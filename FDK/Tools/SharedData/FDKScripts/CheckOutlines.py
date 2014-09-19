@@ -193,7 +193,7 @@ orientation problems, which always need to be fixed.
 error_doc = """
 The following is list of the checkOutlines error messages, and a brief
 explanation of each. The error messages here may be just the first part
-of the actual message, with additional info and cordinates given in the
+of the actual message, with additional info and coordinates given in the
 rest of the actual message.
 
 The phrase 'subpath' means what in FontLab is a contour: a complete
@@ -673,7 +673,7 @@ def openUFOFile(path, outFilePath, useHashMaps):
 	# If user has specified a path other than the source font path, then copy the entire
 	# ufo font, and operate on the copy.
 	if (outFilePath != None) and (os.path.abspath(path) != os.path.abspath(outFilePath)):
-		msg = "Copying from source UFO font to output UFO fot before processing..."
+		msg = "Copying from source UFO font to output UFO font before processing..."
 		logMsg(msg)
 		if os.path.exists(outFilePath):
 			shutil.rmtree(outFilePath)

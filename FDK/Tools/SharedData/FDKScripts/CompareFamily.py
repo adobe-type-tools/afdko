@@ -1343,7 +1343,7 @@ def doSingleTest2():
 			reporter2_failedvalue.append(len(font.compatibleSubFamilyName3))
 		if nameDict.has_key(font.FullFontName1):
 			nameDict[font.FullFontName1].append(font.PostScriptName1)
-			print "	Error: The Mac platform name ID 4 Prefered Full Name must be unique within Preferred Family Name group. name: '%s'. Conflicting fonts: %s." % (nameDict[font.FullFontName1][0], nameDict[font.FullFontName1][-1])
+			print "	Error: The Mac platform name ID 4 Preferred Full Name must be unique within Preferred Family Name group. name: '%s'. Conflicting fonts: %s." % (nameDict[font.FullFontName1][0], nameDict[font.FullFontName1][-1])
 		else:
 			nameDict[font.FullFontName1] = [font.FullFontName1]
 		if (len(font.FullFontName1) > 63):
@@ -1379,7 +1379,7 @@ def doSingleTest3():
 			print "	Error: Mac platform Full Name  name id 4) '%s' does not begin with the string used for font Preferred Family Name, '%s', for Font %s." %  (font.FullFontName1,  font.preferredFamilyName1,  font.PostScriptName1)
 		if  font.ttFont.has_key('CFF ') and (font.FullFontName1 != font.topDict.FullName):
 			print "	Warning: Mac platform Full Name  name id 4) '%s' is not the same as the font CFF table Full Name, '%s', for Font %s." %  (font.FullFontName1,  font.topDict.FullName,  font.PostScriptName1)
-			print "This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used. However, having different values for differnt copies of the same field and cause confusion when using font development tools."
+			print "This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used. However, having different values for different copies of the same field and cause confusion when using font development tools."
 
 
 def doSingleTest4():
