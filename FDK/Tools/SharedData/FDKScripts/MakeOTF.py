@@ -2072,7 +2072,7 @@ def makeRelativePath(curDir, targetPath):
 			cDir = cDir[1:]
 		dirList = re.findall(r"([^\\/]+)", cDir)
 		numDir = len(dirList)
-		relDir = "../"*numDir
+		relDir = (".."+os.path.sep)*numDir
 		targetPath = os.path.join(relDir, targetBaseName)
 	else:
 		if cDir[0] in ["/", "\\"]:
@@ -2083,7 +2083,7 @@ def makeRelativePath(curDir, targetPath):
 		# First build the reative path up.
 		dirList = re.findall(r"([^\\/]+)", cDir)
 		numDir = len(dirList)
-		relDir = "../"*numDir
+		relDir = (".."+os.path.sep)*numDir
 		targetPath = os.path.join(relDir, targetBaseName)
 		targetPath = os.path.join(relDir, tdir, targetBaseName)
 		
