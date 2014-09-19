@@ -64,7 +64,7 @@ change any paths.
 
 The editStatus flag records whether any program has changed the path
 data. If 0 (no change), a program should read its data from the default
-glyph layer. Otherwiser, a program should take the input  glyph file
+glyph layer. Otherwise, a program should take the input  glyph file
 from the processed layer.
 
 If the stored hash for the glyph matches the hash for the current glyph
