@@ -1,0 +1,20 @@
+$! File: MAKE.COM - Makefile for genmms OpenVMS
+$!
+$! History:
+$! ---------
+$! 28-Jan-1998  J.F. Pieronne         V1.0.
+$!
+$ set noon      !Don't stop on errors.
+$!
+$ if P1 .eqs. "LINK" then goto relink
+$!
+$!
+$ delete/nolog *.obj;*  !Get rid of existing .OBJ files.
+$!
+$ options = "/INCLUDE=([--.h])"
+$ CC 'options' genmms
+$!
+$relink:
+$ LINK	genmms, sys$input:/options
+!	sys$share:vaxcrtl.exe/share
+$ EXIT

@@ -1,0 +1,82 @@
+/* Test of tree rewriting */
+
+#header <<
+typedef struct _node {
+            struct _node *right, *down;	/* using non-transform mode */
+            int token;
+            char text[50];
+        } SORAST;
+>>
+
+<<
+#include "astlib.h"		/* need the ast_X support library */
+#include "errsupport.c" /* define error routines here or include errsupport.c */
+#define Int		1
+#define Plus	2
+#define Mult	3
+
+/* This function is implicitly called when you reference the node constructor #[] */
+SORAST *
+#ifdef __STDC__
+ast_node(int tok, char *s)
+#else
+ast_node(tok, s)
+int tok;
+char *s;
+#endif
+{
+    SORAST *p = (SORAST *) calloc(1, sizeof(SORAST));
+    if ( p == NULL ) {fprintf(stderr, "out of mem\n"); exit(-1);}
+
+    p->token = tok;
+    strcpy(p->text, s);
+    return p;
+}
+
+main()
+{
+    SORAST *a, *b, *c, *d;
+    SORAST *result = NULL;
+    STreeParser myparser;
+    STreeParserInit(&myparser);
+
+    /* create the tree (for 3+4*5) to parse */
+    b = #[Mult,"Mult"]; b->down = #[Int,"4"]; b->down->right = #[Int,"5"];
+    a = #[Plus,"Plus"]; a->down = #[Int,"3"]; a->down->right = b;
+
+    /* match tree and execute actions */
+	printf("tree parser input: "); lisp(a, 0); printf("\n");
+    expr(&myparser, &a, &result);
+	printf("tree parser output: "); lisp(result, 0); printf("\n");
+}
+>>
+
+<<
+#ifdef __STDC__
+lisp(SORAST *tree, int rw)
+#else
+lisp(tree, rw)
+SORAST *tree;
+int rw;
+#endif
+{
+	while ( tree!= NULL )
+	{
+		if ( tree->down != NULL ) printf(" (");
+		printf(" %s", tree->text);
+		lisp(tree->down, rw);
+		if ( tree->down != NULL ) printf(" )");;
+		tree = tree->right;
+	}
+}
+>>
+
+/* In an action, 'label' refers to the input node and '#label'
+ * refers to the output node.
+ */
+
+/* switch order of operands */
+expr:   #(Plus expr expr)
+    |!  #(a:Mult b:expr c:expr) <<#expr = #(a,c,b);>>
+    |   Int
+    ;

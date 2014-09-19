@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN"
+"http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+
+<!-- 
+Version 1.000 Chris Slye April 24 2007
+
+BBEdit Codeless Language Module for OpenType feature files.
+Requires BBEdit v8.5 or later
+
+Put this file here:
+   ~/Library/Application Support/BBEdit/Language Modules/
+
+Issues and notes:
+
+   Cannot get function-scanning regexp to work. Setting 'Prefix for Functions'
+   seems to work, but 'lookup' blocks aren't found. Even setting this string to
+   'lookup' instead of 'feature' doesn't work.
+
+   There are a number of deprecated keywords included; it might be better to
+   exclude them.
+
+   No testing done yet with non-GSUB feature files. There are likely more
+   symbols/keywords, etc., to include to make this work better with non-GSUB
+   feature code.
+
+ -->
+
+<!--
+Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+-->
+
+<dict>
+	<key>BBEditDocumentType</key>
+	<string>CodelessLanguageModule</string>
+	<key>BBLMColorsSyntax</key> 
+	<true/> 
+	<key>BBLMIsCaseSensitive</key> 
+	<true/> 
+	<key>BBLMKeywordList</key>
+	<array>
+		<string>anchor</string>
+		<string>anon</string>
+		<string>anonymous</string>
+		<string>Ascender</string>
+		<string>Attach</string>
+		<string>BaseScriptList</string>
+		<string>BaseTagList</string>
+		<string>by</string>
+		<string>CapHeight</string>
+		<string>caret</string>
+		<string>CaretOffset</string>
+		<string>CodePageRange</string>
+		<string>contourpoint</string>
+		<string>cursive</string>
+		<string>Descender</string>
+		<string>device</string>
+		<string>enum</string>
+		<string>enumerate</string>
+		<string>exclude_dflt</string>
+		<string>excludeDFLT</string>
+		<string>feature</string>
+		<string>FontRevision</string>
+		<string>from</string>
+		<string>FSType</string>
+		<string>GlyphClassDef</string>
+		<string>HorizAxis</string>
+		<string>ignore</string>
+		<string>IgnoreBaseGlyphs</string>
+		<string>IgnoreLigatures</string>
+		<string>IgnoreMarks</string>
+		<string>include_dflt</string>
+		<string>include</string>
+		<string>includeDFLT</string>
+		<string>language</string>
+		<string>languagesystem</string>
+		<string>LigatureCaret</string>
+		<string>LineGap</string>
+		<string>lookup</string>
+		<string>lookupflag</string>
+		<string>mark</string>
+		<string>MinMax</string>
+		<string>nameid</string>
+		<string>NULL</string>
+		<string>Panose</string>
+		<string>parameters</string>
+		<string>pos</string>
+		<string>position</string>
+		<string>required</string>
+		<string>RightToLeft</string>
+		<string>script</string>
+		<string>sizemenuname</string>
+		<string>sub</string>
+		<string>substitute</string>
+		<string>subtable</string>
+		<string>table</string>
+		<string>TypoAscender</string>
+		<string>TypoDescender</string>
+		<string>TypoLineGap</string>
+		<string>UnicodeRange</string>
+		<string>useExtension</string>
+		<string>Vendor</string>
+		<string>VertAdvanceY</string>
+		<string>VertAxis</string>
+		<string>VertOriginY</string>
+		<string>VertTypoAscender</string>
+		<string>VertTypoDescender</string>
+		<string>VertTypoLineGap</string>
+		<string>WeightClass</string>
+		<string>WidthClass</string>
+		<string>winAscent</string>
+		<string>winDescent</string>
+		<string>XHeight</string>
+	</array>
+	<key>BBLMLanguageCode</key>
+	<string>feat</string>
+	<key>BBLMLanguageDisplayName</key>
+	<string>Feature File</string>
+	<key>BBLMScansFunctions</key> 
+	<true/> 
+	<key>BBLMSuffixMap</key>
+	<array>
+		<dict>
+			<key>BBLMLanguageSuffix</key>
+			<string>.fea</string>
+		</dict>
+	</array>
+
+
+	<key>Language Features</key> 
+	<dict>
+		<key>Comment Pattern</key>
+		<string><![CDATA[#.*$]]></string>
+
+		<key>Function Pattern</key>
+		<string><![CDATA[(?s)^(?P<function>\s*(feature)\s+(?P<function_name>[A-Za-z0-9_]+)\s+\{.*?\}\s+(?P=function_name);)]]></string>
+		<key>String Pattern</key>
+		<string></string>
+		<key>Skip Pattern</key>
+		<string></string>
+		<key>Identifier and Keyword Character Class</key>
+		<string><![CDATA[0-9A-Za-z_]]></string>
+	</dict>
+</dict>
+</plist>

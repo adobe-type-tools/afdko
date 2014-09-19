@@ -1,0 +1,21 @@
+0ption ProjectOptions =
+    define("__USE_PROTOS", ),
+    incl(searchpath, "..\\sorcerer\\h"),
+    incl(searchpath, "..\\h"),
+    incl(searchpath, "..\\support\\set"),
+    link(pmtype, vio)
+{
+    target "..\\bin\\sorcerer.exe"
+    {
+        option incl(searchpath, "..\\sorcerer") {
+            source type("c")
+
+'sor.c','scan.c','err.c','main.c','globals.c','gen.c','hash.c','look.c','cpp.c'
+        }
+
+        option incl(searchpath, "..\\support\\set") {
+            source type("c")
+                "set.c"
+        }
+    }
+}

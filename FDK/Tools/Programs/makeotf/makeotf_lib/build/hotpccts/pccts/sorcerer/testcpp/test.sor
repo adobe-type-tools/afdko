@@ -1,0 +1,57 @@
+#header <<
+#include <stdio.h>
+#include "SCommonAST.h"
+class SORAST;
+#include <string.h>
+>>
+
+<<
+class SORAST : public SORCommonAST {
+protected:
+	char text[50];
+public:
+	SORAST() {setType(0);}
+	SORAST(ExprTreeParser::STokenType tok, char *s);
+	char *getText()			{ return text; }
+	void lisp_action(FILE *f);
+};
+
+/* This constr is implicitly called when you ref node constructor #[tok,s] */
+SORAST::SORAST(ExprTreeParser::STokenType tok, char *s)
+{
+    setType(tok);
+    strcpy(getText(), s);
+}
+
+void SORAST::
+lisp_action(FILE *f)
+{
+	fprintf(f, " %s", getText());
+}
+
+main()
+{
+    SORAST *a, *result=NULL;
+	ExprTreeParser myparser;
+
+	/* M a k e  I n p u t  T r e e  T o  P a r s e */
+    /* 'a' expr is ( * a b ) == "a * b" */
+	a = #[ExprTreeParser::Mult,"*"];
+	a->addChild(#[ExprTreeParser::Var,"a"]);
+	a->addChild(#[ExprTreeParser::Var,"b"]);
+
+	printf("tree parser input: "); a->lisp(stdout); printf("\n");
+    myparser.expr((SORASTBase **)&a);
+}
+>>
+
+class ExprTreeParser {
+
+expr:	#( Plus b:expr expr )
+		<<printf("plus opnds are : "); b->lisp(stdout); printf("\n");>>
+	|	#( Mult b:expr expr )
+		<<printf("mult opnds are : "); b->lisp(stdout); printf("\n");>>
+	|	Var
+	;
+
+}

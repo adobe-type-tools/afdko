@@ -1,0 +1,11 @@
+
+AFDKO_EXE_PATH="${cmdDirPath}"
+
+AFDKO_Python="${cmdDirPath}"/Python/Current/bin/python
+
+AFDKO_Scripts="${AFDKO_EXE_PATH}"/../SharedData/FDKScripts
+
+export AFDKO_EXE_PATH
+export AFDKO_Python
+export AFDKO_Scripts
+

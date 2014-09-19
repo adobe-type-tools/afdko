@@ -1,0 +1,92 @@
+/* Do a simple ast_scan() test. */
+#header <<
+typedef struct _node {
+            struct _node *right, *down;	/* using transform mode */
+            int token;
+            char text[50];
+        } SORAST;
+>>
+
+#tokdefs "test3.tokens"	/* required in order to use ast_scan() */
+
+<<
+#include "errsupport.c" /* define error routines here or include errsupport.c */
+#include "astlib.h"		/* we will use AST support lib */
+
+/* This function is implicitly called when you reference the node constructor #[] */
+SORAST *
+#ifdef __STDC__
+ast_node(int tok, char *s)
+#else
+ast_node(tok, s)
+int tok;
+char *s;
+#endif
+{
+    SORAST *p = ast_alloc();
+
+    p->token = tok;
+    strcpy(p->text, s);
+    return p;
+}
+
+main()
+{
+    SORAST *a,*b,*c,*d, *result=NULL;
+	STreeParser myparser, *_parser;
+
+	STreeParserInit(&myparser);
+
+	/* M a k e  I n p u t  T r e e  T o  P a r s e */
+	_parser = &myparser;
+    /* 'a' expr is ( * a b) == "a * b" */
+	a = #( #[Mult,"*"], #[Var,"a"], #[Var,"b"]);
+    /* 'b' expr is ( * a b) == "a * b" */
+	b = #( #[Plus,"*"], #[Var,"d"], #[Var,"a"]);
+	/* make DO loop */
+	d = #( #[DO,"do"], #[Var, "i"], a, b);
+
+	printf("tree parser input: "); lisp(d); printf("\n");
+    stat(&myparser, &d, &result);
+	printf("tree parser output: "); lisp(result); printf("\n");
+}
+>>
+
+<<
+#ifdef __STDC__
+lisp(SORAST *tree)
+#else
+lisp(tree)
+SORAST *tree;
+#endif
+{
+	while ( tree!= NULL )
+	{
+		if ( tree->down != NULL ) printf(" (");
+		printf(" %s", tree->text);
+		lisp(tree->down);
+		if ( tree->down != NULL ) printf(" )");;
+		tree = tree->right;
+	}
+}
+>>
+
+/* We don't do any transformation, but we want a duplicate tree anyway */
+
+/* This rule matches a DO loop header */
+stat:	<<SORAST *loop_var, *lower, *upper; int n;>>
+		#( d:DO Var expr expr )
+		<<
+		n = ast_scan("#( DO %1:Var %2:. %3:. )", d, &loop_var, &lower, &upper);
+		printf("ast_scan(\"#( DO %%1:Var %%2:. %%3:. )\") results: found %d successful matches\n", n);
+		printf("loop_var: %s\n", loop_var->text);
+		printf("lower_bound:", d->text); lisp(lower); printf("\n");
+		printf("upper_bound:", d->text); lisp(upper); printf("\n");
+		>>
+	;
+
+/* This rule matches an expr, but also permits copying of input to output tree */
+expr:	#( Plus expr expr )
+	|	#( Mult expr expr )
+	|	Var
+	;

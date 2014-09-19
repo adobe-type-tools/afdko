@@ -1,0 +1,77 @@
+
+                        Welcome to SORCERER 1.00B15
+
+                              September 1995
+
+
+             Terence John Parr, Aaron Sawdey, and Gary Funck
+                          parrt@parr-research.com
+                         sawdey@everest.ee.umn.edu
+                             gary@intrepid.com
+
+SORCERER is a simple tree-parser generator that automates the process
+of tree walking that is so common in many large programs. E.g., in the
+case of source-to-source translators, a programmer typically has a
+front-end that constructs intermediate form trees and simply wants to
+traverse the trees and execute a few actions.  In this case, the
+optimal tree walks of code-generator generators and the powerful
+attribute evaluation schemes of source-to-source translator systems
+are overkill; programmers would rather avoid the overhead and
+complexity.
+
+SORCERER is more suitable for the class of translation problems lying
+between those solved by code-generator generators and by full
+source-to-source translator generators.  SORCERER generates simple,
+flexible, top-down, tree parsers that, in contrast to code-generators,
+may execute actions at any point during a tree walk.  SORCERER accepts
+extended BNF notation, allows predicates to direct the tree walk with
+semantic and syntactic context information, and does not rely on any
+particular intermediate form, parser generator, or other pre-existing
+application.
+
+This is the 1.00B14 release and, therefore, may be less robust than
+ANTLR and DLG; the source has not been heavily tested for portability;
+especially outside the UNIX, PC, and MacIntosh world.  This initial
+release contains the full public-domain source code, a manual, and two
+simple examples.  Naturally, as the system matures, more goodies will
+become available.  Though not included in the actual release (to cut
+down on net traffic), an overview paper is also available.
+
+We anticipate SORCERER's inclusion with PCCTS release very soon.
+
+We hope to have the book done very soon now also.
+
+
+                              INSTALLATION
+
+[Mac users: see NOTES.Mac also]
+
+Simply copy the tar file over (or the compressed tar) and untar it will
+
+     tar xvf sor.tar
+
+Then, 'cd' into the 'sorcerer' directory that was created by 'tar',
+type 'make'--the executable 'sor' will appear in the 'sorcerer'
+directory.  Subdirectory 'test' contains two simple test programs and
+'support' contains a necessary include file and a C file containing
+default error reporting routines that you can use.
+
+
+                         WORD SIZE AND PC USERS
+
+SORCERER makefiles assume 32-bit integers.  If you have 16-bit
+integers, you must turn on preprocessor symbol PC to change wordsize
+definitions; see PC32 definition also in config.h.  You can add
+another "#ifdef" for your machine or specific wordsize (see set.h and
+config.h) if your machine is really weird.  [SORCERER has not been
+adequately tested for portability to non-32-bit machines.]
+
+                         BUG REPORTS & QUESTIONS
+
+Please send bug reports to parrt@parr-research.com.
+
+If you are interested in sharing your experiences/problems/
+successes/suggestions regarding SORCERER or PCCTS, subscribe to
+newsgroup
+
+	comp.compilers.tools.pccts

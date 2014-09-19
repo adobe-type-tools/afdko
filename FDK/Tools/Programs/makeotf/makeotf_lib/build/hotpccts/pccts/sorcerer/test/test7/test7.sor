@@ -1,0 +1,18 @@
+/* Example linkage to ANTLR tree builder */
+#header <<
+#include "stdpccts.h"	/* define ANTLR tree stuff and token types */
+typedef AST SORAST;
+>>
+
+<<
+#include "errsupport.c"	/* define some default error routines */
+>>
+
+gen_stat:	#( ASSIGN t:ID gen_expr )	<<printf("\tstore %s\n", t->text);>>
+		;
+
+gen_expr:	#( ADD gen_expr gen_expr )	<<printf("\tadd\n");>>
+		|	#( MULT gen_expr gen_expr )	<<printf("\tmult\n");>>
+		|	t:ID						<<printf("\tpush %s\n", t->text);>>
+		|	t:INT						<<printf("\tpush %s\n", t->text);>>
+		;

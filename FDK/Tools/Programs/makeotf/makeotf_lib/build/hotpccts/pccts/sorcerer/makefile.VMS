@@ -1,0 +1,33 @@
+$! File: MAKE.COM - Makefile for SORCERER on OpenVMS, DECC
+$!
+$! History:
+$! ---------
+$! 27-Jan-1998  J.F. Pieronne           Initial Version
+$!
+$ set noon      !Don't stop on errors.
+$!
+$ if P1 .eqs. "LINK" then goto relink
+$!
+$ define/nolog pccts_h     "[-.h]"
+$ define/nolog support_set "[-.support.set]"
+$!
+$ delete/nolog *.obj;*  !Get rid of existing .OBJ files.
+$!
+$ options = "/INCLUDE=(pccts_h,support_set)"
+$ CC 'options' sor
+$ CC 'options' scan
+$ CC 'options' err
+$ CC 'options' main
+$ CC 'options' globals
+$ CC 'options' gen
+$ CC 'options' hash
+$ CC 'options' look
+$ CC 'options' cpp
+$ CC 'options' [-.support.set]set
+$!
+$relink:
+$ LINK/EXE=SOR.EXE sor,scan,err,main,globals,	-
+	gen,hash,look,cpp,set,	-
+	sys$input:/options
+!	sys$share:vaxcrtl.exe/share
+$ EXIT

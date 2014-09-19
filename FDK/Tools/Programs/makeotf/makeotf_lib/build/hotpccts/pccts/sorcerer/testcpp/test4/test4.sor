@@ -1,0 +1,19 @@
+/* Example linkage to ANTLR tree builder */
+#header <<
+#include "tokens.h"
+#include "AST.h"
+>>
+
+class SimpleTreeParser {
+
+gen_stat:	#( ASSIGN t:ID gen_expr )
+			<<printf("\tstore %s\n", t->getText());>>
+		;
+
+gen_expr:	#( ADD gen_expr gen_expr )	<<printf("\tadd\n");>>
+		|	#( MULT gen_expr gen_expr )	<<printf("\tmult\n");>>
+		|	t:ID					<<printf("\tpush %s\n", t->getText());>>
+		|	t:INT					<<printf("\tpush %s\n", t->getText());>>
+		;
+
+}

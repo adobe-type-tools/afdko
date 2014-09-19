@@ -1,0 +1,89 @@
+#	File name		installPPC.mpw 
+#
+#	Description		This script builds PPC version of antlr, dlg and sor.
+#					and install them into Tools folder in your MPW.
+#					They have commando interfaces.
+#
+#	Installation	Set Directory to the directory containing this file.
+#					Enter "installPPC.mpw" and press enter key.
+#
+#   Requirements 	MrC(for PPC) compiler
+#					http://developer.apple.com/dev/tools/mpw-tools/compilers/index.html
+#
+#	Author			Kenji Tanaka (kentar@osa.att.ne.jp)
+#					http://www.geocities.com/SiliconValley/Platform/5502/pccts
+#	Created			06/16/98
+#	Modified		12/14/98
+
+Echo "# `Date -t` ----- Building PPC version of PCCTS tools."
+
+# Make 'Macintosh' folders to hold object files.
+
+Echo "# `Date -t` -----   Making Object File Folders."
+If (!`exists :dlg:Obj:`)
+  NewFolder :dlg:Obj:
+End
+If (!`exists :antlr:Obj:`)
+  NewFolder :antlr:Obj:
+End
+If (!`exists :sorcerer:Obj:`)
+  NewFolder :sorcerer:Obj:
+End
+
+Echo "# `Date -t` -----   Done."
+Echo "#"
+
+# DLG build commands
+
+Echo "# `Date -t` -----   Building DLG."
+Echo "# `Date -t` -----     Analyzing dependencies."
+Directory :dlg:
+Begin
+	Echo "Set Echo 1"
+	Make Install -f dlgPPC.make
+End > dlg.makeout
+Echo "# `Date -t` -----     Executing build commands."
+dlg.makeout
+Delete dlg.makeout
+Delete -y Obj		
+
+Echo "# `Date -t` -----   Done."
+Echo "#"
+Directory ::
+
+# ANTLR build commands
+
+Echo "# `Date -t` -----   Building ANTLR."
+Echo "# `Date -t` -----     Analyzing dependencies."
+Directory :antlr:
+Begin
+	Echo "Set Echo 1"
+	Make Install -f antlrPPC.make
+End > antlr.makeout
+antlr.makeout
+Delete antlr.makeout
+Delete -y Obj
+Echo "# `Date -t` -----   Done."
+Echo "#"
+Directory ::
+
+# SORCERER build commands
+
+Echo "# `Date -t` -----   Building SORCERER."
+Echo "# `Date -t` -----     Analyzing dependencies."
+Directory :sorcerer:
+Begin
+	Echo "Set Echo 1"
+	Make Install -f sorPPC.make
+End > sorcerer.makeout
+sorcerer.makeout
+Delete sorcerer.makeout
+Delete -y Obj
+Echo "# `Date -t` -----   Done."
+Echo "#"
+Directory ::
+
+
+# Done
+
+Echo "# `Date -t` ----- Done Building PPC version of PCCTS tools."

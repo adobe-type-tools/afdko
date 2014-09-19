@@ -1,0 +1,5 @@
+scan("#( Plus %1:Var #( Mult %2:Var %3:Var ) )")
+on tree:  ( + c ( * a b ) )
+results: found 3 successful matches
+tree parser input:  ( + c ( * a b ) )
+tree parser output:  ( + ( * b ) c )

@@ -1,0 +1,88 @@
+/* Test of tree rewriting */
+#header <<
+#include <stdio.h>
+#include <string.h>
+#include "SCommonAST.h"
+
+class wacko {
+protected:
+	char text[50];
+public:
+	char *getText()			{ return text; }
+};
+
+class SORAST : public SORCommonAST, public wacko {
+public:
+	SORAST() {setType(0);}
+	SORAST(int tok, char *s);
+	void lisp_action(FILE *f);
+	PCCTS_AST *shallowCopy();
+};
+>>
+
+#tokdefs "token3.h"
+
+<<
+/* This constr is implicitly called when you ref node constructor #[tok,s] */
+SORAST::SORAST(int tok, char *s)
+{
+    setType(tok);
+    strcpy(getText(), s);
+}
+
+void SORAST::
+lisp_action(FILE *f)
+{
+	fprintf(f, " %s", getText());
+}
+
+PCCTS_AST *SORAST::
+shallowCopy()
+{
+	SORAST *p = new SORAST();
+	*p = *this;
+	p->setDown(NULL);
+	p->setRight(NULL);
+	return p;
+}
+>>
+
+<<
+main()
+{
+    SORAST *a, *b, *c, *d, *e, *f, *g;
+    SORAST *result = NULL;
+    Cool myparser;
+	int n;
+
+	/* M a k e  I n p u t  T r e e  T o  P a r s e */
+    /* var 'b' expr is ( + c ( * a b ) ) == "c + a * b" */
+	a = #[Mult,"*"];
+	a->addChild(#[Var,"a"]);
+	a->addChild(#[Var,"b"]);
+	b = #[Plus,"+"];
+	b->addChild(#[Var,"c"]);
+	b->addChild(a);
+
+	n = b->ast_scan("#( Plus %1:Var #( Mult %2:Var %3:Var ) )", &e,&f,&g);
+	printf("scan(\"#( Plus %%1:Var #( Mult %%2:Var %%3:Var ) )\")\n");
+	printf("on tree: ");
+	b->lisp(stdout);
+	printf("\nresults: found %d successful matches\n", n);
+
+	printf("tree parser input: "); b->lisp(stdout); printf("\n");
+    myparser.expr((SORASTBase **)&b, (SORASTBase **)&result);
+	printf("tree parser output: "); result->lisp(stdout); printf("\n");
+}
+>>
+
+class Cool {
+
+/* Reverse order of Plus's and kill 2nd operand of mult */
+
+expr:!  #(a:Plus b:expr c:expr) <<#expr = (SORASTBase *)#(a,c,b);>>
+    |   #(Mult expr! expr)
+    |	Var
+    ;
+
+}

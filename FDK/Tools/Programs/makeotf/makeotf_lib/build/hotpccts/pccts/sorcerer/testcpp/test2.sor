@@ -1,0 +1,76 @@
+/* Test of tree rewriting */
+#header <<
+#include <stdio.h>
+#include <string.h>
+#include "SCommonAST.h"
+class SORAST;
+>>
+
+<<
+class SORAST : public SORCommonAST {
+protected:
+	char text[50];
+public:
+	SORAST() {setType(0);}
+	SORAST(Cool::STokenType tok, char *s);
+	char *getText()			{ return text; }
+	void lisp_action(FILE *f);
+	PCCTS_AST *shallowCopy();
+};
+
+/* This constr is implicitly called when you ref node constructor #[tok,s] */
+SORAST::SORAST(Cool::STokenType tok, char *s)
+{
+    setType(tok);
+    strcpy(getText(), s);
+}
+
+PCCTS_AST *SORAST::
+shallowCopy()
+{
+	SORAST *p = new SORAST();
+	*p = *this;
+	p->setDown(NULL);
+	p->setRight(NULL);
+	return p;
+}
+
+void SORAST::
+lisp_action(FILE *f)
+{
+	fprintf(f, " %s", getText());
+}
+
+main()
+{
+    SORAST *a, *b, *c, *d;
+    SORAST *result = NULL;
+    Cool myparser;
+
+	/* M a k e  I n p u t  T r e e  T o  P a r s e */
+    /* var 'b' expr is ( + c ( * a b ) ) == "c + a * b" */
+	a = #[Cool::Mult,"*"];
+	a->addChild(#[Cool::Var,"a"]);
+	a->addChild(#[Cool::Var,"b"]);
+	b = #[Cool::Plus,"+"];
+	b->addChild(#[Cool::Var,"c"]);
+	b->addChild(a);
+
+	printf("tree parser input: "); b->lisp(stdout); printf("\n");
+    myparser.expr((SORASTBase **)&b, (SORASTBase **)&result);
+	printf("tree parser output: "); result->lisp(stdout); printf("\n");
+}
+>>
+
+class Cool {
+
+/* switch order of operands */
+
+/* In an action, 'label' refers to the output node */
+
+expr!:  #(a:Plus b:expr c:expr) <<#expr = #(a,c,b);>>
+    |   #(a:Mult b:expr c:expr) <<#expr = #(a,c,b);>>
+    |   v:Var					<<#expr = v;>>
+    ;
+
+}

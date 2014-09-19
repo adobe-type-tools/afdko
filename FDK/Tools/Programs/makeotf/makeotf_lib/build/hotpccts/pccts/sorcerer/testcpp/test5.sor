@@ -1,0 +1,122 @@
+/* Test of support routines */
+#header <<
+#include <stdio.h>
+#include <string.h>
+#include "SCommonAST.h"
+
+class wacko {
+protected:
+	char text[50];
+public:
+	char *getText()			{ return text; }
+};
+
+class SORAST : public SORCommonAST, public wacko {
+public:
+	SORAST() {setType(0);}
+	SORAST(int tok, char *s);
+	void lisp_action(FILE *f);
+	PCCTS_AST *shallowCopy();
+};
+>>
+
+#tokdefs "token3.h"
+
+<<
+/* This constr is implicitly called when you ref node constructor #[tok,s] */
+SORAST::SORAST(int tok, char *s)
+{
+    setType(tok);
+    strcpy(getText(), s);
+}
+
+void SORAST::
+lisp_action(FILE *f)
+{
+	fprintf(f, " %s", getText());
+}
+
+PCCTS_AST *SORAST::
+shallowCopy()
+{
+	SORAST *p = new SORAST();
+	*p = *this;
+	p->setDown(NULL);
+	p->setRight(NULL);
+	return p;
+}
+>>
+
+<<
+main()
+{
+    SORAST *a, *b, *c, *d, *e, *f, *g, *start;
+    SORAST *result = NULL;
+    Cool myparser;
+	int n;
+
+	/* M a k e  I n p u t  T r e e  T o  P a r s e */
+    /* var 'b' expr is ( + c ( * a b ) ) == "c + a * b" */
+	a = #[Mult,"*"];
+	a->addChild(#[Var,"a"]);
+	a->addChild(#[Var,"b"]);
+	b = #[Plus,"+"];
+	b->addChild(#[Var,"c"]);
+	b->addChild(a);
+
+	printf("inital tree: "); b->lisp(stdout); printf("\n");
+
+	b->down()->append(#[Var,"z"]);
+	printf("after appending z to end of sibling list of '+': ");
+	b->lisp(stdout);
+	printf("\n");
+
+	PCCTS_AST *t = b->down()->right()->bottom();
+	t->insert_after(#[Var,"ack"]);
+	printf("after inserting an 'ack' after 'a': ");
+	b->lisp(stdout);
+	printf("\n");
+
+	PCCTS_AST::cut_between(t,t->tail());
+	printf("after cutting between a and b: ");
+	b->lisp(stdout);
+	printf("\n");
+
+	// find all Vars in b
+	SORAST *var = #[Var, ""];
+	PCCTS_AST *cursor = b;
+	SORAST *p;
+	while ( (p= (SORAST *)b->ast_find_all(var,&cursor)) )
+	{
+	    printf("ast_find_all reports id %s\n", p->getText());
+	}
+
+	// add a new subtree
+	b->addChild(PCCTS_AST::make(#[Plus,"+"],#[Var,"t"],NULL));
+	printf("after adding subtree (+ t) as child of initial '+': ");
+	b->lisp(stdout);
+	printf("\n");
+
+	if ( !b->match(b) ) printf("something is not right with match()\n");
+	if ( b->match(b->down()) ) printf("something is not right with match()\n");
+
+	printf("number of children of top + tree is %d\n", b->down()->nsiblings());
+
+	printf("ptr from 3rd child to end of siblings of top + tree is:");
+	b->down()->sibling_index(3)->lisp(stdout);
+	printf("\n");
+
+	start = b;
+    myparser.expr((SORASTBase **)&b, (SORASTBase **)&result);
+	start->tfree();
+}
+>>
+
+class Cool {
+
+/* Match anything; we are testing support routines */
+
+expr:	.
+	;
+
+}

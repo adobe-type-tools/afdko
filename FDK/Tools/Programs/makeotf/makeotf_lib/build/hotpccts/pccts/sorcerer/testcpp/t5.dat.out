@@ -1,0 +1,11 @@
+inital tree:  ( + c ( * a b ) )
+after appending z to end of sibling list of '+':  ( + c ( * a b ) z )
+after inserting an 'ack' after 'a':  ( + c ( * a ack b ) z )
+after cutting between a and b:  ( + c ( * a b ) z )
+ast_find_all reports id c
+ast_find_all reports id a
+ast_find_all reports id b
+ast_find_all reports id z
+after adding subtree (+ t) as child of initial '+':  ( + c ( * a b ) z ( + t ) )
+number of children of top + tree is 4
+ptr from 3rd child to end of siblings of top + tree is: z ( + t )

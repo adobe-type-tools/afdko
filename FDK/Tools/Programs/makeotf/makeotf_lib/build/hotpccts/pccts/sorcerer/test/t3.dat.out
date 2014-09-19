@@ -1,0 +1,6 @@
+tree parser input:  ( do i ( * a b ) ( * d a ) )
+ast_scan("#( DO %1:Var %2:. %3:. )") results: found 3 successful matches
+loop_var: i
+lower_bound: ( * a b ) ( * d a )
+upper_bound: ( * d a )
+tree parser output:  ( do i ( * a b ) ( * d a ) )

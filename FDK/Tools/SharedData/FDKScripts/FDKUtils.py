@@ -1,0 +1,92 @@
+"""
+FDKUtils.py v 1.1 May 6 2006
+ A module of functions that are needed by several of the FDK scripts.
+"""
+
+__copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+"""
+
+import os
+import sys
+import subprocess
+import traceback
+import platform
+curSystem = platform.system()
+
+AdobeCMAPS = "Adobe Cmaps"
+AdobeCharsets = "CID charsets"
+
+class FDKEnvError(KeyError):
+	pass
+
+def findFDKDirs():
+	fdkScriptsDir = None
+	fdkToolsDir = None
+	""" Look up the file path to find the "Tools" directory;
+	then add the os.name for the executables, and .'FDKScripts' for the scripts.
+	"""
+	dir = os.path.dirname(__file__)
+
+	while dir:
+		if os.path.basename(dir) == "Tools":
+			fdkScriptsDir = os.path.join(dir, "SharedData", "FDKScripts")
+			if curSystem == "Darwin":
+				fdkToolsDir = os.path.join(dir, "osx")
+			elif curSystem == "Windows":
+				fdkToolsDir = os.path.join(dir, "win")
+			elif curSystem == "Linux":
+				fdkToolsDir = os.path.join(dir, "linux")
+			else:
+				print "Fatal error: un-supported platform %s %s." % (os.name, sys.platform)
+				raise FDKEnvError
+
+			if not (os.path.exists(fdkScriptsDir) and os.path.exists(fdkToolsDir)):
+				print "Fatal error: could not find  the FDK scripts dir %s and the tools directory %s." % (fdkScriptsDir, fdkToolsDir)
+				raise FDKEnvError
+ 
+			# the FDK.py bootstrap program already adds fdkScriptsDir to the  sys.path;
+			# this is useful only when running the calling script directly using an external Python.
+			if not fdkScriptsDir in sys.path:
+				sys.path.append(fdkScriptsDir)
+			fdkSharedDataDir = os.path.join(dir, "SharedData")
+			break
+		dir = os.path.dirname(dir)
+	return fdkToolsDir,fdkSharedDataDir
+
+
+def findFDKFile(fdkDir, fileName):
+	path = os.path.join(fdkDir, fileName)
+	if os.path.exists(path):
+            return path
+        p1 = path + ".exe"
+ 	if os.path.exists(p1):
+            return p1
+        p2 = path + ".cmd"
+	if os.path.exists(p2):
+            return p2
+	if fileName not in ["addGlobalColor"]:
+		print "Fatal error: could not find '%s or %s or %s'." % (path,p1,p2)
+	raise FDKEnvError
+
+def runShellCmd(cmd):
+	try:
+		p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout
+		log = p.read()
+		return log
+	except :
+		msg = "Error executing command '%s'. %s" % (cmd, traceback.print_exc())
+		print(msg)
+		return ""
+
+def runShellCmdLogging(cmd):
+	try:
+		retcode = subprocess.call(cmd, shell=True, stderr=subprocess.STDOUT)
+		if retcode < 0:
+			msg = "command was terminated by signal '%s'. '%s'" % (retcode, cmd)
+			print(msg)
+			return retcode
+	except:
+		msg = "Error executing command '%s'. %s" % (cmd, traceback.print_exc())
+		print(msg)
+		return 1
+	return 0

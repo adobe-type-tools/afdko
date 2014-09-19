@@ -1,0 +1,2 @@
+tree parser input:  ( + c ( * a b ) )
+tree parser output:  ( + ( * b a ) c )

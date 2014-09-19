@@ -1,0 +1,22 @@
+option ProjectOptions =
+    define("USER_ZZSYN", ),
+    define("__USE_PROTOS", ),
+    incl(searchpath, "..\\h"),
+    incl(searchpath, "..\\support\\set"),
+    link(pmtype, vio)
+{
+    target "..\\bin\\dlg.exe"
+    {
+        source type("c")
+            "..\\dlg\\automata.c",
+            "..\\dlg\\dlg_a.c",
+            "..\\dlg\\dlg_p.c",
+            "..\\dlg\\err.c",
+            "..\\dlg\\main.c",
+            "..\\dlg\\output.c",
+            "..\\dlg\\relabel.c",
+            "..\\dlg\\support.c",
+
+            "..\\support\\set\\set.c"
+    }
+}

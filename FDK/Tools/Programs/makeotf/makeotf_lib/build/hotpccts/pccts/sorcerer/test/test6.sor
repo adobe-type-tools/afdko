@@ -1,0 +1,98 @@
+/* Test of tree rewriting */
+
+#header <<
+typedef struct _node {
+            struct _node *right, *down;	/* using non-transform mode */
+            int token;
+            char text[50];
+        } SORAST;
+>>
+
+<<
+#include "tokens6.h"
+#include "astlib.h"		/* need the ast_X support library */
+#include "errsupport.c" /* define error routines here or include errsupport.c */
+
+/* This function is implicitly called when you reference the node constructor #[] */
+SORAST *
+#ifdef __STDC__
+ast_node(int tok, char *s)
+#else
+ast_node(tok, s)
+int tok;
+char *s;
+#endif
+{
+    SORAST *p = (SORAST *) calloc(1, sizeof(SORAST));
+    if ( p == NULL ) {fprintf(stderr, "out of mem\n"); exit(-1);}
+
+    p->token = tok;
+    strcpy(p->text, s);
+    return p;
+}
+
+main()
+{
+    SORAST *a, *b, *c, *d, *s;
+    SORAST *result = NULL;
+    STreeParser myparser;
+    STreeParserInit(&myparser);
+
+    /* create the tree for 'DO i=1,10 a(i)=3' to parse
+	 * #( DO ID expr expr stat )
+	 */
+	s = #( #[ASSIGN,"="], #(#[AREF,"()"],  #[ID,"a"], #[ID,"i"]), #[INT,"3"] );
+	d = #( #[DO,"do"], #[ID,"i"], #[INT,"1"], #[INT,"10"], s );
+
+    /* match tree and execute actions */
+	printf("tree parser input: "); lisp(d, 0); printf("\n");
+    do_stat(&myparser, &d, &result);
+	printf("tree parser output: "); lisp(result, 0); printf("\n");
+}
+>>
+
+<<
+#ifdef __STDC__
+lisp(SORAST *tree)
+#else
+lisp(tree, rw)
+SORAST *tree;
+#endif
+{
+	while ( tree!= NULL )
+	{
+		if ( tree->down != NULL ) printf(" (");
+		printf(" %s", tree->text);
+		lisp(tree->down);
+		if ( tree->down != NULL ) printf(" )");;
+		tree = tree->right;
+	}
+}
+>>
+
+/* In an action, 'label' refers to the output node and 'label_in'
+ * refers to the input node.
+ */
+
+do_stat
+	:	<<@(static SORAST *loop_var)>>
+		#( DO lvar:ID <<@loop_var=lvar;>> expr expr stat )
+	;
+
+stat!
+	:	<<SORAST *ne;>>
+		#( a:ASSIGN l:lvalue e:expr )
+		<<
+		ne = #(#[MULT,"*"], e, #[ID,@loop_var->text]);
+		#stat = #(a,l,ne);
+		>>
+	;
+
+lvalue
+	:	#( AREF ID expr )
+	;
+
+expr:	#( MULT expr expr )
+	|	ID
+	|	INT
+	;

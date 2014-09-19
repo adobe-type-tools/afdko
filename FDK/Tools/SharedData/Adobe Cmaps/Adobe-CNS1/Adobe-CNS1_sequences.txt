@@ -1,0 +1,18 @@
+# 14 Standardized Variants (Unicode 6.3)
+# Version 12/03/2013
+# Prepared by Ken Lunde (lunde@adobe.com), Adobe Systems Incorporated
+456B FE00; Standardized_Variants; CID+14339
+5140 FE00; Standardized_Variants; CID+628
+52C7 FE01; Standardized_Variants; CID+15704
+5406 FE00; Standardized_Variants; CID+18411
+54A2 FE00; Standardized_Variants; CID+18727
+55C0 FE00; Standardized_Variants; CID+9089
+5C6E FE01; Standardized_Variants; CID+17634
+5F22 FE00; Standardized_Variants; CID+16715
+6148 FE00; Standardized_Variants; CID+16757
+6649 FE00; Standardized_Variants; CID+15842
+82B3 FE00; Standardized_Variants; CID+14270
+8728 FE00; Standardized_Variants; CID+15241
+8CAB FE00; Standardized_Variants; CID+14408
+9F9C FE00; Standardized_Variants; CID+17686
+# EOF

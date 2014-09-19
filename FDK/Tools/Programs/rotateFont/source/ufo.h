@@ -1,0 +1,13 @@
+"UFO mode converts an abstract font to a UFO 2 font.\n",
+
+"Note that it is NOT a full UFO writer. It writes only the information from\n",
+"the Postscript font data. If the source is an OTF or TTF font, it will not copy\n",
+"any of the meta data from outside the font program table. Also, if the destination\n",
+"is an already existing UFO font, tx will overwrite it with the new data:\n",
+"it will not merge the new font data with the old.\n",
+"\n",
+"When reading from a UFO font, tx will prefer GLIF files in the layer\n",
+"'glyphs.com.adobe.type.processedGlyphs'. You can select another preferred\n",
+"layer with the option '-altLayer <layer name>'. Use 'None' for the layer name\n",
+"in order to have tx ignore the preferred layer and read GLIF files only from\n",
+"the default layer.\n",

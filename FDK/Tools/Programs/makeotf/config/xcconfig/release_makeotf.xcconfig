@@ -1,0 +1,3 @@
+#include "../../../public/config/xcconfig/release_tx.xcconfig"
+HEADER_SEARCH_PATHS =  $(SDKROOT)/usr/include  ../../../makeotf_lib/api/** ../../../makeotf_lib/resource/**  ../../../../public/lib/api/** ../../../../public/lib/resource/**
+LIBRARY_SEARCH_PATHS = ../../../makeotf_lib/lib/osx/release

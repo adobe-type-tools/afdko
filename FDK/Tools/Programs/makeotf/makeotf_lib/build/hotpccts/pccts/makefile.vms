@@ -1,0 +1,13 @@
+$ set def [.antlr]
+$ @makefile.vms
+$ rename *.exe [-.bin]
+$ set def [-.dlg]
+$ @makefile.vms
+$ rename *.exe [-.bin]
+$ set def [-.sorcerer]
+$ @makefile.vms
+$ rename *.exe [-.bin]
+$ set def [-.support.decmms]
+$ @makefile.vms
+$ rename *.exe [--.bin]
+$ set def [--]

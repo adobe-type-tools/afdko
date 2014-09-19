@@ -1,0 +1,20 @@
+option ProjectOptions =
+    define("USER_ZZSYN", ),
+    define("__USE_PROTOS", ),
+    incl(searchpath, "..\\h"),
+    incl(searchpath, "..\\support\\set"),
+    link(pmtype, vio)
+{
+    target "..\\bin\\antlr.exe"
+    {
+        option incl(searchpath, "..\\antlr") { source type("c")
+            "antlr.c","bits.c","build.c","dumpcycles.c",
+            "dumpnode.c","egman.c","main.c","err.c",
+            "fcache.c","fset.c","fset2.c","gen.c",
+            "globals.c","hash.c","lex.c","main.c",
+            "misc.c","mrhoist.c","pred.c","scan.c"}
+
+        option incl(searchpath, "..\\support\\set") source type("c")
+            "set.c"
+    }
+}

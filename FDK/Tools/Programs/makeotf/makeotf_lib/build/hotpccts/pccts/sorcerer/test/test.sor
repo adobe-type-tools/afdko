@@ -1,0 +1,69 @@
+#header <<
+/* Only requirements are that the user define what an AST is; it must have
+ * right, down pointers and a token field.  After that, the user can put it
+ * what he/she wants
+ */
+typedef struct _node {
+            struct _node *right, *down;
+            int token;
+            char text[50];
+        } SORAST;
+
+#ifdef __STDC__
+#include "stdlib.h"
+#else
+#include "malloc.h"
+#endif
+>>
+
+<<
+#define Plus	1
+#define Mult	2
+#define Var		3
+
+/* define error routines here or include sorcerer.c */
+#include "errsupport.c"
+
+/* We use our own node construction routine here rather than #[...] */
+SORAST *
+#ifdef __STDC__
+node(int tok, char *s)
+#else
+node(tok, s)
+int tok;
+char *s;
+#endif
+{
+    SORAST *p;
+
+    p = (SORAST *) calloc(1, sizeof(SORAST));
+    if ( p == NULL ) {fprintf(stderr, "out of mem\n"); exit(-1);}
+    p->token = tok;
+    strcpy(p->text, s);
+    return p;
+}
+
+main()
+{
+    SORAST *a,*b,*c,*d,*e,*f;
+	STreeParser myparser;
+
+	STreeParserInit(&myparser);
+
+    /* tree is ( + ( * d a ) ( * a b ) ) == "d*a + a*b" */
+    c = node(Mult,""); c->down = node(Var,"d"); c->down->right = node(Var,"a");
+    b = node(Mult,""); b->down = node(Var,"a"); b->down->right = node(Var,"b");
+    a = node(Plus,""); a->down = c; a->down->right = b;
+
+    /* gen code */
+    reg(&myparser, &a);
+}
+>>
+
+reg	:	#( Plus reg reg )		<<printf("\tadd\n");>>
+	|	#( Mult reg reg )		<<printf("\tmult\n");>>
+	|	load
+	;
+
+load:	f:Var					<<printf("\tpush %s\n", f->text);>>
+	;

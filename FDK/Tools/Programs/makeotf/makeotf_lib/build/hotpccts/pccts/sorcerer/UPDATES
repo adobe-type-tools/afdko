@@ -1,0 +1,153 @@
+1.00B1 Fixes:
+Missing includes from antlr.h
+
+1.00B2 Fixes:
+Didn't save _t during (...)?
+
+1.00B3 Fixes:
+Fixed bug that wouldn't allow labels on wildcard nodes
+Would dump argument list to some labelled rule refs
+Fixed code gen bug with #(. B) as last element of production
+
+1.00B4 Fixes:
+Another teeny-weeny little code gen fix related to "rule > [result]"
+
+1.00B5 Fixes:
+Made tar file create a root directory called sorcerer
+Line 465 in gen.c had an 'stdout' where an 'output' was needed.
+
+1.00B6 Fixes:
+K&R function headers were missing a ',' in the argument list
+Made the default prototype style the same as how you compiled SORCERER itself.
+
+1.00B7
+Rik Faith <faith@cs.unc.edu>:
+	[...] patch fixes a bug in sorcerer where the "actions" in the
+	input file which appeared between the second set of << >>'s (i.e.,
+	the user's main routine) would format poorly in the output file.
+
+1.00B8:
+changed the STreeTry() macro (it's much better now)
+added -transform option (double pointers now needed in tree structure)
+added ``!'' operator to indicate what is not to be included in tree copy
+	from input to output tree in transform mode.
+Added _result parameter for transform mode
+Changed sorcerer.c to errsupport.c; sorcerer.c is now regular support code.
+function sorcerer_panic() was added
+Added all of the libraries for tree rewrite support
+	(ast.c slist.c sint.c hash.c sstack.c)
+	Added a very cool function ast_scan(); check it out
+Added @-variables; e.g., @(int i = 3) ... @i = 4;
+Added __USE_PROTOS definition in sorcerer.h
+SORCERER now reads the config.h file used by ANTLR/DLG.
+Uses ast_right(rw) and ast_down(rw) so C/C++ compatible -- also means
+	C/C++ can have different tree layout and use these as functions to
+	simulate child-sibling trees.
+Fixed: Bad error messages:
+	a : A | (b)? b;
+	b : B;
+	error: infinite recursion from rule a to rule b
+Fixed a bug:
+    Sorcerer  a simple tree-parser generator  Version 1.00B3  1992-1994
+    warning: missing #header statement
+    test.t, line 3: warning: (...)? predicate in block with one alternative; will genera!
+    bash$ more test.t
+    expr: ;
+
+    variable:
+           #( VARIABLE
+           ID
+           ( DOT ID
+             | UPARROW
+             | LBRACK
+               expr
+               ( COMMA expr
+               )*
+               RBRACK
+             | COLON_COLON ID
+           )*
+           )
+           ;
+
+1.00B9:
+Fixed support/ast.c so K&R C would compile it.
+
+1.00B13:
+Totally new, cool, simple tree rewriting mechanism.  Not many bug fixes
+
+Made enum def ignore #ifdef #else #endif etc... in #tokdefs
+
+Added C++ support
+
+Made h and lib directory
+
+Changed name: AST_NONTRANSFORM_FIELDS -> AST_REQD_FIELDS
+
+-def-tokens and -proto-file are not valid in C++ mode.
+
+Changed name: AST -> SORAST in C and C++.
+
+When you -def-tokens, it generates them ast consts inside class def.
+	Ref with classname::def.
+
+All #[] constructor calls must be done in class A { ... } def of grammar
+	so it knows which to call.  Else, put Classname:: on front manually.
+
+1.00B14
+
+[Not completed yet]
+
+#label -> label; #label is no longer valid.  Just use label to access
+output node in transform mode.  label_in is the input node (for token
+references only).
+
+ast_node, ast_dup -> shallowCopy() (user must define for transform
+mode), deepCopy().
+
+Fixed the C support functions for ASTs
+
+#[] -> new SORAST
+
+token() -> type()  (sorry, but had to make more consistent)
+setToken() -> setType() (you can just add type() { token(); } if you want).
+
+Remove guessing gate on actions if no (...)?
+
+Wildcard as root of tree made SOR bomb
+
+All the token field refs in PCCTSAST.C -> type()
+
+ASTBase::double_link didn't check for NULL pointers.
+
+#if in action caused trouble.
+
+made action buffer bigger (8k bytes)
+
+SORCERER had a bug in that it did not update the tree result before
+returning sometimes.
+
+PCCTS_AST::ast_scan() is now non-virtual
+
+C++ support functions like tail(), bottom(), etc... now use 'this'
+pointer rather a passed argument.
+
+Sorcerer spun when it found identifier+ instead of (identifier)+ in a
+tree rule.
+
+This version corresponds pretty to the state of the book.
+
+1.00B15
+
+All .C files are changed to .cpp.
+
+ASTBase::dup() and ASTDoublyLinkedBase::dup() now call shallowCopy()
+to actually duplicate a node.  shallowCopy() can either call a copy
+constructor or can just duplicate things right there.
+
+C++ keyword "template" was used as a variable in some SORCERER files.
+
+1.00b20  (2-Oct-1998)
+
+Minor changes as reported in CHANGES_FROM_1.33 of the main pccts
+distribution kit.  Main reason for change in version number is to
+indicate that it matches the new release of pccts 1.33MR15.

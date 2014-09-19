@@ -1,0 +1,90 @@
+#
+#	File name		install68K.mpw 
+#
+#	Description		This script builds 68K version of antlr, dlg and sor.
+#					and install them into Tools folder in your MPW.
+#					They have commando interfaces.
+#
+#	Installation	Set Directory to the directory containing this file.
+#					Enter "install68K.mpw" and press enter key.
+#				
+#   Requirements 	SC compiler
+#					http://developer.apple.com/dev/tools/mpw-tools/compilers/index.html
+#
+#	Author			Kenji Tanaka (kentar@osa.att.ne.jp)
+#					http://www.geocities.com/SiliconValley/Platform/5502/pccts
+#	Created			06/16/98
+#	Modified		12/14/98
+#
+
+Echo "# `Date -t` ----- Building 68K version of PCCTS tools."
+
+# Make 'Macintosh' folders to hold object files.
+
+Echo "# `Date -t` -----   Making Object File Folders."
+If (!`exists :dlg:Obj:`)
+  NewFolder :dlg:Obj:
+End
+If (!`exists :antlr:Obj:`)
+  NewFolder :antlr:Obj:
+End
+If (!`exists :sorcerer:Obj:`)
+  NewFolder :sorcerer:Obj:
+End
+
+Echo "# `Date -t` -----   Done."
+Echo "#"
+
+# DLG build commands
+
+Echo "# `Date -t` -----   Building DLG."
+Echo "# `Date -t` -----     Analyzing dependencies."
+Directory :dlg:
+Begin
+	Echo "Set Echo 1"
+	Make Install -f dlg68K.make
+End > dlg.makeout
+Echo "# `Date -t` -----     Executing build commands."
+dlg.makeout
+Delete dlg.makeout
+Delete -y Obj
+
+Echo "# `Date -t` -----   Done."
+Echo "#"
+Directory ::
+
+# ANTLR build commands
+
+Echo "# `Date -t` -----   Building ANTLR."
+Echo "# `Date -t` -----     Analyzing dependencies."
+Directory :antlr:
+Begin
+	Echo "Set Echo 1"
+	Make Install -f antlr68K.make
+End > antlr.makeout
+antlr.makeout
+Delete antlr.makeout
+Delete -y Obj
+Echo "# `Date -t` -----   Done."
+Echo "#"
+Directory ::
+
+# SORCERER build commands
+
+Echo "# `Date -t` -----   Building SORCERER."
+Echo "# `Date -t` -----     Analyzing dependencies."
+Directory :sorcerer:
+Begin
+	Echo "Set Echo 1"
+	Make Install -f sor68K.make
+End > sorcerer.makeout
+sorcerer.makeout
+Delete sorcerer.makeout
+Delete -y Obj
+Echo "# `Date -t` -----   Done."
+Echo "#"
+Directory ::
+
+# Done
+
+Echo "# `Date -t` ----- Done Building 68K version of PCCTS tools."

@@ -1,0 +1,4 @@
+#include "debug.xcconfig"
+HEADER_SEARCH_PATHS =  $(SDKROOT)/usr/include  ../../../../public/lib/api/** ../../../../public/lib/resource/**
+LIBRARY_SEARCH_PATHS = ../../../../public/lib/lib/osx/debug
+

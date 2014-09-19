@@ -1,0 +1,17 @@
+input tree: ( = a ( + ( + ( + ( + ( + 1 ( * 2 3 ) ) 4 ) 5 ) 6 ) ( * 7 8 ) ) )
+	push 1
+	push 2
+	push 3
+	mult
+	add
+	push 4
+	add
+	push 5
+	add
+	push 6
+	add
+	push 7
+	push 8
+	mult
+	add
+	store a

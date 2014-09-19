@@ -1,0 +1,58 @@
+#
+# PCCTS makefile for: test2.g
+#
+# PCCTS release 1.21
+# Project: t
+# C++ output
+# D scanner
+# A-defined token types
+#
+TOKENS = B/tokens.h
+#
+# The following filenames must be consistent with A/D flags
+D_FILE = B/parser.dlg
+ERR = B/err
+HDR_FILE = 
+SCAN = B/BLexer
+PCCTS = ../..
+A_H = $(PCCTS)/h
+BIN = $(PCCTS)/bin
+A = $(BIN)/antlr
+D = $(BIN)/dlg
+CFLAGS = -I. -I$(A_H) -IB -g
+AFLAGS = -o B -CC
+DFLAGS = -C2 -i -CC -cl BLexer -o B
+GRM = test2.g
+SRC = B/test2.cpp \
+      B/B.cpp \
+      $(SCAN).cpp
+OBJ = B/test2.o B/B.o $(SCAN).o
+A_SPAWN = B/test2.cpp B/B.cpp \
+              B/B.h \
+              $(HDR_FILE) $(D_FILE) $(TOKENS)
+D_SPAWN = $(SCAN).cpp $(SCAN).h
+#CCC=g++
+CCC=$(CC)
+
+t: $(OBJ) $(SRC)
+
+B/test2.o : $(TOKENS) $(SCAN).h B/test2.cpp $(HDR_FILE)
+	$(CCC) -c $(CFLAGS) -o B/test2.o B/test2.cpp
+
+B/B.o : $(TOKENS) $(SCAN).h B/B.cpp B/B.h $(HDR_FILE)
+	$(CCC) -c $(CFLAGS) -o B/B.o B/B.cpp
+
+$(SCAN).o : $(SCAN).cpp $(TOKENS)
+	$(CCC) -c $(CFLAGS) -o $(SCAN).o $(SCAN).cpp
+
+$(A_SPAWN) : $(GRM)
+	$(A) $(AFLAGS) $(GRM)
+
+$(D_SPAWN) : $(D_FILE)
+	$(D) $(DFLAGS) $(D_FILE)
+
+clean:
+	rm -f *.o core t B/*.o
+
+scrub:
+	rm -f *.o core t B/*.o $(A_SPAWN) $(D_SPAWN)

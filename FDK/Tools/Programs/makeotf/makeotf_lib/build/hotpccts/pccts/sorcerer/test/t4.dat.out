@@ -1,0 +1,4 @@
+tree parser input:  ( do i 1 10 ( do j 2 9 ( := a i ) ) )
+do i at level 1, statement 1
+do j at level 2, statement 2
+3 statements

@@ -1,0 +1,137 @@
+/* Test of @(...) and @id 'reference vars'
+ * Output should be:
+ *
+ *	tree parser input:  ( do i ( * a b ) ( * d a ) )
+ *	ast_scan("#( DO %1:Var %2:. %3:. )") results: found 3 successful matches
+ *	loop_var: i
+ *	lower_bound: ( * a b ) ( * d a )
+ *	upper_bound: ( * d a )
+ *	tree parser output:  ( do i ( * a b ) ( * d a ) )
+ *	bash$ t4
+ *	tree parser input:  ( do i 1 10 ( do j 2 9 ( := a i ) ) )
+ *	do i at level 1, statement 1
+ *	do j at level 2, statement 2
+ *	3 statements
+ *
+ */
+
+#header <<
+typedef struct _node {
+            struct _node *right, *down;	/* using non-transform mode */
+            int token;
+            char text[50];
+        } SORAST;
+>>
+
+<<
+#ifdef __USE_PROTOS
+#include "stdlib.h"
+#else
+#include "malloc.h"
+#endif
+>>
+
+<<
+#include "errsupport.c" /* define error routines here or include errsupport.c */
+
+#define Do		1
+#define Var		2
+#define Int		3
+#define Assign	4
+
+SORAST *
+ast_empty_node()
+{
+    SORAST *p = (SORAST *) calloc(1, sizeof(SORAST));
+    if ( p == NULL ) {fprintf(stderr, "out of mem\n"); exit(-1);}
+	return p;
+}
+
+/* This function is implicitly called when you reference the node constructor #[] */
+SORAST *
+#ifdef __STDC__
+ast_node(int tok, char *s)
+#else
+ast_node(tok, s)
+int tok;
+char *s;
+#endif
+{
+    SORAST *p = ast_empty_node();
+
+    p->token = tok;
+    strcpy(p->text, s);
+    return p;
+}
+
+main()
+{
+    SORAST *a,*b,*c,*d, *result=NULL;
+	STreeParser myparser;
+
+	STreeParserInit(&myparser);
+
+	/* M a k e  I n p u t  T r e e  T o  P a r s e */
+    /* 'a' is #(Do i 1 10 #( Do j 2 9 #(Assign a i) ) ) */
+	a = #[Do,"do"];
+	a->down = #[Var,"i"];
+	a->down->right = #[Int,"1"];
+	a->down->right->right = #[Int,"10"];
+	b = a->down->right->right->right = #[Do,"do"];
+	b->down = #[Var,"j"];
+	b->down->right = #[Int,"2"];
+	b->down->right->right = #[Int,"9"];
+	c = b->down->right->right->right = #[Assign,":="];
+	c->down = #[Var,"a"];
+	c->down->right = #[Var,"i"];
+
+	printf("tree parser input: "); lisp(a, 0); printf("\n");
+    test(&myparser, &a);
+	printf("%d statements\n", myparser.nstats);
+}
+>>
+
+<<
+#ifdef __STDC__
+lisp(SORAST *tree, int rw)
+#else
+lisp(tree, rw)
+SORAST *tree;
+int rw;
+#endif
+{
+	while ( tree!= NULL )
+	{
+		if ( tree->down != NULL ) printf(" (");
+		printf(" %s", tree->text);
+		lisp(tree->down, rw);
+		if ( tree->down != NULL ) printf(" )");;
+		tree = tree->right;
+	}
+}
+>>
+
+test:	stat
+	;
+
+/* do_level can be either static or not, but nstats must be static
+ * so that at the end of the tree walk, myparser.nstats has the
+ * total statements found.  If it were not static, rule 'stat'
+ * would restore the value of nstats to its initial value (zero)
+ * before returning.
+ */
+stat:	<<@(int do_level=0) @(static int nstats=0)>>
+		do_stat
+	|	#( Assign Var Var )	<<@nstats++;>>
+	;
+
+do_stat
+	:	#(	Do v:Var Int Int
+			<<
+			@nstats++;
+			@do_level++;
+			printf("do %s at level %d, statement %d\n", v->text, @do_level, @nstats);
+			>>
+			stat
+		)
+	;

@@ -1,0 +1,52 @@
+/* A SORCERER grammar to evaluate simple expression trees */
+#header <<
+typedef struct _ast {
+            struct _ast *right, *down;  /* required */
+            int token;                  /* required */
+            int val;                    /* needed by this task */
+        } SORAST;
+>>
+
+<<
+/* include support code so we don't have to link in default error routines */
+#include "errsupport.c"
+
+#define Plus    1   /* define token types referenced in SORCERER grammar */
+#define Mult    2
+#define Int     3
+
+/* SORCERER converts #[...] to ast_node(...) */
+SORAST *ast_node(int token, int v)
+{
+    SORAST *p = (SORAST *) calloc(1,sizeof(SORAST));
+    p->token = token; p->val = v;
+    return p;
+}
+
+main()
+{
+    SORAST *a, *b, *c, *d;
+    int result;
+    STreeParser myparser;
+    STreeParserInit(&myparser);
+
+    /* create the tree (for 3+4*5) to parse */
+    b = #[Mult,0]; b->down = #[Int,4]; b->down->right = #[Int,5];
+    a = #[Plus,0]; a->down = #[Int,3]; a->down->right = b;
+
+    /* match tree and execute actions */
+    result = eval(&myparser, &a);
+    printf("result is %d\n", result);
+}
+>>
+
+/* Match expression trees and return result of operation */
+eval > [int r]             /* read: "eval is a rule w/no args returning an int" */
+    :   <<int opnd1, opnd2;>>   /* define local variables */
+        #(Plus eval>[opnd1] eval>[opnd2])   <<r = opnd1+opnd2;>>
+
+    |   <<int opnd1, opnd2;>>   /* define local variables */
+        #(Mult eval>[opnd1] eval>[opnd2])   <<r = opnd1*opnd2;>>
+
+    |   v:Int                               <<r = v->val;>>
+    ;

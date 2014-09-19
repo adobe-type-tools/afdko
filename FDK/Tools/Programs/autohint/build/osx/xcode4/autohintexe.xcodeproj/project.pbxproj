@@ -1,0 +1,375 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		BDD0854714E47AC700F0FC0D /* BuildAll */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = BDD0855C14E47B0900F0FC0D /* Build configuration list for PBXAggregateTarget "BuildAll" */;
+			buildPhases = (
+			);
+			dependencies = (
+				BDD0854B14E47AD000F0FC0D /* PBXTargetDependency */,
+				BDD0854D14E47AD500F0FC0D /* PBXTargetDependency */,
+			);
+			name = BuildAll;
+			productName = BuildAll;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		BD5BF4170D9AD1F80015F645 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = BD5BF4160D9AD1F80015F645 /* main.c */; };
+		BD5BF44A0D9AD3D60015F645 /* libautohintlib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BD5BF4490D9AD3C80015F645 /* libautohintlib.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BD5BF4480D9AD3C80015F645 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD5BF4440D9AD3C80015F645 /* autohintlib.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = autohintlib;
+		};
+		BD5E127317A73C6E007BA047 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD5BF4440D9AD3C80015F645 /* autohintlib.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = autohintlib;
+		};
+		BDD0854A14E47AD000F0FC0D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD5BF4440D9AD3C80015F645 /* autohintlib.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = autohintlib;
+		};
+		BDD0854C14E47AD500F0FC0D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DD76FA90486AB0100D96B5E;
+			remoteInfo = autohintexe;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		BD5BF40F0D9AD0A50015F645 /* debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../../../../public/config/xcconfig/debug.xcconfig; sourceTree = SOURCE_ROOT; };
+		BD5BF4100D9AD0A50015F645 /* release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = release.xcconfig; path = ../../../../public/config/xcconfig/release.xcconfig; sourceTree = SOURCE_ROOT; };
+		BD5BF4130D9AD0DB0015F645 /* ac_C_lib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ac_C_lib.h; path = ../../../autohintlib/source/public/ac/ac_C_lib.h; sourceTree = SOURCE_ROOT; };
+		BD5BF4160D9AD1F80015F645 /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = main.c; path = ../../../source/main.c; sourceTree = SOURCE_ROOT; };
+		BD5BF4180D9AD2120015F645 /* autohintexe */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = autohintexe; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD5BF4200D9AD3230015F645 /* buildfont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = buildfont.h; path = ../../../autohintlib/source/bf/buildfont.h; sourceTree = SOURCE_ROOT; };
+		BD5BF4330D9AD3490015F645 /* ../../../autohintlib/source/public/extras/numtypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ../../../autohintlib/source/public/extras/numtypes.h; sourceTree = "<group>"; };
+		BD5BF4340D9AD3490015F645 /* ../../../autohintlib/source/public/extras/pubtypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ../../../autohintlib/source/public/extras/pubtypes.h; sourceTree = "<group>"; };
+		BD5BF4360D9AD3630015F645 /* bftoac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bftoac.h; path = ../../../autohintlib/source/bf/bftoac.h; sourceTree = SOURCE_ROOT; };
+		BD5BF4370D9AD36B0015F645 /* machinedep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = machinedep.h; path = ../../../autohintlib/source/bf/machinedep.h; sourceTree = SOURCE_ROOT; };
+		BD5BF4390D9AD37D0015F645 /* memcheck.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = memcheck.h; path = ../../../autohintlib/source/public/ac/memcheck.h; sourceTree = SOURCE_ROOT; };
+		BD5BF4440D9AD3C80015F645 /* ../../../autohintlib/build/osx/xcode4/autohintlib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = ../../../autohintlib/build/osx/xcode4/autohintlib.xcodeproj; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8DD76FAD0486AB0100D96B5E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BD5BF44A0D9AD3D60015F645 /* libautohintlib.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08FB7794FE84155DC02AAC07 /* autohintexe */ = {
+			isa = PBXGroup;
+			children = (
+				BD5BF4440D9AD3C80015F645 /* autohintlib.xcodeproj */,
+				BD5BF4080D9AD0760015F645 /* xcconfig */,
+				BD5BF4090D9AD0830015F645 /* Headers */,
+				08FB7795FE84155DC02AAC07 /* Source */,
+				C6A0FF2B0290797F04C91782 /* Documentation */,
+				1AB674ADFE9D54B511CA2CBB /* Products */,
+			);
+			name = autohintexe;
+			sourceTree = "<group>";
+		};
+		08FB7795FE84155DC02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				BD5BF4160D9AD1F80015F645 /* main.c */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		1AB674ADFE9D54B511CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BD5BF4180D9AD2120015F645 /* autohintexe */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BD5BF4080D9AD0760015F645 /* xcconfig */ = {
+			isa = PBXGroup;
+			children = (
+				BD5BF40F0D9AD0A50015F645 /* debug.xcconfig */,
+				BD5BF4100D9AD0A50015F645 /* release.xcconfig */,
+			);
+			name = xcconfig;
+			sourceTree = "<group>";
+		};
+		BD5BF4090D9AD0830015F645 /* Headers */ = {
+			isa = PBXGroup;
+			children = (
+				BD5BF4130D9AD0DB0015F645 /* ac_C_lib.h */,
+				BD5BF4390D9AD37D0015F645 /* memcheck.h */,
+				BD5BF4200D9AD3230015F645 /* buildfont.h */,
+				BD5BF4360D9AD3630015F645 /* bftoac.h */,
+				BD5BF4370D9AD36B0015F645 /* machinedep.h */,
+				BD5BF4320D9AD3490015F645 /* extras */,
+			);
+			name = Headers;
+			sourceTree = "<group>";
+		};
+		BD5BF4320D9AD3490015F645 /* extras */ = {
+			isa = PBXGroup;
+			children = (
+				BD5BF4330D9AD3490015F645 /* ../../../autohintlib/source/public/extras/numtypes.h */,
+				BD5BF4340D9AD3490015F645 /* ../../../autohintlib/source/public/extras/pubtypes.h */,
+			);
+			name = extras;
+			path = ../../../source/public/extras;
+			sourceTree = SOURCE_ROOT;
+		};
+		BD5BF4450D9AD3C80015F645 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BD5BF4490D9AD3C80015F645 /* libautohintlib.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C6A0FF2B0290797F04C91782 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Documentation;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8DD76FA90486AB0100D96B5E /* autohintexe */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DEB928508733DD80010E9CD /* Build configuration list for PBXNativeTarget "autohintexe" */;
+			buildPhases = (
+				8DD76FAB0486AB0100D96B5E /* Sources */,
+				8DD76FAD0486AB0100D96B5E /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BD5E127417A73C6E007BA047 /* PBXTargetDependency */,
+			);
+			name = autohintexe;
+			productInstallPath = "$(HOME)/bin";
+			productName = autohintexe;
+			productReference = BD5BF4180D9AD2120015F645 /* autohintexe */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0460;
+			};
+			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "autohintexe" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
+			mainGroup = 08FB7794FE84155DC02AAC07 /* autohintexe */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = BD5BF4450D9AD3C80015F645 /* Products */;
+					ProjectRef = BD5BF4440D9AD3C80015F645 /* autohintlib.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				8DD76FA90486AB0100D96B5E /* autohintexe */,
+				BDD0854714E47AC700F0FC0D /* BuildAll */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		BD5BF4490D9AD3C80015F645 /* libautohintlib.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libautohintlib.a;
+			remoteRef = BD5BF4480D9AD3C80015F645 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8DD76FAB0486AB0100D96B5E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BD5BF4170D9AD1F80015F645 /* main.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BD5E127417A73C6E007BA047 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = autohintlib;
+			targetProxy = BD5E127317A73C6E007BA047 /* PBXContainerItemProxy */;
+		};
+		BDD0854B14E47AD000F0FC0D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = autohintlib;
+			targetProxy = BDD0854A14E47AD000F0FC0D /* PBXContainerItemProxy */;
+		};
+		BDD0854D14E47AD500F0FC0D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8DD76FA90486AB0100D96B5E /* autohintexe */;
+			targetProxy = BDD0854C14E47AD500F0FC0D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1DEB928608733DD80010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BD5BF40F0D9AD0A50015F645 /* debug.xcconfig */;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = ("EXECUTABLE=1", "OSX=1");
+				HEADER_SEARCH_PATHS = (
+					../../../autohintlib/source/ac,
+					../../../autohintlib/source/bf,
+					../../../autohintlib/source/public/extras,
+					../../../autohintlib/source/public/ac,
+					"$(SDKROOT)/usr/include",
+					"$(SDKROOT)/usr/include/sys",
+					"../../../../public/include_files/sfnt_tables/**",
+				);
+			};
+			name = Debug;
+		};
+		1DEB928708733DD80010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BD5BF4100D9AD0A50015F645 /* release.xcconfig */;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = ("EXECUTABLE=1", "OSX=1");
+				HEADER_SEARCH_PATHS = (
+					../../../autohintlib/source/ac,
+					../../../autohintlib/source/bf,
+					../../../autohintlib/source/public/extras,
+					../../../autohintlib/source/public/ac,
+					"$(SDKROOT)/usr/include",
+					"$(SDKROOT)/usr/include/sys",
+					"../../../../public/include_files/sfnt_tables/**",
+				);
+			};
+			name = Release;
+		};
+		1DEB928A08733DD80010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BD5BF40F0D9AD0A50015F645 /* debug.xcconfig */;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = ("EXECUTABLE=1", "OSX=1");
+				HEADER_SEARCH_PATHS = (
+					../../../autohintlib/source/ac,
+					../../../autohintlib/source/bf,
+					../../../autohintlib/source/public/extras,
+					../../../autohintlib/source/public/ac,
+					"$(SDKROOT)/usr/include",
+					"$(SDKROOT)/usr/include/sys",
+					"../../../../public/include_files/sfnt_tables/**",
+				);
+				PRODUCT_NAME = autohintexe;
+			};
+			name = Debug;
+		};
+		1DEB928B08733DD80010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BD5BF4100D9AD0A50015F645 /* release.xcconfig */;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = ("EXECUTABLE=1", "OSX=1");
+				HEADER_SEARCH_PATHS = (
+					../../../autohintlib/source/ac,
+					../../../autohintlib/source/bf,
+					../../../autohintlib/source/public/extras,
+					../../../autohintlib/source/public/ac,
+					"$(SDKROOT)/usr/include",
+					"$(SDKROOT)/usr/include/sys",
+					"../../../../public/include_files/sfnt_tables/**",
+				);
+				PRODUCT_NAME = autohintexe;
+			};
+			name = Release;
+		};
+		BDD0854814E47AC700F0FC0D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BD5BF40F0D9AD0A50015F645 /* debug.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		BDD0854914E47AC700F0FC0D /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BD5BF4100D9AD0A50015F645 /* release.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB928508733DD80010E9CD /* Build configuration list for PBXNativeTarget "autohintexe" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB928608733DD80010E9CD /* Debug */,
+				1DEB928708733DD80010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "autohintexe" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB928A08733DD80010E9CD /* Debug */,
+				1DEB928B08733DD80010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BDD0855C14E47B0900F0FC0D /* Build configuration list for PBXAggregateTarget "BuildAll" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BDD0854814E47AC700F0FC0D /* Debug */,
+				BDD0854914E47AC700F0FC0D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

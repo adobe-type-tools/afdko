@@ -1,0 +1,7 @@
+	push d
+	push a
+	mult
+	push a
+	push b
+	mult
+	add
