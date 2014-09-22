@@ -53,7 +53,7 @@ The FDK distribution directory tree is built by:
 
 3) Building the Python interpreter for the FDK.
 
-Note that the FDK will use the Python interpreter whose path is specified in line 4 of the file "setFDKPaths.py" This line can be changed to point to any other Python interpreter program on the system. However, if you choose to use another Python interpreter, you must add the several third party packages. package.
+Note that the FDK will use the Python interpreter whose path is specified in line 4 of the file "setFDKPaths.py" This line can be changed to point to any other Python interpreter program on the system. However, if you choose to use another Python interpreter, you must add the several third party packages.
 
 The FDK contains a copy of the Python interpreter. This is used to run the FDK Python scripts. To build this:
  - download the latest Python 2.7 source from www.python.org to a local directory.
@@ -109,9 +109,9 @@ Do this for the osx, win and Linux AFDKOPython directories.
 
 The command-line tools are all implemented as either binary C programs or shell scripts. Each shell script 1) finds the Python included in the FDK and then 2) uses that Python to run a specific Python script with appropriate options.
 
-All the commands will work only if the path FDK/Tools/osx|win|linux  is added to the current users PATH environment variable.
+All the commands will work only if the path FDK/Tools/osx|win|linux is added to the current users PATH environment variable.
 
-If your primary system is Mac OSX, then z useful approach is to use MVWare Fusion to make virtual systems. For Linux:
+If your primary system is Mac OSX, then a useful approach is to use VMWare Fusion (or Virtualbox) to make virtual machines. For Linux:
 - download the Ubuntu Linux 32 bit iso file (x86).
 - make a new VM machine with VMWare Fusion: select the iso file as the source
 - install all updates
