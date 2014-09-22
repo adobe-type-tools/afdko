@@ -1,7 +1,11 @@
 
 AFDKO_EXE_PATH="${cmdDirPath}"
 
+# point to the self-compiled python
 AFDKO_Python="${cmdDirPath}"/Python/bin/python2.7
+
+# uncomment this to point to the system python on Ubuntu
+# AFDKO_Python="/usr/bin/env python"
 
 AFDKO_Scripts="${AFDKO_EXE_PATH}"/../SharedData/FDKScripts
 
