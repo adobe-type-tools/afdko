@@ -272,7 +272,7 @@ in order to add the 'FDK/Tools/linux' directory to your PATH environment variabl
 		doItYourselfMsg()
 		return
 
-	print "If you cannot run the FDK tools by name from the command-line after logging out fro Linux and then back in, then your"
+	print "If you cannot run the FDK tools by name from the command-line after logging out and then back in, then your"
 	print "Terminal program may be using a different login file than the ones I modified."
 	print "If so, you will need to identify your login file, and then add the same two lines to that file. "
 
@@ -281,7 +281,7 @@ def main():
 			MakeSymLink()
 			UpdateLoginFile()
 			print
-			print "You must log out of Linux, and log back in, before the changes will take effect."
+			print "You must log out, and log back in, before the changes will take effect."
 			print "The FDK will then be ready to use."
 		except IOError:
 			pass
