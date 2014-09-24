@@ -1,22 +1,15 @@
 _help_ = """
-importSVGDocsToSVGTable.py v 1.01 Aug 20 2013
+importSVGDocsToSVGTable.py v 2.0 Sep 23 2014
 
-python importSVGDocsToSVGTable.py <path to input TTX file>  <path to folder to contain output SVG files> 
+python importSVGDocsToSVGTable.py <path to input OTF/TTF file>  <path(s) to SVG files OR to folder containing SVG files> 
 
-Converts the set of SVG docs to a TTX SVG table definition, and adds
-this the TTX file.
+Converts a set of SVG docs to a TTX SVG table definition, and then adds this table into the font file.
+The script will replace any pre-existing SVG table.
 
-Requires that the target TTX file exist. The script will replace any
-pre- existing SVG table.
+Requires the <svg> element of every SVG file to have an 'id' parameter that follows the format 'glyphID' where ID is an integer number.
+(If you're using Adobe Illustrator to create the SVG files, giving the name 'glyphID' to the top layer will fulfill the above requirement)
 
-Requires that each SVG doc file  have a name matching "<file base
-name>.start GID>.<end GID>.svg"
-
-Removes any existing "glyphID" or "id="glyphX" tags from each svg document, and adds in
-new ones, using the  start GID - end GID range.
-
-Does NOT add a colorPalettes element to the SVG table, but will preserve
-one if there is a colorPalettes element in a pre-existing SVG table.
+The integer ID values (of glyphID) should match the glyph indexes of the font.
 """
 
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
@@ -25,28 +18,166 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 import os
 import sys
 import re
-try:
-    import xml.etree.cElementTree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET
-import copy
-
-XML = ET.XML
-XMLElement = ET.Element
-xmlToString = ET.tostring
+import io # io module is used for dealing with the line-ending differences that exist between platforms
+from subprocess import Popen, PIPE
 
 kSVGDocTemplate = """\t\t<svgDoc endGlyphID="%s" startGlyphID="%s">
-\t\t\t<![CDATA[<?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg  PUBLIC '-//W3C//DTD SVG 1.1//EN'  'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>%s]]>
+\t\t\t<![CDATA[%s]]>
 \t\t</svgDoc>"""
 
-kSVGTableTemplate = """\t<SVG>
+kSVGTableTemplate = """<?xml version="1.0" encoding="utf-8"?>
+<ttFont sfntVersion="%s">
+\t<SVG>
 %s
-\t</SVG>"""
+\t\t<colorPalettes></colorPalettes><!-- COLOR PALETTES IN SVG TABLE HAVE BEEN SUPERSEEDED BY CPAL TABLE -->
+\t</SVG>
+</ttFont>
+"""
+
+kSVGFileNameSuffix = "-SVG"
+
+debug = False
+
+
+def writeNewFontFile(fontFilePath, ttxFilePath):
+	folderPath, fontFileName = os.path.split(fontFilePath)
+	fileNameNoExtension, fileExtension = os.path.splitext(fontFileName)
+	newFontFilePath = os.path.join(folderPath, "%s%s%s" % (fileNameNoExtension, kSVGFileNameSuffix, fileExtension))
+	
+	cmd = "ttx -o '%s' -m '%s' '%s'" % (newFontFilePath, fontFilePath, ttxFilePath)
+	popen = Popen(cmd, shell=True, stdout=PIPE)
+	popenout, popenerr = popen.communicate()
+	if popenout:
+		output = popenout
+	else:
+		return
+	
+
+def writeTTXfile(fontFilePath, UPM, fontFormat, svgFilePathsList):
+	if debug:
+		period = ''
+		debugSuffix = '-DEBUG'
+	else:
+		period = '.'
+		debugSuffix = ''
+	folderPath, fontFileName = os.path.split(fontFilePath)
+	fileNameNoExtension, fileExtension = os.path.splitext(fontFileName)
+	ttxFilePath = os.path.join(folderPath, "%s%s%s.ttx" % (period, fileNameNoExtension, debugSuffix))
+	
+	# the svgDoc entries in the SVG table need to be sorted,
+	# so first make a dictionary with all the entries
+	svgDocDict = {}
+	for svgFilePath in svgFilePathsList:
+		f = io.open(svgFilePath, "rt", newline=None)
+		data = f.read()
+		f.close()
+		
+		gid = re.search(r"<svg.+?id=\"glyph(\d+)\".+?>", data, re.DOTALL).group(1)
+		svgDoc = kSVGDocTemplate % (gid, gid, data.strip())
+		svgDocDict[gid] = svgDoc
+	
+	svgDocIndexList = svgDocDict.keys()
+	svgDocIndexList.sort()
+	svgDocList = [svgDocDict[index] for index in svgDocIndexList]
+	
+	tableContents = os.linesep.join(svgDocList)
+	tableTotal = kSVGTableTemplate % (fontFormat, tableContents)
+	
+	# add 'transform' parameter to all <svg> elements (it does NOT check if the parameter already exists)
+	tableFinal = re.sub(r"(<svg) ", r"""\1 transform="translate(0 -""" + UPM + """)\" """, tableTotal)
+	
+	f = open(ttxFilePath, "wt")
+	f.write(tableFinal)
+	f.close()
+	
+	if not len(svgDocList):
+		print "ERROR: Could not assemble any data for the SVG table."
+		return ttxFilePath, False # ok2continue
+	else:
+		return ttxFilePath, True
+
+
+def validateSVGfiles(svgFilePathsList):
+	"""
+	Light validation of SVG files.
+	Checks that:
+		- there is an <xml> header
+		- there is an <svg> element
+		- the 'id' parameter in the <svg> element follows the format 'glyphID' where ID is an integer number
+		- there are no repeated glyphIDs
+	"""
+	validatedPaths = []
+	glyphIDsFound = []
+	
+	for filePath in svgFilePathsList:
+		# read file
+		f = open(filePath, "rt")
+		data = f.read()
+		f.close()
+		
+		# find <xml> header
+		xml = re.search(r"<\?xml.+?\?>", data)
+		if not xml:
+			print "WARNING: Could not find <xml> header in SVG file. Skiping %s" % (filePath)
+			continue
+
+		# find <svg> blob
+		svg = re.search(r"<svg.+?>.+?</svg>", data, re.DOTALL)
+		if not svg:
+			print "WARNING: Could not find <svg> element in SVG file. Skiping %s" % (filePath)
+			continue
+		
+		# check 'id' value
+		id = re.search(r"<svg.+?id=\"glyph(\d+)\".+?>", data, re.DOTALL)
+		if not id:
+			print "WARNING: The 'id' parameter in the <svg> element does not match the format 'glyphID'. Skiping %s" % (filePath)
+			continue
+		
+		gid = id.group(1)
+		
+		# look out for duplicate IDs
+		if gid in glyphIDsFound:
+			print "WARNING: The 'id' value 'glyph%s' is already being used by another SVG file. Skiping %s" % (gid, filePath)
+			continue
+		else:
+			glyphIDsFound.append(gid)
+		
+		validatedPaths.append(filePath)
+	
+# 	print glyphIDsFound
+# 	print validatedPaths
+	return validatedPaths
+
+
+def getFontUPM(fontFilePath):
+	"""
+	Use spot to get the UPM value from the head table of the font.
+	If this fails we can assume that the file is not a font.
+	"""
+	cmd = "spot -t head '%s'" % fontFilePath
+	popen = Popen(cmd, shell=True, stdout=PIPE)
+	popenout, popenerr = popen.communicate()
+	if popenout:
+		output = popenout
+	else:
+		return
+	
+	headUPM = re.search("unitsPerEm\s*=(\d+)", output).group(1)
+	return headUPM
+
+
+def getFontFormat(fontFilePath):
+	# these lines were scavenged from fontTools
+	f = open(fontFilePath, "rb")
+	header = f.read(256)
+	formatTag = header[:4]
+	return repr(formatTag)[1:-1]
+
 
 def getOptions():
 	
-	if len(sys.argv) !=4:
-		print "Need 3 argurments."
+	if len(sys.argv) < 3:
+		print "ERROR: Not enough arguments."
 		print _help_
 		sys.exit(0)
 	
@@ -54,126 +185,46 @@ def getOptions():
 		print _help_
 		sys.exit(0)
 
-	ttxFilePath = sys.argv[1]
-	svgDir =  sys.argv[2]
-	fileBaseName =  sys.argv[3]
+	fontFilePath = sys.argv[1]
+	svgFilesOrFolder = sys.argv[2:]
 
-	if not os.path.exists(ttxFilePath):
-		print "The first argument must be a path to TTX file."
-		print "Could not find '%s'." % (ttxFilePath)
+	if not os.path.isfile(fontFilePath):
+		print "ERROR: The first argument must be a path to an OTF or TTF file."
 		print sys.exit(0)
 
-	if not os.path.exists(svgDir):
-		print "The second argument must be a path to a directory containing the SVG docs."
-		print "Could not find '%s'." % (svgDir)
+	UPM = getFontUPM(fontFilePath)
+	
+	if not UPM:
+		print "ERROR: Invalid font file."
 		print sys.exit(0)
 
-	return ttxFilePath, svgDir, fileBaseName
-
-def addGlyphID(startGID, endGID, data, filePath):
-	m  = re.search(r"<svg\s(.+?)</svg>", data, re.DOTALL)
-	if not m:
-		raise ValueError("Error: There are no <svg> elements in the file '%s." % ())
-	dataList = []
-	glyphID = startGID-1
-	while m:
-		glyphID += 1
-		if glyphID > endGID:
-			raise ValueError("Error: there are more svg docs in the file than allowed by the endGID value '%s'. %s'." % (endGID, filePath))
-			
-		start = m.start()
-		end = m.end()
-		svgData = data[start:end]
-		dataList.append(data[:start])
-		data = data[end:]
-		# remove old ones
-		svgData = re.sub(r"glyphid=\".+?\"", "", svgData)
-		svgData = re.sub(r"id=\"glyph.+?\"", "", svgData)
-		# add new one.
-		dataList.append("<svg id=\"glyph%s\" " % (glyphID))
-		dataList.append(svgData[5:])
-		m  = re.search(r"<svg\s(.+?)</svg>", data, re.DOTALL)
+	fontFormat = getFontFormat(fontFilePath)
 	
-	if glyphID != endGID:
-		raise ValueError("Error: The number of svg docs in the file ('%s') do not match the startGlyphID-endGlyphID range '%s-'%s'. %s'." % (glyphID -startGID+1,  startGID, endGID, filePath))
-	data = "".join(dataList)
-	return data
-
-def parseFileName(fileName):
-	parts = fileName.split(".")
-	try:
-		startGID = int(parts[1])
-		endGID = int(parts[2])
-	except (IndexError, ValueError):
-		msg =  "Error. File name must have the format '<base file name>.<integer start GID>.<integer end GID>.svg'. "
-		msg +=  "Failed to parse file name '%s'." % (fileName)
-		raise ValueError(msg)
-	return parts[0], startGID, endGID
-	
-def byValue(name1, name2):
-	parts1 = parseFileName(name1)
-	parts2 = parseFileName(name2)
-	return cmp(parts1, parts2)
-	
-def importSVGDocs(ttxFilePath, svgDir, fileBaseName):
-	# Build the SVG table text.
-	fileList = os.listdir(svgDir)
-	fileList = filter(lambda fileName: fileName.startswith(fileBaseName), fileList)
-	if len(fileList) == 0:
-		print "Could not find any files starting with '%s' in '%s'." % (fileBaseName, svgDir)
-		return None
-	fileList.sort(byValue)
-	svgDocList = []
-	for fileName in fileList:
-		parts = fileName.split(".")
-		try:
-			startGID = int(parts[1])
-			endGID = int(parts[2])
-		except (IndexError, ValueError):
-			print "Error. File name must have the format '<base file name>.<integer start GID>.<integer end GID>.svg'."
-			print "Failed to parse file name '%s'." % (fileName)
-			return None
-		filePath = os.path.join(svgDir, fileName)
-		fp = open(filePath, "rt")
-		data = fp.read()
-		fp.close()
-		# Make sure that svgDocs have the glyphID attribute, and the right glyphID attribute
-		data = addGlyphID(startGID, endGID, data, filePath)
-		svgDoc = kSVGDocTemplate % (startGID, endGID, data.strip())
-		svgDocList.append(svgDoc)
-		
-	svgDocList.append("\t")
-	tableData = os.linesep.join(svgDocList)
-	tableText = kSVGTableTemplate % (tableData + os.linesep + "<colorPalettes></colorPalettes>" + os.linesep)
-		
-	# Add it to the TTX file.
-	fp = open(ttxFilePath, "rt")
-	oldData = fp.read()
-	fp.close()
-	m = re.search(r"<SVG>.+?</SVG>", oldData, re.DOTALL)
-	if m:
-		# Replace existing table. Extract the color palettes, if any, and add them back in.
-		oldSVGData = oldData[m.start():m.end()]
-		cm = re.search(r"\s*<colorPalettes>.+?</colorPalettes>\s*", oldSVGData, re.DOTALL)
-		if cm:
-			cpData = oldSVGData[cm.start():cm.end()]
-			tableText = kSVGTableTemplate % (tableData + cpData)
-		newData = oldData[:m.start()] + tableText + oldData[m.end():]
+	if os.path.isdir(svgFilesOrFolder[0]): # If the first path is a folder
+		dir = svgFilesOrFolder[0]
+		svgFilePathsList = [os.path.join(dir, file) for file in os.listdir(dir)] # Assemble the full paths, not just file names
 	else:
-		# Insert table data at end.
-		m = re.search(r"\s+</ttFont>", oldData, re.DOTALL)
-		if not m:
-			print "Error. Could not find string '</ttFont>' in TTX file '%s': must be some other format." % (ttxFilePath)
-			return None
-		newData = oldData[:m.start()] + tableText + oldData[m.start():]
-			
-	fp = open(ttxFilePath + ".new", "wt")
-	fp.write(newData)
-	fp.close()
+		svgFilePathsList = []
+		for file in svgFilesOrFolder[:]: # copy
+			if os.path.isfile(file):
+				svgFilePathsList.append(file)
 	
+	svgFilePathsList = validateSVGfiles(svgFilePathsList)
+
+	return fontFilePath, UPM, fontFormat, svgFilePathsList
+
+
 def run():
-	ttxFilePath, svgDir, fileBaseName = getOptions()
-	svgData = importSVGDocs(ttxFilePath, svgDir, fileBaseName)
+	fontFilePath, UPM, fontFormat, svgFilePathsList = getOptions()
+	ttxFilePath, ok2continue = writeTTXfile(fontFilePath, UPM, fontFormat, svgFilePathsList)
 	
+	if ok2continue:
+		writeNewFontFile(fontFilePath, ttxFilePath)
+	
+	# delete temporary TTX file
+	if os.path.exists(ttxFilePath) and not debug:
+		os.remove(ttxFilePath)
+
+
 if __name__ == "__main__":
 	run()
