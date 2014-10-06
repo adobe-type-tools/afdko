@@ -38,7 +38,7 @@ FDK/Tools/Programs/public/lib/
 
 For the Mac, all programs are built with Xcode 4.5
 For Windows, all programs are built with VC10
-For Linux, programs are built with the Ubuntu 12.0.4 release.
+For Linux, programs are built with the Ubuntu 12.04 release.
 
 2) FDK distribution package.
 
