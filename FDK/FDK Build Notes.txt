@@ -53,7 +53,7 @@ The FDK distribution directory tree is built by:
 
 3) Building the Python interpreter for the FDK.
 
-Note that the FDK will use the Python interpreter whose path is specified in line 4 of the file "setFDKPaths.py" This line can be changed to point to any other Python interpreter program on the system. However, if you choose to use another Python interpreter, you must add the several third party packages.
+Note that the FDK will use the Python interpreter whose path is specified in the file "setFDKPaths" This line can be changed to point to any other Python interpreter program on the system. However, if you choose to use another Python interpreter, you must add the several third party packages.
 
 The FDK contains a copy of the Python interpreter. This is used to run the FDK Python scripts. To build this:
  - download the latest Python 2.7 source from www.python.org to a local directory.
