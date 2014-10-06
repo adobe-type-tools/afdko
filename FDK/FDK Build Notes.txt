@@ -81,8 +81,8 @@ Once you have built the AFDKO Python, you need to install the various modules th
 
 This module is needed for the ttx and ttxn tools to work. I use Behdad Esfahbod's GitHub v2.5 branch, as it fixes a number of bugs, and is not dependent on the numPy module.
 
-Ge the master branch of fontTools from https://github.com/behdad/fonttools. Download the zip file, cd to the unpacked directory, 
-and use the command "AFDKOPython setup.py install". When you are done, copy the file site-packages/FontTools/fontTools/misc/xmlWriter.py
+Get the master branch of fontTools from https://github.com/behdad/fonttools. Download the zip file, cd to the unpacked directory, 
+and use the command "AFDKOPython setup.py install". When you are done, copy the files site-packages/FontTools/fontTools/misc/xmlWriter.py*
 to site-packages/FontTools/xmlWriter.py. This allows the robofab libraries to work with this branch of the fontTools.
 
 3.2 mutatorMath support.
