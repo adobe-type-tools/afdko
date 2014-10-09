@@ -92,7 +92,7 @@ fontMath-ufo3: ufo3 branch of fontMath at: https://github.com/typesupply/fontMat
 Install with "AFDKOPython setup.py install"
 
 robofab-ufo3k: ufo3K branch of robofab library from https://github.com/robofab-developers/robofab/tree/ufo3k.
-This does not have a setup.py file. Install by copying the robofab-ufo3k directory to FDK/Tools/osx/Python/AFDKOPython27/lib/python2.7/site-packages, cd to the directory, run "AFDKOPython install.py", and then delete all but the LIB directory and the LICENSE.txt file.
+This does not have a setup.py file. Install by copying the robofab-ufo3k directory to your Python installation's site-packages directory, e.g. FDK/Tools/osx/Python/AFDKOPython27/lib/python2.7/site-packages, cd to the directory, run "AFDKOPython install.py", and then delete all but the LIB directory and the LICENSE.txt file.
 
 defcon-ufo3: ufo3 branch of defcon library at https://github.com/typesupply/defcon/tree/ufo3.
 Install with "AFDKOPython setup.py install"
