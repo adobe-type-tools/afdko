@@ -85,7 +85,7 @@ Get the master branch of fontTools from https://github.com/behdad/fonttools. Dow
 and use the command "AFDKOPython setup.py install". When you are done, copy the files site-packages/FontTools/fontTools/misc/xmlWriter.py*
 to site-packages/FontTools/xmlWriter.py. This allows the robofab libraries to work with this branch of the fontTools.
 
-3.2 mutatorMath support.
+3.2 MutatorMath support.
 
 Install in order:
 fontMath-ufo3: ufo3 branch of fontMath at: https://github.com/typesupply/fontMath/tree/ufo3/.
@@ -98,8 +98,8 @@ defcon-ufo3: ufo3 branch of defcon library at https://github.com/typesupply/defc
 Install with "AFDKOPython setup.py install"
 The install script has a bug, in that it does not copy any of the subdirectories of defcon. Copy these manually.
 
-mutatorMath-master.
-This does not have a setup.py file. Install by copying the mutatorMath-master directory to FDK/Tools/osx/Python/AFDKOPython27/lib/python2.7/site-packages, and delete all but the LIB and LICENSE.txt file. Manually create the file "mutatorMath-master.pth", and put in it the relative path to the mutatorMath-master directory, e.g just  the line "mutatorMath-master".
+MutatorMath: master branch of MutatorMath at https://github.com/LettError/MutatorMath
+This does not have a setup.py file. Install by copying the mutatorMath directory to FDK/Tools/osx/Python/AFDKOPython27/lib/python2.7/site-packages, and delete all but the Lib directory and LICENSE file. Manually create the file "MutatorMath.pth", and put in it the relative path to the MutatorMath directory, e.g. just the line "mutatorMath".
 
 Check all the *.pth files in "FDK/Tools/osx/Python/AFDKOPython27/lib/python2.7/site-packages", and make sure the path references are all relative to the site-packages directory.
 
