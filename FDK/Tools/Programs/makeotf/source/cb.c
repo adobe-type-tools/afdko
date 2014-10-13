@@ -172,8 +172,8 @@ struct cbCtx_ {
 /* ----------------------------- Error Handling ---------------------------- */
 
 /* [hot callback] Fatal exception handler */
-void myfatal(void *ctx)	{
-	if (!KeepGoing)	{
+void myfatal(void *ctx) {
+	if (!KeepGoing) {
 		cbCtx h = ctx;
 		/*This seems to cause all kinds of crashes on Windows and OSX*/
 		/* hotFree(h->hot.ctx);*/	/* Free library context */
@@ -211,7 +211,7 @@ void message(void *ctx, int type, char *text) {
 /* --------------------------- Memory Management --------------------------- */
 
 /* Make a copy of a string */
-static void copyStr(cbCtx h, char **dst, char *src)	{
+static void copyStr(cbCtx h, char **dst, char *src) {
 	*dst = cbMemNew(h, strlen(src) + 1);
 	strcpy(*dst, src);
 }
@@ -363,13 +363,13 @@ static char *cffId(void *ctx) {
 }
 
 /* [hot callback] Write 1 byte to data buffer */
-static void cffWrite1(void *ctx, int c)	{
+static void cffWrite1(void *ctx, int c) {
 	cbCtx h = ctx;
 	*h->cff.next++ = c;
 }
 
 /* [hot callback] Write N bytes to data buffer */
-static void cffWriteN(void *ctx, long count, char *ptr)	{
+static void cffWriteN(void *ctx, long count, char *ptr) {
 	cbCtx h = ctx;
 	memcpy(h->cff.next, ptr, count);
 	h->cff.next += count;
@@ -378,7 +378,7 @@ static void cffWriteN(void *ctx, long count, char *ptr)	{
 /* [hot callback] Seek to offset and return data */
 static char *cffSeek(void *ctx, long offset, long *count) {
 	cbCtx h = ctx;
-	if (offset >= h->cff.buf.cnt || offset < 0)	{
+	if (offset >= h->cff.buf.cnt || offset < 0) {
 		/* Seek outside data bounds */
 		*count = 0;
 		return NULL;
@@ -413,14 +413,14 @@ static char *otfId(void *ctx) {
 }
 
 /* [hot callback] Write single byte to output file (errors checked on close) */
-static void otfWrite1(void *ctx, int c)	{
+static void otfWrite1(void *ctx, int c) {
 	cbCtx h = ctx;
 	fileWrite1(&h->otf.file, c);
 }
 
 /* [hot callback] Write multiple bytes to output file (errors checked on
    close) */
-static void otfWriteN(void *ctx, long count, char *ptr)	{
+static void otfWriteN(void *ctx, long count, char *ptr) {
 	cbCtx h = ctx;
 	fileWriteN(&h->otf.file, count, ptr);
 }
@@ -432,7 +432,7 @@ static long otfTell(void *ctx) {
 }
 
 /* [hot callback] Seek to offset */
-static void otfSeek(void *ctx, long offset)	{
+static void otfSeek(void *ctx, long offset) {
 	cbCtx h = ctx;
 	fileSeek(&h->otf.file, offset, SEEK_SET);
 }
@@ -462,9 +462,8 @@ static char *findFeatInclFile(cbCtx h, char *filename) {
 		int i;
 
 		for (; pathstart[0] == '.' && pathstart[1] == '.' & pathstart[2] == '/'; upcounter++, pathstart += 3) {}
-		for (i = 0; i < 3; i++)	{
-			if ((h->feat.includeDir[i] != NULL) &&
-				(h->feat.includeDir[i][0] != '\0'))	{
+		for (i = 0; i < 3; i++) {
+			if ((h->feat.includeDir[i] != NULL) && (h->feat.includeDir[i][0] != '\0')) {
 				int j, pathreduced = 1;
 				char reducedpath[FILENAME_MAX + 1];
 				strcpy(reducedpath, h->feat.includeDir[i]);
@@ -472,7 +471,7 @@ static char *findFeatInclFile(cbCtx h, char *filename) {
 				if (reducedpath[strlen(reducedpath) - 1] == ':') {
 					reducedpath[strlen(reducedpath) - 1] = '\0';
 				}
-				for (j = 0; j < upcounter; j++)	{
+				for (j = 0; j < upcounter; j++) {
 					int k, lastspot = -1;
 					for (k = 0; reducedpath[k] != '\0'; k++) {
 						if (reducedpath[k] == ':') {
@@ -497,12 +496,12 @@ static char *findFeatInclFile(cbCtx h, char *filename) {
 		path[0] = '\0';
 	}
 #endif
-	if (filename[0] != '/')	{
+	if (filename[0] != '/') {
 		/* Check if absolute path */
 		int i;
-		for (i = 0; i < 3; i++)	{
+		for (i = 0; i < 3; i++) {
 			if ((h->feat.includeDir[i] != NULL) &&
-				(h->feat.includeDir[i][0] != '\0'))	{
+				(h->feat.includeDir[i][0] != '\0')) {
 				if (strcmp(h->feat.includeDir[i], curdir()) == 0) {
 					strcpy(path, filename);
 				}
@@ -566,7 +565,7 @@ static char *featOpen(void *ctx, char *name, long offset) {
 }
 
 /* [hot callback] Refill data buffer from file */
-static char *featRefill(void *ctx, long *count)	{
+static char *featRefill(void *ctx, long *count) {
 	cbCtx h = ctx;
 	*count = fileReadN(&h->feat.file, BUFSIZ, h->feat.buf);
 	return (*count == 0) ? NULL : h->feat.buf;
@@ -626,7 +625,7 @@ static void featAddAnonData(void *ctx, char *data, long count,
 }
 
 /* [hot callback] Open Unicose Variation Selector file. (name == NULL) indicates not supplied. The full file name is returned. */
-static char *uvsOpen(void *ctx, char *name)	{
+static char *uvsOpen(void *ctx, char *name) {
 	cbCtx h = ctx;
 
 	if (name == NULL) {
@@ -669,7 +668,7 @@ static char *uvsGetLine(void *ctx,  char *buffer, long *count) {
 }
 
 /* [hot callback] Close feature file */
-static void uvsClose(void *ctx)	{
+static void uvsClose(void *ctx) {
 	cbCtx h = ctx;
 	fileClose(&h->uvs.file);
 }
@@ -686,7 +685,7 @@ static void tmpOpen(void *ctx) {
 }
 
 /* [hot callback] Write multiple bytes to temporary file */
-static void tmpWriteN(void *ctx, long count, char *ptr)	{
+static void tmpWriteN(void *ctx, long count, char *ptr) {
 	cbCtx h = ctx;
 	fileWriteN(&h->tmp.file, count, ptr);
 }
@@ -705,7 +704,7 @@ static char *tmpRefill(void *ctx, long *count) {
 }
 
 /* [hot callback] Close temporary file */
-static void tmpClose(void *ctx)	{
+static void tmpClose(void *ctx) {
 	cbCtx h = ctx;
 
 	if (h->tmp.file.fp != NULL) {
@@ -746,14 +745,14 @@ static char *CMapId(void *ctx) {
 }
 
 /* [hot callback] Refill CMap file input buffer */
-static char *CMapRefill(void *ctx, long *count)	{
+static char *CMapRefill(void *ctx, long *count) {
 	cbCtx h = ctx;
 	*count = fileReadN(&h->CMap.file, BUFSIZ, h->CMap.buf);
 	return h->CMap.buf;
 }
 
 /* Open CMap file */
-static void CMapOpen(void *ctx, char *filename)	{
+static void CMapOpen(void *ctx, char *filename) {
 	cbCtx h = ctx;
 	fileOpen(&h->CMap.file, h, filename, "rb");
 }
@@ -817,14 +816,14 @@ static int fcdbAddName(void *ctx,
 					  platformId, platspecId, languageId, nameId, str);
 }
 
-*#undef TRY_LINKS
-*#ifdef TRY_LINKS
+#undef TRY_LINKS
+#ifdef TRY_LINKS
 // [fcdb callback] Add style link from requested font record.
 void fcdbAddLink(void *ctx, int style, char *fontname) {
 	printf("link: %s=%s\n", (style == fcdbStyleBold)? "Bold":
 		   (style == fcdbStyleItalic)? "Italic" : "Bold Italic", fontname);
 }
-*#endif
+#endif
 
 // [fcdb callback] Add encoding from requested font record.
 static void fcdbAddEnc(void *ctx, int code, char *gname) {
@@ -881,7 +880,7 @@ static char *gnameScan(cbCtx h, char *p) {
 #define	Q_	(1 << 0)	/* Quit scan on unrecognized character */
 #define	E_	(1 << 1)	/* Report syntax error */
 
-	static unsigned char action[3][4] =	{
+	static unsigned char action[3][4] = {
 		/*  A-Za-z_	0-9		.		*		index  */
 		/* -------- ------- ------- ------- ------ */
 		{	0,		E_,		0,		Q_ },	/* [0] */
@@ -942,7 +941,7 @@ static int CDECL matchAliasRec(const void *key, const void *value) {
 	return strcmp(h->matchkey, (const char *)aliasString);
 }
 
-static int CDECL cmpAlias(const void *first, const void *second, void *ctx)	{
+static int CDECL cmpAlias(const void *first, const void *second, void *ctx) {
 	struct cbCtx_ *h = (cbCtx)ctx;
 	AliasRec *alias1 = (AliasRec *)first;
 	AliasRec *alias2 = (AliasRec *)second;
@@ -1016,7 +1015,7 @@ static int CDECL matchAliasRecByFinal(const void *key, const void *value) {
 
    All alias names must be
    unique. */
-void cbAliasDBRead(cbCtx h, char *filename)	{
+void cbAliasDBRead(cbCtx h, char *filename) {
 	File file;
 	long lineno;
 	long iOrder = -1;
@@ -1084,7 +1083,7 @@ void cbAliasDBRead(cbCtx h, char *filename)	{
 			/* Parse uv override name */
 			/* *p is either '\0' or '#' or a uv-name.  */
 			uvName = p;
-			if (*p != '\0')	{
+			if (*p != '\0') {
 				if (*p == '#') {
 					*p = '\0';
 				}
@@ -1187,7 +1186,7 @@ syntaxError:
 #if 0	/* xxx remove when fully tested */
 	{
 		int i;
-		for (i = 0; i < h->alias.recs.cnt; i++)	{
+		for (i = 0; i < h->alias.recs.cnt; i++) {
 			AliasRec *alias = &h->alias.recs.array[i];
 			printf("%s	%s %d\n",
 				   &h->alias.names.array[alias->iFinal],
@@ -1256,7 +1255,7 @@ static char *getUVOverrideName(void *ctx, char *gname) {
 }
 
 /* [hot callback] Get alias name and order. */
-static void getAliasAndOrder(void *ctx, char *oldName, char **newName, long int *order)	{
+static void getAliasAndOrder(void *ctx, char *oldName, char **newName, long int *order) {
 	cbCtx h = ctx;
 	AliasRec *alias;
 	h->matchkey = oldName;
@@ -1364,7 +1363,7 @@ close:
 }
 
 /* Get the pathname of given file */
-static char *getPathName(cbCtx h, char *name, int fail)	{
+static char *getPathName(cbCtx h, char *name, int fail) {
 	char *result;
 	char userfile[FILENAME_MAX];
 	char stdfile[FILENAME_MAX];
@@ -1392,7 +1391,7 @@ static char *getPathName(cbCtx h, char *name, int fail)	{
 static void anonInit(void *ctx, long count, AnonInfo *ai) {
 	dnaCtx localDnaCtx = (dnaCtx)ctx;
 	long i;
-	for (i = 0; i < count; i++)	{
+	for (i = 0; i < count; i++) {
 		dnaINIT(localDnaCtx, ai->data, 1, 3);	/* xxx */
 		ai++;
 	}
@@ -1514,7 +1513,7 @@ static void addCMap(cbCtx h, char *cmapfile) {
 }
 
 /* Make OTF pathname */
-static void makeOTFPath(cbCtx h, char *otfpath, char *FontName)	{
+static void makeOTFPath(cbCtx h, char *otfpath, char *FontName) {
 	int length = strlen(FontName);
 
 	if (length > 27) {

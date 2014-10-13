@@ -156,7 +156,7 @@ static void makeArgs(char *filename) {
 				break;
 
 			case 3:	/* Space-delimited string */
-				if (isspace(c))	{
+				if (isspace(c)) {
 					script.buf[i] = '\0';	/* Terminate string */
 					*dnaNEXT(script.args) = start;
 					state = 0;
@@ -257,7 +257,7 @@ static void printUsage(void) {
 }
 
 /* Show usage information */
-static void showUsage(void)	{
+static void showUsage(void) {
 	printUsage();
 	exit(1);
 }
@@ -308,16 +308,15 @@ static void parseArgs(int argc, char *argv[], int inScript) {
 	for (i = 0; i < argc; i++) {
 		int argsleft = argc - i - 1;
 		char *arg = argv[i];
-		switch (arg[0])	{
+		switch (arg[0]) {
 			case '-':
 				/* Process regular and disabling options */
-				switch (arg[1])	{
-					case 'D':
-					{
+				switch (arg[1]) {
+					case 'D': {
 						/* Process list of debug args */
 						int j = 2;
 						do {
-							switch (arg[j])	{
+							switch (arg[j]) {
 								case 'a':	/* [-Da] AFM debug */
 									convert.flags |= HOT_DB_AFM;
 									break;
@@ -337,8 +336,7 @@ static void parseArgs(int argc, char *argv[], int inScript) {
 								default:
 									cbFatal(cbctx, "unrecognized debug option (%s)", arg);
 							}
-						}
-						while (arg[++j] != '\0');
+						} while (arg[++j] != '\0');
 					}
 					break;
 
@@ -346,7 +344,7 @@ static void parseArgs(int argc, char *argv[], int inScript) {
 						if (!strcmp(arg, "-addn")) {
 							convert.flags |= HOT_FORCE_NOTDEF;
 						}
-						else if (!strcmp(arg, "-adds"))	{
+						else if (!strcmp(arg, "-adds")) {
 							convert.flags |= HOT_ADD_EURO;
 							convert.addGlyphWeight = 0;
 							if (argsleft > 0) {
@@ -368,7 +366,7 @@ static void parseArgs(int argc, char *argv[], int inScript) {
 						break;
 
 					case 'c':	/* Adobe CMap directory */
-						switch (arg[2])	{
+						switch (arg[2]) {
 							case '\0':	/* [-c] CMap directory */
 								if (argsleft == 0) {
 									showUsage();
@@ -424,7 +422,7 @@ static void parseArgs(int argc, char *argv[], int inScript) {
 						break;
 
 					case 'd':
-						switch (arg[2])	{
+						switch (arg[2]) {
 							case 'b':
 								if (arg[3] != 'l' ||  arg[4] != '\0') {
 									cbFatal(cbctx, "unrecognized option (%s)", arg);
@@ -449,7 +447,7 @@ static void parseArgs(int argc, char *argv[], int inScript) {
 						break;
 
 					case 'f':
-						switch (arg[2])	{
+						switch (arg[2]) {
 							case '\0':	/* [-f] Process file list */
 
 								if (argsleft == 0) {
@@ -490,7 +488,7 @@ static void parseArgs(int argc, char *argv[], int inScript) {
 						break;
 
 					case 'g':				/* Glyph name alias database */
-						switch (arg[2])	{
+						switch (arg[2]) {
 							case 'f':	/* [-c] CMap directory */
 								if (arg[3] != '\0' || argsleft == 0) {
 									showUsage();
@@ -525,7 +523,7 @@ static void parseArgs(int argc, char *argv[], int inScript) {
 						break;
 
 					case 'm':	/* Font conversion database */
-						switch (arg[2])	{
+						switch (arg[2]) {
 							case 'f':	/* [-c] CMap directory */
 								if (arg[3] != '\0' || argsleft == 0) {
 									showUsage();
@@ -565,11 +563,10 @@ static void parseArgs(int argc, char *argv[], int inScript) {
 							break;
 						}
 
-						switch (arg[2])	{
-							case 's':
-							{
+						switch (arg[2]) {
+							case 's': {
 								short val;
-								if (0 == strcmp(arg, "-osbOn"))	{
+								if (0 == strcmp(arg, "-osbOn")) {
 									val = atoi(argv[++i]);
 									if ((val < 0) || (val > 15)) {
 										cbFatal(cbctx, "The bit index value for option (-%s) must be an integer number between 0 and 15 (%s)", arg);
@@ -612,9 +609,8 @@ static void parseArgs(int argc, char *argv[], int inScript) {
 						break;
 
 					case 'n':	/* all the 'off' settings */
-						switch (arg[2])	{
-							case 'g':
-							{
+						switch (arg[2]) {
+							case 'g': {
 								if (arg[4] != '\0') {
 									showUsage();
 								}
@@ -648,7 +644,7 @@ static void parseArgs(int argc, char *argv[], int inScript) {
 							convert.flags &= ~HOT_IS_SANSSERIF;
 							convert.flags |= HOT_IS_SERIF;
 						}
-						else if (!strcmp(arg, "-sans"))	{
+						else if (!strcmp(arg, "-sans")) {
 							convert.flags |= HOT_IS_SANSSERIF;
 							convert.flags &= ~HOT_IS_SERIF;
 						}
@@ -715,7 +711,7 @@ static void parseArgs(int argc, char *argv[], int inScript) {
 
 			case '+':
 				/* Process enabling options */
-				switch (arg[1])	{
+				switch (arg[1]) {
 /*	This is left over from when Morisawa was demanding font protection mechanims.
         case 'a':
                 convert.flags |= HOT_ADD_AUTH_AREA;

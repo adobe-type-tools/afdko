@@ -1,16 +1,13 @@
 #include "systemspecific.h"
 
-char *curdir()
-{
+char *curdir() {
 	return ":";
 }
 
-char *sep()
-{
+char *sep() {
 	return ":";
 }
 
-char sepch()
-{
+char sepch() {
 	return ':';
 }

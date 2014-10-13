@@ -14,25 +14,24 @@ extern int vsprintf(char *, const char *, va_list);
 extern int KeepGoing;
 
 /* Print fatal error message */
-void cbFatal(cbCtx h, char *fmt, ...)
-	{
+void cbFatal(cbCtx h, char *fmt, ...) {
 	char text[512];
 	va_list ap;
 	va_start(ap, fmt);
 	vsprintf(text, fmt, ap);
 	message(h, hotFATAL, text);
 	va_end(ap);
-	if (!KeepGoing)
-	  myfatal(h);
+	if (!KeepGoing) {
+		myfatal(h);
 	}
+}
 
 /* Print warning message */
-void cbWarning(cbCtx h, char *fmt, ...)
-	{
+void cbWarning(cbCtx h, char *fmt, ...) {
 	char text[512];
 	va_list ap;
 	va_start(ap, fmt);
 	vsprintf(text, fmt, ap);
 	message(h, hotWARNING, text);
 	va_end(ap);
-	}
+}

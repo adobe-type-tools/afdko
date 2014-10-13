@@ -4600,13 +4600,13 @@ table_name()
 								id = numUInt16Ext();
 
 
-								if (!(id == 0 || (id >= 7 && id <= 255))) {
-									hotMsg(g, hotWARNING,
-									       "name id not in registered range; "
-									       "ignoring record [%s %d]",
-									       INCL.file, h->linenum);
-									ignoreRec = 1;
-								}
+//								if (!(id == 0 || (id >= 7 && id <= 255) {
+//									hotMsg(g, hotWARNING,
+//									       "name id not in registered range; "
+//									       "ignoring record [%s %d]",
+//									       INCL.file, h->linenum);
+//									ignoreRec = 1;
+//								}
 								{
 									zzBLOCK(zztasp4);
 									zzMake0;
