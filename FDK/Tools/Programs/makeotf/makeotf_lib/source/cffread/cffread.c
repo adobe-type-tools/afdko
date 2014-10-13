@@ -31,25 +31,25 @@ static short exenc[] = {
 #endif
 
 #define ARRAY_LEN(t)    (sizeof(t) / sizeof((t)[0]))
-#define ABS(v)            ((v) < 0 ? -(v) : (v))
+#define ABS(v)          ((v) < 0 ? -(v) : (v))
 
 /* 16.16 fixed point arithmetic */
 typedef long Fixed;
-#define fixedScale    65536.0
+#define fixedScale   65536.0
 #define FixedMax    ((Fixed)0x7FFFFFFF)
 #define FixedMin    ((Fixed)0x80000000)
 #define FixedOne    ((Fixed)0x00010000)
-#define FixedHalf    ((Fixed)0x00008000)
+#define FixedHalf   ((Fixed)0x00008000)
 
 /* Type conversions */
 #define INT(f)        (((f) & 0xffff0000) >> 16)
-#define FRAC(f)        ((f) & 0x0000ffff)
+#define FRAC(f)       ((f) & 0x0000ffff)
 #define INT2FIX(i)    ((Fixed)(i) << 16)
 #define FIX2INT(f)    ((short)(((f) + FixedHalf) >> 16))
 #define FIX2DBL(f)    ((double)((f) / fixedScale))
 #define DBL2FIX(d)    ((Fixed)((d) * fixedScale + ((d) < 0 ? -0.5 : 0.5)))
 #define DBL2INT(d)    ((long)((d) + ((d) < 0 ? -0.5 : 0.5)))
-#define CEIL(f)        ((Fixed)(((f) + 0xffff) & 0xffff0000))
+#define CEIL(f)       ((Fixed)(((f) + 0xffff) & 0xffff0000))
 #define FLOOR(f)    ((Fixed)((f) & 0xffff0000))
 #define PATH_FUNC_DEFINED(func) (h->path.cb != NULL && h->path.cb->func != NULL)
 #define PATH_FUNC_CALL(func, args) \
@@ -57,22 +57,17 @@ typedef long Fixed;
 	} \
 	while (0)
 
-typedef unsigned char OffSize;
-/* Offset size indicator */
+typedef unsigned char OffSize;  /* Offset size indicator */
 typedef long Offset;            /* 1, 2, 3, or 4-byte offset */
-#define SID_SIZE    2            /* SID byte size */
+#define SID_SIZE    2           /* SID byte size */
 
-typedef struct                /* INDEX */
+typedef struct                 /* INDEX */
 {
-	unsigned short count;
-	/* Element count */
-	OffSize offSize;
-	/* Offset size */
-	Offset offset;
-	/* Offset start */
-	Offset data;
-	/* Data start - 1 */
-	unsigned bias;                /* Subr number bias */
+	unsigned short count;     /* Element count */
+	OffSize offSize;            /* Offset size */
+	Offset offset;              /* Offset start */
+	Offset data;               /* Data start - 1 */
+	unsigned bias;            /* Subr number bias */
 } INDEX;
 
 typedef struct                    /* FDArray element */
@@ -80,8 +75,7 @@ typedef struct                    /* FDArray element */
 	INDEX Subrs;
 	Fixed defaultWidthX;
 	Fixed nominalWidthX;
-	double *FontMatrix;
-	/* FD FontMatrix (NULL if default) */
+	double *FontMatrix;         /* FD FontMatrix (NULL if default) */
 	double FDMatrix[6];
 } FDElement;
 
@@ -101,32 +95,27 @@ typedef enum                    /* Stack element type */
 
 typedef struct                    /* Per-glyph data */
 {
-	unsigned short id;
-	/* SID/CID */
-	short code;
-	/* Encoding */
-	short fd;
-	/* FD index */
+	unsigned short id;          /* SID/CID */
+	short code;                 /* Encoding */
+	short fd;                   /* FD index */
 	cffSupCode *sup;            /* Supplementary encodings (linked list) */
 } Glyph;
 
 struct cffCtx_                    /* Context */
 {
 	short flags;                /* Parse flags */
-#define MM_FONT        (1 << 0)        /* MM Font */
-#define CID_FONT    (1 << 1)        /* CID Font */
-#define    FONT_INIT    (1 << 8)        /* Global font data has been parsed */
-#define    GLYPHS_INIT    (1 << 9)        /* Global glyph data has been parsed */
-#define    UDV_SET        (1 << 10)        /* UDV explicitly set */
-#define    WV_SET        (1 << 11)        /* WV explicitly set */
-#define    JUST_WIDTH    (1 << 12)        /* Stop parse after width found */
-	struct                        /* CFF data */
+#define MM_FONT     (1 << 0)      /* MM Font */
+#define CID_FONT    (1 << 1)      /* CID Font */
+#define FONT_INIT   (1 << 8)      /* Global font data has been parsed */
+#define GLYPHS_INIT (1 << 9)      /* Global glyph data has been parsed */
+#define UDV_SET     (1 << 10)     /* UDV explicitly set */
+#define WV_SET      (1 << 11)     /* WV explicitly set */
+#define JUST_WIDTH  (1 << 12)     /* Stop parse after width found */
+	struct                      /* CFF data */
 	{
-		char *next;
-		/* Next byte available */
-		long left;
-		/* Number of bytes available */
-		Offset nextoff;            /* Offset of next input buffer */
+		char *next;             /* Next byte available */
+		long left;              /* Number of bytes available */
+		Offset nextoff;         /* Offset of next input buffer */
 	}
 	data;
 	struct                        /* CFF header */
@@ -148,11 +137,9 @@ struct cffCtx_                    /* Context */
 		INDEX FDArray;
 	}
 	index;
-	cffFontInfo font;
-	/* Font descriptor (returned to client) */
-	cffGlyphInfo glyph;
-	/* Glyph descriptor (returned to client) */
-	struct                        /* DICT values */
+	cffFontInfo font;           /* Font descriptor (returned to client) */
+	cffGlyphInfo glyph;         /* Glyph descriptor (returned to client) */
+	struct                      /* DICT values */
 	{
 		Offset Encoding;
 		Offset charset;
@@ -173,10 +160,8 @@ struct cffCtx_                    /* Context */
 			Fixed y;
 		}
 		vOrig;
-		FDElement *fd;
-		/* Active FD (NULL indicates top DICT) */
-		double *FontMatrix;
-		/* Active matrix (NULL indicates default) */
+		FDElement *fd;          /* Active FD (NULL indicates top DICT) */
+		double *FontMatrix;     /* Active matrix (NULL indicates default) */
 		double topDICTMatrix[6]; /* FontMatrix read from top DICT */
 	}
 	dict;
@@ -191,61 +176,40 @@ struct cffCtx_                    /* Context */
 	struct                        /* Glyph outline path */
 	{
 		short flags;
-#define GET_WIDTH    (1 << 0)        /* Flags to get width value */
-#define FIRST_MOVE    (1 << 1)        /* Flags first move */
-#define FIRST_MASK    (1 << 2)        /* Flags first hint/cntrmask */
-#define DICT_CSTR    (1 << 3)        /* Flags DICT charstring */
-#define SEEN_END    (1 << 4)        /* Flags endchar operator seen */
-		short nStems;
-		/* Stem count */
-		Fixed hstem;
-		/* Horizontal hint stem accumulator */
-		Fixed vstem;
-		/* Vertical hint stem accumulator */
-		Fixed hAdv;
-		/* Horizontal advance width */
-		Fixed vAdv;
-		/* Vertical advance width */
-		Fixed x;
-		/* Current x-coord */
-		Fixed y;
-		/* Current y-coord */
-		Fixed left;
-		/* BBox */
-		Fixed bottom;
-		/* BBox */
-		Fixed right;
-		/* BBox */
-		Fixed top;
-		/* BBox */
-		cffPathCallbacks *cb;    /* Path callback functions (if defined) */
+#define GET_WIDTH   (1 << 0)      /* Flags to get width value */
+#define FIRST_MOVE  (1 << 1)      /* Flags first move */
+#define FIRST_MASK  (1 << 2)      /* Flags first hint/cntrmask */
+#define DICT_CSTR   (1 << 3)      /* Flags DICT charstring */
+#define SEEN_END    (1 << 4)      /* Flags endchar operator seen */
+		short nStems;           /* Stem count */
+		Fixed hstem;            /* Horizontal hint stem accumulator */
+		Fixed vstem;            /* Vertical hint stem accumulator */
+		Fixed hAdv;             /* Horizontal advance width */
+		Fixed vAdv;             /* Vertical advance width */
+		Fixed x;                /* Current x-coord */
+		Fixed y;                /* Current y-coord */
+		Fixed left;             /* BBox */
+		Fixed bottom;           /* BBox */
+		Fixed right;            /* BBox */
+		Fixed top;              /* BBox */
+		cffPathCallbacks *cb;   /* Path callback functions (if defined) */
 	}
 	path;
-	unsigned short stdGlyphs[256];
-	/* Standard encoded GIDs indexed by code */
-	Glyph *glyphs;
-	/* Glyph names and encoding */
-	struct                        /* BuildCharArray */
+	unsigned short stdGlyphs[256]; /* Standard encoded GIDs indexed by code */
+	Glyph *glyphs;              /* Glyph names and encoding */
+	struct                      /* BuildCharArray */
 	{
 		int size;
 		Fixed *array;
 	}
 	BCA;
-	Fixed WV[TX_MAX_MASTERS];
-	/* Weight vector */
-	Fixed NDV[TX_MAX_AXES];
-	/* Normalized design vector */
-	Fixed UDV[TX_MAX_AXES];
-	/* User design vector */
-	FDElement *fd;
-	/* FD info array */
-	short lastfd;
-	/* Last FD index */
-	Offset start;
-	/* CFF data offset */
-	cffStdCallbacks cb;
-
-	/* Standard callback functions */
+	Fixed WV[TX_MAX_MASTERS];   /* Weight vector */
+	Fixed NDV[TX_MAX_AXES];     /* Normalized design vector */
+	Fixed UDV[TX_MAX_AXES];     /* User design vector */
+	FDElement *fd;              /* FD info array */
+	short lastfd;               /* Last FD index */
+	Offset start;               /* CFF data offset */
+	cffStdCallbacks cb;         /* Standard callback functions */
 	void (*cstrRead)(cffCtx h, Offset offset, int init);
 };
 
@@ -264,7 +228,7 @@ static void t13Read(cffCtx h, Offset offset, int init);
 static int t13Support(cffCtx h);
 
 #define MEM_NEW(h, s)    (h)->cb.malloc((h)->cb.ctx, (s))
-#define MEM_FREE(h, p)    (h)->cb.free((h)->cb.ctx, (p))
+#define MEM_FREE(h, p)   (h)->cb.free((h)->cb.ctx, (p))
 
 /* Create new instance */
 cffCtx cffNew(cffStdCallbacks *cb, Offset offset) {
@@ -679,7 +643,7 @@ int cffGetString(cffCtx h, cffSID sid,
 /* Get NDV/CDV charstring offset */
 static Offset getProcOffset(cffCtx h, cffSID sid, unsigned *length) {
 	char *ptr;
-	long offset;
+	long offset = 0;
 	if (cffGetString(h, sid, length, &ptr, &offset)) {
 		fatal(h, "bad NDV/CDV proc");
 	}
@@ -1226,7 +1190,7 @@ static void t2Read(cffCtx h, Offset offset, int init) {
 					addCurve(h, 0,
 					         indexFix(h, 0), indexFix(h, 1),
 					         indexFix(h, 2), indexFix(h, 3),
-					         0, indexFix(h, 4));
+					         0,              indexFix(h, 4));
 					j = 5;
 				}
 				else {
@@ -1236,9 +1200,9 @@ static void t2Read(cffCtx h, Offset offset, int init) {
 				/* Add remaining curve(s) */
 				for (; j < h->stack.cnt; j += 4) {
 					addCurve(h, 0,
-					         0, indexFix(h, j + 0),
+					         0,                  indexFix(h, j + 0),
 					         indexFix(h, j + 1), indexFix(h, j + 2),
-					         0, indexFix(h, j + 3));
+					         0,                  indexFix(h, j + 3));
 				}
 				h->stack.cnt = 0;
 				break;
@@ -1288,11 +1252,11 @@ static void t2Read(cffCtx h, Offset offset, int init) {
 						addCurve(h, 0,
 						         indexFix(h, j + 0), 0,
 						         indexFix(h, j + 1), indexFix(h, j + 2),
-						         0, indexFix(h, j + 3));
+						         0,                  indexFix(h, j + 3));
 					}
 					else {
 						addCurve(h, 0,
-						         0, indexFix(h, j + 0),
+						         0,                  indexFix(h, j + 0),
 						         indexFix(h, j + 1), indexFix(h, j + 2),
 						         indexFix(h, j + 3), 0);
 					}
@@ -1308,7 +1272,7 @@ static void t2Read(cffCtx h, Offset offset, int init) {
 					}
 					else {
 						addCurve(h, 0,
-						         0, indexFix(h, j + 0),
+						         0,                  indexFix(h, j + 0),
 						         indexFix(h, j + 1), indexFix(h, j + 2),
 						         indexFix(h, j + 3), indexFix(h, j + 4));
 					}
@@ -1660,7 +1624,7 @@ static void t2Read(cffCtx h, Offset offset, int init) {
 							dy = indexFix(h, 10);
 						}
 						addCurve(h, 1, dx1, dy1, dx2, dy2, dx3, dy3);
-						addCurve(h, 1, dx4, dy4, dx5, dy5, dx, dy);
+						addCurve(h, 1, dx4, dy4, dx5, dy5,  dx,  dy);
 					}
 						h->stack.cnt = 0;
 						break;
@@ -1891,10 +1855,10 @@ static void DICTRead(cffCtx h, int length, Offset offset, int enable) {
 
 			case cff_FontBBox:
 				if (enable) {
-					h->font.FontBBox.left = FIX2INT(FLOOR(indexFix(h, 0)));
+					h->font.FontBBox.left   = FIX2INT(FLOOR(indexFix(h, 0)));
 					h->font.FontBBox.bottom = FIX2INT(FLOOR(indexFix(h, 1)));
-					h->font.FontBBox.right = FIX2INT(CEIL(indexFix(h, 2)));
-					h->font.FontBBox.top = FIX2INT(CEIL(indexFix(h, 3)));
+					h->font.FontBBox.right  = FIX2INT(CEIL(indexFix(h, 2)));
+					h->font.FontBBox.top    = FIX2INT(CEIL(indexFix(h, 3)));
 				}
 				h->stack.cnt = 0;
 				break;
@@ -2281,15 +2245,15 @@ static void predefCharset(cffCtx h, int cnt, cffSID *cs) {
 static void charsetRead(cffCtx h) {
 	/* Predefined charsets */
 	static cffSID isocs[] = {
-		0,                        /* .notdef */
+		0,  /* .notdef */
 #include "isocs0.h"
 	};
 	static cffSID excs[] = {
-		0,                        /* .notdef */
+		0,  /* .notdef */
 #include "excs0.h"
 	};
 	static cffSID exsubcs[] = {
-		0,                        /* .notdef */
+		0,  /* .notdef */
 #include "exsubcs0.h"
 	};
 
@@ -2524,11 +2488,11 @@ static void glyphRead(cffCtx h, unsigned gid) {
 		/* FD change; copy new fd values */
 		FDElement *fd = &h->fd[newfd];
 
-		h->index.Subrs = fd->Subrs;
-		h->dict.defaultWidthX = fd->defaultWidthX;
-		h->dict.nominalWidthX = fd->nominalWidthX;
-		h->dict.FontMatrix = fd->FontMatrix;
-		h->lastfd = newfd;
+		h->index.Subrs          = fd->Subrs;
+		h->dict.defaultWidthX   = fd->defaultWidthX;
+		h->dict.nominalWidthX   = fd->nominalWidthX;
+		h->dict.FontMatrix      = fd->FontMatrix;
+		h->lastfd               = newfd;
 	}
 	h->cstrRead(h,
 	            INDEXGet(h, &h->index.CharStrings, gid, &length), cstr_GLYPH);
@@ -2549,15 +2513,15 @@ cffGlyphInfo *cffGetGlyphInfo(cffCtx h, unsigned gid, cffPathCallbacks *cb) {
 	h->path.cb = NULL;
 
 	glyph = &h->glyphs[gid];
-	h->glyph.id = glyph->id;
-	h->glyph.code = glyph->code;
-	h->glyph.hAdv = FIX2INT(h->path.hAdv);
-	h->glyph.vAdv = FIX2INT(h->path.vAdv);
-	h->glyph.bbox.left = FIX2INT(FLOOR(h->path.left));
-	h->glyph.bbox.bottom = FIX2INT(FLOOR(h->path.bottom));
-	h->glyph.bbox.right = FIX2INT(CEIL(h->path.right));
-	h->glyph.bbox.top = FIX2INT(CEIL(h->path.top));
-	h->glyph.sup = glyph->sup;
+	h->glyph.id             = glyph->id;
+	h->glyph.code           = glyph->code;
+	h->glyph.hAdv           = FIX2INT(h->path.hAdv);
+	h->glyph.vAdv           = FIX2INT(h->path.vAdv);
+	h->glyph.bbox.left      = FIX2INT(FLOOR(h->path.left));
+	h->glyph.bbox.bottom    = FIX2INT(FLOOR(h->path.bottom));
+	h->glyph.bbox.right     = FIX2INT(CEIL(h->path.right));
+	h->glyph.bbox.top       = FIX2INT(CEIL(h->path.top));
+	h->glyph.sup            = glyph->sup;
 
 	return &h->glyph;
 }
@@ -2589,9 +2553,9 @@ void cffGetGlyphOrg(cffCtx h, unsigned gid,
 	}
 
 	glyph = &h->glyphs[gid];
-	*id = glyph->id;
-	*code = glyph->code;
-	*sup = glyph->sup;
+	*id     = glyph->id;
+	*code   = glyph->code;
+	*sup    = glyph->sup;
 }
 
 /* Set UDV */
@@ -2672,8 +2636,7 @@ int cffExecLocalMetric(cffCtx h, char *cstr, long length, cffFixed *result) {
 		char *next;
 		long left;
 		Offset nextoff;
-
-		char * (*cffRefill)(void *ctx, long *count);
+		char *(*cffRefill) (void *ctx, long *count);
 	}
 	save;
 
