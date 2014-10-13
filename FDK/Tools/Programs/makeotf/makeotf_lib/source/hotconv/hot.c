@@ -682,6 +682,7 @@ static void prepWinData(hotCtx g) {
 	hotGlyphInfo *gi;
 	long i;
 	long sum;
+	long count;
 	int intLeading;
 	FontInfo_ *font = &g->font;
 	if (g->convertFlags & HOT_OLD_SPACE_DEFAULT_CHAR) {
@@ -854,10 +855,14 @@ static void prepWinData(hotCtx g) {
 	/* No need to duplicate PFM avgCharWidth algorithm: Euro, Zcarons added to
 	   WinANSI. This algorithm is encoding-dependent. */
 	sum = 0;
+	count = 0;
 	for (i = 0; i < font->glyphs.cnt; i++) {
+		if (font->glyphs.array[i].hAdv > 0) {
 		sum += font->glyphs.array[i].hAdv;
+			count++;
+		}
 	}
-	g->font.win.AvgWidth = (short)(sum / font->glyphs.cnt);
+	g->font.win.AvgWidth = (short)(sum / count);
 }
 
 /* Compute named MMFX table metrics */
