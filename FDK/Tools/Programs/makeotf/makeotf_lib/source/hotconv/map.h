@@ -1,5 +1,5 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. *//***********************************************************************
+   This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. *//***********************************************************************
  * SCCS Id:    %W%
  * Changed:    %G% %U%
  ***********************************************************************/
@@ -22,7 +22,7 @@ void mapFree(hotCtx g);
 /* Supplementary functions */
 void mapApplyReencoding(hotCtx g, hotEncoding *comEnc, hotEncoding *macEnc);
 void mapAddCMap(hotCtx g, hotCMapId id, hotCMapRefill refill);
-void mapAddUVS(hotCtx g, char* uvsName);
+void mapAddUVS(hotCtx g, char *uvsName);
 void mapMakeKern(hotCtx g);
 void mapMakeVert(hotCtx g);
 void mapPrintAFM(hotCtx g);
@@ -36,10 +36,12 @@ GID mapUV2GID(hotCtx g, UV uv);
 
 hotGlyphInfo *mapName2Glyph(hotCtx g, char *gname, char **useAliasDB);
 GID mapName2GID(hotCtx g, char *gname, char **useAliasDB);
+
 #define mapGID2Name(gid) (g->font.glyphs.array[gid].gname.str)
 
 hotGlyphInfo *mapCID2Glyph(hotCtx g, CID cid);
 GID mapCID2GID(hotCtx g, CID cid);
+
 #define mapGID2CID(gid) (g->font.glyphs.array[gid].id)
 
 UV mapWinANSI2UV(hotCtx g, int code);
