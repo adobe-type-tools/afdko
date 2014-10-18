@@ -99,7 +99,7 @@ Install with "AFDKOPython setup.py install"
 The install script has a bug, in that it does not copy any of the subdirectories of defcon. Copy these manually.
 
 MutatorMath: master branch of MutatorMath at https://github.com/LettError/MutatorMath
-This does not have a setup.py file. Install by copying the mutatorMath directory to FDK/Tools/osx/Python/AFDKOPython27/lib/python2.7/site-packages, and delete all but the Lib directory and LICENSE file. Manually create the file "MutatorMath.pth", and put in it the relative path to the MutatorMath directory, e.g. just the line "mutatorMath".
+Install with "AFDKOPython setup.py install"
 
 Check all the *.pth files in "FDK/Tools/osx/Python/AFDKOPython27/lib/python2.7/site-packages", and make sure the path references are all relative to the site-packages directory.
 
