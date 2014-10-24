@@ -1,5 +1,5 @@
 _help_ = """
-importSVGDocsToSVGTable.py v 2.1 Oct 14 2014
+importSVGDocsToSVGTable.py v 2.2 Oct 24 2014
 
 python importSVGDocsToSVGTable.py <path to input OTF/TTF file>  <path(s) to SVG files OR to folder containing SVG files> 
 
@@ -97,7 +97,7 @@ def writeTTXfile(fontFilePath, UPM, fontFormat, svgFilePathsList):
 	
 		gid = re.search(r"<svg.+?id=\"glyph(\d+)\".+?>", data, re.DOTALL).group(1)
 		svgDoc = kSVGDocTemplate % (gid, gid, data.strip())
-		svgDocDict[gid] = svgDoc
+		svgDocDict[int(gid)] = svgDoc
 	
 	svgDocIndexList = svgDocDict.keys()
 	svgDocIndexList.sort()
