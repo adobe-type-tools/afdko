@@ -428,7 +428,7 @@ static char* translate2MacDflt(nameCtx h, char *src)
 				uvp[0]  = s0 >> 2 & 0x07;
 				uvp[1] = s0 << 6 | (s1 & 0x3f);
 #endif
-			}
+				}
 			else
 				{
 				/* 3-byte */
@@ -440,6 +440,7 @@ static char* translate2MacDflt(nameCtx h, char *src)
 				uvp[0] = s0 << 4 | (s1 >> 2 & 0x0f);
 				uvp[1] = s1 << 6 | (s2 & 0x3f);
 #endif
+				}
 			}
 		if (uv)
 			{
