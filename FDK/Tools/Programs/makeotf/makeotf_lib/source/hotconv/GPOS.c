@@ -130,8 +130,10 @@ typedef struct						/* Kerning pair */
 	{
 	KernGlyph first;
 	KernGlyph second;
-	short metricsCnt; /* Allowable values are 1 ( x advance adjsutment only) or 4. */
-	short metricsRec[4];
+    short metricsCnt1; /* Allowable values are 1 ( x advance adjsutment only) or 4. */
+    short metricsRec1[4];
+    short metricsCnt2; /* Allowable values are 1 ( x advance adjsutment only) or 4. */
+    short metricsRec2[4];
 	} KernRec;
 
 typedef struct
@@ -165,7 +167,8 @@ typedef struct						/* New subtable data */
 	dnaDCL(KernRec, pairs);		/* Kern pair accumulator */
 	Subtable *sub;				/* Current subtable */
 	short pairFmt;				/* Fmt (1 or 2) of GPOS pair */
-	unsigned short pairValFmt;	/* Fmt (1 or 2) of GPOS pair */
+        unsigned short pairValFmt1;	/* Fmt (1 or 2) of first value record  of GPOS pair */
+        unsigned short pairValFmt2;	/* Fmt (1 or 2) of second value record of GPOS pair */
 	char* fileName;				/* the current feature file name */
 	} SubtableInfo;
 
@@ -706,7 +709,8 @@ void GPOSLookupBegin(hotCtx g, unsigned lkpType, unsigned lkpFlag, Label label,
 	newsi->single.cnt = 0;
 	newsi->pairs.cnt = 0;
 	newsi->pairFmt = 0;
-	newsi->pairValFmt = 0;
+    newsi->pairValFmt1 = 0;
+    newsi->pairValFmt2 = 0;
 	newsi->markClassList.cnt = 0;
 	newsi->baseList.cnt = 0;
 	newsi->rules.cnt = 0;
@@ -1553,9 +1557,8 @@ typedef struct
 	PairValueRecord *PairValueRecord;				/* [PairValueCount] */
 	} PairSet;
 
-/* macro PAIR_SET_SIZE assumes that fmt->ValueFormat2 is 0. */
-#define PAIR_SET_SIZE(nRecs, nValues) \
-	(uint16+(uint16+uint16*(nValues))*(nRecs))
+#define PAIR_SET_SIZE(nRecs, nValues1, nValues2) \
+	(uint16+(uint16+uint16*(nValues1)+uint16*(nValues2))*(nRecs))
 
 typedef struct
 	{
@@ -1710,7 +1713,7 @@ static void insertInClassDef(GPOSCtx h, int classDefInx, GNode *gc, int inx,
 
 /* Add a specific kern pair */
 
-static void addSpecPair(hotCtx g, GID first, GID second, short metricsCnt, short *values)
+static void addSpecPair(hotCtx g, GID first, GID second,  short metricsCnt1, short *values1, short metricsCnt2, short *values2)
 	{
 	GPOSCtx h = g->ctx.GPOS;
 	KernRec *pair = dnaNEXT(h->new.pairs);
@@ -1718,15 +1721,20 @@ static void addSpecPair(hotCtx g, GID first, GID second, short metricsCnt, short
 	
 	pair->first.gid = first;
 	pair->second.gid = second;
-	pair->metricsCnt = metricsCnt;
 	/* metricsCnt is either 1 or 4 */
-	for (i=0; i < pair->metricsCnt; i++)
-		pair->metricsRec[i] = values[i];
+    pair->metricsCnt1 = metricsCnt1;
+   for (i=0; i < pair->metricsCnt1; i++)
+        pair->metricsRec1[i] = values1[i];
+        
+    pair->metricsCnt2 = metricsCnt2;
+	for (i=0; i < pair->metricsCnt2; i++)
+		pair->metricsRec2[i] = values2[i];
+        
 #if HOT_DEBUG
 	if (DF_LEVEL >= 2)
 		{
 		fprintf(stderr, "  * GPOSPair ");
-		kernRecDump(g, first, second, metricsCnt, values, NULL, NULL, 0, 0);
+		kernRecDump(g, first, second, metricsCnt2, values2, NULL, NULL, 0, 0);
 		}
 #endif
 	}
@@ -1739,47 +1747,101 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second,  cha
 	{
 	GPOSCtx h = g->ctx.GPOS;
 	SubtableInfo * si = (SubtableInfo*)subtableInfo;
-	short* values = second->metricsInfo->metrics;
-	short metricsCnt = second->metricsInfo->cnt;
-	
+    short metricsCnt1 = 0;
+    short metricsCnt2 = 0;
+    short* values1 = NULL;
+    short* values2 = NULL;
+    if (first->metricsInfo == NULL)
+        {
+            /* If the only metrics record is appplied to the second glyph,
+             then this is shorthand for applying a single kern value to the first glyph.
+             The parser enforces that if first->metricsInfo == null, then the 
+             second value record must exist.*/
+            first->metricsInfo = second->metricsInfo;
+            second->metricsInfo = NULL;
+            metricsCnt1 = first->metricsInfo->cnt;
+            values1 = first->metricsInfo->metrics;
+        }
+    else
+    {
+        /* first->metricsInfo exists, but second->metricsInfo  may or may not exist */
+        metricsCnt1 = first->metricsInfo->cnt;
+        values1 = first->metricsInfo->metrics;
+        if (second->metricsInfo != NULL)
+        {
+            metricsCnt2 = second->metricsInfo->cnt;
+            values2 = second->metricsInfo->metrics;
+        }
+        
+    }
+        
+        
 	int enumerate = first->flags & FEAT_ENUMERATE;
 
 	/* The FEAT_GCLASS is essential for identifying a singleton gclass */
 	int pairFmt = ((first->flags & FEAT_GCLASS || second->flags & FEAT_GCLASS)
 				   && !enumerate) ? 2 : 1;
 
-	unsigned valFmt;
+        unsigned valFmt1 = 0;
+        unsigned valFmt2 = 0;
 	
-	 if (second->metricsInfo->cnt == 1)
+        if (first->metricsInfo->cnt == 1)
 		{
-		if (h->new.feature == vkrn_)
-			valFmt =  (unsigned short)(IS_MM(g) ? ValueYIdAdvance: ValueYAdvance);
-		else
-			valFmt =  (unsigned short) (IS_MM(g) ? ValueXIdAdvance: ValueXAdvance);
-		}
- 	 else
-        {
-		valFmt = makeValueFormat(g, values[0], values[1], values[2], values[3]);
-        if (valFmt == 0)
-            {
-            /* if someone has specified a value of <0 0 0 0>, then valFmt is 0.
-             This will cause a subtable break, since the valFmt wil differ from
-             any non-zero record. Set teh val fmt to the default value. */
             if (h->new.feature == vkrn_)
-                valFmt =  (unsigned short)(IS_MM(g) ? ValueYIdAdvance: ValueYAdvance);
+                valFmt1 =  (unsigned short)(IS_MM(g) ? ValueYIdAdvance: ValueYAdvance);
             else
-                valFmt =  (unsigned short) (IS_MM(g) ? ValueXIdAdvance: ValueXAdvance);
+                valFmt1 =  (unsigned short) (IS_MM(g) ? ValueXIdAdvance: ValueXAdvance);
+		}
+        else
+        {
+            valFmt1 = makeValueFormat(g, values1[0], values1[1], values1[2], values1[3]);
+            if (valFmt1 == 0)
+            {
+                /* if someone has specified a value of <0 0 0 0>, then valFmt is 0.
+                 This will cause a subtable break, since the valFmt wil differ from
+                 any non-zero record. Set teh val fmt to the default value. */
+                if (h->new.feature == vkrn_)
+                    valFmt1 =  (unsigned short)(IS_MM(g) ? ValueYIdAdvance: ValueYAdvance);
+                else
+                    valFmt1 =  (unsigned short) (IS_MM(g) ? ValueXIdAdvance: ValueXAdvance);
             }
         }
-
+        
+    if (second->metricsInfo != NULL)
+    {
+        if (second->metricsInfo->cnt == 1)
+            {
+            if (h->new.feature == vkrn_)
+                valFmt2 =  (unsigned short)(IS_MM(g) ? ValueYIdAdvance: ValueYAdvance);
+            else
+                valFmt2 =  (unsigned short) (IS_MM(g) ? ValueXIdAdvance: ValueXAdvance);
+            }
+         else
+            {
+            valFmt2 = makeValueFormat(g, values2[0], values2[1], values2[2], values2[3]);
+            if (valFmt2 == 0)
+                {
+                /* if someone has specified a value of <0 0 0 0>, then valFmt is 0.
+                 This will cause a subtable break, since the valFmt wil differ from
+                 any non-zero record. Set teh val fmt to the default value. */
+                if (h->new.feature == vkrn_)
+                    valFmt2 =  (unsigned short)(IS_MM(g) ? ValueYIdAdvance: ValueYAdvance);
+                else
+                    valFmt2 =  (unsigned short) (IS_MM(g) ? ValueXIdAdvance: ValueXAdvance);
+                }
+            }
+    }
 	if (si==NULL)
 		si = &h->new;
     else
     {
         /* Changing valFmt causes a sub-table break. If the current valFmt can be represented by
          the previous valFmt, then use the previous valFmt. */
-        if ((valFmt != si->pairValFmt) && ((valFmt & si->pairValFmt) == valFmt))
-            valFmt = si->pairValFmt;
+        if ((valFmt1 != si->pairValFmt1) && ((valFmt1 & si->pairValFmt1) == valFmt1))
+            valFmt1 = si->pairValFmt1;
+        
+        if ((valFmt2 != si->pairValFmt2) && ((valFmt2 & si->pairValFmt2) == valFmt2))
+            valFmt2 = si->pairValFmt2;
     }
         
 	first->nextSeq = NULL; /* else featRecycleNodes  recycles the second mode as well. */
@@ -1789,7 +1851,8 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second,  cha
 		return;
 
 	if (pairFmt != si->pairFmt /* First subtable in this lookup */
-		|| valFmt != si->pairValFmt
+		|| valFmt1 != si->pairValFmt1
+		|| valFmt2 != si->pairValFmt2
 		|| h->startNewPairPosSubtbl /* Automatic or explicit break */)
 		{
 		GPOSCtx h = g->ctx.GPOS;
@@ -1822,7 +1885,8 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second,  cha
 		startNewSubtable(g);
 		si->pairs.cnt = 0;
 		si->pairFmt = pairFmt;
-		si->pairValFmt = valFmt;
+        si->pairValFmt1 = valFmt1;
+        si->pairValFmt2 = valFmt2;
 		}
 
 	/* Check if value record format needs updating */
@@ -1831,7 +1895,7 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second,  cha
 		/* --- Add specific pair(s) --- */
 		first->nextSeq = second;
 		if (first->nextCl == NULL && second->nextCl == NULL)
-			addSpecPair(g, first->gid, second->gid, metricsCnt, values);
+			addSpecPair(g, first->gid, second->gid, metricsCnt1, values1, metricsCnt2, values2);
 #if HOT_FEAT_SUPPORT
 		else
 			{
@@ -1844,7 +1908,7 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second,  cha
 			for (i = 0; i < length; i++)
 				{
 				GNode *specPair = (*prod)[i];
-				addSpecPair(g, specPair->gid, specPair->nextSeq->gid, metricsCnt, values);
+				addSpecPair(g, specPair->gid, specPair->nextSeq->gid, metricsCnt1, values1, metricsCnt2, values2);
 				featRecycleNodes(g, specPair);
 				}
 			}
@@ -1870,15 +1934,19 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second,  cha
 			pair = dnaNEXT(si->pairs);
 			pair->first.gcl = featSetNewNode(g, cl1);	/* Store classes */
 			pair->second.gcl = featSetNewNode(g, cl2);
-			pair->metricsCnt = metricsCnt;
-	/* metricsCnt is either 1 or 4 */
-			for (i=0; i < metricsCnt; i++)
-				pair->metricsRec[i] = values[i];
+            pair->metricsCnt1 = metricsCnt1;
+            /* metricsCnt is either 1 or 4 */
+            for (i=0; i < metricsCnt1; i++)
+                pair->metricsRec1[i] = values1[i];
+			pair->metricsCnt2 = metricsCnt2;
+            /* metricsCnt is either 1 or 4 */
+            for (i=0; i < metricsCnt2; i++)
+                pair->metricsRec2[i] = values2[i];
 #if HOT_DEBUG
 		if (DF_LEVEL >= 2)
 			{
 			fprintf(stderr, "  * GPOSPair ");
-			kernRecDump(g, 0, 0, metricsCnt, values, first, second, pair->first.gcl->gid,
+			kernRecDump(g, 0, 0, metricsCnt2, values2, first, second, pair->first.gcl->gid,
 						pair->second.gcl->gid);
 			}
 #endif
@@ -2109,7 +2177,8 @@ static int CDECL cmpPairPos1(const void *first, const void *second)
 	const KernRec *a = first;
 	const KernRec *b = second;
 	int i;
-	int metricsCnt = (a->metricsCnt > b->metricsCnt) ?  b->metricsCnt : a->metricsCnt;
+    int metricsCnt;
+        
 	if (a->first.gid == GID_UNDEF && b->first.gid == GID_UNDEF)
 		return 0;
 	else if (a->first.gid == GID_UNDEF)
@@ -2124,17 +2193,42 @@ static int CDECL cmpPairPos1(const void *first, const void *second)
 		return -1;
 	else if (a->second.gid > b->second.gid)
 		return 1;
-	for (i=0; i < metricsCnt; i++)
-		{
-		if (ABS(a->metricsRec[i]) > ABS(b->metricsRec[i]))	/* Abs values in decr order */
-			return -1;
-		else if (ABS(a->metricsRec[i]) < ABS(b->metricsRec[i]))
-			return 1;
-		else if (a->metricsRec[i] > b->metricsRec[i])			/* Values in decr order */
-			return -1;
-		else if (a->metricsRec[i] < b->metricsRec[i])
-			return 1;
-			}
+        
+    if ((a->metricsRec1[i] == 0) && (b->metricsRec1[i] != 0))	/* Abs values in decr order */
+        return -1;
+    else if ((a->metricsRec1[i] != 0) && (b->metricsRec1[i] == 0))
+        return 1;
+        
+   metricsCnt  = (a->metricsCnt1 > b->metricsCnt1) ?  b->metricsCnt1 : a->metricsCnt1;
+    for (i=0; i < metricsCnt; i++)
+    {
+        if (ABS(a->metricsRec1[i]) > ABS(b->metricsRec1[i]))	/* Abs values in decr order */
+            return -1;
+        else if (ABS(a->metricsRec1[i]) < ABS(b->metricsRec1[i]))
+            return 1;
+        else if (a->metricsRec1[i] > b->metricsRec1[i])			/* Values in decr order */
+            return -1;
+        else if (a->metricsRec1[i] < b->metricsRec1[i])
+            return 1;
+    }
+    
+    if ((a->metricsRec2[i] == 0) && (b->metricsRec2[i] != 0))	/* Abs values in decr order */
+        return -1;
+    else if ((a->metricsRec2[i] != 0) && (b->metricsRec2[i] == 0))
+        return 1;
+        
+    metricsCnt  = (a->metricsCnt2 > b->metricsCnt2) ?  b->metricsCnt2 : a->metricsCnt2;
+    for (i=0; i < metricsCnt; i++)
+    {
+        if (ABS(a->metricsRec2[i]) > ABS(b->metricsRec2[i]))	/* Abs values in decr order */
+            return -1;
+        else if (ABS(a->metricsRec2[i]) < ABS(b->metricsRec2[i]))
+            return 1;
+        else if (a->metricsRec2[i] > b->metricsRec2[i])			/* Values in decr order */
+            return -1;
+        else if (a->metricsRec2[i] < b->metricsRec2[i])
+            return 1;
+    }
 		
 	return 0;
 	}
@@ -2147,7 +2241,7 @@ static int CDECL cmpPairPos2(const void *first, const void *second)
 	const KernRec *b = second;
 	int i;
 	
-	int metricsCnt = (a->metricsCnt > b->metricsCnt) ?  b->metricsCnt : a->metricsCnt;
+    int metricsCnt;
 
 	if (a->first.gcl == NULL && b->first.gcl == NULL)
 		return 0;
@@ -2163,17 +2257,42 @@ static int CDECL cmpPairPos2(const void *first, const void *second)
 		return -1;
 	else if (a->second.gcl->gid > b->second.gcl->gid)
 		return 1;
-	for (i=0; i < metricsCnt; i++)
-		{
-		if (ABS(a->metricsRec[i]) > ABS(b->metricsRec[i]))	/* Abs values in decr order */
-			return -1;
-		else if (ABS(a->metricsRec[i]) < ABS(b->metricsRec[i]))
-			return 1;
-		else if (a->metricsRec[i] > b->metricsRec[i])			/* Values in decr order */
-			return -1;
-		else if (a->metricsRec[i] < b->metricsRec[i])
-			return 1;
-			}
+        
+        if ((a->metricsRec1[i] == 0) && (b->metricsRec1[i] != 0))	/* Abs values in decr order */
+            return -1;
+        else if ((a->metricsRec1[i] != 0) && (b->metricsRec1[i] == 0))
+            return 1;
+        
+        metricsCnt  = (a->metricsCnt1 > b->metricsCnt1) ?  b->metricsCnt1 : a->metricsCnt1;
+        for (i=0; i < metricsCnt; i++)
+        {
+            if (ABS(a->metricsRec1[i]) > ABS(b->metricsRec1[i]))	/* Abs values in decr order */
+                return -1;
+            else if (ABS(a->metricsRec1[i]) < ABS(b->metricsRec1[i]))
+                return 1;
+            else if (a->metricsRec1[i] > b->metricsRec1[i])			/* Values in decr order */
+                return -1;
+            else if (a->metricsRec1[i] < b->metricsRec1[i])
+                return 1;
+        }
+        
+        if ((a->metricsRec2[i] == 0) && (b->metricsRec2[i] != 0))	/* Abs values in decr order */
+            return -1;
+        else if ((a->metricsRec2[i] != 0) && (b->metricsRec2[i] == 0))
+            return 1;
+        
+        metricsCnt  = (a->metricsCnt2 > b->metricsCnt2) ?  b->metricsCnt2 : a->metricsCnt2;
+        for (i=0; i < metricsCnt; i++)
+        {
+            if (ABS(a->metricsRec2[i]) > ABS(b->metricsRec2[i]))	/* Abs values in decr order */
+                return -1;
+            else if (ABS(a->metricsRec2[i]) < ABS(b->metricsRec2[i]))
+                return 1;
+            else if (a->metricsRec2[i] > b->metricsRec2[i])			/* Values in decr order */
+                return -1;
+            else if (a->metricsRec2[i] < b->metricsRec2[i])
+                return 1;
+        }
 		
 	return 0;
 	}
@@ -2212,12 +2331,6 @@ static void printKernPair(hotCtx g, GID gid1, GID gid2, int val1, int val2,
 		featGlyphClassDump(g, getGNodes(g, gid1, 0), ' ', 0);
 		featGlyphClassDump(g, getGNodes(g, gid2, 1), '\0', 0);
 		}
-#if 0
-	/* xxx Print orig metric array for MMs! */
-	fprintf(stderr, "%d", val1);
-	if (val1 != val2)
-		fprintf(stderr, ",%d", val2);
-#endif
 	}
 
 /* Check for duplicate pairs; sort */
@@ -2229,7 +2342,6 @@ static void checkAndSortPairPos(hotCtx g, GPOSCtx h, SubtableInfo *si)
 	long i;
 	int nDuplicates = 0;
 	int fmt1 = si->pairFmt == 1;
-	int samePrev = 0;
 	KernRec *prev = NULL; /* Suppress optimizer warning */
 
 	/* Sort by first, second, value */
@@ -2244,8 +2356,7 @@ static void checkAndSortPairPos(hotCtx g, GPOSCtx h, SubtableInfo *si)
 		GID prev2;
 		KernRec *curr = & si->pairs.array[i];
 
-		if (!samePrev)
-			prev = curr - 1;
+        prev = curr - 1;
 		if (fmt1)
 			{
 			curr1 = curr->first.gid;
@@ -2261,20 +2372,25 @@ static void checkAndSortPairPos(hotCtx g, GPOSCtx h, SubtableInfo *si)
 			prev2 = prev->second.gcl->gid;
 			}
 
-		if (samePrev)
-			samePrev = 0;
-
 		if (curr1 == prev1 && curr2 == prev2)
 			{
 			KernRec *delete;
+            int isDuplicate = 0;
 
-			/* Value is actually an MMFX ID for an MM: I assume that the MMFX
-			   module's optimization ensures that this is a reliable test for
-			   equality of the original metric array. */
-			if (curr->metricsRec[0] == prev->metricsRec[0])
-				{
+            /* Check if values conflict. Report different message if they are duplicates.  */
+            if ((curr->metricsCnt1 == prev->metricsCnt1) && ((curr->metricsCnt1 == 0) || (curr->metricsRec1[0] == prev->metricsRec1[0])))
+            {
+                isDuplicate = 1;
+            }
+            else if ((curr->metricsCnt2 == prev->metricsCnt2) && ((curr->metricsCnt2 == 0) || (curr->metricsRec2[0] == prev->metricsRec2[0])))
+            {
+                isDuplicate = 1;
+            }
+                
+            if (isDuplicate)
+                {
 #if REPORT_DUPE_KERN
-				printKernPair(g, curr1, curr2, curr->metricsRec[0], prev->metricsRec[0], fmt1);
+				printKernPair(g, curr1, curr2, curr->metricsRec1[0], prev->metricsRec1[0], fmt1);
 				hotMsg(g, hotNOTE, "Removing duplicate pair positioning in "
 					   "'%c%c%c%c' feature: %s", TAG_ARG( si->feature),
 					   g->note.array);
@@ -2282,26 +2398,23 @@ static void checkAndSortPairPos(hotCtx g, GPOSCtx h, SubtableInfo *si)
 				}
 			else
 				{
-				int currVal = IS_MM(g)? FIX2INT(MMFXExecMetric(g, curr->metricsRec[0]))
-					                  : curr->metricsRec[0];
-				int prevVal = IS_MM(g)? FIX2INT(MMFXExecMetric(g, prev->metricsRec[0]))
-					                  : prev->metricsRec[0];
+				int currVal = IS_MM(g)? FIX2INT(MMFXExecMetric(g, curr->metricsRec1[0]))
+					                  : curr->metricsRec1[0];
+				int prevVal = IS_MM(g)? FIX2INT(MMFXExecMetric(g, prev->metricsRec1[0]))
+					                  : prev->metricsRec1[0];
 
 #if REPORT_DUPE_KERN
 				printKernPair(g, curr1, curr2, currVal, prevVal, fmt1);
 				hotMsg(g, hotWARNING,
-					   "Pair positioning has two different values in "
-					   "'%c%c%c%c' feature; choosing the smaller absolute "
+					   "Pair positioning has conflicting statements in "
+					   "'%c%c%c%c' feature; choosing the first "
 					   "value: %s", TAG_ARG( si->feature), g->note.array);
 				/* ... for MMs, at default instance */
 #endif /* REPORT_DUPE_KERN */
-
-				if (IS_MM(g) && ABS(currVal) > ABS(prevVal))
-					samePrev = 1;
-				}
+                }
 
 			/* Mark previous (unless samePrev) record for deletion */
-			delete = samePrev ? curr : prev;
+			delete = curr;
 			if (fmt1)
 				delete->first.gid = GID_UNDEF;
 			else
@@ -2355,8 +2468,8 @@ static LOffset fillPairPos1(hotCtx g, GPOSCtx h)
 
 	fmt->PosFormat = 1;
 
-	fmt->ValueFormat1 = h->new.pairValFmt;
-	fmt->ValueFormat2 = 0;
+  	fmt->ValueFormat1 = h->new.pairValFmt1;
+	fmt->ValueFormat2 = h->new.pairValFmt2;
 
 	fmt->PairSetCount = nPairSets;
 
@@ -2383,28 +2496,54 @@ static LOffset fillPairPos1(hotCtx g, GPOSCtx h)
 				MEM_NEW(g, sizeof(PairValueRecord) * tbl->PairValueCount);
 
 			for (k = 0; k < tbl->PairValueCount; k++)
-				{
+            {
 				KernRec *src = &h->new.pairs.array[iFirst + k];
 				PairValueRecord *dst = &tbl->PairValueRecord[k];
 
 				dst->SecondGlyph = src->second.gid;
 
-
-				dst->Value1 = h->values.cnt;
-				dst->Value2 = VAL_REC_UNDEF;
-				if (src->metricsCnt == 1)
-					{
-					*dnaNEXT(h->values) = src->metricsRec[0];
-					}
-				else
-					{
-					recordValues(h, fmt->ValueFormat1,  src->metricsRec[0],  src->metricsRec[1],
-							  src->metricsRec[2],  src->metricsRec[3]);
-					}
+                /* Fill in first glyph values.
+                First value record is always defined, but could be a dummy with
+                 a count of 1 and a value of 0. */
+                if ((src->metricsCnt1 == 1) && (src->metricsRec1[0] == 0))
+                {
+                    dst->Value1 = VAL_REC_UNDEF;
+                }
+                else
+                {
+                    dst->Value1 = h->values.cnt;
+                    if (src->metricsCnt1 == 1)
+                        {
+                        *dnaNEXT(h->values) = src->metricsRec1[0];
+                        }
+                    else
+                        {
+                        recordValues(h, fmt->ValueFormat1,  src->metricsRec1[0],  src->metricsRec1[1],
+                                  src->metricsRec1[2],  src->metricsRec1[3]);
+                        }
 				}
+                /* Fill in second glyph values */
 
-			/* macro PAIR_SET_SIZE assumes that fmt->ValueFormat2 is 0. */
-			offset += PAIR_SET_SIZE(tbl->PairValueCount, numValues(fmt->ValueFormat1));
+                if ((src->metricsCnt2 == 0) || ((src->metricsCnt2 == 1) && (src->metricsRec2[0] == 0)))
+                {
+                    dst->Value2 = VAL_REC_UNDEF;
+                }
+                else
+                {
+                    dst->Value2 = h->values.cnt;
+                    if (src->metricsCnt2 == 1)
+                    {
+                        *dnaNEXT(h->values) = src->metricsRec2[0];
+                    }
+                    else
+                    {
+                        recordValues(h, fmt->ValueFormat2,  src->metricsRec2[0],  src->metricsRec2[1],
+                                     src->metricsRec2[2],  src->metricsRec2[3]);
+                    }
+                }
+
+            }
+			offset += PAIR_SET_SIZE(tbl->PairValueCount, numValues(fmt->ValueFormat1), numValues(fmt->ValueFormat2));
 			iFirst = i;
 			}
 
@@ -2474,8 +2613,8 @@ static void fillPairPos2(hotCtx g, GPOSCtx h)
 
 	fmt->PosFormat = 2;
 
-	fmt->ValueFormat1 = h->new.pairValFmt;
-	fmt->ValueFormat2 = 0;
+	fmt->ValueFormat1 = h->new.pairValFmt1;
+	fmt->ValueFormat2 = h->new.pairValFmt2;
 
 	/* (ClassDef offsets adjusted later) */	
 	fmt->ClassDef1 = classDefMake(g, h, otl, 0, &fmt->Coverage,
@@ -2507,18 +2646,42 @@ static void fillPairPos2(hotCtx g, GPOSCtx h)
 		unsigned cl2 = pair->second.gcl->gid;
 		Class2Record *dst = &fmt->Class1Record[cl1].Class2Record[cl2];
 
-		/* Use only Value1, not Value2 */
-		dst->Value1 = h->values.cnt;
-		if (pair->metricsCnt == 1)
-			{
-			*dnaNEXT(h->values) = pair->metricsRec[0];
-			}
-		else
-			{
-			recordValues(h, fmt->ValueFormat1,  pair->metricsRec[0],  pair->metricsRec[1],
-						  pair->metricsRec[2],  pair->metricsRec[3]);
-			}
-
+        if ((pair->metricsCnt1 == 0) || ((pair->metricsCnt1 == 1) && (pair->metricsRec1[0] == 0)))
+        {
+            dst->Value1 = VAL_REC_UNDEF;
+        }
+        else
+        {
+            dst->Value1 = h->values.cnt;
+           if (pair->metricsCnt1 == 1)
+            {
+                *dnaNEXT(h->values) = pair->metricsRec1[0];
+            }
+            else
+            {
+                recordValues(h, fmt->ValueFormat1,  pair->metricsRec1[0],  pair->metricsRec1[1],
+                             pair->metricsRec1[2],  pair->metricsRec1[3]);
+            }
+        }
+        
+        if ((pair->metricsCnt2 == 0) || ((pair->metricsCnt2 == 1) && (pair->metricsRec2[0] == 0)))
+        {
+            dst->Value2 = VAL_REC_UNDEF;
+        }
+        else
+        {
+            dst->Value2 = h->values.cnt;
+            if (pair->metricsCnt2 == 1)
+            {
+                *dnaNEXT(h->values) = pair->metricsRec2[0];
+            }
+            else
+            {
+                recordValues(h, fmt->ValueFormat2,  pair->metricsRec2[0],  pair->metricsRec2[1],
+                             pair->metricsRec2[2],  pair->metricsRec2[3]);
+            }
+        }
+            
 
 #if HOT_DEBUG
 		nFilled++;
@@ -2529,10 +2692,12 @@ static void fillPairPos2(hotCtx g, GPOSCtx h)
 						  numValues(fmt->ValueFormat1) +
 						  numValues(fmt->ValueFormat2));
 #if HOT_DEBUG
-	DF(1, (stderr, "#Cl kern: %d of %hu(%hux%hu) array els filled "
+	DF(1, (stderr, "#Cl kern: %d of %u(%hux%u) array is filled "
 		   "(%4.2f%%), excl ClassDef2's class 0. Subtbl size: %lu\n",
-		   nFilled, fmt->Class1Count * (fmt->Class2Count - 1),
-		   fmt->Class1Count, fmt->Class2Count - 1,
+		   nFilled,
+           fmt->Class1Count * (fmt->Class2Count - 1),
+		   fmt->Class1Count,
+           fmt->Class2Count - 1,
 		   nFilled * 100.00 /(fmt->Class1Count * (fmt->Class2Count-1)),
 		   size));
 #endif
@@ -2818,12 +2983,6 @@ static SubtableInfo* addAnonPosRule(hotCtx g, GPOSCtx h, SubtableInfo *cur_si, u
 	si->markSetIndex = cur_si->markSetIndex;
 	si->fileName = cur_si->fileName;				/* the current feature file name */
 
-	/* Not: 
-	si->sub = cur_si->sub;	
-	si->pairFmt = cur_si->pairFmt;
-	si->pairValFmt = cur_si->pairValFmt;
-	or any of the dna arrays.
-	*/
 	
 	/* Now for the new values that are specific to this table */
 	si->lkpType = lkpType;
