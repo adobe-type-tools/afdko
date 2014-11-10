@@ -1780,13 +1780,13 @@ def doSingleTest16():
 			print "	Warning: OS/2 table usWinDescent field '%s' is not the same as the font bounding box y min '%s'. %s" % (-os2table.usWinDescent, font.fontBBox[1], font.PostScriptName1)
 		if font.fontBBox[3] != os2table.usWinAscent:
 			print "	Warning: OS/2 table usWinAscent field '%s' is not the same as the font bounding box y max '%s'. %s" % (os2table.usWinAscent, font.fontBBox[3], font.PostScriptName1)
-		# make sure that DONT_USE_WIN_LINE_METRICS is on
+		# make sure that USE_TYPO_METRICS is on
 		if not (font.fsSelection & (1<<7)):
 			if os2table.version >= 4:
-				print "	Warning. The OS/2 table version 4 fsSelection field bit 7 'DONT_USE_WIN_LINE_METRICS' is not turned on. Windows applications will (eventually) use the OS/2 sTypo fields only if this bit is on. %s." % (font.PostScriptName1)
+				print "	Warning. The OS/2 table version 4 fsSelection field bit 7 'USE_TYPO_METRICS' is not turned on. Windows applications will (eventually) use the OS/2 sTypo fields only if this bit is on. %s." % (font.PostScriptName1)
 		else:
 			if os2table.version < 4:
-				print "	Error. The OS/2 table version 4 fsSelection field bit 7 'DONT_USE_WIN_LINE_METRICS' is set on, but the OS/2 version '%s' is not 4 or greater.. %s." % (os2table.version, font.PostScriptName1)
+				print "	Error. The OS/2 table version 4 fsSelection field bit 7 'USE_TYPO_METRICS' is set on, but the OS/2 version '%s' is not 4 or greater.. %s." % (os2table.version, font.PostScriptName1)
 	if len(emSquareeDict.keys()) > 1:
 		print "	Error: fonts in family have different em-squares! %s." % (font.preferredFamilyName1)
 		for item in emSquareeDict.items():
