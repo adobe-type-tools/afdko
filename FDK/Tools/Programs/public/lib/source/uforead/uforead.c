@@ -2318,9 +2318,7 @@ static int parsePoint(ufoCtx h, abfGlyphCallbacks *glyph_cb, GLIF_Rec* glifRec, 
                 float xnew = mtx[0]*x + mtx[2]*y + mtx[4];
                 y = mtx[1]*x + mtx[3]*y + mtx[5];
                 x = xnew;
-            }
-            x = (float)round(x);
-            y = (float)round(y);
+           }
             CHKOFLOW(2);
             PUSH(x);
             PUSH(y);
@@ -3343,7 +3341,7 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                 if (h->data.opList.cnt > 1)
                 {
                     OpRec* firstOpRec = &h->data.opList.array[contourStartOpIndex];
-                    /* Now we need to fix up the OpList. In GLIF, there is usually no explicit start point, as the format expresses
+                   /* Now we need to fix up the OpList. In GLIF, there is usually no explicit start point, as the format expresses
                      the path segments as a complete closed path, with no explicit start point.
                      
                      I use the first path operator end point as the start point, and convert this first operator to move-to.
@@ -3366,30 +3364,16 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                         PUSH(firstOpRec->coords[0]);
                         PUSH(firstOpRec->coords[1]);
                         doOp_ct(h, glyph_cb, h->hints.pointName); /* adds a new curve opRec to the op list, using the point name (if any) of the first point of the curve.  */
+                        
+                        /* doOp_ct can resize the opList array, invalidating the firstOpRec pointer */
+                        firstOpRec = &h->data.opList.array[contourStartOpIndex];
+                        firstOpRec->opType = movetoType;
+                        
                         h->hints.pointName = NULL;
 
-                        firstOpRec->opType = movetoType;
                      }
                     
-                     
-                    
-                    switch(firstOpRec->opType)
-                    {
-                        case 0:
-                        case 1:
-                            // If the first op was an real move-to, we don't need to do anything,
-                            break;
-                        case 2:
-                            // If it was line-to, we also don't need to do anything. An implicit line-to will do just fine.
-                            break;
-                        case 3:
-                            CHKOFLOW(2);
-                            PUSH(firstOpRec->coords[0]);
-                            PUSH(firstOpRec->coords[1]);
-                            doOp_ct(h, glyph_cb, NULL);
-                            break;
-                    }
-                }
+                 }
                  h->stack.flags &= ~((unsigned long)(PARSE_PATH | PARSE_SEEN_MOVETO));
 			}
             else if (tokenEqualStr(tk, "<point"))
