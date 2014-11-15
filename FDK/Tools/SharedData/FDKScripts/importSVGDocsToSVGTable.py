@@ -1,5 +1,5 @@
 _help_ = """
-importSVGDocsToSVGTable.py v 2.0 Sep 23 2014
+importSVGDocsToSVGTable.py v 2.2 Oct 24 2014
 
 python importSVGDocsToSVGTable.py <path to input OTF/TTF file>  <path(s) to SVG files OR to folder containing SVG files> 
 
@@ -12,14 +12,14 @@ Requires the <svg> element of every SVG file to have an 'id' parameter that foll
 The integer ID values (of glyphID) should match the glyph indexes of the font.
 """
 
-__copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-"""
+__copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved."""
 
 import os
 import sys
 import re
 import io # io module is used for dealing with the line-ending differences that exist between platforms
 from subprocess import Popen, PIPE
+from xml.etree import ElementTree
 
 kSVGDocTemplate = """\t\t<svgDoc endGlyphID="%s" startGlyphID="%s">
 \t\t\t<![CDATA[%s]]>
@@ -34,6 +34,9 @@ kSVGTableTemplate = """<?xml version="1.0" encoding="utf-8"?>
 </ttFont>
 """
 
+kSVGDefaultViewBox = """ viewBox="0 %s 1000 1000"\
+""" # the placeholder is for the UPM value
+
 kSVGFileNameSuffix = "-SVG"
 
 debug = False
@@ -44,13 +47,20 @@ def writeNewFontFile(fontFilePath, ttxFilePath):
 	fileNameNoExtension, fileExtension = os.path.splitext(fontFileName)
 	newFontFilePath = os.path.join(folderPath, "%s%s%s" % (fileNameNoExtension, kSVGFileNameSuffix, fileExtension))
 	
+	# check if the XML is well formed, before trying to compile a new font with TTX
+	try:
+		ElementTree.parse(ttxFilePath)
+	except ElementTree.ParseError:
+		print "ERROR: The SVG's table XML code is malformed."
+		if debug:
+			print "\tCheck the file %s" % ttxFilePath
+		return
+	
 	cmd = "ttx -o '%s' -m '%s' '%s'" % (newFontFilePath, fontFilePath, ttxFilePath)
 	popen = Popen(cmd, shell=True, stdout=PIPE)
 	popenout, popenerr = popen.communicate()
-	if popenout:
-		output = popenout
-	else:
-		return
+	if popenout and debug:
+		print popenout
 	
 
 def writeTTXfile(fontFilePath, UPM, fontFormat, svgFilePathsList):
@@ -72,9 +82,22 @@ def writeTTXfile(fontFilePath, UPM, fontFormat, svgFilePathsList):
 		data = f.read()
 		f.close()
 		
+		# add or offset the viewBox, to adjust for the different coordinate system of SVG (when compared to fonts' coordinate system)
+		# https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Positions
+		viewBox = re.search(r"<svg.+?(viewBox=[\"|\'][\d, ]+[\"|\']).+?>", data, re.DOTALL)
+		if viewBox: # offset the second value (y-min) of the viewBox			
+# 			print "BEFORE: ", viewBox.group(1)
+			viewBoxValues = re.search(r"viewBox=[\"|\'](\d+)[, ](\d+)[, ](\d+)[, ](\d+)[\"|\']", viewBox.group(1))
+			yMin = int(viewBoxValues.group(2))
+			newViewBox = "viewBox=\"%s %s %s %s\"" % (viewBoxValues.group(1), yMin + UPM, viewBoxValues.group(3), viewBoxValues.group(4))
+# 			print "AFTER:  ", newViewBox
+			data = re.sub(viewBox.group(1), newViewBox, data)
+		else: # add the viewBox parameter
+			data = re.sub(r"<svg", r"<svg" + kSVGDefaultViewBox % UPM, data)
+	
 		gid = re.search(r"<svg.+?id=\"glyph(\d+)\".+?>", data, re.DOTALL).group(1)
 		svgDoc = kSVGDocTemplate % (gid, gid, data.strip())
-		svgDocDict[gid] = svgDoc
+		svgDocDict[int(gid)] = svgDoc
 	
 	svgDocIndexList = svgDocDict.keys()
 	svgDocIndexList.sort()
@@ -83,18 +106,11 @@ def writeTTXfile(fontFilePath, UPM, fontFormat, svgFilePathsList):
 	tableContents = os.linesep.join(svgDocList)
 	tableTotal = kSVGTableTemplate % (fontFormat, tableContents)
 	
-	# add 'transform' parameter to all <svg> elements (it does NOT check if the parameter already exists)
-	tableFinal = re.sub(r"(<svg) ", r"""\1 transform="translate(0 -""" + UPM + """)\" """, tableTotal)
-	
 	f = open(ttxFilePath, "wt")
-	f.write(tableFinal)
+	f.write(tableTotal)
 	f.close()
 	
-	if not len(svgDocList):
-		print "ERROR: Could not assemble any data for the SVG table."
-		return ttxFilePath, False # ok2continue
-	else:
-		return ttxFilePath, True
+	return ttxFilePath
 
 
 def validateSVGfiles(svgFilePathsList):
@@ -110,6 +126,11 @@ def validateSVGfiles(svgFilePathsList):
 	glyphIDsFound = []
 	
 	for filePath in svgFilePathsList:
+		# skip hidden files (filenames that start with period)
+		fileName = os.path.basename(filePath)
+		if fileName[0] == '.':
+			continue
+		
 		# read file
 		f = open(filePath, "rt")
 		data = f.read()
@@ -118,13 +139,13 @@ def validateSVGfiles(svgFilePathsList):
 		# find <xml> header
 		xml = re.search(r"<\?xml.+?\?>", data)
 		if not xml:
-			print "WARNING: Could not find <xml> header in SVG file. Skiping %s" % (filePath)
+			print "WARNING: Could not find <xml> header in the file. Skiping %s" % (filePath)
 			continue
 
 		# find <svg> blob
 		svg = re.search(r"<svg.+?>.+?</svg>", data, re.DOTALL)
 		if not svg:
-			print "WARNING: Could not find <svg> element in SVG file. Skiping %s" % (filePath)
+			print "WARNING: Could not find <svg> element in the file. Skiping %s" % (filePath)
 			continue
 		
 		# check 'id' value
@@ -163,7 +184,7 @@ def getFontUPM(fontFilePath):
 		return
 	
 	headUPM = re.search("unitsPerEm\s*=(\d+)", output).group(1)
-	return headUPM
+	return int(headUPM)
 
 
 def getFontFormat(fontFilePath):
@@ -216,14 +237,18 @@ def getOptions():
 
 def run():
 	fontFilePath, UPM, fontFormat, svgFilePathsList = getOptions()
-	ttxFilePath, ok2continue = writeTTXfile(fontFilePath, UPM, fontFormat, svgFilePathsList)
+
+	if len(svgFilePathsList): # after validation there may not be any SVG files left to process
+		ttxFilePath = writeTTXfile(fontFilePath, UPM, fontFormat, svgFilePathsList)
 	
-	if ok2continue:
 		writeNewFontFile(fontFilePath, ttxFilePath)
 	
-	# delete temporary TTX file
-	if os.path.exists(ttxFilePath) and not debug:
-		os.remove(ttxFilePath)
+		# delete temporary TTX file
+		if os.path.exists(ttxFilePath) and not debug:
+			os.remove(ttxFilePath)
+	
+	else:
+		print "ERROR: Could not assemble any data for the SVG table."
 
 
 if __name__ == "__main__":

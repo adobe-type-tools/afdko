@@ -53,7 +53,7 @@ The FDK distribution directory tree is built by:
 
 3) Building the Python interpreter for the FDK.
 
-Note that the FDK will use the Python interpreter whose path is specified in line 4 of the file "setFDKPaths.py" This line can be changed to point to any other Python interpreter program on the system. However, if you choose to use another Python interpreter, you must add the several third party packages.
+Note that the FDK will use the Python interpreter whose path is specified in the file "setFDKPaths" This line can be changed to point to any other Python interpreter program on the system. However, if you choose to use another Python interpreter, you must add the several third party packages.
 
 The FDK contains a copy of the Python interpreter. This is used to run the FDK Python scripts. To build this:
  - download the latest Python 2.7 source from www.python.org to a local directory.
@@ -81,25 +81,25 @@ Once you have built the AFDKO Python, you need to install the various modules th
 
 This module is needed for the ttx and ttxn tools to work. I use Behdad Esfahbod's GitHub v2.5 branch, as it fixes a number of bugs, and is not dependent on the numPy module.
 
-Ge the master branch of fontTools from https://github.com/behdad/fonttools. Download the zip file, cd to the unpacked directory, 
-and use the command "AFDKOPython setup.py install". When you are done, copy the file site-packages/FontTools/fontTools/misc/xmlWriter.py
+Get the master branch of fontTools from https://github.com/behdad/fonttools. Download the zip file, cd to the unpacked directory, 
+and use the command "AFDKOPython setup.py install". When you are done, copy the files site-packages/FontTools/fontTools/misc/xmlWriter.py*
 to site-packages/FontTools/xmlWriter.py. This allows the robofab libraries to work with this branch of the fontTools.
 
-3.2 mutatorMath support.
+3.2 MutatorMath support.
 
 Install in order:
 fontMath-ufo3: ufo3 branch of fontMath at: https://github.com/typesupply/fontMath/tree/ufo3/.
 Install with "AFDKOPython setup.py install"
 
 robofab-ufo3k: ufo3K branch of robofab library from https://github.com/robofab-developers/robofab/tree/ufo3k.
-This does not have a setup.py file. Install by copying the robofab-ufo3k directory to FDK/Tools/osx/Python/AFDKOPython27/lib/python2.7/site-packages, cd to the directory, run "AFDKOPython install.py", and then delete all but the LIB directory and the LICENSE.txt file.
+This does not have a setup.py file. Install by copying the robofab-ufo3k directory to your Python installation's site-packages directory, e.g. FDK/Tools/osx/Python/AFDKOPython27/lib/python2.7/site-packages, cd to the directory, run "AFDKOPython install.py", and then delete all but the LIB directory and the LICENSE.txt file.
 
 defcon-ufo3: ufo3 branch of defcon library at https://github.com/typesupply/defcon/tree/ufo3.
 Install with "AFDKOPython setup.py install"
 The install script has a bug, in that it does not copy any of the subdirectories of defcon. Copy these manually.
 
-mutatorMath-master.
-This does not have a setup.py file. Install by copying the mutatorMath-master directory to FDK/Tools/osx/Python/AFDKOPython27/lib/python2.7/site-packages, and delete all but the LIB and LICENSE.txt file. Manually create the file "mutatorMath-master.pth", and put in it the relative path to the mutatorMath-master directory, e.g just  the line "mutatorMath-master".
+MutatorMath: master branch of MutatorMath at https://github.com/LettError/MutatorMath
+Install with "AFDKOPython setup.py install"
 
 Check all the *.pth files in "FDK/Tools/osx/Python/AFDKOPython27/lib/python2.7/site-packages", and make sure the path references are all relative to the site-packages directory.
 
