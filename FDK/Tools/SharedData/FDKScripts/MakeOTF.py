@@ -380,7 +380,7 @@ class MakeOTFParams:
 		self.srcIsTTF = 0
 		for item in kMOTFOptions.items():
 			exec("self.%s%s = None" % (kFileOptPrefix, item[0]))
-		# DONT_USE_WIN_LINE_METRICS Remove comment from next line to turn on bits 7 and 8 by default.
+		# USE_TYPO_METRICS Remove comment from next line to turn on bits 7 and 8 by default.
 		# exec("self.%s%s = [7,8]" % (kFileOptPrefix, kSetfsSelectionBitsOn))
 
 	def __repr__(self):
@@ -600,7 +600,7 @@ def setOptionsFromFontInfo(makeOTFParams):
 					exec("makeOTFParams.%s%s += [val]" % (kFileOptPrefix, kSetfsSelectionBitsOn))
 			elif not m.group(1) in ["False", "false", "0"]:
 				print "makeotf [Error] Failed to parse value for PreferOS/2TypoMetrics in file '%s'." % (fiPath)
-			print "makeotf [Note] setting the DONT_USE_WIN_LINE_METRICS OS/2 fsSelection bit 7 from fontinfo keyword."
+			print "makeotf [Note] setting the USE_TYPO_METRICS OS/2 fsSelection bit 7 from fontinfo keyword."
 		
 
 		m = re.search(r"IsOS/2WidthWeightSlopeOnly\s+(([Tt]rue|1)|([Ff]alse)|0|1)", data)
@@ -2228,7 +2228,7 @@ def runMakeOTF(makeOTFParams):
 		osv4Err = 0
 		if makeOTFParams.seenOS2v4Bits[0] == 0:
 			osv4Err = 1
-			print "makeotf [Error] No value was provided for DONT_USE_WIN_LINE_METRICS OS/2 fsSelection bit 7."
+			print "makeotf [Error] No value was provided for USE_TYPO_METRICS OS/2 fsSelection bit 7."
 		if makeOTFParams.seenOS2v4Bits[1] == 0:
 			osv4Err = 1
 			print "makeotf [Error] No value was provided for WEIGHT_WIDTH_SLOPE_ONLY OS/2 fsSelection bit 8."
