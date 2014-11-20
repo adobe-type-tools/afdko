@@ -1862,7 +1862,7 @@ static void fillClientData(ttrCtx h) {
 	if (h->post.format != 0) {
 		top->isFixedPitch       = h->post.isFixedPitch;
 		top->ItalicAngle        = FIX2FLT(h->post.italicAngle);
-		top->UnderlinePosition  = h->post.underlinePosition;
+		top->UnderlinePosition  = h->post.underlinePosition - floor(h->post.underlineThickness * 0.5);
 		top->UnderlineThickness = h->post.underlineThickness;
 	}
 	else {
