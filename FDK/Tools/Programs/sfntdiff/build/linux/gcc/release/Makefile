@@ -7,7 +7,7 @@ CONFIG = release
 ROOT_DIR = ../../../..
 OBJECT_DIR = .
 
-CFLAGS = $(STD_OPTS) -m32 -I$(ROOT_DIR)/../spot/sfnt_includes
+CFLAGS = $(STD_OPTS) -I$(ROOT_DIR)/../spot/sfnt_includes
 
 # Program
 PRG_SRCS = $(SRC_DIR)/Dmain.c \
