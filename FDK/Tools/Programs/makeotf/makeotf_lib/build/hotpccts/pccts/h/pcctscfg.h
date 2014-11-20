@@ -254,8 +254,7 @@ inline
 #else
 static
 #endif
-void special_inits()
-{
+void special_inits() {
   InitCursorCtl((acurHandle) 0);
 }
 #endif
@@ -266,8 +265,7 @@ inline
 #else
 static
 #endif
-void special_fopen_actions(char * s)
-{
+void special_fopen_actions(char * s) {
   fsetfileinfo (s, MAC_FILE_CREATOR, 'TEXT');
 }
 #endif

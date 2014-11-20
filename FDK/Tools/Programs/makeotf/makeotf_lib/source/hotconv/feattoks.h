@@ -115,351 +115,467 @@
 #define T_STRING 133
 
 #ifdef __USE_PROTOS
-extern GID glyph(char * tok);
+extern GID glyph(char *tok);
+
 #else
 extern GID glyph();
+
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode * glyphClass(int named,char * gcname);
+extern GNode *glyphClass(int named, char *gcname);
+
 #else
-extern GNode * glyphClass();
+extern GNode *glyphClass();
+
 #endif
 
 #ifdef __USE_PROTOS
 extern unsigned char numUInt8(void);
+
 #else
 extern unsigned char numUInt8();
+
 #endif
 
 #ifdef __USE_PROTOS
 extern short numInt16(void);
+
 #else
 extern short numInt16();
+
 #endif
 
 #ifdef __USE_PROTOS
 extern unsigned numUInt16(void);
+
 #else
 extern unsigned numUInt16();
+
 #endif
 
 #ifdef __USE_PROTOS
 extern short parameterValue(void);
+
 #else
 extern short parameterValue();
+
 #endif
 
 #ifdef __USE_PROTOS
 extern unsigned numUInt16Ext(void);
+
 #else
 extern unsigned numUInt16Ext();
+
 #endif
 
 #ifdef __USE_PROTOS
 extern short metric(void);
+
 #else
 extern short metric();
+
 #endif
 
 #ifdef __USE_PROTOS
 void deviceEntry(void);
+
 #else
 extern void deviceEntry();
+
 #endif
 
 #ifdef __USE_PROTOS
 extern unsigned short contourpoint(void);
+
 #else
 extern unsigned short contourpoint();
+
 #endif
 
 #ifdef __USE_PROTOS
 extern unsigned short device(void);
+
 #else
 extern unsigned short device();
+
 #endif
 
 #ifdef __USE_PROTOS
 void caret(void);
+
 #else
 extern void caret();
+
 #endif
 
 #ifdef __USE_PROTOS
 void valueRecordDef(void);
+
 #else
 extern void valueRecordDef();
+
 #endif
 
 #ifdef __USE_PROTOS
-void valueRecord(GNode* gnode);
+void valueRecord(GNode *gnode);
+
 #else
 extern void valueRecord();
+
 #endif
 
 #ifdef __USE_PROTOS
-void valueRecord3(GNode* gnode);
+void valueRecord3(GNode *gnode);
+
 #else
 extern void valueRecord3();
+
 #endif
 
 #ifdef __USE_PROTOS
 void anchorDef(void);
+
 #else
 extern void anchorDef();
+
 #endif
 
 #ifdef __USE_PROTOS
 extern int anchor(int componentIndex);
+
 #else
 extern int anchor();
+
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode * pattern(int markedOK);
+extern GNode *pattern(int markedOK);
+
 #else
-extern GNode * pattern();
+extern GNode *pattern();
+
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode * pattern2(int markedOK,GNode** headP);
+extern GNode *pattern2(int markedOK, GNode **headP);
+
 #else
-extern GNode * pattern2();
+extern GNode *pattern2();
+
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode * pattern3(int markedOK,GNode** headP);
+extern GNode *pattern3(int markedOK, GNode **headP);
+
 #else
-extern GNode * pattern3();
+extern GNode *pattern3();
+
 #endif
 
 #ifdef __USE_PROTOS
 void ignoresub_or_pos(void);
+
 #else
 extern void ignoresub_or_pos();
+
 #endif
 
 #ifdef __USE_PROTOS
 void substitute(void);
+
 #else
 extern void substitute();
+
 #endif
 
 #ifdef __USE_PROTOS
 void mark_statement(void);
+
 #else
 extern void mark_statement();
+
 #endif
 
 #ifdef __USE_PROTOS
 void position(void);
+
 #else
 extern void position();
+
 #endif
 
 #ifdef __USE_PROTOS
 void parameters(void);
+
 #else
 extern void parameters();
+
 #endif
 
 #ifdef __USE_PROTOS
 void featureNameEntry(void);
+
 #else
 extern void featureNameEntry();
+
 #endif
 
 #ifdef __USE_PROTOS
 void featureNames(void);
+
 #else
 extern void featureNames();
+
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode * cursive(int markedOK,GNode** headP);
+extern GNode *cursive(int markedOK, GNode **headP);
+
 #else
-extern GNode * cursive();
+extern GNode *cursive();
+
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode * baseToMark(int markedOK,GNode** headP);
+extern GNode *baseToMark(int markedOK, GNode **headP);
+
 #else
-extern GNode * baseToMark();
+extern GNode *baseToMark();
+
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode * ligatureMark(int markedOK,GNode** headP);
+extern GNode *ligatureMark(int markedOK, GNode **headP);
+
 #else
-extern GNode * ligatureMark();
+extern GNode *ligatureMark();
+
 #endif
 
 #ifdef __USE_PROTOS
 void glyphClassAssign(void);
+
 #else
 extern void glyphClassAssign();
+
 #endif
 
 #ifdef __USE_PROTOS
 void scriptAssign(void);
+
 #else
 extern void scriptAssign();
+
 #endif
 
 #ifdef __USE_PROTOS
 void languageAssign(void);
+
 #else
 extern void languageAssign();
+
 #endif
 
 #ifdef __USE_PROTOS
-void namedLookupFlagValue(unsigned short * val);
+void namedLookupFlagValue(unsigned short *val);
+
 #else
 extern void namedLookupFlagValue();
+
 #endif
 
 #ifdef __USE_PROTOS
 void lookupflagAssign(void);
+
 #else
 extern void lookupflagAssign();
+
 #endif
 
 #ifdef __USE_PROTOS
 void featureUse(void);
+
 #else
 extern void featureUse();
+
 #endif
 
 #ifdef __USE_PROTOS
 void subtable(void);
+
 #else
 extern void subtable();
+
 #endif
 
 #ifdef __USE_PROTOS
 void sizemenuname(void);
+
 #else
 extern void sizemenuname();
+
 #endif
 
 #ifdef __USE_PROTOS
 void statement(void);
+
 #else
 extern void statement();
+
 #endif
 
 #ifdef __USE_PROTOS
 void lookupBlockOrUse(void);
+
 #else
 extern void lookupBlockOrUse();
+
 #endif
 
 #ifdef __USE_PROTOS
 void lookupBlockStandAlone(void);
+
 #else
 extern void lookupBlockStandAlone();
+
 #endif
 
 #ifdef __USE_PROTOS
 void featureBlock(void);
+
 #else
 extern void featureBlock();
+
 #endif
 
 #ifdef __USE_PROTOS
-void baseScript(int vert,long nTag);
+void baseScript(int vert, long nTag);
+
 #else
 extern void baseScript();
+
 #endif
 
 #ifdef __USE_PROTOS
 void axisSpecs(void);
+
 #else
 extern void axisSpecs();
+
 #endif
 
 #ifdef __USE_PROTOS
 void table_BASE(void);
+
 #else
 extern void table_BASE();
+
 #endif
 
 #ifdef __USE_PROTOS
 void table_OS_2(void);
+
 #else
 extern void table_OS_2();
+
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode * glyphClassOptional(void);
+extern GNode *glyphClassOptional(void);
+
 #else
-extern GNode * glyphClassOptional();
+extern GNode *glyphClassOptional();
+
 #endif
 
 #ifdef __USE_PROTOS
 void table_GDEF(void);
+
 #else
 extern void table_GDEF();
+
 #endif
 
 #ifdef __USE_PROTOS
 void table_head(void);
+
 #else
 extern void table_head();
+
 #endif
 
 #ifdef __USE_PROTOS
 void table_hhea(void);
+
 #else
 extern void table_hhea();
+
 #endif
 
 #ifdef __USE_PROTOS
 void table_name(void);
+
 #else
 extern void table_name();
+
 #endif
 
 #ifdef __USE_PROTOS
 void table_vhea(void);
+
 #else
 extern void table_vhea();
+
 #endif
 
 #ifdef __USE_PROTOS
 void table_vmtx(void);
+
 #else
 extern void table_vmtx();
+
 #endif
 
 #ifdef __USE_PROTOS
 void tableBlock(void);
+
 #else
 extern void tableBlock();
+
 #endif
 
 #ifdef __USE_PROTOS
 void languagesystemAssign(void);
+
 #else
 extern void languagesystemAssign();
+
 #endif
 
 #ifdef __USE_PROTOS
 void topLevelStatement(void);
+
 #else
 extern void topLevelStatement();
+
 #endif
 
 #ifdef __USE_PROTOS
 void anonBlock(void);
+
 #else
 extern void anonBlock();
+
 #endif
 
 #ifdef __USE_PROTOS
 void featureFile(void);
+
 #else
 extern void featureFile();
+
 #endif
 
 #endif

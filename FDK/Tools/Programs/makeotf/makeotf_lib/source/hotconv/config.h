@@ -34,9 +34,9 @@
  */
 
 /* This file knows about the following ``environments''
-	UNIX (default)
-	DOS  (use #define PC)
-	MAC  (use #define MPW; has a few things for THINK C, Metrowerks)
+    UNIX (default)
+    DOS  (use #define PC)
+    MAC  (use #define MPW; has a few things for THINK C, Metrowerks)
  */
 
 /* should test __STDC__ for 1, but some compilers don't set value, just def */
@@ -45,15 +45,15 @@
 #endif
 
 /*
-*  Define PC32 if in a 32-bit PC environment (e.g. extended DOS or Win32).
-*  The macros tested here are defined by Watcom, Microsoft, Borland,
-*  and djgpp, respectively, when they are used as 32-bit compilers.
-*  Users of these compilers *must* be sure to define PC in their
-*  makefiles for this to work correctly.
-*/
+ *  Define PC32 if in a 32-bit PC environment (e.g. extended DOS or Win32).
+ *  The macros tested here are defined by Watcom, Microsoft, Borland,
+ *  and djgpp, respectively, when they are used as 32-bit compilers.
+ *  Users of these compilers *must* be sure to define PC in their
+ *  makefiles for this to work correctly.
+ */
 #ifdef PC
 # if (defined(__WATCOM__) || defined(_WIN32) || defined(__WIN32__) || \
-   defined(__GNUC__) || defined(__GNUG__))
+    defined(__GNUC__) || defined(__GNUG__))
 #     ifndef PC32
 #        define PC32
 #     endif
@@ -61,7 +61,7 @@
 #endif
 
 /* MR1  10-Apr-97  Default for PC is short file names			            */
-/* MR1		   Default for non-PC is long file names                		*/
+/* MR1		   Default for non-PC is long file names                        */
 /* MR1		   Can override via command line option LONGFILENAMES           */
 
 #ifndef LONGFILENAMES
@@ -71,39 +71,39 @@
 #endif
 
 #ifndef LONGFILENAMES
-#define ATOKEN_H			"AToken.h"
-#define ATOKPTR_H			"ATokPtr.h"
-#define ATOKPTR_C			"ATokPtr.cpp"
-#define ATOKENBUFFER_H		"ATokBuf.h"
+#define ATOKEN_H            "AToken.h"
+#define ATOKPTR_H           "ATokPtr.h"
+#define ATOKPTR_C           "ATokPtr.cpp"
+#define ATOKENBUFFER_H      "ATokBuf.h"
 #define ATOKENBUFFER_C      "ATokBuf.cpp"
-#define ATOKENSTREAM_H		"ATokStr.h"
-#define APARSER_H			"AParser.h"
+#define ATOKENSTREAM_H      "ATokStr.h"
+#define APARSER_H           "AParser.h"
 #define APARSER_C           "AParser.cpp"
-#define ASTBASE_H			"ASTBase.h"
+#define ASTBASE_H           "ASTBase.h"
 #define ASTBASE_C           "ASTBase.cpp"
 #define PCCTSAST_C          "PCCTSAST.cpp"
 #define LIST_C              "List.cpp"
-#define DLEXERBASE_H		"DLexBase.h"
+#define DLEXERBASE_H        "DLexBase.h"
 #define DLEXERBASE_C        "DLexBase.cpp"
 #define DLEXER_C            "DLexer.cpp"
-#define STREESUPPORT_C		"STreeSup.C"
+#define STREESUPPORT_C      "STreeSup.C"
 #else
-#define ATOKEN_H			"AToken.h"
-#define ATOKPTR_H			"ATokPtr.h"
-#define ATOKPTR_C			"ATokPtr.cpp"
-#define ATOKENBUFFER_H		"ATokenBuffer.h"
-#define ATOKENBUFFER_C		"ATokenBuffer.cpp"
-#define ATOKENSTREAM_H		"ATokenStream.h"
-#define APARSER_H			"AParser.h"
-#define APARSER_C			"AParser.cpp"
-#define ASTBASE_H			"ASTBase.h"
-#define ASTBASE_C		    "ASTBase.cpp"
-#define PCCTSAST_C			"PCCTSAST.cpp"
-#define LIST_C				"List.cpp"
-#define DLEXERBASE_H		"DLexerBase.h"
-#define DLEXERBASE_C		"DLexerBase.cpp"
-#define DLEXER_C			"DLexer.cpp"
-#define STREESUPPORT_C		"STreeSupport.cpp"
+#define ATOKEN_H            "AToken.h"
+#define ATOKPTR_H           "ATokPtr.h"
+#define ATOKPTR_C           "ATokPtr.cpp"
+#define ATOKENBUFFER_H      "ATokenBuffer.h"
+#define ATOKENBUFFER_C      "ATokenBuffer.cpp"
+#define ATOKENSTREAM_H      "ATokenStream.h"
+#define APARSER_H           "AParser.h"
+#define APARSER_C           "AParser.cpp"
+#define ASTBASE_H           "ASTBase.h"
+#define ASTBASE_C           "ASTBase.cpp"
+#define PCCTSAST_C          "PCCTSAST.cpp"
+#define LIST_C              "List.cpp"
+#define DLEXERBASE_H        "DLexerBase.h"
+#define DLEXERBASE_C        "DLexerBase.cpp"
+#define DLEXER_C            "DLexer.cpp"
+#define STREESUPPORT_C      "STreeSupport.cpp"
 #endif
 
 /* SORCERER Stuff */
@@ -111,26 +111,26 @@
 /* MR8 6-Aug-97     Change from ifdef PC to ifndef LONGFILENAMES            */
 
 #ifndef LONGFILENAMES
-#define STPARSER_H			"STreePar.h"
-#define STPARSER_C			"STreePar.C"
+#define STPARSER_H          "STreePar.h"
+#define STPARSER_C          "STreePar.C"
 #else
-#define STPARSER_H			"STreeParser.h"
-#define STPARSER_C			"STreeParser.cpp"
+#define STPARSER_H          "STreeParser.h"
+#define STPARSER_C          "STreeParser.cpp"
 #endif
 
 #ifdef MPW
-#define CPP_FILE_SUFFIX		".cp"
-#define CPP_FILE_SUFFIX_NO_DOT	"cp"
-#define OBJ_FILE_SUFFIX		".o"
+#define CPP_FILE_SUFFIX     ".cp"
+#define CPP_FILE_SUFFIX_NO_DOT  "cp"
+#define OBJ_FILE_SUFFIX     ".o"
 #else
 #ifdef PC
-#define CPP_FILE_SUFFIX		".cpp"
-#define CPP_FILE_SUFFIX_NO_DOT	"cpp"
-#define OBJ_FILE_SUFFIX		".obj"
+#define CPP_FILE_SUFFIX     ".cpp"
+#define CPP_FILE_SUFFIX_NO_DOT  "cpp"
+#define OBJ_FILE_SUFFIX     ".obj"
 #else
-#define CPP_FILE_SUFFIX		".cpp"
-#define CPP_FILE_SUFFIX_NO_DOT	"cpp"
-#define OBJ_FILE_SUFFIX		".o"
+#define CPP_FILE_SUFFIX     ".cpp"
+#define CPP_FILE_SUFFIX_NO_DOT  "cpp"
+#define OBJ_FILE_SUFFIX     ".o"
 #endif
 #endif
 
@@ -141,17 +141,17 @@
 /* must assume old K&R cpp here, can't use #if defined(..)... */
 
 #ifdef MPW
-#define TopDirectory	":"
-#define DirectorySymbol	":"
+#define TopDirectory    ":"
+#define DirectorySymbol ":"
 #define OutputDirectoryOption "Directory where all output files should go (default=\":\")"
 #else
 #ifdef PC
-#define TopDirectory	"."
-#define DirectorySymbol	"\\"
+#define TopDirectory    "."
+#define DirectorySymbol "\\"
 #define OutputDirectoryOption "Directory where all output files should go (default=\".\")"
 #else
-#define TopDirectory	"."
-#define DirectorySymbol	"/"
+#define TopDirectory    "."
+#define DirectorySymbol "/"
 #define OutputDirectoryOption "Directory where all output files should go (default=\".\")"
 #endif
 #endif
@@ -164,12 +164,13 @@
 #include <stdlib.h>
 /* MR6 2-Jun-97	Fixes false dependency caused by VC++ #include scanner	*/
 /* MR6		   Reported by Brad Schick (schick@interaccess.com)	*/
-#define	MPW_CursorCtl_Header <CursorCtl.h>
+#define MPW_CursorCtl_Header <CursorCtl.h>
 #include MPW_CursorCtl_Header
 #ifdef __cplusplus
 extern "C" {
 #endif
-extern void fsetfileinfo (char *filename, unsigned long newcreator, unsigned long newtype);
+extern void fsetfileinfo(char *filename, unsigned long newcreator, unsigned long newtype);
+
 #ifdef __cplusplus
 }
 #endif
@@ -187,7 +188,7 @@ extern void fsetfileinfo (char *filename, unsigned long newcreator, unsigned lon
 #endif
 
 #ifdef MPW
-#define DAWDLE	SpinCursor(1)
+#define DAWDLE  SpinCursor(1)
 #else
 #define DAWDLE
 #endif
@@ -203,10 +204,10 @@ inline
 #else
 static
 #endif
-void special_inits()
-{
-  InitCursorCtl((acurHandle) 0);
+void special_inits() {
+	InitCursorCtl((acurHandle)0);
 }
+
 #endif
 
 #ifdef MPW
@@ -215,16 +216,16 @@ inline
 #else
 static
 #endif
-void special_fopen_actions(char * /* s */)
-{
-  fsetfileinfo (s, MAC_FILE_CREATOR, 'TEXT');
+void special_fopen_actions(char * /* s */) {
+	fsetfileinfo(s, MAC_FILE_CREATOR, 'TEXT');
 }
+
 #endif
 
 /* Define usable bits for set.c stuff */
-#define BytesPerWord	sizeof(unsigned)
-#define	WORDSIZE		(sizeof(unsigned)*8)
-#define LogWordSize     (WORDSIZE==16?4:5)
+#define BytesPerWord    sizeof(unsigned)
+#define WORDSIZE        (sizeof(unsigned) * 8)
+#define LogWordSize     (WORDSIZE == 16 ? 4 : 5)
 
 #ifndef TRUE
 #define TRUE 1
@@ -236,15 +237,15 @@ void special_fopen_actions(char * /* s */)
 #ifdef VAXC
 #define PCCTS_EXIT_SUCCESS 1
 #define PCCTS_EXIT_FAILURE 0
-#define zzDIE		return 0;
-#define zzDONE	return 1;
+#define zzDIE       return 0;
+#define zzDONE  return 1;
 
 #else /* !VAXC */
 
 #define PCCTS_EXIT_SUCCESS 0
 #define PCCTS_EXIT_FAILURE 1
-#define zzDIE		return 1;
-#define zzDONE	return 0;
+#define zzDIE       return 1;
+#define zzDONE  return 0;
 
 #endif
 

@@ -11,12 +11,11 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "cb.h"
 #include "lstdio.h"
 
-typedef struct
-	{
+typedef struct {
 	char *name;
 	FILE *fp;
 	cbCtx h;
-	} File;
+} File;
 
 void fileOpen(File *file, cbCtx h, char *filename, char *mode);
 int fileExists(char *filename);
