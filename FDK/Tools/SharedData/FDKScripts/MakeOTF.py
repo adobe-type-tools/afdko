@@ -1751,9 +1751,12 @@ def getGOADBData(goadbPath):
 def compareSrcNames(srcGOADBList, realGOADBList):
 	srcNameList = map(lambda entry: entry[1], srcGOADBList)
 	realNameList = map(lambda entry: entry[1], realGOADBList)
-	if srcNameList == realNameList:
-		return 0  # files match
-	return 1
+	if srcNameList != realNameList:
+		# order or names don't match, report any missing names
+		onlyInSrc = [n for n in srcNameList if n not in realNameList]
+		onlyInReal = [n for n in realNameList if n not in srcNameList]
+		return 1, onlyInSrc, onlyInReal
+	return 0, [], []  # both names and order match
 
 def writeTempGOADB(inputFilePath, srcGOADBList):
 	fpath = inputFilePath + ".temp.GOADB"
@@ -2184,8 +2187,13 @@ def runMakeOTF(makeOTFParams):
 		if use_alias:
 			goadbPath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kGOADB))
 			realGOADBList = getGOADBData(goadbPath)
-			if compareSrcNames(srcGOADBList, realGOADBList):
+			result, onlyInSrc, onlyInReal = compareSrcNames(srcGOADBList, realGOADBList)
+			if result == 1:
 				print "makeotf [Error] For TTF fonts, the GlyphOrderAndAliasDB file must preserve the original font glyph order, and use the same names as they are derived by the 'tx' tool. %s." % (goadbPath)
+				if onlyInSrc:
+					print "Glyphs in TTF font missing from GlyphOrderAndAliasDB: %s" % " ".join(onlyInSrc)
+				if onlyInReal:
+					print "Glyphs in GlyphOrderAndAliasDB missing from TTF font: %s" % " ".join(onlyInReal)
 				raise MakeOTFRunError
 		else:
 			# If user has not asked to use an existing GOADB file, then we need to make and use one in order to preserve glyph order.
