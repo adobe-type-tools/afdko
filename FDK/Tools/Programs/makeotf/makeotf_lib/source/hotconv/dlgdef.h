@@ -56,69 +56,71 @@ struct zzdlg_state {
 	int bufsize;
 	int bufovf;
 	zzchar_t *nextpos;
-	int	class_num;
+	int class_num;
 };
 
-extern zzchar_t	*zzlextext;  	/* text of most recently matched token */
-extern zzchar_t	*zzbegexpr;	/* beginning of last reg expr recogn. */
-extern zzchar_t	*zzendexpr;	/* beginning of last reg expr recogn. */
-extern int	zzbufsize;	/* how long zzlextext is */
-extern int	zzbegcol;	/* column that first character of token is in*/
-extern int	zzendcol;	/* column that last character of token is in */
-extern int	zzline;		/* line current token is on */
-extern int	zzreal_line;		/* line of 1st portion of token that is not skipped */
-extern int	zzchar;		/* character to determine next state */
-extern int	zzbufovf;	/* indicates that buffer too small for text */
+extern zzchar_t *zzlextext;     /* text of most recently matched token */
+extern zzchar_t *zzbegexpr; /* beginning of last reg expr recogn. */
+extern zzchar_t *zzendexpr; /* beginning of last reg expr recogn. */
+extern int zzbufsize;   /* how long zzlextext is */
+extern int zzbegcol;    /* column that first character of token is in*/
+extern int zzendcol;    /* column that last character of token is in */
+extern int zzline;      /* line current token is on */
+extern int zzreal_line;         /* line of 1st portion of token that is not skipped */
+extern int zzchar;      /* character to determine next state */
+extern int zzbufovf;    /* indicates that buffer too small for text */
 #ifdef __USE_PROTOS
-extern void	(*zzerr)(const char *);/* pointer to error reporting function */
+extern void (*zzerr)(const char *); /* pointer to error reporting function */
 #else
-extern void	(*zzerr)();
+extern void (*zzerr)();
 #endif
 
 #ifdef USER_ZZMODE_STACK
-extern int     zzauto;
+extern int zzauto;
 #endif
 
 #ifdef __USE_PROTOS
-extern void	zzadvance(void);
-extern void	zzskip(void);	/* erase zzlextext, look for antoher token */
-extern void	zzmore(void);	/* keep zzlextext, look for another token */
-extern void	zzmode(int k);	/* switch to automaton 'k' */
-extern void	zzrdstream(FILE *);/* what stream to read from */
-extern void	zzclose_stream(void);/* close the current input stream */
-extern void	zzrdfunc(int (*)(void));/* what function to get char from */
-extern void zzrdstr( zzchar_t * );
-extern void	zzgettok(void);	/* get next token */
-extern void	zzreplchar(zzchar_t c);/* replace last recognized reg. expr. with
-					a character */
-extern void	zzreplstr(zzchar_t *s);/* replace last recognized reg. expr. with
-					a string */
+extern void zzadvance(void);
+extern void zzskip(void);   /* erase zzlextext, look for antoher token */
+extern void zzmore(void);   /* keep zzlextext, look for another token */
+extern void zzmode(int k);  /* switch to automaton 'k' */
+extern void zzrdstream(FILE *); /* what stream to read from */
+extern void zzclose_stream(void); /* close the current input stream */
+
+extern void zzrdfunc(int (*)(void)); /* what function to get char from */
+extern void zzrdstr(zzchar_t *);
+extern void zzgettok(void); /* get next token */
+extern void zzreplchar(zzchar_t c); /* replace last recognized reg. expr. with
+                                       a character */
+extern void zzreplstr(zzchar_t *s); /* replace last recognized reg. expr. with
+                                       a string */
 extern void zzsave_dlg_state(struct zzdlg_state *);
 extern void zzrestore_dlg_state(struct zzdlg_state *);
 extern int zzerr_in(void);
-extern void	zzerrstd(const char *);
+extern void zzerrstd(const char *);
 extern void zzerraction();
 
 #else
 
-extern void	zzadvance();
-extern void	zzskip();	/* erase zzlextext, look for antoher token */
-extern void	zzmore();	/* keep zzlextext, look for another token */
-extern void	zzmode(/*k*/);	/* switch to automaton 'k' */
-extern void	zzrdstream();	/* what stream to read from */
-extern void	zzclose_stream();/* close the current input stream */
-extern void	zzrdfunc();	/* what function to get char from */
+extern void zzadvance();
+extern void zzskip();   /* erase zzlextext, look for antoher token */
+extern void zzmore();   /* keep zzlextext, look for another token */
+extern void zzmode(/*k*/);  /* switch to automaton 'k' */
+extern void zzrdstream();   /* what stream to read from */
+extern void zzclose_stream(); /* close the current input stream */
+extern void zzrdfunc(); /* what function to get char from */
 extern void zzrdstr();
-extern void	zzgettok();	/* get next token */
-extern void	zzreplchar();	/* replace last recognized reg. expr. with
-					a character */
-extern void	zzreplstr();	/* replace last recognized reg. expr. with
-					a string */
+extern void zzgettok(); /* get next token */
+extern void zzreplchar();   /* replace last recognized reg. expr. with
+                               a character */
+extern void zzreplstr();    /* replace last recognized reg. expr. with
+                               a string */
 extern void zzsave_dlg_state();
 extern void zzrestore_dlg_state();
 extern int zzerr_in();
-extern void	zzerrstd();
+extern void zzerrstd();
 extern void zzerraction();
+
 #endif
 
 #endif

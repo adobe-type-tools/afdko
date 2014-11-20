@@ -4860,7 +4860,7 @@ def main():
 	import agd
 	fdkToolsDir, fdkSharedDataDir = FDKUtils.findFDKDirs()
 	sys.path.append(fdkSharedDataDir)
-	kAGD_TXTPath = os.path.join(fdkSharedDataDir, "AGD.TXT")
+	kAGD_TXTPath = os.path.join(fdkSharedDataDir, "AGD.txt")
 	fp = open(kAGD_TXTPath, "rU")
 	agdTextPath = fp.read()
 	fp.close()

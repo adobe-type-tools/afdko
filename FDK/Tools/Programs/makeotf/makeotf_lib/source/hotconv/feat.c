@@ -4086,12 +4086,6 @@ static void addPos(GNode *targ, int type, int enumerate)
 		}
 	else if (type == GPOSPair)
 		{
-		if (targ->metricsInfo != NULL)
-			{
-			featMsg(hotERROR,
-					"Pair positioning rule can take only a single final value record. Skipping rule.");
-			return;
-			}
 		next_targ = targ->nextSeq;
 		if (targ->nextCl != NULL)
 		{
