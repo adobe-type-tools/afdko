@@ -1225,7 +1225,10 @@ static void writeContour(ufwCtx h)
     int i;
     
     if (h->path.opList.cnt < 2)
+    {
+        h->path.opList.cnt = 0;
         return; /* Don't write paths with only a single move-to. UFO fonts can make these. */
+    }
     
     /* Fix up the start op. UFo fonts require a completely closed path, and no initial move-to.
     If the last op coords are not the same as the move-to:
