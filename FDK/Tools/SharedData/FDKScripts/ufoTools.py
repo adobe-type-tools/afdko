@@ -1,10 +1,13 @@
 """
-ufoTools.py v1.13 May 6 2014
+ufoTools.py v1.14 Nov 24 2104
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
 data without fully parsing and instantiating UFO objects, and without
 requiring that the AFDKO contain the robofab libraries.
+
+Modified in Nov 2014, when AFDKO acquired the robofab libraries. It can now
+be used with UFO fonts only to support the hash mechanism. 
 
 Developed in order to support checkOutlines and autohint, the code
 supports two main functions:
@@ -444,6 +447,51 @@ class UFOFontData:
 				self.curSrcDir = self.glyphDefaultDir
 			
 		return glyphPath
+	
+	def checkSkipGlyph(self, glyphName, newSrcHash):
+		hashEntry = None
+		programHistoryIndex = -1 # not found in historyList
+		usingProcessedLayer = False
+		skip = False
+		if not self.useHashMap:
+			return usingProcessedLayer, skip
+		
+		try:
+			hashEntry = self.hashMap[glyphName]
+			srcHash, editStatus, historyList = hashEntry
+			try:
+				programHistoryIndex = historyList.index(self.programName)
+			except ValueError:
+				programHistoryIndex = -1
+			if (editStatus == 1) and (programHistoryIndex != 0):
+				usingProcessedLayer = 1
+		except KeyError:
+			# Glyph is as yet untouched by any program. Use default glyph layer for source
+				pass
+
+		if (hashEntry != None) and (srcHash == newSrcHash) and (programHistoryIndex >= 0):
+			# The glyph has already been processed by this program, and there have been no changes since.
+			skip = 1
+			return usingProcessedLayer, skip
+			
+		skip = 0 # We need to process this glyph.
+		self.hashMapChanged = 1
+		
+		# If there is no hash entry for the glyph, add one. If the hash did not match, then build a new entry.
+		if (hashEntry == None) or (newSrcHash != srcHash):
+			self.hashMap[glyphName] = [newSrcHash, 0, [self.programName] ]
+		else:
+			# newHash == srcHash
+			# Add program name to the historyList, if it is not there already.
+			if programHistoryIndex < 0:
+				# autohint must be run last. Remove it, if it is in the list before this program.
+				try:
+					historyList.remove(kAutohintName)
+				except ValueError:
+					pass
+				historyList.append(self.programName)
+				
+		return usingProcessedLayer, skip
 		
 	def getOrSkipGlyphXML(self, glyphName):
 		# Get the glyph file name.

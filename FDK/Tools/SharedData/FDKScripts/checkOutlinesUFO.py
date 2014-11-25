@@ -1,12 +1,12 @@
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
-__doc__ = """
-"""
 __usage__ = """
-   checkOutlinesUFO program v1.01 Sep 22 2014
+   checkOutlinesUFO program v1.01 Sep 24 2014
    
    checkOutlinesUFO [-r] [-e]  [-d] [-g glyphList] [-gx glyphList]
+   
+   Remove path overlaps, and do a few basic outline quality checks.
  """
 
 kProcessedGlyphLayerName = "com.adobe.type.processedglyphs"
@@ -15,7 +15,27 @@ __help__ = __usage__ + """
 
 -nr	do not round point values to integer
 
--e	remove overlaps
+-e	fix reported problems
+
+-noOverlap	turn off path overlap checks
+	This reports path overlaps, and tiny outlines, such as those formed when two
+	line segments should meet, but cross each other just before the join,
+	defining a triangle a few units on a side.
+
+
+-noBasicChecks	turn off basic checks:
+	- coincident points
+	- flat curves (curves which are a straight line)
+	- colinear lines (several line segments that define the same path asa single line);
+
+- setMinArea <n>  Set the minimum area for a tiny outline. Default is 25 square
+units. Subpaths with a bounding box less than this will be reported, and deleted
+if fixed.
+
+- setTolerance <n>  Set the maximum deviation from a straight line allowed.
+Default is 0 design space units. This is used to test whether the control points
+for a curve define a flat curve, and whether a sequence of line segments
+defines a straight line.
 
 -d	write changed glyphs to default layer instead of '%s'
 
@@ -25,8 +45,8 @@ __help__ = __usage__ + """
 	glyph CID's. If the latter, the CID value must be prefixed with the 
 	string "cid". There must be no white-space in the glyph list.
 	Examples:
-		checkoutlines -g A,B,C,69 myFont
-		checkoutlines -g cid1030,cid34,cid3455,69 myCIDFont
+		checkOutlinesUFO -g A,B,C,69 myFont
+		checkOutlinesUFO -g cid1030,cid34,cid3455,69 myCIDFont
 
 -gf <file name>
 	Check only the list of glyphs contained in the specified file, The file 
@@ -34,17 +54,27 @@ __help__ = __usage__ + """
 	space, tab, and new-line characters are permitted between glyph names 
 	and commas.
 
--e	Make changes
-	Default is to just report findings, and to not change the glyphs.
+-all Force all glyphs to be processed. This applies only to UFO fonts, where processed glyphs
+	are saved in a layer, and processing of a glyph is skipped if has already been processed.
 
 """ % kProcessedGlyphLayerName
+
+__doc__ = __usage__ + __help__
+
 
 import sys
 import os
 import re
+import copy
 import defcon
+import ufoLib
+import subprocess
+import shutil
+import ufoTools
 import booleanOperations.booleanGlyph
 from robofab.pens.digestPen import DigestPointPen
+
+kSrcGLIFHashMap = "com.adobe.type.checkOutlinesHashMap"
 
 class focusOptionParseError(KeyError):
 	pass
@@ -52,6 +82,132 @@ class focusOptionParseError(KeyError):
 class focusFontError(KeyError):
 	pass
 
+kUknownFontType = 0
+kUFOFontType = 1
+kType1FontType = 2
+kCFFFontType = 3
+kOpenTypeCFFFontType = 4 
+
+class FontFile(object):
+	def __init__(self, fontPath):
+		self.fontPath = fontPath
+		self.tempUFOPath = None
+		self.fontType = kUknownFontType
+		self.dFont = None
+		self.useHashMap = False
+		self.ufoFontHashData = None
+		self.ufoFormat = 2
+		
+	def open(self, useHashMap):
+		fontPath = self.fontPath
+		try:
+			self.dFont = dFont = defcon.Font(fontPath)
+			self.ufoFormat = dFont.ufoFormatVersion
+			if self.ufoFormat < 2:
+				self.ufoFormat = 2
+			self.fontType = kUFOFontType
+			self.useHashMap = useHashMap
+			self.ufoFontHashData = ufoTools.UFOFontData(fontPath, self.useHashMap, programName="ChckOutlinesUFO")
+			self.ufoFontHashData.readHashMap()
+			
+		except ufoLib.UFOLibError,e:
+			if (not os.path.isdir(fontPath)) and "metainfo.plist is missing" in e.message:
+				# It was a file, but not a UFO font. try converting to UFO font, and try again.
+				print "converting to temp UFO font..."
+				self.tempUFOPath = tempPath = fontPath + ".temp.ufo"
+				if os.path.exists(tempPath):
+					 shutil.rmtree(tempPath) 
+				cmd = "tx -ufo \"%s\" \"%s\"" % (fontPath, tempPath)
+				p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout
+				log = p.read()
+				if os.path.exists(tempPath):
+					try:
+						self.dFont = dFont = defcon.Font(tempPath)
+					except ufoLib.UFOLibError,e:
+						return
+					# It must be a font file!
+					self.tempUFOPath = tempPath
+					# figure out font type.
+					try:
+						ff = file(fontPath, "rb")
+						data = ff.read(10)
+						ff.close()
+					except (IOError, OSError):
+						return
+					if data[:4] == "OTTO": # it is an OTF font.
+						self.fontType = kOpenTypeCFFFontType
+					elif (data[0] == '\1') and (data[1] == '\0'): # CFF file
+						self.fontType = kCFFFontType
+					elif "%" in data:
+						self.fontType = kType1FontType
+					else:
+						print "Font type is unknown: will not be able to save changes"
+			else:
+				raise(e)
+		return dFont
+
+	def save(self):
+		print "Saving font..."
+		if self.ufoFormat < 3:
+			self.dFont.save(formatVersion=3)
+		else:
+			self.dFont.save(formatVersion=self.ufoFormat)
+			
+		if self.fontType == kUFOFontType:
+			"""IF the font format was less than 3, we need to save it with the
+			original format. I care specifically about RoboFont, which can still
+			read only format 2. I will remove this code as soon as Robofont can
+			handle format 3. Simply saving the font in format less than 3 will
+			remove the processed glyph layer, hence saving it in format 2 to a
+			different path, and then moving the fomrat 3 data to the new  format
+			2 font. This effectively makes the processed glyph layer a private
+			UFO extension for UFO format 2, for use by the FDK tools,
+			specifically tx and makeotf."""
+			self.ufoFontHashData.close() # Write the hash data.
+			if self.ufoFormat < 3:
+				self.tempUFOPath = self.fontPath + ".temp.ufo"
+				if os.path.exists(self.tempUFOPath):
+					shutil.rmtree(self.tempUFOPath)
+				self.dFont.save(formatVersion=self.ufoFormat, path=self.tempUFOPath)
+				p1 = os.path.join(self.fontPath, "glyphs." + kProcessedGlyphLayerName)
+				p2 = os.path.join(self.fontPath, "layercontents.plist")
+				p3 = os.path.join(self.fontPath, "data")
+				shutil.move(p1, self.tempUFOPath)
+				shutil.move(p2, self.tempUFOPath)
+				if os.path.exists(p3):
+					shutil.move(p3, self.tempUFOPath)
+				shutil.rmtree(self.fontPath)
+				shutil.move(self.tempUFOPath, self.fontPath)
+		elif self.fontType == kType1FontType:
+			cmd = "tx -t1 \"%s\" \"%s\"" % (self.tempUFOPath, self.fontPath)
+			p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout
+			log = p.read()
+		elif self.fontType == kCFFFontType:
+			cmd = "tx -cff +b -std \"%s\" \"%s\"" % (self.tempUFOPath, self.fontPath)
+			p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout
+			log = p.read()
+		elif self.fontType == kOpenTypeCFFFontType:
+			tempCFFPath = self.tempUFOPath + ".cff"
+			cmd = "tx -cff +b -std \"%s\" \"%s\"" % (self.tempUFOPath, tempCFFPath)
+			p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout
+			log = p.read()
+			cmd = "sfntedit -a \"CFF \"=\"%s\" \"%s\"" % (tempCFFPath, self.fontPath)
+			p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout
+			log = p.read()
+			#os.remove(tempCFFPath)
+		else:
+			print "Font type is unknown: cannot save changes"
+
+		if 0: #self.tempUFOPath != None:
+			shutil.rmtree(self.tempUFOPath) 
+		print "Done"
+
+	def checkSkipGlyph(self, glyphName, newSrcHash):
+		usingProcessedLayer = skip = False
+		if self.useHashMap:
+			usingProcessedLayer, skip = self.ufoFontHashData.checkSkipGlyph(glyphName, newSrcHash)
+		return usingProcessedLayer, skip
+		
 class COOptions:
 	def __init__(self):
 		self.filePath = None
@@ -59,13 +215,18 @@ class COOptions:
 		self.logFilePath = None
 		self.glyphList = []
 		self.allowChanges = 0
-		self.doOverlapCheck = 1
 		self.writeToDefaultLayer = 0
 		self.roundValues = 1
-		self.skipIfUnchanged = False
-		self.checkAll = False # overrides skipIfUnchanged: forces all glyphs to be processed even if src hasn't changed.
-
-	
+		self.minArea = 25
+		self.tolerance = 0
+		self.checkAll = False # forces all glyphs to be processed even if src hasn't changed.
+		self.removeCoincidentPointsDone = 0 # processing state flag, used to not repeat coincident point removal.
+		self.removeFlatCurvesDone = 0 # processing state flag, used to not repeat flat curve point removal.
+		
+		# doOverlapRemoval must come first in the list, since it may cause problems, like co-linear lines, 
+		# that need to be checked/fixed by later tests.
+		self.testList = [doOverlapRemoval, doCleanup]
+		
 def parseGlyphListArg(glyphString):
 	glyphString = re.sub(r"[ \t\r\n,]+",  ",",  glyphString)
 	glyphList = glyphString.split(",")
@@ -88,7 +249,7 @@ def getOptions():
 			print __usage__
 			sys.exit()
 		elif arg == "-h":
-			print __help__
+			print __doc__
 			sys.exit()
 		elif arg == "-d":
 			writeToDefaultLayer = 1
@@ -113,9 +274,26 @@ def getOptions():
 			options.glyphList += parseGlyphListArg(glyphString)
 		elif arg == "-e":
 			options.allowChanges = 1
-			skipIfUnchanged = True
+		elif arg == "-noOverlap":
+			self.testList.remove(doOverlapRemoval)
+		elif arg == "-noBasicChecks":
+			self.testList.remove(doCleanup)
+		elif arg == "-setMinArea":
+			i = i +1
+			try:
+				options.minArea = int(sys.argv[i])
+			except:
+				raise focusOptionParseError("The argument following '-setMinArea' must be an integer.") 
+		elif arg == "-setTolerance":
+			i = i +1
+			try:
+				options.tolerance = int(sys.argv[i])
+			except:
+				raise focusOptionParseError("The argument following '-setTolerance' must be an integer.") 
 		elif arg == "-nr":
 			options.roundValues = 0
+		elif arg == "-all":
+			options.checkAll = True
 		elif arg[0] == "-":
 			raise focusOptionParseError("Option Error: Unknown option <%s>." %  arg) 
 		else:
@@ -128,6 +306,9 @@ def getOptions():
 		raise focusOptionParseError("Option Error: You must provide a font file path.") 
 	else:
 		options.filePath = options.filePath.rstrip(os.sep) # might be a UFO font. auto completion in some shells adds a dir separator, which then causes problems with os.path.dirname().
+
+	if not os.path.exists(options.filePath):
+		raise focusOptionParseError("Option Error: The file path does not exist.") 
 
 	return options
 
@@ -169,6 +350,7 @@ def expandNames(glyphName):
 			nameAliasDict[glyphName] = "cid00000"
 
 	return glyphName
+	
 def getGlyphNames(glyphTag, fontGlyphList, fontFileName):
 	glyphNameList = []
 	rangeList = glyphTag.split("-")
@@ -216,12 +398,14 @@ def getDigest(dGlyph):
 	"""
 	mp = DigestPointPen()
 	dGlyph.drawPoints(mp)
-	return mp.getDigestPointsOnly(needSort=True)
+	digest = mp.getDigestPointsOnly(needSort=True)
+	# we need to round to int.
+	intDigest = digest #[ (int(p[0]), int(p[1])) for p in digest]
+	return intDigest
 
-def cleanupOutlines(bGlyph):
+def removeCoincidentPoints(bGlyph, changed, msg, options):
 	""" Remove coincident points. 
 	# a point is (segmentType, pt, smooth, name).
-	# e.g. (u'curve', (138, -92), False, None)
 	# e.g. (u'curve', (138, -92), False, None)
 	"""
 	for contour in bGlyph.contours:
@@ -238,6 +422,8 @@ def cleanupOutlines(bGlyph):
 				op = point
 				if lastOp[1] == op[1]:
 					# Coincident point. Remove it.
+					msg.append( "Coincident points at (%s,%s)." % (op[1]))
+					changed = 1
 					del contour._points[i]
 					numOps -= 1
 					if type == "curve":
@@ -250,14 +436,165 @@ def cleanupOutlines(bGlyph):
 					# Note that we do not increment i - this will now index the next point.
 					continue
 			i += 1
+	return changed, msg
+
+def removeTinySubPaths(bGlyph, minArea, changed, msg):
+	# removes tiny subpaths that are created by overlap removal when the start and end path segments cross each other, rather than meet.
+	numContours  = len(bGlyph.contours)
+	ci = 0
+	while ci < numContours:
+		contour = bGlyph.contours[ci]
+		ci += 1
+		onLinePts = filter(lambda pt: pt[0] != None, contour._points)
+		numPts = len(onLinePts)
+		if numPts <= 4:
+			cBounds = contour.bounds
+			cArea = (cBounds[2] - cBounds[0])*(cBounds[3] - cBounds[1])
+			if cArea < minArea:
+				ci -= 1
+				numContours -= 1
+				msg.append( "Contour %s is too small: bounding box is less then minimum area. Start point: (%s)." % (ci, contour._points[0][1]))
+				del bGlyph.contours[ci]
+	return changed, msg
+	
+def isColinearLine(b3, b2, b1, tolerance = 0):
+	# b1-b3 are three points  [x, y] to test. 
+	# b1 = start point of first line, b2 is start point of second, b3 is end point of second line.
+	# tolerance is how tight the match must be in design units, default 0.
+	isCL = 1 # is a co-linear line
+	x1 = b1[-2]
+	y1 = b1[-1]
+	x2 = b2[-2]
+	y2 = b2[-1]
+	x3 = b3[-2]
+	y3 = b3[-1]
+
+		
+	dx2 = x2 -x1
+	dy2 = y2 -y1
+	if (dx2 == 0) and (dy2 == 0):
+		return 1
+
+	if (x3-x1) == 0:
+		if abs(dx2) > tolerance:
+			return 0
+		else:
+			return 1
 			
+	if (y3-y1) == 0:
+		if abs(dy2) > tolerance:
+			return 0
+		else:
+			return 1
+
+	dx3 = x3 -x2
+	dy3 = y3 -y2
+	if (dx3 == 0) and (dy3 == 0):
+		return 1
+	
+	if (dx2) == 0:
+		if abs(x3 -x1) > tolerance:
+			return 0
+		else:
+			return 1
 			
+	if (dy2) == 0:
+		if abs(y3 -y1) > tolerance:
+			return 0
+		else:
+			return 1
+	
+	a = float(dy2)/(dx2)
+	b = y1-a*x1
+	if abs(a) <= 1:
+		y3t = a*x3+b
+		if abs(y3t -y3) > tolerance:
+			return 0
+		else:
+			return 1
+	else:
+		x3t = float(y3-b)/a
+		if abs(x3t -x3) > tolerance:
+			return 0
+		else:
+			return 1
+
+	#if dx or dy == 0, then  matching would be caught be previous arg test.
+	return isCL
+
+def removeFlatCurves(newGlyph, changed, msg, options):
+	""" Remove flat curves. 
+	# a point is (segmentType, pt, smooth, name).
+	# e.g. (u'curve', (138, -92), False, None)
+	"""
+	for contour in newGlyph.contours:
+		numOps = len(contour._points)
+		i = 0
+		while i < numOps:
+			p0 = contour._points[i]
+			type = p0[0]
+			
+			if type == "curve":
+				p3 = contour._points[i-3]
+				p2 = contour._points[i-2]
+				p1 = contour._points[i-1]
+				# fix flat curve.
+				isCL1 = isColinearLine(p3[1], p2[1], p0[1], options.tolerance)
+				if isCL1:
+					isCL2 = isColinearLine(p3[1], p1[1], p0[1], options.tolerance)
+					if isCL2:
+						msg.append("Flat curve at (%s, %s)." % (p0[1]))
+						changed = 1
+						p0 = list(p0)
+						p0[0] = type = "line"
+						contour._points[i] = tuple(p0)
+						numOps -= 2
+						if i > 0:
+							del contour._points[i-1]
+							del contour._points[i-2]
+							i -= 2
+						else:
+							del contour._points[i-1]
+							del contour._points[i-1]
+			i += 1
+	return changed, msg
+
+def removeColinearLines(newGlyph, changed, msg, options):
+	""" Remove colinear line- curves. 
+	# a point is (segmentType, pt, smooth, name).
+	# e.g. (u'curve', (138, -92), False, None)
+	"""
+	for contour in newGlyph.contours:
+		numOps = len(contour._points)
+		p0 = contour._points[0]
+		i = 0
+		while i < numOps:
+			p0 = contour._points[i]
+			type = p0[0]
+			# Check for co-linear line.
+			if type == "line":
+				p1 = contour._points[i-1]
+				if p1[0] == "line": # if p1 is a curve end point, no need to do colinear check!
+					p2 = contour._points[i-2]
+					isCL1 = isColinearLine(p2[1], p1[1], p0[1], options.tolerance)
+					if isCL1:
+						msg.append( "Colinear line at (%s, %s)." % (p1[1]))
+						changed = 1
+						del contour._points[i-1]
+						numOps -= 1
+						i -= 1
+			i += 1
+	return changed, msg
+
 
 def splitTouchingPaths(newGlyph):
 	""" This hack fixes a design difference between the Adobe checkOutlines logic and booleanGlyph.
-	In this case, if only a single point on a contour lines is coincident with the path of the another contour,
-	the paths are NOT merged. In the later, they are merged. An example is the vertex of a diamond shape having the same 
-	y coordinate as a horizontal line in another path, but no other overlap. 
+	With checkOutlines, if only a single point on a contour lines is coincident with the path of the another contour,
+	the paths are NOT merged. with booleanGlyph, they are merged. An example is the vertex of a diamond shape having the same 
+	y coordinate as a horizontal line in another path, but no other overlap.
+	However, this works only when a single point on one contour is coincident with another contour, with no other overlap.
+	If there is more than one point of contact, then result is separate inner (unfilled) contour. This logic works only when the
+	touching contour is merged with the other contour.
 	"""
 	numPaths = len(newGlyph.contours)
 	i = 0
@@ -269,10 +606,14 @@ def splitTouchingPaths(newGlyph):
 		sortlist.sort()
 		j = 1
 		lenSortList = len(sortlist)
+		haveNewContour = 0
 		while j < lenSortList:
 			coords1, j1 =  sortlist[j][0][1], sortlist[j][1]
 			coords0, j0 = sortlist[j-1][0][1], sortlist[j-1][1]
-			if ((j1 - j0) > 1) and (coords0 == coords1):
+			if (numPts != (j1+1)) and ((j1 - j0) > 1) and (coords0 == coords1):
+				# If the contour has two non-contiguous points that are coincident, and are not the
+				# start and end points, then we have  contour that can be pinched off.
+				# I don't bother to test that j0 is the start point, as UFO paths are always closed.
 				newContourPts = contour._points[j0:j1+1]
 				np0 = newContourPts[0]
 				if np0[0] == 'curve':
@@ -280,48 +621,82 @@ def splitTouchingPaths(newGlyph):
 				newContour = booleanOperations.booleanGlyph.BooleanContour()
 				newContour._points = newContourPts
 				newContour._clockwise = newContour._get_clockwise()
+				#print "i", i
 				#print "coords1, j1", coords1, j1
 				#print "coords0, j0 ", coords0, j0
-				#print "coords0, j0 ", coords0, j0
 				#print "newContour._clockwise", repr(newContour._clockwise)
-				if newContour.clockwise == contour.clockwise:
-					#print "un-merging", repr(newContour._clockwise)
+				if 1: #newContour.clockwise == contour.clockwise:
+					#print "un-merging", newContour._points, repr(newContour._clockwise)
 					del contour._points[j0+1:j1+1]
-					# is a tiny path that should get deleted?
-					if not isTinyContour(newContour):
-						newGlyph.contours.insert(i+1, newContour)
-						j +=1
+					newGlyph.contours.insert(i+1, newContour)
+					haveNewContour = 1
+					numPaths += 1
+					break
 			j +=1
-		
+		if haveNewContour:
+			continue
 		i += 1
 
-def isTinyContour(contour):
-	# The Adobe checkOutlinesremoves tiny subpaths create when the start and end path segments cross each other, rather than meet.
-	isTiny = 0
-	
-	numPts = len(contour)
-	if numPts > 4:
-		return isTiny
+def doOverlapRemoval(bGlyph, oldDigest, changed, msg, options):
+	changed, msg = removeCoincidentPoints(bGlyph, changed, msg, options)
+	options.removeCoincidentPointsDone = 1
+	changed, msg = removeFlatCurves(bGlyph, changed, msg, options)
+	changed, msg = removeColinearLines(bGlyph, changed, msg, options)
+	options.removeFlatCurvesDone = 1
+	# I need to fix these in the source, or the old vs new digests will differ, as BooleanOperations removes these 
+	# even if it does not do overlap removal.
+	if oldDigest == None:
+		oldDigest = getDigest(bGlyph)
+	newPathNum = -1
+	prevPathNum = 0
+	newGlyph = bGlyph
+	while newPathNum != prevPathNum:
+		# This hack to get around a bug in booleanGlyph. Consider an M sitting on a separate rectangular crossbar contour,
+		# the bottom of the M legs being co-linear with the top of the cross bar. pyClipper will merge only one of the 
+		# co-linear lines with each call to removeOverlap(). I suspect that this bug is in pyClipper, but haven't yet looked.
+		prevPathNum = len(newGlyph.contours)
+		newGlyph = newGlyph.removeOverlap()
+		newPathNum = len(newGlyph.contours)
 		
-	j = 1
-	while j < numPts:
-		coords1 = contour._points[j][1]
-		coords0 = contour._points[j-1][1]
-		j += 1
-		
-		if abs(coords1[0] - coords0[0]) >= 5:
-			continue
-		if abs(coords1[1] - coords0[1]) >= 5:
-			continue
-		isTiny = 1
-		break
-	return isTiny
+	# Can't use change in path number to see if something has changed - overlap removal can add and subtract paths.
+	newDigest = getDigest(newGlyph)
+	if str(oldDigest) != str(newDigest):
+		changed = 1
+		msg.append( "There is an overlap.")
+	# don't need to remove coincident points again. These are not added by overlap removal.
+	changed, msg = removeTinySubPaths(newGlyph, options.minArea, changed, msg) # Tiny subpaths are added by overlap removal.
+	return newGlyph, newDigest, changed, msg
 
+def doCleanup(newGlyph,oldDigest, changed, msg, options):
+	if oldDigest == None:
+		oldDigest = getDigest(newGlyph)
+
+	if not options.removeCoincidentPointsDone:
+		changed, msg = removeCoincidentPoints(newGlyph, changed, msg, options)
+		options.removeCoincidentPointsDone = 1
+	if not options.removeFlatCurvesDone:
+		changed, msg = removeFlatCurves(newGlyph, changed, msg, options)
+	changed, msg = removeColinearLines(newGlyph, changed, msg, options)
+
+	newDigest = getDigest(newGlyph)
+	if str(oldDigest) != str(newDigest):
+		changed = 1
+
+	return newGlyph, newDigest, changed, msg
 
 def run(args):
+	
 	options = getOptions()
 	fontPath = os.path.abspath(options.filePath)
-	dFont = defcon.Font(fontPath)
+	dFont = None
+	fontFile = FontFile(fontPath)
+	dFont = fontFile.open(options.allowChanges) # We allow use of a hash map to skip glyphs only if fixing glyphs
+	
+			
+	if dFont == None:
+		print "Could not open  file: %s." % (fontPath)
+		return
+			
 	glyphCount = len(dFont)
 	changed = 0
 	glyphList = filterGlyphList(options, dFont.keys(), options.filePath)
@@ -333,33 +708,39 @@ def run(args):
 			processedLayer = dFont.layers[kProcessedGlyphLayerName]
 		except KeyError:
 			processedLayer = dFont.newLayer(kProcessedGlyphLayerName)
-		
-	changed = 0
+	
+	fontChanged = 0
+	lastHadMsg = 0
 	for glyphName in glyphList:
+		changed = 0
+		msg = []
+			
 		dGlyph = dFont[glyphName]
 		if dGlyph.components:
 			dGlyph.decomposeAllComponents()
-		bGlyph = booleanOperations.booleanGlyph.BooleanGlyph(dGlyph)
-		cleanupOutlines(bGlyph) # The processing step removes coincident points and co-linear lines.'
-		# I need to fix these in the source, or the old vs new digests wil differ.
-		olddg = getDigest(bGlyph)
-		newPathNum = -1
-		prevPathNum = 0
-		newGlyph = bGlyph
-		while newPathNum != prevPathNum:
-			# This hack to get around a bug in booleanGlyph. Consider an M sitting on a separate rectangular crossbar contour,
-			# the bottom of the M legs being co-linear with the top of the cross bar. pyClipper will merge only one of the 
-			# co-linear lines with each callto removeOverlap(). I suspect that this bug is in pyClipper, but haven't yet looked.
-			prevPathNum = len(newGlyph.contours)
-			newGlyph = newGlyph.removeOverlap()
-			newPathNum = len(newGlyph.contours)
-		newdg = getDigest(newGlyph)
-		if str(olddg) != str(newdg):
-			if not options.allowChanges:
-				print "There is an overlap in: %s" % glyphName
+		newGlyph = booleanOperations.booleanGlyph.BooleanGlyph(dGlyph)
+
+		glyphDigest = getDigest(newGlyph)
+		if not options.checkAll:
+			useProcessedLayer, skip = fontFile.checkSkipGlyph(glyphName, glyphDigest)
+			if skip:
 				continue
-			splitTouchingPaths(newGlyph)
-			
+
+		for test in options.testList:
+			if test != None:
+				newGlyph, glyphDigest, changed, msg = test(newGlyph, glyphDigest, changed, msg, options)
+
+		if len(msg) == 0:
+			if lastHadMsg:
+				print
+			print ".",
+			lastHadMsg = 0
+		else:
+			print os.linesep + glyphName, " ".join(msg),
+			if changed:
+				fontChanged = 1
+			lastHadMsg = 1
+		if options.allowChanges and changed:
 			if options.writeToDefaultLayer:
 				fixedGlyph = dGlyph
 				fixedGlyph.clearContours()
@@ -376,22 +757,12 @@ def run(args):
 					for point in contour:
 						point.x = round(point.x)
 						point.y = round(point.y)
-			changed = 1
-			print "Removed overlap in: %s" % glyphName
-	if changed:
-		print "Saving font..."
-		dFont.save(formatVersion=3)
-		# Now patch the font version to 2 so that Robofont will open it.
-		miPath = os.path.join(fontPath, "metainfo.plist")
-		f = open(miPath, "rt")
-		data = f.read()
-		f.close()
-		data = re.sub(r"(?P<CAPS><key>formatVersion</key>\s+<integer>)\d+", r"\g<CAPS>2", data)
-		f = open(miPath, "wt")
-		f.write(data)
-		f.close()
-		
-
+	if not fontChanged:
+		print
+		print "Done"
+	else:
+		print
+		fontFile.save()
 	return
 
 if __name__=='__main__':
