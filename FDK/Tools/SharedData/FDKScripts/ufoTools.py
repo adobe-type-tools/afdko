@@ -795,6 +795,9 @@ class UFOFontData:
 		dataList = [str(width)]
 		if level > 10:
 			raise UFOParseError("In parsing component, exceeded 10 levels of reference. '%s'. " % (glyphName))
+		# <outline> tag is optional per spec., e.g. space glyph does not necessarily have it.
+		if outlineXML is None:
+			raise UFOParseError("In parsing component, no outline component found. '%s'. " % (glyphName))
 		for childContour in outlineXML:
 			if childContour.tag == "contour":
 				if len(childContour) < 2:
