@@ -1,0 +1,12 @@
+*.o
+*.a
+*.exe
+*.pyc
+exe/
+
+# Xcode files
+xcode4/build
+project.xcworkspace/
+xcuserdata/
+Debug/
+Build/

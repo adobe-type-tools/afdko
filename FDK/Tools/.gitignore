@@ -1,0 +1,11 @@
+# ignore the OSX and linux compiled programs
+autohintexe
+detype1
+makeotfexe
+mergeFonts
+rotateFont
+sfntdiff
+sfntedit
+spot
+tx
+type1

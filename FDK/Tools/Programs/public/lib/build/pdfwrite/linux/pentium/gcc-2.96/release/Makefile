@@ -1,23 +1,6 @@
-#########################################################################
-#                                                                       #
-# Copyright 2000-2001 Adobe Systems Incorporated.                       #
-# All rights reserved.                                                  #
-#                                                                       #
-# Patents Pending                                                       #
-#                                                                       #
-# NOTICE: All information contained herein is the property of Adobe     #
-# Systems Incorporated. Many of the intellectual and technical          #
-# concepts contained herein are proprietary to Adobe, are protected     #
-# as trade secrets, and are made available only to Adobe licensees      #
-# for their internal use. Any reproduction or dissemination of this     #
-# software is strictly forbidden unless prior written permission is     #
-# obtained from Adobe.                                                  #
-#                                                                       #
-# PostScript and Display PostScript are trademarks of Adobe Systems     #
-# Incorporated or its subsidiaries and may be registered in certain     #
-# jurisdictions.                                                        #
-#                                                                       #
-#########################################################################
+# Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+# This software is licensed as OpenSource, under the Apache License, Version 2.0. 
+# This license is available at: http://opensource.org/licenses/Apache-2.0.
 
 # Configuration
 CONFIG = release

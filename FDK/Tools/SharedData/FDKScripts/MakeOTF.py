@@ -380,7 +380,7 @@ class MakeOTFParams:
 		self.srcIsTTF = 0
 		for item in kMOTFOptions.items():
 			exec("self.%s%s = None" % (kFileOptPrefix, item[0]))
-		# DONT_USE_WIN_LINE_METRICS Remove comment from next line to turn on bits 7 and 8 by default.
+		# USE_TYPO_METRICS Remove comment from next line to turn on bits 7 and 8 by default.
 		# exec("self.%s%s = [7,8]" % (kFileOptPrefix, kSetfsSelectionBitsOn))
 
 	def __repr__(self):
@@ -600,7 +600,7 @@ def setOptionsFromFontInfo(makeOTFParams):
 					exec("makeOTFParams.%s%s += [val]" % (kFileOptPrefix, kSetfsSelectionBitsOn))
 			elif not m.group(1) in ["False", "false", "0"]:
 				print "makeotf [Error] Failed to parse value for PreferOS/2TypoMetrics in file '%s'." % (fiPath)
-			print "makeotf [Note] setting the DONT_USE_WIN_LINE_METRICS OS/2 fsSelection bit 7 from fontinfo keyword."
+			print "makeotf [Note] setting the USE_TYPO_METRICS OS/2 fsSelection bit 7 from fontinfo keyword."
 		
 
 		m = re.search(r"IsOS/2WidthWeightSlopeOnly\s+(([Tt]rue|1)|([Ff]alse)|0|1)", data)
@@ -1751,9 +1751,12 @@ def getGOADBData(goadbPath):
 def compareSrcNames(srcGOADBList, realGOADBList):
 	srcNameList = map(lambda entry: entry[1], srcGOADBList)
 	realNameList = map(lambda entry: entry[1], realGOADBList)
-	if srcNameList == realNameList:
-		return 0  # files match
-	return 1
+	if srcNameList != realNameList:
+		# order or names don't match, report any missing names
+		onlyInSrc = [n for n in srcNameList if n not in realNameList]
+		onlyInReal = [n for n in realNameList if n not in srcNameList]
+		return 1, onlyInSrc, onlyInReal
+	return 0, [], []  # both names and order match
 
 def writeTempGOADB(inputFilePath, srcGOADBList):
 	fpath = inputFilePath + ".temp.GOADB"
@@ -2072,7 +2075,7 @@ def makeRelativePath(curDir, targetPath):
 			cDir = cDir[1:]
 		dirList = re.findall(r"([^\\/]+)", cDir)
 		numDir = len(dirList)
-		relDir = "../"*numDir
+		relDir = (".."+os.path.sep)*numDir
 		targetPath = os.path.join(relDir, targetBaseName)
 	else:
 		if cDir[0] in ["/", "\\"]:
@@ -2083,7 +2086,7 @@ def makeRelativePath(curDir, targetPath):
 		# First build the reative path up.
 		dirList = re.findall(r"([^\\/]+)", cDir)
 		numDir = len(dirList)
-		relDir = "../"*numDir
+		relDir = (".."+os.path.sep)*numDir
 		targetPath = os.path.join(relDir, targetBaseName)
 		targetPath = os.path.join(relDir, tdir, targetBaseName)
 		
@@ -2184,8 +2187,13 @@ def runMakeOTF(makeOTFParams):
 		if use_alias:
 			goadbPath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kGOADB))
 			realGOADBList = getGOADBData(goadbPath)
-			if compareSrcNames(srcGOADBList, realGOADBList):
+			result, onlyInSrc, onlyInReal = compareSrcNames(srcGOADBList, realGOADBList)
+			if result == 1:
 				print "makeotf [Error] For TTF fonts, the GlyphOrderAndAliasDB file must preserve the original font glyph order, and use the same names as they are derived by the 'tx' tool. %s." % (goadbPath)
+				if onlyInSrc:
+					print "Glyphs in TTF font missing from GlyphOrderAndAliasDB: %s" % " ".join(onlyInSrc)
+				if onlyInReal:
+					print "Glyphs in GlyphOrderAndAliasDB missing from TTF font: %s" % " ".join(onlyInReal)
 				raise MakeOTFRunError
 		else:
 			# If user has not asked to use an existing GOADB file, then we need to make and use one in order to preserve glyph order.
@@ -2228,7 +2236,7 @@ def runMakeOTF(makeOTFParams):
 		osv4Err = 0
 		if makeOTFParams.seenOS2v4Bits[0] == 0:
 			osv4Err = 1
-			print "makeotf [Error] No value was provided for DONT_USE_WIN_LINE_METRICS OS/2 fsSelection bit 7."
+			print "makeotf [Error] No value was provided for USE_TYPO_METRICS OS/2 fsSelection bit 7."
 		if makeOTFParams.seenOS2v4Bits[1] == 0:
 			osv4Err = 1
 			print "makeotf [Error] No value was provided for WEIGHT_WIDTH_SLOPE_ONLY OS/2 fsSelection bit 8."
