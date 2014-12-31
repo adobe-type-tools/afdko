@@ -31,7 +31,7 @@ CompareFamily will look in the specified directory and examine and
    -d <path>: Look in the specified directory for fonts. Default
       is the current directory
    -toleranance <integer.  set the tolerance for metrics differences in design space units.
-        Default is 0.  Set to a larger value to see only big problems.Affects  Single Test 11 BASE tabvle metrics,
+        Default is 0.  Set to a larger value to see only big problems.Affects  Single Test 11 BASE table metrics,
         Single Test 22 ligature widths, and Single Test 23 Accent Widths.
    -rm:  Write the font menu name report. This prints out a table of the
        font menu names, and enables the font menu name checks.
@@ -3479,7 +3479,7 @@ def doFamilyTest10():
 					panoseStatus = 1
 					break
 
-		return panoseStatus # 0 means all the values are 0; 1 means they were probably dervived by MakeOTF; 2 means they exist, and were not derived by MakeOTF.
+		return panoseStatus # 0 means all the values are 0; 1 means they were probably derived by MakeOTF; 2 means they exist, and were not derived by MakeOTF.
 	firstFontName = ""
 	print "\nFamily Test 10: Check that if all faces in family have a Panose number and that CFF ISFixedPtch matches the Panose monospace setting."
 	for name in preferredFamilyList1.keys():
@@ -4037,7 +4037,7 @@ def doFamilyTest19():
 	global compatibleFamilyList3
 
 	print "\nFamily Test 19: Check that all faces in the Preferred Family group have the same values of FamilyBlues and FamilyOtherBlues, and are valid."
-	# A preferred family can contain grousp of fonts that have different Family Blues; different optical sizes, for example.
+	# A preferred family can contain groups of fonts that have different Family Blues; different optical sizes, for example.
 	# What I will do is collect a dict of unique FamilyBlue values, and report on any that are unique, or do not contain a "regular" member".
 
 	FBList = [ ["FamilyBlues", "BlueValues", {}, 0], ["FamilyOtherBlues", "OtherBlues",{}, 0]]
