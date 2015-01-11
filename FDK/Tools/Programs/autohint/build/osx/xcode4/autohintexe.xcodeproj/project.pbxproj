@@ -13,7 +13,6 @@
 			buildPhases = (
 			);
 			dependencies = (
-				BDD0854B14E47AD000F0FC0D /* PBXTargetDependency */,
 				BDD0854D14E47AD500F0FC0D /* PBXTargetDependency */,
 			);
 			name = BuildAll;
@@ -22,30 +21,16 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		56AE0BA81A633867000ECBEE /* libautohintlib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 56AE0BA71A633867000ECBEE /* libautohintlib.a */; };
 		BD5BF4170D9AD1F80015F645 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = BD5BF4160D9AD1F80015F645 /* main.c */; };
-		BD5BF44A0D9AD3D60015F645 /* libautohintlib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BD5BF4490D9AD3C80015F645 /* libautohintlib.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		BD5BF4480D9AD3C80015F645 /* PBXContainerItemProxy */ = {
+		56AE0BAC1A633B80000ECBEE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BD5BF4440D9AD3C80015F645 /* autohintlib.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = D2AAC046055464E500DB518D;
-			remoteInfo = autohintlib;
-		};
-		BD5E127317A73C6E007BA047 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BD5BF4440D9AD3C80015F645 /* autohintlib.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D;
-			remoteInfo = autohintlib;
-		};
-		BDD0854A14E47AD000F0FC0D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BD5BF4440D9AD3C80015F645 /* autohintlib.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = autohintlib;
 		};
 		BDD0854C14E47AD500F0FC0D /* PBXContainerItemProxy */ = {
@@ -58,6 +43,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		56AE0BA71A633867000ECBEE /* libautohintlib.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libautohintlib.a; path = "../../../../../../../../../Library/Developer/Xcode/DerivedData/autohintexe-aqaujhwuqqtoouhccdzyzjbhhmcb/Build/Products/Debug/libautohintlib.a"; sourceTree = "<group>"; };
 		BD5BF40F0D9AD0A50015F645 /* debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../../../../public/config/xcconfig/debug.xcconfig; sourceTree = SOURCE_ROOT; };
 		BD5BF4100D9AD0A50015F645 /* release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = release.xcconfig; path = ../../../../public/config/xcconfig/release.xcconfig; sourceTree = SOURCE_ROOT; };
 		BD5BF4130D9AD0DB0015F645 /* ac_C_lib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ac_C_lib.h; path = ../../../autohintlib/source/public/ac/ac_C_lib.h; sourceTree = SOURCE_ROOT; };
@@ -69,7 +55,7 @@
 		BD5BF4360D9AD3630015F645 /* bftoac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bftoac.h; path = ../../../autohintlib/source/bf/bftoac.h; sourceTree = SOURCE_ROOT; };
 		BD5BF4370D9AD36B0015F645 /* machinedep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = machinedep.h; path = ../../../autohintlib/source/bf/machinedep.h; sourceTree = SOURCE_ROOT; };
 		BD5BF4390D9AD37D0015F645 /* memcheck.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = memcheck.h; path = ../../../autohintlib/source/public/ac/memcheck.h; sourceTree = SOURCE_ROOT; };
-		BD5BF4440D9AD3C80015F645 /* ../../../autohintlib/build/osx/xcode4/autohintlib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = ../../../autohintlib/build/osx/xcode4/autohintlib.xcodeproj; sourceTree = "<group>"; };
+		BD5BF4440D9AD3C80015F645 /* autohintlib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = autohintlib.xcodeproj; path = ../../../autohintlib/build/osx/xcode4/autohintlib.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,7 +63,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BD5BF44A0D9AD3D60015F645 /* libautohintlib.a in Frameworks */,
+				56AE0BA81A633867000ECBEE /* libautohintlib.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,6 +73,7 @@
 		08FB7794FE84155DC02AAC07 /* autohintexe */ = {
 			isa = PBXGroup;
 			children = (
+				56AE0BA71A633867000ECBEE /* libautohintlib.a */,
 				BD5BF4440D9AD3C80015F645 /* autohintlib.xcodeproj */,
 				BD5BF4080D9AD0760015F645 /* xcconfig */,
 				BD5BF4090D9AD0830015F645 /* Headers */,
@@ -109,6 +96,14 @@
 			isa = PBXGroup;
 			children = (
 				BD5BF4180D9AD2120015F645 /* autohintexe */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		56AE0BA91A633B7F000ECBEE /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				56AE0BAD1A633B80000ECBEE /* libautohintlib.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -145,14 +140,6 @@
 			path = ../../../source/public/extras;
 			sourceTree = SOURCE_ROOT;
 		};
-		BD5BF4450D9AD3C80015F645 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				BD5BF4490D9AD3C80015F645 /* libautohintlib.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		C6A0FF2B0290797F04C91782 /* Documentation */ = {
 			isa = PBXGroup;
 			children = (
@@ -173,7 +160,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				BD5E127417A73C6E007BA047 /* PBXTargetDependency */,
 			);
 			name = autohintexe;
 			productInstallPath = "$(HOME)/bin";
@@ -203,7 +189,7 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = BD5BF4450D9AD3C80015F645 /* Products */;
+					ProductGroup = 56AE0BA91A633B7F000ECBEE /* Products */;
 					ProjectRef = BD5BF4440D9AD3C80015F645 /* autohintlib.xcodeproj */;
 				},
 			);
@@ -216,11 +202,11 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		BD5BF4490D9AD3C80015F645 /* libautohintlib.a */ = {
+		56AE0BAD1A633B80000ECBEE /* libautohintlib.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libautohintlib.a;
-			remoteRef = BD5BF4480D9AD3C80015F645 /* PBXContainerItemProxy */;
+			remoteRef = 56AE0BAC1A633B80000ECBEE /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -237,16 +223,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		BD5E127417A73C6E007BA047 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = autohintlib;
-			targetProxy = BD5E127317A73C6E007BA047 /* PBXContainerItemProxy */;
-		};
-		BDD0854B14E47AD000F0FC0D /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = autohintlib;
-			targetProxy = BDD0854A14E47AD000F0FC0D /* PBXContainerItemProxy */;
-		};
 		BDD0854D14E47AD500F0FC0D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8DD76FA90486AB0100D96B5E /* autohintexe */;
@@ -259,15 +235,15 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BD5BF40F0D9AD0A50015F645 /* debug.xcconfig */;
 			buildSettings = {
-				GCC_PREPROCESSOR_DEFINITIONS = ("EXECUTABLE=1", "OSX=1");
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"EXECUTABLE=1",
+					"$(inherited)",
+				);
 				HEADER_SEARCH_PATHS = (
 					../../../autohintlib/source/ac,
 					../../../autohintlib/source/bf,
 					../../../autohintlib/source/public/extras,
 					../../../autohintlib/source/public/ac,
-					"$(SDKROOT)/usr/include",
-					"$(SDKROOT)/usr/include/sys",
-					"../../../../public/include_files/sfnt_tables/**",
 				);
 			};
 			name = Debug;
@@ -276,15 +252,15 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BD5BF4100D9AD0A50015F645 /* release.xcconfig */;
 			buildSettings = {
-				GCC_PREPROCESSOR_DEFINITIONS = ("EXECUTABLE=1", "OSX=1");
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"EXECUTABLE=1",
+					"$(inherited)",
+				);
 				HEADER_SEARCH_PATHS = (
 					../../../autohintlib/source/ac,
 					../../../autohintlib/source/bf,
 					../../../autohintlib/source/public/extras,
 					../../../autohintlib/source/public/ac,
-					"$(SDKROOT)/usr/include",
-					"$(SDKROOT)/usr/include/sys",
-					"../../../../public/include_files/sfnt_tables/**",
 				);
 			};
 			name = Release;
@@ -293,7 +269,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BD5BF40F0D9AD0A50015F645 /* debug.xcconfig */;
 			buildSettings = {
-				GCC_PREPROCESSOR_DEFINITIONS = ("EXECUTABLE=1", "OSX=1");
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"EXECUTABLE=1",
+					"$(inherited)",
+				);
 				HEADER_SEARCH_PATHS = (
 					../../../autohintlib/source/ac,
 					../../../autohintlib/source/bf,
@@ -311,7 +290,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BD5BF4100D9AD0A50015F645 /* release.xcconfig */;
 			buildSettings = {
-				GCC_PREPROCESSOR_DEFINITIONS = ("EXECUTABLE=1", "OSX=1");
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"EXECUTABLE=1",
+					"$(inherited)",
+				);
 				HEADER_SEARCH_PATHS = (
 					../../../autohintlib/source/ac,
 					../../../autohintlib/source/bf,
