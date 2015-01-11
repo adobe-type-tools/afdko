@@ -1,6 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
- /************************************************************************/
+/************************************************************************/
 /* control.c */
 
 #include "ac.h"
@@ -10,15 +10,14 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 extern boolean charstringoutput;
 #endif
 
-extern  void CSWrite(void);
+extern void CSWrite(void);
 
 private procedure DoHStems();
 private procedure DoVStems();
 
 private boolean CounterFailed;
 
-public procedure InitAll(integer reason)
-{
+public procedure InitAll(integer reason) {
 	InitData(reason); /* must be first */
 	InitAuto(reason);
 	InitFix(reason);
@@ -26,111 +25,161 @@ public procedure InitAll(integer reason)
 	InitPick(reason);
 }
 
-private integer PtLstLen(lst) PClrPoint lst; {
+private integer PtLstLen(PClrPoint lst) {
 	integer cnt = 0;
-	while (lst != NULL) { cnt++; lst = lst->next; }
+	while (lst != NULL) {
+		cnt++;
+		lst = lst->next;
+	}
 	return cnt;
 }
 
-public integer PointListCheck(new,lst) PClrPoint new, lst; {
+public integer PointListCheck(PClrPoint new, PClrPoint lst) {
 	/* -1 means not a member, 1 means already a member, 0 means conflicts */
 	Fixed l1, l2, n1, n2, tmp, halfMargin;
 	char ch = new->c;
 	halfMargin = FixHalfMul(bandMargin);
 	switch (ch) {
-		case 'y': case 'm': {
-			n1 = new->x0; n2 = new->x1;
-			break; }
-		case 'b': case 'v': {
-			n1 = new->y0; n2 = new->y1;
-			break; }
-		default:
-		{
-		FlushLogFiles();
-		sprintf(globmsg, "Illegal character in point list in %s.\n", fileName);
-		LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+		case 'y':
+		case 'm': {
+			n1 = new->x0;
+			n2 = new->x1;
+			break;
 		}
-    }
-	if (n1 > n2) { tmp = n1; n1 = n2; n2 = tmp; }
+		case 'b':
+		case 'v': {
+			n1 = new->y0;
+			n2 = new->y1;
+			break;
+		}
+		default: {
+			FlushLogFiles();
+			sprintf(globmsg, "Illegal character in point list in %s.\n", fileName);
+			LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+		}
+	}
+	if (n1 > n2) {
+		tmp = n1;
+		n1 = n2;
+		n2 = tmp;
+	}
 	while (TRUE) {
-		if (lst == NULL) return -1;
-		if (lst->c == ch) { /* same kind of color */
+		if (lst == NULL) {
+			return -1;
+		}
+		if (lst->c == ch) {/* same kind of color */
 			switch (ch) {
-				case 'y': case 'm': {
-					l1 = lst->x0; l2 = lst->x1;
-					break; }
-				case 'b': case 'v': {
-					l1 = lst->y0; l2 = lst->y1;
-					break; }
+				case 'y':
+				case 'm': {
+					l1 = lst->x0;
+					l2 = lst->x1;
+					break;
+				}
+				case 'b':
+				case 'v': {
+					l1 = lst->y0;
+					l2 = lst->y1;
+					break;
+				}
 			}
-			if (l1 > l2) { tmp = l1; l1 = l2; l2 = tmp; }
-			if (l1==n1 && l2==n2) return 1L;
+			if (l1 > l2) {
+				tmp = l1;
+				l1 = l2;
+				l2 = tmp;
+			}
+			if (l1 == n1 && l2 == n2) {
+				return 1L;
+			}
 			/* Add this extra margin to the band to fix a problem in
 			 TimesEuropa/Italic/v,w,y where a main hstem hint was
 			 being merged with newcolors. This main hstem caused
-			 problems in rasterization so it shouldn't be included. */ 
-			l1 -= halfMargin; l2 += halfMargin;
-			if (l1 <= n2 && n1 <= l2) return 0L;
+			 problems in rasterization so it shouldn't be included. */
+			l1 -= halfMargin;
+			l2 += halfMargin;
+			if (l1 <= n2 && n1 <= l2) {
+				return 0L;
+			}
 		}
 		lst = lst->next;
-    }
+	}
 }
 
-private boolean SameColorLists(lst1, lst2) PClrPoint lst1, lst2; {
-	if (PtLstLen(lst1) != PtLstLen(lst2)) return FALSE;
-	while (lst1 != NULL) { /* go through lst1 */
-		if (PointListCheck(lst1,lst2) != 1) return FALSE;
+private boolean SameColorLists(PClrPoint lst1, PClrPoint lst2) {
+	if (PtLstLen(lst1) != PtLstLen(lst2)) {
+		return FALSE;
+	}
+	while (lst1 != NULL) {/* go through lst1 */
+		if (PointListCheck(lst1, lst2) != 1) {
+			return FALSE;
+		}
 		lst1 = lst1->next;
-    }
+	}
 	return TRUE;
 }
 
-public boolean SameColors(cn1, cn2) integer cn1, cn2; {
-	if (cn1 == cn2) return TRUE;
+public boolean SameColors(integer cn1, integer cn2) {
+	if (cn1 == cn2) {
+		return TRUE;
+	}
 	return SameColorLists(ptLstArray[cn1], ptLstArray[cn2]);
 }
 
-public procedure MergeFromMainColors(ch) char ch; {
+public procedure MergeFromMainColors(char ch) {
 	register PClrPoint lst;
 	for (lst = ptLstArray[0]; lst != NULL; lst = lst->next) {
-		if (lst->c != ch) continue;
-		if (PointListCheck(lst, pointList) == -1) {
-			if (ch == 'b')
-				AddColorPoint(0L, lst->y0, 0L, lst->y1, ch, lst->p0, lst->p1);
-			else
-				AddColorPoint(lst->x0, 0L, lst->x1, 0L, ch, lst->p0, lst->p1);
+		if (lst->c != ch) {
+			continue;
 		}
-    }
+		if (PointListCheck(lst, pointList) == -1) {
+			if (ch == 'b') {
+				AddColorPoint(0L, lst->y0, 0L, lst->y1, ch, lst->p0, lst->p1);
+			}
+			else {
+				AddColorPoint(lst->x0, 0L, lst->x1, 0L, ch, lst->p0, lst->p1);
+			}
+		}
+	}
 }
 
-public procedure AddColorPoint(x0, y0, x1, y1, ch, p0, p1)
-Fixed x0, y0, x1, y1; char ch; PPathElt p0, p1; {
+public procedure AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0, PPathElt p1) {
 	register PClrPoint pt;
 	integer chk;
 	pt = (PClrPoint)Alloc(sizeof(ClrPoint));
-	pt->x0 = x0; pt->y0 = y0; pt->x1 = x1; pt->y1 = y1; pt->c = ch;
-	pt->done = FALSE; pt->next = NULL; pt->p0 = p0; pt->p1 = p1;
+	pt->x0 = x0;
+	pt->y0 = y0;
+	pt->x1 = x1;
+	pt->y1 = y1;
+	pt->c = ch;
+	pt->done = FALSE;
+	pt->next = NULL;
+	pt->p0 = p0;
+	pt->p1 = p1;
 	chk = PointListCheck(pt, pointList);
-	if (chk == 0 && showClrInfo) ReportColorConflict(x0, y0, x1, y1, ch);
+	if (chk == 0 && showClrInfo) {
+		ReportColorConflict(x0, y0, x1, y1, ch);
+	}
 	if (chk == -1) {
 		pt->next = pointList;
 		pointList = pt;
-		if (logging) LogColorInfo(pointList);
-    }
+		if (logging) {
+			LogColorInfo(pointList);
+		}
+	}
 }
 
-private procedure CopyClrFromLst(clr, lst)
-char clr; register PClrPoint lst; {
+private procedure CopyClrFromLst(char clr, register PClrPoint lst) {
 	boolean bvflg = (clr == 'b' || clr == 'v');
 	while (lst != NULL) {
 		if (lst->c == clr) {
-			if (bvflg)
+			if (bvflg) {
 				AddColorPoint(0L, lst->y0, 0L, lst->y1, clr, lst->p0, lst->p1);
-			else
+			}
+			else {
 				AddColorPoint(lst->x0, 0L, lst->x1, 0L, clr, lst->p0, lst->p1);
+			}
 		}
 		lst = lst->next;
-    }
+	}
 }
 
 public procedure CopyMainV() {
@@ -141,7 +190,7 @@ public procedure CopyMainH() {
 	CopyClrFromLst('v', ptLstArray[0]);
 }
 
-public procedure AddHPair(v, ch) PClrVal v; char ch; {
+public procedure AddHPair(PClrVal v, char ch) {
 	Fixed bot, top, tmp;
 	PPathElt p0, p1, p;
 	bot = itfmy(v->vLoc1);
@@ -149,23 +198,31 @@ public procedure AddHPair(v, ch) PClrVal v; char ch; {
 	p0 = v->vBst->vSeg1->sElt;
 	p1 = v->vBst->vSeg2->sElt;
 	if (top < bot) {
-		tmp = top; top = bot; bot = tmp;
-		p = p0; p0 = p1; p1 = p;
-    }
+		tmp = top;
+		top = bot;
+		bot = tmp;
+		p = p0;
+		p0 = p1;
+		p1 = p;
+	}
 	if (v->vGhst) {
 		if (v->vSeg1->sType == sGHOST) {
-			bot = top; p0 = p1; p1 = NULL;
+			bot = top;
+			p0 = p1;
+			p1 = NULL;
 			top = bot - FixInt(20); /* width == -20 iff bottom seg is ghost */
 		}
 		else {
-			top = bot; p1 = p0; p0 = NULL;
+			top = bot;
+			p1 = p0;
+			p0 = NULL;
 			bot = top + FixInt(21); /* width == -21 iff top seg is ghost */
 		}
-    }
+	}
 	AddColorPoint(0L, bot, 0L, top, ch, p0, p1);
 }
 
-public procedure AddVPair(v, ch) PClrVal v; char ch; {
+public procedure AddVPair(PClrVal v, char ch) {
 	Fixed lft, rght, tmp;
 	PPathElt p0, p1, p;
 	lft = itfmx(v->vLoc1);
@@ -173,13 +230,17 @@ public procedure AddVPair(v, ch) PClrVal v; char ch; {
 	p0 = v->vBst->vSeg1->sElt;
 	p1 = v->vBst->vSeg2->sElt;
 	if (lft > rght) {
-		tmp = lft; lft = rght; rght = tmp;
-		p = p0; p0 = p1; p1 = p;
-    }
+		tmp = lft;
+		lft = rght;
+		rght = tmp;
+		p = p0;
+		p0 = p1;
+		p1 = p;
+	}
 	AddColorPoint(lft, 0L, rght, 0L, ch, p0, p1);
 }
 
-private boolean UseCounter(sLst, mclr) PClrVal sLst; boolean mclr; {
+private boolean UseCounter(PClrVal sLst, boolean mclr) {
 	integer cnt = 0;
 	Fixed minLoc, midLoc, maxLoc, abstmp, prevBstVal, bestVal;
 	Fixed minDelta, midDelta, maxDelta, loc, delta, th;
@@ -187,45 +248,66 @@ private boolean UseCounter(sLst, mclr) PClrVal sLst; boolean mclr; {
 	minLoc = midLoc = maxLoc = FixInt(20000L);
 	minDelta = midDelta = maxDelta = 0;
 	lst = sLst;
-	while (lst != NULL) { cnt++; lst = lst->vNxt; }
-	if (cnt < 3) return FALSE;
-	cnt -= 3; prevBstVal = 0;
+	while (lst != NULL) {
+		cnt++;
+		lst = lst->vNxt;
+	}
+	if (cnt < 3) {
+		return FALSE;
+	}
+	cnt -= 3;
+	prevBstVal = 0;
 	while (cnt > 0) {
 		cnt--;
-		if (cnt == 0) prevBstVal = sLst->vVal;
+		if (cnt == 0) {
+			prevBstVal = sLst->vVal;
+		}
 		sLst = sLst->vNxt;
-    }
+	}
 	bestVal = sLst->vVal;
-	if (prevBstVal > FixInt(1000L) || bestVal < prevBstVal * 10L)
+	if (prevBstVal > FixInt(1000L) || bestVal < prevBstVal * 10L) {
 		return FALSE;
+	}
 	newLst = sLst;
 	while (sLst != NULL) {
 		loc = sLst->vLoc1;
 		delta = sLst->vLoc2 - loc;
 		loc += FixHalfMul(delta);
 		if (loc < minLoc) {
-			maxLoc = midLoc; maxDelta = midDelta;
-			midLoc = minLoc; midDelta = minDelta;
-			minLoc = loc; minDelta = delta;
+			maxLoc = midLoc;
+			maxDelta = midDelta;
+			midLoc = minLoc;
+			midDelta = minDelta;
+			minLoc = loc;
+			minDelta = delta;
 		}
 		else if (loc < midLoc) {
-			maxLoc = midLoc; maxDelta = midDelta;
-			midLoc = loc; midDelta = delta;
+			maxLoc = midLoc;
+			maxDelta = midDelta;
+			midLoc = loc;
+			midDelta = delta;
 		}
-		else { maxLoc = loc; maxDelta = delta; }
+		else {
+			maxLoc = loc;
+			maxDelta = delta;
+		}
 		sLst = sLst->vNxt;
-    }
+	}
 	th = FixInt(5) / 100L;
-	if (ac_abs(minDelta-maxDelta) < th &&
-		ac_abs((maxLoc-midLoc)-(midLoc-minLoc)) < th) {
-		if (mclr) Vcoloring = newLst;
-		else Hcoloring = newLst;
+	if (ac_abs(minDelta - maxDelta) < th &&
+		ac_abs((maxLoc - midLoc) - (midLoc - minLoc)) < th) {
+		if (mclr) {
+			Vcoloring = newLst;
+		}
+		else {
+			Hcoloring = newLst;
+		}
 		return TRUE;
-    }
-	if (ac_abs(minDelta-maxDelta) < FixInt(3) &&
-		ac_abs((maxLoc-midLoc)-(midLoc-minLoc)) < FixInt(3))
-		ReportError(mclr ? "Near miss for using V counter hinting." :
-					"Near miss for using H counter hinting.");
+	}
+	if (ac_abs(minDelta - maxDelta) < FixInt(3) &&
+		ac_abs((maxLoc - midLoc) - (midLoc - minLoc)) < FixInt(3)) {
+		ReportError(mclr ? "Near miss for using V counter hinting." : "Near miss for using H counter hinting.");
+	}
 	return FALSE;
 }
 
@@ -235,23 +317,24 @@ private procedure GetNewPtLst() {
 		integer i;
 		maxPtLsts += 5;
 		newArray = (PClrPoint *)Alloc(maxPtLsts * sizeof(PClrPoint));
-		for (i = 0; i < maxPtLsts - 5; i++)
+		for (i = 0; i < maxPtLsts - 5; i++) {
 			newArray[i] = ptLstArray[i];
+		}
 		ptLstArray = newArray;
-    }
+	}
 	ptLstIndex = numPtLsts;
 	numPtLsts++;
 	pointList = NULL;
 	ptLstArray[ptLstIndex] = NULL;
 }
 
-public procedure XtraClrs(e) PPathElt e; {
+public procedure XtraClrs(PPathElt e) {
 	/* this can be simplified for standalone coloring */
 	ptLstArray[ptLstIndex] = pointList;
 	if (e->newcolors == 0) {
 		GetNewPtLst();
 		e->newcolors = (short)ptLstIndex;
-    }
+	}
 	ptLstIndex = e->newcolors;
 	pointList = ptLstArray[ptLstIndex];
 }
@@ -259,7 +342,7 @@ public procedure XtraClrs(e) PPathElt e; {
 private procedure Blues() {
 	Fixed pv, pd, pc, pb, pa;
 	PClrVal sLst;
-	
+
 	/* 
 	 Top alignment zones are in the global 'topBands', bottom in 'botBands'.
 	 
@@ -379,18 +462,29 @@ private procedure Blues() {
 	 
 	 4) pick.c:FindBestHVals();
 	 When a hint segment    */
-	if (showClrInfo) PrintMessage("generate blues");
-	if (NoBlueChar()) { lenTopBands = lenBotBands = 0; }
+
+	if (showClrInfo) {
+		PrintMessage("generate blues");
+	}
+	if (NoBlueChar()) {
+		lenTopBands = lenBotBands = 0;
+	}
 	GenHPts();
-	if (showClrInfo)
+	if (showClrInfo) {
 		PrintMessage("evaluate");
+	}
 	if (!CounterFailed && HColorChar()) {
-		pv = pruneValue; pruneValue = (Fixed)minVal;
-		pa = pruneA; pruneA = (Fixed)minVal;
-		pd = pruneD; pruneD = (Fixed)minVal;
-		pc = pruneC; pruneC = (Fixed)maxVal;
-		pb = pruneB; pruneB = (Fixed)minVal;
-    }
+		pv = pruneValue;
+		pruneValue = (Fixed)minVal;
+		pa = pruneA;
+		pruneA = (Fixed)minVal;
+		pd = pruneD;
+		pruneD = (Fixed)minVal;
+		pc = pruneC;
+		pruneC = (Fixed)maxVal;
+		pb = pruneB;
+		pruneB = (Fixed)minVal;
+	}
 	EvalH();
 	PruneHVals();
 	FindBestHVals();
@@ -398,13 +492,17 @@ private procedure Blues() {
 	if (showClrInfo) {
 		ShowHVals(valList);
 		PrintMessage("pick best");
-    }
-	MarkLinks(valList,TRUE);
+	}
+	MarkLinks(valList, TRUE);
 	CheckVals(valList, FALSE);
-	DoHStems (valList); /* Report stems and alignment zones, if this has been requested. */
+	DoHStems(valList);  /* Report stems and alignment zones, if this has been requested. */
 	PickHVals(valList); /* Moves best ClrVal items from valList to Hcoloring list. (? Choose from set of ClrVals for the samte stem values.) */
 	if (!CounterFailed && HColorChar()) {
-		pruneValue = pv; pruneD = pd; pruneC = pc; pruneB = pb; pruneA = pa;
+		pruneValue = pv;
+		pruneD = pd;
+		pruneC = pc;
+		pruneB = pb;
+		pruneA = pa;
 		useH = UseCounter(Hcoloring, FALSE);
 		if (!useH) { /* try to fix */
 			AddBBoxHV(TRUE, TRUE);
@@ -414,67 +512,89 @@ private procedure Blues() {
 				CounterFailed = TRUE;
 			}
 		}
-    }
-	else useH = FALSE;
-	if (Hcoloring == NULL)
-		AddBBoxHV(TRUE,FALSE);
+	}
+	else {
+		useH = FALSE;
+	}
+	if (Hcoloring == NULL) {
+		AddBBoxHV(TRUE, FALSE);
+	}
 	if (showClrInfo) {
 		PrintMessage("results");
 		PrintMessage(useH ? "rv" : "rb");
 		ShowHVals(Hcoloring);
-    }
-	if (useH) PrintMessage("Using H counter hints.");
+	}
+	if (useH) {
+		PrintMessage("Using H counter hints.");
+	}
 	sLst = Hcoloring;
 	while (sLst != NULL) {
-		AddHPair(sLst, useH ? 'v' : 'b');/* actually adds hint */
+		AddHPair(sLst, useH ? 'v' : 'b'); /* actually adds hint */
 		sLst = sLst->vNxt;
-    }
+	}
 }
 
-private procedure DoHStems (sLst1)
-PClrVal sLst1; {
+private procedure DoHStems(PClrVal sLst1) {
 	Fixed bot, top;
 	Fixed charTop = MINinteger, charBot = MAXinteger;
 	boolean curved;
-	if (!doAligns && !doStems)
+	if (!doAligns && !doStems) {
 		return;
+	}
 	while (sLst1 != NULL) {
 		bot = itfmy(sLst1->vLoc1);
 		top = itfmy(sLst1->vLoc2);
-		if (top < bot) { Fixed tmp = top; top = bot; bot = tmp; }
-		if (top > charTop)
+		if (top < bot) {
+			Fixed tmp = top;
+			top = bot;
+			bot = tmp;
+		}
+		if (top > charTop) {
 			charTop = top;
-		if (bot < charBot)
+		}
+		if (bot < charBot) {
 			charBot = bot;
+		}
 		/* skip if ghost or not a line on top or bottom */
 		if (sLst1->vGhst) {
 			sLst1 = sLst1->vNxt;
 			continue;
 		}
 		curved = !FindLineSeg(sLst1->vLoc1, botList) &&
-		!FindLineSeg(sLst1->vLoc2, topList);
+				 !FindLineSeg(sLst1->vLoc2, topList);
 		AddHStem(top, bot, curved);
 		sLst1 = sLst1->vNxt;
-		if (top != MINinteger || bot != MAXinteger)
-			AddStemExtremes (UnScaleAbs(bot), UnScaleAbs(top));
-    }
-	if (charTop != MINinteger || charBot != MAXinteger)
-		AddCharExtremes (UnScaleAbs(charBot), UnScaleAbs(charTop));
+		if (top != MINinteger || bot != MAXinteger) {
+			AddStemExtremes(UnScaleAbs(bot), UnScaleAbs(top));
+		}
+	}
+	if (charTop != MINinteger || charBot != MAXinteger) {
+		AddCharExtremes(UnScaleAbs(charBot), UnScaleAbs(charTop));
+	}
 }
 
 private procedure Yellows() {
 	Fixed pv, pd, pc, pb, pa;
 	PClrVal sLst;
-	if (showClrInfo) PrintMessage("generate yellows");
+	if (showClrInfo) {
+		PrintMessage("generate yellows");
+	}
 	GenVPts(SpecialCharType());
-	if (showClrInfo) PrintMessage("evaluate");
+	if (showClrInfo) {
+		PrintMessage("evaluate");
+	}
 	if (!CounterFailed && VColorChar()) {
-		pv = pruneValue; pruneValue = (Fixed)minVal;
-		pa = pruneA; pruneA = (Fixed)minVal;
-		pd = pruneD; pruneD = (Fixed)minVal;
-		pc = pruneC; pruneC = (Fixed)maxVal;
-		pb = pruneB; pruneB = (Fixed)minVal;
-    }
+		pv = pruneValue;
+		pruneValue = (Fixed)minVal;
+		pa = pruneA;
+		pruneA = (Fixed)minVal;
+		pd = pruneD;
+		pruneD = (Fixed)minVal;
+		pc = pruneC;
+		pruneC = (Fixed)maxVal;
+		pb = pruneB;
+		pruneB = (Fixed)minVal;
+	}
 	EvalV();
 	PruneVVals();
 	FindBestVVals();
@@ -482,14 +602,17 @@ private procedure Yellows() {
 	if (showClrInfo) {
 		ShowVVals(valList);
 		PrintMessage("pick best");
-    }
+	}
 	MarkLinks(valList, FALSE);
 	CheckVals(valList, TRUE);
 	DoVStems(valList);
 	PickVVals(valList);
 	if (!CounterFailed && VColorChar()) {
-		pruneValue = pv; pruneD = pd; pruneC = pc;
-		pruneB = pb; pruneA = pa;
+		pruneValue = pv;
+		pruneD = pd;
+		pruneC = pc;
+		pruneB = pb;
+		pruneA = pa;
 		useV = UseCounter(Vcoloring, TRUE);
 		if (!useV) { /* try to fix */
 			AddBBoxHV(FALSE, TRUE);
@@ -499,44 +622,54 @@ private procedure Yellows() {
 				CounterFailed = TRUE;
 			}
 		}
-    }
-	else useV = FALSE;
-	if (Vcoloring == NULL)
-		AddBBoxHV(FALSE,FALSE);
+	}
+	else {
+		useV = FALSE;
+	}
+	if (Vcoloring == NULL) {
+		AddBBoxHV(FALSE, FALSE);
+	}
 	if (showClrInfo) {
 		PrintMessage("results");
 		PrintMessage(useV ? "rm" : "ry");
 		ShowVVals(Vcoloring);
-    }
-	if (useV) PrintMessage("Using V counter hints.");
+	}
+	if (useV) {
+		PrintMessage("Using V counter hints.");
+	}
 	sLst = Vcoloring;
 	while (sLst != NULL) {
 		AddVPair(sLst, useV ? 'm' : 'y');
 		sLst = sLst->vNxt;
-    }
+	}
 }
 
-private procedure DoVStems (sLst)
-PClrVal sLst; {  
+private procedure DoVStems(PClrVal sLst) {
 	Fixed lft, rght;
 	boolean curved;
-	if (!doAligns && !doStems)
+	if (!doAligns && !doStems) {
 		return;
+	}
 	while (sLst != NULL) {
-		curved = !FindLineSeg(sLst->vLoc1, leftList) && 
-		!FindLineSeg(sLst->vLoc2, rightList);
+		curved = !FindLineSeg(sLst->vLoc1, leftList) &&
+				 !FindLineSeg(sLst->vLoc2, rightList);
 		lft = itfmx(sLst->vLoc1);
 		rght = itfmx(sLst->vLoc2);
-		if (lft > rght) { Fixed tmp = lft; lft = rght; rght = tmp; }
-		AddVStem(rght,lft, curved);
+		if (lft > rght) {
+			Fixed tmp = lft;
+			lft = rght;
+			rght = tmp;
+		}
+		AddVStem(rght, lft, curved);
 		sLst = sLst->vNxt;
-    }
+	}
 }
 
 private procedure RemoveRedundantFirstColors() {
 	register PPathElt e;
-	if (numPtLsts < 2) return;
-	if (!SameColors(0L,1L)) return;
+	if (numPtLsts < 2 || !SameColors(0L, 1L)) {
+		return;
+	}
 	e = pathStart;
 	while (e != NULL) {
 		if (e->newcolors == 1) {
@@ -544,52 +677,65 @@ private procedure RemoveRedundantFirstColors() {
 			return;
 		}
 		e = e->next;
-    }
+	}
 }
 
 private procedure PreCheckForSolEol() {
 	integer code;
 	Fixed yStart, yEnd, x1, y1;
-	if (!SpecialSolEol() || useV || useH || pathStart == NULL) return;
+	if (!SpecialSolEol() || useV || useH || pathStart == NULL) {
+		return;
+	}
 	code = SolEolCharCode();
-	if (code == 0) return;
+	if (code == 0) {
+		return;
+	}
 	GetEndPoint(pathStart, &x1, &y1);
 	yStart = itfmy(y1);
 	GetEndPoint(GetDest(pathEnd), &x1, &y1);
 	yEnd = itfmy(y1);
-	if (editChar && ((code == 1 && yStart > yEnd) ||
-					 (code == -1 && yStart < yEnd)))
+	if (editChar && ((code == 1 && yStart > yEnd) || (code == -1 && yStart < yEnd))) {
 		MoveSubpathToEnd(pathStart);
+	}
 }
 
 private procedure AddColorsSetup() {
 	int i;
 	Fixed abstmp;
 	vBigDist = 0;
-	for (i = 0; i < NumVStems; i++)
-		if (VStems[i] > vBigDist) vBigDist = VStems[i];
+	for (i = 0; i < NumVStems; i++) {
+		if (VStems[i] > vBigDist) {
+			vBigDist = VStems[i];
+		}
+	}
 	vBigDist = dtfmx(vBigDist);
-	if (vBigDist < initBigDist) vBigDist = initBigDist;
+	if (vBigDist < initBigDist) {
+		vBigDist = initBigDist;
+	}
 	vBigDist = (vBigDist * 23L) / 20L;
 	acfixtopflt(vBigDist, &vBigDistR);
 	hBigDist = 0;
-	for (i = 0; i < NumHStems; i++)
-		if (HStems[i] > hBigDist) hBigDist = HStems[i];
+	for (i = 0; i < NumHStems; i++) {
+		if (HStems[i] > hBigDist) {
+			hBigDist = HStems[i];
+		}
+	}
 	hBigDist = ac_abs(dtfmy(hBigDist));
-	if (hBigDist < initBigDist) hBigDist = initBigDist;
+	if (hBigDist < initBigDist) {
+		hBigDist = initBigDist;
+	}
 	hBigDist = (hBigDist * 23L) / 20L;
 	acfixtopflt(hBigDist, &hBigDistR);
-	if (!scalinghints)
+	if (!scalinghints) {
 		RoundPathCoords();
+	}
 	CheckForMultiMoveTo();
 	/* PreCheckForSolEol(); */
 }
 
 /* If extracolor is TRUE then it is ok to have multi-level
- coloring. */ 
-private procedure AddColorsInnerLoop(extracolor)
-boolean extracolor;
-{
+ coloring. */
+private procedure AddColorsInnerLoop(boolean extracolor) {
 	integer solEolCode = 2, retryColoring = 0;
 	boolean isSolEol = FALSE;
 	while (TRUE) {
@@ -597,10 +743,12 @@ boolean extracolor;
 		CheckSmooth();
 		InitShuffleSubpaths();
 		Blues();
-		if (!doAligns)
+		if (!doAligns) {
 			Yellows();
-		if (editChar)
+		}
+		if (editChar) {
 			DoShuffleSubpaths();
+		}
 		Hprimary = CopyClrs(Hcoloring);
 		Vprimary = CopyClrs(Vcoloring);
 		/*
@@ -608,99 +756,126 @@ boolean extracolor;
 		 solEolCode = isSolEol? SolEolCharCode() : 2;
 		 */
 		PruneElementColorSegs();
-		if (listClrInfo) ListClrInfo();
-		if (extracolor)
+		if (listClrInfo) {
+			ListClrInfo();
+		}
+		if (extracolor) {
 			AutoExtraColors(MoveToNewClrs(), isSolEol, solEolCode);
+		}
 		ptLstArray[ptLstIndex] = pointList;
-		if (isSolEol) break;
+		if (isSolEol) {
+			break;
+		}
 		retryColoring++;
 		/* we want to retry coloring if
 		 `1) CounterFailed or
 		 2) doFixes changed something, but in both cases, only on the first pass.
 		 */
-		if (CounterFailed && retryColoring==1) goto retry;
-		if  (!DoFixes()) break;
-		if (retryColoring > 1) break;
+		if (CounterFailed && retryColoring == 1) {
+			goto retry;
+		}
+		if (!DoFixes()) {
+			break;
+		}
+		if (retryColoring > 1) {
+			break;
+		}
 	retry:
 		/* if we are doing the stem and zones reporting, we need to discard the reported. */
-		if (reportRetryCB != NULL)
+		if (reportRetryCB != NULL) {
 			reportRetryCB();
-		if (pathStart == NULL || pathStart == pathEnd)
-			{
+		}
+		if (pathStart == NULL || pathStart == pathEnd) {
 			FlushLogFiles();
 			sprintf(globmsg, "No character path in %s.\n", fileName);
 			LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
-			}
-		
+		}
+
 		/* SaveFile(); SaveFile is always called in AddColorsCleanup, so this is a duplciate */
 		InitAll(RESTART);
-		if (writecoloredbez && !ReadCharFile(FALSE, FALSE, FALSE, TRUE)) break;
+		if (writecoloredbez && !ReadCharFile(FALSE, FALSE, FALSE, TRUE)) {
+			break;
+		}
 		AddColorsSetup();
-		if (!PreCheckForColoring()) break;
-		if (flexOK) { hasFlex = FALSE; AutoAddFlex(); }
+		if (!PreCheckForColoring()) {
+			break;
+		}
+		if (flexOK) {
+			hasFlex = FALSE;
+			AutoAddFlex();
+		}
 		reportErrors = FALSE;
-    }
+	}
 }
 
 private procedure AddColorsCleanup() {
 	RemoveRedundantFirstColors();
 	reportErrors = TRUE;
-	if (writecoloredbez)
-	{
-        
-    if (pathStart == NULL || pathStart == pathEnd) {
-			sprintf (globmsg, "The %s character path vanished while adding hints.\n  File not written.", fileName);
+	if (writecoloredbez) {
+
+		if (pathStart == NULL || pathStart == pathEnd) {
+			sprintf(globmsg, "The %s character path vanished while adding hints.\n  File not written.", fileName);
 			LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
 		}
-		else
-			{
+		else {
 #if ALLOWCSOUTPUT && THISISACMAIN
-			if (charstringoutput)
+			if (charstringoutput) {
 				CSWrite();
-			else
+			}
+			else {
 #endif
 				SaveFile();
+#if ALLOWCSOUTPUT && THISISACMAIN
 			}
-    }
+#endif
+		}
+	}
 	InitAll(RESTART);
 }
 
-private procedure AddColors(extracolor) boolean extracolor; {
+private procedure AddColors(boolean extracolor) {
 	if (pathStart == NULL || pathStart == pathEnd) {
 		PrintMessage("No character path, so no hints.");
 #if ALLOWCSOUTPUT && THISISACMAIN
-		if (charstringoutput)
+		if (charstringoutput) {
 			CSWrite();
-		else
+		}
+		else {
 #endif
 			SaveFile(); /* make sure it gets saved with no coloring */
+#if ALLOWCSOUTPUT && THISISACMAIN
+		}
+#endif
 		return;
-    }
+	}
 	reportErrors = TRUE;
 	CounterFailed = bandError = FALSE;
 	CheckPathBBox();
 	CheckForDups();
 	AddColorsSetup();
-	if (!PreCheckForColoring()) return;
+	if (!PreCheckForColoring()) {
+		return;
+	}
 	if (flexOK) {
-		hasFlex = FALSE; AutoAddFlex(); }
+		hasFlex = FALSE;
+		AutoAddFlex();
+	}
 	AddColorsInnerLoop(extracolor);
 	AddColorsCleanup();
 	Test();
 }
 
-public boolean DoFile(fname, extracolor)
-char *fname; boolean extracolor;
-{
+public boolean DoFile(char *fname, boolean extracolor) {
 	integer lentop = lenTopBands, lenbot = lenBotBands;
 	fileName = fname;
 	if (!ReadCharFile(TRUE, FALSE, FALSE, TRUE)) {
 		sprintf(globmsg, "Cannot open %s file.\n", fileName);
 		LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
-    }
-	PrintMessage("");  /* Just print the file name. */
+	}
+	PrintMessage(""); /* Just print the file name. */
 	LogYMinMax();
 	AddColors(extracolor);
-	lenTopBands = lentop; lenBotBands = lenbot;
+	lenTopBands = lentop;
+	lenBotBands = lenbot;
 	return TRUE;
 }
