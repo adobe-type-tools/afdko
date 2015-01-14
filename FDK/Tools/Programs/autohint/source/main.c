@@ -65,15 +65,17 @@ static void printHelp(void)
 	fprintf(OUTPUTBUFF, "   -n no multiple layers of coloring\n");
 	fprintf(OUTPUTBUFF, "   -q quiet\n");
 	fprintf(OUTPUTBUFF, "   -f <name> path to font info file\n");
+	fprintf(OUTPUTBUFF, "   -i <font info string> This can be used instead of the -f parameter for data input \n");
 	fprintf(OUTPUTBUFF, "   <name1> [name2]..[nameN]  paths to glyph bez files\n");
+	fprintf(OUTPUTBUFF, "   -b the last argument is bez data instead of a file name and the result will go to stdOut\n");
 	fprintf(OUTPUTBUFF, "   -s <suffix> Write output data to 'file name' + 'suffix', rather\n");
 	fprintf(OUTPUTBUFF,"       than writing it to the same file name as the input file.\n");
 	fprintf(OUTPUTBUFF, "   -ra Write alignment zones data. Does not hint or change glyph. Default extension is '.rpt'\n");
 	fprintf(OUTPUTBUFF, "   -rs Write stem widths data. Does not hint or change glyph. Default extension is '.rpt'\n");
 	fprintf(OUTPUTBUFF, "   -a Modifies -ra and -rs: Includes stems between curved lines: default is to omit these.\n");
-	fprintf(OUTPUTBUFF,"    -v print versions.\n");
-	}
-	
+	fprintf(OUTPUTBUFF, "   -v print versions.\n");
+}
+
 static int main_cleanup(short code)
 {
 	closefiles();
@@ -226,9 +228,11 @@ static void closeReportFile(void)
 int main(int argc, char *argv[])
 {
 	int allowEdit, allowHintSub, fixStems, debug, badParam;
+	boolean argumentIsBezData = false;
 	char *fontInfoFileName=NULL; /* font info file name, or suffix of environment variable holding the fontfino string. */
 	char *fontinfo = NULL; /* the string of fontinfo data */
 	int firstFileNameIndex = -1; /* arg index for first bez file name, or  suffix of environment variable holding the bez string. */
+	
 	register char *current_arg;
 	short total_files = 0; 
 	int result, argi;
@@ -282,13 +286,31 @@ int main(int argc, char *argv[])
 			 case 'e':
 				allowEdit = FALSE;
 				break;
-			 case 'f':
+			case 'b':
+				argumentIsBezData = true;
+				break;
+			case 'f':
+				if (fontinfo != NULL) {
+					fprintf(OUTPUTBUFF, "Error. Illegal command line. \"-f\" can’t be used together with the \"-i\" command.\n");
+					exit(1);
+				}
 				fontInfoFileName = argv[++argi];
-				if  ((fontInfoFileName[0] == '\0') || (fontInfoFileName[0] == '-'))
-					{
+				if ((fontInfoFileName[0] == '\0') || (fontInfoFileName[0] == '-')) {
 					fprintf(OUTPUTBUFF, "Error. Illegal command line. \"-f\" option must be followed by a file name.\n");
 					exit(1);
-					}
+				}
+				fontinfo = getFileData(fontInfoFileName);
+				break;
+			case 'i':
+				if (fontinfo != NULL) {
+					fprintf(OUTPUTBUFF, "Error. Illegal command line. \"-i\" can’t be used together with the \"-f\" command.\n");
+					exit(1);
+				}
+				fontinfo = argv[++argi];
+				if ((fontinfo[0] == '\0') || (fontinfo[0] == '-')) {
+					fprintf(OUTPUTBUFF, "Error. Illegal command line. \"-i\" option must be followed by a font info string.\n");
+					exit(1);
+				}
 				break;
 			 case 's':
 				fileSuffix = argv[++argi];
@@ -386,30 +408,35 @@ int main(int argc, char *argv[])
 #endif
 
 	AC_SetReportCB(reportCB, verbose);
-	fontinfo = getFileData(fontInfoFileName);
-	argi = firstFileNameIndex-1;
-	while (++argi < argc)
-		{
+	argi = firstFileNameIndex - 1;
+	while (++argi < argc) {
 		char *bezdata;
 		char *output;
 		size_t outputsize = 0;
 		bezName = argv[argi];
-		bezdata = getFileData(bezName);
-		outputsize = 4*strlen(bezdata);
-		output = malloc(outputsize); 
+		if (!argumentIsBezData) {
+			bezdata = getFileData(bezName);
+		}
+		else {
+			bezdata = bezName;
+		}
+		outputsize = 4 * strlen(bezdata);
+		output = malloc(outputsize);
 
-		if (doAligns || doStems)
+		if (!argumentIsBezData && (doAligns || doStems)) {
 			openReportFile(bezName, fileSuffix);
-			
-		result = AutoColorString(bezdata, fontinfo, output, (int*)&outputsize, allowEdit, allowHintSub, debug);
+		}
+
+		result = AutoColorString(bezdata, fontinfo, output, (int *)&outputsize, allowEdit, allowHintSub, debug);
 		if (result == AC_DestBuffOfloError)
 			{
 			free(output);
 			if (reportFile != NULL)
 				closeReportFile();
-			if (doAligns || doStems)
+			if (!argumentIsBezData && (doAligns || doStems)) {
 				openReportFile(bezName, fileSuffix);
-			output = malloc(outputsize); 
+			}
+			output = malloc(outputsize);
 			/* printf("NOTE: trying again. Input size %d output size %d.\n", strlen(bezdata), outputsize); */
 			AC_SetReportCB(reportCB, FALSE);
 			result = AutoColorString(bezdata, fontinfo, output, (int*)&outputsize, allowEdit, allowHintSub, debug);
@@ -417,11 +444,16 @@ int main(int argc, char *argv[])
 			}
 		if (reportFile != NULL)
 			closeReportFile();
-		else
-			{
-			if ((outputsize != 0) && (result == AC_Success))
-				writeFileData(bezName, output, fileSuffix);
+		else {
+			if ((outputsize != 0) && (result == AC_Success)) {
+				if (!argumentIsBezData) {
+					writeFileData(bezName, output, fileSuffix);
+				}
+				else {
+					printf("%s", output);
+				}
 			}
+		}
 		free(output);
 		main_cleanup( (result == AC_Success) ? OK : FATALERROR);
 		}
