@@ -2,6 +2,19 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
+FDK v2.5 Dec 02 2104 change number 63408.
+
+	spot.
+	Fixed error message in GSUB chain contextual 3 proof file output. spot was
+	adding it as a shell comment to the proof output, cuasing conversion to PDF
+	to fail.
+
+	makeotf.
+	Increase limit for glyph name length from 31 to 63 characters. This is not
+	encouraged in shipping fonts, as there may be text engines that will not
+	accept glyphs with more than 31 characters. This was done to allow building
+	test fonts to look for such cases.
+	
 FDK v2.5 Sep 18 2014 change number 63209.
 
 	makeInstancesUFO.

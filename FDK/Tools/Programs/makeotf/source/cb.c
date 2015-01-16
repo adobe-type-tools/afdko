@@ -64,7 +64,7 @@ extern jmp_buf mark;
 #define WINDOWS_SCRIPT		(4 << 4)
 #define WINDOWS_DECORATIVE	(5 << 4)
 #define MAX_CHAR_NAME_LEN			63		/* Max charname len (inc '\0') */
-#define MAX_FINAL_CHAR_NAME_LEN			31		/* Max charname len (inc '\0') */
+#define MAX_FINAL_CHAR_NAME_LEN			63		/* Max charname len (inc '\0') */
 #ifdef WIN32
 char sepch();	/* from WIN.C */
 

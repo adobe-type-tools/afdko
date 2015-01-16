@@ -529,23 +529,32 @@ void proofMessage(ProofContextPtr ctx, Byte8 * str)
 			sprintf(psstr, " gsave /Courier-Bold findfont 12 scalefont setfont (%s) show grestore ", str);
 			proofPSOUT(ctx, psstr);
 		}else{
-			while (strlen(str) > kMaxMessageLength)
+            char * temp =(char *)memNew( kMaxMessageLength+1);
+            size_t nPos = 0;
+            size_t nLen = strlen(str);
+            size_t tLen = nLen;
+            
+ 			while (tLen > 0)
 				{
-				char temp=str[kMaxMessageLength-1];
-				str[kMaxMessageLength-1]=0;
-
-				sprintf(psstr, " gsave /Courier-Bold findfont 12 scalefont setfont (%s) show grestore ", str);
+                if (tLen > kMaxMessageLength)
+                {
+                    strncpy(temp, &str[nPos], kMaxMessageLength);
+                    nPos += kMaxMessageLength;
+                    temp[nPos] = 0;
+               }
+                else
+                {
+                    strcpy(temp, &str[nPos]);
+                    nPos = nLen;
+                }
+				sprintf(psstr, " gsave /Courier-Bold findfont 12 scalefont setfont (%s) show grestore ", temp);
 				proofPSOUT(ctx, psstr);
 				
 				ctx->curry-=13;
 				sprintf(psstr,"%g %g _MT %% Newline\n", ctx->currx, ctx->curry);
 				proofPSOUT(ctx, psstr);
-				
-				str[kMaxMessageLength-1]=temp;
-				str=str+(kMaxMessageLength-1);
+                tLen = nLen - nPos;
 				}
-			sprintf(psstr, " gsave /Courier-Bold findfont 12 scalefont setfont (%s) show grestore ", str);
-			proofPSOUT(ctx, psstr);
 		}	
 	}
 	proofNewline(ctx);	

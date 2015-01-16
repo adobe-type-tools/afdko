@@ -25,7 +25,7 @@
 #define SET_BIT_ARR(a, b) (a[(b) / 32] |= 1UL << (b) % 32)
 #define TEST_BIT_ARR(a, b) (a[(b) / 32] & 1UL << (b) % 32)
 
-#define MAX_GNAME_LEN   31
+#define MAX_GNAME_LEN   63
 
 #define SUPP_UV_BITNUM  57 /* OS/2.ulUnicodeRange bitnum flagging supp UVs */
 
