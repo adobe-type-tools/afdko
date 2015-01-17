@@ -72,11 +72,7 @@ static void printHelp(void)
 	fprintf(OUTPUTBUFF, "   -ra Write alignment zones data. Does not hint or change glyph. Default extension is '.rpt'\n");
 	fprintf(OUTPUTBUFF, "   -rs Write stem widths data. Does not hint or change glyph. Default extension is '.rpt'\n");
 	fprintf(OUTPUTBUFF, "   -a Modifies -ra and -rs: Includes stems between curved lines: default is to omit these.\n");
-<<<<<<< .merge_file_LpHuQZ
 	fprintf(OUTPUTBUFF, "   -v print versions.\n");
-=======
-	fprintf(OUTPUTBUFF, "    -v print versions.\n");
->>>>>>> .merge_file_xHqP76
 }
 
 static int main_cleanup(short code)
@@ -219,20 +215,11 @@ static void closeReportFile(void)
 int main(int argc, char *argv[])
 {
 	int allowEdit, allowHintSub, fixStems, debug, badParam;
-<<<<<<< .merge_file_LpHuQZ
 	boolean argumentIsBezData = false;
 	char *fontInfoFileName=NULL; /* font info file name, or suffix of environment variable holding the fontfino string. */
 	char *fontinfo = NULL; /* the string of fontinfo data */
 	int firstFileNameIndex = -1; /* arg index for first bez file name, or  suffix of environment variable holding the bez string. */
 	
-=======
-	char *
-		fontInfoFileName = NULL; /* font info file name, or suffix of environment variable holding
-									the fontfino string. */
-	char *fontinfo = NULL;		 /* the string of fontinfo data */
-	int firstFileNameIndex = -1; /* arg index for first bez file name, or  suffix of environment
-									variable holding the bez string. */
->>>>>>> .merge_file_xHqP76
 	register char *current_arg;
 	short total_files = 0;
 	int result, argi;
@@ -284,7 +271,6 @@ int main(int argc, char *argv[])
 			case 'e':
 				allowEdit = FALSE;
 				break;
-<<<<<<< .merge_file_LpHuQZ
 			case 'b':
 				argumentIsBezData = true;
 				break;
@@ -293,15 +279,11 @@ int main(int argc, char *argv[])
 					fprintf(OUTPUTBUFF, "Error. Illegal command line. \"-f\" can’t be used together with the \"-i\" command.\n");
 					exit(1);
 				}
-=======
-			case 'f':
->>>>>>> .merge_file_xHqP76
 				fontInfoFileName = argv[++argi];
 				if ((fontInfoFileName[0] == '\0') || (fontInfoFileName[0] == '-')) {
 					fprintf(OUTPUTBUFF, "Error. Illegal command line. \"-f\" option must be followed by a file name.\n");
 					exit(1);
 				}
-<<<<<<< .merge_file_LpHuQZ
 				fontinfo = getFileData(fontInfoFileName);
 				break;
 			case 'i':
@@ -314,8 +296,6 @@ int main(int argc, char *argv[])
 					fprintf(OUTPUTBUFF, "Error. Illegal command line. \"-i\" option must be followed by a font info string.\n");
 					exit(1);
 				}
-=======
->>>>>>> .merge_file_xHqP76
 				break;
 			case 's':
 				fileSuffix = argv[++argi];
@@ -409,68 +389,42 @@ int main(int argc, char *argv[])
 #endif
 
 	AC_SetReportCB(reportCB, verbose);
-<<<<<<< .merge_file_LpHuQZ
-=======
-	fontinfo = getFileData(fontInfoFileName);
->>>>>>> .merge_file_xHqP76
 	argi = firstFileNameIndex - 1;
 	while (++argi < argc) {
 		char *bezdata;
 		char *output;
 		size_t outputsize = 0;
 		bezName = argv[argi];
-<<<<<<< .merge_file_LpHuQZ
 		if (!argumentIsBezData) {
 			bezdata = getFileData(bezName);
 		}
 		else {
 			bezdata = bezName;
 		}
-=======
-		bezdata = getFileData(bezName);
->>>>>>> .merge_file_xHqP76
 		outputsize = 4 * strlen(bezdata);
 		output = malloc(outputsize);
 
 		if (!argumentIsBezData && (doAligns || doStems)) {
 			openReportFile(bezName, fileSuffix);
-<<<<<<< .merge_file_LpHuQZ
 		}
 
 		result = AutoColorString(bezdata, fontinfo, output, (int *)&outputsize, allowEdit, allowHintSub, debug);
 		if (result == AC_DestBuffOfloError)
 			{
-=======
-
-		result = AutoColorString(bezdata, fontinfo, output, (int *)&outputsize, allowEdit,
-								 allowHintSub, debug);
-		if (result == AC_DestBuffOfloError) {
->>>>>>> .merge_file_xHqP76
 			free(output);
 			if (reportFile != NULL) {
 				closeReportFile();
-<<<<<<< .merge_file_LpHuQZ
 			if (!argumentIsBezData && (doAligns || doStems)) {
 				openReportFile(bezName, fileSuffix);
 			}
 			output = malloc(outputsize);
 			/* printf("NOTE: trying again. Input size %d output size %d.\n", strlen(bezdata), outputsize); */
-=======
-			}
-			if (doAligns || doStems) {
-				openReportFile(bezName, fileSuffix);
-			}
-			output = malloc(outputsize);
-			/* printf("NOTE: trying again. Input size %d output size %d.\n", strlen(bezdata),
-			 * outputsize); */
->>>>>>> .merge_file_xHqP76
 			AC_SetReportCB(reportCB, FALSE);
 			result = AutoColorString(bezdata, fontinfo, output, (int *)&outputsize, allowEdit, allowHintSub, debug);
 			AC_SetReportCB(reportCB, verbose);
 		}
 		if (reportFile != NULL) {
 			closeReportFile();
-<<<<<<< .merge_file_LpHuQZ
 		else {
 			if ((outputsize != 0) && (result == AC_Success)) {
 				if (!argumentIsBezData) {
@@ -483,13 +437,6 @@ int main(int argc, char *argv[])
 		}
 		free(output);
 		main_cleanup( (result == AC_Success) ? OK : FATALERROR);
-=======
-		}
-		else {
-			if ((outputsize != 0) && (result == AC_Success)) {
-				writeFileData(bezName, output, fileSuffix);
-			}
->>>>>>> .merge_file_xHqP76
 		}
 		free(output);
 		main_cleanup((result == AC_Success) ? OK : FATALERROR);
