@@ -425,7 +425,8 @@ int main(int argc, char *argv[])
 		}
 		if (reportFile != NULL) {
 			closeReportFile();
-		else {
+        }
+        else {
 			if ((outputsize != 0) && (result == AC_Success)) {
 				if (!argumentIsBezData) {
 					writeFileData(bezName, output, fileSuffix);
