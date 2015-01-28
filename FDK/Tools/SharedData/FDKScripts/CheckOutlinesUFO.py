@@ -1,17 +1,17 @@
-__copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+__copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
 __usage__ = """
-   checkOutlinesUFO program v1.01 Sep 24 2014
+   checkOutlinesUFO program v1.03 Jan 28 2015
    
-   checkOutlinesUFO [-r] [-e]  [-d] [-g glyphList] [-gx glyphList]
+   checkOutlinesUFO [-nr] [-e] [-g glyphList] [-gf <file name>] [-all] [-noOverlap] [-noBasicChecks] [-setMinArea <n>] [- setTolerance <n>] [-d]
    
    Remove path overlaps, and do a few basic outline quality checks.
  """
 
 kProcessedGlyphLayerName = "com.adobe.type.processedglyphs"
 
-__help__ = __usage__ + """
+__help__ = """
 
 -nr	do not round point values to integer
 
@@ -148,36 +148,33 @@ class FontFile(object):
 
 	def save(self):
 		print "Saving font..."
-		if self.ufoFormat < 3:
-			self.dFont.save(formatVersion=3)
-		else:
-			self.dFont.save(formatVersion=self.ufoFormat)
-			
+		""" A real hack here. 
+		If the font format was less than 3, we need to save it with the original
+		format. I care specifically about RoboFont, which can still read only
+		format 2. However, dfont.save() will save the processed layer only if
+		the format is 3. If I ask to save(formatVersion=3) when the dfont format
+		is 2, then the save function will  first mark all the glyphs in all the layers
+		as being 'dirty' and needing to be saved. and also causes the defcon
+		font.py:save to delete the original font and write everything anew.
+		
+		In order to avoid this, I reach into the defcon code and save only the processed glyphs layer.
+		
+		"""
+		from ufoLib import UFOWriter
+		writer = UFOWriter(self.dFont.path, formatVersion=2)
+		layers = self.dFont.layers
+ 
+		layer = layers[kProcessedGlyphLayerName]
+		writer._formatVersion = 3
+		writer.layerContents[kProcessedGlyphLayerName] = "glyphs." + kProcessedGlyphLayerName
+		glyphSet = writer.getGlyphSet(layerName=kProcessedGlyphLayerName, defaultLayer=False)
+		writer.writeLayerContents(layers.layerOrder)
+		writer._formatVersion = 2
+		layer.save(glyphSet)
+		layer.dirty = False
+
 		if self.fontType == kUFOFontType:
-			"""IF the font format was less than 3, we need to save it with the
-			original format. I care specifically about RoboFont, which can still
-			read only format 2. I will remove this code as soon as Robofont can
-			handle format 3. Simply saving the font in format less than 3 will
-			remove the processed glyph layer, hence saving it in format 2 to a
-			different path, and then moving the fomrat 3 data to the new  format
-			2 font. This effectively makes the processed glyph layer a private
-			UFO extension for UFO format 2, for use by the FDK tools,
-			specifically tx and makeotf."""
 			self.ufoFontHashData.close() # Write the hash data.
-			if self.ufoFormat < 3:
-				self.tempUFOPath = self.fontPath + ".temp.ufo"
-				if os.path.exists(self.tempUFOPath):
-					shutil.rmtree(self.tempUFOPath)
-				self.dFont.save(formatVersion=self.ufoFormat, path=self.tempUFOPath)
-				p1 = os.path.join(self.fontPath, "glyphs." + kProcessedGlyphLayerName)
-				p2 = os.path.join(self.fontPath, "layercontents.plist")
-				p3 = os.path.join(self.fontPath, "data")
-				shutil.move(p1, self.tempUFOPath)
-				shutil.move(p2, self.tempUFOPath)
-				if os.path.exists(p3):
-					shutil.move(p3, self.tempUFOPath)
-				shutil.rmtree(self.fontPath)
-				shutil.move(self.tempUFOPath, self.fontPath)
 		elif self.fontType == kType1FontType:
 			cmd = "tx -t1 \"%s\" \"%s\"" % (self.tempUFOPath, self.fontPath)
 			p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout
@@ -194,13 +191,13 @@ class FontFile(object):
 			cmd = "sfntedit -a \"CFF \"=\"%s\" \"%s\"" % (tempCFFPath, self.fontPath)
 			p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout
 			log = p.read()
-			#os.remove(tempCFFPath)
+			if os.path.exists(tempCFFPath):
+				os.remove(tempCFFPath)
 		else:
 			print "Font type is unknown: cannot save changes"
 
-		if 0: #self.tempUFOPath != None:
+		if (self.tempUFOPath != None) and os.path.exists(tempUFOPath):
 			shutil.rmtree(self.tempUFOPath) 
-		print "Done"
 
 	def checkSkipGlyph(self, glyphName, newSrcHash):
 		usingProcessedLayer = skip = False
@@ -737,7 +734,7 @@ def run(args):
 			lastHadMsg = 0
 		else:
 			print os.linesep + glyphName, " ".join(msg),
-			if changed:
+			if changed and options.allowChanges:
 				fontChanged = 1
 			lastHadMsg = 1
 		if options.allowChanges and changed:
@@ -755,14 +752,14 @@ def run(args):
 			if options.roundValues:
 				for contour in fixedGlyph:
 					for point in contour:
-						point.x = round(point.x)
-						point.y = round(point.y)
+						point.x = int(round(point.x))
+						point.y = int(round(point.y))
 	if not fontChanged:
 		print
-		print "Done"
 	else:
 		print
 		fontFile.save()
+	print "Done with font"
 	return
 
 if __name__=='__main__':

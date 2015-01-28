@@ -1,8 +1,28 @@
-<?xml version="1.0" encoding="utf-8"?>
 FDKReleaseNotes.txt
 ===============================================================================
+FDK v2.5 Jan 26 2015 change number 63537.
 
-FDK v2.5 Dec 02 2104 change number 63408.
+	checkOutlinesUFO
+	Coordinates are written as integers, as well as being rounded.
+	Changed save function so that only the processed glyph layer is saved, and
+	the default layer is not touched.
+	Changed so that XML type is written as 'UTF-8' rather than 'utf-8'. This was
+	actually a change in the FontTools xmlWriter.py module.
+	Fxied typos in usage and help text.
+	
+	makeInstancesUFO.
+	Changed so that the option -i (selection of  which instances to build) actually works.
+	Removed dependence on existence of instance.txt file.
+	Changed to call checkOutlinesUFO rather than checkOutlines
+	Removed hack of converting all file paths to absolute file paths: this was a
+	work-around for a bug in robofab-ufo3k that is now fixed.
+	Removed all references to old instances.txt meta data file.
+		
+	Misc
+	Merged fixes from the Github AFDKO OpenSource depot.
+	Updated to latest modules for defcon, fontMath, robofab, and mutatorMath.
+	
+FDK v2.5 Dec 02 2014 change number 63408.
 
 	spot.
 	Fixed error message in GSUB chain contextual 3 proof file output. spot was

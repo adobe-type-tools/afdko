@@ -14,7 +14,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <sys/stat.h>
 #endif
 
-const char *C_ProgramVersion = "1.56040";
+const char *C_ProgramVersion = "1.63533";
 const char *reportExt = ".rpt";
 const char *dfltExt = ".new";
 char *bezName = NULL;
@@ -410,35 +410,35 @@ int main(int argc, char *argv[])
 
 		result = AutoColorString(bezdata, fontinfo, output, (int *)&outputsize, allowEdit, allowHintSub, debug);
 		if (result == AC_DestBuffOfloError)
-			{
-			free(output);
+        {
 			if (reportFile != NULL) {
 				closeReportFile();
-			if (!argumentIsBezData && (doAligns || doStems)) {
-				openReportFile(bezName, fileSuffix);
-			}
-			output = malloc(outputsize);
-			/* printf("NOTE: trying again. Input size %d output size %d.\n", strlen(bezdata), outputsize); */
-			AC_SetReportCB(reportCB, FALSE);
-			result = AutoColorString(bezdata, fontinfo, output, (int *)&outputsize, allowEdit, allowHintSub, debug);
-			AC_SetReportCB(reportCB, verbose);
-		}
-		if (reportFile != NULL) {
-			closeReportFile();
+                if (!argumentIsBezData && (doAligns || doStems)) {
+                    openReportFile(bezName, fileSuffix);
+                }
+                free(output);
+                output = malloc(outputsize);
+                /* printf("NOTE: trying again. Input size %d output size %d.\n", strlen(bezdata), outputsize); */
+                AC_SetReportCB(reportCB, FALSE);
+                result = AutoColorString(bezdata, fontinfo, output, (int *)&outputsize, allowEdit, allowHintSub, debug);
+                AC_SetReportCB(reportCB, verbose);
+            }
+        }
+        
+        if (reportFile != NULL) {
+            closeReportFile();
         }
         else {
-			if ((outputsize != 0) && (result == AC_Success)) {
-				if (!argumentIsBezData) {
-					writeFileData(bezName, output, fileSuffix);
-				}
-				else {
-					printf("%s", output);
-				}
-			}
-		}
-		free(output);
-		main_cleanup( (result == AC_Success) ? OK : FATALERROR);
-		}
+            if ((outputsize != 0) && (result == AC_Success)) {
+                if (!argumentIsBezData) {
+                    writeFileData(bezName, output, fileSuffix);
+                }
+                else {
+                    printf("%s", output);
+                }
+            }
+        }
+        
 		free(output);
 		main_cleanup((result == AC_Success) ? OK : FATALERROR);
 	}
