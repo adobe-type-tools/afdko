@@ -6,7 +6,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 __doc__ = """
 """
 __usage__ = """
-   makeInstancesUFO program v1.04 Jan 28 2015
+   makeInstancesUFO program v1.05 Jan 29 2015
    makeInstancesUFO -h
    makeInstancesUFO -u
    makeInstancesUFO [-a]  [-d <design space file name>]
@@ -192,28 +192,25 @@ def updateInstance(options, fontInstancePath):
 		logMsg.log("\tdoing overlap removal with checkOutlinesUFO %s ..." % (fontInstancePath))
 		logList = []
 		if os.name == "nt":
-			proc = Popen(['checkOutlinesUFO.cmd', "-e", fontInstancePath], stdout=PIPE)
+			proc = Popen(['checkOutlinesUFO.cmd', "-e", '-all',fontInstancePath], stdout=PIPE)
 		else:
-			proc = Popen(['checkOutlinesUFO', "-e", fontInstancePath], stdout=PIPE)
-		lastLine = ""
+			proc = Popen(['checkOutlinesUFO', "-e", '-all',fontInstancePath], stdout=PIPE)
 		while 1:
 			output = proc.stdout.readline()
 			if output:
-				sys.stdout.write(".")
+				print ".",
 				logList.append(output)
-				lastLine = output
 			if proc.poll() != None:
 				output = proc.stdout.readline()
 				if output:
 					print output,
 					logList.append(output)
-					lastLine = output
 				break
 		log = "".join(logList)
 		if not ("Done with font" in log):
 			print
-			logMsg.log("Error in checkOutlinesUFO %s" % (fontInstancePath))
 			logMsg.log(log)
+			logMsg.log("Error in checkOutlinesUFO %s" % (fontInstancePath))
 			raise(SnapShotError)
 		else:
 			print
@@ -222,28 +219,25 @@ def updateInstance(options, fontInstancePath):
 		logMsg.log("\tautohinting %s ..." % (fontInstancePath))
 		logList = []
 		if os.name == "nt":
-			proc = Popen(['autohint.cmd','-q', '-nb', fontInstancePath], stdout=PIPE)
+			proc = Popen(['autohint.cmd','-q', '-nb', '-all', fontInstancePath], stdout=PIPE)
 		else:
-			proc = Popen(['autohint', '-q','-nb',fontInstancePath], stdout=PIPE)
-		lastLine = ""
+			proc = Popen(['autohint', '-q','-nb', '-all', fontInstancePath], stdout=PIPE)
 		while 1:
 			output = proc.stdout.readline()
 			if output:
-				sys.stdout.write(".")
+				print output,
 				logList.append(output)
-				lastLine = output
 			if proc.poll() != None:
 				output = proc.stdout.readline()
 				if output:
 					print output,
 					logList.append(output)
-					lastLine = output
 				break
 		log = "".join(logList)
 		if not ("Done with font" in log):
 			print
-			logMsg.log("Error in autohinting %s" % (fontInstancePath))
 			logMsg.log(log)
+			logMsg.log("Error in autohinting %s" % (fontInstancePath))
 			raise(SnapShotError)
 		else:
 			print
@@ -279,7 +273,7 @@ def run(args):
 if __name__=='__main__':
 	try:
 		run(sys.argv[1:])
-	except (OptError, ParseError):
+	except (OptError, ParseError, SnapShotError):
 		logMsg.log("Quitting after error.")
 		pass
 	

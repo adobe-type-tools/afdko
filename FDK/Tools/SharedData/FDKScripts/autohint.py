@@ -1246,7 +1246,6 @@ def hintFile(options):
 				if not options.verbose:
 					logMsg("") # end series of "."
 				logMsg(report)
-	
 			if os.path.exists(tempBezNew):
 				bp = open(tempBezNew, "rt")
 				newBezString = bp.read()
@@ -1260,7 +1259,9 @@ def hintFile(options):
 				newBezString = None
 			
 		if not newBezString:
-			print "Error - failure in processing outline data"
+			if not options.verbose:
+				logMsg("")
+			logMsg("%s Error - failure in processing outline data." % aliasName(name))
 			continue
 			
 		if not (("ry" in newBezString[:200]) or ("rb" in newBezString[:200]) or ("rm" in newBezString[:200]) or ("rv" in newBezString[:200])):

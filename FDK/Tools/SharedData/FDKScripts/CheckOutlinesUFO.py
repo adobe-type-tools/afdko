@@ -754,6 +754,7 @@ def run(args):
 					for point in contour:
 						point.x = int(round(point.x))
 						point.y = int(round(point.y))
+		sys.stdout.flush() # Need when the script is called from another script with Popen().
 	if not fontChanged:
 		print
 	else:

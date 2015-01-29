@@ -416,13 +416,13 @@ int main(int argc, char *argv[])
                 if (!argumentIsBezData && (doAligns || doStems)) {
                     openReportFile(bezName, fileSuffix);
                 }
-                free(output);
-                output = malloc(outputsize);
-                /* printf("NOTE: trying again. Input size %d output size %d.\n", strlen(bezdata), outputsize); */
-                AC_SetReportCB(reportCB, FALSE);
-                result = AutoColorString(bezdata, fontinfo, output, (int *)&outputsize, allowEdit, allowHintSub, debug);
-                AC_SetReportCB(reportCB, verbose);
             }
+            free(output);
+            output = malloc(outputsize);
+            /* printf("NOTE: trying again. Input size %d output size %d.\n", strlen(bezdata), outputsize); */
+            AC_SetReportCB(reportCB, FALSE);
+            result = AutoColorString(bezdata, fontinfo, output, (int *)&outputsize, allowEdit, allowHintSub, debug);
+            AC_SetReportCB(reportCB, verbose);
         }
         
         if (reportFile != NULL) {
