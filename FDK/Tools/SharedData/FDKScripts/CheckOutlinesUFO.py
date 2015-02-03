@@ -2,14 +2,13 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-   checkOutlinesUFO program v1.03 Jan 28 2015
+   checkOutlinesUFO program v1.04 Feb 3 2015
    
    checkOutlinesUFO [-nr] [-e] [-g glyphList] [-gf <file name>] [-all] [-noOverlap] [-noBasicChecks] [-setMinArea <n>] [- setTolerance <n>] [-d]
    
    Remove path overlaps, and do a few basic outline quality checks.
  """
-
-kProcessedGlyphLayerName = "com.adobe.type.processedglyphs"
+from ufoTools import kProcessedGlyphsLayerName, kProcessedGlyphsLayer
 
 __help__ = """
 
@@ -57,7 +56,7 @@ defines a straight line.
 -all Force all glyphs to be processed. This applies only to UFO fonts, where processed glyphs
 	are saved in a layer, and processing of a glyph is skipped if has already been processed.
 
-""" % kProcessedGlyphLayerName
+""" % kProcessedGlyphsLayerName
 
 __doc__ = __usage__ + __help__
 
@@ -73,6 +72,7 @@ import shutil
 import ufoTools
 import booleanOperations.booleanGlyph
 from robofab.pens.digestPen import DigestPointPen
+import hashlib
 
 kSrcGLIFHashMap = "com.adobe.type.checkOutlinesHashMap"
 
@@ -107,7 +107,7 @@ class FontFile(object):
 				self.ufoFormat = 2
 			self.fontType = kUFOFontType
 			self.useHashMap = useHashMap
-			self.ufoFontHashData = ufoTools.UFOFontData(fontPath, self.useHashMap, programName="ChckOutlinesUFO")
+			self.ufoFontHashData = ufoTools.UFOFontData(fontPath, self.useHashMap, programName="CheckOutlinesUFO")
 			self.ufoFontHashData.readHashMap()
 			
 		except ufoLib.UFOLibError,e:
@@ -164,16 +164,17 @@ class FontFile(object):
 		writer = UFOWriter(self.dFont.path, formatVersion=2)
 		layers = self.dFont.layers
  
-		layer = layers[kProcessedGlyphLayerName]
+		layer = layers[kProcessedGlyphsLayerName]
 		writer._formatVersion = 3
-		writer.layerContents[kProcessedGlyphLayerName] = "glyphs." + kProcessedGlyphLayerName
-		glyphSet = writer.getGlyphSet(layerName=kProcessedGlyphLayerName, defaultLayer=False)
+		writer.layerContents[kProcessedGlyphsLayerName] = kProcessedGlyphsLayer
+		glyphSet = writer.getGlyphSet(layerName=kProcessedGlyphsLayerName, defaultLayer=False)
 		writer.writeLayerContents(layers.layerOrder)
 		writer._formatVersion = 2
 		layer.save(glyphSet)
 		layer.dirty = False
 
 		if self.fontType == kUFOFontType:
+			self.ufoFontHashData.hashMapChanged = True
 			self.ufoFontHashData.close() # Write the hash data.
 		elif self.fontType == kType1FontType:
 			cmd = "tx -t1 \"%s\" \"%s\"" % (self.tempUFOPath, self.fontPath)
@@ -204,7 +205,21 @@ class FontFile(object):
 		if self.useHashMap:
 			usingProcessedLayer, skip = self.ufoFontHashData.checkSkipGlyph(glyphName, newSrcHash)
 		return usingProcessedLayer, skip
-		
+	
+	def buildGlyphHash(self, width, glyphDigest):
+		dataList = [str(width)]
+		for x,y in glyphDigest:
+			dataList.append("%s%s" %  (x,y))
+		data = "".join(dataList)
+		if len(data) < 128:
+			hash = data
+		else:
+			hash = hashlib.sha512(data).hexdigest()
+		return hash
+	
+	def markGlyphChangedInHash(self, glyphName):
+		self.ufoFontHashData.markGlyphChangedInHash(glyphName)
+	
 class COOptions:
 	def __init__(self):
 		self.filePath = None
@@ -272,9 +287,9 @@ def getOptions():
 		elif arg == "-e":
 			options.allowChanges = 1
 		elif arg == "-noOverlap":
-			self.testList.remove(doOverlapRemoval)
+			options.testList.remove(doOverlapRemoval)
 		elif arg == "-noBasicChecks":
-			self.testList.remove(doCleanup)
+			options.testList.remove(doCleanup)
 		elif arg == "-setMinArea":
 			i = i +1
 			try:
@@ -395,7 +410,7 @@ def getDigest(dGlyph):
 	"""
 	mp = DigestPointPen()
 	dGlyph.drawPoints(mp)
-	digest = mp.getDigestPointsOnly(needSort=True)
+	digest = mp.getDigestPointsOnly(needSort=False)
 	# we need to round to int.
 	intDigest = digest #[ (int(p[0]), int(p[1])) for p in digest]
 	return intDigest
@@ -642,8 +657,8 @@ def doOverlapRemoval(bGlyph, oldDigest, changed, msg, options):
 	options.removeFlatCurvesDone = 1
 	# I need to fix these in the source, or the old vs new digests will differ, as BooleanOperations removes these 
 	# even if it does not do overlap removal.
-	if oldDigest == None:
-		oldDigest = getDigest(bGlyph)
+	oldDigest = list(getDigest(bGlyph))
+	oldDigest.sort()
 	newPathNum = -1
 	prevPathNum = 0
 	newGlyph = bGlyph
@@ -656,7 +671,8 @@ def doOverlapRemoval(bGlyph, oldDigest, changed, msg, options):
 		newPathNum = len(newGlyph.contours)
 		
 	# Can't use change in path number to see if something has changed - overlap removal can add and subtract paths.
-	newDigest = getDigest(newGlyph)
+	newDigest = list(getDigest(newGlyph))
+	newDigest.sort()
 	if str(oldDigest) != str(newDigest):
 		changed = 1
 		msg.append( "There is an overlap.")
@@ -664,18 +680,18 @@ def doOverlapRemoval(bGlyph, oldDigest, changed, msg, options):
 	changed, msg = removeTinySubPaths(newGlyph, options.minArea, changed, msg) # Tiny subpaths are added by overlap removal.
 	return newGlyph, newDigest, changed, msg
 
-def doCleanup(newGlyph,oldDigest, changed, msg, options):
-	if oldDigest == None:
-		oldDigest = getDigest(newGlyph)
-
+def doCleanup(newGlyph, oldDigest, changed, msg, options):
+	# Note that these removeCoincidentPointsDone and removeFlatCurvesDone get called only if doOverlapRemoval is NOT called.
 	if not options.removeCoincidentPointsDone:
 		changed, msg = removeCoincidentPoints(newGlyph, changed, msg, options)
 		options.removeCoincidentPointsDone = 1
 	if not options.removeFlatCurvesDone:
 		changed, msg = removeFlatCurves(newGlyph, changed, msg, options)
+	# I call removeColinearLines even when doOverlapRemoval is called, as the latter can introduce new co-linear points.
 	changed, msg = removeColinearLines(newGlyph, changed, msg, options)
 
-	newDigest = getDigest(newGlyph)
+	newDigest = list(getDigest(newGlyph))
+	newDigest.sort()
 	if str(oldDigest) != str(newDigest):
 		changed = 1
 
@@ -702,9 +718,9 @@ def run(args):
 
 	if not options.writeToDefaultLayer:
 		try:
-			processedLayer = dFont.layers[kProcessedGlyphLayerName]
+			processedLayer = dFont.layers[kProcessedGlyphsLayerName]
 		except KeyError:
-			processedLayer = dFont.newLayer(kProcessedGlyphLayerName)
+			processedLayer = dFont.newLayer(kProcessedGlyphsLayerName)
 	
 	fontChanged = 0
 	lastHadMsg = 0
@@ -717,9 +733,13 @@ def run(args):
 			dGlyph.decomposeAllComponents()
 		newGlyph = booleanOperations.booleanGlyph.BooleanGlyph(dGlyph)
 
-		glyphDigest = getDigest(newGlyph)
+		glyphDigest = list(getDigest(newGlyph))
+		glyphDigest.sort()
+		glyphHash = fontFile.buildGlyphHash(newGlyph.width, glyphDigest)
+		# fontFile.checkSkipGlyph updates the hash map for the glyph, so we call it even when
+		# the  '-all' option is used.
+		useProcessedLayer, skip = fontFile.checkSkipGlyph(glyphName, glyphHash)
 		if not options.checkAll:
-			useProcessedLayer, skip = fontFile.checkSkipGlyph(glyphName, glyphDigest)
 			if skip:
 				continue
 
@@ -738,6 +758,7 @@ def run(args):
 				fontChanged = 1
 			lastHadMsg = 1
 		if options.allowChanges and changed:
+			fontFile.markGlyphChangedInHash(glyphName)
 			if options.writeToDefaultLayer:
 				fixedGlyph = dGlyph
 				fixedGlyph.clearContours()

@@ -1,6 +1,15 @@
 FDKReleaseNotes.txt
 ===============================================================================
-FDK v2.5 Jan 26 2015 change number 63537.
+FDK v2.5 Feb 3 2015 change number 63553.
+
+	autohint
+	Fixed a bug with processing flex hints in ufoTools.py, that caused outline distortion.
+	
+	compareFamily.
+	Fixed bug in processing hints: it would miss fractional hints, and so
+	falsely report a glyph as having no hints.
+	Fixed so that it would survive a CFF font with a missing Full Name key.
+	
 
 	checkOutlinesUFO
 	Coordinates are written as integers, as well as being rounded.
@@ -8,7 +17,12 @@ FDK v2.5 Jan 26 2015 change number 63537.
 	the default layer is not touched.
 	Changed so that XML type is written as 'UTF-8' rather than 'utf-8'. This was
 	actually a change in the FontTools xmlWriter.py module.
-	Fxied typos in usage and help text.
+	Fixed typos in usage and help text.
+	Fixed hash dictionary handling so that it will work with autohint, when
+	skipping already processed glyphs.
+	Fixed false report of overlap removal when only change was removing flat curve
+	Fixed stack dump when new glyph is seen which is not in hash map of
+	previously processed glyphs.
 	
 	makeInstancesUFO.
 	Changed so that the option -i (selection of  which instances to build) actually works.
@@ -17,7 +31,7 @@ FDK v2.5 Jan 26 2015 change number 63537.
 	Removed hack of converting all file paths to absolute file paths: this was a
 	work-around for a bug in robofab-ufo3k that is now fixed.
 	Removed all references to old instances.txt meta data file.
-		
+	
 	Misc
 	Merged fixes from the Github AFDKO OpenSource depot.
 	Updated to latest modules for defcon, fontMath, robofab, and mutatorMath.

@@ -7,7 +7,7 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-CompareFamily 2.0.49 Jan 15 2014
+CompareFamily 2.0.50 Feb 2 2015
 
 comparefamily [u] -h] [-d <directory path>] [-tolerance <n>] -rm] [-rn] [-rp] [-nohints] [-l] [-rf] [-st n1,..] [-ft n1,..]
 where 'n1' stands for the number of a test, such as "-st 26" to run Single Test 26.
@@ -1377,9 +1377,16 @@ def doSingleTest3():
 	for font in fontlist:
 		if not  font.FullFontName1.startswith(font.preferredFamilyName1):
 			print "	Error: Mac platform Full Name  name id 4) '%s' does not begin with the string used for font Preferred Family Name, '%s', for Font %s." %  (font.FullFontName1,  font.preferredFamilyName1,  font.PostScriptName1)
-		if  font.ttFont.has_key('CFF ') and (font.FullFontName1 != font.topDict.FullName):
-			print "	Warning: Mac platform Full Name  name id 4) '%s' is not the same as the font CFF table Full Name, '%s', for Font %s." %  (font.FullFontName1,  font.topDict.FullName,  font.PostScriptName1)
-			print "This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used. However, having different values for different copies of the same field and cause confusion when using font development tools."
+		
+		if  font.ttFont.has_key('CFF '):
+			try:
+				cffFullName = font.topDict.FullName
+				if (font.FullFontName1 != cffFullName):
+					print "	Warning: Mac platform Full Name  name id 4) '%s' is not the same as the font CFF table Full Name, '%s', for Font %s." %  (font.FullFontName1,  font.topDict.FullName,  font.PostScriptName1)
+					print "This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used. However, having different values for different copies of the same field and cause confusion when using font development tools."
+			except AttributeError:
+				print "Note: font CFF table has no Full Name entry, for Font %s." %  (font.PostScriptName1)
+				print "This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used."
 
 
 def doSingleTest4():
@@ -1871,7 +1878,7 @@ def doSingleTest17():
 						print "\t\t" + name
 
 
-hintPat = re.compile(r"(?:(\s-*\d+)(\s-*\d+)*)\s([a-z]+)")
+hintPat = re.compile(r"(?:(\s-*[0-9.]+)(\s-*[0-9.]+)*)\s([a-z]+)")
 def checkHintEntry(entry, missingHintsGlyphs, glyphBox, fontPSName):
 	errorCount = 0
 	errMsgs = []

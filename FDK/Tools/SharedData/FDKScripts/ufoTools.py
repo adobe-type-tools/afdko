@@ -1,5 +1,5 @@
 """
-ufoTools.py v1.14 Nov 24 2104
+ufoTools.py v1.15 Feb 2 2015
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -455,7 +455,6 @@ class UFOFontData:
 		skip = False
 		if not self.useHashMap:
 			return usingProcessedLayer, skip
-		
 		try:
 			hashEntry = self.hashMap[glyphName]
 			srcHash, editStatus, historyList = hashEntry
@@ -506,10 +505,14 @@ class UFOFontData:
 			self.readHashMap()
 
 		usingProcessedLayer = 0 # default.
+		try:
+			hashEntry = self.hashMap[glyphName]
+			srcHash, editStatus, historyList = hashEntry
+		except KeyError:
+			hashEntry = None
+			
 		if self.useHashMap:
 			try:
-				hashEntry = self.hashMap[glyphName]
-				srcHash, editStatus, historyList = hashEntry
 				try:
 					programHistoryIndex = historyList.index(self.programName)
 				except ValueError:
@@ -521,7 +524,6 @@ class UFOFontData:
 				hashEntry = None
 				programHistoryIndex = -1 # not found in historyList
 		else:
-			hashEntry = None
 			programHistoryIndex = -1 # not found in historyList
 		
 		# Get default glyph layer data, so we can check if the glyph has been edited since this program was last run.
@@ -575,6 +577,21 @@ class UFOFontData:
 	
 		return glifXML, outlineXML, skip
 	
+	
+	def markGlyphChangedInHash(self, glyphName):
+		hashEntry = self.hashMap[glyphName]
+		hashEntry[1] = 1 # mark the glyph as having been edited; any following program should read from the processed layer.
+		historyList = hashEntry[2] 
+		try:
+			programHistoryIndex = historyList.index(self.programName)
+		except ValueError:
+			programHistoryIndex = -1
+		if programHistoryIndex >= 0:
+			# truncate the history entry after the current position.
+			historyList = historyList[:programHistoryIndex+1]
+			hashEntry[2] = historyList
+		
+
 	def getGlyphList(self):
 		if len(self.glyphMap) == 0:
 			self.loadGlyphMap()
@@ -805,20 +822,10 @@ class UFOFontData:
 				else:
 					for child in childContour:
 						if child.tag == "point":
-							dataList.append(child.attrib["x"])
-							dataList.append(child.attrib["y"])
-							try:
-								dataList.append(child.attrib["type"][0])
-							except KeyError:
-								dataList.append("o") # for off-curve.
+							dataList.append("%s%s" % (child.attrib["x"], child.attrib["y"]))
 							#print dataList[-3:]
 			elif childContour.tag == "component":
-				# first append the key/value pairs
-				for key in childContour.attrib.keys():
-					if key in ["base", "xOffset", "yOffset"]:
-						dataList.append(key) # for off-curve.
-						dataList.append(childContour.attrib[key]) # for off-curve.
-				# now append the component hash.
+				# append the component hash.
 				try:
 					compGlyphName = childContour.attrib["base"]
 				except KeyError:
@@ -834,7 +841,7 @@ class UFOFontData:
 				componentOutlineXML = componentXML.find("outline")
 				componentHash, componentDataList = self.buildGlyphHashValue(width, componentOutlineXML, glyphName, level+1)
 				dataList.extend(componentDataList)
-				
+		
 		data = "".join(dataList)
 		if len(data) < 128:
 			hash = data
@@ -1461,7 +1468,8 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
 				curX += argList[4]
 				curY += argList[5]
 				showX, showY = convertCoords(curX, curY)
-				newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY), "type": "%s" % ('curve') } )
+				opName = 'curve'
+				newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY), "type": opName } )
 				outlineItem.append(newPoint)
 				opList.append([opName,curX,  curY])
 				opIndex += 1
@@ -1570,7 +1578,6 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
 					newHintMaskName = None
 				opList.append([opName,curX,  curY])
 			argList = []
-		
 	if outlineItem != None:
 		if len(outlineItem) == 1:
 			# Just in case we see two moves in a row, delete the previous outlineItem if it has zero length.
@@ -1674,17 +1681,7 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly = False):
 	# convertBezToGLIF is called only if the GLIF has been edited by a tool. We need to update the edit status
 	# in the has map entry.
 	# I assume that convertGLIFToBez has ben run before, which will add an entry for this glyph.
-	hashEntry = ufoFontData.hashMap[glyphName]
-	hashEntry[1] = 1 # mark the glyph as having been edited; any other program should read from the processed layer.
-	historyList = hashEntry[2] 
-	try:
-		programHistoryIndex = historyList.index(ufoFontData.programName)
-	except ValueError:
-		programHistoryIndex = -1
-	if programHistoryIndex >= 0:
-		# truncate the history entry after the current position.
-		historyList = historyList[:programHistoryIndex+1]
-		hashEntry[2] = historyList
+	ufoFontData.markGlyphChangedInHash(glyphName)
 	
 	# Add the stem hints.
 	if (stemHints != None):
