@@ -1,7 +1,7 @@
 _help_ = """
 importSVGDocsToSVGTable.py v 2.2 Oct 24 2014
 
-python importSVGDocsToSVGTable.py <path to input OTF/TTF file>  <path(s) to SVG files OR to folder containing SVG files> 
+python importSVGDocsToSVGTable.py <path to input OTF/TTF file>  <path(s) to SVG files OR to folder tree containing SVG files> 
 
 Converts a set of SVG docs to a TTX SVG table definition, and then adds this table into the font file.
 The script will replace any pre-existing SVG table.
@@ -222,8 +222,11 @@ def getOptions():
 	fontFormat = getFontFormat(fontFilePath)
 	
 	if os.path.isdir(svgFilesOrFolder[0]): # If the first path is a folder
+		svgFilePathsList = []
 		dir = svgFilesOrFolder[0]
-		svgFilePathsList = [os.path.join(dir, file) for file in os.listdir(dir)] # Assemble the full paths, not just file names
+		for dirName, subdirList, fileList in os.walk(dir): # Support nested folders
+			for file in fileList:
+				svgFilePathsList.append(os.path.join(dirName, file)) # Assemble the full paths, not just file names
 	else:
 		svgFilePathsList = []
 		for file in svgFilesOrFolder[:]: # copy
