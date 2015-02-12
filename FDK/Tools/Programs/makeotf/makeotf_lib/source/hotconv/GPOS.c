@@ -1774,6 +1774,11 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second,  cha
 	short metricsCnt2 = 0;
 	short* values1 = NULL;
 	short* values2 = NULL;
+    int enumerate;
+    int pairFmt;
+    unsigned valFmt1 = 0;
+    unsigned valFmt2 = 0;
+    
 	if (first->metricsInfo == NULL) {
 		/* If the only metrics record is appplied to the second glyph,
 		then this is shorthand for applying a single kern value to the first glyph.
@@ -1795,13 +1800,11 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second,  cha
 	}
 
 	
-	int enumerate = first->flags & FEAT_ENUMERATE;
+	enumerate = first->flags & FEAT_ENUMERATE;
 
 	/* The FEAT_GCLASS is essential for identifying a singleton gclass */
-	int pairFmt = ((first->flags & FEAT_GCLASS || second->flags & FEAT_GCLASS) && !enumerate) ? 2 : 1;
+	pairFmt = ((first->flags & FEAT_GCLASS || second->flags & FEAT_GCLASS) && !enumerate) ? 2 : 1;
 
-	unsigned valFmt1 = 0;
-	unsigned valFmt2 = 0;
 
 	if (first->metricsInfo->cnt == 1) {
 		if (h->new.feature == vkrn_) {
