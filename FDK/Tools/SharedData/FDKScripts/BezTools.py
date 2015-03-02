@@ -1105,7 +1105,7 @@ class CFFFontData:
 		psName = self.cffTable.cff.fontNames[0]
 		return psName
 		
-	def convertToBez(self, glyphName, removeHints, beVerbose):
+	def convertToBez(self, glyphName, removeHints, beVerbose, doAll=False):
 		gid = self.charStrings.charStrings[glyphName]
 		t2CharString = self.charStringIndex[gid]
 		try:

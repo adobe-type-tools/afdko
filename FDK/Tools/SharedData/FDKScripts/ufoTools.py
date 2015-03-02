@@ -1,5 +1,5 @@
 """
-ufoTools.py v1.15 Feb 2 2015
+ufoTools.py v1.16 Feb 11 2015
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -46,7 +46,7 @@ different layer in order to not destroy the source data. The ufoTools
 defines an Adobe-specific glyph layer for processed glyphs, named
 "glyphs.com.adobe.type.processedGlyphs".
 checkOutlines  writes new glyph files to the processed glyphs layer only
-when it makes a change.
+when it makes a change to the glyph data.
 
 When the autohint program is run, the ufoTools must be able to tell
 whether checkOutlines has been run and has altered a glyph: if so, the
@@ -56,42 +56,45 @@ be from the default glyph layer.
 The way the hashmap works is that we keep an entry for every glyph that
 has been processed, identified by a hash of its marking path data. Each
 entry contains:
-- a hash of the glyph point coordinates and its type
-- a flag 'editStatus' of whether the path data was altered by a program.
+- a hash of the glyph point coordinates, from the default layer.
+This is set after a program has been run.
 - a history list: a list of the names of each program that has been run, in order.
+- an editStatus flag. 
+Altered GLIF data is always written to the Adobe processed glyph layer. The
+program may or may not have altered the outline data. For example, autohint adds
+private hint data, and adds names to points, but does not change any paths.
 
-New GLIF data is always written to the Adobe processed glyph layer. The
-program may or may not have altered the outline data. For example,
-autohint adds private hint data, and adds names to points, but does not
-change any paths.
+If the stored hash for the glyph does not exist, the ufoTools lib will save the
+new hash in the hash map entry and will set the history list to contain just the
+current program. The program will read the glyph from the default layer.
 
-The editStatus flag records whether any program has changed the path
-data. If 0 (no change), a program should read its data from the default
-glyph layer. Otherwise, a program should take the input  glyph file
-from the processed layer.
+If the stored hash matches the hash for the current glyph file in the default
+layer, and the current program name is in the history list,then  ufoTools
+will return "skip=1", and the calling program may skip the glyph.
 
-If the stored hash for the glyph matches the hash for the current glyph
-file in the default layer, and the current program name is in the
-history list,then the ufoTools will return "skipped=1", and the calling
-program will skip the glyph. If the hash differs between the hash map
-entry and the current glyph in the default layer, then the ufoTools lib
-will save the new hash in the hash map entry and reset the history list
-to contain just the current program. If the old and new hash match, but
-the program name is not in the history list, then the ufoTools will not
-skip the glyph, and will add the program name to the history list.
+If the stored hash matches the hash for the current glyph file in the default
+layer, and the current program name is not in the history list, then the
+ufoTools will return "skip=0". If the font object field 'usedProcessedLayer' is
+set True, the program will read the glyph from the from the Adobe processed
+layer, if it exists, else it will always read from the default layer.
 
-If a program changes the path data -- which we can tell by whether the
-convertBezToGLIF() function is called, or if the hash of the new data is
-different from the source data -- then the editStatus flag is set, and
-any program names following the current program name are removed from
-the history list.
+If the hash differs between the hash map entry and the current glyph in the
+default layer, and usedProcessedLayer is False, then  ufoTools will return
+"skip=0". If usedProcessedLayer is True, then the program will consult the list
+of required programs. If any of these are in the history list, then the program
+will report an error and return skip =1, else it will return skip=1. The program
+will then save the new hash in the hash map entry and reset the history list to
+contain just the current program. If the old and new hash match, but the program
+name is not in the history list, then the ufoTools will not skip the glyph, and
+will add the program name to the history list.
 
-The only tools using this are, at the moment, checkOutlines and
-autohint. checkOutlines uses the hash map to skip processing only when
-being used to edit glyphs, not when reporting them. checkOutlines
-necessarily flattens  any components in the source glyph file to actual
-outlines. autohint adds point names, and saves the hint data as a
-private data in the new GLIF file.
+
+The only tools using this are, at the moment, checkOutlines, checkOutlinesUFO
+and autohint. checkOutlines and checkOutlinesUFO use the hash map to skip
+processing only when being used to edit glyphs, not when reporting them.
+checkOutlines necessarily flattens any components in the source glyph file to
+actual outlines. autohint adds point names, and saves the hint data as a private
+data in the new GLIF file.
 
 autohint saves the hint data in the GLIF private data area, /lib/dict,
 as a key and data pair. See below for the format.
@@ -212,8 +215,11 @@ kPublicGlyphOrderKey = "public.glyphOrder"
 
 kAdobeDomainPrefix = "com.adobe.type"
 kAdobHashMapName = "%s.processedHashMap" % (kAdobeDomainPrefix)
+kAdobHashMapVersionName = "hashMapVersion"
+kAdobHashMapVersion = (1,0) # If major version differs, do not use.
 kAutohintName = "autohint"
 kCheckOutlineName = "checkOutlines"
+kCheckOutlineNameUFO = "checkOutlines"
 
 kOutlinePattern = re.compile(r"<outline.+?outline>", re.DOTALL)
 
@@ -252,16 +258,21 @@ class UFOFontData:
 		self.newGlyphMap = {}
 		self.glyphList = []
 		self.fontInfo = None
-		self.useHashMap = useHashMap # if true, will skip building bez string when glyph matches current glyph name.
+		self.useHashMap = useHashMap # if False, will skip reading has map and testing to see if glyph can be skipped.
+		# should be used only when calling program is running in report mdoe only, and not changing any glyph data.
 		self.hashMap = {} #  Used to skip getting glyph data when glyph hash matches hash of current glyph data.
 		self.fontDict = None
 		self.programName = programName
 		self.curSrcDir = None
 		self.hashMapChanged = 0
-		
 		self.glyphDefaultDir = os.path.join(parentPath, "glyphs")
 		self.glyphLayerDir = os.path.join(parentPath, kProcessedGlyphsLayer)
 		self.glyphWriteDir = self.glyphLayerDir
+		self.historyList = []
+		self.requiredHistory = [] # See documentation above.
+		self.useProcessedLayer = False # If False, then read data only from the default layer; else read glyphs from processed layer, if it exists.
+		self.doAll = False # if True, then do not skip any glyphs.
+		self.deletedGlyph = False # track whether checkSkipGLyph has deleted a out of date glyph from the processed glyph layer
 		
 	def getUnitsPerEm(self):
 		unitsPerEm = "1000"
@@ -283,9 +294,9 @@ class UFOFontData:
 	def isCID(self):
 		return 0
 		
-	def convertToBez(self, glyphName, removeHints, beVerbose):
+	def convertToBez(self, glyphName, removeHints, beVerbose, doAll = 0):
 		# convertGLIFToBez does not yet support hints - no need for removeHints arg.
-		bezString, width = convertGLIFToBez(self, glyphName)
+		bezString, width = convertGLIFToBez(self, glyphName, doAll)
 		return bezString, width
 
 	def updateFromBez(self, bezData, glyphName, width, beVerbose):
@@ -336,8 +347,18 @@ class UFOFontData:
 			fp.close()
 			newMap =  eval(data)
 		else:
-			newMap = {}
-			
+			newMap = {kAdobHashMapVersionName:kAdobHashMapVersion}
+		
+		try:
+			version = newMap[kAdobHashMapVersionName]
+			if version[0] > kAdobHashMapVersion[0]:
+				raise UFOParseError("Hash map version is newer than program. Please update the FDK")
+			elif  version[0] < kAdobHashMapVersion[0]:
+				print "Updating hash map: was older version"
+				newMap = {kAdobHashMapVersionName:kAdobHashMapVersion}
+		except KeyError:
+			print "Updating hash map: was older version"
+			newMap = {kAdobHashMapVersionName:kAdobHashMapVersion}
 		self.hashMap = newMap
 		return
 		
@@ -353,10 +374,12 @@ class UFOFontData:
 		
 		hasMapKeys = hashMap.keys()
 		hasMapKeys.sort()
-		data = "{" + os.linesep
+		data = ["{"]
 		for gName in hasMapKeys:
-			data += "'%s': %s,%s" % (gName, hashMap[gName], os.linesep)
-		data += "}"
+			data.append("'%s': %s," % (gName, hashMap[gName]))
+		data.append("}")
+		data.append("")
+		data = os.linesep.join(data)
 		fp = open(hashPath, "wt")
 		fp.write(data)
 		fp.close()
@@ -374,161 +397,122 @@ class UFOFontData:
 		return path
 		
 	def getGlyphSrcPath(self, glyphName):
-		"""
-		A program that uses this library will read from the default
-		glyph layer if it is the first program to run, else it will read
-		from the processed layer. It will also skip processing a glyph
-		if the glyph has not changed since the last time the program was
-		run.
-		
-		This is controlled by the hash map, which will have an entry for
-		each glyph that has been processed by a program. Each hash entry
-		contains:
-		[hash of the glyph in the default glyph layer, edit status, edit history list]
-		
-		When a program reads a UFO glyph, this library will apply the
-		following rules. 
-		If there is no hash map entry for the glyph, the glyph will be
-		read from the default layer. 
-		Else if the edit status is 0 (not yet changed), then glyph will
-		be read from the default layer.
-		Else if  the program name is first in the edit history list,
-		then glyph will be read from the default layer.
-		Else the program will read the glyph data from the processed
-		glyph layer.
-		
-		If the program changes the glyph data:
-			If it has an entry in the edit history list, it will delete all
-			subsequent entries.
-			Else it will add its name to the end.
-		
-		If the program's name is in the edit history list, it will
-		compare the first entry in the hash map entry with a hash of the
-		glyphs data in the default glyph data. If these match, the
-		program will skip processing of this glyph.
-
-		If a program changes the glyph data, it will set the edit status
-		in the hash map entry to 1.
-			
-		"""
-		
-		# Get the glyph file name.
 		if len(self.glyphMap) == 0:
 			self.loadGlyphMap()
 		glyphFileName = self.glyphMap[glyphName]
 
-		srcDir = self.glyphDefaultDir
-		usingLayer = 0
-		if len(self.hashMap) == 0:
-			# Hash maps have not yet been read in. Get them.
-			self.readHashMap()
-
-		usingProcessedLayer = 0 # default.
-		try:
-			hash, editStatus, historyList = self.hashMap[glyphName]
-			try:
-				programHistoryIndex = historyList.index(self.programName)
-			except ValueError:
-				programHistoryIndex = -1
-			if (editStatus == 1) and (programHistoryIndex != 0):
-				usingProcessedLayer = 1
-		except KeyError:
-			pass # use default glyph layer
-
-		glyphPath = os.path.join(self.glyphDefaultDir, glyphFileName) # default
-		self.curSrcDir = self.glyphDefaultDir
-		if usingProcessedLayer:
+		if self.useProcessedLayer: # Try for processed layer first.
 			self.curSrcDir = self.glyphLayerDir
 			glyphPath = os.path.join(self.glyphLayerDir, glyphFileName)
-			if not os.path.exists(glyphPath):
-				# should never happen
-				print "Warning! hash map says '%s' should be in the '%s' layer, but it isn't." % (glyphName, self.glyphLayerDir)
-				glyphPath = os.path.join(self.glyphDefaultDir, glyphFileName)
-				self.curSrcDir = self.glyphDefaultDir
+			if os.path.exists(glyphPath):
+				return glyphPath
+				
+		self.curSrcDir = self.glyphDefaultDir
+		glyphPath = os.path.join(self.curSrcDir, glyphFileName)
 			
 		return glyphPath
-	
-	def checkSkipGlyph(self, glyphName, newSrcHash):
-		hashEntry = None
-		programHistoryIndex = -1 # not found in historyList
-		usingProcessedLayer = False
-		skip = False
-		if not self.useHashMap:
-			return usingProcessedLayer, skip
-		try:
-			hashEntry = self.hashMap[glyphName]
-			srcHash, editStatus, historyList = hashEntry
-			try:
-				programHistoryIndex = historyList.index(self.programName)
-			except ValueError:
-				programHistoryIndex = -1
-			if (editStatus == 1) and (programHistoryIndex != 0):
-				usingProcessedLayer = 1
-		except KeyError:
-			# Glyph is as yet untouched by any program. Use default glyph layer for source
-				pass
 
-		if (hashEntry != None) and (srcHash == newSrcHash) and (programHistoryIndex >= 0):
-			# The glyph has already been processed by this program, and there have been no changes since.
-			skip = 1
-			return usingProcessedLayer, skip
-			
-		skip = 0 # We need to process this glyph.
-		self.hashMapChanged = 1
-		
-		# If there is no hash entry for the glyph, add one. If the hash did not match, then build a new entry.
-		if (hashEntry == None) or (newSrcHash != srcHash):
-			self.hashMap[glyphName] = [newSrcHash, 0, [self.programName] ]
-		else:
-			# newHash == srcHash
-			# Add program name to the historyList, if it is not there already.
-			if programHistoryIndex < 0:
-				# autohint must be run last. Remove it, if it is in the list before this program.
-				try:
-					historyList.remove(kAutohintName)
-				except ValueError:
-					pass
-				historyList.append(self.programName)
-				
-		return usingProcessedLayer, skip
-		
-	def getOrSkipGlyphXML(self, glyphName):
-		# Get the glyph file name.
+	def getGlyphDefaultPath(self, glyphName):
 		if len(self.glyphMap) == 0:
 			self.loadGlyphMap()
 		glyphFileName = self.glyphMap[glyphName]
+		glyphPath = os.path.join(self.glyphDefaultDir, glyphFileName)
+		return glyphPath
 
-		self.curSrcDir = self.glyphDefaultDir
-		usingLayer = 0
+	def getGlyphProcessedPath(self, glyphName):
+		if len(self.glyphMap) == 0:
+			self.loadGlyphMap()
+		glyphFileName = self.glyphMap[glyphName]
+		glyphPath = os.path.join(self.glyphLayerDir, glyphFileName)
+		return glyphPath
+
+	def updateHashEntry(self, glyphName, changed):
+		if not self.useHashMap:
+			return
+		# Get hash entry for glyph
+		try:
+			hashEntry = self.hashMap[glyphName]
+			srcHash, historyList = hashEntry
+		except KeyError:
+			hashEntry = None
+
+		self.hashMapChanged = 1
+		# If the program always reads data from the default layer, and since we have just created a new glyph in the precessed layer, then reset the history.
+		if (not self.useProcessedLayer) and changed:
+			self.hashMap[glyphName] = [srcHash, [self.programName] ]
+			return
+		
+		try:
+			programHistoryIndex = historyList.index(self.programName)
+		except ValueError:
+			#If the program is not in the history list, add it.
+			historyList.append(self.programName)
+	
+	
+	def checkSkipGlyph(self, glyphName, newSrcHash, doAll):
+		skip = False
+
+		if not self.useHashMap:
+			return skip
+
 		if len(self.hashMap) == 0:
 			# Hash maps have not yet been read in. Get them.
 			self.readHashMap()
 
-		usingProcessedLayer = 0 # default.
+		hashEntry = srcHash = None
+		historyList = []
+		programHistoryIndex = -1 # not found in historyList
+
+		# Get hash entry for glyph
 		try:
 			hashEntry = self.hashMap[glyphName]
-			srcHash, editStatus, historyList = hashEntry
-		except KeyError:
-			hashEntry = None
-			
-		if self.useHashMap:
+			srcHash, historyList = hashEntry
 			try:
-				try:
-					programHistoryIndex = historyList.index(self.programName)
-				except ValueError:
-					programHistoryIndex = -1
-				if (editStatus == 1) and (programHistoryIndex != 0):
-					usingProcessedLayer = 1
-			except KeyError:
-				# Glyph is as yet untouched by any program. Use default glyph layer
-				hashEntry = None
-				programHistoryIndex = -1 # not found in historyList
+				programHistoryIndex = historyList.index(self.programName)
+			except ValueError:
+				pass
+		except KeyError:
+			# Glyph is as yet untouched by any program.
+			pass
+
+		# Decide whether to skip glyph.
+		if (hashEntry == None):
+			self.hashMap[glyphName] = [newSrcHash, [self.programName] ]
+			self.hashMapChanged = 1
+		elif (srcHash == newSrcHash):
+			if (programHistoryIndex >= 0):
+				# The glyph has already been processed by this program, and there have been no changes since.
+				skip = True and (not doAll)
+			else:
+				historyList.append(self.programName)
+				self.hashMapChanged = 1
 		else:
-			programHistoryIndex = -1 # not found in historyList
-		
-		# Get default glyph layer data, so we can check if the glyph has been edited since this program was last run.
-		# If the program name is in the history list, and the srcHash matches the default glyph layer data, we can skip.
-		glyphPath = os.path.join(self.glyphDefaultDir, glyphFileName) # default
+			# If the source hash has changed, we need to delete the processed layer glyph.
+			glyphPath = self.getGlyphProcessedPath(glyphName)
+			if os.path.exists(glyphPath):
+				os.remove(glyphPath)
+				self.deletedGlyph = True
+			if not self.useProcessedLayer: # case  for Checkoutlines
+				self.hashMapChanged = 1
+				self.hashMap[glyphName] = [newSrcHash, [self.programName] ]
+			else: # case for autohint
+				# default layer glyph and stored glyph hash differ,and useProcessedLayer is True
+				# If any of the programs in requiredHistory in are in the historyList, we need to complain and skip.
+				foundMatch = False
+				for programName in self.requiredHistory:
+					if programName in historyList:
+						foundMatch = True
+				if foundMatch:
+					print "Error. Glyph '%s' has been edited. You must first run '%s' before running '%s'. Skipping." % (glyphName, self.requiredHistory, self.programName)
+					skip = True
+				else:	
+					self.hashMapChanged = 1
+					self.hashMap[glyphName] = [newSrcHash, [self.programName] ]
+				
+		return skip
+	
+	def getGlyphXML(self, glyphDir, glyphFileName):
+		glyphPath = os.path.join(glyphDir, glyphFileName) # default
 		etRoot = ET.ElementTree()
 		glifXML = etRoot.parse(glyphPath)
 		outlineXML = glifXML.find("outline")
@@ -538,60 +522,39 @@ class UFOFontData:
 				width = int(eval(widthXML.get("width")))
 			else:
 				width = 1000
-			newHash, dataList = self.buildGlyphHashValue(width, outlineXML, glyphName)
 		except UFOParseError,e:
 			print "Error. skipping glyph '%s' because of parse error: %s" % (glyphName, e.message)
-			return None, None, 1
-		if self.useHashMap and (hashEntry != None) and (srcHash == newHash) and (programHistoryIndex >= 0):
-			# The glyph has already been processed by this program, and there have been no changes since.
+			return None, None, None
+		return width, glifXML, outlineXML
+		
+	def getOrSkipGlyphXML(self, glyphName, doAll = 0):
+		# Get default glyph layer data, so we can check if the glyph has been edited since this program was last run.
+		# If the program name is in the history list, and the srcHash matches the default glyph layer data, we can skip.
+		if len(self.glyphMap) == 0:
+			self.loadGlyphMap()
+		glyphFileName = self.glyphMap[glyphName]
+		
+		width, glifXML, outlineXML = self.getGlyphXML(self.glyphDefaultDir, glyphFileName)
+		if glifXML == None:
 			skip = 1
 			return None, None, skip
-		skip = 0 # We need to process this glyph.
-		self.hashMapChanged = 1
 		
-		# If there is no hash entry for the glyph, add one. If the hash did not match, then build a new entry.
-		if (hashEntry == None) or (newHash != srcHash):
-			self.hashMap[glyphName] = [newHash, 0, [self.programName] ]
-		else:
-			# newHash == srcHash
-			# Add program name to the historyList, if it is not there already.
-			if programHistoryIndex < 0:
-				# autohint must be run last. Remove it, if it is in the list before this program.
-				try:
-					historyList.remove(kAutohintName)
-				except ValueError:
-					pass
-				historyList.append(self.programName)
+		useDefaultGlyphDir = True # Has is always from the default glyph layer.
+		newHash, dataList = self.buildGlyphHashValue(width, outlineXML, glyphName, useDefaultGlyphDir)
+		skip = self.checkSkipGlyph(glyphName, newHash, doAll)			
 				
-		# If the glyph needs to be read from the processed layer instead of the default layer, we still need to get it.
-		if usingProcessedLayer:
-			self.curSrcDir = self.glyphLayerDir
+		# If  self.useProcessedLayer and there is a glyph in the processed layer, get the outline from that.
+		if self.useProcessedLayer:
 			glyphPath = os.path.join(self.glyphLayerDir, glyphFileName)
-			if not os.path.exists(glyphPath):
-				# should never happen
-				print "Warning! hash map says '%s' should be in the '%s' layer, but it isn't." % (glyphName, self.glyphLayerDir)
-				glyphPath = os.path.join(self.glyphDefaultDir, glyphFileName)
-			etRoot = ET.ElementTree()
-			glifXML = etRoot.parse(glyphPath)
-			outlineXML = glifXML.find("outline")
+			if os.path.exists(glyphPath):
+				width, glifXML, outlineXML = self.getGlyphXML(self.glyphLayerDir, glyphFileName)
+				if glifXML == None:
+					skip = 1
+					return None, None, skip
 	
-		return glifXML, outlineXML, skip
+		return width, outlineXML, skip
 	
 	
-	def markGlyphChangedInHash(self, glyphName):
-		hashEntry = self.hashMap[glyphName]
-		hashEntry[1] = 1 # mark the glyph as having been edited; any following program should read from the processed layer.
-		historyList = hashEntry[2] 
-		try:
-			programHistoryIndex = historyList.index(self.programName)
-		except ValueError:
-			programHistoryIndex = -1
-		if programHistoryIndex >= 0:
-			# truncate the history entry after the current position.
-			historyList = historyList[:programHistoryIndex+1]
-			hashEntry[2] = historyList
-		
-
 	def getGlyphList(self):
 		if len(self.glyphMap) == 0:
 			self.loadGlyphMap()
@@ -805,7 +768,7 @@ class UFOFontData:
 			raise UFOParseError("Could not find glyph name '%s' in UFO font contents plist. '%s'. " % (glyphName, self.parentPath))
 		return gid
 		
-	def buildGlyphHashValue(self, width, outlineXML, glyphName, level = 0):
+	def buildGlyphHashValue(self, width, outlineXML, glyphName, useDefaultGlyphDir, level = 0):
 		"""  glyphData must be the official <outline> XML from a GLIF.
 		We skip contours with only one point.
 		"""
@@ -831,7 +794,10 @@ class UFOFontData:
 				except KeyError:
 					raise UFOParseError("'%s' is missing the 'base' attribute in a component. glyph '%s'." % (glyphName))
 				try:
-					componentPath = self.getCurGlyphPath(compGlyphName)
+					if useDefaultGlyphDir:
+						componentPath = self.getGlyphDefaultPath(compGlyphName)
+					else:
+						componentPath = self.getGlyphSrcPath(compGlyphName)
 				except KeyError:
 					raise UFOParseError("'%s' component glyph is missing from contents.plist." % (compGlyphName))
 				if not os.path.exists(componentPath):
@@ -839,9 +805,9 @@ class UFOFontData:
 				etRoot = ET.ElementTree()
 				componentXML = etRoot.parse(componentPath)
 				componentOutlineXML = componentXML.find("outline")
-				componentHash, componentDataList = self.buildGlyphHashValue(width, componentOutlineXML, glyphName, level+1)
+				componentHash, componentDataList = self.buildGlyphHashValue(width, componentOutlineXML, glyphName, useDefaultGlyphDir, level+1)
 				dataList.extend(componentDataList)
-		
+		dataList.sort()
 		data = "".join(dataList)
 		if len(data) < 128:
 			hash = data
@@ -856,7 +822,7 @@ class UFOFontData:
 			raise UFOParseError("'%s' attribute missing from component '%s'." % ("base", xmlToString(componentXML)))
 		
 		try:
-			compGlyphFilePath = self.getCurGlyphPath(compGlyphName)
+			compGlyphFilePath = self.getGlyphSrcPath(compGlyphName)
 		except KeyError:
 			raise UFOParseError("'%s' compGlyphName missing from contents.plist." % (compGlyphName))
 		if not os.path.exists(compGlyphFilePath):
@@ -876,6 +842,16 @@ class UFOFontData:
 			self.writeHashMap()
 		self.hashMapChanged = 0
 		return
+	
+	def clearHashMap(self):
+		self.hashMap = {kAdobHashMapVersionName:kAdobHashMapVersion}
+		hashDir = os.path.join(self.parentPath, "data")
+		if not os.path.exists(hashDir):
+			return
+
+		hashPath = os.path.join(hashDir, kAdobHashMapName)
+		if  os.path.exists(hashPath):
+			os.remove(hashPath)
 
 def parseGlyphOrder(filePath):
 	orderMap = None
@@ -1208,21 +1184,15 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transfor
 	return bezstring, curX, curY
 
 
-def convertGLIFToBez(ufoFontData, glyphName):
-	glifXML, outlineXML, skipped = ufoFontData.getOrSkipGlyphXML(glyphName)
-	if skipped:
+def convertGLIFToBez(ufoFontData, glyphName, doAll= 0):
+	width, outlineXML, skip = ufoFontData.getOrSkipGlyphXML(glyphName, doAll)
+	
+	if skip:
 		return None, 0
 
 	if outlineXML == None:
 		print "Glyph '%s' has no outline data" % (glyphName)
 		return None, 0
-
-		
-	widthXML = glifXML.find("advance")
-	if widthXML != None:
-		width = int(eval(widthXML.get("width")))
-	else:
-		width = 1000
 
 	curX = curY = 0
 	bezString, curX, curY = convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY)
@@ -1370,7 +1340,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
 	hStem3List = []
 	argList = []
 	opList = []
-	newHintMaskName = hintMask.pointName
+	newHintMaskName =  None
 	inPreFlex = False
 	
 	opIndex = 0
@@ -1410,16 +1380,22 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
 			value = argList[-2]/float(argList[-1])
 			argList[-2:] =[value]
 		elif token == "rb":
+			if newHintMaskName == None:
+				newHintMaskName = hintMask.pointName
 			lastPathOp = token
 			hintMask.hList.append(argList)
 			argList = []
 			seenHints = 1	
 		elif token == "ry":
+			if newHintMaskName == None:
+				newHintMaskName = hintMask.pointName
 			lastPathOp = token
 			hintMask.vList.append(argList)
 			argList = []
 			seenHints = 1	
 		elif token == "rm": # vstem3's are vhints
+			if newHintMaskName == None:
+				newHintMaskName = hintMask.pointName
 			seenHints = 1	
 			vStem3Args.append(argList)
 			argList = []
@@ -1681,8 +1657,7 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly = False):
 	# convertBezToGLIF is called only if the GLIF has been edited by a tool. We need to update the edit status
 	# in the has map entry.
 	# I assume that convertGLIFToBez has ben run before, which will add an entry for this glyph.
-	ufoFontData.markGlyphChangedInHash(glyphName)
-	
+	ufoFontData.updateHashEntry(glyphName, changed=True)
 	# Add the stem hints.
 	if (stemHints != None):
 		widthXML = glifXML.find("advance")
@@ -1690,7 +1665,8 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly = False):
 			width = int(eval(widthXML.get("width")))
 		else:
 			width = 1000
-		newGlyphHash, dataList = ufoFontData.buildGlyphHashValue(width, newOutlineElement, glyphName)
+		useDefaultGlyphDir = False
+		newGlyphHash, dataList = ufoFontData.buildGlyphHashValue(width, newOutlineElement, glyphName, useDefaultGlyphDir)
 		# We add this hash to the T1 data, as it is the hash which matches the output outline data.
 		# This is not necessarily the same as the the hash of the source data - autohint can be used to change outlines.
 		stemHints.set("id", newGlyphHash)
@@ -1762,8 +1738,9 @@ def checkHashMaps(fontPath, doSync):
 						width = int(eval(widthXML.get("width")))
 					else:
 						width = 1000
-					oldHash, oldEdited, historyList = hashMap[glyphName] 
-					newHash, dataList = ufoFontData.buildGlyphHashValue(width, outlineXML, glyphName)
+					oldHash, historyList = hashMap[glyphName] 
+					useDefaultGlyphDir= True
+					newHash, dataList = ufoFontData.buildGlyphHashValue(width, outlineXML, glyphName, useDefaultGlyphDir)
 					#print "\toldHash", oldHash
 					if oldHash != newHash:
 						failedMatch = 1
@@ -1824,9 +1801,9 @@ def test1():
 	else:
 		gm = ufoFontData.getGlyphMap()
 		gNameList = gm.keys()
-		
+	doAll = 0
 	for glyphName in gNameList:
-		bezString = convertGLIFToBez(ufoFontData, glyphName)
+		bezString = convertGLIFToBez(ufoFontData, glyphName, doAll)
 		print bezString
 		glifXML = convertBezToGLIF(ufoFontData, glyphName, bezString )
 		#pprint.pprint(xmlToString(glifXML))

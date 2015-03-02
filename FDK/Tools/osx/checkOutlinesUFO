@@ -1,5 +1,5 @@
 #! /usr/bin/env sh
-targetScript=checkOutlinesUFO.py
+targetScript=CheckOutlinesUFO.py
 
 cmdDirPath=`dirname $0`
 cmdName=`basename $0`

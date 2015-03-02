@@ -3,7 +3,7 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-autohint  AutoHinting program v1.45 Mar 20 2014
+autohint  AutoHinting program v1.46 Feb 10 2105
 autohint -h
 autohint -u
 autohint -hfd
@@ -914,7 +914,7 @@ def openFile(path, outFilePath, useHashMap):
 		font =  openOpenTypeFile(path, outFilePath)
 	else:
 		# maybe it is a a UFO font.
-		# We always use the hash map to skip glyphs that have been previously processed, unless the user has said to do all.
+		# We always use the hash map to skip glyphs that have been previously processed, unless the user has report only, not make changes.
 		font =  openUFOFile(path, outFilePath, useHashMap)
 	return font
 
@@ -936,6 +936,8 @@ def openUFOFile(path, outFilePath, useHashMap):
 		shutil.copytree(path , outFilePath)
 		path = outFilePath
 	font = ufoTools.UFOFontData(path, useHashMap, ufoTools.kAutohintName)
+	font.useProcessedLayer = True
+	font.requiredHistory.append(ufoTools.kCheckOutlineName) # Programs in this list must be run before autohint, if the outlines have been edited.
 	return font
 	
 def openOpenTypeFile(path, outFilePath):
@@ -1024,8 +1026,8 @@ def hintFile(options):
 	logMsg("Hinting font %s. Start time: %s." % (path, time.asctime()))
 
 	try:
-		useHashMap = not options.hintAll # for UFO fonts only. We always use the hash map to skip glyphs that have been previously processed, unless the user has said to do all.
-		fontData = openFile(path, options.outputPath, not options.hintAll)
+		useHashMap = not options.logOnly # for UFO fonts only. We always use the hash map, unless the user has said to only report issues.
+		fontData = openFile(path, options.outputPath, useHashMap)
 	except (IOError, OSError):
 		logMsg( traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1])
 		raise ACFontError("Error opening or reading from font file <%s>." % fontFileName)
@@ -1143,12 +1145,13 @@ def hintFile(options):
 	processedGlyphCount = 0
 	for name in glyphList:
 		prevACIdentifier = None
-		seenGlyphCount +=1 
+		seenGlyphCount +=1
+			
 		# 	Convert to bez format
-		bezString, width = fontData.convertToBez(name, removeHints, options.verbose)
+		bezString, width = fontData.convertToBez(name, removeHints, options.verbose, options.hintAll)
+		processedGlyphCount += 1
 		if bezString == None:
 			continue
-		processedGlyphCount += 1
 
 		if "mt" not in bezString:
 			# skip empty glyphs.
@@ -1223,7 +1226,6 @@ def hintFile(options):
 				# This in turn give reasonable performance when calling autohint in a subprocess
 				# and getting output with std.readline()
 
-		anyGlyphChanged = 1
 		# 	Call auto-hint library on bez string.
 		bp = open(tempBez, "wt")
 		bp.write(bezString)
@@ -1271,6 +1273,7 @@ def hintFile(options):
 			continue
 			
 		# 	Convert bez to charstring, and update CFF.
+		anyGlyphChanged = 1
 		fontData.updateFromBez(newBezString, name, width, options.verbose)
 
 		

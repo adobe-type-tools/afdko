@@ -6,7 +6,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 __doc__ = """
 """
 __usage__ = """
-   makeInstancesUFO program v1.05 Jan 29 2015
+   makeInstancesUFO program v1.06 Feb 3 2015
    makeInstancesUFO -h
    makeInstancesUFO -u
    makeInstancesUFO [-a]  [-d <design space file name>]
@@ -219,9 +219,9 @@ def updateInstance(options, fontInstancePath):
 		logMsg.log("\tautohinting %s ..." % (fontInstancePath))
 		logList = []
 		if os.name == "nt":
-			proc = Popen(['autohint.cmd','-q', '-nb', '-all', fontInstancePath], stdout=PIPE)
+			proc = Popen(['autohint.cmd','-q', '-nb', fontInstancePath], stdout=PIPE)
 		else:
-			proc = Popen(['autohint', '-q','-nb', '-all', fontInstancePath], stdout=PIPE)
+			proc = Popen(['autohint', '-q','-nb',  fontInstancePath], stdout=PIPE)
 		while 1:
 			output = proc.stdout.readline()
 			if output:
@@ -252,6 +252,12 @@ def run(args):
 	dsPath, newInstancesList = readDesignSpaceFile(options)
 	if not dsPath:
 		return
+
+	# Set the current dir to teh design space dir, so that relative paths in
+	# the design space file will work.
+	dsDir = os.path.dirname(os.path.abspath(options.dsPath))
+	os.chdir(dsDir)
+
 	version = 2
 	if len(newInstancesList) == 1:
 		logMsg.log( "Building 1 instance..")

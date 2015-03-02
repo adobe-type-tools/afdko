@@ -1,6 +1,6 @@
 FDKReleaseNotes.txt
 ===============================================================================
-FDK v2.5 Feb 3 2015 change number 63553.
+FDK v2.5 Feb 21 2015 change number 63718.
 
 	autohint
 	Fixed a bug with processing flex hints in ufoTools.py, that caused outline distortion.
@@ -23,6 +23,12 @@ FDK v2.5 Feb 3 2015 change number 63553.
 	Fixed false report of overlap removal when only change was removing flat curve
 	Fixed stack dump when new glyph is seen which is not in hash map of
 	previously processed glyphs.
+	Added logic to make a reasonable effort to sort the new glyph contours in
+	the same order as the source glyph contours, so the final contour order will
+	not depend on (x,y) position. This was needed because the pyClipper library
+	(which is used to remove overlaps) otherwise sorts the contours in (x,y)
+	position order, which can result in different contour order in different
+	instance fonts from the same set of master fonts.
 	
 	makeInstancesUFO.
 	Changed so that the option -i (selection of  which instances to build) actually works.
@@ -31,11 +37,26 @@ FDK v2.5 Feb 3 2015 change number 63553.
 	Removed hack of converting all file paths to absolute file paths: this was a
 	work-around for a bug in robofab-ufo3k that is now fixed.
 	Removed all references to old instances.txt meta data file.
+	Fixed so that current dir does not have to be the parent dir of the design space file.
 	
 	Misc
 	Merged fixes from the Github AFDKO OpenSource depot.
 	Updated to latest modules for defcon, fontMath, robofab, and mutatorMath.
-	
+	Fix for Yosemite (Mac OSX 10.10) in FDK/Tools/setFDKPaths. When an FDK script 
+	is run from another Python interpreter, such as the one in Robofont, the parent
+	Python interpreter may set the Unix environment variables PYTHONHOME and
+	PYTHONPATH. This can cause the AFDKO Python interpreter to load some modules
+	from its own library, and others from the parent interpreters library. If these
+	are incompatible, a crash ensues.  The fix is to unset the variables PYTHONHOME
+	and PYTHONPATH before the AFDKO interpreter is called. 
+	Note: AS a separate issue, under Mac OSX 10.10, Python calls to FDK commands
+	will  only  work  if  the calling app is run from the command-line (e.g:
+	“open /Applications/RoboFont.app“), and the argument "shell="True" is added
+	to the subprocess module call to open a system command. I favor also adding
+	the argument "stderr=subprocess.STDOUT", else you will not see error
+	messages from the Unix shell. Example:
+	"log = subprocess.check_output("makeotf -u" , stderr=subprocess.STDOUT , shell=True)".
+
 FDK v2.5 Dec 02 2014 change number 63408.
 
 	spot.

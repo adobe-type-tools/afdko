@@ -2,7 +2,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-   checkOutlinesUFO program v1.04 Feb 3 2015
+   checkOutlinesUFO program v1.08 Feb 17 2015
    
    checkOutlinesUFO [-nr] [-e] [-g glyphList] [-gf <file name>] [-all] [-noOverlap] [-noBasicChecks] [-setMinArea <n>] [- setTolerance <n>] [-d]
    
@@ -72,6 +72,8 @@ import shutil
 import ufoTools
 import booleanOperations.booleanGlyph
 from robofab.pens.digestPen import DigestPointPen
+from plistlib import readPlist, writePlistToString
+
 import hashlib
 
 kSrcGLIFHashMap = "com.adobe.type.checkOutlinesHashMap"
@@ -107,7 +109,7 @@ class FontFile(object):
 				self.ufoFormat = 2
 			self.fontType = kUFOFontType
 			self.useHashMap = useHashMap
-			self.ufoFontHashData = ufoTools.UFOFontData(fontPath, self.useHashMap, programName="CheckOutlinesUFO")
+			self.ufoFontHashData = ufoTools.UFOFontData(fontPath, self.useHashMap, programName=ufoTools.kCheckOutlineName)
 			self.ufoFontHashData.readHashMap()
 			
 		except ufoLib.UFOLibError,e:
@@ -163,7 +165,6 @@ class FontFile(object):
 		from ufoLib import UFOWriter
 		writer = UFOWriter(self.dFont.path, formatVersion=2)
 		layers = self.dFont.layers
- 
 		layer = layers[kProcessedGlyphsLayerName]
 		writer._formatVersion = 3
 		writer.layerContents[kProcessedGlyphsLayerName] = kProcessedGlyphsLayer
@@ -197,19 +198,20 @@ class FontFile(object):
 		else:
 			print "Font type is unknown: cannot save changes"
 
-		if (self.tempUFOPath != None) and os.path.exists(tempUFOPath):
+		if (self.tempUFOPath != None) and os.path.exists(self.tempUFOPath):
 			shutil.rmtree(self.tempUFOPath) 
 
-	def checkSkipGlyph(self, glyphName, newSrcHash):
-		usingProcessedLayer = skip = False
-		if self.useHashMap:
-			usingProcessedLayer, skip = self.ufoFontHashData.checkSkipGlyph(glyphName, newSrcHash)
-		return usingProcessedLayer, skip
+	def checkSkipGlyph(self, glyphName, doAll):
+		skip = False
+		if self.ufoFontHashData and self.useHashMap:
+			width, outlineXML, skip = self.ufoFontHashData.getOrSkipGlyphXML(glyphName, doAll)
+		return skip
 	
 	def buildGlyphHash(self, width, glyphDigest):
 		dataList = [str(width)]
 		for x,y in glyphDigest:
 			dataList.append("%s%s" %  (x,y))
+		dataList.sort()
 		data = "".join(dataList)
 		if len(data) < 128:
 			hash = data
@@ -217,9 +219,44 @@ class FontFile(object):
 			hash = hashlib.sha512(data).hexdigest()
 		return hash
 	
-	def markGlyphChangedInHash(self, glyphName):
-		self.ufoFontHashData.markGlyphChangedInHash(glyphName)
+	def updateHashEntry(self, glyphName, changed):
+		if self.ufoFontHashData != None:  # isn't a UFO font.
+			self.ufoFontHashData.updateHashEntry(glyphName, changed)
 	
+	def updateLayerContentList(self):
+		if not self.ufoFontHashData: # isn't a UFO font.
+			return
+			
+		if not self.ufoFontHashData.deletedGlyph:
+			return
+			
+		# Get list of glif file names:
+		fileList = os.listdir(self.ufoFontHashData.glyphLayerDir)
+		fileDict = {}
+		for fileName in fileList:
+			if fileName.endswith(".glif"):
+				fileDict[fileName] = 1
+		
+		contentsPath = os.path.join(self.ufoFontHashData.glyphLayerDir, "contents.plist")
+		try:
+			contents = readPlist(contentsPath)
+		except:
+			raise focusFontError("The processed layer file %s could not be read." % path)
+		contentItems =  contents.items()
+		for name, fileName in contentItems:
+			if fileName not in fileDict:
+				del contents[name]
+
+		plist = writePlistToString(contents)
+		f = open(contentsPath, "wb")
+		f.write(plist)
+		f.close()
+		print "Updated plist"
+
+	def clearHashMap(self):
+		if self.ufoFontHashData != None:
+			self.ufoFontHashData.clearHashMap()
+		
 class COOptions:
 	def __init__(self):
 		self.filePath = None
@@ -234,6 +271,7 @@ class COOptions:
 		self.checkAll = False # forces all glyphs to be processed even if src hasn't changed.
 		self.removeCoincidentPointsDone = 0 # processing state flag, used to not repeat coincident point removal.
 		self.removeFlatCurvesDone = 0 # processing state flag, used to not repeat flat curve point removal.
+		self.clearHashMap = False
 		
 		# doOverlapRemoval must come first in the list, since it may cause problems, like co-linear lines, 
 		# that need to be checked/fixed by later tests.
@@ -306,6 +344,8 @@ def getOptions():
 			options.roundValues = 0
 		elif arg == "-all":
 			options.checkAll = True
+		elif arg == "-clearHashMap":
+			options.clearHashMap = True
 		elif arg[0] == "-":
 			raise focusOptionParseError("Option Error: Unknown option <%s>." %  arg) 
 		else:
@@ -649,6 +689,10 @@ def splitTouchingPaths(newGlyph):
 			continue
 		i += 1
 
+def roundPt(pt):
+	pt = map(int, pt)
+	return pt
+	
 def doOverlapRemoval(bGlyph, oldDigest, changed, msg, options):
 	changed, msg = removeCoincidentPoints(bGlyph, changed, msg, options)
 	options.removeCoincidentPointsDone = 1
@@ -659,20 +703,21 @@ def doOverlapRemoval(bGlyph, oldDigest, changed, msg, options):
 	# even if it does not do overlap removal.
 	oldDigest = list(getDigest(bGlyph))
 	oldDigest.sort()
-	newPathNum = -1
-	prevPathNum = 0
+	oldDigest = map(roundPt, oldDigest)
+	newDigest = []
+	prevDigest = oldDigest
 	newGlyph = bGlyph
-	while newPathNum != prevPathNum:
+	while newDigest != prevDigest:
 		# This hack to get around a bug in booleanGlyph. Consider an M sitting on a separate rectangular crossbar contour,
 		# the bottom of the M legs being co-linear with the top of the cross bar. pyClipper will merge only one of the 
 		# co-linear lines with each call to removeOverlap(). I suspect that this bug is in pyClipper, but haven't yet looked.
-		prevPathNum = len(newGlyph.contours)
+		prevDigest = newDigest
 		newGlyph = newGlyph.removeOverlap()
-		newPathNum = len(newGlyph.contours)
+		newDigest = list(getDigest(newGlyph))
+		newDigest.sort()
+		newDigest = map(roundPt, newDigest) # The new path points sometimes come back with very small fractional parts to to rounding issues.
 		
 	# Can't use change in path number to see if something has changed - overlap removal can add and subtract paths.
-	newDigest = list(getDigest(newGlyph))
-	newDigest.sort()
 	if str(oldDigest) != str(newDigest):
 		changed = 1
 		msg.append( "There is an overlap.")
@@ -681,6 +726,10 @@ def doOverlapRemoval(bGlyph, oldDigest, changed, msg, options):
 	return newGlyph, newDigest, changed, msg
 
 def doCleanup(newGlyph, oldDigest, changed, msg, options):
+	if oldDigest == None:
+		oldDigest = list(getDigest(bGlyph))
+		oldDigest.sort()
+
 	# Note that these removeCoincidentPointsDone and removeFlatCurvesDone get called only if doOverlapRemoval is NOT called.
 	if not options.removeCoincidentPointsDone:
 		changed, msg = removeCoincidentPoints(newGlyph, changed, msg, options)
@@ -697,6 +746,124 @@ def doCleanup(newGlyph, oldDigest, changed, msg, options):
 
 	return newGlyph, newDigest, changed, msg
 
+	
+def restoreContourOrder(fixedGlyph, originalContours):
+	""" The pyClipper library first sorts all the outlines by x position, then y position.
+	I try to undo that, so that un-touched contours will end up in the same order as the
+	in the original, and any conbined contours will end up in a similar order.
+	The reason I try to match new contours to the old is to reduce arbitraryness in the new contour order.
+	If contours are sorted in x, then y position, then contours in the same
+	glyph from two different  instance fonts which are created from a set of
+	master designs, and then run through this program may, end up with different
+	contour order. I can't completely avoid this, but I can considerably reduce how often it happens.
+	"""
+	newContours = list(fixedGlyph)
+	newIndexList = range(len(newContours))
+	newList = [[i,newContours[i]] for i in newIndexList]
+	oldIndexList = range(len(originalContours))
+	oldList = [[i,originalContours[i]] for i in oldIndexList]
+	orderList = []
+
+	# Match start points, This will fix the order of the contours that have not been touched.
+	for i in newIndexList:
+		ci, contour = newList[i]
+		firstPoint = contour[0]
+		for j in oldIndexList:
+			ci2, oldContour = oldList[j]
+			oldFP = oldContour[0]
+			if (firstPoint.x == oldFP.x) and (firstPoint.y == oldFP.y):
+				newList[i] = None
+				orderList.append([ci2, ci])
+				break
+	newList = filter(lambda entry: entry != None, newList)
+	
+	# New contour start point did not match any of old contour start points.
+	# Look through original contours, and see if the start point for any old contour
+	# is on the new contour.
+	numC = len(newList)
+	if numC > 0: # If the new contours aren't already all matched..
+		newIndexList = range(numC)
+		for i in newIndexList:
+			ci, contour = newList[i]
+			for j in oldIndexList:
+				ci2, oldContour = oldList[j]
+				oldFP = oldContour[0]
+				matched = 0
+				pi = -1
+				for point in contour:
+					pi += 1
+					if point.segmentType == None:
+						continue
+					if (oldFP.x == point.x) and (oldFP.y == point.y):
+						newList[i] = None
+						orderList.append([ci2, ci])
+						matched = 1
+						contour.setStartPoint(pi)
+						break
+				if matched:
+					break
+
+	newList = filter(lambda entry: entry != None, newList)
+	numC = len(newList)
+	# Start points didn't all match. Check each extreme for a match.
+	for ti in range(4):
+		if numC > 0:
+			newIndexList = range(numC)
+			for i in newIndexList:
+				ci, contour = newList[i]
+				maxP = contour[0]
+				for point in contour:
+					if point.segmentType == None:
+						continue
+					if ti == 0:
+						if maxP.y < point.y:
+							maxP = point
+					elif ti == 1:
+						if maxP.y > point.y:
+							maxP = point
+					elif ti == 2:
+						if maxP.x < point.x:
+							maxP = point
+					elif ti == 3:
+						if maxP.x > point.x:
+							maxP = point
+				# Now search the old contour list.
+				for j in oldIndexList:
+					ci2, oldContour = oldList[j]
+					matched = 0
+					for point in oldContour:
+						if point.segmentType == None:
+							continue
+						if (maxP.x == point.x) and (maxP.y == point.y):
+							newList[i] = None
+							orderList.append([ci2, ci])
+							matched = 1
+							break
+					if matched:
+						break
+			newList = filter(lambda entry: entry != None, newList)
+			numC = len(newList)
+
+	# Now re-order the new list
+	orderList.sort()
+	newContourList= []
+	for ci2, ci in orderList:
+		newContourList.append(newContours[ci])
+
+	# If the algorithm didn't work for some contours,
+	# just add them on the end.
+	if numC != 0:
+		for ci, contour in newList:
+			newContourList.append(contour)
+			keys = dir(contour)
+			keys.sort()
+
+	numC = len(newContourList)
+	fixedGlyph.clearContours()
+	for contour in newContourList:
+		fixedGlyph.appendContour(contour)
+
+
 def run(args):
 	
 	options = getOptions()
@@ -704,7 +871,9 @@ def run(args):
 	dFont = None
 	fontFile = FontFile(fontPath)
 	dFont = fontFile.open(options.allowChanges) # We allow use of a hash map to skip glyphs only if fixing glyphs
-	
+	if options.clearHashMap:
+		fontFile.clearHashMap()
+		return
 			
 	if dFont == None:
 		print "Could not open  file: %s." % (fontPath)
@@ -724,25 +893,27 @@ def run(args):
 	
 	fontChanged = 0
 	lastHadMsg = 0
+	seenGlyphCount = 0
+	processedGlyphCount = 0
+	glyphList.sort()
 	for glyphName in glyphList:
 		changed = 0
+		seenGlyphCount +=1
 		msg = []
-			
+
+		# fontFile.checkSkipGlyph updates the hash map for the glyph, so we call it even when
+		# the  '-all' option is used.
+		skip = fontFile.checkSkipGlyph(glyphName, options.checkAll)
+		#Note: this will delete glyphs from the processed layer, if the glyph hash has changed.
+		if skip:
+			continue
+		processedGlyphCount += 1
+
 		dGlyph = dFont[glyphName]
 		if dGlyph.components:
 			dGlyph.decomposeAllComponents()
 		newGlyph = booleanOperations.booleanGlyph.BooleanGlyph(dGlyph)
-
-		glyphDigest = list(getDigest(newGlyph))
-		glyphDigest.sort()
-		glyphHash = fontFile.buildGlyphHash(newGlyph.width, glyphDigest)
-		# fontFile.checkSkipGlyph updates the hash map for the glyph, so we call it even when
-		# the  '-all' option is used.
-		useProcessedLayer, skip = fontFile.checkSkipGlyph(glyphName, glyphHash)
-		if not options.checkAll:
-			if skip:
-				continue
-
+		glyphDigest = None
 		for test in options.testList:
 			if test != None:
 				newGlyph, glyphDigest, changed, msg = test(newGlyph, glyphDigest, changed, msg, options)
@@ -757,8 +928,9 @@ def run(args):
 			if changed and options.allowChanges:
 				fontChanged = 1
 			lastHadMsg = 1
-		if options.allowChanges and changed:
-			fontFile.markGlyphChangedInHash(glyphName)
+		if changed and options.allowChanges:
+			originalContours = list(dGlyph)
+			fontFile.updateHashEntry(glyphName, changed)
 			if options.writeToDefaultLayer:
 				fixedGlyph = dGlyph
 				fixedGlyph.clearContours()
@@ -775,12 +947,17 @@ def run(args):
 					for point in contour:
 						point.x = int(round(point.x))
 						point.y = int(round(point.y))
+			restoreContourOrder(fixedGlyph, originalContours)
 		sys.stdout.flush() # Need when the script is called from another script with Popen().
+	# update layer plist: the has check call may have deleted glyphs that are out of date.
+	fontFile.updateLayerContentList()
 	if not fontChanged:
 		print
 	else:
 		print
 		fontFile.save()
+	if processedGlyphCount != seenGlyphCount:
+		print "Skipped %s of %s glyphs." % (seenGlyphCount - processedGlyphCount, seenGlyphCount)
 	print "Done with font"
 	return
 

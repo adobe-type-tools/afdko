@@ -59,7 +59,7 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 
 
 __help__ = """
-ttxn v1.15 Oct 9 2012
+ttxn v1.16 Feb 18 2015
 
 Based on the ttx tool, with the same options, except that it is limited to
 dumping, and cannot compile. Makes a normalized dump of the font, or of
@@ -1620,10 +1620,15 @@ class OTLConverter:
 			lookupIndex += 1
 			self.curLookupIndex = lookupIndex
 			subtableIndex = -1
+			subtableIndex = -1
 			for subtable in lookup.SubTable:
 				subtableIndex += 1
 				self.curSubTableIndex = subtableIndex
-				handler = self.classHandlers.get( (lookup.LookupType, subtable.Format), None)
+				try:
+					format = subtable.Format
+				except AttributeError:
+					continue
+				handler = self.classHandlers.get( (lookup.LookupType, format), None)
 				if handler:
 					handler(subtable, self)
 

@@ -1,6 +1,6 @@
-FDK Build Notes v2.5.
+FDK Build Notes v2.6.
 
-v1.05 Sep 18 2014
+v1.06 Feb 18 2015
 
 1) FDK build directory tree.
 
@@ -82,8 +82,7 @@ Once you have built the AFDKO Python, you need to install the various modules th
 This module is needed for the ttx and ttxn tools to work. I use Behdad Esfahbod's GitHub v2.5 branch, as it fixes a number of bugs, and is not dependent on the numPy module.
 
 Get the master branch of fontTools from https://github.com/behdad/fonttools. Download the zip file, cd to the unpacked directory, 
-and use the command "AFDKOPython setup.py install". When you are done, copy the files site-packages/FontTools/fontTools/misc/xmlWriter.py*
-to site-packages/FontTools/xmlWriter.py. This allows the robofab libraries to work with this branch of the fontTools.
+and use the command "AFDKOPython setup.py install".
 
 3.2 MutatorMath support.
 
@@ -92,7 +91,12 @@ fontMath-ufo3: ufo3 branch of fontMath at: https://github.com/typesupply/fontMat
 Install with "AFDKOPython setup.py install"
 
 robofab-ufo3k: ufo3K branch of robofab library from https://github.com/robofab-developers/robofab/tree/ufo3k.
-This does not have a setup.py file. Install by copying the robofab-ufo3k directory to your Python installation's site-packages directory, e.g. FDK/Tools/osx/Python/AFDKOPython27/lib/python2.7/site-packages, cd to the directory, run "AFDKOPython install.py", and then delete all but the LIB directory and the LICENSE.txt file.
+This does not have a setup.py file. The install.py file just makes a link to the
+source. Install by copying the robofab-ufo3k directory to your Python
+installation's site-packages directory. For the Mac, this is
+FDK/Tools/osx/Python/AFDKOPython27/lib/python2.7/site-packages, cd to the
+directory, run "AFDKOPython install.py", and then delete all but the LIB
+directory and the LICENSE.txt file.
 
 defcon-ufo3: ufo3 branch of defcon library at https://github.com/typesupply/defcon/tree/ufo3.
 Install with "AFDKOPython setup.py install"
@@ -104,6 +108,35 @@ Install with "AFDKOPython setup.py install"
 Check all the *.pth files in "FDK/Tools/osx/Python/AFDKOPython27/lib/python2.7/site-packages", and make sure the path references are all relative to the site-packages directory.
 
 Do this for the osx, win and Linux AFDKOPython directories.
+
+3.3 BooleanOperations support
+This is needed for the checkOutlinesUFO command.
+
+booleanOperations-master: master branch of booleanOperations at:
+https://github.com/typesupply/booleanOperations/tree/ufo3/. This does not have a
+setup.py file. Install by copying the booleanOperations-master directory to your
+Python installation's site-packages directory. For the Mac, this is
+FDK/Tools/osx/Python/AFDKOPython27/lib/python2.7/site-packages, cd to the
+site-packages directory, duplicate the file 'robofab.pth', and rename it
+to"booleanOperations-master.pth". Edit the file by  replacing
+"./robofab-ufo3k/Lib" with "./booleanOperations-master/Lib".
+
+This library requires a C++ module named pyClipper. The GIT download includes
+the pyClipper.so library for Max OSX< but you have to build it yourself for
+Linux and Windows.
+
+To build under windows, cd to booleanOperations/cppWrapper, and run:
+ <Linux FDK  Python> setup.py build".
+ Copy the new pyClipper.so file into booleanOperations/Lib
+ 
+To build under Windodws Visual C 9,
+-  in cppWrapper/clipper.py, at line 41, replace:
+#if (__GNUC__ == 2 && __GNUC_MINOR__ <= 97) || (defined(BOOST_MSVC) && _MSC_VER <= 1200)
+with:
+#if (__GNUC__ == 2 && __GNUC_MINOR__ <= 97) || (1)
+
+- use the command <FDK WIndows Python> the setup.py command ' setup.py build_ext --inplace".
+- Copy the new pyClipper.pyd file into booleanOperations/Lib
 
 4) Testing/building systems.
 

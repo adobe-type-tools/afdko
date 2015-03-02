@@ -3,7 +3,7 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 
 
 __usage__ = """
-CheckOutlines v1.23 April 16 2014
+CheckOutlines v1.24 Feb 10 2015
 
 Outline checking program for OpenType/CFF fonts.
 
@@ -350,8 +350,7 @@ class focusOptions:
 		self.arcTolerance = ""
 		self.pathTolerance = ""
 		self.emSquare = ""
-		self.skipIfUnchanged = False
-		self.checkAll = False # overrides skipIfUnchanged: forces all glyphs to be processed even if src hasn't changed.
+		self.checkAll = False # forces all glyphs to be processed even if src hasn't changed.
 
 
 class FDKEnvironmentError(AttributeError):
@@ -498,7 +497,6 @@ def getOptions():
 			options.glyphList += parseGlyphListArg(glyphString)
 		elif arg == "-e":
 			options.allowChanges = 1
-			skipIfUnchanged = True
 		elif arg == "-v":
 			options.beVerbose = 1
 		elif arg == "-V":
@@ -680,6 +678,8 @@ def openUFOFile(path, outFilePath, useHashMaps):
 		shutil.copytree(path , outFilePath)
 		path = outFilePath
 	font = ufoTools.UFOFontData(path, useHashMaps, ufoTools.kCheckOutlineName)
+	font.useProcessedLayer = False # always read glyphs from default layer.
+	font.requiredHistory = [] # Programs in this list must be run before autohint, if the outlines have been edited.
 	return font
 	
 def openOpenTypeFile(path, outFilePath):
@@ -754,7 +754,7 @@ def checkFile(path, options):
 	fontFileName = os.path.basename(path)
 	logMsg("Checking font %s. Start time: %s." % (path, time.asctime()))
 	try:
-		fontData = openFile(path, options.outFilePath, options.allowChanges and (not options.checkAll))
+		fontData = openFile(path, options.outFilePath, options.allowChanges)
 	except (IOError, OSError):
 		logMsg( traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1])
 		raise focusFontError("Error opening or reading from font file <%s>." % fontFileName)
@@ -801,7 +801,7 @@ def checkFile(path, options):
 			os.remove(kTempFilepathOut)
 		
 		# 	Convert to bez format
-		bezString, width= fontData.convertToBez(name, removeHints, options.beVerbose)
+		bezString, width= fontData.convertToBez(name, removeHints, options.beVerbose, options.checkAll)
 			
 		if bezString == None:
 			continue
@@ -835,7 +835,7 @@ def checkFile(path, options):
 			fp.close()
 			if bezData != bezString:
 				fontData.updateFromBez(bezData, name, width, options.beVerbose)
-			seenChangedGlyph = 1
+				seenChangedGlyph = 1
 
 	if not options.beVerbose:
 		logMsg("")
