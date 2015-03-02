@@ -197,7 +197,8 @@ def writeTTC(fontList, tableList, ttcFilePath):
 	for tableEntryList in tableList:
 		for tableEntry in tableEntryList:
 			tableEntry.offset = fontOffset
-			fontOffset += tableEntry.length
+			paddedLength = (tableEntry.length + 3) & ~3
+			fontOffset += paddedLength
 			
 	# save the font sfnt directories
 	for fontEntry in fontList:
@@ -210,7 +211,9 @@ def writeTTC(fontList, tableList, ttcFilePath):
 	# save the tables.
 	for tableEntryList in tableList:
 		for tableEntry in tableEntryList:
-			dataList.append(tableEntry.data)
+			paddedLength = (tableEntry.length + 3) & ~3
+			paddedData = tableEntry.data + b"\0" * (paddedLength - tableEntry.length)
+			dataList.append(paddedData)
 	
 	fontData = "".join(dataList)
 	
