@@ -1858,6 +1858,16 @@ static int CTL_CDECL cmpGNames(const void *first, const void *second,
 				  h->glyphs.array[*(unsigned short *)second].info.gname.ptr);
 	}
 
+static STI getFontVersion(ttrCtx h)
+{
+
+    float fontRevision;
+    char buf[16];
+    fontRevision = ((float)(h->head.fontRevision)/65536L);
+    sprintf(buf, "%.3f", fontRevision);
+    return addString(h, (int)strlen(buf), buf);
+}
+
 /* Fill out client data. */
 static void fillClientData(ttrCtx h)
 	{
@@ -1866,7 +1876,7 @@ static void fillClientData(ttrCtx h)
 	abfFontDict *font = &top->FDArray.array[0];
 
 	/* Top dict */
-	top->version.impl 	= nameGet(h, name_VERSION);
+	top->version.impl 	= getFontVersion(h);
 	top->Notice.impl 	= nameGet(h, name_TRADEMARK);
 	top->Copyright.impl = nameGet(h, name_COPYRIGHT);
 	top->FullName.impl 	= nameGet(h, name_FULL);
@@ -1877,7 +1887,7 @@ static void fillClientData(ttrCtx h)
 		{
 		top->isFixedPitch		= h->post.isFixedPitch;
 		top->ItalicAngle		= FIX2FLT(h->post.italicAngle);
-		top->UnderlinePosition  = h->post.underlinePosition - floor(h->post.underlineThickness * 0.5);
+		top->UnderlinePosition  = (float)(h->post.underlinePosition - floor(h->post.underlineThickness * 0.5));
 		top->UnderlineThickness = h->post.underlineThickness;
 		}
 	else

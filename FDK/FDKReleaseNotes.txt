@@ -1,5 +1,20 @@
 FDKReleaseNotes.txt
 ===============================================================================
+
+FDK. v2.5 March 3 2015 change number 63782.
+
+	tx.
+	Fix bug in reading ttf's. Font version was taken from the name table, which
+	can include a good deal more than just the font version. Changed to read
+	fontRevision from the head table.
+	
+	detype1.
+	Changed to wrap line only after an operator name, so that the coordinates
+	for a command and the command name would stay on one line.
+	
+	Misc.
+	otf2otc.py. Pad table data with 0's so as to align tables on a 4 boundary. Submitted by Cosimo Lupo.
+	
 FDK v2.5 Feb 21 2015 change number 63718.
 
 	autohint

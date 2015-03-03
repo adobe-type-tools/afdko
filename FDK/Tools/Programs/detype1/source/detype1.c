@@ -57,6 +57,7 @@ static uchar decrypt(uchar cipher, unsigned short *keyp) {
 
 static uchar *charstring(uchar *prefix, uchar *s, int lenIV, FILE *fp) {
 	int i;
+    int afterOpName = 0;
 	uchar *end;
 	unsigned short key = key_charstring;
 	static const char
@@ -93,12 +94,16 @@ static uchar *charstring(uchar *prefix, uchar *s, int lenIV, FILE *fp) {
 		decrypt(*s++, &key);
     i = 12;
 	while (s < end) {
-		int c = decrypt(*s++, &key);
+		uchar c = decrypt(*s++, &key);
 		if (c == 12) {
 			c = decrypt(*s++, &key);
 			if (c >= length_of(esc) || esc[c] == NULL)
 				panic("bad charstring escape: %d", c);
 			i += fprintf(fp," %s", esc[c]);
+            if(i > 70){
+                fprintf(fp,"\n");
+                i = 0;
+            }
 		} else if (c < 32) {
 			if (cmd[c] == NULL)
 				panic("bad charstring command: %d", c);
@@ -107,30 +112,22 @@ static uchar *charstring(uchar *prefix, uchar *s, int lenIV, FILE *fp) {
                 fprintf(fp,"\n");
                 i = 0;
             }
+            else if(i > 70){
+                fprintf(fp,"\n");
+                i = 0;
+            }
         } else if (c < 247){
-		    if(i > 70){
-			    fprintf(fp,"\n");
-			    i = 0;
-		    }
 			i += fprintf(fp," %d", c - 139);
         } else if (c < 251){
             long n;
-		    if(i > 70){
-			    fprintf(fp,"\n");
-			    i = 0;
-		    }
              n = decrypt(*s++, &key);
 			i += fprintf(fp," %d",  
-				108 + ((c - 247) << 8) + n);
+				(int)(108 + ((c - 247) << 8) + n));
         } else if (c < 255){
             long n;
-		    if(i > 70){
-			    fprintf(fp,"\n");
-			    i = 0;
-		    }
             n = decrypt(*s++, &key);
  			i += fprintf(fp," -%d", 
-				108 + ((c - 251) << 8) + n);
+				(int)(108 + ((c - 251) << 8) + n));
         } else {
 			long n;
 			n  = decrypt(*s++, &key) << 24;
@@ -139,11 +136,10 @@ static uchar *charstring(uchar *prefix, uchar *s, int lenIV, FILE *fp) {
 			n |= decrypt(*s++, &key);
 			i += fprintf(fp," %ld", n);
 		}
-		if(i > 70){
-			fprintf(fp,"\n");
-			i = 0;
-		}
 	}
+    if(i > 70){
+        fprintf(fp,"\n");
+    }
 	if (s != end)
 		panic("ran off the end of charstring");
 	fprintf(fp," }");
@@ -528,7 +524,7 @@ int getopt  (int argc, char **argv, char *opstring) {
 
 int main(int argc, char *argv[]) {
 	int c;
-	while ((c = getopt(argc, argv, "?")) != EOF)
+	while ((c = getopt(argc, argv, "?uh")) != EOF)
 		switch (c) {
 		default:	usage();
 		}
