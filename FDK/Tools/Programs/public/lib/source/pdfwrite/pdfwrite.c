@@ -102,7 +102,7 @@ static Font fonts[FONT_CNT] =
 	832, 547, 547, 592, 592, 547, 501, 638, 
 	592, 228, 410, 547, 456, 683, 592, 638, 
 	547, 638, 592, 547, 501, 592, 547, 774, 
-	547, 547, 501, 228, 228, 228, 385, 456, 
+	547, 547, 501, 228, 228, 228, 385, 456,
 	182, 456, 456, 410, 456, 456, 228, 456, 
 	456, 182, 182, 410, 182, 683, 456, 456, 
 	456, 456, 273, 410, 228, 456, 410, 592, 
@@ -587,10 +587,10 @@ static void textBeg(pdwCtx h, int iStm, int iFont, float size, float leading)
 	/* Select font */
 	stmPrint(h, iStm,
 			 "BT\n"
-			 "/F%d %g Tf\n",
+			 "/F%d %.2f Tf\n",
 			 iFont, RND(1, size));
 
-	stmPrint(h, iStm, "%g TL\n", RND(1, leading));
+	stmPrint(h, iStm, "%.2f TL\n", RND(1, leading));
 	stmPrint(h, iStm, "%d Tz\n", (iFont == FONT_TEXT)? 82: 100);
 
 	/* Save text parameters */
@@ -612,7 +612,7 @@ static void textEnd(pdwCtx h)
 static void textSetPos(pdwCtx h, float x, float y)
 	{
 	y += h->text.leading;
-	stmPrint(h, h->text.iStm, "%g %g Td\n", 
+	stmPrint(h, h->text.iStm, "%.2f %.2f Td\n", 
 			 RND(1, x - h->text.x), RND(1, y - h->text.y));
 	h->text.x = x;
 	h->text.y = y;
@@ -728,12 +728,12 @@ static void glyphWidth(abfGlyphCallbacks *cb, float hAdv)
 
 	/* Write bearings object */
 	stmPrint(h, STM_MISC,
-			 "%g 0 m\n"
+			 "%.2f 0 m\n"
 			 "0 0 l\n"
-			 "0 %g l\n"
-			 "%g 0 m\n"
-			 "%g 0 l\n"
-			 "%g %g l\n"
+			 "0 %.2f l\n"
+			 "%.2f 0 m\n"
+			 "%.2f 0 l\n"
+			 "%.2f %.2f l\n"
 			 "S\n",
 			 IN_EM(-0.03), 
 			 IN_EM(-0.03),
@@ -808,8 +808,8 @@ static void drawCoord(pdwCtx h, float ax, float ay)
 
 		/* Draw tic */
 		stmPrint(h, STM_TICS,
-				 "%g %g m\n"
-				 "%g %g l\n",
+				 "%.2f %.2f m\n"
+				 "%.2f %.2f l\n",
 				 h->path.bx, h->path.by,
 				 x, y);
 
@@ -848,11 +848,11 @@ static void drawCircle(pdwCtx h, int iStm, float x, float y, float r)
 	double yp		= RND(1, y + l);
 	double ym		= RND(1, y - l);
 	stmPrint(h, iStm,
-			 "%g %g m\n"
-			 "%g %g %g %g %g %g c\n"
-			 "%g %g %g %g %g %g c\n"
-			 "%g %g %g %g %g %g c\n"
-			 "%g %g %g %g %g %g c\n"
+			 "%.2f %.2f m\n"
+			 "%.2f %.2f %.2f %.2f %.2f %.2f c\n"
+			 "%.2f %.2f %.2f %.2f %.2f %.2f c\n"
+			 "%.2f %.2f %.2f %.2f %.2f %.2f c\n"
+			 "%.2f %.2f %.2f %.2f %.2f %.2f c\n"
 			 "h\n",
 			 x, top,
 			 xp, top, right, yp, right, y,
@@ -884,10 +884,10 @@ static void drawClose(pdwCtx h, int closepoint)
 	stmPrint(h, STM_TICS,
 			 "f\n"
 			 "q\n"
-			 "%g %g %g %g %g %g cm\n"
+			 "%.2f %.2f %.2f %.2f %.2f %.2f cm\n"
 			 "0 0 m\n"
-			 "%g %g l\n"
-			 "%g %g l\n"
+			 "%.2f %.2f l\n"
+			 "%.2f %.2f l\n"
 			 "h\n",
 			 dx/l, dy/l, -dy/l, dx/l, h->path.fx, h->path.fy,
 			 TO_EM(-6), TO_EM(-1.5),
@@ -928,7 +928,7 @@ static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0)
 	if (h->path.moves != 0)
 		endPath(h);
 
-	stmPrint(h, STM_PATH, "%g %g m\n", x0, y0);
+	stmPrint(h, STM_PATH, "%.2f %.2f m\n", x0, y0);
 
 	h->path.cnt = 1;
 	if (h->level > 0)
@@ -952,7 +952,7 @@ static void drawCntlPt(pdwCtx h, float x, float y)
 
 	side = (float)RND(1, TO_EM(0.6));
 	stmPrint(h, STM_TICS,
-			 "%g %g %g %g re\n",
+			 "%.2f %.2f %.2f %.2f re\n",
 			 RND(1, x - TO_EM(0.3)), RND(1, y - TO_EM(0.3)),
 			 side, side);
 	}
@@ -962,7 +962,7 @@ static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1)
 	{
 	pdwCtx h = cb->direct_ctx;
 
-	stmPrint(h, STM_PATH, "%g %g l\n", x1, y1);	
+	stmPrint(h, STM_PATH, "%.2f %.2f l\n", x1, y1);	
 	drawCoord(h, x1, y1);
 
 	if (h->level > 0)
@@ -979,7 +979,7 @@ static void glyphCurve(abfGlyphCallbacks *cb,
 	{
 	pdwCtx h = cb->direct_ctx;
 
-	stmPrint(h, STM_PATH, "%g %g %g %g %g %g c\n", x1, y1, x2, y2, x3, y3);
+	stmPrint(h, STM_PATH, "%.2f %.2f %.2f %.2f %.2f %.2f c\n", x1, y1, x2, y2, x3, y3);
 
 	drawCntlPt(h, x1, y1);
 	drawCntlPt(h, x2, y2);
@@ -1006,12 +1006,12 @@ static void drawVStem(pdwCtx h,
 	{
 	if (left == right)
 		stmPrint(h, STM_MISC, 
-				 "%g %g m\n"
-				 "%g %g l\n",
+				 "%.2f %.2f m\n"
+				 "%.2f %.2f l\n",
 				 left, bottom, left, top);
 	else
 		stmPrint(h, STM_MISC,
-				 "%g %g %g %g re\n",
+				 "%.2f %.2f %.2f %.2f re\n",
 				 left, bottom, right - left, top - bottom);
 	}
 
@@ -1021,7 +1021,7 @@ static void drawHCoords(pdwCtx h, float left, float top, float bottom)
 	char buf[20];
 	float baseshift = -textCapHeight(h)/2;
 		
-	sprintf(buf, "%g", top);
+	sprintf(buf, "%.2f", top);
 	left -= textLength(h, buf);
 	textSetPos(h, left, top + baseshift);
 	textShow(h, buf);
@@ -1029,7 +1029,7 @@ static void drawHCoords(pdwCtx h, float left, float top, float bottom)
 	if (bottom == top)
 		return;
 
-	sprintf(buf, "%g", bottom);
+	sprintf(buf, "%.2f", bottom);
 	left -= textLength(h, buf);
 	textSetPos(h, left, bottom + baseshift);
 	textShow(h, buf);
@@ -1066,12 +1066,12 @@ static void glyphStem(abfGlyphCallbacks *cb,
 
 		if (bottom == top)
 			stmPrint(h, STM_HINT,
-					 "%g %g m\n"
-					 "%g %g l\n",
+					 "%.2f %.2f m\n"
+					 "%.2f %.2f l\n",
 					 left, top, right, top);
 		else
 			stmPrint(h, STM_MISC,
-					 "%g %g %g %g re\n",
+					 "%.2f %.2f %.2f %.2f re\n",
 					 left, bottom, right - left, top - bottom);
 		}
 	}
@@ -1094,9 +1094,9 @@ static void glyphFlex(abfGlyphCallbacks *cb, float depth,
 		return;
 
 	stmPrint(h, STM_FLEX,
-			 "%g %g m\n"
-			 "%g %g %g %g %g %g c\n"
-			 "%g %g %g %g %g %g c\n",
+			 "%.2f %.2f m\n"
+			 "%.2f %.2f %.2f %.2f %.2f %.2f c\n"
+			 "%.2f %.2f %.2f %.2f %.2f %.2f c\n",
 			 h->path.bx, h->path.by,
 			 x1, y1, x2, y2, x3, y3,
 			 x4, y4, x5, y5, x6, y6);
@@ -1156,7 +1156,7 @@ static void drawTile(pdwCtx h, int iStm,
 
 	/* Draw tile rectangle */
 	stmPrint(h, iStm, 
-			 "%g %g %d %d re\n"
+			 "%.2f %.2f %d %d re\n"
 			 "s\n",
 			 x, y - TILE_SIZE, TILE_SIZE, TILE_SIZE);
 
@@ -1203,12 +1203,12 @@ static long writeTileMtxValueObj(pdwCtx h, abfGlyphInfo *info)
 		sprintf(tag, "%hu,%s", info->tag, makeEncStr(h, enc, info));
 		sprintf(gname, "%s", info->gname.ptr);
 		}
-	sprintf(hAdv, "%g", h->glyph.hAdv);
+	sprintf(hAdv, "%.2f", h->glyph.hAdv);
 
 	drawTile(h, STM_MISC, x, y, tag, hAdv, gname);
 	stmPrint(h, STM_MISC, 
 			 "q\n"
-			 "%g 0 0 %g %g %g cm\n",
+			 "%.2f 0 0 %.2f %.2f %.2f cm\n",
 			 scale, scale,
 			 RND(1, x + (TILE_SIZE - TILE_GLYPH_SIZE*
 						   h->glyph.hAdv/h->top->sup.UnitsPerEm)/2),

@@ -1,6 +1,60 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
+FDK. v2.5 April XX change number 63782.
+
+	checkOutlinesUFO.
+	Added a new logic to delete any glyphs from the processed layer which are
+	not in the ‘glyphs’ layer.
+
+	makeotf.
+	When building CID font, some error messages were printed twice. 
+	Add new option -stubCmap4. This causes makeotf to build only a stub cmap 4
+	subtable, with just two segments. Needed only for special cases like
+	AdobeBlank, where every byte is an issue. Windows requires a cmap format 4
+	subtable, but not that it be useful.
+
+	makeCIDFont.
+	Output FontDict was sized incorrectly. A function at the end adds some FontInfo keys, but did not increment the size of the dict. Legacy logic is to make the FontInfo dict be 3 larger than the current number of keys.
+
+	makeInstanceUFO:
+	Changed FDK branch of mutatorMath so that kern values, glyph widths, and the
+	BlueValues family of global hint values are all rounded to integer even when
+	the –decimal option is used.
+	makeInstanceUFO now deletes the default ‘glyphs’  layer of the target
+	instance font before generating the instance. This solves the problem that
+	when glyphs are removed from the master instances, the instance font still
+	has them.
+	Added a new logic to delete any glyphs from the processed layer which are
+	not in the ‘glyphs’ layer.
+	Removed the ‘-all’ option: even though mutatorMath rewrites all the glyphs,
+	the hash values are still valid for glyphs which have not been edited. This
+	means that if the developer edits only a few glyphs in the master designs,
+	only those glyphs in the instances will get processed by checkOutlinesUFO
+	and autohint .
+
+	Support decimal coordinate values in fonts in UFO workflow.
+
+	checkOutlinesUFUO (but not checkOutlines), autohint, and makeInstancesUFO
+	will now all pass through decinal coordinates without rounding, if you use
+	the new option "-decimal". 'tx' will dump decinal values with 3 decimal places.
+
+	'tx' already reported fractional values, but needed to be modified to report
+	only 3 decimal places when writing UFO glif files, and in PDF output mode -
+	Acrobat won't read PDF files with 9 decimal places in position values.
+	
+	This allows a developer to use a much higher precision of point positioning
+	without using a large em-square. The Adobe Type group found that using an
+	em-square of other than 1000 design units still causes problems in layout
+	and text selection line height in many apps, despite it being legal by the
+	Type 1 and CFF specifications. 
+	
+	Note that code design issues in 'autohint'currently limit the decimal
+	precision and accuracy to 2 decimal places. 1.01 is works, 1.001 will be
+	rounded to 0.
+	
+	
+	
 FDK. v2.5 March 3 2015 change number 63782.
 
 	tx.

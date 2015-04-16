@@ -6,7 +6,7 @@ default values, and can read values in from a text project file. It will also
 use the tx program to convert the input font file to a Type 1 font, if needed.
 """
 
-__copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+__copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
 
@@ -41,7 +41,7 @@ Project file.
 """
 
 __usage__ = """
-makeotf v2.0.79 Sept 8 2014
+makeotf v2.0.81 April 3 2015
 -f <input font>         Specify input font path. Default is 'font.pfa'.
 -o <output font>        Specify output font path. Default is
                         '<PostScript-Name>.otf'.
@@ -197,9 +197,13 @@ makeotf v2.0.79 Sept 8 2014
 -ncn                    Turn off converting the CFF table to a CID-keyed
                         CFF that specifies the Adobe-Identity-0 ROS;
                         otherwise has no effect.
-
--shw/-nshw              do/do not suppress warnings about unhinted glyphs.
+-shw/-nshw              Do/Do Not suppress warnings about unhinted glyphs.
 						This is useful when processing unhinted fonts.
+-stubCmap4              Build only a "stub" Format 4 'cmap' subtable, with
+                        only two segments. This is useful only for special-
+                        purpose fonts such as AdobeBlank, whose size is an
+                        issue. Windows requires a Format 4 'cmap' subtable
+                        to be present, but it is not used.
 						
 Note that options are applied in the order in which they are
 specified: "-r -nS" will not subroutinize a font, but "-nS -r" will
@@ -279,6 +283,7 @@ kSerif = "AddedGlyphsAreSerif"  # if true, any added glyphs will be serif. Else,
 kXUID = "XUID" # Integer. Sets the XUID value in the font. Default is to provide no XUID value.
 kConvertToCID = "ConvertToCID"     # Boolean: turns on converting name-keyed font to CID with and identity CMAP.
 kSuppressHintWarnings = "SuppressHintWarnings"
+kStubCmap4 = "StubCmap4"
 
 # Required project file field names for CID-keyed fonts
 kMacScript = "MacCmapScriptID" # Integer. Used to override the heuristics used to determine the script id for the cmap table Mac encoding sub-table.
@@ -336,6 +341,8 @@ kMOTFOptions = {
 	kWriteWrongBacktrack: [kOptionNotSeen, "-fc", None],
 	kConvertToCID: [kOptionNotSeen, "-cn", "-ncn"],
 	kSuppressHintWarnings:  [kOptionNotSeen, "-shw", "-nshw"],
+	kStubCmap4:  [kOptionNotSeen, "-stubCmap4", None],
+
 }
 
 # Used to compile post table for TTF fonts. We need to stay in syn with the
@@ -563,6 +570,10 @@ def setOptionsFromFontInfo(makeOTFParams):
 	if kMOTFOptions[kSuppressHintWarnings][0] == kOptionNotSeen:
 		if re.search(r"SuppressHintWarnings\s+([Tt]rue|1)", data):
 			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kSuppressHintWarnings))
+
+	if kMOTFOptions[kStubCmap4][0] == kOptionNotSeen:
+		if re.search(r"stubCmap4\s+([Tt]rue|1)", data):
+			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kStubCmap4))
 
 
 
@@ -957,10 +968,8 @@ def getOptions(makeOTFParams):
 			exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kGOADB))
 
 		elif arg == kMOTFOptions[kDoSubset][1]:
-			if (not eval("makeOTFParams.%s%s" % (kFileOptPrefix, kRelease))) and (None == eval("makeOTFParams.%s%s" % (kFileOptPrefix, kDoAlias))):
-				# we don't need to turn Alias on if release mode is on, and Alias has not been explicitly disabled.
-				kMOTFOptions[kDoSubset][0] = i + optionIndex
-				exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kDoSubset))
+			kMOTFOptions[kDoSubset][0] = i + optionIndex
+			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kDoSubset))
 				
 		elif arg == kMOTFOptions[kDoSubset][2]:
 			exec("makeOTFParams.%s%s = 'false'" % (kFileOptPrefix, kDoSubset))
@@ -1206,10 +1215,13 @@ def getOptions(makeOTFParams):
 		elif arg == kMOTFOptions[kSuppressHintWarnings][1]:
 			kMOTFOptions[kSuppressHintWarnings][0] = i + optionIndex
 			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kSuppressHintWarnings))
-
 		elif arg == kMOTFOptions[kSuppressHintWarnings][2]:
 			kMOTFOptions[kSuppressHintWarnings][0] = i + optionIndex
 			exec("makeOTFParams.%s%s = 'None'" % (kFileOptPrefix, kSuppressHintWarnings))
+		elif arg == kMOTFOptions[kStubCmap4][1]:
+			kMOTFOptions[kStubCmap4][0] = i + optionIndex
+			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kStubCmap4))
+
 
 		else:
 			error = 1
@@ -1470,9 +1482,7 @@ def setMissingParams(makeOTFParams):
 				print "makeotf [Warning] the feature file does not contain a 'vert' feature %s." % (featPath)
 				
 			if not (eval("makeOTFParams.%s%s" % (kFileOptPrefix, kMacCMAPPath)) and
-				eval("makeOTFParams.%s%s" % (kFileOptPrefix, kHUniCMAPPath)) ):
-				error = setCIDCMAPPaths(makeOTFParams, R,O,S)
-			if not eval("makeOTFParams.%s%s" % (kFileOptPrefix, kUVSPath)):
+				eval("makeOTFParams.%s%s" % (kFileOptPrefix, kHUniCMAPPath)) and eval("makeOTFParams.%s%s" % (kFileOptPrefix, kUVSPath)) ):
 				error = setCIDCMAPPaths(makeOTFParams, R,O,S)
 
 	# output file path.

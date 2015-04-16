@@ -1,5 +1,5 @@
 """
-fontPDF v1.21 Dec 6 2010. This module is not run stand-alone; it requires
+fontPDF v1.22 April 2015. This module is not run stand-alone; it requires
 another module, such as ProofPDF.py, in order to collect the options, and call
 the MakePDF function.
 
@@ -1867,7 +1867,7 @@ def getEncodingInfo(fontInfo):
 	return fontInfo.firstChar, fontInfo.lastChar, fontInfo.widths
 
 
-def doWaterfall(params, glyphList, fontInfo, wi, cur_y, cur_x):
+def doWaterfall(params, glyphList, fontInfo, wi, cur_y, cur_x, pdfFont, yTop, numGlyphs, numPages):
 	rt_canvas = params.rt_canvas
 	fontPath = params.rt_filePath
 	embeddedFontPSName = fontInfo.FontName
@@ -1880,8 +1880,13 @@ def doWaterfall(params, glyphList, fontInfo, wi, cur_y, cur_x):
 	text= text.replace("\\", "\\\\")
 	#print text, codeRange, glyphList
 	for gSize in params.waterfallRange:
-		rt_canvas.setFont(embeddedFontPSName, gSize, leading, fontInfo.encoding)
 		cur_y -= gSize*1.2
+		if ((cur_y) < params.pageBottomMargin):
+			rt_canvas.showPage()
+			yTop = doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages)
+			cur_x = params.pageLeftMargin
+			cur_y = yTop - gSize*1.2
+		rt_canvas.setFont(embeddedFontPSName, gSize, leading, fontInfo.encoding)
 		rt_canvas.drawString(cur_x, cur_y, text)
 	return cur_y
 
@@ -1935,7 +1940,7 @@ def makeWaterfallPDF(params, pdfFont, progressBarInstance):
 	ptSizeTemplate = "%s pts   "
 	ptWidth = pdfmetrics.stringwidth(ptSizeTemplate % ("00"), pageTitleFont)*0.001*maxLabelSize
 
-	waterfallHeight = 0
+	waterfallHeight = 0 # page height of one water fall  one row per pt size.
 	for gSize in waterfallRange:
 		waterfallHeight += gSize*1.2
 		cur_y -= gSize*1.2
@@ -1948,6 +1953,8 @@ def makeWaterfallPDF(params, pdfFont, progressBarInstance):
 
 
 	# Build the list of strings, based on their widths.
+	# If the glyph string is too long to font on one line, divide it up into
+	# a list of glyphs strings, each of which do fit on one line.
 	glyphLists = []
 	glyphList = []
 	stringWidth = ptWidth # allow for initial pt size field on first group.
@@ -1964,20 +1971,15 @@ def makeWaterfallPDF(params, pdfFont, progressBarInstance):
 	if glyphList:
 		glyphLists.append(glyphList)
 		
-	numWaterfallsOnPage = int(pageHeight/waterfallHeight)
+	numWaterfallsOnPage = pageHeight/float(waterfallHeight)
 	numWaterFalls = len(glyphLists)
 	numPages = int(round(0.5 + float(numWaterFalls)/numWaterfallsOnPage))
+	if numPages == 0:
+		numPages = 1
 	doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages)
 
-	
 	for wi in range(numWaterFalls):
-		if (wi > 0) and (wi % numWaterfallsOnPage) == 0:
-			progressBarInstance.DoProgress(wi)
-			rt_canvas.showPage()
-			yTop = doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages)
-			cur_x = params.pageLeftMargin
-			cur_y = yTop
-		cur_y = doWaterfall(params, glyphLists[wi], fontInfo, wi, cur_y, cur_x)
+		cur_y = doWaterfall(params, glyphLists[wi], fontInfo, wi, cur_y, cur_x, pdfFont, yTop, numGlyphs, numPages)
 		cur_x = params.pageLeftMargin
 	progressBarInstance.EndProgress()
 	rt_canvas.showPage()

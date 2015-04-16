@@ -181,7 +181,7 @@ static unsigned char *refill(t2cCtx h, unsigned char **end)
 	if (h->src.length == 0)
     {
         errMsg = strerror(errno);
-        printf(errMsg);
+        printf("%s", errMsg);
 		return NULL;	/* Stream error */
     }
 

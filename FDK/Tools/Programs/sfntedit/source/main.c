@@ -40,7 +40,7 @@ jmp_buf mark;
 
 #endif /* SUNOS */
 
-#define VERSION "1.3"
+#define VERSION "1.4"
 
 /* Data type sizes (bytes) */
 #define uint16_	2
@@ -1394,8 +1394,7 @@ scriptAbEnd:
 		}
 		
 	fprintf(stdout, "\nDone.\n");
-	quit (0);
-	return 0;
+	return status;
 	}
 
 

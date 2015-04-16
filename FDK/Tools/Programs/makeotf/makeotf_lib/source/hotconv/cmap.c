@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <limits.h>
 
+#include "hotconv.h"
 #include "cmap.h"
 #include "map.h"
 #include "feat.h"
@@ -363,7 +364,7 @@ void cmapAddCodeSpaceRange(hotCtx g, unsigned lo, unsigned hi, int codeSize) {
 	csr->hi = hi;
 }
 
-/* Add a UVS entry to current tables. Needs to add teh entry to one of the four
+/* Add a UVS entry to current tables. Needs to add the entry to one of the four
    lists: default UVS with BMP UB, default UVS with supplement UV, non default UVS
    with BMP UVm non-default UBS with supplemental UV, Assumes that the
    entries are added in UVS order, so we don;t need to sort the four tables.. */
@@ -389,7 +390,7 @@ void cmapAddUVSEntry(hotCtx g, unsigned int uvsFlags, unsigned long uv, unsigned
 		}
 		else {
 			DefaultUVSEntryRange *uvd = dnaINDEX(uvsRec->dfltUVS,  uvsRec->dfltUVS.cnt - 1);
-			if ((uvd->uv  + uvd->addtlCnt + 1) == uv) {
+			if ((uvd->addtlCnt < 255) && ((uvd->uv  + uvd->addtlCnt + 1) == uv)) {
 				uvd->addtlCnt++;
 			}
 			else {
@@ -838,6 +839,9 @@ static Format4 *makeFormat4(cmapCtx h, unsigned long *length) {
 	Format4 *fmt = MEM_NEW(h->g, sizeof(Format4));
 	dnaINIT(h->g->dnaCtx, fmt->glyphId, 256, 64);
 
+    if (h->g->convertFlags & HOT_STUB_CMAP4)
+        truncateCmap = 1;
+
 	while (notOK) {
 		unsigned int numOrdered = 0;
 		unsigned int numNotOrdered = 0;
@@ -845,6 +849,7 @@ static Format4 *makeFormat4(cmapCtx h, unsigned long *length) {
 		fmt->glyphId.cnt = 0;
 
 		nSegments = partitionRanges(h, mapping);
+         
 		if (truncateCmap) {
 			nSegments = 2;
 		}

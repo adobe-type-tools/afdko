@@ -106,17 +106,17 @@ void GetMasterDirName(char *dirname, indx ix)
 #define IntToFix(i) ((long int)(i) << FixShift)
 #define FRnd(x) ((long int)(((x)+(1<<7)) & ~0xFFL))
 #define FTrunc8(x) ((long int)((x)>>8))
-#define F2Float(x) ((float)((x) / 256.0))
+#define FIXED2FLOAT(x) ((float)((x) / 256.0))
 #define FixedToDouble(x) ((double)((x) / 256.0))
 #define Frac(x) ((x) & 0xFFL)
 #define FixOne (0x100L)
 #define FixHalf (0x80L)
 #define FixHalfMul(f) ((f) >> 1)
 #define FixTwoMul(f) ((f) << 1)
-#define TFMX(x) (FixHalfMul(x))
-#define TFMY(y) (-FixHalfMul(y))
-#define ITFMX(x) (FixTwoMul(x))
-#define ITFMY(y) (-FixTwoMul(y))
+#define TFMX(x) ((x))
+#define TFMY(y) (-(y))
+#define ITFMX(x) ((x))
+#define ITFMY(y) (-(y))
 #define WRTNUM(i) {sprintf(outstr, "%d ", (int)(i)); WriteToBuffer(); }
 #define WriteStr(str) {\
 sprintf(outstr, "%s ", (char *)str); WriteToBuffer(); }
@@ -977,7 +977,7 @@ static short GetPointType(short hinttype, Fixed value, long *pathEltIx)
     
 #if __CENTERLINE__
     if (TRACE) {
-        fprintf(stderr, "Enter GetPointType: Hinttype=%s @(%.2f) curr patheltix=%d pathIx=%d  <%s>",_HintKind_(hinttype), F2Float(value), *pathEltIx, pathIx, _elttype_(pathIx));
+        fprintf(stderr, "Enter GetPointType: Hinttype=%s @(%.2f) curr patheltix=%d pathIx=%d  <%s>",_HintKind_(hinttype), FIXED2FLOAT(value), *pathEltIx, pathIx, _elttype_(pathIx));
     }
 #endif
     
@@ -990,7 +990,7 @@ retry:
             startval = startPt.y;
             endval = endPt.y;
 #if __CENTERLINE__
-            if (TRACE) fprintf(stderr, "Startval Y=%.2f EndVal Y=%.2f ", F2Float(startval), F2Float(endval));
+            if (TRACE) fprintf(stderr, "Startval Y=%.2f EndVal Y=%.2f ", FIXED2FLOAT(startval), FIXED2FLOAT(endval));
 #endif
             break;
         case RY:
@@ -998,7 +998,7 @@ retry:
             startval = startPt.x;
             endval = endPt.x;
 #if __CENTERLINE__
-            if (TRACE) fprintf(stderr, "Startval X=%.2f EndVal X=%.2f ", F2Float(startval), F2Float(endval));
+            if (TRACE) fprintf(stderr, "Startval X=%.2f EndVal X=%.2f ", FIXED2FLOAT(startval), FIXED2FLOAT(endval));
 #endif
             break;
         default:
@@ -1131,11 +1131,11 @@ static void InsertHint(PHintElt currHintElt, indx pathEltIx,
             fprintf(stderr,"%d ", pathEltIx);
             if (type1 != GHOST) {
                 GetEndPoint(hintsdirIx, currHintElt->pathix1 - 1, &tx, &ty);
-                fprintf(stderr,"Start attached to (%.2f %.2f)", F2Float(tx), F2Float(ty));
+                fprintf(stderr,"Start attached to (%.2f %.2f)", FIXED2FLOAT(tx), FIXED2FLOAT(ty));
             }
             if (type2 != GHOST) {
                 GetEndPoint(hintsdirIx, currHintElt->pathix2 - 1, &tx, &ty);
-                fprintf(stderr,"End attached to (%.2f %.2f)", F2Float(tx), F2Float(ty));
+                fprintf(stderr,"End attached to (%.2f %.2f)", FIXED2FLOAT(tx), FIXED2FLOAT(ty));
             }
         }
         fprintf(stderr,"\n");

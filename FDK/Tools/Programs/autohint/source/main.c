@@ -214,7 +214,12 @@ static void closeReportFile(void)
 
 int main(int argc, char *argv[])
 {
-	int allowEdit, allowHintSub, fixStems, debug, badParam;
+    /* See the discussion in the function definition for:
+     autohintlib:control.c:Blues()
+     private procedure Blues()
+     */
+
+	int allowEdit, roundCoords, allowHintSub, fixStems, debug, badParam;
 	boolean argumentIsBezData = false;
 	char *fontInfoFileName=NULL; /* font info file name, or suffix of environment variable holding the fontfino string. */
 	char *fontinfo = NULL; /* the string of fontinfo data */
@@ -225,7 +230,7 @@ int main(int argc, char *argv[])
 	int result, argi;
 
 	badParam = fixStems = debug = doAligns = doStems = allstems = FALSE;
-	allowEdit = allowHintSub = TRUE;
+	allowEdit = allowHintSub = roundCoords = TRUE;
 	fileSuffix = (char *)dfltExt;
 
 	/* read in options */
@@ -270,6 +275,8 @@ int main(int argc, char *argv[])
 				break;
 			case 'e':
 				allowEdit = FALSE;
+            case 'd':
+                roundCoords = FALSE;
 				break;
 			case 'b':
 				argumentIsBezData = true;
@@ -408,7 +415,7 @@ int main(int argc, char *argv[])
 			openReportFile(bezName, fileSuffix);
 		}
 
-		result = AutoColorString(bezdata, fontinfo, output, (int *)&outputsize, allowEdit, allowHintSub, debug);
+		result = AutoColorString(bezdata, fontinfo, output, (int *)&outputsize, allowEdit, allowHintSub, roundCoords, debug);
 		if (result == AC_DestBuffOfloError)
         {
 			if (reportFile != NULL) {
@@ -421,7 +428,7 @@ int main(int argc, char *argv[])
             output = malloc(outputsize);
             /* printf("NOTE: trying again. Input size %d output size %d.\n", strlen(bezdata), outputsize); */
             AC_SetReportCB(reportCB, FALSE);
-            result = AutoColorString(bezdata, fontinfo, output, (int *)&outputsize, allowEdit, allowHintSub, debug);
+            result = AutoColorString(bezdata, fontinfo, output, (int *)&outputsize, allowEdit, allowHintSub, roundCoords, debug);
             AC_SetReportCB(reportCB, verbose);
         }
         

@@ -1,5 +1,5 @@
 """
-ufoTools.py v1.16 Feb 11 2015
+ufoTools.py v1.17 Apr 3 2015
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -273,6 +273,7 @@ class UFOFontData:
 		self.useProcessedLayer = False # If False, then read data only from the default layer; else read glyphs from processed layer, if it exists.
 		self.doAll = False # if True, then do not skip any glyphs.
 		self.deletedGlyph = False # track whether checkSkipGLyph has deleted a out of date glyph from the processed glyph layer
+		self.allowDecimalCoords = False # if true, do NOT round x,y values when processing.
 		
 	def getUnitsPerEm(self):
 		unitsPerEm = "1000"
@@ -475,7 +476,6 @@ class UFOFontData:
 			# Glyph is as yet untouched by any program.
 			pass
 
-		# Decide whether to skip glyph.
 		if (hashEntry == None):
 			self.hashMap[glyphName] = [newSrcHash, [self.programName] ]
 			self.hashMapChanged = 1
@@ -772,7 +772,7 @@ class UFOFontData:
 		"""  glyphData must be the official <outline> XML from a GLIF.
 		We skip contours with only one point.
 		"""
-		dataList = [str(width)]
+		dataList = ["w%s" % (str(width))]
 		if level > 10:
 			raise UFOParseError("In parsing component, exceeded 10 levels of reference. '%s'. " % (glyphName))
 		# <outline> tag is optional per spec., e.g. space glyph does not necessarily have it.
@@ -785,12 +785,17 @@ class UFOFontData:
 				else:
 					for child in childContour:
 						if child.tag == "point":
-							dataList.append("%s%s" % (child.attrib["x"], child.attrib["y"]))
+							try:
+								pointType = child.attrib["type"][0]
+							except KeyError:
+								pointType = ""
+							dataList.append("%s%s%s" % (pointType, child.attrib["x"], child.attrib["y"]))
 							#print dataList[-3:]
 			elif childContour.tag == "component":
 				# append the component hash.
 				try:
 					compGlyphName = childContour.attrib["base"]
+					dataList.append("%s%s" % ("base:", compGlyphName))
 				except KeyError:
 					raise UFOParseError("'%s' is missing the 'base' attribute in a component. glyph '%s'." % (glyphName))
 				try:
@@ -803,11 +808,18 @@ class UFOFontData:
 				if not os.path.exists(componentPath):
 					raise UFOParseError("'%s' component file is missing: '%s'." % (compGlyphName, componentPath))
 				etRoot = ET.ElementTree()
+				
+				# Collect transformm fields, if any.
+				for transformTag in ["xScale", "xyScale", "yxScale", "yScale", "xOffset", "yOffset"]:
+					try:
+						value = childContour.attrib[transformTag]
+						dataList.append(value)
+					except KeyError:
+						pass
 				componentXML = etRoot.parse(componentPath)
 				componentOutlineXML = componentXML.find("outline")
 				componentHash, componentDataList = self.buildGlyphHashValue(width, componentOutlineXML, glyphName, useDefaultGlyphDir, level+1)
 				dataList.extend(componentDataList)
-		dataList.sort()
 		data = "".join(dataList)
 		if len(data) < 128:
 			hash = data
@@ -1047,6 +1059,8 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transfor
 	if level > 10:
 		raise UFOParseError("In parsing component, exceeded 10 levels of reference. '%s'. " % (outlineXML))
 
+	allowDecimals = ufoFontData.allowDecimalCoords
+	
 	bezStringList = []
 	for outlineItem in outlineXML:
 
@@ -1088,12 +1102,20 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transfor
 			y = float(lastItem.attrib["y"])
 			if transform != None:
 				x,y = transform.apply(x,y)
-			dx = int(round(x)) - curX
-			dy = int(round(y)) - curY
+			
+			if (allowDecimals):
+				dx = x - curX
+				dy = y - curY
+			else:
+				dx = int(round(x)) - curX
+				dy = int(round(y)) - curY
 			curX = curX + dx
 			curY = curY + dy
-			
-			op = "%s %s rmt" % (dx, dy)
+
+			if (allowDecimals):
+				op = "%.2f %.2f rmt" % (dx , dy)
+			else:
+				op = "%s %s rmt" % (dx, dy)
 			bezStringList.append(op)
 		elif type == "move":
 			# first op is a move-to.
@@ -1115,11 +1137,19 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transfor
 					y = float(curLastItem.attrib["y"])
 					if transform != None:
 						x,y = transform.apply(x,y)
-					dx = int(round(x)) - curX
-					dy = int(round(y)) - curY
+					if (allowDecimals):
+						dx = x - curX
+						dy = y - curY
+					else:
+						dx = int(round(x)) - curX
+						dy = int(round(y)) - curY
 					curX = curX + dx
 					curY = curY + dy
-					op = "%s %s rmt" % (dx, dy)
+					if (allowDecimals):
+						op = "%.2f %.2f rmt" % (dx, dy)
+					else:
+						op = "%s %s rmt" % (dx, dy)
+
 					bezStringList.append(op)
 					outlineItem = outlineItem[:-1]
 				elif lastType == "curve":
@@ -1127,11 +1157,18 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transfor
 					y = float(curLastItem.attrib["y"])
 					if transform != None:
 						x,y = transform.apply(x,y)
-					dx = int(round(x)) - curX
-					dy = int(round(y)) - curY
+					if (allowDecimals):
+						dx = x - curX
+						dy = y - curY
+					else:
+						dx = int(round(x)) - curX
+						dy = int(round(y)) - curY
 					curX = curX + dx
 					curY = curY + dy
-					op = "%s %s rmt" % (dx, dy)
+					if (allowDecimals):
+						op = "%.2f %.2f rmt" % (dx, dy)
+					else:
+						op = "%s %s rmt" % (dx, dy)
 					bezStringList.append(op)
 					
 			except KeyError:
@@ -1145,8 +1182,12 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transfor
 			y = float(contourItem.attrib["y"])
 			if transform != None:
 				x,y = transform.apply(x,y)
-			dx = int(round(x)) - curX
-			dy = int(round(y)) - curY
+			if (allowDecimals):
+				dx = x - curX
+				dy = y - curY
+			else:
+				dx = int(round(x)) - curX
+				dy = int(round(y)) - curY
 			curX = curX + dx
 			curY = curY + dy
 			try:
@@ -1158,17 +1199,26 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transfor
 				argStack.append(dx)
 				argStack.append(dy)
 			elif type == "move":
-				op = "%s %s rmt" % (dx, dy)
+				if (allowDecimals):
+					op = "%.2f %.2f rmt" % (dx, dy)
+				else:
+					op = "%s %s rmt" % (dx, dy)
 				bezStringList.append(op)
 				argStack = []
 			elif type == "line":
-				op = "%s %s rdt" % (dx, dy)
+				if (allowDecimals):
+					op = "%.2f %.2f rdt" % (dx, dy)
+				else:
+					op = "%s %s rdt" % (dx, dy)
 				bezStringList.append(op)
 				argStack = []
 			elif type == "curve":
 				if len(argStack) != 4:
 					raise UFOParseError("Argument stack error seen for curve point '%s'." % (xmlToString(contourItem)))
-				op = "%s %s %s %s %s %s rct" % ( argStack[0], argStack[1], argStack[2], argStack[3], dx, dy)
+				if (allowDecimals):
+					op = "%.2f %.2f %.2f %.2f %.2f %.2f rct" % ( argStack[0], argStack[1], argStack[2], argStack[3], dx, dy)
+				else:
+					op = "%s %s %s %s %s %s rct" % ( argStack[0], argStack[1], argStack[2], argStack[3], dx, dy)
 				argStack = []
 				bezStringList.append(op)
 			elif type == "qccurve":
@@ -1791,7 +1841,56 @@ def checkHashMaps(fontPath, doSync):
 	else:
 		retVal = msgList
 	return msgList
+
+def validateProcessedGlyphs(ufoFontPath):
+	# Read glyphs/contents.plist file.
+	# Delete any glyphs on /glyphs or /processed glyphs which are not in glyphs/contents.plist file.
+	# filter contents list with what's in /processed glyphs: write to process/plist file.
+	glyphDirPath = os.path.join(ufoFontPath, "glyphs")
+	processedGlyphDirPath = os.path.join(ufoFontPath, kProcessedGlyphsLayer)
+	if not os.path.exists(processedGlyphDirPath):
+		return
+	contentsFilePath = os.path.join(ufoFontPath, "glyphs", kContentsName)
+	contentsDict = plistlib.readPlist(contentsFilePath) # maps glyph names to files.
+	fileDict = {}
+	for glyphName, fileName in contentsDict.items():
+		fileDict[fileName] = glyphName
+
+	fileList = os.listdir(glyphDirPath)
+	for fileName in fileList:
+		if not fileName.endswith(".glif"):
+			continue
+		if fileDict.has_key(fileName):
+			continue
+		glyphFilePath = os.path.join(glyphDirPath, fileName)
+		os.remove(glyphFilePath)
+		
+	# now for the processed dir.
+	fileList = os.listdir(processedGlyphDirPath)
+	contentsFilePath = os.path.join(ufoFontPath, processedGlyphDirPath, kContentsName)
+	for fileName in fileList:
+		if not fileName.endswith(".glif"):
+			continue
+		if fileDict.has_key(fileName):
+			continue
+		glyphFilePath = os.path.join(processedGlyphDirPath, fileName)
+		os.remove(glyphFilePath)
+		
+	# now update and write the processed processedGlyphDirPath contents.plist file.
+	contentsDict = {}
+	fileList = os.listdir(processedGlyphDirPath)
+	for fileName in fileList:
+		if not fileName.endswith(".glif"):
+			continue
+		glyphName = fileDict[fileName]
+		contentsDict[glyphName] = fileName
+	contentsFilePath = os.path.join(ufoFontPath, kProcessedGlyphsLayer, kContentsName)
+	plistlib.writePlist(contentsDict, contentsFilePath)
 	
+	
+	
+
+
 def test1():
 	import pprint
 	ufoFontData = UFOFontData(sys.argv[1])

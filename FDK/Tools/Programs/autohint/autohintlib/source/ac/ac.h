@@ -1,6 +1,11 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
+
+/* See the discussion in the function definition for:
+ control.c:Blues() 
+ private procedure Blues() 
+ */
 #include "ac_C_lib.h"
 #include "buildfont.h"
 
@@ -225,6 +230,7 @@ extern boolean writecoloredbez;
 extern Fixed bluefuzz;
 extern boolean doAligns, doStems;
 extern boolean idInFile;
+extern boolean roundToInt;
 extern char bezGlyphName[64]; /* defined in read.c; set from the glyph name at the start of the bex file. */
 
 /* macros */
@@ -235,10 +241,12 @@ extern char bezGlyphName[64]; /* defined in read.c; set from the glyph name at t
 #define FixedNegInf MINinteger
 #define FixShift (8)
 #define FixInt(i) ((long int)(i) << FixShift)
-#define FRnd(x) ((long int)(((x)+(1<<7)) & ~0xFFL))
-#define FHalfRnd(x) ((long int)(((x)+(1<<6)) & ~0x7FL))
-#define FracPart(x) ((x) & 0xFFL)
-#define FTrunc(x) ((long int)((x)>>8))
+#define FixReal(i) ((long int)((i) *256.0))
+extern long int FRnd(long int x);
+#define FHalfRnd(x) ((long int)(((x)+(1<<7)) & ~0xFFL))
+#define FracPart(x) ((long int)(x) & 0xFFL)
+#define FTrunc(x) ((long int)((x)>>FixShift))
+#define FIXED2FLOAT(x) (x/256.0)
 #if SUN
 #ifndef MAX
 #define MAX(a,b) ((a) >= (b)? (a) : (b))
@@ -248,27 +256,20 @@ extern char bezGlyphName[64]; /* defined in read.c; set from the glyph name at t
 #endif
 #endif
 
-#if 0
-#define X0 (FixInt(200))
-#define Y0 (FixInt(473))
-#else
-#define X0 (0L)
-#define Y0 (0L)
-#endif
 #define FixOne (0x100L)
 #define FixHalf (0x80L)
 #define FixQuarter (0x40L)
 #define FixHalfMul(f) ((f) >> 1)
 #define FixTwoMul(f) ((f) << 1)
-#define tfmx(x) (FixHalfMul(x) + X0)
-#define tfmy(y) (-FixHalfMul(y) + Y0)
-#define itfmx(x) (FixTwoMul((x) - X0))
-#define itfmy(y) (-FixTwoMul((y) - Y0))
-#define dtfmx(x) (FixHalfMul(x))
-#define dtfmy(y) (-FixHalfMul(y))
-#define idtfmx(x) (FixTwoMul(x))
-#define idtfmy(y) (-FixTwoMul(y))
-#define PSDist(d) (dtfmx(FixInt(d)))
+#define tfmx(x) ((x))
+#define tfmy(y) (-(y))
+#define itfmx(x) ((x))
+#define itfmy(y) (-(y))
+#define dtfmx(x) ((x))
+#define dtfmy(y) (-(y))
+#define idtfmx(x) ((x))
+#define idtfmy(y) (-(y))
+#define PSDist(d) ((FixInt(d)))
 #define IsVertical(x1,y1,x2,y2) (VertQuo(x1,y1,x2,y2) > 0)
 #define IsHorizontal(x1,y1,x2,y2) (HorzQuo(x1,y1,x2,y2) > 0)
 #define SFACTOR (20L)

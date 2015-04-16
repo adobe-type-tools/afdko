@@ -10,7 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "memcheck.h"
 
-extern boolean AutoColor(boolean, boolean, boolean, boolean, boolean, short, char *[], boolean, boolean, boolean);
+extern boolean AutoColor(boolean, boolean, boolean, boolean, boolean, short, char *[], boolean, boolean, boolean, boolean);
 
 extern boolean CreateACTimes (void);
 typedef void (*tConvertfunc)(const char *, const char *);

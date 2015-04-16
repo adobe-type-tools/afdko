@@ -11,7 +11,7 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 
 
 __usage__ = """
-ProofPDF v1.12 Nov 11 2010
+ProofPDF v1.13 April 8 2015
 ProofPDF [-h] [-u]
 ProofPDF -help_params
 ProofPDF [-g <glyph list>] [-gf <filename>] [-gpp <number>] [-pt <number>] [-dno] [-baseline <number>] [-black] [-lf <filename>] [-select_hints <0,1,2..> ]  \
@@ -243,11 +243,11 @@ def CheckEnvironment():
 
 	return txPath, fdkSharedDataDir
 
-def expandNames(glyphName):
+def fixGlyphNames(glyphName):
 	glyphRange = glyphName.split("-")
-	if len(glyphRange) > 1:
-		g1 = expandNames(glyphRange[0])
-		g2 =  expandNames(glyphRange[1])
+	if len(glyphRange) >1:
+		g1 = fixGlyphNames(glyphRange[0])
+		g2 =  fixGlyphNames(glyphRange[1])
 		glyphName =  "%s-%s" % (g1, g2)
 
 	elif glyphName[0] == "/":
@@ -261,9 +261,29 @@ def expandNames(glyphName):
 def parseGlyphListArg(glyphString):
 	glyphString = re.sub(r"[ \t\r\n,]+",  ",",  glyphString)
 	glyphList = glyphString.split(",")
-	glyphList = map(expandNames, glyphList)
+	glyphList = map(fixGlyphNames, glyphList)
 	glyphList =  filter(None, glyphList)
 	return glyphList
+
+def expandRanges(tag):
+	ptRange = tag.split("-")
+	if len(ptRange) > 1:
+		g1 = int(ptRange[0])
+		g2 =  int(ptRange[1])
+		ptRange = range(g1, g2+1)
+	else:
+		ptRange = [int(tag)]
+	return ptRange
+	
+def parsePtSizeListArg(ptSizeString):
+	ptSizeString = re.sub(r"[ \t\r\n,]+",  ",",  ptSizeString)
+	ptsizeList = ptSizeString.split(",")
+	ptEntryList = map(expandRanges, ptsizeList)
+	ptSizeList = []
+	for ptEntry in ptEntryList:
+		ptSizeList.extend(ptEntry)
+	return ptSizeList
+
 
 def findLayoutFile(filePath, sharedDataDirectory):
 	layoutFilePath = None
@@ -561,11 +581,7 @@ def getOptions(params):
 			sizeString = sys.argv[i]
 			if sizeString[0] == "-":
 				raise OptionParseError("Option Error: it looks like the first item in the waterfall size list following '-wfr' is another option.") 
-			waterfallRange = parseGlyphListArg(sizeString)
-			params.waterfallRange = []
-			for ptSize in waterfallRange:
-				params.waterfallRange.append(eval(ptSize))
-			print params.waterfallRange
+			params.waterfallRange = parsePtSizeListArg(sizeString)
 		elif arg == "-gpp":
 			i = i +1
 			try:

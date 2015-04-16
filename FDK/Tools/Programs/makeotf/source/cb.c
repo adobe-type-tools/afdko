@@ -1801,7 +1801,9 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
 	if (otherflags & OTHERFLAGS_OMIT_MAC_NAMES) {
 		hotConvertFlags |= HOT_OMIT_MAC_NAMES;
 	}
-
+	if (otherflags & OTHERFLAGS_STUB_CMAP4) {
+		hotConvertFlags |= HOT_STUB_CMAP4;
+	}
 
 	if (flags & HOT_RENAME) {
 		h->alias.useFinalNames = 1;

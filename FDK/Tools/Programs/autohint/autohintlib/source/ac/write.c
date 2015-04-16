@@ -26,6 +26,18 @@ extern int bezoutputactual;
 
 #define ws(str) WriteString(str)
 
+public long int FRnd(long int x){
+    /* This is meant to work on Fixed 24.8 values, not the elt path (x,y) which are 25.7 */
+    long int r;
+    r = x;
+    if (roundToInt)
+    {
+        r = r+ (1<<7);
+        r = r & ~0xFFL;
+    }
+    return r;
+}
+
 /* returns the number of characters written and possibly encrypted*/
 static long WriteString(char *str) {
 	if (bezoutput) {
@@ -52,25 +64,74 @@ static long WriteString(char *str) {
 	}
 }
 
+/* Note: The 8 bit fixed fraction cannot support more than 2 decimal p;laces. */
 #define WRTNUM(i)                           \
 	{                                       \
 		sprintf(S0, "%ld ", (long int)(i)); \
 		ws(S0);                             \
 	}
 
+
+#define WRTRNUM(i)                           \
+{                                       \
+sprintf(S0, "%0.2f ", (float)(i)); \
+ws(S0);                             \
+}
+
+
+
 static void wrtfx(Fixed f) {
-	Fixed i = FRnd(f);
-	WRTNUM(FTrunc(i))
+    if (roundToInt)
+    {
+        Fixed i = FRnd(f);
+        WRTNUM(FTrunc(i));
+    }
+    else
+    {
+        float r = FIXED2FLOAT(f);
+        WRTRNUM(r);
+    }
 }
 
 static void wrtx(Fixed x) {
-	Fixed i = FRnd(x);
-	WRTNUM(FTrunc(i - currentx)) currentx = i;
+	Fixed i;
+    Fixed dx;
+    if (roundToInt)
+    {
+        i = FRnd(x);
+        dx = i - currentx;
+        WRTNUM(FTrunc(dx));
+        currentx = i;
+    }
+    else
+    {
+        float r;
+        i = x - currentx;
+        currentx = x;
+        r = FIXED2FLOAT(i);
+        WRTRNUM(r);
+    }
+
 }
 
 static void wrty(Fixed y) {
-	Fixed i = FRnd(y);
-	WRTNUM(FTrunc(i - currenty)) currenty = i;
+	Fixed i;
+    Fixed dy;
+    if (roundToInt)
+    {
+        i = FRnd(y);
+        dy = i - currentx;
+        WRTNUM(FTrunc(dy));
+        currenty = i;
+    }
+    else
+    {
+        float r;
+        i = y - currenty;
+        currenty = y;
+        r = FIXED2FLOAT(i);
+        WRTRNUM(r);
+    }
 }
 
 #define wrtcd(c) \
@@ -126,8 +187,19 @@ static void WriteOne(Fixed s) { /* write s to output file */
 		SWRTNUM(FTrunc(r))
 	}
 	else {
-		SWRTNUM(FTrunc(FRnd(r * 100L)))
-		sws("100 div ");
+        float d = FIXED2FLOAT(r);
+        int d1 = ((int)(d+0.05))*10;
+        int d2 = (int) ((d+0.05)*10);
+        if (d1 != d2)
+		{
+            SWRTNUM(d2);
+			sws("10 div ");
+		}
+		else {
+            d2 = (int) ((d+0.005)*100);
+            SWRTNUM(d2);
+			sws("100 div ");
+		}
 	}
 }
 
@@ -361,8 +433,10 @@ static void wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e) {
 	wrtcd(c1);
 	wrtcd(c2);
 	wrtcd(c3);
-	WRTNUM(dmin) WRTNUM(delta) WRTNUM(yflag)
-		WRTNUM(FTrunc(FRnd(currentx)));
+	WRTNUM(dmin);
+    WRTNUM(delta);
+    WRTNUM(yflag);
+    WRTNUM(FTrunc(FRnd(currentx)));
 	WRTNUM(FTrunc(FRnd(currenty)));
 	ws("flx\n");
 	firstFlex = TRUE;

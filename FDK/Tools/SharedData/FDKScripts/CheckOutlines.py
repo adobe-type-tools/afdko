@@ -3,7 +3,7 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 
 
 __usage__ = """
-CheckOutlines v1.24 Feb 10 2015
+CheckOutlines v1.25 Mar 31 2015
 
 Outline checking program for OpenType/CFF fonts.
 
@@ -351,6 +351,7 @@ class focusOptions:
 		self.pathTolerance = ""
 		self.emSquare = ""
 		self.checkAll = False # forces all glyphs to be processed even if src hasn't changed.
+		self.allowDecimalCoords = 0
 
 
 class FDKEnvironmentError(AttributeError):
@@ -477,6 +478,8 @@ def getOptions():
 			sys.exit()
 		elif arg == "-d":
 			debug = 1
+		elif arg == "-decimal":
+			options.allowDecimalCoords = True
 		elif arg == "-g":
 			i = i +1
 			glyphString = sys.argv[i]
@@ -755,6 +758,7 @@ def checkFile(path, options):
 	logMsg("Checking font %s. Start time: %s." % (path, time.asctime()))
 	try:
 		fontData = openFile(path, options.outFilePath, options.allowChanges)
+		fontData.allowDecimalCoords = options.allowDecimalCoords
 	except (IOError, OSError):
 		logMsg( traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1])
 		raise focusFontError("Error opening or reading from font file <%s>." % fontFileName)
@@ -801,8 +805,7 @@ def checkFile(path, options):
 			os.remove(kTempFilepathOut)
 		
 		# 	Convert to bez format
-		bezString, width= fontData.convertToBez(name, removeHints, options.beVerbose, options.checkAll)
-			
+		bezString, width = fontData.convertToBez(name, removeHints, options.beVerbose, options.checkAll)
 		if bezString == None:
 			continue
 		processedGlyphCount += 1

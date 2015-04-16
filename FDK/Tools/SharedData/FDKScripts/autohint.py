@@ -1,9 +1,9 @@
 #!/bin/env python
-__copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+__copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
 __usage__ = """
-autohint  AutoHinting program v1.46 Feb 10 2015
+autohint  AutoHinting program v1.47 Mar 31 2015
 autohint -h
 autohint -u
 autohint -hfd
@@ -139,6 +139,8 @@ alignment zones in an "fontinfo" file.
 	if they already have hints. However, glyphs will not be hinted if
 	they both have not changed and are in the history file.
 
+ -decimal  Use decimal coordinates, instead of rounding them to the 
+ nearest integer value.
 
 autohint can also apply different sets of alignment zones while hinting
 a particular set of glyphs. This is useful for name-keyed fonts, which,
@@ -473,6 +475,7 @@ class ACOptions:
 		self.printDefaultFDDict = 0
 		self.printFDDictList = 0
 		self.debug = 0
+		self.allowDecimalCoords = 0
 		
 class ACOptionParseError(KeyError):
 	pass
@@ -723,6 +726,8 @@ def getOptions():
 			options.outputPath = sys.argv[i]
 		elif arg == "-d":
 			options.debug = 1
+		elif arg == "-decimal":
+			options.allowDecimalCoords = True
 		elif arg[0] == "-":
 			raise ACOptionParseError("Option Error: Unknown option <%s>." %  arg) 
 		else:
@@ -1028,6 +1033,7 @@ def hintFile(options):
 	try:
 		useHashMap = not options.logOnly # for UFO fonts only. We always use the hash map, unless the user has said to only report issues.
 		fontData = openFile(path, options.outputPath, useHashMap)
+		fontData.allowDecimalCoords = options.allowDecimalCoords
 	except (IOError, OSError):
 		logMsg( traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1])
 		raise ACFontError("Error opening or reading from font file <%s>." % fontFileName)
@@ -1140,6 +1146,11 @@ def hintFile(options):
 	else:
 		supressHintSubArg = ""
 
+	if options.allowDecimalCoords:
+		decimalArg = " -d"
+	else:
+		decimalArg = ""
+
 	dotCount = 0
 	seenGlyphCount = 0
 	processedGlyphCount = 0
@@ -1240,7 +1251,7 @@ def hintFile(options):
 		else:
 			if os.path.exists(tempBezNew):
 				os.remove(tempBezNew)
-			command = "autohintexe %s%s%s -s .new -f \"%s\" \"%s\"" % (verboseArg, suppressEditArg, supressHintSubArg, tempFI, tempBez)
+			command = "autohintexe %s%s%s%s -s .new -f \"%s\" \"%s\"" % (verboseArg, suppressEditArg, supressHintSubArg, decimalArg, tempFI, tempBez)
 			if  options.debug:
 				print command
 			report = FDKUtils.runShellCmd(command)

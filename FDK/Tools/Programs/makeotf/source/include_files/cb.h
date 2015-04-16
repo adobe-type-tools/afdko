@@ -73,5 +73,6 @@ void message(void *ctx, int type, char *text);
 #define OTHERFLAGS_OLD_SPACE_DEFAULT_CHAR  (1<<8)
 #define OTHERFLAGS_OLD_NAMEID4  (1<<9)
 #define OTHERFLAGS_OMIT_MAC_NAMES (1<<10)
+#define OTHERFLAGS_STUB_CMAP4 (1<< 11)
 
 #endif /* CB_H */

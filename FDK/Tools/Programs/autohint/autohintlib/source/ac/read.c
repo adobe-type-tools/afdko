@@ -164,6 +164,7 @@ private procedure RDmtlt(etype) integer etype; {
     PPathElt new;
     new = AppendElement(etype);
     new->x = tfmx(ScaleAbs(currentx)); new->y = tfmy(ScaleAbs(currenty));
+      return;
   }
   else
   {
@@ -471,8 +472,11 @@ private procedure DoName(nm, buff, len) const char * nm, *buff; int len; {
 
 private procedure ParseString(s) const char * s; {
   const char * s0;
-  char c;
-  boolean neg;
+    char c;
+    char *c0;
+   boolean neg;
+    boolean isReal;
+    float rval;
   integer val;
   Fixed r;
   pathStart = pathEnd = NULL;
@@ -545,34 +549,49 @@ private procedure ParseString(s) const char * s; {
         LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
       }
       rdnum:
-    while (TRUE) {
-      c = *s++;
-      if (c >= '0' && c <= '9') val = val * 10 + (c - '0');
-      else if ((c == ' ') || (c == '\t')) {
-        if (neg)
-          val = -val;
-        r = FixInt(val); /* convert to Fixed */
-        /* Push(r); */
-        if (stkindex >= STKMAX) {
-		  FlushLogFiles();
-          sprintf (globmsg, "Stack overflow while reading %s file.\n", 
-            fileName);
-          LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
-          return;
+      isReal = false;
+      c0 = (char*)(s-1);
+      while (TRUE) {
+          c = *s++;
+          if (c == '.')
+              isReal = true;
+          else if (c >= '0' && c <= '9')
+              val = val * 10 + (c - '0');
+          else if ((c == ' ') || (c == '\t'))
+          {
+            if (isReal)
+            {
+                sscanf(c0, "%f", &rval);
+                /* do not need to use 'neg' to negate the value, as c0 string includes the minus sign.*/
+                 r = FixReal(rval); /* convert to Fixed */
+            }
+            else
+            {
+                if (neg)
+                    val = -val;
+                r = FixInt(val); /* convert to Fixed */
+            }
+              /* Push(r); */
+              if (stkindex >= STKMAX) {
+                  FlushLogFiles();
+                  sprintf (globmsg, "Stack overflow while reading %s file.\n",
+                           fileName);
+                  LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+                  return;
+              }
+              stk[stkindex] = r;
+              stkindex++;
+              goto nxtChar;
           }
-        stk[stkindex] = r;
-        stkindex++;
-        goto nxtChar;
-        }
-      else {
-		FlushLogFiles();
-        sprintf (globmsg, 
-          "Illegal number terminator while reading %s file.\n", 
-          fileName);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
-        return;
-        }
-      }
+          else {
+              FlushLogFiles();
+              sprintf (globmsg,
+                       "Illegal number terminator while reading %s file.\n",
+                       fileName);
+              LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+              return;
+          }
+      } /*end while true */
     }
   }
 

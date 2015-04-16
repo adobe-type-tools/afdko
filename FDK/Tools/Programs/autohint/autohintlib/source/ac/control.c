@@ -346,8 +346,10 @@ private procedure Blues() {
 	/* 
 	 Top alignment zones are in the global 'topBands', bottom in 'botBands'.
 	 
-	 This looks through the path, as defined by the linked list of 'elts', starting at the global 'pathStart', and adds to several lists.
-	 HStems, Vstems are global lists of Fixed 16.16 numbers..
+	 This function looks through the path, as defined by the linked list of 'elts', starting at the global 'pathStart', and adds to several lists. Coordinates are stored in the elt.(x,y) as (original value)/2.0, aka right shifted by 1 bit from the original 24.8 Fixed. I suspect that is to allow a larger integer portion - when this program was written, an int was 16 bits.
+     
+     
+	 HStems, Vstems are global lists of Fixed 24.8 numbers..
 	 
 	 segLists is an array of 4  ClrSeg linked lists. list 0 and 1 are respectively up and down vertical segments. Lists 2 and 3 are
 	 respectively left pointing and right pointing horizontal segments. On a counter-clockwise path, this is the same as selecting
@@ -374,7 +376,7 @@ private procedure Blues() {
 	 If the current path elt is a Closepath, It also calls LinkSegment() to add the current stem segment to the list of stem segments referenced by this elt.
 	 e->Hs/Vs.
 	 
-	 Note that a hint segment is create for each nearly vertical or horioztonal path elt. Ths means that in an H, there will be two hint segments created for
+	 Note that a hint segment is created for each nearly vertical or horioztonal path elt. Ths means that in an H, there will be two hint segments created for
 	 the bottom and top of the H, as there are two horizontal paths with the same Y at the top and bottom of the H.
 	 
 	 Assign the top and bottom Hstem location lists.
@@ -726,7 +728,7 @@ private procedure AddColorsSetup() {
 	}
 	hBigDist = (hBigDist * 23L) / 20L;
 	acfixtopflt(hBigDist, &hBigDistR);
-	if (!scalinghints) {
+	if ((!scalinghints) && (roundToInt)) {
 		RoundPathCoords();
 	}
 	CheckForMultiMoveTo();

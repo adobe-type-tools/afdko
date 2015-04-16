@@ -227,7 +227,7 @@ static void printUsage(void) {
 		""
 		"Build:\n"
 		"    makeotf.lib version: %s \n"
-		"    OTF Library Version: %lu\n",
+		"    OTF Library Version: %u\n",
 		progname,
 		MAKEOTF_VERSION,
 		HOT_VERSION);
@@ -650,6 +650,9 @@ static void parseArgs(int argc, char *argv[], int inScript) {
 						}
 						else if (!strcmp(arg, "-shw")) {
 							convert.flags |= HOT_SUPRESS_HINT_WARNINGS;
+						}
+						else if (!strcmp(arg, "-stubCmap4")) {
+							convert.otherflags |= OTHERFLAGS_STUB_CMAP4;
 						}
 						else {
 							/* Process script file */

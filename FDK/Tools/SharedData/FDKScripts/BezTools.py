@@ -48,6 +48,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
 		self.firstMarkingOpSeen = 0
 		self.closePathSeen = 0
 		self.subrLevel = 0
+		self.allowDecimalCoords = 0
 
 	def execute(self, charString):
 		self.subrLevel += 1
@@ -62,18 +63,18 @@ class T2ToBezExtractor(T2OutlineExtractor):
 			self.firstMarkingOpSeen = 1
 			self.bezProgram.append("sc\n")
 		debugMsg("moveto", point, "curpos", self.currentPoint)
-		dx = int(point[0])
-		dy = int(point[1])
+		dx = point[0]
+		dy = point[1]
 		if dy == 0:
 			if dx != 0:
-				self.bezProgram.append("%s hmt\n" % dx)
+				self.bezProgram.append("%.2f hmt\n" % dx)
 			else:
 				self.bezProgram.append("0 0 rmt\n" )
 
 		elif  dx == 0:
-			self.bezProgram.append("%s vmt\n" % dy)
+			self.bezProgram.append("%.2f vmt\n" % dy)
 		else:
-			self.bezProgram.append("%s  %s rmt\n" % (point[0], point[1]))
+			self.bezProgram.append("%.2f  %.2f rmt\n" % (point[0], point[1]))
 		self.sawMoveTo = 1
 
 	def rLineTo(self, point):
@@ -85,18 +86,18 @@ class T2ToBezExtractor(T2OutlineExtractor):
 		debugMsg("lineto", point, "curpos", self.currentPoint)
 		if not self.sawMoveTo:
 			self.rMoveTo((0, 0))
-		dx = int(point[0])
-		dy = int(point[1])
+		dx = point[0]
+		dy = point[1]
 		if dy == 0:
 			if dx != 0:
-				self.bezProgram.append("%s hdt\n" % dx)
+				self.bezProgram.append("%.2f hdt\n" % dx)
 			else:
 				self.bezProgram.append("0 0 rdt\n")
 			
 		elif  dx == 0:
-			self.bezProgram.append("%s vdt\n" % dy)
+			self.bezProgram.append("%.2f vdt\n" % dy)
 		else :
-			self.bezProgram.append("%s  %s rdt\n" % (dx,dy))
+			self.bezProgram.append("%.2f  %.2f rdt\n" % (dx,dy))
 
 	def rCurveTo(self, pt1, pt2, pt3):
 		self._nextPoint(pt1)
@@ -110,11 +111,11 @@ class T2ToBezExtractor(T2OutlineExtractor):
 		if not self.sawMoveTo:
 			self.rMoveTo((0, 0))
 		if pt1[0] == 0 and pt3[1] == 0:
-			self.bezProgram.append("%s %s %s %s vhct\n" %  (int(pt1[1]),  int(pt2[0]), int(pt2[1]),  int(pt3[0])))
+			self.bezProgram.append("%.2f %.2f %.2f %.2f vhct\n" %  (pt1[1],  pt2[0], pt2[1],  pt3[0]))
 		elif   pt1[1] == 0 and pt3[0] == 0:
-			self.bezProgram.append("%s %s %s %s hvct\n" %  (int(pt1[0]),  int(pt2[0]),  int(pt2[1]),  int(pt3[1])))
+			self.bezProgram.append("%.2f %.2f %.2f %.2f hvct\n" %  (pt1[0],  pt2[0],  pt2[1],  pt3[1]))
 		else:
-			self.bezProgram.append("%s %s %s %s %s %s rct\n" %  (int(pt1[0]),  int(pt1[1]),  int(pt2[0]),  int(pt2[1]),  int(pt3[0]),  int(pt3[1])))
+			self.bezProgram.append("%.2f %.2f %.2f %.2f %.2f %.2f rct\n" %  (pt1[0],  pt1[1],  pt2[0],  pt2[1], pt3[0],  pt3[1]))
 
 	def op_endchar(self, index):
 		self.endPath()
@@ -891,8 +892,15 @@ def convertBezToT2(bezString):
 	
 	for token in bezList:
 		try:
-			val = int(token)
-			argList.append(val)
+			val1 = round(float(token),2)
+			try:
+				val2 = int(token)
+				if int(val1) == val2:
+					argList.append(val2)
+				else:
+					argList.append("% 100 div" % (str(int(val1*100))))
+			except ValueError:
+				argList.append(val1)
 			continue
 		except ValueError:
 			pass

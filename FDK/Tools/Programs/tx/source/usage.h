@@ -17,10 +17,11 @@
 "-path           test path handling code                 (-path -h for help)\n"
 "\n"
 "[shared options]\n"
-"-g <list>       glyph selector: tag, cid, or glyph name. May use ranges.\n",
+"-g <list>       comma separated glyph selector: tag, cid, or glyph name.\n",
+"           May use ranges. Example: '-g Aacute,three.superior,100-123\'n",
 " \n",
-"-gx <list>       glyph exclusion selector: tag, cid, or glyph name. May use\n",
-"	ranges. All glyphs except those\n",
+"-gx <list>      comma separated glyph exclusion selector: tag, cid, or glyph name.\n",
+"          May use ranges. All glyphs except those\n",
 "	listed are copied. The .notdef glyph will never be excluded.\n",
 " \n",
 "-fd <index>     only select glyphs belonging to specified font dict\n"

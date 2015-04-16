@@ -22,7 +22,7 @@ OpenType font for the fontTools to work with.
 
 """
 __usage__ = """
-stemHist program v1.24 Oct 16 2013
+stemHist program v1.25 Mar 5 2015
 stemHist -h
 stemHist -u
 stemHist [-g <glyph list>] [-gf <filename>] [-xg <glyph list>] [-xgf <filename>] [-all] [-a] [-new] -q font-path1 font-path2...
@@ -701,7 +701,7 @@ def PrintReports(path, hStemDict, vStemDict,topZoneDict, bottomZoneDict):
 			"Count\tTop Zone\tGlyph List",
 			"Count\tBottom Zone\tGlyph List",
 			)
-
+	sawData = 0
 	for i in range(len(items)):
 		rDict = items[i][0]
 		sortFunc = items[i][1]
@@ -711,6 +711,7 @@ def PrintReports(path, hStemDict, vStemDict,topZoneDict, bottomZoneDict):
 		try:
 			if not rDict:
 				continue
+			sawData = 1
 			fp = file(fName, "wt")
 			fp.write(title + os.linesep)
 			fp.write(header + os.linesep)
@@ -721,7 +722,8 @@ def PrintReports(path, hStemDict, vStemDict,topZoneDict, bottomZoneDict):
 			print "\tWrote  %s" % (fName)
 		except (IOError, OSError):
 			print "Has some error opening the file %s!" % fName
-
+	if not sawData:
+		print "\tWarning. No reports printed - no stem data was collected."
 
 def collectStemsFont(path, options, txPath):
 	#    use fontTools library to open font and extract CFF table. 

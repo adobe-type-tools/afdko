@@ -252,7 +252,7 @@ static void writeReal(ufwCtx h, float value)
 	if ((value-floor(value) < FLT_EPSILON) && value>LONG_MIN && value<LONG_MAX)
 		ufw_ltoa(buf, (long)value);
 	else
-		ctuDtostr(buf, value, 0, 0);
+		ctuDtostr(buf, value, 0, 3);
 	writeBuf(h, strlen(buf), buf);
 }
 
@@ -591,7 +591,7 @@ static void setStyleName(char* dst, char* postScriptName)
 
 static void setVersionMajor(char* dst, char* version)
 {
-    /* Copy text up to '.' SKip leading zeroes.*/
+    /* Copy text up to '.' Skip leading zeroes.*/
     int seenNonZero = 0;
     char* p = &version[0];
     while ((*p != '.') && (*p != 0x00))

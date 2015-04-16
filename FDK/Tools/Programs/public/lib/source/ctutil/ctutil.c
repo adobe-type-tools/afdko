@@ -246,16 +246,16 @@ double ctuStrtod(const char *s, char **endptr) {
 void ctuDtostr(char *buf, double value, int width, int precision) {
 	char *p;
 	if (width == 0 && precision == 0) {
-		sprintf(buf, "%g", value);
+		sprintf(buf, "%f", value);
 	}
 	else if (width == 0 && precision > 0) {
-		sprintf(buf, "%.*g", precision, value);
+		sprintf(buf, "%.*f", precision, value);
 	}
 	else if (width > 0 && precision == 0) {
-		sprintf(buf, "%*g", width, value);
+		sprintf(buf, "%*f", width, value);
 	}
 	else {
-		sprintf(buf, "%*.*g", width, precision, value);
+		sprintf(buf, "%*.*f", width, precision, value);
 	}
 	p = strchr(buf, ',');
 	if (p != NULL) {

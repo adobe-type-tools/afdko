@@ -6,18 +6,20 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 __doc__ = """
 """
 __usage__ = """
-   makeInstancesUFO program v1.06 Feb 3 2015
+   makeInstancesUFO program v1.09 Apr 8 2015
    makeInstancesUFO -h
    makeInstancesUFO -u
    makeInstancesUFO [-a]  [-d <design space file name>]
-                 [-c] [-a] [-i ,i0,i1..,in]
+                 [-c] [-a] [-decimal] [-i n0,n1,..nx]
 
    -d <design space file path> .... Specifies alternate path to design space file.
                                 Default: font.designspace
 
    -i <list of instance indices> Build only the listed instances, i is a  0-based index of the instance records in the instance file.
+      example: '-i 1,4,22' -> build only the instances 1,4 and 22. 
    -a ... do NOT autohint the instance font files. Default is to do so, as master designs are unhinted.
    -c ... do NOT run checkOutlines to remove overlaps from the instance font files. Default is to do so.
+   -decimal Allow decimal coordinated: do not round to integer.
 """
 
 __help__ = __usage__ + """
@@ -36,7 +38,8 @@ import FDKUtils
 from subprocess import PIPE, Popen
 from mutatorMath.ufo import build as mutatorMathBuild
 import robofab.world
-
+import shutil
+import ufoTools
 try:
     import xml.etree.cElementTree as ET
 except ImportError:
@@ -62,6 +65,7 @@ class Options:
 		self.doAutoHint = 1
 		self.doOverlapRemoval = 1
 		self.logFile = None
+		self.allowDecimalCoords = False
 		self.indexList = []
 		lenArgs = len(args)
 		
@@ -87,6 +91,8 @@ class Options:
 				self.doAutoHint = 0
 			elif arg == "-c":
 				self.doOverlapRemoval = 0
+			elif arg == "-decimal":
+				self.allowDecimalCoords = True
 			elif arg == "-i":
 				ilist = args[i]
 				i +=1
@@ -167,6 +173,10 @@ def readDesignSpaceFile(options):
 			psName = instanceXML.attrib["postscriptfontname"]
 			print "adding %s to build list." % (psName)
 			instanceEntryList.append(curPath)
+			if os.path.exists(curPath):
+				glyphDir = os.path.join(curPath, "glyphs")
+				if os.path.exists(glyphDir):
+					shutil.rmtree(glyphDir, ignore_errors=True)
 		except KeyError:
 			print "Skipping instance that does not have postscriptname attribute:", xmlToString(instanceXML)
 			continue
@@ -191,10 +201,15 @@ def updateInstance(options, fontInstancePath):
 	if options.doOverlapRemoval:
 		logMsg.log("\tdoing overlap removal with checkOutlinesUFO %s ..." % (fontInstancePath))
 		logList = []
+		opList = ["-e", fontInstancePath]
+		if options.allowDecimalCoords:
+			opList.insert(0, "-decimal")
 		if os.name == "nt":
-			proc = Popen(['checkOutlinesUFO.cmd', "-e", '-all',fontInstancePath], stdout=PIPE)
+			opList.insert(0, 'checkOutlinesUFO.cmd')
+			proc = Popen(opList, stdout=PIPE)
 		else:
-			proc = Popen(['checkOutlinesUFO', "-e", '-all',fontInstancePath], stdout=PIPE)
+			opList.insert(0, 'checkOutlinesUFO')
+			proc = Popen(opList, stdout=PIPE)
 		while 1:
 			output = proc.stdout.readline()
 			if output:
@@ -218,10 +233,15 @@ def updateInstance(options, fontInstancePath):
 	if options.doAutoHint:
 		logMsg.log("\tautohinting %s ..." % (fontInstancePath))
 		logList = []
+		opList = ['-q', '-nb', fontInstancePath]
+		if options.allowDecimalCoords:
+			opList.insert(0, "-decimal")
 		if os.name == "nt":
-			proc = Popen(['autohint.cmd','-q', '-nb', fontInstancePath], stdout=PIPE)
+			opList.insert(0, 'autohint.cmd')
+			proc = Popen(opList, stdout=PIPE)
 		else:
-			proc = Popen(['autohint', '-q','-nb',  fontInstancePath], stdout=PIPE)
+			opList.insert(0, 'autohint')
+			proc = Popen(opList, stdout=PIPE)
 		while 1:
 			output = proc.stdout.readline()
 			if output:
@@ -249,21 +269,23 @@ def updateInstance(options, fontInstancePath):
 def run(args):
 	options = Options(args)
 
+	# Set the current dir to the design space dir, so that relative paths in
+	# the design space file will work.
+	dsDir,dsFile = os.path.split(os.path.abspath(options.dsPath))
+	os.chdir(dsDir)
+	options.dsPath = dsFile
+	
 	dsPath, newInstancesList = readDesignSpaceFile(options)
 	if not dsPath:
 		return
 
-	# Set the current dir to teh design space dir, so that relative paths in
-	# the design space file will work.
-	dsDir = os.path.dirname(os.path.abspath(options.dsPath))
-	os.chdir(dsDir)
 
 	version = 2
 	if len(newInstancesList) == 1:
 		logMsg.log( "Building 1 instance..")
 	else:
 		logMsg.log("Building %s instances.." % (len(newInstancesList)))
-	mutatorMathBuild(documentPath=dsPath, outputUFOFormatVersion=version)
+	mutatorMathBuild(documentPath=dsPath, outputUFOFormatVersion=version, roundGeometry=(not options.allowDecimalCoords))
 	if (dsPath != options.dsPath) and os.path.exists(dsPath):
 		os.remove(dsPath)
 
@@ -275,7 +297,12 @@ def run(args):
 			# make new instance font.
 			updateInstance(options, instancePath)
 
+	if not options.doOverlapRemoval: # checkOutlinesUFO does ufoTools.validateProcessedGlyphs()
+		for instancePath in newInstancesList:
+			# make sure that that there are no old glyphs left in the processed glyphs folder.
+			ufoTools.validateProcessedGlyphs(instancePath)
 
+	
 if __name__=='__main__':
 	try:
 		run(sys.argv[1:])

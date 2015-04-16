@@ -152,7 +152,7 @@ Byte8 *getFontName(Card8 which)
 void quit(IntN status)
 	{
 	/* longjmp(global.env, status + 1); */
-	exit(status +1);
+	exit(status);
 	}
 
 /* Initialize glyph name fetching */

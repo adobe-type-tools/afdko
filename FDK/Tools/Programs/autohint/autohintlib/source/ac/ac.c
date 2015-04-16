@@ -48,6 +48,7 @@ public boolean writecoloredbez = TRUE;
 public Fixed bluefuzz;
 public boolean doAligns, doStems;
 public boolean idInFile;
+public boolean roundToInt;
 private int maxStemDist = MAXSTEMDIST;
 
 
@@ -180,6 +181,7 @@ public procedure InitData(integer reason)
       minVal = 1.0 / (real)(FixOne);
       autoHFix = autoVFix = FALSE;
       editChar = TRUE;
+      roundToInt = true;
       /* Default is to change a curve with collinear points into a line. */
       autoLinearCurveFix = TRUE;
       flexOK = FALSE;
@@ -188,7 +190,7 @@ public procedure InitData(integer reason)
       logging = FALSE;
       debugColorPath = FALSE;
       /* DEBUG */
-      DEBUG = FALSE;
+      DEBUG = TRUE;
       showClrInfo = DEBUG;
       showHs = showVs = DEBUG;
       listClrInfo = DEBUG;
@@ -250,7 +252,8 @@ public boolean AutoColor(
 			 short total_files,
 			 char *fileNamePtr[],
 			 boolean quiet,
-			 boolean doAll,
+             boolean doAll,
+             boolean roundCoords,
 			 boolean doLog)
 {
   boolean result, renameLog = FALSE;
@@ -267,6 +270,7 @@ public boolean AutoColor(
 #endif
   if (!ReadFontInfo()) return FALSE;
   editChar = changeChar;
+  roundToInt = roundCoords;
   if ((editChar) && fixStems)
     autoVFix = autoHFix = fixStems;
   autoLinearCurveFix = editChar;
