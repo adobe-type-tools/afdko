@@ -53,6 +53,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <limits.h>
 
 #if _WIN32
+#include <fcntl.h>
+#include <io.h>
 #define stat _stat
 #define S_IFDIR _S_IFDIR
 #include <direct.h> /* to get _mkdir() */
@@ -670,12 +672,40 @@ static void tmpSet(Stream *s, char *filename)
 	s->pos = 0;
 	}
 
+/* On Windows, the stdio.h 'tmpfile' function tries to make temp files in the root
+directory, thus requiring administrative privileges. So we first need to use '_tempnam'
+to generate a unique filename inside the user's TMP environment variable (or the
+current working directory if TMP is not defined). Then we open the temporary file
+and return its pointer */
+static FILE *_tmpfile()
+	{
+	FILE *fp = NULL;
+#ifdef _WIN32
+	char* tempname = NULL;
+	int fd, flags, mode;
+	flags = _O_BINARY|_O_CREAT|_O_EXCL|_O_RDWR|_O_TEMPORARY;
+	mode = _S_IREAD | _S_IWRITE;
+	tempname = _tempnam(NULL, "tx_tmpfile");
+	if(tempname != NULL)
+		{
+		fd = _open(tempname, flags, mode);
+		if (fd != -1)
+			fp = _fdopen(fd, "w+b");
+		free(tempname);
+		}
+#else
+	/* Use the default tmpfile on non-Windows platforms */
+	fp = tmpfile();
+#endif
+	return fp;
+	}
+
 /* Open tmp stream. */
 static Stream *tmp_open(txCtx h, Stream *s)
 	{
 	s->buf = memNew(h, TMPSIZE + BUFSIZ);
 	memset(s->buf, 0, TMPSIZE + BUFSIZ);
-	s->fp = tmpfile();
+	s->fp = _tmpfile();
 	if (s->fp == NULL)
 		fileError(h, s->filename);
 	return s;
@@ -2947,7 +2977,7 @@ static void writePFB(txCtx h, FILE *font, char *fontfile,
 					 long begBinary, long begTrailer, long endTrailer)
 	{
 	char *tmpfil = "(t1w) reformat tmpfil";
-	FILE *tmp = tmpfile();
+	FILE *tmp = _tmpfile();
 	if (tmp == NULL)
 		fileError(h, tmpfil);
 
@@ -3070,7 +3100,7 @@ static void writeLWFN(txCtx h, FILE *font, char *fontfile,
 	long datalen = rescnt*(4 + 1 + 1) + endTrailer;
 	long maplen = MAP_HEADER_LEN + TYPE_LIST_LEN + rescnt*REFERENCE_LEN;
 	char *tmpfil = "(t1w) reformat tmpfile";
-	FILE *tmp = tmpfile();
+	FILE *tmp = _tmpfile();
 	if (tmp == NULL)
 		fileError(h, tmpfil);
 
