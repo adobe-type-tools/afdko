@@ -366,7 +366,8 @@ private procedure ShwHV(val) PClrVal val; {
   PrntVal(val->vVal);
   sprintf(S0, " s %g", FixToDbl(val->vSpc));
   PrinMsg(S0);
-  if (val->vGhst) PrinMsg(" G");
+  if (val->vGhst)
+      PrinMsg(" G");
   }
 
 public procedure ShowHVal(val) PClrVal val; {
@@ -490,22 +491,20 @@ public procedure ReportBestCP(e, cp) PPathElt e, cp; {
 
 
 public procedure LogColorInfo(pl) PClrPoint pl; {
-#if !IS_LIB
   char c = pl->c;
   Fixed lft, rht, top, bot, wdth;
   if (c == 'y' || c == 'm') { /* vertical lines */
     lft = pl->x0; rht = pl->x1;
-    (void)fprintf(vertfile, "%4g  %-30s%5g%5g\n",FixToDbl(rht-lft),fileName,
+    (void)printf( "%4g  %-30s%5g%5g\n",FixToDbl(rht-lft),fileName,
       FixToDbl(lft), FixToDbl(rht));
     }
   else {
     bot = pl->y0; top = pl->y1;
     wdth = top - bot;
     if (wdth == FixInt(-21) || wdth == FixInt(-20)) return; /* ghost pair */
-    (void)fprintf(horzfile, "%4g  %-30s%5g%5g\n",FixToDbl(wdth),fileName,
+    (void)printf("%4g  %-30s%5g%5g\n",FixToDbl(wdth),fileName,
       FixToDbl(bot), FixToDbl(top));
     }
-#endif
   }
 
 

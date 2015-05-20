@@ -141,6 +141,7 @@ public unsigned char * Alloc(integer sz)
 	return s;
   }
 
+
 public procedure InitData(integer reason)
  {
   register char *s;
@@ -148,13 +149,13 @@ public procedure InitData(integer reason)
 
   switch (reason) {
     case STARTUP:
+      DEBUG = FALSE;
 	  DMIN = 50;
       DELTA = 0;
       YgoesUp = (dtfmy(FixOne) > 0) ? TRUE : FALSE;
       initBigDist = PSDist(maxStemDist);
       /* must be <= 168 for ITC Garamond Book Italic p, q, thorn */
       minDist = PSDist(7);
-      minMidPt = PSDist(62);
       ghostWidth = PSDist(20);
       ghostLength = PSDist(4);
       bendLength = PSDist(2);
@@ -186,11 +187,9 @@ public procedure InitData(integer reason)
       autoLinearCurveFix = TRUE;
       flexOK = FALSE;
       flexStrict = FALSE;
-      AutoExtraDEBUG = FALSE;
-      logging = FALSE;
+      AutoExtraDEBUG = DEBUG;
+      logging = DEBUG;
       debugColorPath = FALSE;
-      /* DEBUG */
-      DEBUG = TRUE;
       showClrInfo = DEBUG;
       showHs = showVs = DEBUG;
       listClrInfo = DEBUG;

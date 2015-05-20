@@ -115,7 +115,7 @@ private procedure RemLnk(e,hFlg,rm)
   LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
   }
 
-private boolean AlreadyOnList(v, lst) register PClrVal v, lst; {
+private boolean AlreadyOnList(v, lst)  register PClrVal v, lst; {
   while (lst != NULL) {
     if (v == lst) return TRUE;
     lst = lst->vNxt;
@@ -668,7 +668,8 @@ private procedure CarryIfNeed(loc,vert,clrs)
   Fixed l0, l1, tmp, halfMargin;
   if ((vert && useV) || (!vert && useH)) return;
   halfMargin = FixHalfMul(bandMargin);
-  if (halfMargin > FixInt(10)) halfMargin = FixInt(10);
+  /* DEBUG 8 BIT. Needed to double test from 10 to 20 for change in coordinate system */
+  if (halfMargin > FixInt(20)) halfMargin = FixInt(20);
   while (clrs != NULL) {
     seg = clrs->vSeg1;
     if (clrs->vGhst && seg->sType == sGHOST) seg = clrs->vSeg2;
@@ -680,13 +681,15 @@ private procedure CarryIfNeed(loc,vert,clrs)
       seglnk = seg->sLnk; seg->sLnk = clrs;
       if (vert) {
         if (TestColor(seg,Vcoloring,TRUE,TRUE) == 1) {
-          if (showClrInfo) ReportCarry(l0, l1, loc, clrs, vert);
+          if (showClrInfo)
+              ReportCarry(l0, l1, loc, clrs, vert);
           AddVColoring(clrs);
 	  seg->sLnk = seglnk;
 	  break; }
         }
       else if (TestColor(seg,Hcoloring,YgoesUp,TRUE) == 1) {
-        if (showClrInfo) ReportCarry(l0, l1, loc, clrs, vert);
+        if (showClrInfo)
+            ReportCarry(l0, l1, loc, clrs, vert);
         AddHColoring(clrs);
 	seg->sLnk = seglnk;
 	break; }
@@ -696,7 +699,7 @@ private procedure CarryIfNeed(loc,vert,clrs)
     }
   }
 
-#define PRODIST (FixInt(50))
+#define PRODIST (FixInt(100)) /* DEBUG 8 BIT. Needed to double test from 50 to 100 for change in coordinate system */
 private procedure ProClrs(e,hFlg,loc)
   PPathElt e; Fixed loc; boolean hFlg; {
   PSegLnkLst lst, plst;
@@ -830,14 +833,17 @@ boolean movetoNewClrs, soleol; integer solWhere; {
                 newClrs = TRUE;
                 mtVclrs = CopyClrs(prvVclrs);
                 mtHclrs = CopyClrs(prvHclrs); }
-            StartNewColoring(e, hLst, vLst); Tst = IsOk;
+            StartNewColoring(e, hLst, vLst);
+            Tst = IsOk;
             if (etype == CURVETO) { x = e->x1; y = e->y1; }
             else GetEndPoint(e, &x, &y);
             CarryIfNeed(y,FALSE,prvHclrs);
             CarryIfNeed(x,TRUE,prvVclrs);
         }
         else { /* do not need to start new coloring */
-            AddIfNeedH(h,hLst); AddIfNeedV(v,vLst); }
+            AddIfNeedH(h,hLst);
+            AddIfNeedV(v,vLst);
+        }
         e = e->next; }
     ReClrBounds(pathEnd);
     if (AutoExtraDEBUG) PrintMessage("RemPromotedClrs");

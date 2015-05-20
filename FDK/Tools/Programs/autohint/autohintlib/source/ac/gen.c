@@ -72,7 +72,7 @@ PPathElt e1, e2; boolean Hflg; integer typ; {
     }
 	segNm = (from > to)? lftLstNm: rghtLstNm;
 	segList = segLists[segNm];
-	prevSeg = NULL; 
+	prevSeg = NULL;
 	while (TRUE) { /* keep list in increasing order by sLoc */
 		if (segList == NULL) { /* at end of list */
 			if (prevSeg == NULL) { segLists[segNm] = seg; break; }
@@ -86,7 +86,7 @@ PPathElt e1, e2; boolean Hflg; integer typ; {
 
 public procedure AddVSegment(from,to,loc,p1,p2,typ,i) 
 Fixed from, to, loc; PPathElt p1, p2; integer typ, i; {
-	if (DEBUG) ReportAddVSeg(from, to, loc, i);
+ 	if (DEBUG) ReportAddVSeg(from, to, loc, i);
 	if (YgoesUp) AddSegment(from,to,loc,0,1,p1,p2,FALSE,typ);
 	else AddSegment(from,to,loc,1,0,p1,p2,FALSE,typ); }
 
@@ -96,10 +96,19 @@ Fixed from, to, loc; PPathElt p1, p2; integer typ, i; {
 	AddSegment(from,to,loc,2,3,p1,p2,TRUE,typ); }
 
 private Fixed CPFrom(cp2,cp3) Fixed cp2,cp3; {
-	return ((cp3-cp2)*cpFrom)/100L + cp2; }
+    Fixed val = 2*(((cp3-cp2)*cpFrom)/200L);  /*DEBUG 8 BIT: hack to get same rounding as old version */
+    val += cp2;
+
+     DEBUG_ROUND(val)
+	return val; /* DEBUG 8 BIT to match results with 7 bit fractions */
+}
 
 private Fixed CPTo(cp0,cp1) Fixed cp0,cp1; {
-	return ((cp1-cp0)*cpTo)/100L + cp0; }
+    Fixed val = 2*(((cp1-cp0)*cpTo)/200L); /*DEBUG 8 BIT: hack to get same rounding as old version */
+    val += cp0;
+    DEBUG_ROUND(val)
+	return val; /* DEBUG 8 BIT to match results with 7 bit fractions */
+}
 
 private boolean TestBend(x0,y0,x1,y1,x2,y2) Fixed x0, y0, x1, y1, x2, y2; {
 	/* return true if bend angle is sharp enough (135 degrees or less) */
@@ -379,8 +388,15 @@ Fixed x0,y0,x1,y1,px1,py1,px2,py2,prvx,prvy,nxtx,nxty; {
 }
 
 private Fixed AdjDist(d,q) Fixed d,q; {
-	if (q == FixOne) return d;
-	return FTrunc(d * q);
+	Fixed val;
+	if (q == FixOne)
+    {
+        DEBUG_ROUND(d)/* DEBUG 8 BIT */
+        return d;
+    }
+	val =  (d * q) >>8;
+    DEBUG_ROUND(val)/* DEBUG 8 BIT */
+    return val;
 }
 
 /* serifs of ITCGaramond Ultra have points that are not quite horizontal 
@@ -529,10 +545,10 @@ public procedure GenVPts(specialCharType) integer specialCharType; {
 			if (!flex1 && !flex2) {
 				Fixed minx, maxx;
 				maxx = MAX(x0,x1); minx = MIN(x0,x1);
-				if (px1-maxx >= FixOne || px2-maxx >= FixOne ||
-					px1-minx <= FixOne || px2-minx <= FixOne) {
+				if (px1-maxx >= FixTwo || px2-maxx >= FixTwo ||
+					px1-minx <= FixTwo || px2-minx <= FixTwo) {
 					FindCurveBBox(x0,y0,px1,py1,px2,py2,x1,y1,&llx,&lly,&urx,&ury);
-					if (urx-maxx > FixOne || minx-llx > FixOne) {
+					if (urx-maxx > FixTwo || minx-llx > FixTwo) {
 						Fixed loc, frst, lst;
 						loc = (minx-llx > urx-maxx)? llx : urx;
 						CheckBBoxEdge(p,TRUE,loc,&frst,&lst);
@@ -566,7 +582,7 @@ public procedure GenVPts(specialCharType) integer specialCharType; {
 					AddVSegment(yavg-ydist,yavg+ydist,
 								PickVSpot(x0,y0,x1,y1,x0,y0,x1,y1,prvx,prvy,nxtx,nxty),
 								p,(PPathElt)NULL,sLINE,12L);
-					if (abs(x0-x1) <= FixOne)
+					if (abs(x0-x1) <= FixTwo)
 						ReportNonVError(x0, y0, x1, y1);
 				}
 			}
@@ -717,10 +733,10 @@ public procedure GenHPts() {
 			if (!flex1 && !flex2) {
 				Fixed miny, maxy; 
 				maxy = MAX(y0,y1); miny = MIN(y0,y1); 
-				if (py1-maxy >= FixOne || py2-maxy >= FixOne ||
-					py1-miny <= FixOne || py2-miny <= FixOne) {
+				if (py1-maxy >= FixTwo || py2-maxy >= FixTwo ||
+					py1-miny <= FixTwo || py2-miny <= FixTwo) {
 					FindCurveBBox(x0,y0,px1,py1,px2,py2,x1,y1,&llx,&lly,&urx,&ury);
-					if (ury-maxy > FixOne || miny-lly > FixOne) {
+					if (ury-maxy > FixTwo || miny-lly > FixTwo) {
 						Fixed loc, frst, lst;
 						loc = (miny-lly > ury-maxy)? lly : ury;
 						CheckBBoxEdge(p,FALSE,loc,&frst,&lst);
@@ -747,7 +763,7 @@ public procedure GenHPts() {
 					(void)NxtForBend(p,&nxtx,&nxty,&xx,&yy);
 					yy = PickHSpot(x0,y0,x1,y1,xdist,x0,y0,x1,y1,prvx,prvy,nxtx,nxty);
 					AddHSegment(xavg-xdist,xavg+xdist,yy,p->prev,p,sLINE,12L);
-					if (abs(y0-y1) <= FixOne)
+					if (abs(y0-y1) <= FixTwo)
 						ReportNonHError(x0, y0, x1, y1);
 				}
 			}

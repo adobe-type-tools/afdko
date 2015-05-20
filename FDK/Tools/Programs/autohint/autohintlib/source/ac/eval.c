@@ -11,12 +11,14 @@ private procedure AdjustVal(pv,l1,l2,dist,d,hFlg)
 Fixed *pv, l1, l2, dist, d; boolean hFlg; {
 	real v, q, r1, r2, rd;
 	Fixed abstmp;
-	if (dist < FixOne)
-		dist = FixOne;
-	if (l1 < FixOne)
-		l1 = FixOne;
-	if (l2 < FixOne)
-		l2 = FixOne;
+    /* DEBUG 8 BIT. To get the saem result as the old auothint, had to change from FixedOne to FixedTwo. Since the returned weight is proportional to the square of l1 and l2,
+     these need to be clamped to twice the old clamped value, else when the clamped values are used, the weight comes out as 1/4 of the original value. */
+	if (dist < FixTwo)
+		dist = FixTwo;
+	if (l1 < FixTwo)
+		l1 = FixTwo;
+	if (l2 < FixTwo)
+		l2 = FixTwo;
 	if (ac_abs(l1) < MAXF)
 		r1 = (real)(l1 * l1);
 	else {
@@ -66,7 +68,13 @@ Fixed d, overlaplen, minlen; {
 }
 
 #define GapDist(d) (((d) < FixInt(127)) ? \
-FTrunc(((d) * (d)) / 20) : FTrunc((d) * ((d) / 20)))
+FTrunc(((d) * (d)) / 40) : ((long)  (((double)(d)) * (d) / (40*256))))
+/* if d is >= 127.0 Fixed, then d*d will overflow the signed int 16 bit value. */
+/* DEBUG 8 BIT. No idea why d*d was divided by 20, but we need to divide it by 2 more to get a dist that is only 2* the old autohint value. 
+ With the 8.8 fixed coordinate system, we still overflow a long int with d*(d/40), so rather than casting this to a long int and then doing >>8, we need to divide by 256, then cast to long int. 
+ I also fail to understand why the original used FTrunc, which right shifts by 256. For the current coordinate space, which has a fractional part of 8 bits, you do need to divide by 256 after doing a simple int multiply, but the previous coordinate space
+    has a 7 bit Fixed fraction, and should be dividing by 128. I suspect that there was a yet earlier version which used a 8 bit fraction, and this is a bug.
+ */
 
 private procedure EvalHPair(botSeg,topSeg,pspc,pv)
 PClrSeg botSeg, topSeg; Fixed *pspc, *pv; {
@@ -99,15 +107,17 @@ PClrSeg botSeg, topSeg; Fixed *pspc, *pv; {
 	else { /* no overlap; take closer ends */
 		ldst = ac_abs(tlft-brght); rdst = ac_abs(trght-blft);
 		dx = MIN(ldst, rdst);
-		dist = GapDist(dx) + (7*dy)/5; /* extra penalty for nonoverlap
+		dist = GapDist(dx);
+        dist += (7*dy)/5; /* extra penalty for nonoverlap
 										* changed from 7/5 to 12/5 for Perpetua/Regular/
 										* n, r ,m and other lowercase serifs;
 										* undid change for Berthold/AkzidenzGrotesk 9/16/91;
 										* this did not make Perpetua any worse. */
-		if (dx > dy) dist *= dx / dy;
+        DEBUG_ROUND(dist) /* DEBUG 8 BIT */
+		if (dx > dy)
+            dist *= dx / dy;
     }
-	mndist = FixTwoMul(minDist);
-	dist = MAX(dist, mndist);
+	mndist = FixTwoMul(minDist);     dist = MAX(dist, mndist);
 	if (NumHStems > 0) {
 		Fixed w = idtfmy(dy);
 		w = ac_abs(w);
@@ -190,10 +200,13 @@ PClrSeg leftSeg, rightSeg; Fixed *pspc, *pv; {
 		else dist = CalcOverlapDist(dx, overlaplen, minlen);
     }
 	else { /* no overlap; take closer ends */
-		tdst = ac_abs(ltop-rbot); bdst = ac_abs(lbot-rtop);
+		tdst = ac_abs(ltop-rbot);
+        bdst = ac_abs(lbot-rtop);
 		dy = MIN(tdst, bdst);
 		dist = (7*dx)/5 + GapDist(dy); /* extra penalty for nonoverlap */
-		if (dy > dx) dist *= dy / dx;
+        DEBUG_ROUND(dist) /* DEBUG 8 BIT */
+		if (dy > dx)
+            dist *= dy / dx;
     }
 	mndist = FixTwoMul(minDist);
 	dist = MAX(dist, mndist);
@@ -302,15 +315,6 @@ Fixed bot, top, val, spc; PClrSeg bSeg, tSeg; boolean ghst; {
 	PClrVal item, vlist, vprev, vl;
 	Fixed b;
 	b = itfmy(bot);
-#if 0
-	if (b > 0) {
-		Fixed t;
-		/* because of bug in early version of fontbuild.Adjust,
-		 we must prune any pairs that have bot > 0 and mid < minMidPt */
-		t = itfmy(top);
-		if (FixHalfMul(t+b) < minMidPt) return;
-    }
-#endif
 	vlist = valList; vprev = NULL;
 	while (vlist != NULL) {
 		if (vlist->vLoc2 >= top) break;
@@ -461,6 +465,8 @@ public procedure EvalH() {
 			cntr = (lst->sMax + lst->sMin)/2;
 			ghostSeg->sMax = cntr + ghostLength/2;
 			ghostSeg->sMin = cntr - ghostLength/2;
+			DEBUG_ROUND(ghostSeg->sMax)/* DEBUG 8 BIT */
+			DEBUG_ROUND(ghostSeg->sMin)/* DEBUG 8 BIT */
 			spc = FixInt(2);
 			val = FixInt(20);
 			AddHValue(lstLoc,tempLoc,val,spc,lst,ghostSeg); }
@@ -480,6 +486,7 @@ public procedure EvalH() {
 			val = FixInt(20);
 			AddHValue(tempLoc,lstLoc,val,spc,ghostSeg,lst); }
 		lst = lst->sNxt; }
-done: CombineValues();
+done:
+    CombineValues();
 }
 

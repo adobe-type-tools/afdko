@@ -39,6 +39,11 @@ public integer PointListCheck(PClrPoint new, PClrPoint lst) {
 	Fixed l1, l2, n1, n2, tmp, halfMargin;
 	char ch = new->c;
 	halfMargin = FixHalfMul(bandMargin);
+	halfMargin = FixHalfMul(halfMargin);
+    /* DEBUG 8 BIT. In the previous version, with 7 bit fraction coordinates instead of the current
+    8 bit, bandMargin is declared as 30, but scaled by half to match the 7 bit fraction coordinate -> a value of 15.
+    In the current version this scaling doesn't happen. However, in this part of the code, the hint values are scaled up to 8 bits of fraction even in the original version, but topBand is applied without correcting for the scaling difference. In this version  I need to divide by half again in order to get to the same value. I think the original is a bug, but it has been working for 30 years, so I am not going to change the test now.
+     */
 	switch (ch) {
 		case 'y':
 		case 'm': {

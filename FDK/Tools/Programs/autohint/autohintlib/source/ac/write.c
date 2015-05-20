@@ -81,7 +81,7 @@ ws(S0);                             \
 
 
 static void wrtfx(Fixed f) {
-    if (roundToInt)
+    if ((roundToInt) || (FracPart(f) == 0))
     {
         Fixed i = FRnd(f);
         WRTNUM(FTrunc(i));
@@ -96,7 +96,7 @@ static void wrtfx(Fixed f) {
 static void wrtx(Fixed x) {
 	Fixed i;
     Fixed dx;
-    if (roundToInt)
+    if ((roundToInt) || (FracPart(x) == 0))
     {
         i = FRnd(x);
         dx = i - currentx;
@@ -117,10 +117,10 @@ static void wrtx(Fixed x) {
 static void wrty(Fixed y) {
 	Fixed i;
     Fixed dy;
-    if (roundToInt)
+    if ((roundToInt) || (FracPart(y) == 0))
     {
         i = FRnd(y);
-        dy = i - currentx;
+        dy = i - currenty;
         WRTNUM(FTrunc(dy));
         currenty = i;
     }
@@ -188,19 +188,10 @@ static void WriteOne(Fixed s) { /* write s to output file */
 	}
 	else {
         float d = FIXED2FLOAT(r);
-        int d1 = ((int)(d+0.05))*10;
-        int d2 = (int) ((d+0.05)*10);
-        if (d1 != d2)
-		{
-            SWRTNUM(d2);
-			sws("10 div ");
-		}
-		else {
-            d2 = (int) ((d+0.005)*100);
-            SWRTNUM(d2);
-			sws("100 div ");
-		}
-	}
+        d = (int) ((d+0.005)*100);
+        SWRTNUM(d);
+        sws("100 div ");
+    }
 }
 
 static void WritePointItem(PClrPoint lst) {

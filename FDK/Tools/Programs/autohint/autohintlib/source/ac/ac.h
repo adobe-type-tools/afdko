@@ -240,12 +240,12 @@ extern char bezGlyphName[64]; /* defined in read.c; set from the glyph name at t
 #define FixedPosInf MAXinteger
 #define FixedNegInf MINinteger
 #define FixShift (8)
-#define FixInt(i) ((long int)(i) << FixShift)
+#define FixInt(i) (((long int)(i)) << FixShift)
 #define FixReal(i) ((long int)((i) *256.0))
 extern long int FRnd(long int x);
 #define FHalfRnd(x) ((long int)(((x)+(1<<7)) & ~0xFFL))
 #define FracPart(x) ((long int)(x) & 0xFFL)
-#define FTrunc(x) ((long int)((x)>>FixShift))
+#define FTrunc(x) (((long int)(x))>>FixShift)
 #define FIXED2FLOAT(x) (x/256.0)
 #if SUN
 #ifndef MAX
@@ -257,9 +257,10 @@ extern long int FRnd(long int x);
 #endif
 
 #define FixOne (0x100L)
+#define FixTwo (0x200L)
 #define FixHalf (0x80L)
 #define FixQuarter (0x40L)
-#define FixHalfMul(f) ((f) >> 1)
+#define FixHalfMul(f) (2*((f) >> 2)) /* DEBUG 8 BIT. Revert this to ((f) >>1) once I am confident that there are not bugs from the update to 8 bits for the Fixed fraction. */
 #define FixTwoMul(f) ((f) << 1)
 #define tfmx(x) ((x))
 #define tfmy(y) (-(y))
@@ -278,6 +279,10 @@ extern long int FRnd(long int x);
 #define ProdLt0(f0, f1) (((f0) < 0L && (f1) > 0L) || ((f0) > 0L && (f1) < 0L))
 #define ProdGe0(f0, f1) (!ProdLt0(f0, f1))
 
+#define DEBUG_ROUND(val) { val = ( val >=0 ) ? (2*(val/2)) : (2*((val - 1)/2));}
+#define DEBUG_ROUND4(val) { val = ( val >=0 ) ? (4*(val/4)) : (4*((val - 1)/4));}
+
+/* DEBUG_ROUND is used to force calculations to come out the same as the previous version, where coordinates used 7 bits for the Fixed fraction, rather than the current 8 bits. Once I am confident that there are no bugs in the update, I will remove all occurences of this macro, and accept the differences due to more exact division */
 /* procedures */
 
 /* The fix to float and float to fixed procs are different for ac because it

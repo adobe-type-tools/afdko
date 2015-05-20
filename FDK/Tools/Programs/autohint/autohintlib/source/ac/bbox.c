@@ -35,7 +35,8 @@ private procedure FindPathBBox() {
     switch (e->type) {
       case MOVETO:
       case LINETO:
-        c0.x = e->x; c0.y = e->y; pe = e; FPBBoxPt(c0);
+        c0.x = e->x; c0.y = e->y; pe = e;
+        FPBBoxPt(c0);
 	break;
       case CURVETO:
         c1.x = e->x1; c1.y = e->y1;

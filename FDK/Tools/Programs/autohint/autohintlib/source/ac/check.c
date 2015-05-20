@@ -22,9 +22,10 @@ private boolean forMultiMaster = FALSE, inflPtFound = FALSE;
 #define goingUP (1L)
 #define goingDOWN (2L)
 
-#define SDELTA (FixInt(4))
-#define SDELTA2 (FixInt(2))
-#define SDELTA3 (FixInt(5))
+/* DEBUG 8 BIT. The SDELTA value must tbe increased by 2 due to change in coordinate system from 7 to 8 bit FIXED fraction. */
+
+#define SDELTA (FixInt(8))
+#define SDELTA3 (FixInt(10))
 
 private procedure chkBad() {
     reCheckSmooth = ResolveConflictBySplit(e,FALSE,NULL,NULL);;
@@ -103,6 +104,8 @@ private procedure chkXDIR() {
 
 private procedure chkDT(c) Cd c; {
     Fixed abstmp;
+    Fixed loc;
+
     x = c.x, y = c.y;
     ynxt = y; xnxt = x;
     if (!ydone) {
@@ -117,16 +120,23 @@ private procedure chkDT(c) Cd c; {
                 return; }
             if (ac_abs(yflatstartx-yflatendx) > SDELTA3)
             {
+                DEBUG_ROUND(yflatstartx);
+                DEBUG_ROUND(yflatendx);
+                DEBUG_ROUND(yflatstarty);
+                DEBUG_ROUND(yflatendy);
+                
+                loc = (yflatstarty+yflatendy)/2;
+                DEBUG_ROUND(loc);
                 
             if (!forMultiMaster)
                 {
-                    AddHSegment(yflatstartx,yflatendx,(yflatstarty+yflatendy)/2,
+                    AddHSegment(yflatstartx,yflatendx,loc,
                                 e,(PPathElt)NULL,sCURVE,13L);
                 }
                 else
                 {
                     inflPtFound = TRUE;
-                    fltnvalue = itfmy((yflatstarty+yflatendy)/2);
+                    fltnvalue = itfmy(loc);
                 }
             }
         }
@@ -142,14 +152,25 @@ private procedure chkDT(c) Cd c; {
                     chkBad();
                 return; }
             if (ac_abs(xflatstarty-xflatendy) > SDELTA3)
-            {    if (!forMultiMaster)
-                {  AddVSegment(xflatstarty,xflatendy,(xflatstartx+xflatendx)/2,
+            {
+                DEBUG_ROUND(xflatstarty);
+                DEBUG_ROUND(xflatendy);
+                DEBUG_ROUND(xflatstartx);
+                DEBUG_ROUND(xflatendx);
+                
+                loc = (xflatstartx+xflatendx)/2;
+                DEBUG_ROUND(loc);
+
+                if (!forMultiMaster)
+                
+                {
+                    AddVSegment(xflatstarty,xflatendy,loc,
                                e,(PPathElt)NULL,sCURVE,13L);
                 }
                 else
                 {
                     inflPtFound = TRUE;
-                    fltnvalue = itfmx((xflatstartx+xflatendx)/2);
+                    fltnvalue = itfmx(loc);
                 }
                 
             }
@@ -424,7 +445,7 @@ restart:
     /* in certain cases clip sharp point can produce a zero length line */
 }
 
-#define BBdist (FixInt(10))
+#define BBdist (FixInt(20)) /* DEBUG 8 BIT. DOuble value from 10 to 20 for change in coordinate system. */
 
 private procedure chkBBDT(c) Cd c; {
     Fixed x = c.x, y = c.y, abstmp;
@@ -523,7 +544,8 @@ Fixed x0, cy0, x1, cy1, x2, y2, *pd; {
     MakeColinear(x1, cy1, x0, cy0, x2, y2, &smx, &smy);
     smx = FHalfRnd(smx);
     smy = FHalfRnd(smy);
-    return ac_abs(smx - x1) < FixInt(2) && ac_abs(smy - cy1) < FixInt(2);
+    /* DEBUG 8 BIT. Double hard coded distance values, for change from 7 to 8 bits for fractions. */
+    return ac_abs(smx - x1) < FixInt(4) && ac_abs(smy - cy1) < FixInt(4);
 }
 
 public procedure CheckForDups() {

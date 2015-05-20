@@ -74,41 +74,65 @@ private Fixed HVness(pq) real *pq; {
   return acpflttofix(&result); }
 
 public Fixed VertQuo(xk,yk,xl,yl) Fixed xk,yk,xl,yl; {
-  /* FixOne means exactly vertical. 0 means not vertical */
-  /* intermediate values mean almost vertical */
-  register Fixed xabs, yabs;
-  real rx, ry, q;
-  xabs = xk-xl; if (xabs < 0L) xabs = -xabs;
-  if (xabs==0) return FixOne;
-  yabs = yk-yl; if (yabs < 0L) yabs = -yabs;
-  if (yabs==0) return 0L;
-  acfixtopflt(xabs, &rx); acfixtopflt(yabs, &ry);
-  q = (real)(2.0*rx*rx)/(theta*ry);
-  return HVness(&q); }
+    /* FixOne means exactly vertical. 0 means not vertical */
+    /* intermediate values mean almost vertical */
+    register Fixed xabs, yabs;
+    real rx, ry, q;
+    xabs = xk-xl;
+    if (xabs < 0L)
+        xabs = -xabs;
+    if (xabs==0)
+        return FixOne;
+    yabs = yk-yl;
+    if (yabs < 0L)
+        yabs = -yabs;
+    if (yabs==0)
+        return 0L;
+    acfixtopflt(xabs, &rx);
+    acfixtopflt(yabs, &ry);
+    q = (real)(rx*rx)/(theta*ry); /* DEBUG 8 BIT. Used to by 2*(rx*rx)/(theta*ry). Don't need thsi with the 8 bits of Fixed fraction. */
+    return HVness(&q);
+}
 
 public Fixed HorzQuo(xk,yk,xl,yl) Fixed xk,yk,xl,yl; {
-  register Fixed xabs, yabs;
-  real rx, ry, q;
-  yabs = yk-yl; if (yabs < 0) yabs = -yabs;
-  if (yabs==0L) return FixOne;
-  xabs = xk-xl; if (xabs < 0) xabs = -xabs;
-  if (xabs==0L) return 0L;
-  acfixtopflt(xabs, &rx); acfixtopflt(yabs, &ry);
-  q = (real)(2.0*ry*ry)/(theta*rx);
-  return HVness(&q); }
+    register Fixed xabs, yabs;
+    real rx, ry, q;
+    yabs = yk-yl;
+    if (yabs < 0)
+        yabs = -yabs;
+    if (yabs==0L)
+        return FixOne;
+    xabs = xk-xl;
+    if (xabs < 0)
+        xabs = -xabs;
+    if (xabs==0L)
+        return 0L;
+    acfixtopflt(xabs, &rx);
+    acfixtopflt(yabs, &ry);
+    q = (real)(ry*ry)/(theta*rx); /* DEBUG 8 BIT. Used to by 2*(ry*ry)/(theta*ry). Don't need thsi with the 8 bits of Fixed fraction. */
+    return HVness(&q);
+}
 
 public boolean IsTiny(e) PPathElt e; {
   Fixed x0, y0, x1, y1, abstmp;
   GetEndPoints(e,&x0,&y0,&x1,&y1);
-  return ((ac_abs(x0-x1) < FixOne) && (ac_abs(y0-y1) < FixOne))? TRUE : FALSE; }
+  return ((ac_abs(x0-x1) < FixTwo) && (ac_abs(y0-y1) < FixTwo))? TRUE : FALSE; }
 
 public boolean IsShort(e) PPathElt e; {
-  Fixed x0, y0, x1, y1, dx, dy, mn, mx, abstmp;
-  GetEndPoints(e,&x0,&y0,&x1,&y1);
-  dx = ac_abs(x0-x1); dy = ac_abs(y0-y1);
-  if (dx > dy) { mn = dy; mx = dx; }
-  else { mn = dx; mx = dy; }
-  return ((mx + (mn*42L)/125L) < FixInt(3))? TRUE : FALSE; }
+    Fixed x0, y0, x1, y1, dx, dy, mn, mx, abstmp;
+    GetEndPoints(e,&x0,&y0,&x1,&y1);
+    dx = ac_abs(x0-x1);
+    dy = ac_abs(y0-y1);
+    if (dx > dy)
+    { mn = dy;
+        mx = dx;
+    }
+    else {
+        mn = dx;
+        mx = dy;
+    }
+    return ((mx + (mn*42L)/125L) < FixInt(6))? TRUE : FALSE; /* DEBUG 8 BIT. Increased threshold from 3 to 6, for change in coordinare system. */
+}
 
 public PPathElt NxtForBend(p,px2,py2,px3,py3)
   PPathElt p; Fixed *px2, *py2, *px3, *py3; {
