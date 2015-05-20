@@ -3,7 +3,7 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 
 
 __usage__ = """
-CheckOutlines v1.25 Mar 31 2015
+CheckOutlines v1.25 May 20 2015
 
 Outline checking program for OpenType/CFF fonts.
 
@@ -518,7 +518,7 @@ def getOptions():
 			options.doSpikeTest = 1
 		elif arg == "-3":
 			options.doTriangleTest = 1
-		elif arg == "-r":
+		elif arg == "-4":
 			options.doNearlyVH = 1
 		elif arg == "-O":
 			options.doPathDirectionTest = 0
