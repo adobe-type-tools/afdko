@@ -2,7 +2,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-   checkOutlinesUFO program v1.08 Feb 17 2015
+   checkOutlinesUFO program v1.10 Apr 3 2015
    
    checkOutlinesUFO [-nr] [-e] [-g glyphList] [-gf <file name>] [-all] [-noOverlap] [-noBasicChecks] [-setMinArea <n>] [- setTolerance <n>] [-d]
    
@@ -12,7 +12,7 @@ from ufoTools import kProcessedGlyphsLayerName, kProcessedGlyphsLayer
 
 __help__ = """
 
--nr	do not round point values to integer
+-decimal	do not round point values to integer
 
 -e	fix reported problems
 
@@ -27,11 +27,11 @@ __help__ = """
 	- flat curves (curves which are a straight line)
 	- colinear lines (several line segments that define the same path asa single line);
 
-- setMinArea <n>  Set the minimum area for a tiny outline. Default is 25 square
+-setMinArea <n>  Set the minimum area for a tiny outline. Default is 25 square
 units. Subpaths with a bounding box less than this will be reported, and deleted
 if fixed.
 
-- setTolerance <n>  Set the maximum deviation from a straight line allowed.
+-setTolerance <n>  Set the maximum deviation from a straight line allowed.
 Default is 0 design space units. This is used to test whether the control points
 for a curve define a flat curve, and whether a sequence of line segments
 defines a straight line.
@@ -265,7 +265,7 @@ class COOptions:
 		self.glyphList = []
 		self.allowChanges = 0
 		self.writeToDefaultLayer = 0
-		self.roundValues = 1
+		self.allowDecimalCoords = 0
 		self.minArea = 25
 		self.tolerance = 0
 		self.checkAll = False # forces all glyphs to be processed even if src hasn't changed.
@@ -340,8 +340,8 @@ def getOptions():
 				options.tolerance = int(sys.argv[i])
 			except:
 				raise focusOptionParseError("The argument following '-setTolerance' must be an integer.") 
-		elif arg == "-nr":
-			options.roundValues = 0
+		elif arg == "-decimal":
+			options.allowDecimalCoords = 1
 		elif arg == "-all":
 			options.checkAll = True
 		elif arg == "-clearHashMap":
@@ -942,7 +942,12 @@ def run(args):
 				fixedGlyph.unicodes = dGlyph.unicodes
 			pointPen = fixedGlyph.getPointPen()
 			newGlyph.drawPoints(pointPen)
-			if options.roundValues:
+			if options.allowDecimalCoords:
+				for contour in fixedGlyph:
+					for point in contour:
+						point.x = round(point.x, 3)
+						point.y = round(point.y, 3)
+			else:
 				for contour in fixedGlyph:
 					for point in contour:
 						point.x = int(round(point.x))
@@ -956,6 +961,9 @@ def run(args):
 	else:
 		print
 		fontFile.save()
+	if options.allowChanges:
+		ufoTools.validateProcessedGlyphs(fontPath)
+		
 	if processedGlyphCount != seenGlyphCount:
 		print "Skipped %s of %s glyphs." % (seenGlyphCount - processedGlyphCount, seenGlyphCount)
 	print "Done with font"
