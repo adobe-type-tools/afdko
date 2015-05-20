@@ -477,11 +477,11 @@ static void callbackFlex(t1cCtx h)
 		if (h->flags & USE_MATRIX)
 			{
 			x1 = TX(x1, y1);	y1 = TY(x1, y1);
-			x2 = TX(x2, y2);	y1 = TY(x2, y2);
-			x3 = TX(x3, y3);	y1 = TY(x3, y3);
-			x4 = TX(x4, y4);	y1 = TY(x4, y4);
-			x5 = TX(x5, y5);	y1 = TY(x5, y5);
-			x6 = TX(x6, y6);	y1 = TY(x6, y6);
+			x2 = TX(x2, y2);	y2 = TY(x2, y2);
+			x3 = TX(x3, y3);	y3 = TY(x3, y3);
+			x4 = TX(x4, y4);	y4 = TY(x4, y4);
+			x5 = TX(x5, y5);	y5 = TY(x5, y5);
+			x6 = TX(x6, y6);	y6 = TY(x6, y6);
 			/* depth not in char space units so not transformed! */
 			}
 		else if (h->flags & SEEN_BLEND)
@@ -2192,14 +2192,23 @@ int t1cParse(long offset, t1cAuxData *aux, abfGlyphCallbacks *glyph)
 	aux->bchar = 0;
 	aux->achar = 0;
 
-	if (aux->flags & T1C_USE_MATRIX)
+    if (aux->flags & T1C_USE_MATRIX)
     {
         int i;
-		h.flags |= USE_MATRIX;
-        h.flags |= USE_GLOBAL_MATRIX;
-        for (i = 0; i < 6; i++)
+        if ((abs(1 - aux->matrix[0]) > 0.0001) ||
+            (abs(1 - aux->matrix[3]) > 0.0001) ||
+            (aux->matrix[1] != 0) ||
+            (aux->matrix[2] != 0) ||
+            (aux->matrix[4] != 0) ||
+            (aux->matrix[5] != 0))
+
         {
-            h.transformMatrix[i] = aux->matrix[i];
+            h.flags |= USE_MATRIX;
+            h.flags |= USE_GLOBAL_MATRIX;
+            for (i = 0; i < 6; i++)
+            {
+                h.transformMatrix[i] = aux->matrix[i];
+            }
         }
     }
 	if (aux->flags & T1C_FLATTEN_CUBE)

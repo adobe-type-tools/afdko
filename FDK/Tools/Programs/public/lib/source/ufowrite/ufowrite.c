@@ -245,12 +245,14 @@ static void ufw_ltoa(char* buf, long val)
 }
 
 /* Write real number in ASCII to dst stream. */
+#define TX_EPSILON 0.0001 
+/*In Xcode, FLT_EPSILON is 1.192..x10-7, but the diff between value-roundf(value) can be 3.05..x10-5, when the input value is an integer. */
 static void writeReal(ufwCtx h, float value)
 {
 	char buf[50];
 	/* if no decimal component, perform a faster to string conversion */
-	if ((value-floor(value) < FLT_EPSILON) && value>LONG_MIN && value<LONG_MAX)
-		ufw_ltoa(buf, (long)value);
+	if ((fabs(value-roundf(value)) < TX_EPSILON) && value>LONG_MIN && value<LONG_MAX)
+		ufw_ltoa(buf, (long)roundf(value));
 	else
 		ctuDtostr(buf, value, 0, 3);
 	writeBuf(h, strlen(buf), buf);

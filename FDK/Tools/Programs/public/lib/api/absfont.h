@@ -6,7 +6,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define ABF_VERSION CTL_MAKE_VERSION(1,0,48)
+#define ABF_VERSION CTL_MAKE_VERSION(1,0,49)
 
 #include <stdio.h>
 

@@ -11,6 +11,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "ctutil.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
@@ -458,13 +459,15 @@ static void glyphWidth(abfGlyphCallbacks *cb, float hAdv)
 	}
 
 /* Write real number in ASCII to dst stream. */
+#define TX_EPSILON 0.0001
+/*In Xcode, FLT_EPSILON is 1.192..x10-7, but the diff between value-roundf(value) can be 3.05x10-5, when the input value is an integer. */
 static void writeReal(char* buf, float value)
 {
 	char tmp[50];
     int l;
 	/* if no decimal component, perform a faster to string conversion */
-	if ((value-floor(value) < FLT_EPSILON) && value>LONG_MIN && value<LONG_MAX)
-        sprintf(tmp, " %ld", (long int)value);
+	if ((fabs(value-roundf(value)) < TX_EPSILON) && (value>LONG_MIN) && (value<LONG_MAX))
+        sprintf(tmp, " %ld", (long int)roundf(value));
 	else
 	{
         sprintf(tmp, " %.3f", value);

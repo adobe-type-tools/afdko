@@ -2333,11 +2333,19 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, abfGlyphCallbacks *gl
 	if (aux->flags & T2C_USE_MATRIX)
     {
         int i;
-		h.flags |= USE_MATRIX;
-        h.flags |= USE_GLOBAL_MATRIX;
-        for (i = 0; i < 6; i++)
+        if ((abs(1 - aux->matrix[0]) > 0.0001) ||
+            (abs(1 - aux->matrix[3]) > 0.0001) ||
+            (aux->matrix[1] != 0) ||
+            (aux->matrix[2] != 0) ||
+            (aux->matrix[4] != 0) ||
+            (aux->matrix[5] != 0))
         {
-            h.transformMatrix[i] = aux->matrix[i];
+            h.flags |= USE_MATRIX;
+            h.flags |= USE_GLOBAL_MATRIX;
+            for (i = 0; i < 6; i++)
+            {
+                h.transformMatrix[i] = aux->matrix[i];
+            }
         }
     }
 	if (aux->flags & T2C_FLATTEN_CUBE)

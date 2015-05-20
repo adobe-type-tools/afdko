@@ -6,7 +6,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define SVW_VERSION CTL_MAKE_VERSION(1,1,9)
+#define SVW_VERSION CTL_MAKE_VERSION(1,1,10)
 
 #include "absfont.h"
 
