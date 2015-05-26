@@ -1,4 +1,4 @@
-# otc2otf.py v1.1 Jan 20 2014
+# otc2otf.py v1.2 May 23 2015
 
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
@@ -142,6 +142,9 @@ def parseArgs(args):
 
 	return fontPath, doReportOnly
 
+MSUnicodeKey = (3, 1, 6)
+AppleLatinKey = (1, 0, 6)
+
 def getPSName(data):
 	format, n, stringOffset = struct.unpack(">HHH", data[:6])
 	expectedStringOffset = 6 + n * nameRecordSize
@@ -150,20 +153,33 @@ def getPSName(data):
 		print "Warning: 'name' table stringOffset incorrect.",
 		print "Expected: %s; Actual: %s" % (expectedStringOffset, stringOffset)
 	stringData = data[stringOffset:]
-	data = data[6:]
-	psName = "PSNameUndefined"
-	for i in range(n):
-		if len(data) < 12:
-			# compensate for buggy font
+	startNameRecordData = data[6:]
+	psName = None
+	
+	for nameRecordKey in [ AppleLatinKey, MSUnicodeKey ]:
+		if psName != None:
 			break
-		platformID, platEncID, langID, nameID, length, offset = struct.unpack(nameRecordFormat, data[:nameRecordSize])
-		data = data[nameRecordSize:]
-		if not ((platformID, platEncID, langID, nameID) == (1, 0, 0, 6)):
-			continue
-			
-		psName = stringData[offset:offset+length]
-		assert len(psName) == length
+		
+		data = startNameRecordData
+		for i in range(n):
+			if len(data) < 12:
+				# compensate for buggy font
+				break
+			platformID, platEncID, langID, nameID, length, offset = struct.unpack(nameRecordFormat, data[:nameRecordSize])
+			data = data[nameRecordSize:]
+			if ((platformID, platEncID, nameID) == nameRecordKey):
+				psName = stringData[offset:offset+length]
+				if nameRecordKey == MSUnicodeKey:
+					psName = psName.decode('utf-16be')
+					psName = psName.encode('latin-1')
+				else:
+					assert len(psName) == length
+				break
+			else:
+				continue
 
+	if psName == None:
+		psName = "PSNameUndefined"
 	return psName
 
 def readFontFile(fontOffset, data, tableDict, doReportOnly):
