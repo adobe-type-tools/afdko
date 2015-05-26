@@ -1,5 +1,5 @@
 """
-ufoTools.py v1.17 Apr 3 2015
+ufoTools.py v1.18 May 26 2015
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -798,15 +798,29 @@ class UFOFontData:
 					dataList.append("%s%s" % ("base:", compGlyphName))
 				except KeyError:
 					raise UFOParseError("'%s' is missing the 'base' attribute in a component. glyph '%s'." % (glyphName))
-				try:
-					if useDefaultGlyphDir:
+
+				if useDefaultGlyphDir:
+					try:
 						componentPath = self.getGlyphDefaultPath(compGlyphName)
-					else:
+					except KeyError:
+						raise UFOParseError("'%s' component glyph is missing from contents.plist." % (compGlyphName))
+				else:
+					# If we are not necessarily using the default layer for the main glyph, then a missing component
+					# may not have been processed, and may just be in the default layer. We need to look for component
+					# glyphs in the src list first, then in the defualt layer.
+					try:
 						componentPath = self.getGlyphSrcPath(compGlyphName)
-				except KeyError:
-					raise UFOParseError("'%s' component glyph is missing from contents.plist." % (compGlyphName))
+						if not os.path.exists(componentPath):
+							componentPath = self.getGlyphDefaultPath(compGlyphName)
+					except KeyError:
+						try:
+							componentPath = self.getGlyphDefaultPath(compGlyphName)
+						except KeyError:
+							raise UFOParseError("'%s' component glyph is missing from contents.plist." % (compGlyphName))
+
 				if not os.path.exists(componentPath):
 					raise UFOParseError("'%s' component file is missing: '%s'." % (compGlyphName, componentPath))
+
 				etRoot = ET.ElementTree()
 				
 				# Collect transformm fields, if any.
@@ -1094,6 +1108,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transfor
 			type = lastItem.attrib["type"]
 		except KeyError:
 			type = "offcurve"
+
 		if type in ["curve","line","qccurve"]:
 			outlineItem = outlineItem[1:]
 			if type != "line":
@@ -1103,19 +1118,16 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transfor
 			if transform != None:
 				x,y = transform.apply(x,y)
 			
-			if (allowDecimals):
-				dx = x - curX
-				dy = y - curY
-			else:
-				dx = int(round(x)) - curX
-				dy = int(round(y)) - curY
-			curX = curX + dx
-			curY = curY + dy
+			if (not allowDecimals):
+				x = int(round(x))
+				y = int(round(y))
+			curX = x
+			curY = y
 
 			if (allowDecimals):
-				op = "%.2f %.2f rmt" % (dx , dy)
+				op = "%.3f %.3f mt" % (x , y)
 			else:
-				op = "%s %s rmt" % (dx, dy)
+				op = "%s %s mt" % (x, y)
 			bezStringList.append(op)
 		elif type == "move":
 			# first op is a move-to.
@@ -1132,49 +1144,39 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transfor
 			# In this case, insert a move-to to the last op's end pos.
 			try:
 				lastType = curLastItem.attrib["type"]
+				x = float(curLastItem.attrib["x"])
+				y = float(curLastItem.attrib["y"])
+				if transform != None:
+					x,y = transform.apply(x,y)
+
+				if (not allowDecimals):
+					x = int(round(x))
+					y = int(round(y))
+				curX = x
+				curY = y
+
 				if lastType == "line":
-					x = float(curLastItem.attrib["x"])
-					y = float(curLastItem.attrib["y"])
-					if transform != None:
-						x,y = transform.apply(x,y)
+		
 					if (allowDecimals):
-						dx = x - curX
-						dy = y - curY
+						op = "%.3f %.3f mt" % (x , y)
 					else:
-						dx = int(round(x)) - curX
-						dy = int(round(y)) - curY
-					curX = curX + dx
-					curY = curY + dy
-					if (allowDecimals):
-						op = "%.2f %.2f rmt" % (dx, dy)
-					else:
-						op = "%s %s rmt" % (dx, dy)
+						op = "%s %s mt" % (x, y)
 
 					bezStringList.append(op)
 					outlineItem = outlineItem[:-1]
 				elif lastType == "curve":
-					x = float(curLastItem.attrib["x"])
-					y = float(curLastItem.attrib["y"])
-					if transform != None:
-						x,y = transform.apply(x,y)
+		
 					if (allowDecimals):
-						dx = x - curX
-						dy = y - curY
+						op = "%.3f %.3f mt" % (x , y)
 					else:
-						dx = int(round(x)) - curX
-						dy = int(round(y)) - curY
-					curX = curX + dx
-					curY = curY + dy
-					if (allowDecimals):
-						op = "%.2f %.2f rmt" % (dx, dy)
-					else:
-						op = "%s %s rmt" % (dx, dy)
+						op = "%s %s mt" % (x, y)
 					bezStringList.append(op)
 					
 			except KeyError:
 				raise UFOParseError("Unhandled case for first and last points in outline '%s'." % (xmlToString(outlineItem)))
 		else:
 			raise UFOParseError("Unhandled case for first point in outline '%s'." % (xmlToString(outlineItem)))
+
 		for contourItem in outlineItem:
 			if contourItem.tag != "point":
 				continue
@@ -1182,43 +1184,42 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transfor
 			y = float(contourItem.attrib["y"])
 			if transform != None:
 				x,y = transform.apply(x,y)
-			if (allowDecimals):
-				dx = x - curX
-				dy = y - curY
-			else:
-				dx = int(round(x)) - curX
-				dy = int(round(y)) - curY
-			curX = curX + dx
-			curY = curY + dy
+
+			if (not allowDecimals):
+				x = int(round(x))
+				y = int(round(y))
+			curX = x
+			curY = y
+
 			try:
 				type = contourItem.attrib["type"]
 			except KeyError:
 				type = "offcurve"
 			
 			if type == "offcurve":
-				argStack.append(dx)
-				argStack.append(dy)
+				argStack.append(x)
+				argStack.append(y)
 			elif type == "move":
 				if (allowDecimals):
-					op = "%.2f %.2f rmt" % (dx, dy)
+					op = "%.3f %.3f mt" % (x , y)
 				else:
-					op = "%s %s rmt" % (dx, dy)
+					op = "%s %s mt" % (x, y)
 				bezStringList.append(op)
 				argStack = []
 			elif type == "line":
 				if (allowDecimals):
-					op = "%.2f %.2f rdt" % (dx, dy)
+					op = "%.3f %.3f dt" % (x, y)
 				else:
-					op = "%s %s rdt" % (dx, dy)
+					op = "%s %s dt" % (x, y)
 				bezStringList.append(op)
 				argStack = []
 			elif type == "curve":
 				if len(argStack) != 4:
 					raise UFOParseError("Argument stack error seen for curve point '%s'." % (xmlToString(contourItem)))
 				if (allowDecimals):
-					op = "%.2f %.2f %.2f %.2f %.2f %.2f rct" % ( argStack[0], argStack[1], argStack[2], argStack[3], dx, dy)
+					op = "%.3f %.3f %.3f %.3f %.3f %.3f ct" % ( argStack[0], argStack[1], argStack[2], argStack[3], x, y)
 				else:
-					op = "%s %s %s %s %s %s rct" % ( argStack[0], argStack[1], argStack[2], argStack[3], dx, dy)
+					op = "%s %s %s %s %s %s ct" % ( argStack[0], argStack[1], argStack[2], argStack[3], x, y)
 				argStack = []
 				bezStringList.append(op)
 			elif type == "qccurve":

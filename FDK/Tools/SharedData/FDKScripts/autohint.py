@@ -3,7 +3,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-autohint  AutoHinting program v1.47 Mar 31 2015
+autohint  AutoHinting program v1.48 May 26 2015
 autohint -h
 autohint -u
 autohint -hfd

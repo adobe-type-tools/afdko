@@ -1,10 +1,37 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
-FDK. v2.5 April XX change number 63782.
+FDK. v2.5 May 26 change number 64261.
+
+	autohintexe. Worked through a lot of problems with fractional coordinates.
+	In the previous release, autohintexe was changed to read and write
+	fractional values. However, internal value storage used a Fixed format with
+	only 7 bits of precision for the value. This meant that underflow errors
+	occurred with 2 decimal places, leading to incorrect coordinates. I was able
+	to fix this by changing the code to use 8 bits of precision, which supports
+	2 decimal places (but not more!) without rounding errors, but this required
+	many changes. The current autohint output will match the output of the
+	previous version for integer input values, with two exceptions. Fractional
+	stem values will (rarely) differ in the second decimal place. The new
+	version will also choose different hints in glyphs which have coordinate
+	values outside of the range -16256 to +16256; the previous version had a bug
+	in calculating weights for stems.
+	
+	autohint. Changed logic for writing bez files to write absolute coordinate
+	values instead of relative coordinate values. Fixed bug where truncation of
+	decimal values lead to cumulative errors in positions adding up to mroe than
+	1 design unit over the length of a path.
+	
+	tx. Fixed bugs in handling fractional values. tx had a bug with writing
+	fractional values that are very near an integer value for the modes -dump.
+	-svg, and -ufo. 'tx' also always applied the logic for applying a user
+	transform matrix, even though the default transform is the identity
+	transform. This has the side-effect of rounding to integer values.
+	
+FDK. v2.5 April 8 change number 64043.
 
 	checkOutlinesUFO.
-	Added a new logic to delete any glyphs from the processed layer which are
+	Added  new logic to delete any glyphs from the processed layer which are
 	not in the ‘glyphs’ layer.
 
 	makeotf.
