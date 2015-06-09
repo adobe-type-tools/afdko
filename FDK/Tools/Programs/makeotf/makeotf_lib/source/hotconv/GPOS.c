@@ -2216,10 +2216,10 @@ static int CDECL cmpPairPos1(const void *first, const void *second) {
 	else if (a->second.gid > b->second.gid) {
 		return 1;
 	}
-	if ((a->metricsRec1[i] == 0) && (b->metricsRec1[i] != 0)) {	/* Abs values in decr order */
+	if ((a->metricsRec1[0] == 0) && (b->metricsRec1[0] != 0)) {	/* Abs values in decr order */
 		return -1;
 	}
-	else if ((a->metricsRec1[i] != 0) && (b->metricsRec1[i] == 0)) {
+	else if ((a->metricsRec1[0] != 0) && (b->metricsRec1[0] == 0)) {
 		return 1;
 	}
 	metricsCnt = (a->metricsCnt1 > b->metricsCnt1) ?  b->metricsCnt1 : a->metricsCnt1;
@@ -2238,10 +2238,10 @@ static int CDECL cmpPairPos1(const void *first, const void *second) {
 		}
 	}
 	
-	if ((a->metricsRec2[i] == 0) && (b->metricsRec2[i] != 0)) {	/* Abs values in decr order */
+	if ((a->metricsRec2[0] == 0) && (b->metricsRec2[0] != 0)) {	/* Abs values in decr order */
 		return -1;
 	}
-	else if ((a->metricsRec2[i] != 0) && (b->metricsRec2[i] == 0)) {
+	else if ((a->metricsRec2[0] != 0) && (b->metricsRec2[0] == 0)) {
 		return 1;
 	}
 	metricsCnt  = (a->metricsCnt2 > b->metricsCnt2) ?  b->metricsCnt2 : a->metricsCnt2;
@@ -2294,10 +2294,10 @@ static int CDECL cmpPairPos2(const void *first, const void *second) {
 	else if (a->second.gcl->gid > b->second.gcl->gid) {
 		return 1;
 	}
-	if ((a->metricsRec1[i] == 0) && (b->metricsRec1[i] != 0)) {	/* Abs values in decr order */
+	if ((a->metricsRec1[0] == 0) && (b->metricsRec1[0] != 0)) {	/* Abs values in decr order */
 		return -1;
 	}
-	else if ((a->metricsRec1[i] != 0) && (b->metricsRec1[i] == 0)) {
+	else if ((a->metricsRec1[0] != 0) && (b->metricsRec1[0] == 0)) {
 		return 1;
 	}
 	
@@ -2316,10 +2316,10 @@ static int CDECL cmpPairPos2(const void *first, const void *second) {
 			return 1;
 		}
 	}
-	if ((a->metricsRec2[i] == 0) && (b->metricsRec2[i] != 0)) {	/* Abs values in decr order */
+	if ((a->metricsRec2[0] == 0) && (b->metricsRec2[0] != 0)) {	/* Abs values in decr order */
 		return -1;
 	}
-	else if ((a->metricsRec2[i] != 0) && (b->metricsRec2[i] == 0)) {
+	else if ((a->metricsRec2[0] != 0) && (b->metricsRec2[0] == 0)) {
 		return 1;
 	}
 	metricsCnt = (a->metricsCnt2 > b->metricsCnt2) ?  b->metricsCnt2 : a->metricsCnt2;

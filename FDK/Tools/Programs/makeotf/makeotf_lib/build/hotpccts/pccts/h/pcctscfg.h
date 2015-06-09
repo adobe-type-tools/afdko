@@ -272,8 +272,12 @@ void special_fopen_actions(char * s) {
 
 /* Define usable bits for set.c stuff */
 #define BytesPerWord	sizeof(unsigned)
-#define	WORDSIZE		(sizeof(unsigned)*8)
-#define LogWordSize     (WORDSIZE==16?4:5)
+#ifndef WORDSIZE
+#define WORDSIZE        (sizeof(unsigned) * 8)
+#endif
+#ifndef LogWordSize
+#define LogWordSize     (WORDSIZE == 16 ? 4 : 5)
+#endif
 
 #ifndef TRUE
 #define TRUE 1

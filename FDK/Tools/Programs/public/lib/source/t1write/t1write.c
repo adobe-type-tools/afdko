@@ -1289,13 +1289,13 @@ static void writeIdentComment(t1wCtx h)
 static void writeFontBBox(t1wCtx h, float *FontBBox)
 	{
 	writeStr(h, "/FontBBox {");
-	writeReal(h, FontBBox[0]);
+	writeReal(h, roundf(FontBBox[0]));
 	writeStr(h, " ");
-	writeReal(h, FontBBox[1]);
+	writeReal(h, roundf(FontBBox[1]));
 	writeStr(h, " ");
-	writeReal(h, FontBBox[2]);
+	writeReal(h, roundf(FontBBox[2]));
 	writeStr(h, " ");
-	writeReal(h, FontBBox[3]);
+	writeReal(h, roundf(FontBBox[3]));
 	writeLine(h, "} def");
 	}
 
@@ -2574,7 +2574,7 @@ static void glyphWidth(abfGlyphCallbacks *cb, float hAdv)
 		return;
 
 	saveInt(h, 0);
-	saveFlt(h, hAdv);
+	saveFlt(h, roundf(hAdv));
 	saveOp(h, t1_hsbw);
 
 	h->path.state = 2;
@@ -2728,8 +2728,12 @@ static void saveStems(t1wCtx h)
 static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0)
 	{
 	t1wCtx h = cb->direct_ctx;
-	float dx0 = x0 - h->path.x; 
-	float dy0 = y0 - h->path.y;
+    float dx0;
+    float dy0;
+    x0 = roundf(x0*100)/100;  // need to round to 2 decimal places, else get cumulative error when reading the relative coords. This is becuase decimal valuea wre stored as at most "<int> 100 div" aka 2 decimal places.
+    y0 = roundf(y0*100)/100;
+	dx0 = x0 - h->path.x;
+	dy0 = y0 - h->path.y;
 	h->path.x = x0;
 	h->path.y = y0;
 
@@ -2767,7 +2771,7 @@ static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0)
 		}
 	else
 		{
-		saveFlt(h, dx0); 
+		saveFlt(h, dx0);
 		saveFlt(h, dy0);
 		saveOp(h, tx_rmoveto);
 		}
@@ -2779,8 +2783,12 @@ static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0)
 static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1)
 	{
 	t1wCtx h = cb->direct_ctx;
-	float dx1 = x1 - h->path.x; 
-	float dy1 = y1 - h->path.y;
+    float dx1;
+    float dy1;
+    x1 = roundf(x1*100)/100;  // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
+    y1 = roundf(y1*100)/100;
+    dx1 = x1 - h->path.x;
+    dy1 = y1 - h->path.y;
 	h->path.x = x1;
 	h->path.y = y1;
 
@@ -2824,13 +2832,29 @@ static void glyphCurve(abfGlyphCallbacks *cb,
 					   float x3, float y3)
 	{
 	t1wCtx h = cb->direct_ctx;
-	float dx1 = x1 - h->path.x; 
-	float dy1 = y1 - h->path.y;
-	float dx2 = x2 - x1;
-	float dy2 = y2 - y1;
-	float dx3 = x3 - x2;
-	float dy3 = y3 - y2;
-	h->path.x = x3;
+    float dx1;
+    float dy1;
+    float dx2;
+    float dy2;
+    float dx3;
+    float dy3;
+
+    x1 = roundf(x1*100)/100; // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
+    y1 = roundf(y1*100)/100;
+    x2 = roundf(x2*100)/100;
+    y2 = roundf(y2*100)/100;
+    x3 = roundf(x3*100)/100;
+    y3 = roundf(y3*100)/100;
+
+    dx1 = x1 - h->path.x;
+    dy1 = y1 - h->path.y;
+    dx2 = x2 - x1;
+    dy2 = y2 - y1;
+    dx3 = x3 - x2;
+    dy3 = y3 - y2;
+        
+    
+    h->path.x = x3;
 	h->path.y = y3;
 
 	if (h->err.code != 0)
@@ -2970,6 +2994,19 @@ static void glyphFlex(abfGlyphCallbacks *cb, float depth,
 		saveStems(h);
 
 	h->flags |= IN_FLEX;
+
+    x1 = roundf(x1*100)/100; // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
+    y1 = roundf(y1*100)/100;
+    x2 = roundf(x2*100)/100;
+    y2 = roundf(y2*100)/100;
+    x3 = roundf(x3*100)/100;
+    y3 = roundf(y3*100)/100;
+    x4 = roundf(x4*100)/100;
+    y4 = roundf(y4*100)/100;
+    x5 = roundf(x5*100)/100;
+    y5 = roundf(y5*100)/100;
+    x6 = roundf(x6*100)/100;
+    y6 = roundf(y6*100)/100;
 
 	saveCall(h, 1);
 	if (fabs(x6 - x0) > fabs(y6 - y0))

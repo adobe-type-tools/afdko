@@ -39,7 +39,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
 	# I use this to convert the T2 operands and arguments to bez operators.
 	# Note: flex is converted to regulsr rcurveto's.
 	# cntrmasks just map to hint replacement blocks with the specified stems.
-	def __init__(self, localSubrs, globalSubrs, nominalWidthX, defaultWidthX, removeHints = 0):
+	def __init__(self, localSubrs, globalSubrs, nominalWidthX, defaultWidthX, removeHints = 0, allowDecimals = 0):
 		T2OutlineExtractor.__init__(self, None, localSubrs, globalSubrs, nominalWidthX, defaultWidthX)
 		self.vhints = []
 		self.hhints = []
@@ -48,7 +48,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
 		self.firstMarkingOpSeen = 0
 		self.closePathSeen = 0
 		self.subrLevel = 0
-		self.allowDecimalCoords = 0
+		self.allowDecimals = allowDecimals
 
 	def execute(self, charString):
 		self.subrLevel += 1
@@ -58,27 +58,23 @@ class T2ToBezExtractor(T2OutlineExtractor):
 			 self.closePath()
 			
 	def rMoveTo(self, point):
-		self._nextPoint(point)
+		point = self._nextPoint(point)
 		if not self.firstMarkingOpSeen :
 			self.firstMarkingOpSeen = 1
 			self.bezProgram.append("sc\n")
 		debugMsg("moveto", point, "curpos", self.currentPoint)
-		dx = point[0]
-		dy = point[1]
-		if dy == 0:
-			if dx != 0:
-				self.bezProgram.append("%.2f hmt\n" % dx)
-			else:
-				self.bezProgram.append("0 0 rmt\n" )
-
-		elif  dx == 0:
-			self.bezProgram.append("%.2f vmt\n" % dy)
+		x = point[0]
+		y = point[1]
+		if (not self.allowDecimals):
+			x = int(round(x))
+			y = int(round(y))
+			self.bezProgram.append("%s  %s mt\n" % (x, y))
 		else:
-			self.bezProgram.append("%.2f  %.2f rmt\n" % (point[0], point[1]))
+			self.bezProgram.append("%.2f  %.2f mt\n" % (x, y))
 		self.sawMoveTo = 1
 
 	def rLineTo(self, point):
-		self._nextPoint(point)
+		point = self._nextPoint(point)
 		if not self.firstMarkingOpSeen :
 			self.firstMarkingOpSeen = 1
 			self.bezProgram.append("sc\n")
@@ -86,23 +82,19 @@ class T2ToBezExtractor(T2OutlineExtractor):
 		debugMsg("lineto", point, "curpos", self.currentPoint)
 		if not self.sawMoveTo:
 			self.rMoveTo((0, 0))
-		dx = point[0]
-		dy = point[1]
-		if dy == 0:
-			if dx != 0:
-				self.bezProgram.append("%.2f hdt\n" % dx)
-			else:
-				self.bezProgram.append("0 0 rdt\n")
-			
-		elif  dx == 0:
-			self.bezProgram.append("%.2f vdt\n" % dy)
-		else :
-			self.bezProgram.append("%.2f  %.2f rdt\n" % (dx,dy))
+		x = point[0]
+		y = point[1]
+		if (not self.allowDecimals):
+			x = int(round(x))
+			y = int(round(y))
+			self.bezProgram.append("%s  %s dt\n" % (x, y))
+		else:
+			self.bezProgram.append("%.2f  %.2f dt\n" % (x, y))
 
 	def rCurveTo(self, pt1, pt2, pt3):
-		self._nextPoint(pt1)
-		self._nextPoint(pt2)
-		self._nextPoint(pt3)
+		pt1 = list(self._nextPoint(pt1))
+		pt2 = list(self._nextPoint(pt2))
+		pt3 = list(self._nextPoint(pt3))
 		if not self.firstMarkingOpSeen :
 			self.firstMarkingOpSeen = 1
 			self.bezProgram.append("sc\n")
@@ -110,12 +102,13 @@ class T2ToBezExtractor(T2OutlineExtractor):
 		debugMsg("curveto", pt1, pt2, pt3, "curpos", self.currentPoint)
 		if not self.sawMoveTo:
 			self.rMoveTo((0, 0))
-		if pt1[0] == 0 and pt3[1] == 0:
-			self.bezProgram.append("%.2f %.2f %.2f %.2f vhct\n" %  (pt1[1],  pt2[0], pt2[1],  pt3[0]))
-		elif   pt1[1] == 0 and pt3[0] == 0:
-			self.bezProgram.append("%.2f %.2f %.2f %.2f hvct\n" %  (pt1[0],  pt2[0],  pt2[1],  pt3[1]))
+		if (not self.allowDecimals):
+			for pt in [pt1, pt2, pt3]:
+				pt[0] = int(round(pt[0]))
+				pt[1] = int(round(pt[1]))
+			self.bezProgram.append("%s %s %s %s %s %s ct\n" %  (pt1[0],  pt1[1],  pt2[0],  pt2[1], pt3[0],  pt3[1]))
 		else:
-			self.bezProgram.append("%.2f %.2f %.2f %.2f %.2f %.2f rct\n" %  (pt1[0],  pt1[1],  pt2[0],  pt2[1], pt3[0],  pt3[1]))
+			self.bezProgram.append("%.2f %.2f %.2f %.2f %.2f %.2f ct\n" %  (pt1[0],  pt1[1],  pt2[0],  pt2[1], pt3[0],  pt3[1]))
 
 	def op_endchar(self, index):
 		self.endPath()
@@ -269,12 +262,12 @@ class T2ToBezExtractor(T2OutlineExtractor):
 	def countHints(self, args):
 		self.hintCount = self.hintCount + len(args) / 2
 
-def convertT2GlyphToBez(t2CharString, removeHints = 0):
+def convertT2GlyphToBez(t2CharString, removeHints = 0, allowDecimals = 0):
 	# wrapper for T2ToBezExtractor which applies it to the supplied T2 charstring
 	bezString = ""
 	subrs = getattr(t2CharString.private, "Subrs", [])
 	extractor = T2ToBezExtractor(subrs, t2CharString.globalSubrs,
-				t2CharString.private.nominalWidthX, t2CharString.private.defaultWidthX, removeHints)
+				t2CharString.private.nominalWidthX, t2CharString.private.defaultWidthX, removeHints, allowDecimals)
 	extractor.execute(t2CharString)
 	if extractor.gotWidth:
 		t2Wdth = extractor.width - t2CharString.private.nominalWidthX
@@ -352,7 +345,7 @@ def makeHintList(hints, needHintMasks, isH):
 			pos = int(pos)
 		hintList.append(pos)
 		pos2 = hint[1]
-		if (type(pos2) == FloatType) and (int(pos2) == pos):
+		if (type(pos2) == FloatType) and (int(pos2) == pos2):
 			pos2 = int(pos2)
 		lastPos = pos1 + pos2
 		hintList.append(pos2)
@@ -374,12 +367,15 @@ def makeHintList(hints, needHintMasks, isH):
 
 
 bezToT2 = {
+		"mt" : 'rmoveto',
 		"rmt" : 'rmoveto',
 		 "hmt" : 'hmoveto',
 		"vmt" : 'vmoveto',
+		"dt" : 'rlineto', 
 		"rdt" : 'rlineto', 
 		"hdt" : "hlineto", 
 		"vdt" : "vlineto", 
+		"ct" : 'rrcurveto', 
 		"rct" : 'rrcurveto', 
 		"rcv" : 'rrcurveto',  # Morisawa's alternate name for 'rct'.
 		"vhct": 'vhcurveto',
@@ -402,11 +398,6 @@ def optimizeT2Program(t2List):
 	for entry in t2List:
 		op =  entry[1]
 		args = entry[0]
-		if 0: #(len(args) >= 2):
-			if (args[-1] == 17) and (args[-2] == -9):
-				print "DEBUG", op, args
-				import pdb
-				pdb.set_trace()
 
 		if op == "vlineto":
 			dy = args[-1]
@@ -862,7 +853,19 @@ def buildControlMaskList(hStem3List, vStem3List):
 			
 	return controlMaskList
 				
+def makeRelativeCTArgs(argList, curX, curY):
+	newCurX = argList[4]
+	newCurY = argList[5]
+	argList[5] -= argList[3]
+	argList[4] -= argList[2]
 
+	argList[3] -= argList[1]
+	argList[2] -= argList[0]
+
+	argList[0] -= curX
+	argList[1] -= curY
+	return argList, newCurX, newCurY
+	
 def convertBezToT2(bezString):
 	# convert bez data to a T2 outline program, a list of operator tokens.
 	#
@@ -889,7 +892,8 @@ def convertBezToT2(bezString):
 	t2List = []
 
 	lastPathOp = None
-	
+	curX = 0
+	curY = 0
 	for token in bezList:
 		try:
 			val1 = round(float(token),2)
@@ -990,12 +994,20 @@ def convertBezToT2(bezString):
 			# while the flex sequence is simply the 6 rcurveto points. Both sequences are always provided.
 			lastPathOp = token
 			argList = []
-		elif token == "preflx2":
+		elif token in ["preflx2", "preflx2a"]:
 			lastPathOp = token
 			del t2List[-1]
 			argList = []
 		elif token == "flx":
 			lastPathOp = token
+			argList = argList[:12] 
+			t2List.append([argList + [50], "flex"]) 
+			argList = []
+		elif token == "flxa":
+			lastPathOp = token
+			argList1, curX, curY = makeRelativeCTArgs(argList[:6], curX, curY)
+			argList2, curX, curY = makeRelativeCTArgs(argList[6:], curX, curY)
+			argList = argList1 + argList2
 			t2List.append([argList[:12] + [50], "flex"]) 
 			argList = []
 		elif token == "sc":
@@ -1005,6 +1017,13 @@ def convertBezToT2(bezString):
 			if token[-2:] in ["mt", "dt", "ct", "cv"]:
 				lastPathOp = token
 			t2Op = bezToT2.get(token,None)
+			if token in ["mt", "dt"]:
+				newList = [argList[0] - curX, argList[1]- curY]
+				curX = argList[0]
+				curY = argList[1]
+				argList = newList
+			elif token in ["ct", "cv"]:
+				argList, curX, curY = makeRelativeCTArgs(argList, curX, curY)
 			if t2Op:
 				t2List.append([argList, t2Op])
 			elif t2Op == None:
@@ -1097,7 +1116,8 @@ class CFFFontData:
 		self.topDict = topDict
 		self.charStrings = topDict.CharStrings
 		self.charStringIndex = self.charStrings.charStringsIndex
-
+		self.allowDecimalCoords = False
+		
 	def getGlyphList(self):
 		fontGlyphList = self.ttFont.getGlyphOrder()
 		return fontGlyphList
@@ -1117,7 +1137,7 @@ class CFFFontData:
 		gid = self.charStrings.charStrings[glyphName]
 		t2CharString = self.charStringIndex[gid]
 		try:
-			bezString, hasHints, t2Wdth = convertT2GlyphToBez(t2CharString, removeHints)
+			bezString, hasHints, t2Wdth = convertT2GlyphToBez(t2CharString, removeHints, self.allowDecimalCoords)
 			# Note: the glyph name is important, as it is used by autohintexe for various heurisitics, including [hv]stem3 derivation.
 			bezString  = (r"%%%s%ssc " % (glyphName, os.linesep)) + bezString
 		except SEACError:
@@ -1173,10 +1193,9 @@ class CFFFontData:
 			data = ttFont["CFF "].compile(ttFont)
 			if fontType == 1: # CFF
 				if overwriteOriginal:
-					tf = file(tempPath, "wb")
+					tf = file(inputPath, "wb")
 					tf.write(data)
 					tf.close()
-					os.rename(tempPath, inputPath)
 				else:
 					tf = file(outFilePath, "wb")
 					tf.write(data)

@@ -132,7 +132,6 @@ Byte8 tday[32];
 Byte8 * headGetCreatedDate(Card32 client)
 	{
 	  struct tm tmp;
-	  Byte8 *str;
 
 	  tday[0] = '\0';
 	  if (!loaded)
@@ -155,7 +154,6 @@ Byte8 * headGetCreatedDate(Card32 client)
 Byte8 * headGetModifiedDate(Card32 client)
 	{
 	  struct tm tmp;
-	  Byte8 *str;
 
 	  tday[0] = '\0';
 	  if (!loaded)

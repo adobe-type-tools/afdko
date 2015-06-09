@@ -797,8 +797,8 @@ class Charstring:
 		m = self.kMovetoPat.search(charstring)
 		if not m:
 			print "Failed to find moveto in  %s." % (glyphName)
-			import pdb
-			pdb.set_trace()
+			#import pdb
+			#pdb.set_trace()
 			raise CharParseError
 		start = m.start()
 		self.prefix = charstring[:start]
@@ -850,9 +850,10 @@ class Charstring:
 				path1 = self.paths[pathIndex + i]
 				path2 = otherChar.paths[i]
 			except IndexError:
-				import pdb
-				pdb.set_trace()
-				print self
+				#import pdb
+				#pdb.set_trace()
+				#print self
+				raise CharParseError
 				
 			if not path1.fuzzyMatch(path2):
 				print "\tWARNING: Paths don't match. Comp glyph %s ci %s, exception glyph %s ci %s. " % (self.glyphName, pathIndex + i, otherChar.glyphName, i)
@@ -933,8 +934,9 @@ class Charstring:
 
 		if (scale[0] != 1.0) or (scale[1] != 1.0):
 			print "Help! I need to scale exception %s." % (self.glyphName)
-			import pdb
-			pdb.set_trace()
+			#import pdb
+			#pdb.set_trace()
+			raise CharParseError
 		return scaledChar
 
 def getExceptionEntries(charDict, exceptionSuffixList):
@@ -1123,8 +1125,8 @@ def fixPostScriptFontDict(log, key, value):
 			log = log[:end] + newEntry + log[end:]
 		else:
 			editError = 1
-			import pdb
-			pdb.set_trace()
+			#import pdb
+			#pdb.set_trace()
 			logMsg.log("Error: Failed to match PostScript FontDict key '%s' in list of known PS Font Dict keys: %s." % (key, kPSNameKeys + kPSFontDictKeys.keys()))
 	else:
 		start = m1.end()

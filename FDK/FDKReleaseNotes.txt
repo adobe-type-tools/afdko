@@ -1,6 +1,28 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
+FDK. v2.5 June 4 change number 64310.
+
+	autohint.
+	Fixed bug in ufoFontTools.py which placed a new hint block after a flex operator, when it should be before.
+	Fixed new bug in hinting non-UFO fonts, introduced by switch to absolute coordinates in the bez file interchange format.
+	Fixed bugs in using hashmap to detect previously hinted glyphs.
+	
+	makeotf. Fixed bug with Unicode values in the absolute path to to the font home directory.
+	
+	tx, IS, mergeFonts rotateFont:
+	fixed bug in handling CID glyph ID greater than 32K.
+	Changed to write widths and FontBBox as integer values
+	Changed to write SVG, UFO, and dump coordinates with 2 places of precision when there is a fractional part.	
+	Fixed bugs in handling the '-gx' option to exclude glyphs. Fixed problem
+	with CID > 32K. Fixed problem when font has 65536 glyphs: all glyphs after
+	first last would be excluded.
+	Fixed rounding errors in writing out decimal values to cff and t1 fonts
+
+	misc
+	Fixed windows builds: had to provide a roundf function, and more includes for
+	the _tmpFile function. Fixed a few compile errors.
+
 FDK. v2.5 May 26 change number 64261.
 
 	autohintexe. Worked through a lot of problems with fractional coordinates.
@@ -19,7 +41,7 @@ FDK. v2.5 May 26 change number 64261.
 	
 	autohint. Changed logic for writing bez files to write absolute coordinate
 	values instead of relative coordinate values. Fixed bug where truncation of
-	decimal values lead to cumulative errors in positions adding up to mroe than
+	decimal values lead to cumulative errors in positions adding up to more than
 	1 design unit over the length of a path.
 	
 	tx. Fixed bugs in handling fractional values. tx had a bug with writing

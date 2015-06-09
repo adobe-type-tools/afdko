@@ -207,7 +207,7 @@ static void svw_ltoa(char* buf, long val)
 	}
 }
 /* Write real number in ASCII to dst stream. */
-#define TX_EPSILON 0.0001 
+#define TX_EPSILON 0.0003 
 /*In Xcode, FLT_EPSILON is 1.192..x10-7, but the diff between value-roundf(value) can be 3.05..x10-5, when the input value is an integer. */
 static void writeReal(svwCtx h, float value)
 {
@@ -216,7 +216,7 @@ static void writeReal(svwCtx h, float value)
 	if ((fabs(value-roundf(value)) < TX_EPSILON) && (value>LONG_MIN) && (value<LONG_MAX))
 		svw_ltoa(buf, (long)roundf(value));
 	else
-		ctuDtostr(buf, value, 0, 0);
+		ctuDtostr(buf, value, 0, 2);
 	writeBuf(h, strlen(buf), buf);
 }
 
@@ -675,7 +675,7 @@ static void glyphWidth(abfGlyphCallbacks *cb, float hAdv)
 		}
 
 	writeStr(h, " horiz-adv-x=\"");
-	writeReal(h, hAdv);
+	writeInt(h, (long)roundf(hAdv));
 	writeStr(h, "\"");
 
 	h->path.state = 2;

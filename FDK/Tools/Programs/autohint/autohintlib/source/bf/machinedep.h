@@ -17,6 +17,7 @@ End Edit History
 
 #if WIN32
 #include <dir.h>
+#include <math.h>
 #else
 #include <sys/dir.h>
 #endif
@@ -176,6 +177,10 @@ extern char *GetPathName (
 
 
 extern int bf_alphasort(const void *f1, const void *f2);
+
+#if defined(_MSC_VER) && ( _MSC_VER < 1800)
+public float roundf(float x);
+#endif
 
 
 #endif /*MACHINEDEP_H*/

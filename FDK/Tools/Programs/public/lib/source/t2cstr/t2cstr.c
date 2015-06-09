@@ -10,6 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "t2cstr.h"
 #include "txops.h"
+#include "ctutil.h"
 
 #include <string.h>
 #include <stdarg.h>
@@ -647,7 +648,10 @@ static void callbackMove(t2cCtx h, float dx, float dy)
 		}
 
 
-	h->x = x;	h->y = y;
+    x = roundf(x*100)/100;
+    y = roundf(y*100)/100;
+    h->x = x;
+    h->y = y;
 	
 	if (h->flags & USE_MATRIX)
 		h->glyph->move(h->glyph, TX(h->x, h->y), TY(h->x, h->y));
@@ -671,6 +675,9 @@ static void callbackLine(t2cCtx h, float dx, float dy)
 		}
 
 	h->x += dx;	h->y += dy;
+    h->x = roundf(h->x*100)/100;
+    h->y = roundf(h->y*100)/100;
+        
 	if (h->flags & USE_MATRIX)
 		h->glyph->line(h->glyph, TX(h->x, h->y), TY(h->x, h->y));
 	else if (h->flags & SEEN_BLEND)
@@ -701,7 +708,10 @@ static void callbackCurve(t2cCtx h,
 	x2 = x1 + dx2;		y2 = y1 + dy2; 
 	x3 = x2 + dx3;		y3 = y2 + dy3;
 
-	h->x = x3;				h->y = y3;
+    x3 = roundf(x3*100)/100;
+    y3 = roundf(y3*100)/100;
+    h->x = x3;
+    h->y = y3;
 
 	if (h->flags & USE_MATRIX)
 		h->glyph->curve(h->glyph, 
@@ -758,7 +768,10 @@ static void callbackFlex(t2cCtx h,
 		float x4 = x3 + dx4;	float y4 = y3 + dy4;
 		float x5 = x4 + dx5;	float y5 = y4 + dy5;
 		float x6 = x5 + dx6;	float y6 = y5 + dy6;
-		h->x = x6;				h->y = y6;
+        x6 = roundf(x6*100)/100;
+        y6 = roundf(y6*100)/100;
+        h->x = x6;
+        h->y = y6;
 
 		if (h->flags & USE_MATRIX)
 			h->glyph->flex(h->glyph, depth,
@@ -910,6 +923,8 @@ static void callback_setwv_cube(t2cCtx h, unsigned int numDV)
 static void callback_compose(t2cCtx h, int cubeLEIndex, float dx, float dy, int numDV, float *ndv)
 	{
 	h->x += dx;	h->y += dy;
+    h->x = roundf(h->x*100)/100;
+    h->y = roundf(h->y*100)/100;
 	if (h->glyph->cubeCompose == NULL)
 		return;
 		
@@ -1876,6 +1891,8 @@ static int t2Decode(t2cCtx h, long offset)
 						h->mask.state = 0;
 						h->x = h->seac.adx;
 						h->y = h->seac.ady;
+                        h->x = roundf(h->x*100)/100;
+                        h->y = roundf(h->y*100)/100;
 						
 						/* Parse accent component */
 						h->seac.phase = seacAccentPreMove;
@@ -2333,8 +2350,8 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, abfGlyphCallbacks *gl
 	if (aux->flags & T2C_USE_MATRIX)
     {
         int i;
-        if ((abs(1 - aux->matrix[0]) > 0.0001) ||
-            (abs(1 - aux->matrix[3]) > 0.0001) ||
+        if ((fabs(1 - aux->matrix[0]) > 0.0001) ||
+            (fabs(1 - aux->matrix[3]) > 0.0001) ||
             (aux->matrix[1] != 0) ||
             (aux->matrix[2] != 0) ||
             (aux->matrix[4] != 0) ||

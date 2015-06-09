@@ -783,9 +783,6 @@ def makeGAFile(gaPath, fontPath, glyphList, fontDictList, fdGlyphDict, removeNot
 	lineList.append("")
 	gaText = "mergeFonts %s%s%s" % (dictName, langGroup, os.linesep.join(lineList))
 
-	if len(gaText.strip()) == 0:
-		import pdb
-		pdb.set_trace()
 	gf = file(gaPath, "wb")
 	gf.write(gaText)
 	gf.close()

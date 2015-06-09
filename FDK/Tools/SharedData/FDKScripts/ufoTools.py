@@ -1,5 +1,5 @@
 """
-ufoTools.py v1.18 May 26 2015
+ufoTools.py v1.19 May 28 2015
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -428,6 +428,7 @@ class UFOFontData:
 		return glyphPath
 
 	def updateHashEntry(self, glyphName, changed):
+		# srcHarsh has already been set: we are fixing the history list.
 		if not self.useHashMap:
 			return
 		# Get hash entry for glyph
@@ -438,21 +439,20 @@ class UFOFontData:
 			hashEntry = None
 
 		self.hashMapChanged = 1
-		# If the program always reads data from the default layer, and since we have just created a new glyph in the precessed layer, then reset the history.
+		# If the program always reads data from the default layer, and  we have just created a new glyph in the processed layer, then reset the history.
 		if (not self.useProcessedLayer) and changed:
 			self.hashMap[glyphName] = [srcHash, [self.programName] ]
 			return
-		
-		try:
-			programHistoryIndex = historyList.index(self.programName)
-		except ValueError:
-			#If the program is not in the history list, add it.
-			historyList.append(self.programName)
+		else:
+			try:
+				programHistoryIndex = historyList.index(self.programName)
+			except ValueError:
+				#If the program is not in the history list, add it.
+				historyList.append(self.programName)
 	
 	
 	def checkSkipGlyph(self, glyphName, newSrcHash, doAll):
 		skip = False
-
 		if not self.useHashMap:
 			return skip
 
@@ -475,33 +475,37 @@ class UFOFontData:
 		except KeyError:
 			# Glyph is as yet untouched by any program.
 			pass
-
-		if (hashEntry == None):
-			self.hashMap[glyphName] = [newSrcHash, [self.programName] ]
-			self.hashMapChanged = 1
-		elif (srcHash == newSrcHash):
+		
+		if (srcHash == newSrcHash):
 			if (programHistoryIndex >= 0):
 				# The glyph has already been processed by this program, and there have been no changes since.
 				skip = True and (not doAll)
-			else:
-				historyList.append(self.programName)
-				self.hashMapChanged = 1
+			if not skip:
+				if not self.useProcessedLayer: # case  for Checkoutlines
+					self.hashMapChanged = 1
+					self.hashMap[glyphName] = [newSrcHash, [self.programName] ]
+					glyphPath = self.getGlyphProcessedPath(glyphName)
+					if os.path.exists(glyphPath):
+						os.remove(glyphPath)
+				else:
+					historyList.append(self.programName)
 		else:
 			# If the source hash has changed, we need to delete the processed layer glyph.
-			glyphPath = self.getGlyphProcessedPath(glyphName)
-			if os.path.exists(glyphPath):
-				os.remove(glyphPath)
-				self.deletedGlyph = True
 			if not self.useProcessedLayer: # case  for Checkoutlines
 				self.hashMapChanged = 1
 				self.hashMap[glyphName] = [newSrcHash, [self.programName] ]
+				glyphPath = self.getGlyphProcessedPath(glyphName)
+				if os.path.exists(glyphPath):
+					os.remove(glyphPath)
+					self.deletedGlyph = True
 			else: # case for autohint
 				# default layer glyph and stored glyph hash differ,and useProcessedLayer is True
 				# If any of the programs in requiredHistory in are in the historyList, we need to complain and skip.
 				foundMatch = False
-				for programName in self.requiredHistory:
-					if programName in historyList:
-						foundMatch = True
+				if len(historyList) > 0:
+					for programName in self.requiredHistory:
+						if programName in historyList:
+							foundMatch = True
 				if foundMatch:
 					print "Error. Glyph '%s' has been edited. You must first run '%s' before running '%s'. Skipping." % (glyphName, self.requiredHistory, self.programName)
 					skip = True
@@ -533,13 +537,12 @@ class UFOFontData:
 		if len(self.glyphMap) == 0:
 			self.loadGlyphMap()
 		glyphFileName = self.glyphMap[glyphName]
-		
 		width, glifXML, outlineXML = self.getGlyphXML(self.glyphDefaultDir, glyphFileName)
 		if glifXML == None:
 			skip = 1
 			return None, None, skip
 		
-		useDefaultGlyphDir = True # Has is always from the default glyph layer.
+		useDefaultGlyphDir = True # Hash is always from the default glyph layer.
 		newHash, dataList = self.buildGlyphHashValue(width, outlineXML, glyphName, useDefaultGlyphDir)
 		skip = self.checkSkipGlyph(glyphName, newHash, doAll)			
 				
@@ -847,12 +850,27 @@ class UFOFontData:
 		except KeyError:
 			raise UFOParseError("'%s' attribute missing from component '%s'." % ("base", xmlToString(componentXML)))
 		
-		try:
-			compGlyphFilePath = self.getGlyphSrcPath(compGlyphName)
-		except KeyError:
-			raise UFOParseError("'%s' compGlyphName missing from contents.plist." % (compGlyphName))
+		if not self.useProcessedLayer:
+			try:
+				compGlyphFilePath = self.getGlyphDefaultPath(compGlyphName)
+			except KeyError:
+				raise UFOParseError("'%s' component glyph is missing from contents.plist." % (compGlyphName))
+		else:
+			# If we are not necessarily using the default layer for the main glyph, then a missing component
+			# may not have been processed, and may just be in the default layer. We need to look for component
+			# glyphs in the src list first, then in the defualt layer.
+			try:
+				compGlyphFilePath = self.getGlyphSrcPath(compGlyphName)
+				if not os.path.exists(compGlyphFilePath):
+					compGlyphFilePath = self.getGlyphDefaultPath(compGlyphName)
+			except KeyError:
+				try:
+					compGlyphFilePath = self.getGlyphDefaultPath(compGlyphName)
+				except KeyError:
+					raise UFOParseError("'%s' component glyph is missing from contents.plist." % (compGlyphName))
+
 		if not os.path.exists(compGlyphFilePath):
-			raise UFOParseError("'%s' compGlyphName file is missing: '%s'." % (compGlyphName, compGlyphFilePath))
+			raise UFOParseError("'%s' component file is missing: '%s'." % (compGlyphName, compGlyphFilePath))
 		
 		etRoot =  ET.ElementTree()
 		glifXML = etRoot.parse(compGlyphFilePath)
@@ -866,7 +884,7 @@ class UFOFontData:
 	def close(self):
 		if self.hashMapChanged:
 			self.writeHashMap()
-		self.hashMapChanged = 0
+			self.hashMapChanged = 0
 		return
 	
 	def clearHashMap(self):
@@ -1108,7 +1126,6 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transfor
 			type = lastItem.attrib["type"]
 		except KeyError:
 			type = "offcurve"
-
 		if type in ["curve","line","qccurve"]:
 			outlineItem = outlineItem[1:]
 			if type != "line":
@@ -1231,7 +1248,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transfor
 		bezStringList.append("cp" + os.linesep)
 
 		
-	bezstring = " ".join(bezStringList)
+	bezstring = os.linesep.join(bezStringList)
 	return bezstring, curX, curY
 
 
@@ -1342,13 +1359,16 @@ def fixStartPoint(outlineItem, opList):
 
 
 bezToUFOPoint = {
+		"mt" : 'move',
 		"rmt" : 'move',
 		 "hmt" : 'move',
 		"vmt" : 'move',
 		"rdt" : 'line', 
+		"dt" : 'line', 
 		"hdt" : "line", 
 		"vdt" : "line", 
 		"rct" : 'curve', 
+		"ct" : 'curve', 
 		"rcv" : 'curve',  # Morisawa's alternate name for 'rct'.
 		"vhct": 'curve',
 		"hvct": 'curve', 
@@ -1367,9 +1387,9 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
 	""" Since the UFO outline element as no attributes to preserve, I can
 	just make a new one.
 	"""
-	# convert bez data to a T2 outline program, a list of operator tokens.
+	# convert bez data to a UFO glif XML representation
 	#
-	# Convert all bez ops to simplest T2 equivalent
+	# Convert all bez ops to simplest UFO equivalent
 	# Add all hints to vertical and horizontal hint lists as encountered; insert a HintMask class whenever a
 	# new set of hints is encountered
 	# after all operators have been processed, convert HintMask items into hintmask ops and hintmask bytes
@@ -1471,7 +1491,47 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
 			lastPathOp = token
 			argList = []
 			inPreFlex = True # need to skip all move-tos until we see the "flex" operator.
+		elif token == "preflx2a":
+			lastPathOp = token
+			argList = []
 		elif token == "preflx2":
+			lastPathOp = token
+			argList = []
+		elif token == "flxa": # flex with absolute coords.
+			inPreFlex = False
+			flexPointName = kBaseFlexName + str(opIndex).zfill(4)
+			flexList.append(flexPointName)
+			curveCnt = 2
+			i = 0
+			# The first 12 args are the 6 args for each of the two curves that make up the flex feature.
+			while i < curveCnt:
+				curX = argList[0]
+				curY = argList[1]
+				showX, showY = convertCoords(curX, curY)
+				newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
+				outlineItem.append(newPoint)
+				curX = argList[2]
+				curY = argList[3]
+				showX, showY = convertCoords(curX, curY)
+				newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
+				outlineItem.append(newPoint)
+				curX = argList[4]
+				curY = argList[5]
+				showX, showY = convertCoords(curX, curY)
+				opName = 'curve'
+				newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY), "type": opName } )
+				outlineItem.append(newPoint)
+				opList.append([opName,curX,  curY])
+				opIndex += 1
+				if i == 0:
+					argList = argList[6:12]
+				i += 1
+			outlineItem[-6].set(kPointName, flexPointName) # attach the point name to the first point of the first curve.
+			if (newHintMaskName != None):
+				# We have a hint mask that we want to attach to the first point of the flex op. However, there is already
+				# a flex name in that attribute. What we do is set the flex point name into the hint mask.
+				hintMask.pointName = flexPointName
+				newHintMaskName = None
 			lastPathOp = token
 			argList = []
 		elif token == "flx":
@@ -1504,6 +1564,11 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
 					argList = argList[6:12]
 				i += 1
 			outlineItem[-6].set(kPointName, flexPointName) # attach the point name to the first point of the first curve.
+			if (newHintMaskName != None):
+				# We have a hint mask that we want to attach to the first point of the flex op. However, there is already
+				# a flex name in that attribute. What we do is set the flex point name into the hint mask.
+				hintMask.pointName = flexPointName
+				newHintMaskName = None
 			lastPathOp = token
 			argList = []
 		elif token == "sc":
@@ -1526,15 +1591,19 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
 			dx = dy = 0
 			opName = bezToUFOPoint[token]
 			if  token[-2:] in ["mt", "dt"]:
-				if token in ["rmt", "rdt"]:
-					dx = argList[0]
-					dy = argList[1]
-				elif token in ["hmt", "hdt"]:
-					dx = argList[0]
-				elif token in ["vmt", "vdt"]:
-					dy = argList[0]
-				curX += dx
-				curY += dy
+				if token in ["mt", "dt"]:
+					curX = argList[0]
+					curY = argList[1]
+				else:
+					if token in ["rmt", "rdt"]:
+						dx = argList[0]
+						dy = argList[1]
+					elif token in ["hmt", "hdt"]:
+						dx = argList[0]
+					elif token in ["vmt", "vdt"]:
+						dy = argList[0]
+					curX += dx
+					curY += dy
 				showX, showY = convertCoords(curX, curY)
 				newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY), "type": "%s" % (opName) } )
 				
@@ -1556,50 +1625,67 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
 				outlineItem.append(newPoint)
 				opList.append([opName,curX,  curY])
 			else:
-				if token in ["rct", "rcv"]:
-					curX += argList[0]
-					curY += argList[1]
+				if token in ["ct", "cv"]:
+					curX = argList[0]
+					curY = argList[1]
 					showX, showY = convertCoords(curX, curY)
 					newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
 					outlineItem.append(newPoint)
-					curX += argList[2]
-					curY += argList[3]
+					curX = argList[2]
+					curY = argList[3]
 					showX, showY = convertCoords(curX, curY)
 					newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
 					outlineItem.append(newPoint)
-					curX += argList[4]
-					curY += argList[5]
+					curX = argList[4]
+					curY = argList[5]
 					showX, showY = convertCoords(curX, curY)
 					newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY), "type": "%s" % (opName) } )
 					outlineItem.append(newPoint)
-				elif token == "vhct":
-					curY += argList[0]
-					showX, showY = convertCoords(curX, curY)
-					newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
-					outlineItem.append(newPoint)
-					curX += argList[1]
-					curY += argList[2]
-					showX, showY = convertCoords(curX, curY)
-					newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
-					outlineItem.append(newPoint)
-					curX += argList[3]
-					showX, showY = convertCoords(curX, curY)
-					newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY), "type": "%s" % (opName) } )
-					outlineItem.append(newPoint)
-				elif token == "hvct":
-					curX += argList[0]
-					showX, showY = convertCoords(curX, curY)
-					newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
-					outlineItem.append(newPoint)
-					curX += argList[1]
-					curY += argList[2]
-					showX, showY = convertCoords(curX, curY)
-					newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
-					outlineItem.append(newPoint)
-					curY += argList[3]
-					showX, showY = convertCoords(curX, curY)
-					newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY), "type": "%s" % (opName) } )
-					outlineItem.append(newPoint)
+				else:
+					if token in ["rct", "rcv"]:
+						curX += argList[0]
+						curY += argList[1]
+						showX, showY = convertCoords(curX, curY)
+						newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
+						outlineItem.append(newPoint)
+						curX += argList[2]
+						curY += argList[3]
+						showX, showY = convertCoords(curX, curY)
+						newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
+						outlineItem.append(newPoint)
+						curX += argList[4]
+						curY += argList[5]
+						showX, showY = convertCoords(curX, curY)
+						newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY), "type": "%s" % (opName) } )
+						outlineItem.append(newPoint)
+					elif token == "vhct":
+						curY += argList[0]
+						showX, showY = convertCoords(curX, curY)
+						newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
+						outlineItem.append(newPoint)
+						curX += argList[1]
+						curY += argList[2]
+						showX, showY = convertCoords(curX, curY)
+						newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
+						outlineItem.append(newPoint)
+						curX += argList[3]
+						showX, showY = convertCoords(curX, curY)
+						newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY), "type": "%s" % (opName) } )
+						outlineItem.append(newPoint)
+					elif token == "hvct":
+						curX += argList[0]
+						showX, showY = convertCoords(curX, curY)
+						newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
+						outlineItem.append(newPoint)
+						curX += argList[1]
+						curY += argList[2]
+						showX, showY = convertCoords(curX, curY)
+						newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
+						outlineItem.append(newPoint)
+						curY += argList[3]
+						showX, showY = convertCoords(curX, curY)
+						newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY), "type": "%s" % (opName) } )
+						outlineItem.append(newPoint)
 				if (newHintMaskName != None):
 					outlineItem[-3].set(kPointName, newHintMaskName) # attach the pointName to the first point of the curve.
 					newHintMaskName = None
@@ -1829,7 +1915,7 @@ def checkHashMaps(fontPath, doSync):
 			try:
 				glyphPath = os.path.join(ufoFontData.glyphWriteDir, fileName)
 				os.remove(glyphPath)
-				print "Removed outdate file:", glyphPath
+				print "Removed outdated file:", glyphPath
 			except OSError:
 				print "Cannot delete outdated file:", glyphPath
 	return allMatch, msgList
@@ -1843,19 +1929,19 @@ def checkHashMaps(fontPath, doSync):
 		retVal = msgList
 	return msgList
 
-def validateProcessedGlyphs(ufoFontPath):
-	# Read glyphs/contents.plist file.
-	# Delete any glyphs on /glyphs or /processed glyphs which are not in glyphs/contents.plist file.
-	# filter contents list with what's in /processed glyphs: write to process/plist file.
-	glyphDirPath = os.path.join(ufoFontPath, "glyphs")
-	processedGlyphDirPath = os.path.join(ufoFontPath, kProcessedGlyphsLayer)
-	if not os.path.exists(processedGlyphDirPath):
-		return
-	contentsFilePath = os.path.join(ufoFontPath, "glyphs", kContentsName)
+kAdobeLCALtSuffix = ".adobe.lc.altsuffix"
+
+def cleanUpGLIFFiles(contentsFilePath, glyphDirPath, doWarning=True):
+	changed = 0
 	contentsDict = plistlib.readPlist(contentsFilePath) # maps glyph names to files.
+	# First, delete glyph files that are not in the default layer contents.plist file
+	# In some UFOfont  files, we end up with case errors, so we need to check for a lower-case version of the file name.
 	fileDict = {}
 	for glyphName, fileName in contentsDict.items():
 		fileDict[fileName] = glyphName
+		lcFileName = fileName.lower()
+		if lcFileName != fileName:
+			fileDict[lcFileName + kAdobeLCALtSuffix] = glyphName
 
 	fileList = os.listdir(glyphDirPath)
 	for fileName in fileList:
@@ -1863,33 +1949,79 @@ def validateProcessedGlyphs(ufoFontPath):
 			continue
 		if fileDict.has_key(fileName):
 			continue
+		lcFileName = fileName.lower()
+		if fileDict.has_key(lcFileName + kAdobeLCALtSuffix):
+			# glif file exists which has a case-insensitive match to file name entry in the contents.plist file
+			# assume it is intended, and change the file case to match.
+			glyphFilePathOld = os.path.join(glyphDirPath, fileName)
+			glyphFilePathNew = os.path.join(glyphDirPath, lcFileName)
+			os.rename(glyphFilePathOld, glyphFilePathNew)
+			continue
+
 		glyphFilePath = os.path.join(glyphDirPath, fileName)
 		os.remove(glyphFilePath)
+		if doWarning:
+			print "Removing glif file that was not in the contents.plist file: %s" % (glyphFilePath)
+		changed = 1
 		
-	# now for the processed dir.
-	fileList = os.listdir(processedGlyphDirPath)
-	contentsFilePath = os.path.join(ufoFontPath, processedGlyphDirPath, kContentsName)
+	return changed
+
+def cleanupContentsList(glyphDirPath, doWarning=True):
+	contentsFilePath = os.path.join(glyphDirPath, kContentsName)
+	contentsDict = plistlib.readPlist(contentsFilePath) # maps glyph names to files.
+	fileDict = {}
+	fileList = os.listdir(glyphDirPath)
 	for fileName in fileList:
-		if not fileName.endswith(".glif"):
-			continue
-		if fileDict.has_key(fileName):
-			continue
-		glyphFilePath = os.path.join(processedGlyphDirPath, fileName)
-		os.remove(glyphFilePath)
-		
+		fileDict[fileName] = 1
+	changed = 0
+	
 	# now update and write the processed processedGlyphDirPath contents.plist file.
-	contentsDict = {}
-	fileList = os.listdir(processedGlyphDirPath)
-	for fileName in fileList:
-		if not fileName.endswith(".glif"):
-			continue
-		glyphName = fileDict[fileName]
-		contentsDict[glyphName] = fileName
-	contentsFilePath = os.path.join(ufoFontPath, kProcessedGlyphsLayer, kContentsName)
-	plistlib.writePlist(contentsDict, contentsFilePath)
+	itemList = contentsDict.items()
+	for glyphName, fileName in itemList:
+		if not fileDict.has_key(fileName):
+			del contentsDict[glyphName]
+			changed = 1
+			if doWarning:
+				print "Removing contents.plist entry where glif was missing: %s, %s, %s" % (glyphName, fileName, glyphDirPath)
+
+	if changed:
+		plistlib.writePlist(contentsDict, contentsFilePath)
+
+def validateLayers(ufoFontPath, doWarning=True):
+	# Read glyphs/contents.plist file.
+	# Delete any glyphs on /glyphs or /processed glyphs which are not in glyphs/contents.plist file.
+	# Delete any entries in the contents.plist file which are not in the glyph files.
+	# filter contents list with what's in /processed glyphs: write to process/plist file.'
+	# The most common way that this is needed in the AFDKO workflow is if someone kills checkOutlines/checkOutlinesUFO or autohint
+	# while it is running. Since the program may delete glyphs from the processed layer while running, and the contents.plist file
+	# is updated only when the changed font is saved, the contents.plist file in the processed layer ends up referencing glyphs
+	# that aren't there anymore.
+	# You can also get extra glyphs not in the contents.plist file by several editing workflows.
 	
+	# First, the default layer.
+	glyphDirPath = os.path.join(ufoFontPath, "glyphs")
+	contentsFilePath = os.path.join(ufoFontPath, "glyphs", kContentsName)
+	if not os.path.exists(contentsFilePath): # Happens when called on a font which is not a UFO font.
+		return
+
+	changed = cleanUpGLIFFiles(contentsFilePath, glyphDirPath, doWarning) # remove glif files not in contents.plist
+	cleanupContentsList(glyphDirPath, doWarning) # remove entries for glif files that don't exist
 	
+	# now for the processed dir.
+	glyphDirPath = os.path.join(ufoFontPath, kProcessedGlyphsLayer)
+	if not os.path.exists(glyphDirPath):
+		return
+		
+	# Remove any glif files that are not in the default glif directory contents.plist file
+	changed = cleanUpGLIFFiles(contentsFilePath, glyphDirPath, doWarning)
+
+	# Remove any glif files that are not in the processed glif directory contents.plist file
+	# This will happen pretty often, as glif files are deleted from the processed glyph layer
+	# is their hash differs from the current hash for the glyph in the default layer.
+	contentsFilePath = os.path.join(glyphDirPath, kContentsName)
+	changed2 = cleanUpGLIFFiles(contentsFilePath, glyphDirPath,doWarning)
 	
+	cleanupContentsList(glyphDirPath, doWarning)
 
 
 def test1():

@@ -105,6 +105,10 @@ void ctuGetVersion(ctlVersionCallbacks *cb);
 /* ctuGetVersion() returns the library version number and name via the client
    callbacks passed with the "cb" parameter (see ctlshare.h). */
 
+#if defined(_MSC_VER) && ( _MSC_VER < 1800)
+    float roundf(float x);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

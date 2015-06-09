@@ -12,7 +12,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "machinedep.h"
 #include "opcodes.h"
 #include "optable.h"
-
 #define PRINT_READ (0)
 
 #ifdef IS_LIB
@@ -562,6 +561,7 @@ private procedure ParseString(s) const char * s; {
             if (isReal)
             {
                 sscanf(c0, "%f", &rval);
+                rval = roundf(rval*100)/100;// Autohint can only support 2 digits of decimal precision.
                 /* do not need to use 'neg' to negate the value, as c0 string includes the minus sign.*/
                  r = FixReal(rval); /* convert to Fixed */
             }
@@ -723,3 +723,5 @@ public procedure Test() {
   fclose(fd);
 #endif
   }
+
+

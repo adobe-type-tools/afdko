@@ -11,6 +11,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "t1cstr.h"
 #include "txops.h"
+#include "ctutil.h"
 
 #include <string.h>
 #include <math.h>
@@ -306,8 +307,10 @@ static void callbackMove(t1cCtx h, float dx, float dy)
 		h->seac.phase = seacAccentPostMove;
     }
     
-    
-	h->x = x; h->y = y;
+	x = roundf(x*100)/100;
+    y = roundf(y*100)/100;
+	h->x = x;
+    h->y = y;
     
 	if (h->flags & USE_MATRIX)
 		h->glyph->move(h->glyph, TX(h->x, h->y), TY(h->x, h->y));
@@ -327,7 +330,8 @@ static void callbackLine(t1cCtx h, float dx, float dy)
 		callbackMove(h, 0, 0);	/* Insert missing move */
 
 	x = h->x + dx; 	y = h->y + dy;
-	h->x = x;		h->y = y;
+    h->x = roundf(x*100)/100;
+    h->y = roundf(y*100)/100;
 
 	if (h->flags & USE_MATRIX)
 		h->glyph->line(h->glyph, TX(h->x, h->y), TY(h->x, h->y));
@@ -353,7 +357,10 @@ static void callbackCurve(t1cCtx h,
 	x1 = h->x + dx1;	y1 = h->y + dy1;
 	x2 = x1 + dx2; 		y2 = y1 + dy2; 
 	x3 = x2 + dx3; 		y3 = y2 + dy3;
-	h->x = x3;			h->y = y3;
+    x3 = roundf(x3*100)/100;
+    y3 = roundf(y3*100)/100;
+    h->x = x3;
+    h->y = y3;
 
 	if (h->flags & USE_MATRIX)
 		h->glyph->curve(h->glyph, 
@@ -472,7 +479,10 @@ static void callbackFlex(t1cCtx h)
 		float x4 = x3 + dx4;    float y4 = y3 + dy4;
 		float x5 = x4 + dx5;   	float y5 = y4 + dy5;
 		float x6 = x5 + dx6;   	float y6 = y5 + dy6;
-		h->x = x6; 				h->y = y6;
+        x6 = roundf(x6*100)/100;
+        y6 = roundf(y6*100)/100;
+        h->x = x6;
+        h->y = y6;
 
 		if (h->flags & USE_MATRIX)
 			{
@@ -517,7 +527,8 @@ static void callbackFlex(t1cCtx h)
 
 	if (h->seac.phase <= seacBase)
 		{
-		h->x = args[15]; h->y = args[16];
+        h->x = roundf(args[15]*100)/100;
+        h->y = roundf(args[16]*100)/100;
 		}
 	}
 
@@ -567,7 +578,9 @@ static void callback_setwv_cube(t1cCtx h, unsigned int numDV)
 static void callback_compose(t1cCtx h, int cubeLEIndex, float dx, float dy, int numDV, float *ndv)
 	{
 	h->x += dx;	h->y += dy;
-	if (h->glyph->cubeCompose == NULL)
+    h->x = roundf(h->x*100)/100;
+    h->y = roundf(h->y*100)/100;
+        if (h->glyph->cubeCompose == NULL)
 		return;
 		
 	h->glyph->cubeCompose(h->glyph, cubeLEIndex, h->x, h->y, numDV, ndv);
@@ -1222,6 +1235,8 @@ static int t1Decode(t1cCtx h, long offset)
 					*/
 					h->x = h->le_start.x;
 					h->y = h->le_start.y;
+                    h->x = roundf(h->x*100)/100;
+                    h->y = roundf(h->y*100)/100;
 					if (h->flags & FLATTEN_CUBE)
 					{
 						h->flags &= ~START_COMPOSE;
@@ -1565,7 +1580,7 @@ static int t1Decode(t1cCtx h, long offset)
 					CHKUFLOW(4);
 					h->x = h->lsb.x = INDEX(0);
 					h->y = h->lsb.y = INDEX(1);
-					if (callbackWidth(h, INDEX(2)))
+                        if (callbackWidth(h, INDEX(2)))
 						return t1cSuccess;
 					}
 				else if (h->seac.phase == seacAccentPreMove)
@@ -1584,6 +1599,8 @@ static int t1Decode(t1cCtx h, long offset)
 					h->x = h->seac.bsb_x = INDEX(0);
 					h->y = h->seac.bsb_y = INDEX(1);
 					}
+                h->x = roundf(h->x*100)/100;
+                h->y = roundf(h->y*100)/100;
 				break;
 			case tx_div:
 				result = do_div(h);
@@ -1740,6 +1757,8 @@ static int t1Decode(t1cCtx h, long offset)
 					CHKUFLOW(2);
 					h->x = INDEX(0);
 					h->y = INDEX(1);
+                    h->x = roundf(h->x*100)/100;
+                    h->y = roundf(h->y*100)/100;
 					}
 				break;
 			case tx_reservedESC19:
@@ -1903,6 +1922,8 @@ static int t1Decode(t1cCtx h, long offset)
 				h->x  = h->seac.bsb_x = INDEX(0);
 				h->y  = h->seac.bsb_y = 0;
 				}
+            h->x = roundf(h->x*100)/100;
+            h->y = roundf(h->y*100)/100;
 			break;
 		case tx_endchar:
 			h->flags |= SEEN_ENDCHAR;
@@ -2195,8 +2216,8 @@ int t1cParse(long offset, t1cAuxData *aux, abfGlyphCallbacks *glyph)
     if (aux->flags & T1C_USE_MATRIX)
     {
         int i;
-        if ((abs(1 - aux->matrix[0]) > 0.0001) ||
-            (abs(1 - aux->matrix[3]) > 0.0001) ||
+        if ((fabs(1 - aux->matrix[0]) > 0.0001) ||
+            (fabs(1 - aux->matrix[3]) > 0.0001) ||
             (aux->matrix[1] != 0) ||
             (aux->matrix[2] != 0) ||
             (aux->matrix[4] != 0) ||

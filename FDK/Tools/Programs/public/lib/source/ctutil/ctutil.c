@@ -5,12 +5,13 @@
  * CoreType Utilities Library
  */
 
-#include "ctutil.h"
 
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <math.h>
+#include "ctutil.h"
 
 /* Exchange 2 values of size "s" pointed to by "a" and "b". */
 #define MAX_BUF 256
@@ -274,3 +275,12 @@ void ctuGetVersion(ctlVersionCallbacks *cb) {
 	/* Record this call */
 	cb->called |= 1 << CTU_LIB_ID;
 }
+
+#if defined(_MSC_VER) && ( _MSC_VER < 1800)
+float roundf(float x)
+{
+    float val =  (float)((x < 0) ? (ceil((x)-0.5)) : (floor((x)+0.5)));
+    return val;
+}
+#endif
+

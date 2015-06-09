@@ -7,6 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "cryptdefs.h"
 #include "fipublic.h"
 #include "machinedep.h"
+#include <math.h>
 
 #define WRTABS_COMMENT (0)
 
@@ -25,6 +26,7 @@ extern int bezoutputalloc;
 extern int bezoutputactual;
 
 #define ws(str) WriteString(str)
+public int writeAbsolute = 1;
 
 public long int FRnd(long int x){
     /* This is meant to work on Fixed 24.8 values, not the elt path (x,y) which are 25.7 */
@@ -74,7 +76,7 @@ static long WriteString(char *str) {
 
 #define WRTRNUM(i)                           \
 {                                       \
-sprintf(S0, "%0.2f ", (float)(i)); \
+sprintf(S0, "%0.2f ", roundf((float)(i)*100)/100); \
 ws(S0);                             \
 }
 
@@ -88,7 +90,7 @@ static void wrtfx(Fixed f) {
     }
     else
     {
-        float r = FIXED2FLOAT(f);
+        float r = (float)FIXED2FLOAT(f);
         WRTRNUM(r);
     }
 }
@@ -108,10 +110,28 @@ static void wrtx(Fixed x) {
         float r;
         i = x - currentx;
         currentx = x;
-        r = FIXED2FLOAT(i);
+        r = (float)FIXED2FLOAT(i);
         WRTRNUM(r);
     }
 
+}
+
+static void wrtxa(Fixed x) {
+	Fixed i;
+    if ((roundToInt) || (FracPart(x) == 0))
+    {
+        i = FRnd(x);
+        WRTNUM(FTrunc(i));
+        currentx = i;
+    }
+    else
+    {
+        float r;
+        currentx = x;
+        r = (float)FIXED2FLOAT(x);
+        WRTRNUM(r);
+    }
+    
 }
 
 static void wrty(Fixed y) {
@@ -129,14 +149,35 @@ static void wrty(Fixed y) {
         float r;
         i = y - currenty;
         currenty = y;
-        r = FIXED2FLOAT(i);
+        r = (float)FIXED2FLOAT(i);
+        WRTRNUM(r);
+    }
+}
+
+static void wrtya(Fixed y) {
+	Fixed i;
+    if ((roundToInt) || (FracPart(y) == 0))
+    {
+        i = FRnd(y);
+        WRTNUM(FTrunc(i));
+        currenty = i;
+    }
+    else
+    {
+        float r;
+        currenty = y;
+        r = (float)FIXED2FLOAT(y);
         WRTRNUM(r);
     }
 }
 
 #define wrtcd(c) \
-	wrtx(c.x);   \
-	wrty(c.y)
+wrtx(c.x);   \
+wrty(c.y)
+
+#define wrtcda(c) \
+wrtxa(c.x);   \
+wrtya(c.y)
 
 /*To avoid pointless hint subs*/
 #define HINTMAXSTR 2048
@@ -156,8 +197,13 @@ void safestrcat(char *s1, char *s2) {
 #define sws(str) safestrcat(hintmaskstr, (char *)str)
 
 #define SWRTNUM(i) {                    \
-	sprintf(S0, "%ld ", (long int)(i)); \
-	sws(S0);                            \
+sprintf(S0, "%ld ", (long int)(i)); \
+sws(S0);                            \
+}
+
+#define SWRTNUMA(i) {                    \
+sprintf(S0, "%0.2f ", roundf((float)(i)*100)/100); \
+sws(S0);                            \
 }
 
 static void NewBest(PClrPoint lst) {
@@ -187,10 +233,17 @@ static void WriteOne(Fixed s) { /* write s to output file */
 		SWRTNUM(FTrunc(r))
 	}
 	else {
-        float d = FIXED2FLOAT(r);
-        d = (int) ((d+0.005)*100);
-        SWRTNUM(d);
-        sws("100 div ");
+        float d = (float)FIXED2FLOAT(r);
+        if (writeAbsolute)
+        {
+            SWRTNUMA(d);
+        }
+        else
+        {
+             d = (float)((d+0.005)*100);
+            SWRTNUM(d);
+            sws("100 div ");
+        }
     }
 }
 
@@ -305,42 +358,59 @@ static void mt(Cd c, PPathElt e) {
 	if (e->newcolors != 0) {
 		wrtnewclrs(e);
 	}
-	if (FRnd(c.y) == currenty) {
-		wrtx(c.x);
-		ws("hmt\n");
-	}
-	else if (FRnd(c.x) == currentx) {
-		wrty(c.y);
-		ws("vmt\n");
-	}
-	else {
-		wrtcd(c);
-		ws("rmt\n");
-	}
-	if (e->eol) {
-		ws("eol\n");
-	}
-	if (e->sol) {
-		ws("sol\n");
-	}
+    if (writeAbsolute)
+    {
+		wrtcda(c);
+		ws("mt\n");
+    }
+    else
+    {
+        
+        if (FRnd(c.y) == currenty) {
+            wrtx(c.x);
+            ws("hmt\n");
+        }
+        else if (FRnd(c.x) == currentx) {
+            wrty(c.y);
+            ws("vmt\n");
+        }
+        else {
+            wrtcd(c);
+            ws("rmt\n");
+        }
+    }
+    if (e->eol) {
+        ws("eol\n");
+    }
+    if (e->sol) {
+        ws("sol\n");
+    }
 }
 
 static void dt(Cd c, PPathElt e) {
 	if (e->newcolors != 0) {
 		wrtnewclrs(e);
 	}
-	if (FRnd(c.y) == currenty) {
-		wrtx(c.x);
-		ws("hdt\n");
-	}
-	else if (FRnd(c.x) == currentx) {
-		wrty(c.y);
-		ws("vdt\n");
-	}
-	else {
-		wrtcd(c);
-		ws("rdt\n");
-	}
+    if (writeAbsolute)
+    {
+		wrtcda(c);
+		ws("dt\n");
+    }
+    else
+    {
+        if (FRnd(c.y) == currenty) {
+            wrtx(c.x);
+            ws("hdt\n");
+        }
+        else if (FRnd(c.x) == currentx) {
+            wrty(c.y);
+            ws("vdt\n");
+        }
+        else {
+            wrtcd(c);
+            ws("rdt\n");
+        }
+    }
 	if (e->eol) {
 		ws("eol\n");
 	}
@@ -351,6 +421,14 @@ static void dt(Cd c, PPathElt e) {
 
 Fixed flX, flY;
 Cd fc1, fc2, fc3;
+
+#define wrtpreflx2(c) \
+wrtcd(c);         \
+ws("rmt\npreflx2\n")
+
+#define wrtpreflx2a(c) \
+wrtcda(c);         \
+ws("rmt\npreflx2a\n")
 
 static void wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e) {
 	integer dmin, delta;
@@ -406,30 +484,55 @@ static void wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e) {
 		}
 		c13.y = fc3.y;
 	}
-#define wrtpreflx2(c) \
-	wrtcd(c);         \
-	ws("rmt\npreflx2\n")
-	wrtpreflx2(c13);
-	wrtpreflx2(fc1);
-	wrtpreflx2(fc2);
-	wrtpreflx2(fc3);
-	wrtpreflx2(c1);
-	wrtpreflx2(c2);
-	wrtpreflx2(c3);
-	currentx = flX;
-	currenty = flY;
-	wrtcd(fc1);
-	wrtcd(fc2);
-	wrtcd(fc3);
-	wrtcd(c1);
-	wrtcd(c2);
-	wrtcd(c3);
-	WRTNUM(dmin);
-    WRTNUM(delta);
-    WRTNUM(yflag);
-    WRTNUM(FTrunc(FRnd(currentx)));
-	WRTNUM(FTrunc(FRnd(currenty)));
-	ws("flx\n");
+    
+    if (writeAbsolute)
+    {
+        wrtpreflx2a(c13);
+        wrtpreflx2a(fc1);
+        wrtpreflx2a(fc2);
+        wrtpreflx2a(fc3);
+        wrtpreflx2a(c1);
+        wrtpreflx2a(c2);
+        wrtpreflx2a(c3);
+        currentx = flX;
+        currenty = flY;
+        wrtcda(fc1);
+        wrtcda(fc2);
+        wrtcda(fc3);
+        wrtcda(c1);
+        wrtcda(c2);
+        wrtcda(c3);
+        WRTNUM(dmin);
+        WRTNUM(delta);
+        WRTNUM(yflag);
+        WRTNUM(FTrunc(FRnd(currentx)));
+        WRTNUM(FTrunc(FRnd(currenty)));
+        ws("flxa\n");
+    }
+    else {
+        
+        wrtpreflx2(c13);
+        wrtpreflx2(fc1);
+        wrtpreflx2(fc2);
+        wrtpreflx2(fc3);
+        wrtpreflx2(c1);
+        wrtpreflx2(c2);
+        wrtpreflx2(c3);
+        currentx = flX;
+        currenty = flY;
+        wrtcd(fc1);
+        wrtcd(fc2);
+        wrtcd(fc3);
+        wrtcd(c1);
+        wrtcd(c2);
+        wrtcd(c3);
+        WRTNUM(dmin);
+        WRTNUM(delta);
+        WRTNUM(yflag);
+        WRTNUM(FTrunc(FRnd(currentx)));
+        WRTNUM(FTrunc(FRnd(currenty)));
+        ws("flx\n");
+	}
 	firstFlex = TRUE;
 }
 
@@ -440,24 +543,34 @@ static void ct(Cd c1, Cd c2, Cd c3, PPathElt e) {
 	if (e->isFlex && IsFlex(e)) {
 		wrtflex(c1, c2, c3, e);
 	}
-	else if ((FRnd(c1.x) == currentx) && (c2.y == c3.y)) {
-		wrty(c1.y);
-		wrtcd(c2);
-		wrtx(c3.x);
-		ws("vhct\n");
-	}
-	else if ((FRnd(c1.y) == currenty) && (c2.x == c3.x)) {
-		wrtx(c1.x);
-		wrtcd(c2);
-		wrty(c3.y);
-		ws("hvct\n");
-	}
-	else {
-		wrtcd(c1);
-		wrtcd(c2);
-		wrtcd(c3);
-		ws("rct\n");
-	}
+    else if (writeAbsolute)
+    {
+        wrtcda(c1);
+        wrtcda(c2);
+        wrtcda(c3);
+        ws("ct\n");
+    }
+    else
+    {
+        if ((FRnd(c1.x) == currentx) && (c2.y == c3.y)) {
+            wrty(c1.y);
+            wrtcd(c2);
+            wrtx(c3.x);
+            ws("vhct\n");
+        }
+        else if ((FRnd(c1.y) == currenty) && (c2.x == c3.x)) {
+            wrtx(c1.x);
+            wrtcd(c2);
+            wrty(c3.y);
+            ws("hvct\n");
+        }
+        else {
+            wrtcd(c1);
+            wrtcd(c2);
+            wrtcd(c3);
+            ws("rct\n");
+        }
+    }
 	if (e->eol) {
 		ws("eol\n");
 	}

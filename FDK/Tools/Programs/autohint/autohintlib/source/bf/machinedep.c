@@ -668,6 +668,15 @@ int bf_alphasort(const void *f1, const void *f2)
 	return strcmp((*mf1)->d_name, (*mf2)->d_name);
 }
 
+#if defined(_MSC_VER) && ( _MSC_VER < 1800)
+float roundf(float x)
+{
+    float val =  (float)((x < 0) ? (ceil((x)-0.5)) : (floor((x)+0.5)));
+    return val;
+}
+#endif
+
+
 #ifdef WIN32
 	
 int BFscandir(char* dirName, struct direct ***nameList, includeFile IncludeFile, sortFn Sort)

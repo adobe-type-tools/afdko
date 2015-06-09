@@ -8,7 +8,9 @@
 #include "cffwrite_dict.h"
 #include "cffwrite_sindex.h"
 #include "dictops.h"
+#include "ctutil.h"
 
+#include <math.h>
 #if PLAT_SUN4
 #include "sun4/fixstring.h"
 #else /* PLAT_SUN4 */
@@ -455,6 +457,10 @@ void cfwDictFillTop(cfwCtx g, DICT *dst,
 	    top->FontBBox[1] != 0 ||
 	    top->FontBBox[2] != 0 ||
 	    top->FontBBox[3] != 0) {
+        top->FontBBox[0] = roundf(top->FontBBox[0]);
+        top->FontBBox[0] = roundf(top->FontBBox[1]);
+        top->FontBBox[0] = roundf(top->FontBBox[2]);
+        top->FontBBox[0] = roundf(top->FontBBox[3]);
 		saveRealArrayOp(dst, 4, top->FontBBox, cff_FontBBox);
 	}
 

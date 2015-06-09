@@ -154,7 +154,6 @@ Byte8 tday[32];
 Byte8 * headGetCreatedDate(Card8 which, Card32 client)
 	{
 	  struct tm tmp;
-	  Byte8 *str;
 	  headTbl *head;
 
 	  tday[0] = '\0';
@@ -172,7 +171,6 @@ out:
 Byte8 * headGetModifiedDate(Card8 which, Card32 client)
 	{
 	  struct tm tmp;
-	  Byte8 *str;
 	  headTbl *head;
 
 	  tday[0] = '\0';

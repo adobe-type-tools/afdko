@@ -7,7 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define TX_VERSION CTL_MAKE_VERSION(1,0,63)
+#define TX_VERSION CTL_MAKE_VERSION(1,0,64)
 
 #include "cfembed.h"
 #include "cffread.h"
@@ -2015,8 +2015,12 @@ static void makeSubsetArgList(txCtx h)
 	h->subset.args.cnt = 0;
 	for (i = 1; i <= h->subset.glyphs.cnt; i++)
 		{
-		unsigned short curr = 
-			(i == h->subset.glyphs.cnt)? 65535: h->subset.glyphs.array[i];
+        unsigned short curr;
+         if (i < h->subset.glyphs.cnt)
+             curr = h->subset.glyphs.array[i];
+        else
+            curr = 0;
+            
 		if (last + 1 != curr)
 			{
 			char buf[12];	/* 5 digits + hyphen + 5 digits + nul */
@@ -5077,7 +5081,7 @@ static void invertSubset(txCtx h)
 	for (i = 0; i < h->src.glyphs.cnt; i++)
 		{
 		size_t index;
-		short tag = h->src.glyphs.array[i]->tag;
+		unsigned short tag = h->src.glyphs.array[i]->tag;
 		if (!ctuLookup(&tag, h->src.exclude.array, h->src.exclude.cnt,
 					  sizeof(h->src.exclude.array[0]), matchExcludedByTag, &index, h))
 			{

@@ -41,7 +41,7 @@ Project file.
 """
 
 __usage__ = """
-makeotf v2.0.81 April 3 2015
+makeotf v2.0.82 Juane 1 2015
 -f <input font>         Specify input font path. Default is 'font.pfa'.
 -o <output font>        Specify output font path. Default is
                         '<PostScript-Name>.otf'.
@@ -490,9 +490,10 @@ def writeOptionsFile(makeOTFParams, filePath):
 		data.sort() # sort by order in which the options were added
 		data = map(lambda entry: entry[1], data) # reduce list to just the strings
 		data = os.linesep.join(data) + os.linesep
+		data = data.encode('utf-8')
 		print "makeotf [Note] Writing options file", filePath
 		try:
-			fp = open(filePath, "wt")
+			fp = open(filePath, "w")
 			fp.write(data)
 			fp.close()
 		except (IOError, OSError):

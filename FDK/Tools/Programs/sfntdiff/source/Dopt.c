@@ -66,7 +66,6 @@ static opt_Option *lookup(char *name,
 
 static void message(char *fmt, char *arg)
 {
-	va_list s;    
 	printf( "%s [ERROR]: ", opt_progname);
 	printf( fmt, arg);
 }	 

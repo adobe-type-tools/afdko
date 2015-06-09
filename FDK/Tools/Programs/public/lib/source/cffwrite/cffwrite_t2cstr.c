@@ -247,7 +247,7 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
 static void glyphWidth(abfGlyphCallbacks *cb, float hAdv) {
 	cfwCtx g = cb->direct_ctx;
 	cstrCtx h = g->ctx.cstr;
-	h->glyph.hAdv = hAdv;
+	h->glyph.hAdv = roundf(hAdv);
 }
 
 /* Save number in charstring. */
@@ -344,6 +344,8 @@ static void clearmoveto(cstrCtx h, float dx, float dy) {
 	/* Restore current point */
 	h->x -= dx;
 	h->y -= dy;
+    h->x = roundf(h->x*100)/100;
+    h->y = roundf(h->y*100)/100;
 
 	addWarn(h, warn_move2);
 	clearop(h);
@@ -353,8 +355,13 @@ static void clearmoveto(cstrCtx h, float dx, float dy) {
 static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0) {
 	cfwCtx g = cb->direct_ctx;
 	cstrCtx h = g->ctx.cstr;
-	float dx0;
-	float dy0;
+
+    float dx0;
+    float dy0;
+    x0 = roundf(x0*100)/100;  // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
+    y0 = roundf(y0*100)/100;
+	dx0 = x0 - h->x;
+	dy0 = y0 - h->y;
 
 	/* Check pending op */
 	switch (h->pendop) {
@@ -422,9 +429,15 @@ static void insertMove(abfGlyphCallbacks *cb) {
 static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1) {
 	cfwCtx g = cb->direct_ctx;
 	cstrCtx h = g->ctx.cstr;
-	float dx1 = x1 - h->x;
-	float dy1 = y1 - h->y;
-	h->x = x1;
+
+    float dx1;
+    float dy1;
+    x1 = roundf(x1*100)/100;  // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
+    y1 = roundf(y1*100)/100;
+    dx1 = x1 - h->x;
+    dy1 = y1 - h->y;
+
+    h->x = x1;
 	h->y = y1;
 
 	if (!(h->flags & SEEN_MOVETO)) {
@@ -504,13 +517,29 @@ static void glyphCurve(abfGlyphCallbacks *cb,
                        float x3, float y3) {
 	cfwCtx g = cb->direct_ctx;
 	cstrCtx h = g->ctx.cstr;
-	float dx1 = x1 - h->x;
-	float dy1 = y1 - h->y;
-	float dx2 = x2 - x1;
-	float dy2 = y2 - y1;
-	float dx3 = x3 - x2;
-	float dy3 = y3 - y2;
-	h->x = x3;
+
+    float dx1;
+    float dy1;
+    float dx2;
+    float dy2;
+    float dx3;
+    float dy3;
+    
+    x1 = roundf(x1*100)/100; // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
+    y1 = roundf(y1*100)/100;
+    x2 = roundf(x2*100)/100;
+    y2 = roundf(y2*100)/100;
+    x3 = roundf(x3*100)/100;
+    y3 = roundf(y3*100)/100;
+    
+    dx1 = x1 - h->x;
+    dy1 = y1 - h->y;
+    dx2 = x2 - x1;
+    dy2 = y2 - y1;
+    dx3 = x3 - x2;
+    dy3 = y3 - y2;
+
+    h->x = x3;
 	h->y = y3;
 
 	if (!(h->flags & SEEN_MOVETO)) {
@@ -976,6 +1005,19 @@ static void glyphFlex(abfGlyphCallbacks *cb, float depth,
 	if (h->pendop != tx_noop) {
 		saveop(h, h->pendop);
 	}
+
+    x1 = roundf(x1*100)/100; // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
+    y1 = roundf(y1*100)/100;
+    x2 = roundf(x2*100)/100;
+    y2 = roundf(y2*100)/100;
+    x3 = roundf(x3*100)/100;
+    y3 = roundf(y3*100)/100;
+    x4 = roundf(x4*100)/100;
+    y4 = roundf(y4*100)/100;
+    x5 = roundf(x5*100)/100;
+    y5 = roundf(y5*100)/100;
+    x6 = roundf(x6*100)/100;
+    y6 = roundf(y6*100)/100;
 
 	if (depth != TX_STD_FLEX_DEPTH) {
 		/* dx1 dy1 dx2 dy2 dx3 dy3 dx4 dy4 dx5 dy5 dx6 dy6 depth flex */

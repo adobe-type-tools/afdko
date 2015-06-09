@@ -297,10 +297,10 @@ def run(args):
 			# make new instance font.
 			updateInstance(options, instancePath)
 
-	if not options.doOverlapRemoval: # checkOutlinesUFO does ufoTools.validateProcessedGlyphs()
+	if not options.doOverlapRemoval: # checkOutlinesUFO does ufoTools.validateLayers()
 		for instancePath in newInstancesList:
 			# make sure that that there are no old glyphs left in the processed glyphs folder.
-			ufoTools.validateProcessedGlyphs(instancePath)
+			ufoTools.validateLayers(instancePath)
 
 	
 if __name__=='__main__':

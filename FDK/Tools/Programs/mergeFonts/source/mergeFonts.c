@@ -7,7 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define MERGEFONTS_VERSION CTL_MAKE_VERSION(1,0,59) /* derived from tx */
+#define MERGEFONTS_VERSION CTL_MAKE_VERSION(1,0,60) /* derived from tx */
 
 #include "cfembed.h"
 #include "cffread.h"
@@ -53,6 +53,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <limits.h>
 
 #if _WIN32
+#include <fcntl.h>
+#include <io.h>
 #define stat _stat
 #define S_IFDIR _S_IFDIR
 #include <direct.h> /* to get _mkdir() */
@@ -763,12 +765,41 @@ static void tmpSet(Stream *s, char *filename)
 	s->pos = 0;
 	}
 
+/* On Windows, the stdio.h 'tmpfile' function tries to make temp files in the root
+directory, thus requiring administrative privileges. So we first need to use '_tempnam'
+to generate a unique filename inside the user's TMP environment variable (or the
+current working directory if TMP is not defined). Then we open the temporary file
+and return its pointer */
+static FILE *_tmpfile()
+	{
+	FILE *fp = NULL;
+#ifdef _WIN32
+	char* tempname = NULL;
+	int fd, flags, mode;
+	flags = _O_BINARY|_O_CREAT|_O_EXCL|_O_RDWR|_O_TEMPORARY;
+	mode = _S_IREAD | _S_IWRITE;
+	tempname = _tempnam(NULL, "tx_tmpfile");
+	if(tempname != NULL)
+		{
+		fd = _open(tempname, flags, mode);
+		if (fd != -1)
+			fp = _fdopen(fd, "w+b");
+		free(tempname);
+		}
+#else
+	/* Use the default tmpfile on non-Windows platforms */
+	fp = tmpfile();
+#endif
+	return fp;
+	}
+
+
 /* Open tmp stream. */
 static Stream *tmp_open(txCtx h, Stream *s)
 	{
 	s->buf = memNew(h, TMPSIZE + BUFSIZ);
 	memset(s->buf, 0, TMPSIZE + BUFSIZ);
-	s->fp = tmpfile();
+	s->fp = _tmpfile();
 	if (s->fp == NULL)
 		fileError(h, s->filename);
 	return s;
@@ -2074,18 +2105,22 @@ static void makeSubsetGlyphList(txCtx h)
 
 /* Construct arg buffer from subset list to simulated -g option. */
 static void makeSubsetArgList(txCtx h)
-	{
+{
 	long i;
 	long rangecnt = 0;
 	unsigned short first = h->subset.glyphs.array[0];
 	unsigned short last = first;
 	h->subset.args.cnt = 0;
 	for (i = 1; i <= h->subset.glyphs.cnt; i++)
-		{
-		unsigned short curr = 
-			(i == h->subset.glyphs.cnt)? 65535: h->subset.glyphs.array[i];
+    {
+        unsigned short curr;
+        if (i < h->subset.glyphs.cnt)
+            curr = h->subset.glyphs.array[i];
+        else
+            curr = 0;
+        
 		if (last + 1 != curr)
-			{
+        {
 			char buf[12];	/* 5 digits + hyphen + 5 digits + nul */
 			if (first == last)
 				sprintf(buf, "%hu", last);
@@ -2094,12 +2129,12 @@ static void makeSubsetArgList(txCtx h)
 			strcpy(dnaEXTEND(h->subset.args, (long)strlen(buf) + 1), buf);
 			first = curr;
 			rangecnt++;
-			}
+        }
 		last = curr;
-		}
+    }
 	h->arg.g.cnt = rangecnt;
 	h->arg.g.substrs = h->subset.args.array;
-	}
+}
 
 /* ----------------------------- Subset Parsing ---------------------------- */
 
@@ -3139,7 +3174,7 @@ static void writePFB(txCtx h, FILE *font, char *fontfile,
 					 long begBinary, long begTrailer, long endTrailer)
 	{
 	char *tmpfil = "(t1w) reformat tmpfil";
-	FILE *tmp = tmpfile();
+	FILE *tmp = _tmpfile();
 	if (tmp == NULL)
 		fileError(h, tmpfil);
 
@@ -3262,7 +3297,7 @@ static void writeLWFN(txCtx h, FILE *font, char *fontfile,
 	long datalen = rescnt*(4 + 1 + 1) + endTrailer;
 	long maplen = MAP_HEADER_LEN + TYPE_LIST_LEN + rescnt*REFERENCE_LEN;
 	char *tmpfil = "(t1w) reformat tmpfile";
-	FILE *tmp = tmpfile();
+	FILE *tmp = _tmpfile();
 	if (tmp == NULL)
 		fileError(h, tmpfil);
 
@@ -5239,7 +5274,7 @@ static void invertSubset(txCtx h)
 	for (i = 0; i < h->src.glyphs.cnt; i++)
 		{
 		size_t index;
-		short tag = h->src.glyphs.array[i]->tag;
+		unsigned short tag = h->src.glyphs.array[i]->tag;
 		if (!ctuLookup(&tag, h->src.exclude.array, h->src.exclude.cnt,
 					  sizeof(h->src.exclude.array[0]), matchExcludedByTag, &index, h))
 			{

@@ -1769,7 +1769,7 @@ static int preParseGLIFS(ufoCtx h)
     return retVal;
 }
 
-static void addCharFromGLIF(ufoCtx h, int tag, long char_begin, long char_end, unsigned long unicode)
+static void addCharFromGLIF(ufoCtx h, int tag, char* glyphName, long char_begin, long char_end, unsigned long unicode)
 {
     abfGlyphInfo *chr;
 
@@ -1783,7 +1783,7 @@ static void addCharFromGLIF(ufoCtx h, int tag, long char_begin, long char_end, u
     {
         chr->flags 		= 0;
         chr->tag		= tag;
-        chr->gname.ptr	= NULL;
+        chr->gname.ptr	= glyphName;
         chr->gname.impl	= tag;
         chr->iFD		= 0;
         if (unicode != ABF_GLYPH_UNENC)
@@ -1907,7 +1907,7 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag)
         else if (tokenEqualStr(tk, "</glyph>"))
         {
             if (char_begin == 0) // happens when there is no <outline> element, which can happen with spaces.
-                addCharFromGLIF(h, tag, char_begin, char_end, unicode);
+                addCharFromGLIF(h, tag, glifRec->glyphName, char_begin, char_end, unicode);
             state = 0;
             h->flags |= SEEN_END;
             break;
@@ -1975,7 +1975,7 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag)
             }
             state = 1;
             char_end = tk->offset;
-            addCharFromGLIF(h, tag, char_begin, char_end, unicode);
+            addCharFromGLIF(h, tag, glifRec->glyphName, char_begin, char_end, unicode);
             state = 0;
             break;
         }
@@ -3246,7 +3246,7 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
     int contourStartOpIndex = 0;
     token* tk;
     
-    STI sti =  (STI)gi->gname.impl;
+    STI sti =  (STI)gi->tag;
     GLIF_Rec* glifRec = &h->data.glifRecs.array[sti];
     
     /* open the file */
@@ -3511,7 +3511,7 @@ static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb)
 	gi = &h->chars.index.array[tag];
     
 	/* note that gname.ptr is not stable: it is a pointer into the h->string->buf array, which moves when it gets resized. */
-	gi->gname.ptr = getString(h, (STI)gi->gname.impl);
+	gi->gname.ptr = getString(h, (STI)gi->tag);
 	result = glyph_cb->beg(glyph_cb, gi);
 	gi->flags |= ABF_GLYPH_SEEN;
 	result = h->metrics.cb.beg(&h->metrics.cb, &h->metrics.gi);
@@ -3528,7 +3528,7 @@ static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb)
             fatal(h, ufoErrParseFail, NULL);
     }
     
-    width = getWidth(h, (STI)gi->gname.impl);
+    width = getWidth(h, (STI)gi->tag);
     glyph_cb->width(glyph_cb, (float)width );
     if (result == ABF_WIDTH_RET)
         return ufoSuccess;
@@ -3675,7 +3675,7 @@ static int CTL_CDECL matchChar(const void *key, const void *value, void *ctx)
 {
 	ufoCtx h = ctx;
 	return strcmp((char *)key, getString(h, (STI)h->chars.index.array
-										 [*(long *)value].gname.impl) );
+										 [*(long *)value].tag) );
 }
 
 /* Add char record. Return 1 if record exists else 0. Char record returned by
@@ -3818,8 +3818,9 @@ static int CTL_CDECL postMatchChar(const void *key, const void *value,
 								   void *ctx)
 {
 	ufoCtx h = ctx;
-	return strcmp((char *)key, getString(h, (STI)h->chars.index.array
-										 [*(long *)value].gname.impl) );
+    char * testKey = getString(h, (STI)h->chars.index.array
+                               [*(long *)value].tag);
+	return strcmp((char *)key, testKey );
 }
 
 int ufoGetGlyphByName(ufoCtx h, char *gname, abfGlyphCallbacks *glyph_cb)

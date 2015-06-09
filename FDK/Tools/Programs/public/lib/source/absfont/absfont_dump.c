@@ -455,29 +455,32 @@ static void CTL_CDECL dumpInstr(abfGlyphCallbacks *cb, char *fmt, ...)
 /* Dump glyph width. */
 static void glyphWidth(abfGlyphCallbacks *cb, float hAdv)
 	{
-	dumpInstr(cb, " %g width", hAdv);
+	dumpInstr(cb, " %g width", roundf(hAdv));
 	}
 
 /* Write real number in ASCII to dst stream. */
-#define TX_EPSILON 0.0001
+#define TX_EPSILON 0.0003
 /*In Xcode, FLT_EPSILON is 1.192..x10-7, but the diff between value-roundf(value) can be 3.05x10-5, when the input value is an integer. */
 static void writeReal(char* buf, float value)
 {
 	char tmp[50];
     int l;
+    
 	/* if no decimal component, perform a faster to string conversion */
 	if ((fabs(value-roundf(value)) < TX_EPSILON) && (value>LONG_MIN) && (value<LONG_MAX))
         sprintf(tmp, " %ld", (long int)roundf(value));
 	else
 	{
-        sprintf(tmp, " %.3f", value);
-        l = strlen(tmp)-2;
-        while ((l > 0) && (tmp[l] == '0'))
+        float value2 = roundf(value*100)/100; // to avoid getting -0 from 0.0004.
+        if ((value2 == 0) && (value < 0))
+            value2 = 0;
+        sprintf(tmp, " %.2f", value2);
+        l = strlen(tmp)-1;
+        if ((tmp[l] == '0') && (tmp[l-1] == '0'))
         {
-            tmp[l--] = ' ';
+            tmp[l-2] = 0;
         }
-        tmp[l+2] = '\0';
-    }
+     }
     strcat(buf, tmp);
 }
 

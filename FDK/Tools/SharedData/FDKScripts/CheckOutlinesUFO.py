@@ -2,7 +2,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-   checkOutlinesUFO program v1.10 Apr 3 2015
+   checkOutlinesUFO program v1.11 May 28 2015
    
    checkOutlinesUFO [-nr] [-e] [-g glyphList] [-gf <file name>] [-all] [-noOverlap] [-noBasicChecks] [-setMinArea <n>] [- setTolerance <n>] [-d]
    
@@ -103,6 +103,7 @@ class FontFile(object):
 	def open(self, useHashMap):
 		fontPath = self.fontPath
 		try:
+			ufoTools.validateLayers(fontPath)
 			self.dFont = dFont = defcon.Font(fontPath)
 			self.ufoFormat = dFont.ufoFormatVersion
 			if self.ufoFormat < 2:
@@ -148,6 +149,12 @@ class FontFile(object):
 				raise(e)
 		return dFont
 
+	def close(self):
+		# Differs from save in that it saves just the hash file. To be used when the glif files have not been changed by this program,
+		# but the hash file has changed.
+		if self.fontType == kUFOFontType:
+			self.ufoFontHashData.close() # Write the hash data, if it has changed.
+			
 	def save(self):
 		print "Saving font..."
 		""" A real hack here. 
@@ -175,8 +182,7 @@ class FontFile(object):
 		layer.dirty = False
 
 		if self.fontType == kUFOFontType:
-			self.ufoFontHashData.hashMapChanged = True
-			self.ufoFontHashData.close() # Write the hash data.
+			self.ufoFontHashData.close() # Write the hash data, if it has changed.
 		elif self.fontType == kType1FontType:
 			cmd = "tx -t1 \"%s\" \"%s\"" % (self.tempUFOPath, self.fontPath)
 			p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout
@@ -223,36 +229,6 @@ class FontFile(object):
 		if self.ufoFontHashData != None:  # isn't a UFO font.
 			self.ufoFontHashData.updateHashEntry(glyphName, changed)
 	
-	def updateLayerContentList(self):
-		if not self.ufoFontHashData: # isn't a UFO font.
-			return
-			
-		if not self.ufoFontHashData.deletedGlyph:
-			return
-			
-		# Get list of glif file names:
-		fileList = os.listdir(self.ufoFontHashData.glyphLayerDir)
-		fileDict = {}
-		for fileName in fileList:
-			if fileName.endswith(".glif"):
-				fileDict[fileName] = 1
-		
-		contentsPath = os.path.join(self.ufoFontHashData.glyphLayerDir, "contents.plist")
-		try:
-			contents = readPlist(contentsPath)
-		except:
-			raise focusFontError("The processed layer file %s could not be read." % path)
-		contentItems =  contents.items()
-		for name, fileName in contentItems:
-			if fileName not in fileDict:
-				del contents[name]
-
-		plist = writePlistToString(contents)
-		f = open(contentsPath, "wb")
-		f.write(plist)
-		f.close()
-		print "Updated plist"
-
 	def clearHashMap(self):
 		if self.ufoFontHashData != None:
 			self.ufoFontHashData.clearHashMap()
@@ -726,9 +702,15 @@ def doOverlapRemoval(bGlyph, oldDigest, changed, msg, options):
 	return newGlyph, newDigest, changed, msg
 
 def doCleanup(newGlyph, oldDigest, changed, msg, options):
+	newDigest = oldDigest
+	
+	if newGlyph == None:
+		return newGlyph, newDigest, changed, msg
+
 	if oldDigest == None:
-		oldDigest = list(getDigest(bGlyph))
+		oldDigest = list(getDigest(newGlyph))
 		oldDigest.sort()
+		oldDigest = map(roundPt, oldDigest)
 
 	# Note that these removeCoincidentPointsDone and removeFlatCurvesDone get called only if doOverlapRemoval is NOT called.
 	if not options.removeCoincidentPointsDone:
@@ -738,11 +720,6 @@ def doCleanup(newGlyph, oldDigest, changed, msg, options):
 		changed, msg = removeFlatCurves(newGlyph, changed, msg, options)
 	# I call removeColinearLines even when doOverlapRemoval is called, as the latter can introduce new co-linear points.
 	changed, msg = removeColinearLines(newGlyph, changed, msg, options)
-
-	newDigest = list(getDigest(newGlyph))
-	newDigest.sort()
-	if str(oldDigest) != str(newDigest):
-		changed = 1
 
 	return newGlyph, newDigest, changed, msg
 
@@ -953,16 +930,20 @@ def run(args):
 						point.x = int(round(point.x))
 						point.y = int(round(point.y))
 			restoreContourOrder(fixedGlyph, originalContours)
-		sys.stdout.flush() # Need when the script is called from another script with Popen().
-	# update layer plist: the has check call may have deleted glyphs that are out of date.
-	fontFile.updateLayerContentList()
+		sys.stdout.flush() # Needed when the script is called from another script with Popen().
+	# update layer plist: the hash check call may have deleted processed layer glyphs because the default layer glyph is newer.
+
+	# At this point, we may have deleted glypsh  in the processed layer.writer.getGlyphSet()
+	# will fail unless we update the contents.plist file to match.
+	if options.allowChanges:
+		ufoTools.validateLayers(fontPath, False)
+
 	if not fontChanged:
 		print
+		fontFile.close() # Even if the program didn't change any glyphs, we should still save updates to the src glyph hash file.
 	else:
 		print
 		fontFile.save()
-	if options.allowChanges:
-		ufoTools.validateProcessedGlyphs(fontPath)
 		
 	if processedGlyphCount != seenGlyphCount:
 		print "Skipped %s of %s glyphs." % (seenGlyphCount - processedGlyphCount, seenGlyphCount)
