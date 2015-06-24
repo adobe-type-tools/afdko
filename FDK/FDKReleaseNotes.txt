@@ -1,14 +1,19 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
-FDK. v2.5 June 4 change number 64310.
+FDK. v2.5 June 18 change number 64350.
 
+FDK. 
 	autohint.
 	Fixed bug in ufoFontTools.py which placed a new hint block after a flex operator, when it should be before.
 	Fixed new bug in hinting non-UFO fonts, introduced by switch to absolute coordinates in the bez file interchange format.
 	Fixed bugs in using hashmap to detect previously hinted glyphs.
 	
 	makeotf. Fixed bug with Unicode values in the absolute path to to the font home directory.
+	Add support for Character Variant (cvXX) feature params.
+	
+	spot. Added support for cvXX feature params. 
+	Fixed in crash in dumping long contextual substitution strings, such as in 'GentiumPlus-R.ttf'.
 	
 	tx, IS, mergeFonts rotateFont:
 	fixed bug in handling CID glyph ID greater than 32K.
@@ -22,6 +27,9 @@ FDK. v2.5 June 4 change number 64310.
 	misc
 	Fixed windows builds: had to provide a roundf function, and more includes for
 	the _tmpFile function. Fixed a few compile errors.
+	Fix bug in documentation for makeInstancesUFO
+	Fix bug in BezTools.py on Windows, when having to use a temp file
+
 
 FDK. v2.5 May 26 change number 64261.
 

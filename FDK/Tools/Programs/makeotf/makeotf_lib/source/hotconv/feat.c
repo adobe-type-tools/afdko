@@ -236,6 +236,16 @@ struct featCtx_ {
 	}
 	aalt;
 
+    struct {
+            unsigned short Format;
+            unsigned short FeatUILabelNameID;
+            unsigned short FeatUITooltipTextNameID;
+            unsigned short SampleTextNameID;
+            unsigned short NumNamedParameters;
+            unsigned short FirstParamUILabelNameID;
+            dnaDCL(unsigned long, charValues);
+    } cvParameters;
+    
 	/* --- Hash stuff --- */
 	HashElement *ht[HASH_SIZE]; /* Hash table */
 	HashElement *he;            /* Current hash element */
@@ -283,6 +293,14 @@ struct featCtx_ {
 #if HOT_FEAT_SUPPORT
 
 static void prepRule(Tag newTbl, int newlkpType, GNode *targ, GNode *repl);
+
+enum {
+    cvUILabelEnum =1,
+    cvToolTipEnum,
+    cvSampletextEnum,
+    kCVParameterLabelEnum
+};
+
 
 #endif /* HOT_FEAT_SUPPORT */
 
@@ -369,11 +387,11 @@ static void nodeStats(featCtx h) {
 	BlockList *bl = &h->blockList;
 
 	fprintf(stderr, "### GNode Stats\n"
-	        "nAdded2FreeList: %d, "
-	        "nNewFromBlockList: %d, "
-	        "nNewFromFreeList: %d.\n",
+	        "nAdded2FreeList: %ld, "
+	        "nNewFromBlockList: %ld, "
+	        "nNewFromFreeList: %ld.\n",
 	        h->nAdded2FreeList, h->nNewFromBlockList, h->nNewFromFreeList);
-	fprintf(stderr, "%d not freed\n",
+	fprintf(stderr, "%ld not freed\n",
 	        h->nNewFromBlockList + h->nNewFromFreeList - h->nAdded2FreeList);
 
 	fprintf(stderr, "### BlockList:");
@@ -693,6 +711,7 @@ static void addFeatureNameString(long platformId, long platspecId,
 
 	addNameString(platformId, platspecId, languageId, nameID);
 }
+
 
 /* Add Unicode and CodePage ranges to  OS/2 table. */
 /* ------------------------------------------------------------------- */
@@ -2030,9 +2049,11 @@ static GNode *gcEnd(int named) {
 
 static int fillBuf(featCtx h) {
 	long count;
+    int retVal;
 	h->data = g->cb.featRefill(g->cb.ctx, &count);
 	h->nextoffset += count;
-	return (count == 0) ? EOF : (unsigned char)*h->data++;
+	retVal =  (count == 0) ? EOF : (unsigned char)*h->data++;
+    return retVal;
 }
 
 /* Get next character of current file being read */
@@ -3212,9 +3233,73 @@ static int isUnmarkedGlyphSeq(GNode *node) {
 
 static void addFeatureNameParam(hotCtx g, unsigned short nameID) {
 	prepRule(GSUB_, GSUBFeatureNameParam, NULL, NULL);
-
+    
 	GSUBAddFeatureMenuParam(g, &nameID);
+    
+	wrapUpRule();
+}
 
+static void addCVNameID(unsigned int nameID, int labelID)
+{
+    switch(labelID)
+    {
+            
+        case cvUILabelEnum:
+        {
+            if (h->cvParameters.FeatUILabelNameID != 0)
+            {
+                featMsg(hotERROR, "A Character Variant parameter table can have only one FeatUILabelNameID entry.");
+            }
+            h->cvParameters.FeatUILabelNameID = h->featNameID;
+            break;
+        }
+            
+        case cvToolTipEnum:
+        {
+            if (h->cvParameters.FeatUITooltipTextNameID != 0)
+            {
+                featMsg(hotERROR, "A Character Variant parameter table can have only one SampleTextNameID entry.");
+            }
+            h->cvParameters.FeatUITooltipTextNameID = h->featNameID;
+            break;
+        }
+            
+        case cvSampletextEnum:
+        {
+            if (h->cvParameters.SampleTextNameID != 0)
+            {
+                featMsg(hotERROR, "A Character Variant parameter table can have only one SampleTextNameID entry.");
+            }
+            h->cvParameters.SampleTextNameID = h->featNameID;
+            break;
+        }
+            
+        case kCVParameterLabelEnum:
+        {
+            h->cvParameters.NumNamedParameters++;
+            if (h->cvParameters.FirstParamUILabelNameID == 0)
+            {
+                h->cvParameters.FirstParamUILabelNameID = h->featNameID;
+            }
+            break;
+        }
+    }
+
+    h->featNameID = 0;
+}
+
+static void addCVParametersCharValue(unsigned long uv)
+{
+    unsigned long *uvp = dnaNEXT(h->cvParameters.charValues);
+    *uvp = uv;
+   
+}
+
+static void addCVParam(hotCtx g) {
+	prepRule(GSUB_, GSUBCVParam, NULL, NULL);
+    
+	GSUBAddCVParam(g, &h->cvParameters);
+    
 	wrapUpRule();
 }
 
@@ -4297,8 +4382,9 @@ void featNew(hotCtx hot) {
 	dnaINIT(hot->dnaCtx, h->aalt.features, 10, 20);
 	dnaINIT(hot->dnaCtx, h->aalt.usedFeatures, 10, 20);
 	dnaINIT(hot->dnaCtx, h->aalt.rules, 50, 200);
+	dnaINIT(hot->dnaCtx, h->cvParameters.charValues, 10, 10);
 
-	dnaINIT(hot->dnaCtx, h->sortTmp, 100, 200);
+ 	dnaINIT(hot->dnaCtx, h->sortTmp, 100, 200);
 
 	hashInit(h);
 
@@ -4430,7 +4516,8 @@ void featReuse(hotCtx g) {
 
 	h->DFLTLkps.cnt = 0;
 	h->aalt.rules.cnt = 0;
-
+    h->cvParameters.charValues.cnt = 0;
+    
 	hashFree(h);
 	hashInit(h);
 
@@ -4489,6 +4576,7 @@ void featFree(hotCtx g) {
 	dnaFREE(h->DFLTLkps);
 
 	dnaFREE(h->aalt.rules);
+	dnaFREE(h->cvParameters.charValues);
 
 	dnaFREE(h->sortTmp);
 	hashFree(h);

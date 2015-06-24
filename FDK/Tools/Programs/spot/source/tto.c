@@ -10,7 +10,7 @@ struct LookupFlagRec {
 	 };
 
 struct 	LookupFlagRec lookupFlagRec[] = 
-		 { 
+		 {
 		 	{ RightToLeft, "RightToLeft"},
 		 	{IgnoreBaseGlyphs, "IgnoreBaseGlyphs"},
 		 	{ IgnoreLigatures, "IgnoreLigatures"},
@@ -242,77 +242,268 @@ static Card32 readFeature(Card32 offset, Feature *feature)
 
 void ttoReadFeatureList(Card32 offset, FeatureList *list) 
 	{
-	IntX i;
-	Card32 save = TELL();
-	Card32 save2;
-	
-	SEEK_SURE(offset);
-
-	IN1(list->FeatureCount);
-
-	list->FeatureRecord = memNew(sizeof(FeatureRecord) * list->FeatureCount);
-	for (i = 0; i < list->FeatureCount; i++)
+        IntX i;
+        Card32 save = TELL();
+        Card32 save2;
+        
+        SEEK_SURE(offset);
+        
+        IN1(list->FeatureCount);
+        
+        list->FeatureRecord = memNew(sizeof(FeatureRecord) * list->FeatureCount);
+        for (i = 0; i < list->FeatureCount; i++)
 		{
-		FeatureRecord *record = &list->FeatureRecord[i];
-		IN1(record->FeatureTag);
-		IN1(record->Feature);
-		readFeature(offset + record->Feature, &record->_Feature);
+            FeatureRecord *record = &list->FeatureRecord[i];
+            IN1(record->FeatureTag);
+            IN1(record->Feature);
+            readFeature(offset + record->Feature, &record->_Feature);
 		}
-	for (i = 0; i < list->FeatureCount; i++)
+        for (i = 0; i < list->FeatureCount; i++)
 		{
-		FeatureRecord *record = &list->FeatureRecord[i];
-		Feature *feature = &record->_Feature;
-		if(feature->FeatureParam!=0){ 
-			if(record->FeatureTag==TAG('s', 'i', 'z', 'e')){
-				Card16 *featureParam;
-				feature->_FeatureParam=memNew(12); /* 'size' has 5 16-bit values, and I add a 6th for result flags.*/
-				featureParam = feature->_FeatureParam;
-				featureParam[5] = 0;	
-				save2=TELL();
-				/* try correct interpretation of FeatureParam: is offset from start of Feature table. */
-				SEEK_SURE(offset+record->Feature+feature->FeatureParam);
-				fileReadObject(2, featureParam);
-				fileReadObject(2, featureParam+1);
-				fileReadObject(2, featureParam+2);
-				fileReadObject(2, featureParam+3);
-				fileReadObject(2, featureParam+4);
-				if (!ValuesArePlausible(featureParam))
+            FeatureRecord *record = &list->FeatureRecord[i];
+            Feature *feature = &record->_Feature;
+            if(feature->FeatureParam!=0){
+                if(record->FeatureTag==TAG('s', 'i', 'z', 'e')){
+                    Card16 *featureParam;
+                    feature->_FeatureParam=memNew(12); /* 'size' has 5 16-bit values, and I add a 6th for result flags.*/
+                    featureParam = feature->_FeatureParam;
+                    featureParam[5] = 0;
+                    save2=TELL();
+                    /* try correct interpretation of FeatureParam: is offset from start of Feature table. */
+                    SEEK_SURE(offset+record->Feature+feature->FeatureParam);
+                    fileReadObject(2, featureParam);
+                    fileReadObject(2, featureParam+1);
+                    fileReadObject(2, featureParam+2);
+                    fileReadObject(2, featureParam+3);
+                    fileReadObject(2, featureParam+4);
+                    if (!ValuesArePlausible(featureParam))
 					{/* try old makeotf logic, with offset being from start of FeatureList. */
-					SEEK_SURE(offset+feature->FeatureParam);
-					fileReadObject(2, featureParam);
-					fileReadObject(2, featureParam+1);
-					fileReadObject(2, featureParam+2);
-					fileReadObject(2, featureParam+3);
-					fileReadObject(2, featureParam+4);
-					if (!ValuesArePlausible(featureParam))
+                        SEEK_SURE(offset+feature->FeatureParam);
+                        fileReadObject(2, featureParam);
+                        fileReadObject(2, featureParam+1);
+                        fileReadObject(2, featureParam+2);
+                        fileReadObject(2, featureParam+3);
+                        fileReadObject(2, featureParam+4);
+                        if (!ValuesArePlausible(featureParam))
 						{
-						featureParam[5] = 1;
+                            featureParam[5] = 1;
 						}
-					else
-						featureParam[5] = 2;
+                        else
+                            featureParam[5] = 2;
 					}
-				SEEK_SURE(save2);
-			}
-			else
-			{
-				Card16 *featureParam;
-				feature->_FeatureParam=memNew(4); /* stylistic alt name references have two 2 byte entries */
-				featureParam = feature->_FeatureParam;
-					save2=TELL();
-				/* try correct interpretation of FeatureParam: is offset from start of Feature table. */
-				SEEK_SURE(offset+record->Feature+feature->FeatureParam);
-				fileReadObject(2, featureParam);
-				fileReadObject(2, featureParam+1);
-				SEEK_SURE(save2);
-				if (featureParam[0] != 0)
-					fprintf(OUTPUTBUFF, "Unknown tag with FeatureParam\n");
-			}
-		}
-		}
+                    SEEK_SURE(save2);
+                }
+                else
+                {
+                    Card16 *featureParam;
+                    char* cp = (char*)&record->FeatureTag;
+                    if ((cp[3] == 'c') &&
+                        (cp[2] == 'v'))
+                    {
+                        Card16 CharCount ;
+                        feature->_FeatureParam=memNew(7*sizeof(Card16)); /* character variant parameter table has at least 7 entries. */
+                        featureParam = feature->_FeatureParam;
+                        save2=TELL();
+                        SEEK_SURE(offset+record->Feature+feature->FeatureParam);
+                        fileReadObject(2, featureParam);
+                        fileReadObject(2, featureParam+1);
+                        fileReadObject(2, featureParam+2);
+                        fileReadObject(2, featureParam+3);
+                        fileReadObject(2, featureParam+4);
+                        fileReadObject(2, featureParam+5);
+                        fileReadObject(2, featureParam+6);
+                        CharCount = featureParam[6];
+                        if (CharCount > 0)
+                        {
+                            unsigned int c = 0;
+                            Card32* uvp;
+                            Card16 *newParam = memNew(7*sizeof(Card16) + CharCount*sizeof(Card32)); /* need bigger memory block than when CharCount =0 */
+                            unsigned int n = 0;
+                            while (n < 7)
+                            {
+                                newParam[n] = featureParam[n];
+                                n++;
+                            }
+                            memFree(featureParam);
+                            featureParam = newParam;
+                            /* I will read the 3 byte UV values into a Card32. */
+                            uvp = (Card32*)(&featureParam[6+2]); // point to first 4 byte uv value
+                            while (c < CharCount)
+                            {
+                                Card8 val1;
+                                Card16 val2;
+                                fileReadObject(1, &val1);
+                                fileReadObject(2, &val2);
+                                *uvp = (val1<<16) + val2;
+                                uvp++;
+                                c++;
+                            }
+                       }
+                        SEEK_SURE(save2);
+                    }
+                    else if  ((cp[3] == 's') &&
+                                  (cp[2] == 's'))
+                    {
+                        feature->_FeatureParam=memNew(4); /* stylistic alt name references have two 2 byte entries */
+                        save2=TELL();
+                        SEEK_SURE(offset+record->Feature+feature->FeatureParam);
+                        fileReadObject(2, featureParam);
+                        fileReadObject(2, featureParam+1);
+                        SEEK_SURE(save2);
+                    }
+                    else
+                    {
+                        fprintf(OUTPUTBUFF, "Unknown tag with FeatureParam\n");
+                    }
+                    
+                }
+                
+                SEEK_SURE(save);
+            }
+        }
+    }
 
-	SEEK_SURE(save);
-	}
-	
+static void dumpFeatureParams(FeatureRecord *record, Feature *feature, IntX level, Tag currentScript, Tag currentLang)
+{
+    Card16 *FeatureParam = feature->_FeatureParam;
+    if(record->FeatureTag==TAG('s', 'i', 'z', 'e')){
+        if (FeatureParam[5] == 1)
+            fprintf(OUTPUTBUFF, "Data at size feature offset does not look right.\n");
+        else if  (FeatureParam[5] == 2)
+            fprintf(OUTPUTBUFF, "Using old incorrect FDK 1.6 rule for size feature FeatureParam offset.\n");
+        if ( (FeatureParam[5] == 2) ||  (FeatureParam[5] == 0))
+        {
+            if (level == 7)
+            {
+                fprintf(OUTPUTBUFF, "\n# Printing optical size record in feature '%c%c%c%c' for script '%c%c%c%c' language '%c%c%c%c'.\n",
+                        TAG_ARG(record->FeatureTag), TAG_ARG(currentScript), TAG_ARG(currentLang));
+                fprintf (OUTPUTBUFF, "feature size {\n");
+                fprintf (OUTPUTBUFF, "\tparameters %d # design size\n",  FeatureParam[0]);
+                fprintf (OUTPUTBUFF, "\t\t\t %d # subfamily identifier\n",  FeatureParam[1]);
+                fprintf (OUTPUTBUFF, "\t\t\t %d # range start \n",  FeatureParam[3]);
+                fprintf (OUTPUTBUFF, "\t\t\t %d; # range end\n",  FeatureParam[4]);
+                fprintf (OUTPUTBUFF, "\tsizemenuname ID %d; # must be replaced by string value from name table\n",  FeatureParam[2]);
+                fprintf (OUTPUTBUFF, "} size;\n");
+            }
+            else {
+                DL(2, (OUTPUTBUFF, "   Offset: %04hx\n", feature->FeatureParam));
+                DL(2, (OUTPUTBUFF, "   Design Size: %d\n", FeatureParam[0]));
+                DL(2, (OUTPUTBUFF, "   Subfamily Identifier: %d\n", FeatureParam[1]));
+                DL(2, (OUTPUTBUFF, "   name table name ID for common Subfamily name for size group: %d\n", FeatureParam[2]));
+                DL(2, (OUTPUTBUFF, "   Range Start: %d\n", FeatureParam[3]));
+                DL(2, (OUTPUTBUFF, "   Range End: %d\n", FeatureParam[4]));
+            }
+        }
+    } else
+    {
+        if (FeatureParam[0] == 0)
+        {
+            char* cp = (char*)&record->FeatureTag;
+            
+            if ((cp[3] == 's') &&
+                (cp[2] == 's'))
+            {
+                
+                if (level == 7)
+                {
+                    fprintf(OUTPUTBUFF, "\n# Printing stylistic name records in feature '%c%c%c%c' for script '%c%c%c%c' language '%c%c%c%c'.\n",
+                            TAG_ARG(record->FeatureTag), TAG_ARG(currentScript), TAG_ARG(currentLang));
+                    fprintf (OUTPUTBUFF, "featureNames {\n");
+                    fprintf (OUTPUTBUFF, "\tname %d; # Must be replaced by string values from name table.\n",  FeatureParam[1]);
+                    fprintf (OUTPUTBUFF, "};\n");
+                }
+                else {
+                    DL(2, (OUTPUTBUFF, "   Stylistic Alternate name parameter version: %d\n", FeatureParam[0]));
+                    DL(2, (OUTPUTBUFF, "   Stylistic Alternate name parameter name table name ID: %d\n", FeatureParam[1]));
+                }
+            }
+            else if ((cp[3] == 'c') &&
+                     (cp[2] == 'v'))
+            {
+                if (level == 7)
+                {
+                    fprintf(OUTPUTBUFF, "\n# Printing character variant parameter table in feature '%c%c%c%c' for script '%c%c%c%c' language '%c%c%c%c'.\n",
+                            TAG_ARG(record->FeatureTag), TAG_ARG(currentScript), TAG_ARG(currentLang));
+                    fprintf (OUTPUTBUFF, "cvParameters {\n");
+                    
+                    fprintf (OUTPUTBUFF, "\tFeatUILabelNameID {\n");
+                    fprintf (OUTPUTBUFF, "\t\tname %d; # Must be replaced by string values from name table.\n",  FeatureParam[1]);
+                    fprintf (OUTPUTBUFF, "\t};\n");
+                    
+                    fprintf (OUTPUTBUFF, "\tFeatUITooltipTextNameID {\n");
+                    fprintf (OUTPUTBUFF, "\t\tname %d; # Must be replaced by string values from name table.\n",  FeatureParam[2]);
+                    fprintf (OUTPUTBUFF, "\t};\n");
+                    
+                    fprintf (OUTPUTBUFF, "\tSampleTextNameID {\n");
+                    fprintf (OUTPUTBUFF, "\t\tname %d; # Must be replaced by string values from name table.\n",  FeatureParam[3]);
+                    fprintf (OUTPUTBUFF, "\t};\n");
+                    
+                    {
+                        Card16 numNamedParameters = FeatureParam[4];
+                        Card16 paramUILabelNameID  = FeatureParam[5];
+                        Card16 n = 0;
+                        while (n < numNamedParameters)
+                        {
+                            fprintf (OUTPUTBUFF, "\tParamUILabelNameID {\n");
+                            fprintf (OUTPUTBUFF, "\t\tname %d; # Must be replaced by string values from name table.\n",  paramUILabelNameID);
+                            fprintf (OUTPUTBUFF, "\t};\n");
+                            paramUILabelNameID++;
+                            n++;
+                            
+                        }
+                    }
+                    {
+                        unsigned int c = 0;
+                        Card16 CharCount = FeatureParam[6];
+                        Card32* uvp = (Card32*)(&FeatureParam[6+2]);
+                        DL(2, (OUTPUTBUFF, "# Character Variant CharCount: %d\n", CharCount));
+                        if (CharCount > 0)
+                        {
+                            while (c < CharCount)
+                            {
+                                Card32 uv = uvp[c];
+                                fprintf (OUTPUTBUFF, "\tCharacter 0x%04lx;\n", uv);
+                                c++;
+                            }
+                        }
+                    }
+                    fprintf (OUTPUTBUFF, "};\n"); // end cvParameters block
+                    
+                }
+                else {
+                    Card16 CharCount = 0;
+                    unsigned int c = 0;
+                    Card32* uvp = (Card32*)(&FeatureParam[6+2]);
+                    DL(2, (OUTPUTBUFF, "   Character Variant Format: %d\n", FeatureParam[0]));
+                    DL(2, (OUTPUTBUFF, "   Character Variant FeatUILabelNameID: %d\n", FeatureParam[1]));
+                    DL(2, (OUTPUTBUFF, "   Character Variant FeatUITooltipTextNameID: %d\n", FeatureParam[2]));
+                    DL(2, (OUTPUTBUFF, "   Character Variant SampleTextNameID: %d\n", FeatureParam[3]));
+                    DL(2, (OUTPUTBUFF, "   Character Variant NumNamedParameters: %d\n", FeatureParam[4]));
+                    DL(2, (OUTPUTBUFF, "   Character Variant FirstParamUILabelNameID: %d\n", FeatureParam[5]));
+                    CharCount = FeatureParam[6];
+                    DL(2, (OUTPUTBUFF, "   Character Variant CharCount: %d\n", CharCount));
+                    while (c < CharCount)
+                    {
+                        Card32 uv = uvp[c];
+                        DL(2, (OUTPUTBUFF, "   Character Variant index: %d. Character: 0x%04lx\n", c, uv));
+                        c++;
+                    }
+                }
+            }
+            else
+            {
+                DL(2, (OUTPUTBUFF, "First short word of the FeatureParam is 0, but the FeatureParam is neither stylistic alternate name nor character variant parameter table!\n"));
+            }
+        }
+        else
+        {
+            DL(2, (OUTPUTBUFF, "FeatureParam is not zero but is neither size nor stylistic alternate name\n"));
+        }
+        
+    }
+}
+
+
 /* This is currently used only for a straight text dump */
 void ttoDumpFeatureList(Card16 offset, FeatureList *list, IntX level)
 	{
@@ -377,50 +568,9 @@ void ttoDumpFeatureList(Card16 offset, FeatureList *list, IntX level)
 			
 			/*ASP: Size specific code*/
 			if(feature->FeatureParam!=0) {
-				if(record->FeatureTag==TAG('s', 'i', 'z', 'e')){
-					Card16 *FeatureParam = feature->_FeatureParam;
-					if (FeatureParam[5] == 1)
-						DL(2, (OUTPUTBUFF, "Data at size feature offset does not look right.\n"));
-					else if  (FeatureParam[5] == 2)
-						DL(2, (OUTPUTBUFF, "Using old incorrect FDK 1.6 rule for size feature FeatureParam offset.\n"));
-						
-					if ( (FeatureParam[5] == 2) ||  (FeatureParam[5] == 0))
-						{
-						if (level < 5)
-							{
-							DL(2, (OUTPUTBUFF, "   Design Size: %d\n", FeatureParam[0]));
-							DL(2, (OUTPUTBUFF, "   Subfamily Identifier: %d\n", FeatureParam[1]));
-							DL(2, (OUTPUTBUFF, "   name table name ID for common Subfamily name for size group: %d\n", FeatureParam[2]));
-							DL(2, (OUTPUTBUFF, "   Range Start: %d\n", FeatureParam[3]));
-							DL(2, (OUTPUTBUFF, "   Range End: %d\n", FeatureParam[4]));
-							}
-						}
-				} else
-				{
-				Card16 *FeatureParam = feature->_FeatureParam;
-				if (FeatureParam[0] != 0)
-					DL(2, (OUTPUTBUFF, "FeatureParam is not zero but is not either size nor stylistic alternate name\n"));
-				else
-					{
-					if (level < 5)
-						{
-						DL(2, (OUTPUTBUFF, "   Stylistic Alternate name parameter version: %d\n", FeatureParam[0]));
-						DL(2, (OUTPUTBUFF, "   Stylistic Alternate name parameter name table name ID: %d\n", FeatureParam[1]));
-						}
-					}
-					
-				}
-			}
-			
-			DLu(2, "LookupCount =", feature->LookupCount);
-				
-			if(feature->LookupCount>0){
-				DL(2, (OUTPUTBUFF, "--- LookupListIndex[index]=value\n"));
-				for (j = 0; j < feature->LookupCount; j++)
-				  DL(2, (OUTPUTBUFF, "[%d]=%hu ", j, feature->LookupListIndex[j]));
-				DL(2, (OUTPUTBUFF, "\n"));
-			}			
-		  }
+                dumpFeatureParams(record, feature, level, 0, 0);
+            }
+          }
 	  }
 	}
 
@@ -619,36 +769,6 @@ void ttoDumpLookupifFeaturePresent(LookupList *lookuplist,
 		if ((ret < 0) /* empty list --> ?do all of them? */
 			|| (ret > 0))
 		{
-			/*ASP: Size specific code*/
-			if(feature->FeatureParam!=0) {
-				if(record->FeatureTag==TAG('s', 'i', 'z', 'e')){
-					Card16 *FeatureParam = feature->_FeatureParam;
-					if (FeatureParam[5] == 1)
-						fprintf(OUTPUTBUFF, "Data at size feature offset does not look right.\n");
-					else if  (FeatureParam[5] == 2)
-						fprintf(OUTPUTBUFF, "Using old incorrect FDK 1.6 rule for size feature FeatureParam offset.\n");
-					if ( (FeatureParam[5] == 2) ||  (FeatureParam[5] == 0))
-						{
-						DL(2, (OUTPUTBUFF, "   Offset: %04hx\n", feature->FeatureParam));
-						DL(2, (OUTPUTBUFF, "   Design Size: %d\n", FeatureParam[0]));
-						DL(2, (OUTPUTBUFF, "   Subfamily Identifier: %d\n", FeatureParam[1]));
-						DL(2, (OUTPUTBUFF, "   name table name ID for common Subfamily name for size group: %d\n", FeatureParam[2]));
-						DL(2, (OUTPUTBUFF, "   Range Start: %d\n", FeatureParam[3]));
-						DL(2, (OUTPUTBUFF, "   Range End: %d\n", FeatureParam[4]));
-						}
-				} else
-				{
-				Card16 *FeatureParam = feature->_FeatureParam;
-				if (FeatureParam[0] != 0)
-					DL(2, (OUTPUTBUFF, "FeatureParam is not zero but is not either size nor stylistic alternate name\n"));
-				else
-					{
-						DL(2, (OUTPUTBUFF, "   Stylistic Alternate name parameter version: %d\n", FeatureParam[0]));
-						DL(2, (OUTPUTBUFF, "   Stylistic Alternate name parameter name table name ID: %d\n", FeatureParam[1]));
-					}
-				}
-			}
-		  
 		  /*Search for a script with a language that refers to this feature*/
 		  for (j=0; j< scriptlist->ScriptCount; j++)
 		  {
@@ -682,7 +802,15 @@ void ttoDumpLookupifFeaturePresent(LookupList *lookuplist,
 		  					else
 		  						currentLang=lrecord->LangSysTag;
 
-		  					for (n = 0; n < feature->LookupCount; n++) 
+                            /*ASP: Size specific code*/
+                            if(feature->FeatureParam!=0) {
+                                index = feature->LookupListIndex[0];
+                                if (!((level!=6)  && SeenLookups[index].seen))
+                                    dumpFeatureParams(record, feature, level, currentScript, currentLang);
+                                dumpFeatureParams(record, feature, level, currentScript, currentLang);
+                            }
+                            
+		  					for (n = 0; n < feature->LookupCount; n++)
 							{
 							  index = feature->LookupListIndex[n];
 							  if(SeenLookups[index].seen)
@@ -1278,15 +1406,15 @@ void ttoFreeClass(void *class)
 	}
 
 /* Used only with level 5 */
-void ttoDumpFeaturesByScript(ScriptList *scriptlist, FeatureList *featurelist, LookupList *lookuplist, 
-						    ttoDumpCB dumpCB, IntX level)
+void ttoDumpFeaturesByScript(ScriptList *scriptlist, FeatureList *featurelist, LookupList *lookuplist,
+                             ttoDumpCB dumpCB, IntX level)
 {
 	IntX  j,k,m,n, index, errorcount;
 	Tag currentScript, currentLang;
 	
 	errorcount=0;
-
-
+    
+    
 	for (j=0; j< scriptlist->ScriptCount; j++)
 	{
   		ScriptRecord * srecord = &scriptlist->ScriptRecord[j];
@@ -1315,56 +1443,32 @@ void ttoDumpFeaturesByScript(ScriptList *scriptlist, FeatureList *featurelist, L
 				record =  &featurelist->FeatureRecord[featureNum];
 	  			feature=&record->_Feature;
 				fprintf(OUTPUTBUFF, "\t\t[%2d]='%c%c%c%c' LookupListIndex: ", m,
-				                         TAG_ARG(record->FeatureTag));
+                        TAG_ARG(record->FeatureTag));
 				
 				
-				for (n = 0; n < feature->LookupCount; n++) 
+				for (n = 0; n < feature->LookupCount; n++)
 				{
-				  index = feature->LookupListIndex[n];
-
-				  fprintf(OUTPUTBUFF,  "%hu ",  (Card16)index);
-				  if (level==5)
+                    index = feature->LookupListIndex[n];
+                    
+                    fprintf(OUTPUTBUFF,  "%hu ",  (Card16)index);
+                    if (level==5)
 					{
-					Tag tags[3];
-					 tags[0]=record->FeatureTag;
-					 tags[1]=currentScript;
-					 tags[2]=currentLang;
-					 dumpLookup(lookuplist->Lookup[index],
-							 &lookuplist->_Lookup[index], index,
-							 level, dumpCB, tags); /*(void *)record->FeatureTag);  */
+                        Tag tags[3];
+                        tags[0]=record->FeatureTag;
+                        tags[1]=currentScript;
+                        tags[2]=currentLang;
+                        dumpLookup(lookuplist->Lookup[index],
+                                   &lookuplist->_Lookup[index], index,
+                                   level, dumpCB, tags); /*(void *)record->FeatureTag);  */
 					}
 				}
 				fprintf(OUTPUTBUFF,  "\n");
+                
 				/*ASP: Size specific code*/
-				if(feature->FeatureParam!=0) {
-					if(record->FeatureTag==TAG('s', 'i', 'z', 'e')){
-						Card16 *FeatureParam = feature->_FeatureParam;
-						if (FeatureParam[5] == 1)
-							fprintf(OUTPUTBUFF, "Data at size feature offset does not look right.\n");
-						else if  (FeatureParam[5] == 2)
-							fprintf(OUTPUTBUFF, "Using old incorrect FDK 1.6 rule for size feature FeatureParam offset.\n");
-						if ( (FeatureParam[5] == 2) ||  (FeatureParam[5] == 0))
-							{
-								DL(2, (OUTPUTBUFF, "   Offset: %04hx\n", feature->FeatureParam));
-								DL(2, (OUTPUTBUFF, "   Design Size: %d\n", FeatureParam[0]));
-								DL(2, (OUTPUTBUFF, "   Subfamily Identifier: %d\n", FeatureParam[1]));
-								DL(2, (OUTPUTBUFF, "   name table name ID for common Subfamily name for size group: %d\n", FeatureParam[2]));
-								DL(2, (OUTPUTBUFF, "   Range Start: %d\n", FeatureParam[3]));
-								DL(2, (OUTPUTBUFF, "   Range End: %d\n", FeatureParam[4]));
-							}
-					} else
-					{
-					Card16 *FeatureParam = feature->_FeatureParam;
-					if (FeatureParam[0] != 0)
-						DL(2, (OUTPUTBUFF, "FeatureParam is not zero but is not either size nor stylistic alternate name\n"));
-					else
-						{
-							DL(2, (OUTPUTBUFF, "   Stylistic Alternate name parameter version: %d\n", FeatureParam[0]));
-							DL(2, (OUTPUTBUFF, "   Stylistic Alternate name parameter name table name ID: %d\n", FeatureParam[1]));
-						}
-						
-					}
-				}
+                if(feature->FeatureParam!=0) {
+                    dumpFeatureParams(record, feature, level, currentScript, currentLang);
+                }
+                
 			}
 		}
   		/*Then do the non-default languages*/
@@ -1373,88 +1477,38 @@ void ttoDumpFeaturesByScript(ScriptList *scriptlist, FeatureList *featurelist, L
   			LangSysRecord *lrecord = &script->LangSysRecord[k];
   			LangSys * langsys = &lrecord->_LangSys;
   			fprintf(OUTPUTBUFF, "\tLanguage '%c%c%c%c'\n", TAG_ARG(lrecord->LangSysTag));
- 
+            
 			currentLang=lrecord->LangSysTag;
-
+            
  			for (m=0; m<langsys->FeatureCount; m++)
   			{
   				FeatureRecord *record =  &featurelist->FeatureRecord[langsys->FeatureIndex[m]];
   				Feature *feature=&record->_Feature;
   				
   				fprintf(OUTPUTBUFF, "\t\t[%2d]='%c%c%c%c' LookupListIndex: ", m,
-			                         TAG_ARG(record->FeatureTag));
-							
-  				for (n = 0; n < feature->LookupCount; n++) 
+                        TAG_ARG(record->FeatureTag));
+                
+  				for (n = 0; n < feature->LookupCount; n++)
 				{
-				  index = feature->LookupListIndex[n];
-
-				  fprintf(OUTPUTBUFF,  "%hu ", (Card16)index);
-				  if (level==5)
+                    index = feature->LookupListIndex[n];
+                    
+                    fprintf(OUTPUTBUFF,  "%hu ", (Card16)index);
+                    if (level==5)
 					{
-					Tag tags[3];
-					 tags[0]=record->FeatureTag;
-					 tags[1]=currentScript;
-					 tags[2]=currentLang;
-					 dumpLookup(lookuplist->Lookup[index],
-							 &lookuplist->_Lookup[index], index,
-							 level, dumpCB, tags); /*(void *)record->FeatureTag);  */
+                        Tag tags[3];
+                        tags[0]=record->FeatureTag;
+                        tags[1]=currentScript;
+                        tags[2]=currentLang;
+                        dumpLookup(lookuplist->Lookup[index],
+                                   &lookuplist->_Lookup[index], index,
+                                   level, dumpCB, tags); /*(void *)record->FeatureTag);  */
 					}
-				  
+                    
 				}
 				fprintf(OUTPUTBUFF,  "\n");
-			/*ASP: Size specific code*/
+                /*ASP: Size specific code*/
 				if(feature->FeatureParam!=0) {
-					if(record->FeatureTag==TAG('s', 'i', 'z', 'e')){
-						Card16 *FeatureParam = feature->_FeatureParam;
-						if (FeatureParam[5] == 1)
-							fprintf(OUTPUTBUFF, "Data at size feature offset does not look right.\n");
-						else if  (FeatureParam[5] == 2)
-							fprintf(OUTPUTBUFF, "Using old incorrect FDK 1.6 rule for size feature FeatureParam offset.\n");
-						if ( (FeatureParam[5] == 2) ||  (FeatureParam[5] == 0))
-							{
-							if (level == 7)
-								{
-								fprintf(OUTPUTBUFF, "\n# Printing optical size record in feature '%c%c%c%c' for script '%c%c%c%c' language '%c%c%c%c'.\n",
-									TAG_ARG(record->FeatureTag), TAG_ARG(currentScript), TAG_ARG(currentLang));
-								fprintf (OUTPUTBUFF, "feature size {\n");
-								fprintf (OUTPUTBUFF, "\tparameters %d # design size\n",  FeatureParam[0]);
-								fprintf (OUTPUTBUFF, "\t\t\t %d # subfamily identifier\n",  FeatureParam[1]);
-								fprintf (OUTPUTBUFF, "\t\t\t %d # range start \n",  FeatureParam[3]);
-								fprintf (OUTPUTBUFF, "\t\t\t %d; # range end\n",  FeatureParam[4]);
-								fprintf (OUTPUTBUFF, "\tsizemenuname ID %d; # must be replaced by string value from name table\n",  FeatureParam[2]);
-								fprintf (OUTPUTBUFF, "} size;\n");
-								}
-							else {
-								DL(2, (OUTPUTBUFF, "   Offset: %04hx\n", feature->FeatureParam));
-								DL(2, (OUTPUTBUFF, "   Design Size: %d\n", FeatureParam[0]));
-								DL(2, (OUTPUTBUFF, "   Subfamily Identifier: %d\n", FeatureParam[1]));
-								DL(2, (OUTPUTBUFF, "   name table name ID for common Subfamily name for size group: %d\n", FeatureParam[2]));
-								DL(2, (OUTPUTBUFF, "   Range Start: %d\n", FeatureParam[3]));
-								DL(2, (OUTPUTBUFF, "   Range End: %d\n", FeatureParam[4]));
-								}
-							}
-					} else
-					{
-					Card16 *FeatureParam = feature->_FeatureParam;
-					if (FeatureParam[0] != 0)
-						DL(2, (OUTPUTBUFF, "FeatureParam is not zero but is not either size nor stylistic alternate name\n"));
-					else
-						{
-						if (level == 7)
-							{
-							fprintf(OUTPUTBUFF, "\n# Printing stylistic name records in feature '%c%c%c%c' for script '%c%c%c%c' language '%c%c%c%c'.\n",
-								TAG_ARG(record->FeatureTag), TAG_ARG(currentScript), TAG_ARG(currentLang));
-							fprintf (OUTPUTBUFF, "featureNames {\n");
-							fprintf (OUTPUTBUFF, "\tname table name ID %d; # Must be replaced by string values from name table.\n",  FeatureParam[1]);
-							fprintf (OUTPUTBUFF, "};\n");
-							}
-						else {
-							DL(2, (OUTPUTBUFF, "   Stylistic Alternate name parameter version: %d\n", FeatureParam[0]));
-							DL(2, (OUTPUTBUFF, "   Stylistic Alternate name parameter name table name ID: %d\n", FeatureParam[1]));
-							}
-						}
-						
-					}
+                    dumpFeatureParams(record, feature, level, currentScript, currentLang);
 				}
 			}
 		}
@@ -1497,48 +1551,16 @@ void ttoDecompileByScript(ScriptList *scriptlist, FeatureList *featurelist, Look
 				   if ((level==6) && (! (record->FeatureTag == STR2TAG("kern") || (record->FeatureTag == STR2TAG("vkrn")) )))
 					   continue;
 				   
-				   if (level==7)
+                       if (level==7)
 					   {
-					   if(feature->FeatureParam!=0) {
-						   if(record->FeatureTag==TAG('s', 'i', 'z', 'e')){
-							   Card16 *FeatureParam = feature->_FeatureParam;
-							   if (FeatureParam[5] == 1)
-								   DL(2, (OUTPUTBUFF, "Data at size feature offset does not look right.\n"));
-							   else if  (FeatureParam[5] == 2)
-								   DL(2, (OUTPUTBUFF, "Using old incorrect FDK 1.6 rule for size feature FeatureParam offset.\n"));
-							   
-							   if ( (FeatureParam[5] == 2) ||  (FeatureParam[5] == 0))
-								   {
-								   fprintf(OUTPUTBUFF, "\n# Printing optical size record in feature '%c%c%c%c' for script '%c%c%c%c' language '%c%c%c%c'.\n",
-										   TAG_ARG(record->FeatureTag), TAG_ARG(currentScript), TAG_ARG(currentLang));
-								   fprintf (OUTPUTBUFF, "feature size {\n");
-								   fprintf (OUTPUTBUFF, "\tparameters %d # design size\n",  FeatureParam[0]);
-								   fprintf (OUTPUTBUFF, "\t\t\t %d # subfamily identifier\n",  FeatureParam[1]);
-								   fprintf (OUTPUTBUFF, "\t\t\t %d # range start \n",  FeatureParam[3]);
-								   fprintf (OUTPUTBUFF, "\t\t\t %d; # range end\n",  FeatureParam[4]);
-								   fprintf (OUTPUTBUFF, "\tsizemenuname ID %d; # must be replaced by string value from name table\n",  FeatureParam[2]);
-								   fprintf (OUTPUTBUFF, "} size;\n");
-								   }
-							   continue; /* 'size'feature cannot have lookups */
-						   } else
-							   {
-							   Card16 *FeatureParam = feature->_FeatureParam;
-							   if (FeatureParam[0] != 0)
-								   DL(2, (OUTPUTBUFF, "FeatureParam is not zero but is not either size nor stylistic alternate name\n"));
-							   else
-								   {
-								   fprintf(OUTPUTBUFF, "\n# Printing stylistic name records in feature '%c%c%c%c' for script '%c%c%c%c' language '%c%c%c%c'.\n",
-										   TAG_ARG(record->FeatureTag), TAG_ARG(currentScript), TAG_ARG(currentLang));
-								   fprintf (OUTPUTBUFF, "featureNames {\n");
-								   fprintf (OUTPUTBUFF, "\tname table name ID %d; # Must be replaced by string values from name table.\n",  FeatureParam[1]);
-								   fprintf (OUTPUTBUFF, "};\n");
-								   }
-							   
-							   }
+                           if(feature->FeatureParam!=0) {
+                               index = feature->LookupListIndex[0];
+                               if (!((level!=6)  && SeenLookups[index].seen))
+                                   dumpFeatureParams(record, feature, level, currentScript, currentLang);
+                           }
 					   }
-					   }
-				   
-				   for (n = 0; n < feature->LookupCount; n++) 
+                       
+                       for (n = 0; n < feature->LookupCount; n++)
 					   {
 					   index = feature->LookupListIndex[n];
 					   if ((level!=6)  && SeenLookups[index].seen)
@@ -1634,43 +1656,11 @@ void ttoDecompileByScript(ScriptList *scriptlist, FeatureList *featurelist, Look
 				   if (level==7)
 					   {
 					   if(feature->FeatureParam!=0) {
-						   if(record->FeatureTag==TAG('s', 'i', 'z', 'e')){
-							   Card16 *FeatureParam = feature->_FeatureParam;
-							   if (FeatureParam[5] == 1)
-								   DL(2, (OUTPUTBUFF, "Data at size feature offset does not look right.\n"));
-							   else if  (FeatureParam[5] == 2)
-								   DL(2, (OUTPUTBUFF, "Using old incorrect FDK 1.6 rule for size feature FeatureParam offset.\n"));
-							   
-							   if ( (FeatureParam[5] == 2) ||  (FeatureParam[5] == 0))
-								   {
-								   fprintf(OUTPUTBUFF, "\n# Printing feature '%c%c%c%c' for script '%c%c%c%c' language '%c%c%c%c'.\n",
-										   TAG_ARG(record->FeatureTag), TAG_ARG(currentScript), TAG_ARG(currentLang));
-								   fprintf (OUTPUTBUFF, "feature size {\n");
-								   fprintf (OUTPUTBUFF, "\tparameters %d # design size\n",  FeatureParam[0]);
-								   fprintf (OUTPUTBUFF, "\t\t\t %d # subfamily identifier\n",  FeatureParam[1]);
-								   fprintf (OUTPUTBUFF, "\t\t\t %d # range start \n",  FeatureParam[3]);
-								   fprintf (OUTPUTBUFF, "\t\t\t %d; # range end\n",  FeatureParam[4]);
-								   fprintf (OUTPUTBUFF, "\tsizemenuname ID %d; # must be replaced by string value from name table\n",  FeatureParam[2]);
-								   fprintf (OUTPUTBUFF, "} size;\n");
-								   }
-							   continue; /* 'size'feature cannot have lookups */
-						   } else
-							   {
-							   Card16 *FeatureParam = feature->_FeatureParam;
-							   if (FeatureParam[0] != 0)
-								   DL(2, (OUTPUTBUFF, "FeatureParam is not zero but is not either size nor stylistic alternate name\n"));
-							   else
-								   {
-								   fprintf(OUTPUTBUFF, "\n# Printing stylistic name records in feature '%c%c%c%c' for script '%c%c%c%c' language '%c%c%c%c'.\n",
-										   TAG_ARG(record->FeatureTag), TAG_ARG(currentScript), TAG_ARG(currentLang));
-								   fprintf (OUTPUTBUFF, "featureNames {\n");
-								   fprintf (OUTPUTBUFF, "\tname table name ID %d; # Must be replaced by string values from name table.\n",  FeatureParam[1]);
-								   fprintf (OUTPUTBUFF, "};\n");
-								   }
-							   
-							   }
+                           index = feature->LookupListIndex[0];
+                           if (!((level!=6)  && SeenLookups[index].seen))
+                               dumpFeatureParams(record, feature, level, currentScript, currentLang);
 					   }
-					   }
+                    }
 				   
 				   for (n = 0; n < feature->LookupCount; n++) 
 					   {

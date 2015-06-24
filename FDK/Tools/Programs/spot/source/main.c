@@ -25,8 +25,8 @@ jmp_buf mark;
 #define MAX_ARGS 200
 
 
-Byte8 *version = "3.5.63408";	/* Program version */
-Byte8 *libversion = "3.5.6024";	/* Library version */
+Byte8 *version = "3.5.64350";	/* Program version */
+Byte8 *libversion = "3.5.64350";	/* Library version */
 char * sourcepath;
 char * outputfilebase = NULL;
 char *infilename=NULL;

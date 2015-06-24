@@ -34,6 +34,7 @@ enum {
 	GSUBExtension,  /* Handled specially: it points to any of the above */
 	GSUBReverse,
 	GSUBFeatureNameParam,
+    GSUBCVParam,
 };
 
 void GSUBLookupBegin(hotCtx g, unsigned lkpType, unsigned lkpFlag,
@@ -43,6 +44,7 @@ void GSUBRuleAdd(hotCtx g, GNode *targ, GNode *repl);
 int GSUBSubtableBreak(hotCtx g);
 void GSUBSetFeatureNameID(hotCtx g, Tag feat, unsigned short nameID);
 void GSUBAddFeatureMenuParam(hotCtx g, void *param);
+void GSUBAddCVParam(hotCtx g, void *param);
 
 /*
    Each feature definition is bracketed by a GSUBFeatureBegin() and

@@ -2057,7 +2057,7 @@ static void showContext2(ContextSubstFormat2 *fmt, IntX level, void *feattag)
 		ttoEnumRec *classList;
 		Card32 cnt, scscnt, psIndex;
 		IntX i, forProofing, isVert;
-		char proofString[1024];
+		char proofString[kProofBufferLen];
 		classList = memNew(sizeof(ttoEnumRec) * (fmt->SubClassSetCnt));
 		ttoEnumerateClass(fmt->ClassDef, fmt->_ClassDef, 
 						  fmt->SubClassSetCnt,
@@ -2126,6 +2126,15 @@ static void showContext2(ContextSubstFormat2 *fmt, IntX level, void *feattag)
 							GlyphId glyphId2 = *da_INDEX(CR->glyphidlist, c);
 							strcpy(name2, getGlyphName(glyphId2, forProofing));
 							psIndex = strlen(proofString);
+                            if ((psIndex + strlen(name2) + 10) >= kProofBufferLen)
+                            {
+                                if (level == 7)
+                                    fprintf(OUTPUTBUFF, "\n    %s", proofString);
+                                else if (level == 8)
+                                    dumpMessage(proofString, ((Card32 *)feattag)[0]);
+                                proofString[0] = 0;
+                                psIndex = 0;
+                            }
 							sprintf(&proofString[psIndex]," %s", name2);
 						  }
 						psIndex = strlen(proofString);

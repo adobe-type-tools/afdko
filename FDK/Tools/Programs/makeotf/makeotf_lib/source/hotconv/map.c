@@ -2454,7 +2454,7 @@ static void dbgUniBlock(hotCtx g) {
 
 	for (i = 0; i < ARRAY_LEN(unicodeBlock); i++) {
 		UnicodeBlock *block = &unicodeBlock[i];
-		printf("%2d  (%3hd)  %s\n", i, block->numFound, block->name);
+		printf("%2d  (%3d)  %s\n", i, block->numFound, block->name);
 	}
 }
 

@@ -1,3 +1,4 @@
+
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
    This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
@@ -88,6 +89,18 @@ typedef struct {            /* Subtable record */
 	unsigned short nameID;
 } FeatureNameParameterFormat;     /* Special case format for subtable data. */
 
+typedef struct {            /* Subtable record */
+	unsigned short Format;
+	unsigned short FeatUILabelNameID;
+	unsigned short FeatUITooltipTextNameID;
+	unsigned short SampleTextNameID;
+    unsigned short NumNamedParameters;
+	unsigned short FirstParamUILabelNameID;
+	dnaDCL(unsigned long, charValues);
+} CVParameterFormat;     /* Special case format for subtable data. */
+#define CV_PARAM_SIZE(p)    ((uint16 * 7) + 3*(p->charValues.cnt))
+
+
 typedef struct {
 	Tag featTag;
 	short unsigned nameID;
@@ -127,6 +140,11 @@ struct GSUBCtx_ {
 static void fillGSUBFeatureNameParam(hotCtx g, GSUBCtx h, Subtable *sub);
 static void writeGSUBFeatNameParam(GSUBCtx h, Subtable *sub);
 static void freeGSUBFeatParam(hotCtx g, Subtable *sub);
+
+static void fillGSUBCVParam(hotCtx g, GSUBCtx h, Subtable *sub);
+static void writeGSUBCVParam(GSUBCtx h, Subtable *sub);
+static void freeGSUBCVParam(hotCtx g, Subtable *sub);
+
 
 static void fillSingle(hotCtx g, GSUBCtx h);
 static void writeSingle(hotCtx g, GSUBCtx h, Subtable *sub);
@@ -221,7 +239,8 @@ int GSUBFill(hotCtx g) {
 		Subtable *sub = &h->subtables.array[i];
 		int isExt = sub->extension.use;
 		int hasFeatureParam;
-		hasFeatureParam = (sub->lkpType == GSUBFeatureNameParam);
+		hasFeatureParam =  ((sub->lkpType == GSUBFeatureNameParam) ||
+                            (sub->lkpType == GSUBCVParam ) );
 
 		otlSubtableAdd(g, h->otl, sub->script, sub->language, sub->feature,
 		               isExt ? GSUBExtension : sub->lkpType,
@@ -309,7 +328,10 @@ void GSUBWrite(hotCtx g) {
 
 			case GSUBFeatureNameParam: writeGSUBFeatNameParam(h, sub);
 				break;
-
+                
+			case GSUBCVParam: writeGSUBCVParam(h, sub);
+				break;
+                
 			case GSUBContext:
 				break;
 #endif /* HOT_FEAT_SUPPORT */
@@ -395,7 +417,10 @@ void GSUBReuse(hotCtx g) {
 
 			case GSUBFeatureNameParam:  freeGSUBFeatParam(g, sub);
 				break;
-
+                
+			case GSUBCVParam:  freeGSUBCVParam(g, sub);
+				break;
+                
 			case GSUBContext:
 				break;
 #endif /* HOT_FEAT_SUPPORT */
@@ -643,7 +668,8 @@ void GSUBLookupEnd(hotCtx g, Tag feature) {
 	}
 
 	if (h->new.rules.cnt == 0) {
-		int hasParam = (h->new.lkpType == GSUBFeatureNameParam);
+		int hasParam = ((h->new.lkpType == GSUBFeatureNameParam) ||
+                        (h->new.lkpType == GSUBCVParam));
 		if (!hasParam) {
 			hotMsg(g, hotFATAL, "Empty GSUB lookup in feature '%c%c%c%c'", TAG_ARG(h->new.feature));
 		}
@@ -676,7 +702,13 @@ void GSUBLookupEnd(hotCtx g, Tag feature) {
 
 		case GSUBFeatureNameParam: fillGSUBFeatureNameParam(g, h,  h->new.sub);
 			break;
-
+            
+		case GSUBCVParam: fillGSUBCVParam(g, h,  h->new.sub);
+			break;
+            
+            
+            
+            
 		case GSUBContext:
 			hotMsg(g, hotFATAL, "unsupported GSUB lkpType <%d>", h->new.lkpType);
 
@@ -772,6 +804,99 @@ void GSUBAddFeatureMenuParam(hotCtx g, void *param) {
 	sub->tbl = feat_param;
 	h->offset.subtable += param_size;
 }
+
+static void fillGSUBCVParam(hotCtx g, GSUBCtx h, Subtable *sub) {
+	CVParameterFormat *feat_param = (CVParameterFormat *)sub->tbl;
+    int i = 0;
+    unsigned short nameIDs[4];
+    
+    nameIDs[0]= feat_param->FeatUILabelNameID;
+    nameIDs[1]= feat_param->FeatUITooltipTextNameID;
+    nameIDs[2]= feat_param->SampleTextNameID;
+    nameIDs[3]= feat_param->FirstParamUILabelNameID;
+
+    while (i < 4)
+    {
+        unsigned short nameid = nameIDs[i++];
+        if (nameid != 0) {
+            unsigned short nameIDPresent = nameVerifyDefaultNames(g, nameid);
+            if (nameIDPresent != 0) {
+                if ((nameIDPresent & MISSING_WIN_DEFAULT_NAME)
+                    && (nameIDPresent & MISSING_MAC_DEFAULT_NAME)) {
+                    hotMsg(g, hotFATAL, "Missing both Mac and Windows default names for feature name  nameid %i",  nameid);
+                }
+                else if (nameIDPresent & MISSING_WIN_DEFAULT_NAME) {
+                    hotMsg(g, hotFATAL, "Missing Windows default name for for feature name  nameid %i",  nameid);
+                }
+                else if (nameIDPresent & MISSING_MAC_DEFAULT_NAME) {
+                    hotMsg(g, hotFATAL, "Missing Mac default name for for feature name  nameid %i",  nameid);
+                }
+            }
+        }
+        
+    }
+}
+
+static void writeGSUBCVParam(GSUBCtx h, Subtable *sub) {
+    int i = 0;
+    CVParameterFormat  *feat_param = (CVParameterFormat *)sub->tbl;
+    
+	OUT2(feat_param->Format);
+	OUT2(feat_param->FeatUILabelNameID);
+	OUT2(feat_param->FeatUITooltipTextNameID);
+	OUT2(feat_param->SampleTextNameID);
+	OUT2(feat_param->NumNamedParameters);
+	OUT2(feat_param->FirstParamUILabelNameID);
+	OUT2((unsigned short)feat_param->charValues.cnt);
+    while  (i < feat_param->charValues.cnt)
+    {
+        unsigned long uv = feat_param->charValues.array[i++];
+        char val1 = (char)(uv >>16);
+        unsigned short val2  = (unsigned short)(uv & 0x0000FFFF);
+        OUT1(val1);
+        OUT2(val2);
+    }
+}
+
+static void freeGSUBCVParam(hotCtx g, Subtable *sub) {
+    CVParameterFormat  *feat_param = (CVParameterFormat *)sub->tbl;
+    dnaFREE(feat_param->charValues);
+	MEM_FREE(g, sub->tbl);
+}
+
+void GSUBAddCVParam(hotCtx g, void *param) {
+	GSUBCtx h = g->ctx.GSUB;
+	Subtable *sub;
+    int i;
+	CVParameterFormat *feat_param = (CVParameterFormat*)param;
+	CVParameterFormat *new_param;
+	Offset param_size = sizeof(CVParameterFormat);
+	Offset param_offset = (Offset)CV_PARAM_SIZE(feat_param);
+    
+	startNewSubtable(g);
+	sub = h->new.sub;
+    
+	new_param = MEM_NEW(g, param_size);
+    
+	new_param->Format = feat_param->Format;
+	new_param->FeatUILabelNameID = feat_param->FeatUILabelNameID;
+	new_param->FeatUITooltipTextNameID = feat_param->FeatUITooltipTextNameID;
+	new_param->SampleTextNameID = feat_param->SampleTextNameID;
+	new_param->NumNamedParameters = feat_param->NumNamedParameters;
+	new_param->FirstParamUILabelNameID = feat_param->FirstParamUILabelNameID;
+    
+    dnaINIT(g->dnaCtx, new_param->charValues, 20,20);
+    i = 0;
+    while (i < feat_param->charValues.cnt)
+    {
+        *dnaNEXT(new_param->charValues) = feat_param->charValues.array[i++];
+    }
+    
+	sub->tbl = new_param;
+	h->offset.subtable += param_offset;
+}
+
+
 
 /* -------------------------- Single Substitution -------------------------- */
 

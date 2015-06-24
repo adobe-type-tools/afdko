@@ -217,6 +217,12 @@ hotCtx g;
 #token K_position       "position|pos"
 #token K_parameters		"parameters"
 #token K_feat_names		"featureNames"
+#token K_cv_params "cvParameters"
+#token K_cvUILabel	"FeatUILabelNameID"
+#token K_cvToolTip	"FeatUITooltipTextNameID"
+#token K_cvSampletext	"SampleTextNameID"
+#token K_cvParameterLabel	"ParamUILabelNameID"
+#token K_cvCharacter	"Character"
 #token K_sizemenuname	"sizemenuname"
 #token K_contourpoint	"contourpoint"
 #token K_device			"device"
@@ -436,6 +442,23 @@ numUInt16Ext>[unsigned value]
 					if ($n.lval < 0 || $n.lval > 65535)
 						zzerr("not in range 0 .. 65535");
 					$value = (unsigned)($n).lval;
+					>>
+	;
+
+/* Extended format: hex, oct also allowed */
+numUInt32Ext>[unsigned value]
+	:	<<$value = 0; /* Suppress optimizer warning */
+		  h->linenum = zzline;>>
+		m:T_NUMEXT	<<
+					if ( $m.ulval > ((unsigned long)0xFFFFFFFF))
+						zzerr("not in range 0 .. ((1<<32) -1)");
+					$value = (unsigned)($m).ulval;
+					>>
+		|
+		n:T_NUM		<<
+					if ($n.ulval > ((unsigned long)0xFFFFFFFF))
+						zzerr("not in range 0 .. ((1<<32) -1)");
+					$value = (unsigned)($n).ulval;
 					>>
 	;
 
@@ -1121,6 +1144,92 @@ featureNames
 	>>
 	;
 
+
+cvParameterBlock
+	:
+	<<
+	h->cvParameters.FeatUILabelNameID = 0;
+	h->cvParameters.FeatUITooltipTextNameID = 0;
+	h->cvParameters.SampleTextNameID = 0;
+	h->cvParameters.NumNamedParameters = 0;
+	h->cvParameters.FirstParamUILabelNameID = 0;
+	h->cvParameters.charValues.cnt = 0;
+	h->featNameID = 0;
+	>>
+	K_cv_params
+	"\{"
+		{
+			K_cvUILabel
+			"\{"
+			(
+				(featureNameEntry)+
+				<<
+				addCVNameID(h->featNameID, cvUILabelEnum);
+				>>
+			)
+			"\}"
+			";" 
+		}
+		{
+			K_cvToolTip
+			"\{"
+			(
+				(featureNameEntry)+
+				<<
+				addCVNameID(h->featNameID, cvToolTipEnum);
+				>>
+			)
+			"\}"
+			";" 
+		}
+		{
+			K_cvSampletext
+			"\{"
+			(
+				(featureNameEntry)+
+				<<
+				addCVNameID(h->featNameID, cvSampletextEnum);
+				>>
+			)
+			"\}"
+			";" 
+		}
+		{
+			(
+			K_cvParameterLabel
+			"\{"
+			(
+				(featureNameEntry)+
+				<<
+				addCVNameID(h->featNameID, kCVParameterLabelEnum);
+				>>
+			)
+			"\}"
+			";" 
+			)+
+		}
+		{
+			(
+			K_cvCharacter
+				(
+				<<
+				unsigned long uv = 0;
+				>>
+				numUInt32Ext>[uv]
+				<<
+				addCVParametersCharValue(uv);
+				>>
+				)
+			";" 
+			)+
+		}
+
+	"\}"
+	<<
+	addCVParam(h->g);
+	>>
+	;
+
 // Assignment rules -----------------------------------------------------------
 
 /* This expects the cursive base glyph or glyph clase
@@ -1669,6 +1778,7 @@ featureBlock
 		"\{"
 		( statement
 		| lookupBlockOrUse
+		| cvParameterBlock
 		)+
 		"\}"					<<zzmode(TAG_MODE);>>
 		u:T_TAG					<<checkTag($u.ulval, featureTag, 0);>>

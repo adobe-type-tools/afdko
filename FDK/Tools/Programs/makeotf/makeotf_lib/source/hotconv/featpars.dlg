@@ -277,6 +277,36 @@ featureNames
 		NLA = K_feat_names;
 	>>
 
+cvParameters
+	<<
+		NLA = K_cv_params;
+	>>
+
+FeatUILabelNameID
+	<<
+		NLA = K_cvUILabel;
+	>>
+
+FeatUITooltipTextNameID
+	<<
+		NLA = K_cvToolTip;
+	>>
+
+SampleTextNameID
+	<<
+		NLA = K_cvSampletext;
+	>>
+
+ParamUILabelNameID
+	<<
+		NLA = K_cvParameterLabel;
+	>>
+
+Character
+	<<
+		NLA = K_cvCharacter;
+	>>
+
 sizemenuname
 	<<
 		NLA = K_sizemenuname;
@@ -619,52 +649,52 @@ VertAdvanceY
 
 \[
 	<<
-		NLA = 134;
+		NLA = 140;
 	>>
 
 \-
 	<<
-		NLA = 135;
+		NLA = 141;
 	>>
 
 \]
 	<<
-		NLA = 136;
+		NLA = 142;
 	>>
 
 0
 	<<
-		NLA = 137;
+		NLA = 143;
 	>>
 
 ,
 	<<
-		NLA = 138;
+		NLA = 144;
 	>>
 
 '
 	<<
-		NLA = 139;
+		NLA = 145;
 	>>
 
 ;
 	<<
-		NLA = 140;
+		NLA = 146;
 	>>
 
 \{
 	<<
-		NLA = 141;
+		NLA = 147;
 	>>
 
 \}
 	<<
-		NLA = 142;
+		NLA = 148;
 	>>
 
 =
 	<<
-		NLA = 143;
+		NLA = 149;
 	>>
 
 

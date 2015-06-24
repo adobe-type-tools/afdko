@@ -123,6 +123,9 @@ extern void proofPSOUT(ProofContextPtr c, const Byte8 *cmd);
 #define STDPAGE_BOTTOM STDPAGE_MARGIN
 #define STDPAGE_GLYPH_PTSIZE  24.0
 
+#define kProofBufferLen 1024
+
+
 extern void proofSetPolicy(IntX policyNum, IntX value);
 extern void proofResetPolicies(void);
 extern opt_Scanner proofPolicyScan;

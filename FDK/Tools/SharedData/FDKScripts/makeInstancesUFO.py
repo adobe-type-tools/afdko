@@ -6,11 +6,11 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 __doc__ = """
 """
 __usage__ = """
-   makeInstancesUFO program v1.09 Apr 8 2015
+   makeInstancesUFO program v1.10 June 12 2015
    makeInstancesUFO -h
    makeInstancesUFO -u
    makeInstancesUFO [-a]  [-d <design space file name>]
-                 [-c] [-a] [-decimal] [-i n0,n1,..nx]
+                 [-c] [-a] [-decimal] [-i 0,1,..n]
 
    -d <design space file path> .... Specifies alternate path to design space file.
                                 Default: font.designspace
