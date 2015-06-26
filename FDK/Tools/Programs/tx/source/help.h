@@ -221,11 +221,3 @@
 ,
 "same failure, tx should be run again but this time with -N (a hyphen followed\n"
 "by N) as the argument to the -m option.\n"
-"\n"
-"For certain operations tx uses anonymous temporary files that are automatically\n"
-"deleted when they are closed. The location of these files is operating system\n"
-"dependent. On Windows they are created in the root directory (most likely c:).\n"
-"If you do not have permission to write into the root directory tx will fail\n"
-,
-"with a file permission error. You can remedy this situation by re-running tx as\n"
-"a user with the appropriate permissions.\n"
