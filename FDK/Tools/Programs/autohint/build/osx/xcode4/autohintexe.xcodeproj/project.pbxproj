@@ -21,7 +21,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		56AE0BA81A633867000ECBEE /* libautohintlib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 56AE0BA71A633867000ECBEE /* libautohintlib.a */; };
+		BB2B3E751B3CFAF600641593 /* libautohintlib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 56AE0BAD1A633B80000ECBEE /* libautohintlib.a */; };
 		BD5BF4170D9AD1F80015F645 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = BD5BF4160D9AD1F80015F645 /* main.c */; };
 /* End PBXBuildFile section */
 
@@ -63,7 +63,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				56AE0BA81A633867000ECBEE /* libautohintlib.a in Frameworks */,
+				BB2B3E751B3CFAF600641593 /* libautohintlib.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
