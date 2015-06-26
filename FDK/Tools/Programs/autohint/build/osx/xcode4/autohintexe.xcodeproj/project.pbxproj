@@ -13,6 +13,7 @@
 			buildPhases = (
 			);
 			dependencies = (
+				FF99806E1B3D5E000020B466 /* PBXTargetDependency */,
 				BDD0854D14E47AD500F0FC0D /* PBXTargetDependency */,
 			);
 			name = BuildAll;
@@ -39,6 +40,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 8DD76FA90486AB0100D96B5E;
 			remoteInfo = autohintexe;
+		};
+		FF99806D1B3D5E000020B466 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD5BF4440D9AD3C80015F645 /* autohintlib.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = autohintlib;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -227,6 +235,11 @@
 			isa = PBXTargetDependency;
 			target = 8DD76FA90486AB0100D96B5E /* autohintexe */;
 			targetProxy = BDD0854C14E47AD500F0FC0D /* PBXContainerItemProxy */;
+		};
+		FF99806E1B3D5E000020B466 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = autohintlib;
+			targetProxy = FF99806D1B3D5E000020B466 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
