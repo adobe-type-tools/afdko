@@ -1,31 +1,39 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
-FDK. v2.5 June 18 change number 64350.
+FDK. v2.5 July 6 change number 64391.
 
 FDK. 
 	autohint.
-	Fixed bug in ufoFontTools.py which placed a new hint block after a flex operator, when it should be before.
-	Fixed new bug in hinting non-UFO fonts, introduced by switch to absolute coordinates in the bez file interchange format.
+	Fixed bug in ufoFontTools.py which placed a new hint block after a flex
+	operator, when it should be before.
+	Fixed new bug in hinting non-UFO fonts, introduced by switch to absolute
+	coordinates in the bez file interchange format.
 	Fixed bugs in using hashmap to detect previously hinted glyphs.
-	
-	makeotf. Fixed bug with Unicode values in the absolute path to to the font home directory.
+	Fixed bugs in handling the issue that checkOutlinesUFO.py, which uses the
+	defcon library to write UFO glif files, will in some cases write glif files
+	with different file names than they had in the default glyph layer.
+
+	makeotf. Fixed bug with Unicode values in the absolute path to to the font
+	home directory.
 	Add support for Character Variant (cvXX) feature params.
 	
 	spot. Added support for cvXX feature params. 
-	Fixed in crash in dumping long contextual substitution strings, such as in 'GentiumPlus-R.ttf'.
+	Fixed in crash in dumping long contextual substitution strings, such as in
+	'GentiumPlus-R.ttf'.
 	
 	tx, IS, mergeFonts rotateFont:
 	fixed bug in handling CID glyph ID greater than 32K.
 	Changed to write widths and FontBBox as integer values
-	Changed to write SVG, UFO, and dump coordinates with 2 places of precision when there is a fractional part.	
+	Changed to write SVG, UFO, and dump coordinates with 2 places of precision
+	when there is a fractional part.
 	Fixed bugs in handling the '-gx' option to exclude glyphs. Fixed problem
 	with CID > 32K. Fixed problem when font has 65536 glyphs: all glyphs after
 	first last would be excluded.
 	Fixed rounding errors in writing out decimal values to cff and t1 fonts
 
 	misc
-	Fixed windows builds: had to provide a roundf function, and more includes for
+	Fixed windows builds: had to provide a roundf() function, and more includes for
 	the _tmpFile function. Fixed a few compile errors.
 	Fix bug in documentation for makeInstancesUFO
 	Fix bug in BezTools.py on Windows, when having to use a temp file

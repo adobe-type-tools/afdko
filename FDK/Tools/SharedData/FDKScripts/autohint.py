@@ -8,10 +8,12 @@ autohint -h
 autohint -u
 autohint -hfd
 autohint -pfd
-autohint [-g <glyph list>] [-gf <filename>] [-xg <glyph list>] [-xgf <filename>] [-cf path] [-a] [-logOnly] [-log <logFile path>] [-r] [-q] [-c] [-nf] [-ns] [-nb] [-o <output font path>]  font-path
+autohint [-g <glyph list>] [-gf <filename>] [-xg <glyph list>] [-xgf <filename>] [-cf path] [-a] [-logOnly] [-log <logFile path>] [-r] [-q] [-c] [-nf] [-ns] [-nb] [-wd] [-o <output font path>]  font-path
 
 Auto-hinting program for PostScript and OpenType/CFF fonts.
 """
+
+from ufoTools import kProcessedGlyphsLayerName, kProcessedGlyphsLayer
 
 __help__ = __usage__ + """
 
@@ -142,6 +144,8 @@ alignment zones in an "fontinfo" file.
  -decimal  Use decimal coordinates, instead of rounding them to the 
  nearest integer value.
 
+-wd	write changed glyphs to default layer instead of '%s'
+
 autohint can also apply different sets of alignment zones while hinting
 a particular set of glyphs. This is useful for name-keyed fonts, which,
 unlike CID fonts, only have one set of global alignment zones and stem
@@ -175,7 +179,8 @@ glyph has hints, then autohint assumes it was manually hinted, and will by
 default not hint it again. If the file is missing, autohint will assume that all
 the glyphs were manually hinted, and you will have to use the option -a or -r to
 hint any glyphs.
-"""
+""" % (kProcessedGlyphsLayerName)
+
 
 __FDDoc__ = """
 By default, autohint uses the font's global alignment zones and stem
@@ -476,6 +481,7 @@ class ACOptions:
 		self.printFDDictList = 0
 		self.debug = 0
 		self.allowDecimalCoords = 0
+		self.writeToDefaultLayer = 0
 		
 class ACOptionParseError(KeyError):
 	pass
@@ -728,6 +734,8 @@ def getOptions():
 			options.debug = 1
 		elif arg == "-decimal":
 			options.allowDecimalCoords = True
+		elif arg =="-wd":
+			options.writeToDefaultLayer = 1
 		elif arg[0] == "-":
 			raise ACOptionParseError("Option Error: Unknown option <%s>." %  arg) 
 		else:
@@ -1034,6 +1042,8 @@ def hintFile(options):
 		useHashMap = not options.logOnly # for UFO fonts only. We always use the hash map, unless the user has said to only report issues.
 		fontData = openFile(path, options.outputPath, useHashMap)
 		fontData.allowDecimalCoords = options.allowDecimalCoords
+		if options.writeToDefaultLayer and hasattr(fontData, "setWriteToDefault"): # UFO fonts only
+			fontData.setWriteToDefault()
 	except (IOError, OSError):
 		logMsg( traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1])
 		raise ACFontError("Error opening or reading from font file <%s>." % fontFileName)

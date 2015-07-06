@@ -1,5 +1,5 @@
 """
-ufoTools.py v1.19 May 28 2015
+ufoTools.py v1.20 July 6 2015
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -255,6 +255,7 @@ class UFOFontData:
 	def __init__(self, parentPath, useHashMap, programName):
 		self.parentPath = parentPath
 		self.glyphMap = {}
+		self.processedLayerGlyphMap = {}
 		self.newGlyphMap = {}
 		self.glyphList = []
 		self.fontInfo = None
@@ -271,6 +272,7 @@ class UFOFontData:
 		self.historyList = []
 		self.requiredHistory = [] # See documentation above.
 		self.useProcessedLayer = False # If False, then read data only from the default layer; else read glyphs from processed layer, if it exists.
+		self.writeToDefaultLayer = False # If True, then write data to the default layer
 		self.doAll = False # if True, then do not skip any glyphs.
 		self.deletedGlyph = False # track whether checkSkipGLyph has deleted a out of date glyph from the processed glyph layer
 		self.allowDecimalCoords = False # if true, do NOT round x,y values when processing.
@@ -330,8 +332,15 @@ class UFOFontData:
 	def getWriteGlyphPath(self, glyphName):
 		if len(self.glyphMap) == 0:
 			self.loadGlyphMap()
-			
-		glyphFileName = self.glyphMap[glyphName]
+		
+		if self.writeToDefaultLayer:
+			glyphFileName = self.glyphMap[glyphName]
+		else:
+			try:
+				glyphFileName = self.processedLayerGlyphMap[glyphName]
+			except KeyError:
+				glyphFileName = self.glyphMap[glyphName]
+		
 		glifFilePath = os.path.join(self.glyphWriteDir, glyphFileName)
 		return glifFilePath
 		
@@ -595,6 +604,14 @@ class UFOFontData:
 			numGlyphs = len(self.glyphList)
 			for i in range(numGlyphs):
 				self.orderMap[self.glyphList[i]] = i
+		
+		# I also need to get the glyph map for the processed layer,
+		# and use this when the glyph is read from the processed layer.
+		# Because checkOutliensUFO used the defcon library, it can write glyph file names
+		# that differ from what is in the default glyph layer.
+		contentsPath = os.path.join(self.glyphLayerDir, kContentsName)
+		if os.path.exists(contentsPath):
+			self.processedLayerGlyphMap, self.processedLayerGlyphList = parsePList(contentsPath)
 		
 		
 				
@@ -897,6 +914,11 @@ class UFOFontData:
 		if  os.path.exists(hashPath):
 			os.remove(hashPath)
 
+	def setWriteToDefault(self):
+		self.useProcessedLayer =  False
+		self.writeToDefaultLayer = True
+		self.glyphWriteDir = self.glyphDefaultDir
+		
 def parseGlyphOrder(filePath):
 	orderMap = None
 	if os.path.exists(filePath):
@@ -1931,10 +1953,11 @@ def checkHashMaps(fontPath, doSync):
 
 kAdobeLCALtSuffix = ".adobe.lc.altsuffix"
 
-def cleanUpGLIFFiles(contentsFilePath, glyphDirPath, doWarning=True):
+def cleanUpGLIFFiles(defaultContentsFilePath, glyphDirPath, doWarning=True):
 	changed = 0
+	contentsFilePath = os.path.join(glyphDirPath, kContentsName)
 	contentsDict = plistlib.readPlist(contentsFilePath) # maps glyph names to files.
-	# First, delete glyph files that are not in the default layer contents.plist file
+	# First, delete glyph files that are not in the contents.plist file in the glyphDirPath
 	# In some UFOfont  files, we end up with case errors, so we need to check for a lower-case version of the file name.
 	fileDict = {}
 	for glyphName, fileName in contentsDict.items():
@@ -1952,7 +1975,7 @@ def cleanUpGLIFFiles(contentsFilePath, glyphDirPath, doWarning=True):
 		lcFileName = fileName.lower()
 		if fileDict.has_key(lcFileName + kAdobeLCALtSuffix):
 			# glif file exists which has a case-insensitive match to file name entry in the contents.plist file
-			# assume it is intended, and change the file case to match.
+			# assume latter is intended, and change the file name to match.
 			glyphFilePathOld = os.path.join(glyphDirPath, fileName)
 			glyphFilePathNew = os.path.join(glyphDirPath, lcFileName)
 			os.rename(glyphFilePathOld, glyphFilePathNew)
@@ -1961,8 +1984,32 @@ def cleanUpGLIFFiles(contentsFilePath, glyphDirPath, doWarning=True):
 		glyphFilePath = os.path.join(glyphDirPath, fileName)
 		os.remove(glyphFilePath)
 		if doWarning:
-			print "Removing glif file that was not in the contents.plist file: %s" % (glyphFilePath)
+			print "Removing glif file %s that was not in the contents.plist file: %s" % (glyphDirPath, contentsFilePath)
 		changed = 1
+		del fileDict[fileName]
+		
+	if 	defaultContentsFilePath == contentsFilePath:
+		return changed
+
+	# Now remove glyphs that are not referenced in the defaultContentsFilePath. Since the processed glyph layer is written with the defcon module,
+	# and the default layer may be written by anything, the actual glyph file names may be different for the same UFO glyph. We need to compare by UFO glyph name, not file name.
+	defaultContentsDict = plistlib.readPlist(defaultContentsFilePath)
+	fileList = os.listdir(glyphDirPath)
+	for fileName in fileList:
+		if not fileName.endswith(".glif"):
+			continue
+		try:
+			glyphName = fileDict[fileName]
+			if not defaultContentsDict.has_key(glyphName):
+				glyphFilePath = os.path.join(glyphDirPath, fileName)
+				os.remove(glyphFilePath)
+				if doWarning:
+					print "Removing glif %s that was not in the contents.plist file: %s" % (glyphName, defaultContentsFilePath)
+				changed = 1
+			
+		except KeyError:
+			print"Soudln't happen", glyphName, defaultContentsFilePath
+	
 		
 	return changed
 
@@ -1998,13 +2045,13 @@ def validateLayers(ufoFontPath, doWarning=True):
 	# that aren't there anymore.
 	# You can also get extra glyphs not in the contents.plist file by several editing workflows.
 	
-	# First, the default layer.
+	# First, clean up the default layer.
 	glyphDirPath = os.path.join(ufoFontPath, "glyphs")
-	contentsFilePath = os.path.join(ufoFontPath, "glyphs", kContentsName)
-	if not os.path.exists(contentsFilePath): # Happens when called on a font which is not a UFO font.
+	defaultContentsFilePath = os.path.join(ufoFontPath, "glyphs", kContentsName)
+	if not os.path.exists(defaultContentsFilePath): # Happens when called on a font which is not a UFO font.
 		return
 
-	changed = cleanUpGLIFFiles(contentsFilePath, glyphDirPath, doWarning) # remove glif files not in contents.plist
+	changed = cleanUpGLIFFiles(defaultContentsFilePath, glyphDirPath, doWarning) # remove glif files not in contents.plist
 	cleanupContentsList(glyphDirPath, doWarning) # remove entries for glif files that don't exist
 	
 	# now for the processed dir.
@@ -2012,14 +2059,11 @@ def validateLayers(ufoFontPath, doWarning=True):
 	if not os.path.exists(glyphDirPath):
 		return
 		
-	# Remove any glif files that are not in the default glif directory contents.plist file
-	changed = cleanUpGLIFFiles(contentsFilePath, glyphDirPath, doWarning)
-
-	# Remove any glif files that are not in the processed glif directory contents.plist file
+	# Remove any glif files that are not in both the processed glif directory contents.plist file
+	# and the default contents .plist file.
 	# This will happen pretty often, as glif files are deleted from the processed glyph layer
 	# is their hash differs from the current hash for the glyph in the default layer.
-	contentsFilePath = os.path.join(glyphDirPath, kContentsName)
-	changed2 = cleanUpGLIFFiles(contentsFilePath, glyphDirPath,doWarning)
+	changed = cleanUpGLIFFiles(defaultContentsFilePath, glyphDirPath, doWarning)
 	
 	cleanupContentsList(glyphDirPath, doWarning)
 
