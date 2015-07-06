@@ -2,9 +2,9 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-   checkOutlinesUFO program v1.11 May 28 2015
+   checkOutlinesUFO program v1.12 July 2 2015
    
-   checkOutlinesUFO [-nr] [-e] [-g glyphList] [-gf <file name>] [-all] [-noOverlap] [-noBasicChecks] [-setMinArea <n>] [- setTolerance <n>] [-d]
+   checkOutlinesUFO [-e] [-g glyphList] [-gf <file name>] [-all] [-noOverlap] [-noBasicChecks] [-setMinArea <n>] [-setTolerance <n>] [-wd]
    
    Remove path overlaps, and do a few basic outline quality checks.
  """
@@ -36,7 +36,7 @@ Default is 0 design space units. This is used to test whether the control points
 for a curve define a flat curve, and whether a sequence of line segments
 defines a straight line.
 
--d	write changed glyphs to default layer instead of '%s'
+-wd	write changed glyphs to default layer instead of '%s'
 
 -g <glyphID1>,<glyphID2>,...,<glyphIDn>
 	Check only the specified list of glyphs. The list must be 
@@ -99,6 +99,7 @@ class FontFile(object):
 		self.useHashMap = False
 		self.ufoFontHashData = None
 		self.ufoFormat = 2
+		self.saveToDefaultLayer = 0
 		
 	def open(self, useHashMap):
 		fontPath = self.fontPath
@@ -171,15 +172,18 @@ class FontFile(object):
 		"""
 		from ufoLib import UFOWriter
 		writer = UFOWriter(self.dFont.path, formatVersion=2)
-		layers = self.dFont.layers
-		layer = layers[kProcessedGlyphsLayerName]
-		writer._formatVersion = 3
-		writer.layerContents[kProcessedGlyphsLayerName] = kProcessedGlyphsLayer
-		glyphSet = writer.getGlyphSet(layerName=kProcessedGlyphsLayerName, defaultLayer=False)
-		writer.writeLayerContents(layers.layerOrder)
-		writer._formatVersion = 2
-		layer.save(glyphSet)
-		layer.dirty = False
+		if self.saveToDefaultLayer:
+			self.dFont.save()
+		else:
+			layers = self.dFont.layers
+			layer = layers[kProcessedGlyphsLayerName]
+			writer._formatVersion = 3
+			writer.layerContents[kProcessedGlyphsLayerName] = kProcessedGlyphsLayer
+			glyphSet = writer.getGlyphSet(layerName=kProcessedGlyphsLayerName, defaultLayer=False)
+			writer.writeLayerContents(layers.layerOrder)
+			writer._formatVersion = 2
+			layer.save(glyphSet)
+			layer.dirty = False
 
 		if self.fontType == kUFOFontType:
 			self.ufoFontHashData.close() # Write the hash data, if it has changed.
@@ -277,8 +281,8 @@ def getOptions():
 		elif arg == "-h":
 			print __doc__
 			sys.exit()
-		elif arg == "-d":
-			writeToDefaultLayer = 1
+		elif arg == "-wd":
+			options.writeToDefaultLayer = 1
 		elif arg == "-g":
 			i = i +1
 			glyphString = sys.argv[i]
@@ -867,7 +871,9 @@ def run(args):
 			processedLayer = dFont.layers[kProcessedGlyphsLayerName]
 		except KeyError:
 			processedLayer = dFont.newLayer(kProcessedGlyphsLayerName)
-	
+	else:
+		processedLayer = None
+		fontFile.saveToDefaultLayer = 1
 	fontChanged = 0
 	lastHadMsg = 0
 	seenGlyphCount = 0
@@ -933,7 +939,7 @@ def run(args):
 		sys.stdout.flush() # Needed when the script is called from another script with Popen().
 	# update layer plist: the hash check call may have deleted processed layer glyphs because the default layer glyph is newer.
 
-	# At this point, we may have deleted glypsh  in the processed layer.writer.getGlyphSet()
+	# At this point, we may have deleted glyphs  in the processed layer.writer.getGlyphSet()
 	# will fail unless we update the contents.plist file to match.
 	if options.allowChanges:
 		ufoTools.validateLayers(fontPath, False)
