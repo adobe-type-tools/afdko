@@ -81,7 +81,7 @@ Once you have built the AFDKO Python, you need to install the various modules th
 
 This module is needed for the ttx and ttxn tools to work. I use Behdad Esfahbod's GitHub v2.5 branch, as it fixes a number of bugs, and is not dependent on the numPy module.
 
-Get the master branch of fontTools from https://github.com/behdad/fonttools. Download the zip file, cd to the unpacked directory, 
+Get the master branch of fontTools from https://github.com/behdad/fonttools. Download the zip file, cd to the unpacked directory,
 and use the command "AFDKOPython setup.py install".
 
 3.2 MutatorMath support.
@@ -113,7 +113,7 @@ Do this for the osx, win and Linux AFDKOPython directories.
 This is needed for the checkOutlinesUFO command.
 
 booleanOperations-master: master branch of booleanOperations at:
-https://github.com/typesupply/booleanOperations/tree/ufo3/. This does not have a
+https://github.com/typemytype/booleanOperations/. This does not have a
 setup.py file. Install by copying the booleanOperations-master directory to your
 Python installation's site-packages directory. For the Mac, this is
 FDK/Tools/osx/Python/AFDKOPython27/lib/python2.7/site-packages, cd to the
@@ -128,7 +128,7 @@ Linux and Windows.
 To build under windows, cd to booleanOperations/cppWrapper, and run:
  <Linux FDK  Python> setup.py build".
  Copy the new pyClipper.so file into booleanOperations/Lib
- 
+
 To build under Windodws Visual C 9,
 -  in cppWrapper/clipper.py, at line 41, replace:
 #if (__GNUC__ == 2 && __GNUC_MINOR__ <= 97) || (defined(BOOST_MSVC) && _MSC_VER <= 1200)

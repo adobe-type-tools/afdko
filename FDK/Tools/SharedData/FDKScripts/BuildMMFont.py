@@ -234,7 +234,7 @@ class TempFont:
 
   <name>
     <namerecord nameID="0" platformID="1" platEncID="0" langID="0x0">
-      Copyright &#169; 205 Adobe Systems Incorporated.  All Rights Reserved.
+      Copyright &#169; 2005 Adobe Systems Incorporated.  All Rights Reserved.
     </namerecord>
     <namerecord nameID="1" platformID="1" platEncID="0" langID="0x0">
       Temp Font
@@ -255,7 +255,7 @@ class TempFont:
       TempFont-Regular
     </namerecord>
     <namerecord nameID="0" platformID="3" platEncID="1" langID="0x409">
-      Copyright &#169; 205 Adobe Systems Incorporated.  All Rights Reserved.
+      Copyright &#169; 2005 Adobe Systems Incorporated.  All Rights Reserved.
     </namerecord>
     <namerecord nameID="1" platformID="3" platEncID="1" langID="0x409">
       Temp Font
