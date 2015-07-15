@@ -187,7 +187,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define TXOPSIZE(op) (((op)&0xff00)?2:1)
 
 /* Interpreter limits/definitions */
-#define TX_MAX_OP_STACK_CUBE     192  /* Max operand stack depth */
+#define TX_MAX_OP_STACK_CUBE     576  /* Max operand stack depth */
 #define TX_MAX_CALL_STACK_CUBE   15  /* Max callsubr stack depth */
 #define CUBE_LE_STACKDEPTH 6
 #define kMaxCubeAxes 9
