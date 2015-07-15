@@ -375,7 +375,7 @@ int OS_2Fill(hotCtx g) {
 	if (h->tbl.usLowerOpticalPointSize > 0) {
 		h->tbl.version = g->font.os2Version = 5;
 	}
-	else if ((h->tbl.fsSelection & ~0xfe) > 0) {
+	else if ((h->tbl.fsSelection & ~0xff) > 0) {
 		/* If any of the OS/2 v 4 fsSelection bits are on.*/
 		h->tbl.version = g->font.os2Version = 4;
 	}
