@@ -458,9 +458,9 @@ void cfwDictFillTop(cfwCtx g, DICT *dst,
 	    top->FontBBox[2] != 0 ||
 	    top->FontBBox[3] != 0) {
         top->FontBBox[0] = roundf(top->FontBBox[0]);
-        top->FontBBox[0] = roundf(top->FontBBox[1]);
-        top->FontBBox[0] = roundf(top->FontBBox[2]);
-        top->FontBBox[0] = roundf(top->FontBBox[3]);
+        top->FontBBox[1] = roundf(top->FontBBox[1]);
+        top->FontBBox[2] = roundf(top->FontBBox[2]);
+        top->FontBBox[3] = roundf(top->FontBBox[3]);
 		saveRealArrayOp(dst, 4, top->FontBBox, cff_FontBBox);
 	}
 

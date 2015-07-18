@@ -1,7 +1,7 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
-FDK. v2.5 July 6 change number 64391.
+FDK. v2.5 July 17 change number 64655.
 
 FDK. 
 	autohint.
@@ -17,6 +17,7 @@ FDK.
 	makeotf. Fixed bug with Unicode values in the absolute path to to the font
 	home directory.
 	Add support for Character Variant (cvXX) feature params.
+	Fixed bug where setting Italic style forced OS/2 version to be 4.
 	
 	spot. Added support for cvXX feature params. 
 	Fixed in crash in dumping long contextual substitution strings, such as in
@@ -31,7 +32,9 @@ FDK.
 	with CID > 32K. Fixed problem when font has 65536 glyphs: all glyphs after
 	first last would be excluded.
 	Fixed rounding errors in writing out decimal values to cff and t1 fonts
-
+	Increased interpreter stack depth to allow for CUBE operators (Library
+	elements) with up to 9 blend axes.
+	
 	misc
 	Fixed windows builds: had to provide a roundf() function, and more includes for
 	the _tmpFile function. Fixed a few compile errors.
