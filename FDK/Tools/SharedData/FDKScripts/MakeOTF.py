@@ -41,7 +41,7 @@ Project file.
 """
 
 __usage__ = """
-makeotf v2.0.82 Juane 1 2015
+makeotf v2.0.83 July 27 2015
 -f <input font>         Specify input font path. Default is 'font.pfa'.
 -o <output font>        Specify output font path. Default is
                         '<PostScript-Name>.otf'.
@@ -1781,13 +1781,13 @@ def copyTTFGlyphTables(inputFilePath, tempOutputPath, outputPath):
 	# tempOutputPath exists and is an OTF/CFF font.
 	# outputPath does not yet exist, or is the same as inputFilePath.
 	
-	command = "spot %s" % (tempOutputPath)
+	command = "spot \"%s\"" % (tempOutputPath)
 	tableDump = FDKUtils.runShellCmd(command)
 
 	# Get the final glyph name list.
 	tempTablePath = inputFilePath + ".temp.table"
 
-	command = "tx -mtx %s 2>&1" % (tempOutputPath)
+	command = "tx -mtx \"%s\" 2>&1" % (tempOutputPath)
 	report = FDKUtils.runShellCmd(command)
 	glyphList = re.findall("[\n\r]glyph\[\d+\]\s+\{([^,]+)", report)
 	
@@ -1806,7 +1806,7 @@ def copyTTFGlyphTables(inputFilePath, tempOutputPath, outputPath):
 	for tableTag in ["GDEF", "GSUB", "GPOS", "cmap", "name", "OS/2", "BASE",]:
 		if tableTag not in tableDump:
 			continue
-		command = "sfntedit -x \"%s\"=%s %s 2>&1" % (tableTag, tempTablePath, tempOutputPath)
+		command = "sfntedit -x \"%s\"=%s \"%s\" 2>&1" % (tableTag, tempTablePath, tempOutputPath)
 		log = FDKUtils.runShellCmd(command)
 		if not ("Done." in log):
 			print log
@@ -1814,16 +1814,16 @@ def copyTTFGlyphTables(inputFilePath, tempOutputPath, outputPath):
 			return
 	
 	
-		command = "sfntedit -a \"%s\"=%s %s 2>&1" % (tableTag, tempTablePath, outputPath)
+		command = "sfntedit -a \"%s\"=\"%s\" \"%s\" 2>&1" % (tableTag, tempTablePath, outputPath)
 		log = FDKUtils.runShellCmd(command)
 		if not ("Done." in log):
 			print log
 			print "Error in merging makeotf tables with TrueType source font to final TrueType output font at '%s'." % (outputPath)
 			return
 		
-		print "\tcopied %s." % (tableTag)
+		print "\tcopied \"%s\"." % (tableTag)
 		
-	command = "sfntedit -f %s 2>&1" % (outputPath)
+	command = "sfntedit -f \"%s\" 2>&1" % (outputPath)
 	log = FDKUtils.runShellCmd(command)
 	if not gDebug:
 		if os.path.exists(tempTablePath):

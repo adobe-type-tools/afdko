@@ -1,9 +1,13 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
-FDK. v2.5 July 17 change number 64655.
+FDK. v2.5 July 27 2015 change number 64685.
 
-FDK. 
+	makeotf. Fixed bug reported by Paul van der Laan: failed to build ttf file when
+	the output file name contains spaces.
+
+FDK. v2.5 July 17 2015 change number 64655.
+
 	autohint.
 	Fixed bug in ufoFontTools.py which placed a new hint block after a flex
 	operator, when it should be before.
@@ -42,7 +46,7 @@ FDK.
 	Fix bug in BezTools.py on Windows, when having to use a temp file
 
 
-FDK. v2.5 May 26 change number 64261.
+FDK. v2.5 May 26 2015 change number 64261.
 
 	autohintexe. Worked through a lot of problems with fractional coordinates.
 	In the previous release, autohintexe was changed to read and write
@@ -69,7 +73,7 @@ FDK. v2.5 May 26 change number 64261.
 	transform matrix, even though the default transform is the identity
 	transform. This has the side-effect of rounding to integer values.
 	
-FDK. v2.5 April 8 change number 64043.
+FDK. v2.5 April 8 2015 change number 64043.
 
 	checkOutlinesUFO.
 	Added  new logic to delete any glyphs from the processed layer which are
