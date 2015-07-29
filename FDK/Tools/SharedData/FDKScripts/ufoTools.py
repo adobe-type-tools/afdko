@@ -1,5 +1,5 @@
 """
-ufoTools.py v1.20 July 6 2015
+ufoTools.py v1.21 July 29 2015
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -333,13 +333,13 @@ class UFOFontData:
 		if len(self.glyphMap) == 0:
 			self.loadGlyphMap()
 		
-		if self.writeToDefaultLayer:
-			glyphFileName = self.glyphMap[glyphName]
-		else:
-			try:
-				glyphFileName = self.processedLayerGlyphMap[glyphName]
-			except KeyError:
-				glyphFileName = self.glyphMap[glyphName]
+		glyphFileName = self.glyphMap[glyphName]
+		if not self.writeToDefaultLayer:
+			if self.processedLayerGlyphMap:
+				try:
+					glyphFileName = self.processedLayerGlyphMap[glyphName]
+				except KeyError:
+					pass
 		
 		glifFilePath = os.path.join(self.glyphWriteDir, glyphFileName)
 		return glifFilePath
@@ -411,11 +411,15 @@ class UFOFontData:
 			self.loadGlyphMap()
 		glyphFileName = self.glyphMap[glyphName]
 
-		if self.useProcessedLayer: # Try for processed layer first.
-			self.curSrcDir = self.glyphLayerDir
-			glyphPath = os.path.join(self.glyphLayerDir, glyphFileName)
-			if os.path.exists(glyphPath):
-				return glyphPath
+		if self.useProcessedLayer and self.processedLayerGlyphMap: # Try for processed layer first.
+			try:
+				glyphFileName = self.processedLayerGlyphMap[glyphName]
+				self.curSrcDir = self.glyphLayerDir
+				glyphPath = os.path.join(self.glyphLayerDir, glyphFileName)
+				if os.path.exists(glyphPath):
+					return glyphPath
+			except KeyError:
+				pass
 				
 		self.curSrcDir = self.glyphDefaultDir
 		glyphPath = os.path.join(self.curSrcDir, glyphFileName)
@@ -432,8 +436,14 @@ class UFOFontData:
 	def getGlyphProcessedPath(self, glyphName):
 		if len(self.glyphMap) == 0:
 			self.loadGlyphMap()
-		glyphFileName = self.glyphMap[glyphName]
-		glyphPath = os.path.join(self.glyphLayerDir, glyphFileName)
+		if not self.processedLayerGlyphMap:
+			return None
+			
+		try:
+			glyphFileName = self.processedLayerGlyphMap[glyphName]
+			glyphPath = os.path.join(self.glyphLayerDir, glyphFileName)
+		except KeyError:
+			glyphPath = None
 		return glyphPath
 
 	def updateHashEntry(self, glyphName, changed):
@@ -494,7 +504,7 @@ class UFOFontData:
 					self.hashMapChanged = 1
 					self.hashMap[glyphName] = [newSrcHash, [self.programName] ]
 					glyphPath = self.getGlyphProcessedPath(glyphName)
-					if os.path.exists(glyphPath):
+					if glyphPath and os.path.exists(glyphPath):
 						os.remove(glyphPath)
 				else:
 					historyList.append(self.programName)
@@ -504,7 +514,7 @@ class UFOFontData:
 				self.hashMapChanged = 1
 				self.hashMap[glyphName] = [newSrcHash, [self.programName] ]
 				glyphPath = self.getGlyphProcessedPath(glyphName)
-				if os.path.exists(glyphPath):
+				if glyphPath and os.path.exists(glyphPath):
 					os.remove(glyphPath)
 					self.deletedGlyph = True
 			else: # case for autohint
@@ -556,7 +566,11 @@ class UFOFontData:
 		skip = self.checkSkipGlyph(glyphName, newHash, doAll)			
 				
 		# If  self.useProcessedLayer and there is a glyph in the processed layer, get the outline from that.
-		if self.useProcessedLayer:
+		if self.useProcessedLayer and self.processedLayerGlyphMap:
+			try:
+				glyphFileName = self.processedLayerGlyphMap[glyphName]
+			except KeyError:
+				pass
 			glyphPath = os.path.join(self.glyphLayerDir, glyphFileName)
 			if os.path.exists(glyphPath):
 				width, glifXML, outlineXML = self.getGlyphXML(self.glyphLayerDir, glyphFileName)
@@ -639,7 +653,13 @@ class UFOFontData:
 		else:
 			contentsDict = {}
 		for glyphName in newGlyphData.keys():
-			contentsDict[glyphName] = self.glyphMap[glyphName]
+			if self.useProcessedLayer and self.processedLayerGlyphMap: # Try for processed layer first.
+				try:
+					contentsDict[glyphName] = self.processedLayerGlyphMap[glyphName]
+				except KeyError:
+					contentsDict[glyphName] = self.glyphMap[glyphName]
+			else:		
+				contentsDict[glyphName] = self.glyphMap[glyphName]
 		plistlib.writePlist(contentsDict, contentsFilePath)
 
 	def getFontInfo(self, fontPSName, inputPath, allow_no_blues, noFlex, vCounterGlyphs, hCounterGlyphs, fdIndex=0):
@@ -1986,7 +2006,6 @@ def cleanUpGLIFFiles(defaultContentsFilePath, glyphDirPath, doWarning=True):
 		if doWarning:
 			print "Removing glif file %s that was not in the contents.plist file: %s" % (glyphDirPath, contentsFilePath)
 		changed = 1
-		del fileDict[fileName]
 		
 	if 	defaultContentsFilePath == contentsFilePath:
 		return changed
@@ -2008,7 +2027,7 @@ def cleanUpGLIFFiles(defaultContentsFilePath, glyphDirPath, doWarning=True):
 				changed = 1
 			
 		except KeyError:
-			print"Soudln't happen", glyphName, defaultContentsFilePath
+			print"Shouldn't happen", glyphName, defaultContentsFilePath
 	
 		
 	return changed
