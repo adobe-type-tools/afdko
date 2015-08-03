@@ -1,10 +1,14 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
-FDK. v2.5 July 27 2015 change number 64685.
+FDK. v2.5 Aug 3 2015 change number 64966.
 
-	makeotf. Fixed bug reported by Paul van der Laan: failed to build ttf file when
+	makeotf.
+	Fixed bug reported by Paul van der Laan: failed to build ttf file when
 	the output file name contains spaces.
+	
+	checkOutlinesUFO. 
+	Fixed bug where presence of outlines with only one or two points caused a stack dump.
 
 FDK. v2.5 July 17 2015 change number 64655.
 

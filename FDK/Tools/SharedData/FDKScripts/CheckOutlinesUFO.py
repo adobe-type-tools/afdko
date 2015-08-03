@@ -2,7 +2,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-   checkOutlinesUFO program v1.12 July 2 2015
+   checkOutlinesUFO program v1.13 Aug 3 2015
    
    checkOutlinesUFO [-e] [-g glyphList] [-gf <file name>] [-all] [-noOverlap] [-noBasicChecks] [-setMinArea <n>] [-setTolerance <n>] [-wd]
    
@@ -598,6 +598,8 @@ def removeColinearLines(newGlyph, changed, msg, options):
 	"""
 	for contour in newGlyph.contours:
 		numOps = len(contour._points)
+		if numOps < 3:
+			continue # Need at least two line segments to have a co-linear line.
 		p0 = contour._points[0]
 		i = 0
 		while i < numOps:
@@ -606,7 +608,7 @@ def removeColinearLines(newGlyph, changed, msg, options):
 			# Check for co-linear line.
 			if type == "line":
 				p1 = contour._points[i-1]
-				if p1[0] == "line": # if p1 is a curve end point, no need to do colinear check!
+				if p1[0] == "line": # if p1 is a curve  point, no need to do colinear check!
 					p2 = contour._points[i-2]
 					isCL1 = isColinearLine(p2[1], p1[1], p0[1], options.tolerance)
 					if isCL1:
@@ -614,6 +616,8 @@ def removeColinearLines(newGlyph, changed, msg, options):
 						changed = 1
 						del contour._points[i-1]
 						numOps -= 1
+						if numOps < 3:
+							break # Need at least two line segments to have a co-linear line.
 						i -= 1
 			i += 1
 	return changed, msg
