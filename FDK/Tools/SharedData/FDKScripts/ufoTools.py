@@ -1,5 +1,5 @@
 """
-ufoTools.py v1.21 July 29 2015
+ufoTools.py v1.22 Aug 3 2015
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -507,7 +507,8 @@ class UFOFontData:
 					if glyphPath and os.path.exists(glyphPath):
 						os.remove(glyphPath)
 				else:
-					historyList.append(self.programName)
+					if (programHistoryIndex < 0):
+						historyList.append(self.programName)
 		else:
 			# If the source hash has changed, we need to delete the processed layer glyph.
 			if not self.useProcessedLayer: # case  for Checkoutlines
