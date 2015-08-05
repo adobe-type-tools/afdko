@@ -1,7 +1,7 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
-FDK. v2.5 Aug 3 2015 change number 64699.
+FDK. v2.5 Aug 4 2015 change number 64700.
 
 	autohint.
 	Fixed bug in ufoTools.py that was harmless but annoying. Everytime that
@@ -10,13 +10,16 @@ FDK. v2.5 Aug 3 2015 change number 64699.
 	opened the hashmap file with a text editor, and perhaps eventually in
 	slightly slower performance.
 	
-	
 	checkOutlinesUFO. 
 	Fixed bug where presence of outlines with only one or two points caused a stack dump.
 
 	makeotf.
 	Fixed bug reported by Paul van der Laan: failed to build ttf file when
 	the output file name contains spaces.
+	
+	spot.
+	Fixed new bug that caused spot to crash when dumping GPOS 'size' feature in 
+	feature file format.
 	
 FDK. v2.5 July 17 2015 change number 64655.
 

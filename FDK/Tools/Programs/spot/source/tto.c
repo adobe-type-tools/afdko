@@ -804,8 +804,7 @@ void ttoDumpLookupifFeaturePresent(LookupList *lookuplist,
 
                             /*ASP: Size specific code*/
                             if(feature->FeatureParam!=0) {
-                                index = feature->LookupListIndex[0];
-                                if (!((level!=6)  && SeenLookups[index].seen))
+                                if (!(level!=6))
                                     dumpFeatureParams(record, feature, level, currentScript, currentLang);
                                 dumpFeatureParams(record, feature, level, currentScript, currentLang);
                             }
@@ -1554,8 +1553,7 @@ void ttoDecompileByScript(ScriptList *scriptlist, FeatureList *featurelist, Look
                        if (level==7)
 					   {
                            if(feature->FeatureParam!=0) {
-                               index = feature->LookupListIndex[0];
-                               if (!((level!=6)  && SeenLookups[index].seen))
+                               if (!(level!=6))
                                    dumpFeatureParams(record, feature, level, currentScript, currentLang);
                            }
 					   }
@@ -1656,8 +1654,7 @@ void ttoDecompileByScript(ScriptList *scriptlist, FeatureList *featurelist, Look
 				   if (level==7)
 					   {
 					   if(feature->FeatureParam!=0) {
-                           index = feature->LookupListIndex[0];
-                           if (!((level!=6)  && SeenLookups[index].seen))
+                           if (!(level!=6))
                                dumpFeatureParams(record, feature, level, currentScript, currentLang);
 					   }
                     }
