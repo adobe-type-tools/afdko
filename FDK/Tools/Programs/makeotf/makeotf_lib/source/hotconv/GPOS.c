@@ -1290,14 +1290,8 @@ static void fillSizeFeature(hotCtx g, GPOSCtx h, Subtable *sub) {
 		}
 
 		if (nameIDPresent != 0) {
-			if ((nameIDPresent & MISSING_WIN_DEFAULT_NAME) && (nameIDPresent & MISSING_MAC_DEFAULT_NAME)) {
-				hotMsg(g, hotFATAL, "Missing both Mac and Windows default names for size feature menu name nameid %i",  nameid);
-			}
-			else if (nameIDPresent & MISSING_WIN_DEFAULT_NAME) {
+			if (nameIDPresent & MISSING_WIN_DEFAULT_NAME) {
 				hotMsg(g, hotFATAL, "Missing Windows default name for size feature menu name nameid %i",  nameid);
-			}
-			else if (nameIDPresent & MISSING_MAC_DEFAULT_NAME) {
-				hotMsg(g, hotFATAL, "Missing Mac default name for size feature menu name nameid %i",  nameid);
 			}
 		}
 	}

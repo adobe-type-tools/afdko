@@ -763,15 +763,8 @@ static void fillGSUBFeatureNameParam(hotCtx g, GSUBCtx h, Subtable *sub) {
 	}
 
 	if (nameIDPresent != 0) {
-		if ((nameIDPresent & MISSING_WIN_DEFAULT_NAME)
-		    && (nameIDPresent & MISSING_MAC_DEFAULT_NAME)) {
-			hotMsg(g, hotFATAL, "Missing both Mac and Windows default names for feature name  nameid %i",  nameid);
-		}
-		else if (nameIDPresent & MISSING_WIN_DEFAULT_NAME) {
+		if (nameIDPresent & MISSING_WIN_DEFAULT_NAME) {
 			hotMsg(g, hotFATAL, "Missing Windows default name for for feature name  nameid %i",  nameid);
-		}
-		else if (nameIDPresent & MISSING_MAC_DEFAULT_NAME) {
-			hotMsg(g, hotFATAL, "Missing Mac default name for for feature name  nameid %i",  nameid);
 		}
 	}
 }
@@ -821,15 +814,8 @@ static void fillGSUBCVParam(hotCtx g, GSUBCtx h, Subtable *sub) {
         if (nameid != 0) {
             unsigned short nameIDPresent = nameVerifyDefaultNames(g, nameid);
             if (nameIDPresent != 0) {
-                if ((nameIDPresent & MISSING_WIN_DEFAULT_NAME)
-                    && (nameIDPresent & MISSING_MAC_DEFAULT_NAME)) {
-                    hotMsg(g, hotFATAL, "Missing both Mac and Windows default names for feature name  nameid %i",  nameid);
-                }
-                else if (nameIDPresent & MISSING_WIN_DEFAULT_NAME) {
+                if (nameIDPresent & MISSING_WIN_DEFAULT_NAME) {
                     hotMsg(g, hotFATAL, "Missing Windows default name for for feature name  nameid %i",  nameid);
-                }
-                else if (nameIDPresent & MISSING_MAC_DEFAULT_NAME) {
-                    hotMsg(g, hotFATAL, "Missing Mac default name for for feature name  nameid %i",  nameid);
                 }
             }
         }
