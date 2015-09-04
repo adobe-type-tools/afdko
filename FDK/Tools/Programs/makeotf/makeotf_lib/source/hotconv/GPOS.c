@@ -1276,7 +1276,6 @@ static void fillSizeFeature(hotCtx g, GPOSCtx h, Subtable *sub) {
 	 * if so, then there is no special sub family menu name.
 	 */
 	if ((sub->feature == size_) && (params[kSizeSubFamilyID] != 0)) {
-		int nameIDPresent;
 		unsigned short nameid =  h->featNameID;
 
 		params[kSizeMenuNameID] = nameid;
@@ -1284,15 +1283,11 @@ static void fillSizeFeature(hotCtx g, GPOSCtx h, Subtable *sub) {
 		/* If there is a sub family menu name id, check if the default names are present,
 		 * and complain if they are not.
 		 */
-		nameIDPresent = 0;
 		if (nameid != 0) {
-			nameIDPresent = nameVerifyDefaultNames(g, nameid);
-		}
-
-		if (nameIDPresent != 0) {
-			if (nameIDPresent & MISSING_WIN_DEFAULT_NAME) {
-				hotMsg(g, hotFATAL, "Missing Windows default name for size feature menu name nameid %i",  nameid);
-			}
+		    unsigned short nameIDPresent = nameVerifyDefaultNames(g, nameid);
+		    if (nameIDPresent && nameIDPresent & MISSING_WIN_DEFAULT_NAME) {
+			hotMsg(g, hotFATAL, "Missing Windows default name for for feature name  nameid %i",  nameid);
+		    }
 		}
 	}
 	else {
