@@ -3,11 +3,11 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 
 
 __usage__ = """
-CheckOutlines v1.25 May 20 2015
+CheckOutlines v1.26 Sep 4 2015
 
 Outline checking program for OpenType/CFF fonts.
 
-Usage: checkOutlines [-h]  [-u] [-he] -g <glyph list>] [-gf <glyphNameList>][-e] [-v] [-s] [-x] [-3] [-4] [-I] [-i] [-O] [-V] [-k] [-C <tol>] [-L <tol>] [-S <tol>] [-K <tol>] [-log <path>] [-o outputFile] input-font-file
+Usage: checkOutlines [-h]  [-u] [-he] -g <glyph list>] [-gf <glyphNameList>][-e] [-v] [-s] [-x] [-3] [-4] [-5] [-I] [-i] [-O] [-V] [-k] [-C <tol>] [-L <tol>] [-S <tol>] [-K <tol>] [-log <path>] [-o outputFile] input-font-file
 Example:  checkOutlines -e -g A-B -o test.otf  MyNewFont.otf
 """
 
@@ -100,6 +100,9 @@ orientation problems, which always need to be fixed.
 	This test reports if a line is so nearly vertical or horizontal that
 	the editor probably meant it to be exactly vertical or horizontal.
 
+-5	Check for tiny paths: default on. This is turned off only by -I.
+	This test reports if a path is so small that it is almost certainly an accident. 
+
 -O	Skip checking path orientations/directions: default on.
 	Bad path orientation and overlap will make the glyph fill with black 
 	incorrectly at some point sizes.
@@ -150,6 +153,8 @@ orientation problems, which always need to be fixed.
 	- Do triangle test. See "-3" above.
 	
 	- Do nearly horizontal/vertical test. See "-4" above.
+	
+	- Check for tiny paths. See "-5" above.
 	
 -I	Skip checks other than overlap, path orientation, and coincident paths.
 
@@ -343,6 +348,7 @@ class focusOptions:
 		self.doSpikeTest = 0
 		self.doTriangleTest = 0
 		self.doNearlyVH = 0
+		self.cleanPath = 0
 		self.doPathDirectionTest = 1
 		self.doCoincidentPathTest = 1
 		self.curveTolerance = ""
@@ -520,6 +526,8 @@ def getOptions():
 			options.doTriangleTest = 1
 		elif arg == "-4":
 			options.doNearlyVH = 1
+		elif arg == "-5":
+			options.cleanPath = 1
 		elif arg == "-O":
 			options.doPathDirectionTest = 0
 		elif arg == "-k":
@@ -579,6 +587,8 @@ def buildArgString(options):
 		arg_string = arg_string + " -3"
 	if options.doNearlyVH:
 		arg_string = arg_string + " -4"
+	if options.cleanPath:
+		arg_string = arg_string + " -5"
 	if not options.doPathDirectionTest:
 		arg_string = arg_string + " -O"
 	if not options.doOverlapCheck:

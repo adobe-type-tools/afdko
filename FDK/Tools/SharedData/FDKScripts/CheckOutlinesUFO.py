@@ -2,7 +2,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-   checkOutlinesUFO program v1.13 Aug 3 2015
+   checkOutlinesUFO program v1.14 Sep 4 2015
    
    checkOutlinesUFO [-e] [-g glyphList] [-gf <file name>] [-all] [-noOverlap] [-noBasicChecks] [-setMinArea <n>] [-setTolerance <n>] [-wd]
    
@@ -428,9 +428,10 @@ def filterGlyphList(options, fontGlyphList, fontFileName):
 def getDigest(dGlyph):
 	"""copied from robofab ObjectsBase.py.
 	"""
-	mp = DigestPointPen()
+	mp = DigestPointPen() 
 	dGlyph.drawPoints(mp)
-	digest = mp.getDigestPointsOnly(needSort=False)
+	digest = list(mp.getDigestPointsOnly(needSort=False))
+	digest.append( (len(dGlyph.contours), 0) )
 	# we need to round to int.
 	intDigest = digest #[ (int(p[0]), int(p[1])) for p in digest]
 	return intDigest
@@ -691,6 +692,7 @@ def doOverlapRemoval(bGlyph, oldDigest, changed, msg, options):
 	newDigest = []
 	prevDigest = oldDigest
 	newGlyph = bGlyph
+	
 	while newDigest != prevDigest:
 		# This hack to get around a bug in booleanGlyph. Consider an M sitting on a separate rectangular crossbar contour,
 		# the bottom of the M legs being co-linear with the top of the cross bar. pyClipper will merge only one of the 
