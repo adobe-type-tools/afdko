@@ -41,7 +41,7 @@ Project file.
 """
 
 __usage__ = """
-makeotf v2.0.83 July 27 2015
+makeotf v2.0.84 Sep 3 2015
 -f <input font>         Specify input font path. Default is 'font.pfa'.
 -o <output font>        Specify output font path. Default is
                         '<PostScript-Name>.otf'.
@@ -1241,7 +1241,7 @@ def lookUpDirTree(fileName):
 	These are often located one or two dir levels above the font file, as they are shared by the font family.
 	"""
 
-	maxLevels = 2
+	maxLevels = 3
 	i = 0
 	found = 0
 	dirPath, fileName = os.path.split(fileName)

@@ -160,7 +160,7 @@ void csEndFont(tcCtx g, unsigned nChars, unsigned short *reorder) {
 	char *dst;
 	char *dststart;
 	CSData *chars = &h->font->chars;
-	long size = h->procs.endFont(g);
+	unsigned long size = h->procs.endFont(g);
 	int cid = h->font->flags & FONT_CID;
 
 	/* Allocate to store charstring data */

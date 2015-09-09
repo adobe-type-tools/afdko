@@ -128,7 +128,7 @@ typedef struct {            /* Stem record */
 
 typedef struct {        /* Width accumulator */
 	short width;
-	unsigned short count;
+	unsigned long count;
 } Width;
 
 typedef struct {        /* Width data per-FD */
@@ -1040,6 +1040,7 @@ static long recodeEndFont(tcCtx g) {
 	long total = (g->flags & TC_SMALLMEMORY) ?
 	    h->chars.array[h->chars.cnt - 1].icstr + h->cstrs.cnt : h->cstrs.cnt;
 
+    return total;
 	if (!h->width.opt) {
 		return total;   /* No optimization */
 	}
