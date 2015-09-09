@@ -1,6 +1,38 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
+FDK. v2.5 Sep 8 2015 change number 64747.
+
+	autohint and tx.
+	Switched to using new text format that is plist-compatible for T1 hint data in UFO fonts.
+	See header of FDK/Tools/SharedData/FDKScripts/ufoTools.py for format.
+	
+	checkOutlinesUFO
+	Fixed bug where abutting paths didn't get merged if there were no changes in the set of points.
+
+	checkOutlines
+	Changed -I option so that it also turns off checking for tiny paths. Added
+	new option -5 to turn this check back on again.
+	Increased max number of paths in a glyph from 64 to 128, per request from a developer.
+	
+	MakeOTF User Guide.
+	Fix typos reported by Gustavo Ferreira
+	
+	MakeOTF.py.
+	Increased max number of directories to look upwards when searching for
+	GOADB/FontMenuNameDB from 2 to 3
+	
+	makeotfexe.
+	Extended the set of characters allowed in glyph names to include + * : ~ ^ !
+	Fixed crashing bug with more than 32K glyphs in a name-keyed font, reported by Gustavo Ferreira.
+	Merged changes from Kahled Hosny, to remove requirement that 'size' feature menu names have Mac 
+	platform names.
+	
+	tx family
+	Fix crash when using '-gx' option with source UFO fonts for 'tx' family of tools.
+	Fix crash when a UFO glyph point has a name attribute with an empty string.
+	Fix crash when a UFO font has no public.glyphOrder dict in teh lib.plist file.
+	
 FDK. v2.5 Aug 4 2015 change number 64700.
 
 	autohint.
