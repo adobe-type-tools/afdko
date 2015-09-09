@@ -1,12 +1,12 @@
 """
-ufoTools.py v1.22 Aug 3 2015
+ufoTools.py v1.24 Sep 7 2015
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
 data without fully parsing and instantiating UFO objects, and without
 requiring that the AFDKO contain the robofab libraries.
 
-Modified in Nov 2014, when AFDKO acquired the robofab libraries. It can now
+Modified in Nov 2014, when AFDKO added the robofab libraries. It can now
 be used with UFO fonts only to support the hash mechanism. 
 
 Developed in order to support checkOutlines and autohint, the code
@@ -99,6 +99,24 @@ data in the new GLIF file.
 autohint saves the hint data in the GLIF private data area, /lib/dict,
 as a key and data pair. See below for the format.
 
+autohint started with _hintFormat1_, a reasonably compact XML representation of
+the data. In Sep 2105, autohhint switched to _hintFormat2_ in order to be plist
+compatible. This was necessary in order to be compatible with the UFO spec, by
+was driven more immediately by the fact the the UFO font file normalization
+tools stripped out the _hintFormat1_ hint data as invalid elements.
+
+
+"""
+
+__copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+"""
+
+import ConvertFontToCID
+
+_hintFormat1_ = """
+
+Deprecated. See _hintFormat2_ below.
+
 A <hintset> element identifies a specific point by its name, and 
 describes a new set of stem hints which should be applied before the 
 specific point. 
@@ -118,15 +136,6 @@ the path. Hence, if a hintset references the first operator, there is a
 potential ambiguity: should it be applied before the T1 move-to, or
 before the final T1 path operator?  The logic here applies it before the
 move-to only. 
-
-"""
-
-__copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-"""
-
-import ConvertFontToCID
-
-_hintFormat_ = """
 
  <glyph>
 ...
@@ -185,6 +194,107 @@ Example from "B" in SourceCodePro-Regular
 </data>
 
 """
+
+_hintFormat2_ = """
+
+A <dict> element in the hintSetList array identifies a specific point by its
+name, and describes a new set of stem hints which should be applied before the
+specific point.
+
+A <string> element in the flexList identifies a specific point by its name. The
+point is the first point of a curve. The presence of the element is a processing
+suggestion, that the curve and its successor curve should be converted to a flex
+operator.
+
+One challenge in applying the hintSetList and flexList elements is that in the
+GLIF format, there is no explicit start and end operator: the first path
+operator is both the end and the start of the path. I have chosen to convert
+this to T1 by taking the first path operator, and making it a move-to. I then
+also use it as the last path operator. An exception is a line-to; in T1, this is
+omitted, as it is implied by the need to close the path. Hence, if a hintset
+references the first operator, there is a potential ambiguity: should it be
+applied before the T1 move-to, or before the final T1 path operator?  The logic
+here applies it before the move-to only.
+ <glyph>
+...
+	<lib>
+		<dict>
+			<key><com.adobe.type.autohint></key>
+    		<dict>
+				<key>id</key>
+				<string> <fingerprint for glyph> </string>
+				<key>hintSetList</key>
+				<array>
+					<dict>
+						<key>pointTag</key>
+						<string> <point name> </string>
+						<key>stems</key>
+						<array>
+							<string>hstem <position value> <width value></string>*
+							<string>vstem <position value> <width value></string>*
+							<string>hstem3 <position value 0>...<position value 5></string>*
+							<string>vstem3 <position value 0>...<position value 5></string>*
+						</array>
+					</dict>*
+				</array>
+
+				<key>flexList</key>*
+				<array>
+					<string><point name></string>+
+				</array>
+			</dict>
+		</dict>
+	</lib>
+</glyph>
+
+Example from "B" in SourceCodePro-Regular
+<key><com.adobe.type.autohint><key>
+<dict>
+	<key>id</key>
+	<string>64bf4987f05ced2a50195f971cd924984047eb1d79c8c43e6a0054f59cc85dea23a49deb20946a4ea84840534363f7a13cca31a81b1e7e33c832185173369086</string>
+	<key>hintSetList</key>
+	<array>
+		<dict>
+			<key>pointTag</key>
+			<string>hintSet0000</string>
+			<key>stems</key>
+			<array>
+				<string>hstem 338 28</string>
+				<string>hstem 632 28</string>
+				<string>hstem 100 32</string>
+				<string>hstem 496 32</string>
+			</array>
+		</dict>
+		<dict>
+			<key>pointTag</key>
+			<string>hintSet0005</string>
+			<key>stems</key>
+			<array>
+				<string>hstem 0 28</string>
+				<string>hstem 338 28</string>
+				<string>hstem 632 28</string>
+				<string>hstem 100 32</string>
+				<string>hstem 454 32</string>
+				<string>hstem 496 32</string>
+			</array>
+		</dict>
+		<dict>
+			<key>pointTag</key>
+			<string>hintSet0016</string>
+			<key>stems</key>
+			<array>
+				<string>hstem 0 28</string>
+				<string>hstem 338 28</string>
+				<string>hstem 632 28</string>
+				<string>hstem 100 32</string>
+				<string>hstem 496 32</string>
+			</array>
+		</dict>
+	</array>
+<dict>
+
+"""
+
 import sys
 import re
 import time
@@ -233,12 +343,14 @@ kHStem3Name = "hstem3"
 kVStem3Name = "vstem3"
 kStem3Pos = "stem3List"
 kHintSetListName = "hintSetList"
+kFlexListName = "hintSetList"
 kHintSetName = "hintset"
 kBaseFlexName = "flexCurve"
 kPointTag = "pointTag"
 kStemIndexName = "stemindex"
 kFlexIndexListName = "flexList"
-kHintDomainName = "com.adobe.type.autohint"
+kHintDomainName1 = "com.adobe.type.autohint"
+kHintDomainName2 = "com.adobe.type.autohint.v2"
 kPointName = "name"
 # Hint stuff
 kStackLimit = 46
@@ -1323,15 +1435,32 @@ class HintMask:
 		
 	def addHintSet(self, hintSetList):
 		# Add the hint set to hintSetList
-		newHintSet = XMLElement(kHintSetName, {kPointTag: "%s" % (self.pointName) } )
-		hintSetList.append(newHintSet)
+		newHintSetDict = XMLElement("dict")
+		hintSetList.append(newHintSetDict)
+		
+		newHintSetKey = XMLElement("key")
+		newHintSetKey.text = kPointTag
+		newHintSetDict.append(newHintSetKey)
+		
+		newHintSetValue = XMLElement("string")
+		newHintSetValue.text = self.pointName
+		newHintSetDict.append(newHintSetValue)
+		
+		stemKey = XMLElement("key")
+		stemKey.text = "stems"
+		newHintSetDict.append(stemKey)
+		
+		newHintSetArray = XMLElement("array")
+		newHintSetDict.append(newHintSetArray)
+
+		newHintSet = []
 		if (len(self.hList) > 0) or (len(self.vstem3List)):
 			isH = 1
-			addHintList(self.hList, self.hstem3List, newHintSet, isH)
+			addHintList(self.hList, self.hstem3List, newHintSetArray, isH)
 
 		if (len(self.vList) > 0) or (len(self.vstem3List)):
 			isH = 0
-			addHintList(self.vList, self.vstem3List, newHintSet, isH)
+			addHintList(self.vList, self.vstem3List, newHintSetArray, isH)
 
 
 def makeStemHintList(hintsStem3, stemList, isH):
@@ -1342,20 +1471,20 @@ def makeStemHintList(hintsStem3, stemList, isH):
 		op = kHStem3Name
 	else: 
 		op = kVStem3Name
-	newStem = XMLElement(op )
-	posList = []
+	newStem = XMLElement("string")
+	posList = [op]
 	for stem3 in hintsStem3:
 		for pos, width in stem3:
 			if (type(pos) == type(0.0)) and (int(pos) == pos):
 				pos = int(pos)
 			if (type(width) == type(0.0)) and (int(width) == width):
 				width = int(width)
-			posList.append("%s,%s" % (pos, width))
-	posAttr = ",".join(posList)
-	newStem.attrib[kStem3Pos] = posAttr
+			posList.append("%s %s" % (pos, width))
+	posString = " ".join(posList)
+	newStem.text = posString
 	stemList.append(newStem)
 		
-def makeHintList(hints, stemList, isH):
+def makeHintList(hints, newHintSetArray, isH):
 	# Add the list of  hint operators
 	hintList = []
 	lastPos = 0
@@ -1373,15 +1502,15 @@ def makeHintList(hints, stemList, isH):
 			op = kHStemName
 		else: 
 			op = kVStemName
-		newStem = XMLElement(op, {kStemPosName: "%s" % (pos), kStemWidthName: "%s" % (width) } )
-		stemList.append(newStem)
+		newStem = XMLElement("string")
+		newStem.text = "%s %s %s" % (op, pos, width)
+		newHintSetArray.append(newStem)
 
-def addFlexHint(flexList, stemHints):
-	newFlexList = XMLElement(kFlexIndexListName)
-	stemHints.append(newFlexList)
+def addFlexHint(flexList, flexArray):
 	for pointTag in flexList:
-		newFlexTag =  XMLElement("flex", {"pointTag": "%s" % (pointTag) } )
-		newFlexList.append(newFlexTag)
+		newFlexTag =  XMLElement("string")
+		newFlexTag.text = pointTag
+		flexArray.append(newFlexTag)
 
 def fixStartPoint(outlineItem, opList):
 	# For the GLIF format, the idea of first/last point is funky, because the format avoids identifying a 
@@ -1749,17 +1878,37 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
 	
 	hintSetList = None
 	if (seenHints) or (len(flexList) > 0):
-		hintSetList = XMLElement(kHintSetListName)
+		hintInfoDict = XMLElement("dict")
+
+		idItem = XMLElement("key")
+		idItem.text = "id"
+		hintInfoDict.append(idItem)
+
+		idString = XMLElement("string")
+		idString.text = "id"
+		hintInfoDict.append(idString)
 		
+		hintSetListItem = XMLElement("key")
+		hintSetListItem.text = kHintSetListName
+		hintInfoDict.append(hintSetListItem)
+		
+		hintSetListArray =  XMLElement("array")
+		hintInfoDict.append(hintSetListArray)
 		# Convert the rest of the hint masks to a hintmask op and hintmask bytes.
 		for hintMask in hintMaskList:
-			hintMask.addHintSet(hintSetList)
+			hintMask.addHintSet(hintSetListArray)
 				
 		if len(flexList) > 0:
-			addFlexHint(flexList, hintSetList)
-	return newOutline, hintSetList
+			hintSetListItem = XMLElement("key")
+			hintSetListItem.text = kFlexIndexListName
+			hintInfoDict.append(hintSetListItem)
+			
+			flexArray =  XMLElement("array")
+			hintInfoDict.append(flexArray)
+			addFlexHint(flexList, flexArray)
+	return newOutline, hintInfoDict
 
-def addHintList(hints, hintsStem3, stemList, isH):
+def addHintList(hints, hintsStem3, newHintSetArray, isH):
 	# A charstring may have regular v stem hints or vstem3 hints, but not both.
 	# Same for h stem hints and hstem3 hints.
 	if len(hintsStem3) > 0:
@@ -1769,7 +1918,7 @@ def addHintList(hints, hintsStem3, stemList, isH):
 		if numHints >=hintLimit:
 			hintsStem3 = hintsStem3[:hintLimit]
 			numHints = hintLimit
-		makeStemHintList(hintsStem3, stemList, isH)
+		makeStemHintList(hintsStem3, newHintSetArray, isH)
 		
 	else:
 		hints.sort()
@@ -1778,7 +1927,7 @@ def addHintList(hints, hintsStem3, stemList, isH):
 		if numHints >=hintLimit:
 			hints = hints[:hintLimit]
 			numHints = hintLimit
-		makeHintList(hints, stemList, isH)
+		makeHintList(hints, newHintSetArray, isH)
 
 
 def addWhiteSpace(parent, level):
@@ -1819,7 +1968,7 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly = False):
 		childIndex += 1 
 		
 
-	newOutlineElement, stemHints = convertBezToOutline(ufoFontData, glyphName, bezString )
+	newOutlineElement, hintInfoDict = convertBezToOutline(ufoFontData, glyphName, bezString )
 	#print xmlToString(stemHints)
 	
 	if not hintsOnly:
@@ -1839,7 +1988,7 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly = False):
 	# I assume that convertGLIFToBez has ben run before, which will add an entry for this glyph.
 	ufoFontData.updateHashEntry(glyphName, changed=True)
 	# Add the stem hints.
-	if (stemHints != None):
+	if (hintInfoDict != None):
 		widthXML = glifXML.find("advance")
 		if widthXML != None:
 			width = int(eval(widthXML.get("width")))
@@ -1849,7 +1998,6 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly = False):
 		newGlyphHash, dataList = ufoFontData.buildGlyphHashValue(width, newOutlineElement, glyphName, useDefaultGlyphDir)
 		# We add this hash to the T1 data, as it is the hash which matches the output outline data.
 		# This is not necessarily the same as the the hash of the source data - autohint can be used to change outlines.
-		stemHints.set("id", newGlyphHash)
 		if libIndex > 0:	
 			libItem = glifXML[libIndex]
 		else:
@@ -1866,16 +2014,20 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly = False):
 		childList = list(dictItem)
 		for childItem in childList:
 			i += 1
-			if (childItem.tag == "key") and (childItem.text == kHintDomainName):
+			if (childItem.tag == "key") and ((childItem.text == kHintDomainName1) or (childItem.text == kHintDomainName2)):
 				dictItem.remove(childItem) # remove key
 				dictItem.remove(childList[i]) # remove data item.
 		
+		glyphDictItem = dictItem
 		key = XMLElement("key")
-		key.text = kHintDomainName
-		dictItem.append(key)
-		dataItem = XMLElement("data")
-		dataItem.append(stemHints)
-		dictItem.append(dataItem)
+		key.text = kHintDomainName2
+		glyphDictItem.append(key)
+		
+		glyphDictItem.append(hintInfoDict)
+
+		childList = list(hintInfoDict)
+		idValue = childList[1]
+		idValue.text = newGlyphHash
 
 	addWhiteSpace(glifXML, 0)
 	return glifXML
