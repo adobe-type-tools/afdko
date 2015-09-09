@@ -1918,7 +1918,7 @@ static void getGlyphList(txCtx h)
 	h->cb.saveGlyphBeg = h->cb.glyph.beg; 
 
 	/* Insert data gather function */
-	h->cb.glyph.beg = getGlyphBeg;
+    h->cb.glyph.beg = getGlyphBeg;
 	h->cb.glyph.indirect_ctx = h;
 
 	/* Iterate glyphs */
@@ -5063,7 +5063,7 @@ static void invertSubset(txCtx h)
 	h->cb.saveGlyphBeg = h->cb.glyph.beg; 
 
 	/* Insert data gather function */
-	h->cb.glyph.beg = getExcludeGlyphBeg;
+    h->cb.glyph.beg = getExcludeGlyphBeg;
 	h->cb.glyph.indirect_ctx = h;
 	h->flags |= SUBSET_SKIP_NOTDEF;
 	h->flags |= SUBSET_HAS_NOTDEF; /* This gets cleared by the getExcludeGlyphBeg if the .notdef is seen.*/
@@ -5074,7 +5074,7 @@ static void invertSubset(txCtx h)
 		
 	/* Restore saved function */
 	h->cb.glyph.beg = h->cb.saveGlyphBeg;
-	
+ 	
 	getGlyphList(h);
 	dnaSET_CNT(h->subset.glyphs, h->src.glyphs.cnt);
 	cnt = 0;

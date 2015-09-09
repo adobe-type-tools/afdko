@@ -49,6 +49,8 @@ enum
 #define kMaxToken 1024
 #define kMaxName 64
 const char * t1HintKey = "com.adobe.type.autohint";
+const char * t1HintKeyV1 = "com.adobe.type.autohint";
+const char * t1HintKeyV2 = "com.adobe.type.autohint.v2";
 
 typedef struct
 {
@@ -134,10 +136,13 @@ enum
 	outlineInComment,
 	outlineInLib,
 	outlineInLibDict,
+	outlineInID,
 	outlineInHintData,
 	outlineInHintSetList,
     outlineInFlexList,
 	outlineInHintSet,
+	outlineInHintSetName,
+	outlineInHintSetStemList,
 	outlineInStemHint,
     otherDictKey,
     otherInElement,
@@ -541,6 +546,8 @@ static char* getBufferContextPtr(ufoCtx h)
         *(h->src.end-1) = 0;
     else
         *(p+64) = 0;
+    if (strlen(p) > 128)
+        p[128] = 0;
     return p;
     
 }
@@ -555,7 +562,8 @@ static token* setToken(ufoCtx h)
 	if ((len+1) > kMaxToken)
 		return NULL;
     
-	memcpy(h->src.tk.val, h->mark, len);
+	if (len >0)
+        memcpy(h->src.tk.val, h->mark, len);
 	h->src.tk.val[len] = 0;
 	h->src.tk.length = len;
 	h->src.tk.offset = h->src.offset + (h->mark - h->src.buf);
@@ -640,6 +648,7 @@ static token* getAttribute(ufoCtx h, int state)
 	char ch;
     token* tk = NULL;
 	h->mark = NULL;
+    int lastWasQuote = 0;
     
 	while (bufferReady(h))
     {
@@ -648,8 +657,25 @@ static token* getAttribute(ufoCtx h, int state)
         {
 			break;
         }
-		if ( isspace(ch) || (ch == '"'))
-			h->src.next++;
+		if ( isspace(ch))
+		{
+            lastWasQuote = 0;
+            h->src.next++;
+        }
+		else if (ch == '"')
+		{
+            if (lastWasQuote)
+            {
+                ch = 0; /* we have an empty attribute */
+                h->mark = h->src.next;
+                break;
+            }
+            else
+            {
+                h->src.next++;
+                lastWasQuote = 1;
+            }
+        }
 		else
 			break;
     }
@@ -1475,6 +1501,9 @@ static int parseGlyphOrder(ufoCtx h)
 	while (!(h->flags & SEEN_END))
     {
 		tk = getToken(h, state);
+        
+        if (tk == NULL)
+            break;
 		
 		if (tokenEqualStr(tk, "<!--"))
 		{
@@ -1495,7 +1524,7 @@ static int parseGlyphOrder(ufoCtx h)
         {
 			if (state >= 2)
 				fatal(h,ufoErrParse,  "Encountered second <dict while in first");
-            state = 1;
+            state++;
             
             if ((tk->val[tk->length-2] == '/') && (tk->val[tk->length-1] == '>'))
             {
@@ -1506,19 +1535,17 @@ static int parseGlyphOrder(ufoCtx h)
                 }
             }
         }
-		else if (tokenEqualStr(tk, "</dict>") && (state == 1))
+		else if (tokenEqualStr(tk, "</dict>"))
         {
-            if (seenGO)
+            state--;
+            if (seenGO && (state == 1))
             {
                 h->flags |=  SEEN_END;
                 break;
             }
         }
-		else if (tokenEqualStrN(tk, "<key", 4))
+		else if (tokenEqualStrN(tk, "<key", 4) && (state == 1))
         {
-			if (state != 1)
-				fatal(h,ufoErrParse,  "Encountered <key> while not in top level of first <dict>");
-            
             if ((tk->val[tk->length-2] == '/') && (tk->val[tk->length-1] == '>'))
             {
                 message(h, "Warning: Encountered empty <key></key>. Text: '%s'.", getBufferContextPtr(h));
@@ -1535,7 +1562,7 @@ static int parseGlyphOrder(ufoCtx h)
                 {
                     if (tokenEqualStr(tk, "public.glyphOrder"))
                     {
-                        state = 2;
+                        state = 10;
                     }
                     // get end-key.
                     tk = getToken(h, state);
@@ -1547,19 +1574,19 @@ static int parseGlyphOrder(ufoCtx h)
                 }
             }
         }
-        else if ((tokenEqualStrN(tk, "<array",6)) && (state == 2))
+        else if ((tokenEqualStrN(tk, "<array",6)) && (state == 10))
         {
-            state = 3;
+            state = 11;
             if ((tk->val[tk->length-2] == '/') && (tk->val[tk->length-1] == '>'))
             {
                 state = 1;
             }
         }
-        else if ((tokenEqualStr(tk, "</array>")) && (state == 3))
+        else if ((tokenEqualStr(tk, "</array>")) && (state == 11))
         {
             state = 1;
         }
-        else if ((tokenEqualStrN(tk, "<string", 7)) && (state == 3))
+        else if ((tokenEqualStrN(tk, "<string", 7)) && (state == 11))
         {
             GlIFOrderRec* newGLIFOrderRec;
             
@@ -1589,10 +1616,6 @@ static int parseGlyphOrder(ufoCtx h)
                     }
                 }
             }
-        }
- 		else if (state >1)
-        {
-            message(h, "Warning: discarding token '%s", tk->val);
         }
         else
         {
@@ -2284,10 +2307,13 @@ static int parsePoint(ufoCtx h, abfGlyphCallbacks *glyph_cb, GLIF_Rec* glifRec, 
         else if (tokenEqualStr(tk, "name="))
         {
 			tk = getAttribute(h, state);
-            pointName = memNew(h, tk->length+1);
-            end = tk->val+tk->length;
-            strncpy(pointName, tk->val, tk->length);
-            pointName[tk->length] = 0;
+            if (tk->length > 0)
+            {
+                pointName = memNew(h, tk->length+1);
+                end = tk->val+tk->length;
+                strncpy(pointName, tk->val, tk->length);
+                pointName[tk->length] = 0;
+            }
          }
         
         
@@ -2935,7 +2961,7 @@ static int parseType1HintSet(ufoCtx h, GLIF_Rec* glifRec, char* pointName, Trans
     return result;
 }
 
-static int parseType1HintData(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
+static int parseType1HintDataV1(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
 {
     int result = ufoSuccess;
     int state = outlineInHintData;
@@ -3029,8 +3055,7 @@ static int parseType1HintData(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
             tk = getAttribute(h, state);
             end = tk->val+tk->length;
             pointName = memNew(h, tk->length+1);
-            strncpy(pointName, tk->val, tk->length);
-            pointName[tk->length] = 0;
+            strcpy(pointName, tk->val);
             /* We discard the ID - tx assumes the file is up to date */
             
             tk = getToken(h, state);
@@ -3108,8 +3133,658 @@ static int parseType1HintData(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
         }
         else
         {
-            printf("parseT1HintData: unhandled token: %s\n", tk->val);
+            printf("parseT1HintDataV1: unhandled token: %s\n", tk->val);
             continue;
+        }
+    }
+    return result;
+}
+
+
+static int parseStemV2(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int stemFlags, Transform* transform)
+{
+    int result = ufoSuccess;
+    token* tk;
+    int state = outlineInStemHint;
+    char* end;
+    float pos = 0;
+    float width = 0;
+    StemHint* stem;
+    int isH = !(stemFlags & ABF_VERT_STEM);
+    int count = 0;
+    if ((transform != NULL) && (!transform->isOffsetOnly))
+    {
+        /* We omit stems if the stems are being skewed */
+        if (isH && (transform->mtx[2] != 0.0))
+            return result;
+        if ( (!isH) && (transform->mtx[1] != 0.0))
+            return result;
+    }
+    
+    
+    while (1)
+    {
+        tk = getToken(h, state);
+        if (tk == NULL)
+        {
+            fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph when parsing stem.%s.", glifRec->glyphName);
+        }
+        
+        else if (tokenEqualStr(tk, "</string>"))
+        {
+            if (count != 2)
+            {
+                fatal(h,ufoErrParse,  "Encountered end of stem hint before seeing both pos and width. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+            }
+            state = outlineInHintSet;
+            break;
+        }
+        
+        else if (tk->val[0] == '<')
+        {
+            fatal(h,ufoErrParse,  "Encountered new XML element before seeing both pos and width. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+            return result;
+        }
+        
+        else if (count == 0)
+        {
+            end = tk->val+tk->length;
+            pos = (float)strtod(tk->val, &end);
+            count++;
+        }
+        
+        else if (count == 1)
+        {
+            end = tk->val+tk->length;
+            width = (float)strtod(tk->val, &end);
+            count++;
+        }
+        
+        else
+        {
+            break;
+        }
+        
+    }
+    
+    if (state != outlineInHintSet)
+    {
+        fatal(h,ufoErrParse,  "Encountered unexpected token when parsing stem hint. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+    }
+    
+    if ((transform != NULL) && (!transform->isDefault))
+    {
+        float *mtx = (float*)transform->mtx;
+        { // width is relative, and needs only to be scaled. WE quite at the beginning if the scale factors were not 0.
+            if (isH)
+            {
+                pos = mtx[3]*pos + mtx[5];
+                width =  mtx[3]*width;
+            }
+            else
+            {
+                pos = mtx[0]*pos + mtx[4];
+                width = mtx[0]*width;
+            }
+        }
+    }
+    
+    stem = dnaNEXT(curHintMask->maskStems);
+    stem->edge = pos;
+    stem->width = width;
+    stem->flags = stemFlags;
+    return result;
+    
+}
+
+
+
+static int parseStem3V2(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int stemFlags, Transform* transform)
+{
+    int result = ufoSuccess;
+    token* tk;
+    int state = outlineInStemHint;
+    float coords[] = {0,0,0,0,0,0};
+    StemHint* stem;
+    int isH = !(stemFlags & ABF_VERT_STEM);
+    int count = 0;
+    
+    if ((transform != NULL) && (!transform->isOffsetOnly))
+    {
+        /* We omit stems if the stems are being skewed */
+        if (isH && (transform->mtx[2] != 0.0))
+            return result;
+        if ( (!isH) && (transform->mtx[1] != 0.0))
+            return result;
+    }
+    
+    
+    while (1)
+    {
+        tk = getToken(h, state);
+        if (tk == NULL)
+        {
+            fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph when parsing stem3.%s.", glifRec->glyphName);
+        }
+        else if (tokenEqualStr(tk, "</string>"))
+        {
+            if (count != 6)
+            {
+                fatal(h,ufoErrParse,  "Encountered end of stem3 hint before seeing both pos and width. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+            }
+            state = outlineInStemHint;
+            break;
+        }
+        else if (tk->val[0] == '<')
+        {
+            fatal(h,ufoErrParse,  "Encountered new XML element before seeing both pos and width in stem3 hint. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+            return result;
+        }
+        
+        else
+        {
+            char* start;
+            char* end;
+            start = tk->val;
+            end = start + tk->length;
+            coords[count++] = (float)strtod(start, &end);
+            /* This is 6 float numbers, separated by spaces. */
+            while (count < 6)
+            {
+                tk = getToken(h, state);
+                start = tk->val;
+                end = start + tk->length;
+                coords[count] = (float)strtod(start, &end);
+                start = end +1;
+                count++;
+            }
+            if (count != 6)
+            {
+                fatal(h,ufoErrParse,  "When parsing stem3, did not find 6 coordinates. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+            }
+        }
+         
+    }
+    
+    if (state != outlineInStemHint)
+    {
+        fatal(h,ufoErrParse,  "Encountered unexpected token when parsing stem3 hint. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+    }
+    
+    if ((transform != NULL) && (!transform->isDefault))
+    {
+        float *mtx = (float*)transform->mtx;
+        count = 0;
+        while (count < 6)
+        { // width is relative, and needs only to be scaled. WE quite at the beginning if the scale factors were not 0.
+            if (isH)
+            {
+                coords[count] = mtx[3]*coords[count] + mtx[5];
+                count++;
+                coords[count] =  mtx[3]*coords[count];
+                count++;
+            }
+            else
+            {
+                coords[count] = mtx[0]*coords[count] + mtx[4];
+                count++;
+                coords[count] = mtx[0]*coords[count];
+                count++;
+            }
+        }
+    }
+    
+    // Add the stems
+    count = 0;
+    while (count < 6)
+    {
+        stem = dnaNEXT(curHintMask->maskStems);
+        stem->edge = coords[count++];
+        stem->width = coords[count++];
+        stem->flags = stemFlags;
+        if ((count ==0) && (stemFlags & ABF_NEW_HINTS))
+            stemFlags &= ~ABF_NEW_HINTS;
+    }
+    return result;
+    
+}
+
+
+
+static int parseHintSetV2(ufoCtx h, GLIF_Rec* glifRec, char* pointName, Transform* transform)
+{
+    int result = ufoSuccess;
+    int state = outlineInHintSet;
+    token* tk;
+    int prevState;
+    int stemFlags = 0;
+    HintMask * curHintMask;
+    
+    curHintMask = dnaNEXT(h->hints.hintMasks);
+    curHintMask->pointName = pointName;
+    
+    //printf("Parsing Type1 hint set.\n");
+    if (h->hints.hintMasks.cnt > 1)
+        stemFlags |= ABF_NEW_HINTS;
+    while (1)
+    {
+        tk = getToken(h, state);
+        if (tk == NULL)
+        {
+            fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+        }
+        
+        else if (tokenEqualStr(tk, "<!--"))
+        {
+            prevState = state;
+            state = outlineInComment;
+        }
+        else if (tokenEqualStr(tk, "-->"))
+        {
+            if (state != outlineInComment)
+            {
+                fatal(h,ufoErrParse,  "Encountered end comment token while not in comment. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));;
+            }
+            state = prevState;
+        }
+        else if (state == outlineInComment)
+        {
+            continue;
+        }
+        
+        else if (tokenEqualStr(tk, "</array>"))
+        {
+            return result;
+        }
+        
+        else if (tokenEqualStr(tk, "<string>"))
+        {
+            continue;
+        }
+        
+        else if (tokenEqualStr(tk, "</string>"))
+        {
+            continue;
+        }
+        
+        else if (tokenEqualStr(tk, "hstem"))
+        {
+            parseStemV2(h, glifRec, curHintMask, stemFlags, transform);
+            stemFlags = 0;
+        }
+        else if (tokenEqualStr(tk, "hstem3"))
+        {
+            stemFlags |= ABF_STEM3_STEM;
+            parseStem3V2(h, glifRec, curHintMask, stemFlags, transform);
+            stemFlags = 0;
+        }
+        
+        else if (tokenEqualStr(tk, "vstem"))
+        {
+            stemFlags |= ABF_VERT_STEM;
+            parseStemV2(h, glifRec, curHintMask, stemFlags, transform);
+            stemFlags = 0;
+        }
+        else if (tokenEqualStr(tk, "vstem3"))
+        {
+            stemFlags |= ABF_VERT_STEM;
+            stemFlags |= ABF_STEM3_STEM;
+            parseStem3V2(h, glifRec, curHintMask, stemFlags, transform);
+            stemFlags = 0;
+        }
+        
+        else
+        {
+            printf("parseT1HintSet: unhandled token: %s\n", tk->val);
+            continue;
+        }
+        
+        
+    }
+    
+    
+    return result;
+}
+
+static int parseHintSetListV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
+{
+    int result = ufoSuccess;
+    int state = outlineInHintData;
+    token* tk;
+    int prevState;
+    int stemFlags = 0;
+    HintMask * curHintMask;
+    char* pointName = NULL;
+    
+    
+    //printf("Parsing Type1 hint set.\n");
+    if (h->hints.hintMasks.cnt > 1)
+        stemFlags |= ABF_NEW_HINTS;
+    while (1)
+    {
+        tk = getToken(h, state);
+        if (tk == NULL)
+        {
+            fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+        }
+        
+        else if (tokenEqualStr(tk, "<!--"))
+        {
+            prevState = state;
+            state = outlineInComment;
+        }
+        else if (tokenEqualStr(tk, "-->"))
+        {
+            if (state != outlineInComment)
+            {
+                fatal(h,ufoErrParse,  "Encountered end comment token while not in comment. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));;
+            }
+            state = prevState;
+        }
+        else if (state == outlineInComment)
+        {
+            continue;
+        }
+        
+        else if (tokenEqualStr(tk, "<array>") && (state == outlineInHintData))
+        {
+            state = outlineInHintSetList;
+            continue;
+        }
+        
+        else if (tokenEqualStr(tk, "</array>") && (state == outlineInHintSetList))
+        {
+            state = outlineInHintData;
+            return result;
+        }
+        
+        else if (tokenEqualStr(tk, "<key>") && (state == outlineInHintSet))
+        {
+            tk = getToken(h, state);
+            if (tk == NULL)
+            {
+                fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+            }
+            if (tk->val[0] == '<')
+            {
+                fatal(h,ufoErrParse,  "hintSet entry was empty. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+            }
+            
+            if (!strcmp(tk->val, "pointTag"))
+            {
+                state = outlineInHintSetName;
+                tk = getToken(h, state);
+                if (!tokenEqualStr(tk, "</key>"))
+                {
+                    fatal(h,ufoErrParse, "Failed to find end of element for <key>pointTag Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+                }
+            }
+            continue;
+       }
+        else if (tokenEqualStr(tk, "<string>") && (state == outlineInHintSetName))
+        {
+            tk = getToken(h, state);
+            if (tk == NULL)
+            {
+                fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+            }
+            if (tk->val[0] == '<')
+            {
+                fatal(h,ufoErrParse,  "hintSet entry was empty. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+            }
+
+            pointName = memNew(h, tk->length+1);
+            strcpy(pointName, tk->val);
+            //pointName[tk->length+1] = 0;
+            
+            tk = getToken(h, state);
+            if (!tokenEqualStr(tk, "</string>"))
+            {
+                fatal(h,ufoErrParse, "Failed to find end of element for <string>hintSet name. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+            }
+            
+            state = outlineInHintSetStemList;
+            continue;
+        }
+        else if (tokenEqualStr(tk, "<key>") && (state == outlineInHintSetStemList))
+        {
+            tk = getToken(h, state);
+            if (tk == NULL)
+            {
+                fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+            }
+            if (tk->val[0] == '<')
+            {
+                fatal(h,ufoErrParse,  "hintSet entry was empty. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+            }
+            
+            if (!strcmp(tk->val, "stems"))
+            {
+                tk = getToken(h, state);
+                if (!tokenEqualStr(tk, "</key>"))
+                {
+                    fatal(h,ufoErrParse, "Failed to find end of element for <key>stems Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+                }
+            }
+            continue;
+        }
+        else if (tokenEqualStr(tk, "<array>") && (state == outlineInHintSetStemList))
+        {
+            if (pointName == NULL)
+            {
+                fatal(h,ufoErrParse, "Encountered hintset stems array before seing point name. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+            }
+            result = parseHintSetV2(h, glifRec, pointName, transform);
+            state = outlineInHintSet;
+            pointName = NULL;
+            continue;
+        }
+
+        
+        else if (tokenEqualStr(tk, "</dict>") && (state == outlineInHintSet))
+        {
+            state = outlineInHintSetList;
+            continue;
+        }
+        else if (tokenEqualStr(tk, "<dict>") && (state == outlineInHintSetList))
+        {
+            state = outlineInHintSet;
+            continue;
+        }
+        
+        else
+        {
+            printf("parseHintSetListV2: unhandled token: %s. Glyph: %s. Context: %s\n.", tk->val, glifRec->glyphName, getBufferContextPtr(h));
+            continue;
+        }
+        
+        
+    }
+    
+    
+    return result;
+}
+
+static int parseFlexListV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
+{
+    int result = ufoSuccess;
+    int state = outlineInHintData;
+    token* tk;
+    int prevState;
+    char* pointName;
+     
+    while (1)
+    {
+        tk = getToken(h, state);
+        if (tk == NULL)
+        {
+            fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+        }
+        
+        else if (tokenEqualStr(tk, "<!--"))
+        {
+            prevState = state;
+            state = outlineInComment;
+        }
+        else if (tokenEqualStr(tk, "-->"))
+        {
+            if (state != outlineInComment)
+            {
+                fatal(h,ufoErrParse,  "Encountered end comment token while not in comment. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+            }
+            state = prevState;
+        }
+        else if (state == outlineInComment)
+        {
+            continue;
+        }
+        
+        else if (tokenEqualStr(tk, "<array>") && (state == outlineInHintData))
+        {
+            state = outlineInFlexList;
+            continue;
+        }
+        
+        else if (tokenEqualStr(tk, "</array>") && (state == outlineInFlexList))
+        {
+            state = outlineInFlexList;
+            return result;
+        }
+        
+        
+        else if (tokenEqualStr(tk, "<string>") && (state == outlineInFlexList))
+        {
+            tk = getToken(h, state);
+            if (tk == NULL)
+            {
+                fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph.. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+            }
+            
+            if (tk->val[0] == '<')
+            {
+                fatal(h,ufoErrParse,  "Entry in flexList was empty. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+            }
+            
+            if ((transform == NULL) || ( (transform->mtx[1] == 0) && (transform->mtx[2] == 0)))
+            { /* Omit flex if the transform exists and has any skew. */
+                pointName = memNew(h, tk->length+1);
+                strcpy(pointName, tk->val);
+                //pointName[tk->length+1] = 0;
+                
+                tk = getToken(h, state);
+                if (!tokenEqualStr(tk, "</string>"))
+                {
+                    fatal(h,ufoErrParse, "Failed to find end of element for <string>flexPointName. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+                }
+                
+                *dnaNEXT(h->hints.flexOpList) = pointName;
+                pointName = NULL;
+            }
+        }
+ 
+        else
+        {
+            fatal(h,ufoErrParse, "parseFlexListV2: unhandled token: %s. Glyph: %s. Context: %s\n.", tk->val, glifRec->glyphName, getBufferContextPtr(h));
+            continue;
+        }
+        
+        
+    }
+    
+    
+    return result;
+}
+
+
+static int parseType1HintDataV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
+{
+    int result = ufoSuccess;
+    int state = outlineInHintData;
+    char * pointName = NULL;
+    
+    token* tk;
+    int prevState;
+    //printf("Parsing Type1 hint data.\n");
+    /* This is Adobe private T1 hint data, so we report a fatal error if the struture is not as expected */
+    while (1)
+    {
+        tk = getToken(h, state);
+        if (tk == NULL)
+        {
+            fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+        }
+        
+        else if (tokenEqualStr(tk, "<!--"))
+        {
+            prevState = state;
+            state = outlineInComment;
+        }
+        else if (tokenEqualStr(tk, "-->"))
+        {
+            if (state != outlineInComment)
+            {
+                fatal(h,ufoErrParse,  "Encountered end comment token while not in comment. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+            }
+            state = prevState;
+        }
+        else if (state == outlineInComment)
+        {
+            continue;
+        }
+        
+        else if (tokenEqualStr(tk, "</dict>"))
+        {
+            return result;
+        }
+        else if (tokenEqualStr(tk, "<key>"))
+        {
+            tk = getToken(h, state);
+            if (tk == NULL)
+            {
+                fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+            }
+            if (!strcmp(tk->val, "id"))
+            {
+                tk = getToken(h, state); /* skip the close key */
+                state = outlineInID;
+                continue;
+            }
+            else if (!strcmp(tk->val, "hintSetList"))
+            {
+                tk = getToken(h, state); /* skip the close key */
+                parseHintSetListV2(h, glifRec, transform);
+                continue;
+            }
+            else if (!strcmp(tk->val, "flexList"))
+            {
+                tk = getToken(h, state); /* skip the close key */
+                parseFlexListV2(h, glifRec, transform);
+                continue;
+            }
+            else
+            {
+                fatal(h,ufoErrParse, "parseType1HintDataV2: unhandled key value: %s. Glyph: %s. Context: %s\n.", tk->val, glifRec->glyphName, getBufferContextPtr(h));
+            }
+           
+           
+       }
+        else if ((tokenEqualStr(tk, "<string>")) && (state == outlineInID))
+        {
+            tk = getToken(h, state); /* skip the value */
+            if (tokenEqualStr(tk, "</string>"))
+            {
+                state = outlineInHintData; // cover case of empty element.
+            }
+            continue;
+        }
+        else if ((tokenEqualStr(tk, "</string>")) && (state == outlineInID))
+        {
+            state = outlineInHintData;
+            continue;
+        }
+        else
+        {
+            fatal(h,ufoErrParse, "parseType1HintDataV2: unhandled token: %s. Glyph: %s. Context: %s\n.", tk->val, glifRec->glyphName, getBufferContextPtr(h));
         }
     }
     return result;
@@ -3445,7 +4120,7 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                         h->stack.flags = PARSE_END;
                     }
                     
-                    if (0 == strcmp(valueString, t1HintKey))
+                    if (0 == strcmp(valueString, t1HintKeyV1))
                     {
                         tk = getToken(h, state);
                         if (tk == NULL)
@@ -3456,7 +4131,21 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                         
                         if (tokenEqualStr(tk, "<data>"))
                         {
-                            parseType1HintData(h, glifRec, transform);
+                            parseType1HintDataV1(h, glifRec, transform);
+                        }
+                    }
+                    else if (0 == strcmp(valueString, t1HintKeyV2))
+                    {
+                        tk = getToken(h, state);
+                        if (tk == NULL)
+                        {
+                            fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph when parsing t1 hint key. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+                            h->stack.flags = PARSE_END;
+                        }
+                        
+                        if (tokenEqualStr(tk, "<dict>"))
+                        {
+                            parseType1HintDataV2(h, glifRec, transform);
                         }
                     }
                     else
@@ -3514,7 +4203,6 @@ static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb)
 	gi->gname.ptr = getString(h, (STI)gi->tag);
 	result = glyph_cb->beg(glyph_cb, gi);
 	gi->flags |= ABF_GLYPH_SEEN;
-	result = h->metrics.cb.beg(&h->metrics.cb, &h->metrics.gi);
     
     
 	/* Check result */
@@ -3527,7 +4215,7 @@ static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb)
         case ABF_FAIL_RET:
             fatal(h, ufoErrParseFail, NULL);
     }
-    
+	result = h->metrics.cb.beg(&h->metrics.cb, &h->metrics.gi);
     width = getWidth(h, (STI)gi->tag);
     glyph_cb->width(glyph_cb, (float)width );
     if (result == ABF_WIDTH_RET)

@@ -37,5 +37,5 @@
 "  mergeFonts -gx .notdef newFont.pfa srcFont1.pfa  mapFile2.txt srcFont2.pfa\n",
 "  \n",
 "This command will create a new font file 'newFont.pfa'. This will contain all\n",
-"the glyphs ecxept '.notdef' from srcFont1.pfa, and all the glyphs from\n",
+"the glyphs except '.notdef' from srcFont1.pfa, and all the glyphs from\n",
 "srcFont2.pfa that are referenced in mapFile2.txt.\n",

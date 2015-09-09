@@ -7,7 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define MERGEFONTS_VERSION CTL_MAKE_VERSION(1,0,60) /* derived from tx */
+#define MERGEFONTS_VERSION CTL_MAKE_VERSION(1,0,61) /* derived from tx */
 
 #include "cfembed.h"
 #include "cffread.h"
@@ -291,7 +291,7 @@ enum						/* Source font technology types */
 	src_CFF,				/* Naked CFF */
 	src_TrueType,			/* TrueType */
 	src_SVG,				/* SVG data. Supported only as a merge font, and not as the first in the set. */
-	src_UFO,				/* UFO data. Supported only as a merge font, and not as the first in the set. */
+	src_UFO,				/* UFO data. */
 	};
 
 enum						/* Operation modes */

@@ -1294,8 +1294,6 @@ static int readGlyph(svrCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb)
 	result = glyph_cb->beg(glyph_cb, gi);
 	gi->flags |= ABF_GLYPH_SEEN;
 
-	h->metrics.cb.beg(&h->metrics.cb, &h->metrics.gi);
-
 
 	/* Check result */
 	switch (result)
@@ -1307,6 +1305,9 @@ static int readGlyph(svrCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb)
 	case ABF_FAIL_RET:
 		fatal(h, svrErrParseFail, NULL);
 		}
+        
+    h->metrics.cb.beg(&h->metrics.cb, &h->metrics.gi);
+        
 
 	width = getWidth(h, (STI)gi->gname.impl);
 	glyph_cb->width(glyph_cb, (float)width );
