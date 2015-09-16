@@ -101,7 +101,7 @@ extern void zzsave_dlg_state(struct zzdlg_state *);
 extern void zzrestore_dlg_state(struct zzdlg_state *);
 extern int zzerr_in(void);
 extern void	zzerrstd(const char *);
-extern void zzerraction(void);
+extern void zzerraction();
 
 #else
 

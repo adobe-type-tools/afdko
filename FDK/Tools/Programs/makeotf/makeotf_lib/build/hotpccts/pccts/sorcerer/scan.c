@@ -48,7 +48,7 @@ LOOKAHEAD
 
 void
 #ifdef __USE_PROTOS
-zzerraction(void)
+zzerraction()
 #else
 zzerraction()
 #endif

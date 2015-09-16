@@ -15,9 +15,9 @@ MANDIR=$(HOME)/man
 MANEXT=1
 MANFILES=dlg/dlg.1 antlr/antlr.1
 
-#CC=cc
+CC=cc
 #CC=gcc
-#COPT=-O2
+COPT=-O2 -DPCCTS_USE_STDARG=1
 
 pccts:
 	@echo " "

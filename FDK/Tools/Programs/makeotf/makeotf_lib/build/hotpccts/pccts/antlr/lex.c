@@ -111,7 +111,7 @@ genLexDescr( )
 		fprintf(dlgFile, "\n");
 		fprintf(dlgFile, "void\n");
 		fprintf(dlgFile, "#ifdef __USE_PROTOS\n");
-		fprintf(dlgFile, "zzerraction(void)\n");
+		fprintf(dlgFile, "zzerraction()\n");
 		fprintf(dlgFile, "#else\n");
 		fprintf(dlgFile, "zzerraction()\n");
 		fprintf(dlgFile, "#endif\n");

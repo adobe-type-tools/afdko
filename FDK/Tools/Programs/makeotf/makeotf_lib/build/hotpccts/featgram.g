@@ -2058,16 +2058,6 @@ table_name
 						>>
 
 				numUInt16Ext>[id]
-					<<
-					if (!(id == 0 || (id >= 7 && id <= 255)))
-						{
-						hotMsg(g, hotWARNING,
-							   "name id not in registered range; "
-							   "ignoring record [%s %d]",
-							   INCL.file, h->linenum);
-						ignoreRec = 1;
-						}
-					>>
 					
 					
 				{

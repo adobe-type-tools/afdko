@@ -4880,8 +4880,7 @@ table_name()
 
            id  = numUInt16Ext();
 
-          
-           {
+          {
             zzBLOCK(zztasp4);
             zzMake0;
             {
