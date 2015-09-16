@@ -625,6 +625,8 @@ static token* getToken(ufoCtx h, int state)
         }
     }
     
+    if (h->mark == NULL)
+        printf("Help");
     
     // Back up and remove any final whitespace.
     while ((h->mark != NULL) && (h->src.next != h->mark ) && (isspace(*(h->src.next-1))))
@@ -1477,6 +1479,10 @@ static void  addGLIFRec(ufoCtx h, int state)
     sprintf(newGLIFRec->glifFileName, "%s", fileName);
 }
 
+#define START_PUBLIC_ORDER 1256
+#define IN_PUBLIC_ORDER 1257
+#define IN_COMMENT 1258
+
 static int parseGlyphOrder(ufoCtx h)
 {
     int state = 0; /* 0 == start, 1= seen start of glyph, 2 = seen glyph name, 3 = in path, 4 in comment.  */
@@ -1497,8 +1503,7 @@ static int parseGlyphOrder(ufoCtx h)
 	fillbuf(h, 0);
     /* Read in file, then sort by glyph name */
 
-	h->flags &= ~SEEN_END;
-	while (!(h->flags & SEEN_END))
+	while (!(seenGO || (h->flags & SEEN_END)))
     {
 		tk = getToken(h, state);
         
@@ -1508,43 +1513,27 @@ static int parseGlyphOrder(ufoCtx h)
 		if (tokenEqualStr(tk, "<!--"))
 		{
 			prevState = state;
-			state = 4;
+			state = IN_COMMENT;
 		}
 		else if (tokenEqualStr(tk, "-->"))
         {
-			if (state != 4)
+			if (state != IN_COMMENT)
 				fatal(h,ufoErrParse,  "Encountered end comment token while not in comment.");
 			state = prevState;
         }
-		else if (state == 4)
+		else if (state == IN_COMMENT)
         {
 			continue;
         }
 		else if (tokenEqualStrN(tk, "<dict", 5))
         {
-			if (state >= 2)
-				fatal(h,ufoErrParse,  "Encountered second <dict while in first");
             state++;
-            
-            if ((tk->val[tk->length-2] == '/') && (tk->val[tk->length-1] == '>'))
-            {
-                if (seenGO)
-                {
-                    h->flags |=  SEEN_END;
-                    break;
-                }
-            }
         }
 		else if (tokenEqualStr(tk, "</dict>"))
         {
             state--;
-            if (seenGO && (state == 1))
-            {
-                h->flags |=  SEEN_END;
-                break;
-            }
         }
-		else if (tokenEqualStrN(tk, "<key", 4) && (state == 1))
+		else if (tokenEqualStrN(tk, "<key", 4) && (state == 1)) /* if we are at the top level of the lib dict, check the key values */
         {
             if ((tk->val[tk->length-2] == '/') && (tk->val[tk->length-1] == '>'))
             {
@@ -1562,7 +1551,8 @@ static int parseGlyphOrder(ufoCtx h)
                 {
                     if (tokenEqualStr(tk, "public.glyphOrder"))
                     {
-                        state = 10;
+                        prevState = state;
+                        state = START_PUBLIC_ORDER;
                     }
                     // get end-key.
                     tk = getToken(h, state);
@@ -1574,23 +1564,24 @@ static int parseGlyphOrder(ufoCtx h)
                 }
             }
         }
-        else if ((tokenEqualStrN(tk, "<array",6)) && (state == 10))
+        else if ((tokenEqualStrN(tk, "<array",6)) && (state == START_PUBLIC_ORDER))
         {
-            state = 11;
+            state = IN_PUBLIC_ORDER;
             if ((tk->val[tk->length-2] == '/') && (tk->val[tk->length-1] == '>'))
             {
-                state = 1;
+                state = prevState;
             }
         }
-        else if ((tokenEqualStr(tk, "</array>")) && (state == 11))
+        else if ((tokenEqualStr(tk, "</array>")) && (state == IN_PUBLIC_ORDER))
         {
-            state = 1;
+            state = prevState;
+            seenGO = 1;
+            break;
         }
-        else if ((tokenEqualStrN(tk, "<string", 7)) && (state == 11))
+        else if ((tokenEqualStrN(tk, "<string", 7)) && (state == IN_PUBLIC_ORDER))
         {
             GlIFOrderRec* newGLIFOrderRec;
             
-            seenGO = 1;
             if ((tk->val[tk->length-2] == '/') && (tk->val[tk->length-1] == '>'))
             {
                 message(h, "Warning: Encountered empty <string/> in public.glyphOrder. Text: '%s'.", getBufferContextPtr(h));
@@ -1607,6 +1598,8 @@ static int parseGlyphOrder(ufoCtx h)
                 {
                     newGLIFOrderRec = dnaNEXT(h->data.glifOrder);
                     newGLIFOrderRec->glyphName =  copyStr(h, tk->val); // get a copy in memory
+                    if (!strcmp("newsheqel.oldstyle", newGLIFOrderRec->glyphName))
+                        printf("Here!");
                     newGLIFOrderRec->order = h->data.glifOrder.cnt -1;
                     tk = getToken(h, state);
                     if (!tokenEqualStr(tk, "</string>"))
@@ -1616,11 +1609,6 @@ static int parseGlyphOrder(ufoCtx h)
                     }
                 }
             }
-        }
-        else
-        {
-            if (h->data.glifOrder.cnt > 0) // If we have seen the glif order records, then we are done with any additional parsing
-                break;
         }
         
     } /* end while more tokens */
