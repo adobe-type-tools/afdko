@@ -216,6 +216,7 @@ extern procedure AddStemExtremes(Fixed bot, Fixed top);
 #define topList (segLists[2])
 #define botList (segLists[3])
 
+#define MAXFLEX (PSDist(20))
 #define MAXBLUES (20)
 #define MAXSERIFS (5)
 extern Fixed topBands[MAXBLUES], botBands[MAXBLUES], serifs[MAXSERIFS];

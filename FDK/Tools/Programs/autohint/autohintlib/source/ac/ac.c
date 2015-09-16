@@ -186,7 +186,7 @@ public procedure InitData(integer reason)
       /* Default is to change a curve with collinear points into a line. */
       autoLinearCurveFix = TRUE;
       flexOK = FALSE;
-      flexStrict = FALSE;
+      flexStrict = TRUE;
       AutoExtraDEBUG = DEBUG;
       logging = DEBUG;
       debugColorPath = FALSE;

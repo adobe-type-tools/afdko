@@ -141,7 +141,8 @@ public boolean ReadFontInfo() {
    ACFREEMEM(fontinfostr);
 #endif
   fontinfostr = GetFntInfo("FlexStrict", TRUE);
-  flexStrict = (fontinfostr != NULL) && strcmp(fontinfostr, "false");
+if (fontinfostr != NULL) 
+  flexStrict = strcmp(fontinfostr, "false");
 #if DOMEMCHECK
 	memck_free(fontinfostr);
 #else

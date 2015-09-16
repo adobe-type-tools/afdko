@@ -134,7 +134,11 @@ private procedure TryYFlex(e, n, x0, y0, x1, y1)
   longreal d0sq, d1sq, quot, dx, dy;
 
   GetEndPoint(n, &x2, &y2);
-  if (ac_abs(y0-y2) > flexCand) return; /* too big diff in bases */
+  dy = ac_abs(y0-y2);
+  if (dy > flexCand) return; /* too big diff in bases. If dy is within flexCand, flex will fail , but we will report it as a candidate. */
+  dx = ac_abs(x0-x2);
+  if (dx < MAXFLEX) return; /* Let's not add flex to features less than MAXFLEX wide. */
+  if (dx < (3*ac_abs(y0-y2))) return; /* We want the width to be at least three times the height. */
   if (ProdLt0(y1-y0,y1-y2)) return; /* y0 and y2 not on same side of y1 */
 
   /* check the ratios of the "lengths" of 'e' and 'n'  */
@@ -177,7 +181,13 @@ private procedure TryXFlex(e, n, x0, y0, x1, y1)
   longreal d0sq, d1sq, quot, dx, dy;
 
   GetEndPoint(n, &x2, &y2);
-  if (ac_abs(x0-x2) > flexCand) return; /* too big diff in bases */
+      dx = ac_abs(y0-y2);
+  if (dx > flexCand) return; /* too big diff in bases */
+
+  dy = ac_abs(x0-x2);
+  if (dy < MAXFLEX) return; /* Let's not add flex to features less than MAXFLEX wide. */
+  if (dy < (3*ac_abs(x0-x2))) return; /* We want the width to be at least three times the height. */
+
   if (ProdLt0(x1-x0,x1-x2)) return; /* x0 and x2 not on same side of x1 */
 
   /* check the ratios of the "lengths" of 'e' and 'n'  */
@@ -210,7 +220,6 @@ private procedure TryXFlex(e, n, x0, y0, x1, y1)
     ReportAddFlex();
   }
 
-#define MAXFLEX (PSDist(20))
 public procedure AutoAddFlex() {
   PPathElt e, n;
   Fixed x0, y0, x1, y1, abstmp;
