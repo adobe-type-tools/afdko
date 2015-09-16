@@ -172,6 +172,13 @@ static void addName(nameCtx h,
 	int index;
 	int omitMacNames =  (h->g->convertFlags & HOT_OMIT_MAC_NAMES); /* omit all Mac platform names. */
 
+    if (platformId == HOT_NAME_MAC_PLATFORM) {
+        if (omitMacNames)
+            return;
+	}
+    
+
+    
 	if (omitMacNames && (platformId == HOT_NAME_MAC_PLATFORM)) {
 		return;
 	}
@@ -249,7 +256,7 @@ void nameNew(hotCtx g) {
 static void addStdNames(nameCtx h, int win, int mac) {
 	hotCtx g = h->g;
 	char buf[256];
-
+    int index = 0;
 
 	{
 		/* Set font version string. Round to 3 decimal places. Truncated to 3 decimal places by sprintf. */
@@ -290,7 +297,15 @@ static void addStdNames(nameCtx h, int win, int mac) {
 			        g->font.FontName.array);
 		}
 
-		addStdNamePair(h, win, mac, HOT_NAME_UNIQUE, strlen(buf), buf);
+        /* Don't add if one has already been provided from the feature file */
+		index = enumNames(h, index,
+		                  MATCH_ANY,
+		                  MATCH_ANY,
+		                  MATCH_ANY,
+		                  HOT_NAME_UNIQUE);
+		if (index == -1) {
+            addStdNamePair(h, win, mac, HOT_NAME_UNIQUE, strlen(buf), buf);
+		}
 
 		/* Make and add version name */
 		if (g->font.version.client == NULL) {
@@ -310,7 +325,15 @@ static void addStdNames(nameCtx h, int win, int mac) {
 		}
 	}
 
-	addStdNamePair(h, win, mac, HOT_NAME_VERSION, strlen(buf), buf);
+    /* Don't add if one has already been provided from the feature file */
+    index = enumNames(h, index,
+                      MATCH_ANY,
+                      MATCH_ANY,
+                      MATCH_ANY,
+                      HOT_NAME_VERSION);
+    if (index == -1) {
+        addStdNamePair(h, win, mac, HOT_NAME_VERSION, strlen(buf), buf);
+    }
 
 	/* Add PostScript name */
 	addStdNamePair(h, win, mac, HOT_NAME_FONTNAME,
@@ -553,6 +576,17 @@ static void fillNames(nameCtx h) {
 		 */
 		index = 0;
 		for (;; ) {
+            
+            /* Skip this if we already have one defined by the feature file > Not usually
+             allowed, but the prohibition can be overriden */
+            index = enumNames(h, index,
+			                  HOT_NAME_MS_PLATFORM,
+			                  HOT_NAME_MS_UGL,
+			                  MATCH_ANY,
+			                  HOT_NAME_FULL);
+			if (index != -1) {
+				break; /* no more MS UGL HOT_NAME_FAMILY recs */
+            }
 			/* We make an entry for each HOT_NAME_PREF_FAMILY */
 			index = enumNames(h, index,
 			                  HOT_NAME_MS_PLATFORM,
@@ -759,6 +793,14 @@ static void fillNames(nameCtx h) {
 		for (;; ) {
 			char *Family;
 			char *Subfamily;
+
+            index = enumNames(h, index,
+			                  HOT_NAME_MAC_PLATFORM,
+                              MATCH_ANY,
+                              MATCH_ANY,
+			                  HOT_NAME_FULL);
+			if (index != -1) {
+				break;            }
 
 			if (doOTSpecName4) {
 				index = enumNames(h, index,

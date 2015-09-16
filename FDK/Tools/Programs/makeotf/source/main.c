@@ -40,7 +40,7 @@
 
 jmp_buf mark;
 
-#define MAKEOTF_VERSION "2.5.64726"
+#define MAKEOTF_VERSION "2.5.64756"
 /*Warning: this string is now part of heuristic used by CoolType to identify the
    first round of CoolType fonts which had the backtrack sequence of a chaining
    contextual substitution ordered incorrectly.  Fonts with the old ordering MUST match
@@ -221,9 +221,18 @@ static void printUsage(void) {
 		"              Required because  this is how all FDK fonts were done before 11/2010, and changing the name ID 4 from previously\n"
 		"              shipped versions causes major installation problems under Windows. New fonts should be built without this option.\n"
 		"-lic <string>  Adds arbitrary string to the end of name ID 3. Adobe uses this to add a code indicating from which foundry a font is licensed.\n"
-		"-shw       : suppress warnings about missing or problematic hints. \n"
-		"               This is useful when processsing a temporary font made from a TTF or other no PS font.\n"
-/* Always do this now. "+z   : Remove the deprecated Type 1 operators seac and dot section from the output front\n" */
+       "-shw       : suppress warnings about missing or problematic hints. \n"
+       "               This is useful when processsing a temporary font made from a TTF or other no PS font.\n"
+       "-stubCmap4 : This causes makeotf to build only a stub cmap 4 subtable, with just two segments. Needed only for special cases like\n"
+       "AdobeBlank, where every byte is an issue. Windows requires a cmap format 4 subtable, but not that it be useful.\n"
+       "-swo       : suppress width optimization in CFF (use of defaultWidthX and nominalWidthX). Makes it easier to poke at charstrings with other tools.\n"
+       "-omitMacNames   : Omit all Mac platform names from the name table. Note: You cannot specify this and -oldNameID4; else\n"
+       "              font would contain only teh PS name as a name ID 4.\n"
+       "-overrideMenuNames   : Allow feature file name table entries to override default values and the values from the font manu name DB for name IDs. \n"
+       "  Name ID's 2 and 6 cannot be overridden. Use this with caution, and make sure you have provided feature file name table entries for all platforms.\n"
+       "-skco  :  suppress kern class optimization. Do not use the default class 0 for non-zero left side kern classes. Using the optimization saves hundreds to thousands of\n"
+       "bytes and is the default behavior, but causes kerning to be not seen by some programs.\n"
+/* Always do +z now. "+z   : Remove the deprecated Type 1 operators seac and dot section from the output front\n" */
 		""
 		"Build:\n"
 		"    makeotf.lib version: %s \n"
@@ -552,17 +561,27 @@ static void parseArgs(int argc, char *argv[], int inScript) {
 							break;
 						}
 
-						if (0 == strcmp(arg, "-oldNameID4")) {
+						else if (0 == strcmp(arg, "-oldNameID4")) {
 							convert.otherflags |= OTHERFLAGS_OLD_NAMEID4;
+                            if (convert.otherflags & OTHERFLAGS_OMIT_MAC_NAMES)
+                                cbFatal(cbctx, "You cannot specify both -omitMacNames and -oldNameID4.");
 							break;
 						}
 
 
-						if (0 == strcmp(arg, "-omitMacNames")) {
+						else if (0 == strcmp(arg, "-omitMacNames")) {
 							convert.otherflags |= OTHERFLAGS_OMIT_MAC_NAMES;
+                            if (convert.otherflags & OTHERFLAGS_OLD_NAMEID4)
+                                cbFatal(cbctx, "You cannot specify both -omitMacNames and -oldNameID4.");
 							break;
 						}
-
+                        
+						else if (0 == strcmp(arg, "-overrideMenuNames")) {
+							convert.otherflags |= OTHERFLAGS_OVERRIDE_MENUNAMES;
+							break;
+						}
+                        
+                        
 						switch (arg[2]) {
 							case 's': {
 								short val;
@@ -651,8 +670,16 @@ static void parseArgs(int argc, char *argv[], int inScript) {
 						else if (!strcmp(arg, "-shw")) {
 							convert.flags |= HOT_SUPRESS_HINT_WARNINGS;
 						}
+						else if (!strcmp(arg, "-swo")) {
+							convert.flags |= HOT_SUPRESS__WIDTH_OPT;
+						}
+                        
 						else if (!strcmp(arg, "-stubCmap4")) {
 							convert.otherflags |= OTHERFLAGS_STUB_CMAP4;
+						}
+						else if (!strcmp(arg, "-skco")) {
+							convert.otherflags |= OTHERFLAGS_DO_NOT_OPTIMIZE_KERN;
+							break;
 						}
 						else {
 							/* Process script file */

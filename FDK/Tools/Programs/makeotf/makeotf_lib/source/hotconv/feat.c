@@ -639,7 +639,24 @@ static void creatDefaultGDEFClasses() {
 
 static void addNameString(long platformId, long platspecId,
                           long languageId, long nameId) {
-	/* Add defaults */
+
+    int nameError = 0;
+    if ((nameId == 2) ||(nameId == 6) || (nameId > 255))
+        nameError = 1;
+    else if ((nameId > 0) && ((nameId < 7) && (!(g->convertFlags & HOT_OVERRIDE_MENUNAMES))))
+    {
+        nameError = 1;
+    }
+    if (nameError)
+    {
+        hotMsg(g, hotWARNING,
+               "name id %d cannot be set from the feature file. "
+               "ignoring record [%s %d]", nameId, 
+               INCL.file, h->linenum);
+        return;
+    }
+
+    /* Add defaults */
 	if (platformId == -1) {
 		platformId = HOT_NAME_MS_PLATFORM;
 	}

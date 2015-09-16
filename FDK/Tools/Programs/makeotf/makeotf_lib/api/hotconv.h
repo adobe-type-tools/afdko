@@ -10,7 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 extern "C" {
 #endif
 
-#define HOT_VERSION 0x010057 /* Library version (1.0.87) */
+#define HOT_VERSION 0x010058 /* Library version (1.0.88) */
 /*Warning: this string is now part of heuristic used by CoolType to identify the
 first round of CoolType fonts which had the backtrack sequence of a chaining 
 contextual substitution ordered incorrectly.  Fonts with the old ordering MUST match
@@ -72,6 +72,7 @@ inside the (1,0,0) nameID 5 "Version: string. */
    single master conversion follows the following call sequence.
 
    ctx = hotNew(...);
+   hotSetConvertFlags(ctx, hotConvFlags) // set flags before any hot unctions are called.
    FontName = hotReadFont(ctx, ...);
    hotAddName(ctx, ...);       // repeat for each name
    hotAddMiscData(ctx, ...);
@@ -85,6 +86,7 @@ inside the (1,0,0) nameID 5 "Version: string. */
    multiple master conversion follows the following call sequence.
 
    ctx = hotNew(...);
+   hotSetConvertFlags(ctx, hotConvFlags) // set flags before any hot unctions are called.
    FontName = hotReadFont(ctx, ...);
    hotAddName(ctx, ...);       // repeat for each name
    hotAddMiscData(ctx, ...);
@@ -102,6 +104,7 @@ inside the (1,0,0) nameID 5 "Version: string. */
    sequence.
 
    ctx = hotNew(...);
+   hotSetConvertFlags(ctx, hotConvFlags) // set flags before any hot unctions are called.
    FontName = hotReadFont(ctx, ...);
    hotAddName(ctx, ...);       // repeat for each name
    hotAddMiscData(ctx, ...);
@@ -376,6 +379,8 @@ struct hotCallbacks_
 
 typedef struct hotReadFontOverrides_ hotReadFontOverrides;
 
+void hotSetConvertFlags(hotCtx g, unsigned long hotConvFlags); // set flags before any hot unctions are called.
+
 char *hotReadFont(hotCtx g, int flags, int *psinfo, hotReadFontOverrides *fontOverride );
 
 /* hotReadFont() is called to read the PostScript outline font. The flags
@@ -397,6 +402,8 @@ char *hotReadFont(hotCtx g, int flags, int *psinfo, hotReadFontOverrides *fontOv
 										/* heuristic is used when neither HOT_IS_SANSSERIF nor HOT_IS_SERIF is used. */
 #define HOT_RENAME  (1<<12)  /*Use client call-back to rename and reorder glyphs. */
 #define HOT_SUBSET (1<<13)
+ 
+#define HOT_SUPRESS__WIDTH_OPT (1<<14) /* supress width optimization in CFF: makes it easier to poek at charstrings with other tools */
     
 struct hotReadFontOverrides_           /* Record for instructions to modify font as it is read in. */
     {
@@ -801,7 +808,7 @@ unsigned short hotMapCID2GID(hotCtx g, unsigned short cid);
    functions return a invalid GID with a value of 65535 if the mapping doesn't
    exist. */
 
-void hotConvert(hotCtx g, unsigned long convertFlags);
+void hotConvert(hotCtx g);
 
 /* hotConvert() is used to initiate the final conversion to OTF after all the
    miscellaneous data has been provided via the other library functions. 
@@ -826,7 +833,9 @@ void hotConvert(hotCtx g, unsigned long convertFlags);
 
 #define HOT_OMIT_MAC_NAMES (1 << 6) /* Build name table without Mac platform names */
 #define HOT_STUB_CMAP4 (1 << 7) /* Build only a stub cmap 4 table. Useful for AdobeBlank, and otehr cases where size is an issue. Font must contain cmap format 4 to work on Windows, but it doesn't have to be useful. */
-
+#define HOT_OVERRIDE_MENUNAMES (1<<8)
+#define HOT_DO_NOT_OPTIMIZE_KERN (1<<9) /* Do not use left side kern class 0 for non-zero kern values. Saves a a few hundred to thousand bytes, but confuses some developers. */
+    
 void hotFree(hotCtx g);
 
 /* hotFree() destroys the library context and all the resources allocated to

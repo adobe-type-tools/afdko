@@ -375,10 +375,14 @@ int OS_2Fill(hotCtx g) {
 	if (h->tbl.usLowerOpticalPointSize > 0) {
 		h->tbl.version = g->font.os2Version = 5;
 	}
-	else if ((h->tbl.fsSelection & ~0xff) > 0) {
+	else if (h->tbl.fsSelection >= 0x80) {
 		/* If any of the OS/2 v 4 fsSelection bits are on.*/
 		h->tbl.version = g->font.os2Version = 4;
 	}
+    else if ((h->tbl.ulUnicodeRange3 >= (unsigned long)(1<<29)) || (h->tbl.ulUnicodeRange4 != 0))
+    {
+         h->tbl.version = g->font.os2Version = 4;
+    }
 	else if (g->font.os2Version != 0) {
 		h->tbl.version              = g->font.os2Version;
 	}

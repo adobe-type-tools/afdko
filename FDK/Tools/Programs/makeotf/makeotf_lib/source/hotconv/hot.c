@@ -382,6 +382,10 @@ char *hotReadFont(hotCtx g, int flags, int *psinfo,  hotReadFontOverrides *fontO
 	if (flags & HOT_SUPRESS_HINT_WARNINGS) {
 		tcflags |= TC_SUPPRESS_HINT_WARNINGS;
 	}
+	if (flags & HOT_SUPRESS__WIDTH_OPT) {
+		tcflags |= TC_SUPPRESS_WIDTH_OPT;
+	}
+    
 	if (flags & HOT_NO_OLD_OPS) {
 		tcflags |= TC_NOOLDOPS;
 	}
@@ -1050,8 +1054,7 @@ static void hotReuse(hotCtx g) {
 /* ------------------------------------------------------------------------- */
 
 /* Convert to OTF */
-void hotConvert(hotCtx g, unsigned long convertFlags) {
-	g->convertFlags = convertFlags;
+void hotConvert(hotCtx g) {
 
 	if (IS_MM(g)) {
 		sortInstances(g);
@@ -1133,6 +1136,12 @@ static void saveWinData(hotCtx g, hotWinData *win) {
 		/* Converting from non-Windows data; mark for latter processing */
 		g->font.win.Family      = FAMILY_UNSET;
 	}
+}
+
+/* */
+void hotSetConvertFlags(hotCtx g, unsigned long hotConvertFlags)
+{
+    g->convertFlags = hotConvertFlags;
 }
 
 /* Add miscellaneous data */

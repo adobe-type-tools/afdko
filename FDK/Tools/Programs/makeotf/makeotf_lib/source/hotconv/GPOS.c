@@ -2584,7 +2584,10 @@ static Offset classDefMake(hotCtx g, GPOSCtx h, otlTbl t, int cdefInx,
 
 	/* --- Create classdef --- */
 	/* Classes start numbering from 0 for ClassDef1, 1 for ClassDef2 */
-	*count = (unsigned short)((cdefInx == 0) ? cdef->classInfo.cnt : cdef->classInfo.cnt + 1);
+    if (g->convertFlags & HOT_DO_NOT_OPTIMIZE_KERN)
+        *count = (unsigned short)cdef->classInfo.cnt + 1;
+    else
+        *count = (unsigned short)((cdefInx == 0) ? cdef->classInfo.cnt : cdef->classInfo.cnt + 1);
 	otlClassBegin(g, t);
 	for (i = 0; i < cdef->classInfo.cnt; i++) {
 		ClassInfo *ci = &cdef->classInfo.array[i];

@@ -631,7 +631,10 @@ static void recodeNewFont(tcCtx g, Font *font) {
 		h->width.fd.array[i].total.cnt = 0;
 	}
 	h->width.fd.cnt = 0;
-	h->width.opt = g->nMasters == 1;
+	if (g->flags & TC_SUPPRESS_WIDTH_OPT)
+        h->width.opt = 0;
+    else
+        h->width.opt = g->nMasters == 1;
 	h->tmpFile.left = 0;
 #if TC_EURO_SUPPORT
 /* ---------------------------------------------------------------------- */
@@ -1040,7 +1043,6 @@ static long recodeEndFont(tcCtx g) {
 	long total = (g->flags & TC_SMALLMEMORY) ?
 	    h->chars.array[h->chars.cnt - 1].icstr + h->cstrs.cnt : h->cstrs.cnt;
 
-    return total;
 	if (!h->width.opt) {
 		return total;   /* No optimization */
 	}

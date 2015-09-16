@@ -244,7 +244,7 @@ void tcCompactFont(tcCtx g, long flags);
 #define TC_SUBSET (1<<15) /* Omit glyphs not named in the GOADB. */
 #define TC_SUPPRESS_HINT_WARNINGS (1<<16) /* Used to supress hitn warngins when buiulding a temp font from a TTF source font. */
 
-    
+#define TC_SUPPRESS_WIDTH_OPT (1<<17) /* supress width optimization in CFF: makes it easier to poek at charstrings with other tools */
 
 
 int tcSetStats(tcCtx g, int gather);

@@ -1836,10 +1836,20 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
 	if (otherflags & OTHERFLAGS_OMIT_MAC_NAMES) {
 		hotConvertFlags |= HOT_OMIT_MAC_NAMES;
 	}
+    
+    
 	if (otherflags & OTHERFLAGS_STUB_CMAP4) {
 		hotConvertFlags |= HOT_STUB_CMAP4;
 	}
+	if (otherflags & OTHERFLAGS_OVERRIDE_MENUNAMES) {
+		hotConvertFlags |= HOT_OVERRIDE_MENUNAMES;
+	}
+	if (otherflags & OTHERFLAGS_DO_NOT_OPTIMIZE_KERN) {
+		hotConvertFlags |= HOT_DO_NOT_OPTIMIZE_KERN;
+	}
 
+    hotSetConvertFlags(h->hot.ctx, hotConvertFlags);
+    
 	if (flags & HOT_RENAME) {
 		h->alias.useFinalNames = 1;
 	}
@@ -1961,7 +1971,7 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
 
 	/* Write OTF file */
 	fileOpen(&h->otf.file, h, otfpath, "w+b");
-	hotConvert(h->hot.ctx, hotConvertFlags);
+	hotConvert(h->hot.ctx);
 	fileClose(&h->otf.file);
 
 	if (freeFeatName) {
