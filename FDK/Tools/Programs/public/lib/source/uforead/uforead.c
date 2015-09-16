@@ -625,10 +625,7 @@ static token* getToken(ufoCtx h, int state)
         }
     }
     
-    if (h->mark == NULL)
-        printf("Help");
-    
-    // Back up and remove any final whitespace.
+     // Back up and remove any final whitespace.
     while ((h->mark != NULL) && (h->src.next != h->mark ) && (isspace(*(h->src.next-1))))
         h->src.next--;
     
@@ -649,8 +646,8 @@ static token* getAttribute(ufoCtx h, int state)
 {
 	char ch;
     token* tk = NULL;
-	h->mark = NULL;
     int lastWasQuote = 0;
+	h->mark = NULL;
     
 	while (bufferReady(h))
     {
@@ -1598,8 +1595,6 @@ static int parseGlyphOrder(ufoCtx h)
                 {
                     newGLIFOrderRec = dnaNEXT(h->data.glifOrder);
                     newGLIFOrderRec->glyphName =  copyStr(h, tk->val); // get a copy in memory
-                    if (!strcmp("newsheqel.oldstyle", newGLIFOrderRec->glyphName))
-                        printf("Here!");
                     newGLIFOrderRec->order = h->data.glifOrder.cnt -1;
                     tk = getToken(h, state);
                     if (!tokenEqualStr(tk, "</string>"))
@@ -3441,7 +3436,6 @@ static int parseHintSetListV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
     token* tk;
     int prevState;
     int stemFlags = 0;
-    HintMask * curHintMask;
     char* pointName = NULL;
     
     
