@@ -1,17 +1,17 @@
 #!/bin/env python
 #installFontLabMacros.py
 __copyright__ =  """
-Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+Copyright 2015 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 """
 
 __doc__ = """
-v 1.1 Feb 09 2009
+v 1.2 Sep 14 2105
 
 Add the path to FDK/Tools/SharedData/FDScripts to the site-packages path
 Copy all the FontLab-related scripts from the Adobe FDK.
 
-Copies each directory under <FDKRoot>/Tools/FontLab
+Copies each directory under <FDKRoot>/Tools/Programs/FontLab/Macros
 to the appropriate place under FontLab/macros.
 """
 
