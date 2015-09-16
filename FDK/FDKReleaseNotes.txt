@@ -1,11 +1,17 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
-FDK. v2.5 Sep 8 2015 change number 64747.
+FDK. v2.5 Sep 8 2015 change number 64765.
 
 	autohint and tx.
 	Switched to using new text format that is plist-compatible for T1 hint data in UFO fonts.
 	See header of FDK/Tools/SharedData/FDKScripts/ufoTools.py for format.
+	
+	autohint
+	Finally fixed excessive generation of flex hints. This has been an issue for
+	decades, but never got fixed because it didn't show up anywhere as a
+    problem. The last version of makeotf turned on parsing warnings, and so now
+	we notice.
 	
 	checkOutlinesUFO
 	Fixed bug where abutting paths didn't get merged if there were no changes in the set of points.
@@ -20,18 +26,40 @@ FDK. v2.5 Sep 8 2015 change number 64747.
 	
 	MakeOTF.py.
 	Increased max number of directories to look upwards when searching for
-	GOADB/FontMenuNameDB from 2 to 3
-	
+	GOADB/FontMenuNameDB from 2 to 3.
+	Added three new options.
+	-omitMacNames/useMacNames   Write only Windows platform menu names in name table,
+                        apart from the names specified in the feature file.
+                        -useMacNames writes Mac as well as Windows names.
+
+	-overrideMenuNames      Allow feature file name table entries to override
+                        default values and the values from the font menu name DB
+                        for name IDs. Name ID's 2 and 6 cannot be overridden.
+                        Use this with caution, and make sure you have provided
+                        feature file name table entries for all platforms.
+
+	-skco/nskco             do/do not suppress kern class optimization by using left
+                        side class 0 for non-zero kern values. Optimizing saves a few
+                        hundred to thousand bytes, but confuses some programs.
+                        Optimizing is the default behavior, and previously was the only option.
+
 	makeotfexe.
 	Extended the set of characters allowed in glyph names to include + * : ~ ^ !
 	Fixed crashing bug with more than 32K glyphs in a name-keyed font, reported by Gustavo Ferreira.
 	Merged changes from Kahled Hosny, to remove requirement that 'size' feature menu names have Mac 
 	platform names.
-	
+	Added three new options: see above.
+	Code maintenance in generation of the feature file parser. Rebuilt the
+	'antler' parser generator to get rid of a compile-time warning for
+	zzerraction, and changed featgram,g so that it would generate the current
+	featgram.c, rather than having to edit the latter directly. Deleted the
+	object files for the 'antler' parser generator, and updated the read-me for
+	the parser generator.
+
 	tx family
 	Fix crash when using '-gx' option with source UFO fonts for 'tx' family of tools.
 	Fix crash when a UFO glyph point has a name attribute with an empty string.
-	Fix crash when a UFO font has no public.glyphOrder dict in teh lib.plist file.
+	Fix crash when a UFO font has no public.glyphOrder dict in the lib.plist file.
 	
 FDK. v2.5 Aug 4 2015 change number 64700.
 
