@@ -41,7 +41,7 @@ Project file.
 """
 
 __usage__ = """
-makeotf v2.0.84 Sep 3 2015
+makeotf v2.0.85 Sep 14 2015
 -f <input font>         Specify input font path. Default is 'font.pfa'.
 -o <output font>        Specify output font path. Default is
                         '<PostScript-Name>.otf'.
@@ -198,13 +198,31 @@ makeotf v2.0.84 Sep 3 2015
                         CFF that specifies the Adobe-Identity-0 ROS;
                         otherwise has no effect.
 -shw/-nshw              Do/Do Not suppress warnings about unhinted glyphs.
-						This is useful when processing unhinted fonts.
+                        This is useful when processing unhinted fonts.
+-swo/-nswo              Suppress CFF width optimization (use of defaultWidthX
+                        and nominalWidthX). Useful when poking at charstrings
+                        with other  tools.
 -stubCmap4              Build only a "stub" Format 4 'cmap' subtable, with
                         only two segments. This is useful only for special-
                         purpose fonts such as AdobeBlank, whose size is an
                         issue. Windows requires a Format 4 'cmap' subtable
                         to be present, but it is not used.
-						
+
+-omitMacNames/useMacNames   Write only Windows platform menu names in name table,
+                        apart from the names specified in the feature file.
+                        -useMacNames writes Mac as well as Windows names.
+
+-overrideMenuNames      Allow feature file name table entries to override
+                        default values and the values from the font menu name DB
+                        for name IDs. Name ID's 2 and 6 cannot be overridden.
+                        Use this with caution, and make sure you have provided
+                        feature file name table entries for all platforms.
+
+-skco/nskco             do/do not suppress kern class optimization by using left
+                        side class 0 for non-zero kern values. Optimizing saves a few
+                        hundred to thousand bytes, but confuses some programs.
+                        Optimizing is the default behavior, and previously was the only option.
+
 Note that options are applied in the order in which they are
 specified: "-r -nS" will not subroutinize a font, but "-nS -r" will
 subroutinize a font. See the document 'MakeOTFUserGuide.pdf' for the
@@ -283,7 +301,9 @@ kSerif = "AddedGlyphsAreSerif"  # if true, any added glyphs will be serif. Else,
 kXUID = "XUID" # Integer. Sets the XUID value in the font. Default is to provide no XUID value.
 kConvertToCID = "ConvertToCID"     # Boolean: turns on converting name-keyed font to CID with and identity CMAP.
 kSuppressHintWarnings = "SuppressHintWarnings"
+kSuppressWidthOptimization = "SuppressWidthOptimization"
 kStubCmap4 = "StubCmap4"
+kSuppressKernOptimization = "SuppressKernOptimization"
 
 # Required project file field names for CID-keyed fonts
 kMacScript = "MacCmapScriptID" # Integer. Used to override the heuristics used to determine the script id for the cmap table Mac encoding sub-table.
@@ -341,7 +361,9 @@ kMOTFOptions = {
 	kWriteWrongBacktrack: [kOptionNotSeen, "-fc", None],
 	kConvertToCID: [kOptionNotSeen, "-cn", "-ncn"],
 	kSuppressHintWarnings:  [kOptionNotSeen, "-shw", "-nshw"],
+	kSuppressWidthOptimization:  [kOptionNotSeen, "-swo", "-nswo"],
 	kStubCmap4:  [kOptionNotSeen, "-stubCmap4", None],
+	kSuppressKernOptimization:  [kOptionNotSeen, "-skco", "-nsko"],
 
 }
 
@@ -563,6 +585,11 @@ def setOptionsFromFontInfo(makeOTFParams):
 			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kOmitMacNames))
 			print "makeotf [Note] omitting Mac platform names from the name table."
 
+	if kMOTFOptions[kSuppressKernOptimization][0] == kOptionNotSeen:
+		if re.search(r"SuppressKernOptimization+([Tt]rue|1)", data):
+			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kSuppressKernOptimization))
+			print "makeotf [Note] Suppresing Kern Optimization."
+
 	if kMOTFOptions[kLicenseCode][0] == kOptionNotSeen:
 		m = re.search(r"LicenseCode\s+([^\r\n]+)", data)
 		if m:
@@ -572,13 +599,13 @@ def setOptionsFromFontInfo(makeOTFParams):
 		if re.search(r"SuppressHintWarnings\s+([Tt]rue|1)", data):
 			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kSuppressHintWarnings))
 
+	if kMOTFOptions[kSuppressWidthOptimization][0] == kOptionNotSeen:
+		if re.search(r"SuppressWidthOptimization\s+([Tt]rue|1)", data):
+			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kSuppressWidthOptimization))
+
 	if kMOTFOptions[kStubCmap4][0] == kOptionNotSeen:
 		if re.search(r"stubCmap4\s+([Tt]rue|1)", data):
 			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kStubCmap4))
-
-
-
-
 
 	if kMOTFOptions[kMacScript][0] == kOptionNotSeen:
 		m = re.search(r"Language\s+\(([^\)]+)\)", data)
@@ -1197,6 +1224,14 @@ def getOptions(makeOTFParams):
 			kMOTFOptions[kOmitMacNames][0] = i + optionIndex
 			exec("makeOTFParams.%s%s = 'None'" % (kFileOptPrefix, kOmitMacNames))
 
+		elif arg == kMOTFOptions[kSuppressKernOptimization][1]:
+			kMOTFOptions[kSuppressKernOptimization][0] = i + optionIndex
+			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kSuppressKernOptimization))
+
+		elif arg == kMOTFOptions[kSuppressKernOptimization][2]:
+			kMOTFOptions[kSuppressKernOptimization][0] = i + optionIndex
+			exec("makeOTFParams.%s%s = 'None'" % (kFileOptPrefix, kSuppressKernOptimization))
+
 		elif arg == kMOTFOptions[kLicenseCode][1]:
 			kMOTFOptions[kLicenseCode][0] = i + optionIndex
 			try:
@@ -1219,9 +1254,23 @@ def getOptions(makeOTFParams):
 		elif arg == kMOTFOptions[kSuppressHintWarnings][2]:
 			kMOTFOptions[kSuppressHintWarnings][0] = i + optionIndex
 			exec("makeOTFParams.%s%s = 'None'" % (kFileOptPrefix, kSuppressHintWarnings))
+
+		elif arg == kMOTFOptions[kSuppressWidthOptimization][1]:
+			kMOTFOptions[kSuppressWidthOptimization][0] = i + optionIndex
+			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kSuppressWidthOptimization))
+		elif arg == kMOTFOptions[kSuppressWidthOptimization][2]:
+			kMOTFOptions[kSuppressWidthOptimization][0] = i + optionIndex
+			exec("makeOTFParams.%s%s = 'None'" % (kFileOptPrefix, kSuppressWidthOptimization))
+
 		elif arg == kMOTFOptions[kStubCmap4][1]:
 			kMOTFOptions[kStubCmap4][0] = i + optionIndex
 			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kStubCmap4))
+		elif arg == kMOTFOptions[kOmitMacNames][1]:
+			kMOTFOptions[kOmitMacNames][0] = i + optionIndex
+			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kOmitMacNames))
+		elif arg == kMOTFOptions[kOmitMacNames][1]:
+			kMOTFOptions[kSuppressKernOptimization][0] = i + optionIndex
+			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kSuppressKernOptimization))
 
 
 		else:
@@ -2220,7 +2269,7 @@ def runMakeOTF(makeOTFParams):
 		# We also need to suppress the warnings about no hints: all glyphs will be un-hinted.
 		exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kSuppressHintWarnings))
 	
-	# Suppress hint warnings if not in release ode.
+	# Suppress hint warnings if not in release mode.
 	if 'true' != eval("makeOTFParams.%s%s" % (kFileOptPrefix, kRelease)):
 		exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kSuppressHintWarnings))
 		
