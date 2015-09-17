@@ -16,6 +16,7 @@
 						<li><a href="#Win">Windows XP</a></li>
 					</ul>
 				</li>
+				<li><a href="#FontLab">FDK FontLab scripts</a></li>
 				<li><a href="#Contact">Contact information</a></li>
 				<li><a href="#TechNotes">Technical Notes</a></li>
 			</ol>
@@ -25,26 +26,24 @@
 		<p><a name="Introduction" id="Introduction"></a><h2>1. Introduction</h2></p>
 		<p>This release of the Adobe Font Development Kit for OpenType (AFDKO) is being provided by Adobe in order to help font developers get started with making OpenType fonts. It contains a set of tools that will allow you to build an OpenType font from an existing font, verify the contents of the font, and proof the font on screen or on paper. This FDK also contains useful technical documentation and some of the source material required to produce OpenType fonts, as well as instructions on how to create and structure this source material for your own font production work.</p>
 		
-		<p>Please see the document <a href="AFDKO-Overview.html">"Adobe Font Development Kit for OpenType (AFDKO) Overview"</a>, in the file "AFDKO-Overview.html", for what is new and for a summary of all the tools and what they do.</p>
+		<p>Please see the document <a href="AFDKO-Overview.html">Adobe Font Development Kit for OpenType (AFDKO) Overview</a>, in the file "AFDKO-Overview.html" for what is new and for a summary of all the tools and what they do.</p>
 		
 		<p><strong>NOTE:</strong> The FDK 2.5 requires an Intel-based Mac running OSX 10.6.8 or later , or Windows XP or later.</p>
 		
 		<p><a name="Installation" id="Installation"></a><h2>2. AFDKO Installation Guide</h2></p>
 		
-		<p>Before you get started using the tools, you need to install the Font Development Kit on your local hard disk. Follow the steps below depending on the platform you are using, <a href="#Mac">Mac OS X</a> or <a href="#Win">Windows 2000/XP/Vista</a>.</p>
+		<p>Before you get started using the tools, you need to install the Font Development Kit on your local hard disk. Follow the steps below depending on the platform you are using, <a href="#Mac">Mac OS X</a> or <a href="#Win">Windows</a>.</p>
 		
-		<p>If you have previously installed the AFDKO v2.0 or 2.5, you can simply replace the old FDK directory with new one. And if you are using the scripts for FontLab, run the script <a href="Tools/FontLab">FDK/Tools/FontLab/installFontLabMacros.py</a>, and you will not need to do anything else.</p>
+		<p>If you have previously installed the AFDKO v2.0 or 2.5, you can simply replace the old FDK directory with new one, and skip all the foloowing steps.</p>
 		
-		<p>The FontLab macros now require that the FDK command line tools are installed.</p>
-
 		<p><a name="Mac" id="Mac"></a><h3>Mac OS X</h3></p>
 		<ol>
 			<li><a href="http://www.adobe.com/devnet/opentype/afdko/">Download the AFDKO</a> archive file and decompress it.</li>
 			<li>You should now have a folder named "FDK". Move it to where you want.</li>
 			<li>Open a Terminal window <em>(Terminal is located in <a href="/Applications/Utilities/Terminal.app">/Applications/Utilities/Terminal</a>).</em></li>
 			<li>Open the "FDK" folder and locate the file named "FinishInstallOSX".</li>
-			<li>Select the "FinishInstallOSX" file, drag & drop it on the Terminal window, and press the "Return" key.
-				<ul><li>If FinishInstallOSX complains that it does not have permission to make the changes, type "<code>sudo </code>" <em>(no quotes and keep the final space)</em> before doing step&nbsp;5. The results in the command line "sudo <path to FDK>FinishInstallOSX". This command will prompt you for the system administrator password, which will allow FinishInstallOSX to complete its work.</li></ul>
+			<li>Find and select the file "FinishInstallOSX", drag & drop it on the Terminal window, and press the "Return" key.
+				<ul><li>If FinishInstallOSX complains that it does not have permission to make the changes, type "<code>sudo </code>" <em>(no quotes and keep the final space)</em> before doing step&nbsp;5. This results in the command line "sudo &lt;path to FDK&gt;FinishInstallOSX". This command will prompt you for the system administrator password, which will allow FinishInstallOSX to complete its work.</li></ul>
 			</li>
 			<li>Close the Terminal window.</li>
 		</ol>
@@ -61,7 +60,7 @@
 		<p><a name="Linux" id="Linux"></a><h3>Linux</h3></p>
 		<p> The install procedure for Linux is the same as for Mac OSX, except that you run the "FinishInstallLinux" file instead of "FinishInstallOSX" file, and you have to logout and log back in before the changes take effect.</p>
 		
-		<p><a name="Win" id="Win"></a><h3>Windows XP , Vista and 7</h3></p>
+		<p><a name="Win" id="Win"></a><h3>Windows</h3></p>
 		<p> After downloading and decompressing the FDK, the only installation step is to add the directory for the FDK programs to your system's environment variable "PATH".
 		This variable contains a list of directory paths, as a single string of text with the directory paths  separated by semicolons.
 		When the system needs to find a program that you have typed in a command-line, it looks for that program in all the directories listed in the PATH variable.
@@ -72,8 +71,7 @@
 		<ol>
 
 			<li><a href="http://www.adobe.com/devnet/opentype/afdko/">Download the AFDKO</a> archive file and decompress it.</li>
-			<li>You should now have a folder named "FDK". Move it to where you want (e.g. <code>C:\FDK</code>).<br>
-				NOTE: In case you put the FDK folder inside another folder, make sure that the folder name does *not* have spaces. Therefore, do not put it inside the "Program Files" folder, for example. Note also that, due to limitations of the python ziplib module, the path must be limited to 1 byte characters whose encoding is recognized by the system.</li>
+			<li>You should now have a folder named "FDK". Move it wherever you want (example: <code>C:\Program Files (x86)\FDK</code>).</li>
 			<li>Open the "FDK" folder. and find the file "FinishInstallWindows.cmd".</li>
 			<li>Open a command prompt window. If you do not know how to do this, read the file "FDK\Technical Documentation\CommandLineHowTo.pdf".</li>
 			<li>Note! The command window must be run with Administrator privileges. If you open a regular command line window, the script will fail. To open a command window with Adminstrator priviliges, right click on the command program icon, and choose "Run with Adminstrator privileges."</li>
@@ -92,24 +90,48 @@
 		<p>NOTE: If you move the FDK directory to a new location, you will need to change the PATH variable as well.</p>
 
 
-		<p><strong>For installing the AFDKO FontLab macros</strong> <em>on Windows XP:</em><br>
-			<em>You must have Python installed before you proceed. For information on how to install Python, go to the <a href="http://www.fontlab.com/python/">FontLab Python page</a>.</em></p>
+
+		<p><a name="FontLab" id="FontLab"></a><h2>3. FontLab scripts</h2></p>
+		
+		<p>There are some old scripts that provide a dialog for running autohint and checkOutlines within FontLab. These have not been maintained for years, but a few people still use them. It is better to use the command-line versions, which are actively maintained.</p>
+		<p>To install these, get a copy of the FDK FontLab directory. You can get this by downloading the OpenSource version of the FDK from github at <a href="https://github.com/adobe-type-tools/afdko">https://github.com/adobe-type-tools/afdko</a>. The FontLab directory is at FDK/Tools/Programs/FontLab. You can also get the FontLab directory by downloading it from Adobe build of the AFDKO (see below in the section "Contacts" for the link). Follow the link to download the FDK; one of the download options will be the FontLab directory.</p>
+		
+		<p>NOTE: Several of the scripts for FontLab will bring up a dialog to set options if you hold down the CONTROL key while starting the script. </p>
+
+		<p><strong>For installing the AFDKO FontLab macros</strong> on Mac OSX:</p>
 		<ol>
 			<li>Quit FontLab, in case it is running.</li>
-			<li>Locate the "Macros" folder in your FontLab installation. The path to it should be something like <code>C:\Documents&nbsp;and&nbsp;Settings\<em>your_username</em>\My&nbsp;Documents\FontLab\Studio5\Macros</code>. If there is no "Macros" folder, create one on that location.</li>
-			<li><a href="http://www.adobe.com/devnet/opentype/afdko/">Download the AFDKO</a> archive file and decompress it.</li>
-			<li>You should now have a folder named "FDK".</li>
-			<li>Open a Command Prompt window <em>(Start Menu > Run... > cmd.exe)</em> and type "<code>cd </code>" <em>(no quotes and keep the final space)</em>.</li>
-
-			<li>Select the "FDK" folder, drag & drop it on the Command Prompt window, and press the "Return" key.</li>
-			<li>Type "<code>cd Tools/FontLab</code>" <em>(no quotes)</em> and hit "Return".</li>
-			<li>Still in the Command Prompt window, type "<code>python installFontLabMacros.py </code>" <em>(no quotes and keep the final space)</em>.</li>
-			<li>Select the "Macros" folder from step 1, drag & drop it on the Command Prompt window, and press the "Return" key.</li>
+			<li>Locate the "Macros" folder in your FontLab program installation. The path to it should be something like <code>/Users/&lt;<em>your_username</em>&gt;/Library/Application\ Support/FontLab/Studio\ 5/Macros</code>. If there is no "Macros" folder, create one on that location.</li>
+			<li>Open a Terminal window <em>(Terminal is located in <a href="/Applications/Utilities/Terminal.app">/Applications/Utilities/Terminal</a>)</em> and enter the command to change the current directory to be the FDK FontLab script directory:</li>
+		<ol>
+			<li>Type "<code>cd </code>" <em>(no quotes and keep the final space)</em>.</li>
+			<li>Find and select the FDK "FontLab" folder, drag & drop it on the Terminal window, and press the "Return" key.</li>
+		</ol>
+			<li>You next want to enter the command run the installFontLabMacros.py script with the system Python interpreter:</li>
+		<ol>
+			<li>type <code>"python installFontLabMacros.py "</code> <em>(no quotes and keep the final space)</em>.</li>
+			<li>Select the "Macros" folder from step 1, drag & drop it on the Terminal window, and press the "Return" key.</li>
+		</ol>
 		</ol>
 		<p>If all went well, you should see a bunch of lines in the Command Prompt window that start with "<code>Copied:</code>". The AFDKO FontLab macros are now installed.</p>
-		<p>On step 7, if you have Python installed but still get a message that says "<code>'python' is not recognized as an internal or external command, operable program or batch file.</code>", locate the folder where Python is installed, and add that folder's path to the "PATH" User Variable.</p>
-		<p>NOTE: Several of the scripts for FontLab will bring up a dialog to set options if you hold down the CONTROL key while starting the script. However, for this to work, you must install the win32all Python module. This can be downloaded from: <a href="http://www.python.net/crew/mhammond/win32/Downloads.html">Win32 Extensions for Python</a> or <a href="http://sourceforge.net/project/showfiles.php?group_id=78018">SourceForge.net</a>.</p>
 
+		<p><strong>For installing the AFDKO FontLab macros</strong> n Windows XP:<br>
+			<ol>
+			<li>Quit FontLab, in case it is running.</li>
+			<li>Locate the "Macros" folder in your FontLab installation. The path to it should be something like <code>C:\Documents&nbsp;and&nbsp;Settings\<em>your_username</em>\My&nbsp;Documents\FontLab\Studio5\Macros</code>. If there is no "Macros" folder, create one on that location.</li>
+			<li>Open a Command Prompt window <em>(Start Menu > Run... > cmd.exe)</em> and enter the command to change the current directory to be the FDK FontLab script directory:</li>
+		<ol>
+			<li>Type "<code>cd </code>" <em>(no quotes and keep the final space)</em>.</li>
+			<li>Find and select the "FontLab" folder, drag & drop it on the Command Prompt window, and press the "Return" key.</li>
+		</ol>
+			<li>You next want to enter the command run the installFontLabMacros.py script with the AFDKO Python interpreter:</li>
+		<ol>
+			<li>Find and select the file "FDK/Tools/win/Python/AFDKOPython/python.exe", and drag & drop it on the Command Prompt window,</li>
+			<li>Type "<code> installFontLabMacros.py </code>" <em>(no quotes, but enter the space characters before and after the script file name)</em>.</li>
+			<li>Select the "Macros" folder from step 1, drag & drop it on the Command Prompt window, and press the "Return" key.</li>
+		</ol>
+		</ol>
+		<p>If all went well, you should see a bunch of lines in the Command Prompt window that start with "<code>Copied:</code>". The AFDKO FontLab macros are now installed.</p>
 
 		<p><a name="Contact" id="Contact"></a><h2>3. Contact information</h2></p>
 

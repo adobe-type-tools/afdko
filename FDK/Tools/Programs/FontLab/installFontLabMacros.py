@@ -6,13 +6,10 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 """
 
 __doc__ = """
-v 1.2 Sep 14 2105
+v 1.2 Sep 15 2105
 
-Add the path to FDK/Tools/SharedData/FDScripts to the site-packages path
-Copy all the FontLab-related scripts from the Adobe FDK.
-
-Copies each directory under <FDKRoot>/Tools/Programs/FontLab/Macros
-to the appropriate place under FontLab/macros.
+Copies the Macros directory under the parent directory of this script file
+to the appropriate place under FontLab program's Macros directory.
 """
 
 import sys
@@ -39,6 +36,8 @@ def copyFile(srcPath, dstPath):
 				print "Quitting - not all files were copied."
 				raise InstallError
 			print "Copied: %s to dir %s" % (srcPath, dstPath)
+		else:
+			print "Failed to find src file '%s'." % (srcPath)
 			
 
 def copyDir(srcDirPath, destDirPath):
@@ -73,15 +72,10 @@ def run():
 		return
 	
 	# Find the path to the <FDKRoot>/Tools/FontLab/
-	fdkToolsDir = os.path.dirname(os.path.abspath(__file__)) # Tools/FontLab
-	fdkToolsDir = os.path.dirname(fdkToolsDir) # Tools/
+	scriptDir = os.path.dirname(os.path.abspath(__file__)) # Tools/FontLab
 	
 
-	srcBasePath = os.path.join(fdkToolsDir, "FontLab", "Macros")
-	if not os.path.exists(srcBasePath):
-		print "Error. Quitting. The FDK path to the FontLab scripts does not exist %s ." % srcBasePath
-		print "Please run the FDK script FinishInstall.py, then restart FontLab."
-		return
+	srcBasePath = os.path.join(scriptDir, "Macros")
 		
 	# copy all files from the other directories at this level to the directories of
 	# the same name under FontLab
@@ -92,26 +86,6 @@ def run():
 			continue
 		destDirPath = os.path.join(destBasePath, dirName)
 		copyDir(srcDirPath, destDirPath)
-
-	FDKFontLabModuleList = ["plistlib.py",
-							"fontPDF.py",
-							"otfPDF.py",
-							"pdfdoc.py",
-							"pdfgen.py",
-							"pdfgeom.py",
-							"pdfmetrics.py",
-							"pdfutils.py",
-							"ttfPDF.py",
-							"Py23AC.pyd",
-							"Py24AC.pyd",
-							"Py23focusdll.pyd",
-							"Py24focusdll.pyd",
-							]
-	fdkOtherScriptsDir = os.path.join(fdkToolsDir, "SharedData", "FDKScripts")
-	for fileName in FDKFontLabModuleList:
-		srcPath = os.path.join(fdkOtherScriptsDir, fileName)
-		dstPath = os.path.join(destBasePath, "System", "Modules", fileName)
-		copyFile(srcPath, dstPath)
 		
 
 if __name__ == "__main__":
