@@ -2,7 +2,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-   checkOutlinesUFO program v1.14 Sep 4 2015
+   checkOutlinesUFO program v1.15 Sep 16 2015
    
    checkOutlinesUFO [-e] [-g glyphList] [-gf <file name>] [-all] [-noOverlap] [-noBasicChecks] [-setMinArea <n>] [-setTolerance <n>] [-wd]
    
@@ -168,7 +168,7 @@ class FontFile(object):
 		font.py:save to delete the original font and write everything anew.
 		
 		In order to avoid this, I reach into the defcon code and save only the processed glyphs layer.
-		
+		I also set glyphSet.ufoFormatVersion so that the glif files will be set to format 1.
 		"""
 		from ufoLib import UFOWriter
 		writer = UFOWriter(self.dFont.path, formatVersion=2)
@@ -181,7 +181,7 @@ class FontFile(object):
 			writer.layerContents[kProcessedGlyphsLayerName] = kProcessedGlyphsLayer
 			glyphSet = writer.getGlyphSet(layerName=kProcessedGlyphsLayerName, defaultLayer=False)
 			writer.writeLayerContents(layers.layerOrder)
-			writer._formatVersion = 2
+			glyphSet.ufoFormatVersion = 2
 			layer.save(glyphSet)
 			layer.dirty = False
 
