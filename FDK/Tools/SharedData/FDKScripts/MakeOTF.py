@@ -41,7 +41,7 @@ Project file.
 """
 
 __usage__ = """
-makeotf v2.0.85 Sep 14 2015
+makeotf v2.0.86 Sep 17 2015
 -f <input font>         Specify input font path. Default is 'font.pfa'.
 -o <output font>        Specify output font path. Default is
                         '<PostScript-Name>.otf'.
@@ -316,6 +316,7 @@ kDoubleMapGlyphs = "DoulbeMapGlyphs"
 kDefaultCharAsSpace = "DefaultCharAsSpace"
 kUseOldNameID4 = "UseOldNameID4" # Use old logic for name ID 4, i.e. what was done for name ID 4 for all FDK fonts before 11/2010.
 kOmitMacNames = "OmitMacNames" # omit all Mac platform names from the name table
+kOverrideMenuNames = "OverrideMenuNames"
 kLicenseCode = "LicenseCode" # Arbitrary string appended at the end of name ID 3. Used by Adobe for font license code.
 kDefaultFontPathList = ["font.ufo", "font.pfa", "font.ps", "font.txt"] # Will look for all.
 kDefaultFeaturesPath = "features"
@@ -357,6 +358,7 @@ kMOTFOptions = {
 	kDefaultCharAsSpace: [kOptionNotSeen, "-dcs", None],
 	kUseOldNameID4: [kOptionNotSeen, "-oldNameID4", "-newNameID4"],
 	kOmitMacNames: [kOptionNotSeen, "-omitMacNames", "-useMacNames"],
+	kOverrideMenuNames: [kOptionNotSeen, "-overrideMenuNames", "-donotOverrideMenuNames"],
 	kLicenseCode: [kOptionNotSeen, "-lic", None],
 	kWriteWrongBacktrack: [kOptionNotSeen, "-fc", None],
 	kConvertToCID: [kOptionNotSeen, "-cn", "-ncn"],
@@ -584,6 +586,11 @@ def setOptionsFromFontInfo(makeOTFParams):
 		if re.search(r"OmitMacNames+([Tt]rue|1)", data):
 			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kOmitMacNames))
 			print "makeotf [Note] omitting Mac platform names from the name table."
+
+	if kMOTFOptions[kOverrideMenuNames][0] == kOptionNotSeen:
+		if re.search(r"OverrideMenuNames+([Tt]rue|1)", data):
+			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kOverrideMenuNames))
+			print "makeotf [Note] allowing overrides of font menu names in name table."
 
 	if kMOTFOptions[kSuppressKernOptimization][0] == kOptionNotSeen:
 		if re.search(r"SuppressKernOptimization+([Tt]rue|1)", data):
@@ -1224,6 +1231,14 @@ def getOptions(makeOTFParams):
 			kMOTFOptions[kOmitMacNames][0] = i + optionIndex
 			exec("makeOTFParams.%s%s = 'None'" % (kFileOptPrefix, kOmitMacNames))
 
+		elif arg == kMOTFOptions[kOverrideMenuNames][1]:
+			kMOTFOptions[kOverrideMenuNames][0] = i + optionIndex
+			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kOverrideMenuNames))
+
+		elif arg == kMOTFOptions[kOverrideMenuNames][2]:
+			kMOTFOptions[kOverrideMenuNames][0] = i + optionIndex
+			exec("makeOTFParams.%s%s = 'None'" % (kFileOptPrefix, kOverrideMenuNames))
+
 		elif arg == kMOTFOptions[kSuppressKernOptimization][1]:
 			kMOTFOptions[kSuppressKernOptimization][0] = i + optionIndex
 			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kSuppressKernOptimization))
@@ -1265,12 +1280,6 @@ def getOptions(makeOTFParams):
 		elif arg == kMOTFOptions[kStubCmap4][1]:
 			kMOTFOptions[kStubCmap4][0] = i + optionIndex
 			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kStubCmap4))
-		elif arg == kMOTFOptions[kOmitMacNames][1]:
-			kMOTFOptions[kOmitMacNames][0] = i + optionIndex
-			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kOmitMacNames))
-		elif arg == kMOTFOptions[kOmitMacNames][1]:
-			kMOTFOptions[kSuppressKernOptimization][0] = i + optionIndex
-			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kSuppressKernOptimization))
 
 
 		else:
