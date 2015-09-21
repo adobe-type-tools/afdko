@@ -6,7 +6,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 """
 
 __doc__ = """
-v 1.2 Sep 15 2105
+v 1.2 Sep 15 2015
 
 Copies the Macros directory under the parent directory of this script file
 to the appropriate place under FontLab program's Macros directory.
