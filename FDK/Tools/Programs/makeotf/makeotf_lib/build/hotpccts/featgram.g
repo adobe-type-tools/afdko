@@ -319,9 +319,9 @@ hotCtx g;
 
 // ------- glyph class rules
 
-glyph[char *tok]>[GID gid]
+glyph[char *tok, int allowNotdef]>[GID gid]
 	:	<<$gid = 0; /* Suppress optimizer warning */>>
-		gname:T_GNAME				<<$gid = featMapGName2GID(g, $gname.text);
+		gname:T_GNAME				<<$gid = featMapGName2GID(g, $gname.text, allowNotdef);
 									  if ($tok != NULL)
 										  strcpy($tok, $gname.text);>>
 	|	cid:T_CID					<<$gid = cid2gid(g, (CID)($cid).lval);>>
@@ -343,7 +343,7 @@ glyphClass[int named, char *gcname]>[GNode *gnode]
 		<<
 		if ($named)
 			{
-			$gnode   = gcAddGlyphClass($a.text, 1);
+			$gnode = gcAddGlyphClass($a.text, 1);
 			gcEnd(named);
 			}
 		else
@@ -362,9 +362,41 @@ glyphClass[int named, char *gcname]>[GNode *gnode]
 		(
 			<<GID gid, endgid;
 			  char p[MAX_TOKEN], q[MAX_TOKEN];>>
-			glyph[p]>[gid]
-			( "\-" glyph[q]>[endgid]   <<gcAddRange(gid, endgid, p, q);>>
-			|						   <<gcAddGlyph(gid);>>
+			glyph[p, TRUE]>[gid]
+			<<if (gid == 0) {
+				/* it might be a range.*/
+				zzBLOCK(zztasp4);
+				zzMake0;
+				if (strchr(p, '-')) {
+				  char *secondPart = p;
+				  char *firstPart = strsep(&secondPart, "-");
+				  if (firstPart == NULL) {
+				    featMsg(hotERROR, "Glyph \"%s\" not in font", p);
+				  }
+				  else {
+				    gid = featMapGName2GID(g, firstPart, FALSE );
+				    endgid  = featMapGName2GID(g, secondPart, FALSE );
+				    if (gid != 0 && endgid != 0) {
+				      gcAddRange(gid, endgid, firstPart, secondPart);
+				    }
+				    else {
+				      zzFAIL(1,zzerr2,&zzMissSet,&zzMissText,&zzBadTok,&zzBadText,&zzErrk);
+				      goto fail;
+				    }
+				  }
+				}
+				else {
+				  zzFAIL(1,zzerr2,&zzMissSet,&zzMissText,&zzBadTok,&zzBadText,&zzErrk);
+				  goto fail;
+				}
+				zzEXIT(zztasp4);
+			}
+			else
+			>>
+			( "\-" glyph[q, FALSE]>[endgid]
+				<<gcAddRange(gid, endgid, p, q);>>
+			|
+				<<gcAddGlyph(gid);>>
 			)
 			|
 			b:T_GCLASS				<<gcAddGlyphClass($b.text, named);>>
@@ -552,7 +584,7 @@ valueRecordDef
 		>>
 		)
 	)
-	valName:T_GNAME				
+	valName:T_GNAME
 	<<
 	featAddValRecDef(metrics, $valName.text);
 	>>
@@ -680,7 +712,7 @@ pattern[int markedOK]>[GNode *pat]
 				(
 				<<GID gid;>>
 	
-				glyph[NULL]>[gid]
+				glyph[NULL, FALSE]>[gid]
 					<<
 					*insert = newNode(h);
 					(*insert)->gid = gid;
@@ -742,7 +774,7 @@ pattern2[int markedOK, GNode** headP]>[GNode *lastNode]
 				(
 				<<GID gid;>>
 	
-				glyph[NULL]>[gid]
+				glyph[NULL, FALSE]>[gid]
 					<<
 					*insert = newNode(h);
 					(*insert)->gid = gid;
@@ -796,7 +828,7 @@ pattern3[int markedOK, GNode** headP]>[GNode *lastNode]
 				(
 				<<GID gid;>>
 	
-				glyph[NULL]>[gid]
+				glyph[NULL, FALSE]>[gid]
 					<<
 					*insert = newNode(h);
 					(*insert)->gid = gid;
@@ -900,7 +932,7 @@ substitute
 					)
 					(
 					K_NULL
-					| pattern[0]>[repl]			
+					| pattern[0]>[repl]
 					)
 				}
 				<<addSub(targ, repl, type, targLine);>>
@@ -926,7 +958,7 @@ mark_statement
 			/* require a glyph or glyph class*/
 			<<GID gid;>>
 	
-			glyph[NULL]>[gid]
+			glyph[NULL, FALSE]>[gid]
 				<<
 				targ = newNode(h);
 				targ->gid = gid;
@@ -1248,7 +1280,7 @@ cursive[int markedOK, GNode** headP]>[GNode *lastNode]
 				(
 				<<GID gid;>>
 	
-				glyph[NULL]>[gid]
+				glyph[NULL, FALSE]>[gid]
 					<<
 					*insert = newNode(h);
 					(*insert)->gid = gid;
@@ -1310,7 +1342,7 @@ baseToMark[int markedOK, GNode** headP]>[GNode *lastNode]
 				(
 				<<GID gid;>>
 	
-				glyph[NULL]>[gid]
+				glyph[NULL, FALSE]>[gid]
 					<<
 					*insert = newNode(h);
 					(*insert)->gid = gid;
@@ -1355,7 +1387,7 @@ baseToMark[int markedOK, GNode** headP]>[GNode *lastNode]
 					(
 					<<GID gid;>>
 		
-					glyph[NULL]>[gid]
+					glyph[NULL, FALSE]>[gid]
 						<<
 						*insert = newNode(h);
 						(*insert)->gid = gid;
@@ -1446,7 +1478,7 @@ ligatureMark[int markedOK, GNode** headP]>[GNode *lastNode]
 				(
 				<<GID gid;>>
 	
-				glyph[NULL]>[gid]
+				glyph[NULL, FALSE]>[gid]
 					<<
 					*insert = newNode(h);
 					(*insert)->gid = gid;
@@ -1491,7 +1523,7 @@ ligatureMark[int markedOK, GNode** headP]>[GNode *lastNode]
 					(
 					<<GID gid;>>
 		
-					glyph[NULL]>[gid]
+					glyph[NULL, FALSE]>[gid]
 						<<
 						*insert = newNode(h);
 						(*insert)->gid = gid;
@@ -1740,10 +1772,10 @@ lookupBlockOrUse
 		  K_useExtension		<<useExtension = 1;>>
 		  }
 		  "\{"					<<
-                                checkLkpName($t.text, labelLine, 1, 0);
+								checkLkpName($t.text, labelLine, 1, 0);
 								if (useExtension)
 									flagExtension(1);
-                                >>
+								>>
 		  (statement)+
 		  "\}"					<<zzmode(LABEL_MODE);>>
 		  u:T_LABEL				<<checkLkpName($u.text, 0, 0, 0);>>
@@ -2116,12 +2148,12 @@ table_vmtx
 			(
 			<<GID gid; short value;>>
 
-			K_VertOriginY  glyph[NULL]>[gid]  numInt16>[value]
+			K_VertOriginY  glyph[NULL, FALSE]>[gid]  numInt16>[value]
 				<<
 				hotAddVertOriginY(g, gid, value, INCL.file, zzline);
 				>>
 			|
-			K_VertAdvanceY  glyph[NULL]>[gid]  numInt16>[value]
+			K_VertAdvanceY  glyph[NULL, FALSE]>[gid]  numInt16>[value]
 				<<
 				hotAddVertAdvanceY(g, gid, value, INCL.file, zzline);
 				>>

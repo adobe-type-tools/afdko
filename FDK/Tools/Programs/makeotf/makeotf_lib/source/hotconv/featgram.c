@@ -71,10 +71,11 @@ hotCtx g;
 
 GID
 #ifdef __USE_PROTOS
-glyph(char * tok)
+glyph(char * tok,int allowNotdef)
 #else
-glyph(tok)
- char *tok ;
+glyph(tok,allowNotdef)
+ char *tok;
+int allowNotdef ;
 #endif
 {
   GID   _retv;
@@ -89,7 +90,7 @@ glyph(tok)
     zzmatch(T_GNAME);
     gname = zzaCur;
 
-    _retv = featMapGName2GID(g,  gname.text);
+    _retv = featMapGName2GID(g,  gname.text, allowNotdef);
     if ( tok != NULL)
     strcpy( tok,  gname.text);
  zzCONSUME;
@@ -143,7 +144,7 @@ char *gcname ;
     
     if ( named)
     {
-      _retv   = gcAddGlyphClass( a.text, 1);
+      _retv = gcAddGlyphClass( a.text, 1);
       gcEnd(named);
     }
     else
@@ -172,15 +173,44 @@ char *gcname ;
           char p[MAX_TOKEN], q[MAX_TOKEN];
           do {
             if ( (setwd1[LA(1)]&0x2) ) {
-               gid  = glyph( p );
+               gid  = glyph( p, TRUE );
 
+              if (gid == 0) {
+                /* it might be a range.*/
+                zzBLOCK(zztasp4);
+                zzMake0;
+                if (strchr(p, '-')) {
+                  char *secondPart = p;
+                  char *firstPart = strsep(&secondPart, "-");
+                  if (firstPart == NULL) {
+                    featMsg(hotERROR, "Glyph \"%s\" not in font", p);
+                  }
+                  else {
+                    gid = featMapGName2GID(g, firstPart, FALSE );
+                    endgid  = featMapGName2GID(g, secondPart, FALSE );
+                    if (gid != 0 && endgid != 0) {
+                      gcAddRange(gid, endgid, firstPart, secondPart);
+                    }
+                    else {
+                      zzFAIL(1,zzerr2,&zzMissSet,&zzMissText,&zzBadTok,&zzBadText,&zzErrk);
+                      goto fail;
+                    }
+                  }
+                }
+                else {
+                  zzFAIL(1,zzerr2,&zzMissSet,&zzMissText,&zzBadTok,&zzBadText,&zzErrk);
+                  goto fail;
+                }
+                zzEXIT(zztasp4);
+              }
+              else
               {
                 zzBLOCK(zztasp4);
                 zzMake0;
                 {
                 if ( (LA(1)==141) ) {
                   zzmatch(141); zzCONSUME;
-                   endgid  = glyph( q );
+                   endgid  = glyph( q, FALSE );
 
                   gcAddRange(gid, endgid, p, q);
                 }
@@ -1085,7 +1115,7 @@ pattern(markedOK)
             zzMake0;
             {
             GID gid;
-             gid  = glyph( NULL );
+             gid  = glyph( NULL, FALSE );
 
             
             *insert = newNode(h);
@@ -1223,7 +1253,7 @@ GNode** headP ;
             zzMake0;
             {
             GID gid;
-             gid  = glyph( NULL );
+             gid  = glyph( NULL, FALSE );
 
             
             *insert = newNode(h);
@@ -1334,7 +1364,7 @@ GNode** headP ;
           zzMake0;
           {
           GID gid;
-           gid  = glyph( NULL );
+           gid  = glyph( NULL, FALSE );
 
           
           *insert = newNode(h);
@@ -1699,7 +1729,7 @@ mark_statement()
         zzMake0;
         {
         GID gid;
-         gid  = glyph( NULL );
+         gid  = glyph( NULL, FALSE );
 
         
         targ = newNode(h);
@@ -2542,7 +2572,7 @@ GNode** headP ;
           zzMake0;
           {
           GID gid;
-           gid  = glyph( NULL );
+           gid  = glyph( NULL, FALSE );
 
           
           *insert = newNode(h);
@@ -2659,7 +2689,7 @@ GNode** headP ;
           zzMake0;
           {
           GID gid;
-           gid  = glyph( NULL );
+           gid  = glyph( NULL, FALSE );
 
           
           *insert = newNode(h);
@@ -2745,7 +2775,7 @@ GNode** headP ;
                 zzMake0;
                 {
                 GID gid;
-                 gid  = glyph( NULL );
+                 gid  = glyph( NULL, FALSE );
 
                 
                 *insert = newNode(h);
@@ -2929,7 +2959,7 @@ GNode** headP ;
           zzMake0;
           {
           GID gid;
-           gid  = glyph( NULL );
+           gid  = glyph( NULL, FALSE );
 
           
           *insert = newNode(h);
@@ -3015,7 +3045,7 @@ GNode** headP ;
                 zzMake0;
                 {
                 GID gid;
-                 gid  = glyph( NULL );
+                 gid  = glyph( NULL, FALSE );
 
                 
                 *insert = newNode(h);
@@ -5078,7 +5108,7 @@ table_vmtx()
         GID gid; short value;
         if ( (LA(1)==K_VertOriginY) ) {
           zzmatch(K_VertOriginY); zzCONSUME;
-           gid  = glyph( NULL );
+           gid  = glyph( NULL, FALSE );
 
            value  = numInt16();
 
@@ -5088,7 +5118,7 @@ table_vmtx()
         else {
           if ( (LA(1)==K_VertAdvanceY) ) {
             zzmatch(K_VertAdvanceY); zzCONSUME;
-             gid  = glyph( NULL );
+             gid  = glyph( NULL, FALSE );
 
              value  = numInt16();
 

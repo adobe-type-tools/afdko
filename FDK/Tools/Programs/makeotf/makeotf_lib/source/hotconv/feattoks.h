@@ -121,7 +121,7 @@
 #define T_STRING 139
 
 #ifdef __USE_PROTOS
-extern GID glyph(char * tok);
+extern GID glyph(char * tok,int allowNotdef);
 #else
 extern GID glyph();
 #endif
