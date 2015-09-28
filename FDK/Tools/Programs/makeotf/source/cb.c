@@ -1026,11 +1026,17 @@ static int CDECL matchAliasRecByFinal(const void *key, const void *value) {
    contain characters from the following set:
 
    A-Z  capital letters
-   a-z	lowercase letters
-   0-9	figures
-    _	underscore
-    -	hyphen
-   .	period
+   a-z  lowercase letters
+   0-9  figures
+    _   underscore
+    .   period
+    -   hyphen
+    +   plus
+    *   asterisk
+    :   colon
+    ~   tilde
+    ^   asciicircum
+    !   exclam
 
    A glyph name may not begin with a figure or consist of a period followed by
    a sequence of digits only.
