@@ -926,7 +926,7 @@ static char *gnameScan(cbCtx h, char *p) {
 	char *start = p;
 	int state = 0;
 
-	for (;; ) {
+	for (;;) {
 		int actn;
 		int class;
 		int c = *p;
