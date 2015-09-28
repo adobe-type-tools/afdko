@@ -302,9 +302,9 @@ hotCtx g;
 #token T_NUMEXT		"0x[0-9a-fA-F]+|0[0-7]+"
 #token T_NUM		"({\-}[1-9][0-9]*)|0"
 
-#token T_GCLASS  	"\@[A-Za-z_0-9.]+"
+#token T_GCLASS  	"\@[A-Za-z_0-9.\-]+"
 #token T_CID		"\\[0-9]+"
-#token T_GNAME		"{\\}[A-Za-z_0-9.\+\*:\~^!]+"
+#token T_GNAME		"{\\}[A-Za-z_\.]+[A-Za-z_0-9.\-\+\*:\~^!]*"
 #token T_STRING		"\""	<<zzmode(STRING_MODE);>>
 
 #token Eof "@"		    <<

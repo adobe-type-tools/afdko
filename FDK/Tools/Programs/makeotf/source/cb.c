@@ -938,7 +938,7 @@ static char *gnameScan(cbCtx h, char *p) {
 		else if (isdigit(c)) {
 			class = 1;
 		}
-		else if (c == '.' || c == '+' || c == '*' || c == ':' || c == '~' || c == '^' || c == '!') {
+		else if (c == '.' || c == '+' || c == '*' || c == ':' || c == '~' || c == '^' || c == '!' || c == '-') {
 			class = 2;
 		}
 		else {
