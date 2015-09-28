@@ -293,7 +293,7 @@ static void CDECL cmapMsg(hotCtx g, int msgType, char *fmt, ...) {
 	va_start(ap, fmt);
 	vsprintf(msgVar, fmt, ap);
 	va_end(ap);
-	sprintf(msg, "cmap{plat=%hu,script=%hu,lang=%hu}: %s", h->platformId,
+	sprintf(msg, "cmap{plat=%u,script=%u,lang=%u}: %s", h->platformId,
 	        h->scriptId, h->language, msgVar);
 	hotMsg(g, msgType, msg);
 }
@@ -758,7 +758,7 @@ static int partitionRanges(cmapCtx h, Mapping *mapping) {
 			mapping[i - total].span = total;
 			mapping[i - total].ordered = ordered;
 			total = ordered = span;
-			overflow = abs(mapping[i].glyphId - mapping[i].code);
+			overflow = abs((int)mapping[i].glyphId - (long)mapping[i].code); // Posible int overflow as mapping[i].code is unsigned long a overflow is int; the casts are needed to trigger signed substraction otherwise the abs() is useless.
 			if (overflow >= 1 << 15) {
 				ordered = 0;
 			}
