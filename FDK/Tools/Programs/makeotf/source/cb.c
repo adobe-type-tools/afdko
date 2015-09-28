@@ -1892,10 +1892,11 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
 		psinfo |= HOT_EURO_ADDED;
 	}
 
-	if (type == hotCID) {
-		flags &= ~HOT_RENAME;
-		h->alias.useFinalNames = 0;
-	}
+//	if (type == hotCID) {
+//		{
+//		flags &= ~HOT_RENAME;
+//		h->alias.useFinalNames = 0;
+//		}
 
 	if (uvsFile != NULL) {
 		hotAddUVSMap(h->hot.ctx, uvsFile);

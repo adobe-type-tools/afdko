@@ -439,7 +439,7 @@ hotGlyphInfo *mapName2Glyph(hotCtx g, char *gname, char **useAliasDB) {
 	char *realName;
 	hotGlyphInfo **found;
 
-	if (IS_CID(g)) {
+	if (IS_CID(g) && useAliasDB == NULL) {
 		hotMsg(g, hotFATAL, "Not a non-CID font");
 	}
 
@@ -448,7 +448,13 @@ hotGlyphInfo *mapName2Glyph(hotCtx g, char *gname, char **useAliasDB) {
 	if (useAliasDB != NULL) {
 		*useAliasDB = g->cb.getFinalGlyphName != NULL ? realName : NULL;
 	}
-
+	if (IS_CID(g)) {
+		CID cid = 0;
+		sscanf(realName, "cid%hd", &cid);
+		if (cid == 0)
+			return NULL;
+		return mapCID2Glyph(g, cid);
+	}
 	found = (hotGlyphInfo **)bsearch(realName, h->sort.gname.array,
 	                                 h->sort.gname.cnt, sizeof(hotGlyphInfo *),
 	                                 matchGlyphName);

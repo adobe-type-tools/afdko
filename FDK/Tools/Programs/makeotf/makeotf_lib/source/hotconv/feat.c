@@ -1810,9 +1810,9 @@ static GID featMapGName2GID(hotCtx g, char *gname) {
 	GID gid;
 	char *realname;
 
-	if (IS_CID(g)) {
-		zzerr("glyph name specified for a CID font");
-	}
+//	if (IS_CID(g)) {
+//		zzerr("glyph name specified for a CID font");
+//	}
 
 	gid = mapName2GID(g, gname, &realname);
 
