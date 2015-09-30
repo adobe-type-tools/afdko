@@ -1,5 +1,5 @@
 """
-ufoTools.py v1.24 Sep 7 2015
+ufoTools.py v1.25 Sep 30 2015
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -929,64 +929,63 @@ class UFOFontData:
 		if level > 10:
 			raise UFOParseError("In parsing component, exceeded 10 levels of reference. '%s'. " % (glyphName))
 		# <outline> tag is optional per spec., e.g. space glyph does not necessarily have it.
-		if outlineXML is None:
-			raise UFOParseError("In parsing component, no outline component found. '%s'. " % (glyphName))
-		for childContour in outlineXML:
-			if childContour.tag == "contour":
-				if len(childContour) < 2:
-					continue
-				else:
-					for child in childContour:
-						if child.tag == "point":
-							try:
-								pointType = child.attrib["type"][0]
-							except KeyError:
-								pointType = ""
-							dataList.append("%s%s%s" % (pointType, child.attrib["x"], child.attrib["y"]))
-							#print dataList[-3:]
-			elif childContour.tag == "component":
-				# append the component hash.
-				try:
-					compGlyphName = childContour.attrib["base"]
-					dataList.append("%s%s" % ("base:", compGlyphName))
-				except KeyError:
-					raise UFOParseError("'%s' is missing the 'base' attribute in a component. glyph '%s'." % (glyphName))
-
-				if useDefaultGlyphDir:
+		if outlineXML:
+			for childContour in outlineXML:
+				if childContour.tag == "contour":
+					if len(childContour) < 2:
+						continue
+					else:
+						for child in childContour:
+							if child.tag == "point":
+								try:
+									pointType = child.attrib["type"][0]
+								except KeyError:
+									pointType = ""
+								dataList.append("%s%s%s" % (pointType, child.attrib["x"], child.attrib["y"]))
+								#print dataList[-3:]
+				elif childContour.tag == "component":
+					# append the component hash.
 					try:
-						componentPath = self.getGlyphDefaultPath(compGlyphName)
+						compGlyphName = childContour.attrib["base"]
+						dataList.append("%s%s" % ("base:", compGlyphName))
 					except KeyError:
-						raise UFOParseError("'%s' component glyph is missing from contents.plist." % (compGlyphName))
-				else:
-					# If we are not necessarily using the default layer for the main glyph, then a missing component
-					# may not have been processed, and may just be in the default layer. We need to look for component
-					# glyphs in the src list first, then in the defualt layer.
-					try:
-						componentPath = self.getGlyphSrcPath(compGlyphName)
-						if not os.path.exists(componentPath):
-							componentPath = self.getGlyphDefaultPath(compGlyphName)
-					except KeyError:
+						raise UFOParseError("'%s' is missing the 'base' attribute in a component. glyph '%s'." % (glyphName))
+	
+					if useDefaultGlyphDir:
 						try:
 							componentPath = self.getGlyphDefaultPath(compGlyphName)
 						except KeyError:
 							raise UFOParseError("'%s' component glyph is missing from contents.plist." % (compGlyphName))
-
-				if not os.path.exists(componentPath):
-					raise UFOParseError("'%s' component file is missing: '%s'." % (compGlyphName, componentPath))
-
-				etRoot = ET.ElementTree()
-				
-				# Collect transformm fields, if any.
-				for transformTag in ["xScale", "xyScale", "yxScale", "yScale", "xOffset", "yOffset"]:
-					try:
-						value = childContour.attrib[transformTag]
-						dataList.append(value)
-					except KeyError:
-						pass
-				componentXML = etRoot.parse(componentPath)
-				componentOutlineXML = componentXML.find("outline")
-				componentHash, componentDataList = self.buildGlyphHashValue(width, componentOutlineXML, glyphName, useDefaultGlyphDir, level+1)
-				dataList.extend(componentDataList)
+					else:
+						# If we are not necessarily using the default layer for the main glyph, then a missing component
+						# may not have been processed, and may just be in the default layer. We need to look for component
+						# glyphs in the src list first, then in the defualt layer.
+						try:
+							componentPath = self.getGlyphSrcPath(compGlyphName)
+							if not os.path.exists(componentPath):
+								componentPath = self.getGlyphDefaultPath(compGlyphName)
+						except KeyError:
+							try:
+								componentPath = self.getGlyphDefaultPath(compGlyphName)
+							except KeyError:
+								raise UFOParseError("'%s' component glyph is missing from contents.plist." % (compGlyphName))
+	
+					if not os.path.exists(componentPath):
+						raise UFOParseError("'%s' component file is missing: '%s'." % (compGlyphName, componentPath))
+	
+					etRoot = ET.ElementTree()
+					
+					# Collect transformm fields, if any.
+					for transformTag in ["xScale", "xyScale", "yxScale", "yScale", "xOffset", "yOffset"]:
+						try:
+							value = childContour.attrib[transformTag]
+							dataList.append(value)
+						except KeyError:
+							pass
+					componentXML = etRoot.parse(componentPath)
+					componentOutlineXML = componentXML.find("outline")
+					componentHash, componentDataList = self.buildGlyphHashValue(width, componentOutlineXML, glyphName, useDefaultGlyphDir, level+1)
+					dataList.extend(componentDataList)
 		data = "".join(dataList)
 		if len(data) < 128:
 			hash = data
