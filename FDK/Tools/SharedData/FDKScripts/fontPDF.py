@@ -1448,8 +1448,6 @@ def getLayoutFromGPP(params, extraY, yTop):
 	glyphWidthUnscaled = (kGlyphSquare + 2*params.rt_glyphHPadding) *params.rt_repeats
 	glyphHeightUnscaled = kGlyphSquare + extraY + 2*params.rt_glyphVPadding
 
-	#import pdb
-	#pdb.set_trace()
 	tryCount = 0
 	while  1: # If we end up with one across or down, we see the padding around the glyph to 0, and try again.
 		if tryCount > 1:
@@ -1795,6 +1793,7 @@ class  FontInfo:
 							">>"
 							]
 		# Now get the widths for this vector.
+		
 		widthList = ["["]
 		for name in glyphList:
 			widthList.append(str(self.widthDict[name]))
@@ -1911,6 +1910,7 @@ def makeWaterfallPDF(params, pdfFont, progressBarInstance):
 	numGlyphs = len(params.rt_glyphList)
 	yTop = getTitleHeight(params)
 	rt_canvas = params.rt_canvas
+	rt_canvas.setPageCompression(0)
 	if progressBarInstance == None:
 		progressBarInstance = ProgressBar(numGlyphs, "Proofing font...", )
 
@@ -2010,7 +2010,7 @@ def makeFontSetPDF(pdfFontList,  params, progressBarInstance = None):
 	else:
 		# We put the PDF wherever the first font is.
 		firstPDFFont = pdfFontList[0][1]
-		fontPath = params.rt_filePath = firstPDFFont.path
+		fontPath = params.rt_filePath
 		pdfPath = os.path.splitext(fontPath)[0] + ".fontset.pdf"
 	params.rt_canvas = rt_canvas = pdfgen.Canvas(pdfPath, pagesize=params.pageSize, bottomup = 1)
 
@@ -2304,7 +2304,7 @@ def makeKernPairPDF(pdfFont, kernOverlapList, params, progressBarInstance = None
 		pdfPath = params.rt_pdfFileName
 	else:
 		# We put the PDF wherever the  font is.
-		fontPath = params.rt_filePath = pdfFont.path
+		fontPath = params.rt_filePath
 		pdfPath = os.path.splitext(fontPath)[0] + ".kc.pdf"
 		
 	params.rt_canvas = rt_canvas = pdfgen.Canvas(pdfPath, pagesize=params.pageSize, bottomup = 1)

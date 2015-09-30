@@ -11,7 +11,7 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 
 
 __usage__ = """
-ProofPDF v1.13 April 8 2015
+ProofPDF v1.14 Sep 29 2015
 ProofPDF [-h] [-u]
 ProofPDF -help_params
 ProofPDF [-g <glyph list>] [-gf <filename>] [-gpp <number>] [-pt <number>] [-dno] [-baseline <number>] [-black] [-lf <filename>] [-select_hints <0,1,2..> ]  \
@@ -729,51 +729,88 @@ def filterGlyphList(params, fontGlyphList, fontFileName):
 def openFile(path, txPath):
 	# If input font is  CFF or PS, build a dummy ttFont.
 	tempPathCFF = None
-	try:
-		ff = file(path, "rb")
-		data = ff.read(10)
-		ff.close()
-	except (IOError, OSError):
-		import traceback
-		traceback.print_exc()
-		raise FontError("Failed to open and read font file %s. Check file/directory permissions." % path)
-		
-	if len(data) < 10:
-		raise FontError("Error: font file was zero size: may be a resource fork font, which this program does not process. <%s>." % path)
+	cffPath = None
 
-	if (data[:4] == "OTTO") or (data[:4] == "true") or (data[:4] == "\0\1\0\0"): # it is an OTF/TTF font, can process file directly
-		try:
-			ttFont = ttLib.TTFont(path)
-		except (IOError, OSError):
-			raise FontError("Error opening or reading from font file <%s>." % path)
-		except TTLibError:
-			raise FontError("Error parsing font file 333 <%s>." % path)
+	# If it is CID-keyed font, we need to convert it to a name-keyed font. This is a hack, but I really don't want to add CID support to
+	# the very simple-minded PDF library.
+	command="%s   -dump -0  \"%s\" 2>&1" % (txPath, path)
+	report = FDKUtils.runShellCmd(command)
+	if "CIDFontName" in report:
+		tfd,tempPath1 = tempfile.mkstemp()
+		command="%s   -t1 -decid -usefd 0  \"%s\" \"%s\" 2>&1" % (txPath, path, tempPath1)
+		report = FDKUtils.runShellCmd(command)
+		if "fatal" in report:
+			logMsg(report)
+			logMsg("Failed to convert CID-keyed font %s to a temporary Typ1 data file." % path)
 
-		if not (ttFont.has_key('CFF ') or ttFont.has_key('glyf')):
-			raise FontError("Error: font is not a CFF or TrueType font <%s>." % path)
-
-		return ttFont, tempPathCFF
-
-	# It is not an OTF file.
-	if (data[0] == '\1') and (data[1] == '\0'): # CFF file
-		cffPath = path
-	elif not "%" in data:
-		#not a PS file either
-		logMsg("Font file must be a PS, CFF or OTF  fontfile: %s." % path)
-		raise FontError("Font file must be PS, CFF or OTF file: %s." % path)
-
-	else:  # It is a PS file. Convert to CFF.	
 		tfd,tempPathCFF = tempfile.mkstemp()
-		os.close(tfd)
+		command="%s   -cff +b  \"%s\" \"%s\" 2>&1" % (txPath, tempPath1, tempPathCFF)
+		report = FDKUtils.runShellCmd(command)
+		if "fatal" in report:
+			logMsg(report)
+			logMsg("Failed to convert CID-keyed font %s to a temporary CFF data file." % path)
 		cffPath = tempPathCFF
+		os.remove(tempPath1)
+	elif os.path.isdir(path):
+		# See if it is a UFO font by truing to dump it.
+		command="%s   -dump -0  \"%s\" 2>&1" % (txPath, path)
+		report = FDKUtils.runShellCmd(command)
+		if not "sup.srcFontType" in report:
+			logMsg(report)
+			logMsg("Failed to open directory %s as a UFO font." % path)
+			
+		tfd,tempPathCFF = tempfile.mkstemp()
 		command="%s   -cff +b  \"%s\" \"%s\" 2>&1" % (txPath, path, tempPathCFF)
 		report = FDKUtils.runShellCmd(command)
 		if "fatal" in report:
-			logMsg("Attempted to convert font %s  from PS to a temporary CFF data file." % path)
 			logMsg(report)
-			raise FontError("Failed to convert PS font %s to a temp CFF font." % path)
+			logMsg("Failed to convert ufo font %s to a temporary CFF data file." % path)
+		cffPath = tempPathCFF
+	else:
+		try:
+			ff = file(path, "rb")
+			data = ff.read(10)
+			ff.close()
+		except (IOError, OSError):
+			import traceback
+			traceback.print_exc()
+			raise FontError("Failed to open and read font file %s. Check file/directory permissions." % path)
+		
+		if len(data) < 10:
+			raise FontError("Error: font file was zero size: may be a resource fork font, which this program does not process. <%s>." % path)
+		if (data[:4] == "OTTO") or (data[:4] == "true") or (data[:4] == "\0\1\0\0"): # it is an OTF/TTF font, can process file directly
+			try:
+				ttFont = ttLib.TTFont(path)
+			except (IOError, OSError):
+				raise FontError("Error opening or reading from font file <%s>." % path)
+			except TTLibError:
+				raise FontError("Error parsing font file 333 <%s>." % path)
+	
+			if not (ttFont.has_key('CFF ') or ttFont.has_key('glyf')):
+				raise FontError("Error: font is not a CFF or TrueType font <%s>." % path)
+	
+			return ttFont, tempPathCFF
+	
+		# It is not an OTF file.
+		if (data[0] == '\1') and (data[1] == '\0'): # CFF file
+			cffPath = path
+		elif not "%" in data:
+			#not a PS file either
+			logMsg("Font file must be a PS, CFF or OTF  fontfile: %s." % path)
+			raise FontError("Font file must be PS, CFF or OTF file: %s." % path)
+	
+		else:  # It is a PS file. Convert to CFF.	
+			tfd,tempPathCFF = tempfile.mkstemp()
+			os.close(tfd)
+			cffPath = tempPathCFF
+			command="%s   -cff +b  \"%s\" \"%s\" 2>&1" % (txPath, path, tempPathCFF)
+			report = FDKUtils.runShellCmd(command)
+			if "fatal" in report:
+				logMsg("Attempted to convert font %s  from PS to a temporary CFF data file." % path)
+				logMsg(report)
+				raise FontError("Failed to convert PS font %s to a temp CFF font." % path)
 
-	# now package the CFF font as an OTF font for use by autohint.
+	# now package the CFF font as an OTF font
 	ff = file(cffPath, "rb")
 	data = ff.read()
 	ff.close()
@@ -828,6 +865,8 @@ def proofMakePDF(pathList, params, txPath):
 			else:
 				logMsg( "Quitting. Font type is not recognized. %s.." % (path))
 				break
+			if tempPathCFF:
+				pdfFont.path = tempPathCFF
 			pdfFontList.append([glyphList, pdfFont, tempPathCFF])
 			
 		pdfFilePath = makeFontSetPDF(pdfFontList,  params)
@@ -836,7 +875,8 @@ def proofMakePDF(pathList, params, txPath):
 			pdfFont = entry[1]
 			pdfFont.clientFont.close()
 			if tempPathCFF:
-				os.remove(tempPathCFF)
+				print (tempPathCFF)
+				#os.remove(tempPathCFF)
 		
 			
 		logMsg( "Wrote proof file %s. End time: %s." % (pdfFilePath, time.asctime()))
@@ -883,6 +923,8 @@ def proofMakePDF(pathList, params, txPath):
 				logMsg( "Quitting. Font type is not recognized. %s.." % (path))
 				return
 			
+			if tempPathCFF:
+				pdfFont.path = tempPathCFF
 			pdfFilePath = makePDF(pdfFont,  params)
 			if tempPathCFF:
 				os.remove(tempPathCFF)
@@ -925,7 +967,7 @@ def main():
 	# verify that all files exist.
 	haveFiles = 1
 	for path in params.rt_fileList:
-		if not os.path.isfile(path):
+		if not os.path.exists(path):
 			print "File does not exist: <%s>." % path
 			haveFiles = 0
 	if not haveFiles:
