@@ -641,7 +641,7 @@ static void addNameString(long platformId, long platspecId,
                           long languageId, long nameId) {
 
     int nameError = 0;
-    if ((nameId == 2) ||(nameId == 6) || (nameId > 255))
+    if ((nameId == 2) ||(nameId == 6) || ((nameId >= 25) && (nameId <= 255)))
         nameError = 1;
     else if ((nameId > 0) && ((nameId < 7) && (!(g->convertFlags & HOT_OVERRIDE_MENUNAMES))))
     {

@@ -1,6 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. *//***********************************************************************/
-
+#include <string.h>
 #include "tto.h"
 #include "sfnt.h"
 
@@ -20,6 +20,15 @@ struct 	LookupFlagRec lookupFlagRec[] =
 			};
 			
 unsigned short kNamedLookupMask  = (1 + 2 + 4 + 8 + 16 +0xFF00);
+
+typedef struct {
+	Tag ScriptTag;
+    Tag LangSysTag;
+    Tag featTag;
+    Offset featureOffset;
+    char *param;
+	IntX seen;
+} SeenFeatureParam;
 
 /* --- ScriptList --- */
 static void readLangSys(Card32 offset, LangSys *lang)
@@ -345,6 +354,7 @@ void ttoReadFeatureList(Card32 offset, FeatureList *list)
                                   (cp[2] == 's'))
                     {
                         feature->_FeatureParam=memNew(4); /* stylistic alt name references have two 2 byte entries */
+                        featureParam = feature->_FeatureParam;
                         save2=TELL();
                         SEEK_SURE(offset+record->Feature+feature->FeatureParam);
                         fileReadObject(2, featureParam);
@@ -363,9 +373,105 @@ void ttoReadFeatureList(Card32 offset, FeatureList *list)
         }
     }
 
-static void dumpFeatureParams(FeatureRecord *record, Feature *feature, IntX level, Tag currentScript, Tag currentLang)
+static void dumpFeatureParams(FeatureRecord *record, Feature *feature, IntX level, Tag currentScript, Tag currentLang, SeenFeatureParam* lastFeatureParam)
 {
     Card16 *FeatureParam = feature->_FeatureParam;
+    if (lastFeatureParam->param != NULL)
+    {
+        /* Skip printing the param block if we have already printed it. */
+        char* cp = (char*)&record->FeatureTag;
+        
+        if (record->FeatureTag==TAG('s', 'i', 'z', 'e'))
+        {
+            if ((0 == memcmp(lastFeatureParam->param, (char*)FeatureParam, 10)) && (record->FeatureTag == lastFeatureParam->featTag))
+            {
+                if ((level == 7) || (level < 5))
+                {
+                    if ((currentLang == 0) && (currentScript==0))
+                    {
+                        
+                        fprintf(OUTPUTBUFF, "\n# Skipping optical size parameter block in feature '%c%c%c%c' offset %04hx. It was previously reported for feature '%c%c%c%c' offset %04hx.\n",
+                                TAG_ARG(record->FeatureTag), record->Feature, TAG_ARG(lastFeatureParam->featTag), lastFeatureParam->featureOffset);
+                    }
+                    else
+                    {
+                        fprintf(OUTPUTBUFF, "\n# Skipping optical size parameter block in feature '%c%c%c%c' for script '%c%c%c%c' language '%c%c%c%c'. It was previously reported for feature '%c%c%c%c' for script '%c%c%c%c' language '%c%c%c%c'.\n",
+                                TAG_ARG(record->FeatureTag), TAG_ARG(currentScript), TAG_ARG(currentLang), TAG_ARG(lastFeatureParam->featTag), TAG_ARG(lastFeatureParam->ScriptTag), TAG_ARG(lastFeatureParam->LangSysTag));
+                    }
+                }
+                return;
+            }
+            else
+            {
+                lastFeatureParam->param = NULL;
+            }
+        }
+        else if ((cp[3] == 's') &&
+                 (cp[2] == 's'))
+        {
+            if ((0 == memcmp(lastFeatureParam->param, (char*)FeatureParam, 4)) && (cp[3] == 's') && (cp[2] == 's'))
+
+            {
+                if ((level == 7) || (level < 5))
+                {
+                    if ((currentLang == 0) && (currentScript==0))
+                    {
+                        
+                        fprintf(OUTPUTBUFF, "\n# Skipping stylistic alternate parameter block in feature '%c%c%c%c' offset %04hx. It was previously reported for feature '%c%c%c%c' offset %04hx.\n",
+                                TAG_ARG(record->FeatureTag), record->Feature, TAG_ARG(lastFeatureParam->featTag), lastFeatureParam->featureOffset);
+                    }
+                    else
+                    {
+                        
+                        fprintf(OUTPUTBUFF, "\n# Skipping stylistic alternate parameter block in feature '%c%c%c%c' for script '%c%c%c%c' language '%c%c%c%c'. It was previously reported for feature '%c%c%c%c' for script '%c%c%c%c' language '%c%c%c%c'.\n",
+                                TAG_ARG(record->FeatureTag), TAG_ARG(currentScript), TAG_ARG(currentLang), TAG_ARG(lastFeatureParam->featTag), TAG_ARG(lastFeatureParam->ScriptTag), TAG_ARG(lastFeatureParam->LangSysTag));
+                    }
+                }
+                return;
+            }
+            else
+            {
+                lastFeatureParam->param = NULL;
+            }
+        }
+        else if ((cp[3] == 'c') &&
+                 (cp[2] == 'v'))
+        {
+            if ((0 == memcmp(lastFeatureParam->param, (char* )FeatureParam, 14))  && (cp[3] == 'c') && (cp[2] == 'v'))
+
+            {
+                if ((level == 7) || (level < 5))
+                {
+                    if ((currentLang == 0) && (currentScript==0))
+                    {
+                        
+                        fprintf(OUTPUTBUFF, "\n# Skipping character variant parameter block in feature '%c%c%c%c' offset %04hx. It was previously reported for feature '%c%c%c%c' offset %04hx.\n",
+                                TAG_ARG(record->FeatureTag), record->Feature, TAG_ARG(lastFeatureParam->featTag), lastFeatureParam->featureOffset);
+                    }
+                    else
+                    {
+                        fprintf(OUTPUTBUFF, "\n# Skipping character variant parameter block in feature '%c%c%c%c' for script '%c%c%c%c' language '%c%c%c%c'. It was previously reported for feature '%c%c%c%c' for script '%c%c%c%c' language '%c%c%c%c'.\n",
+                                TAG_ARG(record->FeatureTag), TAG_ARG(currentScript), TAG_ARG(currentLang), TAG_ARG(lastFeatureParam->featTag), TAG_ARG(lastFeatureParam->ScriptTag), TAG_ARG(lastFeatureParam->LangSysTag));
+                    }
+                }
+                return;
+            }
+            else
+            {
+                lastFeatureParam->param = NULL;
+            }
+        }
+    }
+    
+    if (lastFeatureParam->param == NULL)
+    {
+        lastFeatureParam->param = (char *)FeatureParam;
+        lastFeatureParam->LangSysTag = currentLang;
+        lastFeatureParam->ScriptTag = currentScript;
+        lastFeatureParam->featTag= record->FeatureTag;
+        lastFeatureParam->featureOffset = record->Feature;
+    }
+    
     if(record->FeatureTag==TAG('s', 'i', 'z', 'e')){
         if (FeatureParam[5] == 1)
             fprintf(OUTPUTBUFF, "Data at size feature offset does not look right.\n");
@@ -385,7 +491,7 @@ static void dumpFeatureParams(FeatureRecord *record, Feature *feature, IntX leve
                 fprintf (OUTPUTBUFF, "\tsizemenuname ID %d; # must be replaced by string value from name table\n",  FeatureParam[2]);
                 fprintf (OUTPUTBUFF, "} size;\n");
             }
-            else {
+            else if (level < 5) {
                 DL(2, (OUTPUTBUFF, "   Offset: %04hx\n", feature->FeatureParam));
                 DL(2, (OUTPUTBUFF, "   Design Size: %d\n", FeatureParam[0]));
                 DL(2, (OUTPUTBUFF, "   Subfamily Identifier: %d\n", FeatureParam[1]));
@@ -412,7 +518,7 @@ static void dumpFeatureParams(FeatureRecord *record, Feature *feature, IntX leve
                     fprintf (OUTPUTBUFF, "\tname %d; # Must be replaced by string values from name table.\n",  FeatureParam[1]);
                     fprintf (OUTPUTBUFF, "};\n");
                 }
-                else {
+                else if (level < 5) {
                     DL(2, (OUTPUTBUFF, "   Stylistic Alternate name parameter version: %d\n", FeatureParam[0]));
                     DL(2, (OUTPUTBUFF, "   Stylistic Alternate name parameter name table name ID: %d\n", FeatureParam[1]));
                 }
@@ -470,7 +576,7 @@ static void dumpFeatureParams(FeatureRecord *record, Feature *feature, IntX leve
                     fprintf (OUTPUTBUFF, "};\n"); // end cvParameters block
                     
                 }
-                else {
+                else if (level < 5) {
                     Card16 CharCount = 0;
                     unsigned int c = 0;
                     Card32* uvp = (Card32*)(&FeatureParam[6+2]);
@@ -508,7 +614,10 @@ static void dumpFeatureParams(FeatureRecord *record, Feature *feature, IntX leve
 void ttoDumpFeatureList(Card16 offset, FeatureList *list, IntX level)
 	{
 	IntX i, j;
-	if (level == 5) 
+    SeenFeatureParam lastFeatureParam;
+    lastFeatureParam.param = NULL;
+
+        if (level == 5)
 	  {
 		for (i = 0; i < list->FeatureCount; i++)
 		  {
@@ -568,7 +677,7 @@ void ttoDumpFeatureList(Card16 offset, FeatureList *list, IntX level)
 			
 			/*ASP: Size specific code*/
 			if(feature->FeatureParam!=0) {
-                dumpFeatureParams(record, feature, level, 0, 0);
+                dumpFeatureParams(record, feature, level, 0, 0, &lastFeatureParam);
             }
           }
 	  }
@@ -742,9 +851,9 @@ void ttoDumpLookupListItem(Offset offset, LookupList *list, IntX which,
 typedef struct {
 	Tag ScriptTag, LangSysTag;
 	IntX seen;
-	} SeenLookup;
+} SeenLookup;
 
-void ttoDumpLookupifFeaturePresent(LookupList *lookuplist, 
+void ttoDumpLookupifFeaturePresent(LookupList *lookuplist,
 								   FeatureList *featurelist,
 								   ScriptList * scriptlist,
 								   IntX level,
@@ -753,7 +862,9 @@ void ttoDumpLookupifFeaturePresent(LookupList *lookuplist,
 	IntX i, j, k, m, n, index;
 	IntX ret;
 	SeenLookup *SeenLookups;
-	Tag currentScript, currentLang;
+    SeenFeatureParam lastFeatureParam;
+    Tag currentScript, currentLang;
+    lastFeatureParam.param = NULL;
 	
 	SeenLookups = (SeenLookup *)memNew(lookuplist->LookupCount*sizeof(SeenLookup));
 	for (i=0; i< lookuplist->LookupCount; i++)
@@ -804,9 +915,7 @@ void ttoDumpLookupifFeaturePresent(LookupList *lookuplist,
 
                             /*ASP: Size specific code*/
                             if(feature->FeatureParam!=0) {
-                                if (!(level!=6))
-                                    dumpFeatureParams(record, feature, level, currentScript, currentLang);
-                                dumpFeatureParams(record, feature, level, currentScript, currentLang);
+                                dumpFeatureParams(record, feature, level, currentScript, currentLang, &lastFeatureParam);
                             }
                             
 		  					for (n = 0; n < feature->LookupCount; n++)
@@ -1419,6 +1528,8 @@ void ttoDumpFeaturesByScript(ScriptList *scriptlist, FeatureList *featurelist, L
   		ScriptRecord * srecord = &scriptlist->ScriptRecord[j];
   		Script *script = &srecord->_Script;
   		LangSys * defaultLangSys = &script->_DefaultLangSys;
+        SeenFeatureParam lastFeatureParam;
+        lastFeatureParam.param = NULL;
 		
 		currentScript=srecord->ScriptTag;
 		
@@ -1465,7 +1576,7 @@ void ttoDumpFeaturesByScript(ScriptList *scriptlist, FeatureList *featurelist, L
                 
 				/*ASP: Size specific code*/
                 if(feature->FeatureParam!=0) {
-                    dumpFeatureParams(record, feature, level, currentScript, currentLang);
+                    dumpFeatureParams(record, feature, level, currentScript, currentLang, &lastFeatureParam);
                 }
                 
 			}
@@ -1507,7 +1618,7 @@ void ttoDumpFeaturesByScript(ScriptList *scriptlist, FeatureList *featurelist, L
 				fprintf(OUTPUTBUFF,  "\n");
                 /*ASP: Size specific code*/
 				if(feature->FeatureParam!=0) {
-                    dumpFeatureParams(record, feature, level, currentScript, currentLang);
+                    dumpFeatureParams(record, feature, level, currentScript, currentLang, &lastFeatureParam);
 				}
 			}
 		}
@@ -1522,6 +1633,8 @@ void ttoDecompileByScript(ScriptList *scriptlist, FeatureList *featurelist, Look
 	   SeenLookup *SeenLookups;
 	   Tag currentScript, currentLang;
 		IntX numReferencedLookups = 0; /* number of lookups referenced from chain context statements that must also be dumped */
+        SeenFeatureParam lastFeatureParam;
+        lastFeatureParam.param = NULL;
 
 		SeenLookups = (SeenLookup *)memNew(lookuplist->LookupCount*sizeof(SeenLookup));
 		for (i=0; i< lookuplist->LookupCount; i++)
@@ -1553,8 +1666,7 @@ void ttoDecompileByScript(ScriptList *scriptlist, FeatureList *featurelist, Look
                        if (level==7)
 					   {
                            if(feature->FeatureParam!=0) {
-                               if (!(level!=6))
-                                   dumpFeatureParams(record, feature, level, currentScript, currentLang);
+                                dumpFeatureParams(record, feature, level, currentScript, currentLang, &lastFeatureParam);
                            }
 					   }
                        
@@ -1654,8 +1766,7 @@ void ttoDecompileByScript(ScriptList *scriptlist, FeatureList *featurelist, Look
 				   if (level==7)
 					   {
 					   if(feature->FeatureParam!=0) {
-                           if (!(level!=6))
-                               dumpFeatureParams(record, feature, level, currentScript, currentLang);
+                            dumpFeatureParams(record, feature, level, currentScript, currentLang, &lastFeatureParam);
 					   }
                     }
 				   

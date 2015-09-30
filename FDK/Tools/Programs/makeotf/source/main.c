@@ -40,7 +40,7 @@
 
 jmp_buf mark;
 
-#define MAKEOTF_VERSION "2.5.64756"
+#define MAKEOTF_VERSION "2.5.64775"
 /*Warning: this string is now part of heuristic used by CoolType to identify the
    first round of CoolType fonts which had the backtrack sequence of a chaining
    contextual substitution ordered incorrectly.  Fonts with the old ordering MUST match
