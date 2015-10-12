@@ -100,7 +100,6 @@ directory and the LICENSE.txt file.
 
 defcon-ufo3: ufo3 branch of defcon library at https://github.com/typesupply/defcon/tree/ufo3.
 Install with "AFDKOPython setup.py install"
-The install script has a bug, in that it does not copy any of the subdirectories of defcon. Copy these manually.
 
 MutatorMath: master branch of MutatorMath at https://github.com/LettError/MutatorMath
 Install with "AFDKOPython setup.py install"
