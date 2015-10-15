@@ -1765,9 +1765,9 @@ def getSourceGOADBData(inputFilePath):
 		uni = entry[0]
 		try:
 			uniList = gDict[gid]
-			if uni not in uniList:
+			if int(uni, 16) not in [int(i, 16) for i in uniList]:
 				hasDoubleMapping = 1
-				print "makeotf [Warning] Source TTF font contains multiple Unicode values '%s' for glyph '%s'. Only the first will be used." % (uniList, gname)
+				print "makeotf [Warning] Source TTF font contains multiple Unicode values '%s' for glyph '%s'. Only the first will be used." % (uniList + [uni], gname)
 		except KeyError:
 			gDict[gid] = [uni]
 			
