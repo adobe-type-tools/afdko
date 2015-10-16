@@ -439,7 +439,7 @@ hotGlyphInfo *mapName2Glyph(hotCtx g, char *gname, char **useAliasDB) {
 	char *realName;
 	hotGlyphInfo **found;
 
-	if (IS_CID(g)) {
+	if (IS_CID(g) && useAliasDB == NULL) {
 		hotMsg(g, hotFATAL, "Not a non-CID font");
 	}
 
@@ -448,7 +448,13 @@ hotGlyphInfo *mapName2Glyph(hotCtx g, char *gname, char **useAliasDB) {
 	if (useAliasDB != NULL) {
 		*useAliasDB = g->cb.getFinalGlyphName != NULL ? realName : NULL;
 	}
-
+	if (IS_CID(g)) {
+		CID cid = 0;
+		sscanf(realName, "cid%hd", &cid);
+		if (cid == 0)
+			return NULL;
+		return mapCID2Glyph(g, cid);
+	}
 	found = (hotGlyphInfo **)bsearch(realName, h->sort.gname.array,
 	                                 h->sort.gname.cnt, sizeof(hotGlyphInfo *),
 	                                 matchGlyphName);
@@ -621,8 +627,7 @@ static void addUVToGlyph(hotCtx g, hotGlyphInfo *gi, UV uv) {
 			*dnaNEXT(h->sort.glyphAddlUV) = GET_GID(gi);
 		}
 
-		for (new = &gi->addlUV; *new != NULL; new = &(*new)->next) {
-		}
+		for (new = &gi->addlUV; *new != NULL; new = &(*new)->next) {}
 		*new = MEM_NEW(g, sizeof(AddlUV));
 		(*new)->next = NULL;
 		(*new)->uv = uv;
@@ -949,7 +954,7 @@ static void addRanges(hotCtx g, int isMac) {
 
 		if (notdef != NULL) {
 			/* Add notdef mapping before next range */
-			for (;; ) {
+			for (;;) {
 				if (code > notdef->hi) {
 					/* End of notdef range */
 					notdef = NULL;
@@ -1245,7 +1250,7 @@ static char *gnameScan(hotCtx g, char *p) {
 
 	int state = 0;
 
-	for (;; ) {
+	for (;;) {
 		int actn;
 		int class;
 		int c = *p;

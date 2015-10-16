@@ -626,7 +626,7 @@ VertAdvanceY
 		NLA = T_NUM;
 	>>
 
-\@[A-Za-z_0-9.]+
+\@[A-Za-z_0-9.\-]+
 	<<
 		NLA = T_GCLASS;
 	>>
@@ -636,7 +636,7 @@ VertAdvanceY
 		NLA = T_CID;
 	>>
 
-{\\}[A-Za-z_0-9.\+\*:\~^!]+
+{\\}[A-Za-z_\.]+[A-Za-z_0-9.\-\+\*:\~^!]*
 	<<
 		NLA = T_GNAME;
 	>>

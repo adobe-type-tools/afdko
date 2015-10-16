@@ -926,7 +926,7 @@ static char *gnameScan(cbCtx h, char *p) {
 	char *start = p;
 	int state = 0;
 
-	for (;; ) {
+	for (;;) {
 		int actn;
 		int class;
 		int c = *p;
@@ -938,7 +938,7 @@ static char *gnameScan(cbCtx h, char *p) {
 		else if (isdigit(c)) {
 			class = 1;
 		}
-		else if (c == '.' || c == '+' || c == '*' || c == ':' || c == '~' || c == '^' || c == '!') {
+		else if (c == '.' || c == '+' || c == '*' || c == ':' || c == '~' || c == '^' || c == '!' || c == '-') {
 			class = 2;
 		}
 		else {
@@ -1026,11 +1026,17 @@ static int CDECL matchAliasRecByFinal(const void *key, const void *value) {
    contain characters from the following set:
 
    A-Z  capital letters
-   a-z	lowercase letters
-   0-9	figures
-    _	underscore
-    -	hyphen
-   .	period
+   a-z  lowercase letters
+   0-9  figures
+    _   underscore
+    .   period
+    -   hyphen
+    +   plus
+    *   asterisk
+    :   colon
+    ~   tilde
+    ^   asciicircum
+    !   exclam
 
    A glyph name may not begin with a figure or consist of a period followed by
    a sequence of digits only.
@@ -1892,10 +1898,11 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
 		psinfo |= HOT_EURO_ADDED;
 	}
 
-	if (type == hotCID) {
-		flags &= ~HOT_RENAME;
-		h->alias.useFinalNames = 0;
-	}
+//	if (type == hotCID) {
+//		{
+//		flags &= ~HOT_RENAME;
+//		h->alias.useFinalNames = 0;
+//		}
 
 	if (uvsFile != NULL) {
 		hotAddUVSMap(h->hot.ctx, uvsFile);

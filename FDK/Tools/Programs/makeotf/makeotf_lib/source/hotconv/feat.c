@@ -1806,28 +1806,28 @@ static void hashFree(featCtx h) {
 
 /* Map feature file glyph name to gid; emit error message and return notdef if
    not found (in order to continue until hotQuitOnError() called) */
-static GID featMapGName2GID(hotCtx g, char *gname) {
+static GID featMapGName2GID(hotCtx g, char *gname, int allowNotdef) {
 	GID gid;
 	char *realname;
 
-	if (IS_CID(g)) {
-		zzerr("glyph name specified for a CID font");
-	}
+//	if (IS_CID(g)) {
+//		zzerr("glyph name specified for a CID font");
+//	}
 
 	gid = mapName2GID(g, gname, &realname);
 
 	if (gid != GID_UNDEF) {
 		return gid;
 	}
-
-	if (realname != NULL && strcmp(gname, realname) != 0) {
-		featMsg(hotERROR, "Glyph \"%s\" (alias \"%s\") not in font",
-		        realname, gname);
+	if (allowNotdef == 0) {
+		if (realname != NULL && strcmp(gname, realname) != 0) {
+			featMsg(hotERROR, "Glyph \"%s\" (alias \"%s\") not in font",
+					realname, gname);
+		}
+		else {
+			featMsg(hotERROR, "Glyph \"%s\" not in font (featMapGName2GID)", gname);
+		}
 	}
-	else {
-		featMsg(hotERROR, "Glyph \"%s\" not in font", gname);
-	}
-
 	return GID_NOTDEF;
 }
 
@@ -1903,7 +1903,7 @@ static void addAlphaRange(GID first, GID last, char *firstName, char *p,
 
 	for (; *ptr <= q; (*ptr)++) {
 		GID gid = (*ptr == *p) ? first : (*ptr == q) ? last :
-		    featMapGName2GID(g, gname);
+		    featMapGName2GID(g, gname, FALSE);
 		gcAddGlyph(gid);
 	}
 }
@@ -1939,7 +1939,7 @@ static void addNumRange(GID first, GID last, char *firstName, char *p1,
 				preNum[p1 - firstName] = '\0';
 			}
 			sprintf(gname, fmt, preNum, i, p2);
-			gid = featMapGName2GID(g, gname);
+			gid = featMapGName2GID(g, gname, FALSE);
 		}
 		gcAddGlyph(gid);
 	}
