@@ -1753,10 +1753,20 @@ void proofDrawGlyph(ProofContextPtr ctx,
 	   proofThinspace(ctx, 1);
 	 }
 	 else {
-	   if (options && options->newwidth)
-		advance(ctx, options->newwidth);
-	   else
-		advance(ctx, width);
+	   if (isVert)
+		 {
+		   if (options && options->newvwidth)
+			 advance(ctx, options->newvwidth);
+		   else
+			 advance(ctx, width);
+		 }
+  	   else
+		 {
+		   if (options && options->newwidth)
+			 advance(ctx, options->newwidth);
+		   else
+			 advance(ctx, width);
+		 }
 	 }
 	 if (ctx->thinspace) {
 	   if (isVert)
