@@ -125,7 +125,7 @@ struct cbCtx_ {
 	
 	struct {						/* Feature file input */
 		char *mainFile;			/* Main feature file name */
-		char *includeDir[3];	/* font dir; getPathName("features") */
+		char *includeDir[4];	/* font dir; getPathName("features") */
 		File file;
 		char buf[BUFSIZ];		/* Refill buffer for feature file */
 		dnaDCL(AnonInfo, anon);	/* Storage for anon tables */
@@ -461,73 +461,53 @@ static char *findFeatInclFile(cbCtx h, char *filename) {
 	if (!filename) {
 		return NULL;
 	}
-#if __MWERKS__	/* handle features file in parent directory on Mac*/
-	if (filename[0] == '.' && filename[1] == '.' & filename[2] == '/') {
-		int upcounter = 1;
-		char *pathstart = filename + 3;
-		int i;
-
-		for (; pathstart[0] == '.' && pathstart[1] == '.' & pathstart[2] == '/'; upcounter++, pathstart += 3) {}
-		for (i = 0; i < 3; i++) {
-			if ((h->feat.includeDir[i] != NULL) && (h->feat.includeDir[i][0] != '\0')) {
-				int j, pathreduced = 1;
-				char reducedpath[FILENAME_MAX + 1];
-				strcpy(reducedpath, h->feat.includeDir[i]);
-
-				if (reducedpath[strlen(reducedpath) - 1] == ':') {
-					reducedpath[strlen(reducedpath) - 1] = '\0';
-				}
-				for (j = 0; j < upcounter; j++) {
-					int k, lastspot = -1;
-					for (k = 0; reducedpath[k] != '\0'; k++) {
-						if (reducedpath[k] == ':') {
-							lastspot = k;
-						}
-					}
-					if (lastspot != -1) {
-						reducedpath[lastspot] = '\0';
-					}
-					else {
-						pathreduced = 0;
-					}
-				}
-				if (pathreduced) {
-					sprintf(path, "%s%s%s", reducedpath, sep(), pathstart);
-					if (fileExists(path)) {
-						goto found;
-					}
-				}
-			}
-		}
-		path[0] = '\0';
-	}
-#endif
+    /* Check if relative path */
 	if (filename[0] != '/') {
-		/* Check if absolute path */
 		int i;
-		for (i = 0; i < 3; i++) {
-			if ((h->feat.includeDir[i] != NULL) &&
+        /* Look first relative to to the current include directory. If
+         not found, check relative to the main feature file.
+         */
+		for (i = 1; i >= 0; i--) {
+			if ((h->feat.includeDir[i] != 0) &&
 				(h->feat.includeDir[i][0] != '\0')) {
-				if (strcmp(h->feat.includeDir[i], curdir()) == 0) {
-					strcpy(path, filename);
-				}
-				else {
-					sprintf(path, "%s%s%s", h->feat.includeDir[i], sep(), filename);
-				}
+                sprintf(path, "%s%s%s", h->feat.includeDir[i], sep(), filename);
 				if (fileExists(path)) {
 					goto found;
 				}
 			}
 		}
-		if (fileExists(filename)) {
-			/*Another check for absolute path on Mac*/
-			copyStr(h, &fullpath, filename);
-			return fullpath;
-		}
 		return NULL;			/* Can't find include file (error) */
 	}
-
+    else
+    {
+		if (fileExists(filename)) {
+			char *t = strcpy((char*)path, filename);
+		}
+        else
+        {
+            return NULL;			/* Can't find include file (error) */
+        }
+    }
 found:
+    { /* set the current include directory */
+        char *p;
+        char featDir[FILENAME_MAX];
+
+        p = strrchr(path, sepch());
+		if (p == NULL) {
+            /* if there are no directory separators, it is in the main feature file parent dir */
+            if (h->feat.includeDir[1] != 0)
+                cbMemFree(h, h->feat.includeDir[1]);
+		}
+        else
+        {
+        strncpy(featDir, path, p - path);
+        featDir[p - path] = '\0';
+        if (h->feat.includeDir[1] != 0)
+            cbMemFree(h, h->feat.includeDir[1]);
+        copyStr(h, &h->feat.includeDir[1], featDir);
+        }
+    }
 	copyStr(h, &fullpath, (path[0] == '\0') ? filename : path);
 	return fullpath;
 }
@@ -542,21 +522,49 @@ static char *featOpen(void *ctx, char *name, long offset) {
 		/* Main feature file */
 		if (h->feat.mainFile != NULL) {
 			if (!fileExists(h->feat.mainFile)) {
-				cbFatal(h, "Specifed feature file not found: %s \n", h->feat.mainFile);
+				cbFatal(h, "Specified feature file not found: %s \n", h->feat.mainFile);
 				return NULL;		/* No feature file for this font */
 			}
 			copyStr(h, &fullpath, h->feat.mainFile);
-		}
+            if (h->feat.includeDir[1] != 0)
+            {
+                cbMemFree(ctx, h->feat.includeDir[1]);
+                h->feat.includeDir[1] = 0;
+            }
+ 		}
 		else {
 			return NULL;		/* No feature file for this font */
 		}
 	}
-	else {
-		/* Include file */
+    else if (offset == 0)
+    {
+        /* First time called, we get the path used in the feature file */
 		fullpath = findFeatInclFile(h, name);
 		if (fullpath == NULL) {
 			return NULL;		/* Include file not found (error) */
 		}
+    }
+	else {
+        char * p;
+		/* RE-opening file: name is full path. */
+        copyStr(h, &fullpath, name);
+        /* Determine dir that feature file's in */
+            p = strrchr(fullpath, sepch());	/* xxx won't work for '\' delimiters */
+            if (p == NULL) {
+                cbMemFree(ctx, h->feat.includeDir[1]);
+                h->feat.includeDir[1] = 0;
+            }
+            else {
+                char featDir[FILENAME_MAX];
+                strncpy(featDir, fullpath, p - fullpath);
+                featDir[p - fullpath] = '\0';
+                if (h->feat.includeDir[1] != 0)
+                {
+                    cbMemFree(ctx, h->feat.includeDir[1]);
+                    h->feat.includeDir[1] = 0;
+                }
+                copyStr(h, &h->feat.includeDir[1], featDir);
+            }
 	}
 
 	if (h->feat.file.name != NULL) {
@@ -1494,8 +1502,10 @@ cbCtx cbNew(char *progname, char *pfbdir, char *otfdir,
 
 	dnaINIT(mainDnaCtx, h->cff.buf, 50000, 150000);
 	h->cff.euroAdded = 0;
-	h->feat.includeDir[1] = featdir;
-	h->feat.includeDir[2] = getPathName(h, FEATUREDIR, 0);
+	h->feat.includeDir[0] = 0;
+	h->feat.includeDir[1] = 0;
+	h->feat.includeDir[2] = 0;
+	h->feat.includeDir[3] = 0;
 	h->feat.file.name = NULL;
 	dnaINIT(mainDnaCtx, h->feat.anon, 1, 3);	/* xxx */
 	h->feat.anon.func = anonInit;
@@ -1868,13 +1878,13 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
 
 	if ((pfbpath != NULL) && (!fileExists(pfbpath))) {
 		char buf[1024];
-		sprintf(buf, "Specifed source font file not found: %s \n", pfbpath);
+		sprintf(buf, "Specified source font file not found: %s \n", pfbpath);
 		message(h, hotERROR, buf);
 		return;
 	}
 	if ((featurefile != NULL) && (!fileExists(featurefile))) {
 		char buf[1024];
-		sprintf(buf, "Specifed feature file not found: %s \n", featurefile);
+		sprintf(buf, "Specified feature file not found: %s \n", featurefile);
 		message(h, hotERROR, buf);
 		return;
 	}
@@ -1930,19 +1940,13 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
 
 	// Get database data via callbacks
 	if (h->fcdb.files.cnt == 0) {
-		if (releasemode) {
-			cbFatal(h, "Font Menu Name database is not specified or nor found .[%s]", FontName);
-		}
-		else {
+		{
 			fcdbGetRec(h->fcdb.ctx, FontName);
 			cbWarning(h, "Font Menu Name database is not specified or not found .[%s]", FontName);
 		}
 	}
 	else if (fcdbGetRec(h->fcdb.ctx, FontName)) {
-		if (releasemode) {
-			cbFatal(h, "not in Font Menu Name database [%s]", FontName);
-		}
-		else {
+        {
 			cbWarning(h, "not in Font Menu Name database [%s]", FontName);
 		}
 	}
@@ -1950,7 +1954,7 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
 
 	// Make sure that GOADB file has been read in, if required
 	if ((flags & HOT_RENAME) && (h->alias.recs.cnt < 1)) {
-		cbFatal(h, "Glyph renaming is requested, but the Glyph Alias And Order DB file was not specified.");
+		cbWarning(h, "Glyph renaming is requested, but the Glyph Alias And Order DB file was not specified.");
 	}
 
 	h->mac.cmapScript = macScript;	/* Used in hotAddmiscData, in ProcessFontInfo */
