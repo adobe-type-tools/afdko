@@ -319,6 +319,7 @@ def debugMsg(*args):
 #UFO names
 kProcessedGlyphsLayerName = "AFDKO ProcessedGlyphs"
 kProcessedGlyphsLayer = "glyphs.com.adobe.type.processedGlyphs"
+kFontInfoName = "fontinfo.plist"
 kContentsName = "contents.plist"
 kLibName = "lib.plist"
 kPublicGlyphOrderKey = "public.glyphOrder"
@@ -355,6 +356,9 @@ kPointName = "name"
 # Hint stuff
 kStackLimit = 46
 kStemLimit = 96
+
+kDefaultFMNDBPath = "FontMenuNameDB"
+kDefaultGOADBPath = "GlyphOrderAndAliasDB"
 
 
 class UFOParseError(ValueError):
@@ -1248,161 +1252,163 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transfor
 	allowDecimals = ufoFontData.allowDecimalCoords
 	
 	bezStringList = []
-	for outlineItem in outlineXML:
-
-		if outlineItem.tag == "component":
-			newTransform = UFOTransform(outlineItem)
-			if newTransform.isDefault:
-				if transform != None:
-					newTransform.concat(transform)
-				else:	
-					newTransform = None
-			else:
-				if transform != None:
-					newTransform.concat(transform)
-			componentOutline = ufoFontData.getComponentOutline(outlineItem)
-			outlineBezString, curX, curY = convertGlyphOutlineToBezString(componentOutline, ufoFontData, curX, curY, newTransform, level+1)
-			bezStringList.append(outlineBezString)
-			continue
-			
-		if outlineItem.tag != "contour":
-			continue
-		
-		# May be an empty contour.
-		if len(outlineItem) == 0:
-			continue 
-			
-		# We have a regular contour. Iterate over points.
-		argStack = []
-		# Deal with setting up move-to.
-		lastItem = outlineItem[0]
-		try:
-			type = lastItem.attrib["type"]
-		except KeyError:
-			type = "offcurve"
-		if type in ["curve","line","qccurve"]:
-			outlineItem = outlineItem[1:]
-			if type != "line":
-				outlineItem.append(lastItem) # I don't do this for line, as AC behaves differently when a final line-to is explicit.
-			x = float(lastItem.attrib["x"])
-			y = float(lastItem.attrib["y"])
-			if transform != None:
-				x,y = transform.apply(x,y)
-			
-			if (not allowDecimals):
-				x = int(round(x))
-				y = int(round(y))
-			curX = x
-			curY = y
-
-			if (allowDecimals):
-				op = "%.3f %.3f mt" % (x , y)
-			else:
-				op = "%s %s mt" % (x, y)
-			bezStringList.append(op)
-		elif type == "move":
-			# first op is a move-to.
-			if len(outlineItem) == 1:
-				# this is a move, and is the only op in this outline. Don't pass it through. 
-				# this is most likely left over from a GLIF format 1 anchor.
-				argStack = []
+	if outlineXML == None:
+		bezstring = ""
+	else:
+		for outlineItem in outlineXML:
+	
+			if outlineItem.tag == "component":
+				newTransform = UFOTransform(outlineItem)
+				if newTransform.isDefault:
+					if transform != None:
+						newTransform.concat(transform)
+					else:	
+						newTransform = None
+				else:
+					if transform != None:
+						newTransform.concat(transform)
+				componentOutline = ufoFontData.getComponentOutline(outlineItem)
+				if componentOutline:
+					outlineBezString, curX, curY = convertGlyphOutlineToBezString(componentOutline, ufoFontData, curX, curY, newTransform, level+1)
+					bezStringList.append(outlineBezString)
 				continue
-		elif type == "offcurve":
-			# We should only see an off curve point as the first point when the first op is  a curve and the last op is a line.
-			# In this case, insert a move-to to the line's coords, then omit the line.
-			# Breaking news! In rare cases, a first off-curve point can occur when the first AND last op is a curve.
-			curLastItem = outlineItem[-1]
-			# In this case, insert a move-to to the last op's end pos.
+				
+			if outlineItem.tag != "contour":
+				continue
+			
+			# May be an empty contour.
+			if len(outlineItem) == 0:
+				continue 
+				
+			# We have a regular contour. Iterate over points.
+			argStack = []
+			# Deal with setting up move-to.
+			lastItem = outlineItem[0]
 			try:
-				lastType = curLastItem.attrib["type"]
-				x = float(curLastItem.attrib["x"])
-				y = float(curLastItem.attrib["y"])
+				type = lastItem.attrib["type"]
+			except KeyError:
+				type = "offcurve"
+			if type in ["curve","line","qccurve"]:
+				outlineItem = outlineItem[1:]
+				if type != "line":
+					outlineItem.append(lastItem) # I don't do this for line, as AC behaves differently when a final line-to is explicit.
+				x = float(lastItem.attrib["x"])
+				y = float(lastItem.attrib["y"])
 				if transform != None:
 					x,y = transform.apply(x,y)
-
+				
 				if (not allowDecimals):
 					x = int(round(x))
 					y = int(round(y))
 				curX = x
 				curY = y
-
-				if lastType == "line":
-		
-					if (allowDecimals):
-						op = "%.3f %.3f mt" % (x , y)
-					else:
-						op = "%s %s mt" % (x, y)
-
-					bezStringList.append(op)
-					outlineItem = outlineItem[:-1]
-				elif lastType == "curve":
-		
-					if (allowDecimals):
-						op = "%.3f %.3f mt" % (x , y)
-					else:
-						op = "%s %s mt" % (x, y)
-					bezStringList.append(op)
-					
-			except KeyError:
-				raise UFOParseError("Unhandled case for first and last points in outline '%s'." % (xmlToString(outlineItem)))
-		else:
-			raise UFOParseError("Unhandled case for first point in outline '%s'." % (xmlToString(outlineItem)))
-
-		for contourItem in outlineItem:
-			if contourItem.tag != "point":
-				continue
-			x = float(contourItem.attrib["x"])
-			y = float(contourItem.attrib["y"])
-			if transform != None:
-				x,y = transform.apply(x,y)
-
-			if (not allowDecimals):
-				x = int(round(x))
-				y = int(round(y))
-			curX = x
-			curY = y
-
-			try:
-				type = contourItem.attrib["type"]
-			except KeyError:
-				type = "offcurve"
-			
-			if type == "offcurve":
-				argStack.append(x)
-				argStack.append(y)
-			elif type == "move":
+	
 				if (allowDecimals):
 					op = "%.3f %.3f mt" % (x , y)
 				else:
 					op = "%s %s mt" % (x, y)
 				bezStringList.append(op)
-				argStack = []
-			elif type == "line":
-				if (allowDecimals):
-					op = "%.3f %.3f dt" % (x, y)
-				else:
-					op = "%s %s dt" % (x, y)
-				bezStringList.append(op)
-				argStack = []
-			elif type == "curve":
-				if len(argStack) != 4:
-					raise UFOParseError("Argument stack error seen for curve point '%s'." % (xmlToString(contourItem)))
-				if (allowDecimals):
-					op = "%.3f %.3f %.3f %.3f %.3f %.3f ct" % ( argStack[0], argStack[1], argStack[2], argStack[3], x, y)
-				else:
-					op = "%s %s %s %s %s %s ct" % ( argStack[0], argStack[1], argStack[2], argStack[3], x, y)
-				argStack = []
-				bezStringList.append(op)
-			elif type == "qccurve":
-				raise UFOParseError("Point type not supported '%s'." % (xmlToString(contourItem)))
+			elif type == "move":
+				# first op is a move-to.
+				if len(outlineItem) == 1:
+					# this is a move, and is the only op in this outline. Don't pass it through. 
+					# this is most likely left over from a GLIF format 1 anchor.
+					argStack = []
+					continue
+			elif type == "offcurve":
+				# We should only see an off curve point as the first point when the first op is  a curve and the last op is a line.
+				# In this case, insert a move-to to the line's coords, then omit the line.
+				# Breaking news! In rare cases, a first off-curve point can occur when the first AND last op is a curve.
+				curLastItem = outlineItem[-1]
+				# In this case, insert a move-to to the last op's end pos.
+				try:
+					lastType = curLastItem.attrib["type"]
+					x = float(curLastItem.attrib["x"])
+					y = float(curLastItem.attrib["y"])
+					if transform != None:
+						x,y = transform.apply(x,y)
+	
+					if (not allowDecimals):
+						x = int(round(x))
+						y = int(round(y))
+					curX = x
+					curY = y
+	
+					if lastType == "line":
+			
+						if (allowDecimals):
+							op = "%.3f %.3f mt" % (x , y)
+						else:
+							op = "%s %s mt" % (x, y)
+	
+						bezStringList.append(op)
+						outlineItem = outlineItem[:-1]
+					elif lastType == "curve":
+			
+						if (allowDecimals):
+							op = "%.3f %.3f mt" % (x , y)
+						else:
+							op = "%s %s mt" % (x, y)
+						bezStringList.append(op)
+						
+				except KeyError:
+					raise UFOParseError("Unhandled case for first and last points in outline '%s'." % (xmlToString(outlineItem)))
 			else:
-				raise UFOParseError("Unknown Point type not supported '%s'." % (xmlToString(contourItem)))
+				raise UFOParseError("Unhandled case for first point in outline '%s'." % (xmlToString(outlineItem)))
+	
+			for contourItem in outlineItem:
+				if contourItem.tag != "point":
+					continue
+				x = float(contourItem.attrib["x"])
+				y = float(contourItem.attrib["y"])
+				if transform != None:
+					x,y = transform.apply(x,y)
+	
+				if (not allowDecimals):
+					x = int(round(x))
+					y = int(round(y))
+				curX = x
+				curY = y
+	
+				try:
+					type = contourItem.attrib["type"]
+				except KeyError:
+					type = "offcurve"
 				
-		# we get here only if there was at least a move.
-		bezStringList.append("cp" + os.linesep)
-
-		
-	bezstring = os.linesep.join(bezStringList)
+				if type == "offcurve":
+					argStack.append(x)
+					argStack.append(y)
+				elif type == "move":
+					if (allowDecimals):
+						op = "%.3f %.3f mt" % (x , y)
+					else:
+						op = "%s %s mt" % (x, y)
+					bezStringList.append(op)
+					argStack = []
+				elif type == "line":
+					if (allowDecimals):
+						op = "%.3f %.3f dt" % (x, y)
+					else:
+						op = "%s %s dt" % (x, y)
+					bezStringList.append(op)
+					argStack = []
+				elif type == "curve":
+					if len(argStack) != 4:
+						raise UFOParseError("Argument stack error seen for curve point '%s'." % (xmlToString(contourItem)))
+					if (allowDecimals):
+						op = "%.3f %.3f %.3f %.3f %.3f %.3f ct" % ( argStack[0], argStack[1], argStack[2], argStack[3], x, y)
+					else:
+						op = "%s %s %s %s %s %s ct" % ( argStack[0], argStack[1], argStack[2], argStack[3], x, y)
+					argStack = []
+					bezStringList.append(op)
+				elif type == "qccurve":
+					raise UFOParseError("Point type not supported '%s'." % (xmlToString(contourItem)))
+				else:
+					raise UFOParseError("Unknown Point type not supported '%s'." % (xmlToString(contourItem)))
+					
+			# we get here only if there was at least a move.
+			bezStringList.append("cp" + os.linesep)
+		bezstring = os.linesep.join(bezStringList)
 	return bezstring, curX, curY
 
 
@@ -2238,6 +2244,74 @@ def validateLayers(ufoFontPath, doWarning=True):
 	
 	cleanupContentsList(glyphDirPath, doWarning)
 
+
+	 
+def makeUFOGOADB(srcFontPath):
+	 # Make a GOAD file for for a UFO font.
+	 # Use public.glyphOrder if it exists, else use the contents.plist file.
+	 ufoFont = UFOFontData(srcFontPath, False, "")
+	 try:
+	 	ufoFont.loadGlyphMap()
+	 except:
+	 	return None
+	 	
+	 goadbList = [[i, glyphName] for glyphName,i in ufoFont.orderMap.items()]
+	 goadbList.sort()
+	 ufoGOADBPath = os.path.join(srcFontPath, kDefaultGOADBPath) # default
+	 fp = file(ufoGOADBPath, "wt")
+	 for i, glyphName in goadbList:
+	 	fp.write("%s\t%s%s" % (glyphName, glyphName, os.linesep))
+	 fp.close()
+	 return ufoGOADBPath
+	
+	 
+def makeUFOFMNDB(srcFontPath):
+	try:
+		import xml.etree.cElementTree as ET
+	except ImportError:
+		import xml.etree.ElementTree as ET
+	fontInfoPath = os.path.join(srcFontPath, kFontInfoName) # default
+	fiMap, fiList = parsePList(fontInfoPath)
+	psName = "NoFamilyName-Regular"
+	familyName = "NoFamilyName"
+	styleName = "Regular"
+	try:
+		 psName = fiMap["postscriptFontName"]
+		 parts = psName.split("-")
+		 familyName = parts[0]
+		 if len(parts)> 1:
+		 	styleName = parts[1]
+	except KeyError:
+		print "[Warning] UFO font is missing PostScript Name"
+	
+
+	try:
+		 familyName = fiMap["openTypeNamePreferredFamilyName"]
+	except KeyError:
+		try:
+			 familyName = fiMap["familyName"]
+		except KeyError:
+			print "[Warning] UFO font is missing familyName"
+
+	try:
+		 styleName = fiMap["openTypeNamePreferredSubfamilyName"]
+	except KeyError:
+		try:
+			 styleName = fiMap["styleName"]
+		except KeyError:
+			print "[Warning] UFO font is missing styleName"
+	
+	fmndbPath = os.path.join(srcFontPath, kDefaultFMNDBPath)
+	parts = []
+	parts.append("[%s]" % (psName))
+	parts.append("\tf=%s" % (familyName))
+	parts.append("\ts=%s" % (styleName))
+	parts.append("")
+	data = os.linesep.join(parts)
+	fp = file(fmndbPath, "wt")
+	fp.write(data)
+	fp.close()
+	return fmndbPath
 
 def test1():
 	import pprint
