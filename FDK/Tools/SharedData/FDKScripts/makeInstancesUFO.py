@@ -6,27 +6,30 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 __doc__ = """
 """
 __usage__ = """
-   makeInstancesUFO program v1.11 Oct 5 2015
+   makeInstancesUFO program v1.2 Oct 7 2015
    makeInstancesUFO -h
    makeInstancesUFO -u
-   makeInstancesUFO [-a]  [-d <design space file name>]
-                 [-c] [-a] [-decimal] [-i 0,1,..n]
+   makeInstancesUFO [-d <design space file name>] [-a] [-c] [-n] [-dec] [-i 0,1,..n]
 
-   -d <design space file path> .... Specifies alternate path to design space file.
-                                Default: font.designspace
+   -d <design space file path>
+   Specifies alternate path to design space file. Default name is 'font.designspace'.
 
-   -i <list of instance indices> Build only the listed instances, i is a  0-based index of the instance records in the instance file.
-      example: '-i 1,4,22' -> build only the instances 1,4 and 22. 
-   -a ... do NOT autohint the instance font files. Default is to do so, as master designs are unhinted.
-   -c ... do NOT run checkOutlines to remove overlaps from the instance font files. Default is to do so.
-   -decimal Allow decimal coordinated: do not round to integer.
+   -a ... do NOT autohint the instances. Default is to do so.
+   -c ... do NOT remove the outline overlaps in the instances. Default is to do so.
+   -n ... do NOT normalize the instances. Default is to do so.
+   -dec . do NOT round coordinates to integer. Default is to do so.
+
+   -i <list of instance indices>
+   Specify the instances to generate. 'i' is a 0-based index of the instance records
+   in the design space file.
+      Example: '-i 1,4,22' -> generates only the 2nd, 5th, and 23rd instances
 """
 
 __help__ = __usage__ + """
-	makeInstances builds UFO font instances from a set of master design UFO fonts.
+	makeInstancesUFO generates UFO font instances from a set of master design UFO fonts.
 	It uses the same font math library as the LettError Superpolator program.
-	The  paths of the master and instances are specified in "design space" XML file.
-	
+	The paths of the masters and instances fonts are specified in "design space" XML file.
+
 """
 
 import sys
@@ -50,10 +53,10 @@ xmlToString = ET.tostring
 
 try:
 	import  ufoLib.ufonormalizer as ufonormalizerLib
-	haveUfONormalizer = 1
+	haveUfONormalizer = True
 except ImportError:
-	haveUfONormalizer = 0
-	
+	haveUfONormalizer = False
+
 kFontName = "PSFontName"
 
 kDefaultDesignSpaceFileName = "font.designspace"
@@ -69,19 +72,20 @@ class SnapShotError(ValueError):
 class Options:
 	def __init__(self, args):
 		self.dsPath = kDefaultDesignSpaceFileName
-		self.doAutoHint = 1
-		self.doOverlapRemoval = 1
+		self.doAutoHint = True
+		self.doOverlapRemoval = True
+		self.doNormalize = True
 		self.logFile = None
 		self.allowDecimalCoords = False
 		self.indexList = []
 		lenArgs = len(args)
-		
+
 		i = 0
 		hadError = 0
 		while i < lenArgs:
 			arg = args[i]
 			i += 1
-			
+
 			if arg == "-h":
 				logMsg.log(__help__)
 				sys.exit(0)
@@ -95,10 +99,12 @@ class Options:
 				logMsg.sendTo( args[i])
 				i +=1
 			elif arg == "-a":
-				self.doAutoHint = 0
+				self.doAutoHint = False
 			elif arg == "-c":
-				self.doOverlapRemoval = 0
-			elif arg == "-decimal":
+				self.doOverlapRemoval = False
+			elif arg == "-n":
+				self.doNormalize = False
+			elif arg == "-dec":
 				self.allowDecimalCoords = True
 			elif arg == "-i":
 				ilist = args[i]
@@ -109,15 +115,14 @@ class Options:
 			else:
 				logMsg.log("Error: unrcognized argument:", arg)
 				hadError = 1
-	
+
 		if hadError:
 			raise(OptError)
 
-		
 		if not os.path.exists(self.dsPath):
 			logMsg.log("Note: could not find design space file path:", self.dsPath)
 			hadError = 1
-			
+
 		if hadError:
 			raise(OptError)
 
@@ -135,7 +140,7 @@ class LogMsg:
 		if  self.logFilePath:
 			self.logFile.write(txt + os.linesep)
 			self.logFile.flush()
-			
+
 	def sendTo(self, logFilePath):
 		self.logFilePath = logFilePath
 		self.logFile = open(logFilePath, "wt")
@@ -146,22 +151,22 @@ logMsg = LogMsg()
 def readDesignSpaceFile(options):
 	""" Read design space file.
 	build a new instancesList with all the instances from the ds file
-	
+
 	Promote all the source and instance filename attributes from relative to absolute paths
 	write a temporary ds file
 	return a path to the temporary ds file, and the current instances list.
 	"""
-	
+
 	instanceEntryList = []
 	print "Reading design space file: %s ..." % (options.dsPath)
-	
+
 	f = open(options.dsPath, "rt")
 	data = f.read()
 	f.close()
 	ds = XML(data)
-	
+
 	instances = ds.find("instances")
-	
+
 	# Remove any instances that are not in the specified list of instance indices, from the option -i.
 	if (len(options.indexList) > 0):
 		newInstanceXMLList = instances.findall("instance")
@@ -173,7 +178,7 @@ def readDesignSpaceFile(options):
 			if not (instanceIndex in options.indexList):
 				instances.remove(instanceXML)
 
-	# We want to build all remaining instances. 
+	# We want to build all remaining instances.
 	for instanceXML in instances:
 		try:
 			curPath = instanceXML.attrib["filename"]
@@ -190,15 +195,14 @@ def readDesignSpaceFile(options):
 	if not instanceEntryList:
 		print "Failed to find any instances in the ds file '%s' that have the postscriptfilename attribute" % (options.dsPath)
 		return None, None
-				
+
 	dsPath = options.dsPath + ".temp"
 	data = xmlToString(ds)
 	f = open(dsPath, "wt")
 	f.write(data)
 	f.close()
-	
+
 	return dsPath, instanceEntryList
-	
 
 
 def updateInstance(options, fontInstancePath):
@@ -210,7 +214,7 @@ def updateInstance(options, fontInstancePath):
 		logList = []
 		opList = ["-e", fontInstancePath]
 		if options.allowDecimalCoords:
-			opList.insert(0, "-decimal")
+			opList.insert(0, "-dec")
 		if os.name == "nt":
 			opList.insert(0, 'checkOutlinesUFO.cmd')
 			proc = Popen(opList, stdout=PIPE)
@@ -236,13 +240,13 @@ def updateInstance(options, fontInstancePath):
 			raise(SnapShotError)
 		else:
 			print
-			
+
 	if options.doAutoHint:
 		logMsg.log("\tautohinting %s ..." % (fontInstancePath))
 		logList = []
 		opList = ['-q', '-nb', fontInstancePath]
 		if options.allowDecimalCoords:
-			opList.insert(0, "-decimal")
+			opList.insert(0, "-dec")
 		if os.name == "nt":
 			opList.insert(0, 'autohint.cmd')
 			proc = Popen(opList, stdout=PIPE)
@@ -270,19 +274,19 @@ def updateInstance(options, fontInstancePath):
 			print
 
 	return
-	
-		
+
 
 def clearCustomLibs(fontPath):
 	dFont = defcon.Font(fontPath)
 	for key in dFont.lib.keys():
-		if not key == 'public.glyphOrder':
+		if key not in ['public.glyphOrder', 'org.unifiedfontobject.normalizer.modTimes']:
 			del(dFont.lib[key])
 
 	libGlyphs = [g for g in dFont if len(g.lib)]
 	for g in libGlyphs:
 		g.lib.clear()
 	dFont.save()
+
 
 def run(args):
 	options = Options(args)
@@ -292,31 +296,34 @@ def run(args):
 	dsDir,dsFile = os.path.split(os.path.abspath(options.dsPath))
 	os.chdir(dsDir)
 	options.dsPath = dsFile
-	
+
 	dsPath, newInstancesList = readDesignSpaceFile(options)
 	if not dsPath:
 		return
 
-
 	version = 2
 	if len(newInstancesList) == 1:
-		logMsg.log( "Building 1 instance..")
+		logMsg.log("Building 1 instance...")
 	else:
-		logMsg.log("Building %s instances.." % (len(newInstancesList)))
+		logMsg.log("Building %s instances..." % (len(newInstancesList)))
 	mutatorMathBuild(documentPath=dsPath, outputUFOFormatVersion=version, roundGeometry=(not options.allowDecimalCoords))
 	if (dsPath != options.dsPath) and os.path.exists(dsPath):
 		os.remove(dsPath)
 
-	logMsg.log("Built %s instances.." % (len(newInstancesList)))
+	logMsg.log("Built %s instances." % (len(newInstancesList)))
 
-	logMsg.log( "Applying ufo normalization")
+	# Remove glyph.lib and font.lib (except for "public.glyphOrder")
 	for instancePath in newInstancesList:
 		clearCustomLibs(instancePath)
-		if haveUfONormalizer:
-			ufonormalizerLib.normalizeUFO(instancePath, outputPath=None, onlyModified=True)
+
+	if options.doNormalize:
+		logMsg.log("Applying UFO normalization...")
+		for instancePath in newInstancesList:
+			if haveUfONormalizer:
+				ufonormalizerLib.normalizeUFO(instancePath, outputPath=None, onlyModified=True)
 
 	if options.doAutoHint or options.doOverlapRemoval:
-		logMsg.log( "Applying post-processing")
+		logMsg.log("Applying post-processing...")
 		# Apply autohint and checkoutlines, if requested.
 		for instancePath in newInstancesList:
 			# make new instance font.
@@ -326,10 +333,10 @@ def run(args):
 		for instancePath in newInstancesList:
 			# make sure that that there are no old glyphs left in the processed glyphs folder.
 			ufoTools.validateLayers(instancePath)
-			
-	if  options.doOverlapRemoval or options.doAutoHint: # The defcon library renames glyphs. Need to fix them again.		
+
+	if options.doOverlapRemoval or options.doAutoHint: # The defcon library renames glyphs. Need to fix them again.
 		for instancePath in newInstancesList:
-			if haveUfONormalizer:
+			if haveUfONormalizer and options.doNormalize:
 				ufonormalizerLib.normalizeUFO(instancePath, outputPath=None, onlyModified=False)
 
 if __name__=='__main__':
@@ -338,5 +345,5 @@ if __name__=='__main__':
 	except (OptError, ParseError, SnapShotError):
 		logMsg.log("Quitting after error.")
 		pass
-	
-	
+
+
