@@ -1,7 +1,7 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
-FDK. v2.5 Sep 8 2015 change number 64765.
+FDK. v2.5 Oct 29 2015 change number 64800.
 
 	autohint and tx.
 	Switched to using new text format that is plist-compatible for T1 hint data in UFO fonts.
@@ -15,11 +15,31 @@ FDK. v2.5 Sep 8 2015 change number 64765.
 	
 	checkOutlinesUFO
 	Fixed bug where abutting paths didn't get merged if there were no changes in the set of points.
-
+	Fixed bug where a .glif file without an <outline> element was treated as
+	fatal error. It is valid for the <outline> element to be missing.
+	
 	checkOutlines
 	Changed -I option so that it also turns off checking for tiny paths. Added
 	new option -5 to turn this check back on again.
 	Increased max number of paths in a glyph from 64 to 128, per request from a developer.
+	
+	CompareFamily.py
+	Fix old bug in applying ligature width tests for CID fonts, and fixed issue
+	with fonts that do not have Mac name table names. The logic now reports
+	missing Mac name table names only if there actually are some: if there are
+	none, these messages are suppressed.
+
+	
+	fontplot/waterfallplot/hintplot/fontsetplot
+	Fix bugs that prevented these from being used with CID-keyed fonts and ufo
+	fonts. Since the third party library that generates the PDF files is very
+	limited, I did this by simply converting the source files to a name-keyed
+	Type 1 temporary font file, and then applying the tools the temporary file.
+	
+	makeInstancesUFO:
+	Added a call to the ufonormalizer tool for each instance. Also added a call
+	to the defcon library to remove all private lib keys from lib.py and each
+	glyph in the default layer, excepting only "public.glyphOrder".
 	
 	MakeOTF User Guide.
 	Fix typos reported by Gustavo Ferreira
@@ -42,7 +62,16 @@ FDK. v2.5 Sep 8 2015 change number 64765.
                         side class 0 for non-zero kern values. Optimizing saves a few
                         hundred to thousand bytes, but confuses some programs.
                         Optimizing is the default behavior, and previously was the only option.
-
+	Allow building an OTF from a UFO font only. The internal features.fea file
+	will be used if there is no "features" file in the font's parent directory.
+	If the GlyphAliasAndOrderDB file is missing, only a warning will be issued.
+	If the FontMenuNameDB is missing, makeotf will attempt to build the font
+	menu names from the UFO fontinfo file, using the first of the following keys
+	found: "openTypeNamePreferredFamilyName", "familyName", the family name part
+	of the PostScriptName,  and finally the value "NoFamilyName". For style, the
+	keys are: "openTypeNamePreferredSubfamilyName", "styleName", the style name
+	part of the PostScriptName, and finally the value "Regular".
+	
 	makeotfexe.
 	Extended the set of characters allowed in glyph names to include + * : ~ ^ !
 	Fixed crashing bug with more than 32K glyphs in a name-keyed font, reported by Gustavo Ferreira.
@@ -55,11 +84,23 @@ FDK. v2.5 Sep 8 2015 change number 64765.
 	featgram.c, rather than having to edit the latter directly. Deleted the
 	object files for the 'antler' parser generator, and updated the read-me for
 	the parser generator.
+	Fixed really old bug: relative include file references in feature files
+	haven't worked right since the FDK moved from Mac OS 9 to OSX. They are now
+	relative to the parent directory of the including feature file. If that is
+	not found, then makeotf tries to apply the reference as relative to the main
+	feature file.
+	
 
+	spot.
+	Fixed bug in duming stylistic feature names.
+	
 	tx family
 	Fix crash when using '-gx' option with source UFO fonts for 'tx' family of tools.
 	Fix crash when a UFO glyph point has a name attribute with an empty string.
 	Fix crash when a UFO font has no public.glyphOrder dict in the lib.plist file.
+
+	ufonormalizer
+	Added a command to call the ufonormalizer tool.
 	
 FDK. v2.5 Aug 4 2015 change number 64700.
 
