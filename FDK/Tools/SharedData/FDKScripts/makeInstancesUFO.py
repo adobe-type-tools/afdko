@@ -6,7 +6,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 __doc__ = """
 """
 __usage__ = """
-   makeInstancesUFO program v1.10 June 12 2015
+   makeInstancesUFO program v1.11 Oct 5 2015
    makeInstancesUFO -h
    makeInstancesUFO -u
    makeInstancesUFO [-a]  [-d <design space file name>]
@@ -40,6 +40,7 @@ from mutatorMath.ufo import build as mutatorMathBuild
 import robofab.world
 import shutil
 import ufoTools
+import defcon
 try:
     import xml.etree.cElementTree as ET
 except ImportError:
@@ -47,6 +48,12 @@ except ImportError:
 XML = ET.XML
 xmlToString = ET.tostring
 
+try:
+	import  ufoLib.ufonormalizer as ufonormalizerLib
+	haveUfONormalizer = 1
+except ImportError:
+	haveUfONormalizer = 0
+	
 kFontName = "PSFontName"
 
 kDefaultDesignSpaceFileName = "font.designspace"
@@ -266,6 +273,17 @@ def updateInstance(options, fontInstancePath):
 	
 		
 
+def clearCustomLibs(fontPath):
+	dFont = defcon.Font(fontPath)
+	for key in dFont.lib.keys():
+		if not key == 'public.glyphOrder':
+			del(dFont.lib[key])
+
+	libGlyphs = [g for g in dFont if len(g.lib)]
+	for g in libGlyphs:
+		g.lib.clear()
+	dFont.save()
+
 def run(args):
 	options = Options(args)
 
@@ -290,6 +308,13 @@ def run(args):
 		os.remove(dsPath)
 
 	logMsg.log("Built %s instances.." % (len(newInstancesList)))
+
+	logMsg.log( "Applying ufo normalization")
+	for instancePath in newInstancesList:
+		clearCustomLibs(instancePath)
+		if haveUfONormalizer:
+			ufonormalizerLib.normalizeUFO(instancePath, outputPath=None, onlyModified=True)
+
 	if options.doAutoHint or options.doOverlapRemoval:
 		logMsg.log( "Applying post-processing")
 		# Apply autohint and checkoutlines, if requested.
@@ -301,8 +326,12 @@ def run(args):
 		for instancePath in newInstancesList:
 			# make sure that that there are no old glyphs left in the processed glyphs folder.
 			ufoTools.validateLayers(instancePath)
+			
+	if  options.doOverlapRemoval or options.doAutoHint: # The defcon library renames glyphs. Need to fix them again.		
+		for instancePath in newInstancesList:
+			if haveUfONormalizer:
+				ufonormalizerLib.normalizeUFO(instancePath, outputPath=None, onlyModified=False)
 
-	
 if __name__=='__main__':
 	try:
 		run(sys.argv[1:])
