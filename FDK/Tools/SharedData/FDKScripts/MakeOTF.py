@@ -41,7 +41,7 @@ Project file.
 """
 
 __usage__ = """
-makeotf v2.0.86 Sep 17 2015
+makeotf v2.0.88 Oct 5 2015
 -f <input font>         Specify input font path. Default is 'font.pfa'.
 -o <output font>        Specify output font path. Default is
                         '<PostScript-Name>.otf'.
@@ -320,6 +320,7 @@ kOverrideMenuNames = "OverrideMenuNames"
 kLicenseCode = "LicenseCode" # Arbitrary string appended at the end of name ID 3. Used by Adobe for font license code.
 kDefaultFontPathList = ["font.ufo", "font.pfa", "font.ps", "font.txt"] # Will look for all.
 kDefaultFeaturesPath = "features"
+kDefaultUFOFeaturesPath = "features.fea"
 kDefaultOptionsFile = "current.fpr"
 kDefaultFMNDBPath = "FontMenuNameDB"
 kDefaultGOADBPath = "GlyphOrderAndAliasDB"
@@ -409,6 +410,9 @@ class MakeOTFParams:
 		self.ROS = None # CID Registry, Order, Supplement.
 		self.seenOS2v4Bits = [0,0,0] # for bits 7, 8, 9.
 		self.srcIsTTF = 0
+		self.srcIsUFO = 0
+		self.ufoFMNDBPath = None
+		self.ufoGAODBPath = None
 		for item in kMOTFOptions.items():
 			exec("self.%s%s = None" % (kFileOptPrefix, item[0]))
 		# USE_TYPO_METRICS Remove comment from next line to turn on bits 7 and 8 by default.
@@ -1453,16 +1457,84 @@ def checkIfVertInFeature(featurePath):
 				
 	return foundVert
 
+def	parsePList(filePath, dictKey = None):
+	# if dictKey is defined, parse and return only the data for that key.
+	# This helps avoid needing to parse all plist types. I need to support only data for known keys amd lists.
+	plistDict = {}
+	plistKeys = []
+
+	# I uses this rather than the plistlib in order to get a list that allows preserving key order.
+	fp = open(filePath, "r")
+	data = fp.read()
+	fp.close()
+	contents = XML(data)
+	dict = contents.find("dict")
+	if dict == None:
+		raise UFOParseError("In '%s', failed to find dict. '%s'." % (filePath))
+	lastTag = "string"
+	for child in dict:
+		if child.tag == "key":
+			if lastTag == "key":
+				raise UFOParseError("In contents.plist, key name '%s' followed another key name '%s'." % (xmlToString(child), lastTag) )
+			skipKeyData = False
+			lastName = child.text
+			lastTag = "key"
+			if dictKey != None:
+				if lastName != dictKey:
+					skipKeyData = True
+		elif  child.tag != "key":
+			if lastTag != "key":
+				raise UFOParseError("In contents.plist, key value '%s' followed a non-key tag '%s'." % (xmlToString(child), lastTag) )
+			lastTag =  child.tag
+
+			if skipKeyData:
+				continue
+				
+			if plistDict.has_key(lastName):
+				raise UFOParseError("Encountered duplicate key name '%s' in '%s'." % (lastName, filePath) )
+			if child.tag == "array":
+				list = []
+				for listChild in child:
+					val = listChild.text
+					if listChild.tag == "integer":
+						val= int(eval(val))
+					elif listChild.tag == "real":
+						val = float(eval(val))
+					elif listChild.tag == "string":
+						pass
+					else:
+						raise UFOParseError("In plist file, encountered unhandled key type '%s' in '%s' for parent key %s. %s." % (listChild.tag, child.tag, lastName, filePath))
+					list.append(val)
+				plistDict[lastName] = list
+			elif child.tag == "integer":
+				plistDict[lastName] = int(eval(child.text))
+			elif child.tag == "real":
+				plistDict[lastName] = float(eval(child.text))
+			elif child.tag == "false":
+				plistDict[lastName] = 0
+			elif child.tag == "true":
+				plistDict[lastName] = 1
+			elif child.tag == "string":
+				plistDict[lastName] = child.text
+			else:
+				raise UFOParseError("In plist file, encountered unhandled key type '%s' for key %s. %s." % (child.tag, lastName, filePath))
+			plistKeys.append(lastName)
+		else:
+			raise UFOParseError("In plist file, encountered unexpected element '%s'. %s." % (xmlToString(child), filePath ))
+	if len(plistDict) == 0:
+		plistDict = None
+	return plistDict, plistKeys
 
 def setMissingParams(makeOTFParams):
 	error = 0
 	inputFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kInputFont)) # The path to the original src font file
-
+	srcFontPath = inputFilePath
 	# check for input font file.
 	if not inputFilePath: # path to font file was not specified.
 		for fileName in kDefaultFontPathList:
 			inputFilePath = inputFontPath = fileName
 			if os.path.exists(inputFilePath):
+				srcFontPath = inputFilePath
 				break
 		exec("makeOTFParams.%s%s = inputFilePath" % (kFileOptPrefix, kInputFont))
 		if not os.path.exists(inputFilePath):
@@ -1483,8 +1555,15 @@ def setMissingParams(makeOTFParams):
 	# features path.
 	path = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kFeature))
 	if not path:
-		path = os.path.join(makeOTFParams.fontDirPath, kDefaultFeaturesPath)
-		if not os.path.exists(path): # look in font's home dir.
+		# look in font's home dir.
+		path1 = os.path.join(makeOTFParams.fontDirPath, kDefaultFeaturesPath)
+		if os.path.exists(path1):
+			path = path1
+		elif makeOTFParams.srcIsUFO:
+				path1 = os.path.join(srcFontPath, kDefaultUFOFeaturesPath)
+				if  os.path.exists(path1):
+					path = path1
+		if not path:
 			print "makeotf [Warning] Could not find default features file at '%s'. Font will be built without any layout features." % (path)
 			exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kFeature))
 		else:
@@ -1504,8 +1583,17 @@ def setMissingParams(makeOTFParams):
 		if found:
 			exec("makeOTFParams.%s%s = path" % (kFileOptPrefix, kFMB))
 		else:	
-			print "makeotf [Warning] Could not find FontMenuNameDB file. Font will be built with menu names derived from PostScript name."
-			exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kFMB))
+			if makeOTFParams.srcIsUFO:
+				path = ufoTools.makeUFOFMNDB(srcFontPath)
+				if path:
+					makeOTFParams.ufoFMNDBPath = path
+					exec("makeOTFParams.%s%s = path" % (kFileOptPrefix, kFMB))
+				else:
+					print "makeotf [Note] Could not find FontMenuNameDB file. Font will be built with menu names derived from PostScript name."
+					exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kFMB))
+			else:
+				print "makeotf [Warning] Could not find FontMenuNameDB file. Font will be built with menu names derived from PostScript name."
+				exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kFMB))
 	
 
 	# GOADB path.
@@ -1527,9 +1615,17 @@ def setMissingParams(makeOTFParams):
 				break
 		if found:
 			exec("makeOTFParams.%s%s = path" % (kFileOptPrefix, kGOADB))
-		else:	
-			print "makeotf [Error] Could not find GlyphOrderAndAliasDB file at '%s'." % (newpath)
-			error = 1
+		else:
+			if makeOTFParams.srcIsUFO:
+				path = ufoTools.makeUFOGOADB(srcFontPath)
+				if path:
+					makeOTFParams.ufoGAODBPath = path
+					exec("makeOTFParams.%s%s = path" % (kFileOptPrefix, kGOADB))
+				else:
+					print "makeotf [Warning] Could not  make a temp GlyphOrderAndAliasDB file for '%s'." % (makeOTFParams.fontDirPath)
+			else:
+				print "makeotf [Error] Could not find GlyphOrderAndAliasDB file at '%s'." % (newpath)
+				error = 1
 
 	# If font is CID, look in the SharedData folder.
 	if os.path.exists(inputFontPath):
@@ -1612,6 +1708,7 @@ def convertFontIfNeeded(makeOTFParams):
 			print "The source file is a direectory, and is not a valid UFO font - missing glyphs/contents.plist. %s." % (filePath)
 			print "makeotf [Error] Failed to convert input font '%s' to temp file." % (filePath)
 			raise MakeOTFTXError
+		makeOTFParams.srcIsUFO = 1
 	else:
 		commandString = "spot %s 2>&1" % (filePath)
 		report = FDKUtils.runShellCmd(commandString)
@@ -2373,12 +2470,13 @@ def runMakeOTF(makeOTFParams):
 	print "   %s" % (commandString)
 	FDKUtils.runShellCmdLogging(commandString) # I use os.system rather than os.pipe so that the user will see the log messages from the C program during processing, rather than only at the end.
 
-	if not os.path.exists(tempOutPath) or (os.path.getsize(tempOutPath) < 500):
-		print "makeotf [Error] Failed to build output font file '%s'." % (tempOutPath)
-		if os.path.exists(tempOutPath):
-			os.remove(tempOutPath)
-		raise MakeOTFRunError
 	
+	if (not gDebug) and makeOTFParams.ufoGAODBPath:
+		os.remove(makeOTFParams.ufoGAODBPath)
+		
+	if (not gDebug) and makeOTFParams.ufoFMNDBPath:
+		os.remove(makeOTFParams.ufoFMNDBPath)
+		
 	if makeOTFParams.srcIsTTF:
 		copyTTFGlyphTables(inputFilePath, tempOutPath, outputPath)
 		
@@ -2390,6 +2488,12 @@ def runMakeOTF(makeOTFParams):
 		if tempGOADBPath:
 			os.remove(tempGOADBPath)
 		
+	if not os.path.exists(tempOutPath) or (os.path.getsize(tempOutPath) < 500):
+		print "makeotf [Error] Failed to build output font file '%s'." % (tempOutPath)
+		if os.path.exists(tempOutPath):
+			os.remove(tempOutPath)
+		raise MakeOTFRunError
+
 	# The following check is here because of the internal Adobe production process for CID fonts, where a
 	# Type1 CID font is made with the FSType from the cidfontinfo file, and can be a product indpendent of the 
 	# OpenType font. Need to make sure that CID font FSTYpe is the same as the table fsType.
