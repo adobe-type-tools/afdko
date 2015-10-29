@@ -1863,9 +1863,9 @@ static void proofPosPair1(PosPairFormat1 *fmt, IntX glyphtoproof1, IntX glyphtop
 						  if (isVert)
 					  		{
 					  		  if (yadv)
-					  	  		options.newwidth = -(abs(vwidth) + yadv);
+					  	  		options.newvwidth = -(abs(vwidth) + yadv);
 					  		  else
-						  		options.newwidth = -(abs(vwidth) + xadv);					  	  
+						  		options.newvwidth = -(abs(vwidth) + xadv);					  	  
 					  		}
 						  else
 					  		{
@@ -2128,7 +2128,10 @@ static void proofPosPair2(PosPairFormat2 *fmt, IntX glyphtoproof1, IntX glyphtop
 							  else
 								proofCheckAdvance(proofctx, width + width2);
 							  proofClearOptions(&options);
-							  options.newwidth = width + xadv;
+                                                          if (isVert)
+                                                                  options.newvwidth = vwidth + yadv;
+                                                          else
+                                                                  options.newwidth = width + xadv;
 							  proofDrawGlyph(proofctx, 
 											 g1, ANNOT_SHOWIT, /* glyphId,glyphflags */
 											 nam1, ANNOT_SHOWIT|(isVert ? ANNOT_ATRIGHT : ANNOT_ATBOTTOM),   /* glyphname,glyphnameflags */
