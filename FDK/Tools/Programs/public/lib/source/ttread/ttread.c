@@ -2121,7 +2121,7 @@ static void glyfReadCompound(ttrCtx h, GID gid, GID *mtx_gid, int depth)
 		{
 		Offset saveoff;			
 		int i;
-		long iStart = 0;	/* Suppress optimizer warning */
+		long iStart;
 		short nContours;	
 		int translate;		
 		int transform;		
@@ -2135,6 +2135,8 @@ static void glyfReadCompound(ttrCtx h, GID gid, GID *mtx_gid, int depth)
 		flags 		= read2(h);
 		component 	= read2(h);
 
+        iStart = h->glyf.coords.cnt; //compound glyphs can be nested; iStart is not necessarily 0 here.
+            
 		/* Validate component's glyph index */
 		if (component >= h->glyphs.cnt)
   			fatal(h, ttrErrNoComponent, 
