@@ -2,7 +2,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-   checkOutlinesUFO program v1.15 Sep 16 2015
+   checkOutlinesUFO program v1.16 Nov 3 2015
 
    checkOutlinesUFO [-e] [-g glyphList] [-gf <file name>] [-all] [-noOverlap] [-noBasicChecks] [-setMinArea <n>] [-setTolerance <n>] [-wd]
 
@@ -275,7 +275,10 @@ def getOptions():
 		if options.filePath and arg[0] == "-":
 			raise focusOptionParseError("Option Error: All file names must follow all other options <%s>." % arg)
 
-		if arg == "-u":
+		if arg == "-test":
+			import doctest
+			sys.exit(doctest.testmod().failed)
+		elif arg == "-u":
 			print __usage__
 			sys.exit()
 		elif arg == "-h":
@@ -471,9 +474,42 @@ def removeCoincidentPoints(bGlyph, changed, msg, options):
 			i += 1
 	return changed, msg
 
+
 def removeTinySubPaths(bGlyph, minArea, changed, msg):
-	# removes tiny subpaths that are created by overlap removal when the start and end path segments cross each other, rather than meet.
-	numContours  = len(bGlyph.contours)
+	"""
+	Removes tiny subpaths that are created by overlap removal when the start
+	and end path segments cross each other, rather than meet.
+
+	>>> from defcon.objects.glyph import Glyph
+	>>> import booleanOperations.booleanGlyph
+
+	# large contour
+	>>> g = Glyph()
+	>>> p = g.getPen()
+	>>> p.moveTo((100,100))
+	>>> p.lineTo((200,200))
+	>>> p.lineTo((0,100))
+	>>> p.closePath()
+	>>> assert (len(g[0]) == 3), "Contour does not have the expected number of points"
+	>>> assert (g.bounds == (0, 100, 200, 200)), "The contour's bounds do not match the expected"
+	>>> bg = booleanOperations.booleanGlyph.BooleanGlyph(g)
+	>>> removeTinySubPaths(bg, 25, 0, []) == (0, [])
+	True
+
+	# small contour
+	>>> g = Glyph()
+	>>> p = g.getPen()
+	>>> p.moveTo((1,1))
+	>>> p.lineTo((2,2))
+	>>> p.lineTo((0,1))
+	>>> p.closePath()
+	>>> assert (len(g[0]) == 3), "Contour does not have the expected number of points"
+	>>> assert (g.bounds == (0, 1, 2, 2)), "The contour's bounds do not match the expected"
+	>>> bg = booleanOperations.booleanGlyph.BooleanGlyph(g)
+	>>> removeTinySubPaths(bg, 25, 0, []) == (0, ['Contour 0 is too small: bounding box is less than minimum area. Start point: ((1, 1)).'])
+	True
+	"""
+	numContours = len(bGlyph.contours)
 	ci = 0
 	while ci < numContours:
 		contour = bGlyph.contours[ci]
@@ -486,9 +522,10 @@ def removeTinySubPaths(bGlyph, minArea, changed, msg):
 			if cArea < minArea:
 				ci -= 1
 				numContours -= 1
-				msg.append( "Contour %s is too small: bounding box is less then minimum area. Start point: (%s)." % (ci, contour._points[0][1]))
+				msg.append("Contour %s is too small: bounding box is less than minimum area. Start point: (%s)." % (ci, contour._points[0][1]))
 				del bGlyph.contours[ci]
 	return changed, msg
+
 
 def isColinearLine(b3, b2, b1, tolerance = 0):
 	# b1-b3 are three points  [x, y] to test.
