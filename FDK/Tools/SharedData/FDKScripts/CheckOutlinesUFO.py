@@ -2,10 +2,10 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-   checkOutlinesUFO program v1.15 Sep 16 2015
-   
+   checkOutlinesUFO program v1.16 Nov 3 2015
+
    checkOutlinesUFO [-e] [-g glyphList] [-gf <file name>] [-all] [-noOverlap] [-noBasicChecks] [-setMinArea <n>] [-setTolerance <n>] [-wd]
-   
+
    Remove path overlaps, and do a few basic outline quality checks.
  """
 from ufoTools import kProcessedGlyphsLayerName, kProcessedGlyphsLayer
@@ -39,18 +39,18 @@ defines a straight line.
 -wd	write changed glyphs to default layer instead of '%s'
 
 -g <glyphID1>,<glyphID2>,...,<glyphIDn>
-	Check only the specified list of glyphs. The list must be 
-	comma-delimited. The glyph ID's may be glyphID's, glyph names, or 
-	glyph CID's. If the latter, the CID value must be prefixed with the 
+	Check only the specified list of glyphs. The list must be
+	comma-delimited. The glyph ID's may be glyphID's, glyph names, or
+	glyph CID's. If the latter, the CID value must be prefixed with the
 	string "cid". There must be no white-space in the glyph list.
 	Examples:
 		checkOutlinesUFO -g A,B,C,69 myFont
 		checkOutlinesUFO -g cid1030,cid34,cid3455,69 myCIDFont
 
 -gf <file name>
-	Check only the list of glyphs contained in the specified file, The file 
-	must contain a comma-delimited list of glyph identifiers. Any number of 
-	space, tab, and new-line characters are permitted between glyph names 
+	Check only the list of glyphs contained in the specified file, The file
+	must contain a comma-delimited list of glyph identifiers. Any number of
+	space, tab, and new-line characters are permitted between glyph names
 	and commas.
 
 -all Force all glyphs to be processed. This applies only to UFO fonts, where processed glyphs
@@ -88,7 +88,7 @@ kUknownFontType = 0
 kUFOFontType = 1
 kType1FontType = 2
 kCFFFontType = 3
-kOpenTypeCFFFontType = 4 
+kOpenTypeCFFFontType = 4
 
 class FontFile(object):
 	def __init__(self, fontPath):
@@ -100,7 +100,7 @@ class FontFile(object):
 		self.ufoFontHashData = None
 		self.ufoFormat = 2
 		self.saveToDefaultLayer = 0
-		
+
 	def open(self, useHashMap):
 		fontPath = self.fontPath
 		try:
@@ -113,14 +113,14 @@ class FontFile(object):
 			self.useHashMap = useHashMap
 			self.ufoFontHashData = ufoTools.UFOFontData(fontPath, self.useHashMap, programName=ufoTools.kCheckOutlineName)
 			self.ufoFontHashData.readHashMap()
-			
+
 		except ufoLib.UFOLibError,e:
 			if (not os.path.isdir(fontPath)) and "metainfo.plist is missing" in e.message:
 				# It was a file, but not a UFO font. try converting to UFO font, and try again.
 				print "converting to temp UFO font..."
 				self.tempUFOPath = tempPath = fontPath + ".temp.ufo"
 				if os.path.exists(tempPath):
-					 shutil.rmtree(tempPath) 
+					 shutil.rmtree(tempPath)
 				cmd = "tx -ufo \"%s\" \"%s\"" % (fontPath, tempPath)
 				p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout
 				log = p.read()
@@ -155,10 +155,10 @@ class FontFile(object):
 		# but the hash file has changed.
 		if self.fontType == kUFOFontType:
 			self.ufoFontHashData.close() # Write the hash data, if it has changed.
-			
+
 	def save(self):
 		print "Saving font..."
-		""" A real hack here. 
+		""" A real hack here.
 		If the font format was less than 3, we need to save it with the original
 		format. I care specifically about RoboFont, which can still read only
 		format 2. However, dfont.save() will save the processed layer only if
@@ -166,7 +166,7 @@ class FontFile(object):
 		is 2, then the save function will  first mark all the glyphs in all the layers
 		as being 'dirty' and needing to be saved. and also causes the defcon
 		font.py:save to delete the original font and write everything anew.
-		
+
 		In order to avoid this, I reach into the defcon code and save only the processed glyphs layer.
 		I also set glyphSet.ufoFormatVersion so that the glif files will be set to format 1.
 		"""
@@ -209,14 +209,14 @@ class FontFile(object):
 			print "Font type is unknown: cannot save changes"
 
 		if (self.tempUFOPath != None) and os.path.exists(self.tempUFOPath):
-			shutil.rmtree(self.tempUFOPath) 
+			shutil.rmtree(self.tempUFOPath)
 
 	def checkSkipGlyph(self, glyphName, doAll):
 		skip = False
 		if self.ufoFontHashData and self.useHashMap:
 			width, outlineXML, skip = self.ufoFontHashData.getOrSkipGlyphXML(glyphName, doAll)
 		return skip
-	
+
 	def buildGlyphHash(self, width, glyphDigest):
 		dataList = [str(width)]
 		for x,y in glyphDigest:
@@ -228,15 +228,15 @@ class FontFile(object):
 		else:
 			hash = hashlib.sha512(data).hexdigest()
 		return hash
-	
+
 	def updateHashEntry(self, glyphName, changed):
 		if self.ufoFontHashData != None:  # isn't a UFO font.
 			self.ufoFontHashData.updateHashEntry(glyphName, changed)
-	
+
 	def clearHashMap(self):
 		if self.ufoFontHashData != None:
 			self.ufoFontHashData.clearHashMap()
-		
+
 class COOptions:
 	def __init__(self):
 		self.filePath = None
@@ -252,11 +252,11 @@ class COOptions:
 		self.removeCoincidentPointsDone = 0 # processing state flag, used to not repeat coincident point removal.
 		self.removeFlatCurvesDone = 0 # processing state flag, used to not repeat flat curve point removal.
 		self.clearHashMap = False
-		
-		# doOverlapRemoval must come first in the list, since it may cause problems, like co-linear lines, 
+
+		# doOverlapRemoval must come first in the list, since it may cause problems, like co-linear lines,
 		# that need to be checked/fixed by later tests.
 		self.testList = [doOverlapRemoval, doCleanup]
-		
+
 def parseGlyphListArg(glyphString):
 	glyphString = re.sub(r"[ \t\r\n,]+",  ",",  glyphString)
 	glyphList = glyphString.split(",")
@@ -266,16 +266,19 @@ def parseGlyphListArg(glyphString):
 
 def getOptions():
 	global debug
-	
+
 	options = COOptions()
 	i = 1
 	numOptions = len(sys.argv)
 	while i < numOptions:
 		arg = sys.argv[i]
 		if options.filePath and arg[0] == "-":
-			raise focusOptionParseError("Option Error: All file names must follow all other options <%s>." % arg) 
+			raise focusOptionParseError("Option Error: All file names must follow all other options <%s>." % arg)
 
-		if arg == "-u":
+		if arg == "-test":
+			import doctest
+			sys.exit(doctest.testmod().failed)
+		elif arg == "-u":
 			print __usage__
 			sys.exit()
 		elif arg == "-h":
@@ -287,20 +290,20 @@ def getOptions():
 			i = i +1
 			glyphString = sys.argv[i]
 			if glyphString[0] == "-":
-				raise focusOptionParseError("Option Error: it looks like the first item in the glyph list following '-g' is another option.") 
+				raise focusOptionParseError("Option Error: it looks like the first item in the glyph list following '-g' is another option.")
 			options.glyphList += parseGlyphListArg(glyphString)
 		elif arg == "-gf":
 			i = i +1
 			filePath = sys.argv[i]
 			if filePath[0] == "-":
-				raise focusOptionParseError("Option Error: it looks like the the glyph list file following '-gf' is another option.") 
+				raise focusOptionParseError("Option Error: it looks like the the glyph list file following '-gf' is another option.")
 			try:
 				gf = file(filePath, "rt")
 				glyphString = gf.read()
 				glyphString = glyphString.strip()
 				gf.close()
 			except (IOError,OSError):
-				raise focusOptionParseError("Option Error: could not open glyph list file <%s>." %  filePath) 
+				raise focusOptionParseError("Option Error: could not open glyph list file <%s>." %  filePath)
 			options.glyphList += parseGlyphListArg(glyphString)
 		elif arg == "-e":
 			options.allowChanges = 1
@@ -313,13 +316,13 @@ def getOptions():
 			try:
 				options.minArea = int(sys.argv[i])
 			except:
-				raise focusOptionParseError("The argument following '-setMinArea' must be an integer.") 
+				raise focusOptionParseError("The argument following '-setMinArea' must be an integer.")
 		elif arg == "-setTolerance":
 			i = i +1
 			try:
 				options.tolerance = int(sys.argv[i])
 			except:
-				raise focusOptionParseError("The argument following '-setTolerance' must be an integer.") 
+				raise focusOptionParseError("The argument following '-setTolerance' must be an integer.")
 		elif arg == "-decimal":
 			options.allowDecimalCoords = 1
 		elif arg == "-all":
@@ -327,20 +330,20 @@ def getOptions():
 		elif arg == "-clearHashMap":
 			options.clearHashMap = True
 		elif arg[0] == "-":
-			raise focusOptionParseError("Option Error: Unknown option <%s>." %  arg) 
+			raise focusOptionParseError("Option Error: Unknown option <%s>." %  arg)
 		else:
 			if options.filePath:
-				raise focusOptionParseError("Option Error: You cannot specify more than one file to check <%s>." %  arg) 
+				raise focusOptionParseError("Option Error: You cannot specify more than one file to check <%s>." %  arg)
 			options.filePath = arg
 
 		i  += 1
 	if not options.filePath:
-		raise focusOptionParseError("Option Error: You must provide a font file path.") 
+		raise focusOptionParseError("Option Error: You must provide a font file path.")
 	else:
 		options.filePath = options.filePath.rstrip(os.sep) # might be a UFO font. auto completion in some shells adds a dir separator, which then causes problems with os.path.dirname().
 
 	if not os.path.exists(options.filePath):
-		raise focusOptionParseError("Option Error: The file path does not exist.") 
+		raise focusOptionParseError("Option Error: The file path does not exist.")
 
 	return options
 
@@ -362,7 +365,7 @@ def getGlyphID(glyphTag, fontGlyphList):
 
 def expandNames(glyphName):
 	global nameAliasDict
-	
+
 	glyphRange = glyphName.split("-")
 	if len(glyphRange) > 1:
 		g1 = expandNames(glyphRange[0])
@@ -382,7 +385,7 @@ def expandNames(glyphName):
 			nameAliasDict[glyphName] = "cid00000"
 
 	return glyphName
-	
+
 def getGlyphNames(glyphTag, fontGlyphList, fontFileName):
 	glyphNameList = []
 	rangeList = glyphTag.split("-")
@@ -410,7 +413,7 @@ def getGlyphNames(glyphTag, fontGlyphList, fontFileName):
 		prevGID = gid
 
 	return glyphNameList
-	
+
 def filterGlyphList(options, fontGlyphList, fontFileName):
 	# Return the list of glyphs which are in the intersection of the argument list and the glyphs in the font
 	# Complain about glyphs in the argument list which are not in the font.
@@ -428,7 +431,7 @@ def filterGlyphList(options, fontGlyphList, fontFileName):
 def getDigest(dGlyph):
 	"""copied from robofab ObjectsBase.py.
 	"""
-	mp = DigestPointPen() 
+	mp = DigestPointPen()
 	dGlyph.drawPoints(mp)
 	digest = list(mp.getDigestPointsOnly(needSort=False))
 	digest.append( (len(dGlyph.contours), 0) )
@@ -437,7 +440,7 @@ def getDigest(dGlyph):
 	return intDigest
 
 def removeCoincidentPoints(bGlyph, changed, msg, options):
-	""" Remove coincident points. 
+	""" Remove coincident points.
 	# a point is (segmentType, pt, smooth, name).
 	# e.g. (u'curve', (138, -92), False, None)
 	"""
@@ -471,9 +474,42 @@ def removeCoincidentPoints(bGlyph, changed, msg, options):
 			i += 1
 	return changed, msg
 
+
 def removeTinySubPaths(bGlyph, minArea, changed, msg):
-	# removes tiny subpaths that are created by overlap removal when the start and end path segments cross each other, rather than meet.
-	numContours  = len(bGlyph.contours)
+	"""
+	Removes tiny subpaths that are created by overlap removal when the start
+	and end path segments cross each other, rather than meet.
+
+	>>> from defcon.objects.glyph import Glyph
+	>>> import booleanOperations.booleanGlyph
+
+	# large contour
+	>>> g = Glyph()
+	>>> p = g.getPen()
+	>>> p.moveTo((100,100))
+	>>> p.lineTo((200,200))
+	>>> p.lineTo((0,100))
+	>>> p.closePath()
+	>>> assert (len(g[0]) == 3), "Contour does not have the expected number of points"
+	>>> assert (g.bounds == (0, 100, 200, 200)), "The contour's bounds do not match the expected"
+	>>> bg = booleanOperations.booleanGlyph.BooleanGlyph(g)
+	>>> removeTinySubPaths(bg, 25, 0, []) == (0, [])
+	True
+
+	# small contour
+	>>> g = Glyph()
+	>>> p = g.getPen()
+	>>> p.moveTo((1,1))
+	>>> p.lineTo((2,2))
+	>>> p.lineTo((0,1))
+	>>> p.closePath()
+	>>> assert (len(g[0]) == 3), "Contour does not have the expected number of points"
+	>>> assert (g.bounds == (0, 1, 2, 2)), "The contour's bounds do not match the expected"
+	>>> bg = booleanOperations.booleanGlyph.BooleanGlyph(g)
+	>>> removeTinySubPaths(bg, 25, 0, []) == (0, ['Contour 0 is too small: bounding box is less than minimum area. Start point: ((1, 1)).'])
+	True
+	"""
+	numContours = len(bGlyph.contours)
 	ci = 0
 	while ci < numContours:
 		contour = bGlyph.contours[ci]
@@ -486,12 +522,13 @@ def removeTinySubPaths(bGlyph, minArea, changed, msg):
 			if cArea < minArea:
 				ci -= 1
 				numContours -= 1
-				msg.append( "Contour %s is too small: bounding box is less then minimum area. Start point: (%s)." % (ci, contour._points[0][1]))
+				msg.append("Contour %s is too small: bounding box is less than minimum area. Start point: (%s)." % (ci, contour._points[0][1]))
 				del bGlyph.contours[ci]
 	return changed, msg
-	
+
+
 def isColinearLine(b3, b2, b1, tolerance = 0):
-	# b1-b3 are three points  [x, y] to test. 
+	# b1-b3 are three points  [x, y] to test.
 	# b1 = start point of first line, b2 is start point of second, b3 is end point of second line.
 	# tolerance is how tight the match must be in design units, default 0.
 	isCL = 1 # is a co-linear line
@@ -502,7 +539,7 @@ def isColinearLine(b3, b2, b1, tolerance = 0):
 	x3 = b3[-2]
 	y3 = b3[-1]
 
-		
+
 	dx2 = x2 -x1
 	dy2 = y2 -y1
 	if (dx2 == 0) and (dy2 == 0):
@@ -513,7 +550,7 @@ def isColinearLine(b3, b2, b1, tolerance = 0):
 			return 0
 		else:
 			return 1
-			
+
 	if (y3-y1) == 0:
 		if abs(dy2) > tolerance:
 			return 0
@@ -524,19 +561,19 @@ def isColinearLine(b3, b2, b1, tolerance = 0):
 	dy3 = y3 -y2
 	if (dx3 == 0) and (dy3 == 0):
 		return 1
-	
+
 	if (dx2) == 0:
 		if abs(x3 -x1) > tolerance:
 			return 0
 		else:
 			return 1
-			
+
 	if (dy2) == 0:
 		if abs(y3 -y1) > tolerance:
 			return 0
 		else:
 			return 1
-	
+
 	a = float(dy2)/(dx2)
 	b = y1-a*x1
 	if abs(a) <= 1:
@@ -556,7 +593,7 @@ def isColinearLine(b3, b2, b1, tolerance = 0):
 	return isCL
 
 def removeFlatCurves(newGlyph, changed, msg, options):
-	""" Remove flat curves. 
+	""" Remove flat curves.
 	# a point is (segmentType, pt, smooth, name).
 	# e.g. (u'curve', (138, -92), False, None)
 	"""
@@ -566,7 +603,7 @@ def removeFlatCurves(newGlyph, changed, msg, options):
 		while i < numOps:
 			p0 = contour._points[i]
 			type = p0[0]
-			
+
 			if type == "curve":
 				p3 = contour._points[i-3]
 				p2 = contour._points[i-2]
@@ -593,7 +630,7 @@ def removeFlatCurves(newGlyph, changed, msg, options):
 	return changed, msg
 
 def removeColinearLines(newGlyph, changed, msg, options):
-	""" Remove colinear line- curves. 
+	""" Remove colinear line- curves.
 	# a point is (segmentType, pt, smooth, name).
 	# e.g. (u'curve', (138, -92), False, None)
 	"""
@@ -627,7 +664,7 @@ def removeColinearLines(newGlyph, changed, msg, options):
 def splitTouchingPaths(newGlyph):
 	""" This hack fixes a design difference between the Adobe checkOutlines logic and booleanGlyph.
 	With checkOutlines, if only a single point on a contour lines is coincident with the path of the another contour,
-	the paths are NOT merged. with booleanGlyph, they are merged. An example is the vertex of a diamond shape having the same 
+	the paths are NOT merged. with booleanGlyph, they are merged. An example is the vertex of a diamond shape having the same
 	y coordinate as a horizontal line in another path, but no other overlap.
 	However, this works only when a single point on one contour is coincident with another contour, with no other overlap.
 	If there is more than one point of contact, then result is separate inner (unfilled) contour. This logic works only when the
@@ -654,7 +691,7 @@ def splitTouchingPaths(newGlyph):
 				newContourPts = contour._points[j0:j1+1]
 				np0 = newContourPts[0]
 				if np0[0] == 'curve':
-					newContourPts[0] = ('line', np0[1], np0[2], np0[3]) 
+					newContourPts[0] = ('line', np0[1], np0[2], np0[3])
 				newContour = booleanOperations.booleanGlyph.BooleanContour()
 				newContour._points = newContourPts
 				newContour._clockwise = newContour._get_clockwise()
@@ -677,14 +714,14 @@ def splitTouchingPaths(newGlyph):
 def roundPt(pt):
 	pt = map(int, pt)
 	return pt
-	
+
 def doOverlapRemoval(bGlyph, oldDigest, changed, msg, options):
 	changed, msg = removeCoincidentPoints(bGlyph, changed, msg, options)
 	options.removeCoincidentPointsDone = 1
 	changed, msg = removeFlatCurves(bGlyph, changed, msg, options)
 	changed, msg = removeColinearLines(bGlyph, changed, msg, options)
 	options.removeFlatCurvesDone = 1
-	# I need to fix these in the source, or the old vs new digests will differ, as BooleanOperations removes these 
+	# I need to fix these in the source, or the old vs new digests will differ, as BooleanOperations removes these
 	# even if it does not do overlap removal.
 	oldDigest = list(getDigest(bGlyph))
 	oldDigest.sort()
@@ -692,17 +729,17 @@ def doOverlapRemoval(bGlyph, oldDigest, changed, msg, options):
 	newDigest = []
 	prevDigest = oldDigest
 	newGlyph = bGlyph
-	
+
 	while newDigest != prevDigest:
 		# This hack to get around a bug in booleanGlyph. Consider an M sitting on a separate rectangular crossbar contour,
-		# the bottom of the M legs being co-linear with the top of the cross bar. pyClipper will merge only one of the 
+		# the bottom of the M legs being co-linear with the top of the cross bar. pyClipper will merge only one of the
 		# co-linear lines with each call to removeOverlap(). I suspect that this bug is in pyClipper, but haven't yet looked.
 		prevDigest = newDigest
 		newGlyph = newGlyph.removeOverlap()
 		newDigest = list(getDigest(newGlyph))
 		newDigest.sort()
 		newDigest = map(roundPt, newDigest) # The new path points sometimes come back with very small fractional parts to to rounding issues.
-		
+
 	# Can't use change in path number to see if something has changed - overlap removal can add and subtract paths.
 	if str(oldDigest) != str(newDigest):
 		changed = 1
@@ -713,7 +750,7 @@ def doOverlapRemoval(bGlyph, oldDigest, changed, msg, options):
 
 def doCleanup(newGlyph, oldDigest, changed, msg, options):
 	newDigest = oldDigest
-	
+
 	if newGlyph == None:
 		return newGlyph, newDigest, changed, msg
 
@@ -733,7 +770,7 @@ def doCleanup(newGlyph, oldDigest, changed, msg, options):
 
 	return newGlyph, newDigest, changed, msg
 
-	
+
 def restoreContourOrder(fixedGlyph, originalContours):
 	""" The pyClipper library first sorts all the outlines by x position, then y position.
 	I try to undo that, so that un-touched contours will end up in the same order as the
@@ -763,7 +800,7 @@ def restoreContourOrder(fixedGlyph, originalContours):
 				orderList.append([ci2, ci])
 				break
 	newList = filter(lambda entry: entry != None, newList)
-	
+
 	# New contour start point did not match any of old contour start points.
 	# Look through original contours, and see if the start point for any old contour
 	# is on the new contour.
@@ -852,7 +889,7 @@ def restoreContourOrder(fixedGlyph, originalContours):
 
 
 def run(args):
-	
+
 	options = getOptions()
 	fontPath = os.path.abspath(options.filePath)
 	dFont = None
@@ -861,11 +898,11 @@ def run(args):
 	if options.clearHashMap:
 		fontFile.clearHashMap()
 		return
-			
+
 	if dFont == None:
 		print "Could not open  file: %s." % (fontPath)
 		return
-			
+
 	glyphCount = len(dFont)
 	changed = 0
 	glyphList = filterGlyphList(options, dFont.keys(), options.filePath)
@@ -924,7 +961,7 @@ def run(args):
 				fixedGlyph = dGlyph
 				fixedGlyph.clearContours()
 			else:
-				processedLayer.newGlyph(glyphName) # will replace any pre-existing glyph 
+				processedLayer.newGlyph(glyphName) # will replace any pre-existing glyph
 				fixedGlyph = processedLayer[glyphName]
 				fixedGlyph.width = dGlyph.width
 				fixedGlyph.height = dGlyph.height
@@ -956,7 +993,7 @@ def run(args):
 	else:
 		print
 		fontFile.save()
-		
+
 	if processedGlyphCount != seenGlyphCount:
 		print "Skipped %s of %s glyphs." % (seenGlyphCount - processedGlyphCount, seenGlyphCount)
 	print "Done with font"
@@ -968,5 +1005,3 @@ if __name__=='__main__':
 	except (focusOptionParseError, focusFontError),e :
 		print "Quitting after error.", e
 		pass
-	
-	
