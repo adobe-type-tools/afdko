@@ -866,7 +866,12 @@ static void prepWinData(hotCtx g) {
 			count++;
 		}
 	}
-	g->font.win.AvgWidth = (short)(sum / count);
+	if (count > 0) {
+		g->font.win.AvgWidth = (short)(sum / count);
+	}
+	else {
+		g->font.win.AvgWidth = 0;
+	}
 }
 
 /* Compute named MMFX table metrics */
