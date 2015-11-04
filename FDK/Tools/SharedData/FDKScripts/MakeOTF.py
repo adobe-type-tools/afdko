@@ -2488,10 +2488,10 @@ def runMakeOTF(makeOTFParams):
 		if tempGOADBPath:
 			os.remove(tempGOADBPath)
 		
-	if not os.path.exists(tempOutPath) or (os.path.getsize(tempOutPath) < 500):
-		print "makeotf [Error] Failed to build output font file '%s'." % (tempOutPath)
-		if os.path.exists(tempOutPath):
-			os.remove(tempOutPath)
+	if not os.path.exists(outputPath) or (os.path.getsize(outputPath) < 500):
+		print "makeotf [Error] Failed to build output font file '%s'." % (outputPath)
+		if os.path.exists(outputPath):
+			os.remove(outputPath)
 		raise MakeOTFRunError
 
 	# The following check is here because of the internal Adobe production process for CID fonts, where a
