@@ -2463,7 +2463,7 @@ static void dbop(int length, unsigned char *cstr) {
 
 static char *dbinfo(subrCtx h, Subr *subr, int mark) {
 	static char buf[16];
-	sprintf(buf, "%hu.%hu%c%ld", subr->count, subr->length - subr->maskcnt,
+	sprintf(buf, "%hu.%d%c%ld", subr->count, subr->length - subr->maskcnt,
 	        mark, subrSaved(h, subr));
 	return buf;
 }
@@ -2482,7 +2482,7 @@ static void dbsubr(subrCtx h, unsigned iSubr, int c, unsigned offset) {
 	}
 	printf("%-9s%-*c", dbinfo(h, subr, mark), offset * 2 + 3, c);
 	dbcstr(h, subr->length, subr->cstr);
-	printf(" [%hu]\n", iSubr);
+	printf(" [%u]\n", iSubr);
 }
 
 static void dbnode(subrCtx h, Node *node) {
