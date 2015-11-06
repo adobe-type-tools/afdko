@@ -909,27 +909,38 @@ static void gnameError(cbCtx h, char *message, char *filename, long line) {
 
 /* Validate glyph name and return a NULL pointer if the name failed to validate
    else return a pointer to character that stopped the scan. */
-static char *gnameScan(cbCtx h, char *p) {
-	/* Next state table */
-	static unsigned char next[3][4] = {
-		/*  A-Za-z_	0-9		.		*		index  */
-		/* -------- ------- ------- ------- ------ */
-		{	1,		0,		2,		0 },	/* [0] */
-		{	1,		1,		1,		0 },	/* [1] */
-		{	1,		2,		2,		0 },	/* [2] */
-	};
 
-	/* Action table */
+/* Next state table */
+static unsigned char nextFinal[3][4] = {
+    /*  A-Za-z_	0-9		.		*		index  */
+    /* -------- ------- ------- ------- ------ */
+    {	1,		0,		2,		0 },	/* [0] */
+    {	1,		1,		1,		0 },	/* [1] */
+    {	1,		2,		2,		0 },	/* [2] */
+};
+
+/* Action table */
 #define	Q_	(1 << 0)	/* Quit scan on unrecognized character */
 #define	E_	(1 << 1)	/* Report syntax error */
 
-	static unsigned char action[3][4] = {
-		/*  A-Za-z_	0-9		.		*		index  */
-		/* -------- ------- ------- ------- ------ */
-		{	0,		E_,		0,		Q_ },	/* [0] */
-		{	0,		0,		0,		Q_ },	/* [1] */
-		{	0,		0,		0,		E_ },	/* [2] */
-	};
+static unsigned char actionFinal[3][4] = {
+    /*  A-Za-z_	0-9		.		*		index  */
+    /* -------- ------- ------- ------- ------ */
+    {	0,		E_,		0,		Q_ },	/* [0] */
+    {	0,		0,		0,		Q_ },	/* [1] */
+    {	0,		0,		0,		E_ },	/* [2] */
+};
+
+/* Allow glyph names to start with numbers. */
+static unsigned char actionDev[3][4] = {
+    /*  A-Za-z_	0-9		.		*		index  */
+    /* -------- ------- ------- ------- ------ */
+    {	0,		0,		0,		Q_ },	/* [0] */
+    {	0,		0,		0,		Q_ },	/* [1] */
+    {	0,		0,		0,		E_ },	/* [2] */
+};
+
+static char *gnameScan(cbCtx h, char *p, unsigned char* action, unsigned char* next) {
 
 	char *start = p;
 	int state = 0;
@@ -954,8 +965,8 @@ static char *gnameScan(cbCtx h, char *p) {
 		}
 
 		/* Fetch action and change state */
-		actn = action[state][class];
-		state = next[state][class];
+		actn = (int)(action[state*4 + class]);
+		state = (int)(next[state*4 + class]);
 
 		/* Performs actions */
 		if (actn == 0) {
@@ -973,6 +984,17 @@ static char *gnameScan(cbCtx h, char *p) {
 		}
 	}
 }
+
+static char* gnameDevScan(cbCtx h, char *p) {
+    char *val = gnameScan(h, p, (unsigned char*)actionDev, (unsigned char*)nextFinal);
+    return val;
+}
+
+static char* gnameFinalScan(cbCtx h, char *p) {
+    char *val = gnameScan(h, p, (unsigned char*)actionFinal, (unsigned char*)nextFinal);
+    return val;
+}
+
 
 /* Match alias name record. */
 static int CDECL matchAliasRec(const void *key, const void *value) {
@@ -1091,7 +1113,7 @@ void cbAliasDBRead(cbCtx h, char *filename) {
 			iOrder++;
 			/* Parse final name */
 			final = p;
-			p = gnameScan(h, final);
+			p = gnameFinalScan(h, final);
 			if (p == NULL || !isspace(*p)) {
 				goto syntaxError;
 			}
@@ -1108,7 +1130,7 @@ void cbAliasDBRead(cbCtx h, char *filename) {
 
 			/* Parse alias name */
 			alias = p;
-			p = gnameScan(h, alias);
+			p = gnameDevScan(h, alias);
 			if (p == NULL || !isspace(*p)) {
 				goto syntaxError;
 			}
@@ -1132,7 +1154,7 @@ void cbAliasDBRead(cbCtx h, char *filename) {
 				}
 				else {
 					uvName = p;
-					p = gnameScan(h, uvName);
+					p = gnameFinalScan(h, uvName);
 					if (p == NULL || !isspace(*p)) {
 						goto syntaxError;
 					}
