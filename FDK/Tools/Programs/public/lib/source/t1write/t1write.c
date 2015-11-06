@@ -295,8 +295,13 @@ static void writeInt(t1wCtx h, size_t N, long value)
 static void writeReal(t1wCtx h, float value)
 {
 	char buf[50];
-	ctuDtostr(buf, value, 0, 0);
-	writeBuf(h, strlen(buf), buf);
+    if (roundf(value) == value)
+        sprintf(buf, "%ld", (long)roundf(value));
+    else
+    {
+        ctuDtostr(buf, value, 0, 0);
+    }
+    writeBuf(h, strlen(buf), buf);
 }
 
 /* Write null-terminated string to dst steam. */
@@ -819,13 +824,34 @@ static void writeIntDef(t1wCtx h, char *key, long value)
 
 /* Write PostScript definition of real object. */
 static void writeRealDef(t1wCtx h, char *key, float value)
-	{
+{
 	if (value == ABF_UNSET_REAL)
 		return;
-	writeFmt(h, "/%s ", key);
-	writeReal(h, value);
-	writeLine(h, " def");
-	}
+    
+    writeFmt(h, "/%s ", key);
+    writeReal(h, value);
+    writeLine(h, " def");
+}
+
+/* Write PostScript Version of real object. */
+static void writeVersion(t1wCtx h, float value)
+{
+	if (value == ABF_UNSET_REAL)
+		return;
+    
+    writeFmt(h, "%.3f", value);
+}
+
+/* Write PostScript Version of real object. */
+static void writeVersionDef(t1wCtx h, char *key, float value)
+{
+	if (value == ABF_UNSET_REAL)
+		return;
+    
+    writeFmt(h, "/%s ", key);
+    writeFmt(h, "%.3f", value);
+    writeLine(h, " def");
+}
 
 /* Write PostScript definition of integer array object. */
 static void writeIntArrayDef(t1wCtx h, char *key, long cnt, long *array)
@@ -854,7 +880,13 @@ static void writeRealArrayDef(t1wCtx h, char *key, long cnt, float *array)
 	while (cnt--)
 		{
 		writeStr(h, sep);
-		writeReal(h, *array++);
+        {
+            float value = *array++;
+            if (roundf(value) == value)
+                writeFmt(h, "%ld", (long)roundf(value));
+            else
+                writeReal(h, *array++);
+        }
 		sep = " ";
 		}
 	writeLine(h, "] def");
@@ -1877,7 +1909,7 @@ static void writeHostCIDKeyedFont(t1wCtx h)
 	writeStr(h, top->cid.Ordering.ptr);
 	writeFmt(h, " %ld)%s", top->cid.Supplement, h->arg.newline);
 	writeStr(h, "%%Version: ");
-	writeReal(h, top->cid.CIDFontVersion);
+	writeVersion(h, top->cid.CIDFontVersion);
 	writeStr(h, h->arg.newline);
 
 	writeLine(h, "/CIDInit /ProcSet findresource begin");
@@ -1926,7 +1958,7 @@ static void writeHostCIDKeyedFont(t1wCtx h)
 	writeFmt(h, "%d dict begin%s", size, h->arg.newline);
 	writeLiteralDef(h, "CIDFontName", top->cid.CIDFontName.ptr);
 	if (host)
-		writeRealDef(h, "CIDFontVersion", top->cid.CIDFontVersion);
+		writeVersionDef(h, "CIDFontVersion", top->cid.CIDFontVersion);
 	writeLine(h, "/CIDFontType 0 def");
 	writeLine(h, "/CIDSystemInfo 3 dict dup begin");
 	writeStringDef(h, "Registry", top->cid.Registry.ptr);

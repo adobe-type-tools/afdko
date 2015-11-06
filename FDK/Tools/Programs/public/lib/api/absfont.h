@@ -6,7 +6,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define ABF_VERSION CTL_MAKE_VERSION(1,0,49)
+#define ABF_VERSION CTL_MAKE_VERSION(1,0,50)
 
 #include <stdio.h>
 
@@ -730,7 +730,9 @@ struct abfDumpCtx_
     int flags;      /* Control flags */
     int level;      /* Dump level */
     int left;       /* Columns left in line (characters) */
-    int fd;         /* Index of font dict to dump or -1 for all dicts */
+    int excludeSubset;
+    int fdCnt;         /* Index of font dict to dump or -1 for all dicts */
+    int *fdArray;         /* Index of font dict to dump or -1 for all dicts */
     };
     
 /* abfDumpCtx is the abstract font dumping context. It must be created by the

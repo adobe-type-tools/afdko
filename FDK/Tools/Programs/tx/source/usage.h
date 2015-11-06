@@ -25,6 +25,9 @@
 "	listed are copied. The .notdef glyph will never be excluded.\n",
 " \n",
 "-fd <index>     only select glyphs belonging to specified font dict\n"
+"-fd <index>     only select glyphs not belonging to specified font dict\n"
+"				 font dict index list arg may be arange or comma-delimited list.\n"
+"				 '-fd 1' or '-fd 3,4,7' or '-fd 3-5' are all valid.\n"
 "-p <percent>    select random <percent> of src glyphs [repeatable]\n"
 "-P <percent>    select randon <percent> of src glyphs [unrepeatable]\n"
 "-U <list>       user design vector\n"

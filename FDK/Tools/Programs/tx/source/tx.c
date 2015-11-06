@@ -7,7 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define TX_VERSION CTL_MAKE_VERSION(1,0,65)
+#define TX_VERSION CTL_MAKE_VERSION(1,0,66)
 
 #include "cfembed.h"
 #include "cffread.h"
@@ -484,7 +484,7 @@ struct txCtx_
 		} stack;
 	struct					/* Font Dict filter */
 		{
-		int index;
+        dnaDCL(int, fdIndices);/* Source glyph width for -t1 -3 mode */
 		} fd;
 	struct					/* OTF cmap encoding */
 		{
@@ -1364,7 +1364,12 @@ static void dump_BegFont(txCtx h, abfTopDict *top)
 	{
 	dstFileOpen(h, top);
 	h->abf.dump.fp = h->dst.stm.fp;
-	h->abf.dump.fd = h->fd.index;
+    if (h->fd.fdIndices.cnt > 0)
+    {
+        h->abf.dump.excludeSubset = (h->flags & SUBSET__EXCLUDE_OPT);
+        h->abf.dump.fdCnt = h->fd.fdIndices.cnt;
+        h->abf.dump.fdArray = h->fd.fdIndices.array;
+    }
 	top->sup.filename = 
 		(strcmp(h->src.stm.filename, "-") == 0)? "stdin": h->src.stm.filename;
 	abfDumpBegFont(&h->abf.dump, top);
@@ -1589,7 +1594,9 @@ static void path_BegFont(txCtx h, abfTopDict *top)
 		{
 		/* Prepare dump facility */
 		h->abf.dump.fp = h->dst.stm.fp;
-		h->abf.dump.left = 0;
+        h->abf.dump.left = 0;
+        h->abf.dump.excludeSubset = 0;
+        h->abf.dump.fdCnt = 0;
 		abfDumpBegFont(&h->abf.dump, top);
 		}
 
@@ -2048,7 +2055,7 @@ enum				/* Glyph selector types */
 	};
 
 /* Parse subset args. */
-static void parseSubset(txCtx h, void (*select)(txCtx h, int type, 
+static void parseSubset(txCtx h, void (*select)(txCtx h, int type,
 												unsigned short id, char *name))
 	{
 	long i;
@@ -2097,6 +2104,44 @@ static void parseSubset(txCtx h, void (*select)(txCtx h, int type,
 			;
 		}
 	}
+
+/* Parse subset args. */
+static void parseFDSubset(txCtx h)
+{
+	long i;
+	char *p = h->arg.g.substrs;
+    
+	for (i = 0; i < h->arg.g.cnt; i++)
+    {
+		unsigned short id;
+		unsigned short lo;
+		unsigned short hi;
+        
+        if (isdigit(*p))
+        {
+			/* Tag */
+			if (sscanf(p, "%hu-%hu", &lo, &hi) == 2)
+				;
+			else if (sscanf(p, "%hu", &lo) == 1)
+				hi = lo;
+			else
+				goto next;
+            
+			for (id = lo; id <= hi; id++)
+                *dnaNEXT(h->fd.fdIndices)= id;
+       }
+		else
+        {
+            fatal(h, "-fd argument is not an integer.");
+
+        }
+		/* Advance to next substring */
+	next:
+		while (*p++ != '\0')
+			;
+    }
+}
+
 
 /* -------------------------------- cef mode ------------------------------- */
 
@@ -4855,12 +4900,10 @@ static void dcf_SetMode(txCtx h)
 	/* Set mode name */
 	h->modename	= "dcf";
 
-	/* This is now zeroed at the start of parseArgs
+	/* h->dcf.flags is now set at the start of parseArgs
 	h->dcf.flags = DCF_AllTables|DCF_BreakFlowed;
-	*/
-
-	h->dcf.flags |= DCF_AllTables|DCF_BreakFlowed;
 	h->dcf.level = 5;
+	*/
 
 	/* Set library functions */
 	h->dst.begset	= dcf_BegSet;
@@ -4989,22 +5032,46 @@ static void makeRandSubset(txCtx h, char *opt, char *arg)
 /* Make Font Dict subset. */
 static void makeFDSubset(txCtx h)
 	{
-	long i;
+	long i,j;
 
 	if (!(h->top->sup.flags & ABF_CID_FONT))
 		fatal(h, "-fd specified for non-CID font");
 
 	getGlyphList(h);
-
-	for (i = 0; i < h->src.glyphs.cnt; i++)
-		{
-		abfGlyphInfo *info = h->src.glyphs.array[i];
-		if (info->iFD == h->fd.index)
-			*dnaNEXT(h->subset.glyphs) = info->tag;
-		}
+            
+    for (i = 0; i < h->src.glyphs.cnt; i++)
+    {
+        abfGlyphInfo *info = h->src.glyphs.array[i];
+        if (h->flags & SUBSET__EXCLUDE_OPT)
+        {
+            unsigned int match = 0;
+            for (j = 0; j < h->fd.fdIndices.cnt; j++)
+            {
+                if (info->iFD == h->fd.fdIndices.array[j])
+                {
+                    match = 1;
+                    break;
+                }
+            }
+            if (!match)
+                *dnaNEXT(h->subset.glyphs) = info->tag;
+            
+        }
+        else
+        {
+            for (j = 0; j < h->fd.fdIndices.cnt; j++)
+            {
+                if (info->iFD == h->fd.fdIndices.array[j])
+                {
+                    *dnaNEXT(h->subset.glyphs) = info->tag;
+                    break;
+               }
+            }
+        }
+    }
 
 	if (h->subset.glyphs.cnt == 0)
-		fatal(h, "empty subset (-fd %d)", h->fd.index);
+		fatal(h, "no glyphs selected by -fd argument");
 	}
 
 /* Begin new glyph definition for gathering glyph info. */
@@ -5105,44 +5172,46 @@ static void prepSubset(txCtx h)
 	are not such glyphs, it returns. Else, it then proceeds to build the glyph list arg in
 	makeSubsetArgList() */
 	
-	long i;
-
-	if (h->flags & SHOW_NAMES)
-		{
-		fflush(stdout);
-		if (h->top->sup.flags & ABF_CID_FONT)
-			fprintf(stderr, "--- CIDFontName: %s\n",
-					h->top->cid.CIDFontName.ptr);
-		else
-			fprintf(stderr, "--- FontName: %s\n", 
-					h->top->FDArray.array[0].FontName.ptr);
-		}
-
-	h->flags &= ~SUBSET_HAS_NOTDEF;
-	h->src.glyphs.cnt = 0;
-	h->src.exclude.cnt = 0;
-	h->subset.glyphs.cnt = 0;
-
-	/* Make subset glyph list */
-	if (h->arg.p != NULL)
-		makeRandSubset(h, "-p", h->arg.p);
-	else if (h->arg.P != NULL)
-		makeRandSubset(h, "-P", h->arg.P);
-	else if (h->fd.index != -1)
-		makeFDSubset(h);
-	else if (h->flags & SUBSET__EXCLUDE_OPT)
-		invertSubset(h);
-	else
-    if (h->flags & SUBSET_OPT) {
-      if (h->flags & PRESERVE_GID) {
-        getGlyphList(h);
-        parseSubset(h, callbackPreserveGlyph);
-        h->src.glyphs.array[0]->flags |= PRESERVE_CHARSTRING;
-        h->arg.g.cnt = 0;
-        h->cb.save = h->cb.glyph;
-        h->cb.glyph = preserveGlyphCallbacks;
-        h->cb.glyph.direct_ctx = h;
-      }
+    long i;
+    
+    if (h->flags & SHOW_NAMES)
+    {
+        fflush(stdout);
+        if (h->top->sup.flags & ABF_CID_FONT)
+            fprintf(stderr, "--- CIDFontName: %s\n",
+                    h->top->cid.CIDFontName.ptr);
+        else
+            fprintf(stderr, "--- FontName: %s\n",
+                    h->top->FDArray.array[0].FontName.ptr);
+    }
+    
+    h->flags &= ~SUBSET_HAS_NOTDEF;
+    h->src.glyphs.cnt = 0;
+    h->src.exclude.cnt = 0;
+    h->subset.glyphs.cnt = 0;
+    
+    /* Make subset glyph list */
+    if (h->arg.p != NULL)
+        makeRandSubset(h, "-p", h->arg.p);
+    else if (h->arg.P != NULL)
+        makeRandSubset(h, "-P", h->arg.P);
+    else if (h->fd.fdIndices.cnt > 0)
+        makeFDSubset(h);
+    else if (h->flags & SUBSET__EXCLUDE_OPT)
+        invertSubset(h);
+    else
+    {
+        if (h->flags & SUBSET_OPT) {
+            if (h->flags & PRESERVE_GID) {
+                getGlyphList(h);
+                parseSubset(h, callbackPreserveGlyph);
+                h->src.glyphs.array[0]->flags |= PRESERVE_CHARSTRING;
+                h->arg.g.cnt = 0;
+                h->cb.save = h->cb.glyph;
+                h->cb.glyph = preserveGlyphCallbacks;
+                h->cb.glyph.direct_ctx = h;
+            }
+        }
     }
 
 	if (h->subset.glyphs.cnt == 0)
@@ -5150,7 +5219,7 @@ static void prepSubset(txCtx h)
  
 	/* Make subset arg list */
 	makeSubsetArgList(h);
-	if ((h->mode == mode_cff || h->mode == mode_t1) && (h->flags & SHOW_NAMES))
+	if ((h->mode == mode_cff || h->mode == mode_t1) || h->mode == mode_svg || h->mode == mode_ufow && (h->flags & SHOW_NAMES))
 		{
 		char *p;
 		char *q;
@@ -6746,7 +6815,8 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 	h->t1r.flags = 0; /* I initialize these here,as I need to set the std Encoding flags before calling setMode. */
 	h->cfr.flags = 0;
 	h->cfw.flags = 0;
-	h->dcf.flags = 0;
+	h->dcf.flags = DCF_AllTables|DCF_BreakFlowed;
+	h->dcf.level = 5;
 	h->svr.flags = 0;
 	h->ufr.flags = 0;
 	h->ufow.flags = 0;
@@ -7482,19 +7552,32 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 			h->flags |= NO_UDV_CLAMPING;
 			break;
 			
-		case opt_fd:
+        case opt_fdx:
+            if ((h->flags & SUBSET_OPT) || (h->flags & SUBSET__EXCLUDE_OPT))
+                goto subsetclash;
+            h->flags |= SUBSET__EXCLUDE_OPT;
+        case opt_fd:
 			if (!argsleft)
 				goto noarg;
-			else if (h->flags & SUBSET_OPT)
-				goto subsetclash;
+            else if ( (h->arg.g.cnt > 0) && ((h->flags & SUBSET_OPT) || (h->flags & SUBSET__EXCLUDE_OPT)))
+                        goto subsetclash;
 			else
 				{
-				char *p;
-				h->fd.index = strtol(argv[++i], &p, 0);
-				if (*p != '\0' || h->fd.index < -1)
-					goto badarg;
+                    /* Convert comma-terminated substrings to null-terminated*/
+                    char *p;
+                    h->arg.g.cnt = 1;
+                    h->arg.g.substrs = argv[++i];
+                    for (p = strchr(h->arg.g.substrs, ',');
+                         p != NULL;
+                         p = strchr(p, ','))
+					{
+                        *p++ = '\0';
+                        h->arg.g.cnt++;
+					}
 				}
 			h->flags |= SUBSET_OPT;
+            // Parse FD argument.
+            parseFDSubset(h);
 			break;
 		case opt_i:
 			if (!argsleft)
@@ -7675,7 +7758,6 @@ static void txNew(txCtx h, char *progname)
     h->ufow.ctx = NULL;
     h->ufow.flags = 0;
     h->ufr.altLayerDir = NULL;
-	h->fd.index = -1;
 	h->ctx.sfr = NULL;
 
 	memInit(h);	
@@ -7708,7 +7790,8 @@ static void txNew(txCtx h, char *progname)
 	dnaINIT(h->ctx.dna, h->dcf.global.stemcnt, 300, 2000);
 	dnaINIT(h->ctx.dna, h->dcf.local, 1, 15);
 	h->dcf.local.func = initLocal;
-	dnaINIT(h->ctx.dna, h->cmap.encoding, 1, 1);
+    dnaINIT(h->ctx.dna, h->cmap.encoding, 1, 1);
+    dnaINIT(h->ctx.dna, h->fd.fdIndices, 16, 16);
 	dnaINIT(h->ctx.dna, h->cmap.segment, 1, 1);
 	dnaINIT(h->ctx.dna, h->dcf.glyph, 256, 768);
 
@@ -7744,7 +7827,8 @@ static void txFree(txCtx h)
 		dnaFREE(h->dcf.local.array[i].stemcnt);
 	dnaFREE(h->dcf.local);
 	dnaFREE(h->dcf.glyph);
-	dnaFREE(h->cmap.encoding);
+    dnaFREE(h->cmap.encoding);
+    dnaFREE(h->fd.fdIndices);
 	dnaFREE(h->cmap.segment);
 	if (h->t1r.ctx != NULL)
 		t1rFree(h->t1r.ctx);
