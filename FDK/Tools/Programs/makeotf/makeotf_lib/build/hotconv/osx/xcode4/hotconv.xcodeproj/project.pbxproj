@@ -419,7 +419,7 @@
 					"DEBUG=1",
 				);
 				PRODUCT_NAME = hotconv;
-				WARNING_CFLAGS = "-Wno-parentheses-equality";
+				WARNING_CFLAGS = "";
 			};
 			name = Debug;
 		};
@@ -432,7 +432,7 @@
 					"HOT_FEAT_SUPPORT=1",
 				);
 				PRODUCT_NAME = hotconv;
-				WARNING_CFLAGS = "-Wno-parentheses-equality";
+				WARNING_CFLAGS = "";
 			};
 			name = Release;
 		};
