@@ -41,7 +41,7 @@ Project file.
 """
 
 __usage__ = """
-makeotf v2.0.88 Oct 5 2015
+makeotf v2.0.89 Nov 4 2015
 -f <input font>         Specify input font path. Default is 'font.pfa'.
 -o <output font>        Specify output font path. Default is
                         '<PostScript-Name>.otf'.
@@ -822,6 +822,7 @@ def getOptions(makeOTFParams):
 			kMOTFOptions[kInputFont][0] = i + optionIndex
 			try:
 				file_path = args[i]
+				exec("makeOTFParams.%s%s = file_path" % (kFileOptPrefix, kInputFont))
 			except IndexError:
 				file_path = None
 			if (file_path == None) or (file_path[0] == "-"):
@@ -835,39 +836,6 @@ def getOptions(makeOTFParams):
 				print "makeotf [Error] Could not find the input font file at '%s'." % file_path
 				continue
 				
-			newFontDirPath = os.path.dirname(file_path)
-			if newFontDirPath:
-				makeOTFParams.fontDirPath = newFontDirPath
-			exec("makeOTFParams.%s%s = file_path" % (kFileOptPrefix, kInputFont))
-			
-			convertFontIfNeeded(makeOTFParams)
-			# If we need to convert the original source, makeOTFParams.tempFontPath = fontPath = the path to the converted data,
-			# while file_path = "makeOTFParams.%s%s = file_path" % (kFileOptPrefix, kInputFont)) = path to original source.
-			if makeOTFParams.tempFontPath:
-				fontPath = makeOTFParams.tempFontPath
-			else:
-				fontPath = file_path
-	
-			# For non CID font, you can refer to the font.pfa file by a path, and all other files will be found relative
-			# to the font's parent directory. However, with CID-keyed fonts at Adobe, the font file is kept a level or two down from the face source data
-			# and we can only assume that the current directory is the starting point for all relative paths.
-			R,O,S = getROS(fontPath)
-			if R:
-				makeOTFParams.ROS = (R,O,S)
-				# Since we have the ROS, let's set default Mac Script value.
-				script = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kMacScript))
-				if not script:
-					if O.startswith("Japan"):
-						script = "1"
-					elif O.startswith("CN"):
-						script = "2"
-					elif O.startswith("GB"):
-						script = "25"
-					elif O.startswith("Korea"):
-						script = "3"
-					else:
-						defaultScriptWarning = "makeotf [Warning] Did not recognize the ordering '%s'. The Mac cmap script id will be set to Roman (0)." % (O)
-					exec("makeOTFParams.%s%s = script" % (kFileOptPrefix, kMacScript))
 
 
 		elif arg == kMOTFOptions[kOutputFont][1]:
@@ -1292,10 +1260,53 @@ def getOptions(makeOTFParams):
 
 	if defaultScriptWarning:
 		print defaultScriptWarning
-		
+	
 	if error:
 		raise MakeOTFOptionsError
+		
+	checkInputFile(makeOTFParams)
+	return
 
+def checkInputFile(makeOTFParams):
+	inputFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kInputFont)) # The path to the original src font file
+	if not inputFilePath: # path to font file was not specified.
+		return None
+	
+	file_path = inputFilePath
+	newFontDirPath = os.path.dirname(file_path)
+	if newFontDirPath:
+		makeOTFParams.fontDirPath = newFontDirPath
+	exec("makeOTFParams.%s%s = file_path" % (kFileOptPrefix, kInputFont))
+	
+	convertFontIfNeeded(makeOTFParams)
+	# If we need to convert the original source, makeOTFParams.tempFontPath = fontPath = the path to the converted data,
+	# while file_path = "makeOTFParams.%s%s = file_path" % (kFileOptPrefix, kInputFont)) = path to original source.
+	if makeOTFParams.tempFontPath:
+		fontPath = makeOTFParams.tempFontPath
+	else:
+		fontPath = file_path
+
+	# For non CID fonts, you can refer to the font.pfa file by a path, and all other files will be found relative
+	# to the font's parent directory. However, with CID-keyed fonts at Adobe, the font file is usually kept a level or two down from the face source data
+	# and we can only assume that the current directory is the starting point for all relative paths.
+	R,O,S = getROS(fontPath)
+	if R:
+		makeOTFParams.ROS = (R,O,S)
+		# Since we have the ROS, let's set default Mac Script value.
+		script = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kMacScript))
+		if not script:
+			if O.startswith("Japan"):
+				script = "1"
+			elif O.startswith("CN"):
+				script = "2"
+			elif O.startswith("GB"):
+				script = "25"
+			elif O.startswith("Korea"):
+				script = "3"
+			else:
+				defaultScriptWarning = "makeotf [Warning] Did not recognize the ordering '%s'. The Mac cmap script id will be set to Roman (0)." % (O)
+			exec("makeOTFParams.%s%s = script" % (kFileOptPrefix, kMacScript))
+	return fontPath
 
 def lookUpDirTree(fileName):
 	""" 
@@ -1457,7 +1468,7 @@ def checkIfVertInFeature(featurePath):
 				
 	return foundVert
 
-def	parsePList(filePath, dictKey = None):
+def parsePList(filePath, dictKey = None):
 	# if dictKey is defined, parse and return only the data for that key.
 	# This helps avoid needing to parse all plist types. I need to support only data for known keys amd lists.
 	plistDict = {}
@@ -1542,9 +1553,9 @@ def setMissingParams(makeOTFParams):
 			error = 1
 			raise MakeOTFOptionsError # stop here already, otherwise getROS() will generate an IOError.
 			
-		convertFontIfNeeded(makeOTFParams)
+		fontPath = checkInputFile(makeOTFParams)
 		# If we need to convert the original source, makeOTFParams.tempFontPath = fontPath = the path to the converted data,
-		# while file_path = "makeOTFParams.%s%s = file_path" % (kFileOptPrefix, kInputFont)) = path to original source.
+		# while srcFontPath = "makeOTFParams.%s%s = file_path" % (kFileOptPrefix, kInputFont)) = path to original source.
 
 	if makeOTFParams.tempFontPath:
 		inputFontPath = makeOTFParams.tempFontPath
@@ -1569,7 +1580,7 @@ def setMissingParams(makeOTFParams):
 		else:
 			exec("makeOTFParams.%s%s = path" % (kFileOptPrefix, kFeature))
 			
-	# FomtMenuNameDB path.
+	# FontMenuNameDB path.
 	found = 0
 	specified = 0
 	path = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kFMB))
