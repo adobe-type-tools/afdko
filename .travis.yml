@@ -20,3 +20,5 @@ script:
   - coverage run --source=CheckOutlinesUFO.py CheckOutlinesUFO.py -test
 after_success:
   - coveralls
+notifications:
+  slack: typekit:pMf8FVeyFAWFIjwoECsBSFCu
