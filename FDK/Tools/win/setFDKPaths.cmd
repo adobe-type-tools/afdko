@@ -6,7 +6,8 @@ REM that this includes the final directory separator char.
 
 set AFDKO_EXE_PATH="%~dp0"
 
-set AFDKO_Python=%AFDKO_EXE_PATH%Python\AFDKOPython\python
+set AFDKO_Python=%AFDKO_EXE_PATH:~0,-1%Python\AFDKOPython27\python"
+set AFDKO_Python_BIN=%AFDKO_EXE_PATH:~0,-1%Python\AFDKOPython27\Scripts"
 
 REM I need the path to this script's home directory.
 REM I know that this scripts directory ends

@@ -2,7 +2,7 @@
 AFDKO_EXE_PATH="${cmdDirPath}"
 
 # point to the self-compiled python
-AFDKO_Python="${cmdDirPath}"/Python/bin/python2.7
+AFDKO_Python="${cmdDirPath}"/Python/Current/bin/python2.7
 
 # uncomment this to point to the system python
 # AFDKO_Python="/usr/bin/env python"

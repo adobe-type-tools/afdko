@@ -1,5 +1,5 @@
 #! /usr/bin/env sh
-targetScript=ufonormalizer.py
+targetScript=ufonormalizer
 
 cmdDirPath=`dirname $0`
 cmdName=`basename $0`
@@ -15,5 +15,5 @@ fi
 
 source "${cmdPath}/setFDKPaths"
 
-$AFDKO_Python "${AFDKO_Scripts}/${targetScript}" "$@"
+$AFDKO_Python "${cmdDirPath}"/Python/Current/bin/ufonormalizer "$@"
 
