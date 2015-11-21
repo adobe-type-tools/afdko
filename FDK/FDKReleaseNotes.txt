@@ -1,7 +1,7 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
-FDK. v2.5 Oct 29 2015 change number 64800.
+FDK. v2.5 Nov 20 2015 change number 64956.
 
 	autohint and tx.
 	Switched to using new text format that is plist-compatible for T1 hint data in UFO fonts.
@@ -71,12 +71,16 @@ FDK. v2.5 Oct 29 2015 change number 64800.
 	of the PostScriptName,  and finally the value "NoFamilyName". For style, the
 	keys are: "openTypeNamePreferredSubfamilyName", "styleName", the style name
 	part of the PostScriptName, and finally the value "Regular".
+	Fixed bug where MakeOTF allowed the input file path and the output file path
+	to be the same.
 	
 	makeotfexe.
 	Extended the set of characters allowed in glyph names to include + * : ~ ^ !
-	Fixed crashing bug with more than 32K glyphs in a name-keyed font, reported by Gustavo Ferreira.
-	Merged changes from Kahled Hosny, to remove requirement that 'size' feature menu names have Mac 
-	platform names.
+	Allow developer glyph names to start with numbers: final names must still
+	follow the PS spec.
+	Fixed crashing bug with more than 32K glyphs in a name-keyed font, reported
+	by Gustavo Ferreira. Merged changes from Kahled Hosny, to remove requirement
+	that 'size' feature menu names have Mac platform names.
 	Added three new options: see above.
 	Code maintenance in generation of the feature file parser. Rebuilt the
 	'antler' parser generator to get rid of a compile-time warning for
@@ -89,19 +93,37 @@ FDK. v2.5 Oct 29 2015 change number 64800.
 	relative to the parent directory of the including feature file. If that is
 	not found, then makeotf tries to apply the reference as relative to the main
 	feature file.
-	
+	Changed glyph name parsing rules so that ‘friendly’ glyph names can start
+	with a sequence of numbers. Final glyph names still cannot start with a
+	number.
 
 	spot.
-	Fixed bug in duming stylistic feature names.
+	Fixed bug in dumping stylistic feature names.
+	Fixed bug proofing vertical features: needed to use vkern values. Fix contributed by Hiroki Kanou.
 	
 	tx family
 	Fix crash when using '-gx' option with source UFO fonts for 'tx' family of tools.
 	Fix crash when a UFO glyph point has a name attribute with an empty string.
 	Fix crash when a UFO font has no public.glyphOrder dict in the lib.plist file.
-
+	Fix really old bug in reading TTF fonts, reported by Belleve Invis. TrueType
+	glyphs with nested component references and x/y offsets or translation get
+	shifted.
+	Added new option '-fdx' to select glyphs by excluding all glyphs with the
+	specified FDArray indicies. This and the '-fd' option now take lists and
+	ranges of indices, as well as a single index value.
+	 
 	ufonormalizer
 	Added a command to call the ufonormalizer tool.
 	
+	Misc
+	Updated to latest modules for booleanOperatons, defcon (ufo3 branch),
+	fontMath (ufo3 branch), fontTools, mutatorMath, and robofab (ufo3 branch).
+	The FDK no longer contains any private branches of third party modules.
+	Rebuilt the Mac OSX, Linux and Windows Python interpreters in the AFDKO,
+	bringing the Python version up to 2.7.10. The python interpreters are now
+	built for 64 bite systems, and will not run on 32 bit systems.
+	
+
 FDK. v2.5 Aug 4 2015 change number 64700.
 
 	autohint.

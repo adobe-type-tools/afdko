@@ -28,21 +28,19 @@
   
   <p>Once the AFDKO is installed, all the command-line programs can be run by entering the command name in a Terminal window (OSX, Windows, Linux), along with the necessary option text. All command-line tools provide usage and help text with the options -u and -h. There is a separate user documentation file only for the makeotf tool. Using a command-line window may seem alarming if you are not used to it, but it is actually quite easy to learn a useful set of commands. Please read the FDK documentation "CommandLineHowTo.pdf", sub-titled "The Joys of Command Line", for pointers on how to get started.</p>
 
-  <h4>Current version 2.5 change number 64800, Oct 29 2015</h4>
+  <h4>Current version 2.5 change number 64956, Nov 20 2015</h4>
   
    <h4>Important Changes since 2.5 change number 64655, Mar 3 2015</h4>
   <ul>
+    <li>Updated the AFDKO Python interpreter to 2.7.10. This is now 64-bit only.</li>
     <li>Switched to using new text format that is plist-compatible for T1 hint data in UFO fonts.</li>
 	<li>Fixed crashing bugs in working with UFO fonts.</li>
-	<li>Added new options to makeotf.</li>
-	<li>See the file FDKReleaseNotes.txt for more details and a number of other minor bug fixes.</li>
-  </ul>
-  
-   <h4>Important Changes since 2.5 change number 63782, Mar 3 2015</h4>
-  <ul>
+	<li>Added new options to makeotf, including one to build fonts with Mac platform name strings in the name table.</li>
+	<li>See the file FDKReleaseNotes.txt for more details.</li>
     <li>Added support for fractional coordinates fonts, in UFO workflow only. See release notes.</li>
-    <li>Added support for Character Variant (cvXX) feature params.</li>
-	<li>See release notes for a number of other minor bug fixes.</li>
+    <li>Added support for Character Variant (cvXX) feature params, in spot and makeotf.</li>
+    <li>Added option to tx family of tools, to select/exclude glyphs by FontDict index. For CID fonts only.</li>
+	<li>See release notes for a number of other bug fixes and new options.</li>
   </ul>
   
    <h4>Important Changes since 2.5 change number 63209, Sept 18 2014</h4>
