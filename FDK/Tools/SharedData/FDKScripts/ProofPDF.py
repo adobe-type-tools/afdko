@@ -737,6 +737,7 @@ def openFile(path, txPath):
 	report = FDKUtils.runShellCmd(command)
 	if "CIDFontName" in report:
 		tfd,tempPath1 = tempfile.mkstemp()
+		os.close(tfd)
 		command="%s   -t1 -decid -usefd 0  \"%s\" \"%s\" 2>&1" % (txPath, path, tempPath1)
 		report = FDKUtils.runShellCmd(command)
 		if "fatal" in report:
@@ -744,6 +745,7 @@ def openFile(path, txPath):
 			logMsg("Failed to convert CID-keyed font %s to a temporary Typ1 data file." % path)
 
 		tfd,tempPathCFF = tempfile.mkstemp()
+		os.close(tfd)
 		command="%s   -cff +b  \"%s\" \"%s\" 2>&1" % (txPath, tempPath1, tempPathCFF)
 		report = FDKUtils.runShellCmd(command)
 		if "fatal" in report:
@@ -760,6 +762,7 @@ def openFile(path, txPath):
 			logMsg("Failed to open directory %s as a UFO font." % path)
 			
 		tfd,tempPathCFF = tempfile.mkstemp()
+		os.close(tfd)
 		command="%s   -cff +b  \"%s\" \"%s\" 2>&1" % (txPath, path, tempPathCFF)
 		report = FDKUtils.runShellCmd(command)
 		if "fatal" in report:
@@ -875,8 +878,7 @@ def proofMakePDF(pathList, params, txPath):
 			pdfFont = entry[1]
 			pdfFont.clientFont.close()
 			if tempPathCFF:
-				print (tempPathCFF)
-				#os.remove(tempPathCFF)
+				os.remove(tempPathCFF)
 		
 			
 		logMsg( "Wrote proof file %s. End time: %s." % (pdfFilePath, time.asctime()))
@@ -896,6 +898,7 @@ def proofMakePDF(pathList, params, txPath):
 				command = "open \"" + pdfFilePath  + "\"" + " &"
 				FDKUtils.runShellCmdLogging(command)
 	else:
+		tmpList = []
 		for path in pathList:
 			fontFileName = os.path.basename(path)
 			params.rt_filePath = os.path.abspath(path)
@@ -926,6 +929,7 @@ def proofMakePDF(pathList, params, txPath):
 			if tempPathCFF:
 				pdfFont.path = tempPathCFF
 			pdfFilePath = makePDF(pdfFont,  params)
+			ttFont.close()
 			if tempPathCFF:
 				os.remove(tempPathCFF)
 				

@@ -41,7 +41,7 @@ Project file.
 """
 
 __usage__ = """
-makeotf v2.0.89 Nov 4 2015
+makeotf v2.0.90 Nov 19 2015
 -f <input font>         Specify input font path. Default is 'font.pfa'.
 -o <output font>        Specify output font path. Default is
                         '<PostScript-Name>.otf'.
@@ -2325,7 +2325,7 @@ def runMakeOTF(makeOTFParams):
 	# Change to current directory to be the same as the features dir so that relative paths in feature file will work
 	curdir = os.getcwd()
 	fontDir = makeRelativePaths(makeOTFParams) # Change file paths to be relative to fontDir, if possible, else to absolute paths.
-	inputFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kInputFont))
+	origInputFilePath = inputFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kInputFont))
 	
 	os.chdir(fontDir) # This MUST follow makeRelativePaths.
 
@@ -2335,6 +2335,12 @@ def runMakeOTF(makeOTFParams):
 
 	# If the output file already exists, delete it - we want to know if the new output file fails to be made.
 	outputPath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kOutputFont))
+	if os.path.abspath(outputPath) == os.path.abspath(inputFilePath):
+		print "makeotf [Error] Source and output files cannot be the same. %s." % (outputPath)
+		if inputFontPath != inputFilePath:
+			os.remove(inputFontPath)
+		raise MakeOTFRunError
+
 	if os.path.exists(outputPath):
 		os.remove(outputPath)
 	tempOutPath = outputPath
@@ -2356,7 +2362,7 @@ def runMakeOTF(makeOTFParams):
 	if makeOTFParams.srcIsTTF:
 		tempOutPath = tempOutPath + ".temp_cff"
 		# Build GAODB data from the source.
-		srcGOADBList = getSourceGOADBData(inputFilePath) # Maps src glyph names to the same, plus adfing any Unicode values
+		srcGOADBList = getSourceGOADBData(inputFilePath) # Maps src glyph names to the same, plus adding any Unicode values
 		
 		# if the user has asked to use an existing GOADB file, we need to make sure that it wlll preserve
 		# the src glyph order.
@@ -2488,9 +2494,6 @@ def runMakeOTF(makeOTFParams):
 	if (not gDebug) and makeOTFParams.ufoFMNDBPath:
 		os.remove(makeOTFParams.ufoFMNDBPath)
 		
-	if makeOTFParams.srcIsTTF:
-		copyTTFGlyphTables(inputFilePath, tempOutPath, outputPath)
-		
 	if not gDebug:
 		if inputFontPath != inputFilePath: # the actual input file was a temp file.
 			os.remove(inputFontPath)
@@ -2498,16 +2501,27 @@ def runMakeOTF(makeOTFParams):
 	if not gDebug:
 		if tempGOADBPath:
 			os.remove(tempGOADBPath)
+
+	if not os.path.exists(tempOutPath) or (os.path.getsize(tempOutPath) < 500):
+		print "makeotf [Error] Failed to build output font file '%s'." % (tempOutPath)
+		if os.path.exists(tempOutPath):
+			os.remove(tempOutPath)
+		raise MakeOTFRunError
+
+	if makeOTFParams.srcIsTTF:
+		copyTTFGlyphTables(inputFilePath, tempOutPath, outputPath)
 		
 	if not os.path.exists(outputPath) or (os.path.getsize(outputPath) < 500):
 		print "makeotf [Error] Failed to build output font file '%s'." % (outputPath)
 		if os.path.exists(outputPath):
 			os.remove(outputPath)
+		if (tempOutPath != outputPath) and os.path.exists(tempOutPath):
+			os.remove(tempOutPath)
 		raise MakeOTFRunError
 
 	# The following check is here because of the internal Adobe production process for CID fonts, where a
 	# Type1 CID font is made with the FSType from the cidfontinfo file, and can be a product indpendent of the 
-	# OpenType font. Need to make sure that CID font FSTYpe is the same as the table fsType.
+	# OpenType font. Need to make sure that CID font FSType is the same as the table fsType.
 	if hasattr(makeOTFParams, 'FSType'):
 		checkFSTypeValue(makeOTFParams.FSType, outputPath)
 	
@@ -2535,6 +2549,8 @@ def runMakeOTF(makeOTFParams):
 			print "makeotf [Error] Failed to convert font '%s' to CID." % (outputPath)
 			if os.path.exists(outputPath):
 				os.remove(outputPath)
+			if (not gDebug) and os.path.exists(tempPath):
+				os.remove(tempPath)
 			raise MakeOTFRunError
 
 		if (not gDebug) and os.path.exists(tempPath):

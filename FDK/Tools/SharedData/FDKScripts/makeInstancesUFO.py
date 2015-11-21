@@ -51,11 +51,16 @@ except ImportError:
 XML = ET.XML
 xmlToString = ET.tostring
 
+haveUfONormalizer = True
 try:
-	import  ufoLib.ufonormalizer as ufonormalizerLib
-	haveUfONormalizer = True
+	import ufoLib.ufonormalizer as ufonormalizer
 except ImportError:
-	haveUfONormalizer = False
+	try:
+		import ufonormalizer
+	except ImportError:
+		haveUfONormalizer = False
+		print "Failed to find UFO normalizer, Pleas re-install the AFDKO."
+		sys.exit()
 
 kFontName = "PSFontName"
 
@@ -122,6 +127,10 @@ class Options:
 		if not os.path.exists(self.dsPath):
 			logMsg.log("Note: could not find design space file path:", self.dsPath)
 			hadError = 1
+			
+		if self.doNormalize and not haveUfONormalizer:
+			logMsg.log("Warning: skipping UFO normalization, as I cannot find the ufonormalizer module:", self.dsPath)
+		
 
 		if hadError:
 			raise(OptError)
@@ -275,9 +284,7 @@ def updateInstance(options, fontInstancePath):
 
 	return
 
-
-def clearCustomLibs(fontPath):
-	dFont = defcon.Font(fontPath)
+def clearCustomLibs(dFont):
 	for key in dFont.lib.keys():
 		if key not in ['public.glyphOrder', 'org.unifiedfontobject.normalizer.modTimes']:
 			del(dFont.lib[key])
@@ -285,8 +292,99 @@ def clearCustomLibs(fontPath):
 	libGlyphs = [g for g in dFont if len(g.lib)]
 	for g in libGlyphs:
 		g.lib.clear()
-	dFont.save()
 
+def roundSelectedFontInfo(fontInfo):
+		"""self.roundGeometry is false. However, most FontInfo fields have to be integer.
+		Exceptions are:
+			any of the PostScript Blue values.
+			postscriptStemSnapH, postscriptStemSnapV, postscriptSlantAngle
+		The Blue values should be rounded to 2 decimal places, with the exception
+		of postscriptBlueScale.
+		I round the float values because most Type1/Type2 rasterizers store
+		point and stem coordinates as Fixed numbers with 8 bits. You end up
+		cumulative rounding errors if you pass in relative values with more
+		than 2 decimal places. Other FontInfo float values are stored as Fixed
+		number with 16 bits,and can support 6 decimal places.
+		"""
+		listType = type([])
+		strType = type("")
+		realType = type(0.1)
+		
+		fiKeys = dir(fontInfo)
+		for fieldName in fiKeys:
+			if fieldName.startswith("_"):
+				continue
+			srcValue = getattr(fontInfo, fieldName)
+			if type(srcValue) != listType:
+				try:
+					realValue = float(srcValue)
+				except (TypeError, ValueError):
+					continue
+				intValue = int(realValue)
+				if intValue == realValue:
+					if type(srcValue) == realType:
+						# Convert to int value. I do the following because setattr() will actually set the value only
+						# if it compares differently, and (intValue == realValue), so we first
+						# have to set it to a different value.
+						setattr(fontInfo, fieldName, intValue-1)
+						setattr(fontInfo, fieldName, intValue)
+					continue
+				
+				if (fieldName.startswith("postscript") and ("Blue" in fieldName)) or (fieldName == "postscriptSlantAngle"):
+					if fieldName == "postscriptBlueScale":
+						# round to 6 places
+						rndValue = round(realValue*1000000)/1000000.0
+						if rndValue != realValue:
+							setattr(fontInfo, fieldName, rndValue)
+					else:
+						# round to 2 places
+						rndValue = round(realValue*100)/100.0
+						if rndValue != realValue:
+							setattr(fontInfo, fieldName, rndValue)
+				else:
+					intValue = int(round(realValue))
+					setattr(fontInfo, fieldName, intValue)
+					
+			elif (fieldName.startswith("postscript") and ("Blue" in fieldName)) or fieldName.startswith("postscriptStemSnap"):
+				# It is a list.
+				for i in range(len(srcValue)):
+					realValue = float(srcValue[i])
+					intVal = int(realValue)
+					if intValue == realValue:
+						continue
+					# round to 2 places
+					rndValue = round(realValue*100)/100.0
+					if rndValue != realValue:
+						srcValue[i] = rndValue
+
+def roundSelectedValues(dFont):
+	""" Glyph widths, kern values, and selected FontInfo values must be rounded,
+	as these are stored in the final OTF as ints.
+	"""
+	roundSelectedFontInfo(dFont.info)
+	
+	# round widths.
+	for dGlyph in dFont:
+		rval = dGlyph.width
+		ival = int(round(rval))
+		if ival != rval:
+			dGlyph.width = ival
+		
+	# round kern values, if any.
+	if dFont.kerning:
+		keys = dFont.kerning.keys()
+		for key in keys:
+			rval = dFont.kerning[key]
+			ival = int(round(rval))
+			if ival != rval:
+				dFont.kerning[key] = ival
+			
+def postProcessInstance(fontPath, options):
+	dFont = defcon.Font(fontPath)
+	clearCustomLibs(dFont)
+	if options.allowDecimalCoords:
+		roundSelectedValues(dFont)
+	dFont.save()
 
 def run(args):
 	options = Options(args)
@@ -311,16 +409,14 @@ def run(args):
 		os.remove(dsPath)
 
 	logMsg.log("Built %s instances." % (len(newInstancesList)))
-
 	# Remove glyph.lib and font.lib (except for "public.glyphOrder")
 	for instancePath in newInstancesList:
-		clearCustomLibs(instancePath)
+		postProcessInstance(instancePath, options)
 
-	if options.doNormalize:
+	if options.doNormalize and haveUfONormalizer:
 		logMsg.log("Applying UFO normalization...")
 		for instancePath in newInstancesList:
-			if haveUfONormalizer:
-				ufonormalizerLib.normalizeUFO(instancePath, outputPath=None, onlyModified=True)
+				ufonormalizer.normalizeUFO(instancePath, outputPath=None, onlyModified=True)
 
 	if options.doAutoHint or options.doOverlapRemoval:
 		logMsg.log("Applying post-processing...")
