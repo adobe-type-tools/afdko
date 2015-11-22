@@ -433,7 +433,7 @@ def run(args):
 	if options.doOverlapRemoval or options.doAutoHint: # The defcon library renames glyphs. Need to fix them again.
 		for instancePath in newInstancesList:
 			if haveUfONormalizer and options.doNormalize:
-				ufonormalizerLib.normalizeUFO(instancePath, outputPath=None, onlyModified=False)
+				ufonormalizer.normalizeUFO(instancePath, outputPath=None, onlyModified=False)
 
 if __name__=='__main__':
 	try:
