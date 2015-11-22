@@ -1,7 +1,7 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
-FDK. v2.5 Nov 20 2015 change number 64956.
+FDK. v2.5 Nov 22 2015 change number 64958.
 
 	autohint and tx.
 	Switched to using new text format that is plist-compatible for T1 hint data in UFO fonts.
