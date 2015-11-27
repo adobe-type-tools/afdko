@@ -41,7 +41,7 @@ Project file.
 """
 
 __usage__ = """
-makeotf v2.0.90 Nov 19 2015
+makeotf v2.0.91 Nov 26 2015
 -f <input font>         Specify input font path. Default is 'font.pfa'.
 -o <output font>        Specify output font path. Default is
                         '<PostScript-Name>.otf'.
@@ -1721,7 +1721,7 @@ def convertFontIfNeeded(makeOTFParams):
 			raise MakeOTFTXError
 		makeOTFParams.srcIsUFO = 1
 	else:
-		commandString = "spot %s 2>&1" % (filePath)
+		commandString = "spot \"%s\" 2>&1" % (filePath)
 		report = FDKUtils.runShellCmd(commandString)
 		if ("sfnt" in report):
 			needsConversion = 1
@@ -1861,7 +1861,7 @@ def checkFSTypeValue(FSType, outputPath):
 
 def getSourceGOADBData(inputFilePath):
 	# First, get the Unicode mapping from the TTF cmap table.
-	command = "spot -t cmap=7 %s 2>&1" % (inputFilePath)
+	command = "spot -t cmap=7 \"%s\" 2>&1" % (inputFilePath)
 	report = FDKUtils.runShellCmd(command)
 	glyphList = re.findall("[\n\t]\[(....+)\]=<([^>]+)>", report)
 	hasDoubleMapping = 0
