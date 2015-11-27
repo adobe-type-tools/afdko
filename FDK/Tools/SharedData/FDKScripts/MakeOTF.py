@@ -41,7 +41,7 @@ Project file.
 """
 
 __usage__ = """
-makeotf v2.0.91 Nov 26 2015
+makeotf v2.0.92 Nov 27 2015
 -f <input font>         Specify input font path. Default is 'font.pfa'.
 -o <output font>        Specify output font path. Default is
                         '<PostScript-Name>.otf'.
@@ -1883,7 +1883,7 @@ def getSourceGOADBData(inputFilePath):
 	# We'll also use this to set the glyph order. I use tx so as to get teh same names
 	# as tx for the TTF glyphs; this can differ from spot. I don't use tx for Unicode values.
 	# as tx doesn't check 32 bit UV's, and doesn't report double-encodings.
-	command = "tx -mtx %s 2>&1" % (inputFilePath)
+	command = "tx -mtx \"%s\" 2>&1" % (inputFilePath)
 	report = FDKUtils.runShellCmd(command)
 	glyphList = re.findall("[\n\r]glyph\[(\d+)\]\s+\{([^,]+)", report)
 	gnameDict = {}
@@ -1972,7 +1972,7 @@ def copyTTFGlyphTables(inputFilePath, tempOutputPath, outputPath):
 	for tableTag in ["GDEF", "GSUB", "GPOS", "cmap", "name", "OS/2", "BASE",]:
 		if tableTag not in tableDump:
 			continue
-		command = "sfntedit -x \"%s\"=%s \"%s\" 2>&1" % (tableTag, tempTablePath, tempOutputPath)
+		command = "sfntedit -x \"%s\"=\"%s\" \"%s\" 2>&1" % (tableTag, tempTablePath, tempOutputPath)
 		log = FDKUtils.runShellCmd(command)
 		if not ("Done." in log):
 			print log
