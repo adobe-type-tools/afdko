@@ -829,7 +829,7 @@ static void doRemovePUAs(hotCtx g, cmapCtx h, int isMixedByte) {
 static Format4 *makeFormat4(cmapCtx h, unsigned long *length) {
 	hotCtx g = h->g;
 	int i;
-	int nSegments;
+	int nSegments = 0;
 	int segment;
 	int notOK = 1;
 	int truncateCmap = 0;
@@ -839,7 +839,7 @@ static Format4 *makeFormat4(cmapCtx h, unsigned long *length) {
 	Format4 *fmt = MEM_NEW(h->g, sizeof(Format4));
 	dnaINIT(h->g->dnaCtx, fmt->glyphId, 256, 64);
 
-    if (h->g->convertFlags & HOT_STUB_CMAP4)
+    if (g->convertFlags & HOT_STUB_CMAP4)
         truncateCmap = 1;
 
 	while (notOK) {
@@ -847,9 +847,20 @@ static Format4 *makeFormat4(cmapCtx h, unsigned long *length) {
 		unsigned int numNotOrdered = 0;
 
 		fmt->glyphId.cnt = 0;
-
-		nSegments = partitionRanges(h, mapping);
-         
+        if (h->mapping.cnt == 0)
+        {
+            Mapping *stub_mapping = dnaNEXT(h->mapping);
+            
+            stub_mapping->code = 0;
+            stub_mapping->glyphId = 0;
+            stub_mapping->span = 1;
+            stub_mapping->ordered = 1;
+            stub_mapping->flags = 0;
+            nSegments = 1;
+            mapping = h->mapping.array;
+        }
+        nSegments = partitionRanges(h, mapping);
+        
 		if (truncateCmap) {
 			nSegments = 2;
 		}
@@ -1093,7 +1104,8 @@ int cmapEndEncoding(hotCtx g) {
 			/* Mac cmap is required; the space wasn't present, so: */
 			cmapAddMapping(g, 0, GID_NOTDEF, 1);
 		}
-		else {
+ 		else if (!((IS_CID(g)) && (h->platformId == cmap_MS) && ( h->scriptId == cmap_MS_UGL))){
+            /* Ms cmap is required; the space wasn't present, so: */
 			return 0;
 		}
 	}

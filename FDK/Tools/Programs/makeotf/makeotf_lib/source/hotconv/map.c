@@ -1300,6 +1300,7 @@ void mapAddUVS(hotCtx g, char *uvsName) {
 	long lineLen = 0;
 	UVSEntry *uvsEntry = NULL;
 	mapCtx h = g->ctx.map;
+    int isCID = IS_CID(g);
 
 	dnaSET_CNT(h->uvs.entries, 0);
 	g->cb.uvsOpen(g->cb.ctx, uvsName); /*jumps to fatal error if not opened succesfully */
@@ -1346,18 +1347,22 @@ void mapAddUVS(hotCtx g, char *uvsName) {
 			p++;
 		}
 
-		/* Parse R-O-S name */
-		rosName   = p2  = p;
-		p = gnameScan(g, rosName);
-		if (p == NULL || !isspace(*p)) {
-			goto syntaxError;
-		}
-		*p++  = '\0';
+        if (isCID)
+        {
+            /* Parse R-O-S name */
+            rosName   = p2  = p;
+            p = gnameScan(g, rosName);
+            if (p == NULL || !isspace(*p)) {
+                goto syntaxError;
+            }
+            *p++  = '\0';
 
-		/* Skip blanks and semi-colons */
-		while (isspace(*p) || (*p == ';')) {
-			p++;
-		}
+            /* Skip blanks and semi-colons */
+            while (isspace(*p) || (*p == ';')) {
+                p++;
+            }
+        }
+
 
 		/* Parse glyphTag string */
 		glyphTag   = p2  = p;
@@ -1373,12 +1378,28 @@ void mapAddUVS(hotCtx g, char *uvsName) {
 		uvsEntry->uv =  strtoul(uv, NULL, 16);
 		uvsEntry->uvs = strtoul(uvs, NULL, 16);
 		if (0 == strncmp(glyphTag, "CID+", 4)) {
-			uvsEntry->cid = atoi(&glyphTag[4]);
-			uvsEntry->gName[0] = '\0';
+            if (isCID)
+            {
+                uvsEntry->cid = atoi(&glyphTag[4]);
+                uvsEntry->gName[0] = '\0';
+            }
+            else
+            {
+                hotMsg(g, hotWARNING, "UVS entry in file '%s' has CID glyph name '%s', but source font is not CID-keyed. Skipping.", uvsName, glyphTag);
+                dnaSET_CNT(h->uvs.entries, h->uvs.entries.cnt-1);
+            }
 		}
 		else {
-			uvsEntry->cid = -1;
-			strcpy(uvsEntry->gName, glyphTag);
+            if (isCID)
+            {
+                hotMsg(g, hotWARNING, "UVS entry in file '%s' has non-CID name '%s', but source font is CID-keyed. Skipping.", uvsName, glyphTag);
+                dnaSET_CNT(h->uvs.entries, h->uvs.entries.cnt-1);
+           }
+            else
+            {
+                uvsEntry->cid = -1;
+                strcpy(uvsEntry->gName, glyphTag);
+            }
 		}
 
 		continue;
@@ -2136,12 +2157,10 @@ static void makeUnicodecmaps(hotCtx g) {
 				cmapAddMapping(g, adUV->uv, GET_GID(gi), 2);
 			}
 		}
+        
 	}
 	if (cmapEndEncoding(g)) {
 		cmapPointToPreviousEncoding(g, cmap_UNI, cmap_UNI_UTF16_BMP);
-	}
-	else {
-		return;
 	}
 
 	/* Create UTF-32 cmaps, if needed, as supersets of the BMP UTF-16 cmaps: */
@@ -2159,6 +2178,7 @@ static void makeUnicodecmaps(hotCtx g) {
 			cmapAddMapping(g, adUV->uv, GET_GID(gi), 4);
 		}
 	}
+ 
 	if (cmapEndEncoding(g)) {
 		cmapPointToPreviousEncoding(g, cmap_UNI, cmap_UNI_UTF32);
 	}
@@ -2210,14 +2230,24 @@ static void makeUVScmap(hotCtx g) {
 
 		if (IS_CID(g)) {
 			gi_id = mapCID2Glyph(g, uve->cid);
+            if (gi_id == NULL) {
+                hotMsg(g, hotWARNING, "Skipping UVS entry for CID '%s': not found in source font.", uve->cid);
+                continue;
+            }
 		}
 		else {
-			gi_id = mapName2Glyph(g, uve->gName, NULL);
+            char *finalName;
+			gi_id = mapName2Glyph(g, uve->gName, &finalName);
+            if (gi_id == NULL) {
+                hotMsg(g, hotWARNING, "Skipping  UVS entry for glyph name '%s': not found in source font.", uve->gName);
+                continue;
+            }
+            if (finalName != NULL)
+            {
+                strcpy(uve->gName, finalName);
+            }
 		}
 
-		if (gi_id == NULL) {
-			continue;
-		}
 
 		uveGID =  GET_GID(gi_id);
 

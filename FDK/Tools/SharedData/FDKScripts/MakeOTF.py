@@ -143,8 +143,7 @@ makeotf v2.0.92 Nov 27 2015
 -ci <path>              Path to the Unicode Variation Sequences
                         specification file; if present, a 'cmap'
                         subtable will be added with PlatformID = 0,
-                        ScriptID = 5, and Format = 14; CID-keyed fonts
-                        only.
+                        ScriptID = 5, and Format = 14. See MakeOTF User's Guide.
 -dbl                    For a short list of glyphs, double map them to
                         two Unicode values if there is no other glyph
                         mapped from the same Unicode value. This used to
