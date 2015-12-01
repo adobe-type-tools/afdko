@@ -1,6 +1,25 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
+FDK. v2.5 Dec 1 2015 change number 65012.
+
+	makeotf.
+	Fixed bug in MakeOTF.py that kept makeotf from building fonts with spaces in the path.
+	Fixed bug in ConvertFontToCID module that kept makeotf from converting UFO fonts to CID.
+	Changed support for Unicode Variation Sequence file ( option -ci) so that
+	when used with name-keyed fonts, the Region-Order field is omitted, and the
+	glyph name may be either a final name or developer glyph name. Added warning
+	when glyph in the UVS entry is not found in font. See MakeOTF User's Guide.
+	Fixed bug in makeotfexe: it now always makes a cmap table subtable MS
+	platform, Unicode, format 4 for CID fonts: this is required by Windows. If
+	there are no BMP unicode values, then it makes a stub subtable, mapping GID 0
+	to UVS 0.
+	
+	tx and related programs.
+	When reading a UFO source font, do not complain if the fontinfo.plistentry
+	"styleName" is present but has is an empty string. This is valid, and is
+	common when the style is "Regular".
+	
 FDK. v2.5 Nov 22 2015 change number 64958.
 
 	autohint and tx.

@@ -1369,7 +1369,11 @@ static int doFontDictValue(ufoCtx h, char* keyName, char* endKeyName, int state)
     char* valueString  = getKeyValue(h,  endKeyName, state);
     if (valueString == NULL)
     {
+        if (strcmp(h->parseKeyName, "styleName"))
+        {
         message(h, "Warning: Encountered empty %s for fontinfo key %s. Skipping", keyName, h->parseKeyName);
+        /* It is valid and common for styleName can be present and empty, when the style is "Regular".*/
+        }
     }
     
     if (state == 2) // we are processing a key value.
