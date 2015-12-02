@@ -1590,7 +1590,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
 	opList = []
 	newHintMaskName =  None
 	inPreFlex = False
-	
+	hintInfoDict = None
 	opIndex = 0
 	lastPathOp = None
 	curX = 0
