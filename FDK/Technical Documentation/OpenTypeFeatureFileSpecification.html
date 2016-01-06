@@ -7,11 +7,11 @@
 		<h1>OpenType&trade; Feature File Specification</h1>
 
 <p><b>Copyright</b></p>
-<p>Copyright 2015 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+<p>Copyright 2015,2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0.
 </p>
 <p><b>Version</b></p>
-<p>[ Document version 1.15. Last updated 12 June 2015]</p>
+<p>[ Document version 1.17. Last updated 6 Jan 2016]</p>
 <p><b>Caution:</b></p>
 <p>Portions of the syntax unimplemented by Adobe are subject to change.</p>
 <ol>
@@ -303,28 +303,28 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 <li>Value record format A:</li>
 <li><code> &lt;metric&gt; # Angle brackets around value are not allowed.</code></li>
 </ul>
-<p>Here the &lt;metric&gt; represents an×advance adjustment, except when used in the 'vkrn' feature, in which case it represents a Y advance adjustment. All other adjustments are implicitly set to 0. This is the simplest feature file &lt;valuerecord&gt; format, and is provided since it represents the most commonly used adjustment (i.e. for kerning). For example:</p>
+<p>Here the &lt;metric&gt; represents an x advance adjustment, except when used in the 'vkrn', 'vpal', 'vhal', or 'valt' features, in which case it represents a Y advance adjustment. All other adjustments are implicitly set to 0. This is the simplest feature file &lt;valuerecord&gt; format, and is provided since it represents the most commonly used adjustment (i.e. for kerning). For example:</p>
 <pre>
 -3                 # without &lt;&gt;</pre>
 <ul>
 <li>Value record format B:</li>
 <li><code> &lt; &lt;metric&gt; &lt;metric&gt; &lt;metric&gt; &lt;metric&gt; &gt;</code></li>
 </ul>
-<p>Here, the &lt;metric&gt;s represent adjustments for×placement, Y placement,×advance, and Y advance, in that order. For example:</p>
+<p>Here, the &lt;metric&gt;s represent adjustments for x placement, Y placement, x advance, and Y advance, in that order. For example:</p>
 <pre>
-  &lt;-80 0 -160 0&gt;       #×placement adjustment: -80;× advance adjustment: -160</pre>
+  &lt;-80 0 -160 0&gt;       # x placement adjustment: -80; x advance adjustment: -160</pre>
 <ul>
 <li>Value record format C: <i>[ Currently not implemented. ]</i></li>
 <li><code> &lt; &lt;metric&gt; &lt;metric&gt; &lt;metric&gt; &lt;metric&gt; &lt;device&gt; &lt;device&gt; &lt;device&gt; &lt;device&gt; &gt;</code></li>
 </ul>
-<p>Here, the &lt;metric&gt;s represent the same adjustments as in format B. The &lt;device&gt;s represent device tables [&sect;<a href="#2.e.iii">2.e.iii</a>] for× placement, Y placement,×advance, and Y advance, in that order. This format lets the editor express the full functionality of an OpenType value record. For example:</p>
+<p>Here, the &lt;metric&gt;s represent the same adjustments as in format B. The &lt;device&gt;s represent device tables [&sect;<a href="#2.e.iii">2.e.iii</a>] for x placement, Y placement, x advance, and Y advance, in that order. This format lets the editor express the full functionality of an OpenType value record. For example:</p>
 <pre>
   &lt;-80 0 -160 0 &lt;<b>device</b> 11 -1, 12 -1&gt;
                &lt;<b>device NULL</b>&gt;
                
                &lt;<b>device</b> 11 -2, 12 -2&gt;
                &lt;<b>device NULL</b>&gt;&gt;</pre>
-<p>This example specifies adjustments for×placement and×advance, as well as device adjustments at 11 and 12 ppem sizes for×placement and×advance.</p>
+<p>This example specifies adjustments for x placement and x advance, as well as device adjustments at 11 and 12 ppem sizes for x placement and x advance.</p>
 <ul>
 <li><p>Value record format D, the null value record: <i>[ Currently not implemented. ]</i></p>
 <pre>
@@ -365,14 +365,14 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 <ul>
 <li><p>Anchor format A:</p>
 <pre>
-  &lt; <b>anchor</b> &lt;metric&gt; &lt;metric&gt; &gt;        #×coordinate, Y coordinate</pre>
+  &lt; <b>anchor</b> &lt;metric&gt; &lt;metric&gt; &gt;        # x coordinate, Y coordinate</pre>
 <p>For example:</p>
 <pre>
   &lt;<b>anchor</b> 120 -20&gt;</pre>
 </li>
 <li><p>Anchor format B:</p>
 <pre>
-  &lt;<b>anchor</b> &lt;metric&gt; &lt;metric&gt;         #×coordinate, Y coordinate
+  &lt;<b>anchor</b> &lt;metric&gt; &lt;metric&gt;         # x coordinate, Y coordinate
            &lt;contour point&gt; &gt;</pre>
 <p>For example:</p>
 <pre>
@@ -668,7 +668,7 @@ include<code>(../features.family);</code></pre>
 <pre>
 <b>  markClass</b> &lt;glyph|glyphclass&gt; &lt;anchor&gt;  &lt;mark glyph class name&gt;;</pre>
 <p>Each additional mark statement for a mark class adds the referenced glyphs to that mark class.</p>
-<p>The &lt;anchor&gt; [&sect;<a href="#2.e.vii">2.e.vii</a>] indicates the point on the mark glyph(s) by which it is attached to a matching anchor point on a base glyph. If a mark glyph has an anchor point at &lt;anchor 300, 0&gt; and the base glyph has an anchor point at &lt;anchor 400 300&gt;, then the mark glyph will be shifted so that the point x=300, y = 0 in its design space will be superimposed on the point×= 300, y = 400 in the design space of the base glyph.</p>
+<p>The &lt;anchor&gt; [&sect;<a href="#2.e.vii">2.e.vii</a>] indicates the point on the mark glyph(s) by which it is attached to a matching anchor point on a base glyph. If a mark glyph has an anchor point at &lt;anchor 300, 0&gt; and the base glyph has an anchor point at &lt;anchor 400 300&gt;, then the mark glyph will be shifted so that the point x=300, y = 0 in its design space will be superimposed on the point x = 300, y = 400 in the design space of the base glyph.</p>
 <p>For example:</p>
 <pre>
 <b> markClass</b> [acute grave dieresis] &lt;anchor 350 0&gt;  @MARK_TOP_ACCENTS;</pre>
@@ -986,7 +986,7 @@ include<code>(../features.family);</code></pre>
 <pre>
   <b>position</b> &lt;glyph|glyphclass&gt; &lt;valuerecord format A&gt; &lt;glyph|glyphclass&gt;
 &lt;<b>NULL</b>&gt;;</pre>
-<p>Kerning can most easily be expressed with this format. This will result in adjusting the first glyph's×advance, except when in the 'vrkn' feature, in which case it will adjust the first glyph's Y advance. Some examples:</p>
+<p>Kerning can most easily be expressed with this format. This will result in adjusting the first glyph's x advance, except when in the 'vrkn' feature, in which case it will adjust the first glyph's Y advance. Some examples:</p>
 <pre>
   <b>pos</b> T a -100;        # specific pair (no glyph class present)
   <b>pos</b> [T] a -100;      # class pair (singleton glyph class present)
@@ -1132,18 +1132,20 @@ include<code>(../features.family);</code></pre>
 <p>The most general form of the contextual substitution rule is to explicitly reference named lookups in the rule.</p>
 <p><b>Example 1.</b> Define two stand-alone lookups (&sect;<a href="#4.e">4.e</a>), and then reference them in the input sequence of contextual positioning rules with the keyword &quot;lookup&quot; and the lookup name.</p>
 <pre>
+<b>markClass</b> [acute grave] &lt;<b>anchor</b> 150 -10&gt; @ALL_MARKS;
+
 <b>lookup</b> CNTXT_PAIR_POS {
      <b>position </b>T o -10;
-     <b>position </b>T c by -12;
+     <b>position </b>T c -12;
  } CNTXT_PAIR_POS;
  
 <b>lookup</b> CNTXT_MARK_TO_BASE {
-     <b>position </b>base o 
-     <b>position </b>base c 
+     <b>position base</b> o &lt;<b>anchor</b> 250 450&gt; <b>mark</b> @ALL_MARKS;
+     <b>position base</b> c &lt;<b>anchor</b> 250 450&gt; <b>mark</b> @ALL_MARKS; 
  } CNTXT_MARK_TO_BASE;
  
 <b>feature</b> test {
-     <b>substitute </b>T' lookup CNTXT_PAIR_POS [o c]' @ALL_MARKS' lookup CNTXT_MARK_TO_BASE;
+     <b>position </b>T' <b>lookup</b> CNTXT_PAIR_POS [o c]' @ALL_MARKS' <b>lookup</b> CNTXT_MARK_TO_BASE;
  } test;</pre>
 <p>This rule has only an input sequence, and no backtrack or lookahead sequence. It will match when the current glyph is 'T', followed by either 'o' or 'c', followed by any mark glyph. The lookup CNTXT_PAIR_POS will applied to the 'T', and the lookup CNTXT_MARK_TO_BASE will be applied to the glyphs in the class @ALL_MARKS.</p>
 <p>This form of the contextual positioning rule is the most flexible. You can specify a positioning lookup for more than one input sequence glyph or glyph class, the referenced lookups can be of different types, and the referenced lookups can have different lookup flags that the parent contextual lookup. The drawback is that it is difficult to understand what position rule will be applied, and the implementation may not warn if the referenced lookup does not contain a rule that matches the context.</p>
@@ -1153,7 +1155,7 @@ include<code>(../features.family);</code></pre>
 <pre>
   <b>position</b> [quoteleft quotedblleft ][Y T]' &lt;0 0 20 0 &gt;  [quoteright quotedblright];
   <b>position</b> [quoteleft quotedblleft ][Y T]' 20  [quoteright quotedblright];</pre>
-<p>Both of these rules have an input sequence of a single glyph position, for which the glyph class [Y T] is specified. The marked glyph class is followed by a value record. The first form shows a full value record which allows you to alter both the (x,y) coordinates of the origin and the (x,y) coordinates of the advance width. The second rule shows the simple form of the value record, which specifies a value for only a change to the×value of the advance width. Note that the value record modifies the glyph which it follows. These both increase the advance width of Y or T by 20, when preceded by either quoteleft or quotedblleft, and followed by quoteright or quotedblright. Note that not all marked glyphs or glyphclasses in the input sequence must be followed by a value record; if this is omitted, then the item's positioning info will not be affected.</p>
+<p>Both of these rules have an input sequence of a single glyph position, for which the glyph class [Y T] is specified. The marked glyph class is followed by a value record. The first form shows a full value record which allows you to alter both the (x,y) coordinates of the origin and the (x,y) coordinates of the advance width. The second rule shows the simple form of the value record, which specifies a value for only a change to the x value of the advance width. Note that the value record modifies the glyph which it follows. These both increase the advance width of Y or T by 20, when preceded by either quoteleft or quotedblleft, and followed by quoteright or quotedblright. Note that not all marked glyphs or glyphclasses in the input sequence must be followed by a value record; if this is omitted, then the item's positioning info will not be affected.</p>
 <p>Example 2:</p>
 <pre>
   <b>position</b> s f' 10 t;
@@ -1310,8 +1312,8 @@ If this is a (chain) contextual lookup do the following [(10)-(11)] in the subta
   } smcp;
  
   <b>feature</b> salt {
-     <b>sub</b> a <b>from</b> [a.alt1 a.alt2 a.alt2];
-     <b>sub</b> e [c d e] f <b>by</b> [c.mid d.mid e.mid];
+     <b>sub</b> a <b>from</b> [a.alt1 a.alt2 a.alt3];
+     <b>sub</b> e [c d e]' f <b>by</b> [c.mid d.mid e.mid];
      <b>sub</b> b <b>by</b> b.alt;
   } salt;</pre>
 <p>The 'aalt' lookups from the above example will be registered under the default language systems of the 'DFLT', 'latn' and 'cyrl' scripts, and also under the 'latn'/'TRK ' language systems. The 'aalt' created would be the same as if the font editor had specified:</p>
@@ -1376,8 +1378,8 @@ If this is a (chain) contextual lookup do the following [(10)-(11)] in the subta
  <b>feature</b> ss01 {
     <b>featureNames</b> {
          <b>name</b> &quot;Feature description for MS Platform, script Unicode, language English&quot;;
-# With no platform ID, script ID, or language ID specified, the implementation assumes (3,1,0×409). 
-         <b>name</b> 3 1 0×411 &quot;Feature description for MS Platform, script Unicode, language Japanese&quot;;
+# With no platform ID, script ID, or language ID specified, the implementation assumes (3,1,0x409). 
+         <b>name</b> 3 1 0x411 &quot;Feature description for MS Platform, script Unicode, language Japanese&quot;;
          <b>name</b> 1 &quot;Feature description for Apple Platform, script Roman, language unspecified&quot;;
 # With only the platform ID specified, the implementation assumes script and language = Latin. For Apple this is (1,0,0). 
          <b>name</b> 1 1 12 &quot;Feature description for Apple Platform, script Japanese, language Japanese&quot;;     } ;
@@ -1544,19 +1546,19 @@ table GDEF {
   <b>table</b> head {
      <b>FontRevision</b> 1.1;
   } head;</pre>
-<p>This format is supported, but will cause a warning that the specification will be converted to &quot;1.100&quot;. It will be stored in the font as 0×0001199A. A more exact decimal representation would be 1.10000610352, but it will be reported as &quot;1.100&quot;.</p>
+<p>This format is supported, but will cause a warning that the specification will be converted to &quot;1.100&quot;. It will be stored in the font as 0x0001199A. A more exact decimal representation would be 1.10000610352, but it will be reported as &quot;1.100&quot;.</p>
 <p>Example 2:</p>
 <pre>
   <b>table</b> head {
      <b>FontRevision</b> 1.001;
   } head;</pre>
-<p>This value be stored in the font as 0×00010042. A more exact decimal representation is 1.001007, but it will be reported as &quot;1.001&quot;.</p>
+<p>This value be stored in the font as 0x00010042. A more exact decimal representation is 1.001007, but it will be reported as &quot;1.001&quot;.</p>
 <p>Example 3:</p>
 <pre>
   <b>table</b> head {
      <b>FontRevision</b> 1.500;
   } head;</pre>
-<p>This value be stored in the font as 0×00018000, and will be reported as &quot;1.500&quot;. The decimal and Fixed values are equal in this case.</p>
+<p>This value be stored in the font as 0x00018000, and will be reported as &quot;1.500&quot;. The decimal and Fixed values are equal in this case.</p>
 <p><a name="9.d"></a><b>9.d. hhea table</b></p>
 <pre>
   <b>table</b> hhea {
@@ -1593,7 +1595,7 @@ table GDEF {
   platspec id      1
 (Unicode)
   language id     
-0×0409 (Windows default English)</pre>
+0x0409 (Windows default English)</pre>
 <p>Macintosh platform selected:</p>
 <pre>
   platspec id      0
@@ -1604,8 +1606,8 @@ table GDEF {
 <pre>
 representation              id  platform id platspec id language id
 --------------------------- --- ----------- ----------- -----------
-nameid I  &lt;string&gt;;         I   3          1           0×0409
-nameid I 3 &lt;string&gt;;        I   3          1           0×0409
+nameid I  &lt;string&gt;;         I   3          1           0x0409
+nameid I 3 &lt;string&gt;;        I   3          1           0x0409
 nameid I 3 S L &lt;string&gt;;    I   3          S           L
 nameid I 1 &lt;string&gt;;        I   1          0           0
 nameid I 1 S L &lt;string&gt;;    I   1          S           L</pre>
@@ -1730,6 +1732,14 @@ nameid I 1 S L &lt;string&gt;;    I   1          S           L</pre>
   }</pre>
 <p>along with the tag 'sbit'.</p>
 <p><a name="11"></a><b>11. Document revisions</b></p>
+<p><b>v1.17 [ 6 Jan 2016]:</b></p>
+<ul>
+<li>Fixed bug in example for salt feature in section 8.a, and in example for contextual lookup specification in section 6.h.ii.</li>
+</ul>
+<p><b>v1.16 [ 9 Dec 2015]:</b></p>
+<ul>
+<li>For value record format A, specify that the single value represents a Y advance change for vpal, vhal, and valt features, as well as vkern.</li>
+</ul>
 <p><b>v1.15 [ 12 June 2015]:</b></p>
 <ul>
 <li>Added documentation for Character Variant (cv01-cv99) features.</li>

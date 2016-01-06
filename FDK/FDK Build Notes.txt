@@ -1,6 +1,6 @@
 FDK Build Notes v2.6.
 
-v1.06 Feb 18 2015
+v1.07 Jan 6 2016
 
 1) FDK build directory tree.
 
@@ -75,7 +75,7 @@ Also, you must first get the build-essentials and readline packages, with the
 commands: sudo apt-get install build-essential
 sudo apt-get install zlib1g-dev # gets you the zlib.h file and zlib library.
 sudo apt-get install libreadline-dev
-You must also edit the Moudles/Setup.dist file, BEFORE running ./configure, to enable the readlines library by removing the comment at the start of the line:
+You must also edit the Modules/Setup.dist file, BEFORE running ./configure, to enable the readlines library by removing the comment at the start of the line:
 readline readline.c -lreadline -ltermcap # line 166 at the moment.
 After building the Python interpreter, copy the file '/lib/i386-linux-gnu/libz.so.1.2.3.4'  to Python/lib/python2.7/lib-dynload/.
 Then cd there, and make a symbolic link named 'libz.so.1' to the libz.so.1.2.3. file.
@@ -142,9 +142,10 @@ The command-line tools are all implemented as either binary C programs or shell 
 All the commands will work only if the path FDK/Tools/osx|win|linux is added to the current users PATH environment variable.
 
 If your primary system is Mac OSX, then a useful approach is to use VMWare Fusion (or Virtualbox) to make virtual machines. For Linux:
-- download the Ubuntu Linux 32 bit iso file (x86).
+- download the Ubuntu Linux 64 bit iso file (x86).
 - make a new VM machine with VMWare Fusion: select the iso file as the source
 - install all updates
+- install the 32 bit libraries: for Ubuntu 13.04 (64-bit) or later, say 'sudo apt-get install lib32z1'; for Ubuntu 12.04 LTS (64-bit) or earlier, say 'sudo apt-get install ia32-libs'.
 - use the Settings->Share option to share the FDK source tree on your Mac OSX file system.
 - choose the VMWare Fusion menu option "VM Machine->Install VMWare Tools"
 This mounts an iso file in the Linux VM. Copy the contents to a local folder in the Ubuntu Linux system. Decompress the tar file, look inside for vmware-install.pl. Run this with sudo, take default answer for all.
