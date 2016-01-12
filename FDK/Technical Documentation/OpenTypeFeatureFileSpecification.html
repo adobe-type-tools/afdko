@@ -413,7 +413,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 <p><a name="2.f"></a><b>2.f. Glyphs</b></p>
 <p>These are represented by one of:</p>
 <p><a name="2.f.i"></a><b>2.f.i. Glyph name</b></p>
-<p>A glyph name may be up to 31 characters in length, must be entirely comprised of characters from the following set:</p>
+<p>A glyph name may be up to 63 characters in length, must be entirely comprised of characters from the following set:</p>
 <p>A-Z a-z 0-9 . (period) _ (underscore)</p>
 <p>and must not start with a digit or period. The only exception is the special character &quot;.notdef&quot;.</p>
 <p>&quot;twocents&quot;, &quot;a1&quot;, and &quot;_&quot; are valid glyph names. &quot;2cents&quot; and &quot;.twocents&quot; are not.</p>
@@ -474,7 +474,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 <pre>
   @dash = [endash emdash figuredash];     # Assignment
   space @dash space                       # Usage</pre>
-<p>The part of the glyph class name after the &quot;@&quot; is subject to the same name restrictions that apply to a glyph name, except that its maximum length is 30.</p>
+<p>The part of the glyph class name after the &quot;@&quot; is subject to the same name restrictions that apply to a glyph name, except that its maximum length is 63.</p>
 <p>Glyph class assignments can appear anywhere in the feature file. A glyph class name may be used in the feature file only after its definition.</p>
 <p>When a glyph class name occurs within square brackets, its elements are simply added onto the other elements in the glyph class being defined. For example:</p>
 <pre>
@@ -1732,6 +1732,10 @@ nameid I 1 S L &lt;string&gt;;    I   1          S           L</pre>
   }</pre>
 <p>along with the tag 'sbit'.</p>
 <p><a name="11"></a><b>11. Document revisions</b></p>
+<p><b>v1.18 [not yet released]:</b></p>
+<ul>
+<li>Increased maximum length of glyph names and named glyph classes from 31 to 63.</li>
+</ul>
 <p><b>v1.17 [ 6 Jan 2016]:</b></p>
 <ul>
 <li>Fixed bug in example for salt feature in section 8.a, and in example for contextual lookup specification in section 6.h.ii.</li>
