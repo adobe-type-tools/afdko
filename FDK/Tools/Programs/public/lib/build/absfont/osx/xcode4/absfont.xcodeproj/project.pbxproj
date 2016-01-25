@@ -192,9 +192,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BD8A5ABA0D6F8FA900301916 /* debug.xcconfig */;
 			buildSettings = {
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"\"ABF_DEBUG=1\"",
-				);
+				GCC_PREPROCESSOR_DEFINITIONS = "\"ABF_DEBUG=1\"";
 				PRODUCT_NAME = absfont;
 			};
 			name = Debug;

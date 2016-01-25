@@ -5219,7 +5219,7 @@ static void prepSubset(txCtx h)
  
 	/* Make subset arg list */
 	makeSubsetArgList(h);
-	if ((h->mode == mode_cff || h->mode == mode_t1) || h->mode == mode_svg || h->mode == mode_ufow && (h->flags & SHOW_NAMES))
+	if ((h->mode == mode_cff || h->mode == mode_t1) || h->mode == mode_svg || h->mode == (mode_ufow && (h->flags & SHOW_NAMES)))
 		{
 		char *p;
 		char *q;

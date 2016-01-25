@@ -216,4 +216,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define T1_REG_NDV          1   /* NormalizedDesignVector */
 #define T1_REG_UDV          2   /* UserDesignVector */
 
+#define RND_ON_READ(val) (((int)((val)*10000))/10000.0) /* Truncate at 4 decimal places, the most that CFF supports as a real. */
+#define RND_ON_WRITE(val) (roundf(val*100)/100.0)  /* round to 2 decimal places for output. */
+
 #endif /* TXOPS_H */

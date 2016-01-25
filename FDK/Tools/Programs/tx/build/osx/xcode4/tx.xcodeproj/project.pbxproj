@@ -1479,6 +1479,11 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BD49904A0D7DE640005EF88C /* debug_tx.xcconfig */;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"$(SDKROOT)/usr/include",
+					"../../../../public/lib/api/**",
+					"../../../../public/lib/resource/**",
+				);
 				PRODUCT_NAME = tx;
 			};
 			name = Debug;

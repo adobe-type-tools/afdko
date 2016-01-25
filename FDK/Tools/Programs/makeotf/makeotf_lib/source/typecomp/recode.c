@@ -711,11 +711,11 @@ static void showWarn(recodeCtx h) {
 			break;
 
 		case CIDType:
-			sprintf(id, "cid#%hu", h->id);
+			sprintf(id, "cid#%u", h->id);
 			break;
 
 		case SubrType:
-			sprintf(id, "subr#%hu", h->id);
+			sprintf(id, "subr#%u", h->id);
 			break;
 	}
 
@@ -3447,7 +3447,7 @@ static void recodeAddChar(tcCtx g, unsigned length, char *cstr, unsigned id,
 #if TC_DEBUG
 	if (h->debug.input || h->debug.output) {
 		if (h->font->flags & FONT_CID) {
-			printf("--- glyph[%hu]\n", id);
+			printf("--- glyph[%u]\n", id);
 		}
 		else {
 			printf("--- glyph[%s]\n", sindexGetString(g, (SID)id));
@@ -3470,7 +3470,7 @@ static void recodeAddChar(tcCtx g, unsigned length, char *cstr, unsigned id,
 	if (h->debug.output) {
 		long icstr = h->chars.array[h->chars.cnt - 1].icstr;
 		unsigned length = h->cstrs.cnt - icstr;
-		printf("==== recode[%hd]: ", length);
+		printf("==== recode[%d]: ", length);
 		csDump(length, (unsigned char *)&h->cstrs.array[icstr], g->nMasters, 0);
 	}
 #endif /* TC_DEBUG */
@@ -5256,7 +5256,7 @@ static void dbstems(recodeCtx h) {
 		int idsize = (h->stem.list.cnt + 7) / 8;
 		for (i = 0; i < h->stem.list.cnt; i++) {
 			Stem *stem = &h->stem.list.array[i];
-			printf("[%d]={%hx,%hd,", i, stem->type, stem->id);
+			printf("[%d]={%hhx,%hhu,", i, stem->type, stem->id);
 			dbvalue(h, h->nMasters, stem->edge);
 			printf(",");
 			dbvalue(h, h->nMasters, stem->delta);
@@ -5295,7 +5295,7 @@ static void dbwidths(recodeCtx h, int fd) {
 		int i;
 		for (i = 0; i < h->width.fd.array[fd].total.cnt; i++) {
 			Width *width = &h->width.fd.array[fd].total.array[i];
-			printf("[%d]={%hd,%hu} ", i, width->width, width->count);
+			printf("[%d]={%hd,%lu} ", i, width->width, width->count);
 		}
 		printf("\n");
 	}

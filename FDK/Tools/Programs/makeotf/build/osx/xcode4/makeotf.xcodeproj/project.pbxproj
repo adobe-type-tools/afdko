@@ -371,7 +371,7 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0460;
+				LastUpgradeCheck = 0720;
 			};
 			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "makeotf" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -556,6 +556,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BD61592D0D2D755300C1E0CA /* debug_makeotf.xcconfig */;
 			buildSettings = {
+				ENABLE_TESTABILITY = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					BRV_64BIT_TYPES,
 					"HOT_FEAT_SUPPORT=1",
@@ -567,6 +568,21 @@
 					"HOT_DEBUG=1",
 					"TC_DEBUG=1",
 				);
+				HEADER_SEARCH_PATHS = (
+					"$(SDKROOT)/usr/include",
+					"../../../makeotf_lib/api/**",
+					"../../../makeotf_lib/resource/**",
+					"../../../../public/lib/api/**",
+					"../../../../public/lib/resource/**",
+				);
+				"HEADER_SEARCH_PATHS[arch=*]" = (
+					"$(SDKROOT)/usr/include",
+					"../../../makeotf_lib/api/**",
+					"../../../makeotf_lib/resource/**",
+					"../../../../public/lib/api/**",
+					"../../../../public/lib/resource/**",
+				);
+				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = makeotfexe;
 			};
 			name = Debug;

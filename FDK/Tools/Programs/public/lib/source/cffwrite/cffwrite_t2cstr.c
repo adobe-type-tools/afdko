@@ -344,8 +344,8 @@ static void clearmoveto(cstrCtx h, float dx, float dy) {
 	/* Restore current point */
 	h->x -= dx;
 	h->y -= dy;
-    h->x = roundf(h->x*100)/100;
-    h->y = roundf(h->y*100)/100;
+    h->x = RND_ON_WRITE(h->x);
+    h->y = RND_ON_WRITE(h->y);
 
 	addWarn(h, warn_move2);
 	clearop(h);
@@ -358,8 +358,8 @@ static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0) {
 
     float dx0;
     float dy0;
-    x0 = roundf(x0*100)/100;  // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
-    y0 = roundf(y0*100)/100;
+    x0 = RND_ON_WRITE(x0);  // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
+    y0 = RND_ON_WRITE(y0);
 	dx0 = x0 - h->x;
 	dy0 = y0 - h->y;
 
@@ -432,8 +432,8 @@ static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1) {
 
     float dx1;
     float dy1;
-    x1 = roundf(x1*100)/100;  // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
-    y1 = roundf(y1*100)/100;
+    x1 = RND_ON_WRITE(x1);  // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
+    y1 = RND_ON_WRITE(y1);
     dx1 = x1 - h->x;
     dy1 = y1 - h->y;
 
@@ -525,12 +525,12 @@ static void glyphCurve(abfGlyphCallbacks *cb,
     float dx3;
     float dy3;
     
-    x1 = roundf(x1*100)/100; // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
-    y1 = roundf(y1*100)/100;
-    x2 = roundf(x2*100)/100;
-    y2 = roundf(y2*100)/100;
-    x3 = roundf(x3*100)/100;
-    y3 = roundf(y3*100)/100;
+    x1 = RND_ON_WRITE(x1); // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
+    y1 = RND_ON_WRITE(y1);
+    x2 = RND_ON_WRITE(x2);
+    y2 = RND_ON_WRITE(y2);
+    x3 = RND_ON_WRITE(x3);
+    y3 = RND_ON_WRITE(y3);
     
     dx1 = x1 - h->x;
     dy1 = y1 - h->y;
@@ -1006,18 +1006,18 @@ static void glyphFlex(abfGlyphCallbacks *cb, float depth,
 		saveop(h, h->pendop);
 	}
 
-    x1 = roundf(x1*100)/100; // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
-    y1 = roundf(y1*100)/100;
-    x2 = roundf(x2*100)/100;
-    y2 = roundf(y2*100)/100;
-    x3 = roundf(x3*100)/100;
-    y3 = roundf(y3*100)/100;
-    x4 = roundf(x4*100)/100;
-    y4 = roundf(y4*100)/100;
-    x5 = roundf(x5*100)/100;
-    y5 = roundf(y5*100)/100;
-    x6 = roundf(x6*100)/100;
-    y6 = roundf(y6*100)/100;
+    x1 = RND_ON_WRITE(x1); // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
+    y1 = RND_ON_WRITE(y1);
+    x2 = RND_ON_WRITE(x2);
+    y2 = RND_ON_WRITE(y2);
+    x3 = RND_ON_WRITE(x3);
+    y3 = RND_ON_WRITE(y3);
+    x4 = RND_ON_WRITE(x4);
+    y4 = RND_ON_WRITE(y4);
+    x5 = RND_ON_WRITE(x5);
+    y5 = RND_ON_WRITE(y5);
+    x6 = RND_ON_WRITE(x6);
+    y6 = RND_ON_WRITE(y6);
 
 	if (depth != TX_STD_FLEX_DEPTH) {
 		/* dx1 dy1 dx2 dy2 dx3 dy3 dx4 dy4 dx5 dy5 dx6 dy6 depth flex */

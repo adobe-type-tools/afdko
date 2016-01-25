@@ -71,8 +71,11 @@ struct t1cCtx
 		int nMasters;
 		int leIndex;
 		int composeOpCnt;
+        int isX;
 		float composeOpArray[TX_MAX_OP_STACK_CUBE];
 		double WV[kMaxCubeMasters]; /* Was originally just 4, to support substitution MM fonts. Note: the PFR rasterizer can support only up to 5 axes */
+        float curX[kMaxCubeMasters];
+        float curY[kMaxCubeMasters];
 		} cube[CUBE_LE_STACKDEPTH];
 	struct
 		{
@@ -236,8 +239,14 @@ static void callbackMove(t1cCtx h, float dx, float dy)
          h->x and h->y are the current absolute position of the last point in the last path.
          h->le_start.x,y are the LE absolute start position.
          */
+        /* Also, for LE's, dx and dy are actually absolute values relative to the LE start position */
 		x = h->le_start.x + dx;
 		y = h->le_start.y + dy;
+        x = RND(x);
+        y = RND(y);
+        h->x = h->le_start.x;
+        h->y = h->le_start.y;
+        
         
         if (h->flags & START_PATH_MATRIX)
         {
@@ -260,8 +269,17 @@ static void callbackMove(t1cCtx h, float dx, float dy)
         x = h->x + dx;
         y = h->y + dy;
         
-        if (!(h->flags & FLATTEN_COMPOSE))
+        if (h->flags & FLATTEN_COMPOSE)
         {
+            x = RND(x);
+            y = RND(y);
+        }
+        else
+        {
+            x = RND_ON_READ(x);
+            y = RND_ON_READ(y);
+            h->x = x;
+            h->y = y;
             /* If we are not processing an LE, then a move-to marks a new non-LE path */
             if (h->cubeStackDepth < 0)
                 h->le_start.useLEStart = 0;
@@ -307,17 +325,12 @@ static void callbackMove(t1cCtx h, float dx, float dy)
 		h->seac.phase = seacAccentPostMove;
     }
     
-	x = roundf(x*100)/100;
-    y = roundf(y*100)/100;
-	h->x = x;
-    h->y = y;
-    
-	if (h->flags & USE_MATRIX)
-		h->glyph->move(h->glyph, TX(h->x, h->y), TY(h->x, h->y));
-	else if (h->flags & SEEN_BLEND)
-		h->glyph->move(h->glyph, RND(h->x), RND(h->y));
-	else
-		h->glyph->move(h->glyph, h->x, h->y);
+    if (h->flags & USE_MATRIX)
+        h->glyph->move(h->glyph, TX(x, y), TY(x, y));
+    else if (h->flags & SEEN_BLEND)
+        h->glyph->move(h->glyph, RND(x), RND(y));
+    else
+        h->glyph->move(h->glyph, x, y);
 }
 
 
@@ -328,17 +341,28 @@ static void callbackLine(t1cCtx h, float dx, float dy)
 
 	if (h->flags & PEND_MOVETO)
 		callbackMove(h, 0, 0);	/* Insert missing move */
-
+ 
 	x = h->x + dx; 	y = h->y + dy;
-    h->x = roundf(x*100)/100;
-    h->y = roundf(y*100)/100;
-
+        
+    /* for LE's, dx and dy are actually absolute values relative to the LE start position */
+    if  (!(h->flags & FLATTEN_COMPOSE))
+    {
+        x = RND_ON_READ(x);
+        y = RND_ON_READ(y);
+        h->x = x;
+        h->y = y;
+    }
+    else
+    {
+        x = RND(x);
+        y = RND(y);
+    }
 	if (h->flags & USE_MATRIX)
-		h->glyph->line(h->glyph, TX(h->x, h->y), TY(h->x, h->y));
+		h->glyph->line(h->glyph, TX(x, y), TY(x, y));
 	else if (h->flags & SEEN_BLEND)
-		h->glyph->line(h->glyph, RND(h->x), RND(h->y));
+		h->glyph->line(h->glyph, RND(x), RND(y));
 	else
-		h->glyph->line(h->glyph, h->x, h->y);
+		h->glyph->line(h->glyph, x, y);
 	}
 
 /* Callback path curve. */
@@ -354,13 +378,29 @@ static void callbackCurve(t1cCtx h,
 	if (h->flags & PEND_MOVETO)
 		callbackMove(h, 0, 0);	/* Insert missing move */
 
-	x1 = h->x + dx1;	y1 = h->y + dy1;
-	x2 = x1 + dx2; 		y2 = y1 + dy2; 
-	x3 = x2 + dx3; 		y3 = y2 + dy3;
-    x3 = roundf(x3*100)/100;
-    y3 = roundf(y3*100)/100;
-    h->x = x3;
-    h->y = y3;
+    if  (h->flags & FLATTEN_COMPOSE)
+    {
+        /* for LE's, dx and dy are actually absolute values relative to the LE start position */
+        x1 = h->x + dx1;	y1 = h->y + dy1;
+        x2 = h->x + dx2; 		y2 = h->y + dy2;
+        x3 = h->x + dx3; 		y3 = h->y + dy3;
+        x1 = RND(x1);
+        y1 = RND(y1);
+        x2 = RND(x2);
+        y2 = RND(y2);
+        x3 = RND(x3);
+        y3 = RND(y3);
+    }
+    else
+    {
+        x1 = h->x + dx1;	y1 = h->y + dy1;
+        x2 = x1 + dx2; 		y2 = y1 + dy2; 
+        x3 = x2 + dx3; 		y3 = y2 + dy3;
+        x3 = RND_ON_READ(x3);
+        y3 = RND_ON_READ(y3);
+        h->x = x3;
+        h->y = y3;
+    }
 
 	if (h->flags & USE_MATRIX)
 		h->glyph->curve(h->glyph, 
@@ -479,8 +519,8 @@ static void callbackFlex(t1cCtx h)
 		float x4 = x3 + dx4;    float y4 = y3 + dy4;
 		float x5 = x4 + dx5;   	float y5 = y4 + dy5;
 		float x6 = x5 + dx6;   	float y6 = y5 + dy6;
-        x6 = roundf(x6*100)/100;
-        y6 = roundf(y6*100)/100;
+        x6 = RND_ON_READ(x6);
+        y6 = RND_ON_READ(y6);
         h->x = x6;
         h->y = y6;
 
@@ -527,8 +567,8 @@ static void callbackFlex(t1cCtx h)
 
 	if (h->seac.phase <= seacBase)
 		{
-        h->x = roundf(args[15]*100)/100;
-        h->y = roundf(args[16]*100)/100;
+        h->x = RND_ON_READ(args[15]);
+            h->y = RND_ON_READ(args[16]);
 		}
 	}
 
@@ -578,8 +618,8 @@ static void callback_setwv_cube(t1cCtx h, unsigned int numDV)
 static void callback_compose(t1cCtx h, int cubeLEIndex, float dx, float dy, int numDV, float *ndv)
 	{
 	h->x += dx;	h->y += dy;
-    h->x = roundf(h->x*100)/100;
-    h->y = roundf(h->y*100)/100;
+    h->x = RND_ON_READ(h->x);
+    h->y = RND_ON_READ(h->y);
         if (h->glyph->cubeCompose == NULL)
 		return;
 		
@@ -1030,7 +1070,14 @@ static int do_set_weight_vector_cube(t1cCtx h, int nAxes)
 		h->cube[h->cubeStackDepth].composeOpCnt -= popCnt;
 		return t1cSuccess;
 		}
-
+        
+    h->cube[h->cubeStackDepth].isX = 1; /* Used to determine whether do_blend_cude is blending X or Y value.*/
+    for (i = 0; i < kMaxCubeMasters; i++)
+    {
+        h->cube[h->cubeStackDepth].curX[i] = 0;
+        h->cube[h->cubeStackDepth].curY[i] = 0;
+    }
+    i =0;
 	while (i < nAxes)
 		{
 		NDV[i] = (double)((100 + (long)composeOps[3+i])/200.0);
@@ -1055,25 +1102,79 @@ static int do_set_weight_vector_cube(t1cCtx h, int nAxes)
 /* Execute "blend" op. Return 0 on success else error code. */
 static int do_blend_cube(t1cCtx h, int nBlends)
 	{
+    /* When processing blended values for an LE, each drawing op value is stored as set of
+     blend values that gets reduced to a single value by making weighted average of the set of values.
+     The first blend value is the original value from the first master design;
+     each subsquent value is a delta from that value to the value for the corresponding master design.
+     Example:
+     Master 1:  100 200 rmoveto 100 0 rlineto  # in absolute coordinates: 100 200 moveto 200 200 lineto
+     Master 2:  110 220 rmoveto 220 330 rlineto  # in absolute coordinates: 110 220 moveto 330 550 lineto
+     In an LE charstring, this gives ->
+            [100 10] blend [200 20] blend removeto [100 120] blend [0 330] blend rlineto
+    This code originally applied the weighted average to the set of blend values to come up with a new relative
+    value. However, I need the output to match that of the TWB2 font editing program, which calculates a weighted
+    average of the absolute coordinates for the LE. Becuase of issues with math library precision, in order
+    to match the TWB2 output, I had to also apply the weighted average to the absolute values.
+    */
 	int i;
 	int nElements = nBlends * h->cube[h->cubeStackDepth].nMasters;
 	int iBase = h->stack.cnt - nElements;
-	int k = iBase + nBlends;
-	
+	int k = (iBase + nBlends);
 	if (h->cube[h->cubeStackDepth].nMasters <= 1)
 		return t1cErrInvalidWV;
 	CHKUFLOW(nElements);
 
 	if  (h->flags & FLATTEN_CUBE)
 		{
+        int isX = h->cube[h->cubeStackDepth].isX;
+        float* curX;
+            
+           
 		for (i = 0; i < nBlends; i++)
 			{
-			int j;
-			double x = INDEX(iBase + i);
-			for (j = 1; j < h->cube[h->cubeStackDepth].nMasters; j++)
-				x += INDEX(k++)*h->cube[h->cubeStackDepth].WV[j];
-			INDEX(iBase + i) = (float)x;
-			}
+                int j;
+                double x;
+                double xs;
+                double wv;
+                if (isX)
+                    curX = h->cube[h->cubeStackDepth].curX;
+                else
+                    curX = h->cube[h->cubeStackDepth].curY;
+                x = INDEX(iBase + i);
+                wv = h->cube[h->cubeStackDepth].WV[0];
+                xs = 0;
+                if (wv != 0)
+                {
+                    xs = (curX[0] + x)*wv;
+                }
+                curX[0] += x;
+               if (0) {
+                   printf("j %d val x %f\n", 0, x);
+                   printf("wv %f\n", wv);
+                   printf("xs %f\n\n", xs);
+                }
+                
+                for (j = 1; j < h->cube[h->cubeStackDepth].nMasters; j++)
+                {
+                    float val = curX[j] + x + INDEX(k);
+                    wv = h->cube[h->cubeStackDepth].WV[j];
+                    k++;
+                    if (wv != 0)
+                    {
+                        xs += val*wv;
+                       if (0)
+                       {
+                           printf("j %d val %f\n", j, val);
+                           printf("wv %f\n", wv);
+                           printf("xs %f\n\n", xs);
+                       }
+                    }
+                    curX[j] = val;
+                }
+                INDEX(iBase + i) = (float)xs;
+                isX = !isX;
+            }
+            h->cube[h->cubeStackDepth].isX = isX;
 		}
 	else
 		{
@@ -1235,8 +1336,6 @@ static int t1Decode(t1cCtx h, long offset)
 					*/
 					h->x = h->le_start.x;
 					h->y = h->le_start.y;
-                    h->x = roundf(h->x*100)/100;
-                    h->y = roundf(h->y*100)/100;
 					if (h->flags & FLATTEN_CUBE)
 					{
 						h->flags &= ~START_COMPOSE;
@@ -1599,8 +1698,8 @@ static int t1Decode(t1cCtx h, long offset)
 					h->x = h->seac.bsb_x = INDEX(0);
 					h->y = h->seac.bsb_y = INDEX(1);
 					}
-                h->x = roundf(h->x*100)/100;
-                h->y = roundf(h->y*100)/100;
+                h->x = RND_ON_READ(h->x);
+                h->y = RND_ON_READ(h->y);
 				break;
 			case tx_div:
 				result = do_div(h);
@@ -1757,8 +1856,8 @@ static int t1Decode(t1cCtx h, long offset)
 					CHKUFLOW(2);
 					h->x = INDEX(0);
 					h->y = INDEX(1);
-                    h->x = roundf(h->x*100)/100;
-                    h->y = roundf(h->y*100)/100;
+                    h->x = RND_ON_READ(h->x);
+                    h->y = RND_ON_READ(h->y);
 					}
 				break;
 			case tx_reservedESC19:
@@ -1922,8 +2021,8 @@ static int t1Decode(t1cCtx h, long offset)
 				h->x  = h->seac.bsb_x = INDEX(0);
 				h->y  = h->seac.bsb_y = 0;
 				}
-            h->x = roundf(h->x*100)/100;
-            h->y = roundf(h->y*100)/100;
+            h->x = RND_ON_READ(h->x);
+            h->y = RND_ON_READ(h->y);
 			break;
 		case tx_endchar:
 			h->flags |= SEEN_ENDCHAR;
