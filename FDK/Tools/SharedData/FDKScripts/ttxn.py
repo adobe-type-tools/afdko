@@ -59,7 +59,7 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 
 
 __help__ = """
-ttxn v1.16 Feb 18 2015
+ttxn v1.17 Jan 12 2016
 
 Based on the ttx tool, with the same options, except that it is limited to
 dumping, and cannot compile. Makes a normalized dump of the font, or of
@@ -1926,23 +1926,8 @@ def debugmsg(msg):
 	print(msg + time.strftime("  (%H:%M:%S)", time.localtime(time.time())))
 
 class  TTXNWriter(XMLWriter):
-	def __init__(self, fileOrPath, indentwhite=INDENT, idlefunc=None, encoding="ISO-8859-1", indentLevel=0):
-		if not hasattr(fileOrPath, "write"):
-			self.file = open(fileOrPath, "w")
-			if os.name == "mac":
-				import macfs
-				macfs.FSSpec(fileOrPath).SetCreatorType('R*ch', 'TEXT')
-		else:
-			# assume writable file object
-			self.file = fileOrPath
-		self.indentwhite = indentwhite
-		self.indentlevel = indentLevel
-		self.stack = []
-		self.needindent = 1
-		self.idlefunc = idlefunc
-		self.idlecounter = 0
-		self.newline()
-
+	def __init__(self, fileOrPath, indentwhite=INDENT, idlefunc=None, encoding='utf8', indentLevel=0):
+		XMLWriter. __init__(self, fileOrPath, indentwhite, idlefunc, encoding)
 
 class  TTXNTTFont(TTFont):
 	def __init__(self, file=None, res_name_or_index=None,
