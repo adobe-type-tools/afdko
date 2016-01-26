@@ -147,7 +147,7 @@ class glyph:
 			otherkeys.sort()
 			for k in otherkeys: e.append("\t%s: %s" % (k, self.other[k])) # other keys
 		return '\n'.join(e) + '\n'
-	
+
 	# return a uni-name for the glyph's Unicode value:
 	def uniname(self):
 		if self.uni: return "uni%s"%self.uni
@@ -184,7 +184,7 @@ class dictionary:
 		self.unicode = {} # Hash of Unicode values
 		self.messages = [] # A list of error/warning messages
 		if intext: self.parse(intext)
-	
+
 	# Read text, convert to glyph entries, and add to dictionary:
 	def parse(self, intext, priority=1):
 		intext += '\n' # ensure the file ends with a newline for grep purposes
@@ -240,7 +240,7 @@ class dictionary:
 		else:
 			self.messages.append("Cannot remove alias '%s'. (Name not found.)" % n)
 			return False
-	
+
 	# Find and remove a Unicode value:
 	def removeunicode(self, u):
 		if u in self.unicode:
@@ -418,7 +418,7 @@ class substitution:
 		else: self.input = list(a) # List of input glyphs
 		if isinstance(b, str): self.output = [b] # if b is string, not list
 		else: self.output = list(b) # List of output glyphs
-		
+
 		if len(self.input) == 1 and len(self.output) == 1: self.type = 1
 		elif len(self.input) > 1 and len(self.output) == 1: self.type = 4
 		elif len(self.input) == 1 and len(self.output) > 1: self.type = 3
@@ -426,7 +426,7 @@ class substitution:
 
 		if intype: self.type = intype # Set input override type
 
-	# return a single glyph substitution as a tuple if the input and 
+	# return a single glyph substitution as a tuple if the input and
 	# output both have one glyphs, otherwise return None:
 	def pair(self):
 		if len(self.input) == 1 and len(self.output) == 1:
@@ -448,13 +448,13 @@ class substitution:
 		else: b = ''
 
 		if len_a == 1 and len_b > 1: subword = 'from'
-		
+
 		if a and b: return '\tsub %s %s %s;' % (a, subword, b)
 		elif b and not a: return '\t# %s' % b
 		else: return ''
 
 #-----------------------------------------------------------
-# Looks through a list of substitution instances (ss) and 
+# Looks through a list of substitution instances (ss) and
 # consolidates one-for-one entries into many-for-one or one-from-many
 def consolidate(ss):
 	glyphs_a = {} # collects matching input glyphs
@@ -533,7 +533,7 @@ def consolidate(ss):
 	return newlist
 
 #---------------------------------------
-# Create feature file code from a dictionary (d) and 
+# Create feature file code from a dictionary (d) and
 # optional list of glyph names (nn)
 def makefeatures(d, nn=None):
 	outlist = [] # List to collect output lines
@@ -542,7 +542,7 @@ def makefeatures(d, nn=None):
 	glyphpass = []
 
 	nn = nn or d.list # Get list of glyphs from dictionary if not submitted
-	
+
 	# check list of glyph names:
 	for n in nn:
 		g = d.glyph(n)
@@ -553,7 +553,7 @@ def makefeatures(d, nn=None):
 	for g in glyphpass:
 		subpass = []
 		if not g.sub: continue
-		# Parse substitution data and create substitution objects:	
+		# Parse substitution data and create substitution objects:
 		for subst in g.sub:
 			ss = subst.split('+')
 			f = ss.pop() # get the feature tag
@@ -576,7 +576,7 @@ def makefeatures(d, nn=None):
 		cs = consolidate(features[f]) # consolidate the feature's substitutions
 		for s in cs: outlist.append(s.feature())
 		outlist.append('} %s;\n' % f)
-	
+
 	return '\n'.join(outlist)
 
 
@@ -607,10 +607,10 @@ def makederived(g):
 
 
 #---------------------------------------
-# Create derivedchars entries from composite information in 
-# dictionary (d). Produce entries for (glyphlist) or all glyphs 
+# Create derivedchars entries from composite information in
+# dictionary (d). Produce entries for (glyphlist) or all glyphs
 # in (d) if (glyphlist) is None.
-# A composite entry will be skipped if all its components 
+# A composite entry will be skipped if all its components
 # are not in (glyphlist).
 def derivedchars(d, glyphlist=None):
 	cmpsplit = re.compile(r' |\+') # regexp for splitting 'cmp' text
@@ -674,8 +674,8 @@ def cfforder(nn=None):
 # Take a glyph list as text (textin),
 # return a report of name changes, etc.,
 # a feature file, and GOADB
-# With namechange False, will retain submitted 
-# names instead of changing them to prescribed 
+# With namechange False, will retain submitted
+# names instead of changing them to prescribed
 # work names.
 def looklist(textin, d, namechange=True):
 	m = [] # output messages
@@ -734,12 +734,12 @@ def namecheck(nn, match=False):
 			if not (p in a or re_uall.match(p)): nomatch = 1
 		if match is False and nomatch: nout.append(n)
 		elif match is True and not nomatch: nout.append(n)
-					
+
 	return nout
 
 
 #-----------------------------------------------------------
-# Deconstruct the character mapping of a glyph name (n), and return 
+# Deconstruct the character mapping of a glyph name (n), and return
 # (as a tuple) a list of Unicode values, and a suffix string
 re_uni = re.compile(r'^uni((?:[0-9A-F]{4})+)$') # match uni-name
 re_u = re.compile(r'^u([0-9A-F]{4}(?:[0-9A-F]{2})?)$') # match u-name
@@ -749,7 +749,7 @@ def namemap(n):
 	if not re.compile(r'^[A-Za-z0-9\._]+$').match(n): return None # If the glyph name does not match accepted characters
 	uu = [] # collects Unicode values
 	namesuffix = None # glyph name suffix
-	
+
 	nameparts = n.split(".", 1)
 	if len(nameparts) > 1: namesuffix = nameparts[1] # set name suffix, if any
 	nameparts = nameparts[0].split("_")
@@ -791,7 +791,7 @@ kPunctuation = {
 					"at" : 0x0040,
 					"questiondown" : 0x0021,
 					}
-					
+
 kUnicodeScriptRanges = [
 			# Note: CJK ranges omitted. Don;t expect to kern these!
 			(0x0000, 0x007F, "Latin", "C0 Controls and Basic Latin (Basic Latin)"),
