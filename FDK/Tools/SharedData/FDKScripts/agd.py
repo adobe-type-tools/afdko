@@ -6,6 +6,7 @@ dictionaries. In particular, to load the latest set of recommended Adobe Glyph
 names and Unicode values, from one of the scripts in
 FDK/Tools/SharedData/FDKScripts/, the set of commands is:
 	import agd
+	import os
 	sharedData = os.path.dirname(__file__)
 	sharedData = os.path.dirname(sharedData)
 	kAGD_TXTPath = os.path.join(sharedData, "AGD.TXT")
@@ -15,6 +16,7 @@ FDK/Tools/SharedData/FDKScripts/, the set of commands is:
 	gAGDDict = agd.dictionary(agdTextPath)
 """
 
+from __future__ import print_function
 import re, sys, os, time
 
 
@@ -90,8 +92,7 @@ class glyph:
 				m.append("Removed alias '%s' from glyph '%s' (uni-name for Unicode value)." % (a, self.name))
 				continue
 			else: n[a] = 1 # pass the alias
-		self.ali = n.keys() # list of passed aliases
-		self.ali.sort() # sort alias list
+		self.ali = sorted(n.keys()) # sorted list of passed aliases
 		# check final name:
 		if self.fin and self.fin == self.name:
 			m.append("Removed final name '%s' from glyph '%s' (same as index name)." % (self.fin, self.name))
@@ -126,8 +127,7 @@ class glyph:
 		if self.uni: n[self.uniname()] = 1
 		for i in self.ali: n[i] = 1 # add the glyph's own alias names
 		for i in addglyphs: n[i] = 1 # add any additional alias names
-		nn = n.keys()
-		nn.sort()
+		nn = sorted(n.keys())
 		return nn
 
 	# Return a text entry
@@ -143,8 +143,7 @@ class glyph:
 		if self.maj: e.append("\tmaj: %s" % self.maj) # majuscule
 		if self.cmp: e.append("\tcmp: %s" % self.cmp) # components
 		if self.other:
-			otherkeys = self.other.keys()
-			otherkeys.sort()
+			otherkeys = sorted(self.other.keys())
 			for k in otherkeys: e.append("\t%s: %s" % (k, self.other[k])) # other keys
 		return '\n'.join(e) + '\n'
 
@@ -350,9 +349,8 @@ class dictionary:
 	# Create a list of Unicodes in the dictionary, sorted by Unicode value:
 	def unicodes(self):
 		x = []
-		uu = self.unicode.keys()
-		print "Unicodes: %s" % len(uu)
-		uu.sort()
+		uu = sorted(self.unicode.keys())
+		print("Unicodes: %s" % len(uu))
 		for u in uu: x.append("%s\t%s" % (self.glyphs[self.unicode[u]].uni, self.unicode[u]))
 		return "\n".join(x)
 
@@ -567,8 +565,7 @@ def makefeatures(d, nn=None):
 			if not (f in features): features[f] = [] # create a feature tag entry
 			features[f].append(substitution(subpass, glyphnames[g.name])) # Append a substitution instance to the feature's list
 
-	flist = features.keys() # all feature tags
-	flist.sort()
+	flist = sorted(features.keys()) # all feature tags
 
 	# Create feature text output:
 	for f in flist:
@@ -697,14 +694,14 @@ def looklist(textin, d, namechange=True):
 
 	# Print GOADB file:
 	aliasfile = d.aliasfile(glyphlist)
-	print aliasfile + "\n\n"
+	print(aliasfile + "\n\n")
 
 	# Print feature file
 	featurefile = makefeatures(d, glyphlist)
-	print featurefile + "\n\n"
+	print(featurefile + "\n\n")
 
 	# Print derivedchars:
-	print derivedchars(d, glyphlist) + "\n\n"
+	print(derivedchars(d, glyphlist) + "\n\n")
 
 	# Check for minuscule/majuscule matches:
 	for n in glyphlist:
