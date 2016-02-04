@@ -912,7 +912,7 @@ include<code>(../features.family);</code></pre>
 <p><b>Example 1.</b> Ignoring specific sequences: The &quot;ignore substitute&quot; rules below will block any subsequent rules that specifies a substitution for &quot;d&quot; when the context around &quot;d&quot; matches any of the sequences &quot;f a d&quot;, &quot;f e d&quot;, or &quot;a d d&quot;.</p>
 <p>Note that the marked glyphs in the exception sequences indicate where a substitution would have occurred; this is necessary for the OpenType layout engine to correctly handle skipping this sequence.</p>
 <pre>
-  <b>ignore substitute</b> f [a e] d'
+  <b>ignore substitute</b> f [a e] d';
   <b>ignore substitute</b> a d' d;
   <b>substitute</b> [a e n] d' <b>by</b> d.alt;</pre>
 <p><b>Example 2.</b> Matching a beginning-of-word boundary:</p>
