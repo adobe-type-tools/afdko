@@ -52,6 +52,9 @@ void otlDumpSizes(hotCtx g, otlTbl t, LOffset subtableSize,
 #define aalt_   TAG('a', 'a', 'l', 't')    /* All alternates */
 #define kern_   TAG('k', 'e', 'r', 'n')    /* Kerning */
 #define vkrn_   TAG('v', 'k', 'r', 'n')    /* Vertical kerning */
+#define vpal_   TAG('v', 'p', 'a', 'l')    /* Vertical kerning */
+#define vhal_   TAG('v', 'h', 'a', 'l')    /* Vertical kerning */
+#define valt_   TAG('v', 'a', 'l', 't')    /* Vertical kerning */
 #define vert_   TAG('v', 'e', 'r', 't')    /* Vertical writing */
 #define vrt2_   TAG('v', 'r', 't', '2')    /* Vertical rotation */
 #define size_   TAG('s', 'i', 'z', 'e')    /* Vertical rotation */

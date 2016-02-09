@@ -936,23 +936,38 @@ typedef struct {
 
 /* --- ValueFormat and ValueRecord utility functions --- */
 
+static unsigned int isVertFeature(Tag featTag)
+{
+    int isVert = 0;
+    if ( (featTag == vkrn_) || (featTag == vpal_)  || (featTag == vhal_)  || (featTag == valt_) )
+        isVert = 1;
+    return isVert;
+}
+
 /* Calculate value format */
 
 static unsigned makeValueFormat(hotCtx g, int xPla, int yPla, int xAdv, int yAdv) {
-	unsigned val = 0;
-	if (xPla) {
+    unsigned val = 0;
+    GPOSCtx h = g->ctx.GPOS;
+
+     if (xPla) {
 		val |= IS_MM(g) ? ValueXIdPlacement : ValueXPlacement;
 	}
 	if (yPla) {
 		val |= IS_MM(g) ? ValueYIdPlacement : ValueYPlacement;
 	}
-	if (xAdv) {
-		val |= IS_MM(g) ? ValueXIdAdvance : ValueXAdvance;
-	}
 	if (yAdv) {
 		val |= IS_MM(g) ? ValueYIdAdvance : ValueYAdvance;
 	}
-	return val;
+    
+    if (xAdv) {
+        if  ((val == 0) && (isVertFeature(h->new.feature)))
+            val =  (IS_MM(g) ? ValueYIdAdvance: ValueYAdvance);
+        else
+            val |= IS_MM(g) ? ValueXIdAdvance : ValueXAdvance;
+    }
+
+        return val;
 }
 
 static void recordValues(GPOSCtx h, unsigned valFmt, int xPla, int yPla, int xAdv, int yAdv) {
@@ -1071,7 +1086,10 @@ void GPOSSetSizeMenuNameID(hotCtx g, unsigned short nameID) {
 
 static void GPOSAddSingle(hotCtx g, SubtableInfo *si, GNode *targ, int xPla, int yPla, int xAdv, int yAdv) {
 	GNode *p;
-	unsigned valFmt = makeValueFormat(g, xPla, yPla, xAdv, yAdv);
+    unsigned valFmt;
+    GPOSCtx h = g->ctx.GPOS;
+   
+    valFmt = makeValueFormat(g, xPla, yPla, xAdv, yAdv);
 
 	if (g->hadError) {
 		return;
@@ -1087,8 +1105,16 @@ static void GPOSAddSingle(hotCtx g, SubtableInfo *si, GNode *targ, int xPla, int
 		single->gid = p->gid;
 		single->xPla = xPla;
 		single->yPla = yPla;
-		single->xAdv = xAdv;
-		single->yAdv = yAdv;
+        if (isVertFeature(h->new.feature) && (valFmt == ValueYAdvance) && (yAdv == 0))
+             {
+                 single->xAdv = 0;
+                 single->yAdv = xAdv;
+             }
+             else
+             {
+                 single->xAdv = xAdv;
+                 single->yAdv = yAdv;
+             }
 		single->valFmt = valFmt;
 #if HOT_DEBUG
 		if (DF_LEVEL >= 2) {
@@ -1756,6 +1782,7 @@ static void addSpecPair(hotCtx g, GID first, GID second,  short metricsCnt1, sho
    removed. Input GNodes are stored; they are recycled in this function
    (if fmt1), or at GPOSLookupEnd(?) (if fmt2). */
 
+
 void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second,  char *filename, int lineNum) {
 	GPOSCtx h = g->ctx.GPOS;
 	SubtableInfo * si = (SubtableInfo*)subtableInfo;
@@ -1796,7 +1823,7 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second,  cha
 
 
 	if (first->metricsInfo->cnt == 1) {
-		if (h->new.feature == vkrn_) {
+		if (isVertFeature(h->new.feature)) {
 			valFmt1 =  (unsigned short)(IS_MM(g) ? ValueYIdAdvance: ValueYAdvance);
 		}
 		else {
@@ -1807,9 +1834,9 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second,  cha
 		valFmt1 = makeValueFormat(g, values1[0], values1[1], values1[2], values1[3]);
 		if (valFmt1 == 0) {
 			/* if someone has specified a value of <0 0 0 0>, then valFmt is 0.
-			This will cause a subtable break, since the valFmt wil differ from
-			any non-zero record. Set teh val fmt to the default value. */
-			if (h->new.feature == vkrn_) {
+			This will cause a subtable break, since the valFmt will differ from
+			any non-zero record. Set the val fmt to the default value. */
+			if (isVertFeature(h->new.feature)) {
 				valFmt1 =  (unsigned short)(IS_MM(g) ? ValueYIdAdvance: ValueYAdvance);
 			}
 			else {
@@ -1820,7 +1847,7 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second,  cha
 	
 	if (second->metricsInfo != NULL) {
 		if (second->metricsInfo->cnt == 1) {
-			if (h->new.feature == vkrn_) {
+			if (isVertFeature(h->new.feature)) {
 				valFmt2 =  (unsigned short)(IS_MM(g) ? ValueYIdAdvance: ValueYAdvance);
 			}
 			else {
@@ -1832,8 +1859,8 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second,  cha
 			if (valFmt2 == 0) {
 				/* if someone has specified a value of <0 0 0 0>, then valFmt is 0.
 				This will cause a subtable break, since the valFmt wil differ from
-				any non-zero record. Set teh val fmt to the default value. */
-				if (h->new.feature == vkrn_) {
+				any non-zero record. Set the val fmt to the default value. */
+				if (isVertFeature(h->new.feature)) {
 					valFmt2 = (unsigned short)(IS_MM(g) ? ValueYIdAdvance: ValueYAdvance);
 				}
 				else {

@@ -1,6 +1,44 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
+	Adobe CMAP files for CJK fonts.
+	Updated UniCNS-UTF32-H to v1.14
+
+	Build issues.
+	Made changes to allow compiling under Xcode 7.x and OSX 10.11
+	 
+	Documentation:
+	Fixed a bunch of errors in the Feature File spec. My thanks to Sascha Brawer, 
+	who has been reviewing this carefully. See the issues raised by him in Jan
+	and Feb 2016 on https://github.com/adobe-type-tools/afdko.
+	
+	checkOutlines.
+	Fixed bug in ufoTools.py that kept checkOutlines (NOT checkOutlinesUFO) from
+	working with a UFO font.
+	
+	makeotf.
+	Fixed bug where using both kern format A and B in a single lookup caused
+	random values to be assigned.
+	Fixed bug where a format A kern value (a single value) would be applied
+	to X positioning rather than Y positioning for the features 'vkrn'. Applied same
+	logic to vpal, valt, and vhal.
+	
+	ttxn
+	Fix bug in ttxn.py that broke it when dumping some tables, when used with
+	latest font tools library on github.
+
+	tx.
+	Fixed bug in rounding fractional values when flattening library elements,
+	used in design of CJK fonts.
+	Fixed bug in handling FontDict FontMatrix array values: not enough precision
+	was used, so that 1/2048 was written as 1/2049 in some cases.
+	Fixed bug in reading UFO fonts, so that glyphs with no <outline> element and
+	with a <lib> element would be skipped.
+	Minor code changes to allow 'tx' to compile as a 64 bit program.
+	
+	
+	
+	
 FDK. v2.5 Dec 1 2015 change number 65012.
 
 	makeotf.
