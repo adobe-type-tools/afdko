@@ -103,7 +103,7 @@ typedef struct
     char* glyphName;
     char* glifFileName;
     char* glifFilePath;
-    int glyphOrder; // used to sort the glypfRecs by glyph order from lib.plist.
+    long int glyphOrder; // used to sort the glypfRecs by glyph order from lib.plist.
 } GLIF_Rec;
 
 typedef struct 
@@ -1468,9 +1468,15 @@ static int getGlyphOrderIndex(ufoCtx h, char * glyphName)
 static void  addGLIFRec(ufoCtx h, int state)
 {
 	char* fileName;
-    GLIF_Rec* newGLIFRec = dnaNEXT(h->data.glifRecs);
+    GLIF_Rec* newGLIFRec;
+    long int glyphOrder;
+    int k;
+
+    glyphOrder = getGlyphOrderIndex(h,  h->parseKeyName);
+    newGLIFRec = dnaNEXT(h->data.glifRecs);
+    k = h->data.glifRecs.cnt-1;
     newGLIFRec->glyphName = h->parseKeyName;
-    newGLIFRec->glyphOrder = getGlyphOrderIndex(h,  h->parseKeyName);
+    newGLIFRec->glyphOrder = glyphOrder;
     fileName = getKeyValue(h,  "</string>", state);
     if (fileName == NULL)
     {
@@ -1821,7 +1827,7 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag)
     // set width, stores offset to outline data, Does not parse it.
     int state = 0; /* 0 == start, 1= seen start of glyph,  4 in comment.  */
     int prevState = 0;
-    int i;
+    long i;
     long char_begin;
     long char_end;
     long defaultWidth = 1000;
@@ -1833,7 +1839,7 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag)
     h->src.next = h->mark = NULL;
     
     h->flags &= ~((unsigned long)SEEN_END);
-    
+
     /* First, try the alt layer directory */
     glifRec->glifFilePath = memNew(h, 2 + strlen(h->altLayerDir) + strlen(glifRec->glifFileName));
     sprintf(glifRec->glifFilePath, "%s/%s", h->altLayerDir, glifRec->glifFileName);
@@ -1850,10 +1856,15 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag)
         h->cb.stm.clientFileName = glifRec->glifFilePath;
         h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
     }
-    if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0))
+    if (h->stm.src == NULL)
     {
-        fprintf(stderr, "Failed to open glif file in parseGLIF. %s.\n", glifRec->glifFileName);
-		return ufoErrSrcStream;
+        fprintf(stderr, "Failed to open glif file in parseGLIF. h->stm.src == NULL. %s.\n", glifRec->glifFilePath);
+        return ufoErrSrcStream;
+    }
+    if (h->cb.stm.seek(&h->cb.stm, h->stm.src, 0))
+    {
+        fprintf(stderr, "Failed to open glif file in parseGLIF. seek failed. %s.\n", glifRec->glifFilePath);
+        return ufoErrSrcStream;
     }
 
     fillbuf(h, 0);
@@ -1991,6 +2002,17 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag)
         }
         else if (tokenEqualStr(tk, "lib"))
         {
+            /* since any lib element follows the outline element, if we get here there is no outline element.
+             end we need to add the current glyph to the char list with no outline content. */
+            char_begin= 0;
+            char_end = 0;
+            
+            if (state != 1)
+            {
+                continue;
+            }
+            addCharFromGLIF(h, tag, glifRec->glyphName, char_begin, char_end, unicode);
+            state = 0;
             break;
         }
         else if (isUnknownAttribute(tk))
