@@ -6,7 +6,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define UFO_VERSION CTL_MAKE_VERSION(1,0,11)
+#define UFO_VERSION CTL_MAKE_VERSION(1,0,12)
 
 #include "absfont.h"
 

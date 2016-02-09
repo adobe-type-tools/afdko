@@ -230,9 +230,7 @@ void cfwDictSaveReal(DICT *dict, float r) {
 		return;
 	}
 
-	/* Convert to string; 8 digits of precision is enough to accurately
-	   represent the matrix of a typical TrueType font using a 2048 unit em */
-	ctuDtostr(buf, r, 0, 8);
+	ctuDtostr(buf, r, 0, 0);
 
 	*dnaNEXT(*dict) = cff_BCD;
 	for (i = buf[0] == '0';; i++) {

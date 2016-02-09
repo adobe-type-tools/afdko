@@ -470,7 +470,7 @@ static void CTL_CDECL dumpInstr(abfGlyphCallbacks *cb, char *fmt, ...)
 			/* Find break point */
 			for (p = &buf[h->left]; *p != ' '; p--)
 				;
-			fprintf(h->fp, "%.*s\n", p - buf, buf);
+			fprintf(h->fp, "%.*s\n", (int)(p - buf), buf);
 			fprintf(h->fp, "%s", p);
 			h->left = 79 - (strlen(p) + 1);
 			}

@@ -882,10 +882,7 @@ static void writeRealArrayDef(t1wCtx h, char *key, long cnt, float *array)
 		writeStr(h, sep);
         {
             float value = *array++;
-            if (roundf(value) == value)
-                writeFmt(h, "%ld", (long)roundf(value));
-            else
-                writeReal(h, value);
+            writeReal(h, value);
         }
 		sep = " ";
 		}

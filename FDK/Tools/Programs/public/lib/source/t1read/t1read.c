@@ -1856,8 +1856,11 @@ static int parseNumArray(t1rCtx h, int kKey,
 					{
 					float value = parseBlend(h, kKey, &p);
 					if (kKey == kFontBBox)
-						array[i++] = 
-							(float)((i < 2)? floor(value): ceil(value));
+                    {
+                        array[i] =
+                        (float)((i < 2)? floor(value): ceil(value));
+                        i++;
+                    }
 					else
 						array[i++] = value;
 					}

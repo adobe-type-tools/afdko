@@ -759,7 +759,7 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top)
     if (fontDict0->FontMatrix.cnt > 0)
     {
         sprintf(buffer, "\t<integer>%d</integer>",
-                (int)round(0.5 + 1.0/fontDict0->FontMatrix.array[0])
+                (int)round(1.0/fontDict0->FontMatrix.array[0])
                 );
         writeLine(h, buffer);
         

@@ -1,6 +1,7 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
+
 /*
  * Type 1 charstring support.
  */
@@ -25,7 +26,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 /* Make up operator for internal use */
 #define t2_cntroff	t2_reservedESC33
-
 enum							/* seac operator conversion phase */
 	{
 	seacNone,					/* No seac conversion */
@@ -1028,7 +1028,6 @@ static long unbiasLE(long arg, long nSubrs)
 	return (subrIndex < 0 || subrIndex >= nSubrs)? -1: subrIndex;
 }
 
-
 static int do_set_weight_vector_cube(t1cCtx h, int nAxes)
 	{
 	float dx, dy;
@@ -1071,7 +1070,7 @@ static int do_set_weight_vector_cube(t1cCtx h, int nAxes)
 		return t1cSuccess;
 		}
         
-    h->cube[h->cubeStackDepth].isX = 1; /* Used to determine whether do_blend_cude is blending X or Y value.*/
+    h->cube[h->cubeStackDepth].isX = 1; /* Used to determine whether do_blend_cube is blending X or Y value.*/
     for (i = 0; i < kMaxCubeMasters; i++)
     {
         h->cube[h->cubeStackDepth].curX[i] = 0;
@@ -1089,7 +1088,11 @@ static int do_set_weight_vector_cube(t1cCtx h, int nAxes)
 		{
 		h->cube[h->cubeStackDepth].WV[i] = 1;
 		for (j = 0; j < nAxes; j++)
-			h->cube[h->cubeStackDepth].WV[i] *= (i & 1<<j)? NDV[j]: 1 - NDV[j];
+        {
+            double wv = (i & 1<<j)? NDV[j]: 1 - NDV[j];
+            wv = h->cube[h->cubeStackDepth].WV[i]*wv;
+            h->cube[h->cubeStackDepth].WV[i] = wv;
+        }
 		}
 	/* Pop all the current COMPOSE args off the stack. */
 	for (i=popCnt; i< composeCnt; i++)
@@ -1098,7 +1101,73 @@ static int do_set_weight_vector_cube(t1cCtx h, int nAxes)
 
 	return t1cSuccess;
 	}
-	
+
+static int do_blend_cube_flattened(t1cCtx h, int nBlends, int iBase)
+{
+    int i;
+    int k = (iBase + nBlends);
+
+    int isX = h->cube[h->cubeStackDepth].isX;
+    float* curX;
+    
+    
+    for (i = 0; i < nBlends; i++)
+    {
+        int j;
+        double x;
+        double xs;
+        double wv;
+        double val;
+        
+        if (isX)
+            curX = h->cube[h->cubeStackDepth].curX;
+        else
+            curX = h->cube[h->cubeStackDepth].curY;
+        x = INDEX(iBase + i);
+        val = curX[0] + x;
+        wv = h->cube[h->cubeStackDepth].WV[0];
+        xs = 0;
+        if (wv != 0)
+        {
+            xs = val*wv;
+        }
+        curX[0] = val;
+        if (0 && (h->cube[h->cubeStackDepth].leIndex == -70))
+        {
+            printf("j %d val x %lf\n", 0, val);
+            printf("wv %lf\n", wv);
+            printf("xs %lf\n\n", xs);
+        }
+        
+        for (j = 1; j < h->cube[h->cubeStackDepth].nMasters; j++)
+        {
+            val = curX[j] + x + INDEX(k);
+            wv = h->cube[h->cubeStackDepth].WV[j];
+            k++;
+            if (wv != 0)
+            {
+                xs += val*wv;
+                if (0 && (h->cube[h->cubeStackDepth].leIndex == -70))
+                {
+                    printf("j %d val %lf\n", j, val);
+                    printf("wv %lf\n", wv);
+                    printf("xs %lf\n\n", xs);
+                }
+            }
+            curX[j] = val;
+        }
+        xs = xs*10000000000;
+        xs = (long int)xs;
+        xs = xs/10000000000.0;
+        xs = round(xs);
+        INDEX(iBase + i) = xs;
+        isX = !isX;
+    }
+    h->cube[h->cubeStackDepth].isX = isX;
+
+    return t1cSuccess;
+}
+
 /* Execute "blend" op. Return 0 on success else error code. */
 static int do_blend_cube(t1cCtx h, int nBlends)
 	{
@@ -1126,55 +1195,7 @@ static int do_blend_cube(t1cCtx h, int nBlends)
 
 	if  (h->flags & FLATTEN_CUBE)
 		{
-        int isX = h->cube[h->cubeStackDepth].isX;
-        float* curX;
-            
-           
-		for (i = 0; i < nBlends; i++)
-			{
-                int j;
-                double x;
-                double xs;
-                double wv;
-                if (isX)
-                    curX = h->cube[h->cubeStackDepth].curX;
-                else
-                    curX = h->cube[h->cubeStackDepth].curY;
-                x = INDEX(iBase + i);
-                wv = h->cube[h->cubeStackDepth].WV[0];
-                xs = 0;
-                if (wv != 0)
-                {
-                    xs = (curX[0] + x)*wv;
-                }
-                curX[0] += x;
-               if (0) {
-                   printf("j %d val x %f\n", 0, x);
-                   printf("wv %f\n", wv);
-                   printf("xs %f\n\n", xs);
-                }
-                
-                for (j = 1; j < h->cube[h->cubeStackDepth].nMasters; j++)
-                {
-                    float val = curX[j] + x + INDEX(k);
-                    wv = h->cube[h->cubeStackDepth].WV[j];
-                    k++;
-                    if (wv != 0)
-                    {
-                        xs += val*wv;
-                       if (0)
-                       {
-                           printf("j %d val %f\n", j, val);
-                           printf("wv %f\n", wv);
-                           printf("xs %f\n\n", xs);
-                       }
-                    }
-                    curX[j] = val;
-                }
-                INDEX(iBase + i) = (float)xs;
-                isX = !isX;
-            }
-            h->cube[h->cubeStackDepth].isX = isX;
+            do_blend_cube_flattened(h, nBlends, iBase);
 		}
 	else
 		{
@@ -1188,7 +1209,7 @@ static int do_blend_cube(t1cCtx h, int nBlends)
 		
 	h->stack.cnt = iBase + nBlends;
 
-	return 0;
+	return t1cSuccess;
 	}
 
 /* Execute "blend" op. Return 0 on success else error code. */
@@ -1203,14 +1224,21 @@ static int do_blend(t1cCtx h, int nBlends)
 		return t1cErrInvalidWV;
 	CHKUFLOW(nElements);
 
-	for (i = 0; i < nBlends; i++)
-		{
-		int j;
-		float x = INDEX(iBase + i);
-		for (j = 1; j < h->aux->nMasters; j++)
-			x += INDEX(k++)*h->aux->WV[j];
-		INDEX(iBase + i) = x;
-		}
+    if  (h->flags & FLATTEN_COMPOSE)
+    {
+        do_blend_cube_flattened(h, nBlends, iBase);
+    }
+    else
+    {
+        for (i = 0; i < nBlends; i++)
+        {
+            int j;
+            float x = INDEX(iBase + i);
+            for (j = 1; j < h->aux->nMasters; j++)
+                x += INDEX(k++)*h->aux->WV[j];
+            INDEX(iBase + i) = x;
+        }
+    }
 	h->stack.cnt = iBase + nBlends;
 
 	h->flags |= SEEN_BLEND;
@@ -1223,6 +1251,7 @@ static int t1Decode(t1cCtx h, long offset)
 	unsigned char *end;
 	unsigned char *next;
 
+        
 	/* Fetch charstring */
 	if (srcSeek(h, offset))
 		return t1cErrSrcStream;
@@ -2331,7 +2360,24 @@ int t1cParse(long offset, t1cAuxData *aux, abfGlyphCallbacks *glyph)
             }
         }
     }
-	if (aux->flags & T1C_FLATTEN_CUBE)
+
+    if ((h.aux != NULL) && (h.aux->nMasters > 1) && (aux->flags & T1C_FLATTEN_CUBE))
+    {
+        // User has requested CUBE flattening be used for an MM font with the '-cubef' option.
+        // This requires doing the blend math the way the TWB2 does it.
+        int j;
+        h.flags |= FLATTEN_COMPOSE;
+        h.cubeStackDepth = 0;
+        h.cube[0].nMasters = h.aux->nMasters;
+        for (j = 0; j < h.aux->nMasters; j++)
+        {
+            h.cube[0].WV[j] =  h.aux->WV[j];
+            h.cube[0].curX[j] = 0;
+            h.cube[0].curY[j] = 0;
+        }
+        
+    }
+    else if (aux->flags & T1C_FLATTEN_CUBE)
 		h.flags |= FLATTEN_CUBE;
 	if (aux->flags & T1C_IS_CUBE)
 		h.flags |= IS_CUBE;
