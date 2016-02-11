@@ -575,58 +575,61 @@ static void fillNames(nameCtx h) {
 		   If SubFamily name is Regular, we omit it.
 		 */
 		index = 0;
-		for (;; ) {
-            
-            /* Skip this if we already have one defined by the feature file > Not usually
-             allowed, but the prohibition can be overriden */
-            index = enumNames(h, index,
-			                  HOT_NAME_MS_PLATFORM,
-			                  HOT_NAME_MS_UGL,
-			                  MATCH_ANY,
-			                  HOT_NAME_FULL);
-			if (index != -1) {
-				break; /* no more MS UGL HOT_NAME_FAMILY recs */
+        
+        /* Skip this if we already have one defined by the feature file > Not usually
+         allowed, but the prohibition can be overriden */
+        index = enumNames(h, index,
+                          HOT_NAME_MS_PLATFORM,
+                          HOT_NAME_MS_UGL,
+                          MATCH_ANY,
+                          HOT_NAME_FULL);
+        if (index == -1)
+        { /* no predefined MS UGL HOT_NAME_FAMILY recs */
+            index = 0;
+            for (;; ) {
+                
+                
+                /* We make an entry for each HOT_NAME_PREF_FAMILY */
+                index = enumNames(h, index,
+                                  HOT_NAME_MS_PLATFORM,
+                                  HOT_NAME_MS_UGL,
+                                  MATCH_ANY,
+                                  HOT_NAME_FAMILY);
+                if (index == -1) {
+                    break; /* no more MS UGL HOT_NAME_FAMILY recs */
+                }
+                /* If there is not already a compatible Family Name, add the HOT_NAME_FAMILY value  */
+                rec = &h->tbl.record.array[index];
+                Family = &h->addstrs.array[rec->offset];
+                
+                /* See if we can get a  subfamily name with the same script/language settings */
+                Subfamily = getName(h,
+                                    HOT_NAME_MS_PLATFORM,
+                                    rec->platspecId,
+                                    rec->languageId,
+                                    HOT_NAME_SUBFAMILY);
+                
+                if (Subfamily == NULL) {
+                    Subfamily = getWinDfltName(h, HOT_NAME_SUBFAMILY);
+                }
+                else if (strcmp(Subfamily, "Regular") == 0) {
+                    addName(h,
+                            HOT_NAME_MS_PLATFORM,
+                            rec->platspecId,
+                            rec->languageId,
+                            HOT_NAME_FULL, strlen(Family), Family);
+                }
+                else {
+                    sprintf(Full, "%s %s", Family, Subfamily);
+                    addName(h,
+                            HOT_NAME_MS_PLATFORM,
+                            rec->platspecId,
+                            rec->languageId,
+                            HOT_NAME_FULL, strlen(Full), Full);
+                }
+                index++;
             }
-			/* We make an entry for each HOT_NAME_PREF_FAMILY */
-			index = enumNames(h, index,
-			                  HOT_NAME_MS_PLATFORM,
-			                  HOT_NAME_MS_UGL,
-			                  MATCH_ANY,
-			                  HOT_NAME_FAMILY);
-			if (index == -1) {
-				break; /* no more MS UGL HOT_NAME_FAMILY recs */
-			}
-			/* If there is not already a compatible Family Name, add the HOT_NAME_FAMILY value  */
-			rec = &h->tbl.record.array[index];
-			Family = &h->addstrs.array[rec->offset];
-
-			/* See if we can get a  subfamily name with the same script/language settings */
-			Subfamily = getName(h,
-			                    HOT_NAME_MS_PLATFORM,
-			                    rec->platspecId,
-			                    rec->languageId,
-			                    HOT_NAME_SUBFAMILY);
-
-			if (Subfamily == NULL) {
-				Subfamily = getWinDfltName(h, HOT_NAME_SUBFAMILY);
-			}
-			else if (strcmp(Subfamily, "Regular") == 0) {
-				addName(h,
-				        HOT_NAME_MS_PLATFORM,
-				        rec->platspecId,
-				        rec->languageId,
-				        HOT_NAME_FULL, strlen(Family), Family);
-			}
-			else {
-				sprintf(Full, "%s %s", Family, Subfamily);
-				addName(h,
-				        HOT_NAME_MS_PLATFORM,
-				        rec->platspecId,
-				        rec->languageId,
-				        HOT_NAME_FULL, strlen(Full), Full);
-			}
-			index++;
-		}
+        }
 	}
 
 
@@ -793,13 +796,15 @@ static void fillNames(nameCtx h) {
 		for (;; ) {
 			char *Family;
 			char *Subfamily;
-
-            index = enumNames(h, index,
+            int localIndex;
+            
+            /* Don't add Mac FULl names if they are already predefined from the feature file. */
+            localIndex = enumNames(h, index,
 			                  HOT_NAME_MAC_PLATFORM,
                               MATCH_ANY,
                               MATCH_ANY,
 			                  HOT_NAME_FULL);
-			if (index != -1) {
+			if (localIndex != -1) {
 				break;            }
 
 			if (doOTSpecName4) {
