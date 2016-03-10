@@ -2231,7 +2231,7 @@ static void makeUVScmap(hotCtx g) {
 		if (IS_CID(g)) {
 			gi_id = mapCID2Glyph(g, uve->cid);
             if (gi_id == NULL) {
-                hotMsg(g, hotWARNING, "Skipping UVS entry for CID '%s': not found in source font.", uve->cid);
+                hotMsg(g, hotWARNING, "Skipping UVS entry for CID '%d': not found in source font.", uve->cid);
                 continue;
             }
 		}
