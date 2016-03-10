@@ -818,7 +818,10 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top)
         for (i = 0; i < privateDict->BlueValues.cnt; i++)
         {
             float stem = privateDict->BlueValues.array[i];
-            sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+            if (stem == ((int)stem))
+                sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
+            else
+                sprintf(buffer, "\t\t<real>%.2f</real>", stem);
             writeLine(h, buffer);
             
         }
@@ -832,7 +835,10 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top)
         for (i = 0; i < privateDict->OtherBlues.cnt; i++)
         {
             float stem = privateDict->OtherBlues.array[i];
-            sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+            if (stem == ((int)stem))
+                sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
+            else
+                sprintf(buffer, "\t\t<real>%.2f</real>", stem);
             writeLine(h, buffer);
         }
         writeLine(h, "\t</array>");
@@ -845,7 +851,10 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top)
         for (i = 0; i < privateDict->FamilyBlues.cnt; i++)
         {
             float stem = privateDict->FamilyBlues.array[i];
-            sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+            if (stem == ((int)stem))
+                sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
+            else
+                sprintf(buffer, "\t\t<real>%.2f</real>", stem);
             writeLine(h, buffer);
         }
         writeLine(h, "\t</array>");
@@ -858,7 +867,10 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top)
         for (i = 0; i < privateDict->FamilyOtherBlues.cnt; i++)
         {
             float stem = privateDict->FamilyOtherBlues.array[i];
-            sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+            if (stem == ((int)stem))
+                sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
+            else
+                sprintf(buffer, "\t\t<real>%.2f</real>", stem);
             writeLine(h, buffer);
             
         }
@@ -872,7 +884,10 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top)
         for (i = 0; i < privateDict->StemSnapH.cnt; i++)
         {
             float stem = privateDict->StemSnapH.array[i];
-            sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+            if (stem == ((int)stem))
+                sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
+            else
+                sprintf(buffer, "\t\t<real>%.2f</real>", stem);
             writeLine(h, buffer);
             
         }
@@ -886,7 +901,10 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top)
         for (i = 0; i < privateDict->StemSnapV.cnt; i++)
         {
             float stem = privateDict->StemSnapV.array[i];
-            sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+            if (stem == ((int)stem))
+                sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
+            else
+                sprintf(buffer, "\t\t<real>%.2f</real>", stem);
             writeLine(h, buffer);
             
         }
