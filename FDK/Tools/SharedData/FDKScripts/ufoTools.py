@@ -1,5 +1,5 @@
 """
-ufoTools.py v1.25 Sep 30 2015
+ufoTools.py v1.26 Mar 10 2016
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
