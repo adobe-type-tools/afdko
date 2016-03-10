@@ -3083,8 +3083,8 @@ static GAFileInfo* checkIFParentCIDCompatible(txCtx h, 	abfTopDict *local_top, b
 static void mergeFDArray(txCtx h, abfTopDict *local_top)
 {
     dnaSET_CNT(h->mergeInfo.newiFDArray, local_top->FDArray.cnt);
-    /* This will merge the new font's newiFDArray into the output font's FDArray. and will fill in the h->mergeInfo.newiFDArray.array */
-    /* Note that fonts from different hint dirs will end up in different FDArray dicts, becuase the FDArray dicts only comapre as equal if
+    /* This will merge the new font's new FDArray into the output font's FDArray. and will fill in the h->mergeInfo.newiFDArray.array */
+    /* Note that fonts from different hint dirs will end up in different FDArray dicts, because the FDArray dicts only compare as equal if
      the font Dict's FontName match */
     h->mergeInfo.mergeFDArray( h->cb.glyph.direct_ctx, local_top, h->mergeInfo.newiFDArray.array);
     if (h->mergeInfo.newiFDArray.array[0] < 0) /*usu happens when last glyph in the font is a duplicate; this leaves an error state set in the cff write context, that
@@ -7529,7 +7529,7 @@ static void stringStrip(char * str)
 
 		str[end+1] = 0;
 		if (start > 0)
-			strcpy(str, &str[start] );
+			memmove(str, &str[start], (end-start)+2 );
 		if (strlen(str) == 0)
 			{
 			str[0] = ' '; /* so that the string is not empty. The  h->mergeInfo.cidinfo must not be empty strings in order to override the src fonts values.*/
@@ -8273,7 +8273,7 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 				h->cfw.flags |= CFW_PRESERVE_GLYPH_ORDER;
 				i = doMergeFileSet(h, argc, argv, i);
 				if (h->mergeInfo.mode != mode_cff)
-					{ /* output font 'h->file.dst" is cff; we need wheter */
+					{ /* output font 'h->file.dst" is cff; we need to convert to t1. */
 					setMode(h, h->mergeInfo.mode);
 					strcpy(h->file.src, dstPath);
 					strcpy(h->file.dst, dstPath);
