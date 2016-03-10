@@ -1503,24 +1503,6 @@ static void addFont(parseCtx h) {
 
 #endif /* TC_EURO_SUPPORT */
 
-	/* coun ttotal character size. */
-	if (!(h->font->flags & FONT_CID)) {
-		unsigned long glyphNameBufferSize = 0;
-		glyphNameBufferSize = 2 * h->chars.cnt;
-
-		for (i = 0; i < h->chars.cnt; i++) {
-			unsigned short sid = h->chars.array[i].id;
-			char *gname =  sindexGetString(g,  sid);
-			glyphNameBufferSize += strlen(gname);
-		}
-		if (glyphNameBufferSize >  32767) {
-			tcWarning(g, "The total size of the glyph names is greater than the safe limit for Mac OSX 10.4.x and earlier by %d bytes, and will cause crashes.",  glyphNameBufferSize - 32767);
-		}
-		else if (glyphNameBufferSize + (2 * h->chars.cnt) >  32767) {
-			tcWarning(g, "The total size of the glyph names is getting close to  than the safe limit of 32767 for Mac OSX 10.4.x. The safety margin is  %d bytes. If this margin goes below zero, the font will cause crashes.",  32767 - glyphNameBufferSize);
-		}
-	}
-
 	reorderChars(h);
 }
 

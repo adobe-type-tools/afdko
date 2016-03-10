@@ -11,7 +11,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 extern "C" {
 #endif
 
-#define TC_VERSION 0x020024 /* Library version 2.0.36 */
+#define TC_VERSION 0x020025 /* Library version 2.0.37 */
 
 /* CFF major and minor version numbers supported by library */
 #define TC_MAJOR    1
