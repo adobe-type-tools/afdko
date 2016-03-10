@@ -942,7 +942,7 @@ static void writeFontInfoDict(t1wCtx h, abfTopDict *top)
 		(3 /* Headroom for new key addition */ +
 		 (top->Notice.ptr != ABF_UNSET_PTR) +
 		 (top->Weight.ptr != ABF_UNSET_PTR) +
-		 1 /* ItalicAngle */ +
+		 (top->ItalicAngle != cff_DFLT_ItalicAngle) /* ItalicAngle */ +
 		 (top->FSType != ABF_UNSET_INT));
 
 	if (host)
@@ -951,9 +951,9 @@ static void writeFontInfoDict(t1wCtx h, abfTopDict *top)
 			 (top->Copyright.ptr != ABF_UNSET_PTR) +
 			 (top->FullName.ptr != ABF_UNSET_PTR) +
 			 (top->FamilyName.ptr != ABF_UNSET_PTR) +
-			 1 /* isFixedPitch */ +
-			 1 /* UnderlinePosition */ +
-			 1 /* UnderlineThickness */);
+			 (top->isFixedPitch != cff_DFLT_isFixedPitch) /* isFixedPitch */ +
+			 (top->UnderlinePosition != cff_DFLT_UnderlinePosition) /* UnderlinePosition */ +
+			 (top->UnderlineThickness != cff_DFLT_UnderlineThickness) /* UnderlineThickness */);
 	else
 		{
 		if (top->FSType == ABF_UNSET_INT)
@@ -973,20 +973,29 @@ static void writeFontInfoDict(t1wCtx h, abfTopDict *top)
 	writeFmt(h, "/FontInfo %d dict dup begin%s", size, h->arg.newline);
 	if (host)
 		writeStringDef(h, "version", top->version.ptr);
-	writeStringDef(h, "Notice", top->Notice.ptr);
+    if (top->Notice.ptr != ABF_UNSET_PTR)
+        writeStringDef(h, "Notice", top->Notice.ptr);
 	if (host)
 		{
-		writeStringDef(h, "Copyright", top->Copyright.ptr);
-		writeStringDef(h, "FullName", top->FullName.ptr);
-		writeStringDef(h, "FamilyName", top->FamilyName.ptr);
+		if (top->Copyright.ptr != ABF_UNSET_PTR)
+            writeStringDef(h, "Copyright", top->Copyright.ptr);
+        if (top->FullName.ptr != ABF_UNSET_PTR)
+            writeStringDef(h, "FullName", top->FullName.ptr);
+        if (top->FamilyName.ptr != ABF_UNSET_PTR)
+            writeStringDef(h, "FamilyName", top->FamilyName.ptr);
 		}
-	writeStringDef(h, "Weight", top->Weight.ptr);
-	writeRealDef(h, "ItalicAngle", top->ItalicAngle);
+	if (top->Weight.ptr != ABF_UNSET_PTR)
+        writeStringDef(h, "Weight", top->Weight.ptr);
+    if (top->ItalicAngle != cff_DFLT_ItalicAngle)
+        writeRealDef(h, "ItalicAngle", top->ItalicAngle);
 	if (host)
 		{
-		writeBooleanDef(h, "isFixedPitch", top->isFixedPitch);
-		writeRealDef(h, "UnderlinePosition", top->UnderlinePosition);
-		writeRealDef(h, "UnderlineThickness", top->UnderlineThickness);
+        if (top->isFixedPitch != cff_DFLT_isFixedPitch)
+            writeBooleanDef(h, "isFixedPitch", top->isFixedPitch);
+        if (top->UnderlinePosition != cff_DFLT_UnderlinePosition)
+            writeRealDef(h, "UnderlinePosition", top->UnderlinePosition);
+        if (top->UnderlineThickness != cff_DFLT_UnderlineThickness)
+            writeRealDef(h, "UnderlineThickness", top->UnderlineThickness);
 		}
 	else
 		{
@@ -1009,7 +1018,8 @@ static void writeFontInfoDict(t1wCtx h, abfTopDict *top)
 			writeLine(h, "end def");
 			}
 		}
-	writeIntDef(h, "FSType", top->FSType);
+	if ((top->FSType != ABF_UNSET_INT))
+        writeIntDef(h, "FSType", top->FSType);
 	writeLine(h, "end def");
 	}
 
@@ -1912,11 +1922,21 @@ static void writeHostCIDKeyedFont(t1wCtx h)
 	writeLine(h, "/CIDInit /ProcSet findresource begin");
 
 	/* Compute size of FontInfo dict */
-	fi_size =
-		((top->Notice.ptr != ABF_UNSET_PTR) +
-		 (top->FSType != ABF_UNSET_INT));
+    fi_size =(3 /* Headroom for new key addition */ +
+                  (top->Notice.ptr != ABF_UNSET_PTR) +
+                  (top->Weight.ptr != ABF_UNSET_PTR) +
+                    (top->ItalicAngle != cff_DFLT_ItalicAngle) /* ItalicAngle */ +
+                    (top->FSType != ABF_UNSET_INT));
 	if (host)
-		fi_size += (top->FullName.ptr != ABF_UNSET_PTR);
+    {
+        fi_size +=
+        ((top->Copyright.ptr != ABF_UNSET_PTR) +
+         (top->FullName.ptr != ABF_UNSET_PTR) +
+         (top->FamilyName.ptr != ABF_UNSET_PTR) +
+         (top->isFixedPitch != cff_DFLT_isFixedPitch) /* isFixedPitch */ +
+         (top->UnderlinePosition != cff_DFLT_UnderlinePosition) /* UnderlinePosition */ +
+         (top->UnderlineThickness != cff_DFLT_UnderlineThickness) /* UnderlineThickness */);
+    }
 	else
 		{
 		if (top->FSType == ABF_UNSET_INT)
@@ -1928,8 +1948,6 @@ static void writeHostCIDKeyedFont(t1wCtx h)
 		fi_size += ((OrigFontType != NULL) +
 					(WasEmbedded != 0));
 		}
-	if (fi_size > 0)
-		fi_size += 3; /* Headroom for new key addition */
 
 	/* Compute size of top dict */
 	size =
@@ -1970,13 +1988,29 @@ static void writeHostCIDKeyedFont(t1wCtx h)
 		writeFmt(h, "/FontInfo %d dict dup begin%s", fi_size, h->arg.newline);
 		writeStringDef(h, "Notice", top->Notice.ptr);
 		if (host)
-			writeStringDef(h, "FullName", top->FullName.ptr);
+        {
+            writeStringDef(h, "Copyright", top->Copyright.ptr);
+            writeStringDef(h, "FullName", top->FullName.ptr);
+            writeStringDef(h, "FamilyName", top->FamilyName.ptr);
+        }
 		else 
 			{
 			writeLiteralDef(h, "OrigFontType", OrigFontType);
 			if (WasEmbedded)
 				writeBooleanDef(h, "WasEmbedded", 1);
 			}
+        writeStringDef(h, "Weight", top->Weight.ptr);
+        if (top->ItalicAngle != cff_DFLT_ItalicAngle)
+            writeRealDef(h, "ItalicAngle", top->ItalicAngle);
+        if (host)
+        {
+            if (top->isFixedPitch != cff_DFLT_isFixedPitch)
+                writeBooleanDef(h, "isFixedPitch", top->isFixedPitch);
+            if (top->UnderlinePosition != cff_DFLT_UnderlinePosition)
+                writeRealDef(h, "UnderlinePosition", top->UnderlinePosition);
+            if (top->UnderlineThickness != cff_DFLT_UnderlineThickness)
+                writeRealDef(h, "UnderlineThickness", top->UnderlineThickness);
+        }
 		writeIntDef(h, "FSType", top->FSType);
 		writeLine(h, "end def");
 		}

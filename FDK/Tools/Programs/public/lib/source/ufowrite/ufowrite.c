@@ -768,9 +768,12 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top)
         writeLine(h, "\t<integer>1000</integer>");
     }
     
-    writeLine(h, "\t<key>italicAngle</key>");
-    sprintf(buffer, "\t<real>%f</real>", top->ItalicAngle);
-    writeLine(h, buffer);
+    if (top->ItalicAngle != cff_DFLT_ItalicAngle)
+    {
+        writeLine(h, "\t<key>italicAngle</key>");
+        sprintf(buffer, "\t<real>%f</real>", top->ItalicAngle);
+        writeLine(h, buffer);
+    }
     
     /* Now for all the other PostScript-specific UFO data */
     if (top->FullName.ptr != NULL)
@@ -787,21 +790,21 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top)
         writeLine(h, buffer);
     }
     
-    if (top->UnderlinePosition != ABF_UNSET_REAL)
+    if (top->UnderlinePosition != cff_DFLT_UnderlinePosition)
     {
         writeLine(h, "\t<key>postscriptUnderlinePosition</key>");
         sprintf(buffer, "\t<integer>%d</integer>", (int)round(0.5 + top->UnderlinePosition));
         writeLine(h, buffer);
     }
     
-    if (top->UnderlineThickness != ABF_UNSET_REAL)
+    if (top->UnderlineThickness != cff_DFLT_UnderlineThickness)
     {
         writeLine(h, "\t<key>postscriptUnderlineThickness</key>");
         sprintf(buffer, "\t<integer>%d</integer>", (int)round(0.5 + top->UnderlineThickness));
         writeLine(h, buffer);
     }
     
-    if ((top->isFixedPitch != ABF_UNSET_INT) && (top->isFixedPitch > 0))
+    if ((top->isFixedPitch != cff_DFLT_isFixedPitch) && (top->isFixedPitch > 0))
     {
         writeLine(h, "\t<key>postscriptIsFixedPitch</key>");
         writeLine(h, "\t<true/>");

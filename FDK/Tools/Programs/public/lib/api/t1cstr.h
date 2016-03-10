@@ -10,7 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define T1C_VERSION CTL_MAKE_VERSION(1,0,17)
+#define T1C_VERSION CTL_MAKE_VERSION(1,0,18)
 
 #include "absfont.h"
 

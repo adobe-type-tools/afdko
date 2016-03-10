@@ -49,6 +49,7 @@ struct t1cCtx
 #define	NEW_GROUP		(1<<7)	/* Flags new counter group */
 #define START_COMPOSE  	(1<<8)	/* currently flattening a Cube library element: need to add the compose (dx, dy) to the LE moveto */
 #define FLATTEN_CUBE	(1<<9)  /* when process a compose operator, flatten it rather than report it. */
+
 #define NEW_HINTS		(1<<10)  /* Needed for cube gsubrs that report simple simple and vstems, Type1 style. */
 #define IS_CUBE			(1<<11) /* Current font is a cube font. Allow no endchar/return ops, increase stack sizes. */
 #define USE_MATRIX		(1<<12)	/* Apply transform to */
@@ -134,8 +135,23 @@ struct t1cCtx
 #define PUSH(v) (h->stack.array[h->stack.cnt++]=(float)(v))
 
 #define ARRAY_LEN(a)	(sizeof(a)/sizeof(a[0]))
-#define RND(v)	((float)floor((v)+0.5))
+#define RND(v)	((float)floor((v)+0.50001))
+/* The 0.000005 is added to allow for differences in OS's and other mathlibs
+when blending LE's or MM's. The problem is that the differences can lead to 
+a final value being just a hair above .5 on one platform and a hair below on
+another,leading, to off by one differences depending on which system is being
+ used to build the output font.
+The logic 'floor(x + 0.5)' implemnets std Java rounding, where x.5 rounds
+ to (x+1), -x.5) rounds to (-x), and everything else rounds to the nearest
+ whole integer. The addition of 0.00001 captures everything 'close enough'
+ to +/- x.5 to be treated as it if were on the boundary. This number is derived
+ empirically, as being the smallest number that is still larger than precision
+ differences between Flex/Flash in TWB2, and the 64 bit C math lib.
+ */
 
+ 
+ 
+ 
 /* Transform coordinates by matrix. */
 #define TX(x, y) \
 	RND(h->transformMatrix[0]*(x) + h->transformMatrix[2]*(y) + h->transformMatrix[4])
@@ -214,6 +230,17 @@ static int callbackWidth(t1cCtx h, float width)
 		   cause subsequent processing problems. */
 		width /= 65536.0f;
 
+        if (h->flags & FLATTEN_COMPOSE){
+            // User has requested CUBE flattening be used for an MM font with the '-cubef' option.
+            // This requires doing the blend math the way the TWB2 does it.
+            // and we need to clear the current position after calling width.
+            int j;
+            for (j = 0; j < h->aux->nMasters; j++)
+            {
+                h->cube[0].curX[j] = 0;
+                h->cube[0].curY[j] = 0;
+            }
+        }
 	if (h->flags & USE_MATRIX)
 		width = SX(width);
 	else if (h->flags & SEEN_BLEND)
@@ -1028,6 +1055,9 @@ static long unbiasLE(long arg, long nSubrs)
 	return (subrIndex < 0 || subrIndex >= nSubrs)? -1: subrIndex;
 }
 
+#define DEBUG_FLATTEN 0
+#define DEBUG_LE -92
+
 static int do_set_weight_vector_cube(t1cCtx h, int nAxes)
 	{
 	float dx, dy;
@@ -1038,7 +1068,8 @@ static int do_set_weight_vector_cube(t1cCtx h, int nAxes)
 	int popCnt = nAxes + 3;
 	int composeCnt = h->cube[h->cubeStackDepth].composeOpCnt;
 	float*composeOps = h->cube[h->cubeStackDepth].composeOpArray;
-
+    double wv;
+        
 	h->flags |= NEW_HINTS;
 	
 	dx = (float)(long)composeOps[1];
@@ -1076,23 +1107,31 @@ static int do_set_weight_vector_cube(t1cCtx h, int nAxes)
         h->cube[h->cubeStackDepth].curX[i] = 0;
         h->cube[h->cubeStackDepth].curY[i] = 0;
     }
+    /* Since the NDV values are quantized to setps of 0.005, I round 
+    the values to be exactily that. The math can produce 0.56499999999999995
+    instead of 0.565, but this causes differences from TBW2 in calculating the weight vector
+     */
     i =0;
 	while (i < nAxes)
 		{
-		NDV[i] = (double)((100 + (long)composeOps[3+i])/200.0);
-		i++;
+            double ndv =(double)((100 + (long)composeOps[3+i])/200.0);
+            NDV[i] = ndv;
+            i++;
 		}
 		
 	/* Compute Weight Vector */
 	for (i = 0; i < nMasters; i++)
 		{
-		h->cube[h->cubeStackDepth].WV[i] = 1;
+        wv = 1;
 		for (j = 0; j < nAxes; j++)
         {
-            double wv = (i & 1<<j)? NDV[j]: 1 - NDV[j];
-            wv = h->cube[h->cubeStackDepth].WV[i]*wv;
-            h->cube[h->cubeStackDepth].WV[i] = wv;
+            double wv2 = (i & 1<<j)? NDV[j]: 1 - NDV[j];
+            wv = wv*wv2;
         }
+        //wv = wv*SCALE_FLATTEN;
+        //wv = round(wv);
+        //wv = wv/SCALE_FLATTEN;
+        h->cube[h->cubeStackDepth].WV[i] = wv;
 		}
 	/* Pop all the current COMPOSE args off the stack. */
 	for (i=popCnt; i< composeCnt; i++)
@@ -1132,13 +1171,15 @@ static int do_blend_cube_flattened(t1cCtx h, int nBlends, int iBase)
             xs = val*wv;
         }
         curX[0] = val;
-        if (0 && (h->cube[h->cubeStackDepth].leIndex == -70))
+#if DEBUG_FLATTEN
+        if (h->cube[h->cubeStackDepth].leIndex == DEBUG_LE)
         {
             printf("j %d val x %lf\n", 0, val);
             printf("wv %lf\n", wv);
             printf("xs %lf\n\n", xs);
+            
         }
-        
+#endif
         for (j = 1; j < h->cube[h->cubeStackDepth].nMasters; j++)
         {
             val = curX[j] + x + INDEX(k);
@@ -1147,19 +1188,17 @@ static int do_blend_cube_flattened(t1cCtx h, int nBlends, int iBase)
             if (wv != 0)
             {
                 xs += val*wv;
-                if (0 && (h->cube[h->cubeStackDepth].leIndex == -70))
+#if DEBUG_FLATTEN
+                if (h->cube[h->cubeStackDepth].leIndex == DEBUG_LE)
                 {
                     printf("j %d val %lf\n", j, val);
                     printf("wv %lf\n", wv);
                     printf("xs %lf\n\n", xs);
                 }
+#endif
             }
             curX[j] = val;
         }
-        xs = xs*10000000000;
-        xs = (long int)xs;
-        xs = xs/10000000000.0;
-        xs = round(xs);
         INDEX(iBase + i) = xs;
         isX = !isX;
     }
@@ -1214,16 +1253,16 @@ static int do_blend_cube(t1cCtx h, int nBlends)
 
 /* Execute "blend" op. Return 0 on success else error code. */
 static int do_blend(t1cCtx h, int nBlends)
-	{
-	int i;
-	int nElements = nBlends * h->aux->nMasters;
-	int iBase = h->stack.cnt - nElements;
-	int k = iBase + nBlends;
-
-	if (h->aux->nMasters <= 1)
-		return t1cErrInvalidWV;
-	CHKUFLOW(nElements);
-
+{
+    int i;
+    int nElements = nBlends * h->aux->nMasters;
+    int iBase = h->stack.cnt - nElements;
+    int k = iBase + nBlends;
+    
+    if (h->aux->nMasters <= 1)
+        return t1cErrInvalidWV;
+    CHKUFLOW(nElements);
+    
     if  (h->flags & FLATTEN_COMPOSE)
     {
         do_blend_cube_flattened(h, nBlends, iBase);
@@ -1239,11 +1278,11 @@ static int do_blend(t1cCtx h, int nBlends)
             INDEX(iBase + i) = x;
         }
     }
-	h->stack.cnt = iBase + nBlends;
-
-	h->flags |= SEEN_BLEND;
-	return 0;
-	}
+    h->stack.cnt = iBase + nBlends;
+    
+    h->flags |= SEEN_BLEND;
+    return 0;
+}
 
 /* Decode type 1 charstring. Called recursively. Return 1 on endchar else 0. */
 static int t1Decode(t1cCtx h, long offset)
@@ -2366,7 +2405,6 @@ int t1cParse(long offset, t1cAuxData *aux, abfGlyphCallbacks *glyph)
         // User has requested CUBE flattening be used for an MM font with the '-cubef' option.
         // This requires doing the blend math the way the TWB2 does it.
         int j;
-        h.flags |= FLATTEN_COMPOSE;
         h.cubeStackDepth = 0;
         h.cube[0].nMasters = h.aux->nMasters;
         for (j = 0; j < h.aux->nMasters; j++)
@@ -2375,7 +2413,7 @@ int t1cParse(long offset, t1cAuxData *aux, abfGlyphCallbacks *glyph)
             h.cube[0].curX[j] = 0;
             h.cube[0].curY[j] = 0;
         }
-        
+        h.flags |= FLATTEN_COMPOSE;
     }
     else if (aux->flags & T1C_FLATTEN_CUBE)
 		h.flags |= FLATTEN_CUBE;
