@@ -1,5 +1,5 @@
 """
-ufoTools.py v1.26 Mar 10 2016
+ufoTools.py v1.27 Mar 11 2016
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -983,6 +983,9 @@ class UFOFontData:
 					for transformTag in ["xScale", "xyScale", "yxScale", "yScale", "xOffset", "yOffset"]:
 						try:
 							value = childContour.attrib[transformTag]
+							rval = eval(value)
+							if int(rval) == rval:
+								value = str(int(rval))
 							dataList.append(value)
 						except KeyError:
 							pass
