@@ -7,11 +7,11 @@
 		<h1>OpenType&trade; Feature File Specification</h1>
 
 <p><b>Copyright</b></p>
-<p>Copyright 2015,2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+<p>Copyright 2015, 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0.
 </p>
 <p><b>Version</b></p>
-<p>[ Document version 1.17. Last updated 6 Jan 2016]</p>
+<p>[ Document version 1.18. Last updated 16 Mar 2016]</p>
 <p><b>Caution:</b></p>
 <p>Portions of the syntax unimplemented by Adobe are subject to change.</p>
 <ol>
@@ -592,7 +592,7 @@ include<code>(../features.family);</code></pre>
 <p>The &quot;parameters&quot; statement specifies the feature parameters for the currently defined language system. It is currently supported only for the 'size', 'ssXX', and 'cvXX' features; see &sect; <a href="#8.b">8.b</a>, <a href="#8.c">8.c</a> and <a href="#8.d">8.d</a>.</p>
 <p><a name="4.d"></a><b>4.d. lookupflag</b></p>
 <p>The chapter &quot;Common Table Formats&quot; in the OpenType Font File Specification describes the LookupFlag field in the Lookup table.</p>
-<p>The lookupflag attribute defaults to 0 at the start of a feature block.</p>
+<p>The lookupflag attribute defaults to 0 at the start of a feature or named lookup block.</p>
 <p>The lookupflag attribute stays the same until explicitly changed, until a lookup reference statement is encountered that changes it, until the script is changed, or until the end of the feature.</p>
 <p>To change the lookupflag attribute explicitly, use the lookupflag statement, which takes two formats:</p>
 <ul>
@@ -908,6 +908,18 @@ include<code>(../features.family);</code></pre>
             &lt;marked glyph sequence&gt;
             &lt;lookahead glyph sequence&gt;*;</pre>
 <p>The backtrack and lookahead sequences may be omitted, but there must be at least one marked glyph or glyph class.</p>
+<p>For convenience, several ignore statements may be collapsed into one by separating the matching sequences with a comma. See Example 3. The following three statements:</p>
+<pre>
+  <b>ignore substitute</b> &lt;match sequence1&gt;;</b>
+  <b>ignore substitute</b> &lt;match sequence2&gt;;</b>
+  <b>ignore substitute</b> &lt;match sequence3&gt;;</b>
+</pre>
+<p>can be written as:</p>
+<pre>
+  <b>ignore substitute</b> &lt;match sequence1&gt;, &lt;match sequence2&gt;, &lt;match sequence3&gt;;</b>
+</pre>
+<p>Note that each match sequence is in effect a complete ignore statement, and contains its own independent backtrack, marked glyph, and lookahead sequences.</p>
+
 <p>The &quot;ignore substitute&quot; statement works by creating subtables in the GSUB that tell the OT layout engine simply to match the specified sequences, and not to perform any substitutions on them. As a result of the match, remaining rules (i.e. subtables) in the lookup will be skipped when the rule matches. (See the OT layout algorithm in &sect;<a href="#7.a">7.a</a>.)</p>
 <p><b>Example 1.</b> Ignoring specific sequences: The &quot;ignore substitute&quot; rules below will block any subsequent rules that specifies a substitution for &quot;d&quot; when the context around &quot;d&quot; matches any of the sequences &quot;f a d&quot;, &quot;f e d&quot;, or &quot;a d d&quot;.</p>
 <p>Note that the marked glyphs in the exception sequences indicate where a substitution would have occurred; this is necessary for the OpenType layout engine to correctly handle skipping this sequence.</p>
@@ -924,7 +936,11 @@ include<code>(../features.family);</code></pre>
 <pre>
   <b>ignore substitute</b> @LETTER a' n' d', a' n' d' @LETTER;
   <b>substitute</b> a' n' d' by a_n_d;</pre>
-<p>In this example, the a_n_d ligature will apply only if the sequence &quot;a n d&quot; is neither preceded nor succeeded by a @LETTER.</p>
+<p>In this example, the a_n_d ligature will apply only if the sequence &quot;a n d&quot; is neither preceded nor succeeded by a @LETTER. Also, note the use of the comma in the &quot;ignore&quot; statement: this is equivalent to writing:</p>
+<pre>
+  <b>ignore substitute</b> @LETTER a' n' d';
+  <b>ignore substitute</b> a' n' d' @LETTER;
+  <b>substitute</b> a' n' d' by a_n_d;</pre>
 <p><b>Example 4.</b> This shows a specification for the contextual swashes feature:</p>
 <pre>
   <b>feature</b> cswh {
@@ -1732,8 +1748,10 @@ nameid I 1 S L &lt;string&gt;;    I   1          S           L</pre>
   }</pre>
 <p>along with the tag 'sbit'.</p>
 <p><a name="11"></a><b>11. Document revisions</b></p>
-<p><b>v1.18 [not yet released]:</b></p>
+<p><b>v1.18 [16 Mar 2016]:</b></p>
 <ul>
+<li>Clarified use of commas in ignore statement.</li>
+<li>Fixed spelling errors: example at end of section 9.e name table, example 1 in section 5.f.ii ignore sub.</li>
 <li>Increased maximum length of glyph names and named glyph classes from 31 to 63.</li>
 </ul>
 <p><b>v1.17 [ 6 Jan 2016]:</b></p>
