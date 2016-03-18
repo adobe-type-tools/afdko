@@ -109,7 +109,7 @@ class Options:
 				self.doOverlapRemoval = False
 			elif arg == "-n":
 				self.doNormalize = False
-			elif arg == "-dec":
+			elif arg in ["-dec", "-decimal"]:
 				self.allowDecimalCoords = True
 			elif arg == "-i":
 				ilist = args[i]
