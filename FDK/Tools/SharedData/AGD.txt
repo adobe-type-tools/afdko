@@ -948,24 +948,31 @@ twothirds
 	cmp: two.numerator fraction three.denominator
 onefifth
 	uni: 2155
+	fin: uni2155
 	cmp: one.numerator fraction five.denominator
 twofifths
 	uni: 2156
+	fin: uni2156
 	cmp: two.numerator fraction five.denominator
 threefifths
 	uni: 2157
+	fin: uni2157
 	cmp: three.numerator fraction five.denominator
 fourfifths
 	uni: 2158
+	fin: uni2158
 	cmp: four.numerator fraction five.denominator
 onesixth
 	uni: 2159
+	fin: uni2159
 	cmp: one.numerator fraction six.denominator
 fivesixths
 	uni: 215A
+	fin: uni215A
 	cmp: five.numerator fraction six.denominator
 onefraction
 	uni: 215F
+	fin: uni215F
 	cmp: one.numerator fraction
 Oneroman
 	uni: 2160
@@ -2770,346 +2777,458 @@ schwacyr
 	ali: afii10846 schwa.cyr schwacyrillic
 	set: AGL1 AGL2 AGLFN
 	maj: Schwacyr
-Aybarmenian
+Ayb
 	uni: 0531
 	fin: uni0531
+	ali: Aybarmenian
 	set: AGL1
-Benarmenian
+Ben
 	uni: 0532
 	fin: uni0532
+	ali: Benarmenian
 	set: AGL1
-Gimarmenian
+Gim
 	uni: 0533
 	fin: uni0533
+	ali: Gimarmenian
 	set: AGL1
-Daarmenian
+Da
 	uni: 0534
 	fin: uni0534
+	ali: Daarmenian
 	set: AGL1
-Echarmenian
+Ech
 	uni: 0535
 	fin: uni0535
+	ali: Echarmenian
 	set: AGL1
-Zaarmenian
+Za
 	uni: 0536
 	fin: uni0536
+	ali: Zaarmenian
 	set: AGL1
-Eharmenian
+Eh
 	uni: 0537
 	fin: uni0537
+	ali: Eharmenian
 	set: AGL1
-Etarmenian
+Et
 	uni: 0538
 	fin: uni0538
+	ali: Etarmenian
 	set: AGL1
-Toarmenian
+To
 	uni: 0539
 	fin: uni0539
+	ali: Toarmenian
 	set: AGL1
-Zhearmenian
+Zhearm
 	uni: 053A
 	fin: uni053A
+	ali: Zhearmenian
 	set: AGL1
-Iniarmenian
+Ini
 	uni: 053B
 	fin: uni053B
+	ali: Iniarmenian
 	set: AGL1
-Liwnarmenian
+Liwn
 	uni: 053C
 	fin: uni053C
+	ali: Liwnarmenian
 	set: AGL1
-Xeharmenian
+Xeh
 	uni: 053D
 	fin: uni053D
+	ali: Xeharmenian
 	set: AGL1
-Caarmenian
+Ca
 	uni: 053E
 	fin: uni053E
+	ali: Caarmenian
 	set: AGL1
-Kenarmenian
+Ken
 	uni: 053F
 	fin: uni053F
+	ali: Kenarmenian
 	set: AGL1
-Hoarmenian
+Ho
 	uni: 0540
 	fin: uni0540
+	ali: Hoarmenian
 	set: AGL1
-Jaarmenian
+Ja
 	uni: 0541
 	fin: uni0541
+	ali: Jaarmenian
 	set: AGL1
-Ghadarmenian
+Ghad
 	uni: 0542
 	fin: uni0542
+	ali: Ghadarmenian
 	set: AGL1
-Cheharmenian
+Cheh
 	uni: 0543
 	fin: uni0543
+	ali: Cheharmenian
 	set: AGL1
-Menarmenian
+Men
 	uni: 0544
 	fin: uni0544
+	ali: Menarmenian
 	set: AGL1
-Yiarmenian
+Yiarm
 	uni: 0545
 	fin: uni0545
+	ali: Yiarmenian
 	set: AGL1
-Nowarmenian
+Now
 	uni: 0546
 	fin: uni0546
+	ali: Nowarmenian
 	set: AGL1
-Shaarmenian
+Shaarm
 	uni: 0547
 	fin: uni0547
+	ali: Shaarmenian
 	set: AGL1
-Voarmenian
+Vo
 	uni: 0548
 	fin: uni0548
+	ali: Voarmenian
 	set: AGL1
-Chaarmenian
+Cha
 	uni: 0549
 	fin: uni0549
+	ali: Chaarmenian
 	set: AGL1
-Peharmenian
+Peh
 	uni: 054A
 	fin: uni054A
+	ali: Peharmenian
 	set: AGL1
-Jheharmenian
+Jheh
 	uni: 054B
 	fin: uni054B
+	ali: Jheharmenian
 	set: AGL1
-Raarmenian
+Ra
 	uni: 054C
 	fin: uni054C
+	ali: Raarmenian
 	set: AGL1
-Seharmenian
+Seh
 	uni: 054D
 	fin: uni054D
+	ali: Seharmenian
 	set: AGL1
-Vewarmenian
+Vew
 	uni: 054E
 	fin: uni054E
+	ali: Vewarmenian
 	set: AGL1
-Tiwnarmenian
+Tiwn
 	uni: 054F
 	fin: uni054F
+	ali: Tiwnarmenian
 	set: AGL1
-Reharmenian
+Reh
 	uni: 0550
 	fin: uni0550
+	ali: Reharmenian
 	set: AGL1
-Coarmenian
+Co
 	uni: 0551
 	fin: uni0551
+	ali: Coarmenian
 	set: AGL1
-Yiwnarmenian
+Yiwn
 	uni: 0552
 	fin: uni0552
+	ali: Yiwnarmenian
 	set: AGL1
-Piwrarmenian
+Piwr
 	uni: 0553
 	fin: uni0553
+	ali: Piwrarmenian
 	set: AGL1
-Keharmenian
+Keh
 	uni: 0554
 	fin: uni0554
+	ali: Keharmenian
 	set: AGL1
-Oharmenian
+Oh
 	uni: 0555
 	fin: uni0555
+	ali: Oharmenian
 	set: AGL1
-Feharmenian
+Feh
 	uni: 0556
 	fin: uni0556
+	ali: Feharmenian
 	set: AGL1
-ringhalfleftarmenian
+amRinghalfleft
 	uni: 0559
 	fin: uni0559
+	ali: ringhalfleftarmenian
 	set: AGL1
-apostrophearmenian
+amApostrophe
 	uni: 055A
 	fin: uni055A
+	ali: apostrophearmenian
 	set: AGL1
-emphasismarkarmenian
+amEmphasis
 	uni: 055B
 	fin: uni055B
+	ali: emphasismarkarmenian
 	set: AGL1
-exclamarmenian
+amExclam
 	uni: 055C
 	fin: uni055C
+	ali: exclamarmenian
 	set: AGL1
-commaarmenian
+amComma
 	uni: 055D
 	fin: uni055D
+	ali: commaarmenian
 	set: AGL1
-questionarmenian
+amQuestion
 	uni: 055E
 	fin: uni055E
+	ali: questionarmenian
 	set: AGL1
-abbreviationmarkarmenian
+amAbbreviation
 	uni: 055F
 	fin: uni055F
+	ali: abbreviationmarkarmenian
 	set: AGL1
-aybarmenian
+ayb
 	uni: 0561
 	fin: uni0561
+	ali: aybarmenian
 	set: AGL1
-benarmenian
+ben
 	uni: 0562
 	fin: uni0562
+	ali: benarmenian
 	set: AGL1
-gimarmenian
+gim
 	uni: 0563
 	fin: uni0563
+	ali: gimarmenian
 	set: AGL1
-daarmenian
+da
 	uni: 0564
 	fin: uni0564
+	ali: daarmenian
 	set: AGL1
-echarmenian
+ech
 	uni: 0565
 	fin: uni0565
+	ali: echarmenian
 	set: AGL1
-zaarmenian
+za
 	uni: 0566
 	fin: uni0566
+	ali: zaarmenian
 	set: AGL1
-eharmenian
+eh
 	uni: 0567
 	fin: uni0567
+	ali: eharmenian
 	set: AGL1
-etarmenian
+et
 	uni: 0568
 	fin: uni0568
+	ali: etarmenian
 	set: AGL1
-toarmenian
+to
 	uni: 0569
 	fin: uni0569
+	ali: toarmenian
 	set: AGL1
-zhearmenian
+zhearm
 	uni: 056A
 	fin: uni056A
+	ali: zhearmenian
 	set: AGL1
-iniarmenian
+ini
 	uni: 056B
 	fin: uni056B
+	ali: iniarmenian
 	set: AGL1
-liwnarmenian
+liwn
 	uni: 056C
 	fin: uni056C
+	ali: liwnarmenian
 	set: AGL1
-xeharmenian
+xeh
 	uni: 056D
 	fin: uni056D
+	ali: xeharmenian
 	set: AGL1
-caarmenian
+ca
 	uni: 056E
 	fin: uni056E
+	ali: caarmenian
 	set: AGL1
-kenarmenian
+ken
 	uni: 056F
 	fin: uni056F
+	ali: kenarmenian
 	set: AGL1
-hoarmenian
+ho
 	uni: 0570
 	fin: uni0570
+	ali: hoarmenian
 	set: AGL1
-jaarmenian
+ja
 	uni: 0571
 	fin: uni0571
+	ali: jaarmenian
 	set: AGL1
-ghadarmenian
+ghad
 	uni: 0572
 	fin: uni0572
+	ali: ghadarmenian
 	set: AGL1
-cheharmenian
+cheh
 	uni: 0573
 	fin: uni0573
+	ali: cheharmenian
 	set: AGL1
-menarmenian
+men
 	uni: 0574
 	fin: uni0574
+	ali: menarmenian
 	set: AGL1
-yiarmenian
+yiarm
 	uni: 0575
 	fin: uni0575
+	ali: yiarmenian
 	set: AGL1
-nowarmenian
+now
 	uni: 0576
 	fin: uni0576
+	ali: nowarmenian
 	set: AGL1
-shaarmenian
+shaarm
 	uni: 0577
 	fin: uni0577
+	ali: shaarmenian
 	set: AGL1
-voarmenian
+vo
 	uni: 0578
 	fin: uni0578
+	ali: voarmenian
 	set: AGL1
-chaarmenian
+cha
 	uni: 0579
 	fin: uni0579
+	ali: chaarmenian
 	set: AGL1
-peharmenian
+peh
 	uni: 057A
 	fin: uni057A
+	ali: peharmenian
 	set: AGL1
-jheharmenian
+jheh
 	uni: 057B
 	fin: uni057B
+	ali: jheharmenian
 	set: AGL1
-raarmenian
+ra
 	uni: 057C
 	fin: uni057C
+	ali: raarmenian
 	set: AGL1
-seharmenian
+seh
 	uni: 057D
 	fin: uni057D
+	ali: seharmenian
 	set: AGL1
-vewarmenian
+vew
 	uni: 057E
 	fin: uni057E
+	ali: vewarmenian
 	set: AGL1
-tiwnarmenian
+tiwn
 	uni: 057F
 	fin: uni057F
+	ali: tiwnarmenian
 	set: AGL1
-reharmenian
+reh
 	uni: 0580
 	fin: uni0580
+	ali: reharmenian
 	set: AGL1
-coarmenian
+co
 	uni: 0581
 	fin: uni0581
+	ali: coarmenian
 	set: AGL1
-yiwnarmenian
+yiwn
 	uni: 0582
 	fin: uni0582
+	ali: yiwnarmenian
 	set: AGL1
-piwrarmenian
+piwr
 	uni: 0583
 	fin: uni0583
+	ali: piwrarmenian
 	set: AGL1
-keharmenian
+keh
 	uni: 0584
 	fin: uni0584
+	ali: keharmenian
 	set: AGL1
-oharmenian
+oh
 	uni: 0585
 	fin: uni0585
+	ali: oharmenian
 	set: AGL1
-feharmenian
+feh
 	uni: 0586
 	fin: uni0586
+	ali: feharmenian
 	set: AGL1
-echyiwnarmenian
+ech_yiwn
 	uni: 0587
 	fin: uni0587
+	ali: echyiwnarmenian
 	set: AGL1
-periodarmenian
+amPeriod
 	uni: 0589
 	fin: uni0589
+	ali: periodarmenian
 	set: AGL1
+amHyphen
+	uni: 058A
+	fin: uni058A
+eternityright
+	uni: 058D
+	fin: uni058D
+eternityleft
+	uni: 058E
+	fin: uni058E
+dram
+	uni: 058F
+	fin: uni058F
+men_now
+	uni: FB13
+	fin: uniFB13
+men_ech
+	uni: FB14
+	fin: uniFB14
+men_ini
+	uni: FB15
+	fin: uniFB15
+vew_now
+	uni: FB16
+	fin: uniFB16
+men_xeh
+	uni: FB17
+	fin: uniFB17
 etnahtafoukhhebrew
 	uni: 0591
 	fin: uni0591
@@ -4820,6 +4939,12 @@ nine.inferior
 	sub: nine+sinf
 	set: AGL1 AGL2
 	cmp: nine.numerator
+plus.inferior
+	uni: 208A
+minus.inferior
+	uni: 208B
+equal.inferior
+	uni: 208C
 nine.oldstyle
 	uni: F739
 	ali: nineoldstyle
@@ -4842,13 +4967,10 @@ notsubset
 	uni: 2284
 	set: AGL1 AGL2 AGLFN
 n.superior
-	ali: nsuperior
+	uni: 207F
+	ali: nsup nsuperior
 	sub: n+sups
 	set: AGL1 AGL2
-nsup
-	uni: 207F
-	fin: uni207F
-	cmp: n.superior
 nu
 	uni: 03BD
 	set: AGL1 AGL2 AGLFN
@@ -16131,6 +16253,9 @@ anglebracketleft
 	uni: 3008
 	fin: uni3008
 	set: AGL1
+anglebracketleftmath
+	uni: 27E8
+	fin: uni27E8
 anglebracketleftvertical
 	uni: FE3F
 	fin: uniFE3F
@@ -16139,6 +16264,9 @@ anglebracketright
 	uni: 3009
 	fin: uni3009
 	set: AGL1
+anglebracketrightmath
+	uni: 27E9
+	fin: uni27E9
 anglebracketrightvertical
 	uni: FE40
 	fin: uniFE40
@@ -17525,10 +17653,15 @@ eopenclosed
 	uni: 029A
 	fin: uni029A
 	set: AGL1
+Eopenreversed
+	uni: A7AB
+	fin: uniA7AB
+	min: eopenreversed
 eopenreversed
 	uni: 025C
 	fin: uni025C
 	set: AGL1
+	maj: Eopenreversed
 eopenreversedclosed
 	uni: 025E
 	fin: uni025E
@@ -17552,9 +17685,9 @@ equalsmall
 	uni: FE66
 	fin: uniFE66
 	set: AGL1
-equalsuperior
+equal.superior
 	uni: 207C
-	fin: uni207C
+	ali: equalsuperior
 	set: AGL1
 erbopomofo
 	uni: 3126
@@ -18006,10 +18139,15 @@ greatersmall
 	uni: FE65
 	fin: uniFE65
 	set: AGL1
+Gscript
+	uni: A7AC
+	fin: uniA7AC
+	min: gscript
 gscript
 	uni: 0261
 	fin: uni0261
 	set: AGL1
+	maj: Gscript
 gstroke
 	uni: 01E5
 	fin: uni01E5
@@ -18711,10 +18849,15 @@ jcircle
 	uni: 24D9
 	fin: uni24D9
 	set: AGL1
+Jcrossedtail
+	uni: A7B2
+	fin: uniA7B2
+	min: jcrossedtail
 jcrossedtail
 	uni: 029D
 	fin: uni029D
 	set: AGL1
+	maj: Jcrossedtail
 dotlessjstroke
 	uni: 025F
 	fin: uni025F
@@ -19071,10 +19214,15 @@ ktfullwidth
 	fin: uni33CF
 	ali: ktsquare
 	set: AGL1
+Kturned
+	uni: A7B0
+	fin: uniA7B0
+	min: kturned
 kturned
 	uni: 029E
 	fin: uni029E
 	set: AGL1
+	maj: Kturned
 kuhiragana
 	uni: 304F
 	fin: uni304F
@@ -19191,10 +19339,15 @@ lbar
 	fin: uni019A
 	set: AGL1
 	maj: Lbar
+Lbelt
+	uni: A7AD
+	fin: uniA7AD
+	min: lbelt
 lbelt
 	uni: 026C
 	fin: uni026C
 	set: AGL1
+	maj: Lbelt
 lbopomofo
 	uni: 310C
 	fin: uni310C
@@ -20465,10 +20618,12 @@ plussmall
 	uni: FE62
 	fin: uniFE62
 	set: AGL1
-plussuperior
+plus.superior
 	uni: 207A
-	fin: uni207A
+	ali: plussuperior
 	set: AGL1
+minus.superior
+	uni: 207B
 pfullwidth
 	uni: FF50
 	fin: uniFF50
@@ -22002,10 +22157,15 @@ arTtehPF.m
 	fin: uniFB69
 	ali: ttehmedialarabic
 	set: AGL1
+Tturned
+	uni: A7B1
+	fin: uniA7B1
+	min: tturned
 tturned
 	uni: 0287
 	fin: uni0287
 	set: AGL1
+	maj: Tturned
 tuhiragana
 	uni: 3064
 	fin: uni3064
@@ -23504,6 +23664,30 @@ whook
 	uni: 2C73
 	fin: uni2C73
 	maj: Whook
+Chilatin
+	uni: A7B3
+	fin: uniA7B3
+	min: chilatin
+chilatin
+	uni: AB53
+	fin: uniAB53
+	maj: Chilatin
+Betalatin
+	uni: A7B4
+	fin: uniA7B4
+	min: betalatin
+betalatin
+	uni: A7B5
+	fin: uniA7B5
+	maj: Betalatin
+Omegalatin
+	uni: A7B6
+	fin: uniA7B6
+	min: omegalatin
+omegalatin
+	uni: A7B7
+	fin: uniA7B7
+	maj: Omegalatin
 replacementchar
 	uni: FFFD
 	fin: uniFFFD
@@ -24830,7 +25014,7 @@ dvUue
 dvZha
 	uni: 0979
 	fin: uni0979
-dvYaheavy
+dvYha
 	uni: 097A
 	fin: uni097A
 dvOesign
@@ -26877,6 +27061,9 @@ teTsa
 teDza
 	uni: 0C59
 	fin: uni0C59
+teRrra
+	uni: 0C5A
+	fin: uni0C5A
 teRrvocal
 	uni: 0C60
 	fin: uni0C60
@@ -30218,6 +30405,7 @@ lenistildecmb
 Hhook
 	uni: A7AA
 	fin: uniA7AA
+	min: hhook
 colonmod
 	uni: A789
 	fin: uniA789
@@ -30227,6 +30415,103 @@ shortequalsmod
 Saltillo
 	uni: A78B
 	fin: uniA78B
+	min: saltillo
 saltillo
 	uni: A78C
 	fin: uniA78C
+	maj: Saltillo
+Acedilla
+	fin: uni00410327
+Icedilla
+	fin: uni00490327
+Mcedilla
+	fin: uni004D0327
+Ocedilla
+	fin: uni004F0327
+Ucedilla
+	fin: uni00550327
+acedilla
+	fin: uni00610327
+icedilla
+	fin: uni00690327
+mcedilla
+	fin: uni006D0327
+ocedilla
+	fin: uni006F0327
+ucedilla
+	fin: uni00750327
+Oslashcedilla
+	fin: uni00D80327
+oslashcedilla
+	fin: uni00F80327
+Oopencedilla
+	fin: uni01860327
+Eturnedcedilla
+	fin: uni018E0327
+Schwacedilla
+	fin: uni018F0327
+Eopencedilla
+	fin: uni01900327
+Iotalatincedilla
+	fin: uni01960327
+Iotalatinstroke
+	fin: uni01960335
+Iotalatinstrokecedilla
+	fin: uni019603350327
+Istrokecedilla
+	fin: uni01970327
+Obarcedilla
+	fin: uni019F0327
+Upsilonlatincedilla
+	fin: uni01B10327
+Vhookcedilla
+	fin: uni01B20327
+eturnedcedilla
+	fin: uni01DD0327
+Ubarcedilla
+	fin: uni02440327
+Vturnedcedilla
+	fin: uni02450327
+aturnedcedilla
+	fin: uni02500327
+alphalatincedilla
+	fin: uni02510327
+oopencedilla
+	fin: uni02540327
+schwacedilla
+	fin: uni02590327
+eopencedilla
+	fin: uni025B0327
+istrokecedilla
+	fin: uni02680327
+iotalatincedilla
+	fin: uni02690327
+Ismallcedilla
+	fin: uni026A0327
+obarcedilla
+	fin: uni02750327
+ubarcedilla
+	fin: uni02890327
+upsilonlatincedilla
+	fin: uni028A0327
+vhookcedilla
+	fin: uni028B0327
+vturnedcedilla
+	fin: uni028C0327
+Ismallstrokecedilla
+	fin: uni1D7B0327
+iotalatinstrokecedilla
+	fin: uni1D7C0327
+csupmodcedilla
+	fin: uni1D9C0327
+Alphalatincedilla
+	fin: uni2C6D0327
+Aturnedcedilla
+	fin: uni2C6F0327
+Heng
+	fin: uniA726
+heng
+	fin: uniA727
+interrobangdown
+	uni: 2E18
+	fin: uni2E18
