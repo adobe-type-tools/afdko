@@ -305,6 +305,14 @@ static void callbackMove(t1cCtx h, float dx, float dy)
         {
             x = RND_ON_READ(x);
             y = RND_ON_READ(y);
+
+            if (h->seac.phase == seacAccentPreMove)
+            {
+                x += h->seac.xshift;
+                y += h->seac.ady;
+                h->seac.phase = seacAccentPostMove;
+            }
+
             h->x = x;
             h->y = y;
             /* If we are not processing an LE, then a move-to marks a new non-LE path */
@@ -345,12 +353,6 @@ static void callbackMove(t1cCtx h, float dx, float dy)
     }
 	
     
-	if (h->seac.phase == seacAccentPreMove)
-    {
-		x += h->seac.xshift;
-		y += h->seac.ady;
-		h->seac.phase = seacAccentPostMove;
-    }
     
     if (h->flags & USE_MATRIX)
         h->glyph->move(h->glyph, TX(x, y), TY(x, y));

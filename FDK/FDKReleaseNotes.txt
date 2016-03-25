@@ -35,7 +35,8 @@ FDKReleaseNotes.txt
 	Fixed bug in reading UFO fonts, so that glyphs with no <outline> element and
 	with a <lib> element would be skipped.
 	Minor code changes to allow 'tx' to compile as a 64 bit program.
-	
+	Fixed bug in dumping afm format data, introduced when tx was updated to be 64 bit.
+	Fixed bug in processing seac, introduced in work on rounding fractional values.
 	
 	
 	

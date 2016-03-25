@@ -179,7 +179,7 @@ static void glyphEnd(abfGlyphCallbacks *cb)
 	abfMetricsCtx g = &h->metrics.ctx;
 	abfGlyphInfo *info = cb->info;
     unsigned long code = (info->encoding.code == ABF_GLYPH_UNENC)?
-		0xFFFFFFFF: (unsigned long)info->encoding.code;
+		(unsigned long)-1: (unsigned long)info->encoding.code;
 	h->metrics.cb.end(&h->metrics.cb);
 
 	/* Print glyph metrics */
