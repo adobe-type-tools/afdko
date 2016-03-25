@@ -6,7 +6,7 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 __doc__ = """
 """
 __usage__ = """
-   makeInstances program v1.31 March 2 2012
+   makeInstances program v1.32 March 17 2016
    makeInstances -h
    makeInstances -u
    makeInstances [-a] [-f <instance file path>] [-m <MM font path>] 
@@ -528,7 +528,8 @@ def doSnapshot(coords, emSquare, mmFontPath, tempInstance):
 	if coords[-1] == ",":  # If it is a one-item list
 		coords = coords[:-1]
 	coords = re.sub(r"\s+", "", coords) # get rid of spaces after commas
-	command = "IS -t1 -U %s -z %s \"%s\" \"%s\" 2>&1" % (coords, emSquare, mmFontPath, tempInstance)
+	command = "IS -t1 -Z -U %s -z %s \"%s\" \"%s\" 2>&1" % (coords, emSquare, mmFontPath, tempInstance)
+	print command
 	log = FDKUtils.runShellCmd(command)
 	if ("error" in log) or not os.path.exists(tempInstance):
 		logMsg.log("Error in IS snapshotting to %s" % (tempInstance))
