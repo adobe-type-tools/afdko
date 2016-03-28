@@ -2250,7 +2250,7 @@ def ttnDump(input, output, options, showExtensionFlag, supressHints = 0, supress
 def run(args):
 	if ("-h" in args) or ("-u" in args):
 		print __help__
-	
+		sys.exit(0)
 	
 	if "-a" not in args:
 		args.insert(0, "-a") # allow virtual GIDS.
