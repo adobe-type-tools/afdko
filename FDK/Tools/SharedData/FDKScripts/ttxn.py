@@ -91,6 +91,7 @@ import collections
 import textwrap
 import string
 import platform
+import getopt
 
 curSystem = platform.system()
 INDENT = "   "
@@ -2277,8 +2278,13 @@ def run(args):
 		supressTTFDiffs = 1
 	else:
 		supressTTFDiffs = 0
-		
-	jobs, options = ttx.parseOptions(args)
+
+	try:
+		jobs, options = ttx.parseOptions(args)
+	except getopt.GetoptError as e:
+		print "ERROR:", e
+		sys.exit(2)
+
 	if not jobs:
 		return
 		
