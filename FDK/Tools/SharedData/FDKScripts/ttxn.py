@@ -77,7 +77,7 @@ Adds additional options:
 import sys
 from fontTools import ttx
 from fontTools.ttLib import TTFont, tagToXML, TTLibError
-from fontTools.misc.xmlWriter import XMLWriter
+from fontTools.ttLib.tables.DefaultTable import DefaultTable
 from fontTools.misc.loggingTools import Timer
 from fontTools.misc.py23 import basestring, tostr
 import copy
@@ -95,8 +95,8 @@ log = logging.getLogger(__name__)
 
 
 curSystem = platform.system()
-INDENT = "   "
-ChainINDENT = INDENT + " C "
+INDENT = "  "
+ChainINDENT = INDENT + "C "
 kMaxLineLength = 80
 gtextWrapper = textwrap.TextWrapper(width = kMaxLineLength, subsequent_indent = INDENT + INDENT)
 
@@ -1473,9 +1473,6 @@ class OTLConverter:
 			raise KeyError("OTLConverter can only be called for GPOS and GSUB tables")
 				
 	def otlFeatureFormat(self, writer):
-		writer.newline()
-		writer.indent()
-		
 		# get and write language systems
 		lsList, featDictByLangSys, featDictByIndex = self.buildLangSys()
 		self.writeLangSys(writer, lsList)
@@ -1489,12 +1486,7 @@ class OTLConverter:
 
 		# do feature defs
 		self.doFeatures(writer, featDictByLangSys)
-		
-		# write feature defs.
-		
-		writer.dedent()
-		writer.newline()
-		
+
 	def addLangSysEntry(self, pfeatList, scriptTag, langTag, langSys, featDictByLangSys, featDictByIndex):
 		for featIndex in langSys.FeatureIndex:
 			try:
@@ -1863,11 +1855,7 @@ def dumpOTLAsFeatureFile(tableTag, writer, ttf):
 	otlConverter.otlFeatureFormat(writer)
 
 
-class  TTXNWriter(XMLWriter):
-	def __init__(self, fileOrPath, indentwhite=INDENT, idlefunc=None, encoding='utf8', indentLevel=0):
-		XMLWriter. __init__(self, fileOrPath, indentwhite, idlefunc, encoding)
-
-class  TTXNTTFont(TTFont):
+class TTXNTTFont(TTFont):
 	def __init__(self, file=None, res_name_or_index=None,
 			sfntVersion="\000\001\000\000", flavor=None, checkChecksums=False,
 			verbose=None, recalcBBoxes=True, allowVID=False, ignoreDecompileErrors=False,
@@ -1897,21 +1885,19 @@ class  TTXNTTFont(TTFont):
 		if tag not in self:
 			return
 		xmlTag = tagToXML(tag)
+		attrs = dict()
 		if hasattr(table, "ERROR"):
-			writer.begintag(xmlTag, ERROR="decompilation error")
+			attrs['ERROR'] = "decompilation error"
+		if table.__class__ == DefaultTable:
+			attrs['raw'] = True
+		writer.begintag(xmlTag, **attrs)
+		writer.newline()
+		if tag in ("glyf", "CFF "):
+			dumpFont(writer, self.filePath, self.supressHints)
+		elif tag in ("GSUB", "GPOS"):
+			dumpOTLAsFeatureFile(tag, writer, self)
 		else:
-			writer.begintag(xmlTag)
-			writer.newline()
-			if tag in ("glyf", "CFF "):
-				ttxnWriter = TTXNWriter(writer.file, indentLevel=writer.indentlevel)
-				dumpFont(ttxnWriter, self.filePath, self.supressHints)
-				ttxnWriter.newline()
-			elif tag in ("GSUB", "GPOS"):
-				ttxnWriter = TTXNWriter(writer.file,  indentLevel=writer.indentlevel)
-				dumpOTLAsFeatureFile(tag, ttxnWriter, self)
-				ttxnWriter.newline()
-			else:
-				table.toXML(writer, self)
+			table.toXML(writer, self)
 		writer.endtag(xmlTag)
 		writer.newline()
 		writer.newline()
