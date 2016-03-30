@@ -52,6 +52,7 @@ Get feat tag list. For each tag:
 					
 		
 """
+from __future__ import print_function, absolute_import
 
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
@@ -73,25 +74,25 @@ Adds additional options:
 
 """
 
-def _dummy():
-	from encodings import latin_1, utf_8, utf_16_be
-
-
 import sys
-import os
 from fontTools import ttx
-from fontTools.ttLib import TTFont, tagToIdentifier
-from fontTools.ttLib.tables.otBase import BaseTTXConverter
-from fontTools.ttLib.tables.otTables import fixLookupOverFlows, fixSubTableOverFlows
+from fontTools.ttLib import TTFont, tagToXML, TTLibError
 from fontTools.misc.xmlWriter import XMLWriter
+from fontTools.misc.loggingTools import Timer
+from fontTools.misc.py23 import basestring, tostr
 import copy
 import subprocess
 import re
 import collections
 import textwrap
-import string
 import platform
 import getopt
+import tempfile
+import logging
+
+
+log = logging.getLogger(__name__)
+
 
 curSystem = platform.system()
 INDENT = "   "
@@ -142,8 +143,8 @@ def addClassDef(otlConv, classDefs, coverage, type = None, anchor = None):
 			classDict[classIndex] = [name]
 	classZeroList = None
 	if coverage:
-		if not classDict.has_key(0):
-			classZeroList = glyphDict.keys()
+		if 0 not in classDict:
+			classZeroList = list(glyphDict.keys())
 			classZeroList.sort()
 			i = len(classZeroList)
 			while i > 0:
@@ -175,8 +176,7 @@ def AddMarkClassDef(otlConv, markCoverage, markArray, type):
 		markClass[markRec.Class].append( (getAnchorString(markRec.MarkAnchor),markGlyphList[m]) )
 		
 	# Get the mark class names from the global dict
-	for c in markClass.keys():
-		valueList = markClass[c]
+	for c, valueList in markClass.items():
 		anchorDict = collections.defaultdict(list)
 		for anchor, glyph in valueList:
 			anchorDict[anchor].append(glyph)
@@ -240,13 +240,12 @@ class ContextRecord:
 		
 def checkGlyphInSequence(glyphName, contextSequence, i):
 	retVal = 0
-	note = ""
 	try:
 		input = contextSequence[i]
-		if type(input) == type([]):
-			if glyphName  in input:
+		if isinstance(input, list):
+			if glyphName in input:
 				retVal = 1
-		elif type(input) == type(""):
+		elif isinstance(input, basestring):
 			if glyphName == input:
 				retVal = 1
 	except IndexError:
@@ -282,12 +281,12 @@ def ruleSinglePos(subtable, otlConv, context = None):
 					rules.append(rule)
 			
 	elif subtable.Format == 2:
-		for i in range(subtable.ValueCount):
+		for i in range(len(subtable.Value)):
 			rule = note = None
 			tglyph = subtable.Coverage.glyphs[i]
 			valueString = getValRec(subtable.ValueFormat, subtable.Value[i])
 			if valueString and valueString != "0" and valueString != kNullValueRecord:
-				if context and (not tglyph in inputSeqList):
+				if context and (tglyph not in inputSeqList):
 					note = " # Note! Not in input sequence"
 				else:
 					note = ""
@@ -320,10 +319,10 @@ def rulePairPos(subtable, otlConv, context = None):
 
 	if subtable.Format == 1:
 		firstGlyphList = subtable.Coverage.glyphs
-		for i in range(subtable.PairSetCount):
+		for i in range(len(subtable.PairSet)):
 			g1 = firstGlyphList[i]
 			pairSet = subtable.PairSet[i]
-			for j in range(pairSet.PairValueCount):
+			for j in range(len(pairSet.PairValueRecord)):
 				rule = note = None
 				pairValueRec = pairSet.PairValueRecord[j]
 				g2 = pairValueRec.SecondGlyph
@@ -347,11 +346,11 @@ def rulePairPos(subtable, otlConv, context = None):
 						
 
 	elif subtable.Format == 2:
-		for i in range(subtable.Class1Count):
+		for i in range(len(subtable.Class1Record)):
 			classRec1 = subtable.Class1Record[i]
 			# if this class reference exists it has to be in classesByLookup.
 			g1 = otlConv.classesByLookup[otlConv.curLookupIndex, otlConv.curSubTableIndex, i, otlConv.leftSideTag]
-			for j in range(subtable.Class2Count):
+			for j in range(len(classRec1.Class2Record)):
 				rule = note = None
 				classRec2 = classRec1.Class2Record[j]
 				g2 = otlConv.classesByLookup[otlConv.curLookupIndex, otlConv.curSubTableIndex, j, otlConv.rightSideTag]
@@ -398,8 +397,8 @@ def ruleCursivePos(subtable, otlConv, context = None):
 		indent = ""
 
 	cursivelyphList = subtable.Coverage.glyphs
-	for i in range(subtable.EntryExitCount):
-		rule =  note = None
+	for i in range(len(subtable.EntryExitRecord)):
+		rule = note = None
 		tglyph = cursivelyphList[i]
 		if context and (not checkGlyphInSequence(tglyph, inputSeqList, 0)):
 			note = " # Note! Not in input sequence"
@@ -435,8 +434,8 @@ def ruleMarkBasePos(subtable, otlConv, context = None):
 	markGlyphList = subtable.MarkCoverage.glyphs
 	baseGlyphList = subtable.BaseCoverage.glyphs
 	markClass = collections.defaultdict(list)
-	classCount = subtable.ClassCount
-	
+	classCount = len(set(v.Class for v in subtable.MarkArray.MarkRecord))
+
 	for m in range(len(markGlyphList)):
 		markRec = subtable.MarkArray.MarkRecord[m]
 		markClass[markRec.Class].append( (getAnchorString(markRec.MarkAnchor),markGlyphList[m]) )
@@ -462,7 +461,7 @@ def ruleMarkBasePos(subtable, otlConv, context = None):
 		note = None
 		glyphList.sort() 
 		if context:
-			if type(inputSeqList[0]) == type([]):
+			if isinstance(inputSeqList[0], list):
 				inputList = inputSeqList[0]
 			else:
 				inputList = [inputSeqList[0]]
@@ -505,8 +504,8 @@ def ruleMarkLigPos(subtable, otlConv, context = None):
 	markGlyphList = subtable.MarkCoverage.glyphs
 	ligGlyphList = subtable.LigatureCoverage.glyphs
 	markClass = collections.defaultdict(list)
-	classCount = subtable.ClassCount
-	
+	classCount = len(set(v.Class for v in subtable.MarkArray.MarkRecord))
+
 	for m in range(len(markGlyphList)):
 		markRec = subtable.MarkArray.MarkRecord[m]
 		markClass[markRec.Class].append( (getAnchorString(markRec.MarkAnchor),markGlyphList[m]) )
@@ -524,7 +523,7 @@ def ruleMarkLigPos(subtable, otlConv, context = None):
 		indent = ""
 	subsequentIndent = indent + INDENT
 	ligArray = subtable.LigatureArray
-	for l in range(ligArray.LigatureCount):
+	for l in range(len(ligArray.LigatureAttach)):
 		ligGlyph = ligGlyphList[l]
 		tokenList = ["%spos ligature " % (indent), ligGlyph ]
 		if context and (not checkGlyphInSequence(ligGlyph, inputSeqList, 0)):
@@ -532,7 +531,7 @@ def ruleMarkLigPos(subtable, otlConv, context = None):
 		else:
 			note = ""
 		ligAttach = ligArray.LigatureAttach[l]
-		for cmpIndex in range(ligAttach.ComponentCount):
+		for cmpIndex in range(len(ligAttach.ComponentRecord)):
 			if cmpIndex > 0:
 				tokenList.append("\n%sligComponent\n%s"% (subsequentIndent, subsequentIndent))
 			componentRec = ligAttach.ComponentRecord[cmpIndex]
@@ -569,8 +568,8 @@ def ruleMarkMarkPos(subtable, otlConv, context = None):
 	markGlyphList = subtable.Mark1Coverage.glyphs
 	mark2GlyphList = subtable.Mark2Coverage.glyphs
 	markClass = collections.defaultdict(list)
-	classCount = subtable.ClassCount
-	
+	classCount = len(set(v.Class for v in subtable.Mark1Array.MarkRecord))
+
 	for m in range(len(markGlyphList)):
 		markRec = subtable.Mark1Array.MarkRecord[m]
 		markClass[markRec.Class].append( (getAnchorString(markRec.MarkAnchor),markGlyphList[m]) )
@@ -594,7 +593,7 @@ def ruleMarkMarkPos(subtable, otlConv, context = None):
 		note = None
 		glyphList.sort() # This sort will lead the rules to be sorted by base glyph names.
 		if context:
-			if type(inputSeqList[0]) == type([]):
+			if isinstance(inputSeqList[0], list):
 				inputList = inputSeqList[0]
 			else:
 				inputList = [inputSeqList[0]]
@@ -638,12 +637,10 @@ def ruleContextPOS(subtable, otlConv, context = None):
 
 		inputList = []
 		inputList2 = []
-		for i in range(subtable.GlyphCount):
+		for i in range(len(subtable.Coverage)):
 			glyphList = subtable.Coverage[i].glyphs
 			glyphList.sort()
-			rg = range(1, len(glyphList))
-			rg.reverse()
-			for i in rg:
+			for i in reversed(range(1, len(glyphList))):
 				if glyphList[i-1] == glyphList[i]:
 					del glyphList[i]
 			inputList2.append(glyphList)
@@ -653,7 +650,7 @@ def ruleContextPOS(subtable, otlConv, context = None):
 		rule = "pos %s;" % (inputTxt)
 		pLookupList =  otlConv.table.LookupList.Lookup
 		posRules = []
-		for i in range(subtable.PosCount):
+		for i in range(len(subtable.PosLookupRecord)):
 			subRec = subtable.PosLookupRecord[i]
 			if not subRec:
 				continue
@@ -663,7 +660,7 @@ def ruleContextPOS(subtable, otlConv, context = None):
 			otlConv.curLookupIndex = subRec.LookupListIndex
 			handler = otlConv.ruleHandlers[(lookupType)]
 			contextRec = ContextRecord(inputList2, subRec.SequenceIndex)
-			for si in range(lookup.SubTableCount):
+			for si in range(len(lookup.SubTable)):
 				curSI = otlConv.curSubTableIndex
 				otlConv.curSubTableIndex = si
 				subtablerules = handler(lookup.SubTable[si], otlConv, contextRec)
@@ -674,18 +671,18 @@ def ruleContextPOS(subtable, otlConv, context = None):
 
 	elif subtable.Format == 2:
 		subRules = []
-		for i in range(subtable.PosClassSetCount):
+		for i in range(len(subtable.PosClassSet)):
 			ctxClassSet = subtable.PosClassSet[i]
 			if not ctxClassSet:
 				continue
-			for j in range(ctxClassSet.PosClassRuleCount):
+			for j in range(len(ctxClassSet.PosClassRule)):
 				ctxClassRule = ctxClassSet.PosClassRule[j]
 
 				inputList = []
 				className = otlConv.classesByLookup[otlConv.curLookupIndex, otlConv.curSubTableIndex, i, otlConv.InputTag]
 				inputList = [className]
 				inputList2 = [ otlConv.classesByClassName[className] ]
-				for c in range(ctxClassRule.InputGlyphCount -1):
+				for c in range(len(ctxClassRule.Input)):
 					classIndex = ctxClassRule.Input[c]
 					className = otlConv.classesByLookup[otlConv.curLookupIndex, otlConv.curSubTableIndex, classIndex, otlConv.InputTag]
 					inputList.append(className)
@@ -693,7 +690,7 @@ def ruleContextPOS(subtable, otlConv, context = None):
 				inputTxt = "' ".join(inputList) + "'"
 				rule = "pos %s;" % (inputTxt)
 				subRules = []
-				for k in range(ctxClassRule.PosCount):
+				for k in range(len(ctxClassRule.PosLookupRecord)):
 					subsRec = ctxClassRule.PosLookupRecord[k]
 					if not subsRec:
 						continue
@@ -703,7 +700,7 @@ def ruleContextPOS(subtable, otlConv, context = None):
 					otlConv.curLookupIndex = subsRec.LookupListIndex
 					handler = otlConv.ruleHandlers[(lookupType)]
 					contextRec = ContextRecord(inputList, subsRec.SequenceIndex)
-					for si in range(lookup.SubTableCount):
+					for si in range(len(lookup.SubTable)):
 						curSI = otlConv.curSubTableIndex
 						otlConv.curSubTableIndex = si
 						subtablerules = handler(lookup.SubTable[si], otlConv, contextRec)
@@ -714,16 +711,16 @@ def ruleContextPOS(subtable, otlConv, context = None):
 
 	elif subtable.Format == 1:
 		firstGlyphList = subtable.Coverage.glyphs
-		for si in range(subtable.PosRuleSetCount): # for each glyph in the coverage table
+		for si in range(len(subtable.PosRuleSet)):  # for each glyph in the coverage table
 			firstGlyph = firstGlyphList[si]
 			subRuleSet = subtable.PosRuleSet[si]
-			for ri in range(subRuleSet.PosRuleCount):
+			for ri in range(len(subRuleSet.PosRule)):
 				ctxRuleRec = subRuleSet.PosRule[ri]
 				inputList = [firstGlyph] + ctxRuleRec.Input
 				inputTxt = "' ".join(inputList) + "'"
 				rule = "pos %s" % (inputTxt)
 				subRules = []
-				for i in range(ctxRuleRec.PosCount):
+				for i in range(len(ctxRuleRec.PosLookupRecord)):
 					subsRec = ctxRuleRec.PosLookupRecord[i]
 					if not subsRec:
 						continue
@@ -733,7 +730,7 @@ def ruleContextPOS(subtable, otlConv, context = None):
 					otlConv.curLookupIndex = subsRec.LookupListIndex
 					handler = otlConv.ruleHandlers[(lookupType)]
 					contextRec = ContextRecord(inputList, subsRec.SequenceIndex)
-					for si in range(lookup.SubTableCount):
+					for si in range(len(lookup.SubTable[si])):
 						curSI = otlConv.curSubTableIndex
 						otlConv.curSubTableIndex = si
 						subtablerules = handler(lookup.SubTable[si], otlConv, contextRec)
@@ -755,12 +752,10 @@ def ruleChainContextPOS(subtable, otlConv, context = None):
 	chainRules = []
 	if subtable.Format == 3:
 		backtrackList = []
-		for i in range(subtable.BacktrackGlyphCount):
+		for i in range(len(subtable.BacktrackCoverage)):
 			glyphList = subtable.BacktrackCoverage[i].glyphs
 			glyphList.sort()
-			rg = range(1, len(glyphList))
-			rg.reverse()
-			for i in rg:
+			for i in reversed(range(1, len(glyphList))):
 				if glyphList[i-1] == glyphList[i]:
 					del glyphList[i]
 			backtrackList.append("[" + (" ".join(glyphList)) + "]")
@@ -769,12 +764,10 @@ def ruleChainContextPOS(subtable, otlConv, context = None):
 
 		inputList = []
 		inputList2 = []
-		for i in range(subtable.InputGlyphCount):
+		for i in range(len(subtable.InputCoverage)):
 			glyphList = subtable.InputCoverage[i].glyphs
 			glyphList.sort()
-			rg = range(1, len(glyphList))
-			rg.reverse()
-			for i in rg:
+			for i in reversed(range(1, len(glyphList))):
 				if glyphList[i-1] == glyphList[i]:
 					del glyphList[i]
 			inputList2.append(glyphList)
@@ -782,12 +775,10 @@ def ruleChainContextPOS(subtable, otlConv, context = None):
 		inputTxt = "' ".join(inputList) + "'"
 
 		lookAheadList = []
-		for i in range(subtable.LookAheadGlyphCount):
+		for i in range(len(subtable.LookAheadCoverage)):
 			glyphList = subtable.LookAheadCoverage[i].glyphs
 			glyphList.sort()
-			rg = range(1, len(glyphList))
-			rg.reverse()
-			for i in rg:
+			for i in reversed(range(1, len(glyphList))):
 				if glyphList[i-1] == glyphList[i]:
 					del glyphList[i]
 			lookAheadList.append("[" + (" ".join(glyphList)) + "]")
@@ -796,8 +787,7 @@ def ruleChainContextPOS(subtable, otlConv, context = None):
 		rule = "pos %s %s %s;" % (backTxt, inputTxt, lookAheadTxt)
 		pLookupList =  otlConv.table.LookupList.Lookup
 		posRules = []
-		for i in range(subtable.PosCount):
-			subRec = subtable.PosLookupRecord[i]
+		for subRec in subtable.PosLookupRecord:
 			if not subRec:
 				continue
 			lookup = pLookupList[subRec.LookupListIndex]
@@ -806,7 +796,7 @@ def ruleChainContextPOS(subtable, otlConv, context = None):
 			otlConv.curLookupIndex = subRec.LookupListIndex
 			handler = otlConv.ruleHandlers[(lookupType)]
 			contextRec = ContextRecord(inputList2, subRec.SequenceIndex)
-			for si in range(lookup.SubTableCount):
+			for si in range(len(lookup.SubTable)):
 				curSI = otlConv.curSubTableIndex
 				otlConv.curSubTableIndex = si
 				subtablerules = handler(lookup.SubTable[si], otlConv, contextRec)
@@ -817,14 +807,13 @@ def ruleChainContextPOS(subtable, otlConv, context = None):
 
 	elif subtable.Format == 2:
 		subRules = []
-		for i in range(subtable.ChainPosRuleSetCount):
+		for i in range(len(subtable.ChainSubClassSet)):
 			ctxClassSet = subtable.ChainSubClassSet[i]
 			if not ctxClassSet:
 				continue
-			for j in range(ctxClassSet.ChainSubClassRuleCount):
-				ctxClassRule = ctxClassSet.ChainPosRuleSet[j]
+			for ctxClassRule in ctxClassSet.ChainPosRuleSet:
 				backTrackList = []
-				for c in range(ctxClassRule.BacktrackGlyphCount):
+				for c in range(len(ctxClassRule.Backtrack)):
 					classIndex = ctxClassRule.Backtrack[c]
 					className = otlConv.classesByLookup[otlConv.curLookupIndex, otlConv.curSubTableIndex, classIndex, otlConv.backtrackTag]
 					backTrackList.append(className)
@@ -833,24 +822,21 @@ def ruleChainContextPOS(subtable, otlConv, context = None):
 				className = otlConv.classesByLookup[otlConv.curLookupIndex, otlConv.curSubTableIndex, i, otlConv.InputTag]
 				inputList = [className]
 				inputList2 = [ otlConv.classesByClassName[className] ]
-				for c in range(ctxClassRule.InputGlyphCount -1):
-					classIndex = ctxClassRule.Input[c]
+				for classIndex in ctxClassRule.Input:
 					className = otlConv.classesByLookup[otlConv.curLookupIndex, otlConv.curSubTableIndex, classIndex, otlConv.InputTag]
 					inputList.append(className)
 					inputList2.append(otlConv.classesByClassName[className])
 				inputTxt = "' ".join(inputList) + "'"
 
 				lookAheadList = []
-				for c in range(ctxClassRule.LookAheadGlyphCount):
-					classIndex = ctxClassRule.LookAhead[c]
+				for classIndex in ctxClassRule.LookAhead:
 					className = otlConv.classesByLookup[otlConv.curLookupIndex, otlConv.curSubTableIndex, classIndex, otlConv.lookAheadTag]
 					lookAheadList.append(className)
 				lookTxt = " ".join(lookAheadList)
 
 				rule = "sub %s %s %s;" % (backTxt, inputTxt, lookTxt)
 				subRules = []
-				for k in range(ctxClassRule.SubstCount):
-					subsRec = ctxClassRule.SubstLookupRecord[k]
+				for subsRec in ctxClassRule.SubstLookupRecord:
 					if not subsRec:
 						continue
 					lookup = pLookupList[subsRec.LookupListIndex]
@@ -859,7 +845,7 @@ def ruleChainContextPOS(subtable, otlConv, context = None):
 					otlConv.curLookupIndex = subsRec.LookupListIndex
 					handler = otlConv.ruleHandlers[(lookupType)]
 					contextRec = ContextRecord(inputList, subsRec.SequenceIndex)
-					for si in range(lookup.SubTableCount):
+					for si in range(len(lookup.SubTable)):
 						curSI = otlConv.curSubTableIndex
 						otlConv.curSubTableIndex = si
 						subtablerules = handler(lookup.SubTable[si], otlConv, contextRec)
@@ -870,11 +856,10 @@ def ruleChainContextPOS(subtable, otlConv, context = None):
 
 	elif subtable.Format == 1:
 		firstGlyphList = subtable.Coverage.glyphs
-		for si in range(subtable.ChainPosRuleSetCount): # for each glyph in the coverage table
+		for si in range(len(subtable.ChainPosRuleSet)):  # for each glyph in the coverage table
 			firstGlyph = firstGlyphList[si]
 			subRuleSet = subtable.ChainPosRuleSet[si]
-			for ri in range(subRuleSet.ChainPosRuleCount):
-				ctxRuleRec = subRuleSet.ChainPosRule[ri]
+			for ctxRuleRec in subRuleSet.ChainPosRule:
 				backList = ctxRuleRec.Backtrack
 				backList.reverse()
 				backTxt = " ".join(backList)
@@ -883,8 +868,7 @@ def ruleChainContextPOS(subtable, otlConv, context = None):
 				lookAheadTxt = " ".join(ctxRuleRec.LookAhead)
 				rule = "sub %s %s %s" % (backTxt, inputTxt, lookAheadTxt)
 				subRules = []
-				for i in range(ctxRuleRec.SubstCount):
-					subsRec = ctxRuleRec.SubstLookupRecord[i]
+				for subsRec in ctxRuleRec.SubstLookupRecord:
 					if not subsRec:
 						continue
 					lookup = pLookupList[subsRec.LookupListIndex]
@@ -893,7 +877,7 @@ def ruleChainContextPOS(subtable, otlConv, context = None):
 					otlConv.curLookupIndex = subsRec.LookupListIndex
 					handler = otlConv.ruleHandlers[(lookupType)]
 					contextRec = ContextRecord(inputList, subsRec.SequenceIndex)
-					for si in range(lookup.SubTableCount):
+					for si in range(len(lookup.SubTable)):
 						curSI = otlConv.curSubTableIndex
 						otlConv.curSubTableIndex = si
 						subtablerules = handler(lookup.SubTable[si], otlConv, contextRec)
@@ -920,14 +904,13 @@ def ruleSingleSub(subtable, otlConv, context = None):
 	rules = []
 	noMatchRules = [] # contains the rules that don't match the context
 
-	items = subtable.mapping.items()
 	if context:
 		indent = ChainINDENT
 		inputSeqList = context.inputList[context.sequenceIndex:]
 	else:
 		indent = ""
 
-	for g1, g2 in items:
+	for g1, g2 in subtable.mapping.items():
 		rule = note = None
 		if context and (not checkGlyphInSequence(g1, inputSeqList, 0)):
 			note = " # Note! Not in input sequence"
@@ -956,18 +939,12 @@ def ruleMultipleSub(subtable, otlConv, context = None):
 		inputSeqList = context.inputList[context.sequenceIndex:]
 	else:
 		indent = ""
-	for i in range(subtable.SequenceCount):
+	for g1, substGlyphList in subtable.mapping.items():
 		rule = note = None
-		g1 = subtable.Coverage.glyphs[i]
 		if context and (not checkGlyphInSequence(g1, inputSeqList, 0)):
 			note = " # Note! Not in input sequence"
 		else:
 			note = ""
-		substGlyphList = []
-		subRec = subtable.Sequence[i]
-		for j in range(subRec.GlyphCount):
-			substGlyphList.append(subRec.Substitute[j])
-		substGlyphList.sort()
 		subTxt = " ".join(substGlyphList)
 		rule = "%ssub %s by [%s];%s" % (indent, g1, subTxt, note)
 		if context and note:
@@ -992,8 +969,7 @@ def ruleAltSub(subtable, otlConv, context = None):
 	else:
 		indent = ""
 
-	items = subtable.alternates.items()
-	for g1, alts in items:
+	for g1, alts in subtable.alternates.items():
 		rule = note = None
 		if context and (not checkGlyphInSequence(g1, inputSeqList, 0)):
 			note = " # Note! Not in input sequence"
@@ -1024,8 +1000,7 @@ def ruleLigatureSub(subtable, otlConv, context = None):
 	else:
 		indent = ""
 
-	items = subtable.ligatures.items()
-	for item in items:
+	for item in subtable.ligatures.items():
 		ligs = item[1]
 		firstGlyph = item[0]
 		for lig in ligs:
@@ -1077,12 +1052,10 @@ def ruleContextSUB(subtable, otlConv, context = None):
 
 		inputList = []
 		inputList2 = []
-		for i in range(subtable.GlyphCount):
+		for i in range(len(subtable.Coverage)):
 			glyphList = subtable.Coverage[i].glyphs
 			glyphList.sort()
-			rg = range(1, len(glyphList))
-			rg.reverse()
-			for i in rg:
+			for i in reversed(range(1, len(glyphList))):
 				if glyphList[i-1] == glyphList[i]:
 					del glyphList[i]
 			inputList2.append(glyphList)
@@ -1092,8 +1065,7 @@ def ruleContextSUB(subtable, otlConv, context = None):
 		rule = "sub %s;" % (inputTxt)
 		pLookupList =  otlConv.table.LookupList.Lookup
 		posRules = []
-		for i in range(subtable.SubstCount):
-			subRec = subtable.SubstLookupRecord[i]
+		for subRec in subtable.SubstLookupRecord:
 			if not subRec:
 				continue
 			lookup = pLookupList[subRec.LookupListIndex]
@@ -1102,7 +1074,7 @@ def ruleContextSUB(subtable, otlConv, context = None):
 			otlConv.curLookupIndex = subRec.LookupListIndex
 			handler = otlConv.ruleHandlers[(lookupType)]
 			contextRec = ContextRecord(inputList2, subRec.SequenceIndex)
-			for si in range(lookup.SubTableCount):
+			for si in range(len(lookup.SubTable)):
 				curSI = otlConv.curSubTableIndex
 				otlConv.curSubTableIndex = si
 				subtablerules = handler(lookup.SubTable[si], otlConv, contextRec)
@@ -1113,19 +1085,16 @@ def ruleContextSUB(subtable, otlConv, context = None):
 
 	elif subtable.Format == 2:
 		subRules = []
-		for i in range(subtable.SubClassSetCount):
+		for i in range(len(subtable.SubClassSet)):
 			ctxClassSet = subtable.SubClassSet[i]
 			if not ctxClassSet:
 				continue
-			for j in range(ctxClassSet.SubClassRuleCount):
-				ctxClassRule = ctxClassSet.SubClassRule[j]
-
+			for ctxClassRule in ctxClassSet.SubClassRule:
 				inputList = []
 				className = otlConv.classesByLookup[otlConv.curLookupIndex, otlConv.curSubTableIndex, i, otlConv.InputTag]
 				inputList = [className]
 				inputList2 = [ otlConv.classesByClassName[className] ]
-				for c in range(ctxClassRule.InputGlyphCount -1):
-					classIndex = ctxClassRule.Input[c]
+				for classIndex in ctxClassRule.Input:
 					className = otlConv.classesByLookup[otlConv.curLookupIndex, otlConv.curSubTableIndex, classIndex, otlConv.InputTag]
 					inputList.append(className)
 					inputList2.append(otlConv.classesByClassName[className])
@@ -1134,8 +1103,7 @@ def ruleContextSUB(subtable, otlConv, context = None):
 
 				rule = "sub %s;" % (inputTxt)
 				subRules = []
-				for k in range(ctxClassRule.SubstCount):
-					subsRec = ctxClassRule.SubstLookupRecord[k]
+				for subsRec in ctxClassRule.SubstLookupRecord:
 					if not subsRec:
 						continue
 					lookup = pLookupList[subsRec.LookupListIndex]
@@ -1144,7 +1112,7 @@ def ruleContextSUB(subtable, otlConv, context = None):
 					otlConv.curLookupIndex = subsRec.LookupListIndex
 					handler = otlConv.ruleHandlers[(lookupType)]
 					contextRec = ContextRecord(inputList, subsRec.SequenceIndex)
-					for si in range(lookup.SubTableCount):
+					for si in range(len(lookup.SubTable)):
 						curSI = otlConv.curSubTableIndex
 						otlConv.curSubTableIndex = si
 						subtablerules = handler(lookup.SubTable[si], otlConv, contextRec)
@@ -1155,17 +1123,15 @@ def ruleContextSUB(subtable, otlConv, context = None):
 
 	elif subtable.Format == 1:
 		firstGlyphList = subtable.Coverage.glyphs
-		for si in range(subtable.SubRuleSetCount): # for each glyph in the coverage table
+		for si in range(len(subtable.SubRuleSet)):  # for each glyph in the coverage table
 			firstGlyph = firstGlyphList[si]
 			subRuleSet = subtable.SubRuleSet[si]
-			for ri in range(subRuleSet.SubRuleCount):
-				ctxRuleRec = subRuleSet.SubRule[ri]
+			for ctxRuleRec in subRuleSet.SubRule:
 				inputList = [firstGlyph] + ctxRuleRec.Input
 				inputTxt = "' ".join(inputList) + "'"
 				rule = "sub %s" % (inputTxt)
 				subRules = []
-				for i in range(ctxRuleRec.SubstCount):
-					subsRec = ctxRuleRec.SubstLookupRecord[i]
+				for subsRec in ctxRuleRec.SubstLookupRecord:
 					if not subsRec:
 						continue
 					lookup = pLookupList[subsRec.LookupListIndex]
@@ -1174,7 +1140,7 @@ def ruleContextSUB(subtable, otlConv, context = None):
 					otlConv.curLookupIndex = subsRec.LookupListIndex
 					handler = otlConv.ruleHandlers[(lookupType)]
 					contextRec = ContextRecord(inputList, subsRec.SequenceIndex)
-					for si in range(lookup.SubTableCount):
+					for si in range(len(lookup.SubTable)):
 						curSI = otlConv.curSubTableIndex
 						otlConv.curSubTableIndex = si
 						subtablerules = handler(lookup.SubTable[si], otlConv, contextRec)
@@ -1198,12 +1164,10 @@ def ruleChainContextSUB(subtable, otlConv, context = None):
 	
 	if subtable.Format == 3:
 		backtrackList = []
-		for i in range(subtable.BacktrackGlyphCount):
+		for i in range(len(subtable.BacktrackCoverage)):
 			glyphList = subtable.BacktrackCoverage[i].glyphs
 			glyphList.sort()
-			rg = range(1, len(glyphList))
-			rg.reverse()
-			for i in rg:
+			for i in reversed(range(1, len(glyphList))):
 				if glyphList[i-1] == glyphList[i]:
 					del glyphList[i]
 			backtrackList.append("[" + (" ".join(glyphList)) + "]")
@@ -1212,12 +1176,10 @@ def ruleChainContextSUB(subtable, otlConv, context = None):
 
 		inputList = []
 		inputList2 = []
-		for i in range(subtable.InputGlyphCount):
+		for i in range(len(subtable.InputCoverage)):
 			glyphList = subtable.InputCoverage[i].glyphs
 			glyphList.sort()
-			rg = range(1, len(glyphList))
-			rg.reverse()
-			for i in rg:
+			for i in reversed(range(1, len(glyphList))):
 				if glyphList[i-1] == glyphList[i]:
 					del glyphList[i]
 			inputList2.append(glyphList)
@@ -1225,27 +1187,24 @@ def ruleChainContextSUB(subtable, otlConv, context = None):
 		inputTxt = " ".join(inputList)
 
 		lookAheadList = []
-		for i in range(subtable.LookAheadGlyphCount):
+		for i in range(len(subtable.LookAheadCoverage)):
 			glyphList = subtable.LookAheadCoverage[i].glyphs
 			glyphList.sort()
-			rg = range(1, len(glyphList))
-			rg.reverse()
-			for i in rg:
+			for i in reversed(range(1, len(glyphList))):
 				if glyphList[i-1] == glyphList[i]:
 					del glyphList[i]
 			lookAheadList.append("[" + (" ".join(glyphList)) + "]")
 		lookAheadTxt = " ".join(lookAheadList)
 		rule = "sub %s %s %s;" % (backTxt, inputTxt, lookAheadTxt)
 		subRules = []
-		for i in range(subtable.SubstCount):
-			subsRec = subtable.SubstLookupRecord[i]
+		for subsRec in subtable.SubstLookupRecord:
 			lookup = pLookupList[subsRec.LookupListIndex]
 			lookupType = lookup.LookupType
 			curLI = otlConv.curLookupIndex 
 			otlConv.curLookupIndex = subsRec.LookupListIndex
 			handler = otlConv.ruleHandlers[(lookupType)]
 			contextRec = ContextRecord(inputList2, subsRec.SequenceIndex)
-			for si in range(lookup.SubTableCount):
+			for si in range(len(lookup.SubTable)):
 				curSI = otlConv.curSubTableIndex
 				otlConv.curSubTableIndex = si
 				subtablerules = handler(lookup.SubTable[si], otlConv, contextRec)
@@ -1256,15 +1215,14 @@ def ruleChainContextSUB(subtable, otlConv, context = None):
 
 	elif subtable.Format == 2:
 		subRules = []
-		for i in range(subtable.ChainSubClassSetCount):
+		for i in range(len(subtable.ChainSubClassSet)):
 			ctxClassSet = subtable.ChainSubClassSet[i]
 			if not ctxClassSet:
 				continue
-			for j in range(ctxClassSet.ChainSubClassRuleCount):
-				ctxClassRule = ctxClassSet.ChainSubClassRule[j]
+			for ctxClassRule in ctxClassSet.ChainSubClassRule:
 				inputList = []
 				backTrackList = []
-				for c in range(ctxClassRule.BacktrackGlyphCount):
+				for c in range(len(ctxClassRule.Backtrack)):
 					classIndex = ctxClassRule.Backtrack[c]
 					className = otlConv.classesByLookup[otlConv.curLookupIndex, otlConv.curSubTableIndex, classIndex, otlConv.backtrackTag]
 					backTrackList.append(className)
@@ -1273,31 +1231,28 @@ def ruleChainContextSUB(subtable, otlConv, context = None):
 				className = otlConv.classesByLookup[otlConv.curLookupIndex, otlConv.curSubTableIndex, i, otlConv.InputTag]
 				inputList = [className]
 				inputList2 = [ otlConv.classesByClassName[className] ]
-				for c in range(ctxClassRule.InputGlyphCount -1):
-					classIndex = ctxClassRule.Input[c]
+				for classIndex in ctxClassRule.Input:
 					className = otlConv.classesByLookup[otlConv.curLookupIndex, otlConv.curSubTableIndex, classIndex, otlConv.InputTag]
 					inputList.append(className)
 					inputList2.append(otlConv.classesByClassName[className])
 				inputTxt = " ".join(inputList)
 
 				lookAheadList = []
-				for c in range(ctxClassRule.LookAheadGlyphCount):
-					classIndex = ctxClassRule.LookAhead[c]
+				for classIndex in ctxClassRule.LookAhead:
 					className = otlConv.classesByLookup[otlConv.curLookupIndex, otlConv.curSubTableIndex, classIndex, otlConv.lookAheadTag]
 					lookAheadList.append(className)
 				lookTxt = " ".join(lookAheadList)
 
 				rule = "sub %s %s' %s;" % (backTxt, inputTxt, lookTxt)
 				subRules = []
-				for k in range(ctxClassRule.SubstCount):
-					subsRec = ctxClassRule.SubstLookupRecord[k]
+				for subsRec in ctxClassRule.SubstLookupRecord:
 					lookup = pLookupList[subsRec.LookupListIndex]
 					lookupType = lookup.LookupType
 					curLI = otlConv.curLookupIndex 
 					otlConv.curLookupIndex = subsRec.LookupListIndex
 					handler = otlConv.ruleHandlers[(lookupType)]
 					contextRec = ContextRecord(inputList, subsRec.SequenceIndex)
-					for si in range(lookup.SubTableCount):
+					for si in range(len(lookup.SubTable)):
 						curSI = otlConv.curSubTableIndex
 						otlConv.curSubTableIndex = si
 						subtablerules = handler(lookup.SubTable[si], otlConv, contextRec)
@@ -1308,11 +1263,10 @@ def ruleChainContextSUB(subtable, otlConv, context = None):
 
 	elif subtable.Format == 1:
 		firstGlyphList = subtable.Coverage.glyphs
-		for si in range(subtable.ChainSubRuleSetCount): # for each glyph in the coverage table
+		for si in range(len(subtable.ChainSubRuleSet)):  # for each glyph in the coverage table
 			firstGlyph = firstGlyphList[si]
 			subRuleSet = subtable.ChainSubRuleSet[si]
-			for ri in range(subRuleSet.ChainSubRuleCount):
-				ctxRuleRec = subRuleSet.ChainSubRule[ri]
+			for ctxRuleRec in subRuleSet.ChainSubRule:
 				backList = ctxRuleRec.Backtrack
 				backList.reverse()
 				backTxt = " ".join(backList)
@@ -1321,15 +1275,14 @@ def ruleChainContextSUB(subtable, otlConv, context = None):
 				lookAheadTxt = " ".join(ctxRuleRec.LookAhead)
 				rule = "sub %s %s' %s by " % (backTxt, inputTxt, lookAheadTxt)
 				subRules = []
-				for i in range(ctxRuleRec.SubstCount):
-					subsRec = ctxRuleRec.SubstLookupRecord[i]
+				for subsRec in ctxRuleRec.SubstLookupRecord:
 					lookup = pLookupList[subsRec.LookupListIndex]
 					lookupType = lookup.LookupType
 					curLI = otlConv.curLookupIndex 
 					otlConv.curLookupIndex = subsRec.LookupListIndex
 					handler = otlConv.ruleHandlers[(lookupType)]
 					contextRec = ContextRecord(inputList, subsRec.SequenceIndex)
-					for si in range(lookup.SubTableCount):
+					for si in range(len(lookup.SubTable)):
 						curSI = otlConv.curSubTableIndex
 						otlConv.curSubTableIndex = si
 						subtablerules = handler(lookup.SubTable[si], otlConv, contextRec)
@@ -1356,12 +1309,10 @@ def ruleReverseChainSub(subtable, otlConv, context = None):
 	rules = []
 	if subtable.Format == 1:
 		backtrackList = []
-		for i in range(subtable.BacktrackGlyphCount):
+		for i in range(len(subtable.BacktrackCoverage)):
 			glyphList = subtable.BacktrackCoverage[i].glyphs
 			glyphList.sort()
-			rg = range(1, len(glyphList))
-			rg.reverse()
-			for i in rg:
+			for i in reversed(range(1, len(glyphList))):
 				if glyphList[i-1] == glyphList[i]:
 					del glyphList[i]
 			backtrackTxt = "[ %s ] " % (" ".join(glyphList))
@@ -1382,9 +1333,7 @@ def ruleReverseChainSub(subtable, otlConv, context = None):
 			for entry in glyphList:
 				substituteList.append(subtable.Substitute[entry[1]])
 			
-		rg = range(1, len(glyphList))
-		rg.reverse()
-		for i in rg:
+		for i in reversed(range(1, len(glyphList))):
 			if glyphList[i-1] == glyphList[i]:
 				del glyphList[i]
 				del substituteList[i]
@@ -1394,19 +1343,17 @@ def ruleReverseChainSub(subtable, otlConv, context = None):
 		inputTxt = "[ %s ]" % (" ".join(glyphList))
 
 		lookAheadList = []
-		for i in range(subtable.LookAheadGlyphCount):
+		for i in range(len(subtable.LookAheadCoverage)):
 			glyphList = subtable.LookAheadCoverage[i].glyphs
 			glyphList.sort()
-			rg = range(1, len(glyphList))
-			rg.reverse()
-			for i in rg:
+			for i in reversed(range(1, len(glyphList))):
 				if glyphList[i-1] == glyphList[i]:
 					del glyphList[i]
 			lookAheadTxt = " [ %s ]" % (" ".join(glyphList))
 			lookAheadList.append(lookAheadTxt)
 		lookAheadTxt = " ".join(lookAheadList)
 		
-		if subtable.GlyphCount:
+		if subtable.Substitute:
 			replText = " by [ %s ]" % (" ".join(substituteList))
 		else:
 			replText = ""
@@ -1441,8 +1388,9 @@ gLookupFlagMap = {
 				8: " IgnoreMarks",
 				0xFF00: " MarkAttachmentTypedef",
 				}
-gLookupFlagKeys = gLookupFlagMap.keys()
-gLookupFlagKeys.sort()
+
+gLookupFlagKeys = sorted(gLookupFlagMap.keys())
+
 
 def getLookupFlagTag(lookupFlag):
 	retList = []
@@ -1552,8 +1500,12 @@ class OTLConverter:
 			try:
 				featRecord = pfeatList[featIndex]
 			except IndexError:
-				print "FeatList does not contain index %s from current langsys (%s, %s)." % (featIndex,scriptTag,langTag )
-				print "FeaturListLen %s,  langsys FeatIndex %s." % (len(pfeatList),  langSys.FeatureIndex)
+				log.error(
+					"FeatList does not contain index %s from current langsys (%s, %s).",
+					featIndex, scriptTag, langTag)
+				log.error(
+					"FeaturListLen %s, langsys FeatIndex %s.",
+					len(pfeatList), langSys.FeatureIndex)
 				continue
 			featTag = featRecord.FeatureTag
 			lang_sys = (scriptTag, langTag)
@@ -1592,7 +1544,7 @@ class OTLConverter:
 		if not haveDFLT:
 			# Synthesize a DFLT dflt entry.
 			addedDFLT = 0
-			scriptCount = self.table.ScriptList.ScriptCount
+			scriptCount = len(self.table.ScriptList.ScriptRecord)
 			for langsysList in featDictByIndex.values():
 				if len(langsysList) == scriptCount:
 					langsysList.insert(0, ("DFLT", "dflt", 0xFFFF))
@@ -1633,9 +1585,7 @@ class OTLConverter:
 				if handler:
 					handler(subtable, self)
 
-		classNameLists = self.classesByNameList.keys()
-		classNameLists.sort()
-		for nameList in classNameLists:
+		for nameList in sorted(self.classesByNameList.keys()):
 			classRecList = self.classesByNameList[nameList]
 			lenList = len(nameList)
 			if lenList == 0:
@@ -1647,16 +1597,14 @@ class OTLConverter:
 			else:
 				className = "@%s_%d_%s" % (nameList[0], len(nameList), nameList[-1])
 				i = 1
-				while( (i < lenList) and self.classesByClassName.has_key(className)):
+				while((i < lenList) and className in self.classesByClassName):
 					className = "@%s_%s_%d_%s" % (nameList[0], nameList[i], len(nameList), nameList[-1])
 			self.classesByClassName[className]= nameList
 			for classRec in classRecList:
 				key = (classRec.lookupIndex, classRec.subtableIndex, classRec.classIndex, classRec.type)
 				self.classesByLookup[key] = className
 			
-		classDefLists = self.markClassesByDefList.keys()
-		classDefLists.sort()
-		for defList in classDefLists:
+		for defList in sorted(self.markClassesByDefList.keys()):
 			classRecList = self.markClassesByDefList[defList]
 			defNameList = []
 			for nameList,anchor in defList:
@@ -1671,7 +1619,7 @@ class OTLConverter:
 			else:
 				className = "@%s_%d_%s_mark" % (defNameList[0], len(defNameList), defNameList[-1])
 				i = 1
-				while( (i < lenList) and self.classesByClassName.has_key(className)):
+				while((i < lenList) and className in self.classesByClassName):
 					className = "@%s_%s_%d_%s_mark" % (defNameList[0], defNameList[i], len(defNameList), defNameList[-1])
 
 			self.markClassesByClassName[className] = defList
@@ -1683,7 +1631,7 @@ class OTLConverter:
 		return
 		
 	def writeClasses(self, writer):
-		classNames = self.classesByClassName.keys()
+		classNames = list(self.classesByClassName.keys())
 		if classNames:
 			writer.newline()
 			writer.write("# Class definitions *********************************" )
@@ -1710,7 +1658,7 @@ class OTLConverter:
 		
 
 	def writeMarkClasses(self, writer):
-		classNames = self.markClassesByClassName.keys()
+		classNames = list(self.markClassesByClassName.keys())
 		if classNames:
 			writer.newline()
 			writer.write("# Mark Class definitions *********************************" )
@@ -1735,16 +1683,13 @@ class OTLConverter:
 		
 
 	def doFeatures(self, writer, featDictByLangSys):
-		featTagList = featDictByLangSys.keys()
-		featTagList.sort()
-		for featTag in featTagList:
-			writer.write( "feature %s {" % (featTag))
+		for featTag in sorted(featDictByLangSys.keys()):
+			writer.write("feature %s {" % (featTag))
 			writer.newline()
 			writer.indent()
 			langSysDict = featDictByLangSys[featTag]
 			dfltLangSysKey = ("DFLT", "dflt")
-			langSysTagList = langSysDict.keys()
-			langSysTagList.sort()
+			langSysTagList = sorted(langSysDict.keys())
 			try:
 				dfltFeatIndexList = langSysDict[dfltLangSysKey]
 				langSysTagList.remove(dfltLangSysKey)
@@ -1773,11 +1718,9 @@ class OTLConverter:
 			for lookupIndex in featRecord.Feature.LookupListIndex:
 				lookupIndexDict[lookupIndex] = pLookupList[lookupIndex]
 		
-		liList = lookupIndexDict.keys()
-		liList.sort()
 		excludeDLFTtxt = ""
 		nameIndex = 0
-		for li in liList:
+		for li in sorted(lookupIndexDict.keys()):
 			self.curLookupIndex = li
 			lookup =  pLookupList[li]
 			lookupFlagTxt = getLookupFlagTag(lookup.LookupFlag)
@@ -1785,7 +1728,7 @@ class OTLConverter:
 				useExtension = " useExtension"
 			else:
 				useExtension = ""
-			if self.seenLookup.has_key(li):
+			if li in self.seenLookup:
 				lookupName = self.seenLookup[li]
 				writer.write("lookup %s%s%s;" % (lookupName, lookupFlagTxt, excludeDLFTtxt) )
 				writer.newline()
@@ -1820,16 +1763,13 @@ class OTLConverter:
 		haveAnyDflt = 0
 		excludeDLFT = 0
 		if dfltLookupIndexDict:
-			lookupIndexList = lookupIndexDict.keys()
-			lookupIndexList.sort()
-			for lookupIndex in lookupIndexList:
-				if dfltLookupIndexDict.has_key(lookupIndex):
+			for lookupIndex in sorted(lookupIndexDict.keys()):
+				if lookupIndex in dfltLookupIndexDict:
 					del lookupIndexDict[lookupIndex]
 					haveAnyDflt =1
 			if not haveAnyDflt:
 				excludeDLFT = 1
-		liList = lookupIndexDict.keys()
-		liList.sort()
+		liList = sorted(lookupIndexDict.keys())
 		if excludeDLFT:
 			excludeDLFTtxt = " excludeDLFT"
 		else:
@@ -1852,9 +1792,10 @@ class OTLConverter:
 				if self.showExtension and lookup.LookupType == self.ExtensionIndex:
 					useExtension = " useExtension"
 				else:
+					# XXX 'useExtension' is assigned here but never used
 					useExtension = ""
 			
-				if self.seenLookup.has_key(li):
+				if li in self.seenLookup:
 					lookupName = self.seenLookup[li]
 					writer.write("lookup %s%s;" % (lookupName, excludeDLFTtxt) )
 					excludeDLFTtxt = "" # Only need to write it once.
@@ -1880,12 +1821,12 @@ class OTLConverter:
 			handler = self.ruleHandlers[(lookupType)]
 		except KeyError:
 			msg = "Error. Unknown lookup type %s. Skipping lookup." % (lookupType)
-			print msg
+			log.error(msg)
 			writer._writeraw(msg)
 			writer.newline()
 			return
 			
-		for si in range(lookup.SubTableCount):
+		for si in range(len(lookup.SubTable)):
 			self.curSubTableIndex = si
 			rules = handler(lookup.SubTable[si], self)
 			for rule in rules:
@@ -1915,16 +1856,12 @@ def dumpOTLAsFeatureFile(tableTag, writer, ttf):
 	try:
 		table = ttf[tableTag]
 	except:
-		print "Font does not have %s. Skipping." % (tableTag)
+		log.error("Font does not have %s. Skipping.", tableTag)
 		return
 
 	otlConverter = OTLConverter(table, ttf)
 	otlConverter.otlFeatureFormat(writer)
 
-
-def debugmsg(msg):
-	import time
-	print(msg + time.strftime("  (%H:%M:%S)", time.localtime(time.time())))
 
 class  TTXNWriter(XMLWriter):
 	def __init__(self, fileOrPath, indentwhite=INDENT, idlefunc=None, encoding='utf8', indentLevel=0):
@@ -1932,30 +1869,32 @@ class  TTXNWriter(XMLWriter):
 
 class  TTXNTTFont(TTFont):
 	def __init__(self, file=None, res_name_or_index=None,
-			sfntVersion="\000\001\000\000", checkChecksums=0,
-			verbose=0, recalcBBoxes=1, allowVID=0, ignoreDecompileErrors=False,
-			fontNumber=-1, supressHints = 0, lazy=False, quiet=False):
-			
+			sfntVersion="\000\001\000\000", flavor=None, checkChecksums=False,
+			verbose=None, recalcBBoxes=True, allowVID=False, ignoreDecompileErrors=False,
+			recalcTimestamp=True, fontNumber=-1, lazy=None, quiet=None,
+			supressHints=False):
+
 		self.filePath = file
 		self.supressHints = supressHints
-		TTFont. __init__(self, file, res_name_or_index,sfntVersion, checkChecksums,
-			verbose, recalcBBoxes, allowVID, ignoreDecompileErrors,
-			fontNumber)
+		TTFont. __init__(self, file, res_name_or_index=res_name_or_index,
+			sfntVersion=sfntVersion, flavor=flavor, checkChecksums=checkChecksums,
+			verbose=verbose, recalcBBoxes=recalcBBoxes, allowVID=allowVID,
+			ignoreDecompileErrors=ignoreDecompileErrors, recalcTimestamp=recalcTimestamp,
+			fontNumber=fontNumber, lazy=lazy, quiet=quiet)
 
-	def _tableToXML(self, writer, tag, progress, quiet):
-		if self.has_key(tag):
+	def _tableToXML(self, writer, tag, progress, quiet=None):
+		if quiet is not None:
+			from fontTools.misc.loggingTools import deprecateArgument
+			deprecateArgument("quiet", "configure logging instead")
+		if tag in self:
 			table = self[tag]
 			report = "Dumping '%s' table..." % tag
 		else:
 			report = "No '%s' table found." % tag
 		if progress:
 			progress.setLabel(report)
-		elif self.verbose:
-			debugmsg(report)
-		else:
-			if not quiet:
-				print report
-		if not self.has_key(tag):
+		log.info(report)
+		if tag not in self:
 			return
 		xmlTag = tagToXML(tag)
 		if hasattr(table, "ERROR"):
@@ -1965,12 +1904,10 @@ class  TTXNTTFont(TTFont):
 			writer.newline()
 			if tag in ("glyf", "CFF "):
 				ttxnWriter = TTXNWriter(writer.file, indentLevel=writer.indentlevel)
-				print "Dumping '%s' table ..." % (tag)
 				dumpFont(ttxnWriter, self.filePath, self.supressHints)
 				ttxnWriter.newline()
 			elif tag in ("GSUB", "GPOS"):
 				ttxnWriter = TTXNWriter(writer.file,  indentLevel=writer.indentlevel)
-				print "Dumping '%s' table ..." % (tag)
 				dumpOTLAsFeatureFile(tag, ttxnWriter, self)
 				ttxnWriter.newline()
 			else:
@@ -1979,57 +1916,29 @@ class  TTXNTTFont(TTFont):
 		writer.newline()
 		writer.newline()
 
-def tagToXML(tag):
-	"""Similarly to tagToIdentifier(), this converts a TT tag
-	to a valid XML element name. Since XML element names are
-	case sensitive, this is a fairly simple/readable translation.
-	"""
-	import re
-	if tag == "OS/2":
-		return "OS_2"
-	elif tag == "GlyphOrder":
-		return tag
-	if re.match("[A-Za-z_][A-Za-z_0-9]* *$", tag):
-		return string.strip(tag)
-	else:
-		return tagToIdentifier(tag)
-
-
-def xmlToTag(tag):
-	"""The opposite of tagToXML()"""
-	if tag == "OS_2":
-		return "OS/2"
-	if len(tag) == 8:
-		return identifierToTag(tag)
-	else:
-		return tag + " " * (4 - len(tag))
-	return tag
 
 def shellcmd(cmdList):
-	tempFile = os.tmpfile() # I use this because tx -dump -6 can be very large.
-	p = subprocess.Popen(cmdList,stdout=tempFile, stderr=subprocess.STDOUT)
-	retCode = p.poll()
-	while None == retCode:
-		retCode = p.poll()
-	tempFile.seek(0)
-	log = tempFile.read()
-	tempFile.close()
-	return log
-	
+	# I use this because tx -dump -6 can be very large.
+	with tempfile.TemporaryFile() as tempFile:
+		subprocess.check_call(cmdList, stdout=tempFile, stderr=subprocess.STDOUT)
+		tempFile.seek(0)
+		data = tempFile.read()
+	# XXX is UTF-8 the correct encoding to decode tx output for py3?
+	return tostr(data, encoding="utf8")
+
+
 def dumpFont(writer, fontPath, supressHints=0):
 	dictTxt = shellcmd(["tx", "-dump", "-0", fontPath])
 	if curSystem == "Windows":
 		dictTxt = re.sub(r"[\r\n]+", "\n", dictTxt)
-	dictTxt = re.sub(r"##[^\r\n]*Filename[^\r\n]+", "", dictTxt, 1)
-	lines = dictTxt.splitlines()
-	dictTxt = "\n".join(lines)
-	writer._writeraw("<FontTopDict>")
+	dictTxt = re.sub(r"##[^\r\n]*Filename[^\r\n]+", "", dictTxt, 1).strip()
+	dictLines = dictTxt.splitlines()
+	writer.begintag("FontTopDict")
 	writer.newline()
-	writer.indent()
-	writer._writeraw(dictTxt)
-	writer.newline()
-	writer.dedent()
-	writer._writeraw("</FontTopDict>")
+	for line in dictLines:
+		writer._writeraw(line)
+		writer.newline()
+	writer.endtag("FontTopDict")
 	writer.newline()
 	
 	if supressHints:
@@ -2042,39 +1951,44 @@ def dumpFont(writer, fontPath, supressHints=0):
 	charList = re.findall(r"[^ ]glyph\[[^]]+\] \{([^,]+),[^\r\n]+,([^}]+)", charData)
 	if "cid.CIDFontName" in dictTxt:
 		# fix glyph names to sort
-		charList = map(lambda entry: ("cid%s" % (entry[0]).zfill(5), entry[1]) , charList)
+		charList = [("cid%s" % (entry[0]).zfill(5), entry[1]) for entry in charList]
 
-	charList = map(lambda entry: entry[0] + entry[1], charList)
+	charList = [entry[0] + entry[1] for entry in charList]
 	charList.sort()
 	charTxt = "\n".join(charList)
-	writer._writeraw("<FontOutlines>")
+	writer.begintag("FontOutlines")
 	writer.newline()
-	writer.indent()
-	writer._writeraw(charTxt)
-	writer.newline()
-	writer.dedent()
-	writer._writeraw("</FontOutlines>")
+	for line in charTxt.splitlines():
+		writer._writeraw(line)
+		writer.newline()
+	writer.endtag("FontOutlines")
 	writer.newline()
 	
 	return
-	
-def ttnDump(input, output, options, showExtensionFlag, supressHints = 0, supressVersions = 0, supressTTFDiffs = 0):
-	print 'Dumping "%s" to "%s"...' % (input, output)
-	ttf = TTXNTTFont(input, 0, verbose=options.verbose, allowVID=options.allowVID,
-			ignoreDecompileErrors=options.ignoreDecompileErrors, supressHints = supressHints)
-	splitTables=options.splitTables
+
+
+@Timer(log, 'Done dumping TTX in %(time).3f seconds')
+def ttnDump(input, output, options, showExtensionFlag, supressHints=0, supressVersions=0, supressTTFDiffs=0):
+	log.info('Dumping "%s" to "%s"...', input, output)
+	if options.unicodedata:
+		from fontTools.unicode import setUnicodeData
+		setUnicodeData(options.unicodedata)
+	ttf = TTXNTTFont(input, 0, allowVID=options.allowVID,
+			ignoreDecompileErrors=options.ignoreDecompileErrors,
+			fontNumber=options.fontNumber, supressHints=supressHints)
+
 	ttf.showExtensionFlag = showExtensionFlag
 	
 	kDoNotDumpTagList = ["GlyphOrder", "DSIG"]
 	if options.onlyTables:
-		onlyTables = copy.copy(options.onlyTables)
+		onlyTables = list(options.onlyTables)
 	else:
-		onlyTables = ttf.keys()
-		
+		onlyTables = list(ttf.keys())
+
 	if options.skipTables:
 		for tag in options.skipTables:
 			if tag in onlyTables:
-			 	onlyTables.remove(tag)
+				onlyTables.remove(tag)
 
 	for tag in kDoNotDumpTagList:
 		if tag in onlyTables:
@@ -2139,9 +2053,11 @@ def ttnDump(input, output, options, showExtensionFlag, supressHints = 0, supress
 		GDEF = ttf["GDEF"]
 		gt = GDEF.table
 		if gt.GlyphClassDef:
+			# XXX why is 'gtc' assigned here but never used?
 			gtc = gt.GlyphClassDef.classDefs
 			gt.GlyphClassDef.Format = 0
 		if gt.MarkAttachClassDef:
+			# XXX why is 'gtc' assigned here but never used?
 			gtc = gt.MarkAttachClassDef.classDefs
 			gt.MarkAttachClassDef.Format = 0
 		if gt.AttachList:
@@ -2171,8 +2087,7 @@ def ttnDump(input, output, options, showExtensionFlag, supressHints = 0, supress
 			#if cmapSubtable.format != 4:
 			#	continue
 			delList = []
-			items = cmapSubtable.cmap.items()
-			for mapping in items:
+			for mapping in cmapSubtable.cmap.items():
 				if mapping[1] == ".notdef":
 					delList.append(mapping)
 				if supressTTFDiffs:
@@ -2192,6 +2107,7 @@ def ttnDump(input, output, options, showExtensionFlag, supressHints = 0, supress
 			if hasattr(cmapSubtable, "length"):
 				cmapSubtable.length = 0		
 	if ('OS/2' in onlyTables) and supressTTFDiffs:
+		# XXX why is 'os2Table' assigned here but never used?
 		os2Table = ttf["OS/2"]
 		
 	if onlyTables:
@@ -2199,57 +2115,18 @@ def ttnDump(input, output, options, showExtensionFlag, supressHints = 0, supress
 			tables=onlyTables,
 			skipTables=options.skipTables, 
 			splitTables=options.splitTables,
-			disassembleInstructions=options.disassembleInstructions)
-
-	if 0:
-		writer = None
-		specialTables = []
-		path, ext = os.path.splitext(output)
-		for tag in [ "GSUB", "GPOS"]:
-			if tag in specialTables:
-				if not (tag in options.skipTables):
-					if options.splitTables:
-						outputPath = "%s.%s%s" % (path,tagToIdentifier(tag),ext)
-					else:
-						outputPath = output
-					writer = TTXNWriter(outputPath, splitTables=options.splitTables)
-					print "Dumping '%s' table ..." % (tag)
-					writer._writeraw("<%s>" % (tag))
-					writer.newline()
-					writer.indent()
-					dumpOTLAsFeatureFile(tag, writer, ttf)
-					writer.newline()
-					writer.dedent()
-					writer._writeraw("</%s>" % (tag))
-					writer.newline()
-					writer.close()
-	
-		for tag in [ "CFF ", "glyf"]:
-			if tag in specialTables:
-				if not ( tag in options.skipTables):
-					if options.splitTables:
-						outputPath = "%s.%s%s" % (path,tagToIdentifier(tag),ext)
-					else:
-						outputPath = output
-					writer = TTXNWriter(outputPath, splitTables=options.splitTables)
-					print "Dumping '%s' table ..." % (tag)
-					writer._writeraw("<%s>" % (tag))
-					writer.newline()
-					writer.indent()
-					dumpFont(writer, input, supressHints)
-					writer.newline()
-					writer.dedent()
-					writer._writeraw("</%s>" % (tag))
-					writer.newline()
-					writer.close()
+			disassembleInstructions=options.disassembleInstructions,
+			bitmapGlyphDataFormat=options.bitmapGlyphDataFormat)
 	ttf.close()
 	return ttf
 
 
 
 def run(args):
+	from fontTools import configLogger
+
 	if ("-h" in args) or ("-u" in args):
-		print __help__
+		print(__help__)
 		sys.exit(0)
 	
 	if "-a" not in args:
@@ -2282,23 +2159,34 @@ def run(args):
 	try:
 		jobs, options = ttx.parseOptions(args)
 	except getopt.GetoptError as e:
-		print "ERROR:", e
+		print("ERROR:", e, file=sys.stderr)
 		sys.exit(2)
 
-	if not jobs:
-		return
-		
-	action, input, output = jobs[0]
+	root = logging.getLogger(None)
+	configLogger(logger=root, level=options.logLevel)
 
-	if action != ttx.ttDump:
-		print sys.argv[0],"can only dump font files."
 	try:
-		ttf = ttnDump(input, output, options, showExtensionFlag, supressHints, supressVersions, supressTTFDiffs)
-		
+		for action, input, output in jobs:
+			if action != ttx.ttDump:
+				log.error("ttxn can only dump font files.")
+				sys.exit(1)
+			ttnDump(input, output, options, showExtensionFlag, supressHints, supressVersions, supressTTFDiffs)
 	except KeyboardInterrupt:
-		print "(Cancelled.)"
-	
-	
+		log.error("(Cancelled.)")
+		sys.exit(1)
+	except SystemExit:
+		if sys.platform == "win32":
+			ttx.waitForKeyPress()
+		raise
+	except TTLibError as e:
+		log.error(e)
+		sys.exit(1)
+	except:
+		log.exception('Unhandled exception has occurred')
+		if sys.platform == "win32":
+			ttx.waitForKeyPress()
+		sys.exit(1)
+
 
 if __name__ == "__main__":
 	run(sys.argv[1:])
