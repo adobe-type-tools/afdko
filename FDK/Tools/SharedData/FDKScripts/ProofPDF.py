@@ -1,7 +1,7 @@
 #!/bin/env python
 """
 ProofPDF.py. A wrapper for the fontPDF.py module. This script verifies
-the existence of the specified font files, crreates a font class object
+the existence of the specified font files, creates a font class object
 with the call-backs required by fontPDF, and translates the command line
 options to arguments for the fontPDF module; the latter produces a proof
 file using the provided options annd font instance.
