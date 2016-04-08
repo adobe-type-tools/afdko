@@ -21,20 +21,18 @@ Glyph Proofing program for OpenType fonts
 """
 __help__= __usage__ + """
 
-"charplot", "digiplot", "fontplot", "hintplot", and "showfont" are all
-command files that call the ProofPDF script with different options.
+"charplot", "digiplot", "fontplot", "hintplot", and "waterfallplot" are
+all command files that call the ProofPDF script with different options.
 ProofPDF takes as options a list of fonts, and an optional list of
-glyphs, and prints a PDF file for the specified font. showing the glyphs
+glyphs, and prints a PDF file for the specified font, showing the glyphs
 as specified by options.
 
-The five main options, "-charplot", "-digiplot", "-fontplot", and
-"-hintplot"", each set a bunch of lower level parameters in order to
-produce a particular page layout. All these low-level parameters can be
-set by command-line options. This means that you can edit one of the
+The five main options, "-charplot", "-digiplot", "-fontplot", "-hintplot"
+and "waterfallplot", each set a bunch of lower level parameters in order
+to produce a particular page layout. All these low-level parameters can
+be set by command-line options. This means that you can edit one of the
 command files to add your own parameter values to make your own
-customized proofing command. The "showfont" command file is an example
-of adding additional low-level parameter specifications to the -fontplot
-option.
+customized proofing command.
 
 Options:
 
