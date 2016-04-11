@@ -529,7 +529,6 @@ def doSnapshot(coords, emSquare, mmFontPath, tempInstance):
 		coords = coords[:-1]
 	coords = re.sub(r"\s+", "", coords) # get rid of spaces after commas
 	command = "IS -t1 -Z -U %s -z %s \"%s\" \"%s\" 2>&1" % (coords, emSquare, mmFontPath, tempInstance)
-	print command
 	log = FDKUtils.runShellCmd(command)
 	if ("error" in log) or not os.path.exists(tempInstance):
 		logMsg.log("Error in IS snapshotting to %s" % (tempInstance))
