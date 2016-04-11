@@ -940,12 +940,12 @@ static unsigned char actionDev[3][4] = {
     {	0,		0,		0,		E_ },	/* [2] */
 };
 
-static char *gnameScan(cbCtx h, char *p, unsigned char* action, unsigned char* next) {
+static char *gnameScan(cbCtx h, char *p, unsigned char* action, unsigned char* next, int isDev) {
 
 	char *start = p;
 	int state = 0;
 
-	for (;; ) {
+	for (;;) {
 		int actn;
 		int class;
 		int c = *p;
@@ -957,9 +957,12 @@ static char *gnameScan(cbCtx h, char *p, unsigned char* action, unsigned char* n
 		else if (isdigit(c)) {
 			class = 1;
 		}
-		else if (c == '.' || c == '+' || c == '*' || c == ':' || c == '~' || c == '^' || c == '!') {
-			class = 2;
-		}
+        else if (c == '.') {
+            class = 2;
+        }
+        else if (isDev && (c == '.' || c == '+' || c == '*' || c == ':' || c == '~' || c == '^' || c == '!' || c == '-')) {
+            class = 2;
+        }
 		else {
 			class = 3;
 		}
@@ -986,12 +989,12 @@ static char *gnameScan(cbCtx h, char *p, unsigned char* action, unsigned char* n
 }
 
 static char* gnameDevScan(cbCtx h, char *p) {
-    char *val = gnameScan(h, p, (unsigned char*)actionDev, (unsigned char*)nextFinal);
+    char *val = gnameScan(h, p, (unsigned char*)actionDev, (unsigned char*)nextFinal, 1);
     return val;
 }
 
 static char* gnameFinalScan(cbCtx h, char *p) {
-    char *val = gnameScan(h, p, (unsigned char*)actionFinal, (unsigned char*)nextFinal);
+    char *val = gnameScan(h, p, (unsigned char*)actionFinal, (unsigned char*)nextFinal, 0);
     return val;
 }
 
@@ -1059,8 +1062,14 @@ static int CDECL matchAliasRecByFinal(const void *key, const void *value) {
    a-z	lowercase letters
    0-9	figures
     _	underscore
+    .   period
     -	hyphen
-   .	period
+    +   plus
+    *   asterisk
+    :   colon
+    ~   tilde
+    ^   asciicircum
+    !   exclam
 
    A glyph name may not begin with a figure or consist of a period followed by
    a sequence of digits only.
@@ -1898,7 +1907,7 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
 		h->tmp.file.name = pfbpath;
 	}
 
-	if (!fileExists(pfbpath)) {
+	if ((pfbpath != NULL) && (!fileExists(pfbpath))) {
 		char buf[1024];
 		sprintf(buf, "Specified source font file not found: %s \n", pfbpath);
 		message(h, hotERROR, buf);
@@ -1924,10 +1933,11 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
 		psinfo |= HOT_EURO_ADDED;
 	}
 
-	if (type == hotCID) {
-		flags &= ~HOT_RENAME;
-		h->alias.useFinalNames = 0;
-	}
+//	if (type == hotCID) {
+//		{
+//		flags &= ~HOT_RENAME;
+//		h->alias.useFinalNames = 0;
+//		}
 
 	if (uvsFile != NULL) {
 		hotAddUVSMap(h->hot.ctx, uvsFile);
