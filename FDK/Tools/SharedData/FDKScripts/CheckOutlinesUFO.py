@@ -323,7 +323,7 @@ def getOptions():
 				options.tolerance = int(sys.argv[i])
 			except:
 				raise focusOptionParseError("The argument following '-setTolerance' must be an integer.")
-		elif arg == "-decimal":
+		elif arg in ["-decimal", "-dec"]:
 			options.allowDecimalCoords = 1
 		elif arg == "-all":
 			options.checkAll = True

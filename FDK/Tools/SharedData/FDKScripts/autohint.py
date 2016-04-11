@@ -732,7 +732,7 @@ def getOptions():
 			options.outputPath = sys.argv[i]
 		elif arg == "-d":
 			options.debug = 1
-		elif arg == "-decimal":
+		elif arg in ["-decimal", "-dec"]:
 			options.allowDecimalCoords = True
 		elif arg =="-wd":
 			options.writeToDefaultLayer = 1
