@@ -108,7 +108,7 @@ typedef struct dictCtx_ *dictCtx;
 typedef struct cstrCtx_ *cstrCtx;
 typedef struct subrCtx_ *subrCtx;
 
-/* Libarary context (the one returned to client) */
+/* Library context (the one returned to client) */
 struct cfwCtx_ {
 	long flags;                 /* Control flags */
 	struct                      /* Client callbacks */

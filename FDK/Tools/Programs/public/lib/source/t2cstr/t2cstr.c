@@ -1907,12 +1907,12 @@ static int t2Decode(t2cCtx h, long offset)
 					}
 				h->flags |= SEEN_ENDCHAR;
 				return 0;
-				case t2_reserved16:
-				result = blend(h);
-				if (result)
-					return result;
-				continue;
-				case t2_hintmask:
+                case t2_blend:
+                    result = blend(h);
+                    if (result)
+                        return result;
+                    continue;
+                case t2_hintmask:
 				if (callbackWidth(h, 1))
 					return t2cSuccess;
 				result = callbackMask(h, 0, &next, &end);
@@ -2250,7 +2250,7 @@ static int t2DecodeSubr(t2cCtx h, long offset)
 			break;
 		case tx_endchar:
 			return 0;
-		case t2_reserved16:
+		case t2_blend:
 		case t2_rcurveline:
 		case t2_rlinecurve:
 		case t2_vvcurveto:

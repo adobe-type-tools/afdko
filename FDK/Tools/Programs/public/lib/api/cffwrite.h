@@ -87,7 +87,8 @@ enum
 	what is in the font. This is useful for working with font sources that will be used for
 	OpenType/CFF fonts */     
 
-	CFW_CUBE_RND    = 1<<11,
+    CFW_CUBE_RND    = 1<<11,
+    CFW_NO_OPTIMIZATION   = 1<<12,
 
     };
 

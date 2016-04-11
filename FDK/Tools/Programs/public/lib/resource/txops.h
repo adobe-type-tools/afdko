@@ -38,7 +38,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define t2_reserved13       13  /* Reserved */
 #define tx_endchar          14
 #define t2_reserved15       15  /* Reserved */
-#define t2_reserved16       16  /* Reserved */
+#define t2_blend       16  /* Reserved */
 #define tx_callgrel         17
 #define t2_hstemhm          18 
 #define t2_hintmask         19

@@ -4281,7 +4281,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr)
 		case t2_reserved13:
 		case tx_endchar:
 		case t2_reserved15:
-		case t2_reserved16:
+		case t2_blend:
 		case tx_rmoveto:
 		case tx_hmoveto:
 		case t2_rcurveline:
@@ -7038,6 +7038,15 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 				goto wrongmode;
 				}
 			break;
+        case opt_no_opt:
+            switch (h->mode)
+            {
+                case mode_cff:
+                    h->cfw.flags |= CFW_NO_OPTIMIZATION;
+                    break;
+                default:
+                    goto wrongmode;
+            }
 		case opt__E:
 			switch (h->mode)
 				{

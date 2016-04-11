@@ -89,7 +89,7 @@ struct cstrCtx_ {
 #define SEEN_HINT       (1 << 1)  /* Seen hint subs */
 #define SEEN_CNTR       (1 << 2)  /* Seen counter */
 #define SEEN_WARN       (1 << 3)  /* Seen cstr warning */
-	int pendop;                 /* Pending op */
+    int pendop;                 /* Pending op */
 	int seqop;                  /* Pending sequence op */
 	struct                      /* Operand stack */
 	{
@@ -358,6 +358,8 @@ static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0) {
 
     float dx0;
     float dy0;
+    int doOptimize = !(g->flags & CFW_NO_OPTIMIZATION);
+
     x0 = RND_ON_WRITE(x0);  // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
     y0 = RND_ON_WRITE(y0);
 	dx0 = x0 - h->x;
@@ -397,12 +399,12 @@ static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0) {
 	h->y = y0;
 
 	/* Choose format */
-	if (dx0 == 0.0) {
+	if ((dx0 == 0.0) && doOptimize) {
 		/* - dy0 vmoveto */
 		/*  0  */ PUSH(dy0);
 		h->pendop = tx_vmoveto;
 	}
-	else if (dy0 == 0.0) {
+	else if ((dy0 == 0.0) && doOptimize) {
 		/* dx0 - hmoveto */
 		PUSH(dx0); /*  0  */
 		h->pendop = tx_hmoveto;
@@ -432,6 +434,8 @@ static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1) {
 
     float dx1;
     float dy1;
+    int doOptimize = !(g->flags & CFW_NO_OPTIMIZATION);
+    
     x1 = RND_ON_WRITE(x1);  // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
     y1 = RND_ON_WRITE(y1);
     dx1 = x1 - h->x;
@@ -445,7 +449,7 @@ static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1) {
 	}
 
 	/* Choose format */
-	if (dx1 == 0.0) {
+	if ((dx1 == 0.0) && doOptimize) {
 		/* - dy1 vlineto */
 		flushop(h, 1);
 		switch (h->pendop) {
@@ -463,7 +467,7 @@ static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1) {
 				h->pendop = h->seqop = tx_vlineto;
 		}
 	}
-	else if (dy1 == 0.0) {
+	else if ((dy1 == 0.0) && doOptimize) {
 		/* dx1 - hlineto */
 		flushop(h, 1);
 		switch (h->pendop) {
@@ -524,6 +528,7 @@ static void glyphCurve(abfGlyphCallbacks *cb,
     float dy2;
     float dx3;
     float dy3;
+    int doOptimize = !(g->flags & CFW_NO_OPTIMIZATION);
     
     x1 = RND_ON_WRITE(x1); // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
     y1 = RND_ON_WRITE(y1);
@@ -547,7 +552,7 @@ static void glyphCurve(abfGlyphCallbacks *cb,
 	}
 
 	/* Choose format */
-	if (dx1 == 0.0) {
+	if ((dx1 == 0.0) && doOptimize) {
 		if (dy3 == 0.0) {
 			/* - dy1 dx2 dy2 dx3 - vhcurveto */
 			flushop(h, 4);
@@ -619,7 +624,7 @@ static void glyphCurve(abfGlyphCallbacks *cb,
 			}
 		}
 	}
-	else if (dy1 == 0.0) {
+	else if ((dy1 == 0.0) && doOptimize) {
 		if (dx3 == 0.0) {
 			/* dx1 - dx2 dy2 - dy3 hvcurveto */
 			flushop(h, 4);
@@ -693,7 +698,7 @@ static void glyphCurve(abfGlyphCallbacks *cb,
 		}
 	}
 	else {
-		if (dx3 == 0.0) {
+		if ((dx3 == 0.0) && doOptimize) {
 			/* dx1 dy1 dx2 dy2 - dy3 vvcurveto (odd args) */
 			flushop(h, 5);
 			switch (h->pendop) {
@@ -711,7 +716,7 @@ static void glyphCurve(abfGlyphCallbacks *cb,
 					break;
 			}
 		}
-		else if (dy3 == 0.0) {
+		else if ((dy3 == 0.0) && doOptimize) {
 			/* dx1 dy1 dx2 dy2 dx3 - hhcurveto (odd args) */
 			flushop(h, 5);
 			switch (h->pendop) {
@@ -2074,7 +2079,7 @@ static void dbt2cstr(long length, unsigned char *cstr) {
 			case tx_return:
 			case t2_reserved13:
 			case t2_reserved15:
-			case t2_reserved16:
+			case t2_blend:
 			case tx_callgrel:
 			case tx_rmoveto:
 			case tx_hmoveto:
