@@ -1,5 +1,15 @@
 #!/usr/bin/perl
-# Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+
+# Written by Dr. Ken Lunde (lunde@adobe.com)
+# Senior Computer Scientist, Adobe Systems Incorporated
+# Version 08/18/2014
+#
+# This script takes a CIDFont resource as its only argument, and
+# outputs to STDOUT a CIDFont resource with a corrected /FontBBox
+# array. The original and corrected /FontBBox array values are output
+# to STDERR.
+#
+# Tool Dependencies: tx (AFDKO)
 
 $file = $ARGV[0];
 

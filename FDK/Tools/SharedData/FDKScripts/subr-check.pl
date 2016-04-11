@@ -2,18 +2,21 @@
 
 # Written by Dr. Ken Lunde (lunde@adobe.com)
 # Senior Computer Scientist, Adobe Systems Incorporated
-# Version 10/11/2012
+# Version 08/18/2014
 #
 # This tool takes a CFF resource/table (instantiated as a file) or an
 # OpenType/CFF (name- or CID-keyed) as its only argument, and reports
 # the number of global (for name- and CID-keyed fonts) and local (for
 # CID-keyed fonts only) subroutines are present, their sizes in bytes,
 # and whether the number of subroutines exceeds architectural (64K - 3
-# = 65,533) or known implementation-specific (32K - 3 = 32,765).
+# = 65,533) or known implementation-specific (32K - 3 = 32,765)
+# limits.
 #
 # Mac OS X Version 10.4 (aka, Tiger) and earlier, along with Adobe
 # Acrobat Distiller Version 7.0 and earlier, are known implementations
 # whose subroutine limit is 32K - 3 (32,765).
+#
+# Tool Dependencies: tx (AFDKO)
 
 if ($ARGV[0] =~ /^-[huHU]/) {
   print STDERR "Usage: subr-check.pl <CFF|OpenTypeCFF>\n";

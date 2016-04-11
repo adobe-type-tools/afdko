@@ -1,12 +1,24 @@
 #!/usr/bin/perl
 
-# This tool was written by Dr. Ken Lunde, Adobe Systems Incorporated
-# lunde@adobe.com
+# Written by Dr. Ken Lunde (lunde@adobe.com)
+# Senior Computer Scientist 2, Adobe Systems Incorporated
+# Version 11/08/2015
 #
-# Version 10/26/2013
+# This tool takes a valid CMap resource as STDIN, and outputs to STDOUT
+# an optimized -- in terms of representing contiguous code points and
+# contiguous CIDs as ranges -- CMap resource. Various error checking is
+# performed, to include sorting the code points, detecting duplicate code
+# points, and checking for out-of-range code points. If the "-e" command-
+# line option is specified, a single "begincidchar/endcidchar" block that
+# contains single mappings is output to STDOUT, which is considered the
+# uncompiled form. If the tool detects that a UTF-32 CMap resource is
+# being compiled, by having "UTF32" as part of the /CMapName, corresponding
+# UTF-8 and UTF-16 CMap resources are compiled. If STDIN does not include
+# a /UIDBase value or /XUID array, the CMap resources that are generated
+# will not include them. The BSD license is included as part of the CMap
+# resource header.
 #
-# Changed call to the deprecated ctime.pl module to the more proper
-# localtime function.
+# Tool Dependencies: None
 
 $year = (localtime)[5] + 1900;
 
@@ -52,8 +64,11 @@ $nd16 = "\n1 beginnotdefrange\n<0000> <001f> 1\nendnotdefrange\n";
   "UniKS-UTF16-V" => "1 10 25545",
 );
 
-while ($ARGV[0]) { # Handle the single option "-e"
-  if ($ARGV[0] eq "-e") {
+while ($ARGV[0]) {
+  if ($ARGV[0] =~ /^-[huHU]/) {
+    print STDERR "Usage: cmap-tool.pl [-e] < STDIN\n";
+    exit;
+  } elsif ($ARGV[0] =~ /^-[eE]/) {
     $expand = 1;
     shift;
   } else {
@@ -91,7 +106,7 @@ if ($cmap{Name} eq "$cmap{Registry}-$cmap{Ordering}-$cmap{Supplement}") {
   &PrintCMap(%cmap);
 }
 
-if ($cmap{Name} =~ /UTF32/) {
+if ($cmap{Name} =~ /UTF32/ and not $expand) {
   foreach $utf (8, 16) {
     $outfile = "OUTFILE";
     $cmap{Name} =~ s/UTF32/UTF$utf/;
@@ -384,9 +399,9 @@ sub PrintCMap (%) {
   my (%cmap) = @_;
   my $uid;
   if (defined $cmap{UIDOffset}) {
-    $uid = "$cmap{UIDOffset}/XUID [$cmap{XUID}] def";
-  } else {
-    $uid = "/XUID [$cmap{XUID}] def";
+    $uid = "\n$cmap{UIDOffset}/XUID [$cmap{XUID}] def\n";
+  } elsif (defined $cmap{XUID}) {
+    $uid = "\n/XUID [$cmap{XUID}] def\n";
   }
 
   print $outfile <<EOD;
@@ -449,9 +464,7 @@ end def
 /CMapName /$cmap{Name} def
 /CMapVersion $cmap{Version} def
 /CMapType 1 def
-
 $uid
-
 /WMode $cmap{WMode} def
 
 $cmap{CodeSpace}$cmap{NotDef}
@@ -469,9 +482,9 @@ sub PrintUseCMap (%) {
   my (%cmap) = @_;
   my $uid;
   if (defined $cmap{UIDOffset}) {
-    $uid = "$cmap{UIDOffset}/XUID [$cmap{XUID}] def";
-  } else {
-    $uid = "/XUID [$cmap{XUID}] def";
+    $uid = "\n$cmap{UIDOffset}/XUID [$cmap{XUID}] def\n";
+  } elsif (defined $cmap{XUID}) {
+    $uid = "\n/XUID [$cmap{XUID}] def\n";
   }
 
   print $outfile <<EOD;
@@ -538,9 +551,7 @@ end def
 /CMapName /$cmap{Name} def
 /CMapVersion $cmap{Version} def
 /CMapType 1 def
-
 $uid
-
 /WMode $cmap{WMode} def
 
 $cmap{NewMappings}endcmap
@@ -557,9 +568,9 @@ sub PrintIdentityCMap (%) {
   my (%cmap) = @_;
   my $uid;
   if (defined $cmap{UIDOffset}) {
-    $uid = "$cmap{UIDOffset}/XUID [$cmap{XUID}] def";
-  } else {
-    $uid = "/XUID [$cmap{XUID}] def";
+    $uid = "\n$cmap{UIDOffset}/XUID [$cmap{XUID}] def\n";
+  } elsif (defined $cmap{XUID}) {
+    $uid = "\n/XUID [$cmap{XUID}] def\n";
   }
 
   print $outfile <<EOD;
@@ -622,9 +633,7 @@ end def
 /CMapName /$cmap{Name} def
 /CMapVersion $cmap{Version} def
 /CMapType 1 def
-
 $uid
-
 /WMode $cmap{WMode} def
 
 /CIDCount $expanded def
@@ -693,21 +702,3 @@ sub UTF32toUTF16 ($) {
     die "Whoah! Bad UTF-32 data! Perhaps outside of Unicode (UCS-4).\n";
   }
 }
-
-__END__
-
-
-First some background. To convert a code point to UTF-16, you use
-
-Formula 1.
-
-    lead = (cp >> 10) + 0xD7C0;
-    trail = (cp & 0x3FF) + 0xDC00;
-
-where cp > 0xFFFF. To convert it back, you use
-
-Formula 2.
-
-   cp = (lead << 10) + trail - 0x35FDC00;
-
-where lead is in (D800..DBFF) and trail is in (DC00..DFFF)

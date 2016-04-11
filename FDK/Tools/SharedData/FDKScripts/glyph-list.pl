@@ -2,19 +2,21 @@
 
 # Written by Dr. Ken Lunde (lunde@adobe.com)
 # Senior Computer Scientist, Adobe Systems Incorporated
-# Version 10/26/2012
+# Version 03/30/2016
 #
 # This tool lists the glyphs in the specified font, which can be a
 # CIDFont resource, a name-keyed Type 1 font (PFA), or an 'sfnt'
 # (TrueType or OpenType) font. By default, glyphs are listed as CIDs
 # or glyph names, depending on whether the font is CID- or name-keyed.
-# CIDs are prefixed with a slash. The "-g" option will list GIDs
-# in lieu of CIDs or glyph names. The "-r" option will turn the list
-# of CIDs or GIDs into ranges. The "-s" will additionally output
-# lists or ranges onto a single line with comma separators so that it
-# can be repurposed, such as to be used as the argument of the "-g"
-# option that is supported by many AFDKO tools.
-# Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+# CIDs are prefixed with a slash. The "-g" command-line option will
+# list GIDs in lieu of CIDs or glyph names. The "-r" command-line
+# option will turn the list of CIDs or GIDs into ranges. The "-s"
+# command-line option will additionally output lists or ranges onto
+# a single line with comma separators so that it can be repurposed, such
+# as to be used as the argument of the "-g" or "-gx" command-line
+# options that are supported by many AFDKO tools.
+#
+# Tool Dependencies: tx (AFDKO)
 
 $usegid = $second = $range = 0;
 $iscid = 1;
@@ -37,12 +39,12 @@ while ($ARGV[0]) {
         $sep = ",";
         shift;
     } else {
-        $font = "\"$ARGV[0]\"";
+        $file = "\"$ARGV[0]\"";
         shift;
     }
 }
 
-open(FILE,"tx -1 $font |") or die "Cannot open $font input file!\n";
+open(FILE,"tx -1 $file |") or die "Cannot open $file input file!\n";
 
 while(defined($line = <FILE>)) {
     chomp $line;

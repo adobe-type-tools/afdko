@@ -2,20 +2,24 @@
 
 # Written by Dr. Ken Lunde (lunde@adobe.com)
 # Senior Computer Scientist, Adobe Systems Incorporated
-# Version 10/11/2012
+# Version 08/18/2014
 #
 # This tool takes a CID-keyed font, which can be a CIDFont resource
 # (instantiated as a file), CFF resource/table (instantiated as a
 # file), or an OpenType/CFF font, as its only argument, and reports
-# the name of each FDArray element, along with its index in
+# to STDOUT the name of each FDArray element, along with its index in
 # parentheses, the CIDs that are assigned to it, and the total number
-# of CIDs in parentheses. The "-p" option is used to prefix the CIDs
-# with a slash to explicitly indicate CIDs, as opposed to GIDs, which
-# is useful when using the "-g" option for many AFDKO tools,
-# especially when GIDs do not equal CIDs in the specified font. The
-# ROS (/Registry, /Ordering, and /Supplement) of the CID-keyed font is
-# reported. This tool also reports, via STDERR, whether GIDs do not
+# of CIDs in parentheses. The CIDs are prefixed with a slash to
+# explicitly indicate CIDs, as opposed to GIDs, which is useful when
+# using the "-g" or "-gx" command-line options for many AFDKO tools,
+# especially when GIDs do not equal CIDs in a particular font. The
+# slash prefix can be suppressed by specifying the "-g" command-line
+# option, and the values are still CIDs, not GIDs. The ROS (/Registry,
+# /Ordering, and /Supplement) of the CID-keyed font is also reported
+# to STDOUT. This tool also reports, via STDERR, whether GIDs do not
 # equal CIDs in the specified font, and starting from which GID/CID.
+#
+# Tool Dependencies: tx (AFDKO)
 
 $pre = "/";
 $gidNEcid = 0;

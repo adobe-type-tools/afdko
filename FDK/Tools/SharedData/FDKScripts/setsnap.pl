@@ -1,22 +1,35 @@
 #!/usr/bin/perl
 
+# Written by Dr. Ken Lunde (lunde@adobe.com)
+# Senior Computer Scientist 2, Adobe Systems Incorporated
+# Version 04/11/2016
+#
+# Please invoke this script using the "-u" command-line option to see
+# the command-line options, or "-h" to display more information.
+#
+# Tool Dependencies: None
+
 $makefile = $number = $optimize = $hicount = $hiwidth = 0;
 $newline = "\n";
-$lower = 9;
-$upper = 24;
+$bottom = 9;
+$top = 24;
 $res = 72;
 
 while (@ARGV and $ARGV[0] =~ /^-/) {
   my $arg = shift @ARGV;
-  if (lc $arg eq "-h") {
+  if (lc $arg eq "-u") {
+      &ShowUsage;
+      exit;
+  } elsif (lc $arg eq "-h") {
+      &ShowUsage;
       &ShowHelp;
       exit;
   } elsif (lc $arg eq "-o") {
       $optimize = 1;
-  } elsif (lc $arg =~ /-l(\d+)/) {
-      $lower = $1;
-  } elsif (lc $arg =~ /-u(\d+)/) {
-      $upper = $1;
+  } elsif (lc $arg =~ /-b(\d+)/) {
+      $bottom = $1;
+  } elsif (lc $arg =~ /-t(\d+)/) {
+      $top = $1;
   } elsif (lc $arg =~ /-r(\d+)/) {
       $res = $1;
   } elsif (lc $arg eq "-s") {
@@ -46,17 +59,17 @@ if ($makefile) {
     }
     print STDOUT "$hiwidth (x $w2c{$hiwidth})$newline";
 } else {
-    $index = &getindex($lower,$upper);
+    $index = &getindex($bottom,$top);
     $buffer = "[$index]";
     foreach $size ($index - 10 .. $index + 10) {
         delete $w2c{$size};
     }
-    $index = &getindex($lower,$upper);
+    $index = &getindex($bottom,$top);
     $buffer .= " " . $index;
     foreach $size ($index - 10 .. $index + 10) {
         delete $w2c{$size};
     }
-    $index = &getindex($lower,$upper);
+    $index = &getindex($bottom,$top);
     $buffer .= " " . $index;
     print STDOUT "$buffer$newline";
 }
@@ -86,8 +99,8 @@ sub getrange ($) {
 }
 
 sub getindex ($$) {
-    my ($lower,$upper) = @_;
-    foreach $size ($lower * 2 .. $upper * 2) {
+    my ($bottom,$top) = @_;
+    foreach $size ($bottom * 2 .. $top * 2) {
         $count{&getrange(&rnd(0.35 * (72000 / (($size / 2) * $res))))} += 1;
     }
     foreach $i (sort {$a <=> $b} keys %count) {
@@ -114,32 +127,37 @@ sub fix {
     return $string;
 }
 
-sub ShowHelp {
-  print STDERR &fix(<<ENDHELP);
-  setsnap.pl Version 1.0 (10/23/2006)
-  Written by Ken Lunde (lunde\@adobe.com)
-  Program Copyright 2006 Adobe Systems Incorporated. All Rights Reserved.
+sub ShowUsage {
+  print STDOUT &fix(<<ENDUSAGE);
+  setsnap.pl Version 04/11/2016
+
+  setsnap.pl [-u] [-h]
+  setsnap.pl < stemHist-generated-stemwidth-reports
+  setsnap.pl [-o [-b<bot_pt_size>] [-t<top_pt_size>] [-r<dpi>]] < stemHist-generated-stemwidth-reports
 
   Calculates highest-frequency or optimal stem width values in one or more
   stemHist-generated stemwidth reports.
 
-  setsnap.pl -h
-  setsnap.pl < stemHist-generated-stemwidth-reports
-  setsnap.pl [-o [-l<lo_pt_size>] [-u<up_pt_size>] [-r<dpi>]] < stemHist-generated-stemwidth-reports
+ENDUSAGE
+}
 
+sub ShowHelp {
+  print STDOUT &fix(<<ENDHELP);
   OPTIONS:
+   -u = Displays only the version and command-line options
    -h = Displays this help page
    -o = Calculate optimal values based on point size range and resolution
-   -l = Lower end of point size range; used only with '-o' option
-   -u = Upper end of point size range; used only with '-o' option
+   -b = Bottom (lower) end of point size range; used only with '-o' option
+   -t = Top (upper) end of point size range; used only with '-o' option
    -r = Resolution expressed in dpi; used only with '-o' option
 
   When no options are used, the highest-frequency stem width value is
   reported, along with the frequency in parentheses.
 
-  When the '-o' option is used, the '-l', '-u', and '-r' options can also be
+  When the '-o' option is used, the '-b', '-t', and '-r' options can also be
   used, and their default values are 9 (points), 24 (points), and 72 (dpi),
   respectively. The optimal value is output in brackets, followed by secondary
   and tertiary values.
+
 ENDHELP
 }
