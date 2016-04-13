@@ -1,12 +1,12 @@
 #!/bin/env python
 
-__copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+__copyright__ = """Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
 __doc__ = """
 """
 __usage__ = """
-   makeInstances program v1.32 March 17 2016
+   makeInstances program v1.33 April 12 2016
    makeInstances -h
    makeInstances -u
    makeInstances [-a] [-f <instance file path>] [-m <MM font path>] 
@@ -837,12 +837,14 @@ class Charstring:
 		if not otherChar.parsed:
 			otherChar.parse()
 		if self.seac:
-			return 1
+			return 0, 0 # SHoudln't ever see a seac here. The IS command in teh snapshort function should remove them.
 			
 		# compMetrics is [shift, scale]. Each of these contain [x, y].
 		numPaths = len(otherChar.paths) 
 		
-		pathIndex
+		# First see if we match at pathIndex. This fails if the 'self' was originally a seac glyph,
+		# as IS does not decompose the seac in the same order as the FontLabcomposite glyph. IS always writes
+		# the accent glyph first, base character second.
 		ok = 1
 			
 		for i in range(numPaths):
@@ -856,10 +858,40 @@ class Charstring:
 				raise CharParseError
 				
 			if not path1.fuzzyMatch(path2):
-				print "\tWARNING: Paths don't match. Comp glyph %s ci %s, exception glyph %s ci %s. " % (self.glyphName, pathIndex + i, otherChar.glyphName, i)
-				print "\t\tpath1: %s" % (path1)
-				print "\t\tpath2: %s" % (path2)
-		return ok
+				ok = 0
+				break
+				
+		if not ok:
+			# See if we can match at any other positions.
+			numCompositePaths = len(self.paths)
+			for pi in range(numCompositePaths):
+				if pi == pathIndex:
+					continue
+				ok = 1
+				for i in range(numPaths):
+					pn = pi + i
+					if pn >= numCompositePaths:
+						break
+					try:
+						path1 = self.paths[pi + i]
+						path2 = otherChar.paths[i]
+					except IndexError:
+						#import pdb
+						#pdb.set_trace()
+						#print self
+						raise CharParseError
+						
+					if not path1.fuzzyMatch(path2):
+						ok = 0
+						break
+
+				if ok: # We matched all the base glyphs paths in the exception glyph!
+					pathIndex = pi
+					break
+
+		if not ok:
+			print "\tError: Can't find base glyph in composite glyph. Composite glyph %s, base glyph %s. " % (self.glyphName, otherChar.glyphName)
+		return ok, pathIndex
 		
 	def replace(self, otherChar, pathIndex, stdChar):
 		if not self.parsed:
@@ -975,14 +1007,15 @@ def replaceContour(glyphName, pathIndex, metrics, stdName, exceptionName, charDi
 		2.C reconstitute this into a string
 		2.D replace the target path.
 	"""
+	erMsg = None
 	targetChar = charDict[glyphName]
 	stdChar = charDict[stdName]
 	exceptionChar = charDict[exceptionName]
-
-	ok = targetChar.checkMatch(stdChar, pathIndex, metrics)
+	ok,pathIndex = targetChar.checkMatch(stdChar, pathIndex, metrics)
 	if not ok:
-		print "Error: could not match %s in composite glyph %s. Will skip merging exception glyph %s" % (stdName, glyphName, exceptionName )
-		return
+		erMsg =  "Error: could not match %s in composite glyph %s. Will skip merging exception glyph %s" % (stdName, glyphName, exceptionName )
+		err = 1
+		return erMsg
 	
 	if metrics:
 		scale = metrics[1]
@@ -993,7 +1026,7 @@ def replaceContour(glyphName, pathIndex, metrics, stdName, exceptionName, charDi
 	else:
 		srcChar = exceptionChar
 	targetChar.replace(srcChar, pathIndex, stdChar)
-	return
+	return erMsg
 
 def blendMetrics(metrics, wgtVector):
 	numMasters = len(wgtVector)
@@ -1032,6 +1065,7 @@ def fixGlyphs(log, extraList, exceptionList, compositeDict, wgtVector):
 	Then, for each glyph name in the MM exception glyph list, replace the matching glyph name without the sufiix
 	then delete the MM execption glyph.
 	"""
+	errList = []
 	fontParts = FontParts(log)
 	if exceptionList:
 		# We don't need to decompose any compsite glyphs that will be wholly replaced by an exception glyph.
@@ -1057,17 +1091,20 @@ def fixGlyphs(log, extraList, exceptionList, compositeDict, wgtVector):
 				metrics = cmpEntry[2]
 				if metrics:
 					metrics = blendMetrics(metrics, wgtVector)
-				replaceContour(glyphName, pathIndex, metrics, stdName, exceptionName, fontParts.charDict)
-				print "\tFixed comp %s with %s." % (glyphName, exceptionName)
-			# Then replace the base glyphs.
+				errMsg = replaceContour(glyphName, pathIndex, metrics, stdName, exceptionName, fontParts.charDict)
+				if not errMsg:
+					print "\tFixed comp %s with %s." % (glyphName, exceptionName)
+				else:
+					errList.append(errMsg)
+		# Then replace the base glyphs.
 		print "\nReplacing glyph1 with glyph2:"
 		for exceptionName, stdName in exceptionList:
 			print "\t(%s, %s)" % (stdName, exceptionName)
 			try:
 				fontParts.charDict[stdName].replaceAllPaths(fontParts.charDict[exceptionName])
 			except KeyError:
-				print
-				logMsg.log("Warning: either glyph %s or %s not in font!"  % (stdName, exceptionName))
+				errMsg = "Warning: either glyph %s or %s not in font!"  % (stdName, exceptionName)
+				errList.append(errMsg)
 		print
 
 	if extraList:
@@ -1077,9 +1114,8 @@ def fixGlyphs(log, extraList, exceptionList, compositeDict, wgtVector):
 				del fontParts.charDict[glyphName]
 				print "\t%s" % glyphName
 			except KeyError:
-				print
-				logMsg.log("Warning: extra glyph %s not in font!"  % (glyphName))
-		print
+				errMsg = "Warning: extra glyph %s not in font!"  % (glyphName)
+				errList.append(errMsg)
 			
 	charList = fontParts.charDict.values()
 	charList.sort() # sorts by index order, since that is first
@@ -1090,6 +1126,9 @@ def fixGlyphs(log, extraList, exceptionList, compositeDict, wgtVector):
 	dataList.append(fontParts.suffix)
 	log = "".join(dataList)
 	
+	if errList:
+		for errMsg in errList:
+			print errMsg
 	return log
 	
 def fixPostScriptFontDict(log, key, value):
@@ -1200,6 +1239,7 @@ def makeInstance(instanceDict, updateDict, options, instanceFontPaths, extraGlyp
 	# Do snapshot to make instance font.
 	doSnapshot(coords, options.emSquare, options.mmFontPath, tempInstance)
 	logMsg.log("Wrote instance font file '%s'." % (fontInstancePath))
+	print tempInstance
 
 	#Decompile font to text
 	command = "detype1 \"%s\"" % (tempInstance)
@@ -1548,10 +1588,10 @@ def fillCompositeDict(options):
 		newCompositeDict = {}
 		return newCompositeDict
 		
-	# This dict has glyph names as keys. Each entry is a list of component entrries. Each component entry looks like:
+	# This dict has glyph names as keys. Each entry is a list of component entries. Each component entry looks like:
 	# [component Name, path number, None or [list of shifts and deltas for each master]
 	# We want a dict keyed by component name, with a list of component entries
-	# Each dict value will be a list of component, where th glyph name is the name of the composite glyph that
+	# Each dict value will be a list of component, where the glyph name is the name of the composite glyph that
 	# references the key glyph name as a component, and the metrics for the key glyph in the comnposite glyph.
 	newCompositeDict = {}
 	for glyphName, compositeEntryList in compositeDict.items():
