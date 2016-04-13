@@ -15,7 +15,6 @@
 						<li><a href="#Win">Windows XP</a></li>
 					</ul>
 				</li>
-				<li><a href="#FontLab">FDK FontLab scripts</a></li>
 				<li><a href="#Contact">Contact information</a></li>
 				<li><a href="#TechNotes">Technical Notes</a></li>
 			</ol>
@@ -89,50 +88,6 @@
 			</ul>
 		</p>
 		<p>NOTE: If you move the FDK directory to a new location, you will need to change the PATH variable as well.</p>
-
-
-
-		<p><a name="FontLab" id="FontLab"></a><h2>3. FontLab scripts</h2></p>
-		
-		<p>There are some old scripts that provide a dialog for running autohint and checkOutlines within FontLab. These have not been maintained for years, but a few people still use them. It is better to use the command-line versions, which are actively maintained.</p>
-		<p>To install these, get a copy of the FDK FontLab directory. You can get this by downloading the OpenSource version of the FDK from github at <a href="https://github.com/adobe-type-tools/afdko">https://github.com/adobe-type-tools/afdko</a>. The FontLab directory is at FDK/Tools/Programs/FontLab. You can also get the FontLab directory by downloading it from Adobe build of the AFDKO (see below in the section "Contacts" for the link). Follow the link to download the FDK; one of the download options will be the FontLab directory.</p>
-		
-		<p>NOTE: Several of the scripts for FontLab will bring up a dialog to set options if you hold down the CONTROL key while starting the script. </p>
-
-		<p><strong>For installing the AFDKO FontLab macros</strong> on Mac OSX:</p>
-		<ol>
-			<li>Quit FontLab, in case it is running.</li>
-			<li>Locate the "Macros" folder in your FontLab program installation. The path to it should be something like <code>/Users/&lt;<em>your_username</em>&gt;/Library/Application\ Support/FontLab/Studio\ 5/Macros</code>. If there is no "Macros" folder, create one on that location.</li>
-			<li>Open a Terminal window <em>(Terminal is located in <a href="/Applications/Utilities/Terminal.app">/Applications/Utilities/Terminal</a>)</em> and enter the command to change the current directory to be the FDK FontLab script directory:</li>
-		<ol>
-			<li>Type "<code>cd </code>" <em>(no quotes and keep the final space)</em>.</li>
-			<li>Find and select the FDK "FontLab" folder, drag & drop it on the Terminal window, and press the "Return" key.</li>
-		</ol>
-			<li>You next want to enter the command run the installFontLabMacros.py script with the system Python interpreter:</li>
-		<ol>
-			<li>type <code>"python installFontLabMacros.py "</code> <em>(no quotes and keep the final space)</em>.</li>
-			<li>Select the "Macros" folder from step 1, drag & drop it on the Terminal window, and press the "Return" key.</li>
-		</ol>
-		</ol>
-		<p>If all went well, you should see a bunch of lines in the Command Prompt window that start with "<code>Copied:</code>". The AFDKO FontLab macros are now installed.</p>
-
-		<p><strong>For installing the AFDKO FontLab macros</strong> n Windows XP:<br>
-			<ol>
-			<li>Quit FontLab, in case it is running.</li>
-			<li>Locate the "Macros" folder in your FontLab installation. The path to it should be something like <code>C:\Documents&nbsp;and&nbsp;Settings\<em>your_username</em>\My&nbsp;Documents\FontLab\Studio5\Macros</code>. If there is no "Macros" folder, create one on that location.</li>
-			<li>Open a Command Prompt window <em>(Start Menu > Run... > cmd.exe)</em> and enter the command to change the current directory to be the FDK FontLab script directory:</li>
-		<ol>
-			<li>Type "<code>cd </code>" <em>(no quotes and keep the final space)</em>.</li>
-			<li>Find and select the "FontLab" folder, drag & drop it on the Command Prompt window, and press the "Return" key.</li>
-		</ol>
-			<li>You next want to enter the command run the installFontLabMacros.py script with the AFDKO Python interpreter:</li>
-		<ol>
-			<li>Find and select the file "FDK/Tools/win/Python/AFDKOPython/python.exe", and drag & drop it on the Command Prompt window,</li>
-			<li>Type "<code> installFontLabMacros.py </code>" <em>(no quotes, but enter the space characters before and after the script file name)</em>.</li>
-			<li>Select the "Macros" folder from step 1, drag & drop it on the Command Prompt window, and press the "Return" key.</li>
-		</ol>
-		</ol>
-		<p>If all went well, you should see a bunch of lines in the Command Prompt window that start with "<code>Copied:</code>". The AFDKO FontLab macros are now installed.</p>
 
 		<p><a name="Contact" id="Contact"></a><h2>3. Contact information</h2></p>
 
