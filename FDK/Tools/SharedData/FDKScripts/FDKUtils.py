@@ -1,9 +1,9 @@
 """
-FDKUtils.py v 1.1 May 6 2006
+FDKUtils.py v 1.2 April 13 6 2016
  A module of functions that are needed by several of the FDK scripts.
 """
 
-__copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+__copyright__ = """Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
 import os
@@ -80,11 +80,20 @@ def runShellCmd(cmd):
 
 def runShellCmdLogging(cmd):
 	try:
-		retcode = subprocess.call(cmd, shell=True, stderr=subprocess.STDOUT)
-		if retcode < 0:
-			msg = "command was terminated by signal '%s'. '%s'" % (retcode, cmd)
-			print(msg)
-			return retcode
+		logList = []
+		proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+		while 1:
+			output = proc.stdout.readline()
+			if output:
+				print output,
+				logList.append(output)
+			if proc.poll() != None:
+				output = proc.stdout.readline()
+				if output:
+					print output,
+					logList.append(output)
+				break
+		log = "".join(logList)
 	except:
 		msg = "Error executing command '%s'. %s" % (cmd, traceback.print_exc())
 		print(msg)
