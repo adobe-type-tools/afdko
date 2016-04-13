@@ -11,7 +11,7 @@
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0.
 </p>
 <p><b>Version</b></p>
-<p>[ Document version 1.18. Last updated 16 Mar 2016]</p>
+<p>[ Document version 1.19. Last updated 12 April 2016]</p>
 <p><b>Caution:</b></p>
 <p>Portions of the syntax unimplemented by Adobe are subject to change.</p>
 <ol>
@@ -168,7 +168,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 <p><a name="2.b"></a><b>2.b. White space</b></p>
 <p>White space is not significant except for delimiting tokens. You can have multiple line endings, spaces, and tabs between tokens. Macintosh, UNIX and PC line endings are all supported.</p>
 <p><a name="2.c"></a><b>2.c. Keywords</b></p>
-<p>This is a complete list of keywords in the feature file language, shown in <b>boldface</b> in examples:</p>
+<p>This is a complete list of keywords in the feature file language. They are shown in <b>boldface</b> in examples. Note that all keywords have a global scope. Although many keywords may be used only in specific contexts, the same keyword is never used in different ways in different contexts.</p>
 <pre>
   <a href="#2.e.vii">anchor</a>
   <a href="#2.e.viii">anchorDef</a>
@@ -306,6 +306,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 <p>Here the &lt;metric&gt; represents an x advance adjustment, except when used in the 'vkrn', 'vpal', 'vhal', or 'valt' features, in which case it represents a Y advance adjustment. All other adjustments are implicitly set to 0. This is the simplest feature file &lt;valuerecord&gt; format, and is provided since it represents the most commonly used adjustment (i.e. for kerning). For example:</p>
 <pre>
 -3                 # without &lt;&gt;</pre>
+
+<p>Note that the use of a single value as Y advance can only be triggered when the value record definition is contained within a 'vkrn', 'vpal', 'vhal', or 'valt' feature definition. If it is in a stand-alone lookup, then the value will be interpreted as an X advance, even if the lookup is referenced from within one of the vertail metric features. </p>
 <ul>
 <li>Value record format B:</li>
 <li><code> &lt; &lt;metric&gt; &lt;metric&gt; &lt;metric&gt; &lt;metric&gt; &gt;</code></li>
@@ -343,15 +345,16 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 <p><a name="2.e.v"></a><b>2.e.v. Named value record definition.</b></p>
 <p>The <b>valueRecordDef</b> keyword is used to define a named value record. This name can then be used in value records instead of coordinates. It offers the advantage of being able to change the coordinates in the named value record definition only, and having that single edit change the coordinates used in all the rules in which the named value record is used. The format is:</p>
 <pre>
-  <b>valueRecordDef</b> &lt;coordinates&gt; &lt;name&gt;;</pre>
+  <b>valueRecordDef</b> &lt;coordinates&gt; name;</pre>
 <p>where the coordinates can be in value record formats A or B. The anchor name follows the same rules as are used to form glyph names. For example:</p>
 <pre>
   <b>valueRecordDef</b> -10 FIRST_KERN;
-  <b>valueRecordDef</b> 0 0 20 0 SECOND_KERN;</pre>
+  <b>valueRecordDef</b> &lt; 0 0 20 0 &gt; SECOND_KERN;</pre>
 <p>These named value coordinates can then be used in value records. For example:</p>
 <pre>
   <b>pos</b> T V &lt; SECOND_KERN &gt; ;</pre>
-<p>Note than when the value record name is used, it must be enclosed by angle brackets, whether it is a single value or four value record.</p>
+<p>Note than when the value record name is used, it must be enclosed by angle brackets, whether it is a single value or four value record. The valueRecordDef is a top level statement, and must be defined outside of feature blocks. It also must be defined before it is used.</p>
+
 <p><a name="2.e.vi"></a><b>2.e.vi. Contour point</b></p>
 <p>A &lt;contour point&gt; is used in anchors [&sect;<a href="#2.e.vii">2.e.vii</a>] and the GDEF table LigatureCaret statements [&sect;<a href="#9.b">9.b</a>]. It takes the format:</p>
 <pre>
@@ -638,7 +641,7 @@ include<code>(../features.family);</code></pre>
   } &lt;label&gt;;</pre>
 <p>A named lookup block may be defined either inside or outside of a feature block. In either case, it may be referenced in different feature blocks. If it is defined outside a feature block, is is referred to as a 'stand-alone' lookup.</p>
 <p>The lookup will be created with a GSUB or GPOS Extension lookup type if and only if the optional &quot;useExtension&quot; keyword is used.</p>
-<p>A lookup block may be defined either inside or outside of feature blocks. You may not use the <b>script</b> or <b>language</b> keywords within a named lookup block.</p>
+<p>A lookup block may be defined either inside or outside of feature blocks. You may not use the <b>script</b> or <b>language</b> keywords within a stand-alone lookup block.</p>
 <p>The useExtension keyword has two effects: all the records of all types that are referenced by a lookup qualifier placed in one contiguous block of data, and the offset to the lookup may be 32 bits rather limited to 16 bits.</p>
 <p>When you font cannot be built because of an offset overflow error (meaning that the offset from one record to another record exceeds the 64 Kbyte limit imposed by the maximum size possible for a 16-bit offset field), then add this qualifier to the largest lookup. Keep adding it to more lookups until your font will build.</p>
 <p>Note that since the Extension lookup types were added in OpenType specification v1.3, they will not be recognized by all OpenType layout parsers.</p>
@@ -1536,13 +1539,14 @@ table GDEF {
      <b>LigatureCaretByIndex </b>&lt;glyph|glyphclass&gt; &lt;caret contour point index value&gt;+;
   } GDEF:</pre>
 <p>The number of &lt;caret value&gt;s specified for a LigatureCaret must be: (number of ligature components) - 1.</p>
+<p>Only one LigatureCaret rule may be specified per glyph, whether it is LigatureCaretByPos or LigatureCaretByIndex.</p>
 <p>Here is an example of a GDEF table block:</p>
 <pre>
   <b>table</b> GDEF {
      <b>GlyphClassDef</b> @BASE, @LIGATURES, @MARKS, @COMPONENT;
      <b>Attach</b> noon.final 5;
      <b>Attach</b> noon.initial 4;
-     <b>LigatureCaretByPos</b> f_i 400 380;
+     <b>LigatureCaretByPos</b> f_f_l 400 600;
      <b>LigatureCaretByPos</b> [c_t c_s]  500;
      <b>LigatureCaretByIndex </b>f_f_i 23 46;
 } GDEF;</pre>
@@ -1748,6 +1752,14 @@ nameid I 1 S L &lt;string&gt;;    I   1          S           L</pre>
   }</pre>
 <p>along with the tag 'sbit'.</p>
 <p><a name="11"></a><b>11. Document revisions</b></p>
+<p><b>v1.19 [12 April 2016]:</b></p>
+<ul>
+<li>Fixed missing angle brackets in ValueRecordDef example.</li>
+<li>Clarified that langsys rules cannot be used in stand-alone lookups.</li>
+<li>Clarified 'ignore sub' syntax.</li>
+<li>Clarified keyword scoping rules.</li>
+<li>Clarified that a glyph can have only one caret position rule in the GDEF table, and fixed example.</li>
+</ul>
 <p><b>v1.18 [16 Mar 2016]:</b></p>
 <ul>
 <li>Clarified use of commas in ignore statement.</li>
