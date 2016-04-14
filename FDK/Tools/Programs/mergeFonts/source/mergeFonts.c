@@ -7,7 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define MERGEFONTS_VERSION CTL_MAKE_VERSION(1,0,62) /* derived from tx */
+#define MERGEFONTS_VERSION CTL_MAKE_VERSION(1,0,63) /* derived from tx */
 
 #include "cfembed.h"
 #include "cffread.h"
@@ -3010,9 +3010,27 @@ static boolean applyCIDFontInfo(txCtx h, boolean fontisCID)
         h->top->FullName.ptr = h->mergeInfo.cidinfo.FullName;
         h->top->FamilyName.ptr = h->mergeInfo.cidinfo.FamilyName;
         h->top->Copyright.ptr = h->mergeInfo.cidinfo.AdobeCopyright;
-        h->top->Weight.ptr = h->mergeInfo.cidinfo.Weight;
+        if (( h->mergeInfo.cidinfo.AdobeCopyright[0] != ABF_EMPTY_ARRAY) ||
+            ( h->mergeInfo.cidinfo.Trademark[0] != ABF_EMPTY_ARRAY))
+        {
+            h->top->Copyright.ptr = ABF_UNSET_PTR;
+            h->top->Notice.ptr = ABF_UNSET_PTR;
+        }
+        if ( h->mergeInfo.cidinfo.AdobeCopyright[0] != ABF_EMPTY_ARRAY)
+        {
+            h->top->Notice.ptr = h->mergeInfo.cidinfo.AdobeCopyright;
+        }
         if ( h->mergeInfo.cidinfo.Trademark[0] != ABF_EMPTY_ARRAY)
-            h->top->Notice.ptr = h->mergeInfo.cidinfo.Trademark;
+        {
+            if (h->mergeInfo.cidinfo.AdobeCopyright[0] == ABF_EMPTY_ARRAY)
+                h->top->Notice.ptr = h->mergeInfo.cidinfo.Trademark;
+            else
+            {
+                strcat(h->top->Notice.ptr, " ");
+                strcat(h->top->Notice.ptr, h->mergeInfo.cidinfo.Trademark);
+            }
+        }
+        h->top->Weight.ptr = h->mergeInfo.cidinfo.Weight;
         if ( h->mergeInfo.cidinfo.isFixedPitch != ABF_UNSET_INT)
             h->top->isFixedPitch = h->mergeInfo.cidinfo.isFixedPitch;
         if ( h->mergeInfo.cidinfo.fsType != ABF_UNSET_INT)
@@ -4473,7 +4491,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr)
 		case t2_reserved13:
 		case tx_endchar:
 		case t2_reserved15:
-		case t2_reserved16:
+		case t2_blend:
 		case tx_rmoveto:
 		case tx_hmoveto:
 		case t2_rcurveline:
@@ -5411,7 +5429,8 @@ static void prepSubset(txCtx h)
 		
 	/* Make subset arg list */
 	makeSubsetArgList(h);
-	if ((h->mode == mode_cff || h->mode == mode_t1) || h->mode == mode_svg || h->mode == mode_ufow && (h->flags & SHOW_NAMES))
+	if ((h->mode == mode_cff || h->mode == mode_t1 || h->mode == mode_svg || h->mode == mode_ufow) &&
+        (h->flags & SHOW_NAMES))
 		{
 		char *p;
 		char *q;
@@ -6266,7 +6285,11 @@ static void cfrReadFont(txCtx h, long origin, int ttcIndex)
 			h->cfr.flags &= ~CFR_NO_ENCODING;
 			}
 		}
-
+    /* CFF does not contain fsType, so I need to set it again is the source is CFF */
+    if (h->mergeInfo.cidinfo.fsType != ABF_UNSET_INT)
+    {
+        h->top->FSType = h->mergeInfo.cidinfo.fsType;
+    }
 	h->dst.endfont(h);
 
 	if (cfrEndFont(h->cfr.ctx))
@@ -7463,7 +7486,7 @@ static void doSingleFileSet(txCtx h, char *srcname)
 	{
 	h->dst.begset(h);
 	doFile(h, srcname);
-	h->dst.endset(h);
+    h->dst.endset(h);
 	}
 
 /* Process auto-file set. Return index of last used arg. */
