@@ -134,6 +134,12 @@ what you get with the main branch, and update as needed. You need the source
 wheel in order to easily compiled the pyClipper library; else you need to
 isntall Cython and do a lot more work.
 
+3.4 ufoNormalizer support
+This is needed for the ufonormalizer command.
+
+ufoNormalizer: master branch of ufoNormalizer at https://github.com/unified-font-object/ufoNormalizer
+Install with "AFDKOPython setup.py install"
+
 
 4) Testing/building systems.
 
