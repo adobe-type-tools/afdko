@@ -6,7 +6,7 @@ default values, and can read values in from a text project file. It will also
 use the tx program to convert the input font file to a Type 1 font, if needed.
 """
 
-__copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+__copyright__ = """Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
 
@@ -41,7 +41,7 @@ Project file.
 """
 
 __usage__ = """
-makeotf v2.0.92 Nov 27 2015
+makeotf v2.0.93 April 18 2016
 -f <input font>         Specify input font path. Default is 'font.pfa'.
 -o <output font>        Specify output font path. Default is
                         '<PostScript-Name>.otf'.
@@ -2534,7 +2534,7 @@ def runMakeOTF(makeOTFParams):
 			os.remove(tempPath)
 		try:
 			doSubr = 'true' == eval("makeOTFParams.%s%s" % (kFileOptPrefix, kDoSubr))
-			if not doSubr:
+			if kMOTFOptions[kDoSubr][0] == kOptionNotSeen:
 				doSubr = 'true' == eval("makeOTFParams.%s%s" % (kFileOptPrefix, kRelease))
 			# Send the font.pfa file to ConvertFontToCID.py rather than the OTF because the GlyphSet
 			# definitions in the fontinfo files use production glyph names not final glyph names.
