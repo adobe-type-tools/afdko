@@ -1,7 +1,7 @@
 #!/bin/env python
 
 __doc__ = """
-ConvertFontToCID.py. v 1.8 May 15 2012
+ConvertFontToCID.py. v 1.9 April 16 2016
 
 Convert a Type 1 font to CID, given multiple hint dict defs in the
 "fontinfo" file. See AC.py help, with the "-hfd" option, or the MakeOTF
@@ -129,6 +129,9 @@ txFields = [ # [field name in tx, key name in cidfontinfo, value]
 			]
 
 class FontInfoParseError(ValueError):
+	pass
+
+class FontParseError(KeyError):
 	pass
 	
 class FDDict:
@@ -359,9 +362,7 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName, blueF
 			 	else:
 			 		raise FontInfoParseError("FDDict key \"%s\" in fdDict named \"%s\" is not recognised." % ( token, dictName))
 			 	
-	if lenSrcFontDictList == len(fontDictList):
-		fdGlyphDict = None
-	else:
+	if lenSrcFontDictList != len(fontDictList):
 		# There are some FDDict definitions. This means that we need to fix the default fontDict, inherited from the source font,
 		# so that it has blues zones that will not affect hinting, e.g outside of the Font BBox. We do this becuase if there are
 		# glyphs which are not assigned toa user specified font dict, it is becuase it doesn't make sense to provide alignment zones
@@ -495,8 +496,8 @@ def mergeFDDicts(prevDictList, privateDict):
 			else:
 				goodStemList.append(stem)
 			prevStem = stem
-			
-	privateDict.BlueValues = goodBlueZoneList
+	if goodBlueZoneList:
+		privateDict.BlueValues = goodBlueZoneList
 	if goodOtherBlueZoneList:
 		privateDict.OtherBlues = goodOtherBlueZoneList
 	else:
@@ -657,12 +658,13 @@ def fixFontDict(tempPath, fdDict):
 			data = data[:m.start()] +  data[m.end():]
 	
 	# Fix BlueValues. Must be present.
-	m = re.search(r"/BlueValues\s+\[.+?\]\s+def", data)
-	if not m:
-		raise FontParseError("Failed to find BlueValues in input font! %s" % (tempPath))
-	target = "/BlueValues %s def" % (fdDict.BlueValues)
-	data = data[:m.start()] + target +  data[m.end():]
-	insertIndex = m.start() + len(target)
+	if fdDict.BlueValues:
+		m = re.search(r"/BlueValues\s+\[.+?\]\s+def", data)
+		if not m:
+			raise FontParseError("Failed to find BlueValues in input font! %s" % (tempPath))
+		target = "/BlueValues %s def" % (fdDict.BlueValues)
+		data = data[:m.start()] + target +  data[m.end():]
+		insertIndex = m.start() + len(target)
 
 	# Fix OtherBlues, if present. Remove if there are no OtherBlues entry.
 	m = re.search(r"/OtherBlues\s+\[.+?\]\s+def", data)
@@ -718,6 +720,8 @@ def makeCIDFontInfo(fontPath, cidfontinfoPath):
 	cfiDict = {}
 	for key in kRequiredCIDFontInfoFields + kOptionalFields:
 		cfiDict[key] = None
+	cfiDict["Weight"] = "(Regular)"
+	cfiDict["AdobeCopyright"] = "0"
 
 	# get regular FontDict.
 	command="tx -0 \"%s\" 2>&1" % (fontPath)
@@ -753,6 +757,7 @@ def makeCIDFontInfo(fontPath, cidfontinfoPath):
 				value = "(" + value[1:-1] + ")"
 			string = "%s\t%s" % (key, value)
 			fp.write(string + os.linesep)
+			fp.write(os.linesep)
 		fp.close()
 	except (IOError, OSError):
 		msg = "Error. Could not open and write file '%s'" % (cidfontinfoPath)
