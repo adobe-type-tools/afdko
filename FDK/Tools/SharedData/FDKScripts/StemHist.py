@@ -100,7 +100,7 @@ A range of glyphs may be specified by providing two names separated only
 	   <base path>.top.txt   The top zones.
 	  <base path >.bot.txt   The bottom zones.
 
--o  Don't print glyph names - just print a dot occasionally to show progress. 
+-q  Don't print glyph names - just print a dot occasionally to show progress. 
 
 """
 
