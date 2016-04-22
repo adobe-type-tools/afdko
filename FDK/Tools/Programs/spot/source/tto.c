@@ -673,12 +673,20 @@ void ttoDumpFeatureList(Card16 offset, FeatureList *list, IntX level)
 			
 			DL(2, (OUTPUTBUFF, "--- FeatureTable (%04hx)\n", record->Feature));
 			
-			DLx(2, "FeatureParam=", feature->FeatureParam);
+              DLx(2, "FeatureParam=", feature->FeatureParam);
 			
 			/*ASP: Size specific code*/
 			if(feature->FeatureParam!=0) {
                 dumpFeatureParams(record, feature, level, 0, 0, &lastFeatureParam);
             }
+              DLu(2, "LookupCount =", feature->LookupCount);
+              
+              if(feature->LookupCount>0){
+                  DL(2, (OUTPUTBUFF, "--- LookupListIndex[index]=value\n"));
+                  for (j = 0; j < feature->LookupCount; j++)
+                      DL(2, (OUTPUTBUFF, "[%d]=%hu ", j, feature->LookupListIndex[j]));
+                  DL(2, (OUTPUTBUFF, "\n"));
+              }			
           }
 	  }
 	}
