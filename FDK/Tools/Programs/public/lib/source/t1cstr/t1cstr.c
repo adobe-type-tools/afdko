@@ -303,8 +303,8 @@ static void callbackMove(t1cCtx h, float dx, float dy)
         }
         else
         {
-            x = RND_ON_READ(x);
-            y = RND_ON_READ(y);
+            x = (float)RND_ON_READ(x);
+            y = (float)RND_ON_READ(y);
 
             if (h->seac.phase == seacAccentPreMove)
             {
@@ -376,8 +376,8 @@ static void callbackLine(t1cCtx h, float dx, float dy)
     /* for LE's, dx and dy are actually absolute values relative to the LE start position */
     if  (!(h->flags & FLATTEN_COMPOSE))
     {
-        x = RND_ON_READ(x);
-        y = RND_ON_READ(y);
+        x =  (float)RND_ON_READ(x);
+        y =  (float)RND_ON_READ(y);
         h->x = x;
         h->y = y;
     }
@@ -425,8 +425,8 @@ static void callbackCurve(t1cCtx h,
         x1 = h->x + dx1;	y1 = h->y + dy1;
         x2 = x1 + dx2; 		y2 = y1 + dy2; 
         x3 = x2 + dx3; 		y3 = y2 + dy3;
-        x3 = RND_ON_READ(x3);
-        y3 = RND_ON_READ(y3);
+        x3 =  (float)RND_ON_READ(x3);
+        y3 =  (float)RND_ON_READ(y3);
         h->x = x3;
         h->y = y3;
     }
@@ -548,8 +548,8 @@ static void callbackFlex(t1cCtx h)
 		float x4 = x3 + dx4;    float y4 = y3 + dy4;
 		float x5 = x4 + dx5;   	float y5 = y4 + dy5;
 		float x6 = x5 + dx6;   	float y6 = y5 + dy6;
-        x6 = RND_ON_READ(x6);
-        y6 = RND_ON_READ(y6);
+        x6 =  (float)RND_ON_READ(x6);
+        y6 =  (float)RND_ON_READ(y6);
         h->x = x6;
         h->y = y6;
 
@@ -596,8 +596,8 @@ static void callbackFlex(t1cCtx h)
 
 	if (h->seac.phase <= seacBase)
 		{
-        h->x = RND_ON_READ(args[15]);
-            h->y = RND_ON_READ(args[16]);
+        h->x =  (float)RND_ON_READ(args[15]);
+            h->y =  (float)RND_ON_READ(args[16]);
 		}
 	}
 
@@ -647,8 +647,8 @@ static void callback_setwv_cube(t1cCtx h, unsigned int numDV)
 static void callback_compose(t1cCtx h, int cubeLEIndex, float dx, float dy, int numDV, float *ndv)
 	{
 	h->x += dx;	h->y += dy;
-    h->x = RND_ON_READ(h->x);
-    h->y = RND_ON_READ(h->y);
+    h->x =  (float)RND_ON_READ(h->x);
+    h->y =  (float)RND_ON_READ(h->y);
         if (h->glyph->cubeCompose == NULL)
 		return;
 		
@@ -1172,7 +1172,7 @@ static int do_blend_cube_flattened(t1cCtx h, int nBlends, int iBase)
         {
             xs = val*wv;
         }
-        curX[0] = val;
+        curX[0] = (float)val;
 #if DEBUG_FLATTEN
         if (h->cube[h->cubeStackDepth].leIndex == DEBUG_LE)
         {
@@ -1199,9 +1199,9 @@ static int do_blend_cube_flattened(t1cCtx h, int nBlends, int iBase)
                 }
 #endif
             }
-            curX[j] = val;
+            curX[j] = (float)val;
         }
-        INDEX(iBase + i) = xs;
+        INDEX(iBase + i) = (float)xs;
         isX = !isX;
     }
     h->cube[h->cubeStackDepth].isX = isX;
@@ -1768,8 +1768,8 @@ static int t1Decode(t1cCtx h, long offset)
 					h->x = h->seac.bsb_x = INDEX(0);
 					h->y = h->seac.bsb_y = INDEX(1);
 					}
-                h->x = RND_ON_READ(h->x);
-                h->y = RND_ON_READ(h->y);
+                h->x =  (float)RND_ON_READ(h->x);
+                h->y =  (float)RND_ON_READ(h->y);
 				break;
 			case tx_div:
 				result = do_div(h);
@@ -1926,8 +1926,8 @@ static int t1Decode(t1cCtx h, long offset)
 					CHKUFLOW(2);
 					h->x = INDEX(0);
 					h->y = INDEX(1);
-                    h->x = RND_ON_READ(h->x);
-                    h->y = RND_ON_READ(h->y);
+                    h->x =  (float)RND_ON_READ(h->x);
+                    h->y =  (float)RND_ON_READ(h->y);
 					}
 				break;
 			case tx_reservedESC19:
@@ -2091,8 +2091,8 @@ static int t1Decode(t1cCtx h, long offset)
 				h->x  = h->seac.bsb_x = INDEX(0);
 				h->y  = h->seac.bsb_y = 0;
 				}
-            h->x = RND_ON_READ(h->x);
-            h->y = RND_ON_READ(h->y);
+            h->x =  (float)RND_ON_READ(h->x);
+            h->y =  (float)RND_ON_READ(h->y);
 			break;
 		case tx_endchar:
 			h->flags |= SEEN_ENDCHAR;

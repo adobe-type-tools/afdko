@@ -1907,7 +1907,7 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
 		h->tmp.file.name = pfbpath;
 	}
 
-	if ((pfbpath != NULL) && (!fileExists(pfbpath))) {
+	if (!fileExists(pfbpath)) {
 		char buf[1024];
 		sprintf(buf, "Specified source font file not found: %s \n", pfbpath);
 		message(h, hotERROR, buf);

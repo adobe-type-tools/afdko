@@ -4321,7 +4321,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr)
 		case t2_reserved13:
 		case tx_endchar:
 		case t2_reserved15:
-		case t2_reserved16:
+		case t2_blend:
 		case tx_rmoveto:
 		case tx_hmoveto:
 		case t2_rcurveline:
@@ -5259,7 +5259,7 @@ static void prepSubset(txCtx h)
 
 	/* Make subset arg list */
 	makeSubsetArgList(h);
-	if ((h->mode == mode_cff || h->mode == mode_t1) || h->mode == mode_svg || h->mode == mode_ufow && (h->flags & SHOW_NAMES))
+	if ((h->mode == mode_cff || h->mode == mode_t1 || h->mode == mode_svg || h->mode == mode_ufow) && (h->flags & SHOW_NAMES))
 		{
 		char *p;
 		char *q;

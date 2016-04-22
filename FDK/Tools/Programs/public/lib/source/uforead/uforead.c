@@ -166,7 +166,7 @@ struct ufoCtx_
 	abfTopDict top;
 	abfFontDict fdict;
 	int flags;
-#define SEEN_END			1<<0
+#define SEEN_END			1
 	struct
     {
 		void *dbg;

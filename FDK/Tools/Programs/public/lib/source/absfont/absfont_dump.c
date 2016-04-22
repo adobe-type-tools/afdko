@@ -511,7 +511,7 @@ static void writeReal(char* buf, float value)
         sprintf(tmp, " %ld", (long int)roundf(value));
 	else
 	{
-        float value2 = RND_ON_WRITE(value); // to avoid getting -0 from 0.0004.
+        float value2 = (float)RND_ON_WRITE(value); // to avoid getting -0 from 0.0004.
         if ((value2 == 0) && (value < 0))
             value2 = 0;
         sprintf(tmp, " %.2f", value2);

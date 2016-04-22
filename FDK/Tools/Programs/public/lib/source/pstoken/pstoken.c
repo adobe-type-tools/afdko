@@ -1198,9 +1198,7 @@ void pstDumpToken(pstToken *token)
 		"doctype",
 		};
 	
-	if (token->type >= sizeof(type))
-		printf("{INVALID   ,-    ,-}\n");
-	else if (token->length > 52)
+	if (token->length > 52)
 		printf("{%-10s,%4ld,%.26s ... %.26s}\n",
 			   type[token->type], 
 			   token->length,

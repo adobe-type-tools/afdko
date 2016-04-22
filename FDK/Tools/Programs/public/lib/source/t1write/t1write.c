@@ -2793,8 +2793,8 @@ static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0)
 	t1wCtx h = cb->direct_ctx;
     float dx0;
     float dy0;
-    x0 = RND_ON_WRITE(x0);  // need to round to 2 decimal places, else get cumulative error when reading the relative coords. This is becuase decimal valuea wre stored as at most "<int> 100 div" aka 2 decimal places.
-    y0 = RND_ON_WRITE(y0);
+    x0 = (float)RND_ON_WRITE(x0);  // need to round to 2 decimal places, else get cumulative error when reading the relative coords. This is becuase decimal valuea wre stored as at most "<int> 100 div" aka 2 decimal places.
+    y0 = (float)RND_ON_WRITE(y0);
 	dx0 = x0 - h->path.x;
 	dy0 = y0 - h->path.y;
 	h->path.x = x0;
@@ -2848,8 +2848,8 @@ static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1)
 	t1wCtx h = cb->direct_ctx;
     float dx1;
     float dy1;
-    x1 = RND_ON_WRITE(x1);  // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
-    y1 = RND_ON_WRITE(y1);
+    x1 = (float)RND_ON_WRITE(x1);  // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
+    y1 = (float)RND_ON_WRITE(y1);
     dx1 = x1 - h->path.x;
     dy1 = y1 - h->path.y;
 	h->path.x = x1;
@@ -2902,12 +2902,12 @@ static void glyphCurve(abfGlyphCallbacks *cb,
     float dx3;
     float dy3;
 
-    x1 = RND_ON_WRITE(x1); // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
-    y1 = RND_ON_WRITE(y1);
-    x2 = RND_ON_WRITE(x2);
-    y2 = RND_ON_WRITE(y2);
-    x3 = RND_ON_WRITE(x3);
-    y3 = RND_ON_WRITE(y3);
+    x1 = (float)RND_ON_WRITE(x1); // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
+    y1 = (float)RND_ON_WRITE(y1);
+    x2 = (float)RND_ON_WRITE(x2);
+    y2 = (float)RND_ON_WRITE(y2);
+    x3 = (float)RND_ON_WRITE(x3);
+    y3 = (float)RND_ON_WRITE(y3);
 
     dx1 = x1 - h->path.x;
     dy1 = y1 - h->path.y;
@@ -3058,18 +3058,18 @@ static void glyphFlex(abfGlyphCallbacks *cb, float depth,
 
 	h->flags |= IN_FLEX;
 
-    x1 = RND_ON_WRITE(x1); // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
-    y1 = RND_ON_WRITE(y1);
-    x2 = RND_ON_WRITE(x2);
-    y2 = RND_ON_WRITE(y2);
-    x3 = RND_ON_WRITE(x3);
-    y3 = RND_ON_WRITE(y3);
-    x4 = RND_ON_WRITE(x4);
-    y4 = RND_ON_WRITE(y4);
-    x5 = RND_ON_WRITE(x5);
-    y5 = RND_ON_WRITE(y5);
-    x6 = RND_ON_WRITE(x6);
-    y6 = RND_ON_WRITE(y6);
+    x1 = (float)RND_ON_WRITE(x1); // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
+    y1 = (float)RND_ON_WRITE(y1);
+    x2 = (float)RND_ON_WRITE(x2);
+    y2 = (float)RND_ON_WRITE(y2);
+    x3 = (float)RND_ON_WRITE(x3);
+    y3 = (float)RND_ON_WRITE(y3);
+    x4 = (float)RND_ON_WRITE(x4);
+    y4 = (float)RND_ON_WRITE(y4);
+    x5 = (float)RND_ON_WRITE(x5);
+    y5 = (float)RND_ON_WRITE(y5);
+    x6 = (float)RND_ON_WRITE(x6);
+    y6 = (float)RND_ON_WRITE(y6);
 
 	saveCall(h, 1);
 	if (fabs(x6 - x0) > fabs(y6 - y0))

@@ -67,7 +67,7 @@ struct svrCtx_
 	abfTopDict top;
 	abfFontDict fdict;
 	int flags;
-#define SEEN_END			1<<0
+#define SEEN_END			1
 	struct 
 		{
 		void *dbg;
@@ -94,12 +94,12 @@ struct svrCtx_
 		{
 		int cnt;
 		int flags;
-#define PARSE_INIT 			1<<0
-#define PARSE_PATH			1<<1
-#define PARSE_STARTHINT     1<<2
-#define PARSE_HINT			1<<3
-#define PARSE_ENDHINT		1<<4
-#define PARSE_END			1<<5
+#define PARSE_INIT 			(1<<0)
+#define PARSE_PATH			(1<<1)
+#define PARSE_STARTHINT     (1<<2)
+#define PARSE_HINT			(1<<3)
+#define PARSE_ENDHINT		(1<<4)
+#define PARSE_END			(1<<5)
 
 		int hintflags;
 #define SVG_MAX_OP_STACK 18
