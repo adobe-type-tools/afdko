@@ -1,2 +1,4 @@
 #include "../../../config/xcconfig/release.xcconfig"
 HEADER_SEARCH_PATHS =  $(SDKROOT)/usr/include  ../../../../api/** ../../../../resource/**
+CONFIGURATION_BUILD_DIR = ../../../../lib/osx/release
+
