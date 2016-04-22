@@ -176,27 +176,26 @@ char *gcname ;
                gid  = glyph( p, TRUE );
 
               if (gid == 0) {
+                char *secondPart = p;
+                char *firstPart = p;
                 /* it might be a range.*/
                 zzBLOCK(zztasp4);
                 zzMake0;
-                if (strchr(p, '-')) {
-                  char *secondPart = p;
-                  char *firstPart = strsep(&secondPart, "-");
-                  if (firstPart == NULL) {
-                    featMsg(hotERROR, "Glyph \"%s\" not in font", p);
+                secondPart = strchr(p, '-');
+                if (secondPart != NULL) {
+                  *secondPart = '\0';
+                  secondPart++;
+                  gid = featMapGName2GID(g, firstPart, FALSE );
+                  endgid  = featMapGName2GID(g, secondPart, FALSE );
+                  if (gid != 0 && endgid != 0) {
+                    gcAddRange(gid, endgid, firstPart, secondPart);
                   }
                   else {
-                    gid = featMapGName2GID(g, firstPart, FALSE );
-                    endgid  = featMapGName2GID(g, secondPart, FALSE );
-                    if (gid != 0 && endgid != 0) {
-                      gcAddRange(gid, endgid, firstPart, secondPart);
-                    }
-                    else {
-                      zzFAIL(1,zzerr2,&zzMissSet,&zzMissText,&zzBadTok,&zzBadText,&zzErrk);
-                      goto fail;
-                    }
+                    zzFAIL(1,zzerr2,&zzMissSet,&zzMissText,&zzBadTok,&zzBadText,&zzErrk);
+                    goto fail;
                   }
-                }
+                  
+				}
                 else {
                   zzFAIL(1,zzerr2,&zzMissSet,&zzMissText,&zzBadTok,&zzBadText,&zzErrk);
                   goto fail;

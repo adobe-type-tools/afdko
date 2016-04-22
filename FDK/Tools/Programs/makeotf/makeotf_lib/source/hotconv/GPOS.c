@@ -116,7 +116,9 @@ typedef struct MetricsRec {
 
 typedef struct {                     /* Kerning pair */
 	KernGlyph first;
-	KernGlyph second;
+    KernGlyph second;
+    unsigned long lineIndex; /* used to sort records in order of occurrence. 
+                              Needed so keep first of conflicting records. */
 	short metricsCnt1; /* Allowable values are 1 ( x advance adjsutment only) or 4. */
 	short metricsRec1[4];
 	short metricsCnt2; /* Allowable values are 1 ( x advance adjsutment only) or 4. */
@@ -2225,14 +2227,22 @@ static int CDECL cmpPairPos1(const void *first, const void *second) {
 	else if (a->first.gid > b->first.gid) {
 		return 1;
 	}
-	else if (a->second.gid < b->second.gid) {
-		/* Compare second glyphs */
-		return -1;
-	}
-	else if (a->second.gid > b->second.gid) {
-		return 1;
-	}
-	if ((a->metricsRec1[0] == 0) && (b->metricsRec1[0] != 0)) {	/* Abs values in decr order */
+    else if (a->second.gid < b->second.gid) {
+        /* Compare second glyphs */
+        return -1;
+    }
+    else if (a->second.gid > b->second.gid) {
+        return 1;
+    }
+    else if (a->lineIndex < b->lineIndex) {
+        /* Compare second glyphs */
+        return -1;
+    }
+    else if (a->lineIndex > b->lineIndex) {
+        return 1;
+    }
+
+    else if ((a->metricsRec1[0] == 0) && (b->metricsRec1[0] != 0)) {	/* Abs values in decr order */
 		return -1;
 	}
 	else if ((a->metricsRec1[0] != 0) && (b->metricsRec1[0] == 0)) {
@@ -2275,7 +2285,8 @@ static int CDECL cmpPairPos1(const void *first, const void *second) {
 			return 1;
 		}
 	}
-	return 0;
+
+    return 0;
 }
 
 /* Compare kern pairs, fmt2. Pairs marked for deletion sink to bottom */
@@ -2310,7 +2321,14 @@ static int CDECL cmpPairPos2(const void *first, const void *second) {
 	else if (a->second.gcl->gid > b->second.gcl->gid) {
 		return 1;
 	}
-	if ((a->metricsRec1[0] == 0) && (b->metricsRec1[0] != 0)) {	/* Abs values in decr order */
+    else if (a->lineIndex < b->lineIndex) {
+        /* Compare second glyphs */
+        return -1;
+    }
+    else if (a->lineIndex > b->lineIndex) {
+        return 1;
+    }
+	else if ((a->metricsRec1[0] == 0) && (b->metricsRec1[0] != 0)) {	/* Abs values in decr order */
 		return -1;
 	}
 	else if ((a->metricsRec1[0] != 0) && (b->metricsRec1[0] == 0)) {
@@ -2353,7 +2371,7 @@ static int CDECL cmpPairPos2(const void *first, const void *second) {
 			return 1;
 		}
 	}
-	return 0;
+    return 0;
 }
 
 /* For a particular classDef and a given class, return the GNode linked list */
@@ -2393,11 +2411,15 @@ static void printKernPair(hotCtx g, GID gid1, GID gid2, int val1, int val2,
 static void checkAndSortPairPos(hotCtx g, GPOSCtx h, SubtableInfo *si) {
 #define REPORT_DUPE_KERN 1  /* Turn off for bad fonts, which may flood you
 							  with warnings */
-	long i;
+	long i,j;
 	int nDuplicates = 0;
 	int fmt1 = si->pairFmt == 1;
 	KernRec *prev = NULL; /* Suppress optimizer warning */
 
+    /* Add line index numbers, so can keep first of conflicting records. */
+    for (i = 0; i <  si->pairs.cnt; i++) {
+        (si->pairs.array[i]).lineIndex = i;
+    }
 	/* Sort by first, second, value */
 	qsort(si->pairs.array,  si->pairs.cnt, sizeof(KernRec),
 		  fmt1 ? cmpPairPos1 : cmpPairPos2);
@@ -2410,7 +2432,18 @@ static void checkAndSortPairPos(hotCtx g, GPOSCtx h, SubtableInfo *si) {
 		KernRec *curr = &si->pairs.array[i];
 
 		prev = curr - 1;
-		if (fmt1) {
+        if (prev->first.gid == GID_UNDEF)
+        {
+            j = 2;
+            while ((j <= i) && (prev->first.gid == GID_UNDEF))
+            {
+                prev = &si->pairs.array[i-j++];
+            }
+            if (prev->first.gid == GID_UNDEF) /* didn't find an earlier match that was not deleted. */
+                continue;
+        }
+
+        if (fmt1) {
 			curr1 = curr->first.gid;
 			curr2 = curr->second.gid;
 			prev1 = prev->first.gid;
@@ -2423,15 +2456,16 @@ static void checkAndSortPairPos(hotCtx g, GPOSCtx h, SubtableInfo *si) {
 			prev2 = prev->second.gcl->gid;
 		}
 
+
 		if (curr1 == prev1 && curr2 == prev2) {
 			KernRec *delete;
 			int isDuplicate = 0;
 
 			/* Check if values conflict. Report different message if they are duplicates.  */
-			if ((curr->metricsCnt1 == prev->metricsCnt1) && ((curr->metricsCnt1 == 0) || (curr->metricsRec1[0] == prev->metricsRec1[0]))) {
+			if ((curr->metricsCnt1 == prev->metricsCnt1) && ((curr->metricsCnt1 == 1) &&(curr->metricsRec1[0] == prev->metricsRec1[0]))) {
 				isDuplicate = 1;
 			}
-			else if ((curr->metricsCnt2 == prev->metricsCnt2) && ((curr->metricsCnt2 == 0) || (curr->metricsRec2[0] == prev->metricsRec2[0]))) {
+			else if ((curr->metricsCnt2 == prev->metricsCnt2) && ((curr->metricsCnt2 == 1) && (curr->metricsRec2[0] == prev->metricsRec2[0]))) {
 				isDuplicate = 1;
 			}
 			if (isDuplicate) {
@@ -2454,7 +2488,7 @@ static void checkAndSortPairPos(hotCtx g, GPOSCtx h, SubtableInfo *si) {
 				/* ... for MMs, at default instance */
 #endif /* REPORT_DUPE_KERN */
 			}
-			/* Mark previous (unless samePrev) record for deletion */
+			/* Mark cur (unless samePrev) record for deletion */
 			delete = curr;
 			if (fmt1) {
 				delete->first.gid = GID_UNDEF;
@@ -2470,7 +2504,7 @@ static void checkAndSortPairPos(hotCtx g, GPOSCtx h, SubtableInfo *si) {
 	}
 
 	if (nDuplicates > 0) {
-		/* Duplicates sink to the bottom */
+		/* Duplicates sink to the bottom, because delete->first.gid == GID_UNDEF */
 		qsort(si->pairs.array,  si->pairs.cnt, sizeof(KernRec),
 		      fmt1 ? cmpPairPos1 : cmpPairPos2);
 		si->pairs.cnt -= nDuplicates;
