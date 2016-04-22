@@ -164,7 +164,7 @@ Byte8 * headGetModifiedDate(Card32 client)
 			  return tday;
 			}
 		}
-	  LongDateTime2ANSITime(&tmp, head->created);
+	  LongDateTime2ANSITime(&tmp, head->modified);
         if (strftime(tday, sizeof(tday), dateFormat, &tmp) == 0) {
             fprintf(stderr, "strftime returned 0");
             exit(EXIT_FAILURE);
