@@ -2056,6 +2056,12 @@ static void fixUnsetDictValues(ufoCtx h)
         message(h, "Warning: No PS name specified in source UFO font. Using 'PSNameNotSpecified'.");
     }
     
+    if ( top->version.ptr == NULL)
+    {
+        top->version.ptr  = "1.000";
+        message(h, "Warning: No version specified in source UFO font. Using '1.000'.");
+    }
+    
     if (pd->StemSnapH.cnt > ABF_EMPTY_ARRAY)
     {
         if (pd->StdHW == ABF_UNSET_REAL)

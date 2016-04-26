@@ -876,7 +876,7 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top)
         }
         writeLine(h, "\t</array>");
     }
-    
+ 
     if (privateDict->StemSnapH.cnt != ABF_EMPTY_ARRAY)
     {
         writeLine(h, "\t<key>postscriptStemSnapH</key>");
@@ -891,6 +891,18 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top)
             writeLine(h, buffer);
             
         }
+        writeLine(h, "\t</array>");
+    }
+    else if (privateDict->StdHW != ABF_UNSET_REAL)
+    {
+        float stem = privateDict->StdHW;
+        writeLine(h, "\t<key>postscriptStemSnapH</key>");
+        writeLine(h, "\t<array>");
+        if (stem == ((int)stem))
+            sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
+        else
+            sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+        writeLine(h, buffer);
         writeLine(h, "\t</array>");
     }
     
@@ -908,6 +920,18 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top)
             writeLine(h, buffer);
             
         }
+        writeLine(h, "\t</array>");
+    }
+    else if (privateDict->StdVW != ABF_UNSET_REAL)
+    {
+        float stem = privateDict->StdVW;
+        writeLine(h, "\t<key>postscriptStemSnapV</key>");
+        writeLine(h, "\t<array>");
+        if (stem == ((int)stem))
+            sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
+        else
+            sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+        writeLine(h, buffer);
         writeLine(h, "\t</array>");
     }
     
