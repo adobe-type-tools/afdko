@@ -353,56 +353,58 @@ public procedure MergeVals(vert) boolean vert; {
 		bV = vL->vBst;
 		v = bV->vVal;
 		s = bV->vSpc;
-		while (vLst != NULL) { /* consider replacing vLst by vL */
-			if (vLst->merge || ghst != vLst->vGhst) goto NxtVL;
-			bot = vLst->vLoc1;
-			top = vLst->vLoc2;
-			if (bot == b && top == t) goto NxtVL;
-			bstV = vLst->vBst;
-			val = bstV->vVal;
-			spc = bstV->vSpc;
-			if ((top == t && CloseSegs(sg2,vLst->vSeg2,vert) &&
-				 (vert || (
-						   !InBlueBand(t,lenTopBands,topBands) &&
-						   !InBlueBand(bot,lenBotBands,botBands) &&
-						   !InBlueBand(b,lenBotBands,botBands)))) ||
-				(bot == b && CloseSegs(sg1,vLst->vSeg1,vert) &&
-				 (vert || (
-						   !InBlueBand(b,lenBotBands,botBands) &&
-						   !InBlueBand(t,lenTopBands,topBands) &&
-						   !InBlueBand(top,lenTopBands,topBands)))) ||
-				(ac_abs(top-t) <= maxMerge && ac_abs(bot-b) <= maxMerge &&
-				 (vert || (t == top || !InBlueBand(top,lenTopBands,topBands))) &&
-				 (vert || (b == bot || !InBlueBand(bot,lenBotBands,botBands))))) {
-					if (s==spc && val==v && !vert) {
-						if (InBlueBand(t,lenTopBands,topBands)) {
-							if ((YgoesUp && t > top) || (!YgoesUp && t < top))
-								goto replace; }
-						else if (InBlueBand(b,lenBotBands,botBands)) {
-							if ((YgoesUp && b < bot) || (!YgoesUp && b > bot))
-								goto replace; }
-					}
-					else goto replace;
-				}
-			else if (s==spc && sg1 != NULL && sg2 != NULL) {
-				seg1 = vLst->vSeg1; seg2 = vLst->vSeg2;
-				if (seg1 != NULL && seg2 != NULL) {
-					if (ac_abs(bot-b) <= FixOne && ac_abs(top-t) <= maxBendMerge) {
-						if (seg2->sType == sBEND &&
-							(vert || !InBlueBand(top,lenTopBands,topBands)))
-							goto replace;
-					}
-					else if (ac_abs(top-t) <= FixOne && ac_abs(bot-b) <= maxBendMerge) {
-						if (v > val && seg1->sType == sBEND &&
-							(vert || !InBlueBand(bot,lenBotBands,botBands)))
-							goto replace;
-					}
-				}
-			}
-			goto NxtVL;
-		replace: ReplaceVals(bot,top,b,t,bV,vert);
-		NxtVL: vLst = vLst->vNxt;
-		}
+        while (vLst != NULL) { /* consider replacing vLst by vL */
+            if (vLst->merge || ghst != vLst->vGhst) goto NxtVL;
+            bot = vLst->vLoc1;
+            top = vLst->vLoc2;
+            if (bot == b && top == t)
+                goto NxtVL;
+            bstV = vLst->vBst;
+            val = bstV->vVal;
+            spc = bstV->vSpc;
+            if ((top == t && CloseSegs(sg2,vLst->vSeg2,vert) &&
+                 (vert || (
+                           !InBlueBand(t,lenTopBands,topBands) &&
+                           !InBlueBand(bot,lenBotBands,botBands) &&
+                           !InBlueBand(b,lenBotBands,botBands)))) ||
+                (bot == b && CloseSegs(sg1,vLst->vSeg1,vert) &&
+                 (vert || (
+                           !InBlueBand(b,lenBotBands,botBands) &&
+                           !InBlueBand(t,lenTopBands,topBands) &&
+                           !InBlueBand(top,lenTopBands,topBands)))) ||
+                (ac_abs(top-t) <= maxMerge && ac_abs(bot-b) <= maxMerge &&
+                 (vert || (t == top || !InBlueBand(top,lenTopBands,topBands))) &&
+                 (vert || (b == bot || !InBlueBand(bot,lenBotBands,botBands))))) {
+                    if (s==spc && val==v && !vert) {
+                        if (InBlueBand(t,lenTopBands,topBands)) {
+                            if ((YgoesUp && t > top) || (!YgoesUp && t < top))
+                                goto replace; }
+                        else if (InBlueBand(b,lenBotBands,botBands)) {
+                            if ((YgoesUp && b < bot) || (!YgoesUp && b > bot))
+                                goto replace; }
+                    }
+                    else
+                        goto replace;
+                }
+            else if (s==spc && sg1 != NULL && sg2 != NULL) {
+                seg1 = vLst->vSeg1; seg2 = vLst->vSeg2;
+                if (seg1 != NULL && seg2 != NULL) {
+                    if (ac_abs(bot-b) <= FixOne && ac_abs(top-t) <= maxBendMerge) {
+                        if (seg2->sType == sBEND &&
+                            (vert || !InBlueBand(top,lenTopBands,topBands)))
+                            goto replace;
+                    }
+                    else if (ac_abs(top-t) <= FixOne && ac_abs(bot-b) <= maxBendMerge) {
+                        if (v > val && seg1->sType == sBEND &&
+                            (vert || !InBlueBand(bot,lenBotBands,botBands)))
+                            goto replace;
+                    }
+                }
+            }
+            goto NxtVL;
+        replace: ReplaceVals(bot,top,b,t,bV,vert);
+        NxtVL: vLst = vLst->vNxt;
+        }
 		vL = vL->vNxt;
     }
 }

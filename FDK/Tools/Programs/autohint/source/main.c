@@ -14,7 +14,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <sys/stat.h>
 #endif
 
-const char *C_ProgramVersion = "1.63533";
+const char *C_ProgramVersion = "1.65240";
 const char *reportExt = ".rpt";
 const char *dfltExt = ".new";
 char *bezName = NULL;

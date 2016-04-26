@@ -10,7 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "machinedep.h"
 
 
-const char *libversion = "1.5.11";
+const char *libversion = "1.5.12";
 const char *progname="AC_C_lib";
 char editingResource=0;
 
