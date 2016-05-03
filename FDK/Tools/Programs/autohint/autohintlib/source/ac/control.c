@@ -495,9 +495,8 @@ private procedure Blues() {
 	EvalH();
 	PruneHVals();
 	FindBestHVals();
-    /* We want to get rid of wider hstems in favor or overlapping smaller hstems only if we are NOT reporting all possible alignment zones. */
-    if (AddStemExtremes == NULL)
-        MergeVals(FALSE);
+    MergeVals(FALSE);
+
 	if (showClrInfo) {
 		ShowHVals(valList);
 		PrintMessage("pick best");
