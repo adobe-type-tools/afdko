@@ -412,11 +412,23 @@ class UFOFontData:
 
 	def isCID(self):
 		return 0
-		
+	
+	def checkForHints(self, glyphName):
+		hasHints = 0
+		glyphPath = self.getGlyphProcessedPath(glyphName)
+		if glyphPath and os.path.exists(glyphPath):
+			fp = open(glyphPath, "rt")
+			data = fp.read()
+			fp.close()
+			if "hintSetList" in data:
+				hasHints = 1
+		return hasHints
+	
 	def convertToBez(self, glyphName, removeHints, beVerbose, doAll = 0):
 		# convertGLIFToBez does not yet support hints - no need for removeHints arg.
 		bezString, width = convertGLIFToBez(self, glyphName, doAll)
-		return bezString, width
+		hasHints = self.checkForHints(glyphName)
+		return bezString, width, hasHints
 
 	def updateFromBez(self, bezData, glyphName, width, beVerbose):
 		# For UFO font, we don't use the width parameter: it is carried over from the input glif file.
@@ -1419,11 +1431,11 @@ def convertGLIFToBez(ufoFontData, glyphName, doAll= 0):
 	width, outlineXML, skip = ufoFontData.getOrSkipGlyphXML(glyphName, doAll)
 	
 	if skip:
-		return None, 0
+		return None, width
 
 	if outlineXML == None:
 		print "Glyph '%s' has no outline data" % (glyphName)
-		return None, 0
+		return None, width 
 
 	curX = curY = 0
 	bezString, curX, curY = convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY)
@@ -2327,8 +2339,7 @@ def test1():
 		gNameList = gm.keys()
 	doAll = 0
 	for glyphName in gNameList:
-		bezString = convertGLIFToBez(ufoFontData, glyphName, doAll)
-		print bezString
+		bezString, width = convertGLIFToBez(ufoFontData, glyphName, doAll)
 		glifXML = convertBezToGLIF(ufoFontData, glyphName, bezString )
 		#pprint.pprint(xmlToString(glifXML))
 	print len(gNameList)

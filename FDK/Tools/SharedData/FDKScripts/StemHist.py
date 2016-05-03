@@ -22,7 +22,7 @@ OpenType font for the fontTools to work with.
 
 """
 __usage__ = """
-stemHist program v1.25 Mar 5 2015
+stemHist program v1.26 April 27 2016
 stemHist -h
 stemHist -u
 stemHist [-g <glyph list>] [-gf <filename>] [-xg <glyph list>] [-xgf <filename>] [-all] [-a] [-new] -q font-path1 font-path2...
@@ -800,7 +800,7 @@ def collectStemsFont(path, options, txPath):
 				print ""
 
 		# 	Convert to bez format
-		bezString, width = fontData.convertToBez(name, removeHints, options.verbose)
+		bezString, width, hasHints = fontData.convertToBez(name, removeHints, options.verbose)
 		if bezString == None:
 			continue
 		if "mt" not in bezString:
@@ -852,7 +852,7 @@ def collectStemsFont(path, options, txPath):
 		else:
 			allStems = ""
 			
-		command = "autohintexe -q %s %s  -f \"%s\" \"%s\"" % (doAlign, allStems, tempFI, tempBez)
+		command = "autohintexe -q %s %s  -f \"%s\" \"%s\" 2>&1" % (doAlign, allStems, tempFI, tempBez)
 		if options.debug:
 			print command
 		log = FDKUtils.runShellCmd(command)
@@ -866,6 +866,7 @@ def collectStemsFont(path, options, txPath):
 			bp = open(tempReport, "rt")
 			report = bp.read()
 			bp.close()
+			print "report <%s>" % (report)
 			if options.debug:
 				print "Wrote AC fontinfo data file to", tempFI
 				print "Wrote AC output rpt file to", tempReport

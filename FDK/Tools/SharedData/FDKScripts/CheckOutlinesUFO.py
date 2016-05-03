@@ -214,7 +214,7 @@ class FontFile(object):
 	def checkSkipGlyph(self, glyphName, doAll):
 		skip = False
 		if self.ufoFontHashData and self.useHashMap:
-			width, outlineXML, skip = self.ufoFontHashData.getOrSkipGlyphXML(glyphName, doAll)
+			width, outlineXML, skip, hasHints = self.ufoFontHashData.getOrSkipGlyphXML(glyphName, doAll)
 		return skip
 
 	def buildGlyphHash(self, width, glyphDigest):

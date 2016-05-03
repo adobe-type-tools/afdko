@@ -1,5 +1,5 @@
 """
-BezTools.py v 1.11 Jan 23 2008
+BezTools.py v 1.12 April 27 2106
 
 Utilities for converting between T2 charstrings and the bez data format.
 Used by AC and focus/CheckOutlines.
@@ -1137,21 +1137,22 @@ class CFFFontData:
 		return psName
 		
 	def convertToBez(self, glyphName, removeHints, beVerbose, doAll=False):
+		hasHints = 0
+		t2Wdth = None
 		gid = self.charStrings.charStrings[glyphName]
 		t2CharString = self.charStringIndex[gid]
 		try:
 			bezString, hasHints, t2Wdth = convertT2GlyphToBez(t2CharString, removeHints, self.allowDecimalCoords)
 			# Note: the glyph name is important, as it is used by autohintexe for various heurisitics, including [hv]stem3 derivation.
-			bezString  = (r"%%%s%ssc " % (glyphName, os.linesep)) + bezString
+			bezString  = (r"%%%s%s " % (glyphName, os.linesep)) + bezString
 		except SEACError:
-			t2Wdth = None
 			if not beVerbose:
 				dotCount = 0
 				self.logMsg("") # end series of "."
 				self.logMsg("Checking %s -- ," % (glyphName)) # output message when SEAC glyph is found
 			self.logMsg("Skipping %s: can't process SEAC composite glyphs." % (glyphName))
 			bezString = None
-		return bezString, t2Wdth		
+		return bezString, t2Wdth, hasHints		
 
 	def updateFromBez(self, bezData, glyphName, width, beVerbose):
 		t2Program = [width] + convertBezToT2(bezData)

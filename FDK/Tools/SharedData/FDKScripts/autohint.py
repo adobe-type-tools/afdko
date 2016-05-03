@@ -1,9 +1,9 @@
 #!/bin/env python
-__copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+__copyright__ = """Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
 __usage__ = """
-autohint  AutoHinting program v1.48 May 26 2015
+autohint  AutoHinting program v1.49 April 27 2016
 autohint -h
 autohint -u
 autohint -hfd
@@ -134,10 +134,10 @@ alignment zones in an "fontinfo" file.
 -hf	Use history file.  Will create it if it does not already exist.
 	Should not be used with UFO fonts, where another mechanism is used.
 
--a	Hint all glyphs unconditionally Has effect only if the history
-	file is being used.
+-a	Hint all glyphs that are in the history file, or are unhinted.
+	Has effect only if the history file is being used.
 
--r	Re-hint glyphs Glyphs not in the history file will be hinted even
+-r	Re-hint glyphs. Glyphs not in the history file will be hinted even
 	if they already have hints. However, glyphs will not be hinted if
 	they both have not changed and are in the history file.
 
@@ -1167,9 +1167,9 @@ def hintFile(options):
 	for name in glyphList:
 		prevACIdentifier = None
 		seenGlyphCount +=1
-			
+
 		# 	Convert to bez format
-		bezString, width = fontData.convertToBez(name, removeHints, options.verbose, options.hintAll)
+		bezString, width, hasHints = fontData.convertToBez(name, removeHints, options.verbose, options.hintAll)
 		processedGlyphCount += 1
 		if bezString == None:
 			continue
@@ -1207,7 +1207,6 @@ def hintFile(options):
 
 		oldBezString = ""
 		oldHintBezString = ""
-		
 		if (not options.logOnly) and options.usePlistFile:
 			# If the glyph is not in the  plist file, then we skip it unless kReHintUnknown is set.
 			# If the glyph is in the plist file and the outline has changed, we hint it. 
@@ -1219,16 +1218,15 @@ def hintFile(options):
 				oldBezString = oldHintBezString = ""
 			except KeyError:
 				pListChanged = 1 # Didn't have an entry in tempList file, so we will add one.
-				if hasHints and not (options.rehint):
-					# Glyphs is hinted, but not referenced in the plist file. Skip it unless options.rehint is se
+				if hasHints and not options.rehint:
+					# Glyphs is hinted, but not referenced in the plist file. Skip it unless options.rehint is seen
 					if  not isNewPlistFile:
 						# Comment only if there is a plist file; otherwise, we'd be complaining for almost every glyph.
 						logMsg("%s Skipping glyph - it has hints, but it is not in the hint info plist file." % aliasName(name))
 						dotCount = 0
 					continue
-
 			if prevACIdentifier and (prevACIdentifier == ACidentifier): # there is an entry in the plist file and it matches what's in the font.
-				if hasHints and not options.hintAll:
+				if hasHints and not (options.hintAll or options.rehint):
 					continue
 			else:
 				pListChanged = 1
@@ -1299,8 +1297,7 @@ def hintFile(options):
 
 		
 		if options.usePlistFile:
-			bezString, hasHints, t2Wdth = convertT2GlyphToBez(t2CharString, 1)
-			bezString = "%% %s%s%s" % (name, os.linesep, bezString)
+			bezString = "%% %s%s%s" % (name, os.linesep, newBezString)
 			ACidentifier = makeACIdentifier(bezString)
 			# add glyph hint entry to plist file
 			if options.allowChanges:
@@ -1328,6 +1325,8 @@ def hintFile(options):
 			if options.usePlistFile:
 				if options.rehint:
 					logMsg("No new hints. All glyphs had hints that matched the hint record file %s." % (fontPlistFilePath))
+				if options.hintAll:
+					logMsg("No new hints. All glyphs had hints that matched the hint history file %s, or were not in the history file and already had hints." % (fontPlistFilePath))
 				else:
 					logMsg("No new hints. All glyphs were already hinted.")
 			else:
