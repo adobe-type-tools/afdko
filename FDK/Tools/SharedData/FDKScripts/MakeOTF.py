@@ -17,7 +17,8 @@ __methods__ = """
  - if the -rp option is used with a file name, use those options, but save the final option
  - save the current options only if requested with -sp, or if the file did not exist before.
  - override all options from a project file with any other options that are specified
- - if the input font is not specified, look for 'font.pfa' in the current directory.
+ - if the input font is not specified, look for, in order, 'font.ufo,
+ 'font.pfa', and cidfont.ps, all in the current directory.
  - if the FontMenuNameDB file is not specified look in:
 	1) the current directory
 	2) one up from the current

@@ -530,8 +530,8 @@ static Offset deviceEnd(void) {
 
 static void setGDEFGlyphClassDef(GNode *simple, GNode *ligature, GNode *mark,
                                  GNode *component) {
-	h->gFlags |= GF_SEEN_GDEF_GLYPHCLASS;
-	setGlyphClassGDef(g, simple, ligature, mark, component);
+    h->gFlags |= GF_SEEN_GDEF_GLYPHCLASS;
+    setGlyphClassGDef(g, simple, ligature, mark, component);
 }
 
 static void addGDEFAttach(GNode *pat, unsigned short contour) {
@@ -564,9 +564,6 @@ static void setGDEFLigatureCaret(GNode *pat, unsigned short caretValue, unsigned
 	while (next != NULL) {
 		seenCaretValue = 0;
 		seenCaretValue = addLigCaretEntryGDEF(g, next, caretValue,  format);
-		if (seenCaretValue) {
-			featMsg(hotWARNING, "Skipping duplicate caret value %d", caretValue);
-		}
 		next = next->nextCl;
 	}
 }
@@ -2499,7 +2496,7 @@ static int checkTag(Tag tag, int type, int atStart) {
 			}
 			else if ((tag != (Tag)TAG_STAND_ALONE) && (h->curr.feature == (Tag)TAG_STAND_ALONE)) {
 				featMsg(hotERROR, "\"script\" and \"language\" statements"
-				        "not allowed in within named lookup blocks; ");
+				        "not allowed in within stand-alone lookup blocks; ");
 			}
 			/*
 			   if (h->fFlags & FF_LANGSYS_MODE)
@@ -2524,7 +2521,7 @@ static int checkTag(Tag tag, int type, int atStart) {
 				}    /* Statement has no effect */
 
 				/* Once we have seen a script or a language statement other than 'dflt'
-				   any further rules in the featue should nto be added to the default list.
+				   any further rules in the featue should not be added to the default list.
 				 */
 				if ((h->fFlags & FF_LANGSYS_MODE)) {
 					h->fFlags &= ~FF_LANGSYS_MODE;

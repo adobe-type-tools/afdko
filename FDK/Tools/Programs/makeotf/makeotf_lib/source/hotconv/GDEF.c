@@ -98,7 +98,7 @@ static void writeMarkSetClassTable(hotCtx g, GDEFCtx h);
 struct GDEFCtx_ {
 	GDEFTbl tbl;    /* Table data */
 	hotCtx g;       /* Package context */
-	dnaDCL(GNode *, glyphClasess);
+	dnaDCL(GNode *, glyphClasses);
 	dnaDCL(AttachEntry, attachEntries);
 	dnaDCL(LigGlyphEntry, ligCaretEntries);
 	dnaDCL(GNode *, markAttachClasses);
@@ -120,7 +120,7 @@ void GDEFNew(hotCtx g) {
 	/* Link contexts */
 	h->g = g;
 	g->ctx.GDEF = h;
-	dnaINIT(g->dnaCtx, h->glyphClasess, 50, 200);
+	dnaINIT(g->dnaCtx, h->glyphClasses, 50, 200);
 	dnaINIT(g->dnaCtx, h->attachEntries, 50, 200);
 	dnaINIT(g->dnaCtx, h->ligCaretEntries, 50, 200);
 	dnaINIT(g->dnaCtx, h->markAttachClasses, 50, 200);
@@ -154,7 +154,7 @@ int GDEFFill(hotCtx g) {
 		h->tbl.version  = 0x00010002;
 	}
 
-	if (h->glyphClasess.cnt > 0) {
+	if (h->glyphClasses.cnt > 0) {
 		h->tbl.GlyphClassDefOffset = h->offset;
 		h->glyphClassTable =  otlTableNew(g);
 		tableSize = createGlyphClassDef(h);
@@ -249,7 +249,7 @@ void GDEFFree(hotCtx g) {
 	int i;
 	GDEFCtx h = g->ctx.GDEF;
 
-	dnaFREE(h->glyphClasess);
+	dnaFREE(h->glyphClasses);
 	if (h->glyphClassTable != NULL) {
 		otlTableFree(g, h->glyphClassTable);
 	}
@@ -316,12 +316,28 @@ static void removeNodeFromClass(GDEFCtx h, GNode **glyphClass, GNode **headNode,
 void setGlyphClassGDef(hotCtx g, GNode *simple, GNode *ligature, GNode *mark,
                        GNode *component) {
 	GDEFCtx h = g->ctx.GDEF;
-	GNode **simpleClass = dnaNEXT(h->glyphClasess);
-	GNode **ligClass = dnaNEXT(h->glyphClasess);
-	GNode **markClass = dnaNEXT(h->glyphClasess);
-	GNode **compClass = dnaNEXT(h->glyphClasess);
+	GNode **simpleClass;
+	GNode **ligClass;
+	GNode **markClass;
+	GNode **compClass;
 	int hadConflictingClassDef = 0;
 
+    if (h->glyphClasses.cnt > 0)
+    {
+         /* Have seen previous GlyphClassDef. Can index into list */
+        simpleClass = h->glyphClasses.array[0];
+        ligClass = h->glyphClasses.array[1];
+        markClass = h->glyphClasses.array[2];
+        compClass = h->glyphClasses.array[3];
+    }
+    else
+    {
+        simpleClass = dnaNEXT(h->glyphClasses);
+        ligClass = dnaNEXT(h->glyphClasses);
+        markClass = dnaNEXT(h->glyphClasses);
+        compClass = dnaNEXT(h->glyphClasses);
+    }
+        
 	char *glyphClassNames[] = {
 		"Base", "Ligature", "Mark", "Component"
 	};
@@ -357,17 +373,17 @@ void setGlyphClassGDef(hotCtx g, GNode *simple, GNode *ligature, GNode *mark,
 
 
 	/* Check and warn if the same glyph has ended up in more than one class */
-	for (i = 0; i < h->glyphClasess.cnt; i++) {
+	for (i = 0; i < h->glyphClasses.cnt; i++) {
 		GNode *p1;
 		GNode *prev1 = NULL;
-		GNode *headNode1 = h->glyphClasess.array[i];
+		GNode *headNode1 = h->glyphClasses.array[i];
 		if (headNode1 == NULL) {
 			continue;
 		}
 
-		for (j = i + 1; j < h->glyphClasess.cnt; j++) {
+		for (j = i + 1; j < h->glyphClasses.cnt; j++) {
 			GNode *p2;
-			GNode *headNode2 = h->glyphClasess.array[j];
+			GNode *headNode2 = h->glyphClasses.array[j];
 			if (headNode2 == NULL) {
 				continue;
 			}
@@ -384,11 +400,11 @@ void setGlyphClassGDef(hotCtx g, GNode *simple, GNode *ligature, GNode *mark,
 								featGlyphDump(g, p1->gid, 0, 0);
 								hotMsg(g, hotWARNING, "GDEF GlyphClass. Glyph '%s' gid '%d'. previous glyph class '%s' overrides new class '%s'.", g->note.array, p1->gid, glyphClassNames[i],  glyphClassNames[j]);
 							}
-							removeNodeFromClass(h, &(h->glyphClasess.array[j]), &headNode2, &prev2, &p2);
+							removeNodeFromClass(h, &(h->glyphClasses.array[j]), &headNode2, &prev2, &p2);
 						}
 						else {
 							// class j is the mark class; we need to remove p1 from the glyph class i. We do this silently, as the mark class always supersedes other classes.
-							removeNodeFromClass(h, &(h->glyphClasess.array[i]), &headNode1, &prev1, &p1);
+							removeNodeFromClass(h, &(h->glyphClasses.array[i]), &headNode1, &prev1, &p1);
 							removedP1 = 1;
 						}
 					}
@@ -398,7 +414,7 @@ void setGlyphClassGDef(hotCtx g, GNode *simple, GNode *ligature, GNode *mark,
 					}
 
 					if (p1 == NULL) {
-						break; /* This can happen because all teh p1's get removed by mark class overrides above */
+						break; /* This can happen because all the p1's get removed by mark class overrides above */
 					}
 				}
 				if (!removedP1) {
@@ -411,7 +427,7 @@ void setGlyphClassGDef(hotCtx g, GNode *simple, GNode *ligature, GNode *mark,
 		}
 	}
 	if (hadConflictingClassDef) {
-		hotMsg(g, hotWARNING, "GDEF Glyph Class. Since there were conflicting GlyphClass assignments, you should examine this auto-built GDEF table, and make sure that the glyph class assignments are as needed. If not, you should specify the GDEF table explicitly, in the features file.\n");
+		hotMsg(g, hotWARNING, "GDEF Glyph Class. Since there were conflicting GlyphClass assignments, you should examine this GDEF table, and make sure that the glyph class assignments are as needed.\n");
 	}
 }
 
@@ -503,44 +519,62 @@ int addAttachEntryGDEF(hotCtx g, GNode *glyphNode, unsigned short contour) {
 }
 
 int addLigCaretEntryGDEF(hotCtx g, GNode *glyphNode, unsigned short caretValue, unsigned short format) {
-	int i;
-	LigGlyphEntry *lge = NULL;
-	GID gid = glyphNode->gid;
-	GDEFCtx h = g->ctx.GDEF;
-	int seenCaretValue = 0;
-	/* See if we can find matching GID entry in the attach point list.*/
-	i = 0;
-	while (i <  h->ligCaretEntries.cnt) {
-		if (h->ligCaretEntries.array[i].gid == gid) {
-			unsigned short j;
-			CaretTable *ct;
-			lge = &h->ligCaretEntries.array[i];
-			/* make sure the contour isn't already in the list. */
-			for (j = 0; j < lge->caretTables.cnt; j++) {
-				if (lge->caretTables.array[j].CaretValue == caretValue) {
-					seenCaretValue = 1;
-					break;
-				}
-			}
-			if (!seenCaretValue) {
-				ct = dnaNEXT(lge->caretTables);
-				ct->format = format;
-				ct->CaretValue = caretValue;
-			}
-			break;
-		}
-		i++;
-	}
-	if (lge == NULL) {
-		CaretTable *ct;
-		lge = dnaNEXT(h->ligCaretEntries);
-		lge->gid = gid;
-		dnaINIT(g->dnaCtx, lge->caretTables, 10, 10);
-		ct = dnaNEXT(lge->caretTables);
-		ct->format = format;
-		ct->CaretValue = caretValue;
-	}
-	return seenCaretValue;
+    int i;
+    LigGlyphEntry *lge = NULL;
+    GID gid = glyphNode->gid;
+    GDEFCtx h = g->ctx.GDEF;
+    int seenCaretValue = 0;
+    CaretTable *ct;
+    
+    if (h->ligCaretEntries.cnt == 0)
+    {
+        lge = dnaNEXT(h->ligCaretEntries);
+        lge->gid = gid;
+        dnaINIT(g->dnaCtx, lge->caretTables, 10, 10);
+        ct = dnaNEXT(lge->caretTables);
+        ct->format = format;
+        ct->CaretValue = caretValue;
+    }
+    else
+    {
+        /* We allow only one device entry and either one byPos or byIndex entry */
+        i = 0;
+        while (i <  h->ligCaretEntries.cnt) {
+            if (h->ligCaretEntries.array[i].gid == gid) {
+                unsigned short j;
+                CaretTable *ct;
+                lge = &h->ligCaretEntries.array[i];
+                for (j = 0; j < lge->caretTables.cnt; j++) {
+                    if (lge->caretTables.array[j].format == format) {
+                        seenCaretValue = 1;
+                        break;
+                    }
+                    if (((lge->caretTables.array[j].format == 1) &&
+                         (lge->caretTables.array[j].format == 2))
+                        ||
+                        ((lge->caretTables.array[j].format == 2) &&
+                         (lge->caretTables.array[j].format == 1)))
+                    {
+                        featGlyphDump(g, gid, 0, 0);
+                        seenCaretValue = 1;
+                        break;
+                    }
+                }
+                if (!seenCaretValue) {
+                    ct = dnaNEXT(lge->caretTables);
+                    ct->format = format;
+                    ct->CaretValue = caretValue;
+                }
+                break;
+            }
+            i++;
+        }
+    }
+    if (seenCaretValue) {
+        featGlyphDump(g, gid, 0, 0);
+        hotMsg(g, hotWARNING, "GDEF Ligature Caret List Table. Glyph '%s' gid '%d'.\n A glyph can have at most one ligature caret device  statement and one of either\n ligature caret by position or ligature caret by index statetment. Skipping entry for format '%d'.", g->note.array, gid, format);
+        return seenCaretValue;
+    }
 }
 
 static LOffset createGlyphClassDef(GDEFCtx h) {
@@ -549,9 +583,9 @@ static LOffset createGlyphClassDef(GDEFCtx h) {
 	otlTbl otl = h->glyphClassTable;
 	int i;
 	otlClassBegin(h->g, otl);
-	for (i = 0; i < h->glyphClasess.cnt; i++) {
+	for (i = 0; i < h->glyphClasses.cnt; i++) {
 		GNode *p;
-		GNode *headNode = h->glyphClasess.array[i];
+		GNode *headNode = h->glyphClasses.array[i];
 		if (headNode == NULL) {
 			continue;
 		}
@@ -560,7 +594,7 @@ static LOffset createGlyphClassDef(GDEFCtx h) {
 			otlClassAddMapping(h->g, otl, p->gid, i + 1);
 		}
 		featRecycleNodes(h->g, headNode); /* Don't need this class any more*/
-		h->glyphClasess.array[i] = NULL;
+		h->glyphClasses.array[i] = NULL;
 	}
 	otlClassEnd(h->g, otl);
 	return otlGetClassSize(otl);
@@ -629,14 +663,16 @@ static int cmpLigGlyphEntries(const void *first, const void *second) {
 static int cmpCaretTables(const void *first, const void *second) {
 	unsigned short format1 = ((CaretTable *)first)->format;
 	unsigned short format2 = ((CaretTable *)second)->format;
+    /* Sort device table entries format == 3) before By Pos or By Index entries (formats 1 and 2).
+    Not allowed to have both by Pos and by Index entries */
 	if (format1 < format2) {
-		return -1;
-	}
-	else if (format1 > format2) {
 		return 1;
 	}
+	else if (format1 > format2) {
+		return -1;
+	}
 
-	/* both are the same foramt */
+	/* both are the same format */
 	if (format1 == 1) {
 		short a = (short)((CaretTable *)first)->CaretValue;
 		short b = (short)((CaretTable *)second)->CaretValue;
