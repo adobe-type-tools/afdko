@@ -805,7 +805,7 @@ static void dbdict(DICT *dict) {
 			case cff_reserved25:
 			case cff_reserved26:
 			case cff_reserved27:
-			case cff_reserved31:
+			case cff_Blend:
 				printf("%s ", opname[op]);
 				i++;
 				break;

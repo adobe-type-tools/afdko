@@ -3908,7 +3908,7 @@ static void dumpDICT(txCtx h, const ctlRegion *region)
 		/* 28 */ "shortint",
 		/* 29 */ "longint",
 		/* 30 */ "BCD",
-		/* 31 */ "reserved31",
+		/* 31 */ "Blend",
 		};
 	static char *escopname[] =
 		{
@@ -3936,7 +3936,7 @@ static void dumpDICT(txCtx h, const ctlRegion *region)
 		/* 21 */ "PostScript",
 		/* 22 */ "BaseFontName",
 		/* 23 */ "BaseFontBlend",
-		/* 24 */ "reservedESC24",
+		/* 24 */ "numMasters",
 		/* 25 */ "reservedESC25",
 		/* 26 */ "reservedESC26",
 		/* 27 */ "reservedESC27",
@@ -3969,7 +3969,6 @@ static void dumpDICT(txCtx h, const ctlRegion *region)
 		case cff_FamilyName:
 		case cff_Weight:
 		case cff_FontBBox:
-		case cff_BlueValues:
 		case cff_OtherBlues:
 		case cff_FamilyBlues:
 		case cff_FamilyOtherBlues:
@@ -3990,9 +3989,12 @@ static void dumpDICT(txCtx h, const ctlRegion *region)
 		case cff_reserved25:
 		case cff_reserved26:
 		case cff_reserved27:
-		case cff_reserved31:
-			flowOp(h, opname[byte]);
-			break;
+            flowOp(h, opname[byte]);
+            break;
+        case cff_BlueValues:
+        case cff_Blend:
+            flowOp(h, opname[byte]);
+            break;
 		case cff_escape:
 			{
 			/* Process escaped operator */
@@ -4189,7 +4191,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr)
 		/* 13 */ "reserved13",
 		/* 14 */ "endchar",
 		/* 15 */ "reserved15",
-		/* 16 */ "reserved16",
+		/* 16 */ "blend",
 		/* 17 */ "callgrel",
 		/* 18 */ "hstemhm",
 		/* 19 */ "hintmask",

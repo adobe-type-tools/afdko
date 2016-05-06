@@ -75,9 +75,9 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define cff_shortint                28  /* All. Shared with T2 ops */
 #define cff_longint                 29  /* All */
 #define cff_BCD                     30  /* All */  
-#define cff_reserved31              31
+#define cff_Blend                   31
 #define cff_reserved255             255
-#define cff_LAST_ONE_BYTE_OP        cff_reserved31
+#define cff_LAST_ONE_BYTE_OP        cff_Blend
 
 /* Make escape operator value; may be redefined to suit implementation */
 #ifndef cff_ESC
@@ -109,7 +109,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define cff_PostScript              cff_ESC(21) /* Private/PD */
 #define cff_BaseFontName            cff_ESC(22) /* Top/FD */
 #define cff_BaseFontBlend           cff_ESC(23) /* Top/FD (instance UDV) */
-#define cff_reservedESC24           cff_ESC(24)
+#define cff_numMasters           cff_ESC(24)
 #define cff_reservedESC25           cff_ESC(25)
 #define cff_reservedESC26           cff_ESC(26)
 #define cff_reservedESC27           cff_ESC(27)
