@@ -263,6 +263,17 @@ void ctuDtostr(char *buf, double value, int width, int precision) {
 		/* Non-C locale in use; convert to C locale convention */
 		*p = '.';
 	}
+    p = strchr(buf, '.');
+    if (p != NULL) {
+        /* Have decimal point. Remove trailing zeroes.*/
+        int l = strlen(p);
+        p += l-1;
+        while(*p == '0')
+        {
+           *p = '\0';
+            p--;
+        }
+    }
 }
 
 /* Get version numbers of libraries. */

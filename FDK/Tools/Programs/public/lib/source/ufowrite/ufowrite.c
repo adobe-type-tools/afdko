@@ -246,7 +246,7 @@ static void ufw_ltoa(char* buf, long val)
 
 /* Write real number in ASCII to dst stream. */
 #define TX_EPSILON 0.0003 
-/*In Xcode, FLT_EPSILON is 1.192..x10-7, but the diff between value-roundf(value) can be 3.05..x10-5, when the input value is an integer. */
+/*In Xcode, FLT_EPSILON is 1.192..x10-7, but the diff between value-roundf(value) can be 3.05..x10-5, when the input value was a 24.8 Fixed. */
 static void writeReal(ufwCtx h, float value)
 {
 	char buf[50];
@@ -771,7 +771,7 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top)
     if (top->ItalicAngle != cff_DFLT_ItalicAngle)
     {
         writeLine(h, "\t<key>italicAngle</key>");
-        sprintf(buffer, "\t<real>%f</real>", top->ItalicAngle);
+        sprintf(buffer, "\t<real>%.8f</real>", top->ItalicAngle);
         writeLine(h, buffer);
     }
     
@@ -937,8 +937,24 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top)
     
     if (privateDict->BlueScale != ABF_UNSET_REAL)
     {
+        char *p;
+        char valueBuffer[50];
+        /* 8 places is as good as it gets when converting ASCII real numbers->float-> ASCII real numbers, as happens to all the  PrivateDict values.*/
+        sprintf(valueBuffer, "%.8f", privateDict->BlueScale);
+        p = strchr(valueBuffer, '.');
+        if (p != NULL) {
+            /* Have decimal point. Remove trailing zeroes.*/
+            int l = strlen(p);
+            p += l-1;
+            while(*p == '0')
+            {
+                *p = '\0';
+                p--;
+            }
+        }
+
         writeLine(h, "\t<key>postscriptBlueScale</key>");
-        sprintf(buffer, "\t<real>%f</real>", privateDict->BlueScale);
+        sprintf(buffer, "\t<real>%s</real>", valueBuffer);
         writeLine(h, buffer);
     }
     

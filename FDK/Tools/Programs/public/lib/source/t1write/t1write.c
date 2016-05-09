@@ -299,7 +299,8 @@ static void writeReal(t1wCtx h, float value)
         sprintf(buf, "%ld", (long)roundf(value));
     else
     {
-        ctuDtostr(buf, value, 0, 0);
+        ctuDtostr(buf, value, 0, 8); /* 8 places is as good as it gets when converting ASCII real numbers->float-> ASCII real numbers, as happens to all the  PrivateDict values.*/
+
     }
     writeBuf(h, strlen(buf), buf);
 }
@@ -825,11 +826,13 @@ static void writeIntDef(t1wCtx h, char *key, long value)
 /* Write PostScript definition of real object. */
 static void writeRealDef(t1wCtx h, char *key, float value)
 {
+    char buf[50];
 	if (value == ABF_UNSET_REAL)
 		return;
     
+    ctuDtostr(buf, value, 0, 8); /* 8 places is as good as it gets when converting ASCII real numbers->float-> ASCII real numbers, as happens to all the  PrivateDict values.*/
     writeFmt(h, "/%s ", key);
-    writeReal(h, value);
+    writeFmt(h, "%s", buf);
     writeLine(h, " def");
 }
 
@@ -872,20 +875,16 @@ static void writeIntArrayDef(t1wCtx h, char *key, long cnt, long *array)
 /* Write PostScript definition of real array object. */
 static void writeRealArrayDef(t1wCtx h, char *key, long cnt, float *array)
 	{
-	char *sep;
 	if (cnt == ABF_EMPTY_ARRAY)
 		return;
 	writeFmt(h, "/%s [", key);
-	sep = "";
 	while (cnt--)
-		{
-		writeStr(h, sep);
         {
+            char buf[50];
             float value = *array++;
-            writeReal(h, value);
+            ctuDtostr(buf, value, 0, 8); /* 8 places is as good as it gets when converting ASCII real numbers->float-> ASCII real numbers, as happens to all the  PrivateDict values.*/
+            writeFmt(h, "%s ", buf);
         }
-		sep = " ";
-		}
 	writeLine(h, "] def");
 	}
 

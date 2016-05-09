@@ -208,7 +208,7 @@ static void svw_ltoa(char* buf, long val)
 }
 /* Write real number in ASCII to dst stream. */
 #define TX_EPSILON 0.0003 
-/*In Xcode, FLT_EPSILON is 1.192..x10-7, but the diff between value-roundf(value) can be 3.05..x10-5, when the input value is an integer. */
+/*In Xcode, FLT_EPSILON is 1.192..x10-7, but the diff between value-roundf(value) can be 3.05..x10-5, when the input value is from a 24.8 fixed. */
 static void writeReal(svwCtx h, float value)
 {
 	char buf[50];

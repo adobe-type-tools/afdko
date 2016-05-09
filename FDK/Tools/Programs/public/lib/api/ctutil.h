@@ -6,7 +6,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define CTU_VERSION CTL_MAKE_VERSION(2,0,1)
+#define CTU_VERSION CTL_MAKE_VERSION(2,0,2)
 
 #include <stddef.h> /* For size_t */
 #include <time.h>   /* For struct tm */

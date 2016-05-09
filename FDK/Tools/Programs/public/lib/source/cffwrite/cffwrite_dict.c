@@ -230,7 +230,7 @@ void cfwDictSaveReal(DICT *dict, float r) {
 		return;
 	}
 
-	ctuDtostr(buf, r, 0, 0);
+	ctuDtostr(buf, r, 0, 8); /* 8 places is as good as it gets when converting ASCII real numbers->float-> ASCII real numbers, as happens to all the  PrivateDict values.*/
 
 	*dnaNEXT(*dict) = cff_BCD;
 	for (i = buf[0] == '0';; i++) {
