@@ -322,13 +322,19 @@ void setGlyphClassGDef(hotCtx g, GNode *simple, GNode *ligature, GNode *mark,
 	GNode **compClass;
 	int hadConflictingClassDef = 0;
 
+    char *glyphClassNames[] = {
+        "Base", "Ligature", "Mark", "Component"
+    };
+    
+    long i, j;
+    
     if (h->glyphClasses.cnt > 0)
     {
          /* Have seen previous GlyphClassDef. Can index into list */
-        simpleClass = h->glyphClasses.array[0];
-        ligClass = h->glyphClasses.array[1];
-        markClass = h->glyphClasses.array[2];
-        compClass = h->glyphClasses.array[3];
+        simpleClass = &h->glyphClasses.array[0];
+        ligClass = &h->glyphClasses.array[1];
+        markClass = &h->glyphClasses.array[2];
+        compClass = &h->glyphClasses.array[3];
     }
     else
     {
@@ -338,12 +344,6 @@ void setGlyphClassGDef(hotCtx g, GNode *simple, GNode *ligature, GNode *mark,
         compClass = dnaNEXT(h->glyphClasses);
     }
         
-	char *glyphClassNames[] = {
-		"Base", "Ligature", "Mark", "Component"
-	};
-
-	long i, j;
-
 	if (simple == NULL) {
 		*simpleClass = NULL;
 	}
