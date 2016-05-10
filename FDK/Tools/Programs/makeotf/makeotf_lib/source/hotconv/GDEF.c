@@ -573,8 +573,8 @@ int addLigCaretEntryGDEF(hotCtx g, GNode *glyphNode, unsigned short caretValue, 
     if (seenCaretValue) {
         featGlyphDump(g, gid, 0, 0);
         hotMsg(g, hotWARNING, "GDEF Ligature Caret List Table. Glyph '%s' gid '%d'.\n A glyph can have at most one ligature caret device  statement and one of either\n ligature caret by position or ligature caret by index statetment. Skipping entry for format '%d'.", g->note.array, gid, format);
-        return seenCaretValue;
     }
+    return seenCaretValue;
 }
 
 static LOffset createGlyphClassDef(GDEFCtx h) {
