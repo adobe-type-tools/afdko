@@ -4200,7 +4200,7 @@ static void dumpDICT(txCtx h, const ctlRegion *region)
 		case cff_reserved25:
 		case cff_reserved26:
 		case cff_reserved27:
-		case cff_reserved31:
+		case cff_Blend:
 			flowOp(h, opname[byte]);
 			break;
 		case cff_escape:

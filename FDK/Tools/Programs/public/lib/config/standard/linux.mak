@@ -1,21 +1,7 @@
 #########################################################################
 #                                                                       #
-# Copyright 1997-1999 Adobe Systems Incorporated.                       #
+# Copyright 2016 Adobe Systems Incorporated.                       #
 # All rights reserved.                                                  #
-#                                                                       #
-# Patents Pending                                                       #
-#                                                                       #
-# NOTICE: All information contained herein is the property of Adobe     #
-# Systems Incorporated. Many of the intellectual and technical          #
-# concepts contained herein are proprietary to Adobe, are protected     #
-# as trade secrets, and are made available only to Adobe licensees      #
-# for their internal use. Any reproduction or dissemination of this     #
-# software is strictly forbidden unless prior written permission is     #
-# obtained from Adobe.                                                  #
-#                                                                       #
-# PostScript and Display PostScript are trademarks of Adobe Systems     #
-# Incorporated registered in the U.S.A. and other countries.            #
-#                                                                       #
 #########################################################################
 
 # Make definitions for Linux platform (Linux x86)

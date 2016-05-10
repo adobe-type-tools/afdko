@@ -28,8 +28,16 @@
   
   <p>Once the AFDKO is installed, all the command-line programs can be run by entering the command name in a Terminal window (OSX, Windows, Linux), along with the necessary option text. All command-line tools provide usage and help text with the options -u and -h. There is a separate user documentation file only for the makeotf tool. Using a command-line window may seem alarming if you are not used to it, but it is actually quite easy to learn a useful set of commands. Please read the FDK documentation "CommandLineHowTo.pdf", sub-titled "The Joys of Command Line", for pointers on how to get started.</p>
 
-  <h4>Current version 2.5 change number 64958, Nov 22 2015</h4>
+  <h4>Current version 2.5 change number 65290, May 10 2016</h4>
   
+   <h4>Important Changes since 2.5 change number 64958, Nov 22 2015</h4>
+  <ul>
+    <li>makeotf now allows a number of special characters in development glyph names.</li>
+    <li>Fixed bugs in compiling a feature file GDEF definition</li>
+	<li>Added the FontLab macros back in the AFDKO download.</li>
+	<li>Many minor bug fixes. See "FDKReleaseNotes.txt.</li>
+  </ul>
+
    <h4>Important Changes since 2.5 change number 64655, Mar 3 2015</h4>
   <ul>
     <li>Updated the AFDKO Python interpreter to 2.7.10. This is now 64-bit only.</li>
@@ -315,6 +323,8 @@
         <li>win: the set of Windows tools</li>
 
         <li>linux: the set of Linux tools</li>
+
+        <li>FontLab: scripts for FontLab. None of these are polished production tools. They are mostly Python scripts written once and used once for a particular need, with little error checking, and are supplied mostly as a example of how to do something in FontLab. The only documentation is at the beginning of the script files - open them in an editor. A number of the commands - notably "AutoHint", "Check Outlines", and the PDF proofing scripts - will open a dialog for setting preferences if you hold down the CONTROL key while clicking on the FontLab Macro run button.</li>
 
         <li>the sub-directory "SharedData", a directory tree containing shared data files used by various tools.
 

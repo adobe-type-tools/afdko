@@ -386,6 +386,7 @@ static void checkFontDict(abfErrCallbacks *cb,
 		return;
 		}
 
+    
 	/* Check each hint zone array for errors */	
 	if (checkZoneArray(cb,
 					   abfErrBadBlueValues, 

@@ -4121,15 +4121,26 @@ static void fillMarkToBase(hotCtx g, GPOSCtx h) {
 		}     /* end for each base glyph entry */
 
 		/* For any glyph, the user may not have specified an anchor for any particular mark class.
-		   We need to fill these in with default anchors at 0.0 */
+		   We will fill these in with default anchors at 0.0, but will also report a warning. */
 
 		for (i = 0; i  < numBaseGlyphs; i++) {
 			int j;
 			LOffset *baseAnchorArray = fmt->BaseArray_.BaseRecord[i].BaseAnchorArray;
+            BaseGlyphRec *baseRec = &(h->new.baseList.array[i]);
 
 			for (j = 0; j < fmt->ClassCount; j++) {
 				if (baseAnchorArray[j] == 0xFFFFFFFFL) {
+                    char msg[1024];
 					baseAnchorArray[j] = getAnchoOffset(g, &kDefaultAnchor, fmt); /* this returns the offset from the start of the anchor list. To be adjusted later*/
+                    featGlyphDump(g,   baseRec->gid, '\0', 0);
+                    if (h->new.fileName != NULL) {
+                        sprintf(msg, " [%s %ld]", h->new.fileName, baseRec->lineNum);
+                    }
+                    else {
+                        msg[0] = '\0';
+                    }
+                    hotMsg(g, hotERROR, "MarkToBase or MarkToMark: A previous statement has already assigned the current mark class to another anchor point on the same glyph '%s'. Skipping rule. %s",
+                           g->note.array, msg);
 				}
 			}
 		}

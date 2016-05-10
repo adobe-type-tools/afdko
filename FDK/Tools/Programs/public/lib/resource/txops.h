@@ -195,7 +195,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define kMaxBlendOps 6
 
 #define TX_MAX_SUBR_DEPTH 10  /* Max recursion level allowed */
-#define T2_MAX_OP_STACK     48  /* Max operand stack depth */
+#define T2_MAX_OP_STACK     96  /* Max operand stack depth */
 #define TX_MAX_CALL_STACK   10  /* Max callsubr stack depth */
 #define T2_MAX_STEMS        96  /* Max stems */
 #define TX_STD_FLEX_DEPTH   50  /* Standard flex depth (100ths/pixel) */

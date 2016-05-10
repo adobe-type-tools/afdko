@@ -1,6 +1,8 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
+FDK. v2.5 May 9 2016 change number 65290.
+
 	Adobe CMAP files for CJK fonts.
 	Updated UniCNS-UTF32-H to v1.14
 
@@ -12,9 +14,33 @@ FDKReleaseNotes.txt
 	who has been reviewing this carefully. See the issues raised by him in Jan
 	and Feb 2016 on https://github.com/adobe-type-tools/afdko.
 	
+	autohint.
+	Fixed support for history file, which can be used with non-UFO fonts only.
+	This has been broken since UFO support was added.
+	
+	autohintexe.
+	Fixed really old bug:  ascenders and descenders get dropped from the
+	alignment zone report if they are a) not in an alignment zone and b) there
+	is an overlapping smaller stem hint. This happened with a lot of descenders.
+	
 	checkOutlines.
 	Fixed bug in ufoTools.py that kept checkOutlines (NOT checkOutlinesUFO) from
-	working with a UFO font.
+	working with a UFO font. Fixed bug which mis-identified orientation of path
+	which is very thin and in part convex. I am a bit concerned about the
+	solution, as what I did was to delete some logic that was used to
+	double-check the default rules for determining orientation. However, the
+	default logic is the standard way to determine orientation and should always
+	be correct. The back-up logic was definitely not always correct as it was
+	applied only to a single point, and was correct only if the curve associated
+	with the point is concave. It is in fact applied at several different points
+	on a path, with the majority vote winning. Since the backup logic is used
+	only when a path is very thin, I suspect that it was a sloppy solution to
+	fix a specific case.  The change was tested with several large fonts, and
+	found no false positives.
+	
+	makeInstances.
+	Fixed bug which produced distorted shapes for those glypsh which were written with the
+	Type 1 'seac' operator, aka Type 1 composite glyphs.
 	
 	makeotf.
 	Fixed bug where using both kern format A and B in a single lookup caused
@@ -22,6 +48,43 @@ FDKReleaseNotes.txt
 	Fixed bug where a format A kern value (a single value) would be applied
 	to X positioning rather than Y positioning for the features 'vkrn'. Applied same
 	logic to vpal, valt, and vhal.
+	Finally integrated Georg Seifert's code for supporting hyphen in development
+	glyph names. This version differs from Georg's branch in that it does not
+	allow any of the special characters in final names, the left side names in
+	the GlyphAliasAndOrderDB. However, allowing this is a smaller tweak than it
+	used to be: just use the same arguments in cb.c:gnameFinalScan() as in
+	gnameDevScan(). This update also includes Geeorg Seifert's changes for allow
+	source fonts to have CID names in the form 'cidNNNN'.
+	Fixed bugs in ConvertToCID.py module, that kept the -cn option from working
+	with a simple source font.
+	- fixed bug that the script expected in several places that the fontinfo file
+	would contain at least one user defined FontDict.
+	- fixed bug that the script expected that the src font would have Weight and
+	AdobeCopyright fields in the font dict.
+	- fixed a bug that kept the ‘-nS’ option for having any effect when the ‘-cn’ option is used.
+	Remove use of 'strsep()': function is not defined in the Windows C library
+	Fixed bug in removing duplicate and conflicting entries.
+	Changed logic to leave the first pair defined out of a set of duplicate or conflicting entries.
+	Fixed bug in processing GDEF glyph class statements: if multiple GlyphClass statements were used.
+	the additional glyphs were added to a new set of 4 glyph classes, rather than merged with the 
+	allowed 4 glyph classes.
+	Fixed issue in GDEF definition processing. Made it an error to specify both LigCaretByPosition
+	and LigCaretByIndex for a glyph.
+	Corrected error message: language and system statements are allowed in named lookups within
+	a feature definition, but are not allowed in stand-alone lookups.
+	Corrected typo in MakeOTF.py help text about what the default source font path.
+	Fixed an old bug in makeotf. If a mark-to-base or mark-to-mark lookup has
+	statements that do not all reference the same mark classes, makeotf used to
+	write a 'default' anchor attachment point of (0.0) for any mark class that
+	was not referenced by a given statement. Fixed this bug by reporting a fatal
+	error: the feature file must be re-written so that all the statements in a
+	lookup must all reference the same set of mark classes.
+	
+	misc.
+	Fix copyright statements that are incompatible with the OpenSource license.
+	Thanks to Dmitry Smirnov for pointing these out. These were in some make
+	files, an example Adobe CMAP file, and some of the technical documentation.
+	Fixed typos in help text in PrrofPDF.py. Thank you Arno Enslin.
 	
 	ttxn
 	Fix bug in ttxn.py that broke it when dumping some tables, when used with
@@ -37,8 +100,26 @@ FDKReleaseNotes.txt
 	Minor code changes to allow 'tx' to compile as a 64 bit program.
 	Fixed bug in dumping afm format data, introduced when tx was updated to be 64 bit.
 	Fixed bug in processing seac, introduced in work on rounding fractional values.
-	
-	
+	Fixed bug in writing AFM files: -1 value would be written as 4294967295	instead of -1.
+	Add option -noOpt, rename blend operator from 'reserved' to 'blend'. This was done in
+	order to support experiments with  multiple master fonts.
+	When reading a UFO font: if it has no Postscript version entry, set the version to
+	1.0.
+	When writing a UFO font: If StemSnap[H,V] are missing, but Std[H,V]W are
+	present, then use the Std[H,V]W values to supply the UFO postscript
+	StemSnap[H,V] values.
+	Fixed old bug in 'tx' with rounding decimal values for BlueScale is one of
+	the few Postscript values with several places of decimal precision. It is
+	stored as an ascii text decimal point number in T1, T2, and UFO files, but
+	is stored internally as a C 'float' value in some programs. Real values in C
+	cannot exactly represent all decimal values. For example, the closest that a
+	C 'float' value can come to "0.375" is "0.03750000149".  When writing output
+	fonts, tx was writing out the latter value in ascii text, rather than
+	rounding back to 0.0375. Fixed by rounding to 8 decimal places on writing
+	the value out. This bug had no practical consequences, as 0.0375 and
+	0.03750000149 both convert to exactly the same float value, but was
+	annoying, and could cause rounding differences in any programs that use
+	higher precision fields to hold the BlueScale value.
 	
 FDK. v2.5 Dec 1 2015 change number 65012.
 

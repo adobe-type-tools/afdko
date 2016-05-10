@@ -65,7 +65,8 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
 #define CFR_IS_CUBE   (1<<4)
 #define CFR_FLATTEN_CUBE   (1<<5)
 #define CFR_SEEN_GLYPH (1<<6) /* have seen a glyph */
-#define CFR_CUBE_RND (1<<7) 
+#define CFR_CUBE_RND (1<<7)
+#define CFR_SEEN_BLEND (1<<8)
 
 /* cfrBegFont() is called to initiate a new font parse. The source data stream
    (CFR_SRC_STREAM_ID) is opened, positioned at the offset specified by the

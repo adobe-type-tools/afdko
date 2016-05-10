@@ -1,27 +1,8 @@
 /***********************************************************************/
 /*                                                                     */
-/* Copyright 2003 Adobe Systems Incorporated.                          */
+/* Copyright 2016 Adobe Systems Incorporated.                          */
 /* All rights reserved.                                                */
-/*                                                                     */
-/* Patents Pending                                                     */
-/*                                                                     */
-/* NOTICE: All information contained herein is the property of Adobe   */
-/* Systems Incorporated. Many of the intellectual and technical        */
-/* concepts contained herein are proprietary to Adobe, are protected   */
-/* as trade secrets, and are made available only to Adobe licensees    */
-/* for their internal use. Any reproduction or dissemination of this   */
-/* software is strictly forbidden unless prior written permission is   */
-/* obtained from Adobe.                                                */
-/*                                                                     */
-/* PostScript and Display PostScript are trademarks of Adobe Systems   */
-/* Incorporated or its subsidiaries and may be registered in certain   */
-/* jurisdictions.                                                      */
-/*                                                                     */
 /***********************************************************************/
-/* ------------------------------------------------------------------- */
-/* Adobe Patent or Adobe Patent Pending Invention Included Within this */
-/* File.                                                               */
-/* ------------------------------------------------------------------- */
 
 /*
  * Feature file grammar
@@ -45,10 +26,6 @@
 
 #define MAX_TOKEN	64
 
-/* ------------------------------------------------------------------- */
-/* Adobe patent application tracking #P295, entitled FONT FEATURE FILE */
-/* PROCESSING, inventors: Patel, Hall.                                 */
-/* ------------------------------------------------------------------- */
 extern featCtx h;	/* Not reentrant; see featNew() comments */
 extern hotCtx g;
 

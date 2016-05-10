@@ -1023,13 +1023,13 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
                         fatal(h, cfrErrDICTOp);
                     message(h, "defunct /lenIV operator (ignored)");
                     break;
-                case cff_reservedESC24:
+                case cff_numMasters:
                     /* Was cff_MultipleMaster so this must be one of the old test
                      MMs that are no longer supported. There are too many things
                      that will break if an attempt is made to continue so just
                      print a helpful message and quit. */
                     message(h, "defunct /MultipleMaster operator");
-                    fatal(h, cfrErrDICTOp);
+                    break;
                 case cff_reservedESC40:
                     /* Was an experimental cff_VToHOrigin but the experiment was
                      never conducted. However, it was implemented in cff_parse.c
@@ -1140,6 +1140,10 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
                 CHKOFLOW(1);
                 PUSH_REAL((float)convBCD(h));
                 continue;
+            case cff_Blend:
+                h->flags |= CFR_SEEN_BLEND;
+                PUSH_INT(byte0);
+                continue;
             default:
                 /* 1 byte number */
                 CHKOFLOW(1);
@@ -1161,7 +1165,6 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
             case cff_reserved25:
             case cff_reserved26:
             case cff_reserved27:
-            case cff_reserved31:
             case cff_reserved255:
                 if (h->stm.dbg == NULL)
                     fatal(h, cfrErrDICTOp);
@@ -1812,7 +1815,7 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
 	h->header.minor = read1(h);
 	h->header.hdrSize = read1(h);
 	h->header.offSize = read1(h);
-	if (h->header.major != 1)
+	if ((h->header.major != 1) && (h->header.major != 2))
 		fatal(h, cfrErrBadFont);
 	h->region.Header.end = h->src.origin + h->header.hdrSize;
     
@@ -1865,15 +1868,18 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
 	h->top.sup.nGlyphs = h->glyphs.cnt;
 	*top = &h->top;
     
-	/* Validate dictionaries */
-	if (h->stm.dbg == NULL)
-		abfCheckAllDicts(NULL, &h->top);
-	else
+    if (!(h->flags & CFR_SEEN_BLEND))
     {
-		abfErrCallbacks cb;
-		cb.ctx = h;
-		cb.report_error = report_error;
-		abfCheckAllDicts(&cb, &h->top);
+        /* Validate dictionaries */
+        if (h->stm.dbg == NULL)
+            abfCheckAllDicts(NULL, &h->top);
+        else
+        {
+            abfErrCallbacks cb;
+            cb.ctx = h;
+            cb.report_error = report_error;
+            abfCheckAllDicts(&cb, &h->top);
+        }
     }
     
 	/* Fill glyphs array */

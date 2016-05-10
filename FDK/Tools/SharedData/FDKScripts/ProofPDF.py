@@ -1,7 +1,7 @@
 #!/bin/env python
 """
 ProofPDF.py. A wrapper for the fontPDF.py module. This script verifies
-the existence of the specified font files, crreates a font class object
+the existence of the specified font files, creates a font class object
 with the call-backs required by fontPDF, and translates the command line
 options to arguments for the fontPDF module; the latter produces a proof
 file using the provided options annd font instance.
@@ -11,7 +11,7 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 
 
 __usage__ = """
-ProofPDF v1.14 Sep 29 2015
+ProofPDF v1.15 May 9 2016
 ProofPDF [-h] [-u]
 ProofPDF -help_params
 ProofPDF [-g <glyph list>] [-gf <filename>] [-gpp <number>] [-pt <number>] [-dno] [-baseline <number>] [-black] [-lf <filename>] [-select_hints <0,1,2..> ]  \
@@ -21,20 +21,18 @@ Glyph Proofing program for OpenType fonts
 """
 __help__= __usage__ + """
 
-"charplot", "digiplot", "fontplot", "hintplot", and "showfont" are all
-command files that call the ProofPDF script with different options.
+"charplot", "digiplot", "fontplot", "hintplot", and "waterfallplot" are
+all command files that call the ProofPDF script with different options.
 ProofPDF takes as options a list of fonts, and an optional list of
-glyphs, and prints a PDF file for the specified font. showing the glyphs
+glyphs, and prints a PDF file for the specified font, showing the glyphs
 as specified by options.
 
-The five main options, "-charplot", "-digiplot", "-fontplot", and
-"-hintplot"", each set a bunch of lower level parameters in order to
-produce a particular page layout. All these low-level parameters can be
-set by command-line options. This means that you can edit one of the
+The five main options, "-charplot", "-digiplot", "-fontplot","-hintplot"
+and "waterfallplot", each set a bunch of lower level parameters in order
+to produce a particular page layout. All these low-level parameters can
+be set by command-line options. This means that you can edit one of the
 command files to add your own parameter values to make your own
-customized proofing command. The "showfont" command file is an example
-of adding additional low-level parameter specifications to the -fontplot
-option.
+customized proofing command.
 
 Options:
 

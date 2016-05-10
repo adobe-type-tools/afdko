@@ -158,22 +158,22 @@ typedef struct
     struct
         {
         long cnt;               /* ABF_EMPTY_ARRAY */
-        float array[14];           
+        float array[96];
         } BlueValues;              
     struct                         
         {                          
         long cnt;               /* ABF_EMPTY_ARRAY */
-        float array[10];
+        float array[96];
         } OtherBlues;
     struct
         {
         long cnt;               /* ABF_EMPTY_ARRAY */
-        float array[14];
+        float array[96];
         } FamilyBlues;
     struct
         {
         long cnt;               /* ABF_EMPTY_ARRAY */
-        float array[10];
+        float array[96];
         } FamilyOtherBlues;
     float BlueScale;            /* 0.039625 */
     float BlueShift;            /* 7 */
@@ -183,12 +183,12 @@ typedef struct
     struct
         {
         long cnt;               /* ABF_EMPTY_ARRAY */
-        float array[12];    
+        float array[96];
         } StemSnapH;
     struct
         {
         long cnt;               /* ABF_EMPTY_ARRAY */
-        float array[12];    
+        float array[96];    
         } StemSnapV;
     long ForceBold;             /* 0=false */
     long LanguageGroup;         /* 0 */

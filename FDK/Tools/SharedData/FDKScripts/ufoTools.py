@@ -1,5 +1,5 @@
 """
-ufoTools.py v1.27 Mar 11 2016
+ufoTools.py v1.28 May 10 2016
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -317,6 +317,8 @@ def debugMsg(*args):
 		print args
 
 #UFO names
+kDefaultGlyphsLayerName = "public.default"
+kDefaultGlyphsLayer = "glyphs"
 kProcessedGlyphsLayerName = "AFDKO ProcessedGlyphs"
 kProcessedGlyphsLayer = "glyphs.com.adobe.type.processedGlyphs"
 kFontInfoName = "fontinfo.plist"
@@ -765,15 +767,29 @@ class UFOFontData:
 		self.fontInfo, tempList = parsePList(fontInfoPath)
 
 	def updateLayerContents(self, contentsFilePath):
+		print "Calling updateLayerContents"
 		if os.path.exists(contentsFilePath):
 			contentsList= plistlib.readPlist(contentsFilePath)
 			# If the layer name already exists, don't add a new one, or change the path
+			seenPublicDefault = 0
+			seenProcessedGlyph = 0
 			for layerName, layerPath in contentsList:
 				if (layerPath == kProcessedGlyphsLayer):
-					return
+					seenProcessedGlyph = 1
+				if (layerPath == kDefaultGlyphsLayer):
+					seenPublicDefault = 1
+			update = 0
+			if not seenPublicDefault:
+				update = 1
+				contentsList = [[kDefaultGlyphsLayerName, kDefaultGlyphsLayer]] + contentsList
+			if not seenProcessedGlyph:
+				update = 1
+				contentsList.append([kProcessedGlyphsLayerName, kProcessedGlyphsLayer])
+			if update:
+				plistlib.writePlist(contentsList, contentsFilePath)
 		else:
-			contentsList = []
-		contentsList.append([kProcessedGlyphsLayerName, kProcessedGlyphsLayer])
+			contentsList = [[kDefaultGlyphsLayerName, kDefaultGlyphsLayer]]
+			contentsList.append([kProcessedGlyphsLayerName, kProcessedGlyphsLayer])
 		plistlib.writePlist(contentsList, contentsFilePath)
 			
 	def updateLayerGlyphContents(self, contentsFilePath, newGlyphData):
