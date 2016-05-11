@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
@@ -16,7 +18,6 @@ FDK/Tools/SharedData/FDKScripts/, the set of commands is:
 	gAGDDict = agd.dictionary(agdTextPath)
 """
 
-from __future__ import print_function
 import re, sys, os, time
 
 
