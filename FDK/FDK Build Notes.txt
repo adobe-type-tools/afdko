@@ -84,7 +84,7 @@ Then cd there, and make a symbolic link named 'libz.so.1' to the libz.so.1.2.3. 
 
 For Windows, I just use the std x64 Windows MSI installer, and then move it
 under FDK/Tools/win/Python27. I do not use the std Python installers for the
-other platforms, becuase they come with compiled-in search paths for modules that
+other platforms, because they come with compiled-in search paths for modules that
 conflicts with any user/system installed Python interpreter.
 
 Once you have built the AFDKO Python, you need to install the various modules that it needs.
