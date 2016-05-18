@@ -273,6 +273,9 @@ void ctuDtostr(char *buf, double value, int width, int precision) {
            *p = '\0';
             p--;
         }
+        if (*p == '.') {
+          *p = '\0';
+        }
     }
 }
 

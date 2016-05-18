@@ -951,6 +951,9 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top)
                 *p = '\0';
                 p--;
             }
+            if (*p == '.') {
+                *p = '\0';
+            }
         }
 
         writeLine(h, "\t<key>postscriptBlueScale</key>");

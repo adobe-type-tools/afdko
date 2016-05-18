@@ -830,7 +830,14 @@ static void writeRealDef(t1wCtx h, char *key, float value)
 	if (value == ABF_UNSET_REAL)
 		return;
     
-    ctuDtostr(buf, value, 0, 8); /* 8 places is as good as it gets when converting ASCII real numbers->float-> ASCII real numbers, as happens to all the  PrivateDict values.*/
+    if (roundf(value) == value)
+    {
+        sprintf(buf, "%ld", (long)roundf(value));
+    }
+    else
+    {
+        ctuDtostr(buf, value, 0, 8); /* 8 places is as good as it gets when converting ASCII real numbers->float-> ASCII real numbers, as happens to all the  PrivateDict values.*/
+    }
     writeFmt(h, "/%s ", key);
     writeFmt(h, "%s", buf);
     writeLine(h, " def");
@@ -882,7 +889,14 @@ static void writeRealArrayDef(t1wCtx h, char *key, long cnt, float *array)
         {
             char buf[50];
             float value = *array++;
-            ctuDtostr(buf, value, 0, 8); /* 8 places is as good as it gets when converting ASCII real numbers->float-> ASCII real numbers, as happens to all the  PrivateDict values.*/
+            if (roundf(value) == value)
+            {
+                sprintf(buf, "%ld", (long)roundf(value));
+            }
+            else
+            {
+                ctuDtostr(buf, value, 0, 8); /* 8 places is as good as it gets when converting ASCII real numbers->float-> ASCII real numbers, as happens to all the  PrivateDict values.*/
+            }
             writeFmt(h, "%s ", buf);
         }
 	writeLine(h, "] def");
