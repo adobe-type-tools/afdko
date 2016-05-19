@@ -882,14 +882,17 @@ static void writeIntArrayDef(t1wCtx h, char *key, long cnt, long *array)
 /* Write PostScript definition of real array object. */
 static void writeRealArrayDef(t1wCtx h, char *key, long cnt, float *array)
 	{
+        char* sep;
 	if (cnt == ABF_EMPTY_ARRAY)
 		return;
 	writeFmt(h, "/%s [", key);
+    sep = "";
 	while (cnt--)
         {
             char buf[50];
             float value = *array++;
-            if (roundf(value) == value)
+            writeStr(h, sep);
+            {if (roundf(value) == value)
             {
                 sprintf(buf, "%ld", (long)roundf(value));
             }
@@ -897,7 +900,8 @@ static void writeRealArrayDef(t1wCtx h, char *key, long cnt, float *array)
             {
                 ctuDtostr(buf, value, 0, 8); /* 8 places is as good as it gets when converting ASCII real numbers->float-> ASCII real numbers, as happens to all the  PrivateDict values.*/
             }
-            writeFmt(h, "%s ", buf);
+            writeFmt(h, "%s", buf);
+            sep = " ";
         }
 	writeLine(h, "] def");
 	}
