@@ -882,7 +882,7 @@ static void writeIntArrayDef(t1wCtx h, char *key, long cnt, long *array)
 /* Write PostScript definition of real array object. */
 static void writeRealArrayDef(t1wCtx h, char *key, long cnt, float *array)
 	{
-        char* sep;
+    char* sep;
 	if (cnt == ABF_EMPTY_ARRAY)
 		return;
 	writeFmt(h, "/%s [", key);
@@ -892,7 +892,7 @@ static void writeRealArrayDef(t1wCtx h, char *key, long cnt, float *array)
             char buf[50];
             float value = *array++;
             writeStr(h, sep);
-            {if (roundf(value) == value)
+            if (roundf(value) == value)
             {
                 sprintf(buf, "%ld", (long)roundf(value));
             }
