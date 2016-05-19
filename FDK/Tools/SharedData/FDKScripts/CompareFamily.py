@@ -7,7 +7,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-CompareFamily 2.0.51 Sep 30 2015
+CompareFamily 2.0.52 May 19 2016
 
 comparefamily [u] -h] [-d <directory path>] [-tolerance <n>] -rm] [-rn] [-rp] [-nohints] [-l] [-rf] [-st n1,..] [-ft n1,..]
 where 'n1' stands for the number of a test, such as "-st 26" to run Single Test 26.
@@ -3930,7 +3930,10 @@ def doFamilyTest16():
 					try:
 						widthList.append([htmx_table.metrics[gname][0], font.PostScriptName1])
 					except KeyError:
+						print "\tError: Glyph '%s' is in font, but is nt in the width list. This can happen when the number of glyphs in the maxp table is less than the actual number of glyphs." % (gname)
 						pass
+				if not widthList:
+					continue
 				widthList.sort()
 				if (widthList[0][0]*kWidthMultiplier < widthList[-1][0]):
 					print "\tWarning: width (%s) of glyph %s in %s is more than %s times the width (%s) in %s." % (widthList[-1][0], gname,  widthList[-1][1], kWidthMultiplier,widthList[0][0], widthList[0][1])
