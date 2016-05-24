@@ -1933,12 +1933,6 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
 		psinfo |= HOT_EURO_ADDED;
 	}
 
-//	if (type == hotCID) {
-//		{
-//		flags &= ~HOT_RENAME;
-//		h->alias.useFinalNames = 0;
-//		}
-
 	if (uvsFile != NULL) {
 		hotAddUVSMap(h->hot.ctx, uvsFile);
 	}
@@ -1985,7 +1979,7 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
 
 
 	// Make sure that GOADB file has been read in, if required
-	if ((flags & HOT_RENAME) && (h->alias.recs.cnt < 1)) {
+	if ((flags & HOT_RENAME) && (h->alias.recs.cnt < 1) && (type != hotCID)) {
 		cbWarning(h, "Glyph renaming is requested, but the Glyph Alias And Order DB file was not specified.");
 	}
 

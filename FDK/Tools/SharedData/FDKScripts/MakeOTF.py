@@ -42,7 +42,7 @@ Project file.
 """
 
 __usage__ = """
-makeotf v2.0.93 April 18 2016
+makeotf v2.0.94 May 23 2016
 -f <input font>         Specify input font path. Default is 'font.pfa'.
 -o <output font>        Specify output font path. Default is
                         '<PostScript-Name>.otf'.
@@ -2541,7 +2541,7 @@ def runMakeOTF(makeOTFParams):
 			# definitions in the fontinfo files use production glyph names not final glyph names.
 			# I'm not sure what the side effects of that may be.
 			# msousa: May 12 2012
-			ConvertFontToCID.convertFontToCID(eval("makeOTFParams.%s%s" % (kFileOptPrefix, kInputFont)), tempPath)
+			ConvertFontToCID.convertFontToCID(outputPath, tempPath)
 			ConvertFontToCID.mergeFontToCFF(tempPath, outputPath, doSubr)
 		except ConvertFontToCID.FontInfoParseError:
 			import traceback
