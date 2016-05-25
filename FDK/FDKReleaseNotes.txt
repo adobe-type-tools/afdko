@@ -1,7 +1,7 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
-FDK. v2.5 May 9 2016 change number 65290.
+FDK. v2.5 May 24 2016 change number 65314.
 
 	Adobe CMAP files for CJK fonts.
 	Updated UniCNS-UTF32-H to v1.14
@@ -79,6 +79,15 @@ FDK. v2.5 May 9 2016 change number 65290.
 	was not referenced by a given statement. Fixed this bug by reporting a fatal
 	error: the feature file must be re-written so that all the statements in a
 	lookup must all reference the same set of mark classes.
+	Suppressed warning about not using GOADB file when building a CID font. Some
+	of the changes I made a few weeks ago to allow building fonts with CID's
+	specified as glyphs names with the form 'cidNNNNN' allowed this warning to
+	be be shown, but it is not appropriate for CID-keyed fonts.
+	Fixed old bug where using option -'cn' to convert a nonCID source font to
+	CID would cause a mis-match between the maxp table  number of glyphs and the
+	numver of glyph actually in the output font, because the conversion used the
+	source font data rather than the first pass name-keyed OTF which had been
+	subject to glyph subsetting with the GOADB file.
 	
 	misc.
 	Fix copyright statements that are incompatible with the OpenSource license.
