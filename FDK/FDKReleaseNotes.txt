@@ -1,7 +1,7 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
-FDK. v2.5 May 24 2016 change number 65314.
+FDK. v2.5 May 27 2016 change number 65322.
 
 	Adobe CMAP files for CJK fonts.
 	Updated UniCNS-UTF32-H to v1.14
@@ -88,6 +88,7 @@ FDK. v2.5 May 24 2016 change number 65314.
 	numver of glyph actually in the output font, because the conversion used the
 	source font data rather than the first pass name-keyed OTF which had been
 	subject to glyph subsetting with the GOADB file.
+	Fixed bug in reading UVS files for non_CID fonts.
 	
 	misc.
 	Fix copyright statements that are incompatible with the OpenSource license.

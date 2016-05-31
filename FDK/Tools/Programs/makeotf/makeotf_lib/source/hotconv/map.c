@@ -1305,6 +1305,7 @@ void mapAddUVS(hotCtx g, char *uvsName) {
 	long lineLen = 0;
 	UVSEntry *uvsEntry = NULL;
 	mapCtx h = g->ctx.map;
+    int isCID = IS_CID(g);
 
 	dnaSET_CNT(h->uvs.entries, 0);
 	g->cb.uvsOpen(g->cb.ctx, uvsName); /*jumps to fatal error if not opened succesfully */
@@ -1351,25 +1352,33 @@ void mapAddUVS(hotCtx g, char *uvsName) {
 			p++;
 		}
 
-            /* Parse R-O-S name */
-            rosName   = p2  = p;
-            p = gnameScan(g, rosName);
-            if (p == NULL || !isspace(*p)) {
-                goto syntaxError;
-            }
-            *p++  = '\0';
+        /* Parse R-O-S name */
+        rosName   = p2  = p;
+        p = gnameScan(g, rosName);
+        if (p == NULL || !isspace(*p)) {
+            goto syntaxError;
+        }
+        *p++  = '\0';
 
-            /* Skip blanks and semi-colons */
-            while (isspace(*p) || (*p == ';')) {
-                p++;
-            }
-
+        /* Skip blanks and semi-colons */
+        while (isspace(*p) || (*p == ';')) {
+            p++;
+        }
+ 
 		/* Parse glyphTag string */
 		glyphTag   = p2  = p;
 		p = gnameScan(g, glyphTag);
 		if (p == NULL || !isspace(*p)) {
-			goto syntaxError;
-		}
+            if (isCID)
+            {
+                gnameError(g, "For CID fonts, UVS file line must contain 'UV IVS; R-O-S; CID+<cid number>'.", buf, "", lineno);
+                continue;
+            }
+            else
+            {
+                glyphTag   = p2  = rosName;
+            }
+ 		}
 		*p++  = '\0';
 
 		/* We now have the entire record.
