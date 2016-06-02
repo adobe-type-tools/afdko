@@ -7,7 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define TX_VERSION CTL_MAKE_VERSION(1,0,66)
+#define TX_VERSION CTL_MAKE_VERSION(1,0,67)
 
 #include "cfembed.h"
 #include "cffread.h"
@@ -5471,31 +5471,46 @@ static void ufoReadFont(txCtx h, long origin)
 /* ---------------------------- cffread Library ---------------------------- */
 
 /* Read format 12 Unicode cmap. Assumes format field already read. */
+static void readCmap14(txCtx h)
+{
+    unsigned long numVarSelectorRecords;
+    unsigned long i;
+    
+    /* Skip format and length fields */
+    (void)read2(h);
+    (void)read4(h);
+    
+    numVarSelectorRecords = read4(h);
+    
+    /* Not yet implemented - not sure it is worth the effort: spot and ttx are more useful outputs for this Unicode format. */
+    return;
+}
+
 static void readCmap12(txCtx h)
 {
-	unsigned long nGroups;
-	unsigned long i;
-
-	/* Skip reserved, language, and length fields */
-	(void)read2(h);
-	(void)read4(h);
-	(void)read4(h);
-
-	nGroups = read4(h);
-	for (i = 0; i < nGroups; i++) {
-		unsigned long startCharCode = read4(h);
-		unsigned long endCharCode = read4(h);
-		unsigned long startGlyphId = read4(h);
-
-		while (startCharCode <= endCharCode) {
-			if (startGlyphId >= (unsigned long)h->top->sup.nGlyphs)
-				return;
-			h->cmap.encoding.array[startGlyphId++] = startCharCode++;
-		}
-	}
+    unsigned long nGroups;
+    unsigned long i;
+    
+    /* Skip reserved, language, and length fields */
+    (void)read2(h);
+    (void)read4(h);
+    (void)read4(h);
+    
+    nGroups = read4(h);
+    for (i = 0; i < nGroups; i++) {
+        unsigned long startCharCode = read4(h);
+        unsigned long endCharCode = read4(h);
+        unsigned long startGlyphId = read4(h);
+        
+        while (startCharCode <= endCharCode) {
+            if (startGlyphId >= (unsigned long)h->top->sup.nGlyphs)
+                return;
+            h->cmap.encoding.array[startGlyphId++] = startCharCode++;
+        }
+    }
 }	
 
-/* Read format 4 Unicode cmap. */
+/* Read Unicode cmap. */
 static void readCmap(txCtx h, size_t offset)
 {
 	unsigned short segCount;
@@ -5507,9 +5522,12 @@ static void readCmap(txCtx h, size_t offset)
 	switch (read2(h)) {
 	case 4:
 		break;
-	case 12:
-		readCmap12(h);
-		return;
+    case 14:
+        readCmap14(h);
+        return;
+    case 12:
+        readCmap12(h);
+        return;
 	default:
 		return;
 	}
@@ -5585,7 +5603,8 @@ static int otfGlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 /* Prepare to process OTF font. */
 static void prepOTF(txCtx h)
 {
-	long unioff;
+    long unioff;
+    long uni5off;
 	long winoff;
 	unsigned short uniscore;
 	unsigned short winscore;
@@ -5619,7 +5638,8 @@ static void prepOTF(txCtx h)
 		fatal(h, "cmap: bad version");
 
 	/* Search for Unicode and Windows subtables */
-	unioff = 0;
+    unioff = 0;
+    uni5off = 0;
 	uniscore = 0;
 	winoff = 0;
 	winscore = 0;
@@ -5633,10 +5653,17 @@ static void prepOTF(txCtx h)
 		/* Select table */
 		switch (platformId) {
 		case 0: /* Unicode platform */
-			if (unioff == 0 || uniscore < platspecId) {
+            if ((platspecId == 3 ||		/* Unicode */
+                platspecId == 4) &&	/* UCS-4 */
+                (unioff == 0 || uniscore < platspecId)) {
 				unioff = table->offset + suboff;
 				uniscore = platspecId;
 			}
+            else if (platspecId == 5)
+            {
+                uni5off = table->offset + suboff;
+                readCmap(h, uni5off);	/* read UVS cmap. */
+            }
 			break;
 		case 3: /* Windows platform */
 			if ((platspecId == 1 ||		/* Unicode */
