@@ -22,7 +22,7 @@ OpenType font for the fontTools to work with.
 
 """
 __usage__ = """
-stemHist program v1.26 April 27 2016
+stemHist program v1.27 June 10 2016
 stemHist -h
 stemHist -u
 stemHist [-g <glyph list>] [-gf <filename>] [-xg <glyph list>] [-xgf <filename>] [-all] [-a] [-new] -q font-path1 font-path2...
@@ -866,7 +866,6 @@ def collectStemsFont(path, options, txPath):
 			bp = open(tempReport, "rt")
 			report = bp.read()
 			bp.close()
-			print "report <%s>" % (report)
 			if options.debug:
 				print "Wrote AC fontinfo data file to", tempFI
 				print "Wrote AC output rpt file to", tempReport
