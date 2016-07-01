@@ -264,14 +264,14 @@ def parseGlyphListArg(glyphString):
 	glyphList =  filter(None, glyphList)
 	return glyphList
 
-def getOptions():
+def getOptions(args):
 	global debug
 
 	options = COOptions()
-	i = 1
-	numOptions = len(sys.argv)
+	i = 0
+	numOptions = len(args)
 	while i < numOptions:
-		arg = sys.argv[i]
+		arg = args[i]
 		if options.filePath and arg[0] == "-":
 			raise focusOptionParseError("Option Error: All file names must follow all other options <%s>." % arg)
 
@@ -288,13 +288,13 @@ def getOptions():
 			options.writeToDefaultLayer = 1
 		elif arg == "-g":
 			i = i +1
-			glyphString = sys.argv[i]
+			glyphString = args[i]
 			if glyphString[0] == "-":
 				raise focusOptionParseError("Option Error: it looks like the first item in the glyph list following '-g' is another option.")
 			options.glyphList += parseGlyphListArg(glyphString)
 		elif arg == "-gf":
 			i = i +1
-			filePath = sys.argv[i]
+			filePath = args[i]
 			if filePath[0] == "-":
 				raise focusOptionParseError("Option Error: it looks like the the glyph list file following '-gf' is another option.")
 			try:
@@ -314,13 +314,13 @@ def getOptions():
 		elif arg == "-setMinArea":
 			i = i +1
 			try:
-				options.minArea = int(sys.argv[i])
+				options.minArea = int(args[i])
 			except:
 				raise focusOptionParseError("The argument following '-setMinArea' must be an integer.")
 		elif arg == "-setTolerance":
 			i = i +1
 			try:
-				options.tolerance = int(sys.argv[i])
+				options.tolerance = int(args[i])
 			except:
 				raise focusOptionParseError("The argument following '-setTolerance' must be an integer.")
 		elif arg in ["-decimal", "-dec"]:
@@ -890,7 +890,7 @@ def restoreContourOrder(fixedGlyph, originalContours):
 
 def run(args):
 
-	options = getOptions()
+	options = getOptions(args)
 	fontPath = os.path.abspath(options.filePath)
 	dFont = None
 	fontFile = FontFile(fontPath)
