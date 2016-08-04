@@ -1,10 +1,10 @@
-__copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+__copyright__ = """Copyright 2015-16 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
 __usage__ = """
-   checkOutlinesUFO program v1.16 Nov 3 2015
+   checkOutlinesUFO program v1.17 Aug 3 2016
 
-   checkOutlinesUFO [-e] [-g glyphList] [-gf <file name>] [-all] [-noOverlap] [-noBasicChecks] [-setMinArea <n>] [-setTolerance <n>] [-wd]
+   checkOutlinesUFO [-e] [-g glyphList] [-gf <file name>] [-all] [-noOverlap] [-noBasicChecks] [-q] [-setMinArea <n>] [-setTolerance <n>] [-wd]
 
    Remove path overlaps, and do a few basic outline quality checks.
  """
@@ -12,9 +12,11 @@ from ufoTools import kProcessedGlyphsLayerName, kProcessedGlyphsLayer
 
 __help__ = """
 
--decimal	do not round point values to integer
+-decimal	do NOT round point values to integer
 
 -e	fix reported problems
+
+-q	run in quiet mode
 
 -noOverlap	turn off path overlap checks
 	This reports path overlaps, and tiny outlines, such as those formed when two
@@ -252,6 +254,7 @@ class COOptions:
 		self.removeCoincidentPointsDone = 0 # processing state flag, used to not repeat coincident point removal.
 		self.removeFlatCurvesDone = 0 # processing state flag, used to not repeat flat curve point removal.
 		self.clearHashMap = False
+		self.quietMode = False
 
 		# doOverlapRemoval must come first in the list, since it may cause problems, like co-linear lines,
 		# that need to be checked/fixed by later tests.
@@ -307,6 +310,8 @@ def getOptions(args):
 			options.glyphList += parseGlyphListArg(glyphString)
 		elif arg == "-e":
 			options.allowChanges = 1
+		elif arg == "-q":
+			options.quietMode = True
 		elif arg == "-noOverlap":
 			options.testList.remove(doOverlapRemoval)
 		elif arg == "-noBasicChecks":
@@ -944,17 +949,17 @@ def run(args):
 			if test != None:
 				newGlyph, glyphDigest, changed, msg = test(newGlyph, glyphDigest, changed, msg, options)
 
-		if len(msg) == 0:
-			if lastHadMsg:
-				print
-			print ".",
-			lastHadMsg = 0
-		else:
-			print os.linesep + glyphName, " ".join(msg),
-			if changed and options.allowChanges:
-				fontChanged = 1
-			lastHadMsg = 1
+		if not options.quietMode:
+			if len(msg) == 0:
+				if lastHadMsg:
+					print
+				print ".",
+				lastHadMsg = 0
+			else:
+				print os.linesep + glyphName, " ".join(msg),
+				lastHadMsg = 1
 		if changed and options.allowChanges:
+			fontChanged = 1
 			originalContours = list(dGlyph)
 			fontFile.updateHashEntry(glyphName, changed)
 			if options.writeToDefaultLayer:
