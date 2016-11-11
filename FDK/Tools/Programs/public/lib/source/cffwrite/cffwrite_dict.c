@@ -717,8 +717,8 @@ static void dbdict(DICT *dict) {
 		/* 19 */ "Subrs",
 		/* 20 */ "defaultWidthX",
 		/* 21 */ "nominalWidthX",
-		/* 22 */ "reserved22",
-		/* 23 */ "reserved23",
+		/* 22 */ "vsindex",
+		/* 23 */ "blend",
 		/* 24 */ "reserved24",
 		/* 25 */ "reserved25",
 		/* 26 */ "reserved26",
@@ -726,7 +726,7 @@ static void dbdict(DICT *dict) {
 		/* 28 */ "shortint",
 		/* 29 */ "longint",
 		/* 30 */ "BCD",
-		/* 31 */ "reserved31",
+		/* 31 */ "BlendLE",
 	};
 	static char *escopname[] = {
 		/*  0 */ "Copyright",
@@ -799,13 +799,11 @@ static void dbdict(DICT *dict) {
 			case cff_Subrs:
 			case cff_defaultWidthX:
 			case cff_nominalWidthX:
-			case cff_reserved22:
-			case cff_reserved23:
-			case cff_reserved24:
-			case cff_reserved25:
+			case cff_vsindex:
+			case cff_blend:
 			case cff_reserved26:
 			case cff_reserved27:
-			case cff_Blend:
+			case cff_BlendLE:
 				printf("%s ", opname[op]);
 				i++;
 				break;

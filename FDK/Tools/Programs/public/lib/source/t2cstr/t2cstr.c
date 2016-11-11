@@ -62,10 +62,15 @@ struct t2cCtx
 #define USE_GLOBAL_MATRIX (1<<10)	/* Transform is applied to entire charstring */
 #define START_PATH_MATRIX	 (1<<11) /* Transform has just been defined, and shoould be applied to the foloowing path (from next move-to tup o the following move-to). */
 #define FLATTEN_COMPOSE (1<<12)	/* Flag that we are flattening a compose operation. Used to rest the USE_MATRIX flag when done. */
+#define FLATTEN_BLEND (1<<13)	/* Flag that we are flattening a CFF2 charstring. */
+#define SEEN_CFF2_BLEND (1<<14)	/* Flag that we are flattening a CFF2 charstring. */
 	struct						/* Operand stack */
 		{
 		long cnt;
 		float array[TX_MAX_OP_STACK_CUBE];
+        unsigned short numRegions;
+        long blendCnt;
+        abfOpEntry blendArray[TX_MAX_OP_STACK_CUBE];
 		} stack;
 	long maxOpStack;
 	float BCA[TX_BCA_LENGTH];	/* BuildCharArray */
@@ -114,7 +119,8 @@ struct t2cCtx
 		} src;
 	short LanguageGroup;
 	t2cAuxData *aux;			/* Auxiliary parse data */
-	abfGlyphCallbacks *glyph;	/* Glyph callbacks */
+    abfGlyphCallbacks *glyph;	/* Glyph callbacks */
+    ctlMemoryCallbacks *mem;	/* Glyph callbacks */
 	};
 
 /* Check stack contains at least n elements. */
@@ -127,8 +133,9 @@ struct t2cCtx
 
 /* Stack access without check. */
 #define INDEX(i) (h->stack.array[i])
+#define INDEX_BLEND(i) (h->stack.blendArray[i])
 #define POP() (h->stack.array[--h->stack.cnt])
-#define PUSH(v) (h->stack.array[h->stack.cnt++]=(float)(v))
+#define PUSH(v) {h->stack.blendArray[h->stack.blendCnt++].value =(float)(v);  h->stack.array[h->stack.cnt++]=(float)(v);}
 
 #define ABS(v)	(((v)<0)?-(v):(v))
 #define ARRAY_LEN(a)	(sizeof(a)/sizeof(a[0]))
@@ -168,6 +175,20 @@ static void CTL_CDECL message(t2cCtx h, char *fmt, ...)
 	vmessage(h, fmt, ap);
 	va_end(ap);
 	}
+/* --------------------------- Memory Management --------------------------- */
+
+/* Allocate memory. */
+static void *memNew(t2cCtx h, size_t size)
+{
+    void *ptr = h->mem->manage(h->mem, NULL, size);
+    return ptr;
+}
+
+/* Free memory. */
+static void memFree(t2cCtx h, void *ptr)
+{
+    h->mem->manage(h->mem, ptr, 0);
+}
 
 /* ------------------------------- Data Input ------------------------------ */
 
@@ -221,6 +242,8 @@ static int srcSeek(t2cCtx h, long offset)
 			{ \
 			if (h->src.offset >= h->src.endOffset) \
 				{\
+                if (h->aux->flags & T2C_IS_CFF2) \
+                    goto do_endchar;\
 				if (!(h->aux->flags & T2C_IS_CUBE)) \
 						return t2cErrSrcStream;\
 				if ((h->subrDepth > 0) || (h->cubeStackDepth >= 0))\
@@ -240,6 +263,8 @@ static int srcSeek(t2cCtx h, long offset)
 			{ \
 			if (h->src.offset >= h->src.endOffset) \
 				{\
+                if (h->aux->flags & T2C_IS_CFF2) \
+                    goto do_subr_return;\
 				if (!(h->aux->flags & T2C_IS_CUBE)) \
 						return t2cErrSrcStream;\
 				goto do_subr_return;\
@@ -255,7 +280,7 @@ static int srcSeek(t2cCtx h, long offset)
 /* Compute and callback width. Return non-0 to end parse else 0. */
 static int callbackWidth(t2cCtx h, int odd_args)
 	{
-	if (h->flags & PEND_WIDTH)
+	if ((h->flags & PEND_WIDTH) && (h->flags & ~T2C_IS_CFF2))
 		{		
 		float width = (odd_args == (h->stack.cnt & 1))?
 			INDEX(0) + h->aux->nominalWidthX: h->aux->defaultWidthX;
@@ -1108,38 +1133,93 @@ static int do_blend_cube(t2cCtx h, int nBlends)
    substitution. Assumes 4 masters. Return 0 on success else error code. */
 /* Note: there is no command line support to set a WV for Type 2, but you can
    compile one for testing by editing t2cParse(), below */
-static int blend(t2cCtx h)
-	{
-	int nArgs;
-	int iSrc;
-	int iDst;
-	nArgs = (int)POP();
-	iDst = h->stack.cnt - nArgs*4;	/* start of initial value/destination array */
-	iSrc = iDst + nArgs;			/* start of first delta array */
-	if (iDst < 0)
-		return t2cErrStackUnderflow;
-	else if (iDst >= h->stack.cnt)
-		return t2cErrStackOverflow;
-	while (nArgs--)
-		{
-			/* Blend an initial value and 3 delta values: a, b-a, c-a, d-a.
-			   WV[0] is always ignored; this forces a normalized WV */
-			h->stack.array[iDst++] +=
-			h->stack.array[iSrc+0]*h->aux->WV[1] +
-			h->stack.array[iSrc+1]*h->aux->WV[2] +
-			h->stack.array[iSrc+2]*h->aux->WV[3];
-		iSrc += 3;
-		}
-	h->stack.cnt = iDst;
-	return t2cSuccess;
-	}
+
+static int handleBlend(t2cCtx h)
+{
+    /* When the 'blend operator is encountered, the last items on the stack are
+     the blend operands. These are, in order:
+     numMaster operands from the default font
+     (numMaster-1)* numBlends blend delta operands
+     numBlends value
+     
+     What we do is to find the first blend operand item, which is the first value from the
+     default font. We assign numBlends to the field of the same name in this struct_elem, and pop
+     it off the stack. We then allocate memory to hold the (numMaster-1)* numBlends blend delta operands,
+     and copy them to the blendValues field. We then pop the (numMaster-1)* numBlends blend delta operands,
+     leaving the numMaster operands.
+     When an operator is encountered, a handler that does not know about the blend values will
+     simply see the usual stack values from the default fonts. A handler which does know about
+     the blend values can use the blend values to fill the blendable fields.
+     
+     Alternatively, the blend handler can use the blend operands to actually produce blended values,
+     and replace the  numMaster operands from the defaultfont with the blended values.
+     */
+    int result = 0;
+    int numBlends = h->glyph->info->blendInfo.numBlends = (int)INDEX(h->stack.cnt -1);
+    h->stack.cnt--;
+    h->stack.blendCnt--;
+    
+    if (h->flags & T2C_FLATTEN_BLEND)
+    {
+        /* this is where we should blend the values. For the moment, we will just pop off the the blend delta operands,
+         leaving the the default values on the stack, which has the same result as making a snapshot at the center of
+         the design space.
+         */
+        h->stack.cnt -= numBlends*h->stack.numRegions;
+    }
+    else
+    {
+        abfOpEntry* firstItem;
+        int i = 0;
+        int numDeltaBlends = numBlends*h->stack.numRegions;
+        int firstItemIndex = (h->stack.blendCnt - (numBlends + numDeltaBlends));
+        
+        firstItem = &(h->stack.blendArray[firstItemIndex]);
+        firstItem->numBlends = numBlends;
+        firstItem->blendValues = memNew(h, sizeof(float)*numDeltaBlends);
+        while (i < numDeltaBlends)
+        {
+            int index = i + (h->stack.cnt - numDeltaBlends);
+            float val= INDEX_BLEND(index).value;
+            firstItem->blendValues[i] = val;
+            i++;
+        }
+        h->stack.cnt -= numDeltaBlends;
+        h->stack.blendCnt -= numDeltaBlends;
+    }
+    return result;
+}
+
+static void clearBlendStack(t2cCtx h)
+{
+    if (h->flags & SEEN_CFF2_BLEND)
+    {
+        int j = 0;
+        while (j < h->stack.blendCnt)
+        {
+            if (h->stack.blendArray[j].numBlends > 0)
+            {
+                memFree(h, h->stack.blendArray[j].blendValues);
+                h->stack.blendArray[j].numBlends = 0;
+            }
+            j++;
+        }
+        h->flags &= ~SEEN_CFF2_BLEND;
+    }
+
+}
+
+static void setNumMasters(t2cCtx h)
+{
+    unsigned int vsindex = h->glyph->info->blendInfo.vsindex;
+    h->stack.numRegions = h->aux->varStore->varDataList[vsindex].regionCount;
+}
 
 /* Decode Type 2 charstring. Return 0 to continue else error code. */
 static int t2Decode(t2cCtx h, long offset)
 {
 	unsigned char *end;
 	unsigned char *next;
-	
 	/* Fetch charstring */
 	if (srcSeek(h, offset))
 		return t2cErrSrcStream;
@@ -1152,15 +1232,17 @@ static int t2Decode(t2cCtx h, long offset)
 		int i;
 		int result;
 		int byte0;
-		CHKBYTE(h);
+            
+        CHKBYTE(h);
+        //CHKBYTE2(h, &next, &end);
 		byte0 = *next++;
 		switch (byte0)
 			{
 				case tx_reserved0:
 				case t2_reserved9:
 				case t2_reserved13:
-				case t2_reserved15:
-				return t2cErrInvalidOp;
+                    return t2cErrInvalidOp;
+                case t2_vsindex:
 				case tx_callgrel:
 				{
 				int result;
@@ -1908,9 +1990,14 @@ static int t2Decode(t2cCtx h, long offset)
 				h->flags |= SEEN_ENDCHAR;
 				return 0;
                 case t2_blend:
-                    result = blend(h);
-                    if (result)
-                        return result;
+                {
+                h->flags &= SEEN_CFF2_BLEND;
+                if (h->stack.numRegions == 0)
+                    setNumMasters(h);
+                 result = handleBlend(h);
+                if (result)
+                    return result;
+                }
                     continue;
                 case t2_hintmask:
 				if (callbackWidth(h, 1))
@@ -2089,13 +2176,15 @@ static int t2Decode(t2cCtx h, long offset)
 				/* Positive 2 byte number */
 				CHKOFLOW(1);
 				CHKBYTE(h);
-				PUSH(108 + 256*(byte0 - 247) + *next++);
+				PUSH(108 + 256*(byte0 - 247) + *next);
+                next++;
 				continue;
 				case 251: case 252: case 253: case 254:
 				/* Negative 2 byte number */
 				CHKOFLOW(1);
 				CHKBYTE(h);
-				PUSH(-108 - 256*(byte0 - 251) - *next++);
+				PUSH(-108 - 256*(byte0 - 251) - *next);
+                next++;
 				continue;
 				case 255:
 				/* 5 byte number */
@@ -2119,8 +2208,20 @@ static int t2Decode(t2cCtx h, long offset)
 				}
 				continue;
 			} 				/* End: switch (byte0) */
+        clearBlendStack(h);
 		h->stack.cnt = 0;	/* Clear stack */
 		} 					/* End: while (cstr < end) */
+ 
+    /* for CFF2 Charstrings, we hit the end of the charstring without having seen endchar or return yet. Add it now. */
+    if ((h->aux->flags & T2C_IS_CFF2)  && !(h->flags & SEEN_ENDCHAR))
+    
+    {
+        /* if this was a subr, do return. */
+        if (h->subrDepth > 0)
+            return 0;
+        else
+            goto do_endchar;
+     }
 }
 
 /* Decode Type 2 charstring. Return 0 to continue else error code.
@@ -2155,8 +2256,8 @@ static int t2DecodeSubr(t2cCtx h, long offset)
 		case tx_reserved0:
 		case t2_reserved9:
 		case t2_reserved13:
-		case t2_reserved15:
 			return t2cErrInvalidOp;
+        case t2_vsindex:
 		case t2_hintmask:
 		case t2_cntrmask: /* can't process these in the context of subrs - no way to know how long the mask byte is. Skip it. */
 			return 0;
@@ -2251,6 +2352,13 @@ static int t2DecodeSubr(t2cCtx h, long offset)
 		case tx_endchar:
 			return 0;
 		case t2_blend:
+            {
+                h->flags &= SEEN_CFF2_BLEND;
+                int result = handleBlend(h);
+                if (result)
+                    return result;
+            }
+            continue;
 		case t2_rcurveline:
 		case t2_rlinecurve:
 		case t2_vvcurveto:
@@ -2286,13 +2394,15 @@ static int t2DecodeSubr(t2cCtx h, long offset)
 			/* Positive 2 byte number */
 			CHKOFLOW(1);
 			CHKSUBRBYTE(h);
-			PUSH(108 + 256*(byte0 - 247) + *next++);
+			PUSH(108 + 256*(byte0 - 247) + *next);
+            next++;
 			continue;
 		case 251: case 252: case 253: case 254:
 			/* Negative 2 byte number */
 			CHKOFLOW(1);
 			CHKSUBRBYTE(h);
-			PUSH(-108 - 256*(byte0 - 251) - *next++);
+			PUSH(-108 - 256*(byte0 - 251) - *next);
+            next++;
 			continue;
 		case 255:
 			/* 5 byte number */
@@ -2316,12 +2426,13 @@ static int t2DecodeSubr(t2cCtx h, long offset)
 			}
 			continue;
 			} 				/* End: switch (byte0) */
+        clearBlendStack(h);
 		h->stack.cnt = 0;	/* Clear stack */
 		} 					/* End: while (cstr < end) */
 	}
 
 /* Parse Type 2 charstring. */
-int t2cParse(long offset, long endOffset, t2cAuxData *aux, abfGlyphCallbacks *glyph)
+int t2cParse(long offset, long endOffset, t2cAuxData *aux, abfGlyphCallbacks *glyph, ctlMemoryCallbacks *mem)
 	{
 	struct t2cCtx h;
 	int retVal;
@@ -2341,7 +2452,8 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, abfGlyphCallbacks *gl
 	h.aux->WV[1] = 0.25f;
 	h.aux->WV[2] = 0.25f;
 	h.aux->WV[3] = 0.25f;
-	h.glyph = glyph;
+    h.glyph = glyph;
+    h.mem = mem;
 	h.LanguageGroup = (glyph->info->flags & ABF_GLYPH_LANG_1) != 0;
 	h.maxOpStack = (aux->flags & T2C_IS_CUBE) ? TX_MAX_OP_STACK_CUBE : T2_MAX_OP_STACK;
 	aux->bchar = 0;
@@ -2365,8 +2477,10 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, abfGlyphCallbacks *gl
             }
         }
     }
-	if (aux->flags & T2C_FLATTEN_CUBE)
-		h.flags |= FLATTEN_CUBE;
+    if (aux->flags & T2C_FLATTEN_CUBE)
+        h.flags |= FLATTEN_CUBE;
+    if (aux->flags & T2C_FLATTEN_BLEND)
+        h.flags |= FLATTEN_BLEND;
 	if (aux->flags & T2C_IS_CUBE)
 		h.flags |= IS_CUBE;
 	if (aux->flags & T2C_CUBE_RND)

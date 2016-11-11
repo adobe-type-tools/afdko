@@ -129,6 +129,9 @@ void abfInitGlyphInfo(abfGlyphInfo *info)
 	info->iFD 			= 0;
 	info->sup.begin		= ABF_UNSET_INT;
 	info->sup.end		= ABF_UNSET_INT;
+    info->blendInfo.numBlends = 0;
+    info->blendInfo.vsindex = 0;
+    info->blendInfo.blendDeltaArgs = NULL;
 	}
 
 /* Check UniqueID values is within 24-bit unsigned range. */

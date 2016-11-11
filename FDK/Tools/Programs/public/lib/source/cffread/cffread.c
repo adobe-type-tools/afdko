@@ -37,6 +37,19 @@ static const unsigned char exenc[] =
 #include "exenc0.h"
 };
 
+static char *stdstrs[] =
+{
+#include "stdstr1.h"
+};
+
+
+/* Glyph names for Standard Apple Glyph Ordering */
+static char *applestd[258] =
+{
+#include "applestd.h"
+};
+
+
 #define ARRAY_LEN(t) 	(sizeof(t)/sizeof((t)[0]))
 
 typedef unsigned char OffSize;  /* Offset size indicator */
@@ -73,7 +86,35 @@ typedef struct					/* Operand Stack element */
         long int_val;		/* allow at least 32-bit int */
         float real_val;
     } u;
+        unsigned short numBlends;    /* the last operand before the blend operator.
+                            The number of items in blend_val is numBlends*(h->numRegions -1)
+                            */
+        float* blend_val;  /* NULL unless the blend operator has been encountered. */
 } stack_elem;
+
+typedef struct					/* Format 2.0 data */
+{
+    dnaDCL(unsigned short, glyphNameIndex);
+    dnaDCL(char *, strings);
+    dnaDCL(char, buf);
+} postFmt2;
+
+typedef long Fixed;
+typedef short FWord;
+
+typedef struct					/* post table */
+{
+    Fixed format;				/* =1.0, 2.0, 2.5, 3.0, 4.0 */
+    Fixed italicAngle;
+    FWord underlinePosition;
+    FWord underlineThickness;
+    unsigned long isFixedPitch;
+    unsigned long minMemType42;
+    unsigned long maxMemType42;
+    unsigned long minMemType1;
+    unsigned long maxMemType1;
+    postFmt2 fmt2;				
+} postTbl;
 
 struct cfrCtx_					/* Context */
 {
@@ -102,8 +143,14 @@ struct cfrCtx_					/* Context */
 	FDInfo *fd;					/* Active Font Dict */
 	struct						/* DICT operand stack */
     {
-		int cnt;
-		stack_elem array[T2_MAX_OP_STACK];
+        /* Operands are pushed on the stack as they are encountered. However,
+         when the 'blend' operator is called, the stack is edited. See the comment in copyToBlendStackElement()
+         for what is done.
+         */
+        int cnt;
+        int numRegions; /* current number of regions ( 1 less than the numer of source master designs), defined by
+                         the varData structure which is selected by  the current vsindex into the VarStore. */
+		stack_elem array[T2_MAX_OP_STACK];  /* XXXX Must fix - needs to be allocated dynamically, according to the maxstack value */
     } stack;
 	struct						/* String data */
     {
@@ -130,6 +177,7 @@ struct cfrCtx_					/* Context */
     } src;
 	unsigned short stdEnc2GID[256];/* Map standard encoding to GID */
 	abfEncoding *encfree;		/* Supplementary encoding free list */
+    postTbl post;			/* post table */
 	struct						/* Client callbacks */
     {
 		ctlMemoryCallbacks mem;
@@ -147,7 +195,9 @@ struct cfrCtx_					/* Context */
     } err;
 };
 
+
 static void encListFree(cfrCtx h, abfEncoding *node);
+
 
 /* ----------------------------- Error Handling ---------------------------- */
 
@@ -250,6 +300,9 @@ cfrCtx cfrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 	h->gsubrs.size = 0;
 	h->FDArray.size = 0;
 	h->fdicts.size = 0;
+    h->post.fmt2.glyphNameIndex.size = 0;
+    h->post.fmt2.strings.size = 0;
+    h->post.fmt2.buf.size = 0;
 	h->string.offsets.size = 0;
 	h->string.ptrs.size = 0;
 	h->string.buf.size = 0;
@@ -283,6 +336,9 @@ cfrCtx cfrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 	dnaINIT(h->ctx.dna, h->glyphs, 256, 768);
 	dnaINIT(h->ctx.dna, h->glyphsByName, 256, 768);
 	dnaINIT(h->ctx.dna, h->glyphsByCID, 256, 768);
+    dnaINIT(h->ctx.dna, h->post.fmt2.glyphNameIndex, 256, 768);
+    dnaINIT(h->ctx.dna, h->post.fmt2.strings, 50, 200);
+    dnaINIT(h->ctx.dna, h->post.fmt2.buf, 300, 1200);
 	dnaINIT(h->ctx.dna, h->string.offsets, 16, 256);
 	dnaINIT(h->ctx.dna, h->string.ptrs, 16, 256);
 	dnaINIT(h->ctx.dna, h->string.buf, 200, 2000);
@@ -316,6 +372,9 @@ void cfrFree(cfrCtx h)
 	dnaFREE(h->glyphs);
 	dnaFREE(h->glyphsByName);
 	dnaFREE(h->glyphsByCID);
+    dnaFREE(h->post.fmt2.glyphNameIndex);
+    dnaFREE(h->post.fmt2.strings);
+    dnaFREE(h->post.fmt2.buf);
 	dnaFREE(h->string.offsets);
 	dnaFREE(h->string.ptrs);
 	dnaFREE(h->string.buf);
@@ -479,6 +538,10 @@ readhdr:
                     sfrTable *table =
                     sfrGetTableByTag(h->ctx.sfr, CTL_TAG('C','F','F',' '));
                     if (table == NULL)
+                    {
+                        table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('C','F','F','2'));
+                    }
+                    if (table == NULL)
                         fatal(h, cfrErrNoCFF);
                     origin = table->offset;
                     
@@ -532,10 +595,10 @@ do if(h->stack.cnt+(n)>T2_MAX_OP_STACK)fatal(h,cfrErrStackOverflow);while(0)
 #define INDEX(i) (h->stack.array[i])
 #define INDEX_INT(i) (INDEX(i).is_int? INDEX(i).u.int_val: (long)INDEX(i).u.real_val)
 #define PUSH_INT(v) { stack_elem*	elem = &h->stack.array[h->stack.cnt++];	\
-elem->is_int = 1; elem->u.int_val = (v); }
+elem->is_int = 1; elem->u.int_val = (v); elem->numBlends = 0; }
 #define INDEX_REAL(i) (INDEX(i).is_int? (float)INDEX(i).u.int_val: INDEX(i).u.real_val)
 #define PUSH_REAL(v) { stack_elem*	elem = &h->stack.array[h->stack.cnt++];	\
-elem->is_int = 0; elem->u.real_val = (v); }
+elem->is_int = 0; elem->u.real_val = (v); elem->numBlends = 0;}
 
 /* Save font transformation matrix. */
 static void saveMatrix(cfrCtx h, int topdict)
@@ -672,14 +735,65 @@ static double convBCD(cfrCtx h)
 	return result;
 }
 
+
+static void handleBlend(cfrCtx h)
+{
+    /* When the CFF2 blend operator is encountered, the last items on the stack are
+     the blend operands. These are, in order:
+     numMaster operands from the default font
+     (numMaster-1)* numBlends blend delta operands
+     numBlends value
+     
+     What we do is to find the first blend operand item, which is the first value from the
+     default font. We assign numBlends to the field of the same name in this struct_elem, and pop
+     it off the stack. We then allocate memory to hold the (numMaster-1)* numBlends blend delta operands,
+     and copy them to the blendValues field. We then pop the (numMaster-1)* numBlends blend delta operands,
+     leaving the numMaster operands.
+     When an operator is encountered, a handler that does not know about the blend values will
+     simply see the usual stack values from the default fonts. A handler which does know about
+     the blend values can use the blend values to fill the blendable fields. 
+     
+     Alternatively, the blend handler can use the blend operands to actually produce blended values,
+     and replace the  numMaster operands from the defaultfont with the blended values.
+     */
+    
+    int numBlends = INDEX_INT(h->stack.cnt -1);
+    h->stack.cnt--;
+
+    if (h->flags & CFR_FLATTEN_VF)
+      {
+          /* this is where we should blend the values. For the moment, we will just pop off the the blend delta operands,
+           leaving the the default values on the stack, which has the same result as making a snapshot at the center of
+           the design space.
+        */
+          h->stack.cnt -= (numBlends*h->stack.numRegions);
+      }
+    else
+    {
+        stack_elem* firstItem;
+        int i = 0;
+        int numDeltaBlends = numBlends*h->stack.numRegions;
+        int firstItemIndex = (h->stack.cnt - (numBlends + numDeltaBlends));
+        
+        h->flags |= CFR_SEEN_BLEND;
+        firstItem = &(h->stack.array[firstItemIndex]);
+        firstItem->numBlends = numBlends;
+        firstItem->blend_val = memNew(h, sizeof(float)*numDeltaBlends);
+        while (i < numDeltaBlends)
+        {
+            int index = i + (h->stack.cnt - numDeltaBlends);
+            float val= INDEX_REAL(index);
+            firstItem->blend_val[i] = val;
+            i++;
+        }
+        h->stack.cnt -= numDeltaBlends;
+    }
+}
+
+
 /* Get string from its sid. */
 static char *sid2str(cfrCtx h, long sid)
 {
-	static char *stdstrs[] =
-    {
-#include "stdstr1.h"
-    };
-    
 	if (sid < 0)
 		;
 	else if (sid < (int)ARRAY_LEN(stdstrs))
@@ -695,16 +809,157 @@ static char *sid2str(cfrCtx h, long sid)
 	return NULL;	/* Suppress compiler warning */
 }
 
-/* Save real delta array operands. */
-static void saveDeltaArray(cfrCtx h, size_t max, long *cnt, float *array)
+static int hasBlend(cfrCtx h)
 {
-	int i;
-	if (h->stack.cnt == 0 || h->stack.cnt > (long)max)
-		fatal(h, cfrErrDICTArray);
-	array[0] = INDEX_REAL(0);
-	for (i = 1; i < h->stack.cnt; i++)
-		array[i] = array[i - 1] + INDEX_REAL(i);
-	*cnt = h->stack.cnt;
+    int i;
+    int hasBlend = 0;
+    for (i = 0; i < h->stack.cnt; i++)
+    {
+        if (INDEX(i).numBlends > 0)
+        {
+            hasBlend = 1;
+        }
+    }
+    return hasBlend;
+}
+
+/* Save real delta array operands. */
+static void saveDeltaArray(cfrCtx h, size_t max, long *cnt, float *array, long *blendCnt, abfOpEntry* blendArray)
+{
+    /* The regular values on the stack just need to be copied to the regular value array, and this happens
+     whether or not there are blend operators.
+     
+     However, some of the values are the default font values from the operands for a blend operation.
+     If any of these exist in the stack, then we fill out the blendArray. The regular values in the stack are just
+     copied over as is. However, when we encounter a stack entry with numBlends > 0, we know this is the start of
+     numBlends operands from a blend operation. In this case, we first copy the numBlends operands
+     the current blendArray entry, and then copy the numBlends * numMaster delta values
+     from that first stack entry to the current blendArray entry. The current blend entry then contains all the
+     operands for the blend operator.
+     We then skip over the numBlends stack entries, as these have already been copied to the current blendArray entry.
+     
+     Note that the blendArray will have fewer elements than the regular stack, as each set of numBlends default font
+     values from a blend operation will be copied into a single blendArray entry.
+     */
+    
+	int i,j, k, bi;
+    int numBlends;
+
+    if (h->stack.cnt == 0 || h->stack.cnt > (long)max)
+        fatal(h, cfrErrDICTArray);
+
+    array[0] = INDEX_REAL(0);
+    for (i = 1; i < h->stack.cnt; i++)
+        array[i] = array[i - 1] + INDEX_REAL(i);
+    
+    *cnt = h->stack.cnt;
+
+    if (!hasBlend(h))
+    {
+        *blendCnt = 0; /* show that there are no blended values - the regular array should be used. */
+    }
+    else
+    {
+        float lastValue = 0;
+        
+        i = j = k = bi = 0;
+        while (i < h->stack.cnt)
+        {
+            abfOpEntry *blendEntry = &blendArray[bi];
+            
+            stack_elem *stackEntry = &(INDEX(i));
+            numBlends = stackEntry->numBlends;
+
+            if (numBlends == 0)
+            {
+                blendEntry->value = lastValue + (stackEntry->is_int) ? (float)stackEntry->u.int_val : stackEntry->u.real_val;
+                lastValue = blendEntry->value;
+                blendEntry->numBlends = 0;
+                blendEntry->blendValues = NULL;
+                i++;
+                bi++;
+            }
+            else
+            {
+                int l;
+                float val;
+                signed int numRegions = h->stack.numRegions;
+                unsigned short numBlendValues = numBlends +  numBlends*numRegions;
+                float *blendValues = memNew(h, sizeof(abfOpEntry)*numBlendValues);
+                
+                blendEntry->numBlends = numBlends;
+                blendEntry->blendValues = blendValues;
+                
+                /* first, copy the numBlend default values to blendArray[i], summing the deltas to give absolute values. */
+                for (j = 0; j < numBlends; j++)
+                {
+                    val = INDEX_REAL(i);
+                    blendValues[j] = lastValue + val;
+                    lastValue = blendValues[j];
+                    i++;
+                }
+                /* now, copy the blend deltas default values to blendArray[i]. 
+                We write all the absolute values for region 0, then for region 1, ...,r egion n.*/
+                l = numBlends;
+                for (j = 0; j < numRegions; j++)
+                {
+                    float diff = 0;
+                    for (k = 0; k < numBlends; k++)
+                    {
+                        val = stackEntry->blend_val[j + numRegions*k];
+                        diff += val;
+                        blendValues[l++] = blendValues[k] + diff;
+                    }
+                }
+                
+               bi++;
+           }
+        }
+        *blendCnt = bi;
+    }
+    
+}
+
+static void saveBlend(cfrCtx h, float *realValue, abfOpEntry *blendEntry)
+{
+    /* Save a value that may be blended. Stack depth is 1 for a non-blended value, or numBlends for a blended value. */
+    int i,j;
+    int numBlends;
+    
+    stack_elem *stackEntry = &(INDEX(0));
+    numBlends = stackEntry->numBlends;
+    
+    *realValue = (stackEntry->is_int) ? (float)stackEntry->u.int_val : stackEntry->u.real_val;
+
+    if (numBlends == 0)
+    {
+        blendEntry->value = *realValue;
+        blendEntry->numBlends = 0; /* shows there is no blend value, and the regular value shoud be used instead. */
+        blendEntry->blendValues = NULL;
+    }
+    else
+    {
+        signed int numBlendDeltas = numBlends*(h->stack.numRegions);
+        unsigned short numBlendValues = numBlends + numBlendDeltas;
+        float *blendValues = memNew(h, sizeof(abfOpEntry)*numBlendValues);
+
+        blendEntry->numBlends = numBlends;
+        blendEntry->blendValues = blendValues;
+        
+        /* first, copy the numBlend default values to blendArray[i]. */
+        for (j = 0; j < numBlends; j++)
+        {
+            blendValues[j] = INDEX_REAL(j);
+        }
+        /* now, copy the blend deltas default values to blendArray[i]. */
+        for (i = 0; i < numBlendDeltas; i++)
+        {
+            blendValues[j++] = stackEntry->blend_val[i];
+        }
+        
+    }
+
+   
 }
 
 /* Save integer array operands. */
@@ -718,6 +973,92 @@ static void saveIntArray(cfrCtx h, size_t max, long *cnt, long *array,
 	for (i = 1; i < h->stack.cnt; i++)
 		array[i] = (delta? array[i - 1] + INDEX_INT(i): INDEX_INT(i));
 	*cnt = h->stack.cnt;
+}
+
+static void setNumMasters(cfrCtx h, unsigned int vsindex)
+{
+    h->stack.numRegions = h->top.VarStore.varDataList[vsindex].regionCount;
+}
+
+/* -------------------------------- VarStore ------------------------------- */
+
+static float AxisCoord2Real(short val)
+{
+    float newVal = (val >> 14) + ((val & 0x3fff) / 16384.0);
+    return newVal;
+}
+
+static void readVarStore(cfrCtx h)
+{
+    unsigned short length;
+    unsigned char* data;
+    unsigned long offset;
+    unsigned short format;
+    unsigned short count;
+    unsigned int i,j;
+    unsigned int vstoreStart = h->region.VarStore.begin + 2;
+    unsigned int curPos;
+    VarStore* varStore = &h->top.VarStore;
+    
+    if (h->region.VarStore.begin == -1)
+        fatal(h, cfrErrNoFDSelect);
+    
+    srcSeek(h, h->region.VarStore.begin);
+    length = read2(h);
+    h->region.VarStore.end = vstoreStart + length;
+    
+    format = read2(h);
+    
+    // read the RegionList
+    offset = readN(h, 4);
+    curPos = vstoreStart + 6;
+
+    srcSeek(h, vstoreStart + offset);
+    varStore->axisCount = read2(h);
+    varStore->regionCount = read2(h);
+    varStore->variationRegions = memNew(h, sizeof(varRegion)*varStore->regionCount);
+    i = 0;
+    while (i < varStore->regionCount)
+    {
+        varRegion *vregion = &varStore->variationRegions[i];
+        vregion->regionAxes = memNew(h, sizeof(varRegionAxis)*varStore->axisCount);
+        j = 0;
+        while (j < varStore->axisCount)
+        {
+            varRegionAxis *regionAxis = &vregion->regionAxes[j];
+            short val = read2(h);
+            regionAxis->startCoord = AxisCoord2Real(val);
+            val = read2(h);
+            regionAxis->peakCoord = AxisCoord2Real(val);
+            val = read2(h);
+            regionAxis->endCoord = AxisCoord2Real(val);
+            j++;
+        }
+        i++;
+    }
+    
+    srcSeek(h, curPos);
+    varStore->itemVariationDataCount = read2(h);
+    curPos += 2;
+    varStore->varDataList = memNew(h, sizeof(varData)*varStore->itemVariationDataCount);
+   i = 0;
+    while (i < varStore->itemVariationDataCount)
+    {
+        varData *vData = &varStore->varDataList[i];
+        srcSeek(h, curPos);
+        offset = readN(h, 4);
+        curPos += 4;
+        srcSeek(h, vstoreStart + offset+4);// We skip over itemCount and shortDeltaCount.
+        vData->regionCount = read2(h);
+        vData->regionIndices = memNew(h, sizeof(int)*vData->regionCount);
+        j = 0;
+        while (j < vData->regionCount)
+        {
+            vData->regionIndices[j] = read2(h);
+            j++;
+        }
+        i++;
+    }
 }
 
 /* Save PostScript operator string. */
@@ -762,8 +1103,10 @@ static char *savePostScript(cfrCtx h, char *str)
 			h->top.OrigFontType = abfOrigFontTypeCID;
 		else if (sscanf(q, " /TrueType def%n", &n) == 0 && n != -1)
 			h->top.OrigFontType = abfOrigFontTypeTrueType;
-		else if (sscanf(q, " /OCF def%n", &n) == 0 && n != -1)
-			h->top.OrigFontType = abfOrigFontTypeOCF;
+        else if (sscanf(q, " /OCF def%n", &n) == 0 && n != -1)
+            h->top.OrigFontType = abfOrigFontTypeOCF;
+        else if (sscanf(q, " /UFO def%n", &n) == 0 && n != -1)
+            h->top.OrigFontType = abfOrigFontTypeUFO;
 		else
 			fatal(h, cfrErrOrigFontType);
         
@@ -798,11 +1141,18 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
 	srcSeek(h, region->begin);
     
 	h->stack.cnt = 0;
+    private->vsindex = 0;
+    
 	while (srcTell(h) < region->end)
     {
 		int byte0 = read1(h);
 		switch (byte0)
         {
+            case cff_vsindex:
+                private->vsindex = INDEX_INT(0);
+                setNumMasters(h, private->vsindex);
+                break;
+
             case cff_version:
                 CHKUFLOW(1);
                 top->version.ptr = sid2str(h, (SID)INDEX_INT(0));
@@ -833,14 +1183,18 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
             case cff_BlueValues:
                 saveDeltaArray(h, ARRAY_LEN(private->BlueValues.array),
                                &private->BlueValues.cnt,
-                               private->BlueValues.array);
+                               private->BlueValues.array,
+                               &private->blendValues.BlueValues.cnt,
+                               private->blendValues.BlueValues.array);
                 h->fd->flags |= SEEN_BLUE_VALUES;
                 break;
             case cff_OtherBlues:
                 if (h->stack.cnt > 0)
                     saveDeltaArray(h, ARRAY_LEN(private->OtherBlues.array),
                                    &private->OtherBlues.cnt,
-                                   private->OtherBlues.array);
+                                   private->OtherBlues.array,
+                                   &private->blendValues.OtherBlues.cnt,
+                                private->blendValues.OtherBlues.array);
                 else
                     message(h, "OtherBlues empty array (ignored)");
                 break;
@@ -848,7 +1202,10 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
                 if (h->stack.cnt > 0)
                     saveDeltaArray(h, ARRAY_LEN(private->FamilyBlues.array),
                                    &private->FamilyBlues.cnt,
-                                   private->FamilyBlues.array);
+                                   private->FamilyBlues.array,
+                                   &private->blendValues.FamilyBlues.cnt,
+                                   private->blendValues.FamilyBlues.array);
+
                 else
                     message(h, "FamilyBlues empty array (ignored)");
                 break;
@@ -856,17 +1213,18 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
                 if (h->stack.cnt > 0)
                     saveDeltaArray(h, ARRAY_LEN(private->FamilyOtherBlues.array),
                                    &private->FamilyOtherBlues.cnt,
-                                   private->FamilyOtherBlues.array);
+                                   private->FamilyOtherBlues.array,
+                                   &private->blendValues.FamilyOtherBlues.cnt,
+                                   private->blendValues.FamilyOtherBlues.array);
+
                 else
                     message(h, "FamilyBlues empty array (ignored)");
                 break;
             case cff_StdHW:
-                CHKUFLOW(1);
-                private->StdHW = INDEX_REAL(0);
+                 saveBlend(h, &private->StdHW, &private->blendValues.StdHW);
                 break;
             case cff_StdVW:
-                CHKUFLOW(1);
-                private->StdVW = INDEX_REAL(0);
+                saveBlend(h, &private->StdVW, &private->blendValues.StdVW);
                 break;
             case cff_escape:
                 /* Process escaped operator */
@@ -915,26 +1273,29 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
                     top->StrokeWidth = INDEX_REAL(0);
                     break;
                 case cff_BlueScale:
-                    CHKUFLOW(1);
-                    private->BlueScale = INDEX_REAL(0);
+                    saveBlend(h, &private->BlueScale, &private->blendValues.BlueScale);
                     break;
                 case cff_BlueShift:
-                    CHKUFLOW(1);
-                    private->BlueShift = INDEX_REAL(0);
+                    saveBlend(h, &private->BlueShift, &private->blendValues.BlueShift);
                     break;
                 case cff_BlueFuzz:
-                    CHKUFLOW(1);
-                    private->BlueFuzz = INDEX_REAL(0);
+                    saveBlend(h, &private->BlueFuzz, &private->blendValues.BlueFuzz);
                     break;
                 case cff_StemSnapH:
                     saveDeltaArray(h, ARRAY_LEN(private->StemSnapH.array),
                                    &private->StemSnapH.cnt,
-                                   private->StemSnapH.array);
+                                   private->StemSnapH.array,
+                                   &private->blendValues.StemSnapH.cnt,
+                                   private->blendValues.StemSnapH.array);
+
                     break;
                 case cff_StemSnapV:
                     saveDeltaArray(h, ARRAY_LEN(private->StemSnapV.array),
                                    &private->StemSnapV.cnt,
-                                   private->StemSnapV.array);
+                                   private->StemSnapV.array,
+                                   &private->blendValues.StemSnapV.cnt,
+                                   private->blendValues.StemSnapV.array);
+
                     break;
                 case cff_ForceBold:
                     CHKUFLOW(1);
@@ -1091,7 +1452,18 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
                 CHKUFLOW(2);
                 h->fd->region.PrivateDICT.begin = h->src.origin + INDEX_INT(1);
                 h->fd->region.PrivateDICT.end =
-				h->fd->region.PrivateDICT.begin + INDEX_INT(0);
+                h->fd->region.PrivateDICT.begin + INDEX_INT(0);
+                break;
+            case cff_VarStore:
+                CHKUFLOW(1);
+                h->region.VarStore.begin = h->src.origin + INDEX_INT(0);
+                readVarStore(h);
+                break;
+            case cff_maxstack:
+                CHKUFLOW(2);
+                h->fd->region.PrivateDICT.begin = h->src.origin + INDEX_INT(1);
+                h->fd->region.PrivateDICT.end =
+                h->fd->region.PrivateDICT.begin + INDEX_INT(0);
                 break;
             case cff_Subrs:
                 CHKUFLOW(1);
@@ -1140,9 +1512,13 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
                 CHKOFLOW(1);
                 PUSH_REAL((float)convBCD(h));
                 continue;
-            case cff_Blend:
-                h->flags |= CFR_SEEN_BLEND;
-                PUSH_INT(byte0);
+            case cff_blend:
+                if (h->stack.numRegions == 0)
+                {
+                    /* private->vsindex is set to 0 by default; it is otherwise only if the vsindex operator is used */
+                    setNumMasters(h, private->vsindex);
+                }
+                handleBlend(h);
                 continue;
             default:
                 /* 1 byte number */
@@ -1159,10 +1535,6 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
                 CHKOFLOW(1);
                 PUSH_INT(-108 - 256*(byte0 - 251) - read1(h));
                 continue;
-            case cff_reserved22:
-            case cff_reserved23:
-            case cff_reserved24:
-            case cff_reserved25:
             case cff_reserved26:
             case cff_reserved27:
             case cff_reserved255:
@@ -1171,6 +1543,21 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
                 else
                     message(h, "Invalid DICT op %hu (ignored)", byte0);
         }				/* End: switch (byte0) */
+        if (h->flags & CFR_SEEN_BLEND)
+        {
+            int j = 0;
+            while (j < h->stack.cnt)
+            {
+                if (h->stack.array[j].numBlends > 0)
+                {
+                    memFree(h, h->stack.array[j].blend_val);
+                    h->stack.array[j].numBlends = 0;
+                }
+                j++;
+            }
+            h->flags &= ~CFR_SEEN_BLEND;
+        }
+
 		h->stack.cnt = 0;	/* Clear stack */
     }					/* End: while (...) */
 }
@@ -1183,23 +1570,33 @@ static void readSubrINDEX(cfrCtx h, ctlRegion *region, SubrOffsets *offsets)
 	long i;
 	long cnt;
 	Offset dataoff;
-	OffSize offSize;
+    OffSize offSize;
+    OffSize cntSize;
     
 	/* Read INDEX count */
 	srcSeek(h, region->begin);
-	cnt = read2(h);
+    if (h->flags & CFR_IS_CFF2)
+    {
+        cntSize = 4;
+       cnt = readN(h, cntSize);
+    }
+    else
+    {
+        cntSize = 2;
+        cnt = read2(h);
+    }
     
 	if (cnt == 0)
     {
 		/* Empty INDEX */
-		region->end = region->begin + 2;
+		region->end = region->begin + cntSize;
 		return;
     }
     
 	offSize = read1(h);		/* Get offset size */
     
 	/* Compute data offset */
-	dataoff = region->begin + 2 + 1 + (cnt + 1)*offSize - 1;
+	dataoff = region->begin + cntSize + 1 + (cnt + 1)*offSize - 1;
     
 	/* Allocate offset array */
 	dnaSET_CNT(*offsets, cnt);
@@ -1215,14 +1612,27 @@ static void readSubrINDEX(cfrCtx h, ctlRegion *region, SubrOffsets *offsets)
 /* Read INDEX structure parameters and return offset of byte following INDEX.*/
 static void readINDEX(cfrCtx h, ctlRegion *region, INDEX *index)
 {
+    OffSize cntSize;
+    
 	/* Read INDEX count */
 	srcSeek(h, region->begin);
-	index->count = read2(h);
+
+    if (h->flags & CFR_IS_CFF2)
+    {
+        cntSize = 4;
+        index->count = readN(h, 4);
+    }
+    else
+    {
+        cntSize = 2;
+        index->count = read2(h);
+    }
+
     
 	if (index->count == 0)
     {
 		/* Empty INDEX */
-		region->end = region->begin + 2;
+		region->end = region->begin + cntSize;
 		return;
     }
     
@@ -1231,7 +1641,7 @@ static void readINDEX(cfrCtx h, ctlRegion *region, INDEX *index)
 	if (index->offSize < 1 || index->offSize > 4)
 		fatal(h, cfrErrINDEXHeader);
     
-	index->offset = region->begin + 2 + 1;	/* Get offset array base */
+	index->offset = region->begin + cntSize + 1;	/* Get offset array base */
     
 	/* Read and validate first offset */
 	if (readN(h, index->offSize) != 1)
@@ -1244,6 +1654,17 @@ static void readINDEX(cfrCtx h, ctlRegion *region, INDEX *index)
 	srcSeek(h, index->offset + index->count*index->offSize);
 	region->end = index->data + readN(h, index->offSize);
 }
+
+static void readTopDataAsIndex(cfrCtx h, ctlRegion *region, INDEX *index)
+{
+    srcSeek(h, region->begin);
+    index->count = 1;
+    index->offset = region->begin;	/* Get offset array base */
+    index->offSize = 0;
+    index->data = region->end;
+    srcSeek(h, region->end);
+}
+
 
 /* Get an element (offset and length) from INDEX structure. */
 static void INDEXGet(cfrCtx h, INDEX *index,
@@ -1286,7 +1707,9 @@ static void readPrivate(cfrCtx h, int iFD)
     
 	fd->aux.gsubrs.cnt = h->gsubrs.cnt;
 	fd->aux.gsubrs.offset = h->gsubrs.array;
-	fd->aux.gsubrsEnd = h->region.GlobalSubrINDEX.end;
+    fd->aux.gsubrsEnd = h->region.GlobalSubrINDEX.end;
+    fd->aux.default_vsIndex = fd->fdict->Private.vsindex;
+    fd->aux.varStore = &h->top.VarStore;
 }
 
 /* Return the offset of a standard encoded glyph of -1 if none. */
@@ -1317,7 +1740,7 @@ static void initFDInfo(cfrCtx h, int iFD)
 		fd->aux.flags 			|= T2C_UPDATE_OPS;
 	fd->aux.src 				= h->stm.src;
 	fd->aux.dbg					= h->stm.dbg;
-	fd->aux.stm 				= &h->cb.stm;
+    fd->aux.stm 				= &h->cb.stm;
 	fd->aux.subrs.cnt 			= 0;
 	fd->aux.gsubrs.cnt 			= 0;
 	fd->aux.defaultWidthX 		= cff_DFLT_defaultWidthX;
@@ -1360,19 +1783,19 @@ static void readStrings(cfrCtx h)
 	int i;
 	char *p;
 	ctlRegion FontName;
-	long lenFontName;
+	long lenFontName = 0;
 	long lenStrings;
+
+    if (h->index.name.count != 1)
+        fatal(h, cfrErrMultipleFont);
     
-	if (h->index.name.count != 1)
-		fatal(h, cfrErrMultipleFont);
-    
-	/* Get FontName data and compute its size */
-	INDEXGet(h, &h->index.name, 0, &FontName);
-	lenFontName = FontName.end - FontName.begin;
+    /* Get FontName data and compute its size */
+    INDEXGet(h, &h->index.name, 0, &FontName);
+    lenFontName = FontName.end - FontName.begin;
     
 	/* Compute string data size */
 	lenStrings = (h->index.string.count == 0)? 0:
-    (h->region.GlobalSubrINDEX.begin -
+    (h->region.StringINDEX.end -
      h->index.string.data + 1 + 	/* String data bytes */
      h->index.string.count);		/* Null termination */
     
@@ -1381,12 +1804,17 @@ static void readStrings(cfrCtx h)
 	dnaSET_CNT(h->string.ptrs, h->index.string.count);
 	dnaSET_CNT(h->string.buf, lenFontName + 1 +	lenStrings);
     
-	/* Copy FontName into buffer */
-	p = h->string.buf.array;
-	srcSeek(h, FontName.begin);
-	srcRead(h, lenFontName, p);
-	p += lenFontName;
-	*p++ = '\0';
+    p = h->string.buf.array;
+    *p = '\0';
+    if (h->header.major == 1)
+    {
+        /* Copy FontName into buffer */
+        srcSeek(h, FontName.begin);
+        srcRead(h, lenFontName, p);
+        p += lenFontName;
+        *p++ = '\0';
+    }
+    
     
 	if (h->index.string.count == 0)
 		return;	/* Empty string INDEX */
@@ -1448,14 +1876,44 @@ static void readCharStringsINDEX(cfrCtx h, short flags)
         
 		/* Validate object length */
 		length = info->sup.end - info->sup.begin;
-		if (length < 1 || length > 65535)
-			fatal(h, cfrErrINDEXOffset);
+        if (h->flags & CFR_IS_CFF2)
+        {
+            if (length > 65535)
+                fatal(h, cfrErrINDEXOffset);
+        }
+        else
+        {
+            if (length < 1 || length > 65535)
+                fatal(h, cfrErrINDEXOffset);
+        }
         
 		offset = info->sup.end;
     }
 }
 
 /* -------------------------------- Charset -------------------------------- */
+
+/* Get glyph name from format 2.0 post table. */
+static char *post2GetName(cfrCtx h, SID gid)
+{
+    if (gid >= h->post.fmt2.glyphNameIndex.cnt)
+        return NULL;	/* Out of bounds; .notdef */
+    else
+    {
+        long nid = h->post.fmt2.glyphNameIndex.array[gid];
+        if (nid == 0)
+            return stdstrs[nid];	/* .notdef */
+        else if (nid < 258)
+            return applestd[nid];
+        else if (nid - 258 >= h->post.fmt2.strings.cnt)
+        {
+            return NULL;	/* Out of bounds; .notdef */
+ 
+        }
+        else
+            return h->post.fmt2.strings.array[nid - 258];
+    }
+}
 
 /* Add SID/CID to charset */
 static void addID(cfrCtx h, long gid, unsigned short id)
@@ -1468,7 +1926,10 @@ static void addID(cfrCtx h, long gid, unsigned short id)
     {
 		/* Save SID */
 		info->gname.impl = id;
-		info->gname.ptr = sid2str(h, id);
+        if  (h->header.major == 1)
+            info->gname.ptr = sid2str(h, id);
+        else
+            post2GetName(h, id);
         
 		/* Non-CID font so select FD[0] */
 		info->iFD = 0;
@@ -1485,6 +1946,156 @@ static void addID(cfrCtx h, long gid, unsigned short id)
     }
 }
 
+/* Read 2-byte signed number. */
+static short sread2(cfrCtx h)
+{
+    unsigned short value = (unsigned short)read1(h)<<8;
+    value |= (unsigned short)read1(h);
+#if SHRT_MAX == 32767
+    return (short)value;
+#else
+    return (short)((value > 32767)? value - 65536: value);
+#endif
+}
+
+/* Read 4-byte unsigned number. */
+static unsigned long read4(cfrCtx h)
+{
+    unsigned long value = (unsigned long)read1(h)<<24;
+    value |= (unsigned long)read1(h)<<16;
+    value |= (unsigned long)read1(h)<<8;
+    return value | (unsigned long)read1(h);
+}
+
+/* Read 4-byte signed number. */
+static long sread4(cfrCtx h)
+{
+    unsigned long value = (unsigned long)read1(h)<<24;
+    value |= (unsigned long)read1(h)<<16;
+    value |= (unsigned long)read1(h)<<8;
+    value |= (unsigned long)read1(h);
+#if LONG_MAX == 2147483647
+    return (long)value;
+#else
+    return (long)((value > 2417483647)? value - 4294967296: value);
+#endif
+}
+
+static int invalidStreamOffset(cfrCtx h, unsigned long offset)
+{
+    h->src.length = 0;	/* To force re-read after this test */
+    h->cb.stm.seek(&h->cb.stm, h->stm.src, offset);
+    return h->cb.stm.read(&h->cb.stm, h->stm.src, &h->src.buf) == 0;
+}
+
+/* Read post table. */
+static void postRead(cfrCtx h)
+{
+    enum { POST_HEADER_SIZE = 4*7 + 2*2 };
+    char *p;
+    char *end;
+    long i;
+    long length;
+    long numGlyphs;
+    sfrTable *table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('p','o','s','t'));
+    if (table == NULL)
+        return;	/* Optional table missing */
+    
+    if (invalidStreamOffset(h, table->offset + POST_HEADER_SIZE - 1))
+    {
+        message(h, "post: header outside stream bounds");
+        return;
+    }
+    
+    srcSeek(h, table->offset);
+    
+    h->post.format				= read4(h);
+    h->post.italicAngle			= sread4(h);
+    h->post.underlinePosition	= sread2(h);
+    h->post.underlineThickness	= sread2(h);
+    h->post.isFixedPitch		= read4(h);
+    h->post.minMemType42		= read4(h);
+    h->post.maxMemType42		= read4(h);
+    h->post.minMemType1			= read4(h);
+    h->post.maxMemType1			= read4(h);
+    
+    if (h->post.format != 0x00020000)
+        return;	/* Successfully read header */
+    
+    if (invalidStreamOffset(h, table->offset + table->length - 1))
+    {
+        message(h, "post: table truncated");
+        goto parseError;
+    }
+    
+    srcSeek(h, table->offset + POST_HEADER_SIZE);
+    
+    /* Parse format 2.0 data */
+    numGlyphs = read2(h);
+    if (numGlyphs != h->glyphs.cnt)
+        message(h, "post 2.0: name index size doesn't match numGlyphs");
+    
+    /* Validate table length against size of glyphNameIndex */
+    length = table->length - (srcTell(h) - table->offset);
+    if (length < numGlyphs * 2)
+    {
+        message(h, "post 2.0: table truncated (table ignored)");
+        goto parseError;
+    }
+    
+    /* Read name index */
+    dnaSET_CNT(h->post.fmt2.glyphNameIndex, numGlyphs);
+    h->post.fmt2.strings.cnt = 0;
+    for (i = 0; i < numGlyphs; i++)
+    {
+        unsigned short nid = read2(h);
+        h->post.fmt2.glyphNameIndex.array[i] = nid;
+        if (nid > 32767)
+        {
+            message(h, "post 2.0: invalid name id (table ignored)");
+            goto parseError;
+        }
+        else if (nid > 257)
+            h->post.fmt2.strings.cnt++;
+    }
+    
+    /* Read string data */
+    length = table->length - (srcTell(h) -  table->offset);
+    dnaSET_CNT(h->post.fmt2.buf, length + 1);
+    srcRead(h, length, h->post.fmt2.buf.array);
+    
+    /* Build C strings array */
+    dnaSET_CNT(h->post.fmt2.strings, h->post.fmt2.strings.cnt);
+    p = h->post.fmt2.buf.array;
+    end = p + length;
+    i = 0;
+    for (i = 0; i < h->post.fmt2.strings.cnt; i++)
+    {
+        length = *(unsigned char *)p;
+        *p++ = '\0';
+        h->post.fmt2.strings.array[i] = p;
+        p += length;
+        if (p > end)
+        {
+            message(h, "post 2.0: invalid strings");
+            goto parseError;
+        }
+    }
+    *p = '\0';
+    if (p != end)
+        message(h, "post 2.0: string data didn't reach end of table");
+    
+    return;	/* Success */
+    
+parseError:
+    /* We managed to read the header but the rest of the table had an error that
+     prevented reading some (or all) glyph names. We set the the post format
+     to a value that will allow us to use the header values but will prevent
+     us from using any glyph name data which is likely missing or invalid */
+    h->post.format = 0x00000001;
+}
+
+
 /* Initialize from predefined charset */
 static void predefCharset(cfrCtx h, int cnt, const SID *charset)
 {
@@ -1496,6 +2107,76 @@ static void predefCharset(cfrCtx h, int cnt, const SID *charset)
     
 	for (gid = 0; gid < cnt; gid++)
 		addID(h, (unsigned short)gid, charset[gid]);
+}
+
+
+static void readCharSetFromPost(cfrCtx h)
+{
+    Offset offset;
+    int i;
+    char *p;
+    ctlRegion FontName;
+    long lenFontName = 0;
+    long lenStrings = ARRAY_LEN(stdstrs);
+    
+    /* init string.offsets and h->string.ptrs */
+    h->index.string.count = h->glyphs.cnt;
+    dnaSET_CNT(h->string.offsets, h->index.string.count + 1);
+    dnaSET_CNT(h->string.ptrs, h->index.string.count);
+    
+     /* Compute string data size */
+    lenStrings = (h->index.string.count == 0)? 0:
+    (h->region.StringINDEX.end -
+     h->index.string.data + 1 + 	/* String data bytes */
+     h->index.string.count);		/* Null termination */
+    
+    /* Allocate buffers */
+    dnaSET_CNT(h->string.offsets, h->index.string.count + 1);
+    dnaSET_CNT(h->string.ptrs, h->index.string.count);
+    dnaSET_CNT(h->string.buf, lenFontName + 1 +	lenStrings);
+    
+    p = h->string.buf.array;
+    *p = '\0';
+    if (h->header.major == 1)
+    {
+        /* Copy FontName into buffer */
+        srcSeek(h, FontName.begin);
+        srcRead(h, lenFontName, p);
+        p += lenFontName;
+        *p++ = '\0';
+    }
+    
+    
+    if (h->index.string.count == 0)
+        return;	/* Empty string INDEX */
+    
+    /* Read string offsets */
+    srcSeek(h, h->index.string.offset);
+    offset = readN(h, h->index.string.offSize);
+    for (i = 0; i < h->index.string.count; i++)
+    {
+        long length;
+        h->string.offsets.array[i] = offset;
+        offset = readN(h, h->index.string.offSize);
+        
+        /* Compute and validate object length */
+        length = offset - h->string.offsets.array[i];
+        if (length < 0 || length > 65535)
+            fatal(h, cfrErrINDEXOffset);
+    }
+    h->string.offsets.array[i] = offset;
+    
+    /* Read string data */
+    for (i = 0; i < h->string.ptrs.cnt; i++)
+    {
+        long length =
+        h->string.offsets.array[i + 1] - h->string.offsets.array[i];
+        srcRead(h, length, p);
+        h->string.ptrs.array[i] = p;
+        p += length;
+        *p++ = '\0';
+    }
+
 }
 
 /* Read charset */
@@ -1517,6 +2198,12 @@ static void readCharset(cfrCtx h)
 		0,	/* .notdef */
 #include "exsubcs0.h"
     };
+    
+    if (h->header.major == 2)
+    {
+        postRead(h);
+        return;
+    }
     
 	switch (h->region.Charset.begin)
     {
@@ -1726,6 +2413,7 @@ static void readEncoding(cfrCtx h)
     }
 }
 
+
 /* -------------------------------- FDSelect ------------------------------- */
 
 /* Read FDSelect */
@@ -1800,63 +2488,114 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
 	memset(h->stdEnc2GID, 0, sizeof(h->stdEnc2GID));
 	dnaSET_CNT(h->FDArray, 1);
 	dnaSET_CNT(h->fdicts, 1);
-	h->region.Encoding.begin = cff_ISOAdobeCharset;
-	h->region.Encoding.end = -1;
-	h->region.Charset.begin = cff_StandardEncoding;
-	h->region.Charset.end = -1;
+    initRegion(&h->region.NameINDEX);
+    initRegion(&h->region.StringINDEX);
+    initRegion(&h->region.Charset);
+    initRegion(&h->region.Encoding);
     initRegion(&h->region.FDSelect);
+    initRegion(&h->region.VarStore);
     initRegion(&h->region.CharStringsINDEX);
     initRegion(&h->region.FDArrayINDEX);
 	initFDInfo(h, 0);
+    h->region.Encoding.begin = cff_ISOAdobeCharset;
+    h->region.Encoding.end = -1;
+    h->region.Charset.begin = cff_StandardEncoding;
+    h->region.Charset.end = -1;
     
 	/* Read header */
 	h->region.Header.begin = h->src.origin;
 	h->header.major = read1(h);
 	h->header.minor = read1(h);
 	h->header.hdrSize = read1(h);
-	h->header.offSize = read1(h);
+    
 	if ((h->header.major != 1) && (h->header.major != 2))
 		fatal(h, cfrErrBadFont);
 	h->region.Header.end = h->src.origin + h->header.hdrSize;
     
-	/* Read name INDEX */
-	h->region.NameINDEX.begin = h->region.Header.end;
-	readINDEX(h, &h->region.NameINDEX, &h->index.name);
-    
-	/* Read top INDEX */
-	h->region.TopDICTINDEX.begin = h->region.NameINDEX.end;
-	readINDEX(h, &h->region.TopDICTINDEX, &h->index.top);
+    if (h->header.major == 1)
+    {
+        h->header.offSize = read1(h);
+        /* Read name INDEX */
+        h->region.NameINDEX.begin = h->region.Header.end;
+
+        readINDEX(h, &h->region.NameINDEX, &h->index.name);
+        /* Read top INDEX */
+        
+        h->region.TopDICTINDEX.begin = h->region.NameINDEX.end;
+        readINDEX(h, &h->region.TopDICTINDEX, &h->index.top);
+    }
+    else
+    {
+        /* We use the TopDICTINDEX region to just hold the TopDict data block. */
+        h->header.offSize = read2(h); /* In CFF2, this is the size of the Top Dict. */
+        h->region.TopDICTINDEX.begin = h->region.Header.end;
+        h->region.TopDICTINDEX.end = h->region.TopDICTINDEX.begin + h->header.offSize;
+        h->flags |= CFR_IS_CFF2;
+
+     }
     
 	/* Read string INDEX  */
-	h->region.StringINDEX.begin = h->region.TopDICTINDEX.end;
-	readINDEX(h, &h->region.StringINDEX, &h->index.string);
+    if (h->header.major == 1)
+    {
+        h->region.StringINDEX.begin = h->region.TopDICTINDEX.end;
+        if (h->region.StringINDEX.begin > 0)
+        {
+            readINDEX(h, &h->region.StringINDEX, &h->index.string);
+            /* Read strings */
+            readStrings(h);
+        }
+        /* Read gsubrs INDEX */
+        h->region.GlobalSubrINDEX.begin = h->region.StringINDEX.end;
+        readSubrINDEX(h, &h->region.GlobalSubrINDEX, &h->gsubrs);
+   }
+    else
+    {
+        /* Read gsubrs INDEX */
+        h->region.GlobalSubrINDEX.begin = h->region.TopDICTINDEX.end;
+        readSubrINDEX(h, &h->region.GlobalSubrINDEX, &h->gsubrs);
+    }
     
-	/* Read strings */
-	h->region.GlobalSubrINDEX.begin = h->region.StringINDEX.end;
-	readStrings(h);
     
-	/* Read gsubrs INDEX */
-	readSubrINDEX(h, &h->region.GlobalSubrINDEX, &h->gsubrs);
 	
 	/* Read top DICT */
-	INDEXGet(h, &h->index.top, 0, &region);
-	readDICT(h, &region, 1);
+    if (h->header.major == 1)
+    {
+        INDEXGet(h, &h->index.top, 0, &region);
+        readDICT(h, &region, 1);
+    }
+    else
+    {
+        /* h->index.top.begin/end already marks the span of the TopDict data. */
+        readDICT(h, &h->region.TopDICTINDEX, 1);
+    }
     
 	gi_flags = 0;
 	if (h->flags & CID_FONT)
     {
 		if (!(flags & CFR_SHALLOW_READ))
 			readFDArray(h);
-		h->top.cid.CIDFontName.ptr = h->string.buf.array;
+        if (h->header.major == 1)
+            h->top.cid.CIDFontName.ptr = h->string.buf.array;
+        else
+            h->top.cid.CIDFontName.ptr = NULL;
 		h->top.sup.srcFontType = abfSrcFontTypeCFFCID;
 		h->top.sup.flags |= ABF_CID_FONT;
 		gi_flags |= ABF_GLYPH_CID;
     }
 	else
     {
-		readPrivate(h, 0);
-		h->fd->fdict->FontName.ptr = h->string.buf.array;
-		h->top.sup.srcFontType = abfSrcFontTypeCFFName;
+        if (h->header.major == 1)
+        {
+            readPrivate(h, 0);
+            h->fd->fdict->FontName.ptr = h->string.buf.array;
+        }
+        else
+        {
+            if (!(flags & CFR_SHALLOW_READ))
+                readFDArray(h);
+            h->fd->fdict->FontName.ptr = NULL;
+        }
+ 		h->top.sup.srcFontType = abfSrcFontTypeCFFName;
     }
     
 	if (!(flags & CFR_SHALLOW_READ))
@@ -1868,18 +2607,15 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
 	h->top.sup.nGlyphs = h->glyphs.cnt;
 	*top = &h->top;
     
-    if (!(h->flags & CFR_SEEN_BLEND))
+    /* Validate dictionaries */
+    if (h->stm.dbg == NULL)
+        abfCheckAllDicts(NULL, &h->top);
+    else
     {
-        /* Validate dictionaries */
-        if (h->stm.dbg == NULL)
-            abfCheckAllDicts(NULL, &h->top);
-        else
-        {
-            abfErrCallbacks cb;
-            cb.ctx = h;
-            cb.report_error = report_error;
-            abfCheckAllDicts(&cb, &h->top);
-        }
+        abfErrCallbacks cb;
+        cb.ctx = h;
+        cb.report_error = report_error;
+        abfCheckAllDicts(&cb, &h->top);
     }
     
 	/* Fill glyphs array */
@@ -1904,7 +2640,7 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
         }
 		else
         {
-			if (!(flags & CFR_NO_ENCODING))
+            if ((!(flags & CFR_NO_ENCODING)) && (h->header.major == 1))
 				readEncoding(h);
             
 			if (h->fdicts.array[0].Private.LanguageGroup == 1)
@@ -1937,6 +2673,8 @@ static void readGSubr(cfrCtx h, abfGlyphCallbacks *glyph_cb, Offset gsubrStartOf
 	info.flags |= ABF_GLYPH_CUBE_GSUBR;
 	aux.flags |= T2C_CUBE_GSUBR;
 	info.flags &= ~ABF_GLYPH_SEEN;
+    info.blendInfo.vsindex = aux.default_vsIndex;
+    
 	/* Begin glyph and mark it as seen */
 	result = glyph_cb->beg(glyph_cb, &info);
     
@@ -1964,7 +2702,7 @@ static void readGSubr(cfrCtx h, abfGlyphCallbacks *glyph_cb, Offset gsubrStartOf
 		aux.flags |= T2C_CUBE_RND;
     
 	/* Parse charstring */
-	result = t2cParse(info.sup.begin, info.sup.end, &aux, glyph_cb);
+	result = t2cParse(info.sup.begin, info.sup.end, &aux, glyph_cb, &h->cb.mem);
 	if (result)
     {
 		if (info.flags & ABF_GLYPH_CID)
@@ -2016,9 +2754,13 @@ static void readGlyph(cfrCtx h,
 		aux->flags |= T2C_FLATTEN_CUBE;
 	if (h->flags & CFR_CUBE_RND)
 		aux->flags |= T2C_CUBE_RND;
+    if (h->flags & CFR_IS_CFF2)
+        aux->flags |= T2C_IS_CFF2;
+    if (h->flags & CFR_FLATTEN_VF)
+        aux->flags |= T2C_FLATTEN_BLEND;
     
 	/* Parse charstring */
-	result = t2cParse(info->sup.begin, info->sup.end, aux, glyph_cb);
+	result = t2cParse(info->sup.begin, info->sup.end, aux, glyph_cb, &h->cb.mem);
 	if (result)
     {
 		if (info->flags & ABF_GLYPH_CID)

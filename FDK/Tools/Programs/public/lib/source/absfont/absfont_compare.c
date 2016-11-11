@@ -13,6 +13,38 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <string.h>
 #endif  /* PLAT_SUN4 */
 
+static int compareOpEntries(abfOpEntry *opEntry1, abfOpEntry *opEntry2)
+{
+    /* return 1 if NOT equal */
+    int i = 0;
+    int retVal = 1;
+    
+    if (opEntry1->numBlends != opEntry2->numBlends)
+        return 1;
+ 
+    if (opEntry1->numBlends == 0)
+    {
+        if (opEntry1->value == opEntry2->value)
+            return 0;
+        else
+            return 1;
+    }
+    else
+    {
+        retVal = 0;
+        while (i < opEntry1->numBlends )
+        {
+          if (opEntry1->blendValues[i] != opEntry2->blendValues[i])
+          {
+              retVal = 1;
+              break;
+          }
+        i++;
+        }
+    }
+    return retVal;
+}
+
 /* Compare two private dicts to see if they are similar enough to merge. */
 static int comparePrivateDicts(abfPrivateDict *private1, 
 							   abfPrivateDict *private2)
@@ -21,58 +53,88 @@ static int comparePrivateDicts(abfPrivateDict *private1,
 
 	/* note: for all arrays, unused arrays are init'd with a cnt of 0. */
 	
-	if (private1->BlueValues.cnt != private2->BlueValues.cnt)
-		return 1;
-
+        if (private1->BlueValues.cnt != private2->BlueValues.cnt)
+            return 1;
+        
+        if (private1->blendValues.BlueValues.cnt != private2->blendValues.BlueValues.cnt)
+            return 1;
+        
 	for (i = 0; i < private1->BlueValues.cnt;  i++)
-		if (private1->BlueValues.array[i] != private2->BlueValues.array[i])
+		if ( (private1->BlueValues.array[i] != private2->BlueValues.array[i]) ||
+            ((private1->blendValues.BlueValues.cnt > 0) && compareOpEntries(&private1->blendValues.BlueValues.array[i], &private2->blendValues.BlueValues.array[i]))
+            )
 			return 1;
 			
 	if (private1->OtherBlues.cnt != private2->OtherBlues.cnt)
 		return 1;
+        if (private1->blendValues.OtherBlues.cnt != private2->blendValues.OtherBlues.cnt)
+            return 1;
+        
 
 	for (i = 0; i < private1->OtherBlues.cnt; i++)
-		if (private1->OtherBlues.array[i] != private2->OtherBlues.array[i])
+        if ( (private1->OtherBlues.array[i] != private2->OtherBlues.array[i]) ||
+       ((private1->blendValues.OtherBlues.cnt > 0) && compareOpEntries(&private1->blendValues.OtherBlues.array[i], &private2->blendValues.OtherBlues.array[i]))
+            )
 			return 1;
 			
 	if (private1->FamilyBlues.cnt != private2->FamilyBlues.cnt)
 		return 1;
+        if (private1->blendValues.FamilyBlues.cnt != private2->blendValues.FamilyBlues.cnt)
+            return 1;
 
 	for (i = 0; i < private1->FamilyBlues.cnt; i++)
-		if (private1->FamilyBlues.array[i] != private2->FamilyBlues.array[i])
+        if ( (private1->FamilyBlues.array[i] != private2->FamilyBlues.array[i]) ||
+        ((private1->blendValues.FamilyBlues.cnt > 0) && compareOpEntries(&private1->blendValues.FamilyBlues.array[i], &private2->blendValues.FamilyBlues.array[i]))
+            )
 			return 1;
 			
 	if (private1->FamilyOtherBlues.cnt != private2->FamilyOtherBlues.cnt)
 		return 1;
+        if (private1->blendValues.FamilyOtherBlues.cnt != private2->blendValues.FamilyOtherBlues.cnt)
+            return 1;
 
 	for (i = 0; i < private1->FamilyOtherBlues.cnt; i++)
-		if (private1->FamilyOtherBlues.array[i] != 
-			private2->FamilyOtherBlues.array[i])
+        if ( (private1->FamilyOtherBlues.array[i] != private2->FamilyOtherBlues.array[i]) ||
+        ((private1->blendValues.FamilyOtherBlues.cnt > 0) && compareOpEntries(&private1->blendValues.FamilyOtherBlues.array[i], &private2->blendValues.FamilyOtherBlues.array[i]))
+        )
 			return 1;
 			
 	if (private1->StemSnapH.cnt != private2->StemSnapH.cnt)
 		return 1;
+        if (private1->blendValues.StemSnapH.cnt != private2->blendValues.StemSnapH.cnt)
+            return 1;
 
 	for (i = 0; i < private1->StemSnapH.cnt; i++)
-		if (private1->StemSnapH.array[i] != private2->StemSnapH.array[i])
-			return 1;
+        if ( (private1->StemSnapH.array[i] != private2->StemSnapH.array[i]) ||
+        ((private1->blendValues.StemSnapH.cnt > 0) && compareOpEntries(&private1->blendValues.StemSnapH.array[i], &private2->blendValues.StemSnapH.array[i]))
+		)
+            return 1;
 			
 	if (private1->StemSnapV.cnt != private2->StemSnapV.cnt)
 		return 1;
+        if (private1->blendValues.StemSnapV.cnt != private2->blendValues.StemSnapV.cnt)
+            return 1;
 
 	for (i = 0; i < private1->StemSnapV.cnt; i++)
-		if (private1->StemSnapV.array[i] != private2->StemSnapV.array[i])
-			return 1;
+        if ( (private1->StemSnapV.array[i] != private2->StemSnapV.array[i]) ||
+        ((private1->blendValues.StemSnapV.cnt > 0) && compareOpEntries(&private1->blendValues.StemSnapV.array[i], &private2->blendValues.StemSnapV.array[i]))
+            )
+            return 1;
 			
-	if (private1->BlueScale != private2->BlueScale ||
-		private1->BlueShift != private2->BlueShift ||
-		private1->BlueFuzz != private2->BlueFuzz ||
-		private1->StdHW != private2->StdHW ||
-		private1->StdVW != private2->StdVW ||
-		private1->ForceBold != private2->ForceBold ||
-		private1->LanguageGroup != private2->LanguageGroup ||
-		private1->ExpansionFactor != private2->ExpansionFactor)
-		return 1;
+    if (private1->BlueScale != private2->BlueScale ||
+        private1->BlueShift != private2->BlueShift ||
+        private1->BlueFuzz != private2->BlueFuzz ||
+        private1->StdHW != private2->StdHW ||
+        private1->StdVW != private2->StdVW ||
+        (compareOpEntries(&private1->blendValues.BlueScale, &private2->blendValues.BlueScale)) ||
+        (compareOpEntries(&private1->blendValues.BlueShift, &private2->blendValues.BlueShift)) ||
+        (compareOpEntries(&private1->blendValues.BlueFuzz, &private2->blendValues.BlueFuzz)) ||
+        (compareOpEntries(&private1->blendValues.StdHW, &private2->blendValues.StdHW)) ||
+        (compareOpEntries(&private1->blendValues.StdVW, &private2->blendValues.StdVW)) ||
+        private1->ForceBold != private2->ForceBold ||
+    private1->LanguageGroup != private2->LanguageGroup ||
+    private1->ExpansionFactor != private2->ExpansionFactor)
+    return 1;
 		
 	return 0;
 	}

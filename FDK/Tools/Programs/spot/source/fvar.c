@@ -13,6 +13,7 @@ static IntX loaded = 0;
 void fvarRead(LongN start, Card32 length)
 	{
 	IntX i;
+    int hasInstancePSNames = 0;
 
 	if (loaded)
 		return;
@@ -28,6 +29,9 @@ void fvarRead(LongN start, Card32 length)
 	IN1(fvar->instanceCount);
 	IN1(fvar->instanceSize);
 
+    if (fvar->instanceSize == (fvar->axisCount * 4 + 6))
+        hasInstancePSNames = 1;
+        
 	/* Read axes */
 	fvar->axis = memNew(sizeof(Axis) * fvar->axisCount);
 	for (i = 0; i < fvar->axisCount; i++)
@@ -49,12 +53,15 @@ void fvarRead(LongN start, Card32 length)
 		IntX j;
 		Instance *instance = &fvar->instance[i];
 
+        instance->psNameId = MAX_CARD16;
 		IN1(instance->nameId);
 		IN1(instance->flags);
 
 		instance->coord = memNew(sizeof(instance->coord[0]) * fvar->axisCount);
 		for (j = 0; j < fvar->axisCount; j++)
 			IN1(instance->coord[j]);
+        if (hasInstancePSNames)
+            IN1(instance->psNameId);
 		}
 
 	loaded = 1;
@@ -101,6 +108,9 @@ void fvarDump(IntX level, LongN start)
 		for (j = 0; j < fvar->axisCount; j++)
 			DL(2, (OUTPUTBUFF, "coord[%d]=%08lx (%1.3f)\n", j, instance->coord[j],
 				   FIX2FLT(instance->coord[j])));
+        if ( instance->psNameId != MAX_CARD16)
+            DLu(2, "psNameId=", instance->psNameId);
+            
 		}
 	}
 

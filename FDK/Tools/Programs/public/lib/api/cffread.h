@@ -6,7 +6,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define CFR_VERSION CTL_MAKE_VERSION(2,0,46)
+#define CFR_VERSION CTL_MAKE_VERSION(2,0,48)
 
 #include "absfont.h"
 
@@ -67,6 +67,8 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
 #define CFR_SEEN_GLYPH (1<<6) /* have seen a glyph */
 #define CFR_CUBE_RND (1<<7)
 #define CFR_SEEN_BLEND (1<<8)
+#define CFR_IS_CFF2 (1<<9)
+#define CFR_FLATTEN_VF   (1<<10)
 
 /* cfrBegFont() is called to initiate a new font parse. The source data stream
    (CFR_SRC_STREAM_ID) is opened, positioned at the offset specified by the
@@ -187,6 +189,7 @@ typedef struct
     ctlRegion Encoding;
     ctlRegion Charset;
     ctlRegion FDSelect;
+    ctlRegion VarStore;
     ctlRegion CharStringsINDEX;
     ctlRegion FDArrayINDEX;
     } cfrSingleRegions;

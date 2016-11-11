@@ -33,11 +33,13 @@ typedef struct
 	{
 	Card16 nameId;
 	Card16 flags;
+    Card16 psNameId; /* This field may not be present in font */
 	Fixed *coord;
-	} Instance;
+    } Instance;
 #define INSTANCE_SIZE(axes) (SIZEOF(Instance, nameId) + \
-							 SIZEOF(Instance, flags) + \
-							 SIZEOF(Instance, coord[0]) * (axes))
+                            SIZEOF(Instance, flags) + \
+                            SIZEOF(Instance, psNameId) + \
+							 SIZEOF(Instance, coord[0]) * (axes)  )
 
 typedef struct
 	{

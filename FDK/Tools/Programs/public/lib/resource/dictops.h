@@ -66,18 +66,18 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define cff_Subrs                   19  /* Private/PD */
 #define cff_defaultWidthX           20  /* Private/PD (0) */
 #define cff_nominalWidthX           21  /* Private/PD (0) */
-#define cff_reserved22              22
-#define cff_reserved23              23
-#define cff_reserved24              24
-#define cff_reserved25              25
+#define cff_vsindex                 22
+#define cff_blend                   23
+#define cff_VarStore                24
+#define cff_maxstack                25
 #define cff_reserved26              26
 #define cff_reserved27              27
 #define cff_shortint                28  /* All. Shared with T2 ops */
 #define cff_longint                 29  /* All */
 #define cff_BCD                     30  /* All */  
-#define cff_Blend                   31
+#define cff_BlendLE                 31
 #define cff_reserved255             255
-#define cff_LAST_ONE_BYTE_OP        cff_Blend
+#define cff_LAST_ONE_BYTE_OP        cff_BlendLE
 
 /* Make escape operator value; may be redefined to suit implementation */
 #ifndef cff_ESC
@@ -159,7 +159,8 @@ enum
     cff_ISOAdobeCharset,
     cff_ExpertCharset,
     cff_ExpertSubsetCharset,
-    cff_PredefCharsetCount
+    cff_PredefCharsetCount,
+    cff_CharSetfromPost,
     };
 
 /* Predefined encodings (cff_Encoding operands) */

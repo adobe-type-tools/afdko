@@ -7,7 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define TX_VERSION CTL_MAKE_VERSION(1,0,67)
+#define TX_VERSION CTL_MAKE_VERSION(1,0,69)
 
 #include "cfembed.h"
 #include "cffread.h"
@@ -98,6 +98,7 @@ static const char *options[] =
 #define sig_PostScript2	CTL_TAG('%',  '%',0x00,0x00)	/* %%... */
 #define sig_PFB   	   	((ctlTag)0x80010000)
 #define sig_CFF		   	((ctlTag)0x01000000)
+#define sig_CFF2		   	((ctlTag)0x02000000)
 #define sig_OTF		   	CTL_TAG('O','T','T','O')
 #define sig_MacResource	((ctlTag)0x00000100)
 #define sig_AppleSingle	((ctlTag)0x00051600)
@@ -468,6 +469,7 @@ struct txCtx_
 #define DCF_Flatten			(1<<15)	/* Flatten charstrings */
 #define DCF_SaveStemCnt			(1<<16)	/* Save h/vstems counts */
 #define DCF_IS_CUBE 			(1<<17)	/* Font has Cube data - use different stack and op limits. */
+#define DCF_IS_CFF2 			(1<<18)	/* Font has CFF table is CFF 2 */
 
 		int level;			/* Dump level */
 		char *sep;			/* Flowed text separator */
@@ -3764,22 +3766,25 @@ static void dumpTagLine(txCtx h, char *title, const ctlRegion *region)
 	}
 
 /* Dump CFF header. */
-static void dcf_DumpHeader(txCtx h, const ctlRegion *region)
+static unsigned short dcf_DumpHeader(txCtx h, const ctlRegion *region)
 	{
+    unsigned short major = 0;
 	FILE *fp = h->dst.stm.fp;
+    bufSeek(h, region->begin);
+    major = read1(h);
 
 	if (!(h->dcf.flags & DCF_Header) || region->begin == -1)
-		return;
+		return major;
 		
 	dumpTagLine(h, "Header", region);
 	if (h->dcf.level < 1)
-		return;
+		return major;
 
-	bufSeek(h, region->begin);
-	fprintf(fp, "major  =%u\n", read1(h));
+	fprintf(fp, "major  =%u\n", major);
 	fprintf(fp, "minor  =%u\n", read1(h));
 	fprintf(fp, "hdrSize=%u\n", read1(h));
 	fprintf(fp, "offSize=%u\n", read1(h));
+    return major;
 	}
 
 /* Dump CFF INDEX. */
@@ -3794,16 +3799,29 @@ static void dumpINDEX(txCtx h, char *title, const ctlRegion *region,
 		long i;
 		long offset;
 		long dataref;
-		unsigned short count;
+        unsigned short count;
+        unsigned short countSize;
 		unsigned char offSize = 0;	/* Suppress optimizer warning */
 		ctlRegion element;
 		FILE *fp = h->dst.stm.fp;
 
 		/* Read header */
 		bufSeek(h, region->begin);
-		count = read2(h);
-		if (count > 0)
-			offSize = read1(h);
+
+            
+        if (h->dcf.flags & DCF_IS_CFF2)
+        {
+            countSize = 4;
+            count = read4(h);
+        }
+        else
+        {
+            count = read2(h);
+            countSize = 2;
+        }
+ 
+        if (count > 0)
+            offSize = read1(h);
 
 		if (h->dcf.level < 5)
 			{
@@ -3826,7 +3844,7 @@ static void dumpINDEX(txCtx h, char *title, const ctlRegion *region,
 			}
 
 		/* Compute offset array base and data reference offset */
-		offset = region->begin + 2 + 1;
+		offset = region->begin + countSize + 1;
 		dataref = offset + (count + 1)*offSize - 1;
 		
 		/* Dump object data */
@@ -3899,16 +3917,16 @@ static void dumpDICT(txCtx h, const ctlRegion *region)
 		/* 19 */ "Subrs",
 		/* 20 */ "defaultWidthX",
 		/* 21 */ "nominalWidthX",
-		/* 22 */ "reserved22",
-		/* 23 */ "reserved23",
-		/* 24 */ "reserved24",
-		/* 25 */ "reserved25",
+		/* 22 */ "vsindex",
+		/* 23 */ "blend",
+		/* 24 */ "VarStore",
+		/* 25 */ "maxstack",
 		/* 26 */ "reserved26",
 		/* 27 */ "reserved27",
 		/* 28 */ "shortint",
 		/* 29 */ "longint",
-		/* 30 */ "BCD",
-		/* 31 */ "Blend",
+		/* 30 */ "real",
+		/* 31 */ "blendLE",
 		};
 	static char *escopname[] =
 		{
@@ -3983,16 +4001,16 @@ static void dumpDICT(txCtx h, const ctlRegion *region)
 		case cff_Subrs:
 		case cff_defaultWidthX:
 		case cff_nominalWidthX:
-		case cff_reserved22:
-		case cff_reserved23:
-		case cff_reserved24:
-		case cff_reserved25:
+		case cff_vsindex:
+        case cff_blend:
+        case cff_VarStore:
+        case cff_maxstack:
 		case cff_reserved26:
 		case cff_reserved27:
             flowOp(h, opname[byte]);
             break;
         case cff_BlueValues:
-        case cff_Blend:
+        case cff_BlendLE:
             flowOp(h, opname[byte]);
             break;
 		case cff_escape:
@@ -4108,6 +4126,17 @@ static void dcf_DumpTopDICTINDEX(txCtx h, const ctlRegion *region)
 	dumpINDEX(h, "Top DICT INDEX", region, dumpDICTElement);
 	}
 
+static void dcf_DumpTopDICT2(txCtx h, const ctlRegion *region)
+{
+    if (!(h->dcf.flags & DCF_TopDICTINDEX) || region->begin == -1)
+        return;
+    
+    dumpTagLine(h, "Top DICT Data", region);
+    dumpDICTElement(h, 0, region);
+    flowEnd(h);
+}
+
+
 /* Dump String INDEX element. */
 static void dumpStringElement(txCtx h, long index, const ctlRegion *region)
 	{
@@ -4190,7 +4219,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr)
 		/* 12 */ "escape",
 		/* 13 */ "reserved13",
 		/* 14 */ "endchar",
-		/* 15 */ "reserved15",
+		/* 15 */ "vsindex",
 		/* 16 */ "blend",
 		/* 17 */ "callgrel",
 		/* 18 */ "hstemhm",
@@ -4282,7 +4311,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr)
 		case t2_reserved9:
 		case t2_reserved13:
 		case tx_endchar:
-		case t2_reserved15:
+		case t2_vsindex:
 		case t2_blend:
 		case tx_rmoveto:
 		case tx_hmoveto:
@@ -4590,6 +4619,38 @@ static void dcf_DumpCharset(txCtx h, const ctlRegion *region)
 		}
 	}
 
+/* Dump VarStore table. */
+static void dcf_DumpVarStore(txCtx h, const ctlRegion *region)
+{
+    unsigned short length;
+    unsigned int i = 0;
+    
+    FILE *fp = h->dst.stm.fp;
+    
+    if (!(h->dcf.flags & DCF_FDSelect) || region->begin == -1)
+        return;
+    
+    dumpTagLine(h, "VarStore", region);
+    if (h->dcf.level < 1)
+        return;
+    else
+    {
+        bufSeek(h, region->begin);
+        length = read2(h);
+        fprintf(fp, "length =%u\n", length);
+        while (i < length)
+        {
+            fprintf(fp, "%02x ", read1(h));
+            if ((i != 0) && (((i+1) % 8) == 0))
+            {
+                fprintf(fp, "\n");
+            }
+            i++;
+        }
+    }
+    fprintf(fp, "\n");
+}
+
 /* Dump FDSelect table. */
 static void dcf_DumpFDSelect(txCtx h, const ctlRegion *region)
 	{
@@ -4726,6 +4787,7 @@ static void dcf_DumpLocalSubrINDEX(txCtx h, const ctlRegion *region)
 /* Initialize subr info from INDEX. */
 static void initSubrInfo(txCtx h, const ctlRegion *region, SubrInfo *info)
 	{
+    Card16 countSize;
 	if (region->begin == -1)
 		{
 		/* Empty region */
@@ -4734,12 +4796,23 @@ static void initSubrInfo(txCtx h, const ctlRegion *region, SubrInfo *info)
 		}
 
 	bufSeek(h, region->begin);
-	info->count = read2(h);
+    
+    if (h->dcf.flags & DCF_IS_CFF2)
+    {
+        countSize = 4;
+        info->count = read4(h);
+    }
+    else
+    {
+        info->count = read2(h);
+        countSize = 2;
+    }
+        
 	if (info->count == 0)
 		return;
 
 	info->offSize = read1(h);
-	info->offset = region->begin + 2 + 1;
+	info->offset = region->begin + countSize + 1;
 	info->dataref = info->offset + (info->count + 1)*info->offSize - 1;
 
 	dnaSET_CNT(info->stemcnt, info->count);
@@ -4836,7 +4909,7 @@ static void dcf_BegFont(txCtx h, abfTopDict *top)
 	{
 	long i;
 	const cfrSingleRegions *single;
-
+    unsigned short major;
 	if (h->src.type != src_OTF && h->src.type != src_CFF)
 		fatal(h, "-dcf mode: non-CFF font");
 	if (h->dcf.flags & DCF_IS_CUBE)
@@ -4859,17 +4932,27 @@ static void dcf_BegFont(txCtx h, abfTopDict *top)
 	h->src.offset = -BUFSIZ;
 	dstFileOpen(h, top);
 
-	initCstrs(h, top);
 
 	single = cfrGetSingleRegions(h->cfr.ctx);
-	dcf_DumpHeader(h, 			&single->Header);
-	dcf_DumpNameINDEX(h, 		&single->NameINDEX);
-	dcf_DumpTopDICTINDEX(h, 	&single->TopDICTINDEX);
-	dcf_DumpStringINDEX(h, 		&single->StringINDEX);
-	dcf_DumpGlobalSubrINDEX(h,	&single->GlobalSubrINDEX);
-	dcf_DumpEncoding(h,			&single->Encoding);
-	dcf_DumpCharset(h,			&single->Charset);
-	dcf_DumpFDSelect(h,			&single->FDSelect);
+	major = dcf_DumpHeader(h, 			&single->Header);        
+    if (major == 1)
+    {
+        initCstrs(h, top);
+        dcf_DumpNameINDEX(h, 		&single->NameINDEX);
+        dcf_DumpTopDICTINDEX(h, 	&single->TopDICTINDEX);
+        dcf_DumpStringINDEX(h, 		&single->StringINDEX);
+        dcf_DumpGlobalSubrINDEX(h,	&single->GlobalSubrINDEX);
+        dcf_DumpEncoding(h,			&single->Encoding);
+        dcf_DumpCharset(h,			&single->Charset);
+    }
+    else
+    {
+        h->dcf.flags |= DCF_IS_CFF2;
+        initCstrs(h, top);
+        dcf_DumpTopDICT2(h, &single->TopDICTINDEX);
+     }
+    dcf_DumpFDSelect(h,			&single->FDSelect);
+    dcf_DumpVarStore(h,			&single->VarStore);
 	dcf_DumpFDArrayINDEX(h,		&single->FDArrayINDEX);
 	dcf_DumpCharStringsINDEX(h,	&single->CharStringsINDEX);
 
@@ -6370,6 +6453,7 @@ static void buildFontList(txCtx h)
                 addFont(h, src_Type1, 0, 0);
                 break;
             case sig_CFF:
+            case sig_CFF2:
                 addFont(h, src_CFF, 0, 0);
                 break;
             default:
@@ -7076,6 +7160,7 @@ static void parseArgs(txCtx h, int argc, char *argv[])
                 default:
                     goto wrongmode;
             }
+            break;
 		case opt__E:
 			switch (h->mode)
 				{

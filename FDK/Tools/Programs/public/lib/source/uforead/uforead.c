@@ -3012,32 +3012,31 @@ static int parseType1HintDataV1(ufoCtx h, GLIF_Rec* glifRec, Transform* transfor
             continue;
         }
 
-        else if (tokenEqualStr(tk, "<hintSetList"))
+        else if (tokenEqualStrN(tk, "<hintSetList", 12))
         {
             if (state != outlineInHintData)
             {
                 fatal(h,ufoErrParse,  "Encountered <hintSetList> when not under <stemhints>. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
             }
             state = outlineInHintSetList;
-
-            tk = getToken(h, state);
-            if (tk == NULL)
+            if (tk->length == 12)
             {
-                fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-            }
- 
-            if (!tokenEqualStr(tk, "id="))
-            {
-                fatal(h,ufoErrParse,  "Failed to find id attribute in <hintSetList id='xxx'>. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-            }
-            
-            tk = getAttribute(h, state);
-            /* We discard the ID - tx assumes the file is up to date */
-
-            tk = getToken(h, state);
-            if (!tokenEqualStr(tk, ">"))
-            {
-                fatal(h,ufoErrParse, "Failed to find end of element for <hintSetList id='xxx'> element. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+                tk = getToken(h, state);
+                if (tk == NULL)
+                {
+                    fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+                }
+                
+                if (tokenEqualStr(tk, "id="))
+                {
+                    tk = getAttribute(h, state);
+                    /* We discard the ID - tx assumes the file is up to date */
+                    tk = getToken(h, state);
+                }
+                if (!tokenEqualStr(tk, ">"))
+                {
+                    fatal(h,ufoErrParse, "Failed to find end of element for <hintSetList id='xxx'> element. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+                }
             }
         }
         else if (tokenEqualStr(tk, "</hintSetList>"))

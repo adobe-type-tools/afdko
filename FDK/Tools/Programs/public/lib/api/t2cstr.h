@@ -10,7 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define T2C_VERSION CTL_MAKE_VERSION(1,0,17)
+#define T2C_VERSION CTL_MAKE_VERSION(1,0,18)
 
 #include "absfont.h"
 
@@ -28,6 +28,9 @@ typedef struct
 #define T2C_FLATTEN_CUBE  (1<<4)
 #define T2C_CUBE_GSUBR (1<<5) /* current charstring is a subr. */
 #define T2C_CUBE_RND (1<<6) /* start (x,y) for a Cube element is rounded to a multiple of 4: used when building real Cube host fonts. Required to be rasterized by PFR. */
+#define T2C_IS_CFF2 (1<<7)
+#define T2C_FLATTEN_BLEND (1<<8)
+        
     void *src;
     ctlStreamCallbacks *stm;
     ctlSubrs subrs;
@@ -43,9 +46,11 @@ typedef struct
     float matrix[6];
     float WV[4];
     void *dbg;
+    unsigned short default_vsIndex; /* this is the vsindex set in the private dict. */
+    VarStore *varStore;
     } t2cAuxData;
 
-int t2cParse(long offset, long endOffset, t2cAuxData *aux, abfGlyphCallbacks *glyph);
+int t2cParse(long offset, long endOffset, t2cAuxData *aux, abfGlyphCallbacks *glyph, ctlMemoryCallbacks *mem);
 
 /* t2cParse() is called to parse a Type 2 charstring into its constituent
    parts.

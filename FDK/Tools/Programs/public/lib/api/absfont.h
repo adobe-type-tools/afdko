@@ -5,6 +5,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define ABSFONT_H
 
 #include "ctlshare.h"
+#include "dynarr.h"
 
 #define ABF_VERSION CTL_MAKE_VERSION(1,0,51)
 
@@ -96,9 +97,47 @@ enum                            /* OrigFontType field values */
     abfOrigFontTypeType1,
     abfOrigFontTypeCID,
     abfOrigFontTypeTrueType,
-    abfOrigFontTypeOCF
+    abfOrigFontTypeOCF,
+    abfOrigFontTypeUFO
     };
 
+typedef struct
+{
+    float startCoord;
+    float peakCoord;
+    float endCoord;
+} varRegionAxis;
+
+    
+typedef struct
+{
+    varRegionAxis* regionAxes; // axisCount itemns
+} varRegion;
+
+typedef struct
+{
+    unsigned short regionCount;
+    int* regionIndices; //regionCount items
+    // for CFF2 data, itemCount and shortDeltaCount are always 0, and there are no deltaSet items.
+} varData;
+
+typedef struct                      /* Font dict array */
+{
+    unsigned long length;
+    unsigned char *data;
+    unsigned long format;
+    
+    // Variation region
+    unsigned short axisCount;
+    unsigned short regionCount;
+    varRegion* variationRegions; // regionCount items
+    
+    // ItemVariationData
+    unsigned short itemVariationDataCount;
+    varData* varDataList;
+} VarStore;
+
+    
 /* Top dictionary data. Comments indicate default/initial values. */
 typedef struct
     {                           
@@ -143,23 +182,35 @@ typedef struct
         long CIDCount;          /* 8720 */
         long UIDBase;           /* ABF_UNSET_INT */
         } cid;
-    struct                      /* Font dict array */
+        struct                      /* Font dict array */
         {
-        long cnt;               /* Value set by client to match array */
-        abfFontDict *array;     /* Array allocated by client to match cnt */
+            long cnt;               /* Value set by client to match array */
+            abfFontDict *array;     /* Array allocated by client to match cnt */
         } FDArray;
-    abfSupplement sup;          /* Supplementary data */
+        VarStore VarStore;
+        abfSupplement sup;          /* Supplementary data */
     } abfTopDict;
 
 /* Private dictionary data. Comments indicate default/initial values. */
 
 typedef struct
     {
+        /* Used to hold stack items from a font with blended values */
+        float value;
+        unsigned short numBlends;
+        float* blendValues;
+    } abfOpEntry;
+    
+typedef struct
+    {
+    /* Note that even for a font with blended values,
+     the non-blended values are always set, using the values from the default font.
+     */
     struct
         {
         long cnt;               /* ABF_EMPTY_ARRAY */
         float array[96];
-        } BlueValues;              
+        } BlueValues;
     struct                         
         {                          
         long cnt;               /* ABF_EMPTY_ARRAY */
@@ -181,19 +232,58 @@ typedef struct
     float StdHW;                /* ABF_UNSET_REAL */
     float StdVW;                /* ABF_UNSET_REAL */
     struct
-        {
+    {
         long cnt;               /* ABF_EMPTY_ARRAY */
         float array[96];
-        } StemSnapH;
+    } StemSnapH;
     struct
-        {
+    {
         long cnt;               /* ABF_EMPTY_ARRAY */
-        float array[96];    
-        } StemSnapV;
+        float array[96];
+    } StemSnapV;
     long ForceBold;             /* 0=false */
     long LanguageGroup;         /* 0 */
     float ExpansionFactor;      /* 0.06 */
     float initialRandomSeed;    /* 0. */
+    long vsindex;
+    struct
+    {
+        struct
+        {
+            long cnt;               /* ABF_EMPTY_ARRAY */
+            abfOpEntry array[96];
+        } BlueValues;
+        struct
+        {
+            long cnt;               /* ABF_EMPTY_ARRAY */
+            abfOpEntry array[96];
+        } OtherBlues;
+        struct
+        {
+            long cnt;               /* ABF_EMPTY_ARRAY */
+            abfOpEntry array[96];
+        } FamilyBlues;
+        struct
+        {
+            long cnt;               /* ABF_EMPTY_ARRAY */
+            abfOpEntry array[96];
+        } FamilyOtherBlues;
+        abfOpEntry BlueScale;
+        abfOpEntry BlueShift;
+        abfOpEntry BlueFuzz;
+        abfOpEntry StdHW;
+        abfOpEntry StdVW;
+        struct
+        {
+            long cnt;               /* ABF_EMPTY_ARRAY */
+            abfOpEntry array[96];
+        } StemSnapH;
+        struct
+        {
+            long cnt;               /* ABF_EMPTY_ARRAY */
+            abfOpEntry array[96];
+        } StemSnapV;
+   } blendValues;
     } abfPrivateDict;
 
 /* Font dictionary data. Comments indicate default/initial values. */
@@ -342,6 +432,11 @@ typedef struct                  /* Glyph information */
     unsigned short cid;         /* CID-keyed: CID */
     unsigned char iFD;          /* CID-keyed: FD index */
     ctlRegion sup;              /* Supplementary data */
+    struct {
+        unsigned short vsindex;
+        unsigned short numBlends;
+         float *blendDeltaArgs;
+        } blendInfo;/* Supplementary data */
     } abfGlyphInfo;
 
 /* The "flags" field specifies glyph attributes. Libraries may augment this

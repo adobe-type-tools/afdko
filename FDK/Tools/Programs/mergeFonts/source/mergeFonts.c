@@ -4194,13 +4194,13 @@ static void dumpDICT(txCtx h, const ctlRegion *region)
 		case cff_Subrs:
 		case cff_defaultWidthX:
 		case cff_nominalWidthX:
-		case cff_reserved22:
-		case cff_reserved23:
-		case cff_reserved24:
-		case cff_reserved25:
+		case cff_vsindex:
+		case cff_blend:
+		case cff_VarStore:
+		case cff_maxstack:
 		case cff_reserved26:
 		case cff_reserved27:
-		case cff_Blend:
+		case cff_BlendLE:
 			flowOp(h, opname[byte]);
 			break;
 		case cff_escape:
@@ -4490,7 +4490,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr)
 		case t2_reserved9:
 		case t2_reserved13:
 		case tx_endchar:
-		case t2_reserved15:
+		case t2_vsindex:
 		case t2_blend:
 		case tx_rmoveto:
 		case tx_hmoveto:

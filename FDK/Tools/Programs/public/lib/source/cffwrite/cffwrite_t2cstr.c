@@ -97,8 +97,10 @@ struct cstrCtx_ {
 		float array[TX_MAX_OP_STACK_CUBE];
 	}
 	stack;
-	float x;                    /* Current x-coordinate */
-	float y;                    /* Current y-coordinate */
+    float x;                    /* Current x-coordinate */
+    float y;                    /* Current y-coordinate */
+    float start_x;             /*  x-coordinate of current path initial moveto */
+    float start_y;              /*  y-coordinate  of current path initial moveto */
 	dnaDCL(char, cstr);         /* Charstring accumulator */
 	struct                      /* Hint stems */
 	{
@@ -318,7 +320,8 @@ static void saveopDirect(cstrCtx h, int op) {
 		}
 		h->stack.cnt = 0;
 	}
-
+    if (op == tx_noop)
+        printf("Help.\n");
 	cstr_saveop(h, op);
 
 	h->pendop = tx_noop;    /* Clear pending op */
@@ -392,11 +395,26 @@ static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0) {
 			break;
 	}
 
+    if ((!doOptimize) && (h->flags & SEEN_MOVETO)) /* add closing line-to, if last op is not the same as the starting moveto. */
+    {
+      if ((h->x != h->start_x) || (h->y != h->start_y))
+      {
+          dx0 = h->start_x - h->x;
+          dy0 = h->start_y - h->y;
+          PUSH(dx0);
+          PUSH(dy0);
+          h->pendop = tx_rlineto;
+          saveop(h, h->pendop);
+          h->x = h->start_x;
+          h->y = h->start_y;
+      }
+    }
+    
 	/* Compute delta and update current point */
 	dx0 = x0 - h->x;
 	dy0 = y0 - h->y;
-	h->x = x0;
-	h->y = y0;
+	h->x = h->start_x = x0;
+	h->y = h->start_y = y0;
 
 	/* Choose format */
 	if ((dx0 == 0.0) && doOptimize) {
@@ -489,28 +507,38 @@ static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1) {
 	else {
 		/* dx1 dy1 rlineto */
 		flushop(h, 2);
-		switch (h->pendop) {
-			case tx_rlineto:
-				PUSH(dx1);
-				PUSH(dy1);
-				break;
-
-			case tx_rrcurveto:
-				PUSH(dx1);
-				PUSH(dy1);
-				saveop(h, t2_rcurveline);
-				break;
-
-			default:
-				saveop(h, h->pendop);
-
-			/* Fall through */
-			case tx_noop:
-				PUSH(dx1);
-				PUSH(dy1);
-				h->pendop = tx_rlineto;
-				break;
-		}
+        if (doOptimize)
+        {
+            switch (h->pendop) {
+                case tx_rlineto:
+                    PUSH(dx1);
+                    PUSH(dy1);
+                    break;
+                    
+                case tx_rrcurveto:
+                    PUSH(dx1);
+                    PUSH(dy1);
+                    saveop(h, t2_rcurveline);
+                    break;
+                    
+                default:
+                    saveop(h, h->pendop);
+                    
+                    /* Fall through */
+                case tx_noop:
+                    PUSH(dx1);
+                    PUSH(dy1);
+                    h->pendop = tx_rlineto;
+                    break;
+            }
+        }
+        else
+        {
+            saveop(h, h->pendop);
+            PUSH(dx1);
+            PUSH(dy1);
+            h->pendop = tx_rlineto;
+        }
 	}
 }
 
@@ -733,44 +761,57 @@ static void glyphCurve(abfGlyphCallbacks *cb,
 					h->pendop = t2_hhcurveto;
 			}
 		}
-		else {
-			/* dx1 dy1 dx2 dy2 dx3 dy3 rrcurveto */
-			flushop(h, 6);
-			switch (h->pendop) {
-				case tx_rlineto:
-					PUSH(dx1);
-					PUSH(dy1);
-					PUSH(dx2);
-					PUSH(dy2);
-					PUSH(dx3);
-					PUSH(dy3);
-					saveop(h, t2_rlinecurve);
-					break;
-
-				case tx_rrcurveto:
-					PUSH(dx1);
-					PUSH(dy1);
-					PUSH(dx2);
-					PUSH(dy2);
-					PUSH(dx3);
-					PUSH(dy3);
-					break;
-
-				default:
-					saveop(h, h->pendop);
-
-				/* Fall through */
-				case tx_noop:
-					PUSH(dx1);
-					PUSH(dy1);
-					PUSH(dx2);
-					PUSH(dy2);
-					PUSH(dx3);
-					PUSH(dy3);
-					h->pendop = tx_rrcurveto;
-					break;
-			}
-		}
+        else {
+            /* dx1 dy1 dx2 dy2 dx3 dy3 rrcurveto */
+            flushop(h, 6);
+            if (doOptimize) {
+                switch (h->pendop) {
+                    case tx_rlineto:
+                        PUSH(dx1);
+                        PUSH(dy1);
+                        PUSH(dx2);
+                        PUSH(dy2);
+                        PUSH(dx3);
+                        PUSH(dy3);
+                        saveop(h, t2_rlinecurve);
+                        break;
+                        
+                    case tx_rrcurveto:
+                        PUSH(dx1);
+                        PUSH(dy1);
+                        PUSH(dx2);
+                        PUSH(dy2);
+                        PUSH(dx3);
+                        PUSH(dy3);
+                        break;
+                        
+                    default:
+                        saveop(h, h->pendop);
+                        
+                        /* Fall through */
+                    case tx_noop:
+                        PUSH(dx1);
+                        PUSH(dy1);
+                        PUSH(dx2);
+                        PUSH(dy2);
+                        PUSH(dx3);
+                        PUSH(dy3);
+                        h->pendop = tx_rrcurveto;
+                        break;
+                }
+            }
+            else
+            {
+                saveop(h, h->pendop);
+                PUSH(dx1);
+                PUSH(dy1);
+                PUSH(dx2);
+                PUSH(dy2);
+                PUSH(dx3);
+                PUSH(dy3);
+                h->pendop = tx_rrcurveto;
+            }
+        }
 	}
 }
 
@@ -1611,6 +1652,7 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
 	long iCstr;
 	unsigned char map[T2_MAX_STEMS];
 	long cstroff = h->tmpoff;
+    int doOptimize = !(g->flags & CFW_NO_OPTIMIZATION);
 
 	switch (h->pendop) {
 		case tx_vmoveto:
@@ -1632,7 +1674,26 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
 			saveop(h, h->pendop);
 			break;
 	}
-	if ((g->flags & CFW_IS_CUBE) && (h->cstr.cnt > 0)) {
+
+    if ((!doOptimize) && (h->flags & SEEN_MOVETO)) /* add closing line-to, if last op is not the same as the starting moveto. */
+    {
+        if ((h->x != h->start_x) || (h->y != h->start_y))
+        {
+            float dx0;
+            float dy0;
+            dx0 = h->start_x - h->x;
+            dy0 = h->start_y - h->y;
+            PUSH(dx0);
+            PUSH(dy0);
+            h->pendop = tx_rlineto;
+            saveop(h, h->pendop);
+            h->x = h->start_x;
+            h->y = h->start_y;
+        }
+    }
+
+    
+    if ((g->flags & CFW_IS_CUBE) && (h->cstr.cnt > 0)) {
 		clearop(h);
 	}
 	else {
@@ -1982,8 +2043,8 @@ static void dbt2cstr(long length, unsigned char *cstr) {
 		/* 12 */ "escape",
 		/* 13 */ "reserved13",
 		/* 14 */ "endchar",
-		/* 15 */ "reserved15",
-		/* 16 */ "reserved16",
+		/* 15 */ "vsindex",
+		/* 16 */ "blend",
 		/* 17 */ "callgrel",
 		/* 18 */ "hstemhm",
 		/* 19 */ "hintmask",
@@ -2078,7 +2139,7 @@ static void dbt2cstr(long length, unsigned char *cstr) {
 			case tx_callsubr:
 			case tx_return:
 			case t2_reserved13:
-			case t2_reserved15:
+			case t2_vsindex:
 			case t2_blend:
 			case tx_callgrel:
 			case tx_rmoveto:
