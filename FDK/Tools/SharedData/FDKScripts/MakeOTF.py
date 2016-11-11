@@ -464,7 +464,7 @@ def readOptionFile(filePath, makeOTFParams, optionIndex):
 				path = os.path.join(fprDir, value)
 				path = os.path.abspath(path)
 				fileDir,fileName = os.path.split(path)
-				relativeDirPath = getRelativeDirPath(fileDir, currentDir)
+				relativeDirPath = getRelativeDirPath(fileDir, os.path.abspath(currentDir))
 				if relativeDirPath:
 					path = os.path.join(relativeDirPath, fileName)
 				# Now let's see if we can reduce this to a path relative to the current directory.
@@ -701,34 +701,8 @@ def getRelativeDirPath(absPath1, abspath2):
 	Return a relative path to the first dir from the second directory
 	If the paths have no common prefix, return None
 	"""
-	parts1 = re.findall(r"([^\\/]+)", absPath1)
-	parts2 = re.findall(r"([^\\/]+)", abspath2)
-
-	i = 0
-	try:
-		while parts1[i] == parts2[i]:
-			i +=1
-	except IndexError:
-		pass
-
-	# i now references the first dir level which differs.
-	if i == 0:
-		return None
-	numDirs1 = len(parts1)
-	numDirs2 = len(parts2)
-	if absPath1 == abspath2:
-		relPath = "."
-	elif i == numDirs1: # abspath2 is a subdirectory under absPath1
-		numLevelsUp = len(parts2[i:])
-		relParts = [".."]*numLevelsUp
-		relPath = apply(os.path.join, relParts)
-	elif i == numDirs2: # abspath1 is a subdirectory under absPath2
-		relParts = parts1[i:]
-		relPath = apply(os.path.join, relParts)
-	else:
-		numLevelsUp = len(parts2[i:])
-		relParts = [".."]*numLevelsUp + parts1[i:]
-		relPath = apply(os.path.join, relParts)
+	relPath = os.path.relpath(absPath1, abspath2)
+	
 	return relPath
 
 
@@ -903,11 +877,14 @@ def getOptions(makeOTFParams):
 				print "makeotf [Error] The '%s' option must be followed by the path to the FontMenuNameDB file." % (arg)
 				continue
 			i += 1
-			if not os.path.exists( file_path):
-				error = 1
-				print "makeotf [Error] Could not find the FontMenuNameDB file at '%s'." % file_path
-				continue
-			exec("makeOTFParams.%s%s = file_path" % (kFileOptPrefix, kFMB))
+			if file_path == "None":
+				exec("makeOTFParams.%s%s = file_path" % (kFileOptPrefix, kFMB))
+			else:
+				if not os.path.exists( file_path):
+					error = 1
+					print "makeotf [Error] Could not find the FontMenuNameDB file at '%s'." % file_path
+					continue
+				exec("makeOTFParams.%s%s = file_path" % (kFileOptPrefix, kFMB))
 
 		elif arg == kMOTFOptions[kGOADB][1]:
 			kMOTFOptions[kGOADB][0] = i + optionIndex
@@ -1584,7 +1561,9 @@ def setMissingParams(makeOTFParams):
 	found = 0
 	specified = 0
 	path = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kFMB))
-	if not path: # it was not specified
+	if path == "None":
+		exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kFMB))
+	elif not path: # it was not specified
 		newpath = os.path.join(makeOTFParams.fontDirPath, kDefaultFMNDBPath)
 		found = 0
 		for path in [newpath, lookUpDirTree(newpath)]:
@@ -2227,51 +2206,9 @@ def makeRelativePath(curDir, targetPath):
 		return targetPath
 
 	targetPath = os.path.abspath(targetPath)
-	targetBaseName = os.path.basename(targetPath)
-	tdir = os.path.dirname(targetPath)
-	if tdir == curDir:
-		return targetBaseName
-
-	commonPrefix = os.path.commonprefix([tdir, curDir])
-	if not os.path.exists(commonPrefix) or (commonPrefix in ["/", "\\"]):
-		return targetPath # the absolute path
-
-	relDir = None
-	# the common prefix does exist.
-	commonLen = len(commonPrefix)
-	tdir = tdir[commonLen:]
-	cDir = curDir[commonLen:]
-	if not cDir:
-		# target is in a sub-directory of the font directory.
-		if tdir[0] in ["/", "\\"]:
-			tdir = tdir[1:]
-		targetPath = os.path.join(tdir, targetBaseName)
-	elif not tdir:
-		# target is in a parent directory of the font directory.
-		if cDir[0] in ["/", "\\"]:
-			cDir = cDir[1:]
-		dirList = re.findall(r"([^\\/]+)", cDir)
-		numDir = len(dirList)
-		relDir = (".."+os.path.sep)*numDir
-		targetPath = os.path.join(relDir, targetBaseName)
-	else:
-		if cDir[0] in ["/", "\\"]:
-			cDir = cDir[1:]
-		if tdir[0] in ["/", "\\"]:
-			tdir = tdir[1:]
-		# Both branch for a higher level.
-		# First build the reative path up.
-		dirList = re.findall(r"([^\\/]+)", cDir)
-		numDir = len(dirList)
-		relDir = (".."+os.path.sep)*numDir
-		targetPath = os.path.join(relDir, targetBaseName)
-		targetPath = os.path.join(relDir, tdir, targetBaseName)
-
+	curDir = os.path.abspath(curDir)
+	targetPath = os.path.relpath(targetPath, curDir)
 	return targetPath
-
-
-
-
 
 def	makeRelativePaths(makeOTFParams):
 	inputFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kInputFont))
