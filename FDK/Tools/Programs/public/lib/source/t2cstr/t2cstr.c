@@ -135,7 +135,7 @@ struct t2cCtx
 #define INDEX(i) (h->stack.array[i])
 #define INDEX_BLEND(i) (h->stack.blendArray[i])
 #define POP() (h->stack.array[--h->stack.cnt])
-#define PUSH(v) {h->stack.blendArray[h->stack.blendCnt++].value =(float)(v);  h->stack.array[h->stack.cnt++]=(float)(v);}
+#define PUSH(v) {if (h->aux->flags & T2C_IS_CFF2) h->stack.blendArray[h->stack.blendCnt++].value =(float)(v);  h->stack.array[h->stack.cnt++]=(float)(v);}
 
 #define ABS(v)	(((v)<0)?-(v):(v))
 #define ARRAY_LEN(a)	(sizeof(a)/sizeof(a[0]))
@@ -1206,7 +1206,7 @@ static void clearBlendStack(t2cCtx h)
         }
         h->flags &= ~SEEN_CFF2_BLEND;
     }
-
+    h->stack.blendCnt = 0;
 }
 
 static void setNumMasters(t2cCtx h)
@@ -1243,6 +1243,9 @@ static int t2Decode(t2cCtx h, long offset)
 				case t2_reserved13:
                     return t2cErrInvalidOp;
                 case t2_vsindex:
+                    h->glyph->info->blendInfo.vsindex = POP();
+                    setNumMasters(h);
+                    break;
 				case tx_callgrel:
 				{
 				int result;
@@ -1271,7 +1274,7 @@ static int t2Decode(t2cCtx h, long offset)
 				case tx_compose:
 				
 				CHKUFLOW(4);
-                /* If there is a transform left over from a previous path op, lear it. */
+                /* If there is a transform left over from a previous path op, clear it. */
                 if (h->flags & USE_MATRIX)
                 {
                     h->flags &= ~USE_MATRIX;
@@ -2353,8 +2356,11 @@ static int t2DecodeSubr(t2cCtx h, long offset)
 			return 0;
 		case t2_blend:
             {
+                int result = 0;
                 h->flags &= SEEN_CFF2_BLEND;
-                int result = handleBlend(h);
+                if (h->stack.numRegions == 0)
+                    setNumMasters(h);
+                result = handleBlend(h);
                 if (result)
                     return result;
             }

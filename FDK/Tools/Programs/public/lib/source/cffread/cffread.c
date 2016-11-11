@@ -59,7 +59,7 @@ typedef unsigned short SID;		/* String identifier */
 
 typedef struct          		/* INDEX */
 {
-	unsigned short count;		/* Element count */
+	unsigned long count;		/* Element count */
 	OffSize offSize;			/* Offset size */
 	Offset offset;				/* Offset start */
 	Offset data;				/* Data start - 1 */
@@ -984,17 +984,15 @@ static void setNumMasters(cfrCtx h, unsigned int vsindex)
 
 static float AxisCoord2Real(short val)
 {
-    float newVal = (val >> 14) + ((val & 0x3fff) / 16384.0);
+    float newVal = (float)((val >> 14) + ((val & 0x3fff) / 16384.0));
     return newVal;
 }
 
 static void readVarStore(cfrCtx h)
 {
     unsigned short length;
-    unsigned char* data;
     unsigned long offset;
     unsigned short format;
-    unsigned short count;
     unsigned int i,j;
     unsigned int vstoreStart = h->region.VarStore.begin + 2;
     unsigned int curPos;
@@ -1149,7 +1147,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
 		switch (byte0)
         {
             case cff_vsindex:
-                private->vsindex = INDEX_INT(0);
+                private->vsindex = (unsigned short)INDEX_INT(0);
                 setNumMasters(h, private->vsindex);
                 break;
 
@@ -1780,7 +1778,7 @@ static void readFDArray(cfrCtx h)
 static void readStrings(cfrCtx h)
 {
 	Offset offset;
-	int i;
+	unsigned long i;
 	char *p;
 	ctlRegion FontName;
 	long lenFontName = 0;
@@ -1836,7 +1834,7 @@ static void readStrings(cfrCtx h)
 	h->string.offsets.array[i] = offset;
     
 	/* Read string data */
-	for (i = 0; i < h->string.ptrs.cnt; i++)
+	for (i = 0; i < (unsigned long)h->string.ptrs.cnt; i++)
     {
 		long length =
         h->string.offsets.array[i + 1] - h->string.offsets.array[i];
@@ -1850,7 +1848,7 @@ static void readStrings(cfrCtx h)
 /* Read CharStrings INDEX. */
 static void readCharStringsINDEX(cfrCtx h, short flags)
 {
-	long i;
+	unsigned long i;
 	INDEX index;
 	Offset offset;
     
@@ -2113,14 +2111,14 @@ static void predefCharset(cfrCtx h, int cnt, const SID *charset)
 static void readCharSetFromPost(cfrCtx h)
 {
     Offset offset;
-    int i;
+    unsigned long i;
     char *p;
     ctlRegion FontName;
     long lenFontName = 0;
     long lenStrings = ARRAY_LEN(stdstrs);
     
     /* init string.offsets and h->string.ptrs */
-    h->index.string.count = h->glyphs.cnt;
+    h->index.string.count = (short)h->glyphs.cnt;
     dnaSET_CNT(h->string.offsets, h->index.string.count + 1);
     dnaSET_CNT(h->string.ptrs, h->index.string.count);
     
@@ -2167,7 +2165,7 @@ static void readCharSetFromPost(cfrCtx h)
     h->string.offsets.array[i] = offset;
     
     /* Read string data */
-    for (i = 0; i < h->string.ptrs.cnt; i++)
+    for (i = 0; i < (unsigned long)h->string.ptrs.cnt; i++)
     {
         long length =
         h->string.offsets.array[i + 1] - h->string.offsets.array[i];
@@ -2527,7 +2525,7 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
     else
     {
         /* We use the TopDICTINDEX region to just hold the TopDict data block. */
-        h->header.offSize = read2(h); /* In CFF2, this is the size of the Top Dict. */
+        h->header.offSize = (OffSize)read2(h); /* In CFF2, this is the size of the Top Dict. */
         h->region.TopDICTINDEX.begin = h->region.Header.end;
         h->region.TopDICTINDEX.end = h->region.TopDICTINDEX.begin + h->header.offSize;
         h->flags |= CFR_IS_CFF2;

@@ -245,7 +245,7 @@ typedef struct
     long LanguageGroup;         /* 0 */
     float ExpansionFactor;      /* 0.06 */
     float initialRandomSeed;    /* 0. */
-    long vsindex;
+    unsigned short vsindex;
     struct
     {
         struct

@@ -163,7 +163,7 @@ typedef struct				/* Font record */
 
 typedef struct				/* CFF subr data */
 	{
-	unsigned short count;
+	unsigned long count;
 	unsigned char offSize;
 	unsigned long offset;	/* Offset array base */
 	unsigned long dataref;
@@ -3796,10 +3796,10 @@ static void dumpINDEX(txCtx h, char *title, const ctlRegion *region,
 		return;
 	else
 		{
-		long i;
+		unsigned long i;
 		long offset;
 		long dataref;
-        unsigned short count;
+        unsigned long count;
         unsigned short countSize;
 		unsigned char offSize = 0;	/* Suppress optimizer warning */
 		ctlRegion element;
@@ -3826,7 +3826,7 @@ static void dumpINDEX(txCtx h, char *title, const ctlRegion *region,
 		if (h->dcf.level < 5)
 			{
 			/* Dump header */
-			fprintf(fp, "count  =%hu\n", count);
+			fprintf(fp, "count  =%lu\n", count);
 			if (count == 0)
 				return;
 			fprintf(fp, "offSize=%u\n", offSize);
@@ -4174,14 +4174,14 @@ static void flowCommand(txCtx h, char *opname)
 static void callsubr(txCtx h, 
 					 SubrInfo *info, const ctlRegion *caller, long left)
 	{	
-	long arg;
+    long arg;
 	ctlRegion callee;
 	long saveoff = caller->end - left;
 
 	/* Validate and unbias subr number */
 	CHKUFLOW(1);
 	arg = info->bias + (long)POP();
-	if (arg < 0 || arg >= info->count)
+	if (arg < 0 || (arg >= (long)info->count))
 		fatal(h, "invalid subr call");
 
 	/* Compute subr region */
@@ -5557,7 +5557,6 @@ static void ufoReadFont(txCtx h, long origin)
 static void readCmap14(txCtx h)
 {
     unsigned long numVarSelectorRecords;
-    unsigned long i;
     
     /* Skip format and length fields */
     (void)read2(h);
