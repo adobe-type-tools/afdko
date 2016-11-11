@@ -4,7 +4,7 @@ __copyright__ = """Copyright 2016 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-buildMasterOTFs.py  1.1 Nov 2 2016
+buildMasterOTFs.py  1.2 Nov 10 2016
 Build master source OpenType/CFF fonts from a Superpolator design space file and the UFO master source fonts.
 
 python buildMasterOTFs.py -h
@@ -15,13 +15,19 @@ python buildMasterOTFs.py  <path to design space file>
 __help__  = __usage__  + """
 The script makes a number of assumptions.
 1) all the master source fonts are blend compatible in all their data.
-2) For each source master font, all the files needed to build an OT font with makeotf are in the same directory as the UFO font, and have the default file names expected by makeotf. There must be a FontMenuNameDB file, with an entry which matches the PostScript name of the default font.
+2) Each master source font is in a separate directory from the other master
+source fonts, and each of these directories provides the default meta data files 
+expected by the 'makeotf' command:
+- features
+- font.ufo
+- FontMenuNameDB within the directory or no more than three parent directories up.
+- GlyphAliasAndOrderDB within the directory or no more than three parent directories up.
 3) The Adobe AFDKO is installed: the script calls 'tx' and 'makeotf'.
 4) <source> element for the default font in the design space file has
 the child element <info copy="1">; this is used to identify which master is
 the default font.
 
-Any Python interpeter may be used, not just the AFDKO Python. If the AFDKO is installed, teh command 'buildMasterOTFs' will call the script with the AFDKOPython.
+Any Python interpeter may be used, not just the AFDKO Python. If the AFDKO is installed, the command 'buildMasterOTFs' will call the script with the AFDKOPython.
 
 The script will build a master source OpenType/CFF font for each master source UFO font, using the same file name, but with the extension '.otf'.
 """
