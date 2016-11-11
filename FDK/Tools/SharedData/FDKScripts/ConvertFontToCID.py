@@ -558,7 +558,7 @@ def getFontName(fPath):
 
 def getBlueFuzz(fPath):
 	blueFuzz = 1.0
-	command = "tx -dump -0 \"%s\"s 2>&1" % (fPath)
+	command = "tx -dump -0 \"%s\" 2>&1" % (fPath)
 	data = FDKUtils.runShellCmd(command)
 	if not data:
 		raise FontInfoParseError("Error: Failed getting  log from tx from %, when trying to get FontName." % (fPath))
