@@ -1214,7 +1214,7 @@ class CFFFontData:
 				report = FDKUtils.runShellCmd(command)
 				self.logMsg(report)
 				if "fatal" in report:
-					raise IOError("Failed to convert hinted font temp file with tx %s. Maybe target font font file '%s' is set to read-only." % (tempPath, outFilePath))
+					raise IOError("Failed to convert hinted font temp file with tx %s. Maybe target font font file '%s' is set to read-only. %s" % (tempPath, outFilePath, report))
 	
 			if os.path.exists(tempPath):
 				os.remove(tempPath)
