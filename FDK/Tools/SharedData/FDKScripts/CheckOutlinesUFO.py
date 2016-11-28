@@ -1,8 +1,8 @@
-__copyright__ = """Copyright 2015-16 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+__copyright__ = """Copyright 2015, 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
 __usage__ = """
-   checkOutlinesUFO program v1.17 Aug 3 2016
+   checkOutlinesUFO program v1.18 Nov 23 2016
 
    checkOutlinesUFO [-e] [-g glyphList] [-gf <file name>] [-all] [-noOverlap] [-noBasicChecks] [-q] [-setMinArea <n>] [-setTolerance <n>] [-wd]
 
@@ -667,7 +667,7 @@ def removeColinearLines(newGlyph, changed, msg, options):
 
 
 def splitTouchingPaths(newGlyph):
-	""" This hack fixes a design difference between the Adobe checkOutlines logic and booleanGlyph.
+	""" This hack fixes a design difference between the Adobe checkOutlines logic and booleanGlyph, and is used only when comparing the two.
 	With checkOutlines, if only a single point on a contour lines is coincident with the path of the another contour,
 	the paths are NOT merged. with booleanGlyph, they are merged. An example is the vertex of a diamond shape having the same
 	y coordinate as a horizontal line in another path, but no other overlap.
@@ -775,40 +775,65 @@ def doCleanup(newGlyph, oldDigest, changed, msg, options):
 
 	return newGlyph, newDigest, changed, msg
 
+def setMaxP(contour):
+	# Find the topmost point
+	# If more than one point has the same Y, choose the leftmost.
+	# Used to sort contours.
+	maxP = contour[0]
+	for point in contour:
+		if point.segmentType == None:
+			continue
+		if maxP.y < point.y:
+			maxP = point
+		elif maxP.y == point.y:
+			if maxP.x <  point.y:
+				maxP == point
+	contour.maxP = maxP
+	
+def sortContours(c1, c2):
+	if not hasattr(c1,'maxP'):
+		setMaxP(c1)
+	if not hasattr(c2, 'maxP'):
+		setMaxP(c2)
+		
+	if c1.maxP.y > c2.maxP.y:
+		return 1
+	elif c1.maxP.y < c2.maxP.y:
+		return -1
 
+	if c1.maxP.x > c2.maxP.x:
+		return 1
+	elif c1.maxP.x < c2.maxP.x:
+		return -1
+	
+	lc1 = len(c1)
+	lc2 = len(c2)
+	if len(lc1)  > len(lc2):
+		return 1
+	elif len(lc1)  < len(lc2):
+		return -1
+	return 0
+		
+		
 def restoreContourOrder(fixedGlyph, originalContours):
 	""" The pyClipper library first sorts all the outlines by x position, then y position.
 	I try to undo that, so that un-touched contours will end up in the same order as the
 	in the original, and any conbined contours will end up in a similar order.
-	The reason I try to match new contours to the old is to reduce arbitraryness in the new contour order.
-	If contours are sorted in x, then y position, then contours in the same
-	glyph from two different  instance fonts which are created from a set of
-	master designs, and then run through this program may, end up with different
-	contour order. I can't completely avoid this, but I can considerably reduce how often it happens.
+	The reason I try to match new contours to the old is to reduce arbitraryness in the new contour order between similar fonts. I can't completely avoid this, but I can  reduce how often it happens.
 	"""
 	newContours = list(fixedGlyph)
+	if len(newContours) > 1:
+		newContours.sort(sortContours)
+	else:
+		setMaxP(newContours[0])
 	newIndexList = range(len(newContours))
 	newList = [[i,newContours[i]] for i in newIndexList]
 	oldIndexList = range(len(originalContours))
 	oldList = [[i,originalContours[i]] for i in oldIndexList]
 	orderList = []
 
-	# Match start points, This will fix the order of the contours that have not been touched.
-	for i in newIndexList:
-		ci, contour = newList[i]
-		firstPoint = contour[0]
-		for j in oldIndexList:
-			ci2, oldContour = oldList[j]
-			oldFP = oldContour[0]
-			if (firstPoint.x == oldFP.x) and (firstPoint.y == oldFP.y):
-				newList[i] = None
-				orderList.append([ci2, ci])
-				break
-	newList = filter(lambda entry: entry != None, newList)
-
-	# New contour start point did not match any of old contour start points.
-	# Look through original contours, and see if the start point for any old contour
-	# is on the new contour.
+	# Match contours that have not changed.
+	# This will fix the order of the contours that have not been touched.
 	numC = len(newList)
 	if numC > 0: # If the new contours aren't already all matched..
 		newIndexList = range(numC)
@@ -817,61 +842,55 @@ def restoreContourOrder(fixedGlyph, originalContours):
 			for j in oldIndexList:
 				ci2, oldContour = oldList[j]
 				oldFP = oldContour[0]
-				matched = 0
-				pi = -1
-				for point in contour:
-					pi += 1
-					if point.segmentType == None:
-						continue
-					if (oldFP.x == point.x) and (oldFP.y == point.y):
-						newList[i] = None
-						orderList.append([ci2, ci])
-						matched = 1
-						contour.setStartPoint(pi)
-						break
-				if matched:
-					break
+				# skip if is not the same set of values.
+				if len(oldContour) != len(contour):
+					continue
+				if oldContour[0] != oldContour[0]:
+					continue
+				orderList.append([ci2, ci])
+				newList[i] = None
+				matched = 1
+				break
 
 	newList = filter(lambda entry: entry != None, newList)
 	numC = len(newList)
-	# Start points didn't all match. Check each extreme for a match.
-	for ti in range(4):
-		if numC > 0:
-			newIndexList = range(numC)
-			for i in newIndexList:
-				ci, contour = newList[i]
-				maxP = contour[0]
-				for point in contour:
+	# Check each extreme for a match.
+	if numC > 0:
+		newIndexList = range(numC)
+		for i in newIndexList:
+			ci, contour = newList[i]
+			maxP = contour.maxP
+			# Now search the old contour list.
+			for j in oldIndexList:
+				ci2, oldContour = oldList[j]
+				matched = 0
+				for point in oldContour:
 					if point.segmentType == None:
 						continue
-					if ti == 0:
-						if maxP.y < point.y:
-							maxP = point
-					elif ti == 1:
-						if maxP.y > point.y:
-							maxP = point
-					elif ti == 2:
-						if maxP.x < point.x:
-							maxP = point
-					elif ti == 3:
-						if maxP.x > point.x:
-							maxP = point
-				# Now search the old contour list.
-				for j in oldIndexList:
-					ci2, oldContour = oldList[j]
-					matched = 0
-					for point in oldContour:
-						if point.segmentType == None:
-							continue
-						if (maxP.x == point.x) and (maxP.y == point.y):
-							newList[i] = None
-							orderList.append([ci2, ci])
-							matched = 1
-							break
-					if matched:
+					if (maxP.x == point.x) and (maxP.y == point.y):
+						newList[i] = None
+						orderList.append([ci2, ci])
+						matched = 1
+						# See if we can set the start point in the new contour # to match the old one.
+						if not ((oldContour[0].x == contour[0].x) and (oldContour[0].y == contour[0].y)):
+							oldSP = oldContour[0]
+							for pi in range(len(contour)):
+								point = contour[pi]
+								if (point.x == oldSP.x) and (point.y == oldSP.y):
+									contour.setStartPoint(pi)
+						
 						break
-			newList = filter(lambda entry: entry != None, newList)
-			numC = len(newList)
+				if matched:
+					break
+		newList = filter(lambda entry: entry != None, newList)
+		numC = len(newList)
+
+	# If the algorithm didn't work for some contours,
+	# just add them on the end.
+	if numC != 0:
+		ci2 = len(newContours)
+		for ci, contour in newList:
+			orderList.append([ci2, ci])
 
 	# Now re-order the new list
 	orderList.sort()
@@ -879,13 +898,6 @@ def restoreContourOrder(fixedGlyph, originalContours):
 	for ci2, ci in orderList:
 		newContourList.append(newContours[ci])
 
-	# If the algorithm didn't work for some contours,
-	# just add them on the end.
-	if numC != 0:
-		for ci, contour in newList:
-			newContourList.append(contour)
-			keys = dir(contour)
-			keys.sort()
 
 	numC = len(newContourList)
 	fixedGlyph.clearContours()
