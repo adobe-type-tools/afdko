@@ -2251,6 +2251,8 @@ def	makeRelativePaths(makeOTFParams):
 
 	uvsFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kUVSPath))
 	uvsFilePath = makeRelativePath(fontDir, uvsFilePath)
+	if uvsFilePath:
+		exec("makeOTFParams.%s%s = uvsFilePath" % (kFileOptPrefix, kUVSPath))
 
 	if makeOTFParams.tempFontPath:
 		 makeOTFParams.tempFontPath = makeRelativePath(fontDir, makeOTFParams.tempFontPath)
