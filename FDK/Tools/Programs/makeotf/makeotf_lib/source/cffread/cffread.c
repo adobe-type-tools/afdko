@@ -2199,7 +2199,9 @@ static void cffRead(cffCtx h) {
 	}
 	else {
 		/* Read Private DICT */
-		DICTRead(h, h->dict.Private.length, h->dict.Private.offset, 1);
+                if (h->dict.Private.length > 0) {
+    		    DICTRead(h, h->dict.Private.length, h->dict.Private.offset, 1);
+                }
 
 		/* Read Subrs index */
 		if (h->dict.Subrs != 0) {
