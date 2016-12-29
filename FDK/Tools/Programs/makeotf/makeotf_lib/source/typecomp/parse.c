@@ -460,7 +460,7 @@ static void readEncoding(parseCtx h) {
 	if (!h->encoding.std) {
 		int i;
 		char *p;
-		int length;
+		int length = 0;
 		long index[256]; /* Glyph name index, b31-8 buf. index, b7-0 length */
 
 		/* Initialize index */
@@ -1522,6 +1522,8 @@ void parseFont(tcCtx g, Font *font) {
 	h->subrs.cnt = 0;
 	h->component.chars.cnt = 0;
 	h->component.inorder = 0;
+	h->subset.nGlyphs = 0;
+
 	h->font->synthetic.oblique_term = 0.0;
 
 	if (g->flags & TC_NOOLDOPS) {
@@ -2090,6 +2092,7 @@ static void saveString(parseCtx h, DICT *dict, int iKey) {
 		strng = psConvLiteral(h->ps, token, &length);
 	}
 	else {
+                length = 0;
 		badKeyValue(h, iKey);
 	}
 
