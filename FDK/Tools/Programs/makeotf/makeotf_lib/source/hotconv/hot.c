@@ -405,7 +405,9 @@ char *hotReadFont(hotCtx g, int flags, int *psinfo,  hotReadFontOverrides *fontO
 	tcSetWeightOverride(g->ctx.tc,  fontOverride->syntheticWeight);
 	tcCompactFont(g->ctx.tc, tcflags);
 
-	g->cb.tmpClose(g->cb.ctx); /* temporary hack to write out tmp cff file. */
+	if (g->cb.tmpClose) {
+          g->cb.tmpClose(g->cb.ctx); /* temporary hack to write out tmp cff file. */
+        }
 
 	/* Parse CFF data and get global font information */
 	cb.ctx = g;
