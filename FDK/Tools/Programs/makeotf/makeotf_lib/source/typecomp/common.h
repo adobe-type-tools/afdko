@@ -9,11 +9,12 @@
 
 #include "dynarr.h"
 #include "typecomp.h"
+#include "stdint.h"
 
 /* Types */
 /*typedef long Fixed;	*/			/* 16.16 fixed point */
 typedef unsigned char OffSize;  /* Offset size indicator */
-typedef unsigned long Offset;   /* 1, 2, 3, or 4-byte offset */
+typedef uint32_t Offset;   /* 1, 2, 3, or 4-byte offset */
 typedef unsigned short SID;     /* String id */
 typedef struct {                /* INDEX table header */
 	unsigned short count;
@@ -135,12 +136,12 @@ typedef struct {
 /* Package context */
 struct tcCtx_ {
 	tcCallbacks cb;     /* Client callbacks */
-	long flags;         /* Compression specification flags */
-	long status;        /* Program status flags */
+	int32_t flags;         /* Compression specification flags */
+	int32_t status;        /* Program status flags */
 #define TC_MESSAGE      (1 << 0)  /* Flags message for font already posted */
 #define TC_EURO_ADDED   (1 << 1)  /* Flags Euro glyph added to font */
 	short nMasters;     /* Number of masters */
-	unsigned long maxNumSubrs;
+	uint32_t maxNumSubrs;
 	SubrParseData *spd; /* Subroutinizer parse data */
 	struct {            /* --- Module contexts */
 		dnaCtx dnaCtx;

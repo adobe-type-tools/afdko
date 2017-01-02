@@ -12,8 +12,9 @@
 
 #include "common.h"
 #include "pstoken.h"
+#include <stdint.h>
 
-typedef long Fixed;
+typedef int32_t Fixed;
 
 #define CS_MAX_SIZE 65535   /* Max charstring size (bytes) */
 

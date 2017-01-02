@@ -2359,7 +2359,7 @@ static Blend *setCntrMask(recodeCtx h, Blend *p, int vert, HintMask cntrmask) {
 #endif
 			{
 				/* Stem list full; just find the best match */
-				Fixed smallest = LONG_MAX;
+				Fixed smallest = INT32_MAX;
 
 				for (i = 0; i < h->stem.list.cnt; i++) {
 					int j;
@@ -2907,7 +2907,7 @@ static void recodePath(recodeCtx h) {
 	setBlend(h, h->path.y, 0);
 
 	/* Handle charstring width */
-	if (h->path.width[0] == LONG_MIN) {
+	if (h->path.width[0] == INT32_MIN) {
 		if (h->idType != SubrType) {
 			badChar(h); /* Charstring has no width! */
 		}
@@ -3349,7 +3349,7 @@ static void cstrRecode(tcCtx g, unsigned length, unsigned char *cstr,
 	h->pend.move = 1;
 	h->pend.trans = 0;
 
-	h->path.width[0] = LONG_MIN;
+	h->path.width[0] = INT32_MIN;
 	h->path.segs.cnt = 0;
 	h->path.ops.cnt = 0;
 	h->path.args.cnt = 0;
@@ -4220,7 +4220,7 @@ static void saveTemplateGlyphData(recodeCtx h, TemplateGlyphData *templateGlyph)
 
 	for (h->newGlyph.iMaster = 0; h->newGlyph.iMaster < h->nMasters; h->newGlyph.iMaster++) {
 		int iMaster = h->newGlyph.iMaster;
-		templateGlyph->bbox.left[iMaster] = LONG_MAX;
+		templateGlyph->bbox.left[iMaster] = INT32_MAX;
 		templateGlyph->bbox.bottom[iMaster] = 0;
 		templateGlyph->bbox.right[iMaster] = 0;
 		templateGlyph->bbox.top[iMaster] = 0;

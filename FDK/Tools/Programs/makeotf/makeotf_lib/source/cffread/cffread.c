@@ -34,7 +34,7 @@ static short exenc[] = {
 #define ABS(v)            ((v) < 0 ? -(v) : (v))
 
 /* 16.16 fixed point arithmetic */
-typedef long Fixed;
+typedef int32_t Fixed;
 #define fixedScale    65536.0
 #define FixedMax    ((Fixed)0x7FFFFFFF)
 #define FixedMin    ((Fixed)0x80000000)
