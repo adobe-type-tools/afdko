@@ -3029,7 +3029,6 @@ static void cidReadChars(parseCtx h) {
 	unsigned nChars = 0;
 	int tableBytes = h->cid.GDBytes + h->cid.FDBytes;
 	SID *sid = MEM_NEW(g, sizeof(SID) * h->cid.Count);
-	unsigned short *subsetSID = NULL;
 	unsigned short *pSubsetSID = NULL;
 
 
