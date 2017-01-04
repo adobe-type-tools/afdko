@@ -17,13 +17,13 @@ void OS_2Free(hotCtx g);
 
 /* Supplementary functions */
 void OS_2SetUnicodeRanges(hotCtx        g,
-                          unsigned long ulUnicodeRange1,
-                          unsigned long ulUnicodeRange2,
-                          unsigned long ulUnicodeRange3,
-                          unsigned long ulUnicodeRange4);
+                          uint32_t ulUnicodeRange1,
+                          uint32_t ulUnicodeRange2,
+                          uint32_t ulUnicodeRange3,
+                          uint32_t ulUnicodeRange4);
 void OS_2SetCodePageRanges(hotCtx        g,
-                           unsigned long ulCodePageRange1,
-                           unsigned long ulCodePageRange2);
+                           uint32_t lCodePageRange1,
+                           uint32_t ulCodePageRange2);
 void OS_2SetCharIndexRange(hotCtx         g,
                            unsigned short usFirstCharIndex,
                            unsigned short usLastCharIndex);

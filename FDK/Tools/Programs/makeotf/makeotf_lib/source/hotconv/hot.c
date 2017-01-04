@@ -1825,14 +1825,14 @@ void hotOut2(hotCtx g, short value) {
 }
 
 /* Output OTF data as 3-byte number in big-endian order */
-void hotOut3(hotCtx g, long value) {
+void hotOut3(hotCtx g, int32_t value) {
 	g->cb.otfWrite1(g->cb.ctx, value >> 16);
 	g->cb.otfWrite1(g->cb.ctx, value >> 8);
 	g->cb.otfWrite1(g->cb.ctx, value);
 }
 
 /* Output OTF data as 4-byte number in big-endian order */
-void hotOut4(hotCtx g, long value) {
+void hotOut4(hotCtx g, int32_t value) {
 	g->cb.otfWrite1(g->cb.ctx, value >> 24);
 	g->cb.otfWrite1(g->cb.ctx, value >> 16);
 	g->cb.otfWrite1(g->cb.ctx, value >> 8);

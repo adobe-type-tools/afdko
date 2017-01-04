@@ -439,8 +439,8 @@ void CDECL hotMsg(hotCtx g, int level, char *fmt, ...);
 void hotQuitOnError(hotCtx g);
 
 void hotOut2(hotCtx g, short value);
-void hotOut3(hotCtx g, long value);
-void hotOut4(hotCtx g, long value);
+void hotOut3(hotCtx g, int32_t value);
+void hotOut4(hotCtx g, int32_t value);
 
 void hotCalcSearchParams(unsigned unitSize, long nUnits,
                          unsigned short *searchRange,

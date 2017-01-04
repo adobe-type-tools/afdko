@@ -38,7 +38,7 @@ static void dbgPrintUV(UV uv);
 
 #endif /* HOT_DEBUG	*/
 
-typedef long SInx;              /* Index into char da */
+typedef int32_t SInx;              /* Index into char da */
 #define SINX_UNDEF      (-1)    /* Indicates invalid SInx */
 #define STR(i)          (&h->str.array[i])
 
