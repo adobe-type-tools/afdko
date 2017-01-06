@@ -244,7 +244,7 @@ typedef enum {                  /* Char id type */
 #define DEG_2_RAD   (3.141592653589793 / 180)
 
 /* Round double and convert to Fixed */
-#define RND2FIX(d)  ((Fixed)((long)((double)(d) + 0.5) * 65536.0))
+#define RND2FIX(d)  ((Fixed)((int32_t)((double)(d) + 0.5) * 65536.0))
 
 /* --- template glyph data for auto glyph addition --- */
 typedef struct {
@@ -1756,8 +1756,8 @@ static int t1parse(recodeCtx h, unsigned length, unsigned char *cstr,
 
 			case 255: {
 				/* 5 byte number */
-				long value = (long)cstr[i + 1] << 24 | (long)cstr[i + 2] << 16 |
-				    (long)cstr[i + 3] << 8 | (long)cstr[i + 4];
+				int32_t value = (int32_t)cstr[i + 1] << 24 | (int32_t)cstr[i + 2] << 16 |
+				    (int32_t)cstr[i + 3] << 8 | (int32_t)cstr[i + 4];
 				if (-32000 <= value && value <= 32000) {
 					value <<= 16;
 				}
