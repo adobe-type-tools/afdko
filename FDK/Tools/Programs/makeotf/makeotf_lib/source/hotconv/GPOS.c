@@ -895,7 +895,7 @@ void GPOSFeatureEnd(hotCtx g) {
 #define ValueYIdAdvance     (1 << 11)
 
 #define VAL_REC_UNDEF       (-1)
-typedef long ValueRecord;   /* Stores index into h->values, which is read at write time. If -1, then write 0; */
+typedef int32_t ValueRecord;   /* Stores index into h->values, which is read at write time. If -1, then write 0; */
 
 
 

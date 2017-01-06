@@ -51,7 +51,7 @@ extern jmp_buf mark;
 
 #define FEATUREDIR   "features"
 
-#define INT2FIX(i)  ((long)(i) << 16)
+#define INT2FIX(i)  ((int32_t)(i) << 16)
 
 #define WIN_SPACE      32
 #define WIN_BULLET     149
@@ -313,9 +313,9 @@ reload:
 		else {
 			/* Read segment length (little endian) */
 			h->ps.left = read1(h);
-			h->ps.left |= (long)read1(h) << 8;
-			h->ps.left |= (long)read1(h) << 16;
-			h->ps.left |= (long)read1(h) << 24;
+			h->ps.left |= (int32_t)read1(h) << 8;
+			h->ps.left |= (int32_t)read1(h) << 16;
+			h->ps.left |= (int32_t)read1(h) << 24;
 
 			goto reload;
 		}

@@ -64,7 +64,7 @@ void csAddChar(tcCtx g, unsigned length, char *cstr,
 void csEndFont(tcCtx g, unsigned nChars, unsigned short *recode);
 void csSetConvProcs(tcCtx g, csConvProcs *procs);
 
-int csEncInteger(long i, char *t);
+int csEncInteger(int32_t i, char *t);
 int csEncFixed(Fixed f, char *t);
 
 long csSizeChars(tcCtx g, Font *font);

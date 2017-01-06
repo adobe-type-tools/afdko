@@ -19,7 +19,7 @@
 #include <math.h>
 
 /* Fixed point (for stem list) */
-typedef long Fixed;
+typedef int32_t Fixed;
 
 /* Make up operators for internal use */
 #define tx_noop     tx_reserved0

@@ -676,9 +676,9 @@ char *psGetValue(psCtx h, psToken *token) {
 }
 
 /* Convert integer token to integer value. Already validated */
-long psConvInteger(psCtx h, psToken *token) {
-	int base = 10;
-	long value = 0;
+int32_t psConvInteger(psCtx h, psToken *token) {
+	int32_t base = 10;
+	int32_t value = 0;
 	char *p = &h->cb.buf->array[token->index];
 	char *end = p + token->length;
 	int neg = *p == '-';
@@ -703,7 +703,7 @@ long psConvInteger(psCtx h, psToken *token) {
 }
 
 /* Get next token as an integer and convert its value */
-long psGetInteger(psCtx h) {
+int32_t psGetInteger(psCtx h) {
 	psToken *value = psGetToken(h);
 
 	if (value->type != PS_INTEGER) {
@@ -753,10 +753,10 @@ char *psConvLiteral(psCtx h, psToken *token, unsigned *length) {
 }
 
 /* Convert hexadecimal string to integer value. Already validated */
-unsigned long psConvHexString(psCtx h, psToken *token) {
+uint32_t psConvHexString(psCtx h, psToken *token) {
 	char *p = &h->cb.buf->array[token->index + 1];
 	int digits = 0;
-	long value = 0;
+	uint32_t value = 0;
 
 	do {
 		if (ISHEX(*p)) {
@@ -790,7 +790,7 @@ int psGetHexLength(psCtx h, psToken *token) {
 }
 
 /* Get next token as a hexadecimal string and convert its value */
-unsigned long psGetHexString(psCtx h, int *length) {
+uint32_t psGetHexString(psCtx h, int *length) {
 	psToken *value = psGetToken(h);
 
 	if (value->type != PS_HEXSTRING) {
