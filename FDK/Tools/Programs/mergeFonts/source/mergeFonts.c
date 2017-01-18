@@ -7,7 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define MERGEFONTS_VERSION CTL_MAKE_VERSION(1,0,63) /* derived from tx */
+#define MERGEFONTS_VERSION CTL_MAKE_VERSION(1,0,64) /* derived from tx */
 
 #include "cfembed.h"
 #include "cffread.h"
@@ -7726,26 +7726,6 @@ static void readCIDFontInfo(txCtx h, char * filePath)
 	if (h->mergeInfo.cidinfo.CIDFontName[0] == 0)
 		{
 		fprintf(stderr, "Parse error in the CID fontinfo file \"%s\": missing required key \"FontName\".", filePath);
-		missingKey = 1;
-		}
-	else if (h->mergeInfo.cidinfo.FullName[0] == 0)
-		{
-		fprintf(stderr, "Parse error in the CID fontinfo file \"%s\": missing required key \"FullName\".", filePath);
-		missingKey = 1;
-		}
-	else if (h->mergeInfo.cidinfo.FamilyName[0] == 0)
-		{
-		fprintf(stderr, "Parse error in the CID fontinfo file \"%s\": missing required key \"FamilyName\".", filePath);
-		missingKey = 1;
-		}
-	else if (h->mergeInfo.cidinfo.Weight[0] == 0)
-		{
-		fprintf(stderr, "Parse error in the CID fontinfo file \"%s\": missing required key \"Weight\".", filePath);
-		missingKey = 1;
-		}
-	else if (h->mergeInfo.cidinfo.AdobeCopyright[0] == 0)
-		{
-		fprintf(stderr, "Parse error in the CID fontinfo file \"%s\": missing required key \"AdobeCopyright\".", filePath);
 		missingKey = 1;
 		}
 	else if (h->mergeInfo.cidinfo.Registry[0] == 0)

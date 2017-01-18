@@ -1,7 +1,7 @@
 #!/bin/env python
 
 __doc__ = """
-ConvertFontToCID.py. v 1.9 April 16 2016
+ConvertFontToCID.py. v 1.10 Jan 13 2017
 
 Convert a Type 1 font to CID, given multiple hint dict defs in the
 "fontinfo" file. See AC.py help, with the "-hfd" option, or the MakeOTF
@@ -632,7 +632,8 @@ def fixFontDict(tempPath, fdDict):
 		data = data[:m.start()] + target +  data[m.end():]
 		insertIndex = m.start() + len(target)
 	else:
-		data = data[:m.start()] + data[m.end():]
+		if m:
+			data = data[:m.start()] + data[m.end():]
 
 	# fix StemSnapV.  Remove StemSnapV entry if fdDict.StemSnapV is not defined, else set it.
 	m = re.search(r"/StemSnapV\s+\[.+?\]\s+def", data)
@@ -641,7 +642,8 @@ def fixFontDict(tempPath, fdDict):
 		data = data[:m.start()] + target +  data[m.end():]
 		insertIndex = m.start() + len(target)
 	else:
-		data = data[:m.start()] + data[m.end():]
+		if m:
+			data = data[:m.start()] + data[m.end():]
 	
 	# LanguageGroup. Remove LanguageGroup entry if fdDict.LanguageGroup is not defined, else set it.
 	if fdDict.LanguageGroup:
@@ -676,6 +678,7 @@ def fixFontDict(tempPath, fdDict):
 			target = "/OtherBlues %s def" % (fdDict.OtherBlues)
 			data = data[:m.start()] + target +  data[m.end():]
 	else:
+		if m:
 			data = data[:m.start()] + data[m.end():]
 		
 	
