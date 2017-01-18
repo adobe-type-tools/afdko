@@ -151,24 +151,35 @@ def main(args=None):
 		ufoName = os.path.basename(masterDSFont.filePath)
 		otfName = os.path.splitext(ufoName)[0] + ".otf"
 		os.chdir(masterDSFont.buildDir)
-		cmd = "tx -t1 \"%s\" \"%s\" " % (masterDSFont.fileName, tempT1)
+		cmd = "tx -t1 \"%s\" \"%s\" 2>&1" % (masterDSFont.fileName, tempT1)
 		log = runShellCmd(cmd)
-		cmd = "makeotf -f \"%s\" -o \"%s\"" % (tempT1, otfName)
+		if not os.path.exists(tempT1):
+			print("Error converting UFO to T1. Skipping font", masterDSFont.filePath)
+			print("'tx' log:", log)
+			os.chdir(curDir)
+			continue
+		cmd = "makeotf -f \"%s\" -o \"%s\" 2>&1" % (tempT1, otfName)
 		log = runShellCmd(cmd)
 		if "FATAL" in log:
 			# If there is a FontMenuNameDB file, then not finding an entry
 			# which matches the PS name is a fatal error. For this case, we
 			# just try again, but without the FontMenuNameDB.
 			if "I can't find a Family name" in log:
-				cmd = "makeotf -f \"%s\" -o \"%s\" -mf None" % (tempT1, otfName)
+				cmd = "makeotf -f \"%s\" -o \"%s\" -mf None 2>&1" % (tempT1, otfName)
 				log = runShellCmd(cmd)
+				if "FATAL" in log:
+					print(log)
+				else:
+					print("Building '%s' without FontMenuNameDB entry." % (masterDSFont.filePath))
 			
 		if not "Built" in str(log):
 			print("Error building OTF font for", masterDSFont.filePath, log)
+			print("makeotf cmd was '%s' in %s." % (cmd, masterDSFont.buildDir))
 		else:
 			print("Built OTF font for", masterDSFont.filePath)
 			compatibilizePaths(otfName)
-		os.remove(tempT1)
+			if os.path.exists(tempT1):
+				os.remove(tempT1)
 		os.chdir(curDir)
 
 if __name__ == "__main__":
