@@ -14,8 +14,6 @@
 #include "pstoken.h"
 #include <stdint.h>
 
-typedef int32_t Fixed;
-
 #define CS_MAX_SIZE 65535   /* Max charstring size (bytes) */
 
 /* Single char/subr reference */
