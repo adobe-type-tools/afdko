@@ -3925,7 +3925,7 @@ static void addPos(GNode *targ, int type, int enumerate) {
 		}
 		if (next_targ->lookupLabel >= 0) {
 			lookupLabelCnt++;
-			if (!next_targ->flags & FEAT_MARKED) {
+			if (!(next_targ->flags & FEAT_MARKED)) {
 				featMsg(hotERROR, "the glyph which precedes the 'lookup' keyword must be marked as part of the contextual input sequence");
 			}
 		}

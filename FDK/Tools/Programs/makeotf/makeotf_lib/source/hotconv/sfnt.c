@@ -73,19 +73,19 @@ static Funcs funcs[] = {
 /* ---------------------------- Table Definition --------------------------- */
 
 typedef struct {
-	unsigned long tag;
-	unsigned long checksum;
-	unsigned long offset;
-	unsigned long length;
+	int32_t tag;
+	uint32_t checksum;
+	uint32_t offset;
+	uint32_t length;
 } Entry;
 #define ENTRY_SIZE (uint32 * 4)
 
 typedef struct {
 	Fixed version;
-	unsigned short numTables;
-	unsigned short searchRange;
-	unsigned short entrySelector;
-	unsigned short rangeShift;
+	uint16_t numTables;
+	uint16_t searchRange;
+	uint16_t entrySelector;
+	uint16_t rangeShift;
 	dnaDCL(Entry, directory);   /* [numTables] */
 } sfntTbl;
 #define DIR_HDR_SIZE (int32 + uint16 * 4)
