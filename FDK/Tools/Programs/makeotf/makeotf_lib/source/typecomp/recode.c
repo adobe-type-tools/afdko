@@ -913,7 +913,7 @@ static void addWidth(recodeCtx h, Fixed width) {
 
 			/* Write width and copy rest of charstring */
 			bytes = csEncInteger(this->width, dst);
-			memcpy(dst + bytes,
+			memmove(dst + bytes,
 			       &h->cstrs.array[this->icstr + DUMMY_WIDTH_SIZE], length);
 
 			length += bytes;
