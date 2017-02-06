@@ -7,11 +7,11 @@
 		<h1>OpenType&trade; Feature File Specification</h1>
 
 <p><b>Copyright</b></p>
-<p>Copyright 2015, 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+<p>Copyright 2015, 2016, 2017 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0.
 </p>
 <p><b>Version</b></p>
-<p>[ Document version 1.19. Last updated 12 April 2016]</p>
+<p>[ Document version 1.20. Last updated 6 Feb 2017]</p>
 <p><b>Caution:</b></p>
 <p>Portions of the syntax unimplemented by Adobe are subject to change.</p>
 <ol>
@@ -416,14 +416,28 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 <p><a name="2.f"></a><b>2.f. Glyphs</b></p>
 <p>These are represented by one of:</p>
 <p><a name="2.f.i"></a><b>2.f.i. Glyph name</b></p>
+<p>There are two different contexts for glyph naming: final production names and development names.</p>
+<p>For production glyph names, names that are used in shipping font files, the specification is set by the Postscript and Type 1 specifications, which define what is expected by existing PostScript interpreters. These limitations are as follows.</p>
 <p>A glyph name may be up to 63 characters in length, must be entirely comprised of characters from the following set:</p>
 <p>A-Z a-z 0-9 . (period) _ (underscore)</p>
 <p>and must not start with a digit or period. The only exception is the special character &quot;.notdef&quot;.</p>
 <p>&quot;twocents&quot;, &quot;a1&quot;, and &quot;_&quot; are valid glyph names. &quot;2cents&quot; and &quot;.twocents&quot; are not.</p>
+<p> Development glyph names, names used in source data during the development of a font, have a larger supported character set. In addition to the characters allowed for production glyph names, the following characters must also be supported for development glyph names:</p>
+<ul>
+<li>U+002A	*	Asterisk	</li>
+<li>U+002B	+	Plus sign</li>
+<li>U+002D	-	Hyphen-minus</li>
+<li>U+003A	:	Colon</li>
+<li>U+005E	^	Circumflex accent</li>
+<li>U+007C	|	Vertical bar</li>
+<li>U+007E	~	Tilde</li>
+</ul>
+<p>For glyphs where the development glyph name differs from the final production glyph name, an implementation of the feature file syntax must be able to accept either name in source files, but must produce output data which contains either only development glyph names or only final production glyph names.</p>
+<p>A glyph name alias database may be used by the implementation of the feature file grammar to map from development glyph names in the source font data to final production glyph names. If it is used, then it is the responsibility of the implementation to correlate the development glyph names used in the feature file with the final glyph names in the font.</p>
 <p>An initial backslash serves to differentiate a glyph name from an identical keyword in the feature file language. (See &sect;<a href="#2.c">2.c</a> for a list of keywords.) For example, a glyph named &quot;table&quot; must be specified in the feature file as:</p>
 <pre>
    \table</pre>
-<p>A glyph name alias database may be used by the implementation of the feature file grammar. If it is used, then it is the responsibility of the implementation to correlate the glyph name aliases used in the feature file with the actual glyph names in the font.</p>
+
 <p><a name="2.f.ii"></a><b>2.f.ii. CID</b></p>
 <p>CIDs are represented by a non-negative &lt;number&gt; [&sect;<a href="#2.e.i">2.e.i</a>] preceded by a backslash. For example:</p>
 <pre>
@@ -1755,6 +1769,10 @@ nameid I 1 S L &lt;string&gt;;    I   1          S           L</pre>
   }</pre>
 <p>along with the tag 'sbit'.</p>
 <p><a name="11"></a><b>11. Document revisions</b></p>
+<p><b>v1.20 [6 Feb 2017]:</b></p>
+<ul>
+<li>Updated glyph name rules in section <a href="#2.f.i">2.f.i glyph name</a> to allow additional characters for development names.</li></li>
+</ul>
 <p><b>v1.19 [26 April 2016]:</b></p>
 <ul>
 <li>Corrected statement about assigning glyphs to GDEF mark GlyphClass in section <a href="#4.f">4.f markClass</a></li>
