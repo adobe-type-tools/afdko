@@ -434,6 +434,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 </ul>
 <p>For glyphs where the development glyph name differs from the final production glyph name, an implementation of the feature file syntax must be able to accept either name in source files, but must produce output data which contains either only development glyph names or only final production glyph names.</p>
 <p>A glyph name alias database may be used by the implementation of the feature file grammar to map from development glyph names in the source font data to final production glyph names. If it is used, then it is the responsibility of the implementation to correlate the development glyph names used in the feature file with the final glyph names in the font.</p>
+<p> In order disambiguate whether a text token is a range argument or a glyph name which contains a hyphen, the implementation should first assume that the token is a glyph name. If there is no glyph in the source data with a name that matches the token, then the implementation should interpret the token as a range argument.</p>
 <p>An initial backslash serves to differentiate a glyph name from an identical keyword in the feature file language. (See &sect;<a href="#2.c">2.c</a> for a list of keywords.) For example, a glyph named &quot;table&quot; must be specified in the feature file as:</p>
 <pre>
    \table</pre>
