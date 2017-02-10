@@ -12,6 +12,9 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "txops.h"
 #include "ctutil.h"
 #include "sfntread.h"
+#include "nameread.h"
+#include "varread.h"
+#include "supportfp.h"
 
 #if PLAT_SUN4
 #include "sun4/fixstring.h"
@@ -49,6 +52,8 @@ static char *applestd[258] =
 #include "applestd.h"
 };
 
+#define SHORT_PS_NAME_LIMIT   63      /* according to the OpenType name table spec */
+#define LONG_PS_NAME_LIMIT    127     /* according to Adobe tech notes #5902 */
 
 #define ARRAY_LEN(t) 	(sizeof(t)/sizeof((t)[0]))
 
@@ -121,6 +126,8 @@ struct cfrCtx_					/* Context */
 	long flags;					/* Status flags */
 #define CID_FONT		(1UL<<31)	/* CID Font */
 #define FREE_ENCODINGS	(1UL<<30)	/* Return encoding nodes to free list */
+#define CFR_SEEN_BLEND  (1<<29)
+#define CFR_IS_CFF2     (1<<28)
 	cfrSingleRegions region;
 	struct						/* CFF header */
     {
@@ -178,10 +185,26 @@ struct cfrCtx_					/* Context */
 	unsigned short stdEnc2GID[256];/* Map standard encoding to GID */
 	abfEncoding *encfree;		/* Supplementary encoding free list */
     postTbl post;			/* post table */
+    struct                      /* CFF2 font tables */
+    {
+		float           *UDV;	/* From client */
+        var_F2dot14     ndv[T1_MAX_AXES];     /* normalized weight vector */
+        float           scalars[T1_MAX_MASTERS];               /* scalar values for regions */
+        unsigned short  regionCount;          /* number of all regions */
+        unsigned short  regionIndices[T1_MAX_MASTERS];  /* region indices for the current vsindex */
+
+        unsigned short  axisCount;
+        var_axes        axes;
+        var_hmtx        hmtx;
+        nam_name        name;
+        var_itemVariationStore  varStore;
+    } cff2;
 	struct						/* Client callbacks */
     {
 		ctlMemoryCallbacks mem;
 		ctlStreamCallbacks stm;
+        cff2GlyphCallbacks cff2;
+        ctlSharedStmCallbacks shstm;
     } cb;
 	struct						/* Contexts */
     {
@@ -197,7 +220,7 @@ struct cfrCtx_					/* Context */
 
 
 static void encListFree(cfrCtx h, abfEncoding *node);
-
+static void setupSharedStream(cfrCtx h);
 
 /* ----------------------------- Error Handling ---------------------------- */
 
@@ -317,7 +340,7 @@ cfrCtx cfrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 	/* Copy callbacks */
 	h->cb.mem = *mem_cb;
 	h->cb.stm = *stm_cb;
-    
+
 	/* Set error handler */
 	if (setjmp(h->err.env))
 		goto cleanup;
@@ -342,9 +365,12 @@ cfrCtx cfrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 	dnaINIT(h->ctx.dna, h->string.offsets, 16, 256);
 	dnaINIT(h->ctx.dna, h->string.ptrs, 16, 256);
 	dnaINIT(h->ctx.dna, h->string.buf, 200, 2000);
-	
+
 	/* Open optional debug stream */
 	h->stm.dbg = h->cb.stm.open(&h->cb.stm, CFR_DBG_STREAM_ID, 0);
+    
+    /* Set up shared source stream callbacks */
+    setupSharedStream(h);
     
 	return h;
     
@@ -740,7 +766,7 @@ static void handleBlend(cfrCtx h)
 {
     /* When the CFF2 blend operator is encountered, the last items on the stack are
      the blend operands. These are, in order:
-     numMaster operands from the default font
+     numBlends operands from the default font
      (numMaster-1)* numBlends blend delta operands
      numBlends value
      
@@ -748,35 +774,51 @@ static void handleBlend(cfrCtx h)
      default font. We assign numBlends to the field of the same name in this struct_elem, and pop
      it off the stack. We then allocate memory to hold the (numMaster-1)* numBlends blend delta operands,
      and copy them to the blendValues field. We then pop the (numMaster-1)* numBlends blend delta operands,
-     leaving the numMaster operands.
+     leaving the numBlends operands.
      When an operator is encountered, a handler that does not know about the blend values will
      simply see the usual stack values from the default fonts. A handler which does know about
      the blend values can use the blend values to fill the blendable fields. 
      
      Alternatively, the blend handler can use the blend operands to actually produce blended values,
-     and replace the  numMaster operands from the defaultfont with the blended values.
+     and replace the  numBlends operands from the defaultfont with the blended values.
      */
     
     int numBlends = INDEX_INT(h->stack.cnt -1);
+    stack_elem* firstItem;
+    int i = 0;
+    int numDeltaBlends = numBlends*h->stack.numRegions;
+    int firstItemIndex;
+
     h->stack.cnt--;
 
+    CHKUFLOW(numBlends + numDeltaBlends);
+    firstItemIndex = (h->stack.cnt - (numBlends + numDeltaBlends));
+    firstItem = &(h->stack.array[firstItemIndex]);
+
     if (h->flags & CFR_FLATTEN_VF)
-      {
-          /* this is where we should blend the values. For the moment, we will just pop off the the blend delta operands,
-           leaving the the default values on the stack, which has the same result as making a snapshot at the center of
-           the design space.
-        */
-          h->stack.cnt -= (numBlends*h->stack.numRegions);
-      }
+    {
+        /* Blend values on the stack and replace the default values with the results.
+         */
+        for (i = 0; i < numBlends; i++) {
+            float   val = INDEX_REAL(firstItemIndex + i);
+            int r;
+
+            for (r = 0; r < h->stack.numRegions; r++) {
+                int index = (i * h->stack.numRegions) + r + (h->stack.cnt - numDeltaBlends);
+                val += INDEX_REAL(index) * h->cff2.scalars[h->cff2.regionIndices[r]];
+            }
+
+            firstItem[i].is_int = 0;
+            firstItem[i].u.real_val = val;
+            firstItem[i].numBlends = 0;
+        }
+        
+        h->stack.cnt -= numDeltaBlends;
+    }
     else
     {
-        stack_elem* firstItem;
-        int i = 0;
-        int numDeltaBlends = numBlends*h->stack.numRegions;
-        int firstItemIndex = (h->stack.cnt - (numBlends + numDeltaBlends));
-        
+    
         h->flags |= CFR_SEEN_BLEND;
-        firstItem = &(h->stack.array[firstItemIndex]);
         firstItem->numBlends = numBlends;
         firstItem->blend_val = memNew(h, sizeof(float)*numDeltaBlends);
         while (i < numDeltaBlends)
@@ -977,7 +1019,13 @@ static void saveIntArray(cfrCtx h, size_t max, long *cnt, long *array,
 
 static void setNumMasters(cfrCtx h, unsigned int vsindex)
 {
-    h->stack.numRegions = h->top.VarStore.varDataList[vsindex].regionCount;
+    h->stack.numRegions = var_getIVSRegionCountForIndex(h->cff2.varStore, vsindex);
+    if (h->stack.numRegions >= T1_MAX_MASTERS)
+        fatal(h, cfrErrGeometry);
+    
+    if (!var_getIVSRegionIndices(h->cff2.varStore, vsindex, h->cff2.regionIndices, h->stack.numRegions)) {
+        message(h, "inconsistent region indices detected in item variation store subtable %d", vsindex);
+    }
 }
 
 /* -------------------------------- VarStore ------------------------------- */
@@ -991,72 +1039,24 @@ static float AxisCoord2Real(short val)
 static void readVarStore(cfrCtx h)
 {
     unsigned short length;
-    unsigned long offset;
-    unsigned short format;
-    unsigned int i,j;
     unsigned int vstoreStart = h->region.VarStore.begin + 2;
-    unsigned int curPos;
-    VarStore* varStore = &h->top.VarStore;
-    
+
     if (h->region.VarStore.begin == -1)
         fatal(h, cfrErrNoFDSelect);
     
+    if (h->cff2.varStore) {
+        var_freeItemVariationStore(&h->cb.shstm, h->cff2.varStore);
+        h->cff2.varStore = 0;
+    }
+    
     srcSeek(h, h->region.VarStore.begin);
-    length = read2(h);
+    length = (unsigned long)read2(h);
     h->region.VarStore.end = vstoreStart + length;
-    
-    format = read2(h);
-    
-    // read the RegionList
-    offset = readN(h, 4);
-    curPos = vstoreStart + 6;
+    h->cff2.varStore = var_loadItemVariationStore(&h->cb.shstm, (unsigned long)vstoreStart, length, 0);
+    h->cff2.regionCount = var_getIVSRegionCount(h->cff2.varStore);
 
-    srcSeek(h, vstoreStart + offset);
-    varStore->axisCount = read2(h);
-    varStore->regionCount = read2(h);
-    varStore->variationRegions = memNew(h, sizeof(varRegion)*varStore->regionCount);
-    i = 0;
-    while (i < varStore->regionCount)
-    {
-        varRegion *vregion = &varStore->variationRegions[i];
-        vregion->regionAxes = memNew(h, sizeof(varRegionAxis)*varStore->axisCount);
-        j = 0;
-        while (j < varStore->axisCount)
-        {
-            varRegionAxis *regionAxis = &vregion->regionAxes[j];
-            short val = read2(h);
-            regionAxis->startCoord = AxisCoord2Real(val);
-            val = read2(h);
-            regionAxis->peakCoord = AxisCoord2Real(val);
-            val = read2(h);
-            regionAxis->endCoord = AxisCoord2Real(val);
-            j++;
-        }
-        i++;
-    }
-    
-    srcSeek(h, curPos);
-    varStore->itemVariationDataCount = read2(h);
-    curPos += 2;
-    varStore->varDataList = memNew(h, sizeof(varData)*varStore->itemVariationDataCount);
-   i = 0;
-    while (i < varStore->itemVariationDataCount)
-    {
-        varData *vData = &varStore->varDataList[i];
-        srcSeek(h, curPos);
-        offset = readN(h, 4);
-        curPos += 4;
-        srcSeek(h, vstoreStart + offset+4);// We skip over itemCount and shortDeltaCount.
-        vData->regionCount = read2(h);
-        vData->regionIndices = memNew(h, sizeof(int)*vData->regionCount);
-        j = 0;
-        while (j < vData->regionCount)
-        {
-            vData->regionIndices[j] = read2(h);
-            j++;
-        }
-        i++;
-    }
+    /* pre-calculate scalars for all regions for the current weight vector */
+    var_calcRegionScalars(&h->cb.shstm, h->cff2.varStore, h->cff2.axisCount, h->cff2.ndv, h->cff2.scalars);
 }
 
 /* Save PostScript operator string. */
@@ -1139,6 +1139,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
 	srcSeek(h, region->begin);
     
 	h->stack.cnt = 0;
+    h->stack.numRegions = 0;
     private->vsindex = 0;
     
 	while (srcTell(h) < region->end)
@@ -1361,6 +1362,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
                 case cff_FDSelect:
                     CHKUFLOW(1);
                     h->region.FDSelect.begin = h->src.origin + INDEX_INT(0);
+                    h->flags |= CID_FONT;
                     break;
                 case cff_FontName:
                     CHKUFLOW(1);
@@ -1707,7 +1709,8 @@ static void readPrivate(cfrCtx h, int iFD)
 	fd->aux.gsubrs.offset = h->gsubrs.array;
     fd->aux.gsubrsEnd = h->region.GlobalSubrINDEX.end;
     fd->aux.default_vsIndex = fd->fdict->Private.vsindex;
-    fd->aux.varStore = &h->top.VarStore;
+    fd->aux.varStore = h->cff2.varStore;
+    fd->aux.scalars = h->cff2.scalars;
 }
 
 /* Return the offset of a standard encoded glyph of -1 if none. */
@@ -1745,6 +1748,7 @@ static void initFDInfo(cfrCtx h, int iFD)
 	fd->aux.nominalWidthX 		= cff_DFLT_nominalWidthX;
 	fd->aux.ctx					= h;
 	fd->aux.getStdEncGlyphOffset= getStdEncGlyphOffset;
+    fd->aux.varStore            = 0;
 	fd->fdict 					= fdict;
 	abfInitFontDict(fdict);
 }
@@ -1924,11 +1928,8 @@ static void addID(cfrCtx h, long gid, unsigned short id)
     {
 		/* Save SID */
 		info->gname.impl = id;
-        if  (h->header.major == 1)
-            info->gname.ptr = sid2str(h, id);
-        else
-            post2GetName(h, id);
-        
+        info->gname.ptr = sid2str(h, id);
+    
 		/* Non-CID font so select FD[0] */
 		info->iFD = 0;
         
@@ -2112,69 +2113,66 @@ static void readCharSetFromPost(cfrCtx h)
 {
     Offset offset;
     unsigned long i;
+	long gid;
     char *p;
-    ctlRegion FontName;
-    long lenFontName = 0;
     long lenStrings = ARRAY_LEN(stdstrs);
-    
-    /* init string.offsets and h->string.ptrs */
-    h->index.string.count = (short)h->glyphs.cnt;
-    dnaSET_CNT(h->string.offsets, h->index.string.count + 1);
-    dnaSET_CNT(h->string.ptrs, h->index.string.count);
-    
-     /* Compute string data size */
-    lenStrings = (h->index.string.count == 0)? 0:
-    (h->region.StringINDEX.end -
-     h->index.string.data + 1 + 	/* String data bytes */
-     h->index.string.count);		/* Null termination */
-    
-    /* Allocate buffers */
-    dnaSET_CNT(h->string.offsets, h->index.string.count + 1);
-    dnaSET_CNT(h->string.ptrs, h->index.string.count);
-    dnaSET_CNT(h->string.buf, lenFontName + 1 +	lenStrings);
-    
-    p = h->string.buf.array;
-    *p = '\0';
-    if (h->header.major == 1)
+
+    if (!(h->flags & CFR_IS_CFF2))
     {
-        /* Copy FontName into buffer */
-        srcSeek(h, FontName.begin);
-        srcRead(h, lenFontName, p);
-        p += lenFontName;
-        *p++ = '\0';
-    }
-    
-    
-    if (h->index.string.count == 0)
-        return;	/* Empty string INDEX */
-    
-    /* Read string offsets */
-    srcSeek(h, h->index.string.offset);
-    offset = readN(h, h->index.string.offSize);
-    for (i = 0; i < h->index.string.count; i++)
-    {
-        long length;
-        h->string.offsets.array[i] = offset;
-        offset = readN(h, h->index.string.offSize);
+        /* init string.offsets and h->string.ptrs */
+        h->index.string.count = (short)h->glyphs.cnt;
+        dnaSET_CNT(h->string.offsets, h->index.string.count + 1);
+        dnaSET_CNT(h->string.ptrs, h->index.string.count);
         
-        /* Compute and validate object length */
-        length = offset - h->string.offsets.array[i];
-        if (length < 0 || length > 65535)
-            fatal(h, cfrErrINDEXOffset);
-    }
-    h->string.offsets.array[i] = offset;
-    
-    /* Read string data */
-    for (i = 0; i < (unsigned long)h->string.ptrs.cnt; i++)
-    {
-        long length =
-        h->string.offsets.array[i + 1] - h->string.offsets.array[i];
-        srcRead(h, length, p);
-        h->string.ptrs.array[i] = p;
-        p += length;
-        *p++ = '\0';
+         /* Compute string data size */
+        lenStrings = (h->index.string.count == 0)? 0:
+        (h->region.StringINDEX.end -
+         h->index.string.data + 1 + 	/* String data bytes */
+         h->index.string.count);		/* Null termination */
+        
+        /* Allocate buffers */
+        dnaSET_CNT(h->string.offsets, h->index.string.count + 1);
+        dnaSET_CNT(h->string.ptrs, h->index.string.count);
+        /* Append char names after the font name already in the string buffer */
+        p = &h->string.buf.array[h->string.buf.cnt];
+        dnaSET_CNT(h->string.buf,  h->string.buf.cnt + lenStrings);
+        
+        if (h->index.string.count == 0)
+            return;	/* Empty string INDEX */
+        
+        /* Read string offsets */
+        srcSeek(h, h->index.string.offset);
+        offset = readN(h, h->index.string.offSize);
+        for (i = 0; i < h->index.string.count; i++)
+        {
+            long length;
+            h->string.offsets.array[i] = offset;
+            offset = readN(h, h->index.string.offSize);
+            
+            /* Compute and validate object length */
+            length = offset - h->string.offsets.array[i];
+            if (length < 0 || length > 65535)
+                fatal(h, cfrErrINDEXOffset);
+        }
+        h->string.offsets.array[i] = offset;
+        
+        /* Read string data */
+        for (i = 0; i < (unsigned long)h->string.ptrs.cnt; i++)
+        {
+            long length =
+            h->string.offsets.array[i + 1] - h->string.offsets.array[i];
+            srcRead(h, length, p);
+            h->string.ptrs.array[i] = p;
+            p += length;
+            *p++ = '\0';
+        }
     }
 
+	for (gid = 0; gid < h->glyphs.cnt; gid++)
+    {
+        abfGlyphInfo *info = &h->glyphs.array[gid];
+        info->gname.ptr = post2GetName(h, (SID)gid);
+    }
 }
 
 /* Read charset */
@@ -2197,9 +2195,10 @@ static void readCharset(cfrCtx h)
 #include "exsubcs0.h"
     };
     
-    if (h->header.major == 2)
+    if (h->header.major == 2 && !(h->flags & CID_FONT))
     {
         postRead(h);
+        readCharSetFromPost(h);
         return;
     }
     
@@ -2450,6 +2449,65 @@ static void readFDSelect(cfrCtx h)
 	h->region.FDSelect.end = srcTell(h);
 }
 
+/* ------------------------------- CFF2 glyph callbacks ------------------------------- */
+
+static float cff2GetWidth(cff2GlyphCallbacks *cb, unsigned short gid)
+{
+    cfrCtx  h = (cfrCtx)cb->direct_ctx;
+    var_glyphMetrics    metrics;
+
+    if (!var_lookuphmtx(&h->cb.shstm, h->cff2.hmtx, h->cff2.axisCount, h->cff2.scalars, gid, &metrics)) {
+        return metrics.width;
+    }
+
+    return .0f;
+}
+
+/* ------------------------------- make up info missing from CFF2 ------------------------------- */
+static char * addString(cfrCtx h, char *str)
+{
+    long    len = (long)strlen(str);
+    long    offset = h->string.buf.cnt;
+
+    dnaSET_CNT(h->string.buf, offset + len + 1);
+    strcpy(&h->string.buf.array[offset], str);
+
+    return &h->string.buf.array[offset];
+}
+
+static void makeupCFF2Info(cfrCtx h)
+{
+    long   lenFontName;
+    char    postscriptName[LONG_PS_NAME_LIMIT+1];
+    unsigned long   nameLengthLimit;
+
+    if (h->flags & CFR_SHORT_VF_NAME)
+        nameLengthLimit = SHORT_PS_NAME_LIMIT;
+    else
+        nameLengthLimit = LONG_PS_NAME_LIMIT;
+
+    /* generate an instance PostScript name */
+    lenFontName = nam_generateInstancePSName(h->cff2.name, h->cff2.axes, &h->cb.shstm,
+                                            h->cff2.UDV, h->cff2.axisCount, -1,
+                                            postscriptName, nameLengthLimit + 1);
+
+    if (lenFontName > 0) {
+        h->fdicts.array[0].FontName.ptr = addString(h, postscriptName);
+    }
+
+    /* Load CIDFontName from name table and make up CID font ROS */
+    if (h->flags & CID_FONT) {
+        lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, postscriptName, sizeof(postscriptName), NAME_ID_CIDFONTNAME);
+        if (lenFontName <= 0)    /* if no CID font name in the name table, put PS name instead */
+            lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, postscriptName, sizeof(postscriptName), NAME_ID_POSTSCRIPT);
+        if (lenFontName > 0)
+            h->top.cid.CIDFontName.ptr = addString(h, postscriptName);
+        h->top.cid.Registry.ptr = addString(h, "Adobe");
+        h->top.cid.Ordering.ptr = addString(h, "Identity");
+		h->top.cid.Supplement = 1;
+    }
+}
+
 /* ------------------------------- Interface ------------------------------- */
 
 /* Report absfont error message to debug stream. */
@@ -2463,7 +2521,7 @@ static void report_error(abfErrCallbacks *cb, int err_code, int iFD)
 }
 
 /* Begin reading new font. */
-int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top)
+int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top, float *UDV)
 {
 	long i;
 	ctlRegion region;
@@ -2499,7 +2557,7 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
     h->region.Encoding.end = -1;
     h->region.Charset.begin = cff_StandardEncoding;
     h->region.Charset.end = -1;
-    
+
 	/* Read header */
 	h->region.Header.begin = h->src.origin;
 	h->header.major = read1(h);
@@ -2530,6 +2588,44 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
         h->region.TopDICTINDEX.end = h->region.TopDICTINDEX.begin + h->header.offSize;
         h->flags |= CFR_IS_CFF2;
 
+        h->cb.cff2.direct_ctx = h;
+        h->cb.cff2.getWidth = cff2GetWidth;
+
+        /* Load CFF2 font tables */
+        if (!(flags & CFR_SHALLOW_READ))
+        {
+            unsigned short  axis;
+
+            h->cff2.axes = var_loadaxes(h->ctx.sfr, &h->cb.shstm);
+            h->cff2.hmtx = var_loadhmtx(h->ctx.sfr, &h->cb.shstm);
+            h->cff2.varStore = NULL;
+            h->cff2.axisCount = var_getAxisCount(h->cff2.axes);
+            if (h->cff2.axisCount > T1_MAX_AXES)
+                fatal(h, cfrErrGeometry);
+
+            h->cff2.UDV = UDV;
+
+            /* normalize the variable font design vector */
+            for (axis = 0; axis < h->cff2.axisCount; axis++) {
+                h->cff2.ndv[axis] = 0;
+            }
+            if (h->cff2.UDV != NULL) {
+                Fixed   userCoords[T1_MAX_AXES];
+
+                for (axis = 0; axis < h->cff2.axisCount; axis++) {
+                    userCoords[axis] = pflttofix(&h->cff2.UDV[axis]);
+                }
+
+                if (var_normalizeCoords(&h->cb.shstm, h->cff2.axes, userCoords, h->cff2.ndv)) {
+                    fatal(h, cfrErrGeometry);
+                }
+            }
+
+            /* name table */
+            h->cff2.name = nam_loadname(h->ctx.sfr, &h->cb.shstm);
+        } else {
+            memset(&h->cff2, 0, sizeof(h->cff2));
+        }
      }
     
 	/* Read string INDEX  */
@@ -2548,6 +2644,8 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
    }
     else
     {
+        h->index.string.count = 0;
+
         /* Read gsubrs INDEX */
         h->region.GlobalSubrINDEX.begin = h->region.TopDICTINDEX.end;
         readSubrINDEX(h, &h->region.GlobalSubrINDEX, &h->gsubrs);
@@ -2575,7 +2673,7 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
         if (h->header.major == 1)
             h->top.cid.CIDFontName.ptr = h->string.buf.array;
         else
-            h->top.cid.CIDFontName.ptr = NULL;
+            makeupCFF2Info(h);
 		h->top.sup.srcFontType = abfSrcFontTypeCFFCID;
 		h->top.sup.flags |= ABF_CID_FONT;
 		gi_flags |= ABF_GLYPH_CID;
@@ -2589,9 +2687,10 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
         }
         else
         {
-            if (!(flags & CFR_SHALLOW_READ))
+            if (!(flags & CFR_SHALLOW_READ)) {
                 readFDArray(h);
-            h->fd->fdict->FontName.ptr = NULL;
+            }
+            makeupCFF2Info(h);
         }
  		h->top.sup.srcFontType = abfSrcFontTypeCFFName;
     }
@@ -2700,7 +2799,7 @@ static void readGSubr(cfrCtx h, abfGlyphCallbacks *glyph_cb, Offset gsubrStartOf
 		aux.flags |= T2C_CUBE_RND;
     
 	/* Parse charstring */
-	result = t2cParse(info.sup.begin, info.sup.end, &aux, glyph_cb, &h->cb.mem);
+	result = t2cParse(info.sup.begin, info.sup.end, &aux, 0, NULL, glyph_cb, &h->cb.mem);
 	if (result)
     {
 		if (info.flags & ABF_GLYPH_CID)
@@ -2724,6 +2823,7 @@ static void readGlyph(cfrCtx h,
 	long flags = h->flags;
 	abfGlyphInfo *info = &h->glyphs.array[gid];
 	t2cAuxData *aux = &h->FDArray.array[info->iFD].aux;
+    cff2GlyphCallbacks *cff2_cb = NULL;
     
 	/* Begin glyph and mark it as seen */
 	result = glyph_cb->beg(glyph_cb, info);
@@ -2753,12 +2853,16 @@ static void readGlyph(cfrCtx h,
 	if (h->flags & CFR_CUBE_RND)
 		aux->flags |= T2C_CUBE_RND;
     if (h->flags & CFR_IS_CFF2)
+        {
         aux->flags |= T2C_IS_CFF2;
+        cff2_cb = &h->cb.cff2;
+        }
     if (h->flags & CFR_FLATTEN_VF)
         aux->flags |= T2C_FLATTEN_BLEND;
     
 	/* Parse charstring */
-	result = t2cParse(info->sup.begin, info->sup.end, aux, glyph_cb, &h->cb.mem);
+    info->blendInfo.vsindex = aux->default_vsIndex;
+	result = t2cParse(info->sup.begin, info->sup.end, aux, gid, cff2_cb, glyph_cb, &h->cb.mem);
 	if (result)
     {
 		if (info->flags & ABF_GLYPH_CID)
@@ -3017,8 +3121,80 @@ int cfrEndFont(cfrCtx h)
 		return cfrErrSrcStream;
     
 	encListReuse(h);
-    
+
+    if (h->header.major != 1) {
+        var_freeaxes(&h->cb.shstm, h->cff2.axes);
+        var_freehmtx(&h->cb.shstm, h->cff2.hmtx);
+        nam_freename(&h->cb.shstm, h->cff2.name);
+        var_freeItemVariationStore(&h->cb.shstm, h->cff2.varStore);
+    }
+
 	return cfrSuccess;
+}
+
+/* --------------------------- Shared source stream  -------------------------- */
+
+static void* sharedSrcMemNew(ctlSharedStmCallbacks *h, size_t size)
+{
+    return memNew((cfrCtx)h->direct_ctx, size);
+}
+
+static void sharedSrcMemFree(ctlSharedStmCallbacks *h, void *ptr)
+{
+    memFree((cfrCtx)h->direct_ctx, ptr);
+}
+
+static void sharedSrcSeek(ctlSharedStmCallbacks *h, long offset)
+{
+    srcSeek((cfrCtx)h->direct_ctx, offset);
+}
+
+static long sharedSrcTell(ctlSharedStmCallbacks *h)
+{
+    return srcTell(((cfrCtx)h->direct_ctx));
+}
+
+static void sharedSrcRead(ctlSharedStmCallbacks *h, size_t count, char *ptr)
+{
+    srcRead((cfrCtx)h->direct_ctx, count, ptr);
+}
+
+static unsigned char sharedSrcRead1(ctlSharedStmCallbacks *h)
+{
+    return read1(((cfrCtx)h->direct_ctx));
+}
+
+static unsigned short sharedSrcRead2(ctlSharedStmCallbacks *h)
+{
+    return read2(((cfrCtx)h->direct_ctx));
+}
+
+static unsigned long sharedSrcRead4(ctlSharedStmCallbacks *h)
+{
+    return read4(((cfrCtx)h->direct_ctx));
+}
+
+void sharedSrcMessage(ctlSharedStmCallbacks *h, char *fmt, ...)
+{
+ 	va_list ap;
+	va_start(ap, fmt);
+    vmessage((cfrCtx)h->direct_ctx, fmt, ap);
+	va_end(ap);
+}
+
+static void setupSharedStream(cfrCtx h)
+{
+    h->cb.shstm.direct_ctx = h;
+    h->cb.shstm.dna = h->ctx.dna;
+    h->cb.shstm.memNew = sharedSrcMemNew;
+    h->cb.shstm.memFree = sharedSrcMemFree;
+    h->cb.shstm.seek = sharedSrcSeek;
+    h->cb.shstm.tell = sharedSrcTell;
+    h->cb.shstm.read = sharedSrcRead;
+    h->cb.shstm.read1 = sharedSrcRead1;
+    h->cb.shstm.read2 = sharedSrcRead2;
+    h->cb.shstm.read4 = sharedSrcRead4;
+    h->cb.shstm.message = sharedSrcMessage;
 }
 
 /* Get version numbers of libraries. */

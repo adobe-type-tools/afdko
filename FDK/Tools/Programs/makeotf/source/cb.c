@@ -1885,9 +1885,12 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
 	if (otherflags & OTHERFLAGS_OVERRIDE_MENUNAMES) {
 		hotConvertFlags |= HOT_OVERRIDE_MENUNAMES;
 	}
-	if (otherflags & OTHERFLAGS_DO_NOT_OPTIMIZE_KERN) {
-		hotConvertFlags |= HOT_DO_NOT_OPTIMIZE_KERN;
-	}
+    if (otherflags & OTHERFLAGS_DO_NOT_OPTIMIZE_KERN) {
+        hotConvertFlags |= HOT_DO_NOT_OPTIMIZE_KERN;
+    }
+    if (otherflags & OTHERFLAGS_ADD_STUB_DSIG) {
+        hotConvertFlags |= HOT_ADD_STUB_DSIG;
+    }
 
     hotSetConvertFlags(h->hot.ctx, hotConvertFlags);
     

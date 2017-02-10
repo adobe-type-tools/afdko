@@ -1,3 +1,21 @@
+Tools/SharedData/FDKScripts/CheckOutlines.py
+
+# ignore the OSX and linux compiled programs
+autohintexe
+detype1
+makeotfexe
+mergeFonts
+rotateFont
+sfntdiff
+sfntedit
+spot
+tx
+type1
+
+# ignore the Windows compiled programs
+*.exe
+
+# ignore the temp build directories and files
 *.o
 *.a
 *.exe

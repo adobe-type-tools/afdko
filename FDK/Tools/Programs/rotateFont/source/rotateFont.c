@@ -5706,7 +5706,7 @@ static void cfrReadFont(txCtx h, long origin, int ttcIndex)
 	if (h->flags & SUBSET_OPT && h->mode != mode_dump)
 		h->cfr.flags |= CFR_UPDATE_OPS;	/* Convert seac for subsets */
 
-	if (cfrBegFont(h->cfr.ctx, h->cfr.flags, origin,  ttcIndex, &h->top))
+	if (cfrBegFont(h->cfr.ctx, h->cfr.flags, origin,  ttcIndex, &h->top, NULL))
 		fatal(h, NULL);
 
 	prepSubset(h);

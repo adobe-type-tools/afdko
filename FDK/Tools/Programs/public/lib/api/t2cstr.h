@@ -47,10 +47,19 @@ typedef struct
     float WV[4];
     void *dbg;
     unsigned short default_vsIndex; /* this is the vsindex set in the private dict. */
-    VarStore *varStore;
+    struct var_itemVariationStore_ *varStore;
+    float *scalars;
     } t2cAuxData;
 
-int t2cParse(long offset, long endOffset, t2cAuxData *aux, abfGlyphCallbacks *glyph, ctlMemoryCallbacks *mem);
+typedef struct cff2GlyphCallbacks_ cff2GlyphCallbacks;
+
+struct cff2GlyphCallbacks_
+    {
+    void *direct_ctx;
+    float (*getWidth)   (cff2GlyphCallbacks *cb, unsigned short gid);
+    };
+
+int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, cff2GlyphCallbacks *cff2, abfGlyphCallbacks *glyph, ctlMemoryCallbacks *mem);
 
 /* t2cParse() is called to parse a Type 2 charstring into its constituent
    parts.
@@ -65,6 +74,11 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, abfGlyphCallbacks *gl
    across charstrings. A client may therefore set this up once before parsing
    all the charstrings in a font. The "aux" parameter fields are described
    below.
+
+   The "gid" prameter specifies the glyph ID.
+
+   The "cff2" parameter specifies the context for reading SFNT tables
+   for metrics and variation font data needed if this is a CFF2 font.
 
    The "flags" field allows client control over the parse by setting bits as
    follows:

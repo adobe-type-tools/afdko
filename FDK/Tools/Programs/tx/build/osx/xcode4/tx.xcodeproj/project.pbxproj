@@ -41,6 +41,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		8E8759E71DCD415400C7A081 /* libvarread.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E8759E21DCBF66500C7A081 /* libvarread.a */; };
+		8EE84C601DEDFADD00157252 /* libnameread.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8EE84C5A1DED07A300157252 /* libnameread.a */; };
 		BD49906D0D7DE66E005EF88C /* tx.c in Sources */ = {isa = PBXBuildFile; fileRef = BD49906C0D7DE66E005EF88C /* tx.c */; };
 		BD5E126017A73B7C007BA047 /* libcfembed.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BD5E117317A736F7007BA047 /* libcfembed.a */; };
 		BD5E126117A73B7C007BA047 /* libabsfont.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BD5E116D17A736B1007BA047 /* libabsfont.a */; };
@@ -66,6 +68,34 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		8E8759E11DCBF66500C7A081 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8E8759DD1DCBF66500C7A081 /* varread.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = varread;
+		};
+		8E8759E81DCD416100C7A081 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8E8759DD1DCBF66500C7A081 /* varread.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = varread;
+		};
+		8EE84C591DED07A300157252 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8EE84C551DED07A300157252 /* nameread.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = nameread;
+		};
+		8EE84C611DEDFAEB00157252 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8EE84C551DED07A300157252 /* nameread.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = nameread;
+		};
 		BD1FAAAE1731D2E200472BF0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BD1FAAA71731D2E100472BF0 /* uforead.xcodeproj */;
@@ -510,6 +540,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8E8759DD1DCBF66500C7A081 /* varread.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = varread.xcodeproj; path = ../../../../public/lib/build/varread/osx/xcode4/varread.xcodeproj; sourceTree = "<group>"; };
+		8EE84C551DED07A300157252 /* nameread.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = nameread.xcodeproj; path = ../../../../public/lib/build/nameread/osx/xcode4/nameread.xcodeproj; sourceTree = "<group>"; };
 		BD1FAAA71731D2E100472BF0 /* uforead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = uforead.xcodeproj; path = ../../../../public/lib/build/uforead/osx/xcode4/uforead.xcodeproj; sourceTree = "<group>"; };
 		BD49904A0D7DE640005EF88C /* debug_tx.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; name = debug_tx.xcconfig; path = ../../../../public/config/xcconfig/debug_tx.xcconfig; sourceTree = SOURCE_ROOT; };
 		BD49904B0D7DE640005EF88C /* release_tx.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; name = release_tx.xcconfig; path = ../../../../public/config/xcconfig/release_tx.xcconfig; sourceTree = SOURCE_ROOT; };
@@ -595,6 +627,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8EE84C601DEDFADD00157252 /* libnameread.a in Frameworks */,
+				8E8759E71DCD415400C7A081 /* libvarread.a in Frameworks */,
 				BDAF347117D6A9DE004B2EA0 /* libufowrite.a in Frameworks */,
 				BD5E126117A73B7C007BA047 /* libabsfont.a in Frameworks */,
 				BD5E126017A73B7C007BA047 /* libcfembed.a in Frameworks */,
@@ -648,6 +682,22 @@
 			isa = PBXGroup;
 			children = (
 				BD49908A0D7DE69A005EF88C /* tx */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8E8759DE1DCBF66500C7A081 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8E8759E21DCBF66500C7A081 /* libvarread.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8EE84C561DED07A300157252 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8EE84C5A1DED07A300157252 /* libnameread.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -731,6 +781,7 @@
 				BD5E118617A73754007BA047 /* cffwrite.xcodeproj */,
 				BD5E118C17A737AB007BA047 /* ctutil.xcodeproj */,
 				BD5E119217A737B8007BA047 /* dynarr.xcodeproj */,
+				8EE84C551DED07A300157252 /* nameread.xcodeproj */,
 				BD5E119817A737C5007BA047 /* pdfwrite.xcodeproj */,
 				BD5E11A417A737E0007BA047 /* sfntread.xcodeproj */,
 				BD5E119E17A737D3007BA047 /* pstoken.xcodeproj */,
@@ -746,6 +797,7 @@
 				BD5E11E017A7384E007BA047 /* ttread.xcodeproj */,
 				BD1FAAA71731D2E100472BF0 /* uforead.xcodeproj */,
 				BDAF345217D6A9AF004B2EA0 /* ufowrite.xcodeproj */,
+				8E8759DD1DCBF66500C7A081 /* varread.xcodeproj */,
 			);
 			name = Libs;
 			sourceTree = "<group>";
@@ -944,6 +996,8 @@
 			buildRules = (
 			);
 			dependencies = (
+				8EE84C621DEDFAEB00157252 /* PBXTargetDependency */,
+				8E8759E91DCD416100C7A081 /* PBXTargetDependency */,
 				BDAF347017D6A9D4004B2EA0 /* PBXTargetDependency */,
 				BD5E11F917A73897007BA047 /* PBXTargetDependency */,
 				BD5E120717A73897007BA047 /* PBXTargetDependency */,
@@ -1018,6 +1072,10 @@
 					ProjectRef = BD5E119217A737B8007BA047 /* dynarr.xcodeproj */;
 				},
 				{
+					ProductGroup = 8EE84C561DED07A300157252 /* Products */;
+					ProjectRef = 8EE84C551DED07A300157252 /* nameread.xcodeproj */;
+				},
+				{
 					ProductGroup = BD5E119917A737C5007BA047 /* Products */;
 					ProjectRef = BD5E119817A737C5007BA047 /* pdfwrite.xcodeproj */;
 				},
@@ -1077,6 +1135,10 @@
 					ProductGroup = BDAF345317D6A9AF004B2EA0 /* Products */;
 					ProjectRef = BDAF345217D6A9AF004B2EA0 /* ufowrite.xcodeproj */;
 				},
+				{
+					ProductGroup = 8E8759DE1DCBF66500C7A081 /* Products */;
+					ProjectRef = 8E8759DD1DCBF66500C7A081 /* varread.xcodeproj */;
+				},
 			);
 			projectRoot = "";
 			targets = (
@@ -1087,6 +1149,20 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		8E8759E21DCBF66500C7A081 /* libvarread.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libvarread.a;
+			remoteRef = 8E8759E11DCBF66500C7A081 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		8EE84C5A1DED07A300157252 /* libnameread.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libnameread.a;
+			remoteRef = 8EE84C591DED07A300157252 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		BD1FAAAF1731D2E200472BF0 /* libuforead.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1248,6 +1324,16 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		8E8759E91DCD416100C7A081 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = varread;
+			targetProxy = 8E8759E81DCD416100C7A081 /* PBXContainerItemProxy */;
+		};
+		8EE84C621DEDFAEB00157252 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = nameread;
+			targetProxy = 8EE84C611DEDFAEB00157252 /* PBXContainerItemProxy */;
+		};
 		BD5E11E717A7387C007BA047 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = pdfwrite;

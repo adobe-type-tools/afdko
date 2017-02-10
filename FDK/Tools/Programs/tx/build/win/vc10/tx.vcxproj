@@ -62,7 +62,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>../../../../public/lib/lib/win/debug/dynarr.lib;../../../../public/lib/lib/win/debug/t1read.lib;../../../../public/lib/lib/win/debug/t1cstr.lib;../../../../public/lib/lib/win/debug/cffread.lib;../../../../public/lib/lib/win/debug/t2cstr.lib;../../../../public/lib/lib/win/debug/ttread.lib;../../../../public/lib/lib/win/debug/pstoken.lib;../../../../public/lib/lib/win/debug/absfont.lib;../../../../public/lib/lib/win/debug/ctutil.lib;../../../../public/lib/lib/win/debug/cffwrite.lib;../../../../public/lib/lib/win/debug/cfembed.lib;../../../../public/lib/lib/win/debug/pdfwrite.lib;../../../../public/lib/lib/win/debug/sfntread.lib;../../../../public/lib/lib/win/debug/sfntwrite.lib;../../../../public/lib/lib/win/debug/svgwrite.lib;../../../../public/lib/lib/win/debug/svread.lib;../../../../public/lib/lib/win/debug/sha1.lib;../../../../public/lib/lib/win/debug/t1write.lib;../../../../public/lib/lib/win/debug/support.lib;../../../../public/lib/lib/win/debug/uforead.lib;../../../../public/lib/lib/win/debug/ufowrite.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../../../../public/lib/lib/win/debug/dynarr.lib;../../../../public/lib/lib/win/debug/t1read.lib;../../../../public/lib/lib/win/debug/t1cstr.lib;../../../../public/lib/lib/win/debug/cffread.lib;../../../../public/lib/lib/win/debug/t2cstr.lib;../../../../public/lib/lib/win/debug/ttread.lib;../../../../public/lib/lib/win/debug/pstoken.lib;../../../../public/lib/lib/win/debug/absfont.lib;../../../../public/lib/lib/win/debug/ctutil.lib;../../../../public/lib/lib/win/debug/cffwrite.lib;../../../../public/lib/lib/win/debug/cfembed.lib;../../../../public/lib/lib/win/debug/pdfwrite.lib;../../../../public/lib/lib/win/debug/sfntread.lib;../../../../public/lib/lib/win/debug/sfntwrite.lib;../../../../public/lib/lib/win/debug/svgwrite.lib;../../../../public/lib/lib/win/debug/svread.lib;../../../../public/lib/lib/win/debug/sha1.lib;../../../../public/lib/lib/win/debug/t1write.lib;../../../../public/lib/lib/win/debug/support.lib;../../../../public/lib/lib/win/debug/uforead.lib;../../../../public/lib/lib/win/debug/ufowrite.lib;../../../../public/lib/lib/win/debug/nameread.lib;../../../../public/lib/lib/win/debug/varread.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName).exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
@@ -81,7 +81,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>../../../../public/lib/lib/win/release/dynarr.lib;../../../../public/lib/lib/win/release/t1read.lib;../../../../public/lib/lib/win/release/t1cstr.lib;../../../../public/lib/lib/win/release/cffread.lib;../../../../public/lib/lib/win/release/t2cstr.lib;../../../../public/lib/lib/win/release/ttread.lib;../../../../public/lib/lib/win/release/pstoken.lib;../../../../public/lib/lib/win/release/absfont.lib;../../../../public/lib/lib/win/release/ctutil.lib;../../../../public/lib/lib/win/release/cffwrite.lib;../../../../public/lib/lib/win/release/cfembed.lib;../../../../public/lib/lib/win/release/pdfwrite.lib;../../../../public/lib/lib/win/release/sfntread.lib;../../../../public/lib/lib/win/release/sfntwrite.lib;../../../../public/lib/lib/win/release/svgwrite.lib;../../../../public/lib/lib/win/release/svread.lib;../../../../public/lib/lib/win/release/sha1.lib;../../../../public/lib/lib/win/release/t1write.lib;../../../../public/lib/lib/win/release/support.lib;../../../../public/lib/lib/win/release/uforead.lib;../../../../public/lib/lib/win/release/ufowrite.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../../../../public/lib/lib/win/release/dynarr.lib;../../../../public/lib/lib/win/release/t1read.lib;../../../../public/lib/lib/win/release/t1cstr.lib;../../../../public/lib/lib/win/release/cffread.lib;../../../../public/lib/lib/win/release/t2cstr.lib;../../../../public/lib/lib/win/release/ttread.lib;../../../../public/lib/lib/win/release/pstoken.lib;../../../../public/lib/lib/win/release/absfont.lib;../../../../public/lib/lib/win/release/ctutil.lib;../../../../public/lib/lib/win/release/cffwrite.lib;../../../../public/lib/lib/win/release/cfembed.lib;../../../../public/lib/lib/win/release/pdfwrite.lib;../../../../public/lib/lib/win/release/sfntread.lib;../../../../public/lib/lib/win/release/sfntwrite.lib;../../../../public/lib/lib/win/release/svgwrite.lib;../../../../public/lib/lib/win/release/svread.lib;../../../../public/lib/lib/win/release/sha1.lib;../../../../public/lib/lib/win/release/t1write.lib;../../../../public/lib/lib/win/release/support.lib;../../../../public/lib/lib/win/release/uforead.lib;../../../../public/lib/lib/win/release/ufowrite.lib;../../../../public/lib/lib/win/release/nameread.lib;../../../../public/lib/lib/win/release/varread.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName).exe</OutputFile>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -131,6 +131,9 @@
     <ProjectReference Include="..\..\..\..\public\lib\build\dynarr\win\vc10\dynarr.vcxproj">
       <Project>{41075538-eb2c-43dd-90df-21c6ed004ab7}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\public\lib\build\nameread\win\vc10\nameread.vcxproj">
+      <Project>{da4450e3-e694-4f89-aeb3-d1a5498bd6f5}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\public\lib\build\pdfwrite\win\vc10\pdfwrite.vcxproj">
       <Project>{f3843d68-b828-4f63-a5c1-031c86a04038}</Project>
@@ -191,6 +194,9 @@
     <ProjectReference Include="..\..\..\..\public\lib\build\ufowrite\win\vc10\ufowrite.vcxproj">
       <Project>{65BCCE6E-3601-428C-8403-2F1AFC8B6E11}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\public\lib\build\varread\win\vc10\varread.vcxproj">
+      <Project>{0f6c5c6e-5b6d-463d-81df-cceb1271c759}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -43,7 +43,7 @@
    CDAWG using the concatenation of all the charstrings from all the fonts as
    input. Subseqeuntly the completed suffix CDAWG is traversed in order to count
 
-   The suffix CDAWG is built as a compact CDAWG (CDAWG) using an algorithm described in paper
+   The suffix CDAWG is built as a compact DAWG (CDAWG) using an algorithm described in paper
    "On-Line Construction of Compact Directed Acyclic Word Graphs" (200), S. Inenaga, et. al.
    <http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.25.474> which is an extension
    to the compact suffix tree construction algorithm "On-line construction of suffix trees"
@@ -126,6 +126,7 @@ static unsigned char *gTestString = (unsigned char *)"Humpty Dumpty sat on a wal
 #define SEPARATOR   t2_separator
 #endif
 
+#define MAX_NUM_SUBRS		65535L	/* Maximum number of subroutines in one INDEX structure */
 #define MAX_CALL_LIST_COUNT 3   /* Maximum number of call list candidates buildCallList creates */
 
 /* --- Memory management --- */
@@ -268,7 +269,7 @@ struct subrCtx_ {
 	unsigned maxSubrLen;    /* Maximum subr length */
 	unsigned minSubrLen;    /* Minimum subr lenth */
 
-	long maxNumSubrs;       /* Maximum number of subroutines (0 means default 65536) */
+	long maxNumSubrs;       /* Maximum number of subroutines (0 means default MAX_NUM_SUBRS) */
 
 	cfwCtx g;               /* Package context */
 };
@@ -1563,7 +1564,8 @@ static void buildCallList(subrCtx h, int buildPhase, unsigned length, unsigned c
 			subr = subrHash ? *subrHash : NULL;
 			if (subr && (!buildPhase || (subr->flags & SUBR_SELECT))
 			    && ((subend != pend) || (pstr != pstart) || selfMatch)
-			    && (!buildPhase || (id == subr->node->id) || (subr->node->id == NODE_GLOBAL))) {
+				&& (!buildPhase || (id == subr->node->id) || (subr->node->id == NODE_GLOBAL)))
+                {
 				int foundGap = 0;
 				unsigned subrStartOffset = pstr - pstart;
 				unsigned subrEndOffset = subrStartOffset + subr->length;
@@ -1659,6 +1661,48 @@ static void buildCallList(subrCtx h, int buildPhase, unsigned length, unsigned c
 
 #if DB_INFS
 	if (buildPhase && h->calls.cnt != 0) {
+		int j;
+		for (j = 0; j < h->calls.cnt; j++) {
+			Call *call = &h->calls.array[j];
+			if (call->subr != NULL) {
+				dbsubr(h, call->subr - h->subrs.array, 'y', call->offset);
+			}
+		}
+	}
+#endif
+}
+
+/* Compare subr calls by offset */
+static int CTL_CDECL cmpCalls(const void *first, const void *second) {
+	Call *a = (Call *)first;
+	Call *b = (Call *)second;
+    return a->offset - b->offset;
+}
+
+static void buildSubrCallList(subrCtx h, Subr *subr, unsigned id) {
+    unsigned length = subr->length;
+    unsigned char *pstart = subr->cstr;
+    short subrDepth = subr->misc;
+    Link *link;
+
+	h->calls.cnt = 0;
+    for (link = subr->infs; link; link = link->next) {
+        Subr *inf = link->subr;
+        if ((inf->flags & SUBR_SELECT) != 0
+            && ((id == inf->node->id) || (inf->node->id == NODE_GLOBAL))
+                /* respect the max subr stack depth observed by checkSubrStackOvl */
+            && ((subrDepth < 0) || (subrDepth > inf->misc)))
+        {
+            Call    *call = dnaNEXT(h->calls);
+            call->subr = inf;
+            call->offset = link->offset;
+        }
+    }
+
+    qsort(h->calls.array, h->calls.cnt, sizeof(Call), cmpCalls);
+
+#if DB_INFS
+	if (h->calls.cnt != 0) {
 		int j;
 		for (j = 0; j < h->calls.cnt; j++) {
 			Call *call = &h->calls.array[j];
@@ -1996,7 +2040,10 @@ static int CTL_CDECL cmpLocalSetSubrs(const void *first, const void *second) {
 			return 0;
 
 		default:
+#if TC_DEBUG
 			printf("cmpLocalSetSubrs() can't happen!\n");
+#endif
+            break;
 	}
 	return 0;   /* Suppress compiler warning */
 }
@@ -2167,15 +2214,16 @@ static int CTL_CDECL cmpSubrFitness(const void *first, const void *second) {
 }
 
 /* Check for subr stack depth overflow */
-static void checkSubrStackOvl(subrCtx h, Subr *subr, int depth) {
+static void checkSubrStackOvl(subrCtx h, Subr *subr, int depth, unsigned id) {
 	Link *sup;
 
-	/* No need to check this subr if it has been checked with this or deeper stack */
-	if (depth <= subr->misc) {
+	/* No need to check this subr if it is local and has been checked with this or deeper stack */
+	if (depth <= subr->misc && (subr->node->id != NODE_GLOBAL || id == NODE_GLOBAL)) {
 		return;
 	}
 
-	subr->misc = (short)depth;
+    if (depth > subr->misc)
+        subr->misc = (short)depth;
 	if (subr->flags & SUBR_SELECT) {
 		depth++;    /* Bump depth for selected subrs only */
 
@@ -2191,7 +2239,7 @@ static void checkSubrStackOvl(subrCtx h, Subr *subr, int depth) {
 
 	/* Recursively ascend superior subrs */
 	for (sup = subr->sups; sup != NULL; sup = sup->next) {
-		checkSubrStackOvl(h, sup->subr, depth);
+		checkSubrStackOvl(h, sup->subr, depth, id);
 	}
 }
 
@@ -2241,7 +2289,7 @@ reselect:
 		Subr *subr;
 		for (subr = h->leaders.array[i]; subr != NULL; subr = subr->next) {
 			if (subr->infs == NULL) {
-				checkSubrStackOvl(h, subr, 0);
+				checkSubrStackOvl(h, subr, 0, id);
 			}
 			subr->flags &= ~SUBR_MEMBER;
 		}
@@ -2263,7 +2311,7 @@ reselect:
 		/* Discard extra subrs if exceeds capacity */
 		long limit = h->maxNumSubrs;
 		if (limit == 0) {
-			limit = 65536L;
+			limit = MAX_NUM_SUBRS;
 		}
 		limit = limit * multiplier;
 
@@ -2279,7 +2327,7 @@ reselect:
 		}
 		#else /* original code before I added h->g->maxNumSubrs */
 		h->tmp.cnt =
-		    (nSelected > 65536L * multiplier) ? 65536L * multiplier : nSelected;
+		    (nSelected > MAX_NUM_SUBRS * multiplier) ? MAX_NUM_SUBRS * multiplier : nSelected;
 		#endif
 		return;
 	}
@@ -2567,7 +2615,7 @@ static void addSubrs(subrCtx h, subr_CSData *subrs, unsigned id) {
 #endif
 
 		/* Build subr call list */
-		buildCallList(h, 1, subr->length, subr->cstr, 0, id);
+		buildSubrCallList(h, subr, id);
 
 		/* Subroutinize charstring */
 		pdst = subrizeCstr(h, pdst, subr->cstr, subr->length);

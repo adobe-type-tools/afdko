@@ -40,7 +40,7 @@
 
 jmp_buf mark;
 
-#define MAKEOTF_VERSION "2.5.65220"
+#define MAKEOTF_VERSION "2.5.65590"
 /*Warning: this string is now part of heuristic used by CoolType to identify the
    first round of CoolType fonts which had the backtrack sequence of a chaining
    contextual substitution ordered incorrectly.  Fonts with the old ordering MUST match
@@ -364,6 +364,11 @@ static void parseArgs(int argc, char *argv[], int inScript) {
 								}
 							}
 						}
+
+                        else if (!strcmp(arg, "-addDSIG")) {
+                            convert.otherflags |= OTHERFLAGS_ADD_STUB_DSIG;
+                            break;
+                        }
 						else {
 							cbFatal(cbctx, "unrecognized option (%s)", arg);
 						}
@@ -580,7 +585,12 @@ static void parseArgs(int argc, char *argv[], int inScript) {
 							convert.otherflags |= OTHERFLAGS_OVERRIDE_MENUNAMES;
 							break;
 						}
-                        
+
+                        else if (!strcmp(arg, "-omitDSIG")) {
+                            convert.otherflags &= ~OTHERFLAGS_ADD_STUB_DSIG;
+                            break;
+                        }
+                       
                         
 						switch (arg[2]) {
 							case 's': {
@@ -633,12 +643,12 @@ static void parseArgs(int argc, char *argv[], int inScript) {
 								if (arg[4] != '\0') {
 									showUsage();
 								}
-								if (arg[3] == 'a') {
+								else if (arg[3] == 'a') {
 									convert.flags &= ~HOT_RENAME;
 									/* just in case the GOADB has already been read in */
 									cbAliasDBCancel(cbctx);
 								}
-								if (arg[3] == 's') {
+								else if (arg[3] == 's') {
 									convert.flags &= ~HOT_SUBSET;
 									/* just in case the GOADB has already been read in */
 								}
@@ -708,7 +718,8 @@ static void parseArgs(int argc, char *argv[], int inScript) {
 					case 'r':
 						convert.otherflags |= OTHERFLAGS_RELEASEMODE;
 						convert.flags |= HOT_RENAME;
-						convert.flags |= HOT_SUBRIZE;
+                        convert.flags |= HOT_SUBRIZE;
+                       convert.otherflags |= OTHERFLAGS_ADD_STUB_DSIG;
 						break;
 
 /* No longer supported - not used enough

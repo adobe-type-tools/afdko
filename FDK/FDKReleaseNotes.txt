@@ -1,6 +1,48 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
+FDK. v2.5 Feb 9 2017 change number 65642.
+
+	Variable fonts.
+	buildMasterOTFs. new command to build OTF font files from UFO sources, when building variable fonts.
+	buildCCF2VF. New command  to build a CFF2 Variable font from the master OTF fonts.
+
+
+	autohint.
+	Fix bug introduced by typo on Dec 1 2015. Caused BlueFuzz to always be set to 1. Rarely causes problems, but found it with font that sets BlueFuzz to zero: with BlueFuzz set to 1, some of the alignment zones were filtered out as being closer than BlueFuzz*3.
+		
+	CheckOutlinesUFO.
+	Added "quiet mode" option.
+	Fixed a bug where logic could try and set an off-curve point as a start point.
+	Changed the logic for assigning contour order and start point. The overlap removal changes both, and  checkOutlinesUFO makes some attempt to restore the original state when possible.  These changes will result in different contour order and start points than before the change, but fixes a bug, and will usually produce the same contour order and start point in fonts that are generated as instances from a set of master designs. There will always be cases where there will be some differences. 
+	
+	MakeOTF.py
+	Replace old logic for deriving relative paths with python function for the same.
+	When converting Type1 to CID in makeotf, the logic in mergeFonts and ConvertFontToCID.py was requiring the FDArray FontDicts to have keys, like FullName, that are not in fact required, and and are often not present in the source fonts. Fixed both mergeFonts and ConvertFontToCID.py.
+	By default, makeotf will add a minimal stub DSIG table in release mode. The new options "-addDSIG" and "-omitDSIG" will force makeotf to either add or omit the stub DSIG table. This function was added because the Adobe Type group is discontinuing signing font files.
+	
+	makeotfexe.
+	fix bug in processing UVS input file for makeotf for non-CID fonts.
+
+	mergeFonts.
+	Removed requirement for mergeFonts that each FontDict have a FullName, Weight, and Family Name. This fixes a bug in using mergeFonts with UFO sources and converting to CID-keyed output font. Develoeprs shouldn't have to put these fields in the source fonts, since they are not required.
+	
+	spot.
+	Fixed bug in name table dump: Microsoft platform language tags for Big5 and PRC were swapped.
+	
+	stemHist.
+	Removed debug print line, that caused a lot of annoying output, and was left in the last update by accident.
+	
+	tx.
+	When getting Unicode values for output, the presence of UVS cmap meant that no UV values were read from any other cmap subtable. I fixed this bug, but 'tx' still does not support reading and showing UVS values. Doing so will be a significant amount of work, so I am deferring that to the my round of FDK work.
+	Added support for CFF2 variable fonts as source fonts: when using -t1 or -cff, these wil be snapshotted to an instance. If no user design vector (UDV) argument is supplied, then the output will be the default  data. If a UDV argument is supplied with the option -U, then the instance is built at the specified point in design space.
+	Added new option +V/-V to remove overlaps in output Type 1 fonts ( mode -t1) and CFF fonts (mode -cff). This is still experimental: please report any bugs.
+	
+	ttx.
+	Updated to version 3.6.3 of the fontTools module from master branch on github.
+	Extended fontToosk to be able to compile and decompile CFF2 tables in variable fonts. This will eventually be folded back into the main branch.
+	
+
 FDK. v2.5 May 27 2016 change number 65322.
 
 	Adobe CMAP files for CJK fonts.

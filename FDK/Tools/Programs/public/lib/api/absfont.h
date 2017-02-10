@@ -100,43 +100,6 @@ enum                            /* OrigFontType field values */
     abfOrigFontTypeOCF,
     abfOrigFontTypeUFO
     };
-
-typedef struct
-{
-    float startCoord;
-    float peakCoord;
-    float endCoord;
-} varRegionAxis;
-
-    
-typedef struct
-{
-    varRegionAxis* regionAxes; // axisCount itemns
-} varRegion;
-
-typedef struct
-{
-    unsigned short regionCount;
-    int* regionIndices; //regionCount items
-    // for CFF2 data, itemCount and shortDeltaCount are always 0, and there are no deltaSet items.
-} varData;
-
-typedef struct                      /* Font dict array */
-{
-    unsigned long length;
-    unsigned char *data;
-    unsigned long format;
-    
-    // Variation region
-    unsigned short axisCount;
-    unsigned short regionCount;
-    varRegion* variationRegions; // regionCount items
-    
-    // ItemVariationData
-    unsigned short itemVariationDataCount;
-    varData* varDataList;
-} VarStore;
-
     
 /* Top dictionary data. Comments indicate default/initial values. */
 typedef struct
@@ -187,7 +150,6 @@ typedef struct
             long cnt;               /* Value set by client to match array */
             abfFontDict *array;     /* Array allocated by client to match cnt */
         } FDArray;
-        VarStore VarStore;
         abfSupplement sup;          /* Supplementary data */
     } abfTopDict;
 

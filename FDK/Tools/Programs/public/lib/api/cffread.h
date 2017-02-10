@@ -56,7 +56,7 @@ cfrCtx cfrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
    available via cfrErrStr(). If the client doesn't require the debug data
    stream, NULL should be returned from its stream open call. */
 
-int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top);
+int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top, float *UDV);
 
 #define CFR_UPDATE_OPS  (1<<0)
 #define CFR_USE_MATRIX  (1<<1)
@@ -66,9 +66,8 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
 #define CFR_FLATTEN_CUBE   (1<<5)
 #define CFR_SEEN_GLYPH (1<<6) /* have seen a glyph */
 #define CFR_CUBE_RND (1<<7)
-#define CFR_SEEN_BLEND (1<<8)
-#define CFR_IS_CFF2 (1<<9)
-#define CFR_FLATTEN_VF   (1<<10)
+#define CFR_FLATTEN_VF   (1<<8)
+#define CFR_SHORT_VF_NAME   (1<<9)
 
 /* cfrBegFont() is called to initiate a new font parse. The source data stream
    (CFR_SRC_STREAM_ID) is opened, positioned at the offset specified by the
@@ -115,7 +114,17 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
 	   
    CFR_FLATTEN_CUBE - the data contains cube font operators. Stack depth
    and operator defs are different. The Cube compose ops must be flattened.
-*/     
+
+   CFR_FLATTEN_VF - flatten CFF2 variable font data for a given user design vector.
+
+   CFR_SHORT_VF_NAME - when flattening a CFF2 variable font, a generated instance
+   PS name will be limited to 63 characters, as opposed to 127 characters as
+   documented in Adobe Tech Notes 5902.
+
+   The "UDV" parameter specifies the User Design Vector to be used in
+   flattening (snapshotting) a CFF2 variable font. If NULL, the font is flattened at the
+   default instance. The parameter may be set to NULL for non-variable fonts.
+*/
 
 
 int cfrIterateGlyphs(cfrCtx h, abfGlyphCallbacks *glyph_cb);

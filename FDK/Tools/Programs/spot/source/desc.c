@@ -192,10 +192,10 @@ static Byte8 *macLanguage[] =
 static Byte8 *MSScript[] =
 	{
 	"Symbol",					/* 0 */
-	"Unicode BMP only",	/* 1 */
+	"Unicode BMP only",         /* 1 */
 	"ShiftJIS",					/* 2 */
-	"Big5",						/* 3 */
-	"PRC",						/* 4 */
+	"PRC",						/* 3 */
+    "Big5",						/* 4 */
 	"Wangsung",					/* 5 */
 	"Johab",					/* 6 */
 	"--unknown--",				/* 7 */

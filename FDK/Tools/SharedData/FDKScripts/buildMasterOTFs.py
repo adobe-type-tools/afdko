@@ -160,11 +160,11 @@ def main(args=None):
 			continue
 		cmd = "makeotf -f \"%s\" -o \"%s\" 2>&1" % (tempT1, otfName)
 		log = runShellCmd(cmd)
-		if "FATAL" in log:
+		if ("FATAL" in log) or ("Failed to build" in log):
 			# If there is a FontMenuNameDB file, then not finding an entry
 			# which matches the PS name is a fatal error. For this case, we
 			# just try again, but without the FontMenuNameDB.
-			if "I can't find a Family name" in log:
+			if ("I can't find a Family name" in log) or ("not in Font Menu Name database" in log):
 				cmd = "makeotf -f \"%s\" -o \"%s\" -mf None 2>&1" % (tempT1, otfName)
 				log = runShellCmd(cmd)
 				if "FATAL" in log:

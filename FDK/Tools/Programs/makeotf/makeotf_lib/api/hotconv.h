@@ -10,7 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 extern "C" {
 #endif
 
-#define HOT_VERSION 0x0100633 /* Library version (1.0.93) */
+#define HOT_VERSION 0x0100635 /* Library version (1.0.95) */
 /*Warning: this string is now part of heuristic used by CoolType to identify the
 first round of CoolType fonts which had the backtrack sequence of a chaining 
 contextual substitution ordered incorrectly.  Fonts with the old ordering MUST match
@@ -835,12 +835,13 @@ void hotConvert(hotCtx g);
 #define HOT_STUB_CMAP4 (1 << 7) /* Build only a stub cmap 4 table. Useful for AdobeBlank, and otehr cases where size is an issue. Font must contain cmap format 4 to work on Windows, but it doesn't have to be useful. */
 #define HOT_OVERRIDE_MENUNAMES (1<<8)
 #define HOT_DO_NOT_OPTIMIZE_KERN (1<<9) /* Do not use left side kern class 0 for non-zero kern values. Saves a a few hundred to thousand bytes, but confuses some developers. */
+#define HOT_ADD_STUB_DSIG (1<<10)
     
-void hotFree(hotCtx g);
-
 /* hotFree() destroys the library context and all the resources allocated to
    it. It must be the last function called by a client of the library. */
 
+void hotFree(hotCtx g);
+    
 /* Environment variables used to set default values */
 #define kFSTypeEnviron "FDK_FSTYPE"
 

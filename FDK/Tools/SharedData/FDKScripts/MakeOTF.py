@@ -6,7 +6,7 @@ default values, and can read values in from a text project file. It will also
 use the tx program to convert the input font file to a Type 1 font, if needed.
 """
 
-__copyright__ = """Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+__copyright__ = """Copyright 2017 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
 
@@ -42,7 +42,7 @@ Project file.
 """
 
 __usage__ = """
-makeotf v2.0.94 May 23 2016
+makeotf v2.0.96 Feb 9 2017
 -f <input font>         Specify input font path. Default is 'font.pfa'.
 -o <output font>        Specify output font path. Default is
                         '<PostScript-Name>.otf'.
@@ -222,6 +222,8 @@ makeotf v2.0.94 May 23 2016
                         side class 0 for non-zero kern values. Optimizing saves a few
                         hundred to thousand bytes, but confuses some programs.
                         Optimizing is the default behavior, and previously was the only option.
+-addDSIG,-omitDSIG      Add or omit minimal empty DSIG table. This is added by
+                        default in release mode.
 
 Note that options are applied in the order in which they are
 specified: "-r -nS" will not subroutinize a font, but "-nS -r" will
@@ -326,6 +328,7 @@ kDefaultFMNDBPath = "FontMenuNameDB"
 kDefaultGOADBPath = "GlyphOrderAndAliasDB"
 kTempFontSuffix = ".tmp"
 kTemp2FontSuffix = ".tmp2"
+kAddStubDSIG = "AddStubDSIG"
 kOptionNotSeen = 99
 
 kMOTFOptions = {
@@ -367,7 +370,15 @@ kMOTFOptions = {
 	kSuppressWidthOptimization:  [kOptionNotSeen, "-swo", "-nswo"],
 	kStubCmap4:  [kOptionNotSeen, "-stubCmap4", None],
 	kSuppressKernOptimization:  [kOptionNotSeen, "-skco", "-nsko"],
+	kAddStubDSIG:  [kOptionNotSeen, "-addDSIG", "-omitDSIG"],
 
+}
+
+#The options whcih should NOT be passed to makeotfexe, as
+#they are for local use only.
+kSkipOptions = { "":None,
+	kRenumber:None,
+	kConvertToCID:None,
 }
 
 # Used to compile post table for TTF fonts. We need to stay in syn with the
@@ -600,6 +611,10 @@ def setOptionsFromFontInfo(makeOTFParams):
 		if re.search(r"SuppressKernOptimization+([Tt]rue|1)", data):
 			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kSuppressKernOptimization))
 			print "makeotf [Note] Suppresing Kern Optimization."
+
+	if kMOTFOptions[kAddStubDSIG][0] == kOptionNotSeen:
+		if re.search(r"AddStubDSIG+([Tt]rue|1)", data):
+			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kAddStubDSIG))
 
 	if kMOTFOptions[kLicenseCode][0] == kOptionNotSeen:
 		m = re.search(r"LicenseCode\s+([^\r\n]+)", data)
@@ -1229,6 +1244,14 @@ def getOptions(makeOTFParams):
 		elif arg == kMOTFOptions[kStubCmap4][1]:
 			kMOTFOptions[kStubCmap4][0] = i + optionIndex
 			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kStubCmap4))
+
+		elif arg == kMOTFOptions[kAddStubDSIG][1]:
+			kMOTFOptions[kAddStubDSIG][0] = i + optionIndex
+			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kAddStubDSIG))
+
+		elif arg == kMOTFOptions[kAddStubDSIG][2]:
+			kMOTFOptions[kAddStubDSIG][0] = i + optionIndex
+			exec("makeOTFParams.%s%s = 'false'" % (kFileOptPrefix, kAddStubDSIG))
 
 
 		else:
@@ -2380,13 +2403,11 @@ def runMakeOTF(makeOTFParams):
 			fp.write(os.linesep + "table head {" + os.linesep + "FontRevision 1.000;" + os.linesep + "} head;" + os.linesep)
 			fp.close()
 		updateFontRevision(featuresPath, fontRevision)
-		exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kRenumber)) # Don't pass the argument through to makeotfexe
 
 	# if converting to CID, save the setting, but remove the option from makeOTFParams so we don't
 	# pass the -cn arg/-ncn arg on to makeotfexe.
 	doConvertToCID = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kConvertToCID))
 	if doConvertToCID != None:
-		exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kConvertToCID))
 		if makeOTFParams.srcIsTTF:
 			doConvertToCID = None
 
@@ -2397,9 +2418,12 @@ def runMakeOTF(makeOTFParams):
 	# Add the rest of the parameters
 	optionKeys.sort(byEntryOrder)
 	for optionKey in optionKeys:
+		if optionKey in kSkipOptions: # Skip the options that should not be passed to maketfexe.
+			continue
 		val = eval("makeOTFParams.%s%s" % (kFileOptPrefix, optionKey))
 		if val == None:
 			continue
+			
 		optionEntry = kMOTFOptions[optionKey]
 		if optionEntry[2]: # it is a true/false option.
 			if val == 'true':
@@ -2499,6 +2523,7 @@ def runMakeOTF(makeOTFParams):
 			if os.exists(outputPath):
 				os.remove(outputPath)
 			raise MakeOTFRunError
+
 
 	if eval("makeOTFParams.%s%s" % (kFileOptPrefix, kRelease)):
 		try:

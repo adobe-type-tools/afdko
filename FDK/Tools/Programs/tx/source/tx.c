@@ -7,7 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define TX_VERSION CTL_MAKE_VERSION(1,0,69)
+#define TX_VERSION CTL_MAKE_VERSION(1,0,70)
 
 #include "cfembed.h"
 #include "cffread.h"
@@ -245,6 +245,7 @@ struct txCtx_
 #define SUBSET__EXCLUDE_OPT	(1<<11)	/* use glyph list to exclude glyphs, instead of including them */
 #define SUBSET_SKIP_NOTDEF  (1<<12)	/* While this is set, don't force the notdef into the current subset. */
 #define SUBSET_HAS_NOTDEF  (1<<13)	/* Indcates that notdef has been added, no need to force it in.*/
+#define PATH_REMOVE_OVERLAP (1<<14) /* Do not remove path overlaps */
 	int mode;				/* Current mode */
 	char *modename;			/* Name of current mode */
 	abfTopDict *top;		/* Top dictionary */
@@ -429,6 +430,7 @@ struct txCtx_
 		Stream dbg;
 		long flags;			/* Library flags */
 		int lenIV;
+        long maxGlyphs;
 		int fd;				/* -decid target fd */
 		dnaDCL(char, gnames);	/* -decid glyph names */
 		} t1w;
@@ -1681,6 +1683,36 @@ static void path_Help(txCtx h)
 
 /* -------------------------------- cff mode ------------------------------- */
 
+/* Reset the glyph flags. */
+static void resetGlyphs(txCtx h)
+	{
+    int result = 1;
+
+	switch (h->src.type)
+		{
+	case src_Type1:
+		result = t1rResetGlyphs(h->t1r.ctx);
+		break;
+	case src_OTF:
+	case src_CFF:
+		result = cfrResetGlyphs(h->cfr.ctx);
+		break;
+	case src_TrueType:
+		result = ttrResetGlyphs(h->ttr.ctx);
+		break;
+	case src_SVG:
+		result = svrResetGlyphs(h->svr.ctx);
+		break;
+		
+	case src_UFO:
+		result = ufoResetGlyphs(h->ufr.ctx);
+		break;
+		
+		}
+    if (result)
+        fatal(h, NULL);
+	}
+
 /* Begin font set. */
 static void cff_BegSet(txCtx h)
 	{
@@ -1692,21 +1724,52 @@ static void cff_BegSet(txCtx h)
 static void cff_BegFont(txCtx h, abfTopDict *top)
 	{
 	dstFileSetAutoName(h, top);
-	if (cfwBegFont(h->cfw.ctx, NULL))
-		fatal(h, NULL);
+    if (h->flags & PATH_REMOVE_OVERLAP)
+        {
+        h->cb.glyph = abfGlyphPathCallbacks;
+        h->cb.glyph.direct_ctx = h->abf.ctx;
+        if (abfBegFont(h->abf.ctx, top))
+            fatal(h, NULL);
+        }
+    else
+        {
+        h->cb.glyph = cfwGlyphCallbacks;
+        h->cb.glyph.direct_ctx = h->cfw.ctx;
+        if (cfwBegFont(h->cfw.ctx, NULL))
+            fatal(h, NULL);
+        }
 	}
 
 /* End font. */
 static void cff_EndFont(txCtx h)
 	{
-	if (cfwEndFont(h->cfw.ctx, h->top))
-		fatal(h, NULL);
+    if (h->flags & PATH_REMOVE_OVERLAP)
+        {
+        if (cfwBegFont(h->cfw.ctx, NULL))
+            fatal(h, NULL);
+        
+        resetGlyphs(h);
+        h->cb.glyph = cfwGlyphCallbacks;
+        h->cb.glyph.direct_ctx = h->cfw.ctx;
+        if (abfEndFont(h->abf.ctx, ABF_PATH_REMOVE_OVERLAP, &h->cb.glyph))
+            fatal(h, NULL);
+        
+        if (cfwEndFont(h->cfw.ctx, h->top))
+                fatal(h, NULL);
+        }
+    else
+        {
+        if (cfwEndFont(h->cfw.ctx, h->top))
+            fatal(h, NULL);
+        }
 	}
 
 /* End font set. */
 static void cff_EndSet(txCtx h)
 	{
 	if (cfwEndSet(h->cfw.ctx))
+		fatal(h, NULL);
+	if (abfFree(h->abf.ctx))
 		fatal(h, NULL);
 	}
 
@@ -1735,9 +1798,13 @@ static void cff_SetMode(txCtx h)
 			fatal(h, "(cfw) can't init lib");
 		}
 
-	/* Initialize glyph callbacks */
-	h->cb.glyph = cfwGlyphCallbacks;
-	h->cb.glyph.direct_ctx = h->cfw.ctx;
+    if (h->abf.ctx == NULL)
+        {
+        /* Create library context */
+        h->abf.ctx = abfNew(&h->cb.mem, ABF_CHECK_ARGS);
+        if (h->abf.ctx == NULL)
+            fatal(h, "(abf) can't init lib");
+        }
 
 	/* Set source library flags */
 	/* These are now set at the start of parseArgs
@@ -2951,7 +3018,19 @@ static int t1_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 /* Begin font. */
 static void t1_BegFont(txCtx h, abfTopDict *top)
 	{
-	long maxglyphs = 0;
+	h->t1w.maxGlyphs = 0;
+
+	/* Initialize glyph callbacks */
+    if (h->flags & PATH_REMOVE_OVERLAP)
+        {
+        h->cb.glyph = abfGlyphPathCallbacks;
+        h->cb.glyph.direct_ctx = h->abf.ctx;
+        }
+    else
+        {
+        h->cb.glyph = t1wGlyphCallbacks;
+        h->cb.glyph.direct_ctx = h->t1w.ctx;
+        }
 
 	if (h->t1w.options & T1W_DECID)
 		{
@@ -2967,19 +3046,30 @@ static void t1_BegFont(txCtx h, abfTopDict *top)
 		h->t1w.gnames.cnt = 0;
 
 		/* Replace callback */
-		h->cb.glyph.beg = t1_GlyphBeg;
+		if (!(h->flags & PATH_REMOVE_OVERLAP))
+            h->cb.glyph.beg = t1_GlyphBeg;
 		h->cb.glyph.indirect_ctx = h;
 		}
 	if (h->t1w.options & T1W_WAS_EMBEDDED)
 		top->WasEmbedded = 1;
 	
 	if (h->t1w.flags & T1W_TYPE_BASE)
-		maxglyphs = (top->sup.flags & ABF_CID_FONT)? 
+		h->t1w.maxGlyphs = (top->sup.flags & ABF_CID_FONT)?
 			top->cid.CIDCount: top->sup.nGlyphs;
 
 	dstFileSetAutoName(h, top);
-	if (t1wBegFont(h->t1w.ctx, h->t1w.flags, h->t1w.lenIV, maxglyphs))
-		fatal(h, NULL);
+
+	/* Initialize glyph callbacks */
+    if (h->flags & PATH_REMOVE_OVERLAP)
+        {
+        if (abfBegFont(h->abf.ctx, top))
+            fatal(h, NULL);
+        }
+    else
+        {
+        if (t1wBegFont(h->t1w.ctx, h->t1w.flags, h->t1w.lenIV, h->t1w.maxGlyphs))
+            fatal(h, NULL);
+        }
 	}
 
 /* Copy length bytes from source file to destination file. */
@@ -3330,7 +3420,7 @@ static void t1_EndFont(txCtx h)
 		h->top->FDArray.cnt = 1;
 		h->top->FDArray.array = &h->top->FDArray.array[h->t1w.fd];
 		h->t1w.options |= T1W_NO_UID;	/* Clear UniqueIDs */
-		}
+ 		}
 
 	if (h->t1w.options & T1W_NO_UID)
 		{
@@ -3343,8 +3433,28 @@ static void t1_EndFont(txCtx h)
 		strcmp(h->dst.stm.filename, "-") == 0)
 		fatal(h, "stdout can't be used with -pfb or -LWFN options");
 
-	if (t1wEndFont(h->t1w.ctx, h->top))
-		fatal(h, NULL);
+    if (!(h->flags & PATH_REMOVE_OVERLAP))
+        {
+        if (t1wEndFont(h->t1w.ctx, h->top))
+            fatal(h, NULL);
+        }
+    else
+        {
+        if (t1wBegFont(h->t1w.ctx, h->t1w.flags, h->t1w.lenIV, h->t1w.maxGlyphs))
+            fatal(h, NULL);
+
+        resetGlyphs(h);
+        h->cb.glyph = t1wGlyphCallbacks;
+        h->cb.glyph.direct_ctx = h->t1w.ctx;
+        h->cb.glyph.indirect_ctx = h;
+        if (h->t1w.options & T1W_DECID)
+            h->cb.glyph.beg = t1_GlyphBeg;
+        if (abfEndFont(h->abf.ctx, ABF_PATH_REMOVE_OVERLAP, &h->cb.glyph))
+            fatal(h, NULL);
+
+        if (t1wEndFont(h->t1w.ctx, h->top))
+            fatal(h, NULL);
+        }
 
 	if (h->t1w.options & T1W_REFORMAT)
 		t1_Reformat(h);
@@ -3410,9 +3520,13 @@ static void t1_SetMode(txCtx h)
 			fatal(h, "(t1w) can't init lib");
 		}
 
-	/* Initialize glyph callbacks */
-	h->cb.glyph = t1wGlyphCallbacks;
-	h->cb.glyph.direct_ctx = h->t1w.ctx;
+    if (h->abf.ctx == NULL)
+        {
+        /* Create library context */
+        h->abf.ctx = abfNew(&h->cb.mem, ABF_CHECK_ARGS);
+        if (h->abf.ctx == NULL)
+            fatal(h, "(abf) can't init lib");
+        }
 
 	/* Set source library flags */
 	/* These are now set at the start of parseArgs
@@ -4635,17 +4749,81 @@ static void dcf_DumpVarStore(txCtx h, const ctlRegion *region)
         return;
     else
     {
+        unsigned long regionListOffset;
+        unsigned short ivdSubtableCount;
+        dnaDCL(unsigned long, ivdSubtableOffsets);
+        unsigned short axisCount, regionCount;
+        long ivsStart = region->begin + 2;
+
         bufSeek(h, region->begin);
         length = read2(h);
         fprintf(fp, "length =%u\n", length);
-        while (i < length)
-        {
-            fprintf(fp, "%02x ", read1(h));
-            if ((i != 0) && (((i+1) % 8) == 0))
-            {
-                fprintf(fp, "\n");
+        fprintf(fp, "format = %u\n", read2(h));
+
+        regionListOffset = read4(h);
+        fprintf(fp, "regionListOffset = %08lx\n", regionListOffset);
+        ivdSubtableCount = read2(h);
+        fprintf(fp, "subtableCount = %d\n", ivdSubtableCount);
+
+        dnaINIT(h->ctx.dna, ivdSubtableOffsets, ivdSubtableCount, ivdSubtableCount);
+        dnaSET_CNT(ivdSubtableOffsets, ivdSubtableCount);
+
+        fprintf(fp, "--- subtableOffsets[index]={offset}\n");
+        for (i = 0; i < ivdSubtableCount; i++) {
+            ivdSubtableOffsets.array[i] = read4(h);
+            fprintf(fp, "[%d]={%08lx}\n", i, ivdSubtableOffsets.array[i]);
+        }
+
+        bufSeek(h, ivsStart + regionListOffset);
+        fprintf(fp, "--- RegionList\n");
+        axisCount = read2(h);
+        fprintf(fp, "axisCount = %u\n", axisCount);
+        regionCount = read2(h);
+        fprintf(fp, "regionCount = %u\n", regionCount);
+
+        fprintf(fp, "--- RegionCoords[region,axis]={start,peak,end}\n");
+        for (i = 0; i < regionCount; i++) {
+            unsigned short axis;
+            for (axis = 0; axis < axisCount; axis++) {
+                float start = ((float)read2(h))/(1<<14);
+                float peak = ((float)read2(h))/(1<<14);
+                float end = ((float)read2(h))/(1<<14);
+                fprintf(fp, "[%d,%d]={%g,%g,%g}\n", i, axis, start, peak, end);
             }
-            i++;
+        }
+
+        /* item variation data list */
+        for (i = 0; i < ivdSubtableCount; i++) {
+            unsigned short  itemCount;
+            unsigned short  shortDeltaCount;
+            unsigned short regionIndexCount;
+            unsigned short  r, t;
+
+            fprintf(fp, "--- VarStoreSubtable[%d]\n", i);
+
+            bufSeek(h, ivsStart + ivdSubtableOffsets.array[i]);
+
+            itemCount = read2(h);
+            shortDeltaCount = read2(h);
+            regionIndexCount = read2(h);
+            fprintf(fp, "itemCount        = %d\n", itemCount);
+            fprintf(fp, "shortDeltaCount  = %d\n", shortDeltaCount);
+            fprintf(fp, "regionIndexCount = %d\n", regionIndexCount);
+
+            /* region indices */
+            fprintf(fp, "--- RegionIndex[region]={index}\n");
+            for (r = 0; r < regionIndexCount; r++) {
+                fprintf(fp, "[%d]={%d}\n", r, read2(h));
+            }
+            
+            /* load two-dimensional delta values array */
+            fprintf(fp, "--- DeltaValue[item,region]={delta}\n");
+            for (t = 0; t < itemCount; t++) {
+                for (r = 0; r < regionCount; r++) {
+                    short   delta = (short)((r < shortDeltaCount)? read2(h): (char)read1(h));
+                    fprintf(fp, "[%d,%d]={%d}\n", t, r, delta);
+                }
+            }
         }
     }
     fprintf(fp, "\n");
@@ -5767,6 +5945,7 @@ static void prepOTF(txCtx h)
 /* Read font with cffread library. */
 static void cfrReadFont(txCtx h, long origin, int ttcIndex)
 	{
+    float *uv;
 	if (h->cfr.ctx == NULL)
 		{
 		h->cfr.ctx = cfrNew(&h->cb.mem, &h->cb.stm, CFR_CHECK_ARGS);
@@ -5777,7 +5956,10 @@ static void cfrReadFont(txCtx h, long origin, int ttcIndex)
 	if (h->flags & SUBSET_OPT && h->mode != mode_dump)
 		h->cfr.flags |= CFR_UPDATE_OPS;	/* Convert seac for subsets */
 
-	if (cfrBegFont(h->cfr.ctx, h->cfr.flags, origin,  ttcIndex, &h->top))
+    uv = getUDV(h);
+    if (uv)
+        h->cfr.flags |= CFR_FLATTEN_VF;
+	if (cfrBegFont(h->cfr.ctx, h->cfr.flags, origin,  ttcIndex, &h->top, uv))
 		fatal(h, NULL);
 
 	prepSubset(h);
@@ -7237,6 +7419,28 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 				break;
 			case mode_t1:
 				h->t1w.flags &= ~T1W_ENABLE_CMP_TEST;
+				break;
+			default:
+				goto wrongmode;
+				}
+			break;
+        case opt_V:
+			switch (h->mode)
+				{
+			case mode_cff:
+			case mode_t1:
+				h->flags &= ~PATH_REMOVE_OVERLAP;
+				break;
+			default:
+				goto wrongmode;
+				}
+			break;
+        case opt__V:
+			switch (h->mode)
+				{
+			case mode_cff:
+			case mode_t1:
+				h->flags |= PATH_REMOVE_OVERLAP;
 				break;
 			default:
 				goto wrongmode;

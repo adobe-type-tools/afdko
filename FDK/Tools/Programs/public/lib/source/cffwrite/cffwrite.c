@@ -1088,8 +1088,11 @@ static int numsize(float r) {
 		else if (-1131 <= i && i <= 1131) {
 			return 2;
 		}
-		else {
+        else if (-32768 <= i && i <= 32767) {
 			return 3;
+		}
+		else {
+			return 5;
 		}
 	}
 	else {
@@ -1184,9 +1187,12 @@ static void writeCharStringsINDEX(controlCtx h, cff_Font *font) {
 		if (glyph->hAdv != fd->width.dflt) {
 			/* Write width */
 			unsigned char t[5];
+            long n;
 			float r = glyph->hAdv - fd->width.nominal;
-			long n = (long)r;
-			length = (n == r) ? cfwEncInt(n, t) : cfwEncReal(r, t);
+            if (r < -32768 || r >= 32768)
+                cfwMessage(h->g, "out of numeric range width %g in glyph %ld", r, i);
+			n = (long)r;
+			length = (numsize(r) <= 3) ? cfwEncInt(n, t) : cfwEncReal(r, t);
 			cfwWrite(g, length, (char *)t);
 		}
 

@@ -19,6 +19,7 @@ PRG_LIBS = \
 	$(CT_LIB_DIR)/pdfwrite.a \
 	$(CT_LIB_DIR)/sfntread.a \
 	$(CT_LIB_DIR)/sfntwrite.a \
+	$(CT_LIB_DIR)/nameread.a \
 	$(CT_LIB_DIR)/sha1.a \
 	$(CT_LIB_DIR)/support.a \
 	$(CT_LIB_DIR)/svgwrite.a \
@@ -32,7 +33,8 @@ PRG_LIBS = \
 	$(CT_LIB_DIR)/pstoken.a \
 	$(CT_LIB_DIR)/t1cstr.a \
 	$(CT_LIB_DIR)/absfont.a \
-	$(CT_LIB_DIR)/dynarr.a
+	$(CT_LIB_DIR)/dynarr.a \
+	$(CT_LIB_DIR)/varread.a
 
 include ../../../../../public/config/linux/gcc/gcc.mak
 
@@ -98,3 +100,9 @@ $(CT_LIB_DIR)/uforead.a:
 
 $(CT_LIB_DIR)/ufowrite.a:
 	cd $(LIB_BUILD_DIR)/ufowrite/$(PLATFORM)/$(COMPILER)/$(CONFIG); $(MAKE) clean; $(MAKE);
+
+$(CT_LIB_DIR)/nameread.a:
+	cd $(LIB_BUILD_DIR)/nameread/$(PLATFORM)/$(COMPILER)/$(CONFIG); $(MAKE) clean; $(MAKE);
+
+$(CT_LIB_DIR)/varread.a:
+	cd $(LIB_BUILD_DIR)/varread/$(PLATFORM)/$(COMPILER)/$(CONFIG); $(MAKE) clean; $(MAKE);

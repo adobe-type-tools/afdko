@@ -126,6 +126,9 @@
       <Project>{41075538-eb2c-43dd-90df-21c6ed004ab7}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\..\public\lib\build\nameread\win\vc10\nameread.vcxproj">
+      <Project>{da4450e3-e694-4f89-aeb3-d1a5498bd6f5}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\public\lib\build\pdfwrite\win\vc10\pdfwrite.vcxproj">
       <Project>{f3843d68-b828-4f63-a5c1-031c86a04038}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
@@ -185,6 +188,9 @@
     <ProjectReference Include="..\..\..\..\public\lib\build\ufowrite\win\vc10\ufowrite.vcxproj">
       <Project>{65BCCE6E-3601-428C-8403-2F1AFC8B6E11}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\public\lib\build\varread\win\vc10\varread.vcxproj">
+      <Project>{0f6c5c6e-5b6d-463d-81df-cceb1271c759}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

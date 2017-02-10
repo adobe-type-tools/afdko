@@ -1,4 +1,4 @@
-"[-t1 options: default -0, -l, -E, -S, +T, +q, -w, -e 4, -lf]\n"
+"[-t1 options: default -0, -l, -E, -S, +T, +V, +q, -w, -e 4, -lf]\n"
 "-0        host font type\n"
 "-1        base incremental download font\n"
 "-2        addition incremental download font\n"
@@ -8,6 +8,7 @@
 "+/-E      add/remove WasEmbedded key\n"
 "+/-S      ProcSet/Private OtherSubrs\n"
 "+/-T      do/don't optimize font\n",
+"+/-V      emove path overlaps. Default is to not remove overlaps\n"
 "+/-q      retain/remove UniqueID keys in font\n"
 "+/-w      enable/disable widths-only font\n"
 "-Z        decompose SEAC oand dotsection operators\n",

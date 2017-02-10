@@ -12,6 +12,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #else
 #include <stddef.h>     /* For size_t and NULL */
 #endif
+#include <setjmp.h>
 
 /* CoreType Library Shared Definitions
    ===================================
@@ -278,7 +279,9 @@ enum
     UFW_DST_STREAM_ID,  /* ufowrite */
     UFW_TMP_STREAM_ID,
     UFW_DBG_STREAM_ID,
-        
+
+    CTL_SRC_STREAM_ID,  /* ctlshare source stream */
+    
     CTL_STREAM_CNT
     };
 
@@ -316,6 +319,46 @@ typedef struct
    is one past the last byte in the set. Several of the libraries return
    ctlRegion's so that clients may access objects in the stream data directly.
    An empty region is indicated by setting both fields to -1. */
+
+typedef struct ctlSharedStmCallbacks_ ctlSharedStmCallbacks;
+struct ctlSharedStmCallbacks_
+    {
+    void *direct_ctx;           /* host library context */
+
+    struct dnaCtx_ *dna;        /* dynarr context */
+
+    /* Allocate memory. */
+    void* (*memNew)(ctlSharedStmCallbacks *h, size_t size);
+
+    /* Free memory. */
+    void (*memFree)(ctlSharedStmCallbacks *h, void *ptr);
+
+    /* Seek to an offset in a source stream. */
+    void (*seek)(ctlSharedStmCallbacks *h, long offset);
+
+    /* Return absolute byte position in stream. */
+    long (*tell)(ctlSharedStmCallbacks *h);
+
+    /* Copy count bytes from source stream. */
+    void (*read)(ctlSharedStmCallbacks *h, size_t count, char *ptr);
+
+    /* Read 1-byte unsigned number. */
+    unsigned char (*read1)(ctlSharedStmCallbacks *h);
+
+    /* Read 2-byte number. */
+    unsigned short (*read2)(ctlSharedStmCallbacks *h);
+
+    /* Read 4-byte unsigned number. */
+    unsigned long (*read4)(ctlSharedStmCallbacks *h);
+
+    /* Error message. */
+    void (*message)(ctlSharedStmCallbacks *h, char *msg, ...);
+    };
+
+/* ctlSharedStmCallbacks is used for reading SFNT tables shared by multiple font formats.
+ * Unlike other font reading libraries, none of stream data and stream reading functions are
+ * implemented in this library. Instead they are implmented by each host library as callbacks.
+ */
 
 /* ----------------------------- Tag Constants ----------------------------- */
 
@@ -456,6 +499,7 @@ enum
     SVW_LIB_ID,
     UFR_LIB_ID,
     UFW_LIB_ID,
+    CTL_LIB_ID,
     CTL_LIB_ID_CNT
     };
 

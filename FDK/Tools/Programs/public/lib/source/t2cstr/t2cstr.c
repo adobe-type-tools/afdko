@@ -11,6 +11,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "t2cstr.h"
 #include "txops.h"
 #include "ctutil.h"
+#include "varread.h"
 
 #include <string.h>
 #include <stdarg.h>
@@ -63,7 +64,8 @@ struct t2cCtx
 #define START_PATH_MATRIX	 (1<<11) /* Transform has just been defined, and shoould be applied to the foloowing path (from next move-to tup o the following move-to). */
 #define FLATTEN_COMPOSE (1<<12)	/* Flag that we are flattening a compose operation. Used to rest the USE_MATRIX flag when done. */
 #define FLATTEN_BLEND (1<<13)	/* Flag that we are flattening a CFF2 charstring. */
-#define SEEN_CFF2_BLEND (1<<14)	/* Flag that we are flattening a CFF2 charstring. */
+#define SEEN_CFF2_BLEND (1<<14)	/* Seen CFF2 blend operator. */
+#define IS_CFF2         (1<<15) /* CFF2 charstring */
 	struct						/* Operand stack */
 		{
 		long cnt;
@@ -119,6 +121,9 @@ struct t2cCtx
 		} src;
 	short LanguageGroup;
 	t2cAuxData *aux;			/* Auxiliary parse data */
+    unsigned short gid;         /* glyph ID */
+    unsigned short regionIndices[T1_MAX_MASTERS];  /* variable font region indices */
+    cff2GlyphCallbacks *cff2;   /* CFF2 font callbacks */
     abfGlyphCallbacks *glyph;	/* Glyph callbacks */
     ctlMemoryCallbacks *mem;	/* Glyph callbacks */
 	};
@@ -280,14 +285,24 @@ static int srcSeek(t2cCtx h, long offset)
 /* Compute and callback width. Return non-0 to end parse else 0. */
 static int callbackWidth(t2cCtx h, int odd_args)
 	{
-	if ((h->flags & PEND_WIDTH) && (h->flags & ~T2C_IS_CFF2))
+	if (h->flags & PEND_WIDTH)
 		{		
-		float width = (odd_args == (h->stack.cnt & 1))?
-			INDEX(0) + h->aux->nominalWidthX: h->aux->defaultWidthX;
-		if (h->flags & USE_MATRIX)
-			width = SX(width);
-		else if (h->flags & SEEN_BLEND)
-			width = RND(width);
+		float width;
+
+        if (h->flags & IS_CFF2)
+            {
+                width = h->cff2->getWidth(h->cff2, h->gid);
+            }
+        else
+            {
+            width = (odd_args == (h->stack.cnt & 1))?
+                INDEX(0) + h->aux->nominalWidthX: h->aux->defaultWidthX;
+            if (h->flags & USE_MATRIX)
+                width = SX(width);
+            else if (h->flags & SEEN_BLEND)
+                width = RND(width);
+            }
+        
 		h->glyph->width(h->glyph, width);
 		h->flags &= ~PEND_WIDTH;
 		if (h->aux->flags & T2C_WIDTH_ONLY)
@@ -1156,25 +1171,39 @@ static int handleBlend(t2cCtx h)
      */
     int result = 0;
     int numBlends = h->glyph->info->blendInfo.numBlends = (int)INDEX(h->stack.cnt -1);
+    abfOpEntry* firstItem;
+    int i = 0;
+    int numDeltaBlends = numBlends*h->stack.numRegions;
+    int firstItemIndex;
+
     h->stack.cnt--;
     h->stack.blendCnt--;
+
+	CHKUFLOW(numBlends + numDeltaBlends);
+    firstItemIndex = (h->stack.blendCnt - (numBlends + numDeltaBlends));
+    firstItem = &(h->stack.blendArray[firstItemIndex]);
     
-    if (h->flags & T2C_FLATTEN_BLEND)
+    if (h->flags & FLATTEN_BLEND)
     {
-        /* this is where we should blend the values. For the moment, we will just pop off the the blend delta operands,
-         leaving the the default values on the stack, which has the same result as making a snapshot at the center of
-         the design space.
+        /* Blend values on the blend stack and replace the default values on the regular stack with the results.
          */
-        h->stack.cnt -= numBlends*h->stack.numRegions;
+        for (i = 0; i < numBlends; i++) {
+            float   val = firstItem[i].value;
+            int r;
+
+            for (r = 0; r < h->stack.numRegions; r++) {
+                int index = (i * h->stack.numRegions) + r + (h->stack.blendCnt - numDeltaBlends);
+                val += INDEX_BLEND(index).value * h->aux->scalars[h->regionIndices[r]];
+            }
+
+            h->stack.array[i + h->stack.cnt - (numBlends + numDeltaBlends)] = val;
+        }
+        
+        h->stack.cnt -= numDeltaBlends;
+        h->stack.blendCnt -= numDeltaBlends;
     }
     else
     {
-        abfOpEntry* firstItem;
-        int i = 0;
-        int numDeltaBlends = numBlends*h->stack.numRegions;
-        int firstItemIndex = (h->stack.blendCnt - (numBlends + numDeltaBlends));
-        
-        firstItem = &(h->stack.blendArray[firstItemIndex]);
         firstItem->numBlends = numBlends;
         firstItem->blendValues = memNew(h, sizeof(float)*numDeltaBlends);
         while (i < numDeltaBlends)
@@ -1212,7 +1241,11 @@ static void clearBlendStack(t2cCtx h)
 static void setNumMasters(t2cCtx h)
 {
     unsigned int vsindex = h->glyph->info->blendInfo.vsindex;
-    h->stack.numRegions = h->aux->varStore->varDataList[vsindex].regionCount;
+    h->stack.numRegions = var_getIVSRegionCountForIndex(h->aux->varStore, vsindex);
+
+    if (!var_getIVSRegionIndices(h->aux->varStore, vsindex, h->regionIndices, h->stack.numRegions)) {
+        message(h, "inconsistent region indices detected in item variation store subtable %d", vsindex);
+    }
 }
 
 /* Decode Type 2 charstring. Return 0 to continue else error code. */
@@ -1994,7 +2027,7 @@ static int t2Decode(t2cCtx h, long offset)
 				return 0;
                 case t2_blend:
                 {
-                h->flags &= SEEN_CFF2_BLEND;
+                h->flags &= ~SEEN_CFF2_BLEND;
                 if (h->stack.numRegions == 0)
                     setNumMasters(h);
                  result = handleBlend(h);
@@ -2438,13 +2471,14 @@ static int t2DecodeSubr(t2cCtx h, long offset)
 	}
 
 /* Parse Type 2 charstring. */
-int t2cParse(long offset, long endOffset, t2cAuxData *aux, abfGlyphCallbacks *glyph, ctlMemoryCallbacks *mem)
+int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, cff2GlyphCallbacks *cff2, abfGlyphCallbacks *glyph, ctlMemoryCallbacks *mem)
 	{
 	struct t2cCtx h;
 	int retVal;
 	/* Initialize */
 	h.flags = PEND_WIDTH|PEND_MASK;
 	h.stack.cnt = 0;
+    h.stack.numRegions = 0;
 	h.x = 0;
 	h.y = 0;
 	h.cubeStackDepth = -1;
@@ -2462,6 +2496,8 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, abfGlyphCallbacks *gl
     h.mem = mem;
 	h.LanguageGroup = (glyph->info->flags & ABF_GLYPH_LANG_1) != 0;
 	h.maxOpStack = (aux->flags & T2C_IS_CUBE) ? TX_MAX_OP_STACK_CUBE : T2_MAX_OP_STACK;
+    h.gid = gid;
+    h.cff2 = cff2;
 	aux->bchar = 0;
 	aux->achar = 0;
 
@@ -2491,6 +2527,8 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, abfGlyphCallbacks *gl
 		h.flags |= IS_CUBE;
 	if (aux->flags & T2C_CUBE_RND)
 		h.flags |= CUBE_RND;
+    if (aux->flags & T2C_IS_CFF2)
+        h.flags |= IS_CFF2;
 	h.src.endOffset = endOffset;
 	if (aux->flags & T2C_CUBE_GSUBR)
 		retVal = t2DecodeSubr(&h, offset);

@@ -475,7 +475,7 @@ static void fillNames(nameCtx h) {
 	                     MATCH_ANY,
 	                     HOT_NAME_PREF_FAMILY);
 	if (tempString == NULL) {
-		/* Use thefamily Font name; this is generated from the PS family name if there is no Font Mneu Name DB. */
+		/* Use the family Font name; this is generated from the PS family name if there is no Font Menu Name DB. */
 		tempString = getName(h, HOT_NAME_MS_PLATFORM,
 		                     HOT_NAME_MS_UGL,
 		                     MATCH_ANY,

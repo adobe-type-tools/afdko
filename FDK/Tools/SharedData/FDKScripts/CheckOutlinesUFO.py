@@ -2,7 +2,7 @@ __copyright__ = """Copyright 2015, 2016 Adobe Systems Incorporated (http://www.a
 """
 
 __usage__ = """
-   checkOutlinesUFO program v1.18 Nov 23 2016
+   checkOutlinesUFO program v1.19 Jan 20 2017
 
    checkOutlinesUFO [-e] [-g glyphList] [-gf <file name>] [-all] [-noOverlap] [-noBasicChecks] [-q] [-setMinArea <n>] [-setTolerance <n>] [-wd]
 
@@ -876,7 +876,7 @@ def restoreContourOrder(fixedGlyph, originalContours):
 							oldSP = oldContour[0]
 							for pi in range(len(contour)):
 								point = contour[pi]
-								if (point.x == oldSP.x) and (point.y == oldSP.y):
+								if (point.x == oldSP.x) and (point.y == oldSP.y) and point.segmentType != None:
 									contour.setStartPoint(pi)
 						
 						break

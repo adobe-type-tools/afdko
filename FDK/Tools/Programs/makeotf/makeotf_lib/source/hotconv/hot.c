@@ -27,6 +27,7 @@
 #define SYMBOL_CHARSET  2
 
 int setVendId_str(hotCtx g, char *vend);
+void hotAddAnonTable(hotCtx g, unsigned long tag, hotAnonRefill refill);
 
 /* Initialize chararcter name */
 static void initCharName(void *ctx, long count, CharName *charname) {
@@ -1056,6 +1057,24 @@ static void hotReuse(hotCtx g) {
 	featReuse(g);
 }
 
+const char data[] = "\x00\x00\x00\x01\x00\x00\x00";
+unsigned int dsigCnt = 0;
+char *refillDSIG(void *ctx, long *count, unsigned long tag)
+{
+    if (dsigCnt == 0)
+    {
+        *count = 8;
+        dsigCnt = 1;
+       return (char *)(&data);
+    }
+    else
+    {
+        *count = 0;
+        return (char *)NULL;
+    }
+    
+}
+
 /* ------------------------------------------------------------------------- */
 
 /* Convert to OTF */
@@ -1075,7 +1094,10 @@ void hotConvert(hotCtx g) {
 
 	setVBounds(g);
 
-	sfntFill(g);
+    if (g->convertFlags & HOT_ADD_STUB_DSIG)
+        hotAddAnonTable(g, TAG('D','S','I','G'), refillDSIG);
+    
+    sfntFill(g);
 	sfntWrite(g);
 
 #if HOT_DEBUG

@@ -1369,7 +1369,7 @@ static void cffParse(cefCtx h)
 		}
 
 	/* Parse font */
-	if (cfrBegFont(h->ctx.cfr, CFR_UPDATE_OPS, h->src.origin, 0, &h->top))
+	if (cfrBegFont(h->ctx.cfr, CFR_UPDATE_OPS, h->src.origin, 0, &h->top, NULL))
 		fatal(h, cefErrCFFParse);
 
 	if (h->top->sup.flags & ABF_CID_FONT)

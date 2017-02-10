@@ -1,10 +1,10 @@
 from __future__ import print_function, division, absolute_import
 
-__copyright__ = """Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+__copyright__ = """Copyright 2017 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
 __usage__ = """
-buildCFF2VF.py  1.0 Oct 25 2016
+buildCFF2VF.py  1.2 Jan 27 2017
 Build a variable font from a Superpolator design space file and the UFO master source fonts.
 
 python buildCFF2VF.py -h
@@ -31,14 +31,16 @@ import os
 import re
 import sys
 import traceback
+import copy
 import fontTools
 import fontTools.varLib
+from fontTools.varLib import designspace, models
 from fontTools.misc import xmlWriter
 from fontTools.ttLib import TTFont, getTableModule, newTable
-from fontTools.cffLib import VarStoreData, buildOpcodeDict, privateDictOperators
+from fontTools.cffLib import VarStoreData, buildOpcodeDict, privateDictOperators, CharStrings
 from fontTools.misc.psCharStrings import T2OutlineExtractor, CFF2CharString
-from fontTools.pens.t2CharStringPen import T2CharStringPen, roundInt, roundIntPoint
-
+from fontTools.pens.t2CharStringPen import T2CharStringPen, makeRoundFunc
+roundPoint = makeRoundFunc(0.5)
 import collections
 try:
     import xml.etree.cElementTree as ET
@@ -90,10 +92,6 @@ class CFF2FontData:
 		self.charStrings = topDict.CharStrings
 		self.charStringIndex = self.charStrings.charStringsIndex
 		self.allowDecimalCoords = False
-
-def roundIntPoint(point):
-    x, y = point
-    return roundInt(x), roundInt(y)
 
 class OpListExtractor(T2OutlineExtractor):
 	def __init__(self, pen, subrs, globalSubrs, nominalWidthX, defaultWidthX):
@@ -185,15 +183,15 @@ class OpListPen(T2CharStringPen):
 
     def _relativeLineTo(self, pt):
         self._storeHeldMove()
-        pt = roundIntPoint(pt)
+        pt = roundPoint(pt)
         x, y = pt
         self.opList.append(["rlineto", [x, y]])
 
     def _relativeCurveToOne(self, pt1, pt2, pt3):
         self._storeHeldMove()
-        pt1 = roundIntPoint(pt1)
-        pt2 = roundIntPoint(pt2)
-        pt3 = roundIntPoint(pt3)
+        pt1 = roundPoint(pt1)
+        pt2 = roundPoint(pt2)
+        pt3 = roundPoint(pt3)
         x1, y1 = pt1
         x2, y2 = pt2
         x3, y3 = pt3
@@ -291,6 +289,7 @@ class CFF2GlyphData:
 		#  add the args for each opName to pointList
 		# deal with incompatible path lists because:
 		# converting from UFO to Type1 can convert flat curves to lines.
+		blendError = 0
 		i = 1
 		while i < len(self.charstringList):
 			opList2 = self.buildOpList(i, supportHints)
@@ -304,7 +303,13 @@ class CFF2GlyphData:
 					continue
 					
 				# Do minor work to compatibilize charstrings.
-				token, pointList = opList2[op2Index]
+				try:
+					token, pointList = opList2[op2Index]
+				except IndexError:
+					print("Path mismatch: different number of points. Glyph name: %s. font index: %s. master font path: %s. Delta font path: %s." % (self.glyphName, i-1, self.masterFontList[0].srcPath, self.masterFontList[i-1].srcPath))
+					blendError = 1
+					break
+
 				if (not supportHints) and token in self.hintOpList:
 					op2Index +=1 
 					continue
@@ -324,7 +329,8 @@ class CFF2GlyphData:
 						break
 						
 					print("Path mismatch 1", self.glyphName, i, self.masterFontList[i].srcPath)
-					raise ACFontError("Path mismatch")
+					blendError = 1
+					break
 
 				try:
 					self.mergePointList(masterPointList, pointList, masterOp in ('hintmask', 'cntrmask'))
@@ -338,14 +344,15 @@ class CFF2GlyphData:
 						break
 					else:
 						print("Path mismatch 2", self.glyphName, i, self.masterFontList[i].srcPath)
-						raise ACFontError("Path mismatch")
+						blendError = 1
+						break
 				opIndex += 1
 				op2Index += 1
 					
 		# Now pointList is the list of number lists' first master value, folowed by the other master values.
 		if not supportHints:
 			print("\t skipped incompatible hint data for", self.glyphName)
-		return
+		return blendError
 		
 	def mergePointList(self, masterPointList, pointList, isHintMask):
 		i = 0
@@ -372,9 +379,37 @@ class CFF2GlyphData:
 			pointList.append(0)
 		
 		
+
+def getInsertGID(origGID, fontGlyphNameList, mergedGlyphNameList):
+	if origGID == 0:
+		return origGID
+	newGID = 0
+	# try stepping down in GID.
+	gid = origGID-1
+	while gid >= 0:
+		prevName = fontGlyphNameList[gid]
+		newGID = mergedGlyphNameList.index(prevName)
+		if newGID >= 0:
+			newGID += 1
+			return newGID
+		gid -= 1
+	
+	# try stepping up in GID.
+	numGlyphs = len(fontGlyphNameList)
+	gid = origGID+1
+	while gid < numGlyphs:
+		prevName = fontGlyphNameList[gid]
+		newGID = mergedGlyphNameList.index(prevName)
+		if newGID >= 0:
+			newGID -= 1
+			return newGID
+		gid += 1
+	
+	return None
 	
 
 def buildMasterList(inputPaths):
+	blendError = 0
 	cff2FontList = []
 	# Collect all the charstrings.
 	cff2GlyphList = collections.OrderedDict()
@@ -407,10 +442,16 @@ def buildMasterList(inputPaths):
 	# Now build MM versions.
 	print("Reading glyph data...")
 	bcDictList = {}
+	blendError = 0
 	for glyphName in fontGlyphList:
 		cff2GlyphData = cff2GlyphList[glyphName]
-		cff2GlyphData.buildMMData()
-	
+		blendError = cff2GlyphData.buildMMData()
+		if blendError:
+			break
+	if blendError:
+		print("Failed to blend master designs.")
+		return None, None, None, None, blendError
+
 	# Now get the MM data for the Private Dict.
 	# Not all fonts will have the same keys.
 	# The first time a key is encountered, we fill out the
@@ -442,7 +483,7 @@ def buildMasterList(inputPaths):
 				else:
 					bcDictList[key] = [value]*numMasters
 	
-	return baseFont, bcDictList, cff2GlyphList, fontGlyphList
+	return baseFont, bcDictList, cff2GlyphList, fontGlyphList, blendError
 	
 
 def pointsDiffer(pointList):
@@ -667,21 +708,144 @@ def fixVerticalMetrics(masterFont, masterPaths):
 	hheaTable.ascent = ascent
 	hheaTable.descent = descent
 
+def fixNameTablePSName(varFont):
+	# Split off the style part, if any, and add "-VF"
+	nameTable = varFont['name']
+	for namerecord in nameTable.names:
+		if namerecord.nameID == 6:
+			namerecord.string = namerecord.string.rsplit("-",1)[0] + "-VF"
+
 def buildCFF2Font(varFontPath, varFont, varModel, masterPaths):
 
 	inputPaths = reorderMasters(varModel.mapping, masterPaths)
 	"""Build CFF2 font from the master designs. default font is first."""
-	baseFont, bcDictList, cff2GlyphList, fontGlyphList = buildMasterList(inputPaths)
+	baseFont, bcDictList, cff2GlyphList, fontGlyphList, blendError = buildMasterList(inputPaths)
+	if blendError:
+		return blendError
 	numMasters = len(inputPaths)
 	buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, numMasters, varModel)
 	addCFFVarStore(baseFont, varModel, varFont)
 	addNamesToPost(varFont, fontGlyphList)
 	convertCFFtoCFF2(baseFont, varFont)
 	fixVerticalMetrics(varFont, masterPaths)
+	fixNameTablePSName(varFont)
 	varFont.save(varFontPath)
-		
+	return blendError
+	
 def otfFinder(s):
 	return s.replace('.ufo', '.otf')
+	
+def buildMergedGlyphList(master_fonts):
+	# Build a merged glyph name list.
+	
+	# Start with the glyph name list from mater_fonts[0].
+	mergedGlyphNameList = copy.deepcopy(master_fonts[0].getGlyphOrder())
+	seenGlyphDict = {}
+	for glyphName in mergedGlyphNameList:
+		seenGlyphDict[glyphName] = None
+		
+	for masterFont in master_fonts[1:]:
+		fontGlyphList = masterFont.getGlyphOrder()
+		gid = -1
+		for glyphName in fontGlyphList:
+			gid += 1
+			try:
+				seen = seenGlyphDict[glyphName]
+			except KeyError:
+				seenGlyphDict[glyphName] = None
+				newGID = getInsertGID(gid, fontGlyphList, mergedGlyphNameList)
+				if newGID == None:
+					mergedGlyphNameList.append(glyphName)
+				else:
+					mergedGlyphNameList.insert(newGID, glyphName)
+
+	return mergedGlyphNameList
+	
+def compatibilizeCFF2Table(master_fonts, mergedGlyphNameList):
+	# We allow master fonts to not all have the same glyph set.
+
+	numGlyphs = len(mergedGlyphNameList)
+
+	# Find a default charstring for each glyph
+	fallbackCharDict = {}
+	for glyphName in mergedGlyphNameList:
+		mi = 0
+		for masterFont in master_fonts:
+			cffFont = masterFont['CFF '].cff
+			TDCharStrings = cffFont.topDictIndex[0].CharStrings
+			mi += 1
+			try:
+				gid = TDCharStrings.charStrings[glyphName]
+				t2CharString = TDCharStrings.charStringsIndex[gid]
+				fallbackCharDict[glyphName] = copy.deepcopy(t2CharString)
+				break
+			except KeyError:
+				continue
+
+	# Now add new charstrings, in the new order
+	for masterFont in master_fonts:
+		cffFont = masterFont['CFF '].cff
+		topDict = cffFont.topDictIndex[0]
+		TDCharStrings = topDict.CharStrings
+		newCharStringDict = {}
+		for glyphName in mergedGlyphNameList:
+			try:
+				t2CharString = TDCharStrings[glyphName]
+			except KeyError:
+				t2CharString = fallbackCharDict[glyphName]
+			newCharStringDict[glyphName] = t2CharString
+			
+		topDict.charset = mergedGlyphNameList
+		topDict.CharStrings.charStrings = newCharStringDict
+		topDict.CharStrings.charStringsAreIndexed = 0
+	return
+
+def compatibilize_hmtx(master_fonts, mergedGlyphNameList):
+	# Find a default advance width for each glyph
+	fallbackDict = {}
+	for glyphName in mergedGlyphNameList:
+		for masterFont in master_fonts:
+			metrics = masterFont["hmtx"].metrics
+			try:
+				metricEntry = metrics[glyphName]
+				fallbackDict[glyphName] = copy.deepcopy(metricEntry)
+				break
+			except KeyError:
+				continue
+				
+	# Now add widths
+	for masterFont in master_fonts:
+		metrics = masterFont["hmtx"].metrics
+		for glyphName in mergedGlyphNameList:
+			try:
+				metricEntry = metrics[glyphName]
+			except KeyError:
+				 metrics[glyphName] = fallbackDict[glyphName]
+
+def compatibilizeMasters(designspace_filename, master_finder):
+	masters, instances = designspace.load(designspace_filename)
+	basedir = os.path.dirname(designspace_filename)
+	master_ttfs = [master_finder(os.path.join(basedir, m['filename'])) for m in masters]
+	master_fonts = [TTFont(ttf_path) for ttf_path in master_ttfs]
+	mergedGlyphNameList = buildMergedGlyphList(master_fonts)
+	
+	# We need to decompile hmtx to a dict[glyphName] = metricEntry
+	# before we change CFF2. We will change glyph index and order for all 
+	# the master fonts when updating the CFF table, and this would produce an 
+	# incorrect mappingof glyph names to metrics if we decompiled
+	# the hmtx after this change.
+	for masterFont in master_fonts:
+		metrics = masterFont["hmtx"].metrics
+		gpod = masterFont["GPOS"].table.LookupList
+
+	compatibilizeCFF2Table(master_fonts, mergedGlyphNameList)
+	compatibilize_hmtx(master_fonts, mergedGlyphNameList)
+	numMasters = len(master_fonts)
+	for i in range(numMasters):
+		masterFont = master_fonts[i]
+		masterFont.setGlyphOrder(mergedGlyphNameList)
+		fontPath = master_ttfs[i]
+		masterFont.save(fontPath)
 
 def run(args=None):
 	if args is None:
@@ -698,12 +862,29 @@ def run(args=None):
 	except:
 		print(__usage_)
 		return
-		
+	
+	axisMap = {
+		'weight':  ('wght', 'Weight'),
+		'width':   ('wdth', 'Width'),
+		'slant':   ('slnt', 'Slant'),
+		'optical': ('opsz', 'Optical Size'),
+		'contrast':  ('ctst', 'Contrast'),
+		'italic':  ('ital', 'Italic'),
+		'custom':  ('xxxx', 'Custom'),
+	}
+	
 	if os.path.exists(varFontPath):
 		os.remove(varFontPath)
-	varFont, varModel, masterPaths = fontTools.varLib.build(designSpacePath, otfFinder)
-	buildCFF2Font(varFontPath, varFont, varModel, masterPaths)
-	print("Built variable font '%s'" % (varFontPath))
+	try:
+		varFont, varModel, masterPaths = fontTools.varLib.build(designSpacePath, otfFinder, axisMap)
+	except KeyError:
+		# force fonts to have same glyph set.
+		compatibilizeMasters(designSpacePath, otfFinder)
+		varFont, varModel, masterPaths = fontTools.varLib.build(designSpacePath, otfFinder, axisMap)
+		
+	blendError = buildCFF2Font(varFontPath, varFont, varModel, masterPaths)
+	if not blendError:	
+		print("Built variable font '%s'" % (varFontPath))
 
 if __name__=='__main__':
 	run()
