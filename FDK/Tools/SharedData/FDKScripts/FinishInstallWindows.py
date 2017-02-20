@@ -1,7 +1,9 @@
 """
-FinishInstallWindows.py v1.3 July 28 2104
+FinishInstallWindows.py v1.3 July 28 2014
 """
-__copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+__copyright__ = """
+Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/).
+All Rights Reserved.
 """
 
 import sys
@@ -23,13 +25,13 @@ def isNotFDKDir(dirPath):
 		print "Note: removing old FDK path '%s' from PATH list." % (dirPath)
 		return 0
 	return 1
-	
+
 def removeOldFDKDirectories(path):
 	dirList = path.split(";")
 	dirList = filter(isNotFDKDir, dirList)
 	path = ";".join(dirList)
 	return path
-	
+
 def getRegistryValue(registry, key, name):
 	kHandle = _winreg.OpenKey(registry, key)
 	value = _winreg.QueryValueEx(kHandle, name)[0]
@@ -71,8 +73,6 @@ def main():
 			print "If you did not run this command from a command window with Administrator privileges, this script will fail under Windows 7 and later. If this is the case, then please try again with a command window that has been opened with Administrator privileges."
 		print "Quitting. Failed to add the FDK path to the system environment variable PATH."
 	return
-	
-
 
 
 if __name__=='__main__':

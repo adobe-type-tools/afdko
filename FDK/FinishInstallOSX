@@ -1,26 +1,28 @@
 #!/usr/bin/env python
-##***********************************************************************#
+##**********************************************************************#
 #*                                                                     *#
-#* Copyright 2014 Adobe Systems Incorporated.                    *#
+#* Copyright 2017 Adobe Systems Incorporated.                          *#
 #* All rights reserved.                                                *#
 #*                                                                     *#
 #***********************************************************************#
 """
-FinishInstallOSX v 1.3 Oct 20 2008
+FinishInstallOSX v 1.4 February 20 2017
 
 This script file does two things:
-1) create a symbolic link (a Unix alias file) from the "bin" sub-directory of your
-home directory to wherever the FDK actually is. This is necessary for the
-Python-based tools to work at all.
+1) create a symbolic link (a Unix alias file) from the "bin" sub-
+directory of your home directory to wherever the FDK actually is.
+This is necessary for the Python-based tools to work at all.
 
-2) edit your Terminal start-up script to add "<your home dir>/bin/FDK/Tools/osx"
-to your $PATH environment variable. If this is succesful, then you can run the
-FDK commands without having to type in the full path to the command.
+2) edit your Terminal start-up script to add "<your home dir>/
+bin/FDK/Tools/osx" to your $PATH environment variable. If this is
+succesful, then you can run the FDK commands without having to type
+in the full path to the command.
 
 The FDK tools for Mac OSX are all in FDK/Tools/osx.
 
-The command-line programs written in C are independent of location or any other
-files, and can be copied to any location and used without the rest of the FDK.
+The command-line programs written in C are independent of location or
+any other files, and can be copied to any location and used without
+the rest of the FDK.
 These are the tools:
     mergeFonts
     makeotfexe
@@ -29,17 +31,19 @@ These are the tools:
     spot
     tx
 
-The other tools are Unix shell script files that run Python scripts in  a rather
-complex way. These will not work if thery are copied anywhere else. The FDK
-Python interpreter is wrapped in the  "py2app" bundle application "FDK.app". The
-Unix shells scripts call the FDK.ap program with the name of a Python script and
-the command-ine options that you entered. The FDK.app program finds the Python
-script at a fixed directory path relative to itself, and runs the script with
-the remaining command line options and using the embedded Python interpreter. 
+The other tools are Unix shell script files that run Python scripts in
+a rather complex way. These will not work if thery are copied anywhere
+else. The FDK Python interpreter is wrapped in the "py2app" bundle
+application "FDK.app". The Unix shell scripts call the FDK.app program
+with the name of a Python script and the command-line options that you
+entered. The FDK.app program finds the Python script at a fixed
+directory path relative to itself, and runs the script with the
+remaining command line options and using the embedded Python
+interpreter.
 
 For all this to work, the Unix shell scripts must be able to find the
 command-line executable program "FDK" inside the FDK.app program at a
-known absolute path. For some reason, when  this is referenced by a
+known absolute path. For some reason, when this is referenced by a
 symbolic link, it won't run. I assume this has something to do with
 how Mac OS finds the other parts of the bundle app by the current path.
 This is why the command-line scripts are written to look in the "bin"
@@ -62,23 +66,23 @@ import time
 import re
 import traceback
 
-def MakeSymLink():
+def makeSymLink():
 
 	realPath = os.path.dirname(os.path.abspath(__file__)) # the FDK root is the parent director for this script.
 	binPath = os.path.join(os.environ['HOME'], "bin")
 	print
-	print "Adding a symbolic link from '%s' to the FDK directory %s." % (binPath, realPath)
+	print "Adding a symbolic link from %s to the FDK directory\n%s ..." % (binPath, realPath)
 
 	# make sure that $HOME/bin exists.
-	if  not os.path.exists(binPath):
+	if not os.path.exists(binPath):
 		try:
 			os.mkdir(binPath)
 		except:
 			print traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1]
-			print "I could not create the sub-directory %s under your home directory. Please create this manually, and try again." % (binPath)
+			print "I could not create the sub-directory %s under your home directory.\nPlease create this manually, and try again." % (binPath)
 			raise e
 
-	# define the  desired link path, and the path to where the FDK really is.
+	# define the desired link path, and the path to where the FDK really is.
 	fdkPath = os.path.join(binPath, "FDK")
 
 	# We don't need to make a symbolic link if the FDK is already in the binPath.
@@ -111,47 +115,50 @@ def MakeSymLink():
 		print "Please create this symbolic link manually, and try again."
 		raise IOError
 
-	
+
 
 def showFailedChangeMsg(fdkToolsPath):
-		print "Failed to edit user's login file to add FDK tool path under Mac OS X."
+	print "Failed to edit user's login file to add FDK tool path under Mac OS X."
 
 def doItYourselfMsg():
-	print """ 
+	print """
 	I did not find or was unable to change any of the usual startup files
 	that let you set Terminal window environment variables. As a result I
 	could not add the lines to add the FDK path to PATH variable. This
 	is necessary in order for the Terminal window to find the FDK
-	commands. You need to create  such a file. If your Terminal window
+	commands. You need to create such a file. If your Terminal window
 	is using tcsh or csh, create a file named ".cshrc" and add these
 	lines:
-	setenv FDK_EXE   "~/bin/FDK/Tools/osx"
+	setenv FDK_EXE "~/bin/FDK/Tools/osx"
 	setenv PATH $PATH:"~/bin/FDK/Tools/osx"
 
-	If you  are using sh, you need to create a file named
+	If you are using sh, you need to create a file named
 	".profile", and add these lines:
 	FDK_EXE="~/bin/FDK/Tools/osx"
 	path=$PATH:"~/bin/FDK/Tools/osx"
-	
-	If you  are using szh, you need to create a file named
+
+	If you are using szh, you need to create a file named
 	".zprofile", and add these lines:
 	FDK_EXE="~/bin/FDK/Tools/osx"
 	path=$PATH:"~/bin/FDK/Tools/osx"
-	
-	If you are using bash, you need to create a file named .bash_profile, and
-	add the same commands as for sh or zsh.
-	
-	If in doubt about which shell program the Terminal in using, check the Terminal preferences.
+
+	If you are using bash, you need to create a file named
+	".bash_profile", and add the same commands as for sh or zsh.
+
+	If in doubt about which shell program the Terminal in using,
+	check the Terminal preferences.
 	"""
 
 
-def UpdateLoginFile():
+def updateLoginFile():
 	print
-	print "Adding a command to your login file that will append the FDK path to the $PATH environment variable..."
+	print "Adding a command to your login file that will append the FDK path"
+	print "to the $PATH environment variable ...\n"
+
 	foundit = 0
 	try:
 		homeDir = os.environ['HOME']
-		commentLine = r"# Initialization for FDK command line tools." +  time.asctime()
+		commentLine = r"# Initialization for FDK command line tools." + time.asctime()
 		fdkToolsPath = os.path.join(homeDir, "bin", "FDK", "Tools", "osx")
 		loginPath1 = os.path.join(homeDir, ".login")
 		loginPath2 = os.path.join(homeDir, ".cshrc")
@@ -164,7 +171,7 @@ def UpdateLoginFile():
 			if os.path.exists(loginPath):
 				foundit = 1
 				break
-				
+
 		if not foundit:  # Need to make stub files, so the following code can add the paths.
 			for loginPath in [loginPath1, loginPath3, loginPath4, loginPath5]:
 				try:
@@ -175,7 +182,7 @@ def UpdateLoginFile():
 				except (IOError, OSError):
 					print traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1]
 					pass
-					
+
 		if not foundit:
 			showFailedChangeMsg(fdkToolsPath)
 			doItYourselfMsg()
@@ -184,14 +191,14 @@ def UpdateLoginFile():
 		# provide tcsh/csh version
 		linitLines = []
 		linitLines.append(commentLine)
-		linitLines.append("setenv FDK_EXE \"" +  fdkToolsPath + "\"")
-		linitLines.append( "setenv PATH ${PATH}:\"" +  fdkToolsPath + "\"")
-		linitLines.append( "export PATH")
-		linitLines.append( "export FDK_EXE")
+		linitLines.append("setenv FDK_EXE \"" + fdkToolsPath + "\"")
+		linitLines.append("setenv PATH ${PATH}:\"" + fdkToolsPath + "\"")
+		linitLines.append("export PATH")
+		linitLines.append("export FDK_EXE")
 		linitLines = os.linesep.join(linitLines) + os.linesep
 		foundit = 0
 		# now update the tcsh/csh login file(s)
-		# If both .login and .cshrc exist, I want to remove 
+		# If both .login and .cshrc exist, I want to remove
 		# FDK path command from both files. However, I want to add
 		# the new command to only one file. I prefer .login, as
 		# that is used only when logging in interactively.
@@ -200,7 +207,7 @@ def UpdateLoginFile():
 				cfile = open(loginPath, "rt")
 				data = cfile.read()
 				cfile.close()
-				
+
 				# get of older calls to FDK.init
 				data2 = re.sub(r"\n.*?source\s+.+?FDK.+", "", data) # for FDK 1.6
 				# get rid of comment line
@@ -212,26 +219,28 @@ def UpdateLoginFile():
 					data2 = re.sub(r"\n.*?PATH.+?Tools/osx.*", "", data2)
 					data2 = re.sub(r"\nexport FDK_EXE", "", data2)
 					data2 = re.sub(r"\nexport PATH", "", data2)
-				
+
 				if not foundit:
 					# add command to login file
 					data2 = data2 + linitLines
 					foundit = 1
-					print "   I added some lines to the  startup file %s for the tcsh/csh versions of the Terminal program,\
-	 in order to add the 'FDK/Tools/osx' directory to your PATH environment variable."  % (loginPath)
+					print "Added some lines to the startup file %s\nfor the tcsh/csh versions of the Terminal program, in order to\nadd the 'FDK/Tools/osx' directory to your PATH environment variable." % (loginPath)
 				if data != data2:
 					cfile = open(loginPath, "wt")
 					cfile.write(data2)
 					cfile.close()
+					print "Changes made to file %s\n" % loginPath
+				else:
+					print "No changes to file %s\n" % loginPath
 
 		# now update the bash/sh/zsh login file(s)
 		# For these, we want to fix every one
 		linitLines = []
 		linitLines.append(commentLine)
-		linitLines.append("FDK_EXE=\"" +  fdkToolsPath + "\"")
-		linitLines.append( "PATH=${PATH}:\"" +  fdkToolsPath + "\"")
-		linitLines.append( "export PATH")
-		linitLines.append( "export FDK_EXE")
+		linitLines.append("FDK_EXE=\"" + fdkToolsPath + "\"")
+		linitLines.append("PATH=${PATH}:\"" + fdkToolsPath + "\"")
+		linitLines.append("export PATH")
+		linitLines.append("export FDK_EXE")
 		linitLines = os.linesep.join(linitLines) + os.linesep
 
 		data = ""
@@ -252,41 +261,41 @@ def UpdateLoginFile():
 					data2 = re.sub(r"\nexport FDK_EXE", "", data2)
 					data2 = re.sub(r"\nexport PATH", "", data2)
 				foundit = 1
-				# write now command to login file
+				# write new command to login file
 				data2 = data2 + linitLines
-				print "   I added some lines to the  startup file %s for the bash/sh/zsh versions of the Terminal program,  \
-in order to add the 'FDK/Tools/osx' directory to your PATH environment variable."  % (loginPath)
+				print "Added some lines to the startup file %s\nfor the bash/sh/zsh versions of the Terminal program, in order to\nadd the 'FDK/Tools/osx' directory to your PATH environment variable." % (loginPath)
 				if data2 != data:
 					cfile = open(loginPath, "wt")
 					cfile.write(data2)
 					cfile.close()
-					print "Changed to file", loginPath
+					print "Changes made to file %s\n" % loginPath
 				else:
-					print "No change to file", loginPath
+					print "No changes to file %s\n" % loginPath
 	except:
 		print traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1]
 		showFailedChangeMsg(fdkToolsPath)
 		pass
-		
+
 	if not foundit:
 		doItYourselfMsg()
 		return
 
-	print "If you cannot run the FDK tools by name from the command-line after closing this window, then your"
-	print "Terminal program may be using a different login file than the ones I modified."
-	print "If so, you will need to identify your login file, and then add the same two lines to that file. "
+	print "\nIf you cannot run the FDK tools by name from the command-line after"
+	print "closing this window, then your Terminal program may be using a"
+	print "different login file than the ones I modified. If so, you will need to"
+	print "identify your login file, and then add the same two lines to that file."
 
 def main():
 		try:
-			MakeSymLink()
-			UpdateLoginFile()
+			makeSymLink()
+			updateLoginFile()
 			print
-			print "You must close the current Terminal windows."
-			print "The update to your PATH environment variable will take effect only when a new terminal window is opened."
-			print "The FDK will then be ready to use."
+			print "You must close the current Terminal windows. The update to your PATH"
+			print "environment variable will take effect only when a new terminal window"
+			print "is opened. The FDK will then be ready to use.\n"
 		except IOError:
 			pass
-	
-	
-if __name__=='__main__':	
+
+
+if __name__=='__main__':
 	main()
