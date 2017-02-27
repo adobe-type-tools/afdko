@@ -148,7 +148,7 @@ table BASE {
                             cyrl  romn   $bottom  $top   -120  0,
                             grek  romn   $bottom  $top   -120  0;
 
-  VertAxis.BaseTagList                  icfl  icfr  ideo  romn;
+  VertAxis.BaseTagList                  icfb  icft  ideo  romn;
   VertAxis.BaseScriptList   hani  ideo  $left    $right   0     120,
                             kana  ideo  $left    $right   0     120,
                             latn  romn  $left    $right   0     120,
