@@ -1,5 +1,5 @@
 """
-ufoTools.py v1.28 May 10 2016
+ufoTools.py v1.29 Feb 22 2017
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -640,15 +640,7 @@ class UFOFontData:
 					if (programHistoryIndex < 0):
 						historyList.append(self.programName)
 		else:
-			# If the source hash has changed, we need to delete the processed layer glyph.
-			if not self.useProcessedLayer: # case  for Checkoutlines
-				self.hashMapChanged = 1
-				self.hashMap[glyphName] = [newSrcHash, [self.programName] ]
-				glyphPath = self.getGlyphProcessedPath(glyphName)
-				if glyphPath and os.path.exists(glyphPath):
-					os.remove(glyphPath)
-					self.deletedGlyph = True
-			else: # case for autohint
+			if self.useProcessedLayer: # case for autohint
 				# default layer glyph and stored glyph hash differ,and useProcessedLayer is True
 				# If any of the programs in requiredHistory in are in the historyList, we need to complain and skip.
 				foundMatch = False
@@ -659,9 +651,14 @@ class UFOFontData:
 				if foundMatch:
 					print "Error. Glyph '%s' has been edited. You must first run '%s' before running '%s'. Skipping." % (glyphName, self.requiredHistory, self.programName)
 					skip = True
-				else:
-					self.hashMapChanged = 1
-					self.hashMap[glyphName] = [newSrcHash, [self.programName] ]
+
+			# If the source hash has changed, we need to delete the processed layer glyph.
+			self.hashMapChanged = 1
+			self.hashMap[glyphName] = [newSrcHash, [self.programName] ]
+			glyphPath = self.getGlyphProcessedPath(glyphName)
+			if glyphPath and os.path.exists(glyphPath):
+				os.remove(glyphPath)
+				self.deletedGlyph = True
 
 		return skip
 
