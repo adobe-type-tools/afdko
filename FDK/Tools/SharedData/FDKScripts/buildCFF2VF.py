@@ -207,11 +207,11 @@ class OpListPen(T2CharStringPen):
 
     def vstem(self, args):
         if self.supportHints:
-            self.opList.append(["hstem", args])
+            self.opList.append(["vstem", args])
 
     def hstem(self, args):
         if self.supportHints:
-            self.opList.append(["vstem", args])
+            self.opList.append(["hstem", args])
 
     def vstemhm(self, args):
         if self.supportHints:
