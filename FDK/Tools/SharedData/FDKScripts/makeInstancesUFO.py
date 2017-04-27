@@ -189,18 +189,15 @@ def readDesignSpaceFile(options):
 
 	# We want to build all remaining instances.
 	for instanceXML in instances:
-		try:
-			curPath = instanceXML.attrib["filename"]
-			psName = instanceXML.attrib["postscriptfontname"]
-			print "adding %s to build list." % (psName)
-			instanceEntryList.append(curPath)
-			if os.path.exists(curPath):
-				glyphDir = os.path.join(curPath, "glyphs")
-				if os.path.exists(glyphDir):
-					shutil.rmtree(glyphDir, ignore_errors=True)
-		except KeyError:
-			print "Skipping instance that does not have postscriptname attribute:", xmlToString(instanceXML)
-			continue
+		familyName = instanceXML.attrib["familyname"]
+		styleName = instanceXML.attrib["stylename"]
+		curPath = instanceXML.attrib["filename"]
+		print "adding %s %s to build list." % (familyName, styleName)
+		instanceEntryList.append(curPath)
+		if os.path.exists(curPath):
+			glyphDir = os.path.join(curPath, "glyphs")
+			if os.path.exists(glyphDir):
+				shutil.rmtree(glyphDir, ignore_errors=True)
 	if not instanceEntryList:
 		print "Failed to find any instances in the ds file '%s' that have the postscriptfilename attribute" % (options.dsPath)
 		return None, None
