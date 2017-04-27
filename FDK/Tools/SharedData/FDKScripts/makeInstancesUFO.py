@@ -6,7 +6,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 __doc__ = """
 """
 __usage__ = """
-   makeInstancesUFO program v1.2 Oct 7 2015
+   makeInstancesUFO program v1.3 Apr 27 2017
    makeInstancesUFO -h
    makeInstancesUFO -u
    makeInstancesUFO [-d <design space file name>] [-a] [-c] [-n] [-dec] [-i 0,1,..n]
@@ -127,10 +127,10 @@ class Options:
 		if not os.path.exists(self.dsPath):
 			logMsg.log("Note: could not find design space file path:", self.dsPath)
 			hadError = 1
-			
+
 		if self.doNormalize and not haveUfONormalizer:
 			logMsg.log("Warning: skipping UFO normalization, as I cannot find the ufonormalizer module:", self.dsPath)
-		
+
 
 		if hadError:
 			raise(OptError)
@@ -189,18 +189,15 @@ def readDesignSpaceFile(options):
 
 	# We want to build all remaining instances.
 	for instanceXML in instances:
-		try:
-			curPath = instanceXML.attrib["filename"]
-			psName = instanceXML.attrib["postscriptfontname"]
-			print "adding %s to build list." % (psName)
-			instanceEntryList.append(curPath)
-			if os.path.exists(curPath):
-				glyphDir = os.path.join(curPath, "glyphs")
-				if os.path.exists(glyphDir):
-					shutil.rmtree(glyphDir, ignore_errors=True)
-		except KeyError:
-			print "Skipping instance that does not have postscriptname attribute:", xmlToString(instanceXML)
-			continue
+		familyName = instanceXML.attrib["familyname"]
+		styleName = instanceXML.attrib["stylename"]
+		curPath = instanceXML.attrib["filename"]
+		print "adding %s %s to build list." % (familyName, styleName)
+		instanceEntryList.append(curPath)
+		if os.path.exists(curPath):
+			glyphDir = os.path.join(curPath, "glyphs")
+			if os.path.exists(glyphDir):
+				shutil.rmtree(glyphDir, ignore_errors=True)
 	if not instanceEntryList:
 		print "Failed to find any instances in the ds file '%s' that have the postscriptfilename attribute" % (options.dsPath)
 		return None, None
@@ -286,7 +283,7 @@ def updateInstance(options, fontInstancePath):
 
 def clearCustomLibs(dFont):
 	for key in dFont.lib.keys():
-		if key not in ['public.glyphOrder', 'org.unifiedfontobject.normalizer.modTimes']:
+		if key not in ['public.glyphOrder', 'public.postscriptNames']:
 			del(dFont.lib[key])
 
 	libGlyphs = [g for g in dFont if len(g.lib)]
@@ -309,7 +306,7 @@ def roundSelectedFontInfo(fontInfo):
 		listType = type([])
 		strType = type("")
 		realType = type(0.1)
-		
+
 		fiKeys = dir(fontInfo)
 		for fieldName in fiKeys:
 			if fieldName.startswith("_"):
@@ -329,7 +326,7 @@ def roundSelectedFontInfo(fontInfo):
 						setattr(fontInfo, fieldName, intValue-1)
 						setattr(fontInfo, fieldName, intValue)
 					continue
-				
+
 				if (fieldName.startswith("postscript") and ("Blue" in fieldName)) or (fieldName == "postscriptSlantAngle"):
 					if fieldName == "postscriptBlueScale":
 						# round to 6 places
@@ -344,7 +341,7 @@ def roundSelectedFontInfo(fontInfo):
 				else:
 					intValue = int(round(realValue))
 					setattr(fontInfo, fieldName, intValue)
-					
+
 			elif (fieldName.startswith("postscript") and ("Blue" in fieldName)) or fieldName.startswith("postscriptStemSnap"):
 				# It is a list.
 				for i in range(len(srcValue)):
@@ -362,14 +359,14 @@ def roundSelectedValues(dFont):
 	as these are stored in the final OTF as ints.
 	"""
 	roundSelectedFontInfo(dFont.info)
-	
+
 	# round widths.
 	for dGlyph in dFont:
 		rval = dGlyph.width
 		ival = int(round(rval))
 		if ival != rval:
 			dGlyph.width = ival
-		
+
 	# round kern values, if any.
 	if dFont.kerning:
 		keys = dFont.kerning.keys()
@@ -378,7 +375,7 @@ def roundSelectedValues(dFont):
 			ival = int(round(rval))
 			if ival != rval:
 				dFont.kerning[key] = ival
-			
+
 def postProcessInstance(fontPath, options):
 	dFont = defcon.Font(fontPath)
 	clearCustomLibs(dFont)
