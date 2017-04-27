@@ -127,10 +127,10 @@ class Options:
 		if not os.path.exists(self.dsPath):
 			logMsg.log("Note: could not find design space file path:", self.dsPath)
 			hadError = 1
-			
+
 		if self.doNormalize and not haveUfONormalizer:
 			logMsg.log("Warning: skipping UFO normalization, as I cannot find the ufonormalizer module:", self.dsPath)
-		
+
 
 		if hadError:
 			raise(OptError)
@@ -309,7 +309,7 @@ def roundSelectedFontInfo(fontInfo):
 		listType = type([])
 		strType = type("")
 		realType = type(0.1)
-		
+
 		fiKeys = dir(fontInfo)
 		for fieldName in fiKeys:
 			if fieldName.startswith("_"):
@@ -329,7 +329,7 @@ def roundSelectedFontInfo(fontInfo):
 						setattr(fontInfo, fieldName, intValue-1)
 						setattr(fontInfo, fieldName, intValue)
 					continue
-				
+
 				if (fieldName.startswith("postscript") and ("Blue" in fieldName)) or (fieldName == "postscriptSlantAngle"):
 					if fieldName == "postscriptBlueScale":
 						# round to 6 places
@@ -344,7 +344,7 @@ def roundSelectedFontInfo(fontInfo):
 				else:
 					intValue = int(round(realValue))
 					setattr(fontInfo, fieldName, intValue)
-					
+
 			elif (fieldName.startswith("postscript") and ("Blue" in fieldName)) or fieldName.startswith("postscriptStemSnap"):
 				# It is a list.
 				for i in range(len(srcValue)):
@@ -362,14 +362,14 @@ def roundSelectedValues(dFont):
 	as these are stored in the final OTF as ints.
 	"""
 	roundSelectedFontInfo(dFont.info)
-	
+
 	# round widths.
 	for dGlyph in dFont:
 		rval = dGlyph.width
 		ival = int(round(rval))
 		if ival != rval:
 			dGlyph.width = ival
-		
+
 	# round kern values, if any.
 	if dFont.kerning:
 		keys = dFont.kerning.keys()
@@ -378,7 +378,7 @@ def roundSelectedValues(dFont):
 			ival = int(round(rval))
 			if ival != rval:
 				dFont.kerning[key] = ival
-			
+
 def postProcessInstance(fontPath, options):
 	dFont = defcon.Font(fontPath)
 	clearCustomLibs(dFont)
