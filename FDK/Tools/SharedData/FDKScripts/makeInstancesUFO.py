@@ -6,7 +6,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 __doc__ = """
 """
 __usage__ = """
-   makeInstancesUFO program v1.2 Oct 7 2015
+   makeInstancesUFO program v1.3 Apr 27 2017
    makeInstancesUFO -h
    makeInstancesUFO -u
    makeInstancesUFO [-d <design space file name>] [-a] [-c] [-n] [-dec] [-i 0,1,..n]
@@ -283,7 +283,7 @@ def updateInstance(options, fontInstancePath):
 
 def clearCustomLibs(dFont):
 	for key in dFont.lib.keys():
-		if key not in ['public.glyphOrder', 'org.unifiedfontobject.normalizer.modTimes']:
+		if key not in ['public.glyphOrder', 'public.postscriptNames']:
 			del(dFont.lib[key])
 
 	libGlyphs = [g for g in dFont if len(g.lib)]
