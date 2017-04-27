@@ -9,6 +9,9 @@ use the tx program to convert the input font file to a Type 1 font, if needed.
 __copyright__ = """Copyright 2017 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
+__version__ = """\
+makeotf v2.0.97 Feb 18 2017
+"""
 
 __methods__ = """
  Methods:
@@ -41,8 +44,7 @@ Project file.
   below for the fields.
 """
 
-__usage__ = """
-makeotf v2.0.96 Feb 9 2017
+__usage__ = __version__ + """
 -f <input font>         Specify input font path. Default is 'font.pfa'.
 -o <output font>        Specify output font path. Default is
                         '<PostScript-Name>.otf'.
@@ -224,6 +226,7 @@ makeotf v2.0.96 Feb 9 2017
                         Optimizing is the default behavior, and previously was the only option.
 -addDSIG,-omitDSIG      Add or omit minimal empty DSIG table. This is added by
                         default in release mode.
+-v                      Print the tool's version.
 
 Note that options are applied in the order in which they are
 specified: "-r -nS" will not subroutinize a font, but "-nS -r" will
@@ -717,7 +720,7 @@ def getRelativeDirPath(absPath1, abspath2):
 	If the paths have no common prefix, return None
 	"""
 	relPath = os.path.relpath(absPath1, abspath2)
-	
+
 	return relPath
 
 
@@ -738,6 +741,10 @@ def getOptions(makeOTFParams):
 	i = 0
 	error = 0
 	optionIndex = 0 # We use this to allow for the indices used when reading the options file.
+	if "-v" in args:
+		print __version__
+		raise MakeOTFOptionsError
+
 	if "-h" in args:
 		print __help__
 		raise MakeOTFOptionsError
@@ -2423,7 +2430,7 @@ def runMakeOTF(makeOTFParams):
 		val = eval("makeOTFParams.%s%s" % (kFileOptPrefix, optionKey))
 		if val == None:
 			continue
-			
+
 		optionEntry = kMOTFOptions[optionKey]
 		if optionEntry[2]: # it is a true/false option.
 			if val == 'true':
