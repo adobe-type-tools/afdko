@@ -1,15 +1,34 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
-FDK. v2.5 Feb 9 2017 change number 65642.
+FDK. v2.5 April 27 2017 change number 65781.
+
+	makeInstancesUFO.
+	Preserve public.postscriptNames lib key.
+	Do not use postscriptFontName attribute.
+	
+	makeotf.
+	New option -V to print MakeOTF.py script version
+	
+	tx.
+	Added new option '-maxs', to set the maximum number of subroutines allowed. The default is now 32K, as some legacy systems cannot support more than this.
+	Add improved CFF2 support: tx can now use the option -cff2 to write from a CFF2 font (in a complete OpenType font) to a file containing the output CFF2 table, with full charstring optimization and subroutinization. This last option is still work in progress: it has not been extensively tested, and does yet support blended hints.	
+	Several bug fixes for overlap removal.
+	Fixed bug in subroutinization that could leave a small number of unused subroutines in the font. This clean-up is optional, as it requires 3x the processing speed with the option than without, and typically reduces the font size by less than 0.5 percent.
+	
+	ttxn.
+	Option '-nv' will now print name ID's 3, and 5, but with the actual version number replaced by the string "VERSION SUPPRESSED".
+
+FDK. v2.5 April 3 2017 change number 65781.
 
 	Variable fonts.
 	buildMasterOTFs. new command to build OTF font files from UFO sources, when building variable fonts.
-	buildCCF2VF. New command  to build a CFF2 Variable font from the master OTF fonts.
+	buildCFF2VF. New command  to build a CFF2 Variable font from the master OTF fonts.
 
 
 	autohint.
 	Fix bug introduced by typo on Dec 1 2015. Caused BlueFuzz to always be set to 1. Rarely causes problems, but found it with font that sets BlueFuzz to zero: with BlueFuzz set to 1, some of the alignment zones were filtered out as being closer than BlueFuzz*3.
+	Fixed long-standing bug with UFO fonts where if a glyph was edited after being hinted, running autohint would process and output only the old version of the glyph from the processed layer.
 		
 	CheckOutlinesUFO.
 	Added "quiet mode" option.
@@ -23,9 +42,10 @@ FDK. v2.5 Feb 9 2017 change number 65642.
 	
 	makeotfexe.
 	fix bug in processing UVS input file for makeotf for non-CID fonts.
-
+	Fixed bug where makeotf would reject a name ID 25 record when specified in a feature file. This name id value used to be reserved, but is now used for for overriding the postscript family named used with arbitrary instances in variable fonts.
+	
 	mergeFonts.
-	Removed requirement for mergeFonts that each FontDict have a FullName, Weight, and Family Name. This fixes a bug in using mergeFonts with UFO sources and converting to CID-keyed output font. Develoeprs shouldn't have to put these fields in the source fonts, since they are not required.
+	Removed requirement for mergeFonts that each FontDict have a FullName, Weight, and Family Name. This fixes a bug in using mergeFonts with UFO sources and converting to CID-keyed output font. Developers shouldn't have to put these fields in the source fonts, since they are not required.
 	
 	spot.
 	Fixed bug in name table dump: Microsoft platform language tags for Big5 and PRC were swapped.
@@ -35,14 +55,14 @@ FDK. v2.5 Feb 9 2017 change number 65642.
 	
 	tx.
 	When getting Unicode values for output, the presence of UVS cmap meant that no UV values were read from any other cmap subtable. I fixed this bug, but 'tx' still does not support reading and showing UVS values. Doing so will be a significant amount of work, so I am deferring that to the my round of FDK work.
-	Added support for CFF2 variable fonts as source fonts: when using -t1 or -cff, these wil be snapshotted to an instance. If no user design vector (UDV) argument is supplied, then the output will be the default  data. If a UDV argument is supplied with the option -U, then the instance is built at the specified point in design space.
+	Added support for CFF2 variable fonts as source fonts: when using -t1 or -cff, these will be snapshotted to an instance. If no user design vector (UDV) argument is supplied, then the output will be the default  data. If a UDV argument is supplied with the option -U, then the instance is built at the specified point in design space.
 	Added new option +V/-V to remove overlaps in output Type 1 fonts ( mode -t1) and CFF fonts (mode -cff). This is still experimental: please report any bugs.
+	Updated subroutinizer to much faster with larger fonts. (by Ariza Michiharu)
+	Added new option (+V/-V) to remove overlaps. (by Ariza Michiharu)
 	
 	ttx.
-	Updated to version 3.6.3 of the fontTools module from master branch on github.
-	Extended fontToosk to be able to compile and decompile CFF2 tables in variable fonts. This will eventually be folded back into the main branch.
+	Updated to version 3.9.1 of the fontTools module from master branch on github.
 	
-
 FDK. v2.5 May 27 2016 change number 65322.
 
 	Adobe CMAP files for CJK fonts.
@@ -81,7 +101,7 @@ FDK. v2.5 May 27 2016 change number 65322.
 	found no false positives.
 	
 	makeInstances.
-	Fixed bug which produced distorted shapes for those glypsh which were written with the
+	Fixed bug which produced distorted shapes for those glyphs which were written with the
 	Type 1 'seac' operator, aka Type 1 composite glyphs.
 	
 	makeotf.
