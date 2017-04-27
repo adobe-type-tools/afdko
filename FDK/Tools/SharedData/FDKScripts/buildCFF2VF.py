@@ -4,7 +4,7 @@ __copyright__ = """Copyright 2017 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-buildCFF2VF.py  1.2 Jan 27 2017
+buildCFF2VF.py  1.7 Mar 29 2017
 Build a variable font from a Superpolator design space file and the UFO master source fonts.
 
 python buildCFF2VF.py -h
@@ -57,7 +57,10 @@ kTempCFF2File = "test.cff2"
 
 class ACFontError(KeyError):
 	pass
-	
+
+class AxisMapError(KeyError):
+	pass
+
 def logMsg(err):
 	print(err)
 
@@ -621,11 +624,9 @@ def addCFFVarStore(baseFont, varModel, varFont):
 	supports = varModel.supports[1:]
 	fvarTable = varFont['fvar']
 	axisKeys = []
-	for axisEntry in supports:
-		for axisKey in axisEntry.keys():
-			if axisKey in axisKeys:
-				continue
-			axisKeys.append(axisKey)
+	for axis in fvarTable.axes:
+		axisKeys.append(axis.axisTag)
+		print("axisTag", axis.axisTag)
 	import pprint
 	print("CFF2 region list:")
 	pprint.pprint(supports)
@@ -708,13 +709,6 @@ def fixVerticalMetrics(masterFont, masterPaths):
 	hheaTable.ascent = ascent
 	hheaTable.descent = descent
 
-def fixNameTablePSName(varFont):
-	# Split off the style part, if any, and add "-VF"
-	nameTable = varFont['name']
-	for namerecord in nameTable.names:
-		if namerecord.nameID == 6:
-			namerecord.string = namerecord.string.rsplit("-",1)[0] + "-VF"
-
 def buildCFF2Font(varFontPath, varFont, varModel, masterPaths):
 
 	inputPaths = reorderMasters(varModel.mapping, masterPaths)
@@ -728,124 +722,11 @@ def buildCFF2Font(varFontPath, varFont, varModel, masterPaths):
 	addNamesToPost(varFont, fontGlyphList)
 	convertCFFtoCFF2(baseFont, varFont)
 	fixVerticalMetrics(varFont, masterPaths)
-	fixNameTablePSName(varFont)
 	varFont.save(varFontPath)
 	return blendError
 	
 def otfFinder(s):
 	return s.replace('.ufo', '.otf')
-	
-def buildMergedGlyphList(master_fonts):
-	# Build a merged glyph name list.
-	
-	# Start with the glyph name list from mater_fonts[0].
-	mergedGlyphNameList = copy.deepcopy(master_fonts[0].getGlyphOrder())
-	seenGlyphDict = {}
-	for glyphName in mergedGlyphNameList:
-		seenGlyphDict[glyphName] = None
-		
-	for masterFont in master_fonts[1:]:
-		fontGlyphList = masterFont.getGlyphOrder()
-		gid = -1
-		for glyphName in fontGlyphList:
-			gid += 1
-			try:
-				seen = seenGlyphDict[glyphName]
-			except KeyError:
-				seenGlyphDict[glyphName] = None
-				newGID = getInsertGID(gid, fontGlyphList, mergedGlyphNameList)
-				if newGID == None:
-					mergedGlyphNameList.append(glyphName)
-				else:
-					mergedGlyphNameList.insert(newGID, glyphName)
-
-	return mergedGlyphNameList
-	
-def compatibilizeCFF2Table(master_fonts, mergedGlyphNameList):
-	# We allow master fonts to not all have the same glyph set.
-
-	numGlyphs = len(mergedGlyphNameList)
-
-	# Find a default charstring for each glyph
-	fallbackCharDict = {}
-	for glyphName in mergedGlyphNameList:
-		mi = 0
-		for masterFont in master_fonts:
-			cffFont = masterFont['CFF '].cff
-			TDCharStrings = cffFont.topDictIndex[0].CharStrings
-			mi += 1
-			try:
-				gid = TDCharStrings.charStrings[glyphName]
-				t2CharString = TDCharStrings.charStringsIndex[gid]
-				fallbackCharDict[glyphName] = copy.deepcopy(t2CharString)
-				break
-			except KeyError:
-				continue
-
-	# Now add new charstrings, in the new order
-	for masterFont in master_fonts:
-		cffFont = masterFont['CFF '].cff
-		topDict = cffFont.topDictIndex[0]
-		TDCharStrings = topDict.CharStrings
-		newCharStringDict = {}
-		for glyphName in mergedGlyphNameList:
-			try:
-				t2CharString = TDCharStrings[glyphName]
-			except KeyError:
-				t2CharString = fallbackCharDict[glyphName]
-			newCharStringDict[glyphName] = t2CharString
-			
-		topDict.charset = mergedGlyphNameList
-		topDict.CharStrings.charStrings = newCharStringDict
-		topDict.CharStrings.charStringsAreIndexed = 0
-	return
-
-def compatibilize_hmtx(master_fonts, mergedGlyphNameList):
-	# Find a default advance width for each glyph
-	fallbackDict = {}
-	for glyphName in mergedGlyphNameList:
-		for masterFont in master_fonts:
-			metrics = masterFont["hmtx"].metrics
-			try:
-				metricEntry = metrics[glyphName]
-				fallbackDict[glyphName] = copy.deepcopy(metricEntry)
-				break
-			except KeyError:
-				continue
-				
-	# Now add widths
-	for masterFont in master_fonts:
-		metrics = masterFont["hmtx"].metrics
-		for glyphName in mergedGlyphNameList:
-			try:
-				metricEntry = metrics[glyphName]
-			except KeyError:
-				 metrics[glyphName] = fallbackDict[glyphName]
-
-def compatibilizeMasters(designspace_filename, master_finder):
-	masters, instances = designspace.load(designspace_filename)
-	basedir = os.path.dirname(designspace_filename)
-	master_ttfs = [master_finder(os.path.join(basedir, m['filename'])) for m in masters]
-	master_fonts = [TTFont(ttf_path) for ttf_path in master_ttfs]
-	mergedGlyphNameList = buildMergedGlyphList(master_fonts)
-	
-	# We need to decompile hmtx to a dict[glyphName] = metricEntry
-	# before we change CFF2. We will change glyph index and order for all 
-	# the master fonts when updating the CFF table, and this would produce an 
-	# incorrect mappingof glyph names to metrics if we decompiled
-	# the hmtx after this change.
-	for masterFont in master_fonts:
-		metrics = masterFont["hmtx"].metrics
-		gpod = masterFont["GPOS"].table.LookupList
-
-	compatibilizeCFF2Table(master_fonts, mergedGlyphNameList)
-	compatibilize_hmtx(master_fonts, mergedGlyphNameList)
-	numMasters = len(master_fonts)
-	for i in range(numMasters):
-		masterFont = master_fonts[i]
-		masterFont.setGlyphOrder(mergedGlyphNameList)
-		fontPath = master_ttfs[i]
-		masterFont.save(fontPath)
 
 def run(args=None):
 	if args is None:
@@ -863,24 +744,9 @@ def run(args=None):
 		print(__usage_)
 		return
 	
-	axisMap = {
-		'weight':  ('wght', 'Weight'),
-		'width':   ('wdth', 'Width'),
-		'slant':   ('slnt', 'Slant'),
-		'optical': ('opsz', 'Optical Size'),
-		'contrast':  ('ctst', 'Contrast'),
-		'italic':  ('ital', 'Italic'),
-		'custom':  ('xxxx', 'Custom'),
-	}
-	
 	if os.path.exists(varFontPath):
 		os.remove(varFontPath)
-	try:
-		varFont, varModel, masterPaths = fontTools.varLib.build(designSpacePath, otfFinder, axisMap)
-	except KeyError:
-		# force fonts to have same glyph set.
-		compatibilizeMasters(designSpacePath, otfFinder)
-		varFont, varModel, masterPaths = fontTools.varLib.build(designSpacePath, otfFinder, axisMap)
+	varFont, varModel, masterPaths = fontTools.varLib.build(designSpacePath, otfFinder)
 		
 	blendError = buildCFF2Font(varFontPath, varFont, varModel, masterPaths)
 	if not blendError:	

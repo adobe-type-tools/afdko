@@ -1,10 +1,10 @@
 from __future__ import print_function, division, absolute_import
 
-__copyright__ = """Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+__copyright__ = """Copyright 2017 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
 __usage__ = """
-buildMasterOTFs.py  1.2 Nov 10 2016
+buildMasterOTFs.py  1.5 April 3 2017
 Build master source OpenType/CFF fonts from a Superpolator design space file and the UFO master source fonts.
 
 python buildMasterOTFs.py -h
@@ -36,6 +36,9 @@ import os
 import re
 import sys
 import subprocess
+import defcon
+import copy
+from mutatorMath.ufo import build as mutatorMathBuild
 
 try:
     import xml.etree.cElementTree as ET
@@ -46,34 +49,7 @@ XML = ET.XML
 XMLElement = ET.Element
 xmlToString = ET.tostring
 
-
-class DSFont(object):
-	def __init__(self, filePath):
-		self.filePath = filePath
-		self.fileName = os.path.basename(filePath)
-		self.buildDir = os.path.dirname(filePath)
-		self.locations = []
-		
-	def __str__(self):
-		txtList = ["%s %s" % (self.filename , self.name )]
-		for loc in self.locations:
-			txtList.append(str(loc))
-		return " ".join(txtList)
-		
-	def locationKey(self):
-		txtList = []
-		for loc in self.locations:
-			txtList.append(str(loc))
-		keyStr = " ".join(txtList)
-		return keyStr
-		
-class DSLocation(object):
-	def __init__(self, name, coord):
-		self.name = name
-		self.coord = coord
-		
-	def __str__(self):
-		return "%s %s" % (self.name , self.coord )
+kTempUFOExt = ".temp.ufo"
 
 def runShellCmd(cmd):
 	try:
@@ -99,6 +75,60 @@ def compatibilizePaths(otfPath):
 		sys.exit(1)
 	os.remove(tempPathCFF)	
 
+def buldTempDesignSpace(dsPath):
+	rootET = ET.parse(dsPath)
+	masterETs = []
+	ds = rootET.getroot()
+	sourceET = ds.find('sources')
+	masterList = sourceET.findall('source')
+	
+	# Delete the existing instances
+	instanceET = ds.find('instances')
+	instances = instanceET.findall("instance")
+	for et in instances:
+		instanceET.remove(et)
+	# Make copies of the masters,, edit them, and add as instances.
+	master_paths = []
+	for master in masterList:
+		instance = copy.deepcopy(master)
+		instanceET.append(instance)
+		masterPath = master.attrib['filename']
+		masterPath = os.path.splitext(masterPath)[0] + kTempUFOExt
+		master_paths.append(masterPath)
+		instance.attrib['filename'] = masterPath
+		instance.attrib['familyname'] = master.attrib['name']
+		instance.attrib['postscriptfontname'] = master.attrib['name']
+		del instance.attrib['name'] 
+		for tag in ['lib', 'info', 'glyph', 'groups']:
+			tagList = instance.findall(tag)
+			for tagET in tagList:
+				instance.remove(tagET)
+	tempDSPath = dsPath + ".temp"
+	fp = open(tempDSPath, "wt")
+	fp.write(xmlToString(ds))
+	fp.close()
+	return tempDSPath, master_paths
+
+def testGlyphSetsCompatible(dsPath):
+	# check if the masters all have the same glyph set and order.
+	glyphSetsDiffer = False
+	dsDirPath = os.path.dirname(dsPath)
+	rootET = ET.parse(dsPath)
+	master_paths = []
+	ds = rootET.getroot()
+	sourceET = ds.find('sources')
+	masterList = sourceET.findall('source')
+	for et in masterList:
+		master_paths.append(et.attrib['filename'])
+	master_path = os.path.join(dsDirPath, master_paths[0])
+	baseGO = defcon.Font(master_path).glyphOrder
+	for master_path in master_paths[1:]:
+		master_path = os.path.join(dsDirPath, master_path)
+		if baseGO != defcon.Font(master_path).glyphOrder:
+			glyphSetsDiffer	= True
+			break
+	return glyphSetsDiffer, master_paths
+
 def main(args=None):
 	if args is None:
 		args = sys.argv[1:]
@@ -112,75 +142,57 @@ def main(args=None):
 
 	(dsPath,) = args
 	
-	dsET = ET.parse(dsPath)
-	dsXML = dsET.getroot()
-	
-	# Identify masters
-	masterList = []
-	
 	dsDirPath = os.path.dirname(dsPath)
-	err = 0
-	masterList = []
-	print("Collecting master font paths...")
-	for sources in dsXML.findall('sources'):
-		for source in sources.findall('source'):
-			ufoPath = os.path.join(dsDirPath, source.attrib["filename"])
-			dsFont = DSFont(ufoPath)
-			masterList.append(dsFont)
-			for location in source.findall('location'):
-				for dimension in location.findall('dimension'):
-					name = dimension.attrib["name"]
-					value = eval(dimension.attrib["xvalue"] )
-					dsFont.locations.append(DSLocation(name, value))
-			
-	haveData = True
-	for masterDSFont in masterList:
-		if not os.path.exists(masterDSFont.filePath):
-			haveData = False
-			print("Missing master font '%s'." % (masterDSFont.filePath))
-			
-
-	if not haveData:
-		print("Quitting.")
-		return
+	glyphSetsDiffer, master_paths = testGlyphSetsCompatible(dsPath)
+	
+	if glyphSetsDiffer:
+		version = 2
+		allowDecimalCoords = False
+		tempDSPath, master_paths = buldTempDesignSpace(dsPath)
+		mutatorMathBuild(documentPath=tempDSPath, outputUFOFormatVersion=version, roundGeometry=(not allowDecimalCoords))		
 		
 	print("Building local otf's for master font paths...")
 	tempT1 = "temp.pfa"
 	curDir = os.getcwd()
-	for masterDSFont in masterList:
-		ufoName = os.path.basename(masterDSFont.filePath)
-		otfName = os.path.splitext(ufoName)[0] + ".otf"
-		os.chdir(masterDSFont.buildDir)
-		cmd = "tx -t1 \"%s\" \"%s\" 2>&1" % (masterDSFont.fileName, tempT1)
-		log = runShellCmd(cmd)
-		if not os.path.exists(tempT1):
-			print("Error converting UFO to T1. Skipping font", masterDSFont.filePath)
-			print("'tx' log:", log)
-			os.chdir(curDir)
-			continue
-		cmd = "makeotf -f \"%s\" -o \"%s\" 2>&1" % (tempT1, otfName)
+	dsDir = os.path.dirname(dsPath)
+	for master_path in master_paths:
+		master_path = os.path.join(dsDir, master_path)
+		masterDir = os.path.dirname(master_path)
+		ufoName = os.path.basename(master_path)
+		if glyphSetsDiffer:
+			otfName = ufoName[:-len(kTempUFOExt)]
+		else:
+			otfName = os.path.splitext(ufoName)[0]
+		otfName = otfName + ".otf"	
+		os.chdir(masterDir)
+		cmd = "makeotf -f \"%s\" -o \"%s\" -r -nS 2>&1" % (ufoName, otfName)
 		log = runShellCmd(cmd)
 		if ("FATAL" in log) or ("Failed to build" in log):
 			# If there is a FontMenuNameDB file, then not finding an entry
 			# which matches the PS name is a fatal error. For this case, we
 			# just try again, but without the FontMenuNameDB.
 			if ("I can't find a Family name" in log) or ("not in Font Menu Name database" in log):
-				cmd = "makeotf -f \"%s\" -o \"%s\" -mf None 2>&1" % (tempT1, otfName)
+				cmd = "makeotf -f \"%s\" -o \"%s\" -mf None -r -nS 2>&1" % (tempT1, otfName)
 				log = runShellCmd(cmd)
 				if "FATAL" in log:
 					print(log)
 				else:
-					print("Building '%s' without FontMenuNameDB entry." % (masterDSFont.filePath))
+					print("Building '%s' without FontMenuNameDB entry." % (master_path))
 			
 		if not "Built" in str(log):
-			print("Error building OTF font for", masterDSFont.filePath, log)
-			print("makeotf cmd was '%s' in %s." % (cmd, masterDSFont.buildDir))
+			print("Error building OTF font for", master_path, log)
+			print("makeotf cmd was '%s' in %s." % (cmd, masterDir))
 		else:
-			print("Built OTF font for", masterDSFont.filePath)
+			print("Built OTF font for", master_path)
 			compatibilizePaths(otfName)
 			if os.path.exists(tempT1):
 				os.remove(tempT1)
+			if os.path.exists(master_path) and glyphSetsDiffer:
+				shutil.removetree(master_path)
 		os.chdir(curDir)
+		
+	if os.path.exists(master_path) and glyphSetsDiffer:
+		os.remove(tempDSPath)
 
 if __name__ == "__main__":
 	main()
