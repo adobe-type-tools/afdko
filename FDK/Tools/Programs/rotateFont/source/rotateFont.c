@@ -7,7 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define ROTATE_VERSION CTL_MAKE_VERSION(1,0,51)
+#define ROTATE_VERSION CTL_MAKE_VERSION(1,0,52)
 
 #include "cfembed.h"
 #include "cffread.h"
@@ -1729,7 +1729,8 @@ static void cff_BegSet(txCtx h)
 static void cff_BegFont(txCtx h, abfTopDict *top)
 	{
 	dstFileSetAutoName(h, top);
-	if (cfwBegFont(h->cfw.ctx, NULL))
+	// we do not support subroutinzation in rotateFont, so can pass default maxSubr value.
+	if (cfwBegFont(h->cfw.ctx, NULL, 0)) 
 		fatal(h, NULL);
 	}
 
