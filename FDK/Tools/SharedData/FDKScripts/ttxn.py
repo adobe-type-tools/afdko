@@ -20,7 +20,7 @@ For each lookup in lookup list: for each class def in the lookup:
 
 Get list of keys for ClassesByNameDict. Sort. MakeClassNameDict.
 For each  keys for ClassesByNameDict:
-	make class name from <firstglyph_lastglyph>. 
+	make class name from <firstglyph_lastglyph>.
 	while class name is in ClassesByNameDict:
 		find glyph in current class that is not in previous class, and make name firstglyph_diff-glyph_last-glyph
 	add entry to ClassesByLookup[lookup index, subtable_index, class index)] = class name.
@@ -49,8 +49,8 @@ Get feat tag list. For each tag:
 			just write lookup references
 		else:
 			write lookup definition with name "feat_script_lang_new_index"
-					
-		
+
+
 """
 from __future__ import print_function, absolute_import
 
@@ -60,7 +60,7 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 
 
 __help__ = """
-ttxn v1.17 Jan 12 2016
+ttxn v1.18 Mar 30 2017
 
 Based on the ttx tool, with the same options, except that it is limited to
 dumping, and cannot compile. Makes a normalized dump of the font, or of
@@ -68,7 +68,7 @@ selected tables.
 
 Adds additional options:
 	-nh	: suppresses hints in the glyph outline dump.
-	-nv	: suppress version info in outpiut: head.fontRevision, and name ID's 3 and 5.
+	-nv	: suppress version info in output: head.fontRevision and name ID 3.
 	-se	: show if lookup is wrapped in an Extension lookup type;
 			by default, this information is suppressed.
 
@@ -108,7 +108,7 @@ kNullValueRecord = getValueRecord(0,0,0,0)
 def getAnchorString(anchorTable):
 	if not anchorTable:
 		return "<anchor NULL>"
-	
+
 	tokenList = ["<anchor", "%d" % (anchorTable.XCoordinate),"%d" % (anchorTable.YCoordinate)]
 	if anchorTable.Format == 2:
 		tokenList.append("%d" % (anchorTable.AnchorPoint))
@@ -130,11 +130,11 @@ class ClassRecord:
 
 	def __repr__(self):
 		return "(lookup %s subtable %s class %s type %s anchor %s)" % (self.lookupIndex, self.subtableIndex, self.classIndex, self.type, self.anchor)
-		
+
 def addClassDef(otlConv, classDefs, coverage, type = None, anchor = None):
 	classDict = {}
 	glyphDict = copy.deepcopy(otlConv.glyphDict)
-	
+
 	for name, classIndex in classDefs.items():
 		del glyphDict[name]
 		try:
@@ -156,9 +156,9 @@ def addClassDef(otlConv, classDefs, coverage, type = None, anchor = None):
 		classDict[0] = classZeroList
 	else:
 		classDict[0] = []
-		
-		
-	
+
+
+
 	for classIndex, nameList in classDict.items():
 		nameList.sort()
 		key = tuple(nameList)
@@ -170,11 +170,11 @@ def addClassDef(otlConv, classDefs, coverage, type = None, anchor = None):
 def AddMarkClassDef(otlConv, markCoverage, markArray, type):
 	markGlyphList = markCoverage.glyphs
 	markClass = collections.defaultdict(list)
-	
+
 	for m in range(len(markGlyphList)):
 		markRec = markArray.MarkRecord[m]
 		markClass[markRec.Class].append( (getAnchorString(markRec.MarkAnchor),markGlyphList[m]) )
-		
+
 	# Get the mark class names from the global dict
 	for c, valueList in markClass.items():
 		anchorDict = collections.defaultdict(list)
@@ -193,19 +193,19 @@ def classPairGPOS(subtable, otlConv=None):
 	addClassDef(otlConv, subtable.ClassDef1.classDefs, subtable.Coverage, otlConv.leftSideTag )
 	addClassDef(otlConv, subtable.ClassDef2.classDefs, None, otlConv.rightSideTag )
 	return
-	
+
 def markClassPOS(subtable, otlConv=None):
 	AddMarkClassDef(otlConv, subtable.MarkCoverage, subtable.MarkArray, otlConv.markTag)
-	
+
 def markLigClassPOS(subtable, otlConv=None):
 	AddMarkClassDef(otlConv, subtable.MarkCoverage, subtable.MarkArray, otlConv.markTag)
-	
+
 def markMarkClassPOS(subtable, otlConv=None):
 	AddMarkClassDef(otlConv, subtable.Mark1Coverage, subtable.Mark1Array, otlConv.mark1Tag)
-	
+
 def classContexGPOS(subtable, otlConv):
 	addClassDef(otlConv, subtable.ClassDef.classDefs )
-	
+
 def classChainContextGPOS(subtable, otlConv):
 	addClassDef(otlConv, subtable.BacktrackClassDef.classDefs, None, otlConv.backtrackTag)
 	addClassDef(otlConv, subtable.InputClassDef.classDefs, None, otlConv.InputTag)
@@ -215,29 +215,29 @@ def classExtPOS(subtable, otlConv):
 	handler = otlConv.classHandlers.get( (subtable.ExtensionLookupType,  subtable.ExtSubTable.Format), None)
 	if handler:
 		handler( subtable.ExtSubTable, otlConv)
-	
+
 def classContextGSUB(subtable, otlConv):
 	addClassDef(otlConv, subtable.ClassDef.classDefs )
-	
+
 def classChainContextGSUB(subtable, otlConv):
 	addClassDef(otlConv, subtable.BacktrackClassDef.classDefs, None, otlConv.backtrackTag)
 	addClassDef(otlConv, subtable.InputClassDef.classDefs, None, otlConv.InputTag)
 	addClassDef(otlConv, subtable.LookAheadClassDef.classDefs, None,  otlConv.lookAheadTag)
-	
+
 def classExtSUB(subtable, otlConv):
 	handler = otlConv.classHandlers.get( (subtable.ExtensionLookupType, subtable.ExtSubTable.Format), None)
 	if handler:
 		handler( subtable.ExtSubTable, otlConv)
 
 
-	
+
 class ContextRecord:
 	def __init__(self, inputList, sequenceIndex):
 		self.inputList = inputList
 		self.sequenceIndex = sequenceIndex
 		self.glyphsUsed = 0
 		self.result = ""
-		
+
 def checkGlyphInSequence(glyphName, contextSequence, i):
 	retVal = 0
 	try:
@@ -250,9 +250,9 @@ def checkGlyphInSequence(glyphName, contextSequence, i):
 				retVal = 1
 	except IndexError:
 		pass
-		
+
 	return retVal
-	
+
 
 def ruleSinglePos(subtable, otlConv, context = None):
 	rules = []
@@ -279,7 +279,7 @@ def ruleSinglePos(subtable, otlConv, context = None):
 					noMatchRules.append(rule)
 				else:
 					rules.append(rule)
-			
+
 	elif subtable.Format == 2:
 		for i in range(len(subtable.Value)):
 			rule = note = None
@@ -304,9 +304,9 @@ def ruleSinglePos(subtable, otlConv, context = None):
 	else:
 		noMatchRules.sort()
 		return noMatchRules
-	
-		
-	
+
+
+
 def rulePairPos(subtable, otlConv, context = None):
 	rules = []
 	noMatchRules = [] # contains the rules that don't match the context
@@ -343,7 +343,7 @@ def rulePairPos(subtable, otlConv, context = None):
 						noMatchRules.append(rule)
 					else:
 						rules.append(rule)
-						
+
 
 	elif subtable.Format == 2:
 		for i in range(len(subtable.Class1Record)):
@@ -365,7 +365,7 @@ def rulePairPos(subtable, otlConv, context = None):
 					valueString = getValRec(subtable.ValueFormat1, classRec2.Value1)
 					if valueString and valueString != "0":
 						rule = "%spos %s %s %s;%s" % (indent, g1, g2, valueString, note)
-					
+
 				if 	classRec2.Value2:
 					valueString = getValRec(subtable.ValueFormat1, classRec2.Value2)
 					if valueString and valueString != "0":
@@ -385,7 +385,7 @@ def rulePairPos(subtable, otlConv, context = None):
 	else:
 		noMatchRules.sort()
 		return noMatchRules
-	
+
 def ruleCursivePos(subtable, otlConv, context = None):
 	rules = []
 	noMatchRules = [] # contains the rules that don't match the context
@@ -419,7 +419,7 @@ def ruleCursivePos(subtable, otlConv, context = None):
 	else:
 		noMatchRules.sort()
 		return noMatchRules
-	
+
 def ruleMarkBasePos(subtable, otlConv, context = None):
 	rules = []
 	noMatchRules = [] # contains the rules that don't match the context
@@ -430,7 +430,7 @@ def ruleMarkBasePos(subtable, otlConv, context = None):
 	else:
 		indent = ""
 	subsequentIndent = indent + INDENT
-	
+
 	markGlyphList = subtable.MarkCoverage.glyphs
 	baseGlyphList = subtable.BaseCoverage.glyphs
 	markClass = collections.defaultdict(list)
@@ -439,13 +439,13 @@ def ruleMarkBasePos(subtable, otlConv, context = None):
 	for m in range(len(markGlyphList)):
 		markRec = subtable.MarkArray.MarkRecord[m]
 		markClass[markRec.Class].append( (getAnchorString(markRec.MarkAnchor),markGlyphList[m]) )
-		
+
 	# Get the mark class names from the global dict
 	markClassNameList = []
 	for c in markClass.keys():
 		markClassName = otlConv.markClassesByLookup[otlConv.curLookupIndex, otlConv.curSubTableIndex, c, otlConv.markTag]
 		markClassNameList.append(markClassName)
-	
+
 	# build a dict of [common set of anchors] -> glyph list.
 	baseAnchorSets = collections.defaultdict(list)
 	for b in range(len(baseGlyphList)):
@@ -455,11 +455,11 @@ def ruleMarkBasePos(subtable, otlConv, context = None):
 			anchorList.append(getAnchorString(baseRec.BaseAnchor[c]))
 		anchorKey = tuple(anchorList)
 		baseAnchorSets[anchorKey].append(baseGlyphList[b])
-		
-	
+
+
 	for anchorKey, glyphList in baseAnchorSets.items():
 		note = None
-		glyphList.sort() 
+		glyphList.sort()
 		if context:
 			if isinstance(inputSeqList[0], list):
 				inputList = inputSeqList[0]
@@ -489,18 +489,18 @@ def ruleMarkBasePos(subtable, otlConv, context = None):
 			noMatchRules.append(rule)
 		else:
 			rules.append(rule)
-		
+
 	if rules:
 		rules.sort()
 		return rules
 	else:
 		noMatchRules.sort()
 		return noMatchRules
-	
+
 def ruleMarkLigPos(subtable, otlConv, context = None):
 	rules = []
 	noMatchRules = [] # contains the rules that don't match the context
-	
+
 	markGlyphList = subtable.MarkCoverage.glyphs
 	ligGlyphList = subtable.LigatureCoverage.glyphs
 	markClass = collections.defaultdict(list)
@@ -509,13 +509,13 @@ def ruleMarkLigPos(subtable, otlConv, context = None):
 	for m in range(len(markGlyphList)):
 		markRec = subtable.MarkArray.MarkRecord[m]
 		markClass[markRec.Class].append( (getAnchorString(markRec.MarkAnchor),markGlyphList[m]) )
-		
+
 	# Get the mark class names from the global dict
 	markClassNameList = []
 	for c in markClass.keys():
 		markClassName = otlConv.markClassesByLookup[otlConv.curLookupIndex, otlConv.curSubTableIndex, c, otlConv.markTag]
 		markClassNameList.append(markClassName)
-	
+
 	if context:
 		indent = ChainINDENT
 		inputSeqList = context.inputList[context.sequenceIndex:]
@@ -547,14 +547,14 @@ def ruleMarkLigPos(subtable, otlConv, context = None):
 			noMatchRules.append(rule)
 		else:
 			rules.append(rule)
-		
+
 	if rules:
 		rules.sort()
 		return rules
 	else:
 		noMatchRules.sort()
 		return noMatchRules
-	
+
 def ruleMarkMarkPos(subtable, otlConv, context = None):
 	rules = []
 	noMatchRules = [] # contains the rules that don't match the context
@@ -573,13 +573,13 @@ def ruleMarkMarkPos(subtable, otlConv, context = None):
 	for m in range(len(markGlyphList)):
 		markRec = subtable.Mark1Array.MarkRecord[m]
 		markClass[markRec.Class].append( (getAnchorString(markRec.MarkAnchor),markGlyphList[m]) )
-		
+
 	# Get the mark class names from the global dict
 	markClassNameList = []
 	for c in markClass.keys():
 		markClassName = otlConv.markClassesByLookup[otlConv.curLookupIndex, otlConv.curSubTableIndex, c, otlConv.mark1Tag]
 		markClassNameList.append(markClassName)
-	
+
 	mark2AnchorSets = collections.defaultdict(list)
 	for b in range(len(mark2GlyphList)):
 		mark2Rec = subtable.Mark2Array.Mark2Record[b]
@@ -588,7 +588,7 @@ def ruleMarkMarkPos(subtable, otlConv, context = None):
 			anchorList.append(getAnchorString(mark2Rec.Mark2Anchor[c]))
 		anchorKey = tuple(anchorList)
 		mark2AnchorSets[anchorKey].append(mark2GlyphList[b])
-		
+
 	for anchorKey, glyphList in mark2AnchorSets.items():
 		note = None
 		glyphList.sort() # This sort will lead the rules to be sorted by base glyph names.
@@ -607,7 +607,7 @@ def ruleMarkMarkPos(subtable, otlConv, context = None):
 		else:
 			note = ""
 			glyphTxt = " ".join(glyphList)
-			
+
 		rule = ["%spos mark [%s]" % (indent, glyphTxt)]
 		for cl in range(classCount):
 			rule.append(" %s mark %s" % (anchorKey[cl], markClassNameList[cl]) )
@@ -621,14 +621,14 @@ def ruleMarkMarkPos(subtable, otlConv, context = None):
 			noMatchRules.append(rule)
 		else:
 			rules.append(rule)
-		
+
 	if rules:
 		rules.sort()
 		return rules
 	else:
 		noMatchRules.sort()
 		return noMatchRules
-	
+
 def ruleContextPOS(subtable, otlConv, context = None):
 	chainRules = []
 	pLookupList =  otlConv.table.LookupList.Lookup
@@ -656,7 +656,7 @@ def ruleContextPOS(subtable, otlConv, context = None):
 				continue
 			lookup = pLookupList[subRec.LookupListIndex]
 			lookupType = lookup.LookupType
-			curLI = otlConv.curLookupIndex 
+			curLI = otlConv.curLookupIndex
 			otlConv.curLookupIndex = subRec.LookupListIndex
 			handler = otlConv.ruleHandlers[(lookupType)]
 			contextRec = ContextRecord(inputList2, subRec.SequenceIndex)
@@ -696,7 +696,7 @@ def ruleContextPOS(subtable, otlConv, context = None):
 						continue
 					lookup = pLookupList[subsRec.LookupListIndex]
 					lookupType = lookup.LookupType
-					curLI = otlConv.curLookupIndex 
+					curLI = otlConv.curLookupIndex
 					otlConv.curLookupIndex = subsRec.LookupListIndex
 					handler = otlConv.ruleHandlers[(lookupType)]
 					contextRec = ContextRecord(inputList, subsRec.SequenceIndex)
@@ -726,7 +726,7 @@ def ruleContextPOS(subtable, otlConv, context = None):
 						continue
 					lookup = pLookupList[subsRec.LookupListIndex]
 					lookupType = lookup.LookupType
-					curLI = otlConv.curLookupIndex 
+					curLI = otlConv.curLookupIndex
 					otlConv.curLookupIndex = subsRec.LookupListIndex
 					handler = otlConv.ruleHandlers[(lookupType)]
 					contextRec = ContextRecord(inputList, subsRec.SequenceIndex)
@@ -746,8 +746,8 @@ def ruleContextPOS(subtable, otlConv, context = None):
 	for chainRule, subRules in chainRules:
 		rules.append(chainRule)
 		rules.extend(subRules)
-	return rules	
-	
+	return rules
+
 def ruleChainContextPOS(subtable, otlConv, context = None):
 	chainRules = []
 	if subtable.Format == 3:
@@ -783,7 +783,7 @@ def ruleChainContextPOS(subtable, otlConv, context = None):
 					del glyphList[i]
 			lookAheadList.append("[" + (" ".join(glyphList)) + "]")
 		lookAheadTxt = " ".join(lookAheadList)
-		
+
 		rule = "pos %s %s %s;" % (backTxt, inputTxt, lookAheadTxt)
 		pLookupList =  otlConv.table.LookupList.Lookup
 		posRules = []
@@ -792,7 +792,7 @@ def ruleChainContextPOS(subtable, otlConv, context = None):
 				continue
 			lookup = pLookupList[subRec.LookupListIndex]
 			lookupType = lookup.LookupType
-			curLI = otlConv.curLookupIndex 
+			curLI = otlConv.curLookupIndex
 			otlConv.curLookupIndex = subRec.LookupListIndex
 			handler = otlConv.ruleHandlers[(lookupType)]
 			contextRec = ContextRecord(inputList2, subRec.SequenceIndex)
@@ -841,7 +841,7 @@ def ruleChainContextPOS(subtable, otlConv, context = None):
 						continue
 					lookup = pLookupList[subsRec.LookupListIndex]
 					lookupType = lookup.LookupType
-					curLI = otlConv.curLookupIndex 
+					curLI = otlConv.curLookupIndex
 					otlConv.curLookupIndex = subsRec.LookupListIndex
 					handler = otlConv.ruleHandlers[(lookupType)]
 					contextRec = ContextRecord(inputList, subsRec.SequenceIndex)
@@ -873,7 +873,7 @@ def ruleChainContextPOS(subtable, otlConv, context = None):
 						continue
 					lookup = pLookupList[subsRec.LookupListIndex]
 					lookupType = lookup.LookupType
-					curLI = otlConv.curLookupIndex 
+					curLI = otlConv.curLookupIndex
 					otlConv.curLookupIndex = subsRec.LookupListIndex
 					handler = otlConv.ruleHandlers[(lookupType)]
 					contextRec = ContextRecord(inputList, subsRec.SequenceIndex)
@@ -893,8 +893,8 @@ def ruleChainContextPOS(subtable, otlConv, context = None):
 	for chainRule, subRules in chainRules:
 		rules.append(chainRule)
 		rules.extend(subRules)
-	return rules	
-	
+	return rules
+
 def ruleExtPOS(subtable, otlConv, context = None):
 	handler = otlConv.ruleHandlers[(subtable.ExtensionLookupType)]
 	rules = handler(subtable.ExtSubTable, otlConv, context)
@@ -928,8 +928,8 @@ def ruleSingleSub(subtable, otlConv, context = None):
 	else:
 		noMatchRules.sort()
 		return noMatchRules
-		
-	
+
+
 def ruleMultipleSub(subtable, otlConv, context = None):
 	rules = []
 	noMatchRules = [] # contains the rules that don't match the context
@@ -958,7 +958,7 @@ def ruleMultipleSub(subtable, otlConv, context = None):
 	else:
 		noMatchRules.sort()
 		return noMatchRules
-		
+
 
 def ruleAltSub(subtable, otlConv, context = None):
 	rules = []
@@ -976,7 +976,7 @@ def ruleAltSub(subtable, otlConv, context = None):
 		else:
 			note = ""
 		alts.sort()
-		altText = " ".join(alts) 
+		altText = " ".join(alts)
 		rule = "%ssub %s from [%s];%s" % (indent, g1, altText, note)
 		if context and note:
 			noMatchRules.append(rule)
@@ -988,8 +988,8 @@ def ruleAltSub(subtable, otlConv, context = None):
 		return rules
 	else:
 		noMatchRules.sort()
-		return noMatchRules			
-	
+		return noMatchRules
+
 def ruleLigatureSub(subtable, otlConv, context = None):
 	rules = []
 	noMatchRules = [] # contains the rules that don't match the context
@@ -1043,7 +1043,7 @@ def ruleLigatureSub(subtable, otlConv, context = None):
 		noMatchRules.sort()
 		return noMatchRules
 
-	
+
 def ruleContextSUB(subtable, otlConv, context = None):
 	chainRules = []
 	pLookupList =  otlConv.table.LookupList.Lookup
@@ -1070,7 +1070,7 @@ def ruleContextSUB(subtable, otlConv, context = None):
 				continue
 			lookup = pLookupList[subRec.LookupListIndex]
 			lookupType = lookup.LookupType
-			curLI = otlConv.curLookupIndex 
+			curLI = otlConv.curLookupIndex
 			otlConv.curLookupIndex = subRec.LookupListIndex
 			handler = otlConv.ruleHandlers[(lookupType)]
 			contextRec = ContextRecord(inputList2, subRec.SequenceIndex)
@@ -1108,7 +1108,7 @@ def ruleContextSUB(subtable, otlConv, context = None):
 						continue
 					lookup = pLookupList[subsRec.LookupListIndex]
 					lookupType = lookup.LookupType
-					curLI = otlConv.curLookupIndex 
+					curLI = otlConv.curLookupIndex
 					otlConv.curLookupIndex = subsRec.LookupListIndex
 					handler = otlConv.ruleHandlers[(lookupType)]
 					contextRec = ContextRecord(inputList, subsRec.SequenceIndex)
@@ -1136,7 +1136,7 @@ def ruleContextSUB(subtable, otlConv, context = None):
 						continue
 					lookup = pLookupList[subsRec.LookupListIndex]
 					lookupType = lookup.LookupType
-					curLI = otlConv.curLookupIndex 
+					curLI = otlConv.curLookupIndex
 					otlConv.curLookupIndex = subsRec.LookupListIndex
 					handler = otlConv.ruleHandlers[(lookupType)]
 					contextRec = ContextRecord(inputList, subsRec.SequenceIndex)
@@ -1156,12 +1156,12 @@ def ruleContextSUB(subtable, otlConv, context = None):
 	for chainRule, subRules in chainRules:
 		rules.append(chainRule)
 		rules.extend(subRules)
-	return rules	
-	
+	return rules
+
 def ruleChainContextSUB(subtable, otlConv, context = None):
 	chainRules = []
 	pLookupList =  otlConv.table.LookupList.Lookup
-	
+
 	if subtable.Format == 3:
 		backtrackList = []
 		for i in range(len(subtable.BacktrackCoverage)):
@@ -1200,7 +1200,7 @@ def ruleChainContextSUB(subtable, otlConv, context = None):
 		for subsRec in subtable.SubstLookupRecord:
 			lookup = pLookupList[subsRec.LookupListIndex]
 			lookupType = lookup.LookupType
-			curLI = otlConv.curLookupIndex 
+			curLI = otlConv.curLookupIndex
 			otlConv.curLookupIndex = subsRec.LookupListIndex
 			handler = otlConv.ruleHandlers[(lookupType)]
 			contextRec = ContextRecord(inputList2, subsRec.SequenceIndex)
@@ -1248,7 +1248,7 @@ def ruleChainContextSUB(subtable, otlConv, context = None):
 				for subsRec in ctxClassRule.SubstLookupRecord:
 					lookup = pLookupList[subsRec.LookupListIndex]
 					lookupType = lookup.LookupType
-					curLI = otlConv.curLookupIndex 
+					curLI = otlConv.curLookupIndex
 					otlConv.curLookupIndex = subsRec.LookupListIndex
 					handler = otlConv.ruleHandlers[(lookupType)]
 					contextRec = ContextRecord(inputList, subsRec.SequenceIndex)
@@ -1278,7 +1278,7 @@ def ruleChainContextSUB(subtable, otlConv, context = None):
 				for subsRec in ctxRuleRec.SubstLookupRecord:
 					lookup = pLookupList[subsRec.LookupListIndex]
 					lookupType = lookup.LookupType
-					curLI = otlConv.curLookupIndex 
+					curLI = otlConv.curLookupIndex
 					otlConv.curLookupIndex = subsRec.LookupListIndex
 					handler = otlConv.ruleHandlers[(lookupType)]
 					contextRec = ContextRecord(inputList, subsRec.SequenceIndex)
@@ -1292,13 +1292,13 @@ def ruleChainContextSUB(subtable, otlConv, context = None):
 				chainRules.append([rule, subRules])
 	else:
 		raise AttributeError("Unknown  Chain Context Sub format %s" % (subtable.Format))
-				
+
 	chainRules.sort()
 	rules = []
 	for chainRule, subRules in chainRules:
 		rules.append(chainRule)
 		rules.extend(subRules)
-	return rules	
+	return rules
 
 def ruleExtSub(subtable, otlConv, context = None):
 	handler = otlConv.ruleHandlers[(subtable.ExtensionLookupType)]
@@ -1322,24 +1322,24 @@ def ruleReverseChainSub(subtable, otlConv, context = None):
 
 
 		glyphList = subtable.Coverage.glyphs
-		# Since the substitute list is in the same order as the 
+		# Since the substitute list is in the same order as the
 		# coverage table, I need to sort the substitution array
 		# in the same order as the input list.
-		
+
 		glyphList = [ [glyphList[i], i] for i in range(len(glyphList))]
 		glyphList.sort()
 		if subtable.Substitute:
 			substituteList = []
 			for entry in glyphList:
 				substituteList.append(subtable.Substitute[entry[1]])
-			
+
 		for i in reversed(range(1, len(glyphList))):
 			if glyphList[i-1] == glyphList[i]:
 				del glyphList[i]
 				del substituteList[i]
-				
+
 		glyphList = [ entry[0] for entry in glyphList]
-		
+
 		inputTxt = "[ %s ]" % (" ".join(glyphList))
 
 		lookAheadList = []
@@ -1352,14 +1352,14 @@ def ruleReverseChainSub(subtable, otlConv, context = None):
 			lookAheadTxt = " [ %s ]" % (" ".join(glyphList))
 			lookAheadList.append(lookAheadTxt)
 		lookAheadTxt = " ".join(lookAheadList)
-		
+
 		if subtable.Substitute:
 			replText = " by [ %s ]" % (" ".join(substituteList))
 		else:
 			replText = ""
 		rule = "sub %s%s'%s%s;" % (backTxt, inputTxt, lookAheadTxt, replText)
-		rules.append(rule)	
-	return rules	
+		rules.append(rule)
+	return rules
 
 
 def getValRec(valueFormat, valueRec):
@@ -1375,10 +1375,10 @@ def getValRec(valueFormat, valueRec):
 			xAdv = valueRec.XAdvance
 		if valueFormat & 8:
 			yAdv = valueRec.YAdvance
-			
+
 		if xPos == yPos == xAdv == yAdv == 0:
 			return "0"
-			
+
 		return getValueRecord(xPos, yPos, xAdv,  yAdv)
 
 gLookupFlagMap = {
@@ -1401,7 +1401,7 @@ def getLookupFlagTag(lookupFlag):
 				classIndex = (lookupVal & lookupFlag)>>8
 				retList.append(" %d" % (classIndex))
 	return " ".join(retList)
-	
+
 class OTLConverter:
 	leftSideTag = "Left"
 	rightSideTag = "Right"
@@ -1411,7 +1411,7 @@ class OTLConverter:
 	markTag = "MarkClass"
 	mark1Tag = "MarkMarkClass1"
 	mark2Tag = "MarkMarkClass2"
-	
+
 	def __init__(self, table, ttFont):
 		self.table = table.table
 		self.classesByNameList = collections.defaultdict(list)
@@ -1425,10 +1425,10 @@ class OTLConverter:
 		self.markClassesByClassName = {}
 		self.curLookupName = ""
 		self.showExtension = ttFont.showExtensionFlag
-		
+
 		for name in ttFont.getGlyphOrder():
 			self.glyphDict[name] = 0
-		
+
 		if table.tableTag == "GPOS":
 			self.ExtensionIndex = 9
 			self.classHandlers = {
@@ -1451,7 +1451,7 @@ class OTLConverter:
 				(8) : ruleChainContextPOS,
 				(9) : ruleExtPOS,
 				}
-				
+
 		elif table.tableTag == "GSUB":
 			self.ExtensionIndex = 7
 			self.classHandlers = {
@@ -1471,12 +1471,12 @@ class OTLConverter:
 				}
 		else:
 			raise KeyError("OTLConverter can only be called for GPOS and GSUB tables")
-				
+
 	def otlFeatureFormat(self, writer):
 		# get and write language systems
 		lsList, featDictByLangSys, featDictByIndex = self.buildLangSys()
 		self.writeLangSys(writer, lsList)
-		
+
 		writer.newline()
 
 		# get and write class defs.
@@ -1505,14 +1505,14 @@ class OTLConverter:
 				featDictByIndex[featIndex].append(lang_sys)
 			except KeyError:
 				featDictByIndex[featIndex] = [lang_sys]
-			
+
 			langsysDict = featDictByLangSys.get(featTag, {})
 			try:
 				langsysDict[lang_sys].append(featIndex)
 			except KeyError:
 				langsysDict[lang_sys] = [featIndex]
 			featDictByLangSys[featTag] = langsysDict
-	
+
 	def buildLangSys(self):
 		pfeatList = self.table.FeatureList.FeatureRecord
 		featDictByLangSys = {}
@@ -1527,12 +1527,12 @@ class OTLConverter:
 				langTag = "dflt"
 				lsList.insert(0, (scriptTag, langTag, scriptRecord.Script.DefaultLangSys.ReqFeatureIndex))
 				self.addLangSysEntry(pfeatList, scriptTag, langTag, scriptRecord.Script.DefaultLangSys, featDictByLangSys, featDictByIndex)
-	
+
 			for langSysRecord in scriptRecord.Script.LangSysRecord:
 				langTag = langSysRecord.LangSysTag
 				lsList.append( (scriptTag, langTag, langSysRecord.LangSys.ReqFeatureIndex) )
 				self.addLangSysEntry(pfeatList, scriptTag, langTag, langSysRecord.LangSys, featDictByLangSys, featDictByIndex)
-		
+
 		if not haveDFLT:
 			# Synthesize a DFLT dflt entry.
 			addedDFLT = 0
@@ -1541,11 +1541,11 @@ class OTLConverter:
 				if len(langsysList) == scriptCount:
 					langsysList.insert(0, ("DFLT", "dflt", 0xFFFF))
 					addedDFLT = 1
-					
+
 			if addedDFLT:
 				lsList.insert(0, ("DFLT", "dflt", 0xFFFF))
-				
-			
+
+
 		return lsList, featDictByLangSys, featDictByIndex
 
 
@@ -1558,7 +1558,7 @@ class OTLConverter:
 				rfTxt = ""
 			writer.write("languagesystem %s %s%s;" %  (lang_sys[0], lang_sys[1], rfTxt))
 			writer.newline()
-		
+
 	def buildClasses(self):
 		lookupIndex = -1
 		for lookup in self.table.LookupList.Lookup:
@@ -1595,7 +1595,7 @@ class OTLConverter:
 			for classRec in classRecList:
 				key = (classRec.lookupIndex, classRec.subtableIndex, classRec.classIndex, classRec.type)
 				self.classesByLookup[key] = className
-			
+
 		for defList in sorted(self.markClassesByDefList.keys()):
 			classRecList = self.markClassesByDefList[defList]
 			defNameList = []
@@ -1619,9 +1619,9 @@ class OTLConverter:
 			for classRec in classRecList:
 				key = (classRec.lookupIndex, classRec.subtableIndex, classRec.classIndex, classRec.type)
 				self.markClassesByLookup[key] = className
-			
+
 		return
-		
+
 	def writeClasses(self, writer):
 		classNames = list(self.classesByClassName.keys())
 		if classNames:
@@ -1638,7 +1638,7 @@ class OTLConverter:
 			writer.write( " %s" % (defString) )
 			nameList = nameList[10:]
 			writer.indent()
-			while nameList:	
+			while nameList:
 				writer.newline()
 				defString = " ".join(nameList[:10])
 				writer.write( " %s" % (defString) )
@@ -1647,7 +1647,7 @@ class OTLConverter:
 			writer.write( " ];")
 			writer.newline()
 		writer.newline()
-		
+
 
 	def writeMarkClasses(self, writer):
 		classNames = list(self.markClassesByClassName.keys())
@@ -1663,7 +1663,7 @@ class OTLConverter:
 				writer._writeraw("mark [%s" % (nameTxt))
 				writer.indent()
 				nameList = nameList[10:]
-				while nameList:	
+				while nameList:
 					writer.newline()
 					defString = " ".join(nameList[:10])
 					writer._writeraw( " %s" % (defString) )
@@ -1672,7 +1672,7 @@ class OTLConverter:
 				writer._writeraw( "] %s %s;" % (anchor, className))
 				writer.newline()
 		writer.newline()
-		
+
 
 	def doFeatures(self, writer, featDictByLangSys):
 		for featTag in sorted(featDictByLangSys.keys()):
@@ -1687,7 +1687,7 @@ class OTLConverter:
 				langSysTagList.remove(dfltLangSysKey)
 			except KeyError:
 				dfltFeatIndexList = None
-			
+
 			if dfltFeatIndexList:
 				dfltLookupIndexDict = self.writeDfltLangSysFeat(writer, dfltLangSysKey, dfltFeatIndexList)
 			else:
@@ -1700,7 +1700,7 @@ class OTLConverter:
 			writer.write( "} %s;" % (featTag))
 			writer.newline()
 			writer.newline()
-			
+
 	def writeDfltLangSysFeat(self, writer, langSysKey, featIndexList):
 		pfeatList = self.table.FeatureList.FeatureRecord
 		pLookupList =  self.table.LookupList.Lookup
@@ -1709,7 +1709,7 @@ class OTLConverter:
 			featRecord = pfeatList[featIndex]
 			for lookupIndex in featRecord.Feature.LookupListIndex:
 				lookupIndexDict[lookupIndex] = pLookupList[lookupIndex]
-		
+
 		excludeDLFTtxt = ""
 		nameIndex = 0
 		for li in sorted(lookupIndexDict.keys()):
@@ -1738,9 +1738,9 @@ class OTLConverter:
 				writer.write("} %s;" % (lookupName) )
 				writer.newline()
 				writer.newline()
-				
+
 		return lookupIndexDict
-	
+
 	def writeLangSysFeat(self, writer, langSysKey, prevLangSysKey, featIndexList, dfltLookupIndexDict):
 		pfeatList = self.table.FeatureList.FeatureRecord
 		pLookupList =  self.table.LookupList.Lookup
@@ -1749,7 +1749,7 @@ class OTLConverter:
 			featRecord = pfeatList[featIndex]
 			for lookupIndex in featRecord.Feature.LookupListIndex:
 				lookupIndexDict[lookupIndex] = pLookupList[lookupIndex]
-		
+
 		# Remove all lookups shared with the DFLT dflt script.
 		# Note if there were any; if not, then we need to use the exclude keyword with the lookup.
 		haveAnyDflt = 0
@@ -1776,7 +1776,7 @@ class OTLConverter:
 			elif prevLangSysKey[1] != langSysKey[1]:
 				writer.write("language %s;" % (langSysKey[1]) )
 				writer.newline()
-				
+
 			for li in liList:
 				self.curLookupIndex = li
 				lookup =  pLookupList[li]
@@ -1786,7 +1786,7 @@ class OTLConverter:
 				else:
 					# XXX 'useExtension' is assigned here but never used
 					useExtension = ""
-			
+
 				if li in self.seenLookup:
 					lookupName = self.seenLookup[li]
 					writer.write("lookup %s%s;" % (lookupName, excludeDLFTtxt) )
@@ -1806,7 +1806,7 @@ class OTLConverter:
 					writer.write("} %s;" % (lookupName) )
 					writer.newline()
 					writer.newline()
-				
+
 	def writeLookup(self, writer, lookup):
 		lookupType = lookup.LookupType
 		try:
@@ -1817,7 +1817,7 @@ class OTLConverter:
 			writer._writeraw(msg)
 			writer.newline()
 			return
-			
+
 		for si in range(len(lookup.SubTable)):
 			self.curSubTableIndex = si
 			rules = handler(lookup.SubTable[si], self)
@@ -1839,11 +1839,11 @@ class OTLConverter:
 				else:
 					writer._writeraw(rule)
 					writer.newline()
-		
-			
-			
-		
-				
+
+
+
+
+
 def dumpOTLAsFeatureFile(tableTag, writer, ttf):
 	try:
 		table = ttf[tableTag]
@@ -1926,12 +1926,12 @@ def dumpFont(writer, fontPath, supressHints=0):
 		writer.newline()
 	writer.endtag("FontTopDict")
 	writer.newline()
-	
+
 	if supressHints:
 		charData= shellcmd(["tx", "-dump", "-6", "-n", fontPath])
 	else:
 		charData= shellcmd(["tx", "-dump", "-6", fontPath])
-	
+
 	if curSystem == "Windows":
 		charData = re.sub(r"[\r\n]+", "\n", charData)
 	charList = re.findall(r"[^ ]glyph\[[^]]+\] \{([^,]+),[^\r\n]+,([^}]+)", charData)
@@ -1949,7 +1949,7 @@ def dumpFont(writer, fontPath, supressHints=0):
 		writer.newline()
 	writer.endtag("FontOutlines")
 	writer.newline()
-	
+
 	return
 
 
@@ -1964,7 +1964,7 @@ def ttnDump(input, output, options, showExtensionFlag, supressHints=0, supressVe
 			fontNumber=options.fontNumber, supressHints=supressHints)
 
 	ttf.showExtensionFlag = showExtensionFlag
-	
+
 	kDoNotDumpTagList = ["GlyphOrder", "DSIG"]
 	if options.onlyTables:
 		onlyTables = list(options.onlyTables)
@@ -1979,7 +1979,7 @@ def ttnDump(input, output, options, showExtensionFlag, supressHints=0, supressVe
 	for tag in kDoNotDumpTagList:
 		if tag in onlyTables:
 			onlyTables.remove(tag)
-			
+
 	# Zero values that always differ.
 	if 'head' in onlyTables:
 		head = ttf["head"]
@@ -1990,9 +1990,9 @@ def ttnDump(input, output, options, showExtensionFlag, supressHints=0, supressVe
 		head.checkSumAdjustment = 0
 		if supressVersions:
 			head.fontRevision = 0
-	
+
 	if 'hmtx' in onlyTables:
-		hmtx = ttf["hmtx"]		
+		hmtx = ttf["hmtx"]
 		temp = hmtx.metrics # hmtx must be decompiled *before* we zero the  hhea.numberOfHMetrics value
 		if supressTTFDiffs:
 			try:
@@ -2003,13 +2003,13 @@ def ttnDump(input, output, options, showExtensionFlag, supressHints=0, supressVe
 				del temp["NULL"]
 			except KeyError:
 				pass
-				
-		
+
+
 	if 'hhea' in onlyTables:
 		hhea = ttf["hhea"]
 		temp = hhea.numberOfHMetrics
 		hhea.numberOfHMetrics = 0
-		
+
 	if 'vmtx' in onlyTables:
 		vmtx = ttf["vmtx"]
 		temp = vmtx.metrics # vmtx must be decompiled *before* we zero the  vhea.numberOfHMetrics value
@@ -2022,19 +2022,27 @@ def ttnDump(input, output, options, showExtensionFlag, supressHints=0, supressVe
 				del temp["NULL"]
 			except KeyError:
 				pass
-		
+
 	if 'vhea' in onlyTables:
 		vhea = ttf["vhea"]
 		temp = vhea.numberOfVMetrics
 		vhea.numberOfVMetrics = 0
-	
+
 	if supressVersions:
 		if 'name' in onlyTables:
 			name_table = ttf["name"]
 			for namerecord in name_table.names:
-				if namerecord.nameID in [3,5]:
-					namerecord.string = "VERSION SUPPRSESSED"
-		
+				if namerecord.nameID == 3:
+					if namerecord.isUnicode():
+						namerecord.string = "VERSION SUPPRESSED".encode("utf-16be")
+					else:
+						namerecord.string = "VERSION SUPPRESSED"
+				elif namerecord.nameID == 5:
+					if namerecord.platformID == 3:
+						namerecord.string = namerecord.string.split(';')[0]
+					else:
+						namerecord.string = "VERSION SUPPRESSED"
+
 	if 'GDEF' in onlyTables:
 		GDEF = ttf["GDEF"]
 		gt = GDEF.table
@@ -2049,18 +2057,18 @@ def ttnDump(input, output, options, showExtensionFlag, supressHints=0, supressVe
 		if gt.AttachList:
 			if not gt.AttachList.Coverage.glyphs:
 				gt.AttachList = None
-			
+
 		if gt.LigCaretList:
 			if not gt.LigCaretList.Coverage.glyphs:
 				gt.LigCaretList = None
-				
-		
+
+
 	onlyTables.sort() # this is why I always use the onlyTables option - it allows me to sort the table list.
 	if 'cmap' in onlyTables:
 		# remove mappings to notdef.
 		cmapTable = ttf["cmap"]
 		""" Force shared cmap tables to get separately decompiled.
-		The _c_m_a_p.py logic will decompile a cmap from source data if an attempt is made to 
+		The _c_m_a_p.py logic will decompile a cmap from source data if an attempt is made to
 		access a field which is not (yet) defined. Unicode ( format 4) subtables
 		are usually identical, and thus shared. When intially decompiled, the first gets
 		fully decompiled, and then the second gets a reference to the 'cmap' dict of the first.
@@ -2087,19 +2095,19 @@ def ttnDump(input, output, options, showExtensionFlag, supressHints=0, supressVe
 						del cmapSubtable.cmap[charCode]
 					except KeyError:
 						pass
-			
+
 			if (cmapSubtable.format in [12,14]) and hasattr(cmapSubtable, "nGroups"):
 				cmapSubtable.nGroups = 0
 			if hasattr(cmapSubtable, "length"):
-				cmapSubtable.length = 0		
+				cmapSubtable.length = 0
 	if ('OS/2' in onlyTables) and supressTTFDiffs:
 		# XXX why is 'os2Table' assigned here but never used?
 		os2Table = ttf["OS/2"]
-		
+
 	if onlyTables:
 		ttf.saveXML(output,
 			tables=onlyTables,
-			skipTables=options.skipTables, 
+			skipTables=options.skipTables,
 			splitTables=options.splitTables,
 			disassembleInstructions=options.disassembleInstructions,
 			bitmapGlyphDataFormat=options.bitmapGlyphDataFormat)
@@ -2114,7 +2122,7 @@ def run(args):
 	if ("-h" in args) or ("-u" in args):
 		print(__help__)
 		sys.exit(0)
-	
+
 	if "-a" not in args:
 		args.insert(0, "-a") # allow virtual GIDS.
 
@@ -2129,13 +2137,13 @@ def run(args):
 		showExtensionFlag = 1
 	else:
 		showExtensionFlag = 0
-		
+
 	if "-nv" in args:
 		args.remove("-nv")
 		supressVersions = 1
 	else:
 		supressVersions = 0
-		
+
 	if "-supressTTFDiffs" in args:
 		args.remove("-supressTTFDiffs")
 		supressTTFDiffs = 1
