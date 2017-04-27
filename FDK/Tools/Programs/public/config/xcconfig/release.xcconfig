@@ -1,6 +1,5 @@
 #include "common.xcconfig"
 GCC_GENERATE_DEBUGGING_SYMBOLS = NO
 GCC_OPTIMIZATION_LEVEL = s
-GCC_PREPROCESSOR_DEFINITIONS = OSX=1
 CONFIGURATION_BUILD_DIR = ../../../exe/osx/release/
 HEADER_SEARCH_PATHS =  $(SDKROOT)/usr/include ../../../sfnt_includes

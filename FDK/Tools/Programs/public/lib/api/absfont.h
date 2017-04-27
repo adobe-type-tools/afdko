@@ -6,8 +6,9 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 #include "dynarr.h"
+#include "txops.h"
 
-#define ABF_VERSION CTL_MAKE_VERSION(1,0,51)
+#define ABF_VERSION CTL_MAKE_VERSION(1,0,52)
 
 #include <stdio.h>
 
@@ -100,7 +101,12 @@ enum                            /* OrigFontType field values */
     abfOrigFontTypeOCF,
     abfOrigFontTypeUFO
     };
+
+/* item variation store  */
+struct var_itemVariationStore_;
+typedef struct var_itemVariationStore_ *var_itemVariationStore;
     
+
 /* Top dictionary data. Comments indicate default/initial values. */
 typedef struct
     {                           
@@ -151,18 +157,35 @@ typedef struct
             abfFontDict *array;     /* Array allocated by client to match cnt */
         } FDArray;
         abfSupplement sup;          /* Supplementary data */
+        unsigned short maxstack;     /* Supplementary data */
+        var_itemVariationStore varStore;
     } abfTopDict;
 
 /* Private dictionary data. Comments indicate default/initial values. */
 
-typedef struct
+    typedef struct
     {
         /* Used to hold stack items from a font with blended values */
         float value;
-        unsigned short numBlends;
+        int numBlends;
         float* blendValues;
     } abfOpEntry;
     
+    typedef struct
+    {
+        /* Used to hold stack items from a font with blended values */
+        float value;
+        int     hasBlend;
+        float blendValues[CFF2_MAX_OP_STACK];
+    } abfBlendArg;
+    
+    
+typedef struct
+    {
+        long cnt;               /* ABF_EMPTY_ARRAY */
+        abfOpEntry array[CFF2_MAX_OP_STACK];
+    } abfOpEntryArray;
+
 typedef struct
     {
     /* Note that even for a font with blended values,
@@ -173,8 +196,8 @@ typedef struct
         long cnt;               /* ABF_EMPTY_ARRAY */
         float array[96];
         } BlueValues;
-    struct                         
-        {                          
+    struct
+        {
         long cnt;               /* ABF_EMPTY_ARRAY */
         float array[96];
         } OtherBlues;
@@ -208,43 +231,20 @@ typedef struct
     float ExpansionFactor;      /* 0.06 */
     float initialRandomSeed;    /* 0. */
     unsigned short vsindex;
+    int numRegions;
     struct
     {
-        struct
-        {
-            long cnt;               /* ABF_EMPTY_ARRAY */
-            abfOpEntry array[96];
-        } BlueValues;
-        struct
-        {
-            long cnt;               /* ABF_EMPTY_ARRAY */
-            abfOpEntry array[96];
-        } OtherBlues;
-        struct
-        {
-            long cnt;               /* ABF_EMPTY_ARRAY */
-            abfOpEntry array[96];
-        } FamilyBlues;
-        struct
-        {
-            long cnt;               /* ABF_EMPTY_ARRAY */
-            abfOpEntry array[96];
-        } FamilyOtherBlues;
+        abfOpEntryArray  BlueValues;
+        abfOpEntryArray  OtherBlues;
+        abfOpEntryArray FamilyBlues;
+        abfOpEntryArray FamilyOtherBlues;
         abfOpEntry BlueScale;
         abfOpEntry BlueShift;
         abfOpEntry BlueFuzz;
         abfOpEntry StdHW;
         abfOpEntry StdVW;
-        struct
-        {
-            long cnt;               /* ABF_EMPTY_ARRAY */
-            abfOpEntry array[96];
-        } StemSnapH;
-        struct
-        {
-            long cnt;               /* ABF_EMPTY_ARRAY */
-            abfOpEntry array[96];
-        } StemSnapV;
+        abfOpEntryArray StemSnapH;
+        abfOpEntryArray StemSnapV;
    } blendValues;
     } abfPrivateDict;
 
@@ -396,8 +396,9 @@ typedef struct                  /* Glyph information */
     ctlRegion sup;              /* Supplementary data */
     struct {
         unsigned short vsindex;
-        unsigned short numBlends;
-         float *blendDeltaArgs;
+        unsigned short maxstack;
+        unsigned short numRegions;
+        float *blendDeltaArgs;
         } blendInfo;/* Supplementary data */
     } abfGlyphInfo;
 
@@ -483,6 +484,14 @@ struct abfGlyphCallbacks_
 							/* Note: ndv is the raw value from the CFF, a value in the range -100 to +100, which corresponds to the
 							normalized design vector range 0.0-1.0.  x0 and y0 are the absolute x and y of the LE origin in the glyph design space.*/
 	void (*cubeTransform)     (abfGlyphCallbacks *cb, float rotate, float scaleX, float scaleY, float skewX, float skewY);
+    void (*moveVF)    (abfGlyphCallbacks *cb, abfBlendArg* x0, abfBlendArg* y0);
+    void (*lineVF)    (abfGlyphCallbacks *cb, abfBlendArg* x1, abfBlendArg* y1);
+    void (*curveVF)   (abfGlyphCallbacks *cb,
+                     abfBlendArg* x1, abfBlendArg* y1,
+                     abfBlendArg* x2, abfBlendArg* y2,
+                     abfBlendArg* x3, abfBlendArg* y3);
+    void (*stemVF)    (abfGlyphCallbacks *cb,
+                     int flags, abfBlendArg* edge0, abfBlendArg* edge1);
     };
 
 /* beg() is called to begin a new glyph definition and end() is called to

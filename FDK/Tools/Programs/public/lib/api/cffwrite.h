@@ -6,7 +6,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define CFW_VERSION CTL_MAKE_VERSION(1,0,42)
+#define CFW_VERSION CTL_MAKE_VERSION(1,0,45)
 
 #include "absfont.h"
 
@@ -89,7 +89,8 @@ enum
 
     CFW_CUBE_RND    = 1<<11,
     CFW_NO_OPTIMIZATION   = 1<<12,
-
+    CFW_WRITE_CFF2   = 1<<13,
+    CFW_NO_FUTILE_SUBRS = 1<<14  /* Remove futile subroutines during subroutinization */
     };
 
 /* If the CFW_PRESERVE_GLYPH_ORDER bit is not set, glyphs are accumulated and
@@ -121,7 +122,7 @@ struct cfwMapCallback_
                      unsigned short gid, abfGlyphInfo *info);
     };
 
-int cfwBegFont(cfwCtx h, cfwMapCallback *map);
+int cfwBegFont(cfwCtx h, cfwMapCallback *map, unsigned long maxNumSubrs);
 
 /* cfwBegFont() is called to begin a new member font definition.
 

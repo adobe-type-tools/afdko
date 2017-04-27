@@ -58,8 +58,14 @@ enum
 
 /* name IDs */
 enum {
+    NAME_ID_COPYRIGHT   = 0,         /* copyright notice */
     NAME_ID_FAMILY      = 1,         /* family name */
+    NAME_ID_SUBFAMILY   = 2,         /* sub-family name */
+    NAME_ID_UNIQUEID    = 3,         /* unique font identifier */
+    NAME_ID_FULL        = 4,         /* full name */
+    NAME_ID_VERSION     = 5,         /* version */
     NAME_ID_POSTSCRIPT  = 6,         /* Postscript font name */
+    NAME_ID_TRADEMARK   = 7,         /* trademark */
     NAME_ID_TYPO_FAMILY = 16,        /* typographic family name */
     NAME_ID_CIDFONTNAME = 20,        /* CID font name */
     NAME_ID_POSTSCRIPT_PREFIX = 25   /* Postscript font name prefix */
@@ -106,18 +112,25 @@ nam_NameRecord *nam_nameFind(nam_name tbl,
     nameId - the name ID in the name table to be retrieved.
 */
 
+enum {
+    NAME_READ_FAILED            = 0,
+    NAME_READ_NAME_NOT_FOUND    = -1,
+    NAME_READ_NAME_TOO_LONG     = -2
+};
+
 long nam_getASCIIName(nam_name tbl,
                     ctlSharedStmCallbacks *sscb,
                     char *buffer, unsigned long bufferLen,
-                    unsigned short nameId);
+                    unsigned short nameId,
+                    int isPS);
 
 /*  nam_getASCIIName() looks up the name table for an ASCII name string specified by a name ID.
     If a name string contains any Unicode characters outside of the ASCII range,
     they are removed from the result.
 
     The length of the name is returned as the result.
-    If no name is found, -1 is returned.
-    If a found name exceeds the given buffer length, -2 is returned.
+    If no name is found, NAME_READ_NAME_NOT_FOUND is returned.
+    If a found name exceeds the given buffer length, NAME_READ_NAME_TOO_LONG is returned.
 
     tbl - name table data loaded by calling nam_loadname in nameread library.
 
@@ -130,21 +143,45 @@ long nam_getASCIIName(nam_name tbl,
     bufferLen-1.
 
     nameId - the name ID in the name table to be looked up.
+
+    isPS - if non-zero, the returned name must be Postscript-safe
 */
 
-long nam_generateInstancePSName(nam_name nameTbl,
-                                var_axes axesTbl,
-                                ctlSharedStmCallbacks *sscb,
-                                float *coords,
-                                unsigned short axisCount,
-                                int instanceIndex,
-                                char *instanceName, unsigned long instanceNameLen);
-
-/*  nam_generateInstancePSName() generates a PostScript font name for the specified instance,
-    given the name table and the axes table data obtained from a CFF2 variable font.
+long nam_getFamilyNamePrefix(nam_name nameTbl,
+                            ctlSharedStmCallbacks *sscb,
+                            char *buffer, unsigned long bufferLen);
+/*  nam_getFamilyNamePrefix() returns a font name prefix string to be used
+    to name a CFF2 variable font instance.
     The length of the name is returned as the result.
-    If no name is found, -1 is returned.
-    If a found name exceeds the given buffer length, -2 is returned.
+    If no name is found, NAME_READ_INST_NOT_FOUND is returned.
+    If a found name exceeds the given buffer length, NAME_READ_NAME_TOO_LONG is returned.
+
+    nameTbl - name table data loaded by calling nam_loadname in nameread library.
+
+    sscb - pointer to shared stream callback functions.
+
+    coords - the user design vector. May be NULL if the default instance or a named
+    instance is specified.
+
+    buffer - where a font name prefix stirng is returned.
+
+    bufferLen - the allocated byte length of buffer. Note that a null character
+    is added at the end of the name string, so the actual length of the name will be at most
+    bufferLen-1. */
+
+long nam_getNamedInstancePSName(nam_name nameTbl,
+                            var_axes axesTbl,
+                            ctlSharedStmCallbacks *sscb,
+                            float *coords,
+                            unsigned short axisCount,
+                            int instanceIndex,
+                            char *instanceName, unsigned long instanceNameLen);
+
+/*  nam_getNamedInstancePSName() looks up the fvar table for a named instnace of a CFF2 variable font
+    specified either by its instance index or a design vector of the instance.
+    The length of the name is returned as the result.
+    If no name is found, NAME_READ_INST_NOT_FOUND is returned.
+    If a found name exceeds the given buffer length, NAME_READ_NAME_TOO_LONG is returned.
 
     nameTbl - name table data loaded by calling nam_loadname in nameread library.
 
@@ -159,6 +196,66 @@ long nam_generateInstancePSName(nam_name nameTbl,
 
     instanceIndex - specifies the named instance. If -1, coords specifies an
     arbitrary instance.
+
+    instanceName - where a generated PostScript name of the instance is returned.
+
+    instanceNameLen - the allocated byte length of instanceName. Note that a null character
+    is added at the end of the name string, so the actual length of the name will be at most
+    instanceNameLen-1. */
+
+long nam_generateArbitraryInstancePSName(nam_name nameTbl,
+                            var_axes axesTbl,
+                            ctlSharedStmCallbacks *sscb,
+                            float *coords,
+                            unsigned short axisCount,
+                            char *instanceName, unsigned long instanceNameLen);
+
+/*  nam_generateArbitraryInstancePSName() generate a PS name of an arbitrary instance
+    of a CFF2 variable font specified by a design vector of the instance.
+    The length of the name is returned as the result.
+    If no name is found, NAME_READ_INST_NOT_FOUND is returned.
+    If a found name exceeds the given buffer length, NAME_READ_NAME_TOO_LONG is returned.
+
+    nameTbl - name table data loaded by calling nam_loadname in nameread library.
+
+    axesTbl - axes table data loaded by calling var_loadaxes in varread library.
+
+    sscb - pointer to shared stream callback functions.
+
+    coords - the user design vector.
+
+    axisCount - the number of axes in the variable font.
+
+    instanceName - where a generated PostScript name of the instance is returned.
+
+    instanceNameLen - the allocated byte length of instanceName. Note that a null character
+    is added at the end of the name string, so the actual length of the name will be at most
+    instanceNameLen-1. */
+
+long nam_generateLastResortInstancePSName(nam_name nameTbl,
+                                var_axes axesTbl,
+                                ctlSharedStmCallbacks *sscb,
+                                float *coords,
+                                unsigned short axisCount,
+                                char *instanceName, unsigned long instanceNameLen);
+
+/*  nam_generateLastResortInstancePSName() generates a unique PostScript font name
+    for the specified instance of a CFF2 variable font by hashing the coordinate values
+    as the last resort.
+    The length of the name is returned as the result.
+    If no name is found, NAME_READ_INST_NOT_FOUND is returned.
+    If a name exceeds the given buffer length, NAME_READ_NAME_TOO_LONG is returned.
+
+    nameTbl - name table data loaded by calling nam_loadname in nameread library.
+
+    axesTbl - axes table data loaded by calling var_loadaxes in varread library.
+
+    sscb - pointer to shared stream callback functions.
+
+    coords - the user design vector. May be NULL if the default instance or a named
+    instance is specified.
+
+    axisCount - the number of axes in the variable font.
 
     instanceName - where a generated PostScript name of the instance is returned.
 

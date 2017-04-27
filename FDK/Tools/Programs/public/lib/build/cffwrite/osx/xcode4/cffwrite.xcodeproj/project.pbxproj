@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BD0E2CA21E9EA3C200BC17B8 /* cffwrite_varstore.c in Sources */ = {isa = PBXBuildFile; fileRef = BD0E2CA11E9EA3C200BC17B8 /* cffwrite_varstore.c */; };
 		BD6460200F1BE633000D0A63 /* cffwrite_subr.c in Sources */ = {isa = PBXBuildFile; fileRef = BD64601F0F1BE633000D0A63 /* cffwrite_subr.c */; };
 		BD6460220F1BE63A000D0A63 /* cffwrite_subr.h in Headers */ = {isa = PBXBuildFile; fileRef = BD6460210F1BE63A000D0A63 /* cffwrite_subr.h */; };
 		BDA34EEC0D6F68FC0009FF85 /* cffwrite_fdselect.c in Sources */ = {isa = PBXBuildFile; fileRef = BDA34EE50D6F68FC0009FF85 /* cffwrite_fdselect.c */; };
@@ -29,6 +30,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		BD0E2CA11E9EA3C200BC17B8 /* cffwrite_varstore.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = cffwrite_varstore.c; path = ../../../../source/cffwrite/cffwrite_varstore.c; sourceTree = "<group>"; };
+		BD0E2CA31E9EA47500BC17B8 /* cffwrite_varstore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = cffwrite_varstore.h; path = ../../../../source/cffwrite/cffwrite_varstore.h; sourceTree = "<group>"; };
 		BD64601F0F1BE633000D0A63 /* cffwrite_subr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = cffwrite_subr.c; path = ../../../../source/cffwrite/cffwrite_subr.c; sourceTree = SOURCE_ROOT; };
 		BD6460210F1BE63A000D0A63 /* cffwrite_subr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cffwrite_subr.h; path = ../../../../source/cffwrite/cffwrite_subr.h; sourceTree = SOURCE_ROOT; };
 		BDA34BA80D6F46AF0009FF85 /* abfdesc.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = abfdesc.h; path = ../../../../api/abfdesc.h; sourceTree = SOURCE_ROOT; };
@@ -51,8 +54,8 @@
 		BDA34EF80D6F69030009FF85 /* cffwrite_t2cstr.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = cffwrite_t2cstr.h; path = ../../../../source/cffwrite/cffwrite_t2cstr.h; sourceTree = SOURCE_ROOT; };
 		BDA34EF90D6F69030009FF85 /* cffwrite_sindex.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = cffwrite_sindex.h; path = ../../../../source/cffwrite/cffwrite_sindex.h; sourceTree = SOURCE_ROOT; };
 		BDA34F010D6F692C0009FF85 /* cffwrite.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = cffwrite.h; path = ../../../../api/cffwrite.h; sourceTree = SOURCE_ROOT; };
-		BDA34F040D6F69760009FF85 /* dictops.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = dictops.h; path = ../../../../../public/resource/dictops.h; sourceTree = SOURCE_ROOT; };
-		BDA34F060D6F69810009FF85 /* txops.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = txops.h; path = ../../../../../public/resource/txops.h; sourceTree = SOURCE_ROOT; };
+		BDA34F040D6F69760009FF85 /* dictops.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = dictops.h; path = ../../../../resource/dictops.h; sourceTree = SOURCE_ROOT; };
+		BDA34F060D6F69810009FF85 /* txops.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = txops.h; path = ../../../../resource/txops.h; sourceTree = SOURCE_ROOT; };
 		D2AAC046055464E500DB518D /* libcffwrite.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libcffwrite.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -85,6 +88,7 @@
 				BDA34EE50D6F68FC0009FF85 /* cffwrite_fdselect.c */,
 				BDA34EE60D6F68FC0009FF85 /* cffwrite.c */,
 				BDA34EE70D6F68FC0009FF85 /* cffwrite_dict.c */,
+				BD0E2CA11E9EA3C200BC17B8 /* cffwrite_varstore.c */,
 				BDA34EE80D6F68FC0009FF85 /* cffwrite_charset.c */,
 				BDA34EE90D6F68FC0009FF85 /* cffwrite_sindex.c */,
 				BDA34EEA0D6F68FC0009FF85 /* cffwrite_t2cstr.c */,
@@ -110,6 +114,7 @@
 				BDA34BAA0D6F46AF0009FF85 /* absfont.h */,
 				BDA34F010D6F692C0009FF85 /* cffwrite.h */,
 				BDA34EF30D6F69030009FF85 /* cffwrite_share.h */,
+				BD0E2CA31E9EA47500BC17B8 /* cffwrite_varstore.h */,
 				BDA34EF40D6F69030009FF85 /* cffwrite_charset.h */,
 				BDA34EF50D6F69030009FF85 /* cffwrite_encoding.h */,
 				BDA34EF60D6F69030009FF85 /* cffwrite_dict.h */,
@@ -219,6 +224,7 @@
 				BDA34EF00D6F68FC0009FF85 /* cffwrite_sindex.c in Sources */,
 				BDA34EF10D6F68FC0009FF85 /* cffwrite_t2cstr.c in Sources */,
 				BDA34EF20D6F68FC0009FF85 /* cffwrite_encoding.c in Sources */,
+				BD0E2CA21E9EA3C200BC17B8 /* cffwrite_varstore.c in Sources */,
 				BD6460200F1BE633000D0A63 /* cffwrite_subr.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

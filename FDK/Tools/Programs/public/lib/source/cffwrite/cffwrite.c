@@ -13,6 +13,7 @@
 #include "cffwrite_fdselect.h"
 #include "cffwrite_sindex.h"
 #include "cffwrite_dict.h"
+#include "cffwrite_varstore.h"
 #include "cffwrite_t2cstr.h"
 #include "cffwrite_subr.h"
 
@@ -25,6 +26,7 @@
 #include <stdarg.h>
 
 #define CFF_HDR_SIZE 4          /* CFF v1.0 header size */
+#define CFF2_HDR_SIZE 5          /* CFF v2.0 header size */
 
 /* Width optimization seeks to find two values called the default and nominal
    width. Glyphs with the default width omit the width altogether and all other
@@ -98,10 +100,12 @@ typedef struct                  /* Per-font data */
 	long flags;                 /* Font-specific flags */
 #define FONT_CID    (1 << 0)      /* CID font */
 #define FONT_SYN    (1 << 1)      /* Synthetic font */
+#define FONT_CFF2    (1 << 2)      /* Is CFF2 font. */
 	abfTopDict top;             /* Top dict data (copied from client) */
 	struct                      /* CFF DICT data */
 	{
-		DICT top;
+        DICT top;
+        DICT varStore;
 		DICT synthetic;         /* Synthetic Top DICT */
 	} cff;
 	dnaDCL(FDInfo, FDArray);    /* FD array */
@@ -119,8 +123,9 @@ typedef struct                  /* Per-font data */
 	struct                      /* CFF data sizes */
 	{
 		long top;
-		long CharStrings;
-		long FDArray;           /* CID only */
+        long CharStrings;
+        long VarStore;
+		long FDArray;           /* CID and CFF2 only */
 		long Private;
 		long Subrs;
 		long widths;
@@ -129,9 +134,10 @@ typedef struct                  /* Per-font data */
 	{
 		Offset charset;
 		Offset Encoding;
-		Offset FDSelect;
+        Offset VarStore;
+        Offset FDSelect;
 		Offset CharStrings;
-		Offset FDArray;         /* CID only */
+		Offset FDArray;         /* CID and CFF2 only */
 		Offset Private;
 		Offset Subrs;
 	} offset;
@@ -146,6 +152,7 @@ struct controlCtx_ {
 #define FONTSET_EMBED   (1 << 1)  /* Peform embedding space optimization */
 #define SEEN_NAME_KEYED_GLYPH (1 << 2)    /* Seen name-keyed glyph */
 #define SEEN_CID_KEYED_GLYPH  (1 << 3)    /* Seen cid-keyed glyph */
+#define FONTSET_CFF2  (1 << 4)  /* We are writing a CFF2 font. */
 	dnaDCL(cff_Font, FontSet);      /* FontSet */
 	cff_Font *new;                  /* New font */
 	INDEX name;                 /* Name INDEX */
@@ -153,7 +160,8 @@ struct controlCtx_ {
 	{
 		long header;
 		long name;
-		long top;
+        long top;
+        long varStore;
 		long string;
 		long gsubr;
 		long charset;
@@ -164,7 +172,8 @@ struct controlCtx_ {
 	struct                      /* Global data offsets */
 	{
 		Offset name;
-		Offset top;
+        Offset top;
+        Offset varStore;
 		Offset string;
 		Offset gsubr;
 		Offset charset;
@@ -201,7 +210,8 @@ static void initFDInfo(void *ctx, long cnt, FDInfo *fd) {
 static void initFont(void *ctx, long cnt, cff_Font *font) {
 	cfwCtx g = ctx;
 	while (cnt--) {
-		dnaINIT(g->ctx.dnaSafe, font->cff.top, 50, 50);
+        dnaINIT(g->ctx.dnaSafe, font->cff.top, 50, 50);
+        dnaINIT(g->ctx.dnaSafe, font->cff.varStore, 100, 100);
 		dnaINIT(g->ctx.dnaSafe, font->cff.synthetic, 25, 50);
 		dnaINIT(g->ctx.dnaSafe, font->FDArray, 1, 14);
 		font->FDArray.func = initFDInfo;
@@ -246,7 +256,8 @@ static void cfwControlFree(cfwCtx g) {
 			dnaFREE(fd->width.freqs);
 			freeSubrData(g, &fd->subrData);
 		}
-		dnaFREE(font->cff.top);
+        dnaFREE(font->cff.top);
+        dnaFREE(font->cff.varStore);
 		dnaFREE(font->cff.synthetic);
 		dnaFREE(font->FDArray);
 		dnaFREE(font->glyphs);
@@ -656,30 +667,49 @@ void cfwAddGlyph(cfwCtx g,
 /* ---------------------------- FontSet Filling ---------------------------- */
 
 /* Fill CharStrings INDEX. */
-static long fillCharStringsINDEX(cff_Font *font) {
-	font->CharStrings.count = (unsigned short)font->glyphs.cnt;
-	font->CharStrings.datasize += font->size.widths;
-	font->CharStrings.offSize = INDEX_OFF_SIZE(font->CharStrings.datasize);
-	return INDEX_SIZE(font->CharStrings.count, font->CharStrings.datasize);
+static long fillCharStringsINDEX(cfwCtx g, cff_Font *font) {
+    long size;
+    font->CharStrings.count = (unsigned short)font->glyphs.cnt;
+    if (!(g->flags & CFW_WRITE_CFF2)) {
+        font->CharStrings.datasize += font->size.widths;
+    }
+    font->CharStrings.offSize = INDEX_OFF_SIZE(font->CharStrings.datasize);
+    
+    if (g->flags & CFW_WRITE_CFF2) {
+        size = INDEX2_SIZE(font->CharStrings.count, font->CharStrings.datasize);
+    }
+    else {
+        size = INDEX_SIZE(font->CharStrings.count, font->CharStrings.datasize);
+    }
+    return size;
 }
 
 /* Calculate initial font sizes. */
 static void initFontSizes(controlCtx h, cff_Font *font) {
 	int i;
+    cfwCtx g = h->g;
 
-	font->size.top = font->cff.top.cnt;
+    font->size.top = font->cff.top.cnt;
 
 	/* Calculate CharStrings INDEX size */
-	font->size.CharStrings = fillCharStringsINDEX(font);
+	font->size.CharStrings = fillCharStringsINDEX(g, font);
 
-	/* Calculate FDArray size */
-	if (font->flags & FONT_CID) {
+    /* Calculate VarStore INDEX size */
+    font->size.VarStore = font->cff.varStore.cnt;
+
+    /* Calculate FDArray size */
+	if ((font->flags & FONT_CID) || (g->flags & CFW_WRITE_CFF2)) {
 		long size = 0;
 		for (i = 0; i < font->FDArray.cnt; i++) {
 			size += font->FDArray.array[i].cff.dict.cnt;
 		}
-		font->size.FDArray = INDEX_SIZE(font->FDArray.cnt, size);
-	}
+        if (g->flags & CFW_WRITE_CFF2) {
+            font->size.FDArray = INDEX2_SIZE(font->FDArray.cnt, size);
+        }
+        else {
+            font->size.FDArray = INDEX_SIZE(font->FDArray.cnt, size);
+        }
+    }
 	else {
 		font->size.FDArray = 0;
 	}
@@ -690,7 +720,7 @@ static void initFontSizes(controlCtx h, cff_Font *font) {
 	for (i = 0; i < font->FDArray.cnt; i++) {
 		FDInfo *fd = &font->FDArray.array[i];
 		font->size.Private += fd->size.Private = fd->cff.Private.cnt;
-		font->size.Subrs += fd->size.Subrs = cfwSubrSizeLocal(&fd->subrData);
+		font->size.Subrs += fd->size.Subrs = cfwSubrSizeLocal(g, &fd->subrData);
 	}
 }
 
@@ -703,14 +733,14 @@ static Offset calcFontOffsets(controlCtx h, cff_Font *font, Offset offset) {
 	    cfwCharsetGetOffset(g, font->iObject.charset, h->offset.charset);
 	font->offset.Encoding =
 	    cfwEncodingGetOffset(g, font->iObject.Encoding, h->offset.Encoding);
-	font->offset.FDSelect =
-	    cfwFdselectGetOffset(g, font->iObject.FDSelect, h->offset.FDSelect);
+    font->offset.FDSelect =
+    cfwFdselectGetOffset(g, font->iObject.FDSelect, h->offset.FDSelect);
 
-	font->offset.CharStrings = offset;
-	font->offset.FDArray = font->offset.CharStrings + font->size.CharStrings;
+    font->offset.VarStore = offset;
+    font->offset.CharStrings = font->offset.VarStore + font->size.VarStore;
+    font->offset.FDArray = font->offset.CharStrings + font->size.CharStrings;
 	font->offset.Private = font->offset.FDArray    + font->size.FDArray;
 	font->offset.Subrs  = font->offset.Private    + font->size.Private;
-
 	/* Compute individual Private DICT offsets */
 	offset = font->offset.Private;
 	for (i = 0; i < font->FDArray.cnt; i++) {
@@ -748,53 +778,87 @@ static int intsize(long i) {
 static void calcFontSizes(controlCtx h, cff_Font *font) {
 	int i;
 	long size;
+    cfwCtx g = h->g;
 
 	/* Calculate Top DICT size */
-	size = font->cff.top.cnt;
-	switch (font->offset.charset) {
-		case cff_ISOAdobeCharset:
-			break;
+    if (g->flags & CFW_WRITE_CFF2) {
+        size = font->cff.top.cnt;
+        size += intsize(font->offset.CharStrings) + DICT_OP_SIZE(cff_CharStrings);
+        
+        if (font->offset.VarStore > 0)
+            size += (intsize(font->offset.VarStore) + DICT_OP_SIZE(cff_VarStore));
+        
+        if (font->offset.FDSelect > 0)
+            size += (intsize(font->offset.FDSelect) + DICT_OP_SIZE(cff_FDSelect));
+        
+        size +=  (intsize(font->offset.FDArray) + DICT_OP_SIZE(cff_FDArray));
+        font->size.top = size;
+        
+        /* Calculate FDArray size */
+        size = 0;
+        for (i = 0; i < font->FDArray.cnt; i++) {
+            FDInfo *fd = &font->FDArray.array[i];
+            size += (fd->cff.dict.cnt +
+                     intsize(fd->size.Private) + intsize(fd->offset.Private) +
+                     DICT_OP_SIZE(cff_Private));
+        }
+        
+        font->size.FDArray = INDEX2_SIZE(font->FDArray.cnt, size);
+        
+        
+        
+     }
+    else {
+        size = font->cff.top.cnt;
+        switch (font->offset.charset) {
+            case cff_ISOAdobeCharset:
+                break;
+                
+            case cff_ExpertCharset:
+            case cff_ExpertSubsetCharset:
+            default:
+                size += intsize(font->offset.charset) + DICT_OP_SIZE(cff_charset);
+                break;
+        }
+        
+        switch (font->offset.Encoding) {
+            case cff_StandardEncoding:
+                break;
+                
+            case cff_ExpertEncoding:
+            default:
+                size += intsize(font->offset.Encoding) + DICT_OP_SIZE(cff_Encoding);
+                break;
+        }
+        
+        size += intsize(font->offset.CharStrings) + DICT_OP_SIZE(cff_CharStrings);
+        
+        if (font->flags & FONT_CID) {
+            size += (intsize(font->offset.FDSelect) + DICT_OP_SIZE(cff_FDSelect) +
+                     intsize(font->offset.FDArray) + DICT_OP_SIZE(cff_FDArray));
+        }
+        else {
+            size += (intsize(font->size.Private) + intsize(font->offset.Private) +
+                     DICT_OP_SIZE(cff_Private));
+        }
+        font->size.top = size;
+        
+        if (font->flags & FONT_CID) {
+            /* Calculate FDArray size */
+            size = 0;
+            for (i = 0; i < font->FDArray.cnt; i++) {
+                FDInfo *fd = &font->FDArray.array[i];
+                size += (fd->cff.dict.cnt +
+                         intsize(fd->size.Private) + intsize(fd->offset.Private) +
+                         DICT_OP_SIZE(cff_Private));
+            }
+            
+            font->size.FDArray = INDEX_SIZE(font->FDArray.cnt, size);
+            
+            
+        }
+    }
 
-		case cff_ExpertCharset:
-		case cff_ExpertSubsetCharset:
-		default:
-			size += intsize(font->offset.charset) + DICT_OP_SIZE(cff_charset);
-			break;
-	}
-
-	switch (font->offset.Encoding) {
-		case cff_StandardEncoding:
-			break;
-
-		case cff_ExpertEncoding:
-		default:
-			size += intsize(font->offset.Encoding) + DICT_OP_SIZE(cff_Encoding);
-			break;
-	}
-
-	size += intsize(font->offset.CharStrings) + DICT_OP_SIZE(cff_CharStrings);
-
-	if (font->flags & FONT_CID) {
-		size += (intsize(font->offset.FDSelect) + DICT_OP_SIZE(cff_FDSelect) +
-		         intsize(font->offset.FDArray) + DICT_OP_SIZE(cff_FDArray));
-	}
-	else {
-		size += (intsize(font->size.Private) + intsize(font->offset.Private) +
-		         DICT_OP_SIZE(cff_Private));
-	}
-	font->size.top = size;
-
-	if (font->flags & FONT_CID) {
-		/* Calculate FDArray size */
-		size = 0;
-		for (i = 0; i < font->FDArray.cnt; i++) {
-			FDInfo *fd = &font->FDArray.array[i];
-			size += (fd->cff.dict.cnt +
-			         intsize(fd->size.Private) + intsize(fd->offset.Private) +
-			         DICT_OP_SIZE(cff_Private));
-		}
-		font->size.FDArray = INDEX_SIZE(font->FDArray.cnt, size);
-	}
 
 	/* Calculate total size of Private DICTs */
 	font->size.Private = 0;
@@ -834,12 +898,20 @@ static long fillNameINDEX(controlCtx h) {
 
 /* Size top DICT INDEX. */
 static long sizeTopDICT_INDEX(controlCtx h) {
-	long i;
-	long size = 0;
-	for (i = 0; i < h->FontSet.cnt; i++) {
-		size += h->FontSet.array[i].cff.top.cnt;
-	}
-	return INDEX_SIZE(h->FontSet.cnt, size);
+    long i;
+    long size = 0;
+    for (i = 0; i < h->FontSet.cnt; i++) {
+        size += h->FontSet.array[i].cff.top.cnt;
+    }
+    return INDEX_SIZE(h->FontSet.cnt, size);
+}
+
+static long sizeTopDICT_Data(controlCtx h) {
+    return h->FontSet.array[0].cff.top.cnt;
+}
+
+static long sizeVarStore(controlCtx h) {
+    return h->FontSet.array[0].cff.varStore.cnt;
 }
 
 /* Calculate initial FontSet sizes. */
@@ -848,14 +920,26 @@ static void initSetSizes(controlCtx h) {
 	int i;
 
 	/* Compute initial sizes */
-	h->size.header      = CFF_HDR_SIZE;
-	h->size.name        = fillNameINDEX(h);
-	h->size.top         = sizeTopDICT_INDEX(h);
-	h->size.string      = cfwSindexSize(g);
-	h->size.gsubr       = cfwSubrSizeGlobal(g);
-	h->size.charset     = cfwCharsetFill(g);
-	h->size.Encoding    = cfwEncodingFill(g);
-	h->size.FDSelect    = cfwFdselectFill(g);
+    if (g->flags & CFW_WRITE_CFF2) {
+        h->size.string      = 0;
+        h->size.charset     = 0;
+        h->size.Encoding    = 0;
+        h->size.header      = CFF2_HDR_SIZE;
+        h->size.top         = sizeTopDICT_Data(h);
+        h->size.varStore    = sizeVarStore(h);
+        h->size.gsubr       = cfwSubrSizeGlobal(g);
+        h->size.FDSelect    = cfwFdselectFill(g);
+    } else {
+        h->size.header      = CFF_HDR_SIZE;
+        h->size.name        = fillNameINDEX(h);
+        h->size.top         = sizeTopDICT_INDEX(h);
+        h->size.varStore    = 0;
+        h->size.string      = cfwSindexSize(g);
+        h->size.gsubr       = cfwSubrSizeGlobal(g);
+        h->size.charset     = cfwCharsetFill(g);
+        h->size.Encoding    = cfwEncodingFill(g);
+        h->size.FDSelect    = cfwFdselectFill(g);
+    }
 
 	for (i = 0; i < h->FontSet.cnt; i++) {
 		initFontSizes(h, &h->FontSet.array[i]);
@@ -867,15 +951,37 @@ static void initSetSizes(controlCtx h) {
 static int calcSetOffsets(controlCtx h) {
 	int i;
 	Offset lastend = h->offset.end;
+    cfwCtx g = h->g;
 
-	h->offset.name      = 0                  + h->size.header;
-	h->offset.top       = h->offset.name     + h->size.name;
-	h->offset.string    = h->offset.top      + h->size.top;
-	h->offset.gsubr     = h->offset.string   + h->size.string;
-	h->offset.charset   = h->offset.gsubr    + h->size.gsubr;
-	h->offset.Encoding  = h->offset.charset  + h->size.charset;
-	h->offset.FDSelect  = h->offset.Encoding + h->size.Encoding;
-	h->offset.end       = h->offset.FDSelect + h->size.FDSelect;
+    if (g->flags & CFW_WRITE_CFF2) {
+        h->offset.name      = 0;
+        h->offset.string    = 0;
+        h->offset.charset   = 0;
+        h->offset.Encoding  = 0;
+        
+        h->offset.top       = h->size.header;
+        h->offset.gsubr     = h->offset.top + h->size.top;
+        h->offset.varStore  = h->offset.gsubr + h->size.gsubr;
+        if (h->size.FDSelect > 0) {
+            h->offset.FDSelect  = h->offset.varStore + h->size.varStore;
+            h->offset.end       = h->offset.FDSelect + h->size.FDSelect;
+        }
+        else {
+            h->offset.FDSelect = 0;
+            h->offset.end       = h->offset.gsubr + h->size.gsubr;
+        }
+    } else {
+        h->offset.varStore = 0;
+
+        h->offset.name      = 0                  + h->size.header;
+        h->offset.top       = h->offset.name     + h->size.name;
+        h->offset.string    = h->offset.top      + h->size.top;
+        h->offset.gsubr     = h->offset.string   + h->size.string;
+        h->offset.charset   = h->offset.gsubr    + h->size.gsubr;
+        h->offset.Encoding  = h->offset.charset  + h->size.charset;
+        h->offset.FDSelect  = h->offset.Encoding + h->size.Encoding;
+        h->offset.end       = h->offset.FDSelect + h->size.FDSelect;
+    }
 
 	/* Calculate offset for each font in FontSet */
 	for (i = 0; i < h->FontSet.cnt; i++) {
@@ -889,43 +995,69 @@ static int calcSetOffsets(controlCtx h) {
 static void calcSetSizes(controlCtx h) {
 	int i;
 	long size = 0;
+    cfwCtx g = h->g;
+    
 	for (i = 0; i < h->FontSet.cnt; i++) {
 		cff_Font *font = &h->FontSet.array[i];
 		calcFontSizes(h, font);
 		size += font->size.top;
 	}
-	h->size.top = INDEX_SIZE(h->FontSet.cnt, size);
+    if (g->flags & CFW_WRITE_CFF2) {
+        h->size.top = h->FontSet.array[0].size.top;
+    }
+    else {
+        h->size.top = INDEX_SIZE(h->FontSet.cnt, size);
+    }
 }
 
 /* Fill font. */
 static void fillFont(controlCtx h, cff_Font *font) {
 	int i;
+    cfwCtx g = h->g;
 
-	/* Fill top DICT with dynamic data */
-	switch (font->offset.charset) {
-		case cff_ISOAdobeCharset:
-			break;
-
-		case cff_ExpertCharset:
-		case cff_ExpertSubsetCharset:
-		default:
-			cfwDictSaveIntOp(&font->cff.top, font->offset.charset, cff_charset);
-			break;
-	}
-
-	switch (font->offset.Encoding) {
-		case cff_StandardEncoding:
-			break;
-
-		case cff_ExpertEncoding:
-		default:
-			cfwDictSaveIntOp(&font->cff.top, font->offset.Encoding, cff_Encoding);
-			break;
-	}
+    if (!(g->flags & CFW_WRITE_CFF2))
+    {
+        /* Fill top DICT with dynamic data */
+        switch (font->offset.charset) {
+            case cff_ISOAdobeCharset:
+                break;
+                
+            case cff_ExpertCharset:
+            case cff_ExpertSubsetCharset:
+            default:
+                cfwDictSaveIntOp(&font->cff.top, font->offset.charset, cff_charset);
+                break;
+        }
+        
+        switch (font->offset.Encoding) {
+            case cff_StandardEncoding:
+                break;
+                
+            case cff_ExpertEncoding:
+            default:
+                cfwDictSaveIntOp(&font->cff.top, font->offset.Encoding, cff_Encoding);
+                break;
+        }
+    }
 
 	cfwDictSaveIntOp(&font->cff.top, font->offset.CharStrings, cff_CharStrings);
 
-	if (font->flags & FONT_CID) {
+    if (g->flags & CFW_WRITE_CFF2) {
+        if (font->offset.VarStore != 0)
+            cfwDictSaveIntOp(&font->cff.top, font->offset.VarStore, cff_VarStore);
+        if (font->offset.FDSelect != 0)
+            cfwDictSaveIntOp(&font->cff.top, font->offset.FDSelect, cff_FDSelect);
+        cfwDictSaveIntOp(&font->cff.top, font->offset.FDArray, cff_FDArray);
+ 
+        /* Fill font DICTs with dynamic data */
+        for (i = 0; i < font->FDArray.cnt; i++) {
+            FDInfo *fd = &font->FDArray.array[i];
+            cfwDictSaveInt(&fd->cff.dict, fd->size.Private);
+            cfwDictSaveInt(&fd->cff.dict, fd->offset.Private);
+            cfwDictSaveOp(&fd->cff.dict, cff_Private);
+        }
+   }
+	else if (font->flags & FONT_CID) {
 		cfwDictSaveIntOp(&font->cff.top, font->offset.FDSelect, cff_FDSelect);
 		cfwDictSaveIntOp(&font->cff.top, font->offset.FDArray, cff_FDArray);
 
@@ -943,7 +1075,7 @@ static void fillFont(controlCtx h, cff_Font *font) {
 		cfwDictSaveOp(&font->cff.top, cff_Private);
 	}
 
-	/* Fill Private DICTs with dynarmic data */
+	/* Fill Private DICTs with dynamic data */
 	for (i = 0; i < font->FDArray.cnt; i++) {
 		FDInfo *fd = &font->FDArray.array[i];
 		if (fd->Subrs.count > 0) {
@@ -963,23 +1095,28 @@ static void fillSet(controlCtx h) {
 		long j;
 		cff_Font *font = &h->FontSet.array[i];
 
-		cfwDictFillTop(g, &font->cff.top, &font->top,
-		               &font->FDArray.array[0].dict, -1);
-
+        cfwDictFillTop(g, &font->cff.top, &font->top,
+                       &font->FDArray.array[0].dict, -1);
+        
+        cfwDictFillVarStore(g, &font->cff.varStore, &font->top);
+        
 		for (j = 0; j < font->FDArray.cnt; j++) {
 			FDInfo *fd = &font->FDArray.array[j];
-			if (font->flags & FONT_CID) {
+			if ((font->flags & FONT_CID) || (g->flags & CFW_WRITE_CFF2)) {
 				cfwDictFillFont(h->g, &fd->cff.dict, &fd->dict);
 			}
 			cfwDictFillPrivate(h->g, &fd->cff.Private, &fd->Private);
-			if (fd->width.dflt != cff_DFLT_defaultWidthX) {
-				cfwDictSaveRealOp(&fd->cff.Private,
-				                  fd->width.dflt, cff_defaultWidthX);
-			}
-			if (fd->width.nominal != cff_DFLT_nominalWidthX) {
-				cfwDictSaveRealOp(&fd->cff.Private,
-				                  fd->width.nominal, cff_nominalWidthX);
-			}
+            if (!(g->flags & CFW_WRITE_CFF2))
+            {
+                if (fd->width.dflt != cff_DFLT_defaultWidthX) {
+                    cfwDictSaveRealOp(&fd->cff.Private,
+                                      fd->width.dflt, cff_defaultWidthX);
+                }
+                if (fd->width.nominal != cff_DFLT_nominalWidthX) {
+                    cfwDictSaveRealOp(&fd->cff.Private,
+                                      fd->width.nominal, cff_nominalWidthX);
+                }
+            }
 		}
 	}
 
@@ -1002,10 +1139,19 @@ static void fillSet(controlCtx h) {
 static void writeHeader(controlCtx h) {
 	cfwCtx g = h->g;
 
-	cfwWrite1(g, 1);                        /* major */
-	cfwWrite1(g, 0);                        /* minor */
-	cfwWrite1(g, CFF_HDR_SIZE);             /* hdrSize */
-	cfwWrite1(g, OFF_SIZE(h->offset.end));  /* offSize */
+    if (g->flags & CFW_WRITE_CFF2) {
+        cfwWrite1(g, 2);                        /* major */
+        cfwWrite1(g, 0);                        /* minor */
+        cfwWrite1(g, CFF2_HDR_SIZE);             /* hdrSize */
+        cfwWrite2(g, (unsigned short)h->FontSet.array[0].size.top);  /* topDict data length */
+    }
+    else {
+        cfwWrite1(g, 1);                        /* major */
+        cfwWrite1(g, 0);                        /* minor */
+        cfwWrite1(g, CFF_HDR_SIZE);             /* hdrSize */
+        cfwWrite1(g, OFF_SIZE(h->offset.end));  /* offSize */
+    }
+
 }
 
 /* Write name INDEX. */
@@ -1015,7 +1161,7 @@ static void writeNameINDEX(controlCtx h) {
 	Offset offset;
 
 	/* Write header */
-	cfwWrite2(g, h->name.count);
+	cfwWrite2(g, (unsigned short)h->name.count);
 	cfwWrite1(g, h->name.offSize);
 
 	/* Write offset array */
@@ -1059,7 +1205,7 @@ static void writeTopDICT_INDEX(controlCtx h) {
 	index.offSize = INDEX_OFF_SIZE(index.datasize);
 
 	/* Write header */
-	cfwWrite2(g, index.count);
+	cfwWrite2(g, (unsigned short)index.count);
 	cfwWrite1(g, index.offSize);
 
 	/* Write offset array */
@@ -1075,6 +1221,20 @@ static void writeTopDICT_INDEX(controlCtx h) {
 		DICT *top = &h->FontSet.array[i].cff.top;
 		cfwWrite(g, top->cnt, top->array);
 	}
+}
+
+static void writeTopDICT_Data(controlCtx h) {
+    cfwCtx g = h->g;
+    
+    DICT *top = &h->FontSet.array[0].cff.top;
+    cfwWrite(g, top->cnt, top->array);
+}
+
+static void writeVarStoreData_Data(controlCtx h) {
+    cfwCtx g = h->g;
+    
+    DICT *varStore = &h->FontSet.array[0].cff.varStore;
+    cfwWrite(g, varStore->cnt, varStore->array);
 }
 
 /* Return size of argument (in bytes) if formatted for charstring. */
@@ -1155,7 +1315,12 @@ static void writeCharStringsINDEX(controlCtx h, cff_Font *font) {
 	Offset offset;
 
 	/* Write header */
-	cfwWrite2(g, font->CharStrings.count);
+    if (g->flags & CFW_WRITE_CFF2) {
+        cfwWriteN(g, 4, font->CharStrings.count);
+    }
+    else {
+        cfwWrite2(g, (unsigned short)font->CharStrings.count);
+    }
 	cfwWrite1(g, font->CharStrings.offSize);
 
 	/* Write offset array */
@@ -1169,7 +1334,7 @@ static void writeCharStringsINDEX(controlCtx h, cff_Font *font) {
 			cfwFatal(g, cfwErrCstrTooLong, NULL);
 		}
 
-		if (glyph->hAdv != fd->width.dflt) {
+        if ((!(g->flags & CFW_WRITE_CFF2)) && (glyph->hAdv != fd->width.dflt)) {
 			/* Add glyph width size */
 			offset += numsize(glyph->hAdv - fd->width.nominal);
 		}
@@ -1184,7 +1349,7 @@ static void writeCharStringsINDEX(controlCtx h, cff_Font *font) {
 		Glyph *glyph = &font->glyphs.array[i];
 		FDInfo *fd = &font->FDArray.array[glyph->iFD];
 
-		if (glyph->hAdv != fd->width.dflt) {
+        if ((!(g->flags & CFW_WRITE_CFF2)) && (glyph->hAdv != fd->width.dflt)) {
 			/* Write width */
 			unsigned char t[5];
             long n;
@@ -1206,7 +1371,7 @@ static void writeFDArray(controlCtx h, cff_Font *font) {
 	cfwCtx g = h->g;
 	int i;
 
-	if (font->flags & FONT_CID) {
+	if ((font->flags & FONT_CID) || (g->flags & CFW_WRITE_CFF2)) {
 		/* Compute FDArray offSize */
 		INDEX index;
 		Offset offset;
@@ -1216,11 +1381,16 @@ static void writeFDArray(controlCtx h, cff_Font *font) {
 		for (i = 0; i < font->FDArray.cnt; i++) {
 			index.datasize += font->FDArray.array[i].cff.dict.cnt;
 		}
-		index.count = (unsigned short)font->FDArray.cnt;
+		index.count = font->FDArray.cnt;
 		index.offSize = INDEX_OFF_SIZE(index.datasize);
 
 		/* Write header */
-		cfwWrite2(g, index.count);
+        if (g->flags & CFW_WRITE_CFF2) {
+            cfwWriteN(g, 4, index.count);
+        }
+        else {
+            cfwWrite2(g, (unsigned short)index.count);
+       }
 		cfwWrite1(g, index.offSize);
 
 		/* Write offset array */
@@ -1268,20 +1438,28 @@ static void writeSet(controlCtx h) {
 
 	/* Write aggregate data structures */
 	writeHeader(h);
-	writeNameINDEX(h);
-	writeTopDICT_INDEX(h);
-	cfwSindexWrite(g);
-	cfwSubrWriteGlobal(g);
-	cfwCharsetWrite(g);
-	cfwEncodingWrite(g);
-	cfwFdselectWrite(g);
+    if (g->flags & CFW_WRITE_CFF2) {
+        writeTopDICT_Data(h);
+        cfwSubrWriteGlobal(g);
+        writeVarStoreData_Data(h);
+        cfwFdselectWrite(g);
+    }
+    else {
+        writeNameINDEX(h);
+        writeTopDICT_INDEX(h);
+        cfwSindexWrite(g);
+        cfwSubrWriteGlobal(g);
+        cfwCharsetWrite(g);
+        cfwEncodingWrite(g);
+        cfwFdselectWrite(g);
+    }
 
 	/* Write per-font data structures */
 	for (i = 0; i < h->FontSet.cnt; i++) {
 		cff_Font *font = &h->FontSet.array[i];
 		writeCharStringsINDEX(h, font);
 		writeFDArray(h, font);
-	}
+    }
 
 	/* Close output stream */
 	if (g->cb.stm.close(&g->cb.stm, g->stm.dst)) {
@@ -1294,7 +1472,9 @@ int cfwBegSet(cfwCtx g, long flags) {
 	controlCtx h = g->ctx.control;
 	g->flags = flags;
 	h->FontSet.cnt = 0;
-
+    if (flags & CFW_WRITE_CFF2)
+        h->flags |= FONTSET_CFF2;
+    
 	/* Open debug stream */
 	g->stm.dbg = g->cb.stm.open(&g->cb.stm, CFW_DBG_STREAM_ID, 0);
 
@@ -1302,13 +1482,14 @@ int cfwBegSet(cfwCtx g, long flags) {
 }
 
 /* Begin new font. */
-int cfwBegFont(cfwCtx g, cfwMapCallback *map) {
+int cfwBegFont(cfwCtx g, cfwMapCallback *map, unsigned long maxNumSubrs) {
 	controlCtx h = g->ctx.control;
 	long index;
 
 	/* set tmp buffer buffers safely */
 	g->tmp.offset = 0;
 	g->tmp.length = 0;
+    g->maxNumSubrs = maxNumSubrs;
 
 	/* Allocate and initialize new font */
 	index = dnaNext(&h->FontSet, sizeof(cff_Font));
@@ -1332,7 +1513,7 @@ int cfwBegFont(cfwCtx g, cfwMapCallback *map) {
 
 	h->flags &= ~(SEEN_NAME_KEYED_GLYPH | SEEN_CID_KEYED_GLYPH);
 	h->mergedDicts = 0;
-
+ 
 	return cfwSuccess;
 }
 
@@ -1851,7 +2032,7 @@ static void cfwCallSubrizer(cfwCtx g) {
 		subrFont->fdInfo = cfwMemNew(g, sizeof(subr_FDInfo) * subrFont->fdCount);
 		memset(subrFont->fdInfo, 0, sizeof(subr_FDInfo) * subrFont->fdCount);
 
-		if (cffFont->flags & FONT_CID) {
+		if ((cffFont->flags & FONT_CID) || (g->flags & CFW_WRITE_CFF2)) {
 			subrFont->flags = SUBR_FONT_CID;
 			subrFont->fdIndex = cfwMemNew(g, sizeof(subr_FDIndex) * cffFont->glyphs.cnt);
 			for (iGlyph = 0; iGlyph < cffFont->glyphs.cnt; iGlyph++) {
@@ -1907,7 +2088,7 @@ static void cfwCallSubrizer(cfwCtx g) {
 		/* Copy back local subr info */
 		for (i = 0; i < cffFont->FDArray.cnt; i++) {
 			fd = &cffFont->FDArray.array[i];
-			if (cffFont->flags & FONT_CID) {
+			if ((cffFont->flags & FONT_CID) || (g->flags & CFW_WRITE_CFF2)) {
 				fd->subrData = subrFont->fdInfo[i].subrs;
 			}
 			else {
@@ -2035,7 +2216,8 @@ cfwCtx cfwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 	}
 
 	/* Safety initialization */
-	g->ctx.dnaSafe  = NULL;
+    g->flags  = 0;
+    g->ctx.dnaSafe  = NULL;
 	g->ctx.dnaFail  = NULL;
 	g->ctx.control  = NULL;
 	g->ctx.charset  = NULL;
@@ -2385,8 +2567,10 @@ static void dblayout(controlCtx h) {
 		printf("FDSelect    %7ld        -\n", font->offset.FDSelect);
 		printf("CharStrings %7ld  %7ld\n",
 		       font->offset.CharStrings, font->size.CharStrings);
-		printf("FDArray     %7ld  %7ld\n",
-		       font->offset.FDArray, font->size.FDArray);
+        printf("VarStore     %7ld  %7ld\n",
+               font->offset.VarStore, font->size.VarStore);
+        printf("FDArray     %7ld  %7ld\n",
+               font->offset.FDArray, font->size.FDArray);
 		printf("Private     %7ld  %7ld\n",
 		       font->offset.Private, font->size.Private);
 		printf("Subrs       %7ld  %7ld\n",

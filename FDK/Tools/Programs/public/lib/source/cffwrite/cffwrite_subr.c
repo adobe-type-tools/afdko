@@ -4,6 +4,7 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. *//***********************************************************************/
 
 /* Temporary debug control */
+#define TC_DEBUG    0
 #define DB_FONT     0   /* Font input charstrings */
 #define DB_INFS     0   /* Inferior subr selection */
 #define DB_ASSOC    0   /* Associate with subrs */
@@ -15,7 +16,6 @@
 #define DB_CALLS    0   /* Call counts */
 
 #define EDGE_HASH_STAT  0   /* Collect edge hash table statistics */
-#define SUBR_HASH_STAT  0   /* Collect subr hash table statistics */
 
 /*
    T2 subroutinizer.
@@ -119,15 +119,14 @@
 static unsigned char *gTestString = (unsigned char *)"Humpty Dumpty sat on a wall.Humpty Dumpty had a great fall.";
 #define FONT_CHARS_DATA gTestString
 #define OPLEN(h, cstr)   1
-#define SEPARATOR(h)    ','
+#define SEPARATOR    ','
 #else
 #define FONT_CHARS_DATA font->chars.data
 #define OPLEN(h, cstr)   ((h)->opLenCache[*(cstr)] == 0 ? (cstr)[1] : (h)->opLenCache[*(cstr)])
 #define SEPARATOR   t2_separator
 #endif
 
-#define MAX_NUM_SUBRS		65535L	/* Maximum number of subroutines in one INDEX structure */
-#define MAX_CALL_LIST_COUNT 3   /* Maximum number of call list candidates buildCallList creates */
+#define MAX_NUM_SUBRS		32765L	/* Maximum number of subroutines in one INDEX structure. 64K is valid by the spec, but but teh Google font validation tool OTS rejects fonts with subrs in a subrindex which is  over 32K -3.*/
 
 /* --- Memory management --- */
 #define MEM_NEW(g, s)        cfwMemNew(g, s)
@@ -147,7 +146,7 @@ struct Node_ {
 	long misc;          /* Initially longest path from root, then subr index */
 	unsigned edgeCount; /* Number of edges from this node */
 	unsigned edgeTableSize; /* Number of entries allocated in the edge table */
-	unsigned short paths;   /* Paths through node */
+	unsigned short paths;   /* Paths through node; depth for subr trie */
 	unsigned short id;  /* Font id */
 #define NODE_GLOBAL USHRT_MAX   /* Identifies global subr */
 	short flags;        /* Status flags */
@@ -158,13 +157,15 @@ struct Node_ {
 #define NODE_SUBR       (1 << 11) /* Node has subr info (index in misc) */
 };
 
+typedef struct NodeLink_ NodeLink;
+struct NodeLink_ {
+    Node        *node;
+    NodeLink    *next;
+};
 /* ------------------------------- hash table parameters ------------------------------- */
 
 #define EDGE_TABLE_SMALLEST_SPARSE_SIZE 128 /* Double the hash table size even before it becomes full beyond this size */
 #define EDGE_TABLE_SIZE_USE_SIMPLE_HASH 16  /* Use a better hash function for edges if the table size is larger than this */
-
-#define SUBR_TABLE_SIZE_USE_SIMPLE_HASH (1 << 18) /* Use a better hash function for subrs if the table size is larger than this */
-#define SUBR_HASH_SAMPLE_COUNT  8               /* Sample this many bytes from a subr in the better hash function */
 
 /* ------------------------------- Subr data ------------------------------- */
 typedef struct Subr_ Subr;
@@ -174,6 +175,7 @@ struct Subr_ {
 	Link *sups;             /* Superior subrs */
 	Link *infs;             /* Inferior subrs */
 	Subr *next;             /* Next member of social group */
+    Subr *output;           /* Link to next subr for match trie output */
 	unsigned char *cstr;    /* Charstring */
 	unsigned short length;  /* Subr length (original bytes spanned) */
 	unsigned short count;   /* Occurance count */
@@ -206,6 +208,8 @@ typedef struct              /* Subr call within charstring */
 	unsigned short offset;  /* Offset within charstring */
 } Call;
 
+typedef dnaDCL(Call, CallList);
+
 typedef struct MemBlk_ MemBlk;
 struct MemBlk_          /* Generalized memory block for object allocation */
 {
@@ -221,17 +225,25 @@ typedef struct {
 
 #define NODES_PER_BLK   5000
 #define LINKS_PER_BLK   1000
+#define NODE_LINKS_PER_BLK  500
+#define TRIE_NODES_PER_BLK  1000
 
 /* Subroutinization context */
 struct subrCtx_ {
 	MemInfo nodeBlks;       /* Node blocks */
 	MemInfo linkBlks;       /* Relation blocks */
+	MemInfo trieNodeBlks;   /* Trie node blocks */
+	MemInfo nodeLinkBlks;   /* Node link blocks */
 
 	Node *root;             /* CDAWG root */
 	Node *base;             /* CDAWG base */
 	dnaDCL(Node *, sinks);  /* CDAWG sinks (one for each font id) */
 
 	Edge baseEdge;          /* dummy edge from base to root */
+
+    Node *trieRoot;         /* Subr match trie root */
+    Node *trieParent;       /* parent node used during trie walk */
+    NodeLink *trieQueue;    /* node link queue */
 
 	dnaDCL(Subr, subrs);    /* Subr list (all) */
 	dnaDCL(Subr *, tmp);    /* Temporary subr list */
@@ -269,7 +281,7 @@ struct subrCtx_ {
 	unsigned maxSubrLen;    /* Maximum subr length */
 	unsigned minSubrLen;    /* Minimum subr lenth */
 
-	long maxNumSubrs;       /* Maximum number of subroutines (0 means default MAX_NUM_SUBRS) */
+	unsigned long maxNumSubrs;       /* Maximum number of subroutines (0 means default MAX_NUM_SUBRS) */
 
 	cfwCtx g;               /* Package context */
 };
@@ -450,20 +462,46 @@ static Link *newLink(subrCtx h, Subr *subr, unsigned offset, Link *next) {
 	return link;
 }
 
+/* Create and initialize new trie node */
+static Node *newTrieNode(subrCtx h, long depth) {
+	Node *node = newObject(h, &h->trieNodeBlks, sizeof(Node), TRIE_NODES_PER_BLK);
+	node->edgeTable = NULL;
+	node->edgeCount = 0;
+	node->edgeTableSize = 0;
+    node->suffix = NULL;    /* suffix link */
+	node->misc = -1;        /* subr index */
+	node->paths = (unsigned short)depth;    /* debug only */
+	node->id = 0;
+	node->flags = 0;
+	return node;
+}
+
+/* Create and initialize new node link */
+static NodeLink *newNodeLink(subrCtx h, Node *node, NodeLink *next) {
+	NodeLink *link = newObject(h, &h->nodeLinkBlks, sizeof(NodeLink), NODE_LINKS_PER_BLK);
+	link->node = node;
+	link->next = next;
+	return link;
+}
+
 /* --------------------------- Context Management -------------------------- */
 
 /* Initialize module */
 void cfwSubrNew(cfwCtx g) {
 	subrCtx h = MEM_NEW(g, sizeof(struct subrCtx_));
 
-	h->maxNumSubrs = 0;
-
 	h->nodeBlks.head = h->nodeBlks.free = NULL;
 	h->linkBlks.head = h->linkBlks.free = NULL;
+	h->trieNodeBlks.head = h->trieNodeBlks.free = NULL;
+	h->nodeLinkBlks.head = h->nodeLinkBlks.free = NULL;
 
 	h->root = NULL;
 	h->base = NULL;
 
+    h->trieRoot = NULL;
+    h->trieQueue = NULL;
+    h->maxNumSubrs = 0;
+    
 	/* xxx tune these parameters */
 	dnaINIT(g->ctx.dnaSafe, h->subrs, 500, 1000);
 	dnaINIT(g->ctx.dnaSafe, h->tmp, 500, 1000);
@@ -494,7 +532,7 @@ void cfwSubrNew(cfwCtx g) {
 	g->ctx.subr = h;
 }
 
-static void freeEdges(subrCtx h);
+static void freeEdges(subrCtx h, MemInfo *info);
 
 /* Free charstring data */
 static void csFreeData(cfwCtx g, subr_CSData *data) {
@@ -509,12 +547,15 @@ static void csFreeData(cfwCtx g, subr_CSData *data) {
 void cfwSubrReuse(cfwCtx g) {
 	subrCtx h = g->ctx.subr;
 
-	freeEdges(h);
+	freeEdges(h, &h->nodeBlks);
+	freeEdges(h, &h->trieNodeBlks);
 	dnaSET_CNT(h->sinks, 0);
 	dnaSET_CNT(h->subrHash, 0);
 
 	reuseObjects(g, &h->nodeBlks);
 	reuseObjects(g, &h->linkBlks);
+	reuseObjects(g, &h->trieNodeBlks);
+	reuseObjects(g, &h->nodeLinkBlks);
 
 	csFreeData(g, &h->gsubrs);
 
@@ -529,10 +570,13 @@ void cfwSubrReuse(cfwCtx g) {
 void cfwSubrFree(cfwCtx g) {
 	subrCtx h = g->ctx.subr;
 
-	freeEdges(h);
+	freeEdges(h, &h->nodeBlks);
+	freeEdges(h, &h->trieNodeBlks);
 
 	freeObjects(g, &h->nodeBlks);
 	freeObjects(g, &h->linkBlks);
+	freeObjects(g, &h->trieNodeBlks);
+	freeObjects(g, &h->nodeLinkBlks);
 
 	dnaFREE(h->subrs);
 	dnaFREE(h->tmp);
@@ -570,8 +614,7 @@ static void initEdge(Edge *edge, unsigned char *label, unsigned edgeLength, Node
 }
 
 /* free edge tables allocated for all nodes */
-static void freeEdges(subrCtx h) {
-	MemInfo *info = &h->nodeBlks;
+static void freeEdges(subrCtx h, MemInfo *info) {
 	MemBlk *pblk = info->head;
 	while (pblk) {
 		short i;
@@ -626,9 +669,9 @@ static unsigned hashLabel(unsigned char *label, unsigned length) {
 }
 
 #if EDGE_HASH_STAT
+static unsigned long gTotalEdgeTableSize;
+static unsigned long gTotalEdgeCount;
 static unsigned long long gTotalEdgeLookupCount;
-static unsigned long long gTotalSubrHashTableSize;
-static unsigned long long gTotalSubrLookupCount;
 static unsigned long gTotalEdgeMissCount;
 #endif
 
@@ -642,7 +685,7 @@ static Edge *lookupEdgeTable(subrCtx h, Node *node, unsigned length, unsigned ch
 	unsigned count = 0;
 #if EDGE_HASH_STAT
 	gTotalEdgeLookupCount++;
-	gTotalTableSize += tableSize;
+	gTotalEdgeTableSize += tableSize;
 	gTotalEdgeCount += node->edgeCount;
 #endif
 
@@ -1128,157 +1171,6 @@ static void addFont(subrCtx h, subr_Font *font, unsigned iFont, int multiFonts) 
 	}
 }
 
-/* ----------------------- Subr Hash Table ------------------------ */
-unsigned static hashSubr(unsigned char *cstr, unsigned short length) {
-	unsigned hash = length;
-	unsigned limit;
-	unsigned delta;
-	unsigned i;
-
-	if (length >= ((SUBR_HASH_SAMPLE_COUNT - 1) * 2)) {
-		delta = length / ((SUBR_HASH_SAMPLE_COUNT - 1));
-	}
-	else {
-		delta = 1;
-	}
-
-	limit = length - delta;
-	for (i = 0; i < limit; i += delta) {
-		hash += cstr[i];
-		hash += (hash << 10);
-		hash ^= (hash >> 6);
-	}
-	hash += cstr[length - 1];
-	hash += (hash << 10);
-	hash ^= (hash >> 6);
-
-	hash += (hash << 3);
-	hash ^= (hash >> 11);
-	return hash;
-}
-
-#if SUBR_HASH_STAT
-static unsigned long long gTotalSubrLookupCount;
-static unsigned long gTotalSubrMissCount;
-#endif
-
-static Subr **lookupSubrHash(subrCtx h, unsigned char *cstr, unsigned short length) {
-	unsigned tableSize = h->subrHash.cnt;
-	unsigned tableSizeMinus1 = tableSize - 1;
-	unsigned hashValue;
-	unsigned hashIncrement = 0;
-	unsigned count = 0;
-
-	/* switch to a better hashing function when the table size gets large */
-	if (tableSize <= SUBR_TABLE_SIZE_USE_SIMPLE_HASH) {
-		unsigned char c1 = cstr[0];
-		unsigned char c2 = cstr[length / 2];
-		unsigned char c3 = cstr[length - 1];
-		hashValue = (c1 + c2 + c3 + length) + (length << 5) + (c2 << 9) + (c3 << 14);
-	}
-	else {
-		hashValue = hashSubr(cstr, length);
-	}
-
-#if SUBR_HASH_STAT
-	gTotalSubrLookupCount++;
-#endif
-	while (count < tableSize) {
-		unsigned i = hashValue & tableSizeMinus1;
-		Subr **entry = &h->subrHash.array[i];
-		Subr *subr = *entry;
-		if (!subr) {
-			return entry;
-		}
-		if ((subr->length == length) && ((cstr == subr->cstr) || (memcmp(cstr, subr->cstr, length) == 0))) {
-			return entry;
-		}
-
-#if SUBR_HASH_STAT
-		gTotalSubrMissCount++;
-#endif
-		hashValue += ++hashIncrement;
-		count++;
-	}
-	/* shouldn't happen */
-	return NULL;
-}
-
-static void updateSubrQuickTestTables(subrCtx h) {
-	long i;
-	unsigned short prevSubrLen;
-
-	/* Determine the subr max and min lengths and build the prefix map
-	   with the current selected subrs */
-	memset(h->subrPrefixMap, 0, SUBR_PREFIX_MAP_SIZE);
-	h->maxSubrLen = 0;
-	h->minSubrLen = UINT_MAX;
-
-	for (i = 0; i < h->subrs.cnt; i++) {
-		Subr *subr = &h->subrs.array[i];
-
-		if (!(subr->flags & SUBR_REJECT)) {
-			unsigned length = subr->length;
-			SET_SUBR_PREFIX_MAP(h, subr->cstr);
-
-			/* Record the max and min lengths of subrs
-			   for use by buildCallList */
-			if (length > h->maxSubrLen) {
-				h->maxSubrLen = length;
-			}
-			if (length < h->minSubrLen) {
-				h->minSubrLen = length;
-			}
-		}
-	}
-
-	/* Set flags in the subr len map for all current selected subrs */
-	dnaSET_CNT(h->subrLenMap, h->maxSubrLen + 1);
-	memset(&h->subrLenMap.array[0], 0, sizeof(unsigned short) * h->subrLenMap.cnt);
-	for (i = 0; i < h->subrs.cnt; i++) {
-		Subr *subr = &h->subrs.array[i];
-
-		if (!(subr->flags & SUBR_REJECT)) {
-			h->subrLenMap.array[subr->length] = 1;
-		}
-	}
-
-	/* Modify the subr len map so that every entry contains a length of a selected subr
-	   which is shorter or equal to the length for the entry */
-	prevSubrLen = 0;    /* 0 means no subr */
-	for (i = 0; i < h->subrLenMap.cnt; i++) {
-		if (h->subrLenMap.array[i]) {
-			prevSubrLen = (unsigned short)i;
-		}
-		h->subrLenMap.array[i] = prevSubrLen;
-	}
-}
-
-/* Enter all subrs in the subr hash table.
-   Also update subrPrefixMap and subrLenMap */
-static void createSubrHash(subrCtx h) {
-	unsigned n = h->subrs.cnt;
-	unsigned hashTableSize = 1;
-	long i;
-
-	/* Make the table size a power of 2 and at least 50% free */
-	n *= 2;
-	while (n > hashTableSize) {
-		hashTableSize <<= 1;
-	}
-
-	dnaSET_CNT(h->subrHash, hashTableSize);
-	memset(h->subrHash.array, 0, hashTableSize * sizeof(Subr *));
-
-	for (i = 0; i < h->subrs.cnt; i++) {
-		Subr *subr = &h->subrs.array[i];
-
-		*lookupSubrHash(h, subr->cstr, subr->length) = subr;
-	}
-
-	updateSubrQuickTestTables(h);
-}
-
 /* ----------------------- Candidate Subr Selection ------------------------ */
 
 static long countPathsForNode(subrCtx h, Node *node);
@@ -1396,6 +1288,7 @@ static void saveSubr(subrCtx h, unsigned char *edgeEnd, Node *node,
 	subr->sups = NULL;
 	subr->infs = NULL;
 	subr->next = NULL;
+    subr->output = NULL;
 	subr->cstr = edgeEnd - subrLen;
 	subr->length = (unsigned short)subrLen;
 	subr->count = count;
@@ -1485,6 +1378,196 @@ static int subrSavedByOneCall(subrCtx h, Subr *subr) {
 	return (length - CALL_OP_SIZE - subr->numsize);
 }
 
+/* ----------------------- Subr match trie ----------------------- */
+
+/* Set up suffix links */
+static void setTrieSuffixProc(subrCtx h, Edge *edge, long param1, long param2) {
+    Node    *node = edge->son;
+    Node    *state;
+    Edge    *suffixEdge = NULL;
+
+    /* Append this node to the queue for later processing of its children */
+    h->trieQueue->next = newNodeLink(h, node, NULL);
+    h->trieQueue = h->trieQueue->next;
+    if (h->trieParent == h->trieRoot)
+        return;
+
+    state = h->trieParent->suffix;
+
+    for (;;) {
+        if (!state)
+            state = h->trieRoot;
+        suffixEdge = findEdge(h, state, edge->length, edge->label);
+        if (suffixEdge) {
+            node->suffix = suffixEdge->son;
+            break;
+        }
+        if (state == h->trieRoot)
+            return;
+
+        state = state->suffix;
+    }
+    
+    /* Chain the output subr of this node to the ouput subr of the suffix node */
+    if (node->misc >= 0) {
+        Subr    *subr = &h->subrs.array[node->misc];
+
+        if (node->suffix->misc >= 0)
+            subr->output = &h->subrs.array[node->suffix->misc];
+    } else
+        node->misc = node->suffix->misc;
+}
+
+/* Update each suffix link with the pointer to the next node */
+static void setTrieNextProc(subrCtx h, Edge *edge, long param1, long param2) {
+    Node    *node = edge->son;
+    Node    *suffix;
+    Edge    *suffixEdge = NULL;
+
+    /* Append this node to the queue for later processing of its children */
+    h->trieQueue->next = newNodeLink(h, node, NULL);
+    h->trieQueue = h->trieQueue->next;
+    if (h->trieParent == h->trieRoot)
+        return;
+
+    suffix = h->trieParent->suffix;
+    if (!suffix)
+        suffix = h->trieRoot;
+    suffixEdge = findEdge(h, suffix, edge->length, edge->label);
+    if (!suffixEdge) {
+        if (suffix == h->trieRoot)
+            return;
+
+        suffixEdge = findEdge(h, suffix, edge->length, edge->label);
+        if (suffixEdge)
+            node->suffix = suffixEdge->son;
+        else
+            node->suffix = NULL;
+    }
+}
+
+/* Build a subr match trie using Aho-Corasick algorithm */
+static void buildSubrMatchTrie(subrCtx h)
+{
+    long i;
+    NodeLink    *link;
+    Node        *node;
+
+    h->trieRoot = newTrieNode(h, 0);
+
+    /* Add all subrs to the trie */
+    for (i = 0; i < h->subrs.cnt; i++) {
+        Subr    *subr = &h->subrs.array[i];
+        unsigned char   *pstr, *pend;
+        long    oplen;
+        long    depth;
+
+        node = h->trieRoot;
+        pstr = subr->cstr;
+        pend = pstr + subr->length;
+        for (depth = 1; pstr < pend; pstr += oplen, depth++) {
+            Edge    *edge;
+
+            oplen = OPLEN(h, pstr);
+            edge = findEdge(h, node, oplen, pstr);
+            if (edge) {
+                node = edge->son;
+            } else {
+                Node    *son = newTrieNode(h, depth);
+                addEdge(h, node, son, oplen, pstr, oplen);
+                node = son;
+            }
+        }
+        node->misc = subr - h->subrs.array; /* store output subr index in the trie node */
+    }
+
+    /* Set up suffix links */
+	reuseObjects(h->g, &h->nodeLinkBlks);
+    link = h->trieQueue = newNodeLink(h, h->trieRoot, NULL);
+    for (; link; link = link->next) {
+        h->trieParent = link->node;
+        walkEdgeTable(h, link->node, setTrieSuffixProc, 0, 0);
+    }
+
+    /* Update each suffix link with the pointer to the next node */
+	reuseObjects(h->g, &h->nodeLinkBlks);
+    link = h->trieQueue = newNodeLink(h, h->trieRoot, NULL);
+    for (; link; link = link->next) {
+        h->trieParent = link->node;
+        walkEdgeTable(h, link->node, setTrieNextProc, 0, 0);
+    }
+}
+
+/* List up all subrs matching the given string against the subr match trie */
+static void listUpSubrMatches(subrCtx h, unsigned char *pstart, long length, int buildPhase, int selfMatch,
+                            unsigned id, short subrDepth, CallList *callList)
+{
+    Node    *node = h->trieRoot;
+    unsigned char   *pstr, *pend = pstart + length;
+    int    oplen;
+    Edge    *edge;
+
+    for (pstr = pstart; pstr < pend; pstr += oplen) {
+        oplen = OPLEN(h, pstr);
+
+        for (;;) {
+            edge = findEdge(h, node, oplen, pstr);
+            if (edge) {
+                node = edge->son;
+                break;
+            } else {
+                node = node->suffix;
+                if (!node)
+                    break;
+            }
+        }
+
+        if (!node) {
+            node = h->trieRoot;
+            continue;
+        }
+        if (node->misc >= 0) {
+            Subr    *subr = &h->subrs.array[node->misc];
+
+            for (; subr; subr = subr->output) {
+                long    offset;
+
+                if (buildPhase) {
+                    if ((subr->flags & SUBR_MARKED) != SUBR_SELECT)
+                        continue;
+                    if (subr->node->id != NODE_GLOBAL && subr->node->id != id)
+                        continue;
+                }
+
+                offset = pstr - pstart + oplen - subr->length;
+                if ((offset >= 0) && (offset + subr->length <= length)) {
+                    Call  *c;
+                
+                    if (!selfMatch && offset == 0 && offset + subr->length == length)
+                        continue;
+					/* respect the max subr stack depth observed by checkSubrStackOvl */
+                    if ((subrDepth >= 0) && (subrDepth <= subr->misc))
+                        continue;
+
+                    c = dnaNEXT(*callList);
+                    c->subr = subr;
+                    c->offset = (unsigned short)offset;
+                }
+            }
+        }
+    }
+}
+
+/* Compare subr calls by length (longest first) then by offset (smallest first) */
+static int CTL_CDECL cmpSubrLengths(const void *first, const void *second) {
+	Call *a = (Call *)first;
+	Call *b = (Call *)second;
+    if (a->subr->length != b->subr->length)
+        return (int)b->subr->length - (int)a->subr->length;
+    else
+        return (int)a->offset - (int)b->offset;
+}
+
 /* Scan charstring and build call list of subrs */
 /* The same function is called with buildPhase = 0 for setting subr count duing
    overlap handling phase and called with buildPhase = 1 for building call list.
@@ -1504,150 +1587,57 @@ static int subrSavedByOneCall(subrCtx h, Subr *subr) {
  */
 
 static void buildCallList(subrCtx h, int buildPhase, unsigned length, unsigned char *pstart,
-                          int selfMatch, unsigned id) {
-	unsigned char *pstr;
+                          int selfMatch, unsigned id, short subrDepth) {
 	unsigned char *pend = pstart + length;
-	unsigned char *subend;
-	unsigned char *p;
-	unsigned substrlen;
 	unsigned i, j;
-	int maxSaved;
-	unsigned bestListIndex;
-	typedef dnaDCL (Call, CallList);
-	CallList *list;
+    CallList  callList;
 
-	dnaDCL(CallList, callListArray);
-	dnaINIT(h->g->ctx.dnaSafe, callListArray, MAX_CALL_LIST_COUNT, MAX_CALL_LIST_COUNT);
+    /* List up all matching subrs */
+    dnaINIT(h->g->ctx.dnaSafe, callList, 100, 100);
+    listUpSubrMatches(h, pstart, length, buildPhase, selfMatch, id, subrDepth, &callList);
+    qsort(callList.array, callList.cnt, sizeof(Call), cmpSubrLengths);
 
-	/* Initialize the prefix length array for the given charstring
-	   it is used to shorten a charstring at its end */
-	dnaSET_CNT(h->prefixLen, length);
-	p = pstart;
-	for (i = 0; i < length; ) {
-		unsigned oplen = OPLEN(h, p);
-		unsigned j;
-		for (j = 0; j < oplen; j++) {
-			h->prefixLen.array[i++] = j;
-		}
+    /* Try to fill lists with longest subrs first */
+    h->calls.cnt = 0;
+    for (i = 0; i < (unsigned)callList.cnt; i++) {
+        Call  *c = &callList.array[i];
+        Subr    *subr = c->subr;
+        unsigned subrEndOffset = c->offset + subr->length;
 
-		p += oplen;
+        /* Try to fill a gap in calls array */
+        unsigned cnt;
+        int overlap = 0;
+        cnt = h->calls.cnt;
+
+        for (j = 0; j < cnt; j++) {
+            Call *call = &h->calls.array[j];
+            if (subrEndOffset <= call->offset) {
+                /* found gap before at j'th call */
+                break;
+            }
+            if (subrEndOffset > call->offset
+                && c->offset < (unsigned)call->offset + call->subr->length) {
+                /* overlap */
+                overlap = 1;
+                break;
+            }
+            if (c->offset < call->offset + (unsigned)call->subr->length
+                && subrEndOffset > call->offset) {
+                /* overlap */
+                overlap = 1;
+                break;
+            }
+        }
+
+        /* insert the subr into this gap */
+        if (!overlap) {
+            dnaSET_CNT(h->calls, cnt + 1);
+            memmove(&h->calls.array[j + 1], &h->calls.array[j], sizeof(Call) * (cnt - j));
+            h->calls.array[j] = *c;
+        }
 	}
 
-	substrlen = pend - pstart;
-	if (substrlen > h->maxSubrLen) {
-		substrlen = h->maxSubrLen;
-	}
-
-	for (; substrlen >= h->minSubrLen; substrlen--) {
-		/* Shorten substrlen to a nearest shorter or equal subr length */
-		substrlen = (unsigned)h->subrLenMap.array[substrlen];
-
-		for (pstr = pstart; (subend = pstr + substrlen) <= pend; pstr += OPLEN(h, pstr)) {
-			Subr **subrHash;
-			Subr *subr;
-
-			/* Check the subr prefix map to see if there is any subrs starting with this prefix */
-			if (!TEST_SUBR_PREFIX_MAP(h, pstr)) {
-				continue;
-			}
-
-			subend = pstr + substrlen;
-			if (subend < pend) {
-				if (h->prefixLen.array[subend - pstart]) {
-					/* invalid op at the end */
-					continue;
-				}
-			}
-
-			/* Look up this substring in the subr hash table */
-			subrHash = lookupSubrHash(h, pstr, subend - pstr);
-			subr = subrHash ? *subrHash : NULL;
-			if (subr && (!buildPhase || (subr->flags & SUBR_SELECT))
-			    && ((subend != pend) || (pstr != pstart) || selfMatch)
-				&& (!buildPhase || (id == subr->node->id) || (subr->node->id == NODE_GLOBAL)))
-                {
-				int foundGap = 0;
-				unsigned subrStartOffset = pstr - pstart;
-				unsigned subrEndOffset = subrStartOffset + subr->length;
-
-				/* Try to fill a gap in any list in callListArray */
-				for (i = 0; i < (unsigned)callListArray.cnt; i++) {
-					unsigned cnt;
-					int overlap = 0;
-					list = &callListArray.array[i];
-					cnt = list->cnt;
-
-					for (j = 0; j < cnt; j++) {
-						Call *call = &list->array[j];
-						if (subrEndOffset <= call->offset) {
-							/* found gap before at j'th call */
-							break;
-						}
-						if (subrEndOffset > call->offset
-						    && subrStartOffset < (unsigned)call->offset + call->subr->length) {
-							/* overlap */
-							overlap = 1;
-							break;
-						}
-						if (subrStartOffset < call->offset + (unsigned)call->subr->length
-						    && subrEndOffset > call->offset) {
-							/* overlap */
-							overlap = 1;
-							break;
-						}
-					}
-
-					/* insert the subr into this gap */
-					if (!overlap) {
-						(void)dnaSET_CNT(*list, cnt + 1);
-						memmove(&list->array[j + 1], &list->array[j], sizeof(Call) * (cnt - j));
-						list->array[j].offset = subrStartOffset;
-						list->array[j].subr = subr;
-						foundGap = 1;
-						break;
-					}
-				}
-
-				if (!foundGap && (callListArray.cnt < MAX_CALL_LIST_COUNT)) {
-					/* create a new list for this subr */
-					dnaSET_CNT(callListArray, callListArray.cnt + 1);
-					list = &callListArray.array[callListArray.cnt - 1];
-
-					dnaINIT(h->g->ctx.dnaSafe, *list, 4, 4);
-					dnaSET_CNT(*list, 1);
-					list->array[0].offset = subrStartOffset;
-					list->array[0].subr = subr;
-				}
-			}
-		}
-	}
-
-	/* Select the most space saving call list from the call list array */
-	maxSaved = 0;
-	bestListIndex = 0;
-	for (i = 0; i < (unsigned)callListArray.cnt; i++) {
-		int saved = 0;
-		list = &callListArray.array[i];
-		for (j = 0; j < (unsigned)list->cnt; j++) {
-			saved += subrSavedByOneCall(ctx, list->array[j].subr);
-		}
-
-		if (saved > maxSaved) {
-			maxSaved = saved;
-			bestListIndex = i;
-		}
-	}
-
-	h->calls.cnt = 0;
-	if (bestListIndex < (unsigned)callListArray.cnt) {
-		unsigned cnt = callListArray.array[bestListIndex].cnt;
-		memcpy(dnaEXTEND(h->calls, cnt), callListArray.array[bestListIndex].array, sizeof(Call) * cnt);
-	}
-
-	for (i = 0; i < (unsigned)callListArray.cnt; i++) {
-		dnaFREE(callListArray.array[i]);
-	}
-	dnaFREE(callListArray);
+    dnaFREE(callList);
 
 	if (!buildPhase) {
 		for (i = 0; i < (unsigned)h->calls.cnt; i++) {
@@ -1661,48 +1651,6 @@ static void buildCallList(subrCtx h, int buildPhase, unsigned length, unsigned c
 
 #if DB_INFS
 	if (buildPhase && h->calls.cnt != 0) {
-		int j;
-		for (j = 0; j < h->calls.cnt; j++) {
-			Call *call = &h->calls.array[j];
-			if (call->subr != NULL) {
-				dbsubr(h, call->subr - h->subrs.array, 'y', call->offset);
-			}
-		}
-	}
-#endif
-}
-
-/* Compare subr calls by offset */
-static int CTL_CDECL cmpCalls(const void *first, const void *second) {
-	Call *a = (Call *)first;
-	Call *b = (Call *)second;
-    return a->offset - b->offset;
-}
-
-static void buildSubrCallList(subrCtx h, Subr *subr, unsigned id) {
-    unsigned length = subr->length;
-    unsigned char *pstart = subr->cstr;
-    short subrDepth = subr->misc;
-    Link *link;
-
-	h->calls.cnt = 0;
-    for (link = subr->infs; link; link = link->next) {
-        Subr *inf = link->subr;
-        if ((inf->flags & SUBR_SELECT) != 0
-            && ((id == inf->node->id) || (inf->node->id == NODE_GLOBAL))
-                /* respect the max subr stack depth observed by checkSubrStackOvl */
-            && ((subrDepth < 0) || (subrDepth > inf->misc)))
-        {
-            Call    *call = dnaNEXT(h->calls);
-            call->subr = inf;
-            call->offset = link->offset;
-        }
-    }
-
-    qsort(h->calls.array, h->calls.cnt, sizeof(Call), cmpCalls);
-
-#if DB_INFS
-	if (h->calls.cnt != 0) {
 		int j;
 		for (j = 0; j < h->calls.cnt; j++) {
 			Call *call = &h->calls.array[j];
@@ -1735,7 +1683,7 @@ static void setSubrActCount(subrCtx h) {
 		dbsubr(h, i, '-', 0);
 #endif
 		subr = &h->subrs.array[i];
-		buildCallList(h, 0, subr->length, subr->cstr, 0, 0);
+		buildCallList(h, 0, subr->length, subr->cstr, 0, 0, -1);
 
 		infs = NULL;
 		for (j = h->calls.cnt - 1; j >= 0; j--) {
@@ -1814,9 +1762,6 @@ static void selectCandSubrs(subrCtx h) {
 	h->subrs.cnt = 0;
 	walkEdgeTable(h, h->root, findCandSubrsProc, 0, 0);
 
-	/* Create a hash table of subrs */
-	createSubrHash(h);
-
 #if 0
 	printf("--- xfindSubrRelns\n");
 	h->tmp.cnt = 0;
@@ -1854,7 +1799,7 @@ static void assocSubrs(subrCtx h) {
 			printf("\n");
 #endif
 
-			buildCallList(h, 0, nextoff - offset, (unsigned char *)&FONT_CHARS_DATA[offset], 1, 0);
+			buildCallList(h, 0, nextoff - offset, (unsigned char *)&FONT_CHARS_DATA[offset], 1, 0, -1);
 
 			offset = nextoff;
 		}
@@ -2217,14 +2162,14 @@ static int CTL_CDECL cmpSubrFitness(const void *first, const void *second) {
 static void checkSubrStackOvl(subrCtx h, Subr *subr, int depth, unsigned id) {
 	Link *sup;
 
-	/* No need to check this subr if it is local and has been checked with this or deeper stack */
-	if (depth <= subr->misc && (subr->node->id != NODE_GLOBAL || id == NODE_GLOBAL)) {
-		return;
-	}
+	if ((subr->flags & SUBR_MARKED) == SUBR_SELECT) {
+        /* No need to check this subr if it is local and has been checked with this or deeper stack */
+        if (depth <= subr->misc && (subr->node->id != NODE_GLOBAL || id == NODE_GLOBAL)) {
+            return;
+        }
 
-    if (depth > subr->misc)
-        subr->misc = (short)depth;
-	if (subr->flags & SUBR_SELECT) {
+        if (depth > subr->misc)
+            subr->misc = (short)depth;
 		depth++;    /* Bump depth for selected subrs only */
 
 		if (depth >= TX_MAX_CALL_STACK) {
@@ -2251,6 +2196,12 @@ static void selectFinalSubrSet(subrCtx h, unsigned id) {
 	long nSelected = 0; /* Suppress optimizer warning */
 	int multiplier = h->singleton ? 2 : 1;    /* Range multiplier */
 	int pass = 0;
+    long limit = h->maxNumSubrs;
+
+    if (limit == 0) {
+        limit = MAX_NUM_SUBRS;
+    }
+    limit = limit * multiplier;
 
 	findGroups(h, id);  /* Find social groups (related subrs) */
 
@@ -2306,29 +2257,18 @@ reselect:
 		}
 	}
 
-	if (++pass == 2) {
-		#if 1
-		/* Discard extra subrs if exceeds capacity */
-		long limit = h->maxNumSubrs;
-		if (limit == 0) {
-			limit = MAX_NUM_SUBRS;
-		}
-		limit = limit * multiplier;
+    if (nSelected >= limit) {
+        for (i = limit; i < nSelected; i++) {
+            h->tmp.array[i]->flags &= ~SUBR_SELECT;
+            h->tmp.array[i]->flags |= SUBR_REJECT;
+        }
+        h->tmp.cnt = nSelected = limit;
+    }
+    else {
+        h->tmp.cnt = nSelected;
+    }
 
-		if (nSelected >= limit) {
-			for (i = limit; i < nSelected; i++) {
-				h->tmp.array[i]->flags &= ~SUBR_SELECT;
-				h->tmp.array[i]->flags |= SUBR_REJECT;
-			}
-			h->tmp.cnt = limit;
-		}
-		else {
-			h->tmp.cnt = nSelected;
-		}
-		#else /* original code before I added h->g->maxNumSubrs */
-		h->tmp.cnt =
-		    (nSelected > MAX_NUM_SUBRS * multiplier) ? MAX_NUM_SUBRS * multiplier : nSelected;
-		#endif
+	if (++pass == 2) {
 		return;
 	}
 	else if (nSelected < 215 * multiplier) {
@@ -2426,7 +2366,7 @@ static void subrizeChars(subrCtx h, subr_CSData *chars, unsigned id) {
 #endif
 
 		/* Build subr call list */
-		buildCallList(h, 1, length, psrc, 1, id);
+		buildCallList(h, 1, length, psrc, 1, id, -1);
 
 		/* Subroutinize charstring */
 		pdst = subrizeCstr(h, pdst, psrc, length);
@@ -2615,7 +2555,7 @@ static void addSubrs(subrCtx h, subr_CSData *subrs, unsigned id) {
 #endif
 
 		/* Build subr call list */
-		buildSubrCallList(h, subr, id);
+		buildCallList(h, 1, subr->length, subr->cstr, 0, id, subr->misc);
 
 		/* Subroutinize charstring */
 		pdst = subrizeCstr(h, pdst, subr->cstr, subr->length);
@@ -2677,7 +2617,7 @@ static void subrizeFDChars(subrCtx h, subr_CSData *dst, subr_Font *font,
 #endif
 
 			/* Build subr call list */
-			buildCallList(h, 1, length, psrc, 1, iFont + iFD);
+			buildCallList(h, 1, length, psrc, 1, iFont + iFD, -1);
 
 			/* Subroutinize charstring */
 			pdst = subrizeCstr(h, pdst, psrc, length);
@@ -2785,7 +2725,6 @@ static void buildSubrs(subrCtx h, subr_CSData *subrs, unsigned id) {
 #endif
 
 	selectFinalSubrSet(h, id);
-	updateSubrQuickTestTables(h);
 	reorderSubrs(h);
 	addSubrs(h, subrs, id);
 }
@@ -2798,6 +2737,7 @@ void cfwSubrSubrize(cfwCtx g, int nFonts, subr_Font *fonts) {
 
 	h->nFonts = nFonts;
 	h->fonts = fonts;
+    h->maxNumSubrs = g->maxNumSubrs;
 
 	/* Initialize opLenCache */
 	{
@@ -2822,6 +2762,7 @@ void cfwSubrSubrize(cfwCtx g, int nFonts, subr_Font *fonts) {
 	}
 
 	selectCandSubrs(h); /* Select candidate subrs */
+    buildSubrMatchTrie(h);
 	setSubrActCount(h); /* Set subr actual call counts */
 #if DB_TEST_STRING
 	return;
@@ -2840,7 +2781,6 @@ void cfwSubrSubrize(cfwCtx g, int nFonts, subr_Font *fonts) {
 
 		h->subrStackOvl = 0;
 		selectFinalSubrSet(h, 0);
-		updateSubrQuickTestTables(h);
 		if (h->subrStackOvl) {
 			cfwMessage(h->g, "subr stack depth exceeded (reduced)");
 		}
@@ -2934,13 +2874,6 @@ void cfwSubrSubrize(cfwCtx g, int nFonts, subr_Font *fonts) {
 			printf("average table size (static): %2lf, average fill rate (static): %d%%\n",
 			       (double)totalTableSize / nodeCount, (int)((double)totalEdgeCount / totalTableSize * 100.0));
 		}
-	}
-#endif
-#if SUBR_HASH_STAT
-	if (gTotalSubrLookupCount) {
-		printf("subr table statistics -- size: %d, total lookup: %lld, fill rate: %d%%, average miss per call: %.2lf\n",
-		       h->subrHash.cnt, gTotalSubrLookupCount,
-		       (int)(((double)h->subrs.cnt / h->subrHash.cnt) * 100.0), (double)gTotalSubrMissCount / gTotalSubrLookupCount);
 	}
 #endif
 }
@@ -3041,17 +2974,34 @@ void cfwMergeCubeGSUBR(cfwCtx g) {
 }
 
 /* Compute size of font's subrs */
-long cfwSubrSizeLocal(subr_CSData *subrs) {
-	return (!subrs || subrs->nStrings == 0) ? 0 :
+long cfwSubrSizeLocal(cfwCtx g, subr_CSData *subrs) {
+    long size = 0;
+    if (g->flags & CFW_WRITE_CFF2) {
+        size = (!subrs || subrs->nStrings == 0) ? 0 :
+	       INDEX2_SIZE(subrs->nStrings, subrs->offset[subrs->nStrings - 1]);
+    }
+    else {
+        size = (!subrs || subrs->nStrings == 0) ? 0 :
 	       INDEX_SIZE(subrs->nStrings, subrs->offset[subrs->nStrings - 1]);
+    }
+    return size;
 }
 
 /* Compute size of global subrs */
 long cfwSubrSizeGlobal(cfwCtx g) {
 	subrCtx h = g->ctx.subr;
-	return (!h || h->gsubrs.nStrings == 0) ?
+    long size = 0;
+    if (g->flags & CFW_WRITE_CFF2) {
+        size = (!h || h->gsubrs.nStrings == 0) ?
+	       INDEX2_SIZE(0, 0) : INDEX2_SIZE(h->gsubrs.nStrings,
+                                         h->gsubrs.offset[h->gsubrs.nStrings - 1]);
+    }
+    else {
+        size = (!h || h->gsubrs.nStrings == 0) ?
 	       INDEX_SIZE(0, 0) : INDEX_SIZE(h->gsubrs.nStrings,
-	                                     h->gsubrs.offset[h->gsubrs.nStrings - 1]);
+                                         h->gsubrs.offset[h->gsubrs.nStrings - 1]);
+    }
+    return size;
 }
 
 /* Write subrs */
@@ -3061,7 +3011,12 @@ static void subrWrite(cfwCtx g, subr_CSData *subrs) {
 	unsigned i;
 
 	header.count = subrs->nStrings;
-	cfwWrite2(g, header.count);
+    if (g->flags & CFW_WRITE_CFF2) {
+        cfwWriteN(g, 4, header.count);
+    }
+    else {
+        cfwWrite2(g, header.count);
+    }
 
 	if (header.count == 0) {
 		return; /* Empty table just has zero count */
@@ -3097,7 +3052,12 @@ void cfwSubrWriteGlobal(cfwCtx g) {
 		/* Write empty global subr INDEX */
 		INDEXHdr header;
 		header.count = 0;
-		cfwWrite2(g, header.count);
+        if (g->flags & CFW_WRITE_CFF2) {
+            cfwWriteN(g, 4, header.count);
+        }
+        else {
+            cfwWrite2(g, header.count);
+        }
 	}
 }
 

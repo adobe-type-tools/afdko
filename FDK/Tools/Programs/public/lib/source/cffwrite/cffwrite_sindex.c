@@ -232,7 +232,7 @@ void cfwSindexWrite(cfwCtx g) {
 	index.count = (unsigned short)h->custom.cnt;
 	index.offSize = INDEX_OFF_SIZE(index.datasize);
 
-	cfwWrite2(g, index.count);
+	cfwWrite2(g, (unsigned short)index.count);
 
 	if (index.count == 0) {
 		return; /* Empty table just has zero count */

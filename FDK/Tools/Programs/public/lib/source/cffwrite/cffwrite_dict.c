@@ -8,7 +8,9 @@
 #include "cffwrite_dict.h"
 #include "cffwrite_sindex.h"
 #include "dictops.h"
+#include "txops.h"
 #include "ctutil.h"
+#include "varread.h"
 
 #include <math.h>
 #if PLAT_SUN4
@@ -291,6 +293,7 @@ void cfwDictSaveRealOp(DICT *dict, float r, int op) {
 	cfwDictSaveOp(dict, op);
 }
 
+
 /* Save simple int array operator in DICT. */
 static void saveIntArrayOp(DICT *dict, int cnt, long *array, int op) {
 	int i;
@@ -311,12 +314,125 @@ static void saveRealArrayOp(DICT *dict, int cnt, float *array, int op) {
 
 /* Save real delta-encoded array operator in DICT. */
 static void saveRealDeltaOp(DICT *dict, int cnt, float *array, int op) {
-	int i;
-	/* Compute deltas */
-	for (i = cnt - 1; i > 0; i--) {
-		array[i] -= array[i - 1];
-	}
-	saveRealArrayOp(dict, cnt, array, op);
+    int i;
+    /* Compute deltas */
+    for (i = cnt - 1; i > 0; i--) {
+        array[i] -= array[i - 1];
+    }
+    saveRealArrayOp(dict, cnt, array, op);
+}
+
+static void saveRealBlendOp(DICT *dict, int numRegions, abfOpEntry *opEntry, int op) {
+    
+    int j,k,l;
+    float defaultValue = 0;
+    int numBlends = opEntry->numBlends;
+    float delta;
+    float* blendValues = opEntry->blendValues;
+    /* We can assume that numBlends > 0, else this function is not called.
+     blendValues contains all the numBlends absolute values for first the default region,
+     then for region 0, then for region 1, ..., region n.
+     convert the numBlends*(numRegions+1) values to delta values from previous absolute value
+     in the same region.
+     */
+    for (k=0;k <= numRegions;k++)
+    {
+        int curIndex = (k+1)*numBlends -1;
+        for (j = 1 ; j < numBlends; j++) {
+            blendValues[curIndex] -= blendValues[curIndex-1];
+            curIndex--;
+        }
+    }
+    
+    // Save the numBlends delta values for the default region
+    for (j = 0 ; j < numBlends; j++) {
+        delta = blendValues[j];
+        cfwDictSaveReal(dict, delta);
+    }
+    // save the region blend values. These are the difference between
+    // the current region delta value, and the default region delta value.
+    for (l = 0; l < numBlends; l++)
+    {
+        float defaultDeltaValue = blendValues[l];
+        for (k=0;k < numRegions;k++)
+        {
+            float diff;
+            diff = blendValues[(k+1)*numBlends + l] - defaultDeltaValue;
+            cfwDictSaveReal(dict, diff);
+        }
+    }
+    
+    // save num blends
+    cfwDictSaveInt(dict, numBlends);
+    
+    // Save the blend op.
+    cfwDictSaveOp(dict, cff_blend);
+ 
+    // Save the dict op.
+    cfwDictSaveOp(dict, op);
+    
+}
+
+static void saveRealDeltaBlendOp(DICT *dict, int numRegions, abfOpEntryArray *entryArray, int op) {
+    int i,j,k,l;
+    float defaultValue = 0;
+    
+    /* Each abfOpEntry* arrayEntry corresponds to one blend operator and its operands */
+    for (i = 0; i < entryArray->cnt; i++)
+    {
+        abfOpEntry* arrayEntry = &entryArray->array[i];
+        int numBlends = arrayEntry->numBlends;
+        if (numBlends == 0)
+        {
+            defaultValue = arrayEntry->value - defaultValue;
+            cfwDictSaveReal(dict, defaultValue);
+        }
+        else
+        {
+            float delta;
+            float* blendValues = arrayEntry->blendValues;
+            /* blendValues contains all the numBlends absolute values for first the default region,
+            then for region 0, then for region 1, ..., region n.
+            convert the numBlends*(numRegions+1) values to delta values from previous absolute value
+            in the same region.
+            */
+            for (k=0;k <= numRegions;k++)
+            {
+                int curIndex = (k+1)*numBlends -1;
+                for (j = 1 ; j < numBlends; j++) {
+                    blendValues[curIndex] -= blendValues[curIndex-1];
+                    curIndex--;
+                }
+            }
+        
+            // Save the numBlends delta values for the default region
+            for (j = 0 ; j < numBlends; j++) {
+                delta = blendValues[j];
+                cfwDictSaveReal(dict, delta);
+            }
+           // save the region blend values. These are the difference between
+           // the current region delta value, and the default region delta value.
+             for (l = 0; l < numBlends; l++)
+             {
+                float defaultDeltaValue = blendValues[l];
+                for (k=0;k < numRegions;k++)
+                {
+                     float diff;
+                    diff = blendValues[(k+1)*numBlends + l] - defaultDeltaValue;
+                   cfwDictSaveReal(dict, diff);
+                }
+            }
+            
+            // save num blends
+            cfwDictSaveInt(dict, numBlends);
+            
+            // Save the blend op.
+            cfwDictSaveOp(dict, cff_blend);
+        }
+    }
+    // Save the PrivatDict op.
+    cfwDictSaveOp(dict, op);
+
 }
 
 /* Save integer delta-encoded array operator in DICT. */
@@ -368,7 +484,48 @@ void cfwDictFillTop(cfwCtx g, DICT *dst,
 		return;
 	}
 
-	/* ROS */
+
+    if (top->sup.flags & ABF_CID_FONT) {
+        /* FontMatrix; note default values are different from font dict */
+        abfFontMatrix* fm = &(top->cid.FontMatrix);
+        if (fm->cnt != ABF_EMPTY_ARRAY &&
+            (fm->array[0] != 1.0 ||
+             fm->array[1] != 0.0 ||
+             fm->array[2] != 0.0 ||
+             fm->array[3] != 1.0 ||
+             fm->array[4] != 0.0 ||
+             fm->array[5] != 0.0)) {
+                saveRealArrayOp(dst, 6, fm->array, cff_FontMatrix);
+            }
+    }
+    else if (g->flags & CFW_WRITE_CFF2) {
+        abfFontMatrix* fm = &(font0->FontMatrix);
+        if (fm->cnt != ABF_EMPTY_ARRAY &&
+            (fm->array[0] != 1.0 ||
+             fm->array[1] != 0.0 ||
+             fm->array[2] != 0.0 ||
+             fm->array[3] != 1.0 ||
+             fm->array[4] != 0.0 ||
+             fm->array[5] != 0.0)) {
+                saveRealArrayOp(dst, 6, fm->array, cff_FontMatrix);
+            }
+    }
+    else {
+        /* FontMatrix */
+        saveFontMatrix(dst, &font0->FontMatrix);
+    }
+    
+    if (g->flags & CFW_WRITE_CFF2)
+    {
+        // maxstack deprecated on April 2017
+        //if (top->maxstack != CFF2_DEFAULT_OP_STACK ) {
+        //    cfwDictSaveIntOp(dst, top->maxstack, cff_maxstack);
+        //}
+        return;
+    }
+    
+
+    /* ROS */
 	if (top->sup.flags & ABF_CID_FONT) {
 		cfwDictSaveInt(dst,
 		               cfwSindexAssignSID(g, (SRI)top->cid.Registry.impl));
@@ -462,28 +619,6 @@ void cfwDictFillTop(cfwCtx g, DICT *dst,
 		saveRealArrayOp(dst, 4, top->FontBBox, cff_FontBBox);
 	}
 
-	if (top->sup.flags & ABF_CID_FONT) {
-		/* FontMatrix; note default values are different from font dict */
-		if (top->cid.FontMatrix.cnt != ABF_EMPTY_ARRAY &&
-		    (top->cid.FontMatrix.array[0] != 1.0 ||
-		     top->cid.FontMatrix.array[1] != 0.0 ||
-		     top->cid.FontMatrix.array[2] != 0.0 ||
-		     top->cid.FontMatrix.array[3] != 1.0 ||
-		     top->cid.FontMatrix.array[4] != 0.0 ||
-		     top->cid.FontMatrix.array[5] != 0.0)) {
-			saveRealArrayOp(dst, 6, top->cid.FontMatrix.array, cff_FontMatrix);
-		}
-	}
-	else {
-		/* PaintType */
-		if (font0->PaintType != cff_DFLT_PaintType) {
-			cfwDictSaveIntOp(dst, font0->PaintType, cff_PaintType);
-		}
-
-		/* FontMatrix */
-		saveFontMatrix(dst, &font0->FontMatrix);
-	}
-
 	/* UniqueID */
 	if (top->UniqueID != ABF_UNSET_INT) {
 		cfwDictSaveIntOp(dst, top->UniqueID, cff_UniqueID);
@@ -516,6 +651,13 @@ void cfwDictFillTop(cfwCtx g, DICT *dst,
 			cfwDictSaveIntOp(dst, top->cid.UIDBase, cff_UIDBase);
 		}
 	}
+    else
+    {
+        /* PaintType */
+        if (font0->PaintType != cff_DFLT_PaintType) {
+            cfwDictSaveIntOp(dst, font0->PaintType, cff_PaintType);
+        }
+    }
 
 	/* XUID */
 	if (top->XUID.cnt != ABF_EMPTY_ARRAY) {
@@ -527,6 +669,14 @@ void cfwDictFillTop(cfwCtx g, DICT *dst,
 void cfwDictFillFont(cfwCtx g, DICT *dst, abfFontDict *src) {
 	dst->cnt = 0;
 
+    /* FontMatrix */
+    saveFontMatrix(dst, &src->FontMatrix);
+
+    if (g->flags & CFW_WRITE_CFF2)
+    {
+        return;
+    }
+    
 	/* FontName */
 	if (src->FontName.impl != SRI_UNDEF) {
 		saveStringOp(g, dst, (SRI)src->FontName.impl, cff_FontName);
@@ -610,67 +760,117 @@ void cfwDictFillPrivate(cfwCtx g, DICT *dst, abfPrivateDict *src) {
 
 	/* BlueValues */
 	if (src->BlueValues.cnt != ABF_EMPTY_ARRAY) {
-		saveRealDeltaOp(dst, src->BlueValues.cnt, src->BlueValues.array,
-		                cff_BlueValues);
+        if ((g->flags & CFW_WRITE_CFF2) && (src->blendValues.BlueValues.cnt > 0)) {
+            saveRealDeltaBlendOp(dst, src->numRegions, (abfOpEntryArray*)&(src->blendValues.BlueValues), cff_BlueValues);
+        }
+        else {
+            saveRealDeltaOp(dst, src->BlueValues.cnt, src->BlueValues.array, cff_BlueValues);
+        }
 	}
 
 	/* OtherBlues */
 	if (src->OtherBlues.cnt != ABF_EMPTY_ARRAY) {
-		saveRealDeltaOp(dst, src->OtherBlues.cnt, src->OtherBlues.array,
-		                cff_OtherBlues);
+        if ((g->flags & CFW_WRITE_CFF2) && (src->blendValues.OtherBlues.cnt > 0)) {
+            saveRealDeltaBlendOp(dst, src->numRegions, (abfOpEntryArray*)&(src->blendValues.OtherBlues), cff_OtherBlues);
+        }
+        else {
+            saveRealDeltaOp(dst, src->OtherBlues.cnt, src->OtherBlues.array,
+                            cff_OtherBlues);
+       }
 	}
 
 	/* FamilyBlues */
 	if (src->FamilyBlues.cnt != ABF_EMPTY_ARRAY) {
-		saveRealDeltaOp(dst, src->FamilyBlues.cnt, src->FamilyBlues.array,
-		                cff_FamilyBlues);
+        if ((g->flags & CFW_WRITE_CFF2) && (src->blendValues.FamilyBlues.cnt > 0)) {
+            saveRealDeltaBlendOp(dst, src->numRegions, (abfOpEntryArray*)&(src->blendValues.FamilyBlues), cff_FamilyBlues);
+        }
+        else {
+            saveRealDeltaOp(dst, src->FamilyBlues.cnt, src->FamilyBlues.array,
+                            cff_FamilyBlues);
+       }
 	}
 
 	/* FamilyOtherBlues */
 	if (src->FamilyOtherBlues.cnt != ABF_EMPTY_ARRAY) {
-		saveRealDeltaOp(dst, src->FamilyOtherBlues.cnt,
-		                src->FamilyOtherBlues.array, cff_FamilyOtherBlues);
+        if ((g->flags & CFW_WRITE_CFF2) && (src->blendValues.FamilyOtherBlues.cnt > 0)) {
+            saveRealDeltaBlendOp(dst, src->numRegions, (abfOpEntryArray*)&(src->blendValues.FamilyOtherBlues), cff_FamilyOtherBlues);
+        }
+        else {
+            saveRealDeltaOp(dst, src->FamilyOtherBlues.cnt,
+                            src->FamilyOtherBlues.array, cff_FamilyOtherBlues);
+        }
 	}
 
 	/* BlueScale */
 	if (src->BlueScale != (float)cff_DFLT_BlueScale) {
-		cfwDictSaveRealOp(dst, src->BlueScale, cff_BlueScale);
+        if ((g->flags & CFW_WRITE_CFF2) && (src->blendValues.BlueScale.numBlends > 0)) {
+            saveRealBlendOp(dst, src->numRegions, (abfOpEntry*)&(src->blendValues.BlueScale), cff_BlueScale);
+        }
+        else {
+            cfwDictSaveRealOp(dst, src->BlueScale, cff_BlueScale);
+        }
 	}
 
 	/* BlueShift */
 	if (src->BlueShift != cff_DFLT_BlueShift) {
-		cfwDictSaveRealOp(dst, src->BlueShift, cff_BlueShift);
+        if ((g->flags & CFW_WRITE_CFF2) && (src->blendValues.BlueShift.numBlends > 0)) {
+            saveRealBlendOp(dst, src->numRegions, (abfOpEntry*)&(src->blendValues.BlueShift), cff_BlueShift);
+        }
+        else {
+            cfwDictSaveRealOp(dst, src->BlueShift, cff_BlueShift);
+       }
 	}
 
 	/* BlueFuzz */
 	if (src->BlueFuzz != cff_DFLT_BlueFuzz) {
-		cfwDictSaveRealOp(dst, src->BlueFuzz, cff_BlueFuzz);
+        if ((g->flags & CFW_WRITE_CFF2) && (src->blendValues.BlueFuzz.numBlends > 0)) {
+            saveRealBlendOp(dst, src->numRegions, (abfOpEntry*)&(src->blendValues.BlueFuzz), cff_BlueFuzz);
+        }
+        else {
+            cfwDictSaveRealOp(dst, src->BlueFuzz, cff_BlueFuzz);
+       }
 	}
 
 	/* StdHW */
 	if (src->StdHW != ABF_UNSET_REAL) {
-		cfwDictSaveRealOp(dst, src->StdHW, cff_StdHW);
+        if ((g->flags & CFW_WRITE_CFF2) && (src->blendValues.StdHW.numBlends > 0)) {
+            saveRealBlendOp(dst, src->numRegions, (abfOpEntry*)&(src->blendValues.StdHW), cff_StdHW);
+        }
+        else {
+            cfwDictSaveRealOp(dst, src->StdHW, cff_StdHW);
+       }
 	}
 
 	/* StdVW */
 	if (src->StdVW != ABF_UNSET_REAL) {
-		cfwDictSaveRealOp(dst, src->StdVW, cff_StdVW);
+        if ((g->flags & CFW_WRITE_CFF2) && (src->blendValues.StdVW.numBlends > 0)) {
+            saveRealBlendOp(dst, src->numRegions, (abfOpEntry*)&(src->blendValues.StdVW), cff_StdVW);
+        }
+        else {
+            cfwDictSaveRealOp(dst, src->StdVW, cff_StdVW);
+        }
 	}
 
 	/* StemSnapH */
 	if (src->StemSnapH.cnt != ABF_EMPTY_ARRAY) {
-		saveRealDeltaOp(dst, src->StemSnapH.cnt, src->StemSnapH.array,
-		                cff_StemSnapH);
+        if ((g->flags & CFW_WRITE_CFF2) && (src->blendValues.StemSnapH.cnt > 0)) {
+            saveRealDeltaBlendOp(dst, src->numRegions, (abfOpEntryArray*)&(src->blendValues.StemSnapH), cff_StemSnapH);
+        }
+        else {
+            saveRealDeltaOp(dst, src->StemSnapH.cnt, src->StemSnapH.array,
+                            cff_StemSnapH);
+        }
 	}
 
 	/* StemSnapV */
 	if (src->StemSnapV.cnt != ABF_EMPTY_ARRAY) {
-		saveRealDeltaOp(dst, src->StemSnapV.cnt, src->StemSnapV.array,
-		                cff_StemSnapV);
-	}
-	/* ForceBold */
-	if (src->ForceBold != cff_DFLT_ForceBold) {
-		cfwDictSaveIntOp(dst, src->ForceBold, cff_ForceBold);
+        if ((g->flags & CFW_WRITE_CFF2) && (src->blendValues.StemSnapV.cnt > 0)) {
+            saveRealDeltaBlendOp(dst, src->numRegions, (abfOpEntryArray*)&(src->blendValues.StemSnapV), cff_StemSnapV);
+        }
+        else {
+            saveRealDeltaOp(dst, src->StemSnapV.cnt, src->StemSnapV.array,
+                            cff_StemSnapV);
+        }
 	}
 
 	/* LanguageGroup */
@@ -683,11 +883,24 @@ void cfwDictFillPrivate(cfwCtx g, DICT *dst, abfPrivateDict *src) {
 		cfwDictSaveRealOp(dst, src->ExpansionFactor, cff_ExpansionFactor);
 	}
 
+    if (g->flags & CFW_WRITE_CFF2)
+    {
+        if (src->vsindex != 0) {
+            cfwDictSaveRealOp(dst, src->vsindex, cff_vsindex);
+        }
+        return;
+    }
+
+    /* ForceBold */
+    if (src->ForceBold != cff_DFLT_ForceBold) {
+        cfwDictSaveIntOp(dst, src->ForceBold, cff_ForceBold);
+    }
 	/* initialRandomSeed */
 	if (src->initialRandomSeed != cff_DFLT_initialRandomSeed) {
 		cfwDictSaveRealOp(dst, src->initialRandomSeed, cff_initialRandomSeed);
 	}
 }
+
 
 /* ----------------------------- Debug Support ----------------------------- */
 

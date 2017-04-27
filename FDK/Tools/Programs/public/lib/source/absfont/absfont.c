@@ -9,6 +9,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "dictops.h"
 
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 #define ARRAY_LEN(a) 	(sizeof(a)/sizeof((a)[0]))
@@ -69,13 +70,17 @@ void abfInitTopDict(abfTopDict *top)
 	top->cid.CIDFontRevision		= cff_DFLT_CIDFontRevision;
 	top->cid.CIDCount				= cff_DFLT_CIDCount;
 	top->cid.UIDBase				= ABF_UNSET_INT;
-
+    
+        
 	/* Supplementary data */
 	top->sup.flags					= 0;
 	top->sup.srcFontType			= ABF_UNSET_INT;
 	top->sup.filename				= ABF_UNSET_PTR;
 	top->sup.UnitsPerEm				= 1000;
 	top->sup.nGlyphs				= ABF_UNSET_INT;
+
+    /* CFF2 data */
+    top->maxstack = 0;
 	}
 
 /* Initialize Private dictionary. */
@@ -96,6 +101,7 @@ static void initPrivateDict(abfPrivateDict *private)
 	private->LanguageGroup 			= cff_DFLT_LanguageGroup;
 	private->ExpansionFactor 		= (float)cff_DFLT_ExpansionFactor;
 	private->initialRandomSeed 		= cff_DFLT_initialRandomSeed;
+    memset(&private->blendValues, 0, sizeof(private->blendValues));
 	}
 
 /* Initialize font dictionary. */
@@ -129,9 +135,8 @@ void abfInitGlyphInfo(abfGlyphInfo *info)
 	info->iFD 			= 0;
 	info->sup.begin		= ABF_UNSET_INT;
 	info->sup.end		= ABF_UNSET_INT;
-    info->blendInfo.numBlends = 0;
+    info->blendInfo.numRegions = 0;
     info->blendInfo.vsindex = 0;
-    info->blendInfo.blendDeltaArgs = NULL;
 	}
 
 /* Check UniqueID values is within 24-bit unsigned range. */

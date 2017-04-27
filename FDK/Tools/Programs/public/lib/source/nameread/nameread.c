@@ -16,8 +16,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #define MAX_FAMILY_NAME_LENGTH      64
 #define MAX_COORD_STRING_LENGTH     16
-#define NAME_NOT_FOUND              -1
-#define NAME_LENGTH_EXCEEDS_BUFFER  -2
 
 /* --------------------------- type Definitions  --------------------------- */
 
@@ -138,18 +136,23 @@ nam_NameRecord *nam_nameFind(nam_name tbl,
 				sizeof(nam_NameRecord), matchIds); 
 	}
 
-static int checkPSNameChar(unsigned char ch)
+static int checkNameChar(unsigned char ch, int isPS)
 {
-    switch (ch) {
-    case '[': case ']': case '(': case ')': case '{':
-    case '}': case '<': case '>': case '/': case '%':
-        return 0;
-    default:
-        return (ch >= 33 && ch <= 126);
+    if (isPS)
+    {
+        switch (ch) {
+        case '[': case ']': case '(': case ')': case '{':
+        case '}': case '<': case '>': case '/': case '%':
+            return 0;
+        default:
+            return (ch >= 33 && ch <= 126);
+        }
     }
+    else
+        return (ch >= 32) && (ch <= 126);
 }
 
-long nam_getASCIIName(nam_name nameTbl, ctlSharedStmCallbacks *sscb, char *buffer, unsigned long bufferLen, unsigned short nameId)
+long nam_getASCIIName(nam_name nameTbl, ctlSharedStmCallbacks *sscb, char *buffer, unsigned long bufferLen, unsigned short nameId, int isPS)
 {
     unsigned long i;
     long nameLen;
@@ -158,43 +161,47 @@ long nam_getASCIIName(nam_name nameTbl, ctlSharedStmCallbacks *sscb, char *buffe
 
     rec = nam_nameFind(nameTbl, NAME_WIN_PLATFORM, NAME_WIN_UGL, NAME_WIN_ENGLISH, nameId);
     if (rec && rec->length > 0) {
-        nameLen = rec->length / 2;
-        if ((unsigned long)nameLen < bufferLen) {
-            sscb->seek(sscb, rec->offset);
-            for (i = 0; i < (unsigned long)nameLen; i++) {
-                ch1 = sscb->read1(sscb);
-                ch2 = sscb->read1(sscb);
-                if (ch1 == 0 && checkPSNameChar(ch2))
-                    buffer[i] = (char)ch2;
+        nameLen = 0;
+        sscb->seek(sscb, rec->offset);
+        for (i = 0; i + 1 < (unsigned long)rec->length; i += 2) {
+            ch1 = sscb->read1(sscb);
+            ch2 = sscb->read1(sscb);
+            if (ch1 == 0 && checkNameChar(ch2, isPS)) {
+                if ((unsigned long)nameLen + 1 >= bufferLen) {
+                    sscb->message(sscb, "a name in the name table is longer than the given buffer");
+                    return NAME_READ_NAME_TOO_LONG;
+                }
+                buffer[nameLen++] = (char)ch2;
             }
-            buffer[i] = 0;
-            return nameLen;
-            
-        } else {
-            sscb->message(sscb, "a name in the name table is longer than the given buffer");
-            return NAME_LENGTH_EXCEEDS_BUFFER;
         }
+        buffer[nameLen] = 0;
+        return nameLen;
     }
     rec = nam_nameFind(nameTbl, NAME_MAC_PLATFORM, NAME_MAC_ROMAN, NAME_MAC_ENGLISH, nameId);
     if (rec) {
-        nameLen = rec->length;
-        if ((unsigned long)nameLen < bufferLen) {
-            sscb->seek(sscb, rec->offset);
-            for (i = 0; i < (unsigned long)nameLen; i++) {
-                ch1 = sscb->read1(sscb);
-                if (checkPSNameChar(ch1))
-                    buffer[i] = (char)ch1;
+        nameLen = 0;
+        sscb->seek(sscb, rec->offset);
+        for (i = 0; i < (unsigned long)rec->length; i++) {
+            ch1 = sscb->read1(sscb);
+            if (checkNameChar(ch1, isPS)) {
+                if ((unsigned long)nameLen + 1 >= bufferLen) {
+                    sscb->message(sscb, "a name in the name table is longer than the given buffer");
+                    return NAME_READ_NAME_TOO_LONG;
+                }
+                buffer[nameLen++] = (char)ch1;
             }
-            buffer[i] = 0;
-            return nameLen;
         }
-        else
-        {
-            sscb->message(sscb, "a name in the name table is longer than the given buffer");
-            return NAME_LENGTH_EXCEEDS_BUFFER;
-        }
+        buffer[nameLen] = 0;
+        return nameLen;
     }
-    return NAME_NOT_FOUND;
+    return NAME_READ_NAME_NOT_FOUND;
+}
+
+static long getPSName(nam_name nameTbl,
+                    ctlSharedStmCallbacks *sscb,
+                    char *nameBuffer, unsigned long nameBufferLen)
+{
+    return nam_getASCIIName(nameTbl, sscb, nameBuffer, nameBufferLen, NAME_ID_POSTSCRIPT, 1);
 }
 
 static unsigned long removeNonAlphanumChar(char *buffer, unsigned long len)
@@ -208,6 +215,110 @@ static unsigned long removeNonAlphanumChar(char *buffer, unsigned long len)
     }
     buffer[j] = 0;
     return j;
+}
+
+/* get the family name prefix for a variable font instance name */
+long nam_getFamilyNamePrefix(nam_name nameTbl,
+                            ctlSharedStmCallbacks *sscb,
+                            char *buffer, unsigned long bufferLen)
+{
+    long    nameLen;
+
+    nameLen = nam_getASCIIName(nameTbl, sscb, buffer, bufferLen, NAME_ID_POSTSCRIPT_PREFIX, 1);
+    if (nameLen == NAME_READ_NAME_NOT_FOUND)
+        nameLen = nam_getASCIIName(nameTbl, sscb, buffer, bufferLen, NAME_ID_TYPO_FAMILY, 1);
+    if (nameLen == NAME_READ_NAME_NOT_FOUND)
+        nameLen = nam_getASCIIName(nameTbl, sscb, buffer, bufferLen, NAME_ID_FAMILY, 1);
+    if (nameLen > 0)
+        nameLen = removeNonAlphanumChar(buffer, nameLen);
+
+    if (nameLen > MAX_FAMILY_NAME_LENGTH) {
+        sscb->message(sscb, "too long family name prefix");
+        nameLen = NAME_READ_NAME_TOO_LONG;
+    }
+    return nameLen;
+}
+
+    /* allocate a temporary buffer long enough to hold a generated instance name */
+static char *allocNameBuffer(ctlSharedStmCallbacks *sscb, long axisCount, unsigned long *bufferLen)
+{
+    char    *buffer;
+
+    *bufferLen = MAX_FAMILY_NAME_LENGTH + 10 + (MAX_COORD_STRING_LENGTH * axisCount);
+    buffer = (char *)sscb->memNew(sscb, *bufferLen);
+    if (buffer == 0) {
+        sscb->message(sscb, "failed to allocate memory");
+        return NULL;
+    }
+    return buffer;
+}
+
+long nam_getNamedInstancePSName(nam_name nameTbl,
+                            var_axes axesTbl,
+                            ctlSharedStmCallbacks *sscb,
+                            float *coords,
+                            unsigned short axisCount,
+                            int instanceIndex,
+                            char *instanceName, unsigned long instanceNameLen)
+{
+    unsigned long   familyNameLen = 0;
+    long            nameLen = NAME_READ_NAME_NOT_FOUND;
+    unsigned short  subfamilyID, postscriptID;
+    char            *buffer = 0;
+    unsigned long   bufferLen;
+
+    /* if the font is not a variable font or no coordinates are specified, return the default PS name */
+    if (!axesTbl || !coords || !axisCount) {
+        return getPSName(nameTbl, sscb, instanceName, instanceNameLen);
+    }
+
+
+    /* find a matching named instance in the fvar table */
+    if (instanceIndex < 0)
+        instanceIndex = var_findInstance(axesTbl, coords, axisCount, &subfamilyID, &postscriptID);
+    if ((instanceIndex >= 0) && (postscriptID == 6 || ((postscriptID > 255) && (postscriptID < 32768)))) {
+        nameLen = nam_getASCIIName(nameTbl, sscb, instanceName, instanceNameLen, postscriptID, 1);
+        if (nameLen > 0)
+            return nameLen;
+    }
+
+    /* allocate a temporary buffer long enough to hold a generated instance name */
+    buffer = allocNameBuffer(sscb, axisCount, &bufferLen);
+    if (buffer == NULL)
+        return NAME_READ_FAILED;
+
+    /* get the family name prefix */
+    nameLen = nam_getFamilyNamePrefix(nameTbl, sscb, buffer, bufferLen);
+    if (nameLen <= 0)
+        goto cleanup;
+
+    familyNameLen = (unsigned long)nameLen;
+
+    /* append the style name from the instance if there is a matching one */
+    if (instanceIndex >= 0) {
+        char    *styleName = &buffer[nameLen];
+        unsigned long   styleBufferLen = bufferLen - nameLen;
+        unsigned long   styleLen;
+        
+        styleLen = nam_getASCIIName(nameTbl, sscb, styleName, styleBufferLen, subfamilyID, 0);
+        if (styleLen > 0)
+            styleLen = removeNonAlphanumChar(styleName, styleLen);
+        if (styleLen > 0) {
+            nameLen = nameLen + styleLen;
+        }
+        if ((unsigned long)nameLen + 1 > instanceNameLen)
+            nameLen = NAME_READ_NAME_TOO_LONG;
+        else
+            strcpy(instanceName, buffer);
+    }
+    else
+        nameLen = NAME_READ_NAME_NOT_FOUND;
+
+cleanup:
+    if (buffer)
+        sscb->memFree(sscb, buffer);
+
+    return nameLen;
 }
 
 /* convert a fractional number to a string in the buffer.
@@ -233,8 +344,8 @@ static unsigned long stringizeNum(char *buffer, unsigned long bufferLen, float v
     hi = value + eps;
     lo = value - eps;
 
-    intPart = (int)hi;
-    if (intPart != (int)lo) {
+    intPart = (int)floor(hi);
+    if (intPart != (int)floor(lo)) {
         fractPart = 0.0f;
     } else {
         fractPart = hi - intPart;
@@ -277,89 +388,36 @@ static unsigned long stringizeNum(char *buffer, unsigned long bufferLen, float v
     return i;
 }
 
-static void * nam_sha1_malloc(size_t size, void *hook)
-{
-    ctlSharedStmCallbacks   *sscb = (ctlSharedStmCallbacks *)hook;
-    return sscb->memNew(sscb, size);
-}
-
-static void nam_sha1_free(sha1_pctx ctx, void *hook)
-{
-    ctlSharedStmCallbacks   *sscb = (ctlSharedStmCallbacks *)hook;
-    sscb->memFree(sscb, ctx);
-}
-
-long nam_generateInstancePSName(nam_name nameTbl,
-                                var_axes axesTbl,
-                                ctlSharedStmCallbacks *sscb,
-                                float *coords,
-                                unsigned short axisCount,
-                                int instanceIndex,
-                                char *instanceName, unsigned long instanceNameLen)
+long nam_generateArbitraryInstancePSName(nam_name nameTbl,
+                            var_axes axesTbl,
+                            ctlSharedStmCallbacks *sscb,
+                            float *coords,
+                            unsigned short axisCount,
+                            char *instanceName, unsigned long instanceNameLen)
 {
     unsigned long   familyNameLen = 0;
     long            nameLen;
-    unsigned short  subfamilyID, postscriptID;
     unsigned short  axis;
     char            *buffer = 0;
     unsigned long   bufferLen;
-    unsigned long   hashLen;
-    unsigned long   i;
 
     /* if the font is not a variable font or no coordinates are specified, return the default PS name */
     if (!axesTbl || !coords || !axisCount) {
-        return nam_getASCIIName(nameTbl, sscb, instanceName, instanceNameLen, NAME_ID_POSTSCRIPT);
+        return getPSName(nameTbl, sscb, instanceName, instanceNameLen);
     }
 
-
-    /* find a matching named instance in the fvar table */
-    if (instanceIndex < 0)
-        instanceIndex = var_findInstance(axesTbl, coords, axisCount, &subfamilyID, &postscriptID);
-    if ((instanceIndex >= 0) && (postscriptID == 6 || ((postscriptID > 255) && (postscriptID < 32768)))) {
-        nameLen = nam_getASCIIName(nameTbl, sscb, instanceName, instanceNameLen, postscriptID);
-        if (nameLen > 0)
-            return nameLen;
-    }
 
     /* allocate a temporary buffer long enough to hold a generated instance name */
-    bufferLen = MAX_FAMILY_NAME_LENGTH + 10 + (MAX_COORD_STRING_LENGTH * axisCount);
-    buffer = (char *)sscb->memNew(sscb, bufferLen);
-    if (buffer == 0) {
-        sscb->message(sscb, "failed to allocate memory");
-        return 0;
-    }
+    buffer = allocNameBuffer(sscb, axisCount, &bufferLen);
+    if (buffer == NULL)
+        return NAME_READ_FAILED;
 
     /* get the family name prefix */
-    nameLen = nam_getASCIIName(nameTbl, sscb, buffer, bufferLen, NAME_ID_POSTSCRIPT_PREFIX);
-    if (nameLen == -1)
-        nameLen = nam_getASCIIName(nameTbl, sscb, buffer, bufferLen, NAME_ID_TYPO_FAMILY);
-    if (nameLen == -1)
-        nameLen = nam_getASCIIName(nameTbl, sscb, buffer, bufferLen, NAME_ID_FAMILY);
+    nameLen = nam_getFamilyNamePrefix(nameTbl, sscb, buffer, bufferLen);
     if (nameLen <= 0)
         goto cleanup;
-    nameLen = removeNonAlphanumChar(buffer, nameLen);
 
-    if (nameLen > MAX_FAMILY_NAME_LENGTH) {
-        sscb->message(sscb, "too long family name prefix");
-        nameLen = 0;
-        goto cleanup;
-    }
     familyNameLen = (unsigned long)nameLen;
-
-    /* append the style name from the instance if there is a matching one */
-    if (instanceIndex >= 0) {
-        char    *styleName = &buffer[nameLen];
-        unsigned long   styleBufferLen = bufferLen - nameLen;
-        unsigned long   styleLen;
-        
-        styleLen = nam_getASCIIName(nameTbl, sscb, styleName, styleBufferLen, subfamilyID);
-        if (styleLen > 0)
-            styleLen = removeNonAlphanumChar(styleName, styleLen);
-        if (styleLen > 0) {
-            nameLen = nameLen + styleLen;
-            goto cleanup;
-        }
-    }
 
     /* create an arbitrary instance name from the coordinates */
     for (axis = 0; axis < axisCount; axis++) {
@@ -399,11 +457,61 @@ long nam_generateInstancePSName(nam_name nameTbl,
     if (nameLen <= (long)instanceNameLen) {
         strncpy(instanceName, buffer, nameLen);
         instanceName[nameLen] = 0;
-        return nameLen;
+     }
+    else
+        nameLen = NAME_READ_NAME_TOO_LONG;
+
+cleanup:
+    if (buffer)
+        sscb->memFree(sscb, buffer);
+
+    return nameLen;
+}
+
+static void * nam_sha1_malloc(size_t size, void *hook)
+{
+    ctlSharedStmCallbacks   *sscb = (ctlSharedStmCallbacks *)hook;
+    return sscb->memNew(sscb, size);
+}
+
+static void nam_sha1_free(sha1_pctx ctx, void *hook)
+{
+    ctlSharedStmCallbacks   *sscb = (ctlSharedStmCallbacks *)hook;
+    sscb->memFree(sscb, ctx);
+}
+
+long nam_generateLastResortInstancePSName(nam_name nameTbl,
+                                var_axes axesTbl,
+                                ctlSharedStmCallbacks *sscb,
+                                float *coords,
+                                unsigned short axisCount,
+                                char *instanceName, unsigned long instanceNameLen)
+{
+    unsigned long   familyNameLen = 0;
+    long            nameLen;
+    char            *buffer = 0;
+    unsigned long   bufferLen;
+    unsigned long   hashLen;
+    unsigned long   i;
+
+    /* if the font is not a variable font or no coordinates are specified, return the default PS name */
+    if (!axesTbl || !coords || !axisCount) {
+        return getPSName(nameTbl, sscb, instanceName, instanceNameLen);
     }
 
-    /* a name generated above exceeds the requested length; generate a SHA1 value of the generated name
-     * as the identififier in a last resort name.
+    /* allocate a temporary buffer long enough to hold a generated instance name */
+    buffer = allocNameBuffer(sscb, axisCount, &bufferLen);
+    if (buffer == NULL)
+        return NAME_READ_FAILED;
+
+    /* get the family name prefix */
+    nameLen = nam_getFamilyNamePrefix(nameTbl, sscb, buffer, bufferLen);
+    if (nameLen <= 0)
+        goto cleanup;
+
+    familyNameLen = (unsigned long)nameLen;
+
+    /* generate a SHA1 value of the generated name as the identififier in a last resort name.
      */
     hashLen = sizeof(sha1_hash);
     for (i = 0; i < 2; i++) {

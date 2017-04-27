@@ -21,7 +21,8 @@ LIB_SRCS = \
 	$(SRC_DIR)/cffwrite_fdselect.c \
 	$(SRC_DIR)/cffwrite_sindex.c \
 	$(SRC_DIR)/cffwrite_subr.c \
-	$(SRC_DIR)/cffwrite_t2cstr.c
+	$(SRC_DIR)/cffwrite_t2cstr.c \
+	$(SRC_DIR)/cffwrite_varstore.c
 LIB_OBJS = \
 	cffwrite.o \
 	cffwrite_charset.o \
@@ -30,7 +31,8 @@ LIB_OBJS = \
 	cffwrite_fdselect.o \
 	cffwrite_sindex.o \
 	cffwrite_subr.o \
-	cffwrite_t2cstr.o
+	cffwrite_t2cstr.o \
+	cffwrite_varstore.o
 LIB_TARGET = $(LIB_DIR)/cffwrite.a
 
 # Build targets
@@ -63,3 +65,6 @@ cffwrite_subr.o:
 
 cffwrite_t2cstr.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/cffwrite_t2cstr.c -o $@
+
+cffwrite_varstore.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/cffwrite_varstore.c -o $@

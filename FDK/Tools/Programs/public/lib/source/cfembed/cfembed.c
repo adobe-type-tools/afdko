@@ -1496,7 +1496,7 @@ static int CFF_Fill(sfwTableCallbacks *cb, int *dont_write)
 
 	/* Prepare to add CFF data */
 	if (cfwBegSet(h->ctx.cfw, CFW_EMBED_OPT) ||
-		cfwBegFont(h->ctx.cfw, &map_cb))
+		cfwBegFont(h->ctx.cfw, &map_cb, 0))
 		fatal(h, cefErrCffwriteFont);
 
 	switch (h->src.type)

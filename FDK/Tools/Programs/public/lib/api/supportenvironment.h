@@ -148,12 +148,34 @@ that changes to environment.h be upward-compatible, as described above.
 
 #define os_mac          os_thinkc /* Apple Macintosh, 68K or PPC, any compiler.  
                                      "os_thinkc" should not be used. */
+
+/* automatic Windows configuration */
+#ifndef OS
+#if defined(_WIN64)
+#define OS os_win64
+#elif defined(_WIN32)
+#define OS os_win32
+#endif
+#endif
+
+#ifndef ISP
+#if defined(_M_X64)
+#define ISP isp_x64
+#elif defined(_M_IX86)
+#define ISP isp_i80486
+#endif
+#endif
+
 #if OS==os_osx
-	#if __i386__ 
+  #if __x86_64__
+		#define ISP isp_x64
+  #else
+	#if __i386__
 		#define ISP isp_i80486
 	#else
 		#define ISP isp_ppc
 	#endif
+  #endif
 #endif
 /*
  * STAGE = one of (order is important). If STAGE is DEVELOP, the runtime
@@ -370,10 +392,424 @@ that changes to environment.h be upward-compatible, as described above.
   the most important.
  */
 
+#if ISP==isp_i80486 && ( OS==os_windowsNT || OS==os_osx)
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 0
+#define MINALIGN 1
+#define PREFERREDALIGN 8
+#define REGISTERVARS 4
+#define SCANUNIT 8
 
-#if 1
-/* This a very complex set of  targets, mostly archaic. I am substituting a simple definition for for the only platforms we current build for.
-These are aimed at a 32 bit CPU, but will work with a 64 bit CPU as well. */
+#ifndef ASMARITH
+#define ASMARITH 0
+#endif
+#endif
+
+
+#if ISP==isp_ia64 && OS==os_windowsNT
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 0
+#define MINALIGN 1
+#define PREFERREDALIGN 8
+#define REGISTERVARS 4
+#define SCANUNIT 32
+#define ARCH_64BIT 1
+
+#ifndef ASMARITH 
+#define ASMARITH 0
+#endif
+
+#endif
+
+#if ISP==isp_alpha && OS==os_osf1
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 0
+#define MINALIGN 8
+#define PREFERREDALIGN 8
+#define REGISTERVARS 9
+#define SCANUNIT 8 /* 64 in 2ps environment.h */
+#define ARCH_64BIT 1
+
+#endif
+
+#if ISP==isp_r2000be && OS==os_irix
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 0
+#define UNSIGNEDCHARS 1
+#define MINALIGN 4
+#define PREFERREDALIGN 4
+#define REGISTERVARS 9
+
+#endif
+
+#if ISP==isp_vax && (OS==os_bsd || OS==os_ultrix || OS==os_vms || OS==os_vaxeln)
+#define MC68K 0
+#define IEEEFLOAT 0
+#define IEEESOFT 0
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 0
+#define MINALIGN 1
+#define PREFERREDALIGN 4
+#define REGISTERVARS 8		/* actually, bsd supports up to 10 */
+
+#endif
+
+#if ISP==isp_mc68010 && OS==os_ps
+#define MC68K 1
+#define IEEEFLOAT 1
+#define IEEESOFT 1
+#define SWAPBITS 0
+#define UNSIGNEDCHARS 0
+#define MINALIGN 2
+#define PREFERREDALIGN 2
+#define REGISTERVARS 6		/* data regs, plus up to 4 address regs */
+#endif
+
+#if ISP==isp_mc68020 && (OS==os_sun || OS==os_ps)
+#define MC68K 1
+#define IEEEFLOAT 1
+#define IEEESOFT 1
+#define SWAPBITS 0
+#define UNSIGNEDCHARS 0
+#define MINALIGN 1
+#define PREFERREDALIGN 4
+#define REGISTERVARS 6		/* data regs, plus up to 4 address regs */
+
+#endif
+
+#if ISP==isp_mc68020 && OS==os_mach
+#define MC68K 1
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 0
+#define UNSIGNEDCHARS 0
+#define MINALIGN 1
+#define PREFERREDALIGN 4
+#define REGISTERVARS 6		/* data regs, plus up to 4 address regs */
+#endif
+
+#if ISP==isp_mc68020 && OS==os_mpw
+#define MC68K 1
+#define MACROM 1
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 0
+#define UNSIGNEDCHARS 0
+#define MINALIGN 1
+#define PREFERREDALIGN 4
+#define REGISTERVARS 6		/* data regs, plus up to 4 address regs */
+#endif
+
+#if ISP==isp_mc68020 && OS==os_thinkc
+#define MC68K 1
+#define MACROM 1
+#define IEEEFLOAT 1
+#define IEEESOFT 1
+#define SWAPBITS 0
+#define UNSIGNEDCHARS 0
+#define MINALIGN 2
+#define PREFERREDALIGN 4
+#define REGISTERVARS 5		/* data regs, plus up to 4 address regs */
+#endif
+
+#if ISP==isp_mc68000 && OS==os_thinkc
+#define MC68K 1
+#define MACROM 1
+#define IEEEFLOAT 1
+#define IEEESOFT 1
+#define SWAPBITS 0
+#define UNSIGNEDCHARS 0
+#define MINALIGN 2
+#define PREFERREDALIGN 2
+#define REGISTERVARS 5		/* data regs, plus up to 4 address regs */
+#endif
+
+#if ISP==isp_mc68040 && OS==os_ps
+#define MC68K 1
+#define IEEEFLOAT 1
+#define IEEESOFT 1
+#define SWAPBITS 0
+#define UNSIGNEDCHARS 0
+#define MINALIGN 1
+#define PREFERREDALIGN 4
+#define REGISTERVARS 6		/* data regs, plus up to 4 address regs */
+#endif
+
+#if ISP==isp_i80286 && OS==os_msdos /* and/or others? */
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 0
+#define MINALIGN 1
+#define PREFERREDALIGN 2
+#define REGISTERVARS 4		/* ? */
+#endif
+
+#if (OS==os_windows3 || OS==os_os2_32bit) && (ISP==isp_i80286 || ISP==isp_i80386 || ISP==isp_i80486)
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 1      /* need timing tests -- probably faster with SOFT */
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 0
+#define MINALIGN 1
+#define PREFERREDALIGN 4
+#define REGISTERVARS 2
+
+#endif
+
+
+
+/** Unknown if these setting are correct **/
+/* Added for getting BC working on PC under Metaware HighC*/
+
+
+#if (ISP==isp_i80386 || ISP==isp_i80486) && (OS==os_msdos || OS==os_windows95)
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 0
+#define MINALIGN 1
+#define PREFERREDALIGN 4
+#define REGISTERVARS 4		/* ? */
+
+#endif
+
+#if ISP==isp_i80386 && (OS==os_aix || OS==os_pharlap || OS==os_xenix)
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 0
+#define MINALIGN 1
+#define PREFERREDALIGN 4
+#define REGISTERVARS 4
+
+#endif
+
+#if ISP==isp_ibm370 && (OS==os_vm370 || OS==os_mvs370)
+#define MC68K 0
+#define IEEEFLOAT 0
+#define IEEESOFT 0
+#define SWAPBITS 0
+#define UNSIGNEDCHARS 1
+#define MINALIGN 2
+#define PREFERREDALIGN 4
+#define REGISTERVARS 4		/* ? */
+#endif
+
+#if ISP==isp_ti34010  /* && OS==? */
+#define MC68K 0
+#define IEEEFLOAT 0
+#define IEEESOFT 0
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 0
+#define MINALIGN 1
+#define PREFERREDALIGN 4
+#define REGISTERVARS 4		/* ? */
+#endif
+
+#if ISP==isp_rs6000 && OS==os_aix
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 1
+#define SWAPBITS 0
+#define UNSIGNEDCHARS 1
+#define MINALIGN 4
+#define PREFERREDALIGN 4
+#define REGISTERVARS 4		/* ? */
+#endif
+
+#if ISP==isp_rs6000 && OS==os_ps
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 1
+#define SWAPBITS 0
+#define UNSIGNEDCHARS 1
+#define MINALIGN 4
+#define PREFERREDALIGN 4
+#define REGISTERVARS 4          /* ? */
+#endif
+
+#if ISP==isp_rs6000 && OS==os_thinkc  /* PowerPC */
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 1
+#define SWAPBITS 0
+#define UNSIGNEDCHARS 0
+#define MINALIGN 4
+#define PREFERREDALIGN 4
+#define REGISTERVARS 4          /* ? */
+#endif
+
+#if ISP==isp_r2000be && (OS==os_sysv || OS==os_ps)
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 0
+#define UNSIGNEDCHARS 0
+#define MINALIGN 4
+#define PREFERREDALIGN 4
+#define REGISTERVARS 9
+
+#endif
+
+#if ISP==isp_r2000le && OS==os_ultrix
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 1
+#define MINALIGN 4
+#define PREFERREDALIGN 4
+#define REGISTERVARS 9
+
+#endif
+
+#if ISP==isp_r2000le && OS==os_ps
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 1
+#define MINALIGN 4
+#define PREFERREDALIGN 4
+#define REGISTERVARS 9
+#endif
+
+#if ISP==isp_sparc && OS==os_solaris
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 0
+#define UNSIGNEDCHARS 0
+#define MINALIGN 4
+#define PREFERREDALIGN 4
+#define REGISTERVARS 16		/* ? */
+#endif
+
+#if ISP==isp_sparc && OS==os_sun
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 0
+#define UNSIGNEDCHARS 0
+#define MINALIGN 4
+#define PREFERREDALIGN 4
+#define REGISTERVARS 16		/* ? */
+#include "sun4/fixstdio.h"
+#include "sun4/fixstdlib.h"
+#include "sun4/fixstring.h"
+#include "sun4/fixtime.h"
+#endif
+
+#if ISP==isp_sparc && OS==os_ps
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 0
+#define UNSIGNEDCHARS 0
+#define MINALIGN 4
+#define PREFERREDALIGN 4
+#define REGISTERVARS 16		/* ? */
+#endif
+
+#if ISP==isp_ns32532  /* && OS==? */
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 0
+#define MINALIGN 1
+#define PREFERREDALIGN 4
+#define REGISTERVARS 4		/* ? */
+#endif
+
+#if (ISP==isp_xl8000 || ISP==isp_xl8220) && OS==os_ps
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 1
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 0
+#define MINALIGN 4
+#define PREFERREDALIGN 4
+#define REGISTERVARS 15
+#endif
+
+#if ISP==isp_amd29k && OS==os_ps
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 1
+#define SWAPBITS 0
+#define UNSIGNEDCHARS 1         /* Note that the compiler can do either one */
+#define MINALIGN 4
+#define PREFERREDALIGN 4
+#define REGISTERVARS 15         /* probably does not matter */
+#endif
+
+#if ((ISP==isp_i960ca) || (ISP==isp_i960b) || (ISP==isp_i960a) || (ISP==isp_i960kai)) && OS==os_ps
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 1
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 1         /* Note that the compiler can do either one */
+#define MINALIGN 1
+#define PREFERREDALIGN 4
+#define REGISTERVARS 10         /* probably does not matter */
+#endif
+
+#if ISP==isp_i960cabe && OS==os_ps
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 1
+#define SWAPBITS 0
+#define UNSIGNEDCHARS 1         /* Note that the compiler can do either one */
+#define MINALIGN 1
+#define PREFERREDALIGN 4
+#define REGISTERVARS 10         /* probably does not matter */
+#endif
+
+#if ISP==isp_mc88000 && OS==os_ncd
+#undef MC68K
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 0
+#define UNSIGNEDCHARS 0
+#define MINALIGN 4
+#define PREFERREDALIGN 4
+#define REGISTERVARS 20         /* ? */
+#define USE_SIGNAL 0
+#endif
+
+#if ISP==isp_i80486 && ( OS==os_windowsNT || OS==os_osx)
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 0
+#define MINALIGN 1
+#define PREFERREDALIGN 8
+#define REGISTERVARS 4
+#define SCANUNIT 8
+
+#ifndef ASMARITH 
+#define ASMARITH 0
+#endif
+#endif
+
+#if ISP==isp_i80486 && OS==os_linux
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 0
@@ -384,489 +820,71 @@ These are aimed at a 32 bit CPU, but will work with a 64 bit CPU as well. */
 #define REGISTERVARS 4
 #define SCANUNIT 8
 #define ASMARITH 0
-#endif 
+#endif /* isp_i80486 && os_linux */
 
-#if 0
-    #if ISP==isp_i80486 && ( OS==os_windowsNT || OS==os_osx)
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 1
-    #define PREFERREDALIGN 8
-    #define REGISTERVARS 4
-    #define SCANUNIT 8
+#if ISP==isp_alpha && OS==os_windowsNT
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 0
+#define MINALIGN 8
+#define PREFERREDALIGN 8
+#define REGISTERVARS 9
+#define SCANUNIT 8
+#define ARCH_64BIT 1
+#endif
 
-    #ifndef ASMARITH
-    #define ASMARITH 0
-    #endif
-    #endif
+#if ISP==isp_alpha64 && OS==os_windowsNT
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 0
+#define MINALIGN 8
+#define PREFERREDALIGN 8
+#define REGISTERVARS 9
+#define SCANUNIT 8    
+#define ARCH_64BIT 1
 
+#endif
 
-    #if ISP==isp_ia64 && OS==os_windowsNT
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 1
-    #define PREFERREDALIGN 8
-    #define REGISTERVARS 4
-    #define SCANUNIT 32
-    #define ARCH_64BIT 1
+#if ISP==isp_mppc && OS==os_windowsNT
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 0
+#define MINALIGN 4
+#define PREFERREDALIGN 8
+#define REGISTERVARS 9
+#define SCANUNIT 8
+#endif
 
-    #ifndef ASMARITH 
-    #define ASMARITH 0
-    #endif
+#if ISP==isp_ppc && OS==os_osx
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 0
+#define MINALIGN 4
+#define PREFERREDALIGN 8
+#define REGISTERVARS 9
+#define SCANUNIT 8
+#endif
 
-    #endif
-
-    #if ISP==isp_alpha && OS==os_osf1
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 8
-    #define PREFERREDALIGN 8
-    #define REGISTERVARS 9
-    #define SCANUNIT 8 /* 64 in 2ps environment.h */
-    #define ARCH_64BIT 1
-
-    #endif
-
-    #if ISP==isp_r2000be && OS==os_irix
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 0
-    #define UNSIGNEDCHARS 1
-    #define MINALIGN 4
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 9
-
-    #endif
-
-    #if ISP==isp_vax && (OS==os_bsd || OS==os_ultrix || OS==os_vms || OS==os_vaxeln)
-    #define MC68K 0
-    #define IEEEFLOAT 0
-    #define IEEESOFT 0
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 1
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 8		/* actually, bsd supports up to 10 */
-
-    #endif
-
-    #if ISP==isp_mc68010 && OS==os_ps
-    #define MC68K 1
-    #define IEEEFLOAT 1
-    #define IEEESOFT 1
-    #define SWAPBITS 0
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 2
-    #define PREFERREDALIGN 2
-    #define REGISTERVARS 6		/* data regs, plus up to 4 address regs */
-    #endif
-
-    #if ISP==isp_mc68020 && (OS==os_sun || OS==os_ps)
-    #define MC68K 1
-    #define IEEEFLOAT 1
-    #define IEEESOFT 1
-    #define SWAPBITS 0
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 1
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 6		/* data regs, plus up to 4 address regs */
-
-    #endif
-
-    #if ISP==isp_mc68020 && OS==os_mach
-    #define MC68K 1
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 0
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 1
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 6		/* data regs, plus up to 4 address regs */
-    #endif
-
-    #if ISP==isp_mc68020 && OS==os_mpw
-    #define MC68K 1
-    #define MACROM 1
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 0
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 1
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 6		/* data regs, plus up to 4 address regs */
-    #endif
-
-    #if ISP==isp_mc68020 && OS==os_thinkc
-    #define MC68K 1
-    #define MACROM 1
-    #define IEEEFLOAT 1
-    #define IEEESOFT 1
-    #define SWAPBITS 0
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 2
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 5		/* data regs, plus up to 4 address regs */
-    #endif
-
-    #if ISP==isp_mc68000 && OS==os_thinkc
-    #define MC68K 1
-    #define MACROM 1
-    #define IEEEFLOAT 1
-    #define IEEESOFT 1
-    #define SWAPBITS 0
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 2
-    #define PREFERREDALIGN 2
-    #define REGISTERVARS 5		/* data regs, plus up to 4 address regs */
-    #endif
-
-    #if ISP==isp_mc68040 && OS==os_ps
-    #define MC68K 1
-    #define IEEEFLOAT 1
-    #define IEEESOFT 1
-    #define SWAPBITS 0
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 1
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 6		/* data regs, plus up to 4 address regs */
-    #endif
-
-    #if ISP==isp_i80286 && OS==os_msdos /* and/or others? */
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 1
-    #define PREFERREDALIGN 2
-    #define REGISTERVARS 4		/* ? */
-    #endif
-
-    #if (OS==os_windows3 || OS==os_os2_32bit) && (ISP==isp_i80286 || ISP==isp_i80386 || ISP==isp_i80486)
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 1      /* need timing tests -- probably faster with SOFT */
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 1
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 2
-
-    #endif
-
-
-
-    /** Unknown if these setting are correct **/
-    /* Added for getting BC working on PC under Metaware HighC*/
-
-
-    #if (ISP==isp_i80386 || ISP==isp_i80486) && (OS==os_msdos || OS==os_windows95)
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 1
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 4		/* ? */
-
-    #endif
-
-    #if ISP==isp_i80386 && (OS==os_aix || OS==os_pharlap || OS==os_xenix)
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 1
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 4
-
-    #endif
-
-    #if ISP==isp_ibm370 && (OS==os_vm370 || OS==os_mvs370)
-    #define MC68K 0
-    #define IEEEFLOAT 0
-    #define IEEESOFT 0
-    #define SWAPBITS 0
-    #define UNSIGNEDCHARS 1
-    #define MINALIGN 2
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 4		/* ? */
-    #endif
-
-    #if ISP==isp_ti34010  /* && OS==? */
-    #define MC68K 0
-    #define IEEEFLOAT 0
-    #define IEEESOFT 0
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 1
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 4		/* ? */
-    #endif
-
-    #if ISP==isp_rs6000 && OS==os_aix
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 1
-    #define SWAPBITS 0
-    #define UNSIGNEDCHARS 1
-    #define MINALIGN 4
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 4		/* ? */
-    #endif
-
-    #if ISP==isp_rs6000 && OS==os_ps
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 1
-    #define SWAPBITS 0
-    #define UNSIGNEDCHARS 1
-    #define MINALIGN 4
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 4          /* ? */
-    #endif
-
-    #if ISP==isp_rs6000 && OS==os_thinkc  /* PowerPC */
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 1
-    #define SWAPBITS 0
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 4
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 4          /* ? */
-    #endif
-
-    #if ISP==isp_r2000be && (OS==os_sysv || OS==os_ps)
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 0
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 4
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 9
-
-    #endif
-
-    #if ISP==isp_r2000le && OS==os_ultrix
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 1
-    #define MINALIGN 4
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 9
-
-    #endif
-
-    #if ISP==isp_r2000le && OS==os_ps
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 1
-    #define MINALIGN 4
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 9
-    #endif
-
-    #if ISP==isp_sparc && OS==os_solaris
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 0
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 4
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 16		/* ? */
-    #endif
-
-    #if ISP==isp_sparc && OS==os_sun
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 0
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 4
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 16		/* ? */
-    #include "sun4/fixstdio.h"
-    #include "sun4/fixstdlib.h"
-    #include "sun4/fixstring.h"
-    #include "sun4/fixtime.h"
-    #endif
-
-    #if ISP==isp_sparc && OS==os_ps
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 0
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 4
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 16		/* ? */
-    #endif
-
-    #if ISP==isp_ns32532  /* && OS==? */
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 1
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 4		/* ? */
-    #endif
-
-    #if (ISP==isp_xl8000 || ISP==isp_xl8220) && OS==os_ps
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 1
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 4
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 15
-    #endif
-
-    #if ISP==isp_amd29k && OS==os_ps
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 1
-    #define SWAPBITS 0
-    #define UNSIGNEDCHARS 1         /* Note that the compiler can do either one */
-    #define MINALIGN 4
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 15         /* probably does not matter */
-    #endif
-
-    #if ((ISP==isp_i960ca) || (ISP==isp_i960b) || (ISP==isp_i960a) || (ISP==isp_i960kai)) && OS==os_ps
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 1
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 1         /* Note that the compiler can do either one */
-    #define MINALIGN 1
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 10         /* probably does not matter */
-    #endif
-
-    #if ISP==isp_i960cabe && OS==os_ps
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 1
-    #define SWAPBITS 0
-    #define UNSIGNEDCHARS 1         /* Note that the compiler can do either one */
-    #define MINALIGN 1
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 10         /* probably does not matter */
-    #endif
-
-    #if ISP==isp_mc88000 && OS==os_ncd
-    #undef MC68K
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 0
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 4
-    #define PREFERREDALIGN 4
-    #define REGISTERVARS 20         /* ? */
-    #define USE_SIGNAL 0
-    #endif
-
-    #if ISP==isp_i80486 && ( OS==os_windowsNT || OS==os_osx)
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 1
-    #define PREFERREDALIGN 8
-    #define REGISTERVARS 4
-    #define SCANUNIT 8
-
-    #ifndef ASMARITH 
-    #define ASMARITH 0
-    #endif
-    #endif
-
-    #if ISP==isp_i80486 && OS==os_linux
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 1
-    #define PREFEREDALIGN 8
-    #define REGISTERVARS 4
-    #define SCANUNIT 8
-    #define ASMARITH 0
-    #endif /* isp_i80486 && os_linux */
-
-    #if ISP==isp_alpha && OS==os_windowsNT
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 8
-    #define PREFERREDALIGN 8
-    #define REGISTERVARS 9
-    #define SCANUNIT 8
-    #define ARCH_64BIT 1
-    #endif
-
-    #if ISP==isp_alpha64 && OS==os_windowsNT
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 8
-    #define PREFERREDALIGN 8
-    #define REGISTERVARS 9
-    #define SCANUNIT 8    
-    #define ARCH_64BIT 1
-
-    #endif
-
-    #if ISP==isp_mppc && OS==os_windowsNT
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 4
-    #define PREFERREDALIGN 8
-    #define REGISTERVARS 9
-    #define SCANUNIT 8
-    #endif
-
-    #if ISP==isp_ppc && OS==os_osx
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 4
-    #define PREFERREDALIGN 8
-    #define REGISTERVARS 9
-    #define SCANUNIT 8
-    #endif
+#if ISP==isp_x64 && OS==os_osx
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 0
+#define MINALIGN 1
+#define PREFERREDALIGN 8
+#define REGISTERVARS 4
+#define SCANUNIT 8
+#define ARCH_64BIT 1
+#endif
 
     #if ISP==isp_r2000le && OS==os_windowsNT
     #define MC68K 0
@@ -918,7 +936,6 @@ These are aimed at a 32 bit CPU, but will work with a 64 bit CPU as well. */
     ConfigurationError("Unsupported ISP-OS combination");
     #endif
 
-#endif /* end if for suppressing all the configuration switches used of generating a PostScript interpreter. */
 
 /* ***** Other configuration switches *****
  *

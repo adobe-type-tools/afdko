@@ -30,11 +30,22 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /* Scale to thousandths of an em */
 #define MILLIEM(v)	((float)(h->top->sup.UnitsPerEm*(v)/1000.0))
 
+/* Macro switches */
+#define ROUND_ISECT_COORDS  0           /* Rounding intersection coordinates appear to have negative impact. Disabled */
+#define CLAMP_ISECT_T       0           /* Clamp "t" if the calculated intersection is close to a segment end */
+
 /* Heuristics constants */
-#define ISECT_EPSILON       2.0f
+
+#define BEZ_SPLIT_DEPTH     6           /* Split 6 times; bbox < .002 em; don't split */
+#define BEZ_SPLIT_MILLIEM   MILLIEM(16) /* MILLIEM(64) is not small enough for FiraSans-TwoItalic */
+#define ISECT_EPSILON       1.0f
 #define WIND_TEST_EPSILON   1.0f
-#define NO_DELETE_OUTLET_SCORE    1.0f
 #define EXTREMUM_EPSILON    0.5f
+#define MISMATCH_SEGMENT_PENALTY    0.5f
+#define FIXED_SCORE_INCREMENT       0.1f
+#define EXTRA_OUTLET_PENALTY        0.5f
+#define MAX_SWEEP_FIX_JUNC          100
+#define SHORT_LINE_LIMIT            1
 
 #if ABF_DEBUG
 static void dbglyph(abfCtx h, long iGlyph);
@@ -133,6 +144,7 @@ typedef struct
     {
     int cnt;                /* Number of extrema (up to 2) */
     float t[2];             /* t corresponding to extrema on curve */
+    float v[2];             /* coordinates at extrema */
     } Extrema;
 
 typedef struct				/* Segment */
@@ -156,8 +168,10 @@ typedef struct				/* Segment */
 	long iPath;				/* Parent path */
     long inJunc;            /* ingoing junction index */
     long outJunc;           /* outcoming junction index */
-    float score;            /* Confidence level of delete/undelete status */
+    float score;            /* Confidence level of delete/undelete status (non-negative) */
 	} Segment;
+
+typedef dnaDCL(float, ValueList);
 
 struct abfCtx_				/* Context */
 	{
@@ -168,7 +182,8 @@ struct abfCtx_				/* Context */
 	dnaDCL(Segment, segs);
 	dnaDCL(Intersect, isects);
 	dnaDCL(Junction, juncs);
-    dnaDCL(long, indices);
+    ValueList xExtremaList;
+    ValueList yExtremaList;
 	long iGlyph;			/* Current glyph index */
 	long iPath;				/* Current path index */
 	long iSeg;				/* Current segment index */
@@ -263,7 +278,8 @@ abfCtx abfNew(ctlMemoryCallbacks *mem_cb, CTL_CHECK_ARGS_DCL)
 	dnaINIT(h->fail, h->segs, 100, 5000);
 	dnaINIT(h->safe, h->isects, 10, 20);
 	dnaINIT(h->safe, h->juncs, 10, 20);
-    dnaINIT(h->safe, h->indices, 8, 4);
+	dnaINIT(h->safe, h->xExtremaList, 100, 100);
+	dnaINIT(h->safe, h->yExtremaList, 100, 100);
 	h->iGlyph = -1;
 	h->iPath = -1;
 	h->iSeg = -1;
@@ -272,18 +288,25 @@ abfCtx abfNew(ctlMemoryCallbacks *mem_cb, CTL_CHECK_ARGS_DCL)
 	return h;
 	}
 
+static void freeOutlets(abfCtx h)
+	{
+	long	i;
+
+	for (i = 0; i < h->juncs.cnt; i++)
+		dnaFREE(h->juncs.array[i].outlets);
+	}
+
 /* Free library context. */
 int abfFree(abfCtx h)
 	{
-    long i;
 	dnaFREE(h->glyphs);
 	dnaFREE(h->paths);
 	dnaFREE(h->segs);
 	dnaFREE(h->isects);
-    for (i = 0; i < h->juncs.cnt; i++)
-        dnaFREE(h->juncs.array[i].outlets);
+	freeOutlets(h);
 	dnaFREE(h->juncs);
-    dnaFREE(h->indices);
+    dnaFREE(h->xExtremaList);
+    dnaFREE(h->yExtremaList);
 	dnaFree(h->fail);
 	dnaFree(h->safe);
 	h->mem.manage(&h->mem, h, 0);
@@ -313,7 +336,7 @@ int abfEndFont(abfCtx h, long flags, abfGlyphCallbacks *glyph_cb)
 	/* Set error handler */
 	if (setjmp(h->err.env))
 		return h->err.code;
-	
+
 	if (flags & ABF_PATH_REMOVE_OVERLAP)
 		for (i = 0; i < h->glyphs.cnt; i++)
 			isectGlyph(h, i);
@@ -720,7 +743,18 @@ static void findBezExtrema(float *min, float *max, float *mint, float *maxt,
         findBezExtrema(min, max, mint, maxt, v0, u, (t + u)/2, c, t0, ct);
 
         /* Second half of split */
-        findBezExtrema(min, max, mint, maxt, c, (s + t)/2, u, v3, ct, t1);
+        findBezExtrema(min, max, mint, maxt, c, (s + t)/2, s, v3, ct, t1);
+        }
+    else
+        {
+        if (v1 < *min)
+            *min = v1;
+        if (v2 < *min)
+            *min = v2;
+        if (v1 > *max)
+            *max = v1;
+        if (v2 > *max)
+            *max = v2;
         }
     }
 
@@ -748,18 +782,22 @@ static void setBezExtrema(Extrema *ex, float *lo, float *hi, float v0, float v1,
     if (mint > 0)
         {
         ex->t[i] = mint;
+        ex->v[i] = min;
         i++;
         }
     if (maxt > 0)
         {
         ex->t[i] = maxt;
+        ex->v[i] = max;
         i++;
         }
     ex->cnt = i;
     if (i == 2 && mint > maxt)
         {
         ex->t[0] = maxt;
+        ex->v[0] = max;
         ex->t[1] = mint;
+        ex->v[1] = min;
         }
 
     *lo = min;
@@ -1046,8 +1084,6 @@ static void insertIsect(abfCtx h, long i, Point *p, Segment *seg, float t, long 
 static void saveIsectPair(abfCtx h, 
 						  Segment *seg0, float t0, Segment *seg1, float t1)
 	{
-	float x;
-	float y;
 	Point p;
 	long id = h->isects.cnt;
     long i0, i1;
@@ -1073,9 +1109,11 @@ static void saveIsectPair(abfCtx h,
 	else
 		p = calcCurveIsectPoint(t0, seg0);
 
+#if CLAMP_ISECT_T
+    {
 	/* If intersection is very close to end of segment, force it to	end */
-	x = RND(p.x);
-	y = RND(p.y);
+	float x = RND(p.x);
+	float y = RND(p.y);
 	if (0 < t0 && t0 < 1 &&
 		((x == seg0->p0.x && y == seg0->p0.y) ||
 		 (x == seg0->p3.x && y == seg0->p3.y)))
@@ -1084,6 +1122,8 @@ static void saveIsectPair(abfCtx h,
 		((x == seg1->p0.x && y == seg1->p0.y) ||
 		 (x == seg1->p3.x && y == seg1->p3.y)))
 		t1 = RND(t1);
+    }
+#endif
 
     /* If the intersection is actually the end point between two adjacent segments in the same path, ignore it */
     if (seg0->iPath == seg1->iPath)
@@ -1202,11 +1242,10 @@ static int isectLineRect(Point *u0, Point *u1, Rect *r)
    rasterizer. */
 static int bezFlatEnough(abfCtx h, Bezier *q)
 	{
-	if (q->depth == 6)
-		/* Split 6 times; bbox < .002 em; don't split */
+	if (q->depth == BEZ_SPLIT_DEPTH)
 		return 1;
-	else if (fabs(q->bounds.right - q->bounds.left) > MILLIEM(127) ||
-			 fabs(q->bounds.top - q->bounds.bottom) > MILLIEM(127))
+	else if (fabs(q->bounds.right - q->bounds.left) > BEZ_SPLIT_MILLIEM ||
+			 fabs(q->bounds.top - q->bounds.bottom) > BEZ_SPLIT_MILLIEM)
 		{
 		/* BBox eighth em or bigger, split */
 		q->depth = 0;
@@ -1662,12 +1701,17 @@ static void splitSegment(abfCtx h, Intersect *last, Intersect *isect)
     new->inJunc = -1;
     new->outJunc = -1;
 
+    /* Set new bounds */
+    setSegBounds(seg);
+    setSegBounds(new);
+
 	seg->iNext = iNew;
 	h->segs.array[new->iNext].iPrev = iNew;
 
 	isect->iSplit = iNew;
 	}
 
+#if ROUND_ISECT_COORDS
 /* Round points in segment to nearest integer. */
 static void roundSegment(abfCtx h, long iSeg, int beg)
 	{
@@ -1695,6 +1739,85 @@ static void roundSegment(abfCtx h, long iSeg, int beg)
 		}
 	setSegBounds(seg);
 	}
+#endif
+
+/* Squash a short negligible segment and update intersections. Returns 1 if any segment is squashed. */
+static int squashShortSeg(abfCtx h, Intersect *isect, int isSplit, int atBeg, int *isectSquashed)
+    {
+    long    iSeg = isSplit? isect->iSplit: isect->iSeg;
+    Segment *seg = &h->segs.array[iSeg];
+    int segSquashed = 0;
+
+    if ((seg->flags & SEG_LINE) &&
+        (seg->bounds.right - seg->bounds.left <= SHORT_LINE_LIMIT) &&
+        (seg->bounds.top - seg->bounds.bottom <= SHORT_LINE_LIMIT))
+        {
+        /* Remove this short segment at an intersection from linked segments, isect, and path */
+        long    iPath = seg->iPath;
+
+        if (seg->iNext != iSeg && seg->iPrev != iSeg)
+            {
+            Path    *path;
+            long    iRep;
+            Segment *rep;
+            long    i;
+
+            segSquashed = 1;
+            /* Replace the short segment with the next/previous segment in the link */
+            if (isSplit ^ atBeg)
+                {
+                iRep = seg->iNext;
+                rep = &h->segs.array[iRep];
+                rep->p0 = isect->p;
+                }
+            else
+                {
+                iRep = seg->iPrev;
+                rep = &h->segs.array[iRep];
+                rep->p3 = isect->p;
+                }
+            if (isSplit)
+                isect->iSplit = iRep;
+            else
+                isect->iSeg = iRep;
+            rep->flags |= SEG_ISECT;
+
+            /* Update segment link and bounds */
+            h->segs.array[seg->iPrev].iNext = seg->iNext;
+            h->segs.array[seg->iNext].iPrev = seg->iPrev;
+            setSegBounds(rep);
+
+            /* Update path if necessary */
+            path = &h->paths.array[seg->iPath];
+            if (path->iSeg == iSeg)
+                path->iSeg = iRep;
+
+            /* Delete the short segment */
+            seg->flags |= SEG_DELETE;
+
+            for (i = 0; i < h->isects.cnt; i++)
+                {
+                Intersect   *i2 = &h->isects.array[i];
+
+                if (!(i2->flags & ISECT_DUP))
+                    {
+                    if (i2->iSeg == iSeg)
+                        i2->iSeg = iRep;
+                    if (i2->iSplit == iSeg)
+                        i2->iSplit = iRep;
+
+                    /* If removing the segment degenerates an intersection, squash it as well */
+                    if (i2->iSeg == i2->iSplit)
+                        {
+                        i2->flags |= ISECT_DUP;
+                        *isectSquashed = 1;
+                        }
+                    }
+                }
+            }
+        }
+    return segSquashed;
+    }
 
 /* Split intersecting segments. */
 static void splitIsectSegs(abfCtx h)
@@ -1702,6 +1825,7 @@ static void splitIsectSegs(abfCtx h)
 	long i;
 	Intersect *last;
 	Intersect *isect;
+    int isectSquashed = 0;
 
 	/* Sort list by segment */
 	qsort(h->isects.array, h->isects.cnt, sizeof(Intersect), cmpSegs);
@@ -1736,13 +1860,14 @@ static void splitIsectSegs(abfCtx h)
             }
         if (found)
             {
+            long origId = isect->id;
             isect->flags |= ISECT_DUP;
             if (isect->id != next->id)
                 {
                 for (j = 0; j < h->isects.cnt; j++)
                     {
                     Intersect *i1 = &h->isects.array[j];
-                    if (i1->id == isect->id)
+                    if (i1->id == origId)
                         i1->id = next->id;
                     }
                 }
@@ -1787,25 +1912,61 @@ static void splitIsectSegs(abfCtx h)
 			}
 		}
 
-	/* Round split segments and update unsplit segment connections */
+	/* Update unsplit segment connections and round end coordinates */
 	for (i = 0; i < h->isects.cnt; i++)
 		{
 		Segment *seg;
+        int atBeg;
 		isect = &h->isects.array[i];
 		seg = &h->segs.array[isect->iSeg];
 
+#if ROUND_ISECT_COORDS
+        isect->p.x = RND(isect->p.x);
+        isect->p.y = RND(isect->p.y);
+#endif
+        atBeg = (isect->t == 0);
 		if (isect->iSplit == -1)
-			isect->iSplit = (isect->t == 0)? seg->iPrev: seg->iNext;
-		else
-			{
-			roundSegment(h, isect->iSeg, 0);
-			roundSegment(h, isect->iSplit, 1);
-			}
-
+			isect->iSplit = atBeg? seg->iPrev: seg->iNext;
+#if ROUND_ISECT_COORDS
+        roundSegment(h, isect->iSeg, atBeg);
+        roundSegment(h, isect->iSplit, !atBeg);
+#endif
 		/* Mark segments as intersected */
 		seg->flags |= SEG_ISECT;
 		h->segs.array[isect->iSplit].flags |= SEG_ISECT;
 		}
+    /* Remove short segments from each intersection. */
+retry:
+	for (i = 0; i < h->isects.cnt; i++)
+		{
+		isect = &h->isects.array[i];
+
+        if (!(isect->flags & ISECT_DUP))
+            {
+            int atBeg = (isect->t == 0);
+            int segSquashed = 0;
+            segSquashed |= squashShortSeg(h, isect, 0, atBeg, &isectSquashed);
+            segSquashed |= squashShortSeg(h, isect, 1, atBeg, &isectSquashed);
+            if (segSquashed)
+                goto retry;  /* restart scan for short segments */
+            }
+        }
+
+    /* If any intersections are squashed above, remove them from list */
+    if (isectSquashed)
+        {
+        qsort(h->isects.array, h->isects.cnt, sizeof(Intersect), cmpSegs);
+        for (i = h->isects.cnt - 1; i > 0; i--)
+            {
+            isect = &h->isects.array[i];
+            
+            /* Remove squashed intersections from list */
+            if (!(isect->flags & ISECT_DUP))
+                break;
+            else
+                dnaSET_CNT(h->isects, i);
+            }
+        }
 	}
 
 /* Compare intersections by id. */
@@ -2048,7 +2209,7 @@ static int getWindAtValue(float beg, float end, float value)
 		return (beg > end)? 1: -1;
 	}
 
-static float updateScoreIfClose(float v1, float v2)
+static float penalizeCloseCross(float v1, float v2)
     {
     float   diff = (float)fabs(v1 - v2);
     if (diff < WIND_TEST_EPSILON)
@@ -2057,12 +2218,158 @@ static float updateScoreIfClose(float v1, float v2)
         return 0;
     }
 
+static long searchValueList(ValueList *list, float val)
+    {
+    long    lo = 0;
+    long    hi = list->cnt - 1;
+    long    t;
+
+	/* Binary search for value */
+	while (lo <= hi)
+		{
+        float   test;
+
+		t = (lo + hi)/2;
+        test = list->array[t] - val;
+        if (test == 0)
+            return t;
+		else if (test < 0)
+			lo = t + 1;
+		else
+			hi = t - 1;
+		}
+	return t;
+    }
+
+/* Pick a coordinate value for a segment winding test.
+   Any value between the two ends of the segment should work in theory,
+   however in order to minimize the chance of math errors, avoid proximity of
+   end points and extrema of other segments utilizing extrema lists collected earlier. */
+static void chooseTargetPoint(abfCtx h, Segment *seg, Point *mid, int testvert)
+    {
+    float   v;
+    float   min, max;
+    float   gapVal;
+    long    i, gapIndex;
+    ValueList   *list;
+
+    if (testvert)
+        {
+        min = seg->p0.x;
+        max = seg->p3.x;
+        list = &h->xExtremaList;
+        }
+        else
+        {
+        min = seg->p0.y;
+        max = seg->p3.y;
+        list = &h->yExtremaList;
+        }
+
+    if (min == max)
+        v = min;
+    else
+        {
+        if (min > max)
+            {
+            float   temp = min;
+            min = max;
+            max = temp;
+            }
+
+        /* Search the extrema list for the widest gap between the segment ends. */
+        i = searchValueList(list, min);
+        gapVal = -MAXFLOAT;
+        for (; list->array[i] < max; i++)
+            {
+            float   w = list->array[i+1] - list->array[i];
+
+            /* penalize gaps at both ends of this segment */
+            if (list->array[i] <= min || list->array[i+1] >= max)
+                w -= 5.0f;
+            if (gapVal < w)
+                {
+                gapVal = w;
+                gapIndex = i;
+                }
+            }
+        v = (list->array[gapIndex] + list->array[gapIndex+1])/2;
+    #if ABF_DEBUG
+        if (v <= min || v >= max)
+            fatal(h, abfErrCantHandle);
+    #endif
+    }
+
+    /* Determine the other coordinate value corresponding to v. */
+    if (seg->flags & SEG_LINE)
+        {
+        if (testvert)
+            {
+            mid->x = v;
+            mid->y = ((seg->p3.y - seg->p0.y) * (v - seg->p0.x) + (seg->p3.x - seg->p0.x) * seg->p0.y) / (seg->p3.x - seg->p0.x);
+            }
+        else
+            {
+            mid->x = ((seg->p3.x - seg->p0.x) * (v - seg->p0.y) + (seg->p3.y - seg->p0.y) * seg->p0.x) / (seg->p3.y - seg->p0.y);
+            mid->y = v;
+            }
+        }
+    else
+        {
+        int cnt;
+        float   icepts[3];
+        int     wind[3];    /* unused */
+
+        if (testvert)
+            {
+            mid->x = v;
+            cnt = solveSegAtX(seg, v, icepts, wind);
+#if ABF_DEBUG
+            if (cnt <= 0)
+                fatal(h, abfErrCantHandle);
+#endif
+            mid->y = icepts[0];
+            }
+        else
+            {
+            mid->y = v;
+            cnt = solveSegAtY(seg, v, icepts, wind);
+#if ABF_DEBUG
+            if (cnt <= 0)
+                fatal(h, abfErrCantHandle);
+#endif
+            mid->x = icepts[0];
+            }
+        }
+    }
+
+/* Rough estimate of segment length for heuristics use. */
+static float estSegLen(Segment *seg)
+    {
+    return (float)(fabs(seg->bounds.right - seg->bounds.left) + fabs(seg->bounds.top - seg->bounds.bottom));
+    }
+
+/* Set segment score from winding count, its confidence, and the segment length */
+static void setWindScore(Segment *seg, int windCount, float conf)
+    {
+        float score = (float)windCount/2 + conf;
+        float len = estSegLen(seg);
+
+        score = (float)((score * 0.5) + 1.0);
+        score = MAX(score, 0);
+
+        /* Less confident with short segments */
+        score *= log10f(len);
+
+        seg->score = score;
+    }
+
 /* Test segment winding on both sides and set flags accordingly.
    If both sides are filled/unfilled, delete the segment.
    If the wrong side of the segment is filled, reverse its direction. */
 static void windTestSeg(abfCtx h, long iTarget)
 	{
-	Point p;
+    Point p;
 	float icepts[3];
 	long iPath;
 	long iBegPath;
@@ -2077,18 +2384,6 @@ static void windTestSeg(abfCtx h, long iTarget)
 	if (target->flags & (SEG_WIND_TEST|SEG_DELETE))
 		return;	/* Ignore checked or deleted segments */
 
-	/* Choose target point in middle of this segment */
-	if (target->flags & SEG_LINE)
-		{
-		p.x = (target->p0.x + target->p3.x)/2;
-		p.y = (target->p0.y + target->p3.y)/2;
-		}
-	else
-		{
-		p.x = (target->p3.x + 3*(target->p2.x + target->p1.x) +target->p0.x)/8;
-		p.y = (target->p3.y + 3*(target->p2.y + target->p1.y) +target->p0.y)/8;
-		}
-
 	windTotalLo = windTotalHi = 0;
     score = 0;
 	testvert = (fabs(target->p3.x - target->p0.x) >
@@ -2097,6 +2392,9 @@ static void windTestSeg(abfCtx h, long iTarget)
 		windtarget = getWind(target->p0.x, target->p3.x);
 	else
 		windtarget = getWind(target->p0.y, target->p3.y);
+
+	/* Choose a target point geometrically between the two ends of the segment */
+    chooseTargetPoint(h, target, &p, testvert);
 
 	iBegPath = target->iPath;
 	iPath = iBegPath;
@@ -2165,6 +2463,7 @@ static void windTestSeg(abfCtx h, long iTarget)
                         if (!(seg->flags & SEG_DELETE))
                             {
                             target->flags |= (SEG_DELETE|SEG_WIND_TEST);
+                            setWindScore(target, 1, score);
                             return;
                             }
                         }
@@ -2172,7 +2471,7 @@ static void windTestSeg(abfCtx h, long iTarget)
                         {
                         int cnt = solveSegAtX(seg, p.x, icepts, wind);
                         int self = -1;
-                        float mindiff = FLT_MAX;
+                        float mindiff = MAXFLOAT;
                         if (iTarget == iSeg)
                             {
                             if (cnt == 1)
@@ -2201,7 +2500,7 @@ static void windTestSeg(abfCtx h, long iTarget)
                                     else
                                         windTotalHi += w;
 
-                                    score -= updateScoreIfClose(iy, p.y);
+                                    score -= penalizeCloseCross(iy, p.y);
                                     }
                                 else
                                     score -= 1.0f;  /* overlapping */
@@ -2250,6 +2549,7 @@ static void windTestSeg(abfCtx h, long iTarget)
                         if (!(seg->flags & SEG_DELETE))
                             {
                             target->flags |= (SEG_DELETE|SEG_WIND_TEST);
+                            setWindScore(target, 1, score);
                             return;
                             }
                         }
@@ -2257,7 +2557,7 @@ static void windTestSeg(abfCtx h, long iTarget)
                         {
                         int cnt = solveSegAtY(seg, p.y, icepts, wind);
                         int self = -1;
-                        float mindiff = FLT_MAX;
+                        float mindiff = MAXFLOAT;
                         if (iTarget == iSeg)
                             {
                             if (cnt == 1)
@@ -2286,7 +2586,7 @@ static void windTestSeg(abfCtx h, long iTarget)
                                     else
                                         windTotalHi += w;
 
-                                    score -= updateScoreIfClose(ix, p.x);
+                                    score -= penalizeCloseCross(ix, p.x);
                                     }
                                 else
                                     score -= 1.0f;  /* overlapping */
@@ -2307,20 +2607,13 @@ static void windTestSeg(abfCtx h, long iTarget)
 	if ((windTotalLo != 0) == (windTotalHi != 0))
         {
         /* A segment with (almost) overlapping segments is a candidate for undeletion later. */
-        float diff = (float)MIN(abs(windTotalLo), abs(windTotalHi)) + score;
-        if (diff > 1.0f)
-            target->score = 1;      /* confident */
-        else
-            target->score = diff;   /* inconfident */
+        setWindScore(target, MIN(abs(windTotalLo), abs(windTotalHi)), score);
 		target->flags |= SEG_DELETE;
         }
     else
         {
         /* A segment with (almost) overlapping segments is a candidate for deletion later */
-        if (score >= 0)
-            target->score = 1;      /* confident */
-        else
-            target->score = score;  /* inconfident */
+        setWindScore(target, MAX(abs(windTotalLo), abs(windTotalHi)), score);
 
         /* If the wrong side (i.e., not on the left) of the segment is filled,
            set the flag so that the segment will be reversed */
@@ -2507,7 +2800,7 @@ static long lookupOutlet(abfCtx h, Junction *junc, long iSeg, long flags)
     return segMatch;
     }
 
-static void modifyOutlet(abfCtx h, Junction *junc, long iSeg, long oldFlags, long newFlags)
+static void modifyOutlet(abfCtx h, Junction *junc, long iSeg, long oldFlags, long newFlags, float adjustScore)
     {
     long    i;
     OutletList  *list = &junc->outlets;
@@ -2520,6 +2813,7 @@ static void modifyOutlet(abfCtx h, Junction *junc, long iSeg, long oldFlags, lon
 
     outlet = &junc->outlets.array[i];
     outlet->flags = (outlet->flags & ~mask) | newFlags;
+    outlet->score += adjustScore;
 
     if (!(oldFlags & OUTLET_DELETE))
         {
@@ -2577,9 +2871,10 @@ static void polishOutlet(abfCtx h, long iJunc, Outlet *begOutlet)
     int undelCount = 0;
     int delCount = 0;
     int revCount = 0;
-    int inoutmismatch = 0;
+    float totalRevScore = 0;
     float totalUndelScore = 0;
     float totalDelScore = 0;
+    float totalScore;
     long iEndJunc;
     long iEndOutlet;
     Outlet *endOutlet;
@@ -2611,7 +2906,10 @@ static void polishOutlet(abfCtx h, long iJunc, Outlet *begOutlet)
         revFlag = (seg->flags & SEG_REVERSE);
         revmis = (revFlag != begRevFlag);
         if (revmis)
+            {
             revCount++;
+            totalRevScore += seg->score;
+            }
 
         if (out ^ revmis)
             iEndJunc = seg->inJunc;
@@ -2622,8 +2920,6 @@ static void polishOutlet(abfCtx h, long iJunc, Outlet *begOutlet)
             endJunc = &h->juncs.array[iEndJunc];
             iEndSeg = iSeg;
             endRevFlag = revFlag;
-            if (revmis)
-                inoutmismatch = 1;
             break;
             }
 
@@ -2635,7 +2931,8 @@ static void polishOutlet(abfCtx h, long iJunc, Outlet *begOutlet)
         }
 
     segCount = delCount + undelCount;
-    score = (totalDelScore + totalUndelScore) / segCount;
+    totalScore = totalDelScore + totalUndelScore;
+    score = totalScore / segCount;
 
     /* Set other junction/outlet indices in outlets at both ends */
     begOutlet->otherJunc = iEndJunc;
@@ -2652,18 +2949,6 @@ static void polishOutlet(abfCtx h, long iJunc, Outlet *begOutlet)
         begOutlet->score = score;
         endOutlet->score = score;
         return;
-        }
-    else
-        {
-        /* If the numbers of outlets and inlets are inconsistent at both junctions
-           making this sequence of segments as a good candidate for deletion,
-           lower outlet scores at both ends */
-        int begDiff = begJunc->outCount - begJunc->inCount;
-        int endDiff = endJunc->outCount - endJunc->inCount;
-
-        if ((out && begDiff > 0 && endDiff < 0) ||
-             (!out && begDiff < 0 && endDiff > 0))
-            score -= 10.f;
         }
 
     /* Fix inconsistency problems */
@@ -2688,14 +2973,14 @@ static void polishOutlet(abfCtx h, long iJunc, Outlet *begOutlet)
         if ((h->segs.array[iBegSeg].flags & SEG_DELETE) != segFlag)
             {
             begOutlet->score += score;
-            modifyOutlet(h, begJunc, iBegSeg, begOutlet->flags, begOutlet->flags ^ OUTLET_DELETE);
+            modifyOutlet(h, begJunc, iBegSeg, begOutlet->flags, begOutlet->flags ^ OUTLET_DELETE, 0);
             }
 
         /* Delete/undelete the incoming outlet. */
         if ((h->segs.array[iEndSeg].flags & SEG_DELETE) != segFlag)
             {
             endOutlet->score += score;
-            modifyOutlet(h, endJunc, iEndSeg, endOutlet->flags, endOutlet->flags ^ OUTLET_DELETE);
+            modifyOutlet(h, endJunc, iEndSeg, endOutlet->flags, endOutlet->flags ^ OUTLET_DELETE, 0);
             }
         
         modifySegSeqFlags(h, iBegSeg, iEndSeg, forw, segMask, segFlag);
@@ -2705,41 +2990,41 @@ static void polishOutlet(abfCtx h, long iJunc, Outlet *begOutlet)
         score = 0;
         }
 
-    /* If the direction of the first and the last segments match but some other segments mismatch,
-      then fix them */
-    if (revCount > 0 && !inoutmismatch)
+    /* If any segments have inconsistent reverse flags, then correct minority segments */
+    if (revCount > 0)
         {
-        score += (float)-revCount / segCount;
-        begOutlet->score += score;
-        endOutlet->score += score;
-        modifySegSeqFlags(h, iBegSeg, iEndSeg, forw, SEG_REVERSE, begRevFlag);
-        return;
-        }
-
-    /* If the direction of the first and the last segments mismatch, then correct minority segments */
-    if (inoutmismatch)
-        {
-        if (revCount * 2 <= segCount)
+        if (totalScore > totalRevScore * 2)
             {
             revFlag = begRevFlag;
-            score -= (float)revCount / segCount;
+            score -= totalRevScore / segCount;
             }
         else
             {
-            revFlag = endRevFlag;
-            score -= (float)(segCount - revCount) / segCount;
+            revFlag = begRevFlag ^ SEG_REVERSE;
+            score -= (totalScore - totalRevScore) / segCount;
             }
 
         modifySegSeqFlags(h, iBegSeg, iEndSeg, forw, SEG_REVERSE, revFlag);
 
         if (revFlag != begRevFlag)
-            modifyOutlet(h, begJunc, iBegSeg, begOutlet->flags, begOutlet->flags ^ OUTLET_OUT);
-        else
-            modifyOutlet(h, endJunc, iEndSeg, endOutlet->flags, endOutlet->flags ^ OUTLET_OUT);
+            modifyOutlet(h, begJunc, iBegSeg, begOutlet->flags, begOutlet->flags ^ OUTLET_OUT, score);
+        if (revFlag != endRevFlag)
+            modifyOutlet(h, endJunc, iEndSeg, endOutlet->flags, endOutlet->flags ^ OUTLET_OUT, score);
+        score = 0;
         }
 
     begOutlet->score += score;
     endOutlet->score += score;
+    }
+
+static int signCountDiff(Junction *junc)
+    {
+        if (junc->outCount > junc->inCount)
+            return 1;
+        else if (junc->outCount < junc->inCount)
+            return -1;
+        else
+            return 0;
     }
 
 /* Check consistency of all outlets and segments in between, and score outlets, and fix problems. */
@@ -2755,38 +3040,50 @@ static void polishOutlets(abfCtx h, long iBeg)
             polishOutlet(h, iJunc, &junc->outlets.array[i]);
         }
 
+    /* If the numbers of outlets and inlets at both end junctions of a segment are inconsistent
+       in the opposite directions, penalize the outlets so that fixBadJunctions will consider
+       the segment as a candidate for flipping its direction or deletion.  */
+    for (iJunc = 0; iJunc < h->juncs.cnt; iJunc++)
+        {
+        junc = &h->juncs.array[iJunc];
+        for (i = 0; i < junc->outlets.cnt; i++)
+            {
+            Outlet *begOutlet = &junc->outlets.array[i];
+            Junction *endJunc = &h->juncs.array[begOutlet->otherJunc];
+            int begDiff = signCountDiff(junc);
+            int endDiff = signCountDiff(endJunc);
+
+            if (begDiff && begDiff == -endDiff)
+                {
+                int out = (begOutlet->flags & OUTLET_OUT) != 0;
+                if (((begOutlet->flags & OUTLET_DELETE) != 0) ||
+                    (out && begDiff > 0 && endDiff < 0) ||
+                    (!out && begDiff < 0 && endDiff > 0))
+                    begOutlet->score -= MISMATCH_SEGMENT_PENALTY;
+                }
+            }
+        }
+
     /* Reset visited flag */
     resetSegFlags(h, iBeg, 0, SEG_VISITED);
     }
 
-static int signCountDiff(Junction *junc)
+/* try fixing junctions by deleting or undeleting an outlet with the least score
+   Return 1 if all junctions become good (i.e., inlets and outlets are balanced) */
+static int fixWorstOutlet(abfCtx h)
     {
-        if (junc->outCount > junc->inCount)
-            return 1;
-        else if (junc->outCount < junc->inCount)
-            return -1;
-        else
-            return 0;
-    }
-
-/* try fixing junctions by undeleting outlets to match unbalanced outlets at a bad junction.
-   Return 1 if any change made */
-static int fixJuncsByUndelOutlet(abfCtx h, int phase, int *good)
-    {
+    int     good = 1;
     long    i;
-    int     changed;
-    long    iJunc;
-    Junction *endJunc;
+    long    iJunc, iWorstJunc;
+    Junction *endJunc, *worstJunc;
     float   worstScore;
     Outlet  *worstOutlet;
-    float   startAngle, nextAngle;
-    Outlet  *outlet;
+    long    badFlag;
     long    iBegSeg, iEndSeg;
     Segment *seg;
 
-    *good = 1;
-    changed = 0;
-
+    /* Find the worst outlet */
+    worstScore = MAXFLOAT;
     for (iJunc = 0; iJunc < h->juncs.cnt; iJunc++)
         {
         Junction *junc = &h->juncs.array[iJunc];
@@ -2794,253 +3091,80 @@ static int fixJuncsByUndelOutlet(abfCtx h, int phase, int *good)
 
         if (sign)
             {
-            long    badFlag = (sign > 0)? OUTLET_OUT: 0;
+            good = 0;
 
-            *good = 0;
-
-            if (phase == 0 && junc->inCount && junc->outCount)
-                continue;
-            h->indices.cnt = 0;
-
-            /* Collect non-deleted outlet indices */
             for (i = 0; i < junc->outlets.cnt; i++)
-                if (!(junc->outlets.array[i].flags & OUTLET_DELETE))
-                    *dnaNEXT(h->indices) = i;
-
-            worstScore = FLT_MAX;
-            worstOutlet = NULL;
-
-            for (i = 0; i < h->indices.cnt; i++)
                 {
-                long    outFlag;
+                Outlet *outlet = &junc->outlets.array[i];
+                float  score;
+                int otherSign;
 
-                outlet = &junc->outlets.array[h->indices.array[i]];
-                outFlag = outlet->flags & OUTLET_OUT;
-                
-                if (outFlag == badFlag)
-                    {
-                    long next = (i < h->indices.cnt - 1)? (i+1): 0;
-                    long i0, i1, j;
-
-                    i0 = h->indices.array[i];
-                    i1 = h->indices.array[next];
-
-                    if (((junc->outlets.array[i0].flags & OUTLET_OUT) == outFlag) &&
-                        ((junc->outlets.array[i1].flags & OUTLET_OUT) == outFlag))
-                        {
-                        /* Search around the junction for a deleted outlet clockwise from an outgoing outlet,
-                           search counter-clockwise from an incoming outlet */
-                        if (outFlag)
-                            {
-                            startAngle = junc->outlets.array[i1].angle;
-                            j = i1 - 1;
-                            while (j != i0)
-                                {
-                                if (j < 0)
-                                    {
-                                    j = junc->outlets.cnt - 1;
-                                    continue;
-                                    }
-                                
-                                outlet = &junc->outlets.array[j];
-                                if (outlet->angle != startAngle)
-                                    {
-                                    if (phase == 0)
-                                        break;
-
-                                     /* Second phase: If there are multiple outlets with the same angle,
-                                        pick the one with the worst score. */
-                                   if (worstOutlet == NULL)
-                                        nextAngle = outlet->angle;
-                                    if (outlet->angle != nextAngle)
-                                        break;
-                                    if (outlet->score < worstScore)
-                                        {
-                                        worstOutlet = outlet;
-                                        worstScore = outlet->score;
-                                        }
-                                    }
-                                j--;
-                                }
-                            }
-                        else
-                            {
-                            startAngle = junc->outlets.array[i0].angle;
-                            j = i0 + 1;
-                            while (j != i1)
-                                {
-                                if (j >= junc->outlets.cnt)
-                                    {
-                                    j = 0;
-                                    continue;
-                                    }
-                                
-                                outlet = &junc->outlets.array[j];
-                                if (outlet->angle != startAngle)
-                                    {
-                                    /* During the first phase, find the other outlet whose unbalanced counts would be also corrected.
-                                       During the second phase, pick the one with the worst score. */
-                                    if (0 && phase == 0)
-                                        {
-                                            if (-sign == signCountDiff(&h->juncs.array[outlet->otherJunc]))
-                                                {
-                                                worstOutlet = outlet;
-                                                break;
-                                                }
-                                        }
-                                    else
-                                        {
-                                        if (worstOutlet == NULL)
-                                            nextAngle = outlet->angle;
-                                        if (phase == 0 && outlet->angle != nextAngle)
-                                            break;
-                                        if (outlet->score < worstScore)
-                                            {
-                                            worstOutlet = outlet;
-                                            worstScore = outlet->score;
-                                            }
-                                        }
-                                    }
-                                j++;
-                                }
-                            }
-                        }
-                    }
-                }
-
-            if (worstOutlet != NULL)
-                {
-                /* Undelete the segment sequence starting from this outlet.
-                 */
-                long    segFlag;
-                int     forw;
-
-                iBegSeg = worstOutlet->seg;
-                endJunc = &h->juncs.array[worstOutlet->otherJunc];
-                iEndSeg = worstOutlet->otherSeg;
-                if (endJunc == junc)
+                /* Don't choose an outlet with a segment sequence returning to the same junction */
+                if (junc == &h->juncs.array[outlet->otherJunc])
                     continue;
 
-                seg = &h->segs.array[iBegSeg];
-                forw = (seg->outJunc == iJunc) ^ ((seg->flags & SEG_REVERSE) != 0);
-                segFlag = seg->flags & SEG_REVERSE;
-                if ((seg->inJunc == iJunc) == (badFlag == 0))
-                    segFlag ^= SEG_REVERSE;
-                modifyOutlet(h, endJunc, iEndSeg, OUTLET_DELETE, badFlag);
-                modifyOutlet(h, junc, iBegSeg, OUTLET_DELETE, badFlag ^ OUTLET_OUT);
-                modifySegSeqFlags(h, iBegSeg, iEndSeg, forw, SEG_REVERSE|SEG_DELETE, segFlag);
-                changed = 1;
-                }
-            }
-        }
+                score = outlet->score;
 
-    return changed;
-    }
-
-/* Try fixing junctions by deleting less confident extraneous outlets.
-   Return 1 if any change made */
-static int fixJuncsByDelOutlet(abfCtx h, int phase, int *good)
-    {
-    long    i;
-    int     changed;
-    long    iJunc;
-    Junction *endJunc;
-    float   worstScore;
-    Outlet  *worstOutlet;
-    Outlet  *outlet;
-    long    iBegSeg, iEndSeg;
-
-    *good = 1;
-    changed = 0;
-
-    for (iJunc = 0; iJunc < h->juncs.cnt; iJunc++)
-        {
-        changed = 0;
-
-        for (iJunc = 0; iJunc < h->juncs.cnt; iJunc++)
-            {
-            Junction *junc = &h->juncs.array[iJunc];
-            int sign = signCountDiff(junc);
-
-            if (sign)
-                {
-                long    badFlag = (sign > 0)? OUTLET_OUT: 0;
-
-                /* At a good junction, outlets and inlets must alternate.
-                   At a bad junction, there must be an extraneous non-alternating outlet/inlet. */
-                *good = 0;
-                h->indices.cnt = 0;
-
-                /* Collect non-deleted outlet h->indices */
-                for (i = 0; i < junc->outlets.cnt; i++)
-                    if (!(junc->outlets.array[i].flags & OUTLET_DELETE))
-                        *dnaNEXT(h->indices) = i;
-
-                worstScore = NO_DELETE_OUTLET_SCORE;
-                worstOutlet = NULL;
-
-                for (i = 0; i < h->indices.cnt; i++)
+                if (!(outlet->flags & OUTLET_DELETE))
                     {
-                    long    outFlag;
-
-                    outlet = &junc->outlets.array[h->indices.array[i]];
-                    outFlag = outlet->flags & OUTLET_OUT;
-                    
-                    if (outFlag == badFlag)
-                        {
-                        /* During the first phase, try to maximize outlets/inlets alternating.
-                           During the second phase, delete any outlet with the least score at the junction. */
-                        float score;
-                        Junction    *otherJunc;
-                        int     otherSign;
-                        
-                        if (phase == 0)
-                            {
-                            long prev = (i > 0)? (i-1): (h->indices.cnt - 1);
-                            long next = (i < h->indices.cnt - 1)? (i+1): 0;
-                            int match0 = ((junc->outlets.array[h->indices.array[prev]].flags & OUTLET_OUT) == outFlag);
-                            int match1 = ((junc->outlets.array[h->indices.array[next]].flags & OUTLET_OUT) == outFlag);
-
-                            if (!match0 && !match1) /* Outlets on both sides alternating. Skip */
-                                continue;
-                            }
-
-                        score = outlet->score;
-                        otherJunc = &h->juncs.array[outlet->otherJunc];
-                        otherSign = signCountDiff(otherJunc);
-
-                        if (sign == -otherSign)
-                            score -= 1;
-                        else if (phase == 0)
-                            continue;
-                        if (score < worstScore)
-                            {
-                            worstOutlet = outlet;
-                            worstScore = score;
-                            }
-                        }
-                    }
-
-                if (worstOutlet != NULL)
-                    {
-                    int forw;
-                    /* Delete the segment sequence starting from this outlet. */
-                    iBegSeg = worstOutlet->seg;
-                    endJunc = &h->juncs.array[worstOutlet->otherJunc];
-                    iEndSeg = worstOutlet->otherSeg;
-                    if (endJunc == junc)
+                    if (((outlet->flags & OUTLET_OUT) != 0) != (sign > 0))
                         continue;
-                    
-                    forw = ((worstOutlet->flags & OUTLET_OUT) != 0) ^ ((h->segs.array[iBegSeg].flags & SEG_REVERSE) != 0);
-                    modifyOutlet(h, endJunc, iEndSeg, worstOutlet->flags ^ OUTLET_OUT, OUTLET_DELETE);
-                    modifyOutlet(h, junc, iBegSeg, worstOutlet->flags, OUTLET_DELETE);
-                    modifySegSeqFlags(h, iBegSeg, iEndSeg, forw, SEG_DELETE, SEG_DELETE);
-                    changed = 1;
+
+                    score -= EXTRA_OUTLET_PENALTY * (((sign > 0)? junc->outCount: junc->inCount) - 1);
+                    }
+
+                /* If the other junction has an opposite extra outlet, give it penalty */
+                endJunc = &h->juncs.array[outlet->otherJunc];
+                otherSign = signCountDiff(endJunc);
+                if (otherSign && otherSign != sign)
+                    score -= EXTRA_OUTLET_PENALTY;
+
+                if (score < worstScore)
+                    {
+                    iWorstJunc = iJunc;
+                    worstOutlet = outlet;
+                    worstScore = score;
+                    badFlag = (sign > 0)? OUTLET_OUT: 0;
                     }
                 }
             }
         }
-    return changed;
+
+    if (good)
+        return good;
+
+    /* Fix a bad junction by flipping deletion flag of an outlet with the least score. */
+    iBegSeg = worstOutlet->seg;
+    endJunc = &h->juncs.array[worstOutlet->otherJunc];
+    iEndSeg = worstOutlet->otherSeg;
+    worstJunc = &h->juncs.array[iWorstJunc];
+
+    if (worstOutlet->flags & OUTLET_DELETE)
+        {
+        /* Undelete a deleted outlet and the segment sequence starting from it */
+        long    segFlag;
+        int     forw;
+
+        seg = &h->segs.array[iBegSeg];
+        forw = (seg->outJunc == iWorstJunc) ^ ((seg->flags & SEG_REVERSE) != 0);
+        segFlag = seg->flags & SEG_REVERSE;
+        if ((seg->inJunc == iWorstJunc) == (badFlag == 0))
+            segFlag ^= SEG_REVERSE;
+        modifyOutlet(h, endJunc, iEndSeg, OUTLET_DELETE, badFlag, FIXED_SCORE_INCREMENT);
+        modifyOutlet(h, worstJunc, iBegSeg, OUTLET_DELETE, badFlag ^ OUTLET_OUT, FIXED_SCORE_INCREMENT);
+        modifySegSeqFlags(h, iBegSeg, iEndSeg, forw, SEG_REVERSE|SEG_DELETE, segFlag);
+        }
+    else
+        {
+        /* Delete an outlet and the segment sequence starting from it */
+        int forw = ((worstOutlet->flags & OUTLET_OUT) != 0) ^ ((h->segs.array[iBegSeg].flags & SEG_REVERSE) != 0);
+
+        modifyOutlet(h, endJunc, iEndSeg, worstOutlet->flags ^ OUTLET_OUT, OUTLET_DELETE, FIXED_SCORE_INCREMENT);
+        modifyOutlet(h, worstJunc, iBegSeg, worstOutlet->flags, OUTLET_DELETE, FIXED_SCORE_INCREMENT);
+        modifySegSeqFlags(h, iBegSeg, iEndSeg, forw, SEG_DELETE, SEG_DELETE);
+        }
+
+    return good;
     }
 
 /* Each junction must have the same number of incoming and outgoing outlets.
@@ -3049,34 +3173,22 @@ static int fixJuncsByDelOutlet(abfCtx h, int phase, int *good)
    Fix such junctions heuristically if the numbers of outlets don't match. */
 static void fixBadJunctions(abfCtx h, long iBeg)
     {
-    int     phase, sweep;
-    int     changed, good = 1;
+    int     sweep;
+    int     good = 0;
+    int     maxSweep = h->segs.cnt - h->paths.array[iBeg].iSeg;
 
-    for (phase = 0; phase < 2; phase++)
-        {
-        for (sweep = 0; sweep < h->juncs.cnt; sweep++)
-            {
-            /* Try fixing junctions by undeleting outlets */
-            do {
-                changed = fixJuncsByUndelOutlet(h, phase, &good);
-            } while (changed);
-            if (good)
-                return;
+    if (maxSweep > MAX_SWEEP_FIX_JUNC)
+        maxSweep = MAX_SWEEP_FIX_JUNC;
 
-            /* Try fixing junctions by deleting outlets */
-            do {
-                changed = fixJuncsByDelOutlet(h, phase, &good);
-            } while (changed);
-            if (good)
-                return;
-            }
-        }
+    for (sweep = 0; !good && sweep < h->segs.cnt; sweep++)
+        good = fixWorstOutlet(h);
 
     if (!good)
         {
         /* Last resort: Undelete all segments and restore the path direction. */
         resetSegFlags(h, iBeg, PATH_ISECT, SEG_ISECT|SEG_DELETE|SEG_REVERSE);
-        h->juncs.cnt = 0;
+		freeOutlets(h);
+		h->juncs.cnt = 0;
         }
     }
 
@@ -3097,26 +3209,12 @@ static void reverseSeg(Segment *seg)
     seg->iPrev = next;
     }
 
-/* Delete overlapped segments
-   Check each intersection for in and out non-deleted segments (their counts must match)
-   Collect them in a junction list */
-static void deleteBadSegs(abfCtx h, long iBeg)
-	{
-    long iPath;
-	long i, j;
-    Intersect *firstisect, *lastisect;
-    long beg, end;
-    Segment *seg;
-    long iJunc;
-    Junction *junc = NULL;
-
-    iJunc = h->juncs.cnt = 0;
-
-	/* Sort list by id */
-	qsort(h->isects.array, h->isects.cnt, sizeof(Intersect), cmpIds);
-
+static void windTestPaths(abfCtx h, long iBeg)
+    {
 	/* Check all segments for winding order. */
-    iPath = iBeg;
+    long    iPath = iBeg;
+    long    i;
+
 	do
 		{
 		Path *path = &h->paths.array[iPath];
@@ -3130,6 +3228,108 @@ static void deleteBadSegs(abfCtx h, long iBeg)
         while (i != path->iSeg);
 		}
 	while (iPath != iBeg);
+    }
+
+static void addPointToExtremaLists(abfCtx h, Point *p)
+    {
+    *dnaNEXT(h->xExtremaList) = p->x;
+    *dnaNEXT(h->yExtremaList) = p->y;
+    }
+
+static void addExtremaToExtremaList(abfCtx h, Extrema *extrema, ValueList *extremaList)
+    {
+    long    i;
+    for (i = 0; i < extrema->cnt; i++)
+        *dnaNEXT(*extremaList) = extrema->v[i];
+    }
+
+/* Compare intersections by id. */
+static int CTL_CDECL cmpVals(const void *first, const void *second)
+	{
+	float a = *(float *)first;
+	float b = *(float *)second;
+	if (a < b)
+		return -1;
+	else if (a > b)
+		return 1;
+	else
+		return 0;
+	}
+
+static void sortValueList(ValueList *list)
+    {
+    float   lastVal = -MAXFLOAT;
+    float   val;
+    long    i, j;
+
+	qsort(list->array, list->cnt, sizeof(list->array[0]), cmpVals);
+
+    /* remove duplicates */
+    for (i = j = 0; i < list->cnt; i++)
+        {
+        val = list->array[i];
+        if (val != lastVal)
+            {
+            list->array[j++] = val;
+            lastVal = val;
+            }
+        }
+    list->cnt = j;
+    }
+
+/* Collect all x and y values of segment ends and extrema
+   sort each list for later use in choosing a coordinate value
+   for winding test with a segment */
+static void collectExtrema(abfCtx h)
+    {
+    long    iBeg = h->glyphs.array[h->iGlyph].iPath;
+    long    iPath = iBeg;
+    long    iSeg;
+
+	do
+		{
+		Path *path = &h->paths.array[iPath];
+		iPath = path->iNext;
+        iSeg = path->iSeg;
+        do
+            {
+            Segment *seg = &h->segs.array[iSeg];
+
+            addPointToExtremaLists(h, &seg->p0);
+            addPointToExtremaLists(h, &seg->p3);
+            addExtremaToExtremaList(h, &seg->xExtrema, &h->xExtremaList);
+            addExtremaToExtremaList(h, &seg->yExtrema, &h->yExtremaList);
+
+            iSeg = h->segs.array[iSeg].iNext;
+            }
+        while (iSeg != path->iSeg);
+		}
+	while (iPath != iBeg);
+
+    /* sort both extrema list and remove duplicates */
+    sortValueList(&h->xExtremaList);
+    sortValueList(&h->yExtremaList);
+    }
+
+/* Delete overlapped segments
+   Check each intersection for in and out non-deleted segments (their counts must match)
+   Collect them in a junction list */
+static void deleteBadSegs(abfCtx h, long iBeg)
+	{
+	long i, j;
+    Intersect *firstisect, *lastisect;
+    long beg, end;
+    Segment *seg;
+    long iJunc;
+    Junction *junc = NULL;
+
+	freeOutlets(h);
+    iJunc = h->juncs.cnt = 0;
+
+	/* Sort list by id */
+	qsort(h->isects.array, h->isects.cnt, sizeof(Intersect), cmpIds);
+
+    windTestPaths(h, iBeg);
 
 	/* Collect non-deleted segments intersecting at the same point in a junction list */
     firstisect = lastisect = NULL;
@@ -3165,11 +3365,6 @@ static void deleteBadSegs(abfCtx h, long iBeg)
             lastisect = isect;
 
             /* There must be N*2 segments on N paths surrounding an intersection */
-#if ABF_DEBUG
-            if (lastisect - firstisect <= 0)     /* shouldn't happen but harmless to ignore */
-                fatal(h, abfErrCantHandle);
-#endif
-
             /* Start a new series of intersections at the same point */
             if (junc)
                 {
@@ -3329,6 +3524,68 @@ static void buildPath(abfCtx h, long iBegNewPaths, long iSeg)
 		}
 	}
 
+/* Returns 1 if a non-intersecting path should be preserved;
+   Returns 0 if it should be deleted. */
+static int isMarkingPath(abfCtx h, Path *path)
+    {
+    int segCount, delCount;
+    long    iSeg, iStartSeg;
+    Segment *seg;
+
+    segCount = delCount = 0;
+    iSeg = iStartSeg = path->iSeg;
+    for (;;)
+        {
+        seg = &h->segs.array[iSeg];
+        segCount++;
+        if (seg->flags & SEG_DELETE)
+            delCount++;
+
+        iSeg = seg->iNext;
+        if (iSeg == iStartSeg)
+            break;
+        }
+    return (delCount * 2 <= segCount);
+    }
+
+/* Delete non-marking, non-intersecting paths */
+static void deleteNonMarkingPaths(abfCtx h, long iBeg, long iGlyph)
+    {
+	long iEnd = h->paths.array[iBeg].iPrev;
+    long iFirstPath = -1;
+    long iPrevPath = -1;
+    long i;
+    Path    *path;
+
+    for (i = iBeg; i <= iEnd; i++)
+        {
+        path = &h->paths.array[i];
+#if ABF_DEBUG
+        if (path->flags & PATH_ISECT)
+            fatal(h, abfErrCantHandle);
+#endif
+        if (isMarkingPath(h, path))
+            {
+            if (iPrevPath != -1)
+                {
+                path->iPrev = iPrevPath;
+                h->paths.array[iPrevPath].iNext = i;
+                }
+            iPrevPath = i;
+            if (iFirstPath == -1)
+                iFirstPath = i;
+            }
+        }
+    if (iFirstPath != -1)
+        {
+        h->paths.array[iFirstPath].iPrev = iPrevPath;
+        h->paths.array[iPrevPath].iNext = iFirstPath;
+        h->glyphs.array[iGlyph].iPath = iFirstPath;
+        }
+    else    /* Unlikely but may happen */
+		h->glyphs.array[iGlyph].iPath = -1;
+    }
+
 /* Build new path list. */
 static void buildNewPaths(abfCtx h, long iPath, long iGlyph)
 	{
@@ -3343,7 +3600,7 @@ static void buildNewPaths(abfCtx h, long iPath, long iGlyph)
 		Path *path = &h->paths.array[iPath];
 		iPath = path->iNext;
 		if (!(path->flags & PATH_ISECT)
-            && !(h->segs.array[path->iSeg].flags & SEG_DELETE))
+            && isMarkingPath(h, path))
 			{
 			/* Copy bounds since newPath() may invalidate path pointer */
 			Rect bounds = path->bounds;
@@ -3456,6 +3713,8 @@ static void isectGlyph(abfCtx h, long iGlyph)
 
 	iEnd = h->paths.array[iBeg].iPrev;
 	h->isects.cnt = 0;
+    h->xExtremaList.cnt = 0;
+    h->yExtremaList.cnt = 0;
     h->iGlyph = iGlyph;
 
 	/* Check paths for self-intersection */
@@ -3478,9 +3737,16 @@ static void isectGlyph(abfCtx h, long iGlyph)
 		{
 		/* Glyph contained intersecting paths */
 		splitIsectSegs(h);
+        collectExtrema(h);
 		deleteBadSegs(h, iBeg);
 		buildNewPaths(h, iBeg, iGlyph);
 		}
+    else
+        {
+        collectExtrema(h);
+        windTestPaths(h, iBeg);
+        deleteNonMarkingPaths(h, iBeg, iGlyph);
+        }
 	}
 
 /* Glyph path callbacks */
@@ -3521,6 +3787,8 @@ static void dbseg(abfCtx h, long iSeg)
 	{
 	long i = iSeg;
     long segCount = 0;
+    int seenGoodSeg = 0;
+
 	do
 		{
 		Segment *seg = &h->segs.array[i];
@@ -3540,7 +3808,13 @@ static void dbseg(abfCtx h, long iSeg)
 		printf("iPrev=%ld\n", seg->iPrev);
 		printf("iNext=%ld\n", seg->iNext);
 		printf("iPath=%ld\n", seg->iPath);
-		i = seg->iNext;
+
+        if (!seenGoodSeg && !(seg->flags & SEG_DELETE))
+            {
+            seenGoodSeg = 1;
+            iSeg = i;
+            }
+        i = seg->iNext;
 		}
 	while (i != iSeg);
 	}

@@ -54,6 +54,7 @@ static char *applestd[258] =
 
 #define SHORT_PS_NAME_LIMIT   63      /* according to the OpenType name table spec */
 #define LONG_PS_NAME_LIMIT    127     /* according to Adobe tech notes #5902 */
+#define STRING_BUFFER_LIMIT   1024    /* used to load family name/full name/copyright/trademark strings */
 
 #define ARRAY_LEN(t) 	(sizeof(t)/sizeof((t)[0]))
 
@@ -91,10 +92,10 @@ typedef struct					/* Operand Stack element */
         long int_val;		/* allow at least 32-bit int */
         float real_val;
     } u;
-        unsigned short numBlends;    /* the last operand before the blend operator.
-                            The number of items in blend_val is numBlends*(h->numRegions -1)
+    unsigned short numBlends;    /* the last operand before the blend operator.
+                            The number of items in blend_val is numBlends*(h->numRegions)
                             */
-        float* blend_val;  /* NULL unless the blend operator has been encountered. */
+    float* blend_val;  /* NULL unless the blend operator has been encountered. */
 } stack_elem;
 
 typedef struct					/* Format 2.0 data */
@@ -104,7 +105,6 @@ typedef struct					/* Format 2.0 data */
     dnaDCL(char, buf);
 } postFmt2;
 
-typedef long Fixed;
 typedef short FWord;
 
 typedef struct					/* post table */
@@ -157,7 +157,7 @@ struct cfrCtx_					/* Context */
         int cnt;
         int numRegions; /* current number of regions ( 1 less than the numer of source master designs), defined by
                          the varData structure which is selected by  the current vsindex into the VarStore. */
-		stack_elem array[T2_MAX_OP_STACK];  /* XXXX Must fix - needs to be allocated dynamically, according to the maxstack value */
+		stack_elem array[CFF2_MAX_OP_STACK];
     } stack;
 	struct						/* String data */
     {
@@ -188,16 +188,19 @@ struct cfrCtx_					/* Context */
     struct                      /* CFF2 font tables */
     {
 		float           *UDV;	/* From client */
-        var_F2dot14     ndv[T1_MAX_AXES];     /* normalized weight vector */
-        float           scalars[T1_MAX_MASTERS];               /* scalar values for regions */
+        var_F2dot14     ndv[CFF2_MAX_AXES];     /* normalized weight vector */
+        float           scalars[CFF2_MAX_MASTERS];               /* scalar values for regions */
         unsigned short  regionCount;          /* number of all regions */
-        unsigned short  regionIndices[T1_MAX_MASTERS];  /* region indices for the current vsindex */
+        unsigned short  regionIndices[CFF2_MAX_MASTERS];  /* region indices for the current vsindex */
 
         unsigned short  axisCount;
         var_axes        axes;
         var_hmtx        hmtx;
+        var_MVAR        mvar;
         nam_name        name;
         var_itemVariationStore  varStore;
+		void            *lastResortInstanceNameClientCtx;
+        cfrlastResortInstanceNameCallback    lastResortInstanceNameCallback;
     } cff2;
 	struct						/* Client callbacks */
     {
@@ -336,6 +339,7 @@ cfrCtx cfrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 	h->stm.dbg = NULL;
 	h->encfree = NULL;
 	h->ctx.dna = NULL;
+    h->cff2.lastResortInstanceNameCallback = NULL;
     
 	/* Copy callbacks */
 	h->cb.mem = *mem_cb;
@@ -380,6 +384,37 @@ cleanup:
 	return NULL;
 }
 
+static void freeBlend(cfrCtx h, abfOpEntry *blend)
+{
+    if (blend->blendValues != NULL)
+    {
+        memFree(h, blend->blendValues);
+        blend->blendValues = NULL;
+    }
+}
+
+static void freeBlendArray(cfrCtx h, abfOpEntryArray *blendArray)
+{
+    long    i;
+    for (i = 0; i < blendArray->cnt; i++)
+        freeBlend(h, &blendArray->array[i]);
+}
+
+static void freePrivateBlends(cfrCtx h, abfPrivateDict *private)
+{
+	freeBlend(h, &private->blendValues.StdHW);
+	freeBlend(h, &private->blendValues.StdVW);
+	freeBlend(h, &private->blendValues.BlueScale);
+	freeBlend(h, &private->blendValues.BlueShift);
+	freeBlend(h, &private->blendValues.BlueFuzz);
+	freeBlendArray(h, &private->blendValues.BlueValues);
+    freeBlendArray(h, &private->blendValues.OtherBlues);
+	freeBlendArray(h, &private->blendValues.FamilyBlues);
+	freeBlendArray(h, &private->blendValues.FamilyOtherBlues);
+	freeBlendArray(h, &private->blendValues.StemSnapH);
+	freeBlendArray(h, &private->blendValues.StemSnapV);
+}
+
 /* Free library context. */
 void cfrFree(cfrCtx h)
 {
@@ -390,8 +425,16 @@ void cfrFree(cfrCtx h)
     
 	/* Free dynamic arrays */
 	for (i = 0; i < h->FDArray.size; i++)
+	{
 		dnaFREE(h->FDArray.array[i].Subrs);
-    
+	}
+ 
+    /* Free dynamic arrays */
+    for (i = 0; i < h->FDArray.cnt; i++)
+    {
+         freePrivateBlends(h, &h->FDArray.array[i].fdict->Private);
+    }
+
 	dnaFREE(h->gsubrs);
 	dnaFREE(h->FDArray);
 	dnaFREE(h->fdicts);
@@ -404,6 +447,13 @@ void cfrFree(cfrCtx h)
 	dnaFREE(h->string.offsets);
 	dnaFREE(h->string.ptrs);
 	dnaFREE(h->string.buf);
+    
+    if (h->cff2.varStore != NULL) {
+        /* Call this here rather than end cfrEndFont, so that
+        the allocated memory will be available to aby client modules
+         */
+        var_freeItemVariationStore(&h->cb.shstm, h->cff2.varStore);
+    }
     
 	encListFree(h, h->encfree);
     
@@ -615,7 +665,7 @@ do if(h->stack.cnt<(n))fatal(h,cfrErrStackUnderflow);while(0)
 
 /* Check stack has room for n elements. */
 #define CHKOFLOW(n) \
-do if(h->stack.cnt+(n)>T2_MAX_OP_STACK)fatal(h,cfrErrStackOverflow);while(0)
+do if(h->stack.cnt+(n)>h->top.maxstack)fatal(h,cfrErrStackOverflow);while(0)
 
 /* Stack access without check. */
 #define INDEX(i) (h->stack.array[i])
@@ -765,7 +815,7 @@ static double convBCD(cfrCtx h)
 static void handleBlend(cfrCtx h)
 {
     /* When the CFF2 blend operator is encountered, the last items on the stack are
-     the blend operands. These are, in order:
+     the blend operands. These are in order:
      numBlends operands from the default font
      (numMaster-1)* numBlends blend delta operands
      numBlends value
@@ -788,6 +838,7 @@ static void handleBlend(cfrCtx h)
     int i = 0;
     int numDeltaBlends = numBlends*h->stack.numRegions;
     int firstItemIndex;
+    h->flags |= CFR_SEEN_BLEND;
 
     h->stack.cnt--;
 
@@ -818,7 +869,6 @@ static void handleBlend(cfrCtx h)
     else
     {
     
-        h->flags |= CFR_SEEN_BLEND;
         firstItem->numBlends = numBlends;
         firstItem->blend_val = memNew(h, sizeof(float)*numDeltaBlends);
         while (i < numDeltaBlends)
@@ -965,7 +1015,7 @@ static void saveDeltaArray(cfrCtx h, size_t max, long *cnt, float *array, long *
 static void saveBlend(cfrCtx h, float *realValue, abfOpEntry *blendEntry)
 {
     /* Save a value that may be blended. Stack depth is 1 for a non-blended value, or numBlends for a blended value. */
-    int i,j;
+    int i;
     int numBlends;
     
     stack_elem *stackEntry = &(INDEX(0));
@@ -981,22 +1031,25 @@ static void saveBlend(cfrCtx h, float *realValue, abfOpEntry *blendEntry)
     }
     else
     {
-        signed int numBlendDeltas = numBlends*(h->stack.numRegions);
-        unsigned short numBlendValues = numBlends + numBlendDeltas;
+        float defaultValue;
+        signed int numRegions = h->stack.numRegions;
+        unsigned short numBlendValues = numBlends + numRegions;
         float *blendValues = memNew(h, sizeof(abfOpEntry)*numBlendValues);
 
         blendEntry->numBlends = numBlends;
         blendEntry->blendValues = blendValues;
+    
+        // copy the defaul region value
+        blendValues[0] = defaultValue = INDEX_REAL(0);
+
+        /* now, copy the blend abusolate values to blendArray[i].
+        The default region value is in stackEntry->int_val or real_val
+        The region delta values are in the stackEntry->blend_val array.
+        */
         
-        /* first, copy the numBlend default values to blendArray[i]. */
-        for (j = 0; j < numBlends; j++)
+       for (i = 0; i < numRegions; i++)
         {
-            blendValues[j] = INDEX_REAL(j);
-        }
-        /* now, copy the blend deltas default values to blendArray[i]. */
-        for (i = 0; i < numBlendDeltas; i++)
-        {
-            blendValues[j++] = stackEntry->blend_val[i];
+            blendValues[i+1] = stackEntry->blend_val[i] + defaultValue;
         }
         
     }
@@ -1017,15 +1070,14 @@ static void saveIntArray(cfrCtx h, size_t max, long *cnt, long *array,
 	*cnt = h->stack.cnt;
 }
 
-static void setNumMasters(cfrCtx h, unsigned int vsindex)
+static int setNumMasters(cfrCtx h, unsigned int vsindex)
 {
-    h->stack.numRegions = var_getIVSRegionCountForIndex(h->cff2.varStore, vsindex);
-    if (h->stack.numRegions >= T1_MAX_MASTERS)
-        fatal(h, cfrErrGeometry);
+    int numRegions = h->stack.numRegions = var_getIVSRegionCountForIndex(h->cff2.varStore, vsindex);
     
-    if (!var_getIVSRegionIndices(h->cff2.varStore, vsindex, h->cff2.regionIndices, h->stack.numRegions)) {
+    if (!var_getIVSRegionIndices(h->cff2.varStore, vsindex, h->cff2.regionIndices, numRegions)) {
         message(h, "inconsistent region indices detected in item variation store subtable %d", vsindex);
     }
+    return numRegions;
 }
 
 /* -------------------------------- VarStore ------------------------------- */
@@ -1054,7 +1106,7 @@ static void readVarStore(cfrCtx h)
     h->region.VarStore.end = vstoreStart + length;
     h->cff2.varStore = var_loadItemVariationStore(&h->cb.shstm, (unsigned long)vstoreStart, length, 0);
     h->cff2.regionCount = var_getIVSRegionCount(h->cff2.varStore);
-
+    h->top.varStore = h->cff2.varStore;
     /* pre-calculate scalars for all regions for the current weight vector */
     var_calcRegionScalars(&h->cb.shstm, h->cff2.varStore, h->cff2.axisCount, h->cff2.ndv, h->cff2.scalars);
 }
@@ -1139,9 +1191,13 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
 	srcSeek(h, region->begin);
     
 	h->stack.cnt = 0;
-    h->stack.numRegions = 0;
+    h->stack.numRegions = private->numRegions = 0;
     private->vsindex = 0;
     
+    if (h->cff2.varStore != NULL)
+    {
+        h->stack.numRegions = private->numRegions = setNumMasters(h, private->vsindex);
+    }
 	while (srcTell(h) < region->end)
     {
 		int byte0 = read1(h);
@@ -1149,7 +1205,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
         {
             case cff_vsindex:
                 private->vsindex = (unsigned short)INDEX_INT(0);
-                setNumMasters(h, private->vsindex);
+                h->stack.numRegions = private->numRegions = setNumMasters(h, private->vsindex);
                 break;
 
             case cff_version:
@@ -1457,13 +1513,11 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
             case cff_VarStore:
                 CHKUFLOW(1);
                 h->region.VarStore.begin = h->src.origin + INDEX_INT(0);
-                readVarStore(h);
                 break;
             case cff_maxstack:
-                CHKUFLOW(2);
-                h->fd->region.PrivateDICT.begin = h->src.origin + INDEX_INT(1);
-                h->fd->region.PrivateDICT.end =
-                h->fd->region.PrivateDICT.begin + INDEX_INT(0);
+                CHKUFLOW(1);
+                // deprecated April 2017.
+                // top->maxstack = (unsigned short)INDEX_INT(0);
                 break;
             case cff_Subrs:
                 CHKUFLOW(1);
@@ -2017,6 +2071,9 @@ static void postRead(cfrCtx h)
     h->post.maxMemType42		= read4(h);
     h->post.minMemType1			= read4(h);
     h->post.maxMemType1			= read4(h);
+
+    if (h->flags & CID_FONT)
+        return; /* Don't read glyph names for CID fonts */
     
     if (h->post.format != 0x00020000)
         return;	/* Successfully read header */
@@ -2094,6 +2151,20 @@ parseError:
     h->post.format = 0x00000001;
 }
 
+/* Read MVAR table for font wide variable metrics. */
+static void MVARread(cfrCtx h)
+{
+	abfTopDict *top = &h->top;
+    float   thickness, position;
+
+    if (!var_lookupMVAR(&h->cb.shstm, h->cff2.mvar, h->cff2.axisCount, h->cff2.scalars, MVAR_unds_tag, &thickness)) {
+        top->UnderlineThickness += thickness;
+        top->UnderlinePosition -= thickness/2;
+    }
+    if (!var_lookupMVAR(&h->cb.shstm, h->cff2.mvar, h->cff2.axisCount, h->cff2.scalars, MVAR_undo_tag, &position)) {
+        top->UnderlinePosition += position;
+    }
+}
 
 /* Initialize from predefined charset */
 static void predefCharset(cfrCtx h, int cnt, const SID *charset)
@@ -2107,7 +2178,6 @@ static void predefCharset(cfrCtx h, int cnt, const SID *charset)
 	for (gid = 0; gid < cnt; gid++)
 		addID(h, (unsigned short)gid, charset[gid]);
 }
-
 
 static void readCharSetFromPost(cfrCtx h)
 {
@@ -2195,10 +2265,13 @@ static void readCharset(cfrCtx h)
 #include "exsubcs0.h"
     };
     
-    if (h->header.major == 2 && !(h->flags & CID_FONT))
+    if (h->header.major == 2)
     {
         postRead(h);
-        readCharSetFromPost(h);
+        if (h->cff2.mvar)
+            MVARread(h);
+        if (!(h->flags & CID_FONT))
+            readCharSetFromPost(h);
         return;
     }
     
@@ -2464,48 +2537,177 @@ static float cff2GetWidth(cff2GlyphCallbacks *cb, unsigned short gid)
 }
 
 /* ------------------------------- make up info missing from CFF2 ------------------------------- */
-static char * addString(cfrCtx h, char *str)
+typedef dnaDCL(abfString *, strPtrArray);
+
+static void addString(cfrCtx h, strPtrArray *ptrs, abfString *abfStr, char *str)
 {
     long    len = (long)strlen(str);
     long    offset = h->string.buf.cnt;
 
+	*dnaNEXT(*ptrs) = abfStr;
+	abfStr->impl = offset;
     dnaSET_CNT(h->string.buf, offset + len + 1);
     strcpy(&h->string.buf.array[offset], str);
 
-    return &h->string.buf.array[offset];
+    abfStr->ptr = &h->string.buf.array[offset];	/* needs to be updated after adding all strings */
+}
+
+/* Update string pointers that might have become stale due to buffer reallocation */
+static void resetStringPtrs(cfrCtx h, strPtrArray *ptrs)
+{
+    long	i;
+
+    for (i = 0; i < ptrs->cnt; i++)
+    {
+        abfString	*abfStr = ptrs->array[i];
+        abfStr->ptr = &h->string.buf.array[abfStr->impl];
+    }
+}
+
+static long generateInstancePSName(cfrCtx h, char *nameBuffer, long nameBufferLen)
+{
+    long    nameLen;
+
+    /* Get a named-instance name from the fvar table, if it is preferred and one is available */
+    if (!(h->flags & CFR_UNUSE_VF_NAMED_INSTANCE))
+        {
+        nameLen = nam_getNamedInstancePSName(h->cff2.name, h->cff2.axes, &h->cb.shstm,
+                                                h->cff2.UDV, h->cff2.axisCount, -1,
+                                                nameBuffer, nameBufferLen);
+        if (nameLen > 0)
+            return nameLen;
+        }
+
+    /* Generate an instance name from the design vector */
+    nameLen = nam_generateArbitraryInstancePSName(h->cff2.name, h->cff2.axes, &h->cb.shstm,
+                                                h->cff2.UDV, h->cff2.axisCount,
+                                                nameBuffer, nameBufferLen);
+    if (nameLen > 0)
+        return nameLen;
+
+    /* If above attempts failed, generate a last-resort name. If a naming callback
+       is provided, try it first. */
+    if (h->cff2.lastResortInstanceNameCallback)
+        {
+        char    prefixBuffer[LONG_PS_NAME_LIMIT+1];
+        long    prefixLen;
+
+        prefixLen = nam_getFamilyNamePrefix(h->cff2.name, &h->cb.shstm, prefixBuffer, LONG_PS_NAME_LIMIT+1);
+        if (prefixLen <= 0)
+            return prefixLen;
+
+        nameLen = (*h->cff2.lastResortInstanceNameCallback)(h->cff2.lastResortInstanceNameClientCtx, h->cff2.UDV, h->cff2.axisCount, prefixBuffer, prefixLen, nameBuffer, nameBufferLen);
+
+        if (nameLen > 0)
+            return nameLen;
+        }
+
+    /* Use our own last resort name */
+    nameLen = nam_generateLastResortInstancePSName(h->cff2.name, h->cff2.axes, &h->cb.shstm,
+                                                h->cff2.UDV, h->cff2.axisCount,
+                                                nameBuffer, nameBufferLen);
+
+    return nameLen;
 }
 
 static void makeupCFF2Info(cfrCtx h)
 {
+    abfTopDict *top = &h->top;
+    sfrTable *table;
+    char   buf[64];
     long   lenFontName;
     char    postscriptName[LONG_PS_NAME_LIMIT+1];
+    char    stringBuffer1[STRING_BUFFER_LIMIT+1];
+    char    stringBuffer2[STRING_BUFFER_LIMIT+1];
     unsigned long   nameLengthLimit;
+    long   lenTrademark;
+    strPtrArray	strPtrs;
 
+    dnaINIT(h->ctx.dna, strPtrs, 10, 1);
+
+    /* read font version and fontBBox from head table */
+    table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('h','e','a','d'));
+    if ((table != NULL) && !invalidStreamOffset(h, table->offset + 54 - 1))
+    {
+        unsigned long   version;
+        srcSeek(h, table->offset + 4);
+        version = read4(h);
+        sprintf(buf, "%ld.%ld", version>>16, (version>>12)&0xf);    /* Apple style "fixed point" version number */
+        addString(h, &strPtrs, &top->version, buf);
+
+        srcSeek(h, table->offset + 36);
+        top->FontBBox[0] = (float)sread2(h);
+        top->FontBBox[1] = (float)sread2(h);
+        top->FontBBox[2] = (float)sread2(h);
+        top->FontBBox[3] = (float)sread2(h);
+    }
+
+    /* read isFixedPitch, ItalicAngle, UnderlinePosition, UnderlineThickness from post table */
+    table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('p','o','s','t'));
+    if ((table != NULL) && !invalidStreamOffset(h, table->offset + 32 - 1))
+    {
+        srcSeek(h, table->offset + 4);
+        top->ItalicAngle = (float)(sread4(h) / 65536.0);
+        top->UnderlinePosition = (float)sread2(h);
+        top->UnderlineThickness = (float)sread2(h);
+        top->UnderlinePosition -= top->UnderlineThickness/2;
+        top->isFixedPitch = read4(h) != 0;
+    }
+
+    /* read Notice, FullName, FamilyName, Copyright from name table */
+    lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, stringBuffer1, sizeof(stringBuffer1), NAME_ID_FULL, 0);
+    if (lenFontName > 0)
+        addString(h, &strPtrs, &h->top.FullName, stringBuffer1);
+    lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, stringBuffer1, sizeof(stringBuffer1), NAME_ID_FAMILY, 0);
+    if (lenFontName > 0)
+        addString(h, &strPtrs, &h->top.FamilyName, stringBuffer1);
+    lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, stringBuffer1, sizeof(stringBuffer1), NAME_ID_COPYRIGHT, 0);
+    if (lenFontName > 0)
+        addString(h, &strPtrs, &h->top.Copyright, stringBuffer1);
+    lenTrademark = nam_getASCIIName(h->cff2.name, &h->cb.shstm, stringBuffer2, sizeof(stringBuffer2), NAME_ID_TRADEMARK, 0);
+    if (lenTrademark > 0 && ((unsigned long)(lenFontName + lenTrademark) + 2 < sizeof(stringBuffer1)))
+    {   /* concatename copyright and trademark strings */
+        strcat(stringBuffer1, " ");
+        strcat(stringBuffer1, stringBuffer2);
+    }
+    if (lenFontName > 0)
+        addString(h, &strPtrs, &h->top.Notice, stringBuffer1);
+
+    /* generate PostScript name for the instance */
     if (h->flags & CFR_SHORT_VF_NAME)
         nameLengthLimit = SHORT_PS_NAME_LIMIT;
     else
         nameLengthLimit = LONG_PS_NAME_LIMIT;
 
     /* generate an instance PostScript name */
-    lenFontName = nam_generateInstancePSName(h->cff2.name, h->cff2.axes, &h->cb.shstm,
-                                            h->cff2.UDV, h->cff2.axisCount, -1,
-                                            postscriptName, nameLengthLimit + 1);
+    lenFontName = generateInstancePSName(h, postscriptName, nameLengthLimit + 1);
 
     if (lenFontName > 0) {
-        h->fdicts.array[0].FontName.ptr = addString(h, postscriptName);
+        addString(h, &strPtrs, &h->fdicts.array[0].FontName, postscriptName);
     }
 
     /* Load CIDFontName from name table and make up CID font ROS */
     if (h->flags & CID_FONT) {
-        lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, postscriptName, sizeof(postscriptName), NAME_ID_CIDFONTNAME);
+
+        lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, postscriptName, sizeof(postscriptName), NAME_ID_CIDFONTNAME, 1);
         if (lenFontName <= 0)    /* if no CID font name in the name table, put PS name instead */
-            lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, postscriptName, sizeof(postscriptName), NAME_ID_POSTSCRIPT);
+            lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, postscriptName, sizeof(postscriptName), NAME_ID_POSTSCRIPT, 1);
+
         if (lenFontName > 0)
-            h->top.cid.CIDFontName.ptr = addString(h, postscriptName);
-        h->top.cid.Registry.ptr = addString(h, "Adobe");
-        h->top.cid.Ordering.ptr = addString(h, "Identity");
-		h->top.cid.Supplement = 1;
+            addString(h, &strPtrs, &h->top.cid.CIDFontName, postscriptName);
+        addString(h, &strPtrs, &h->top.cid.Registry, "Adobe");
+        addString(h, &strPtrs, &h->top.cid.Ordering, "Identity");
+        h->top.cid.Supplement = 1;
     }
+
+    resetStringPtrs(h, &strPtrs);
+    dnaFREE(strPtrs);
+}
+
+void cfrSetLastResortInstanceNameCallback(cfrCtx h, cfrlastResortInstanceNameCallback cb, void *clientCtx)
+{
+	h->cff2.lastResortInstanceNameClientCtx = clientCtx;
+    h->cff2.lastResortInstanceNameCallback = cb;
 }
 
 /* ------------------------------- Interface ------------------------------- */
@@ -2598,9 +2800,10 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
 
             h->cff2.axes = var_loadaxes(h->ctx.sfr, &h->cb.shstm);
             h->cff2.hmtx = var_loadhmtx(h->ctx.sfr, &h->cb.shstm);
+            h->cff2.mvar = var_loadMVAR(h->ctx.sfr, &h->cb.shstm);
             h->cff2.varStore = NULL;
             h->cff2.axisCount = var_getAxisCount(h->cff2.axes);
-            if (h->cff2.axisCount > T1_MAX_AXES)
+            if (h->cff2.axisCount > CFF2_MAX_AXES)
                 fatal(h, cfrErrGeometry);
 
             h->cff2.UDV = UDV;
@@ -2610,7 +2813,7 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
                 h->cff2.ndv[axis] = 0;
             }
             if (h->cff2.UDV != NULL) {
-                Fixed   userCoords[T1_MAX_AXES];
+                Fixed   userCoords[CFF2_MAX_AXES];
 
                 for (axis = 0; axis < h->cff2.axisCount; axis++) {
                     userCoords[axis] = pflttofix(&h->cff2.UDV[axis]);
@@ -2623,8 +2826,6 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
 
             /* name table */
             h->cff2.name = nam_loadname(h->ctx.sfr, &h->cb.shstm);
-        } else {
-            memset(&h->cff2, 0, sizeof(h->cff2));
         }
      }
     
@@ -2656,14 +2857,21 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
 	/* Read top DICT */
     if (h->header.major == 1)
     {
+        h->top.maxstack = T2_MAX_OP_STACK;
         INDEXGet(h, &h->index.top, 0, &region);
         readDICT(h, &region, 1);
     }
     else
     {
+        h->top.maxstack = CFF2_MAX_OP_STACK;
         /* h->index.top.begin/end already marks the span of the TopDict data. */
         readDICT(h, &h->region.TopDICTINDEX, 1);
+        if (h->region.VarStore.begin > 0) {
+            readVarStore(h);
+        }
+
     }
+    
     
 	gi_flags = 0;
 	if (h->flags & CID_FONT)
@@ -2826,8 +3034,9 @@ static void readGlyph(cfrCtx h,
     cff2GlyphCallbacks *cff2_cb = NULL;
     
 	/* Begin glyph and mark it as seen */
-	result = glyph_cb->beg(glyph_cb, info);
+ 	result = glyph_cb->beg(glyph_cb, info);
 	info->flags |= ABF_GLYPH_SEEN;
+    info->blendInfo.vsindex = aux->default_vsIndex;
     
 	/* Check result */
 	switch (result)
@@ -2862,6 +3071,7 @@ static void readGlyph(cfrCtx h,
     
 	/* Parse charstring */
     info->blendInfo.vsindex = aux->default_vsIndex;
+    info->blendInfo.maxstack = CFF2_MAX_OP_STACK;
 	result = t2cParse(info->sup.begin, info->sup.end, aux, gid, cff2_cb, glyph_cb, &h->cb.mem);
 	if (result)
     {
@@ -3125,8 +3335,8 @@ int cfrEndFont(cfrCtx h)
     if (h->header.major != 1) {
         var_freeaxes(&h->cb.shstm, h->cff2.axes);
         var_freehmtx(&h->cb.shstm, h->cff2.hmtx);
+        var_freeMVAR(&h->cb.shstm, h->cff2.mvar);
         nam_freename(&h->cb.shstm, h->cff2.name);
-        var_freeItemVariationStore(&h->cb.shstm, h->cff2.varStore);
     }
 
 	return cfrSuccess;

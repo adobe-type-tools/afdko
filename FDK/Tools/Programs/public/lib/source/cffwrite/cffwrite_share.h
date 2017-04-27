@@ -32,7 +32,7 @@ typedef unsigned short GID;     /* Glyph id */
 
 typedef struct                  /* INDEX */
 {
-	unsigned short count;       /* Element count */
+	unsigned long count;       /* Element count */
 	OffSize offSize;            /* Offset size */
 	long datasize;              /* Data size */
 	unsigned short bias;        /* Subr number bias */
@@ -40,10 +40,14 @@ typedef struct                  /* INDEX */
 
 /* INDEX macros */
 #define INDEX_HDR_SIZE  (2 + 1)
+#define INDEX2_HDR_SIZE  (4 + 1)
 #define INDEX_OFF_SIZE(size) OFF_SIZE((size) + 1)
 #define INDEX_SIZE(items, size) \
-	(((items) == 0) ? 2 : \
-	 (INDEX_HDR_SIZE + ((items) + 1) * INDEX_OFF_SIZE(size) + (size)))
+(((items) == 0) ? 2 : \
+(INDEX_HDR_SIZE + ((items) + 1) * INDEX_OFF_SIZE(size) + (size)))
+#define INDEX2_SIZE(items, size) \
+	(((items) == 0) ? 4 : \
+	 (INDEX2_HDR_SIZE + ((items) + 1) * INDEX_OFF_SIZE(size) + (size)))
 
 /* Library-wide utility functions */
 void CTL_CDECL cfwFatal(cfwCtx g, int err_code, char *fmt, ...);
@@ -153,6 +157,7 @@ struct cfwCtx_ {
 		jmp_buf env;
 	}
 	err;
+    unsigned long maxNumSubrs;
 };
 
 #endif /* CFFWRITE_SHARE_H */

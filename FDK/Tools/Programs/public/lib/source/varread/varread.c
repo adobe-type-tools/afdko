@@ -144,38 +144,6 @@ struct var_axes_ {
     var_fvar    fvar;
 };
 
-/* item variation store */
-
-typedef struct region_ {
-    var_F2dot14   startCoord;
-    var_F2dot14   peakCoord;
-    var_F2dot14   endCoord;
-} variationRegion;
-
-typedef struct variationRegionList_ {
-    unsigned short    axisCount;
-    unsigned short    regionCount;
-	dnaDCL(variationRegion, regions);
-} variationRegionList;
-
-typedef dnaDCL(unsigned short, indexArray);
-
-typedef struct itemVariationDataSubtable_ {
-    unsigned short  itemCount;
-    unsigned short  regionCount;
-	dnaDCL(short, regionIndices);
-	dnaDCL(short, deltaValues);
-} itemVariationDataSubtable;
-
-typedef struct itemVariationDataSubtableList_ {
-	dnaDCL(itemVariationDataSubtable, ivdSubtables);
-} itemVariationDataSubtableList;
-
-struct var_itemVariationStore_ {
-    variationRegionList     regionList;
-    itemVariationDataSubtableList   dataList;
-};
-
 typedef dnaDCL(var_glyphMetrics, var_glyphMetricsArray);
 
 /* index pair */
@@ -255,8 +223,7 @@ typedef struct var_vmtx_ *var_vmtx;
 
 typedef struct mvarValueRecord_ {
     ctlTag          valueTag;
-    unsigned short  outerIndex;
-    unsigned short  innerIndex;
+    indexPair       pair;
 } mvarValueRecord;
 
 typedef dnaDCL(mvarValueRecord, mvarValueArray);
@@ -615,7 +582,7 @@ int var_normalizeCoords(ctlSharedStmCallbacks *sscb, var_axes axes, Fixed *userC
         for (i = 0; i < axisCount; i++) {
             segmentMap  *seg = &axes->avar->segmentMaps.array[i];
             if (seg->positionMapCount > 0)
-                normCoords[i] = applySegmentMap(seg, normCoords[i]);
+                normCoords[i] = (var_F2dot14)applySegmentMap(seg, normCoords[i]);
         }
     }
 
@@ -946,41 +913,34 @@ long var_getIVSRegionIndices(var_itemVariationStore ivs, unsigned short vsIndex,
     return subtable->regionIndices.cnt;
 }
 
-static float   var_applyDeltasForGid(ctlSharedStmCallbacks *sscb, var_itemVariationStore ivs, indexMap *map, unsigned short gid, float *scalars, long regionCount)
+static float var_applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb, var_itemVariationStore ivs, indexPair *pair, float *scalars, long regionCount)
 {
     itemVariationDataSubtableList *dataList = &ivs->dataList;
     float   netAdjustment = .0f;
-    indexPair   pair;
     long        i, deltaSetIndex;
     itemVariationDataSubtable   *subtable;
-    unsigned short  regionIndices[T1_MAX_MASTERS];
+    unsigned short  regionIndices[CFF2_MAX_MASTERS];
     long subRegionCount;
 
-    /* no adjustment if the index map table is missing */
-    if (map->cnt == 0)
-        return .0f;
-
-    lookupIndexMap(map, gid, &pair);
-
-    if ((long)pair.outerIndex >= dataList->ivdSubtables.cnt) {
+    if ((long)pair->outerIndex >= dataList->ivdSubtables.cnt) {
         sscb->message(sscb, "invalid outer index in index map");
         return netAdjustment;
     }
 
-    subtable = &dataList->ivdSubtables.array[pair.outerIndex];
+    subtable = &dataList->ivdSubtables.array[pair->outerIndex];
     if (subtable->regionCount > regionCount) {
         sscb->message(sscb, "out of range region count in item variation store subtable");
         return netAdjustment;
     }
     
-    deltaSetIndex = subtable->regionCount * pair.innerIndex;
+    deltaSetIndex = subtable->regionCount * pair->innerIndex;
     
-    if ((long)pair.innerIndex >= subtable->itemCount || deltaSetIndex + subtable->regionCount > subtable->deltaValues.cnt) {
+    if ((long)pair->innerIndex >= subtable->itemCount || deltaSetIndex + subtable->regionCount > subtable->deltaValues.cnt) {
         sscb->message(sscb, "invalid inner index in index map");
         return netAdjustment;
     }
 
-    subRegionCount = var_getIVSRegionIndices(ivs, pair.outerIndex, regionIndices, subtable->regionCount);
+    subRegionCount = var_getIVSRegionIndices(ivs, pair->outerIndex, regionIndices, subtable->regionCount);
     if (subRegionCount == 0) {
         sscb->message(sscb, "out of range region index found in item variation store subtable");
     }
@@ -993,6 +953,19 @@ static float   var_applyDeltasForGid(ctlSharedStmCallbacks *sscb, var_itemVariat
     }
 
     return netAdjustment;
+}
+
+static float   var_applyDeltasForGid(ctlSharedStmCallbacks *sscb, var_itemVariationStore ivs, indexMap *map, unsigned short gid, float *scalars, long regionCount)
+{
+    indexPair   pair;
+
+    /* no adjustment if the index map table is missing */
+    if (map->cnt == 0)
+        return .0f;
+
+    lookupIndexMap(map, gid, &pair);
+
+    return var_applyDeltasForIndexPair(sscb, ivs, &pair, scalars, regionCount);
 }
 
 /* HVAR / vmtx tables */
@@ -1396,7 +1369,6 @@ var_MVAR   var_loadMVAR(sfrCtx sfr, ctlSharedStmCallbacks *sscb)
     var_MVAR   mvar = NULL;
     unsigned long   ivsOffset;
     unsigned short  valueRecordSize;
-    unsigned short  valueRecordCount;
     unsigned short  i;
 
 	sfrTable *table = sfrGetTableByTag(sfr, MVAR_TABLE_TAG);
@@ -1421,7 +1393,7 @@ var_MVAR   var_loadMVAR(sfrCtx sfr, ctlSharedStmCallbacks *sscb)
 
     mvar->axisCount = sscb->read2(sscb);
     valueRecordSize	= sscb->read2(sscb);
-    valueRecordCount = sscb->read2(sscb);
+    mvar->valueRecordCount = sscb->read2(sscb);
     ivsOffset = (unsigned long)sscb->read2(sscb);
 
     if (ivsOffset == 0) {
@@ -1430,21 +1402,21 @@ var_MVAR   var_loadMVAR(sfrCtx sfr, ctlSharedStmCallbacks *sscb)
     }
 
     if (valueRecordSize < MVAR_TABLE_RECORD_SIZE
-        || table->length < MVAR_TABLE_HEADER_SIZE + (unsigned long)valueRecordSize * valueRecordCount) {
+        || table->length < MVAR_TABLE_HEADER_SIZE + (unsigned long)valueRecordSize * mvar->valueRecordCount) {
 		sscb->message(sscb, "invalid MVAR record size or table size");
         return NULL;
     }
     
     dnaINIT(sscb->dna, mvar->values, 0, 1);
-    if (dnaSetCnt(&mvar->values, DNA_ELEM_SIZE_(mvar->values), valueRecordCount) < 0)
+    if (dnaSetCnt(&mvar->values, DNA_ELEM_SIZE_(mvar->values), mvar->valueRecordCount) < 0)
         goto cleanup;
 
-    for (i = 0; i < valueRecordCount; i++) {
+    for (i = 0; i < mvar->valueRecordCount; i++) {
         unsigned short   j;
 
         mvar->values.array[i].valueTag = sscb->read4(sscb);
-        mvar->values.array[i].outerIndex = sscb->read2(sscb);
-        mvar->values.array[i].innerIndex = sscb->read2(sscb);
+        mvar->values.array[i].pair.outerIndex = sscb->read2(sscb);
+        mvar->values.array[i].pair.innerIndex = sscb->read2(sscb);
         for (j = MVAR_TABLE_RECORD_SIZE; j < valueRecordSize; j++)
             (void)sscb->read1(sscb);
     }
@@ -1459,6 +1431,49 @@ cleanup:
     var_freeMVAR(sscb, mvar);
 
     return NULL;
+}
+
+int var_lookupMVAR(ctlSharedStmCallbacks *sscb, var_MVAR mvar, unsigned short axisCount, float *scalars, ctlTag tag, float *value)
+{
+    long    top, bot, index;
+    mvarValueRecord *rec = NULL;
+    int found = 0;
+
+    if (!mvar || !mvar->ivs) {
+		sscb->message(sscb, "invalid MVAR table data");
+        return 1;
+    }
+
+    if (scalars == 0 || axisCount == 0) {
+		sscb->message(sscb, "zero scalars/axis count specified for MVAR");
+        return 1;
+    }
+
+    bot = 0;
+    top = (long)mvar->valueRecordCount - 1;
+    while (bot <= top) {
+        index = (top + bot) / 2;
+        rec = &mvar->values.array[index];
+        if (rec->valueTag == tag)
+        {
+            found = 1;
+            break;
+        }
+        if (tag < rec->valueTag)
+            top = index - 1;
+        else
+            bot = index + 1;
+    }
+
+    if (!found) {
+        /* Specified tag was not found. */
+        return 1;
+    }
+
+    /* Blend the metric value using the IVS table */
+    *value = var_applyDeltasForIndexPair(sscb, mvar->ivs, &rec->pair, scalars, mvar->ivs->regionList.regionCount);
+
+    return 0;
 }
 
 void var_freeMVAR(ctlSharedStmCallbacks *sscb, var_MVAR mvar)

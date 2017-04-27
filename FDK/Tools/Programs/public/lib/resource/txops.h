@@ -195,7 +195,9 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define kMaxBlendOps 6
 
 #define TX_MAX_SUBR_DEPTH 10  /* Max recursion level allowed */
-#define T2_MAX_OP_STACK     197  /* Max operand stack depth */
+#define T2_MAX_OP_STACK     48  /* Max operand stack depth */
+#define CFF2_DEFAULT_OP_STACK   193  /* Max operand stack depth */
+#define CFF2_MAX_OP_STACK   513  /* Max  stack for CFF2 dict and charstrings.*/
 #define TX_MAX_CALL_STACK   10  /* Max callsubr stack depth */
 #define T2_MAX_STEMS        96  /* Max stems */
 #define TX_STD_FLEX_DEPTH   50  /* Standard flex depth (100ths/pixel) */
@@ -210,6 +212,12 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define T1_MAX_AXES         4   /* Max design axes */
 #define T1_MAX_MASTERS      16  /* Max master designs */
 #define T1_MAX_AXIS_MAPS    12  /* Max axis maps (piecewise division) */
+
+/* CFF2 (where different from above) */
+#define CFF2_MAX_AXES         512   /* Max design axes */
+#define CFF2_MAX_MASTERS      512  /* Max master designs */
+#define CFF2_MAX_AXIS_MAPS    512  /* Max axis maps (piecewise division) */
+
 
 /* load/store registry ids */
 #define T1_REG_WV           0   /* WeightVector */

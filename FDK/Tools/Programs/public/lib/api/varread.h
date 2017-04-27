@@ -7,6 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "sfntread.h"
 #include "supportpublictypes.h"
 #include "supportfp.h"
+#include "absfont.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,7 +18,40 @@ extern "C" {
    This library parses tables common tables used by variable OpenType fonts.
 */
 
-typedef Frac   var_F2dot14; /* 2.14 fixed point number */
+typedef Int16   var_F2dot14; /* 2.14 fixed point number */
+
+/* item variation store */
+
+typedef struct region_ {
+    var_F2dot14   startCoord;
+    var_F2dot14   peakCoord;
+    var_F2dot14   endCoord;
+} variationRegion;
+
+typedef struct variationRegionList_ {
+    unsigned short    axisCount;
+    unsigned short    regionCount;
+    dnaDCL(variationRegion, regions);
+} variationRegionList;
+
+typedef dnaDCL(unsigned short, indexArray);
+
+typedef struct itemVariationDataSubtable_ {
+    unsigned short  itemCount;
+    unsigned short  regionCount;
+    dnaDCL(short, regionIndices);
+    dnaDCL(short, deltaValues);
+} itemVariationDataSubtable;
+
+typedef struct itemVariationDataSubtableList_ {
+    dnaDCL(itemVariationDataSubtable, ivdSubtables);
+} itemVariationDataSubtableList;
+
+struct var_itemVariationStore_ {
+    variationRegionList     regionList;
+    itemVariationDataSubtableList   dataList;
+};
+    
 
 /* glyph width and sidebearing */
 typedef struct glyphMetrics_ {
@@ -50,10 +84,6 @@ void var_freeaxes(ctlSharedStmCallbacks *sscb, var_axes axes);
 
     axes - a pointer to the axes table data to be freed.
 */
-
-/* item variation store sub-table */
-struct var_itemVariationStore_;
-typedef struct var_itemVariationStore_ *var_itemVariationStore;
 
 unsigned short var_getAxisCount(var_axes axes);
 
@@ -272,6 +302,46 @@ int var_lookupvmtx(ctlSharedStmCallbacks *sscb, var_vmtx vmtx, unsigned short ax
     metrics - where the vertical glyph metrics are returned.
 */
 
+/* Predefined MVAR tags */
+#define MVAR_hasc_tag   CTL_TAG('h','a','s','c')    /* ascender OS/2.sTypoAscender */
+#define MVAR_hdsc_tag   CTL_TAG('h','d','s','c')    /* horizontal descender	OS/2.sTypoDescender */
+#define MVAR_hlgp_tag   CTL_TAG('h','l','g','p')    /* horizontal line gap	OS/2.sTypoLineGap */
+#define MVAR_hcla_tag   CTL_TAG('h','c','l','a')    /* horizontal clipping ascent	OS/2.usWinAscent */
+#define MVAR_hcld_tag   CTL_TAG('h','c','l','d')    /* horizontal clipping descent	OS/2.usWinDescent */
+#define MVAR_vasc_tag   CTL_TAG('v','a','s','c')    /* vertical ascender	vhea.ascent */
+#define MVAR_vdsc_tag   CTL_TAG('v','d','s','c')    /* vertical descender	vhea.descent */
+#define MVAR_vlgp_tag   CTL_TAG('v','l','g','p')    /* vertical line gap    vhea.lineGap */
+#define MVAR_hcrs_tag   CTL_TAG('h','c','r','s')    /* horizontal caret rise        hhea.caretSlopeRise */
+#define MVAR_hcrn_tag   CTL_TAG('h','c','r','n')    /* horizontal caret run hhea.caretSlopeRun */
+#define MVAR_hcof_tag   CTL_TAG('h','c','o','f')    /* horizontal caret offset      hhea.caretOffset */
+#define MVAR_vcrs_tag   CTL_TAG('v','c','r','s')    /* vertical caret rise  vhea.caretSlopeRise */
+#define MVAR_vcrn_tag   CTL_TAG('v','c','r','n')    /* vertical caret run   vhea.caretSlopeRun */
+#define MVAR_vcof_tag   CTL_TAG('v','c','o','f')    /* vertical caret offset        vhea.caretOffset */
+#define MVAR_xhgt_tag   CTL_TAG('x','h','g','t')    /* x height     OS/2.sxHeight */
+#define MVAR_cpht_tag   CTL_TAG('c','p','h','t')    /* cap height   OS/2.sCapHeight */
+#define MVAR_sbxs_tag   CTL_TAG('s','b','x','s')    /* subscript em x size  OS/2.ySubscriptXSize */
+#define MVAR_sbys_tag   CTL_TAG('s','b','y','s')    /* subscript em y size  OS/2.ySubscriptYSize */
+#define MVAR_sbxo_tag   CTL_TAG('s','b','x','o')    /* subscript em x offset        OS/2.ySubscriptXOffset */
+#define MVAR_sbyo_tag   CTL_TAG('s','b','y','o')    /* subscript em y offset        OS/2.ySubscriptYOffset */
+#define MVAR_spxs_tag   CTL_TAG('s','p','x','s')    /* superscript em x size        OS/2.ySuperscriptXSize */
+#define MVAR_spys_tag   CTL_TAG('s','p','y','s')    /* superscript em y size        OS/2.ySuperscriptYSize */
+#define MVAR_spxo_tag   CTL_TAG('s','p','x','o')    /* superscript em x offset      OS/2.ySuperscriptXOffset */
+#define MVAR_spyo_tag   CTL_TAG('s','p','y','o')    /* superscript em y offset      OS/2.ySuperscriptYOffset */
+#define MVAR_strs_tag   CTL_TAG('s','t','r','s')    /* strikeout size       OS/2.yStrikeoutSize */
+#define MVAR_stro_tag   CTL_TAG('s','t','r','o')    /* strikeout offset     OS/2.yStrikeoutPosition */
+#define MVAR_unds_tag   CTL_TAG('u','n','d','s')    /* underline size       post.underlineThickness */
+#define MVAR_undo_tag   CTL_TAG('u','n','d','o')    /* underline offset     post.underlinePosition */
+#define MVAR_gsp0_tag   CTL_TAG('g','s','p','0')    /* gaspRange[0] gasp.gaspRange[0].rangeMaxPPEM */
+#define MVAR_gsp1_tag   CTL_TAG('g','s','p','1')    /* gaspRange[1] gasp.gaspRange[1].rangeMaxPPEM */
+#define MVAR_gsp2_tag   CTL_TAG('g','s','p','2')    /* gaspRange[2] gasp.gaspRange[2].rangeMaxPPEM */
+#define MVAR_gsp3_tag   CTL_TAG('g','s','p','3')    /* gaspRange[3] gasp.gaspRange[3].rangeMaxPPEM */
+#define MVAR_gsp4_tag   CTL_TAG('g','s','p','4')    /* gaspRange[4] gasp.gaspRange[4].rangeMaxPPEM */
+#define MVAR_gsp5_tag   CTL_TAG('g','s','p','5')    /* gaspRange[5] gasp.gaspRange[5].rangeMaxPPEM */
+#define MVAR_gsp6_tag   CTL_TAG('g','s','p','6')    /* gaspRange[6] gasp.gaspRange[6].rangeMaxPPEM */
+#define MVAR_gsp7_tag   CTL_TAG('g','s','p','7')    /* gaspRange[7] gasp.gaspRange[7].rangeMaxPPEM */
+#define MVAR_gsp8_tag   CTL_TAG('g','s','p','8')    /* gaspRange[8] gasp.gaspRange[8].rangeMaxPPEM */
+#define MVAR_gsp9_tag   CTL_TAG('g','s','p','9')    /* gaspRange[9] gasp.gaspRange[9].rangeMaxPPEM */
+
 /* MVAR table */
 struct var_MVAR_;
 typedef struct var_MVAR_ *var_MVAR;
@@ -284,6 +354,24 @@ var_MVAR var_loadMVAR(sfrCtx sfr, ctlSharedStmCallbacks *sscb);
     sfr - context pointer created by calling sfrNew in sfntread library.
 
     sscb - a pointer to shared stream callback functions.
+*/
+
+int var_lookupMVAR(ctlSharedStmCallbacks *sscb, var_MVAR mvar, unsigned short axisCount, float *scalars, ctlTag tag, float *value);
+
+/*  var_lookupMVAR() lookup font-wide metric values for a tag blended using font instance scalars.
+    returns 0 if successful, otherwise non-zero.
+
+    sscb - a pointer to shared stream callback functions.
+
+    mvar - a pointer to the MVAR metrics table.
+
+    axisCount - the number of axes.
+
+    scalars - a pointer to font instance scalars. May be NULL if no blending required.
+
+    tag - the tag of the metric value to be looked up.
+
+    value - where the blended metric value is returned.
 */
 
 void var_freeMVAR(ctlSharedStmCallbacks *sscb, var_MVAR mvar);

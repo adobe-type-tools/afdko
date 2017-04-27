@@ -81,6 +81,7 @@
     <ClCompile Include="..\..\..\..\source\cffwrite\cffwrite_sindex.c" />
     <ClCompile Include="..\..\..\..\source\cffwrite\cffwrite_subr.c" />
     <ClCompile Include="..\..\..\..\source\cffwrite\cffwrite_t2cstr.c" />
+    <ClCompile Include="..\..\..\..\source\cffwrite\cffwrite_varstore.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

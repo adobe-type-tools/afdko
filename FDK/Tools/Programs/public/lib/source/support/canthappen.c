@@ -60,7 +60,7 @@ PUBLIC procedure CantHappenForDevelop
 		  readonly char*  pPgmFileName,
 		  IntX  lineNum)
 {
-  fprintf(stderr, "ErrID: %ld; %s %s L:%d \n", errID, pMessage, pPgmFileName, lineNum);
+  fprintf(stderr, "ErrID: %u; %s %s L:%d \n", errID, pMessage, pPgmFileName, lineNum);
   os_abort();
 }
 

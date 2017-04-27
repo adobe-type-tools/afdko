@@ -369,7 +369,8 @@ struct txCtx_
 		Stream tmp;
 		Stream dbg;
 		long flags;
-		} cfw;
+        unsigned long maxNumSubrs;
+        } cfw;
 	struct					/* cfembed library */
 		{
 		cefCtx ctx;
@@ -484,7 +485,7 @@ struct txCtx_
 	struct					/* Operand stack */
 		{
 		long cnt;
-		float array[TX_MAX_OP_STACK_CUBE];
+		float array[CFF2_MAX_OP_STACK];
 		} stack;
 	struct					/* Font Dict filter */
 		{
@@ -1734,8 +1735,18 @@ static void cff_BegFont(txCtx h, abfTopDict *top)
     else
         {
         h->cb.glyph = cfwGlyphCallbacks;
+        if (!(h->cfw.flags & CFW_WRITE_CFF2))
+        {
+            /* This keeps these callbacks from being used when 
+             writing a regular CFF, and avoids the overhead of porcessing the
+             source CFF2 blend args */
+            h->cb.glyph.moveVF = NULL;
+            h->cb.glyph.lineVF = NULL;
+            h->cb.glyph.curveVF = NULL;
+        }
+            
         h->cb.glyph.direct_ctx = h->cfw.ctx;
-        if (cfwBegFont(h->cfw.ctx, NULL))
+        if (cfwBegFont(h->cfw.ctx, NULL, h->cfw.maxNumSubrs))
             fatal(h, NULL);
         }
 	}
@@ -1745,7 +1756,7 @@ static void cff_EndFont(txCtx h)
 	{
     if (h->flags & PATH_REMOVE_OVERLAP)
         {
-        if (cfwBegFont(h->cfw.ctx, NULL))
+        if (cfwBegFont(h->cfw.ctx, NULL, h->cfw.maxNumSubrs))
             fatal(h, NULL);
         
         resetGlyphs(h);
@@ -2368,7 +2379,7 @@ static unsigned short mapName2UV(txCtx h, char *gname, unsigned short *unrec)
 /* Get User Design Vector. */
 static float *getUDV(txCtx h)
 	{
-	static float UDV[T1_MAX_AXES];
+	static float UDV[CFF2_MAX_AXES];
 	int i;
 	char *p;
 	char *q;
@@ -2377,11 +2388,11 @@ static float *getUDV(txCtx h)
 		return NULL;
 
 	/* Parse User Design Vector */
-	for (i = 0; i < T1_MAX_AXES; i++)
+	for (i = 0; i < CFF2_MAX_AXES; i++)
 		UDV[i] = 0.0;
 
 	p = h->arg.U;
-	for (i = 0; i < T1_MAX_AXES; i++)
+	for (i = 0; i < CFF2_MAX_AXES; i++)
 		{
 		UDV[i] = (float)strtod(p, &q);
 		if (p == q || (*q != ',' && *q != '\0'))
@@ -5090,10 +5101,6 @@ static void dcf_BegFont(txCtx h, abfTopDict *top)
     unsigned short major;
 	if (h->src.type != src_OTF && h->src.type != src_CFF)
 		fatal(h, "-dcf mode: non-CFF font");
-	if (h->dcf.flags & DCF_IS_CUBE)
-		h->maxOpStack = TX_MAX_OP_STACK_CUBE;
-	else
-		h->maxOpStack = T2_MAX_OP_STACK;
 	
 	if (h->arg.g.cnt > 0)
 		{
@@ -5110,11 +5117,14 @@ static void dcf_BegFont(txCtx h, abfTopDict *top)
 	h->src.offset = -BUFSIZ;
 	dstFileOpen(h, top);
 
-
 	single = cfrGetSingleRegions(h->cfr.ctx);
 	major = dcf_DumpHeader(h, 			&single->Header);        
     if (major == 1)
     {
+        if (h->dcf.flags & DCF_IS_CUBE)
+            h->maxOpStack = TX_MAX_OP_STACK_CUBE;
+        else
+            h->maxOpStack = T2_MAX_OP_STACK;
         initCstrs(h, top);
         dcf_DumpNameINDEX(h, 		&single->NameINDEX);
         dcf_DumpTopDICTINDEX(h, 	&single->TopDICTINDEX);
@@ -5126,6 +5136,7 @@ static void dcf_BegFont(txCtx h, abfTopDict *top)
     else
     {
         h->dcf.flags |= DCF_IS_CFF2;
+        h->maxOpStack = CFF2_MAX_OP_STACK;
         initCstrs(h, top);
         dcf_DumpTopDICT2(h, &single->TopDICTINDEX);
      }
@@ -7148,9 +7159,13 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 		case opt_path:
 			setMode(h, mode_path);
 			break;
-		case opt_cff:
-			setMode(h, mode_cff);
-			break;
+        case opt_cff:
+            setMode(h, mode_cff);
+            break;
+        case opt_cff2:
+            h->cfw.flags |= CFW_WRITE_CFF2;
+            setMode(h, mode_cff);
+            break;
 		case opt_cef:
 			setMode(h, mode_cef);
 			break;
@@ -7387,7 +7402,7 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 			switch (h->mode)
 				{
 			case mode_cff:
-				h->cfw.flags |= CFW_SUBRIZE;
+				h->cfw.flags |= (CFW_SUBRIZE|CFW_NO_FUTILE_SUBRS);
 				break;
 			case mode_t1:
 				h->t1w.flags &= ~T1W_OTHERSUBRS_MASK;
@@ -7401,7 +7416,7 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 			switch (h->mode)
 				{
 			case mode_cff:
-				h->cfw.flags &= ~CFW_SUBRIZE;
+				h->cfw.flags &= ~(CFW_SUBRIZE|CFW_NO_FUTILE_SUBRS);
 				break;
 			case mode_t1:
 				h->t1w.flags &= ~T1W_OTHERSUBRS_MASK;
@@ -7996,6 +8011,19 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 					}
 				}
 			break;
+        case opt_maxs:				/* set max number subrs. */
+            if (!argsleft)
+                goto noarg;
+            else
+            {
+                char *p;
+                char *q;
+                p = argv[++i];
+                h->cfw.maxNumSubrs = strtol(p, &q, 0);
+                if (*q != '\0')
+                    goto badarg;
+            }
+            break;
 		case opt_u:
 			usage(h);
 		case opt_h:
@@ -8070,7 +8098,8 @@ static void txNew(txCtx h, char *progname)
 	h->cfr.ctx = NULL;
 	h->ttr.ctx = NULL;
 	h->ttr.flags = 0;
-	h->cfw.ctx = NULL;
+    h->cfw.ctx = NULL;
+    h->cfw.maxNumSubrs = 0; /* 0 is translated to the MAX_NUMBER_SUBRS defined in the cffWrite module. */
 	h->cef.ctx = NULL;
 	h->abf.ctx = NULL;
 	h->pdw.ctx = NULL;

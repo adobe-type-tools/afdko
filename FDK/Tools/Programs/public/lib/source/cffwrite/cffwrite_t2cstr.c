@@ -27,6 +27,7 @@ typedef long Fixed;
 
 /* Push value on stack */
 #define PUSH(v) (h->stack.array[h->stack.cnt++] = (float)(v))
+#define PUSH_DELTA(v) (h->deltaStack.array[h->deltaStack.cnt++] = (float)(v))
 
 /* ----------------------------- Module Context ---------------------------- */
 
@@ -91,12 +92,20 @@ struct cstrCtx_ {
 #define SEEN_WARN       (1 << 3)  /* Seen cstr warning */
     int pendop;                 /* Pending op */
 	int seqop;                  /* Pending sequence op */
-	struct                      /* Operand stack */
-	{
-		int cnt;
-		float array[TX_MAX_OP_STACK_CUBE];
-	}
-	stack;
+    struct                      /* Operand stack */
+    {
+        int cnt;
+        float array[CFF2_MAX_OP_STACK];
+    }
+    stack;
+    struct                      /* Operand stack */
+    {
+        int cnt;
+        float array[CFF2_MAX_OP_STACK];
+    }
+    deltaStack;
+    int numBlends;
+    unsigned short maxstack;
     float x;                    /* Current x-coordinate */
     float y;                    /* Current y-coordinate */
     float start_x;             /*  x-coordinate of current path initial moveto */
@@ -129,6 +138,9 @@ struct cstrCtx_ {
 	cfwCtx g;                   /* Package context */
 };
 
+
+static void flushBlends(cstrCtx h);
+
 /* Initialize module. */
 void cfwCstrNew(cfwCtx g) {
 	cstrCtx h = cfwMemNew(g, sizeof(struct cstrCtx_));
@@ -136,7 +148,11 @@ void cfwCstrNew(cfwCtx g) {
 	/* Link contexts */
 	h->g = g;
 	g->ctx.cstr = h;
-
+    if (g->flags & CFW_WRITE_CFF2)
+        h->maxstack = CFF2_MAX_OP_STACK;
+    else
+        h->maxstack = T2_MAX_OP_STACK;
+        
 	dnaINIT(g->ctx.dnaFail, h->cstr, 500, 5000);
 	dnaINIT(g->ctx.dnaFail, h->masks, 30, 60);
 	dnaINIT(g->ctx.dnaFail, h->hints, 10, 40);
@@ -154,7 +170,8 @@ void cfwCstrNew(cfwCtx g) {
 
 	/* Used as charstring separator for subroutinizer */
 	h->unique = 0;
-}
+    
+ }
 
 /* Prepare module for reuse. */
 void cfwCstrReuse(cfwCtx g) {
@@ -230,7 +247,9 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
 	h->seqop = tx_noop;
 	h->x = 0;
 	h->y = 0;
-	h->stack.cnt = 0;
+    h->stack.cnt = 0;
+    h->deltaStack.cnt = 0;
+    h->numBlends = 0;
 	h->cstr.cnt = 0;
 	h->stems.cnt = 0;
 	h->iCstr = -1;
@@ -285,7 +304,11 @@ static void cstr_saveop(cstrCtx h, int op) {
 
 /* Save operator and args to charstring. Return 1 on error else 0. */
 static void saveop(cstrCtx h, int op) {
-	if (h->stack.cnt != 0) {
+    
+    if (h->numBlends > 0)
+        flushBlends(h);
+    
+	else if (h->stack.cnt != 0) {
 		/* Save args */
 		int i;
 		for (i = 0; i < h->stack.cnt; i++) {
@@ -296,23 +319,32 @@ static void saveop(cstrCtx h, int op) {
 
 	/* Save op */
 	switch (op) {
-		case tx_hlineto:
+        case t2_blend:
+            cfwMessage(h->g, "CFF2 error - unexpected blend op  <%s>%s",
+                       h->glyph.info->gname.ptr, 0);
+
+             break;
+        case tx_hlineto:
 		case tx_vlineto:
 		case tx_hvcurveto:
 		case tx_vhcurveto:
 			cstr_saveop(h, h->seqop);
+            h->pendop = tx_noop;    /* Clear pending op */
 			break;
 
 		default:
 			cstr_saveop(h, op);
+            h->pendop = tx_noop;    /* Clear pending op */
 			break;
 	}
 
-	h->pendop = tx_noop;    /* Clear pending op */
 }
 
 static void saveopDirect(cstrCtx h, int op) {
-	if (h->stack.cnt != 0) {
+    if (h->numBlends > 0)
+        flushBlends(h);
+    
+    else if (h->stack.cnt != 0) {
 		/* Save args */
 		int i;
 		for (i = 0; i < h->stack.cnt; i++) {
@@ -320,9 +352,8 @@ static void saveopDirect(cstrCtx h, int op) {
 		}
 		h->stack.cnt = 0;
 	}
-    if (op == tx_noop)
-        printf("Help.\n");
-	cstr_saveop(h, op);
+
+    cstr_saveop(h, op);
 
 	h->pendop = tx_noop;    /* Clear pending op */
 }
@@ -331,16 +362,17 @@ static void saveopDirect(cstrCtx h, int op) {
    When subroutinizer is enabled, reserve one extra space for a subr number.
    Return 1 on error else 0. */
 static void flushop(cstrCtx h, int argcnt) {
-	if (h->stack.cnt + argcnt + ((h->g->flags & CFW_SUBRIZE) ? 1 : 0) > T2_MAX_OP_STACK) {
+ 	if (h->stack.cnt + argcnt + ((h->g->flags & CFW_SUBRIZE) ? 1 : 0) > h->maxstack) {
 		saveop(h, h->pendop);
 	}
 }
 
 /* Discard pending operator. */
 static void clearop(cstrCtx h) {
-	h->stack.cnt = 0;
+    h->stack.cnt = 0;
 	h->pendop = tx_noop;
 }
+
 
 /* Discard pending moveto operator. */
 static void clearmoveto(cstrCtx h, float dx, float dy) {
@@ -433,8 +465,118 @@ static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0) {
 		PUSH(dy0);
 		h->pendop = tx_rmoveto;
 	}
-
 	h->flags |= SEEN_MOVETO;
+}
+
+static void pushBlendDeltas(cstrCtx h,abfBlendArg* blendArg)
+{
+    int j;
+    float defaultValue = blendArg->value;
+    for (j = 0; j < h->glyph.info->blendInfo.numRegions; j++)
+    {
+        float val = blendArg->blendValues[j] - defaultValue;
+        PUSH_DELTA(val);
+    }
+    
+}
+
+static void flushBlends(cstrCtx h)
+{
+    int i;
+    for (i = 0; i < h->deltaStack.cnt; i++)
+        PUSH(h->deltaStack.array[i]);
+    PUSH(h->numBlends);
+    h->deltaStack.cnt = 0;
+    h->numBlends = 0;
+   
+    if (h->stack.cnt != 0) {
+        /* Save args */
+        int i;
+        for (i = 0; i < h->stack.cnt; i++) {
+            cstr_savenum(h, h->stack.array[i]);
+        }
+        h->stack.cnt = 0;
+    }
+    cstr_saveop(h, t2_blend);
+}
+
+static void pushBlend(cstrCtx h, abfBlendArg* arg1)
+{
+    if ((arg1 == NULL) || (!arg1->hasBlend))
+    {
+        if (h->numBlends > 0)
+            flushBlends(h);
+    }
+    else
+    {
+        pushBlendDeltas(h,arg1);
+        h->numBlends++;
+    }
+    return;
+}
+
+static void glyphMoveVF(abfGlyphCallbacks *cb, abfBlendArg* argX, abfBlendArg* argY) {
+    cfwCtx g = cb->direct_ctx;
+    cstrCtx h = g->ctx.cstr;
+    float x0, dx0;
+    float y0, dy0;
+    int doOptimize = !(g->flags & CFW_NO_OPTIMIZATION);
+    
+    x0 = (float)RND_ON_WRITE(argX->value);  // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
+    y0 = (float)RND_ON_WRITE(argY->value);
+    dx0 = x0 - h->x;
+    dy0 = y0 - h->y;
+
+    /* Check pending op */
+    switch (h->pendop) {
+        case tx_vmoveto:
+            clearmoveto(h, 0, h->stack.array[0]);
+            break;
+            
+        case tx_hmoveto:
+            clearmoveto(h, h->stack.array[0], 0);
+            break;
+            
+        case tx_rmoveto:
+            clearmoveto(h, h->stack.array[0], h->stack.array[1]);
+            break;
+            
+        case tx_dotsection:
+            /* Discard dotsection before closepath */
+            clearop(h);
+            break;
+            
+        case tx_noop:
+            break;
+            
+        default:
+            saveop(h, h->pendop);
+            break;
+    }
+
+    /* h->pendop is now tx_noop */
+    h->x = x0;
+    h->y = y0;
+
+    if (doOptimize && (dx0 == 0) && ((argX == NULL) || (!argX->hasBlend))) {
+        pushBlend(h, argY);
+        PUSH(dy0);
+        h->pendop = tx_vmoveto;
+    }
+    else if (doOptimize && (dy0 == 0) && ((argY == NULL) || (!argY->hasBlend))) {
+        pushBlend(h, argX);
+        PUSH(dx0);
+        h->pendop = tx_hmoveto;
+    }
+    else {
+        pushBlend(h, argX);
+        PUSH(dx0);
+        pushBlend(h, argY);
+        PUSH(dy0);
+        h->pendop = tx_rmoveto;
+    }
+    h->flags |= SEEN_MOVETO;
+    
 }
 
 /* Insert missing initial moveto op. */
@@ -522,7 +664,7 @@ static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1) {
                     break;
                     
                 default:
-                    saveop(h, h->pendop);
+                   saveop(h, h->pendop);
                     
                     /* Fall through */
                 case tx_noop:
@@ -540,6 +682,113 @@ static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1) {
             h->pendop = tx_rlineto;
         }
 	}
+}
+
+static void glyphLineVF(abfGlyphCallbacks *cb, abfBlendArg* argX, abfBlendArg* argY) {
+    cfwCtx g = cb->direct_ctx;
+    cstrCtx h = g->ctx.cstr;
+    float x0, dx0;
+    float y0, dy0;
+    int doOptimize = !(g->flags & CFW_NO_OPTIMIZATION);
+    
+
+    x0 = (float)RND_ON_WRITE(argX->value);  // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
+    y0 = (float)RND_ON_WRITE(argY->value);
+    dx0 = x0 - h->x;
+    dy0 = y0 - h->y;
+
+    h->x = x0;
+    h->y = y0;
+
+    if (!(h->flags & SEEN_MOVETO)) {
+        insertMove(cb);
+    }
+
+    if (doOptimize && (dx0 == 0) && ((argX == NULL) || (!argX->hasBlend))) {
+        flushop(h, 1);
+        switch (h->pendop) {
+            case tx_hlineto:
+                pushBlend(h, argY);
+                PUSH(dy0);
+                h->pendop = tx_vlineto;
+                break;
+
+            default:
+                saveop(h, h->pendop);
+                /* Fall through */
+
+            case tx_noop:
+                pushBlend(h, argY);
+                PUSH(dy0);
+               h->pendop = h->seqop = tx_vlineto;
+                
+        }
+    }
+    else if (doOptimize && (dy0 == 0) && ((argY == NULL) || (!argY->hasBlend))) {
+        flushop(h, 1);
+        switch (h->pendop) {
+            case tx_vlineto:
+                pushBlend(h, argX);
+                PUSH(dx0);
+                h->pendop = tx_hlineto;
+                break;
+                
+            default:
+                saveop(h, h->pendop);
+                /* Fall through */
+                
+            case tx_noop:
+                pushBlend(h, argX);
+                PUSH(dx0);
+                 h->pendop = h->seqop = tx_hlineto;
+                
+        }
+    }
+    else {
+        flushop(h, 2);
+        if (doOptimize)
+        {
+            switch (h->pendop) {
+                case tx_rlineto:
+                    pushBlend(h, argX);
+                    PUSH(dx0);
+                    pushBlend(h, argY);
+                    PUSH(dy0);
+                    break;
+                    
+                case tx_rrcurveto:
+                    pushBlend(h, argX);
+                    PUSH(dx0);
+                    pushBlend(h, argY);
+                    PUSH(dy0);
+                    saveop(h, t2_rcurveline);
+                    break;
+                    
+                default:
+                    saveop(h, h->pendop);
+                    
+                    /* Fall through */
+                case tx_noop:
+                    pushBlend(h, argX);
+                    PUSH(dx0);
+                    pushBlend(h, argY);
+                    PUSH(dy0);
+                    h->pendop = tx_rlineto;
+                    break;
+            }
+        }
+        else
+        {
+            if (h->pendop != tx_noop)
+                saveop(h, h->pendop);
+            pushBlend(h, argX);
+            PUSH(dx0);
+            pushBlend(h, argY);
+            PUSH(dy0);
+            h->pendop = tx_rlineto;
+        }
+    }
+
 }
 
 /* Add curve to path. */
@@ -707,7 +956,7 @@ static void glyphCurve(abfGlyphCallbacks *cb,
 			flushop(h, 5);
 			switch (h->pendop) {
 				default:
-					saveop(h, h->pendop);
+ 					saveop(h, h->pendop);
 
 				/* Fall through */
 				case tx_noop:
@@ -813,6 +1062,409 @@ static void glyphCurve(abfGlyphCallbacks *cb,
             }
         }
 	}
+}
+
+static void glyphCurveVF(abfGlyphCallbacks *cb,
+                         abfBlendArg* arg_x1, abfBlendArg* arg_y1,
+                         abfBlendArg* arg_x2, abfBlendArg* arg_y2,
+                         abfBlendArg* arg_x3, abfBlendArg* arg_y3) {
+    cfwCtx g = cb->direct_ctx;
+    cstrCtx h = g->ctx.cstr;
+    
+    float x1, dx1;
+    float y1, dy1;
+    float x2, dx2;
+    float y2, dy2;
+    float x3, dx3;
+    float y3, dy3;
+    int doOptimize = !(g->flags & CFW_NO_OPTIMIZATION);
+    
+    x1 = (float)RND_ON_WRITE(arg_x1->value); // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
+    y1 = (float)RND_ON_WRITE(arg_y1->value);
+    x2 = (float)RND_ON_WRITE(arg_x2->value);
+    y2 = (float)RND_ON_WRITE(arg_y2->value);
+    x3 = (float)RND_ON_WRITE(arg_x3->value);
+    y3 = (float)RND_ON_WRITE(arg_y3->value);
+    
+    dx1 = x1 - h->x;
+    dy1 = y1 - h->y;
+    dx2 = x2 - x1;
+    dy2 = y2 - y1;
+    dx3 = x3 - x2;
+    dy3 = y3 - y2;
+    
+    h->x = x3;
+    h->y = y3;
+    
+    if (!(h->flags & SEEN_MOVETO)) {
+        insertMove(cb);
+    }
+    
+    /* Choose format */
+    if ((dx1 == 0.0) && doOptimize) {
+        if (dy3 == 0.0) {
+            /* - dy1 dx2 dy2 dx3 - vhcurveto */
+            flushop(h, 4);
+            switch (h->pendop) {
+                case tx_hvcurveto:
+                    pushBlend(h, arg_y1);
+                    /*  0  */ PUSH(dy1);
+                    pushBlend(h, arg_x2);
+                    PUSH(dx2);
+                    pushBlend(h, arg_y2);
+                    PUSH(dy2);
+                    pushBlend(h, arg_x3);
+                    PUSH(dx3); /*  0  */
+                    h->pendop = tx_vhcurveto;
+                    break;
+                    
+                default:
+                    saveop(h, h->pendop);
+                    
+                    /* Fall through */
+                case tx_noop:
+                    pushBlend(h, arg_y1);
+                    /*  0  */ PUSH(dy1);
+                    pushBlend(h, arg_x2);
+                    PUSH(dx2);
+                    pushBlend(h, arg_y2);
+                    PUSH(dy2);
+                    pushBlend(h, arg_x3);
+                    PUSH(dx3); /*  0  */
+                    h->pendop = h->seqop = tx_vhcurveto;
+            }
+        }
+        else if (dx3 == 0.0) {
+            /* - dy1 dx2 dy2 - dy3 vvcurveto */
+            flushop(h, 4);
+            switch (h->pendop) {
+                case t2_vvcurveto:
+                    pushBlend(h, arg_y1);
+                    /*  0  */ PUSH(dy1);
+                    pushBlend(h, arg_x2);
+                    PUSH(dx2);
+                    pushBlend(h, arg_y2);
+                    PUSH(dy2);
+                    pushBlend(h, arg_y3);
+                    /*  0  */ PUSH(dy3);
+                    break;
+                    
+                default:
+                    saveop(h, h->pendop);
+                    
+                    /* Fall through */
+                case tx_noop:
+                    pushBlend(h, arg_y1);
+                    /*  0  */ PUSH(dy1);
+                    pushBlend(h, arg_x2);
+                    PUSH(dx2);
+                    pushBlend(h, arg_y2);
+                    PUSH(dy2);
+                    pushBlend(h, arg_y3);
+                    /*  0  */ PUSH(dy3);
+                    h->pendop = t2_vvcurveto;
+                    break;
+            }
+        }
+        else {
+            /* - dy1 dx2 dy2 dx3 dy3 vhcurveto (odd args) */
+            flushop(h, 5);
+            switch (h->pendop) {
+                default:
+                    saveop(h, h->pendop);
+                    
+                    /* Fall through */
+                case tx_noop:
+                    h->seqop = tx_vhcurveto;
+                    
+                    /* Fall through */
+                case tx_hvcurveto:
+                    pushBlend(h, arg_y1);
+                    /*  0  */ PUSH(dy1);
+                    pushBlend(h, arg_x2);
+                    PUSH(dx2);
+                    pushBlend(h, arg_y2);
+                    PUSH(dy2);
+                    pushBlend(h, arg_x3);
+                    PUSH(dx3);
+                    pushBlend(h, arg_y3);
+                    PUSH(dy3);
+                    saveop(h, tx_vhcurveto);
+                    break;
+            }
+        }
+    }
+    else if ((dy1 == 0.0) && doOptimize) {
+        if (dx3 == 0.0) {
+            /* dx1 - dx2 dy2 - dy3 hvcurveto */
+            flushop(h, 4);
+            switch (h->pendop) {
+                case tx_vhcurveto:
+                    pushBlend(h, arg_x1);
+                    PUSH(dx1); /*  0  */
+                    pushBlend(h, arg_x2);
+                    PUSH(dx2);
+                    pushBlend(h, arg_y2);
+                    PUSH(dy2);
+                    pushBlend(h, arg_y3);
+                    /*  0  */ PUSH(dy3);
+                    h->pendop = tx_hvcurveto;
+                    break;
+                    
+                default:
+                    saveop(h, h->pendop);
+                    
+                    /* Fall through */
+                case tx_noop:
+                    pushBlend(h, arg_x1);
+                    PUSH(dx1); /*  0  */
+                    pushBlend(h, arg_x2);
+                    PUSH(dx2);
+                    pushBlend(h, arg_y2);
+                    PUSH(dy2);
+                    pushBlend(h, arg_y3);
+                    /*  0  */ PUSH(dy3);
+                    h->pendop = h->seqop = tx_hvcurveto;
+                    break;
+            }
+        }
+        else if (dy3 == 0.0) {
+            /* dx1 - dx2 dy2 dx3 - hhcurveto */
+            flushop(h, 4);
+            switch (h->pendop) {
+                case t2_hhcurveto:
+                    pushBlend(h, arg_x1);
+                    PUSH(dx1); /*  0  */
+                    pushBlend(h, arg_x2);
+                    PUSH(dx2);
+                    pushBlend(h, arg_y2);
+                    PUSH(dy2);
+                    pushBlend(h, arg_x3);
+                    PUSH(dx3); /*  0  */
+                    break;
+                    
+                default:
+                    saveop(h, h->pendop);
+                    
+                    /* Fall through */
+                case tx_noop:
+                    pushBlend(h, arg_x1);
+                    PUSH(dx1); /*  0  */
+                    pushBlend(h, arg_x2);
+                    PUSH(dx2);
+                    pushBlend(h, arg_y2);
+                    PUSH(dy2);
+                    pushBlend(h, arg_x3);
+                    PUSH(dx3); /*  0  */
+                    h->pendop = t2_hhcurveto;
+                    break;
+            }
+        }
+        else {
+            /* dx1 - dx2 dy2 dy3 dx3 hvcurveto (odd args) */
+            flushop(h, 5);
+            switch (h->pendop) {
+                default:
+                    saveop(h, h->pendop);
+                    
+                    /* Fall through */
+                case tx_noop:
+                    h->seqop = tx_hvcurveto;
+                    
+                    /* Fall through */
+                case tx_vhcurveto:
+                    pushBlend(h, arg_x1);
+                    PUSH(dx1); /*  0  */
+                    pushBlend(h, arg_x2);
+                    PUSH(dx2);
+                    pushBlend(h, arg_y2);
+                    PUSH(dy2);
+                    pushBlend(h, arg_y3);
+                    PUSH(dy3);
+                    pushBlend(h, arg_x3);
+                    PUSH(dx3);          /* Note arg swap */
+                    saveop(h, tx_hvcurveto);
+                    break;
+            }
+        }
+    }
+    else {
+        if ((dx3 == 0.0) && doOptimize) {
+            /* dx1 dy1 dx2 dy2 - dy3 vvcurveto (odd args) */
+            flushop(h, 5);
+            switch (h->pendop) {
+                default:
+                    saveop(h, h->pendop);
+                    
+                    /* Fall through */
+                case tx_noop:
+                    pushBlend(h, arg_x1);
+                    PUSH(dx1);
+                    pushBlend(h, arg_y1);
+                    PUSH(dy1);
+                    pushBlend(h, arg_x2);
+                    PUSH(dx2);
+                    pushBlend(h, arg_y2);
+                    PUSH(dy2);
+                    pushBlend(h, arg_y3);
+                    PUSH(dy3); /*  0  */
+                    h->pendop = t2_vvcurveto;
+                    break;
+            }
+        }
+        else if ((dy3 == 0.0) && doOptimize) {
+            /* dx1 dy1 dx2 dy2 dx3 - hhcurveto (odd args) */
+            flushop(h, 5);
+            switch (h->pendop) {
+                default:
+                    saveop(h, h->pendop);
+                    
+                    /* Fall through */
+                case tx_noop:
+                    pushBlend(h, arg_y1);
+                    PUSH(dy1);
+                    pushBlend(h, arg_x1);
+                    PUSH(dx1);          /* Note arg swap */
+                    pushBlend(h, arg_x2);
+                    PUSH(dx2);
+                    pushBlend(h, arg_y2);
+                    PUSH(dy2);
+                    pushBlend(h, arg_x3);
+                    PUSH(dx3); /*  0  */
+                    h->pendop = t2_hhcurveto;
+            }
+        }
+        else {
+            /* dx1 dy1 dx2 dy2 dx3 dy3 rrcurveto */
+            flushop(h, 6);
+            if (doOptimize) {
+                switch (h->pendop) {
+                    case tx_rlineto:
+                        pushBlend(h, arg_x1);
+                        PUSH(dx1);
+                        pushBlend(h, arg_y1);
+                        PUSH(dy1);
+                        pushBlend(h, arg_x2);
+                        PUSH(dx2);
+                        pushBlend(h, arg_y2);
+                        PUSH(dy2);
+                        pushBlend(h, arg_x3);
+                        PUSH(dx3);
+                        pushBlend(h, arg_y3);
+                        PUSH(dy3);
+                        saveop(h, t2_rlinecurve);
+                        break;
+                        
+                    case tx_rrcurveto:
+                        pushBlend(h, arg_x1);
+                        PUSH(dx1);
+                        pushBlend(h, arg_y1);
+                        PUSH(dy1);
+                        pushBlend(h, arg_x2);
+                        PUSH(dx2);
+                        pushBlend(h, arg_y2);
+                        PUSH(dy2);
+                        pushBlend(h, arg_x3);
+                        PUSH(dx3);
+                        pushBlend(h, arg_y3);
+                        PUSH(dy3);
+                        break;
+                        
+                    default:
+                        saveop(h, h->pendop);
+                        
+                        /* Fall through */
+                    case tx_noop:
+                        pushBlend(h, arg_x1);
+                        PUSH(dx1);
+                        pushBlend(h, arg_y1);
+                        PUSH(dy1);
+                        pushBlend(h, arg_x2);
+                        PUSH(dx2);
+                        pushBlend(h, arg_y2);
+                        PUSH(dy2);
+                        pushBlend(h, arg_x3);
+                        PUSH(dx3);
+                        pushBlend(h, arg_y3);
+                        PUSH(dy3);
+                        h->pendop = tx_rrcurveto;
+                        break;
+                }
+            }
+            else
+            {
+                saveop(h, h->pendop);
+                pushBlend(h, arg_x1);
+                PUSH(dx1);
+                pushBlend(h, arg_y1);
+                PUSH(dy1);
+                pushBlend(h, arg_x2);
+                PUSH(dx2);
+                pushBlend(h, arg_y2);
+                PUSH(dy2);
+                pushBlend(h, arg_x3);
+                PUSH(dx3);
+                pushBlend(h, arg_y3);
+                PUSH(dy3);
+                h->pendop = tx_rrcurveto;
+            }
+        }
+    }
+}
+
+static void glyphCurveVF2(abfGlyphCallbacks *cb,
+                        abfBlendArg* arg_x1, abfBlendArg* arg_y1,
+                        abfBlendArg* arg_x2, abfBlendArg* arg_y2,
+                        abfBlendArg* arg_x3, abfBlendArg* arg_y3) {
+    cfwCtx g = cb->direct_ctx;
+    cstrCtx h = g->ctx.cstr;
+    int doOptimize = !(g->flags & CFW_NO_OPTIMIZATION);
+    float x1, dx1;
+    float y1, dy1;
+    float x2, dx2;
+    float y2, dy2;
+    float x3, dx3;
+    float y3, dy3;
+    
+    x1 = (float)RND_ON_WRITE(arg_x1->value); // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
+    y1 = (float)RND_ON_WRITE(arg_y1->value);
+    x2 = (float)RND_ON_WRITE(arg_x2->value);
+    y2 = (float)RND_ON_WRITE(arg_y2->value);
+    x3 = (float)RND_ON_WRITE(arg_x3->value);
+    y3 = (float)RND_ON_WRITE(arg_y3->value);
+    
+    dx1 = x1 - h->x;
+    dy1 = y1 - h->y;
+    dx2 = x2 - x1;
+    dy2 = y2 - y1;
+    dx3 = x3 - x2;
+    dy3 = y3 - y2;
+
+    if (!(h->flags & SEEN_MOVETO)) {
+        insertMove(cb);
+    }
+    
+    h->x = x3;
+    h->y = y3;
+    
+    
+    if (1) {
+        if (h->pendop != tx_noop)
+            saveop(h, h->pendop);
+        pushBlend(h, arg_x1);
+        PUSH(dx1);
+        pushBlend(h, arg_y1);
+        PUSH(dy1);
+        pushBlend(h, arg_x2);
+        PUSH(dx2);
+        pushBlend(h, arg_y2);
+        PUSH(dy2);
+        pushBlend(h, arg_x3);
+        PUSH(dx3);
+        pushBlend(h, arg_y3);
+        PUSH(dy3);
+        h->pendop = tx_rrcurveto;
+    }
 }
 
 /* Save hint/cntr mask. */
@@ -1307,9 +1959,7 @@ static Fixed float2Fixed(float r) {
    arithmetic is performed in fixed point notation so that cumulative rounding
    errors in the delta stem list can be eliminated. */
 static void saveStemOp(cstrCtx h, int iBeg, int iEnd, int op, int optimize) {
-	enum {
-		MAX_STEMS = (T2_MAX_OP_STACK - 1) / 2
-	};
+    unsigned short MAX_STEMS = (h->maxstack - 1) / 2;
 	cfwCtx g = h->g;
 	int i = iBeg;
 	int stems = iEnd - iBeg;
@@ -1693,7 +2343,7 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
     }
 
     
-    if ((g->flags & CFW_IS_CUBE) && (h->cstr.cnt > 0)) {
+    if ((g->flags & (CFW_IS_CUBE | CFW_WRITE_CFF2)) && (h->cstr.cnt > 0)) {
 		clearop(h);
 	}
 	else {
@@ -1942,6 +2592,10 @@ const abfGlyphCallbacks cfwGlyphCallbacks = {
 	glyphCubeSetWV,
 	glyphCubeCompose,
 	cubeTransform,
+    glyphMoveVF,
+    glyphLineVF,
+    glyphCurveVF,
+    NULL,
 };
 
 /* ----------------------------- Debug Support ----------------------------- */

@@ -92,6 +92,77 @@ typedef unsigned int boolean;
         long long (or __longlong) type instead.
   */
 
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+/* If C version is known and C99 or above, define types based on inttypes */
+#include <stdint.h>
+typedef uint8_t		Card8, *PCard8;
+#if UNSIGNEDCHARS	/* see environment.h */
+typedef int8_t		Int8, *PInt8;
+#else /* UNSIGNEDCHARS */
+typedef int8_t			Int8, *PInt8;	/* some compilers having a signed "char" treat "signed char" as a different type */
+#endif /* UNSIGNEDCHARS */
+#if FORCEsignedChar8
+typedef int8_t             Char8;
+#elif FORCEunsignedChar8
+typedef uint8_t           Char8;
+#else
+typedef int8_t                    Char8;
+#endif
+
+#define MAXCard8		((Card8)0xFF)
+
+typedef int16_t		Int16, *PInt16;
+#define MAXInt16		((Int16)0x7FFF)
+#define MINInt16		((Int16)0x8000)
+
+typedef uint16_t	Card16, *PCard16;
+#define MAXCard16		((Card16)0xFFFF)
+
+/*
+ * Under 16-bit x86 compilers, the type of a pointer difference is a 
+ * signed 16 bits; such an expression may be immediately cast to CardPtrDiff
+ * or IntPtrDiff without undesired side-effects.
+ */
+typedef unsigned long int       CardPtrDiff;    /* unsigned pointer difference */
+typedef long int                IntPtrDiff;     /* signed pointer difference */
+
+typedef int32_t			Int32, *PInt32;  /* compiler-dependent? */
+
+typedef uint32_t		Card32, *PCard32;/* compiler-dependent? */
+
+typedef int64_t		Int64, *PInt64;
+#define MAXInt64		((Int64)0x7FFFFFFFFFFFFFFF)
+#define MINInt64		((Int64)0x8000000000000000)
+
+typedef uint64_t	Card64, *PCard64;
+#define MAXCard64		((Card64)0xFFFFFFFFFFFFFFFF)
+
+typedef uint64_t		longcardinal;
+typedef int32_t			integer;
+typedef uint32_t		unsignedinteger;
+
+#define MAXInt32		((Int32) 0x7FFFFFFF)
+#define MINInt32		((Int32) 0x80000000)
+#define MAXCard32		((Card32)0xFFFFFFFF)
+
+typedef uint16_t	cardinal;
+#define MAXcardinal		((cardinal)    0xFFFF)
+#define MAXlongcardinal		((longcardinal)0xFFFFFFFF)
+
+#define MAXinteger		((integer)        0x7FFFFFFF)
+#define MINinteger		((integer)        0x80000000)
+#define MAXunsignedinteger	((unsignedinteger)0xFFFFFFFF)
+
+typedef uint64_t	longlongcardinal;       /* longest supported cardinal type */
+typedef int64_t		longinteger;            /* longest supported integer type */
+typedef uint64_t	unsignedlonginteger;    /* longest supported cardinal type */
+
+#define MAXlonglongcardinal	((longlongcardinal)   0xFFFFFFFFFFFFFFFF)
+#define MAXlonginteger		((longinteger)        0x7FFFFFFFFFFFFFFF)
+#define MINlonginteger		((longinteger)	      0x8000000000000000)
+#define MAXunsignedlonginteger	((unsignedlonginteger)0xFFFFFFFFFFFFFFFF)
+
+#else /* __STDC__VERSION__ */
 typedef unsigned char		Card8, *PCard8;
 #if UNSIGNEDCHARS	/* see environment.h */
 typedef signed char		Int8, *PInt8;
@@ -183,6 +254,7 @@ typedef unsigned long int	unsignedlonginteger;    /* longest supported cardinal 
 #define MAXunsignedlonginteger	((unsignedlonginteger)0xFFFFFFFF)
 
 #endif /* (ARCH_64BIT == 1) */
+#endif /* __STDC_VERSION__ */
 
 #if 0 /* XXX */
 typedef integer (*PIntProc)();	/* pointer to procedure returning integer */
