@@ -10,7 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 extern "C" {
 #endif
 
-#define HOT_VERSION 0x0100635 /* Library version (1.0.95) */
+#define HOT_VERSION 0x0100636 /* Library version (1.0.96) */
 /*Warning: this string is now part of heuristic used by CoolType to identify the
 first round of CoolType fonts which had the backtrack sequence of a chaining 
 contextual substitution ordered incorrectly.  Fonts with the old ordering MUST match
