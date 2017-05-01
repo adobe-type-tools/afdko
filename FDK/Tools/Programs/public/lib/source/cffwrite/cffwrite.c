@@ -100,7 +100,6 @@ typedef struct                  /* Per-font data */
 	long flags;                 /* Font-specific flags */
 #define FONT_CID    (1 << 0)      /* CID font */
 #define FONT_SYN    (1 << 1)      /* Synthetic font */
-#define FONT_CFF2    (1 << 2)      /* Is CFF2 font. */
 	abfTopDict top;             /* Top dict data (copied from client) */
 	struct                      /* CFF DICT data */
 	{
@@ -1098,7 +1097,9 @@ static void fillSet(controlCtx h) {
         cfwDictFillTop(g, &font->cff.top, &font->top,
                        &font->FDArray.array[0].dict, -1);
         
-        cfwDictFillVarStore(g, &font->cff.varStore, &font->top);
+        if ((font->top.varStore != NULL) &&  (g->flags & CFW_WRITE_CFF2)) {
+            cfwDictFillVarStore(g, &font->cff.varStore, &font->top);
+        }
         
 		for (j = 0; j < font->FDArray.cnt; j++) {
 			FDInfo *fd = &font->FDArray.array[j];

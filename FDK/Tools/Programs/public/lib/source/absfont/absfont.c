@@ -81,6 +81,7 @@ void abfInitTopDict(abfTopDict *top)
 
     /* CFF2 data */
     top->maxstack = 0;
+    top->varStore = NULL;
 	}
 
 /* Initialize Private dictionary. */

@@ -8,7 +8,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "dynarr.h"
 #include "txops.h"
 
-#define ABF_VERSION CTL_MAKE_VERSION(1,0,52)
+#define ABF_VERSION CTL_MAKE_VERSION(1,0,53)
 
 #include <stdio.h>
 
