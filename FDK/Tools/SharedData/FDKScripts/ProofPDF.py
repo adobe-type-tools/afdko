@@ -11,7 +11,7 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 
 
 __usage__ = """
-ProofPDF v1.15 May 9 2016
+ProofPDF v1.16 May 2 2017
 ProofPDF [-h] [-u]
 ProofPDF -help_params
 ProofPDF [-g <glyph list>] [-gf <filename>] [-gpp <number>] [-pt <number>] [-dno] [-baseline <number>] [-black] [-lf <filename>] [-select_hints <0,1,2..> ]  \
@@ -41,6 +41,8 @@ Options:
 -h Print help
 
 -help_params Shows help abut the low level parameters.
+
+-q Quiet mode
 
 -charplot Sets parameters to show the glyph outline with most labels;
 the point labels show only the point position. No hints or alignment
@@ -176,12 +178,12 @@ level parameters. Use "-help_params" to see the documentation for the
 low level parameters. All sizes are expressed in points, where 72 points
 = 1 inch. Fonts must be PostScript.
 Examples:
---pageTitleFont "MinionPro-Bold"  #Change the page title font. 
+--pageTitleFont "MinionPro-Bold"  #Change the page title font.
 --pointLabelFont "Times-Bold"  #Change the font for point labels
 --pointLabelColorRGB "(1.0, 0, 0)" #Change the color of the point labels
 to red. The value is a triplet of (R G, B) values, where 0 is dark and 1.0 is
 light. Note that the RGB values must be enclosed in quotes and
-parentheses, and commas separated, as shown. "(0,0,0)" is black, 
+parentheses, and commas separated, as shown. "(0,0,0)" is black,
 "(1.0, 1.0, 1.0)" is page white, "(1.0, 0, 0)" is red.
 --pointLabelSize 12  #Change the size of the point label text.
 """
@@ -193,7 +195,7 @@ import os
 import re
 import time
 from fontTools import ttLib
-from  fontPDF import FontPDFParams, makePDF, makeFontSetPDF, kDrawTag, kDrawPointTag, kShowMetaTag, params_doc
+from fontPDF import FontPDFParams, makePDF, makeFontSetPDF, kDrawTag, kDrawPointTag, kShowMetaTag, params_doc
 import ttfPDF
 import otfPDF
 import FDKUtils
@@ -233,7 +235,7 @@ def CheckEnvironment():
 	report = FDKUtils.runShellCmd(command)
 	if "options" not in report:
 			txError = 1
-	
+
 	if  txError:
 		logMsg("Please re-install the FDK. The executable directory \"%s\" is missing the tool: < %s >." % (exe_dir, txPath ))
 		logMsg("or the files referenced by the shell script is missing.")
@@ -272,7 +274,7 @@ def expandRanges(tag):
 	else:
 		ptRange = [int(tag)]
 	return ptRange
-	
+
 def parsePtSizeListArg(ptSizeString):
 	ptSizeString = re.sub(r"[ \t\r\n,]+",  ",",  ptSizeString)
 	ptsizeList = ptSizeString.split(",")
@@ -297,7 +299,7 @@ def findLayoutFile(filePath, sharedDataDirectory):
 			break
 		tryDir =  os.path.dirname(tryDir)
 		tries += 1
-		
+
 	if cfData:
 		mR = re.search(r"Registry\s+\((\S+)\)", cfData)
 		mO = re.search(r"Ordering\s+\((\S+)\)", cfData)
@@ -316,7 +318,7 @@ def parseLayoutFile(filePath):
 		data = fp.read()
 		fp.close()
 	except (IOError,OSError):
-		raise OptionParseError("Option Error: could not open and read the layout file <%s>." %  filePath) 
+		raise OptionParseError("Option Error: could not open and read the layout file <%s>." %  filePath)
 
 	entryList = re.findall(r"(\d+)\s+(\S+)\s+(\S+)\s+(\S+)", data)
 	if entryList < 2:
@@ -332,7 +334,7 @@ def parseLayoutFile(filePath):
 		layoutDict[reversekey] = [gname, entry[1], entry[2], entry[3]] # add name key -> family, face, cid as cidXXXX
 		entryList = None
 	if layoutDict.has_key("cid00000"):
-		layoutDict[".notdef"] = layoutDict["cid00000"] 
+		layoutDict[".notdef"] = layoutDict["cid00000"]
 	return layoutDict
 
 
@@ -357,15 +359,16 @@ def setDefaultDigiplotRightSideOptions(rightGlyphParams):
 		exec("rightGlyphParams." + kShowMetaTag + "Hints = 0")
 		exec("rightGlyphParams." + kShowMetaTag + "SideBearings = 0")
 		exec("rightGlyphParams." + kShowMetaTag + "V_SideBearings = 0")
-	
+
 def getOptions(params):
 	i = 1
 	numOptions = len(sys.argv)
 	makeRepeatParams = 0
+	params.quietMode = False
 	while i < numOptions:
 		arg = sys.argv[i]
 		if params.rt_fileList and arg[0] == "-":
-			raise OptionParseError("Option Error: All file names must follow all other params <%s>." % arg) 
+			raise OptionParseError("Option Error: All file names must follow all other params <%s>." % arg)
 
 		if arg == "-h":
 			print __help__
@@ -412,7 +415,7 @@ def getOptions(params):
 						print "Error: value for parameter %s must be a number." % (name)
 						raise OptionParseError
 				if value != None:
-					exec("params.%s = value" % (name)) 
+					exec("params.%s = value" % (name))
 
 		elif arg == "-hintplot":
 			exec("params." + kDrawTag + "EMBox = 1")
@@ -455,9 +458,9 @@ def getOptions(params):
 			exec("params." + kDrawPointTag + "BCPMarks = 0")
 			exec("params." + kDrawPointTag + "PointLabels = 0")
 			params.openPDFWhenDone = 0
-			params.glyphsPerPage = 2 
-			params.descenderSpace = -120 
-			params.userBaseLine = -120 
+			params.glyphsPerPage = 2
+			params.descenderSpace = -120
+			params.userBaseLine = -120
 			params.errorLogFilePath = "Error_file.log"
 			params.errorLogColumnHeight = 250
 			params.metaDataAboveGlyph = 0 # write meta data below glyph square.
@@ -468,7 +471,7 @@ def getOptions(params):
 			params.pageRightMargin  = 20
 			params.glyphVPadding  = 0
 			params.glyphHPadding   = 0
-			
+
 			# Look for layout file in default location.
 			layoutFilePath = findLayoutFile(params.rt_filePath, params.rt_fdkSharedDataDir)
 			if layoutFilePath:
@@ -481,7 +484,7 @@ def getOptions(params):
 			rightGlyphParams = copy.copy(params)
 			setDefaultDigiplotRightSideOptions(rightGlyphParams)
 			params.rt_repeatParamList = [params, rightGlyphParams]
-			
+
 		elif arg == "-repeatIndex":
 			index = sys.argv[i+1]
 			try:
@@ -491,8 +494,8 @@ def getOptions(params):
 			except:
 				logMsg( "\tError. Option '%s' must be followed by an index number value, 0 or 1." % (arg))
 			params = params.rt_repeatParamList[index]
-				
-			
+
+
 		elif arg == "-fontplot":
 			exec("params." + kDrawTag + "HHints = 0")
 			exec("params." + kDrawTag + "VHints = 0")
@@ -578,37 +581,37 @@ def getOptions(params):
 			i = i +1
 			sizeString = sys.argv[i]
 			if sizeString[0] == "-":
-				raise OptionParseError("Option Error: it looks like the first item in the waterfall size list following '-wfr' is another option.") 
+				raise OptionParseError("Option Error: it looks like the first item in the waterfall size list following '-wfr' is another option.")
 			params.waterfallRange = parsePtSizeListArg(sizeString)
 		elif arg == "-gpp":
 			i = i +1
 			try:
 				params.glyphsPerPage = int( sys.argv[i])
 			except ValueError:
-				raise OptionParseError("Option Error: -glyphsPerPage must be followed by an integer number") 
+				raise OptionParseError("Option Error: -glyphsPerPage must be followed by an integer number")
 		elif arg == "-pt":
 			i = i +1
 			try:
 				params.userPtSize = int( sys.argv[i])
 			except ValueError:
-				raise OptionParseError("Option Error: -pt must be followed by an integer number") 
+				raise OptionParseError("Option Error: -pt must be followed by an integer number")
 		elif arg == "-g":
 			i = i +1
 			glyphString = sys.argv[i]
 			if glyphString[0] == "-":
-				raise OptionParseError("Option Error: it looks like the first item in the glyph list following '-g' is another option.") 
+				raise OptionParseError("Option Error: it looks like the first item in the glyph list following '-g' is another option.")
 			params.rt_optionGlyphList += parseGlyphListArg(glyphString)
 		elif arg == "-gf":
 			i = i +1
 			rt_filePath = sys.argv[i]
 			if rt_filePath[0] == "-":
-				raise OptionParseError("Option Error: it looks like the the glyph list file following '-gf' is another option.") 
+				raise OptionParseError("Option Error: it looks like the the glyph list file following '-gf' is another option.")
 			try:
 				gf = file(rt_filePath, "rt")
 				glyphString = gf.read()
 				gf.close()
 			except (IOError,OSError):
-				raise OptionParseError("Option Error: could not open glyph list file <%s>." %  rt_filePath) 
+				raise OptionParseError("Option Error: could not open glyph list file <%s>." %  rt_filePath)
 			params.rt_optionGlyphList += parseGlyphListArg(glyphString)
 		elif arg == "-o":
 			i = i +1
@@ -617,6 +620,8 @@ def getOptions(params):
 			params.openPDFWhenDone = 0
 		elif arg == "-do":
 			params.openPDFWhenDone = 1
+		elif arg == "-q":
+			params.quietMode = True
 		elif arg == "-black":
 			params.emboxColorRGB = params.baselineColorRGB = params.xAdvanceColorRGB = params.contourLabelColorRGB = params.pointLabelColorRGB = params.MetaDataGlyphColorRGB = (0,0,0)
 			params.hintColorRGB = params.hintColorOverlapRGB = params.alignmentZoneColorRGB = (0.5,0.5,0.5)
@@ -634,7 +639,7 @@ def getOptions(params):
 			exec("params." + kShowMetaTag + "Hints = 0")
 			exec("params." + kShowMetaTag + "SideBearings = 0")
 			exec("params." + kShowMetaTag + "V_SideBearings = 0")
-			
+
 		elif arg == "-select_hints":
 			i = i +1
 			indexList = sys.argv[i]
@@ -643,8 +648,8 @@ def getOptions(params):
 				indexList = map(int, indexList)
 				params.rt_hintTableList = indexList
 			except ValueError:
-				raise OptionParseError("Option Error: in \" -select_hints %s\,  one of the indices in the argument list is not an integer." %   sys.argv[i]) 
-			
+				raise OptionParseError("Option Error: in \" -select_hints %s\,  one of the indices in the argument list is not an integer." %   sys.argv[i])
+
 		elif arg == "-baseline":
 			i = i +1
 			try:
@@ -658,13 +663,13 @@ def getOptions(params):
 			exec("params." + kShowMetaTag + "SideBearings = 1")
 			exec("params." + kShowMetaTag + "V_SideBearings = 1")
 		elif arg[0] == "-":
-			raise OptionParseError("Option Error: Unknown option <%s>." %  arg) 
+			raise OptionParseError("Option Error: Unknown option <%s>." %  arg)
 		else:
 			params.rt_fileList += [arg]
 		i  += 1
 	if not params.rt_fileList:
-		raise OptionParseError("Option Error: You must provide at least one font file path.") 
-		
+		raise OptionParseError("Option Error: You must provide at least one font file path.")
+
 	return params
 
 
@@ -758,7 +763,7 @@ def openFile(path, txPath):
 		if not "sup.srcFontType" in report:
 			logMsg(report)
 			logMsg("Failed to open directory %s as a UFO font." % path)
-			
+
 		tfd,tempPathCFF = tempfile.mkstemp()
 		os.close(tfd)
 		command="%s   -cff +b  \"%s\" \"%s\" 2>&1" % (txPath, path, tempPathCFF)
@@ -776,7 +781,7 @@ def openFile(path, txPath):
 			import traceback
 			traceback.print_exc()
 			raise FontError("Failed to open and read font file %s. Check file/directory permissions." % path)
-		
+
 		if len(data) < 10:
 			raise FontError("Error: font file was zero size: may be a resource fork font, which this program does not process. <%s>." % path)
 		if (data[:4] == "OTTO") or (data[:4] == "true") or (data[:4] == "\0\1\0\0"): # it is an OTF/TTF font, can process file directly
@@ -786,12 +791,12 @@ def openFile(path, txPath):
 				raise FontError("Error opening or reading from font file <%s>." % path)
 			except TTLibError:
 				raise FontError("Error parsing font file 333 <%s>." % path)
-	
+
 			if not (ttFont.has_key('CFF ') or ttFont.has_key('glyf')):
 				raise FontError("Error: font is not a CFF or TrueType font <%s>." % path)
-	
+
 			return ttFont, tempPathCFF
-	
+
 		# It is not an OTF file.
 		if (data[0] == '\1') and (data[1] == '\0'): # CFF file
 			cffPath = path
@@ -799,8 +804,8 @@ def openFile(path, txPath):
 			#not a PS file either
 			logMsg("Font file must be a PS, CFF or OTF  fontfile: %s." % path)
 			raise FontError("Font file must be PS, CFF or OTF file: %s." % path)
-	
-		else:  # It is a PS file. Convert to CFF.	
+
+		else:  # It is a PS file. Convert to CFF.
 			tfd,tempPathCFF = tempfile.mkstemp()
 			os.close(tfd)
 			cffPath = tempPathCFF
@@ -830,7 +835,7 @@ def openFile(path, txPath):
 
 
 def proofMakePDF(pathList, params, txPath):
-	#    use fontTools library to open font and extract CFF table. 
+	#    use fontTools library to open font and extract CFF table.
 	#    If error, skip font and report error.
 	if params.rt_doFontSet:
 		pdfFontList = []
@@ -851,14 +856,14 @@ def proofMakePDF(pathList, params, txPath):
 			except FontError:
 				print traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1]
 				return
-		
-		
+
+
 			#   filter specified list, if any, with font list.
 			glyphList = filterGlyphList(params, fontGlyphList, fontFileName)
 			if not glyphList:
 				raise FontError("Error: selected glyph list is empty for font <%s>." % fontFileName)
 			params.rt_reporter = logMsg
-		
+
 			if ttFont.has_key("CFF "):
 				pdfFont = otfPDF.txPDFFont(ttFont, params)
 			elif ttFont.has_key("glyf"):
@@ -869,16 +874,17 @@ def proofMakePDF(pathList, params, txPath):
 			if tempPathCFF:
 				pdfFont.path = tempPathCFF
 			pdfFontList.append([glyphList, pdfFont, tempPathCFF])
-			
-		pdfFilePath = makeFontSetPDF(pdfFontList,  params)
+
+		doProgressBar = not params.quietMode
+		pdfFilePath = makeFontSetPDF(pdfFontList, params, doProgressBar)
 		for entry in pdfFontList:
 			tempPathCFF =  entry[2]
 			pdfFont = entry[1]
 			pdfFont.clientFont.close()
 			if tempPathCFF:
 				os.remove(tempPathCFF)
-		
-			
+
+
 		logMsg( "Wrote proof file %s. End time: %s." % (pdfFilePath, time.asctime()))
 		if pdfFilePath and params.openPDFWhenDone:
 			if curSystem == "Windows":
@@ -900,22 +906,23 @@ def proofMakePDF(pathList, params, txPath):
 		for path in pathList:
 			fontFileName = os.path.basename(path)
 			params.rt_filePath = os.path.abspath(path)
-			logMsg("")
-			logMsg( "Proofing font %s. Start time: %s." % (path, time.asctime()))
+			if not params.quietMode:
+				logMsg("")
+				logMsg( "Proofing font %s. Start time: %s." % (path, time.asctime()))
 			try:
 				ttFont, tempPathCFF = openFile(path, txPath)
 				fontGlyphList = ttFont.getGlyphOrder()
 			except FontError:
 				print traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1]
 				return
-		
-		
+
+
 			#   filter specified list, if any, with font list.
 			params.rt_glyphList = filterGlyphList(params, fontGlyphList, fontFileName)
 			if not params.rt_glyphList:
 				raise FontError("Error: selected glyph list is empty for font <%s>." % fontFileName)
 			params.rt_reporter = logMsg
-		
+
 			if ttFont.has_key("CFF "):
 				pdfFont = otfPDF.txPDFFont(ttFont, params)
 			elif ttFont.has_key("glyf"):
@@ -923,15 +930,17 @@ def proofMakePDF(pathList, params, txPath):
 			else:
 				logMsg( "Quitting. Font type is not recognized. %s.." % (path))
 				return
-			
+
 			if tempPathCFF:
 				pdfFont.path = tempPathCFF
-			pdfFilePath = makePDF(pdfFont,  params)
+			doProgressBar = not params.quietMode
+			pdfFilePath = makePDF(pdfFont, params, doProgressBar)
 			ttFont.close()
 			if tempPathCFF:
 				os.remove(tempPathCFF)
-				
-			logMsg( "Wrote proof file %s. End time: %s." % (pdfFilePath, time.asctime()))
+
+			if not params.quietMode:
+				logMsg("Wrote proof file %s. End time: %s." % (pdfFilePath, time.asctime()))
 			if pdfFilePath and params.openPDFWhenDone:
 				if curSystem == "Windows":
 					curdir = os.getcwdu()
@@ -985,5 +994,5 @@ def main():
 
 if __name__=='__main__':
 	main()
-	
-	
+
+

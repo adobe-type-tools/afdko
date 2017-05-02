@@ -1,5 +1,5 @@
 """
-fontPDF v1.22 April 2015. This module is not run stand-alone; it requires
+fontPDF v1.23 May 2 2017. This module is not run stand-alone; it requires
 another module, such as ProofPDF.py, in order to collect the options, and call
 the MakePDF function.
 
@@ -55,8 +55,8 @@ the command-line tools, the values be enclosed in quotes, such as:
 
 
 # Page attributes
---pageSize  (612.0, 792.0)            # Integer pair. Size of page in points. 
-                                       Must be specifed on a command-line 
+--pageSize  (612.0, 792.0)            # Integer pair. Size of page in points.
+                                       Must be specifed on a command-line
                                        as "(x,y)"
 --pageTopMargin  36.0                 # Integer. Point size
 --pageBottomMargin  36.0              # Integer. Point size
@@ -67,54 +67,54 @@ the command-line tools, the values be enclosed in quotes, such as:
 --fontsetGroupPtSize  14              # Integer. Point size for group header and PS name in fontsetplot.
 
 # Page layout attributes
---glyphsPerPage  156                  # Integer. default number of glyphs 
-                                       per page. Set by the "-gpp <number>" 
+--glyphsPerPage  156                  # Integer. default number of glyphs
+                                       per page. Set by the "-gpp <number>"
                                        option.
---userPtSize  None                    # Integer. Point size for glyphs . 
-                                       Usually calculated from glyphs per 
+--userPtSize  None                    # Integer. Point size for glyphs .
+                                       Usually calculated from glyphs per
                                        page. Set by the "-pt <number>" option.
---glyphHPadding  150                  # Design space units. Spacing between 
+--glyphHPadding  150                  # Design space units. Spacing between
                                        glyph tiles on a line, in points.
---glyphVPadding  150                  # Design space units. Spacing  between 
+--glyphVPadding  150                  # Design space units. Spacing  between
                                        lines of glyph tiles, in points.
---doAlphabeticOrder  0                # 0 or 1. Whether to show glyphs in 
-                                       alphabetic order. Does not work with 
+--doAlphabeticOrder  0                # 0 or 1. Whether to show glyphs in
+                                       alphabetic order. Does not work with
                                        CID-keyed fonts
 
 # Main glyph tile elements
 # All metrics are specified in design units for a 1000 em-square. Glyph
 # data is scaled to a 1000-em square before these metrics are used.
---DrawFilledOutline  1                # 0 or 1. Whether to set whether the 
+--DrawFilledOutline  1                # 0 or 1. Whether to set whether the
                                        glyph outline is filled or just stroked.
---drawGlyph_Baseline  0               # 0 or 1. Whether to draw the glyph 
-                                       baseline as a horizontnal line the 
+--drawGlyph_Baseline  0               # 0 or 1. Whether to draw the glyph
+                                       baseline as a horizontnal line the
                                        width of the em-box.
---drawGlyph_BlueZones  0              # 0 or 1. Whether to draw the font 
+--drawGlyph_BlueZones  0              # 0 or 1. Whether to draw the font
                                        alignment zones
 --drawGlyph_CenterMarks  0            # 0 or 1. Whether to center registration marks
---drawGlyph_GlyphBox  0               # 0 or 1. Whether to draw a box around 
-                                       the glyph, height = em-square , width=x-advance. 
+--drawGlyph_GlyphBox  0               # 0 or 1. Whether to draw a box around
+                                       the glyph, height = em-square , width=x-advance.
 --drawGlyph_CenterMarksWithBox  0     # 0 or 1. Do drawGlyph_GlyphBox and drawGlyph_CenterMarks
---drawGlyph_ContourLabels  0          # 0 or 1. Whether to draw the labels 
+--drawGlyph_ContourLabels  0          # 0 or 1. Whether to draw the labels
                                        for each contour
---drawGlyph_EMBox  1                  # 0 or 1. Whether to draw  the em-box 
+--drawGlyph_EMBox  1                  # 0 or 1. Whether to draw  the em-box
                                        square, startig at the glyph origin.
---drawGlyph_HHints  0                 # 0 or 1. Whether to draw the horizontal 
+--drawGlyph_HHints  0                 # 0 or 1. Whether to draw the horizontal
                                        hint zones
 --drawGlyph_Outline  1                # 0 or 1. Whether to draw the glyph.
---drawGlyph_VHints  0                 # 0 or 1. Whether to draw the vertical 
+--drawGlyph_VHints  0                 # 0 or 1. Whether to draw the vertical
                                        hint zones
---drawGlyph_XAdvance  1               # 0 or 1. Whether to draw a T marking 
+--drawGlyph_XAdvance  1               # 0 or 1. Whether to draw a T marking
                                        both the glyph origin and the x-advance.
 
---vhintYOffset  10                    # Design space units. default offset 
-                                       of hint zone; successive zones are 
-                                       staggered so you can see the overlap more easily. 
---hhintXOffset  10                    # Design space units. default offset 
-                                       of hint zone; successive zones are 
+--vhintYOffset  10                    # Design space units. default offset
+                                       of hint zone; successive zones are
                                        staggered so you can see the overlap more easily.
---descenderSpace  None                # Design space units. Space to allow 
-                                       under the origin to allow for descenders. 
+--hhintXOffset  10                    # Design space units. default offset
+                                       of hint zone; successive zones are
+                                       staggered so you can see the overlap more easily.
+--descenderSpace  None                # Design space units. Space to allow
+                                       under the origin to allow for descenders.
                                        Also sets the space from the
                                        origin to the meta data text,
                                        when the latter is below the
@@ -123,110 +123,110 @@ the command-line tools, the values be enclosed in quotes, such as:
                                        from the font bounding box.
 
 
---alignmentZoneColorRGB  (0, 0, 0.75) # Triplet of RGB values. Color of alignment 
+--alignmentZoneColorRGB  (0, 0, 0.75) # Triplet of RGB values. Color of alignment
                                        zones.
---emboxColorRGB  (0.25, 0.25, 0.5)    # Triplet of RGB values. Color of em-box 
+--emboxColorRGB  (0.25, 0.25, 0.5)    # Triplet of RGB values. Color of em-box
                                        rectangle.
---hintColorOverlapRGB  (0.6, 0.6, 0)  # Triplet of RGB values. Color for 
+--hintColorOverlapRGB  (0.6, 0.6, 0)  # Triplet of RGB values. Color for
                                        area where hint zones overlap.
---hintColorRGB  (0, 0.75, 0)          # Triplet of RGB values. Color for 
+--hintColorRGB  (0, 0.75, 0)          # Triplet of RGB values. Color for
                                        hint zones.
---xAdvanceColorRGB  (0.5, 0, 0)       # Triplet of RGB values. Color of ticks 
+--xAdvanceColorRGB  (0.5, 0, 0)       # Triplet of RGB values. Color of ticks
                                        marks for the x-advance.
 
 # Attributes for glyph path points.
---drawPoint_PointMarks  0             # 0 or 1. Whether to draw marks to 
+--drawPoint_PointMarks  0             # 0 or 1. Whether to draw marks to
                                        indicate the location of the  points.
---drawPoint_BCPMarks  0               # 0 or 1. Whether to draw marks to 
-                                       indicate the location of the bezier 
+--drawPoint_BCPMarks  0               # 0 or 1. Whether to draw marks to
+                                       indicate the location of the bezier
                                        control points.
---drawPoint_PointLabels  0            # 0 or 1. Whether to draw a label for 
+--drawPoint_PointLabels  0            # 0 or 1. Whether to draw a label for
                                        each point.
 
---pointLabel_doPointIndex  1          # 0 or 1. In the point label, whether 
+--pointLabel_doPointIndex  1          # 0 or 1. In the point label, whether
                                        to show its path index number.
---pointLabel_doPointType  1           # 0 or 1. In the point label, whether 
-                                       to show the sgment type ( c for curve, 
+--pointLabel_doPointType  1           # 0 or 1. In the point label, whether
+                                       to show the sgment type ( c for curve,
                                        l for line, m for move-to).
---pointLabel_doPosition  1            # 0 or 1. In the point label, whether 
+--pointLabel_doPosition  1            # 0 or 1. In the point label, whether
                                        to show the (x,y) position.
---pointLabelFont  Helvetica           # Text string. Font for point and contour 
+--pointLabelFont  Helvetica           # Text string. Font for point and contour
                                        label text.
---pointLabelSize  16                  # Design space units. Point size used 
+--pointLabelSize  16                  # Design space units. Point size used
                                        for point labels.
---pointClosingArrowLength  15         # Design space units. Point size. Length 
-                                       of arrow used to show closing contour 
+--pointClosingArrowLength  15         # Design space units. Point size. Length
+                                       of arrow used to show closing contour
                                        path segment.
---pointLabel_LineLength  10           # Design space units. Length of tick 
+--pointLabel_LineLength  10           # Design space units. Length of tick
                                        mark connecting a point to its label.
---pointLabel_BCP_CrossSize  5         # Design space units. Size of cross 
+--pointLabel_BCP_CrossSize  5         # Design space units. Size of cross
                                        used to mark a BCP, in points.
---pointMarkDiameter  2                # Design space units. Size of dot used 
+--pointMarkDiameter  2                # Design space units. Size of dot used
                                        to mark a point, in points.
 
---contourLabelColorRGB  (0.5, 0, 0)   # Triplet of RGB values. Color of the 
+--contourLabelColorRGB  (0.5, 0, 0)   # Triplet of RGB values. Color of the
                                        counter lables (P 0, P 1, etc).
---pointLabelColorRGB  (0.5, 0, 0)     # Triplet of RGB values. Color of point 
+--pointLabelColorRGB  (0.5, 0, 0)     # Triplet of RGB values. Color of point
                                        labels in glyph contour
-                                       
+
 --markLineWidth 1                     # The width of the lines used to connect labels to points
 
 # Attributes for descriptive text.
---drawMeta_Name  1                    # 0 or 1. Whether to write the glyph 
-                                       name at the start of the meta data 
+--drawMeta_Name  1                    # 0 or 1. Whether to write the glyph
+                                       name at the start of the meta data
                                        text.
---drawMeta_BBox  0                    # 0 or 1. Whether to write the font 
-                                       bounding box info, in the meta data 
+--drawMeta_BBox  0                    # 0 or 1. Whether to write the font
+                                       bounding box info, in the meta data
                                        text.
---drawMeta_HintDir  0                 # 0 or 1. Whether to write the hint 
-                                       directory from the CID layout file 
+--drawMeta_HintDir  0                 # 0 or 1. Whether to write the hint
+                                       directory from the CID layout file
                                        (CID-keyed fonts only, requires
                                        layout file path to be specified').
---drawMeta_Hints  1                   # 0 or 1. Whether to write the number 
-                                       of vertical and horizontal hints, 
+--drawMeta_Hints  1                   # 0 or 1. Whether to write the number
+                                       of vertical and horizontal hints,
                                        in the meta data text.
---drawMeta_Parts  0                   # 0 or 1. Whether to write the number 
-                                       of path segments of each type, in 
+--drawMeta_Parts  0                   # 0 or 1. Whether to write the number
+                                       of path segments of each type, in
                                        the meta data text.
---drawMeta_Paths  0                   # 0 or 1. Whether to write the number 
+--drawMeta_Paths  0                   # 0 or 1. Whether to write the number
                                        of contours, in the meta data text.
---drawMeta_RowFont  0                 # 0 or 1. Whether to write the row 
-                                       font name and glyph name from the 
+--drawMeta_RowFont  0                 # 0 or 1. Whether to write the row
+                                       font name and glyph name from the
                                        CID layout file (CID-keyed fonts
                                        only, requires layout file path
                                        to be specified').
---drawMeta_SideBearings  1            # 0 or 1. Whether to write the left 
-                                       and right side bearings and the x-advance, 
+--drawMeta_SideBearings  1            # 0 or 1. Whether to write the left
+                                       and right side bearings and the x-advance,
                                        in the meta data text.
---drawMeta_V_SideBearings  0          # 0 or 1. Whether to write the top 
-                                       and bottom side bearings and the y-advance, 
+--drawMeta_V_SideBearings  0          # 0 or 1. Whether to write the top
+                                       and bottom side bearings and the y-advance,
                                        in the meta data text.
---drawMeta_WidthOnly  0               # 0 or 1. Whether to write the x-advance 
-                                       width and the y-advance width, in 
+--drawMeta_WidthOnly  0               # 0 or 1. Whether to write the x-advance
+                                       width and the y-advance width, in
                                        the meta data text.
 
---drawMeta_Outline  0                 # 0 or 1. Whether to draw a small filled 
+--drawMeta_Outline  0                 # 0 or 1. Whether to draw a small filled
                                        glyph next to the meta data text.
---metaDataFilledGlyphSize  320        # Design space units. Point size for 
-                                       the small filled glyph next to the 
+--metaDataFilledGlyphSize  320        # Design space units. Point size for
+                                       the small filled glyph next to the
                                        meta data text.
---MetaDataGlyphColorRGB  (0, 0, 0)    # Triplet of RGB values. Color of the 
-                                       small filled glyph shown next to the 
+--MetaDataGlyphColorRGB  (0, 0, 0)    # Triplet of RGB values. Color of the
+                                       small filled glyph shown next to the
                                        meta data text block when
                                        drawMeta_Outline is set to 1
 
---metaDataAboveGlyph  1               # 0 or 1. Whether to write the meta 
+--metaDataAboveGlyph  1               # 0 or 1. Whether to write the meta
                                        data text above or below the glyph.
---metaDataFont  Times-Bold            # Text string. Font used to write the 
+--metaDataFont  Times-Bold            # Text string. Font used to write the
                                        meta data text.
---metaDataNameSize  80                # Design space units. Point size used 
-                                       for the glyph name in the meta data 
+--metaDataNameSize  80                # Design space units. Point size used
+                                       for the glyph name in the meta data
                                        text
---metaDataTextSize  80                # Design space units. Point size used 
-                                       for all other items in the meta data 
+--metaDataTextSize  80                # Design space units. Point size used
+                                       for all other items in the meta data
                                        text
---metaDataXoffset  0                  # Design space units. Point size used 
-                                       to offset the meta data block to the 
+--metaDataXoffset  0                  # Design space units. Point size used
+                                       to offset the meta data block to the
                                        right from the glyph origin.
 
 
@@ -240,19 +240,19 @@ separated by white-space. The first token is assumed to be the glyph
 name. The remaining tokens must be either words or x, y coordinate
 pairs. The text for each glyph is written under the glyph in columns,
 one word or (x,y) coordinate pair per line.
---errorLogFilePath  Error_file.log    # Text string. File path to the error 
+--errorLogFilePath  Error_file.log    # Text string. File path to the error
                                        log file.
---errogLogFont  Times-Bold            # Text string. Font used to write the 
+--errogLogFont  Times-Bold            # Text string. Font used to write the
                                        text from the error log file
---errorLogColumnHeight  250           # Design space units. column height 
+--errorLogColumnHeight  250           # Design space units. column height
                                        for the error log file
---errorLogColumnSpacing  20           # Design space units. column width 
+--errorLogColumnSpacing  20           # Design space units. column width
                                        for the error log file
---errorLogPointSize  30               # Design space units. Point size for 
+--errorLogPointSize  30               # Design space units. Point size for
                                        text used for error log report.
 
 Examples:
---pageTitleFont "MinionPro-Bold"  #Change the page title font. 
+--pageTitleFont "MinionPro-Bold"  #Change the page title font.
 --pointLabelFont "Times-Bold"  #Change the font for point labels
 --pointLabelColorRGB "(1.0, 0, 0)" #Change the color of the point labels
 to red. The value is a triplet of (Red Green, Blue) values, where 0 is
@@ -296,7 +296,7 @@ class FontPDFParams:
 							# is supressed, and the error list is shown iinstead.
 		self.rt_fileList = []		# list of file to proof
 		self.rt_optionGlyphList = [] # list of glyphs requested by user in options
-		self.rt_glyphList = [] # actual set of glyphs we will proof: the intersection of rt_optionGlyphList and glyphs that are in the font. 
+		self.rt_glyphList = [] # actual set of glyphs we will proof: the intersection of rt_optionGlyphList and glyphs that are in the font.
 		self.rt_alphaSort = 0 # Sort glyph names alphabetically
 		self.rt_doFontSet = 0 # show just one line of glyphs per font.
 		self.rt_optionLayoutDict = None # Dictionary representing a layout file for a CID font. If present, use the specified CID order, and
@@ -308,8 +308,8 @@ class FontPDFParams:
 		self.rt_emBoxScale = None # A scaling factor to allow for the difference between the std 1000 em-square and the font's em-square.
 		self.rt_maxHintLabelWidth = None #  This calculated and used only when showing h hintsl is the added to self.glyphHPadding to set self.rt_glyphHPadding.
 		self.rt_fdkSharedDataDir = None # Location of shared data dir, Used by digiplot to find layoout file
-		
-		
+
+
 		# real parameters
 		self.doAlphabeticOrder = 0 # show glyph list in alphabetic order rather than GI order.
 		self.glyphsPerPage = 1	# glyphs per page
@@ -319,7 +319,7 @@ class FontPDFParams:
 
 		self.descenderSpace = None # The amout of space allowed for descenders. By default is  Font BBox.ymin, but can be set by parameter.
 		self.pageTitleFont = 'Times-Bold'  # Font used for page titles.
-		self.pageTitleSize = 14		# point size for page titles	
+		self.pageTitleSize = 14		# point size for page titles
 		self.fontsetGroupPtSize = 14 # pt size for group header text font fontsetplot
 		self.pointLabelFont = 'Helvetica'  # Font used for all text in glyph tile.
 		self.pointLabelSize = 16 # point size for all text in glyph tile. This is is relative to a glyph tile fo width kGlyphSquare;
@@ -340,9 +340,9 @@ class FontPDFParams:
 		self.pointLabel_LineLength = 10 # length of tick mark from a point to its label
 		self.pointClosingArrowLength = 15 # length of direction arrow, drawn pointing to the first poin on each path.
 
-		# Whether ot not to draw specified object. Fuctions beginning with kDrawTag and kDrawPointTag are drawn wiithin 
+		# Whether ot not to draw specified object. Fuctions beginning with kDrawTag and kDrawPointTag are drawn wiithin
 		# the scale/offset paramters used for drawing the glyph outline
-		# If you want to add a new drawing function, the paramter name here must match 
+		# If you want to add a new drawing function, the paramter name here must match
 		# the function name in the fontPDFGlyph class. and must be added to the sortedMethodsDraw list.
 		self.glyphHPadding = 150 # Extra space around glyph
 		self.glyphVPadding = 150 # Extra space around glyph
@@ -376,7 +376,7 @@ class FontPDFParams:
 
 		# Although the the same transform is used with the kDrawPointTag functions as with the kDrawTag
 		# functions, any text point size is scaled back up by 1/params.emboxScale. so that the point is size is
-		# relative to to the glyph tile, not the glyph outline. This is so that the text doesn't get tiny when showing a 
+		# relative to to the glyph tile, not the glyph outline. This is so that the text doesn't get tiny when showing a
 		# glyph with  2048 embox.
 		exec("self." + kDrawPointTag + "PointMarks = 1")
 		exec("self." + kDrawPointTag + "BCPMarks = 1")
@@ -387,7 +387,7 @@ class FontPDFParams:
 		# Whether or not to draw specified object. Fuctions beginning with kShowMetaTag  are drawn wiith
 		# the scale/offset paramters used for drawing the glyph tile.  Pt sizes are relative to the  kGlyphSquare
 		# embox, and are scaled with the glyph tile.
-		# If you want to add a new drawing function, the paramter name here must match 
+		# If you want to add a new drawing function, the paramter name here must match
 		# the function name in the fontPDFGlyph class. and must be added to the sortedMethodsMeta list.
 
 		# Meta data is shown under the glyph outline, in a single column. metaDataXoffset sets the left margin
@@ -518,11 +518,11 @@ class FontPDFFont:
 		# This must return a list of blueZone items, one item per fontDict in the font ( Type 1 fonts have 1 font dict, CDIF fonts have several).
 		# Each Blue Zone item will be a list of tuples. Each tuple will be a coordinate pair, the absolute low and high values for an alignment zone.
 		raise NotImplementedError
-		
+
 	def clientGetAscentDescent(self):
 		raise NotImplementedError
-	
-			
+
+
 
 
 class FontPDFPoint:
@@ -609,7 +609,7 @@ class FontPDFGlyph:
 			self.extraY = extraY
 		else:
 			extraY = self.extraY
-			
+
 		if not params.metaDataAboveGlyph:
 			glyphY = extraY # glyph origin is  < height of meta data> above the bottom of the glyph tile (0,0). This already i
 		else:
@@ -637,7 +637,7 @@ class FontPDFGlyph:
 					methodName =  kDrawPointTag + clientMethod
 					if  eval("params." + methodName):
 						eval("self." + methodName + "(path, pt, params)")
-				
+
 		rt_canvas.restoreState()
 		# back to 1000 em-square coords.
 		# now draw meta data.
@@ -695,9 +695,9 @@ class FontPDFGlyph:
 			if (posY - ptSize) < 0: # I allow a margin of one line at the bottom of the meta area.
 				posY = self.cur_y - ptSize
 				posX += columnAdvance
-				
-			
-			
+
+
+
 		return
 
 	def drawGlyph_Outline(self, params, fill = 0):
@@ -735,7 +735,7 @@ class FontPDFGlyph:
 			if (curX, curY)  != firstPT:
 				p.lineTo( firstPT[0] , firstPT[1] )
 		rt_canvas.drawPath(p, 1, fill)
-				
+
 
 	def drawGlyph_EMBox(self, params):
 		baseLine = self.parentFont.getBaseLine()
@@ -752,7 +752,7 @@ class FontPDFGlyph:
 		baseLine = self.parentFont.getBaseLine()
 		emSquare = self.parentFont.getEmSquare()
 		yStart = baseLine
-		height =emSquare 
+		height =emSquare
 		if params.drawMeta_V_SideBearings:
 			# Make box fit yorig to advance width.
 			yStart = self.yOrigin - self.yAdvance
@@ -771,11 +771,11 @@ class FontPDFGlyph:
 		rt_canvas.line(x2, yStart + height, x2, yStart + height+tickSize)
 		rt_canvas.line(x2, yStart-tickSize, x2, yStart)
 		rt_canvas.restoreState()
-		
+
 	def drawGlyph_CenterMarksWithBox(self, params):
 		self.drawGlyph_CenterMarks(params)
 		self.drawGlyph_GlyphBox(params)
-		
+
 	def drawGlyph_GlyphBox(self, params):
 		yStart = self.parentFont.getBaseLine()
 		height = self.parentFont.getEmSquare()
@@ -790,7 +790,7 @@ class FontPDFGlyph:
 		rt_canvas.setLineWidth(params.markLineWidth)
 		rt_canvas.rect(0, yStart, self.xAdvance, height) # Second pair of (x,y) coord in .rect are relative to first.
 		rt_canvas.restoreState()
-		
+
 
 	def drawGlyph_Baseline(self, params):
 		baseLine = self.parentFont.getBaseLine()
@@ -825,7 +825,7 @@ class FontPDFGlyph:
 		for path in self.pathList:
 			pointPDF = path[0]
 			p1 = pointPDF.pt0
-	
+
 			# Get the incoming vector. If this poin tis a cureve-to, this is bcp2, else it is the position of the previous point.
 			if pointPDF.bcp2:
 				p0 = pointPDF.bcp2
@@ -836,7 +836,7 @@ class FontPDFGlyph:
 						p0 = pointPDF.last.bcp2
 					else:
 						p0 = pointPDF.last.last.pt0
-	
+
 			if  pointPDF.next.bcp1:
 				p2 = pointPDF.next.bcp1
 			else:
@@ -996,7 +996,7 @@ class FontPDFGlyph:
 		rt_canvas.setFillColorRGB(alignmentZoneColorRGB[0] *0.5, alignmentZoneColorRGB[1] *0.5, alignmentZoneColorRGB[2] *0.5)
 		blueZoneOffset = 5 # used to make the blue zone rect tick out a bit from the em-box on both sides
 		x0 = -blueZoneOffset
-		for i in range(len(blueZones)): 
+		for i in range(len(blueZones)):
 			zone = blueZones[i]
 			y0 = zone[0]
 			y1 = zone[1]
@@ -1040,7 +1040,7 @@ class FontPDFGlyph:
 		pointLabelColorRGB = params.pointLabelColorRGB
 		rt_canvas = params.rt_canvas
 
-		if pointPDF == path[0]: 
+		if pointPDF == path[0]:
 			if path[-1].pt0 == pointPDF.pt0:
 				return # Don't draw label for first point in path if last point s coincident with it.
 		text = ""
@@ -1084,7 +1084,7 @@ class FontPDFGlyph:
 		rt_canvas.setStrokeColorRGB(pointLabelColorRGB[0], pointLabelColorRGB[1], pointLabelColorRGB[2])
 		rt_canvas.drawString( textPos[0], textPos[1], text)
 		rt_canvas.restoreState()
-			
+
 	def drawPoint_PointMarks(self, path, pointPDF , params):
 		eval("self.drawPoint" + pointPDF.type + "(params, pointPDF)")
 
@@ -1102,7 +1102,7 @@ class FontPDFGlyph:
 
 		x0 = p0[0]
 		y0 =  p0[1]
-		x1 = pt.pt0[0] 
+		x1 = pt.pt0[0]
 		y1 =  pt.pt0[1]
 		if (y1 == y0): # arrow is horizontal
 			y3 = y1 + size/4.0
@@ -1188,7 +1188,7 @@ class FontPDFGlyph:
 			nameString = gName
 		rt_canvas.drawString(self.cur_x, self.cur_y, nameString)
 		rt_canvas.restoreState()
-	
+
 	def drawMeta_BBox(self, params):
 		emSquare = float(self.parentFont.getEmSquare())
 		rt_canvas = params.rt_canvas
@@ -1230,8 +1230,8 @@ class FontPDFGlyph:
 				hintDir = params.rt_optionLayoutDict[self.name][0]
 			except KeyError:
 				hintDir = "HintDir: CID not in layout file. %s." % (self.name)
-		else: 
-			# it is name-keyed font that is not helpfully usiing cidXXXX names. Assume that it is in the 
+		else:
+			# it is name-keyed font that is not helpfully usiing cidXXXX names. Assume that it is in the
 			# std development heirarchy.
 			rowDir = os.path.dirname(params.rt_filePath)
 			hintDir = os.path.basename(os.path.dirname(rowDir))
@@ -1241,9 +1241,9 @@ class FontPDFGlyph:
 				entry = params.rt_optionLayoutDict[reversekey]
 			except KeyError:
 				hintDir = "HintDir: '%s  %s  %s' not in layout file." % (hintDir, rowDir, self.name)
-			
+
 		params.rt_canvas.drawString(self.cur_x, self.cur_y, "HintDir = %s" %(hintDir))
-		
+
 	def drawMeta_RowFont(self, params):
 		if self.parentFont.isCID or (self.name.startswith("cid") and re.match(r"\d+", self.name[3:])):
 			# use CIO key to access layout dict
@@ -1253,8 +1253,8 @@ class FontPDFGlyph:
 				rowDir = rec[2]
 			except (KeyError, TypeError):
 				rowFont = "RowFont: CID not in layout file"
-		else: 
-			# it is name-keyed font that is not helpfully usiing cidXXXX names. Assume that it is in the 
+		else:
+			# it is name-keyed font that is not helpfully usiing cidXXXX names. Assume that it is in the
 			# std development heirarchy.
 			rowDir = os.path.dirname(params.rt_filePath)
 			hintDir = os.path.basename(os.path.dirname(rowDir))
@@ -1265,11 +1265,11 @@ class FontPDFGlyph:
 			except KeyError:
 				rowDir = "RowFont: '%s  %s  %s' not in layout file." % (hintDir, rowDir, self.name)
 		params.rt_canvas.drawString(self.cur_x, self.cur_y, "RowDir = %s/%s" % (hintDir, rowDir))
-		
+
 	def drawMeta_WidthOnly(self, params):
 		params.rt_canvas.drawString(self.cur_x, self.cur_y, "Width = %s, Y Advance = %s" % ( self.xAdvance, self.yAdvance))
 
-		
+
 def getTitleHeight(params):
 	pageTitleFont = params.pageTitleFont
 	pageTitleSize = params.pageTitleSize
@@ -1364,17 +1364,17 @@ def setDefaultHPadding(params, init = None):
 		params.rt_glyphHPadding = init
 	else:
 		params.rt_glyphHPadding = params.glyphHPadding
-		
+
 	if  params.drawGlyph_HHints:
 		params.rt_maxHintLabelWidth = pdfmetrics.stringwidth("<999.0, 999.0> 999.0", params.pointLabelFont) * 0.001 *  params.pointLabelSize
 		params.rt_glyphHPadding += params.hhintXOffset + params.rt_maxHintLabelWidth
-				
+
 def setDefaultVPadding(params, init = None):
 	if init:
 		params.rt_glyphVPadding = init
 	else:
 		params.rt_glyphVPadding = params.glyphVPadding
-		
+
 	if  params.drawGlyph_VHints:
 		params.rt_glyphVPadding += params.vhintYOffset +  (2*1.2*params.pointLabelSize) # amount the hints stick out, plus two lines of type.
 
@@ -1384,7 +1384,7 @@ def getLayout(params, extraY, yTop):
 		return getLayoutFromUserPtSize(params, extraY, yTop)
 	else:
 		return getLayoutFromGPP(params, extraY, yTop)
-		
+
 def getLayoutFromUserPtSize(params, extraY, yTop):
 	# figure how many glyphs can go on a page. This complicated by the fact that a glyph can be repeated more than once.
 	numAcross = numDown = scale = xAdvance = yAdvance = leftPadding =  topPadding = 0
@@ -1419,7 +1419,7 @@ def getLayoutFromUserPtSize(params, extraY, yTop):
 	if leftPadding < 0:
 		leftPadding = 0
 	xAdvance = int(glyphWidth/params.rt_repeats  + leftPadding)
-	leftPadding = int(leftPadding/ 2) # Ithe full spacing goes between the glyphs 
+	leftPadding = int(leftPadding/ 2) # Ithe full spacing goes between the glyphs
 
 	# Since the first line starts at (yTop - (yAdvance + topPadding), and
 	# yAdvance already has topPadding in it, what we return is -topPadding/2.
@@ -1429,7 +1429,7 @@ def getLayoutFromUserPtSize(params, extraY, yTop):
 		topPadding = 0
 	yAdvance =int( glyphHeight + topPadding)
 	topPadding = -int(topPadding /2)
-	
+
 	#print "DBG getLayout numAcross %s, numDown %s, scale %s, xAdvance %s, yAdvance %s, leftPadding %s, topPadding %s." % \
 	#	(numAcross, numDown, scale, xAdvance, yAdvance, leftPadding, topPadding)
 
@@ -1440,11 +1440,11 @@ def getLayoutFromGPP(params, extraY, yTop):
 	glyphsPerPage = params.glyphsPerPage
 	if glyphsPerPage == 1:
 		params.rt_glyphHPadding = params.rt_glyphVPadding = 0
-		
+
 	numAcross = numDown = scale = xAdvance = yAdvance = leftPadding =  topPadding = 0
 	pageWidth = float(params.pageSize[0] - (params.pageRightMargin + params.pageLeftMargin))
 	pageHeight = float(yTop - params.pageBottomMargin)
-	
+
 	glyphWidthUnscaled = (kGlyphSquare + 2*params.rt_glyphHPadding) *params.rt_repeats
 	glyphHeightUnscaled = kGlyphSquare + extraY + 2*params.rt_glyphVPadding
 
@@ -1460,12 +1460,12 @@ def getLayoutFromGPP(params, extraY, yTop):
 			scale1 = pageHeight/(numDown1 *glyphHeightUnscaled)
 			numAcross1  = int(pageWidth/(scale1*glyphWidthUnscaled))
 			numGlyphs1 = numAcross1 * numDown1
-			
+
 			numAcross2 = n
 			scale2 = pageWidth/(numAcross2 *glyphWidthUnscaled)
 			numDown2  = int(pageHeight/(scale2*glyphHeightUnscaled))
 			numGlyphs2 = numAcross2 * numDown2
-			
+
 			if (numGlyphs2 >= glyphsPerPage) and (numGlyphs1 >= glyphsPerPage):
 				if scale1 >= scale2:
 					scale = scale1
@@ -1491,7 +1491,7 @@ def getLayoutFromGPP(params, extraY, yTop):
 				numGlyphs = numGlyphs1
 				break
 
-		if tryCount > 0:	
+		if tryCount > 0:
 			setDefaultHPadding(params)
 			setDefaultVPadding(params)
 			glyphWidthUnscaled = (kGlyphSquare + 2*params.rt_glyphHPadding) *params.rt_repeats
@@ -1501,11 +1501,11 @@ def getLayoutFromGPP(params, extraY, yTop):
 		if (numDown == 1):
 			setDefaultVPadding(params, 0)
 			glyphHeightUnscaled = kGlyphSquare + extraY + 2*params.rt_glyphVPadding
-			
+
 		if (numAcross == 1):
 			setDefaultHPadding(params, 0)
 			glyphWidthUnscaled = (kGlyphSquare + 2*params.rt_glyphHPadding) *params.rt_repeats
-			
+
 		tryCount +=1
 
 	glyphHeight = scale * glyphHeightUnscaled
@@ -1513,12 +1513,12 @@ def getLayoutFromGPP(params, extraY, yTop):
 	# Distribute any extra space between the glyphs
 	# The full spacing is used between the glyphs; 1/2 this spacing is left on the left and right end of the lines
 	# in addition to the margins,
-	
+
 	leftPadding =  (pageWidth - (numAcross * glyphWidth)) / (numAcross * params.rt_repeats) # the space between glyphs
 	if leftPadding < 0:
 		leftPadding = 0
 	xAdvance = int(glyphWidth/params.rt_repeats + leftPadding)
-	leftPadding = int(leftPadding/ 2) # the full spacing goes between the glyphs 
+	leftPadding = int(leftPadding/ 2) # the full spacing goes between the glyphs
 
 	# Since the first line starts at (yTop - (yAdvance + topPadding), and
 	# yAdvance already has topPadding in it, what we return is -topPadding/2.
@@ -1535,7 +1535,7 @@ def getLayoutFromGPP(params, extraY, yTop):
 
 def parseErrorLog(errorLines, path):
 	# parse an error log file, and return an errorLog dict. This is keyed by glyph name, Each value is a list of short strings.
-	# This is for the Morisawa error log. 
+	# This is for the Morisawa error log.
 	# The first token on a line is the glyph name. Remaining tokens are either an error name, one of a pair of integer x,y coordinates
 	# or one of a pair of text-named coordinates beginning with x or y.
 	errorDict = {}
@@ -1552,7 +1552,7 @@ def parseErrorLog(errorLines, path):
 		tokenList = tokenList[1:]
 		errorList = []
 		errorDict[curGlyphName] = errorList
-		
+
 		# If this is a CID name, it may end up being referenced as the CId number without
 		# a cid prefix. Derive the numeric form, and add that as well.
 		if curGlyphName.startswith("cid"):
@@ -1598,7 +1598,7 @@ def parseErrorLog(errorLines, path):
 				continue
 			except ValueError:
 				lastCoord = ""
-	
+
 			# It is something else. Append it.
 			errorList.append(token)
 	return errorDict
@@ -1616,7 +1616,7 @@ class ProgressBar:
 		self.tickCount = 0
 		if startText:
 			print startText
-	
+
 	def DoProgress(self, tickCount):
 		if  tickCount and ((tickCount % self.kProgressBarTickStep) == 0):
 			self.tickCount = tickCount
@@ -1626,34 +1626,35 @@ class ProgressBar:
 			minutesLeft = int(timeleft /60)
 			secondsLeft = timeleft % 60
 			print self.kText % (tickCount, self.maxCount, minutesLeft, secondsLeft)
-	def  EndProgress(self):
+
+	def EndProgress(self):
 		print "Saving file..."
 
 
-def makePDF(pdfFont, params, progressBarInstance = None):
+def makePDF(pdfFont, params, doProgressBar=True):
 	if not params.rt_filePath:
 		params.rt_reporter( "Skipping font. Calling program must set params.rt_filePath.")
 		return
 
 	fontPath = params.rt_filePath
 	if params.rt_pdfFileName:
-		pdfPath = params.rt_pdfFileName 
+		pdfPath = params.rt_pdfFileName
 	else:
 		pdfPath = os.path.splitext(fontPath)[0] + ".pdf"
 	params.rt_canvas = rt_canvas = pdfgen.Canvas(pdfPath, pagesize=params.pageSize, bottomup = 1)
-	
+
 	if params.waterfallRange:
-		makeWaterfallPDF(params, pdfFont, progressBarInstance)
+		makeWaterfallPDF(params, pdfFont, doProgressBar)
 	else:
-		makeProofPDF(pdfFont, params, progressBarInstance)
+		makeProofPDF(pdfFont, params, doProgressBar)
 	return pdfPath
-	
+
 
 
 class  FontInfo:
 	def __init__(self, pdfFont, glyphList):
 		self.pdfFont = pdfFont
-		self.glyphList = glyphList # I pass in the glyph list rather than getting the font char set, 
+		self.glyphList = glyphList # I pass in the glyph list rather than getting the font char set,
 									# becuase the user may have spacifued a subset.
 		self.numGlyphs = len(glyphList)
 		self.FontName = pdfFont.getPSName()
@@ -1673,7 +1674,7 @@ class  FontInfo:
 					self.StemV = 100
 			if StemV != None:
 				self.StemV = StemV
-			
+
 			StemH = None
 			try:
 				StemH = pdfFont.clientFont['CFF '].cff.topDictIndex[0].Private.StdHW
@@ -1689,9 +1690,9 @@ class  FontInfo:
 				self.StemH = StemH
 		else:
 			self.StemV = 100 # arbitrary value to make a working FontDescriptor
-				
+
 		self.Flags = (1<<2) # mark it as a symbolic font, so that  glyph names outside the PDF Std set will be recognized.
-		
+
 		# We need to get the widths for all the glyphs, so we can do basic layout.
 		self.widthDict = {}
 		txreport = None
@@ -1745,23 +1746,23 @@ class  FontInfo:
 			else:
 				self.Descent = 750 # real hack, but this doesn;t make much difference in this PDF.
 			self.Leading = 200 # real hack, but this doesn;t make much difference in this PDF.
-			
+
 			widthList = self.widthDict.values()
 			avgWidth = 0
 			for width in widthList:
 				avgWidth += width
 			self.avgWidth = int(round(0.5 + float(avgWidth)/len(widthList)))
-			
-			
+
+
 		if pdfFont.clientFont.has_key('post'):
 			post = pdfFont.clientFont['post']
 			self.ItalicAngle = post.italicAngle
 		else:
 			self.ItalicAngle = 0
-		
+
 	def setEncoding(self, fontInfo, glyphList):
 		"""" We can assume that the range [numAcross*wi -  numAcross*(w+1)]will always contain some glyphs from the list."""
-		
+
 		self.firstChar = firstChar = 64
 		numGlyphs = len(glyphList)
 		if numGlyphs > (255-firstChar):
@@ -1774,26 +1775,26 @@ class  FontInfo:
 		notdefList2 = " /.notdef"*(255 -lastChar)
 		diffList = " /" + " /".join(glyphList)
 		if notdefList2:
-			encodingList = ["<< /Type /Encoding", 
-							"/BaseEncoding /MacRoman", 
-							"/Differences", 
+			encodingList = ["<< /Type /Encoding",
+							"/BaseEncoding /MacRoman",
+							"/Differences",
 							"[ 0 %s" % (notdefList1),
 							" %s %s" % (firstChar, diffList),
-							" %s %s" % (lastChar+1, notdefList2), 
-							"]", 
+							" %s %s" % (lastChar+1, notdefList2),
+							"]",
 							">>"
 							]
 		else:
-			encodingList = ["<< /Type /Encoding", 
-							"/BaseEncoding /MacRoman", 
-							"/Differences", 
+			encodingList = ["<< /Type /Encoding",
+							"/BaseEncoding /MacRoman",
+							"/Differences",
 							"[ 0 %s" % (notdefList1),
 							" %s %s" % (firstChar, diffList),
-							"]", 
+							"]",
 							">>"
 							]
 		# Now get the widths for this vector.
-		
+
 		widthList = ["["]
 		for name in glyphList:
 			widthList.append(str(self.widthDict[name]))
@@ -1804,7 +1805,7 @@ class  FontInfo:
 		fontInfo.widths =  LINEEND.join(widthList)
 
 		return
-	
+
 	def getFontDescriptorText(self):
 		# Build font stream object.
 		""" TrueType and CId not yet working!
@@ -1812,10 +1813,10 @@ class  FontInfo:
 		- build a Type0 font dict, which references the CID Font Dict as a decendant, whuch in turn references
 		the FontDescriptor.
 		TreuType works with the Apple Preview program, but not with Reader. To do it right,
-		I have to treat it like a CJK TrueType font, which is the same as a CID font, but with a different CID font decriptor, and 
+		I have to treat it like a CJK TrueType font, which is the same as a CID font, but with a different CID font decriptor, and
 		an additional dict to map from GID to CID.
 		"""
-		 
+
 		if self.pdfFont.clientFont.has_key('CFF '):
 			fontStream = self.pdfFont.clientFont['CFF '].compile(self.pdfFont.clientFont)
 			formatName = "/FontFile3"
@@ -1825,7 +1826,7 @@ class  FontInfo:
 			else:
 				fontStreamType = "/Type1C"
 				fontType = "/Type1"
-			
+
 		elif self.pdfFont.clientFont.has_key('glyf'):
 			fontStreamType = None # don't need Subtype key/value in teh stream object for TrueType fonts.
 			fp = open(self.pdfFont.path, "rb")
@@ -1836,7 +1837,7 @@ class  FontInfo:
 		else:
 			print "Font type not supported."
 			raise TypeError
-		
+
 		text = []
 		text.append("<< ")
 		text.append("/Type /FontDescriptor")
@@ -1856,7 +1857,7 @@ class  FontInfo:
 		text = LINEEND.join(text)
 		return text, formatName, fontStream, fontType, fontStreamType
 
-	
+
 def getFontDescriptorItems(fontDescriptor):
 	fdItemText, formatName, fontStream, fontType, fontStreamType = fontDescriptor.getFontDescriptorText()
 	return fdItemText, fontType, formatName, fontStream, fontStreamType
@@ -1889,8 +1890,8 @@ def doWaterfall(params, glyphList, fontInfo, wi, cur_y, cur_x, pdfFont, yTop, nu
 		rt_canvas.drawString(cur_x, cur_y, text)
 	return cur_y
 
-def makeWaterfallPDF(params, pdfFont, progressBarInstance):
-	""" 
+def makeWaterfallPDF(params, pdfFont, doProgressBar):
+	"""
 	This is a very different approach than makeProofPDF.
 	The latter uses std PDF commands to draw label text and
 	and to plot the line segments of the glyph paths.
@@ -1906,15 +1907,14 @@ def makeWaterfallPDF(params, pdfFont, progressBarInstance):
 	contains only as many characters as  will fit across the
 	page.
 	"""
-		
+
 	numGlyphs = len(params.rt_glyphList)
 	yTop = getTitleHeight(params)
 	rt_canvas = params.rt_canvas
 	rt_canvas.setPageCompression(0)
-	if progressBarInstance == None:
+	if doProgressBar:
 		progressBarInstance = ProgressBar(numGlyphs, "Proofing font...", )
-
-	progressBarInstance.StartProgress()
+		progressBarInstance.StartProgress()
 
 	waterfallRange = list(params.waterfallRange)
 
@@ -1926,7 +1926,7 @@ def makeWaterfallPDF(params, pdfFont, progressBarInstance):
 	groupIndex = 0
 	fontInfo.setEncoding(fontInfo, params.rt_glyphList[:256])
 	rt_canvas.addFont(embeddedFontPSName, fontInfo.encoding, fontInfo, getFontDescriptorItems, getEncodingInfo)
-	
+
 	# figure out layout.
 	pageWidth = float(params.pageSize[0] - (params.pageRightMargin + params.pageLeftMargin))
 	pageHeight = float(yTop - params.pageBottomMargin)
@@ -1970,7 +1970,7 @@ def makeWaterfallPDF(params, pdfFont, progressBarInstance):
 			stringWidth = width
 	if glyphList:
 		glyphLists.append(glyphList)
-		
+
 	numWaterfallsOnPage = pageHeight/float(waterfallHeight)
 	numWaterFalls = len(glyphLists)
 	numPages = int(round(0.5 + float(numWaterFalls)/numWaterfallsOnPage))
@@ -1981,13 +1981,14 @@ def makeWaterfallPDF(params, pdfFont, progressBarInstance):
 	for wi in range(numWaterFalls):
 		cur_y = doWaterfall(params, glyphLists[wi], fontInfo, wi, cur_y, cur_x, pdfFont, yTop, numGlyphs, numPages)
 		cur_x = params.pageLeftMargin
-	progressBarInstance.EndProgress()
+	if doProgressBar:
+		progressBarInstance.EndProgress()
 	rt_canvas.showPage()
 	rt_canvas.save()
-	return 
+	return
 
-def makeFontSetPDF(pdfFontList,  params, progressBarInstance = None):
-	""" 
+def makeFontSetPDF(pdfFontList, params, doProgressBar=True):
+	"""
 	This PDF will show a set of glyphs from each font, one font per font, with
 	fixed spacing so that the glyphs in a column should all nominally be the
 	same.
@@ -1997,7 +1998,7 @@ def makeFontSetPDF(pdfFontList,  params, progressBarInstance = None):
 	fixed column spacing of em-size. It will then divide the glyph list up into
 	groups by the number across the page. For each group, it will show the
 	glyphs in the group for each font.
-	
+
 	An entry in the pdfFontList is [glyphList, pdfFont, tempCFFPath]
 	"""
 	# Sort fonts with same charsets together. Sort by: len charset, charset, ps name.
@@ -2006,7 +2007,7 @@ def makeFontSetPDF(pdfFontList,  params, progressBarInstance = None):
 	pdfFontList = map(lambda entry: [entry[1], entry[3]], sortList)
 
 	if params.rt_pdfFileName:
-		pdfPath = params.rt_pdfFileName 
+		pdfPath = params.rt_pdfFileName
 	else:
 		# We put the PDF wherever the first font is.
 		firstPDFFont = pdfFontList[0][1]
@@ -2033,7 +2034,7 @@ def makeFontSetPDF(pdfFontList,  params, progressBarInstance = None):
 	# glyph width equivalents of ps name.
 	kPSNameFieldWidth = int( 1 + (psNameWidth/params.userPtSize)) # The space to leave at the begining of a line for the PS name, in em-spaces.
 	kFontIndexWidth = int( 1 + (indexWidth/params.userPtSize))  # The space to leave at the begining of every line for the font index, in em-spaces.
-	
+
 	# get layout parameters
 	scaledxAdvance = params.userPtSize
 	scaledYAdvance = int(params.userPtSize*1.2)
@@ -2062,16 +2063,16 @@ def makeFontSetPDF(pdfFontList,  params, progressBarInstance = None):
 	doWidowControl =  groupsPerPage > 1
 	if 	doWidowControl:
 		numPages = 	int(1 + (float(numGroups)/groupsPerPage))
-	
-	rt_canvas = params.rt_canvas
-	if progressBarInstance == None:
-		progressBarInstance = ProgressBar(numPages, "Proofing font...", )
 
-	progressBarInstance.kProgressBarTickStep = 1
-	progressBarInstance.kText = "Created %s of about %s pages. Time remaining:  %s min %s sec"
-	progressBarInstance.StartProgress("Writing PDF pages...")
+	rt_canvas = params.rt_canvas
+	if doProgressBar:
+		progressBarInstance = ProgressBar(numPages, "Proofing font...", )
+		progressBarInstance.kProgressBarTickStep = 1
+		progressBarInstance.kText = "Created %s of about %s pages. Time remaining:  %s min %s sec"
+		progressBarInstance.StartProgress("Writing PDF pages...")
+
 	params.rt_scale = scale = params.userPtSize/float(kGlyphSquare)
-	
+
 	cur_x = params.pageLeftMargin
 	cur_y = yTop
 	doFontSetTitle(rt_canvas, params, numPages)
@@ -2082,8 +2083,8 @@ def makeFontSetPDF(pdfFontList,  params, progressBarInstance = None):
 	lineCount = 0
 	startgli = 0
 	endgli = startgli + numAcross - kPSNameFieldWidth
-	
-		
+
+
 	groupsOnPageCount = 0
 	for groupIndex in range(numGroups):
 		fountCount = 0
@@ -2091,7 +2092,8 @@ def makeFontSetPDF(pdfFontList,  params, progressBarInstance = None):
 		if doWidowControl and (groupsOnPageCount > groupsPerPage):
 			pageCount += 1
 			groupsOnPageCount = 1
-			progressBarInstance.DoProgress(pageCount)
+			if doProgressBar:
+				progressBarInstance.DoProgress(pageCount)
 			rt_canvas.showPage()
 			yTop = doFontSetTitle(rt_canvas, params, numPages)
 			rt_canvas.setFont( params.pageTitleFont, params.userPtSize)
@@ -2145,7 +2147,8 @@ def makeFontSetPDF(pdfFontList,  params, progressBarInstance = None):
 			if ((cur_y) < params.pageBottomMargin):
 				pageCount += 1
 				groupsOnPageCount = 1
-				progressBarInstance.DoProgress(pageCount)
+				if doProgressBar:
+					progressBarInstance.DoProgress(pageCount)
 				rt_canvas.showPage()
 				yTop = doFontSetTitle(rt_canvas, params, numPages)
 				rt_canvas.setFont( params.pageTitleFont, params.userPtSize)
@@ -2157,15 +2160,16 @@ def makeFontSetPDF(pdfFontList,  params, progressBarInstance = None):
 		endgli = startgli + numAcross
 
 	pageCount += 1
-	progressBarInstance.DoProgress(pageCount)
-	progressBarInstance.EndProgress()
+	if doProgressBar:
+		progressBarInstance.DoProgress(pageCount)
+		progressBarInstance.EndProgress()
 	rt_canvas.showPage()
 	rt_canvas.save()
 	return pdfPath
 
 
 
-def makeProofPDF(pdfFont, params, progressBarInstance):
+def makeProofPDF(pdfFont, params, doProgressBar=True):
 	# Collect log file text, if any.
 	if params.errorLogFilePath:
 		if not os.path.isfile(params.errorLogFilePath):
@@ -2198,14 +2202,14 @@ def makeProofPDF(pdfFont, params, progressBarInstance):
 		params.rt_yMin = fontYMin = pdfFont.descent
 	else:
 		params.rt_yMin = fontYMin =  params.descenderSpace
-		
+
 	if fontYMin > 0:
 		fontYMin = 0 # we want to add extra Y to the glyph tile when the descender is below the embox, but not subtract it when it is above.
 		params.rt_yMin = 0
-		
+
 	setDefaultHPadding(params)
 	setDefaultVPadding(params)
-	
+
 	getMetaDataHeight(params, fontYMin) # how high the meta data block will be for each glyph, unscaled.
 	yMetaHeight = params.rt_metaDataYOffset
 	extraY = yMetaHeight
@@ -2220,7 +2224,7 @@ def makeProofPDF(pdfFont, params, progressBarInstance):
 		numOnPage = params.glyphsPerPage
 	cur_x = params.pageLeftMargin + leftPadding
 	cur_y = yTop - (topPadding + yAdvance)
-	
+
 	giRange = range(numGlyphs)
 	if params.doAlphabeticOrder:
 		params.rt_glyphList.sort()
@@ -2239,14 +2243,15 @@ def makeProofPDF(pdfFont, params, progressBarInstance):
 
 	doTitle(rt_canvas, pdfFont, params, numGlyphs)
 
-	if progressBarInstance == None:
+	if doProgressBar:
 		progressBarInstance = ProgressBar(numGlyphs, "Proofing font...", )
+		progressBarInstance.StartProgress()
 
-	progressBarInstance.StartProgress()
 	rowIndex = 0
 	colIndex = 0
 	for gi in giRange:
-		progressBarInstance.DoProgress(gi)
+		if doProgressBar:
+			progressBarInstance.DoProgress(gi)
 		if  rowIndex >= numAcross:
 			rowIndex = 0
 			colIndex += 1
@@ -2265,7 +2270,7 @@ def makeProofPDF(pdfFont, params, progressBarInstance):
 		pdfGlyph.extraY = extraY
 		if not params.rt_repeatParamList:
 			params.rt_repeatParamList = [params]*params.rt_repeats
-			
+
 		for ri in range(params.rt_repeats):
 			curParams = params.rt_repeatParamList[ri]
 			if ri > 0:
@@ -2273,21 +2278,22 @@ def makeProofPDF(pdfFont, params, progressBarInstance):
 				fieldNames = filter(lambda name: name[:3] == "rt_", fieldNames)
 				for name in fieldNames:
 					exec("curParams.%s = params.%s" % (name,name))
-				
+
 			rt_canvas.saveState()
 			rt_canvas.translate(cur_x, cur_y)
 			rt_canvas.scale(scale, scale)
 			pdfGlyph.draw(curParams, ri)
 			rt_canvas.restoreState()
 			cur_x += xAdvance
-	
-	progressBarInstance.EndProgress()
+
+	if doProgressBar:
+		progressBarInstance.EndProgress()
 	rt_canvas.showPage()
 	rt_canvas.save()
 	return
 
-def makeKernPairPDF(pdfFont, kernOverlapList, params, progressBarInstance = None):
-	""" 
+def makeKernPairPDF(pdfFont, kernOverlapList, params, doProgressBar=True):
+	"""
 	This PDF will show a set of glyphs from each font, one font per font, with
 	fixed spacing so that the glyphs in a column should all nominally be the
 	same.
@@ -2297,7 +2303,7 @@ def makeKernPairPDF(pdfFont, kernOverlapList, params, progressBarInstance = None
 	fixed column spacing of em-size. It will then divide the glyph list up into
 	groups by the number across the page. For each group, it will show the
 	glyphs in the group for each font.
-	
+
 	An entry in the pdfFontList is [glyphList, pdfFont, tempCFFPath]
 	"""
 	if params.rt_pdfFileName:
@@ -2306,7 +2312,7 @@ def makeKernPairPDF(pdfFont, kernOverlapList, params, progressBarInstance = None
 		# We put the PDF wherever the  font is.
 		fontPath = params.rt_filePath
 		pdfPath = os.path.splitext(fontPath)[0] + ".kc.pdf"
-		
+
 	params.rt_canvas = rt_canvas = pdfgen.Canvas(pdfPath, pagesize=params.pageSize, bottomup = 1)
 
 	# figure out how much space to leave at start of line for PS names and fond index fields..
@@ -2322,16 +2328,16 @@ def makeKernPairPDF(pdfFont, kernOverlapList, params, progressBarInstance = None
 	linesPerPage = int(pageHeight/scaledYAdvance)
 	numLines = len(kernOverlapList)
 	numPages = 	int(round(0.5 + float(numLines)/linesPerPage))
-	
-	rt_canvas = params.rt_canvas
-	if progressBarInstance == None:
-		progressBarInstance = ProgressBar(numPages, "Proofing font...", )
 
-	progressBarInstance.kProgressBarTickStep = 1
-	progressBarInstance.kText = "Finished %s of %s pages. Time remaining:  %s min %s sec"
-	progressBarInstance.StartProgress("Writing PDF pages...")
+	rt_canvas = params.rt_canvas
+	if doProgressBar:
+		progressBarInstance = ProgressBar(numPages, "Proofing font...", )
+		progressBarInstance.kProgressBarTickStep = 1
+		progressBarInstance.kText = "Finished %s of %s pages. Time remaining:  %s min %s sec"
+		progressBarInstance.StartProgress("Writing PDF pages...")
+
 	params.rt_scale = scale = params.userPtSize/float(kGlyphSquare)
-	
+
 	cur_x = params.pageLeftMargin
 	numGlyphs = 0
 	yTop = doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages)
@@ -2346,7 +2352,7 @@ def makeKernPairPDF(pdfFont, kernOverlapList, params, progressBarInstance = None
 	for entry in kernOverlapList:
 		cur_x = params.pageLeftMargin
 		leftName,rightName, kernValue, overlap, overlapPtSize = entry
-		
+
 		pdfGlyph = pdfFont.getGlyph(leftName)
 		rt_canvas.saveState()
 		rt_canvas.translate(cur_x, cur_y)
@@ -2368,11 +2374,13 @@ def makeKernPairPDF(pdfFont, kernOverlapList, params, progressBarInstance = None
 		lineCount +=1
 		if ((cur_y) < params.pageBottomMargin):
 			pageCount += 1
-			progressBarInstance.DoProgress(pageCount)
+			if doProgressBar:
+				progressBarInstance.DoProgress(pageCount)
 			rt_canvas.showPage()
 			yTop = 	doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages)
 			cur_y = yTop - scaledYAdvance
-	progressBarInstance.EndProgress()
+	if doProgressBar:
+		progressBarInstance.EndProgress()
 	rt_canvas.showPage()
 	rt_canvas.save()
 	return pdfPath
