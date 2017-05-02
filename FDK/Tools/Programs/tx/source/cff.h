@@ -10,6 +10,7 @@
 "+/-d    enable duplicate hintsubs warnings\n"
 "-n      remove hints\n"
 "-std    force the output font to have StandardEncoding\n"
+"-no_futile remove futile subrs during subroutinization\n"
 "\n"
 "CFF mode writes a CFF conversion of an abstract font. The precise form of the\n"
 "CFF font that is written can be controlled to a limited extent by the options\n"

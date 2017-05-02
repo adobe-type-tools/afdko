@@ -127,6 +127,7 @@ static unsigned char *gTestString = (unsigned char *)"Humpty Dumpty sat on a wal
 #endif
 
 #define MAX_NUM_SUBRS		32765L	/* Maximum number of subroutines in one INDEX structure. 64K is valid by the spec, but but teh Google font validation tool OTS rejects fonts with subrs in a subrindex which is  over 32K -3.*/
+#define MAX_PREFLIGHT	5   /* Typically large enough */
 
 /* --- Memory management --- */
 #define MEM_NEW(g, s)        cfwMemNew(g, s)
@@ -149,6 +150,7 @@ struct Node_ {
 	unsigned short paths;   /* Paths through node; depth for subr trie */
 	unsigned short id;  /* Font id */
 #define NODE_GLOBAL USHRT_MAX   /* Identifies global subr */
+#define NODE_ANY    (NODE_GLOBAL-1)
 	short flags;        /* Status flags */
 #define NODE_COUNTED    (1 << 15) /* Paths have been counted for this node */
 #define NODE_TESTED     (1 << 14) /* Candidacy tested for this node */
@@ -188,6 +190,7 @@ struct Subr_ {
 #define SUBR_SELECT     (1 << 0)  /* Flags subr selected */
 #define SUBR_REJECT     (1 << 1)  /* Flags subr rejected */
 #define SUBR_MEMBER     (1 << 2)  /* Flags subr added to social group */
+#define SUBR_FUTILE     (1 << 3)  /* Flags subr futile (use count 1 or 0) */
 #if DB_CALLS
 	short calls;    /* xxx remove */
 #endif
@@ -1639,14 +1642,12 @@ static void buildCallList(subrCtx h, int buildPhase, unsigned length, unsigned c
 
     dnaFREE(callList);
 
-	if (!buildPhase) {
-		for (i = 0; i < (unsigned)h->calls.cnt; i++) {
-			Call *call = &h->calls.array[i];
-			call->subr->count++;
+    for (i = 0; i < (unsigned)h->calls.cnt; i++) {
+        Call *call = &h->calls.array[i];
+        call->subr->count++;
 #if DB_ASSOC
-			dbsubr(h, call->subr - h->subrs.array, 'i', call->offset);
+        dbsubr(h, call->subr - h->subrs.array, 'i', call->offset);
 #endif
-		}
 	}
 
 #if DB_INFS
@@ -1662,6 +1663,18 @@ static void buildCallList(subrCtx h, int buildPhase, unsigned length, unsigned c
 #endif
 }
 
+/* Reset subr count */
+static void resetSubrCount(subrCtx h, unsigned id) {
+	long i;
+	Subr *subr;
+
+	for (i = 0; i < h->subrs.cnt; i++) {
+		subr = &h->subrs.array[i];
+        if (subr->node->id == id || id == NODE_ANY)
+            subr->count = 0;
+	}
+}
+
 static void setSubrActCount(subrCtx h) {
 	long i, j;
 	Subr *subr;
@@ -1671,11 +1684,7 @@ static void setSubrActCount(subrCtx h) {
 	printf("--- assoc subrs with subrs\n");
 #endif
 
-	/* Reset subr count */
-	for (i = 0; i < h->subrs.cnt; i++) {
-		subr = &h->subrs.array[i];
-		subr->count = 0;
-	}
+	resetSubrCount(h, NODE_ANY);
 
 	/* Make call list for each subr and set actual call count in each */
 	for (i = 0; i < h->subrs.cnt; i++) {
@@ -2063,7 +2072,7 @@ static void selectSubr(subrCtx h, Subr *subr) {
 	       subr - h->subrs.array, count, length, saved);
 #endif
 
-	if (saved > 0) {
+	if (saved > 0 && !(subr->flags & SUBR_FUTILE)) {
 		/* Select subr */
 		unsigned id = subr->node->id;
 		int deltalen = subr->numsize + CALL_OP_SIZE - subr->length -
@@ -2339,7 +2348,7 @@ static unsigned char *subrizeCstr(subrCtx h,
 }
 
 /* Subroutinize charstrings */
-static void subrizeChars(subrCtx h, subr_CSData *chars, unsigned id) {
+static void subrizeChars(subrCtx h, subr_CSData *chars, unsigned id, int preflight) {
 	long i;
 	long offset;
 
@@ -2368,34 +2377,38 @@ static void subrizeChars(subrCtx h, subr_CSData *chars, unsigned id) {
 		/* Build subr call list */
 		buildCallList(h, 1, length, psrc, 1, id, -1);
 
-		/* Subroutinize charstring */
-		pdst = subrizeCstr(h, pdst, psrc, length);
+        if (!preflight) {
+            /* Subroutinize charstring */
+            pdst = subrizeCstr(h, pdst, psrc, length);
 
-		/* Adjust initial length estimate and save offset */
-		h->cstrs.cnt = iStart + pdst - (unsigned char *)&h->cstrs.array[iStart];
-		chars->offset[i] = h->cstrs.cnt;
+            /* Adjust initial length estimate and save offset */
+            h->cstrs.cnt = iStart + pdst - (unsigned char *)&h->cstrs.array[iStart];
+            chars->offset[i] = h->cstrs.cnt;
+        }
 		offset = nextoff;
 	}
 
-	/* Copy charstring data without loosing original data pointer */
-	chars->refcopy = chars->data;
-	chars->data = MEM_NEW(h->g, h->cstrs.cnt);
-	memcpy(chars->data, h->cstrs.array, h->cstrs.cnt);
+    if (!preflight) {
+        /* Copy charstring data without loosing original data pointer */
+        chars->refcopy = chars->data;
+        chars->data = MEM_NEW(h->g, h->cstrs.cnt);
+        memcpy(chars->data, h->cstrs.array, h->cstrs.cnt);
 
 #if DB_CALLS
-	printf("--- actual subr calls\n");
-	for (i = 0; i < h->reorder.cnt; i++) {
-		Subr *subr = h->reorder.array[i];
-		printf("[%3d]=%2d (%2d)", subr - h->subrs.array,
-		       subr->calls, subr->count);
-		if (subr->calls != subr->count) {
-			printf("*\n");
-		}
-		else {
-			printf("\n");
-		}
-	}
+        printf("--- actual subr calls\n");
+        for (i = 0; i < h->reorder.cnt; i++) {
+            Subr *subr = h->reorder.array[i];
+            printf("[%3d]=%2d (%2d)", subr - h->subrs.array,
+                   subr->calls, subr->count);
+            if (subr->calls != subr->count) {
+                printf("*\n");
+            }
+            else {
+                printf("\n");
+            }
+        }
 #endif
+    }
 }
 
 /* Create biased reordering for either global or local subrs for a singleton
@@ -2527,7 +2540,7 @@ static void reorderSubrs(subrCtx h) {
 }
 
 /* Add reorder subrs from reorder array */
-static void addSubrs(subrCtx h, subr_CSData *subrs, unsigned id) {
+static void addSubrs(subrCtx h, subr_CSData *subrs, unsigned id, int preflight) {
 	long i;
 
 #if DB_SUBRS
@@ -2537,47 +2550,56 @@ static void addSubrs(subrCtx h, subr_CSData *subrs, unsigned id) {
 	if (h->reorder.cnt == 0) {
 		return; /* No subrs */
 	}
-	/* Allocate subr offset array */
-	subrs->nStrings = (unsigned short)h->reorder.cnt;
-	subrs->offset = MEM_NEW(h->g, h->reorder.cnt * sizeof(Offset));
 
-	h->cstrs.cnt = 0;
+    if (!preflight) {
+        /* Allocate subr offset array */
+        subrs->nStrings = (unsigned short)h->reorder.cnt;
+        subrs->offset = MEM_NEW(h->g, h->reorder.cnt * sizeof(Offset));
+
+        h->cstrs.cnt = 0;
+    }
 	for (i = 0; i < h->reorder.cnt; i++) {
 		unsigned char *pdst;
 		Subr *subr = h->reorder.array[i];
 		long iStart = h->cstrs.cnt;
 
-		/* Initially allocate space for entire charstring + last op  */
-		pdst = (unsigned char *)dnaEXTEND(h->cstrs, subr->length + 1);
+        if (!preflight) {
+            /* Initially allocate space for entire charstring + last op  */
+            pdst = (unsigned char *)dnaEXTEND(h->cstrs, subr->length + 1);
 
 #if DB_SUBRS
-		dbsubr(h, subr - h->subrs.array, '-', 0);
+            dbsubr(h, subr - h->subrs.array, '-', 0);
 #endif
+        }
 
 		/* Build subr call list */
 		buildCallList(h, 1, subr->length, subr->cstr, 0, id, subr->misc);
 
-		/* Subroutinize charstring */
-		pdst = subrizeCstr(h, pdst, subr->cstr, subr->length);
+        if (!preflight) {
+            /* Subroutinize charstring */
+            pdst = subrizeCstr(h, pdst, subr->cstr, subr->length);
 
-		/* Terminate subr */
-		if (!(subr->node->flags & NODE_TAIL)) {
-			*pdst++ = (unsigned char)tx_return;
-		}
+            /* Terminate subr */
+            if (!(subr->node->flags & NODE_TAIL)) {
+                *pdst++ = (unsigned char)tx_return;
+            }
 
-		/* Adjust initial length estimate and save offset */
-		h->cstrs.cnt = iStart + pdst - (unsigned char *)&h->cstrs.array[iStart];
-		subrs->offset[i] = h->cstrs.cnt;
+            /* Adjust initial length estimate and save offset */
+            h->cstrs.cnt = iStart + pdst - (unsigned char *)&h->cstrs.array[iStart];
+            subrs->offset[i] = h->cstrs.cnt;
+        }
 	}
 
-	/* Allocate and copy charstring data */
-	subrs->data = MEM_NEW(h->g, h->cstrs.cnt);
-	memcpy(subrs->data, h->cstrs.array, h->cstrs.cnt);
+    if (!preflight) {
+        /* Allocate and copy charstring data */
+        subrs->data = MEM_NEW(h->g, h->cstrs.cnt);
+        memcpy(subrs->data, h->cstrs.array, h->cstrs.cnt);
+    }
 }
 
 /* Subroutinize FD charstrings */
 static void subrizeFDChars(subrCtx h, subr_CSData *dst, subr_Font *font,
-                           unsigned iFont, unsigned iFD) {
+                           unsigned iFont, unsigned iFD, int preflight) {
 	long iSrc;
 	unsigned iDst;
 	subr_CSData *src = &font->chars;
@@ -2594,11 +2616,13 @@ static void subrizeFDChars(subrCtx h, subr_CSData *dst, subr_Font *font,
 		}
 	}
 
-	/* Allocate offset array */
-	dst->offset = MEM_NEW(h->g, sizeof(Offset) * dst->nStrings);
+    if (!preflight) {
+        /* Allocate offset array */
+        dst->offset = MEM_NEW(h->g, sizeof(Offset) * dst->nStrings);
 
-	h->cstrs.cnt = 0;
-	iDst = 0;
+        h->cstrs.cnt = 0;
+        iDst = 0;
+    }
 	for (iSrc = 0; iSrc < src->nStrings; iSrc++) {
 		if (font->fdIndex[iSrc] == iFD) {
 			unsigned char *pdst;
@@ -2607,49 +2631,55 @@ static void subrizeFDChars(subrCtx h, subr_CSData *dst, subr_Font *font,
 			unsigned length = src->offset[iSrc] - offset - 4 /* t2_separator */;
 			long iStart = h->cstrs.cnt;
 
-			/* Initially allocate space for entire charstring */
-			pdst = (unsigned char *)dnaEXTEND(h->cstrs, (long)length);
+            if (!preflight) {
+                /* Initially allocate space for entire charstring */
+                pdst = (unsigned char *)dnaEXTEND(h->cstrs, (long)length);
 
 #if DB_CHARS
-			printf("[%3ld]    =  ", iSrc);
-			dbcstr(h, length, psrc);
-			printf("\n");
+                printf("[%3ld]    =  ", iSrc);
+                dbcstr(h, length, psrc);
+                printf("\n");
 #endif
+            }
 
 			/* Build subr call list */
 			buildCallList(h, 1, length, psrc, 1, iFont + iFD, -1);
 
-			/* Subroutinize charstring */
-			pdst = subrizeCstr(h, pdst, psrc, length);
+            if (!preflight) {
+                /* Subroutinize charstring */
+                pdst = subrizeCstr(h, pdst, psrc, length);
 
-			/* Adjust initial length estimate and save offset */
-			h->cstrs.cnt = iStart + pdst -
-			    (unsigned char *)&h->cstrs.array[iStart];
-			dst->offset[iDst++] = h->cstrs.cnt;
+                /* Adjust initial length estimate and save offset */
+                h->cstrs.cnt = iStart + pdst -
+                    (unsigned char *)&h->cstrs.array[iStart];
+                dst->offset[iDst++] = h->cstrs.cnt;
+            }
 		}
 	}
 
-	/* Copy charstring data */
-	dst->data = MEM_NEW(h->g, h->cstrs.cnt);
-	memcpy(dst->data, h->cstrs.array, h->cstrs.cnt);
+    if (!preflight) {
+        /* Copy charstring data */
+        dst->data = MEM_NEW(h->g, h->cstrs.cnt);
+        memcpy(dst->data, h->cstrs.array, h->cstrs.cnt);
 
 #if DB_CALLS
-	{
-		int i;
-		printf("--- actual subr calls\n");
-		for (i = 0; i < h->reorder.cnt; i++) {
-			Subr *subr = h->reorder.array[i];
-			printf("[%3d]=%2d (%2d)", subr - h->subrs.array,
-			       subr->calls, subr->count);
-			if (subr->calls != subr->count) {
-				printf("*\n");
-			}
-			else {
-				printf("\n");
-			}
-		}
-	}
+        {
+            int i;
+            printf("--- actual subr calls\n");
+            for (i = 0; i < h->reorder.cnt; i++) {
+                Subr *subr = h->reorder.array[i];
+                printf("[%3d]=%2d (%2d)", subr - h->subrs.array,
+                       subr->calls, subr->count);
+                if (subr->calls != subr->count) {
+                    printf("*\n");
+                }
+                else {
+                    printf("\n");
+                }
+            }
+        }
 #endif
+    }
 }
 
 /* Reassemble cstrs for CID-keyed font */
@@ -2691,10 +2721,27 @@ static void joinFDChars(subrCtx h, subr_Font *font) {
 	}
 }
 
+/* Returns 1 if any subrs have use count one or less */
+static int checkFutileSubrs(subrCtx h) {
+    long i;
+    long futileCount = 0;
+
+    /* Mark all zero-use subrs as futile */
+    for (i = 0; i < h->subrs.cnt; i++) {
+        Subr *subr = &h->subrs.array[i];
+        if (((subr->flags & (SUBR_MARKED|SUBR_FUTILE)) == SUBR_SELECT) && subr->count <= 1) {
+            subr->flags |= SUBR_FUTILE;
+            futileCount++;
+        }
+    }
+
+    return futileCount > 0;
+}
+
 /* -------------------------- Subroutinize FontSet ------------------------- */
 
 /* Build subrs with specific id */
-static void buildSubrs(subrCtx h, subr_CSData *subrs, unsigned id) {
+static void buildSubrs(subrCtx h, subr_CSData *subrs, unsigned id, int preflight) {
 	long i;
 
 	/* Build temporary array of subrs with matching id */
@@ -2725,8 +2772,9 @@ static void buildSubrs(subrCtx h, subr_CSData *subrs, unsigned id) {
 #endif
 
 	selectFinalSubrSet(h, id);
+    resetSubrCount(h, id);
 	reorderSubrs(h);
-	addSubrs(h, subrs, id);
+    addSubrs(h, subrs, id, preflight);
 }
 
 /* Subroutinize all fonts in FontSet */
@@ -2734,6 +2782,7 @@ void cfwSubrSubrize(cfwCtx g, int nFonts, subr_Font *fonts) {
 	subrCtx h = g->ctx.subr;
 	unsigned iFont;
 	long i;
+    long preflight;
 
 	h->nFonts = nFonts;
 	h->fonts = fonts;
@@ -2770,77 +2819,93 @@ void cfwSubrSubrize(cfwCtx g, int nFonts, subr_Font *fonts) {
 	assocSubrs(h);      /* Associate subrs with a font */
 	sortInfSubrs(h);    /* Sort inferior subrs by saving */
 
-	if (h->singleton) {
-		/* Single non-CID font */
+    if (h->g->flags & CFW_NO_FUTILE_SUBRS)
+        preflight = MAX_PREFLIGHT;  /* Preflight until all subrs become actually used at least twice */
+    else
+        preflight = 0;
+    while (preflight >= 0) {
 
-		/* Build temporary array from full subr list */
-		dnaSET_CNT(h->tmp, h->subrs.cnt);
-		for (i = 0; i < h->subrs.cnt; i++) {
-			h->tmp.array[i] = &h->subrs.array[i];
-		}
+        if (h->singleton) {
+          /* Single non-CID font */
 
-		h->subrStackOvl = 0;
-		selectFinalSubrSet(h, 0);
-		if (h->subrStackOvl) {
-			cfwMessage(h->g, "subr stack depth exceeded (reduced)");
-		}
+          /* Build temporary array from full subr list */
+          dnaSET_CNT(h->tmp, h->subrs.cnt);
+          for (i = 0; i < h->subrs.cnt; i++) {
+            h->tmp.array[i] = &h->subrs.array[i];
+          }
 
-		if (h->tmp.cnt >= 215) {
-			/* Temporarily make local subrs from odd indexes for renumbering */
-			reorderCombined(h, 1);
-			/* Make global subrs from even indexes */
-			reorderCombined(h, 0);
-			addSubrs(h, &h->gsubrs, NODE_GLOBAL);
+          h->subrStackOvl = 0;
+          selectFinalSubrSet(h, 0);
+          resetSubrCount(h, 0);
 
-			/* Make local subrs from odd indexes */
-			reorderCombined(h, 1);
-			addSubrs(h, &h->fonts[0].subrs, 0);
-		}
-		else {
-			reorderSubrs(h);
-			addSubrs(h, &h->fonts[0].subrs, 0);
-		}
-		subrizeChars(h, &h->fonts[0].chars, 0);
-	}
-	else {
-		/* Multiple fonts or single CID font */
+          if (h->subrStackOvl) {
+            cfwMessage(h->g, "subr stack depth exceeded (reduced)");
+          }
 
-		/* Build global subrs */
-		buildSubrs(h, &h->gsubrs, NODE_GLOBAL);
+          if (h->tmp.cnt >= 215) {
+            /* Temporarily make local subrs from odd indexes for renumbering */
+            reorderCombined(h, 1);
+            /* Make global subrs from even indexes */
+            reorderCombined(h, 0);
+            addSubrs(h, &h->gsubrs, NODE_GLOBAL, preflight);
 
-		/* Find and add local subrs to each font */
-		iFont = 0;
-		for (i = 0; i < h->nFonts; i++) {
-			subr_Font *font = &h->fonts[i];
+            /* Make local subrs from odd indexes */
+            reorderCombined(h, 1);
+            addSubrs(h, &h->fonts[0].subrs, 0, preflight);
+          }
+          else {
+            reorderSubrs(h);
+            addSubrs(h, &h->fonts[0].subrs, 0, preflight);
+          }
+          subrizeChars(h, &h->fonts[0].chars, 0, preflight);
+        }
+        else {
+          /* Multiple fonts or single CID font */
 
-			h->subrStackOvl = 0;
-			if (font->flags & SUBR_FONT_CID) {
-				/* Subrotinize CID-keyed font */
-				int j;
-				for (j = 0; j < h->fonts[i].fdCount; j++) {
-					/* Subroutinize component DICT */
-					subr_FDInfo *info = &font->fdInfo[j];
+          /* Build global subrs */
+          buildSubrs(h, &h->gsubrs, NODE_GLOBAL, preflight);
 
-					buildSubrs(h, &info->subrs, iFont + j);
-					subrizeFDChars(h, &info->chars, font, iFont, j);
-				}
-				joinFDChars(h, font);
-				iFont += h->fonts[i].fdCount;
-			}
-			else {
-				if (font->chars.nStrings != 0) {
-					/* Subroutinize non-synthetic font */
-					buildSubrs(h, &font->subrs, iFont);
-					subrizeChars(h, &font->chars, iFont);
-				}
-				iFont++;
-			}
+          /* Find and add local subrs to each font */
+          iFont = 0;
+          for (i = 0; i < h->nFonts; i++) {
+            subr_Font *font = &h->fonts[i];
 
-			if (h->subrStackOvl) {
-				cfwMessage(h->g, "subr stack depth exceeded (reduced)");
-			}
-		}
-	}
+            h->subrStackOvl = 0;
+            if (font->flags & SUBR_FONT_CID) {
+              /* Subrotinize CID-keyed font */
+              int j;
+              for (j = 0; j < h->fonts[i].fdCount; j++) {
+                /* Subroutinize component DICT */
+                subr_FDInfo *info = &font->fdInfo[j];
+
+                buildSubrs(h, &info->subrs, iFont + j, preflight);
+                subrizeFDChars(h, &info->chars, font, iFont, j, preflight);
+              }
+              if (!preflight)
+                  joinFDChars(h, font);
+              iFont += h->fonts[i].fdCount;
+            }
+            else {
+              if (font->chars.nStrings != 0) {
+                /* Subroutinize non-synthetic font */
+                buildSubrs(h, &font->subrs, iFont, preflight);
+                subrizeChars(h, &font->chars, iFont, preflight);
+              }
+              iFont++;
+            }
+
+            if (h->subrStackOvl) {
+              cfwMessage(h->g, "subr stack depth exceeded (reduced)");
+            }
+          }
+        }
+
+        /* Remove any subrs used once or less, otherwise preflight is over */
+        if (preflight > 0 && !checkFutileSubrs(h))
+            preflight = 0;
+        else
+            preflight--;
+    }
 
 	/* Free original unsubroutinized charstring data */
 	for (i = 0; i < h->nFonts; i++) {

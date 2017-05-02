@@ -7347,6 +7347,16 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 				goto wrongmode;
 				}
 			break;
+      case opt_no_futile:
+          switch (h->mode)
+          {
+              case mode_cff:
+                  h->cfw.flags |= CFW_NO_FUTILE_SUBRS;
+                  break;
+              default:
+                  goto wrongmode;
+          }
+          break;
         case opt_no_opt:
             switch (h->mode)
             {
@@ -7402,7 +7412,7 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 			switch (h->mode)
 				{
 			case mode_cff:
-				h->cfw.flags |= (CFW_SUBRIZE|CFW_NO_FUTILE_SUBRS);
+				h->cfw.flags |= CFW_SUBRIZE;
 				break;
 			case mode_t1:
 				h->t1w.flags &= ~T1W_OTHERSUBRS_MASK;
@@ -7416,7 +7426,7 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 			switch (h->mode)
 				{
 			case mode_cff:
-				h->cfw.flags &= ~(CFW_SUBRIZE|CFW_NO_FUTILE_SUBRS);
+				h->cfw.flags &= ~CFW_SUBRIZE;
 				break;
 			case mode_t1:
 				h->t1w.flags &= ~T1W_OTHERSUBRS_MASK;
