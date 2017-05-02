@@ -1891,6 +1891,10 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
     if (otherflags & OTHERFLAGS_ADD_STUB_DSIG) {
         hotConvertFlags |= HOT_ADD_STUB_DSIG;
     }
+    
+    if (otherflags & OTHERFLAGS_VERBOSE) {
+        hotConvertFlags |= HOT_CONVERT_VERBOSE;
+    }
 
     hotSetConvertFlags(h->hot.ctx, hotConvertFlags);
     
@@ -2011,11 +2015,6 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
 		cbMemFree(h, h->feat.includeDir[0]);
 	}
 	h->feat.anon.cnt = 0;
-	{
-		char msgBuf[1024];
-		sprintf(msgBuf, "Wrote new font file '%s'.", otfpath);
-		message(h, hotNOTE, msgBuf);
-	}
 }
 
 // Read font conversion database

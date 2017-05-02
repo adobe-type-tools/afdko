@@ -10,7 +10,7 @@ __copyright__ = """Copyright 2017 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __version__ = """\
-makeotf v2.0.97 Feb 18 2017
+makeotf v2.0.98 May 2 2017
 """
 
 __methods__ = """
@@ -122,7 +122,7 @@ __usage__ = __version__ + """
                         matching font weight and width.
 -naddn                  Turn off the -addn option, if it has previously
                         been turned on.
--adds			        If the font is missing any of the Apple Mac
+-adds                   If the font is missing any of the Apple Mac
                         Symbol glyphs, create them, matching the font
                         weight and width.
                         Will be disabled for fonts without both a zero
@@ -210,7 +210,8 @@ __usage__ = __version__ + """
                         issue. Windows requires a Format 4 'cmap' subtable
                         to be present, but it is not used.
 
--omitMacNames/useMacNames   Write only Windows platform menu names in name table,
+-omitMacNames/useMacNames   Write only Windows platform menu names in name
+table,
                         apart from the names specified in the feature file.
                         -useMacNames writes Mac as well as Windows names.
 
@@ -223,9 +224,16 @@ __usage__ = __version__ + """
 -skco/nskco             do/do not suppress kern class optimization by using left
                         side class 0 for non-zero kern values. Optimizing saves a few
                         hundred to thousand bytes, but confuses some programs.
-                        Optimizing is the default behavior, and previously was the only option.
+                        Optimizing is the default behavior, and previously was
+                        the only option.
 -addDSIG,-omitDSIG      Add or omit minimal empty DSIG table. This is added by
                         default in release mode.
+-V                      Show warnings about common, but usually not
+                        problematic issues, such a glyph being unhinted,
+                        or having conflicting GDEF classes because it is used in
+                        more than one class type in a layout table. An example
+                        is being used as a base glyph in one replacement rule,
+                        and as a mark glyph in another.
 -v                      Print the tool's version.
 
 Note that options are applied in the order in which they are
@@ -332,6 +340,7 @@ kDefaultGOADBPath = "GlyphOrderAndAliasDB"
 kTempFontSuffix = ".tmp"
 kTemp2FontSuffix = ".tmp2"
 kAddStubDSIG = "AddStubDSIG"
+kVerboseWarnings = "VerboseWarnings"
 kOptionNotSeen = 99
 
 kMOTFOptions = {
@@ -374,10 +383,11 @@ kMOTFOptions = {
 	kStubCmap4:  [kOptionNotSeen, "-stubCmap4", None],
 	kSuppressKernOptimization:  [kOptionNotSeen, "-skco", "-nsko"],
 	kAddStubDSIG:  [kOptionNotSeen, "-addDSIG", "-omitDSIG"],
+	kVerboseWarnings:  [kOptionNotSeen, "-V", "-nV"],
 
 }
 
-#The options whcih should NOT be passed to makeotfexe, as
+#The options which should NOT be passed to makeotfexe, as
 #they are for local use only.
 kSkipOptions = { "":None,
 	kRenumber:None,
@@ -427,6 +437,7 @@ class MakeOTFParams:
 		self.srcIsUFO = 0
 		self.ufoFMNDBPath = None
 		self.ufoGAODBPath = None
+		self.verbose = 0
 		for item in kMOTFOptions.items():
 			exec("self.%s%s = None" % (kFileOptPrefix, item[0]))
 		# USE_TYPO_METRICS Remove comment from next line to turn on bits 7 and 8 by default.
@@ -533,7 +544,8 @@ def writeOptionsFile(makeOTFParams, filePath):
 		data = map(lambda entry: entry[1], data) # reduce list to just the strings
 		data = os.linesep.join(data) + os.linesep
 		data = data.encode('utf-8')
-		print "makeotf [Note] Writing options file", filePath
+		if (makeOTFParams.verbose)
+		    print "makeotf [Note] Writing options file", filePath
 		try:
 			fp = open(filePath, "w")
 			fp.write(data)
@@ -544,7 +556,7 @@ def writeOptionsFile(makeOTFParams, filePath):
 def saveOptionsFile(makeOTFParams):
 	filePath = os.path.join(makeOTFParams.fontDirPath, kDefaultOptionsFile)
 	writeOptionsFile(makeOTFParams, filePath)
-	if (makeOTFParams.saveOptions == 'true') and (makeOTFParams.newOptionFilePath != kDefaultOptionsFile):
+	if makeOTFParams.newOptionFilePath != kDefaultOptionsFile:
 		writeOptionsFile(makeOTFParams, makeOTFParams.newOptionFilePath)
 
 
@@ -613,11 +625,17 @@ def setOptionsFromFontInfo(makeOTFParams):
 	if kMOTFOptions[kSuppressKernOptimization][0] == kOptionNotSeen:
 		if re.search(r"SuppressKernOptimization+([Tt]rue|1)", data):
 			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kSuppressKernOptimization))
-			print "makeotf [Note] Suppresing Kern Optimization."
+			print "makeotf [Note] Suppressing Kern Optimization."
 
 	if kMOTFOptions[kAddStubDSIG][0] == kOptionNotSeen:
 		if re.search(r"AddStubDSIG+([Tt]rue|1)", data):
 			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kAddStubDSIG))
+
+	if kMOTFOptions[kVerboseWarnings][0] == kOptionNotSeen:
+		if re.search(r"kVerboseWarnings+([Tt]rue|1)", data):
+			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kVerboseWarnings))
+			makeOTFParams.verbose = True
+
 
 	if kMOTFOptions[kLicenseCode][0] == kOptionNotSeen:
 		m = re.search(r"LicenseCode\s+([^\r\n]+)", data)
@@ -1260,7 +1278,14 @@ def getOptions(makeOTFParams):
 			kMOTFOptions[kAddStubDSIG][0] = i + optionIndex
 			exec("makeOTFParams.%s%s = 'false'" % (kFileOptPrefix, kAddStubDSIG))
 
-
+		elif arg == kMOTFOptions[kVerboseWarnings][1]:
+			kMOTFOptions[kVerboseWarnings][0] = i + optionIndex
+			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kVerboseWarnings))
+			makeOTFParams.verbose = True
+		elif arg == kMOTFOptions[kVerboseWarnings][2]:
+			kMOTFOptions[kVerboseWarnings][0] = None
+			exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kVerboseWarnings))
+			makeOTFParams.verbose = False
 		else:
 			error = 1
 			print "makeotf [Error] Did not recognize option '%s'." % (arg)
@@ -1713,7 +1738,6 @@ def convertFontIfNeeded(makeOTFParams):
 	if os.path.isdir(filePath):
 		if os.path.exists(os.path.join(filePath, "fontinfo.plist")):
 			needsConversion = 1
-			print "Checking that any glyphs in the processed glyphs layer are up to date."
 			doSync = False
 			allMatch, msgList = ufoTools.checkHashMaps(filePath, doSync)
 			if not allMatch:
@@ -1725,7 +1749,7 @@ def convertFontIfNeeded(makeOTFParams):
 			print "makeotf [Error] Failed to convert input font '%s' to temp file." % (filePath)
 			raise MakeOTFTXError
 		else:
-			print "The source file is a direectory, and is not a valid UFO font - missing glyphs/contents.plist. %s." % (filePath)
+			print "The source file is a directory, and is not a valid UFO font - missing glyphs/contents.plist. %s." % (filePath)
 			print "makeotf [Error] Failed to convert input font '%s' to temp file." % (filePath)
 			raise MakeOTFTXError
 		makeOTFParams.srcIsUFO = 1
@@ -1764,8 +1788,6 @@ def convertFontIfNeeded(makeOTFParams):
 				needsSEACRemoval = 1
 	if needsConversion:
 		fontPath = filePath + kTempFontSuffix
-
-		print "makeotf [Note] Converting source font '%s' to temporary Unix Type1 font file '%s'." % (filePath, fontPath)
 
 		if isTextPS:
 			tempTxtPath = fontPath + kTemp2FontSuffix
@@ -2450,9 +2472,10 @@ def runMakeOTF(makeOTFParams):
 			params.append('%s "%s"' % (optionEntry[1], val))
 
 	commandString = " ".join(params)
-	print "makeotf [Note] Running %s with commands:" % (os.path.basename(makeOTFParams.makeotfPath))
-	print "   cd \"%s\"" % (fontDir)
-	print "   %s" % (commandString)
+	if makeOTFParams.verbose:
+        print "makeotf [Note] Running %s with commands:" % (os.path.basename(makeOTFParams.makeotfPath))
+        print "   cd \"%s\"" % (fontDir)
+        print "   %s" % (commandString)
 	FDKUtils.runShellCmdLogging(commandString) # I use os.system rather than os.pipe so that the user will see the log messages from the C program during processing, rather than only at the end.
 
 
@@ -2584,7 +2607,8 @@ def main():
 	getOptions(makeOTFParams)
 	setMissingParams(makeOTFParams)
 	setOptionsFromFontInfo(makeOTFParams)
-	saveOptionsFile(makeOTFParams) # this always saves options to kDefaultOptionsFile; may also save to user-specified option file.
+	if makeOTFParams.saveOptions == 'true':
+	    saveOptionsFile(makeOTFParams) # this always saves options to kDefaultOptionsFile; may also save to user-specified option file.
 	runMakeOTF(makeOTFParams)
 	print "Done."
 

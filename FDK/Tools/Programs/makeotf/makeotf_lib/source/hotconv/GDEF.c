@@ -372,7 +372,7 @@ void setGlyphClassGDef(hotCtx g, GNode *simple, GNode *ligature, GNode *mark,
 	}
 
 
-	/* Check and warn if the same glyph has ended up in more than one class */
+	/* Check if the same glyph has ended up in more than one class, keep only first. */
 	for (i = 0; i < h->glyphClasses.cnt; i++) {
 		GNode *p1;
 		GNode *prev1 = NULL;
@@ -398,7 +398,10 @@ void setGlyphClassGDef(hotCtx g, GNode *simple, GNode *ligature, GNode *mark,
 								/* If the gid in class j is being overridden by the mark class definition, then we do not complain */
 								hadConflictingClassDef = 1;
 								featGlyphDump(g, p1->gid, 0, 0);
-								hotMsg(g, hotWARNING, "GDEF GlyphClass. Glyph '%s' gid '%d'. previous glyph class '%s' overrides new class '%s'.", g->note.array, p1->gid, glyphClassNames[i],  glyphClassNames[j]);
+                                if (g->convertFlags & HOT_CONVERT_VERBOSE)
+                                {
+                                    hotMsg(g, hotWARNING, "GDEF GlyphClass. Glyph '%s' gid '%d'. previous glyph class '%s' overrides new class '%s'.", g->note.array, p1->gid, glyphClassNames[i],  glyphClassNames[j]);
+                                }
 							}
 							removeNodeFromClass(h, &(h->glyphClasses.array[j]), &headNode2, &prev2, &p2);
 						}
@@ -426,9 +429,9 @@ void setGlyphClassGDef(hotCtx g, GNode *simple, GNode *ligature, GNode *mark,
 			}
 		}
 	}
-	if (hadConflictingClassDef) {
-		hotMsg(g, hotWARNING, "GDEF Glyph Class. Since there were conflicting GlyphClass assignments, you should examine this GDEF table, and make sure that the glyph class assignments are as needed.\n");
-	}
+    if (hadConflictingClassDef && (g->convertFlags & HOT_CONVERT_VERBOSE)) {
+        hotMsg(g, hotWARNING, "GDEF Glyph Class. Since there were conflicting GlyphClass assignments, you should examine this GDEF table, and make sure that the glyph class assignments are as needed.\n");
+    }
 }
 
 unsigned short addMarkSetClassGDEF(hotCtx g, GNode *markClassNode) {
@@ -767,7 +770,10 @@ static void validateGlyphClasses(GDEFCtx h, GNode **classList, long numClasses) 
 					if (p1->gid == p2->gid) {
 						hadConflictingClassDef = 1;
 						featGlyphDump(g, p1->gid, 0, 0);
-						hotMsg(g, hotWARNING, "GDEF MarkAttachment. Glyph '%s' gid '%d'. previous glyph class '%s' conflicts with new class '%s'.", g->note.array, p1->gid, className1,  className2);
+                        if (g->convertFlags & HOT_CONVERT_VERBOSE)
+                        {
+                            hotMsg(g, hotWARNING, "GDEF MarkAttachment. Glyph '%s' gid '%d'. previous glyph class '%s' conflicts with new class '%s'.", g->note.array, p1->gid, className1,  className2);
+                        }
 					}
 					prev = p2;
 					p2 = p2->nextCl;
@@ -776,7 +782,7 @@ static void validateGlyphClasses(GDEFCtx h, GNode **classList, long numClasses) 
 			}
 		}
 	}
-	if (hadConflictingClassDef) {
+	if (hadConflictingClassDef && (g->convertFlags & HOT_CONVERT_VERBOSE)) {
 		hotMsg(g, hotWARNING, "GDEF MarkAttachment Classes. There are conflicting MarkAttachment assignments.");
 	}
 }

@@ -393,15 +393,18 @@ char *hotReadFont(hotCtx g, int flags, int *psinfo,  hotReadFontOverrides *fontO
 	if (flags & HOT_FORCE_NOTDEF) {
 		tcflags |= TC_FORCE_NOTDEF;
 	}
-	if (flags & HOT_RENAME) {
-		tcflags |= TC_RENAME; /* turn on  renaming in typecomp */
-	}
+    if (flags & HOT_RENAME) {
+        tcflags |= TC_RENAME; /* turn on  renaming in typecomp */
+    }
 	else {
 		g->cb.getFinalGlyphName = NULL; /* supresses renaming in feature file */
 	}
-	if (flags & HOT_SUBSET) {
-		tcflags |= TC_SUBSET; /* turn on subsetting to GOADB list  in typecomp */
-	}
+    if (flags & HOT_SUBSET) {
+        tcflags |= TC_SUBSET; /* turn on subsetting to GOADB list  in typecomp */
+    }
+    if (flags & HOT_VERBOSE) {
+        tcflags |= TC_VERBOSE; /* turn on all wanrings and notes */
+    }
 	tcSetMaxNumSubrsOverride(g->ctx.tc,  fontOverride->maxNumSubrs);
 	tcSetWeightOverride(g->ctx.tc,  fontOverride->syntheticWeight);
 	tcCompactFont(g->ctx.tc, tcflags);

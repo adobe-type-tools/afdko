@@ -1751,10 +1751,10 @@ static void setOS_2Fields(hotCtx g) {
 			p = q + 1;
 		}
 		numRequired = 1 + block->numEssential / 3;
-		/* This ia a really crude fudge. The numEssential is currently set for
-		   each block in uniblock.h, as the number of entries in the range from min UV to max UV
-		   of the block. This is already not right, as in most blocks, noy all UV's in the range are valid.
-		   However, most of these ranges include a lot of archaic and  unusual glypsh not really needed for
+		/* This is a hack. The numEssential field is set for
+		   each block in uniblock.This is currently the number of entries in the range from min UV to max UV
+		   of the block. This is already not right, as in most blocks, not all UV's in the range are valid.
+		   However, most of these ranges include a lot of archaic and  unusual glyphs not really needed for
 		   useful support of the script. I am going to just say that if at least third of the entry range
 		   is included in the font, the designer was making a reasonable effort to support this block */
 		if (block->numFound >= numRequired) {

@@ -403,7 +403,8 @@ char *hotReadFont(hotCtx g, int flags, int *psinfo, hotReadFontOverrides *fontOv
 #define HOT_RENAME  (1<<12)  /*Use client call-back to rename and reorder glyphs. */
 #define HOT_SUBSET (1<<13)
  
-#define HOT_SUPRESS__WIDTH_OPT (1<<14) /* supress width optimization in CFF: makes it easier to poek at charstrings with other tools */
+#define HOT_SUPRESS__WIDTH_OPT (1<<14) /* supress width optimization in CFF: makes it easier to poke at charstrings with other tools */
+#define HOT_VERBOSE (1<<15)             /* Print all warnings and notes: else suppress the most annoying ones. */
     
 struct hotReadFontOverrides_           /* Record for instructions to modify font as it is read in. */
     {
@@ -836,6 +837,7 @@ void hotConvert(hotCtx g);
 #define HOT_OVERRIDE_MENUNAMES (1<<8)
 #define HOT_DO_NOT_OPTIMIZE_KERN (1<<9) /* Do not use left side kern class 0 for non-zero kern values. Saves a a few hundred to thousand bytes, but confuses some developers. */
 #define HOT_ADD_STUB_DSIG (1<<10)
+#define HOT_CONVERT_VERBOSE (1<<11)
     
 /* hotFree() destroys the library context and all the resources allocated to
    it. It must be the last function called by a client of the library. */

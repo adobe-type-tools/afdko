@@ -77,5 +77,6 @@ void message(void *ctx, int type, char *text);
 #define OTHERFLAGS_OVERRIDE_MENUNAMES (1<<12)
 #define OTHERFLAGS_DO_NOT_OPTIMIZE_KERN (1<<13)
 #define OTHERFLAGS_ADD_STUB_DSIG (1<<14)
+#define OTHERFLAGS_VERBOSE (1<<15)
 
 #endif /* CB_H */

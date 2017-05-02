@@ -168,70 +168,100 @@ static void makeArgs(char *filename) {
 
 /* Print usage information */
 static void printUsage(void) {
-	printf(
-		"Usage:\n"
-		"    %s [options]\n"
-		"Options:\n"
-		"-h   : Help\n"
-		"-u   : Help\n"
-		"-f  <path>  : Specify path to font  file. Default for roman font is 'font.ps' \n"
-		"-o  <path>   : Specify output file name for OTF file. Default is <PostScript name> + '.otf'\n"
-		"-b : Specify that font has bold style.\n"
-		"-i : Specify that font has italic style.\n"
-		"-ff  <path>  : Specify path other than default 'features' for feature file\n"
-		"-fs  : If there are no GSUB rules, amke a stub GSUB table.\n"
-		"-mf  <path>  : Specify path for the Font Menu Name DB file. Required if the '-r' option is used.\n"
-		"-gf  <path>  : Specify path for the Glyph Order and Alias DB file Required if the '-r' or '-ga' options are used.\n"
-		"               When used without the -ga or -r options, the Unicode assignments will be used, but not the final names.\n"
-		"-r   : Release mode:  do NOT put the string 'Development' in the name ID 5 \n"
-		"      'Version' string.\n"
-		"       Also turns on subroutinization,\n"
-		"       and use of the GOADB file to re-order and rename glyphs.\n"
-		"-osbOn n   : set bit 'n' to on in the OS/2 table field 'fsSelection'. Can be used more than once to set different bits,\n"
-		"			for example '-osbOn 7 -osbOn 8' to set the bits 7 and 8 to true.\n"
-		"-osbOff n  : set bit 'n' to off in the OS/2 table field 'fsSelection'. Can be used more than once to set different bits,\n"
-		"			for example '-osbOff 7 -osbOff 8' to set the bits 7 and 8 to false.osbOff is always processed after osbOn.\n"
-		"-osv n    : Set the OS/2 table version to integer value n.\n"
-		"-ga/-nga : Quick mode.  Use/do not use the Glyph Order and Alias DB file to rename and re-order\n"
-		"       glyphs. Default is to not do the renaming and re-ordering. If used after -r,\n"
-		"       -nga overrides the default -r setting.\n"
-		" -gs omit from the font any glyphs that are not in the GOADB file\n"
-		"-S/-nS : Turn subroutinzation on/off. If '-ns' is used after -r, it overrides the default -r\n"
-		"       setting. Default is no subroutinization, except in release mode.\n"
-		"-cm  <path>  : Path to Mac encoding CMAP file : used only for CID fonts.\n"
-		"-cs  <integer>  : Integer value for MAc cmap script ID: -1 means undedfined. : used only for CID fonts.\n"
-		"-cl  <integer>  : Integer value for MAc cmap language ID: -1 means undedfined.: used only for CID fonts.\n"
-		"-ch  <path>  : Path to Unicode horizontal CMAP file : used only for CID fonts\n"
-		"-cv  <path>  : Path to Unicode vertical CMAP file : used only for CID fonts\n"
-		"-ci  <path>  : Path to Unicode Variation Sequences specification file : used only for CID fonts\n"
-		"-addn  : Override any .notdef in the font with a  synthetic marking notdef.\n"
-		"-adds [integer]  : If the source font is missing any glyphs from a std set, add them,\n"
-		"               using an MM font to match weight and width.If an integer value follows,\n"
-		"               it is osed as the design weight for the  the synthetic glyphs.\n"
-		"-serif/-sans   : Force using serif/sans synthetic glyphs, rather than choice derived by heuristics.\n"
-		"-dbl          : for a short list of glyphs, double map them to two Unicode values if there is no other glyph\n"
-		"              mapped to the same Unicode value. This used to be default behaviour. The glyph list is:\n"
-		"              Delta:(0x2206, 0x0394), Omega:(0x2126, 0x03A9), Scedilla:(0x015E, 0xF6C1), Tcommaaccent:(0x0162, 0x021A),\n"
-		"              fraction:(0x2044, 0x2215), hyphen:(0x002D, 0x00AD), macron:(0x00AF, 0x02C9), mu:(0x00B5, 0x03BC),\n"
-		"              periodcentered:(0x00B7, 0x2219), scedilla:(0x015F, 0xF6C2), space:(0x0020, 0x00A00),\n"
-		"              tcommaaccent:(0x0163, 0x021B).\n"
-		"-dcs         : Set  OS/2.DefaultChar to the Unicode value for 'space', rather than '.notdef.\n"
-		"               The latter is correct by the OT spec, but QuarkXPress 6.5 requires the former in order to print OTF/CFF fonts.\n"
-		"-oldNameID4     : Set Windows name ID 4 to the PS name, and Mac name ID 4 to Preferred Family + space + Preferred Style name.\n"
-		"              Required because  this is how all FDK fonts were done before 11/2010, and changing the name ID 4 from previously\n"
-		"              shipped versions causes major installation problems under Windows. New fonts should be built without this option.\n"
-		"-lic <string>  Adds arbitrary string to the end of name ID 3. Adobe uses this to add a code indicating from which foundry a font is licensed.\n"
-       "-shw       : suppress warnings about missing or problematic hints. \n"
-       "               This is useful when processsing a temporary font made from a TTF or other no PS font.\n"
-       "-stubCmap4 : This causes makeotf to build only a stub cmap 4 subtable, with just two segments. Needed only for special cases like\n"
-       "AdobeBlank, where every byte is an issue. Windows requires a cmap format 4 subtable, but not that it be useful.\n"
-       "-swo       : suppress width optimization in CFF (use of defaultWidthX and nominalWidthX). Makes it easier to poke at charstrings with other tools.\n"
-       "-omitMacNames   : Omit all Mac platform names from the name table. Note: You cannot specify this and -oldNameID4; else\n"
-       "              font would contain only teh PS name as a name ID 4.\n"
-       "-overrideMenuNames   : Allow feature file name table entries to override default values and the values from the font manu name DB for name IDs. \n"
-       "  Name ID's 2 and 6 cannot be overridden. Use this with caution, and make sure you have provided feature file name table entries for all platforms.\n"
-       "-skco  :  suppress kern class optimization. Do not use the default class 0 for non-zero left side kern classes. Using the optimization saves hundreds to thousands of\n"
-       "bytes and is the default behavior, but causes kerning to be not seen by some programs.\n"
+    printf(
+        "Usage:\n"
+        "    %s [options]\n"
+        "Options:\n"
+        "-h   : Help\n"
+        "-u   : Help\n"
+
+"-f <path> : Specify path to font file. Default for roman font is 'font.ps'\n"
+"-o <path> : Specify output file name for OTF file. Default is <PostScript\n"
+"    name> + '.otf'\n"
+"-b : Specify that font has bold style.\n"
+"-i : Specify that font has italic style.\n"
+"-ff <path> : Specify path other than default 'features' for feature file\n"
+"-fs : If there are no GSUB rules, make a stub GSUB table.\n"
+"-mf <path> : Specify path for the Font Menu Name DB file. Required if the\n"
+"    '-r' option is used.\n"
+"-gf <path> : Specify path for the Glyph Order and Alias DB file Required if\n"
+"    the '-r' or '-ga' options are used. When used without the -ga or -r\n"
+"    options, the Unicode assignments will be used, but not the final names.\n"
+"-r : Release mode: do NOT put the string 'Development' in the name ID 5\n"
+"    'Version' string. Also turns on subroutinization, and use of the GOADB\n"
+"    file to re-order and rename glyphs.\n"
+"-osbOn n : set bit 'n' to on in the OS/2 table field 'fsSelection'. Can be\n"
+"    used more than once to set different bits, for example '-osbOn 7 -osbOn\n"
+"    8' to set the bits 7 and 8 to true.\n"
+"-osbOff n : set bit 'n' to off in the OS/2 table field 'fsSelection'. Can be\n"
+"    used more than once to set different bits, for example '-osbOff 7\n"
+"    -osbOff 8' to set the bits 7 and 8 to false.osbOff is always processed\n"
+"    after osbOn.\n"
+"-osv n : Set the OS/2 table version to integer value n.\n"
+"-ga/-nga : Quick mode. Use/do not use the Glyph Order and Alias DB file to\n"
+"    rename and re-order glyphs. Default is to not do the renaming and\n"
+"    re-ordering. If used after -r, -nga overrides the default -r setting.\n"
+"    -gs omit from the font any glyphs that are not in the GOADB file\n"
+"-S/-nS : Turn subroutinzation on/off. If '-ns' is used after -r, it\n"
+"    overrides the default -r setting. Default is no subroutinization, except\n"
+"    in release mode.\n"
+"-cm <path> : Path to Mac encoding CMAP file : used only for CID fonts.\n"
+"-cs <integer> : Integer value for Mac cmap script ID: -1 means undefined.\n"
+"    used only for CID fonts.\n"
+"-cl <integer> : Integer value for Mac cmap language ID: -1 means\n"
+"    undefined.: used only for CID fonts.\n"
+"-ch <path> : Path to Unicode horizontal CMAP file : used only for CID fonts\n"
+"-cv <path> : Path to Unicode vertical CMAP file : used only for CID fonts\n"
+"-ci <path> : Path to Unicode Variation Sequences specification file. Used\n"
+"    only for CID fonts\n"
+"-addn : Override any .notdef in the font with a synthetic marking notdef.\n"
+"-adds [integer] : If the source font is missing any glyphs from a std set,\n"
+"    add them, using an MM font to match weight and width.If an integer value\n"
+"    follows, it is osed as the design weight for the the synthetic glyphs.\n"
+"-serif/-sans : Force using serif/sans synthetic glyphs, rather than choice\n"
+"    derived by heuristics.\n"
+"-dbl : for a short list of glyphs, double map them to two Unicode values if\n"
+"    there is no other glyph mapped to the same Unicode value. This used to\n"
+"    be default behaviour. The glyph list is: Delta:(0x2206, 0x0394),\n"
+"    Omega:(0x2126, 0x03A9), Scedilla:(0x015E, 0xF6C1), Tcommaaccent:(0x0162,\n"
+"    0x021A), fraction:(0x2044, 0x2215), hyphen:(0x002D, 0x00AD),\n"
+"    macron:(0x00AF, 0x02C9), mu:(0x00B5, 0x03BC), periodcentered:(0x00B7,\n"
+"    0x2219), scedilla:(0x015F, 0xF6C2), space:(0x0020, 0x00A00),\n"
+"    tcommaaccent:(0x0163, 0x021B).\n"
+"-dcs : Set OS/2.DefaultChar to the Unicode value for 'space', rather than\n"
+"    '.notdef. The latter is correct by the OT spec, but QuarkXPress 6.5\n"
+"    requires the former in order to print OTF/CFF fonts.\n"
+"-oldNameID4 : Set Windows name ID 4 to the PS name, and Mac name ID 4 to\n"
+"    Preferred Family + space + Preferred Style name. Required because this\n"
+"    is how all FDK fonts were done before 11/2010, and changing the name ID\n"
+"    4 from previously shipped versions causes major installation problems\n"
+"    under Windows. New fonts should be built without this option.\n"
+"-lic <string> Adds arbitrary string to the end of name ID 3. Adobe uses this\n"
+"    to add a code indicating from which foundry a font is licensed.\n"
+"-shw : suppress warnings about missing or problematic hints. This is useful\n"
+"    when processing a temporary font made from a TTF or other no PS font.\n"
+"-stubCmap4 : This causes makeotf to build only a stub cmap 4 subtable, with\n"
+"    just two segments. Needed only for special cases like AdobeBlank, where\n"
+"    every byte is an issue. Windows requires a cmap format 4 subtable, but\n"
+"    not that it be useful.\n"
+"-swo : suppress width optimization in CFF (use of defaultWidthX and\n"
+"    nominalWidthX). Makes it easier to poke at charstrings with other tools.\n"
+"-omitMacNames : Omit all Mac platform names from the name table. Note: You\n"
+"    cannot specify this and -oldNameID4; else font would contain only the PS\n"
+"    name as a name ID 4.\n"
+"-overrideMenuNames : Allow feature file name table entries to override\n"
+"    default values and the values from the font manu name DB for name IDs.\n"
+"    Name ID's 2 and 6 cannot be overridden. Use this with caution, and make\n"
+"    sure you have provided feature file name table entries for all\n"
+"    platforms.\n"
+"-skco : suppress kern class optimization. Do not use the default class 0 for\n"
+"    non-zero left side kern classes. Using the optimization saves hundreds\n"
+"    to thousands of bytes and is the default behavior, but causes kerning to\n"
+"    be not seen by some programs.\n"
+"-V : show warnings about common, but usually not problematic issues,such as\n"
+"    a glyph having conflicting GDEF classes because it is used in more than\n"
+"    one class type in a layout table. An example is being used as a base\n"
+"    glyph in one replacement rule, and as a mark glyph in another.\n"
 /* Always do +z now. "+z   : Remove the deprecated Type 1 operators seac and dot section from the output front\n" */
 		""
 		"Build:\n"
@@ -240,29 +270,6 @@ static void printUsage(void) {
 		progname,
 		MAKEOTF_VERSION,
 		HOT_VERSION);
-	/*
-	 * The intent here is that the user should be able to find out
-	 * "Which hotconv am I using?".
-	 * In order for the message to reflect the last *link*, the makefile must
-	 * arrange to recompile main.c on every link, whether main.c is out of
-	 * date or not.
-	 *
-	 * Since support for the required ANSI-standard macros from any
-	 * given compiler seems unpredictable, we test that each is defined.	*/
-#ifdef BUILDDIR
-/* Stringizing macros (C Programming FAQs, section 11.17) */
-#define STR(x)	#x
-#define XSTR(x)	STR(x)
-	printf("    Source:  %s\n", XSTR(BUILDDIR));
-#undef STR
-#undef XSTR
-#endif	/* BUILDDIR */
-#ifdef __DATE__
-	printf("    Date:    %s\n", __DATE__);
-#endif
-#ifdef __TIME__
-	printf("    Time:    %s\n", __TIME__);
-#endif
 }
 
 /* Show usage information */
@@ -736,11 +743,17 @@ static void parseArgs(int argc, char *argv[], int inScript) {
                 convert.flags &= ~HOT_NO_OLD_OPS;
                 break;
  */
-					case 'u':
-						showUsage();
-						break;
+                    case 'u':
+                        showUsage();
+                        break;
+                        
+                    case 'V':
+                        convert.flags |= HOT_VERBOSE; // controls warnigns during oparsing/conversion to CFF
+                        convert.otherflags |= OTHERFLAGS_VERBOSE; // controls warnings during feature file processing
+                        break;
+                        
 
-					case 't':
+                    case 't':
 					case 'h':
 						showHelp();
 						break;

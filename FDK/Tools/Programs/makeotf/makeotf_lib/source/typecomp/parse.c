@@ -382,8 +382,8 @@ static void reportId(tcCtx g, int type) {
 	if (g->status & TC_MESSAGE || g->cb.psId == NULL) {
 		return;
 	}
-
-	sprintf(text, "--- Source font: %s", g->cb.psId(g->cb.ctx));
+    if (g->flags & TC_VERBOSE)
+        sprintf(text, "--- Source font: %s", g->cb.psId(g->cb.ctx));
 	g->cb.message(g->cb.ctx, type, text);
 
 	g->status |= TC_MESSAGE;

@@ -2294,10 +2294,6 @@ void subrSubrize(tcCtx g, int nFonts, Font *fonts) {
 
 		h->subrStackOvl = 0;
 		selectFinalSubrSet(h, 0);
-		if (h->subrStackOvl) {
-			parseWarning(h->g, "subr stack depth exceeded (reduced)");
-		}
-
 		if (h->tmp.cnt >= 215) {
 			/* Make global subrs from even indexes */
 			reorderCombined(h, 0);
@@ -2347,9 +2343,6 @@ void subrSubrize(tcCtx g, int nFonts, Font *fonts) {
 				iFont++;
 			}
 
-			if (h->subrStackOvl) {
-				parseWarning(h->g, "subr stack depth exceeded (reduced)");
-			}
 		}
 	}
 
