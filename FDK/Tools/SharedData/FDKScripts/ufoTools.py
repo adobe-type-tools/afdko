@@ -1,5 +1,5 @@
 """
-ufoTools.py v1.29 Feb 22 2017
+ufoTools.py v1.30 May 2 2017
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -1443,12 +1443,10 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transfor
 
 def convertGLIFToBez(ufoFontData, glyphName, doAll= 0):
 	width, outlineXML, skip = ufoFontData.getOrSkipGlyphXML(glyphName, doAll)
-
 	if skip:
 		return None, width
 
 	if outlineXML == None:
-		print "Glyph '%s' has no outline data" % (glyphName)
 		return None, width
 
 	curX = curY = 0

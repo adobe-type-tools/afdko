@@ -2,7 +2,7 @@ __copyright__ = """Copyright 2015, 2016 Adobe Systems Incorporated (http://www.a
 """
 
 __usage__ = """
-   checkOutlinesUFO program v1.19 Jan 20 2017
+   checkOutlinesUFO program v1.20 May 2 2017
 
    checkOutlinesUFO [-e] [-g glyphList] [-gf <file name>] [-all] [-noOverlap] [-noBasicChecks] [-q] [-setMinArea <n>] [-setTolerance <n>] [-wd]
 
@@ -904,6 +904,7 @@ def restoreContourOrder(fixedGlyph, originalContours):
 	for contour in newContourList:
 		fixedGlyph.appendContour(contour)
 
+kSpacePattern = re.compile(r"space|uni(00A0|1680|180E|202F|205F|3000|FEFF|200[0-9AB])")
 
 def run(args):
 
@@ -956,10 +957,17 @@ def run(args):
 		if dGlyph.components:
 			dGlyph.decomposeAllComponents()
 		newGlyph = booleanOperations.booleanGlyph.BooleanGlyph(dGlyph)
-		glyphDigest = None
-		for test in options.testList:
-			if test != None:
-				newGlyph, glyphDigest, changed, msg = test(newGlyph, glyphDigest, changed, msg, options)
+		if len(newGlyph) == 0:
+			# Complain about empty glyph only if it is not a space glyph.
+			if not kSpacePattern.search(glyphName):
+				msg = ["has no contours"]
+			else:
+				msg = []
+		else:
+			glyphDigest = None
+			for test in options.testList:
+				if test != None:
+					newGlyph, glyphDigest, changed, msg = test(newGlyph, glyphDigest, changed, msg, options)
 
 		if not options.quietMode:
 			if len(msg) == 0:
