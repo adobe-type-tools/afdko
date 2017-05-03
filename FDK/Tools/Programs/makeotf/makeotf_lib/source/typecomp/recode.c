@@ -4702,7 +4702,10 @@ void InitStaticFontData(tcCtx g, int font__serif_selector, double *StdVW, double
 		else {
 			is_serif = (h->newGlyph.tmlength / g->nMasters) >= 118;
 		}
-		parseWarning(h->g, "Falling back on heuristic to choose new glyphs serif-ness: is_serif ==  %i", is_serif);
+        if (g->flags & TC_VERBOSE)
+        {
+            parseWarning(h->g, "Falling back on heuristic to choose new glyphs serif-ness: is_serif ==  %i", is_serif);
+        }
 	}
 
 	if (is_serif) {
