@@ -7,7 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define TX_VERSION CTL_MAKE_VERSION(1,0,70)
+#define TX_VERSION CTL_MAKE_VERSION(1,0,71)
 
 #include "cfembed.h"
 #include "cffread.h"
@@ -246,6 +246,7 @@ struct txCtx_
 #define SUBSET_SKIP_NOTDEF  (1<<12)	/* While this is set, don't force the notdef into the current subset. */
 #define SUBSET_HAS_NOTDEF  (1<<13)	/* Indcates that notdef has been added, no need to force it in.*/
 #define PATH_REMOVE_OVERLAP (1<<14) /* Do not remove path overlaps */
+#define PATH_SUPRESS_HINTS (1<<15) /* Do not remove path overlaps */
 	int mode;				/* Current mode */
 	char *modename;			/* Name of current mode */
 	abfTopDict *top;		/* Top dictionary */
@@ -1626,6 +1627,11 @@ static void path_EndFont(txCtx h)
 		h->cb.glyph = abfGlyphDrawCallbacks;
 		h->cb.glyph.direct_ctx = &h->abf.draw;
 		}
+    if (h->flags & PATH_SUPRESS_HINTS)
+    {
+        h->cb.glyph.stem = NULL;
+        h->cb.glyph.flex = NULL;
+    }
 
 	if (abfEndFont(h->abf.ctx, ABF_PATH_REMOVE_OVERLAP, &h->cb.glyph))
 		fatal(h, NULL);
@@ -1723,33 +1729,38 @@ static void cff_BegSet(txCtx h)
 
 /* Begin font. */
 static void cff_BegFont(txCtx h, abfTopDict *top)
-	{
-	dstFileSetAutoName(h, top);
+{
+    dstFileSetAutoName(h, top);
     if (h->flags & PATH_REMOVE_OVERLAP)
-        {
+    {
         h->cb.glyph = abfGlyphPathCallbacks;
         h->cb.glyph.direct_ctx = h->abf.ctx;
         if (abfBegFont(h->abf.ctx, top))
             fatal(h, NULL);
-        }
+    }
     else
-        {
+    {
         h->cb.glyph = cfwGlyphCallbacks;
         if (!(h->cfw.flags & CFW_WRITE_CFF2))
         {
-            /* This keeps these callbacks from being used when 
+            /* This keeps these callbacks from being used when
              writing a regular CFF, and avoids the overhead of porcessing the
              source CFF2 blend args */
             h->cb.glyph.moveVF = NULL;
             h->cb.glyph.lineVF = NULL;
             h->cb.glyph.curveVF = NULL;
         }
-            
+        
         h->cb.glyph.direct_ctx = h->cfw.ctx;
         if (cfwBegFont(h->cfw.ctx, NULL, h->cfw.maxNumSubrs))
             fatal(h, NULL);
-        }
-	}
+    }
+    if (h->flags & PATH_SUPRESS_HINTS)
+    {
+        h->cb.glyph.stem = NULL;
+        h->cb.glyph.flex = NULL;
+    }
+}
 
 /* End font. */
 static void cff_EndFont(txCtx h)
@@ -1761,6 +1772,11 @@ static void cff_EndFont(txCtx h)
         
         resetGlyphs(h);
         h->cb.glyph = cfwGlyphCallbacks;
+        if (h->flags & PATH_SUPRESS_HINTS)
+        {
+            h->cb.glyph.stem = NULL;
+            h->cb.glyph.flex = NULL;
+        }
         h->cb.glyph.direct_ctx = h->cfw.ctx;
         if (abfEndFont(h->abf.ctx, ABF_PATH_REMOVE_OVERLAP, &h->cb.glyph))
             fatal(h, NULL);
@@ -2992,7 +3008,10 @@ static void t1_BegSet(txCtx h)
 static int t1_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 {
 	txCtx h = cb->indirect_ctx;
-	char gname[9];
+	char gname[64];
+    unsigned int nameLen;
+    long i;
+    
 	
 	if (info->flags & ABF_GLYPH_SEEN)
 		return ABF_SKIP_RET;	/* Already in subset */
@@ -3017,9 +3036,19 @@ static int t1_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 		strcpy(gname, ".notdef");
 	else
 		sprintf(gname, "cid%hu", info->cid);
-	info->gname.ptr = &h->t1w.gnames.array[h->t1w.gnames.cnt];
+    nameLen = strlen(gname) + 1;
+    if (h->t1w.gnames.size < (h->t1w.gnames.cnt + nameLen))
+    {
+        t1wCtx g = h->t1w.ctx;
+        dnaINDEX(h->t1w.gnames,h->t1w.gnames.size + nameLen);
+         /* Update all the gname ptrs, as we just moved h->t1w.gnames.array,and all the info->gname.ptr are invalid. */
+        t1wUpdateGlyphNames(h->t1w.ctx, h->t1w.gnames.array);
+    }
+
+    info->gname.ptr = &h->t1w.gnames.array[h->t1w.gnames.cnt];
+    info->gname.impl = h->t1w.gnames.cnt; // hold current char index, to make renumbering this easier!
 	strcpy(info->gname.ptr, gname);
-	h->t1w.gnames.cnt += (long)strlen(gname) + 1;
+	h->t1w.gnames.cnt += (long)nameLen;
 	
 	info->flags &= ~ABF_GLYPH_CID;	/* Convert to name-keyed glyph */
 	
@@ -3042,6 +3071,11 @@ static void t1_BegFont(txCtx h, abfTopDict *top)
         h->cb.glyph = t1wGlyphCallbacks;
         h->cb.glyph.direct_ctx = h->t1w.ctx;
         }
+    if (h->flags & PATH_SUPRESS_HINTS)
+    {
+        h->cb.glyph.stem = NULL;
+        h->cb.glyph.flex = NULL;
+    }
 
 	if (h->t1w.options & T1W_DECID)
 		{
@@ -3456,6 +3490,11 @@ static void t1_EndFont(txCtx h)
 
         resetGlyphs(h);
         h->cb.glyph = t1wGlyphCallbacks;
+        if (h->flags & PATH_SUPRESS_HINTS)
+        {
+            h->cb.glyph.stem = NULL;
+            h->cb.glyph.flex = NULL;
+        }
         h->cb.glyph.direct_ctx = h->t1w.ctx;
         h->cb.glyph.indirect_ctx = h;
         if (h->t1w.options & T1W_DECID)
@@ -7125,6 +7164,7 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 	h->svr.flags = 0;
 	h->ufr.flags = 0;
 	h->ufow.flags = 0;
+    h->t1w.options = 0;
 	
 	for (i = 0; i < argc; i++)
 		{
@@ -7331,21 +7371,25 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 				}
 			break;
 		case opt_n:
-			switch (h->mode)
-				{
-			case mode_ps:
-			case mode_t1:
-			case mode_cff:
-			case mode_cef:
-			case mode_svg:
-			case mode_ufow:
-			case mode_dump:
-				h->cb.glyph.stem = NULL;
-				h->cb.glyph.flex = NULL;
-				break;
-			default:
-				goto wrongmode;
-				}
+            h->flags |= PATH_SUPRESS_HINTS;
+            /* Setting the hint callbacks to NULL works for the most common case where the
+             callbacks have already been assigned by setMode. Hwoever, in a number of cases, the call backs
+             are assigned later, within beginFont. This, we need the flag, so we can do the right thing there.*/
+            switch (h->mode)
+            {
+                case mode_ps:
+                case mode_t1:
+                case mode_cff:
+                case mode_cef:
+                case mode_svg:
+                case mode_ufow:
+                case mode_dump:
+                    h->cb.glyph.stem = NULL;
+                    h->cb.glyph.flex = NULL;
+                    break;
+                default:
+                    goto wrongmode;
+            }
 			break;
       case opt_no_futile:
           switch (h->mode)

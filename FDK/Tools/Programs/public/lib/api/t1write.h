@@ -270,6 +270,9 @@ void t1wGetVersion(ctlVersionCallbacks *cb);
 /* t1wGetVersion() returns the library version number and name via the client
    callbacks passed with the "cb" parameter (see ctlshare.h). */
 
+void t1wUpdateGlyphNames(t1wCtx h, char *glyphNames);
+/* Used to update the array of glyph name pointers, when the source data array has changed location becuase it needed to grow. */
+    
 #ifdef __cplusplus
 }
 #endif

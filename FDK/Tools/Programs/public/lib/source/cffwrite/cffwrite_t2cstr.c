@@ -29,6 +29,8 @@ typedef long Fixed;
 #define PUSH(v) (h->stack.array[h->stack.cnt++] = (float)(v))
 #define PUSH_DELTA(v) (h->deltaStack.array[h->deltaStack.cnt++] = (float)(v))
 
+#define TC_MAX_WARNINGS 5
+
 /* ----------------------------- Module Context ---------------------------- */
 
 typedef struct                  /* Stem hint */
@@ -189,7 +191,6 @@ void cfwCstrFree(cfwCtx g) {
 	if (h == NULL) {
 		return;
 	}
-
 	dnaFREE(h->cstr);
 	dnaFREE(h->masks);
 	dnaFREE(h->hints);
@@ -2271,28 +2272,43 @@ static void printWarn(cstrCtx h) {
 	for (i = 0; i < warn_cnt; i++) {
 		if (h->warning[i] > 0 &&
 		    ((g->flags & CFW_WARN_DUP_HINTSUBS) || i != warn_hint1)) {
-			char cnt[10];
 			char *msg = warnMsg(i);
 
 			if (h->warning[i] > 1) {
-				sprintf(cnt, " (X%hu)", h->warning[i]);
-			}
-			else {
-				cnt[0] = '\0';
+                if (h->warning[i] > TC_MAX_WARNINGS)
+                    continue;
 			}
 
 			if (h->glyph.info->flags & ABF_GLYPH_CID) {
 				cfwMessage(h->g,
-				           "%s <cid-%hu>%s", msg, h->glyph.info->cid, cnt);
+				           "%s <cid-%hu>", msg, h->glyph.info->cid);
 			}
 			else {
-				cfwMessage(h->g, "%s <%s>%s",
-				           msg, h->glyph.info->gname.ptr, cnt);
+				cfwMessage(h->g, "%s <%s>",
+				           msg, h->glyph.info->gname.ptr);
 			}
-			h->warning[i] = 0;
 		}
 	}
 }
+
+/* Print charstring warning. */
+void printFinalWarn(cfwCtx g) {
+    cstrCtx h = g->ctx.cstr;
+    int i;
+    
+    if (g->stm.dbg == NULL) {
+        return;
+    }
+    
+    for (i = 0; i < warn_cnt; i++) {
+        if (h->warning[i] > TC_MAX_WARNINGS) {
+            char *msg = warnMsg(i);
+            cfwMessage(h->g, "There are %d glyphs with %s.\n", h->warning[i], msg);
+        }
+        h->warning[i] = 0;
+    }
+}
+
 
 /* End glyph definition. */
 static void glyphEnd(abfGlyphCallbacks *cb) {

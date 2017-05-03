@@ -2414,19 +2414,31 @@ int t1wSetSINGCallback(t1wCtx h, t1wSINGCallback *sing_cb)
 
 /* Get version numbers of libraries. */
 void t1wGetVersion(ctlVersionCallbacks *cb)
-	{
-	if (cb->called & 1<<T1W_LIB_ID)
-		return;	/* Already enumerated */
+{
+    if (cb->called & 1<<T1W_LIB_ID)
+        return;	/* Already enumerated */
+    
+    /* Support libraries */
+    dnaGetVersion(cb);
+    
+    /* This library */
+    cb->getversion(cb, T1W_VERSION, "t1write");
+    
+    /* Record this call */
+    cb->called |= 1<<T1W_LIB_ID;
+}
 
-	/* Support libraries */
-	dnaGetVersion(cb);
+void t1wUpdateGlyphNames(t1wCtx h, char *glyphNames)
+{
+    int i;
+    
+    for (i =0; i < h->glyphs.cnt; i++)
+    {
+        abfString *gName = &h->glyphs.array[i].info->gname;
+        gName->ptr = &glyphNames[gName->impl];
+    }
+}
 
-	/* This library */
-	cb->getversion(cb, T1W_VERSION, "t1write");
-
-	/* Record this call */
-	cb->called |= 1<<T1W_LIB_ID;
-	}
 
 /* Map error code to error string. */
 char *t1wErrStr(int err_code)

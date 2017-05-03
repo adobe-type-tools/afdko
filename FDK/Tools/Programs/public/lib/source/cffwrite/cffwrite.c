@@ -1895,6 +1895,9 @@ int cfwEndFont(cfwCtx g, abfTopDict *top) {
 		return g->err.code;
 	}
 
+    /* If there are more warnings than get shown, write out how many there were. */
+    printFinalWarn(g);
+
 	/* Set font-wide flags */
 	h->new->flags = 0;
 	if (top->sup.flags & ABF_CID_FONT) {

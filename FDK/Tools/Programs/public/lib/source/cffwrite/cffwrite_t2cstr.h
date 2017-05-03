@@ -15,5 +15,6 @@ void cfwCstrReuse(cfwCtx g);
 void cfwCstrFree(cfwCtx g);
 
 void cfwCstrBegFont(cfwCtx g, int nFDs);
+void printFinalWarn(cfwCtx g);
 
 #endif /* CSTR_H */
