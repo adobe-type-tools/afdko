@@ -7,7 +7,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-CompareFamily 2.0.52 May 19 2016
+CompareFamily 2.0.53 May 2 2017
 
 comparefamily [u] -h] [-d <directory path>] [-tolerance <n>] -rm] [-rn] [-rp] [-nohints] [-l] [-rf] [-st n1,..] [-ft n1,..]
 where 'n1' stands for the number of a test, such as "-st 26" to run Single Test 26.
@@ -663,7 +663,7 @@ def readGlyphInfo(cmpfFont):
 		cmpfFont.glyph_width_list3 = glyph_width_list3
 		cmpfFont.glyph_widths = glyph_widths
 		cmpfFont.isFixedPitchfromHMTX = len(widthsDict) == 1
-		
+
 
 	# Use tx to get RSB
 	### glyph[tag] {gname,enc,width,{left,bottom,right,top}}
@@ -935,60 +935,60 @@ def readNameTable(cmpfFont):
 		except KeyError:
 			print "	Error: Missing Mac Postcriptname from name table! Should be in record", (1, 0, 0, 6)
 			cmpfFont.PostScriptName1 = ""
-	
+
 		try:
 			cmpfFont.compatibleFamilyName1 = cmpfFont.nameIDDict[(1, 0, 0, 1)]
 		except KeyError:
 			print "	Error: Missing Mac Compatible Family Name from name table! Should be in record", (1, 0, 0, 1) , cmpfFont.PostScriptName1
 			cmpfFont.compatibleFamilyName1 = ""
-	
+
 		try:
 			cmpfFont.compatibleSubFamilyName1 = cmpfFont.nameIDDict[(1, 0, 0, 2)]
 		except KeyError:
 			print "	Error: Missing Mac Compatible SubFamily Name from name table! Should be in record", (1, 0, 0, 2), cmpfFont.PostScriptName1
 			cmpfFont.compatibleSubFamilyName1 = ""
-	
+
 		if cmpfFont.nameIDDict.has_key((1, 0, 0, 16)):
 			cmpfFont.preferredFamilyName1 = cmpfFont.nameIDDict[(1, 0, 0, 16)]
 		else:
 			cmpfFont.preferredFamilyName1 = cmpfFont.compatibleFamilyName1
-	
+
 		if cmpfFont.nameIDDict.has_key((1, 0, 0, 17)):
 			cmpfFont.preferredSubFamilyName1 =  cmpfFont.nameIDDict[(1, 0, 0, 17)]
 		else:
 			cmpfFont.preferredSubFamilyName1 =  cmpfFont.compatibleSubFamilyName1
-	
-	
+
+
 		try:
 			cmpfFont.FullFontName1 = cmpfFont.nameIDDict[(1, 0, 0, 4)]
 		except KeyError:
 			print "	Error: Missing Mac Full Font Name from name table! Should be in record", (1, 0, 0, 4), cmpfFont.PostScriptName1
 			cmpfFont.FullFontName1 = ""
-	
+
 		try:
 			cmpfFont.VersionStr1 = cmpfFont.nameIDDict[(1, 0, 0, 5)]
 		except KeyError:
 			print "	Warning: Missing Mac Version String from name table! Should be in record", (1, 0, 0, 5), cmpfFont.PostScriptName1
 			cmpfFont.VersionStr1 = ""
-	
+
 		try:
 			cmpfFont.copyrightStr1 = cmpfFont.nameIDDict[(1, 0, 0, 0)]
 		except KeyError:
 			print "	Error: Missing Mac Copyright String from name table! Should be in record", (1, 0, 0, 0), cmpfFont.PostScriptName1
 			cmpfFont.copyrightStr1 = ""
-	
+
 		try:
 			cmpfFont.trademarkStr1 = cmpfFont.nameIDDict[(1, 0, 0, 7)]
 		except KeyError:
 			print "	Error: Missing Mac Trademark String from name table! Should be in record", (1, 0, 0, 7), cmpfFont.PostScriptName1
 			cmpfFont.trademarkStr1 = ""
-	
-	
+
+
 		try:
 			temp = cmpfFont.nameIDDict[(1, 0, 0, 14)]
 		except KeyError:
 			print "	Warning: Missing Mac platform License Notice URL  from name table! Should be in record", (1, 0, 0, 14)
-	
+
 		if cmpfFont.nameIDDict.has_key((1, 0, 0, 18)):
 			cmpfFont.MacCompatibleFullName1 = cmpfFont.nameIDDict[(1, 0, 0, 18)]
 		else:
@@ -1060,7 +1060,7 @@ def readNameTable(cmpfFont):
 		cmpfFont.copyrightStr1 = cmpfFont.copyrightStr3
 		cmpfFont.trademarkStr1 = cmpfFont.trademarkStr3
 		cmpfFont.MacCompatibleFullName1 = cmpfFont.FullFontName1
-		
+
 	# Complain if preferred font name has preferred subfamily name, or std styles in name.
 	styleList = [cmpfFont.preferredSubFamilyName1] + [ "Regular", "Bold", "Italic", "Bold Italic"]
 	for style in styleList:
@@ -1397,7 +1397,7 @@ def doSingleTest3():
 	for font in fontlist:
 		if not  font.FullFontName1.startswith(font.preferredFamilyName1):
 			print "	Error: Mac platform Full Name  name id 4) '%s' does not begin with the string used for font Preferred Family Name, '%s', for Font %s." %  (font.FullFontName1,  font.preferredFamilyName1,  font.PostScriptName1)
-		
+
 		if  font.ttFont.has_key('CFF '):
 			try:
 				cffFullName = font.topDict.FullName
@@ -1462,7 +1462,7 @@ def doSingleTest6():
 		# verify that there is no patent number in the copyright.
 		if font.copyrightStr1 and re.search("[ \t,]\d\d\d,*\d\d\d[ \t.,]", font.copyrightStr1):
 			print " Error: There is a patent number in the copyright string. Please check.", font.PostScriptName1
-			
+
 		# Missing Copyright and Trademark strings are actually already reported in the function Read Nmae Table
 		if not font.nameIDDict.has_key((1, 0, 0, 9)):
 			print "	Error: Missing Mac Designer Note name id 9 from name table! Should be in record", (1, 0, 0, 9), font.PostScriptName1
@@ -2489,7 +2489,7 @@ def doSingleTest26():
 	global fontlist
 
 	print "\nSingle Face Test 26: Glyph name checks."
- 
+
 	matchPats = [ re.compile(r"^uni([0-9A-F][0-9A-F][0-9A-F][0-9A-F])+$"), re.compile(r"^u[0-9A-F][0-9A-F][0-9A-F][0-9A-F]([0-9A-F]*[0-9A-F]*)$")]
 
 	for font in fontlist:
@@ -2572,7 +2572,7 @@ def doSingleTest26():
 
 		glyphnames = font.glyphnames
 		htmx_table = font.ttFont['hmtx']
-		
+
 		for gname in glyphnames:
 			enWidth = font.unitsPerEm/2
 			if gname in ["endash ", "onedotenleader", "twodotenleader", "threedotenleader"]:
@@ -4867,7 +4867,6 @@ def main():
 	fontlist = []
 	directory, nreport, mreport, preport, logfilename, \
 		creport, charSetName, doStemWidthChecks, doFeatureReportOnly, singleTestList, familyTestList = read_options()
-	print "Directory:", os.path.abspath(directory)
 	if directory != "":
 			build_fontlist_from_dir(directory)
 	else:
@@ -4886,6 +4885,7 @@ def main():
 			print "Invalid log file name"
 			logfile = ""
 
+	print "Directory:", os.path.abspath(directory)
 	print "Loading Adobe Glyph Dict..."
 	import agd
 	fdkToolsDir, fdkSharedDataDir = FDKUtils.findFDKDirs()
