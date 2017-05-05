@@ -544,7 +544,7 @@ def writeOptionsFile(makeOTFParams, filePath):
 		data = map(lambda entry: entry[1], data) # reduce list to just the strings
 		data = os.linesep.join(data) + os.linesep
 		data = data.encode('utf-8')
-		if (makeOTFParams.verbose)
+		if (makeOTFParams.verbose):
 		    print "makeotf [Note] Writing options file", filePath
 		try:
 			fp = open(filePath, "w")
