@@ -2303,7 +2303,7 @@ void printFinalWarn(cfwCtx g) {
     for (i = 0; i < warn_cnt; i++) {
         if (h->warning[i] > TC_MAX_WARNINGS) {
             char *msg = warnMsg(i);
-            cfwMessage(h->g, "There are %d glyphs with %s.\n", h->warning[i], msg);
+            cfwMessage(h->g, "There are %d additional reports of '%s'.\n", h->warning[i] - TC_MAX_WARNINGS, msg);
         }
         h->warning[i] = 0;
     }
