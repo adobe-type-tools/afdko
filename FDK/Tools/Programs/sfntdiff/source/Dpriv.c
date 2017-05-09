@@ -28,7 +28,7 @@ void fatal(char *fmt, ...)
 	fprintf(stderr, "%s [FATAL]: ", global.progname);
 	vfprintf(stderr, fmt, ap);
 	va_end(ap);
-	quit(10000);
+	quit(1);
 	}
 
 /* Print informational message */

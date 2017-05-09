@@ -753,7 +753,7 @@ scriptAbEnd:
 	  doingScripting = 0;
 	}
 	/*printf( "\nDone.\n");*/
-	quit(DiffExists);
-	return DiffExists;	
+	quit(status);
+	return status;	
 	}
 
