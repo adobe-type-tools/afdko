@@ -544,8 +544,8 @@ def writeOptionsFile(makeOTFParams, filePath):
 		data = map(lambda entry: entry[1], data) # reduce list to just the strings
 		data = os.linesep.join(data) + os.linesep
 		data = data.encode('utf-8')
-		if (makeOTFParams.verbose):
-		    print "makeotf [Note] Writing options file", filePath
+		if makeOTFParams.verbose:
+			print "makeotf [Note] Writing options file", filePath
 		try:
 			fp = open(filePath, "w")
 			fp.write(data)
@@ -2473,9 +2473,9 @@ def runMakeOTF(makeOTFParams):
 
 	commandString = " ".join(params)
 	if makeOTFParams.verbose:
-        print "makeotf [Note] Running %s with commands:" % (os.path.basename(makeOTFParams.makeotfPath))
-        print "   cd \"%s\"" % (fontDir)
-        print "   %s" % (commandString)
+		print "makeotf [Note] Running %s with commands:" % (os.path.basename(makeOTFParams.makeotfPath))
+		print "   cd \"%s\"" % (fontDir)
+		print "   %s" % (commandString)
 	FDKUtils.runShellCmdLogging(commandString) # I use os.system rather than os.pipe so that the user will see the log messages from the C program during processing, rather than only at the end.
 
 
