@@ -1,0 +1,219 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		8EE84C5C1DED07E000157252 /* sfntread.h in Headers */ = {isa = PBXBuildFile; fileRef = 8EE84C5B1DED07E000157252 /* sfntread.h */; };
+		8EE84C5F1DEDF13700157252 /* ctlshare.h in Headers */ = {isa = PBXBuildFile; fileRef = 8EE84C5E1DEDF13700157252 /* ctlshare.h */; };
+		BDA34E340D6F63AB0009FF85 /* nameread.c in Sources */ = {isa = PBXBuildFile; fileRef = BDA34E330D6F63AB0009FF85 /* nameread.c */; };
+		BDA34E360D6F63B20009FF85 /* nameread.h in Headers */ = {isa = PBXBuildFile; fileRef = BDA34E350D6F63B20009FF85 /* nameread.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		8EE84C5B1DED07E000157252 /* sfntread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sfntread.h; path = ../../../../api/sfntread.h; sourceTree = "<group>"; };
+		8EE84C5E1DEDF13700157252 /* ctlshare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ctlshare.h; path = ../../../../api/ctlshare.h; sourceTree = "<group>"; };
+		BDA34BAE0D6F46BD0009FF85 /* debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../../../../config/xcconfig/debug.xcconfig; sourceTree = SOURCE_ROOT; };
+		BDA34BAF0D6F46BD0009FF85 /* release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; name = release.xcconfig; path = ../../../../config/xcconfig/release.xcconfig; sourceTree = SOURCE_ROOT; };
+		BDA34E330D6F63AB0009FF85 /* nameread.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = nameread.c; path = ../../../../source/nameread/nameread.c; sourceTree = SOURCE_ROOT; };
+		BDA34E350D6F63B20009FF85 /* nameread.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = nameread.h; path = ../../../../api/nameread.h; sourceTree = SOURCE_ROOT; };
+		D2AAC046055464E500DB518D /* libnameread.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libnameread.a; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D289987405E68DCB004EDB86 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08FB7794FE84155DC02AAC07 /* absfont */ = {
+			isa = PBXGroup;
+			children = (
+				BDA34BA70D6F468D0009FF85 /* xconfig */,
+				BDA34BA60D6F46820009FF85 /* Headers */,
+				08FB7795FE84155DC02AAC07 /* Source */,
+				C6A0FF2B0290797F04C91782 /* Documentation */,
+				1AB674ADFE9D54B511CA2CBB /* Products */,
+			);
+			name = absfont;
+			sourceTree = "<group>";
+		};
+		08FB7795FE84155DC02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				BDA34E330D6F63AB0009FF85 /* nameread.c */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		1AB674ADFE9D54B511CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D2AAC046055464E500DB518D /* libnameread.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BDA34BA60D6F46820009FF85 /* Headers */ = {
+			isa = PBXGroup;
+			children = (
+				8EE84C5E1DEDF13700157252 /* ctlshare.h */,
+				8EE84C5B1DED07E000157252 /* sfntread.h */,
+				BDA34E350D6F63B20009FF85 /* nameread.h */,
+			);
+			name = Headers;
+			sourceTree = "<group>";
+		};
+		BDA34BA70D6F468D0009FF85 /* xconfig */ = {
+			isa = PBXGroup;
+			children = (
+				BDA34BAE0D6F46BD0009FF85 /* debug.xcconfig */,
+				BDA34BAF0D6F46BD0009FF85 /* release.xcconfig */,
+			);
+			name = xconfig;
+			sourceTree = "<group>";
+		};
+		C6A0FF2B0290797F04C91782 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Documentation;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		D2AAC043055464E500DB518D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8EE84C5F1DEDF13700157252 /* ctlshare.h in Headers */,
+				BDA34E360D6F63B20009FF85 /* nameread.h in Headers */,
+				8EE84C5C1DED07E000157252 /* sfntread.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		D2AAC045055464E500DB518D /* nameread */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DEB91EB08733DB70010E9CD /* Build configuration list for PBXNativeTarget "nameread" */;
+			buildPhases = (
+				D2AAC043055464E500DB518D /* Headers */,
+				D2AAC044055464E500DB518D /* Sources */,
+				D289987405E68DCB004EDB86 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = nameread;
+			productName = absfont;
+			productReference = D2AAC046055464E500DB518D /* libnameread.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0460;
+			};
+			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "nameread" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
+			mainGroup = 08FB7794FE84155DC02AAC07 /* absfont */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D2AAC045055464E500DB518D /* nameread */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D2AAC044055464E500DB518D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BDA34E340D6F63AB0009FF85 /* nameread.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1DEB91EC08733DB70010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BDA34BAE0D6F46BD0009FF85 /* debug.xcconfig */;
+			buildSettings = {
+				PRODUCT_NAME = nameread;
+			};
+			name = Debug;
+		};
+		1DEB91ED08733DB70010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BDA34BAF0D6F46BD0009FF85 /* release.xcconfig */;
+			buildSettings = {
+				PRODUCT_NAME = nameread;
+			};
+			name = Release;
+		};
+		1DEB91F008733DB70010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BDA34BAE0D6F46BD0009FF85 /* debug.xcconfig */;
+			buildSettings = {
+				PRODUCT_NAME = nameread;
+			};
+			name = Debug;
+		};
+		1DEB91F108733DB70010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BDA34BAF0D6F46BD0009FF85 /* release.xcconfig */;
+			buildSettings = {
+				PRODUCT_NAME = nameread;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB91EB08733DB70010E9CD /* Build configuration list for PBXNativeTarget "nameread" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB91EC08733DB70010E9CD /* Debug */,
+				1DEB91ED08733DB70010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "nameread" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB91F008733DB70010E9CD /* Debug */,
+				1DEB91F108733DB70010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

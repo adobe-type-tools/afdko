@@ -23,8 +23,13 @@ type1
 exe/
 
 # Xcode files
-xcode4/build
 project.xcworkspace/
 xcuserdata/
-Debug/
-Build/
+**/xcode4/build/
+
+
+# Windows build directories
+*vcxproj.user
+**/vc10/Debug/*
+**/vc10/Release/*
+
