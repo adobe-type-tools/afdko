@@ -2309,6 +2309,12 @@ cefCtx cefNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 	h->svwFlags = 0;
 	dnaINIT(h->ctx.dna, h->subset, 256, 128);
 	h->cb.glyph = cfwGlyphCallbacks;
+    /* This keeps these callbacks from being used when
+     writing a regular CFF, and avoids the overhead of processing the
+     source CFF2 blend args */
+    h->cb.glyph.moveVF = NULL;
+    h->cb.glyph.lineVF = NULL;
+    h->cb.glyph.curveVF = NULL;
 
 	/* Register tables */
 	cmapRegisterTable(h);

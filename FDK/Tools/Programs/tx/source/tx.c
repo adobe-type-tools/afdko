@@ -1741,6 +1741,8 @@ static void cff_BegFont(txCtx h, abfTopDict *top)
     else
     {
         h->cb.glyph = cfwGlyphCallbacks;
+        h->cb.glyph.direct_ctx = h->cfw.ctx;
+
         if (!(h->cfw.flags & CFW_WRITE_CFF2))
         {
             /* This keeps these callbacks from being used when
@@ -1751,7 +1753,6 @@ static void cff_BegFont(txCtx h, abfTopDict *top)
             h->cb.glyph.curveVF = NULL;
         }
         
-        h->cb.glyph.direct_ctx = h->cfw.ctx;
         if (cfwBegFont(h->cfw.ctx, NULL, h->cfw.maxNumSubrs))
             fatal(h, NULL);
     }
@@ -1772,12 +1773,21 @@ static void cff_EndFont(txCtx h)
         
         resetGlyphs(h);
         h->cb.glyph = cfwGlyphCallbacks;
+        h->cb.glyph.direct_ctx = h->cfw.ctx;
+        if (!(h->cfw.flags & CFW_WRITE_CFF2))
+        {
+            /* This keeps these callbacks from being used when
+             writing a regular CFF, and avoids the overhead of porcessing the
+             source CFF2 blend args */
+            h->cb.glyph.moveVF = NULL;
+            h->cb.glyph.lineVF = NULL;
+            h->cb.glyph.curveVF = NULL;
+        }
         if (h->flags & PATH_SUPRESS_HINTS)
         {
             h->cb.glyph.stem = NULL;
             h->cb.glyph.flex = NULL;
         }
-        h->cb.glyph.direct_ctx = h->cfw.ctx;
         if (abfEndFont(h->abf.ctx, ABF_PATH_REMOVE_OVERLAP, &h->cb.glyph))
             fatal(h, NULL);
         

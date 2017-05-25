@@ -1787,7 +1787,21 @@ static void cff_BegSet(txCtx h)
 static void cff_BegFont(txCtx h, abfTopDict *top)
 	{
 	dstFileSetAutoName(h, top);
-	// we do not support subroutinzation in mregeFonts, so can pass default maxSubr value.
+
+    /* Initialize glyph callbacks */
+    h->cb.glyph = cfwGlyphCallbacks;
+    h->cb.glyph.direct_ctx = h->cfw.ctx;
+    if (!(h->cfw.flags & CFW_WRITE_CFF2))
+    {
+        /* This keeps these callbacks from being used when
+         writing a regular CFF, and avoids the overhead of porcessing the
+         source CFF2 blend args */
+        h->cb.glyph.moveVF = NULL;
+        h->cb.glyph.lineVF = NULL;
+        h->cb.glyph.curveVF = NULL;
+    }
+    
+    // we do not support subroutinzation in mergeFonts, so can pass the default maxSubr value.
 	if (cfwBegFont(h->cfw.ctx, NULL, 0))
 		fatal(h, NULL);
 	}
@@ -1830,10 +1844,6 @@ static void cff_SetMode(txCtx h)
 		if (h->cfw.ctx == NULL)
 			fatal(h, "(cfw) can't init lib");
 		}
-
-	/* Initialize glyph callbacks */
-	h->cb.glyph = cfwGlyphCallbacks;
-	h->cb.glyph.direct_ctx = h->cfw.ctx;
 
 	/* Set source library flags */
 	/* These are now set at the start of parseArgs
