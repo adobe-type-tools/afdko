@@ -1777,7 +1777,7 @@ static void cff_EndFont(txCtx h)
         if (!(h->cfw.flags & CFW_WRITE_CFF2))
         {
             /* This keeps these callbacks from being used when
-             writing a regular CFF, and avoids the overhead of porcessing the
+             writing a regular CFF, and avoids the overhead of trying to process the
              source CFF2 blend args */
             h->cb.glyph.moveVF = NULL;
             h->cb.glyph.lineVF = NULL;
@@ -1835,7 +1835,24 @@ static void cff_SetMode(txCtx h)
 			fatal(h, "(cfw) can't init lib");
 		}
 
-    if (h->abf.ctx == NULL)
+        /* The default callbacks. These get reset in cff_BegFont() and cff_EndFont()
+         as some options play the font data through a different library on a first pass,
+         before writing to cff on a second pass */
+        
+        h->cb.glyph = cfwGlyphCallbacks;
+        h->cb.glyph.direct_ctx = h->cfw.ctx;
+        
+        if (!(h->cfw.flags & CFW_WRITE_CFF2))
+        {
+            /* This keeps these callbacks from being used when
+             writing a regular CFF, and avoids the overhead of porcessing the
+             source CFF2 blend args */
+            h->cb.glyph.moveVF = NULL;
+            h->cb.glyph.lineVF = NULL;
+            h->cb.glyph.curveVF = NULL;
+        }
+
+        if (h->abf.ctx == NULL)
         {
         /* Create library context */
         h->abf.ctx = abfNew(&h->cb.mem, ABF_CHECK_ARGS);

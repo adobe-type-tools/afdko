@@ -1729,20 +1729,8 @@ static void cff_BegSet(txCtx h)
 static void cff_BegFont(txCtx h, abfTopDict *top)
 	{
 	dstFileSetAutoName(h, top);
-    /* Initialize glyph callbacks */
-    h->cb.glyph = cfwGlyphCallbacks;
-    h->cb.glyph.direct_ctx = h->cfw.ctx;
 
-        if (!(h->cfw.flags & CFW_WRITE_CFF2))
-    {
-        /* This keeps these callbacks from being used when
-         writing a regular CFF, and avoids the overhead of processing the
-         source CFF2 blend args */
-        h->cb.glyph.moveVF = NULL;
-        h->cb.glyph.lineVF = NULL;
-        h->cb.glyph.curveVF = NULL;
-    }
-	// we do not support subroutinzation in rotateFont, so can pass default maxSubr value.
+        // we do not support subroutinzation in rotateFont, so can pass default maxSubr value.
 	if (cfwBegFont(h->cfw.ctx, NULL, 0)) 
 		fatal(h, NULL);
 	}
@@ -1786,7 +1774,21 @@ static void cff_SetMode(txCtx h)
 			fatal(h, "(cfw) can't init lib");
 		}
 
-	/* Set source library flags */
+    /* Initialize glyph callbacks */
+    h->cb.glyph = cfwGlyphCallbacks;
+    h->cb.glyph.direct_ctx = h->cfw.ctx;
+    
+    if (!(h->cfw.flags & CFW_WRITE_CFF2))
+    {
+        /* This keeps these callbacks from being used when
+         writing a regular CFF, and avoids the overhead of trying to process the
+         source CFF2 blend args */
+        h->cb.glyph.moveVF = NULL;
+        h->cb.glyph.lineVF = NULL;
+        h->cb.glyph.curveVF = NULL;
+    }
+
+    /* Set source library flags */
 	/* These are now set at the start of parseArgs
 	h->t1r.flags = 0;
 	h->cfr.flags = 0;
