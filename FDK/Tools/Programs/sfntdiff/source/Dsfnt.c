@@ -490,6 +490,7 @@ static void addDumpTable(Card32 tag)
 		dmp = da_NEXT(dump.list);
 		dmp->tag = tag;
 		dmp->level = 0;
+        qsort(dump.list.array, dump.list.cnt, sizeof(Dump), cmpDumps);
 	  }
 	}
 
@@ -502,12 +503,14 @@ static void preMakeDump(void)
 	da_INIT_ONCE(dump.list, 40, 10);
 	dump.list.cnt = 0;
 	for (i = 0; i < sfnt1.numTables; i++)
-		addDumpTable(sfnt1.directory[i].tag);
-	qsort(dump.list.array, dump.list.cnt, sizeof(Dump), cmpDumps);
+    {
+        addDumpTable(sfnt1.directory[i].tag);
+    }
 
 	for (i = 0; i < sfnt2.numTables; i++)
-		addDumpTable(sfnt2.directory[i].tag);
-	qsort(dump.list.array, dump.list.cnt, sizeof(Dump), cmpDumps);
+    {
+       addDumpTable(sfnt2.directory[i].tag);
+    }
 
 	/* Add ttcf header and sfnt directory and sort into place */
 	addDumpTable(ttcf_);
@@ -967,16 +970,6 @@ static void doTables(IntX read)
 		if (!entry1 && !entry2) continue;
 		if (!entry1 || !entry2)
 		  {
-#if 0
-			if (!entry1) 
-			  {
-				note("Table [%c%c%c%c] missing from %s.\n", TAG_ARG(tag), fileName(1));
-			  }
-			if (!entry2)
-			  {
-				note("Table [%c%c%c%c] missing from %s.\n", TAG_ARG(tag), fileName(2));
-			  }
-#endif
 			continue;
 		  }
 

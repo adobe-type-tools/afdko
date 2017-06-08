@@ -12,7 +12,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <ctype.h>
 #include <string.h>
 
-Byte8 *version = "2.21215";	/* Program version */
+Byte8 *version = "2.21216";	/* Program version */
 
 volatile IntX doingScripting = 0;
 static Byte8 scriptfilename[256];
