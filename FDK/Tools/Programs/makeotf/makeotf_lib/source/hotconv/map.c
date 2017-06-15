@@ -38,7 +38,7 @@ static void dbgPrintUV(UV uv);
 
 #endif /* HOT_DEBUG	*/
 
-typedef long SInx;              /* Index into char da */
+typedef int32_t SInx;              /* Index into char da */
 #define SINX_UNDEF      (-1)    /* Indicates invalid SInx */
 #define STR(i)          (&h->str.array[i])
 
@@ -1446,9 +1446,9 @@ static UnicodeChar *getUVFromAGL(hotCtx g, char *glyphName, int fatalErr) {
 
 /* Checks if gname is of the form uni<CODE> or u<CODE>. If it is, returns 1 and
    sets *usv to the <CODE> */
-static int checkUniGName(hotCtx g, char *gn, unsigned long *usv) {
+static int checkUniGName(hotCtx g, char *gn, uint32_t *usv) {
 #define IS_HEX(h) (isxdigit(h) && !islower(h))
-	unsigned long code;
+	uint32_t code;
 	char *pHexStart;
 	char *p;
 	long numHexDig;
@@ -1494,7 +1494,7 @@ static int checkUniGName(hotCtx g, char *gn, unsigned long *usv) {
 	}
 
 	/* Check code */
-	sscanf(pHexStart, "%lx", &code);
+	sscanf(pHexStart, "%ux", &code);
 
 #if 0
 	if (IN_RANGE(code, UV_SURR_BEG, UV_SURR_END)) {
@@ -2484,10 +2484,10 @@ static void dbgUniBlock(hotCtx g) {
 
 static void dbgPrintUV(UV uv) {
 	if (IS_SUPP_UV(uv)) {
-		fprintf(stderr, "%lX", uv);
+		fprintf(stderr, "%uX", uv);
 	}
 	else {
-		fprintf(stderr, "%04lX", uv);
+		fprintf(stderr, "%04uX", uv);
 	}
 }
 
@@ -2522,7 +2522,7 @@ static void dbgPrintInfo(hotCtx g) {
 		        "------------------------------\n",
 		        (nGlyphs > SUBSET_MAX) ? " [only multiple uv maps listed]\n"
 				: "");
-		for (i = 0; i < (long)nGlyphs; i++) {
+		for (i = 0; i < nGlyphs; i++) {
 			AddlUV *addlUV;
 			hotGlyphInfo *gi = &g->font.glyphs.array[i];
 
@@ -2581,8 +2581,7 @@ static void dbgPrintInfo(hotCtx g) {
 				fprintf(stderr, ",%3d", sup->code);
 			}
 		}
-
-		fprintf(stderr, " %4d ", GET_GID(gi));
+		fprintf(stderr, " %4td ", GET_GID(gi));
 		if (GET_GID(gi) != gi->id) {
 			fprintf(stderr, "%4d", gi->id);
 		}
@@ -2662,8 +2661,8 @@ int mapFill(hotCtx g) {
 /* Initialize both CID and non-CID fonts */
 static void initGlyphs(hotCtx g) {
 	mapCtx h = g->ctx.map;
-	long i;
-	long nGlyphs = g->font.glyphs.cnt;
+	int32_t i;
+	int32_t nGlyphs = g->font.glyphs.cnt;
 
 	dnaSET_CNT(h->sort.gname, nGlyphs); /* Includes .notdef/CID 0 */
 

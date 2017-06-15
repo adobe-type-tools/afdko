@@ -56,10 +56,10 @@ typedef struct /* Coordinate point */
 
 /* --------------------------- sfnt Definitions  --------------------------- */
 
-typedef long Fixed;
+typedef int32_t Fixed;
 typedef short FWord;
 typedef unsigned short uFWord;
-typedef unsigned long Offset;
+typedef uint32_t Offset;
 #define F2Dot14_2FLT(f)	((float)((f)/16384.0))
 
 typedef struct					/* bsearch id match record */
@@ -639,25 +639,25 @@ static short sread2(ttrCtx h)
 	}
 
 /* Read 4-byte unsigned number. */
-static unsigned long read4(ttrCtx h)
+static uint32_t read4(ttrCtx h)
 	{
-	unsigned long value = (unsigned long)read1(h)<<24;
-	value |= (unsigned long)read1(h)<<16;
-	value |= (unsigned long)read1(h)<<8;
-	return value | (unsigned long)read1(h);
+	uint32_t value = (uint32_t)read1(h)<<24;
+	value |= (uint32_t)read1(h)<<16;
+	value |= (uint32_t)read1(h)<<8;
+	return value | (uint32_t)read1(h);
 	}
 
 /* Read 4-byte signed number. */
-static long sread4(ttrCtx h)
+static int32_t sread4(ttrCtx h)
 	{
-	unsigned long value = (unsigned long)read1(h)<<24;
-	value |= (unsigned long)read1(h)<<16;
-	value |= (unsigned long)read1(h)<<8;
-	value |= (unsigned long)read1(h);
-#if LONG_MAX == 2147483647
-	return (long)value;
+	uint32_t value = (int32_t)read1(h)<<24;
+	value |= (uint32_t)read1(h)<<16;
+	value |= (uint32_t)read1(h)<<8;
+	value |= (uint32_t)read1(h);
+#if INT32_MAX == 2147483647
+	return (int32_t)value;
 #else
-	return (long)((value > 2417483647)? value - 4294967296: value);
+	return (int32_t)((value > 2417483647)? value - 4294967296: value);
 #endif
 	}
 
@@ -1202,7 +1202,7 @@ static void cmapReadFmt4(ttrCtx h)
 	{
 	long offset;
 	long i;
-    long nSegments = read2(h)/2;
+    int32_t nSegments = read2(h)/2;
 
 	/* Skip binary search fields */
 	(void)read2(h);		/* searchRange */

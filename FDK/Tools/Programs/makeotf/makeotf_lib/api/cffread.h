@@ -5,6 +5,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define CFFREAD_H
 
 #include <stddef.h>             /* For size_t */
+#include <stdint.h>             /* For size_t */
 
 #define CFF_VERSION 0x010005    /* Library version */
 
@@ -124,7 +125,7 @@ struct cffStdCallbacks_
        input functions. */
     };
 
-typedef long cffFixed;          /* 16.16 fixed point */
+typedef int32_t cffFixed;          /* 16.16 fixed point */
 
 void cffSetUDV(cffCtx h, int nAxes, cffFixed *UDV);
 void cffSetWV(cffCtx h, int nMasters, cffFixed *WV);

@@ -895,7 +895,7 @@ void GPOSFeatureEnd(hotCtx g) {
 #define ValueYIdAdvance     (1 << 11)
 
 #define VAL_REC_UNDEF       (-1)
-typedef long ValueRecord;   /* Stores index into h->values, which is read at write time. If -1, then write 0; */
+typedef int32_t ValueRecord;   /* Stores index into h->values, which is read at write time. If -1, then write 0; */
 
 
 
@@ -1494,8 +1494,8 @@ static void fillSinglePos(hotCtx g, GPOSCtx h) {
 	size2 = fillAllSinglePos2(g, h, 1 /* simulate */, &nSub2);
 
 #if 1
-	DF(2, (stderr, "### singlePos1 size=%lu (%d subtables)\n", size1, nSub1));
-	DF(2, (stderr, "### singlePos2 size=%lu (%d subtables)\n", size2, nSub2));
+	DF(2, (stderr, "### singlePos1 size=%u (%d subtables)\n", size1, nSub1));
+	DF(2, (stderr, "### singlePos2 size=%u (%d subtables)\n", size2, nSub2));
 #endif
 
 	/* Select subtable format */
@@ -2749,7 +2749,7 @@ static void fillPairPos2(hotCtx g, GPOSCtx h) {
 	                      numValues(fmt->ValueFormat2));
 #if HOT_DEBUG
 	DF(1, (stderr, "#Cl kern: %d of %u(%hux%u) array is filled "
-		   "(%4.2f%%), excl ClassDef2's class 0. Subtbl size: %lu\n",
+		   "(%4.2f%%), excl ClassDef2's class 0. Subtbl size: %u\n",
 		   nFilled,
 		   fmt->Class1Count * (fmt->Class2Count - 1),
 		   fmt->Class1Count,
@@ -4752,7 +4752,7 @@ static void writeExtension(hotCtx g, GPOSCtx h, Subtable *sub) {
 	/* Adjust offset */
 	fmt->ExtensionOffset += h->offset.extensionSection - sub->offset;
 
-	DF(1, (stderr, "  GPOS Extension: fmt=%1d, lkpType=%2d, offset=%08lx\n",
+	DF(1, (stderr, "  GPOS Extension: fmt=%1d, lkpType=%2d, offset=%08ux\n",
 	       fmt->PosFormat, fmt->ExtensionLookupType, fmt->ExtensionOffset));
 
 	OUT2(fmt->PosFormat);

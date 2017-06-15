@@ -20,23 +20,23 @@
 
 /* Common header for formats 0, 2, 4, 6. Access by the GET_* macros below */
 typedef struct {
-	unsigned short format;
-	unsigned short length;
-	unsigned short language;
+	uint16_t format;
+	uint16_t length;
+	uint16_t language;
 } FormatHdr;
 
 /* Common header for the extended formats: 8, 10, 12. Access by the GET_* macros below */
 typedef struct {
-	unsigned short format;
-	unsigned short reserved;
-	unsigned long length;
-	unsigned long language;
+	uint16_t format;
+	uint16_t reserved;
+	uint32_t length;
+	uint32_t language;
 } FormatHdrExt;
 
 typedef struct {
-	unsigned short format;
-	unsigned long length;
-	unsigned long numUVS;
+	uint16_t format;
+	uint32_t length;
+	uint32_t numUVS;
 } FormatHdr14;
 
 #define IS_EXT_FORMAT(f) ((f) == 8 || (f) == 10 || (f) == 12) /* Extended formats */
@@ -44,9 +44,9 @@ typedef struct {
 #define GET_FORMAT(p)   (*((unsigned short *)p))
 
 typedef struct {
-	unsigned short format;
-	unsigned short length;
-	unsigned short language;
+	uint16_t format;
+	uint16_t length;
+	uint16_t language;
 	unsigned char glyphId[256];
 } Format0;
 #define FORMAT0_SIZE (uint16 * 3 + uint8 * 256)
@@ -100,31 +100,31 @@ typedef struct {
 
 /* Segment for formats 8 and 12: */
 typedef struct {
-	unsigned long startCharCode;
-	unsigned long endCharCode;
-	unsigned long startGlyphID;
+	uint32_t startCharCode;
+	uint32_t endCharCode;
+	uint32_t startGlyphID;
 } Segment8_12;
 #define SEGMENT8_12_SIZE (3 * uint32)
 
 typedef struct {
-	unsigned short format;
-	unsigned short reserved;
-	unsigned long length;
-	unsigned long language;
-	unsigned long nGroups;
+	uint16_t format;
+	uint16_t reserved;
+	uint32_t length;
+	uint32_t language;
+	uint32_t nGroups;
 	dnaDCL(Segment8_12, segment);
 } Format12;
 
 #define FORMAT12_SIZE(nSegs) (2 * uint16 + 3 * uint32 + SEGMENT8_12_SIZE * (nSegs))
 
 typedef struct {
-	unsigned long uv;
-	unsigned short addtlCnt;
+	uint32_t uv;
+	uint32_t addtlCnt;
 } DefaultUVSEntryRange;
 
 typedef struct {
-	unsigned long uv;
-	unsigned short glyphID;
+	uint32_t uv;
+	uint16_t glyphID;
 } ExtUVSEntry;
 
 typedef struct {
@@ -134,28 +134,28 @@ typedef struct {
 } UVSRecord;
 
 typedef struct {
-	unsigned short format;
-	unsigned long length;
-	unsigned long numUVS;
+	uint16_t format;
+	uint32_t length;
+	uint32_t numUVS;
 } Format14;
 
 #define FORMAT14_SIZE(nUVSRecs) (uint16 + 2 * uint32 + nUVSRecs * (uint24 + 2 * uint32))
 
 typedef struct {
-	short id;   /* Internal use. All Encoding's that have the same id will end
+	int16_t id;   /* Internal use. All Encoding's that have the same id will end
 	               up pointing to the same subtable in the OTF. Of all the
 	               Encoding's with the same id, exactly one will have a
 	               non-NULL format field. */
-	unsigned short platformId;
-	unsigned short scriptId;
-	unsigned long offset;
+	uint16_t platformId;
+	uint16_t scriptId;
+	uint32_t offset;
 	void *format;
 } Encoding;
 #define ENCODING_SIZE (uint16 * 2 + uint32 * 1)
 
 typedef struct {
-	unsigned short version;
-	unsigned short nEncodings;
+	uint16_t version;
+	uint16_t nEncodings;
 	dnaDCL(Encoding, encoding);
 } cmapTbl;
 #define TBL_HDR_SIZE (uint16 * 2)

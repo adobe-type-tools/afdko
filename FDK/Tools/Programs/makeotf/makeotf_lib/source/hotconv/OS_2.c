@@ -55,10 +55,10 @@ typedef struct {
 #define PANOSE3_VERY_EXPANDED   7
 #define PANOSE3_VERY_CONDENSED  8
 #define PANOSE3_MONOSPACED      9
-	unsigned long ulUnicodeRange1;
-	unsigned long ulUnicodeRange2;
-	unsigned long ulUnicodeRange3;
-	unsigned long ulUnicodeRange4;
+	uint32_t ulUnicodeRange1;
+	uint32_t ulUnicodeRange2;
+	uint32_t ulUnicodeRange3;
+	uint32_t ulUnicodeRange4;
 	char achVendId[VEND_ID_SIZE];
 	unsigned short fsSelection;
 #define SEL_ITALIC  (1 << 0)
@@ -73,8 +73,8 @@ typedef struct {
 	short sTypoLineGap;
 	unsigned short usWinAscent;
 	unsigned short usWinDescent;
-	unsigned long ulCodePageRange1; /* Version 1 */
-	unsigned long ulCodePageRange2; /* Version 1 */
+	uint32_t ulCodePageRange1; /* Version 1 */
+	uint32_t ulCodePageRange2; /* Version 1 */
 	short sXHeight;                 /* Version 2 */
 	short sCapHeight;               /* Version 2 */
 	unsigned short usDefaultChar;   /* Version 2 */
@@ -379,7 +379,7 @@ int OS_2Fill(hotCtx g) {
 		/* If any of the OS/2 v 4 fsSelection bits are on.*/
 		h->tbl.version = g->font.os2Version = 4;
 	}
-    else if ((h->tbl.ulUnicodeRange3 >= (unsigned long)(1<<29)) || (h->tbl.ulUnicodeRange4 != 0))
+    else if ((h->tbl.ulUnicodeRange3 >= (uint32_t)(1<<29)) || (h->tbl.ulUnicodeRange4 != 0))
     {
          h->tbl.version = g->font.os2Version = 4;
     }
@@ -467,10 +467,10 @@ void OS_2Free(hotCtx g) {
 /* ------------------------ Supplementary Functions ------------------------ */
 
 void OS_2SetUnicodeRanges(hotCtx        g,
-                          unsigned long ulUnicodeRange1,
-                          unsigned long ulUnicodeRange2,
-                          unsigned long ulUnicodeRange3,
-                          unsigned long ulUnicodeRange4) {
+                          uint32_t ulUnicodeRange1,
+                          uint32_t ulUnicodeRange2,
+                          uint32_t ulUnicodeRange3,
+                          uint32_t ulUnicodeRange4) {
 	OS_2Ctx h = g->ctx.OS_2;
 	h->tbl.ulUnicodeRange1 = ulUnicodeRange1;
 	h->tbl.ulUnicodeRange2 = ulUnicodeRange2;
@@ -480,8 +480,8 @@ void OS_2SetUnicodeRanges(hotCtx        g,
 }
 
 void OS_2SetCodePageRanges(hotCtx        g,
-                           unsigned long ulCodePageRange1,
-                           unsigned long ulCodePageRange2) {
+                           uint32_t ulCodePageRange1,
+                           uint32_t ulCodePageRange2) {
 	OS_2Ctx h = g->ctx.OS_2;
 	h->tbl.ulCodePageRange1 = ulCodePageRange1;
 	h->tbl.ulCodePageRange2 = ulCodePageRange2;
