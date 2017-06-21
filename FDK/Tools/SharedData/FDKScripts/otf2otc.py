@@ -1,6 +1,6 @@
-# otf2otc.py v1.3 Sept 2 2014
+# otf2otc.py v1.4 June 21 2107
 
-__copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+__copyright__ = """Copyright 2014,2017 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
 __help__ = """
@@ -26,7 +26,7 @@ identical for more than one font file, it is shared.
 """
 
 __methods__="""
-For each file, check that it looks like an sfnt file.
+For each file, check that it looks like an sfnt or ttc file.
 
 For each file, read in tables. Build a font object list, and dict of table tags to table data blocks.
 
@@ -62,7 +62,15 @@ class FontEntry:
 			if tableTag == tableEntry.tag:
 				return tableEntry
 		raise KeyError("Failed to find tag: " + tableTag)
-	
+
+	def __str__(self):
+		dl = [ "fontEntry sfntType: %s, numTables: %s." % (self.sfntType, len(self.tableList) )]
+		for table in self.tableList:
+			dl.append(str(table))
+		dl.append("")
+		return os.linesep.join(dl)
+	def __repr__(self):
+		return str(self)
 
 class TableEntry:
 	
@@ -73,6 +81,12 @@ class TableEntry:
 		self.data = None
 		self.offset = None
 		self.isPreferred = False
+		
+	def __str__(self):
+		return "Table tag: %s, checksum: %s, length %s." % (self.tag, self.checksum, self.length )
+	def __repr__(self):
+		return str(self)
+		
 
 ttcHeaderFormat = ">4sLL"
 """
@@ -87,6 +101,9 @@ ttcHeaderFormat = ">4sLL"
 """
 
 ttcHeaderSize = struct.calcsize(ttcHeaderFormat)
+
+offsetFormat = ">L"
+offsetSize = struct.calcsize(">L")
 
 sfntDirectoryFormat = ">4sHHHH"
 """
@@ -144,8 +161,8 @@ def parseArgs(args):
 		else:
 			raise OTCError("Unknown option '%s'." % (arg))
 			
-	if len(fontList) < 2:
-		raise OTCError("You must specify more than one input font.")
+	if len(fontList) < 1:
+		raise OTCError("You must specify at least one input font.")
 	
 	allOK = True
 	for fontPath in fontList:
@@ -156,7 +173,7 @@ def parseArgs(args):
 		data = fp.read(4)
 		fp.close()
 		
-		if data not in ["OTTO", "\0\1\0\0", "true"]:
+		if data not in ["OTTO", "\0\1\0\0", "true", 'ttcf']:
 			print "File is not OpenType: '%s'." % (fontPath)
 			allOK = False
 	if not allOK:
@@ -165,13 +182,33 @@ def parseArgs(args):
 	return tagOverrideMap, fontList, ttcFilePath
 
 def readFontFile(fontPath):
+	fontEntryList = []
 	fp = file(fontPath, "rb")
 	data = fp.read()
 	fp.close()
 	
-	sfntType, numTables, searchRange, entrySelector, rangeShift = struct.unpack(sfntDirectoryFormat, data[:sfntDirectorySize])
+	# See if this is a OTC file first.
+	TTCTag, version, numFonts = struct.unpack(ttcHeaderFormat, data[:ttcHeaderSize])
+	if TTCTag != 'ttcf':
+		# it is a regular font.
+		fontEntry = parseFontFile(0, data)
+		fontEntryList.append(fontEntry)
+	else:
+		offsetdata = data[ttcHeaderSize:]
+		i = 0
+		while i < numFonts:
+			offset = struct.unpack(offsetFormat, offsetdata[:offsetSize])[0]
+			fontEntry = parseFontFile(offset, data)
+			fontEntryList.append(fontEntry)
+			offsetdata = offsetdata[offsetSize:]
+			i += 1
+	return fontEntryList
+	
+	
+def parseFontFile(offset, data):
+	sfntType, numTables, searchRange, entrySelector, rangeShift = struct.unpack(sfntDirectoryFormat, data[offset:offset+sfntDirectorySize])
 	fontEntry = FontEntry(sfntType, searchRange, entrySelector, rangeShift)
-	curData = data[sfntDirectorySize:]
+	curData = data[offset+sfntDirectorySize:]
 
 	i = 0
 	while i < numTables:
@@ -232,9 +269,8 @@ def run(args):
 	
 	# Read each font file into a list of tables in a fontEntry
 	for fontPath in fileList:
-		fontEntry = readFontFile(fontPath)
-		fontList.append(fontEntry)
-		
+		fontEntryList = readFontFile(fontPath)
+		fontList += fontEntryList
 	# Add the fontEntry tableEntries to tableList.
 	for fontEntry in fontList:
 		tableIndex = 0
