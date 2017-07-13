@@ -3037,7 +3037,6 @@ static int t1_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 	txCtx h = cb->indirect_ctx;
 	char gname[64];
     unsigned int nameLen;
-    long i;
     
 	
 	if (info->flags & ABF_GLYPH_SEEN)
@@ -3064,7 +3063,7 @@ static int t1_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 	else
 		sprintf(gname, "cid%hu", info->cid);
     nameLen = strlen(gname) + 1;
-    if (h->t1w.gnames.size < (h->t1w.gnames.cnt + nameLen))
+    if (((unsigned long)h->t1w.gnames.size) < (h->t1w.gnames.cnt + nameLen))
     {
         t1wCtx g = h->t1w.ctx;
         dnaINDEX(h->t1w.gnames,h->t1w.gnames.size + nameLen);
