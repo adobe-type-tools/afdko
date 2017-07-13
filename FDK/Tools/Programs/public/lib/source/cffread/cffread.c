@@ -15,6 +15,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "nameread.h"
 #include "varread.h"
 #include "supportfp.h"
+#include "supportexcept.h"
 
 #if PLAT_SUN4
 #include "sun4/fixstring.h"
@@ -25,7 +26,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <stdlib.h>
 #include <limits.h>
 #include <math.h>
-#include <setjmp.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -82,7 +82,7 @@ typedef struct					/* FDArray element */
 	SubrOffsets Subrs;			/* Local subr offsets */
 	t2cAuxData aux;				/* Auxiliary charstring parse data */
 	abfFontDict *fdict;			/* Abstract font data */
-} FDInfo;
+} cfrFDInfo;
 
 typedef struct					/* Operand Stack element */
 {
@@ -92,10 +92,10 @@ typedef struct					/* Operand Stack element */
         long int_val;		/* allow at least 32-bit int */
         float real_val;
     } u;
-    unsigned short numBlends;    /* the last operand before the blend operator.
+        unsigned short numBlends;    /* the last operand before the blend operator.
                             The number of items in blend_val is numBlends*(h->numRegions)
                             */
-    float* blend_val;  /* NULL unless the blend operator has been encountered. */
+        float* blend_val;  /* NULL unless the blend operator has been encountered. */
 } stack_elem;
 
 typedef struct					/* Format 2.0 data */
@@ -145,9 +145,9 @@ struct cfrCtx_					/* Context */
     } index;
 	SubrOffsets gsubrs;			/* Global subr offsets */
 	abfTopDict top;				/* Top dict */
-	dnaDCL(FDInfo, FDArray);	/* FDArray */
+	dnaDCL(cfrFDInfo, FDArray);	/* FDArray */
 	dnaDCL(abfFontDict, fdicts);/* Font Dicts */
-	FDInfo *fd;					/* Active Font Dict */
+	cfrFDInfo *fd;				/* Active Font Dict */
 	struct						/* DICT operand stack */
     {
         /* Operands are pushed on the stack as they are encountered. However,
@@ -214,11 +214,6 @@ struct cfrCtx_					/* Context */
 		dnaCtx dna;				/* dynarr */
 		sfrCtx sfr;				/* sfntread */
     } ctx;
-	struct						/* Error handling */
-    {
-		jmp_buf env;
-		int code;
-    } err;
 };
 
 
@@ -231,11 +226,11 @@ static void setupSharedStream(cfrCtx h);
 static void vmessage(cfrCtx h, char *fmt, va_list ap)
 {
 	char text[500];
-    
+    const size_t textLen = sizeof(text);
 	if (h->stm.dbg == NULL)
 		return;	/* Debug stream not available */
     
-	vsprintf(text, fmt, ap);
+	VSPRINTF_S(text, textLen, fmt, ap);
 	(void)h->cb.stm.write(&h->cb.stm, h->stm.dbg, strlen(text), text);
 }
 
@@ -252,8 +247,7 @@ static void CTL_CDECL message(cfrCtx h, char *fmt, ...)
 static void fatal(cfrCtx h, int err_code)
 {
 	message(h, "%s", cfrErrStr(err_code));
-	h->err.code = err_code;
-	longjmp(h->err.env, 1);
+	RAISE(err_code, NULL);
 }
 
 /* --------------------------- Memory Management --------------------------- */
@@ -264,6 +258,10 @@ static void *memNew(cfrCtx h, size_t size)
 	void *ptr = h->cb.mem.manage(&h->cb.mem, NULL, size);
 	if (ptr == NULL)
 		fatal(h, cfrErrNoMemory);
+
+	/* Safety initialization */
+	memset(ptr, 0, size);
+
 	return ptr;
 }
 
@@ -278,7 +276,7 @@ static void memFree(cfrCtx h, void *ptr)
 /* Manage memory. */
 static void *dna_manage(ctlMemoryCallbacks *cb, void *old, size_t size)
 {
-	cfrCtx h = cb->ctx;
+	cfrCtx h = (cfrCtx)cb->ctx;
 	void *ptr = h->cb.mem.manage(&h->cb.mem, old, size);
 	if (size > 0 && ptr == NULL)
 		fatal(h, cfrErrNoMemory);
@@ -297,11 +295,12 @@ static void dna_init(cfrCtx h)
 /* --------------------------- Context Management -------------------------- */
 
 /* Initialize FDArray element. */
-static void initFDArray(void *ctx, long cnt, FDInfo *info)
+static void initFDArray(void *ctx, long cnt, cfrFDInfo *info)
 {
-	cfrCtx h = ctx;
+	cfrCtx h = (cfrCtx)ctx;
 	while (cnt--)
     {
+		memset(info, 0, sizeof(*info));
 		dnaINIT(h->ctx.dna, info->Subrs, 200, 100);
 		info++;
     }
@@ -318,70 +317,54 @@ cfrCtx cfrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 		return NULL;
     
 	/* Allocate context */
-	h = mem_cb->manage(mem_cb, NULL, sizeof(struct cfrCtx_));
+	h = (cfrCtx)mem_cb->manage(mem_cb, NULL, sizeof(struct cfrCtx_));
 	if (h == NULL)
 		return NULL;
     
 	/* Safety initialization */
-	h->gsubrs.size = 0;
-	h->FDArray.size = 0;
-	h->fdicts.size = 0;
-    h->post.fmt2.glyphNameIndex.size = 0;
-    h->post.fmt2.strings.size = 0;
-    h->post.fmt2.buf.size = 0;
-	h->string.offsets.size = 0;
-	h->string.ptrs.size = 0;
-	h->string.buf.size = 0;
-	h->glyphs.size = 0;
-	h->glyphsByName.size = 0;
-	h->glyphsByCID.size = 0;
-	h->stm.src = NULL;
-	h->stm.dbg = NULL;
-	h->encfree = NULL;
-	h->ctx.dna = NULL;
-    h->cff2.lastResortInstanceNameCallback = NULL;
+	memset(h, 0, sizeof(*h));
     
 	/* Copy callbacks */
 	h->cb.mem = *mem_cb;
 	h->cb.stm = *stm_cb;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		goto cleanup;
+    DURING
     
-	/* Initialize service libraries */
-	dna_init(h);
-	h->ctx.sfr = sfrNew(mem_cb, stm_cb, SFR_CHECK_ARGS);
-	if (h->ctx.sfr == NULL)
-		fatal(h, cfrErrSfntread);
-    
-	/* Initialize */
-	dnaINIT(h->ctx.dna, h->gsubrs, 200, 100);
-	dnaINIT(h->ctx.dna, h->FDArray, 1, 13);
-	h->FDArray.func = initFDArray;
-	dnaINIT(h->ctx.dna, h->fdicts, 1, 13);
-	dnaINIT(h->ctx.dna, h->glyphs, 256, 768);
-	dnaINIT(h->ctx.dna, h->glyphsByName, 256, 768);
-	dnaINIT(h->ctx.dna, h->glyphsByCID, 256, 768);
-    dnaINIT(h->ctx.dna, h->post.fmt2.glyphNameIndex, 256, 768);
-    dnaINIT(h->ctx.dna, h->post.fmt2.strings, 50, 200);
-    dnaINIT(h->ctx.dna, h->post.fmt2.buf, 300, 1200);
-	dnaINIT(h->ctx.dna, h->string.offsets, 16, 256);
-	dnaINIT(h->ctx.dna, h->string.ptrs, 16, 256);
-	dnaINIT(h->ctx.dna, h->string.buf, 200, 2000);
+        /* Initialize service libraries */
+        dna_init(h);
+        h->ctx.sfr = sfrNew(mem_cb, stm_cb, SFR_CHECK_ARGS);
+        if (h->ctx.sfr == NULL)
+            fatal(h, cfrErrSfntread);
+        
+        /* Initialize */
+        dnaINIT(h->ctx.dna, h->gsubrs, 200, 100);
+        dnaINIT(h->ctx.dna, h->FDArray, 1, 13);
+        h->FDArray.func = initFDArray;
+        dnaINIT(h->ctx.dna, h->fdicts, 1, 13);
+        dnaINIT(h->ctx.dna, h->glyphs, 256, 768);
+        dnaINIT(h->ctx.dna, h->glyphsByName, 256, 768);
+        dnaINIT(h->ctx.dna, h->glyphsByCID, 256, 768);
+        dnaINIT(h->ctx.dna, h->post.fmt2.glyphNameIndex, 256, 768);
+        dnaINIT(h->ctx.dna, h->post.fmt2.strings, 50, 200);
+        dnaINIT(h->ctx.dna, h->post.fmt2.buf, 300, 1200);
+        dnaINIT(h->ctx.dna, h->string.offsets, 16, 256);
+        dnaINIT(h->ctx.dna, h->string.ptrs, 16, 256);
+        dnaINIT(h->ctx.dna, h->string.buf, 200, 2000);
 
-	/* Open optional debug stream */
-	h->stm.dbg = h->cb.stm.open(&h->cb.stm, CFR_DBG_STREAM_ID, 0);
+        /* Open optional debug stream */
+        h->stm.dbg = h->cb.stm.open(&h->cb.stm, CFR_DBG_STREAM_ID, 0);
+        
+        /* Set up shared source stream callbacks */
+        setupSharedStream(h);
     
-    /* Set up shared source stream callbacks */
-    setupSharedStream(h);
-    
-	return h;
-    
-cleanup:
-	/* Initialization failed */
-	cfrFree(h);
-	return NULL;
+    HANDLER
+        /* Initialization failed */
+        cfrFree(h);
+        h = NULL;
+    END_HANDLER
+
+    return h;
 }
 
 static void freeBlend(cfrCtx h, abfOpEntry *blend)
@@ -390,7 +373,7 @@ static void freeBlend(cfrCtx h, abfOpEntry *blend)
     {
         memFree(h, blend->blendValues);
         blend->blendValues = NULL;
-    }
+}
 }
 
 static void freeBlendArray(cfrCtx h, abfOpEntryArray *blendArray)
@@ -400,19 +383,19 @@ static void freeBlendArray(cfrCtx h, abfOpEntryArray *blendArray)
         freeBlend(h, &blendArray->array[i]);
 }
 
-static void freePrivateBlends(cfrCtx h, abfPrivateDict *private)
+static void freePrivateBlends(cfrCtx h, abfPrivateDict *priv)
 {
-	freeBlend(h, &private->blendValues.StdHW);
-	freeBlend(h, &private->blendValues.StdVW);
-	freeBlend(h, &private->blendValues.BlueScale);
-	freeBlend(h, &private->blendValues.BlueShift);
-	freeBlend(h, &private->blendValues.BlueFuzz);
-	freeBlendArray(h, &private->blendValues.BlueValues);
-    freeBlendArray(h, &private->blendValues.OtherBlues);
-	freeBlendArray(h, &private->blendValues.FamilyBlues);
-	freeBlendArray(h, &private->blendValues.FamilyOtherBlues);
-	freeBlendArray(h, &private->blendValues.StemSnapH);
-	freeBlendArray(h, &private->blendValues.StemSnapV);
+	freeBlend(h, &priv->blendValues.StdHW);
+	freeBlend(h, &priv->blendValues.StdVW);
+	freeBlend(h, &priv->blendValues.BlueScale);
+	freeBlend(h, &priv->blendValues.BlueShift);
+	freeBlend(h, &priv->blendValues.BlueFuzz);
+	freeBlendArray(h, &priv->blendValues.BlueValues);
+    freeBlendArray(h, &priv->blendValues.OtherBlues);
+	freeBlendArray(h, &priv->blendValues.FamilyBlues);
+	freeBlendArray(h, &priv->blendValues.FamilyOtherBlues);
+	freeBlendArray(h, &priv->blendValues.StemSnapH);
+	freeBlendArray(h, &priv->blendValues.StemSnapV);
 }
 
 /* Free library context. */
@@ -432,7 +415,8 @@ void cfrFree(cfrCtx h)
     /* Free dynamic arrays */
     for (i = 0; i < h->FDArray.cnt; i++)
     {
-         freePrivateBlends(h, &h->FDArray.array[i].fdict->Private);
+		if (h->FDArray.array[i].fdict)
+			freePrivateBlends(h, &h->FDArray.array[i].fdict->Private);
     }
 
 	dnaFREE(h->gsubrs);
@@ -586,7 +570,7 @@ readhdr:
 		{
             case sfr_ttcf_tag:
                 /* Get i'th TrueType Collection offset */
-                for (i = 0; (offset = sfrGetNextTTCOffset(h->ctx.sfr)); i++)
+                for (i = 0; (offset = sfrGetNextTTCOffset(h->ctx.sfr))!=0; i++)
                     if (i == ttcIndex)
                     {
                         ttcIndex = 0;
@@ -842,6 +826,8 @@ static void handleBlend(cfrCtx h)
 
     h->stack.cnt--;
 
+	if (numBlends < 0 || numDeltaBlends < 0)
+		fatal(h, cfrErrStackUnderflow);
     CHKUFLOW(numBlends + numDeltaBlends);
     firstItemIndex = (h->stack.cnt - (numBlends + numDeltaBlends));
     firstItem = &(h->stack.array[firstItemIndex]);
@@ -869,8 +855,8 @@ static void handleBlend(cfrCtx h)
     else
     {
     
-        firstItem->numBlends = numBlends;
-        firstItem->blend_val = memNew(h, sizeof(float)*numDeltaBlends);
+        firstItem->numBlends = (unsigned short)numBlends;
+        firstItem->blend_val = (float *)memNew(h, sizeof(float)*numDeltaBlends);
         while (i < numDeltaBlends)
         {
             int index = i + (h->stack.cnt - numDeltaBlends);
@@ -976,10 +962,10 @@ static void saveDeltaArray(cfrCtx h, size_t max, long *cnt, float *array, long *
                 int l;
                 float val;
                 signed int numRegions = h->stack.numRegions;
-                unsigned short numBlendValues = numBlends +  numBlends*numRegions;
-                float *blendValues = memNew(h, sizeof(abfOpEntry)*numBlendValues);
+                unsigned short numBlendValues = (unsigned short)(numBlends +  numBlends*numRegions);
+                float *blendValues = (float *)memNew(h, sizeof(abfOpEntry)*numBlendValues);
                 
-                blendEntry->numBlends = numBlends;
+                blendEntry->numBlends = (unsigned short)numBlends;
                 blendEntry->blendValues = blendValues;
                 
                 /* first, copy the numBlend default values to blendArray[i], summing the deltas to give absolute values. */
@@ -1033,12 +1019,12 @@ static void saveBlend(cfrCtx h, float *realValue, abfOpEntry *blendEntry)
     {
         float defaultValue;
         signed int numRegions = h->stack.numRegions;
-        unsigned short numBlendValues = numBlends + numRegions;
-        float *blendValues = memNew(h, sizeof(abfOpEntry)*numBlendValues);
+        unsigned short numBlendValues = (unsigned short)(numBlends + numRegions);
+        float *blendValues = (float *)memNew(h, sizeof(abfOpEntry)*numBlendValues);
 
-        blendEntry->numBlends = numBlends;
+        blendEntry->numBlends = (unsigned short)numBlends;
         blendEntry->blendValues = blendValues;
-    
+        
         // copy the defaul region value
         blendValues[0] = defaultValue = INDEX_REAL(0);
 
@@ -1070,12 +1056,17 @@ static void saveIntArray(cfrCtx h, size_t max, long *cnt, long *array,
 	*cnt = h->stack.cnt;
 }
 
-static int setNumMasters(cfrCtx h, unsigned int vsindex)
+static int setNumMasters(cfrCtx h, unsigned short vsindex)
 {
     int numRegions = h->stack.numRegions = var_getIVSRegionCountForIndex(h->cff2.varStore, vsindex);
     
-    if (!var_getIVSRegionIndices(h->cff2.varStore, vsindex, h->cff2.regionIndices, numRegions)) {
+	if (numRegions > CFF2_MAX_MASTERS) {
+		message(h, "too many regions %d for vsindex %d", numRegions, vsindex);
+		numRegions = 0;
+	}
+    if (!var_getIVSRegionIndices(h->cff2.varStore, vsindex, h->cff2.regionIndices, (long)numRegions)) {
         message(h, "inconsistent region indices detected in item variation store subtable %d", vsindex);
+		numRegions = 0;
     }
     return numRegions;
 }
@@ -1105,7 +1096,11 @@ static void readVarStore(cfrCtx h)
     length = (unsigned long)read2(h);
     h->region.VarStore.end = vstoreStart + length;
     h->cff2.varStore = var_loadItemVariationStore(&h->cb.shstm, (unsigned long)vstoreStart, length, 0);
+	if (!h->cff2.varStore)
+		return;
     h->cff2.regionCount = var_getIVSRegionCount(h->cff2.varStore);
+	if (h->cff2.regionCount > CFF2_MAX_MASTERS)
+		fatal(h, cfrErrGeometry);
     h->top.varStore = h->cff2.varStore;
     /* pre-calculate scalars for all regions for the current weight vector */
     var_calcRegionScalars(&h->cb.shstm, h->cff2.varStore, h->cff2.axisCount, h->cff2.ndv, h->cff2.scalars);
@@ -1125,7 +1120,7 @@ static char *savePostScript(cfrCtx h, char *str)
 		/* Extract FSType from string */
 		n = -1;
 		q = p + sizeof("/FSType") - 1;
-		if (sscanf(q, " %ld def%n", &value, &n) == 1 && n != -1 &&
+		if (SSCANF_S(q, " %ld def%n", &value, &n) == 1 && n != -1 &&
 			0 <= value && value < 65536)
         {
 			/* Sucessfully parsed value; remove definition from string */
@@ -1147,15 +1142,15 @@ static char *savePostScript(cfrCtx h, char *str)
 		/* Extract OrigFontType from string */
 		n = -1;
 		q = p + sizeof("/OrigFontType") - 1;
-		if (sscanf(q, " /Type1 def%n", &n) == 0 && n != -1)
+		if (SSCANF_S(q, " /Type1 def%n", &n) == 0 && n != -1)
 			h->top.OrigFontType = abfOrigFontTypeType1;
-		else if (sscanf(q, " /CID def%n", &n) == 0 && n != -1)
+		else if (SSCANF_S(q, " /CID def%n", &n) == 0 && n != -1)
 			h->top.OrigFontType = abfOrigFontTypeCID;
-		else if (sscanf(q, " /TrueType def%n", &n) == 0 && n != -1)
+		else if (SSCANF_S(q, " /TrueType def%n", &n) == 0 && n != -1)
 			h->top.OrigFontType = abfOrigFontTypeTrueType;
-        else if (sscanf(q, " /OCF def%n", &n) == 0 && n != -1)
+        else if (SSCANF_S(q, " /OCF def%n", &n) == 0 && n != -1)
             h->top.OrigFontType = abfOrigFontTypeOCF;
-        else if (sscanf(q, " /UFO def%n", &n) == 0 && n != -1)
+        else if (SSCANF_S(q, " /UFO def%n", &n) == 0 && n != -1)
             h->top.OrigFontType = abfOrigFontTypeUFO;
 		else
 			fatal(h, cfrErrOrigFontType);
@@ -1178,7 +1173,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
 {
 	abfTopDict *top = &h->top;
 	abfFontDict *font = h->fd->fdict;
-	abfPrivateDict *private = &font->Private;
+	abfPrivateDict *priv = &font->Private;
     
 	if (region->begin == region->end)
     {
@@ -1191,12 +1186,12 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
 	srcSeek(h, region->begin);
     
 	h->stack.cnt = 0;
-    h->stack.numRegions = private->numRegions = 0;
-    private->vsindex = 0;
+    h->stack.numRegions = priv->numRegions = 0;
+    priv->vsindex = 0;
     
     if (h->cff2.varStore != NULL)
     {
-        h->stack.numRegions = private->numRegions = setNumMasters(h, private->vsindex);
+        h->stack.numRegions = priv->numRegions = setNumMasters(h, priv->vsindex);
     }
 	while (srcTell(h) < region->end)
     {
@@ -1204,8 +1199,8 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
 		switch (byte0)
         {
             case cff_vsindex:
-                private->vsindex = (unsigned short)INDEX_INT(0);
-                h->stack.numRegions = private->numRegions = setNumMasters(h, private->vsindex);
+                priv->vsindex = (unsigned short)INDEX_INT(0);
+                h->stack.numRegions = priv->numRegions = setNumMasters(h, priv->vsindex);
                 break;
 
             case cff_version:
@@ -1236,50 +1231,50 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
                 top->FontBBox[3] = INDEX_REAL(3);
                 break;
             case cff_BlueValues:
-                saveDeltaArray(h, ARRAY_LEN(private->BlueValues.array),
-                               &private->BlueValues.cnt,
-                               private->BlueValues.array,
-                               &private->blendValues.BlueValues.cnt,
-                               private->blendValues.BlueValues.array);
+                saveDeltaArray(h, ARRAY_LEN(priv->BlueValues.array),
+                               &priv->BlueValues.cnt,
+                               priv->BlueValues.array,
+                               &priv->blendValues.BlueValues.cnt,
+                               priv->blendValues.BlueValues.array);
                 h->fd->flags |= SEEN_BLUE_VALUES;
                 break;
             case cff_OtherBlues:
                 if (h->stack.cnt > 0)
-                    saveDeltaArray(h, ARRAY_LEN(private->OtherBlues.array),
-                                   &private->OtherBlues.cnt,
-                                   private->OtherBlues.array,
-                                   &private->blendValues.OtherBlues.cnt,
-                                private->blendValues.OtherBlues.array);
+                    saveDeltaArray(h, ARRAY_LEN(priv->OtherBlues.array),
+                                   &priv->OtherBlues.cnt,
+                                   priv->OtherBlues.array,
+                                   &priv->blendValues.OtherBlues.cnt,
+                                priv->blendValues.OtherBlues.array);
                 else
                     message(h, "OtherBlues empty array (ignored)");
                 break;
             case cff_FamilyBlues:
                 if (h->stack.cnt > 0)
-                    saveDeltaArray(h, ARRAY_LEN(private->FamilyBlues.array),
-                                   &private->FamilyBlues.cnt,
-                                   private->FamilyBlues.array,
-                                   &private->blendValues.FamilyBlues.cnt,
-                                   private->blendValues.FamilyBlues.array);
+                    saveDeltaArray(h, ARRAY_LEN(priv->FamilyBlues.array),
+                                   &priv->FamilyBlues.cnt,
+                                   priv->FamilyBlues.array,
+                                   &priv->blendValues.FamilyBlues.cnt,
+                                   priv->blendValues.FamilyBlues.array);
 
                 else
                     message(h, "FamilyBlues empty array (ignored)");
                 break;
             case cff_FamilyOtherBlues:
                 if (h->stack.cnt > 0)
-                    saveDeltaArray(h, ARRAY_LEN(private->FamilyOtherBlues.array),
-                                   &private->FamilyOtherBlues.cnt,
-                                   private->FamilyOtherBlues.array,
-                                   &private->blendValues.FamilyOtherBlues.cnt,
-                                   private->blendValues.FamilyOtherBlues.array);
+                    saveDeltaArray(h, ARRAY_LEN(priv->FamilyOtherBlues.array),
+                                   &priv->FamilyOtherBlues.cnt,
+                                   priv->FamilyOtherBlues.array,
+                                   &priv->blendValues.FamilyOtherBlues.cnt,
+                                   priv->blendValues.FamilyOtherBlues.array);
 
                 else
                     message(h, "FamilyBlues empty array (ignored)");
                 break;
             case cff_StdHW:
-                 saveBlend(h, &private->StdHW, &private->blendValues.StdHW);
+                 saveBlend(h, &priv->StdHW, &priv->blendValues.StdHW);
                 break;
             case cff_StdVW:
-                saveBlend(h, &private->StdVW, &private->blendValues.StdVW);
+                saveBlend(h, &priv->StdVW, &priv->blendValues.StdVW);
                 break;
             case cff_escape:
                 /* Process escaped operator */
@@ -1328,45 +1323,45 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
                     top->StrokeWidth = INDEX_REAL(0);
                     break;
                 case cff_BlueScale:
-                    saveBlend(h, &private->BlueScale, &private->blendValues.BlueScale);
+                    saveBlend(h, &priv->BlueScale, &priv->blendValues.BlueScale);
                     break;
                 case cff_BlueShift:
-                    saveBlend(h, &private->BlueShift, &private->blendValues.BlueShift);
+                    saveBlend(h, &priv->BlueShift, &priv->blendValues.BlueShift);
                     break;
                 case cff_BlueFuzz:
-                    saveBlend(h, &private->BlueFuzz, &private->blendValues.BlueFuzz);
+                    saveBlend(h, &priv->BlueFuzz, &priv->blendValues.BlueFuzz);
                     break;
                 case cff_StemSnapH:
-                    saveDeltaArray(h, ARRAY_LEN(private->StemSnapH.array),
-                                   &private->StemSnapH.cnt,
-                                   private->StemSnapH.array,
-                                   &private->blendValues.StemSnapH.cnt,
-                                   private->blendValues.StemSnapH.array);
+                    saveDeltaArray(h, ARRAY_LEN(priv->StemSnapH.array),
+                                   &priv->StemSnapH.cnt,
+                                   priv->StemSnapH.array,
+                                   &priv->blendValues.StemSnapH.cnt,
+                                   priv->blendValues.StemSnapH.array);
 
                     break;
                 case cff_StemSnapV:
-                    saveDeltaArray(h, ARRAY_LEN(private->StemSnapV.array),
-                                   &private->StemSnapV.cnt,
-                                   private->StemSnapV.array,
-                                   &private->blendValues.StemSnapV.cnt,
-                                   private->blendValues.StemSnapV.array);
+                    saveDeltaArray(h, ARRAY_LEN(priv->StemSnapV.array),
+                                   &priv->StemSnapV.cnt,
+                                   priv->StemSnapV.array,
+                                   &priv->blendValues.StemSnapV.cnt,
+                                   priv->blendValues.StemSnapV.array);
 
                     break;
                 case cff_ForceBold:
                     CHKUFLOW(1);
-                    private->ForceBold = INDEX_INT(0);
+                    priv->ForceBold = INDEX_INT(0);
                     break;
                 case cff_LanguageGroup:
                     CHKUFLOW(1);
-                    private->LanguageGroup = INDEX_INT(0);
+                    priv->LanguageGroup = INDEX_INT(0);
                     break;
                 case cff_ExpansionFactor:
                     CHKUFLOW(1);
-                    private->ExpansionFactor = INDEX_REAL(0);
+                    priv->ExpansionFactor = INDEX_REAL(0);
                     break;
                 case cff_initialRandomSeed:
                     CHKUFLOW(1);
-                    private->initialRandomSeed = INDEX_REAL(0);
+                    priv->initialRandomSeed = INDEX_REAL(0);
                     break;
                 case cff_PostScript:
                     CHKUFLOW(1);
@@ -1516,8 +1511,8 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
                 break;
             case cff_maxstack:
                 CHKUFLOW(1);
-                // deprecated April 2017.
-                // top->maxstack = (unsigned short)INDEX_INT(0);
+                /* deprecated April 2017.
+                   top->maxstack = (unsigned short)INDEX_INT(0); */
                 break;
             case cff_Subrs:
                 CHKUFLOW(1);
@@ -1569,8 +1564,8 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
             case cff_blend:
                 if (h->stack.numRegions == 0)
                 {
-                    /* private->vsindex is set to 0 by default; it is otherwise only if the vsindex operator is used */
-                    setNumMasters(h, private->vsindex);
+                    /* priv->vsindex is set to 0 by default; it is otherwise only if the vsindex operator is used */
+                    setNumMasters(h, priv->vsindex);
                 }
                 handleBlend(h);
                 continue;
@@ -1653,7 +1648,8 @@ static void readSubrINDEX(cfrCtx h, ctlRegion *region, SubrOffsets *offsets)
 	dataoff = region->begin + cntSize + 1 + (cnt + 1)*offSize - 1;
     
 	/* Allocate offset array */
-	dnaSET_CNT(*offsets, cnt);
+	if (dnaSetCnt(offsets, DNA_ELEM_SIZE_(*offsets), cnt) < 0)
+		fatal(h, cfrErrNoMemory);
     
 	/* Read charstring offsets */
 	for (i = 0; i < cnt; i++)
@@ -1744,7 +1740,7 @@ static void INDEXGet(cfrCtx h, INDEX *index,
 /* Read Private DICT. */
 static void readPrivate(cfrCtx h, int iFD)
 {
-	FDInfo *fd = &h->FDArray.array[iFD];
+	cfrFDInfo *fd = &h->FDArray.array[iFD];
     
 	if (fd->region.PrivateDICT.begin == -1)
 		fatal(h, cfrErrNoPrivate);
@@ -1770,7 +1766,7 @@ static void readPrivate(cfrCtx h, int iFD)
 /* Return the offset of a standard encoded glyph of -1 if none. */
 static long getStdEncGlyphOffset(void *ctx, int stdcode)
 {
-	cfrCtx h = ctx;
+	cfrCtx h = (cfrCtx)ctx;
 	unsigned short gid = h->stdEnc2GID[stdcode];
 	return (gid == 0)? -1: h->glyphs.array[gid].sup.begin;
 }
@@ -1785,7 +1781,7 @@ static void initRegion(ctlRegion *region)
 /* Initialize FDArray element. */
 static void initFDInfo(cfrCtx h, int iFD)
 {
-	FDInfo *fd = h->fd = &h->FDArray.array[iFD];
+	cfrFDInfo *fd = h->fd = &h->FDArray.array[iFD];
 	abfFontDict *fdict = &h->fdicts.array[iFD];
 	fd->flags					= 0;
 	initRegion(&fd->region.PrivateDICT);
@@ -1822,6 +1818,7 @@ static void readFDArray(cfrCtx h)
 	/* Read FDArray */
 	dnaSET_CNT(h->FDArray, h->index.FDArray.count);
 	dnaSET_CNT(h->fdicts, h->index.FDArray.count);
+	memset(h->fdicts.array, 0, sizeof(h->fdicts.array[0]) * h->index.FDArray.count);
 	for (i = 0; i < h->FDArray.cnt; i++)
     {
 		ctlRegion region;
@@ -2050,6 +2047,7 @@ static void postRead(cfrCtx h)
     long i;
     long length;
     long numGlyphs;
+	long strCount;
     sfrTable *table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('p','o','s','t'));
     if (table == NULL)
         return;	/* Optional table missing */
@@ -2092,7 +2090,7 @@ static void postRead(cfrCtx h)
         message(h, "post 2.0: name index size doesn't match numGlyphs");
     
     /* Validate table length against size of glyphNameIndex */
-    length = table->length - (srcTell(h) - table->offset);
+    length = (long)(table->length - (srcTell(h) - table->offset));
     if (length < numGlyphs * 2)
     {
         message(h, "post 2.0: table truncated (table ignored)");
@@ -2101,7 +2099,7 @@ static void postRead(cfrCtx h)
     
     /* Read name index */
     dnaSET_CNT(h->post.fmt2.glyphNameIndex, numGlyphs);
-    h->post.fmt2.strings.cnt = 0;
+    strCount = 0;
     for (i = 0; i < numGlyphs; i++)
     {
         unsigned short nid = read2(h);
@@ -2112,16 +2110,16 @@ static void postRead(cfrCtx h)
             goto parseError;
         }
         else if (nid > 257)
-            h->post.fmt2.strings.cnt++;
+            strCount++;
     }
     
     /* Read string data */
-    length = table->length - (srcTell(h) -  table->offset);
+    length = (long)(table->length - (srcTell(h) -  table->offset));
     dnaSET_CNT(h->post.fmt2.buf, length + 1);
     srcRead(h, length, h->post.fmt2.buf.array);
     
     /* Build C strings array */
-    dnaSET_CNT(h->post.fmt2.strings, h->post.fmt2.strings.cnt);
+    dnaSET_CNT(h->post.fmt2.strings, strCount);
     p = h->post.fmt2.buf.array;
     end = p + length;
     i = 0;
@@ -2318,7 +2316,7 @@ static void readCharset(cfrCtx h)
                 default:
                     fatal(h, cfrErrCharsetFmt);
 			}
-            h->region.Charset.end = srcTell(h);
+            h->region.Charset.end = (long)srcTell(h);
 		}
             break;
     }
@@ -2339,17 +2337,17 @@ static void encAdd(cfrCtx h, abfGlyphInfo *info, unsigned short code)
 	else
     {
 		/* Second or subsequent encoding; link new encoding */
-		abfEncoding *new = h->encfree;
-		if (new == NULL)
+		abfEncoding *_new = h->encfree;
+		if (_new == NULL)
         /* Get node from heap */
-			new = memNew(h, sizeof(abfEncoding));
+			_new = (abfEncoding *)memNew(h, sizeof(abfEncoding));
 		else
         /* Remove head node from free list */
-			h->encfree = new->next;
+			h->encfree = _new->next;
         
-		new->code = code;
-		new->next = enc->next;
-		enc->next = new;
+		_new->code = code;
+		_new->next = enc->next;
+		enc->next = _new;
 		h->flags |= FREE_ENCODINGS;
     }
 }
@@ -2477,7 +2475,7 @@ static void readEncoding(cfrCtx h)
                 next: ;
 				}
 			}
-            h->region.Encoding.end = srcTell(h);
+            h->region.Encoding.end = (long)srcTell(h);
 		}
             break;
     }
@@ -2512,14 +2510,14 @@ static void readFDSelect(cfrCtx h)
                 long next = read2(h);
                 
                 while (gid < next)
-                    h->glyphs.array[gid++].iFD = fd;
+                    h->glyphs.array[gid++].iFD = (unsigned char)fd;
 			}
 		}
             break;
         default:
             fatal(h, cfrErrFDSelectFmt);
     }
-	h->region.FDSelect.end = srcTell(h);
+	h->region.FDSelect.end = (long)srcTell(h);
 }
 
 /* ------------------------------- CFF2 glyph callbacks ------------------------------- */
@@ -2547,7 +2545,7 @@ static void addString(cfrCtx h, strPtrArray *ptrs, abfString *abfStr, char *str)
 	*dnaNEXT(*ptrs) = abfStr;
 	abfStr->impl = offset;
     dnaSET_CNT(h->string.buf, offset + len + 1);
-    strcpy(&h->string.buf.array[offset], str);
+    STRCPY_S(&h->string.buf.array[offset], len+1, str);
 
     abfStr->ptr = &h->string.buf.array[offset];	/* needs to be updated after adding all strings */
 }
@@ -2615,6 +2613,7 @@ static void makeupCFF2Info(cfrCtx h)
     abfTopDict *top = &h->top;
     sfrTable *table;
     char   buf[64];
+    const size_t bufLen = sizeof(buf);
     long   lenFontName;
     char    postscriptName[LONG_PS_NAME_LIMIT+1];
     char    stringBuffer1[STRING_BUFFER_LIMIT+1];
@@ -2625,83 +2624,89 @@ static void makeupCFF2Info(cfrCtx h)
 
     dnaINIT(h->ctx.dna, strPtrs, 10, 1);
 
-    /* read font version and fontBBox from head table */
-    table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('h','e','a','d'));
-    if ((table != NULL) && !invalidStreamOffset(h, table->offset + 54 - 1))
-    {
-        unsigned long   version;
-        srcSeek(h, table->offset + 4);
-        version = read4(h);
-        sprintf(buf, "%ld.%ld", version>>16, (version>>12)&0xf);    /* Apple style "fixed point" version number */
-        addString(h, &strPtrs, &top->version, buf);
+	DURING
 
-        srcSeek(h, table->offset + 36);
-        top->FontBBox[0] = (float)sread2(h);
-        top->FontBBox[1] = (float)sread2(h);
-        top->FontBBox[2] = (float)sread2(h);
-        top->FontBBox[3] = (float)sread2(h);
-    }
+		/* read font version and fontBBox from head table */
+		table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('h','e','a','d'));
+		if ((table != NULL) && !invalidStreamOffset(h, table->offset + 54 - 1))
+		{
+			unsigned long   version;
+			srcSeek(h, table->offset + 4);
+			version = read4(h);
+			SPRINTF_S(buf, bufLen, "%ld.%ld", version>>16, (version>>12)&0xf);    /* Apple style "fixed point" version number */
+			addString(h, &strPtrs, &top->version, buf);
 
-    /* read isFixedPitch, ItalicAngle, UnderlinePosition, UnderlineThickness from post table */
-    table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('p','o','s','t'));
-    if ((table != NULL) && !invalidStreamOffset(h, table->offset + 32 - 1))
-    {
-        srcSeek(h, table->offset + 4);
-        top->ItalicAngle = (float)(sread4(h) / 65536.0);
-        top->UnderlinePosition = (float)sread2(h);
-        top->UnderlineThickness = (float)sread2(h);
-        top->UnderlinePosition -= top->UnderlineThickness/2;
-        top->isFixedPitch = read4(h) != 0;
-    }
+			srcSeek(h, table->offset + 36);
+			top->FontBBox[0] = (float)sread2(h);
+			top->FontBBox[1] = (float)sread2(h);
+			top->FontBBox[2] = (float)sread2(h);
+			top->FontBBox[3] = (float)sread2(h);
+		}
 
-    /* read Notice, FullName, FamilyName, Copyright from name table */
-    lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, stringBuffer1, sizeof(stringBuffer1), NAME_ID_FULL, 0);
-    if (lenFontName > 0)
-        addString(h, &strPtrs, &h->top.FullName, stringBuffer1);
-    lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, stringBuffer1, sizeof(stringBuffer1), NAME_ID_FAMILY, 0);
-    if (lenFontName > 0)
-        addString(h, &strPtrs, &h->top.FamilyName, stringBuffer1);
-    lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, stringBuffer1, sizeof(stringBuffer1), NAME_ID_COPYRIGHT, 0);
-    if (lenFontName > 0)
-        addString(h, &strPtrs, &h->top.Copyright, stringBuffer1);
-    lenTrademark = nam_getASCIIName(h->cff2.name, &h->cb.shstm, stringBuffer2, sizeof(stringBuffer2), NAME_ID_TRADEMARK, 0);
-    if (lenTrademark > 0 && ((unsigned long)(lenFontName + lenTrademark) + 2 < sizeof(stringBuffer1)))
-    {   /* concatename copyright and trademark strings */
-        strcat(stringBuffer1, " ");
-        strcat(stringBuffer1, stringBuffer2);
-    }
-    if (lenFontName > 0)
-        addString(h, &strPtrs, &h->top.Notice, stringBuffer1);
+		/* read isFixedPitch, ItalicAngle, UnderlinePosition, UnderlineThickness from post table */
+		table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('p','o','s','t'));
+		if ((table != NULL) && !invalidStreamOffset(h, table->offset + 32 - 1))
+		{
+			srcSeek(h, table->offset + 4);
+			top->ItalicAngle = (float)(sread4(h) / 65536.0);
+			top->UnderlinePosition = (float)sread2(h);
+			top->UnderlineThickness = (float)sread2(h);
+			top->UnderlinePosition -= top->UnderlineThickness/2;
+			top->isFixedPitch = read4(h) != 0;
+		}
 
-    /* generate PostScript name for the instance */
-    if (h->flags & CFR_SHORT_VF_NAME)
-        nameLengthLimit = SHORT_PS_NAME_LIMIT;
-    else
-        nameLengthLimit = LONG_PS_NAME_LIMIT;
+		/* read Notice, FullName, FamilyName, Copyright from name table */
+		lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, stringBuffer1, sizeof(stringBuffer1), NAME_ID_FULL, 0);
+		if (lenFontName > 0)
+			addString(h, &strPtrs, &h->top.FullName, stringBuffer1);
+		lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, stringBuffer1, sizeof(stringBuffer1), NAME_ID_FAMILY, 0);
+		if (lenFontName > 0)
+			addString(h, &strPtrs, &h->top.FamilyName, stringBuffer1);
+		lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, stringBuffer1, sizeof(stringBuffer1), NAME_ID_COPYRIGHT, 0);
+		if (lenFontName > 0)
+			addString(h, &strPtrs, &h->top.Copyright, stringBuffer1);
+		lenTrademark = nam_getASCIIName(h->cff2.name, &h->cb.shstm, stringBuffer2, sizeof(stringBuffer2), NAME_ID_TRADEMARK, 0);
+		if (lenFontName > 0 && lenTrademark > 0 && ((unsigned long)(lenFontName + lenTrademark) + 2 < sizeof(stringBuffer1)))
+		{   /* concatename copyright and trademark strings */
+			STRCAT_S(stringBuffer1, STRING_BUFFER_LIMIT, " ");
+			STRCAT_S(stringBuffer1, STRING_BUFFER_LIMIT, stringBuffer2);
+		}
+		if (lenFontName > 0)
+			addString(h, &strPtrs, &h->top.Notice, stringBuffer1);
 
-    /* generate an instance PostScript name */
-    lenFontName = generateInstancePSName(h, postscriptName, nameLengthLimit + 1);
+		/* generate PostScript name for the instance */
+		if (h->flags & CFR_SHORT_VF_NAME)
+			nameLengthLimit = SHORT_PS_NAME_LIMIT;
+		else
+			nameLengthLimit = LONG_PS_NAME_LIMIT;
 
-    if (lenFontName > 0) {
-        addString(h, &strPtrs, &h->fdicts.array[0].FontName, postscriptName);
-    }
+		/* generate an instance PostScript name */
+		lenFontName = generateInstancePSName(h, postscriptName, nameLengthLimit + 1);
 
-    /* Load CIDFontName from name table and make up CID font ROS */
-    if (h->flags & CID_FONT) {
+		if (lenFontName > 0) {
+			addString(h, &strPtrs, &h->fdicts.array[0].FontName, postscriptName);
+		}
 
-        lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, postscriptName, sizeof(postscriptName), NAME_ID_CIDFONTNAME, 1);
-        if (lenFontName <= 0)    /* if no CID font name in the name table, put PS name instead */
-            lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, postscriptName, sizeof(postscriptName), NAME_ID_POSTSCRIPT, 1);
+		/* Load CIDFontName from name table and make up CID font ROS */
+		if (h->flags & CID_FONT) {
 
-        if (lenFontName > 0)
-            addString(h, &strPtrs, &h->top.cid.CIDFontName, postscriptName);
-        addString(h, &strPtrs, &h->top.cid.Registry, "Adobe");
-        addString(h, &strPtrs, &h->top.cid.Ordering, "Identity");
-        h->top.cid.Supplement = 1;
-    }
+			lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, postscriptName, sizeof(postscriptName), NAME_ID_CIDFONTNAME, 1);
+			if (lenFontName <= 0)    /* if no CID font name in the name table, put PS name instead */
+				lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, postscriptName, sizeof(postscriptName), NAME_ID_POSTSCRIPT, 1);
 
-    resetStringPtrs(h, &strPtrs);
-    dnaFREE(strPtrs);
+			if (lenFontName > 0)
+				addString(h, &strPtrs, &h->top.cid.CIDFontName, postscriptName);
+			addString(h, &strPtrs, &h->top.cid.Registry, "Adobe");
+			addString(h, &strPtrs, &h->top.cid.Ordering, "Identity");
+			h->top.cid.Supplement = 1;
+		}
+
+		resetStringPtrs(h, &strPtrs);
+		dnaFREE(strPtrs);
+	HANDLER
+		dnaFREE(strPtrs);
+		RERAISE;
+	END_HANDLER
 }
 
 void cfrSetLastResortInstanceNameCallback(cfrCtx h, cfrlastResortInstanceNameCallback cb, void *clientCtx)
@@ -2715,7 +2720,7 @@ void cfrSetLastResortInstanceNameCallback(cfrCtx h, cfrlastResortInstanceNameCal
 /* Report absfont error message to debug stream. */
 static void report_error(abfErrCallbacks *cb, int err_code, int iFD)
 {
-	cfrCtx h = cb->ctx;
+	cfrCtx h = (cfrCtx)cb->ctx;
 	if (iFD == -1)
 		message(h, "%s (ignored)", abfErrStr(err_code));
 	else
@@ -2730,235 +2735,238 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
 	short gi_flags;	/* abfGlyphInfo flags */
     
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
-	
-	/* Initialize top DICT */
-	abfInitTopDict(&h->top);
+    DURING
     
-	srcOpen(h, origin, ttcIndex);
-    
-	/* Initialize */
-	h->flags = flags & 0xffff;
-	h->fd = NULL;
-	h->glyphsByName.cnt = 0;
-	h->glyphsByCID.cnt = 0;
-	memset(h->stdEnc2GID, 0, sizeof(h->stdEnc2GID));
-	dnaSET_CNT(h->FDArray, 1);
-	dnaSET_CNT(h->fdicts, 1);
-    initRegion(&h->region.NameINDEX);
-    initRegion(&h->region.StringINDEX);
-    initRegion(&h->region.Charset);
-    initRegion(&h->region.Encoding);
-    initRegion(&h->region.FDSelect);
-    initRegion(&h->region.VarStore);
-    initRegion(&h->region.CharStringsINDEX);
-    initRegion(&h->region.FDArrayINDEX);
-	initFDInfo(h, 0);
-    h->region.Encoding.begin = cff_ISOAdobeCharset;
-    h->region.Encoding.end = -1;
-    h->region.Charset.begin = cff_StandardEncoding;
-    h->region.Charset.end = -1;
-
-	/* Read header */
-	h->region.Header.begin = h->src.origin;
-	h->header.major = read1(h);
-	h->header.minor = read1(h);
-	h->header.hdrSize = read1(h);
-    
-	if ((h->header.major != 1) && (h->header.major != 2))
-		fatal(h, cfrErrBadFont);
-	h->region.Header.end = h->src.origin + h->header.hdrSize;
-    
-    if (h->header.major == 1)
-    {
-        h->header.offSize = read1(h);
-        /* Read name INDEX */
-        h->region.NameINDEX.begin = h->region.Header.end;
-
-        readINDEX(h, &h->region.NameINDEX, &h->index.name);
-        /* Read top INDEX */
+        /* Initialize top DICT */
+        abfInitTopDict(&h->top);
         
-        h->region.TopDICTINDEX.begin = h->region.NameINDEX.end;
-        readINDEX(h, &h->region.TopDICTINDEX, &h->index.top);
-    }
-    else
-    {
-        /* We use the TopDICTINDEX region to just hold the TopDict data block. */
-        h->header.offSize = (OffSize)read2(h); /* In CFF2, this is the size of the Top Dict. */
-        h->region.TopDICTINDEX.begin = h->region.Header.end;
-        h->region.TopDICTINDEX.end = h->region.TopDICTINDEX.begin + h->header.offSize;
-        h->flags |= CFR_IS_CFF2;
+        srcOpen(h, origin, ttcIndex);
+        
+        /* Initialize */
+        h->flags = flags & 0xffff;
+        h->fd = NULL;
+        h->glyphsByName.cnt = 0;
+        h->glyphsByCID.cnt = 0;
+        memset(h->stdEnc2GID, 0, sizeof(h->stdEnc2GID));
+        dnaSET_CNT(h->FDArray, 1);
+        dnaSET_CNT(h->fdicts, 1);
+		memset(h->fdicts.array, 0, sizeof(h->fdicts.array[0]));
+		initRegion(&h->region.NameINDEX);
+        initRegion(&h->region.StringINDEX);
+        initRegion(&h->region.Charset);
+        initRegion(&h->region.Encoding);
+        initRegion(&h->region.FDSelect);
+        initRegion(&h->region.VarStore);
+        initRegion(&h->region.CharStringsINDEX);
+        initRegion(&h->region.FDArrayINDEX);
+        initFDInfo(h, 0);
+        h->region.Encoding.begin = cff_ISOAdobeCharset;
+        h->region.Encoding.end = -1;
+        h->region.Charset.begin = cff_StandardEncoding;
+        h->region.Charset.end = -1;
 
-        h->cb.cff2.direct_ctx = h;
-        h->cb.cff2.getWidth = cff2GetWidth;
+        /* Read header */
+        h->region.Header.begin = h->src.origin;
+        h->header.major = read1(h);
+        h->header.minor = read1(h);
+        h->header.hdrSize = read1(h);
+        
+        if ((h->header.major != 1) && (h->header.major != 2))
+            fatal(h, cfrErrBadFont);
+        h->region.Header.end = h->src.origin + h->header.hdrSize;
+    
+        if (h->header.major == 1)
+        {
+            h->header.offSize = read1(h);
+            /* Read name INDEX */
+            h->region.NameINDEX.begin = h->region.Header.end;
 
-        /* Load CFF2 font tables */
+            readINDEX(h, &h->region.NameINDEX, &h->index.name);
+            /* Read top INDEX */
+            
+            h->region.TopDICTINDEX.begin = h->region.NameINDEX.end;
+            readINDEX(h, &h->region.TopDICTINDEX, &h->index.top);
+        }
+        else
+        {
+            /* We use the TopDICTINDEX region to just hold the TopDict data block. */
+            h->header.offSize = (OffSize)read2(h); /* In CFF2, this is the size of the Top Dict. */
+            h->region.TopDICTINDEX.begin = h->region.Header.end;
+            h->region.TopDICTINDEX.end = h->region.TopDICTINDEX.begin + h->header.offSize;
+            h->flags |= CFR_IS_CFF2;
+
+            h->cb.cff2.direct_ctx = h;
+            h->cb.cff2.getWidth = cff2GetWidth;
+
+            /* Load CFF2 font tables */
+            if (!(flags & CFR_SHALLOW_READ))
+            {
+                unsigned short  axis;
+
+                h->cff2.axes = var_loadaxes(h->ctx.sfr, &h->cb.shstm);
+                h->cff2.hmtx = var_loadhmtx(h->ctx.sfr, &h->cb.shstm);
+                h->cff2.mvar = var_loadMVAR(h->ctx.sfr, &h->cb.shstm);
+                h->cff2.axisCount = var_getAxisCount(h->cff2.axes);
+                if (h->cff2.axisCount > CFF2_MAX_AXES)
+                    fatal(h, cfrErrGeometry);
+
+                h->cff2.UDV = UDV;
+
+                /* normalize the variable font design vector */
+                for (axis = 0; axis < h->cff2.axisCount; axis++) {
+                    h->cff2.ndv[axis] = 0;
+                }
+                if (h->cff2.UDV != NULL) {
+                    Fixed   userCoords[CFF2_MAX_AXES];
+
+                    for (axis = 0; axis < h->cff2.axisCount; axis++) {
+                        userCoords[axis] = pflttofix(&h->cff2.UDV[axis]);
+                    }
+
+                    if (var_normalizeCoords(&h->cb.shstm, h->cff2.axes, userCoords, h->cff2.ndv)) {
+                        fatal(h, cfrErrGeometry);
+                    }
+                }
+
+                /* name table */
+                h->cff2.name = nam_loadname(h->ctx.sfr, &h->cb.shstm);
+            }
+         }
+        
+        /* Read string INDEX  */
+        if (h->header.major == 1)
+        {
+            h->region.StringINDEX.begin = h->region.TopDICTINDEX.end;
+            if (h->region.StringINDEX.begin > 0)
+            {
+                readINDEX(h, &h->region.StringINDEX, &h->index.string);
+                /* Read strings */
+                readStrings(h);
+            }
+            /* Read gsubrs INDEX */
+            h->region.GlobalSubrINDEX.begin = h->region.StringINDEX.end;
+            readSubrINDEX(h, &h->region.GlobalSubrINDEX, &h->gsubrs);
+       }
+        else
+        {
+            h->index.string.count = 0;
+
+            /* Read gsubrs INDEX */
+            h->region.GlobalSubrINDEX.begin = h->region.TopDICTINDEX.end;
+            readSubrINDEX(h, &h->region.GlobalSubrINDEX, &h->gsubrs);
+        }
+        
+        
+        
+        /* Read top DICT */
+        if (h->header.major == 1)
+        {
+            h->top.maxstack = T2_MAX_OP_STACK;
+            INDEXGet(h, &h->index.top, 0, &region);
+            readDICT(h, &region, 1);
+        }
+        else
+        {
+            h->top.maxstack = CFF2_MAX_OP_STACK;
+            /* h->index.top.begin/end already marks the span of the TopDict data. */
+            readDICT(h, &h->region.TopDICTINDEX, 1);
+            if (h->region.VarStore.begin > 0) {
+                readVarStore(h);
+        }
+        
+        }
+        
+        
+        gi_flags = 0;
+        if (h->flags & CID_FONT)
+        {
+            if (!(flags & CFR_SHALLOW_READ))
+                readFDArray(h);
+            if (h->header.major == 1)
+                h->top.cid.CIDFontName.ptr = h->string.buf.array;
+            else
+                makeupCFF2Info(h);
+            h->top.sup.srcFontType = abfSrcFontTypeCFFCID;
+            h->top.sup.flags |= ABF_CID_FONT;
+            gi_flags |= ABF_GLYPH_CID;
+        }
+        else
+        {
+            if (h->header.major == 1)
+            {
+                readPrivate(h, 0);
+                h->fd->fdict->FontName.ptr = h->string.buf.array;
+            }
+            else
+            {
+                if (!(flags & CFR_SHALLOW_READ)) {
+                    readFDArray(h);
+                }
+                makeupCFF2Info(h);
+            }
+            h->top.sup.srcFontType = abfSrcFontTypeCFFName;
+        }
+        
+        if (!(flags & CFR_SHALLOW_READ))
+            readCharStringsINDEX(h, gi_flags);
+        
+        /* Prepare client data */
+        h->top.FDArray.cnt = h->fdicts.cnt;
+        h->top.FDArray.array = h->fdicts.array;
+        h->top.sup.nGlyphs = h->glyphs.cnt;
+        *top = &h->top;
+        
+        /* Validate dictionaries */
+        if (h->stm.dbg == NULL)
+            abfCheckAllDicts(NULL, &h->top);
+        else
+        {
+            abfErrCallbacks cb;
+            cb.ctx = h;
+            cb.report_error = report_error;
+            abfCheckAllDicts(&cb, &h->top);
+        }
+        
+        /* Fill glyphs array */
         if (!(flags & CFR_SHALLOW_READ))
         {
-            unsigned short  axis;
-
-            h->cff2.axes = var_loadaxes(h->ctx.sfr, &h->cb.shstm);
-            h->cff2.hmtx = var_loadhmtx(h->ctx.sfr, &h->cb.shstm);
-            h->cff2.mvar = var_loadMVAR(h->ctx.sfr, &h->cb.shstm);
-            h->cff2.varStore = NULL;
-            h->cff2.axisCount = var_getAxisCount(h->cff2.axes);
-            if (h->cff2.axisCount > CFF2_MAX_AXES)
-                fatal(h, cfrErrGeometry);
-
-            h->cff2.UDV = UDV;
-
-            /* normalize the variable font design vector */
-            for (axis = 0; axis < h->cff2.axisCount; axis++) {
-                h->cff2.ndv[axis] = 0;
-            }
-            if (h->cff2.UDV != NULL) {
-                Fixed   userCoords[CFF2_MAX_AXES];
-
-                for (axis = 0; axis < h->cff2.axisCount; axis++) {
-                    userCoords[axis] = pflttofix(&h->cff2.UDV[axis]);
-                }
-
-                if (var_normalizeCoords(&h->cb.shstm, h->cff2.axes, userCoords, h->cff2.ndv)) {
-                    fatal(h, cfrErrGeometry);
-                }
-            }
-
-            /* name table */
-            h->cff2.name = nam_loadname(h->ctx.sfr, &h->cb.shstm);
-        }
-     }
-    
-	/* Read string INDEX  */
-    if (h->header.major == 1)
-    {
-        h->region.StringINDEX.begin = h->region.TopDICTINDEX.end;
-        if (h->region.StringINDEX.begin > 0)
-        {
-            readINDEX(h, &h->region.StringINDEX, &h->index.string);
-            /* Read strings */
-            readStrings(h);
-        }
-        /* Read gsubrs INDEX */
-        h->region.GlobalSubrINDEX.begin = h->region.StringINDEX.end;
-        readSubrINDEX(h, &h->region.GlobalSubrINDEX, &h->gsubrs);
-   }
-    else
-    {
-        h->index.string.count = 0;
-
-        /* Read gsubrs INDEX */
-        h->region.GlobalSubrINDEX.begin = h->region.TopDICTINDEX.end;
-        readSubrINDEX(h, &h->region.GlobalSubrINDEX, &h->gsubrs);
-    }
-    
-    
-	
-	/* Read top DICT */
-    if (h->header.major == 1)
-    {
-        h->top.maxstack = T2_MAX_OP_STACK;
-        INDEXGet(h, &h->index.top, 0, &region);
-        readDICT(h, &region, 1);
-    }
-    else
-    {
-        h->top.maxstack = CFF2_MAX_OP_STACK;
-        /* h->index.top.begin/end already marks the span of the TopDict data. */
-        readDICT(h, &h->region.TopDICTINDEX, 1);
-        if (h->region.VarStore.begin > 0) {
-            readVarStore(h);
-        }
-
-    }
-    
-    
-	gi_flags = 0;
-	if (h->flags & CID_FONT)
-    {
-		if (!(flags & CFR_SHALLOW_READ))
-			readFDArray(h);
-        if (h->header.major == 1)
-            h->top.cid.CIDFontName.ptr = h->string.buf.array;
-        else
-            makeupCFF2Info(h);
-		h->top.sup.srcFontType = abfSrcFontTypeCFFCID;
-		h->top.sup.flags |= ABF_CID_FONT;
-		gi_flags |= ABF_GLYPH_CID;
-    }
-	else
-    {
-        if (h->header.major == 1)
-        {
-            readPrivate(h, 0);
-            h->fd->fdict->FontName.ptr = h->string.buf.array;
-        }
-        else
-        {
-            if (!(flags & CFR_SHALLOW_READ)) {
-                readFDArray(h);
-            }
-            makeupCFF2Info(h);
-        }
- 		h->top.sup.srcFontType = abfSrcFontTypeCFFName;
-    }
-    
-	if (!(flags & CFR_SHALLOW_READ))
-		readCharStringsINDEX(h, gi_flags);
-    
-	/* Prepare client data */
-	h->top.FDArray.cnt = h->fdicts.cnt;
-	h->top.FDArray.array = h->fdicts.array;
-	h->top.sup.nGlyphs = h->glyphs.cnt;
-	*top = &h->top;
-    
-    /* Validate dictionaries */
-    if (h->stm.dbg == NULL)
-        abfCheckAllDicts(NULL, &h->top);
-    else
-    {
-        abfErrCallbacks cb;
-        cb.ctx = h;
-        cb.report_error = report_error;
-        abfCheckAllDicts(&cb, &h->top);
-    }
-    
-	/* Fill glyphs array */
-	if (!(flags & CFR_SHALLOW_READ))
-    {
-		readCharset(h);
-		if (h->flags & CID_FONT)
-        {
-			readFDSelect(h);
-            
-			/* Mark LanguageGroup 1 glyphs */
-			for (i = 0; i < h->glyphs.cnt; i++)
+            readCharset(h);
+            if (h->flags & CID_FONT)
             {
-				abfGlyphInfo *info = &h->glyphs.array[i];
-				if (h->fdicts.array[info->iFD].Private.LanguageGroup == 1)
-					info->flags |= ABF_GLYPH_LANG_1;
+                readFDSelect(h);
+                
+                /* Mark LanguageGroup 1 glyphs */
+                for (i = 0; i < h->glyphs.cnt; i++)
+                {
+                    abfGlyphInfo *info = &h->glyphs.array[i];
+                    if (h->fdicts.array[info->iFD].Private.LanguageGroup == 1)
+                        info->flags |= ABF_GLYPH_LANG_1;
+                }
+                
+                /* We pre-multiplied the FontMatrix's in the FDArray with the one in
+                 the top dict FontMatrix so we can discard it */
+                h->top.cid.FontMatrix.cnt = ABF_EMPTY_ARRAY;
             }
-            
-			/* We pre-multiplied the FontMatrix's in the FDArray with the one in
-             the top dict FontMatrix so we can discard it */
-			h->top.cid.FontMatrix.cnt = ABF_EMPTY_ARRAY;
+            else
+            {
+                if ((!(flags & CFR_NO_ENCODING)) && (h->header.major == 1))
+                    readEncoding(h);
+                
+                if (h->fdicts.array[0].Private.LanguageGroup == 1)
+                /* Mark all glyphs LanguageGroup 1 */
+                    for (i = 0; i < h->glyphs.cnt; i++)
+                        h->glyphs.array[i].flags |= ABF_GLYPH_LANG_1;
+            }
         }
-		else
-        {
-            if ((!(flags & CFR_NO_ENCODING)) && (h->header.major == 1))
-				readEncoding(h);
-            
-			if (h->fdicts.array[0].Private.LanguageGroup == 1)
-            /* Mark all glyphs LanguageGroup 1 */
-				for (i = 0; i < h->glyphs.cnt; i++)
-					h->glyphs.array[i].flags |= ABF_GLYPH_LANG_1;
-        }
-    }
-    
-	/* Check each Private dict contained a BlueValues operator */
-	for (i = 0; i < h->fdicts.cnt; i++)
-		if (!(h->FDArray.array[i].flags & SEEN_BLUE_VALUES))
-			message(h, "/BlueValues missing: FD[%ld]", i);
+        
+        /* Check each Private dict contained a BlueValues operator */
+        for (i = 0; i < h->fdicts.cnt; i++)
+            if (!(h->FDArray.array[i].flags & SEEN_BLUE_VALUES))
+                message(h, "/BlueValues missing: FD[%ld]", i);
+
+    HANDLER
+        return Exception.Code;
+    END_HANDLER
     
 	return cfrSuccess;
 }
@@ -3034,7 +3042,7 @@ static void readGlyph(cfrCtx h,
     cff2GlyphCallbacks *cff2_cb = NULL;
     
 	/* Begin glyph and mark it as seen */
- 	result = glyph_cb->beg(glyph_cb, info);
+	result = glyph_cb->beg(glyph_cb, info);
 	info->flags |= ABF_GLYPH_SEEN;
     info->blendInfo.vsindex = aux->default_vsIndex;
     
@@ -3114,11 +3122,14 @@ int cfrIterateGlyphs(cfrCtx h, abfGlyphCallbacks *glyph_cb)
 	long i;
     
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
+    DURING
 	
-	for (i = 0; i < h->glyphs.cnt; i++)
-		readGlyph(h, (unsigned short)i, glyph_cb);
+        for (i = 0; i < h->glyphs.cnt; i++)
+            readGlyph(h, (unsigned short)i, glyph_cb);
+    
+    HANDLER
+        return Exception.Code;
+    END_HANDLER
     
 	return cfrSuccess;
 }
@@ -3131,10 +3142,13 @@ int cfrGetGlyphByTag(cfrCtx h,
 		return cfrErrNoGlyph;
     
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
+    DURING
 	
-	readGlyph(h, tag, glyph_cb);
+        readGlyph(h, tag, glyph_cb);
+
+    HANDLER
+        return Exception.Code;
+    END_HANDLER
     
 	return cfrSuccess;
 }
@@ -3142,7 +3156,7 @@ int cfrGetGlyphByTag(cfrCtx h,
 /* Compare glyph names. */
 static int CTL_CDECL cmpNames(const void *first, const void *second, void *ctx)
 {
-	cfrCtx h = ctx;
+	cfrCtx h = (cfrCtx)ctx;
 	return strcmp(h->glyphs.array[*(unsigned short *)first].gname.ptr,
 				  h->glyphs.array[*(unsigned short *)second].gname.ptr);
 }
@@ -3150,7 +3164,7 @@ static int CTL_CDECL cmpNames(const void *first, const void *second, void *ctx)
 /* Match glyph name. */
 static int CTL_CDECL matchName(const void *key, const void *value, void *ctx)
 {
-	cfrCtx h = ctx;
+	cfrCtx h = (cfrCtx)ctx;
 	return strcmp((char *)key,
 				  h->glyphs.array[*(unsigned short *)value].gname.ptr);
 }
@@ -3179,10 +3193,13 @@ int cfrGetGlyphByName(cfrCtx h, char *gname, abfGlyphCallbacks *glyph_cb)
 		return cfrErrNoGlyph;
     
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
+	DURING
 	
-	readGlyph(h, (unsigned short)h->glyphsByName.array[index], glyph_cb);
+        readGlyph(h, (unsigned short)h->glyphsByName.array[index], glyph_cb);
+
+    HANDLER
+        return Exception.Code;
+    END_HANDLER
     
 	return cfrSuccess;
 }
@@ -3190,7 +3207,7 @@ int cfrGetGlyphByName(cfrCtx h, char *gname, abfGlyphCallbacks *glyph_cb)
 /* Compare cids. */
 static int CTL_CDECL cmpCIDs(const void *first, const void *second, void *ctx)
 {
-	cfrCtx h = ctx;
+	cfrCtx h = (cfrCtx)ctx;
 	unsigned short a = h->glyphs.array[*(unsigned short *)first].cid;
 	unsigned short b = h->glyphs.array[*(unsigned short *)second].cid;
 	if (a < b)
@@ -3204,7 +3221,7 @@ static int CTL_CDECL cmpCIDs(const void *first, const void *second, void *ctx)
 /* Match CID value. */
 static int CTL_CDECL matchCID(const void *key, const void *value, void *ctx)
 {
-	cfrCtx h= ctx;
+	cfrCtx h = (cfrCtx)ctx;
 	unsigned short a = *(unsigned short *)key;
 	unsigned short b = h->glyphs.array[*(unsigned short *)value].cid;
 	if (a < b)
@@ -3255,11 +3272,14 @@ int cfrGetGlyphByCID(cfrCtx h, unsigned short cid, abfGlyphCallbacks *glyph_cb)
     }
     
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
+	DURING
 	
-	readGlyph(h, gid, glyph_cb);
+        readGlyph(h, gid, glyph_cb);
     
+    HANDLER
+        return Exception.Code;
+    END_HANDLER
+
 	return cfrSuccess;
 }
 
@@ -3272,11 +3292,14 @@ int cfrGetGlyphByStdEnc(cfrCtx h, int stdcode, abfGlyphCallbacks *glyph_cb)
 		return cfrErrNoGlyph;
     
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
+	DURING
 	
-	readGlyph(h, gid, glyph_cb);
+        readGlyph(h, gid, glyph_cb);
     
+    HANDLER
+        return Exception.Code;
+    END_HANDLER
+
 	return cfrSuccess;
 }
 
@@ -3361,7 +3384,7 @@ static void sharedSrcSeek(ctlSharedStmCallbacks *h, long offset)
 
 static long sharedSrcTell(ctlSharedStmCallbacks *h)
 {
-    return srcTell(((cfrCtx)h->direct_ctx));
+    return (long)srcTell(((cfrCtx)h->direct_ctx));
 }
 
 static void sharedSrcRead(ctlSharedStmCallbacks *h, size_t count, char *ptr)
@@ -3454,7 +3477,7 @@ static void dbt2cstack(cfrCtx h)
     {
 		int i;
 		for (i = 0; i < h->stack.cnt; i++)
-			printf("[%d]=%g ", i, h->stack.array[i]);
+			printf("[%d]=%g ", i, INDEX_REAL(i));
 		printf("\n");
     }
 }

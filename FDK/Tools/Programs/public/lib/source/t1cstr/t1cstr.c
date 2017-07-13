@@ -6,7 +6,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
  * Type 1 charstring support.
  */
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_USE_MATH_DEFINES)
 #define _USE_MATH_DEFINES /* Needed to define M_PI under Windows */
 #endif
 

@@ -71,13 +71,13 @@ predefs[] = {
 
 struct encodingCtx_ {
 	dnaDCL(Encoding, encodings);
-	Encoding *new;          /* Encoding being added */
+	Encoding *_new;          /* Encoding being added */
 	cfwCtx g;               /* Package context */
 };
 
 /* Initialize encoding. */
 static void initEncoding(void *ctx, long cnt, Encoding *encoding) {
-	cfwCtx g = ctx;
+	cfwCtx g = (cfwCtx)ctx;
 	while (cnt--) {
 		dnaINIT(g->ctx.dnaSafe, encoding->codes, 256, 256);
 		dnaINIT(g->ctx.dnaSafe, encoding->supcodes, 5, 10);
@@ -87,7 +87,7 @@ static void initEncoding(void *ctx, long cnt, Encoding *encoding) {
 
 /* Initialize module. */
 void cfwEncodingNew(cfwCtx g) {
-	encodingCtx h = cfwMemNew(g, sizeof(struct encodingCtx_));
+	encodingCtx h = (encodingCtx)cfwMemNew(g, sizeof(struct encodingCtx_));
 
 	/* Link contexts */
 	h->g = g;
@@ -139,21 +139,21 @@ const unsigned char *cfwEncodingGetPredef(int id, int *cnt) {
 /* Begin new encoding. */
 void cfwEncodingBeg(cfwCtx g) {
 	encodingCtx h = g->ctx.encoding;
-	h->new = dnaNEXT(h->encodings);
-	h->new->codes.cnt = 0;
-	h->new->supcodes.cnt = 0;
+	h->_new = dnaNEXT(h->encodings);
+	h->_new->codes.cnt = 0;
+	h->_new->supcodes.cnt = 0;
 }
 
 /* Add code point to encoding. */
 void cfwEncodingAddCode(cfwCtx g, unsigned char code) {
 	encodingCtx h = g->ctx.encoding;
-	*dnaNEXT(h->new->codes) = code;
+	*dnaNEXT(h->_new->codes) = code;
 }
 
 /* Add supplementary code point to encoding. */
 void cfwEncodingAddSupCode(cfwCtx g, unsigned char code, SID sid) {
 	encodingCtx h = g->ctx.encoding;
-	SupCode *sup = dnaNEXT(h->new->supcodes);
+	SupCode *sup = dnaNEXT(h->_new->supcodes);
 	sup->code = code;
 	sup->sid = sid;
 }
@@ -185,22 +185,22 @@ int cfwEncodingEnd(cfwCtx g) {
 	int i;
 
 	/* Sort supplementary encoding by code */
-	if (h->new->supcodes.cnt > 0) {
-		qsort(h->new->supcodes.array, h->new->supcodes.cnt, sizeof(SupCode),
+	if (h->_new->supcodes.cnt > 0) {
+		qsort(h->_new->supcodes.array, h->_new->supcodes.cnt, sizeof(SupCode),
 		      cmpSupCodes);
 	}
 
 	for (i = 0; i < h->encodings.cnt - 1; i++) {
 		Encoding *encoding = &h->encodings.array[i];
 
-		if (h->new->codes.cnt == encoding->codes.cnt &&
-		    h->new->supcodes.cnt == encoding->supcodes.cnt &&
-		    memcmp(h->new->codes.array,
+		if (h->_new->codes.cnt == encoding->codes.cnt &&
+		    h->_new->supcodes.cnt == encoding->supcodes.cnt &&
+		    memcmp(h->_new->codes.array,
 		           encoding->codes.array,
-		           h->new->codes.cnt) == 0 &&
-		    memcmp(h->new->supcodes.array,
+		           h->_new->codes.cnt) == 0 &&
+		    memcmp(h->_new->supcodes.array,
 		           encoding->supcodes.array,
-		           h->new->supcodes.cnt) == 0) {
+		           h->_new->supcodes.cnt) == 0) {
 			/* Found match; remove new encoding from list */
 			h->encodings.cnt--;
 			return PREDEF_CNT + i;

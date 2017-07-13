@@ -341,8 +341,7 @@ PUBLIC procedure fixtopflt (Fixed  x, float *  pf)
 #define ASM_pflttofix ASMCONV
 #endif
 #if !ASM_pflttofix
-PUBLIC Fixed pflttofix(pf)      /* converts float *pf to fixed */
-  float *pf;
+PUBLIC Fixed pflttofix(float *pf)      /* converts float *pf to fixed */
   {
   float f = *pf;
   if (f >= (float)(FixedPosInf / fixedScale)) return FixedPosInf;

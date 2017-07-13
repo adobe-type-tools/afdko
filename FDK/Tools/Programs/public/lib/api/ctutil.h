@@ -90,7 +90,7 @@ double ctuStrtod(const char *s, char **endptr);
    it behaves as though it was using the C locale and thus the decimal point
    character is always a period and not comma. */
 
-void ctuDtostr(char *buf, double value, int width, int precision);
+void ctuDtostr(char *buf, size_t bufLen, double value, int width, int precision);
 
 /* ctuDtostr() converts the "value" parameter into a string and stores the
    result into the buffer pointed to by the "buf" parameter. The conversion is
@@ -105,7 +105,7 @@ void ctuGetVersion(ctlVersionCallbacks *cb);
 /* ctuGetVersion() returns the library version number and name via the client
    callbacks passed with the "cb" parameter (see ctlshare.h). */
 
-#if defined(_MSC_VER) && ( _MSC_VER < 1800)
+#if !defined(_UCRT)  
     float roundf(float x);
 #endif
 

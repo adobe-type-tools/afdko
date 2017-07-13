@@ -209,12 +209,14 @@ abfFontDescHeader *abfNewFontDesc(ctlMemoryCallbacks *mem_cb,
 		}
 
 	/* Allocate structure */
-	hdr = mem_cb->manage(mem_cb, NULL, size);
+	hdr = (abfFontDescHeader *)mem_cb->manage(mem_cb, NULL, size);
 	if (hdr == NULL)
 		return NULL;
+	// memset(hdr, 0, size);
+
 
 	/* Fill header */
-	hdr->length = size;
+	hdr->length = (unsigned short)size;
 	hdr->FDElementCnt = (unsigned short)top->FDArray.cnt;
 	memcpy(hdr->FontBBox, top->FontBBox, sizeof(hdr->FontBBox));
 	hdr->StrokeWidth = top->StrokeWidth;

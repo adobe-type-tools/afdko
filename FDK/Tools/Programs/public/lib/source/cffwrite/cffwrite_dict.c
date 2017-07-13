@@ -20,6 +20,7 @@
 #endif /* PLAT_SUN4 */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 /* ----------------------------- Module Context ---------------------------- */
 
@@ -30,7 +31,7 @@ struct dictCtx_ {
 
 /* Initialize module. */
 void cfwDictNew(cfwCtx g) {
-	dictCtx h = cfwMemNew(g, sizeof(struct dictCtx_));
+	dictCtx h = (dictCtx)cfwMemNew(g, sizeof(struct dictCtx_));
 
 	/* Link contexts */
 	h->g = g;
@@ -68,21 +69,27 @@ static void addString(cfwCtx g, abfString *str) {
 static void saveFSType(cfwCtx g, abfTopDict *dst) {
 	dictCtx h = g->ctx.dict;
 	char buf[50];
-
+    const size_t bufLen = sizeof(buf);
+    size_t postscriptLen;
+    size_t bufStringLen;
+    
 	if (dst->PostScript.ptr != ABF_UNSET_PTR) {
 		if (strstr(dst->PostScript.ptr, "/FSType") != NULL) {
 			return; /* PostScript string already has /FSType */
 		}
 		/* Copy string to tmp buf */
 		/* 64-bit warning fixed by cast here */
-		strcpy(dnaEXTEND(h->tmp, (long)strlen(dst->PostScript.ptr)),
-		       dst->PostScript.ptr);
+        postscriptLen = strlen(dst->PostScript.ptr);
+		STRCPY_S(dnaEXTEND(h->tmp, (long)postscriptLen),
+            postscriptLen,
+            dst->PostScript.ptr);
 	}
 
 	/* Append /FSType to tmp buf */
-	sprintf(buf, "/FSType %ld def", dst->FSType);
+	SPRINTF_S(buf, bufLen, "/FSType %ld def", dst->FSType);
 	/* 64-bit warning fixed by cast here */
-	strcpy(dnaEXTEND(h->tmp, (long)strlen(buf)), buf);
+    bufStringLen = strnlen(buf, bufLen);
+	STRCPY_S(dnaEXTEND(h->tmp, (long)bufStringLen), bufStringLen, buf);
 
 	/* Set PostScript string to tmp buf */
 	dst->PostScript.ptr = h->tmp.array;
@@ -92,6 +99,7 @@ static void saveFSType(cfwCtx g, abfTopDict *dst) {
 static void saveOrigFontType(cfwCtx g, abfTopDict *dst) {
 	dictCtx h = g->ctx.dict;
 	char buf[50];
+    const size_t bufLen = sizeof(buf);
 	char *OrigFontType = NULL;  /* Suppress optimizer warning */
 
 	switch (dst->OrigFontType) {
@@ -149,20 +157,25 @@ static void saveOrigFontType(cfwCtx g, abfTopDict *dst) {
 	}
 
 	if (dst->PostScript.ptr != ABF_UNSET_PTR) {
+        size_t postscriptLen;
 		if (strstr(dst->PostScript.ptr, "/OrigFontType") != NULL) {
 			return; /* PostScript string already has /OrigFontType */
 		}
 		/* Copy string to tmp buf */
 		/* 64-bit warning fixed by cast here */
-		strcpy(dnaEXTEND(h->tmp, (long)strlen(dst->PostScript.ptr)),
-		       dst->PostScript.ptr);
+        postscriptLen = strlen(dst->PostScript.ptr);
+		STRCPY_S(dnaEXTEND(h->tmp, (long)postscriptLen),
+            postscriptLen,
+            dst->PostScript.ptr);
 	}
 
 	/* Append /OrigFontType to tmp buf */
-	sprintf(buf, "/OrigFontType /%s def", OrigFontType);
-	/* 64-bit warning fixed by cast here */
-	strcpy(dnaEXTEND(h->tmp, (long)strlen(buf)), buf);
-
+	SPRINTF_S(buf, bufLen, "/OrigFontType /%s def", OrigFontType);
+    {
+         /* 64-bit warning fixed by cast here */
+        size_t bufStringLen = strnlen(buf, bufLen);
+        STRCPY_S(dnaEXTEND(h->tmp, (long)bufStringLen), bufStringLen, buf);
+    }
 	/* Set PostScript string to tmp buf */
 	dst->PostScript.ptr = h->tmp.array;
 }
@@ -221,6 +234,7 @@ void cfwDictSaveInt(DICT *dict, long i) {
 /* Save real number arg in DICT. If not fractional save as integer. */
 void cfwDictSaveReal(DICT *dict, float r) {
 	char buf[50];
+    const size_t bufLen = sizeof(buf);
 	int value;          /* Current nibble value */
 	int last = 0;       /* Last nibble value */
 	int odd = 0;        /* Flags odd nibble */
@@ -232,14 +246,14 @@ void cfwDictSaveReal(DICT *dict, float r) {
 		return;
 	}
 
-	ctuDtostr(buf, r, 0, 8); /* 8 places is as good as it gets when converting ASCII real numbers->float-> ASCII real numbers, as happens to all the  PrivateDict values.*/
+	ctuDtostr(buf, bufLen, r, 0, 8); /* 8 places is as good as it gets when converting ASCII real numbers->float-> ASCII real numbers, as happens to all the  PrivateDict values.*/
 
 	*dnaNEXT(*dict) = cff_BCD;
 	for (i = buf[0] == '0';; i++) {
 		switch (buf[i]) {
 			case '\0':
 				/* Terminate number */
-				*dnaNEXT(*dict) = odd ? last << 4 | 0xf : 0xff;
+				*dnaNEXT(*dict) = (char)(odd ? last << 4 | 0xf : 0xff);
 				return;
 
 			case '+':
@@ -264,7 +278,7 @@ void cfwDictSaveReal(DICT *dict, float r) {
 		}
 
 		if (odd) {
-			*dnaNEXT(*dict) = last << 4 | value;
+			*dnaNEXT(*dict) = (char)(last << 4 | value);
 		}
 		else {
 			last = value;

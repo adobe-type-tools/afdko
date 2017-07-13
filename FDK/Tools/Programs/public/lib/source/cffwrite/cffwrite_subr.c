@@ -101,6 +101,7 @@
  */
 
 #include "cffwrite_subr.h"
+#include "cffwrite.h"
 
 #include <limits.h>
 
@@ -399,20 +400,20 @@ static void *newObject(subrCtx h, MemInfo *info, long size, long count) {
 	MemBlk *pblk = info->head;
 	if (pblk == NULL || pblk->iNext == count) {
 		/* Re/allocate new block */
-		MemBlk *new;
+		MemBlk *_new;
 		if (info->free != NULL) {
 			/* Remove block from free list */
-			new = info->free;
-			info->free = new->nextBlk;
+			_new = info->free;
+			info->free = _new->nextBlk;
 		}
 		else {
 			/* Allocate new block from heap */
-			new = MEM_NEW(h->g, sizeof(MemBlk));
-			new->array = MEM_NEW(h->g,  size * count);
+			_new = (MemBlk *)MEM_NEW(h->g, sizeof(MemBlk));
+			_new->array = (char*)MEM_NEW(h->g,  size * count);
 		}
-		new->nextBlk = pblk;
-		new->iNext = 0;
-		info->head = pblk = new;
+		_new->nextBlk = pblk;
+		_new->iNext = 0;
+		info->head = pblk = _new;
 	}
 	/* Return next object */
 	return &pblk->array[pblk->iNext++ *size];
@@ -445,29 +446,29 @@ static void freeObjects(cfwCtx g, MemInfo *info) {
 
 /* Create and initialize new CDAWG node */
 static Node *newNode(subrCtx h, long length, unsigned id) {
-	Node *node = newObject(h, &h->nodeBlks, sizeof(Node), NODES_PER_BLK);
+	Node *node = (Node *)newObject(h, &h->nodeBlks, sizeof(Node), NODES_PER_BLK);
 	node->edgeTable = NULL;
 	node->edgeCount = 0;
 	node->edgeTableSize = 0;
 	node->misc = length;
 	node->paths = 0;
-	node->id = id;
+	node->id = (unsigned short)id;
 	node->flags = 0;
 	return node;
 }
 
 /* Create and initialize new subr link */
 static Link *newLink(subrCtx h, Subr *subr, unsigned offset, Link *next) {
-	Link *link = newObject(h, &h->linkBlks, sizeof(Link), LINKS_PER_BLK);
+	Link *link = (Link *)newObject(h, &h->linkBlks, sizeof(Link), LINKS_PER_BLK);
 	link->subr = subr;
 	link->next = next;
-	link->offset = offset;
+	link->offset = (unsigned short)offset;
 	return link;
 }
 
 /* Create and initialize new trie node */
 static Node *newTrieNode(subrCtx h, long depth) {
-	Node *node = newObject(h, &h->trieNodeBlks, sizeof(Node), TRIE_NODES_PER_BLK);
+	Node *node = (Node *)newObject(h, &h->trieNodeBlks, sizeof(Node), TRIE_NODES_PER_BLK);
 	node->edgeTable = NULL;
 	node->edgeCount = 0;
 	node->edgeTableSize = 0;
@@ -481,7 +482,7 @@ static Node *newTrieNode(subrCtx h, long depth) {
 
 /* Create and initialize new node link */
 static NodeLink *newNodeLink(subrCtx h, Node *node, NodeLink *next) {
-	NodeLink *link = newObject(h, &h->nodeLinkBlks, sizeof(NodeLink), NODE_LINKS_PER_BLK);
+	NodeLink *link = (NodeLink *)newObject(h, &h->nodeLinkBlks, sizeof(NodeLink), NODE_LINKS_PER_BLK);
 	link->node = node;
 	link->next = next;
 	return link;
@@ -491,7 +492,7 @@ static NodeLink *newNodeLink(subrCtx h, Node *node, NodeLink *next) {
 
 /* Initialize module */
 void cfwSubrNew(cfwCtx g) {
-	subrCtx h = MEM_NEW(g, sizeof(struct subrCtx_));
+	subrCtx h = (subrCtx)MEM_NEW(g, sizeof(struct subrCtx_));
 
 	h->nodeBlks.head = h->nodeBlks.free = NULL;
 	h->linkBlks.head = h->linkBlks.free = NULL;
@@ -573,6 +574,9 @@ void cfwSubrReuse(cfwCtx g) {
 void cfwSubrFree(cfwCtx g) {
 	subrCtx h = g->ctx.subr;
 
+	if (h == NULL)
+		return;
+
 	freeEdges(h, &h->nodeBlks);
 	freeEdges(h, &h->trieNodeBlks);
 
@@ -605,7 +609,7 @@ static void newEdgeTable(cfwCtx g, Node *node, unsigned size) {
 	unsigned long byteSize = sizeof(Edge) * size;
 	node->edgeTableSize = size;
 	node->edgeCount = 0;
-	node->edgeTable = MEM_NEW(g, byteSize);
+	node->edgeTable = (Edge *)MEM_NEW(g, byteSize);
 	memset(node->edgeTable, 0, sizeof(Edge) * size);
 }
 
@@ -761,7 +765,7 @@ static void doubleEdgeTable(subrCtx h, Node *node) {
 	unsigned oldTableSize = node->edgeTableSize;
 	unsigned newTableSize = node->edgeTableSize * 2;
 	unsigned newTableByteSize = sizeof(Edge) * newTableSize;
-	Edge *newTable = MEM_NEW(h->g, newTableByteSize);
+	Edge *newTable = (Edge *)MEM_NEW(h->g, newTableByteSize);
 	Edge *edge;
 	unsigned i;
 
@@ -872,7 +876,7 @@ static void Redirect(subrCtx h, Node *s, unsigned char *k, unsigned char *p, Nod
 	   note that the edge has the same label so it can be replaced in place
 	   within the edge tree */
 	edge->son = r;
-	edge->length = p - k;
+	edge->length = (unsigned int)(p - k);
 }
 
 #define CANONIZE(h, s, k, p, s_ret, k_ret)  \
@@ -921,10 +925,10 @@ static Node *SplitEdge(subrCtx h, Node *s, unsigned char *k, unsigned char *p, i
 	Edge *edge = FIND_EDGE(h, s,  OPLEN(h, k), k);
 	/* replace this edge by edges s (k',k'+p-k) -> r and r (k'+p-k+1,p') -> s',
 	   where r is a new node */
-	r = newNode(h, s->misc + (p - k), (edge->son->id != id) ? NODE_GLOBAL : id);
+	r = newNode(h, s->misc + (long)(p - k), (edge->son->id != id) ? NODE_GLOBAL : id);
 	newLabel = edge->label + (p - k);
-	addEdge(h, r, edge->son, OPLEN(h, newLabel), newLabel, (edge->label + edge->length) - newLabel);
-	edge->length = p - k;
+	addEdge(h, r, edge->son, OPLEN(h, newLabel), newLabel, (unsigned int)((edge->label + edge->length) - newLabel));
+	edge->length = (unsigned int)(p - k);
 	edge->son = r;
 
 	return r;
@@ -968,7 +972,7 @@ static void SeparateNode(subrCtx h, Node *s, unsigned char *k, unsigned char *p,
 
 	/* non-solid case */
 	/* create a new node r' as a duplication of s' */
-	rr = newNode(h, s->misc + (p - k), (ss->id != id) ? NODE_GLOBAL : id);
+	rr = newNode(h, s->misc + (long)(p - k), (ss->id != id) ? NODE_GLOBAL : id);
 	/* Copy the edge table */
 	copyEdgeTable(h, rr, ss);
 	/* set up suffix link */
@@ -982,7 +986,7 @@ static void SeparateNode(subrCtx h, Node *s, unsigned char *k, unsigned char *p,
 		ss = edge->son;
 		edge->son = rr;
 		edge->label = k;
-		edge->length = p - k;
+		edge->length = (unsigned int)(p - k);
 
 		/* calculate a canonical reference for Suf(s) with edge (k,p-1);
 		   (s, k) := Canonize(Suf(s),(k,p-1))
@@ -1125,7 +1129,7 @@ static void addFont(subrCtx h, subr_Font *font, unsigned iFont, int multiFonts) 
 				sink->paths = 1;
 			}
 
-			addEdge(h, r, sink, length, p, pend - p);
+			addEdge(h, r, sink, length, p, (unsigned int)(pend - p));
 
 			if (oldr != NULL) {
 				oldr->suffix = r;
@@ -1294,10 +1298,10 @@ static void saveSubr(subrCtx h, unsigned char *edgeEnd, Node *node,
     subr->output = NULL;
 	subr->cstr = edgeEnd - subrLen;
 	subr->length = (unsigned short)subrLen;
-	subr->count = count;
+	subr->count = (unsigned short)count;
 	subr->deltalen = 0;
 	subr->numsize = 1;
-	subr->maskcnt = maskcnt;
+	subr->maskcnt = (short)maskcnt;
 	subr->flags = 0;
 #if DB_CALLS
 	subr->calls = 0;
@@ -1343,7 +1347,7 @@ static void findCandSubrs(subrCtx h, Edge *edge, int maskcnt) {
 			if (*pstr == tx_endchar) {
 				if (node->paths > 1) {
 					pstr += oplen;
-					saveSubr(h, pstr, node, maskcnt, 1, node->misc - ((edge->label + edge->length) - pstr));
+					saveSubr(h, pstr, node, maskcnt, 1, (long)(node->misc - ((edge->label + edge->length) - pstr)));
 				}
 				return;
 			}
@@ -1481,7 +1485,7 @@ static void buildSubrMatchTrie(subrCtx h)
                 node = son;
             }
         }
-        node->misc = subr - h->subrs.array; /* store output subr index in the trie node */
+        node->misc = (long)(subr - h->subrs.array); /* store output subr index in the trie node */
     }
 
     /* Set up suffix links */
@@ -1542,7 +1546,7 @@ static void listUpSubrMatches(subrCtx h, unsigned char *pstart, long length, int
                         continue;
                 }
 
-                offset = pstr - pstart + oplen - subr->length;
+                offset = (long)(pstr - pstart + oplen - subr->length);
                 if ((offset >= 0) && (offset + subr->length <= length)) {
                     Call  *c;
                 
@@ -1591,7 +1595,7 @@ static int CTL_CDECL cmpSubrLengths(const void *first, const void *second) {
 
 static void buildCallList(subrCtx h, int buildPhase, unsigned length, unsigned char *pstart,
                           int selfMatch, unsigned id, short subrDepth) {
-	unsigned char *pend = pstart + length;
+	//unsigned char *pend = pstart + length;
 	unsigned i, j;
     CallList  callList;
 
@@ -1726,8 +1730,8 @@ static void sortInfSubrs(subrCtx h) {
 
 		/* Sort list in-place */
 		for (head = subr->infs; head != NULL; head = head->next) {
-			Link *try = head->next;
-			if (try == NULL) {
+			Link *try_ = head->next;
+			if (try_ == NULL) {
 				break;  /* End of list */
 			}
 			else {
@@ -1736,14 +1740,14 @@ static void sortInfSubrs(subrCtx h) {
 
 				/* Find best inferior subr in remainder of list */
 				do {
-					int saved = try->subr->misc;
+					int saved = try_->subr->misc;
 					if (saved > max) {
-						best = try;
+						best = try_;
 						max = saved;
 					}
-					try = try->next;
+					try_ = try_->next;
 				}
-				while (try != NULL);
+				while (try_ != NULL);
 
 				if (best != NULL) {
 					/* Swap "head" and "best" nodes */
@@ -2055,7 +2059,7 @@ static void updateSups(subrCtx h, Subr *subr, int deltalen, unsigned id) {
 			       deltalen, sup->deltalen + deltalen);
 #endif
 			updateSups(h, sup, deltalen, id);
-			sup->deltalen += deltalen;
+			sup->deltalen += (short)deltalen;
 		}
 	}
 }
@@ -2382,7 +2386,7 @@ static void subrizeChars(subrCtx h, subr_CSData *chars, unsigned id, int preflig
             pdst = subrizeCstr(h, pdst, psrc, length);
 
             /* Adjust initial length estimate and save offset */
-            h->cstrs.cnt = iStart + pdst - (unsigned char *)&h->cstrs.array[iStart];
+            h->cstrs.cnt = (long)(iStart + pdst - (unsigned char *)&h->cstrs.array[iStart]);
             chars->offset[i] = h->cstrs.cnt;
         }
 		offset = nextoff;
@@ -2391,7 +2395,7 @@ static void subrizeChars(subrCtx h, subr_CSData *chars, unsigned id, int preflig
     if (!preflight) {
         /* Copy charstring data without loosing original data pointer */
         chars->refcopy = chars->data;
-        chars->data = MEM_NEW(h->g, h->cstrs.cnt);
+        chars->data = (char *)MEM_NEW(h->g, h->cstrs.cnt);
         memcpy(chars->data, h->cstrs.array, h->cstrs.cnt);
 
 #if DB_CALLS
@@ -2554,7 +2558,7 @@ static void addSubrs(subrCtx h, subr_CSData *subrs, unsigned id, int preflight) 
     if (!preflight) {
         /* Allocate subr offset array */
         subrs->nStrings = (unsigned short)h->reorder.cnt;
-        subrs->offset = MEM_NEW(h->g, h->reorder.cnt * sizeof(Offset));
+        subrs->offset = (Offset *)MEM_NEW(h->g, h->reorder.cnt * sizeof(Offset));
 
         h->cstrs.cnt = 0;
     }
@@ -2580,19 +2584,19 @@ static void addSubrs(subrCtx h, subr_CSData *subrs, unsigned id, int preflight) 
             pdst = subrizeCstr(h, pdst, subr->cstr, subr->length);
 
             /* Terminate subr */
-            if (!(subr->node->flags & NODE_TAIL)) {
+            if ((!(subr->node->flags & NODE_TAIL)) && (!(h->g->flags & CFW_WRITE_CFF2))) {
                 *pdst++ = (unsigned char)tx_return;
             }
 
             /* Adjust initial length estimate and save offset */
-            h->cstrs.cnt = iStart + pdst - (unsigned char *)&h->cstrs.array[iStart];
+            h->cstrs.cnt = (long)(iStart + pdst - (unsigned char *)&h->cstrs.array[iStart]);
             subrs->offset[i] = h->cstrs.cnt;
         }
 	}
 
     if (!preflight) {
         /* Allocate and copy charstring data */
-        subrs->data = MEM_NEW(h->g, h->cstrs.cnt);
+        subrs->data = (char *)MEM_NEW(h->g, h->cstrs.cnt);
         memcpy(subrs->data, h->cstrs.array, h->cstrs.cnt);
     }
 }
@@ -2618,7 +2622,7 @@ static void subrizeFDChars(subrCtx h, subr_CSData *dst, subr_Font *font,
 
     if (!preflight) {
         /* Allocate offset array */
-        dst->offset = MEM_NEW(h->g, sizeof(Offset) * dst->nStrings);
+        dst->offset = (Offset *)MEM_NEW(h->g, sizeof(Offset) * dst->nStrings);
 
         h->cstrs.cnt = 0;
         iDst = 0;
@@ -2650,8 +2654,8 @@ static void subrizeFDChars(subrCtx h, subr_CSData *dst, subr_Font *font,
                 pdst = subrizeCstr(h, pdst, psrc, length);
 
                 /* Adjust initial length estimate and save offset */
-                h->cstrs.cnt = iStart + pdst -
-                    (unsigned char *)&h->cstrs.array[iStart];
+                h->cstrs.cnt = (long)(iStart + pdst -
+                    (unsigned char *)&h->cstrs.array[iStart]);
                 dst->offset[iDst++] = h->cstrs.cnt;
             }
 		}
@@ -2659,7 +2663,7 @@ static void subrizeFDChars(subrCtx h, subr_CSData *dst, subr_Font *font,
 
     if (!preflight) {
         /* Copy charstring data */
-        dst->data = MEM_NEW(h->g, h->cstrs.cnt);
+        dst->data = (char *)MEM_NEW(h->g, h->cstrs.cnt);
         memcpy(dst->data, h->cstrs.array, h->cstrs.cnt);
 
 #if DB_CALLS
@@ -2699,7 +2703,7 @@ static void joinFDChars(subrCtx h, subr_Font *font) {
 
 	/* Allocate new charstring data without loosing original data pointer */
 	font->chars.refcopy = FONT_CHARS_DATA;
-	font->chars.data = MEM_NEW(g, size);
+	font->chars.data = (char *)MEM_NEW(g, size);
 
 	dstoff = 0;
 	for (i = 0; i < font->chars.nStrings; i++) {
@@ -2781,10 +2785,10 @@ static void buildSubrs(subrCtx h, subr_CSData *subrs, unsigned id, int preflight
 void cfwSubrSubrize(cfwCtx g, int nFonts, subr_Font *fonts) {
 	subrCtx h = g->ctx.subr;
 	unsigned iFont;
-	long i;
     long preflight;
-
-	h->nFonts = nFonts;
+    long i;
+    
+	h->nFonts = (short)nFonts;
 	h->fonts = fonts;
     h->maxNumSubrs = g->maxNumSubrs;
 
@@ -2795,8 +2799,8 @@ void cfwSubrSubrize(cfwCtx g, int nFonts, subr_Font *fonts) {
 		};
 		int i;
 		for (i = 0; i < 256; i++) {
-			dummycstr[0] = i;
-			h->opLenCache[i] = t2oplen(dummycstr);
+			dummycstr[0] = (unsigned char)i;
+			h->opLenCache[i] = (unsigned char)t2oplen(dummycstr);
 		}
 	}
 
@@ -2805,7 +2809,7 @@ void cfwSubrSubrize(cfwCtx g, int nFonts, subr_Font *fonts) {
 
 	/* Add fonts' charstring data to CDAWG */
 	iFont = 0;
-	for (i = 0; i < h->nFonts; i++) {
+    for (i = 0; i < h->nFonts; i++) {
 		addFont(h, &h->fonts[i], iFont, (h->nFonts > 1) || (h->fonts[i].flags & SUBR_FONT_CID));
 		iFont += (h->fonts[i].flags & SUBR_FONT_CID) ? h->fonts[i].fdCount : 1;
 	}

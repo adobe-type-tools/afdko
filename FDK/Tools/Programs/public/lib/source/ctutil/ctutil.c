@@ -87,7 +87,7 @@ void ctuQSort(void *base, size_t count, size_t size,
                                    void *ctx),
               void *ctx) {
 	/* 64-bit warning fixed by cast here */
-	quicksort(base, (char *)base + (count - 1) * size, (int)size, cmp, ctx);
+	quicksort((char *)base, (char *)base + (count - 1) * size, (int)size, cmp, ctx);
 }
 
 /* Binary search for key. Returns 1 if found else 0. Found or insertion
@@ -244,19 +244,19 @@ double ctuStrtod(const char *s, char **endptr) {
 }
 
 /* Convert double in a locale-independant manner. */
-void ctuDtostr(char *buf, double value, int width, int precision) {
+void ctuDtostr(char *buf, size_t bufLen, double value, int width, int precision) {
 	char *p;
 	if (width == 0 && precision == 0) {
-		sprintf(buf, "%.12lf", value);
+		SPRINTF_S(buf, bufLen, "%.12lf", value);
 	}
 	else if (width == 0 && precision > 0) {
-		sprintf(buf, "%.*lf", precision, value);
+		SPRINTF_S(buf, bufLen, "%.*lf", precision, value);
 	}
 	else if (width > 0 && precision == 0) {
-		sprintf(buf, "%*lf", width, value);
+		SPRINTF_S(buf, bufLen, "%*lf", width, value);
 	}
 	else {
-		sprintf(buf, "%*.*lf", width, precision, value);
+		SPRINTF_S(buf, bufLen, "%*.*lf", width, precision, value);
 	}
 	p = strchr(buf, ',');
 	if (p != NULL) {
@@ -266,7 +266,7 @@ void ctuDtostr(char *buf, double value, int width, int precision) {
     p = strchr(buf, '.');
     if (p != NULL) {
         /* Have decimal point. Remove trailing zeroes.*/
-        int l = strlen(p);
+        int l = (int)strlen(p);
         p += l-1;
         while(*p == '0')
         {
@@ -290,7 +290,7 @@ void ctuGetVersion(ctlVersionCallbacks *cb) {
 	cb->called |= 1 << CTU_LIB_ID;
 }
 
-#if defined(_MSC_VER) && ( _MSC_VER < 1800)
+#if !defined(_UCRT)
 float roundf(float x)
 {
     float val =  (float)((x < 0) ? (ceil((x)-0.5)) : (floor((x)+0.5)));

@@ -4,7 +4,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /*
  * Type 2 charstring support.
  */
-#ifdef _WIN32
+
+#if defined(_WIN32) && !defined(_USE_MATH_DEFINES)
 #define _USE_MATH_DEFINES /* Needed to define M_PI under Windows */
 #endif
 
@@ -12,6 +13,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "txops.h"
 #include "ctutil.h"
 #include "varread.h"
+#include "supportexcept.h"
 
 #include <string.h>
 #include <stdarg.h>
@@ -25,7 +27,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #endif /* PLAT_SUN4 */
 
 #include <errno.h>
-
 
 /* Make uzoperator for internal use */
 #define t2_cntroff	t2_reservedESC33
@@ -46,8 +47,8 @@ typedef struct					/* Stem data */
 	} Stem;
 
 /* Module context */
-typedef struct t2cCtx *t2cCtx;
-struct t2cCtx
+typedef struct _t2cCtx *t2cCtx;
+struct _t2cCtx
 	{
 	long flags;					/* Control flags */
 #define PEND_WIDTH		(1<<0)	/* Flags width pending */
@@ -130,28 +131,12 @@ struct t2cCtx
 	};
 
 /* Check stack contains at least n elements. */
-//#define CHKUFLOW(h,n) \
-//	do{if(h->stack.cnt<(n))return t2cErrStackUnderflow;}while(0)
+#define CHKUFLOW(h,n) \
+	do{if(h->stack.cnt<(n))return t2cErrStackUnderflow;}while(0)
 
 /* Check stack has room for n elements. */
-//#define CHKOFLOW(h,n) \
-//	do{if((h->stack.cnt)+(n)>h->maxOpStack)return t2cErrStackOverflow;}while(0)
-static int CHKOFLOW(t2cCtx h, int n)
-{
-    if ((h->stack.cnt)+(n)>h->maxOpStack)
-    {
-        
-        return t2cErrStackOverflow;
-    }
-    return t2cSuccess;
-}
-
-static int CHKUFLOW(t2cCtx h, int n)
-{
-    if(h->stack.cnt<(n))
-       return t2cErrStackUnderflow;
-    return t2cSuccess;
-}
+#define CHKOFLOW(h,n) \
+	do{if(((h->aux->flags&T2C_IS_CFF2)&&((h->stack.blendCnt)+(n)>CFF2_MAX_OP_STACK))||(h->stack.cnt)+(n)>h->maxOpStack)return t2cErrStackOverflow;}while(0)
 
 /* Stack access without check. */
 #define INDEX(i) (h->stack.array[i])
@@ -180,11 +165,12 @@ static void convertToAbsolute(t2cCtx h, float x1, float y1, abfBlendArg* blendAr
 static void vmessage(t2cCtx h, char *fmt, va_list ap)
 	{
 	char text[500];
+    const size_t textLen = sizeof(text);
 
 	if (h->aux->dbg == NULL)
 		return;	/* Debug stream not available */
 
-	vsprintf(text, fmt, ap);
+	VSPRINTF_S(text, textLen, fmt, ap);
 	(void)h->aux->stm->write(h->aux->stm, h->aux->dbg, strlen(text), text);
 	}
 
@@ -196,13 +182,28 @@ static void CTL_CDECL message(t2cCtx h, char *fmt, ...)
 	vmessage(h, fmt, ap);
 	va_end(ap);
 	}
+
+/* Handle fatal error. */
+static void fatal(t2cCtx h, int err_code)
+{
+	message(h, "%s", t2cErrStr(err_code));
+	RAISE(err_code, NULL);
+}
+
 /* --------------------------- Memory Management --------------------------- */
 
 /* Allocate memory. */
 static void *memNew(t2cCtx h, size_t size)
 {
     void *ptr = h->mem->manage(h->mem, NULL, size);
-    return ptr;
+	if (ptr == NULL) {
+		fatal(h, t2cErrMemory);
+	}
+
+	/* Safety initialization */
+	memset(ptr, 0, size);
+
+	return ptr;
 }
 
 /* Free memory. */
@@ -224,7 +225,7 @@ static unsigned char *refill(t2cCtx h, unsigned char **end)
 	if (h->src.length == 0)
     {
         errMsg = strerror(errno);
-        printf("%s", errMsg);
+        message(h, "%s", errMsg);
 		return NULL;	/* Stream error */
     }
 
@@ -538,7 +539,7 @@ static void savePendCntr(t2cCtx h, int cntr)
 
 static void clearHintStack(t2cCtx h)
 	{
-	int flags;
+	int flags = 0;
 
 	if (h->mask.state == 1)
 		savePendCntr(h, 0);
@@ -585,7 +586,7 @@ static void callbackMove(t2cCtx h, float dx, float dy)
 	{
 	int flags;
     float x,y;
-        
+
 	if (h->flags & START_COMPOSE)
     {
         /* 	We can tell that this is the first move-to of a flattened compare operator
@@ -703,7 +704,7 @@ static void callbackMove(t2cCtx h, float dx, float dy)
             }
             else
             {
-                h->glyph->stem(h->glyph, flags, edge0, edge1);
+			h->glyph->stem(h->glyph, flags, edge0, edge1);
             }
 			flags = 0;
 			}
@@ -715,7 +716,7 @@ static void callbackMove(t2cCtx h, float dx, float dy)
     y = roundf(y*100)/100;
     h->x = x;
     h->y = y;
-
+	
         if ((h->flags & IS_CFF2) && (h->glyph->moveVF != NULL))
         {
             abfBlendArg* blendArgs = &(h->stack.blendArgs[0]);
@@ -724,34 +725,34 @@ static void callbackMove(t2cCtx h, float dx, float dy)
         }
         else
         {
-            if (h->flags & USE_MATRIX)
-                h->glyph->move(h->glyph, TX(h->x, h->y), TY(h->x, h->y));
-            else if (h->flags & SEEN_BLEND)
-                h->glyph->move(h->glyph, RND(h->x), RND(h->y));
-            else
-                h->glyph->move(h->glyph, h->x, h->y);
-        }
-        
+	if (h->flags & USE_MATRIX)
+		h->glyph->move(h->glyph, TX(h->x, h->y), TY(h->x, h->y));
+	else if (h->flags & SEEN_BLEND)
+		h->glyph->move(h->glyph, RND(h->x), RND(h->y));
+	else
+		h->glyph->move(h->glyph, h->x, h->y);
+	}
+
 
 	}
 
 /* Callback path line. */
 static void callbackLine(t2cCtx h, float dx, float dy)
-{
-    h->flags |= NEW_HINTS;
-    
-    if (h->flags & START_COMPOSE)
-    {
-        callbackMove(h, h->cube[h->cubeStackDepth].offset_x , h->cube[h->cubeStackDepth].offset_y);
-        h->cube[h->cubeStackDepth].offset_x = 0;
-        h->cube[h->cubeStackDepth].offset_y = 0;
-        h->flags &= ~START_COMPOSE;
-    }
-    
-    h->x += dx;	h->y += dy;
+	{
+	h->flags |= NEW_HINTS;
+
+	if (h->flags & START_COMPOSE)
+		{
+		callbackMove(h, h->cube[h->cubeStackDepth].offset_x , h->cube[h->cubeStackDepth].offset_y);
+		h->cube[h->cubeStackDepth].offset_x = 0;
+		h->cube[h->cubeStackDepth].offset_y = 0;
+		h->flags &= ~START_COMPOSE;
+		}
+
+	h->x += dx;	h->y += dy;
     h->x = roundf(h->x*100)/100;
     h->y = roundf(h->y*100)/100;
-    
+        
     if ((h->flags & IS_CFF2) && (h->glyph->lineVF != NULL))
     {
         abfBlendArg* blendArgs = &(h->stack.blendArgs[0]);
@@ -760,24 +761,24 @@ static void callbackLine(t2cCtx h, float dx, float dy)
     }
     else
     {
-        if (h->flags & USE_MATRIX)
-            h->glyph->line(h->glyph, TX(h->x, h->y), TY(h->x, h->y));
-        else if (h->flags & SEEN_BLEND)
-            h->glyph->line(h->glyph, RND(h->x), RND(h->y));
-        else
-            h->glyph->line(h->glyph, h->x, h->y);
-    }
+	if (h->flags & USE_MATRIX)
+		h->glyph->line(h->glyph, TX(h->x, h->y), TY(h->x, h->y));
+	else if (h->flags & SEEN_BLEND)
+		h->glyph->line(h->glyph, RND(h->x), RND(h->y));
+	else
+		h->glyph->line(h->glyph, h->x, h->y);
+	}
 }
 
 
 /* Callback path curve. */
 static void callbackCurve(t2cCtx h,
-						  float dx1, float dy1,
-						  float dx2, float dy2,
+						  float dx1, float dy1, 
+						  float dx2, float dy2, 
 						  float dx3, float dy3)
 	{
 	float x1, y1, x2, y2, x3, y3;
-        
+
 	h->flags |= NEW_HINTS;
 
 	if (h->flags & START_COMPOSE)
@@ -809,19 +810,19 @@ static void callbackCurve(t2cCtx h,
     }
     else
     {
-        if (h->flags & USE_MATRIX)
-            h->glyph->curve(h->glyph,
-                            TX(x1, y1), TY(x1, y1),
-                            TX(x2, y2), TY(x2, y2),
-                            TX(x3, y3), TY(x3, y3));
-        else if (h->flags & SEEN_BLEND)
-            h->glyph->curve(h->glyph,
-                            RND(x1), RND(y1),
-                            RND(x2), RND(y2),
-                            RND(x3), RND(y3));
-        else
-            h->glyph->curve(h->glyph, x1, y1, x2, y2, x3, y3);
-    }
+	if (h->flags & USE_MATRIX)
+		h->glyph->curve(h->glyph, 
+						TX(x1, y1), TY(x1, y1),
+						TX(x2, y2), TY(x2, y2),
+						TX(x3, y3), TY(x3, y3));
+	else if (h->flags & SEEN_BLEND)
+		h->glyph->curve(h->glyph, 
+						RND(x1), RND(y1),
+						RND(x2), RND(y2),
+						RND(x3), RND(y3));
+	else
+		h->glyph->curve(h->glyph, x1, y1, x2, y2, x3, y3);
+	}
 }
 
 /* Callback path flex. */
@@ -944,7 +945,7 @@ static int callbackMask(t2cCtx h, int cntr,
 		}
 
 	/* Check for invalid mask */
-	if (h->mask.length == 0 || h->mask.length > T2_MAX_STEMS/8)
+	if (h->mask.length <= 0 || h->mask.length > T2_MAX_STEMS/8)
 		return t2cErrHintmask;
 
 	/* Read mask */
@@ -1221,19 +1222,33 @@ static int handleBlend(t2cCtx h)
     int result = 0;
     abfOpEntry* opEntry;
     int i = 0;
-    int numBlends = (int)INDEX(h->stack.cnt -1);
+	int numBlends;
     int numRegions = h->stack.numRegions;
-    int numDeltaBlends = numBlends*numRegions;
+    int numDeltaBlends;
     int firstItemIndex;
 
-    // pop off the numBlends value
+	CHKUFLOW(h, 1);
+	numBlends = (int)INDEX(h->stack.cnt - 1);
+	numDeltaBlends = numBlends*numRegions;
+	if (numBlends < 0 || numDeltaBlends < 0)
+		return t2cErrStackUnderflow;
+
+	// pop off the numBlends value
     h->stack.cnt--;
     h->stack.blendCnt--;
 
+	if (numBlends < 0)
+		return t2cErrStackUnderflow;
 	CHKUFLOW(h,numBlends + numDeltaBlends);
     firstItemIndex = (h->stack.blendCnt - (numBlends + numDeltaBlends));
+	if (firstItemIndex < 0)
+		return t2cErrStackUnderflow;
+
     opEntry = &(h->stack.blendArray[firstItemIndex]);
     
+	if (h->stack.blendCnt < numDeltaBlends || h->stack.cnt < numDeltaBlends)
+		return t2cErrStackUnderflow;
+
     if (h->flags & FLATTEN_BLEND)
     {
         /* Blend values on the blend stack and replace the default values on the regular stack with the results.
@@ -1260,7 +1275,7 @@ static int handleBlend(t2cCtx h)
         for (i = 0; i < numBlends; i++) {
             float   defaultVal = opEntry[i].value;
             int r;
-            opEntry->blendValues = memNew(h, sizeof(float)*numRegions);
+            opEntry->blendValues = (float *)memNew(h, sizeof(float)*numRegions);
             opEntry->numBlends = 1;
             for (r = 0; r < numRegions; r++) {
                 float val = INDEX_BLEND(stackIndex++).value;
@@ -1391,11 +1406,16 @@ static void convertToAbsolute(t2cCtx h, float x1, float y1, abfBlendArg* blendAr
 
 static void setNumMasters(t2cCtx h)
 {
-    unsigned int vsindex = h->glyph->info->blendInfo.vsindex;
+    unsigned short vsindex = h->glyph->info->blendInfo.vsindex;
     h->stack.numRegions = var_getIVSRegionCountForIndex(h->aux->varStore, vsindex);
-    h->glyph->info->blendInfo.numRegions = h->stack.numRegions;
+	if (h->stack.numRegions > CFF2_MAX_MASTERS) {
+		message(h, "too many regions %d for vsindex %d", h->stack.numRegions, vsindex);
+		h->stack.numRegions = 0;
+	}
+	h->glyph->info->blendInfo.numRegions = h->stack.numRegions;
     if (!var_getIVSRegionIndices(h->aux->varStore, vsindex, h->regionIndices, h->stack.numRegions)) {
         message(h, "inconsistent region indices detected in item variation store subtable %d", vsindex);
+		h->stack.numRegions = 0;
     }
 }
 
@@ -1428,13 +1448,13 @@ static int t2Decode(t2cCtx h, long offset)
 				case t2_reserved13:
                     return t2cErrInvalidOp;
                 case t2_vsindex:
+					CHKUFLOW(h, 1);
                     h->glyph->info->blendInfo.vsindex = (unsigned short)POP();
                     setNumMasters(h);
                     break;
 				case tx_callgrel:
 				{
-				int result;
-				long saveoff = h->src.offset - (end - next);
+				long saveoff = (long)(h->src.offset - (end - next));
 				long saveEndOff = h->src.endOffset;
 				long num = unbiasLE((long)POP(), h->aux->gsubrs.cnt);
 				if (num == -1)
@@ -1505,8 +1525,7 @@ static int t2Decode(t2cCtx h, long offset)
                     h->stack.cnt = 0;
 				while (h->cube[h->cubeStackDepth].composeOpCnt >= 4)
 					{
-					int result;
-					long saveoff = h->src.offset - (end - next);
+					long saveoff = (long)(h->src.offset - (end - next));
 					long saveEndOff = h->src.endOffset;
 					float *composeOpArray = h->cube[h->cubeStackDepth].composeOpArray;
 					long int leIndex = (long)composeOpArray[0];
@@ -1575,7 +1594,6 @@ static int t2Decode(t2cCtx h, long offset)
                             /* if START_PATH_MATRIX is not set, then this either global, or left over from a previous path.  */
                             if (h->flags & USE_GLOBAL_MATRIX)
                             {
-                                int i;
                                 /* restore the global matrix values */
                                 for (i = 0; i < 6; i++)
                                 {
@@ -1672,7 +1690,7 @@ static int t2Decode(t2cCtx h, long offset)
                         popBlendArgs2(h, &INDEX_BLEND(i), &INDEX_BLEND(i + 1));
 					callbackLine(h, INDEX(i + 0), INDEX(i + 1));
                 }
-                break;
+				break;
 				case tx_hlineto:
 				case tx_vlineto:
 				CHKUFLOW(h,1);
@@ -1683,14 +1701,14 @@ static int t2Decode(t2cCtx h, long offset)
                     {
                         if (h->glyph->lineVF != NULL)
                             popBlendArgs2(h, &INDEX_BLEND(i), NULL);
-                        callbackLine(h, INDEX(i), 0);
+						callbackLine(h, INDEX(i), 0);
                     }
 					else
                     {
                         if (h->glyph->lineVF != NULL)
                             popBlendArgs2(h, NULL, &INDEX_BLEND(i));
-                        callbackLine(h, 0, INDEX(i));
-                    }
+						callbackLine(h, 0, INDEX(i));
+				}
 				}
 				break;
 				case tx_rrcurveto:
@@ -1702,17 +1720,16 @@ static int t2Decode(t2cCtx h, long offset)
                                                 &INDEX_BLEND(i + 0), &INDEX_BLEND(i + 1),
                                                 &INDEX_BLEND(i + 2), &INDEX_BLEND(i + 3),
                                                 &INDEX_BLEND(i + 4), &INDEX_BLEND(i + 5));
-                    callbackCurve(h,
+					callbackCurve(h, 
 								  INDEX(i + 0), INDEX(i + 1), 
 								  INDEX(i + 2), INDEX(i + 3), 
 								  INDEX(i + 4), INDEX(i + 5));
                 }
-                    break;
+				break;
 				case tx_callsubr:
 				CHKUFLOW(h,1);
 				{
-				int result;
-				long saveoff = h->src.offset - (end - next);
+				long saveoff = (long)(h->src.offset - (end - next));
 				long saveEndOff = h->src.endOffset;
 				long num = unbias((long)POP(), h->aux->subrs.cnt);
                 h->stack.blendCnt--; // we do not blend subr indicies.
@@ -1725,7 +1742,7 @@ static int t2Decode(t2cCtx h, long offset)
 				h->subrDepth++;
                 if (h->subrDepth > TX_MAX_SUBR_DEPTH)
                 {
-                    printf("subr depth: %d\n", h->subrDepth);
+					message(h, "subr depth: %d\n", h->subrDepth);
                     return t2cErrSubrDepth;
                 }
                     
@@ -1833,7 +1850,7 @@ static int t2Decode(t2cCtx h, long offset)
 						case tx_put:
 						CHKUFLOW(h,2);
 						{
-						int i = (int)POP();
+						i = (int)POP();
 						if (i < 0 || i >= TX_BCA_LENGTH)
 							return t2cErrPutBounds;
 						h->BCA[i] = POP();
@@ -1842,7 +1859,7 @@ static int t2Decode(t2cCtx h, long offset)
 						case tx_get:
 						CHKUFLOW(h,1);
 						{
-						int i = (int)POP();
+						i = (int)POP();
 						if (i < 0 || i >= TX_BCA_LENGTH)
 							return t2cErrGetBounds;
 						PUSH(h->BCA[i]);
@@ -1900,7 +1917,7 @@ static int t2Decode(t2cCtx h, long offset)
 						case tx_index:
 						CHKUFLOW(h,1);
 						{
-						int i = (int)POP();
+						i = (int)POP();
 						if (i < 0)
 							i = 0;	/* Duplicate top element */
 						if (i >= h->stack.cnt)
@@ -2228,25 +2245,25 @@ static int t2Decode(t2cCtx h, long offset)
 				break;
 				case t2_rcurveline:
 				CHKUFLOW(h,8);
-                for (i = 0; i < h->stack.cnt - 5; i += 6)
+				for (i = 0; i < h->stack.cnt - 5; i += 6)
                 {
                     if (h->glyph->curveVF != NULL)
                         popBlendArgs6(h,
                                                 &INDEX_BLEND(i + 0), &INDEX_BLEND(i + 1),
                                                 &INDEX_BLEND(i + 2), &INDEX_BLEND(i + 3),
                                                 &INDEX_BLEND(i + 4), &INDEX_BLEND(i + 5));
-                    callbackCurve(h,
-                                  INDEX(i + 0), INDEX(i + 1),
-                                  INDEX(i + 2), INDEX(i + 3),
-                                  INDEX(i + 4), INDEX(i + 5));
+					callbackCurve(h, 
+								  INDEX(i + 0), INDEX(i + 1), 
+								  INDEX(i + 2), INDEX(i + 3), 
+								  INDEX(i + 4), INDEX(i + 5));
                 }
-                if (i < h->stack.cnt - 1)
+				if (i < h->stack.cnt - 1)
                     {
                     if (h->glyph->lineVF != NULL)
                         popBlendArgs2(h, &INDEX_BLEND(i + 0), &INDEX_BLEND(i + 1));
-                    callbackLine(h, INDEX(i + 0), INDEX(i + 1));
+					callbackLine(h, INDEX(i + 0), INDEX(i + 1));
                     }
-                break;
+				break;
 				case t2_rlinecurve:
 				CHKUFLOW(h,8);
 				for (i = 0; i < h->stack.cnt - 6; i += 2)
@@ -2260,10 +2277,10 @@ static int t2Decode(t2cCtx h, long offset)
                                                 &INDEX_BLEND(i + 0), &INDEX_BLEND(i + 1),
                                                 &INDEX_BLEND(i + 2), &INDEX_BLEND(i + 3),
                                                 &INDEX_BLEND(i + 4), &INDEX_BLEND(i + 5));
-                callbackCurve(h,
-                                  INDEX(i + 0), INDEX(i + 1),
-                                  INDEX(i + 2), INDEX(i + 3),
-                                  INDEX(i + 4), INDEX(i + 5));
+				callbackCurve(h, 
+							  INDEX(i + 0), INDEX(i + 1), 
+							  INDEX(i + 2), INDEX(i + 3), 
+							  INDEX(i + 4), INDEX(i + 5));
                 
 				break;
 				case t2_vvcurveto:
@@ -2275,8 +2292,8 @@ static int t2Decode(t2cCtx h, long offset)
                                       &INDEX_BLEND(i + 0), &INDEX_BLEND(i + 1),
                                       &INDEX_BLEND(i + 2), &INDEX_BLEND(i + 3),
                                       NULL, &INDEX_BLEND(i + 4));
-					callbackCurve(h,
-								  INDEX(0), INDEX(1),
+					callbackCurve(h, 
+								  INDEX(0), INDEX(1), 
 								  INDEX(2), INDEX(3), 
 								  0, 	    INDEX(4));
 					i = 5;
@@ -2295,12 +2312,12 @@ static int t2Decode(t2cCtx h, long offset)
                                                     NULL, &INDEX_BLEND(i + 0),
                                                     &INDEX_BLEND(i + 1), &INDEX_BLEND(i + 2),
                                                     NULL, &INDEX_BLEND(i + 3));
-                    callbackCurve(h,
+					callbackCurve(h,
 								  0, 		    INDEX(i + 0), 
 								  INDEX(i + 1), INDEX(i + 2), 
 								  0, 		    INDEX(i + 3));
                 }
-                    break;
+				break;
 				case t2_hhcurveto:
 				if ((h->stack.cnt ) & 1)
 					{
@@ -2331,17 +2348,16 @@ static int t2Decode(t2cCtx h, long offset)
                                                 &INDEX_BLEND(i + 0), NULL,
                                                 &INDEX_BLEND(i + 1), &INDEX_BLEND(i + 2),
                                                 &INDEX_BLEND(i + 3), NULL);
-                    callbackCurve(h,
+					callbackCurve(h,
 								  INDEX(i + 0), 0,
 								  INDEX(i + 1), INDEX(i + 2), 
 								  INDEX(i + 3), 0);
                 }
-                break;
+				break;
 				case t2_callgsubr:
 				CHKUFLOW(h,1);
 				{
-				int result;
-				long saveoff = h->src.offset - (end - next);
+				long saveoff = (long)(h->src.offset - (end - next));
 				long saveEndOff = h->src.endOffset;
 				long num = unbias((long)POP(), h->aux->gsubrs.cnt);
                 h->stack.blendCnt--; // we do not blend subr indicies.
@@ -2355,7 +2371,7 @@ static int t2Decode(t2cCtx h, long offset)
 				h->subrDepth++;
                 if (h->subrDepth > TX_MAX_SUBR_DEPTH)
                 {
-                    printf("subr depth: %d\n", h->subrDepth);
+                    message(h, "subr depth: %d\n", h->subrDepth);
                     return t2cErrSubrDepth;
                 }
                     
@@ -2388,52 +2404,52 @@ static int t2Decode(t2cCtx h, long offset)
                                                     &INDEX_BLEND(i + 0), NULL,
                                                     &INDEX_BLEND(i + 1), &INDEX_BLEND(i + 2),
                                                     NULL,			&INDEX_BLEND(i + 3));
-                        callbackCurve(h,
-                                      INDEX(i + 0), 0,
-                                      INDEX(i + 1), INDEX(i + 2),
-                                      0,			INDEX(i + 3));
+						callbackCurve(h,
+									  INDEX(i + 0), 0,
+									  INDEX(i + 1), INDEX(i + 2), 
+									  0,			INDEX(i + 3));
                     }
-                    else
+					else
                     {
                         if (h->glyph->curveVF != NULL)
                             popBlendArgs6(h,
                                                     NULL,			&INDEX_BLEND(i + 0),
                                                     &INDEX_BLEND(i + 1), &INDEX_BLEND(i + 2),
                                                     &INDEX_BLEND(i + 3), NULL);
-                    callbackCurve(h,
+						callbackCurve(h,
 									  0,			INDEX(i + 0),
 									  INDEX(i + 1), INDEX(i + 2), 
 									  INDEX(i + 3), 0);
                     }
-                    
-                    if (adjust)
-                    {
-                        /* Add last curve */
-                        if (horz & 1)
+				
+				if (adjust)
+					{
+					/* Add last curve */
+					if (horz & 1)
                         {
                             if (h->glyph->curveVF != NULL)
                                     popBlendArgs6(h,
                                                         &INDEX_BLEND(i + 0), NULL,
                                                         &INDEX_BLEND(i + 1), &INDEX_BLEND(i + 2),
                                                         &INDEX_BLEND(i + 4), &INDEX_BLEND(i + 3));
-                            callbackCurve(h,
-                                          INDEX(i + 0), 0,
-                                          INDEX(i + 1), INDEX(i + 2),
-                                          INDEX(i + 4), INDEX(i + 3));
+						callbackCurve(h,
+									  INDEX(i + 0), 0,
+									  INDEX(i + 1), INDEX(i + 2), 
+									  INDEX(i + 4), INDEX(i + 3));
                         }
-                        else
+					else
                         {
                             if (h->glyph->curveVF != NULL)
                                 popBlendArgs6(h,
                                                         NULL,	   	    &INDEX_BLEND(i + 0),
                                                         &INDEX_BLEND(i + 1), &INDEX_BLEND(i + 2),
                                                         &INDEX_BLEND(i + 3), &INDEX_BLEND(i + 4));
-                            callbackCurve(h,
-                                          0,	   	    INDEX(i + 0),
-                                          INDEX(i + 1), INDEX(i + 2),
-                                          INDEX(i + 3), INDEX(i + 4));
-                        }
-                    }
+						callbackCurve(h,
+									  0,	   	    INDEX(i + 0),
+									  INDEX(i + 1), INDEX(i + 2), 
+									  INDEX(i + 3), INDEX(i + 4));
+					}
+				}
 				}
 				break;
 				case t2_shortint:
@@ -2499,15 +2515,15 @@ static int t2Decode(t2cCtx h, long offset)
 		} 					/* End: while (cstr < end) */
  
     /* for CFF2 Charstrings, we hit the end of the charstring without having seen endchar or return yet. Add it now. */
-    if ((h->aux->flags & T2C_IS_CFF2)  && !(h->flags & SEEN_ENDCHAR))
-    
-    {
-        /* if this was a subr, do return. */
-        if (h->subrDepth > 0)
-            return 0;
-        else
-            goto do_endchar;
-     }
+    //if ((h->aux->flags & T2C_IS_CFF2)  && !(h->flags & SEEN_ENDCHAR))
+    //
+    //{
+    //    /* if this was a subr, do return. */
+    //    if (h->subrDepth > 0)
+    //        return 0;
+    //    else
+    //        goto do_endchar;
+    // }
 }
 
 /* Decode Type 2 charstring. Return 0 to continue else error code.
@@ -2548,7 +2564,7 @@ static int t2DecodeSubr(t2cCtx h, long offset)
 		case t2_cntrmask: /* can't process these in the context of subrs - no way to know how long the mask byte is. Skip it. */
 			return 0;
         case t2_blend:
-        case tx_callgrel:
+		case tx_callgrel:
 		case tx_compose:
 		case tx_hstem:
 		case t2_hstemhm:
@@ -2638,7 +2654,7 @@ static int t2DecodeSubr(t2cCtx h, long offset)
 			break;
 		case tx_endchar:
 			return 0;
-        case t2_rcurveline:
+		case t2_rcurveline:
 		case t2_rlinecurve:
 		case t2_vvcurveto:
 		case t2_hhcurveto:
@@ -2713,11 +2729,11 @@ static int t2DecodeSubr(t2cCtx h, long offset)
 /* Parse Type 2 charstring. */
 int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, cff2GlyphCallbacks *cff2, abfGlyphCallbacks *glyph, ctlMemoryCallbacks *mem)
 	{
-	struct t2cCtx h;
+	struct _t2cCtx h;
 	int retVal;
 	/* Initialize */
 	h.flags = PEND_WIDTH|PEND_MASK;
-    h.stack.cnt = 0;
+	h.stack.cnt = 0;
     h.stack.blendCnt = 0;
     memset(h.stack.blendArray, 0, sizeof(h.stack.blendArray));
     h.stack.numRegions = 0;
@@ -2775,10 +2791,17 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
     if (aux->flags & T2C_IS_CFF2)
         h.flags |= IS_CFF2;
 	h.src.endOffset = endOffset;
-	if (aux->flags & T2C_CUBE_GSUBR)
-		retVal = t2DecodeSubr(&h, offset);
-	else
-		retVal = t2Decode(&h, offset);
+
+	DURING
+
+		if (aux->flags & T2C_CUBE_GSUBR)
+			retVal = t2DecodeSubr(&h, offset);
+		else
+			retVal = t2Decode(&h, offset);
+
+	HANDLER
+		retVal = Exception.Code;
+	END_HANDLER
 
 	// Clear path=specifc transform if last over from last path of the charstring,
 	if 	(h.flags & USE_MATRIX)

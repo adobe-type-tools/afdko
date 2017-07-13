@@ -92,10 +92,17 @@ sha1_ctx * sha1_init(sha1_malloc p,void *hook){
     sha1_ctx *c;
     int i;
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning(disable: 4127)
+#endif
     if(sizeof(Card32) != 4)
 	return NULL;
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
-    c = p(sizeof(sha1_ctx),hook);
+    c = (sha1_ctx*)p(sizeof(sha1_ctx),hook);
     if(c == NULL)
 	return NULL;
     c->H[0] = 0x67452301;

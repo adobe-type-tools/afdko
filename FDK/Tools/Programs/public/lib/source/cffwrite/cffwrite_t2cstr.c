@@ -16,10 +16,8 @@
 #include <string.h>
 #endif  /* PLAT_SUN4 */
 
+#include <stdlib.h>
 #include <math.h>
-
-/* Fixed point (for stem list) */
-typedef long Fixed;
 
 /* Make up operators for internal use */
 #define tx_noop     tx_reserved0
@@ -145,35 +143,41 @@ static void flushBlends(cstrCtx h);
 
 /* Initialize module. */
 void cfwCstrNew(cfwCtx g) {
-	cstrCtx h = cfwMemNew(g, sizeof(struct cstrCtx_));
+	cstrCtx h = (cstrCtx)cfwMemNew(g, sizeof(struct cstrCtx_));
 
-	/* Link contexts */
-	h->g = g;
-	g->ctx.cstr = h;
-    if (g->flags & CFW_WRITE_CFF2)
-        h->maxstack = CFF2_MAX_OP_STACK;
-    else
-        h->maxstack = T2_MAX_OP_STACK;
-        
-	dnaINIT(g->ctx.dnaFail, h->cstr, 500, 5000);
-	dnaINIT(g->ctx.dnaFail, h->masks, 30, 60);
-	dnaINIT(g->ctx.dnaFail, h->hints, 10, 40);
-	dnaINIT(g->ctx.dnaFail, h->cntrs, 1, 10);
+	memset(h, 0, sizeof(*h));
 
-	/* Open tmp stream */
-	g->stm.tmp = g->cb.stm.open(&g->cb.stm, CFW_TMP_STREAM_ID, 0);
-	if (g->stm.tmp == NULL) {
-		cfwFatal(g, cfwErrTmpStream, NULL);
-	}
-	h->tmpoff = 0;
+	DURING
+		/* Link contexts */
+		h->g = g;
+		g->ctx.cstr = h;
+		if (g->flags & CFW_WRITE_CFF2)
+			h->maxstack = CFF2_MAX_OP_STACK;
+		else
+			h->maxstack = T2_MAX_OP_STACK;
 
-	/* Initialize warning accumulator */
-	memset(h->warning, 0, sizeof(h->warning));
+		dnaINIT(g->ctx.dnaFail, h->cstr, 500, 5000);
+		dnaINIT(g->ctx.dnaFail, h->masks, 30, 60);
+		dnaINIT(g->ctx.dnaFail, h->hints, 10, 40);
+		dnaINIT(g->ctx.dnaFail, h->cntrs, 1, 10);
 
-	/* Used as charstring separator for subroutinizer */
-	h->unique = 0;
-    
- }
+		/* Open tmp stream */
+		g->stm.tmp = g->cb.stm.open(&g->cb.stm, CFW_TMP_STREAM_ID, 0);
+		if (g->stm.tmp == NULL) {
+			cfwFatal(g, cfwErrTmpStream, NULL);
+		}
+		h->tmpoff = 0;
+
+		/* Initialize warning accumulator */
+		memset(h->warning, 0, sizeof(h->warning));
+
+		/* Used as charstring separator for subroutinizer */
+		h->unique = 0;
+	HANDLER
+		cfwMemFree(g, h);
+	RERAISE;
+	END_HANDLER
+}
 
 /* Prepare module for reuse. */
 void cfwCstrReuse(cfwCtx g) {
@@ -213,7 +217,7 @@ static void addWarn(cstrCtx h, int type) {
 
 /* Begin new glyph definition. */
 static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
-	cfwCtx g = cb->direct_ctx;
+	cfwCtx g = (cfwCtx)cb->direct_ctx;
 	cstrCtx h = g->ctx.cstr;
 
 	cb->info = info;
@@ -267,7 +271,7 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
 
 /* Add horizontal advance width. */
 static void glyphWidth(abfGlyphCallbacks *cb, float hAdv) {
-	cfwCtx g = cb->direct_ctx;
+	cfwCtx g = (cfwCtx)cb->direct_ctx;
 	cstrCtx h = g->ctx.cstr;
 	h->glyph.hAdv = roundf(hAdv);
 }
@@ -389,7 +393,7 @@ static void clearmoveto(cstrCtx h, float dx, float dy) {
 
 /* Add move to path. */
 static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0) {
-	cfwCtx g = cb->direct_ctx;
+	cfwCtx g = (cfwCtx)cb->direct_ctx;
 	cstrCtx h = g->ctx.cstr;
 
     float dx0;
@@ -517,7 +521,7 @@ static void pushBlend(cstrCtx h, abfBlendArg* arg1)
 }
 
 static void glyphMoveVF(abfGlyphCallbacks *cb, abfBlendArg* argX, abfBlendArg* argY) {
-    cfwCtx g = cb->direct_ctx;
+    cfwCtx g = (cfwCtx)cb->direct_ctx;
     cstrCtx h = g->ctx.cstr;
     float x0, dx0;
     float y0, dy0;
@@ -582,7 +586,7 @@ static void glyphMoveVF(abfGlyphCallbacks *cb, abfBlendArg* argX, abfBlendArg* a
 
 /* Insert missing initial moveto op. */
 static void insertMove(abfGlyphCallbacks *cb) {
-	cfwCtx g = cb->direct_ctx;
+	cfwCtx g = (cfwCtx)cb->direct_ctx;
 	cstrCtx h = g->ctx.cstr;
 	addWarn(h, warn_move0);
 	glyphMove(cb, 0, 0);
@@ -590,7 +594,7 @@ static void insertMove(abfGlyphCallbacks *cb) {
 
 /* Add line to path. */
 static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1) {
-	cfwCtx g = cb->direct_ctx;
+	cfwCtx g = (cfwCtx)cb->direct_ctx;
 	cstrCtx h = g->ctx.cstr;
 
     float dx1;
@@ -686,7 +690,7 @@ static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1) {
 }
 
 static void glyphLineVF(abfGlyphCallbacks *cb, abfBlendArg* argX, abfBlendArg* argY) {
-    cfwCtx g = cb->direct_ctx;
+    cfwCtx g = (cfwCtx)cb->direct_ctx;
     cstrCtx h = g->ctx.cstr;
     float x0, dx0;
     float y0, dy0;
@@ -797,7 +801,7 @@ static void glyphCurve(abfGlyphCallbacks *cb,
                        float x1, float y1,
                        float x2, float y2,
                        float x3, float y3) {
-	cfwCtx g = cb->direct_ctx;
+	cfwCtx g = (cfwCtx)cb->direct_ctx;
 	cstrCtx h = g->ctx.cstr;
 
     float dx1;
@@ -1069,7 +1073,7 @@ static void glyphCurveVF(abfGlyphCallbacks *cb,
                          abfBlendArg* arg_x1, abfBlendArg* arg_y1,
                          abfBlendArg* arg_x2, abfBlendArg* arg_y2,
                          abfBlendArg* arg_x3, abfBlendArg* arg_y3) {
-    cfwCtx g = cb->direct_ctx;
+    cfwCtx g = (cfwCtx)cb->direct_ctx;
     cstrCtx h = g->ctx.cstr;
     
     float x1, dx1;
@@ -1417,7 +1421,7 @@ static void glyphCurveVF2(abfGlyphCallbacks *cb,
                         abfBlendArg* arg_x1, abfBlendArg* arg_y1,
                         abfBlendArg* arg_x2, abfBlendArg* arg_y2,
                         abfBlendArg* arg_x3, abfBlendArg* arg_y3) {
-    cfwCtx g = cb->direct_ctx;
+    cfwCtx g = (cfwCtx)cb->direct_ctx;
     cstrCtx h = g->ctx.cstr;
     int doOptimize = !(g->flags & CFW_NO_OPTIMIZATION);
     float x1, dx1;
@@ -1569,11 +1573,11 @@ static int CTL_CDECL matchStems(const void *key, const void *value, void *ctx) {
 }
 
 /* Match stems if both edges are within 2 units. */
-static int approxMatch(Stem *new, Stem *old) {
-	float delta0 = new->edge0 - old->edge0;
-	float delta1 = new->edge1 - old->edge1;
+static int approxMatch(Stem *_new, Stem *old) {
+	float delta0 = _new->edge0 - old->edge0;
+	float delta1 = _new->edge1 - old->edge1;
 	return ((old->flags & STEM_CNTR) &&
-	        (new->flags & STEM_VERT) == (old->flags & STEM_VERT) &&
+	        (_new->flags & STEM_VERT) == (old->flags & STEM_VERT) &&
 	        -2.0f < delta0 && delta0 < 2.0f &&
 	        -2.0f < delta1 && delta1 < 2.0f);
 }
@@ -1582,7 +1586,7 @@ static int approxMatch(Stem *new, Stem *old) {
 static unsigned char addStem(cstrCtx h, int flags, float edge0, float edge1) {
 	int found;
 	size_t index;
-	Stem new;
+	Stem _new;
 	Stem *stem;
 #if PLAT_WIN || PLAT_LINUX
 	/* On the Pentium architecture in an optimized build, float variables
@@ -1598,20 +1602,20 @@ static unsigned char addStem(cstrCtx h, int flags, float edge0, float edge1) {
 	delta = edge1 - edge0;
 	if (delta < 0 && delta != ABF_EDGE_HINT_LO && delta != ABF_EDGE_HINT_HI) {
 		addWarn(h, warn_hint0);
-		new.edge0 = edge1;
-		new.edge1 = edge0;
+		_new.edge0 = edge1;
+		_new.edge1 = edge0;
 	}
 	else {
-		new.edge0 = edge0;
-		new.edge1 = edge1;
+		_new.edge0 = edge0;
+		_new.edge1 = edge1;
 	}
-	new.flags = (flags & ABF_VERT_STEM) ? STEM_VERT : 0;
+	_new.flags = (flags & ABF_VERT_STEM) ? STEM_VERT : 0;
 	if (flags & ABF_CNTR_STEM) {
-		new.flags |= STEM_CNTR;
+		_new.flags |= STEM_CNTR;
 	}
 
 	/* Check if stem already in list */
-	found = ctuLookup(&new, h->stems.array, h->stems.cnt, sizeof(Stem),
+	found = ctuLookup(&_new, h->stems.array, h->stems.cnt, sizeof(Stem),
 	                  matchStems, &index, NULL);
 	stem = &h->stems.array[index];
 	if (!found) {
@@ -1624,10 +1628,10 @@ static unsigned char addStem(cstrCtx h, int flags, float edge0, float edge1) {
 			   match. This is the correct conversion behavior but can cause
 			   rendering differences between the source font and the converted
 			   font so we disable this if are trying to compare bitmaps. */
-			if (approxMatch(&new, stem)) {
+			if (approxMatch(&_new, stem)) {
 				return stem->id;
 			}
-			if (index > 0 && approxMatch(&new, stem - 1)) {
+			if (index > 0 && approxMatch(&_new, stem - 1)) {
 				return (stem - 1)->id;
 			}
 		}
@@ -1639,8 +1643,8 @@ static unsigned char addStem(cstrCtx h, int flags, float edge0, float edge1) {
 		else {
 			/* Insert new stem in list */
 			memmove(stem + 1, stem, (h->stems.cnt - index) * sizeof(Stem));
-			new.id = h->stems.cnt++;
-			*stem = new;
+			_new.id = (unsigned char)h->stems.cnt++;
+			*stem = _new;
 		}
 	}
 
@@ -1650,7 +1654,7 @@ static unsigned char addStem(cstrCtx h, int flags, float edge0, float edge1) {
 /* Add stem hint. */
 static void glyphStem(abfGlyphCallbacks *cb,
                       int flags, float edge0, float edge1) {
-	cfwCtx g = cb->direct_ctx;
+	cfwCtx g = (cfwCtx)cb->direct_ctx;
 	cstrCtx h = g->ctx.cstr;
 	unsigned char stemid;
 
@@ -1694,7 +1698,7 @@ static void glyphFlex(abfGlyphCallbacks *cb, float depth,
                       float x4, float y4,
                       float x5, float y5,
                       float x6, float y6) {
-	cfwCtx g = cb->direct_ctx;
+	cfwCtx g = (cfwCtx)cb->direct_ctx;
 	cstrCtx h = g->ctx.cstr;
 	float x0 = h->x;
 	float y0 = h->y;
@@ -1802,7 +1806,7 @@ flex:
 
 /* Add generic operator. */
 static void glyphGenop(abfGlyphCallbacks *cb, int cnt, float *args, int op) {
-	cfwCtx g = cb->direct_ctx;
+	cfwCtx g = (cfwCtx)cb->direct_ctx;
 	cstrCtx h = g->ctx.cstr;
 
 	if (h->glyph.info->flags & ABF_GLYPH_CUBE_GSUBR) {
@@ -1897,7 +1901,7 @@ static void glyphGenop(abfGlyphCallbacks *cb, int cnt, float *args, int op) {
 /* Add seac operator. */
 static void glyphSeac(abfGlyphCallbacks *cb,
                       float adx, float ady, int bchar, int achar) {
-	cfwCtx g = cb->direct_ctx;
+	cfwCtx g = (cfwCtx)cb->direct_ctx;
 	cstrCtx h = g->ctx.cstr;
 	if (h->pendop != tx_noop) {
 		saveop(h, h->pendop);
@@ -2038,11 +2042,11 @@ static void saveHintMaskOp(cstrCtx h, unsigned char *map,
 	char hintop[MAX_MASK_BYTES + 2];    /* One extra length byte consumed by subroutinizer */
 	char *hintmask = &hintop[1];
 
-	hintop[0] = op;
+	hintop[0] = (char)op;
 
 	/* Add length byte for subroutinizer */
 	if (g->flags & CFW_SUBRIZE) {
-		*hintmask++ = h->masksize;
+		*hintmask++ = (char)h->masksize;
 	}
 
 	/* Construct hintmask from stem ids */
@@ -2073,7 +2077,7 @@ static void saveHintMaskOp(cstrCtx h, unsigned char *map,
 	/* Save mask */
 	if (g->flags & CFW_SUBRIZE) {
 		/* Save mask op size in second byte for subroutinizer */
-		char sizebyte = h->masksize + 2;
+		char sizebyte = (char)(h->masksize + 2);
 		if ((g->cb.stm.write(&g->cb.stm, g->stm.tmp, 1, (char *)hintop) == 0)
 		    || (g->cb.stm.write(&g->cb.stm, g->stm.tmp, 1, &sizebyte) == 0)
 		    || (g->cb.stm.write(&g->cb.stm, g->stm.tmp, h->masksize, hintmask) == 0)) {
@@ -2183,7 +2187,7 @@ check_opt:
 
 	/* Construct stem id to stem order mapping */
 	for (i = 0; i < h->stems.cnt; i++) {
-		map[h->stems.array[i].id] = i;
+		map[h->stems.array[i].id] = (unsigned char)i;
 	}
 
 	/* Save counter masks */
@@ -2312,7 +2316,7 @@ void printFinalWarn(cfwCtx g) {
 
 /* End glyph definition. */
 static void glyphEnd(abfGlyphCallbacks *cb) {
-	cfwCtx g = cb->direct_ctx;
+	cfwCtx g = (cfwCtx)cb->direct_ctx;
 	cstrCtx h = g->ctx.cstr;
 	int i;
 	long iCstr;
@@ -2450,7 +2454,7 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
 }
 
 static void glyphCubeBlend(abfGlyphCallbacks *cb, unsigned int nBlends, unsigned int numVals, float *blendVals) {
-	cfwCtx g = cb->direct_ctx;
+	cfwCtx g = (cfwCtx)cb->direct_ctx;
 	cstrCtx h = g->ctx.cstr;
 	unsigned int i = 0;
 
@@ -2486,7 +2490,7 @@ static void glyphCubeBlend(abfGlyphCallbacks *cb, unsigned int nBlends, unsigned
 }
 
 static void glyphCubeSetWV(abfGlyphCallbacks *cb,  unsigned int numDV) {
-	cfwCtx g = cb->direct_ctx;
+	cfwCtx g = (cfwCtx)cb->direct_ctx;
 	cstrCtx h = g->ctx.cstr;
 
 	if (h->pendop != tx_noop) {
@@ -2521,7 +2525,7 @@ static void glyphCubeSetWV(abfGlyphCallbacks *cb,  unsigned int numDV) {
 }
 
 static void glyphCubeCompose(abfGlyphCallbacks *cb,  int cubeLEIndex, float x0, float y0, int numDV, float *ndv) {
-	cfwCtx g = cb->direct_ctx;
+	cfwCtx g = (cfwCtx)cb->direct_ctx;
 	cstrCtx h = g->ctx.cstr;
 	int i = 0;
 	float dx0;
@@ -2566,7 +2570,7 @@ static void glyphCubeCompose(abfGlyphCallbacks *cb,  int cubeLEIndex, float x0, 
 }
 
 static void cubeTransform(abfGlyphCallbacks *cb,  float rotate, float scaleX, float scaleY, float skewX, float skewY) {
-	cfwCtx g = cb->direct_ctx;
+	cfwCtx g = (cfwCtx)cb->direct_ctx;
 	cstrCtx h = g->ctx.cstr;
 
 	switch (h->pendop) {

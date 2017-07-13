@@ -26,7 +26,7 @@ typedef struct 	/* Rectangle */
 /* Begin glyph path. */
 static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 	{
-	abfMetricsCtx h = cb->direct_ctx;
+	abfMetricsCtx h = (abfMetricsCtx)cb->direct_ctx;
 
 	cb->info = info;
 	h->err_code = abfSuccess;
@@ -45,7 +45,7 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 /* Save glyph width. */
 static void glyphWidth(abfGlyphCallbacks *cb, float hAdv)
 	{
-	abfMetricsCtx h = cb->direct_ctx;
+	abfMetricsCtx h = (abfMetricsCtx)cb->direct_ctx;
 	h->real_mtx.hAdv = (h->flags & ABF_MTX_TRANSFORM)? h->matrix[0]*hAdv: hAdv;
 	}
 
@@ -65,7 +65,7 @@ static void boundPoint(abfMetricsCtx h, float x, float y)
 /* Add move to path. */
 static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0)
 	{
-	abfMetricsCtx h = cb->direct_ctx;
+	abfMetricsCtx h = (abfMetricsCtx)cb->direct_ctx;
 	float x;
 	float y;
 
@@ -97,7 +97,7 @@ static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0)
 /* Add line to path. */
 static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1)
 	{
-	abfMetricsCtx h = cb->direct_ctx;
+	abfMetricsCtx h = (abfMetricsCtx)cb->direct_ctx;
 
 	if (h->flags & ABF_MTX_TRANSFORM)
 		boundPoint(h, TX(x1, y1), TY(x1, y1));
@@ -173,7 +173,7 @@ static void glyphCurve(abfGlyphCallbacks *cb,
 					   float x2, float y2, 
 					   float x3, float y3)
 	{
-	abfMetricsCtx h = cb->direct_ctx;
+	abfMetricsCtx h = (abfMetricsCtx)cb->direct_ctx;
 	Rect ep;	/* End-point bounds */
 	Rect cp;	/* Control-point bounds */
 	float x0 = h->x;
@@ -249,14 +249,14 @@ static void glyphGenop(abfGlyphCallbacks *cb,
 static void glyphSeac(abfGlyphCallbacks *cb, 
 						  float adx, float ady, int bchar, int achar)
 	{
-	abfMetricsCtx h = cb->direct_ctx;
+	abfMetricsCtx h = (abfMetricsCtx)cb->direct_ctx;
 	h->err_code = abfErrGlyphSeac; 
 	}
 
 /* End glyph path. */
 static void glyphEnd(abfGlyphCallbacks *cb)
 	{
-	abfMetricsCtx h = cb->direct_ctx;
+	abfMetricsCtx h = (abfMetricsCtx)cb->direct_ctx;
 
 	/* Compute integer metrics */
 	h->int_mtx.left		= (long)floor(h->real_mtx.left);

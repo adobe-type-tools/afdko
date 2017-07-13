@@ -6,6 +6,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "dynarr.h"
 #include "supportfp.h"
 #include "txops.h"
+#include "supportexcept.h"
 
 #include <string.h>
 
@@ -153,7 +154,10 @@ typedef struct indexPair_ {
     unsigned short  innerIndex;
 } indexPair;
 
-typedef dnaDCL(indexPair, indexMap);
+typedef struct indexMap_ {
+    unsigned long   offset;
+    dnaDCL(indexPair, map);
+} indexMap;
 
 /* horizontal metrics tables: hhea, hmtx, HVAR */
 
@@ -263,78 +267,85 @@ static void var_freeavar(ctlSharedStmCallbacks *sscb, var_avar avar)
 static var_avar var_loadavar(sfrCtx sfr, ctlSharedStmCallbacks *sscb)
 {
     var_avar   avar = NULL;
+	int success = 0;
     unsigned short  i;
 
 	sfrTable *table = sfrGetTableByTag(sfr, AVAR_TABLE_TAG);
 	if (table == NULL)
 		return NULL;
 
-	sscb->seek(sscb, table->offset);
+	DURING
+		sscb->seek(sscb, table->offset);
 
-	/* Read and validate table version */
-	if (sscb->read4(sscb) != AVAR_TABLE_VERSION) {
-		sscb->message(sscb, "invalid avar table version");
-        return NULL;
-    }
+		/* Read and validate table version */
+		if (sscb->read4(sscb) != AVAR_TABLE_VERSION) {
+			sscb->message(sscb, "invalid avar table version");
+			goto cleanup;
+		}
 
-    if (table->length < AVAR_TABLE_HEADER_SIZE) {
-		sscb->message(sscb, "invalid avar table size");
-        return NULL;
-    }
+		if (table->length < AVAR_TABLE_HEADER_SIZE) {
+			sscb->message(sscb, "invalid avar table size");
+			goto cleanup;
+		}
     
-    avar = sscb->memNew(sscb, sizeof(*avar));
-    memset(avar, 0, sizeof(*avar));
+		avar = (var_avar)sscb->memNew(sscb, sizeof(*avar));
+		memset(avar, 0, sizeof(*avar));
 
-    avar->axisCount = sscb->read2(sscb);
+		avar->axisCount = sscb->read2(sscb);
 
-    if (table->length < AVAR_TABLE_HEADER_SIZE + (unsigned long)AVAR_SEGMENT_MAP_SIZE * avar->axisCount) {
-		sscb->message(sscb, "invalid avar table size or axis/instance count/size");
-        goto cleanup;
-    }
+		if (table->length < AVAR_TABLE_HEADER_SIZE + (unsigned long)AVAR_SEGMENT_MAP_SIZE * avar->axisCount) {
+			sscb->message(sscb, "invalid avar table size or axis/instance count/size");
+			goto cleanup;
+		}
 
-    dnaINIT(sscb->dna, avar->segmentMaps, 0, 1);
-    if (dnaSetCnt(&avar->segmentMaps, DNA_ELEM_SIZE_(avar->segmentMaps), avar->axisCount) < 0)
-        goto cleanup;
+		dnaINIT(sscb->dna, avar->segmentMaps, 0, 1);
+		if (dnaSetCnt(&avar->segmentMaps, DNA_ELEM_SIZE_(avar->segmentMaps), avar->axisCount) < 0)
+			goto cleanup;
 
-    for (i = 0; i < avar->axisCount; i++) {
-        segmentMap  *seg = &avar->segmentMaps.array[i];
-        unsigned short  j;
-        int hasZeroMap = 0;
-        seg->positionMapCount = sscb->read2(sscb);
-        if (table->length < sscb->tell(sscb) - table->offset + AVAR_AXIS_VALUE_MAP_SIZE * seg->positionMapCount) {
-            sscb->message(sscb, "avar axis value map out of bounds");
-            goto cleanup;
-        }
+		for (i = 0; i < avar->axisCount; i++) {
+			segmentMap  *seg = &avar->segmentMaps.array[i];
+			unsigned short  j;
+			int hasZeroMap = 0;
+			seg->positionMapCount = sscb->read2(sscb);
+			if (table->length < sscb->tell(sscb) - table->offset + AVAR_AXIS_VALUE_MAP_SIZE * seg->positionMapCount) {
+				sscb->message(sscb, "avar axis value map out of bounds");
+				goto cleanup;
+			}
 
-        dnaINIT(sscb->dna, seg->valueMaps, 0, 1);
-        if (dnaSetCnt(&seg->valueMaps, DNA_ELEM_SIZE_(seg->valueMaps), seg->positionMapCount) < 0)
-            goto cleanup;
-        for (j = 0; j < seg->positionMapCount; j++) {
-            Fixed fromCoord = F2DOT14_TO_FIXED((var_F2dot14)sscb->read2(sscb));
-            Fixed toCoord = F2DOT14_TO_FIXED((var_F2dot14)sscb->read2(sscb));
+			dnaINIT(sscb->dna, seg->valueMaps, 0, 1);
+			if (dnaSetCnt(&seg->valueMaps, DNA_ELEM_SIZE_(seg->valueMaps), seg->positionMapCount) < 0)
+				goto cleanup;
+			for (j = 0; j < seg->positionMapCount; j++) {
+				Fixed fromCoord = F2DOT14_TO_FIXED((var_F2dot14)sscb->read2(sscb));
+				Fixed toCoord = F2DOT14_TO_FIXED((var_F2dot14)sscb->read2(sscb));
 
-            if (j > 0 && j < seg->positionMapCount - 1 && fromCoord == 0 && toCoord == 0) {
-                hasZeroMap = 1;
-            }
-            seg->valueMaps.array[j].fromCoord = fromCoord;
-            seg->valueMaps.array[j].toCoord = toCoord;
-        }
-        if (seg->positionMapCount < 3
-            || seg->valueMaps.array[0].fromCoord != 0
-            || seg->valueMaps.array[0].toCoord != 0
-            || !hasZeroMap
-            || seg->valueMaps.array[seg->positionMapCount-1].fromCoord != FIXED_ONE
-            || seg->valueMaps.array[seg->positionMapCount-1].toCoord != FIXED_ONE) {
-            seg->positionMapCount = 0;  /* incomplete value maps: invalidate the maps entirely for this axis */
-        }
-    }
+				if (j > 0 && j < seg->positionMapCount - 1 && fromCoord == 0 && toCoord == 0) {
+					hasZeroMap = 1;
+				}
+				seg->valueMaps.array[j].fromCoord = fromCoord;
+				seg->valueMaps.array[j].toCoord = toCoord;
+			}
+			if (seg->positionMapCount < 3
+				|| seg->valueMaps.array[0].fromCoord != 0
+				|| seg->valueMaps.array[0].toCoord != 0
+				|| !hasZeroMap
+				|| seg->valueMaps.array[seg->positionMapCount-1].fromCoord != FIXED_ONE
+				|| seg->valueMaps.array[seg->positionMapCount-1].toCoord != FIXED_ONE) {
+				seg->positionMapCount = 0;  /* incomplete value maps: invalidate the maps entirely for this axis */
+			}
+		}
+		success = 1;
+cleanup:;
+	HANDLER
+	END_HANDLER
+
+	if (!success)
+	{
+		var_freeavar(sscb, avar);
+		avar = 0;
+	}
 
     return avar;
-
-cleanup:
-    var_freeavar(sscb, avar);
-
-    return NULL;
 }
 
 /* fvar table */
@@ -344,7 +355,7 @@ static void var_freefvar(ctlSharedStmCallbacks *sscb, var_fvar fvar)
     if (fvar) {
         unsigned short  i;
         
-       for (i = 0; i < fvar->instanceCount; i++) {
+       for (i = 0; i < fvar->instances.cnt; i++) {
             dnaFREE(fvar->instances.array[i].coordinates);
         }
         dnaFREE(fvar->instances);
@@ -357,6 +368,7 @@ static void var_freefvar(ctlSharedStmCallbacks *sscb, var_fvar fvar)
 static var_fvar var_loadfvar(sfrCtx sfr, ctlSharedStmCallbacks *sscb)
 {
     var_fvar   fvar = NULL;
+	int success = 0;
     unsigned short  offsetToAxesArray;
     unsigned short  countSizePairs;
     unsigned short  axisSize;
@@ -367,110 +379,128 @@ static var_fvar var_loadfvar(sfrCtx sfr, ctlSharedStmCallbacks *sscb)
 	if (table == NULL)
 		return NULL;
 
-	sscb->seek(sscb, table->offset);
+	DURING
+		sscb->seek(sscb, table->offset);
 
-	/* Read and validate table version */
-	if (sscb->read4(sscb) != FVAR_TABLE_VERSION) {
-		sscb->message(sscb, "invalid fvar table version");
-        return NULL;
-    }
+		/* Read and validate table version */
+		if (sscb->read4(sscb) != FVAR_TABLE_VERSION) {
+			sscb->message(sscb, "invalid fvar table version");
+			goto cleanup;
+		}
 
-    if (table->length < FVAR_TABLE_HEADER_SIZE) {
-		sscb->message(sscb, "invalid fvar table size");
-        return NULL;
-    }
+		if (table->length < FVAR_TABLE_HEADER_SIZE) {
+			sscb->message(sscb, "invalid fvar table size");
+			goto cleanup;
+		}
     
-    fvar = sscb->memNew(sscb, sizeof(*fvar));
-    memset(fvar, 0, sizeof(*fvar));
+		fvar = (var_fvar)sscb->memNew(sscb, sizeof(*fvar));
+		memset(fvar, 0, sizeof(*fvar));
 
-    offsetToAxesArray = sscb->read2(sscb);
-    countSizePairs = sscb->read2(sscb);
-    fvar->axisCount = sscb->read2(sscb);
-    axisSize = sscb->read2(sscb);
-    fvar->instanceCount = sscb->read2(sscb);
-    instanceSize = sscb->read2(sscb);
+		offsetToAxesArray = sscb->read2(sscb);
+		countSizePairs = sscb->read2(sscb);
+		fvar->axisCount = sscb->read2(sscb);
+		axisSize = sscb->read2(sscb);
+		fvar->instanceCount = sscb->read2(sscb);
+		instanceSize = sscb->read2(sscb);
 
-    /* sanity check of values */
-    if (offsetToAxesArray < FVAR_OFFSET_TO_AXES_ARRAY
-        || countSizePairs < FVAR_COUNT_SIZE_PAIRS
-        || axisSize < FVAR_AXIS_SIZE) {
-		sscb->message(sscb, "invalid values in fvar table header");
-        goto cleanup;
-    }
+		/* sanity check of values */
+		if (offsetToAxesArray < FVAR_OFFSET_TO_AXES_ARRAY
+			|| countSizePairs < FVAR_COUNT_SIZE_PAIRS
+			|| axisSize < FVAR_AXIS_SIZE) {
+			sscb->message(sscb, "invalid values in fvar table header");
+			goto cleanup;
+		}
 
-    if (table->length < offsetToAxesArray + (unsigned long)axisSize * fvar->axisCount + (unsigned long)instanceSize * fvar->instanceCount
-        || instanceSize < FVAR_INSTANCE_SIZE + 4 * fvar->axisCount) {
-		sscb->message(sscb, "invalid fvar table size or axis/instance count/size");
-        return NULL;
-    }
+		if (table->length < offsetToAxesArray + (unsigned long)axisSize * fvar->axisCount + (unsigned long)instanceSize * fvar->instanceCount
+			|| instanceSize < FVAR_INSTANCE_SIZE + 4 * fvar->axisCount) {
+			sscb->message(sscb, "invalid fvar table size or axis/instance count/size");
+			goto cleanup;
+		}
     
-    sscb->seek(sscb, table->offset + offsetToAxesArray);
+		sscb->seek(sscb, table->offset + offsetToAxesArray);
 
-    dnaINIT(sscb->dna, fvar->axes, 0, 1);
-    dnaINIT(sscb->dna, fvar->instances, 0, 1);
-    if (dnaSetCnt(&fvar->axes, DNA_ELEM_SIZE_(fvar->axes), fvar->axisCount) < 0)
-        goto cleanup;
-    if (dnaSetCnt(&fvar->instances, DNA_ELEM_SIZE_(fvar->instances), fvar->instanceCount) < 0)
-        goto cleanup;
+		dnaINIT(sscb->dna, fvar->axes, 0, 1);
+		dnaINIT(sscb->dna, fvar->instances, 0, 1);
+		if (dnaSetCnt(&fvar->axes, DNA_ELEM_SIZE_(fvar->axes), fvar->axisCount) < 0)
+			goto cleanup;
+		memset(fvar->axes.array, 0, sizeof(fvar->axes.array[0])*fvar->axes.cnt);
 
-    for (i = 0; i < fvar->axisCount; i++) {
-        fvar->axes.array[i].tag = sscb->read4(sscb);
-        fvar->axes.array[i].minValue = (Fixed)sscb->read4(sscb);
-        fvar->axes.array[i].defaultValue = (Fixed)sscb->read4(sscb);
-        fvar->axes.array[i].maxValue = (Fixed)sscb->read4(sscb);
-        fvar->axes.array[i].flags = sscb->read2(sscb);
-        fvar->axes.array[i].nameID = sscb->read2(sscb);
-    }
+		if (dnaSetCnt(&fvar->instances, DNA_ELEM_SIZE_(fvar->instances), fvar->instanceCount) < 0)
+			goto cleanup;
+		memset(fvar->instances.array, 0, sizeof(fvar->instances.array[0])*fvar->instances.cnt);
+
+		for (i = 0; i < fvar->axisCount; i++) {
+			fvar->axes.array[i].tag = sscb->read4(sscb);
+			fvar->axes.array[i].minValue = (Fixed)sscb->read4(sscb);
+			fvar->axes.array[i].defaultValue = (Fixed)sscb->read4(sscb);
+			fvar->axes.array[i].maxValue = (Fixed)sscb->read4(sscb);
+			fvar->axes.array[i].flags = sscb->read2(sscb);
+			fvar->axes.array[i].nameID = sscb->read2(sscb);
+		}
     
-    for (i = 0; i < fvar->instanceCount; i++) {
-        variationInstance   *inst = &fvar->instances.array[i];
-        unsigned short  j;
-        inst->subfamilyNameID = sscb->read2(sscb);
-        inst->flags = sscb->read2(sscb);
-        dnaINIT(sscb->dna, inst->coordinates, 0, 1);
-        if (dnaSetCnt(&inst->coordinates, DNA_ELEM_SIZE_(inst->coordinates), fvar->axisCount) < 0)
-            goto cleanup;
-        for (j = 0; j < fvar->axisCount; j++) {
-			fixtopflt((Fixed)sscb->read4(sscb), &inst->coordinates.array[j]);
-        }
-        if (instanceSize >= FVAR_INSTANCE_WITH_NAME_SIZE + 4 * fvar->axisCount)
-            inst->postScriptNameID = sscb->read2(sscb);
-        else
-            inst->postScriptNameID = 0;    /* indicating an unspecified PostScript name ID */
-    }
+		for (i = 0; i < fvar->instanceCount; i++) {
+			dnaINIT(sscb->dna, fvar->instances.array[i].coordinates, 0, 1);
+		}
+			
+		for (i = 0; i < fvar->instanceCount; i++) {
+			variationInstance   *inst = &fvar->instances.array[i];
+			unsigned short  j;
+			inst->subfamilyNameID = sscb->read2(sscb);
+			inst->flags = sscb->read2(sscb);
+			if (dnaSetCnt(&inst->coordinates, DNA_ELEM_SIZE_(inst->coordinates), fvar->axisCount) < 0)
+				goto cleanup;
+			for (j = 0; j < fvar->axisCount; j++) {
+				fixtopflt((Fixed)sscb->read4(sscb), &inst->coordinates.array[j]);
+			}
+			if (instanceSize >= FVAR_INSTANCE_WITH_NAME_SIZE + 4 * fvar->axisCount)
+				inst->postScriptNameID = sscb->read2(sscb);
+			else
+				inst->postScriptNameID = 0;    /* indicating an unspecified PostScript name ID */
+		}
+		success = 1;
+cleanup:;
+	HANDLER
+	END_HANDLER
+
+	if (!success) {
+		var_freefvar(sscb, fvar);
+		fvar = NULL;
+	}
 
     return fvar;
-
-cleanup:
-    var_freefvar(sscb, fvar);
-
-    return NULL;
 }
 
 /* load font axis tables */
 var_axes var_loadaxes(sfrCtx sfr, ctlSharedStmCallbacks *sscb)
 {
     var_axes    axis_tables = NULL;
+	int success = 0;
 
-    axis_tables = sscb->memNew(sscb, sizeof(*axis_tables));
+    axis_tables = (var_axes)sscb->memNew(sscb, sizeof(*axis_tables));
     memset(axis_tables, 0, sizeof(*axis_tables));
 
-    axis_tables->fvar = var_loadfvar(sfr, sscb);
-    if (!axis_tables->fvar)
-        goto cleanup;
+	DURING
+		axis_tables->fvar = var_loadfvar(sfr, sscb);
+		if (!axis_tables->fvar)
+			goto cleanup;
 
-    axis_tables->avar = var_loadavar(sfr, sscb);
-    if (axis_tables->avar && axis_tables->fvar->axisCount != axis_tables->avar->axisCount) {
-		sscb->message(sscb, "mismatching axis counts in fvar and avar");
-        var_freeavar(sscb, axis_tables->avar);
-        axis_tables->avar = NULL;
-    }
+		axis_tables->avar = var_loadavar(sfr, sscb);
+		if (axis_tables->avar && axis_tables->fvar->axisCount != axis_tables->avar->axisCount) {
+			sscb->message(sscb, "mismatching axis counts in fvar and avar");
+			var_freeavar(sscb, axis_tables->avar);
+			axis_tables->avar = NULL;
+		}
+		success = 1;
+cleanup:;
+	HANDLER
+	END_HANDLER
+
+	if (!success) {
+		var_freeaxes(sscb, axis_tables);
+		axis_tables = NULL;
+	}
 
     return axis_tables;
-
-cleanup:
-    var_freeaxes(sscb, axis_tables);
-    return NULL;
 }
 
 /* free font axis tables */
@@ -531,7 +561,7 @@ static var_F2dot14 var_defaultNormalizeAxis(var_fvar fvar, unsigned short axisIn
 static Fixed    applySegmentMap(segmentMap *seg, Fixed value)
 {
     long  i;
-    axisValueMap    *map;
+    axisValueMap    *map = NULL;
     Fixed   endFromVal, endToVal, startFromVal, startToVal;
 
     if (seg->valueMaps.cnt <= 0)
@@ -638,127 +668,139 @@ var_itemVariationStore var_loadItemVariationStore(ctlSharedStmCallbacks *sscb, u
     unsigned long regionListOffset;
     unsigned short ivdSubtableCount;
     var_itemVariationStore  ivs = NULL;
+	int success = 0;
     unsigned short  i, axis;
     dnaDCL(unsigned long, ivdSubtablesOffsets);
     variationRegion *region;
 
-    if (ivsOffset + IVS_SUBTABLE_HEADER_SIZE > tableLength) {
-		sscb->message(sscb, "item variation store offset not within table range");
-        return NULL;
-    }
+	dnaINIT(sscb->dna, ivdSubtablesOffsets, 5, 10);
 
-	sscb->seek(sscb, tableOffset + ivsOffset);
+	DURING
+		if (ivsOffset + IVS_SUBTABLE_HEADER_SIZE > tableLength) {
+			sscb->message(sscb, "item variation store offset not within table range");
+			goto cleanup;
+		}
 
-    /* load table header */
-    if (sscb->read2(sscb) != ITEM_VARIATION_STORE_TABLE_FORMAT) {
-		sscb->message(sscb, "invalid item variation store table format");
-        return NULL;
-    }
-    regionListOffset = sscb->read4(sscb);
-    ivdSubtableCount = sscb->read2(sscb);
+		sscb->seek(sscb, tableOffset + ivsOffset);
 
-    /* allocate and initialize item variation data store structure */
-    ivs = sscb->memNew(sscb, sizeof(*ivs));
-    if (ivs == NULL)
-        return NULL;
-    memset(ivs, 0, sizeof(*ivs));
-    dnaINIT(sscb->dna, ivs->regionList.regions, 0, 1);
-    dnaINIT(sscb->dna, ivs->dataList.ivdSubtables, 0, 1);
+		/* load table header */
+		if (sscb->read2(sscb) != ITEM_VARIATION_STORE_TABLE_FORMAT) {
+			sscb->message(sscb, "invalid item variation store table format");
+			goto cleanup;
+		}
+		regionListOffset = sscb->read4(sscb);
+		ivdSubtableCount = sscb->read2(sscb);
 
-    /* load item variation data offsets into a temporary array */
-    dnaINIT(sscb->dna, ivdSubtablesOffsets, ivdSubtableCount, 1);
-    if ((dnaSetCnt(&ivs->dataList.ivdSubtables, DNA_ELEM_SIZE_(ivs->dataList.ivdSubtables), ivdSubtableCount) < 0)
-        || (dnaSetCnt(&ivdSubtablesOffsets, DNA_ELEM_SIZE_(ivdSubtablesOffsets), ivdSubtableCount) < 0))
-        goto cleanup;
-    for (i = 0; i < ivdSubtableCount; i++) {
-        ivdSubtablesOffsets.array[i] = sscb->read4(sscb);
-    }
+		/* allocate and initialize item variation data store structure */
+		ivs = (var_itemVariationStore)sscb->memNew(sscb, sizeof(*ivs));
+		if (ivs == NULL)
+			goto cleanup;
+		memset(ivs, 0, sizeof(*ivs));
+		dnaINIT(sscb->dna, ivs->regionList.regions, 0, 1);
+		dnaINIT(sscb->dna, ivs->dataList.ivdSubtables, 0, 1);
 
-    /* load variation region list */
-    if (ivsOffset + regionListOffset + IVS_VARIATION_REGION_LIST_HEADER_SIZE > tableLength) {
-		sscb->message(sscb, "invalid item variation region offset");
-        goto cleanup;
-    }
-    sscb->seek(sscb, tableOffset + ivsOffset + regionListOffset);
-    ivs->regionList.axisCount = sscb->read2(sscb);
-    ivs->regionList.regionCount = sscb->read2(sscb);
-    if (dnaSetCnt(&ivs->regionList.regions, DNA_ELEM_SIZE_(ivs->regionList.regions), ivs->regionList.axisCount * ivs->regionList.regionCount) < 0)
-        goto cleanup;
+		/* load item variation data offsets into a temporary array */
+		if (dnaSetCnt(&ivs->dataList.ivdSubtables, DNA_ELEM_SIZE_(ivs->dataList.ivdSubtables), ivdSubtableCount) < 0)
+			goto cleanup;
 
-    if (ivsOffset + regionListOffset + IVS_VARIATION_REGION_LIST_HEADER_SIZE
-        + REGION_AXIS_COORDINATES_SIZE * ivs->regionList.regions.cnt > tableLength) {
-		sscb->message(sscb, "item variation region list out of bounds");
-        goto cleanup;
-    }
+		memset(DNA_ELEM_ADDR_(ivs->dataList.ivdSubtables, 0), 0, DNA_ELEM_SIZE_(ivs->dataList.ivdSubtables) * ivdSubtableCount);
 
-    region = &ivs->regionList.regions.array[0];
-    for (i = 0; i < ivs->regionList.regionCount; i++) {
-        for (axis = 0; axis < ivs->regionList.axisCount; axis++) {
-            region->startCoord = (var_F2dot14)sscb->read2(sscb);
-            region->peakCoord = (var_F2dot14)sscb->read2(sscb);
-            region->endCoord = (var_F2dot14)sscb->read2(sscb);
-            region++;
+		if (dnaSetCnt(&ivdSubtablesOffsets, DNA_ELEM_SIZE_(ivdSubtablesOffsets), ivdSubtableCount) < 0)
+			goto cleanup;
+
+		for (i = 0; i < ivdSubtableCount; i++) {
+			ivdSubtablesOffsets.array[i] = sscb->read4(sscb);
+		}
+
+		/* load variation region list */
+		if (ivsOffset + regionListOffset + IVS_VARIATION_REGION_LIST_HEADER_SIZE > tableLength) {
+			sscb->message(sscb, "invalid item variation region offset");
+			goto cleanup;
+		}
+		sscb->seek(sscb, tableOffset + ivsOffset + regionListOffset);
+		ivs->regionList.axisCount = sscb->read2(sscb);
+		ivs->regionList.regionCount = sscb->read2(sscb);
+		if (dnaSetCnt(&ivs->regionList.regions, DNA_ELEM_SIZE_(ivs->regionList.regions), ivs->regionList.axisCount * ivs->regionList.regionCount) < 0)
+			goto cleanup;
+
+		if (ivsOffset + regionListOffset + IVS_VARIATION_REGION_LIST_HEADER_SIZE
+			+ REGION_AXIS_COORDINATES_SIZE * ivs->regionList.regions.cnt > tableLength) {
+			sscb->message(sscb, "item variation region list out of bounds");
+			goto cleanup;
+		}
+
+		region = &ivs->regionList.regions.array[0];
+		for (i = 0; i < ivs->regionList.regionCount; i++) {
+			for (axis = 0; axis < ivs->regionList.axisCount; axis++) {
+				region->startCoord = (var_F2dot14)sscb->read2(sscb);
+				region->peakCoord = (var_F2dot14)sscb->read2(sscb);
+				region->endCoord = (var_F2dot14)sscb->read2(sscb);
+				region++;
             
-            /* TODO: coord range check? */
-        }
-    }
+				/* TODO: coord range check? */
+			}
+		}
 
-    /* load item variation data list */
-    for (i = 0; i < ivdSubtableCount; i++) {
-        unsigned long   ivdSubtablesOffset;
-        unsigned short  shortDeltaCount;
-        itemVariationDataSubtable  *ivd;
-        unsigned short  r, t, j;
+		/* load item variation data list */
+		for (i = 0; i < ivdSubtableCount; i++) {
+			unsigned long   ivdSubtablesOffset;
+			unsigned short  shortDeltaCount;
+			itemVariationDataSubtable  *ivd;
+			unsigned short  r, t, j;
 
-        ivdSubtablesOffset = ivdSubtablesOffsets.array[i];
-        if (ivsOffset + ivdSubtablesOffset + ITEM_VARIATION_DATA_HEADER_SIZE > tableLength) {
-            sscb->message(sscb, "item variation data offset out of bounds");
-            goto cleanup;
-        }
+			ivdSubtablesOffset = ivdSubtablesOffsets.array[i];
+			if (ivsOffset + ivdSubtablesOffset + ITEM_VARIATION_DATA_HEADER_SIZE > tableLength) {
+				sscb->message(sscb, "item variation data offset out of bounds");
+				goto cleanup;
+			}
 
-        /* load item variation data sub-table header */
-        sscb->seek(sscb, tableOffset + ivsOffset + ivdSubtablesOffset);
+			/* load item variation data sub-table header */
+			sscb->seek(sscb, tableOffset + ivsOffset + ivdSubtablesOffset);
 
-        ivd = &ivs->dataList.ivdSubtables.array[i];
-        ivd->itemCount = sscb->read2(sscb);
-        shortDeltaCount = sscb->read2(sscb);
-        ivd->regionCount = sscb->read2(sscb);
+			ivd = &ivs->dataList.ivdSubtables.array[i];
+			ivd->itemCount = sscb->read2(sscb);
+			shortDeltaCount = sscb->read2(sscb);
+			ivd->regionCount = sscb->read2(sscb);
+			if (ivd->regionCount > CFF2_MAX_MASTERS)
+				goto cleanup;
 
-        dnaINIT(sscb->dna, ivd->regionIndices, ivd->regionCount, 1);
-        dnaINIT(sscb->dna, ivd->deltaValues, ivd->itemCount * ivd->regionCount, 1);
-        if ((dnaSetCnt(&ivd->regionIndices, DNA_ELEM_SIZE_(ivd->regionIndices), ivd->regionCount) < 0)
-            || (dnaSetCnt(&ivd->deltaValues, DNA_ELEM_SIZE_(ivd->deltaValues), ivd->itemCount * ivd->regionCount) < 0))
-            goto cleanup;
+			dnaINIT(sscb->dna, ivd->regionIndices, ivd->regionCount, 1);
+			dnaINIT(sscb->dna, ivd->deltaValues, ivd->itemCount * ivd->regionCount, 1);
+			if ((dnaSetCnt(&ivd->regionIndices, DNA_ELEM_SIZE_(ivd->regionIndices), ivd->regionCount) < 0)
+				|| (dnaSetCnt(&ivd->deltaValues, DNA_ELEM_SIZE_(ivd->deltaValues), ivd->itemCount * ivd->regionCount) < 0))
+				goto cleanup;
 
-        /* load region indices */
-        for (r = 0; r < ivd->regionCount; r++) {
-            ivd->regionIndices.array[r] = (short)sscb->read2(sscb);
-        }
+			/* load region indices */
+			for (r = 0; r < ivd->regionCount; r++) {
+				ivd->regionIndices.array[r] = (short)sscb->read2(sscb);
+			}
         
-        /* load two-dimensional delta values array */
-        j = 0;
-        for (t = 0; t < ivd->itemCount; t++) {
-            for (r = 0; r < ivd->regionCount; r++) {
-                ivd->deltaValues.array[j++] = (short)((r < shortDeltaCount)? sscb->read2(sscb): (char)sscb->read1(sscb));
-            }
-        }
-    }
+			/* load two-dimensional delta values array */
+			j = 0;
+			for (t = 0; t < ivd->itemCount; t++) {
+				for (r = 0; r < ivd->regionCount; r++) {
+					ivd->deltaValues.array[j++] = (short)((r < shortDeltaCount)? sscb->read2(sscb): (char)sscb->read1(sscb));
+				}
+			}
+		}
+		success = 1;
+cleanup:;
+	HANDLER
+	END_HANDLER
 
+	if (!success) {
+		var_freeItemVariationStore(sscb, ivs);
+		ivs = NULL;
+	}
     dnaFREE(ivdSubtablesOffsets);
 
     return ivs;
-
-cleanup:
-    var_freeItemVariationStore(sscb, ivs);
-    dnaFREE(ivdSubtablesOffsets);
-
-    return NULL;
 }
 
 void var_freeItemVariationStore(ctlSharedStmCallbacks *sscb, var_itemVariationStore ivs)
 {
     if (ivs) {
-        short   i;
+        long   i;
         
         for (i = 0; i < ivs->dataList.ivdSubtables.cnt; i++) {
             itemVariationDataSubtable  *ivd = &ivs->dataList.ivdSubtables.array[i];
@@ -780,7 +822,7 @@ unsigned short var_getIVSRegionCount(var_itemVariationStore ivs)
 /* get the region count for a given variation store index */
 unsigned short var_getIVSRegionCountForIndex(var_itemVariationStore ivs, unsigned short vsIndex)
 {
-    if (vsIndex >= ivs->dataList.ivdSubtables.cnt)
+    if (!ivs || vsIndex >= ivs->dataList.ivdSubtables.cnt)
         return 0;
 
     return ivs->dataList.ivdSubtables.array[vsIndex].regionCount;
@@ -842,6 +884,10 @@ static int  loadIndexMap(ctlSharedStmCallbacks *sscb, sfrTable *table, unsigned 
     unsigned long   mapDataSize;
     unsigned short  i, j;
 
+    ima->offset = indexOffset;
+    if (indexOffset == 0)   /* No index map */
+        return 1;
+
     if (indexOffset + DELTA_SET_INDEX_MAP_HEADER_SIZE > table->offset) {
 		sscb->message(sscb, "invalid delta set index map table header");
         return 0;
@@ -862,7 +908,7 @@ static int  loadIndexMap(ctlSharedStmCallbacks *sscb, sfrTable *table, unsigned 
         return 0;
     }
 
-    if (dnaSetCnt(ima, DNA_ELEM_SIZE_(*ima), mapCount) < 0)
+    if (dnaSetCnt(&ima->map, DNA_ELEM_SIZE_(ima->map), mapCount) < 0)
         return 0;
 
     for (i = 0; i < mapCount; i++) {
@@ -871,8 +917,8 @@ static int  loadIndexMap(ctlSharedStmCallbacks *sscb, sfrTable *table, unsigned 
             entry <<= 8;
             entry += sscb->read1(sscb);
         }
-        ima->array[i].innerIndex = (entry & innerIndexEntryMask);
-        ima->array[i].outerIndex = (entry >> outerIndexEntryShift);
+        ima->map.array[i].innerIndex = (entry & innerIndexEntryMask);
+        ima->map.array[i].outerIndex = (entry >> outerIndexEntryShift);
     }
 
     return 1;
@@ -880,15 +926,15 @@ static int  loadIndexMap(ctlSharedStmCallbacks *sscb, sfrTable *table, unsigned 
 
 static void lookupIndexMap(indexMap *map, unsigned short gid, indexPair *index)
 {
-    if (map->cnt <= gid) {
-        if (map->cnt == 0) {
+    if (map->map.cnt <= gid) {
+        if (map->map.cnt == 0) {
             index->innerIndex = gid;
             index->outerIndex = 0;
         } else {
-            *index = map->array[map->cnt-1];
+            *index = map->map.array[map->map.cnt-1];
         }
     } else {
-        *index = map->array[gid];
+        *index = map->map.array[gid];
     }
 }
 
@@ -898,7 +944,7 @@ long var_getIVSRegionIndices(var_itemVariationStore ivs, unsigned short vsIndex,
     itemVariationDataSubtable   *subtable;
     long        i;
 
-    if (vsIndex >= dataList->ivdSubtables.cnt)
+    if (!ivs || vsIndex >= dataList->ivdSubtables.cnt)
         return 0;
 
     subtable = &dataList->ivdSubtables.array[vsIndex];
@@ -907,7 +953,11 @@ long var_getIVSRegionIndices(var_itemVariationStore ivs, unsigned short vsIndex,
         return 0;
 
     for (i = 0; i < subtable->regionIndices.cnt; i++) {
-        regionIndices[i] = subtable->regionIndices.array[i];
+		unsigned short index = subtable->regionIndices.array[i];
+		if (index >= regionCount) {
+			return 0;
+		}
+		regionIndices[i] = index;
     }
 
     return subtable->regionIndices.cnt;
@@ -959,11 +1009,13 @@ static float   var_applyDeltasForGid(ctlSharedStmCallbacks *sscb, var_itemVariat
 {
     indexPair   pair;
 
-    /* no adjustment if the index map table is missing */
-    if (map->cnt == 0)
-        return .0f;
-
-    lookupIndexMap(map, gid, &pair);
+    /* Use (0,gid) as the default index pair if the index map table is missing */
+    if (map->map.cnt == 0) {
+        pair.outerIndex = 0;
+        pair.innerIndex = gid;
+    }
+    else
+        lookupIndexMap(map, gid, &pair);
 
     return var_applyDeltasForIndexPair(sscb, ivs, &pair, scalars, regionCount);
 }
@@ -972,133 +1024,139 @@ static float   var_applyDeltasForGid(ctlSharedStmCallbacks *sscb, var_itemVariat
 
 var_hmtx   var_loadhmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb)
 {
-    var_hmtx   hmtx = NULL;
-    sfrTable *table = NULL;
-    unsigned long   ivsOffset;
-    unsigned long   widthMapOffset;
-    unsigned long   lsbMapOffset;
-    unsigned long   rsbMapOffset;
-    float  defaultWidth;
-    unsigned short   i;
-    long  numGlyphs;
+	var_hmtx   hmtx = NULL;
+	int success = 0;
+	sfrTable *table = NULL;
+	unsigned long   ivsOffset;
+	unsigned long   widthMapOffset;
+	unsigned long   lsbMapOffset;
+	unsigned long   rsbMapOffset;
+	float  defaultWidth;
+	unsigned short   i;
+	long  numGlyphs;
 
-    hmtx = sscb->memNew(sscb, sizeof(*hmtx));
-    memset(hmtx, 0, sizeof(*hmtx));
+	hmtx = (var_hmtx)sscb->memNew(sscb, sizeof(*hmtx));
+	memset(hmtx, 0, sizeof(*hmtx));
 
-    /* read hhea table */
-	table = sfrGetTableByTag(sfr, HHEA_TABLE_TAG);
-	if (table == NULL || table->length < HHEA_TABLE_HEADER_SIZE) {
-		sscb->message(sscb, "invalid/missing hhea table");
-		goto cleanup;
-    }
+	DURING
+		/* read hhea table */
+		table = sfrGetTableByTag(sfr, HHEA_TABLE_TAG);
+		if (table == NULL || table->length < HHEA_TABLE_HEADER_SIZE) {
+			sscb->message(sscb, "invalid/missing hhea table");
+			goto cleanup;
+		}
 
-	sscb->seek(sscb, table->offset);
+		sscb->seek(sscb, table->offset);
 
-    hmtx->header.version = (Fixed)sscb->read4(sscb);
-    if (hmtx->header.version != HHEA_TABLE_VERSION) {
-		sscb->message(sscb, "invalid hhea table version");
-		goto cleanup;
-    }
+		hmtx->header.version = (Fixed)sscb->read4(sscb);
+		if (hmtx->header.version != HHEA_TABLE_VERSION) {
+			sscb->message(sscb, "invalid hhea table version");
+			goto cleanup;
+		}
 
-    hmtx->header.ascender = (short)sscb->read2(sscb);
-    hmtx->header.descender = (short)sscb->read2(sscb);
-    hmtx->header.lineGap = (short)sscb->read2(sscb);
-    hmtx->header.advanceWidthMax = (unsigned short)sscb->read2(sscb);
-    hmtx->header.minLeftSideBearing = (short)sscb->read2(sscb);
-    hmtx->header.minRightSideBearing = (short)sscb->read2(sscb);
-    hmtx->header.xMaxExtent = (short)sscb->read2(sscb);
-    hmtx->header.caretSlopeRise = (short)sscb->read2(sscb);
-    hmtx->header.caretSlopeRun = (short)sscb->read2(sscb);
-    hmtx->header.caretOffset = (short)sscb->read2(sscb);
-    for (i = 0; i < 4; i++) hmtx->header.reserved[i] = (short)sscb->read2(sscb);
-    hmtx->header.metricDataFormat = (short)sscb->read2(sscb);
-    hmtx->header.numberOfHMetrics = (unsigned short)sscb->read2(sscb);
-    if (hmtx->header.numberOfHMetrics == 0) {
-		sscb->message(sscb, "invalid numberOfHMetrics value in hhea table");
-		goto cleanup;
-    }
+		hmtx->header.ascender = (short)sscb->read2(sscb);
+		hmtx->header.descender = (short)sscb->read2(sscb);
+		hmtx->header.lineGap = (short)sscb->read2(sscb);
+		hmtx->header.advanceWidthMax = (unsigned short)sscb->read2(sscb);
+		hmtx->header.minLeftSideBearing = (short)sscb->read2(sscb);
+		hmtx->header.minRightSideBearing = (short)sscb->read2(sscb);
+		hmtx->header.xMaxExtent = (short)sscb->read2(sscb);
+		hmtx->header.caretSlopeRise = (short)sscb->read2(sscb);
+		hmtx->header.caretSlopeRun = (short)sscb->read2(sscb);
+		hmtx->header.caretOffset = (short)sscb->read2(sscb);
+		for (i = 0; i < 4; i++) hmtx->header.reserved[i] = (short)sscb->read2(sscb);
+		hmtx->header.metricDataFormat = (short)sscb->read2(sscb);
+		hmtx->header.numberOfHMetrics = (unsigned short)sscb->read2(sscb);
+		if (hmtx->header.numberOfHMetrics == 0) {
+			sscb->message(sscb, "invalid numberOfHMetrics value in hhea table");
+			goto cleanup;
+		}
 
-    /* read hmtx table */
-	table = sfrGetTableByTag(sfr, HMTX_TABLE_TAG);
-	if (table == NULL)
-		goto cleanup;
+		/* read hmtx table */
+		table = sfrGetTableByTag(sfr, HMTX_TABLE_TAG);
+		if (table == NULL)
+			goto cleanup;
 
-    /* estimate the number of glphs from the table size instead of reading the head table */
-    numGlyphs = (table->length / 2) - hmtx->header.numberOfHMetrics;
-    if (numGlyphs < hmtx->header.numberOfHMetrics) {
-		sscb->message(sscb, "invalid hmtx table size");
-		goto cleanup;
-    }
+		/* estimate the number of glphs from the table size instead of reading the head table */
+		numGlyphs = (table->length / 2) - hmtx->header.numberOfHMetrics;
+		if (numGlyphs < hmtx->header.numberOfHMetrics) {
+			sscb->message(sscb, "invalid hmtx table size");
+			goto cleanup;
+		}
 
-	sscb->seek(sscb, table->offset);
+		sscb->seek(sscb, table->offset);
 
-    dnaINIT(sscb->dna, hmtx->defaultMetrics, numGlyphs, 1);
-    if (dnaSetCnt(&hmtx->defaultMetrics, DNA_ELEM_SIZE_(hmtx->defaultMetrics), numGlyphs) < 0)
-        goto cleanup;
-    for (i = 0; i < hmtx->header.numberOfHMetrics; i++) {
-        hmtx->defaultMetrics.array[i].width = (unsigned short)sscb->read2(sscb);
-        hmtx->defaultMetrics.array[i].sideBearing = (short)sscb->read2(sscb);
-    }
-    defaultWidth = hmtx->defaultMetrics.array[i-1].width;
-    for (; i < numGlyphs; i++) {
-        hmtx->defaultMetrics.array[i].width = defaultWidth;
-        hmtx->defaultMetrics.array[i].sideBearing = (short)sscb->read2(sscb);
-    }
+		dnaINIT(sscb->dna, hmtx->defaultMetrics, numGlyphs, 1);
+		if (dnaSetCnt(&hmtx->defaultMetrics, DNA_ELEM_SIZE_(hmtx->defaultMetrics), numGlyphs) < 0)
+			goto cleanup;
+		for (i = 0; i < hmtx->header.numberOfHMetrics; i++) {
+			hmtx->defaultMetrics.array[i].width = (unsigned short)sscb->read2(sscb);
+			hmtx->defaultMetrics.array[i].sideBearing = (short)sscb->read2(sscb);
+		}
+		defaultWidth = hmtx->defaultMetrics.array[i - 1].width;
+		for (; i < numGlyphs; i++) {
+			hmtx->defaultMetrics.array[i].width = defaultWidth;
+			hmtx->defaultMetrics.array[i].sideBearing = (short)sscb->read2(sscb);
+		}
 
-	table = sfrGetTableByTag(sfr, HVAR_TABLE_TAG);
-	if (table == NULL)  /* HVAR table is optional */
-		return hmtx;
+		table = sfrGetTableByTag(sfr, HVAR_TABLE_TAG);
+		if (table == NULL) {  /* HVAR table is optional */
+			success = 1;
+			goto cleanup;
+		}
 
-	sscb->seek(sscb, table->offset);
+		sscb->seek(sscb, table->offset);
 
-    if (table->length < HVAR_TABLE_HEADER_SIZE) {
-		sscb->message(sscb, "invalid HVAR table size");
-        goto cleanup;
-    }
+		if (table->length < HVAR_TABLE_HEADER_SIZE) {
+			sscb->message(sscb, "invalid HVAR table size");
+			goto cleanup;
+		}
 
-	/* Read and validate HVAR table version */
-	if (sscb->read4(sscb) != HVAR_TABLE_VERSION) {
-		sscb->message(sscb, "invalid HVAR table version");
-        goto cleanup;
-    }
+		/* Read and validate HVAR table version */
+		if (sscb->read4(sscb) != HVAR_TABLE_VERSION) {
+			sscb->message(sscb, "invalid HVAR table version");
+			goto cleanup;
+		}
 
-    ivsOffset = sscb->read4(sscb);
-    widthMapOffset = sscb->read4(sscb);
-    lsbMapOffset = sscb->read4(sscb);
-    rsbMapOffset = sscb->read4(sscb);
+		ivsOffset = sscb->read4(sscb);
+		widthMapOffset = sscb->read4(sscb);
+		lsbMapOffset = sscb->read4(sscb);
+		rsbMapOffset = sscb->read4(sscb);
 
-    if (ivsOffset == 0) {
-		sscb->message(sscb, "item variation store offset in HVAR is NULL");
-        goto cleanup;
-    }
+		if (ivsOffset == 0) {
+			sscb->message(sscb, "item variation store offset in HVAR is NULL");
+			goto cleanup;
+		}
 
-    hmtx->ivs = var_loadItemVariationStore(sscb, table->offset, table->length, ivsOffset);
-    if (hmtx->ivs == NULL)
-        goto cleanup;
+		hmtx->ivs = var_loadItemVariationStore(sscb, table->offset, table->length, ivsOffset);
+		if (hmtx->ivs == NULL)
+			goto cleanup;
 
-    dnaINIT(sscb->dna, hmtx->widthMap, 0, 1);
+		dnaINIT(sscb->dna, hmtx->widthMap.map, 0, 1);
+		dnaINIT(sscb->dna, hmtx->lsbMap.map, 0, 1);
+		dnaINIT(sscb->dna, hmtx->rsbMap.map, 0, 1);
 
-    if (widthMapOffset) {
-        if (!loadIndexMap(sscb, table, widthMapOffset, &hmtx->widthMap))
-            goto cleanup;
-    }
+		if (!loadIndexMap(sscb, table, widthMapOffset, &hmtx->widthMap))
+			goto cleanup;
 
-    if (lsbMapOffset) {
-        if (!loadIndexMap(sscb, table, lsbMapOffset, &hmtx->lsbMap))
-            goto cleanup;
-    }
+		if (!loadIndexMap(sscb, table, lsbMapOffset, &hmtx->lsbMap))
+			goto cleanup;
 
-    if (rsbMapOffset) {
-        if (!loadIndexMap(sscb, table, rsbMapOffset, &hmtx->rsbMap))
-            goto cleanup;
-    }
+		if (!loadIndexMap(sscb, table, rsbMapOffset, &hmtx->rsbMap))
+			goto cleanup;
+
+		success = 1;
+
+cleanup:;
+	HANDLER
+	END_HANDLER
+
+	if (!success) {
+		var_freehmtx(sscb, hmtx);
+		hmtx = NULL;
+	}
 
     return hmtx;
-
-cleanup:
-    var_freehmtx(sscb, hmtx);
-
-    return NULL;
 }
 
 void var_freehmtx(ctlSharedStmCallbacks *sscb, var_hmtx hmtx)
@@ -1106,9 +1164,9 @@ void var_freehmtx(ctlSharedStmCallbacks *sscb, var_hmtx hmtx)
     if (hmtx) {
         dnaFREE(hmtx->defaultMetrics);
         var_freeItemVariationStore(sscb, hmtx->ivs);
-        dnaFREE(hmtx->widthMap);
-        dnaFREE(hmtx->lsbMap);
-        dnaFREE(hmtx->rsbMap);
+        dnaFREE(hmtx->widthMap.map);
+        dnaFREE(hmtx->lsbMap.map);
+        dnaFREE(hmtx->rsbMap.map);
 
         sscb->memFree(sscb, hmtx);
     }
@@ -1133,7 +1191,8 @@ int var_lookuphmtx(ctlSharedStmCallbacks *sscb, var_hmtx hmtx, unsigned short ax
         long        regionCount = hmtx->ivs->regionList.regionCount;
 
         metrics->width += var_applyDeltasForGid(sscb, hmtx->ivs, &hmtx->widthMap, gid, scalars, regionCount);
-        metrics->sideBearing += var_applyDeltasForGid(sscb, hmtx->ivs, &hmtx->lsbMap, gid, scalars, regionCount);
+        if (hmtx->lsbMap.offset > 0)    /* if side bearing variation data are provided, index map must exist */
+            metrics->sideBearing += var_applyDeltasForGid(sscb, hmtx->ivs, &hmtx->lsbMap, gid, scalars, regionCount);
     }
 
     return 0;
@@ -1142,6 +1201,7 @@ int var_lookuphmtx(ctlSharedStmCallbacks *sscb, var_hmtx hmtx, unsigned short ax
 var_vmtx   var_loadvmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb)
 {
     var_vmtx   vmtx = NULL;
+	int success = 0;
     sfrTable *table = NULL;
     unsigned long   ivsOffset;
     unsigned long   widthMapOffset;
@@ -1152,174 +1212,175 @@ var_vmtx   var_loadvmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb)
     unsigned short  i;
     long    numGlyphs;
 
-    vmtx = sscb->memNew(sscb, sizeof(*vmtx));
+    vmtx = (var_vmtx)sscb->memNew(sscb, sizeof(*vmtx));
     memset(vmtx, 0, sizeof(*vmtx));
 
-    /* read hhea table */
-	table = sfrGetTableByTag(sfr, VHEA_TABLE_TAG);
-	if (table == NULL || table->length < VHEA_TABLE_HEADER_SIZE) {
-		sscb->message(sscb, "invalid/missing vhea table");
-		goto cleanup;
-    }
+	DURING
+		/* read hhea table */
+		table = sfrGetTableByTag(sfr, VHEA_TABLE_TAG);
+		if (table == NULL || table->length < VHEA_TABLE_HEADER_SIZE) {
+			sscb->message(sscb, "invalid/missing vhea table");
+			goto cleanup;
+		}
 
-	sscb->seek(sscb, table->offset);
+		sscb->seek(sscb, table->offset);
 
-    vmtx->header.version = (Fixed)sscb->read4(sscb);
-    if (vmtx->header.version != VHEA_TABLE_VERSION && vmtx->header.version != VHEA_TABLE_VERSION_1_1) {
-		sscb->message(sscb, "invalid hhea table version");
-		goto cleanup;
-    }
+		vmtx->header.version = (Fixed)sscb->read4(sscb);
+		if (vmtx->header.version != VHEA_TABLE_VERSION && vmtx->header.version != VHEA_TABLE_VERSION_1_1) {
+			sscb->message(sscb, "invalid hhea table version");
+			goto cleanup;
+		}
 
-    vmtx->header.vertTypoAscender = (short)sscb->read2(sscb);
-    vmtx->header.vertTypoDescender = (short)sscb->read2(sscb);
-    vmtx->header.vertTypoLineGap = (short)sscb->read2(sscb);
-    vmtx->header.advanceHeightMax = (unsigned short)sscb->read2(sscb);
-    vmtx->header.minTop = (short)sscb->read2(sscb);
-    vmtx->header.minBottom = (short)sscb->read2(sscb);
-    vmtx->header.caretSlopeRise = (short)sscb->read2(sscb);
-    vmtx->header.caretSlopeRun = (short)sscb->read2(sscb);
-    vmtx->header.caretOffset = (short)sscb->read2(sscb);
-    for (i = 0; i < 4; i++) vmtx->header.reserved[i] = (short)sscb->read2(sscb);
-    vmtx->header.metricDataFormat = (short)sscb->read2(sscb);
-    vmtx->header.numOfLongVertMetrics = (unsigned short)sscb->read2(sscb);
-    if (vmtx->header.numOfLongVertMetrics == 0) {
-		sscb->message(sscb, "invalid numOfLongVertMetrics value in vhea table");
-		goto cleanup;
-    }
+		vmtx->header.vertTypoAscender = (short)sscb->read2(sscb);
+		vmtx->header.vertTypoDescender = (short)sscb->read2(sscb);
+		vmtx->header.vertTypoLineGap = (short)sscb->read2(sscb);
+		vmtx->header.advanceHeightMax = (unsigned short)sscb->read2(sscb);
+		vmtx->header.minTop = (short)sscb->read2(sscb);
+		vmtx->header.minBottom = (short)sscb->read2(sscb);
+		vmtx->header.caretSlopeRise = (short)sscb->read2(sscb);
+		vmtx->header.caretSlopeRun = (short)sscb->read2(sscb);
+		vmtx->header.caretOffset = (short)sscb->read2(sscb);
+		for (i = 0; i < 4; i++) vmtx->header.reserved[i] = (short)sscb->read2(sscb);
+		vmtx->header.metricDataFormat = (short)sscb->read2(sscb);
+		vmtx->header.numOfLongVertMetrics = (unsigned short)sscb->read2(sscb);
+		if (vmtx->header.numOfLongVertMetrics == 0) {
+			sscb->message(sscb, "invalid numOfLongVertMetrics value in vhea table");
+			goto cleanup;
+		}
 
-    /* read vmtx table */
-	table = sfrGetTableByTag(sfr, VMTX_TABLE_TAG);
-	if (table == NULL)
-		goto cleanup;
+		/* read vmtx table */
+		table = sfrGetTableByTag(sfr, VMTX_TABLE_TAG);
+		if (table == NULL)
+			goto cleanup;
 
-    /* estimate the number of glphs from the table size instead of reading the head table */
-    numGlyphs = (table->length / 2) - vmtx->header.numOfLongVertMetrics;
-    if (numGlyphs < vmtx->header.numOfLongVertMetrics) {
-		sscb->message(sscb, "invalid vmtx table size");
-		goto cleanup;
-    }
+		/* estimate the number of glphs from the table size instead of reading the head table */
+		numGlyphs = (table->length / 2) - vmtx->header.numOfLongVertMetrics;
+		if (numGlyphs < vmtx->header.numOfLongVertMetrics) {
+			sscb->message(sscb, "invalid vmtx table size");
+			goto cleanup;
+		}
 
-	sscb->seek(sscb, table->offset);
+		sscb->seek(sscb, table->offset);
 
-    if (dnaSetCnt(&vmtx->defaultMetrics, DNA_ELEM_SIZE_(vmtx->defaultMetrics), numGlyphs) < 0)
-        goto cleanup;
-    for (i = 0; i < vmtx->header.numOfLongVertMetrics; i++) {
-        vmtx->defaultMetrics.array[i].width = (unsigned short)sscb->read2(sscb);
-        vmtx->defaultMetrics.array[i].sideBearing = (short)sscb->read2(sscb);
-    }
-    defaultWidth = vmtx->defaultMetrics.array[i-1].width;
-    for (; i < numGlyphs; i++) {
-        vmtx->defaultMetrics.array[i].width = defaultWidth;
-        vmtx->defaultMetrics.array[i].sideBearing = (short)sscb->read2(sscb);
-    }
+		if (dnaSetCnt(&vmtx->defaultMetrics, DNA_ELEM_SIZE_(vmtx->defaultMetrics), numGlyphs) < 0)
+			goto cleanup;
+		for (i = 0; i < vmtx->header.numOfLongVertMetrics; i++) {
+			vmtx->defaultMetrics.array[i].width = (unsigned short)sscb->read2(sscb);
+			vmtx->defaultMetrics.array[i].sideBearing = (short)sscb->read2(sscb);
+		}
+		defaultWidth = vmtx->defaultMetrics.array[i-1].width;
+		for (; i < numGlyphs; i++) {
+			vmtx->defaultMetrics.array[i].width = defaultWidth;
+			vmtx->defaultMetrics.array[i].sideBearing = (short)sscb->read2(sscb);
+		}
 
-    /* read optional VORG table */
-    dnaINIT(sscb->dna, vmtx->vertOriginY, 0, 1);
+		/* read optional VORG table */
+		dnaINIT(sscb->dna, vmtx->vertOriginY, 0, 1);
 
-	table = sfrGetTableByTag(sfr, VORG_TABLE_TAG);
-	if (table != NULL) {
-        short   defaultVertOriginY;
-        unsigned short  numVertOriginYMetrics;
+		table = sfrGetTableByTag(sfr, VORG_TABLE_TAG);
+		if (table != NULL) {
+			short   defaultVertOriginY;
+			unsigned short  numVertOriginYMetrics;
         
-        sscb->seek(sscb, table->offset);
+			sscb->seek(sscb, table->offset);
 
-        if (dnaSetCnt(&vmtx->vertOriginY, DNA_ELEM_SIZE_(vmtx->vertOriginY), numGlyphs) < 0)
-            goto cleanup;
+			if (dnaSetCnt(&vmtx->vertOriginY, DNA_ELEM_SIZE_(vmtx->vertOriginY), numGlyphs) < 0)
+				goto cleanup;
 
-        if (table->length < VORG_TABLE_HEADER_SIZE) {
-            sscb->message(sscb, "invalid VVAR table size");
-            goto cleanup;
-        }
+			if (table->length < VORG_TABLE_HEADER_SIZE) {
+				sscb->message(sscb, "invalid VVAR table size");
+				goto cleanup;
+			}
 
-        if (sscb->read4(sscb) != VORG_TABLE_VERSION) {
-            sscb->message(sscb, "invalid VORG table version");
-            goto cleanup;
-        }
+			if (sscb->read4(sscb) != VORG_TABLE_VERSION) {
+				sscb->message(sscb, "invalid VORG table version");
+				goto cleanup;
+			}
 
-        defaultVertOriginY = (short)sscb->read2(sscb);
-        numVertOriginYMetrics = (unsigned short)sscb->read2(sscb);
-        if (table->length < (unsigned long)(VORG_TABLE_HEADER_SIZE + 4 * numVertOriginYMetrics)) {
-            sscb->message(sscb, "invalid VORG table size");
-            goto cleanup;
-        }
+			defaultVertOriginY = (short)sscb->read2(sscb);
+			numVertOriginYMetrics = (unsigned short)sscb->read2(sscb);
+			if (table->length < (unsigned long)(VORG_TABLE_HEADER_SIZE + 4 * numVertOriginYMetrics)) {
+				sscb->message(sscb, "invalid VORG table size");
+				goto cleanup;
+			}
 
-        for (i = 0; i < numGlyphs; i++) {
-            vmtx->vertOriginY.array[i] = defaultVertOriginY;
-        }
+			for (i = 0; i < numGlyphs; i++) {
+				vmtx->vertOriginY.array[i] = defaultVertOriginY;
+			}
 
-        for (i = 0; i < numVertOriginYMetrics; i++) {
-            unsigned short  glyphIndex = (unsigned short)sscb->read2(sscb);
-            short   vertOriginY = (short)sscb->read2(sscb);
+			for (i = 0; i < numVertOriginYMetrics; i++) {
+				unsigned short  glyphIndex = (unsigned short)sscb->read2(sscb);
+				short   vertOriginY = (short)sscb->read2(sscb);
 
-            if (glyphIndex >= numGlyphs) {
-                sscb->message(sscb, "invalid glyph index in VORG table");
-                goto cleanup;
-            }
-            vmtx->vertOriginY.array[glyphIndex] = vertOriginY;
-        }
-    }
+				if (glyphIndex >= numGlyphs) {
+					sscb->message(sscb, "invalid glyph index in VORG table");
+					goto cleanup;
+				}
+				vmtx->vertOriginY.array[glyphIndex] = vertOriginY;
+			}
+		}
 
-	table = sfrGetTableByTag(sfr, VVAR_TABLE_TAG);
-	if (table == NULL)  /* VVAR table is optional */
-		return vmtx;
+		table = sfrGetTableByTag(sfr, VVAR_TABLE_TAG);
+		if (table == NULL) {  /* VVAR table is optional */
+			success = 1;
+			goto cleanup;
+		}
 
-	sscb->seek(sscb, table->offset);
+		sscb->seek(sscb, table->offset);
 
-	/* Read and validate HVAR/VVAR table version */
-    if (table->length < VVAR_TABLE_HEADER_SIZE) {
-		sscb->message(sscb, "invalid VVAR table size");
-        goto cleanup;
-    }
+		/* Read and validate HVAR/VVAR table version */
+		if (table->length < VVAR_TABLE_HEADER_SIZE) {
+			sscb->message(sscb, "invalid VVAR table size");
+			goto cleanup;
+		}
 
-	if (sscb->read4(sscb) != VVAR_TABLE_VERSION) {
-		sscb->message(sscb, "invalid VVAR table version");
-        goto cleanup;
-    }
+		if (sscb->read4(sscb) != VVAR_TABLE_VERSION) {
+			sscb->message(sscb, "invalid VVAR table version");
+			goto cleanup;
+		}
 
-    ivsOffset = sscb->read4(sscb);
-    widthMapOffset = sscb->read4(sscb);
-    tsbMapOffset = sscb->read4(sscb);
-    bsbMapOffset = sscb->read4(sscb);
-    vorgMapOffset = sscb->read4(sscb);
+		ivsOffset = sscb->read4(sscb);
+		widthMapOffset = sscb->read4(sscb);
+		tsbMapOffset = sscb->read4(sscb);
+		bsbMapOffset = sscb->read4(sscb);
+		vorgMapOffset = sscb->read4(sscb);
 
-    if (ivsOffset == 0) {
-		sscb->message(sscb, "item variation store offset in VVAR is NULL");
-        goto cleanup;
-    }
+		if (ivsOffset == 0) {
+			sscb->message(sscb, "item variation store offset in VVAR is NULL");
+			goto cleanup;
+		}
 
-    vmtx->ivs = var_loadItemVariationStore(sscb, table->offset, table->length, ivsOffset);
-    if (vmtx->ivs == NULL)
-        goto cleanup;
+		vmtx->ivs = var_loadItemVariationStore(sscb, table->offset, table->length, ivsOffset);
+		if (vmtx->ivs == NULL)
+			goto cleanup;
 
-    dnaINIT(sscb->dna, vmtx->widthMap, 0, 1);
-    dnaINIT(sscb->dna, vmtx->vorgMap, 0, 1);
+		dnaINIT(sscb->dna, vmtx->widthMap.map, 0, 1);
+		dnaINIT(sscb->dna, vmtx->vorgMap.map, 0, 1);
 
-    if (widthMapOffset) {
-        if (!loadIndexMap(sscb, table, widthMapOffset, &vmtx->widthMap))
-            goto cleanup;
-    }
+		if (!loadIndexMap(sscb, table, widthMapOffset, &vmtx->widthMap))
+			goto cleanup;
 
-    if (tsbMapOffset) {
-        if (!loadIndexMap(sscb, table, tsbMapOffset, &vmtx->tsbMap))
-            goto cleanup;
-    }
+		if (!loadIndexMap(sscb, table, tsbMapOffset, &vmtx->tsbMap))
+			goto cleanup;
 
-    if (bsbMapOffset) {
-        if (!loadIndexMap(sscb, table, bsbMapOffset, &vmtx->bsbMap))
-            goto cleanup;
-    }
+		if (!loadIndexMap(sscb, table, bsbMapOffset, &vmtx->bsbMap))
+			goto cleanup;
 
-    if (vorgMapOffset) {
-        if (!loadIndexMap(sscb, table, vorgMapOffset, &vmtx->vorgMap))
-            goto cleanup;
-    }
+		if (!loadIndexMap(sscb, table, vorgMapOffset, &vmtx->vorgMap))
+			goto cleanup;
+
+		success = 1;
+
+cleanup:;
+	HANDLER
+	END_HANDLER
+
+	if (!success) {
+		var_freevmtx(sscb, vmtx);
+		vmtx = NULL;
+	}
 
     return vmtx;
-
-cleanup:
-    var_freevmtx(sscb, vmtx);
-
-    return NULL;
 }
 
 void var_freevmtx(ctlSharedStmCallbacks *sscb, var_vmtx vmtx)
@@ -1328,10 +1389,10 @@ void var_freevmtx(ctlSharedStmCallbacks *sscb, var_vmtx vmtx)
         dnaFREE(vmtx->defaultMetrics);
         dnaFREE(vmtx->vertOriginY);
         var_freeItemVariationStore(sscb, vmtx->ivs);
-        dnaFREE(vmtx->widthMap);
-        dnaFREE(vmtx->tsbMap);
-        dnaFREE(vmtx->bsbMap);
-        dnaFREE(vmtx->vorgMap);
+        dnaFREE(vmtx->widthMap.map);
+        dnaFREE(vmtx->tsbMap.map);
+        dnaFREE(vmtx->bsbMap.map);
+        dnaFREE(vmtx->vorgMap.map);
 
         sscb->memFree(sscb, vmtx);
     }
@@ -1356,7 +1417,8 @@ int var_lookupvmtx(ctlSharedStmCallbacks *sscb, var_vmtx vmtx, unsigned short ax
         long        regionCount = vmtx->ivs->regionList.regionCount;
 
         metrics->width += var_applyDeltasForGid(sscb, vmtx->ivs, &vmtx->widthMap, gid, scalars, regionCount);
-        metrics->sideBearing += var_applyDeltasForGid(sscb, vmtx->ivs, &vmtx->tsbMap, gid, scalars, regionCount);
+        if (vmtx->tsbMap.offset > 0)    /* if side bearing variation data are provided, index map must exist */
+            metrics->sideBearing += var_applyDeltasForGid(sscb, vmtx->ivs, &vmtx->tsbMap, gid, scalars, regionCount);
     }
 
     return 0;
@@ -1388,7 +1450,7 @@ var_MVAR   var_loadMVAR(sfrCtx sfr, ctlSharedStmCallbacks *sscb)
         return NULL;
     }
 
-    mvar = sscb->memNew(sscb, sizeof(*mvar));
+    mvar = (var_MVAR)sscb->memNew(sscb, sizeof(*mvar));
     memset(mvar, 0, sizeof(*mvar));
 
     mvar->axisCount = sscb->read2(sscb);

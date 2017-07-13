@@ -8,7 +8,7 @@
 #include "dynarr.h"
 #include "ctutil.h"
 
-#include <setjmp.h>
+#include "supportexcept.h"
 
 /* --------------------------- Shared Definitions -------------------------- */
 
@@ -154,7 +154,6 @@ struct cfwCtx_ {
 	struct                      /* Error handling */
 	{
 		short code;
-		jmp_buf env;
 	}
 	err;
     unsigned long maxNumSubrs;

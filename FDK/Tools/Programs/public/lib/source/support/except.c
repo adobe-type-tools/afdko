@@ -21,6 +21,10 @@ PUBLIC _Exc_Buf *_Exc_Header;
 
 PUBLIC procedure os_raise (int  code, char * msg)
 {
+#ifdef USE_CXX_EXCEPTION
+	_Exc_Buf e(code, msg);
+    throw e;
+#else
   register _Exc_Buf *EBp;
   _Exc_Buf **PPExcept = &_Exc_Header;
 
@@ -32,5 +36,5 @@ PUBLIC procedure os_raise (int  code, char * msg)
   *PPExcept = EBp->Prev;
 
   longjmp(EBp->Environ, 1);
-
+#endif
 }

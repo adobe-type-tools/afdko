@@ -7,6 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "absfont.h"
 #include "dynarr.h"
+#include "supportexcept.h"
 
 #if PLAT_SUN4
 #include "sun4/fixstring.h"
@@ -15,7 +16,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #endif  /* PLAT_SUN4 */
 
 #include <math.h>
-#include <setjmp.h>
 #include <stdlib.h>
 #include <float.h>
 
@@ -23,8 +23,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
     #define MAXFLOAT    FLT_MAX
 #endif
 
-#define MIN(a,b)	((a) < (b)? (a): (b))
-#define MAX(a,b)	((a) > (b)? (a): (b))
 #define RND(v)		((float)floor((v) + 0.5))
 
 /* Scale to thousandths of an em */
@@ -193,7 +191,6 @@ struct abfCtx_				/* Context */
 	dnaCtx safe;			/* Safe dna context */
 	struct					/* Error handling */
 		{
-		jmp_buf env;
 		int code;
 		} err;
 	};
@@ -207,7 +204,7 @@ static void splitBez(Bezier *a, Bezier *b, float t);
 static void fatal(abfCtx h, int err_code)
 	{
 	h->err.code = err_code;
-	longjmp(h->err.env, 1);
+    RAISE(h->err.code, NULL);
 	}
 
 /* -------------------------- Fail dynarr Context -------------------------- */
@@ -223,7 +220,7 @@ static dnaCtx dna_FailInit(abfCtx h)
 /* Manage memory. */
 static void *dna_SafeManage(ctlMemoryCallbacks *cb, void *old, size_t size)
 	{
-	abfCtx h = cb->ctx;
+	abfCtx h = (abfCtx)cb->ctx;
 	void *ptr = h->mem.manage(&h->mem, old, size);
 	if (size > 0 && ptr == NULL)
 		fatal(h, abfErrNoMemory);
@@ -251,39 +248,49 @@ abfCtx abfNew(ctlMemoryCallbacks *mem_cb, CTL_CHECK_ARGS_DCL)
 		return NULL;
 
 	/* Allocate context */
-	h = mem_cb->manage(mem_cb, NULL, sizeof(struct abfCtx_));
+	h = (abfCtx)mem_cb->manage(mem_cb, NULL, sizeof(struct abfCtx_));
 	if (h == NULL)
 		return NULL;
 
-	/* Copy callbacks */
-	h->mem = *mem_cb;
+	/* Safety initialization */
+	memset(h, 0, sizeof(*h));
+	h->err.code = abfErrNoMemory;
 
-	/* Initialize service libraries */
-	h->fail = NULL;
-	h->safe = NULL;
-	h->fail = dna_FailInit(h);
-	h->safe = dna_SafeInit(h);
-	if (h->fail == NULL || h->safe == NULL)
-	  	{
-		dnaFree(h->fail);
-		dnaFree(h->safe);
-		mem_cb->manage(mem_cb, h, 0);
-		return NULL;
-		}
+	DURING
+		/* Copy callbacks */
+		h->mem = *mem_cb;
 
-	/* Initialize */
-	h->flags = 0;
-	dnaINIT(h->fail, h->glyphs, 1, 250);
-	dnaINIT(h->fail, h->paths, 20, 500);
-	dnaINIT(h->fail, h->segs, 100, 5000);
-	dnaINIT(h->safe, h->isects, 10, 20);
-	dnaINIT(h->safe, h->juncs, 10, 20);
-	dnaINIT(h->safe, h->xExtremaList, 100, 100);
-	dnaINIT(h->safe, h->yExtremaList, 100, 100);
-	h->iGlyph = -1;
-	h->iPath = -1;
-	h->iSeg = -1;
-	h->err.code = abfSuccess;
+		/* Initialize service libraries */
+		h->fail = NULL;
+		h->safe = NULL;
+		h->fail = dna_FailInit(h);
+		h->safe = dna_SafeInit(h);
+		if (h->fail == NULL || h->safe == NULL)
+	  		{
+			goto cleanup;
+			}
+
+		/* Initialize */
+		h->flags = 0;
+		dnaINIT(h->fail, h->glyphs, 1, 250);
+		dnaINIT(h->fail, h->paths, 20, 500);
+		dnaINIT(h->fail, h->segs, 100, 5000);
+		dnaINIT(h->safe, h->isects, 10, 20);
+		dnaINIT(h->safe, h->juncs, 10, 20);
+		dnaINIT(h->safe, h->xExtremaList, 100, 100);
+		dnaINIT(h->safe, h->yExtremaList, 100, 100);
+		h->iGlyph = -1;
+		h->iPath = -1;
+		h->iSeg = -1;
+		h->err.code = abfSuccess;
+
+cleanup:;
+	HANDLER
+	END_HANDLER
+	if (h->err.code != abfSuccess) {
+		abfFree(h);
+		h = NULL;
+	}
 
 	return h;
 	}
@@ -299,6 +306,9 @@ static void freeOutlets(abfCtx h)
 /* Free library context. */
 int abfFree(abfCtx h)
 	{
+	if (h == NULL)
+		return abfSuccess;
+
 	dnaFREE(h->glyphs);
 	dnaFREE(h->paths);
 	dnaFREE(h->segs);
@@ -334,86 +344,89 @@ int abfEndFont(abfCtx h, long flags, abfGlyphCallbacks *glyph_cb)
 		return abfErrNoMemory;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
+    DURING
 
-	if (flags & ABF_PATH_REMOVE_OVERLAP)
-		for (i = 0; i < h->glyphs.cnt; i++)
-			isectGlyph(h, i);
+        if (flags & ABF_PATH_REMOVE_OVERLAP)
+            for (i = 0; i < h->glyphs.cnt; i++)
+                isectGlyph(h, i);
 
-	/* Callback glyphs */
-	for (i = 0; i < h->glyphs.cnt; i++)
-		{
-		long iPath;
-		Glyph *glyph = &h->glyphs.array[i];
+        /* Callback glyphs */
+        for (i = 0; i < h->glyphs.cnt; i++)
+            {
+            long iPath;
+            Glyph *glyph = &h->glyphs.array[i];
 
-		/* Callback glyph begin and handle return value */
-		switch (glyph_cb->beg(glyph_cb, glyph->info))
-			{
-		case ABF_CONT_RET:
-			break;
-		case ABF_WIDTH_RET:
-			glyph_cb->width(glyph_cb, glyph->hAdv);
-			glyph_cb->end(glyph_cb);
-			continue;
-		case ABF_SKIP_RET:
-			continue;
-		case ABF_QUIT_RET:
-			return abfErrCstrQuit;
-		case ABF_FAIL_RET:
-			return abfErrCstrFail;
-			}
+            /* Callback glyph begin and handle return value */
+            switch (glyph_cb->beg(glyph_cb, glyph->info))
+                {
+            case ABF_CONT_RET:
+                break;
+            case ABF_WIDTH_RET:
+                glyph_cb->width(glyph_cb, glyph->hAdv);
+                glyph_cb->end(glyph_cb);
+                continue;
+            case ABF_SKIP_RET:
+                continue;
+            case ABF_QUIT_RET:
+                E_RETURN(abfErrCstrQuit);
+            case ABF_FAIL_RET:
+                E_RETURN(abfErrCstrFail);
+                }
 
-		/* Callback width */
-		glyph_cb->width(glyph_cb, glyph->hAdv);
+            /* Callback width */
+            glyph_cb->width(glyph_cb, glyph->hAdv);
 
-		iPath = glyph->iPath;
-		if (iPath != -1)
-			do
-				{
-				/* Callback path */
-				Path *path = &h->paths.array[iPath];
-				long iFirst = path->iSeg;
-				Segment *first = &h->segs.array[iFirst];
-				long iLast = first->iPrev;
-				long iStop = 
-					(h->segs.array[iLast].flags & SEG_LINE)? iLast: iFirst;
-				Segment *seg = first;
-				long segcnt = 0;
+            iPath = glyph->iPath;
+            if (iPath != -1)
+                do
+                    {
+                    /* Callback path */
+                    Path *path = &h->paths.array[iPath];
+                    long iFirst = path->iSeg;
+                    Segment *first = &h->segs.array[iFirst];
+                    long iLast = first->iPrev;
+                    long iStop = 
+                        (h->segs.array[iLast].flags & SEG_LINE)? iLast: iFirst;
+                    Segment *seg = first;
+                    long segcnt = 0;
 
-				/* Callback initial move */
-				glyph_cb->move(glyph_cb, first->p0.x, first->p0.y);
+                    /* Callback initial move */
+                    glyph_cb->move(glyph_cb, first->p0.x, first->p0.y);
 
-				/* Callback remaining segments */
-				for (;;)
-					{
-					long iSeg;
+                    /* Callback remaining segments */
+                    for (;;)
+                        {
+                        long iSeg;
 
-					if (seg->flags & SEG_LINE)
-						glyph_cb->line(glyph_cb, seg->p3.x, seg->p3.y);
-					else
-						glyph_cb->curve(glyph_cb, 
-										seg->p1.x, seg->p1.y,
-										seg->p2.x, seg->p2.y,
-										seg->p3.x, seg->p3.y);
+                        if (seg->flags & SEG_LINE)
+                            glyph_cb->line(glyph_cb, seg->p3.x, seg->p3.y);
+                        else
+                            glyph_cb->curve(glyph_cb, 
+                                            seg->p1.x, seg->p1.y,
+                                            seg->p2.x, seg->p2.y,
+                                            seg->p3.x, seg->p3.y);
 
-					if (++segcnt > h->segs.cnt)
-						/* Infinite loop! */
-						fatal(h, abfErrCantHandle);	
+                        if (++segcnt > h->segs.cnt)
+                            /* Infinite loop! */
+                            fatal(h, abfErrCantHandle);	
 
-					iSeg = seg->iNext;
-					if (iSeg == iStop)
-						break;
-					seg = &h->segs.array[iSeg];
-					}
+                        iSeg = seg->iNext;
+                        if (iSeg == iStop)
+                            break;
+                        seg = &h->segs.array[iSeg];
+                        }
 
-				iPath = path->iNext;
-				}
-			while (iPath != glyph->iPath);
+                    iPath = path->iNext;
+                    }
+                while (iPath != glyph->iPath);
 
-		/* Callback glyph end */
-		glyph_cb->end(glyph_cb);
-		}
+            /* Callback glyph end */
+            glyph_cb->end(glyph_cb);
+            }
+
+    HANDLER
+        return h->err.code;
+    END_HANDLER
 
 	return abfSuccess;
 	}
@@ -423,7 +436,7 @@ int abfEndFont(abfCtx h, long flags, abfGlyphCallbacks *glyph_cb)
 /* Begin new glyph. */
 static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 	{
-	abfCtx h = cb->direct_ctx;
+	abfCtx h = (abfCtx)cb->direct_ctx;
 	Glyph *glyph;
 
 	cb->info = info;
@@ -450,7 +463,7 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 /* Add glyph width. */
 static void glyphWidth(abfGlyphCallbacks *cb, float hAdv)
 	{
-	abfCtx h = cb->direct_ctx;
+	abfCtx h = (abfCtx)cb->direct_ctx;
 
 	if (h->iGlyph == -1)
 		{
@@ -489,7 +502,7 @@ static Segment *newSegment(abfCtx h)
 /* Add line segment to path. */
 static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1)
 	{
-	abfCtx h = cb->direct_ctx;
+	abfCtx h = (abfCtx)cb->direct_ctx;
 	Segment *seg;
 
 	if (x1 == h->p.x && y1 == h->p.y)
@@ -510,7 +523,7 @@ static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1)
 /* Close the current path */
 static void closepath(abfGlyphCallbacks *cb)
 	{
-	abfCtx h = cb->direct_ctx;
+	abfCtx h = (abfCtx)cb->direct_ctx;
 	long iBeg;
 	long iEnd;
 	Point *p;
@@ -552,7 +565,7 @@ static void closepath(abfGlyphCallbacks *cb)
 /* Add move to path. */
 static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0)
 	{
-	abfCtx h = cb->direct_ctx;
+	abfCtx h = (abfCtx)cb->direct_ctx;
 	Path *path;
 
 	closepath(cb);
@@ -585,7 +598,7 @@ static void glyphCurve(abfGlyphCallbacks *cb,
 					   float x2, float y2, 
 					   float x3, float y3)
 	{
-	abfCtx h = cb->direct_ctx;
+	abfCtx h = (abfCtx)cb->direct_ctx;
     Segment *seg;
 
 	if (x1 == h->p.x && y1 == h->p.y && x1 == x2 && y1 == y2 && x2 == x3 && y2 == y3)
@@ -611,7 +624,7 @@ static void glyphCurve(abfGlyphCallbacks *cb,
 static void glyphGenop(abfGlyphCallbacks *cb, 
 					   int cnt, float *args, int op)
 	{
-	abfCtx h = cb->direct_ctx;
+	abfCtx h = (abfCtx)cb->direct_ctx;
 	h->err.code = abfErrGlyphGenop;
 	}
 
@@ -619,7 +632,7 @@ static void glyphGenop(abfGlyphCallbacks *cb,
 static void glyphSeac(abfGlyphCallbacks *cb, 
 					  float adx, float ady, int bchar, int achar)
 	{
-	abfCtx h = cb->direct_ctx;
+	abfCtx h = (abfCtx)cb->direct_ctx;
 	h->err.code = abfErrGlyphSeac;
 	}
 
@@ -857,7 +870,7 @@ static void setPathBounds(abfCtx h, Path *path)
 /* Glyph path end. */
 static void glyphEnd(abfGlyphCallbacks *cb)
 	{
-	abfCtx h = cb->direct_ctx;
+	abfCtx h = (abfCtx)cb->direct_ctx;
 	long i;
 	long iFirst;
 	long iLast;
@@ -1064,17 +1077,17 @@ static long checkIsect(abfCtx h, Point *p, Segment *seg, float t, int *match)
 /* Insert intersection at the index. */
 static void insertIsect(abfCtx h, long i, Point *p, Segment *seg, float t, long id)
 	{	
-	Intersect *new;
+	Intersect *_new;
 
 	/* Insert new record */
-	new = &dnaGROW(h->isects, h->isects.cnt)[i];
-	memmove(new + 1, new, (h->isects.cnt++ - i)*sizeof(Intersect));
-	new->t 		= t;
-	new->iSeg 	= seg - h->segs.array;
-	new->iSplit = -1;
-	new->p 		= *p;
-	new->id 	= id;
-    new->flags  = 0;
+	_new = &dnaGROW(h->isects, h->isects.cnt)[i];
+	memmove(_new + 1, _new, (h->isects.cnt++ - i)*sizeof(Intersect));
+	_new->t 		= t;
+	_new->iSeg 	= (long)(seg - h->segs.array);
+	_new->iSplit = -1;
+	_new->p 		= *p;
+	_new->id 	= id;
+    _new->flags  = 0;
 
 	/* Mark path as intersected */
 	h->paths.array[seg->iPath].flags |= PATH_ISECT;
@@ -1128,7 +1141,7 @@ static void saveIsectPair(abfCtx h,
     /* If the intersection is actually the end point between two adjacent segments in the same path, ignore it */
     if (seg0->iPath == seg1->iPath)
         {
-        long iSeg1 = seg1 - h->segs.array;
+        long iSeg1 = (long)(seg1 - h->segs.array);
         if ((seg0->iNext == iSeg1) && (t0 == 1 || t1 == 0))
             return;
         if ((seg0->iPrev == iSeg1) && (t0 == 0 || t1 == 1))
@@ -1378,7 +1391,7 @@ static void makeBez(abfCtx h, Segment *s, Bezier *a)
 	a->t0 = 0;
 	a->t1 = 1;
 	a->depth = 0;
-	a->iSeg = s - h->segs.array;
+	a->iSeg = (long)(s - h->segs.array);
 	a->bounds = s->bounds;
 	}
 
@@ -1389,7 +1402,7 @@ static void makeLine(abfCtx h, Segment *s, Line *l)
 	l->p1 = s->p3;
 	l->t0 = 0;
 	l->t1 = 1;
-	l->iSeg = s - h->segs.array;
+	l->iSeg = (long)(s - h->segs.array);
 	}
 
 /* Intersect a line/curve segments. */
@@ -1515,7 +1528,7 @@ static void selfIsectCurve(abfCtx h, Segment *seg)
 {
     float   lo = 0, hi = 1;
     float   t;
-    Bezier  a, b, c;
+    Bezier  a = {0}, b = {0}, c = {0};
     int     foundSplit = 0;
 
     /* First find a point to split the curve in two
@@ -1627,7 +1640,7 @@ static int curveIsLine(abfCtx h, Segment *seg)
 static void splitSegment(abfCtx h, Intersect *last, Intersect *isect)
 	{
 	long iNew;
-	Segment *new;
+	Segment *_new;
 	Segment *seg;
 	float t = isect->t;
 	long iSeg = isect->iSeg;
@@ -1654,17 +1667,17 @@ static void splitSegment(abfCtx h, Intersect *last, Intersect *isect)
 	iNew = dnaNext(&h->segs, sizeof(Segment));
 	if (iNew == -1)
 		fatal(h, abfErrNoMemory);
-	new = &h->segs.array[iNew];
+	_new = &h->segs.array[iNew];
 	seg = &h->segs.array[iSeg];
 
 	if (seg->flags & SEG_LINE)
 		{
 		/* Split line segment */
-		new->p0 = isect->p;
-		new->p3 = seg->p3;
+		_new->p0 = isect->p;
+		_new->p3 = seg->p3;
 		seg->p3 = isect->p;
 
-		new->flags = SEG_LINE;
+		_new->flags = SEG_LINE;
 		}
 	else
 		{
@@ -1683,30 +1696,30 @@ static void splitSegment(abfCtx h, Intersect *last, Intersect *isect)
 			seg->flags |= SEG_LINE;	/* Make line segment */
 
 		t = 1 - t;
-		new->p3 = p3;
-		new->p2.x = t*(p2.x - p3.x) + new->p3.x;
-		new->p2.y = t*(p2.y - p3.y) + new->p3.y;
-		new->p1.x = t*t*(p1.x - 2*p2.x + p3.x) + 2*new->p2.x - new->p3.x;
-		new->p1.y = t*t*(p1.y - 2*p2.y + p3.y) + 2*new->p2.y - new->p3.y;
-		new->p0 = seg->p3;
-		new->flags = 0;
-		if (curveIsLine(h, new))
-			new->flags |= SEG_LINE;	/* Make line segment */
+		_new->p3 = p3;
+		_new->p2.x = t*(p2.x - p3.x) + _new->p3.x;
+		_new->p2.y = t*(p2.y - p3.y) + _new->p3.y;
+		_new->p1.x = t*t*(p1.x - 2*p2.x + p3.x) + 2*_new->p2.x - _new->p3.x;
+		_new->p1.y = t*t*(p1.y - 2*p2.y + p3.y) + 2*_new->p2.y - _new->p3.y;
+		_new->p0 = seg->p3;
+		_new->flags = 0;
+		if (curveIsLine(h, _new))
+			_new->flags |= SEG_LINE;	/* Make line segment */
 		}
 
-	/* Link new segment */
-	new->iPrev = iSeg;
-	new->iNext = seg->iNext;
-	new->iPath = seg->iPath;
-    new->inJunc = -1;
-    new->outJunc = -1;
+	/* Link _new segment */
+	_new->iPrev = iSeg;
+	_new->iNext = seg->iNext;
+	_new->iPath = seg->iPath;
+    _new->inJunc = -1;
+    _new->outJunc = -1;
 
-    /* Set new bounds */
+    /* Set _new bounds */
     setSegBounds(seg);
-    setSegBounds(new);
+    setSegBounds(_new);
 
 	seg->iNext = iNew;
-	h->segs.array[new->iNext].iPrev = iNew;
+	h->segs.array[_new->iNext].iPrev = iNew;
 
 	isect->iSplit = iNew;
 	}
@@ -1753,7 +1766,6 @@ static int squashShortSeg(abfCtx h, Intersect *isect, int isSplit, int atBeg, in
         (seg->bounds.top - seg->bounds.bottom <= SHORT_LINE_LIMIT))
         {
         /* Remove this short segment at an intersection from linked segments, isect, and path */
-        long    iPath = seg->iPath;
 
         if (seg->iNext != iSeg && seg->iPrev != iSeg)
             {
@@ -2222,7 +2234,7 @@ static long searchValueList(ValueList *list, float val)
     {
     long    lo = 0;
     long    hi = list->cnt - 1;
-    long    t;
+    long    t = 0;
 
 	/* Binary search for value */
 	while (lo <= hi)
@@ -2250,7 +2262,7 @@ static void chooseTargetPoint(abfCtx h, Segment *seg, Point *mid, int testvert)
     float   v;
     float   min, max;
     float   gapVal;
-    long    i, gapIndex;
+    long    i, gapIndex = 0;
     ValueList   *list;
 
     if (testvert)
@@ -2664,7 +2676,7 @@ static Junction *connectSegToJunction(abfCtx h, Intersect *isect, long iJunc, Ju
     {
     Segment *seg = &h->segs.array[iSeg];
     int reverse;
-    int delete;
+    int del;
     int init = iJunc >= h->juncs.cnt;
     Outlet  *outlet;
 
@@ -2677,7 +2689,7 @@ static Junction *connectSegToJunction(abfCtx h, Intersect *isect, long iJunc, Ju
         junc->inCount = junc->outCount = 0;
         }
 
-    delete = (seg->flags & SEG_DELETE) != 0;
+    del = (seg->flags & SEG_DELETE) != 0;
     reverse = (seg->flags & SEG_REVERSE) != 0;
     outlet = dnaNEXT(junc->outlets);
     outlet->seg = iSeg;
@@ -2686,18 +2698,18 @@ static Junction *connectSegToJunction(abfCtx h, Intersect *isect, long iJunc, Ju
     outlet->score = 0;
     outlet->flags = 0;
 
-    if (delete)
+    if (del)
         outlet->flags |= OUTLET_DELETE;
     if (in == !reverse)
         {
-        if (!delete)
+        if (!del)
             junc->inCount++;
         outlet->angle = segmentAngle(seg, !reverse);
         seg->inJunc = iJunc;
         }
     else
         {
-        if (!delete)
+        if (!del)
             junc->outCount++;
         outlet->flags |= OUTLET_OUT;
         outlet->angle = segmentAngle(seg, reverse);
@@ -2803,7 +2815,7 @@ static long lookupOutlet(abfCtx h, Junction *junc, long iSeg, long flags)
 static void modifyOutlet(abfCtx h, Junction *junc, long iSeg, long oldFlags, long newFlags, float adjustScore)
     {
     long    i;
-    OutletList  *list = &junc->outlets;
+    //OutletList  *list = &junc->outlets;
     Outlet  *outlet;
     long    mask = OUTLET_OUT|OUTLET_DELETE;
 
@@ -2832,7 +2844,7 @@ static void modifyOutlet(abfCtx h, Junction *junc, long iSeg, long oldFlags, lon
     }
 
 /* Modify flags of segments in a sequence. */
-static void modifySegSeqFlags(abfCtx h, long iSeg, long iEndSeg, int forward, long mask, long flags)
+static void modifySegSeqFlags(abfCtx h, long iSeg, long iEndSeg, int forw, long mask, long flags)
     {
     for (;;)
         {
@@ -2847,7 +2859,7 @@ static void modifySegSeqFlags(abfCtx h, long iSeg, long iEndSeg, int forward, lo
         if (iSeg == iEndSeg)
             break;
 
-        if (forward)
+        if (forw)
             iSeg = seg->iNext;
         else
             iSeg = seg->iPrev;
@@ -3074,11 +3086,11 @@ static int fixWorstOutlet(abfCtx h)
     {
     int     good = 1;
     long    i;
-    long    iJunc, iWorstJunc;
-    Junction *endJunc, *worstJunc;
+    long    iJunc, iWorstJunc = 0;
+    Junction *endJunc = NULL, *worstJunc = NULL;
     float   worstScore;
-    Outlet  *worstOutlet;
-    long    badFlag;
+    Outlet  *worstOutlet = NULL;
+    long    badFlag = 0;
     long    iBegSeg, iEndSeg;
     Segment *seg;
 
@@ -3130,7 +3142,7 @@ static int fixWorstOutlet(abfCtx h)
             }
         }
 
-    if (good)
+    if (good || !worstOutlet)
         return good;
 
     /* Fix a bad junction by flipping deletion flag of an outlet with the least score. */
@@ -3321,7 +3333,6 @@ static void deleteBadSegs(abfCtx h, long iBeg)
     long beg, end;
     Segment *seg;
     long iJunc;
-    Junction *junc = NULL;
 
 	freeOutlets(h);
     iJunc = h->juncs.cnt = 0;
@@ -3332,49 +3343,51 @@ static void deleteBadSegs(abfCtx h, long iBeg)
     windTestPaths(h, iBeg);
 
 	/* Collect non-deleted segments intersecting at the same point in a junction list */
-    firstisect = lastisect = NULL;
-	for (i = 0; i < h->isects.cnt; i++)
-		{
-		Intersect *isect = &h->isects.array[i];
-
-        /* Beginning of a series of intersections */
-        if (firstisect == NULL)
-            firstisect = isect;
-
-        /* Order intersection path from beg to end.
-           Test isect->t > 0 is to prevent confusion about a path consisting of
-           only two path segments intersecting at both ends. */
-        if (h->segs.array[isect->iSeg].iNext == isect->iSplit && isect->t > 0)
+        {
+        Junction *junc = NULL;
+        firstisect = lastisect = NULL;
+        for (i = 0; i < h->isects.cnt; i++)
             {
-            beg = isect->iSeg;
-            end = isect->iSplit;
-            }
-        else
-            {
-            beg = isect->iSplit;
-            end = isect->iSeg;
-            }
+            Intersect *isect = &h->isects.array[i];
 
-        /* Connect segments to a junction. Count the number of incoming/outgoing segments (outlets). */
-        junc = connectSegToJunction(h, isect, iJunc, junc, beg, 1);
-        junc = connectSegToJunction(h, isect, iJunc, junc, end, 0);
+            /* Beginning of a series of intersections */
+            if (firstisect == NULL)
+                firstisect = isect;
 
-        /* Check the end of a series of intersections sharing the same id */
-        if (i+1 >= h->isects.cnt || isect->id != isect[1].id)
-            {
-            lastisect = isect;
-
-            /* There must be N*2 segments on N paths surrounding an intersection */
-            /* Start a new series of intersections at the same point */
-            if (junc)
+            /* Order intersection path from beg to end.
+               Test isect->t > 0 is to prevent confusion about a path consisting of
+               only two path segments intersecting at both ends. */
+            if (h->segs.array[isect->iSeg].iNext == isect->iSplit && isect->t > 0)
                 {
-                iJunc++;
-                junc = NULL;
+                beg = isect->iSeg;
+                end = isect->iSplit;
                 }
-            firstisect = lastisect = NULL;
-            }
-		}
+            else
+                {
+                beg = isect->iSplit;
+                end = isect->iSeg;
+                }
 
+            /* Connect segments to a junction. Count the number of incoming/outgoing segments (outlets). */
+            junc = connectSegToJunction(h, isect, iJunc, junc, beg, 1);
+            junc = connectSegToJunction(h, isect, iJunc, junc, end, 0);
+
+            /* Check the end of a series of intersections sharing the same id */
+            if (i + 1 >= h->isects.cnt || isect->id != isect[1].id)
+                {
+                lastisect = isect;
+
+                /* There must be N*2 segments on N paths surrounding an intersection */
+                /* Start a new series of intersections at the same point */
+                if (junc)
+                {
+                    iJunc++;
+                    junc = NULL;
+                }
+                firstisect = lastisect = NULL;
+                }
+            }
+        }
     sortOutlets(h);
     polishOutlets(h, iBeg);
     fixBadJunctions(h, iBeg);
@@ -3388,14 +3401,14 @@ static void deleteBadSegs(abfCtx h, long iBeg)
 
         for (i = 0; i < junc->outlets.cnt; i++)
             {
-            Outlet  *outlet = &junc->outlets.array[i];
+            Outlet  *outlet1 = &junc->outlets.array[i];
             long    iSeg, iLastSeg;
 
-            if ((outlet->flags & OUTLET_DELETE) || !(outlet->flags & OUTLET_OUT))
+            if ((outlet1->flags & OUTLET_DELETE) || !(outlet1->flags & OUTLET_OUT))
                 continue;
 
             /* Pick the next segment to start from */
-            beg = outlet->seg;
+            beg = outlet1->seg;
             iLastSeg = -1;
             iSeg = beg;
             seg = &h->segs.array[iSeg];

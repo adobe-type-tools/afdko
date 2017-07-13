@@ -37,13 +37,13 @@ typedef struct {
 
 struct fdselectCtx_ {
 	dnaDCL(Selector, selectors);
-	Selector *new;
+	Selector *_new;
 	cfwCtx g;                   /* Package context */
 };
 
 /* Initialize selector. */
 static void initSelector(void *ctx, long cnt, Selector *selector) {
-	cfwCtx g = ctx;
+	cfwCtx g = (cfwCtx)ctx;
 	while (cnt--) {
 		dnaINIT(g->ctx.dnaSafe, selector->fds, 10000, 20000);
 		selector++;
@@ -52,7 +52,7 @@ static void initSelector(void *ctx, long cnt, Selector *selector) {
 
 /* Initialize module */
 void cfwFdselectNew(cfwCtx g) {
-	fdselectCtx h = cfwMemNew(g, sizeof(struct fdselectCtx_));
+	fdselectCtx h = (fdselectCtx)cfwMemNew(g, sizeof(struct fdselectCtx_));
 
 	/* Link contexts */
 	h->g = g;
@@ -89,14 +89,14 @@ void cfwFdselectFree(cfwCtx g) {
 /* Begin new fdselect. */
 void cfwFdselectBeg(cfwCtx g) {
 	fdselectCtx h = g->ctx.fdselect;
-	h->new = dnaNEXT(h->selectors);
-	h->new->fds.cnt = 0;
+	h->_new = dnaNEXT(h->selectors);
+	h->_new->fds.cnt = 0;
 }
 
 /* Add fd index to selector. */
 void cfwFdselectAddIndex(cfwCtx g, unsigned char fd) {
 	fdselectCtx h = g->ctx.fdselect;
-	*dnaNEXT(h->new->fds) = fd;
+	*dnaNEXT(h->_new->fds) = fd;
 }
 
 /* End fd index addition and check for duplicate selector. */
@@ -106,9 +106,9 @@ int cfwFdselectEnd(cfwCtx g) {
 
 	for (i = 0; i < h->selectors.cnt - 1; i++) {
 		Selector *selector = &h->selectors.array[i];
-		if (h->new->fds.cnt <= selector->fds.cnt &&
-		    memcmp(h->new->fds.array, selector->fds.array,
-		           h->new->fds.cnt) == 0) {
+		if (h->_new->fds.cnt <= selector->fds.cnt &&
+		    memcmp(h->_new->fds.array, selector->fds.array,
+		           h->_new->fds.cnt) == 0) {
 			/* Found match; remove new selector from list */
 			h->selectors.cnt--;
 			return i;

@@ -7,6 +7,7 @@
 
 #include "txops.h"
 #include "dictops.h"
+#include "supportexcept.h"
 
 #include "cffwrite_charset.h"
 #include "cffwrite_encoding.h"
@@ -23,6 +24,7 @@
 #include <string.h>
 #endif  /* PLAT_SUN4 */
 
+#include <stdlib.h>
 #include <stdarg.h>
 
 #define CFF_HDR_SIZE 4          /* CFF v1.0 header size */
@@ -92,7 +94,7 @@ typedef struct                  /* Glyph data */
 
 typedef struct                  /* sorted FontDict data */
 {
-	long fdIndex;           /* index of this dict in h->new.FDArray  */
+	long fdIndex;           /* index of this dict in h->_new.FDArray  */
 } SeenDict;
 
 typedef struct                  /* Per-font data */
@@ -153,7 +155,7 @@ struct controlCtx_ {
 #define SEEN_CID_KEYED_GLYPH  (1 << 3)    /* Seen cid-keyed glyph */
 #define FONTSET_CFF2  (1 << 4)  /* We are writing a CFF2 font. */
 	dnaDCL(cff_Font, FontSet);      /* FontSet */
-	cff_Font *new;                  /* New font */
+	cff_Font *_new;                  /* New font */
 	INDEX name;                 /* Name INDEX */
 	struct                      /* Global data sizes */
 	{
@@ -195,7 +197,7 @@ static void initSubrData(subr_CSData *subrData);
 
 /* Initialize FDInfo. */
 static void initFDInfo(void *ctx, long cnt, FDInfo *fd) {
-	cfwCtx g = ctx;
+	cfwCtx g = (cfwCtx)ctx;
 	while (cnt--) {
 		dnaINIT(g->ctx.dnaSafe, fd->cff.dict, 25, 50);
 		dnaINIT(g->ctx.dnaSafe, fd->cff.Private, 100, 50);
@@ -207,10 +209,11 @@ static void initFDInfo(void *ctx, long cnt, FDInfo *fd) {
 
 /* Initialize font. */
 static void initFont(void *ctx, long cnt, cff_Font *font) {
-	cfwCtx g = ctx;
+	cfwCtx g = (cfwCtx)ctx;
 	while (cnt--) {
-        dnaINIT(g->ctx.dnaSafe, font->cff.top, 50, 50);
-        dnaINIT(g->ctx.dnaSafe, font->cff.varStore, 100, 100);
+		memset(font, 0, sizeof(*font));
+		dnaINIT(g->ctx.dnaSafe, font->cff.top, 50, 50);
+		dnaINIT(g->ctx.dnaSafe, font->cff.varStore, 100, 100);
 		dnaINIT(g->ctx.dnaSafe, font->cff.synthetic, 25, 50);
 		dnaINIT(g->ctx.dnaSafe, font->FDArray, 1, 14);
 		font->FDArray.func = initFDInfo;
@@ -223,7 +226,7 @@ static void initFont(void *ctx, long cnt, cff_Font *font) {
 
 /* Initialize module. */
 static void cfwControlNew(cfwCtx g) {
-	controlCtx h = cfwMemNew(g, sizeof(struct controlCtx_));
+	controlCtx h = (controlCtx)cfwMemNew(g, sizeof(struct controlCtx_));
 
 	dnaINIT(g->ctx.dnaFail, h->FontSet, 1, 150);
 	h->FontSet.func = initFont;
@@ -343,7 +346,7 @@ static int CTL_CDECL matchFontName(const void *srcName, const void *value, void 
 	long fdIndex = ((SeenDict *)value)->fdIndex;
 	controlCtx h  = (controlCtx)ctx;
 	int result;
-	char *destName = h->new->FDArray.array[fdIndex].dict.FontName.ptr;
+	char *destName = h->_new->FDArray.array[fdIndex].dict.FontName.ptr;
 
 	/*  new dict with NULL FontName is always sorted last */
 	/* We also treat NULL FontName as a unique individual name. */
@@ -386,18 +389,18 @@ long cfwSeenGlyph(cfwCtx g, abfGlyphInfo *info, int *result, long startNew, long
 	*result = 0;
 
 	if (info->flags & ABF_GLYPH_CID) {
-		nameFound = ctuLookup(&info->cid, h->new->seenGlyphs.array, h->new->seenGlyphs.cnt,
-		                      sizeof(h->new->seenGlyphs.array[0]), matchSeenCID, (size_t *)&seenIndex, h);
+		nameFound = ctuLookup(&info->cid, h->_new->seenGlyphs.array, h->_new->seenGlyphs.cnt,
+		                      sizeof(h->_new->seenGlyphs.array[0]), matchSeenCID, (size_t *)&seenIndex, h);
 	}
 	else {
-		nameFound = ctuLookup(info->gname.ptr, h->new->seenGlyphs.array, h->new->seenGlyphs.cnt,
-		                      sizeof(h->new->seenGlyphs.array[0]), matchSeenName, (size_t *)&seenIndex, h);
+		nameFound = ctuLookup(info->gname.ptr, h->_new->seenGlyphs.array, h->_new->seenGlyphs.cnt,
+		                      sizeof(h->_new->seenGlyphs.array[0]), matchSeenName, (size_t *)&seenIndex, h);
 	}
 
 	if (nameFound) {
 		long lenNewStr = endNew - startNew;
-		long glyphIndex = h->new->seenGlyphs.array[seenIndex].glyphsIndex;
-		long lenOldStr = h->new->glyphs.array[glyphIndex].cstr.length;
+		long glyphIndex = h->_new->seenGlyphs.array[seenIndex].glyphsIndex;
+		long lenOldStr = h->_new->glyphs.array[glyphIndex].cstr.length;
 
 
 
@@ -405,8 +408,8 @@ long cfwSeenGlyph(cfwCtx g, abfGlyphInfo *info, int *result, long startNew, long
 			noMatch = 1;
 		}
 		else {
-			h->mergeBuffers.newGlyph = g->cb.mem.manage(&g->cb.mem, h->mergeBuffers.newGlyph, lenNewStr);
-			h->mergeBuffers.oldGlyph = g->cb.mem.manage(&g->cb.mem, h->mergeBuffers.oldGlyph, lenOldStr);
+			h->mergeBuffers.newGlyph = (char *)g->cb.mem.manage(&g->cb.mem, h->mergeBuffers.newGlyph, lenNewStr);
+			h->mergeBuffers.oldGlyph = (char *)g->cb.mem.manage(&g->cb.mem, h->mergeBuffers.oldGlyph, lenOldStr);
 
 			/* get  strings */
 			/* This is used in the context of the glyphEnd function,
@@ -415,12 +418,12 @@ long cfwSeenGlyph(cfwCtx g, abfGlyphInfo *info, int *result, long startNew, long
 			   reset the g->tmp values.
 			 */
 			/* re-init temp buffer */
-			g->cb.stm.seek(&g->cb.stm, g->stm.tmp, h->new->glyphs.array[glyphIndex].cstr.offset);
-			g->tmp.offset = h->new->glyphs.array[glyphIndex].cstr.offset;
+			g->cb.stm.seek(&g->cb.stm, g->stm.tmp, h->_new->glyphs.array[glyphIndex].cstr.offset);
+			g->tmp.offset = h->_new->glyphs.array[glyphIndex].cstr.offset;
 			g->tmp.next = g->tmp.buf; /* say that there is no current stream content in the tmp.buf */
 			g->tmp.length = 0;
 
-			tmp2bufCopy(g, lenOldStr,  h->new->glyphs.array[glyphIndex].cstr.offset, h->mergeBuffers.oldGlyph);
+			tmp2bufCopy(g, lenOldStr,  h->_new->glyphs.array[glyphIndex].cstr.offset, h->mergeBuffers.oldGlyph);
 			tmp2bufCopy(g, lenNewStr, startNew, h->mergeBuffers.newGlyph);
 
 			/* fix temp file position */
@@ -451,41 +454,41 @@ static long mergeDict(cfwCtx g, abfFontDict *srcDict) {
 
 	h->mergedDicts = 1;
 
-	dictFound = ctuLookup(srcDict->FontName.ptr, h->new->seenDicts.array, h->new->seenDicts.cnt,
+	dictFound = ctuLookup(srcDict->FontName.ptr, h->_new->seenDicts.array, h->_new->seenDicts.cnt,
 	                      sizeof(SeenDict), matchFontName, (size_t *)&seenIndex, h);
 
 
 	/* if it is a new dict, then add it to the destination font */
 	if (!dictFound) {
-		int needHole = seenIndex < h->new->seenDicts.cnt;
+		int needHole = seenIndex < h->_new->seenDicts.cnt;
 		SeenDict *newSeenDict;
 		FDInfo *newFDInfo;
 		long nDicts;
 
 
-		/* grow h->new.FDArray array, increment FDArray.cnt */
-		if (dnaNext(&h->new->FDArray, sizeof(FDInfo)) == -1) {
+		/* grow h->_new.FDArray array, increment FDArray.cnt */
+		if (dnaNext(&h->_new->FDArray, sizeof(FDInfo)) == -1) {
 			g->err.code = cfwErrNoMemory;
 			return ABF_UNSET_INT;
 		}
-		nDicts =  h->new->FDArray.cnt;
-		newFDInfo = &h->new->FDArray.array[nDicts - 1];
+		nDicts =  h->_new->FDArray.cnt;
+		newFDInfo = &h->_new->FDArray.array[nDicts - 1];
 
 		/* grow seenDicts array, increment SeenDict.cnt */
-		if (dnaNext(&h->new->seenDicts, sizeof(SeenDict)) == -1) {
+		if (dnaNext(&h->_new->seenDicts, sizeof(SeenDict)) == -1) {
 			g->err.code = cfwErrNoMemory;
 			return ABF_UNSET_INT;
 		}
 
 		/* ptr to insertion-point index */
-		newSeenDict = &h->new->seenDicts.array[seenIndex];
+		newSeenDict = &h->_new->seenDicts.array[seenIndex];
 
 
 		/* Move higher elements (if there are any) up one index to make hole,
 		    and fix all the glyph->iFD indices. */
 		if (needHole) {
 			memmove(newSeenDict + 1, newSeenDict,
-			        ((h->new->seenDicts.cnt - 1) - seenIndex) * sizeof(SeenDict));
+			        ((h->_new->seenDicts.cnt - 1) - seenIndex) * sizeof(SeenDict));
 		}
 
 		/* fill new FD array entry */
@@ -498,12 +501,12 @@ static long mergeDict(cfwCtx g, abfFontDict *srcDict) {
 		/* Fill new seenDicts entry */
 		newSeenDict->fdIndex = nDicts - 1;
 
-		/* What we return is the index of the new font dict in the h->new.FDArray.
+		/* What we return is the index of the new font dict in the h->_new.FDArray.
 		   A new dict is always the last dist in the array. */
 		newFDIndex =  nDicts - 1;
 	}
 
-	newFDIndex = h->new->seenDicts.array[seenIndex].fdIndex;
+	newFDIndex = h->_new->seenDicts.array[seenIndex].fdIndex;
 
 	return newFDIndex;
 }
@@ -530,7 +533,7 @@ int cfwMergeFDArray(cfwCtx g, abfTopDict *top, int *newFDIndex) {
 int cfwCompareFDArrays(cfwCtx g, abfTopDict *srcTop) {
 	controlCtx h = g->ctx.control;
 	int srcCount = srcTop->FDArray.cnt;
-	int destCount = h->new->FDArray.cnt;
+	int destCount = h->_new->FDArray.cnt;
 	int j = 0;
 
 	if (destCount > 0) {
@@ -539,13 +542,13 @@ int cfwCompareFDArrays(cfwCtx g, abfTopDict *srcTop) {
 			int dictFound;
 			abfFontDict *srcDict =  &srcTop->FDArray.array[j++];
 
-			dictFound = ctuLookup(srcDict->FontName.ptr, h->new->seenDicts.array, h->new->seenDicts.cnt,
+			dictFound = ctuLookup(srcDict->FontName.ptr, h->_new->seenDicts.array, h->_new->seenDicts.cnt,
 			                      sizeof(SeenDict), matchFontName, (size_t *)&seenIndex, h);
 
 
 			if (dictFound) {
-				int iFD = h->new->seenDicts.array[seenIndex].fdIndex;
-				abfFontDict *destDict =  &h->new->FDArray.array[iFD].dict;
+				int iFD = h->_new->seenDicts.array[seenIndex].fdIndex;
+				abfFontDict *destDict =  &h->_new->FDArray.array[iFD].dict;
 
 				if (abfCompareFontDicts(destDict, srcDict)) {
 					return 1;
@@ -571,30 +574,30 @@ void cfwAddGlyph(cfwCtx g,
 		/* CID-keyed font */
 		if (info->cid == 0) {
 			/* Force CID 0 to GID 0 */
-			glyph = &h->new->glyphs.array[0];
+			glyph = &h->_new->glyphs.array[0];
 		}
 	}
 	else {
 		/* Name-keyed font */
 		if (strcmp(info->gname.ptr, ".notdef") == 0) {
 			/* Force .notdef glyph to GID 0 */
-			glyph = &h->new->glyphs.array[0];
+			glyph = &h->_new->glyphs.array[0];
 		}
 
 		/* Add glyph name to string index, if we have not already seen it. */
 		info->gname.impl = cfwSindexAddString(g, info->gname.ptr);
 	}
 
-	/* h->new->glyphs.array is initialized with one glyph entry reserved for notdef, so when we see the notdef glyph info,
+	/* h->_new->glyphs.array is initialized with one glyph entry reserved for notdef, so when we see the notdef glyph info,
 	   we just copy it to that slot. We need to add a new glyph entry for all other glyphs. */
 	if (glyph == NULL) {
 		/* if it is anything but notdef */
-		index = dnaNext(&h->new->glyphs, sizeof(Glyph));
+		index = dnaNext(&h->_new->glyphs, sizeof(Glyph));
 		if (index == -1) {
 			g->err.code = cfwErrNoMemory;
 			return;
 		}
-		glyph = &h->new->glyphs.array[index];
+		glyph = &h->_new->glyphs.array[index];
 	}
 
 	/* Copy glyph details */
@@ -619,22 +622,22 @@ void cfwAddGlyph(cfwCtx g,
 	   and if so add it, and we need to fix the glyph->iFD value. This is currently
 	   an index into the  source font FD array */
 	if (g->flags & CFW_CHECK_IF_GLYPHS_DIFFER) {
-		int needHole = seen_index < h->new->seenGlyphs.cnt;
+		int needHole = seen_index < h->_new->seenGlyphs.cnt;
 
 		/* grow array, increment seenGlyphs.cnt */
-		if (dnaNext(&h->new->seenGlyphs, sizeof(SeenGlyph)) == -1) {
+		if (dnaNext(&h->_new->seenGlyphs, sizeof(SeenGlyph)) == -1) {
 			g->err.code = cfwErrNoMemory;
 			return;
 		}
 
 		/* ptr to insertion-point index */
-		seenGlyph = &h->new->seenGlyphs.array[seen_index];
+		seenGlyph = &h->_new->seenGlyphs.array[seen_index];
 
 
 		/* Move higher elements (if there are any) up one index to make hole. */
 		if (needHole) {
 			memmove(seenGlyph + 1, seenGlyph,
-			        ((h->new->seenGlyphs.cnt - 1) - seen_index) * sizeof(SeenGlyph));
+			        ((h->_new->seenGlyphs.cnt - 1) - seen_index) * sizeof(SeenGlyph));
 		}
 
 		seenGlyph->glyphsIndex = index;
@@ -654,11 +657,11 @@ void cfwAddGlyph(cfwCtx g,
 	}
 
 	/* Accumulate total charstring size */
-	h->new->CharStrings.datasize += length;
+	h->_new->CharStrings.datasize += length;
 
-	if (h->new->map != NULL && g->flags & CFW_PRESERVE_GLYPH_ORDER) {
-		h->new->map->glyphmap(h->new->map,
-		                      (unsigned short)(glyph - h->new->glyphs.array),
+	if (h->_new->map != NULL && g->flags & CFW_PRESERVE_GLYPH_ORDER) {
+		h->_new->map->glyphmap(h->_new->map,
+		                      (unsigned short)(glyph - h->_new->glyphs.array),
 		                      glyph->info);
 	}
 }
@@ -881,12 +884,14 @@ static long fillNameINDEX(controlCtx h) {
 	h->name.datasize = 0;
 	for (i = 0; i < h->FontSet.cnt; i++) {
 		cff_Font *font = &h->FontSet.array[i];
-		char *name =
-		    cfwSindexGetString(h->g, (SRI)((font->flags & FONT_CID) ?
-		                                   font->top.cid.CIDFontName.impl :
-		                                   font->FDArray.array[0].dict.FontName.impl));
-		/* 64-bit warning fixed by cast here */
-		h->name.datasize += (long)strlen(name);
+		if (font->FDArray.cnt > 0) {
+			char *name =
+				cfwSindexGetString(h->g, (SRI)((font->flags & FONT_CID) ?
+					font->top.cid.CIDFontName.impl :
+					font->FDArray.array[0].dict.FontName.impl));
+			/* 64-bit warning fixed by cast here */
+			h->name.datasize += (long)strlen(name);
+		}
 	}
 
 	h->name.count = (unsigned short)h->FontSet.cnt;
@@ -1094,8 +1099,9 @@ static void fillSet(controlCtx h) {
 		long j;
 		cff_Font *font = &h->FontSet.array[i];
 
-        cfwDictFillTop(g, &font->cff.top, &font->top,
-                       &font->FDArray.array[0].dict, -1);
+		if (font->FDArray.cnt > 0)
+	        cfwDictFillTop(g, &font->cff.top, &font->top,
+    	                   &font->FDArray.array[0].dict, -1);
         
         if ((font->top.varStore != NULL) &&  (g->flags & CFW_WRITE_CFF2)) {
             cfwDictFillVarStore(g, &font->cff.varStore, &font->top);
@@ -1170,23 +1176,27 @@ static void writeNameINDEX(controlCtx h) {
 	cfwWriteN(g, h->name.offSize, offset);
 	for (i = 0; i < h->FontSet.cnt; i++) {
 		cff_Font *font = &h->FontSet.array[i];
-		char *name =
-		    cfwSindexGetString(g, (SRI)((font->flags & FONT_CID) ?
-		                                font->top.cid.CIDFontName.impl :
-		                                font->FDArray.array[0].dict.FontName.impl));
-		/* 64-bit warning fixed by cast here */
-		offset += (Offset)strlen(name);
-		cfwWriteN(g, h->name.offSize, offset);
+		if (font->FDArray.cnt > 0) {
+			char *name =
+				cfwSindexGetString(g, (SRI)((font->flags & FONT_CID) ?
+					font->top.cid.CIDFontName.impl :
+					font->FDArray.array[0].dict.FontName.impl));
+			/* 64-bit warning fixed by cast here */
+			offset += (Offset)strlen(name);
+			cfwWriteN(g, h->name.offSize, offset);
+		}
 	}
 
 	/* Write object data */
 	for (i = 0; i < h->FontSet.cnt; i++) {
 		cff_Font *font = &h->FontSet.array[i];
-		char *name =
-		    cfwSindexGetString(g, (SRI)((font->flags & FONT_CID) ?
-		                                font->top.cid.CIDFontName.impl :
-		                                font->FDArray.array[0].dict.FontName.impl));
-		cfwWrite(g, strlen(name), name);
+		if (font->FDArray.cnt > 0) {
+			char *name =
+				cfwSindexGetString(g, (SRI)((font->flags & FONT_CID) ?
+					font->top.cid.CIDFontName.impl :
+					font->FDArray.array[0].dict.FontName.impl));
+			cfwWrite(g, strlen(name), name);
+		}
 	}
 }
 
@@ -1382,7 +1392,7 @@ static void writeFDArray(controlCtx h, cff_Font *font) {
 		for (i = 0; i < font->FDArray.cnt; i++) {
 			index.datasize += font->FDArray.array[i].cff.dict.cnt;
 		}
-		index.count = font->FDArray.cnt;
+		index.count = (unsigned short)font->FDArray.cnt;
 		index.offSize = INDEX_OFF_SIZE(index.datasize);
 
 		/* Write header */
@@ -1497,18 +1507,18 @@ int cfwBegFont(cfwCtx g, cfwMapCallback *map, unsigned long maxNumSubrs) {
 	if (index == -1) {
 		return cfwErrNoMemory;
 	}
-	h->new = &h->FontSet.array[index];
-	h->new->CharStrings.datasize = 0;
-	h->new->map = map;
+	h->_new = &h->FontSet.array[index];
+	h->_new->CharStrings.datasize = 0;
+	h->_new->map = map;
 
 	/* Allocate slot for .notdef glyph */
-	index = dnaSetCnt(&h->new->glyphs, sizeof(Glyph), 1);
+	index = dnaSetCnt(&h->_new->glyphs, sizeof(Glyph), 1);
 	if (index == -1) {
 		return cfwErrNoMemory;
 	}
-	h->new->glyphs.array[0].info = NULL;
+	h->_new->glyphs.array[0].info = NULL;
 
-	/* For h->new->seenGlyphs, we do NOT need to pre-allocate for .notdef
+	/* For h->_new->seenGlyphs, we do NOT need to pre-allocate for .notdef
 	   as we are not forcing it to the begining of the list */
 
 
@@ -1522,10 +1532,9 @@ int cfwBegFont(cfwCtx g, cfwMapCallback *map, unsigned long maxNumSubrs) {
 static void orderCIDKeyedGlyphs(controlCtx h) {
 	cfwCtx g = h->g;
 	long i;
-	long j;
 	unsigned char fdmap[256];
-	long nGlyphs = h->new->glyphs.cnt;
-	Glyph *glyphs = h->new->glyphs.array;
+	long nGlyphs = h->_new->glyphs.cnt;
+	Glyph *glyphs = h->_new->glyphs.array;
 
 	if (glyphs[0].info == NULL) {
 		cfwFatal(h->g, cfwErrNoCID0, NULL);
@@ -1553,27 +1562,29 @@ static void orderCIDKeyedGlyphs(controlCtx h) {
 	}
 
 	/* Remove unused FDs from FDArray */
-	j = 0;
-	for (i = 0; i < h->new->FDArray.cnt; i++) {
-		if (fdmap[i]) {
-			if (i != j) {
-				/* Swap elements preserving dynamic arrays for later freeing */
-				FDInfo tmp = h->new->FDArray.array[j];
-				h->new->FDArray.array[j] = h->new->FDArray.array[i];
-				h->new->FDArray.array[i] = tmp;
-			}
-			fdmap[i] = (unsigned char)j++;
-		}
-	}
-
-	if (i != j) {
-		/* Unused FDs; remap glyphs to new FDArray */
-		for (i = 0; i < nGlyphs; i++) {
-			glyphs[i].iFD = fdmap[glyphs[i].iFD];
-		}
-		h->new->FDArray.cnt = j;
-	}
-
+    {
+        long j = 0;
+        for (i = 0; i < h->_new->FDArray.cnt; i++) {
+            if (fdmap[i]) {
+                if (i != j) {
+                    /* Swap elements preserving dynamic arrays for later freeing */
+                    FDInfo tmp = h->_new->FDArray.array[j];
+                    h->_new->FDArray.array[j] = h->_new->FDArray.array[i];
+                    h->_new->FDArray.array[i] = tmp;
+                }
+                fdmap[i] = (unsigned char)j++;
+            }
+        }
+        
+        if (i != j) {
+            /* Unused FDs; remap glyphs to new FDArray */
+            for (i = 0; i < nGlyphs; i++) {
+                glyphs[i].iFD = fdmap[glyphs[i].iFD];
+            }
+            h->_new->FDArray.cnt = j;
+        }
+    }
+    
 	cfwCharsetBeg(g, 1);
 	cfwFdselectBeg(g);
 
@@ -1584,11 +1595,11 @@ static void orderCIDKeyedGlyphs(controlCtx h) {
 		cfwFdselectAddIndex(g, glyph->iFD);
 	}
 
-	h->new->iObject.charset = cfwCharsetEnd(g);
-	h->new->iObject.Encoding = 0;
-	h->new->iObject.FDSelect = cfwFdselectEnd(g);
+	h->_new->iObject.charset = cfwCharsetEnd(g);
+	h->_new->iObject.Encoding = 0;
+	h->_new->iObject.FDSelect = cfwFdselectEnd(g);
 
-	h->new->top.cid.CIDCount = glyphs[nGlyphs - 1].info->cid + 1;
+	h->_new->top.cid.CIDCount = glyphs[nGlyphs - 1].info->cid + 1;
 }
 
 /* Order glyphs in name-keyed font. */
@@ -1600,8 +1611,8 @@ static void orderNameKeyedGlyphs(controlCtx h) {
 	long j;
 	long k;
 	Glyph tmp;
-	long nGlyphs = h->new->glyphs.cnt;
-	Glyph *glyphs = h->new->glyphs.array;
+	long nGlyphs = h->_new->glyphs.cnt;
+	Glyph *glyphs = h->_new->glyphs.array;
 
 	if (glyphs[0].info == NULL) {
 		cfwFatal(h->g, cfwErrNoNotdef, NULL);
@@ -1671,7 +1682,7 @@ static void orderNameKeyedGlyphs(controlCtx h) {
 	/* Check for predefined encoding */
 	predef = 0;
 	if (g->flags & CFW_FORCE_STD_ENCODING) {
-		h->new->iObject.Encoding = 0;
+		h->_new->iObject.Encoding = 0;
 		predef = 1;
 	}
 	else {
@@ -1696,7 +1707,7 @@ static void orderNameKeyedGlyphs(controlCtx h) {
 			}
 
 			/* Found compatible predef encoding */
-			h->new->iObject.Encoding = id;
+			h->_new->iObject.Encoding = id;
 			predef = 1;
 			break;
 
@@ -1728,11 +1739,11 @@ incompat:;
 		}
 	}
 
-	h->new->iObject.charset = cfwCharsetEnd(g);
+	h->_new->iObject.charset = cfwCharsetEnd(g);
 	if (!predef) {
-		h->new->iObject.Encoding = cfwEncodingEnd(g);
+		h->_new->iObject.Encoding = cfwEncodingEnd(g);
 	}
-	h->new->iObject.FDSelect = 0;
+	h->_new->iObject.FDSelect = 0;
 }
 
 /* Assign the default and nominal widths (see comment at head of file). */
@@ -1752,7 +1763,6 @@ static int assignWidths(controlCtx h, FDInfo *fd) {
 		return 0;
 	}
 	else {
-		float dflt;
 		float nominal;
 		int i;
 		int minsize;
@@ -1797,28 +1807,31 @@ static int assignWidths(controlCtx h, FDInfo *fd) {
 			}
 		}
 
-		dflt = fd->width.freqs.array[iDefault].width;
-		nominal = fd->width.freqs.array[iNominal].width + 107;
-
-		/* Compute size of dictionary entries */
-		dictsize = 0;
-		if (dflt != 0) {
-			dictsize += numsize(dflt) + DICT_OP_SIZE(cff_defaultWidthX);
-		}
-		if (nominal != 0) {
-			dictsize += numsize(nominal) + DICT_OP_SIZE(cff_nominalWidthX);
-		}
-
-		if (minsize + dictsize < nonoptsize) {
-			/* Optimized savings; set optimization values */
-			fd->width.dflt = dflt;
-			fd->width.nominal = nominal;
-			return minsize;
-		}
-		else {
-			/* No savings; set non-optimized size */
-			return nonoptsize;
-		}
+        {
+             float dflt;
+            dflt = fd->width.freqs.array[iDefault].width;
+            nominal = fd->width.freqs.array[iNominal].width + 107;
+            
+            /* Compute size of dictionary entries */
+            dictsize = 0;
+            if (dflt != 0) {
+                dictsize += numsize(dflt) + DICT_OP_SIZE(cff_defaultWidthX);
+            }
+            if (nominal != 0) {
+                dictsize += numsize(nominal) + DICT_OP_SIZE(cff_nominalWidthX);
+            }
+            
+            if (minsize + dictsize < nonoptsize) {
+                /* Optimized savings; set optimization values */
+                fd->width.dflt = dflt;
+                fd->width.nominal = nominal;
+                return minsize;
+            }
+            else {
+                /* No savings; set non-optimized size */
+                return nonoptsize;
+            }
+        }
 	}
 }
 
@@ -1842,10 +1855,10 @@ static void analyzeWidths(controlCtx h) {
 	long i;
 
 	/* Make width frequency records */
-	for (i = 0; i < h->new->glyphs.cnt; i++) {
+	for (i = 0; i < h->_new->glyphs.cnt; i++) {
 		size_t index;
-		Glyph *glyph = &h->new->glyphs.array[i];
-		FDInfo *fd = &h->new->FDArray.array[glyph->iFD];
+		Glyph *glyph = &h->_new->glyphs.array[i];
+		FDInfo *fd = &h->_new->FDArray.array[glyph->iFD];
 
 		/* Check if width already present */
 		if (ctuLookup(&glyph->hAdv,
@@ -1856,24 +1869,24 @@ static void analyzeWidths(controlCtx h) {
 		}
 		else {
 			/* Not found; add new record */
-			WidthFreq *new =
+			WidthFreq *_new =
 			    &dnaGROW(fd->width.freqs, fd->width.freqs.cnt)[index];
 
 			/* Make hole for new record */
-			new = &fd->width.freqs.array[index];
-			memmove(new + 1, new,
+			_new = &fd->width.freqs.array[index];
+			memmove(_new + 1, _new,
 			        (fd->width.freqs.cnt++ - index) * sizeof(WidthFreq));
 
 			/* Fill new record */
-			new->width = glyph->hAdv;
-			new->count = 1;
+			_new->width = glyph->hAdv;
+			_new->count = 1;
 		}
 	}
 
 	/* Choose nominal and default widths */
-	h->new->size.widths = 0;
-	for (i = 0; i < h->new->FDArray.cnt; i++) {
-		h->new->size.widths += assignWidths(h, &h->new->FDArray.array[i]);
+	h->_new->size.widths = 0;
+	for (i = 0; i < h->_new->FDArray.cnt; i++) {
+		h->_new->size.widths += assignWidths(h, &h->_new->FDArray.array[i]);
 	}
 }
 
@@ -1891,106 +1904,108 @@ int cfwEndFont(cfwCtx g, abfTopDict *top) {
 	}
 
 	/* Set error handler */
-	if (setjmp(g->err.env)) {
-		return g->err.code;
-	}
+    DURING
 
-    /* If there are more warnings than get shown, write out how many there were. */
-    printFinalWarn(g);
+        /* If there are more warnings than get shown, write out how many there were. */
+        printFinalWarn(g);
 
-	/* Set font-wide flags */
-	h->new->flags = 0;
-	if (top->sup.flags & ABF_CID_FONT) {
-		/* Validate CID data */
-		if (top->cid.Registry.ptr == ABF_UNSET_PTR ||
-		    top->cid.Ordering.ptr == ABF_UNSET_PTR ||
-		    top->cid.Supplement == ABF_UNSET_INT) {
-			return cfwErrBadDict;
-		}
+        /* Set font-wide flags */
+        h->_new->flags = 0;
+        if (top->sup.flags & ABF_CID_FONT) {
+            /* Validate CID data */
+            if (top->cid.Registry.ptr == ABF_UNSET_PTR ||
+                top->cid.Ordering.ptr == ABF_UNSET_PTR ||
+                top->cid.Supplement == ABF_UNSET_INT) {
+                E_RETURN(cfwErrBadDict);
+            }
 
-		if (h->flags & SEEN_NAME_KEYED_GLYPH) {
-			return cfwErrGlyphType;
-		}
-		if (top->FDArray.cnt < 1 || top->FDArray.cnt > 256) {
-			return cfwErrBadFDArray;
-		}
+            if (h->flags & SEEN_NAME_KEYED_GLYPH) {
+                E_RETURN(cfwErrGlyphType);
+            }
+            if (top->FDArray.cnt < 1 || top->FDArray.cnt > 256) {
+                E_RETURN(cfwErrBadFDArray);
+            }
 
-		h->new->flags |= FONT_CID;
-	}
-	else {
-		if (h->flags & SEEN_CID_KEYED_GLYPH) {
-			return cfwErrGlyphType;
-		}
-		if (top->FDArray.cnt != 1) {
-			return cfwErrBadFDArray;
-		}
+            h->_new->flags |= FONT_CID;
+        }
+        else {
+            if (h->flags & SEEN_CID_KEYED_GLYPH) {
+                E_RETURN(cfwErrGlyphType);
+            }
+            if (top->FDArray.cnt != 1) {
+                E_RETURN(cfwErrBadFDArray);
+            }
 
-		if (top->sup.flags & ABF_SYN_FONT) {
-			h->new->flags |= FONT_SYN;
-		}
-	}
+            if (top->sup.flags & ABF_SYN_FONT) {
+                h->_new->flags |= FONT_SYN;
+            }
+        }
 
-	/* Copy dict data from client */
-	cfwDictCopyTop(g, &h->new->top, top);
+        /* Copy dict data from client */
+        cfwDictCopyTop(g, &h->_new->top, top);
 
-	if (!(h->mergedDicts && (g->flags & CFW_CHECK_IF_GLYPHS_DIFFER))) {
-		/* Initialize FDArray */
-		dnaSET_CNT(h->new->FDArray, top->FDArray.cnt);
-		for (i = 0; i < top->FDArray.cnt; i++) {
-			abfFontDict *src = &top->FDArray.array[i];
-			FDInfo *dst = &h->new->FDArray.array[i];
+        if (!(h->mergedDicts && (g->flags & CFW_CHECK_IF_GLYPHS_DIFFER))) {
+            /* Initialize FDArray */
+            dnaSET_CNT(h->_new->FDArray, top->FDArray.cnt);
+            for (i = 0; i < top->FDArray.cnt; i++) {
+                abfFontDict *src = &top->FDArray.array[i];
+                FDInfo *dst = &h->_new->FDArray.array[i];
 
-			/* Copy font and Private dict data from client */
-			cfwDictCopyFont(g, &dst->dict, src);
-			cfwDictCopyPrivate(g, &dst->Private, &src->Private);
+                /* Copy font and Private dict data from client */
+                cfwDictCopyFont(g, &dst->dict, src);
+                cfwDictCopyPrivate(g, &dst->Private, &src->Private);
 
-			dst->Subrs.count = 0;
-			memset(&dst->subrData, 0, sizeof(subr_CSData));
-			dst->width.freqs.cnt = 0;
-		}
-	}
-	/* else
-	    {
-	    FDArray has already been added by client during glyph processing
-	    Warning: at this point, the  h->new->FDArray is out of sync with the h->new->top.FDArray!
-	    There may ne more dicts in h->new->FDArray.
-	    }
-	 */
+                dst->Subrs.count = 0;
+                memset(&dst->subrData, 0, sizeof(subr_CSData));
+                dst->width.freqs.cnt = 0;
+            }
+        }
+        /* else
+            {
+            FDArray has already been added by client during glyph processing
+            Warning: at this point, the  h->_new->FDArray is out of sync with the h->_new->top.FDArray!
+            There may ne more dicts in h->_new->FDArray.
+            }
+         */
 
-	if (h->new->flags & FONT_CID) {
-		orderCIDKeyedGlyphs(h);
-	}
-	else {
-		orderNameKeyedGlyphs(h);
-	}
+        if (h->_new->flags & FONT_CID) {
+            orderCIDKeyedGlyphs(h);
+        }
+        else {
+            orderNameKeyedGlyphs(h);
+        }
 
-	analyzeWidths(h);
+        analyzeWidths(h);
 
-	if (h->new->map != NULL && !(g->flags & CFW_PRESERVE_GLYPH_ORDER)) {
-		/* Callback glyph mapping */
-		for (i = 0; i < h->new->glyphs.cnt; i++) {
-			h->new->map->glyphmap(h->new->map, (unsigned short)i,
-			                      h->new->glyphs.array[i].info);
-		}
-	}
+        if (h->_new->map != NULL && !(g->flags & CFW_PRESERVE_GLYPH_ORDER)) {
+            /* Callback glyph mapping */
+            for (i = 0; i < h->_new->glyphs.cnt; i++) {
+                h->_new->map->glyphmap(h->_new->map, (unsigned short)i,
+                                      h->_new->glyphs.array[i].info);
+            }
+        }
 
-	/* The "glyph->info" field points to the client stucture that was supplied
-	   to the glyphBeg() callback. This isn't required to be stable after
-	   returning from from this function so we set to null to ensure it isn't
-	   subsequently used by mistake. */
-	for (i = 0; i < h->new->glyphs.cnt; i++) {
-		h->new->glyphs.array[i].info = NULL;
-	}
+        /* The "glyph->info" field points to the client stucture that was supplied
+           to the glyphBeg() callback. This isn't required to be stable after
+           returning from from this function so we set to null to ensure it isn't
+           subsequently used by mistake. */
+        for (i = 0; i < h->_new->glyphs.cnt; i++) {
+            h->_new->glyphs.array[i].info = NULL;
+        }
 
-	/* release the merge copy buffers */
-	if (h->mergeBuffers.newGlyph != NULL) {
-		g->cb.mem.manage(&g->cb.mem, h->mergeBuffers.newGlyph, 0);
-		h->mergeBuffers.newGlyph = NULL;
-	}
-	if (h->mergeBuffers.oldGlyph != NULL) {
-		g->cb.mem.manage(&g->cb.mem, h->mergeBuffers.oldGlyph, 0);
-		h->mergeBuffers.oldGlyph = NULL;
-	}
+        /* release the merge copy buffers */
+        if (h->mergeBuffers.newGlyph != NULL) {
+            g->cb.mem.manage(&g->cb.mem, h->mergeBuffers.newGlyph, 0);
+            h->mergeBuffers.newGlyph = NULL;
+        }
+        if (h->mergeBuffers.oldGlyph != NULL) {
+            g->cb.mem.manage(&g->cb.mem, h->mergeBuffers.oldGlyph, 0);
+            h->mergeBuffers.oldGlyph = NULL;
+        }
+
+    HANDLER
+        return g->err.code;
+    END_HANDLER
 
 	return cfwSuccess;
 }
@@ -2020,25 +2035,27 @@ static void cfwCallSubrizer(cfwCtx g) {
 	int iFont;
 	int iGlyph;
 	cff_Font *cffFont;
-	subr_Font *subrFonts = cfwMemNew(g, sizeof(subr_Font) * nFonts);
+	subr_Font *subrFonts = (subr_Font*)cfwMemNew(g, sizeof(subr_Font) * nFonts);
 	subr_Font *subrFont;
 	Offset offset;
 
 	/* Repackage font data in formats subroutinizer expects */
 	memset(subrFonts, 0, sizeof(subr_Font) * nFonts);
 
+	DURING
+
 	for (iFont = 0; iFont < nFonts; iFont++) {
 		cffFont = &h->FontSet.array[iFont];
 		subrFont = &subrFonts[iFont];
-
+			
 		/* Set up FDInfo and FDIndex arrays */
 		subrFont->fdCount = (short)cffFont->FDArray.cnt;
-		subrFont->fdInfo = cfwMemNew(g, sizeof(subr_FDInfo) * subrFont->fdCount);
+		subrFont->fdInfo = (subr_FDInfo *)cfwMemNew(g, sizeof(subr_FDInfo) * subrFont->fdCount);
 		memset(subrFont->fdInfo, 0, sizeof(subr_FDInfo) * subrFont->fdCount);
 
 		if ((cffFont->flags & FONT_CID) || (g->flags & CFW_WRITE_CFF2)) {
 			subrFont->flags = SUBR_FONT_CID;
-			subrFont->fdIndex = cfwMemNew(g, sizeof(subr_FDIndex) * cffFont->glyphs.cnt);
+			subrFont->fdIndex = (subr_FDIndex *)cfwMemNew(g, sizeof(subr_FDIndex) * cffFont->glyphs.cnt);
 			for (iGlyph = 0; iGlyph < cffFont->glyphs.cnt; iGlyph++) {
 				Glyph *glyph = &cffFont->glyphs.array[iGlyph];
 				subrFont->fdIndex[iGlyph] = glyph->iFD;
@@ -2047,8 +2064,8 @@ static void cfwCallSubrizer(cfwCtx g) {
 
 		/* Set up charoffsets and charstrings in memory */
 		subrFont->chars.nStrings = (unsigned short)cffFont->glyphs.cnt;
-		subrFont->chars.offset = cfwMemNew(g, sizeof(Offset) * (subrFont->chars.nStrings));
-		subrFont->chars.data = cfwMemNew(g, g->cb.stm.tell(&g->cb.stm, g->stm.tmp));
+		subrFont->chars.offset = (Offset *)cfwMemNew(g, sizeof(Offset) * (subrFont->chars.nStrings));
+		subrFont->chars.data = (char *)cfwMemNew(g, g->cb.stm.tell(&g->cb.stm, g->stm.tmp));
 
 		offset = 0;
 		for (iGlyph = 0; iGlyph < cffFont->glyphs.cnt; iGlyph++) {
@@ -2102,7 +2119,10 @@ static void cfwCallSubrizer(cfwCtx g) {
 		}
 	}
 
-	h->new->CharStrings.datasize = g->cb.stm.tell(&g->cb.stm, g->stm.tmp);
+	h->_new->CharStrings.datasize = g->cb.stm.tell(&g->cb.stm, g->stm.tmp);
+
+	HANDLER
+	END_HANDLER
 
 	/* Free temporary data used by subroutinizer */
 	for (iFont = 0; iFont < nFonts; iFont++) {
@@ -2115,8 +2135,10 @@ static void cfwCallSubrizer(cfwCtx g) {
 			cfwMemFree(g, subrFont->fdIndex);
 		}
 	}
-	cfwMemFree(g, subrFonts);
-}
+
+	if (subrFonts)
+		cfwMemFree(g, subrFonts);
+	}
 
 /* End FontSet. */
 int cfwEndSet(cfwCtx g) {
@@ -2126,38 +2148,40 @@ int cfwEndSet(cfwCtx g) {
 		return cfwSuccess;  /* Nothing to do */
 	}
 	/* Set error handler */
-	if (setjmp(g->err.env)) {
-		return g->err.code;
-	}
+    DURING
 
-	/* Subroutinize charstrings */
-	if (g->flags & CFW_SUBRIZE) {
-		cfwCallSubrizer(g);
-	}
+        /* Subroutinize charstrings */
+        if (g->flags & CFW_SUBRIZE) {
+            cfwCallSubrizer(g);
+        }
 
-	if (g->flags & CFW_IS_CUBE) {
-		cfwMergeCubeGSUBR(g);
-	}
+        if (g->flags & CFW_IS_CUBE) {
+            cfwMergeCubeGSUBR(g);
+        }
 
 
 
-	fillSet(h); /* all subrs and charstrings must be inplace by the time this is called. */
-	writeSet(h);
+        fillSet(h); /* all subrs and charstrings must be inplace by the time this is called. */
+        writeSet(h);
 
-	/* Prepare for reuse */
-	cfwControlReuse(g);
-	cfwCharsetReuse(g);
-	cfwEncodingReuse(g);
-	cfwFdselectReuse(g);
-	cfwSindexReuse(g);
-	cfwDictReuse(g);
-	cfwCstrReuse(g);
-	cfwSubrReuse(g);
+        /* Prepare for reuse */
+        cfwControlReuse(g);
+        cfwCharsetReuse(g);
+        cfwEncodingReuse(g);
+        cfwFdselectReuse(g);
+        cfwSindexReuse(g);
+        cfwDictReuse(g);
+        cfwCstrReuse(g);
+        cfwSubrReuse(g);
 
-	/* Close debug stream */
-	if (g->stm.dbg != NULL) {
-		(void)g->cb.stm.close(&g->cb.stm, g->stm.dbg);
-	}
+        /* Close debug stream */
+        if (g->stm.dbg != NULL) {
+            (void)g->cb.stm.close(&g->cb.stm, g->stm.dbg);
+        }
+
+    HANDLER
+        return g->err.code;
+    END_HANDLER
 
 	return cfwSuccess;
 }
@@ -2166,7 +2190,7 @@ int cfwEndSet(cfwCtx g) {
 
 /* Manage memory and handle failure. */
 static void *safeManage(ctlMemoryCallbacks *cb, void *old, size_t size) {
-	cfwCtx g = cb->ctx;
+	cfwCtx g = (cfwCtx)cb->ctx;
 	void *ptr = g->cb.mem.manage(&g->cb.mem, old, size);
 	if (size > 0 && ptr == NULL) {
 		cfwFatal(g, cfwErrNoMemory, NULL);
@@ -2186,7 +2210,7 @@ static void dnaSafeInit(cfwCtx g) {
 
 /* Manage memory and handle failure. */
 static void *failManage(ctlMemoryCallbacks *cb, void *old, size_t size) {
-	cfwCtx g = cb->ctx;
+	cfwCtx g = (cfwCtx)cb->ctx;
 	return g->cb.mem.manage(&g->cb.mem, old, size);
 }
 
@@ -2214,23 +2238,13 @@ cfwCtx cfwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 	}
 
 	/* Allocate context */
-	g = mem_cb->manage(mem_cb, NULL, sizeof(struct cfwCtx_));
+	g = (cfwCtx)mem_cb->manage(mem_cb, NULL, sizeof(struct cfwCtx_));
 	if (g == NULL) {
 		return NULL;
 	}
 
 	/* Safety initialization */
-    g->flags  = 0;
-    g->ctx.dnaSafe  = NULL;
-	g->ctx.dnaFail  = NULL;
-	g->ctx.control  = NULL;
-	g->ctx.charset  = NULL;
-	g->ctx.encoding = NULL;
-	g->ctx.fdselect = NULL;
-	g->ctx.sindex   = NULL;
-	g->ctx.dict     = NULL;
-	g->ctx.cstr     = NULL;
-	g->ctx.subr     = NULL;
+	memset(g, 0, sizeof(*g));
 
 	g->cb.mem = *mem_cb;
 	g->cb.stm = *stm_cb;
@@ -2239,32 +2253,31 @@ cfwCtx cfwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 	g->stm.dbg = NULL;
 
 	/* Set error handler */
-	if (setjmp(g->err.env)) {
-		goto cleanup;
-	}
+    DURING
 
-	/* Initialize service libraries */
-	dnaSafeInit(g);
-	dnaFailInit(g);
+        /* Initialize service libraries */
+        dnaSafeInit(g);
+        dnaFailInit(g);
 
-	/* Initialize modules */
-	cfwControlNew(g);
-	cfwCharsetNew(g);
-	cfwEncodingNew(g);
-	cfwFdselectNew(g);
-	cfwSindexNew(g);
-	cfwDictNew(g);
-	cfwCstrNew(g);
-	cfwSubrNew(g);
+        /* Initialize modules */
+        cfwControlNew(g);
+        cfwCharsetNew(g);
+        cfwEncodingNew(g);
+        cfwFdselectNew(g);
+        cfwSindexNew(g);
+        cfwDictNew(g);
+        cfwCstrNew(g);
+        cfwSubrNew(g);
 
-	g->err.code = cfwSuccess;
+        g->err.code = cfwSuccess;
+
+    HANDLER
+        /* Initialization failed */
+        cfwFree(g);
+        g = NULL;
+    END_HANDLER
 
 	return g;
-
-cleanup:
-	/* Initialization failed */
-	cfwFree(g);
-	return NULL;
 }
 
 /* Free context. */
@@ -2296,11 +2309,12 @@ void cfwFree(cfwCtx g) {
 /* Write message to debug stream from va_list. */
 static void vmessage(cfwCtx g, char *fmt, va_list ap) {
 	char text[500];
+    const size_t textLen = sizeof(text);
 
 	if (g->stm.dbg == NULL) {
 		return; /* Debug stream not available */
 	}
-	vsprintf(text, fmt, ap);
+	VSPRINTF_S(text, textLen, fmt, ap);
 	(void)g->cb.stm.write(&g->cb.stm, g->stm.dbg, strlen(text), text);
 }
 
@@ -2325,8 +2339,8 @@ void CTL_CDECL cfwFatal(cfwCtx g, int err_code, char *fmt, ...) {
 		vmessage(g, fmt, ap);
 		va_end(ap);
 	}
-	g->err.code = err_code;
-	longjmp(g->err.env, 1);
+	g->err.code = (short)err_code;
+    RAISE(err_code, NULL);
 }
 
 /* --------------------------- Memory Management --------------------------- */
@@ -2337,6 +2351,10 @@ void *cfwMemNew(cfwCtx g, size_t size) {
 	if (ptr == NULL) {
 		cfwFatal(g, cfwErrNoMemory, NULL);
 	}
+
+	/* Safety initialization */
+	memset(ptr, 0, size);
+
 	return ptr;
 }
 

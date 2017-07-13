@@ -48,7 +48,7 @@ struct sindexCtx_ {
 
 /* Initialize module. */
 void cfwSindexNew(cfwCtx g) {
-	sindexCtx h = cfwMemNew(g, sizeof(struct sindexCtx_));
+	sindexCtx h = (sindexCtx)cfwMemNew(g, sizeof(struct sindexCtx_));
 
 	/* Link contexts */
 	h->g = g;
@@ -94,7 +94,7 @@ static int CTL_CDECL matchStdStr(const void *key, const void *value) {
 /* Match non-standard string. */
 static int CTL_CDECL matchNonStdStr(const void *key, const void *value,
                                     void *ctx) {
-	sindexCtx h = ctx;
+	sindexCtx h = (sindexCtx)ctx;
 	return strcmp((char *)key, &h->strings.array
 	              [h->custom.array[*(unsigned short *)value].iString]);
 }
@@ -126,12 +126,14 @@ SRI cfwSindexAddString(cfwCtx g, char *string) {
 	else {
 		/* Not found; add to table */
 		CustomRec *custom;
-		unsigned short *new = &dnaGROW(h->byName, h->byName.cnt)[index];
+        size_t stringLen;
+        
+		unsigned short *_new = &dnaGROW(h->byName, h->byName.cnt)[index];
 
 		/* Make and fill hole */
-		memmove(new + 1, new,
+		memmove(_new + 1, _new,
 		        (h->byName.cnt++ - index) * sizeof(h->byName.array[0]));
-		*new = (unsigned short)h->custom.cnt;
+		*_new = (unsigned short)h->custom.cnt;
 
 		/* Allocate and fill new record */
 		custom = dnaNEXT(h->custom);
@@ -140,9 +142,10 @@ SRI cfwSindexAddString(cfwCtx g, char *string) {
 
 		/* Save string */
 		/* 64-bit warning fixed by cast here */
-		strcpy(dnaEXTEND(h->strings, (long)strlen(string) + 1), string);
+        stringLen = (long)strlen(string) + 1;
+		STRCPY_S(dnaEXTEND(h->strings, (long)stringLen), stringLen, string);
 
-		return *new + STD_STR_CNT;
+		return *_new + STD_STR_CNT;
 	}
 }
 

@@ -97,7 +97,8 @@ that changes to environment.h be upward-compatible, as described above.
 #define isp_alpha64	32	/* DEC Alpha, 64/64 ptr/scnunit little-endian */
 #define isp_ppc         33      /* Mac PPC */
 #define isp_x64         34      /* AMD64 and EM64T */
-
+#define isp_arm         35
+#define isp_arm64       36
 
 
 /*
@@ -163,6 +164,10 @@ that changes to environment.h be upward-compatible, as described above.
 #define ISP isp_x64
 #elif defined(_M_IX86)
 #define ISP isp_i80486
+#elif defined(_M_ARM)
+#define ISP isp_arm
+#elif defined(_ARM64_)
+#define ISP isp_arm64
 #endif
 #endif
 
@@ -392,7 +397,7 @@ that changes to environment.h be upward-compatible, as described above.
   the most important.
  */
 
-#if ISP==isp_i80486 && ( OS==os_windowsNT || OS==os_osx)
+#if (ISP==isp_i80486 || ISP==isp_arm) && ( OS==os_windowsNT || OS==os_osx)
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 0
@@ -599,28 +604,6 @@ that changes to environment.h be upward-compatible, as described above.
 
 #endif
 
-#if ISP==isp_ibm370 && (OS==os_vm370 || OS==os_mvs370)
-#define MC68K 0
-#define IEEEFLOAT 0
-#define IEEESOFT 0
-#define SWAPBITS 0
-#define UNSIGNEDCHARS 1
-#define MINALIGN 2
-#define PREFERREDALIGN 4
-#define REGISTERVARS 4		/* ? */
-#endif
-
-#if ISP==isp_ti34010  /* && OS==? */
-#define MC68K 0
-#define IEEEFLOAT 0
-#define IEEESOFT 0
-#define SWAPBITS 1
-#define UNSIGNEDCHARS 0
-#define MINALIGN 1
-#define PREFERREDALIGN 4
-#define REGISTERVARS 4		/* ? */
-#endif
-
 #if ISP==isp_rs6000 && OS==os_aix
 #define MC68K 0
 #define IEEEFLOAT 1
@@ -724,28 +707,6 @@ that changes to environment.h be upward-compatible, as described above.
 #define MINALIGN 4
 #define PREFERREDALIGN 4
 #define REGISTERVARS 16		/* ? */
-#endif
-
-#if ISP==isp_ns32532  /* && OS==? */
-#define MC68K 0
-#define IEEEFLOAT 1
-#define IEEESOFT 0
-#define SWAPBITS 1
-#define UNSIGNEDCHARS 0
-#define MINALIGN 1
-#define PREFERREDALIGN 4
-#define REGISTERVARS 4		/* ? */
-#endif
-
-#if (ISP==isp_xl8000 || ISP==isp_xl8220) && OS==os_ps
-#define MC68K 0
-#define IEEEFLOAT 1
-#define IEEESOFT 1
-#define SWAPBITS 1
-#define UNSIGNEDCHARS 0
-#define MINALIGN 4
-#define PREFERREDALIGN 4
-#define REGISTERVARS 15
 #endif
 
 #if ISP==isp_amd29k && OS==os_ps
@@ -898,7 +859,7 @@ that changes to environment.h be upward-compatible, as described above.
     #define SCANUNIT 8
     #endif
 
-    #if ISP==isp_x64 && OS==os_win64
+    #if (ISP==isp_x64 || ISP==isp_arm64) && OS==os_win64
     #define MC68K 0
     #define IEEEFLOAT 1
     #define IEEESOFT 0

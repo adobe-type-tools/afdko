@@ -67,13 +67,13 @@ predef[] = {
 
 struct charsetCtx_ {
 	dnaDCL(Charset, charsets);
-	Charset *new;           /* Charset being added */
+	Charset *_new;           /* Charset being added */
 	cfwCtx g;               /* Package context */
 };
 
 /* Initialize charset. */
 static void initCharset(void *ctx, long cnt, Charset *charset) {
-	cfwCtx g = ctx;
+	cfwCtx g = (cfwCtx)ctx;
 	while (cnt--) {
 		dnaINIT(g->ctx.dnaSafe, charset->nameids, 256, 750);
 		charset++;
@@ -82,7 +82,7 @@ static void initCharset(void *ctx, long cnt, Charset *charset) {
 
 /* Initialize module. */
 void cfwCharsetNew(cfwCtx g) {
-	charsetCtx h = cfwMemNew(g, sizeof(struct charsetCtx_));
+	charsetCtx h = (charsetCtx)cfwMemNew(g, sizeof(struct charsetCtx_));
 	unsigned int i;
 
 	/* Link contexts */
@@ -127,15 +127,15 @@ void cfwCharsetFree(cfwCtx g) {
 /* Begin new charset. */
 void cfwCharsetBeg(cfwCtx g, int is_cid) {
 	charsetCtx h = g->ctx.charset;
-	h->new = dnaNEXT(h->charsets);
-	h->new->nameids.cnt = 0;
-	h->new->is_cid = is_cid;
+	h->_new = dnaNEXT(h->charsets);
+	h->_new->nameids.cnt = 0;
+	h->_new->is_cid = is_cid;
 }
 
 /* Add SID/CID to charset. */
 void cfwCharsetAddGlyph(cfwCtx g, unsigned short nameid) {
 	charsetCtx h = g->ctx.charset;
-	*dnaNEXT(h->new->nameids) = nameid;
+	*dnaNEXT(h->_new->nameids) = nameid;
 }
 
 /* End glyph name addition and check for duplicate charset. */
@@ -143,13 +143,13 @@ int cfwCharsetEnd(cfwCtx g) {
 	charsetCtx h = g->ctx.charset;
 	int i;
 
-	for (i = h->new->is_cid ? PREDEF_CNT : 0; i < h->charsets.cnt - 1; i++) {
+	for (i = h->_new->is_cid ? PREDEF_CNT : 0; i < h->charsets.cnt - 1; i++) {
 		Charset *charset = &h->charsets.array[i];
-		if (h->new->nameids.cnt <= charset->nameids.cnt &&
-		    memcmp(h->new->nameids.array,
+		if (h->_new->nameids.cnt <= charset->nameids.cnt &&
+		    memcmp(h->_new->nameids.array,
 		           charset->nameids.array,
-		           h->new->nameids.cnt *
-		           sizeof(h->new->nameids.array[0])) == 0) {
+		           h->_new->nameids.cnt *
+		           sizeof(h->_new->nameids.array[0])) == 0) {
 			/* Found match; remove new charset from list */
 			h->charsets.cnt--;
 			return i;

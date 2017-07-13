@@ -101,7 +101,7 @@ void abfAFMEndFont(abfAFMCtx h)
 /* Begin glyph path. */
 static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 	{
-	abfAFMCtx h = cb->direct_ctx;
+	abfAFMCtx h = (abfAFMCtx)cb->direct_ctx;
 	cb->info = info;
 	return h->metrics.cb.beg(&h->metrics.cb, info);
 	}
@@ -109,21 +109,21 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 /* Save glyph width. */
 static void glyphWidth(abfGlyphCallbacks *cb, float hAdv)
 	{
-	abfAFMCtx h = cb->direct_ctx;
+	abfAFMCtx h = (abfAFMCtx)cb->direct_ctx;
 	h->metrics.cb.width(&h->metrics.cb, hAdv);
 	}
 
 /* Add move to path. */
 static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0)
 	{
-	abfAFMCtx h = cb->direct_ctx;
+	abfAFMCtx h = (abfAFMCtx)cb->direct_ctx;
 	h->metrics.cb.move(&h->metrics.cb, x0, y0);
 	}
 
 /* Add line to path. */
 static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1)
 	{
-	abfAFMCtx h = cb->direct_ctx;
+	abfAFMCtx h = (abfAFMCtx)cb->direct_ctx;
 	h->metrics.cb.line(&h->metrics.cb, x1, y1);
 	}
 
@@ -133,7 +133,7 @@ static void glyphCurve(abfGlyphCallbacks *cb,
 					   float x2, float y2, 
 					   float x3, float y3)
 	{
-	abfAFMCtx h = cb->direct_ctx;
+	abfAFMCtx h = (abfAFMCtx)cb->direct_ctx;
 	h->metrics.cb.curve(&h->metrics.cb, x1, y1, x2, y2, x3, y3);
 	}
 
@@ -168,14 +168,14 @@ static void glyphGenop(abfGlyphCallbacks *cb,
 static void glyphSeac(abfGlyphCallbacks *cb, 
 					  float adx, float ady, int bchar, int achar)
 	{
-	abfMetricsCtx h = cb->direct_ctx;
+	abfMetricsCtx h = (abfMetricsCtx)cb->direct_ctx;
 	h->err_code = abfErrGlyphSeac; 
 	}
 
 /* End glyph path. */
 static void glyphEnd(abfGlyphCallbacks *cb)
 	{
-	abfAFMCtx h = cb->direct_ctx;
+	abfAFMCtx h = (abfAFMCtx)cb->direct_ctx;
 	abfMetricsCtx g = &h->metrics.ctx;
 	abfGlyphInfo *info = cb->info;
     unsigned long code = (info->encoding.code == ABF_GLYPH_UNENC)?

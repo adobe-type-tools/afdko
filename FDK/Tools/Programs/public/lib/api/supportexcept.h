@@ -30,7 +30,11 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #endif
 /* #include CANTHAPPEN	*/	/* To include Abort processing, by reference */
 
+#if defined(USE_CXX_EXCEPTION) && !defined(__cplusplus)
+    #error("must be compiled as C++ to use C++ exception as error handling")
+#endif
 
+#ifndef USE_CXX_EXCEPTION
 /* If the macro setjmp_h is defined, it is the #include path to be used
    instead of <setjmp.h>
  */
@@ -43,6 +47,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <setjmp.h>
 #endif  /* VAXC */
 #endif  /* setjmp_h */
+#endif
 
 /* 
   This interface defines a machine-independent exception handling
@@ -131,29 +136,48 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /* Data structures */
 
 typedef struct _t_Exc_buf {
+#ifdef USE_CXX_EXCEPTION
+    _t_Exc_buf(int code=0, char *msg=0) : Message(msg), Code(code) {}
+#else
 	struct _t_Exc_buf *Prev;	/* exception chain back-pointer */
 	jmp_buf Environ;		/* saved environment */
+#endif
 	char *Message;			/* Human-readable cause */
 	int Code;			/* Exception code */
 } _Exc_Buf;
 
-extern _Exc_Buf *_Exc_Header;	/* global exception chain header */     
+#ifndef USE_CXX_EXCEPTION
+extern _Exc_Buf *_Exc_Header;	/* global exception chain header */
+#endif
 
 /* Macros defining the exception handler "syntax":
      DURING statements HANDLER statements END_HANDLER
    (see the description above)
  */
 
+#ifdef USE_CXX_EXCEPTION
+#define	_E_RESTORE
+#else
 #define	_E_RESTORE  _Exc_Header = Exception.Prev
+#endif
 
+#ifdef USE_CXX_EXCEPTION
 #define	DURING {_Exc_Buf Exception;\
-		Exception.Prev =_Exc_Header;\
-		_Exc_Header = &Exception;\
+		try {
+
+#define	HANDLER	} catch (_Exc_Buf& e) { Exception = e;
+
+#define	END_HANDLER }}
+
+#else /* USE_CXX_EXCEPTION */
+#define	DURING {_Exc_Buf Exception;\
 		if (! setjmp(Exception.Environ)) {
 
 #define	HANDLER	_E_RESTORE;} else {
 
 #define	END_HANDLER }}
+
+#endif /* USE_CXX_EXCEPTION */
 
 #define	E_RETURN(x) {_E_RESTORE; return(x);}
 
@@ -181,7 +205,7 @@ extern procedure os_raise (int  Code, char * Message);
  */
 
 
-#if !WINATM && OS!=os_windowsNT
+#if !defined(USE_CXX_EXCEPTION) && !WINATM && OS!=os_windowsNT
 #ifndef setjmp
 extern int setjmp (jmp_buf  buf);
 #endif
@@ -190,7 +214,7 @@ extern int setjmp (jmp_buf  buf);
    It may return again if longjmp is executed subsequently (see below).
  */
 
-extern procedure longjmp (jmp_buf  buf, int  value);
+/*extern _CRTIMP procedure CDECL longjmp (jmp_buf  buf, int  value);*/
 /* Restores the environment saved by an earlier call to setjmp,
    unwinding the stack and causing setjmp to return again with
    value as its return value (which must be non-zero).

@@ -8,6 +8,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "absfont.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #ifdef _WIN32
 #include <time.h>
 #else
@@ -271,7 +272,7 @@ void abfDrawEndFont(abfDrawCtx h)
 /* Draw glyph beginning. */
 static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 	{
-	abfDrawCtx h = cb->direct_ctx;
+	abfDrawCtx h = (abfDrawCtx)cb->direct_ctx;
 
 	cb->info = info;
 	if (h->flags & NEW_PAGE)
@@ -313,7 +314,7 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 /* Draw glyph width. */
 static void glyphWidth(abfGlyphCallbacks *cb, float hAdv)
 	{
-	abfDrawCtx h = cb->direct_ctx;
+	abfDrawCtx h = (abfDrawCtx)cb->direct_ctx;
 
 	if (!h->showglyph)
 		return;
@@ -528,7 +529,7 @@ static void endPath(abfDrawCtx h)
 /* Draw glyph move. */
 static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0)
 	{
-	abfDrawCtx h = cb->direct_ctx;
+	abfDrawCtx h = (abfDrawCtx)cb->direct_ctx;
 
 	if (!h->showglyph)
 		return;
@@ -562,7 +563,7 @@ static void drawCntlPt(abfDrawCtx h, float x, float y)
 /* Draw glyph line. */
 static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1)
 	{
-	abfDrawCtx h = cb->direct_ctx;
+	abfDrawCtx h = (abfDrawCtx)cb->direct_ctx;
 
 	if (!h->showglyph)
 		return;
@@ -582,7 +583,7 @@ static void glyphCurve(abfGlyphCallbacks *cb,
 					   float x2, float y2, 
 					   float x3, float y3)
 	{
-	abfDrawCtx h = cb->direct_ctx;
+	abfDrawCtx h = (abfDrawCtx)cb->direct_ctx;
 
 	if (!h->showglyph)
 		return;
@@ -655,6 +656,7 @@ static float drawString(abfDrawCtx h, float y, char *key, char *value)
 static void drawMetrics(abfDrawCtx h, abfGlyphInfo *info)
 	{
 	char buf[50];
+    const size_t bufLen = sizeof(buf);
 	float y;
 
 	fprintf(h->fp, "/%s findfont %g scalefont setfont\n",
@@ -681,46 +683,51 @@ static void drawMetrics(abfDrawCtx h, abfGlyphInfo *info)
 		{
 		abfEncoding *enc = &info->encoding;
 		if (enc->code == ABF_GLYPH_UNENC)
-			sprintf(buf, "-");
+			SPRINTF_S(buf, bufLen, "-");
 		else
 			{
 			int cnt = 0;
 			char *p = buf;
+            size_t remainingBufferLength = bufLen;
 			char *sep = "";
+                size_t printStringLength;
 			do
 				{
 				if (info->flags & ABF_GLYPH_UNICODE)
 					{
 					if (enc->code < 0x10000)
-						sprintf(p, "%sU+%04lX", sep, enc->code);
+						SPRINTF_S(p, remainingBufferLength, "%sU+%04lX", sep, enc->code);
 					else
-						sprintf(p, "%sU+%lX", sep, enc->code);
+						SPRINTF_S(p, remainingBufferLength, "%sU+%lX", sep, enc->code);
 					}
 				else
-					sprintf(p, "%s0x%02lx", sep, enc->code);
-				p += strlen(p);
+					SPRINTF_S(p, remainingBufferLength, "%s0x%02lx", sep, enc->code);
+                printStringLength = strnlen(p, remainingBufferLength);
+				p += printStringLength;
+                remainingBufferLength -= printStringLength;
 				sep = "+";
 				enc = enc->next;
 				}
 			while (enc != NULL && ++cnt < 2);
 			if (enc != NULL)
-				sprintf(p, "...");
+				SPRINTF_S(p, remainingBufferLength, "...");
 			}
 		y = drawString(h, y, "enc", buf);
 		}
 	y = drawNumber(h, y, "tag", info->tag);
 	if (info->flags & ABF_GLYPH_CID)
-		sprintf(buf, "\\\\%hu", info->cid);
+		SPRINTF_S(buf, bufLen, "\\\\%hu", info->cid);
 	else
-		sprintf(buf, "%s", info->gname.ptr);
+		SPRINTF_S(buf, bufLen, "%s", info->gname.ptr);
 	y =	drawString(h, y, "glyph", buf);
 	}
 
 /* Draw glyph end. */
 static void glyphEnd(abfGlyphCallbacks *cb)
 	{
-	abfDrawCtx h = cb->direct_ctx;
+	abfDrawCtx h = (abfDrawCtx)cb->direct_ctx;
 	char gname[50];
+    const size_t gnameLen = sizeof(gname);
 	abfGlyphInfo *info = cb->info;
 
 	if (!h->showglyph)
@@ -729,57 +736,64 @@ static void glyphEnd(abfGlyphCallbacks *cb)
 	endPath(h);
 
 	if (h->level == 0)
-		fprintf(h->fp, "fill\n");
+		FPRINTF_S(h->fp, "fill\n");
 	else 
 		fprintf(h->fp, "0 setlinewidth stroke\n");
-	fprintf(h->fp, "grestore\n");
+	FPRINTF_S(h->fp, "grestore\n");
 
 	/* Set glyph name */
 	if (info->flags & ABF_GLYPH_CID)
-		sprintf(gname, "\\\\%hu", info->cid);
+		SPRINTF_S(gname, gnameLen, "\\\\%hu", info->cid);
 	else
-		sprintf(gname, "%s", info->gname.ptr);
+		SPRINTF_S(gname, gnameLen, "%s", info->gname.ptr);
 
 	if (h->level == 0)
 		{
 		char tag[20];
+        const size_t tagLen = sizeof(tag);
 		char hAdv[20];
+        const size_t hAdvLen = sizeof(hAdv);
 
 		if (info->flags & ABF_GLYPH_CID)
-			sprintf(tag, "%hu,%u", info->tag, info->iFD);
+			SPRINTF_S(tag, tagLen, "%hu,%u", info->tag, info->iFD);
 		else
 			{
 			abfEncoding *enc = &info->encoding;
-			sprintf(tag, "%hu,", info->tag);
+			SPRINTF_S(tag, tagLen, "%hu,", info->tag);
 			if (enc->code != ABF_GLYPH_UNENC)
 				{
 				int cnt = 0;
 				char *p = tag;
+                size_t remainingTagLength = tagLen;
 				char *sep = "";
 				do
 					{
-					p += strlen(p);
+                    size_t printStringLength = strnlen(p, remainingTagLength);
+					p += printStringLength;
+                    remainingTagLength -= printStringLength;
 					if (info->flags & ABF_GLYPH_UNICODE)
 						{
 						if (enc->code < 0x10000)
-							sprintf(p, "%sU+%04lX", sep, enc->code);
+							SPRINTF_S(p, remainingTagLength, "%sU+%04lX", sep, enc->code);
 						else
-							sprintf(p, "%sU+%lX", sep, enc->code);
+							SPRINTF_S(p, remainingTagLength, "%sU+%lX", sep, enc->code);
 						}
 					else
-						sprintf(p, "%s0x%02lX", sep, enc->code);
+						SPRINTF_S(p, remainingTagLength, "%s0x%02lX", sep, enc->code);
 					sep = "+";
 					enc = enc->next;
 					}
 				while (enc != NULL && ++cnt < 2);
 				if (enc != NULL)
 					{
-					p += strlen(p);
-					sprintf(p, "...");
+                    size_t printStringLength = strnlen(p, remainingTagLength);
+                    p += printStringLength;
+                    remainingTagLength -= printStringLength;
+					SPRINTF_S(p, remainingTagLength, "...");
 					}
 				}
 			}
-		sprintf(hAdv, "%g", h->glyph.hAdv);
+		SPRINTF_S(hAdv, hAdvLen, "%g", h->glyph.hAdv);
 		drawTile(h, (float)h->tile.h, (float)h->tile.v, tag, hAdv, gname);
 
 		if (!(h->flags & ABF_SHOW_BY_ENC))

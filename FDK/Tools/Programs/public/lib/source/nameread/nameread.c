@@ -6,6 +6,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "varread.h"
 #include "dynarr.h"
 #include "sha1.h"
+#include "supportexcept.h"
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -40,7 +41,8 @@ struct nam_name_					/* name table */
 /* Load the name table. */
 nam_name nam_loadname(sfrCtx sfr, ctlSharedStmCallbacks *sscb)
 {
-    nam_name nameTbl;
+	nam_name nameTbl = NULL;
+	int success = 0;
 	int i;
 
 	sfrTable *table = sfrGetTableByTag(sfr, CTL_TAG('n','a','m','e'));
@@ -49,33 +51,47 @@ nam_name nam_loadname(sfrCtx sfr, ctlSharedStmCallbacks *sscb)
 		sscb->message(sscb, "name table missing");
 		return NULL;
     }
-	sscb->seek(sscb, table->offset);
+	DURING
+		sscb->seek(sscb, table->offset);
 
-    nameTbl = sscb->memNew(sscb, sizeof(*nameTbl));
-    if (!nameTbl) return NULL;
+		nameTbl = (nam_name)sscb->memNew(sscb, sizeof(*nameTbl));
+		if (!nameTbl)
+			goto cleanup;
 
-	/* Read and validate table format */
-	nameTbl->format = sscb->read2(sscb);
-	if (nameTbl->format != 0)
-		sscb->message(sscb, "invalid name table format");
+		/* Read and validate table format */
+		nameTbl->format = sscb->read2(sscb);
+		if (nameTbl->format != 0) {
+			sscb->message(sscb, "invalid name table format");
+			goto cleanup;
+		}
 
-	/* Read rest of header */
-	nameTbl->count			= sscb->read2(sscb);
-	nameTbl->stringOffset 	= sscb->read2(sscb);
+		/* Read rest of header */
+		nameTbl->count			= sscb->read2(sscb);
+		nameTbl->stringOffset 	= sscb->read2(sscb);
 
-	/* Read name records */
-    dnaINIT(sscb->dna, nameTbl->records, nameTbl->count, nameTbl->count);
-	dnaSET_CNT(nameTbl->records, nameTbl->count);
-	for (i = 0; i < nameTbl->records.cnt; i++)
-    {
-		nam_NameRecord *rec = &nameTbl->records.array[i];
-		rec->platformId	= sscb->read2(sscb);
-		rec->platspecId = sscb->read2(sscb);
-		rec->languageId = sscb->read2(sscb);
-		rec->nameId 	= sscb->read2(sscb);
-		rec->length 	= sscb->read2(sscb);
-		rec->offset 	= table->offset + nameTbl->stringOffset + sscb->read2(sscb);
-    }
+		/* Read name records */
+		dnaINIT(sscb->dna, nameTbl->records, nameTbl->count, nameTbl->count);
+		dnaSET_CNT(nameTbl->records, nameTbl->count);
+		for (i = 0; i < nameTbl->records.cnt; i++)
+		{
+			nam_NameRecord *rec = &nameTbl->records.array[i];
+			rec->platformId	= sscb->read2(sscb);
+			rec->platspecId = sscb->read2(sscb);
+			rec->languageId = sscb->read2(sscb);
+			rec->nameId 	= sscb->read2(sscb);
+			rec->length 	= sscb->read2(sscb);
+			rec->offset 	= table->offset + nameTbl->stringOffset + sscb->read2(sscb);
+		}
+		success = 1;
+
+cleanup:;
+	HANDLER
+	END_HANDLER
+
+	if (!success) {
+		nam_freename(sscb, nameTbl);
+		nameTbl = NULL;
+	}
 
     return nameTbl;
 }
@@ -159,6 +175,8 @@ long nam_getASCIIName(nam_name nameTbl, ctlSharedStmCallbacks *sscb, char *buffe
     unsigned char ch1, ch2;
     nam_NameRecord  *rec;
 
+	if (!nameTbl)
+		return NAME_READ_NAME_NOT_FOUND;
     rec = nam_nameFind(nameTbl, NAME_WIN_PLATFORM, NAME_WIN_UGL, NAME_WIN_ENGLISH, nameId);
     if (rec && rec->length > 0) {
         nameLen = 0;
@@ -263,7 +281,7 @@ long nam_getNamedInstancePSName(nam_name nameTbl,
 {
     unsigned long   familyNameLen = 0;
     long            nameLen = NAME_READ_NAME_NOT_FOUND;
-    unsigned short  subfamilyID, postscriptID;
+    unsigned short  subfamilyID = 0, postscriptID = 0;
     char            *buffer = 0;
     unsigned long   bufferLen;
 
@@ -295,21 +313,23 @@ long nam_getNamedInstancePSName(nam_name nameTbl,
     familyNameLen = (unsigned long)nameLen;
 
     /* append the style name from the instance if there is a matching one */
-    if (instanceIndex >= 0) {
-        char    *styleName = &buffer[nameLen];
-        unsigned long   styleBufferLen = bufferLen - nameLen;
-        unsigned long   styleLen;
-        
-        styleLen = nam_getASCIIName(nameTbl, sscb, styleName, styleBufferLen, subfamilyID, 0);
-        if (styleLen > 0)
-            styleLen = removeNonAlphanumChar(styleName, styleLen);
-        if (styleLen > 0) {
-            nameLen = nameLen + styleLen;
-        }
-        if ((unsigned long)nameLen + 1 > instanceNameLen)
-            nameLen = NAME_READ_NAME_TOO_LONG;
-        else
-            strcpy(instanceName, buffer);
+	if (instanceIndex >= 0) {
+		char    *styleName = &buffer[nameLen];
+		unsigned long   styleBufferLen = bufferLen - nameLen;
+		long   styleLen;
+
+		styleLen = nam_getASCIIName(nameTbl, sscb, styleName, styleBufferLen, subfamilyID, 0);
+		if (styleLen < 0)
+			nameLen = styleLen;
+		else
+		{
+			styleLen = removeNonAlphanumChar(styleName, styleLen);
+			nameLen = nameLen + styleLen;
+			if ((unsigned long)nameLen + 1 > instanceNameLen)
+				nameLen = NAME_READ_NAME_TOO_LONG;
+			else
+				STRCPY_S(instanceName, instanceNameLen, buffer);
+		}
     }
     else
         nameLen = NAME_READ_NAME_NOT_FOUND;
@@ -368,7 +388,7 @@ static unsigned long stringizeNum(char *buffer, unsigned long bufferLen, float v
     }
     while (digit-- > 0) {
         power10 /= 10;
-        buffer[i++] = '0' + (intPart / power10);
+        buffer[i++] = (char)('0' + (intPart / power10));
         intPart %= power10;
     }
 
@@ -380,7 +400,7 @@ static unsigned long stringizeNum(char *buffer, unsigned long bufferLen, float v
             fractPart *= 10;
             eps *= 10;
             intPart = (int)fractPart;
-            buffer[i++] = '0' + intPart;
+            buffer[i++] = (char)('0' + intPart);
             fractPart -= intPart;
         } while (fractPart >= eps);
     }
@@ -455,7 +475,7 @@ long nam_generateArbitraryInstancePSName(nam_name nameTbl,
     }
     buffer[nameLen++] = 0;
     if (nameLen <= (long)instanceNameLen) {
-        strncpy(instanceName, buffer, nameLen);
+        STRNCPY_S(instanceName, instanceNameLen, buffer, nameLen);
         instanceName[nameLen] = 0;
      }
     else
@@ -526,7 +546,7 @@ long nam_generateLastResortInstancePSName(nam_name nameTbl,
         hashLen /= 2;   /* give it another chance by halvening the hash length */
     }
     nameLen = familyNameLen;
-    strncpy(instanceName, buffer, nameLen);
+    STRNCPY_S(instanceName, instanceNameLen, buffer, nameLen);
     instanceName[nameLen++] = '-';
 
     {

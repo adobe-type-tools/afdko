@@ -254,7 +254,7 @@ static void writeReal(ufwCtx h, float value)
 	if ((fabs(value-roundf(value)) < TX_EPSILON) && value>LONG_MIN && value<LONG_MAX)
 		ufw_ltoa(buf, (long)roundf(value));
 	else
-		ctuDtostr(buf, value, 0, 2);
+		ctuDtostr(buf, sizeof(buf), value, 0, 2);
 	writeBuf(h, strlen(buf), buf);
 }
 

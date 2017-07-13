@@ -7,6 +7,8 @@
 
 #include "dynarr.h"
 
+#include <string.h>
+
 typedef dnaDCL (void, dnaGeneric);
 
 struct dnaCtx_ { /* Library context */
@@ -23,10 +25,12 @@ dnaCtx dnaNew(ctlMemoryCallbacks *mem_cb, CTL_CHECK_ARGS_DCL) {
 	}
 
 	/* Allocate context */
-	h = mem_cb->manage(mem_cb, NULL, sizeof(struct dnaCtx_));
+	h = (dnaCtx)mem_cb->manage(mem_cb, NULL, sizeof(struct dnaCtx_));
 	if (h == NULL) {
 		return NULL;
 	}
+
+	memset(h, 0, sizeof(*h));
 
 	/* Initialize context */
 	h->mem = *mem_cb;
@@ -45,7 +49,7 @@ void dnaFree(dnaCtx h) {
 
 /* Initialize dynamic array. */
 void dnaInit(dnaCtx h, void *object, size_t init, size_t incr, int check) {
-	dnaGeneric *da = object;
+	dnaGeneric *da = (dnaGeneric*)object;
 
 	if (check && da->size != 0) {
 		return; /* Already initialized */
@@ -66,24 +70,32 @@ void dnaInit(dnaCtx h, void *object, size_t init, size_t incr, int check) {
 long dnaGrow(void *object, size_t elemsize, long index) {
 	void *new_ptr;
 	size_t new_size;
-	dnaGeneric *da = object;
+	dnaGeneric *da = (dnaGeneric*)object;
 	dnaCtx h = da->ctx;
 
-	if (index < da->size) {
+	if (index < da->size || elemsize == 0) {
 		return 0;   /* Use existing allocation */
 	}
 	else if (da->size == 0) {
 		/* Initial allocation */
 		size_t init = (size_t)da->array;
+		size_t new_mem_size;
 		new_size = ((size_t)index < init) ? init :
 		    init + ((index - init) + da->incr) / da->incr * da->incr;
-		new_ptr = h->mem.manage(&h->mem, NULL, new_size * elemsize);
+		new_mem_size = new_size * elemsize;
+		if (new_mem_size / elemsize == new_size)	/* check math overflow */
+			new_ptr = h->mem.manage(&h->mem, NULL, new_mem_size);
+		else
+			new_ptr = NULL;
 	}
 	else {
 		/* Incremental allocation */
 		new_size = da->size +
 		    ((index - da->size) + da->incr) / da->incr * da->incr;
-		new_ptr = h->mem.manage(&h->mem, da->array, new_size * elemsize);
+		if (new_size * elemsize >= new_size)	/* check math overflow */
+			new_ptr = h->mem.manage(&h->mem, da->array, new_size * elemsize);
+		else
+			new_ptr = NULL;
 	}
 
 	if (new_ptr == NULL) {
@@ -104,7 +116,7 @@ long dnaGrow(void *object, size_t elemsize, long index) {
 
 /* Set da cnt. Return -1 on error else 0. */
 long dnaSetCnt(void *object, size_t elemsize, long cnt) {
-	dnaGeneric *da = object;
+	dnaGeneric *da = (dnaGeneric*)object;
 	if (cnt > da->size) {
 		if (dnaGrow(object, elemsize, cnt - 1)) {
 			return -1;
@@ -116,7 +128,7 @@ long dnaSetCnt(void *object, size_t elemsize, long cnt) {
 
 /* Index da. Return -1 on error else index. */
 long dnaIndex(void *object, size_t elemsize, long index) {
-	dnaGeneric *da = object;
+	dnaGeneric *da = (dnaGeneric*)object;
 	if (index >= da->size) {
 		if (dnaGrow(object, elemsize, index)) {
 			return -1;
@@ -127,7 +139,7 @@ long dnaIndex(void *object, size_t elemsize, long index) {
 
 /* Index da and record max index+1 in da.cnt. Return -1 on error else index. */
 long dnaMax(void *object, size_t elemsize, long index) {
-	dnaGeneric *da = object;
+	dnaGeneric *da = (dnaGeneric*)object;
 	if (index >= da->size) {
 		if (dnaGrow(object, elemsize, index)) {
 			return -1;
@@ -141,7 +153,7 @@ long dnaMax(void *object, size_t elemsize, long index) {
 
 /* Grow da by one element. Return -1 on error else da->cnt. */
 long dnaNext(void *object, size_t elemsize) {
-	dnaGeneric *da = object;
+	dnaGeneric *da = (dnaGeneric*)object;
 	if (da->cnt >= da->size) {
 		if (dnaGrow(object, elemsize, da->cnt)) {
 			return -1;
@@ -153,7 +165,7 @@ long dnaNext(void *object, size_t elemsize) {
 /* Extend da by length elements. Return -1 on error else first element of
    extension. */
 long dnaExtend(void *object, size_t elemsize, long length) {
-	dnaGeneric *da = object;
+	dnaGeneric *da = (dnaGeneric*)object;
 	long index = da->cnt + length - 1;
 	long retval = da->cnt;
 	if (index >= da->size) {
@@ -167,7 +179,7 @@ long dnaExtend(void *object, size_t elemsize, long length) {
 
 /* Free dynamic array object. */
 void dnaFreeObj(void *object) {
-	dnaGeneric *da = object;
+	dnaGeneric *da = (dnaGeneric*)object;
 	if (da->size != 0) {
 		dnaCtx h = da->ctx;
 		h->mem.manage(&h->mem, da->array, 0);

@@ -6,8 +6,9 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
  */
 
 #include "sfntread.h"
+#include "supportexcept.h"
 
-#include <setjmp.h>
+#include <string.h>
 
 #define ARRAY_LEN(a)	(sizeof(a)/sizeof(a[0]))
 
@@ -46,11 +47,6 @@ struct sfrCtx_					/* Context */
 		char *end;				/* Buffer end */
 		char *next;				/* Next byte available (buf <= next < end) */
 		} src;
-	struct						/* Error handling */
-		{
-		jmp_buf env;
-		int code;
-		} err;
 	};
 
 /* ----------------------------- Error Handling ---------------------------- */
@@ -58,8 +54,7 @@ struct sfrCtx_					/* Context */
 /* Handle fatal error. */
 static void fatal(sfrCtx h, int err_code)
 	{
-	h->err.code = err_code;
-	longjmp(h->err.env, 1);
+    RAISE(err_code, NULL);
 	}
 
 /* --------------------------- Memory Management --------------------------- */
@@ -67,10 +62,10 @@ static void fatal(sfrCtx h, int err_code)
 /* Resize memory. */
 static void *memResize(sfrCtx h, void *old, size_t size)
 	{
-	void *new = h->cb.mem.manage(&h->cb.mem, old, size);
-	if (new == NULL)
+	void *_new = h->cb.mem.manage(&h->cb.mem, old, size);
+	if (_new == NULL)
 		fatal(h, sfrErrNoMemory);
-	return new;
+	return _new;
 	}
 	
 /* Free memory. */
@@ -92,14 +87,12 @@ sfrCtx sfrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 		return NULL;
 
 	/* Allocate context */
-	h = mem_cb->manage(mem_cb, NULL, sizeof(struct sfrCtx_));
+	h = (sfrCtx)mem_cb->manage(mem_cb, NULL, sizeof(struct sfrCtx_));
 	if (h == NULL)
 		return NULL;
 
 	/* Safety initialization */
-	h->sfnt.directory = NULL;
-    h->TTC.TableDirectory = NULL;
-	h->src.stm = NULL;
+	memset(h, 0, sizeof(*h));
 
 	/* Copy callbacks */
 	h->cb.mem = *mem_cb;
@@ -173,7 +166,7 @@ static void readSfntDirectory(sfrCtx h, long origin)
 	(void)read2(h);
 
 	/* Read directory */
-	h->sfnt.directory = memResize(h, h->sfnt.directory,
+	h->sfnt.directory = (sfrTable *)memResize(h, h->sfnt.directory,
 								  h->sfnt.numTables*sizeof(sfrTable));
 	for (i = 0; i < h->sfnt.numTables; i++)
 		{
@@ -197,7 +190,7 @@ static void readTTCDirectory(sfrCtx h, long origin)
 
 	/* Read directory */
 	h->TTC.DirectoryCount = read4(h);
-	h->TTC.TableDirectory = memResize(h, h->TTC.TableDirectory, 
+	h->TTC.TableDirectory = (long *)memResize(h, h->TTC.TableDirectory, 
 									  h->TTC.DirectoryCount*sizeof(long*));
     h->flags |= TTC_STM; /* readSfntDirectory( reads in to h->TTC.TableDirectory[i].directory if TTC_STM is set.*/
         
@@ -235,27 +228,30 @@ int sfrBegFont(sfrCtx h, void *stm, long origin, ctlTag *sfnt_tag)
 		return sfrErrSrcStream;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
+    DURING
 
-	fillbuf(h);
+        fillbuf(h);
 
-	/* Read and validate sfnt version */
-    *sfnt_tag = read4(h);
-	switch (*sfnt_tag)
-		{
-	case sfr_v1_0_tag:
-	case sfr_true_tag:
-	case sfr_OTTO_tag:
-	case sfr_typ1_tag:
-		readSfntDirectory(h, (h->flags & TTC_STM)? h->TTC.origin: origin);
-		break;
-	case sfr_ttcf_tag:
-		readTTCDirectory(h, origin);
-		break;
-	default:
-		return sfrErrBadSfnt;
-		}
+        /* Read and validate sfnt version */
+        *sfnt_tag = read4(h);
+        switch (*sfnt_tag)
+            {
+        case sfr_v1_0_tag:
+        case sfr_true_tag:
+        case sfr_OTTO_tag:
+        case sfr_typ1_tag:
+            readSfntDirectory(h, (h->flags & TTC_STM)? h->TTC.origin: origin);
+            break;
+        case sfr_ttcf_tag:
+            readTTCDirectory(h, origin);
+            break;
+        default:
+            E_RETURN(sfrErrBadSfnt);
+            }
+
+    HANDLER
+        return Exception.Code;
+    END_HANDLER
 
 	return sfrSuccess;
 	}

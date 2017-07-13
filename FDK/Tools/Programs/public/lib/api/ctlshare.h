@@ -12,7 +12,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #else
 #include <stddef.h>     /* For size_t and NULL */
 #endif
-#include <setjmp.h>
 
 /* CoreType Library Shared Definitions
    ===================================
@@ -522,5 +521,43 @@ enum
    the client via the "libname" and "version" parameters. The callback set is
    also available via the "cb" parameter so that the client may access the
    "ctx" field if neccessary. */
+
+/* ---------------------- Security Functions ---------------------- */
+
+#ifdef _MSC_VER
+#define FPRINTF_S   fprintf_s
+#define VFPRINTF_S  vfprintf_s
+#define SPRINTF_S   sprintf_s
+#define VSPRINTF_S  vsprintf_s
+#define SSCANF_S    sscanf_s
+#define STRCPY_S(d,ds,s) strcpy_s(d,ds,s)
+#define STRNCPY_S(d,ds,s,n) strncpy_s(d,ds,s,n)
+#define STRCAT_S(d,ds,s) strcat_s(d,ds,s)
+#else
+#ifndef FPRINTF_S
+#define FPRINTF_S   fprintf
+#endif
+#ifndef VFPRINTF_S
+#define VFPRINTF_S  vfprintf
+#endif
+#ifndef SPRINTF_S
+#define SPRINTF_S(b,l,f, ...)   sprintf(b,f, ##__VA_ARGS__)
+#endif
+#ifndef VSPRINTF_S
+#define VSPRINTF_S(b,l,f, ...)   vsprintf(b,f, ##__VA_ARGS__)
+#endif
+#ifndef SSCANF_S
+#define SSCANF_S    sscanf
+#endif
+#ifndef STRCPY_S
+#define STRCPY_S(d,ds,s) strcpy(d,s)
+#endif
+#ifndef STRNCPY_S
+#define STRNCPY_S(d,ds,s,n) strncpy(d,s,n)
+#endif
+#ifndef STRCAT_S
+#define STRCAT_S(d,ds,s) strcat(d,s)
+#endif
+#endif
 
 #endif /* CTLSHARE_H */

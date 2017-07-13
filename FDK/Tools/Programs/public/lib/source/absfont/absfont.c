@@ -85,24 +85,24 @@ void abfInitTopDict(abfTopDict *top)
 	}
 
 /* Initialize Private dictionary. */
-static void initPrivateDict(abfPrivateDict *private)
+static void initPrivateDict(abfPrivateDict *priv)
 	{
-	private->BlueValues.cnt 		= ABF_EMPTY_ARRAY;
-	private->OtherBlues.cnt 		= ABF_EMPTY_ARRAY;
-	private->FamilyBlues.cnt 		= ABF_EMPTY_ARRAY;
-	private->FamilyOtherBlues.cnt	= ABF_EMPTY_ARRAY;
-	private->BlueScale 				= (float)cff_DFLT_BlueScale;
-	private->BlueShift 				= cff_DFLT_BlueShift;
-	private->BlueFuzz 				= cff_DFLT_BlueFuzz;
-	private->StdHW 					= ABF_UNSET_REAL;
-	private->StdVW 					= ABF_UNSET_REAL;
-	private->StemSnapH.cnt			= ABF_EMPTY_ARRAY;
-	private->StemSnapV.cnt			= ABF_EMPTY_ARRAY;
-	private->ForceBold 				= cff_DFLT_ForceBold;
-	private->LanguageGroup 			= cff_DFLT_LanguageGroup;
-	private->ExpansionFactor 		= (float)cff_DFLT_ExpansionFactor;
-	private->initialRandomSeed 		= cff_DFLT_initialRandomSeed;
-    memset(&private->blendValues, 0, sizeof(private->blendValues));
+	priv->BlueValues.cnt 		= ABF_EMPTY_ARRAY;
+	priv->OtherBlues.cnt 		= ABF_EMPTY_ARRAY;
+	priv->FamilyBlues.cnt 		= ABF_EMPTY_ARRAY;
+	priv->FamilyOtherBlues.cnt	= ABF_EMPTY_ARRAY;
+	priv->BlueScale 				= (float)cff_DFLT_BlueScale;
+	priv->BlueShift 				= cff_DFLT_BlueShift;
+	priv->BlueFuzz 				= cff_DFLT_BlueFuzz;
+	priv->StdHW 					= ABF_UNSET_REAL;
+	priv->StdVW 					= ABF_UNSET_REAL;
+	priv->StemSnapH.cnt			= ABF_EMPTY_ARRAY;
+	priv->StemSnapV.cnt			= ABF_EMPTY_ARRAY;
+	priv->ForceBold 				= cff_DFLT_ForceBold;
+	priv->LanguageGroup 			= cff_DFLT_LanguageGroup;
+	priv->ExpansionFactor 		= (float)cff_DFLT_ExpansionFactor;
+	priv->initialRandomSeed 		= cff_DFLT_initialRandomSeed;
+    memset(&priv->blendValues, 0, sizeof(priv->blendValues));
 	}
 
 /* Initialize font dictionary. */
@@ -277,8 +277,8 @@ static void checkStemSnap(abfErrCallbacks *cb, abfTopDict *top,
 /* Compare zone pair. */
 static int CTL_CDECL cmpZonePair(const void *first, const void *second)
 	{
-	const ZonePair *a = first;
-	const ZonePair *b = second;
+	const ZonePair *a = (const ZonePair *)first;
+	const ZonePair *b = (const ZonePair *)second;
 	if (a->lo < b->lo)
 		return -1;
 	else if (a->lo > b->lo)
@@ -292,7 +292,7 @@ static void checkZones(abfErrCallbacks *cb,
 					   int overlap,
 					   long bluescnt, float *bluesarray,
 					   long othercnt, float *otherarray,
-					   abfTopDict *top, abfPrivateDict *private, int iFD)
+					   abfTopDict *top, abfPrivateDict *priv, int iFD)
 	{
 	long i;
 	long cnt;
@@ -305,20 +305,30 @@ static void checkZones(abfErrCallbacks *cb,
 
 	/* Combine and sort arrays by increasing pairs */
 	cnt = 0;
-	for (i = 0; i < bluescnt; i += 2)
+	if (((unsigned long)(cnt + bluescnt/2)) > sizeof(array) / sizeof(array[0]))
+		{
+		cb->report_error(cb, abfErrBadBlueValues, iFD);
+		return;
+		}
+	for (i = 0; i + 1 < bluescnt; i += 2)
 		{
 		ZonePair *pair	= &array[cnt++];
 		pair->lo		= bluesarray[i + 0];
 		pair->hi 		= bluesarray[i + 1];
 		pair->top	 	= i > 0;
 		}
-	for (i = 0; i < othercnt; i += 2)
+	if (((unsigned long)(cnt + othercnt/2)) > sizeof(array) / sizeof(array[0]))
+		{
+		cb->report_error(cb, abfErrBadOtherBlues, iFD);
+		return;
+		}
+	for (i = 0; i + 1 < othercnt; i += 2)
 		{
 		ZonePair *pair	= &array[cnt++];
 		pair->lo		= otherarray[i + 0];
 		pair->hi		= otherarray[i + 1];
 		pair->top		= 0;
-		}
+	}
 	qsort(array, cnt, sizeof(ZonePair), cmpZonePair);
 
 	/* Check BlueScale against maximum zone height. */
@@ -329,7 +339,7 @@ static void checkZones(abfErrCallbacks *cb,
 		if (height > max)
 			max = height;
 		}
-	if (max > 0 && (private->BlueScale*max > 1.0 || private->BlueScale*max < 0.5))
+	if (max > 0 && (priv->BlueScale*max > 1.0 || priv->BlueScale*max < 0.5))
 		cb->report_error(cb, abfErrBadBlueScale, iFD);
 
 	/* Check for overlapping zones */
@@ -338,7 +348,7 @@ static void checkZones(abfErrCallbacks *cb,
 		{
 		ZonePair *curr = &array[i];
 		if (last->top == curr->top &&
-			last->hi + 2*private->BlueFuzz + 1 > curr->lo)
+			last->hi + 2*priv->BlueFuzz + 1 > curr->lo)
 			{
 			cb->report_error(cb, overlap, iFD);
 			break;
@@ -352,12 +362,12 @@ static void checkZones(abfErrCallbacks *cb,
 static void checkFontDict(abfErrCallbacks *cb, 
 						  abfTopDict *top, abfFontDict *font, int iFD)
 	{
-	abfPrivateDict *private = &font->Private;
+	abfPrivateDict *priv = &font->Private;
 	
 	/* Check booleans */
 	checkBooleanValue(cb, &top->isFixedPitch, abfErrBadisFixedPitch, iFD);
-	checkBooleanValue(cb, &private->ForceBold, abfErrBadForceBold, iFD);
-	checkBooleanValue(cb, &private->LanguageGroup,abfErrBadLanguageGroup, iFD);
+	checkBooleanValue(cb, &priv->ForceBold, abfErrBadForceBold, iFD);
+	checkBooleanValue(cb, &priv->LanguageGroup,abfErrBadLanguageGroup, iFD);
 
 	if (cb == NULL)
 		return;	/* Reporting turned off; nothing more to do */
@@ -367,30 +377,30 @@ static void checkFontDict(abfErrCallbacks *cb,
 				  abfErrNoStdHW,
 				  abfErrBadStdHW, 
 				  abfErrBadStemSnapH,
-				  &private->StdHW,
-				  &private->StemSnapH.cnt,
-				  private->StemSnapH.array,
+				  &priv->StdHW,
+				  &priv->StemSnapH.cnt,
+				  priv->StemSnapH.array,
 				  iFD);
 	checkStemSnap(cb, top,
 				  abfErrNoStdVW,
 				  abfErrBadStdVW, 
 				  abfErrBadStemSnapV,
-				  &private->StdVW,
-				  &private->StemSnapV.cnt,
-				  private->StemSnapV.array,
+				  &priv->StdVW,
+				  &priv->StemSnapV.cnt,
+				  priv->StemSnapV.array,
 				  iFD);
 
-	if (private->BlueValues.cnt == ABF_EMPTY_ARRAY &&
-		private->OtherBlues.cnt == ABF_EMPTY_ARRAY &&
-		private->FamilyBlues.cnt == ABF_EMPTY_ARRAY &&
-		private->FamilyOtherBlues.cnt == ABF_EMPTY_ARRAY)
+	if (priv->BlueValues.cnt == ABF_EMPTY_ARRAY &&
+		priv->OtherBlues.cnt == ABF_EMPTY_ARRAY &&
+		priv->FamilyBlues.cnt == ABF_EMPTY_ARRAY &&
+		priv->FamilyOtherBlues.cnt == ABF_EMPTY_ARRAY)
 		{
 		/* Report non-default Blue-key values when no zones */
-		if (private->BlueScale != (float)cff_DFLT_BlueScale)
+		if (priv->BlueScale != (float)cff_DFLT_BlueScale)
 			cb->report_error(cb, abfErrUselessBlueScale, iFD);
-		if (private->BlueShift != cff_DFLT_BlueShift)
+		if (priv->BlueShift != cff_DFLT_BlueShift)
 			cb->report_error(cb, abfErrUselessBlueShift, iFD);
-		if (private->BlueFuzz != cff_DFLT_BlueFuzz)
+		if (priv->BlueFuzz != cff_DFLT_BlueFuzz)
 			cb->report_error(cb, abfErrUselessBlueFuzz, iFD);
 		return;
 		}
@@ -400,40 +410,40 @@ static void checkFontDict(abfErrCallbacks *cb,
 	if (checkZoneArray(cb,
 					   abfErrBadBlueValues, 
 					   abfErrBigBlueValues, 
-					   &private->BlueValues.cnt, 
-					   private->BlueValues.array,
+					   &priv->BlueValues.cnt, 
+					   priv->BlueValues.array,
 					   top, iFD, 0) ||
 		checkZoneArray(cb, 
 					   abfErrBadOtherBlues, 
 					   abfErrBigOtherBlues, 
-					   &private->OtherBlues.cnt, 
-					   private->OtherBlues.array,
+					   &priv->OtherBlues.cnt, 
+					   priv->OtherBlues.array,
 					   top, iFD, 1) ||
 		checkZoneArray(cb, 
 					   abfErrBadFamilyBlues, 
 					   abfErrBigFamilyBlues,
-					   &private->FamilyBlues.cnt, 
-					   private->FamilyBlues.array,
+					   &priv->FamilyBlues.cnt, 
+					   priv->FamilyBlues.array,
 					   top, iFD, 1) ||
 		checkZoneArray(cb, 
 					   abfErrBadFamilyOtherBlues, 
 					   abfErrBigFamilyOtherBlues,
-					   &private->FamilyOtherBlues.cnt, 
-					   private->FamilyOtherBlues.array,
+					   &priv->FamilyOtherBlues.cnt, 
+					   priv->FamilyOtherBlues.array,
 					   top, iFD, 1))
 		return;	/* Can't continue with malformed zones */
 
 	/* Check regular and family zones for overlap */
 	checkZones(cb, 
 			   abfErrRegularOverlap,
-			   private->BlueValues.cnt, private->BlueValues.array,
-			   private->OtherBlues.cnt, private->OtherBlues.array,
-			   top, private, iFD);
+			   priv->BlueValues.cnt, priv->BlueValues.array,
+			   priv->OtherBlues.cnt, priv->OtherBlues.array,
+			   top, priv, iFD);
 	checkZones(cb,
 			   abfErrFamilyOverlap,
-			   private->FamilyBlues.cnt, private->FamilyBlues.array,
-			   private->FamilyOtherBlues.cnt, private->FamilyOtherBlues.array,
-			   top, private, iFD);
+			   priv->FamilyBlues.cnt, priv->FamilyBlues.array,
+			   priv->FamilyOtherBlues.cnt, priv->FamilyOtherBlues.array,
+			   top, priv, iFD);
 	}
 
 /* Validate all dictionaries. */

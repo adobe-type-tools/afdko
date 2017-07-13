@@ -299,7 +299,7 @@ static void writeReal(t1wCtx h, float value)
         sprintf(buf, "%ld", (long)roundf(value));
     else
     {
-        ctuDtostr(buf, value, 0, 8); /* 8 places is as good as it gets when converting ASCII real numbers->float-> ASCII real numbers, as happens to all the  PrivateDict values.*/
+        ctuDtostr(buf, sizeof(buf), value, 0, 8); /* 8 places is as good as it gets when converting ASCII real numbers->float-> ASCII real numbers, as happens to all the  PrivateDict values.*/
 
     }
     writeBuf(h, strlen(buf), buf);
@@ -836,7 +836,7 @@ static void writeRealDef(t1wCtx h, char *key, float value)
     }
     else
     {
-        ctuDtostr(buf, value, 0, 8); /* 8 places is as good as it gets when converting ASCII real numbers->float-> ASCII real numbers, as happens to all the  PrivateDict values.*/
+        ctuDtostr(buf, sizeof(buf), value, 0, 8); /* 8 places is as good as it gets when converting ASCII real numbers->float-> ASCII real numbers, as happens to all the  PrivateDict values.*/
     }
     writeFmt(h, "/%s ", key);
     writeFmt(h, "%s", buf);
@@ -898,7 +898,7 @@ static void writeRealArrayDef(t1wCtx h, char *key, long cnt, float *array)
             }
             else
             {
-                ctuDtostr(buf, value, 0, 8); /* 8 places is as good as it gets when converting ASCII real numbers->float-> ASCII real numbers, as happens to all the  PrivateDict values.*/
+                ctuDtostr(buf, sizeof(buf), value, 0, 8); /* 8 places is as good as it gets when converting ASCII real numbers->float-> ASCII real numbers, as happens to all the  PrivateDict values.*/
             }
             writeFmt(h, "%s", buf);
             sep = " ";
