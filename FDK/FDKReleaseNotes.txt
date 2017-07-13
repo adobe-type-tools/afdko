@@ -1,6 +1,19 @@
 FDKReleaseNotes.txt
 ===============================================================================
 
+	otf2otc.
+	Can now take a single font as input, and can take an OTC font as input.
+	
+	sfntdiff.
+	Fixed old bug: it used to crash if no file path or only one file path was
+	provided. 
+	Changed behavior: it now returns non-zero only if a real error occurs: it
+	used to return non-zero when there was a difference between the fonts.
+	
+	spot
+	Fixed old bug: a PrivateDict must exist, but it is legal for it to have a
+	length of 0.
+	
 FDK. v2.5 April 27 2017 change number 65781.
 
 	makeInstancesUFO.
