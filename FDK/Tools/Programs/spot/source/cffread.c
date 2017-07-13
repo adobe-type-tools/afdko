@@ -1752,8 +1752,7 @@ static double convBCD(cffCtx h)
 static void DICTRead(cffCtx h, int length, Offset offset, int enable)
 	{
 	if (length == 0)
-		fatal(h, "empty DICT");
-
+        return;
 	seekbyte(h, offset);
 
 	h->stack.cnt = 0;
