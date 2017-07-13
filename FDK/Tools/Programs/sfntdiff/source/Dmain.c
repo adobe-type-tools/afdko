@@ -12,7 +12,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <ctype.h>
 #include <string.h>
 
-Byte8 *version = "2.21216";	/* Program version */
+Byte8 *version = "2.21217";	/* Program version */
 
 volatile IntX doingScripting = 0;
 static Byte8 scriptfilename[256];
@@ -75,7 +75,7 @@ static void printUsage(void)
 static void showUsage(void)
 	{
 	printUsage();
-	quit(1);
+	quit(0);
 	}
 
 /* Show usage and help information */
@@ -241,7 +241,7 @@ IntN main(IntN argc, Byte8 *argv[])
 
 	scriptfilename[0] = '\0'; /* init */
 	
-	for (i = 0; i < argc; i++)
+        for (i = 0; i < argc; i++)
 	{
 		if (strcmp(argv[i], "-X") == 0)
 		{
@@ -271,9 +271,6 @@ IntN main(IntN argc, Byte8 *argv[])
 	  {
 	  argi = opt_Scan(argc, argv, opt_NOPTS(opt), opt, NULL, NULL);
 	  
-	  if (argi == 0 
-	  )
-		showUsage();
 		
 	  if (!doingScripting && opt_Present("-X"))
 	  {
@@ -293,13 +290,10 @@ IntN main(IntN argc, Byte8 *argv[])
 
 	  if (level > 4) level = 4;
 
-	  if ((argc - argi) == 0)
-		{
-		if (argc > 1) 
+	  if ((argc - argi) < 2)
 		{
 		  printf( "ERROR: not enough files/directories specified.\n");
 		  showUsage();
-		}
 		}
 
 	  filename1 = argv[argi];
