@@ -1463,9 +1463,16 @@ var_MVAR   var_loadMVAR(sfrCtx sfr, ctlSharedStmCallbacks *sscb)
         return NULL;
     }
 
-    if (valueRecordSize < MVAR_TABLE_RECORD_SIZE
-        || table->length < MVAR_TABLE_HEADER_SIZE + (unsigned long)valueRecordSize * mvar->valueRecordCount) {
-		sscb->message(sscb, "invalid MVAR record size or table size");
+    if (valueRecordSize < MVAR_TABLE_RECORD_SIZE) {
+        if ((valueRecordSize > 0) || (mvar->valueRecordCount > 0))
+        {
+            /* It is OK to have valueRecordSize != MVAR_TABLE_RECORD_SIZE if it is zero because there are no records. */
+            sscb->message(sscb, "invalid MVAR record size");
+            return NULL;
+        }
+    }
+    if (table->length < MVAR_TABLE_HEADER_SIZE + (unsigned long)valueRecordSize * mvar->valueRecordCount) {
+        sscb->message(sscb, "invalid MVAR table size");
         return NULL;
     }
     
