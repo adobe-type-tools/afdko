@@ -12,7 +12,7 @@ CFLAGS = $(STD_OPTS) -g
 # Library
 ROOT_DIR = ../../../../..
 SRC_DIR = $(ROOT_DIR)/source/varread
-aa
+
 LIB_SRCS = $(SRC_DIR)/varread.c
 LIB_OBJS = varread.o
 LIB_TARGET = $(LIB_DIR)/varread.a
