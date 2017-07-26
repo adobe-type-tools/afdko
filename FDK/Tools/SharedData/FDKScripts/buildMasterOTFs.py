@@ -191,7 +191,7 @@ def main(args=None):
 				shutil.removetree(master_path)
 		os.chdir(curDir)
 		
-	if os.path.exists(tempDSPath) and glyphSetsDiffer:
+	if glyphSetsDiffer and os.path.exists(tempDSPath):
 		os.remove(tempDSPath)
 
 if __name__ == "__main__":
