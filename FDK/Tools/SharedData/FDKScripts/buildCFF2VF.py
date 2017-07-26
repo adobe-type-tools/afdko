@@ -4,7 +4,7 @@ __copyright__ = """Copyright 2017 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-buildCFF2VF.py  1.8 Jul 11 2017
+buildCFF2VF.py  1.11 Jul 26 2017
 Build a variable font from a designspace file and the UFO master source fonts.
 
 python buildCFF2VF.py -h
@@ -397,7 +397,7 @@ class AxisValueRecord:
 		self.flagValue = flagValue
 		self.valueIndex = valueIndex
 		self.axisIndex = axisIndex
-		
+
 def getInsertGID(origGID, fontGlyphNameList, mergedGlyphNameList):
 	if origGID == 0:
 		return origGID
@@ -754,7 +754,7 @@ def getNewAxisValue(seenCoordinate, fvarInstance, axisTag):
 	# 	have already seen this axis coordinate
 	#   any of the other axis coordinates are non-zero
 	axisValue = fvarInstance.coordinates[axisTag]
-	if seenCoordinate.has_key(axisValue):
+	if axisValue in seenCoordinate:
 		return None
 	for tag, value in fvarInstance.coordinates.items():
 		if tag == axisTag:
@@ -771,7 +771,7 @@ def addAxisValueData(xmlData, prevEntry, axisEntry, nextEntry, linkDelta):
 		format = 1
 	else:
 		format = 2
-		
+
 	xmlData.append("\t\t<AxisValue index=\"%s\" Format=\"%s\">" % (axisEntry.valueIndex, format))
 	xmlData.append("\t\t\t<AxisIndex value=\"%s\" />" % (axisEntry.axisIndex))
 	xmlData.append("\t\t\t<Flags value=\"%s\" />" % (axisEntry.flagValue))
@@ -814,12 +814,11 @@ def makeSTAT(fvar):
 
 	xmlData.append("\t</DesignAxisRecord>")
 	xmlData.append("\t<AxisValueArray>")
-	# For each axis in turn, clyce through the named instances and
+	# For each axis in turn, cycle through the named instances and
 	# make a AxisValue entry for the instance of each new named instance when
 	# the other axes are at 0.
 	numAxes = len(fvar.axes)
 	numInstances = len(fvar.instances)
-	numAxisValueRecords = 0
 	fallBackNameID = None
 	for axisIndex in range(numAxes):
 		axisTag = fvar.axes[axisIndex].axisTag
@@ -833,15 +832,15 @@ def makeSTAT(fvar):
 			if entry == None:
 				continue
 			axisValue, nameID = entry
-			if (axisValue == 0) and (axisTag == 'wgt'):
-				# the style name from any other axis will probably
-				# already be elided from the style name.
-				fallBackNameID = nameID
-				flagValue = 2
+# 			if (axisValue == 0) and (axisTag == 'wght'):
+# 				# the style name from any other axis will probably
+# 				# already be elided from the style name.
+# 				fallBackNameID = nameID
+# 				flagValue = 2
 			axisEntry = AxisValueRecord(nameID, axisValue, flagValue, valueIndex, axisIndex)
 			axisList.append(axisEntry)
 			valueIndex += 1
-			
+
 		numEntries =len(axisList)
 		linkDelta = None
 		if numEntries == 0:
@@ -853,7 +852,7 @@ def makeSTAT(fvar):
 			addAxisValueData(xmlData, None, axisList[0], axisList[1], linkDelta)
 			addAxisValueData(xmlData, axisList[0], axisList[1], None, linkDelta)
 			continue
-			
+
 		prevEntry = nextEntry = None
 		for j in range(numEntries-1):
 			axisEntry = axisList[j]
@@ -874,6 +873,7 @@ def makeSTAT(fvar):
 	return xmlData
 
 def addSTATTable(varFont, varFontPath):
+	print("Adding STAT table")
 	kSTAT_OverrideName = "override.STAT.ttx"
 	statPath = os.path.dirname(varFontPath)
 	statPath = os.path.join(statPath, kSTAT_OverrideName)
