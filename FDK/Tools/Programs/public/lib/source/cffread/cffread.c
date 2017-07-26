@@ -1951,6 +1951,8 @@ static char *post2GetName(cfrCtx h, SID gid)
 {
     if (gid >= h->post.fmt2.glyphNameIndex.cnt)
         return NULL;	/* Out of bounds; .notdef */
+    else if (h->post.format != 0x00020000)
+        return h->post.fmt2.strings.array[gid];
     else
     {
         long nid = h->post.fmt2.glyphNameIndex.array[gid];
@@ -2038,6 +2040,40 @@ static int invalidStreamOffset(cfrCtx h, unsigned long offset)
     return h->cb.stm.read(&h->cb.stm, h->stm.src, &h->src.buf) == 0;
 }
 
+static void buildGIDNames(cfrCtx h)
+{
+    char *p;
+    long length;
+    long numGlyphs = h->glyphs.cnt;
+    unsigned short i;
+
+    dnaSET_CNT(h->post.fmt2.glyphNameIndex, numGlyphs);
+    for (i = 0; i < numGlyphs; i++)
+    {
+        h->post.fmt2.glyphNameIndex.array[i] = i;
+     }
+    /* Read string data */
+    length = numGlyphs*9; /* 3 for 'gid', 5 for GID, 1 for null termination. */
+    dnaSET_CNT(h->post.fmt2.buf, length + 1);
+    /* Build C strings array */
+    dnaSET_CNT(h->post.fmt2.strings, numGlyphs);
+    p = h->post.fmt2.buf.array;
+    sprintf(p, ".notdef");
+    length = strlen(p);
+    h->post.fmt2.strings.array[0] = p;
+    p += length+1;
+    for (i = 1; i < numGlyphs; i++)
+    {
+        h->post.fmt2.strings.array[i] = p;
+        sprintf(p, "gid%05d", i);
+        length = strlen(p);
+        p += length+1;
+    }
+   
+    return;	/* Success */
+   
+}
+
 /* Read post table. */
 static void postRead(cfrCtx h)
 {
@@ -2074,7 +2110,10 @@ static void postRead(cfrCtx h)
         return; /* Don't read glyph names for CID fonts */
     
     if (h->post.format != 0x00020000)
-        return;	/* Successfully read header */
+    {
+        buildGIDNames(h);
+        return;
+    }
     
     if (invalidStreamOffset(h, table->offset + table->length - 1))
     {
