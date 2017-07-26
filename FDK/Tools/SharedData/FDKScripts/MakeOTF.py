@@ -1342,11 +1342,13 @@ def checkInputFile(makeOTFParams):
 
 def lookUpDirTree(fileName):
 	"""
-	This is called when we are using a default name for either the FontMenuNamDB or the GlyphOrderAndAliasDB files.
-	These are often located one or two dir levels above the font file, as they are shared by the font family.
+	This is called when we are using a default name for either the
+	FontMenuNameDB or the GlyphOrderAndAliasDB files.
+	These are often located several dir levels above the font file,
+	as they are shared by the font family.
 	"""
 
-	maxLevels = 3
+	maxLevels = 4
 	i = 0
 	found = 0
 	dirPath, fileName = os.path.split(fileName)
