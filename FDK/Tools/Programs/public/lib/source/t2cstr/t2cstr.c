@@ -2179,6 +2179,9 @@ static int t2Decode(t2cCtx h, long offset)
 					return t2cSuccess;
 				if (callbackWidth(h, 1))
 					return t2cSuccess;
+                if ((h->subrDepth > 0) && (h->flags & IS_CFF2))
+                    return t2cSuccess; /* CFF2 subrs don't have a return char. */
+                    
 				if (h->stack.cnt > 1)
 					{
 					CHKUFLOW(h,4);
@@ -2287,6 +2290,7 @@ static int t2Decode(t2cCtx h, long offset)
 				if ((h->stack.cnt) & 1)
 					{
                     CHKUFLOW(h,5);
+                    i = 0;
                     if (h->glyph->curveVF != NULL)
                         popBlendArgs6(h,
                                       &INDEX_BLEND(i + 0), &INDEX_BLEND(i + 1),
@@ -2323,6 +2327,7 @@ static int t2Decode(t2cCtx h, long offset)
 					{
 					/* Add initial curve */
 					CHKUFLOW(h,5);
+                    i = 0;
                     if (h->glyph->curveVF != NULL)
                         popBlendArgs6(h,
                                                         &INDEX_BLEND(1), &INDEX_BLEND(0),

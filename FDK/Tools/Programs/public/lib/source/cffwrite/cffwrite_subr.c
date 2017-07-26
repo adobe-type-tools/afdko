@@ -128,7 +128,7 @@ static unsigned char *gTestString = (unsigned char *)"Humpty Dumpty sat on a wal
 #endif
 
 #define MAX_NUM_SUBRS		32765L	/* Maximum number of subroutines in one INDEX structure. 64K is valid by the spec, but but teh Google font validation tool OTS rejects fonts with subrs in a subrindex which is  over 32K -3.*/
-#define MAX_PREFLIGHT	5   /* Typically large enough */
+#define MAX_PREFLIGHT	10   /* Typically large enough */
 
 /* --- Memory management --- */
 #define MEM_NEW(g, s)        cfwMemNew(g, s)
@@ -2082,6 +2082,7 @@ static void selectSubr(subrCtx h, Subr *subr) {
 		int deltalen = subr->numsize + CALL_OP_SIZE - subr->length -
 		    subr->deltalen;
 
+        subr->flags &= ~SUBR_REJECT;
 		subr->flags |= SUBR_SELECT;
 
 #if DB_SELECT
@@ -2092,6 +2093,7 @@ static void selectSubr(subrCtx h, Subr *subr) {
 	}
 	else {
 		/* Reject subr */
+        subr->flags &= ~SUBR_SELECT;
 		subr->flags |= SUBR_REJECT;
 #if DB_SELECT
 		printf("reject\n");
@@ -2264,7 +2266,7 @@ reselect:
 
 	/* Find last selected subr */
 	for (i = h->tmp.cnt - 1; i >= 0; i--) {
-		if (h->tmp.array[i]->flags & SUBR_SELECT) {
+		if ((h->tmp.array[i]->flags & SUBR_MARKED) == SUBR_SELECT) {
 			nSelected = i + 1;
 			break;
 		}
@@ -2734,7 +2736,8 @@ static int checkFutileSubrs(subrCtx h) {
     for (i = 0; i < h->subrs.cnt; i++) {
         Subr *subr = &h->subrs.array[i];
         if (((subr->flags & (SUBR_MARKED|SUBR_FUTILE)) == SUBR_SELECT) && subr->count <= 1) {
-            subr->flags |= SUBR_FUTILE;
+            subr->flags &= ~SUBR_SELECT;
+            subr->flags |= (SUBR_REJECT|SUBR_FUTILE);
             futileCount++;
         }
     }
@@ -2775,10 +2778,10 @@ static void buildSubrs(subrCtx h, subr_CSData *subrs, unsigned id, int preflight
 	}
 #endif
 
-	selectFinalSubrSet(h, id);
-    resetSubrCount(h, id);
+  selectFinalSubrSet(h, id);
+  resetSubrCount(h, id);
 	reorderSubrs(h);
-    addSubrs(h, subrs, id, preflight);
+  addSubrs(h, subrs, id, preflight);
 }
 
 /* Subroutinize all fonts in FontSet */
@@ -2786,6 +2789,7 @@ void cfwSubrSubrize(cfwCtx g, int nFonts, subr_Font *fonts) {
 	subrCtx h = g->ctx.subr;
 	unsigned iFont;
     long preflight;
+    int futile = 1;
     long i;
     
 	h->nFonts = (short)nFonts;
@@ -2904,11 +2908,17 @@ void cfwSubrSubrize(cfwCtx g, int nFonts, subr_Font *fonts) {
           }
         }
 
-        /* Remove any subrs used once or less, otherwise preflight is over */
-        if (preflight > 0 && !checkFutileSubrs(h))
+        /* Remove any subrs used once or less, if no subrs removed twice consecutively, preflight is over */
+        if (preflight > 0) {
+          int newfutile = checkFutileSubrs(h);
+          if (!futile && !newfutile)
             preflight = 0;
-        else
+          else
             preflight--;
+          futile = newfutile;
+        }
+        else
+          preflight--;
     }
 
 	/* Free original unsubroutinized charstring data */
