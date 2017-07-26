@@ -488,6 +488,12 @@ static void pushBlendDeltas(cstrCtx h,abfBlendArg* blendArg)
 static void flushBlends(cstrCtx h)
 {
     int i;
+    if ((h->deltaStack.cnt + h->stack.cnt) > 513)
+    {
+        cfwCtx g = h->g;
+        cfwFatal(g, cfwErrStackOverflow, "Blend overflow");
+    }
+    
     for (i = 0; i < h->deltaStack.cnt; i++)
         PUSH(h->deltaStack.array[i]);
     PUSH(h->numBlends);
@@ -514,11 +520,37 @@ static void pushBlend(cstrCtx h, abfBlendArg* arg1)
     }
     else
     {
+        if ( ((h->numBlends+1) * h->glyph.info->blendInfo.numRegions + h->stack.cnt) > 513)
+        {
+            flushBlends(h);
+        }
         pushBlendDeltas(h,arg1);
         h->numBlends++;
     }
     return;
 }
+
+static int blendIsZero(cstrCtx h, float dv, abfBlendArg* blendArg)
+{
+    /* Validate that all the blend args are zero. */
+    int i;
+    if (dv != 0)
+        return 0;
+    
+    if (!blendArg->hasBlend)
+        return 1;
+    
+    i = 0;
+    while (i< h->glyph.info->blendInfo.numRegions)
+    {
+        float delta = (float)RND_ON_WRITE(blendArg->blendValues[i] - blendArg->value);
+        if (delta != 0)
+            return 0;
+        i++;
+    }
+    return 1;
+}
+
 
 static void glyphMoveVF(abfGlyphCallbacks *cb, abfBlendArg* argX, abfBlendArg* argY) {
     cfwCtx g = (cfwCtx)cb->direct_ctx;
@@ -563,12 +595,12 @@ static void glyphMoveVF(abfGlyphCallbacks *cb, abfBlendArg* argX, abfBlendArg* a
     h->x = x0;
     h->y = y0;
 
-    if (doOptimize && (dx0 == 0) && ((argX == NULL) || (!argX->hasBlend))) {
+    if (doOptimize && blendIsZero(h, dx0, argX)) {
         pushBlend(h, argY);
         PUSH(dy0);
         h->pendop = tx_vmoveto;
     }
-    else if (doOptimize && (dy0 == 0) && ((argY == NULL) || (!argY->hasBlend))) {
+    else if (doOptimize && blendIsZero(h, dy0, argY)) {
         pushBlend(h, argX);
         PUSH(dx0);
         h->pendop = tx_hmoveto;
@@ -681,7 +713,8 @@ static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1) {
         }
         else
         {
-            saveop(h, h->pendop);
+            if (h->pendop != tx_noop)
+                saveop(h, h->pendop);
             PUSH(dx1);
             PUSH(dy1);
             h->pendop = tx_rlineto;
@@ -709,7 +742,7 @@ static void glyphLineVF(abfGlyphCallbacks *cb, abfBlendArg* argX, abfBlendArg* a
         insertMove(cb);
     }
 
-    if (doOptimize && (dx0 == 0) && ((argX == NULL) || (!argX->hasBlend))) {
+    if (doOptimize && blendIsZero(h, dx0, argX)) {
         flushop(h, 1);
         switch (h->pendop) {
             case tx_hlineto:
@@ -729,7 +762,7 @@ static void glyphLineVF(abfGlyphCallbacks *cb, abfBlendArg* argX, abfBlendArg* a
                 
         }
     }
-    else if (doOptimize && (dy0 == 0) && ((argY == NULL) || (!argY->hasBlend))) {
+    else if (doOptimize && blendIsZero(h, dy0, argY)) {
         flushop(h, 1);
         switch (h->pendop) {
             case tx_vlineto:
@@ -1056,7 +1089,8 @@ static void glyphCurve(abfGlyphCallbacks *cb,
             }
             else
             {
-                saveop(h, h->pendop);
+                if (h->pendop != tx_noop)
+                    saveop(h, h->pendop);
                 PUSH(dx1);
                 PUSH(dy1);
                 PUSH(dx2);
@@ -1104,10 +1138,9 @@ static void glyphCurveVF(abfGlyphCallbacks *cb,
     if (!(h->flags & SEEN_MOVETO)) {
         insertMove(cb);
     }
-    
     /* Choose format */
-    if ((dx1 == 0.0) && doOptimize) {
-        if (dy3 == 0.0) {
+    if (blendIsZero(h, dx1, arg_x1) && doOptimize) {
+        if (blendIsZero(h, dy3, arg_y3)) {
             /* - dy1 dx2 dy2 dx3 - vhcurveto */
             flushop(h, 4);
             switch (h->pendop) {
@@ -1139,7 +1172,7 @@ static void glyphCurveVF(abfGlyphCallbacks *cb,
                     h->pendop = h->seqop = tx_vhcurveto;
             }
         }
-        else if (dx3 == 0.0) {
+        else if (blendIsZero(h, dx3, arg_x3)) {
             /* - dy1 dx2 dy2 - dy3 vvcurveto */
             flushop(h, 4);
             switch (h->pendop) {
@@ -1199,8 +1232,8 @@ static void glyphCurveVF(abfGlyphCallbacks *cb,
             }
         }
     }
-    else if ((dy1 == 0.0) && doOptimize) {
-        if (dx3 == 0.0) {
+    else if (blendIsZero(h, dy1, arg_y1) && doOptimize) {
+        if (blendIsZero(h, dx3, arg_x3)) {
             /* dx1 - dx2 dy2 - dy3 hvcurveto */
             flushop(h, 4);
             switch (h->pendop) {
@@ -1233,7 +1266,7 @@ static void glyphCurveVF(abfGlyphCallbacks *cb,
                     break;
             }
         }
-        else if (dy3 == 0.0) {
+        else if (blendIsZero(h, dy3, arg_y3)) {
             /* dx1 - dx2 dy2 dx3 - hhcurveto */
             flushop(h, 4);
             switch (h->pendop) {
@@ -1294,7 +1327,7 @@ static void glyphCurveVF(abfGlyphCallbacks *cb,
         }
     }
     else {
-        if ((dx3 == 0.0) && doOptimize) {
+        if (blendIsZero(h, dx3, arg_x3) && doOptimize) {
             /* dx1 dy1 dx2 dy2 - dy3 vvcurveto (odd args) */
             flushop(h, 5);
             switch (h->pendop) {
@@ -1317,7 +1350,7 @@ static void glyphCurveVF(abfGlyphCallbacks *cb,
                     break;
             }
         }
-        else if ((dy3 == 0.0) && doOptimize) {
+        else if (blendIsZero(h, dy3, arg_y3) && doOptimize) {
             /* dx1 dy1 dx2 dy2 dx3 - hhcurveto (odd args) */
             flushop(h, 5);
             switch (h->pendop) {
@@ -1398,7 +1431,8 @@ static void glyphCurveVF(abfGlyphCallbacks *cb,
             }
             else
             {
-                saveop(h, h->pendop);
+                if (h->pendop != tx_noop)
+                    saveop(h, h->pendop);
                 pushBlend(h, arg_x1);
                 PUSH(dx1);
                 pushBlend(h, arg_y1);
@@ -2363,7 +2397,7 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
     }
 
     
-    if ((g->flags & (CFW_IS_CUBE | CFW_WRITE_CFF2)) && (h->cstr.cnt > 0)) {
+    if (g->flags & (CFW_IS_CUBE | CFW_WRITE_CFF2)) {
 		clearop(h);
 	}
 	else {
