@@ -4,44 +4,58 @@ __copyright__ = """Copyright 2017 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-buildCFF2VF.py  1.7 Mar 29 2017
-Build a variable font from a Superpolator design space file and the UFO master source fonts.
+buildCFF2VF.py  1.8 Jul 11 2017
+Build a variable font from a designspace file and the UFO master source fonts.
 
 python buildCFF2VF.py -h
 python buildCFF2VF.py -u
-python buildCFF2VF.py  <path to design space file> <path to output variable font> 
+python buildCFF2VF.py <path to designspace file> (<optional path to output variable font>)
 """
 
 __help__  = __usage__  + """
 The script makes a number of assumptions.
 1) all the master source fonts are blend compatible in all their data.
-2) The source OTF files are in the same directory as the master source fonts, and have the same file name but with an extension of ".otf' rather than '.ufo'
-3) The master source OTF fonts were built with the companion script 'buildMasterOTFs.py'. This does a first pass of compatibilization by using 'tx' with the '-no_opt' option to undo T2 charstring optimization applied by makeotf.
+2) The source OTF files are in the same directory as the master source
+   fonts, and have the same file name but with an extension of '.otf'
+   rather than '.ufo'.
+3) The master source OTF fonts were built with the companion script
+   'buildMasterOTFs.py'. This does a first pass of compatibilization
+   by using 'tx' with the '-no_opt' option to undo T2 charstring
+   optimization applied by makeotf.
 
-The variable font inherits all the OpenType Tables except CFF2 and GPOS from the default master source font. The default font is flagged in the design space file by having the element "<info copy="1" />" in the <source> element.
+The variable font inherits all the OpenType Tables except CFF2 and GPOS
+from the default master source font. The default font is flagged in the
+designspace file by having the element "<info copy="1" />" in the <source>
+element.
 
-The width values and the GPOS positioning data are drawn from all the master source fonts, so each must be built with with a full set of GPOS features.
+The width values and the GPOS positioning data are drawn from all the
+master source fonts, so each must be built with with a full set of GPOS
+features.
 
-The companion script buildMasterOTFs.py will build the master source OTFs from the design space file.
+The companion script buildMasterOTFs.py will build the master source OTFs
+from the designspace file.
 
-Any python interpreter may be used to run the script, as long as it has installed the latest version of the fonttools module from https://github.com/fonttools/fonttools
+Any python interpreter may be used to run the script, as long as it has
+installed the latest version of the fonttools module from
+https://github.com/fonttools/fonttools
 """
 
+import collections
+import io
 import os
-import re
 import sys
 import traceback
-import copy
-import fontTools
-import fontTools.varLib
+
+from fontTools import varLib
 from fontTools.varLib import designspace, models
 from fontTools.misc import xmlWriter
 from fontTools.ttLib import TTFont, getTableModule, newTable
-from fontTools.cffLib import VarStoreData, buildOpcodeDict, privateDictOperators, CharStrings
-from fontTools.misc.psCharStrings import T2OutlineExtractor, CFF2CharString
-from fontTools.pens.t2CharStringPen import T2CharStringPen, makeRoundFunc
-roundPoint = makeRoundFunc(0.5)
-import collections
+from fontTools.cffLib import (VarStoreData, buildOpcodeDict,
+                              privateDictOperators, CharStrings)
+from fontTools.misc.psCharStrings import T2OutlineExtractor, T2CharString
+from fontTools.pens.t2CharStringPen import T2CharStringPen
+from fontTools.ttLib.tables import otTables
+
 try:
     import xml.etree.cElementTree as ET
 except ImportError:
@@ -68,7 +82,7 @@ def openOpenTypeFile(path):
 	try:
 		ttFont = TTFont(path)
 	except:
-		logMsg( "\t%s" %(traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1]))
+		logMsg("\t%s" %(traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1]))
 		logMsg("Attempted to read font %s  as CFF." % path)
 		raise ACFontError("Error parsing font file <%s>." % path)
 
@@ -86,7 +100,7 @@ class CFF2FontData:
 		except KeyError:
 			raise focusFontError("Error: font is not a CFF font <%s>." % fontFileName)
 
-		#    for identifier in glyph-list:
+		#   for identifier in glyph-list:
 		# 	Get charstring.
 		self.topDict = topDict
 		self.privateDict = topDict.Private
@@ -98,11 +112,12 @@ class CFF2FontData:
 
 class OpListExtractor(T2OutlineExtractor):
 	def __init__(self, pen, subrs, globalSubrs, nominalWidthX, defaultWidthX):
-		super(OpListExtractor, self).__init__(pen, subrs,globalSubrs, nominalWidthX, defaultWidthX)
+		super(OpListExtractor, self).__init__(pen, subrs,globalSubrs,
+		                                      nominalWidthX, defaultWidthX)
 		self.seenHints = None
 		self.hintmaskLen = 0
 		self.hints = []
-		
+
 	def countHints(self):
 		args = self.popallWidth()
 		self.hintCount = self.hintCount + len(args) // 2
@@ -167,46 +182,33 @@ class OpListExtractor(T2OutlineExtractor):
 		return hintMaskBytes, index
 
 class OpListPen(T2CharStringPen):
-    # We use this to de-optimize the T2Charstrings to just rmoveto, rlineto, and rrcurveto.
+    # We use this to de-optimize the T2Charstrings
+    # to just rmoveto, rlineto, and rrcurveto.
     def __init__(self, supportHints):
         super(OpListPen, self).__init__(0, {})
         self.opList = []
         self.absMovetoPt = [0,0]
         self.supportHints = supportHints
-        
+
     def _moveTo(self, pt):
-        super(OpListPen, self)._moveTo(pt)
-        self.absMovetoPt = pt
+        self.opList.append(["rmoveto", self._p(pt)])
+        self.absMovetoPt = list(self._p0)
 
-    def _storeHeldMove(self):
-        if self._heldMove is not None:
-            self.opList.append(["rmoveto", self._heldMove[:2]])
-            self._program.extend(self._heldMove)
-            self._heldMove = None
+    def _lineTo(self, pt):
+        self.opList.append(["rlineto", self._p(pt)])
 
-    def _relativeLineTo(self, pt):
-        self._storeHeldMove()
-        pt = roundPoint(pt)
-        x, y = pt
-        self.opList.append(["rlineto", [x, y]])
-
-    def _relativeCurveToOne(self, pt1, pt2, pt3):
-        self._storeHeldMove()
-        pt1 = roundPoint(pt1)
-        pt2 = roundPoint(pt2)
-        pt3 = roundPoint(pt3)
-        x1, y1 = pt1
-        x2, y2 = pt2
-        x3, y3 = pt3
-        self.opList.append(["rrcurveto", [x1, y1, x2, y2, x3, y3]])
+    def _curveToOne(self, pt1, pt2, pt3):
+        _p = self._p
+        self.opList.append(["rrcurveto", _p(pt1)+_p(pt2)+_p(pt3) ])
 
     def _closePath(self):
         # Add closing lineto if start and end path are not the same.
         # We need this to compatibilize different master designs where
-        # the the last path op in one design is a rlineto and is omitted, while
-        # the last path op in another is an rrcurveto.
-        if (self._lastX != self.absMovetoPt[0]) or (self._lastY != self.absMovetoPt[1]):
-            self.opList.append(["rlineto", [self._lastX - self.absMovetoPt[0], self._lastY - self.absMovetoPt[1]]])
+        # the the last path op in one design is a rlineto and is omitted,
+        # while the last path op in another is an rrcurveto.
+        if (self._p0[0] != self.absMovetoPt[0]) or (self._p0[1] != self.absMovetoPt[1]):
+            self.opList.append(["rlineto", [self._p0[0] - self.absMovetoPt[0],
+                                            self._p0[1] - self.absMovetoPt[1]]])
 
     def vstem(self, args):
         if self.supportHints:
@@ -223,7 +225,7 @@ class OpListPen(T2CharStringPen):
     def hstemhm(self, args):
         if self.supportHints:
             self.opList.append(["hstemhm", args])
-    
+
     def hintmask(self, hintMaskBytes):
         if self.supportHints:
             self.opList.append(["hintmask", [hintMaskBytes]] )
@@ -235,7 +237,7 @@ class OpListPen(T2CharStringPen):
 
     def getCharString(self, private=None, globalSubrs=None):
          return self.opList
-        
+
 class CFF2GlyphData:
 	hintOpList = ('hintmask', 'cntrmask', 'hstem',  'vstem',  'hstemhm', 'vstemhm')
 
@@ -245,7 +247,7 @@ class CFF2GlyphData:
 		self.masterFontList = masterFontList
 		self.charstringList = []
 		self.mmCharString = None
-		
+
 	def addCharString(self, t2CharString):
 		self.charstringList.append(t2CharString)
 
@@ -268,27 +270,26 @@ class CFF2GlyphData:
 					t2String.private.nominalWidthX, t2String.private.defaultWidthX)
 		extractor.execute(t2String)
 		opList = t2Pen.getCharString(t2String.private, t2String.globalSubrs)
-		
 		if t2Index == 0:
 			# For the master font path, promote all coordinates to a list.
 			for opName, ptList in opList:
 				for i in range(len(ptList)):
 					ptList[i] = [ptList[i]]
-			
+
 		return opList
-		
+
 	def buildMMData(self):
 		# Build MM charstring, and list of  points.
 		# First, build a list of path entries for the default master.
-		# Each entry is [opName,  [ [arg0], [arg1],..[argn] ]. 
+		# Each entry is [opName,  [ [arg0], [arg1],..[argn] ].
 		# Note that each arg is a list: this is so we can add the corresponding
-		# arg from each successive master font design, and end up with 
+		# arg from each successive master font design, and end up with
 		# [opName,  [ [arg.0.0,...,arg.0.k-1], [arg.1.0,...,arg.1.k-1],..,[arg.n-1.0,...,arg.n-1.k-1] ]
 		# where n is the number of arguments for the opName, and k is the number of master designs.
 		supportHints = True
 		self.opList = opList = self.buildOpList(0, supportHints)
 		numOps = len(opList)
-		# For each other master in turn, 
+		# For each other master in turn,
 		#  add the args for each opName to pointList
 		# deal with incompatible path lists because:
 		# converting from UFO to Type1 can convert flat curves to lines.
@@ -302,19 +303,23 @@ class CFF2GlyphData:
 			while opIndex < numOps:
 				masterOp, masterPointList = opList[opIndex]
 				if (not supportHints) and masterOp in self.hintOpList:
-					opIndex +=1 
+					opIndex +=1
 					continue
-					
+
 				# Do minor work to compatibilize charstrings.
 				try:
 					token, pointList = opList2[op2Index]
 				except IndexError:
-					print("Path mismatch: different number of points. Glyph name: %s. font index: %s. master font path: %s. Delta font path: %s." % (self.glyphName, i-1, self.masterFontList[0].srcPath, self.masterFontList[i-1].srcPath))
-					blendError = 1
+					print("Path mismatch: different number of points. " +\
+					      "Glyph name: %s. " % self.glyphName +\
+					      "font index: %s. " % i-1 +\
+					      "master font path: %s. " % self.masterFontList[0].srcPath +\
+					      "Delta font path: %s." % self.masterFontList[i-1].srcPath)
+					blendError = True
 					break
 
 				if (not supportHints) and token in self.hintOpList:
-					op2Index +=1 
+					op2Index +=1
 					continue
 
 				if token == 'rlineto' and masterOp == 'rrcurveto':
@@ -330,13 +335,15 @@ class CFF2GlyphData:
 						numOps = len(opList)
 						i = 1
 						break
-						
-					print("Path mismatch 1", self.glyphName, i, self.masterFontList[i].srcPath)
-					blendError = 1
+
+					print("Path mismatch 1", self.glyphName, i,
+					                            self.masterFontList[i].srcPath)
+					blendError = True
 					break
 
 				try:
-					self.mergePointList(masterPointList, pointList, masterOp in ('hintmask', 'cntrmask'))
+					self.mergePointList(masterPointList, pointList,
+					                    masterOp in ('hintmask', 'cntrmask'))
 				except IndexError:
 					if supportHints and masterOp in self.hintOpList or token in self.hintOpList:
 						# restart with hint support off.
@@ -346,17 +353,18 @@ class CFF2GlyphData:
 						i = 1
 						break
 					else:
-						print("Path mismatch 2", self.glyphName, i, self.masterFontList[i].srcPath)
-						blendError = 1
+						print("Path mismatch 2", self.glyphName, i,
+						                        self.masterFontList[i].srcPath)
+						blendError = True
 						break
 				opIndex += 1
 				op2Index += 1
-					
-		# Now pointList is the list of number lists' first master value, folowed by the other master values.
+		# Now pointList is the list of number lists' first master value,
+		# folowed by the other master values.
 		if not supportHints:
 			print("\t skipped incompatible hint data for", self.glyphName)
 		return blendError
-		
+
 	def mergePointList(self, masterPointList, pointList, isHintMask):
 		i = 0
 		while i < len(masterPointList):
@@ -366,9 +374,10 @@ class CFF2GlyphData:
 			else:
 				masterPointList[i].append(pointList[i])
 			i += 1
-	
+
 	def updateLineToCurve(self, pointList):
-		# pointList has a lineto that needs to be a flat curve. Convert to curve by pre-pending [0,0], and appending [0,0]
+		# pointList has a lineto that needs to be a flat curve.
+		# Convert to curve by pre-pending [0,0], and appending [0,0]
 		if type(pointList[0]) == type([]):
 			numMasters = len(pointList[0])
 			pointList.insert(0, [0]*numMasters)
@@ -380,9 +389,15 @@ class CFF2GlyphData:
 			pointList.insert(0, 0)
 			pointList.append(0)
 			pointList.append(0)
-		
-		
 
+class AxisValueRecord:
+	def __init__(self, nameID, axisValue, flagValue, valueIndex, axisIndex):
+		self.nameID = nameID
+		self.axisValue = axisValue
+		self.flagValue = flagValue
+		self.valueIndex = valueIndex
+		self.axisIndex = axisIndex
+		
 def getInsertGID(origGID, fontGlyphNameList, mergedGlyphNameList):
 	if origGID == 0:
 		return origGID
@@ -396,7 +411,7 @@ def getInsertGID(origGID, fontGlyphNameList, mergedGlyphNameList):
 			newGID += 1
 			return newGID
 		gid -= 1
-	
+
 	# try stepping up in GID.
 	numGlyphs = len(fontGlyphNameList)
 	gid = origGID+1
@@ -407,9 +422,9 @@ def getInsertGID(origGID, fontGlyphNameList, mergedGlyphNameList):
 			newGID -= 1
 			return newGID
 		gid += 1
-	
+
 	return None
-	
+
 
 def buildMasterList(inputPaths):
 	blendError = 0
@@ -419,17 +434,17 @@ def buildMasterList(inputPaths):
 	print("Opening default font", inputPaths[0])
 	baseFont = openOpenTypeFile(inputPaths[0])
 	cff2FontList.append(baseFont)
-	
+
 	# Get the master source data for all the glyphs.
 	fontGlyphList = baseFont.ttFont.getGlyphOrder()
 	for glyphName in fontGlyphList:
 		gid = baseFont.charStrings.charStrings[glyphName]
 		cff2GlyphData = CFF2GlyphData(glyphName, gid, cff2FontList)
-		cff2GlyphList[glyphName] = cff2GlyphData 
+		cff2GlyphList[glyphName] = cff2GlyphData
 
 		t2CharString = baseFont.charStringIndex[gid]
 		cff2GlyphData.addCharString(t2CharString)
-	
+
 	for fontPath in inputPaths[1:]:
 		print("Opening", fontPath)
 		masterFont = openOpenTypeFile(fontPath)
@@ -438,10 +453,10 @@ def buildMasterList(inputPaths):
 			cff2GlyphData = cff2GlyphList[glyphName]
 			gid = masterFont.charStrings.charStrings[glyphName]
 			if gid != cff2GlyphData.gid:
-				raise ACFontError("GID in master font did not match GID in base font: %s." % (glyphName))
+				raise ACFontError("GID in master font did not match GID in base font: %s." % glyphName)
 			t2CharString = masterFont.charStringIndex[gid]
 			cff2GlyphData.addCharString(t2CharString)
-		
+
 	# Now build MM versions.
 	print("Reading glyph data...")
 	bcDictList = {}
@@ -485,9 +500,9 @@ def buildMasterList(inputPaths):
 					bcDictList[key] = valList
 				else:
 					bcDictList[key] = [value]*numMasters
-	
+
 	return baseFont, bcDictList, cff2GlyphList, fontGlyphList, blendError
-	
+
 
 def pointsDiffer(pointList):
 	val = False
@@ -512,12 +527,11 @@ def appendBlendOp(op, pointList, deltaWeights):
 	# The CFF blend operator expects first the series of args 0-numBlends
 	# from the first master
 	blendList = []
-	
 	if op in ('hintmask', 'cntrmask'):
 		blendStack.append(op)
 		blendStack.append(pointList[0][0])
 		return blendStack
-		
+
 	for argEntry in pointList:
 		masterArg = argEntry[0]
 		if pointsDiffer(argEntry):
@@ -560,14 +574,14 @@ def appendBlendOp(op, pointList, deltaWeights):
 			# for CFF2 data, that has already been written.
 			blendStack.extend(out[1:])
 		numBlends = len(blendList)
-		blendStack.append(numBlends)	
+		blendStack.append(numBlends)
 		blendStack.append('blend')
 		blendList = []
-	
+
 	blendStack.append(op)
 	return blendStack
-			
-		
+
+
 
 def buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, numMasters, varModel):
 
@@ -597,10 +611,10 @@ def buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, numMasters, varModel):
 				dataList = valList
 			else:
 				dataList = valList[0]
-				
+
 		pd.rawDict[key] = dataList
-	
-	
+
+
 	# Now update all the charstrings.
 	fontGlyphList = baseFont.ttFont.getGlyphOrder()
 	for glyphName in fontGlyphList:
@@ -612,11 +626,12 @@ def buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, numMasters, varModel):
 		for op, pointList in cff2GlyphData.opList:
 			blendStack = appendBlendOp(op, pointList, varModel.deltaWeights)
 			newProgram.extend(blendStack)
-		baseFont.charStringIndex[gid] = t2CharString = CFF2CharString(private = t2CharString.private, globalSubrs = t2CharString.globalSubrs)
-		
+		t2CharString = T2CharString(private=t2CharString.private,
+		                            globalSubrs=t2CharString.globalSubrs)
+		baseFont.charStringIndex[gid] = t2CharString
 		t2CharString.program = newProgram
-		t2CharString.compile()
-		
+		t2CharString.compile(isCFF2=True)
+
 	baseFont.privateDict.defaultWidthX = 0
 	baseFont.privateDict.nominalWidthX = 0
 
@@ -630,15 +645,15 @@ def addCFFVarStore(baseFont, varModel, varFont):
 	import pprint
 	print("CFF2 region list:")
 	pprint.pprint(supports)
-	varTupleList = fontTools.varLib.builder.buildVarRegionList(supports, axisKeys)
+	varTupleList = varLib.builder.buildVarRegionList(supports, axisKeys)
 	varTupleIndexes = list(range(len(supports)))
-	varDeltasCFFV = fontTools.varLib.builder.buildVarData(varTupleIndexes, None)
-	varStoreCFFV = fontTools.varLib.builder.buildVarStore(varTupleList, [varDeltasCFFV])
+	varDeltasCFFV = varLib.builder.buildVarData(varTupleIndexes, None)
+	varStoreCFFV = varLib.builder.buildVarStore(varTupleList, [varDeltasCFFV])
 
 	cffTable = baseFont.cffTable
 	topDict =  cffTable.cff.topDictIndex[0]
 	topDict.VarStore = VarStoreData(otVarStore=varStoreCFFV)
-	
+
 def addNamesToPost(ttFont, fontGlyphList):
 	postTable = ttFont['post']
 	postTable.glyphOrder = ttFont.glyphOrder = fontGlyphList
@@ -651,13 +666,14 @@ def convertCFFtoCFF2(baseFont, masterFont):
 	# base font contains the CFF2 blend data, but with the table tag 'CFF '
 	# all the CFF fields. Remove all the fields that were removed in the
 	# CFF2 spec.
-	
+
 	cffTable = baseFont.ttFont['CFF ']
 	del masterFont['CFF ']
 	cffTable.cff.convertCFFToCFF2(masterFont)
-	cffTable.tag = 'CFF2'
-	data = cffTable.compile(masterFont)
-	masterFont['CFF2'] = cffTable
+	newCFF2 = newTable("CFF2")
+	newCFF2.cff = cffTable.cff
+	data = newCFF2.compile(masterFont)
+	masterFont['CFF2'] = newCFF2
 
 def reorderMasters(mapping, masterPaths):
 	numMasters = len(masterPaths)
@@ -665,55 +681,218 @@ def reorderMasters(mapping, masterPaths):
 	for i in range(numMasters):
 		new_order[mapping[i]] = masterPaths[i]
 	return new_order
-	
+
 
 def fixVerticalMetrics(masterFont, masterPaths):
-	# Fix the head table bbox, and OS/ winAScent/descent.
+	# Fix the head table bbox, and OS/2 winAscender/Descender.
 	# Record the largest BBOX extents, and use these values.
 	print("Updating vertical metrics to most extreme in source fonts.")
 	print("\tname old new")
-	
-	xMax = yMax = ascent = -100000
-	xMin = yMin = descent = 100000
+
+	xMax, yMax, xMin, yMin   = ([] for i in range(4))
+	ascender, descender = ([] for i in range(2))
+	gap = 0
+
 	for fPath in masterPaths:
 		srcFont = TTFont(fPath)
+
 		headTable = srcFont['head']
-		xMax = max(xMax, headTable.xMax)
-		yMax = max(yMax, headTable.yMax)
-		xMin = min(xMin, headTable.xMin)
-		yMin = min(yMin, headTable.yMin)
-		hheaTable = srcFont['hhea']
-		ascent = max(ascent, hheaTable.ascent)
-		descent = min(descent, hheaTable.descent)
-	print("\theadTable.xMax", headTable.xMax, xMax)
-	print("\theadTable.xMin", headTable.xMin, xMin)
-	print("\theadTable.yMax", headTable.yMax, yMax)
-	print("\theadTable.yMin", headTable.yMin, yMin)
+		xMax.append(headTable.xMax)
+		yMax.append(headTable.yMax)
+		xMin.append(headTable.xMin)
+		yMin.append(headTable.yMin)
+
+		os2Table = srcFont['OS/2']
+		ascender.append(os2Table.sTypoAscender)
+		descender.append(os2Table.sTypoDescender)
+
+	xMax = max(xMax)
+	yMax = max(yMax)
+	xMin = min(xMin)
+	yMin = min(yMin)
+	ascender = max(ascender)
+	descender = min(descender)
+
 	headTable = masterFont['head']
+	print("\theadTable.xMax", headTable.xMax, xMax)
+	print("\theadTable.yMax", headTable.yMax, yMax)
+	print("\theadTable.xMin", headTable.xMin, xMin)
+	print("\theadTable.yMin", headTable.yMin, yMin)
 	headTable.xMax = xMax
 	headTable.yMax = yMax
 	headTable.xMin = xMin
 	headTable.yMin = yMin
-	OS2Table = masterFont['OS/2']
-	print("\tOS2Table.usWinAscent", OS2Table.usWinAscent, yMax)
-	print("\tOS2Table.usWinDescent", OS2Table.usWinDescent, -yMin)
-	OS2Table.usWinAscent = yMax
-	OS2Table.usWinDescent = -yMin
-	print("\tOS2Table.sTypoAscender", OS2Table.sTypoAscender, ascent)
-	print("\tOS2Table.sTypoDescender", OS2Table.sTypoDescender, descent)
-	OS2Table.sTypoAscender = ascent
-	OS2Table.sTypoDescender = descent
+
+	# IMPORTANT: The vertical metrics are deliberately set in a
+	# way that ensures cross-platform compatibility in browsers.
+	# This approach to setting vertical metrics is different from
+	# what Adobe Type has used for many years in their fonts.
+
 	hheaTable = masterFont['hhea']
-	print("\thheaTable.ascent", hheaTable.ascent, ascent)
-	print("\thheaTable.descent", hheaTable.descent, descent)
-	hheaTable.ascent = ascent
-	hheaTable.descent = descent
+	print("\thheaTable.ascent",  hheaTable.ascent,  yMax)
+	print("\thheaTable.descent", hheaTable.descent, yMin)
+	print("\thheaTable.lineGap", hheaTable.lineGap, gap)
+	hheaTable.ascent  = yMax
+	hheaTable.descent = yMin
+	hheaTable.lineGap = gap
+
+	OS2Table = masterFont['OS/2']
+	print("\tOS2Table.usWinAscent",  OS2Table.usWinAscent, yMax)
+	print("\tOS2Table.usWinDescent", OS2Table.usWinDescent, abs(yMin))
+	OS2Table.usWinAscent = yMax
+	OS2Table.usWinDescent = abs(yMin)
+	print("\tOS2Table.sTypoAscender",  OS2Table.sTypoAscender, ascender)
+	print("\tOS2Table.sTypoDescender", OS2Table.sTypoDescender, descender)
+	print("\tOS2Table.sTypoLineGap",   OS2Table.sTypoLineGap, gap)
+	OS2Table.sTypoAscender = ascender
+	OS2Table.sTypoDescender = descender
+	OS2Table.sTypoLineGap = gap
+
+
+def getNewAxisValue(seenCoordinate, fvarInstance, axisTag):
+	#Return None if:
+	# 	have already seen this axis coordinate
+	#   any of the other axis coordinates are non-zero
+	axisValue = fvarInstance.coordinates[axisTag]
+	if seenCoordinate.has_key(axisValue):
+		return None
+	for tag, value in fvarInstance.coordinates.items():
+		if tag == axisTag:
+			continue
+		if value != 0:
+			return
+	seenCoordinate[axisValue] = axisTag
+	return axisValue, fvarInstance.subfamilyNameID
+
+def addAxisValueData(xmlData, prevEntry, axisEntry, nextEntry, linkDelta):
+	if linkDelta != None:
+		format = 3
+	elif (prevEntry==None) and (nextEntry==None):
+		format = 1
+	else:
+		format = 2
+		
+	xmlData.append("\t\t<AxisValue index=\"%s\" Format=\"%s\">" % (axisEntry.valueIndex, format))
+	xmlData.append("\t\t\t<AxisIndex value=\"%s\" />" % (axisEntry.axisIndex))
+	xmlData.append("\t\t\t<Flags value=\"%s\" />" % (axisEntry.flagValue))
+	xmlData.append("\t\t\t<ValueNameID value=\"%s\" />" % (axisEntry.nameID))
+	if format == 1:
+		xmlData.append("\t\t\t<Value value=\"%s\" />" % (axisEntry.axisValue))
+	elif format == 2:
+		if prevEntry == None:
+			minValue = axisEntry.axisValue
+		else:
+			minValue = (axisEntry.axisValue + prevEntry.axisValue)/2.0
+		if nextEntry == None:
+			maxValue = axisEntry.axisValue
+		else:
+			maxValue = (axisEntry.axisValue + nextEntry.axisValue)/2.0
+		xmlData.append("\t\t\t<NominalValue value=\"%s\" />" % (axisEntry.axisValue))
+		xmlData.append("\t\t\t<RangeMinValue value=\"%s\" />" % (minValue))
+		xmlData.append("\t\t\t<RangeMaxValue value=\"%s\" />" % (maxValue))
+	elif format == 3:
+		xmlData.append("\t\t\t<Value value=\"%s\" />" % (axisEntry.axisValue))
+		xmlData.append("\t\t\t<LinkedValue value=\"%s\" />" % (linkDelta))
+	xmlData.append("\t\t</AxisValue>")
+
+def makeSTAT(fvar):
+	newSTAT = newTable("STAT")
+	newSTAT.table = otTables.STAT()
+	xmlData = ["<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+				"<ttFont sfntVersion=\"OTTO\" ttLibVersion=\"3.11\">",
+				"<STAT>",
+				"\t<Version value=\"0x00010001\"/>",
+				"\t<DesignAxisRecordSize value=\"8\"/>","\t<DesignAxisRecord>"]
+	i = 0
+	for a in fvar.axes:
+		xmlData.append("\t\t<Axis index=\"%s\">" % (i))
+		xmlData.append("\t\t\t<AxisTag value=\"%s\"/>" % (a.axisTag))
+		xmlData.append("\t\t\t<AxisNameID value=\"%s\"/>" % (a.axisNameID))
+		xmlData.append("\t\t\t<AxisOrdering value=\"%s\"/>" % (i))
+		xmlData.append("\t\t</Axis>")
+		i += 1
+
+	xmlData.append("\t</DesignAxisRecord>")
+	xmlData.append("\t<AxisValueArray>")
+	# For each axis in turn, clyce through the named instances and
+	# make a AxisValue entry for the instance of each new named instance when
+	# the other axes are at 0.
+	numAxes = len(fvar.axes)
+	numInstances = len(fvar.instances)
+	numAxisValueRecords = 0
+	fallBackNameID = None
+	for axisIndex in range(numAxes):
+		axisTag = fvar.axes[axisIndex].axisTag
+		seenCoordinate = {}
+		axisList = []
+		valueIndex = 0
+		for j in range(numInstances):
+			flagValue = 0
+			instance = fvar.instances[j]
+			entry = getNewAxisValue(seenCoordinate, instance, axisTag)
+			if entry == None:
+				continue
+			axisValue, nameID = entry
+			if (axisValue == 0) and (axisTag == 'wgt'):
+				# the style name from any other axis will probably
+				# already be elided from the style name.
+				fallBackNameID = nameID
+				flagValue = 2
+			axisEntry = AxisValueRecord(nameID, axisValue, flagValue, valueIndex, axisIndex)
+			axisList.append(axisEntry)
+			valueIndex += 1
+			
+		numEntries =len(axisList)
+		linkDelta = None
+		if numEntries == 0:
+			continue
+		if numEntries == 1:
+			addAxisValueData(xmlData, None, axisList[0], None, linkDelta)
+			continue
+		if numEntries == 2:
+			addAxisValueData(xmlData, None, axisList[0], axisList[1], linkDelta)
+			addAxisValueData(xmlData, axisList[0], axisList[1], None, linkDelta)
+			continue
+			
+		prevEntry = nextEntry = None
+		for j in range(numEntries-1):
+			axisEntry = axisList[j]
+			nextEntry = axisList[j+1]
+			addAxisValueData(xmlData, prevEntry, axisEntry, nextEntry, linkDelta)
+			prevEntry = axisEntry
+		addAxisValueData(xmlData, axisEntry, nextEntry, None, linkDelta)
+
+	xmlData.append("\t</AxisValueArray>")
+
+	if fallBackNameID == None:
+		fallBackNameID = 2
+	xmlData.append("\t<ElidedFallbackNameID value=\"%s\" />" % (fallBackNameID))
+	xmlData.append("</STAT>")
+	xmlData.append("</ttFont>")
+	xmlData.append("")
+	xmlData = os.linesep.join(xmlData)
+	return xmlData
+
+def addSTATTable(varFont, varFontPath):
+	kSTAT_OverrideName = "override.STAT.ttx"
+	statPath = os.path.dirname(varFontPath)
+	statPath = os.path.join(statPath, kSTAT_OverrideName)
+	if not os.path.exists(statPath):
+		print("Note: Generating simple STAT table from 'fvar' table in '%s'." % (statPath))
+		fvar = varFont["fvar"]
+		xmlSTATData = makeSTAT(fvar)
+		statFile = io.BytesIO(xmlSTATData)
+		varFont.importXML(statFile)
+		varFont.saveXML(statPath, tables=["STAT"])
+	else:
+		varFont.importXML(statPath)
 
 def buildCFF2Font(varFontPath, varFont, varModel, masterPaths):
 
 	inputPaths = reorderMasters(varModel.mapping, masterPaths)
 	"""Build CFF2 font from the master designs. default font is first."""
-	baseFont, bcDictList, cff2GlyphList, fontGlyphList, blendError = buildMasterList(inputPaths)
+	(baseFont, bcDictList, cff2GlyphList, fontGlyphList,
+	                                  blendError) = buildMasterList(inputPaths)
 	if blendError:
 		return blendError
 	numMasters = len(inputPaths)
@@ -721,10 +900,11 @@ def buildCFF2Font(varFontPath, varFont, varModel, masterPaths):
 	addCFFVarStore(baseFont, varModel, varFont)
 	addNamesToPost(varFont, fontGlyphList)
 	convertCFFtoCFF2(baseFont, varFont)
-	fixVerticalMetrics(varFont, masterPaths)
+	# fixVerticalMetrics(varFont, masterPaths)
+	addSTATTable(varFont, varFontPath)
 	varFont.save(varFontPath)
 	return blendError
-	
+
 def otfFinder(s):
 	return s.replace('.ufo', '.otf')
 
@@ -737,22 +917,23 @@ def run(args=None):
 	if '-h' in args:
 		print(__help__)
 		return
-		
-	try:
-		(designSpacePath,varFontPath) = args
-	except:
-		print(__usage_)
+
+	if len(args) == 2:
+		designSpacePath, varFontPath = args
+	elif len(args) == 1:
+		designSpacePath = args[0]
+		varFontPath = os.path.splitext(designSpacePath)[0] + '.otf'
+	else:
+		print(__usage__)
 		return
-	
+
 	if os.path.exists(varFontPath):
 		os.remove(varFontPath)
-	varFont, varModel, masterPaths = fontTools.varLib.build(designSpacePath, otfFinder)
-		
+	varFont, varModel, masterPaths = varLib.build(designSpacePath, otfFinder)
+
 	blendError = buildCFF2Font(varFontPath, varFont, varModel, masterPaths)
-	if not blendError:	
+	if not blendError:
 		print("Built variable font '%s'" % (varFontPath))
 
 if __name__=='__main__':
 	run()
-	
-
