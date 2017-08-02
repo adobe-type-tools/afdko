@@ -13,6 +13,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "cffwrite.h"
 #include "sfntread.h"
 #include "svgwrite.h"
+#include "supportexcept.h"
 
 #if PLAT_SUN4
 #include "sun4/fixstring.h"
@@ -20,12 +21,13 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <string.h>
 #endif  /* PLAT_SUN4 */
 
-#include <setjmp.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 #define ARRAY_LEN(a)	(sizeof(a)/sizeof((a)[0]))
+#ifndef ABS
 #define ABS(v)			(((v)<0)?-(v):(v))
+#endif
 
 typedef unsigned short GID;		/* Glyph Index */
 
@@ -272,11 +274,10 @@ struct cefCtx_
 		sfrCtx sfr;
 		sfwCtx sfw;
 		} ctx;
-	struct						/* Error handling */
-		{
-		jmp_buf env;
-		int code;
-		} err;
+	struct					/* Error handling */
+    {
+		_Exc_Buf env;
+    } err;
 	};
 
 /* ----------------------------- Error Handling ---------------------------- */
@@ -284,8 +285,7 @@ struct cefCtx_
 /* Handle fatal error */
 static void fatal(cefCtx h, int err_code)
 	{
-	h->err.code = err_code;
-	longjmp(h->err.env, 1);
+  RAISE(&h->err.env, err_code, NULL);
 	}
 
 /* ----------------------------- Source Stream ----------------------------- */
@@ -2072,167 +2072,170 @@ int cefMakeEmbeddingFont(cefCtx h, cefEmbedSpec *spec, cefMapCallback *map)
 		return cefErrBadSpec;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
+  DURING_EX(h->err.env)
 
-	namecnt = 0;	/* Suppress optimizer warning */
+    namecnt = 0;	/* Suppress optimizer warning */
 
-	/* Make copy of client's subset id list and insert .notdef */
-	h->subset.cnt = 0;
-	dnaSET_CNT(h->subset, spec->subset.cnt + 1);
-	if (spec->subset.names != NULL)
-		{
-		/* Subset glyph names specified; count them and find .notdef */
-		int seen_notdef = 0;
-		for (namecnt = 0;; namecnt++)
-			{
-			char *gname = spec->subset.names[namecnt];
-			if (gname == NULL)
-				break;
-			else if (!seen_notdef && strcmp(gname, ".notdef") == 0)
-				{
-				h->subset.array[0].id = (unsigned short)namecnt;
-				h->subset.array[0].uv = 0xFFFF;  /* Signifies .notdef */
-				seen_notdef = 1;	/* Ignore redefinitions! */
-				}
-			}
-		if (!seen_notdef)
-			return cefErrBadSpec;
-		}
-	else
-		{
-		h->subset.array[0].id = 0;
-		h->subset.array[0].uv = 0xFFFF;  /* Signifies .notdef */
-		}
+    /* Make copy of client's subset id list and insert .notdef */
+    h->subset.cnt = 0;
+    dnaSET_CNT(h->subset, spec->subset.cnt + 1);
+    if (spec->subset.names != NULL)
+      {
+      /* Subset glyph names specified; count them and find .notdef */
+      int seen_notdef = 0;
+      for (namecnt = 0;; namecnt++)
+        {
+        char *gname = spec->subset.names[namecnt];
+        if (gname == NULL)
+          break;
+        else if (!seen_notdef && strcmp(gname, ".notdef") == 0)
+          {
+          h->subset.array[0].id = (unsigned short)namecnt;
+          h->subset.array[0].uv = 0xFFFF;  /* Signifies .notdef */
+          seen_notdef = 1;	/* Ignore redefinitions! */
+          }
+        }
+      if (!seen_notdef)
+        return cefErrBadSpec;
+      }
+    else
+      {
+      h->subset.array[0].id = 0;
+      h->subset.array[0].uv = 0xFFFF;  /* Signifies .notdef */
+      }
 
-	/* Save the .notdef id */
-	notdef = h->subset.array[0].id;
+    /* Save the .notdef id */
+    notdef = h->subset.array[0].id;
 
-	for (i = 0; i < spec->subset.cnt; i++)
-		{
-		h->subset.array[i + 1].id = spec->subset.array[i].id;
-		h->subset.array[i + 1].uv = spec->subset.array[i].uv;
-		}
+    for (i = 0; i < spec->subset.cnt; i++)
+      {
+      h->subset.array[i + 1].id = spec->subset.array[i].id;
+      h->subset.array[i + 1].uv = spec->subset.array[i].uv;
+      }
 
-	/* Sort id list (including vids) and remove duplicates */
-	qsort(h->subset.array, h->subset.cnt, sizeof(GlyphMap), cmpIds);
-	j = 0; /* target index */
-	for (i = 1; i < h->subset.cnt; i++) /* source index */
-		{
-		if (h->subset.array[i].id >= CEF_VID_BEGIN)
-			break;	/* Exclude VIDs from subset */
-		else if (h->subset.array[i].id == h->subset.array[j].id) /* Duplicate ids */
-			{
-			if (h->subset.array[j].id != notdef) /* Target id is not .notdef */
-				{
-				if (h->subset.array[i].uv < h->subset.array[j].uv) /* Current target value is not the minimum for this id */
-					h->subset.array[j].uv = h->subset.array[i].uv; /* Keep the minimum */
-				}
-			else /* The .notdef id is a special case */
-				h->subset.array[j].uv = 0xFFFF; /* Must have the value signifying .notdef */
-			}
-		else /* Source and target have different ids */
-			{
-			/* Copy source to target to collapse any sequence of duplicate ids dealt with above */
-			++j;
-			h->subset.array[j].id = h->subset.array[i].id;
-			h->subset.array[j].uv = h->subset.array[i].uv;
-			}
-		}
-	h->subset.cnt = j + 1; /* Total count is now number of target values written */
+    /* Sort id list (including vids) and remove duplicates */
+    qsort(h->subset.array, h->subset.cnt, sizeof(GlyphMap), cmpIds);
+    j = 0; /* target index */
+    for (i = 1; i < h->subset.cnt; i++) /* source index */
+      {
+      if (h->subset.array[i].id >= CEF_VID_BEGIN)
+        break;	/* Exclude VIDs from subset */
+      else if (h->subset.array[i].id == h->subset.array[j].id) /* Duplicate ids */
+        {
+        if (h->subset.array[j].id != notdef) /* Target id is not .notdef */
+          {
+          if (h->subset.array[i].uv < h->subset.array[j].uv) /* Current target value is not the minimum for this id */
+            h->subset.array[j].uv = h->subset.array[i].uv; /* Keep the minimum */
+          }
+        else /* The .notdef id is a special case */
+          h->subset.array[j].uv = 0xFFFF; /* Must have the value signifying .notdef */
+        }
+      else /* Source and target have different ids */
+        {
+        /* Copy source to target to collapse any sequence of duplicate ids dealt with above */
+        ++j;
+        h->subset.array[j].id = h->subset.array[i].id;
+        h->subset.array[j].uv = h->subset.array[i].uv;
+        }
+      }
+    h->subset.cnt = j + 1; /* Total count is now number of target values written */
 
-	if (spec->subset.names != NULL)
-		{
-		/* Validate glyph/name indexes */
-		if (h->subset.array[h->subset.cnt - 1].id > namecnt)
-			fatal(h, cefErrBadSpec);
+    if (spec->subset.names != NULL)
+      {
+      /* Validate glyph/name indexes */
+      if (h->subset.array[h->subset.cnt - 1].id > namecnt)
+        fatal(h, cefErrBadSpec);
 
-		/* Add glyph names to subset */
-		for (i = 0; i < h->subset.cnt; i++)
-			{
-			GlyphMap *map = &h->subset.array[i];
-			map->gname = spec->subset.names[map->id];
-			}
+      /* Add glyph names to subset */
+      for (i = 0; i < h->subset.cnt; i++)
+        {
+        GlyphMap *map = &h->subset.array[i];
+        map->gname = spec->subset.names[map->id];
+        }
 
-		/* Sort subset by glyph name */
-		qsort(h->subset.array, h->subset.cnt, sizeof(GlyphMap), cmpNames);
-		}
+      /* Sort subset by glyph name */
+      qsort(h->subset.array, h->subset.cnt, sizeof(GlyphMap), cmpNames);
+      }
 
-	h->spec = spec;
-	h->cb.map = map;
+    h->spec = spec;
+    h->cb.map = map;
 
-	stmsOpen(h);
-	h->src.type = getFontType(h);
+    stmsOpen(h);
+    h->src.type = getFontType(h);
 
-	if (spec->flags & CEF_WRITE_SVG) /* Write SVG font */
-		{
-		abfGlyphCallbacks cb = h->cb.glyph;
+    if (spec->flags & CEF_WRITE_SVG) /* Write SVG font */
+      {
+      abfGlyphCallbacks cb = h->cb.glyph;
 
-		svwCtx hSvw = svwNew(&h->cb.mem, &h->cb.stm, SVW_CHECK_ARGS);
-		if (NULL == hSvw)
-			fatal(h, cefErrSvgwriteInit);
+      svwCtx hSvw = svwNew(&h->cb.mem, &h->cb.stm, SVW_CHECK_ARGS);
+      if (NULL == hSvw)
+        fatal(h, cefErrSvgwriteInit);
 
 
-		h->cb.glyph = svwGlyphCallbacks;
-		h->cb.glyph.beg = svg_GlyphBeg;
-		h->cb.glyph.indirect_ctx = h;
-		h->cb.glyph.direct_ctx = hSvw;
+      h->cb.glyph = svwGlyphCallbacks;
+      h->cb.glyph.beg = svg_GlyphBeg;
+      h->cb.glyph.indirect_ctx = h;
+      h->cb.glyph.direct_ctx = hSvw;
 
-		if (svwBegFont(hSvw, h->svwFlags))
-			fatal(h, cefErrCffwriteFont);
+      if (svwBegFont(hSvw, h->svwFlags))
+        fatal(h, cefErrCffwriteFont);
 
-		switch (h->src.type)
-			{
-			case SRC_TYPE1:
-				t1Parse(h);
-				break;
-			case SRC_CFF:
-				cffParse(h);
-				break;
-			case SRC_TRUETYPE:
-				ttParse(h);
-				break;
-			}
+      switch (h->src.type)
+        {
+        case SRC_TYPE1:
+          t1Parse(h);
+          break;
+        case SRC_CFF:
+          cffParse(h);
+          break;
+        case SRC_TRUETYPE:
+          ttParse(h);
+          break;
+        }
 
-		/* Write the SVG font */
-		if (svwEndFont(hSvw, h->top))
-			fatal(h, cefErrCffwriteFont);
+      /* Write the SVG font */
+      if (svwEndFont(hSvw, h->top))
+        fatal(h, cefErrCffwriteFont);
 
-		/* End parse */
-		switch (h->src.type)
-			{
-			case SRC_TYPE1:
-				if (t1rEndFont(h->ctx.t1r))
-					fatal(h, cefErrT1Parse);
-				break;
-			case SRC_CFF:
-				if (cfrEndFont(h->ctx.cfr))
-					fatal(h, cefErrCFFParse);
-				break;
-			case SRC_TRUETYPE:
-				if (ttrEndFont(h->ctx.ttr))
-					fatal(h, cefErrTTParse);
-				break;
-			}
+      /* End parse */
+      switch (h->src.type)
+        {
+        case SRC_TYPE1:
+          if (t1rEndFont(h->ctx.t1r))
+            fatal(h, cefErrT1Parse);
+          break;
+        case SRC_CFF:
+          if (cfrEndFont(h->ctx.cfr))
+            fatal(h, cefErrCFFParse);
+          break;
+        case SRC_TRUETYPE:
+          if (ttrEndFont(h->ctx.ttr))
+            fatal(h, cefErrTTParse);
+          break;
+        }
 
-		svwFree(hSvw);
-		h->cb.glyph = cb;
-		}
-	else  /* Write CEF font */
-		{
-		if (h->flags & DO_NEW_TABLES)
-			{
-			if (sfwNewTables(h->ctx.sfw))
-				fatal(h, cefErrSfntwrite);
-			h->flags &= ~DO_NEW_TABLES;
-			}
+      svwFree(hSvw);
+      h->cb.glyph = cb;
+      }
+    else  /* Write CEF font */
+      {
+      if (h->flags & DO_NEW_TABLES)
+        {
+        if (sfwNewTables(h->ctx.sfw))
+          fatal(h, cefErrSfntwrite);
+        h->flags &= ~DO_NEW_TABLES;
+        }
 
-		if (sfwFillTables(h->ctx.sfw) ||
-			sfwWriteTables(h->ctx.sfw, NULL, sfr_OTTO_tag))
-			fatal(h, cefErrSfntwrite);
-		}
+      if (sfwFillTables(h->ctx.sfw) ||
+        sfwWriteTables(h->ctx.sfw, NULL, sfr_OTTO_tag))
+        fatal(h, cefErrSfntwrite);
+      }
 
-	stmsClose(h);
+    stmsClose(h);
+
+	HANDLER
+		return Exception.Code;
+  END_HANDLER
 
 	return cefSuccess;
 	}
@@ -2289,44 +2292,46 @@ cefCtx cefNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 	h->cb.stm = *stm_cb;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		goto cleanup;
+  DURING_EX(h->err.env)
 
-	/* Initialize stream patches */
-	stmInit(h);
+    /* Initialize stream patches */
+    stmInit(h);
 
-	/* Initialize service libraries */
-	dna_init(h);
-	h->ctx.sfr = sfrNew(mem_cb, &h->stm.cb, SFR_CHECK_ARGS);
-	if (h->ctx.sfr == NULL)
-		fatal(h, ttrErrSfntread);
-	h->ctx.sfw = sfwNew(mem_cb, &h->stm.cb, SFW_CHECK_ARGS);
-	if (h->ctx.sfw == NULL)
-		fatal(h, cefErrSfntwrite);
+    /* Initialize service libraries */
+    dna_init(h);
+    h->ctx.sfr = sfrNew(mem_cb, &h->stm.cb, SFR_CHECK_ARGS);
+    if (h->ctx.sfr == NULL)
+      fatal(h, ttrErrSfntread);
+    h->ctx.sfw = sfwNew(mem_cb, &h->stm.cb, SFW_CHECK_ARGS);
+    if (h->ctx.sfw == NULL)
+      fatal(h, cefErrSfntwrite);
 
-	/* Initialize context */
-	h->flags = DO_NEW_TABLES;
-	h->svwFlags = 0;
-	dnaINIT(h->ctx.dna, h->subset, 256, 128);
-	h->cb.glyph = cfwGlyphCallbacks;
-    /* This keeps these callbacks from being used when
-     writing a regular CFF, and avoids the overhead of processing the
-     source CFF2 blend args */
-    h->cb.glyph.moveVF = NULL;
-    h->cb.glyph.lineVF = NULL;
-    h->cb.glyph.curveVF = NULL;
+    /* Initialize context */
+    h->flags = DO_NEW_TABLES;
+    h->svwFlags = 0;
+    dnaINIT(h->ctx.dna, h->subset, 256, 128);
+    h->cb.glyph = cfwGlyphCallbacks;
+      /* This keeps these callbacks from being used when
+       writing a regular CFF, and avoids the overhead of processing the
+       source CFF2 blend args */
+      h->cb.glyph.moveVF = NULL;
+      h->cb.glyph.lineVF = NULL;
+      h->cb.glyph.curveVF = NULL;
 
-	/* Register tables */
-	cmapRegisterTable(h);
-	CFF_RegisterTable(h);
-	GPOSRegisterTable(h);
+    /* Register tables */
+    cmapRegisterTable(h);
+    CFF_RegisterTable(h);
+    GPOSRegisterTable(h);
+
+	HANDLER
+
+    /* Initilization failed */
+    cefFree(h);
+    h = NULL;
+
+  END_HANDLER
 
 	return h;
-
- cleanup:
-	/* Initilization failed */
-	cefFree(h);
-	return NULL;
 	}
 
 /* Pass svgwrite flags through cfembed context. */

@@ -20,6 +20,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "pstoken.h"
 #include "ctutil.h"
 #include "txops.h"
+#include "supportexcept.h"
 
 #if PLAT_SUN4
 #include "sun4/fixstring.h"
@@ -28,7 +29,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #endif  /* PLAT_SUN4 */
 
 #include <stdlib.h>
-#include <setjmp.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -189,11 +189,10 @@ struct t1rCtx_
 		char *next;				/* Next byte available */
 		} src;
 	abfEncoding *encfree;		/* Encoding node free list */
-	struct						/* Error handling */
-		{
-		jmp_buf env;
-		int code;
-		} err;
+	struct					/* Error handling */
+    {
+		_Exc_Buf env;
+    } err;
 	};
 
 static void parseGlyphDirectory(t1rCtx h);
@@ -235,8 +234,7 @@ static void CTL_CDECL fatal(t1rCtx h, int err_code, char *fmt, ...)
 		vmessage(h, fmt, ap);
 		va_end(ap);
 		}
-	h->err.code = err_code;
-	longjmp(h->err.env, 1);
+  RAISE(&h->err.env, err_code, NULL);
 	}
 
 /* --------------------------- Memory Management --------------------------- */
@@ -554,38 +552,40 @@ t1rCtx t1rNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 	h->cb.stm = *stm_cb;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		goto cleanup;
+  DURING_EX(h->err.env)
 
-	/* Initialize service library */
-	dna_init(h);
+    /* Initialize service library */
+    dna_init(h);
 
-	dnaINIT(h->dna, h->FDArray, 1, 20);
-	h->FDArray.func = allocFDInfo;
-	dnaINIT(h->dna, h->fdicts, 1, 20);
-	newChars(h);
-	newStrings(h);
-	dnaINIT(h->dna, h->tmp, 250, 750);
+    dnaINIT(h->dna, h->FDArray, 1, 20);
+    h->FDArray.func = allocFDInfo;
+    dnaINIT(h->dna, h->fdicts, 1, 20);
+    newChars(h);
+    newStrings(h);
+    dnaINIT(h->dna, h->tmp, 250, 750);
 
-	/* Initialize pstoken library */
-	h->pst = pstNew(mem_cb, stm_cb, T1R_SRC_STREAM_ID, PST_CHECK_ARGS);
-	if (h->pst == NULL)
-		goto cleanup;
+    /* Initialize pstoken library */
+    h->pst = pstNew(mem_cb, stm_cb, T1R_SRC_STREAM_ID, PST_CHECK_ARGS);
+    if (h->pst == NULL)
+      RAISE(&h->err.env, t1rErrSrcStream, NULL);
 
-	/* Open tmp stream */
-	h->stm.tmp = h->cb.stm.open(&h->cb.stm, T1R_TMP_STREAM_ID, 0);
-	if (h->stm.tmp == NULL)
-		goto cleanup;
+    /* Open tmp stream */
+    h->stm.tmp = h->cb.stm.open(&h->cb.stm, T1R_TMP_STREAM_ID, 0);
+    if (h->stm.tmp == NULL)
+      RAISE(&h->err.env, t1rErrTmpStream, NULL);
 
-	/* Open debug stream */
-	h->stm.dbg = h->cb.stm.open(&h->cb.stm, T1R_DBG_STREAM_ID, 0);
+    /* Open debug stream */
+    h->stm.dbg = h->cb.stm.open(&h->cb.stm, T1R_DBG_STREAM_ID, 0);
+
+	HANDLER
+
+    /* Initialization failed */
+    t1rFree(h);
+    h = NULL;
+
+  END_HANDLER
 
 	return h;
-
- cleanup:
-	/* Initialization failed */
-	t1rFree(h);
-	return NULL;
 	}
 
 /* Free context. */
@@ -3250,75 +3250,78 @@ int t1rBegFont(t1rCtx h, long flags, long origin, abfTopDict **top, float *UDV)
 	int result;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
+	DURING_EX(h->err.env)
 	
-	/* Initialize */
-	h->flags = flags & 0xffff;
-	abfInitTopDict(&h->top);
-	dnaSET_CNT(h->FDArray, 1);
-	dnaSET_CNT(h->fdicts, 1);
-	initFDInfo(h, 0);
-	h->fd = &h->FDArray.array[0];
-	initChars(h);
-	initStrings(h);
-	initKeySeen(h);
-	h->key.CIDMapOffset = -1;
-	h->key.FDBytes = (unsigned)-1;
-	h->key.GDBytes = (unsigned)-1;
-	memset(h->encoding.standard, 0xff, sizeof(h->encoding.standard));
-	h->mm.UDV = UDV;
-	h->mm.WV.cnt = 0;
-	h->mm.BDP.cnt = 0;
-	h->mm.BDM.cnt = 0;
-	h->mm.ForceBoldThreshold = 0.5;
-	tmpInit(h);
+    /* Initialize */
+    h->flags = flags & 0xffff;
+    abfInitTopDict(&h->top);
+    dnaSET_CNT(h->FDArray, 1);
+    dnaSET_CNT(h->fdicts, 1);
+    initFDInfo(h, 0);
+    h->fd = &h->FDArray.array[0];
+    initChars(h);
+    initStrings(h);
+    initKeySeen(h);
+    h->key.CIDMapOffset = -1;
+    h->key.FDBytes = (unsigned)-1;
+    h->key.GDBytes = (unsigned)-1;
+    memset(h->encoding.standard, 0xff, sizeof(h->encoding.standard));
+    h->mm.UDV = UDV;
+    h->mm.WV.cnt = 0;
+    h->mm.BDP.cnt = 0;
+    h->mm.BDM.cnt = 0;
+    h->mm.ForceBoldThreshold = 0.5;
+    tmpInit(h);
 
-	/* Begin new parse */
-	result = pstBegParse(h->pst, origin);
-	if (result)
-		pstFatal(h, result);
-	if (flags & T1R_DUMP_TOKENS)
-		pstSetDumpLevel(h->pst, 1);
+    /* Begin new parse */
+    result = pstBegParse(h->pst, origin);
+    if (result)
+      pstFatal(h, result);
+    if (flags & T1R_DUMP_TOKENS)
+      pstSetDumpLevel(h->pst, 1);
 
-	/* Parse font */
-	do
-		{
-		pstToken *token = getToken(h);
-	retry:
-		switch (token->type)
-			{
-		case pstLiteral:
-			doLiteral(h, token);
-			break;
-		case pstOperator:
-			doOperator(h, token);
-			break;
-		case pstString:
-			{
-			int binary;
+    /* Parse font */
+    do
+      {
+      pstToken *token = getToken(h);
+    retry:
+      switch (token->type)
+        {
+      case pstLiteral:
+        doLiteral(h, token);
+        break;
+      case pstOperator:
+        doOperator(h, token);
+        break;
+      case pstString:
+        {
+        int binary;
 
-			/* Try to match possible StartData sequence */
-			if (pstMatch(h->pst, token, "(Hex)"))
-				binary = 0;
-			else if (pstMatch(h->pst, token, "(Binary)"))
-				binary = 1;
-			else
-				break;	/* No match */
+        /* Try to match possible StartData sequence */
+        if (pstMatch(h->pst, token, "(Hex)"))
+          binary = 0;
+        else if (pstMatch(h->pst, token, "(Binary)"))
+          binary = 1;
+        else
+          break;	/* No match */
 
-			token = cidRead(h, binary);
-			if (token != NULL)
-				goto retry;	/* No match */
-			}
-			break;
-		default:
-			break;
-			}
-		}
-	while (!(h->flags & SEEN_END));
+        token = cidRead(h, binary);
+        if (token != NULL)
+          goto retry;	/* No match */
+        }
+        break;
+      default:
+        break;
+        }
+      }
+    while (!(h->flags & SEEN_END));
 
-	prepClientData(h);
-	*top = &h->top;
+    prepClientData(h);
+    *top = &h->top;
+
+	HANDLER
+  	return Exception.Code;
+  END_HANDLER
 
 	return t1rSuccess;
 	}
@@ -3507,11 +3510,14 @@ int t1rIterateGlyphs(t1rCtx h, abfGlyphCallbacks *glyph_cb)
 	long i;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
+	DURING_EX(h->err.env)
 	
-	for (i = 0; i < h->chars.index.cnt; i++)
-		readGlyph(h, (unsigned short)i, glyph_cb);
+    for (i = 0; i < h->chars.index.cnt; i++)
+      readGlyph(h, (unsigned short)i, glyph_cb);
+
+	HANDLER
+  	return Exception.Code;
+  END_HANDLER
 
 	return t1rSuccess;
 	}
@@ -3524,10 +3530,11 @@ int t1rGetGlyphByTag(t1rCtx h,
 		return t1rErrNoGlyph;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
-	
-	readGlyph(h, tag, glyph_cb);
+	DURING_EX(h->err.env)
+		readGlyph(h, tag, glyph_cb);
+	HANDLER
+  	return Exception.Code;
+  END_HANDLER
 
 	return t1rSuccess;
 	}
@@ -3554,10 +3561,13 @@ int t1rGetGlyphByName(t1rCtx h, char *gname, abfGlyphCallbacks *glyph_cb)
 		return t1rErrNoGlyph;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
+	DURING_EX(h->err.env)
 	
-	readGlyph(h, (unsigned short)h->chars.byName.array[index], glyph_cb);
+		readGlyph(h, (unsigned short)h->chars.byName.array[index], glyph_cb);
+
+	HANDLER
+  	return Exception.Code;
+  END_HANDLER
 
 	return t1rSuccess;
 	}
@@ -3607,10 +3617,13 @@ int t1rGetGlyphByCID(t1rCtx h,
 		}
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
+	DURING_EX(h->err.env)
 	
-	readGlyph(h, tag, glyph_cb);
+		readGlyph(h, tag, glyph_cb);
+
+	HANDLER
+  	return Exception.Code;
+  END_HANDLER
 
 	return t1rSuccess;
 	}
@@ -3625,10 +3638,13 @@ int t1rGetGlyphByStdEnc(t1rCtx h, int stdcode, abfGlyphCallbacks *glyph_cb)
 		return t1rErrNoGlyph;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
-	
-	readGlyph(h, tag, glyph_cb);
+  DURING_EX(h->err.env)
+
+		readGlyph(h, tag, glyph_cb);
+
+	HANDLER
+  	return Exception.Code;
+  END_HANDLER
 
 	return t1rSuccess;
 	}

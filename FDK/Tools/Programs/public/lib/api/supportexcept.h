@@ -114,15 +114,14 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
   CAUTIONS:
 
-  It is ILLEGAL to execute a statement between DURING and HANDLER
-  that would transfer control outside of those statements. In particular,
-  "return" is illegal (an unspecified malfunction will occur).
-  To perform a "return", execute E_RTRN_VOID; to perform a "return(x)",
-  execute E_RETURN(x). This restriction does not apply to the statements
-  between HANDLER and END_HANDLER.
-
-  It is ILLEGAL to execute E_RTRN_VOID or E_RETURN between HANDLER and
-  END_HANDLER.
+  Due to multi-threading concerns, a global chain of exception buffers
+  have been removed from DURING ... HANDLER implementation when setjmp/longjmp
+  is selected as the exception handling mechanism.
+  Instead, at least one, usually the outer-most exception handler must be
+  declared with DURING_EX instead of DURING, and its env parameter is respected when
+  longjmp is used as the exception thrown mechanism under C or USE_CXX_EXCEPTION undefined.
+  Handlers within HANDLER ... END_HANDLER following DURING (not DURING_EX) are simply ignored.
+  When C++ exception is used as the implementation, all handlers are respected.
 
   The state of local variables at the time the HANDLER is invoked may
   be unpredictable. In particular, a local variable that is modified
@@ -139,16 +138,11 @@ typedef struct _t_Exc_buf {
 #ifdef USE_CXX_EXCEPTION
     _t_Exc_buf(int code=0, char *msg=0) : Message(msg), Code(code) {}
 #else
-	struct _t_Exc_buf *Prev;	/* exception chain back-pointer */
 	jmp_buf Environ;		/* saved environment */
 #endif
 	char *Message;			/* Human-readable cause */
 	int Code;			/* Exception code */
 } _Exc_Buf;
-
-#ifndef USE_CXX_EXCEPTION
-extern _Exc_Buf *_Exc_Header;	/* global exception chain header */
-#endif
 
 /* Macros defining the exception handler "syntax":
      DURING statements HANDLER statements END_HANDLER
@@ -156,12 +150,7 @@ extern _Exc_Buf *_Exc_Header;	/* global exception chain header */
  */
 
 #ifdef USE_CXX_EXCEPTION
-#define	_E_RESTORE
-#else
-#define	_E_RESTORE  _Exc_Header = Exception.Prev
-#endif
-
-#ifdef USE_CXX_EXCEPTION
+#define DURING_EX(env)	DURING
 #define	DURING {_Exc_Buf Exception;\
 		try {
 
@@ -170,23 +159,19 @@ extern _Exc_Buf *_Exc_Header;	/* global exception chain header */
 #define	END_HANDLER }}
 
 #else /* USE_CXX_EXCEPTION */
-#define	DURING {_Exc_Buf Exception;\
-		if (! setjmp(Exception.Environ)) {
+#define	DURING_EX(env) {_Exc_Buf Exception; _Exc_Buf *_EBP = &env;\
+		if (! setjmp(env.Environ)) {
+#define DURING { _Exc_Buf Exception; Exception.Code=0; _Exc_Buf *_EBP=&Exception; if (1) {
 
-#define	HANDLER	_E_RESTORE;} else {
+#define	HANDLER	} else { Exception.Code=_EBP->Code;
 
 #define	END_HANDLER }}
 
 #endif /* USE_CXX_EXCEPTION */
 
-#define	E_RETURN(x) {_E_RESTORE; return(x);}
-
-#define	E_RTRN_VOID {_E_RESTORE; return;}
-
-
 /* Exported Procedures */
 
-extern procedure os_raise (int  Code, char * Message);
+extern procedure os_raise (_Exc_Buf *buf, int  Code, char * Message);
 /* Initiates an exception; always called via the RAISE macro.
    This procedure never returns; instead, the stack is unwound and
    control passes to the beginning of the exception handler statements
@@ -234,7 +219,7 @@ extern int setjmp (jmp_buf  buf);
 #define RAISE os_raise
 /* See os_raise above; defined as a macro simply for consistency */
 
-#define	RERAISE	RAISE(Exception.Code, Exception.Message)
+#define	RERAISE	RAISE(&Exception, Exception.Code, Exception.Message)
 /* Called from within an exception handler (between HANDLER and
    END_HANDLER), propagates the same exception to the next outer
    dynamically enclosing exception handler; does not return.

@@ -3,6 +3,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "pdfwrite.h"
 #include "dynarr.h"
+#include "supportexcept.h"
 
 #if PLAT_SUN4
 #include "sun4/fixtime.h"
@@ -10,7 +11,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <time.h>
 #endif  /* PLAT_SUN4 */
 
-#include <setjmp.h>
 #include <stdarg.h>
 #include <string.h>
 #include <math.h>
@@ -254,10 +254,9 @@ struct pdwCtx_
 		} cb;
 	dnaCtx dna;				/* dynarr context */
 	struct					/* Error handling */
-		{
-		jmp_buf env;
-		int code;
-		} err;
+    {
+		_Exc_Buf env;
+    } err;
 	};
 
 static void writePDFBeg(pdwCtx h);
@@ -269,8 +268,7 @@ static void writePages(pdwCtx h);
 /* Handle fatal error. */
 static void fatal(pdwCtx h, int err_code)
 	{
-	h->err.code = err_code;
-	longjmp(h->err.env, 1);
+  RAISE(&h->err.env, err_code, NULL);
 	}
 
 /* ---------------------- Error Handling dynarr Context -------------------- */
@@ -390,48 +388,51 @@ static void settime(pdwCtx h)
 int pdwBegFont(pdwCtx h, long flags, long level, abfTopDict *top)
 	{
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
+  DURING_EX(h->err.env)
 
-	/* Initialize */
-	h->flags = flags;
-	if (level < 0)
-		h->level = 0;
-	else if (level > 2)
-		h->level = 2;
-	else
-		h->level = level;
-	h->top = top;
-	h->glyph.scale = 500.0f/top->sup.UnitsPerEm;
-	settime(h);
+    /* Initialize */
+    h->flags = flags;
+    if (level < 0)
+      h->level = 0;
+    else if (level > 2)
+      h->level = 2;
+    else
+      h->level = level;
+    h->top = top;
+    h->glyph.scale = 500.0f/top->sup.UnitsPerEm;
+    settime(h);
 
-	/* Set FontName */
-	if (h->top->sup.flags & ABF_CID_FONT)
-		h->FontName = h->top->cid.CIDFontName.ptr;
-	else
-		h->FontName = h->top->FDArray.array[0].FontName.ptr;
-	if (h->FontName == ABF_UNSET_PTR)
-		h->FontName = "<unknown>";
+    /* Set FontName */
+    if (h->top->sup.flags & ABF_CID_FONT)
+      h->FontName = h->top->cid.CIDFontName.ptr;
+    else
+      h->FontName = h->top->FDArray.array[0].FontName.ptr;
+    if (h->FontName == ABF_UNSET_PTR)
+      h->FontName = "<unknown>";
 
-	if (h->level > 0)
-		{
-		/* Set up metrics facility */
-		h->metrics.cb = abfGlyphMetricsCallbacks;
-		h->metrics.cb.direct_ctx = &h->metrics.ctx;
-		h->metrics.ctx.flags = 0;
-		}
+    if (h->level > 0)
+      {
+      /* Set up metrics facility */
+      h->metrics.cb = abfGlyphMetricsCallbacks;
+      h->metrics.cb.direct_ctx = &h->metrics.ctx;
+      h->metrics.ctx.flags = 0;
+      }
 
-	/* Open dst stream and get start offset */
-	h->dst.stm = h->cb.stm.open(&h->cb.stm, PDW_DST_STREAM_ID, 0);
-	h->dst.start = h->cb.stm.tell(&h->cb.stm, h->dst.stm);
-	if (h->dst.start == -1)
-		return pdwErrDstStream;
-		
-	/* Initialize xref list */
-	h->xref.cnt = 0;
-	*dnaNEXT(h->xref) = 0;
+    /* Open dst stream and get start offset */
+    h->dst.stm = h->cb.stm.open(&h->cb.stm, PDW_DST_STREAM_ID, 0);
+    h->dst.start = h->cb.stm.tell(&h->cb.stm, h->dst.stm);
+    if (h->dst.start == -1)
+      return pdwErrDstStream;
+      
+    /* Initialize xref list */
+    h->xref.cnt = 0;
+    *dnaNEXT(h->xref) = 0;
 
-	writePDFBeg(h);
+    writePDFBeg(h);
+
+	HANDLER
+  	return Exception.Code;
+  END_HANDLER
 
 	return pdwSuccess;
 	}
@@ -440,15 +441,18 @@ int pdwBegFont(pdwCtx h, long flags, long level, abfTopDict *top)
 int pdwEndFont(pdwCtx h)
 	{
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
-	
-	writePages(h);
-	writePDFEnd(h);
+  DURING_EX(h->err.env)
 
-	/* Close dst stream */
-	if (h->cb.stm.close(&h->cb.stm, h->dst.stm) == -1)
-		return pdwErrDstStream;
+    writePages(h);
+    writePDFEnd(h);
+
+    /* Close dst stream */
+    if (h->cb.stm.close(&h->cb.stm, h->dst.stm) == -1)
+      return pdwErrDstStream;
+
+	HANDLER
+  	return Exception.Code;
+  END_HANDLER
 
 	return pdwSuccess;
 	}

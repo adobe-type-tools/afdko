@@ -47,6 +47,10 @@ struct sfrCtx_					/* Context */
 		char *end;				/* Buffer end */
 		char *next;				/* Next byte available (buf <= next < end) */
 		} src;
+	struct					/* Error handling */
+    {
+		_Exc_Buf env;
+    } err;
 	};
 
 /* ----------------------------- Error Handling ---------------------------- */
@@ -54,7 +58,7 @@ struct sfrCtx_					/* Context */
 /* Handle fatal error. */
 static void fatal(sfrCtx h, int err_code)
 	{
-    RAISE(err_code, NULL);
+    RAISE(&h->err.env, err_code, NULL);
 	}
 
 /* --------------------------- Memory Management --------------------------- */
@@ -228,7 +232,7 @@ int sfrBegFont(sfrCtx h, void *stm, long origin, ctlTag *sfnt_tag)
 		return sfrErrSrcStream;
 
 	/* Set error handler */
-    DURING
+    DURING_EX(h->err.env)
 
         fillbuf(h);
 
@@ -246,7 +250,7 @@ int sfrBegFont(sfrCtx h, void *stm, long origin, ctlTag *sfnt_tag)
             readTTCDirectory(h, origin);
             break;
         default:
-            E_RETURN(sfrErrBadSfnt);
+            return sfrErrBadSfnt;
             }
 
     HANDLER

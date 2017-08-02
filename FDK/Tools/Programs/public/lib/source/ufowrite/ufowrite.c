@@ -6,8 +6,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "dictops.h"
 #include "txops.h"
 #include "ctutil.h"
+#include "supportexcept.h"
 
-#include <setjmp.h>
 #include <stdarg.h>
 #include <math.h>
 #include <stdlib.h>
@@ -91,7 +91,7 @@ struct ufwCtx_
 	dnaCtx dna;				/* dynarr context */
 	struct					/* Error handling */
     {
-		jmp_buf env;
+		_Exc_Buf env;
 		int code;
     } err;
 };
@@ -108,7 +108,7 @@ static void fatal(ufwCtx h, int err_code)
 		(void)h->cb.stm.write(&h->cb.stm, h->stm.dbg, strlen(text), text);
     }
 	h->err.code = err_code;
-	longjmp(h->err.env, 1);
+  RAISE(&h->err.env, err_code, NULL);
 }
 
 #if _WIN32
@@ -145,13 +145,15 @@ static void flushBuf(ufwCtx h)
 	if (*cnt == 0)
 		return;	/* Nothing to do */
     
-    if (setjmp(h->err.env))
-        return;
-    
-	/* Write buffered bytes */
-	if (h->cb.stm.write(&h->cb.stm, stm, *cnt, buf) != *cnt)
-		fatal(h, err);
-    
+	DURING_EX(h->err.env)
+  
+    /* Write buffered bytes */
+    if (h->cb.stm.write(&h->cb.stm, stm, *cnt, buf) != *cnt)
+      fatal(h, err);
+
+	HANDLER
+  END_HANDLER
+  
 	*cnt = 0;
 }
 
@@ -428,9 +430,10 @@ int ufwBegFont(ufwCtx h, long flags, char *glyphLayerDir)
         h->arg.glyphLayer = glyphLayerDir;
     
     /* Set error handler */
-    if (setjmp(h->err.env))
-        return h->err.code;
-    
+  DURING_EX(h->err.env)
+  HANDLER
+  END_HANDLER
+  
     return ufwSuccess;
 }
 
@@ -440,47 +443,48 @@ static void writeContents(ufwCtx h)
     char buffer[FILENAME_MAX];
     int i;
 	/* Set error handler */
-	if (setjmp(h->err.env))
-	{
+  DURING_EX(h->err.env)
+  
+    h->state = 1;  /* Indicates writing to dst stream */
+      
+      
+      /* Open fontinfo.plist file as dst stream */
+      
+      sprintf(buffer, "%s/%s", h->arg.glyphLayer, "contents.plist");
+      h->cb.stm.clientFileName = buffer;
+      h->stm.dst = h->cb.stm.open(&h->cb.stm, UFW_DST_STREAM_ID, 0);
+      if (h->stm.dst == NULL)
+          fatal(h, ufwErrDstStream);
+      
+      writeLine(h, XML_HEADER);
+      writeLine(h, PLIST_DTD_HEADER);
+      writeLine(h, "<plist version=\"1.0\">");
+      writeLine(h, "<dict>");
+      for (i = 0; i < h->glyphs.cnt; i++)
+      {
+          glyphRec = &h->glyphs.array[i];
+          sprintf(buffer, "\t<key>%s</key>", glyphRec->glyphName);
+          writeLine(h, buffer);
+          sprintf(buffer, "\t<string>%s</string>", glyphRec->glifFileName);
+          writeLine(h, buffer);
+      }
+      
+      
+      writeLine(h, "</dict>");
+      writeLine(h, "</plist>");
+      
+      /* Close dst stream */
+      flushBuf(h);
+    h->cb.stm.close(&h->cb.stm, h->stm.dst);
+
+  HANDLER
+
 		if (h->stm.dst)
 			h->cb.stm.close(&h->cb.stm, h->stm.dst);
-		return;
-	}
-    
-	h->state = 1;  /* Indicates writing to dst stream */
-    
-    
-    /* Open fontinfo.plist file as dst stream */
-    
-    sprintf(buffer, "%s/%s", h->arg.glyphLayer, "contents.plist");
-    h->cb.stm.clientFileName = buffer;
-    h->stm.dst = h->cb.stm.open(&h->cb.stm, UFW_DST_STREAM_ID, 0);
-    if (h->stm.dst == NULL)
-        fatal(h, ufwErrDstStream);
-    
-    writeLine(h, XML_HEADER);
-    writeLine(h, PLIST_DTD_HEADER);
-    writeLine(h, "<plist version=\"1.0\">");
-    writeLine(h, "<dict>");
-    for (i = 0; i < h->glyphs.cnt; i++)
-    {
-        glyphRec = &h->glyphs.array[i];
-        sprintf(buffer, "\t<key>%s</key>", glyphRec->glyphName);
-        writeLine(h, buffer);
-        sprintf(buffer, "\t<string>%s</string>", glyphRec->glifFileName);
-        writeLine(h, buffer);
-    }
-    
-    
-    writeLine(h, "</dict>");
-    writeLine(h, "</plist>");
-    
-    /* Close dst stream */
-    flushBuf(h);
-	h->cb.stm.close(&h->cb.stm, h->stm.dst);
-    
-    return;
-    
+
+	END_HANDLER
+  
+  return;
 }
 
 static void writeGlyphOrder(ufwCtx h)
@@ -490,14 +494,9 @@ static void writeGlyphOrder(ufwCtx h)
     int i;
     
 	/* Set error handler */
-	if (setjmp(h->err.env))
-	{
-		if (h->stm.dst)
-			h->cb.stm.close(&h->cb.stm, h->stm.dst);
-		return;
-	}
-    
-	h->state = 1;  /* Indicates writing to dst stream */
+  DURING_EX(h->err.env)
+  
+		h->state = 1;  /* Indicates writing to dst stream */
     
     
     /* Open lib.plist file as dst stream */
@@ -527,25 +526,24 @@ static void writeGlyphOrder(ufwCtx h)
     writeLine(h, "</plist>");
     
     
-	/* Close dst stream */
-    flushBuf(h);
-	h->cb.stm.close(&h->cb.stm, h->stm.dst);
-    
-    return;
+    /* Close dst stream */
+      flushBuf(h);
+    h->cb.stm.close(&h->cb.stm, h->stm.dst);
+ 
+ 	HANDLER
+		if (h->stm.dst)
+			h->cb.stm.close(&h->cb.stm, h->stm.dst);
+
+  END_HANDLER
 }
 static void writeMetaInfo(ufwCtx h)
 {
     char buffer[FILENAME_MAX];
     
 	/* Set error handler */
-	if (setjmp(h->err.env))
-	{
-		if (h->stm.dst)
-			h->cb.stm.close(&h->cb.stm, h->stm.dst);
-		return;
-	}
-    
-	h->state = 1;  /* Indicates writing to dst stream */
+  DURING_EX(h->err.env)
+  
+		h->state = 1;  /* Indicates writing to dst stream */
     
     
     /* Open lib.plist file as dst stream */
@@ -568,11 +566,14 @@ static void writeMetaInfo(ufwCtx h)
     writeLine(h, "</plist>");
     
     
-	/* Close dst stream */
-    flushBuf(h);
-	h->cb.stm.close(&h->cb.stm, h->stm.dst);
-    
-    return;
+    /* Close dst stream */
+      flushBuf(h);
+    h->cb.stm.close(&h->cb.stm, h->stm.dst);
+
+  HANDLER
+		if (h->stm.dst)
+			h->cb.stm.close(&h->cb.stm, h->stm.dst);
+	END_HANDLER
 }
 
 static void setStyleName(char* dst, char* postScriptName)
@@ -658,16 +659,10 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top)
     privateDict = &(fontDict0->Private);
     
 	/* Set error handler */
-	if (setjmp(h->err.env))
-	{
-		if (h->stm.dst)
-			h->cb.stm.close(&h->cb.stm, h->stm.dst);
-		return h->err.code;
-	}
-    
-	h->state = 1;  /* Indicates writing to dst stream */
-    
-    
+  DURING_EX(h->err.env)
+  
+    h->state = 1;  /* Indicates writing to dst stream */
+      
     /* Open fontinfo.plist file as dst stream */
     
     sprintf(buffer, "%s", "fontinfo.plist");
@@ -989,11 +984,18 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top)
     writeLine(h, "</dict>");
     writeLine(h, "</plist>");
     flushBuf(h);
-    
-    /* Close dst stream */
-	if (h->cb.stm.close(&h->cb.stm, h->stm.dst) == -1)
-		return ufwErrDstStream;
-    
+  
+      /* Close dst stream */
+    if (h->cb.stm.close(&h->cb.stm, h->stm.dst) == -1)
+      return ufwErrDstStream;
+  
+  HANDLER
+		if (h->stm.dst)
+			h->cb.stm.close(&h->cb.stm, h->stm.dst);
+		return Exception.Code;
+
+	END_HANDLER
+
 	return ufwSuccess;
 }
 
@@ -1156,9 +1158,8 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 	h->path.y = 0;
 	h->path.state = 1;
     
-    if (setjmp(h->err.env))
-        return h->err.code;
-    
+	DURING_EX(h->err.env)
+  
     /* Open GLIF file as dst stream */
     sprintf(glifRelPath, "%s/%s", h->arg.glyphLayer, glifName);
     h->cb.stm.clientFileName = glifRelPath;
@@ -1190,6 +1191,13 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
     glyphRec = dnaNEXT(h->glyphs);
     strcpy(glyphRec->glyphName, glyphName);
     strcpy(glyphRec->glifFileName, glifName);
+
+	HANDLER
+
+  	return Exception.Code;
+
+  END_HANDLER
+
 	return ABF_CONT_RET;
 }
 

@@ -128,6 +128,10 @@ struct _t2cCtx
     cff2GlyphCallbacks *cff2;   /* CFF2 font callbacks */
     abfGlyphCallbacks *glyph;	/* Glyph callbacks */
     ctlMemoryCallbacks *mem;	/* Glyph callbacks */
+	struct					/* Error handling */
+    {
+		_Exc_Buf env;
+    } err;
 	};
 
 /* Check stack contains at least n elements. */
@@ -187,7 +191,7 @@ static void CTL_CDECL message(t2cCtx h, char *fmt, ...)
 static void fatal(t2cCtx h, int err_code)
 {
 	message(h, "%s", t2cErrStr(err_code));
-	RAISE(err_code, NULL);
+	RAISE(&h->err.env, err_code, NULL);
 }
 
 /* --------------------------- Memory Management --------------------------- */
@@ -2797,7 +2801,7 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
         h.flags |= IS_CFF2;
 	h.src.endOffset = endOffset;
 
-	DURING
+	DURING_EX(h.err.env)
 
 		if (aux->flags & T2C_CUBE_GSUBR)
 			retVal = t2DecodeSubr(&h, offset);

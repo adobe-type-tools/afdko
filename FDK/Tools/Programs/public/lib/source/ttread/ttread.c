@@ -5,6 +5,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "dynarr.h"
 #include "ctutil.h"
 #include "sfntread.h"
+#include "supportexcept.h"
 
 #if PLAT_SUN4
 #include "sun4/fixstring.h"
@@ -12,7 +13,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <string.h>
 #endif  /* PLAT_SUN4 */
 
-#include <setjmp.h>
 #include <stdlib.h>
 #include <limits.h>
 #include <math.h>
@@ -56,7 +56,6 @@ typedef struct /* Coordinate point */
 
 /* --------------------------- sfnt Definitions  --------------------------- */
 
-typedef long Fixed;
 typedef short FWord;
 typedef unsigned short uFWord;
 typedef unsigned long Offset;
@@ -376,7 +375,7 @@ struct ttrCtx_
 		} ctx;
 	struct					/* Error handling */
 		{
-		jmp_buf env;
+		_Exc_Buf env;
 		int code;
 		} err;
 	};
@@ -419,7 +418,7 @@ static void CTL_CDECL fatal(ttrCtx h, int err_code, char *fmt, ...)
 		va_end(ap);
 		}
 	h->err.code = err_code;
-	longjmp(h->err.env, 1);
+  RAISE(&h->err.env, err_code, NULL);
 	}
 
 /* ---------------------- Error Handling dynarr Context -------------------- */
@@ -484,40 +483,42 @@ ttrCtx ttrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 	h->cb.mem = *mem_cb;
 	h->cb.stm = *stm_cb;
 
-	if (setjmp(h->err.env))
-		goto cleanup;
+	DURING_EX(h->err.env)
 
-	/* Initialize service libraries */
-	dna_init(h);
-	h->ctx.sfr = sfrNew(mem_cb, stm_cb, SFR_CHECK_ARGS);
-	if (h->ctx.sfr == NULL)
-		fatal(h, ttrErrSfntread, "(sfr) can't init lib");
+    /* Initialize service libraries */
+    dna_init(h);
+    h->ctx.sfr = sfrNew(mem_cb, stm_cb, SFR_CHECK_ARGS);
+    if (h->ctx.sfr == NULL)
+      fatal(h, ttrErrSfntread, "(sfr) can't init lib");
 
-	dnaINIT(h->ctx.dna, h->name.records, 50, 50);
-	dnaINIT(h->ctx.dna, h->cmap.encodings, 10, 10);
-	dnaINIT(h->ctx.dna, h->cmap.segments, 30, 60);
-	dnaINIT(h->ctx.dna, h->post.fmt2.glyphNameIndex, 256, 768);
-	dnaINIT(h->ctx.dna, h->post.fmt2.strings, 50, 200);
-	dnaINIT(h->ctx.dna, h->post.fmt2.buf, 300, 1200);
-	dnaINIT(h->ctx.dna, h->glyphs, 256, 768);
-	dnaINIT(h->ctx.dna, h->glyphsByName, 256, 768);
-	dnaINIT(h->ctx.dna, h->encodings, 256, 768);
-	dnaINIT(h->ctx.dna, h->strings.index, 250, 500);
-	dnaINIT(h->ctx.dna, h->strings.buf, 1000, 2000);
-	dnaINIT(h->ctx.dna, h->glyf.endPts, 10, 20);
-	dnaINIT(h->ctx.dna, h->glyf.coords, 500, 1000);
-	dnaINIT(h->ctx.dna, h->tmp0, 200, 500);
-	dnaINIT(h->ctx.dna, h->tmp1, 200, 500);
+    dnaINIT(h->ctx.dna, h->name.records, 50, 50);
+    dnaINIT(h->ctx.dna, h->cmap.encodings, 10, 10);
+    dnaINIT(h->ctx.dna, h->cmap.segments, 30, 60);
+    dnaINIT(h->ctx.dna, h->post.fmt2.glyphNameIndex, 256, 768);
+    dnaINIT(h->ctx.dna, h->post.fmt2.strings, 50, 200);
+    dnaINIT(h->ctx.dna, h->post.fmt2.buf, 300, 1200);
+    dnaINIT(h->ctx.dna, h->glyphs, 256, 768);
+    dnaINIT(h->ctx.dna, h->glyphsByName, 256, 768);
+    dnaINIT(h->ctx.dna, h->encodings, 256, 768);
+    dnaINIT(h->ctx.dna, h->strings.index, 250, 500);
+    dnaINIT(h->ctx.dna, h->strings.buf, 1000, 2000);
+    dnaINIT(h->ctx.dna, h->glyf.endPts, 10, 20);
+    dnaINIT(h->ctx.dna, h->glyf.coords, 500, 1000);
+    dnaINIT(h->ctx.dna, h->tmp0, 200, 500);
+    dnaINIT(h->ctx.dna, h->tmp1, 200, 500);
 
-	/* Open debug stream */
-	h->stm.dbg = h->cb.stm.open(&h->cb.stm, TTR_DBG_STREAM_ID, 0);
+    /* Open debug stream */
+    h->stm.dbg = h->cb.stm.open(&h->cb.stm, TTR_DBG_STREAM_ID, 0);
+
+	HANDLER
+
+    /* Initilization failed */
+    ttrFree(h);
+    h = NULL;
+
+  END_HANDLER
 
 	return h;
-
- cleanup:
-	/* Initilization failed */
-	ttrFree(h);
-	return NULL;
 	}
 
 /* Free context. */
@@ -1975,56 +1976,59 @@ int ttrBegFont(ttrCtx h, long flags, long origin, int iTTC, abfTopDict **top)
 	long i;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
-	
-	/* Initialize */
-	h->flags = 0;
-	h->client_flags = flags;
-	h->post.format = 0;
-	h->OS_2.version = 0xffff;
-	h->strings.index.cnt = 0;
-	h->strings.buf.cnt = 0;
+  DURING_EX(h->err.env)
 
-	h->top.FDArray.cnt = 1;
-	h->top.FDArray.array = &h->fdict;
-	abfInitAllDicts(&h->top);
+    /* Initialize */
+    h->flags = 0;
+    h->client_flags = flags;
+    h->post.format = 0;
+    h->OS_2.version = 0xffff;
+    h->strings.index.cnt = 0;
+    h->strings.buf.cnt = 0;
 
-	/* Open source stream */
-	h->stm.src = h->cb.stm.open(&h->cb.stm, TTR_SRC_STREAM_ID, 0);
-	if (h->stm.src == NULL)
-		fatal(h, ttrErrSrcStream, NULL);
+    h->top.FDArray.cnt = 1;
+    h->top.FDArray.array = &h->fdict;
+    abfInitAllDicts(&h->top);
 
-	/* Read sfnt support tables */
-	sfntReadHdr(h, origin, iTTC);
-	headRead(h);
-	hheaRead(h);
-	maxpRead(h);
-	nameRead(h);
-	cmapRead(h);
-	postRead(h);
-	OS_2Read(h);
+    /* Open source stream */
+    h->stm.src = h->cb.stm.open(&h->cb.stm, TTR_SRC_STREAM_ID, 0);
+    if (h->stm.src == NULL)
+      fatal(h, ttrErrSrcStream, NULL);
 
-	/* Initialize glyph array */
-	dnaSET_CNT(h->glyphs, h->maxp.numGlyphs);
-	for (i = 0; i < h->glyphs.cnt; i++)
-		{
-		abfGlyphInfo *info = &h->glyphs.array[i].info;
-		abfInitGlyphInfo(info);
-		info->tag = (unsigned short)i;
-		}
+    /* Read sfnt support tables */
+    sfntReadHdr(h, origin, iTTC);
+    headRead(h);
+    hheaRead(h);
+    maxpRead(h);
+    nameRead(h);
+    cmapRead(h);
+    postRead(h);
+    OS_2Read(h);
 
-	/* Read auxiliary glyph info */
-	hmtxRead(h);
-	locaRead(h);
-	table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('g','l','y','f'));
-	if (table == NULL)
-		return ttrErrNoGlyph;
-	h->glyf.offset = table->offset;
+    /* Initialize glyph array */
+    dnaSET_CNT(h->glyphs, h->maxp.numGlyphs);
+    for (i = 0; i < h->glyphs.cnt; i++)
+      {
+      abfGlyphInfo *info = &h->glyphs.array[i].info;
+      abfInitGlyphInfo(info);
+      info->tag = (unsigned short)i;
+      }
 
-	/* Fill out and report client data */
-	fillClientData(h);
-	*top = &h->top;
+    /* Read auxiliary glyph info */
+    hmtxRead(h);
+    locaRead(h);
+    table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('g','l','y','f'));
+    if (table == NULL)
+      return ttrErrNoGlyph;
+    h->glyf.offset = table->offset;
+
+    /* Fill out and report client data */
+    fillClientData(h);
+    *top = &h->top;
+
+	HANDLER
+		return Exception.Code;
+  END_HANDLER
 
 	return ttrSuccess;
 	}
@@ -2679,11 +2683,14 @@ int ttrIterateGlyphs(ttrCtx h, abfGlyphCallbacks *glyph_cb)
 	long gid;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
-	
-	for (gid = 0; gid < h->glyphs.cnt; gid++)
-		readGlyph(h, (unsigned short)gid, glyph_cb);
+  DURING_EX(h->err.env)
+
+    for (gid = 0; gid < h->glyphs.cnt; gid++)
+      readGlyph(h, (unsigned short)gid, glyph_cb);
+
+	HANDLER
+  	return Exception.Code;
+  END_HANDLER
 
 	return ttrSuccess;
 	}
@@ -2696,10 +2703,15 @@ int ttrGetGlyphByTag(ttrCtx h,
 		return ttrErrNoGlyph;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
-	
+  DURING_EX(h->err.env)
+
 	readGlyph(h, tag, glyph_cb);
+
+	HANDLER
+
+  	return Exception.Code;
+
+  END_HANDLER
 
 	return ttrSuccess;
 	}
@@ -2713,10 +2725,13 @@ int ttrGetGlyphByName(ttrCtx h, char *gname, abfGlyphCallbacks *glyph_cb)
 		return ttrErrNoGlyph;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
-	
-	readGlyph(h, h->glyphsByName.array[index], glyph_cb);
+  DURING_EX(h->err.env)
+
+		readGlyph(h, h->glyphsByName.array[index], glyph_cb);
+
+	HANDLER
+		return Exception.Code;
+  END_HANDLER
 
 	return ttrSuccess;
 	}

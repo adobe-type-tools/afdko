@@ -153,6 +153,7 @@ struct cfwCtx_ {
 	ctx;
 	struct                      /* Error handling */
 	{
+		_Exc_Buf env;
 		short code;
 	}
 	err;

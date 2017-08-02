@@ -16,25 +16,17 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "supportexcept.h"
 #include "supportcanthappen.h"
 
-PUBLIC _Exc_Buf *_Exc_Header;
-
-
-PUBLIC procedure os_raise (int  code, char * msg)
+PUBLIC procedure os_raise (_Exc_Buf *buf, int  code, char * msg)
 {
 #ifdef USE_CXX_EXCEPTION
+	(void)buf;
 	_Exc_Buf e(code, msg);
     throw e;
 #else
-  register _Exc_Buf *EBp;
-  _Exc_Buf **PPExcept = &_Exc_Header;
 
-  EBp = *PPExcept;
+  buf->Code = code;
+  buf->Message = msg;
 
-  DebugAssert((EBp != 0));
-  EBp->Code = code;
-  EBp->Message = msg;
-  *PPExcept = EBp->Prev;
-
-  longjmp(EBp->Environ, 1);
+  longjmp(buf->Environ, 1);
 #endif
 }

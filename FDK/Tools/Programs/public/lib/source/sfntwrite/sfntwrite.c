@@ -7,8 +7,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "sfntwrite.h"
 #include "dynarr.h"
+#include "supportexcept.h"
 
-#include <setjmp.h>
 #include <stdlib.h>
 
 #define ARRAY_LEN(a)	(sizeof(a)/sizeof((a)[0]))
@@ -63,11 +63,10 @@ struct sfwCtx_
 		ctlStreamCallbacks stm;
 		} cb;
 	dnaCtx dna;					/* Dynamic array context */
-	struct						/* Error handling */
-		{
-		jmp_buf env;
-		int code;
-		} err;
+	struct					/* Error handling */
+    {
+		_Exc_Buf env;
+    } err;
 	};
 
 /* ----------------------------- Error Handling ---------------------------- */
@@ -75,8 +74,7 @@ struct sfwCtx_
 /* Handle fatal error. */
 static void fatal(sfwCtx h, int err_code)
 	{
-	h->err.code = err_code;
-	longjmp(h->err.env, 1);
+  RAISE(&h->err.env, err_code, NULL);
 	}
 
 /* -------------------------- Safe dynarr Context -------------------------- */
@@ -128,24 +126,26 @@ sfwCtx sfwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 	h->cb.stm = *stm_cb;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		goto cleanup;
+  DURING_EX(h->err.env)
 
-	/* Initialize service library */
-	dna_init(h);
+    /* Initialize service library */
+    dna_init(h);
 
-	/* Initialize */
-	h->state = 0;
-	dnaINIT(h->dna, h->callbacks, 15, 10);
-	dnaINIT(h->dna, h->tables, 15, 10);
-	dnaINIT(h->dna, h->hdr.directory, 15, 10);
+    /* Initialize */
+    h->state = 0;
+    dnaINIT(h->dna, h->callbacks, 15, 10);
+    dnaINIT(h->dna, h->tables, 15, 10);
+    dnaINIT(h->dna, h->hdr.directory, 15, 10);
+
+	HANDLER
+
+		/* Initialization failed */
+    sfwFree(h);
+    h = NULL;
+
+	END_HANDLER
 
 	return h;
-
- cleanup:
-	/* Initialization failed */
-	sfwFree(h);
-	return NULL;
 	}
 
 /* Free library context. */
@@ -267,13 +267,17 @@ int sfwRegisterTable(sfwCtx h, sfwTableCallbacks *cb)
 			return sfwErrDupTables;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
+  DURING_EX(h->err.env)
 
-	/* Copy callbacks */
-	*dnaNEXT(h->callbacks) = *cb;
+    /* Copy callbacks */
+    *dnaNEXT(h->callbacks) = *cb;
 
-	h->state = 1;
+    h->state = 1;
+
+	HANDLER
+  	return Exception.Code;
+  END_HANDLER
+
 	return sfwSuccess;
 	}
 
@@ -515,90 +519,94 @@ int sfwWriteTables(sfwCtx h, void *stm, ctlTag sfnt_tag)
 		h->dst.stm = stm;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
-	
-	origin = dstTell(h);
+  DURING_EX(h->err.env)
 
-	/* Skip header. A simple "dstSeek(h, origin + dirSize);" should be all that
-	   is required here but Acrobat on OS X has mapped the seek callback to a
-	   function that is incapable of seeking beyond the end of a file.
-	   Therefore, we write the appropriate number of zero bytes instead. */
-	dstWrite(h, HDR_SIZE, filler);
-	for (i = 0; i < h->hdr.numTables; i++)
-		dstWrite(h, ENTRY_SIZE, filler);
+    origin = dstTell(h);
 
-	/* Write tables */
-	if (writeTables(h, origin))
-		return sfwErrAbort;
+    /* Skip header. A simple "dstSeek(h, origin + dirSize);" should be all that
+       is required here but Acrobat on OS X has mapped the seek callback to a
+       function that is incapable of seeking beyond the end of a file.
+       Therefore, we write the appropriate number of zero bytes instead. */
+    dstWrite(h, HDR_SIZE, filler);
+    for (i = 0; i < h->hdr.numTables; i++)
+      dstWrite(h, ENTRY_SIZE, filler);
 
-	/* Read tables and compute table checksums */
-	do_seek = 1;
-	offset = 0;
-	entry = h->hdr.directory.array;
-	for (i = 0; i < h->tables.cnt; i++)
-		{
-		Table *table = &h->tables.array[i];
-		if (!(table->flags & DONT_WRITE))
-			{
-			if (table->flags & USE_CHECKSUM)
-				do_seek = 1;
-			else
-				{
-				long j;
-				int nLongs = (entry->length + 3) / 4;
-				
-				if (entry->tag == CTL_TAG('h','e','a','d'))
-					offset = entry->offset + HEAD_ADJUST_OFFSET;
-				
-				if (do_seek)
-					{
-					/* Seek to table offset */
-					dstSeek(h, origin + entry->offset);
-					h->dst.left = 0;
-					do_seek = 0;
-					}
+    /* Write tables */
+    if (writeTables(h, origin))
+      return sfwErrAbort;
 
-				sum = 0;
-				for (j = 0; j < nLongs; j++)
-					sum += read4(h);
-				entry->checksum = sum;
-				}
-			entry++;
-			}
-		}
+    /* Read tables and compute table checksums */
+    do_seek = 1;
+    offset = 0;
+    entry = h->hdr.directory.array;
+    for (i = 0; i < h->tables.cnt; i++)
+      {
+      Table *table = &h->tables.array[i];
+      if (!(table->flags & DONT_WRITE))
+        {
+        if (table->flags & USE_CHECKSUM)
+          do_seek = 1;
+        else
+          {
+          long j;
+          int nLongs = (entry->length + 3) / 4;
+          
+          if (entry->tag == CTL_TAG('h','e','a','d'))
+            offset = entry->offset + HEAD_ADJUST_OFFSET;
+          
+          if (do_seek)
+            {
+            /* Seek to table offset */
+            dstSeek(h, origin + entry->offset);
+            h->dst.left = 0;
+            do_seek = 0;
+            }
 
-	/* Write header */
-	h->hdr.version = sfnt_tag;
-	dstSeek(h, origin);
-	writeHdr(h);
+          sum = 0;
+          for (j = 0; j < nLongs; j++)
+            sum += read4(h);
+          entry->checksum = sum;
+          }
+        entry++;
+        }
+      }
 
-	if (offset != 0)
-		{
-		/* head table present; read header and compute header checksum */
-		dstSeek(h, origin);
-		h->dst.left = 0;
-		sum = 0;
-		for (i = 0; i < dirSize; i += 4)
-			sum += read4(h);
+    /* Write header */
+    h->hdr.version = sfnt_tag;
+    dstSeek(h, origin);
+    writeHdr(h);
 
-		/* Add in table checksums */
-		for (i = 0; i < h->hdr.numTables; i++)
-			sum += h->hdr.directory.array[i].checksum;
+    if (offset != 0)
+      {
+      /* head table present; read header and compute header checksum */
+      dstSeek(h, origin);
+      h->dst.left = 0;
+      sum = 0;
+      for (i = 0; i < dirSize; i += 4)
+        sum += read4(h);
 
-		/* Write head table checksum adjustment */
-		dstSeek(h, origin + offset);
-		write4(h, 0xb1b0afba - sum);
-		}
+      /* Add in table checksums */
+      for (i = 0; i < h->hdr.numTables; i++)
+        sum += h->hdr.directory.array[i].checksum;
 
-	if (stm == NULL)
-		{
-		/* Close output stream */
-		if (h->cb.stm.close(&h->cb.stm, h->dst.stm))
-			fatal(h, sfwErrDstStream);
-		}
+      /* Write head table checksum adjustment */
+      dstSeek(h, origin + offset);
+      write4(h, 0xb1b0afba - sum);
+      }
 
-	h->state = 4;
+    if (stm == NULL)
+      {
+      /* Close output stream */
+      if (h->cb.stm.close(&h->cb.stm, h->dst.stm))
+        fatal(h, sfwErrDstStream);
+      }
+
+    h->state = 4;
+
+	HANDLER
+  	return Exception.Code;
+  END_HANDLER
+
 	return sfwSuccess;
 	}
 

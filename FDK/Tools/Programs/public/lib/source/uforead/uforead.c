@@ -28,7 +28,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "absfont.h"
 #include "dynarr.h"
 #include "ctutil.h"
-#include <setjmp.h>
+#include "supportexcept.h"
 #include "txops.h"
 #include "uforead.h"
 #include <stdlib.h>
@@ -247,7 +247,7 @@ struct ufoCtx_
 	dnaCtx dna;
 	struct
     {
-		jmp_buf env;
+		_Exc_Buf env;
 		int code;
     } err;
 };
@@ -321,7 +321,7 @@ static void CTL_CDECL fatal(ufoCtx h, int err_code, char *fmt, ...)
 		va_end(ap);
     }
 	h->err.code = err_code;
-	longjmp(h->err.env, 1);
+	RAISE(&h->err.env, err_code, NULL);
 }
 
 /* --------------------------- Memory Management --------------------------- */
@@ -427,25 +427,10 @@ ufoCtx ufoNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 	h = (ufoCtx)mem_cb->manage(mem_cb, NULL, sizeof(struct ufoCtx_));
 	if (h == NULL)
 		return NULL;
+
+    /* Safety initialization */
+    memset(h, 0, sizeof(*h));
     
-	/* Safety initialization */
-	h->flags = 0;
-	h->stm.dbg = NULL;
-	h->stm.src = NULL;
-	h->tmp.size = 0;
-	h->mark = NULL;
-	h->valueArray.size = 0;
-	h->chars.index.size = 0;
-	h->chars.byName.size = 0;
-	h->chars.widths.size = 0;
-	h->strings.index.cnt = 0;
-	h->data.glifRecs.size = 0;
-	h->data.glifOrder.size = 0;
-	h->data.opList.size = 0;
-	h->hints.hintMasks.size = 0;
-	h->hints.flexOpList.size = 0;
-	h->strings.buf.cnt = 0;
-	h->dna = NULL;
 	h->metrics.defaultWidth = 1000;
  	h->altLayerDir = "glyphs.com.adobe.type.processedGlyphs";
  	h->defaultLayerDir = "glyphs";
@@ -456,35 +441,35 @@ ufoCtx ufoNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 	h->cb.stm = *stm_cb;
     
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		goto cleanup;
+  DURING_EX(h->err.env)
+  
+    /* Initialize service library */
+    dna_init(h);
+      
+      dnaINIT(h->dna, h->valueArray, 256, 50);
+    dnaINIT(h->dna, h->tmp, 100, 250);
+    dnaINIT(h->dna, h->chars.index, 256, 1000);
+    dnaINIT(h->dna, h->chars.byName, 256, 1000);
+    dnaINIT(h->dna, h->chars.widths, 256, 1000);
+    dnaINIT(h->dna, h->data.glifRecs, 14, 100);
+    dnaINIT(h->dna, h->data.glifOrder, 14, 100);
+    dnaINIT(h->dna, h->data.opList, 50, 50);
+    dnaINIT(h->dna, h->hints.hintMasks, 10, 10);
+    dnaINIT(h->dna, h->hints.flexOpList, 10, 10);
+      h->hints.hintMasks.func = initHintMask;
+      
+    newStrings(h);
     
-	/* Initialize service library */
-	dna_init(h);
-    
-    dnaINIT(h->dna, h->valueArray, 256, 50);
-	dnaINIT(h->dna, h->tmp, 100, 250);
-	dnaINIT(h->dna, h->chars.index, 256, 1000);
-	dnaINIT(h->dna, h->chars.byName, 256, 1000);
-	dnaINIT(h->dna, h->chars.widths, 256, 1000);
-	dnaINIT(h->dna, h->data.glifRecs, 14, 100);
-	dnaINIT(h->dna, h->data.glifOrder, 14, 100);
-	dnaINIT(h->dna, h->data.opList, 50, 50);
-	dnaINIT(h->dna, h->hints.hintMasks, 10, 10);
-	dnaINIT(h->dna, h->hints.flexOpList, 10, 10);
-    h->hints.hintMasks.func = initHintMask;
-    
-	newStrings(h);
-	
-	/* Open debug stream */
-	h->stm.dbg = h->cb.stm.open(&h->cb.stm, UFO_DBG_STREAM_ID, 0);
+    /* Open debug stream */
+    h->stm.dbg = h->cb.stm.open(&h->cb.stm, UFO_DBG_STREAM_ID, 0);
+
+	HANDLER
+    /* Initialization failed */
+    ufoFree(h);
+    h = NULL;
+  END_HANDLER
 
 	return h;
-    
-cleanup:
-	/* Initialization failed */
-	ufoFree(h);
-	return NULL;
 }
 
 static void prepClientData(ufoCtx h)
@@ -2084,6 +2069,29 @@ static void fixUnsetDictValues(ufoCtx h)
     
 }
 
+static void skipToDictEnd(ufoCtx h)
+{
+    int state = 0; /* 0 == start, 1=in first dict, 2 in key, 3= in value, 4=in array 4 in comment, 5 in child dict.*/
+    int prevState = 0; /* used to save prev state while in comment. */
+    token* tk;
+
+    while (!(h->flags & SEEN_END))
+    {
+        tk = getToken(h, state);
+        
+        if (tokenEqualStr(tk, "<dict>"))
+        {
+            skipToDictEnd(h);
+        }
+        else if (tokenEqualStr(tk, "</dict>"))
+        {
+            break;
+        }
+        
+    } /* end while more tokens */
+
+}
+
 static int parseFontInfo(ufoCtx h)
 {
     int state = 0; /* 0 == start, 1=in first dict, 2 in key, 3= in value, 4=in array 4 in comment, 5 in child dict.*/
@@ -2130,21 +2138,15 @@ static int parseFontInfo(ufoCtx h)
         {
 			if (state > 0)
             {
-                message(h, "Warning: entering dict when already in dict, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
-                state = 5 + state;
+                skipToDictEnd(h);
             }
             else
                 state = 1;
         }
 		else if (tokenEqualStr(tk, "</dict>"))
         {
-            if (state > 4)
-                state = state - 5;
-            else
-            {
                 seenDict = 1;
                 break;
-            }
         }
 		else if (state > 4)
             continue;
@@ -2257,7 +2259,7 @@ static int parseUFO(ufoCtx h)
 {
 	/* This does a first pass through the font, loading the glyph name/ID and the path to each glyph file.
      Open the UFO fontinfo.plist, and extract the PS infop
-     Open the glyphs/contents.plist file, adn extract any glyphs that are not in the glyphs.ac/contents.plist file
+     Open the glyphs/contents.plist file, and extract any glyphs that are not in the glyphs.ac/contents.plist file
      */
     int dummy;
     int retVal = parseFontInfo(h);
@@ -4430,44 +4432,47 @@ int ufoBegFont(ufoCtx h, long flags, abfTopDict **top,  char *altLayerDir)
     char *dummy;
     
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
-    
-	/* Initialize */
-	abfInitTopDict(&h->top);
-	abfInitFontDict(&h->fdict);
-    
-	h->top.FDArray.cnt = 1;
-	h->top.FDArray.array = &h->fdict;
-    
-	/* init glyph data structures used */
-	h->valueArray.cnt = 0;
-	h->chars.index.cnt = 0;
-	h->data.glifRecs.cnt = 0;
-	h->data.opList.cnt = 0;
-	h->hints.hintMasks.cnt = 0;
-    
-	h->aggregatebounds.left = 0.0;
-	h->aggregatebounds.bottom = 0.0;
-	h->aggregatebounds.right = 0.0;
-	h->aggregatebounds.top = 0.0;
-    
-	h->metrics.cb = abfGlyphMetricsCallbacks;
-	h->metrics.cb.direct_ctx = &h->metrics.ctx;
-	h->metrics.ctx.flags = 0x0;
-    
-    if (altLayerDir != NULL)
-        h->altLayerDir = altLayerDir;
-    
-    dummy = *dnaGROW(h->valueArray,14);
-    
-	result = parseUFO(h);
-	if (result)
-		fatal(h,result, NULL);
-    
-	prepClientData(h);
-	*top = &h->top;
-    
+  DURING_EX(h->err.env)
+  
+    /* Initialize */
+    abfInitTopDict(&h->top);
+    abfInitFontDict(&h->fdict);
+      
+    h->top.FDArray.cnt = 1;
+    h->top.FDArray.array = &h->fdict;
+      
+    /* init glyph data structures used */
+    h->valueArray.cnt = 0;
+    h->chars.index.cnt = 0;
+    h->data.glifRecs.cnt = 0;
+    h->data.opList.cnt = 0;
+    h->hints.hintMasks.cnt = 0;
+      
+    h->aggregatebounds.left = 0.0;
+    h->aggregatebounds.bottom = 0.0;
+    h->aggregatebounds.right = 0.0;
+    h->aggregatebounds.top = 0.0;
+      
+    h->metrics.cb = abfGlyphMetricsCallbacks;
+    h->metrics.cb.direct_ctx = &h->metrics.ctx;
+    h->metrics.ctx.flags = 0x0;
+      
+      if (altLayerDir != NULL)
+          h->altLayerDir = altLayerDir;
+      
+      dummy = *dnaGROW(h->valueArray,14);
+      
+    result = parseUFO(h);
+    if (result)
+      fatal(h,result, NULL);
+      
+    prepClientData(h);
+    *top = &h->top;
+
+	HANDLER
+  	result = Exception.Code;
+  END_HANDLER
+  
 	return result;
 }
 
@@ -4485,16 +4490,19 @@ int ufoIterateGlyphs(ufoCtx h, abfGlyphCallbacks *glyph_cb)
 	int res;
     
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
-    
-	for (i = 0; i < h->chars.index.cnt; i++)
-    {
-		res = readGlyph(h, i, glyph_cb);
-		if (res != ufoSuccess)
-			return res;
-    }
-    
+  DURING_EX(h->err.env)
+  
+    for (i = 0; i < h->chars.index.cnt; i++)
+      {
+      res = readGlyph(h, i, glyph_cb);
+      if (res != ufoSuccess)
+        return res;
+      }
+  
+  HANDLER
+  	return Exception.Code;
+  END_HANDLER
+  
 	return ufoSuccess;
 }
 
@@ -4506,11 +4514,14 @@ int ufoGetGlyphByTag(ufoCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb)
 		return ufoErrNoGlyph;
     
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
-	
-	res = readGlyph(h, tag, glyph_cb);
-    
+  DURING_EX(h->err.env)
+  
+		res = readGlyph(h, tag, glyph_cb);
+  
+  HANDLER
+  	res = Exception.Code;
+  END_HANDLER
+  
 	return res;
 }
 
@@ -4534,11 +4545,14 @@ int ufoGetGlyphByName(ufoCtx h, char *gname, abfGlyphCallbacks *glyph_cb)
 		return ufoErrNoGlyph;
 	
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
-    
+  DURING_EX(h->err.env)
+  
 	result = readGlyph(h,  (unsigned short)h->chars.byName.array[index], glyph_cb);
-    
+
+	HANDLER
+  	result = Exception.Code;
+  END_HANDLER
+
 	return result;
 }	
 

@@ -8,7 +8,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "absfont.h"
 #include "dynarr.h"
 #include "ctutil.h"
-#include <setjmp.h>
+#include "supportexcept.h"
 #include "svread.h"
 #include <stdlib.h>
 #include <stdarg.h>
@@ -134,11 +134,10 @@ struct svrCtx_
 		ctlStreamCallbacks stm;
 		} cb;
 	dnaCtx dna;
-	struct
-		{
-		jmp_buf env;
-		int code;
-		} err;
+	struct					/* Error handling */
+    {
+		_Exc_Buf env;
+    } err;
 };
 
 typedef abfGlyphInfo Char;		/* Character record */
@@ -201,8 +200,7 @@ static void CTL_CDECL fatal(svrCtx h, int err_code, char *fmt, ...)
 		vmessage(h, fmt, ap);
 		va_end(ap);
 		}
-	h->err.code = err_code;
-	longjmp(h->err.env, 1);
+	RAISE(&h->err.env, err_code, NULL);
 	}
 
 /* --------------------------- Memory Management --------------------------- */
@@ -299,28 +297,30 @@ svrCtx svrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 	h->cb.stm = *stm_cb;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		goto cleanup;
+  DURING_EX(h->err.env)
 
-	/* Initialize service library */
-	dna_init(h);
+    /* Initialize service library */
+    dna_init(h);
 
-	dnaINIT(h->dna, h->tmp, 100, 250);
-	dnaINIT(h->dna, h->chars.index, 256, 1000);
-	dnaINIT(h->dna, h->chars.byName, 256, 1000);
-	dnaINIT(h->dna, h->chars.widths, 256, 1000);
-	dnaINIT(h->dna, h->data.gnames, 14, 100);
-	newStrings(h);
-	
-	/* Open debug stream */
-	h->stm.dbg = h->cb.stm.open(&h->cb.stm, SVR_DBG_STREAM_ID, 0);
+    dnaINIT(h->dna, h->tmp, 100, 250);
+    dnaINIT(h->dna, h->chars.index, 256, 1000);
+    dnaINIT(h->dna, h->chars.byName, 256, 1000);
+    dnaINIT(h->dna, h->chars.widths, 256, 1000);
+    dnaINIT(h->dna, h->data.gnames, 14, 100);
+    newStrings(h);
+    
+    /* Open debug stream */
+    h->stm.dbg = h->cb.stm.open(&h->cb.stm, SVR_DBG_STREAM_ID, 0);
 
-	return h;
+	HANDLER
 
- cleanup:
-	/* Initialization failed */
-	svrFree(h);
-	return NULL;
+    /* Initialization failed */
+		svrFree(h);
+		h = NULL;
+
+	END_HANDLER
+
+  return h;
 	}
 
 static void prepClientData(svrCtx h)
@@ -1526,35 +1526,38 @@ int svrBegFont(svrCtx h, long flags, abfTopDict **top)
 	int result;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
+  DURING_EX(h->err.env)
 
-	/* Initialize */
-	abfInitTopDict(&h->top);
-	abfInitFontDict(&h->fdict);
+    /* Initialize */
+    abfInitTopDict(&h->top);
+    abfInitFontDict(&h->fdict);
 
-	h->top.FDArray.cnt = 1;
-	h->top.FDArray.array = &h->fdict;
+    h->top.FDArray.cnt = 1;
+    h->top.FDArray.array = &h->fdict;
 
-	/* init glyph data structures used */
-	h->chars.index.cnt = 0;
-	h->data.gnames.cnt = 0;	
+    /* init glyph data structures used */
+    h->chars.index.cnt = 0;
+    h->data.gnames.cnt = 0;	
 
-	h->aggregatebounds.left = 0.0;
-	h->aggregatebounds.bottom = 0.0;
-	h->aggregatebounds.right = 0.0;
-	h->aggregatebounds.top = 0.0;
+    h->aggregatebounds.left = 0.0;
+    h->aggregatebounds.bottom = 0.0;
+    h->aggregatebounds.right = 0.0;
+    h->aggregatebounds.top = 0.0;
 
-	h->metrics.cb = abfGlyphMetricsCallbacks;
-	h->metrics.cb.direct_ctx = &h->metrics.ctx;
-	h->metrics.ctx.flags = 0x0;
+    h->metrics.cb = abfGlyphMetricsCallbacks;
+    h->metrics.cb.direct_ctx = &h->metrics.ctx;
+    h->metrics.ctx.flags = 0x0;
 
-	result = parseSVG(h);
-	if (result)
-		fatal(h,result, NULL);
+    result = parseSVG(h);
+    if (result)
+      fatal(h,result, NULL);
 
-	prepClientData(h);
-	*top = &h->top;
+    prepClientData(h);
+    *top = &h->top;
+
+	HANDLER
+  	return Exception.Code;
+  END_HANDLER
 
 	return result;
 	}
@@ -1573,15 +1576,18 @@ int svrIterateGlyphs(svrCtx h, abfGlyphCallbacks *glyph_cb)
 	int res;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
+  DURING_EX(h->err.env)
 
-	for (i = 0; i < h->chars.index.cnt; i++)
-		{
-		res = readGlyph(h, i, glyph_cb);
-		if (res != svrSuccess)
-			return res;
-		}
+    for (i = 0; i < h->chars.index.cnt; i++)
+      {
+      res = readGlyph(h, i, glyph_cb);
+      if (res != svrSuccess)
+        return res;
+      }
+
+	HANDLER
+  	return Exception.Code;
+  END_HANDLER
 
 	return svrSuccess;
 	}
@@ -1594,10 +1600,13 @@ int svrGetGlyphByTag(svrCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb)
 		return svrErrNoGlyph;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
-	
-	res = readGlyph(h, tag, glyph_cb);
+  DURING_EX(h->err.env)
+
+    res = readGlyph(h, tag, glyph_cb);
+
+	HANDLER
+  	res = Exception.Code;
+  END_HANDLER
 
 	return res;
 	}	
@@ -1620,10 +1629,13 @@ int svrGetGlyphByName(svrCtx h, char *gname, abfGlyphCallbacks *glyph_cb)
 		return svrErrNoGlyph;
 	
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
+  DURING_EX(h->err.env)
 
-	result = readGlyph(h,  (unsigned short)h->chars.byName.array[index], glyph_cb);
+    result = readGlyph(h,  (unsigned short)h->chars.byName.array[index], glyph_cb);
+
+	HANDLER
+  	result = Exception.Code;
+  END_HANDLER
 
 	return result;
 	}	

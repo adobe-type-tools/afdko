@@ -1904,7 +1904,7 @@ int cfwEndFont(cfwCtx g, abfTopDict *top) {
 	}
 
 	/* Set error handler */
-    DURING
+    DURING_EX(g->err.env)
 
         /* If there are more warnings than get shown, write out how many there were. */
         printFinalWarn(g);
@@ -1916,24 +1916,24 @@ int cfwEndFont(cfwCtx g, abfTopDict *top) {
             if (top->cid.Registry.ptr == ABF_UNSET_PTR ||
                 top->cid.Ordering.ptr == ABF_UNSET_PTR ||
                 top->cid.Supplement == ABF_UNSET_INT) {
-                E_RETURN(cfwErrBadDict);
+                return cfwErrBadDict;
             }
 
             if (h->flags & SEEN_NAME_KEYED_GLYPH) {
-                E_RETURN(cfwErrGlyphType);
+                return cfwErrGlyphType;
             }
             if (top->FDArray.cnt < 1 || top->FDArray.cnt > 256) {
-                E_RETURN(cfwErrBadFDArray);
+                return cfwErrBadFDArray;
             }
 
             h->_new->flags |= FONT_CID;
         }
         else {
             if (h->flags & SEEN_CID_KEYED_GLYPH) {
-                E_RETURN(cfwErrGlyphType);
+                return cfwErrGlyphType;
             }
             if (top->FDArray.cnt != 1) {
-                E_RETURN(cfwErrBadFDArray);
+                return cfwErrBadFDArray;
             }
 
             if (top->sup.flags & ABF_SYN_FONT) {
@@ -2042,7 +2042,7 @@ static void cfwCallSubrizer(cfwCtx g) {
 	/* Repackage font data in formats subroutinizer expects */
 	memset(subrFonts, 0, sizeof(subr_Font) * nFonts);
 
-	DURING
+	DURING_EX(g->err.env)
 
 	for (iFont = 0; iFont < nFonts; iFont++) {
 		cffFont = &h->FontSet.array[iFont];
@@ -2148,7 +2148,7 @@ int cfwEndSet(cfwCtx g) {
 		return cfwSuccess;  /* Nothing to do */
 	}
 	/* Set error handler */
-    DURING
+    DURING_EX(g->err.env)
 
         /* Subroutinize charstrings */
         if (g->flags & CFW_SUBRIZE) {
@@ -2253,7 +2253,7 @@ cfwCtx cfwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 	g->stm.dbg = NULL;
 
 	/* Set error handler */
-    DURING
+    DURING_EX(g->err.env)
 
         /* Initialize service libraries */
         dnaSafeInit(g);
@@ -2340,7 +2340,7 @@ void CTL_CDECL cfwFatal(cfwCtx g, int err_code, char *fmt, ...) {
 		va_end(ap);
 	}
 	g->err.code = (short)err_code;
-    RAISE(err_code, NULL);
+  RAISE(&g->err.env, err_code, NULL);
 }
 
 /* --------------------------- Memory Management --------------------------- */

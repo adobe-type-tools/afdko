@@ -214,6 +214,10 @@ struct cfrCtx_					/* Context */
 		dnaCtx dna;				/* dynarr */
 		sfrCtx sfr;				/* sfntread */
     } ctx;
+	struct					/* Error handling */
+    {
+		_Exc_Buf env;
+    } err;
 };
 
 
@@ -247,7 +251,7 @@ static void CTL_CDECL message(cfrCtx h, char *fmt, ...)
 static void fatal(cfrCtx h, int err_code)
 {
 	message(h, "%s", cfrErrStr(err_code));
-	RAISE(err_code, NULL);
+	RAISE(&h->err.env, err_code, NULL);
 }
 
 /* --------------------------- Memory Management --------------------------- */
@@ -329,7 +333,7 @@ cfrCtx cfrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 	h->cb.stm = *stm_cb;
 
 	/* Set error handler */
-    DURING
+    DURING_EX(h->err.env)
     
         /* Initialize service libraries */
         dna_init(h);
@@ -2663,23 +2667,71 @@ static void makeupCFF2Info(cfrCtx h)
 
     dnaINIT(h->ctx.dna, strPtrs, 10, 1);
 
-	DURING
+	DURING_EX(h->err.env)
 
 		/* read font version and fontBBox from head table */
 		table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('h','e','a','d'));
 		if ((table != NULL) && !invalidStreamOffset(h, table->offset + 54 - 1))
 		{
 			unsigned long   version;
+            unsigned short	unitsPerEm;
+
 			srcSeek(h, table->offset + 4);
 			version = read4(h);
 			SPRINTF_S(buf, bufLen, "%ld.%ld", version>>16, (version>>12)&0xf);    /* Apple style "fixed point" version number */
 			addString(h, &strPtrs, &top->version, buf);
+
+			srcSeek(h, table->offset + 18);
+            unitsPerEm = read2(h);
+            if (!unitsPerEm) {
+                message(h, "head: zero unitsPerEm (1000 assumed)");
+                unitsPerEm = 1000;
+            }
 
 			srcSeek(h, table->offset + 36);
 			top->FontBBox[0] = (float)sread2(h);
 			top->FontBBox[1] = (float)sread2(h);
 			top->FontBBox[2] = (float)sread2(h);
 			top->FontBBox[3] = (float)sread2(h);
+
+			/* FontMatrix has been deprecated in CFF2 font dicts
+             * if unitsPerEm in the head table is non-standard and FontMatrix is unspecified,
+             * synthesize one from unitsPerEm */
+            if (unitsPerEm != 1000) {
+                float	invUPM = 1.0f / (float)unitsPerEm;
+            	long	iFD;
+
+				for (iFD = 0; iFD < h->fdicts.cnt; iFD++) {
+                	abfFontDict *fdict = &h->fdicts.array[iFD];
+                   
+                    if (fdict->FontMatrix.cnt == ABF_EMPTY_ARRAY) {
+                    	fdict->FontMatrix.cnt = 6;
+
+                    	fdict->FontMatrix.array[0] = invUPM;
+                    	fdict->FontMatrix.array[1] = 0.0f;
+                    	fdict->FontMatrix.array[2] = 0.0f;
+                    	fdict->FontMatrix.array[3] = invUPM;
+                    	fdict->FontMatrix.array[4] = 0.0f;
+                    	fdict->FontMatrix.array[5] = 0.0f;
+                    
+                        h->top.sup.UnitsPerEm = unitsPerEm;
+                    
+                        if (h->flags & CFR_USE_MATRIX)
+                        {
+                            cfrFDInfo *fd = &h->FDArray.array[iFD];
+                        
+                            /* Prepare charstring transformation matrix */
+                        	fd->aux.matrix[0] = 1.0f;
+                        	fd->aux.matrix[1] = 0.0f;
+                        	fd->aux.matrix[2] = 0.0f;
+                        	fd->aux.matrix[3] = 1.0f;
+                        	fd->aux.matrix[4] = 0.0f;
+                        	fd->aux.matrix[5] = 0.0f;
+                            h->fd->aux.flags |= T2C_USE_MATRIX;
+                        }
+                    }
+                }
+            }
 		}
 
 		/* read isFixedPitch, ItalicAngle, UnderlinePosition, UnderlineThickness from post table */
@@ -2774,7 +2826,7 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
 	short gi_flags;	/* abfGlyphInfo flags */
     
 	/* Set error handler */
-    DURING
+    DURING_EX(h->err.env)
     
         /* Initialize top DICT */
         abfInitTopDict(&h->top);
@@ -3161,7 +3213,7 @@ int cfrIterateGlyphs(cfrCtx h, abfGlyphCallbacks *glyph_cb)
 	long i;
     
 	/* Set error handler */
-    DURING
+    DURING_EX(h->err.env)
 	
         for (i = 0; i < h->glyphs.cnt; i++)
             readGlyph(h, (unsigned short)i, glyph_cb);
@@ -3181,7 +3233,7 @@ int cfrGetGlyphByTag(cfrCtx h,
 		return cfrErrNoGlyph;
     
 	/* Set error handler */
-    DURING
+    DURING_EX(h->err.env)
 	
         readGlyph(h, tag, glyph_cb);
 
@@ -3232,7 +3284,7 @@ int cfrGetGlyphByName(cfrCtx h, char *gname, abfGlyphCallbacks *glyph_cb)
 		return cfrErrNoGlyph;
     
 	/* Set error handler */
-	DURING
+	DURING_EX(h->err.env)
 	
         readGlyph(h, (unsigned short)h->glyphsByName.array[index], glyph_cb);
 
@@ -3311,7 +3363,7 @@ int cfrGetGlyphByCID(cfrCtx h, unsigned short cid, abfGlyphCallbacks *glyph_cb)
     }
     
 	/* Set error handler */
-	DURING
+	DURING_EX(h->err.env)
 	
         readGlyph(h, gid, glyph_cb);
     
@@ -3331,7 +3383,7 @@ int cfrGetGlyphByStdEnc(cfrCtx h, int stdcode, abfGlyphCallbacks *glyph_cb)
 		return cfrErrNoGlyph;
     
 	/* Set error handler */
-	DURING
+	DURING_EX(h->err.env)
 	
         readGlyph(h, gid, glyph_cb);
     

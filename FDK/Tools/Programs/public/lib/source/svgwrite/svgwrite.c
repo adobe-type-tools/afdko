@@ -6,8 +6,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "dictops.h"
 #include "txops.h"
 #include "ctutil.h"
+#include "supportexcept.h"
 
-#include <setjmp.h>
 #include <stdarg.h>
 #include <math.h>
 #include <stdlib.h>
@@ -64,7 +64,7 @@ struct svwCtx_
 	dnaCtx dna;				/* dynarr context */
 	struct					/* Error handling */
 		{
-		jmp_buf env;
+		_Exc_Buf env;
 		int code;
 		} err;
 	};
@@ -81,7 +81,7 @@ static void fatal(svwCtx h, int err_code)
 		(void)h->cb.stm.write(&h->cb.stm, h->stm.dbg, strlen(text), text);
 		}
 	h->err.code = err_code;
-	longjmp(h->err.env, 1);
+	RAISE(&h->err.env, err_code, NULL);
 	}
 
 /* --------------------------- Destination Stream -------------------------- */
@@ -424,113 +424,116 @@ int svwEndFont(svwCtx h, abfTopDict *top)
 	h->top = top;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-	{
+  DURING_EX(h->err.env)
+
+    flushBuf(h);  /* Flush tmp stream */
+    h->state = 1;  /* Indicates writing to dst stream */
+
+    /* Open dst stream */
+    h->stm.dst = h->cb.stm.open(&h->cb.stm, SVW_DST_STREAM_ID, 0);
+    if (h->stm.dst == NULL)
+      fatal(h, svwErrDstStream);
+
+    if(h->arg.flags & SVW_STANDALONE)
+    {
+      char tmpBuf[64];
+      writeLine(h, "<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+      writeStr(h, "<!-- Generator: Adobe svgwrite library ");
+      sprintf(tmpBuf, "%1d.%1d.%1d", CTL_SPLIT_VERSION(SVW_VERSION));
+      writeStr(h, tmpBuf);
+      writeLine(h, " -->");
+      writeLine(h, "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.0//EN\" \"http://www.w3.org/TR/SVG/DTD/svg10.dtd\">");
+      writeLine(h, "<svg>");
+    }
+
+    writeStr(h, "<font horiz-adv-x=\"");
+    writeInt(h, h->top->sup.UnitsPerEm);
+    writeLine(h, "\">");
+
+    /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+  This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+    if(h->top->Notice.ptr != ABF_UNSET_PTR)
+      {
+      writeStr(h, "<!-- ");
+      writeXMLStr(h, h->top->Notice.ptr);
+      writeLine(h, " -->");
+      }
+    else if(h->top->Copyright.ptr != ABF_UNSET_PTR)
+      {
+      writeStr(h, "<!-- ");
+      writeXMLStr(h, h->top->Copyright.ptr);
+      writeLine(h, " -->");
+      }
+
+    /* Add derivative copyright notice if necessary: */
+    if ((h->top->Notice.ptr == ABF_UNSET_PTR ||
+       strstr(h->top->Notice.ptr, "Adobe") == NULL) &&
+      (h->top->Copyright.ptr == ABF_UNSET_PTR ||
+       strstr(h->top->Copyright.ptr, "Adobe") == NULL))
+      {
+      /* Non-Adobe font; add Adobe copyright to derivative work */
+      time_t now = time(NULL);
+      writeFmt(h, "<!-- Copyright: Copyright %d Adobe System Incorporated. "
+           "All rights reserved. -->%s", 
+           localtime(&now)->tm_year + 1900, h->arg.newline);
+      }
+
+    writeStr(h, "<font-face font-family=\"");
+    if (h->top->sup.flags & ABF_CID_FONT)
+      writeXMLStr(h, h->top->cid.CIDFontName.ptr);
+    else
+      writeXMLStr(h, h->top->FDArray.array[0].FontName.ptr);
+    writeStr(h, "\"");
+
+    writeStr(h, " units-per-em=\"");
+    writeInt(h, h->top->sup.UnitsPerEm);
+    writeStr(h, "\"");
+
+    writeStr(h, " underline-position=\"");
+    writeReal(h, h->top->UnderlinePosition);
+    writeStr(h, "\"");
+
+    writeStr(h, " underline-thickness=\"");
+    writeReal(h, h->top->UnderlineThickness);
+    writeLine(h, "\"/>");
+
+    /* Transfer tmp stream to dst stream */
+    if ((cntTmp = h->cb.stm.tell(&h->cb.stm, h->stm.tmp)) == (unsigned long)-1)
+      fatal(h, svwErrTmpStream);
+    if (h->cb.stm.seek(&h->cb.stm, h->stm.tmp, 0) != 0)
+      fatal(h, svwErrTmpStream);
+    while((cntRead = h->cb.stm.read(&h->cb.stm, h->stm.tmp, &pBuf)) != 0)
+      {
+      cntWrite = (cntTmp<cntRead)?cntTmp:cntRead;
+      writeBuf(h, cntWrite, pBuf);
+      cntTmp -=cntRead;
+      }
+
+    writeLine(h, "</font>");
+
+    if(h->arg.flags & SVW_STANDALONE)
+      writeLine(h, "</svg>");
+
+    flushBuf(h);
+
+    /* Close tmp stream */
+    if (h->cb.stm.close(&h->cb.stm, h->stm.tmp) == -1)
+      fatal(h, svwErrTmpStream);
+    h->stm.tmp = NULL;
+
+    /* Close dst stream */
+    if (h->cb.stm.close(&h->cb.stm, h->stm.dst) == -1)
+      return svwErrDstStream;
+
+	HANDLER
+
 		if (h->stm.tmp)
 			h->cb.stm.close(&h->cb.stm, h->stm.tmp);
 		if (h->stm.dst)
 			h->cb.stm.close(&h->cb.stm, h->stm.dst);
 		return h->err.code;
-	}
 
-	flushBuf(h);  /* Flush tmp stream */
-	h->state = 1;  /* Indicates writing to dst stream */
-
-	/* Open dst stream */
-	h->stm.dst = h->cb.stm.open(&h->cb.stm, SVW_DST_STREAM_ID, 0);
-	if (h->stm.dst == NULL)
-		fatal(h, svwErrDstStream);
-
-	if(h->arg.flags & SVW_STANDALONE)
-	{
-		char tmpBuf[64];
-		writeLine(h, "<?xml version=\"1.0\" encoding=\"utf-8\"?>");
-		writeStr(h, "<!-- Generator: Adobe svgwrite library ");
-		sprintf(tmpBuf, "%1d.%1d.%1d", CTL_SPLIT_VERSION(SVW_VERSION));
-		writeStr(h, tmpBuf);
-		writeLine(h, " -->");
-		writeLine(h, "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.0//EN\" \"http://www.w3.org/TR/SVG/DTD/svg10.dtd\">");
-		writeLine(h, "<svg>");
-	}
-
-	writeStr(h, "<font horiz-adv-x=\"");
-	writeInt(h, h->top->sup.UnitsPerEm);
-	writeLine(h, "\">");
-
-	/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
-	if(h->top->Notice.ptr != ABF_UNSET_PTR)
-		{
-		writeStr(h, "<!-- ");
-		writeXMLStr(h, h->top->Notice.ptr);
-		writeLine(h, " -->");
-		}
-	else if(h->top->Copyright.ptr != ABF_UNSET_PTR)
-		{
-		writeStr(h, "<!-- ");
-		writeXMLStr(h, h->top->Copyright.ptr);
-		writeLine(h, " -->");
-		}
-
-	/* Add derivative copyright notice if necessary: */
-	if ((h->top->Notice.ptr == ABF_UNSET_PTR ||
-		 strstr(h->top->Notice.ptr, "Adobe") == NULL) &&
-		(h->top->Copyright.ptr == ABF_UNSET_PTR ||
-		 strstr(h->top->Copyright.ptr, "Adobe") == NULL))
-		{
-		/* Non-Adobe font; add Adobe copyright to derivative work */
-		time_t now = time(NULL);
-		writeFmt(h, "<!-- Copyright: Copyright %d Adobe System Incorporated. "
-				 "All rights reserved. -->%s", 
-				 localtime(&now)->tm_year + 1900, h->arg.newline);
-		}
-
-	writeStr(h, "<font-face font-family=\"");
-	if (h->top->sup.flags & ABF_CID_FONT)
-		writeXMLStr(h, h->top->cid.CIDFontName.ptr);
-	else
-		writeXMLStr(h, h->top->FDArray.array[0].FontName.ptr);
-	writeStr(h, "\"");
-
-	writeStr(h, " units-per-em=\"");
-	writeInt(h, h->top->sup.UnitsPerEm);
-	writeStr(h, "\"");
-
-	writeStr(h, " underline-position=\"");
-	writeReal(h, h->top->UnderlinePosition);
-	writeStr(h, "\"");
-
-	writeStr(h, " underline-thickness=\"");
-	writeReal(h, h->top->UnderlineThickness);
-	writeLine(h, "\"/>");
-
-	/* Transfer tmp stream to dst stream */
-	if ((cntTmp = h->cb.stm.tell(&h->cb.stm, h->stm.tmp)) == (unsigned long)-1)
-		fatal(h, svwErrTmpStream);
-	if (h->cb.stm.seek(&h->cb.stm, h->stm.tmp, 0) != 0)
-		fatal(h, svwErrTmpStream);
-	while((cntRead = h->cb.stm.read(&h->cb.stm, h->stm.tmp, &pBuf)) != 0)
-		{
-		cntWrite = (cntTmp<cntRead)?cntTmp:cntRead;
-		writeBuf(h, cntWrite, pBuf);
-		cntTmp -=cntRead;
-		}
-
-	writeLine(h, "</font>");
-
-	if(h->arg.flags & SVW_STANDALONE)
-		writeLine(h, "</svg>");
-
-	flushBuf(h);
-
-	/* Close tmp stream */
-	if (h->cb.stm.close(&h->cb.stm, h->stm.tmp) == -1)
-		fatal(h, svwErrTmpStream);
-	h->stm.tmp = NULL;
-
-	/* Close dst stream */
-	if (h->cb.stm.close(&h->cb.stm, h->stm.dst) == -1)
-		return svwErrDstStream;
+	END_HANDLER
 
 	return svwSuccess;
 	}

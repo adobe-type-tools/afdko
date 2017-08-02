@@ -147,7 +147,7 @@ void cfwCstrNew(cfwCtx g) {
 
 	memset(h, 0, sizeof(*h));
 
-	DURING
+	DURING_EX(g->err.env)
 		/* Link contexts */
 		h->g = g;
 		g->ctx.cstr = h;

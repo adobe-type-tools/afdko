@@ -6,8 +6,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "dictops.h"
 #include "txops.h"
 #include "ctutil.h"
+#include "supportexcept.h"
 
-#include <setjmp.h>
 #include <stdarg.h>
 #include <math.h>
 #include <stdlib.h>
@@ -150,7 +150,7 @@ struct t1wCtx_
 		} cube_gsubrs;
 	struct					/* Error handling */
 		{
-		jmp_buf env;
+		_Exc_Buf env;
 		int code;
 		} err;
 	};
@@ -166,8 +166,8 @@ static void fatal(t1wCtx h, int err_code)
 		char *text = t1wErrStr(err_code);
 		(void)h->cb.stm.write(&h->cb.stm, h->stm.dbg, strlen(text), text);
 		}
-	h->err.code = err_code;
-	longjmp(h->err.env, 1);
+  h->err.code = err_code;
+	RAISE(&h->err.env, err_code, NULL);
 	}
 
 /* --------------------------- Destination Stream -------------------------- */
@@ -2344,11 +2344,16 @@ int t1wBegFont(t1wCtx h, long flags, int lenIV, long maxglyphs)
 	h->tmp.offset = 0;
 
 	/* Set error handler */
-	if (setjmp(h->err.env))
-		return h->err.code;
+  DURING_EX(h->err.env)
 
-	/* Save standard subrs */
-	saveStdSubrs(h);
+    /* Save standard subrs */
+    saveStdSubrs(h);
+
+  HANDLER
+
+  	return Exception.Code;
+
+  END_HANDLER
 
 	return t1wSuccess;
 	}
@@ -2369,38 +2374,41 @@ int t1wEndFont(t1wCtx h, abfTopDict *top)
 		return t1wErrBadCall;
 
 	/* Set error handler */
-    if (setjmp(h->err.env))
-	{
+  DURING_EX(h->err.env)
+
+    /* Open dst stream */
+    h->stm.dst = h->cb.stm.open(&h->cb.stm, T1W_DST_STREAM_ID, 0);
+    if (h->stm.dst == NULL)
+      fatal(h, t1wErrDstStream);
+
+    destFileOpened = 1;
+      
+    /* Seek to start of tmp stream and fill buffer */
+    if (h->cb.stm.seek(&h->cb.stm, h->stm.tmp, 0))
+      fatal(h, t1wErrTmpStream);
+    readTmp(h, 0);
+
+    /* Write out font */
+    h->top = top;
+    h->dst.cnt = 0;
+    if (top->sup.flags & ABF_CID_FONT)
+      writeCIDKeyedFont(h);
+    else
+      writeNameKeyedFont(h);
+
+    flushBuf(h);
+
+    /* Close dst stream */
+    if (h->cb.stm.close(&h->cb.stm, h->stm.dst) == -1)
+      return t1wErrDstStream;
+
+	HANDLER
+
 		if (destFileOpened)
 			h->cb.stm.close(&h->cb.stm, h->stm.dst);
-		return h->err.code;
-	}
+		return Exception.Code;
 
-	/* Open dst stream */
-	h->stm.dst = h->cb.stm.open(&h->cb.stm, T1W_DST_STREAM_ID, 0);
-	if (h->stm.dst == NULL)
-		fatal(h, t1wErrDstStream);
-
-	destFileOpened = 1;
-		
-	/* Seek to start of tmp stream and fill buffer */
-	if (h->cb.stm.seek(&h->cb.stm, h->stm.tmp, 0))
-		fatal(h, t1wErrTmpStream);
-	readTmp(h, 0);
-
-	/* Write out font */
-	h->top = top;
-	h->dst.cnt = 0;
-	if (top->sup.flags & ABF_CID_FONT)
-		writeCIDKeyedFont(h);
-	else
-		writeNameKeyedFont(h);
-
-	flushBuf(h);
-
-	/* Close dst stream */
-	if (h->cb.stm.close(&h->cb.stm, h->stm.dst) == -1)
-		return t1wErrDstStream;	
+  END_HANDLER
 
 	return t1wSuccess;
 	}

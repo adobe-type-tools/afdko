@@ -191,6 +191,7 @@ struct abfCtx_				/* Context */
 	dnaCtx safe;			/* Safe dna context */
 	struct					/* Error handling */
 		{
+		_Exc_Buf env;
 		int code;
 		} err;
 	};
@@ -204,7 +205,7 @@ static void splitBez(Bezier *a, Bezier *b, float t);
 static void fatal(abfCtx h, int err_code)
 	{
 	h->err.code = err_code;
-    RAISE(h->err.code, NULL);
+    RAISE(&h->err.env, h->err.code, NULL);
 	}
 
 /* -------------------------- Fail dynarr Context -------------------------- */
@@ -256,7 +257,7 @@ abfCtx abfNew(ctlMemoryCallbacks *mem_cb, CTL_CHECK_ARGS_DCL)
 	memset(h, 0, sizeof(*h));
 	h->err.code = abfErrNoMemory;
 
-	DURING
+	DURING_EX(h->err.env)
 		/* Copy callbacks */
 		h->mem = *mem_cb;
 
@@ -344,7 +345,7 @@ int abfEndFont(abfCtx h, long flags, abfGlyphCallbacks *glyph_cb)
 		return abfErrNoMemory;
 
 	/* Set error handler */
-    DURING
+    DURING_EX(h->err.env)
 
         if (flags & ABF_PATH_REMOVE_OVERLAP)
             for (i = 0; i < h->glyphs.cnt; i++)
@@ -368,9 +369,9 @@ int abfEndFont(abfCtx h, long flags, abfGlyphCallbacks *glyph_cb)
             case ABF_SKIP_RET:
                 continue;
             case ABF_QUIT_RET:
-                E_RETURN(abfErrCstrQuit);
+                return abfErrCstrQuit;
             case ABF_FAIL_RET:
-                E_RETURN(abfErrCstrFail);
+                return abfErrCstrFail;
                 }
 
             /* Callback width */
