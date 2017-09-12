@@ -964,6 +964,7 @@ static void postRead(ttrCtx h)
 	long i;
 	long length;
 	long numGlyphs;
+    unsigned long maxID=0;
 	sfrTable *table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('p','o','s','t'));
 	if (table == NULL)
 		return;	/* Optional table missing */
@@ -1012,7 +1013,6 @@ static void postRead(ttrCtx h)
 
 	/* Read name index */
 	dnaSET_CNT(h->post.fmt2.glyphNameIndex, numGlyphs);
-	h->post.fmt2.strings.cnt = 0;
 	for (i = 0; i < numGlyphs; i++)
 		{
 		unsigned short nid = read2(h);
@@ -1023,9 +1023,12 @@ static void postRead(ttrCtx h)
 			goto parseError;
 			}
 		else if (nid > 257)
-			h->post.fmt2.strings.cnt++;
+            if (nid > maxID)
+                maxID = nid;
 		}
-	
+	if (maxID > 258)
+    {
+    h->post.fmt2.strings.cnt = 1+ maxID-258;
 	/* Read string data */
 	length = table->length - (srcTell(h) -  table->offset);
 	dnaSET_CNT(h->post.fmt2.buf, length + 1);
@@ -1051,7 +1054,7 @@ static void postRead(ttrCtx h)
 	*p = '\0';
 	if (p != end)
 		message(h, "post 2.0: string data didn't reach end of table");
-	
+    }
 	return;	/* Success */
 	
 parseError:
