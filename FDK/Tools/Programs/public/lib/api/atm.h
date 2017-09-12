@@ -33,7 +33,7 @@ buildch and other ATM modules (font parser).
 /* standard coretype environment */
 #include "supportenvironment.h"
 #include "supportpublictypes.h"
-#include "supportexcept.h"
+#include "supportexcept_bc.h"
 #endif /* PSENVIRONMENT */
 
 #if defined PSENVIRONMENT && PSENVIRONMENT

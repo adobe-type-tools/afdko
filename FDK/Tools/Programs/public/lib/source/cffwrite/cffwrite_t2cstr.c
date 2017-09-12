@@ -147,6 +147,7 @@ void cfwCstrNew(cfwCtx g) {
 
 	memset(h, 0, sizeof(*h));
 
+    /* Review with Ariza */
 	DURING_EX(g->err.env)
 		/* Link contexts */
 		h->g = g;

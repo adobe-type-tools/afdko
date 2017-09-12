@@ -30,11 +30,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #endif
 /* #include CANTHAPPEN	*/	/* To include Abort processing, by reference */
 
-#if defined(USE_CXX_EXCEPTION) && !defined(__cplusplus)
-    #error("must be compiled as C++ to use C++ exception as error handling")
-#endif
 
-#ifndef USE_CXX_EXCEPTION
 /* If the macro setjmp_h is defined, it is the #include path to be used
    instead of <setjmp.h>
  */
@@ -47,7 +43,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <setjmp.h>
 #endif  /* VAXC */
 #endif  /* setjmp_h */
-#endif
 
 /* 
   This interface defines a machine-independent exception handling
@@ -114,14 +109,15 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
   CAUTIONS:
 
-  Due to multi-threading concerns, a global chain of exception buffers
-  have been removed from DURING ... HANDLER implementation when setjmp/longjmp
-  is selected as the exception handling mechanism.
-  Instead, at least one, usually the outer-most exception handler must be
-  declared with DURING_EX instead of DURING, and its env parameter is respected when
-  longjmp is used as the exception thrown mechanism under C or USE_CXX_EXCEPTION undefined.
-  Handlers within HANDLER ... END_HANDLER following DURING (not DURING_EX) are simply ignored.
-  When C++ exception is used as the implementation, all handlers are respected.
+  It is ILLEGAL to execute a statement between DURING and HANDLER
+  that would transfer control outside of those statements. In particular,
+  "return" is illegal (an unspecified malfunction will occur).
+  To perform a "return", execute E_RTRN_VOID; to perform a "return(x)",
+  execute E_RETURN(x). This restriction does not apply to the statements
+  between HANDLER and END_HANDLER.
+
+  It is ILLEGAL to execute E_RTRN_VOID or E_RETURN between HANDLER and
+  END_HANDLER.
 
   The state of local variables at the time the HANDLER is invoked may
   be unpredictable. In particular, a local variable that is modified
@@ -135,43 +131,38 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /* Data structures */
 
 typedef struct _t_Exc_buf {
-#ifdef USE_CXX_EXCEPTION
-    _t_Exc_buf(int code=0, char *msg=0) : Message(msg), Code(code) {}
-#else
+	struct _t_Exc_buf *Prev;	/* exception chain back-pointer */
 	jmp_buf Environ;		/* saved environment */
-#endif
 	char *Message;			/* Human-readable cause */
 	int Code;			/* Exception code */
 } _Exc_Buf;
+
+extern _Exc_Buf *_Exc_Header;	/* global exception chain header */     
 
 /* Macros defining the exception handler "syntax":
      DURING statements HANDLER statements END_HANDLER
    (see the description above)
  */
 
-#ifdef USE_CXX_EXCEPTION
-#define DURING_EX(env)	DURING
+#define	_E_RESTORE  _Exc_Header = Exception.Prev
+
 #define	DURING {_Exc_Buf Exception;\
-		try {
+		Exception.Prev =_Exc_Header;\
+		_Exc_Header = &Exception;\
+		if (! setjmp(Exception.Environ)) {
 
-#define	HANDLER	} catch (_Exc_Buf& e) { Exception = e;
-
-#define	END_HANDLER }}
-
-#else /* USE_CXX_EXCEPTION */
-#define	DURING_EX(env) {_Exc_Buf Exception; _Exc_Buf *_EBP = &env;\
-		if (! setjmp(env.Environ)) {
-#define DURING { _Exc_Buf Exception; _Exc_Buf *_EBP=&Exception; Exception.Code=0;  if (1) {
-
-#define	HANDLER	} else { Exception.Code=_EBP->Code;
+#define	HANDLER	_E_RESTORE;} else {
 
 #define	END_HANDLER }}
 
-#endif /* USE_CXX_EXCEPTION */
+#define	E_RETURN(x) {_E_RESTORE; return(x);}
+
+#define	E_RTRN_VOID {_E_RESTORE; return;}
+
 
 /* Exported Procedures */
 
-extern procedure os_raise (_Exc_Buf *buf, int  Code, char * Message);
+extern procedure os_raise (int  Code, char * Message);
 /* Initiates an exception; always called via the RAISE macro.
    This procedure never returns; instead, the stack is unwound and
    control passes to the beginning of the exception handler statements
@@ -190,7 +181,7 @@ extern procedure os_raise (_Exc_Buf *buf, int  Code, char * Message);
  */
 
 
-#if !defined(USE_CXX_EXCEPTION) && !WINATM && OS!=os_windowsNT
+#if !WINATM && OS!=os_windowsNT
 #ifndef setjmp
 extern int setjmp (jmp_buf  buf);
 #endif
@@ -199,7 +190,7 @@ extern int setjmp (jmp_buf  buf);
    It may return again if longjmp is executed subsequently (see below).
  */
 
-/*extern _CRTIMP procedure CDECL longjmp (jmp_buf  buf, int  value);*/
+extern procedure longjmp (jmp_buf  buf, int  value);
 /* Restores the environment saved by an earlier call to setjmp,
    unwinding the stack and causing setjmp to return again with
    value as its return value (which must be non-zero).
@@ -219,7 +210,7 @@ extern int setjmp (jmp_buf  buf);
 #define RAISE os_raise
 /* See os_raise above; defined as a macro simply for consistency */
 
-#define	RERAISE	RAISE(&Exception, Exception.Code, Exception.Message)
+#define	RERAISE	RAISE(Exception.Code, Exception.Message)
 /* Called from within an exception handler (between HANDLER and
    END_HANDLER), propagates the same exception to the next outer
    dynamically enclosing exception handler; does not return.

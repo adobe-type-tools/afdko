@@ -178,6 +178,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BDA34BAF0D6F46BD0009FF85 /* release.xcconfig */;
 			buildSettings = {
+				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = uforead;
 			};
 			name = Release;
