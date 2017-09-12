@@ -59,9 +59,9 @@ void writeRegionList(DICT *dst, variationRegionList* regionList)
     {
         for (j = 0; j < regionList->axisCount; j++)
         {
-            cfwDictSaveShortInt(dst, vr->startCoord);
-            cfwDictSaveShortInt(dst, vr->peakCoord);
-            cfwDictSaveShortInt(dst, vr->endCoord);
+            cfwDictSaveShortInt(dst, FIXED_TO_F2DOT14(vr->startCoord));
+            cfwDictSaveShortInt(dst, FIXED_TO_F2DOT14(vr->peakCoord));
+            cfwDictSaveShortInt(dst, FIXED_TO_F2DOT14(vr->endCoord));
             vr++;
         }
     }

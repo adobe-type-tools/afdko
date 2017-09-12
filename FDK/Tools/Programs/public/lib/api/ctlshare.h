@@ -498,6 +498,7 @@ enum
     SVW_LIB_ID,
     UFR_LIB_ID,
     UFW_LIB_ID,
+    VAR_LIB_ID,
     CTL_LIB_ID,
     CTL_LIB_ID_CNT
     };

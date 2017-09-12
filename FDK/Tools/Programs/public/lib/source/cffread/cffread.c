@@ -188,7 +188,7 @@ struct cfrCtx_					/* Context */
     struct                      /* CFF2 font tables */
     {
 		float           *UDV;	/* From client */
-        var_F2dot14     ndv[CFF2_MAX_AXES];     /* normalized weight vector */
+        Fixed     ndv[CFF2_MAX_AXES];     /* normalized weight vector */
         float           scalars[CFF2_MAX_MASTERS];               /* scalar values for regions */
         unsigned short  regionCount;          /* number of all regions */
         unsigned short  regionIndices[CFF2_MAX_MASTERS];  /* region indices for the current vsindex */

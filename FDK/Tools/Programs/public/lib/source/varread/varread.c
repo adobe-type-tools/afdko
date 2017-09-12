@@ -2,6 +2,7 @@
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 #include "varread.h"
 #include "ctlshare.h"
+#include "ctutil.h"
 #include "cffread.h"
 #include "dynarr.h"
 #include "supportfp.h"
@@ -14,6 +15,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #define FIXED_ZERO                  0
 #define FIXED_ONE                   0x00010000
+#define FIXED_MINUS_ONE             (-FIXED_ONE)
 #define F2DOT14_ZERO                0
 #define F2DOT14_ONE                 (1<<14)
 #define F2DOT14_MINUS_ONE           (-F2DOT14_ONE)
@@ -291,6 +293,7 @@ static var_avar var_loadavar(sfrCtx sfr, ctlSharedStmCallbacks *sscb)
 		avar = (var_avar)sscb->memNew(sscb, sizeof(*avar));
 		memset(avar, 0, sizeof(*avar));
 
+        i = sscb->read2(sscb); /* skip reserved short */
 		avar->axisCount = sscb->read2(sscb);
 
 		if (table->length < AVAR_TABLE_HEADER_SIZE + (unsigned long)AVAR_SEGMENT_MAP_SIZE * avar->axisCount) {
@@ -326,8 +329,8 @@ static var_avar var_loadavar(sfrCtx sfr, ctlSharedStmCallbacks *sscb)
 				seg->valueMaps.array[j].toCoord = toCoord;
 			}
 			if (seg->positionMapCount < 3
-				|| seg->valueMaps.array[0].fromCoord != 0
-				|| seg->valueMaps.array[0].toCoord != 0
+				|| seg->valueMaps.array[0].fromCoord != FIXED_MINUS_ONE
+				|| seg->valueMaps.array[0].toCoord != FIXED_MINUS_ONE
 				|| !hasZeroMap
 				|| seg->valueMaps.array[seg->positionMapCount-1].fromCoord != FIXED_ONE
 				|| seg->valueMaps.array[seg->positionMapCount-1].toCoord != FIXED_ONE) {
@@ -539,23 +542,23 @@ int var_getAxis(var_axes axes, unsigned short index, unsigned long *tag, Fixed *
         return 1;
 }
 
-static var_F2dot14 var_defaultNormalizeAxis(var_fvar fvar, unsigned short axisIndex, Fixed userValue)
+static Fixed var_defaultNormalizeAxis(var_fvar fvar, unsigned short axisIndex, Fixed userValue)
 {
     variationAxis   *axis = &fvar->axes.array[axisIndex];
 
     if (userValue < axis->defaultValue) {
         if (userValue < axis->minValue)
-            return F2DOT14_MINUS_ONE;
+            return FIXED_MINUS_ONE;
 
-        return FIXED_TO_F2DOT14(fixdiv(-(axis->defaultValue - userValue), axis->defaultValue - axis->minValue));
+        return fixdiv(-(axis->defaultValue - userValue), axis->defaultValue - axis->minValue);
     } else if (userValue > axis->defaultValue) {
         if (userValue > axis->maxValue)
-            return F2DOT14_MINUS_ONE;
+            return FIXED_ONE;
 
-        return FIXED_TO_F2DOT14(fixdiv(userValue - axis->defaultValue, axis->maxValue - axis->defaultValue));
+        return (fixdiv(userValue - axis->defaultValue, axis->maxValue - axis->defaultValue));
     }
     else
-        return F2DOT14_ZERO;
+        return FIXED_ZERO;
 }
 
 static Fixed    applySegmentMap(segmentMap *seg, Fixed value)
@@ -569,14 +572,16 @@ static Fixed    applySegmentMap(segmentMap *seg, Fixed value)
 
     for (i = 0; i < seg->valueMaps.cnt; i++) {
         map = &seg->valueMaps.array[i];
-        if (value >= map->fromCoord)
+        if (value < map->fromCoord)
+        {
             break;
+        }
     }
-    if (i == 0)
-        return map[0].toCoord;
+    if (i <=0) /* value is at min axis value */
+        return seg->valueMaps.array[0].toCoord;
 
-    if (i >= seg->valueMaps.cnt)        /* shouldn't happen */
-        return map[-1].toCoord;
+    if (i >= seg->valueMaps.cnt) /* value is at max axis value */
+        return seg->valueMaps.array[seg->valueMaps.cnt-1].toCoord;
 
     endFromVal = map[0].fromCoord;
     endToVal = map[0].toCoord;
@@ -590,7 +595,7 @@ static Fixed    applySegmentMap(segmentMap *seg, Fixed value)
     return startToVal + fixmul(endToVal - startToVal, fixdiv(value - startFromVal, endFromVal - startFromVal));
 }
 
-int var_normalizeCoords(ctlSharedStmCallbacks *sscb, var_axes axes, Fixed *userCoords, var_F2dot14 *normCoords)
+int var_normalizeCoords(ctlSharedStmCallbacks *sscb, var_axes axes, Fixed *userCoords, Fixed *normCoords)
 {
     unsigned short  i;
     unsigned short axisCount;
@@ -612,7 +617,7 @@ int var_normalizeCoords(ctlSharedStmCallbacks *sscb, var_axes axes, Fixed *userC
         for (i = 0; i < axisCount; i++) {
             segmentMap  *seg = &axes->avar->segmentMaps.array[i];
             if (seg->positionMapCount > 0)
-                normCoords[i] = (var_F2dot14)applySegmentMap(seg, normCoords[i]);
+                normCoords[i] = applySegmentMap(seg, normCoords[i]);
         }
     }
 
@@ -732,9 +737,9 @@ var_itemVariationStore var_loadItemVariationStore(ctlSharedStmCallbacks *sscb, u
 		region = &ivs->regionList.regions.array[0];
 		for (i = 0; i < ivs->regionList.regionCount; i++) {
 			for (axis = 0; axis < ivs->regionList.axisCount; axis++) {
-				region->startCoord = (var_F2dot14)sscb->read2(sscb);
-				region->peakCoord = (var_F2dot14)sscb->read2(sscb);
-				region->endCoord = (var_F2dot14)sscb->read2(sscb);
+				region->startCoord = F2DOT14_TO_FIXED((var_F2dot14)sscb->read2(sscb));
+				region->peakCoord = F2DOT14_TO_FIXED((var_F2dot14)sscb->read2(sscb));
+				region->endCoord = F2DOT14_TO_FIXED((var_F2dot14)sscb->read2(sscb));
 				region++;
             
 				/* TODO: coord range check? */
@@ -829,7 +834,7 @@ unsigned short var_getIVSRegionCountForIndex(var_itemVariationStore ivs, unsigne
 }
 
 /* calculate scalars for all regions given a normalized design vector. */
-void     var_calcRegionScalars(ctlSharedStmCallbacks *sscb, var_itemVariationStore ivs, unsigned short axisCount, var_F2dot14 *instCoords, float *scalars)
+void     var_calcRegionScalars(ctlSharedStmCallbacks *sscb, var_itemVariationStore ivs, unsigned short axisCount, Fixed *instCoords, float *scalars)
 {
     variationRegionList *regionList = &ivs->regionList;
     long regionCount = regionList->regionCount;
@@ -852,9 +857,9 @@ void     var_calcRegionScalars(ctlSharedStmCallbacks *sscb, var_itemVariationSto
         
             if (r->startCoord > r->peakCoord || r->peakCoord > r->endCoord)
                 axisScalar = 1.0f;
-            else if (r->startCoord < F2DOT14_ZERO && r->endCoord > F2DOT14_ZERO && r->peakCoord != F2DOT14_ZERO)
+            else if (r->startCoord < FIXED_ZERO && r->endCoord > FIXED_ZERO && r->peakCoord != FIXED_ZERO)
                 axisScalar = 1.0f;
-            else if (r->peakCoord == F2DOT14_ZERO)
+            else if (r->peakCoord == FIXED_ZERO)
                 axisScalar = 1.0f;
             else if (instCoords[axis] < r->startCoord || instCoords[axis] > r->endCoord)
                 axisScalar = .0f;
@@ -872,6 +877,7 @@ void     var_calcRegionScalars(ctlSharedStmCallbacks *sscb, var_itemVariationSto
 
         scalars[i] = scalar;
     }
+    return;
 }
 
 static int  loadIndexMap(ctlSharedStmCallbacks *sscb, sfrTable *table, unsigned long indexOffset, indexMap *ima)
@@ -999,7 +1005,7 @@ static float var_applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb, var_itemVa
         unsigned short  regionIndex = regionIndices[i];
 
         if (scalars[regionIndex])
-            netAdjustment += scalars[regionIndex] * subtable->deltaValues.array[deltaSetIndex + regionIndex];
+            netAdjustment += scalars[regionIndex] * subtable->deltaValues.array[deltaSetIndex + i];
     }
 
     return netAdjustment;
@@ -1554,4 +1560,18 @@ void var_freeMVAR(ctlSharedStmCallbacks *sscb, var_MVAR mvar)
         sscb->memFree(sscb, mvar);
     }
 }
+/* Get version numbers of libraries. */
+void varreadGetVersion(ctlVersionCallbacks *cb)
+{
+    if (cb->called & 1<<VAR_LIB_ID)
+        return;	/* Already enumerated */
+    
+    /* This library */
+    cb->getversion(cb, VARREAD_VERSION, "varread");
+    
+    /* Record this call */
+    cb->called |= 1<<VAR_LIB_ID;
+}
+
+
 

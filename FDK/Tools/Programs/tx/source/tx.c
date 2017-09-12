@@ -23,6 +23,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "svgwrite.h"
 #include "uforead.h"
 #include "ufowrite.h"
+#include "varread.h"
 #include "txops.h"
 #include "dictops.h"
 #include "abfdesc.h"
@@ -6918,6 +6919,7 @@ static void printVersions(txCtx h)
     svwGetVersion(&cb);
     ufoGetVersion(&cb);
     ufwGetVersion(&cb);
+    varreadGetVersion(&cb);
 
 	exit(0);
 	}

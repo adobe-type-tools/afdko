@@ -18,14 +18,18 @@ extern "C" {
    This library parses tables common tables used by variable OpenType fonts.
 */
 
+#define VARREAD_VERSION CTL_MAKE_VERSION(1,0,4)
+#define F2DOT14_TO_FIXED(v)         (((Fixed)(v))<<2)
+#define FIXED_TO_F2DOT14(v)         ((var_F2dot14)(((Fixed)(v)+0x00000002)>>2))
+
 typedef Int16   var_F2dot14; /* 2.14 fixed point number */
 
 /* item variation store */
 
 typedef struct region_ {
-    var_F2dot14   startCoord;
-    var_F2dot14   peakCoord;
-    var_F2dot14   endCoord;
+    Fixed   startCoord;
+    Fixed   peakCoord;
+    Fixed   endCoord;
 } variationRegion;
 
 typedef struct variationRegionList_ {
@@ -117,7 +121,7 @@ int var_getAxis(var_axes axes, unsigned short index, unsigned long *tag, Fixed *
     May be NULL if the flags value is not needed.
 */
 
-int var_normalizeCoords(ctlSharedStmCallbacks *sscb, var_axes axes, Fixed *userCoords, var_F2dot14 *normCoords);
+int var_normalizeCoords(ctlSharedStmCallbacks *sscb, var_axes axes, Fixed *userCoords, Fixed *normCoords);
 
 /*  var_normalizeCoords() normalizes a variable font value coordinates.
     return 0 for success, 1 for failure.
@@ -205,7 +209,7 @@ long var_getIVSRegionIndices(var_itemVariationStore ivs, unsigned short vsIndex,
     regionCount - the length of regionIndices array.
 */
 
-void     var_calcRegionScalars(ctlSharedStmCallbacks *sscb, var_itemVariationStore ivs, unsigned short axisCount, var_F2dot14 *instCoords, float *scalars);
+void     var_calcRegionScalars(ctlSharedStmCallbacks *sscb, var_itemVariationStore ivs, unsigned short axisCount, Fixed *instCoords, float *scalars);
 
 /*  var_calcRegionScalars() calculates scalars for all regions given a normalized design vector for an instance.
 
@@ -382,6 +386,11 @@ void var_freeMVAR(ctlSharedStmCallbacks *sscb, var_MVAR mvar);
 
     mvar - a pointer to the horizontal metrics table data to be freed.
 */
+
+void varreadGetVersion(ctlVersionCallbacks *cb);
+    
+/* varreadGetVersion() returns the library version number and name via the client
+    callbacks passed with the "cb" parameter (see ctlshare.h). */
 
 #ifdef __cplusplus
 }
