@@ -1061,8 +1061,6 @@ static void checkDuplicates(hotCtx g, cmapCtx h, int isMixedByte) {
 	int nDupes = 0;
 	Mapping *mapping = h->mapping.array;
 
-	return;
-
 	for (i = 1; i < h->mapping.cnt; i++) {
 		if (mapping[i - 1].code == mapping[i].code &&
 		    (mapping[i - 1].flags & CODE_1BYTE) ==
