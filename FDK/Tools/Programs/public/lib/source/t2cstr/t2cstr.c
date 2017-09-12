@@ -2792,7 +2792,10 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
     if (aux->flags & T2C_FLATTEN_CUBE)
         h.flags |= FLATTEN_CUBE;
     if (aux->flags & T2C_FLATTEN_BLEND)
+    {
         h.flags |= FLATTEN_BLEND;
+        h.flags |= SEEN_BLEND;
+    }
 	if (aux->flags & T2C_IS_CUBE)
 		h.flags |= IS_CUBE;
 	if (aux->flags & T2C_CUBE_RND)
