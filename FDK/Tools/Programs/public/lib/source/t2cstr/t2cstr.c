@@ -41,8 +41,15 @@ enum							/* seac operator conversion phase */
 
 typedef struct					/* Stem data */
 	{
-	float edge0;
-	float edge1;
+        union
+        {
+            float edge0;
+            abfBlendArg edge0v;
+        };
+        union {
+            float edge1;
+            abfBlendArg edge1v;
+        };
 	short flags;				/* Uses stem flags defined in absfont.h */
 	} Stem;
 
@@ -163,6 +170,8 @@ RND(h->transformMatrix[1]*(x) + h->transformMatrix[3]*(y) + h->transformMatrix[5
 
 static int t2Decode(t2cCtx h, long offset);
 static void convertToAbsolute(t2cCtx h, float x1, float y1, abfBlendArg* blendArgs, int num);
+static void copyBlendArgs(t2cCtx h, abfBlendArg* blendArg, abfOpEntry* opEntry);
+
 /* ------------------------------- Error handling -------------------------- */
 
 /* Write message to debug stream from va_list. */
@@ -396,6 +405,44 @@ static void callbackOp(t2cCtx h, int op)
 	h->glyph->genop(h->glyph, h->stack.cnt, h->stack.array, op);
 	}
 
+static void callBackStem(t2cCtx h, Stem *stem, int cntr, int flags) {
+   
+    if ((h->glyph->stemVF != NULL) && (h->flags & IS_CFF2))
+    {
+        if (cntr)
+            flags |= ABF_CNTR_STEM;
+        h->glyph->stemVF(h->glyph, flags, &stem->edge0v, &stem->edge1v);
+    }
+    else
+    {
+        float edge0 = stem->edge0;
+        float edge1 = stem->edge1;
+        if (h->flags & USE_MATRIX)
+        {
+            if (stem->flags & ABF_VERT_STEM)
+            {
+                edge0 = SX(edge0);
+                edge1 = SX(edge1);
+            }
+            else
+            {
+                edge0 = SY(edge0);
+                edge1 = SY(edge1);
+            }
+        }
+        else if (h->flags & SEEN_BLEND)
+        {
+            edge0 = RND(edge0);
+            edge1 = RND(edge1);
+        }
+        
+        if (cntr)
+            flags |= ABF_CNTR_STEM;
+        h->glyph->stem(h->glyph, flags, edge0, edge1);
+    }
+
+}
+
 /* Callback stems in mask. */
 static void callbackStems(t2cCtx h, int cntr)
 	{
@@ -428,31 +475,8 @@ static void callbackStems(t2cCtx h, int cntr)
 				{
 				/* Callback stem */
 				Stem *stem = &h->stems.array[j];
-				float edge0 = stem->edge0;
-				float edge1 = stem->edge1;
-				if (h->flags & USE_MATRIX)
-					{
-					if (stem->flags & ABF_VERT_STEM)
-						{
-						edge0 = SX(edge0);
-						edge1 = SX(edge1);
-						}
-					else 
-						{
-						edge0 = SY(edge0);
-						edge1 = SY(edge1);
-						}
-					}
-				else if (h->flags & SEEN_BLEND)
-					{
-					edge0 = RND(edge0);
-					edge1 = RND(edge1);
-					}
-					
-				if (cntr)
-					flags |= ABF_CNTR_STEM;
-				flags |= stem->flags;
-				h->glyph->stem(h->glyph, flags, edge0, edge1);
+                flags |= stem->flags;
+				callBackStem(h,stem,cntr, flags);
 				flags = 0;
 				}
 			byte <<= 1;
@@ -556,29 +580,8 @@ static void clearHintStack(t2cCtx h)
 			{
 			/* Callback stem */
 			Stem *stem = &h->stems.array[i];
-			float edge0 = stem->edge0;
-			float edge1 = stem->edge1;
-			if (h->flags & USE_MATRIX)
-				{
-				if (stem->flags & ABF_VERT_STEM)
-					{
-					edge0 = SX(edge0);
-					edge1 = SX(edge1);
-					}
-				else 
-					{
-					edge0 = SY(edge0);
-					edge1 = SY(edge1);
-					}
-				}
-			else if (h->flags & SEEN_BLEND)
-				{
-				edge0 = RND(edge0);
-				edge1 = RND(edge1);
-				}
-				
-			flags |= stem->flags;
-			h->glyph->stem(h->glyph, flags, edge0, edge1);
+            flags |= stem->flags;
+            callBackStem(h,stem, 0, flags);
 			flags = 0;
 			}
 		h->flags &= ~PEND_MASK;
@@ -679,37 +682,8 @@ static void callbackMove(t2cCtx h, float dx, float dy)
 			{
 			/* Callback stem */
 			Stem *stem = &h->stems.array[i];
-			float edge0 = stem->edge0;
-			float edge1 = stem->edge1;
-			if (h->flags & USE_MATRIX)
-				{
-				if (stem->flags & ABF_VERT_STEM)
-					{
-					edge0 = SX(edge0);
-					edge1 = SX(edge1);
-					}
-				else 
-					{
-					edge0 = SY(edge0);
-					edge1 = SY(edge1);
-					}
-				}
-			else if (h->flags & SEEN_BLEND)
-				{
-				edge0 = RND(edge0);
-				edge1 = RND(edge1);
-				}
-			
-			flags |= stem->flags;
-            if (h->flags & IS_CFF2 && (h->glyph->stemVF != NULL))
-            {
-                abfBlendArg* blendArgs = &(h->stack.blendArgs[0]);
-                h->glyph->stemVF(h->glyph, flags, blendArgs, blendArgs+1);
-            }
-            else
-            {
-			h->glyph->stem(h->glyph, flags, edge0, edge1);
-            }
+            flags |= stem->flags;
+            callBackStem(h,stem, 0, flags);
 			flags = 0;
 			}
 		h->flags &= ~PEND_MASK;
@@ -902,35 +876,72 @@ static void callbackFlex(t2cCtx h,
 		}
 	}
 
-/* Add stems to stem list. Return 1 on stem overflow else 0. */
-/* Note! Make sure that the width value has been cleared from
-the stack befor this is called! */
+static void convertStemToAbsolute(t2cCtx h, float lastEdge, abfBlendArg* blendArgs)
+{
+    /* Convert only the default value. At some point, need to actaully convert the region
+     deltas to absolute values, but this requires referencing teh current point and the region weight map.
+     */
+    
+    
+    blendArgs->value += lastEdge;
+ }
+
+/* Add stems to stem list. Return 1 on stem overflow else 0;
+ This is called only on hstem(hm), vstem(hm), or tx_mask, so all args on teh stack are stems.
+ */
 static int addStems(t2cCtx h, int vert)
-	{
-	int i;
-	float lastedge1 = 0;
-	if (h->stems.cnt + h->stack.cnt/2 > T2_MAX_STEMS)
-		return 1;
-	/* The "i = h->stack.cnt & 1" clause lets it skip the width value, if there is one. */
-	for (i = h->stack.cnt & 1; i < h->stack.cnt - 1; i += 2)
-		{
-		Stem *stem = &h->stems.array[h->stems.cnt++];
-
-		stem->edge0 = lastedge1 + INDEX(i + 0);
-		if (h->seac.phase > seacBase)
-			stem->edge0 += vert? h->seac.adx: h->seac.ady;
-		stem->edge1 = stem->edge0 + INDEX(i + 1);
-		stem->flags = vert? ABF_VERT_STEM: 0;
-
-		lastedge1 = stem->edge1;
-		}
-
-	/* Compute mask length and unused bit mask */
-	h->mask.length = (short)((h->stems.cnt + 7)/8);
-	h->mask.unused = ~(~0<<(h->mask.length*8 - h->stems.cnt));
-
-	return 0;
-	}
+{
+    int i;
+    Stem *stem;
+    float lastedge = 0;
+    
+    if (h->stems.cnt + h->stack.cnt/2 > T2_MAX_STEMS)
+        return 1;
+    
+    /* The "i = h->stack.cnt & 1" clause lets it skip the width value, if there is one. */
+    if ((h->flags & IS_CFF2) && (h->glyph->stemVF != NULL))
+    {
+        for (i = h->stack.cnt & 1; i < h->stack.cnt - 1; i += 2)
+        {
+            abfBlendArg* blendArgs = &h->stack.blendArgs[i];
+            abfOpEntry* opEntry = &h->stack.blendArray[i];
+            stem = &h->stems.array[h->stems.cnt++];
+            copyBlendArgs(h,blendArgs, opEntry);
+            stem->edge0v = h->stack.blendArgs[i];
+            
+            blendArgs = &h->stack.blendArgs[i+1];
+            opEntry = &h->stack.blendArray[i+1];
+            copyBlendArgs(h,blendArgs, opEntry);
+            stem->edge1v = h->stack.blendArgs[i+1];
+            
+            convertStemToAbsolute(h, lastedge, &stem->edge0v);
+            convertStemToAbsolute(h, stem->edge0v.value, &stem->edge1v);
+            lastedge = stem->edge1v.value;
+            stem->flags = vert? ABF_VERT_STEM: 0;
+        }
+    }
+    else
+    {
+        for (i = h->stack.cnt & 1; i < h->stack.cnt - 1; i += 2)
+        {
+            stem = &h->stems.array[h->stems.cnt++];
+            stem->edge0 = lastedge + INDEX(i + 0);
+            if (h->seac.phase > seacBase)
+                stem->edge0 += vert? h->seac.adx: h->seac.ady;
+            stem->edge1 = stem->edge0 + INDEX(i + 1);
+            lastedge = stem->edge1;
+            stem->flags = vert? ABF_VERT_STEM: 0;
+        }
+        
+        
+    }
+    
+    /* Compute mask length and unused bit mask */
+    h->mask.length = (short)((h->stems.cnt + 7)/8);
+    h->mask.unused = ~(~0<<(h->mask.length*8 - h->stems.cnt));
+    
+    return 0;
+}
 
 /* Callback hint/cntrmask. Return 0 on success else error code. */
 static int callbackMask(t2cCtx h, int cntr, 
@@ -1277,7 +1288,6 @@ static int handleBlend(t2cCtx h)
         int stackIndex = h->stack.blendCnt - numDeltaBlends;
 
         for (i = 0; i < numBlends; i++) {
-            float   defaultVal = opEntry[i].value;
             int r;
             opEntry->blendValues = (float *)memNew(h, sizeof(float)*numRegions);
             opEntry->numBlends = 1;
@@ -1359,8 +1369,8 @@ static void popBlendArgs2(t2cCtx h, abfOpEntry* dx, abfOpEntry* dy)
 }
 
 static void popBlendArgs6(t2cCtx h, abfOpEntry* dx1, abfOpEntry* dy1,
-                                   abfOpEntry* dx2, abfOpEntry* dy2,
-                                   abfOpEntry* dx3, abfOpEntry* dy3)
+                          abfOpEntry* dx2, abfOpEntry* dy2,
+                          abfOpEntry* dx3, abfOpEntry* dy3)
 {
     abfBlendArg* blendArgs = h->stack.blendArgs;
     copyBlendArgs(h,&blendArgs[0], dx1);
@@ -1387,10 +1397,6 @@ static void convertToAbsolute(t2cCtx h, float x1, float y1, abfBlendArg* blendAr
                 defaultX = blendArgs->value += defaultX;
             else
                 blendArgs->value = defaultX;
-            for (j=0; j< h->stack.numRegions; j++)
-            {
-                blendArgs->blendValues[j] += defaultX;
-            }
         }
         else
         {
@@ -1398,15 +1404,12 @@ static void convertToAbsolute(t2cCtx h, float x1, float y1, abfBlendArg* blendAr
                 defaultY = blendArgs->value += defaultY;
             else
                 blendArgs->value = defaultY;
-            for (j=0; j< h->stack.numRegions; j++)
-            {
-                blendArgs->blendValues[j] += defaultY;
-            }
         }
         isX = !isX;
         blendArgs++;
     }
 }
+
 
 static void setNumMasters(t2cCtx h)
 {
@@ -1667,7 +1670,7 @@ static int t2Decode(t2cCtx h, long offset)
 				{
 				float y = POP();
 				float x = POP();
-                if (h->glyph->moveVF != NULL)
+                if ((h->flags & IS_CFF2) && (h->glyph->moveVF != NULL))
                     popBlendArgs2(h, &INDEX_BLEND(0), &INDEX_BLEND(1));
 				callbackMove(h, x, y);
 				}
@@ -1675,14 +1678,14 @@ static int t2Decode(t2cCtx h, long offset)
 				case tx_hmoveto:
 				if (callbackWidth(h, 0))
 					return t2cSuccess;
-                if (h->glyph->moveVF != NULL)
+                if ((h->flags & IS_CFF2) && (h->glyph->moveVF != NULL))
                     popBlendArgs2(h, &INDEX_BLEND(0), NULL);
 				callbackMove(h, POP(), 0);
 				break;
 				case tx_vmoveto:
 				if (callbackWidth(h, 0))
 					return t2cSuccess;
-                if (h->glyph->moveVF != NULL)
+                if ((h->flags & IS_CFF2) && (h->glyph->moveVF != NULL))
                     popBlendArgs2(h, NULL, &INDEX_BLEND(0));
 				callbackMove(h, 0, POP());
 				break;
@@ -1690,8 +1693,7 @@ static int t2Decode(t2cCtx h, long offset)
 				CHKUFLOW(h,2);
 				for (i = 0; i < h->stack.cnt - 1; i += 2)
                 {
-                    if (h->glyph->lineVF != NULL)
-                        popBlendArgs2(h, &INDEX_BLEND(i), &INDEX_BLEND(i + 1));
+                    if ((h->flags & IS_CFF2) && (h->glyph->lineVF != NULL))                        popBlendArgs2(h, &INDEX_BLEND(i), &INDEX_BLEND(i + 1));
 					callbackLine(h, INDEX(i + 0), INDEX(i + 1));
                 }
 				break;
@@ -1703,13 +1705,13 @@ static int t2Decode(t2cCtx h, long offset)
 				for (i = 0; i < h->stack.cnt; i++)
 					if (horz++ & 1)
                     {
-                        if (h->glyph->lineVF != NULL)
+                        if ((h->flags & IS_CFF2) && (h->glyph->lineVF != NULL))
                             popBlendArgs2(h, &INDEX_BLEND(i), NULL);
 						callbackLine(h, INDEX(i), 0);
                     }
 					else
                     {
-                        if (h->glyph->lineVF != NULL)
+                        if ((h->flags & IS_CFF2) && (h->glyph->lineVF != NULL))
                             popBlendArgs2(h, NULL, &INDEX_BLEND(i));
 						callbackLine(h, 0, INDEX(i));
 				}
@@ -1719,7 +1721,7 @@ static int t2Decode(t2cCtx h, long offset)
 				CHKUFLOW(h,6);
 				for (i = 0; i < h->stack.cnt - 5; i += 6)
                 {
-                    if (h->glyph->curveVF != NULL)
+                    if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
                         popBlendArgs6(h,
                                                 &INDEX_BLEND(i + 0), &INDEX_BLEND(i + 1),
                                                 &INDEX_BLEND(i + 2), &INDEX_BLEND(i + 3),
@@ -2254,7 +2256,7 @@ static int t2Decode(t2cCtx h, long offset)
 				CHKUFLOW(h,8);
 				for (i = 0; i < h->stack.cnt - 5; i += 6)
                 {
-                    if (h->glyph->curveVF != NULL)
+                    if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
                         popBlendArgs6(h,
                                                 &INDEX_BLEND(i + 0), &INDEX_BLEND(i + 1),
                                                 &INDEX_BLEND(i + 2), &INDEX_BLEND(i + 3),
@@ -2266,7 +2268,7 @@ static int t2Decode(t2cCtx h, long offset)
                 }
 				if (i < h->stack.cnt - 1)
                     {
-                    if (h->glyph->lineVF != NULL)
+                    if ((h->flags & IS_CFF2) && (h->glyph->lineVF != NULL))
                         popBlendArgs2(h, &INDEX_BLEND(i + 0), &INDEX_BLEND(i + 1));
 					callbackLine(h, INDEX(i + 0), INDEX(i + 1));
                     }
@@ -2275,11 +2277,11 @@ static int t2Decode(t2cCtx h, long offset)
 				CHKUFLOW(h,8);
 				for (i = 0; i < h->stack.cnt - 6; i += 2)
                 {
-                    if (h->glyph->lineVF != NULL)
+                    if ((h->flags & IS_CFF2) && (h->glyph->lineVF != NULL))
                         popBlendArgs2(h, &INDEX_BLEND(i + 0), &INDEX_BLEND(i + 1));
 					callbackLine(h, INDEX(i + 0), INDEX(i + 1));
                 }
-                    if (h->glyph->curveVF != NULL)
+                    if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
                         popBlendArgs6(h,
                                                 &INDEX_BLEND(i + 0), &INDEX_BLEND(i + 1),
                                                 &INDEX_BLEND(i + 2), &INDEX_BLEND(i + 3),
@@ -2295,7 +2297,7 @@ static int t2Decode(t2cCtx h, long offset)
 					{
                     CHKUFLOW(h,5);
                     i = 0;
-                    if (h->glyph->curveVF != NULL)
+                    if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
                         popBlendArgs6(h,
                                       &INDEX_BLEND(i + 0), &INDEX_BLEND(i + 1),
                                       &INDEX_BLEND(i + 2), &INDEX_BLEND(i + 3),
@@ -2315,7 +2317,7 @@ static int t2Decode(t2cCtx h, long offset)
 				/* Add remaining curve(s) */
 				for (; i < h->stack.cnt - 3; i += 4)
                 {
-                    if (h->glyph->curveVF != NULL)
+                    if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
                         popBlendArgs6(h,
                                                     NULL, &INDEX_BLEND(i + 0),
                                                     &INDEX_BLEND(i + 1), &INDEX_BLEND(i + 2),
@@ -2332,7 +2334,7 @@ static int t2Decode(t2cCtx h, long offset)
 					/* Add initial curve */
 					CHKUFLOW(h,5);
                     i = 0;
-                    if (h->glyph->curveVF != NULL)
+                    if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
                         popBlendArgs6(h,
                                                         &INDEX_BLEND(1), &INDEX_BLEND(0),
                                                         &INDEX_BLEND(2), &INDEX_BLEND(3),
@@ -2352,7 +2354,7 @@ static int t2Decode(t2cCtx h, long offset)
 				/* Add remaining curve(s) */
 				for (; i < h->stack.cnt - 3; i += 4)
                 {
-                    if (h->glyph->curveVF != NULL)
+                    if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
                         popBlendArgs6(h,
                                                 &INDEX_BLEND(i + 0), NULL,
                                                 &INDEX_BLEND(i + 1), &INDEX_BLEND(i + 2),
@@ -2408,7 +2410,7 @@ static int t2Decode(t2cCtx h, long offset)
 				for (i = 0; i < h->stack.cnt - adjust - 3; i += 4)
 					if (horz++ & 1)
                     {
-                        if (h->glyph->curveVF != NULL)
+                        if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
                             popBlendArgs6(h,
                                                     &INDEX_BLEND(i + 0), NULL,
                                                     &INDEX_BLEND(i + 1), &INDEX_BLEND(i + 2),
@@ -2420,7 +2422,7 @@ static int t2Decode(t2cCtx h, long offset)
                     }
 					else
                     {
-                        if (h->glyph->curveVF != NULL)
+                        if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
                             popBlendArgs6(h,
                                                     NULL,			&INDEX_BLEND(i + 0),
                                                     &INDEX_BLEND(i + 1), &INDEX_BLEND(i + 2),
@@ -2436,7 +2438,7 @@ static int t2Decode(t2cCtx h, long offset)
 					/* Add last curve */
 					if (horz & 1)
                         {
-                            if (h->glyph->curveVF != NULL)
+                            if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
                                     popBlendArgs6(h,
                                                         &INDEX_BLEND(i + 0), NULL,
                                                         &INDEX_BLEND(i + 1), &INDEX_BLEND(i + 2),
@@ -2448,7 +2450,7 @@ static int t2Decode(t2cCtx h, long offset)
                         }
 					else
                         {
-                            if (h->glyph->curveVF != NULL)
+                            if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
                                 popBlendArgs6(h,
                                                         NULL,	   	    &INDEX_BLEND(i + 0),
                                                         &INDEX_BLEND(i + 1), &INDEX_BLEND(i + 2),

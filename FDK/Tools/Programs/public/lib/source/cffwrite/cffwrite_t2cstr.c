@@ -33,8 +33,15 @@
 
 typedef struct                  /* Stem hint */
 {
-	float edge0;
-	float edge1;
+    union
+    {
+        float edge0;
+        abfBlendArg edge0v;
+    };
+    union {
+        float edge1;
+        abfBlendArg edge1v;
+    };
 	unsigned char id;           /* Unique identifier */
 	char flags;
 #define STEM_VERT   (1 << 0)      /* Flags vertical stem */
@@ -140,6 +147,9 @@ struct cstrCtx_ {
 
 
 static void flushBlends(cstrCtx h);
+static void tmp_savefixed(cfwCtx g, Fixed f);
+static Fixed float2Fixed(float r);
+static void tmp_saveop(cfwCtx g, int op);
 
 /* Initialize module. */
 void cfwCstrNew(cfwCtx g) {
@@ -477,10 +487,9 @@ static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0) {
 static void pushBlendDeltas(cstrCtx h,abfBlendArg* blendArg)
 {
     int j;
-    float defaultValue = blendArg->value;
     for (j = 0; j < h->glyph.info->blendInfo.numRegions; j++)
     {
-        float val = blendArg->blendValues[j] - defaultValue;
+        float val = blendArg->blendValues[j];
         PUSH_DELTA(val);
     }
     
@@ -512,6 +521,27 @@ static void flushBlends(cstrCtx h)
     cstr_saveop(h, t2_blend);
 }
 
+static void flushStemBlends(cstrCtx h)
+{
+    cfwCtx g = h->g;
+    int i;
+    if ((h->deltaStack.cnt + h->stack.cnt) > 513)
+    {
+        cfwCtx g = h->g;
+        cfwFatal(g, cfwErrStackOverflow, "Blend overflow");
+    }
+    
+    for (i = 0; i < h->deltaStack.cnt; i++)
+        tmp_savefixed(g, float2Fixed(h->deltaStack.array[i]));
+
+    tmp_savefixed(g, float2Fixed(h->numBlends));
+    h->deltaStack.cnt = 0;
+    h->numBlends = 0;
+    
+    tmp_saveop(g, t2_blend);
+    
+}
+
 static void pushBlend(cstrCtx h, abfBlendArg* arg1)
 {
     if ((arg1 == NULL) || (!arg1->hasBlend))
@@ -530,6 +560,26 @@ static void pushBlend(cstrCtx h, abfBlendArg* arg1)
     }
     return;
 }
+
+static void pushStemBlends(cstrCtx h, abfBlendArg* arg1)
+{
+    if ((arg1 == NULL) || (!arg1->hasBlend))
+    {
+        if (h->numBlends > 0)
+            flushStemBlends(h);
+    }
+    else
+    {
+        if ( ((h->numBlends+1) * h->glyph.info->blendInfo.numRegions + h->stack.cnt) > 513)
+        {
+            flushStemBlends(h);
+        }
+        pushBlendDeltas(h,arg1);
+        h->numBlends++;
+    }
+    return;
+}
+
 
 static int blendIsZero(cstrCtx h, float dv, abfBlendArg* blendArg)
 {
@@ -1686,6 +1736,77 @@ static unsigned char addStem(cstrCtx h, int flags, float edge0, float edge1) {
 	return stem->id;
 }
 
+static unsigned char addStemVF(cstrCtx h, int flags, abfBlendArg* edge0v, abfBlendArg* edge1v) {
+    int found;
+    size_t index;
+    Stem _new;
+    Stem *stem;
+    float edge0 = edge0v->value;
+    float edge1 = edge1v->value;
+    
+#if PLAT_WIN || PLAT_LINUX
+    /* On the Pentium architecture in an optimized build, float variables
+     are kept in 80-bit registers which is more precision than is needed and
+     in fact causes the comparisons against the ABF_EDGE_HINT_LO and
+     ABF_EDGE_HINT_HI integers to fail. The "voilatile" qualifier forces
+     intermediate stores and loads which circumvents this problem. */
+    volatile float delta;
+#else
+    float delta;
+#endif
+    
+    delta = edge1 - edge0;
+    if (delta < 0 && delta != ABF_EDGE_HINT_LO && delta != ABF_EDGE_HINT_HI) {
+        addWarn(h, warn_hint0);
+        _new.edge0v = *edge1v;
+        _new.edge1v = *edge0v;
+    }
+    else {
+        _new.edge0v = *edge0v;
+        _new.edge1v = *edge1v;
+    }
+    _new.flags = (flags & ABF_VERT_STEM) ? STEM_VERT : 0;
+    if (flags & ABF_CNTR_STEM) {
+        _new.flags |= STEM_CNTR;
+    }
+    
+    /* Check if stem already in list */
+    found = ctuLookup(&_new, h->stems.array, h->stems.cnt, sizeof(Stem),
+                      matchStems, &index, NULL);
+    stem = &h->stems.array[index];
+    if (!found) {
+        if (!(h->g->flags & CFW_ENABLE_CMP_TEST) &&
+            (h->flags & SEEN_CNTR) && !(flags & ABF_CNTR_STEM) &&
+            h->stems.cnt != (int)index) {
+            /* We are trying to match a stem against a stem list containing
+             global coloring data. The global coloring stems can have a
+             2-unit error on each edge so we have to perform approximate
+             match. This is the correct conversion behavior but can cause
+             rendering differences between the source font and the converted
+             font so we disable this if are trying to compare bitmaps. */
+            if (approxMatch(&_new, stem)) {
+                return stem->id;
+            }
+            if (index > 0 && approxMatch(&_new, stem - 1)) {
+                return (stem - 1)->id;
+            }
+        }
+        
+        /* New stem */
+        if (h->stems.cnt == T2_MAX_STEMS) {
+            addWarn(h, warn_hint3);
+        }
+        else {
+            /* Insert new stem in list */
+            memmove(stem + 1, stem, (h->stems.cnt - index) * sizeof(Stem));
+            _new.id = (unsigned char)h->stems.cnt++;
+            *stem = _new;
+        }
+    }
+    
+    return stem->id;
+}
+
 /* Add stem hint. */
 static void glyphStem(abfGlyphCallbacks *cb,
                       int flags, float edge0, float edge1) {
@@ -1723,6 +1844,44 @@ static void glyphStem(abfGlyphCallbacks *cb,
 			SET_ID_BIT(h->initmask, stemid);
 		}
 	}
+}
+
+static void glyphStemVF(abfGlyphCallbacks *cb,
+                      int flags, abfBlendArg*  edge0v, abfBlendArg*  edge1v) {
+    cfwCtx g = (cfwCtx)cb->direct_ctx;
+    cstrCtx h = g->ctx.cstr;
+    unsigned char stemid;
+    
+    if (h->flags & SEEN_MOVETO) {
+        if (flags & ABF_NEW_HINTS || h->stems.cnt == 0) {
+            newHint(h);
+        }
+    }
+    else {
+        if (flags & ABF_NEW_HINTS && h->stems.cnt > 0) {
+            newHint(h);
+        }
+    }
+    
+    stemid = addStemVF(h, flags, edge0v, edge1v);
+    
+    if (flags & (ABF_CNTR_STEM | ABF_STEM3_STEM)) {
+        /* Add counter-controlled stem */
+        if (flags & ABF_NEW_GROUP || !(h->flags & SEEN_CNTR)) {
+            newCntr(h);
+        }
+        SET_ID_BIT(h->cntrmask, stemid);
+    }
+    
+    if (!(flags & ABF_CNTR_STEM)) {
+        /* Add stem or stem3 hint */
+        if (h->flags & SEEN_HINT) {
+            SET_ID_BIT(h->hintmask, stemid);
+        }
+        else {
+            SET_ID_BIT(h->initmask, stemid);
+        }
+    }
 }
 
 /* Add flex hint. */
@@ -2007,32 +2166,50 @@ static void saveStemOp(cstrCtx h, int iBeg, int iEnd, int op, int optimize) {
 	stems = stems - (ops - 1) * MAX_STEMS;
 	if (g->flags & CFW_ENABLE_CMP_TEST) {
 		/* For testing; produces result compatible with typecomp CFF */
-		while (ops--) {
-			Fixed last = 0;
-			while (stems--) {
-				Stem *stem = &h->stems.array[i++];
-				Fixed edge0 = float2Fixed(stem->edge0);
-				Fixed edge1 = float2Fixed(stem->edge1);
-				tmp_savefixed(g, edge0 - last);
-				tmp_savefixed(g, edge1 - edge0);
-				last = edge1;
-			}
-			if (ops > 0 || !optimize) {
-				tmp_saveop(g, op);
-			}
-			stems = MAX_STEMS;
+        while (ops--) {
+            Fixed last = 0;
+            while (stems--) {
+                Stem *stem = &h->stems.array[i++];
+                Fixed edge0 = float2Fixed(stem->edge0);
+                Fixed edge1 = float2Fixed(stem->edge1);
+                tmp_savefixed(g, edge0 - last);
+                tmp_savefixed(g, edge1 - edge0);
+                last = edge1;
+            }
+            if (ops > 0 || !optimize) {
+                tmp_saveop(g, op);
+            }
+            stems = MAX_STEMS;
 		}
 	}
 	else {
 		/* For production; produces "correct" result */
 		while (ops--) {
-			float last = 0;
-			while (stems--) {
-				Stem *stem = &h->stems.array[i++];
-				tmp_savefixed(g, float2Fixed(stem->edge0 - last));
-				tmp_savefixed(g, float2Fixed(stem->edge1 - stem->edge0));
-				last = stem->edge1;
-			}
+           if (g->flags & CFW_WRITE_CFF2)
+            {
+                float lastf = 0;
+                /* First, write the default values */
+                while (stems--) {
+                    Stem *stem = &h->stems.array[i++];
+                    pushStemBlends(h, &stem->edge0v);
+                    pushStemBlends(h, &stem->edge1v);
+                    tmp_savefixed(g, float2Fixed(stem->edge0 - lastf));
+                    tmp_savefixed(g, float2Fixed(stem->edge1 - stem->edge0));
+                    lastf = stem->edge1;
+                }
+               if (h->numBlends > 0)
+                    flushStemBlends(h);
+            }
+            else
+            {
+                Fixed last = 0;
+                while (stems--) {
+                    Stem *stem = &h->stems.array[i++];
+                    tmp_savefixed(g, float2Fixed(stem->edge0 - last));
+                    tmp_savefixed(g, float2Fixed(stem->edge1 - stem->edge0));
+                    last = stem->edge1;
+                }
+            }
 			if (ops > 0 || !optimize) {
 				tmp_saveop(g, op);
 			}
@@ -2650,7 +2827,7 @@ const abfGlyphCallbacks cfwGlyphCallbacks = {
     glyphMoveVF,
     glyphLineVF,
     glyphCurveVF,
-    NULL,
+    glyphStemVF,
 };
 
 /* ----------------------------- Debug Support ----------------------------- */

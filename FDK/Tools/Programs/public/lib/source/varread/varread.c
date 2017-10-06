@@ -834,15 +834,17 @@ unsigned short var_getIVSRegionCountForIndex(var_itemVariationStore ivs, unsigne
 }
 
 /* calculate scalars for all regions given a normalized design vector. */
-void     var_calcRegionScalars(ctlSharedStmCallbacks *sscb, var_itemVariationStore ivs, unsigned short axisCount, Fixed *instCoords, float *scalars)
+void     var_calcRegionScalars(ctlSharedStmCallbacks *sscb, var_itemVariationStore ivs, unsigned short *fvarAxisCount, Fixed *instCoords, float *scalars)
 {
     variationRegionList *regionList = &ivs->regionList;
     long regionCount = regionList->regionCount;
     long i;
     unsigned short axis;
+    unsigned short axisCount = *fvarAxisCount;
 
     if (axisCount != regionList->axisCount) {
-        sscb->message(sscb, "invalid axis count in variation font region list");
+        sscb->message(sscb, "axis count in variation font region list does not match axis count in fvar table");
+        *fvarAxisCount = axisCount = regionList->axisCount;
         for (i = 0; i < regionCount; i++)
             scalars[i] = .0f;
         return;

@@ -1107,7 +1107,7 @@ static void readVarStore(cfrCtx h)
 		fatal(h, cfrErrGeometry);
     h->top.varStore = h->cff2.varStore;
     /* pre-calculate scalars for all regions for the current weight vector */
-    var_calcRegionScalars(&h->cb.shstm, h->cff2.varStore, h->cff2.axisCount, h->cff2.ndv, h->cff2.scalars);
+    var_calcRegionScalars(&h->cb.shstm, h->cff2.varStore, &h->cff2.axisCount, h->cff2.ndv, h->cff2.scalars);
 }
 
 /* Save PostScript operator string. */

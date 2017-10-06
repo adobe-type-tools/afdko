@@ -18,7 +18,7 @@ extern "C" {
    This library parses tables common tables used by variable OpenType fonts.
 */
 
-#define VARREAD_VERSION CTL_MAKE_VERSION(1,0,4)
+#define VARREAD_VERSION CTL_MAKE_VERSION(1,0,5)
 #define F2DOT14_TO_FIXED(v)         (((Fixed)(v))<<2)
 #define FIXED_TO_F2DOT14(v)         ((var_F2dot14)(((Fixed)(v)+0x00000002)>>2))
 
@@ -209,7 +209,7 @@ long var_getIVSRegionIndices(var_itemVariationStore ivs, unsigned short vsIndex,
     regionCount - the length of regionIndices array.
 */
 
-void     var_calcRegionScalars(ctlSharedStmCallbacks *sscb, var_itemVariationStore ivs, unsigned short axisCount, Fixed *instCoords, float *scalars);
+void     var_calcRegionScalars(ctlSharedStmCallbacks *sscb, var_itemVariationStore ivs, unsigned short *axisCount, Fixed *instCoords, float *scalars);
 
 /*  var_calcRegionScalars() calculates scalars for all regions given a normalized design vector for an instance.
 
@@ -217,7 +217,8 @@ void     var_calcRegionScalars(ctlSharedStmCallbacks *sscb, var_itemVariationSto
 
     ivs - a pointer to the IVS data.
 
-    axisCount - the number axes.
+    axisCount - the number axes. this is taken from the fvar table. If a naked CFF2 is being dumped,
+ then it is updated from the CFF2 VarationStore.
     
     instCoords - a pointer to normalized design vector of a font instance.
     

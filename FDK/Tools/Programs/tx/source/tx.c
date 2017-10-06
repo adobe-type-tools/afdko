@@ -7,7 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define TX_VERSION CTL_MAKE_VERSION(1,0,71)
+#define TX_VERSION CTL_MAKE_VERSION(1,0,72)
 
 #include "cfembed.h"
 #include "cffread.h"
@@ -179,6 +179,11 @@ typedef struct 				/* cmap format 4 segment */
 	short idDelta;
 	unsigned long idRangeOffset;	/* changed from unsigned short */
 	} cmapSegment4;
+
+typedef struct
+{
+    unsigned long regionCount;
+} RegionInfo;
 
 enum						/* Charstring types */
 	{
@@ -475,13 +480,17 @@ struct txCtx_
 #define DCF_SaveStemCnt			(1<<16)	/* Save h/vstems counts */
 #define DCF_IS_CUBE 			(1<<17)	/* Font has Cube data - use different stack and op limits. */
 #define DCF_IS_CFF2 			(1<<18)	/* Font has CFF table is CFF 2 */
+#define DCF_END_HINTS 			(1<<19)	/* have seen moveto */
 
 		int level;			/* Dump level */
 		char *sep;			/* Flowed text separator */
 		SubrInfo global;	/* Global subrs */
 		dnaDCL(SubrInfo, local);	/* Local subrs */
 		dnaDCL(unsigned char, glyph);	/* Per-glyph stem count */
+        dnaDCL(RegionInfo, varRegionInfo);
 		long stemcnt;		/* Current stem count */
+        long vsIndex;       /* needed to derive numRegions */
+        long numRegions;    /* needed to decode blend args */
 		SubrInfo *fd;		/* Current local info */
 		} dcf;
 	struct					/* Operand stack */
@@ -4494,7 +4503,6 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr)
 		switch (byte)
 			{
 		case tx_reserved0:
-		case tx_vmoveto:
 		case tx_rlineto:
 		case tx_hlineto:
 		case tx_vlineto:
@@ -4502,10 +4510,6 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr)
 		case t2_reserved9:
 		case t2_reserved13:
 		case tx_endchar:
-		case t2_vsindex:
-		case t2_blend:
-		case tx_rmoveto:
-		case tx_hmoveto:
 		case t2_rcurveline:
 		case t2_rlinecurve:
 		case t2_vvcurveto:
@@ -4514,6 +4518,29 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr)
 		case tx_hvcurveto:
 			flowCommand(h, opname[byte]);
 			break;
+        case tx_vmoveto:
+        case tx_rmoveto:
+        case tx_hmoveto:
+            h->dcf.flags |= DCF_END_HINTS;
+            flowCommand(h, opname[byte]);
+            break;
+
+        case t2_blend:
+            if ((h->dcf.flags & DCF_Flatten) && (!(h->dcf.flags & DCF_END_HINTS)))
+            {
+                int numBlends = h->stack.array[h->stack.cnt-1];
+                // take off 1 for num blend arguments, then pop the delta values: what's left are stem coords.
+                h->dcf.stemcnt += (h->stack.cnt -1) - (numBlends* h->dcf.numRegions);
+            }
+            flowCommand(h, opname[byte]);
+            break;
+        case t2_vsindex:
+            {
+                unsigned long vsIndex = h->stack.array[0];
+                h->dcf.numRegions = h->dcf.varRegionInfo.array[vsIndex].regionCount;
+                flowCommand(h, opname[byte]);
+                break;
+            }
 		case tx_compose:
 			flowCommand(h, opname[byte]);
 			break;
@@ -4541,16 +4568,18 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr)
 		case t2_hstemhm:
 		case t2_vstemhm:
 			if (h->dcf.flags & DCF_Flatten)
-				h->dcf.stemcnt += h->stack.cnt/2;
+				h->dcf.stemcnt += h->stack.cnt;
 			flowCommand(h, opname[byte]);
 			break;
 		case t2_hintmask:
 		case t2_cntrmask:
-			if (h->dcf.flags & DCF_Flatten)
-				h->dcf.stemcnt += h->stack.cnt/2;
+            if ((h->dcf.flags & DCF_Flatten) && (!(h->dcf.flags & DCF_END_HINTS)))
+				h->dcf.stemcnt += h->stack.cnt;
+            h->dcf.flags |= DCF_END_HINTS;
 			flowStack(h);
 			{
-			int masklen = (h->dcf.stemcnt + 7)/8;
+            /* stemcnt is currently number of coordinates; number stems is the number of pairs of coordinates. */
+			int masklen = ((h->dcf.stemcnt/2) + 7)/8;
 			flowOp(h, "%s[", opname[byte]);
 			left -= masklen;
 			while (masklen--)
@@ -4811,12 +4840,63 @@ static void dcf_DumpCharset(txCtx h, const ctlRegion *region)
 	}
 
 /* Dump VarStore table. */
+static void dcf_getvsIndices(txCtx h, const ctlRegion *region)
+{
+    unsigned short length, format;
+    unsigned int i = 0;
+    FILE *fp = h->dst.stm.fp;
+
+    
+    unsigned long regionListOffset;
+    unsigned short ivdSubtableCount;
+    dnaDCL(unsigned long, ivdSubtableOffsets);
+    unsigned short axisCount, regionCount;
+    long ivsStart = region->begin + 2;
+    
+    bufSeek(h, region->begin);
+    length = read2(h);
+    format =read2(h);
+    
+    regionListOffset = read4(h);
+    ivdSubtableCount = read2(h);
+    
+    dnaINIT(h->ctx.dna, ivdSubtableOffsets, ivdSubtableCount, ivdSubtableCount);
+    dnaSET_CNT(ivdSubtableOffsets, ivdSubtableCount);
+    
+    for (i = 0; i < ivdSubtableCount; i++) {
+        ivdSubtableOffsets.array[i] = read4(h);
+    }
+    
+    
+    /* item variation data list */
+    for (i = 0; i < ivdSubtableCount; i++) {
+        unsigned short  itemCount;
+        unsigned short  shortDeltaCount;
+        unsigned short regionIndexCount;
+        unsigned short  r, t;
+        RegionInfo *regionIndexCountEntry;
+        
+        bufSeek(h, ivsStart + ivdSubtableOffsets.array[i]);
+        
+        itemCount = read2(h);
+        shortDeltaCount = read2(h);
+        regionIndexCount = read2(h);
+        regionIndexCountEntry = dnaNEXT(h->dcf.varRegionInfo);
+        regionIndexCountEntry->regionCount = regionIndexCount;
+        
+    }
+
+    
+ }
+
 static void dcf_DumpVarStore(txCtx h, const ctlRegion *region)
 {
     unsigned short length;
     unsigned int i = 0;
     
     FILE *fp = h->dst.stm.fp;
+    if (region->begin >0 )
+        dcf_getvsIndices(h, region);
     
     if (!(h->dcf.flags & DCF_FDSelect) || region->begin == -1)
         return;
@@ -5111,6 +5191,18 @@ static int dcf_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 
 	h->dcf.fd = &h->dcf.local.array[info->iFD];
 	h->dcf.stemcnt = 0;
+    h->dcf.flags &= ~DCF_END_HINTS;
+    /* If there is a Variation Region, then we get the regionCount for the current vsIndex.
+     We need this in order to count stems when blends are present. */
+    if (h->dcf.varRegionInfo.cnt == 0)
+    {
+        h->dcf.numRegions = 0;
+    }
+    else
+    {
+        h->dcf.numRegions = h->dcf.varRegionInfo.array[info->blendInfo.vsindex].regionCount;
+    }
+        
 	h->stack.cnt = 0;
 	dumpCstr(h, &info->sup, 0);
 
@@ -8225,7 +8317,8 @@ static void txNew(txCtx h, char *progname)
 	dnaINIT(h->ctx.dna, h->cef.lookup, 256, 768);
 	dnaINIT(h->ctx.dna, h->t1w.gnames, 2000, 80000);
 	dnaINIT(h->ctx.dna, h->dcf.global.stemcnt, 300, 2000);
-	dnaINIT(h->ctx.dna, h->dcf.local, 1, 15);
+    dnaINIT(h->ctx.dna, h->dcf.local, 1, 15);
+    dnaINIT(h->ctx.dna, h->dcf.varRegionInfo, 1, 15);
 	h->dcf.local.func = initLocal;
     dnaINIT(h->ctx.dna, h->cmap.encoding, 1, 1);
     dnaINIT(h->ctx.dna, h->fd.fdIndices, 16, 16);
@@ -8262,7 +8355,9 @@ static void txFree(txCtx h)
 	dnaFREE(h->dcf.global.stemcnt);
 	for (i = 0; i < h->dcf.local.size; i++)
 		dnaFREE(h->dcf.local.array[i].stemcnt);
-	dnaFREE(h->dcf.local);
+    dnaFREE(h->dcf.local);
+    dnaFREE(h->dcf.varRegionInfo);
+        
 	dnaFREE(h->dcf.glyph);
     dnaFREE(h->cmap.encoding);
     dnaFREE(h->fd.fdIndices);
