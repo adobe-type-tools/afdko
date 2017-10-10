@@ -4528,7 +4528,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr)
         case t2_blend:
             if ((h->dcf.flags & DCF_Flatten) && (!(h->dcf.flags & DCF_END_HINTS)))
             {
-                int numBlends = h->stack.array[h->stack.cnt-1];
+                int numBlends = (int)h->stack.array[h->stack.cnt-1];
                 // take off 1 for num blend arguments, then pop the delta values: what's left are stem coords.
                 h->dcf.stemcnt += (h->stack.cnt -1) - (numBlends* h->dcf.numRegions);
             }
@@ -4536,7 +4536,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr)
             break;
         case t2_vsindex:
             {
-                unsigned long vsIndex = h->stack.array[0];
+                unsigned long vsIndex = (unsigned long)h->stack.array[0];
                 h->dcf.numRegions = h->dcf.varRegionInfo.array[vsIndex].regionCount;
                 flowCommand(h, opname[byte]);
                 break;
@@ -4850,7 +4850,6 @@ static void dcf_getvsIndices(txCtx h, const ctlRegion *region)
     unsigned long regionListOffset;
     unsigned short ivdSubtableCount;
     dnaDCL(unsigned long, ivdSubtableOffsets);
-    unsigned short axisCount, regionCount;
     long ivsStart = region->begin + 2;
     
     bufSeek(h, region->begin);
@@ -4873,7 +4872,6 @@ static void dcf_getvsIndices(txCtx h, const ctlRegion *region)
         unsigned short  itemCount;
         unsigned short  shortDeltaCount;
         unsigned short regionIndexCount;
-        unsigned short  r, t;
         RegionInfo *regionIndexCountEntry;
         
         bufSeek(h, ivsStart + ivdSubtableOffsets.array[i]);

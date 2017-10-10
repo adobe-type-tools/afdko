@@ -2063,14 +2063,14 @@ static void buildGIDNames(cfrCtx h)
     dnaSET_CNT(h->post.fmt2.strings, numGlyphs);
     p = h->post.fmt2.buf.array;
     sprintf(p, ".notdef");
-    length = strlen(p);
+    length = (long)strlen(p);
     h->post.fmt2.strings.array[0] = p;
     p += length+1;
     for (i = 1; i < numGlyphs; i++)
     {
         h->post.fmt2.strings.array[i] = p;
         sprintf(p, "gid%05d", i);
-        length = strlen(p);
+        length = (long)strlen(p);
         p += length+1;
     }
    

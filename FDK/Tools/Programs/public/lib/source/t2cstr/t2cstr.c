@@ -1387,7 +1387,7 @@ static void convertToAbsolute(t2cCtx h, float x1, float y1, abfBlendArg* blendAr
     int isX = 1;
     float defaultX = x1;
     float defaultY = y1;
-    int i,j;
+    int i;
     
     for (i = 0; i < num; i++)
     {
