@@ -534,7 +534,7 @@ static void flushStemBlends(cstrCtx h)
     for (i = 0; i < h->deltaStack.cnt; i++)
         tmp_savefixed(g, float2Fixed(h->deltaStack.array[i]));
 
-    tmp_savefixed(g, float2Fixed(h->numBlends));
+    tmp_savefixed(g, float2Fixed((float)h->numBlends));
     h->deltaStack.cnt = 0;
     h->numBlends = 0;
     
@@ -2192,8 +2192,8 @@ static void saveStemOp(cstrCtx h, int iBeg, int iEnd, int op, int optimize) {
                 while (stems--) {
                     Stem *stem = &h->stems.array[i++];
                     pushStemBlends(h, &stem->edge0v);
-                    pushStemBlends(h, &stem->edge1v);
                     tmp_savefixed(g, float2Fixed(stem->edge0 - lastf));
+                    pushStemBlends(h, &stem->edge1v);
                     tmp_savefixed(g, float2Fixed(stem->edge1 - stem->edge0));
                     lastf = stem->edge1;
                 }
@@ -2202,7 +2202,7 @@ static void saveStemOp(cstrCtx h, int iBeg, int iEnd, int op, int optimize) {
             }
             else
             {
-                Fixed last = 0;
+                float last = 0;
                 while (stems--) {
                     Stem *stem = &h->stems.array[i++];
                     tmp_savefixed(g, float2Fixed(stem->edge0 - last));
