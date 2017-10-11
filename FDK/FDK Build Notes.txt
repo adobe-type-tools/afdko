@@ -64,7 +64,7 @@ To build Python for Mac OSX:
  - download the latest Python 2.7 source from www.python.org to a local directory.
  - unzip it
  - Open a Terminal window, and change the current directory to the directory <local directory>/Python-2.7/.
- - For Mac OSX, specify teh Xcode SDKK to use by setting the enviromnet variable:
+ - For Mac OSX, specify the Xcode SDK to use by setting the environment variable:
   "$> export MACOSX_DEPLOYMENT_TARGET=10.6"
  - enter "./configure --prefix=<path to temp directory to hold the installed Python>"
  - When this is done, enter "make install"
@@ -148,7 +148,7 @@ they don't break when the FDK directory is moved.
 Do this for the osx, win and Linux AFDKOPython directories.
 
 
-isntall Cython and do a lot more work.
+install Cython and do a lot more work.
 
 3.4 ufoNormalizer support 
 This is needed for all the scripts that create or modify UFO fonts.
