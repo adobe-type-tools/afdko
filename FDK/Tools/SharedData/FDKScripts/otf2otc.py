@@ -151,12 +151,12 @@ def parseArgs(args):
 				tag.strip("\"")
 				tag.strip("'")
 				fontIndex = int(parts[1])
-			except (ValueError, IndexError),e:
+			except (ValueError, IndexError) as e:
 				raise OTCError("Badly formed table override." + __help__)
 			tagOverrideMap[tag] = fontIndex
 			i += 1
 		elif (arg == "-u") or (arg == "-h"):
-			print __help__
+			print(__help__)
 			raise OTCError()
 		else:
 			raise OTCError("Unknown option '%s'." % (arg))
@@ -169,12 +169,11 @@ def parseArgs(args):
 		if not os.path.exists(fontPath):
 			raise OTCError("Cannot find '%s'." % (fontPath))
 			
-		fp = file(fontPath, "rb")
-		data = fp.read(4)
-		fp.close()
+		with open(fontPath, "rb") as fp:
+			data = fp.read(4)
 		
-		if data not in ["OTTO", "\0\1\0\0", "true", 'ttcf']:
-			print "File is not OpenType: '%s'." % (fontPath)
+		if data not in [b"OTTO", b"\0\1\0\0", b"true", b'ttcf']:
+			print("File is not OpenType: '%s'." % (fontPath))
 			allOK = False
 	if not allOK:
 		raise OTCError()
@@ -183,13 +182,12 @@ def parseArgs(args):
 
 def readFontFile(fontPath):
 	fontEntryList = []
-	fp = file(fontPath, "rb")
-	data = fp.read()
-	fp.close()
+	with open(fontPath, "rb") as fp:
+		data = fp.read()
 	
 	# See if this is a OTC file first.
 	TTCTag, version, numFonts = struct.unpack(ttcHeaderFormat, data[:ttcHeaderSize])
-	if TTCTag != 'ttcf':
+	if TTCTag != b'ttcf':
 		# it is a regular font.
 		fontEntry = parseFontFile(0, data)
 		fontEntryList.append(fontEntry)
@@ -223,7 +221,7 @@ def parseFontFile(offset, data):
 
 def writeTTC(fontList, tableList, ttcFilePath):
 	numFonts = len(fontList)
-	header = struct.pack(ttcHeaderFormat, 'ttcf', 0x00010000,  numFonts)
+	header = struct.pack(ttcHeaderFormat, b'ttcf', 0x00010000,  numFonts)
 	dataList = [header]
 	fontOffset = ttcHeaderSize + numFonts*struct.calcsize(">L")
 	for fontEntry in fontList:
@@ -252,16 +250,15 @@ def writeTTC(fontList, tableList, ttcFilePath):
 			paddedData = tableEntry.data + b"\0" * (paddedLength - tableEntry.length)
 			dataList.append(paddedData)
 	
-	fontData = "".join(dataList)
+	fontData = b"".join(dataList)
 	
-	fp = file(ttcFilePath, "wb")
-	fp.write(fontData)
-	fp.close()
+	with open(ttcFilePath, "wb") as fp:
+		fp.write(fontData)
 	return
 
 def run(args):
 	tagOverrideMap, fileList, ttcFilePath = parseArgs(args)
-	print "Input fonts:", fileList
+	print("Input fonts:", fileList)
 	
 	fontList = []
 	tableMap = {}
@@ -304,31 +301,31 @@ def run(args):
 			
 
 	writeTTC(fontList, tableList, ttcFilePath)
-	print "Output font:", ttcFilePath
+	print("Output font:", ttcFilePath)
 
 	# report which tabetablesls are shared.
 	sharedTables = []
 	unSharedTables = []
 	for tableEntryList in tableList:
 		if len(tableEntryList) > 1:
-			unSharedTables.append(tableEntryList[0].tag)
+			unSharedTables.append(tableEntryList[0].tag.decode('ascii'))
 		else:
-			sharedTables.append(tableEntryList[0].tag)
+			sharedTables.append(tableEntryList[0].tag.decode('ascii'))
 	if len(sharedTables) == 0:
-		print "No tables are shared"
+		print("No tables are shared")
 	else:
-		print "Shared tables:", sharedTables
+		print("Shared tables:", sharedTables)
 	if len(unSharedTables) == 0:
-		print "All tables are shared"
+		print("All tables are shared")
 	else:
-		print "Un-shared tables:", unSharedTables
+		print("Un-shared tables:", unSharedTables)
 	
 
-	print "Done"
+	print("Done")
 
 if __name__ == "__main__":
 	try:
 		run(sys.argv[1:])
-	except (OTCError), e:
-		print e.message
+	except (OTCError) as e:
+		print(e)
 		
