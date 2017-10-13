@@ -1,4 +1,5 @@
 # otc2otf.py v1.2 May 23 2015
+from __future__ import print_function
 
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
@@ -121,7 +122,7 @@ def parseArgs(args):
 		elif arg == "-r":
 			doReportOnly = True
 		elif (arg == "-u") or (arg == "-h"):
-			print __help__
+			print(__help__)
 			raise OTCError()
 		else:
 			raise OTCError("Unknown option '%s'." % (arg))
@@ -133,11 +134,10 @@ def parseArgs(args):
 	if not os.path.exists(fontPath):
 		raise OTCError("Cannot find '%s'." % (fontPath))
 		
-	fp = file(fontPath, "rb")
-	data = fp.read(4)
-	fp.close()
+	with open(fontPath, "rb") as fp:
+		data = fp.read(4)
 	
-	if data != 'ttcf':
+	if data != b'ttcf':
 		raise OTCErrr("File is not an OpenType Collection file: '%s'." % (fontPath))
 
 	return fontPath, doReportOnly
@@ -150,8 +150,8 @@ def getPSName(data):
 	expectedStringOffset = 6 + n * nameRecordSize
 	if stringOffset != expectedStringOffset:
 		# XXX we need a warn function
-		print "Warning: 'name' table stringOffset incorrect.",
-		print "Expected: %s; Actual: %s" % (expectedStringOffset, stringOffset)
+		print("Warning: 'name' table stringOffset incorrect.", end=' ')
+		print("Expected: %s; Actual: %s" % (expectedStringOffset, stringOffset))
 	stringData = data[stringOffset:]
 	startNameRecordData = data[6:]
 	psName = None
@@ -171,7 +171,6 @@ def getPSName(data):
 				psName = stringData[offset:offset+length]
 				if nameRecordKey == MSUnicodeKey:
 					psName = psName.decode('utf-16be')
-					psName = psName.encode('latin-1')
 				else:
 					assert len(psName) == length
 				break
@@ -194,9 +193,9 @@ def readFontFile(fontOffset, data, tableDict, doReportOnly):
 		tableEntry.offset = offset
 		tableEntry.data = data[offset:offset+length]
 		fontEntry.tableList.append(tableEntry)
-		if tag == "name":
+		if tag == b"name":
 			fontEntry.psName = getPSName(tableEntry.data)
-		elif tag == "glyf":
+		elif tag == b"glyf":
 			seenGlyf = True
 		entryData =  entryData[sfntDirectoryEntrySize:]
 		i += 1
@@ -206,16 +205,16 @@ def readFontFile(fontOffset, data, tableDict, doReportOnly):
 			fontEntry.fileName = fontEntry.psName + ".otf"
 		
 	if doReportOnly:
-		print "%s" % (fontEntry.fileName)
+		print("%s" % (fontEntry.fileName))
 	for tableEntry in fontEntry.tableList:
 		try:
 			tableEntry = tableDict[tableEntry.offset]
 			if doReportOnly:
-				print "\t%s offset: 0x%08X, already seen" % (tableEntry.tag, tableEntry.offset)
+				print("\t%s offset: 0x%08X, already seen" % (tableEntry.tag.decode('ascii'), tableEntry.offset))
 		except KeyError:
 			tableDict[tableEntry.offset] = tableEntry
 			if doReportOnly:
-				print "\t%s offset: 0x%08X, checksum: 0x%08X, length: 0x%08X" % (tableEntry.tag, tableEntry.offset, tableEntry.checksum, tableEntry.length)
+				print("\t%s offset: 0x%08X, checksum: 0x%08X, length: 0x%08X" % (tableEntry.tag.decode('ascii'), tableEntry.offset, tableEntry.checksum, tableEntry.length))
 	return fontEntry
 
 
@@ -243,21 +242,19 @@ def writeOTFFont(fontEntry):
 		tableData = tableEntry.data
 		dataList.append(tableData)
 	
-	fontData = "".join(dataList)
+	fontData = b"".join(dataList)
 	
-	fp = file(fontEntry.fileName, "wb")
-	fp.write(fontData)
-	fp.close()
+	with open(fontEntry.fileName, "wb") as fp:
+		fp.write(fontData)
 	return
 
 def run(args):
 	fontPath, doReportOnly = parseArgs(args)
-	print "Input font:", fontPath
+	print("Input font:", fontPath)
 	
 
-	fp = file(fontPath, "rb")
-	data = fp.read()
-	fp.close()
+	with open(fontPath, "rb") as fp:
+		data = fp.read()
 
 	TTCTag, version, numFonts = struct.unpack(ttcHeaderFormat, data[:ttcHeaderSize])
 	offsetdata = data[ttcHeaderSize:]
@@ -268,7 +265,7 @@ def run(args):
 	while i < numFonts:
 		offset = struct.unpack(offsetFormat, offsetdata[:offsetSize])[0]
 		if doReportOnly:
-			print "font %s offset: %s/0x%08X." % (i, offset,offset),
+			print("font %s offset: %s/0x%08X." % (i, offset,offset), end=' ')
 		fontEntry = readFontFile(offset, data, tableDict, doReportOnly)
 		fontList.append(fontEntry)
 		offsetdata = offsetdata[offsetSize:]
@@ -277,12 +274,12 @@ def run(args):
 	if not doReportOnly:		
 		for fontEntry in fontList:
 			writeOTFFont(fontEntry)
-			print "Output font:", fontEntry.fileName
-	print "Done"
+			print("Output font:", fontEntry.fileName)
+	print("Done")
 
 if __name__ == "__main__":
 	try:
 		run(sys.argv[1:])
-	except (OTCError), e:
-		print e.message
+	except (OTCError) as e:
+		print(e)
 		
