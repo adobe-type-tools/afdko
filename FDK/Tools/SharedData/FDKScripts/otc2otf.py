@@ -1,4 +1,4 @@
-# otc2otf.py v1.2 May 23 2015
+# otc2otf.py v1.3 October 13 2017
 from __future__ import print_function
 
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.

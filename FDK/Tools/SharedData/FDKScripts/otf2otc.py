@@ -1,4 +1,4 @@
-# otf2otc.py v1.4 June 21 2107
+# otf2otc.py v1.5 October 12 2017
 
 __copyright__ = """Copyright 2014,2017 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
