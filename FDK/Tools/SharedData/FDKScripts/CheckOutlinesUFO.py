@@ -2,7 +2,7 @@ __copyright__ = """Copyright 2015, 2016 Adobe Systems Incorporated (http://www.a
 """
 
 __usage__ = """
-   checkOutlinesUFO program v1.20 May 2 2017
+   checkOutlinesUFO program v1.21 Aug 8 2017
 
    checkOutlinesUFO [-e] [-g glyphList] [-gf <file name>] [-all] [-noOverlap] [-noBasicChecks] [-q] [-setMinArea <n>] [-setTolerance <n>] [-wd]
 
@@ -789,13 +789,13 @@ def setMaxP(contour):
 			if maxP.x <  point.y:
 				maxP == point
 	contour.maxP = maxP
-	
+
 def sortContours(c1, c2):
 	if not hasattr(c1,'maxP'):
 		setMaxP(c1)
 	if not hasattr(c2, 'maxP'):
 		setMaxP(c2)
-		
+
 	if c1.maxP.y > c2.maxP.y:
 		return 1
 	elif c1.maxP.y < c2.maxP.y:
@@ -805,7 +805,7 @@ def sortContours(c1, c2):
 		return 1
 	elif c1.maxP.x < c2.maxP.x:
 		return -1
-	
+
 	lc1 = len(c1)
 	lc2 = len(c2)
 	if len(lc1)  > len(lc2):
@@ -813,8 +813,8 @@ def sortContours(c1, c2):
 	elif len(lc1)  < len(lc2):
 		return -1
 	return 0
-		
-		
+
+
 def restoreContourOrder(fixedGlyph, originalContours):
 	""" The pyClipper library first sorts all the outlines by x position, then y position.
 	I try to undo that, so that un-touched contours will end up in the same order as the
@@ -878,7 +878,7 @@ def restoreContourOrder(fixedGlyph, originalContours):
 								point = contour[pi]
 								if (point.x == oldSP.x) and (point.y == oldSP.y) and point.segmentType != None:
 									contour.setStartPoint(pi)
-						
+
 						break
 				if matched:
 					break
@@ -939,8 +939,7 @@ def run(args):
 	lastHadMsg = 0
 	seenGlyphCount = 0
 	processedGlyphCount = 0
-	glyphList.sort()
-	for glyphName in glyphList:
+	for glyphName in sorted(glyphList):
 		changed = 0
 		seenGlyphCount +=1
 		msg = []
