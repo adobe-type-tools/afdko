@@ -475,7 +475,7 @@ def buildMasterList(inputPaths):
 	# The first time a key is encountered, we fill out the
 	# value list for that key for all fonts, using the values from
 	# the first font which has the key. When other fonts with the
-	# key are encountered, the real valeus will overwrite the default values.
+	# key are encountered, the real values will overwrite the default values.
 	numMasters = len(cff2FontList)
 	for i in range(numMasters):
 		curFont = cff2FontList[i]
@@ -513,7 +513,7 @@ def pointsDiffer(pointList):
 			break
 	return val
 
-def appendBlendOp(op, pointList, deltaWeights):
+def appendBlendOp(op, pointList, varModel):
 	blendStack = []
 	needBlend = False
 	numBlends = len(pointList)
@@ -540,19 +540,10 @@ def appendBlendOp(op, pointList, deltaWeights):
 		else:
 			if blendList:
 				for masterValues in blendList:
-					out = []
-					for i,weights in enumerate(deltaWeights):
-						m0 = masterValues[0]
-						delta = masterValues[i]
-						# there are no weight items for the default master (0)
-						for j,weight in weights.items():
-							delta -= out[j] * weight
-						if int(delta) == delta:
-							delta = int(delta)
-						out.append(delta)
+					deltas = varModel.getDeltas(masterValues)
 					# First item in out is the default master value;
 					# for CFF2 data, that has already been written.
-					blendStack.extend(out[1:])
+					blendStack.extend(deltas[1:])
 				numBlends = len(blendList)
 				blendStack.append(numBlends)
 				blendStack.append('blend')
@@ -560,19 +551,10 @@ def appendBlendOp(op, pointList, deltaWeights):
 			blendStack.append(masterArg)
 	if blendList:
 		for masterValues in blendList:
-			out = []
-			for i,weights in enumerate(deltaWeights):
-				m0 = masterValues[0]
-				delta = masterValues[i]
-				# there are no weight items for the default master (0)
-				for j,weight in weights.items():
-					delta -= out[j] * weight
-				if int(delta) == delta:
-					delta = int(delta)
-				out.append(delta)
+			deltas = varModel.getDeltas(masterValues)
 			# First item in out is the default master value;
 			# for CFF2 data, that has already been written.
-			blendStack.extend(out[1:])
+			blendStack.extend(deltas[1:])
 		numBlends = len(blendList)
 		blendStack.append(numBlends)
 		blendStack.append('blend')
@@ -584,9 +566,10 @@ def appendBlendOp(op, pointList, deltaWeights):
 
 
 def buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, numMasters, varModel):
-
+		
 	pd = baseFont.privateDict
 	opCodeDict = buildOpcodeDict(privateDictOperators)
+	# The PrivateDict blended items are defined in the CFF2 data as their original absolute values.
 	for key in bcDictList.keys():
 		operator, argType = opCodeDict[key]
 		valList = bcDictList[key]
@@ -624,7 +607,7 @@ def buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, numMasters, varModel):
 		t2CharString.decompile()
 		newProgram = []
 		for op, pointList in cff2GlyphData.opList:
-			blendStack = appendBlendOp(op, pointList, varModel.deltaWeights)
+			blendStack = appendBlendOp(op, pointList, varModel)
 			newProgram.extend(blendStack)
 		t2CharString = T2CharString(private=t2CharString.private,
 		                            globalSubrs=t2CharString.globalSubrs)
@@ -638,13 +621,7 @@ def buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, numMasters, varModel):
 def addCFFVarStore(baseFont, varModel, varFont):
 	supports = varModel.supports[1:]
 	fvarTable = varFont['fvar']
-	axisKeys = []
-	for axis in fvarTable.axes:
-		axisKeys.append(axis.axisTag)
-		print("axisTag", axis.axisTag)
-	import pprint
-	print("CFF2 region list:")
-	pprint.pprint(supports)
+	axisKeys = [axis.axisTag for axis in fvarTable.axes]
 	varTupleList = varLib.builder.buildVarRegionList(supports, axisKeys)
 	varTupleIndexes = list(range(len(supports)))
 	varDeltasCFFV = varLib.builder.buildVarData(varTupleIndexes, None)
@@ -652,7 +629,7 @@ def addCFFVarStore(baseFont, varModel, varFont):
 
 	cffTable = baseFont.cffTable
 	topDict =  cffTable.cff.topDictIndex[0]
-	topDict.VarStore = VarStoreData(otVarStore=varStoreCFFV)
+	topDict.VarStore = varStore = VarStoreData(otVarStore=varStoreCFFV)
 
 def addNamesToPost(ttFont, fontGlyphList):
 	postTable = ttFont['post']
@@ -889,13 +866,16 @@ def addSTATTable(varFont, varFontPath):
 
 def buildCFF2Font(varFontPath, varFont, varModel, masterPaths):
 
+	numMasters = len(masterPaths)
 	inputPaths = reorderMasters(varModel.mapping, masterPaths)
+	varModel.mapping = varModel.reverseMapping = range(numMasters)
+	# Since we have re-ordered the master master data to be the same
+	# as the varModel.location order, the mappings are flat.
 	"""Build CFF2 font from the master designs. default font is first."""
 	(baseFont, bcDictList, cff2GlyphList, fontGlyphList,
 	                                  blendError) = buildMasterList(inputPaths)
 	if blendError:
 		return blendError
-	numMasters = len(inputPaths)
 	buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, numMasters, varModel)
 	addCFFVarStore(baseFont, varModel, varFont)
 	addNamesToPost(varFont, fontGlyphList)
@@ -917,7 +897,7 @@ def run(args=None):
 	if '-h' in args:
 		print(__help__)
 		return
-
+	
 	if len(args) == 2:
 		designSpacePath, varFontPath = args
 	elif len(args) == 1:
@@ -928,9 +908,9 @@ def run(args=None):
 		return
 
 	if os.path.exists(varFontPath):
+		print("removing", varFontPath)
 		os.remove(varFontPath)
 	varFont, varModel, masterPaths = varLib.build(designSpacePath, otfFinder)
-
 	blendError = buildCFF2Font(varFontPath, varFont, varModel, masterPaths)
 	if not blendError:
 		print("Built variable font '%s'" % (varFontPath))
