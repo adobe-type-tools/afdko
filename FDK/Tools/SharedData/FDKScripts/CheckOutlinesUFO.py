@@ -729,9 +729,9 @@ def remove_colinear_lines(new_glyph, changed, msg, options):
         i = 0
         while i < num_ops:
             p0 = contour._points[i]
-            type = p0[0]
+            contour_type = p0[0]
             # Check for co-linear line.
-            if type == "line":
+            if contour_type == "line":
                 p1 = contour._points[i - 1]
                 # if p1 is a curve  point, no need to do colinear check!
                 if p1[0] == "line":
