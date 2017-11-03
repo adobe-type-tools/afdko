@@ -557,7 +557,7 @@ def remove_coincident_points(bool_glyph, changed, msg):
 
 
 # noinspection PyProtectedMember
-def remove_tiny_sub_paths(bool_glyph, min_area, changed, msg):
+def remove_tiny_sub_paths(bool_glyph, min_area, msg):
     """
     Removes tiny subpaths that are created by overlap removal when the start
     and end path segments cross each other, rather than meet.
@@ -572,10 +572,12 @@ def remove_tiny_sub_paths(bool_glyph, min_area, changed, msg):
     >>> p.lineTo((200,200))
     >>> p.lineTo((0,100))
     >>> p.closePath()
-    >>> assert (len(g[0]) == 3), "Contour does not have the expected number of points"
-    >>> assert (g.bounds == (0, 100, 200, 200)), "The contour's bounds do not match the expected"
+    >>> assert (len(g[0]) == 3), \
+            "Contour does not have the expected number of points"
+    >>> assert (g.bounds == (0, 100, 200, 200)), \
+            "The contour's bounds do not match the expected"
     >>> bool_glyph = booleanOperations.booleanGlyph.BooleanGlyph(g)
-    >>> remove_tiny_sub_paths(bool_glyph, 25, 0, []) == (0, [])
+    >>> remove_tiny_sub_paths(bool_glyph, 25, []) == []
     True
 
     # small contour
@@ -585,10 +587,14 @@ def remove_tiny_sub_paths(bool_glyph, min_area, changed, msg):
     >>> p.lineTo((2,2))
     >>> p.lineTo((0,1))
     >>> p.closePath()
-    >>> assert (len(g[0]) == 3), "Contour does not have the expected number of points"
-    >>> assert (g.bounds == (0, 1, 2, 2)), "The contour's bounds do not match the expected"
-    >>> bool_glyph = booleanOperations.booleanGlyph.BooleanGlyph(g)
-    >>> remove_tiny_sub_paths(bool_glyph, 25, 0, []) == (0, ['Contour 0 is too small: bounding box is less than minimum area. Start point: ((1, 1)).'])
+    >>> assert (len(g[0]) == 3), \
+            "Contour does not have the expected number of points"
+    >>> assert (g.bounds == (0, 1, 2, 2)), \
+            "The contour's bounds do not match the expected"
+    >>> bg = booleanOperations.booleanGlyph.BooleanGlyph(g)
+    >>> remove_tiny_sub_paths(bg, 25, []) == \
+            ['Contour 0 is too small: bounding box is less than minimum '\
+             'area. Start point: ((1, 1)).']
     True
     """
     num_contours = len(bool_glyph.contours)
@@ -609,7 +615,7 @@ def remove_tiny_sub_paths(bool_glyph, min_area, changed, msg):
                     "minimum area. Start point: (%s)." %
                     (ci, contour._points[0][1]))
                 del bool_glyph.contours[ci]
-    return changed, msg
+    return msg
 
 
 def is_colinear_line(b3, b2, b1, tolerance=0):
@@ -855,8 +861,7 @@ def do_overlap_removal(bool_glyph, old_digest, changed, msg, options):
     # Don't need to remove coincident points again.
     # These are not added by overlap removal.
     # Tiny subpaths are added by overlap removal.
-    changed, msg = remove_tiny_sub_paths(
-        new_glyph, options.min_area, changed, msg)
+    msg = remove_tiny_sub_paths(new_glyph, options.minArea, msg)
     return new_glyph, new_digest, changed, msg
 
 
