@@ -9,7 +9,10 @@ __usage__ = """
 
    Remove path overlaps, and do a few basic outline quality checks.
  """
-from ufoTools import kProcessedGlyphsLayerName, kProcessedGlyphsLayer
+# noinspection PyPep8Naming
+from ufoTools import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
+# noinspection PyPep8Naming
+from ufoTools import kProcessedGlyphsLayerName as PROCD_GLYPHS_LAYER_NAME
 
 __help__ = """
 
@@ -70,7 +73,7 @@ __help__ = """
     processed glyphs are saved in a layer, and processing of a glyph is skipped
     if has already been processed.
 
-""" % kProcessedGlyphsLayerName
+""" % PROCD_GLYPHS_LAYER_NAME
 
 __doc__ = __usage__ + __help__
 
@@ -100,18 +103,18 @@ class FocusFontError(KeyError):
     pass
 
 
-kUknownFontType = 0
-kUFOFontType = 1
-kType1FontType = 2
-kCFFFontType = 3
-kOpenTypeCFFFontType = 4
+UNKNOWN_FONT_TYPE = 0
+UFO_FONT_TYPE = 1
+TYPE1_FONT_TYPE = 2
+CFF_FONT_TYPE = 3
+OPENTYPE_CFF_FONT_TYPE = 4
 
 
 class FontFile(object):
     def __init__(self, font_path):
         self.fontPath = font_path
         self.tempUFOPath = None
-        self.fontType = kUknownFontType
+        self.fontType = UNKNOWN_FONT_TYPE
         self.dFont = None
         self.useHashMap = False
         self.ufoFontHashData = None
@@ -126,7 +129,7 @@ class FontFile(object):
             self.ufoFormat = self.dFont.ufoFormatVersion
             if self.ufoFormat < 2:
                 self.ufoFormat = 2
-            self.fontType = kUFOFontType
+            self.fontType = UFO_FONT_TYPE
             self.useHashMap = use_hash_map
             self.ufoFontHashData = ufoTools.UFOFontData(
                 font_path, self.useHashMap,
@@ -162,11 +165,11 @@ class FontFile(object):
                     except (IOError, OSError):
                         return
                     if data[:4] == "OTTO":  # it is an OTF font.
-                        self.fontType = kOpenTypeCFFFontType
+                        self.fontType = OPENTYPE_CFF_FONT_TYPE
                     elif (data[0] == '\1') and (data[1] == '\0'):  # CFF file
-                        self.fontType = kCFFFontType
+                        self.fontType = CFF_FONT_TYPE
                     elif "%" in data:
-                        self.fontType = kType1FontType
+                        self.fontType = TYPE1_FONT_TYPE
                     else:
                         print('Font type is unknown: '
                               'will not be able to save changes')
@@ -178,7 +181,7 @@ class FontFile(object):
         # Differs from save in that it saves just the hash file.
         # To be used when the glif files have not been changed by this program,
         # but the hash file has changed.
-        if self.fontType == kUFOFontType:
+        if self.fontType == UFO_FONT_TYPE:
             # Write the hash data, if it has changed.
             self.ufoFontHashData.close()
 
@@ -204,34 +207,34 @@ class FontFile(object):
             self.dFont.save()
         else:
             layers = self.dFont.layers
-            layer = layers[kProcessedGlyphsLayerName]
+            layer = layers[PROCD_GLYPHS_LAYER_NAME]
             writer._formatVersion = 3
-            writer.layerContents[kProcessedGlyphsLayerName] = \
-                kProcessedGlyphsLayer
+            writer.layerContents[PROCD_GLYPHS_LAYER_NAME] = \
+                PROCD_GLYPHS_LAYER
             glyph_set = writer.getGlyphSet(
-                layerName=kProcessedGlyphsLayerName, defaultLayer=False)
+                layerName=PROCD_GLYPHS_LAYER_NAME, defaultLayer=False)
             writer.writeLayerContents(layers.layerOrder)
             glyph_set.ufoFormatVersion = 2
             layer.save(glyph_set)
             layer.dirty = False
 
-        if self.fontType == kUFOFontType:
+        if self.fontType == UFO_FONT_TYPE:
             # Write the hash data, if it has changed.
             self.ufoFontHashData.close()
-        elif self.fontType == kType1FontType:
+        elif self.fontType == TYPE1_FONT_TYPE:
             cmd = "tx -t1 \"%s\" \"%s\"" % (self.tempUFOPath, self.fontPath)
             subprocess.Popen(
                 cmd, shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT)
-        elif self.fontType == kCFFFontType:
+        elif self.fontType == CFF_FONT_TYPE:
             cmd = "tx -cff +b -std \"%s\" \"%s\"" % (
                 self.tempUFOPath, self.fontPath)
             subprocess.call(
                 cmd, shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT)
-        elif self.fontType == kOpenTypeCFFFontType:
+        elif self.fontType == OPENTYPE_CFF_FONT_TYPE:
             temp_cff_path = self.tempUFOPath + ".cff"
             cmd = "tx -cff +b -std \"%s\" \"%s\"" % (
                 self.tempUFOPath, temp_cff_path)
@@ -1018,7 +1021,7 @@ def restore_contour_order(fixed_glyph, original_contours):
         fixed_glyph.appendContour(contour)
 
 
-kSpacePattern = re.compile(
+RE_SPACE_PATTERN = re.compile(
     r"space|uni(00A0|1680|180E|202F|205F|3000|FEFF|200[0-9AB])")
 
 
@@ -1044,9 +1047,9 @@ def run(args):
 
     if not options.writeToDefaultLayer:
         try:
-            processed_layer = d_font.layers[kProcessedGlyphsLayerName]
+            processed_layer = d_font.layers[PROCD_GLYPHS_LAYER_NAME]
         except KeyError:
-            processed_layer = d_font.newLayer(kProcessedGlyphsLayerName)
+            processed_layer = d_font.newLayer(PROCD_GLYPHS_LAYER_NAME)
     else:
         processed_layer = None
         font_file.saveToDefaultLayer = 1
@@ -1074,7 +1077,7 @@ def run(args):
         new_glyph = booleanOperations.booleanGlyph.BooleanGlyph(d_glyph)
         if len(new_glyph) == 0:
             # Complain about empty glyph only if it is not a space glyph.
-            if not kSpacePattern.search(glyph_name):
+            if not RE_SPACE_PATTERN.search(glyph_name):
                 msg = ["has no contours"]
             else:
                 msg = []
