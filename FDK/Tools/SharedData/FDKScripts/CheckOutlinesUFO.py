@@ -115,7 +115,7 @@ class FontFile(object):
         self.font_path = font_path
         self.temp_ufo_path = None
         self.font_type = UNKNOWN_FONT_TYPE
-        self.d_font = None
+        self.defcon_font = None
         self.use_hash_map = False
         self.ufo_font_hash_data = None
         self.ufo_format = 2
@@ -125,8 +125,8 @@ class FontFile(object):
         font_path = self.font_path
         try:
             ufoTools.validateLayers(font_path)
-            self.d_font = defcon.Font(font_path)
-            self.ufo_format = self.d_font.ufoFormatVersion
+            self.defcon_font = defcon.Font(font_path)
+            self.ufo_format = self.defcon_font.ufoFormatVersion
             if self.ufo_format < 2:
                 self.ufo_format = 2
             self.font_type = UFO_FONT_TYPE
@@ -152,7 +152,7 @@ class FontFile(object):
                     stderr=subprocess.STDOUT)
                 if os.path.exists(tempPath):
                     try:
-                        self.d_font = defcon.Font(tempPath)
+                        self.defcon_font = defcon.Font(tempPath)
                     except ufoLib.UFOLibError:
                         return
                     # It must be a font file!
@@ -175,7 +175,7 @@ class FontFile(object):
                               'will not be able to save changes')
             else:
                 raise e
-        return self.d_font
+        return self.defcon_font
 
     def close(self):
         # Differs from save in that it saves just the hash file.
@@ -202,11 +202,11 @@ class FontFile(object):
         that the glif files will be set to format 1.
         """
         from ufoLib import UFOWriter
-        writer = UFOWriter(self.d_font.path, formatVersion=2)
+        writer = UFOWriter(self.defcon_font.path, formatVersion=2)
         if self.save_to_default_layer:
-            self.d_font.save()
+            self.defcon_font.save()
         else:
-            layers = self.d_font.layers
+            layers = self.defcon_font.layers
             layer = layers[PROCD_GLYPHS_LAYER_NAME]
             writer._formatVersion = 3
             writer.layerContents[PROCD_GLYPHS_LAYER_NAME] = \
@@ -515,13 +515,13 @@ def filter_glyph_list(options, font_glyph_list, font_file_name):
     return glyph_list
 
 
-def get_digest(d_glyph):
+def get_digest(digest_glyph):
     """copied from robofab ObjectsBase.py.
     """
     mp = DigestPointPen()
-    d_glyph.drawPoints(mp)
+    digest_glyph.drawPoints(mp)
     digest = list(mp.getDigestPointsOnly(needSort=False))
-    digest.append((len(d_glyph.contours), 0))
+    digest.append((len(digest_glyph.contours), 0))
     return digest
 
 
@@ -1074,10 +1074,10 @@ def run(args):
             continue
         processed_glyph_count += 1
 
-        d_glyph = d_font[glyph_name]
-        if d_glyph.components:
-            d_glyph.decomposeAllComponents()
-        new_glyph = booleanOperations.booleanGlyph.BooleanGlyph(d_glyph)
+        defcon_glyph = d_font[glyph_name]
+        if defcon_glyph.components:
+            defcon_glyph.decomposeAllComponents()
+        new_glyph = booleanOperations.booleanGlyph.BooleanGlyph(defcon_glyph)
         if len(new_glyph) == 0:
             # Complain about empty glyph only if it is not a space glyph.
             if not RE_SPACE_PATTERN.search(glyph_name):
@@ -1102,18 +1102,18 @@ def run(args):
                 last_had_msg = True
         if changed and options.allow_changes:
             font_changed = True
-            original_contours = list(d_glyph)
+            original_contours = list(defcon_glyph)
             font_file.update_hash_entry(glyph_name, changed)
             if options.write_to_default_layer:
-                fixed_glyph = d_glyph
+                fixed_glyph = defcon_glyph
                 fixed_glyph.clearContours()
             else:
                 # this will replace any pre-existing glyph:
                 processed_layer.newGlyph(glyph_name)
                 fixed_glyph = processed_layer[glyph_name]
-                fixed_glyph.width = d_glyph.width
-                fixed_glyph.height = d_glyph.height
-                fixed_glyph.unicodes = d_glyph.unicodes
+                fixed_glyph.width = defcon_glyph.width
+                fixed_glyph.height = defcon_glyph.height
+                fixed_glyph.unicodes = defcon_glyph.unicodes
             point_pen = fixed_glyph.getPointPen()
             new_glyph.drawPoints(point_pen)
             if options.allow_decimal_coords:
