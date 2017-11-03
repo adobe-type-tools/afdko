@@ -526,12 +526,12 @@ def get_digest(d_glyph):
 
 
 # noinspection PyProtectedMember
-def remove_coincident_points(b_glyph, changed, msg):
+def remove_coincident_points(bool_glyph, changed, msg):
     """ Remove coincident points.
     # a point is (segment_type, pt, smooth, name).
     # e.g. (u'curve', (138, -92), False, None)
     """
-    for contour in b_glyph.contours:
+    for contour in bool_glyph.contours:
         op = contour._points[0]
         i = 1
         num_ops = len(contour._points)
@@ -562,7 +562,7 @@ def remove_coincident_points(b_glyph, changed, msg):
 
 
 # noinspection PyProtectedMember
-def remove_tiny_sub_paths(b_glyph, min_area, changed, msg):
+def remove_tiny_sub_paths(bool_glyph, min_area, changed, msg):
     """
     Removes tiny subpaths that are created by overlap removal when the start
     and end path segments cross each other, rather than meet.
@@ -579,8 +579,8 @@ def remove_tiny_sub_paths(b_glyph, min_area, changed, msg):
     >>> p.closePath()
     >>> assert (len(g[0]) == 3), "Contour does not have the expected number of points"
     >>> assert (g.bounds == (0, 100, 200, 200)), "The contour's bounds do not match the expected"
-    >>> bg = booleanOperations.booleanGlyph.BooleanGlyph(g)
-    >>> remove_tiny_sub_paths(bg, 25, 0, []) == (0, [])
+    >>> bool_glyph = booleanOperations.booleanGlyph.BooleanGlyph(g)
+    >>> remove_tiny_sub_paths(bool_glyph, 25, 0, []) == (0, [])
     True
 
     # small contour
@@ -592,14 +592,14 @@ def remove_tiny_sub_paths(b_glyph, min_area, changed, msg):
     >>> p.closePath()
     >>> assert (len(g[0]) == 3), "Contour does not have the expected number of points"
     >>> assert (g.bounds == (0, 1, 2, 2)), "The contour's bounds do not match the expected"
-    >>> bg = booleanOperations.booleanGlyph.BooleanGlyph(g)
-    >>> remove_tiny_sub_paths(bg, 25, 0, []) == (0, ['Contour 0 is too small: bounding box is less than minimum area. Start point: ((1, 1)).'])
+    >>> bool_glyph = booleanOperations.booleanGlyph.BooleanGlyph(g)
+    >>> remove_tiny_sub_paths(bool_glyph, 25, 0, []) == (0, ['Contour 0 is too small: bounding box is less than minimum area. Start point: ((1, 1)).'])
     True
     """
-    num_contours = len(b_glyph.contours)
+    num_contours = len(bool_glyph.contours)
     ci = 0
     while ci < num_contours:
-        contour = b_glyph.contours[ci]
+        contour = bool_glyph.contours[ci]
         ci += 1
         on_line_pts = filter(lambda pt: pt[0] is not None, contour._points)
         num_pts = len(on_line_pts)
@@ -613,7 +613,7 @@ def remove_tiny_sub_paths(b_glyph, min_area, changed, msg):
                     "Contour %s is too small: bounding box is less than "
                     "minimum area. Start point: (%s)." %
                     (ci, contour._points[0][1]))
-                del b_glyph.contours[ci]
+                del bool_glyph.contours[ci]
     return changed, msg
 
 
@@ -818,21 +818,21 @@ def round_point(pt):
     return pt
 
 
-def do_overlap_removal(b_glyph, old_digest, changed, msg, options):
-    changed, msg = remove_coincident_points(b_glyph, changed, msg)
+def do_overlap_removal(bool_glyph, old_digest, changed, msg, options):
+    changed, msg = remove_coincident_points(bool_glyph, changed, msg)
     options.remove_coincident_points_done = True
-    changed, msg = remove_flat_curves(b_glyph, changed, msg, options)
-    changed, msg = remove_colinear_lines(b_glyph, changed, msg, options)
+    changed, msg = remove_flat_curves(bool_glyph, changed, msg, options)
+    changed, msg = remove_colinear_lines(bool_glyph, changed, msg, options)
     options.remove_flat_curves_done = True
     # I need to fix these in the source, or the old vs new digests will differ,
     # as BooleanOperations removes these even if it does not do overlap
     # removal.
-    old_digest = list(get_digest(b_glyph))
+    old_digest = list(get_digest(bool_glyph))
     old_digest.sort()
     old_digest = map(round_point, old_digest)
     new_digest = []
     prev_digest = old_digest
-    new_glyph = b_glyph
+    new_glyph = bool_glyph
 
     while new_digest != prev_digest:
         # This is a hack to get around a bug in booleanGlyph. Consider an M
