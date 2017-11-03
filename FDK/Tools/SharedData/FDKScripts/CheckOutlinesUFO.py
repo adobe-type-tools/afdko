@@ -90,8 +90,6 @@ from robofab.pens.digestPen import DigestPointPen
 
 import hashlib
 
-nameAliasDict = {}
-
 kSrcGLIFHashMap = "com.adobe.type.checkOutlinesHashMap"
 
 
@@ -452,13 +450,11 @@ def expand_names(glyph_name):
         glyph_name = "cid" + glyph_name[1:].zfill(5)
         if glyph_name == "cid00000":
             glyph_name = ".notdef"
-            nameAliasDict[glyph_name] = "cid00000"
 
     elif glyph_name.startswith("cid") and (len(glyph_name) < 8):
         glyph_name = "cid" + glyph_name[3:].zfill(5)
         if glyph_name == "cid00000":
             glyph_name = ".notdef"
-            nameAliasDict[glyph_name] = "cid00000"
 
     return glyph_name
 
