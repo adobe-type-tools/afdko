@@ -90,8 +90,6 @@ from robofab.pens.digestPen import DigestPointPen
 
 import hashlib
 
-kSrcGLIFHashMap = "com.adobe.type.checkOutlinesHashMap"
-
 
 class FocusOptionParseError(KeyError):
     pass
