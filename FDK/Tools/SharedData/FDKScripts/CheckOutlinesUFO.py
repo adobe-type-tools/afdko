@@ -119,7 +119,7 @@ class FontFile(object):
         self.use_hash_map = False
         self.ufo_font_hash_data = None
         self.ufo_format = 2
-        self.save_to_default_layer = 0
+        self.save_to_default_layer = False
 
     def open(self, use_hash_map):
         font_path = self.font_path
@@ -289,9 +289,9 @@ class COOptions(object):
         self.out_file_path = None
         self.log_file_path = None
         self.glyph_list = []
-        self.allow_changes = 0
-        self.write_to_default_layer = 0
-        self.allow_decimal_coords = 0
+        self.allow_changes = False
+        self.write_to_default_layer = False
+        self.allow_decimal_coords = False
         self.min_area = 25
         self.tolerance = 0
 
@@ -299,10 +299,10 @@ class COOptions(object):
         self.check_all = False
 
         # processing state flag, used to not repeat coincident point removal.
-        self.remove_coincident_points_done = 0
+        self.remove_coincident_points_done = False
 
         # processing state flag, used to not repeat flat curve point removal.
-        self.remove_flat_curves_done = 0
+        self.remove_flat_curves_done = False
 
         self.clear_hash_map = False
         self.quiet_mode = False
@@ -342,7 +342,7 @@ def get_options(args):
             print(__doc__)
             sys.exit()
         elif arg == "-wd":
-            options.write_to_default_layer = 1
+            options.write_to_default_layer = True
         elif arg == "-g":
             i += 1
             glyph_string = args[i]
@@ -371,7 +371,7 @@ def get_options(args):
                     file_path)
             options.glyph_list += parse_glyph_list_arg(glyph_string)
         elif arg == "-e":
-            options.allow_changes = 1
+            options.allow_changes = True
         elif arg == "-q":
             options.quiet_mode = True
         elif arg == "-noOverlap":
@@ -394,7 +394,7 @@ def get_options(args):
                     "The argument following '-setTolerance' "
                     "must be an integer.")
         elif arg in ["-decimal", "-dec"]:
-            options.allow_decimal_coords = 1
+            options.allow_decimal_coords = True
         elif arg == "-all":
             options.check_all = True
         elif arg == "-clearHashMap":
@@ -544,7 +544,7 @@ def remove_coincident_points(b_glyph, changed, msg):
                 if last_op[1] == op[1]:
                     # Coincident point. Remove it.
                     msg.append("Coincident points at (%s,%s)." % (op[1]))
-                    changed = 1
+                    changed = True
                     del contour._points[i]
                     num_ops -= 1
                     if segment_type == "curve":
@@ -702,7 +702,7 @@ def remove_flat_curves(new_glyph, changed, msg, options):
                     if is_colinear_line(
                             p3[1], p1[1], p0[1], options.tolerance):
                         msg.append("Flat curve at (%s, %s)." % (p0[1]))
-                        changed = 1
+                        changed = True
                         p0 = list(p0)
                         p0[0] = "line"  # segment_type
                         contour._points[i] = tuple(p0)
@@ -741,7 +741,7 @@ def remove_colinear_lines(new_glyph, changed, msg, options):
                     if is_colinear_line(
                             p2[1], p1[1], p0[1], options.tolerance):
                         msg.append("Colinear line at (%s, %s)." % (p1[1]))
-                        changed = 1
+                        changed = True
                         del contour._points[i - 1]
                         num_ops -= 1
                         if num_ops < 3:
@@ -820,10 +820,10 @@ def round_point(pt):
 
 def do_overlap_removal(b_glyph, old_digest, changed, msg, options):
     changed, msg = remove_coincident_points(b_glyph, changed, msg)
-    options.remove_coincident_points_done = 1
+    options.remove_coincident_points_done = True
     changed, msg = remove_flat_curves(b_glyph, changed, msg, options)
     changed, msg = remove_colinear_lines(b_glyph, changed, msg, options)
-    options.remove_flat_curves_done = 1
+    options.remove_flat_curves_done = True
     # I need to fix these in the source, or the old vs new digests will differ,
     # as BooleanOperations removes these even if it does not do overlap
     # removal.
@@ -852,7 +852,7 @@ def do_overlap_removal(b_glyph, old_digest, changed, msg, options):
     # Can't use change in path number to see if something has changed
     # - overlap removal can add and subtract paths.
     if str(old_digest) != str(new_digest):
-        changed = 1
+        changed = True
         msg.append("There is an overlap.")
     # Don't need to remove coincident points again.
     # These are not added by overlap removal.
@@ -877,7 +877,7 @@ def do_cleanup(new_glyph, old_digest, changed, msg, options):
     # get called only if doOverlapRemoval is NOT called.
     if not options.remove_coincident_points_done:
         changed, msg = remove_coincident_points(new_glyph, changed, msg)
-        options.remove_coincident_points_done = 1
+        options.remove_coincident_points_done = True
     if not options.remove_flat_curves_done:
         changed, msg = remove_flat_curves(new_glyph, changed, msg, options)
     # I call removeColinearLines even when doOverlapRemoval is called,
@@ -977,14 +977,14 @@ def restore_contour_order(fixed_glyph, original_contours):
             # Now search the old contour list.
             for j in old_index_list:
                 ci2, old_contour = old_list[j]
-                matched = 0
+                matched = False
                 for point in old_contour:
                     if point.segmentType is None:
                         continue
                     if (max_p.x == point.x) and (max_p.y == point.y):
                         new_list[i] = None
                         order_list.append([ci2, ci])
-                        matched = 1
+                        matched = True
                         # See if we can set the start point in the new contour
                         # to match the old one.
                         if not ((old_contour[0].x == contour[0].x)
@@ -1052,13 +1052,13 @@ def run(args):
             processed_layer = d_font.newLayer(PROCD_GLYPHS_LAYER_NAME)
     else:
         processed_layer = None
-        font_file.save_to_default_layer = 1
+        font_file.save_to_default_layer = True
     font_changed = False
     last_had_msg = False
     seen_glyph_count = 0
     processed_glyph_count = 0
     for glyph_name in sorted(glyph_list):
-        changed = 0
+        changed = False
         seen_glyph_count += 1
         msg = []
 
