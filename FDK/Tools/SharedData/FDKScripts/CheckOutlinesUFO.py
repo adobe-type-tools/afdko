@@ -248,7 +248,8 @@ class FontFile(object):
         else:
             print("Font type is unknown: cannot save changes")
 
-        if (self.temp_ufo_path is not None) and os.path.exists(self.temp_ufo_path):
+        if (self.temp_ufo_path is not None) \
+                and os.path.exists(self.temp_ufo_path):
             shutil.rmtree(self.temp_ufo_path)
 
     def check_skip_glyph(self, glyph_name, do_all):
