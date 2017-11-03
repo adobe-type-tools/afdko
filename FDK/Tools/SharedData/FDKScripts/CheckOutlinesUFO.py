@@ -18,15 +18,15 @@ from ufoTools import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
 # noinspection PyPep8Naming
 from ufoTools import kProcessedGlyphsLayerName as PROCD_GLYPHS_LAYER_NAME
 
-__copyright__ = """Copyright 2015, 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved."""
+__copyright__ = 'Copyright 2015, 2016 Adobe Systems Incorporated ' \
+                '(http://www.adobe.com/). All Rights Reserved.'
 
-__usage__ = """
-   checkOutlinesUFO program v1.22 Oct 31 2017
+__usage__ = 'checkOutlinesUFO program v1.22 Oct 31 2017\n\n'\
+    'checkOutlinesUFO [-e] [-g glyphList] [-gf <file name>] [-all] '\
+    '[-noOverlap] [-noBasicChecks] [-q] [-setMinArea <n>] '\
+    '[-setTolerance <n>] [-wd]\n\n' \
+    'Remove path overlaps, and do a few basic outline quality checks.'
 
-   checkOutlinesUFO [-e] [-g glyphList] [-gf <file name>] [-all] [-noOverlap] [-noBasicChecks] [-q] [-setMinArea <n>] [-setTolerance <n>] [-wd]
-
-   Remove path overlaps, and do a few basic outline quality checks.
- """
 
 __help__ = """
 
