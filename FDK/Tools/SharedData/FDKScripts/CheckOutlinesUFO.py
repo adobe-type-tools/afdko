@@ -112,29 +112,29 @@ OPENTYPE_CFF_FONT_TYPE = 4
 
 class FontFile(object):
     def __init__(self, font_path):
-        self.fontPath = font_path
-        self.tempUFOPath = None
-        self.fontType = UNKNOWN_FONT_TYPE
-        self.dFont = None
-        self.useHashMap = False
-        self.ufoFontHashData = None
-        self.ufoFormat = 2
-        self.saveToDefaultLayer = 0
+        self.font_path = font_path
+        self.temp_ufo_path = None
+        self.font_type = UNKNOWN_FONT_TYPE
+        self.d_font = None
+        self.use_hash_map = False
+        self.ufo_font_hash_data = None
+        self.ufo_format = 2
+        self.save_to_default_layer = 0
 
     def open(self, use_hash_map):
-        font_path = self.fontPath
+        font_path = self.font_path
         try:
             ufoTools.validateLayers(font_path)
-            self.dFont = defcon.Font(font_path)
-            self.ufoFormat = self.dFont.ufoFormatVersion
-            if self.ufoFormat < 2:
-                self.ufoFormat = 2
-            self.fontType = UFO_FONT_TYPE
-            self.useHashMap = use_hash_map
-            self.ufoFontHashData = ufoTools.UFOFontData(
-                font_path, self.useHashMap,
+            self.d_font = defcon.Font(font_path)
+            self.ufo_format = self.d_font.ufoFormatVersion
+            if self.ufo_format < 2:
+                self.ufo_format = 2
+            self.font_type = UFO_FONT_TYPE
+            self.use_hash_map = use_hash_map
+            self.ufo_font_hash_data = ufoTools.UFOFontData(
+                font_path, self.use_hash_map,
                 programName=ufoTools.kCheckOutlineName)
-            self.ufoFontHashData.readHashMap()
+            self.ufo_font_hash_data.readHashMap()
 
         except ufoLib.UFOLibError as e:
             if (not os.path.isdir(font_path)) \
@@ -142,7 +142,7 @@ class FontFile(object):
                 # It was a file, but not a UFO font.
                 # Try converting to UFO font, and try again.
                 print("converting to temp UFO font...")
-                self.tempUFOPath = tempPath = font_path + ".temp.ufo"
+                self.temp_ufo_path = tempPath = font_path + ".temp.ufo"
                 if os.path.exists(tempPath):
                     shutil.rmtree(tempPath)
                 cmd = "tx -ufo \"%s\" \"%s\"" % (font_path, tempPath)
@@ -152,11 +152,11 @@ class FontFile(object):
                     stderr=subprocess.STDOUT)
                 if os.path.exists(tempPath):
                     try:
-                        self.dFont = defcon.Font(tempPath)
+                        self.d_font = defcon.Font(tempPath)
                     except ufoLib.UFOLibError:
                         return
                     # It must be a font file!
-                    self.tempUFOPath = tempPath
+                    self.temp_ufo_path = tempPath
                     # figure out font type.
                     try:
                         ff = open(font_path, "rb")
@@ -165,25 +165,25 @@ class FontFile(object):
                     except (IOError, OSError):
                         return
                     if data[:4] == "OTTO":  # it is an OTF font.
-                        self.fontType = OPENTYPE_CFF_FONT_TYPE
+                        self.font_type = OPENTYPE_CFF_FONT_TYPE
                     elif (data[0] == '\1') and (data[1] == '\0'):  # CFF file
-                        self.fontType = CFF_FONT_TYPE
+                        self.font_type = CFF_FONT_TYPE
                     elif "%" in data:
-                        self.fontType = TYPE1_FONT_TYPE
+                        self.font_type = TYPE1_FONT_TYPE
                     else:
                         print('Font type is unknown: '
                               'will not be able to save changes')
             else:
                 raise e
-        return self.dFont
+        return self.d_font
 
     def close(self):
         # Differs from save in that it saves just the hash file.
         # To be used when the glif files have not been changed by this program,
         # but the hash file has changed.
-        if self.fontType == UFO_FONT_TYPE:
+        if self.font_type == UFO_FONT_TYPE:
             # Write the hash data, if it has changed.
-            self.ufoFontHashData.close()
+            self.ufo_font_hash_data.close()
 
     def save(self):
         print("Saving font...")
@@ -202,11 +202,11 @@ class FontFile(object):
         that the glif files will be set to format 1.
         """
         from ufoLib import UFOWriter
-        writer = UFOWriter(self.dFont.path, formatVersion=2)
-        if self.saveToDefaultLayer:
-            self.dFont.save()
+        writer = UFOWriter(self.d_font.path, formatVersion=2)
+        if self.save_to_default_layer:
+            self.d_font.save()
         else:
-            layers = self.dFont.layers
+            layers = self.d_font.layers
             layer = layers[PROCD_GLYPHS_LAYER_NAME]
             writer._formatVersion = 3
             writer.layerContents[PROCD_GLYPHS_LAYER_NAME] = \
@@ -218,31 +218,31 @@ class FontFile(object):
             layer.save(glyph_set)
             layer.dirty = False
 
-        if self.fontType == UFO_FONT_TYPE:
+        if self.font_type == UFO_FONT_TYPE:
             # Write the hash data, if it has changed.
-            self.ufoFontHashData.close()
-        elif self.fontType == TYPE1_FONT_TYPE:
-            cmd = "tx -t1 \"%s\" \"%s\"" % (self.tempUFOPath, self.fontPath)
+            self.ufo_font_hash_data.close()
+        elif self.font_type == TYPE1_FONT_TYPE:
+            cmd = "tx -t1 \"%s\" \"%s\"" % (self.temp_ufo_path, self.font_path)
             subprocess.Popen(
                 cmd, shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT)
-        elif self.fontType == CFF_FONT_TYPE:
+        elif self.font_type == CFF_FONT_TYPE:
             cmd = "tx -cff +b -std \"%s\" \"%s\"" % (
-                self.tempUFOPath, self.fontPath)
+                self.temp_ufo_path, self.font_path)
             subprocess.call(
                 cmd, shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT)
-        elif self.fontType == OPENTYPE_CFF_FONT_TYPE:
-            temp_cff_path = self.tempUFOPath + ".cff"
+        elif self.font_type == OPENTYPE_CFF_FONT_TYPE:
+            temp_cff_path = self.temp_ufo_path + ".cff"
             cmd = "tx -cff +b -std \"%s\" \"%s\"" % (
-                self.tempUFOPath, temp_cff_path)
+                self.temp_ufo_path, temp_cff_path)
             subprocess.call(
                 cmd, shell=True,
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             cmd = "sfntedit -a \"CFF \"=\"%s\" \"%s\"" % (
-                temp_cff_path, self.fontPath)
+                temp_cff_path, self.font_path)
             subprocess.call(
                 cmd, shell=True,
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -251,14 +251,14 @@ class FontFile(object):
         else:
             print("Font type is unknown: cannot save changes")
 
-        if (self.tempUFOPath is not None) and os.path.exists(self.tempUFOPath):
-            shutil.rmtree(self.tempUFOPath)
+        if (self.temp_ufo_path is not None) and os.path.exists(self.temp_ufo_path):
+            shutil.rmtree(self.temp_ufo_path)
 
     def check_skip_glyph(self, glyph_name, do_all):
         skip = False
-        if self.ufoFontHashData and self.useHashMap:
+        if self.ufo_font_hash_data and self.use_hash_map:
             width, outline_xml, skip = \
-                self.ufoFontHashData.getOrSkipGlyphXML(glyph_name, do_all)
+                self.ufo_font_hash_data.getOrSkipGlyphXML(glyph_name, do_all)
         return skip
 
     @staticmethod
@@ -275,42 +275,42 @@ class FontFile(object):
         return glyph_hash
 
     def update_hash_entry(self, glyph_name, changed):
-        if self.ufoFontHashData is not None:  # isn't a UFO font.
-            self.ufoFontHashData.update_hash_entry(glyph_name, changed)
+        if self.ufo_font_hash_data is not None:  # isn't a UFO font.
+            self.ufo_font_hash_data.update_hash_entry(glyph_name, changed)
 
     def clear_hash_map(self):
-        if self.ufoFontHashData is not None:
-            self.ufoFontHashData.clear_hash_map()
+        if self.ufo_font_hash_data is not None:
+            self.ufo_font_hash_data.clear_hash_map()
 
 
 class COOptions(object):
     def __init__(self):
-        self.filePath = None
-        self.outFilePath = None
-        self.logFilePath = None
-        self.glyphList = []
-        self.allowChanges = 0
-        self.writeToDefaultLayer = 0
-        self.allowDecimalCoords = 0
-        self.minArea = 25
+        self.file_path = None
+        self.out_file_path = None
+        self.log_file_path = None
+        self.glyph_list = []
+        self.allow_changes = 0
+        self.write_to_default_layer = 0
+        self.allow_decimal_coords = 0
+        self.min_area = 25
         self.tolerance = 0
 
         # forces all glyphs to be processed even if src hasn't changed.
-        self.checkAll = False
+        self.check_all = False
 
         # processing state flag, used to not repeat coincident point removal.
-        self.removeCoincidentPointsDone = 0
+        self.remove_coincident_points_done = 0
 
         # processing state flag, used to not repeat flat curve point removal.
-        self.removeFlatCurvesDone = 0
+        self.remove_flat_curves_done = 0
 
-        self.clearHashMap = False
-        self.quietMode = False
+        self.clear_hash_map = False
+        self.quiet_mode = False
 
         # doOverlapRemoval must come first in the list,
         # since it may cause problems, like co-linear lines,
         # that need to be checked/fixed by later tests.
-        self.testList = [do_overlap_removal, do_cleanup]
+        self.test_list = [do_overlap_removal, do_cleanup]
 
 
 def parse_glyph_list_arg(glyph_string):
@@ -327,7 +327,7 @@ def get_options(args):
     num_options = len(args)
     while i < num_options:
         arg = args[i]
-        if options.filePath and arg[0] == "-":
+        if options.file_path and arg[0] == "-":
             raise FocusOptionParseError(
                 "Option Error: "
                 "All file names must follow all other options <%s>." % arg)
@@ -342,7 +342,7 @@ def get_options(args):
             print(__doc__)
             sys.exit()
         elif arg == "-wd":
-            options.writeToDefaultLayer = 1
+            options.write_to_default_layer = 1
         elif arg == "-g":
             i += 1
             glyph_string = args[i]
@@ -351,7 +351,7 @@ def get_options(args):
                     "Option Error: "
                     "it looks like the first item in the glyph list "
                     "following '-g' is another option.")
-            options.glyphList += parse_glyph_list_arg(glyph_string)
+            options.glyph_list += parse_glyph_list_arg(glyph_string)
         elif arg == "-gf":
             i += 1
             file_path = args[i]
@@ -369,19 +369,19 @@ def get_options(args):
                 raise FocusOptionParseError(
                     "Option Error: could not open glyph list file <%s>." %
                     file_path)
-            options.glyphList += parse_glyph_list_arg(glyph_string)
+            options.glyph_list += parse_glyph_list_arg(glyph_string)
         elif arg == "-e":
-            options.allowChanges = 1
+            options.allow_changes = 1
         elif arg == "-q":
-            options.quietMode = True
+            options.quiet_mode = True
         elif arg == "-noOverlap":
-            options.testList.remove(do_overlap_removal)
+            options.test_list.remove(do_overlap_removal)
         elif arg == "-noBasicChecks":
-            options.testList.remove(do_cleanup)
+            options.test_list.remove(do_cleanup)
         elif arg == "-setMinArea":
             i += 1
             try:
-                options.minArea = int(args[i])
+                options.min_area = int(args[i])
             except ValueError:
                 raise FocusOptionParseError(
                     "The argument following '-setMinArea' must be an integer.")
@@ -394,31 +394,31 @@ def get_options(args):
                     "The argument following '-setTolerance' "
                     "must be an integer.")
         elif arg in ["-decimal", "-dec"]:
-            options.allowDecimalCoords = 1
+            options.allow_decimal_coords = 1
         elif arg == "-all":
-            options.checkAll = True
+            options.check_all = True
         elif arg == "-clearHashMap":
-            options.clearHashMap = True
+            options.clear_hash_map = True
         elif arg[0] == "-":
             raise FocusOptionParseError(
                 "Option Error: Unknown option <%s>." % arg)
         else:
-            if options.filePath:
+            if options.file_path:
                 raise FocusOptionParseError(
                     "Option Error: You cannot specify more than one file "
                     "to check <%s>." % arg)
-            options.filePath = arg
+            options.file_path = arg
 
         i += 1
-    if not options.filePath:
+    if not options.file_path:
         raise FocusOptionParseError(
             "Option Error: You must provide a font file path.")
     else:
         # might be a UFO font. auto completion in some shells adds a dir
         # separator, which then causes problems with os.path.dirname().
-        options.filePath = options.filePath.rstrip(os.sep)
+        options.file_path = options.file_path.rstrip(os.sep)
 
-    if not os.path.exists(options.filePath):
+    if not os.path.exists(options.file_path):
         raise FocusOptionParseError(
             "Option Error: The file path does not exist.")
 
@@ -502,12 +502,12 @@ def filter_glyph_list(options, font_glyph_list, font_file_name):
     # Return the list of glyphs which are in the intersection of the argument
     # list and the glyphs in the font.
     # Complain about glyphs in the argument list which are not in the font.
-    if not options.glyphList:
+    if not options.glyph_list:
         glyph_list = font_glyph_list
     else:
         # expand ranges:
         glyph_list = []
-        for glyphTag in options.glyphList:
+        for glyphTag in options.glyph_list:
             glyph_names = \
                 get_glyph_names(glyphTag, font_glyph_list, font_file_name)
             if glyph_names is not None:
@@ -820,10 +820,10 @@ def round_point(pt):
 
 def do_overlap_removal(b_glyph, old_digest, changed, msg, options):
     changed, msg = remove_coincident_points(b_glyph, changed, msg)
-    options.removeCoincidentPointsDone = 1
+    options.remove_coincident_points_done = 1
     changed, msg = remove_flat_curves(b_glyph, changed, msg, options)
     changed, msg = remove_colinear_lines(b_glyph, changed, msg, options)
-    options.removeFlatCurvesDone = 1
+    options.remove_flat_curves_done = 1
     # I need to fix these in the source, or the old vs new digests will differ,
     # as BooleanOperations removes these even if it does not do overlap
     # removal.
@@ -858,7 +858,7 @@ def do_overlap_removal(b_glyph, old_digest, changed, msg, options):
     # These are not added by overlap removal.
     # Tiny subpaths are added by overlap removal.
     changed, msg = remove_tiny_sub_paths(
-        new_glyph, options.minArea, changed, msg)
+        new_glyph, options.min_area, changed, msg)
     return new_glyph, new_digest, changed, msg
 
 
@@ -875,10 +875,10 @@ def do_cleanup(new_glyph, old_digest, changed, msg, options):
 
     # Note that these removeCoincidentPointsDone and removeFlatCurvesDone
     # get called only if doOverlapRemoval is NOT called.
-    if not options.removeCoincidentPointsDone:
+    if not options.remove_coincident_points_done:
         changed, msg = remove_coincident_points(new_glyph, changed, msg)
-        options.removeCoincidentPointsDone = 1
-    if not options.removeFlatCurvesDone:
+        options.remove_coincident_points_done = 1
+    if not options.remove_flat_curves_done:
         changed, msg = remove_flat_curves(new_glyph, changed, msg, options)
     # I call removeColinearLines even when doOverlapRemoval is called,
     # as the latter can introduce new co-linear points.
@@ -1027,11 +1027,11 @@ RE_SPACE_PATTERN = re.compile(
 
 def run(args):
     options = get_options(args)
-    font_path = os.path.abspath(options.filePath)
+    font_path = os.path.abspath(options.file_path)
     font_file = FontFile(font_path)
-    d_font = font_file.open(options.allowChanges)
+    d_font = font_file.open(options.allow_changes)
     # We allow use of a hash map to skip glyphs only if fixing glyphs
-    if options.clearHashMap:
+    if options.clear_hash_map:
         font_file.clear_hash_map()
         return
 
@@ -1039,20 +1039,20 @@ def run(args):
         print("Could not open  file: %s." % font_path)
         return
 
-    glyph_list = filter_glyph_list(options, d_font.keys(), options.filePath)
+    glyph_list = filter_glyph_list(options, d_font.keys(), options.file_path)
     if not glyph_list:
         raise FocusFontError(
             "Error: selected glyph list is empty for font <%s>." %
-            options.filePath)
+            options.file_path)
 
-    if not options.writeToDefaultLayer:
+    if not options.write_to_default_layer:
         try:
             processed_layer = d_font.layers[PROCD_GLYPHS_LAYER_NAME]
         except KeyError:
             processed_layer = d_font.newLayer(PROCD_GLYPHS_LAYER_NAME)
     else:
         processed_layer = None
-        font_file.saveToDefaultLayer = 1
+        font_file.save_to_default_layer = 1
     font_changed = False
     last_had_msg = False
     seen_glyph_count = 0
@@ -1064,7 +1064,7 @@ def run(args):
 
         # font_file.checkSkipGlyph updates the hash map for the glyph,
         # so we call it even when the  '-all' option is used.
-        skip = font_file.check_skip_glyph(glyph_name, options.checkAll)
+        skip = font_file.check_skip_glyph(glyph_name, options.check_all)
         # Note: this will delete glyphs from the processed layer,
         #       if the glyph hash has changed.
         if skip:
@@ -1083,12 +1083,12 @@ def run(args):
                 msg = []
         else:
             glyph_digest = None
-            for test in options.testList:
+            for test in options.test_list:
                 if test is not None:
                     new_glyph, glyph_digest, changed, msg = \
                         test(new_glyph, glyph_digest, changed, msg, options)
 
-        if not options.quietMode:
+        if not options.quiet_mode:
             if len(msg) == 0:
                 if last_had_msg:
                     print()
@@ -1097,11 +1097,11 @@ def run(args):
             else:
                 print(os.linesep + glyph_name, " ".join(msg), end=' ')
                 last_had_msg = True
-        if changed and options.allowChanges:
+        if changed and options.allow_changes:
             font_changed = True
             original_contours = list(d_glyph)
             font_file.update_hash_entry(glyph_name, changed)
-            if options.writeToDefaultLayer:
+            if options.write_to_default_layer:
                 fixed_glyph = d_glyph
                 fixed_glyph.clearContours()
             else:
@@ -1113,7 +1113,7 @@ def run(args):
                 fixed_glyph.unicodes = d_glyph.unicodes
             point_pen = fixed_glyph.getPointPen()
             new_glyph.drawPoints(point_pen)
-            if options.allowDecimalCoords:
+            if options.allow_decimal_coords:
                 for contour in fixed_glyph:
                     for point in contour:
                         point.x = round(point.x, 3)
@@ -1133,7 +1133,7 @@ def run(args):
     # At this point, we may have deleted glyphs in the
     # processed layer.writer.getGlyphSet()
     # will fail unless we update the contents.plist file to match.
-    if options.allowChanges:
+    if options.allow_changes:
         ufoTools.validateLayers(font_path, False)
 
     if not font_changed:
