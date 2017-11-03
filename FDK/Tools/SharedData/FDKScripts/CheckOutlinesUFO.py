@@ -680,6 +680,7 @@ def is_colinear_line(b3, b2, b1, tolerance=0):
             return True
 
 
+# noinspection PyProtectedMember
 def remove_flat_curves(new_glyph, changed, msg, options):
     """ Remove flat curves.
     # a point is (segmentType, pt, smooth, name).
@@ -718,6 +719,7 @@ def remove_flat_curves(new_glyph, changed, msg, options):
     return changed, msg
 
 
+# noinspection PyProtectedMember
 def remove_colinear_lines(new_glyph, changed, msg, options):
     """ Remove colinear line- curves.
     # a point is (segmentType, pt, smooth, name).
@@ -753,6 +755,7 @@ def remove_colinear_lines(new_glyph, changed, msg, options):
     return changed, msg
 
 
+# noinspection PyProtectedMember
 def split_touching_paths(new_glyph):
     """ This hack fixes a design difference between the Adobe checkOutlines
     logic and booleanGlyph, and is used only when comparing the two. With
