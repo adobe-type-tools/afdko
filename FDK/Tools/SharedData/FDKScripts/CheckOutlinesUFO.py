@@ -1,5 +1,23 @@
 from __future__ import print_function
 
+import hashlib
+import os
+import re
+import shutil
+import subprocess
+import sys
+
+import booleanOperations.booleanGlyph
+import defcon
+import ufoLib
+from robofab.pens.digestPen import DigestPointPen
+
+import ufoTools
+# noinspection PyPep8Naming
+from ufoTools import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
+# noinspection PyPep8Naming
+from ufoTools import kProcessedGlyphsLayerName as PROCD_GLYPHS_LAYER_NAME
+
 __copyright__ = """Copyright 2015, 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved."""
 
 __usage__ = """
@@ -9,10 +27,6 @@ __usage__ = """
 
    Remove path overlaps, and do a few basic outline quality checks.
  """
-# noinspection PyPep8Naming
-from ufoTools import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
-# noinspection PyPep8Naming
-from ufoTools import kProcessedGlyphsLayerName as PROCD_GLYPHS_LAYER_NAME
 
 __help__ = """
 
@@ -76,19 +90,6 @@ __help__ = """
 """ % PROCD_GLYPHS_LAYER_NAME
 
 __doc__ = __usage__ + __help__
-
-import sys
-import os
-import re
-import defcon
-import ufoLib
-import subprocess
-import shutil
-import ufoTools
-import booleanOperations.booleanGlyph
-from robofab.pens.digestPen import DigestPointPen
-
-import hashlib
 
 
 class FocusOptionParseError(KeyError):
