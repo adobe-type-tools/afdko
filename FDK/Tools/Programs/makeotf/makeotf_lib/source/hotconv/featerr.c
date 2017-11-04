@@ -31,10 +31,6 @@
 
 #define MAX_TOKEN	64
 
-/* ------------------------------------------------------------------- */
-/* Adobe patent application tracking #P295, entitled FONT FEATURE FILE */
-/* PROCESSING, inventors: Patel, Hall.                                 */
-/* ------------------------------------------------------------------- */
 extern featCtx h;	/* Not reentrant; see featNew() comments */
 extern hotCtx g;
 

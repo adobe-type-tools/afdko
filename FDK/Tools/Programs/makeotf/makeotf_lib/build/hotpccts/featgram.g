@@ -1693,6 +1693,7 @@ sizemenuname
 			long lang = -1;		/* Suppress optimizer warning */
 			
 			h->nameString.cnt = 0;
+			h->featNameID = 0;
 			>>
 			(
 			K_sizemenuname					
