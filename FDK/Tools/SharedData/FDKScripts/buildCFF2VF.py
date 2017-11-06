@@ -49,7 +49,7 @@ import os
 import sys
 import traceback
 
-from fontTools import varLib
+from fontTools import varLib, version as fontToolsVersion
 from fontTools.varLib import designspace, models
 from fontTools.misc import xmlWriter
 from fontTools.ttLib import TTFont, getTableModule, newTable
@@ -58,7 +58,6 @@ from fontTools.cffLib import (VarStoreData, buildOpcodeDict,
 from fontTools.misc.psCharStrings import T2OutlineExtractor, T2CharString
 from fontTools.pens.t2CharStringPen import T2CharStringPen
 from fontTools.ttLib.tables import otTables
-
 try:
     import xml.etree.cElementTree as ET
 except ImportError:
@@ -897,7 +896,13 @@ def buildCFF2Font(varFontPath, varFont, varModel, masterPaths, post_format_3=Fal
 def otfFinder(s):
 	return s.replace('.ufo', '.otf')
 
+def checkFontToolsVersion():
+	parts  = fontToolsVersion.split('.')
+	parts = [int(part) for part in parts]
+	assert( (parts[0] >= 3) and (parts[1] >=19)), "the Python fonttools module must be at least 3.19.0 in order for buildCFF2VF to work."
+
 def run(args=None):
+	checkFontToolsVersion()
 	post_format_3 = False
 	if args is None:
 		args = sys.argv[1:]
