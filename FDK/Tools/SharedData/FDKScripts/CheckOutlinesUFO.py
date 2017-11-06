@@ -274,7 +274,7 @@ class FontFile(object):
 
     def update_hash_entry(self, glyph_name, changed):
         if self.ufo_font_hash_data is not None:  # isn't a UFO font.
-            self.ufo_font_hash_data.update_hash_entry(glyph_name, changed)
+            self.ufo_font_hash_data.updateHashEntry(glyph_name, changed)
 
     def clear_hash_map(self):
         if self.ufo_font_hash_data is not None:
