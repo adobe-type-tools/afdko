@@ -4,7 +4,7 @@ __copyright__ = """Copyright 2017 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-buildCFF2VF.py  1.11 Jul 26 2017
+buildCFF2VF.py  1.13 Aug 7 2017
 Build a variable font from a designspace file and the UFO master source fonts.
 
 python buildCFF2VF.py -h
@@ -13,6 +13,9 @@ python buildCFF2VF.py <path to designspace file> (<optional path to output varia
 """
 
 __help__  = __usage__  + """
+Options:
+-p   Use 'post' table format 3.
+
 The script makes a number of assumptions.
 1) all the master source fonts are blend compatible in all their data.
 2) The source OTF files are in the same directory as the master source
@@ -524,14 +527,13 @@ def appendBlendOp(op, pointList, varModel):
 	#	...
 	#	[m0, m1..mn] # values for each master for arg numBlends
 	# ]
-	# The CFF blend operator expects first the series of args 0-numBlends
+	# The CFF2 blend operator expects first the series of args 0-numBlends
 	# from the first master
 	blendList = []
 	if op in ('hintmask', 'cntrmask'):
 		blendStack.append(op)
 		blendStack.append(pointList[0][0])
 		return blendStack
-
 	for argEntry in pointList:
 		masterArg = argEntry[0]
 		if pointsDiffer(argEntry):
@@ -541,7 +543,7 @@ def appendBlendOp(op, pointList, varModel):
 			if blendList:
 				for masterValues in blendList:
 					deltas = varModel.getDeltas(masterValues)
-					# First item in out is the default master value;
+					# First item in 'deltas' is the default master value;
 					# for CFF2 data, that has already been written.
 					blendStack.extend(deltas[1:])
 				numBlends = len(blendList)
@@ -552,24 +554,22 @@ def appendBlendOp(op, pointList, varModel):
 	if blendList:
 		for masterValues in blendList:
 			deltas = varModel.getDeltas(masterValues)
-			# First item in out is the default master value;
+			# First item in 'deltas' is the default master value;
 			# for CFF2 data, that has already been written.
 			blendStack.extend(deltas[1:])
 		numBlends = len(blendList)
 		blendStack.append(numBlends)
 		blendStack.append('blend')
 		blendList = []
-
 	blendStack.append(op)
 	return blendStack
 
 
 
 def buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, numMasters, varModel):
-		
+
 	pd = baseFont.privateDict
 	opCodeDict = buildOpcodeDict(privateDictOperators)
-	# The PrivateDict blended items are defined in the CFF2 data as their original absolute values.
 	for key in bcDictList.keys():
 		operator, argType = opCodeDict[key]
 		valList = bcDictList[key]
@@ -584,19 +584,26 @@ def buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, numMasters, varModel):
 			dataList = []
 			if needsBlend:
 				blendCount = 0
+				prevBlendList = [0]*len(valList[0])
 				for blendList in valList:
-					dataList.append(blendList)
+					# convert blend list from absolute values to relative values from the previous blend list.
+					relBlendList = [(val-prevBlendList[i]) for i,val  in enumerate(blendList)]
+					prevBlendList = blendList
+					deltas = varModel.getDeltas(relBlendList)
+					# For PrivateDict BlueValues, the default font
+					# values are absolute, not relative.
+					deltas[0] = blendList[0]
+					dataList.append(deltas)
 			else:
 				for blendList in valList:
 					dataList.append(blendList[0])
 		else:
 			if pointsDiffer(valList):
-				dataList = valList
+				dataList = varModel.getDeltas(valList)
 			else:
 				dataList = valList[0]
 
 		pd.rawDict[key] = dataList
-
 
 	# Now update all the charstrings.
 	fontGlyphList = baseFont.ttFont.getGlyphOrder()
@@ -629,7 +636,7 @@ def addCFFVarStore(baseFont, varModel, varFont):
 
 	cffTable = baseFont.cffTable
 	topDict =  cffTable.cff.topDictIndex[0]
-	topDict.VarStore = varStore = VarStoreData(otVarStore=varStoreCFFV)
+	topDict.VarStore = VarStoreData(otVarStore=varStoreCFFV)
 
 def addNamesToPost(ttFont, fontGlyphList):
 	postTable = ttFont['post']
@@ -639,7 +646,7 @@ def addNamesToPost(ttFont, fontGlyphList):
 	postTable.mapping = {}
 	postTable.compile(ttFont)
 
-def convertCFFtoCFF2(baseFont, masterFont):
+def convertCFFtoCFF2(baseFont, masterFont, post_format_3=False):
 	# base font contains the CFF2 blend data, but with the table tag 'CFF '
 	# all the CFF fields. Remove all the fields that were removed in the
 	# CFF2 spec.
@@ -651,6 +658,8 @@ def convertCFFtoCFF2(baseFont, masterFont):
 	newCFF2.cff = cffTable.cff
 	data = newCFF2.compile(masterFont)
 	masterFont['CFF2'] = newCFF2
+	if post_format_3:
+		masterFont['post'].formatType = 3.0
 
 def reorderMasters(mapping, masterPaths):
 	numMasters = len(masterPaths)
@@ -864,7 +873,7 @@ def addSTATTable(varFont, varFontPath):
 	else:
 		varFont.importXML(statPath)
 
-def buildCFF2Font(varFontPath, varFont, varModel, masterPaths):
+def buildCFF2Font(varFontPath, varFont, varModel, masterPaths, post_format_3=False):
 
 	numMasters = len(masterPaths)
 	inputPaths = reorderMasters(varModel.mapping, masterPaths)
@@ -879,7 +888,7 @@ def buildCFF2Font(varFontPath, varFont, varModel, masterPaths):
 	buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, numMasters, varModel)
 	addCFFVarStore(baseFont, varModel, varFont)
 	addNamesToPost(varFont, fontGlyphList)
-	convertCFFtoCFF2(baseFont, varFont)
+	convertCFFtoCFF2(baseFont, varFont, post_format_3)
 	# fixVerticalMetrics(varFont, masterPaths)
 	addSTATTable(varFont, varFontPath)
 	varFont.save(varFontPath)
@@ -889,6 +898,7 @@ def otfFinder(s):
 	return s.replace('.ufo', '.otf')
 
 def run(args=None):
+	post_format_3 = False
 	if args is None:
 		args = sys.argv[1:]
 	if '-u' in args:
@@ -897,7 +907,10 @@ def run(args=None):
 	if '-h' in args:
 		print(__help__)
 		return
-	
+	if '-p' in args:
+		post_format_3 = True
+		args.remove('-p')
+
 	if len(args) == 2:
 		designSpacePath, varFontPath = args
 	elif len(args) == 1:
@@ -908,10 +921,10 @@ def run(args=None):
 		return
 
 	if os.path.exists(varFontPath):
-		print("removing", varFontPath)
 		os.remove(varFontPath)
 	varFont, varModel, masterPaths = varLib.build(designSpacePath, otfFinder)
-	blendError = buildCFF2Font(varFontPath, varFont, varModel, masterPaths)
+
+	blendError = buildCFF2Font(varFontPath, varFont, varModel, masterPaths, post_format_3)
 	if not blendError:
 		print("Built variable font '%s'" % (varFontPath))
 
