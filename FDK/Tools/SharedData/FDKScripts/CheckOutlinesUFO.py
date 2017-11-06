@@ -862,7 +862,7 @@ def do_overlap_removal(bool_glyph, old_digest, changed, msg, options):
     # Don't need to remove coincident points again.
     # These are not added by overlap removal.
     # Tiny subpaths are added by overlap removal.
-    msg = remove_tiny_sub_paths(new_glyph, options.minArea, msg)
+    msg = remove_tiny_sub_paths(new_glyph, options.min_area, msg)
     return new_glyph, new_digest, changed, msg
 
 
