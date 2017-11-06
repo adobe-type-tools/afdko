@@ -1033,17 +1033,17 @@ def run(args):
     options = get_options(args)
     font_path = os.path.abspath(options.file_path)
     font_file = FontFile(font_path)
-    d_font = font_file.open(options.allow_changes)
+    defcon_font = font_file.open(options.allow_changes)
     # We allow use of a hash map to skip glyphs only if fixing glyphs
     if options.clear_hash_map:
         font_file.clear_hash_map()
         return
 
-    if d_font is None:
+    if defcon_font is None:
         print("Could not open  file: %s." % font_path)
         return
 
-    glyph_list = filter_glyph_list(options, d_font.keys(), options.file_path)
+    glyph_list = filter_glyph_list(options, defcon_font.keys(), options.file_path)
     if not glyph_list:
         raise FocusFontError(
             "Error: selected glyph list is empty for font <%s>." %
@@ -1051,9 +1051,9 @@ def run(args):
 
     if not options.write_to_default_layer:
         try:
-            processed_layer = d_font.layers[PROCD_GLYPHS_LAYER_NAME]
+            processed_layer = defcon_font.layers[PROCD_GLYPHS_LAYER_NAME]
         except KeyError:
-            processed_layer = d_font.newLayer(PROCD_GLYPHS_LAYER_NAME)
+            processed_layer = defcon_font.newLayer(PROCD_GLYPHS_LAYER_NAME)
     else:
         processed_layer = None
         font_file.save_to_default_layer = True
@@ -1075,7 +1075,7 @@ def run(args):
             continue
         processed_glyph_count += 1
 
-        defcon_glyph = d_font[glyph_name]
+        defcon_glyph = defcon_font[glyph_name]
         if defcon_glyph.components:
             defcon_glyph.decomposeAllComponents()
         new_glyph = booleanOperations.booleanGlyph.BooleanGlyph(defcon_glyph)
