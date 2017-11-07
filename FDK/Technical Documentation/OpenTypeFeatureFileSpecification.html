@@ -1621,7 +1621,7 @@ table GDEF {
 <p>A name record is of the form:</p>
 <pre>
   <b>nameid</b> &lt;id&gt; [&lt;string attribute&gt;] &lt;string&gt;;</pre>
-<p>An &lt;id&gt; is a number specifying the id of the name string to be added to the name table. This number must be in the registered id range 0, 7-255. Note that ids 1-6 (Family, Subfamily, Unique, Full, Version, and FontName) are reserved by the implementation and cannot be overridden; doing so will elicit a warning message and the record will be ignored.</p>
+<p>An &lt;id&gt; is a number specifying the id of the name string to be added to the name table. Note that ids 2 and 6 (Family, Subfamily, Unique, Full, Version, and FontName) are reserved by the implementation and cannot be overridden; doing so will elicit a warning message and the record will be ignored.</p>
 <p>An optional &lt;string attribute&gt; is one or three space delimited numbers that specify the platform, platform-specific, and language ids to be stored in the name record of the name table. If only one number is specified it represents the platform id. The platform id may be either 1 or 3, corresponding to the Macintosh or Microsoft (hereafter called Windows) platforms, respectively. The other id numbers must be in the range 0-65535 but are not otherwise validated.</p>
 <p>Decimal numbers must begin with a non-0 digit, octal numbers with a 0 digit, and hexadecimal numbers with a 0x prefix to numbers and hexadecimal letters a-f or A-F.</p>
 <p>If some or all of the string attribute id numbers aren't specified their values are defaulted as follows:</p>
@@ -1774,6 +1774,7 @@ nameid I 1 S L &lt;string&gt;;    I   1          S           L</pre>
 <ul>
 <li>Updated Pair Pos Format A: It is now supported. Corrected syntax of example. See <a href="#6.b.i">class pair kerning</a>.</li>
 <li>Updated description of the <b>UseMarkFilteringSet</b> lookup flag. It is now widely supported. See <a href="#4.d">lookupflag</a>.</li>
+<li>Relaxed limitations on name table name ids: only 2 and 6 are now reserved. See <a href="##9.e">name table</a>.</li>
 </ul>
 <p><b>v1.20 [6 Feb 2017]:</b></p>
 <ul>
