@@ -1043,7 +1043,8 @@ def run(args):
         print("Could not open  file: %s." % font_path)
         return
 
-    glyph_list = filter_glyph_list(options, defcon_font.keys(), options.file_path)
+    glyph_list = filter_glyph_list(
+        options, defcon_font.keys(), options.file_path)
     if not glyph_list:
         raise FocusFontError(
             "Error: selected glyph list is empty for font <%s>." %
