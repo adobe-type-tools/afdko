@@ -480,12 +480,12 @@ def get_glyph_names(glyph_tag, font_glyph_list, font_file_name):
         return None
     glyph_name_list.append(glyph_name)
 
-    for glyphTag2 in range_list[1:]:
-        gid = get_glyph_id(glyphTag2, font_glyph_list)
+    for glyph_tag_2 in range_list[1:]:
+        gid = get_glyph_id(glyph_tag_2, font_glyph_list)
         if gid is None:
             print("\tWarning: glyph ID <%s> in range %s from glyph selection "
                   "list option is not in font. <%s>." %
-                  (glyphTag2, glyph_tag, font_file_name))
+                  (glyph_tag_2, glyph_tag, font_file_name))
             return None
         for i in range(prev_gid + 1, gid + 1):
             glyph_name_list.append(font_glyph_list[i])
@@ -503,9 +503,9 @@ def filter_glyph_list(options, font_glyph_list, font_file_name):
     else:
         # expand ranges:
         glyph_list = []
-        for glyphTag in options.glyph_list:
+        for glyph_tag in options.glyph_list:
             glyph_names = \
-                get_glyph_names(glyphTag, font_glyph_list, font_file_name)
+                get_glyph_names(glyph_tag, font_glyph_list, font_file_name)
             if glyph_names is not None:
                 glyph_list.extend(glyph_names)
     return glyph_list
