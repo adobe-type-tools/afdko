@@ -685,7 +685,7 @@ def is_colinear_line(b3, b2, b1, tolerance=0):
 # noinspection PyProtectedMember
 def remove_flat_curves(new_glyph, changed, msg, options):
     """ Remove flat curves.
-    # a point is (segmentType, pt, smooth, name).
+    # a point is (segment_type, pt, smooth, name).
     # e.g. (u'curve', (138, -92), False, None)
     """
     for contour in new_glyph.contours:
@@ -724,7 +724,7 @@ def remove_flat_curves(new_glyph, changed, msg, options):
 # noinspection PyProtectedMember
 def remove_colinear_lines(new_glyph, changed, msg, options):
     """ Remove colinear line- curves.
-    # a point is (segmentType, pt, smooth, name).
+    # a point is (segment_type, pt, smooth, name).
     # e.g. (u'curve', (138, -92), False, None)
     """
     for contour in new_glyph.contours:
@@ -877,14 +877,14 @@ def do_cleanup(new_glyph, old_digest, changed, msg, options):
         old_digest.sort()
         old_digest = map(round_point, old_digest)
 
-    # Note that these removeCoincidentPointsDone and removeFlatCurvesDone
-    # get called only if doOverlapRemoval is NOT called.
+    # Note that these remove_coincident_points_done and remove_flat_curves_done
+    # get called only if do_overlap_removal is NOT called.
     if not options.remove_coincident_points_done:
         changed, msg = remove_coincident_points(new_glyph, changed, msg)
         options.remove_coincident_points_done = True
     if not options.remove_flat_curves_done:
         changed, msg = remove_flat_curves(new_glyph, changed, msg, options)
-    # I call removeColinearLines even when doOverlapRemoval is called,
+    # I call remove_colinear_lines even when do_overlap_removal is called,
     # as the latter can introduce new co-linear points.
     changed, msg = remove_colinear_lines(new_glyph, changed, msg, options)
 
@@ -1066,7 +1066,7 @@ def run(args):
         seen_glyph_count += 1
         msg = []
 
-        # font_file.checkSkipGlyph updates the hash map for the glyph,
+        # font_file.check_skip_glyph updates the hash map for the glyph,
         # so we call it even when the  '-all' option is used.
         skip = font_file.check_skip_glyph(glyph_name, options.check_all)
         # Note: this will delete glyphs from the processed layer,
