@@ -11,7 +11,7 @@
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0.
 </p>
 <p><b>Version</b></p>
-<p>[ Document version 1.20. Last updated 6 Feb 2017]</p>
+<p>[ Document version 1.21. Last updated 7 Nov 2017]</p>
 <p><b>Caution:</b></p>
 <p>Portions of the syntax unimplemented by Adobe are subject to change.</p>
 <ol>
@@ -630,9 +630,9 @@ include<code>(../features.family);</code></pre>
 <p>Base, ligature, and mark glyphs are specified in the glyph class definition of the GDEF table.</p>
 <p>To skip over all mark glyphs except for those of mark class @TOP_MARKS:</p>
 <pre>
-<b>lookupflag</b> <b>MarkAttachmentType </b> @TOP_MARKS;</pre>
+<b>lookupflag</b> <b>MarkAttachmentType</b> @TOP_MARKS;</pre>
 <p>The class name used with MarkAttachmentType can be either a regular glyph class name or a mark class name. The glyph sets of the referenced classes must not overlap, and the MarkAttachmentType statement can reference at most 15 different classes.</p>
-<p>A new lookup flag which is proposed for OpenType spec 1.6, <b><code>UseMarkFilteringSet,</code></b> is also supported. This works the same as the MarkAttachmentType, but allows you to use up to 16K different mark classes, and allows the glyph sets of the referenced classes to overlap. The drawback to this lookupflag is that as of Nov 2008, there are not yet any programs that support it.</p>
+<p>The flag <b>UseMarkFilteringSet</b> was added in OpenType spec 1.6. This works the same as the MarkAttachmentType, but allows you to use up to 16K different mark classes, and allows the glyph sets of the referenced classes to overlap.</p>
 </li>
 <li><p>lookupflag format B:</p>
 <pre>
@@ -1001,14 +1001,14 @@ include<code>(../features.family);</code></pre>
 <p><a name="6.b.i"></a><b>6.b.i. Specific and class pair kerning</b></p>
 <p>Rules for this LookupType are usually used for kerning, and may be in either of 2 formats:</p>
 <ul>
-<li><p>Pair Pos format A: <i>[ Currently not implemented. ]</i></p>
+<li><p>Pair Pos format A: </p>
 <pre>
   <b>position</b> &lt;glyph|glyphclass&gt; &lt;valuerecord&gt;
            
            &lt;glyph|glyphclass&gt; &lt;valuerecord&gt;;</pre>
 <p>The first &lt;valuerecord&gt; [&sect;<a href="#2.e.iv">2.e.iv</a>] corresponds to the first &lt;glyph|glyphclass&gt;, and the second &lt;valuerecord&gt; corresponds to the second &lt;glyph|glyphclass&gt;. The following example illustrates an unusual way to specify a kern value of -100:</p>
 <pre>
-  <b>position</b> T &lt;-60&gt; a &lt;-40 0 -40 0&gt;;</pre>
+  <b>position</b> T -60 a &lt;-40 0 -40 0&gt;;</pre>
 </li>
 <li><p>Pair Pos format B:</p>
 <pre>
@@ -1770,6 +1770,11 @@ nameid I 1 S L &lt;string&gt;;    I   1          S           L</pre>
   }</pre>
 <p>along with the tag 'sbit'.</p>
 <p><a name="11"></a><b>11. Document revisions</b></p>
+<p><b>v1.21 [7 Nov 2017]:</b></p>
+<ul>
+<li>Updated Pair Pos Format A: It is now supported. Corrected syntax of example. See <a href="#6.b.i">class pair kerning</a>.</li>
+<li>Updated description of the <b>UseMarkFilteringSet</b> lookup flag. It is now widely supported. See <a href="#4.d">lookupflag</a>.</li>
+</ul>
 <p><b>v1.20 [6 Feb 2017]:</b></p>
 <ul>
 <li>Updated glyph name rules in section <a href="#2.f.i">2.f.i glyph name</a> to allow additional characters for development names.</li></li>
