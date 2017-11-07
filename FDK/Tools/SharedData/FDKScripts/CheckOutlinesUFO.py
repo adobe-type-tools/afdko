@@ -139,21 +139,21 @@ class FontFile(object):
                 # It was a file, but not a UFO font.
                 # Try converting to UFO font, and try again.
                 print("converting to temp UFO font...")
-                self.temp_ufo_path = tempPath = font_path + ".temp.ufo"
-                if os.path.exists(tempPath):
-                    shutil.rmtree(tempPath)
-                cmd = "tx -ufo \"%s\" \"%s\"" % (font_path, tempPath)
+                self.temp_ufo_path = temp_path = font_path + ".temp.ufo"
+                if os.path.exists(temp_path):
+                    shutil.rmtree(temp_path)
+                cmd = "tx -ufo \"%s\" \"%s\"" % (font_path, temp_path)
                 subprocess.call(
                     cmd, shell=True,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT)
-                if os.path.exists(tempPath):
+                if os.path.exists(temp_path):
                     try:
-                        self.defcon_font = defcon.Font(tempPath)
+                        self.defcon_font = defcon.Font(temp_path)
                     except ufoLib.UFOLibError:
                         return
                     # It must be a font file!
-                    self.temp_ufo_path = tempPath
+                    self.temp_ufo_path = temp_path
                     # figure out font type.
                     try:
                         ff = open(font_path, "rb")
