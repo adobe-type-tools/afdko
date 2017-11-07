@@ -305,7 +305,7 @@ class COOptions(object):
         self.clear_hash_map = False
         self.quiet_mode = False
 
-        # doOverlapRemoval must come first in the list,
+        # do_overlap_removal must come first in the list,
         # since it may cause problems, like co-linear lines,
         # that need to be checked/fixed by later tests.
         self.test_list = [do_overlap_removal, do_cleanup]
