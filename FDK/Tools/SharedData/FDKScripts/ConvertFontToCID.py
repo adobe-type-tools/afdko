@@ -1,7 +1,7 @@
 #!/bin/env python
 
 __doc__ = """
-ConvertFontToCID.py. v 1.10 Jan 13 2017
+ConvertFontToCID.py. v 1.11 Nov 7 2017
 
 Convert a Type 1 font to CID, given multiple hint dict defs in the
 "fontinfo" file. See AC.py help, with the "-hfd" option, or the MakeOTF
@@ -802,7 +802,8 @@ def mergeFonts(inputFontPath, outputPath, fontList, glyphList, fontDictList, fdG
 	lastFont =""
 	tempfileList = []
 	i = 0
-	print "Merging temp fonts:", 
+	if debug:
+		print "Merging temp fonts:", 
 	for fontPath in fontList:
 		print ".",
 		sys.stdout.flush()
@@ -814,7 +815,6 @@ def mergeFonts(inputFontPath, outputPath, fontList, glyphList, fontDictList, fdG
 			command = "mergeFonts -std -cid \"%s\" \"%s\" \"%s\" \"%s\"  \"%s\" 2>&1"  % (cidfontinfoPath, dstPath, lastFont, gaPath, fontPath)
 		else:
 			command = "mergeFonts -std -cid \"%s\" \"%s\" \"%s\"  \"%s\" 2>&1"  % (cidfontinfoPath, dstPath, gaPath, fontPath)
-		print command
 		log = FDKUtils.runShellCmd(command)
 		if debug:
 			print command
