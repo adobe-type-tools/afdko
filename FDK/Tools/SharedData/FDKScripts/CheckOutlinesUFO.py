@@ -896,7 +896,7 @@ def set_max_p(contour):
             max_p = point
         elif max_p.y == point.y:
             if max_p.x < point.y:
-                max_p == point
+                max_p = point
     contour.maxP = max_p
 
 
