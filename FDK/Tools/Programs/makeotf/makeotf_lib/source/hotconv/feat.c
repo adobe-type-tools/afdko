@@ -1121,11 +1121,18 @@ char *featTrimParensSpaces(char *text) {
 	char *result;
 	int len = strlen(text);
 
-	strcpy(str, text);
+    if (text[len - 1] != ';') {
+        hotMsg(g, hotWARNING, "An include file reference must end with ';'. Some programs may not accept this syntax. Line: <%s>", text);
+    }
+    text[--len] = '\0';
+
+    strcpy(str, text);
 	s = &str[1];
 	e = &str[len - 2];
 
-	if (str[0] != '(' || str[len - 1] != ')') {
+
+    
+    if (str[0] != '(' || str[len - 1] != ')') {
 		hotMsg(g, hotFATAL, "bad include file: <%s>", text);
 	}
 

@@ -84,7 +84,7 @@ hotCtx g;
 #token "\r\n"		<<zzskip(); zzline++;>>
 #token "[\r\n]"		<<zzskip(); zzline++;>>
 
-#token INCLFILE		"\(~[\)]+\)"
+#token INCLFILE		"\(~[\)]+\)[#; \t\r\n]"
 					<<
 					zzmode(featGetIncludeReturnMode());
 					DF(2, (stderr, "# in(%s)\n", zzlextext));
