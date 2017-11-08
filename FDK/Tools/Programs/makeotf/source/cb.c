@@ -1089,168 +1089,170 @@ static int CDECL matchAliasRecByFinal(const void *key, const void *value) {
 
    All alias names must be
    unique. */
+
+static const int maxLineLen = 1024;
+
 void cbAliasDBRead(cbCtx h, char *filename) {
 	File file;
 	long lineno;
 	long iOrder = -1;
-	char buf[256];
+	char buf[maxLineLen];
 
 	h->alias.recs.cnt = 0;
 	h->final.recs.cnt = 0;
 
 	fileOpen(&file, h, filename, "r");
-	for (lineno = 1; fileGetLine(&file, buf, 256) != NULL; lineno++) {
+	for (lineno = 1; fileGetLine(&file, buf, maxLineLen) != NULL; lineno++) {
 		int iNL = strlen(buf) - 1;
+        char *final;
+        char *alias;
+        char *uvName;
+        char *p = buf;
 
-		if (buf[iNL] != '\n') {
-			cbFatal(h, "line too long [%s %d]\n", filename, lineno);
-		}
-		else {
-			char *final;
-			char *alias;
-			char *uvName;
-			char *p = buf;
+        /* Skip blanks */
+        while (isspace(*p)) {
+            p++;
+        }
 
-			/* Skip blanks */
-			while (isspace(*p)) {
-				p++;
-			}
+        if (*p == '\0' || *p == '#') {
+            continue;	/* Skip blank or comment line */
+        }
+        
+        if (buf[iNL] != '\n') {
+            cbFatal(h, "GlyphOrderAndAliasDB line is longer than limit of %d characters. [%s line number: %d]\n", maxLineLen, filename, lineno);
+        }
+        
+        iOrder++;
+        /* Parse final name */
+        final = p;
+        p = gnameFinalScan(h, final);
+        if (p == NULL || !isspace(*p)) {
+            goto syntaxError;
+        }
+        *p = '\0';
+        if (strlen(final) > MAX_FINAL_CHAR_NAME_LEN) {
+            cbWarning(h, "final name %s is longer (%d) than limit %d, in %s line %d.\n", final, strlen(final), MAX_FINAL_CHAR_NAME_LEN, filename, lineno);
+        }
 
-			if (*p == '\0' || *p == '#') {
-				continue;	/* Skip blank or comment line */
-			}
-			iOrder++;
-			/* Parse final name */
-			final = p;
-			p = gnameFinalScan(h, final);
-			if (p == NULL || !isspace(*p)) {
-				goto syntaxError;
-			}
-			*p = '\0';
-			if (strlen(final) > MAX_FINAL_CHAR_NAME_LEN) {
-				cbWarning(h, "final name %s is longer (%d) than limit %d, in %s line %d.\n", final, strlen(final), MAX_FINAL_CHAR_NAME_LEN, filename, lineno);
-			}
+        /* Skip blanks */
+        do {
+            p++;
+        }
+        while (isspace(*p));
 
-			/* Skip blanks */
-			do {
-				p++;
-			}
-			while (isspace(*p));
+        /* Parse alias name */
+        alias = p;
+        p = gnameDevScan(h, alias);
+        if (p == NULL || !isspace(*p)) {
+            goto syntaxError;
+        }
+        *p = '\0';
+        if (strlen(alias) > MAX_CHAR_NAME_LEN) {
+            cbWarning(h, "alias name %s is longer  (%d) than limit %d, in %s line %d.\n", alias, strlen(alias), MAX_CHAR_NAME_LEN, filename, lineno);
+        }
 
-			/* Parse alias name */
-			alias = p;
-			p = gnameDevScan(h, alias);
-			if (p == NULL || !isspace(*p)) {
-				goto syntaxError;
-			}
-			*p = '\0';
-			if (strlen(alias) > MAX_CHAR_NAME_LEN) {
-				cbWarning(h, "alias name %s is longer  (%d) than limit %d, in %s line %d.\n", alias, strlen(alias), MAX_CHAR_NAME_LEN, filename, lineno);
-			}
+        /* Skip blanks. Since line is null terminated, will not go past end of line. */
+        do {
+            p++;
+        }
+        while (isspace(*p));
 
-			/* Skip blanks. Since line is null terminated, will not go past end of line. */
-			do {
-				p++;
-			}
-			while (isspace(*p));
+        /* Parse uv override name */
+        /* *p is either '\0' or '#' or a uv-name.  */
+        uvName = p;
+        if (*p != '\0') {
+            if (*p == '#') {
+                *p = '\0';
+            }
+            else {
+                uvName = p;
+                p = gnameFinalScan(h, uvName);
+                if (p == NULL || !isspace(*p)) {
+                    goto syntaxError;
+                }
+                *p = '\0';
+            }
+        }
 
-			/* Parse uv override name */
-			/* *p is either '\0' or '#' or a uv-name.  */
-			uvName = p;
-			if (*p != '\0') {
-				if (*p == '#') {
-					*p = '\0';
-				}
-				else {
-					uvName = p;
-					p = gnameFinalScan(h, uvName);
-					if (p == NULL || !isspace(*p)) {
-						goto syntaxError;
-					}
-					*p = '\0';
-				}
-			}
+        if (*p == '\0' || *p == '#') {
+            size_t index, finalIndex;
+            AliasRec *previous;
 
-			if (*p == '\0' || *p == '#') {
-				size_t index, finalIndex;
-				AliasRec *previous;
+            h->matchkey = alias;
 
-				h->matchkey = alias;
+            /* build sorted list of alias names */
+            if (bsearch(h, h->alias.recs.array, h->alias.recs.cnt,
+                            sizeof(AliasRec), matchAliasRec)) {
+                gnameError(h, "duplicate name", filename, lineno);
+                continue;
+            }
+            else {
+                index = h->alias.recs.cnt;
+            }
 
-				/* build sorted list of alias names */
-				if (bsearch(h, h->alias.recs.array, h->alias.recs.cnt,
-								sizeof(AliasRec), matchAliasRec)) {
-					gnameError(h, "duplicate name", filename, lineno);
-					continue;
-				}
-				else {
-					index = h->alias.recs.cnt;
-				}
+            /* local block - NOT under closest if statement */
+            {
+                /* Add string */
+                long length;
+                AliasRec *new = &dnaGROW(h->alias.recs, h->alias.recs.cnt)[index];
 
-				/* local block - NOT under closest if statement */
-				{
-					/* Add string */
-					long length;
-					AliasRec *new = &dnaGROW(h->alias.recs, h->alias.recs.cnt)[index];
+                /* Make hole */
+                memmove(new + 1, new, sizeof(AliasRec) * (h->alias.recs.cnt++ - index));
 
-					/* Make hole */
-					memmove(new + 1, new, sizeof(AliasRec) * (h->alias.recs.cnt++ - index));
-
-					/* Fill record */
-					new->iKey = h->alias.names.cnt;
-					length = strlen(alias) + 1;
-					memcpy(dnaEXTEND(h->alias.names, length), alias, length);
-					new->iFinal = h->alias.names.cnt;
-					length = strlen(final) + 1;
-					memcpy(dnaEXTEND(h->alias.names, length), final, length);
-					new->iUV = h->alias.names.cnt;
-					length = strlen(uvName) + 1;
-					memcpy(dnaEXTEND(h->alias.names, length), uvName, length);
-					new->iOrder = iOrder;
-				}
+                /* Fill record */
+                new->iKey = h->alias.names.cnt;
+                length = strlen(alias) + 1;
+                memcpy(dnaEXTEND(h->alias.names, length), alias, length);
+                new->iFinal = h->alias.names.cnt;
+                length = strlen(final) + 1;
+                memcpy(dnaEXTEND(h->alias.names, length), final, length);
+                new->iUV = h->alias.names.cnt;
+                length = strlen(uvName) + 1;
+                memcpy(dnaEXTEND(h->alias.names, length), uvName, length);
+                new->iOrder = iOrder;
+            }
 
 
-				/* build sorted list of final names */
-				h->matchkey = final;
-				previous = bsearch(h, h->final.recs.array, h->final.recs.cnt,
-								   sizeof(AliasRec), matchAliasRecByFinal);
-				if (previous) {
-					char *previousUVName;
-					previousUVName = &h->alias.names.array[previous->iUV];
+            /* build sorted list of final names */
+            h->matchkey = final;
+            previous = bsearch(h, h->final.recs.array, h->final.recs.cnt,
+                               sizeof(AliasRec), matchAliasRecByFinal);
+            if (previous) {
+                char *previousUVName;
+                previousUVName = &h->alias.names.array[previous->iUV];
 
-					if (strcmp(previousUVName,uvName)) {
-						gnameError(h, "duplicate final name, with different uv ovveride", filename, lineno);
-					}
-						continue; /* it is not an error to have more than one final name entry, but we don;t want to entry duplicates in the search array */
-				}
-				else {
-					finalIndex = h->final.recs.cnt;
-				}
+                if (strcmp(previousUVName,uvName)) {
+                    gnameError(h, "duplicate final name, with different uv ovveride", filename, lineno);
+                }
+                    continue; /* it is not an error to have more than one final name entry, but we don;t want to entry duplicates in the search array */
+            }
+            else {
+                finalIndex = h->final.recs.cnt;
+            }
 
-				/* local block - NOT under closest if statement. If we get here, both alias and final names are new. */
-				{
-					/* Add string */
-					AliasRec *newFinal;
-					AliasRec *newAlias = &h->alias.recs.array[index];
-					newFinal = &dnaGROW(h->final.recs, h->final.recs.cnt)[finalIndex];
+            /* local block - NOT under closest if statement. If we get here, both alias and final names are new. */
+            {
+                /* Add string */
+                AliasRec *newFinal;
+                AliasRec *newAlias = &h->alias.recs.array[index];
+                newFinal = &dnaGROW(h->final.recs, h->final.recs.cnt)[finalIndex];
 
-					/* Make hole */
-					memmove(newFinal + 1, newFinal, sizeof(AliasRec) * (h->final.recs.cnt++ - finalIndex));
+                /* Make hole */
+                memmove(newFinal + 1, newFinal, sizeof(AliasRec) * (h->final.recs.cnt++ - finalIndex));
 
-					/* Fill record */
-					newFinal->iKey = newAlias->iKey;
-					newFinal->iFinal = newAlias->iFinal;
-					newFinal->iUV = newAlias->iUV;
-					newFinal->iOrder = newAlias->iOrder;
-				}
-			}		/* end if *p == \0 */
+                /* Fill record */
+                newFinal->iKey = newAlias->iKey;
+                newFinal->iFinal = newAlias->iFinal;
+                newFinal->iUV = newAlias->iUV;
+                newFinal->iOrder = newAlias->iOrder;
+            }
+        }		/* end if *p == \0 */
 
-			continue;	/* avoid final syntaxError */
+        continue;	/* avoid final syntaxError */
 
 syntaxError:
-			gnameError(h, "syntax error", filename, lineno);
-		}
-	}
+        gnameError(h, "syntax error", filename, lineno);
+    }
 	fileClose(&file);
 	ctuQSort(h->alias.recs.array, h->alias.recs.cnt, sizeof(AliasRec),
 			 cmpAlias, h);
