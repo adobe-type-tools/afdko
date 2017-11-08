@@ -309,16 +309,14 @@ static void addStdNames(nameCtx h, int win, int mac) {
 
 		/* Make and add version name */
 		if (g->font.version.client == NULL) {
-			sprintf(buf, "Version %.3f;PS %s;%s %ld.%ld.%ld",
+			sprintf(buf, "Version %.3f;%s %ld.%ld.%ld",
 			        dFontVersion,
-			        g->font.version.PS,
 			        idTag,
 			        (g->version >> 16) & 0xff, (g->version >> 8) & 0xff, g->version & 0xff);
 		}
 		else {
-			sprintf(buf, "Version %.3f;PS %s;%s %ld.%ld.%ld;%s",
+			sprintf(buf, "Version %.3f;%s %ld.%ld.%ld;%s",
 			        dFontVersion,
-			        g->font.version.PS,
 			        idTag,
 			        (g->version >> 16) & 0xff, (g->version >> 8) & 0xff, g->version & 0xff,
 			        g->font.version.client);
