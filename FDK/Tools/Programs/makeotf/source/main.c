@@ -694,10 +694,14 @@ static void parseArgs(int argc, char *argv[], int inScript) {
 						else if (!strcmp(arg, "-stubCmap4")) {
 							convert.otherflags |= OTHERFLAGS_STUB_CMAP4;
 						}
-						else if (!strcmp(arg, "-skco")) {
-							convert.otherflags |= OTHERFLAGS_DO_NOT_OPTIMIZE_KERN;
-							break;
-						}
+                        else if (!strcmp(arg, "-skco")) {
+                            convert.otherflags |= OTHERFLAGS_DO_NOT_OPTIMIZE_KERN;
+                            break;
+                        }
+                        else if (!strcmp(arg, "-showFinal")) {
+                            convert.otherflags |= OTHERFLAGS_FINAL_NAMES;
+                            break;
+                        }
 						else {
 							/* Process script file */
 							if (arg[2] != '\0' || argsleft == 0) {

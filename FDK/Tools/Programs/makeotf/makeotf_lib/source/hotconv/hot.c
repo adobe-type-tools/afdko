@@ -484,7 +484,8 @@ char *hotReadFont(hotCtx g, int flags, int *psinfo,  hotReadFontOverrides *fontO
 		hotgi->vAdv = SHRT_MAX;
 		hotgi->bbox = cffgi->bbox;
 		hotgi->sup  = cffgi->sup;
-		hotgi->vOrigY = SHRT_MAX;
+        hotgi->vOrigY = SHRT_MAX;
+        hotgi->srcName = NULL;
 	}
 
 	setVendId(g);

@@ -436,18 +436,30 @@ static int CDECL matchGlyphName(const void *key, const void *value) {
    non-NULL and glyph alias db is not present, sets *useAliasDB to NULL. */
 hotGlyphInfo *mapName2Glyph(hotCtx g, char *gname, char **useAliasDB) {
 	mapCtx h = g->ctx.map;
-	char *realName;
+	char *realName = gname;
 	hotGlyphInfo **found;
 
 	if (IS_CID(g) && useAliasDB == NULL) {
 		hotMsg(g, hotFATAL, "Not a non-CID font");
 	}
 
-	realName = (useAliasDB != NULL && g->cb.getFinalGlyphName != NULL)
-	    ? g->cb.getFinalGlyphName(g->cb.ctx, gname) : gname;
-	if (useAliasDB != NULL) {
-		*useAliasDB = g->cb.getFinalGlyphName != NULL ? realName : NULL;
-	}
+
+    if (useAliasDB != NULL)
+    {
+        if (g->cb.getFinalGlyphName != NULL)
+        {
+            *useAliasDB = g->cb.getFinalGlyphName(g->cb.ctx, gname);
+            if (strcmp(*useAliasDB, gname) == 0)
+                *useAliasDB = NULL;
+            else
+                realName = *useAliasDB;
+        }
+        else
+        {
+            *useAliasDB = NULL;
+        }
+    }
+    
 	if (IS_CID(g)) {
 		CID cid = 0;
 		sscanf(realName, "cid%hd", &cid);
@@ -459,11 +471,32 @@ hotGlyphInfo *mapName2Glyph(hotCtx g, char *gname, char **useAliasDB) {
 	                                 h->sort.gname.cnt, sizeof(hotGlyphInfo *),
 	                                 matchGlyphName);
 	if (found != NULL) {
-		return *found;
+ 		return *found;
 	}
 	else {
 		return NULL;
 	}
+}
+
+void mapGID2Name(hotCtx g, GID gid, char* msg)
+{
+    int len;
+    char *p;
+    hotGlyphInfo* hGID = &g->font.glyphs.array[gid];
+    
+    if (hGID->srcName == NULL)
+    {
+        sprintf(msg, "%s", hGID->gname.str);
+        len = strlen(msg);
+    }
+    else
+    {
+        if (g->convertFlags & HOT_CONVERT_FINAL_NAME)
+            sprintf(msg, "%s", hGID->gname.str);
+        else
+            sprintf(msg, "%s", hGID->srcName);
+        len = strlen(msg);
+    }
 }
 
 /* Map glyph name to GID; using alias db if present (see mapName2Glyph comments
@@ -2699,8 +2732,23 @@ static void initGlyphs(hotCtx g) {
 	if (!IS_CID(g)) {
 		/* Store gnames as char * instead of SInx */
 		for (i = 0; i < nGlyphs; i++) {
+            char *srcName;
 			hotGlyphInfo *gi = &g->font.glyphs.array[i];
-			gi->gname.str = STR(gi->gname.inx);
+            gi->gname.str = STR(gi->gname.inx);
+            if (strcmp(gi->gname.str, "slashfoo") == 0)
+            {
+                printf("hello\n");
+            }
+            if (strcmp(gi->gname.str, "slash") == 0)
+            {
+                printf("hello\n");
+            }
+            // gi->gname.str have all been renamed to the final strings.
+            srcName = g->cb.getSrcGlyphName(g->cb.ctx, gi->gname.str);
+            if (strcmp(srcName,gi->gname.str) != 0)
+            {
+                gi->srcName = srcName;
+            }
 		}
 	}
 

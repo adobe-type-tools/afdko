@@ -243,6 +243,7 @@ typedef struct {            /* Glyph information */
 		long inx;           /* (tmp) Index into string da in mapCtx */
 		char *str;          /* Actual pointer to glyph name */
 	} gname;
+    char* srcName;          /* Actual pointer to development glyph name */
 	short flags;
 #define GNAME_UNI            (1 << 0) /* Has uni<CODE> or u<CODE> name e.g.
 	                                     "u102345" */

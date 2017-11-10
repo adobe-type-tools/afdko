@@ -237,6 +237,8 @@ table,
 				is being used as a base glyph in one replacement rule,
 				and as a mark glyph in another.
 -v                      Print the tool's version.
+-showFinal              In error messages, show glyph final name rather
+				than source name.
 -debug                  Turn on debug mode: does not delete temporayr files.
 
 Note that options are applied in the order in which they are
@@ -341,6 +343,7 @@ kDefaultGOADBPath = "GlyphOrderAndAliasDB"
 kTempFontSuffix = ".tmp"
 kTemp2FontSuffix = ".tmp2"
 kAddStubDSIG = "AddStubDSIG"
+kShowFinalNames = "ShowFinalNames"
 kVerboseWarnings = "VerboseWarnings"
 kOptionNotSeen = 99
 
@@ -384,6 +387,7 @@ kMOTFOptions = {
 	kStubCmap4:  [kOptionNotSeen, "-stubCmap4", None],
 	kSuppressKernOptimization:  [kOptionNotSeen, "-skco", "-nsko"],
 	kAddStubDSIG:  [kOptionNotSeen, "-addDSIG", "-omitDSIG"],
+	kShowFinalNames:  [kOptionNotSeen, "-showFinal", None],
 	kVerboseWarnings:  [kOptionNotSeen, "-V", "-nV"],
 
 }
@@ -1282,6 +1286,10 @@ def getOptions(makeOTFParams):
 		elif arg == kMOTFOptions[kAddStubDSIG][2]:
 			kMOTFOptions[kAddStubDSIG][0] = i + optionIndex
 			exec("makeOTFParams.%s%s = 'false'" % (kFileOptPrefix, kAddStubDSIG))
+
+		elif arg == kMOTFOptions[kShowFinalNames][1]:
+			kMOTFOptions[kShowFinalNames][0] = i + optionIndex
+			exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kShowFinalNames))
 
 		elif arg == kMOTFOptions[kVerboseWarnings][1]:
 			kMOTFOptions[kVerboseWarnings][0] = i + optionIndex

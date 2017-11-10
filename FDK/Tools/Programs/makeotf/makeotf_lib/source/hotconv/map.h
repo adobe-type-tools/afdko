@@ -37,7 +37,7 @@ GID mapUV2GID(hotCtx g, UV uv);
 hotGlyphInfo *mapName2Glyph(hotCtx g, char *gname, char **useAliasDB);
 GID mapName2GID(hotCtx g, char *gname, char **useAliasDB);
 
-#define mapGID2Name(gid) (g->font.glyphs.array[gid].gname.str)
+void mapGID2Name(hotCtx g, GID gid, char* msg);
 
 hotGlyphInfo *mapCID2Glyph(hotCtx g, CID cid);
 GID mapCID2GID(hotCtx g, CID cid);

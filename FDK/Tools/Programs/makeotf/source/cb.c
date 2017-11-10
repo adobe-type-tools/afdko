@@ -1009,6 +1009,16 @@ static int CDECL matchAliasRec(const void *key, const void *value) {
 	return strcmp(h->matchkey, (const char *)aliasString);
 }
 
+static int CDECL matchAliasRecByFinal(const void *key, const void *value) {
+    AliasRec *finalAlias = (AliasRec *)value;
+    struct cbCtx_ *h = (cbCtx)key;
+    char *finalString;
+
+    finalString = &h->alias.names.array[finalAlias->iFinal];
+    return strcmp(h->matchkey, (const char *)finalString);
+}
+
+
 static int CDECL cmpAlias(const void *first, const void *second, void *ctx) {
 	struct cbCtx_ *h = (cbCtx)ctx;
 	AliasRec *alias1 = (AliasRec *)first;
@@ -1023,15 +1033,6 @@ static int CDECL cmpFinalAlias(const void *first, const void *second, void *ctx)
 	AliasRec *alias2 = (AliasRec *)second;
 
 	return strcmp(&h->alias.names.array[alias1->iFinal], &h->alias.names.array[alias2->iFinal]);
-}
-
-static int CDECL matchAliasRecByFinal(const void *key, const void *value) {
-	AliasRec *finalAlias = (AliasRec *)value;
-	struct cbCtx_ *h = (cbCtx)key;
-	char *finalString;
-	finalString = &h->alias.names.array[finalAlias->iFinal];
-
-	return strcmp(h->matchkey, (const char *)finalString);
 }
 
 /* Parse glyph name aliasing file.
@@ -1283,13 +1284,24 @@ void cbAliasDBCancel(cbCtx h) {
 
 /* [hot callback] Convert alias name to final name. */
 static char *getFinalGlyphName(void *ctx, char *gname) {
-	cbCtx h = ctx;
-	AliasRec *alias;
-	h->matchkey = gname;
-	alias = (AliasRec *)bsearch(h, h->alias.recs.array, h->alias.recs.cnt,
-								sizeof(AliasRec), matchAliasRec);
-	return (alias == NULL) ? gname : &(h->alias.names.array[alias->iFinal]);
+    cbCtx h = ctx;
+    AliasRec *alias;
+    h->matchkey = gname;
+    alias = (AliasRec *)bsearch(h, h->alias.recs.array, h->alias.recs.cnt,
+                                sizeof(AliasRec), matchAliasRec);
+    return (alias == NULL) ? gname : &(h->alias.names.array[alias->iFinal]);
 }
+
+/* [hot callback] Convert final name to src name. */
+static char *getSrcGlyphName(void *ctx, char *gname) {
+    cbCtx h = ctx;
+    AliasRec *alias;
+    h->matchkey = gname;
+    alias = (AliasRec *)bsearch(h, h->final.recs.array, h->final.recs.cnt,
+                                sizeof(AliasRec), matchAliasRecByFinal);
+    return (alias == NULL) ? gname : &(h->alias.names.array[alias->iKey]);
+}
+
 
 /* [hot callback] Get UV override in form of u<UV Code> glyph name. */
 static char *getUVOverrideName(void *ctx, char *gname) {
@@ -1507,8 +1519,9 @@ cbCtx cbNew(char *progname, char *pfbdir, char *otfdir,
 		tmpRewind,
 		tmpRefill,
 		tmpClose,
-		getFinalGlyphName,
-		getUVOverrideName,
+        getFinalGlyphName,
+        getSrcGlyphName,
+ 		getUVOverrideName,
 		getAliasAndOrder,
 		uvsOpen,
 		uvsGetLine,
@@ -1897,7 +1910,11 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
     if (otherflags & OTHERFLAGS_VERBOSE) {
         hotConvertFlags |= HOT_CONVERT_VERBOSE;
     }
-
+    
+    if (otherflags & OTHERFLAGS_FINAL_NAMES) {
+        hotConvertFlags |= HOT_CONVERT_FINAL_NAMES;
+    }
+    
     hotSetConvertFlags(h->hot.ctx, hotConvertFlags);
     
 	if (flags & HOT_RENAME) {
