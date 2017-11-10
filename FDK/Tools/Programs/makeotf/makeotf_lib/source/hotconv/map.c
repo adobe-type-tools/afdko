@@ -491,7 +491,7 @@ void mapGID2Name(hotCtx g, GID gid, char* msg)
     }
     else
     {
-        if (g->convertFlags & HOT_CONVERT_FINAL_NAME)
+        if (g->convertFlags & HOT_CONVERT_FINAL_NAMES)
             sprintf(msg, "%s", hGID->gname.str);
         else
             sprintf(msg, "%s", hGID->srcName);

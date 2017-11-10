@@ -352,12 +352,19 @@ struct hotCallbacks_
    fclose(), respectively.) */
 
     char *(*getFinalGlyphName)(void *ctx, char *gname);
-
+    
 /* [Optional] getFinalGlyphName() is called in order to convert an aliased
-   glyph name (a user-friendly glyph name used within the feature file) to a
-   final name that is used internally within the OpenType font. If no such
-   mapping exists the gname argument is returned. */
-
+     glyph name (a user-friendly glyph name used within the feature file and
+     source font) to a final name that is used internally within the OpenType
+     font. If no such mapping exists the gname argument is returned. */
+        
+    char *(*getSrcGlyphName)(void *ctx, char *gname);
+        
+/* [Optional] getSrcGlyphName() is called in order to retrieve an aliased
+     glyph name (a user-friendly glyph name used within the feature file and
+     source font) from the final name that is used  within the output OpenType
+     font. If no such mapping exists the gname argument is returned. */
+        
     char *(*getUVOverrideName)(void *ctx, char *gname);
 
 /* [Optional] getUVOverrideName() is called in order to get a user-supplied UV value for
@@ -839,6 +846,7 @@ void hotConvert(hotCtx g);
 #define HOT_DO_NOT_OPTIMIZE_KERN (1<<9) /* Do not use left side kern class 0 for non-zero kern values. Saves a a few hundred to thousand bytes, but confuses some developers. */
 #define HOT_ADD_STUB_DSIG (1<<10)
 #define HOT_CONVERT_VERBOSE (1<<11)
+#define HOT_CONVERT_FINAL_NAMES (1<<12) /* When showing error messages, use final names rather than source names. */
     
 /* hotFree() destroys the library context and all the resources allocated to
    it. It must be the last function called by a client of the library. */
