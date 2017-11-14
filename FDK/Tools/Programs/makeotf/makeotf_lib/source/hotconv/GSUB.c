@@ -755,13 +755,24 @@ void GSUBSetFeatureNameID(hotCtx g, Tag feat, unsigned short nameID) {
 static void fillGSUBFeatureNameParam(hotCtx g, GSUBCtx h, Subtable *sub) {
 	FeatureNameParameterFormat *feat_param = (FeatureNameParameterFormat *)sub->tbl;
 	unsigned short nameid = feat_param->nameID;
-
-        if (nameid != 0) {
+    unsigned short cvNumber = (sub->feature >>8 & 0xFF) - (int)'0' << 8;
+    cvNumber += (sub->feature & 0xFF) - (int)'0';
+    if (((sub->feature >>24 & 0xFF) == (int)'s') &&
+        ((sub->feature >>16 & 0xFF) == (int)'s') &&
+        (cvNumber >= 0) &&(cvNumber <= 99)
+        )
+    {
+       if (nameid != 0) {
             unsigned short nameIDPresent = nameVerifyDefaultNames(g, nameid);
             if (nameIDPresent && nameIDPresent & MISSING_WIN_DEFAULT_NAME) {
                 hotMsg(g, hotFATAL, "Missing Windows default name for for feature name  nameid %i",  nameid);
             }
         }
+    }
+    else
+    {
+        hotMsg(g, hotFATAL, "A 'featureNames' block is allowed only Stylistic Set (ssXX) features. It is being used in feature '%c%c%c%c'.",  TAG_ARG(sub->feature));
+    }
 }
 
 static void writeGSUBFeatNameParam(GSUBCtx h, Subtable *sub) {
@@ -797,22 +808,33 @@ static void fillGSUBCVParam(hotCtx g, GSUBCtx h, Subtable *sub) {
 	CVParameterFormat *feat_param = (CVParameterFormat *)sub->tbl;
     int i = 0;
     unsigned short nameIDs[4];
-    
-    nameIDs[0]= feat_param->FeatUILabelNameID;
-    nameIDs[1]= feat_param->FeatUITooltipTextNameID;
-    nameIDs[2]= feat_param->SampleTextNameID;
-    nameIDs[3]= feat_param->FirstParamUILabelNameID;
-
-    while (i < 4)
+    unsigned short cvNumber = (sub->feature >>8 & 0xFF) - (int)'0' << 8;
+    cvNumber += (sub->feature & 0xFF) - (int)'0';
+    if (((sub->feature >>24 & 0xFF) == (int)'c') &&
+        ((sub->feature >>16 & 0xFF) == (int)'v') &&
+        (cvNumber >= 0) &&(cvNumber <= 99)
+        )
     {
-        unsigned short nameid = nameIDs[i++];
-        if (nameid != 0) {
-            unsigned short nameIDPresent = nameVerifyDefaultNames(g, nameid);
-            if (nameIDPresent && nameIDPresent & MISSING_WIN_DEFAULT_NAME) {
-                hotMsg(g, hotFATAL, "Missing Windows default name for for feature name  nameid %i",  nameid);
-            }
-        }
+        nameIDs[0]= feat_param->FeatUILabelNameID;
+        nameIDs[1]= feat_param->FeatUITooltipTextNameID;
+        nameIDs[2]= feat_param->SampleTextNameID;
+        nameIDs[3]= feat_param->FirstParamUILabelNameID;
         
+        while (i < 4)
+        {
+            unsigned short nameid = nameIDs[i++];
+            if (nameid != 0) {
+                unsigned short nameIDPresent = nameVerifyDefaultNames(g, nameid);
+                if (nameIDPresent && nameIDPresent & MISSING_WIN_DEFAULT_NAME) {
+                    hotMsg(g, hotFATAL, "Missing Windows default name for for feature name  nameid %i",  nameid);
+                }
+            }
+            
+        }
+    }
+    else
+    {
+        hotMsg(g, hotFATAL, "A 'cvParameters' block is allowed only Character Variant (cvXX) features. It is being used in feature '%c%c%c%c'.",  TAG_ARG(sub->feature));
     }
 }
 
