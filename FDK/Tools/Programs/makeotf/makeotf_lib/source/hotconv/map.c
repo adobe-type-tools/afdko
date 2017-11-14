@@ -2759,14 +2759,6 @@ static void initGlyphs(hotCtx g) {
             char *srcName;
 			hotGlyphInfo *gi = &g->font.glyphs.array[i];
             gi->gname.str = STR(gi->gname.inx);
-            if (strcmp(gi->gname.str, "slashfoo") == 0)
-            {
-                printf("hello\n");
-            }
-            if (strcmp(gi->gname.str, "slash") == 0)
-            {
-                printf("hello\n");
-            }
             // gi->gname.str have all been renamed to the final strings.
             srcName = g->cb.getSrcGlyphName(g->cb.ctx, gi->gname.str);
             if (strcmp(srcName,gi->gname.str) != 0)
