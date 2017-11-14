@@ -298,8 +298,8 @@ static void dircpy(char *dst, char *src) {
 static void convFont(char *pfbfile,  char *otffile) {
 	cbConvert(cbctx, convert.flags,
 			  (convert.otherflags & OTHERFLAGS_RELEASEMODE) ?
-			  "makeotf "MAKEOTF_VERSION :
-			  "makeotf "MAKEOTF_VERSION" DEVELOPMENT" ,
+			  "makeotfexe "MAKEOTF_VERSION :
+			  "makeotfexe "MAKEOTF_VERSION" DEVELOPMENT" ,
 			  pfbfile, otffile,
 			  convert.features, convert.hCMap, convert.vCMap, convert.mCMap, convert.uvsFile,
 			  convert.otherflags, convert.macScript, convert.macLanguage,
