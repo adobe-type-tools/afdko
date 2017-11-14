@@ -940,7 +940,13 @@ static unsigned char actionDev[3][4] = {
     {	0,		0,		0,		E_ },	/* [2] */
 };
 
-static char *gnameScan(cbCtx h, char *p, unsigned char* action, unsigned char* next, int isDev) {
+enum {
+    finalName,
+    sourceName,
+    uvName
+};
+
+static char *gnameScan(cbCtx h, char *p, unsigned char* action, unsigned char* next, int nameType) {
 
 	char *start = p;
 	int state = 0;
@@ -960,7 +966,10 @@ static char *gnameScan(cbCtx h, char *p, unsigned char* action, unsigned char* n
         else if (c == '.') {
             class = 2;
         }
-        else if (isDev && (c == '.' || c == '+' || c == '*' || c == ':' || c == '~' || c == '^' || c == '!' || c == '-')) {
+        else if ((nameType==sourceName) && (c == '.' || c == '+' || c == '*' || c == ':' || c == '~' || c == '^' || c == '!' || c == '-')) {
+            class = 2;
+        }
+        else if ((nameType==uvName) && (c == ',')) {
             class = 2;
         }
 		else {
@@ -989,12 +998,17 @@ static char *gnameScan(cbCtx h, char *p, unsigned char* action, unsigned char* n
 }
 
 static char* gnameDevScan(cbCtx h, char *p) {
-    char *val = gnameScan(h, p, (unsigned char*)actionDev, (unsigned char*)nextFinal, 1);
+    char *val = gnameScan(h, p, (unsigned char*)actionDev, (unsigned char*)nextFinal, sourceName);
     return val;
 }
 
 static char* gnameFinalScan(cbCtx h, char *p) {
-    char *val = gnameScan(h, p, (unsigned char*)actionFinal, (unsigned char*)nextFinal, 0);
+    char *val = gnameScan(h, p, (unsigned char*)actionFinal, (unsigned char*)nextFinal, finalName);
+    return val;
+}
+
+static char* gnameUVScan(cbCtx h, char *p) {
+    char *val = gnameScan(h, p, (unsigned char*)actionFinal, (unsigned char*)nextFinal, uvName);
     return val;
 }
 
@@ -1167,7 +1181,7 @@ void cbAliasDBRead(cbCtx h, char *filename) {
             }
             else {
                 uvName = p;
-                p = gnameFinalScan(h, uvName);
+                p = gnameUVScan(h, uvName);
                 if (p == NULL || !isspace(*p)) {
                     goto syntaxError;
                 }

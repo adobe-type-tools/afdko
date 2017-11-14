@@ -1070,9 +1070,9 @@ static void checkDuplicates(hotCtx g, cmapCtx h, int isMixedByte) {
 				mapping[i - 1].flags |= CODE_DELETE;
 			}
 			else {
-				featGlyphDump(g, mapping[i - 1].glyphId, ' ', 0);
+				featGlyphDump(g, mapping[i - 1].glyphId, ',', 0);
 				featGlyphDump(g, mapping[i].glyphId, 0, 0);
-				cmapMsg(g, hotFATAL, "multiple glyphs %s mapped to code <%hx>",
+				cmapMsg(g, hotFATAL, "multiple glyphs (%s) mapped to code <%hX>",
 				        g->note.array, mapping[i].code);
 			}
 		}

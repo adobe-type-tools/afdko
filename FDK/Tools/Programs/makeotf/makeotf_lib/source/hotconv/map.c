@@ -1638,6 +1638,26 @@ static void setCodePages(hotCtx g) {
 	}
 }
 
+
+static char* getNextUVName(char**uvOverrideName)
+{
+    /* return next name in list like 'uni002D,uni00AD,uni2010,uni2011' */
+    char* uvName = *uvOverrideName;
+    char* nextName;
+    if (uvName == NULL)
+        return uvName;
+    
+    nextName = strchr(*uvOverrideName, ',');
+    if (nextName == NULL)
+    {
+        *uvOverrideName = NULL;
+        return uvName;
+    }
+    
+    nextName[0] = '\0';
+    *uvOverrideName = nextName +1; /* set *uvOverrideName to the start of the next name. */
+    return uvName;
+}
 /* For non-CID fonts. h->sort.gnames has been sorted by glyph name. */
 static void assignUVs(hotCtx g) {
 	mapCtx h = g->ctx.map;
@@ -1662,13 +1682,17 @@ static void assignUVs(hotCtx g) {
 			addUVToGlyph(g, gi, uv);
 			gi->flags |= GNAME_UNI;
 		}
-		else if (mapName2UVOverrideName(g, gi->gname.str, &uvOverrideName) != 0) {
-			if (checkUniGName(g, uvOverrideName, &uv)) {
-				/* --- Valid uni<CODE> or u<CODE> glyph name */
-				addUVToGlyph(g, gi, uv);
-				gi->flags |= GNAME_UNI_OVERRIDE;
-			}
-		}
+        else if (mapName2UVOverrideName(g, gi->gname.str, &uvOverrideName) != 0) {
+            char* uvName = getNextUVName(&uvOverrideName);
+            while (uvName != NULL) {
+                if (checkUniGName(g, uvName, &uv)) {
+                    /* --- Valid uni<CODE> or u<CODE> glyph name */
+                    addUVToGlyph(g, gi, uv);
+                    gi->flags |= GNAME_UNI_OVERRIDE;
+                }
+                uvName = getNextUVName(&uvOverrideName);
+            }
+        }
 		else {
 			UnicodeChar *uc = getUVFromAGL(g, gi->gname.str, 0);
 
