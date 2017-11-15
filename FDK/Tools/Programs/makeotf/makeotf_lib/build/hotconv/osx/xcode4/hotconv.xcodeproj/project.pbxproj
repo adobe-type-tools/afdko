@@ -418,6 +418,10 @@
 					"HOT_DEBUG=1",
 					"DEBUG=1",
 				);
+				OTHER_CFLAGS = (
+					"-Wno-parentheses-equality",
+					"-fno-inline",
+				);
 				PRODUCT_NAME = hotconv;
 				WARNING_CFLAGS = "";
 			};
@@ -430,6 +434,10 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					BRV_64BIT_TYPES,
 					"HOT_FEAT_SUPPORT=1",
+				);
+				OTHER_CFLAGS = (
+					"-Wno-parentheses-equality",
+					"-fno-inline",
 				);
 				PRODUCT_NAME = hotconv;
 				WARNING_CFLAGS = "";

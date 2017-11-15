@@ -755,7 +755,7 @@ void GSUBSetFeatureNameID(hotCtx g, Tag feat, unsigned short nameID) {
 static void fillGSUBFeatureNameParam(hotCtx g, GSUBCtx h, Subtable *sub) {
 	FeatureNameParameterFormat *feat_param = (FeatureNameParameterFormat *)sub->tbl;
 	unsigned short nameid = feat_param->nameID;
-    unsigned short cvNumber = (sub->feature >>8 & 0xFF) - (int)'0' << 8;
+    unsigned short cvNumber = ((sub->feature >>8 & 0xFF) - (int)'0') << 8;
     cvNumber += (sub->feature & 0xFF) - (int)'0';
     if (((sub->feature >>24 & 0xFF) == (int)'s') &&
         ((sub->feature >>16 & 0xFF) == (int)'s') &&
@@ -808,7 +808,7 @@ static void fillGSUBCVParam(hotCtx g, GSUBCtx h, Subtable *sub) {
 	CVParameterFormat *feat_param = (CVParameterFormat *)sub->tbl;
     int i = 0;
     unsigned short nameIDs[4];
-    unsigned short cvNumber = (sub->feature >>8 & 0xFF) - (int)'0' << 8;
+    unsigned short cvNumber = ((sub->feature >>8 & 0xFF) - (int)'0') << 8;
     cvNumber += (sub->feature & 0xFF) - (int)'0';
     if (((sub->feature >>24 & 0xFF) == (int)'c') &&
         ((sub->feature >>16 & 0xFF) == (int)'v') &&
