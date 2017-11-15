@@ -588,5 +588,4 @@ extern SetWordType zzerr88[];
 extern SetWordType zzerr89[];
 extern SetWordType setwd17[];
 extern SetWordType zzerr90[];
-extern SetWordType zzerr91[];
 extern SetWordType setwd18[];

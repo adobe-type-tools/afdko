@@ -82,7 +82,7 @@ int allowNotdef ;
   zzMake0;
   {
   _retv = 0; /* Suppress optimizer warning */
-  if ( (LA(1)==T_GNAME) ) {
+  if ( LA(1)==T_GNAME  ) {
     zzmatch(T_GNAME);
     gname = zzaCur;
 
@@ -5355,11 +5355,11 @@ featureFile()
   {
   {
     zzBLOCK(zztasp2);
-    int zzcnt=1;
     zzMake0;
     {
-    do {
-      if ( (setwd18[LA(1)]&0x8) ) {
+    for (;;) {
+      if ( !((setwd18[LA(1)]&0x8))) break;
+      if ( (setwd18[LA(1)]&0x10) ) {
         topLevelStatement();
       }
       else {
@@ -5378,16 +5378,13 @@ featureFile()
               if ( (LA(1)==K_lookup) ) {
                 lookupBlockStandAlone();
               }
-              /* MR10 ()+ */ else {
-                if ( zzcnt > 1 ) break;
-                else {zzFAIL(1,zzerr91,&zzMissSet,&zzMissText,&zzBadTok,&zzBadText,&zzErrk); goto fail;}
-              }
+              else break; /* MR6 code for exiting loop "for sure" */
             }
           }
         }
       }
-      zzcnt++; zzLOOP(zztasp2);
-    } while ( 1 );
+      zzLOOP(zztasp2);
+    }
     zzEXIT(zztasp2);
     }
   }
@@ -5397,6 +5394,6 @@ featureFile()
 fail:
   zzEXIT(zztasp1);
   zzsyn(zzMissText, zzBadTok, (ANTLRChar *)"", zzMissSet, zzMissTok, zzErrk, zzBadText);
-  zzresynch(setwd18, 0x10);
+  zzresynch(setwd18, 0x20);
   }
 }

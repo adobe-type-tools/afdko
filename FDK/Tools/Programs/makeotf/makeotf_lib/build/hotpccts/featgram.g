@@ -2184,7 +2184,7 @@ featureFile
 		|	tableBlock
 		|	anonBlock
 		|	lookupBlockStandAlone
-		)+
+		)*
 
 		<<if (zzchar != EOF) zzerrCustom("expecting EOF");>>
 			// Eof itself is intercepted by the tokenizer.
