@@ -62,6 +62,7 @@ try:
     import xml.etree.cElementTree as ET
 except ImportError:
     import xml.etree.ElementTree as ET
+from pkg_resources import parse_version
 
 XML = ET.XML
 XMLElement = ET.Element
@@ -896,13 +897,7 @@ def buildCFF2Font(varFontPath, varFont, varModel, masterPaths, post_format_3=Fal
 def otfFinder(s):
 	return s.replace('.ufo', '.otf')
 
-def checkFontToolsVersion():
-	parts  = fontToolsVersion.split('.')
-	parts = [int(part) for part in parts]
-	assert( (parts[0] >= 3) and (parts[1] >=19)), "the Python fonttools module must be at least 3.19.0 in order for buildCFF2VF to work."
-
 def run(args=None):
-	checkFontToolsVersion()
 	post_format_3 = False
 	if args is None:
 		args = sys.argv[1:]
@@ -915,6 +910,10 @@ def run(args=None):
 	if '-p' in args:
 		post_format_3 = True
 		args.remove('-p')
+
+	if parse_version(fontToolsVersion) < parse_version("3.19"):
+		print("Quitting. The Python fonttools module must be at least 3.19.0 in order for buildCFF2VF to work.")
+		return
 
 	if len(args) == 2:
 		designSpacePath, varFontPath = args
