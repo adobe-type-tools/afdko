@@ -2432,24 +2432,36 @@ static void checkAndSortPairPos(hotCtx g, GPOSCtx h, SubtableInfo *si) {
 		KernRec *curr = &si->pairs.array[i];
 
 		prev = curr - 1;
-        if (prev->first.gid == GID_UNDEF)
-        {
-            j = 2;
-            while ((j <= i) && (prev->first.gid == GID_UNDEF))
-            {
-                prev = &si->pairs.array[i-j++];
-            }
-            if (prev->first.gid == GID_UNDEF) /* didn't find an earlier match that was not deleted. */
-                continue;
-        }
 
         if (fmt1) {
+            // Make sure we don't try to access a prev pair that is already marked for deletion.
+            if (prev->first.gid == GID_UNDEF)
+            {
+                j = 2;
+                while ((j <= i) && (prev->first.gid == GID_UNDEF))
+                {
+                    prev = &si->pairs.array[i-j++];
+                }
+                if (prev->first.gid == GID_UNDEF) /* didn't find an earlier match that was not deleted. */
+                    continue;
+            }
 			curr1 = curr->first.gid;
 			curr2 = curr->second.gid;
 			prev1 = prev->first.gid;
 			prev2 = prev->second.gid;
 		}
 		else {
+            // Make sure we don't try to access a prev pair that is already marked for deletion.
+            if (prev->first.gcl == NULL)
+            {
+                j = 2;
+                while ((j <= i) && (prev->first.gcl == NULL))
+                {
+                    prev = &si->pairs.array[i-j++];
+                }
+                if (prev->first.gcl == NULL) /* didn't find an earlier match that was not deleted. */
+                    continue;
+            }
 			curr1 = curr->first.gcl->gid;
 			curr2 = curr->second.gcl->gid;
 			prev1 = prev->first.gcl->gid;
