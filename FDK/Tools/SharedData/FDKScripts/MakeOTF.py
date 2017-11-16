@@ -1505,13 +1505,18 @@ def checkIfVertInFeature(featurePath):
 
 	includeList = re.findall(r"[^ #] *include *\( *([^ )]+) *\)", data)
 	for file in includeList:
-		apath = os.path.abspath(file)
+		# First, look for include files relative to parent feature file
+		fdir = os.path.dirname(featurePath)
+		apath = os.path.join(fdir, file)
 		if not os.path.exists(apath):
-			fdir = os.path.dirname(familyFilePath)
-			apath = os.path.join(fdir, file)
-			foundVert = checkIfVertInFeature(apath)
-			if foundVert:
-				break
+			# Second, look for include files relative to working directory.
+			apath = os.path.abspath(file)
+			if not os.path.exists(apath):
+				print "Could not find the include file '%s', referenced in '%s'." % (file, featurePath)
+				return 0
+		foundVert = checkIfVertInFeature(apath)
+		if foundVert:
+			break
 
 	return foundVert
 
