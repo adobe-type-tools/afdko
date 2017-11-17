@@ -278,7 +278,7 @@ class FontFile(object):
 
     def clear_hash_map(self):
         if self.ufo_font_hash_data is not None:
-            self.ufo_font_hash_data.clear_hash_map()
+            self.ufo_font_hash_data.clearHashMap()
 
 
 class COOptions(object):
