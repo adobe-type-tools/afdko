@@ -1090,6 +1090,7 @@ parameters
 		short params[MAX_FEAT_PARAM_NUM]; /* allow for feature param size up to MAX_FEAT_PARAM_NUM params. */
 		short value;
 		short index = 0;
+		h->featNameID = 0;
 		>>
 
 		K_parameters  parameterValue>[value]	<< params[index] = value;
@@ -1693,7 +1694,6 @@ sizemenuname
 			long lang = -1;		/* Suppress optimizer warning */
 			
 			h->nameString.cnt = 0;
-			h->featNameID = 0;
 			>>
 			(
 			K_sizemenuname					

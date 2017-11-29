@@ -82,7 +82,7 @@ int allowNotdef ;
   zzMake0;
   {
   _retv = 0; /* Suppress optimizer warning */
-  if ( LA(1)==T_GNAME  ) {
+  if ( (LA(1)==T_GNAME) ) {
     zzmatch(T_GNAME);
     gname = zzaCur;
 
@@ -2132,6 +2132,7 @@ parameters()
   short params[MAX_FEAT_PARAM_NUM]; /* allow for feature param size up to MAX_FEAT_PARAM_NUM params. */
   short value;
   short index = 0;
+  h->featNameID = 0;
   zzmatch(K_parameters); zzCONSUME;
    value  = parameterValue();
 
@@ -3602,7 +3603,6 @@ sizemenuname()
   long lang = -1;		/* Suppress optimizer warning */
   
 			h->nameString.cnt = 0;
-  h->featNameID = 0;
   {
     zzBLOCK(zztasp2);
     zzMake0;
