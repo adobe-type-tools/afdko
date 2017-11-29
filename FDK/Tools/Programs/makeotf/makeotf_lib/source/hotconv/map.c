@@ -481,7 +481,6 @@ hotGlyphInfo *mapName2Glyph(hotCtx g, char *gname, char **useAliasDB) {
 void mapGID2Name(hotCtx g, GID gid, char* msg)
 {
     int len;
-    char *p;
     hotGlyphInfo* hGID = &g->font.glyphs.array[gid];
     
     if (hGID->srcName == NULL)

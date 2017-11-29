@@ -1105,7 +1105,7 @@ static int CDECL cmpFinalAlias(const void *first, const void *second, void *ctx)
    All alias names must be
    unique. */
 
-static const int maxLineLen = 1024;
+#define maxLineLen 1024
 
 void cbAliasDBRead(cbCtx h, char *filename) {
 	File file;
