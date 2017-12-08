@@ -1664,12 +1664,14 @@ def run(args):
 		else:
 			logMsg.log("Note: No changes needed to be made to the instances files.")
 		
-
-if __name__=='__main__':
+def main():
 	try:
 		run(sys.argv[1:])
 	except (OptError, ParseError):
 		logMsg.log("Quitting after error.")
 		pass
+	
+if __name__=='__main__':
+	main()
 	
 	

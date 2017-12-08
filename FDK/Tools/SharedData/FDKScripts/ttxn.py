@@ -2181,6 +2181,8 @@ def run(args):
 			ttx.waitForKeyPress()
 		sys.exit(1)
 
-
-if __name__ == "__main__":
+def main():
 	run(sys.argv[1:])
+	
+if __name__ == "__main__":
+	main()

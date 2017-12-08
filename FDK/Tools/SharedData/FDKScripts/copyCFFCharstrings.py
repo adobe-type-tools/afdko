@@ -208,7 +208,4 @@ def run():
 		copyData(srcPath, dstPath)
 	
 if __name__ == "__main__":
-	#try:
-		run()
-	#except LocalError:
-	#	pass
+	run()
