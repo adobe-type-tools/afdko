@@ -1,5 +1,5 @@
 """
-fontPDF v1.23 May 2 2017. This module is not run stand-alone; it requires
+fontPDF v1.24 Dec 4 2017. This module is not run stand-alone; it requires
 another module, such as ProofPDF.py, in order to collect the options, and call
 the MakePDF function.
 
@@ -2173,7 +2173,7 @@ def makeProofPDF(pdfFont, params, doProgressBar=True):
 	# Collect log file text, if any.
 	if params.errorLogFilePath:
 		if not os.path.isfile(params.errorLogFilePath):
-			print "Error: log file %s does not exist or is not a file." % (repr(params.errorLogFilePath))
+			print "Warning: log file %s does not exist or is not a file." % (repr(params.errorLogFilePath))
 		else:
 			lf = file(params.errorLogFilePath, "rU")
 			errorLines = lf.readlines()

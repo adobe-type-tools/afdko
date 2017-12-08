@@ -1,6 +1,6 @@
 #!/bin/env python
 
-__copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+__copyright__ = """Copyright 2017 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
 __doc__ = """
@@ -522,7 +522,7 @@ def collectKernData(fontpath):
 			
 	if not scriptDict:
 		logMsg("Error: did not find any kern feature text in the output of the command '%s'." % (command))
-		return None
+		return None, None, None
 	
 	# Now build the dict mapping unique lookup sequences to script/language pairs.
 	lookupSequenceDict = {}
@@ -1964,23 +1964,24 @@ def run():
 	agdTextPath = fp.read()
 	fp.close()
 	gAGDDict = agd.dictionary(agdTextPath)
-	overlapList = []
+	overlapList = conflictMsgList = []
 	print "Collecting font kern data..."
 	lookupIndexDict, lookupSequenceDict, fontFlatKernTable = collectKernData(fontPath)
 
-	if doCollisionCheck:
-		print "Building bitmaps for font..."
-	
-		glyphBitMapDict = getBitMaps(fontPath, ppEM, doAll)
+	if lookupIndexDict:
+		if doCollisionCheck:
+			print "Building bitmaps for font..."
 		
-		print "Checking for glyph overlap in all glyph pairs..."
-		overlapList = checkForOverlap(fontFlatKernTable, fontPath, ppEM, glyphBitMapDict, doAll, limitVal)
-	
-	if doSubtableCheck:
-		print "Checking for subtable conflicts in kern feature..."
-		conflictMsgList = checkForSubtableConflict(fontFlatKernTable)
-	#print "Comparing font kern vs calculated values..."
-	#compareKernValues(lookupIndexDict, fontPath, ppEM, glyphBitMapDict)
+			glyphBitMapDict = getBitMaps(fontPath, ppEM, doAll)
+			
+			print "Checking for glyph overlap in all glyph pairs..."
+			overlapList = checkForOverlap(fontFlatKernTable, fontPath, ppEM, glyphBitMapDict, doAll, limitVal)
+		
+		if doSubtableCheck:
+			print "Checking for subtable conflicts in kern feature..."
+			conflictMsgList = checkForSubtableConflict(fontFlatKernTable)
+		#print "Comparing font kern vs calculated values..."
+		#compareKernValues(lookupIndexDict, fontPath, ppEM, glyphBitMapDict)
 
 	reporter.close(fontPath, sortType, overlapList , conflictMsgList)
 
