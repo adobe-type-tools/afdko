@@ -1,11 +1,14 @@
 from __future__ import print_function
 
+import argparse
+import doctest
 import hashlib
 import os
 import re
 import shutil
 import subprocess
 import sys
+import textwrap
 
 import booleanOperations.booleanGlyph
 import defcon
@@ -18,78 +21,10 @@ from ufoTools import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
 # noinspection PyPep8Naming
 from ufoTools import kProcessedGlyphsLayerName as PROCD_GLYPHS_LAYER_NAME
 
+__version__ = 'v1.22 Oct 31 2017'
+
 __copyright__ = 'Copyright 2015, 2016 Adobe Systems Incorporated ' \
                 '(http://www.adobe.com/). All Rights Reserved.'
-
-__usage__ = 'checkOutlinesUFO program v1.22 Oct 31 2017\n\n'\
-    'checkOutlinesUFO [-e] [-g glyphList] [-gf <file name>] [-all] '\
-    '[-noOverlap] [-noBasicChecks] [-q] [-setMinArea <n>] '\
-    '[-setTolerance <n>] [-wd]\n\n' \
-    'Remove path overlaps, and do a few basic outline quality checks.'
-
-
-__help__ = """
-
--decimal
-    do NOT round point values to integer
-
--e
-    fix reported problems
-
--q
-    run in quiet mode
-
--noOverlap
-    turn off path overlap checks
-    This reports path overlaps, and tiny outlines, such as those formed when
-    two line segments should meet, but cross each other just before the join,
-    defining a triangle a few units on a side.
-
-
--noBasicChecks
-    turn off basic checks:
-    - coincident points
-    - flat curves (curves which are a straight line)
-    - colinear lines (several line segments that define
-                      the same path as a single line);
-
--setMinArea <n>
-    Set the minimum area for a tiny outline. Default is 25 square
-    units. Subpaths with a bounding box less than this will be reported, and
-    deleted if fixed.
-
--setTolerance <n>
-    Set the maximum deviation from a straight line allowed.
-    Default is 0 design space units. This is used to test whether the control
-    points for a curve define a flat curve, and whether a sequence of line
-    segments defines a straight line.
-
--wd
-    write changed glyphs to default layer instead of '%s'
-
--g <glyphID1>,<glyphID2>,...,<glyphIDn>
-    Check only the specified list of glyphs. The list must be
-    comma-delimited. The glyph ID's may be glyphID's, glyph names, or
-    glyph CID's. If the latter, the CID value must be prefixed with the
-    string "cid". There must be no white-space in the glyph list.
-    Examples:
-        checkOutlinesUFO -g A,B,C,69 myFont
-        checkOutlinesUFO -g cid1030,cid34,cid3455,69 myCIDFont
-
--gf <file name>
-    Check only the list of glyphs contained in the specified file, The file
-    must contain a comma-delimited list of glyph identifiers. Any number of
-    space, tab, and new-line characters are permitted between glyph names
-    and commas.
-
--all
-    Force all glyphs to be processed. This applies only to UFO fonts, where
-    processed glyphs are saved in a layer, and processing of a glyph is skipped
-    if has already been processed.
-
-""" % PROCD_GLYPHS_LAYER_NAME
-
-__doc__ = __usage__ + __help__
 
 
 class FocusOptionParseError(KeyError):
@@ -319,106 +254,213 @@ def parse_glyph_list_arg(glyph_string):
     return glyph_list
 
 
-def get_options(args):
+class CustomHelpFormatter(argparse.RawDescriptionHelpFormatter):
+    # This class is based on PreserveWhiteSpaceWrapRawTextHelpFormatter
+    # from: https://stackoverflow.com/questions/35917547/
+
+    # noinspection PyMethodMayBeStatic
+    def __add_whitespace(self, idx, i_w_space, text):
+        if idx is 0:
+            return text
+        return (" " * i_w_space) + text
+
+    def _split_lines(self, text, width):
+        text_rows = text.splitlines()
+        for idx, line in enumerate(text_rows):
+            search = re.search('\s*[0-9\-]{0,}\.?\s*', line)
+            if line.strip() is "":
+                text_rows[idx] = " "
+            elif search:
+                l_w_space = search.end()
+                lines = [self.__add_whitespace(i, l_w_space, x)
+                         for i, x in enumerate(textwrap.wrap(line, width))]
+                text_rows[idx] = lines
+
+        # I added the " + ['']" below for a blank line between args.  -- CJC
+        return [item for sublist in text_rows for item in sublist] + ['']
+
+
+class TestAction(argparse.Action):
+    """
+    This class allows the "--test" option to not require a positional argument.
+    """
+    SUPPRESS = '==SUPPRESS=='
+
+    def __init__(self,
+                 option_strings,
+                 dest=SUPPRESS,
+                 default=SUPPRESS,
+                 help=None):
+        super(TestAction, self).__init__(
+            option_strings=option_strings,
+            dest=dest,
+            default=default,
+            nargs=0,
+            help=help)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        parser.exit(doctest.testmod(verbose=True).failed)
+
+
+def get_options():
+    parser = argparse.ArgumentParser(
+        formatter_class=CustomHelpFormatter,
+        prog='checkOutlinesUFO',
+        description='Tool that performs outline quality checks and can remove '
+                    'path overlaps.'
+    )
+    parser.add_argument(
+        '--version',
+        action='version',
+        version='%(prog)s ' + __version__)
+    parser.add_argument(
+        '-q',
+        '--quiet-mode',
+        action='store_true',
+        help='run in quiet mode'
+    )
+    parser.add_argument(
+        '-d',
+        '--decimal',
+        action='store_true',
+        help='do NOT round point coordinates to integer'
+    )
+    parser.add_argument(
+        '-e',
+        '--error-correction-mode',
+        action='store_true',
+        help='correct reported problems\n'
+             'Adds a layer to the UFO containing a modified version '
+             'of the glyphs. The outlines in the default layer are left '
+             "untouched. The modified layer's name is: '%s'" %
+             PROCD_GLYPHS_LAYER,
+    )
+    parser.add_argument(
+        '--no-overlap-checks',
+        action='store_true',
+        help='turn off path overlap checks'
+    )
+    parser.add_argument(
+        '--no-basic-checks',
+        action='store_true',
+        help='turn off the following checks:\n'
+             '- coincident points\n'
+             '- colinear line segments\n'
+             '- flat curves (straight segments with unnecessary control '
+             'points)'
+    )
+    parser.add_argument(
+        '--min-area',
+        metavar='NUMBER',
+        type=int,
+        default=25,
+        help='minimum area for a tiny outline\n'
+             'Default is 25 square units. Subpaths with a bounding box less '
+             'than this will be reported, and deleted if the -e option is '
+             'used.'
+    )
+    parser.add_argument(
+        '--tolerance',
+        metavar='NUMBER',
+        type=int,
+        default=0,
+        help='maximum allowed deviation from a straight line\n'
+             'Default is 0 design space units. This is used to test '
+             'whether the control points of a curve define a flat '
+             'curve, and whether colinear line segments define a '
+             'straight line.'
+    )
+    parser.add_argument(
+        '-w',
+        '--write-to-default-layer',
+        action='store_true',
+        help="write modified glyphs to default layer instead of '%s'" %
+             PROCD_GLYPHS_LAYER
+    )
+    parser.add_argument(
+        '-g',
+        '--glyph-list',
+        help='specify a list of glyphs to check\n'
+             'Check only the specified list of glyphs. The list must be'
+             'comma-delimited. The glyph IDs may be glyph indexes '
+             'or glyph names. There must be no white-space in the '
+             'glyph list.\n'
+             'Example:\n'
+             '    checkOutlinesUFO -g A,B,C,69 MyFont.ufo'
+    )
+    parser.add_argument(
+        '-f',
+        '--glyph-file',
+        metavar='FILE_NAME',
+        help='specify a file containing a list of glyphs to check\n'
+             'Check only specific glyphs listed in a file. The '
+             'file must contain a comma-delimited list of glyph '
+             'identifiers. Any number of space, tab, and new-line '
+             'characters are permitted between glyph names and commas.'
+    )
+    parser.add_argument(
+        '--clear-hash-map',
+        action='store_true',
+        help='delete the hashes file\n'
+             'By default, a file containing compact descriptions '
+             '(a.k.a. hashes) of the glyphs is saved inside the '
+             'UFO on the first time the font is checked. Storing '
+             'these hashes allows checkOutlinesUFO to be much faster '
+             'on successive checks of the same UFO (because the '
+             'tool will skip processing glyphs that were not '
+             'modified since the last time the font was checked).'
+    )
+    parser.add_argument(
+        '--all',
+        action='store_true',
+        help='force all glyphs to be processed\n'
+             'Makes the tool ignore the stored hashes thus checking all the '
+             'glyphs, even if they have already been processed.'
+    )
+    parser.add_argument(
+        '--test',
+        action=TestAction,
+        help='run internal tests'
+    )
+    parser.add_argument(
+        'ufo_file',
+        metavar='UFO_FILE',
+        help='UFO font file'
+    )
+
+    args = parser.parse_args()
+
     options = COOptions()
-    i = 0
-    num_options = len(args)
-    while i < num_options:
-        arg = args[i]
-        if options.file_path and arg[0] == "-":
+    options.write_to_default_layer = args.write_to_default_layer
+
+    if args.glyph_list:
+        options.glyph_list += parse_glyph_list_arg(args.glyph_list)
+
+    if args.glyph_file:
+        try:
+            gf = open(args.glyph_file, "rt")
+            glyph_string = gf.read()
+            glyph_string = glyph_string.strip()
+            gf.close()
+        except (IOError, OSError):
             raise FocusOptionParseError(
-                "Option Error: "
-                "All file names must follow all other options <%s>." % arg)
+                "Option Error: could not open glyph list file <%s>." %
+                args.glyph_file)
+        options.glyph_list += parse_glyph_list_arg(glyph_string)
 
-        if arg == "-test":
-            import doctest
-            sys.exit(doctest.testmod().failed)
-        elif arg == "-u":
-            print(__usage__)
-            sys.exit()
-        elif arg == "-h":
-            print(__doc__)
-            sys.exit()
-        elif arg == "-wd":
-            options.write_to_default_layer = True
-        elif arg == "-g":
-            i += 1
-            glyph_string = args[i]
-            if glyph_string[0] == "-":
-                raise FocusOptionParseError(
-                    "Option Error: "
-                    "it looks like the first item in the glyph list "
-                    "following '-g' is another option.")
-            options.glyph_list += parse_glyph_list_arg(glyph_string)
-        elif arg == "-gf":
-            i += 1
-            file_path = args[i]
-            if file_path[0] == "-":
-                raise FocusOptionParseError(
-                    "Option Error: "
-                    "it looks like the the glyph list file "
-                    "following '-gf' is another option.")
-            try:
-                gf = open(file_path, "rt")
-                glyph_string = gf.read()
-                glyph_string = glyph_string.strip()
-                gf.close()
-            except (IOError, OSError):
-                raise FocusOptionParseError(
-                    "Option Error: could not open glyph list file <%s>." %
-                    file_path)
-            options.glyph_list += parse_glyph_list_arg(glyph_string)
-        elif arg == "-e":
-            options.allow_changes = True
-        elif arg == "-q":
-            options.quiet_mode = True
-        elif arg == "-noOverlap":
-            options.test_list.remove(do_overlap_removal)
-        elif arg == "-noBasicChecks":
-            options.test_list.remove(do_cleanup)
-        elif arg == "-setMinArea":
-            i += 1
-            try:
-                options.min_area = int(args[i])
-            except ValueError:
-                raise FocusOptionParseError(
-                    "The argument following '-setMinArea' must be an integer.")
-        elif arg == "-setTolerance":
-            i += 1
-            try:
-                options.tolerance = int(args[i])
-            except ValueError:
-                raise FocusOptionParseError(
-                    "The argument following '-setTolerance' "
-                    "must be an integer.")
-        elif arg in ["-decimal", "-dec"]:
-            options.allow_decimal_coords = True
-        elif arg == "-all":
-            options.check_all = True
-        elif arg == "-clearHashMap":
-            options.clear_hash_map = True
-        elif arg[0] == "-":
-            raise FocusOptionParseError(
-                "Option Error: Unknown option <%s>." % arg)
-        else:
-            if options.file_path:
-                raise FocusOptionParseError(
-                    "Option Error: You cannot specify more than one file "
-                    "to check <%s>." % arg)
-            options.file_path = arg
+    if args.no_overlap_checks:
+        options.test_list.remove(do_overlap_removal)
+    if args.no_basic_checks:
+        options.test_list.remove(do_cleanup)
 
-        i += 1
-    if not options.file_path:
-        raise FocusOptionParseError(
-            "Option Error: You must provide a font file path.")
-    else:
-        # might be a UFO font. auto completion in some shells adds a dir
-        # separator, which then causes problems with os.path.dirname().
-        options.file_path = options.file_path.rstrip(os.sep)
-
-    if not os.path.exists(options.file_path):
-        raise FocusOptionParseError(
-            "Option Error: The file path does not exist.")
+    options.allow_changes = args.error_correction_mode
+    options.quiet_mode = args.quiet_mode
+    options.min_area = args.min_area
+    options.tolerance = args.tolerance
+    options.allow_decimal_coords = args.decimal
+    options.check_all = args.all
+    options.clear_hash_map = args.clear_hash_map
+    options.file_path = args.ufo_file
 
     return options
 
@@ -1032,8 +1074,8 @@ RE_SPACE_PATTERN = re.compile(
     r"space|uni(00A0|1680|180E|202F|205F|3000|FEFF|200[0-9AB])")
 
 
-def run(args):
-    options = get_options(args)
+def run():
+    options = get_options()
     font_path = os.path.abspath(options.file_path)
     font_file = FontFile(font_path)
     defcon_font = font_file.open(options.allow_changes)
@@ -1162,7 +1204,7 @@ def run(args):
 
 if __name__ == '__main__':
     try:
-        run(sys.argv[1:])
+        run()
     except (FocusOptionParseError, FocusFontError) as focus_error:
         print("Quitting after error.", focus_error)
         pass
