@@ -941,6 +941,9 @@ def restore_contour_order(fixed_glyph, original_contours):
     similar fonts. I can't completely avoid this, but I can reduce how often
     it happens.
     """
+    if len(fixed_glyph) == 0:
+        return
+
     new_contours = list(fixed_glyph)
     if len(new_contours) > 1:
         new_contours.sort(sort_contours)
