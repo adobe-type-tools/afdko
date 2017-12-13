@@ -220,7 +220,7 @@ def updateInstance(options, fontInstancePath):
 		logList = []
 		opList = ["-e", fontInstancePath]
 		if options.allowDecimalCoords:
-			opList.insert(0, "-dec")
+			opList.insert(0, "-d")
 		if os.name == "nt":
 			opList.insert(0, 'checkOutlinesUFO.cmd')
 			proc = Popen(opList, stdout=PIPE)
