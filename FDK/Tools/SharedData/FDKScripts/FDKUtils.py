@@ -99,3 +99,77 @@ def runShellCmdLogging(cmd):
 		print(msg)
 		return 1
 	return 0
+
+def clean_afdko():
+	runShellCmd("pip uninstall afdko -y")
+	bin_fileList = [
+			  "autohint",
+			  "buildCFF2VF",
+			  "buildMasterOTFs",
+			  "compareFamily",
+			  "checkOutlinesUFO",
+			  "copyCFFCharstrings",
+			  "kernCheck",
+			  "makeotf",
+			  "makeInstancesUFO",
+			  "otc2otf",
+			  "otf2otc",
+			  "stemHist",
+			  "ttxn",
+			  "charplot",
+			  "digiplot",
+			  "fontplot",
+			  "fontplot2",
+			  "fontsetplot",
+			  "hintplot",
+			  "waterfallplot",
+			  "check_afdko",
+			  "clean_afdko",
+              "autohintexe",
+              "makeotfexe",
+              "mergeFonts",
+              "rotateFont",
+              "sfntdiff",
+              "sfntedit",
+              "spot",
+              "tx",
+              "type1",
+	]
+	log = runShellCmd("which autohintexe")
+	log = log.strip()
+	if not log:
+		print("Did not find FDK tools in the Python bin directory:")
+	else:
+		basepath = os.path.dirname(log)
+		for fileName in bin_fileList:
+			binPath = os.path.join(basepath, fileName)
+			try:
+				os.remove(binPath)
+				print("Deleted", binPath)
+			except:
+				pass
+	basepath = None
+	foundFDK = False
+	try:
+		import FDK
+		foundFDK = True
+	except:
+		print("Cannot import FDK - must not be installed")
+	if foundFDK:
+		import shutil
+		basepath = os.path.dirname(FDK.__file__)
+		try:
+			shutil.rmtree(basepath)
+			print("Deleted", basepath)
+		except:
+			pass
+		
+	return 
+	
+def check_afkdo():
+	return
+	
+if __name__ == "__main__":
+	clean_afdko()
+	
+	
