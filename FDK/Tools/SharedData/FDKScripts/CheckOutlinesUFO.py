@@ -1,3 +1,5 @@
+"""Copyright 2015 Adobe. All rights reserved."""
+
 from __future__ import print_function
 
 import argparse
@@ -21,10 +23,7 @@ from ufoTools import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
 # noinspection PyPep8Naming
 from ufoTools import kProcessedGlyphsLayerName as PROCD_GLYPHS_LAYER_NAME
 
-__version__ = 'v1.22 Oct 31 2017'
-
-__copyright__ = 'Copyright 2015, 2016 Adobe Systems Incorporated ' \
-                '(http://www.adobe.com/). All Rights Reserved.'
+__version__ = '2.0.0'
 
 
 class FocusOptionParseError(KeyError):
