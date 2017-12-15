@@ -34,7 +34,7 @@ except ImportError:
 
 def getExecutableDir():
 	"""
-	Build source path on the FDK for the command-line tools.
+	Build source path on the afdko for the command-line tools.
 	"""
 	curSystem = platform.system()
 	if curSystem == "Windows":
@@ -66,7 +66,7 @@ class CustomInstallLib(install_lib):
 	"""Custom handler for the 'build_clib' command.
 	Build the C programs before running the original bdist_egg.run()"""
 	def run(self):
-		pgkDir = self.distribution.package_dir['FDK']
+		pgkDir = 'afdko'
 		compile(pgkDir)
 		install_lib.run(self)
 
@@ -84,12 +84,34 @@ classifiers=[
 """
 Identify the dist build as being paltform specific.
 """
+scripts=[\
+	  'afdko/Tools/osx/autohintexe',
+	  'afdko/Tools/osx/makeotfexe',
+	  'afdko/Tools/osx/mergeFonts',
+	  'afdko/Tools/osx/rotateFont',
+	  'afdko/Tools/osx/sfntdiff',
+	  'afdko/Tools/osx/sfntedit',
+	  'afdko/Tools/osx/spot',
+	  'afdko/Tools/osx/tx',
+	  'afdko/Tools/osx/type1',
+		  ]
 if curSystem == "Darwin":
 	moreKeyWords = ['Operating System :: MacOS :: MacOS X',
 					]
 elif curSystem == "Windows":
 	moreKeyWords = ['Operating System :: MacOS :: MacOS X',
 					]
+	scripts=[\
+		  'afdko/Tools/osx/autohintexe.exe',
+		  'afdko/Tools/osx/makeotfexe.exe',
+		  'afdko/Tools/osx/mergeFonts.exe',
+		  'afdko/Tools/osx/rotateFont.exe',
+		  'afdko/Tools/osx/sfntdiff.exe',
+		  'afdko/Tools/osx/sfntedit.exe',
+		  'afdko/Tools/osx/spot.exe',
+		  'afdko/Tools/osx/tx.exe',
+		  'afdko/Tools/osx/type1.exe',
+			  ]
 elif curSystem == "Linux":
 	moreKeyWords = ['Operating System :: MacOS :: MacOS X',
 					]
@@ -107,7 +129,7 @@ with io.open("NEWS.rst", "r", encoding="utf-8") as changelog:
 	long_description += changelog.read()
 
 setup(name="afdko",
-	  version="2.6.0.dev0",
+	  version="2.6.3",
 	  description="Adobe Font Development Kit for OpenType",
 	  long_description=long_description,
 	  url='https://github.com/adobe-type-tools/afdko',
@@ -117,14 +139,10 @@ setup(name="afdko",
 	  classifiers = classifiers,
 	  keywords='font development tools',
 	  platforms=[platform_name],
-	  package_dir={'FDK': 'FDK'},
+	  package_dir={'afdko': 'afdko'},
 	  packages=pkg_list,
 	  include_package_data = True,
-	  package_data = {
-		'SharedData': ['Adobe Cmaps/*'],
-		'SharedData': ['CID charsets/*'],
-		'SharedData': ['AGD.txt'],
-	  },
+	  zip_safe=False,
 	  python_requires='>=2.7,',
 	  setup_requires=['wheel'],
 	  install_requires=[
@@ -137,41 +155,31 @@ setup(name="afdko",
 		  'ufolib>=2.1.1',
 		  'ufonormalizer>=0.3.2',
 	  ],
-	  scripts=[\
-                  'FDK/Tools/osx/autohintexe',
-                  'FDK/Tools/osx/makeotfexe',
-                  'FDK/Tools/osx/mergeFonts',
-                  'FDK/Tools/osx/rotateFont',
-                  'FDK/Tools/osx/sfntdiff',
-                  'FDK/Tools/osx/sfntedit',
-                  'FDK/Tools/osx/spot',
-                  'FDK/Tools/osx/tx',
-                  'FDK/Tools/osx/type1',
-                  ],
+	  scripts=scripts,
 	  entry_points={
 		  'console_scripts': [
-			  "autohint = FDK.Tools.SharedData.FDKScripts.autohint:main",
-			  "buildCFF2VF = FDK.Tools.SharedData.FDKScripts.buildCFF2VF:run",
-			  "buildMasterOTFs = FDK.Tools.SharedData.FDKScripts.buildMasterOTFs:main",
-			  "compareFamily = FDK.Tools.SharedData.FDKScripts.CompareFamily:main",
-			  "checkOutlinesUFO = FDK.Tools.SharedData.FDKScripts.CheckOutlinesUFO:main",
-			  "copyCFFCharstrings = FDK.Tools.SharedData.FDKScripts.copyCFFCharstrings:run",
-			  "kernCheck = FDK.Tools.SharedData.FDKScripts.kernCheck:run",
-			  "makeotf = FDK.Tools.SharedData.FDKScripts.MakeOTF:main",
-			  "makeInstancesUFO = FDK.Tools.SharedData.FDKScripts.makeInstancesUFO:main",
-			  "otc2otf = FDK.Tools.SharedData.FDKScripts.otc2otf:main",
-			  "otf2otc = FDK.Tools.SharedData.FDKScripts.otf2otc:main",
-			  "stemHist = FDK.Tools.SharedData.FDKScripts.StemHist:main",
-			  "ttxn = FDK.Tools.SharedData.FDKScripts.ttxn:main",
-			  "charplot = FDK.Tools.SharedData.FDKScripts.ProofPDF:charplot",
-			  "digiplot = FDK.Tools.SharedData.FDKScripts.ProofPDF:digiplot",
-			  "fontplot = FDK.Tools.SharedData.FDKScripts.ProofPDF:fontplot",
-			  "fontplot2 = FDK.Tools.SharedData.FDKScripts.ProofPDF:fontplot2",
-			  "fontsetplot = FDK.Tools.SharedData.FDKScripts.ProofPDF:fontsetplot",
-			  "hintplot = FDK.Tools.SharedData.FDKScripts.ProofPDF:hintplot",
-			  "waterfallplot = FDK.Tools.SharedData.FDKScripts.ProofPDF:waterfallplot",
-			  "clean_afdko = FDK.Tools.SharedData.FDKScripts.FDKUtils:clean_afdko",
-			  "check_afdko = FDK.Tools.SharedData.FDKScripts.FDKUtils:check_afdko",
+			  "autohint = afdko.Tools.SharedData.FDKScripts.autohint:main",
+			  "buildCFF2VF = afdko.Tools.SharedData.FDKScripts.buildCFF2VF:run",
+			  "buildMasterOTFs = afdko.Tools.SharedData.FDKScripts.buildMasterOTFs:main",
+			  "compareFamily = afdko.Tools.SharedData.FDKScripts.CompareFamily:main",
+			  "checkOutlinesUFO = afdko.Tools.SharedData.FDKScripts.CheckOutlinesUFO:main",
+			  "copyCFFCharstrings = afdko.Tools.SharedData.FDKScripts.copyCFFCharstrings:run",
+			  "kernCheck = afdko.Tools.SharedData.FDKScripts.kernCheck:run",
+			  "makeotf = afdko.Tools.SharedData.FDKScripts.MakeOTF:main",
+			  "makeInstancesUFO = afdko.Tools.SharedData.FDKScripts.makeInstancesUFO:main",
+			  "otc2otf = afdko.Tools.SharedData.FDKScripts.otc2otf:main",
+			  "otf2otc = afdko.Tools.SharedData.FDKScripts.otf2otc:main",
+			  "stemHist = afdko.Tools.SharedData.FDKScripts.StemHist:main",
+			  "ttxn = afdko.Tools.SharedData.FDKScripts.ttxn:main",
+			  "charplot = afdko.Tools.SharedData.FDKScripts.ProofPDF:charplot",
+			  "digiplot = afdko.Tools.SharedData.FDKScripts.ProofPDF:digiplot",
+			  "fontplot = afdko.Tools.SharedData.FDKScripts.ProofPDF:fontplot",
+			  "fontplot2 = afdko.Tools.SharedData.FDKScripts.ProofPDF:fontplot2",
+			  "fontsetplot = afdko.Tools.SharedData.FDKScripts.ProofPDF:fontsetplot",
+			  "hintplot = afdko.Tools.SharedData.FDKScripts.ProofPDF:hintplot",
+			  "waterfallplot = afdko.Tools.SharedData.FDKScripts.ProofPDF:waterfallplot",
+			  "clean_afdko = afdko.Tools.SharedData.FDKScripts.FDKUtils:clean_afdko",
+			  "check_afdko = afdko.Tools.SharedData.FDKScripts.FDKUtils:check_afdko",
 		  ],
 	  },
 	  cmdclass={'install_lib': CustomInstallLib, 'bdist_wheel': bdist_wheel},

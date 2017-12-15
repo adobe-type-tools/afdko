@@ -1,0 +1,10 @@
+include README.rst
+include LICENSE.txt
+include NEWS.rst
+
+recursive-include		afdko/Tools/SharedData/Adobe?Cmaps *
+recursive-include		afdko/Tools/SharedData/CID?charsets *
+
+include		afdko/Tools/SharedData/AGD.txt
+include		afdko/FDKReleaseNotes.txt
+
