@@ -2,8 +2,7 @@ import platform
 from setuptools import setup, find_packages, Extension
 import io
 import os
-from setuptools.command.build_clib import build_clib
-from setuptools.command.install_lib import install_lib
+import setuptools.command.build_py
 import subprocess
 from distutils.util import get_platform
 import sys
@@ -62,13 +61,15 @@ def compile(pgkDir):
 	subprocess.check_call(cmd, cwd=programsDir, shell=True)
 	os.chdir(curdir)
 
-class CustomInstallLib(install_lib):
-	"""Custom handler for the 'build_clib' command.
-	Build the C programs before running the original bdist_egg.run()"""
+class CustomBuild(setuptools.command.build_py.build_py):
+	"""Custom build command."""
+
 	def run(self):
+		print("Hello compile")
 		pgkDir = 'afdko'
 		compile(pgkDir)
-		install_lib.run(self)
+		setuptools.command.build_py.build_py.run(self)
+
 
 
 binDir, platform_name, curSystem = getExecutableDir()
@@ -85,15 +86,16 @@ classifiers=[
 Identify the dist build as being paltform specific.
 """
 scripts=[\
-	  'afdko/Tools/osx/autohintexe',
-	  'afdko/Tools/osx/makeotfexe',
-	  'afdko/Tools/osx/mergeFonts',
-	  'afdko/Tools/osx/rotateFont',
-	  'afdko/Tools/osx/sfntdiff',
-	  'afdko/Tools/osx/sfntedit',
-	  'afdko/Tools/osx/spot',
-	  'afdko/Tools/osx/tx',
-	  'afdko/Tools/osx/type1',
+	  'afdko/Tools/%s/autohintexe' % (binDir),
+	  'afdko/Tools/%s/detype1' % (binDir),
+	  'afdko/Tools/%s/makeotfexe' % (binDir),
+	  'afdko/Tools/%s/mergeFonts' % (binDir),
+	  'afdko/Tools/%s/rotateFont' % (binDir),
+	  'afdko/Tools/%s/sfntdiff' % (binDir),
+	  'afdko/Tools/%s/sfntedit' % (binDir),
+	  'afdko/Tools/%s/spot' % (binDir),
+	  'afdko/Tools/%s/tx' % (binDir),
+	  'afdko/Tools/%s/type1' % (binDir),
 		  ]
 if curSystem == "Darwin":
 	moreKeyWords = ['Operating System :: MacOS :: MacOS X',
@@ -102,15 +104,16 @@ elif curSystem == "Windows":
 	moreKeyWords = ['Operating System :: MacOS :: MacOS X',
 					]
 	scripts=[\
-		  'afdko/Tools/osx/autohintexe.exe',
-		  'afdko/Tools/osx/makeotfexe.exe',
-		  'afdko/Tools/osx/mergeFonts.exe',
-		  'afdko/Tools/osx/rotateFont.exe',
-		  'afdko/Tools/osx/sfntdiff.exe',
-		  'afdko/Tools/osx/sfntedit.exe',
-		  'afdko/Tools/osx/spot.exe',
-		  'afdko/Tools/osx/tx.exe',
-		  'afdko/Tools/osx/type1.exe',
+		  'afdko/Tools/win/autohintexe.exe',
+		  'afdko/Tools/win/detype1.exe',
+		  'afdko/Tools/win/makeotfexe.exe',
+		  'afdko/Tools/win/mergeFonts.exe',
+		  'afdko/Tools/win/rotateFont.exe',
+		  'afdko/Tools/win/sfntdiff.exe',
+		  'afdko/Tools/win/sfntedit.exe',
+		  'afdko/Tools/win/spot.exe',
+		  'afdko/Tools/win/tx.exe',
+		  'afdko/Tools/win/type1.exe',
 			  ]
 elif curSystem == "Linux":
 	moreKeyWords = ['Operating System :: MacOS :: MacOS X',
@@ -166,6 +169,7 @@ setup(name="afdko",
 			  "copyCFFCharstrings = afdko.Tools.SharedData.FDKScripts.copyCFFCharstrings:run",
 			  "kernCheck = afdko.Tools.SharedData.FDKScripts.kernCheck:run",
 			  "makeotf = afdko.Tools.SharedData.FDKScripts.MakeOTF:main",
+			  "makeInstances = afdko.Tools.SharedData.FDKScripts.makeInstances:main",
 			  "makeInstancesUFO = afdko.Tools.SharedData.FDKScripts.makeInstancesUFO:main",
 			  "otc2otf = afdko.Tools.SharedData.FDKScripts.otc2otf:main",
 			  "otf2otc = afdko.Tools.SharedData.FDKScripts.otf2otc:main",
@@ -182,5 +186,5 @@ setup(name="afdko",
 			  "check_afdko = afdko.Tools.SharedData.FDKScripts.FDKUtils:check_afdko",
 		  ],
 	  },
-	  cmdclass={'install_lib': CustomInstallLib, 'bdist_wheel': bdist_wheel},
+	  cmdclass={'build_py': CustomBuild, 'bdist_wheel': bdist_wheel},
 	)
