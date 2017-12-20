@@ -301,7 +301,7 @@ class TestAction(argparse.Action):
         parser.exit(doctest.testmod(verbose=True).failed)
 
 
-def get_options():
+def get_options(args):
     parser = argparse.ArgumentParser(
         formatter_class=CustomHelpFormatter,
         prog='checkOutlinesUFO',
@@ -427,39 +427,39 @@ def get_options():
         help='UFO font file'
     )
 
-    args = parser.parse_args()
+    parsed_args = parser.parse_args(args)
 
     options = COOptions()
-    options.write_to_default_layer = args.write_to_default_layer
+    options.write_to_default_layer = parsed_args.write_to_default_layer
 
-    if args.glyph_list:
-        options.glyph_list += parse_glyph_list_arg(args.glyph_list)
+    if parsed_args.glyph_list:
+        options.glyph_list += parse_glyph_list_arg(parsed_args.glyph_list)
 
-    if args.glyph_file:
+    if parsed_args.glyph_file:
         try:
-            gf = open(args.glyph_file, "rt")
+            gf = open(parsed_args.glyph_file, "rt")
             glyph_string = gf.read()
             glyph_string = glyph_string.strip()
             gf.close()
         except (IOError, OSError):
             raise FocusOptionParseError(
                 "Option Error: could not open glyph list file <%s>." %
-                args.glyph_file)
+                parsed_args.glyph_file)
         options.glyph_list += parse_glyph_list_arg(glyph_string)
 
-    if args.no_overlap_checks:
+    if parsed_args.no_overlap_checks:
         options.test_list.remove(do_overlap_removal)
-    if args.no_basic_checks:
+    if parsed_args.no_basic_checks:
         options.test_list.remove(do_cleanup)
 
-    options.allow_changes = args.error_correction_mode
-    options.quiet_mode = args.quiet_mode
-    options.min_area = args.min_area
-    options.tolerance = args.tolerance
-    options.allow_decimal_coords = args.decimal
-    options.check_all = args.all
-    options.clear_hash_map = args.clear_hash_map
-    options.file_path = args.ufo_file
+    options.allow_changes = parsed_args.error_correction_mode
+    options.quiet_mode = parsed_args.quiet_mode
+    options.min_area = parsed_args.min_area
+    options.tolerance = parsed_args.tolerance
+    options.allow_decimal_coords = parsed_args.decimal
+    options.check_all = parsed_args.all
+    options.clear_hash_map = parsed_args.clear_hash_map
+    options.file_path = parsed_args.ufo_file
 
     return options
 
@@ -1073,8 +1073,8 @@ RE_SPACE_PATTERN = re.compile(
     r"space|uni(00A0|1680|180E|202F|205F|3000|FEFF|200[0-9AB])")
 
 
-def run():
-    options = get_options()
+def run(args=None):
+    options = get_options(args)
     font_path = os.path.abspath(options.file_path)
     font_file = FontFile(font_path)
     defcon_font = font_file.open(options.allow_changes)
@@ -1203,7 +1203,7 @@ def run():
 
 if __name__ == '__main__':
     try:
-        run()
+        run(sys.argv[1:])
     except (FocusOptionParseError, FocusFontError) as focus_error:
         print("Quitting after error.", focus_error)
         pass
