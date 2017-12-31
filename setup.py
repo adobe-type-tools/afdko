@@ -132,7 +132,7 @@ with io.open("NEWS.rst", "r", encoding="utf-8") as changelog:
 	long_description += changelog.read()
 
 setup(name="afdko",
-	  version="2.6.3",
+	  version="2.6.5",
 	  description="Adobe Font Development Kit for OpenType",
 	  long_description=long_description,
 	  url='https://github.com/adobe-type-tools/afdko',

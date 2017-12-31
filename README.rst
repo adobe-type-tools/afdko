@@ -1,7 +1,9 @@
-Adobe Font Development Kit for OpenType (AFDKO)
-===============================================
 
-the AFDKO is a set of tools for building OpenType font files from PostScript and TrueType font data.
+
+Adobe Font Development Kit for OpenType (AFDKO)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The AFDKO is a set of tools for building OpenType font files from PostScript and TrueType font data.
 
 This directory tree contains the data files, Python scripts, Perl scripts, and
 sources for the command line programs that comprise the AFDKO. The project uses the `Apache 2.0 OpenSource license <LICENSE.txt>`__.
@@ -29,7 +31,7 @@ You can also download and install older versions of the AFDKO from the `Adobe af
 
 Build From Source
 ~~~~~~~~~~~~~~~~~~
-In order to build and install the afdko from the `github afdko repository <https://rawgit.com/adobe-type-tools/afdko>`__, get a copy from  the respository, cd to the top-level directory of teh afdko, and use the setup.py script:
+In order to build and install the afdko from the `github afdko repository <https://rawgit.com/adobe-type-tools/afdko>`__, get a copy from  the repository, cd to the top-level directory of the afdko, and use the setup.py script:
 
 .. code:: sh
 
@@ -50,5 +52,5 @@ On Linux, install these with:
 	apt-get -y install python-dev
 
 
-On Windows, you need to donwload and isntall Visual C++ 6, and add all the service packs.
+On Windows, you need to download and install Visual C++ 6, and add all the service packs.
 

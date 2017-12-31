@@ -32,7 +32,7 @@ Notes:
  
 'twine upload dist/<wheel file>', when run for the first time for a new package, will handle registering a project.
 
-test.pyi requries TLS protocol v1.2, which you can get on the Mac only by building python 2.7.14 from sources with brew:
+test.pyi requires TLS protocol v1.2, which you can get on the Mac only by building python 2.7.14 from sources with brew:
 
 brew install python
 
@@ -41,13 +41,13 @@ On my system, the command updated brew, then quit because I need Ruby > 2.0. The
 # Get rvm
 curl -sSL https://get.rvm.io | bash -s stable
 # quit terminal, the restart it, then use rvm to get ruby
-rvm install ruby # download (2.4.1) and compile latest ruby. Needed a lot of pacakges.
+rvm install ruby # download (2.4.1) and compile latest ruby. Needed a lot of packages.
 
 # To see if you have TLS 1.2 say:
 python -c "import requests; print(requests.get('https://www.howsmyssl.com/a/check', verify=False).json()['tls_version'])"
 
 NOTE! brew does not overwrite the commands 'python", "pip", etc; it installs new versions with the the suffix '2' in /usr/local/bin. You need to fix these links yourself.
-NOTE! To update the brew-installed Python, removing or updating pacakges requires user read/write access to '/usr/loca/bin/easy_install'. If you don't have this, then pip fails, but thinks it succeeded. 
+NOTE! To update the brew-installed Python, removing or updating packages requires user read/write access to '/usr/loca/bin/easy_install'. If you don't have this, then pip fails, but thinks it succeeded. 
 
 
 To get an Ubuntu MN for VMWare Fusion 10:
