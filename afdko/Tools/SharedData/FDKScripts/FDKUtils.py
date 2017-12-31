@@ -111,6 +111,7 @@ def clean_afdko():
 			  "copyCFFCharstrings",
 			  "kernCheck",
 			  "makeotf",
+			  "makeInstances",
 			  "makeInstancesUFO",
 			  "otc2otf",
 			  "otf2otc",
@@ -135,7 +136,11 @@ def clean_afdko():
               "tx",
               "type1",
 	]
-	log = runShellCmd("which autohintexe")
+	log = ""
+	if curSystem in ["Darwin", "Linux"]:
+		log = runShellCmd("which autohintexe")
+	elif curSystem == "Windows":
+		log = runShellCmd("where autohintexe")
 	log = log.strip()
 	if not log:
 		print("Did not find FDK tools in the Python bin directory:")
@@ -150,11 +155,12 @@ def clean_afdko():
 				pass
 	basepath = None
 	foundFDK = False
+	"""the command "pip uninstall afdko" should already have gotten rid of the module, but just in case there is another copy of the module on another Python path, we wil try to do it by removing the dir tree."""
 	try:
 		import FDK
 		foundFDK = True
 	except:
-		print("Cannot import FDK - must not be installed")
+		pass
 	if foundFDK:
 		import shutil
 		basepath = os.path.dirname(FDK.__file__)

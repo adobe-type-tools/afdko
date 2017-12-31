@@ -1,12 +1,12 @@
 #!/bin/env python
 
-__copyright__ = """Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+__copyright__ = """Copyright 2017 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
 __doc__ = """
 """
 __usage__ = """
-   makeInstances program v1.33 April 12 2016
+   makeInstances program v1.34
    makeInstances -h
    makeInstances -u
    makeInstances [-a] [-f <instance file path>] [-m <MM font path>] 
@@ -530,6 +530,11 @@ def doSnapshot(coords, emSquare, mmFontPath, tempInstance):
 	coords = re.sub(r"\s+", "", coords) # get rid of spaces after commas
 	command = "IS -t1 -Z -U %s -z %s \"%s\" \"%s\" 2>&1" % (coords, emSquare, mmFontPath, tempInstance)
 	log = FDKUtils.runShellCmd(command)
+	
+	if ("error" in log) or not os.path.exists(tempInstance):
+		# try again with 'tx'.
+		command = "tx -t1 -Z -U %s  \"%s\" \"%s\" 2>&1" % (coords, mmFontPath, tempInstance)
+		log = FDKUtils.runShellCmd(command)
 	if ("error" in log) or not os.path.exists(tempInstance):
 		logMsg.log("Error in IS snapshotting to %s" % (tempInstance))
 		logMsg.log("Command:", command)
@@ -1320,10 +1325,7 @@ def makeInstance(instanceDict, updateDict, options, instanceFontPaths, extraGlyp
 		if options.doOverlapRemoval:
 			logMsg.log("\tdoing overlap removal with checkOutlines %s ..." % (fontInstancePath))
 			logList = []
-			if os.name == "nt":
-				proc = Popen(['checkOutlines.cmd','-I', "-O", "-e", fontInstancePath], stdout=PIPE)
-			else:
-				proc = Popen(['checkOutlines','-I', "-O", "-e", fontInstancePath], stdout=PIPE)
+			proc = Popen(['checkOutlinesUFO', "-e", fontInstancePath], stdout=PIPE)
 			lastLine = ""
 			while 1:
 				output = proc.stdout.readline()
