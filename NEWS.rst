@@ -3,14 +3,17 @@
 Change log for the Adobe Font Development Kit for OpenType (AFDKO)
 ==================================================================
 
-2.6.23 (released 2018-1-3)
+2.6.24 (released 2018-1-3)
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The afdko has been restructured so that it can be installed as a Python package. It now depends on the user's Python interpreter, and no longer contains its own Python interpreter.
 
 In order to do this, the two Adobe-owned, non-OpenSource programs were dropped: IS and checkOutlines. If these turn out to be sorely missed, an installer for them will be added to the old Adobe afdko web-site.  The current intent is to migrate the many tests in checkOutlines to the newer checkOutlinesUFO (which does work with OpenType and Type 1 fonts, but currently does only overlap detection and removal, and a few basic path checks).
 
-Older Releases from the `Adobe afdko home page <http://www.adobe.com/devnet/opentype/afdko.html>`__.
+Older Releases can be downloaded and installed from the `Adobe afdko home page <http://www.adobe.com/devnet/opentype/afdko.html>`__.
+
+Work in progress: auto update of the change log, more installation checks.
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 FDK. v2.5 Dec 1 2017 change number 66097.
