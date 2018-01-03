@@ -432,11 +432,13 @@ def run(args):
 			if haveUfONormalizer and options.doNormalize:
 				ufonormalizer.normalizeUFO(instancePath, outputPath=None, onlyModified=False)
 
-if __name__=='__main__':
+def main():
 	try:
 		run(sys.argv[1:])
 	except (OptError, ParseError, SnapShotError):
 		logMsg.log("Quitting after error.")
 		pass
 
+if __name__=='__main__':
+	main()
 

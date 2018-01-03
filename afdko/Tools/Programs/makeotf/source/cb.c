@@ -125,7 +125,7 @@ struct cbCtx_ {
 	
 	struct {						/* Feature file input */
 		char *mainFile;			/* Main feature file name */
-		char *includeDir[4];	/* font dir; getPathName("features") */
+		char *includeDir[4];	/* font dir*/
 		File file;
 		char buf[BUFSIZ];		/* Refill buffer for feature file */
 		dnaDCL(AnonInfo, anon);	/* Storage for anon tables */
@@ -1383,112 +1383,6 @@ static void getAliasAndOrder(void *ctx, char *oldName, char **newName, long int 
 }
 
 /* ---------------------------- Callback Context --------------------------- */
-
-/* Find pathname */
-static int findPath(cbCtx h, char *filename, char *name, char *pathname) {
-	int cnt;
-	File file;
-	char line[FILENAME_MAX];
-	int found = 0;
-
-	/* Read PathName file */
-	if (!fileExists(filename)) {
-		return 1;
-	}
-
-	fileOpen(&file, NULL, filename, "r");
-	for (cnt = 1; fileGetLine(&file, line, FILENAME_MAX) != NULL; cnt++) {
-		int newline = strlen(line) - 1;
-
-		if (line[newline] != '\n') {
-			cbFatal(h, "line too long [%s %d]\n", filename, cnt);
-		}
-		else {
-			char *p;
-
-			line[newline] = '\0';	/* Delete newline */
-
-			p = strrchr(line, '/');	/* Point to last pathname component */
-			if (p != NULL && strcmp(p + 1, name) == 0) {
-				/* Matched line, expand environment variables */
-				char *s = line;
-				char *d = pathname;
-
-				for (;;) {
-					int length;
-					char *env;
-
-					/* Find environment variable */
-					p = strchr(s, '$');
-					if (p == NULL) {
-						/* Copy remaining string */
-						strcpy(d, s);
-						break;
-					}
-
-					/* Copy prefix path */
-					length = p - s;
-					strncpy(d, s, length);
-					d += length;
-					s = p + 1;
-
-					/* Search for delimiter */
-					p = strchr(s, '/');
-					*p = '\0';
-
-					/* Expand environment variable */
-					env = getenv(s);
-					if (env == NULL) {
-						return 1;
-					}
-
-					/* Copy expanded text to destination */
-					length = strlen(env);
-					strncpy(d, env, length);
-					d += length;
-					*d++ = '/';
-					s = p + 1;
-				}
-				found = 1;
-				goto close;
-			}
-		}
-	}
-
-	if (ferror(file.fp)) {
-		fileError(&file);
-	}
-close:
-	fileClose(&file);
-
-	return !found;
-}
-
-/* Get the pathname of given file */
-static char *getPathName(cbCtx h, char *name, int fail) {
-	char *result;
-	char userfile[FILENAME_MAX];
-	char stdfile[FILENAME_MAX];
-	char pathname[FILENAME_MAX];
-
-	/* Try user's PathNames file */
-	sprintf(userfile, "%s/lib/PathNames", getenv("HOME"));
-	if (findPath(h, userfile, name, pathname)) {
-		/* Try standard PathNames file */
-		sprintf(stdfile, "%s/etc/share/PathNames", getenv("FONTTOOLSPATH"));
-		if (findPath(h, stdfile, name, pathname)) {
-			if (fail) {
-				cbFatal(h, "can't match <%s> in [%s] or [%s]\n",
-						name, userfile, stdfile);
-			}
-			else {
-				return NULL;
-			}
-		}
-	}
-	copyStr(h, &result, pathname);
-	return result;
-}
 
 static void anonInit(void *ctx, long count, AnonInfo *ai) {
 	dnaCtx localDnaCtx = (dnaCtx)ctx;

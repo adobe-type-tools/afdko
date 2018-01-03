@@ -1201,9 +1201,12 @@ def run(args=None):
     return
 
 
-if __name__ == '__main__':
+def main():
     try:
         run(sys.argv[1:])
     except (FocusOptionParseError, FocusFontError) as focus_error:
         print("Quitting after error.", focus_error)
         pass
+
+if __name__ == '__main__':
+    main()

@@ -1,6 +1,41 @@
-FDKReleaseNotes.txt
-===============================================================================
 
+
+Change log for the Aobe Font Development Kit for OpenType (AFDKO)
+=================================================================
+
+2.6.0 (released 2018-1-4)
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The afdko has been restructured so that it can be installed as a Python package. It now depends on the user's Python interpreter, and no longer contains its own Python interpreter.
+
+In order to do this, the two Adobe-owned, non-OpenSource programs were dropped: IS and checkOutlines. If these turn out to be sorely missed, an installer for them will be added to the old Adobe afdko web-site.  The current intent is to migrate the many tests in checkOutlines to the newer checkOutlinesUFO (which does work with OpenType and Type 1 fonts, but currently does only overlap detection and removal, and a few basic path checks).
+
+Older Releases from the `Adobe afdko home page <http://www.adobe.com/devnet/opentype/afdko.html>`__.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+FDK. v2.5 Dec 1 2017 change number 66097.
+	This lists only the major bug fixes since the last release. For a complete list see:
+	https://github.com/adobe-type-tools/afdko/commits/master
+	
+	buildCFF2VF.
+	Add version check for fontTools module: only starting with version 3.19.0 does fontTools.cffLib build correct PrivateDict BlueValues when there are master source fonts not at the ends of the axes.
+	
+	makeotfexe.
+	Support mapping a glyph to several Unicode values. This can now be done by providing the the UV values as a comma-separated list in the third field of the GlyphOrderAndAliasDB file, in the 'uniXXXXX' format.
+	
+	Fixed a crashing bug that can happen when the features file contains duplicate class kern pairs. Reported by Andreas Seidel in email.
+	
+	Add fatal messages if a feature file 'cvParameters' block is used in anything other than a Character Variant (cvXX) feature, or if a 'featureNames' block is used in anything other than a Stylistic Set (ssXX) feature.
+	
+	Relaxed restrictions on name table name IDs. Only 2 and 6 are now reserved for the implementation.
+	
+	Fixed bug where use of the 'size' feature in conjunction with named stylistic alternates would cause the last stylistic alternate name to be replaced by the size feature menu name. Incidentally removed old patent notices.
+	
+	restored old check for the fatal error of two different glyphs being mapped to the same character encoding.
+	
+	If the last line of a GOADB file did not end in a new-line, makeotf quit, saying the line was too long.
+	
+	
 	otf2otc.
 	Can now take a single font as input, and can take an OTC font as input.
 	
@@ -14,8 +49,10 @@ FDKReleaseNotes.txt
 	Fixed old bug: a PrivateDict must exist, but it is legal for it to have a
 	length of 0.
 	
+	tx and family.
+	Add support for reading and writing blended hints from/to CFF2. 
+		
 FDK. v2.5 April 27 2017 change number 65781.
-
 	makeInstancesUFO.
 	Preserve public.postscriptNames lib key.
 	Do not use postscriptFontName attribute.
@@ -33,11 +70,9 @@ FDK. v2.5 April 27 2017 change number 65781.
 	Option '-nv' will now print name ID's 3, and 5, but with the actual version number replaced by the string "VERSION SUPPRESSED".
 
 FDK. v2.5 April 3 2017 change number 65781.
-
 	Variable fonts.
 	buildMasterOTFs. new command to build OTF font files from UFO sources, when building variable fonts.
 	buildCFF2VF. New command  to build a CFF2 Variable font from the master OTF fonts.
-
 
 	autohint.
 	Fix bug introduced by typo on Dec 1 2015. Caused BlueFuzz to always be set to 1. Rarely causes problems, but found it with font that sets BlueFuzz to zero: with BlueFuzz set to 1, some of the alignment zones were filtered out as being closer than BlueFuzz*3.
@@ -46,7 +81,7 @@ FDK. v2.5 April 3 2017 change number 65781.
 	CheckOutlinesUFO.
 	Added "quiet mode" option.
 	Fixed a bug where logic could try and set an off-curve point as a start point.
-	Changed the logic for assigning contour order and start point. The overlap removal changes both, and  checkOutlinesUFO makes some attempt to restore the original state when possible.  These changes will result in different contour order and start points than before the change, but fixes a bug, and will usually produce the same contour order and start point in fonts that are generated as instances from a set of master designs. There will always be cases where there will be some differences. 
+	Changed the logic for assigning contour order and start point. The overlap removal changes both, and  checkOutlinesUFO makes some attempt to restore the original state when possible.	These changes will result in different contour order and start points than before the change, but fixes a bug, and will usually produce the same contour order and start point in fonts that are generated as instances from a set of master designs. There will always be cases where there will be some differences. 
 	
 	MakeOTF.py
 	Replace old logic for deriving relative paths with python function for the same.
@@ -77,13 +112,12 @@ FDK. v2.5 April 3 2017 change number 65781.
 	Updated to version 3.9.1 of the fontTools module from master branch on github.
 	
 FDK. v2.5 May 27 2016 change number 65322.
-
 	Adobe CMAP files for CJK fonts.
 	Updated UniCNS-UTF32-H to v1.14
 
 	Build issues.
 	Made changes to allow compiling under Xcode 7.x and OSX 10.11
-	 
+	
 	Documentation:
 	Fixed a bunch of errors in the Feature File spec. My thanks to Sascha Brawer, 
 	who has been reviewing this carefully. See the issues raised by him in Jan
@@ -159,7 +193,7 @@ FDK. v2.5 May 27 2016 change number 65322.
 	specified as glyphs names with the form 'cidNNNNN' allowed this warning to
 	be be shown, but it is not appropriate for CID-keyed fonts.
 	Fixed old bug where using option -'cn' to convert a nonCID source font to
-	CID would cause a mis-match between the maxp table  number of glyphs and the
+	CID would cause a mis-match between the maxp table	number of glyphs and the
 	numver of glyph actually in the output font, because the conversion used the
 	source font data rather than the first pass name-keyed OTF which had been
 	subject to glyph subsetting with the GOADB file.
@@ -185,7 +219,7 @@ FDK. v2.5 May 27 2016 change number 65322.
 	Minor code changes to allow 'tx' to compile as a 64 bit program.
 	Fixed bug in dumping afm format data, introduced when tx was updated to be 64 bit.
 	Fixed bug in processing seac, introduced in work on rounding fractional values.
-	Fixed bug in writing AFM files: -1 value would be written as 4294967295	instead of -1.
+	Fixed bug in writing AFM files: -1 value would be written as 4294967295 instead of -1.
 	Add option -noOpt, rename blend operator from 'reserved' to 'blend'. This was done in
 	order to support experiments with  multiple master fonts.
 	When reading a UFO font: if it has no Postscript version entry, set the version to
@@ -198,7 +232,7 @@ FDK. v2.5 May 27 2016 change number 65322.
 	stored as an ascii text decimal point number in T1, T2, and UFO files, but
 	is stored internally as a C 'float' value in some programs. Real values in C
 	cannot exactly represent all decimal values. For example, the closest that a
-	C 'float' value can come to "0.375" is "0.03750000149".  When writing output
+	C 'float' value can come to "0.375" is "0.03750000149".	When writing output
 	fonts, tx was writing out the latter value in ascii text, rather than
 	rounding back to 0.0375. Fixed by rounding to 8 decimal places on writing
 	the value out. This bug had no practical consequences, as 0.0375 and
@@ -207,7 +241,6 @@ FDK. v2.5 May 27 2016 change number 65322.
 	higher precision fields to hold the BlueScale value.
 	
 FDK. v2.5 Dec 1 2015 change number 65012.
-
 	makeotf.
 	Fixed bug in MakeOTF.py that kept makeotf from building fonts with spaces in the path.
 	Fixed bug in ConvertFontToCID module that kept makeotf from converting UFO fonts to CID.
@@ -216,7 +249,7 @@ FDK. v2.5 Dec 1 2015 change number 65012.
 	glyph name may be either a final name or developer glyph name. Added warning
 	when glyph in the UVS entry is not found in font. See MakeOTF User's Guide.
 	Fixed bug in makeotfexe: it now always makes a cmap table subtable MS
-	platform, Unicode, format 4 for CID fonts: this is required by Windows. If
+	platform, Unicode, format 4 for CID fonts. This is required by Windows. If
 	there are no BMP unicode values, then it makes a stub subtable, mapping GID 0
 	to UVS 0.
 	
@@ -226,7 +259,6 @@ FDK. v2.5 Dec 1 2015 change number 65012.
 	common when the style is "Regular".
 	
 FDK. v2.5 Nov 22 2015 change number 64958.
-
 	autohint and tx.
 	Switched to using new text format that is plist-compatible for T1 hint data in UFO fonts.
 	See header of FDK/Tools/SharedData/FDKScripts/ufoTools.py for format.
@@ -234,7 +266,7 @@ FDK. v2.5 Nov 22 2015 change number 64958.
 	autohint
 	Finally fixed excessive generation of flex hints. This has been an issue for
 	decades, but never got fixed because it didn't show up anywhere as a
-    problem. The last version of makeotf turned on parsing warnings, and so now
+	problem. The last version of makeotf turned on parsing warnings, and so now
 	we notice.
 	
 	checkOutlinesUFO
@@ -272,27 +304,28 @@ FDK. v2.5 Nov 22 2015 change number 64958.
 	Increased max number of directories to look upwards when searching for
 	GOADB/FontMenuNameDB from 2 to 3.
 	Added three new options.
-	-omitMacNames/useMacNames   Write only Windows platform menu names in name table,
-                        apart from the names specified in the feature file.
-                        -useMacNames writes Mac as well as Windows names.
+	-omitMacNames/useMacNames	Write only Windows platform menu names in name table,
+	apart from the names specified in the feature file.
+	-useMacNames writes Mac as well as Windows names.
 
-	-overrideMenuNames      Allow feature file name table entries to override
-                        default values and the values from the font menu name DB
-                        for name IDs. Name ID's 2 and 6 cannot be overridden.
-                        Use this with caution, and make sure you have provided
-                        feature file name table entries for all platforms.
+	-overrideMenuNames
+	Allow feature file name table entries to override
+	default values and the values from the font menu name DB
+	for name IDs. Name ID's 2 and 6 cannot be overridden.
+	Use this with caution, and make sure you have provided
+	feature file name table entries for all platforms.
 
-	-skco/nskco             do/do not suppress kern class optimization by using left
-                        side class 0 for non-zero kern values. Optimizing saves a few
-                        hundred to thousand bytes, but confuses some programs.
-                        Optimizing is the default behavior, and previously was the only option.
+	-skco/nskco				do/do not suppress kern class optimization by using left
+	side class 0 for non-zero kern values. Optimizing saves a few
+	hundred to thousand bytes, but confuses some programs.
+	Optimizing is the default behavior, and previously was the only option.
 	Allow building an OTF from a UFO font only. The internal features.fea file
 	will be used if there is no "features" file in the font's parent directory.
 	If the GlyphAliasAndOrderDB file is missing, only a warning will be issued.
 	If the FontMenuNameDB is missing, makeotf will attempt to build the font
 	menu names from the UFO fontinfo file, using the first of the following keys
 	found: "openTypeNamePreferredFamilyName", "familyName", the family name part
-	of the PostScriptName,  and finally the value "NoFamilyName". For style, the
+	of the PostScriptName,	and finally the value "NoFamilyName". For style, the
 	keys are: "openTypeNamePreferredSubfamilyName", "styleName", the style name
 	part of the PostScriptName, and finally the value "Regular".
 	Fixed bug where MakeOTF allowed the input file path and the output file path
@@ -335,7 +368,7 @@ FDK. v2.5 Nov 22 2015 change number 64958.
 	Added new option '-fdx' to select glyphs by excluding all glyphs with the
 	specified FDArray indicies. This and the '-fd' option now take lists and
 	ranges of indices, as well as a single index value.
-	 
+	
 	ufonormalizer
 	Added a command to call the ufonormalizer tool.
 	
@@ -349,7 +382,6 @@ FDK. v2.5 Nov 22 2015 change number 64958.
 	
 
 FDK. v2.5 Aug 4 2015 change number 64700.
-
 	autohint.
 	Fixed bug in ufoTools.py that was harmless but annoying. Everytime that
 	'autohint -all' was run, it added a new program name entry to the history
@@ -369,7 +401,6 @@ FDK. v2.5 Aug 4 2015 change number 64700.
 	feature file format.
 	
 FDK. v2.5 July 17 2015 change number 64655.
-
 	autohint.
 	Fixed bug in ufoFontTools.py which placed a new hint block after a flex
 	operator, when it should be before.
@@ -409,7 +440,6 @@ FDK. v2.5 July 17 2015 change number 64655.
 
 
 FDK. v2.5 May 26 2015 change number 64261.
-
 	autohintexe. Worked through a lot of problems with fractional coordinates.
 	In the previous release, autohintexe was changed to read and write
 	fractional values. However, internal value storage used a Fixed format with
@@ -436,7 +466,6 @@ FDK. v2.5 May 26 2015 change number 64261.
 	transform. This has the side-effect of rounding to integer values.
 	
 FDK. v2.5 April 8 2015 change number 64043.
-
 	checkOutlinesUFO.
 	Added  new logic to delete any glyphs from the processed layer which are
 	not in the ‘glyphs’ layer.
@@ -490,7 +519,6 @@ FDK. v2.5 April 8 2015 change number 64043.
 	
 	
 FDK. v2.5 March 3 2015 change number 63782.
-
 	tx.
 	Fix bug in reading ttf's. Font version was taken from the name table, which
 	can include a good deal more than just the font version. Changed to read
@@ -504,7 +532,6 @@ FDK. v2.5 March 3 2015 change number 63782.
 	otf2otc.py. Pad table data with 0's so as to align tables on a 4 boundary. Submitted by Cosimo Lupo.
 	
 FDK v2.5 Feb 21 2015 change number 63718.
-
 	autohint
 	Fixed a bug with processing flex hints in ufoTools.py, that caused outline distortion.
 	
@@ -534,7 +561,7 @@ FDK v2.5 Feb 21 2015 change number 63718.
 	instance fonts from the same set of master fonts.
 	
 	makeInstancesUFO.
-	Changed so that the option -i (selection of  which instances to build) actually works.
+	Changed so that the option -i (selection of	which instances to build) actually works.
 	Removed dependence on existence of instance.txt file.
 	Changed to call checkOutlinesUFO rather than checkOutlines
 	Removed hack of converting all file paths to absolute file paths: this was a
@@ -553,7 +580,7 @@ FDK v2.5 Feb 21 2015 change number 63718.
 	are incompatible, a crash ensues.  The fix is to unset the variables PYTHONHOME
 	and PYTHONPATH before the AFDKO interpreter is called. 
 	Note: AS a separate issue, under Mac OSX 10.10, Python calls to FDK commands
-	will  only  work  if  the calling app is run from the command-line (e.g:
+	will  only	work  if  the calling app is run from the command-line (e.g:
 	“open /Applications/RoboFont.app“), and the argument "shell="True" is added
 	to the subprocess module call to open a system command. I favor also adding
 	the argument "stderr=subprocess.STDOUT", else you will not see error
@@ -561,7 +588,6 @@ FDK v2.5 Feb 21 2015 change number 63718.
 	"log = subprocess.check_output("makeotf -u" , stderr=subprocess.STDOUT , shell=True)".
 
 FDK v2.5 Dec 02 2014 change number 63408.
-
 	spot.
 	Fixed error message in GSUB chain contextual 3 proof file output. spot was
 	adding it as a shell comment to the proof output, cuasing conversion to PDF
@@ -574,10 +600,9 @@ FDK v2.5 Dec 02 2014 change number 63408.
 	test fonts to look for such cases.
 	
 FDK v2.5 Sep 18 2014 change number 63209.
-
 	makeInstancesUFO.
 	Added new script to build instance fonts from UFO master design fonts. This
-	uses the design space XML file exported by Superpolator 3 in order  to
+	uses the design space XML file exported by Superpolator 3 in order	to
 	define the design space, and the location of the masters and instance fonts
 	in the design space. The definition of the format of this file, and the
 	library to use the design space file data, is in the OpenSource mutatorMath
@@ -585,12 +610,12 @@ FDK v2.5 Sep 18 2014 change number 63209.
 	advantages of the Superpolator design space over the previous makeInstances
 	script, which uses the Type1 Multiple Master font format to hold the master
 	designs. The new version:
-	 - allows different master designs and locations for each glyph
-	 - allows master designs to be arbitrarily placed in the design space, and
-	 hence allows intermediate masters.
-	 In order to use the mutatorMath library, the FDK-supplied Python now
-	 contains the robofab, fontMath, and defcon libraries, as well as
-	 mutatorMath.
+	- allows different master designs and locations for each glyph
+	- allows master designs to be arbitrarily placed in the design space, and
+	hence allows intermediate masters.
+	In order to use the mutatorMath library, the FDK-supplied Python now
+	contains the robofab, fontMath, and defcon libraries, as well as
+	mutatorMath.
 
 	ttx. Updated to the latest branch of the fontTools library as maintained by
 	Behdad Esfahbod on GitHub. Added a patch to cffLib.py to fix a minor problem
@@ -600,7 +625,6 @@ FDK v2.5 Sep 18 2014 change number 63209.
 	Updated four Adobe-CNS1-* ordering files.
 
 FDK v2.5 Sep 8 2014 change number 63164.
-
 	makeotf.
 	Fixed MakeOTF.py to detect "IsOS/2WidthWeightSlopeOnly" as well as the
 	misspelled "IsOS/2WidthWeigthSlopeOnly", when processing the fontinfo file.
@@ -629,11 +653,10 @@ FDK v2.5 May 14 2014 change number 62754.
 	in dumping glyph header. Fixed bug in IS to avoid crash when logic for glyphs > 72 points is used.
 
 	makeotfexe.
-	Fixed bug that  applied '-gs' option as default behavior, subsetting the source font to the 
+	Fixed bug that	applied '-gs' option as default behavior, subsetting the source font to the 
 	list of glyphs in the GOADB.
 	
 FDK v2.5 April 30 2014 change number 62690.
-
 	makeotf
 	When building output TTF font from an input TTF font, will now suppress
 	warnings that hints are missing. Added a new option "-shw" to suppress
@@ -675,7 +698,6 @@ FDK v2.5 April 5 2014 change number 61944.
 	Fixed FDK/Tools/win/ttx.cmd file so that the 'ttx' command works again.
 	
 FDK v2.5 Mar 25 2014 change number 61911.
-
 	makeotf.
 	Add support for two new 'features' file keywords, for the OS/2 table.
 	Specifying 'LowerOpSize' and 'UpperOpSize' now sets the values
@@ -756,7 +778,6 @@ FDK v2.5 Feb 17 2014 change number 61250.
 	
 	
 FDK v2.5 Oct 21 2013 change number 60908.
-
 	Added some support for UFO workflow.
 	
 	tx. 
@@ -798,7 +819,6 @@ FDK v2.5 Oct 21 2013 change number 60908.
 
 
 FDK v2.5 Feb 26 2013 change number 60418.
-
 	autohint
 	Fixed bug: autohint did not skip commented-out lines in fontinfo file.
 	
@@ -817,7 +837,6 @@ FDK v2.5 Feb 26 2013 change number 60418.
 	Fixed bug that kept 'palt'/'vpal' features from being applied when proofing kerning.
 	
 FDK v2.5 Sept 4 2012 change number 58732.
-
 	checkOutlines.
 	
 	Fixed bug where checkOutline would falsely identify the arms of an X as coincident paths,
@@ -825,7 +844,6 @@ FDK v2.5 Sept 4 2012 change number 58732.
 	
 
 FDK v2.5 Oct 31 2012 change number 59149.
-
 	makeotf.
 
 	When building OpenType/TTF files, changed logic to copy the OS/2 table usWinAscent/Descent
@@ -854,14 +872,12 @@ FDK v2.5 Oct 31 2012 change number 59149.
 	
 	
 FDK v2.5 Sept 13 2012 change number 58807.
-
 	makeotf.
 	
 	Discovered that when building TTF fonts, the GDEF table wasn't being copied
 	to the final TTF font file. Fixed.
 		
 FDK v2.5 Sept 4 2012 change number 58732.
-
 	autohint.
 
 	Added new feature to support sets of glyphs with different
@@ -925,7 +941,7 @@ FDK v2.5 Sept 4 2012 change number 58732.
 	
 	Family Test 18. Survive OTF fonts with no blue values.
 	
-	Family Test 2 ( Check that the Compatible Family group has same name ID's in all languages except...)
+	Family Test 2 ( Check that the Compatible Family group has same name ID's in all languages.)
 	Added the WPF name ID's 21 and 22 to the exception list, which may not exist in all faces of a family.
 	
 	fontsetplot.
@@ -934,7 +950,7 @@ FDK v2.5 Sept 4 2012 change number 58732.
 	point size of group header.
 	
 	Fixed syntax of assert statements. Produced error messages on first use of
-	the *plot commands.
+	the \*plot commands.
 	
 	kernCheck.
 	
@@ -1015,16 +1031,25 @@ FDK v2.5 Sept 4 2012 change number 58732.
 	of CMAP directories in the FDK, and logic for finding the files.
 		
 	When providing a GDEF feature file definition, class assignments now may be empty:
-		table GDEF {
-			 GlyphClassDef ,,,;
-		} GDEF;
+
+.. code:: sh
+
+        table GDEF {
+            GlyphClassDef ,,,;
+        } GDEF;
+
+.
 	is a valid statement. You just need to provide all three commas and the final
 	colon to define the four classes.
 	The following statement builds a GDEF GlyphClass with an empty Components class.
-		table GDEF {
-			 GlyphClassDef [B], [L], [M], ;
-		} GDEF;
-	
+
+.. code:: sh
+
+        table GDEF {
+            GlyphClassDef [B], [L], [M], ;
+        } GDEF;
+
+.
 	The glyph alias file now defines order in which glyphs are added to the
 	end of the target font, as well as defining the subset and renaming.
 	
@@ -1057,7 +1082,7 @@ FDK v2.5 Sept 4 2012 change number 58732.
 	No longer dumps the DefaultLangSys entry when there is none.
 	
 	Changed dump logic for contextual and chain contextual lookups so
-	that spot will not  dump the lookups referenced by the substitution
+	that spot will not	dump the lookups referenced by the substitution
 	or position rules in the contextual lookups. The previous logic led
 	to some lookups getting dumped many times, and also to infinite
 	loops in  cases where a contextual lookup referenced other
@@ -1083,8 +1108,6 @@ FDK v2.5 Sept 4 2012 change number 58732.
 	
 	Changed dump of cmap subtable 14: hex values are uppercased, and base + UVS
 	values are written in the order [ base, uvs].
-
-	
 	
 	stemHist.
 	
@@ -1094,7 +1117,6 @@ FDK v2.5 Sept 4 2012 change number 58732.
 	Fix bug where the glyph names reported in the stem and alignment reports were off by 
 	1 GID if the list of glyphs included the '.notdef' glyph.
 	
-
 	tx.
 	
 	Added support for option "-n" to remove hints for writing Type1 and CFF output fonts.
@@ -1124,28 +1146,26 @@ FDK v2.5 Sept 4 2012 change number 58732.
 	Miscellaneous.
 	
 	Updated the internal Python interpreter to version 2.7.
-
 		Adobe Cmaps/Adobe-Japan1:
-		 Updated files
-		   Adobe-Japan1_sequences.txt
-		   UniJIS-UTF32-H
-		   UniJIS2004-UTF32-H
-		   UniJISX0213-UTF32-H
-		   UniJISX02132004-UTF32-H
+		Updated files
+		Adobe-Japan1_sequences.txt
+		UniJIS-UTF32-H
+		UniJIS2004-UTF32-H
+		UniJISX0213-UTF32-H
+		UniJISX02132004-UTF32-H
 		
 		FDKScripts:
 		Added several scripts relarted to CID font production.
-			cmap-tool.pl
-			extract-cids.pl
-			extract-gids.pl
-			extract-names.pl
-			fdarray-check.pl
-			fix-fontbbox.pl
-			hintcidfont.pl
-			subr-check.pl
+		cmap-tool.pl
+		extract-cids.pl
+		extract-gids.pl
+		extract-names.pl
+		fdarray-check.pl
+		fix-fontbbox.pl
+		hintcidfont.pl
+		subr-check.pl
 	
 FDK v2.5 March 4 2010 change number 25466.
-
 	charplot.
 	This was non-functional in the build 21898. Now fixed.
 	
@@ -1178,7 +1198,7 @@ FDK v2.5 March 4 2010 change number 25466.
 	spot.
 	Added support for "Small" fonts, an Adobe internal Postscript variant used for
 	CJK fonts.
-	Added support for large kern tables, such as in  the Vista font
+	Added support for large kern tables, such as in	the Vista font
 	Cambria,  where the size of the kern subtable exceeds the value that
 	can be held in the subtable "length" field. In this case, the
 	"length" filed must be ignored.
@@ -1200,13 +1220,12 @@ FDK v2.5 March 4 2010 change number 25466.
 	Added new option '-std' to force StdEncoding in output CFF fonts.
 
 FDK v2.5 May 1 2009 change number 21898.
-
 	autohint
 	- Fixed rare case when an rrcurveto is preceded by such a long list of
 	rlineto's that the stack limit is passed.
 	- Fixed to restore font.pfa output file to StandardEncoding Encoding
 	vector. Since requirements of CFF StandardEncoding differs from
-	Type1 StandardEncoding, a StandardEncoding  Encoding vector in a
+	Type1 StandardEncoding, a StandardEncoding	Encoding vector in a
 	Type 1 font was sometimes getting converted to a custom Encoding
 	vector when being round-tripped through the CFF format which
 	autohint does internally.
@@ -1215,15 +1234,15 @@ FDK v2.5 May 1 2009 change number 21898.
 	- Fixed random crash on Windows due to buffer overrun.
 	- Fixed rare case when an rrcurveto is preceded by such a long list of
 	rlineto's that the stack limit is passed.
-	 - changed default logging mode to not report glyph names when there is no
-	 error report for the glyph.
+	- changed default logging mode to not report glyph names when there is no
+	error report for the glyph.
 	- Fixed to restore font.pfa output file to StandardEncoding Encoding
-	vector.  Since requirements of CFF StandardEncoding differs from
-	Type1 StandardEncoding, a StandardEncoding  Encoding vector in a
+	vector.	Since requirements of CFF StandardEncoding differs from
+	Type1 StandardEncoding, a StandardEncoding	Encoding vector in a
 	Type 1 font was sometimes getting converted to a custom Encoding
 	vector when being round-tripped through the CFF format which
 	autohint does internally.
-	 
+	
 	CompareFamily. 
 	- added "ring" to the list of accent names used to find (accented glyph,
 	base glyph) pairs for "Single Face Test 23: Warn if any accented glyphs have
@@ -1292,9 +1311,9 @@ FDK v2.5 Jan 22 2009 change number 21340.
 	right Unicode values under Mac OSX before 10.4.x.
 	
 	autohint.
-	 -converted AC.py script to call a command-line program rather than
-	 a Python extension module, same way makeotf works, to avoid 
-	 continuing Python version problems.
+	-converted AC.py script to call a command-line program rather than
+	a Python extension module, same way makeotf works, to avoid 
+	continuing Python version problems.
 	- fixed so autohint will actually emit vstem3 and hstem3 hint operators
 	(counter control hints, which work to keep the space between three stems
 	open and equal, as in an 'm') - this has been broken since the first FDK. It
@@ -1328,9 +1347,9 @@ FDK v2.5 Jan 22 2009 change number 21340.
 	does make them. See notes in MakeOTF User Guide about this.
 	- Fixed so it works with ttf fonts again.
 
-    makeotf.
-    - removed code that added a default Adobe copyright to the name table if
-    n copyright is specified, and removed code to add a default trademark.
+	makeotf.
+	- removed code that added a default Adobe copyright to the name table if
+	n copyright is specified, and removed code to add a default trademark.
 	- added support for the lookupflag UseMarkFilteringSet. This is
 	defined in the proposed changes for OpenType spec 1.6, and is
 	subject to change in definition.
@@ -1343,12 +1362,12 @@ FDK v2.5 Jan 22 2009 change number 21340.
 	feature. The aalt feature can take only single and alternate substitution
 	rules.
 	- Added support for the following lookup types:
-	   GSUB type 2 Multiple Substitution
-	   GSUB type 8 Reverse Chaining Single Substitution
-	   GPOS type 3 Cursive Adjustment
-	   GPOS type 4 Mark-to-Base Attachment
-	   GPOS type 5 Mark-to-Ligature Attachment
-	   GPOS type 6 Mark-to-Mark Attachment
+	GSUB type 2 Multiple Substitution
+	GSUB type 8 Reverse Chaining Single Substitution
+	GPOS type 3 Cursive Adjustment
+	GPOS type 4 Mark-to-Base Attachment
+	GPOS type 5 Mark-to-Ligature Attachment
+	GPOS type 6 Mark-to-Mark Attachment
 	- Added support for explicit definition of the GDEF table, and
 	automatic creation of the GDEF when any of the lookup flag settings
 	for ignoring a glyph class is used, or any mark classes are defined.
@@ -1399,7 +1418,7 @@ FDK v2.5 Jan 22 2009 change number 21340.
 	It was just LEFTCLASS_<class index>_<subtable index>, but these names are repeated in every lookup.
 	It is now:
 LEFTCLASS_c<class index>_s<subtable index>_l<lookup index>,
-	- When a positioning value record has more than one value, print the full 4 item value record.  Previously, it would just print non-zero values. This was confusing when dumping Adobe Arabic, as you would see tow identical values at the end of some pos rules. In fact, each of these pos rule does have two adjustment values, one for x and one for y advance adjustment, that happen to be the same numeric value.
+	- When a positioning value record has more than one value, print the full 4 item value record.	Previously, it would just print non-zero values. This was confusing when dumping Adobe Arabic, as you would see tow identical values at the end of some pos rules. In fact, each of these pos rule does have two adjustment values, one for x and one for y advance adjustment, that happen to be the same numeric value.
 	- fixed to write backtrack context glyphs in the right order.
 	
 	tx.
@@ -1416,1130 +1435,5 @@ LEFTCLASS_c<class index>_s<subtable index>_l<lookup index>,
 	ttxn
 	- Added options to suppress hinting in the font program, and version and build numbers.
 	
-FDK v2.0 Nov 10 2007 build 27.
 
-     compareFamily
-     - Fixed Single Test3 bug, reported by Mark Simonson and others.
-     CompareFamily should be comparing the Mac platform name ID 4  (name
-     ID 1 + space + name ID 2, Style) with the target value, but was
-     actually using the value of the nameid 18, Compatible Full Name
-    - Fixed Family Test 2 to print a report that lets you figure out
-    which {platform, script, language, name ID} is present in some fonts
-    but not others.
-    
-    IS.
-    Fixed a bug where applying hint-based scaling can cause an
-    off-by-1 error when the the closepath position is supposed to
-    coincide with the original moveto, leading to an effective final
-    1-unit lineto, that may overlap the initial path. In the old MM
-    design world, we worked around this issue by designing the MM's so
-    that there was always a one unit difference between a final curveto
-    point and the original moveto. FontLab doesn't support doing that
-    automatically, so instead when making an instance, IS will simply
-    look for cases where the moveto and closepath positions differ by
-    one unit, and move the moveto position to coincide with the
-    closepath position.
-    
-    makeotf.
-    -Fixed bug reported by Adam Twardoch, where specifying thousands
-    of singleton kern pairs could silently overflow offsets, and makeotf
-    would build a bad font without any warning
-    Added support for Unicode Variation Sequences. See MakeOTF User's Guide.
-    - Fixed bug reported by Andreas Seidel, who pointed out that makeotf can
-    use relative file paths only when the current dir is the source font
-    directory. Project files can now be saved to directories other than the
-    source font directory. Note that paths stored in project file are
-    relative to the project file's directory.
-    
-    spot.
-    Added support for Unicode Variation Sequences. See MakeOTF User's Guide, and
-    Unicode Technical Standard #37 at: 
-    http://unicode.org/reports/tr37/
-    Fixed bug where contents of 'size' GPOS feature would be printed for
-    all dump levels.
-    Fixed bug where would fail on post table format 4.0. which occurs in some
-    Apple TT fonts, such as Osaka.dfont
-    
-    Misc.
-    Updated Adobe-Japan-1 CMAP files for building CID fonts
-    
 
-FDK v2.0 May 5 2007 build 26.
-
-     Misc.
-     - added "featurefile.plist" for BBedit. Install this in the location shown
-     at the top of the file, and it adds limited coloring and function block
-     selection support for BBedit. This fie is in FDK/Tools/SharedData
-     - Added "MSFontValidatorIssues.html" to FDK/Technical Documentation. This lists
-     the error messages from the MS FontValidator tool that can be ignored for
-     OpenType/CFF fonts.
-
-     FontLab macros
-     - Added InstanceGenerator. Another script for making instances from a
-     FontLab MM font VFB file. Simpler than MakeInstances, InstanceGenerator was
-     written by the Adobe Type editors, and is actually used.
-     - Fixed a bug in Set Start Points, reported by George Ryan. I had left a
-     debug statement such it operated only on the first 50 glyphs.
-    - added explanation of CheckOutlines errors to help dialog
- 
-     checkOutlines
-     - add option -he to print explanation of error messages.
-
-     compareFamily
-     - Added error if font contains a CFF table Type 2  seac operator.
-     This is very bad as the CFF spec does not support this operator.
-     Some very old tools allow this to happen.
-     
-     makeotf
-     - Fixed a bug in decomposing glyphs that are defined as composite glyphs in
-     the Type 1 source font. This bug caused the base component to be shifted
-     when then left side bearing of the composite glyph differs from that of
-     the base glyph. This could be consequential, as FontLab has an option to
-     not decompose composite glyphs when generating a Type 1 font.
-     - Fixed a bug in MakeOTF.py in recognizing the order "Korea1" when trying
-     to pick a default Mac cmap script ID from a CID-keyed font's Registry-Order-
-     Supplement field.
-     
-     tx
-      - fixed a bug in decomposing pretty much all composite glyphs from
-      Type1 and CFF source fonts. This happened only when a Type 1 or
-      CFF font was being subset, i.e. converted into a font with fewer
-      glyphs. tx now has an option "+Z" to force this to occur.
-
-FDK v2.0 March 30 2007 build 25.
-
-    autohint.
-    - Added a new option to allow extending the list of glyph names for which
-    autohint will try to make  counter hints.
-    - Fixed bug where T2 operator stack limit could be exceeded when 
-   optimizing T2 charstring during conversion from bez format.
-    - fixed bug in setting OtherBlues alignment zone values.
-    
-    FontLab Autohint.
-    - the autohinting module behaves quite differently when adding flex is turned off;
-    it makes more hint substitutions, since these are not allowed within the segment
-    of the outline that contributes the 'flex' stem.
-    Turned it on, so that hint results will be the same as the commnand-line tool.
-    This does not affect the outline data.
-    
-    checkOutlines
-    Fixed bug that kept checkOutlines from reporting two succesive points on top of
-    each other. The code to convert from the source outline data to bez format
-    was suppressing zero-length line segments, so the checkOutlines module never
-    saw the problem.
-    
-    compareFamily. 
-    - added new options '-st n1,n2.." and "-ft n1,n2.." to allow executing
-    only one or a few single and family face tests.
-    - Fixed Family Blues Test2. Warn if  a style-linked family group does not
-    have FamilyBlues. When reporting error if FamilyBlues differ in a
-    style-linked family group (where at least one font does have real
-    FamilyBlues), use BlueValues as implied FamilyBlues when the latter
-    attribute is missing from a font. Same for FamilyOtherBlues.
-    - Fixed Family Blues Test2.  warn about zone outside of font BBox only if
-    the entire zone is outside of the font BBox, not just one edge, and warn
-    only for BlueValue zones, not FamilyBlueValue zones.
-    - fixed fsType check. Complain if fsType is not 8 only when it is an Adobe
-    font, determined by checking if the name table trademark string is empty or
-    contains Adobe.
-    Fixed Single Face Test 3 to compare the CFF Full Name with the name table
-    Preferred Full Name (id 18) rather than the "Full Name" (id 4).
-    - fixed new bug where it failed with CID fonts, because it referenced the
-    "Private" dict attribute of the font's topDict, which doesn't exist in CID fonts.
-    - fix new 'size' test to that it works right if the size feature is used only to
-    indicate intended design size, and no range is supplied.
-    - fixed ligature width check to also check that left and right side bearings
-    match those of the left and right components, and to use the "liga' feature
-    to identify ligatures and their components, instead of heuristics based  on
-    glyph names.
-    
-    makeotf
-    - Fixed makeotf to not allow negative values in the feature file for the
-    OS/2 table winAscent and winDescent fields.
-    - Fixed problem in previous FDKv2.0 builds: a lookup excluded with the
-    exclude_dflt keyword was nevertheless included if the script/language was
-    specified with a languagesystem statement.
-    - Fixed problem under Windows where user would see a debug assert dialog
-    when the OS/2 vendorID was not specified in the feature file, and the
-    Copyright string contained an 8-bit ASCII character, like the 'copyright'
-    character.
-    - Fixed problem where name id 17 would be garbage if no FontMeuNameDB was
-    supplied, and the PostScript name did not contain a hyphen, under Windows
-    only.
-    - added warning for Mac OSX pre 10.5 compatibility: total size of glyphs
-    names plus 2 bytes padding per glyph must be less than 32K, or OSX will crash.
-    - fix newly added bug where makeotf would crash if the feature file did not have
-    a languagesystem statement.
-    - fixed very old bug where the subroutinzer would allow a subroutine stack
-    depth of up to 10, but the Type 1 and Type 2 specs allow only 9. This caused
-    most rasterizers to declare the font invalid.
-    - Removed -cv option; the CJK font vertical Unicode CMAP hasn't actually been used
-    in the code for since FDK 1.6
-    
-    spot/otfproof
-    - added support for low-lvel and feature file style text dumps for the GPOS
-    Attachment formats 3,4,5 and 6.
-    - added dump of lookup flag value to the feature-file style report
-    - added MarkAndAttachmentClassDef record to report on GDEF table
-    - added support for GSUB lookup type 2 (Multiple) within contextual
-    substitution.
-    - fixed bug in GSUB lookup 5, causing crash in dumping trado.ttf.
-    - fixed bug in level 7 (feature-file syntax) dump of GPOS table; was
-    omitting the value record for extension lookup types.
-    - fixed  bug where crashed on Windows when proofing contextual substitution 
-    statements. 
-    - fixed Windows spot to behave like Mac spot when proofing: PostScript file
-    data is always sent to standard output, and must be re-directed to a file.
-    See usage from "-u' option.
-    - fixed usage text to better explain proofing output and -P option.
-    - fixed so that it reports the DSIG table for TTC fonts with the version 2 TTC
-    header, even if the header reports it is version 1, like meiryo.ttc
-    - Fixed so that it can actually proof TTC fonts that don't have glyph names in
-    the post table.
-    - Fixed origin offset of bounding box for TTF fonts. 
-    - fixed crash in proofing TTF fonts when the last glyph is non-marking, like trado.ttf
-    in LongHorn.
-    
-FDK v2.0 Nov 6 2006 build 24. Public release of FDK 2.0.
-
-    autohint, checkOutlines, proof-to-PDF scripts:
-    Fix glyph name handling: avoid stack dump when glyph is not in font, and
-    don't require that CID values be zero-padded to 5 hex digits.
-
-    autohint
-    - Fixed bug where edge hints would generated rather than regular hints
-    across the baseline, when there were fewer than 8 pairs of BlueValues.
-    
-    checkOutlines.
-    - Fixed bug where it would not report an overlap if there were an even
-    number of overlapping contours
-    
-    compareFamily.
-    - Fixed Italic angle Single Test 12 to look at the middle third of the test
-    glyph stems, rather than the top and bottom of the glyph bounding box, when
-    guessing the font's italic angle.
-    - Fixed Single Test 15 to allow a difference of 1 unit in the font BBox, to
-    allow for rounding differences.
-    - Fixed Single Test 26 to identify uXXXX names as valid Unicode names; had
-    bug in the regular expression that required 5 digits.
-    - Fixed Single Test 22 to treat glyphs in the combining mark Unicode range
-    u300-u036F range as accent glyphs; require that they have the same width as
-    the base glyph.
-    - changed report from Error to Warning for check that only the first four
-    Panose values are non-zero.
-    - fix bug that causes a stack dump in Single Test 16 and 22
-    - added tests for Mac OSX pre 10.4 compatibility: no charstring is  < 32K,
-    total size of glyphs names plus padding is less than 32K.
-    - added test that known shipping font does not have OS/2 table version 4,
-    and that new fonts do.
-    - fixed Single Test 11: allow BASE offset to differ from calculated offset
-    by up to 10 design units before it complains.
-
-   compareFamily, makeotf
-    - fix failure when tools path contains a space
-    
-    Documentation
-    - in Overview.html, add warning about 'languagesystem Dflt dflt' and FDK 1.6
-    feature files.
-    - in MakeOTFUserGuide.pdf, expand discussion of fontinfo file,
-    updated documentation of OS/2 v 4 table bits with
-    Adobe's practices for the next library release.
-    - added two new tech notes on using rotateFont and mergeFonts
-    - in "OT Feature File Syntax.html", fixed incorrect sign for winAscent
-    keyword, extended discussion of DFLT script tag and useExtension keyword,
-    and fixed minor typos.
-
-    kernCheck
-    - added this new tool. This looks for kern GPOS rules that conflict,
-    and also looks for glyph pairs that overlap.
-    - added option to allow running only the check of GPOS subtables for 
-    kerning rules that mask each other.
-    
-     makeotf
-    - Fix so -adds option works.
-    - add new option "-fi' to specify path to fontinfo file.
-    - add new option '-rev' to increment the fontRevision field.
-    - if the (cid)fontinfo file contains the keyword/value for FSType, will
-    check that the value is the same as the OS/2 fsType field in the final OTF
-    font. This has to do with historic Adobe CJK font development practices.
-    - added support for setting some of the Plane 1+ bits in the OS/2
-    ulUnicodeRange fields
-    
-    mergeFonts.
-    - Will now apply to the output font the values for the fields Weight and
-    XUID, from the cidfontinfo file.
-    
-    spot
-    - added support for showing some of the Plane 1+ bits in the OS/2
-    ulUnicodeRange fields
-
-    stemHist: 
-    - when requiring that reports not already exist, don't delete older stem reports
-    when asking for new alignment zone reports, and vice-versa.
-    
-    setsnap.pl. 
-    - Added new tool to pick standard stem hint values. This PERL script program
-    takes in the report from stemHist, and recommends a set of values to use for
-    the Type 1 font standard stem arrays. This is not as good as choosing the
-    most relevant values yourself, but better than not providing any values.
-    
-FDK v2.0 Sept 12 2006 build 22.
-
-    compareFamily.
-    - added test that Mac name ID  4 starts with Preferred Family name, and is
-    the same as the CFF table Full Name, in Single Test 3.
-    - added test for existence and validation of BASE table in Single Test 11.
-    - fixed bug where failed when reporting font BBox error. - added test that
-    some specific glyph names were not changed from previous version of font, in
-    Single Test 26.
-    - added "Single Face Test 27: Check strikeout/subscript/superscript
-    positions". Checks values against default calculations based on the em-box
-    size.
-    - added "Single Face Test 28: Check font OS/2 code pages for the a common
-    set of code page bits". Checks code OS/2 ulCodePageRange and ulUnicodeRange
-    blocks against the default makeotf heuristics.
-    - added in Single Test 12 a rough calculation of the italic angle. Warns if
-    this is more than 3 degrees different than the post table Italic angle
-    value.
-    - added in Family Test 15 a check that all fonts in a preferred family have
-    the same hhea table underline size and position values.
-    - Added  "Family Test 16: Check that for all faces in a preferred family
-    group, that the width of any glyph is not more than 3 times the width of the
-    same glyph in any other face"
-    - fix Family Test 3 so that it works right. I think it worked before, but
-    was very inefficient.
-    
-    makeotf.v2.0.22, makeotfexe 2.0.14973
-    - added a new option '-maxs <integer>' to limit the number of subroutines
-    generated by subroutinization to the number. Used only when building test
-    fonts to explore possible errors in processing the subroutines.
-    - allow working names to be longer than 31 characters; complain, but don't
-    quit, if final names are longer than 31 characters.
-    
-
-    
-FDK v2.0 Aug 31 2006 build 21.
-    makeotf.
-   - Fixed bug where 'size' feature is built incorrectly when it is the only
-   GPOS feature in a  font.
-    
-    spot.
-   - Better error messages for 'size' feature problems.
-    
-    compareFamily.
-   -  Added dependency on environment variables: CF_DEFAULT_URL  Should be set to
-   standard foundry URL; is compared with name ID 11 CF_DEFAULT_FOUNDRY_CODE
-   Should be set to default 4-letter foundry
-    code, is compared with OS.2 table achVendID field.
-    - CFF PostScript name is same as Mac and Windows name table name ID 6.
-    - named ID 9 and 11 ( foundry design note and URL) exist.
-    - SingleTest 4 extended to verify that version string is in correct format
-    "(Version|OTF) n.nnn'. - added to Panose test that values are not all 0, and
-    than the CFF font dict 'isFixedPitch field matches Panose monospace value.
-    - added check that Unicode cmap sub table exists
-    - added check the latn/dflt and DFLT/dflt script/languages are present, if
-    there are any GPOS or GSUB rules. Also checks that script and language tags
-    are in registered lists, and that all faces have the same set of language
-    and script tags, and feature list under each language and script pair.
-    - added check that all faces in the family have the same OS/2 table fsType
-    embedding permission values.
-    - added check that if font has Bold style bit, that the CFF forceBold flag
-    is on. Also vice-versa, if the font weight is less than 700.
-    - added check that the font does not have a UniqueID or XUID, if not
-    CID-keyed.
-    - added glyph name checks: OS/2 default char is notdef, and that there are
-    "null" and "cr" glyphs in TrueType fonts, and that names conform to the
-    current Adobe Glyph Dictionary. Note that latest usage uses 'uni' names for
-    final names for all the 'afii' glyphs.
-    - fixed family BlueValue tests to compare within Compatible family Name
-    groups
-    - changed Family Test 2 to check if all name ID's except 16,17,18, are all
-    present with the same language/script values within all faces of a preferred
-    family.
-    - Changed Single Test 3, which didn't do at all what it said, to a new test
-    
-    FontLab proofing scripts. 
-    - Fixed bug introduced when changing modules shared with command-line
-    scripts in build 19.
-
-FDK v2.0 Aug 14  2006 build 20.
-    ProofPDF.py
-    - Fixed bug in waterfallplot mode, where Acrobat would report the output
-    pdf file as being damaged. 
-    
-    makeotf. 
-    - Fixed bug where couldn't build CID fonts
-    in release mode, introduced in build 19.
-    
-    
-FDK v2.0 Aug 4 2006 build 19.
-
-    compareFamily.
-    - added to Family Test 13  to report error if two fonts in the same
-    preferred family have the same OS/2 weight, width and Italic settings, and
-    the OS/2 version is greater than 3. Also reports an error if the fsSelection
-    field bit 8 "WEIGHT_WIDTH_SLOPE_ONLY" is set differently in different faces
-    of the same preferred family name group.
-    - Fixed Family Test 12 to not fail when the font has a script/language with
-    no DefaultLangSys entry.
-    
-    makeotf. 
-    - Will now set the new fsSlection bits if the following key/value pairs are
-    in the 'fontinfo' file.
-    PreferOS/2TypoMetrics 1
-    IsOS/2WidthWeigthSlopeOnly 1
-    IsOS/2OBLIQUE 1
-    - If a font file with the requested output file name already exists, will
-    delete it before running makeotfexe, so can tell if it failed.
-    
-    digiplot.
-    - add new option to specify the font base-line, so the base-line can be set
-    correctly when proofing a font file without a BASE table.
-    - allow using a CID layout file to supply meta info when proofing name-keyed
-    font.
-    
-    ProofPDF.py.
-    - Added two new proof-to-PDF functions, waterfallplot, fontsetplot.
-    waterfallplot does not yet work with TrueType or CID-keyed fonts.
-
-FDK v2.0 May 15 2006 build 17.
-    Multiple tools: fixed so the FDK can be installed under Windows on a path
-    with spaces.
-    
-    autohint. 
-    -Added option to suppress hint substitution.
-    -Added option to allow processing of fonts without std stem widths set.
-    -Fixed help and message to refer to 'autohint' tool name, rather
-    than to the AC script file name.
-    - fixed bug in processing hint masks: bytes with no bits set were
-    being omitted.
-    - added option to allow it to hint fonts without StdHW or StdVW
-    entries in the font Private font-dictionary.
-    checkOutlines. 
-    - Fixed this so the script really would write out the changes when
-    fixing outlines.
-    - Fixed bug that mangled outlines when three alternating
-    perpendicular lines or vh/hv/vv/hh curveto's followed each other
-    - WIll now write report to a log file as well as to screen. Added
-    option to set log file path, and added numeric suffix to name so as
-    to avoid overwriting existing log files.
-
-    compareFamily.
-    - fixed bug: it would fail when looking through the directory for
-    font files, when encountering a file for which the user does not
-    have read permission.
-    - added SingleTest24; check that 'size' feature Design Size is
-    within the design range specified for the font.
-    
-    fontplot/charplot/digiplot/hintplot/showfont
-    - extend to work with Type 1 font files as well as OTF and TTF files
-    - add showfont command to show how to customize a command file to
-    produce a different page layout
-    - fixed so fonts with em-squares of other then 1000 would work.
-    
-    makeotf.
-    - Fixed MakeOTF to survive being given a font path with spaces.
-    - the -S and -r options now work.
-    - Added new option '-osv n' to write arbitrary version to the OS/2 table
-    version number.
-    - Added new option '-osbOn n' to set arbitrary bitfields in OS/2 table
-    fsSelection to on. May be repeated more than once to set more than one bit.
-    - Added new option '-osbOff n' to clear arbitrary bitfields in OS/2 table
-    fsSelection to on. May be repeated more than once to clear more than one
-    bit.
-    - if neither the -b nor the -i options are used, check for a file "fontinfo"
-    in the same directory as the source font file, and set the style bits if the
-    key/values are found: "IsBoldStyle true" and "IsItalicStyle true".
-
-    FontLab Macros.
-    - Built the autohint and checkOutline libraries (PyAC and focusdll) linked
-    with Python2.3 so that they will work with FontLab 5.
-
-    mergeFonts.
-    - Added option to copy only font metrics from first source font.
-    - allow empty lines and "#" comment lines in glyph alias and in cidfontinfo
-    files.
-
-    rotateFont
-    - fixed bug where it did not allow negative numbers.
-    - allow empty lines and "#" comment lines in rotation info file
-
-    sfntedit
-    - Fixed so that it will not leave the temp file behind on a fatal error, nor
-    quit because one already exists.
-
-    spot.
-    - Fixed order of backtrack glyphs in dump of chaining contextual sub and pos
-    statements. Now assumes that these are built in the correct order.
-    - removed date-time from page title. v3.5.13354
-
-    detype1/type1. Added two new tools that decompile/compile a Type 1 font
-    to/from a plain text representation.
-
-
-    FDK 2.0 Feb 14 2006 build 5 comparefamily.
-    - Added warning if sum of OS/2 table sTypoLineGap, sTypoAscender, and
-    sTypoDescender is not equal to the sum of usWinAscent and usWinDescent
-    - updated test for allowable weights in style-linked faces to reflect
-    current behaviour of Windows XP.
-    - added check that for OpenType/CFF, name table name ID 4 "Full Name" for
-    Windows is the same as the PostScript Name.
-    - added report on sets of features in different language systems, and an
-    error message if they are not the same in all faces of the font.
-    - fixed incorrect message about real error when menu names are not correctly
-    built.
-    - fixed test for improbable FontBBOX to use em-square rather than assume
-    1000 em.
-    - added warning if widths of ligatures are not larger than the width of the
-    first glyph
-    - added warning if accented glyphs have a width different than their base
-    glyph.
-    - added error message if two faces in the same family have the same OS/2
-    width and weight class and italic style setting, and are not optical size
-    variants. Optical size rule is crude: I compare PS names after removing the
-    Adobe standard optical size names from the PS name string: "Caption, Capt,
-    Disp, Ds, Subh, Six. If the PS names are then the same, then they were
-    optical size variants.
-    - Added check that no hint is outside the FontBBox, for CJK fonts only.
-
-    spot/otfproof.
-    - Added "Korean" to list of tags for OS/2 code page range.
-    - fixed dump of 'size' feature to support correct and old versions
-    - added dump/proof of contextual chaining positioning format 3.
-    - added warnings that only low-level dump of other contextual lookups is
-    supported.
-
-    makeotf.
-    - program is now a stand-alone C executable.
-    - removed option to write contextual positioning rules in the "old"
-    incorrect format.
-    - MakeOTF no longer assigns Unicode Private Use Area values to glyphs for
-    which it cannot identify. If you want to use these values, you must
-    explicitly assign them in the GlyphOrderAndAlias file.
-    - Fixed bug in name table name ID "Version": if version decimal value is
-    x.000, then the value in the Version name ID string was x.001.
-    - fixed bug in handling of DFLT language script: you can now use this tag.
-    - fixed feature file parsing bug bug where ''dflt' lookups in one feature
-    were applied to the following feature if the following feature started with
-    a language statement other than 'dflt'.
-    - Fixed serious bug  where wrong width is calculated for glyphs where\ the
-    CFF font Type 2  charstring for the glyph starts with a width value. This is
-    then followed by the value pairs for the coordinates for the vertical hint,
-    and then these are followed by a hint mask or control mask operator.  The
-    bug  is that when MakeOTF reads in the charstring in order to derive the
-    hmtx width, it discards the data before the control mask operator, leading
-    the parser to use the CFF default width for the glyph.
-    - vhea.caretSlopeRise and vhea.caretSlopeRun is now set to 0 and 1, rather
-    than reverse.
-    - MakeOTF will now set the OS/2 table 'type' field to: the feature file
-    override. If not supplied, then: the value of the environment variable
-    FDK_FSTYPE. If no set then: 4 (EDIT_EMBED)
-    - support contextual chaining positioning for positioning only; mark and
-    anchors not yet supported.
-    - fixes the bug in the 'size' feature: the feature param offset is now set
-    to the offset from the start of the feature table, not from from the start
-    of the FeatureList table.
-    - allow size feature point sizes to be specified as decimal points, as well
-    as in integer decipoints.
-    - OS/2 table version is now set to 3.
-    - added OS/2 overrides for winAscent and winDescent
-    - added hhea overrides for Ascender/Descender/LineGap
-    - set OS/2 Unicode coverage bits only if the font has a reasonable number of
-    glyphs in the Unicode block; it was setting the bits if the font had even
-    one glyph in the block.
-    - MakeOTF will now set the "Macintosh" code page bit in the OS/2
-    corePageRange fields.
-
-    feature file documentation.
-    - fixed incorrect range example in section '2.g.ii. Named glyph classes"
-    - changed rule to allow lookup definitions outside of feature definitions in
-    FDK 2.0.
-    - fixed incorrect uses of 'DFLT' rather than 'dflt' for a language tag.
-    - minor typos
-
-   
-
-FDK 8139 Aug 30 2004
-    OTFProof.py. Fixed error in dumping GSUB table: GSUB lookup 5, context
-    lookup assumed that there was both a look-ahead and a backtrack sequence.
-
-    Updated SING META table tags to latest set.
-
-FDK 7974 Aug 30 2004
-    MakeOTF.py Fixed rule in building CJK font. When looking for Adobe CMAP files, will
-    no longer use a hard-coded max supplement value when building paths to try.
-
-FDK 7393 Jan 14 2004
-    CompareFamily. 
-    Fix stack dump when family has no BlueValues (thanks to House Industries)
-    Fix stack dump when CFF-CID font has glyph with no subr calls.
-
-FDK 7359 Jan 14 2004
-
-    OTFProof. Corrected error in last release, where spaces between ligature match string
-    names were omitted.
-
-    FontLab Scripts. Add scripts to test if joins in connecting script font are good.
-
-FDK 7307 Jan 6 2004
-
-    OTFProof. Fix crash on proofing or dumping feature file syntax for GSUB lookup 5, context
-    lookup. Also fixed rule-generating logic: results were previously wrong for proof and
-    for feature-file syntax formats. Text dump has always been correct.
-
-    Fixed crash when dumping cmap subtables that reference virtual GID's not in the font.
-
-    Fixed crash on dumping GSUB lookup type 6 chaining context subtable format 2. This has never worked before.
-
-    Added dumo for SING glphlet tables, SING and META.
-
-    FontLab Composites Scripts. Added FontLab scripts for creating and reading in
-    an external composites definition text file
-
-    FontLab Scripts. Added FontLab scripts for working with MM fonts
-
-FDK 6864 Oct 8 2003
-    OTFProof. Fix crash after dumping contents of ttc fonts, a bug added in changelist  6792.
-
-FDK 6815 Oct 2 2003
-    OTFProof. Fix to cmap subtable 4 and 2 dumps. Cmap subtable 2 could
-    show encoding values for single byte codes which were really the
-    first byte of two byte character codes. In Format 4, idDelta values
-    were not being added when the glyphindex was derived from the glyph
-    index array. These show issues show up in some TTF CJKV fonts.
-
-FDK 6792 Sept 24 2003
-    OTFProof. Fixed crash when proofing fonts with *many* glyphs
-    Restored "skipping lookup because already seen in script/language/feature" messages
-    to proof file, which was lost in build 6604.
-    Added ability to proof resource fork sfnt fonts from Mac OSX command line. You must
-    still use the SplitForks tool to make a data-fork only resource file, but spot/otfproof
-    can now navigate in the resulting AppleDouble formatted resource file.
-    Added support for a text dump of the GDEF table.
-    Changed title in size feature dump from "Common Characters" to:
-    "name table name ID for common Subfamily name for size group"
-    
-    AGL. Fixed some minor errors in the Adobe Glyph List For New Fonts.
-    
-FDK 6629
-    OTFProof. Fixed bug in dumping KERN table from Mac sfnt-wrapped resource fork Type 1 MM font.
-    
-FDK 6604
-    OTFProof. Changed the AFM-format dump of kern pairs to list all kern pairs
-    for each  lang/script combination in separate blocks, and to eliminate all class kern pairs
-    that are masked by a singleton kern pair. The temp buffer file path is now taken from the
-    system C library function tmpnam(), and is not necessarily in the current directory.
-    
-FDK 6568
-    OTFProof. 1) fixed command-line tool to write proof files in same location as font, and
-    with font-name prefix, when not auto-spooled for printing.
-    2) fixed bug in UI version where proofing GSUB features and then GPOS features would cause
-    the GPOS feature proof files to be empty.
-    
-    MakeOTF/coretype/ Fixed heuristics for picking OS/2 weight/width so that a font name
-    containing "ultracondensed" would trigger only setting the width, and not also the weight.
-    
-    Updated Mac OS project files to CodeWarrior 8.
-    
-FDK 6564
-    OTFProof. 1) When dumping data from TTF fonts, now add "@<gid>" to all glyph names. This
-    is because the rules for deriving names can lead to two glyphs being given the same name.
-    2) Fix bug in proofing GPOS class kernpairs: was  generating bogus kern pairs
-    and duplicate kern pairs when the coverage format was type 2. Affects proof file only, not
-    AFM or feature-format dump. 
-    
-FDK build 6358
-    Fixed memory overwrite bug encountered by Goichi and cleaned up various memory leaks in the process.
-
-FDK 6324
-    ExtractShowRoomData.py. Fixed bugs for ornament and ligature tags, in script
-    which extracts data about an OpenType font in order to set the attribute
-    icons in the Adobe Type web-site.
-FDK 6324
-    ExtractShowRoomData.py. Fixed bugs for ornament and ligature tags, in script
-    which extracts data about an OpenType font in order to set the attribute
-    icons in the Adobe Type web-site.
-
-FDK build 6324
-    CompareFamily.py    Added report on whether face contains known std charset.
-    Stub implementation - still need list of std charsets
-    
-    AFM2Feat. Finally made script to convert a AFM file to a file kern
-    feature pos rules
-    
-FDK build 6148
-    Final rebuild of all libraries for v1.6 release 3/10/2003.
-
-FDK build 6048
-    Updated FinishInstall.py to reflect Python 2.2 requirements 
-    Picked up last MakeOTF.pdf editing changes 
-    Fixed bug in GOADB 
-    Updated CID font data in example fonts 
-
-FDK build 6036
-    Documentation. Updated release notes and installation instructions.
-    
-    GlyphOrderAndAliasDB. Updated to use the file developed while converting the
-    Adobe Type Library. Maps all the old glyph names to AGL compatible names.
-    
-FDK build 6020
-    OTFProof: Fixed crash in handling of VORG with no entries. (V#574752)
-
-FDK build 6014 
-    MakeOTF. Updated the MakeOTF documentation. Added a description of how 
-    all three columns of the Glyph Order and Alias DB file are used. Added a new 
-    section on the key-value pairs of the font project file. Updated 
-    the description of the Font Menu Name DB file entries. Added minor 
-    clarifications throughout. 
- 
-    Documentation. Updated digital_signature_guide.htm to match current Verisign 
-    web site. 
-    
-    Example Fonts. Changed the incorrect language keyword TUR to TRK. Removed the
-    many key/value pairs in the fontinfo files that are not used by MakeOTF.
-    
-    FDK tools. Added new file selector for TTF files when choosing a target font file.
-     
-FDK build 5988
-    Fixed 3-column handling of GOAADB in OTFProof/spot per Vantive 569681
-
-FDK build 5978
-    Created the new FDK Image on Type Server
-
-FDK V1.6 build 5959
-    MakeOTF. Suppressed the "repeat hint substitution discarded" message from the
-    source file parsing library. These are so common that they obscure more useful
-    messages.
-    
-    MakeOTF. Set as default the option to build chaining contextual substitution rules
-    with the incorrect format  used by InDesign 2.0 and earlier. 
-    
-    MakeOTF. If the option above is set, then MakeOTF will write a name id (1,0,0,5)
-    name string ID "Version" which will contain the text string which triggers
-    special case code in future Adobe apps so that it will process the 
-    chaining contextual substitution rules as they were intended. If this option
-    is NOT set, the name string ID "Version" will be written so as to not 
-    trigger this special case code. The special case treats specially
-    any font where the name table name id (1,0,0,5) exists and either matches:
-        "OTF[^;]+;PS[^;]+;Core 1\.0\.[23][0-9].*"
-        example: "OTF 1.006;PS 1.004;Core 1.0.35"
-    or contains:
-        "Core[^;]*;makeotf\.lib" 
-        example: "Core 1.0.38;makeotf.lib1.5.4898" or just  "Core;makeotf.lib"
-        
-    MakeOTF. Set off by default the option to force that the .notdef glyph
-    in the output OTF font bean X'd rectangle with an advance width of 500.
-
-    MakeOTF. Added rule to force the OS/2 WeightClass to always be at least 250.
-    Shows error message if set or calculated WeightClass was less than this.
-    
-    MakeOTF. Add test that FSType is set the same in the feature file as in 
-    source CID font files.
-    
-    FDK UI tools. Fixed font file browsing options to show TTF fonts as well as 
-    OTF fonts by default.
-    
-    OTFProof. page layout for CJKV font vertical layout: now writes the vertical columns
-    right to left.
-    
-    OTFProof. When writing vertical features, now shows the advance width sign as negative.
-    
-    OTFProof. When making PostScript proof file, now writes DSC tags with correct
-    header and page info.
-    
-    FDK. Added OTF FileTyper to Programs directory
-    
-    FDK. Added "Unicode and Glyph Name" documentation to the FDK "Technical Documentation"
-    directory, to allow access to this info under the FDK license.
-    
-    MakeOTF. Added some bug fixes to the typecomp library, copied from CoreTech. 
-    Bumped typecomp library version number to 2.0.33.
-        o The BaseFontBlend operator was never output even if the key was present in
-          the source font because of a bug in the loop that wrote DICT operators.
-        o It was possible for pre-defined charset to be selected for a CID-keyed font
-        o Charstring-encrypted CID-keyed fonts having one set of subroutines referenced
-          from multiple dictionaries failed due to the subr charstrings being decrypted
-        o Duplicate values in a CID subset specification could cause multiple glyphs
-          with the same CID to be included in the subset or worse still to cause a
-          fatal error when parsing the CID font. This possibility is now averted by
-          weeding out duplicates from the client-supplied subset.
-        o Fixed flex optimization bug which caused the hflex operator to be incorrectly
-          selected for certain fonts.
-    Increased Core/hotconv library revision number from 1.0.36 to 1.0.37
-    
-
-V1.6 build 4908
-
-    MakeOTF/feature file syntax. Added new vmtx table overrides, in order to
-    permit setting vertical metrics for pre-rotated proportional glyphs that are
-    specifically designed and are not simply rotated forms of proportional
-    glyphs.
-
-    MakeOTF/feature file syntax. Added new OS/2 overrides to set the Unicode and
-    Windows code page range fields: UnicodeRange CodePageRange
-
-    MakeOTF/feature file syntax. Updated language keywords to be consistent with
-    OpenType spec, i.e using "dflt" instead of "DFLT". Expanded section
-    explaining use of language and script default keywords. Old keywords still
-    work, but cause a warning to be emitted.
-
-    feature file syntax. Expanded explanation of kern class pairs and subtable
-    breaks.
-
-V1.6 build 4908
-    MakeOTF. Updated the MakeOTF.py search rules for CID font CMAP files to support Adobe-Japan2-0,
-    and to look first for UTF-32 CMAP files.
-    
-V1.5 build 4987
-    Release to Adobe web site Sept 2002
-    
-V1.5 build 4908
-    MakeOTF. Changed the name table version string to match OT spec 1.4.
-    
-    CompareFamily. made it *really* work with Sept 10th 2002 release of 
-    Just von Rossum's FontTools library.
-    
-v1.5 build 4492
-    MakeOTF. (hotlib 1.0.35) Fixed the error in processing GSUB contextual
-    chaining substitution format 3. This was originally done according to the
-    OpenType spec spec 1.4, which is in error by the established implementation
-    of VOLT and Uniscribe. Added new flag = "-fc " to cause the library to use
-    the incorrect implementation, according to OT spec v 1.4.  Without flag,
-    MakeOTF builds the correct contextual format per spec v1.5.
-
-    MakeOTF. (hotlib 1.0.35) Fixed Unicode cmap bug in assigning the OS/2 table
-    field usLastCharIndex. This is supposed to be the highest uv value in the
-    BMP-16 cmap tables. The problem was in the logic by which alternates of
-    supplemental plane glyph names were being assigned an EUS code, but not
-    added to the BMP-16 Unicode cmap tables, eg u1D269.alt. When one of these
-    alternates was assigned an EUS value, the usLastCharIndex was getting bumped
-    even though the glyph was not being added to the BMP-16 cmap tables. Fixed
-    by not incrementing usLastCharIndex in this case.
-
-    MakeOTF. Fixed bug in applying client-supplied uv override values. These
-    were omitted if the glyph names in the font were different than the final
-    glyph names, as can happen when the client uses the getFinalGlyphName call
-    back to supply a glyph production name which is different than the final
-    glyph name.
-
-v1.5 build 4479
-    OTFProof. Fixed crash when proofing liga feature in CID font. Also fixed
-    crash when proofing charstring with only one operand, e.g h/r/vmoveto.
-
-v1.5 build 4345
-    CompareFamily. Updated to use the latest version of Just von Rossum's FontTools 
-    library, added support for TrueType fonts. Now requires Python 2.2
-v1.5 build 4141
-    CompareFamily. Added family test 11: verify that for base font in style-linked
-    group, Mac and Windows menu names are the same, and that for other fonts in the
-    style linked group, the Mac and Windows menu names  differ.
-    
-v1.5 build 4099 
-    *** External release of FDK 1.5 on Adobe web site. 
-    Updated release notes and documentation.
-
-v1.5 build 3849
-CompareFamily: Fixed tabular glyph  and isFixedPitch test so that they are now useful
-- used to generate far too many false errors.
-
-v1.5 build 3848
-MakeOTF: Fixed bug in setting Panose values from a feature file override. If any 
-value in the Panose value string is 0, all subsequent values were also set to 0.
-
-v1.5 build 3828
-MakeOTF: Fixed bug where glyphs that got renamed were not subjected to the
-ordering specified by the GlyphOrderAndAliasDb file.
-
-v1.5 build 3762
-    Added FDK.py file to integrate all tools into a common UI
-v1.5 build 3761
-    OTFCompare: Added use of CFFChecker library for CFF table
-v1.5 build 3759
-    EOM: Release 1.1.4 with minor bug fix
-v1.5 build 3635
-    CFFChecker: Added resource fork handling on OSX
-v1.5 build 3633
-    CompareFamily. Added family test 10: if any face in family has a real panose value,
-    report derived panose values as an error. Also fixed bug in comparing copyright notices 
-    in  family test 7: will now really report error only if differs in other than years
-v1.5 build 3480
-    CFFChecker: Added support for multiple input file
-v1.5 build 3319
-    CFFChecker 1.5.1: Added support for resource fork fonts under MacOS 9
-v1.5 build 3204
-    Added CFFChecker interface to makeotf
-v1.5 build 3196
-    OFTCompare: Added OSX prompt-based support
-v1.5 build 3145
-    Fix R-O-S mapping for CMAP files.
-v1.5 build 3144
-    Fixed getunicodeCmap() to not hard-wire Adobe-Japan1-3 when processing J fonts.
-v1.5 build 2940
-    CFFChecker: MacOS 9 version created
-v1.5 build 2606
-    Adding CFFChecker
-v1.5 build 2583
-    Fixed CompareFamily.py to not die on font menu names with non-std ASCII
-v1.5 build 2576
-    OTFProof: Fixed vertical metrics proofing
-v1.5 build 1821
-    Added warning when truncating OS/2 TypoAscender to
-    force it + TypoDescender to be equal to the embox
-v1.5 build 1561
-    FDK, Fix Makeotf to allow fractional synthetic weight values. These are rounded to an integer.
-v1.5 build 1511
-    Changed XUID adding algorithm to NOT add the revision number to the XUID array.
-v1.5 build 1304
-    MakeOTF In release mode, add current year to copyright, suppress (c) string, and fix spaces
-    around the phrase 'All Rights Reserved'
-v1.5 build 1106
-    MakeOTF. Fixed to permit building a font in release mode with no unique ID at all
-v1.5 build 1086
-    makeotf. bad cmap entry offset calculation. 
-v1.5 build 1085
-    makeotf. Fix for bad cmap table entry.
-v1.5 build 1023
-    makeotf:
-    1) change algorithm for adjusting advance width/lsb/rsb of non-slanted synthetic
-    glyphs when adding to italic fonts
-    2) fix failure of re-ordering when NOT forcing use of marking notdef.
-    3) fix ITC PS name prefixes from "Itc" to "ITC", and fix a PS name-too-long 
-    problem with Univers-LightCondensedOblique
-v1.5 build 1010
-    fixed interaction between Sigma and synthetic summation and Pi and product.
-v1.5 build 978
-    spot added the option to select which feature to dump in GPOS or GSUB=7 dumps
-v1.5 build 955
-    OTFProof Added support of TT instructions in compound glyphs
-v1.5 build 938
-    Fixed CompareFamily.py. Was incorrectly unwrapping T2 charstring subroutines.
-    All previous reports on whether glyphs were hinted should be doubted.
-v1.5 build 927
-    Makeotf - tweaked horizontal spacing of upright glyphs in oblique fonts
-v1.5 build 903
-    makeotf added support for "italicangle", "width" and "weight
-    keywords in fontMenuNameDB
-v1.5 build 769
-    SCM makeotf typecomp. 1) Fixed Euro-adding bug 
-v1.5 build 604 - 696
-    OTFProof
-    Removed header note "1000 units/em" from proofs.
-    Added support for cmap version 12.
-    Removed zero padding of CID values from text reports
-    Reduced number of warnings about missing characters.
-    Removed warning when GPOS and GSUB table may be too big, as no tools make this error.
-    any more, and it is triggered inappropriately when font uses the extension lookup.
-v1.5 build 604
-    OTFProof: Fixed different spacing problem reported as Vantive 420313
-
-v1.5 build 602
-    Makeotf: Fixed problem with unspecified CMAP files
-
-v1.5 build 601
-    OTFProof: Fixed so that vertical proofs write from right to left.
-
-v1.5 build 600
-    OTFProof: Fixed so that glyph names for CID fonts print properly.
-    Fixed problems with compile under SUNOS.
-
-    MakeOTF
-    
-    Added MakeOTFScript.py as an example file to edited, in order to allow scripting 
-    of makeOTF on the Mac (or any other platform). Minor changes to MakeOTF.py to fix this.
-    
-    Added options to allow user to specify options to:
-     - remove deprecated Type 1 operands from output font ( e.g. seac and dotsection)
-     - add new glyphs, using a built-in sans and serif multiple master substitution font,
-     if the source font has a 'zero' and a capital "O", and it the option to add std glyphs is chosen.
-     The glyphs added are:
-        Euro
-        Delta
-        Omega
-        approxequal
-        asciicircum
-        asciitilde
-        at
-        backslash
-        bar
-        brokenbar
-        currency
-        dagger
-        daggerdbl
-        degree
-        divide
-        equal
-        estimated
-        fraction
-        greater
-        greaterequal
-        infinity
-        integral
-        less
-        lessequal
-        litre
-        logicalnot
-        lozenge
-        minus
-        multiply
-        notequal
-        numbersign
-        onehalf
-        onequarter
-        paragraph
-        partialdiff
-        perthousand
-        pi
-        plus
-        plusminus
-        product
-        quotedbl
-        quotesingle
-        radical
-        section
-        summation
-        threequarters
-        zero
-
-v1.5 build 592
-    CompareFamily.py. Fixed so that it will not error out when one of the Blues
-    arrays is not present.
-=================================================================================== 
-v1.4 build 583
-Oct 24,2000 Read Roberts, Antoine Picard
-
-*** All components
-
-1) Began tracking files by Perforce changelist label, from the Perforce source code management system.
-
-2) Updated compilers to Mac/CodeWarrior 6 Pro, Windows Visual C++ 6.0
-
-3) Re-organized build directories to have mac/win/sun4 subdirectories
-
-4) Re-organized shared include files to all be under /Programs/api, with non-conflicting names.
-
-*** Example fonts.
-1) Updated MinionPro-Capt: now had correct frac and size features.
-2) added KozMinPro to samples.
-
-*** MakeOTF.
-1) Fixed bug in makeotf where fontinfo keyword IsStyleBold was ignored for CID fonts.
-2) Fixed Mac build project to load debug and release libraries by different names.
-3) coretype library changes, from 1.0.27 to v1.0.28:
-o Added feature file support for the "languagesystem" statement. Note that this
-  entailed removing support for script, language, and named lookup statements
-  in the size feature, and removing support for script and language statements
-  in the aalt feature. See feature file spec for details.
-
-o More descriptive wording in offset overflow error messages. Feature file
-  error handling improved: multiple error messages are emitted before failing
-  if possible, instead of just one; final glyph name as well as glyph alias (if
-  applicable) reported if not found in font.
-
-o Changed the 14 Corporate Use subarea Unicode values for Zapf Dingbats to the
-  proposed UVs in anticipation of their being incorporated into the Unicode
-  standard.
-
-o Added FontWorks ('FWKS') to vendor ID list.
-
-o Increased the maximum number of named lookups allowed to 8192.
-
-o Now makes kern and vert features from kern data passed in by clients and from
-  V CMap (respectively) only when the HOT_CONVERSION bit is set. (Previously,
-  these features were made from the sources mentioned above if they weren't
-  already defined in a feature file.)
-
-o Fixed an obscure bug in OS/2.ulUnicodeRange computation: if the largest UV in
-  the font were not in any Unicode range recognized by hotlib then it was
-  counted as being in the next recognized Unicode range after the UV. (No fonts
-  I know of are affected by this.)
-
-o [rroberts] Force the OS/2 codepage range bits for Chinese to either
-  Simplified or Traditional, based on the Mac cmap script, if it is defined as
-  either Simplified or Traditional, and will fall back on the heuristics if the
-  script is undefined. If the mac.script is something other than a Chinese
-  script, then the OS/2 codepage range bits for Chinese will not get set.*** OTFProof.
-4) Reduced some of the recursion in the subroutinization code to reduce stack space 
-   requirements
-5) Fixed support for included feature files in parent folder on the Mac
-
-
-*** OTFCompare
-1) The Python sys.path variable must now contain the path to the directory
-containing the OTFProof library (usually
-"FDK/Tools/Programs/otfproof/exe"). This replaces the hard-coded path
-reference in the OTFCompare.py script. On all platforms, this is done by
-adding the file "otfproof.pth", containing the path, to the Python installation.
-2) Fixed a bug that was causing tables smaller than 16 bytes to be reported as different
-
-*** OTFProof.
-1) Added a new proofing mode to CFF_ to print one glyph per page
-2) Added a new proofing option to suppress file-specific header info to facilitate diff-ing
-   of multiple proofs.
-3) Added alphabetical sorting of AFM-style dump
-4) Fixed bug causing GPOS/GSUB features with digits in their names to not appear in the
-   proofing list
-5) Added support for glyphsize option in CFF_ dumps
-) Fixed conflicting include file names; must now specify include paths in project file.
- 
-
-
-===============================================================================
-v1.3.2
-Oct 24,2000 Read Roberts, Antoine Picard
-
-*** OTFProof.
-- fixed bug where would report error opening Mac TTF suitcase font, because data fork was of size 0.
-
-- fixed bug where feature tags containing numbers were filtered out of the feature list for proofing.
-
-- fixed bug where base-line was shown incorrectly for CJK fonts with base-lines other than 120.
-
-- fixed bug where y-placement changes were not shown correctly in vertical writing mode proofs.
-
-
-===============================================================================
-v1.3.1
-Aug 15,2000 Read Roberts
-
-*** MakeOT
-1) Fixed problem with heuristics for OS/2 code page range settings, for Chinese Simplified vs Traditional.
-2) Added macro to define MakeOTF version number.
-3) updated makeotflib help/usage messages: shown when args are  incorrectly formatted.
-
-Files changed in makeotf:
-makeotf/exe/makeotfutils.py
-- in getfontinfo()
-    - added fontinfo list entry for "Language"
-    - added 'parameter' variable entry for same
-    - increased num values to from 34 to 35
-    - changed initialization of 'parameter' so can more easily figure out which index matches which fontinfo field.
-
-makeotf/exe/makeotf.py
-    - updated version numbers to 1.3.1
-    - added -cs and -cl options to help
-    - added processing of Language field, to set script and language ID's with -cs and -cl options.
-
-
-
-makeotf/source/main.c
-- added macro to define MakeOTF version number, used in help message, and in client name string for name id 5 "Version"
-- added mac_script and mac_language fields to global static 'convert' structure
-- added processing of -cs and -cl arguments to parse_args()
-- added  mac_script and mac_language arguments to call to cbconvert()
-- updated print_usage to match that of makeotf.py
-- updated the ReadFontInfo() to process new Language field
-
-makeotf/source/cb.c
-- moved initialization ( as type unknown) of mac.encoding, mac.script and mac.language from cbconvert to cbnew()
-- added setting of mac.script and mac.language to cbconvert(), from arguments.
-- added  mac_script and mac_language arguments to call to cbconvert()
-
-source/includes/cb.h
-- added  mac_script and mac_language arguments to call to cbconvert()
-
-Files changed in hotconvlib:
-coretype/source/map.c
-- changed logic for setting OS/2 codepage range to set code page to Simplified or Traditional Chinese based on mac.script setting; fall back on heuristics only if mac.script is not set.
-
-===============================================================================
-Copyright 2014 Adobe Systems, Incorproated. All rights reserved.   

@@ -6,12 +6,12 @@ with the call-backs required by fontPDF, and translates the command line
 options to arguments for the fontPDF module; the latter produces a proof
 file using the provided options annd font instance.
 """
-__copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+__copyright__ = """Copyright 2014-2017 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
 
 __usage__ = """
-ProofPDF v1.16 May 2 2017
+ProofPDF v1.17 Dec 1 2017
 ProofPDF [-h] [-u]
 ProofPDF -help_params
 ProofPDF [-g <glyph list>] [-gf <filename>] [-gpp <number>] [-pt <number>] [-dno] [-baseline <number>] [-black] [-lf <filename>] [-select_hints <0,1,2..> ]  \
@@ -30,9 +30,7 @@ as specified by options.
 The five main options, "-charplot", "-digiplot", "-fontplot","-hintplot"
 and "waterfallplot", each set a bunch of lower level parameters in order
 to produce a particular page layout. All these low-level parameters can
-be set by command-line options. This means that you can edit one of the
-command files to add your own parameter values to make your own
-customized proofing command.
+be set by command-line options.
 
 Options:
 
@@ -958,7 +956,34 @@ def proofMakePDF(pathList, params, txPath):
 					command = "open \"" + pdfFilePath  + "\"" + " &"
 					FDKUtils.runShellCmdLogging(command)
 
-
+def charplot():
+	sys.argv.insert(1, "-charplot")
+	main()
+	
+def digiplot():
+	sys.argv.insert(1, "-digiplot")
+	main()
+	
+def fontplot():
+	sys.argv.insert(1, "-fontplot")
+	main()
+	
+def fontplot2():
+	sys.argv.insert(1, "-fontplot2")
+	main()
+	
+def fontsetplot():
+	sys.argv.insert(1, "-fontsetplot")
+	main()
+	
+def hintplot():
+	sys.argv.insert(1, "-hintplot")
+	main()
+	
+def waterfallplot():
+	sys.argv.insert(1, "-waterfallplot")
+	main()
+	
 def main():
 	try:
 		txPath, fdkSharedDataDir = CheckEnvironment()

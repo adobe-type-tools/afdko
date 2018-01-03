@@ -338,9 +338,8 @@ class CFF2GlyphData:
 						numOps = len(opList)
 						i = 1
 						break
-
-					print("Path mismatch 1", self.glyphName, i,
-					                            self.masterFontList[i].srcPath)
+					print("Path mismatch in glyph %s, master index %s. %s." % ( self.glyphName, i-1,
+					                            self.masterFontList[i-1].srcPath))
 					blendError = True
 					break
 
@@ -357,7 +356,7 @@ class CFF2GlyphData:
 						break
 					else:
 						print("Path mismatch 2", self.glyphName, i,
-						                        self.masterFontList[i].srcPath)
+						                        self.masterFontList[i-1].srcPath)
 						blendError = True
 						break
 				opIndex += 1

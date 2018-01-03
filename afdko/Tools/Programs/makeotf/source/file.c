@@ -67,7 +67,24 @@ int fileWriteN(File *f, size_t count, void *ptr) {
 
 /* Get line from file */
 char *fileGetLine(File *f, char *s, int n) {
-	return fgets(s, n, f->fp);
+    char* newLine = fgets(s, n, f->fp);
+    if (newLine == NULL)
+    {
+        return newLine;
+    }
+    
+    if (feof(f->fp))
+    {
+        int len = strlen(s);
+        if (len+1 < n)
+        {
+            /*  If we hit EOF in a line, then the string in 's' is terminated without a final newline.
+             In order to satisfy the logic in cbAliasDBRead(), we add a terminal newline */
+            s[len] = '\n';
+            s[len+1] = '\0';
+        }
+    }
+	return newLine;
 }
 
 /* Seek on file */

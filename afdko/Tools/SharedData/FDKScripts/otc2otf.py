@@ -277,9 +277,12 @@ def run(args):
 			print("Output font:", fontEntry.fileName)
 	print("Done")
 
-if __name__ == "__main__":
+def main():
 	try:
 		run(sys.argv[1:])
 	except (OTCError) as e:
 		print(e)
 		
+	
+if __name__ == "__main__":
+	main()
