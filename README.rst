@@ -39,7 +39,7 @@ You can remove the afdko package with the command:
 
     pip uninstall afdko
 
-If you have both the FDK from the Adobe AFDKO web page installed, and and the new afdko package installed, the commands in the new afdko will take precedence over commands in the older Adobe FDK, as the Python package directory is added at the beginning of the PATH direectory list, and the old installer added the Adobe FDK directory to the end of the list.
+If you have both the FDK from the Adobe AFDKO web page installed, and and the new afdko package installed, the commands in the new afdko will take precedence over commands in the older Adobe FDK, as the Python package directory is added at the beginning of the PATH directory list, and the old installer added the Adobe FDK directory to the end of the list.
 
 Note that the PyPi installer will add the new adko package paths to the start of your system PATH environment variable, and this is not undone by the uninstaller. If you want to completely clean up, you will need to change the PATH environment variable to remove the new afdko executable directories. On the Mac, this means editing the line in your login file that sets the PATH variable. On Windows, this means editing the PATH environment variable in the System control panel.
 
@@ -54,7 +54,9 @@ In order to build and install the afdko from the `afdko github repository <https
 
     python setup.py install
 
-In to be able to run this install command, you must first have installed the development tools for your platform. On the Mac, install these with:
+And to be able to run this install command, you must first have installed the development tools for your platform.
+
+On the Mac, install these with:
 
 .. code:: sh
 
