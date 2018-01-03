@@ -1,9 +1,9 @@
 
 
-Change log for the Aobe Font Development Kit for OpenType (AFDKO)
-=================================================================
+Change log for the Adobe Font Development Kit for OpenType (AFDKO)
+==================================================================
 
-2.6.0 (released 2018-1-4)
+2.6.23 (released 2018-1-3)
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The afdko has been restructured so that it can be installed as a Python package. It now depends on the user's Python interpreter, and no longer contains its own Python interpreter.

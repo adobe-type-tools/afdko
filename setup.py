@@ -126,12 +126,11 @@ classifiers.extend(moreKeyWords)
 # Copied fomr fonttools setup.py
 with io.open("README.rst", "r", encoding="utf-8") as readme:
 	long_description = readme.read()
-long_description += "\nChangelog\n~~~~~~~~~\n\n"
 with io.open("NEWS.rst", "r", encoding="utf-8") as changelog:
 	long_description += changelog.read()
 
 setup(name="afdko",
-	  version="2.6.20",
+	  version="2.6.23",
 	  description="Adobe Font Development Kit for OpenType",
 	  long_description=long_description,
 	  url='https://github.com/adobe-type-tools/afdko',
