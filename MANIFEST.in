@@ -1,6 +1,7 @@
 include README.rst
 include LICENSE.txt
 include NEWS.rst
+include afdko/AFDKO-Overview.html
 
 recursive-include		afdko/Tools/SharedData/Adobe?Cmaps *
 recursive-include		afdko/Tools/SharedData/CID?charsets *

@@ -57,3 +57,12 @@ File->new , "Install from disk or image"
 sudo apt-get update
 sudo apt-get upgrade
 sudo apt-get dist-upgrade
+
+If the long_description is not showing correctly on github or PyPi, this may be because the source *.rst files have sytnax errors. Upi can check this with.
+# install the checkdocs stuff:
+pip install Pygments # parse the.. code commands correctly
+pip install collective.checkdocs
+# run the checker
+python setup.py checkdocs
+
+

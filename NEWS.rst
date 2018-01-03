@@ -4,17 +4,16 @@ Change log for the Aobe Font Development Kit for OpenType (AFDKO)
 =================================================================
 
 2.6.0 (released 2018-1-4)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The afdko has been restructured so that it can be installed as a Python package. It now depends on the user's Python interpreter, and no longer contains its own Python interpreter.
 
 In order to do this, the two Adobe-owned, non-OpenSource programs were dropped: IS and checkOutlines. If these turn out to be sorely missed, an installer for them will be added to the old Adobe afdko web-site.  The current intent is to migrate the many tests in checkOutlines to the newer checkOutlinesUFO (which does work with OpenType and Type 1 fonts, but currently does only overlap detection and removal, and a few basic path checks).
 
 Older Releases from the `Adobe afdko home page <http://www.adobe.com/devnet/opentype/afdko.html>`__.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 FDK. v2.5 Dec 1 2017 change number 66097.
-
 	This lists only the major bug fixes since the last release. For a complete list see:
 	https://github.com/adobe-type-tools/afdko/commits/master
 	
@@ -54,7 +53,6 @@ FDK. v2.5 Dec 1 2017 change number 66097.
 	Add support for reading and writing blended hints from/to CFF2. 
 		
 FDK. v2.5 April 27 2017 change number 65781.
-
 	makeInstancesUFO.
 	Preserve public.postscriptNames lib key.
 	Do not use postscriptFontName attribute.
@@ -72,11 +70,9 @@ FDK. v2.5 April 27 2017 change number 65781.
 	Option '-nv' will now print name ID's 3, and 5, but with the actual version number replaced by the string "VERSION SUPPRESSED".
 
 FDK. v2.5 April 3 2017 change number 65781.
-
 	Variable fonts.
 	buildMasterOTFs. new command to build OTF font files from UFO sources, when building variable fonts.
 	buildCFF2VF. New command  to build a CFF2 Variable font from the master OTF fonts.
-
 
 	autohint.
 	Fix bug introduced by typo on Dec 1 2015. Caused BlueFuzz to always be set to 1. Rarely causes problems, but found it with font that sets BlueFuzz to zero: with BlueFuzz set to 1, some of the alignment zones were filtered out as being closer than BlueFuzz*3.
@@ -85,7 +81,7 @@ FDK. v2.5 April 3 2017 change number 65781.
 	CheckOutlinesUFO.
 	Added "quiet mode" option.
 	Fixed a bug where logic could try and set an off-curve point as a start point.
-	Changed the logic for assigning contour order and start point. The overlap removal changes both, and  checkOutlinesUFO makes some attempt to restore the original state when possible.  These changes will result in different contour order and start points than before the change, but fixes a bug, and will usually produce the same contour order and start point in fonts that are generated as instances from a set of master designs. There will always be cases where there will be some differences. 
+	Changed the logic for assigning contour order and start point. The overlap removal changes both, and  checkOutlinesUFO makes some attempt to restore the original state when possible.	These changes will result in different contour order and start points than before the change, but fixes a bug, and will usually produce the same contour order and start point in fonts that are generated as instances from a set of master designs. There will always be cases where there will be some differences. 
 	
 	MakeOTF.py
 	Replace old logic for deriving relative paths with python function for the same.
@@ -116,13 +112,12 @@ FDK. v2.5 April 3 2017 change number 65781.
 	Updated to version 3.9.1 of the fontTools module from master branch on github.
 	
 FDK. v2.5 May 27 2016 change number 65322.
-
 	Adobe CMAP files for CJK fonts.
 	Updated UniCNS-UTF32-H to v1.14
 
 	Build issues.
 	Made changes to allow compiling under Xcode 7.x and OSX 10.11
-	 
+	
 	Documentation:
 	Fixed a bunch of errors in the Feature File spec. My thanks to Sascha Brawer, 
 	who has been reviewing this carefully. See the issues raised by him in Jan
@@ -198,7 +193,7 @@ FDK. v2.5 May 27 2016 change number 65322.
 	specified as glyphs names with the form 'cidNNNNN' allowed this warning to
 	be be shown, but it is not appropriate for CID-keyed fonts.
 	Fixed old bug where using option -'cn' to convert a nonCID source font to
-	CID would cause a mis-match between the maxp table  number of glyphs and the
+	CID would cause a mis-match between the maxp table	number of glyphs and the
 	numver of glyph actually in the output font, because the conversion used the
 	source font data rather than the first pass name-keyed OTF which had been
 	subject to glyph subsetting with the GOADB file.
@@ -224,7 +219,7 @@ FDK. v2.5 May 27 2016 change number 65322.
 	Minor code changes to allow 'tx' to compile as a 64 bit program.
 	Fixed bug in dumping afm format data, introduced when tx was updated to be 64 bit.
 	Fixed bug in processing seac, introduced in work on rounding fractional values.
-	Fixed bug in writing AFM files: -1 value would be written as 4294967295	instead of -1.
+	Fixed bug in writing AFM files: -1 value would be written as 4294967295 instead of -1.
 	Add option -noOpt, rename blend operator from 'reserved' to 'blend'. This was done in
 	order to support experiments with  multiple master fonts.
 	When reading a UFO font: if it has no Postscript version entry, set the version to
@@ -237,7 +232,7 @@ FDK. v2.5 May 27 2016 change number 65322.
 	stored as an ascii text decimal point number in T1, T2, and UFO files, but
 	is stored internally as a C 'float' value in some programs. Real values in C
 	cannot exactly represent all decimal values. For example, the closest that a
-	C 'float' value can come to "0.375" is "0.03750000149".  When writing output
+	C 'float' value can come to "0.375" is "0.03750000149".	When writing output
 	fonts, tx was writing out the latter value in ascii text, rather than
 	rounding back to 0.0375. Fixed by rounding to 8 decimal places on writing
 	the value out. This bug had no practical consequences, as 0.0375 and
@@ -246,7 +241,6 @@ FDK. v2.5 May 27 2016 change number 65322.
 	higher precision fields to hold the BlueScale value.
 	
 FDK. v2.5 Dec 1 2015 change number 65012.
-
 	makeotf.
 	Fixed bug in MakeOTF.py that kept makeotf from building fonts with spaces in the path.
 	Fixed bug in ConvertFontToCID module that kept makeotf from converting UFO fonts to CID.
@@ -255,7 +249,7 @@ FDK. v2.5 Dec 1 2015 change number 65012.
 	glyph name may be either a final name or developer glyph name. Added warning
 	when glyph in the UVS entry is not found in font. See MakeOTF User's Guide.
 	Fixed bug in makeotfexe: it now always makes a cmap table subtable MS
-	platform, Unicode, format 4 for CID fonts: this is required by Windows. If
+	platform, Unicode, format 4 for CID fonts. This is required by Windows. If
 	there are no BMP unicode values, then it makes a stub subtable, mapping GID 0
 	to UVS 0.
 	
@@ -265,7 +259,6 @@ FDK. v2.5 Dec 1 2015 change number 65012.
 	common when the style is "Regular".
 	
 FDK. v2.5 Nov 22 2015 change number 64958.
-
 	autohint and tx.
 	Switched to using new text format that is plist-compatible for T1 hint data in UFO fonts.
 	See header of FDK/Tools/SharedData/FDKScripts/ufoTools.py for format.
@@ -273,7 +266,7 @@ FDK. v2.5 Nov 22 2015 change number 64958.
 	autohint
 	Finally fixed excessive generation of flex hints. This has been an issue for
 	decades, but never got fixed because it didn't show up anywhere as a
-    problem. The last version of makeotf turned on parsing warnings, and so now
+	problem. The last version of makeotf turned on parsing warnings, and so now
 	we notice.
 	
 	checkOutlinesUFO
@@ -311,27 +304,28 @@ FDK. v2.5 Nov 22 2015 change number 64958.
 	Increased max number of directories to look upwards when searching for
 	GOADB/FontMenuNameDB from 2 to 3.
 	Added three new options.
-	-omitMacNames/useMacNames   Write only Windows platform menu names in name table,
-                        apart from the names specified in the feature file.
-                        -useMacNames writes Mac as well as Windows names.
+	-omitMacNames/useMacNames	Write only Windows platform menu names in name table,
+	apart from the names specified in the feature file.
+	-useMacNames writes Mac as well as Windows names.
 
-	-overrideMenuNames      Allow feature file name table entries to override
-                        default values and the values from the font menu name DB
-                        for name IDs. Name ID's 2 and 6 cannot be overridden.
-                        Use this with caution, and make sure you have provided
-                        feature file name table entries for all platforms.
+	-overrideMenuNames
+	Allow feature file name table entries to override
+	default values and the values from the font menu name DB
+	for name IDs. Name ID's 2 and 6 cannot be overridden.
+	Use this with caution, and make sure you have provided
+	feature file name table entries for all platforms.
 
-	-skco/nskco             do/do not suppress kern class optimization by using left
-                        side class 0 for non-zero kern values. Optimizing saves a few
-                        hundred to thousand bytes, but confuses some programs.
-                        Optimizing is the default behavior, and previously was the only option.
+	-skco/nskco				do/do not suppress kern class optimization by using left
+	side class 0 for non-zero kern values. Optimizing saves a few
+	hundred to thousand bytes, but confuses some programs.
+	Optimizing is the default behavior, and previously was the only option.
 	Allow building an OTF from a UFO font only. The internal features.fea file
 	will be used if there is no "features" file in the font's parent directory.
 	If the GlyphAliasAndOrderDB file is missing, only a warning will be issued.
 	If the FontMenuNameDB is missing, makeotf will attempt to build the font
 	menu names from the UFO fontinfo file, using the first of the following keys
 	found: "openTypeNamePreferredFamilyName", "familyName", the family name part
-	of the PostScriptName,  and finally the value "NoFamilyName". For style, the
+	of the PostScriptName,	and finally the value "NoFamilyName". For style, the
 	keys are: "openTypeNamePreferredSubfamilyName", "styleName", the style name
 	part of the PostScriptName, and finally the value "Regular".
 	Fixed bug where MakeOTF allowed the input file path and the output file path
@@ -374,7 +368,7 @@ FDK. v2.5 Nov 22 2015 change number 64958.
 	Added new option '-fdx' to select glyphs by excluding all glyphs with the
 	specified FDArray indicies. This and the '-fd' option now take lists and
 	ranges of indices, as well as a single index value.
-	 
+	
 	ufonormalizer
 	Added a command to call the ufonormalizer tool.
 	
@@ -388,7 +382,6 @@ FDK. v2.5 Nov 22 2015 change number 64958.
 	
 
 FDK. v2.5 Aug 4 2015 change number 64700.
-
 	autohint.
 	Fixed bug in ufoTools.py that was harmless but annoying. Everytime that
 	'autohint -all' was run, it added a new program name entry to the history
@@ -408,7 +401,6 @@ FDK. v2.5 Aug 4 2015 change number 64700.
 	feature file format.
 	
 FDK. v2.5 July 17 2015 change number 64655.
-
 	autohint.
 	Fixed bug in ufoFontTools.py which placed a new hint block after a flex
 	operator, when it should be before.
@@ -448,7 +440,6 @@ FDK. v2.5 July 17 2015 change number 64655.
 
 
 FDK. v2.5 May 26 2015 change number 64261.
-
 	autohintexe. Worked through a lot of problems with fractional coordinates.
 	In the previous release, autohintexe was changed to read and write
 	fractional values. However, internal value storage used a Fixed format with
@@ -475,7 +466,6 @@ FDK. v2.5 May 26 2015 change number 64261.
 	transform. This has the side-effect of rounding to integer values.
 	
 FDK. v2.5 April 8 2015 change number 64043.
-
 	checkOutlinesUFO.
 	Added  new logic to delete any glyphs from the processed layer which are
 	not in the ‘glyphs’ layer.
@@ -529,7 +519,6 @@ FDK. v2.5 April 8 2015 change number 64043.
 	
 	
 FDK. v2.5 March 3 2015 change number 63782.
-
 	tx.
 	Fix bug in reading ttf's. Font version was taken from the name table, which
 	can include a good deal more than just the font version. Changed to read
@@ -543,7 +532,6 @@ FDK. v2.5 March 3 2015 change number 63782.
 	otf2otc.py. Pad table data with 0's so as to align tables on a 4 boundary. Submitted by Cosimo Lupo.
 	
 FDK v2.5 Feb 21 2015 change number 63718.
-
 	autohint
 	Fixed a bug with processing flex hints in ufoTools.py, that caused outline distortion.
 	
@@ -573,7 +561,7 @@ FDK v2.5 Feb 21 2015 change number 63718.
 	instance fonts from the same set of master fonts.
 	
 	makeInstancesUFO.
-	Changed so that the option -i (selection of  which instances to build) actually works.
+	Changed so that the option -i (selection of	which instances to build) actually works.
 	Removed dependence on existence of instance.txt file.
 	Changed to call checkOutlinesUFO rather than checkOutlines
 	Removed hack of converting all file paths to absolute file paths: this was a
@@ -592,7 +580,7 @@ FDK v2.5 Feb 21 2015 change number 63718.
 	are incompatible, a crash ensues.  The fix is to unset the variables PYTHONHOME
 	and PYTHONPATH before the AFDKO interpreter is called. 
 	Note: AS a separate issue, under Mac OSX 10.10, Python calls to FDK commands
-	will  only  work  if  the calling app is run from the command-line (e.g:
+	will  only	work  if  the calling app is run from the command-line (e.g:
 	“open /Applications/RoboFont.app“), and the argument "shell="True" is added
 	to the subprocess module call to open a system command. I favor also adding
 	the argument "stderr=subprocess.STDOUT", else you will not see error
@@ -600,7 +588,6 @@ FDK v2.5 Feb 21 2015 change number 63718.
 	"log = subprocess.check_output("makeotf -u" , stderr=subprocess.STDOUT , shell=True)".
 
 FDK v2.5 Dec 02 2014 change number 63408.
-
 	spot.
 	Fixed error message in GSUB chain contextual 3 proof file output. spot was
 	adding it as a shell comment to the proof output, cuasing conversion to PDF
@@ -613,10 +600,9 @@ FDK v2.5 Dec 02 2014 change number 63408.
 	test fonts to look for such cases.
 	
 FDK v2.5 Sep 18 2014 change number 63209.
-
 	makeInstancesUFO.
 	Added new script to build instance fonts from UFO master design fonts. This
-	uses the design space XML file exported by Superpolator 3 in order  to
+	uses the design space XML file exported by Superpolator 3 in order	to
 	define the design space, and the location of the masters and instance fonts
 	in the design space. The definition of the format of this file, and the
 	library to use the design space file data, is in the OpenSource mutatorMath
@@ -624,12 +610,12 @@ FDK v2.5 Sep 18 2014 change number 63209.
 	advantages of the Superpolator design space over the previous makeInstances
 	script, which uses the Type1 Multiple Master font format to hold the master
 	designs. The new version:
-	 - allows different master designs and locations for each glyph
-	 - allows master designs to be arbitrarily placed in the design space, and
-	 hence allows intermediate masters.
-	 In order to use the mutatorMath library, the FDK-supplied Python now
-	 contains the robofab, fontMath, and defcon libraries, as well as
-	 mutatorMath.
+	- allows different master designs and locations for each glyph
+	- allows master designs to be arbitrarily placed in the design space, and
+	hence allows intermediate masters.
+	In order to use the mutatorMath library, the FDK-supplied Python now
+	contains the robofab, fontMath, and defcon libraries, as well as
+	mutatorMath.
 
 	ttx. Updated to the latest branch of the fontTools library as maintained by
 	Behdad Esfahbod on GitHub. Added a patch to cffLib.py to fix a minor problem
@@ -639,7 +625,6 @@ FDK v2.5 Sep 18 2014 change number 63209.
 	Updated four Adobe-CNS1-* ordering files.
 
 FDK v2.5 Sep 8 2014 change number 63164.
-
 	makeotf.
 	Fixed MakeOTF.py to detect "IsOS/2WidthWeightSlopeOnly" as well as the
 	misspelled "IsOS/2WidthWeigthSlopeOnly", when processing the fontinfo file.
@@ -668,11 +653,10 @@ FDK v2.5 May 14 2014 change number 62754.
 	in dumping glyph header. Fixed bug in IS to avoid crash when logic for glyphs > 72 points is used.
 
 	makeotfexe.
-	Fixed bug that  applied '-gs' option as default behavior, subsetting the source font to the 
+	Fixed bug that	applied '-gs' option as default behavior, subsetting the source font to the 
 	list of glyphs in the GOADB.
 	
 FDK v2.5 April 30 2014 change number 62690.
-
 	makeotf
 	When building output TTF font from an input TTF font, will now suppress
 	warnings that hints are missing. Added a new option "-shw" to suppress
@@ -714,7 +698,6 @@ FDK v2.5 April 5 2014 change number 61944.
 	Fixed FDK/Tools/win/ttx.cmd file so that the 'ttx' command works again.
 	
 FDK v2.5 Mar 25 2014 change number 61911.
-
 	makeotf.
 	Add support for two new 'features' file keywords, for the OS/2 table.
 	Specifying 'LowerOpSize' and 'UpperOpSize' now sets the values
@@ -795,7 +778,6 @@ FDK v2.5 Feb 17 2014 change number 61250.
 	
 	
 FDK v2.5 Oct 21 2013 change number 60908.
-
 	Added some support for UFO workflow.
 	
 	tx. 
@@ -837,7 +819,6 @@ FDK v2.5 Oct 21 2013 change number 60908.
 
 
 FDK v2.5 Feb 26 2013 change number 60418.
-
 	autohint
 	Fixed bug: autohint did not skip commented-out lines in fontinfo file.
 	
@@ -856,7 +837,6 @@ FDK v2.5 Feb 26 2013 change number 60418.
 	Fixed bug that kept 'palt'/'vpal' features from being applied when proofing kerning.
 	
 FDK v2.5 Sept 4 2012 change number 58732.
-
 	checkOutlines.
 	
 	Fixed bug where checkOutline would falsely identify the arms of an X as coincident paths,
@@ -864,7 +844,6 @@ FDK v2.5 Sept 4 2012 change number 58732.
 	
 
 FDK v2.5 Oct 31 2012 change number 59149.
-
 	makeotf.
 
 	When building OpenType/TTF files, changed logic to copy the OS/2 table usWinAscent/Descent
@@ -893,14 +872,12 @@ FDK v2.5 Oct 31 2012 change number 59149.
 	
 	
 FDK v2.5 Sept 13 2012 change number 58807.
-
 	makeotf.
 	
 	Discovered that when building TTF fonts, the GDEF table wasn't being copied
 	to the final TTF font file. Fixed.
 		
 FDK v2.5 Sept 4 2012 change number 58732.
-
 	autohint.
 
 	Added new feature to support sets of glyphs with different
@@ -964,7 +941,7 @@ FDK v2.5 Sept 4 2012 change number 58732.
 	
 	Family Test 18. Survive OTF fonts with no blue values.
 	
-	Family Test 2 ( Check that the Compatible Family group has same name ID's in all languages except...)
+	Family Test 2 ( Check that the Compatible Family group has same name ID's in all languages.)
 	Added the WPF name ID's 21 and 22 to the exception list, which may not exist in all faces of a family.
 	
 	fontsetplot.
@@ -973,7 +950,7 @@ FDK v2.5 Sept 4 2012 change number 58732.
 	point size of group header.
 	
 	Fixed syntax of assert statements. Produced error messages on first use of
-	the *plot commands.
+	the \*plot commands.
 	
 	kernCheck.
 	
@@ -1054,16 +1031,25 @@ FDK v2.5 Sept 4 2012 change number 58732.
 	of CMAP directories in the FDK, and logic for finding the files.
 		
 	When providing a GDEF feature file definition, class assignments now may be empty:
-		table GDEF {
-			 GlyphClassDef ,,,;
-		} GDEF;
+
+.. code:: sh
+
+        table GDEF {
+            GlyphClassDef ,,,;
+        } GDEF;
+
+.
 	is a valid statement. You just need to provide all three commas and the final
 	colon to define the four classes.
 	The following statement builds a GDEF GlyphClass with an empty Components class.
-		table GDEF {
-			 GlyphClassDef [B], [L], [M], ;
-		} GDEF;
-	
+
+.. code:: sh
+
+        table GDEF {
+            GlyphClassDef [B], [L], [M], ;
+        } GDEF;
+
+.
 	The glyph alias file now defines order in which glyphs are added to the
 	end of the target font, as well as defining the subset and renaming.
 	
@@ -1096,7 +1082,7 @@ FDK v2.5 Sept 4 2012 change number 58732.
 	No longer dumps the DefaultLangSys entry when there is none.
 	
 	Changed dump logic for contextual and chain contextual lookups so
-	that spot will not  dump the lookups referenced by the substitution
+	that spot will not	dump the lookups referenced by the substitution
 	or position rules in the contextual lookups. The previous logic led
 	to some lookups getting dumped many times, and also to infinite
 	loops in  cases where a contextual lookup referenced other
@@ -1122,8 +1108,6 @@ FDK v2.5 Sept 4 2012 change number 58732.
 	
 	Changed dump of cmap subtable 14: hex values are uppercased, and base + UVS
 	values are written in the order [ base, uvs].
-
-	
 	
 	stemHist.
 	
@@ -1133,7 +1117,6 @@ FDK v2.5 Sept 4 2012 change number 58732.
 	Fix bug where the glyph names reported in the stem and alignment reports were off by 
 	1 GID if the list of glyphs included the '.notdef' glyph.
 	
-
 	tx.
 	
 	Added support for option "-n" to remove hints for writing Type1 and CFF output fonts.
@@ -1163,28 +1146,26 @@ FDK v2.5 Sept 4 2012 change number 58732.
 	Miscellaneous.
 	
 	Updated the internal Python interpreter to version 2.7.
-
 		Adobe Cmaps/Adobe-Japan1:
-		 Updated files
-		   Adobe-Japan1_sequences.txt
-		   UniJIS-UTF32-H
-		   UniJIS2004-UTF32-H
-		   UniJISX0213-UTF32-H
-		   UniJISX02132004-UTF32-H
+		Updated files
+		Adobe-Japan1_sequences.txt
+		UniJIS-UTF32-H
+		UniJIS2004-UTF32-H
+		UniJISX0213-UTF32-H
+		UniJISX02132004-UTF32-H
 		
 		FDKScripts:
 		Added several scripts relarted to CID font production.
-			cmap-tool.pl
-			extract-cids.pl
-			extract-gids.pl
-			extract-names.pl
-			fdarray-check.pl
-			fix-fontbbox.pl
-			hintcidfont.pl
-			subr-check.pl
+		cmap-tool.pl
+		extract-cids.pl
+		extract-gids.pl
+		extract-names.pl
+		fdarray-check.pl
+		fix-fontbbox.pl
+		hintcidfont.pl
+		subr-check.pl
 	
 FDK v2.5 March 4 2010 change number 25466.
-
 	charplot.
 	This was non-functional in the build 21898. Now fixed.
 	
@@ -1217,7 +1198,7 @@ FDK v2.5 March 4 2010 change number 25466.
 	spot.
 	Added support for "Small" fonts, an Adobe internal Postscript variant used for
 	CJK fonts.
-	Added support for large kern tables, such as in  the Vista font
+	Added support for large kern tables, such as in	the Vista font
 	Cambria,  where the size of the kern subtable exceeds the value that
 	can be held in the subtable "length" field. In this case, the
 	"length" filed must be ignored.
@@ -1239,13 +1220,12 @@ FDK v2.5 March 4 2010 change number 25466.
 	Added new option '-std' to force StdEncoding in output CFF fonts.
 
 FDK v2.5 May 1 2009 change number 21898.
-
 	autohint
 	- Fixed rare case when an rrcurveto is preceded by such a long list of
 	rlineto's that the stack limit is passed.
 	- Fixed to restore font.pfa output file to StandardEncoding Encoding
 	vector. Since requirements of CFF StandardEncoding differs from
-	Type1 StandardEncoding, a StandardEncoding  Encoding vector in a
+	Type1 StandardEncoding, a StandardEncoding	Encoding vector in a
 	Type 1 font was sometimes getting converted to a custom Encoding
 	vector when being round-tripped through the CFF format which
 	autohint does internally.
@@ -1254,15 +1234,15 @@ FDK v2.5 May 1 2009 change number 21898.
 	- Fixed random crash on Windows due to buffer overrun.
 	- Fixed rare case when an rrcurveto is preceded by such a long list of
 	rlineto's that the stack limit is passed.
-	 - changed default logging mode to not report glyph names when there is no
-	 error report for the glyph.
+	- changed default logging mode to not report glyph names when there is no
+	error report for the glyph.
 	- Fixed to restore font.pfa output file to StandardEncoding Encoding
-	vector.  Since requirements of CFF StandardEncoding differs from
-	Type1 StandardEncoding, a StandardEncoding  Encoding vector in a
+	vector.	Since requirements of CFF StandardEncoding differs from
+	Type1 StandardEncoding, a StandardEncoding	Encoding vector in a
 	Type 1 font was sometimes getting converted to a custom Encoding
 	vector when being round-tripped through the CFF format which
 	autohint does internally.
-	 
+	
 	CompareFamily. 
 	- added "ring" to the list of accent names used to find (accented glyph,
 	base glyph) pairs for "Single Face Test 23: Warn if any accented glyphs have
@@ -1331,9 +1311,9 @@ FDK v2.5 Jan 22 2009 change number 21340.
 	right Unicode values under Mac OSX before 10.4.x.
 	
 	autohint.
-	 -converted AC.py script to call a command-line program rather than
-	 a Python extension module, same way makeotf works, to avoid 
-	 continuing Python version problems.
+	-converted AC.py script to call a command-line program rather than
+	a Python extension module, same way makeotf works, to avoid 
+	continuing Python version problems.
 	- fixed so autohint will actually emit vstem3 and hstem3 hint operators
 	(counter control hints, which work to keep the space between three stems
 	open and equal, as in an 'm') - this has been broken since the first FDK. It
@@ -1367,9 +1347,9 @@ FDK v2.5 Jan 22 2009 change number 21340.
 	does make them. See notes in MakeOTF User Guide about this.
 	- Fixed so it works with ttf fonts again.
 
-    makeotf.
-    - removed code that added a default Adobe copyright to the name table if
-    n copyright is specified, and removed code to add a default trademark.
+	makeotf.
+	- removed code that added a default Adobe copyright to the name table if
+	n copyright is specified, and removed code to add a default trademark.
 	- added support for the lookupflag UseMarkFilteringSet. This is
 	defined in the proposed changes for OpenType spec 1.6, and is
 	subject to change in definition.
@@ -1382,12 +1362,12 @@ FDK v2.5 Jan 22 2009 change number 21340.
 	feature. The aalt feature can take only single and alternate substitution
 	rules.
 	- Added support for the following lookup types:
-	   GSUB type 2 Multiple Substitution
-	   GSUB type 8 Reverse Chaining Single Substitution
-	   GPOS type 3 Cursive Adjustment
-	   GPOS type 4 Mark-to-Base Attachment
-	   GPOS type 5 Mark-to-Ligature Attachment
-	   GPOS type 6 Mark-to-Mark Attachment
+	GSUB type 2 Multiple Substitution
+	GSUB type 8 Reverse Chaining Single Substitution
+	GPOS type 3 Cursive Adjustment
+	GPOS type 4 Mark-to-Base Attachment
+	GPOS type 5 Mark-to-Ligature Attachment
+	GPOS type 6 Mark-to-Mark Attachment
 	- Added support for explicit definition of the GDEF table, and
 	automatic creation of the GDEF when any of the lookup flag settings
 	for ignoring a glyph class is used, or any mark classes are defined.
@@ -1438,7 +1418,7 @@ FDK v2.5 Jan 22 2009 change number 21340.
 	It was just LEFTCLASS_<class index>_<subtable index>, but these names are repeated in every lookup.
 	It is now:
 LEFTCLASS_c<class index>_s<subtable index>_l<lookup index>,
-	- When a positioning value record has more than one value, print the full 4 item value record.  Previously, it would just print non-zero values. This was confusing when dumping Adobe Arabic, as you would see tow identical values at the end of some pos rules. In fact, each of these pos rule does have two adjustment values, one for x and one for y advance adjustment, that happen to be the same numeric value.
+	- When a positioning value record has more than one value, print the full 4 item value record.	Previously, it would just print non-zero values. This was confusing when dumping Adobe Arabic, as you would see tow identical values at the end of some pos rules. In fact, each of these pos rule does have two adjustment values, one for x and one for y advance adjustment, that happen to be the same numeric value.
 	- fixed to write backtrack context glyphs in the right order.
 	
 	tx.

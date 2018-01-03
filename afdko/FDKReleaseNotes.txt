@@ -1,6 +1,28 @@
 FDKReleaseNotes.txt
 ===============================================================================
+FDK. v2.5 Dec 1 2017 change number 66097.
 
+	This lists only the major bug fixes since the last release. For a complete list see:
+	https://github.com/adobe-type-tools/afdko/commits/master
+	
+	buildCFF2VF.
+	Add version check for fontTools module: only starting with version 3.19.0 does fontTools.cffLib build correct PrivateDict BlueValues when there are master source fonts not at the ends of the axes.
+	
+	makeotfexe.
+	Support mapping a glyph to several Unicode values. This can now be done by providing the the UV values as a comma-separated list in the third field of the GlyphOrderAndAliasDB file, in the 'uniXXXXX' format.
+	
+	Fixed a crashing bug that can happen when the features file contains duplicate class kern pairs. Reported by Andreas Seidel in email.
+	
+	Add fatal messages if a feature file 'cvParameters' block is used in anything other than a Character Variant (cvXX) feature, or if a 'featureNames' block is used in anything other than a Stylistic Set (ssXX) feature.
+	
+	Relaxed restrictions on name table name IDs. Only 2 and 6 are now reserved for the implementation.
+	
+	Fixed bug where use of the 'size' feature in conjunction with named stylistic alternates would cause the last stylistic alternate name to be replaced by the size feature menu name. Incidentally removed old patent notices.
+	
+	restored old check for the fatal error of two different glyphs being mapped to the same character encoding.
+	
+	If the last line of a GOADB file did not end in a new-line, makeotf quit, saying the line was too long.
+		
 	otf2otc.
 	Can now take a single font as input, and can take an OTC font as input.
 	
@@ -14,6 +36,9 @@ FDKReleaseNotes.txt
 	Fixed old bug: a PrivateDict must exist, but it is legal for it to have a
 	length of 0.
 	
+	tx and family.
+	Add support for reading and writing blended hints from/to CFF2. 
+		
 FDK. v2.5 April 27 2017 change number 65781.
 
 	makeInstancesUFO.

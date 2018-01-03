@@ -48,6 +48,7 @@ def getExecutableDir():
 	return binDir, platform_name, curSystem
 	
 def compile(pgkDir):
+	print("Skipping compile - hard coded.")
 	return
 	binDir, platform_name, curSystem = getExecutableDir()
 	programsDir = os.path.join(pgkDir, "Tools", "Programs")
@@ -65,7 +66,6 @@ class CustomBuild(setuptools.command.build_py.build_py):
 	"""Custom build command."""
 
 	def run(self):
-		print("Hello compile")
 		pgkDir = 'afdko'
 		compile(pgkDir)
 		setuptools.command.build_py.build_py.run(self)
@@ -83,7 +83,7 @@ classifiers=[
 		'Programming Language :: Python :: 2.7',
 	]
 """
-Identify the dist build as being paltform specific.
+Identify the dist build as being platform specific.
 """
 scripts=[\
 	  'afdko/Tools/%s/autohintexe' % (binDir),
@@ -132,7 +132,7 @@ with io.open("NEWS.rst", "r", encoding="utf-8") as changelog:
 	long_description += changelog.read()
 
 setup(name="afdko",
-	  version="2.6.5",
+	  version="2.6.12",
 	  description="Adobe Font Development Kit for OpenType",
 	  long_description=long_description,
 	  url='https://github.com/adobe-type-tools/afdko',
