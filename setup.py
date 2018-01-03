@@ -70,8 +70,6 @@ class CustomBuild(setuptools.command.build_py.build_py):
 		compile(pgkDir)
 		setuptools.command.build_py.build_py.run(self)
 
-
-
 binDir, platform_name, curSystem = getExecutableDir()
 pkg_list =  find_packages()
 python_bin = "%s/%s" % (sys.prefix, 'bin') # Build the isntall path for the tools.
@@ -132,7 +130,7 @@ with io.open("NEWS.rst", "r", encoding="utf-8") as changelog:
 	long_description += changelog.read()
 
 setup(name="afdko",
-	  version="2.6.12",
+	  version="2.6.17",
 	  description="Adobe Font Development Kit for OpenType",
 	  long_description=long_description,
 	  url='https://github.com/adobe-type-tools/afdko',
@@ -142,7 +140,6 @@ setup(name="afdko",
 	  classifiers = classifiers,
 	  keywords='font development tools',
 	  platforms=[platform_name],
-	  package_dir={'afdko': 'afdko'},
 	  packages=pkg_list,
 	  include_package_data = True,
 	  zip_safe=False,

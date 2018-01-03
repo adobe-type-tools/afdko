@@ -6,14 +6,10 @@ Adobe Font Development Kit for OpenType (AFDKO)
 The AFDKO is a set of tools for building OpenType font files from PostScript and TrueType font data.
 
 This directory tree contains the data files, Python scripts, Perl scripts, and
-sources for the command line programs that comprise the AFDKO. The project uses the `Apache 2.0 OpenSource license <https://github.com/adobe-type-tools/afdko/blob/master/LICENSE.txt>`__.
-the `Apache 2.0 OpenSource license <LICENSE.txt>`__.
+sources for the command line programs that comprise the AFDKO. The project uses the `Apache 2.0 OpenSource license <https://rawgit.com/adobe-type-tools/afdko/master/LICENSE.txt>`__.
 
-Please refer to the file `AFDKO-Overview.html <afdko/AFDKO-Overview.html>`__
-Please refer to the file `AFDKO-Overview.html <AFDKO-Overview.html>`__
-for a more detailed description of what is in the AFDKO.
+Please refer to the file `AFDKO-Overview.html <https://rawgit.com/adobe-type-tools/afdko/master/FDK/AFDKO-Overview.html>`__ for a more detailed description of what is in the AFDKO.
 
-https://github.com/adobe-type-tools/afdko/blob/master/LICENSE.txt
 Installation
 ~~~~~~~~~~~~
 
@@ -33,7 +29,7 @@ You can also download and install older versions of the AFDKO from the `Adobe af
 
 Build From Source
 ~~~~~~~~~~~~~~~~~~
-In order to build and install the afdko from the `github afdko repository <https://github.com/adobe-type-tools/afdko>`__, get a copy from  the repository, cd to the top-level directory of the afdko, and use the setup.py script:
+In order to build and install the afdko from the `afdko github repository <https://github.com/adobe-type-tools/afdko>`__, get a copy from  the repository, cd to the top-level directory of the afdko, and use the setup.py script:
 
 .. code:: sh
 
