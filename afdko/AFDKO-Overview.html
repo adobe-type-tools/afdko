@@ -8,165 +8,24 @@
 <body>
   <h1>Adobe Font Development Kit for OpenType (AFDKO) Overview</h1>
 
-  <h2>FDK v2.5</h2>
+  <h2>FDK v2.6</h2>
 
   <ul class="link-list">
     <li><a href="#a_introduction">1. Introduction</a></li>
 
     <li><a href="#a_programs">2. Overview of Programs</a></li>
 
-    <li><a href="#a_contents">3. Files in the FDK</a></li>
-
-    <li><a href="#a_support">4. Support Forums</a></li>
+    <li><a href="#a_support">3. Support Forums</a></li>
   </ul>
 
   <h3 id="a_introduction">1. Introduction</h3>
 
   <p>This release of the Adobe Font Development Kit for OpenType (AFDKO) contains a set of tools used to make OpenType fonts by adding the OpenType-specific data to a TrueType or Type1 font. It does not offer tools for designing or editing glyphs. These command-line programs will allow you to build an OpenType font from an existing font, verify the contents of the font, and proof the font on screen or on paper. The AFDKO also contains useful technical documentation and some example font source material. Note! Although the FDK directory tree contains a number of Python scripts, none of them can be used by double-clicking on them; they can only be called by typing commands into a command-line window.</p>
 
-  <p>See the file "Read_Me_First.html" in the FDK main directory for installation instructions.</p> 
-  
-  <p>Once the AFDKO is installed, all the command-line programs can be run by entering the command name in a Terminal window (OSX, Windows, Linux), along with the necessary option text. All command-line tools provide usage and help text with the options -u and -h. There is a separate user documentation file only for the makeotf tool. Using a command-line window may seem alarming if you are not used to it, but it is actually quite easy to learn a useful set of commands. Please read the FDK documentation "CommandLineHowTo.pdf", sub-titled "The Joys of Command Line", for pointers on how to get started.</p>
-
-  <h4>Current version 2.5 change number 65322, May 27 2016</h4>
-  
-   <h4>Important Changes since 2.5 change number 64958, Nov 22 2015</h4>
-  <ul>
-    <li>makeotf now allows a number of special characters in development glyph names.</li>
-    <li>Fixed bugs in compiling a feature file GDEF definition</li>
-	<li>Added the FontLab macros back in the AFDKO download.</li>
-	<li>Many minor bug fixes. See "FDKReleaseNotes.txt".</li>
-  </ul>
-
-   <h4>Important Changes since 2.5 change number 64655, Mar 3 2015</h4>
-  <ul>
-    <li>Updated the AFDKO Python interpreter to 2.7.10. This is now 64-bit only.</li>
-    <li>Switched to using new text format that is plist-compatible for T1 hint data in UFO fonts.</li>
-	<li>Fixed crashing bugs in working with UFO fonts.</li>
-	<li>Added new options to makeotf, including one to build fonts with Mac platform name strings in the name table.</li>
-	<li>See the file FDKReleaseNotes.txt for more details.</li>
-    <li>Added support for fractional coordinates fonts, in UFO workflow only. See release notes.</li>
-    <li>Added support for Character Variant (cvXX) feature params, in spot and makeotf.</li>
-    <li>Added option to tx family of tools, to select/exclude glyphs by FontDict index. For CID fonts only.</li>
-	<li>See release notes for a number of other bug fixes and new options.</li>
-  </ul>
-  
-   <h4>Important Changes since 2.5 change number 63209, Sept 18 2014</h4>
-  <ul>
-    <li>Fixed bugs in supporting UFO fonts. See release notes.</li>
-    <li>Worked around issue in Mac OSX 10.10 (Yosemite) that can cause scripts to fail when calling FDK tools and running from within Robofont.</li>
-	<li> Added new program, checkOutlinesUFO, which is an Open Source alternative
-	to the checkOutlines program. When used with UFO fonts, it runs much faster
-	than checkOutlines, and it does not change the contour order or start point
-	of glyph contours that are not affected by overlap. However, it performs only
-	overlap removal, and a few other checks: checkOutlines should still be used
-	for all the other tests that it supports.
-	<li>See release notes for many other minor bug fixes.</li>
-  </ul>
+  <p>See the <a href="https://github.com/adobe-type-tools/afdko">afdko</a> home page for installation instructions.</p>
 
   
-   <h4>Important Changes since 2.5 change number 63044, May 14 2014</h4>
-
-  <ul>
-    <li>Added new script to build instance fonts from UFO master design fonts. This
-	uses the design space XML file exported by Superpolator 3 in order to
-	define the design space, and the location of the masters and instance fonts
-	in the design space. The definition of the format of this file, and the
-	library to use the design space file data, is in the OpenSource mutatorMath
-	library on GitHub, and maintained by Erik van Blokland. There are several
-	advantages of the Superpolator design space over the previous makeInstances
-	script, which uses the Type1 Multiple Master font format to hold the master
-	designs. The new version:</li>
-	 <li>allows different master designs and locations for each glyph</li>
-	 <li>allows master designs to be arbitrarily placed in the design space, and
-	 hence allows intermediate masters.</li>
-	 <li>In order to use the mutatorMath library, the FDK-supplied Python now
-	 contains the robofab, fontMath, and defcon libraries, as well as
-	 mutatorMath.</li>
- 	<li>See release notes for other changes.</li>
-  </ul>
-
- <h4>Important Changes since 2.5 change number 62754, May 14 2014</h4>
-
-  <ul>
-    <li>Fixed installation issues. Removed old Windows install files from the Windows AFDKOPython directory. This was causing installation of a new FDK version under Windows to fail when the users PATH environment variable contained the path to the AFDKO. Also fixed command file for invoking ttx.py.</li>
-    <li>Changed makeotf behavior when 'subtable' keyword is used in a lookup other than class kerning. This condition now triggers only a warning, not a fatal error. Requested by FontForge developers. Updated feature file specification to make this clear.</li>
-	<li>See release notes for other changes.</li>
-  </ul>
-  
-  <h4>Important Changes since 2.5 change number 61944 April 5 2014</h4>
-
-  <ul>
-    <li>Fixed bug that  applied '-gs' option as default behaviour, subsetting the source font to the list of glyphs in the GOADB.</li>
-	<li>Changes to allow source code for most of the tools to be released as OpenSource. Unfortunately, the source code for the IS and checkOutlines programs cannot be OpenSourced. The OpenSource release will happen later this year.</li>
-    <li>Added common options to mergeFonts, rotateFont, and tx when possible: all now support ufo and svg fonts, the '-gx' option to exclude fonts, the '-std' option for cff output, and the '-b' option for cff output</li>
-  </ul>
-
-  <h4>Important Changes since 2.5 change number 61250 Feb 17 2014</h4>
-
-  <ul>
-    <li>The Linux build is now 32-bit, allowing it to work on 32-bit systems as well as 64 bit systems</li>
-    <li>makeotf has a new option, -gs, which causes it to omit any glyphs not named in the GOADB file.</li>
-  </ul>
-  
-  <h4>Important Changes since 2.5 change number 61250 Feb 17 2014</h4>
-
-  <ul>
-    <li>spot, makeotf and the feature file syntax now support two new OS/2 table fields, usLowerOpticalPointSize and usUpperOpticalPointSize in OS/2 table version 5.</li>
-
-    <li>The FDK now has a Linux build</li>
-
-    <li>Several fixes for UFO font workflow.</li>
-
-  </ul>
-
-  <h4>Important Changes since 2.5 change number 58732 Sept 4 2012</h4>
-
-  <ul>
-    <li>makeotf now accepts the 'detype1' plain text format as a source font.</li>
-
-    <li>makeotf and some other tools now accept the UFO font files as a source font.</li>
-
-    <li>fixed bug where makeotf didn't copy the GDEF table to an output TTF font.</li>
-
-    <li>Fixed bug where checkOutline would falsely identify the arms of an X as coincident paths, when the arms are formed by only two paths with identical bounding boxes.</li>
-
-    <li>Many other fixes: see "FDKReleaseNotes.txt".</li>
-  </ul>
-
-  <h4>Important Changes since 2.5 change number 21898 May 1 2009</h4>
-
-  <ul>
-    <li>charplot: was entirely broken, now works.</li>
-
-    <li>checkOutlines: no longer deletes very thin features, and no longer reverses path orientation when two paths are contained within an outer path, but only one is a real inner path of the outer path.</li>
-
-    <li>makeotf: several bugs fixed in building OpenType/TTF fonts.</li>
-
-    <li>makeotf: several bugs fixed in building mark-attachment lookups and GDEF table.</li>
-
-    <li>makeotf: default values for Mac platform font menu names have changed. See release notes.</li>
-
-    <li>tx: can now read in simple SVG fonts and convert them to CFF or Type1 fonts.</li>
-
-    <li>tx: added new option to force output CFF fonts to have StandardEncoding.</li>
-
-    <li>The built-in Python is now version 2.7</li>
-
-    <li>PPC Macs are no longer supported.</li>
-
-    <li>Many other fixes: see "FDKReleaseNotes.txt".</li>
-  </ul>
-
-  <h4>Important Changes from 2.5 change number 21340</h4>
-
-  <ul>
-    <li>Several important bugs were fixed, in particular with makeotf's generation of names for stylistic alternate features and the data used by the lookup flag 'UseMarkFilteringSet'. See the FDKReleaseNotes.txt for a full list.</li>
-
-    <li>A new tool has been added, "IS", which applies hint-based scaling to a font.</li>
-
-    <li>A new tool has been added, "makeInstances", which makes regular Type1 fonts from MM Type1 fonts while applying a number of useful changes.</li>
-  </ul>
+  <p>Once the AFDKO is installed, all the command-line programs can be run by entering the command name in a Terminal window (OSX, Windows, Linux), along with the necessary option text. All command-line tools provide usage and help text with the options -u and -h.</p>
 
   <h3 id="a_programs">2. Overview of Programs</h3>
 
@@ -178,25 +37,17 @@
 
   <p>This program is the Adobe auto-hinter. It can be applied to both OpenType/CFF and Type 1 fonts. Works with Type 1 and OpenType/CFF fonts only. It uses Just von Rossum's fontTools Python package for accessing and changing the font data.</p>
 
-  <h5>IS</h5>
-
-  <p>This is a variant of 'tx' that will scale fonts to a different em-square size, or snap-shot a Type 1 MM font to a single-master Type 1 font, while using hinting to keep stems aligned. It can be used alone, but is most often called from the 'makeInstances' script.</p>
-
   <h5>makeOTF</h5>
 
   <p>This program will build an OpenType/CFF font from a feature file that defines the OpenType layout rules, and overrides for default values, and a font file: a Type 1 font, TrueType font, 'detype1' text version of a Type 1 font, or UFO font and It also requires some other meta-data files. It will also build an OpenType/TTF font from a TrueType source font file.</p>
 
   <h5>makeInstances</h5>
 
-  <p>This script will generate Type 1 fonts from an MM Type 1 font, using a tab-delimited file to set values in the instances. It offers several advantages over using tx or FontLab alone.</p>
+  <p>This script will generate Type 1 fonts from an MM Type 1 font, using a tab-delimited file to set values in the instances. The Adoeb developers now use makeInstancesUFO, but this version is still supported.</p>
 
-  <ul>
-    <li>You can override any field in the Type 1 Font Dict, setting FontName and PS Name and hint values.</li>
+  <h5>makeInstancesUFO</h5>
 
-    <li>You can specify that working glyphs be omitted from the instance fonts.</li>
-
-    <li>You can create "MM exception glyphs", specific glyphs that are used only in one specific instance to overwrite the matching instance font glyphs. This allows you to fix design problems for a small number of glyphs in particular instances. This function will also replace the contours of the target glyphs from the MM exception glyphs in all composite glyphs.</li>
-  </ul>
+  <p>This script will generate UFO fonts from a set of Superpolator master designs.</p>
 
   <h5>mergeFonts</h5>
 
@@ -276,9 +127,9 @@
 
   <p>The auto-hinting program will report at length about hinting issues. Some of these you can ignore, such as reports about near misses when a stem could be controlled by a hint-zone but is just a little too wide or too narrow. By adjusting either the stem widths or the hint-zones according to these reports, you can include more stems in the set that are controlled by hints, but you can also reasonably decide that is not worth the effort. However, many complaints do need fixing, such not having nodes at vertical or horizontal extremes of a curve.</p>
 
-  <h5>checkOutlines</h5>
+  <h5>checkOutlinesUFO</h5>
 
-  <p>This tool will check the quality of the glyph outline data, and should always be used. It is very good at detecting serious problems, such as overlap and incorrect path direction. It is overly enthusiastic about finding a number of smaller issues, but is right often enough to be worth checking all the error messages. It can also fix the problems it finds, but you should always check any glyphs that it changed - the fixes are not always better than the original problem. It uses Just von Rossum's fontTools Python package for accessing and changing the font data.</p>
+  <p>This tool will check the quality of the glyph outline data, and should always be used. It is very good at detecting serious problems, such as overlap and incorrect path direction. It is overly enthusiastic about finding a number of smaller issues, but is right often enough to be worth checking all the error messages. It can also fix the problems it finds, but you should always check any glyphs that it changed - the fixes are not always better than the original problem.</p>
 
   <h5>compareFamily</h5>
 
@@ -306,69 +157,20 @@
 
   <p>This tool has a couple of modes that are good for testing. It will show only data about the font program with in a font file, either CFF or TrueType. The "-dump" option is good for looking at a text report of the CFF font global and glyph data. The "-bc" option takes additional option that outputs a hash of the rasterized glyphs to a file. This good for finding if hinting has changed in a font; if the hash files for a set of glyphs are the same between two fonts, then the glyphs rasterized identically at the specified point size. You can use this to judge if fonts are functionally equivalent, even if the outlines are not exactly the same. Finally, converting any font to CFF will yield error reports if the font data is not syntactically correct, and if any glyphs are not hinted.</p>
 
-  <h3 id="a_contents">3. Files in the FDK</h3>
-
-  <p>Inside the AFDKO are the following components:</p>
-
-  <ul>
-    <li>The file'Read_Me_First.html": the installation instructions</li>
-
-    <li>"AFDKO-Overview.html": - the file you are reading now, and which provides an overview of the tools.</li>
-
-    <li>The sub directory "Tools" contains:
-
-      <ul>
-        <li>osx: the set of Mac OSX tools</li>
-
-        <li>win: the set of Windows tools</li>
-
-        <li>linux: the set of Linux tools</li>
-
-        <li>FontLab: scripts for FontLab. None of these are polished production tools. They are mostly Python scripts written once and used once for a particular need, with little error checking, and are supplied mostly as a example of how to do something in FontLab. The only documentation is at the beginning of the script files - open them in an editor. A number of the commands - notably "AutoHint", "Check Outlines", and the PDF proofing scripts - will open a dialog for setting preferences if you hold down the CONTROL key while clicking on the FontLab Macro run button.</li>
-
-        <li>the sub-directory "SharedData", a directory tree containing shared data files used by various tools.
-
-          <ul>
-            <li>The directory "FDKScripts", which contains the Python scripts called by the FDK command scripts in FDK/Tools/osx/ and FDK/Tools/win/  </li>
-            <li>The directory "Adobe Cmaps", which contain Adobe CMAP files, used to build OpenType CFF/CID fonts. </li>
-            <li>The directory "CID charsets", which contain Adobe character set files, used with the Adobe CMAP files to build OpenType CFF/CID fonts. </li>
-            <li>The file "featurefile.plist", which provides feature file syntax coloring and function block selection in BBEdit. See the top of the file for the location where it should be installed.</li>
-            <li>The file "AGD.txt", which provides a set of  mappings from source font glyph names to final OpenType font glyph names and their matching Unicodes, and which is used by several programs.</li>
-          </ul>
-        </li>
-      </ul>
-    </li>
-
-    <li>The sub-directory "Technical Documentation" contains a series of reference documents that will be helpful when developing OpenType fonts.
-
-      <ul>
-        <li>"Command Line How-To: Joys of the Command Line", in the file "CommandLineHowTo.pdf": an introduction to using the command-line window.</li>
-
-        <li>"MakeOTFUserGuide.pdf": the user guide for the makeotf tool.</li>
-
-        <li>"OpenTypeFeatureFileSpecification.html": an HTML document offering a detailed description of all the OpenType layout features that you can specify in your own "features" files.</li>
-
-        <li>"Issues with OpenType/CFF fonts and MS Font Validator" in the file "MSFontValidatorIssues.htm": an HTML document that lists errors from the MS Font Validator tool that should be ignored for OpenType/CFF fonts.</li>
-      </ul>
-    </li>
-
-    <li>Some other useful references are:
-
-      <ul>
-        <li><a target="_blank" href="http://sourceforge.net/adobe/aglfn/">Adobe Glyph List (AGL) Specification and the "AGL &amp; Adobe Glyph List For New Fonts (AGLFN)" open source project at Open@Adobe<br></a></li>
-
-        <li>Adobe Technical Note 5149: OpenType-CID/CFF CJK Fonts: name Table Tutorial <a href="www.adobe.com/devnet/font.html">Font Technical Notes - Adobe</a></li>
-
-        <li>Adobe Technical Note 5900: Using mergeFonts, rotateFont &amp; autohint to build a CID font" on the page: <a href="www.adobe.com/devnet/font.html">Font Technical Notes - Adobe</a></li>
-      </ul>
-    </li>
-  </ul>
-
-  <h3 id="a_support">4. Support Forums</h3>
+ <h3 id="a_support">3. Support Forums</h3>
 
   <p>For questions about use of the FDK tools, please try first the FontLab forums at <a href="http://forum.fontlab.com/">http://forum.fontlab.com/</a>. FontLab and the AFDKO share a common code base for creating GPOS and GSUB layout features, and many issues will be the same. AFDKO issues are specifically covered in the forum <a href="http://forum.fontlab.com/adobe/afdko/">http://forum.fontlab. com/adobe/afdko/</a>. An alternative forum for the AFDKO is the Google Groups mailing list <a href="http://groups.google.com/group/uafdkoml">UAFDKOML</a>.</p>
 
   <p>There is also a public forum to which general OpenType questions are often posted. Note that this is not for discussion of the AFKO tools; it is intended only for general issues related to the development and use of OpenType fonts. To subscribe to this list, send an e-mail to: <a href="mailto:opentype-migration-sub@indx.co.uk">opentype-migration-sub@ indx.co.uk</a></p>
+
+  <p>Some other useful references are:</p>
+  <ul>
+	<li><a target="_blank" href="http://sourceforge.net/adobe/aglfn/">Adobe Glyph List (AGL) Specification and the "AGL &amp; Adobe Glyph List For New Fonts (AGLFN)" open source project at Open@Adobe<br></a></li>
+
+	<li>Adobe Technical Note 5149: OpenType-CID/CFF CJK Fonts: name Table Tutorial <a href="www.adobe.com/devnet/font.html">Font Technical Notes - Adobe</a></li>
+
+	<li>Adobe Technical Note 5900: Using mergeFonts, rotateFont &amp; autohint to build a CID font" on the page: <a href="www.adobe.com/devnet/font.html">Font Technical Notes - Adobe</a></li>
+  </ul>
 
   <p>OpenType is a trademark of the Microsoft Corporation. Macintosh is a trademark of Apple Computer Inc. Adobe, the Adobe logo, Adobe Type Manager, PostScript, Adobe InDesign are trademarks of Adobe Systems Inc.</p>
 </body>

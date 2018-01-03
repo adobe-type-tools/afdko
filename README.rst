@@ -27,20 +27,21 @@ install it with `pip <https://pip.pypa.io>`__:
 
 .. code:: sh
 
-    pip install --index-url https://test.pypi.org/simple afdko
+    pip install --extra-index-url https://pypi.org --index-url https://test.pypi.org/simple afdko
 
-Note that for the next month, the afdko will be hosted only on the test version of the PyPy package repository, while we do the beta testing. It will then be moved to the regular PyPi repository.
+Note that for the next month, the afdko will be hosted only on the test version of the PyPy package repository, while we do the beta testing. It will then be moved to the regular PyPi repository. The rather complex pip command above will then reduce to 'pip install afdko'.
 
 The available PyPi packages are for Mac OSX and Windows 64 bit Python.
 
 You can remove the afdko package with the command:
+
 .. code:: sh
 
     pip uninstall afdko
 
-Note that to completely uninstall the afdko package, you will need to change the PATH environment variable to remove the afdko executable directories. On the Mac, this means editing the line in your login file that sets the PATH variable. On Windows, this means editing the PATH environment variable in the System control panel.
-
 If you have both the FDK from the Adobe AFDKO web page installed, and and the new afdko package installed, the commands in the new afdko will take precedence over commands in the older Adobe FDK, as the Python package directory is added at the beginning of the PATH direectory list, and the old installer added the Adobe FDK directory to the end of the list.
+
+Note that the PyPi installer will add the new adko package paths to the start of your system PATH environment variable, and this is not undone by the uninstaller. If you want to completely clean up, you will need to change the PATH environment variable to remove the new afdko executable directories. On the Mac, this means editing the line in your login file that sets the PATH variable. On Windows, this means editing the PATH environment variable in the System control panel.
 
 You can also download and install older versions of the AFDKO from the `Adobe afdko home page <http://www.adobe.com/devnet/opentype/afdko.html>`__.
 

@@ -20,7 +20,7 @@ twine upload dist/<wheel file>
 
 b) test PyPi
 twine upload --repository-url https://test.pypi.org/legacy/ dist/*
-pip install --index-url https://test.pypi.org/simple afdko
+pip install pip install --extra-index-url https://pypi.org  --index-url https://test.pypi.org/simple afdko
 
 Inspect packages at web sites:
 www.pypi.org

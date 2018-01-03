@@ -48,8 +48,9 @@ def getExecutableDir():
 	return binDir, platform_name, curSystem
 	
 def compile(pgkDir):
-	print("Skipping compile - hard coded.")
-	return
+	if 0:
+		print("Skipping compile - hard coded.")
+		return
 	binDir, platform_name, curSystem = getExecutableDir()
 	programsDir = os.path.join(pgkDir, "Tools", "Programs")
 	if binDir == 'osx':
@@ -130,7 +131,7 @@ with io.open("NEWS.rst", "r", encoding="utf-8") as changelog:
 	long_description += changelog.read()
 
 setup(name="afdko",
-	  version="2.6.17",
+	  version="2.6.20",
 	  description="Adobe Font Development Kit for OpenType",
 	  long_description=long_description,
 	  url='https://github.com/adobe-type-tools/afdko',
