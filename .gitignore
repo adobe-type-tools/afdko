@@ -1,0 +1,4 @@
+# temporary wheel build direectories
+afdko.egg-info/
+build/
+dist/
