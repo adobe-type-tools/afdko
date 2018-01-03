@@ -8,7 +8,14 @@ The AFDKO is a set of tools for building OpenType font files from PostScript and
 This directory tree contains the data files, Python scripts, Perl scripts, and
 sources for the command line programs that comprise the AFDKO. The project uses the `Apache 2.0 OpenSource license <https://rawgit.com/adobe-type-tools/afdko/master/LICENSE.txt>`__.
 
-Please refer to the file `AFDKO-Overview.html <https://rawgit.com/adobe-type-tools/afdko/master/FDK/AFDKO-Overview.html>`__ for a more detailed description of what is in the AFDKO.
+Please refer to the file `AFDKO-Overview.html <https://rawgit.com/adobe-type-tools/afdko/master/afdko/AFDKO-Overview.html>`__ for a more detailed description of what is in the AFDKO.
+
+Major Changes
+~~~~~~~~~~~~~
+
+The afdko has been restructured so that it can be installed as a Python package. It now depends on the user's Python interpreter, and no longer contains its own Python interpreter.
+
+In order to do this, the two Adobe-owned, non-OpenSource programs were dropped: IS and checkOutlines. If these turn out to be sorely missed, an installer for them will be added to the old Adobe afdko web-site.  The current intent is to migrate the many tests in checkOutlines to the newer checkOutlinesUFO (which does work with OpenType and Type 1 fonts, but currently does only overlap detection and removal, and a few basic path checks).
 
 Installation
 ~~~~~~~~~~~~
@@ -20,9 +27,20 @@ install it with `pip <https://pip.pypa.io>`__:
 
 .. code:: sh
 
-    pip install afdko
+    pip install --index-url https://test.pypi.org/simple afdko
+
+Note that for the next month, the afdko will be hosted only on the test version of the PyPy package repository, while we do the beta testing. It will then be moved to the regular PyPi repository.
 
 The available PyPi packages are for Mac OSX and Windows 64 bit Python.
+
+You can remove the afdko package with the command:
+.. code:: sh
+
+    pip uninstall afdko
+
+Note that to completely uninstall the afdko package, you will need to change the PATH environment variable to remove the afdko executable directories. On the Mac, this means editing the line in your login file that sets the PATH variable. On Windows, this means editing the PATH environment variable in the System control panel.
+
+If you have both the FDK from the Adobe AFDKO web page installed, and and the new afdko package installed, the commands in the new afdko will take precedence over commands in the older Adobe FDK, as the Python package directory is added at the beginning of the PATH direectory list, and the old installer added the Adobe FDK directory to the end of the list.
 
 You can also download and install older versions of the AFDKO from the `Adobe afdko home page <http://www.adobe.com/devnet/opentype/afdko.html>`__.
 
