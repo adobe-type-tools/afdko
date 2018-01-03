@@ -535,20 +535,16 @@ def get_glyph_names(glyph_tag, font_glyph_list, font_file_name):
     return glyph_name_list
 
 
-def filter_glyph_list(options, font_glyph_list, font_file_name):
+def filter_glyph_list(options_glyph_list, font_glyph_list, font_file_name):
     # Return the list of glyphs which are in the intersection of the argument
     # list and the glyphs in the font.
     # Complain about glyphs in the argument list which are not in the font.
-    if not options.glyph_list:
-        glyph_list = font_glyph_list
-    else:
-        # expand ranges:
-        glyph_list = []
-        for glyph_tag in options.glyph_list:
-            glyph_names = \
-                get_glyph_names(glyph_tag, font_glyph_list, font_file_name)
-            if glyph_names is not None:
-                glyph_list.extend(glyph_names)
+    glyph_list = []
+    for glyph_tag in options_glyph_list:
+        glyph_names = \
+            get_glyph_names(glyph_tag, font_glyph_list, font_file_name)
+        if glyph_names is not None:
+            glyph_list.extend(glyph_names)
     return glyph_list
 
 
@@ -1087,8 +1083,17 @@ def run(args=None):
         print("Could not open  file: %s." % font_path)
         return
 
-    glyph_list = filter_glyph_list(
-        options, defcon_font.glyphOrder, options.file_path)
+    if not options.glyph_list:
+        glyph_list = list(defcon_font.keys())
+    else:
+        if not defcon_font.glyphOrder:
+            raise FocusFontError(
+                "Error: public.glyphOrder is empty or missing "
+                "from lib.plist file of %s" %
+                os.path.abspath(options.file_path))
+        else:
+            glyph_list = filter_glyph_list(
+                options.glyph_list, defcon_font.glyphOrder, options.file_path)
     if not glyph_list:
         raise FocusFontError(
             "Error: selected glyph list is empty for font <%s>." %
