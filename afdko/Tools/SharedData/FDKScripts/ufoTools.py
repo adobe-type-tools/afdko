@@ -683,7 +683,11 @@ class UFOFontData:
 		# If the program name is in the history list, and the srcHash matches the default glyph layer data, we can skip.
 		if len(self.glyphMap) == 0:
 			self.loadGlyphMap()
-		glyphFileName = self.glyphMap[glyphName]
+		glyphFileName = self.glyphMap.get(glyphName)
+		if glyphFileName is None:
+			print "Warning. Skipping glyph '%s' because is not in the UFO glyph map." % (glyphName)
+			skip = 1
+			return None, None, skip
 		width, glifXML, outlineXML = self.getGlyphXML(self.glyphDefaultDir, glyphFileName)
 		if glifXML == None:
 			skip = 1
