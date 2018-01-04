@@ -9,16 +9,14 @@ Windows 7 32 bit with Visual C++ installed
 Windows 10 64 bit ( use copy of afdko dir tree after building on Windows 7).
 Ubuntu Linux with build-essentials installed.
 
-command:
+Build commands are:
 cd <afdko package root directory>
 rm dist/*
+# manually edit setup.py to increase the afdko version number--
 python setup.py bdist_wheel
 
 4) Upload and test download with PyPi
-a) release Pypi
-twine upload dist/<wheel file>
-
-b) test PyPi
+pip uninstall afdko
 twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 pip install pip install --extra-index-url https://pypi.org  --index-url https://test.pypi.org/simple afdko
 
@@ -26,9 +24,10 @@ Inspect packages at web sites:
 www.pypi.org
 www.test.pypi.org
 
-Notes:
- Added afdko command 'clean_afdko', which de-installs itself, including the
- command-line tools, with 'pip uninstall' does NOT do.
+5) Notes:
+
+Added afdko command 'clean_afdko', which de-installs itself, including the
+command-line tools, with 'pip uninstall' does NOT do when it as installed as an egg by 'python setup.py install'. The command-line tools are uninstalled when afdko was installed from pip.
  
 'twine upload dist/<wheel file>', when run for the first time for a new package, will handle registering a project.
 
@@ -58,9 +57,9 @@ sudo apt-get update
 sudo apt-get upgrade
 sudo apt-get dist-upgrade
 
-If the long_description is not showing correctly on github or PyPi, this may be because the source *.rst files have sytnax errors. Upi can check this with.
+If the long_description is not showing correctly on github or PyPi, this may be because the source *.rst files have sytnax errors. You can check this with.
 # install the checkdocs stuff:
-pip install Pygments # parse the.. code commands correctly
+pip install Pygments # parse the '.. code' commands correctly
 pip install collective.checkdocs
 # run the checker
 python setup.py checkdocs
