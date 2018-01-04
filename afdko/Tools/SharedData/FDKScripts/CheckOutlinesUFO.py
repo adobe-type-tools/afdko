@@ -1116,6 +1116,9 @@ def run(args=None):
         seen_glyph_count += 1
         msg = []
 
+        if glyph_name not in defcon_font:
+            continue
+
         # font_file.check_skip_glyph updates the hash map for the glyph,
         # so we call it even when the  '-all' option is used.
         skip = font_file.check_skip_glyph(glyph_name, options.check_all)

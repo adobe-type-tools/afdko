@@ -684,8 +684,7 @@ class UFOFontData:
 		if len(self.glyphMap) == 0:
 			self.loadGlyphMap()
 		glyphFileName = self.glyphMap.get(glyphName)
-		if glyphFileName is None:
-			print "Warning. Skipping glyph '%s' because it is not in the UFO glyph map." % (glyphName)
+		if not glyphFileName:
 			skip = 1
 			return None, None, skip
 		width, glifXML, outlineXML = self.getGlyphXML(self.glyphDefaultDir, glyphFileName)
