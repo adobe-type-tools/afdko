@@ -23,7 +23,7 @@ from ufoTools import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
 # noinspection PyPep8Naming
 from ufoTools import kProcessedGlyphsLayerName as PROCD_GLYPHS_LAYER_NAME
 
-__version__ = '2.0.0'
+__version__ = '2.0.1'
 
 
 class FocusOptionParseError(KeyError):
