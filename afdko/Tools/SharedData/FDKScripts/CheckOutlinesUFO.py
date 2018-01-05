@@ -860,7 +860,7 @@ def round_point(pt):
     return pt
 
 
-def do_overlap_removal(bool_glyph, old_digest, changed, msg, options):
+def do_overlap_removal(bool_glyph, changed, msg, options):
     changed, msg = remove_coincident_points(bool_glyph, changed, msg)
     options.remove_coincident_points_done = True
     changed, msg = remove_flat_curves(bool_glyph, changed, msg, options)
@@ -902,19 +902,13 @@ def do_overlap_removal(bool_glyph, old_digest, changed, msg, options):
     # These are not added by overlap removal.
     # Tiny subpaths are added by overlap removal.
     msg = remove_tiny_sub_paths(new_glyph, options.min_area, msg)
-    return new_glyph, new_digest, changed, msg
+    return new_glyph, changed, msg
 
 
-def do_cleanup(new_glyph, old_digest, changed, msg, options):
-    new_digest = old_digest
+def do_cleanup(new_glyph, changed, msg, options):
 
     if new_glyph is None:
-        return new_glyph, new_digest, changed, msg
-
-    if old_digest is None:
-        old_digest = list(get_digest(new_glyph))
-        old_digest.sort()
-        old_digest = map(round_point, old_digest)
+        return new_glyph, changed, msg
 
     # Note that these remove_coincident_points_done and remove_flat_curves_done
     # get called only if do_overlap_removal is NOT called.
@@ -927,7 +921,7 @@ def do_cleanup(new_glyph, old_digest, changed, msg, options):
     # as the latter can introduce new co-linear points.
     changed, msg = remove_colinear_lines(new_glyph, changed, msg, options)
 
-    return new_glyph, new_digest, changed, msg
+    return new_glyph, changed, msg
 
 
 def set_max_p(contour):
@@ -1141,11 +1135,10 @@ def run(args=None):
             else:
                 msg = []
         else:
-            glyph_digest = None
             for test in options.test_list:
                 if test is not None:
-                    new_glyph, glyph_digest, changed, msg = \
-                        test(new_glyph, glyph_digest, changed, msg, options)
+                    new_glyph, changed, msg = \
+                        test(new_glyph, changed, msg, options)
 
         if not options.quiet_mode:
             if len(msg) == 0:
@@ -1217,6 +1210,7 @@ def main():
     except (FocusOptionParseError, FocusFontError) as focus_error:
         print("Quitting after error.", focus_error)
         pass
+
 
 if __name__ == '__main__':
     main()
