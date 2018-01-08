@@ -1,4 +1,4 @@
-from __future__ import print_function, absolute_import
+from __future__ import print_function
 import sys
 
 PY2 = sys.version_info[0] == 2
@@ -290,6 +290,7 @@ unless you also specify the "-sp" option.
 import os
 import sys
 import re
+import functools
 import FDKUtils
 import glob
 import ufoTools
@@ -559,17 +560,18 @@ def writeOptionsFile(makeOTFParams, filePath):
 			data = data.encode('utf-8')
 		if makeOTFParams.verbose:
 			print("makeotf [Note] Writing options file %s" % filePath)
-		try:
-			fp = open(filePath, "w")
-			fp.write(data)
-			fp.close()
-		except (IOError, OSError):
-			print("makeotf [Warning] Could not write the options file %s. Please check the file protection settings for the file and for the directory." % filePath)
+		if filePath is not None:
+			try:
+				fp = open(filePath, "w")
+				fp.write(data)
+				fp.close()
+			except (IOError, OSError):
+				print("makeotf [Warning] Could not write the options file %s. Please check the file protection settings for the file and for the directory." % filePath)
 
 def saveOptionsFile(makeOTFParams):
 	filePath = os.path.join(makeOTFParams.fontDirPath, kDefaultOptionsFile)
 	writeOptionsFile(makeOTFParams, filePath)
-	if makeOTFParams.newOptionFilePath != kDefaultOptionsFile:
+	if makeOTFParams.newOptionFilePath is not None and makeOTFParams.newOptionFilePath != kDefaultOptionsFile:
 		writeOptionsFile(makeOTFParams, makeOTFParams.newOptionFilePath)
 
 
@@ -591,7 +593,7 @@ def setOptionsFromFontInfo(makeOTFParams):
 
 	if fontinfoFile and os.path.exists(fontinfoFile):
 		try:
-			fi = open(fontinfoFile, "rU")
+			fi = open(fontinfoFile, "r")
 			data = fi.read()
 			fi.close()
 		except (OSError, IOError):
@@ -1750,9 +1752,12 @@ def setMissingParams(makeOTFParams):
 		raise MakeOTFOptionsError
 
 
-def byEntryOrder(key1, key2):
-	return cmp( kMOTFOptions[key1][0], kMOTFOptions[key2][0])
+def _byEntryOrder(key1, key2):
+	a = kMOTFOptions[key1][0]
+	b = kMOTFOptions[key2][0]
+	return (a > b) - (a < b)
 
+byEntryOrder = functools.cmp_to_key(_byEntryOrder)
 
 def convertFontIfNeeded(makeOTFParams):
 	if makeOTFParams.tempFontPath != None:
@@ -2361,7 +2366,7 @@ def runMakeOTF(makeOTFParams):
 	tempOutPath = outputPath
 
 	# The following is because fontPath may not be the same as makeOTFParams.kFileOptPrefix, kInputFont anymore.
-	optionKeys = kMOTFOptions.keys()
+	optionKeys = list(kMOTFOptions.keys())
 	optionKeys.remove(kInputFont)
 	optionKeys.remove(kOutputFont)
 
@@ -2473,7 +2478,7 @@ def runMakeOTF(makeOTFParams):
 			 "\"%s\" \"%s\"" % (eval("kMOTFOptions[\"%s\"]" % (kOutputFont))[1], tempOutPath) # add temp font as the input font.
 			]
 	# Add the rest of the parameters
-	optionKeys.sort(byEntryOrder)
+	optionKeys.sort(key=byEntryOrder)
 	for optionKey in optionKeys:
 		if optionKey in kSkipOptions: # Skip the options that should not be passed to maketfexe.
 			continue

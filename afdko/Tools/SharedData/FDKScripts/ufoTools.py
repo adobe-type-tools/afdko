@@ -1,4 +1,4 @@
-from __future__ import print_function, absolute_import
+from __future__ import print_function
 """
 ufoTools.py v1.30 May 2 2017
 
@@ -111,8 +111,7 @@ tools stripped out the _hintFormat1_ hint data as invalid elements.
 
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
-
-from . import ConvertFontToCID
+import ConvertFontToCID
 
 _hintFormat1_ = """
 

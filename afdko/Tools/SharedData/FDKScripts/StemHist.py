@@ -1,5 +1,5 @@
 #!/bin/env python
-from __future__ import print_function, absolute_import
+from __future__ import print_function
 
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
@@ -113,10 +113,10 @@ import os
 import re
 import time
 from fontTools.ttLib import TTFont, getTableModule
-from .BezTools import *
+from BezTools import *
 import warnings
-from . import FDKUtils
-from . import ufoTools
+import FDKUtils
+import ufoTools
 import traceback
 
 kTempCFFSuffix = ".temp.ac.cff"

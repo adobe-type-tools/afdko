@@ -1,5 +1,5 @@
 #!/bin/env python
-from __future__ import print_function, absolute_import
+from __future__ import print_function
 
 __doc__ = """
 ConvertFontToCID.py. v 1.11 Nov 7 2017
@@ -24,7 +24,7 @@ import sys
 import os
 import re
 import types
-from . import FDKUtils
+import FDKUtils
 
 
 __methods__ = """

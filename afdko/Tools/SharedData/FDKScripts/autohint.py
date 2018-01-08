@@ -1,5 +1,5 @@
 #!/bin/env python
-from __future__ import print_function, absolute_import
+from __future__ import print_function
 
 __copyright__ = """Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
@@ -15,7 +15,7 @@ autohint [-g <glyph list>] [-gf <filename>] [-xg <glyph list>] [-xgf <filename>]
 Auto-hinting program for PostScript and OpenType/CFF fonts.
 """
 
-from .ufoTools import kProcessedGlyphsLayerName, kProcessedGlyphsLayer
+from ufoTools import kProcessedGlyphsLayerName, kProcessedGlyphsLayer
 
 __help__ = __usage__ + """
 
@@ -443,12 +443,13 @@ import sys
 import os
 import re
 import time
+import tempfile
 from fontTools.ttLib import TTFont, getTableModule
 import plistlib
 import warnings
-from .BezTools import *
-from . import FDKUtils
-from . import ufoTools
+from BezTools import *
+import FDKUtils
+import ufoTools
 import traceback
 import shutil
 
@@ -506,7 +507,7 @@ def logMsg(*args):
 	for arg in args:
 		msg = str(arg).strip()
 		if not msg:
-			print()
+			print('')
 			sys.stdout.flush()
 			if gLogFile:
 				gLogFile.write(os.linesep)
@@ -537,7 +538,7 @@ def ACreport(*args):
 	for arg in args:
 		print(arg, end=' ')
 	if arg[-1] != os.linesep:
-		print()
+		print('')
 
 def CheckEnvironment():
 	txPath = 'tx'
@@ -628,7 +629,7 @@ def checkFontinfoFile(options):
 	srcFontInfo = os.path.dirname(options.inputPath)
 	srcFontInfo = os.path.join(srcFontInfo, "fontinfo")
 	if os.path.exists(srcFontInfo):
-		fi = open(srcFontInfo, "rU")
+		fi = open(srcFontInfo, "r")
 		data = fi.read()
 		fi.close()
 		data = re.sub(r"#[^\r\n]+", "", data)
