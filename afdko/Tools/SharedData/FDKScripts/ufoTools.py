@@ -1,3 +1,4 @@
+from __future__ import print_function, absolute_import
 """
 ufoTools.py v1.30 May 2 2017
 
@@ -111,7 +112,7 @@ tools stripped out the _hintFormat1_ hint data as invalid elements.
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
-import ConvertFontToCID
+from . import ConvertFontToCID
 
 _hintFormat1_ = """
 
@@ -314,7 +315,7 @@ debug = 0
 
 def debugMsg(*args):
 	if debug:
-		print args
+		print(args)
 
 #UFO names
 kDefaultGlyphsLayerName = "public.default"
@@ -494,10 +495,10 @@ class UFOFontData:
 			if version[0] > kAdobHashMapVersion[0]:
 				raise UFOParseError("Hash map version is newer than program. Please update the FDK")
 			elif version[0] < kAdobHashMapVersion[0]:
-				print "Updating hash map: was older version"
+				print("Updating hash map: was older version")
 				newMap = {kAdobHashMapVersionName:kAdobHashMapVersion}
 		except KeyError:
-			print "Updating hash map: was older version"
+			print("Updating hash map: was older version")
 			newMap = {kAdobHashMapVersionName:kAdobHashMapVersion}
 		self.hashMap = newMap
 		return
@@ -649,7 +650,7 @@ class UFOFontData:
 						if programName in historyList:
 							foundMatch = True
 				if foundMatch:
-					print "Error. Glyph '%s' has been edited. You must first run '%s' before running '%s'. Skipping." % (glyphName, self.requiredHistory, self.programName)
+					print("Error. Glyph '%s' has been edited. You must first run '%s' before running '%s'. Skipping." % (glyphName, self.requiredHistory, self.programName))
 					skip = True
 
 			# If the source hash has changed, we need to delete the processed layer glyph.
@@ -673,8 +674,8 @@ class UFOFontData:
 				width = int(eval(widthXML.get("width")))
 			else:
 				width = 1000
-		except UFOParseError,e:
-			print "Error. skipping glyph '%s' because of parse error: %s" % (glyphName, e.message)
+		except UFOParseError as e:
+			print("Error. skipping glyph '%s' because of parse error: %s" % (glyphName, e.message))
 			return None, None, None
 		return width, glifXML, outlineXML
 
@@ -767,7 +768,7 @@ class UFOFontData:
 		self.fontInfo, tempList = parsePList(fontInfoPath)
 
 	def updateLayerContents(self, contentsFilePath):
-		print "Calling updateLayerContents"
+		print("Calling updateLayerContents")
 		if os.path.exists(contentsFilePath):
 			contentsList= plistlib.readPlist(contentsFilePath)
 			# If the layer name already exists, don't add a new one, or change the path
@@ -1237,7 +1238,7 @@ class UFOTransform:
 			y += tfCur[5]
 		else:
 			x, y = x*tfCur[0] + y*tfCur[2] + tfCur[4], \
-				   x*tfCur[1] + y*tfCur[3] + tfCur[5]
+				  x*tfCur[1] + y*tfCur[3] + tfCur[5]
 		return x,y
 
 
@@ -1568,7 +1569,7 @@ def fixStartPoint(outlineItem, opList):
 bezToUFOPoint = {
 		"mt" : 'move',
 		"rmt" : 'move',
-		 "hmt" : 'move',
+		"hmt" : 'move',
 		"vmt" : 'move',
 		"rdt" : 'line',
 		"dt" : 'line',
@@ -1784,7 +1785,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
 		elif token == "cp":
 			pass
 		elif token == "ed":
-		 	pass
+			pass
 		else:
 			if inPreFlex and (token[-2:] == "mt"):
 				continue
@@ -1793,7 +1794,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
 				lastPathOp = token
 				opIndex += 1
 			else:
-				print "Unhandled operation", argList, token
+				print("Unhandled operation %s %s" % (argList, token))
 				raise BezParseError("Unhandled operation: '%s' '%s'.", argList, token)
 			dx = dy = 0
 			opName = bezToUFOPoint[token]
@@ -1818,12 +1819,12 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
 					if outlineItem != None:
 						if len(outlineItem) == 1:
 							# Just in case we see two moves in a row, delete the previous outlineItem if it has only the move-to''
-							print "Deleting moveto:", xmlToString(newOutline[-1]), "adding", xmlToString(outlineItem)
+							print("Deleting moveto: %s adding %s" % (xmlToString(newOutline[-1]), xmlToString(outlineItem)))
 							del newOutline[-1]
 						else:
 							fixStartPoint(outlineItem, opList) # Fix the start/implied end path of the previous path.
 					opList = []
-		 			outlineItem = XMLElement('contour')
+					outlineItem = XMLElement('contour')
 					newOutline.append(outlineItem)
 
 				if (newHintMaskName != None):
@@ -2129,25 +2130,25 @@ def checkHashMaps(fontPath, doSync):
 				else:
 					continue
 	if doSync:
-	 	fileList = os.listdir(ufoFontData.glyphWriteDir)
-	 	fileList = filter(lambda fileName: fileName.endswith(".glif"), fileList)
+		fileList = os.listdir(ufoFontData.glyphWriteDir)
+		fileList = filter(lambda fileName: fileName.endswith(".glif"), fileList)
 
-	 	# invert glyphMap
-	 	fileMap = {}
-	 	for glyphName, fileName in ufoFontData.glyphMap.items():
-	 		fileMap[fileName] = glyphName
+		# invert glyphMap
+		fileMap = {}
+		for glyphName, fileName in ufoFontData.glyphMap.items():
+			fileMap[fileName] = glyphName
 
-	 	for fileName in fileList:
-	 		if fileMap.has_key(fileName) and ufoFontData.hashMap.has_key(fileMap[fileName]):
-	 			continue
+		for fileName in fileList:
+			if fileMap.has_key(fileName) and ufoFontData.hashMap.has_key(fileMap[fileName]):
+				continue
 
-	 		# Either not in glyphMap, or not in hashMap. Exterminate.
+			# Either not in glyphMap, or not in hashMap. Exterminate.
 			try:
 				glyphPath = os.path.join(ufoFontData.glyphWriteDir, fileName)
 				os.remove(glyphPath)
-				print "Removed outdated file:", glyphPath
+				print("Removed outdated file: %s" % glyphPath)
 			except OSError:
-				print "Cannot delete outdated file:", glyphPath
+				print("Cannot delete outdated file: %s" % glyphPath)
 	return allMatch, msgList
 
 
@@ -2192,7 +2193,7 @@ def cleanUpGLIFFiles(defaultContentsFilePath, glyphDirPath, doWarning=True):
 		glyphFilePath = os.path.join(glyphDirPath, fileName)
 		os.remove(glyphFilePath)
 		if doWarning:
-			print "Removing glif file %s that was not in the contents.plist file: %s" % (glyphDirPath, contentsFilePath)
+			print("Removing glif file %s that was not in the contents.plist file: %s" % (glyphDirPath, contentsFilePath))
 		changed = 1
 
 	if 	defaultContentsFilePath == contentsFilePath:
@@ -2211,11 +2212,11 @@ def cleanUpGLIFFiles(defaultContentsFilePath, glyphDirPath, doWarning=True):
 				glyphFilePath = os.path.join(glyphDirPath, fileName)
 				os.remove(glyphFilePath)
 				if doWarning:
-					print "Removing glif %s that was not in the contents.plist file: %s" % (glyphName, defaultContentsFilePath)
+					print("Removing glif %s that was not in the contents.plist file: %s" % (glyphName, defaultContentsFilePath))
 				changed = 1
 
 		except KeyError:
-			print"Shouldn't happen", glyphName, defaultContentsFilePath
+			print("Shouldn't happen %s %s" % (glyphName, defaultContentsFilePath))
 
 
 	return changed
@@ -2236,7 +2237,7 @@ def cleanupContentsList(glyphDirPath, doWarning=True):
 			del contentsDict[glyphName]
 			changed = 1
 			if doWarning:
-				print "Removing contents.plist entry where glif was missing: %s, %s, %s" % (glyphName, fileName, glyphDirPath)
+				print("Removing contents.plist entry where glif was missing: %s, %s, %s" % (glyphName, fileName, glyphDirPath))
 
 	if changed:
 		plistlib.writePlist(contentsDict, contentsFilePath)
@@ -2277,22 +2278,22 @@ def validateLayers(ufoFontPath, doWarning=True):
 
 
 def makeUFOGOADB(srcFontPath):
-	 # Make a GOAD file for for a UFO font.
-	 # Use public.glyphOrder if it exists, else use the contents.plist file.
-	 ufoFont = UFOFontData(srcFontPath, False, "")
-	 try:
-	 	ufoFont.loadGlyphMap()
-	 except:
-	 	return None
+	# Make a GOAD file for for a UFO font.
+	# Use public.glyphOrder if it exists, else use the contents.plist file.
+	ufoFont = UFOFontData(srcFontPath, False, "")
+	try:
+		ufoFont.loadGlyphMap()
+	except:
+		return None
 
-	 goadbList = [[i, glyphName] for glyphName,i in ufoFont.orderMap.items()]
-	 goadbList.sort()
-	 ufoGOADBPath = os.path.join(srcFontPath, kDefaultGOADBPath) # default
-	 fp = file(ufoGOADBPath, "wt")
-	 for i, glyphName in goadbList:
-	 	fp.write("%s\t%s%s" % (glyphName, glyphName, os.linesep))
-	 fp.close()
-	 return ufoGOADBPath
+	goadbList = [[i, glyphName] for glyphName,i in ufoFont.orderMap.items()]
+	goadbList.sort()
+	ufoGOADBPath = os.path.join(srcFontPath, kDefaultGOADBPath) # default
+	fp = open(ufoGOADBPath, "wt")
+	for i, glyphName in goadbList:
+		fp.write("%s\t%s%s" % (glyphName, glyphName, os.linesep))
+	fp.close()
+	return ufoGOADBPath
 
 
 def makeUFOFMNDB(srcFontPath):
@@ -2306,30 +2307,30 @@ def makeUFOFMNDB(srcFontPath):
 	familyName = "NoFamilyName"
 	styleName = "Regular"
 	try:
-		 psName = fiMap["postscriptFontName"]
-		 parts = psName.split("-")
-		 familyName = parts[0]
-		 if len(parts)> 1:
-		 	styleName = parts[1]
+		psName = fiMap["postscriptFontName"]
+		parts = psName.split("-")
+		familyName = parts[0]
+		if len(parts)> 1:
+			styleName = parts[1]
 	except KeyError:
-		print "[Warning] UFO font is missing PostScript Name"
+		print("[Warning] UFO font is missing PostScript Name")
 
 
 	try:
-		 familyName = fiMap["openTypeNamePreferredFamilyName"]
+		familyName = fiMap["openTypeNamePreferredFamilyName"]
 	except KeyError:
 		try:
-			 familyName = fiMap["familyName"]
+			familyName = fiMap["familyName"]
 		except KeyError:
-			print "[Warning] UFO font is missing familyName"
+			print("[Warning] UFO font is missing familyName")
 
 	try:
-		 styleName = fiMap["openTypeNamePreferredSubfamilyName"]
+		styleName = fiMap["openTypeNamePreferredSubfamilyName"]
 	except KeyError:
 		try:
-			 styleName = fiMap["styleName"]
+			styleName = fiMap["styleName"]
 		except KeyError:
-			print "[Warning] UFO font is missing styleName"
+			print("[Warning] UFO font is missing styleName")
 
 	fmndbPath = os.path.join(srcFontPath, kDefaultFMNDBPath)
 	parts = []
@@ -2338,7 +2339,7 @@ def makeUFOFMNDB(srcFontPath):
 	parts.append("\ts=%s" % (styleName))
 	parts.append("")
 	data = os.linesep.join(parts)
-	fp = file(fmndbPath, "wt")
+	fp = open(fmndbPath, "wt")
 	fp.write(data)
 	fp.close()
 	return fmndbPath
@@ -2357,7 +2358,7 @@ def test1():
 		bezString, width = convertGLIFToBez(ufoFontData, glyphName, doAll)
 		glifXML = convertBezToGLIF(ufoFontData, glyphName, bezString )
 		#pprint.pprint(xmlToString(glifXML))
-	print len(gNameList)
+	print(len(gNameList))
 
 def test2():
 	checkHashMaps(sys.argv[1], False)

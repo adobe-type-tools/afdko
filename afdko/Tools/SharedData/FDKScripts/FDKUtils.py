@@ -1,3 +1,5 @@
+from __future__ import print_function, absolute_import
+
 """
 FDKUtils.py v 1.2 April 13 6 2016
  A module of functions that are needed by several of the FDK scripts.
@@ -37,13 +39,13 @@ def findFDKDirs():
 			elif curSystem == "Linux":
 				fdkToolsDir = os.path.join(dir, "linux")
 			else:
-				print "Fatal error: un-supported platform %s %s." % (os.name, sys.platform)
+				print("Fatal error: un-supported platform %s %s." % (os.name, sys.platform))
 				raise FDKEnvError
 
 			if not (os.path.exists(fdkScriptsDir) and os.path.exists(fdkToolsDir)):
-				print "Fatal error: could not find  the FDK scripts dir %s and the tools directory %s." % (fdkScriptsDir, fdkToolsDir)
+				print("Fatal error: could not find  the FDK scripts dir %s and the tools directory %s." % (fdkScriptsDir, fdkToolsDir))
 				raise FDKEnvError
- 
+
 			# the FDK.py bootstrap program already adds fdkScriptsDir to the  sys.path;
 			# this is useful only when running the calling script directly using an external Python.
 			if not fdkScriptsDir in sys.path:
@@ -57,22 +59,22 @@ def findFDKDirs():
 def findFDKFile(fdkDir, fileName):
 	path = os.path.join(fdkDir, fileName)
 	if os.path.exists(path):
-            return path
-        p1 = path + ".exe"
- 	if os.path.exists(p1):
-            return p1
-        p2 = path + ".cmd"
+		return path
+	p1 = path + ".exe"
+	if os.path.exists(p1):
+		return p1
+	p2 = path + ".cmd"
 	if os.path.exists(p2):
-            return p2
+		return p2
 	if fileName not in ["addGlobalColor"]:
-		print "Fatal error: could not find '%s or %s or %s'." % (path,p1,p2)
+		print("Fatal error: could not find '%s or %s or %s'." % (path,p1,p2))
 	raise FDKEnvError
 
 def runShellCmd(cmd):
 	try:
 		p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout
 		log = p.read()
-		return log
+		return str(log)
 	except :
 		msg = "Error executing command '%s'. %s" % (cmd, traceback.print_exc())
 		print(msg)
@@ -85,12 +87,12 @@ def runShellCmdLogging(cmd):
 		while 1:
 			output = proc.stdout.readline()
 			if output:
-				print output,
+				print(output, end=' ')
 				logList.append(output)
 			if proc.poll() != None:
 				output = proc.stdout.readline()
 				if output:
-					print output,
+					print(output, end=' ')
 					logList.append(output)
 				break
 		log = "".join(logList)
@@ -169,13 +171,11 @@ def clean_afdko():
 			print("Deleted", basepath)
 		except:
 			pass
-		
-	return 
-	
+
+	return
+
 def check_afkdo():
 	return
-	
+
 if __name__ == "__main__":
 	clean_afdko()
-	
-	

@@ -1,4 +1,6 @@
 #!/bin/env python
+from __future__ import print_function, absolute_import
+
 __copyright__ = """Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
@@ -13,7 +15,7 @@ autohint [-g <glyph list>] [-gf <filename>] [-xg <glyph list>] [-xgf <filename>]
 Auto-hinting program for PostScript and OpenType/CFF fonts.
 """
 
-from ufoTools import kProcessedGlyphsLayerName, kProcessedGlyphsLayer
+from .ufoTools import kProcessedGlyphsLayerName, kProcessedGlyphsLayer
 
 __help__ = __usage__ + """
 
@@ -46,12 +48,12 @@ alignment zones in an "fontinfo" file.
 -pfdl Print the list of user-defined FDDict values, and which glyphs
 	are included in each. This is useful for checking your FDDict
 	definitions and glyph search terms. (see -hfd).
-		
+
 -g <glyphID1>,<glyphID2>,...,<glyphIDn>
-	Hint only the specified list of glyphs. Note that all glyphs will be 
-	written to the output file. The list must be comma-delimited. The glyph 
-	references may be glyphID's, glyph names, or glyph CID's. If the latter, 
-	the CID value must be prefixed with the string "/". There must be no 
+	Hint only the specified list of glyphs. Note that all glyphs will be
+	written to the output file. The list must be comma-delimited. The glyph
+	references may be glyphID's, glyph names, or glyph CID's. If the latter,
+	the CID value must be prefixed with the string "/". There must be no
 	white-space in the glyph list.
 	Examples:
 		autohint -g A,B,C,68 myFont
@@ -65,21 +67,21 @@ alignment zones in an "fontinfo" file.
 	(GID)'s, not by alphabetic names.
 
 -gf <file name>
-	Hint only the list of glyphs contained in the specified file. The file 
-	must contain a comma-delimited list of glyph identifiers. Any number of 
-	space, tab, and new-line characters are permitted between glyph names 
+	Hint only the list of glyphs contained in the specified file. The file
+	must contain a comma-delimited list of glyph identifiers. Any number of
+	space, tab, and new-line characters are permitted between glyph names
 	and commas.
-	
+
 -xg, -xgf
 	Same as -g and -gf, but will exclude the specified glyphs from hinting.
 
 -cf <path>
-	AC will try and add counter hints to only a short hard-coded list of 
+	AC will try and add counter hints to only a short hard-coded list of
 	glyphs:
 		V counters:  "m", "M", "T", "ellipsis"
 		H counters:  "element", "equivalence", "notelement", "divide".
 	Counter hints help to keep the space between stems open and equal in size.
-	
+
 	To extend this list, use the option -cf followed by a path to a text file.
 	The text file must contain one record per line. A  record references one
 	glyph, and should consist of a single letter V or H, to indicate whether
@@ -89,7 +91,7 @@ alignment zones in an "fontinfo" file.
 		V	ffi
 		V	ffl
 		V	f_f_j
-	
+
 	Alternatively, if there is a file named "fontinfo" in the same directory as
 	the source font, this script will look in that file for lines with the format:
 		VCounterChar ( <glyph name1>  <glyph name2> ... )
@@ -97,14 +99,14 @@ alignment zones in an "fontinfo" file.
 	and add the referenced glyphs to the counter hint lists.
 	Example line:
 		VCounterChar (ffi ffl f_f_j)
-	
+
 -logOnly
-	Do not change any outlines, but report warnings for all selected 
-	glyphs, including those already hinted. The option -q is ignored. 
+	Do not change any outlines, but report warnings for all selected
+	glyphs, including those already hinted. The option -q is ignored.
 	The option -a is implied.
-	
+
 -q	Quiet mode
-	Will suppress comments from the auto-hinting library about recommended 
+	Will suppress comments from the auto-hinting library about recommended
 	glyph outline changes.
 
 -c	Permit changes to the glyph outline
@@ -116,14 +118,14 @@ alignment zones in an "fontinfo" file.
 -nf	Suppress generation of flex commands
 
 -ns	Suppress hint substitution
-	Do this only if you really want the smallest possible font file. This 
+	Do this only if you really want the smallest possible font file. This
 	will use only one set of hints for the entire glyph.
 
 -nb	Allow the font to have to no stem widths or blue values specified.
 	Without this option, autohint will complain and quit.
 
 -o <output font path>
-	If not specified, autohint will write the hinted output to the original 
+	If not specified, autohint will write the hinted output to the original
 	font path name.
 
 -log	Write output to a log file
@@ -141,7 +143,7 @@ alignment zones in an "fontinfo" file.
 	if they already have hints. However, glyphs will not be hinted if
 	they both have not changed and are in the history file.
 
- -decimal  Use decimal coordinates, instead of rounding them to the 
+ -decimal  Use decimal coordinates, instead of rounding them to the
  nearest integer value.
 
 -wd	write changed glyphs to default layer instead of '%s'
@@ -278,7 +280,7 @@ begin FDDict ST_Smallcaps
 	OrigEmSqUnits 1000
 	FontName AachenStd-Bold # This gets used as the hint dict name if the font is eventually built as a CID font.
 	FlexOK true
-	
+
 	# Alignment zones. The first is a bottom zone, the rest ar top zones. See below.
 	BaselineOvershoot -20
 	BaselineYCoord 0
@@ -286,7 +288,7 @@ begin FDDict ST_Smallcaps
 	CapOvershoot 20
 	LcHeight 700
 	LcOvershoot 15
-	
+
 	# Stem widths.
 	DominantV [236 267]
 	DominantH [141 152]
@@ -335,45 +337,45 @@ BlueValue pairs:
 	# BaselineOvershoot is a bottom zone, the rest are top zones.
 	BaselineYCoord
 	BaselineOvershoot
-	
-	CapHeight 
-	CapOvershoot 
-	
-	LcHeight 
-	LcOvershoot 
-	
-	AscenderHeight 
-	AscenderOvershoot 
-	
-	FigHeight 
-	FigOvershoot 
-	
+
+	CapHeight
+	CapOvershoot
+
+	LcHeight
+	LcOvershoot
+
+	AscenderHeight
+	AscenderOvershoot
+
+	FigHeight
+	FigOvershoot
+
 	Height5
 	Height5Overshoot
-	
+
 	Height6
 	Height6Overshoot
 
 OtherBlues pairs:
-	# These 
-	Baseline5Overshoot 
+	# These
+	Baseline5Overshoot
 	Baseline5
-	
-	Baseline6Overshoot 
+
+	Baseline6Overshoot
 	Baseline6
-	
-	SuperiorOvershoot 
-	SuperiorBaseline 
-	
-	OrdinalOvershoot 
-	OrdinalBaseline 
-	
-	DescenderOvershoot 
+
+	SuperiorOvershoot
+	SuperiorBaseline
+
+	OrdinalOvershoot
+	OrdinalBaseline
+
+	DescenderOvershoot
 	DescenderHeight
 
 For zones which capture the bottom of a feature in the glyph, (BaselineYCoord and all the OtherBlues), the value
 specifies the top of the zone, and the "Overshoot" is a negative value which specifes the offset to the bottom of the zone, e.g.
-	BaselineYCoord 0 
+	BaselineYCoord 0
 	BaselineOvershoot 12
 
 For zones which capture the top of a feature in the glyph, (teh rest of the BlueValue zones), the value
@@ -418,7 +420,7 @@ write fewer entries this way.
 # and remove all whitespace, then parse out glyph-names and GID's.
 
 # For each font name:
-#    use fontTools library to open font and extract CFF table. 
+#    use fontTools library to open font and extract CFF table.
 #    If error, skip font and report error.
 #    filter specified glyph list, if any, with list of glyphs in the font.
 #    open font plist file, if any. If not, create empty font plist.
@@ -428,7 +430,7 @@ write fewer entries this way.
 #        get new alignment zone string if FD array index (which font dict is used) has changed.
 #        Convert to bez time
 #        Build autohint point list string, used to tell if glyph has been changed since the last time it was hinted.
-#        If requested, check against plist dict, and skip if glyph is 
+#        If requested, check against plist dict, and skip if glyph is
 #        already hinted or is manually hinted.
 #        Call auto-hint library on bez string.
 #        If change to the point list is permitted and happened, rebuild
@@ -444,9 +446,9 @@ import time
 from fontTools.ttLib import TTFont, getTableModule
 import plistlib
 import warnings
-from BezTools import *
-import FDKUtils
-import ufoTools
+from .BezTools import *
+from . import FDKUtils
+from . import ufoTools
 import traceback
 import shutil
 
@@ -482,7 +484,7 @@ class ACOptions:
 		self.debug = 0
 		self.allowDecimalCoords = 0
 		self.writeToDefaultLayer = 0
-		
+
 class ACOptionParseError(KeyError):
 	pass
 
@@ -504,27 +506,27 @@ def logMsg(*args):
 	for arg in args:
 		msg = str(arg).strip()
 		if not msg:
-			print
+			print()
 			sys.stdout.flush()
 			if gLogFile:
 				gLogFile.write(os.linesep)
 				gLogFile.flush()
 			return
-			
+
 		msg = re.sub(r"[\r\n]", " ", msg)
 		if msg[-1] == ",":
 			msg = msg[:-1]
 			if msg == kProgressChar:
 				sys.stdout.write(msg) # avoid space, which is added by 'print'
 			else:
-				print msg,
+				print(msg, end=' ')
 			sys.stdout.flush()
 			if gLogFile:
 				gLogFile.write(msg)
 				gLogFile.flush()
 		else:
-			
-			print msg
+
+			print(msg)
 			sys.stdout.flush()
 			if gLogFile:
 				gLogFile.write(msg + os.linesep)
@@ -533,9 +535,9 @@ def logMsg(*args):
 def ACreport(*args):
 	# long function used by the hinting library
 	for arg in args:
-		print arg,
+		print(arg, end=' ')
 	if arg[-1] != os.linesep:
-		print
+		print()
 
 def CheckEnvironment():
 	txPath = 'tx'
@@ -544,7 +546,7 @@ def CheckEnvironment():
 	report = FDKUtils.runShellCmd(command)
 	if "options" not in report:
 			txError = 1
-	
+
 	if  txError:
 		logMsg("Please re-install the FDK. The path to the program 'tx' is not in the environment variable PATH.")
 		raise FDKEnvironmentError
@@ -554,7 +556,7 @@ def CheckEnvironment():
 	if "version" not in report:
 		logMsg("Please re-install the FDK. The path to the program 'autohintexe' is not in the environment variable PATH.")
 		raise FDKEnvironmentError
-	
+
 	return
 
 global nameAliasDict
@@ -569,7 +571,7 @@ def aliasName(glyphName):
 
 def expandNames(glyphName):
 	global nameAliasDict
-	
+
 	glyphRange = glyphName.split("-")
 	if len(glyphRange) > 1:
 		g1 = expandNames(glyphRange[0])
@@ -601,7 +603,7 @@ def parseGlyphListArg(glyphString):
 def parseCounterHintData(path):
 	hCounterGlyphList = []
 	vCounterGlyphList = []
-	gf = file(path, "rt")
+	gf = open(path, "rt")
 	data = gf.read()
 	gf.close()
 	lines = re.findall(r"([^\r\n]+)", data)
@@ -611,17 +613,17 @@ def parseCounterHintData(path):
 	for line in lines:
 		fields = line.split()
 		if (len(fields) != 2) or (fields[0] not in ["V", "v", "H", "h"]) :
-			print "\tError: could not process counter hint line '%s' in file %s. Doesn't look like V or H followed by a tab or space, and then a glyph name." % (line, path)
+			print("\tError: could not process counter hint line '%s' in file %s. Doesn't look like V or H followed by a tab or space, and then a glyph name." % (line, path))
 		elif  fields[0] in ["V", "v"]:
 			vCounterGlyphList.append(fields[1])
 		else:
 			hCounterGlyphList.append(fields[1])
 	return hCounterGlyphList, vCounterGlyphList
-	
-	
+
+
 
 def checkFontinfoFile(options):
-	# Check if there ia a makeotf fontinfo file in the input font directory. If so, 
+	# Check if there ia a makeotf fontinfo file in the input font directory. If so,
 	# get any Vcounter or HCouunter glyphs from it.
 	srcFontInfo = os.path.dirname(options.inputPath)
 	srcFontInfo = os.path.join(srcFontInfo, "fontinfo")
@@ -638,7 +640,7 @@ def checkFontinfoFile(options):
 					options.vCounterGlyphs.extend(glyphList)
 				else:
 					options.hCounterGlyphs.extend(glyphList)
-					
+
 		if 	options.vCounterGlyphs or options.hCounterGlyphs:
 			options.counterHintFile = srcFontInfo
 
@@ -650,22 +652,22 @@ def getOptions():
 	while i < numOptions:
 		arg = sys.argv[i]
 		if options.inputPath:
-			raise ACOptionParseError("Option Error: All options must preceed the  input font path <%s>." % arg) 
+			raise ACOptionParseError("Option Error: All options must preceed the  input font path <%s>." % arg)
 
 		if arg == "-h":
-			print __help__
+			print(__help__)
 			command = "autohintexe -v"
 			report = FDKUtils.runShellCmd(command)
 			logMsg( report)
 			raise ACOptionParseError
 		elif arg == "-u":
-			print __usage__
+			print(__usage__)
 			command = "autohintexe -v"
 			report = FDKUtils.runShellCmd(command)
 			logMsg( report)
 			raise ACOptionParseError
 		elif arg == "-hfd":
-			print __FDDoc__
+			print(__FDDoc__)
 			raise ACOptionParseError
 		elif arg == "-pfd":
 			options.printDefaultFDDict = 1
@@ -695,7 +697,7 @@ def getOptions():
 			i = i +1
 			glyphString = sys.argv[i]
 			if glyphString[0] == "-":
-				raise ACOptionParseError("Option Error: it looks like the first item in the glyph list following '-g' is another option.") 
+				raise ACOptionParseError("Option Error: it looks like the first item in the glyph list following '-g' is another option.")
 			options.glyphList += parseGlyphListArg(glyphString)
 		elif arg in ["-xgf", "-gf"]:
 			if arg == "-xgf":
@@ -703,24 +705,24 @@ def getOptions():
 			i = i +1
 			filePath = sys.argv[i]
 			if filePath[0] == "-":
-				raise ACOptionParseError("Option Error: it looks like the the glyph list file following '-gf' is another option.") 
+				raise ACOptionParseError("Option Error: it looks like the the glyph list file following '-gf' is another option.")
 			try:
-				gf = file(filePath, "rt")
+				gf = open(filePath, "rt")
 				glyphString = gf.read()
 				gf.close()
 			except (IOError,OSError):
-				raise ACOptionParseError("Option Error: could not open glyph list file <%s>." %  filePath) 
+				raise ACOptionParseError("Option Error: could not open glyph list file <%s>." %  filePath)
 			options.glyphList += parseGlyphListArg(glyphString)
 		elif arg == "-cf":
 			i = i +1
 			filePath = sys.argv[i]
 			if filePath[0] == "-":
-				raise ACOptionParseError("Option Error: it looks like the the counter hint glyph list file following '-cf' is another option.") 
+				raise ACOptionParseError("Option Error: it looks like the the counter hint glyph list file following '-cf' is another option.")
 			try:
 				options.counterHintFile = filePath
 				options.hCounterGlyphs, options.vCounterGlyphs = parseCounterHintData(filePath)
 			except (IOError,OSError):
-				raise ACOptionParseError("Option Error: could not open counter hint glyph list  file <%s>." %  filePath) 
+				raise ACOptionParseError("Option Error: could not open counter hint glyph list  file <%s>." %  filePath)
 		elif arg == "-logOnly":
 			options.logOnly = 1
 		elif arg == "-log":
@@ -737,24 +739,24 @@ def getOptions():
 		elif arg =="-wd":
 			options.writeToDefaultLayer = 1
 		elif arg[0] == "-":
-			raise ACOptionParseError("Option Error: Unknown option <%s>." %  arg) 
+			raise ACOptionParseError("Option Error: Unknown option <%s>." %  arg)
 		else:
 			options.inputPath = arg
 		i  += 1
 	if not options.inputPath:
-		raise ACOptionParseError("Option Error: You must provide a font file path.") 
+		raise ACOptionParseError("Option Error: You must provide a font file path.")
 
 	if not os.path.exists(options.inputPath):
-		raise ACOptionParseError("Option Error: The input font file path %s' does not exist." % (options.inputPath)) 
+		raise ACOptionParseError("Option Error: The input font file path %s' does not exist." % (options.inputPath))
 	else:
 		options.inputPath = options.inputPath.rstrip(os.sep) # might be a UFO font. auto completion in some shells adds a dir separator, which then causes problems with os.path.dirname().
 
 	checkFontinfoFile(options)
-	
+
 	if options.logOnly:
 		options.verbose = 1
 		options.hintAll = 1
-		
+
 	return options
 
 
@@ -820,7 +822,7 @@ def  openFontPlistFile(psName, dirPath):
 	# Find or create the plist file. This hold a Python dictionary in repr() form,
 	# key: glyph name, value: outline point list
 	# This is used to determine which glyphs are manually hinted, and which have changed since the last
-	# hint pass. 
+	# hint pass.
 	fontPlist = None
 	filePath = None
 	isNewPlistFile = 1
@@ -838,10 +840,10 @@ def  openFontPlistFile(psName, dirPath):
 			fontPlist = plistlib.Plist.fromFile(filePath)
 			isNewPlistFile = 0
 		except (IOError, OSError):
-			raise ACFontError("\tError: font plist file exists, but coud not be read <%s>." % filePath)		
+			raise ACFontError("\tError: font plist file exists, but coud not be read <%s>." % filePath)
 		except:
 			raise ACFontError("\tError: font plist file exists, but coud not be parsed <%s>." % filePath)
-		
+
 	if  fontPlist == None:
 		fontPlist =  plistlib.Plist()
 	if not fontPlist.has_key(kACIDKey):
@@ -900,12 +902,12 @@ def parseFontInfoString(fontInfoString):
 			matchingExp = item + arrayPattern
 		else:
 			matchingExp = item + integerPattern
-		
+
 		try:
-			print '\t%s' % re.search(matchingExp, fontInfoString).group()
+			print('\t%s' % re.search(matchingExp, fontInfoString).group())
 		except:
 			pass
-	
+
 flexPatthern = re.compile(r"preflx1[^f]+preflx2[\r\n](-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+)(-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+).+?flx([\r\n])",  re.DOTALL)
 commentPattern = re.compile(r"[^\r\n]*%[^\r\n]*[\r\n]")
 hintGroupPattern = re.compile(r"beginsubr.+?newcolors[\r\n]", re.DOTALL)
@@ -914,7 +916,7 @@ whiteSpacePattern = re.compile(r"\s+", re.DOTALL)
 
 
 def makeACIdentifier(bezText):
-	# Get rid of all the hint operators and their args 
+	# Get rid of all the hint operators and their args
 	# collapse flex to just the two rct's
 	bezText = commentPattern.sub("", bezText)
 	bezText = hintGroupPattern.sub("", bezText)
@@ -938,7 +940,7 @@ def openUFOFile(path, outFilePath, useHashMap):
 		msg = "Font file must be a PS, CFF, OTF, or ufo font file: %s." % (path)
 		logMsg(msg)
 		raise ACFontError(msg)
-	
+
 	# If user has specified a path other than the source font path, then copy the entire
 	# ufo font, and operate on the copy.
 	if (outFilePath != None) and (os.path.abspath(path) != os.path.abspath(outFilePath)):
@@ -952,20 +954,20 @@ def openUFOFile(path, outFilePath, useHashMap):
 	font.useProcessedLayer = True
 	font.requiredHistory.append(ufoTools.kCheckOutlineName) # Programs in this list must be run before autohint, if the outlines have been edited.
 	return font
-	
+
 def openOpenTypeFile(path, outFilePath):
 	# If input font is  CFF or PS, build a dummy ttFont in memory..
 	# return ttFont, and flag if is a real OTF font Return flag is 0 if OTF, 1 if CFF, and 2 if PS/
 	fontType  = 0 # OTF
 	tempPathCFF = path + kTempCFFSuffix
 	try:
-		ff = file(path, "rb")
+		ff = open(path, "rb")
 		data = ff.read(10)
 		ff.close()
 	except (IOError, OSError):
 		logMsg("Failed to open and read font file %s." % path)
 
-	if data[:4] == "OTTO": # it is an OTF font, can process file directly
+	if data[:4] == b"OTTO": # it is an OTF font, can process file directly
 		try:
 			ttFont = TTFont(path)
 		except (IOError, OSError):
@@ -979,28 +981,28 @@ def openOpenTypeFile(path, outFilePath):
 			raise ACFontError("Error: font is not a CFF font <%s>." % fontFileName)
 
 	else:
-	
+
 		# It is not an OTF file.
 		if (data[0] == '\1') and (data[1] == '\0'): # CFF file
 			fontType = 1
 			tempPathCFF = path
-		elif not "%" in data:
+		elif not b"%" in data:
 			#not a PS file either
 			logMsg("Font file must be a PS, CFF or OTF  fontfile: %s." % path)
 			raise ACFontError("Font file must be PS, CFF or OTF file: %s." % path)
-	
-		else:  # It is a PS file. Convert to CFF.	
+
+		else:  # It is a PS file. Convert to CFF.
 			fontType =  2
-			print "Converting Type1 font to temp CFF font file..."
+			print("Converting Type1 font to temp CFF font file...")
 			command="tx  -cff +b -std \"%s\" \"%s\" 2>&1" % (path, tempPathCFF)
 			report = FDKUtils.runShellCmd(command)
 			if "fatal" in report:
 				logMsg("Attempted to convert font %s  from PS to a temporary CFF data file." % path)
 				logMsg(report)
 				raise ACFontError("Failed to convert PS font %s to a temp CFF font." % path)
-		
+
 		# now package the CFF font as an OTF font.
-		ff = file(tempPathCFF, "rb")
+		ff = open(tempPathCFF, "rb")
 		data = ff.read()
 		ff.close()
 		try:
@@ -1010,7 +1012,7 @@ def openOpenTypeFile(path, outFilePath):
 			ttFont['CFF '] = cffTable
 			cffTable.decompile(data, ttFont)
 		except:
-			logMsg( "\t%s" %(traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1]))
+			logMsg( "\t%s" %(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])[-1]))
 			logMsg("Attempted to read font %s  as CFF." % path)
 			raise ACFontError("Error parsing font file <%s>." % path)
 
@@ -1045,10 +1047,10 @@ def hintFile(options):
 		if options.writeToDefaultLayer and hasattr(fontData, "setWriteToDefault"): # UFO fonts only
 			fontData.setWriteToDefault()
 	except (IOError, OSError):
-		logMsg( traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1])
+		logMsg( traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])[-1])
 		raise ACFontError("Error opening or reading from font file <%s>." % fontFileName)
 	except:
-		logMsg( traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1])
+		logMsg( traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])[-1])
 		raise ACFontError("Error parsing font file <%s>." % fontFileName)
 
 	#   filter specified list, if any, with font list.
@@ -1062,10 +1064,10 @@ def hintFile(options):
 	tempBez = tempBaseName + ".bez"
 	tempBezNew = tempBez + ".new"
 	tempFI = tempBaseName + ".fi"
-	
+
 	#print "tempBaseName", tempBaseName
 	psName = fontData.getPSName()
-	
+
 	if (not options.logOnly) and options.usePlistFile:
 		fontPlist, fontPlistFilePath, isNewPlistFile = openFontPlistFile(psName, os.path.dirname(path))
 		if isNewPlistFile and  not (options.hintAll or options.rehint):
@@ -1117,7 +1119,7 @@ def hintFile(options):
 		removeTempFiles( [tempPathCFF] )
 		fontData.close()
 		return
-		
+
 	if fdGlyphDict == None:
 		fdDict = fontDictList[0]
 		fp = open(tempFI, "wt")
@@ -1138,11 +1140,11 @@ def hintFile(options):
 	pListChanged = 0
 	if isCID:
 		options.noFlex = 1
-		
+
 	if options.verbose:
 		verboseArg = ""
 	else:
-		verboseArg = " -q" 
+		verboseArg = " -q"
 		dotCount = 0
 		curTime = time.time()
 
@@ -1201,7 +1203,7 @@ def hintFile(options):
 					fp = open(tempFI, "wt")
 					fp.write(fdDict.getFontInfo())
 					fp.close()
-			
+
 
 		# 	Build autohint point list identifier
 
@@ -1209,7 +1211,7 @@ def hintFile(options):
 		oldHintBezString = ""
 		if (not options.logOnly) and options.usePlistFile:
 			# If the glyph is not in the  plist file, then we skip it unless kReHintUnknown is set.
-			# If the glyph is in the plist file and the outline has changed, we hint it. 
+			# If the glyph is in the plist file and the outline has changed, we hint it.
 			ACidentifier = makeACIdentifier(bezString)
 			try:
 				(prevACIdentifier, ACtime, oldBezString, oldHintBezString) =  fontPlist[kACIDKey][name]
@@ -1253,7 +1255,7 @@ def hintFile(options):
 		#print "oldBezString", oldBezString
 		#print ""
 		#print "bezString", bezString
-		
+
 		if oldBezString != "" and oldBezString == bezString:
 			newBezString = oldHintBezString
 		else:
@@ -1261,7 +1263,7 @@ def hintFile(options):
 				os.remove(tempBezNew)
 			command = "autohintexe %s%s%s%s -s .new -f \"%s\" \"%s\"" % (verboseArg, suppressEditArg, supressHintSubArg, decimalArg, tempFI, tempBez)
 			if  options.debug:
-				print command
+				print(command)
 			report = FDKUtils.runShellCmd(command)
 			if report:
 				if not options.verbose:
@@ -1272,30 +1274,30 @@ def hintFile(options):
 				newBezString = bp.read()
 				bp.close()
 				if options.debug:
-					print "Wrote AC fontinfo data file to", tempFI
-					print "Wrote AC output bez file to", tempBezNew
+					print("Wrote AC fontinfo data file to %s" % tempFI)
+					print("Wrote AC output bez file to %s" % tempBezNew)
 				else:
 					os.remove(tempBezNew)
 			else:
 				newBezString = None
-			
+
 		if not newBezString:
 			if not options.verbose:
 				logMsg("")
 			logMsg("%s Error - failure in processing outline data." % aliasName(name))
 			continue
-			
+
 		if not (("ry" in newBezString[:200]) or ("rb" in newBezString[:200]) or ("rm" in newBezString[:200]) or ("rv" in newBezString[:200])):
-			print "No hints added!"
+			print("No hints added!")
 
 		if options.logOnly:
 			continue
-			
+
 		# 	Convert bez to charstring, and update CFF.
 		anyGlyphChanged = 1
 		fontData.updateFromBez(newBezString, name, width, options.verbose)
 
-		
+
 		if options.usePlistFile:
 			bezString = "%% %s%s%s" % (name, os.linesep, newBezString)
 			ACidentifier = makeACIdentifier(bezString)
@@ -1308,14 +1310,14 @@ def hintFile(options):
 			fontPlist[kACIDKey][name] = (ACidentifier, time.asctime(), bezString, newBezString )
 
 	if not options.verbose:
-		print "" # print final new line after progress dots.
+		print("") # print final new line after progress dots.
 
 	if  options.debug:
-		print "Wrote input AC bez file to", tempBez
+		print("Wrote input AC bez file to %s" % tempBez)
 	else:
 		tempPathCFF = options.inputPath + kTempCFFSuffix # created when a PS file is opened.
 		removeTempFiles( [tempBez, tempBezNew, tempFI, tempPathCFF] )
-					
+
 	if not options.logOnly:
 		if anyGlyphChanged:
 			logMsg("Saving font file with new hints..." + time.asctime())
@@ -1342,28 +1344,28 @@ def main():
 
 	try:
 		CheckEnvironment()
-	except FDKEnvironmentError,e:
+	except FDKEnvironmentError as e:
 		logMsg(e)
 		return
 
 	try:
 		options = getOptions()
-	except ACOptionParseError,e:
+	except ACOptionParseError as e:
 		logMsg(e)
 		return
 
 	# verify that all files exist.
 	try:
 		hintFile(options)
-	except (ACFontError, ufoTools.UFOParseError),e:
+	except (ACFontError, ufoTools.UFOParseError) as e:
 		logMsg("\t%s" % e)
 	if gLogFile:
 		gLogFile.close()
-		
+
 	return
 
 
 if __name__=='__main__':
 	main()
-	
+
 
