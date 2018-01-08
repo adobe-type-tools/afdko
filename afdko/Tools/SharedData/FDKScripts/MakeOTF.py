@@ -1394,8 +1394,12 @@ def getROS(fontPath):
 	"""
 	R=O=S=None
 	fp = open(fontPath, "rb")
-	data = str(fp.read(5000))
+	data = fp.read(5000)
 	fp.close()
+	try:
+		data = data.decode("latin-1")
+	except:
+		return R,O,S
 	match = re.search(r"/Registry\s+\((\S+)\)", data)
 	if not match:
 		return R,O,S
