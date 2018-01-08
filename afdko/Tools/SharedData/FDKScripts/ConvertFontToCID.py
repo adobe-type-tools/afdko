@@ -1,4 +1,5 @@
 #!/bin/env python
+from __future__ import print_function, absolute_import
 
 __doc__ = """
 ConvertFontToCID.py. v 1.11 Nov 7 2017
@@ -23,12 +24,12 @@ import sys
 import os
 import re
 import types
-import FDKUtils
+from . import FDKUtils
 
 
 __methods__ = """
 1) parse fontinfo file. Collect all font dicts and glyph sets.
-2) define final glyph sets = all glyphs not in other glyph sets 
+2) define final glyph sets = all glyphs not in other glyph sets
 3) build glyph sets such that all glyphs in a set are contiguous and
 ordered by original GID, and belong to the same fdDict. This allows the
 glyphs to be merged back into a single CID font while maintaining glyph
@@ -39,7 +40,7 @@ order.
 	edit in the FontDict values
 	use type1 to convert back to type1
 5) Use mergeFonts to merge fonts as a CID font.
-"""	
+"""
 
 debug = 0
 
@@ -92,7 +93,7 @@ kFontDictBluePairsName = "BlueValuesPairs" # We keep this in the FDDict, as it i
 kFontDictOtherBluePairsName = "OtherBlueValuesPairs"
 kFontDictBluesName = "BlueValues" # Holds the actual string for the Type1 font dict
 kFontDictOtherBluesName = "OtherBlues" # Holds the actual string for the Type1 font dict
-kRunTimeFDDictKeys = ["DictName", kFontDictBluePairsName, kFontDictOtherBluePairsName, kFontDictBluesName, kFontDictOtherBluesName]				
+kRunTimeFDDictKeys = ["DictName", kFontDictBluePairsName, kFontDictOtherBluePairsName, kFontDictBluesName, kFontDictOtherBluesName]
 kFDDictKeys = kOtherFDDictKeys + kBlueValueKeys + kOtherBlueValueKeys + kRunTimeFDDictKeys
 
 
@@ -102,7 +103,7 @@ kRequiredCIDFontInfoFields = [
 			"Registry",
 			"Ordering",
 			"Supplement",
-			 ]
+			]
 
 kOptionalFields = [
 			"FSType",
@@ -111,8 +112,8 @@ kOptionalFields = [
 			"FullName",
 			"FamilyName",
 			"version",
-			"AdobeCopyright", 
-			"Trademark", 
+			"AdobeCopyright",
+			"Trademark",
 			]
 kCIDFontInfokeyList = kRequiredCIDFontInfoFields + kOptionalFields
 
@@ -133,14 +134,14 @@ class FontInfoParseError(ValueError):
 
 class FontParseError(KeyError):
 	pass
-	
+
 class FDDict:
 	def __init__(self):
 		self.DictName=None
 		for key in kFDDictKeys:
-			exec("self.%s = None" % (key))			
+			exec("self.%s = None" % (key))
 		self.FlexOK="true"
-	
+
 	def getFontInfo(self):
 		keys = dir(self)
 		fiList = []
@@ -150,17 +151,17 @@ class FDDict:
 			value = eval("self.%s" % (key))
 			if type(value) == types.MethodType:
 				continue
-				
+
 			if value != None:
 				fiList.append("%s %s" % (key, value))
 		return " ".join(fiList)
 
 	def buildBlueLists(self):
 		if (self.BaselineOvershoot == None):
-			print "Error: FDDict definition %s is missing the BaselineYCoord/BaselineOvershoot values. These are required." % (self.DictName)
+			print("Error: FDDict definition %s is missing the BaselineYCoord/BaselineOvershoot values. These are required." % (self.DictName))
 		elif (int(self.BaselineOvershoot) > 0):
-			print "Error: The BaselineYCoord/BaselineOvershoot in FDDict definition %s must be a bottom zone - the BaselineOvershoot must be negative, not positive." % (self.DictName)
-	
+			print("Error: The BaselineYCoord/BaselineOvershoot in FDDict definition %s must be a bottom zone - the BaselineOvershoot must be negative, not positive." % (self.DictName))
+
 		blueKeyList = [kBlueValueKeys, kOtherBlueValueKeys]
 		bluePairListNames = [kFontDictBluePairsName, kFontDictOtherBluePairsName]
 		blueFieldNames = 	[kFontDictBluesName, kFontDictOtherBluesName]
@@ -181,7 +182,7 @@ class FDDict:
 							zonePos = eval("self.BaselineYCoord")
 							zonePos = int(zonePos)
 							tempKey = "BaselineYCoord"
-						else:	
+						else:
 							for posSuffix in ["", "Height", "Baseline"]:
 								tempKey = "%s%s" % (baseName, posSuffix)
 								try:
@@ -197,24 +198,24 @@ class FDDict:
 							bottomPos = zonePos + width
 							isBottomZone = 1
 							if (i == 0) and (key != "BaselineOvershoot"):
-								print "Error: FontDict %s. Zone %s is a top zone, and the width (%s)  must be positive." %  (self.DictName, tempKey, width)
+								print("Error: FontDict %s. Zone %s is a top zone, and the width (%s)  must be positive." %  (self.DictName, tempKey, width))
 						else:
 							bottomPos = zonePos
 							topPos = zonePos + width
 							isBottomZone = 0
 							if (i == 1):
-								print "Error: FontDict %s. Zone %s is a bottom zone, and so the width (%s) must be negative.." %  (self.DictName, tempKey, width)
+								print("Error: FontDict %s. Zone %s is a bottom zone, and so the width (%s) must be negative.." %  (self.DictName, tempKey, width))
 						bluePairList.append((topPos, bottomPos, tempKey, self.DictName, isBottomZone))
-						
+
 			if bluePairList:
 				bluePairList.sort()
 				prevPair = bluePairList[0]
 				zoneBuffer = 2*self.BlueFuzz + 1
 				for pair in bluePairList[1:]:
 					if prevPair[0] > pair[1]:
-						print "Error in FDDict %s. The top of zone %s at %s overlaps zone %s with the bottom at %s." % (self.DictName, prevPair[2], prevPair[0], pair[2], pair[1])
+						print("Error in FDDict %s. The top of zone %s at %s overlaps zone %s with the bottom at %s." % (self.DictName, prevPair[2], prevPair[0], pair[2], pair[1]))
 					elif abs(pair[1] -  prevPair[0]) <= zoneBuffer:
-						print "Error in FDDict %s. The top of zone %s at %s is within the min spearation limit (%s units) of zone %s with the bottom at %s." % (self.DictName, prevPair[2], prevPair[0], zoneBuffer, pair[2], pair[1])
+						print("Error in FDDict %s. The top of zone %s at %s is within the min spearation limit (%s units) of zone %s with the bottom at %s." % (self.DictName, prevPair[2], prevPair[0], zoneBuffer, pair[2], pair[1]))
 					prevPair = pair
 				exec("self.%s = %s" % (pairFieldName, bluePairList))
 				bluesList = []
@@ -226,9 +227,9 @@ class FDDict:
 				#print self.DictName, bluePairList
 				#print "\t", bluesList
 				exec("self.%s = \"%s\"" % (fieldName, bluesList))
-			
+
 		return
-		
+
 	def __repr__(self):
 		printStr = []
 		keys = dir(self)
@@ -248,7 +249,7 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName, blueF
 
 	# Get rid of comments.
 	data = re.sub(r"#[^\r\n]+[\r\n]", "", data)
-	
+
 	# We assume that no items contain whitespace.
 	tokenList = data.split()
 	numTokens = len(tokenList)
@@ -260,9 +261,9 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName, blueF
 	glyphSetState = 4
 	fdIndexDict = {}
 	lenSrcFontDictList = len(fontDictList)
-	
+
 	state = baseState
-	
+
 	while i < numTokens:
 		token = tokenList[i]
 		i += 1
@@ -285,15 +286,15 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName, blueF
 						# save dict and FDIndex.
 						fdIndexDict[dictName] = len(fontDictList)
 						fontDictList.append(fdDict)
-					
+
 				elif token == kGlyphSetToken:
 					state = glyphSetState
 					setName = tokenList[i]
 					i += 1
 				else:
 					raise FontInfoParseError("Unrecognized token after \"begin\" keyword: %s" % (token))
-					
-					
+
+
 			elif token in kBaseStateTokens:
 				# Discard value for base token.
 				token = tokenList[i]
@@ -302,7 +303,7 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName, blueF
 					state = inValue
 			else:
 				raise FontInfoParseError("Unrecognized token in base state: %s" % (token))
-				
+
 		elif state == inValue:
 			# We are processing a list value for a base state token.
 			if token[-1] in  ["]",  ")"]:
@@ -316,52 +317,52 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName, blueF
 				state = dictState # found the last token in the list value.
 
 		elif state == glyphSetState:
-			 # "end GlyphSet" marks end of set, else we are adding a new glyph name.
-			 if (token == kEndToken) and tokenList[i] == kGlyphSetToken:
-			 	if tokenList[i+1] != setName:
-			 		raise FontInfoParseError("End glyph set name \"%s\" does not match begin glyph set name \"%s\"." % ( tokenList[i+1], setName))
-			 	state = baseState
-			 	i += 2
-			 	setName = None
-			 else:
-			 	# Need to add matching glyphs.
-			 	gi = 0
-			 	for gname in glyphList:
-			 		if re.search(token, gname):
-			 			fdGlyphDict[gname] = [fdIndexDict[setName], gi] # fdIndex value
-			 		gi += 1
-			 	
+			# "end GlyphSet" marks end of set, else we are adding a new glyph name.
+			if (token == kEndToken) and tokenList[i] == kGlyphSetToken:
+				if tokenList[i+1] != setName:
+					raise FontInfoParseError("End glyph set name \"%s\" does not match begin glyph set name \"%s\"." % ( tokenList[i+1], setName))
+				state = baseState
+				i += 2
+				setName = None
+			else:
+				# Need to add matching glyphs.
+				gi = 0
+				for gname in glyphList:
+					if re.search(token, gname):
+						fdGlyphDict[gname] = [fdIndexDict[setName], gi] # fdIndex value
+					gi += 1
+
 		elif state == dictState:
-			 # "end FDDict" marks end of set, else we are adding a new glyph name.
-			 if (token == kEndToken) and tokenList[i] == kFDDictToken:
-			 	if tokenList[i+1] != dictName:
-			 		raise FontInfoParseError("End FDDict  name \"%s\" does not match begin FDDict name \"%s\"." % ( tokenList[i+1], dictName))
-			 	if fdDict.DominantH == None:
-			 		print "Warning: the FDDict '%s' in fontinfo has no DominantH value" % (dictName)
-			 	if fdDict.DominantV == None:
-			 		print "Warning: the FDDict '%s' in fontinfo has no DominantV value" % (dictName)
+			# "end FDDict" marks end of set, else we are adding a new glyph name.
+			if (token == kEndToken) and tokenList[i] == kFDDictToken:
+				if tokenList[i+1] != dictName:
+					raise FontInfoParseError("End FDDict  name \"%s\" does not match begin FDDict name \"%s\"." % ( tokenList[i+1], dictName))
+				if fdDict.DominantH == None:
+					print("Warning: the FDDict '%s' in fontinfo has no DominantH value" % (dictName))
+				if fdDict.DominantV == None:
+					print("Warning: the FDDict '%s' in fontinfo has no DominantV value" % (dictName))
 				if (fdDict.BlueFuzz == None):
 					fdDict.BlueFuzz = blueFuzz
-			 	fdDict.buildBlueLists()
-			 	if fdDict.FontName == None:
-			 		fdDict.FontName = fontName
-			 	state = baseState
-			 	i += 2
-			 	dictName = None
-			 	fdDict = None
-			 else:
-			 	if token in kFDDictKeys:
-			 		value = tokenList[i]
-			 		i +=1
+				fdDict.buildBlueLists()
+				if fdDict.FontName == None:
+					fdDict.FontName = fontName
+				state = baseState
+				i += 2
+				dictName = None
+				fdDict = None
+			else:
+				if token in kFDDictKeys:
+					value = tokenList[i]
+					i +=1
 					if (value[0] in ["[",  "("]) and (not value[-1] in ["]",  ")"]):
 						state = inDictValue
 						dictValueList = [value]
-			 			dictKeyWord = token
+						dictKeyWord = token
 					else:
-			 			exec("fdDict.%s = \"%s\"" % (token, value))
-			 	else:
-			 		raise FontInfoParseError("FDDict key \"%s\" in fdDict named \"%s\" is not recognised." % ( token, dictName))
-			 	
+						exec("fdDict.%s = \"%s\"" % (token, value))
+				else:
+					raise FontInfoParseError("FDDict key \"%s\" in fdDict named \"%s\" is not recognised." % ( token, dictName))
+
 	if lenSrcFontDictList != len(fontDictList):
 		# There are some FDDict definitions. This means that we need to fix the default fontDict, inherited from the source font,
 		# so that it has blues zones that will not affect hinting, e.g outside of the Font BBox. We do this becuase if there are
@@ -382,13 +383,13 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName, blueF
 		gi = 0
 		for gname in glyphList:
 			if not fdGlyphDict.has_key(gname):
-			 	fdGlyphDict[gname] = [0, gi]
+				fdGlyphDict[gname] = [0, gi]
 			gi += 1
-					
+
 	return fdGlyphDict, fontDictList, finalFDict
 
-	
-	
+
+
 def mergeFDDicts(prevDictList, privateDict):
 	# Extract the union of the stem widths and zones from the list of FDDicts, and
 	# replace the current values in the topDict.
@@ -408,7 +409,7 @@ def mergeFDDicts(prevDictList, privateDict):
 				continue
 			for topPos, bottomPos, zoneName, dictName, isBottomZone in bluePairList:
 				zoneDict[ (topPos, bottomPos) ] = (isBottomZone, zoneName, prefDDict.DictName)
-				
+
 		# Now for the stem widths.
 		stemNameList = ["DominantH", "DominantV"]
 		stemDictList = [dominantHDict, dominantVDict]
@@ -422,9 +423,9 @@ def mergeFDDicts(prevDictList, privateDict):
 				dList = map(int, dList)
 				for width in dList:
 					stemDict[width] = prefDDict.DictName
-		
-			
-	
+
+
+
 	# Now we have collected all the stem widths and zones from all the dicts. See if we can merge them.
 	goodBlueZoneList = []
 	goodOtherBlueZoneList = []
@@ -456,9 +457,9 @@ def mergeFDDicts(prevDictList, privateDict):
 		zoneBuffer = 2*prefDDict.BlueFuzz + 1
 		for zone in zoneList[1:]:
 			if (ki == 0) and (len(zoneList) >= 14):
-				print "Warning. For final FontDict, skipping BlueValues alignment zone %s from FDDict %s because there are already 7 zones." % (zoneName, fdDictName)
+				print("Warning. For final FontDict, skipping BlueValues alignment zone %s from FDDict %s because there are already 7 zones." % (zoneName, fdDictName))
 			elif (ki == 1) and (len(zoneList) >= 5):
-				print "Warning. For final FontDict, skipping OtherBlues alignment zone %s from FDDict %s because there are already 5 zones." % (zoneName, fdDictName)
+				print("Warning. For final FontDict, skipping OtherBlues alignment zone %s from FDDict %s because there are already 5 zones." % (zoneName, fdDictName))
 			if zone[1] <  prevZone[0]:
 				curEntry = blueZoneDict[zone]
 				prevEntry = blueZoneDict[prevZone]
@@ -466,7 +467,7 @@ def mergeFDDicts(prevDictList, privateDict):
 				fdDictName = curEntry[2]
 				prevZoneName = prevEntry[1]
 				prevFDictName = prevEntry[2]
-				print "Warning. For final FontDict, skipping zone %s in FDDict %s because it overlaps with zone %s in FDDict %s." % (zoneName, fdDictName, prevZoneName, prevFDictName)
+				print("Warning. For final FontDict, skipping zone %s in FDDict %s because it overlaps with zone %s in FDDict %s." % (zoneName, fdDictName, prevZoneName, prevFDictName))
 			elif abs(zone[1] -  prevZone[0]) <= zoneBuffer:
 				curEntry = blueZoneDict[zone]
 				prevEntry = blueZoneDict[prevZone]
@@ -474,13 +475,13 @@ def mergeFDDicts(prevDictList, privateDict):
 				fdDictName = curEntry[2]
 				prevZoneName = prevEntry[1]
 				prevFDictName = prevEntry[2]
-				print "Warning. For final FontDict, skipping zone %s in FDDict %s because it is within the minimum separation allowed (%s units) of %s in FDDict %s." % (zoneName, fdDictName, zoneBuffer, prevZoneName, prevFDictName)
+				print("Warning. For final FontDict, skipping zone %s in FDDict %s because it is within the minimum separation allowed (%s units) of %s in FDDict %s." % (zoneName, fdDictName, zoneBuffer, prevZoneName, prevFDictName))
 			else:
 				goodZoneList.append(zone[1])
 				goodZoneList.append(zone[0])
-				
+
 			prevZone = zone
-		
+
 		stemList = stemDict.keys()
 		if not stemList:
 			continue
@@ -492,7 +493,7 @@ def mergeFDDicts(prevDictList, privateDict):
 			if abs(stem  - prevStem) < 2:
 				fdDictName = stemDict[stem]
 				prevFDictName = stemDict[prevStem]
-				print "Warning. For final FontDict, skipping stem width %s in FDDict %s because it overlaps in coverage with stem width %s in FDDict %s." % (stem, fdDictName, prevStem, prevFDictName)
+				print("Warning. For final FontDict, skipping stem width %s in FDDict %s because it overlaps in coverage with stem width %s in FDDict %s." % (stem, fdDictName, prevStem, prevFDictName))
 			else:
 				goodStemList.append(stem)
 			prevStem = stem
@@ -510,20 +511,20 @@ def mergeFDDicts(prevDictList, privateDict):
 		privateDict.StemSnapV = goodVStemList
 	else:
 		privateDict.StemSnapV = None
-	return 
-	
+	return
+
 
 def getGlyphList(fPath, removeNotdef = 0):
 	command = "tx -dump -4 \"%s\" 2>&1" % (fPath)
 	data = FDKUtils.runShellCmd(command)
 	if not data:
-		print "Error: Failed getting glyph names from  %s with tx." % (fPath)
+		print("Error: Failed getting glyph names from  %s with tx." % (fPath))
 		return []
-	
+
 	nameList = re.findall(r"[\r\n]glyph.+?{([^,]+),", data) # initial newline keeps us from picking up the first column header  line
 	if not nameList:
-		print "Error: Failed getting glyph names from  %s with tx." % (fPath)
-		print data
+		print("Error: Failed getting glyph names from  %s with tx." % (fPath))
+		print(data)
 		return []
 	if removeNotdef:
 		nameList.remove(".notdef")
@@ -535,24 +536,24 @@ def getFontBBox(fPath):
 	data = FDKUtils.runShellCmd(command)
 	if not data:
 		raise FontInfoParseError("Error: Failed getting  log from tx from %, when tryingg to get FontBBox." % (fPath))
-	
-	m = re.search(r"bbox[^{]+{([^}]+)}", data) 
+
+	m = re.search(r"bbox[^{]+{([^}]+)}", data)
 	if not m:
-		print data
+		print(data)
 		raise FontInfoParseError("Error: Failed finding FontBBox in tx log from  %s." % (fPath))
 	fontBBox = m.group(1).split(",")
 	fontBBox = map(int, fontBBox)
 	return fontBBox
-	
+
 def getFontName(fPath):
 	command = "tx -dump -0 \"%s\" 2>&1" % (fPath)
 	data = FDKUtils.runShellCmd(command)
 	if not data:
 		raise FontInfoParseError("Error: Failed getting  log from tx from %, when tryin to get FontName." % (fPath))
-		
-	m = re.search(r"FontName\s+\"([^\"]+)", data) 
+
+	m = re.search(r"FontName\s+\"([^\"]+)", data)
 	if not m:
-		print data
+		print(data)
 		raise FontInfoParseError("Error: Failed finding FontName in tx log from  %s." % (fPath))
 	return m.group(1)
 
@@ -562,8 +563,8 @@ def getBlueFuzz(fPath):
 	data = FDKUtils.runShellCmd(command)
 	if not data:
 		raise FontInfoParseError("Error: Failed getting  log from tx from %, when trying to get FontName." % (fPath))
-		
-	m = re.search(r"BlueFuzz\s+(\d+(?:\.\d+)*)", data) 
+
+	m = re.search(r"BlueFuzz\s+(\d+(?:\.\d+)*)", data)
 	if m:
 		blueFuzz = int(m.group(1))
 	return blueFuzz
@@ -590,20 +591,20 @@ def makeSortedGlyphSets(glyphList, fdGlyphDict, fontDictList):
 			glyphSet = [glyphTag]
 			glyphSetList.append(glyphSet)
 	if len(glyphSetList) <2:
-		print "Warning: There is only one hint dict. Maybe the fontinfo file has not been edited to add hint dict info."
+		print("Warning: There is only one hint dict. Maybe the fontinfo file has not been edited to add hint dict info.")
 	return glyphSetList
 
 def fixFontDict(tempPath, fdDict):
-	
+
 	txtPath = tempPath + ".txt"
 	command = "detype1 \"%s\" \"%s\" 2>&1" % (tempPath, txtPath)
 	log = FDKUtils.runShellCmd(command)
 	if log:
-		print log
+		print(log)
 	fp = open(txtPath, "rt")
 	data = fp.read()
 	fp.close()
-	
+
 	# fix font name.
 	# We always search of it, as it is always present, and we can use the following
 	# white space to get the file new line.
@@ -614,7 +615,7 @@ def fixFontDict(tempPath, fdDict):
 	if fdDict.FontName:
 		target = "/FontName /%s def" % (fdDict.FontName)
 		data = data[:m.start(1)] + target +  data[m.end(1):]
-	
+
 	# fix em square
 	if fdDict.OrigEmSqUnits:
 		m = re.search(r"/FontMatrix\s+\[.+?\]\s+def", data)
@@ -644,7 +645,7 @@ def fixFontDict(tempPath, fdDict):
 	else:
 		if m:
 			data = data[:m.start()] + data[m.end():]
-	
+
 	# LanguageGroup. Remove LanguageGroup entry if fdDict.LanguageGroup is not defined, else set it.
 	if fdDict.LanguageGroup:
 		m = re.search(r"/LanguageGroup\s+\d+\s+def", data)
@@ -658,7 +659,7 @@ def fixFontDict(tempPath, fdDict):
 		m = re.search(r"/LanguageGroup\s+\d+\s+def", data)
 		if m:
 			data = data[:m.start()] +  data[m.end():]
-	
+
 	# Fix BlueValues. Must be present.
 	if fdDict.BlueValues:
 		m = re.search(r"/BlueValues\s+\[.+?\]\s+def", data)
@@ -680,22 +681,22 @@ def fixFontDict(tempPath, fdDict):
 	else:
 		if m:
 			data = data[:m.start()] + data[m.end():]
-		
-	
+
+
 
 	fp = open(txtPath, "wt")
 	fp.write(data)
 	fp.close()
-	
+
 	command = "type1 \"%s\" \"%s\" 2>&1" % (txtPath, tempPath)
 	log = FDKUtils.runShellCmd(command)
 	if log:
-		print log
-	
+		print(log)
+
 	if not debug:
 		os.remove(txtPath)
 	return
-	
+
 def makeTempFonts(fontDictList, glyphSetList, fdGlyphDict, inputPath):
 	fontList = []
 	setIndex = 0
@@ -708,15 +709,15 @@ def makeTempFonts(fontDictList, glyphSetList, fdGlyphDict, inputPath):
 		command = "tx -t1 -g \"%s\" \"%s\" \"%s\" 2>&1" % (arg, inputPath, tempPath)
 		log = FDKUtils.runShellCmd(command)
 		if log:
-			print "Have log output in subsetting command for %s to %s with %s glyphs." % (inputPath, tempPath, len(glyphList) )
-			print log
+			print("Have log output in subsetting command for %s to %s with %s glyphs." % (inputPath, tempPath, len(glyphList) ))
+			print(log)
 		fdIndex = fdGlyphDict[glyphList[0]][0]
-			
+
 		fdDict = fontDictList[fdIndex]
 		fixFontDict(tempPath, fdDict)
 		fontList.append(tempPath)
 		if debug:
-			print glyphList[0], len(glyphList), fdGlyphDict[glyphList[0]], tempPath
+			print(glyphList[0], len(glyphList), fdGlyphDict[glyphList[0]], tempPath)
 	return fontList
 
 def makeCIDFontInfo(fontPath, cidfontinfoPath):
@@ -730,7 +731,7 @@ def makeCIDFontInfo(fontPath, cidfontinfoPath):
 	command="tx -0 \"%s\" 2>&1" % (fontPath)
 	report = FDKUtils.runShellCmd(command)
 	if ("fatal" in report) or ("error" in report):
-		print report
+		print(report)
 		raise FontInfoParseError("Failed to dump font dict using tx from font '%s'" % (fontPath))
 
 	for entry in txFields:
@@ -741,14 +742,14 @@ def makeCIDFontInfo(fontPath, cidfontinfoPath):
 	cfiDict["Registry"] = "Adobe"
 	cfiDict["Ordering"] = "Identity"
 	cfiDict["Supplement"] = "0"
-	
+
 	for entry in txFields:
 		if entry[2]:
 			cfiDict[entry[1]] = entry[2]
 		elif entry[1] in kRequiredCIDFontInfoFields:
 			haveError = 1
-			print "Error: did not find required info '%s' in tx dump of font '%s'." % (entry[1], fontPath) 
-	
+			print("Error: did not find required info '%s' in tx dump of font '%s'." % (entry[1], fontPath))
+
 
 	try:
 		fp = open(cidfontinfoPath, "wt")
@@ -766,14 +767,14 @@ def makeCIDFontInfo(fontPath, cidfontinfoPath):
 		msg = "Error. Could not open and write file '%s'" % (cidfontinfoPath)
 		raise FontInfoParseError(msg)
 	return
-	
+
 def makeGAFile(gaPath, fontPath, glyphList, fontDictList, fdGlyphDict, removeNotdef):
 	lineList = [""]
 	setList = getGlyphList(fontPath, removeNotdef)
 	if not setList:
-		print setList, fontPath, removeNotdef
+		print(setList, fontPath, removeNotdef)
 		raise FontParseError("Program Error - call Read Roberts. In makeGAFile.")
-		
+
 	fdIndex = fdGlyphDict[setList[0]][0] # [fdIndex value, gi]
 	fdDict = fontDictList[fdIndex]
 	langGroup = "" # values for default dict is empty string.
@@ -791,11 +792,11 @@ def makeGAFile(gaPath, fontPath, glyphList, fontDictList, fdGlyphDict, removeNot
 	lineList.append("")
 	gaText = "mergeFonts %s%s%s" % (dictName, langGroup, os.linesep.join(lineList))
 
-	gf = file(gaPath, "wb")
+	gf = open(gaPath, "wb")
 	gf.write(gaText)
 	gf.close()
 	return
-	
+
 def mergeFonts(inputFontPath, outputPath, fontList, glyphList, fontDictList, fdGlyphDict):
 	cidfontinfoPath = "%s.temp.cidfontinfo" % (inputFontPath)
 	makeCIDFontInfo(inputFontPath, cidfontinfoPath)
@@ -803,9 +804,9 @@ def mergeFonts(inputFontPath, outputPath, fontList, glyphList, fontDictList, fdG
 	tempfileList = []
 	i = 0
 	if debug:
-		print "Merging temp fonts:", 
+		print("Merging temp fonts:", end=' ')
 	for fontPath in fontList:
-		print ".",
+		print(".", end=' ')
 		sys.stdout.flush()
 		gaPath = fontPath + ".ga"
 		dstPath = "%s.temp.merge.%s" % (inputFontPath, i)
@@ -817,8 +818,8 @@ def mergeFonts(inputFontPath, outputPath, fontList, glyphList, fontDictList, fdG
 			command = "mergeFonts -std -cid \"%s\" \"%s\" \"%s\"  \"%s\" 2>&1"  % (cidfontinfoPath, dstPath, gaPath, fontPath)
 		log = FDKUtils.runShellCmd(command)
 		if debug:
-			print command
-			print log
+			print(command)
+			print(log)
 		if "rror" in log:
 			msg = "Error merging font %s. Log: %s." % (fontPath, log)
 			raise FontInfoParseError(msg)
@@ -826,8 +827,8 @@ def mergeFonts(inputFontPath, outputPath, fontList, glyphList, fontDictList, fdG
 		lastFont = dstPath
 		tempfileList.append(gaPath)
 		tempfileList.append(dstPath)
-		
-	print ""		
+
+	print("")
 	os.rename(dstPath, outputPath)
 	if not debug:
 		for path in tempfileList:
@@ -835,7 +836,7 @@ def mergeFonts(inputFontPath, outputPath, fontList, glyphList, fontDictList, fdG
 				os.remove(path)
 		os.remove(cidfontinfoPath)
 	return
-	
+
 def convertFontToCID(inputPath, outputPath):
 	# Check the fontinfo file, and add any other font dicts
 	srcFontInfo = os.path.dirname(inputPath)
@@ -846,7 +847,7 @@ def convertFontToCID(inputPath, outputPath):
 		fi.close()
 	else:
 		return
-	
+
 
 	fontDictList = [FDDict()] # Start with a uninitialized entry for the default FD Dict 0.
 	glyphList = getGlyphList(inputPath)
@@ -856,7 +857,7 @@ def convertFontToCID(inputPath, outputPath):
 	maxY = fontBBox[3]
 	minY = fontBBox[1]
 	fdGlyphDict, fontDictList, finalFDict = parseFontInfoFile(fontDictList, fontInfoData, glyphList, maxY, minY, fontName, blueFuzz)
-	
+
 	glyphSetList = makeSortedGlyphSets(glyphList, fdGlyphDict, fontDictList)
 	fontList = makeTempFonts(fontDictList, glyphSetList, fdGlyphDict, inputPath)
 	mergeFonts(inputPath, outputPath, fontList, glyphList, fontDictList, fdGlyphDict)
@@ -869,7 +870,7 @@ def convertFontToCID(inputPath, outputPath):
 
 def mergeFontToCFF(srcPath, outputPath, doSubr):
 	# We assume that srcPath is a type 1 font,and outputPath is an OTF font.
-	
+
 	# First, convert src font to cff, and subroutinize it if so requested.
 	tempPath = srcPath + ".temp.cff"
 	subrArg = ""
@@ -878,9 +879,9 @@ def mergeFontToCFF(srcPath, outputPath, doSubr):
 	command="tx -cff +b%s \"%s\" \"%s\" 2>&1" % (subrArg, srcPath, tempPath)
 	report = FDKUtils.runShellCmd(command)
 	if ("fatal" in report) or ("error" in report):
-		print report
+		print(report)
 		raise FontInfoParseError("Failed to convert font '%s' to CFF." % (fontPath))
-		
+
 	# Now merge it into the output file.
 	command="sfntedit -a CFF=\"%s\" \"%s\" 2>&1" % (tempPath, outputPath)
 	report = FDKUtils.runShellCmd(command)
@@ -888,7 +889,7 @@ def mergeFontToCFF(srcPath, outputPath, doSubr):
 		if os.path.exists(tempPath):
 			os.remove(tempPath)
 	if ("fatal" in report) or ("error" in report):
-		print report
+		print(report)
 		raise FontInfoParseError("Failed to convert font '%s' to CFF." % (fontPath))
 
 def main():
@@ -901,4 +902,4 @@ def main():
 if __name__=='__main__':
 	main()
 
-	
+

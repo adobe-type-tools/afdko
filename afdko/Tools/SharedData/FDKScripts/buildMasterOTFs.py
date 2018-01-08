@@ -3,6 +3,7 @@ from __future__ import print_function, division, absolute_import
 import os
 import shutil
 import subprocess
+import traceback
 import sys
 import tempfile
 
@@ -173,14 +174,14 @@ def testGlyphSetsCompatible(dsPath):
 def main(args=None):
 	if args is None:
 		args = sys.argv[1:]
-
+	if not args:
+		args = ["-h", "-u"]
 	if '-u' in args:
 		print(__usage__)
 		return
 	if '-h' in args:
 		print(__help__)
 		return
-
 	(dsPath,) = args
 
 	dsDirPath = os.path.dirname(dsPath)

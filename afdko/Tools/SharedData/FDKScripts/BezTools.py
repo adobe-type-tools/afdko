@@ -1,3 +1,16 @@
+from __future__ import print_function, absolute_import
+import sys
+
+if sys.version_info > (3,):
+	long = int
+	longType = long
+try:
+	from types import FloatType, StringType, LongType
+except:
+	FloatType = float
+	StringType = str
+	LongType = int
+
 """
 BezTools.py v 1.13 July 11 2017
 
@@ -7,19 +20,17 @@ Used by AC and focus/CheckOutlines.
 __copyright__ = """Copyright 2014-2017 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
-import sys
 import re
 import time
 import os
-import FDKUtils
-import ConvertFontToCID
+from . import FDKUtils
+from . import ConvertFontToCID
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
 from fontTools.pens.basePen import BasePen
-from types import FloatType, StringType, LongType
 debug = 0
 def debugMsg(*args):
 	if debug:
-		print args
+		print(args)
 kStackLimit = 46
 kStemLimit = 96
 
@@ -59,7 +70,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
 		self.subrLevel -= 1
 		if (not self.closePathSeen) and (self.subrLevel == 0):
 			 self.closePath()
-			
+
 	def rMoveTo(self, point):
 		point = self._nextPoint(point)
 		if not self.firstMarkingOpSeen :
@@ -213,7 +224,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
 
 		for i in range(numhhints/2):
 			if hintOn(i, hintMaskBytes):
-				curhhints.extend(self.hhints[2*i:2*i+2])	
+				curhhints.extend(self.hhints[2*i:2*i+2])
 		numvhints = len(self.vhints)
 		for i in range(numvhints/2):
 			if hintOn(i + numhhints/2, hintMaskBytes):
@@ -236,20 +247,20 @@ class T2ToBezExtractor(T2OutlineExtractor):
 			strout = ""
 			mask = [strout + hex(ord(ch)) for ch in self.hintMaskString]
 			debugMsg(bezCommand, mask, curhhints, curvhints, args)
-	
+
 			self.bezProgram.append("beginsubr snc\n")
 			i = 0
 			for hint in curhhints:
 				self.bezProgram.append(str(hint))
 				if i %2:
 					self.bezProgram.append("rb\n")
-				i +=1 
+				i +=1
 			i = 0
 			for hint in curvhints:
 				self.bezProgram.append(str(hint))
 				if i %2:
 					self.bezProgram.append("ry\n")
-				i +=1 
+				i +=1
 			self.bezProgram.extend(["endsubr enc\n", "newcolors\n"])
 		return self.hintMaskString, index
 
@@ -277,7 +288,7 @@ def convertT2GlyphToBez(t2CharString, removeHints = 0, allowDecimals = 0):
 	else:
 		t2Wdth = None
 	return "".join(extractor.bezProgram), extractor.hintCount > 0, t2Wdth
-	
+
 class HintMask:
 	# class used to collect hints for the current hint mask when converting bez to T2.
 	def __init__(self, listPos):
@@ -362,7 +373,7 @@ def makeHintList(hints, needHintMasks, isH):
 	else:
 		if isH:
 			op = "hstem"
-		else: 
+		else:
 			op = "vstem"
 		hintList.append(op)
 
@@ -374,15 +385,15 @@ bezToT2 = {
 		"rmt" : 'rmoveto',
 		 "hmt" : 'hmoveto',
 		"vmt" : 'vmoveto',
-		"dt" : 'rlineto', 
-		"rdt" : 'rlineto', 
-		"hdt" : "hlineto", 
-		"vdt" : "vlineto", 
-		"ct" : 'rrcurveto', 
-		"rct" : 'rrcurveto', 
+		"dt" : 'rlineto',
+		"rdt" : 'rlineto',
+		"hdt" : "hlineto",
+		"vdt" : "vlineto",
+		"ct" : 'rrcurveto',
+		"rct" : 'rrcurveto',
 		"rcv" : 'rrcurveto',  # Morisawa's alternate name for 'rct'.
 		"vhct": 'vhcurveto',
-		"hvct": 'hvcurveto', 
+		"hvct": 'hvcurveto',
 		"cp" : "",
 		"ed" : 'endchar'
 		}
@@ -411,7 +422,7 @@ def optimizeT2Program(t2List):
 					newT2List.append([arglist[:-1], pendingOp])
 					arglist = [dy]
 					pendingOp = "vlineto"
-				
+
 			else:
 				if  pendingOp != kNoOp:
 					newT2List.append([arglist, pendingOp])
@@ -475,7 +486,7 @@ def optimizeT2Program(t2List):
 					newT2List.append([arglist, "rcurveline"])
 					arglist = []
 					pendingOp = sequenceOp = kNoOp
-					
+
 
 			elif  (pendingOp == op) and (sequenceOp == op):
 				arglist.extend([dx,dy])
@@ -633,7 +644,7 @@ def optimizeT2Program(t2List):
 					newT2List.append([arglist, pendingOp])
 					arglist = []
 					pendingOp = sequenceOp = kNoOp
-						
+
 			elif dy3 == 0: #  dx1 dy1 dx2 dy2 dx3 - hhcurveto (odd args)
 					if pendingOp != kNoOp:
 						newT2List.append([arglist, pendingOp])
@@ -697,22 +708,22 @@ def optimizeT2Program(t2List):
 
 			if noFlex:
 				if 0:
-					dx = dx1 + dx2 + dx3 + dx4 + dx5 
+					dx = dx1 + dx2 + dx3 + dx4 + dx5
 					dy = dy1 + dy2 + dy3 + dy4 + dy5
-	
+
 					if ((dy + dy6) == 0) or ((dx+dx6) == 0):
 						if abs(dx) > abs(dy):
 							lastArg = dx6
 						else:
 							lastArg = dy6
-	
-						newT2List.append([args[:10] + [lastArg], "flex1"]) 
+
+						newT2List.append([args[:10] + [lastArg], "flex1"])
 						newLastArg = lastArg
-					else:		
+					else:
 						newT2List.append([args, "flex"])
 				else:
 					newT2List.append([args, "flex"])
-				
+
 			arglist = []
 			pendingOp = sequenceOp = kNoOp
 
@@ -744,7 +755,7 @@ def needsDecryption(bezDataBuffer):
 
 LEN_IV  = 4 #/* Length of initial random byte sequence */
 def  bezDecrypt(bezDataBuffer):
-	r = 11586L
+	r = long(11586)
 	i = 0 # input buffer byte position index
 	lenBuffer = len(bezDataBuffer)
 	byteCnt = 0 # output buffer byte count.
@@ -765,19 +776,19 @@ def  bezDecrypt(bezDataBuffer):
 				return newBuffer
 
 			if not ch.islower():
-				ch = ch.lower() 
+				ch = ch.lower()
 			if ch.isdigit():
-				ch = ord(ch) - ord('0') 
+				ch = ord(ch) - ord('0')
 			else:
 				ch = ord(ch) - ord('a') + 10
-			cipher = (cipher << 4) & 0xFFFFL
+			cipher = (cipher << 4) & long(0xFFFF)
 			cipher = cipher | ch
 			i += 1
 
 		plain = cipher ^ (r >> 8)
-		r = (cipher + r) * 902381661L + 341529579L
-		if r  > 0xFFFFL:
-			r = r & 0xFFFFL
+		r = (cipher + r) * long(902381661) + long(341529579)
+		if r  > long(0xFFFF):
+			r = r & long(0xFFFF)
 		byteCnt +=1
 		if (byteCnt > LEN_IV):
 			newBuffer += chr(plain)
@@ -813,14 +824,14 @@ def checkStem3ArgsOverlap(argList, hintList):
 				if (x1 > y0) and (x1 < y1):
 					return kHintArgsOverLap
 	return status
-		
+
 
 def buildControlMaskList(hStem3List, vStem3List):
 	""" The deal is that a char string will use either counter hints, or stem 3 hints, but
 	 not both. We examine all the arglists. If any are not a multiple of 3, then we use all the arglists as is as the args to a counter hint.
 	 If all are a multiple of 3, then we divide them up into triplets, adn add a separate conter mask for each unique arg set.
 	"""
-		
+
 	vControlMask =  HintMask(0)
 	hControlMask = vControlMask
 	controlMaskList = [hControlMask]
@@ -832,13 +843,13 @@ def buildControlMaskList(hStem3List, vStem3List):
 				overlapStatus = kHintArgsMatch
 				break
 			overlapStatus = checkStem3ArgsOverlap(argList, mask.hList)
-			if overlapStatus == kHintArgsMatch: # The args match args in this control mask. 
-				break				
-		if overlapStatus != kHintArgsMatch: 
+			if overlapStatus == kHintArgsMatch: # The args match args in this control mask.
+				break
+		if overlapStatus != kHintArgsMatch:
 			mask = HintMask(0)
 			controlMaskList.append(mask)
 			mask.hList.extend(argList)
-			
+
 	for argList in vStem3List:
 		for mask in controlMaskList:
 			overlapStatus = kHintArgsNoOverlap
@@ -847,15 +858,15 @@ def buildControlMaskList(hStem3List, vStem3List):
 				overlapStatus = kHintArgsMatch
 				break
 			overlapStatus = checkStem3ArgsOverlap(argList, mask.vList)
-			if overlapStatus == kHintArgsMatch: # The args match args in this control mask. 
-				break				
-		if overlapStatus != kHintArgsMatch: 
+			if overlapStatus == kHintArgsMatch: # The args match args in this control mask.
+				break
+		if overlapStatus != kHintArgsMatch:
 			mask = HintMask(0)
 			controlMaskList.append(mask)
 			mask.vList.extend(argList)
-			
+
 	return controlMaskList
-				
+
 def makeRelativeCTArgs(argList, curX, curY):
 	newCurX = argList[4]
 	newCurY = argList[5]
@@ -868,7 +879,7 @@ def makeRelativeCTArgs(argList, curX, curY):
 	argList[0] -= curX
 	argList[1] -= curY
 	return argList, newCurX, newCurY
-	
+
 def convertBezToT2(bezString):
 	# convert bez data to a T2 outline program, a list of operator tokens.
 	#
@@ -878,7 +889,7 @@ def convertBezToT2(bezString):
 	# after all operators have been processed, convert HintMask items into hintmask ops and hintmask bytes
 	# add all hints as prefix
 	# review operator list to optimize T2 operators.
-	
+
 	bezString = re.sub(r"%.+?\n", "", bezString) # supress comments
 	bezList = re.findall(r"(\S+)", bezString)
 	if not bezList:
@@ -952,7 +963,7 @@ def convertBezToT2(bezString):
 				if vhints[i] not in hintMask.vList:
 					hintMask.vList.append(vhints[i])
 			argList = []
-			
+
 		elif token == "rm": # vstem3 hints are vhints
 			try:
 				i = vhints.index(argList)
@@ -962,14 +973,14 @@ def convertBezToT2(bezString):
 			if hintMask:
 				if vhints[i] not in hintMask.vList:
 					hintMask.vList.append(vhints[i])
-					
+
 			if (lastPathOp != token) and vStem3Args:
 				# first rm, must be start of a new vstem3
 				# if we already have a set of vstems in vStem3Args, save them,
 				# and then cleae the vStem3Args so we can add the new set.
 				vStem3List.append(vStem3Args)
 				vStem3Args = []
-				
+
 			vStem3Args.append(argList)
 			argList = []
 			lastPathOp = token
@@ -982,7 +993,7 @@ def convertBezToT2(bezString):
 			if hintMask:
 				if hhints[i] not in hintMask.hList:
 					hintMask.hList.append(hhints[i])
-					
+
 			if (lastPathOp != token) and hStem3Args:
 				# first rv, must be start of a new h countermask
 				hStem3List.append(hStem3Args)
@@ -992,7 +1003,7 @@ def convertBezToT2(bezString):
 			argList = []
 			lastPathOp = token
 		elif token == "preflx1":
-			# the preflx1/  preflx2 sequence provides the same i as the flex sequence; the difference is that the 
+			# the preflx1/  preflx2 sequence provides the same i as the flex sequence; the difference is that the
 			#  preflx1/preflx2 sequence provides the argument values needed for building a Type1 string
 			# while the flex sequence is simply the 6 rcurveto points. Both sequences are always provided.
 			lastPathOp = token
@@ -1003,20 +1014,20 @@ def convertBezToT2(bezString):
 			argList = []
 		elif token == "flx":
 			lastPathOp = token
-			argList = argList[:12] 
-			t2List.append([argList + [50], "flex"]) 
+			argList = argList[:12]
+			t2List.append([argList + [50], "flex"])
 			argList = []
 		elif token == "flxa":
 			lastPathOp = token
 			argList1, curX, curY = makeRelativeCTArgs(argList[:6], curX, curY)
 			argList2, curX, curY = makeRelativeCTArgs(argList[6:], curX, curY)
 			argList = argList1 + argList2
-			t2List.append([argList[:12] + [50], "flex"]) 
+			t2List.append([argList[:12] + [50], "flex"])
 			argList = []
 		elif token == "sc":
 			lastPathOp = token
 			pass
-		else: 
+		else:
 			if token[-2:] in ["mt", "dt", "ct", "cv"]:
 				lastPathOp = token
 			t2Op = bezToT2.get(token,None)
@@ -1030,11 +1041,11 @@ def convertBezToT2(bezString):
 			if t2Op:
 				t2List.append([argList, t2Op])
 			elif t2Op == None:
-				print "Unhandled operation", argList, token
+				print("Unhandled operation", argList, token)
 				raise KeyError
 			argList = []
-			
-		
+
+
 	# add hints, if any
 	# Must be done at the end of op processing to make sure we have seen all the
 	# hints in the bez string.
@@ -1052,7 +1063,7 @@ def convertBezToT2(bezString):
 	t2Program = []
 	hhints.sort()
 	vhints.sort()
-	numHHints = len(hhints) 
+	numHHints = len(hhints)
 	numVHints =  len(vhints)
 	hintLimit = (kStackLimit-2)/2
 	if numHHints >=hintLimit:
@@ -1067,13 +1078,13 @@ def convertBezToT2(bezString):
 	if vhints:
 		isH = 0
 		t2Program += makeHintList(vhints, needHintMasks, isH)
-		
+
 	if vStem3List or hStem3List:
 		controlMaskList = buildControlMaskList(hStem3List, vStem3List)
 		for cMask in controlMaskList:
 			hBytes = cMask.maskByte(hhints, vhints)
 			t2Program.extend(["cntrmask", hBytes])
-		
+
 	if needHintMasks:
 		# If there is not a hintsub before any drawing operators, then
 		# add an initial first hint mask to the t2Program.
@@ -1093,7 +1104,7 @@ def convertBezToT2(bezString):
 			t2Program.extend(entry[0])
 			t2Program.append(entry[1])
 		except:
-			print "Failed to extend t2Program with entry", entry
+			print("Failed to extend t2Program with entry", entry)
 			raise KeyError
 
 	return t2Program
@@ -1120,22 +1131,22 @@ class CFFFontData:
 		self.charStrings = topDict.CharStrings
 		self.charStringIndex = self.charStrings.charStringsIndex
 		self.allowDecimalCoords = False
-		
+
 	def getGlyphList(self):
 		fontGlyphList = self.ttFont.getGlyphOrder()
 		return fontGlyphList
-		
+
 	def getUnitsPerEm(self):
 		unitsPerEm = "1000"
 		if hasattr(self.topDict, "FontMatrix"):
 			matrix = self.topDict.FontMatrix
 			unitsPerEm = "%s" % (int(round(1.0/matrix[0])))
 		return unitsPerEm
-	
+
 	def getPSName(self):
 		psName = self.cffTable.cff.fontNames[0]
 		return psName
-		
+
 	def convertToBez(self, glyphName, removeHints, beVerbose, doAll=False):
 		hasHints = 0
 		t2Wdth = None
@@ -1152,7 +1163,7 @@ class CFFFontData:
 				self.logMsg("Checking %s -- ," % (glyphName)) # output message when SEAC glyph is found
 			self.logMsg("Skipping %s: can't process SEAC composite glyphs." % (glyphName))
 			bezString = None
-		return bezString, t2Wdth, hasHints		
+		return bezString, t2Wdth, hasHints
 
 	def updateFromBez(self, bezData, glyphName, width, beVerbose):
 		t2Program = [width] + convertBezToT2(bezData)
@@ -1177,7 +1188,7 @@ class CFFFontData:
 		if inputPath == outFilePath:
 			overwriteOriginal = 1
 		tempPath = inputPath +  ".temp.ac"
-	
+
 		if fontType == 0: # OTF
 			if overwriteOriginal:
 				ttFont.save(tempPath)
@@ -1187,26 +1198,26 @@ class CFFFontData:
 						os.remove(inputPath)
 						os.rename(tempPath, inputPath)
 					except (OSError, IOError):
-						self.logMsg( "\t%s" %(traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1]))
+						self.logMsg( "\t%s" %(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])[-1]))
 						self.logMsg("Error: could not overwrite original font file path '%s'. Hinted font file path is '%s'." % (inputPath, tempPath))
 			else:
 				ttFont.save(outFilePath)
 				ttFont.close()
-	
+
 		else:
 			data = ttFont["CFF "].compile(ttFont)
 			if fontType == 1: # CFF
 				if overwriteOriginal:
-					tf = file(inputPath, "wb")
+					tf = open(inputPath, "wb")
 					tf.write(data)
 					tf.close()
 				else:
-					tf = file(outFilePath, "wb")
+					tf = open(outFilePath, "wb")
 					tf.write(data)
 					tf.close()
-	
+
 			elif  fontType == 2: # PS.
-				tf = file(tempPath, "wb")
+				tf = open(tempPath, "wb")
 				tf.write(data)
 				tf.close()
 				finalPath = outFilePath
@@ -1215,20 +1226,20 @@ class CFFFontData:
 				self.logMsg(report)
 				if "fatal" in report:
 					raise IOError("Failed to convert hinted font temp file with tx %s. Maybe target font font file '%s' is set to read-only. %s" % (tempPath, outFilePath, report))
-	
+
 			if os.path.exists(tempPath):
 				os.remove(tempPath)
 	def close(self):
 		self.ttFont.close()
-		
+
 	def getGlyphID(self, name):
 		gid = self.ttFont.getGlyphID(name)
 		return gid
-	
+
 	def isCID(self):
 		isCID = hasattr(self.topDict, "FDSelect")
 		return isCID
-		
+
 	def getFontInfo(self, fontPSName, inputPath, allow_no_blues, noFlex, vCounterGlyphs, hCounterGlyphs,fdIndex = 0):
 		# The AC library needs the global font hint zones and standard stem widths. Format them
 		# into a single  text string.
@@ -1239,31 +1250,31 @@ class CFFFontData:
 		else:
 			pDict = pTopDict
 		privateDict = pDict.Private
-	
+
 		fdDict = ConvertFontToCID.FDDict()
 		if  hasattr(privateDict, "LanguageGroup"):
 			fdDict.LanguageGroup = privateDict.LanguageGroup
 		else:
 			fdDict.LanguageGroup = "0"
-	
+
 		if  hasattr(pDict, "FontMatrix"):
 			fdDict.FontMatrix = pDict.FontMatrix
 		else:
 			fdDict.FontMatrix = pTopDict.FontMatrix
 		upm = int(1/fdDict.FontMatrix[0])
 		fdDict.OrigEmSqUnits = str(upm)
-	
+
 		if  hasattr(pTopDict, "FontName"):
 			fdDict.FontName = pDict.FontName # FontName
 		else:
 			fdDict.FontName = fontPSName
-	
+
 		low =  min( -upm*0.25, pTopDict.FontBBox[1] - 200)
 		high =  max ( upm*1.25, pTopDict.FontBBox[3] + 200)
 		# Make a set of inactive alignment zones: zones outside of the font bbox so as not to affect hinting.
 		# Used when src font has no BlueValues or has invalid BlueValues. Some fonts have bad BBOx values, so
 		# I don't let this be smaller than -upm*0.25, upm*1.25.
-		inactiveAlignmentValues = [low, low, high, high] 
+		inactiveAlignmentValues = [low, low, high, high]
 		if hasattr(privateDict, "BlueValues"):
 			blueValues = privateDict.BlueValues[:]
 			numBlueValues = len(privateDict.BlueValues)
@@ -1280,24 +1291,24 @@ class CFFFontData:
 				numBlueValues = len(blueValues)
 			else:
 				raise	ACFontError("Error: font has no BlueValues array!")
-	
+
 		# The first pair only is a bottom zone,, where the first value is the overshoot position;
 		# the rest are top zones, and second value of the pair is the overshoot position.
 		blueValues[0] = blueValues[0] - blueValues[1]
 		for i in range(3, numBlueValues,2):
 			blueValues[i] = blueValues[i] - blueValues[i-1]
-			
+
 		blueValues = map(str, blueValues)
 		numBlueValues = min(numBlueValues, len(ConvertFontToCID.kBlueValueKeys))
 		for i in range(numBlueValues):
 			key = ConvertFontToCID.kBlueValueKeys[i]
 			value = blueValues[i]
 			exec("fdDict.%s = %s" % (key, value))
-	
+
 		#print numBlueValues
 		#for i in range(0, len(fontinfo),2):
 		#	print fontinfo[i], fontinfo[i+1]
-	
+
 		if hasattr(privateDict, "OtherBlues"):
 			# For all OtherBlues, the pairs are bottom zones, and the first value of each pair is the overshoot position.
 			i = 0
@@ -1312,7 +1323,7 @@ class CFFFontData:
 				key = ConvertFontToCID.kOtherBlueValueKeys[i]
 				value = blueValues[i]
 				exec("fdDict.%s = %s" % (key, value))
-		
+
 		if hasattr(privateDict, "StemSnapV"):
 			vstems = privateDict.StemSnapV
 		elif hasattr(privateDict, "StdVW"):
@@ -1329,7 +1340,7 @@ class CFFFontData:
 			self.logMsg("Warning: There is no value or 0 value for DominantV.")
 		vstems = repr(vstems)
 		fdDict.DominantV = vstems
-	
+
 		if hasattr(privateDict, "StemSnapH"):
 			hstems = privateDict.StemSnapH
 		elif hasattr(privateDict, "StdHW"):
@@ -1351,7 +1362,7 @@ class CFFFontData:
 			fdDict.FlexOK = "false"
 		else:
 			fdDict.FlexOK = "true"
-	
+
 		# Add candidate lists for counter hints, if any.
 		if vCounterGlyphs:
 			temp = " ".join(vCounterGlyphs)
@@ -1359,27 +1370,27 @@ class CFFFontData:
 		if hCounterGlyphs:
 			temp = " ".join(hCounterGlyphs)
 			fdDict.HCounterChars = "( %s )" % (temp)
-	
+
 		if  hasattr(privateDict, "BlueFuzz"):
 			fdDict.BlueFuzz = privateDict.BlueFuzz
 		else:
 			fdDict.BlueFuzz = 1
-	
+
 		return fdDict
 
 	def getfdIndex(self, gid):
 		fdIndex = self.topDict.FDSelect[gid]
 		return fdIndex
-		
+
 	def getfdInfo(self,  fontPSName, inputPath, allow_no_blues, noFlex, vCounterGlyphs, hCounterGlyphs, glyphList, fdIndex=0):
 		topDict = self.topDict
 		fontDictList = []
 		fdGlyphDict = None
-		
+
 		# Get the default fontinfo from the font's top dict.
 		fdDict = self.getFontInfo(fontPSName, inputPath, allow_no_blues, noFlex, vCounterGlyphs, hCounterGlyphs, fdIndex)
 		fontDictList.append(fdDict)
-		
+
 		# Check the fontinfo file, and add any other font dicts
 		srcFontInfo = os.path.dirname(inputPath)
 		srcFontInfo = os.path.join(srcFontInfo, "fontinfo")
@@ -1390,7 +1401,7 @@ class CFFFontData:
 			fontInfoData = re.sub(r"#[^\r\n]+", "", fontInfoData)
 		else:
 			return  fdGlyphDict, fontDictList
-		
+
 		if "FDDict" in fontInfoData:
 			maxY = topDict.FontBBox[3]
 			minY = topDict.FontBBox[1]
@@ -1422,8 +1433,8 @@ def test():
 	removeHints = 0
 
 	for glyphName in glyphNames:
-		print
-		print glyphName
+		print()
+		print(glyphName)
 		t2CharString = charStrings[glyphName]
 		bezString, hasHints, t2Width = convertT2GlyphToBez(t2CharString, removeHints)
 		#print bezString
@@ -1443,9 +1454,9 @@ def test2():
 	fp.close()
 	if needsDecryption(bezString):
 		bezString = bezDecrypt(bezString)
-		
+
 	t2Program = convertBezToT2(bezString)
-	
+
 
 if __name__=='__main__':
 	test2()

@@ -1,4 +1,6 @@
 #!/bin/env python
+from __future__ import print_function, absolute_import
+
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
@@ -88,7 +90,7 @@ A range of glyphs may be specified by providing two names separated only
 	allows you to use the command: stemHist -new */*/*ps, and apply the
 	tool only to fonts where the report has not yet been run.
 
--o report path 
+-o report path
 	When this is specified, the path argument is used as the base
 	path for the reports. Otherwise, the font file path is used as the
 	base path. Several reports are written, using the base path
@@ -100,7 +102,7 @@ A range of glyphs may be specified by providing two names separated only
 	   <base path>.top.txt   The top zones.
 	  <base path >.bot.txt   The bottom zones.
 
--q  Don't print glyph names - just print a dot occasionally to show progress. 
+-q  Don't print glyph names - just print a dot occasionally to show progress.
 
 """
 
@@ -111,10 +113,10 @@ import os
 import re
 import time
 from fontTools.ttLib import TTFont, getTableModule
-from BezTools import *
+from .BezTools import *
 import warnings
-import FDKUtils
-import ufoTools
+from . import FDKUtils
+from . import ufoTools
 import traceback
 
 kTempCFFSuffix = ".temp.ac.cff"
@@ -179,12 +181,12 @@ class ACHintError(KeyError):
 
 def logMsg(*args):
 	for s in args:
-		print s
+		print(s)
 
 def ACreport(*args):
 	# long function used by the hinting library
 	for arg in args:
-		print arg,
+		print(arg, end=' ')
 	if arg[-1] != os.linesep:
 		print
 
@@ -195,7 +197,7 @@ def CheckEnvironment():
 	report = FDKUtils.runShellCmd(command)
 	if "options" not in report:
 			txError = 1
-	
+
 	if  txError:
 		logMsg("Please re-install the FDK. The executable directory \"%s\" is missing the tool: < %s >." % (exe_dir, txPath ))
 		logMsg("or the files referenced by the shell script is missing.")
@@ -233,7 +235,7 @@ def getOptions():
 	while i < numOptions:
 		arg = sys.argv[i]
 		if options.fileList and arg[0] == "-":
-			raise ACOptionParseError("Option Error: All file names must follow all other options <%s>." % arg) 
+			raise ACOptionParseError("Option Error: All file names must follow all other options <%s>." % arg)
 
 		if arg == "-h":
 			logMsg(__help__)
@@ -260,7 +262,7 @@ def getOptions():
 			i = i +1
 			glyphString = sys.argv[i]
 			if glyphString[0] == "-":
-				raise ACOptionParseError("Option Error: it looks like the first item in the glyph list following '-g' is another option.") 
+				raise ACOptionParseError("Option Error: it looks like the first item in the glyph list following '-g' is another option.")
 			options.glyphList += parseGlyphListArg(glyphString)
 		elif arg in ["-xgf", "-gf"]:
 			if arg == "-xgf":
@@ -268,24 +270,24 @@ def getOptions():
 			i = i +1
 			filePath = sys.argv[i]
 			if filePath[0] == "-":
-				raise ACOptionParseError("Option Error: it looks like the the glyph list file following '-gf' is another option.") 
+				raise ACOptionParseError("Option Error: it looks like the the glyph list file following '-gf' is another option.")
 			try:
-				gf = file(filePath, "rt")
+				gf = open(filePath, "rt")
 				glyphString = gf.read()
 				gf.close()
 			except (IOError,OSError):
-				raise ACOptionParseError("Option Error: could not open glyph list file <%s>." %  filePath) 
+				raise ACOptionParseError("Option Error: could not open glyph list file <%s>." %  filePath)
 			options.glyphList += parseGlyphListArg(glyphString)
 		elif arg[0] == "-":
-			raise ACOptionParseError("Option Error: Unknown option <%s>." %  arg) 
+			raise ACOptionParseError("Option Error: Unknown option <%s>." %  arg)
 		else:
 			arg = arg.rstrip(os.sep) # might be a UFO font. auto completion in some shells adds a dir separator, which then causes problems with os.path.dirname().
 			options.fileList += [arg]
 		i  += 1
-		
+
 	if not options.fileList:
-		raise ACOptionParseError("Option Error: You must provide at least one font file path.") 
-		
+		raise ACOptionParseError("Option Error: You must provide at least one font file path.")
+
 	return options
 
 
@@ -357,7 +359,7 @@ def getFontInfo(pTopDict, fontPSName, options, fdIndex = 0):
 		pDict = pTopDict
 	privateDict = pDict.Private
 
-  	fontinfo=[]
+	fontinfo=[]
 	fontinfo.append("OrigEmSqUnits")
 	upm = int(1/pDict.FontMatrix[0])
 	fontinfo.append(str(upm) ) # OrigEmSqUnits
@@ -377,7 +379,7 @@ def getFontInfo(pTopDict, fontPSName, options, fdIndex = 0):
 	numBlueValues = len(blueValues)
 	numBlueValues = min(numBlueValues, len(kBlueValueKeys))
 	blueValues = map(str, blueValues)
-		
+
 	for i in range(numBlueValues):
 		fontinfo.append(kBlueValueKeys[i])
 		fontinfo.append(blueValues[i])
@@ -387,7 +389,7 @@ def getFontInfo(pTopDict, fontPSName, options, fdIndex = 0):
 		fontinfo.append("CapHeight")
 		fontinfo.append('0' )  #CapOvershoot = 0 always needs a value!
 
-	
+
 	vstems = [upm] # dummy value. Needs to be larger than any hint will likely be,
 			# as the autohint program strips out any hint wider than twice the largest global stem width..
 	vstems = repr(vstems)
@@ -428,7 +430,7 @@ def openUFOFile(path, outFilePath, useHashMap):
 		msg = "Font file must be a PS, CFF, OTF, or ufo font file: %s." % (path)
 		logMsg(msg)
 		raise ACFontError(msg)
-	
+
 	# If user has specified a path other than the source font path, then copy the entire
 	# ufo font, and operate on the copy.
 	if (outFilePath != None) and (os.path.abspath(path) != os.path.abspath(outFilePath)):
@@ -437,14 +439,14 @@ def openUFOFile(path, outFilePath, useHashMap):
 		path = outFilePath
 	font = ufoTools.UFOFontData(path, useHashMap, ufoTools.kAutohintName)
 	return font
-	
+
 def openOpenTypeFile(path, outFilePath):
 	# If input font is  CFF or PS, build a dummy ttFont in memory..
 	# return ttFont, and flag if is a real OTF font Return flag is 0 if OTF, 1 if CFF, and 2 if PS/
 	fontType  = 0 # OTF
 	tempPathCFF = path + kTempCFFSuffix
 	try:
-		ff = file(path, "rb")
+		ff = open(path, "rb")
 		data = ff.read(10)
 		ff.close()
 	except (IOError, OSError):
@@ -464,7 +466,7 @@ def openOpenTypeFile(path, outFilePath):
 			raise ACFontError("Error: font is not a CFF font <%s>." % fontFileName)
 
 	else:
-	
+
 		# It is not an OTF file.
 		if (data[0] == '\1') and (data[1] == '\0'): # CFF file
 			fontType = 1
@@ -473,19 +475,19 @@ def openOpenTypeFile(path, outFilePath):
 			#not a PS file either
 			logMsg("Font file must be a PS, CFF or OTF  fontfile: %s." % path)
 			raise ACFontError("Font file must be PS, CFF or OTF file: %s." % path)
-	
-		else:  # It is a PS file. Convert to CFF.	
+
+		else:  # It is a PS file. Convert to CFF.
 			fontType =  2
-			print "Converting Type1 font to temp CFF font file..."
+			print("Converting Type1 font to temp CFF font file...")
 			command="tx  -cff +b -std \"%s\" \"%s\" 2>&1" % (path, tempPathCFF)
 			report = FDKUtils.runShellCmd(command)
 			if "fatal" in report:
 				logMsg("Attempted to convert font %s  from PS to a temporary CFF data file." % path)
 				logMsg(report)
 				raise ACFontError("Failed to convert PS font %s to a temp CFF font." % path)
-		
+
 		# now package the CFF font as an OTF font.
-		ff = file(tempPathCFF, "rb")
+		ff = open(tempPathCFF, "rb")
 		data = ff.read()
 		ff.close()
 		try:
@@ -495,7 +497,7 @@ def openOpenTypeFile(path, outFilePath):
 			ttFont['CFF '] = cffTable
 			cffTable.decompile(data, ttFont)
 		except:
-			logMsg( "\t%s" %(traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1]))
+			logMsg( "\t%s" %(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])[-1]))
 			logMsg("Attempted to read font %s  as CFF." % path)
 			raise ACFontError("Error parsing font file <%s>." % path)
 
@@ -529,7 +531,7 @@ class GlyphReports:
 		self.stemZoneStemList = {}
 		self.glyphs[glyphName] = [self.hStemList, self.vStemList, self.charZoneList, self.stemZoneStemList]
 		self.glyphName = glyphName
-	
+
 	def addGlyphReport(self, reportString):
 		lines = reportString.splitlines()
 		for line in lines:
@@ -556,8 +558,8 @@ class GlyphReports:
 					self.vStemPosList[hintpos] = width
 			else:
 				raise ACFontError("Error: Found unknown keyword %s in report file for glyph %s." % (key, self.glyphName))
-				
-	
+
+
 	def getReportDicts(self):
 		hStemDict = {}
 		vStemDict = {}
@@ -579,7 +581,7 @@ class GlyphReports:
 					hStemDict[width][1].append(gName)
 				except KeyError:
 					hStemDict[width] = [gcount,[gName]]
-					
+
 			for item in vStemList.items():
 				width, gcount = item
 				if width >= 0:
@@ -592,7 +594,7 @@ class GlyphReports:
 					vStemDict[width][1].append(gName)
 				except KeyError:
 					vStemDict[width] = [gcount,[gName]]
-					
+
 			for btval in charZoneList.values():
 				top, bottom = btval
 				if top >= 0:
@@ -615,7 +617,7 @@ class GlyphReports:
 					bottomZoneDict[bottom][1].append(gName)
 				except KeyError:
 					bottomZoneDict[bottom] = [1,[gName]]
-					
+
 			for btval in stemZoneStemList.values():
 				top, bottom = btval
 				if top >= 0:
@@ -638,8 +640,8 @@ class GlyphReports:
 					bottomZoneDict[bottom][1].append(gName)
 				except KeyError:
 					bottomZoneDict[bottom] = [1,[gName]]
-					
-	
+
+
 		return hStemDict, vStemDict,topZoneDict, bottomZoneDict
 
 
@@ -691,7 +693,7 @@ def PrintReports(path, hStemDict, vStemDict,topZoneDict, bottomZoneDict):
 	items = ([hStemDict,srtCnt], [vStemDict, srtCnt],[topZoneDict, srtRevVal], [bottomZoneDict, srtVal])
 	atime = time.asctime()
 	suffixes = (".hstm.txt", ".vstm.txt", ".top.txt", ".bot.txt")
-	titles = ("Horizontal Stem List for %s on %s" % (path, atime), 
+	titles = ("Horizontal Stem List for %s on %s" % (path, atime),
 				"Vertical Stem List for %s on %s" % (path, atime),
 				"Top Zone List for %s on %s" % (path, atime),
 				"Bottom Zone List for %s on %s" % (path, atime),
@@ -712,21 +714,21 @@ def PrintReports(path, hStemDict, vStemDict,topZoneDict, bottomZoneDict):
 			if not rDict:
 				continue
 			sawData = 1
-			fp = file(fName, "wt")
+			fp = open(fName, "wt")
 			fp.write(title + os.linesep)
 			fp.write(header + os.linesep)
 			reportLines = formatReport(rDict, sortFunc)
 			for line in reportLines:
 				fp.write(line + os.linesep)
 			fp.close()
-			print "\tWrote  %s" % (fName)
+			print("\tWrote  %s" % (fName))
 		except (IOError, OSError):
-			print "Has some error opening the file %s!" % fName
+			print("Has some error opening the file %s!" % fName)
 	if not sawData:
-		print "\tWarning. No reports printed - no stem data was collected."
+		print("\tWarning. No reports printed - no stem data was collected.")
 
 def collectStemsFont(path, options, txPath):
-	#    use fontTools library to open font and extract CFF table. 
+	#    use fontTools library to open font and extract CFF table.
 	#    If error, skip font and report error.
 	fontFileName = os.path.basename(path)
 	logMsg("")
@@ -738,10 +740,10 @@ def collectStemsFont(path, options, txPath):
 	try:
 		fontData = openFile(path)
 	except (IOError, OSError):
-		logMsg( traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1])
+		logMsg( traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])[-1])
 		raise ACFontError("Error opening or reading from font file <%s>." % fontFileName)
 	except:
-		logMsg( traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1])
+		logMsg( traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])[-1])
 		raise ACFontError("Error parsing font file <%s>." % fontFileName)
 
 	#   filter specified list, if any, with font list.
@@ -754,10 +756,10 @@ def collectStemsFont(path, options, txPath):
 	tempBez = tempBaseName + ".bez"
 	tempReport = tempBez + ".rpt"
 	tempFI = tempBaseName + ".fi"
-	
+
 	#    open font plist file, if any. If not, create empty font plist.
 	psName = fontData.getPSName()
-	
+
 	#    build alignment zone string
 	allow_no_blues =  1
 	noFlex = 0
@@ -791,13 +793,13 @@ def collectStemsFont(path, options, txPath):
 		else:
 			newTime = time.time()
 			if (newTime - curTime) > 1:
-				print ".",
+				print(".", end=' ')
 				sys.stdout.flush()
 				curTime = newTime
 				dotCount +=1
 			if dotCount > 40:
 				dotCount = 0
-				print ""
+				print("")
 
 		# 	Convert to bez format
 		bezString, width, hasHints = fontData.convertToBez(name, removeHints, options.verbose)
@@ -831,9 +833,9 @@ def collectStemsFont(path, options, txPath):
 					fp = open(tempFI, "wt")
 					fp.write(fdDict.getFontInfo())
 					fp.close()
-		
+
 		glyphReports.startGlyphName(name)
-		
+
 
 		# 	Call auto-hint library on bez string.
 		bp = open(tempBez, "wt")
@@ -846,29 +848,29 @@ def collectStemsFont(path, options, txPath):
 			doAlign = "-ra"
 		else:
 			doAlign = "-rs"
-			
+
 		if options.allStems:
 			allStems = "-a"
 		else:
 			allStems = ""
-			
+
 		command = "autohintexe -q %s %s  -f \"%s\" \"%s\" 2>&1" % (doAlign, allStems, tempFI, tempBez)
 		if options.debug:
-			print command
+			print(command)
 		log = FDKUtils.runShellCmd(command)
 		if log:
-			print log
+			print(log)
 			if "number terminator while" in log:
-				print tempBez
+				print(tempBez)
 				sys.exit()
- 
+
 		if os.path.exists(tempReport):
 			bp = open(tempReport, "rt")
 			report = bp.read()
 			bp.close()
 			if options.debug:
-				print "Wrote AC fontinfo data file to", tempFI
-				print "Wrote AC output rpt file to", tempReport
+				print("Wrote AC fontinfo data file to", tempFI)
+				print("Wrote AC output rpt file to", tempReport)
 			else:
 				os.remove(tempReport)
 			report.strip()
@@ -877,9 +879,9 @@ def collectStemsFont(path, options, txPath):
 				if options.debug:
 					rawData.append(report)
 		else:
-			print "Error - failure in processing outline data"
+			print("Error - failure in processing outline data")
 			report = None
-			
+
 	hStemDict, vStemDict,topZoneDict, bottomZoneDict = glyphReports.getReportDicts()
 	if options.reportPath:
 		reportPath = options.reportPath
@@ -893,16 +895,16 @@ def collectStemsFont(path, options, txPath):
 def main():
 	try:
 		txPath = CheckEnvironment()
-	except FDKEnvironmentError,e:
+	except FDKEnvironmentError as e:
 		logMsg(e)
 		return
 
 	try:
 		options = getOptions()
-	except ACOptionParseError,e:
+	except ACOptionParseError as e:
 		logMsg(e)
 		return
-		
+
 	# verify that all files exist.
 	haveFiles = 1
 	for path in options.fileList:
@@ -924,7 +926,7 @@ def main():
 				continue
 		try:
 			collectStemsFont(path, options, txPath)
-		except (ACFontError, ufoTools.UFOParseError),e:
+		except (ACFontError, ufoTools.UFOParseError) as e:
 			logMsg( "\t%s" % e)
 		if options.debug:
 			fp = open("rawdata.txt", "wt")
@@ -935,5 +937,5 @@ def main():
 
 if __name__=='__main__':
 	main()
-	
-	
+
+
