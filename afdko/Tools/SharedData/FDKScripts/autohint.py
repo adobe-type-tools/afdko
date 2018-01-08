@@ -452,7 +452,7 @@ from . import ufoTools
 import traceback
 import shutil
 
-warnings.simplefilter("ignore", RuntimeWarning) # supress waring about use of os.tempnam().
+# warnings.simplefilter("ignore", RuntimeWarning) # supress waring about use of os.tempnam().
 
 kACIDKey = "AutoHintKey"
 
@@ -1060,7 +1060,7 @@ def hintFile(options):
 		raise ACFontError("Error: selected glyph list is empty for font <%s>." % fontFileName)
 
 	# temp file names for input and output bez files, and for the fontinfo file.
-	tempBaseName = os.tempnam()
+	tempBaseName = os.path.join(tempfile.gettempdir(), "fdkautohint")
 	tempBez = tempBaseName + ".bez"
 	tempBezNew = tempBez + ".new"
 	tempFI = tempBaseName + ".fi"
