@@ -870,7 +870,6 @@ def do_overlap_removal(bool_glyph, changed, msg, options):
     # as BooleanOperations removes these even if it does not do overlap
     # removal.
     old_digest = list(get_digest(bool_glyph))
-    old_digest[:] = [x for x in old_digest if x != 'beginPath']
     old_digest.sort()
     old_digest = map(round_point, old_digest)
     new_digest = []
@@ -887,7 +886,6 @@ def do_overlap_removal(bool_glyph, changed, msg, options):
         prev_digest = new_digest
         new_glyph = new_glyph.removeOverlap()
         new_digest = list(get_digest(new_glyph))
-        new_digest[:] = [x for x in new_digest if x != 'beginPath']
         new_digest.sort()
         # The new path points sometimes come back with very small
         # fractional parts to to rounding issues.
