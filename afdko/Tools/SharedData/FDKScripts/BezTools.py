@@ -1,9 +1,8 @@
-from __future__ import print_function, absolute_import
+from __future__ import print_function
 import sys
 
 if sys.version_info > (3,):
 	long = int
-	longType = long
 try:
 	from types import FloatType, StringType, LongType
 except:
@@ -23,8 +22,8 @@ __copyright__ = """Copyright 2014-2017 Adobe Systems Incorporated (http://www.ad
 import re
 import time
 import os
-from . import FDKUtils
-from . import ConvertFontToCID
+import FDKUtils
+import ConvertFontToCID
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
 from fontTools.pens.basePen import BasePen
 debug = 0
@@ -1298,7 +1297,7 @@ class CFFFontData:
 		for i in range(3, numBlueValues,2):
 			blueValues[i] = blueValues[i] - blueValues[i-1]
 
-		blueValues = map(str, blueValues)
+		blueValues = list(map(str, blueValues))
 		numBlueValues = min(numBlueValues, len(ConvertFontToCID.kBlueValueKeys))
 		for i in range(numBlueValues):
 			key = ConvertFontToCID.kBlueValueKeys[i]
@@ -1395,7 +1394,7 @@ class CFFFontData:
 		srcFontInfo = os.path.dirname(inputPath)
 		srcFontInfo = os.path.join(srcFontInfo, "fontinfo")
 		if os.path.exists(srcFontInfo):
-			fi = open(srcFontInfo, "rU")
+			fi = open(srcFontInfo, "r")
 			fontInfoData = fi.read()
 			fi.close()
 			fontInfoData = re.sub(r"#[^\r\n]+", "", fontInfoData)
@@ -1433,7 +1432,7 @@ def test():
 	removeHints = 0
 
 	for glyphName in glyphNames:
-		print()
+		print('')
 		print(glyphName)
 		t2CharString = charStrings[glyphName]
 		bezString, hasHints, t2Width = convertT2GlyphToBez(t2CharString, removeHints)
