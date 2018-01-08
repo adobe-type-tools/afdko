@@ -1,4 +1,7 @@
-# temporary wheel build direectories
+# temporary wheel build directories
 afdko.egg-info/
 build/
 dist/
+
+# PyCharm directory
+.idea/
