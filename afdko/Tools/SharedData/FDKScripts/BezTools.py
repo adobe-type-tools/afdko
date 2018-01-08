@@ -1297,7 +1297,7 @@ class CFFFontData:
 		for i in range(3, numBlueValues,2):
 			blueValues[i] = blueValues[i] - blueValues[i-1]
 
-		blueValues = list(map(str, blueValues))
+		blueValues = [str(v) for v in blueValues]
 		numBlueValues = min(numBlueValues, len(ConvertFontToCID.kBlueValueKeys))
 		for i in range(numBlueValues):
 			key = ConvertFontToCID.kBlueValueKeys[i]
