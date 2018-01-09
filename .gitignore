@@ -1,3 +1,5 @@
+*.pyc
+
 # temporary wheel build directories
 afdko.egg-info/
 build/
