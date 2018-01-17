@@ -15,7 +15,7 @@ __copyright__ = """Copyright 2017 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __version__ = """\
-makeotf v2.0.99 Nov 7 2017
+makeotf v2.0.100 Jan 17 2018
 """
 
 __methods__ = """
