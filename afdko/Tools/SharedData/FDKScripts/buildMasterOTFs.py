@@ -3,7 +3,6 @@ from __future__ import print_function, division, absolute_import
 import os
 import shutil
 import subprocess
-import traceback
 import sys
 import tempfile
 
@@ -23,7 +22,7 @@ kTempDSExt = ".temp.designspace"
 kFeaturesFile = "features.fea"
 
 __usage__ = """
-buildMasterOTFs.py  1.6 July 26 2017
+buildMasterOTFs.py  1.7 Aug 8 2017
 Build master source OpenType/CFF fonts from a Superpolator design space file
 and the UFO master source fonts.
 
@@ -33,6 +32,9 @@ python buildMasterOTFs.py  <path to design space file>
 """
 
 __help__  = __usage__  + """
+Options:
+--mkot   Allows passing a comma-separated set of options to MakeOTF
+
 The script makes a number of assumptions.
 1) all the master source fonts are blend compatible in all their data.
 2) Each master source font is in a separate directory from the other master
@@ -68,7 +70,7 @@ def runShellCmd(cmd):
 
 def compatibilizePaths(otfPath):
 	tempPathCFF = otfPath + ".temp.cff"
-	command="tx  -cff +b -std -no_opt \"%s\" \"%s\" 2>&1" % (otfPath, tempPathCFF)
+	command="tx -cff +b -std -no_opt \"%s\" \"%s\" 2>&1" % (otfPath, tempPathCFF)
 	report = runShellCmd(command)
 	if "fatal" in str(report):
 		print(report)
@@ -171,17 +173,29 @@ def testGlyphSetsCompatible(dsPath):
 			break
 	return glyphSetsDiffer, master_paths
 
+def parse_makeotf_options(mkot_opts):
+	"""Converts a comma-separated string into a space-separated string"""
+	return ' '.join(mkot_opts.split(','))
+
 def main(args=None):
 	if args is None:
 		args = sys.argv[1:]
 	if not args:
-		args = ["-h", "-u"]
+		args = ["-u"]
+
+	mkot_options = ''
+
 	if '-u' in args:
 		print(__usage__)
 		return
 	if '-h' in args:
 		print(__help__)
 		return
+	if '--mkot' in args:
+		index = args.index('--mkot')
+		args.pop(index)
+		mkot_options = parse_makeotf_options(args.pop(index))
+
 	(dsPath,) = args
 
 	dsDirPath = os.path.dirname(dsPath)
@@ -215,7 +229,7 @@ def main(args=None):
 			otfName = os.path.splitext(ufoName)[0]
 		otfName = otfName + ".otf"
 		os.chdir(masterDir)
-		cmd = "makeotf -f \"%s\" -o \"%s\" -r -nS 2>&1" % (ufoName, otfName)
+		cmd = "makeotf -f \"%s\" -o \"%s\" -r -nS %s 2>&1" % (ufoName, otfName, mkot_options)
 		log = runShellCmd(cmd)
 		if ("FATAL" in log) or ("Failed to build" in log):
 			print(log)
