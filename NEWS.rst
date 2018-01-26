@@ -13,7 +13,7 @@ This release fixes the following issues:
 
 
 2.6.24 (released 2018-1-3)
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The afdko has been restructured so that it can be installed as a Python package. It now depends on the user's Python interpreter, and no longer contains its own Python interpreter.
 
