@@ -3,6 +3,15 @@
 Change log for the Adobe Font Development Kit for OpenType (AFDKO)
 ==================================================================
 
+2.6.25 (released 2018-01-26)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This release fixes the following issues:
+
+* `#237 <https://github.com/adobe-type-tools/afdko/issues/237>`_ 'cvParameters' block is allowed only Character Variant (cvXX) features
+* `#241 <https://github.com/adobe-type-tools/afdko/issues/241>`_ pip uninstall afdko fails
+
+
 2.6.24 (released 2018-1-3)
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
