@@ -27,11 +27,9 @@ install it with `pip <https://pip.pypa.io>`__:
 
 .. code:: sh
 
-    pip install --extra-index-url https://pypi.org/simple --index-url https://test.pypi.org/simple afdko
+    pip install afdko
 
-Note that for the next month, the afdko will be hosted only on the test version of the PyPy package repository, while we do the beta testing. It will then be moved to the regular PyPi repository. The rather complex pip command above will then reduce to 'pip install afdko'.
-
-The available PyPi packages are for Mac OSX and Windows 64 bit Python.
+The current PyPi package is a beta release for Mac OS X.
 
 You can remove the afdko package with the command:
 
