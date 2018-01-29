@@ -1,181 +1,200 @@
+"""Copyright 2016 Adobe. All rights reserved."""
+
 from __future__ import print_function, absolute_import
 
-"""
-FDKUtils.py v 1.2 April 13 6 2016
- A module of functions that are needed by several of the FDK scripts.
-"""
-
-__copyright__ = """Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-"""
-
 import os
-import sys
-import subprocess
-import traceback
 import platform
+import subprocess
+import sys
+import traceback
+
+__doc__ = """
+FDKUtils.py v1.2.1 Jan 28 2018
+A module of functions that are needed by several of the AFDKO scripts.
+"""
+
 curSystem = platform.system()
 
 AdobeCMAPS = "Adobe Cmaps"
 AdobeCharsets = "CID charsets"
 
+
 class FDKEnvError(KeyError):
-	pass
+    pass
+
 
 def findFDKDirs():
-	fdkScriptsDir = None
-	fdkToolsDir = None
-	""" Look up the file path to find the "Tools" directory;
-	then add the os.name for the executables, and .'FDKScripts' for the scripts.
-	"""
-	dir = os.path.dirname(__file__)
+    fdkScriptsDir = None
+    fdkToolsDir = None
+    """ Look up the file path to find the "Tools" directory;
+    then add the os.name for the executables, and 'FDKScripts'
+    for the scripts.
+    """
+    dir = os.path.dirname(__file__)
 
-	while dir:
-		if os.path.basename(dir) == "Tools":
-			fdkScriptsDir = os.path.join(dir, "SharedData", "FDKScripts")
-			if curSystem == "Darwin":
-				fdkToolsDir = os.path.join(dir, "osx")
-			elif curSystem == "Windows":
-				fdkToolsDir = os.path.join(dir, "win")
-			elif curSystem == "Linux":
-				fdkToolsDir = os.path.join(dir, "linux")
-			else:
-				print("Fatal error: un-supported platform %s %s." % (os.name, sys.platform))
-				raise FDKEnvError
+    while dir:
+        if os.path.basename(dir) == "Tools":
+            fdkScriptsDir = os.path.join(dir, "SharedData", "FDKScripts")
+            if curSystem == "Darwin":
+                fdkToolsDir = os.path.join(dir, "osx")
+            elif curSystem == "Windows":
+                fdkToolsDir = os.path.join(dir, "win")
+            elif curSystem == "Linux":
+                fdkToolsDir = os.path.join(dir, "linux")
+            else:
+                print("Fatal error: un-supported platform %s %s." % (
+                    os.name, sys.platform))
+                raise FDKEnvError
 
-			if not (os.path.exists(fdkScriptsDir) and os.path.exists(fdkToolsDir)):
-				print("Fatal error: could not find  the FDK scripts dir %s and the tools directory %s." % (fdkScriptsDir, fdkToolsDir))
-				raise FDKEnvError
+            if (not (os.path.exists(fdkScriptsDir) and
+               os.path.exists(fdkToolsDir))):
+                print("Fatal error: could not find  the FDK scripts dir %s "
+                      "and the tools directory %s." %
+                      (fdkScriptsDir, fdkToolsDir))
+                raise FDKEnvError
 
-			# the FDK.py bootstrap program already adds fdkScriptsDir to the  sys.path;
-			# this is useful only when running the calling script directly using an external Python.
-			if not fdkScriptsDir in sys.path:
-				sys.path.append(fdkScriptsDir)
-			fdkSharedDataDir = os.path.join(dir, "SharedData")
-			break
-		dir = os.path.dirname(dir)
-	return fdkToolsDir,fdkSharedDataDir
+            # the FDK.py bootstrap program already adds fdkScriptsDir
+            # to the  sys.path; this is useful only when running the
+            # calling script directly using an external Python.
+            if fdkScriptsDir not in sys.path:
+                sys.path.append(fdkScriptsDir)
+            fdkSharedDataDir = os.path.join(dir, "SharedData")
+            break
+        dir = os.path.dirname(dir)
+    return fdkToolsDir, fdkSharedDataDir
 
 
 def findFDKFile(fdkDir, fileName):
-	path = os.path.join(fdkDir, fileName)
-	if os.path.exists(path):
-		return path
-	p1 = path + ".exe"
-	if os.path.exists(p1):
-		return p1
-	p2 = path + ".cmd"
-	if os.path.exists(p2):
-		return p2
-	if fileName not in ["addGlobalColor"]:
-		print("Fatal error: could not find '%s or %s or %s'." % (path,p1,p2))
-	raise FDKEnvError
+    path = os.path.join(fdkDir, fileName)
+    if os.path.exists(path):
+        return path
+    p1 = path + ".exe"
+    if os.path.exists(p1):
+        return p1
+    p2 = path + ".cmd"
+    if os.path.exists(p2):
+        return p2
+    if fileName not in ["addGlobalColor"]:
+        print("Fatal error: could not find '%s or %s or %s'." % (path, p1, p2))
+    raise FDKEnvError
+
 
 def runShellCmd(cmd):
-	try:
-		p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout
-		log = p.read()
-		return log.decode("latin-1")
-	except :
-		msg = "Error executing command '%s'. %s" % (cmd, traceback.print_exc())
-		print(msg)
-		return ""
+    try:
+        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT).stdout
+        log = p.read()
+        return log.decode("latin-1")
+    except:  # XXX bare except
+        msg = "Error executing command '%s'. %s" % (cmd, traceback.print_exc())
+        print(msg)
+        return ""
+
 
 def runShellCmdLogging(cmd):
-	try:
-		logList = []
-		proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-		while 1:
-			output = proc.stdout.readline()
-			if output:
-				print(output, end=' ')
-				logList.append(output)
-			if proc.poll() != None:
-				output = proc.stdout.readline()
-				if output:
-					print(output, end=' ')
-					logList.append(output)
-				break
-		log = "".join(logList)
-	except:
-		msg = "Error executing command '%s'. %s" % (cmd, traceback.print_exc())
-		print(msg)
-		return 1
-	return 0
+    try:
+        logList = []
+        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT)
+        while 1:
+            output = proc.stdout.readline()
+            if output:
+                print(output, end=' ')
+                logList.append(output)
+            if proc.poll():
+                output = proc.stdout.readline()
+                if output:
+                    print(output, end=' ')
+                    logList.append(output)
+                break
+        log = "".join(logList)  # XXX 'log' variable is never used
+    except:  # XXX bare except
+        msg = "Error executing command '%s'. %s" % (cmd, traceback.print_exc())
+        print(msg)
+        return 1
+    return 0
+
 
 def clean_afdko():
-	runShellCmd("pip uninstall afdko -y")
-	bin_fileList = [
-			  "autohint",
-			  "buildCFF2VF",
-			  "buildMasterOTFs",
-			  "compareFamily",
-			  "checkOutlinesUFO",
-			  "copyCFFCharstrings",
-			  "kernCheck",
-			  "makeotf",
-			  "makeInstances",
-			  "makeInstancesUFO",
-			  "otc2otf",
-			  "otf2otc",
-			  "stemHist",
-			  "ttxn",
-			  "charplot",
-			  "digiplot",
-			  "fontplot",
-			  "fontplot2",
-			  "fontsetplot",
-			  "hintplot",
-			  "waterfallplot",
-			  "check_afdko",
-			  "clean_afdko",
-              "autohintexe",
-              "makeotfexe",
-              "mergeFonts",
-              "rotateFont",
-              "sfntdiff",
-              "sfntedit",
-              "spot",
-              "tx",
-              "type1",
-	]
-	log = ""
-	if curSystem in ["Darwin", "Linux"]:
-		log = runShellCmd("which autohintexe")
-	elif curSystem == "Windows":
-		log = runShellCmd("where autohintexe")
-	log = log.strip()
-	if not log:
-		print("Did not find FDK tools in the Python bin directory:")
-	else:
-		basepath = os.path.dirname(log)
-		for fileName in bin_fileList:
-			binPath = os.path.join(basepath, fileName)
-			try:
-				os.remove(binPath)
-				print("Deleted", binPath)
-			except:
-				pass
-	basepath = None
-	foundFDK = False
-	"""the command "pip uninstall afdko" should already have gotten rid of the module, but just in case there is another copy of the module on another Python path, we wil try to do it by removing the dir tree."""
-	try:
-		import FDK
-		foundFDK = True
-	except:
-		pass
-	if foundFDK:
-		import shutil
-		basepath = os.path.dirname(FDK.__file__)
-		try:
-			shutil.rmtree(basepath)
-			print("Deleted", basepath)
-		except:
-			pass
+    runShellCmd("pip uninstall afdko -y")
+    bin_fileList = [
+        "autohint",
+        "buildCFF2VF",
+        "buildMasterOTFs",
+        "compareFamily",
+        "checkOutlinesUFO",
+        "copyCFFCharstrings",
+        "kernCheck",
+        "makeotf",
+        "makeInstances",
+        "makeInstancesUFO",
+        "otc2otf",
+        "otf2otc",
+        "stemHist",
+        "ttxn",
+        "charplot",
+        "digiplot",
+        "fontplot",
+        "fontplot2",
+        "fontsetplot",
+        "hintplot",
+        "waterfallplot",
+        "check_afdko",
+        "clean_afdko",
+        "autohintexe",
+        "makeotfexe",
+        "mergeFonts",
+        "rotateFont",
+        "sfntdiff",
+        "sfntedit",
+        "spot",
+        "tx",
+        "type1",
+    ]
+    log = ""
+    if curSystem in ["Darwin", "Linux"]:
+        log = runShellCmd("which autohintexe")
+    elif curSystem == "Windows":
+        log = runShellCmd("where autohintexe")
+    log = log.strip()
+    if not log:
+        print("Did not find AFDKO tools in the Python bin directory:")
+    else:
+        basepath = os.path.dirname(log)
+        for fileName in bin_fileList:
+            binPath = os.path.join(basepath, fileName)
+            try:
+                os.remove(binPath)
+                print("Deleted", binPath)
+            except:  # XXX bare except
+                pass
+    basepath = None
+    foundFDK = False
+    # the command "pip uninstall afdko" should already have gotten
+    # rid of the module, but just in case there is another copy of
+    # the module on another Python path, we wil try to do it by
+    # removing the dir tree.
+    try:
+        import FDK
+        foundFDK = True
+    except:  # XXX bare except
+        pass
+    if foundFDK:
+        import shutil
+        basepath = os.path.dirname(FDK.__file__)
+        try:
+            shutil.rmtree(basepath)
+            print("Deleted", basepath)
+        except:  # XXX bare except
+            pass
 
-	return
+    return
 
-def check_afkdo():
-	return
+
+def check_afdko():
+    print('NOT IMPLEMENTED!')
+    return
+
 
 if __name__ == "__main__":
-	clean_afdko()
+    clean_afdko()
