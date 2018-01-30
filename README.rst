@@ -6,7 +6,7 @@ Adobe Font Development Kit for OpenType (AFDKO)
 The AFDKO is a set of tools for building OpenType font files from PostScript and TrueType font data.
 
 This directory tree contains the data files, Python scripts, Perl scripts, and
-sources for the command line programs that comprise the AFDKO. The project uses the `Apache 2.0 OpenSource license <https://rawgit.com/adobe-type-tools/afdko/master/LICENSE.txt>`__.
+sources for the command line programs that comprise the AFDKO. The project uses the `Apache 2.0 OpenSource license <https://rawgit.com/adobe-type-tools/afdko/master/LICENSE.md>`__.
 
 Please refer to the file `AFDKO-Overview.html <https://rawgit.com/adobe-type-tools/afdko/master/afdko/AFDKO-Overview.html>`__ for a more detailed description of what is in the AFDKO.
 
