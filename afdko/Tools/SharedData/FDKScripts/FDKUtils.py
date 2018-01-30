@@ -93,21 +93,17 @@ def runShellCmd(cmd):
 
 def runShellCmdLogging(cmd):
     try:
-        logList = []
         proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT)
         while 1:
             output = proc.stdout.readline()
             if output:
                 print(output, end=' ')
-                logList.append(output)
             if proc.poll():
                 output = proc.stdout.readline()
                 if output:
                     print(output, end=' ')
-                    logList.append(output)
                 break
-        log = "".join(logList)  # XXX 'log' variable is never used
     except:  # XXX bare except
         msg = "Error executing command '%s'. %s" % (cmd, traceback.print_exc())
         print(msg)
