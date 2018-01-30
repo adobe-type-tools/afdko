@@ -1,4 +1,4 @@
-|PyPI|
+|Travis Build Status| |PyPI|
 
 Adobe Font Development Kit for OpenType (AFDKO)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -73,5 +73,7 @@ On Linux, install these with:
 
 On Windows, you need to download and install Visual C++ 6, and add all the service packs.
 
+.. |Travis Build Status| image:: https://travis-ci.org/adobe-type-tools/afdko.svg
+   :target: https://travis-ci.org/adobe-type-tools/afdko
 .. |PyPI| image:: https://img.shields.io/pypi/v/afdko.svg
    :target: https://pypi.org/project/afdko
