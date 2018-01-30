@@ -2,22 +2,23 @@ language: python
 sudo: required
 python:
   - "2.7"
-before_install:
-  - git clone https://github.com/typesupply/defcon.git --branch ufo3
-  - git clone https://github.com/robofab-developers/robofab.git --branch ufo3k
-  - git clone https://github.com/behdad/fonttools.git
-  - git clone https://github.com/typemytype/booleanOperations.git
+#before_install:
 install:
   - pip install --upgrade pip
   - pip install --upgrade wheel cython
-  - cd defcon; python setup.py install; cd ..
-  - cd robofab; python install.py; cd ..
-  - cd fonttools; python setup.py install; cd ..
-  - cd booleanOperations; python setup.py install; cd ..
   - pip install coveralls
+  - pip install fonttools
+  - pip install booleanOperations
+  - pip install fontMath
+  - pip install robofab
+  - pip install defcon
+  - pip install mutatorMath
+  - pip install ufolib
+  - pip install ufonormalizer
+
 script:
-  - cd FDK/Tools/SharedData/FDKScripts
-  - coverage run --source=CheckOutlinesUFO.py CheckOutlinesUFO.py -test
+  - cd afdko/Tools/SharedData/FDKScripts
+  - coverage run --source=CheckOutlinesUFO.py CheckOutlinesUFO.py --test
 after_success:
   - coveralls
 notifications:
