@@ -323,6 +323,8 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName,
     glyphSetState = 4
     fdIndexDict = {}
     lenSrcFontDictList = len(fontDictList)
+    dictValueList = []
+    dictKeyWord = None
 
     state = baseState
 
@@ -375,7 +377,6 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName,
                 state = baseState
 
         elif state == inDictValue:
-            # XXX dictValueList & dictKeyWord are not defined!!
             dictValueList.append(token)
             if token[-1] in ["]", ")"]:
                 value = " ".join(dictValueList)
@@ -433,7 +434,6 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName,
                     if ((value[0] in ["[", "("]) and
                        (value[-1] not in ["]", ")"])):
                         state = inDictValue
-                        # XXX dictValueList & dictKeyWord are not defined!!
                         dictValueList = [value]
                         dictKeyWord = token
                     else:
@@ -476,6 +476,7 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName,
 def mergeFDDicts(prevDictList, privateDict):
     # Extract the union of the stem widths and zones from the list
     # of FDDicts, and replace the current values in the topDict.
+    fdDictName = None
     blueZoneDict = {}
     otherBlueZoneDict = {}
     dominantHDict = {}
@@ -538,12 +539,10 @@ def mergeFDDicts(prevDictList, privateDict):
         zoneBuffer = 2 * prefDDict.BlueFuzz + 1
         for zone in zoneList[1:]:
             if (ki == 0) and (len(zoneList) >= 14):
-                # XXX fdDictName is not defined!!
                 print("Warning. For final FontDict, skipping BlueValues "
                       "alignment zone %s from FDDict %s because there are "
                       "already 7 zones." % (zoneName, fdDictName))
             elif (ki == 1) and (len(zoneList) >= 5):
-                # XXX fdDictName is not defined!!
                 print("Warning. For final FontDict, skipping OtherBlues "
                       "alignment zone %s from FDDict %s because there are "
                       "already 5 zones." % (zoneName, fdDictName))
@@ -635,7 +634,7 @@ def getFontBBox(fPath):
     data = FDKUtils.runShellCmd(command)
     if not data:
         raise FontInfoParseError("Error: Failed getting log from tx from %s, "
-                                 "when tryingg to get FontBBox." % fPath)
+                                 "when trying to get FontBBox." % fPath)
 
     m = re.search(r"bbox[^{]+{([^}]+)}", data)
     if not m:
@@ -652,7 +651,7 @@ def getFontName(fPath):
     data = FDKUtils.runShellCmd(command)
     if not data:
         raise FontInfoParseError("Error: Failed getting log from tx from %s, "
-                                 "when tryin to get FontName." % fPath)
+                                 "when trying to get FontName." % fPath)
 
     m = re.search(r"FontName\s+\"([^\"]+)", data)
     if not m:
