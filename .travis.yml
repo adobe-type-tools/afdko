@@ -24,4 +24,4 @@ script:
 after_success:
   - coveralls
 notifications:
-  slack: typekit:pMf8FVeyFAWFIjwoECsBSFCu
+  slack: typekit:y89H3n4sxK0ORpapm8zHDu3l
