@@ -18,6 +18,7 @@ install:
   - pip install ufonormalizer
 
 script:
+  - python setup.py checkdocs
   - cd afdko/Tools/SharedData/FDKScripts
   - flake8 CheckOutlinesUFO.py
   - coverage run --source=CheckOutlinesUFO.py CheckOutlinesUFO.py --test
