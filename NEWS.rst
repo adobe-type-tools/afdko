@@ -930,7 +930,7 @@ see: https://github.com/adobe-type-tools/afdko/commits/master
 - [makeotf] When providing a GDEF feature file definition, class assignments
   now may be empty:
 
-.. code:: sh
+  .. code:: sh
 
     table GDEF {
         GlyphClassDef ,,,;
@@ -940,7 +940,7 @@ see: https://github.com/adobe-type-tools/afdko/commits/master
   colon to define the four classes. The following statement builds a GDEF
   GlyphClass with an empty Components class.
 
-.. code:: sh
+  .. code:: sh
 
     table GDEF {
         GlyphClassDef [B], [L], [M], ;
