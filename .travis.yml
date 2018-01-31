@@ -21,6 +21,7 @@ install:
 
 script:
   - python setup.py checkdocs
+  - python setup.py check --restructuredtext --strict
   - cd afdko/Tools/SharedData/FDKScripts
   - flake8 CheckOutlinesUFO.py
   - coverage run --source=CheckOutlinesUFO.py CheckOutlinesUFO.py --test
