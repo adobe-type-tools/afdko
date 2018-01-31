@@ -1,4 +1,4 @@
-|Travis Build Status| |Coverage Status| |PyPI|
+|Travis Build Status| |Health| |Coverage Status| |PyPI|
 
 Adobe Font Development Kit for OpenType (AFDKO)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -75,6 +75,8 @@ On Windows, you need to download and install Visual C++ 6, and add all the servi
 
 .. |Travis Build Status| image:: https://travis-ci.org/adobe-type-tools/afdko.svg
    :target: https://travis-ci.org/adobe-type-tools/afdko
+.. |Health| image:: https://landscape.io/github/adobe-type-tools/afdko/master/landscape.svg?style=flat
+   :target: https://landscape.io/github/adobe-type-tools/afdko/master
 .. |Coverage Status| image:: https://codecov.io/gh/adobe-type-tools/afdko/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/adobe-type-tools/afdko
 .. |PyPI| image:: https://img.shields.io/pypi/v/afdko.svg
