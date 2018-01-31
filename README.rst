@@ -75,7 +75,7 @@ On Windows, you need to download and install Visual C++ 6, and add all the servi
 
 .. |Travis Build Status| image:: https://travis-ci.org/adobe-type-tools/afdko.svg
    :target: https://travis-ci.org/adobe-type-tools/afdko
-.. |Coverage Status| image:: https://codecov.io/gh/afdko/afdko/branch/master/graph/badge.svg
-   :target: https://codecov.io/gh/afdko/afkdo
+.. |Coverage Status| image:: https://codecov.io/gh/adobe-type-tools/afdko/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/adobe-type-tools/afkdo
 .. |PyPI| image:: https://img.shields.io/pypi/v/afdko.svg
    :target: https://pypi.org/project/afdko
