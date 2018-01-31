@@ -25,3 +25,6 @@ after_success:
   - coveralls
 notifications:
   slack: typekit:y89H3n4sxK0ORpapm8zHDu3l
+  email:
+    on_success: change
+    on_failure: always
