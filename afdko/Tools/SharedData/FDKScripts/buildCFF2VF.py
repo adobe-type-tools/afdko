@@ -569,8 +569,7 @@ def appendBlendOp(op, pointList, varModel):
     return blendStack
 
 
-def buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, numMasters,
-                     varModel):
+def buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, varModel):
     pd = baseFont.privateDict
     opCodeDict = buildOpcodeDict(privateDictOperators)
     for key in bcDictList.keys():
@@ -904,7 +903,7 @@ def buildCFF2Font(varFontPath, varFont, varModel, masterPaths,
         buildMasterList(inputPaths)
     if blendError:
         return blendError
-    buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, numMasters, varModel)
+    buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, varModel)
     addCFFVarStore(baseFont, varModel, varFont)
     addNamesToPost(varFont, fontGlyphList)
     convertCFFtoCFF2(baseFont, varFont, post_format_3)
