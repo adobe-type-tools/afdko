@@ -893,12 +893,12 @@ def addSTATTable(varFont, varFontPath):
 
 def buildCFF2Font(varFontPath, varFont, varModel, masterPaths,
                   post_format_3=False):
+    """Build CFF2 font from the master designs. default font is first."""
     numMasters = len(masterPaths)
     inputPaths = reorderMasters(varModel.mapping, masterPaths)
     varModel.mapping = varModel.reverseMapping = range(numMasters)
     # Since we have re-ordered the master master data to be the same
     # as the varModel.location order, the mappings are flat.
-    """Build CFF2 font from the master designs. default font is first."""
     (baseFont, bcDictList, cff2GlyphList, fontGlyphList, blendError) = \
         buildMasterList(inputPaths)
     if blendError:
