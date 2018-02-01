@@ -1199,7 +1199,7 @@ def getOptions(makeOTFParams):
                 if isinstance(fontRevision, int):
                     formatOK = 1
                 elif isinstance(fontRevision, float):
-                    major, minor = fontRevisionString.split(".")
+                    _, minor = fontRevisionString.split(".")
                     if len(minor) == 3:
                         formatOK = 1
             except ValueError:
@@ -3043,7 +3043,7 @@ def CheckEnvironment():
 
 def main():
     try:
-        fdkToolsDir, fdkSharedDataDir = CheckEnvironment()
+        _, fdkSharedDataDir = CheckEnvironment()
     except FDKEnvironmentError:
         return
 
