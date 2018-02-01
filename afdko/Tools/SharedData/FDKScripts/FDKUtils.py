@@ -85,7 +85,7 @@ def runShellCmd(cmd):
                              stderr=subprocess.STDOUT).stdout
         log = p.read()
         return log.decode("latin-1")
-    except:  # XXX bare except
+    except (OSError, ValueError):
         msg = "Error executing command '%s'. %s" % (cmd, traceback.print_exc())
         print(msg)
         return ""
@@ -104,7 +104,7 @@ def runShellCmdLogging(cmd):
                 if output:
                     print(output, end=' ')
                 break
-    except:  # XXX bare except
+    except (OSError, ValueError):
         msg = "Error executing command '%s'. %s" % (cmd, traceback.print_exc())
         print(msg)
         return 1
@@ -162,7 +162,7 @@ def clean_afdko():
             try:
                 os.remove(binPath)
                 print("Deleted", binPath)
-            except:  # XXX bare except
+            except OSError:
                 pass
     basepath = None
     foundFDK = False
@@ -173,7 +173,7 @@ def clean_afdko():
     try:
         import FDK
         foundFDK = True
-    except:  # XXX bare except
+    except ImportError:
         pass
     if foundFDK:
         import shutil
@@ -181,7 +181,7 @@ def clean_afdko():
         try:
             shutil.rmtree(basepath)
             print("Deleted", basepath)
-        except:  # XXX bare except
+        except OSError:
             pass
 
     return

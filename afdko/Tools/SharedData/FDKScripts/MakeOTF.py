@@ -860,7 +860,7 @@ def setOptionsFromFontInfo(makeOTFParams):
                         kFileOptPrefix, kSetfsSelectionBitsOn))
             elif not m.group(1) in ["False", "false", "0"]:
                 print("makeotf [Error] Failed to parse value for "
-                      "PreferOS/2TypoMetrics in file '%s'." % (fiPath))
+                      "PreferOS/2TypoMetrics in file '%s'." % fiPath)
             print("makeotf [Note] setting the OBLIQUE OS/2 fsSelection bit 9 "
                   "from fontinfo keyword.")
 
@@ -871,7 +871,7 @@ def setOptionsFromFontInfo(makeOTFParams):
     if m:
         try:
             val = eval(m.group(1))
-        except:  # XXX bare except
+        except (NameError, SyntaxError):
             print("makeotf [Error] Failed to parse value '%s' for FSType in "
                   "file '%s'." % (m.group(1), fiPath))
         makeOTFParams.FSType = val
@@ -1629,7 +1629,7 @@ def getROS(fontPath):
     fp.close()
     try:
         data = data.decode("latin-1")
-    except:  # XXX bare except
+    except ValueError:
         return Reg, Ord, Sup
     match = re.search(r"/Registry\s+\((\S+)\)", data)
     if not match:
@@ -3010,7 +3010,7 @@ def runMakeOTF(makeOTFParams):
                 raise MakeOTFTXError
             print("Built release mode font '%s' Revision %s" % (
                 outputPath, match.group(1)))
-        except: # XXX bare except
+        except ValueError:
             print("makeotf [Error] Could not extract version number from "
                   "file at '%s'." % outputPath)
     else:
@@ -3062,7 +3062,7 @@ def main():
         runMakeOTF(makeOTFParams)
     except (MakeOTFOptionsError, MakeOTFTXError, MakeOTFRunError):
         pass
-    except:
+    except Exception:
         import traceback
         traceback.print_exc()
     finally:
