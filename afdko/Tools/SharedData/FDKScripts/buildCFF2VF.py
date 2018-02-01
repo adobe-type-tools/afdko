@@ -3,7 +3,7 @@
 from __future__ import print_function, division, absolute_import
 
 __usage__ = """
-buildCFF2VF.py  1.13.1 Jan 26 2018
+buildCFF2VF.py  1.13.2 Jan 31 2018
 Build a variable font from a designspace file and the UFO master source fonts.
 
 python buildCFF2VF.py -h
