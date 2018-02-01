@@ -674,7 +674,7 @@ def getBlueFuzz(fPath):
     return blueFuzz
 
 
-def makeSortedGlyphSets(glyphList, fdGlyphDict, fontDictList):
+def makeSortedGlyphSets(glyphList, fdGlyphDict):
     """ Start a glyph set list. For each glyph in the font glyph,
     check the FD index. If it is different than the previous one,
     start a new glyphset."""
@@ -988,7 +988,7 @@ def convertFontToCID(inputPath, outputPath):
     fdGlyphDict, fontDictList, _ = parseFontInfoFile(
         fontDictList, fontInfoData, glyphList, maxY, minY, fontName, blueFuzz)
 
-    glyphSetList = makeSortedGlyphSets(glyphList, fdGlyphDict, fontDictList)
+    glyphSetList = makeSortedGlyphSets(glyphList, fdGlyphDict)
     fontList = makeTempFonts(fontDictList, glyphSetList, fdGlyphDict,
                              inputPath)
     mergeFonts(inputPath, outputPath, fontList, glyphList, fontDictList,
