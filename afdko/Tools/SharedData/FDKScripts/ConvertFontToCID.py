@@ -938,12 +938,11 @@ def mergeFonts(inputFontPath, outputPath, fontList, glyphList, fontDictList,
         makeGAFile(gaPath, fontPath, glyphList, fontDictList, fdGlyphDict,
                    removeNotdef)
         if lastFont:
-            command = "mergeFonts -std -cid \"%s\" \"%s\" \"%s\" \"%s\"  " + \
-                "\"%s\" 2>&1" % (cidfontinfoPath, dstPath, lastFont, gaPath,
-                                 fontPath)
+            command = 'mergeFonts -std -cid "%s" "%s" "%s" "%s" "%s" 2>&1' % (
+                cidfontinfoPath, dstPath, lastFont, gaPath, fontPath)
         else:
-            command = "mergeFonts -std -cid \"%s\" \"%s\" \"%s\"  " + \
-                "\"%s\" 2>&1" % (cidfontinfoPath, dstPath, gaPath, fontPath)
+            command = 'mergeFonts -std -cid "%s" "%s" "%s" "%s" 2>&1' % (
+                cidfontinfoPath, dstPath, gaPath, fontPath)
         log = FDKUtils.runShellCmd(command)
         if debug:
             print(command)
