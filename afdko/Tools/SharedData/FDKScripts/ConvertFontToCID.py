@@ -477,6 +477,8 @@ def mergeFDDicts(prevDictList, privateDict):
     # Extract the union of the stem widths and zones from the list
     # of FDDicts, and replace the current values in the topDict.
     fdDictName = None
+    prefDDict = None
+    zoneName = None
     blueZoneDict = {}
     otherBlueZoneDict = {}
     dominantHDict = {}
