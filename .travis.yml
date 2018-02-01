@@ -20,6 +20,7 @@ install:
   - pip install ufonormalizer
 
 script:
+  - flake8 setup.py
   - python setup.py checkdocs
   - python setup.py check --restructuredtext --strict
   - cd afdko/Tools/SharedData/FDKScripts
