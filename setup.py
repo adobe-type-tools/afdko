@@ -42,24 +42,21 @@ def get_executable_dir():
     """
     Build source path on the afdko for the command-line tools.
     """
-    cur_system = platform.system()
-    if cur_system == "Windows":
+    platform_system = platform.system()
+    if platform_system == "Windows":
         bin_dir = "win"
-    elif cur_system == "Linux":
+    elif platform_system == "Linux":
         bin_dir = "linux"
-    elif cur_system == "Darwin":
+    elif platform_system == "Darwin":
         bin_dir = "osx"
     else:
-        raise KeyError("Do not recognize target OS: %s" % sys.platform)
-    platform_name = get_platform()
-    return bin_dir, platform_name, cur_system
+        raise KeyError(
+            "Do not recognize target OS: {}".format(platform_system))
+    return bin_dir
 
 
 def compile_package(pkg_dir):
-    if 0:
-        print("Skipping compile - hard coded.")
-        return
-    bin_dir, platform_name, cur_system = get_executable_dir()
+    bin_dir = get_executable_dir()
     programs_dir = os.path.join(pkg_dir, "Tools", "Programs")
     cmd = None
     if bin_dir == 'osx':
@@ -68,10 +65,10 @@ def compile_package(pkg_dir):
         cmd = "BuildAll.cmd"
     elif bin_dir == 'linux':
         cmd = "sh BuildAllLinux.sh"
-    curdir = os.getcwd()
+    cur_dir = os.getcwd()
     assert cmd, 'Unable to form command for this platform.'
     subprocess.check_call(cmd, cwd=programs_dir, shell=True)
-    os.chdir(curdir)
+    os.chdir(cur_dir)
 
 
 # noinspection PyClassicStyleClass
@@ -83,42 +80,55 @@ class CustomBuild(setuptools.command.build_py.build_py):
         setuptools.command.build_py.build_py.run(self)
 
 
-def get_console_scripts():
-    console_scripts = [
-        "autohint = afdko.Tools.SharedData.FDKScripts.autohint:main",
-        "buildcff2vf = afdko.Tools.SharedData.FDKScripts.buildCFF2VF:run",
-        "buildmasterotfs = "
-        "    afdko.Tools.SharedData.FDKScripts.buildMasterOTFs:main",
-        "comparefamily = afdko.Tools.SharedData.FDKScripts.CompareFamily:main",
-        "checkoutlinesufo = "
-        "    afdko.Tools.SharedData.FDKScripts.CheckOutlinesUFO:main",
-        "copycffcharstrings ="
-        "    afdko.Tools.SharedData.FDKScripts.copyCFFCharstrings:run",
-        "kerncheck = afdko.Tools.SharedData.FDKScripts.kernCheck:run",
-        "makeotf = afdko.Tools.SharedData.FDKScripts.MakeOTF:main",
-        "makeinstances = afdko.Tools.SharedData.FDKScripts.makeInstances:main",
-        "makeinstancesufo ="
-        "    afdko.Tools.SharedData.FDKScripts.makeInstancesUFO:main",
-        "otc2otf = afdko.Tools.SharedData.FDKScripts.otc2otf:main",
-        "otf2otc = afdko.Tools.SharedData.FDKScripts.otf2otc:main",
-        "stemhist = afdko.Tools.SharedData.FDKScripts.StemHist:main",
-        "ttxn = afdko.Tools.SharedData.FDKScripts.ttxn:main",
-        "charplot = afdko.Tools.SharedData.FDKScripts.ProofPDF:charplot",
-        "digiplot = afdko.Tools.SharedData.FDKScripts.ProofPDF:digiplot",
-        "fontplot = afdko.Tools.SharedData.FDKScripts.ProofPDF:fontplot",
-        "fontplot2 = afdko.Tools.SharedData.FDKScripts.ProofPDF:fontplot2",
-        "fontsetplot = afdko.Tools.SharedData.FDKScripts.ProofPDF:fontsetplot",
-        "hintplot = afdko.Tools.SharedData.FDKScripts.ProofPDF:hintplot",
-        "waterfallplot ="
-        "    afdko.Tools.SharedData.FDKScripts.ProofPDF:waterfallplot",
-        "clean_afdko = afdko.Tools.SharedData.FDKScripts.FDKUtils:clean_afdko",
-        "check_afdko = afdko.Tools.SharedData.FDKScripts.FDKUtils:check_afdko",
+def get_scripts():
+    bin_dir = get_executable_dir()
+    script_names = [
+        'autohintexe', 'detype1', 'makeotfexe', 'mergeFonts', 'rotateFont',
+        'sfntdiff', 'sfntedit', 'spot', 'tx', 'type1'
     ]
-    return console_scripts
+    if platform.system() == 'Windows':
+        extension = '.exe'
+    else:
+        extension = ''
+
+    scripts = ['afdko/Tools/{}/{}{}'.format(bin_dir, script_name, extension)
+               for script_name in script_names]
+    return scripts
+
+
+def get_console_scripts():
+    script_entries = [
+        ('autohint', 'autohint:main'),
+        ('buildcff2vf', 'buildCFF2VF:run'),
+        ('buildmasterotfs', 'buildMasterOTFs:main'),
+        ('comparefamily', 'CompareFamily:main'),
+        ('checkoutlinesufo', 'CheckOutlinesUFO:main'),
+        ('copycffcharstrings', 'copyCFFCharstrings:run'),
+        ('kerncheck', 'kernCheck:run'),
+        ('makeotf', 'MakeOTF:main'),
+        ('makeinstances', 'makeInstances:main'),
+        ('makeinstancesufo', 'makeInstancesUFO:main'),
+        ('otc2otf', 'otc2otf:main'),
+        ('otf2otc', 'otf2otc:main'),
+        ('stemhist', 'StemHist:main'),
+        ('(ttxn', 'ttxn:main'),
+        ('charplot', 'ProofPDF:charplot'),
+        ('digiplot', 'ProofPDF:digiplot'),
+        ('fontplot', 'ProofPDF:fontplot'),
+        ('fontplot2', 'ProofPDF:fontplot2'),
+        ('fontsetplot', 'ProofPDF:fontsetplot'),
+        ('hintplot', 'ProofPDF:hintplot'),
+        ('waterfallplot', 'ProofPDF:waterfallplot'),
+        ('clean_afdko', 'FDKUtils:clean_afdko'),
+        ('check_afdko', 'FDKUtils:check_afdko')
+    ]
+    scripts_path = 'afdko.Tools.SharedData.FDKScripts'
+    scripts = ['{} = {}.{}'.format(name, scripts_path, entry)
+               for name, entry in script_entries]
+    return scripts
 
 
 def main():
-    bin_dir, platform_name, cur_system = get_executable_dir()
     pkg_list = find_packages()
     classifiers = [
         'Development Status :: 5 - Production/Stable',
@@ -128,40 +138,19 @@ def main():
         'Programming Language :: Python :: 2.7',
     ]
 
-    # Identify the dist build as being platform specific.
-    scripts = [
-        'afdko/Tools/%s/autohintexe' % bin_dir,
-        'afdko/Tools/%s/detype1' % bin_dir,
-        'afdko/Tools/%s/makeotfexe' % bin_dir,
-        'afdko/Tools/%s/mergeFonts' % bin_dir,
-        'afdko/Tools/%s/rotateFont' % bin_dir,
-        'afdko/Tools/%s/sfntdiff' % bin_dir,
-        'afdko/Tools/%s/sfntedit' % bin_dir,
-        'afdko/Tools/%s/spot' % bin_dir,
-        'afdko/Tools/%s/tx' % bin_dir,
-        'afdko/Tools/%s/type1' % bin_dir,
-    ]
+    scripts = get_scripts()
+    console_scripts = get_console_scripts()
 
-    if cur_system == "Darwin":
+    platform_system = platform.system()
+    if platform_system == "Darwin":
         more_keywords = ['Operating System :: MacOS :: MacOS X']
-    elif cur_system == "Windows":
+    elif platform_system == "Windows":
         more_keywords = ['Operating System :: Microsoft :: Windows']
-        scripts = [
-            'afdko/Tools/win/autohintexe.exe',
-            'afdko/Tools/win/detype1.exe',
-            'afdko/Tools/win/makeotfexe.exe',
-            'afdko/Tools/win/mergeFonts.exe',
-            'afdko/Tools/win/rotateFont.exe',
-            'afdko/Tools/win/sfntdiff.exe',
-            'afdko/Tools/win/sfntedit.exe',
-            'afdko/Tools/win/spot.exe',
-            'afdko/Tools/win/tx.exe',
-            'afdko/Tools/win/type1.exe',
-        ]
-    elif cur_system == "Linux":
+    elif platform_system == "Linux":
         more_keywords = ['Operating System :: POSIX :: Linux']
     else:
-        raise KeyError("Do not recognize target OS: %s" % cur_system)
+        raise KeyError(
+            "Do not recognize target OS: {}".format(platform_system))
     classifiers.extend(more_keywords)
 
     # concatenate README.rst and NEWS.rest into long_description so they are
@@ -172,15 +161,15 @@ def main():
     with io.open("NEWS.rst", encoding="utf-8") as changelog:
         long_description += changelog.read()
 
-    console_scripts = get_console_scripts()
+    platform_name = get_platform()
 
     setup(name="afdko",
           version="2.6.25b2",
           description="Adobe Font Development Kit for OpenType",
           long_description=long_description,
           url='https://github.com/adobe-type-tools/afdko',
-          author='Read Roberts and many other font engineers',
-          author_email='rroberts@adobe.com',
+          author='Adobe Type team & friends',
+          author_email='afdko@adobe.com',
           license='Apache License, Version 2.0',
           classifiers=classifiers,
           keywords='font development tools',
