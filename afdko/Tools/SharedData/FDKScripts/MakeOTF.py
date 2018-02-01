@@ -3027,15 +3027,7 @@ def CheckEnvironment():
 
     missingTools = []
     for name in ["tx", "makeotfexe"]:
-        # XXX This executes the following Python code,
-        # >>> txPath = "tx"
-        # >>> makeotfexePath = "makeotfexe"
-        # therefore creating the two variables that at first
-        # seem to be undefined. This approach looks very hackish.
-        # There must be a better way to check for the presence
-        # of the tools!!!
-        exec("%sPath = \"%s\"" % (name, name))
-        command = "%s -u 2>&1" % (name)
+        command = "%s -u 2>&1" % name
         report = FDKUtils.runShellCmd(command)
         if ("options" not in report) and ("Option" not in report):
                 missingTools.append(name)
@@ -3046,21 +3038,20 @@ def CheckEnvironment():
         print("for the files referenced by the shell script is missing.")
         raise FDKEnvironmentError
 
-    return fdkToolsDir, fdkSharedDataDir, txPath, makeotfexePath
+    return fdkToolsDir, fdkSharedDataDir
 
 
 def main():
     try:
-        (fdkToolsDir, fdkSharedDataDir, txPath,
-            makeotfexePath) = CheckEnvironment()
+        fdkToolsDir, fdkSharedDataDir = CheckEnvironment()
     except FDKEnvironmentError:
         return
 
     try:
         makeOTFParams = MakeOTFParams()
         makeOTFParams.fdkSharedDataDir = fdkSharedDataDir
-        makeOTFParams.txPath = txPath
-        makeOTFParams.makeotfPath = makeotfexePath
+        makeOTFParams.txPath = "tx"
+        makeOTFParams.makeotfPath = "makeotfexe"
         getOptions(makeOTFParams)
         setMissingParams(makeOTFParams)
         setOptionsFromFontInfo(makeOTFParams)
