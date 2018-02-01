@@ -81,3 +81,8 @@ On Windows, you need to download and install Visual C++ 6, and add all the servi
    :target: https://codecov.io/gh/adobe-type-tools/afdko
 .. |PyPI| image:: https://img.shields.io/pypi/v/afdko.svg
    :target: https://pypi.org/project/afdko
+
+
+.. image:: https://api.codacy.com/project/badge/Grade/673770d1687f4daca30c451bbb29c984
+   :alt: Codacy Badge
+   :target: https://www.codacy.com/app/cjchapman/afdko?utm_source=github.com&utm_medium=referral&utm_content=adobe-type-tools/afdko&utm_campaign=badger
