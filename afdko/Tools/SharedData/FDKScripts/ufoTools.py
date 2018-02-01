@@ -450,6 +450,7 @@ class UFOFontData(object):
         return hasHints
 
     def convertToBez(self, glyphName, removeHints, beVerbose, doAll=0):
+        # XXX unused args: removeHints, beVerbose
         # convertGLIFToBez does not yet support
         # hints - no need for removeHints arg.
         bezString, width = convertGLIFToBez(self, glyphName, doAll)
@@ -457,6 +458,7 @@ class UFOFontData(object):
         return bezString, width, hasHints
 
     def updateFromBez(self, bezData, glyphName, width, beVerbose):
+        # XXX unused args: width, beVerbose
         # For UFO font, we don't use the width parameter:
         # it is carried over from the input glif file.
         glifXML = convertBezToGLIF(self, glyphName, bezData)
