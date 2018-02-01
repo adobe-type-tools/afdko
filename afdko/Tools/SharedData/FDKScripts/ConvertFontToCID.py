@@ -490,8 +490,7 @@ def mergeFDDicts(prevDictList, privateDict):
             bluePairList = eval("prefDDict.%s" % bluePairName)
             if not bluePairList:
                 continue
-            for (topPos, bottomPos, zoneName, dictName,
-                 isBottomZone) in bluePairList:
+            for topPos, bottomPos, zoneName, _, isBottomZone in bluePairList:
                 zoneDict[(topPos, bottomPos)] = (isBottomZone, zoneName,
                                                  prefDDict.DictName)
 
@@ -986,7 +985,7 @@ def convertFontToCID(inputPath, outputPath):
     blueFuzz = getBlueFuzz(inputPath)
     maxY = fontBBox[3]
     minY = fontBBox[1]
-    fdGlyphDict, fontDictList, finalFDict = parseFontInfoFile(
+    fdGlyphDict, fontDictList, _ = parseFontInfoFile(
         fontDictList, fontInfoData, glyphList, maxY, minY, fontName, blueFuzz)
 
     glyphSetList = makeSortedGlyphSets(glyphList, fdGlyphDict, fontDictList)
