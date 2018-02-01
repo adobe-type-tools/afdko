@@ -1568,23 +1568,23 @@ def checkInputFile(makeOTFParams):
     # is usually kept a level or two down from the face source data
     # and we can only assume that the current directory is the starting
     # point for all relative paths.
-    R, O, S = getROS(fontPath)
-    if R:
-        makeOTFParams.ROS = (R, O, S)
+    Reg, Ord, Sup = getROS(fontPath)
+    if Reg:
+        makeOTFParams.ROS = (Reg, Ord, Sup)
         # Since we have the ROS, let's set default Mac Script value.
         script = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kMacScript))
         if not script:
-            if O.startswith("Japan"):
+            if Ord.startswith("Japan"):
                 script = "1"
-            elif O.startswith("CN"):
+            elif Ord.startswith("CN"):
                 script = "2"
-            elif O.startswith("GB"):
+            elif Ord.startswith("GB"):
                 script = "25"
-            elif O.startswith("Korea"):
+            elif Ord.startswith("Korea"):
                 script = "3"
             else:
                 print("makeotf [Warning] Did not recognize the ordering '%s'. "
-                      "The Mac cmap script id will be set to Roman (0)." % O)
+                      "The Mac cmap script id will be set to Roman (0)." % Ord)
             exec("makeOTFParams.%s%s = script" % (kFileOptPrefix, kMacScript))
     return fontPath
 
@@ -1623,39 +1623,39 @@ def getROS(fontPath):
       /Supplement 3 def
 
     """
-    R = O = S = None  # XXX Poorly-named variables
+    Reg = Ord = Sup = None
     fp = open(fontPath, "rb")
     data = fp.read(5000)
     fp.close()
     try:
         data = data.decode("latin-1")
     except:  # XXX bare except
-        return R, O, S
+        return Reg, Ord, Sup
     match = re.search(r"/Registry\s+\((\S+)\)", data)
     if not match:
-        return R, O, S
-    R = match.group(1)
+        return Reg, Ord, Sup
+    Reg = match.group(1)
     data = data[match.end():match.end() + 200]
 
     match = re.search(r"/Ordering\s+\((\S+)\)", data)
     if not match:
         print("makeotf [Error] found /Registry but not /Ordering in CID font.")
-        R = None
-        return R, O, S
-    O = match.group(1)
+        Reg = None
+        return Reg, Ord, Sup
+    Ord = match.group(1)
 
     match = re.search(r"/Supplement\s+(\d+)", data)
     if not match:
         print("makeotf [Error] found /Registry but not /Supplement in CID "
               "font.")
-        R = None
-        return R, O, S
-    S = match.group(1)
+        Reg = None
+        return Reg, Ord, Sup
+    Sup = match.group(1)
 
-    return R, O, S
+    return Reg, Ord, Sup
 
 
-def setCIDCMAPPaths(makeOTFParams, R, O, S):
+def setCIDCMAPPaths(makeOTFParams, Reg, Ord, Sup):
     """ This is called when one or more of the three Adobe CMAP files
     wanted for CID fonts have not been specified on the command-line.
     Only the Uni-H file is required.
@@ -1663,8 +1663,8 @@ def setCIDCMAPPaths(makeOTFParams, R, O, S):
     error = 0
     cmapPath = os.path.join(makeOTFParams.fdkSharedDataDir,
                             FDKUtils.AdobeCMAPS)
-    ROPath = os.path.join(cmapPath, "%s-%s" % (R, O))
-    ROSPath = "%s-%s" % (ROPath, S)
+    ROPath = os.path.join(cmapPath, "%s-%s" % (Reg, Ord))
+    ROSPath = "%s-%s" % (ROPath, Sup)
     foundIt = 0
     # Try counting up to 9.
     if os.path.exists(ROPath):
@@ -1674,7 +1674,7 @@ def setCIDCMAPPaths(makeOTFParams, R, O, S):
     elif os.path.exists(ROSPath):
         foundIt = 1
     else:
-        s = 1 + eval(S)
+        s = 1 + eval(Sup)
         while s < 10:
             ROSPath = "%s-%s" % (ROPath, s)
             if os.path.exists(ROSPath):
@@ -1689,7 +1689,7 @@ def setCIDCMAPPaths(makeOTFParams, R, O, S):
         fileList = os.listdir(ROSPath)
         fileList.sort()
         for file in fileList:
-            if not uniHFilePath and (R == "Adobe") and (O == "Japan1"):
+            if not uniHFilePath and (Reg == "Adobe") and (Ord == "Japan1"):
                 testPath = os.path.join(ROSPath, "UniJIS2004-UTF32-H")
                 if os.path.exists(testPath):
                     uniHFilePath = testPath
@@ -1702,7 +1702,7 @@ def setCIDCMAPPaths(makeOTFParams, R, O, S):
                 exec("makeOTFParams.%s%s = uniHFilePath" % (
                     kFileOptPrefix, kHUniCMAPPath))
             elif not uvsFilePath and file.endswith("sequences.txt"):
-                uvsName = "%s-%s_%s" % (R, O, "sequences.txt")
+                uvsName = "%s-%s_%s" % (Reg, Ord, "sequences.txt")
                 if uvsName == file:
                     uvsFilePath = os.path.join(ROSPath, file)
                     exec("makeOTFParams.%s%s = uvsFilePath" % (
@@ -1994,8 +1994,8 @@ def setMissingParams(makeOTFParams):
 
     # If font is CID, look in the SharedData folder.
     if os.path.exists(inputFontPath):
-        R, O, S = makeOTFParams.ROS
-        if R:
+        Reg, Ord, Sup = makeOTFParams.ROS
+        if Reg:
             featPath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kFeature))
             foundVert = checkIfVertInFeature(featPath)
             if os.path.exists(featPath) and not foundVert:
@@ -2008,7 +2008,7 @@ def setMissingParams(makeOTFParams):
                     kFileOptPrefix, kHUniCMAPPath)) and
                 eval("makeOTFParams.%s%s" % (
                     kFileOptPrefix, kUVSPath))):
-                error = setCIDCMAPPaths(makeOTFParams, R, O, S)
+                error = setCIDCMAPPaths(makeOTFParams, Reg, Ord, Sup)
 
     # output file path.
     path = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kOutputFont))
