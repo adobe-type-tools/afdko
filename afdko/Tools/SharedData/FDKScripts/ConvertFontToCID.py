@@ -167,7 +167,7 @@ class FontParseError(KeyError):
     pass
 
 
-class FDDict:
+class FDDict(object):
     def __init__(self):
         self.DictName = None
         for key in kFDDictKeys:

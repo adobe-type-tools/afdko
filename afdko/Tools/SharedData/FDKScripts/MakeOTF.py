@@ -503,7 +503,7 @@ class UFOParseError(KeyError):
     pass
 
 
-class MakeOTFParams:
+class MakeOTFParams(object):
     def __init__(self):
         self.makeotfPath = None
         self.txPath = None
@@ -2537,7 +2537,7 @@ def fixHead(tempOTFFilePath, outputPath, makeOTFParams):
         os.rename(newTTFName, outputPath)
 
 
-class HeadTable:
+class HeadTable(object):
     tagName = "head"
     updateFieldList = ["fontRevision", "created", "modified", "macStyle",
                        "xMin", "xMax", "yMin", "yMax"]
