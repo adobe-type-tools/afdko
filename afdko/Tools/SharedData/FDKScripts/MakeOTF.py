@@ -1688,7 +1688,7 @@ def setCIDCMAPPaths(makeOTFParams, Reg, Ord, Sup):
     if foundIt:
         fileList = os.listdir(ROSPath)
         fileList.sort()
-        for file in fileList:
+        for _file in fileList:
             if not uniHFilePath and (Reg == "Adobe") and (Ord == "Japan1"):
                 testPath = os.path.join(ROSPath, "UniJIS2004-UTF32-H")
                 if os.path.exists(testPath):
@@ -1696,31 +1696,31 @@ def setCIDCMAPPaths(makeOTFParams, Reg, Ord, Sup):
                     exec("makeOTFParams.%s%s = uniHFilePath" % (
                         kFileOptPrefix, kHUniCMAPPath))
 
-            if (not uniHFilePath and file.startswith("Uni") and
-               file.endswith("UTF32-H")):
-                uniHFilePath = os.path.join(ROSPath, file)
+            if (not uniHFilePath and _file.startswith("Uni") and
+               _file.endswith("UTF32-H")):
+                uniHFilePath = os.path.join(ROSPath, _file)
                 exec("makeOTFParams.%s%s = uniHFilePath" % (
                     kFileOptPrefix, kHUniCMAPPath))
-            elif not uvsFilePath and file.endswith("sequences.txt"):
+            elif not uvsFilePath and _file.endswith("sequences.txt"):
                 uvsName = "%s-%s_%s" % (Reg, Ord, "sequences.txt")
-                if uvsName == file:
-                    uvsFilePath = os.path.join(ROSPath, file)
+                if uvsName == _file:
+                    uvsFilePath = os.path.join(ROSPath, _file)
                     exec("makeOTFParams.%s%s = uvsFilePath" % (
                         kFileOptPrefix, kUVSPath))
                 else:
                     print("makeotf [Note] Found UVS file '%s' that doesn't "
-                          "match expected name '%s'." % (file, uvsName))
-            elif not macFilePath and file.endswith("-H"):
+                          "match expected name '%s'." % (_file, uvsName))
+            elif not macFilePath and _file.endswith("-H"):
                 if "R" == "Adobe":
-                    if ("O" == "Japan1" and (file == "83pv-RKSJ-H")) or \
-                       ("O" == "GB1" and (file == "GBpc-EUC-H")) or \
-                       ("O" == "CNS1" and (file == "B5pc-H")) or \
-                       ("O" == "Korea1" and (file == "KSCpc-EUC-H")):
-                        macFilePath = os.path.join(ROSPath, file)
+                    if ("O" == "Japan1" and (_file == "83pv-RKSJ-H")) or \
+                       ("O" == "GB1" and (_file == "GBpc-EUC-H")) or \
+                       ("O" == "CNS1" and (_file == "B5pc-H")) or \
+                       ("O" == "Korea1" and (_file == "KSCpc-EUC-H")):
+                        macFilePath = os.path.join(ROSPath, _file)
                 else:
                     # We don't know this ROS, but anything beginning
                     # with "Uni" and which ends in "-H" is probably right.
-                    macFilePath = os.path.join(ROSPath, file)
+                    macFilePath = os.path.join(ROSPath, _file)
             if macFilePath:
                 exec("makeOTFParams.%s%s = macFilePath" % (
                     kFileOptPrefix, kMacCMAPPath))
@@ -1762,16 +1762,16 @@ def checkIfVertInFeature(featurePath):
         return 1
 
     includeList = re.findall(r"[^ #] *include *\( *([^ )]+) *\)", data)
-    for file in includeList:
+    for _file in includeList:
         # First, look for include files relative to parent feature file
         fdir = os.path.dirname(featurePath)
-        apath = os.path.join(fdir, file)
+        apath = os.path.join(fdir, _file)
         if not os.path.exists(apath):
             # Second, look for include files relative to working directory.
-            apath = os.path.abspath(file)
+            apath = os.path.abspath(_file)
             if not os.path.exists(apath):
                 print("Could not find the include file '%s', referenced in "
-                      "'%s'." % (file, featurePath))
+                      "'%s'." % (_file, featurePath))
                 return 0
         foundVert = checkIfVertInFeature(apath)
         if foundVert:
@@ -1824,7 +1824,7 @@ def parsePList(filePath, dictKey=None):
                     "Encountered duplicate key name '%s' in '%s'." %
                     (lastName, filePath))
             if child.tag == "array":
-                list = []
+                _list = []
                 for listChild in child:
                     val = listChild.text
                     if listChild.tag == "integer":
@@ -1838,8 +1838,8 @@ def parsePList(filePath, dictKey=None):
                             "In plist file, encountered unknown key type '%s' "
                             "in '%s' for parent key %s. %s." %
                             (listChild.tag, child.tag, lastName, filePath))
-                    list.append(val)
-                plistDict[lastName] = list
+                    _list.append(val)
+                plistDict[lastName] = _list
             elif child.tag == "integer":
                 plistDict[lastName] = int(eval(child.text))
             elif child.tag == "real":
