@@ -92,7 +92,7 @@ def openOpenTypeFile(path):
     return fontData
 
 
-class CFF2FontData:
+class CFF2FontData(object):
     def __init__(self, ttFont, srcPath):
         self.ttFont = ttFont
         self.srcPath = srcPath
@@ -246,7 +246,7 @@ class OpListPen(T2CharStringPen):
         return self.opList
 
 
-class CFF2GlyphData:
+class CFF2GlyphData(object):
     hintOpList = ('hintmask', 'cntrmask', 'hstem', 'vstem', 'hstemhm',
                   'vstemhm')
 
@@ -408,7 +408,7 @@ class CFF2GlyphData:
             pointList.append(0)
 
 
-class AxisValueRecord:
+class AxisValueRecord(object):
     def __init__(self, nameID, axisValue, flagValue, valueIndex, axisIndex):
         self.nameID = nameID
         self.axisValue = axisValue
