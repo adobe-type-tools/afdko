@@ -774,20 +774,20 @@ def getNewAxisValue(seenCoordinate, fvarInstance, axisTag):
 
 def addAxisValueData(xmlData, prevEntry, axisEntry, nextEntry, linkDelta):
     if linkDelta:
-        format = 3
+        _format = 3
     elif (not prevEntry) and (not nextEntry):
-        format = 1
+        _format = 1
     else:
-        format = 2
+        _format = 2
 
     xmlData.append("\t\t<AxisValue index=\"%s\" Format=\"%s\">" % (
-        axisEntry.valueIndex, format))
+        axisEntry.valueIndex, _format))
     xmlData.append("\t\t\t<AxisIndex value=\"%s\" />" % (axisEntry.axisIndex))
     xmlData.append("\t\t\t<Flags value=\"%s\" />" % (axisEntry.flagValue))
     xmlData.append("\t\t\t<ValueNameID value=\"%s\" />" % (axisEntry.nameID))
-    if format == 1:
+    if _format == 1:
         xmlData.append("\t\t\t<Value value=\"%s\" />" % (axisEntry.axisValue))
-    elif format == 2:
+    elif _format == 2:
         if not prevEntry:
             minValue = axisEntry.axisValue
         else:
@@ -800,7 +800,7 @@ def addAxisValueData(xmlData, prevEntry, axisEntry, nextEntry, linkDelta):
             axisEntry.axisValue))
         xmlData.append("\t\t\t<RangeMinValue value=\"%s\" />" % (minValue))
         xmlData.append("\t\t\t<RangeMaxValue value=\"%s\" />" % (maxValue))
-    elif format == 3:
+    elif _format == 3:
         xmlData.append("\t\t\t<Value value=\"%s\" />" % (axisEntry.axisValue))
         xmlData.append("\t\t\t<LinkedValue value=\"%s\" />" % (linkDelta))
     xmlData.append("\t\t</AxisValue>")
