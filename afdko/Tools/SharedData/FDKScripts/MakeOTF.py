@@ -1907,9 +1907,9 @@ def setMissingParams(makeOTFParams):
         if os.path.exists(path1):
             path = path1
         elif makeOTFParams.srcIsUFO:
-                path1 = os.path.join(srcFontPath, kDefaultUFOFeaturesPath)
-                if os.path.exists(path1):
-                    path = path1
+            path1 = os.path.join(srcFontPath, kDefaultUFOFeaturesPath)
+            if os.path.exists(path1):
+                path = path1
         if not path:
             print("makeotf [Warning] Could not find default features file at "
                   "'%s'. Font will be built without any layout features." %
@@ -3030,7 +3030,7 @@ def CheckEnvironment():
         command = "%s -u 2>&1" % name
         report = FDKUtils.runShellCmd(command)
         if ("options" not in report) and ("Option" not in report):
-                missingTools.append(name)
+            missingTools.append(name)
 
     if missingTools:
         print("Please re-install the FDK. The executable directory '%s' is "
@@ -3074,4 +3074,4 @@ def main():
 
 
 if __name__ == '__main__':
-        main()
+    main()
