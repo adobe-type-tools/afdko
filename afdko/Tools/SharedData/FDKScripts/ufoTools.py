@@ -1220,7 +1220,8 @@ def parsePList(filePath, dictKey=None):
     contents = XML(data)
     contents_dict = contents.find("dict")
     if contents_dict:
-        raise UFOParseError("In '%s', failed to find dict. '%s'." % (filePath))
+        raise UFOParseError("In '%s', failed to find dict. '%s'." % (
+            filePath, contents_dict))
     lastTag = "string"
     for child in contents_dict:
         if child.tag == "key":
