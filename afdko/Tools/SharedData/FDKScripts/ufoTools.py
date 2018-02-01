@@ -157,10 +157,12 @@ move-to only.
             <data>
                 <hintSetList>
                     <hintset pointTag="point name">
-                        (<hstem pos="<decimal value>" width="decimal value" />)*
-                        (<vstem pos="<decimal value>" width="decimal value" />)*
-                        <hstem3 stem3List="n0,n1,n2,n3,n4,n5" />* # where n1-5 are decimal values
-                        <vstem3 stem3List="n0,n1,n2,n3,n4,n5" />* # where n1-5 are decimal values
+                      (<hstem pos="<decimal value>" width="decimal value" />)*
+                      (<vstem pos="<decimal value>" width="decimal value" />)*
+                      <!-- where n1-5 are decimal values -->
+                      <hstem3 stem3List="n0,n1,n2,n3,n4,n5" />*
+                      <!-- where n1-5 are decimal values -->
+                      <vstem3 stem3List="n0,n1,n2,n3,n4,n5" />*
                     </hintset>*
                     (<hintSetList>*
                         (<hintset pointIndex="positive integer">
@@ -179,7 +181,8 @@ move-to only.
 Example from "B" in SourceCodePro-Regular
 <key><com.adobe.type.autohint><key>
 <data>
-<hintSetList id="64bf4987f05ced2a50195f971cd924984047eb1d79c8c43e6a0054f59cc85dea23a49deb20946a4ea84840534363f7a13cca31a81b1e7e33c832185173369086">
+<hintSetList id="64bf4987f05ced2a50195f971cd924984047eb1d79c8c43e6a0054f59cc85
+dea23a49deb20946a4ea84840534363f7a13cca31a81b1e7e33c832185173369086">
     <hintset pointTag="hintSet0000">
         <hstem pos="0" width="28" />
         <hstem pos="338" width="28" />
@@ -238,15 +241,17 @@ here applies it before the move-to only.
                 <key>hintSetList</key>
                 <array>
                     <dict>
-                        <key>pointTag</key>
-                        <string> <point name> </string>
-                        <key>stems</key>
-                        <array>
-                            <string>hstem <position value> <width value></string>*
-                            <string>vstem <position value> <width value></string>*
-                            <string>hstem3 <position value 0>...<position value 5></string>*
-                            <string>vstem3 <position value 0>...<position value 5></string>*
-                        </array>
+                      <key>pointTag</key>
+                      <string> <point name> </string>
+                      <key>stems</key>
+                      <array>
+                        <string>hstem <position value> <width value></string>*
+                        <string>vstem <position value> <width value></string>*
+                        <string>hstem3 <position value 0>...<position value 5>
+                        </string>*
+                        <string>vstem3 <position value 0>...<position value 5>
+                        </string>*
+                      </array>
                     </dict>*
                 </array>
 
@@ -263,7 +268,8 @@ Example from "B" in SourceCodePro-Regular
 <key><com.adobe.type.autohint><key>
 <dict>
     <key>id</key>
-    <string>64bf4987f05ced2a50195f971cd924984047eb1d79c8c43e6a0054f59cc85dea23a49deb20946a4ea84840534363f7a13cca31a81b1e7e33c832185173369086</string>
+    <string>64bf4987f05ced2a50195f971cd924984047eb1d79c8c43e6a0054f59cc85dea23
+    a49deb20946a4ea84840534363f7a13cca31a81b1e7e33c832185173369086</string>
     <key>hintSetList</key>
     <array>
         <dict>
