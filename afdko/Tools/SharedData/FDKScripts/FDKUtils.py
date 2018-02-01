@@ -9,7 +9,7 @@ import sys
 import traceback
 
 __doc__ = """
-FDKUtils.py v1.2.2 Jan 31 2018
+FDKUtils.py v1.2.3 Feb 01 2018
 A module of functions that are needed by several of the AFDKO scripts.
 """
 

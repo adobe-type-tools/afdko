@@ -11,7 +11,7 @@ import types
 import FDKUtils
 
 __doc__ = """
-ConvertFontToCID.py. v 1.11.1 Jan 27 2018
+ConvertFontToCID.py. v 1.11.2 Feb 01 2018
 
 Convert a Type 1 font to CID, given multiple hint dict defs in the
 "fontinfo" file. See AC.py help, with the "-hfd" option, or the MakeOTF

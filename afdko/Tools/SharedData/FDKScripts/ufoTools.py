@@ -16,7 +16,7 @@ except ImportError:
 import ConvertFontToCID
 
 __doc__ = """
-ufoTools.py v1.30.2 Jan 31 2018
+ufoTools.py v1.30.3 Feb 01 2018
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO

@@ -24,7 +24,7 @@ kTempDSExt = ".temp.designspace"
 kFeaturesFile = "features.fea"
 
 __usage__ = """
-buildMasterOTFs.py  1.7.1 Jan 26 2018
+buildMasterOTFs.py  1.7.2 Feb 01 2018
 Build master source OpenType/CFF fonts from a Superpolator design space file
 and the UFO master source fonts.
 
