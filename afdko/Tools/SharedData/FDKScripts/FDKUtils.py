@@ -24,12 +24,12 @@ class FDKEnvError(KeyError):
 
 
 def findFDKDirs():
-    fdkScriptsDir = None
-    fdkToolsDir = None
     """ Look up the file path to find the "Tools" directory;
     then add the os.name for the executables, and 'FDKScripts'
     for the scripts.
     """
+    fdkScriptsDir = None
+    fdkToolsDir = None
     _dir = os.path.dirname(__file__)
 
     while _dir:
