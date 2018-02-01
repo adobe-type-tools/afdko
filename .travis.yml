@@ -23,7 +23,13 @@ script:
   - python setup.py checkdocs
   - python setup.py check --restructuredtext --strict
   - cd afdko/Tools/SharedData/FDKScripts
+  - flake8 buildCFF2VF.py
+  - flake8 buildMasterOTFs.py
   - flake8 CheckOutlinesUFO.py
+  - flake8 ConvertFontToCID.py
+  - flake8 FDKUtils.py
+  - flake8 MakeOTF.py
+  - flake8 ufoTools.py
   - coverage run --source=. CheckOutlinesUFO.py --test
 after_success:
   - codecov
