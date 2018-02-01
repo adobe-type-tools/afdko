@@ -573,7 +573,7 @@ def buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, varModel):
     pd = baseFont.privateDict
     opCodeDict = buildOpcodeDict(privateDictOperators)
     for key in bcDictList.keys():
-        operator, argType = opCodeDict[key]
+        _, argType = opCodeDict[key]
         valList = bcDictList[key]
         if argType == 'delta':
             # If all masters are the same for each entry in the list, then
