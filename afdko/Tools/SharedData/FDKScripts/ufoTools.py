@@ -2494,12 +2494,12 @@ def validateLayers(ufoFontPath, doWarning=True):
 
 
 def makeUFOGOADB(srcFontPath):
-    # Make a GOADB file for for a UFO font.
+    # Make a GOADB file for a UFO font.
     # Use public.glyphOrder if it exists, else use the contents.plist file.
     ufoFont = UFOFontData(srcFontPath, False, "")
     try:
         ufoFont.loadGlyphMap()
-    except:  # XXX bare except
+    except UFOParseError:
         return None
 
     goadbList = [[i, glyphName] for glyphName, i in ufoFont.orderMap.items()]
