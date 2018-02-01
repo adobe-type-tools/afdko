@@ -8,7 +8,8 @@ Build a variable font from a designspace file and the UFO master source fonts.
 
 python buildCFF2VF.py -h
 python buildCFF2VF.py -u
-python buildCFF2VF.py <path to designspace file> (<optional path to output variable font>)
+python buildCFF2VF.py <path to designspace file> (<optional path to output
+                                                               variable font>)
 """
 
 __help__ = __usage__ + """
