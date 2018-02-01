@@ -260,17 +260,6 @@ class CFF2GlyphData(object):
     def addCharString(self, t2CharString):
         self.charstringList.append(t2CharString)
 
-    def fixAdvanceWidth(self, programList, fontIndex):
-        # Find first op token. Discard weight value
-        opIndex = 0
-        while opIndex < len(programList):
-            if isinstance(programList[opIndex], str):
-                if (opIndex % 2) == 1:
-                    del programList[0]
-                break
-            opIndex += 1
-        return programList
-
     def buildOpList(self, t2Index, supportHints):
         t2String = self.charstringList[t2Index]
         t2Pen = OpListPen(supportHints)
