@@ -1,5 +1,5 @@
 #!/bin/env python
-"""Copyright 2014 Adobe. All rights reserved."""
+# Copyright 2014 Adobe. All rights reserved.
 
 from __future__ import print_function
 
