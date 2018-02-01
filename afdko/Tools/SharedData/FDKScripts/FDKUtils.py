@@ -30,17 +30,17 @@ def findFDKDirs():
     then add the os.name for the executables, and 'FDKScripts'
     for the scripts.
     """
-    dir = os.path.dirname(__file__)
+    _dir = os.path.dirname(__file__)
 
-    while dir:
-        if os.path.basename(dir) == "Tools":
-            fdkScriptsDir = os.path.join(dir, "SharedData", "FDKScripts")
+    while _dir:
+        if os.path.basename(_dir) == "Tools":
+            fdkScriptsDir = os.path.join(_dir, "SharedData", "FDKScripts")
             if curSystem == "Darwin":
-                fdkToolsDir = os.path.join(dir, "osx")
+                fdkToolsDir = os.path.join(_dir, "osx")
             elif curSystem == "Windows":
-                fdkToolsDir = os.path.join(dir, "win")
+                fdkToolsDir = os.path.join(_dir, "win")
             elif curSystem == "Linux":
-                fdkToolsDir = os.path.join(dir, "linux")
+                fdkToolsDir = os.path.join(_dir, "linux")
             else:
                 print("Fatal error: un-supported platform %s %s." % (
                     os.name, sys.platform))
@@ -58,9 +58,9 @@ def findFDKDirs():
             # calling script directly using an external Python.
             if fdkScriptsDir not in sys.path:
                 sys.path.append(fdkScriptsDir)
-            fdkSharedDataDir = os.path.join(dir, "SharedData")
+            fdkSharedDataDir = os.path.join(_dir, "SharedData")
             break
-        dir = os.path.dirname(dir)
+        _dir = os.path.dirname(_dir)
     return fdkToolsDir, fdkSharedDataDir
 
 
