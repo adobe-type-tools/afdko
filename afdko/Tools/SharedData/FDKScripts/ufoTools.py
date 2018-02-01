@@ -379,7 +379,7 @@ class BezParseError(ValueError):
     pass
 
 
-class UFOFontData:
+class UFOFontData(object):
     def __init__(self, parentPath, useHashMap, programName):
         self.parentPath = parentPath
         self.glyphMap = {}
