@@ -817,7 +817,7 @@ def setOptionsFromFontInfo(makeOTFParams):
                         kFileOptPrefix, kSetfsSelectionBitsOn))
             elif not m.group(1) in ["False", "false", "0"]:
                 print("makeotf [Error] Failed to parse value for "
-                      "PreferOS/2TypoMetrics in file '%s'." % fiPath)
+                      "PreferOS/2TypoMetrics in file '%s'." % fontinfoFile)
             print("makeotf [Note] setting the USE_TYPO_METRICS OS/2 "
                   "fsSelection bit 7 from fontinfo keyword.")
 
@@ -841,7 +841,7 @@ def setOptionsFromFontInfo(makeOTFParams):
                         kFileOptPrefix, kSetfsSelectionBitsOn))
             elif not m.group(1) in ["False", "false", "0"]:
                 print("makeotf [Error] Failed to parse value for "
-                      "PreferOS/2TypoMetrics in file '%s'." % fiPath)
+                      "PreferOS/2TypoMetrics in file '%s'." % fontinfoFile)
             print("makeotf [Note] setting the WEIGHT_WIDTH_SLOPE_ONLY OS/2 "
                   "fsSelection bit 8 from fontinfo keyword.")
 
@@ -860,7 +860,7 @@ def setOptionsFromFontInfo(makeOTFParams):
                         kFileOptPrefix, kSetfsSelectionBitsOn))
             elif not m.group(1) in ["False", "false", "0"]:
                 print("makeotf [Error] Failed to parse value for "
-                      "PreferOS/2TypoMetrics in file '%s'." % fiPath)
+                      "PreferOS/2TypoMetrics in file '%s'." % fontinfoFile)
             print("makeotf [Note] setting the OBLIQUE OS/2 fsSelection bit 9 "
                   "from fontinfo keyword.")
 
@@ -873,7 +873,7 @@ def setOptionsFromFontInfo(makeOTFParams):
             val = eval(m.group(1))
         except (NameError, SyntaxError):
             print("makeotf [Error] Failed to parse value '%s' for FSType in "
-                  "file '%s'." % (m.group(1), fiPath))
+                  "file '%s'." % (m.group(1), fontinfoFile))
         makeOTFParams.FSType = val
 
     return
