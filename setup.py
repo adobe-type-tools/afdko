@@ -66,8 +66,12 @@ def compile_package(pkg_dir):
     elif bin_dir == 'linux':
         cmd = "sh BuildAllLinux.sh"
     cur_dir = os.getcwd()
-    assert cmd, 'Unable to form command for this platform.'
-    subprocess.check_call(cmd, cwd=programs_dir, shell=True)
+    assert cmd, 'Unable to form build command for this platform.'
+    try:
+        subprocess.check_call(cmd, cwd=programs_dir, shell=True)
+    except subprocess.CalledProcessError:
+        print('Error executing build command.')
+        sys.exit(1)
     os.chdir(cur_dir)
 
 
