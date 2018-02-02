@@ -11,7 +11,14 @@ sudo: required
 
 install:
 #  - sudo apt-get install libc6-i386
-  - pip install --upgrade pip
+#  - pip install --upgrade pip
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+      curl -O https://bootstrap.pypa.io/get-pip.py;
+      python get-pip.py --user;
+      python -m pip install --user virtualenv;
+      python -m virtualenv .venv/;
+      source .venv/bin/activate;
+    fi
   - pip install --upgrade wheel cython
   - pip install codecov
   - pip install collective.checkdocs
