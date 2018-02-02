@@ -1,9 +1,11 @@
-language: python
+os: osx
+
+language: generic
 
 sudo: required
 
-python:
-  - "2.7"
+#python:
+#  - "2.7"
 
 #before_install:
 
