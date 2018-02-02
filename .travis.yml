@@ -8,6 +8,7 @@ python:
 #before_install:
 
 install:
+  - apt-get install libc6-i386
   - pip install --upgrade pip
   - pip install --upgrade wheel cython
   - pip install codecov
