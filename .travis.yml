@@ -39,7 +39,7 @@ script:
   - flake8 MakeOTF.py
   - flake8 ufoTools.py
   - coverage run --source=. CheckOutlinesUFO.py --test
-  - pip uninstall afdko
+  - pip uninstall --yes afdko
 
 after_success:
   - codecov
