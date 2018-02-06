@@ -30,6 +30,7 @@ script:
   - python setup.py check --restructuredtext --strict
   - python setup.py bdist_wheel
   - pip install dist/*.whl
+  - flake8 setup.py
   - cd afdko/Tools/SharedData/FDKScripts
   - flake8 buildCFF2VF.py
   - flake8 buildMasterOTFs.py
