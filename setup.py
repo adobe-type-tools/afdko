@@ -192,6 +192,7 @@ def main():
               'mutatorMath>=2.1.0',
               'ufolib>=2.1.1',
               'ufonormalizer>=0.3.2',
+              'fontPens>=0.1.0'
           ],
           scripts=scripts,
           entry_points={
