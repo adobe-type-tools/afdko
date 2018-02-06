@@ -465,6 +465,8 @@ static void readEncoding(parseCtx h) {
 		int length;
 		long index[256]; /* Glyph name index, b31-8 buf. index, b7-0 length */
 
+		length = 0;
+
 		/* Initialize index */
 		for (i = 0; i < 256; i++) {
 			index[i] = 0;
@@ -478,7 +480,6 @@ static void readEncoding(parseCtx h) {
 
 		if (psMatchValue(h->ps, dupToken, "dup")) {
 			/* Parse encoding */
-			length = 0;
 			do {
 				int code = 0;   /* Suppress optimizer warning */
 				psToken codet;

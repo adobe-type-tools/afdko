@@ -1,4 +1,4 @@
-
+|Travis Build Status| |Codacy| |Coverage Status| |PyPI|
 
 Adobe Font Development Kit for OpenType (AFDKO)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -6,7 +6,7 @@ Adobe Font Development Kit for OpenType (AFDKO)
 The AFDKO is a set of tools for building OpenType font files from PostScript and TrueType font data.
 
 This directory tree contains the data files, Python scripts, Perl scripts, and
-sources for the command line programs that comprise the AFDKO. The project uses the `Apache 2.0 OpenSource license <https://rawgit.com/adobe-type-tools/afdko/master/LICENSE.txt>`__.
+sources for the command line programs that comprise the AFDKO. The project uses the `Apache 2.0 OpenSource license <https://rawgit.com/adobe-type-tools/afdko/master/LICENSE.md>`__.
 
 Please refer to the file `AFDKO-Overview.html <https://rawgit.com/adobe-type-tools/afdko/master/afdko/AFDKO-Overview.html>`__ for a more detailed description of what is in the AFDKO.
 
@@ -27,11 +27,9 @@ install it with `pip <https://pip.pypa.io>`__:
 
 .. code:: sh
 
-    pip install --extra-index-url https://pypi.org --index-url https://test.pypi.org/simple afdko
+    pip install afdko
 
-Note that for the next month, the afdko will be hosted only on the test version of the PyPy package repository, while we do the beta testing. It will then be moved to the regular PyPi repository. The rather complex pip command above will then reduce to 'pip install afdko'.
-
-The available PyPi packages are for Mac OSX and Windows 64 bit Python.
+The current PyPi package is a beta release for Mac OS X.
 
 You can remove the afdko package with the command:
 
@@ -75,3 +73,12 @@ On Linux, install these with:
 
 On Windows, you need to download and install Visual C++ 6, and add all the service packs.
 
+.. |Travis Build Status| image:: https://travis-ci.org/adobe-type-tools/afdko.svg
+   :target: https://travis-ci.org/adobe-type-tools/afdko
+.. |Codacy| image:: https://api.codacy.com/project/badge/Grade/673770d1687f4daca30c451bbb29c984
+   :alt: Codacy Badge
+   :target: https://www.codacy.com/app/cjchapman/afdko?utm_source=github.com&utm_medium=referral&utm_content=adobe-type-tools/afdko&utm_campaign=badger
+.. |Coverage Status| image:: https://codecov.io/gh/adobe-type-tools/afdko/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/adobe-type-tools/afdko
+.. |PyPI| image:: https://img.shields.io/pypi/v/afdko.svg
+   :target: https://pypi.org/project/afdko

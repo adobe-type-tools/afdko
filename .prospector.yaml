@@ -1,0 +1,3 @@
+strictness: veryhigh
+pylint:
+    run: false # since Codacy runs pylint in addition to prospector
