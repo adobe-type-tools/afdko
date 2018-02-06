@@ -1,3 +1,4 @@
+# Python byte code files
 *.pyc
 
 # temporary wheel build directories
@@ -7,3 +8,6 @@ dist/
 
 # PyCharm directory
 .idea/
+
+# coverage data
+.coverage
