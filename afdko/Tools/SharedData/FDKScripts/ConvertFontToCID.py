@@ -184,12 +184,12 @@ class FDDict(object):
             if isinstance(value, types.MethodType):
                 continue
 
-            if value:
+            if value is not None:
                 fiList.append("%s %s" % (key, value))
         return " ".join(fiList)
 
     def buildBlueLists(self):
-        if not self.BaselineOvershoot:
+        if self.BaselineOvershoot is None:
             print("Error: FDDict definition %s is missing the "
                   "BaselineYCoord/BaselineOvershoot values. These are "
                   "required." % self.DictName)
@@ -211,7 +211,7 @@ class FDDict(object):
             for key in keyList:
                 if key.endswith("Overshoot"):
                     width = eval("self.%s" % key)  # XXX this looks fishy!!
-                    if width:
+                    if width is not None:
                         width = int(width)
                         baseName = key[:-len("Overshoot")]
                         zonePos = None
@@ -228,7 +228,7 @@ class FDDict(object):
                                     break
                                 except AttributeError:
                                     continue
-                        if not zonePos:
+                        if zonePos is None:
                             raise FontInfoParseError(
                                 "Failed to find fontinfo  FDDict %s "
                                 "top/bottom zone name %s to match the zone "
@@ -290,7 +290,7 @@ class FDDict(object):
         for key in keys:
             val = eval("self.%s" % (key))
             # print(key, type(val))
-            if (not val or isinstance(val, types.MethodType) or
+            if ((val is None) or isinstance(val, types.MethodType) or
                key.startswith("_")):
                 continue
             printStr.append(key)
@@ -412,16 +412,16 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName,
                     raise FontInfoParseError(
                         "End FDDict  name \"%s\" does not match begin FDDict "
                         "name \"%s\"." % (tokenList[i + 1], dictName))
-                if not fdDict.DominantH:
+                if fdDict.DominantH is None:
                     print("Warning: the FDDict '%s' in fontinfo has no "
                           "DominantH value" % dictName)
-                if not fdDict.DominantV:
+                if fdDict.DominantV is None:
                     print("Warning: the FDDict '%s' in fontinfo has no "
                           "DominantV value" % dictName)
-                if not fdDict.BlueFuzz:
+                if fdDict.BlueFuzz is None:
                     fdDict.BlueFuzz = blueFuzz
                 fdDict.buildBlueLists()
-                if not fdDict.FontName:
+                if fdDict.FontName is None:
                     fdDict.FontName = fontName
                 state = baseState
                 i += 2
@@ -503,7 +503,7 @@ def mergeFDDicts(prevDictList, privateDict):
             stemFieldName = stemNameList[wi]
             dList = eval("prefDDict.%s" % stemFieldName)
             stemDict = stemDictList[wi]
-            if dList:
+            if dList is not None:
                 dList = dList[1:-1]  # remove the braces
                 dList = dList.split()
                 dList = map(int, dList)
@@ -876,7 +876,7 @@ def makeCIDFontInfo(fontPath, cidfontinfoPath):
         fp = open(cidfontinfoPath, "wt")
         for key in kCIDFontInfokeyList:
             value = cfiDict[key]
-            if not value:
+            if value is None:
                 continue
             if value[0] == "\"":
                 value = "(" + value[1:-1] + ")"
@@ -905,7 +905,7 @@ def makeGAFile(gaPath, fontPath, glyphList, fontDictList, fdGlyphDict,
     dictName = ""
     if fdDict:
         langGroup = fdDict.LanguageGroup
-        if not langGroup:
+        if langGroup is None:
             langGroup = " 0"
         else:
             langGroup = " %s" % (langGroup)
