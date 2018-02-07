@@ -32,18 +32,16 @@ __help__ = __usage__ + """
 
 """
 
-import sys
 import os
-import re
-import time
-import traceback
-import FDKUtils
-from subprocess import PIPE, Popen
-from mutatorMath.ufo import build as mutatorMathBuild
-import robofab.world
 import shutil
-import ufoTools
+import sys
+from subprocess import PIPE, Popen
+
 import defcon
+from mutatorMath.ufo import build as mutatorMathBuild
+
+import ufoTools
+
 try:
     import xml.etree.cElementTree as ET
 except ImportError:
