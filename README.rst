@@ -81,4 +81,4 @@ On Windows, you need to download and install Visual C++ 6, and add all the servi
 .. |Coverage Status| image:: https://codecov.io/gh/adobe-type-tools/afdko/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/adobe-type-tools/afdko
 .. |PyPI| image:: https://img.shields.io/pypi/v/afdko.svg
-   :target: https://pypi.org/project/afdko
+   :target: https://pypi.python.org/pypi/afdko
