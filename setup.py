@@ -187,7 +187,6 @@ def main():
               'fonttools>=3.19.0',
               'booleanOperations>=0.7.1',
               'fontMath>=0.4.4',
-              'robofab>=1.2.1',
               'defcon>=0.3.5',
               'mutatorMath>=2.1.0',
               'ufolib>=2.1.1',
