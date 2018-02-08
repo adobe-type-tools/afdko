@@ -9,7 +9,7 @@
 
 #ifndef PSTOKEN_H
 #define PSTOKEN_H
-
+#include <stdint.h>
 #include <stddef.h>
 
 #include "dynarr.h"
@@ -122,17 +122,17 @@ psToken *psFindToken(psCtx h, int type, char *value);
 int psMatchValue(psCtx h, psToken *token, char *strng);
 char *psGetValue(psCtx h, psToken *token);
 
-long psGetInteger(psCtx h);
+int32_t psGetInteger(psCtx h);
 double psGetReal(psCtx h);
 char *psGetString(psCtx h, unsigned *length);
 int psGetHexLength(psCtx h, psToken *token);
-unsigned long psGetHexString(psCtx h, int *length);
+uint32_t psGetHexString(psCtx h, int *length);
 
-long psConvInteger(psCtx h, psToken *token);
+int32_t psConvInteger(psCtx h, psToken *token);
 double psConvReal(psCtx h, psToken *token);
 char *psConvString(psCtx h, psToken *token, unsigned *length);
 char *psConvLiteral(psCtx h, psToken *token, unsigned *length);
-unsigned long psConvHexString(psCtx h, psToken *token);
+uint32_t psConvHexString(psCtx h, psToken *token);
 
 /* Exception handling */
 void CDECL psWarning(psCtx h, char *fmt, ...);

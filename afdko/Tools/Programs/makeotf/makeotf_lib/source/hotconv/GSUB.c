@@ -2977,7 +2977,7 @@ static void writeExtension(hotCtx g, GSUBCtx h, Subtable *sub) {
 	/* Adjust offset */
 	fmt->ExtensionOffset += h->offset.extensionSection - sub->offset;
 
-	DF(1, (stderr, "  GSUB Extension: fmt=%1d, lkpType=%2d, offset=%08lx\n",
+	DF(1, (stderr, "  GSUB Extension: fmt=%1d, lkpType=%2d, offset=%08ux\n",
 	       fmt->SubstFormat, fmt->ExtensionLookupType, fmt->ExtensionOffset));
 
 	OUT2(fmt->SubstFormat);

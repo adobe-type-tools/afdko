@@ -359,17 +359,17 @@ void otlDumpSizes(hotCtx g, otlTbl t, LOffset subtableSize,
 
 	s = otlGetHeaderSize(t);
 	tot += s;
-	DF(1, (stderr, "  Scr,Fea,Lkp lists:     size %5ld, tot %5ld\n", s, tot));
+	DF(1, (stderr, "  Scr,Fea,Lkp lists:     size %5u, tot %5u\n", s, tot));
 
 	s = subtableSize;
 	tot += s;
-	DF(1, (stderr, "  Main subtable section: size %5ld, tot %5ld\n", s, tot));
+	DF(1, (stderr, "  Main subtable section: size %5u, tot %5u\n", s, tot));
 
 	s = otlGetCoverageSize(t);
 	tot += s;
-	DF(1, (stderr, "  Main coverage section: size %5ld, tot ", s));
+	DF(1, (stderr, "  Main coverage section: size %5u, tot ", s));
 	if (s != 0) {
-		DF(1, (stderr, "%5ld\n", tot));
+		DF(1, (stderr, "%5u\n", tot));
 	}
 	else {
 		DF(1, (stderr, "    \"\n"));
@@ -377,9 +377,9 @@ void otlDumpSizes(hotCtx g, otlTbl t, LOffset subtableSize,
 
 	s = otlGetClassSize(t);
 	tot += s;
-	DF(1, (stderr, "  Main class section:    size %5ld, tot ", s));
+	DF(1, (stderr, "  Main class section:    size %5u, tot ", s));
 	if (s != 0) {
-		DF(1, (stderr, "%5ld\n", tot));
+		DF(1, (stderr, "%5u\n", tot));
 	}
 	else {
 		DF(1, (stderr, "    \"\n"));
@@ -387,9 +387,9 @@ void otlDumpSizes(hotCtx g, otlTbl t, LOffset subtableSize,
 
 	s = extensionSectionSize;
 	tot += s;
-	DF(1, (stderr, "  Extension section:     size %5ld, tot ", s));
+	DF(1, (stderr, "  Extension section:     size %5u, tot ", s));
 	if (s != 0) {
-		DF(1, (stderr, "%5ld\n", tot));
+		DF(1, (stderr, "%5u\n", tot));
 	}
 	else {
 		DF(1, (stderr, "    \"\n"));

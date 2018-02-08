@@ -523,7 +523,7 @@ static void fillWrapTrailer(tcCtx g, char *wrapTrailer) {
 #if TC_STATISTICS
 /* Show compression statistics */
 static void showStats(tcprivCtx h) {
-#define AVG(v, c) ((long)((c) ? (double)(v) / (c) + .5 : 0))
+#define AVG(v, c) ((int32_t)((c) ? (double)(v) / (c) + .5 : 0))
 	tcCtx g = h->g;
 	int i;
 	struct {
@@ -1211,10 +1211,10 @@ static void dblayout(tcprivCtx h) {
 	printf("strings     %7ld        -\n", h->size.strings);
 	printf("gsubrs      %7ld        -\n", h->size.gsubrs);
 	printf("FontNames   %7ld        -\n", h->size.FontNames);
-	printf("encodings   %7ld  %7ld\n", h->size.encodings, h->offset.encodings);
-	printf("charsets    %7ld  %7ld\n", h->size.charsets, h->offset.charsets);
-	printf("FDSelects   %7ld  %7ld\n", h->size.FDSelects, h->offset.FDSelects);
-	printf("copyright         -  %7ld\n", h->offset.copyright);
+	printf("encodings   %7ld  %7u\n", h->size.encodings, h->offset.encodings);
+	printf("charsets    %7ld  %7u\n", h->size.charsets, h->offset.charsets);
+	printf("FDSelects   %7ld  %7u\n", h->size.FDSelects, h->offset.FDSelects);
+	printf("copyright         -  %7u\n", h->offset.copyright);
 
 	for (i = 0; i < h->set.cnt; i++) {
 		Font *font = &h->set.array[i];
@@ -1222,16 +1222,16 @@ static void dblayout(tcprivCtx h) {
 		printf("=== font[%3d] ==============\n", i);
 		printf("FontName    %7ld        -\n", font->size.FontName);
 		printf("dict        %7ld        -\n", font->size.dict);
-		printf("encoding          -  %7ld\n", font->offset.encoding);
-		printf("charset           -  %7ld\n", font->offset.charset);
-		printf("fdselect          -  %7ld\n", font->offset.fdselect);
-		printf("CharStrings %7ld  %7ld\n",
+		printf("encoding          -  %7u\n", font->offset.encoding);
+		printf("charset           -  %7u\n", font->offset.charset);
+		printf("fdselect          -  %7u\n", font->offset.fdselect);
+		printf("CharStrings %7ld  %7u\n",
 		       font->size.CharStrings, font->offset.CharStrings);
-		printf("FDArray     %7ld  %7ld\n",
+		printf("FDArray     %7ld  %7u\n",
 		       font->size.FDArray, font->offset.FDArray);
-		printf("Private     %7ld  %7ld\n",
+		printf("Private     %7ld  %7u\n",
 		       font->size.Private, font->offset.Private);
-		printf("Subrs       %7ld  %7ld\n",
+		printf("Subrs       %7ld  %7u\n",
 		       font->size.Subrs, font->offset.Subrs);
 		if (font->flags & FONT_CID) {
 			int j;
@@ -1241,9 +1241,9 @@ static void dblayout(tcprivCtx h) {
 				if (info->seenChar) {
 					printf("--- FD[%2d] -----------------\n", iFD++);
 					printf("FD          %7ld        -\n", info->size.FD);
-					printf("Private     %7ld  %7ld\n",
+					printf("Private     %7ld  %7u\n",
 					       info->size.Private, info->offset.Private);
-					printf("Subrs       %7ld  %7ld\n",
+					printf("Subrs       %7ld  %7u\n",
 					       info->size.Subrs, info->offset.Subrs);
 				}
 			}

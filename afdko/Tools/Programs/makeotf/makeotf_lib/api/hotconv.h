@@ -5,6 +5,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define HOT_H
 
 #include <stddef.h>             /* For size_t */
+#include <stdint.h>             /* For int32_t */
 
 #ifdef __cplusplus
 extern "C" {
@@ -637,7 +638,7 @@ void hotAddUnencChar(hotCtx g, int iChar, char *name);
    glyphs of a kern pair with a name when one or both glyphs are unencoded.
    This name is subsequently converted into a glyph id by the library. */
 
-typedef long hotFixed;          /* 16.16 fixed point */
+typedef int32_t hotFixed;          /* 16.16 fixed point */
 void hotAddAxisData(hotCtx g, int iAxis,
                     char *type, char *longLabel, char *shortLabel,
                     hotFixed minRange, hotFixed maxRange);
