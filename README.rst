@@ -29,17 +29,73 @@ The AFDKO requires Python_ 2.7.x. It does not yet support Python 3.x.
 Releases are available on the `Python Package Index`_ (PyPI) and can be installed with pip_.
 **The current PyPI package is a beta release for Mac OS X only.**
 
+Installing
+~~~~~~~~~~
+**- Option 1 (Recommended)**
+
+  Install `virtualenv`_:
+   .. code:: sh
+
+     pip install --user virtualenv
+
+
+  Create a virtual environment:
+   .. code:: sh
+
+     python -m virtualenv afdko
+
+
+  Activate the virtual environment:
+  - macOS & Linux
+
+     .. code:: sh
+
+       source afdko/bin/activate
+
+  - Windows
+
+     .. code:: sh
+
+       source afdko/bin/activate.bat
+
+
+  Install `afdko`_:
+   .. code:: sh
+
+     pip install afdko
+
+
+  Installing the afdko inside a virtual environment prevents conflicts between its dependencies and other modules installed globally.
+
+
+**- Option 2**
+
+  Install `afdko`_ globally:
+   .. code:: sh
+
+     pip install --user afdko
+
+
+Updating
+~~~~~~~~
+Use the ``-U`` (or ``--upgrade``) option to update the afdko and its dependencies to the newest available release:
+
 .. code:: sh
 
-    pip install afdko
+    pip install -U afdko
 
 
-You can remove the afdko package with the command:
+Uninstalling
+~~~~~~~~~~~~
+To remove the afdko package use the command:
 
 .. code:: sh
 
     pip uninstall afdko
 
+
+Comments
+~~~~~~~~
 If you have both the FDK from the Adobe AFDKO web page installed, and the new afdko package installed, the commands in the new afdko will take precedence over commands in the older Adobe FDK, as the Python package directory is added at the beginning of the PATH directory list, and the old installer added the Adobe FDK directory to the end of the list.
 
 Note that the PyPI installer will add the new adko package paths to the start of your system PATH environment variable, and this is not undone by the uninstaller. If you want to completely clean up, you will need to change the PATH environment variable to remove the new afdko executable directories. On the Mac, this means editing the line in your login file that sets the PATH variable. On Windows, this means editing the PATH environment variable in the System control panel.
@@ -49,6 +105,8 @@ You can download older versions of the tools from the `Adobe AFDKO homepage`_.
 .. _Python: http://www.python.org/download
 .. _Python Package Index: https://pypi.python.org/pypi/afdko
 .. _pip: https://pip.pypa.io
+.. _virtualenv: https://virtualenv.pypa.io
+.. _afdko: https://pypi.python.org/pypi/afdko
 .. _Adobe AFDKO homepage: http://www.adobe.com/devnet/opentype/afdko.html
 
 
