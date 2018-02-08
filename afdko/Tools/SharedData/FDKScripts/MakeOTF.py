@@ -28,7 +28,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.1.2 Feb 01 2018
+makeotf.py v2.1.3 Feb 07 2018
 """
 
 __methods__ = """
@@ -624,7 +624,7 @@ def writeOptionsFile(makeOTFParams, filePath):
             fieldName = field[kFileOptPrefixLen:]
             optionOrder = kMOTFOptions[fieldName][0]
             value = eval("makeOTFParams.%s" % field)
-            if not value:
+            if value is None:
                 continue
 
             if fieldName in kFileOptList:
@@ -796,7 +796,7 @@ def setOptionsFromFontInfo(makeOTFParams):
                 script = 3
             else:
                 script = None
-            if script:
+            if script is not None:
                 exec("makeOTFParams.%s%s = script" % (kFileOptPrefix,
                                                       kMacScript))
 
@@ -809,7 +809,7 @@ def setOptionsFromFontInfo(makeOTFParams):
                 val = 7
                 bitsOn = eval("makeOTFParams.%s%s" % (
                     kFileOptPrefix, kSetfsSelectionBitsOn))
-                if not bitsOn:
+                if bitsOn is None:
                     exec("makeOTFParams.%s%s = [val]" % (
                         kFileOptPrefix, kSetfsSelectionBitsOn))
                 else:
@@ -833,7 +833,7 @@ def setOptionsFromFontInfo(makeOTFParams):
                 val = 8
                 bitsOn = eval("makeOTFParams.%s%s" % (
                     kFileOptPrefix, kSetfsSelectionBitsOn))
-                if not bitsOn:
+                if bitsOn is None:
                     exec("makeOTFParams.%s%s = [val]" % (
                         kFileOptPrefix, kSetfsSelectionBitsOn))
                 else:
@@ -852,7 +852,7 @@ def setOptionsFromFontInfo(makeOTFParams):
                 val = 9
                 bitsOn = eval("makeOTFParams.%s%s" % (
                     kFileOptPrefix, kSetfsSelectionBitsOn))
-                if not bitsOn:
+                if bitsOn is None:
                     exec("makeOTFParams.%s%s = [val]" % (
                         kFileOptPrefix, kSetfsSelectionBitsOn))
                 else:
@@ -949,7 +949,7 @@ def getOptions(makeOTFParams):
                 file_path = args[i]
             except IndexError:
                 file_path = None
-            if not file_path or file_path[0] == "-":
+            if (file_path is None) or (file_path[0] == "-"):
                 error = 1
                 print("makeotf [Error] The '%s' option must be followed by "
                       "the path to the fontinfo file." % arg)
@@ -998,7 +998,7 @@ def getOptions(makeOTFParams):
                                                          kInputFont))
             except IndexError:
                 file_path = None
-            if not file_path or file_path[0] == "-":
+            if (file_path is None) or (file_path[0] == "-"):
                 error = 1
                 print("makeotf [Error] The '%s' option must be followed by "
                       "the path to the input file." % arg)
@@ -1017,7 +1017,7 @@ def getOptions(makeOTFParams):
                 file_path = args[i]
             except IndexError:
                 file_path = None
-            if not file_path or file_path[0] == "-":
+            if (file_path is None) or (file_path[0] == "-"):
                 error = 1
                 print("makeotf [Error] The '%s' option must be followed the "
                       "path to the output font file." % arg)
@@ -1052,7 +1052,7 @@ def getOptions(makeOTFParams):
                 file_path = args[i]
             except IndexError:
                 file_path = None
-            if not file_path or file_path[0] == "-":
+            if (file_path is None) or (file_path[0] == "-"):
                 error = 1
                 print("makeotf [Error] The '%s' option must be followed the "
                       "path to the features file." % arg)
@@ -1083,7 +1083,7 @@ def getOptions(makeOTFParams):
                 file_path = args[i]
             except IndexError:
                 file_path = None
-            if not file_path or file_path[0] == "-":
+            if (file_path is None) or (file_path[0] == "-"):
                 error = 1
                 print("makeotf [Error] The '%s' option must be followed by "
                       "the path to the FontMenuNameDB file." % arg)
@@ -1105,7 +1105,7 @@ def getOptions(makeOTFParams):
                 file_path = args[i]
             except IndexError:
                 file_path = None
-            if not file_path or file_path[0] == "-":
+            if (file_path is None) or (file_path[0] == "-"):
                 error = 1
                 print("makeotf [Error] The '%s' option must be followed by "
                       "the path to the GlyphOrderingAndAliasDB file." % arg)
@@ -1162,8 +1162,8 @@ def getOptions(makeOTFParams):
 
         elif arg == kMOTFOptions[kDoAlias][1]:
             if (not eval("makeOTFParams.%s%s" % (kFileOptPrefix, kRelease))) \
-                and (not eval("makeOTFParams.%s%s" % (
-                    kFileOptPrefix, kDoAlias))):
+                and (eval("makeOTFParams.%s%s" % (kFileOptPrefix, kDoAlias)
+                     is None)):
 
                 # we don't need to turn Alias on if release mode is on,
                 # and Alias has not been explicitly disabled.
@@ -1243,7 +1243,7 @@ def getOptions(makeOTFParams):
                 val = 0
             bitsOn = eval("makeOTFParams.%s%s" % (kFileOptPrefix,
                                                   kSetfsSelectionBitsOn))
-            if not bitsOn:
+            if bitsOn is None:
                 exec("makeOTFParams.%s%s = [val]" % (kFileOptPrefix,
                                                      kSetfsSelectionBitsOn))
             else:
@@ -1265,7 +1265,7 @@ def getOptions(makeOTFParams):
                 val = 0
             bitsoff = eval("makeOTFParams.%s%s" % (kFileOptPrefix,
                                                    kSetfsSelectionBitsOff))
-            if not bitsoff:
+            if bitsoff is None:
                 exec("makeOTFParams.%s%s = [val]" % (kFileOptPrefix,
                                                      kSetfsSelectionBitsOff))
             else:
@@ -1347,7 +1347,7 @@ def getOptions(makeOTFParams):
                 file_path = args[i]
             except IndexError:
                 file_path = None
-            if not file_path or file_path[0] == "-":
+            if (file_path is None) or (file_path[0] == "-"):
                 error = 1
                 print("makeotf [Error] The '%s' option must be followed by "
                       "the path to the CID CMAP Mac encoding file." % arg)
@@ -1367,7 +1367,7 @@ def getOptions(makeOTFParams):
                 file_path = args[i]
             except IndexError:
                 file_path = None
-            if not file_path or file_path[0] == "-":
+            if (file_path is None) or (file_path[0] == "-"):
                 error = 1
                 print("makeotf [Error] The '%s' option must be followed by "
                       "the path to the CID CMAP horizontal Unicode encoding "
@@ -1388,7 +1388,7 @@ def getOptions(makeOTFParams):
                 file_path = args[i]
             except IndexError:
                 file_path = None
-            if not file_path or file_path[0] == "-":
+            if (file_path is None) or (file_path[0] == "-"):
                 error = 1
                 print("makeotf [Error] The '%s' option must be followed by "
                       "the path to the Unicode Variation Sequence "
@@ -1794,7 +1794,7 @@ def parsePList(filePath, dictKey=None):
     fp.close()
     contents = XML(data)
     ufo_dict = contents.find("dict")
-    if not ufo_dict:
+    if ufo_dict is None:
         raise UFOParseError("In '%s', failed to find dict. '%s'." % filePath)
     lastTag = "string"
     for child in ufo_dict:
@@ -1806,7 +1806,7 @@ def parsePList(filePath, dictKey=None):
             skipKeyData = False
             lastName = child.text
             lastTag = "key"
-            if dictKey:
+            if dictKey is not None:
                 if lastName != dictKey:
                     skipKeyData = True
         elif child.tag != "key":
@@ -1954,7 +1954,7 @@ def setMissingParams(makeOTFParams):
     # GOADB path.
     # Figure out if GOABD is required. It is required when (release mode
     # is set or aliasing is requested), and the font is not a CID font.
-    if not makeOTFParams.ROS:
+    if makeOTFParams.ROS is None:
         # Need to know if it has an ROS, e.g. is a CID font.
         # We don't use GOADB file with CID fonts; Unicode values
         # come from Uni-H CMAP file, and names can't be changed.
@@ -2045,7 +2045,7 @@ def setMissingParams(makeOTFParams):
 
 def convertFontIfNeeded(makeOTFParams):
     # we've already done this.
-    if makeOTFParams.tempFontPath:
+    if makeOTFParams.tempFontPath is not None:
         return
 
     # If the font doesn't look like a Unix ASCII
@@ -2281,7 +2281,7 @@ def getSourceGOADBData(inputFilePath):
     for gid, uniList in gdItems:
         gname = gnameDict[gid]
         uniValue = uniList[0]
-        if not uniValue:
+        if uniValue is None:
             uniValue = ""
         else:
             uniValue = 'uni' + uniValue
@@ -2629,7 +2629,7 @@ class HheaTable(HeadTable):
 
 
 def makeRelativePath(curDir, targetPath):
-    if not targetPath:
+    if targetPath is None:
         return
 
     targetPath = os.path.abspath(targetPath)
@@ -2811,7 +2811,7 @@ def runMakeOTF(makeOTFParams):
                                            kSetfsSelectionBitsOff))
     bitsOn = eval("makeOTFParams.%s%s" % (kFileOptPrefix,
                                           kSetfsSelectionBitsOn))
-    if bitsOff:
+    if bitsOff is not None:
         for bitIndex in bitsOff:
             try:
                 bitsOn.remove(bitIndex)
@@ -2825,7 +2825,7 @@ def runMakeOTF(makeOTFParams):
                 hasOS2V4Bit = True
 
     os2Version = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kSetOS2Version))
-    if hasOS2V4Bit and not os2Version:
+    if hasOS2V4Bit and (os2Version is None):
         # If the OS/2 table version has not been explicitly specified,
         # and the kSetfsSelectionBits is being set to greater than 6,
         # then bump the OS/2 table version to 4.
@@ -2854,7 +2854,7 @@ def runMakeOTF(makeOTFParams):
     # renumber the fontRevision
     fontRevision = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kRenumber))
     featuresPath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kFeature))
-    if fontRevision:
+    if fontRevision is not None:
         # If this is not defined, then there is no 'features' file. Make one.
         if not featuresPath:
             print("makeotf [Warning] Creating 'features' file to hold head "
@@ -2874,7 +2874,7 @@ def runMakeOTF(makeOTFParams):
     # pass the -cn arg/-ncn arg on to makeotfexe.
     doConvertToCID = eval("makeOTFParams.%s%s" % (kFileOptPrefix,
                                                   kConvertToCID))
-    if doConvertToCID:
+    if doConvertToCID is not None:
         if makeOTFParams.srcIsTTF:
             doConvertToCID = None
 
@@ -2892,7 +2892,7 @@ def runMakeOTF(makeOTFParams):
         if optionKey in kSkipOptions:
             continue
         val = eval("makeOTFParams.%s%s" % (kFileOptPrefix, optionKey))
-        if not val:
+        if val is None:
             continue
 
         optionEntry = kMOTFOptions[optionKey]
