@@ -3,7 +3,7 @@
 from __future__ import print_function, division, absolute_import
 
 __usage__ = """
-buildCFF2VF.py  1.13.3 Feb 01 2018
+buildCFF2VF.py  1.13.4 Feb 07 2018
 Build a variable font from a designspace file and the UFO master source fonts.
 
 python buildCFF2VF.py -h
@@ -759,9 +759,9 @@ def getNewAxisValue(seenCoordinate, fvarInstance, axisTag):
 
 
 def addAxisValueData(xmlData, prevEntry, axisEntry, nextEntry, linkDelta):
-    if linkDelta:
+    if linkDelta is not None:
         _format = 3
-    elif (not prevEntry) and (not nextEntry):
+    elif (prevEntry is None) and (nextEntry is None):
         _format = 1
     else:
         _format = 2
@@ -774,11 +774,11 @@ def addAxisValueData(xmlData, prevEntry, axisEntry, nextEntry, linkDelta):
     if _format == 1:
         xmlData.append("\t\t\t<Value value=\"%s\" />" % (axisEntry.axisValue))
     elif _format == 2:
-        if not prevEntry:
+        if prevEntry is None:
             minValue = axisEntry.axisValue
         else:
             minValue = (axisEntry.axisValue + prevEntry.axisValue) / 2.0
-        if not nextEntry:
+        if nextEntry is None:
             maxValue = axisEntry.axisValue
         else:
             maxValue = (axisEntry.axisValue + nextEntry.axisValue) / 2.0
@@ -825,7 +825,7 @@ def makeSTAT(fvar):
             flagValue = 0
             instance = fvar.instances[j]
             entry = getNewAxisValue(seenCoordinate, instance, axisTag)
-            if not entry:
+            if entry is None:
                 continue
             axisValue, nameID = entry
 #           if (axisValue == 0) and (axisTag == 'wght'):
@@ -863,7 +863,7 @@ def makeSTAT(fvar):
 
     xmlData.append("\t</AxisValueArray>")
 
-    if not fallBackNameID:
+    if fallBackNameID is None:
         fallBackNameID = 2
     xmlData.append("\t<ElidedFallbackNameID value=\"%s\" />" % (
         fallBackNameID))

@@ -9,7 +9,7 @@ import sys
 import traceback
 
 __doc__ = """
-FDKUtils.py v1.2.3 Feb 01 2018
+FDKUtils.py v1.2.4 Feb 07 2018
 A module of functions that are needed by several of the AFDKO scripts.
 """
 
@@ -99,7 +99,7 @@ def runShellCmdLogging(cmd):
             output = proc.stdout.readline()
             if output:
                 print(output, end=' ')
-            if proc.poll():
+            if proc.poll() is not None:
                 output = proc.stdout.readline()
                 if output:
                     print(output, end=' ')
