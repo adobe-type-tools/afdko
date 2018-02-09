@@ -42,21 +42,22 @@ Installing
   Create a virtual environment:
    .. code:: sh
 
-     python -m virtualenv afdko
+     python -m virtualenv afdko_env
 
 
   Activate the virtual environment:
+
   - macOS & Linux
 
      .. code:: sh
 
-       source afdko/bin/activate
+       source afdko_env/bin/activate
 
   - Windows
 
      .. code:: sh
 
-       source afdko/bin/activate.bat
+       source afdko_env/bin/activate.bat
 
 
   Install `afdko`_:
