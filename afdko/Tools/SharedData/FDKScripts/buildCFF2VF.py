@@ -272,7 +272,8 @@ class CFF2GlyphData(object):
         if t2Index == 0:
             # For the master font path, promote all coordinates to a list.
             for _, ptList in opList:
-                ptList = [[pt] for pt in ptList]
+                for i, item in enumerate(ptList):
+                    ptList[i] = [item]
         return opList
 
     def buildMMData(self):
