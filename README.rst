@@ -148,9 +148,9 @@ On Windows, you need to download and install Visual C++ 6, and add all the servi
 
 .. |Travis Build Status| image:: https://travis-ci.org/adobe-type-tools/afdko.svg
    :target: https://travis-ci.org/adobe-type-tools/afdko
-.. |Codacy| image:: https://api.codacy.com/project/badge/Grade/673770d1687f4daca30c451bbb29c984
+.. |Codacy| image:: https://api.codacy.com/project/badge/Grade/08ceff914833445685924ebb1f040070
    :alt: Codacy Badge
-   :target: https://www.codacy.com/app/cjchapman/afdko?utm_source=github.com&utm_medium=referral&utm_content=adobe-type-tools/afdko&utm_campaign=badger
+   :target: https://www.codacy.com/app/adobe-type-tools/afdko?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=adobe-type-tools/afdko&amp;utm_campaign=Badge_Grade
 .. |Coverage Status| image:: https://codecov.io/gh/adobe-type-tools/afdko/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/adobe-type-tools/afdko
 .. |PyPI| image:: https://img.shields.io/pypi/v/afdko.svg
