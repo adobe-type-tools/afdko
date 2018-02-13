@@ -743,7 +743,6 @@ static int partitionRanges(cmapCtx h, Mapping *mapping) {
 	int span;
 	int ordered;
     int lastOrdered;
-	int overflow;
 	int total;
 	int i;
     int nSegments;
@@ -753,7 +752,7 @@ static int partitionRanges(cmapCtx h, Mapping *mapping) {
      If there is a break in the glyph ID sequence, then we may make a segment break, if doing so saves more bytes
      than not doing so.
      If a segment has more than one glyph and no breaks in its glyphID sequence, then it is set as  ordered.
-     Ordered segments are dropped only if kepeing them costs less than the new segment cost.
+     Ordered segments are dropped only if keeping them costs less than the new segment cost.
      All other segments are merged togther.
      idRangeOffset for an ordered segment is set to 0, and its glyphID's are not added to the glyphId array,
      as its glyphIDs can be calculated from startCode/endCode/idDelta alone.
@@ -813,9 +812,10 @@ static int partitionRanges(cmapCtx h, Mapping *mapping) {
 	mapping[i - total].ordered = ordered;
 	nSegments += 2; /* Add last segment and sentinel */
 
-    /* Previously, 'ordered' has been used to mean "keep this as a segment, and don't merge it with the prior segment or following segment".
-    Now we need to set it to really mean 'the glyphID's in this segment are sequential', as this field is used to decide
-    how to use idDelta and idRange.
+    /* Previously, 'ordered' has been used to mean "keep this as a segment,
+    and don't merge it with the prior segment or following segment".
+    Now we need to set it to really mean 'the glyphID's in this segment are
+    sequential', as this field is used to decide how to use idDelta and idRange.
      */
     for (i = 0; i < h->mapping.cnt; i += span)
         {
@@ -848,9 +848,6 @@ static void makeSegment4(hotCtx g, Format4 *fmt, int nSegments, int segment,
 	if (mapping[start].ordered) {
 		fmt->idDelta[segment] = mapping[start].glyphId - (unsigned short)mapping[start].code;
 		fmt->idRangeOffset[segment] = 0;
-		if ((fmt->idDelta[segment] + (unsigned short)mapping[start].code) < 0) {
-            cmapMsg(g, hotERROR, "Format 4 idDelta overflow. Program error.");
-		}
 	}
 	else {
 		fmt->idDelta[segment] = 0;
@@ -859,6 +856,10 @@ static void makeSegment4(hotCtx g, Format4 *fmt, int nSegments, int segment,
 		for (i = start; i <= end; i++) {
 			*dnaNEXT(fmt->glyphId) = mapping[i].glyphId;
 		}
+        /* Future improvement: when you are using idRangeOffset, you do not
+        have to set idDelta to 0. This could be used to combine sequential
+        segments that are not ordered.
+         */
 	}
 }
 
