@@ -1,4 +1,8 @@
-"""Copyright 2015 Adobe. All rights reserved."""
+# Copyright 2015 Adobe. All rights reserved.
+
+"""
+Tool that performs outline quality checks and can remove path overlaps.
+"""
 
 from __future__ import print_function
 
@@ -305,8 +309,7 @@ def get_options(args):
     parser = argparse.ArgumentParser(
         formatter_class=CustomHelpFormatter,
         prog='checkOutlinesUFO',
-        description='Tool that performs outline quality checks and can remove '
-                    'path overlaps.'
+        description=__doc__
     )
     parser.add_argument(
         '--version',
