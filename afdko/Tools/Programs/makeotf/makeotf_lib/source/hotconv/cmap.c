@@ -721,20 +721,20 @@ static Format2 *makeFormat2(cmapCtx h) {
 
 static void setOrdered( Mapping *mapping, int codeBreak, int span, int index)
 {
-    int threshold;
-    /* If the ordered segment starts with a code break or ends with a code break,
-     then the cost of keeping this as a separate segment is just one new segment break
-     (the following segment break).
-     Else, the cost is adding two new segment breaks - the one to start this segment,
-     and to start the next segment. We mark as NOT orderd those segments that are no larger
-     than the threshold.
-     */
-    if ( (mapping[index-span].flags & CODE_BREAK) || codeBreak)
-        threshold = 4;
-    else
-        threshold = 8;
-    if (span > threshold)
-        mapping[index - span].ordered = 1;
+	int threshold;
+	/* If the ordered segment starts with a code break or ends with a code
+	break, then the cost of keeping this as a separate segment is just one new
+	segment break (the following segment break). Else, the cost is adding two
+	new segment breaks - the one to start this segment, and to start the next
+	segment. We mark as NOT ordered those segments that are no larger than the
+	threshold.
+	 */
+	if ( (mapping[index-span].flags & CODE_BREAK) || codeBreak)
+		threshold = 4;
+	else
+		threshold = 8;
+	if (span > threshold)
+		mapping[index - span].ordered = 1;
 
 }
 
@@ -742,68 +742,68 @@ static void setOrdered( Mapping *mapping, int codeBreak, int span, int index)
 static int partitionRanges(cmapCtx h, Mapping *mapping) {
 	int span;
 	int ordered;
-    int lastOrdered;
+	int lastOrdered;
 	int total;
 	int i;
-    int nSegments;
-
-    /* mapping is sorted by charCode, then by glyphID.
-     If there is a break on the character code sequence, we always make a new segment.
-     If there is a break in the glyph ID sequence, then we may make a segment break, if doing so saves more bytes
-     than not doing so.
-     If a segment has more than one glyph and no breaks in its glyphID sequence, then it is set as  ordered.
-     Ordered segments are dropped only if keeping them costs less than the new segment cost.
-     All other segments are merged togther.
-     idRangeOffset for an ordered segment is set to 0, and its glyphID's are not added to the glyphId array,
-     as its glyphIDs can be calculated from startCode/endCode/idDelta alone.
-     */
-    
-    /* Create ordered partitioning. */
+	int nSegments;
+	
+	/* mapping is sorted by charCode, then by glyphID. If there is a break on
+	the character code sequence, we always make a new segment. If there is a
+	break in the glyph ID sequence, then we may make a segment break, if doing
+	so saves more bytes than not doing so. 
+	If a segment has more than one glyph and no breaks in its glyphID sequence,
+	then it is set as  ordered. Ordered segments are dropped only if keeping
+	them costs less than the new segment cost. All other segments are merged
+	togther. idRangeOffset for an ordered segment is set to 0, and its glyphID's
+	are not added to the glyphId array, as its glyphIDs can be calculated from
+	startCode/endCode/idDelta alone.
+	*/
+	
+	/* Create ordered partitioning. */
 	span = 1;
 	for (i = 1; i < h->mapping.cnt; i++) {
 		int codeBreak = (mapping[i - 1].code + 1 != mapping[i].code);
 		if (codeBreak || mapping[i - 1].glyphId + 1 != mapping[i].glyphId) {
-            mapping[i - span].span = span;
-            mapping[i - span].ordered = 0; /* default */
-            if (span > 1) /* an ordered segment is a segment with more than one code point with consecutive glyph ID's */
-            {
-                setOrdered(mapping, codeBreak, span, i);
-            }
-            if (codeBreak) {
-                mapping[i].flags |= CODE_BREAK;
-            }
+			mapping[i - span].span = span;
+			mapping[i - span].ordered = 0; /* default */
+			if (span > 1) /* an ordered segment is a segment with more than one code point with consecutive glyph ID's */
+			{
+				setOrdered(mapping, codeBreak, span, i);
+			}
+			if (codeBreak) {
+				mapping[i].flags |= CODE_BREAK;
+			}
 			span = 1;
-            nSegments++;
 		}
 		else {
 			span++;
 		}
 	}
 	mapping[i - span].span = span;
-    if (span > 1)
-        setOrdered(mapping, 1, span, i - span);
-    else
-        mapping[i - span].ordered = 0;
-    
+	if (span > 1)
+		setOrdered(mapping, 1, span, i - span);
+	else
+		mapping[i - span].ordered = 0;
+	
 	/* Coalesce ranges */
 	nSegments = 0;
 	total  = span = mapping[0].span;
-    lastOrdered =  mapping[0].ordered;
+	lastOrdered =  mapping[0].ordered;
 	for (i = span; i < h->mapping.cnt; i += span) {
-        int codeBreak = mapping[i].flags & CODE_BREAK;
-        ordered = mapping[i].ordered;
-        span = mapping[i].span;
-        /* merge a segement with the previous segment if
-         1) it does not start with a code break, and
-         2) it is not ordered, and the previous segment is not orderd.
-        */
- 		if ((!codeBreak) && (!ordered) && (!lastOrdered)) {
-            mapping[i - total].span += span;
-            total = mapping[i - total].span;
-            lastOrdered = ordered;
+		int codeBreak = mapping[i].flags & CODE_BREAK;
+		ordered = mapping[i].ordered;
+		span = mapping[i].span;
+		/* merge a segement with the previous segment if
+		 1) it does not start with a code break, and
+		 2) it is not ordered, and the previous segment is not ordered.
+		*/
+		if ((!codeBreak) && (!ordered) && (!lastOrdered)) {
+			mapping[i - total].span += span;
+			total = mapping[i - total].span;
+			lastOrdered = ordered;
 		}
 		else {
-            lastOrdered = mapping[i].ordered;
+			lastOrdered = mapping[i].ordered;
 			total = span;
 			nSegments++;
 		}
@@ -812,26 +812,26 @@ static int partitionRanges(cmapCtx h, Mapping *mapping) {
 	mapping[i - total].ordered = ordered;
 	nSegments += 2; /* Add last segment and sentinel */
 
-    /* Previously, 'ordered' has been used to mean "keep this as a segment,
-    and don't merge it with the prior segment or following segment".
-    Now we need to set it to really mean 'the glyphID's in this segment are
-    sequential', as this field is used to decide how to use idDelta and idRange.
-     */
-    for (i = 0; i < h->mapping.cnt; i += span)
-        {
-            int j;
-            int ordered = 1;
-            span = mapping[i].span;
-            for (j = i+1; j< i+span;j++)
-            {
-               if (mapping[j].glyphId-1 != mapping[j-1].glyphId)
-               {
-                   ordered = 0;
-                   break;
-               }
-            }
-            mapping[i].ordered = ordered;
-       }
+	/* Previously, 'ordered' has been used to mean "keep this as a segment, and
+	don't merge it with the prior segment or following segment". Now we need to
+	set it to really mean 'the glyphID's in this segment are sequential', as
+	this field is used to decide how to use idDelta and idRange.
+	 */
+	for (i = 0; i < h->mapping.cnt; i += span)
+		{
+			int j;
+			int ordered = 1;
+			span = mapping[i].span;
+			for (j = i+1; j< i+span;j++)
+			{
+			   if (mapping[j].glyphId-1 != mapping[j-1].glyphId)
+			   {
+				   ordered = 0;
+				   break;
+			   }
+			}
+			mapping[i].ordered = ordered;
+	   }
 
 	return nSegments;
 }
@@ -856,10 +856,10 @@ static void makeSegment4(hotCtx g, Format4 *fmt, int nSegments, int segment,
 		for (i = start; i <= end; i++) {
 			*dnaNEXT(fmt->glyphId) = mapping[i].glyphId;
 		}
-        /* Future improvement: when you are using idRangeOffset, you do not
-        have to set idDelta to 0. This could be used to combine sequential
-        segments that are not ordered.
-         */
+	/* Future improvement: when you are using idRangeOffset, you do not have to
+	set idDelta to 0. This could be used to combine sequential segments that are
+	not ordered.
+	 */
 	}
 }
 
@@ -898,26 +898,25 @@ static Format4 *makeFormat4(cmapCtx h, unsigned long *length) {
 	Format4 *fmt = MEM_NEW(h->g, sizeof(Format4));
 	dnaINIT(h->g->dnaCtx, fmt->glyphId, 256, 64);
 
-    if (g->convertFlags & HOT_STUB_CMAP4)
-        truncateCmap = 1;
+	if (g->convertFlags & HOT_STUB_CMAP4)
+		truncateCmap = 1;
 
 	while (notOK) {
-
 		fmt->glyphId.cnt = 0;
-        if (h->mapping.cnt == 0)
-        {
-            Mapping *stub_mapping = dnaNEXT(h->mapping);
-            
-            stub_mapping->code = 0;
-            stub_mapping->glyphId = 0;
-            stub_mapping->span = 1;
-            stub_mapping->ordered = 1;
-            stub_mapping->flags = 0;
-            nSegments = 1;
-            mapping = h->mapping.array;
-        }
-        nSegments = partitionRanges(h, mapping);
-        
+		if (h->mapping.cnt == 0)
+		{
+			Mapping *stub_mapping = dnaNEXT(h->mapping);
+			
+			stub_mapping->code = 0;
+			stub_mapping->glyphId = 0;
+			stub_mapping->span = 1;
+			stub_mapping->ordered = 1;
+			stub_mapping->flags = 0;
+			nSegments = 1;
+			mapping = h->mapping.array;
+		}
+		nSegments = partitionRanges(h, mapping);
+
 		if (truncateCmap) {
 			nSegments = 2;
 		}
@@ -926,7 +925,6 @@ static Format4 *makeFormat4(cmapCtx h, unsigned long *length) {
 		fmt->idDelta = MEM_NEW(h->g, sizeof(fmt->idDelta[0]) * nSegments);
 		fmt->idRangeOffset =
 		    MEM_NEW(h->g, sizeof(fmt->idRangeOffset[0]) * nSegments);
-
 
 		segment = 0;
 		for (i = 0; i < h->mapping.cnt; i += mapping[i].span) {
