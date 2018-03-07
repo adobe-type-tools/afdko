@@ -606,7 +606,7 @@ def buildMMCFFTables(baseFont, privateDictList, cff2GlyphList, varModel):
             blendedPD = privateDictList[0]
 
         for key in blendedPD.keys():
-            operator, argType = opCodeDict[key]
+            argType = opCodeDict[key][1]
             valList = blendedPD[key]
             if argType == 'delta':
                 # If all masters are the same for each entry in the list, then
