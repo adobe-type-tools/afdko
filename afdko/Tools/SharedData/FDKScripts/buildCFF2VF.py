@@ -106,9 +106,7 @@ class CFF2FontData(object):
         # for identifier in glyph-list:
         # Get charstring.
         self.topDict = topDict
-        self.privateDict = topDict.Private
-        self.nominalWidth = topDict.Private.nominalWidthX
-        self.defaultWidth = topDict.Private.defaultWidthX
+        self.isCID = hasattr(topDict, "FDArray")
         self.charStrings = topDict.CharStrings
         self.charStringIndex = self.charStrings.charStringsIndex
         self.allowDecimalCoords = False
@@ -484,32 +482,50 @@ def buildMasterList(inputPaths):
     # value list for that key for all fonts, using the values from
     # the first font which has the key. When other fonts with the
     # key are encountered, the real values will overwrite the default values.
+    privateDictList = []
     numMasters = len(cff2FontList)
-    for i in range(numMasters):
-        curFont = cff2FontList[i]
-        pd = curFont.privateDict
-        for key, value in pd.rawDict.items():
-            try:
-                valList = bcDictList[key]
-                if isinstance(valList[0], list):
-                    lenValueList = len(value)
-                    for j in range(lenValueList):
-                        val = value[j]
-                        valList[j][i] = val
-                else:
-                    bcDictList[key][i] = value
-            except KeyError:
-                if isinstance(value, list):
-                    lenValueList = len(value)
-                    valList = [None] * lenValueList
-                    for j in range(lenValueList):
-                        vList = [value[j]] * numMasters
-                        valList[j] = vList
-                    bcDictList[key] = valList
-                else:
-                    bcDictList[key] = [value] * numMasters
+    curFont = cff2FontList[0]
+    isCID = curFont.isCID
+    if isCID:
+        numFDArray = len(cff2FontList[0].topDict.FDArray)
+    else:
+        numFDArray = 1
+    for fdIndex in range(numFDArray):
+        blendedPD = {}
+        privateDictList.append(blendedPD)
+        for i in range(numMasters):
+            curFont = cff2FontList[i]
+            if isCID:
+                pd = curFont.topDict.FDArray[fdIndex].Private
+            else:
+                pd = curFont.topDict.privateDict
+            for key,value in pd.rawDict.items():
+                try:
+                    valList = blendedPD[key]
+                    if isinstance(valList[0], list):
+                        lenValueList = len(value)
+                        if lenValueList != len(valList):
+                            print("Error: the value list for key %s in the Private dict of master %s , FDDict %s, is different than for previous masters." % (key, i, fdIndex))
+                            print("Failed to blend master designs.")
+                            blendError = True
+                            return None, None, None, None, blendError
+                        for j in range(lenValueList):
+                            val = value[j]
+                            valList[j][i] = val
+                    else:
+                        blendedPD[key][i] = value
+                except KeyError:
+                    if isinstance(value, list):
+                        lenValueList = len(value)
+                        valList = [None]*lenValueList
+                        for j in range(lenValueList):
+                            vList = [value[j]]*numMasters
+                            valList[j] = vList
+                        blendedPD[key] = valList
+                    else:
+                        blendedPD[key] = [value]*numMasters
 
-    return baseFont, bcDictList, cff2GlyphList, fontGlyphList, blendError
+    return baseFont, privateDictList, cff2GlyphList, fontGlyphList, blendError
 
 
 def pointsDiffer(pointList):
@@ -570,44 +586,57 @@ def appendBlendOp(op, pointList, varModel):
     return blendStack
 
 
-def buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, varModel):
-    pd = baseFont.privateDict
-    opCodeDict = buildOpcodeDict(privateDictOperators)
-    for key in bcDictList.keys():
-        _, argType = opCodeDict[key]
-        valList = bcDictList[key]
-        if argType == 'delta':
-            # If all masters are the same for each entry in the list, then
-            # save a non-blend version; else save the blend version
-            needsBlend = False
-            for blendList in valList:
-                if pointsDiffer(blendList):
-                    needsBlend = True
-                    break
-            dataList = []
-            if needsBlend:
-                prevBlendList = [0] * len(valList[0])
-                for blendList in valList:
-                    # convert blend list from absolute values to relative
-                    # values from the previous blend list.
-                    relBlendList = [(val - prevBlendList[i]) for (
-                        i, val) in enumerate(blendList)]
-                    prevBlendList = blendList
-                    deltas = varModel.getDeltas(relBlendList)
-                    # For PrivateDict BlueValues, the default font
-                    # values are absolute, not relative.
-                    deltas[0] = blendList[0]
-                    dataList.append(deltas)
-            else:
-                for blendList in valList:
-                    dataList.append(blendList[0])
-        else:
-            if pointsDiffer(valList):
-                dataList = varModel.getDeltas(valList)
-            else:
-                dataList = valList[0]
+def buildMMCFFTables(baseFont, privateDictList, cff2GlyphList, varModel):
 
-        pd.rawDict[key] = dataList
+    #Build the blended PrivateDicts.
+    opCodeDict = buildOpcodeDict(privateDictOperators)
+    blendedPD = privateDictList[0]
+    if baseFont.isCID:
+        numFDArray = len(baseFont.topDict.FDArray)
+    else:
+        numFDArray = 1
+    for fdIndex in range(numFDArray):
+        if baseFont.isCID:
+            pd = baseFont.topDict.FDArray[fdIndex]
+            blendedPD = privateDictList[fdIndex]
+        else:
+            pd = baseFont.privateDict
+            blendedPD = privateDictList[0]
+
+        for key in blendedPD.keys():
+            operator, argType = opCodeDict[key]
+            valList = blendedPD[key]
+            if argType == 'delta':
+                # If all masters are the same for each entry in the list, then
+                # save a non-blend version; else save the blend version
+                needsBlend = False
+                for blendList in valList:
+                    if pointsDiffer(blendList):
+                        needsBlend = True
+                        break
+                dataList = []
+                if needsBlend:
+                    blendCount = 0
+                    prevBlendList = [0]*len(valList[0])
+                    for blendList in valList:
+                        # convert blend list from absolute values to relative values from the previous blend list.
+                        relBlendList = [(val-prevBlendList[i]) for i,val  in enumerate(blendList)]
+                        prevBlendList = blendList
+                        deltas = varModel.getDeltas(relBlendList)
+                        # For PrivateDict BlueValues, the default font
+                        # values are absolute, not relative.
+                        deltas[0] = blendList[0]
+                        dataList.append(deltas)
+                else:
+                    for blendList in valList:
+                        dataList.append(blendList[0])
+            else:
+                if pointsDiffer(valList):
+                    dataList = varModel.getDeltas(valList)
+                else:
+                    dataList = valList[0]
+
+            pd.rawDict[key] = dataList
 
     # Now update all the charstrings.
     fontGlyphList = baseFont.ttFont.getGlyphOrder()
@@ -624,10 +653,9 @@ def buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, varModel):
                                     globalSubrs=t2CharString.globalSubrs)
         baseFont.charStringIndex[gid] = t2CharString
         t2CharString.program = newProgram
+        t2CharString.private.defaultWidthX = 0
+        t2CharString.private.nominalWidthX = 0
         t2CharString.compile(isCFF2=True)
-
-    baseFont.privateDict.defaultWidthX = 0
-    baseFont.privateDict.nominalWidthX = 0
 
 
 def addCFFVarStore(baseFont, varModel, varFont):
@@ -900,11 +928,11 @@ def buildCFF2Font(varFontPath, varFont, varModel, masterPaths,
     varModel.mapping = varModel.reverseMapping = range(numMasters)
     # Since we have re-ordered the master master data to be the same
     # as the varModel.location order, the mappings are flat.
-    (baseFont, bcDictList, cff2GlyphList, fontGlyphList, blendError) = \
+    (baseFont, privateDictList, cff2GlyphList, fontGlyphList, blendError) = \
         buildMasterList(inputPaths)
     if blendError:
         return blendError
-    buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, varModel)
+    buildMMCFFTables(baseFont, privateDictList, cff2GlyphList, varModel)
     addCFFVarStore(baseFont, varModel, varFont)
     addNamesToPost(varFont, fontGlyphList)
     convertCFFtoCFF2(baseFont, varFont, post_format_3)
