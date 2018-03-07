@@ -669,6 +669,9 @@ def addCFFVarStore(baseFont, varModel, varFont):
     varTupleList = varLib.builder.buildVarRegionList(supports, axisKeys)
     varTupleIndexes = list(range(len(supports)))
     varDeltasCFFV = varLib.builder.buildVarData(varTupleIndexes, None)
+    varDeltasCFFV = varLib.builder.buildVarData(
+                                                varTupleIndexes,
+                                                None, optimize=False)
     varStoreCFFV = varLib.builder.buildVarStore(varTupleList, [varDeltasCFFV])
 
     cffTable = baseFont.cffTable
