@@ -492,8 +492,8 @@ def buildMasterList(inputPaths):
     for fdIndex in range(numFDArray):
         blendedPD = {}
         privateDictList.append(blendedPD)
-        for i in range(numMasters):
-            curFont = cff2FontList[i]
+        for master_index in range(numMasters):
+            curFont = cff2FontList[master_index]
             if isCID:
                 pd = curFont.topDict.FDArray[fdIndex].Private
             else:
@@ -504,28 +504,29 @@ def buildMasterList(inputPaths):
                     if isinstance(valList[0], list):
                         lenValueList = len(value)
                         if lenValueList != len(valList):
-                            print("Error: the value list for key %s in the\
-                                Private dict of master %s , FDDict %s, is\
-                                different than for previous masters." %
-                                  (key, i, fdIndex))
+                            print("Error: the number of items in the",
+                                  "value list for key", key,
+                                  "in the Private dict of FDDict index",
+                                  fdIndex, "in master font", master_index,
+                                  "is different than for previous masters.")
                             print("Failed to blend master designs.")
                             blendError = True
                             return None, None, None, None, blendError
                         for j in range(lenValueList):
                             val = value[j]
-                            valList[j][i] = val
+                            valList[j][master_index] = val
                     else:
-                        blendedPD[key][i] = value
+                        blendedPD[key][master_index] = value
                 except KeyError:
                     if isinstance(value, list):
                         lenValueList = len(value)
-                        valList = [None]*lenValueList
+                        valList = [None] * lenValueList
                         for j in range(lenValueList):
-                            vList = [value[j]]*numMasters
+                            vList = [value[j]] * numMasters
                             valList[j] = vList
                         blendedPD[key] = valList
                     else:
-                        blendedPD[key] = [value]*numMasters
+                        blendedPD[key] = [value] * numMasters
 
     return baseFont, privateDictList, cff2GlyphList, fontGlyphList, blendError
 
@@ -618,11 +619,11 @@ def buildMMCFFTables(baseFont, privateDictList, cff2GlyphList, varModel):
                         break
                 dataList = []
                 if needsBlend:
-                    prevBlendList = [0]*len(valList[0])
+                    prevBlendList = [0] * len(valList[0])
                     for blendList in valList:
                         # convert blend list from absolute values to relative
                         # values from the previous blend list.
-                        relBlendList = [(val-prevBlendList[i]) for i, val in
+                        relBlendList = [(val - prevBlendList[i]) for i, val in
                                         enumerate(blendList)]
                         prevBlendList = blendList
                         deltas = varModel.getDeltas(relBlendList)
