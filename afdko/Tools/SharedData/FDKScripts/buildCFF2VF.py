@@ -291,7 +291,7 @@ class CFF2GlyphData(object):
         #  add the args for each opName to pointList
         # deal with incompatible path lists because:
         # converting from UFO to Type1 can convert flat curves to lines.
-        blendError = 0
+        blendError = False
         i = 1
         while i < len(self.charstringList):
             opList2 = self.buildOpList(i, supportHints)
@@ -432,7 +432,7 @@ def getInsertGID(origGID, fontGlyphNameList, mergedGlyphNameList):
 
 
 def buildMasterList(inputPaths):
-    blendError = 0
+    blendError = False
     cff2FontList = []
     # Collect all the charstrings.
     cff2GlyphList = collections.OrderedDict()
@@ -465,7 +465,7 @@ def buildMasterList(inputPaths):
 
     # Now build MM versions.
     print("Reading glyph data...")
-    blendError = 0
+    blendError = False
     for glyphName in fontGlyphList:
         cff2GlyphData = cff2GlyphList[glyphName]
         blendError = cff2GlyphData.buildMMData()
