@@ -465,7 +465,6 @@ def buildMasterList(inputPaths):
 
     # Now build MM versions.
     print("Reading glyph data...")
-    bcDictList = {}
     blendError = 0
     for glyphName in fontGlyphList:
         cff2GlyphData = cff2GlyphList[glyphName]
@@ -499,13 +498,16 @@ def buildMasterList(inputPaths):
                 pd = curFont.topDict.FDArray[fdIndex].Private
             else:
                 pd = curFont.topDict.privateDict
-            for key,value in pd.rawDict.items():
+            for key, value in pd.rawDict.items():
                 try:
                     valList = blendedPD[key]
                     if isinstance(valList[0], list):
                         lenValueList = len(value)
                         if lenValueList != len(valList):
-                            print("Error: the value list for key %s in the Private dict of master %s , FDDict %s, is different than for previous masters." % (key, i, fdIndex))
+                            print("Error: the value list for key %s in the\
+                                Private dict of master %s , FDDict %s, is\
+                                different than for previous masters." %
+                                  (key, i, fdIndex))
                             print("Failed to blend master designs.")
                             blendError = True
                             return None, None, None, None, blendError
@@ -588,7 +590,7 @@ def appendBlendOp(op, pointList, varModel):
 
 def buildMMCFFTables(baseFont, privateDictList, cff2GlyphList, varModel):
 
-    #Build the blended PrivateDicts.
+    # Build the blended PrivateDicts.
     opCodeDict = buildOpcodeDict(privateDictOperators)
     blendedPD = privateDictList[0]
     if baseFont.isCID:
@@ -616,11 +618,12 @@ def buildMMCFFTables(baseFont, privateDictList, cff2GlyphList, varModel):
                         break
                 dataList = []
                 if needsBlend:
-                    blendCount = 0
                     prevBlendList = [0]*len(valList[0])
                     for blendList in valList:
-                        # convert blend list from absolute values to relative values from the previous blend list.
-                        relBlendList = [(val-prevBlendList[i]) for i,val  in enumerate(blendList)]
+                        # convert blend list from absolute values to relative
+                        # values from the previous blend list.
+                        relBlendList = [(val-prevBlendList[i]) for i, val in
+                                        enumerate(blendList)]
                         prevBlendList = blendList
                         deltas = varModel.getDeltas(relBlendList)
                         # For PrivateDict BlueValues, the default font
