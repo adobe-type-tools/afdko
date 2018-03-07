@@ -497,7 +497,7 @@ def buildMasterList(inputPaths):
             if isCID:
                 pd = curFont.topDict.FDArray[fdIndex].Private
             else:
-                pd = curFont.topDict.privateDict
+                pd = curFont.topDict.Private
             for key, value in pd.rawDict.items():
                 try:
                     valList = blendedPD[key]
@@ -603,7 +603,7 @@ def buildMMCFFTables(baseFont, privateDictList, cff2GlyphList, varModel):
             pd = baseFont.topDict.FDArray[fdIndex]
             blendedPD = privateDictList[fdIndex]
         else:
-            pd = baseFont.privateDict
+            pd = baseFont.topDict.Private
             blendedPD = privateDictList[0]
 
         for key in blendedPD.keys():
