@@ -1,6 +1,12 @@
-"""Copyright 2015 Adobe. All rights reserved."""
+# Copyright 2015 Adobe. All rights reserved.
+
+"""
+Tool that performs outline quality checks and can remove path overlaps.
+"""
 
 from __future__ import print_function
+
+__version__ = '2.0.1'
 
 import argparse
 import doctest
@@ -22,8 +28,6 @@ import ufoTools
 from ufoTools import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
 # noinspection PyPep8Naming
 from ufoTools import kProcessedGlyphsLayerName as PROCD_GLYPHS_LAYER_NAME
-
-__version__ = '2.0.1'
 
 
 class FocusOptionParseError(KeyError):
@@ -305,13 +309,13 @@ def get_options(args):
     parser = argparse.ArgumentParser(
         formatter_class=CustomHelpFormatter,
         prog='checkOutlinesUFO',
-        description='Tool that performs outline quality checks and can remove '
-                    'path overlaps.'
+        description=__doc__
     )
     parser.add_argument(
         '--version',
         action='version',
-        version='%(prog)s ' + __version__)
+        version=__version__
+    )
     parser.add_argument(
         '-q',
         '--quiet-mode',

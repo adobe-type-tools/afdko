@@ -998,7 +998,7 @@ static float var_applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb, var_itemVa
         return netAdjustment;
     }
 
-    subRegionCount = var_getIVSRegionIndices(ivs, pair->outerIndex, regionIndices, subtable->regionCount);
+    subRegionCount = var_getIVSRegionIndices(ivs, pair->outerIndex, regionIndices, regionCount);
     if (subRegionCount == 0) {
         sscb->message(sscb, "out of range region index found in item variation store subtable");
     }

@@ -3,7 +3,7 @@
 from __future__ import print_function, division, absolute_import
 
 __usage__ = """
-buildCFF2VF.py  1.13.3 Feb 01 2018
+buildCFF2VF.py  1.13.4 Feb 07 2018
 Build a variable font from a designspace file and the UFO master source fonts.
 
 python buildCFF2VF.py -h
@@ -106,9 +106,7 @@ class CFF2FontData(object):
         # for identifier in glyph-list:
         # Get charstring.
         self.topDict = topDict
-        self.privateDict = topDict.Private
-        self.nominalWidth = topDict.Private.nominalWidthX
-        self.defaultWidth = topDict.Private.defaultWidthX
+        self.isCID = hasattr(topDict, "FDArray")
         self.charStrings = topDict.CharStrings
         self.charStringIndex = self.charStrings.charStringsIndex
         self.allowDecimalCoords = False
@@ -272,7 +270,8 @@ class CFF2GlyphData(object):
         if t2Index == 0:
             # For the master font path, promote all coordinates to a list.
             for _, ptList in opList:
-                ptList = [[pt] for pt in ptList]
+                for i, item in enumerate(ptList):
+                    ptList[i] = [item]
         return opList
 
     def buildMMData(self):
@@ -292,7 +291,7 @@ class CFF2GlyphData(object):
         #  add the args for each opName to pointList
         # deal with incompatible path lists because:
         # converting from UFO to Type1 can convert flat curves to lines.
-        blendError = 0
+        blendError = False
         i = 1
         while i < len(self.charstringList):
             opList2 = self.buildOpList(i, supportHints)
@@ -433,7 +432,7 @@ def getInsertGID(origGID, fontGlyphNameList, mergedGlyphNameList):
 
 
 def buildMasterList(inputPaths):
-    blendError = 0
+    blendError = False
     cff2FontList = []
     # Collect all the charstrings.
     cff2GlyphList = collections.OrderedDict()
@@ -466,8 +465,7 @@ def buildMasterList(inputPaths):
 
     # Now build MM versions.
     print("Reading glyph data...")
-    bcDictList = {}
-    blendError = 0
+    blendError = False
     for glyphName in fontGlyphList:
         cff2GlyphData = cff2GlyphList[glyphName]
         blendError = cff2GlyphData.buildMMData()
@@ -483,32 +481,54 @@ def buildMasterList(inputPaths):
     # value list for that key for all fonts, using the values from
     # the first font which has the key. When other fonts with the
     # key are encountered, the real values will overwrite the default values.
+    privateDictList = []
     numMasters = len(cff2FontList)
-    for i in range(numMasters):
-        curFont = cff2FontList[i]
-        pd = curFont.privateDict
-        for key, value in pd.rawDict.items():
-            try:
-                valList = bcDictList[key]
-                if isinstance(valList[0], list):
-                    lenValueList = len(value)
-                    for j in range(lenValueList):
-                        val = value[j]
-                        valList[j][i] = val
-                else:
-                    bcDictList[key][i] = value
-            except KeyError:
-                if isinstance(value, list):
-                    lenValueList = len(value)
-                    valList = [None] * lenValueList
-                    for j in range(lenValueList):
-                        vList = [value[j]] * numMasters
-                        valList[j] = vList
-                    bcDictList[key] = valList
-                else:
-                    bcDictList[key] = [value] * numMasters
+    curFont = cff2FontList[0]
+    isCID = curFont.isCID
+    if isCID:
+        numFDArray = len(cff2FontList[0].topDict.FDArray)
+    else:
+        numFDArray = 1
+    for fdIndex in range(numFDArray):
+        blendedPD = {}
+        privateDictList.append(blendedPD)
+        for master_index in range(numMasters):
+            curFont = cff2FontList[master_index]
+            if isCID:
+                pd = curFont.topDict.FDArray[fdIndex].Private
+            else:
+                pd = curFont.topDict.Private
+            for key, value in pd.rawDict.items():
+                try:
+                    valList = blendedPD[key]
+                    if isinstance(valList[0], list):
+                        lenValueList = len(value)
+                        if lenValueList != len(valList):
+                            print("Error: the number of items in the",
+                                  "value list for key", key,
+                                  "in the Private dict of FDDict index",
+                                  fdIndex, "in master font", master_index,
+                                  "is different than for previous masters.")
+                            print("Failed to blend master designs.")
+                            blendError = True
+                            return None, None, None, None, blendError
+                        for j in range(lenValueList):
+                            val = value[j]
+                            valList[j][master_index] = val
+                    else:
+                        blendedPD[key][master_index] = value
+                except KeyError:
+                    if isinstance(value, list):
+                        lenValueList = len(value)
+                        valList = [None] * lenValueList
+                        for j in range(lenValueList):
+                            vList = [value[j]] * numMasters
+                            valList[j] = vList
+                        blendedPD[key] = valList
+                    else:
+                        blendedPD[key] = [value] * numMasters
 
-    return baseFont, bcDictList, cff2GlyphList, fontGlyphList, blendError
+    return baseFont, privateDictList, cff2GlyphList, fontGlyphList, blendError
 
 
 def pointsDiffer(pointList):
@@ -569,44 +589,58 @@ def appendBlendOp(op, pointList, varModel):
     return blendStack
 
 
-def buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, varModel):
-    pd = baseFont.privateDict
-    opCodeDict = buildOpcodeDict(privateDictOperators)
-    for key in bcDictList.keys():
-        _, argType = opCodeDict[key]
-        valList = bcDictList[key]
-        if argType == 'delta':
-            # If all masters are the same for each entry in the list, then
-            # save a non-blend version; else save the blend version
-            needsBlend = False
-            for blendList in valList:
-                if pointsDiffer(blendList):
-                    needsBlend = True
-                    break
-            dataList = []
-            if needsBlend:
-                prevBlendList = [0] * len(valList[0])
-                for blendList in valList:
-                    # convert blend list from absolute values to relative
-                    # values from the previous blend list.
-                    relBlendList = [(val - prevBlendList[i]) for (
-                        i, val) in enumerate(blendList)]
-                    prevBlendList = blendList
-                    deltas = varModel.getDeltas(relBlendList)
-                    # For PrivateDict BlueValues, the default font
-                    # values are absolute, not relative.
-                    deltas[0] = blendList[0]
-                    dataList.append(deltas)
-            else:
-                for blendList in valList:
-                    dataList.append(blendList[0])
-        else:
-            if pointsDiffer(valList):
-                dataList = varModel.getDeltas(valList)
-            else:
-                dataList = valList[0]
+def buildMMCFFTables(baseFont, privateDictList, cff2GlyphList, varModel):
 
-        pd.rawDict[key] = dataList
+    # Build the blended PrivateDicts.
+    opCodeDict = buildOpcodeDict(privateDictOperators)
+    blendedPD = privateDictList[0]
+    if baseFont.isCID:
+        numFDArray = len(baseFont.topDict.FDArray)
+    else:
+        numFDArray = 1
+    for fdIndex in range(numFDArray):
+        if baseFont.isCID:
+            pd = baseFont.topDict.FDArray[fdIndex]
+            blendedPD = privateDictList[fdIndex]
+        else:
+            pd = baseFont.topDict.Private
+            blendedPD = privateDictList[0]
+
+        for key in blendedPD.keys():
+            argType = opCodeDict[key][1]
+            valList = blendedPD[key]
+            if argType == 'delta':
+                # If all masters are the same for each entry in the list, then
+                # save a non-blend version; else save the blend version
+                needsBlend = False
+                for blendList in valList:
+                    if pointsDiffer(blendList):
+                        needsBlend = True
+                        break
+                dataList = []
+                if needsBlend:
+                    prevBlendList = [0] * len(valList[0])
+                    for blendList in valList:
+                        # convert blend list from absolute values to relative
+                        # values from the previous blend list.
+                        relBlendList = [(val - prevBlendList[i]) for i, val in
+                                        enumerate(blendList)]
+                        prevBlendList = blendList
+                        deltas = varModel.getDeltas(relBlendList)
+                        # For PrivateDict BlueValues, the default font
+                        # values are absolute, not relative.
+                        deltas[0] = blendList[0]
+                        dataList.append(deltas)
+                else:
+                    for blendList in valList:
+                        dataList.append(blendList[0])
+            else:
+                if pointsDiffer(valList):
+                    dataList = varModel.getDeltas(valList)
+                else:
+                    dataList = valList[0]
+
+            pd.rawDict[key] = dataList
 
     # Now update all the charstrings.
     fontGlyphList = baseFont.ttFont.getGlyphOrder()
@@ -623,10 +657,9 @@ def buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, varModel):
                                     globalSubrs=t2CharString.globalSubrs)
         baseFont.charStringIndex[gid] = t2CharString
         t2CharString.program = newProgram
+        t2CharString.private.defaultWidthX = 0
+        t2CharString.private.nominalWidthX = 0
         t2CharString.compile(isCFF2=True)
-
-    baseFont.privateDict.defaultWidthX = 0
-    baseFont.privateDict.nominalWidthX = 0
 
 
 def addCFFVarStore(baseFont, varModel, varFont):
@@ -635,7 +668,7 @@ def addCFFVarStore(baseFont, varModel, varFont):
     axisKeys = [axis.axisTag for axis in fvarTable.axes]
     varTupleList = varLib.builder.buildVarRegionList(supports, axisKeys)
     varTupleIndexes = list(range(len(supports)))
-    varDeltasCFFV = varLib.builder.buildVarData(varTupleIndexes, None)
+    varDeltasCFFV = varLib.builder.buildVarData(varTupleIndexes, None, False)
     varStoreCFFV = varLib.builder.buildVarStore(varTupleList, [varDeltasCFFV])
 
     cffTable = baseFont.cffTable
@@ -759,9 +792,9 @@ def getNewAxisValue(seenCoordinate, fvarInstance, axisTag):
 
 
 def addAxisValueData(xmlData, prevEntry, axisEntry, nextEntry, linkDelta):
-    if linkDelta:
+    if linkDelta is not None:
         _format = 3
-    elif (not prevEntry) and (not nextEntry):
+    elif (prevEntry is None) and (nextEntry is None):
         _format = 1
     else:
         _format = 2
@@ -774,11 +807,11 @@ def addAxisValueData(xmlData, prevEntry, axisEntry, nextEntry, linkDelta):
     if _format == 1:
         xmlData.append("\t\t\t<Value value=\"%s\" />" % (axisEntry.axisValue))
     elif _format == 2:
-        if not prevEntry:
+        if prevEntry is None:
             minValue = axisEntry.axisValue
         else:
             minValue = (axisEntry.axisValue + prevEntry.axisValue) / 2.0
-        if not nextEntry:
+        if nextEntry is None:
             maxValue = axisEntry.axisValue
         else:
             maxValue = (axisEntry.axisValue + nextEntry.axisValue) / 2.0
@@ -825,7 +858,7 @@ def makeSTAT(fvar):
             flagValue = 0
             instance = fvar.instances[j]
             entry = getNewAxisValue(seenCoordinate, instance, axisTag)
-            if not entry:
+            if entry is None:
                 continue
             axisValue, nameID = entry
 #           if (axisValue == 0) and (axisTag == 'wght'):
@@ -863,7 +896,7 @@ def makeSTAT(fvar):
 
     xmlData.append("\t</AxisValueArray>")
 
-    if not fallBackNameID:
+    if fallBackNameID is None:
         fallBackNameID = 2
     xmlData.append("\t<ElidedFallbackNameID value=\"%s\" />" % (
         fallBackNameID))
@@ -899,11 +932,11 @@ def buildCFF2Font(varFontPath, varFont, varModel, masterPaths,
     varModel.mapping = varModel.reverseMapping = range(numMasters)
     # Since we have re-ordered the master master data to be the same
     # as the varModel.location order, the mappings are flat.
-    (baseFont, bcDictList, cff2GlyphList, fontGlyphList, blendError) = \
+    (baseFont, privateDictList, cff2GlyphList, fontGlyphList, blendError) = \
         buildMasterList(inputPaths)
     if blendError:
         return blendError
-    buildMMCFFTables(baseFont, bcDictList, cff2GlyphList, varModel)
+    buildMMCFFTables(baseFont, privateDictList, cff2GlyphList, varModel)
     addCFFVarStore(baseFont, varModel, varFont)
     addNamesToPost(varFont, fontGlyphList)
     convertCFFtoCFF2(baseFont, varFont, post_format_3)

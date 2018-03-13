@@ -46,7 +46,7 @@ after_success:
   - codecov
 
 notifications:
-  slack: typekit:y89H3n4sxK0ORpapm8zHDu3l
+  slack: typekit:TRAVIS_SLACK_TOKEN
   email:
     on_success: change
     on_failure: always
