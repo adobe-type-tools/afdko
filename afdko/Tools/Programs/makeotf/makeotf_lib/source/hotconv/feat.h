@@ -114,7 +114,7 @@ struct GNode_ {
 	MetricsInfo *metricsInfo;
 	int lookupLabel;
 	char *markClassName;
-	AnchorMarkInfo markClassAnchorInfo; /* Used obnly be mark class definitions */
+	AnchorMarkInfo markClassAnchorInfo; /* Used only be mark class definitions */
 };
 
 

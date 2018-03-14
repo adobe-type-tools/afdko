@@ -1526,7 +1526,7 @@ static int checkUniGName(hotCtx g, char *gn, uint32_t *usv) {
 	}
 
 	/* Check code */
-	sscanf(pHexStart, "%ux", &code);
+	sscanf(pHexStart, "%x", &code);
 
 #if 0
 	if (IN_RANGE(code, UV_SURR_BEG, UV_SURR_END)) {

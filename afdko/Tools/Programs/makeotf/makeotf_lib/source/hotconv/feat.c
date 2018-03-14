@@ -1210,6 +1210,16 @@ static void blockListFree(hotCtx g) {
 /* --- Linked list support --- */
 
 /* Returns a glyph node, uninitialized except for flags */
+static void initAnchor(AnchorMarkInfo *anchor) {
+    anchor->x = 0;
+    anchor->y = 0;
+    anchor->contourpoint = 0;
+    anchor->format = 0;
+    anchor->markClass = NULL;
+    anchor->markClassIndex = 0;
+    anchor->componentIndex = 0;
+    return;
+}
 
 static GNode *newNode(featCtx h) {
 	GNode *ret;
@@ -1239,7 +1249,7 @@ static GNode *newNode(featCtx h) {
 	ret->metricsInfo = NULL;
 	ret->aaltIndex = 0;
 	ret->markClassName = NULL;
-	ret->markClassAnchorInfo.format = 0;
+    initAnchor(&ret->markClassAnchorInfo);
 	return ret;
 }
 
@@ -1534,7 +1544,7 @@ void featAddAnchorDef(short x, short y, unsigned short contourIndex, int hasCont
 static void featAddAnchor(short xVal, short yVal, unsigned short contourIndex, int isNULL, int hasContour, char *anchorName, int componentIndex) {
 	AnchorMarkInfo *anchorMarkInfo = dnaNEXT(h->anchorMarkInfo);
 	anchorMarkInfo->markClass = NULL;
-
+    initAnchor(anchorMarkInfo);
 	if (anchorName != NULL) {
 		AnchorDef *ad;
 		ad = (AnchorDef *)bsearch(anchorName, h->anchorDefs.array, h->anchorDefs.cnt,

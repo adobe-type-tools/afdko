@@ -3560,14 +3560,14 @@ typedef struct {
 	EntryExitRecord *EntryExitRecord;               /* [EntryExitCount] */
 } CursivePosFormat1;
 
-static void initAnchor(void *ctx, long count, AnchorMarkInfo *anchor) {
+static void initAnchorArray(void *ctx, long count, AnchorMarkInfo *anchor) {
 	long i;
 	for (i = 0; i < count; i++) {
 		anchor->x = 0;
 		anchor->y = 0;
 		anchor->contourpoint = 0;
 		anchor->format = 0;
-		anchor->markClass = 0;
+		anchor->markClass = NULL;
 		anchor->markClassIndex = 0;
 		anchor->componentIndex = 0;
 		anchor++;
@@ -3578,16 +3578,7 @@ static void initAnchor(void *ctx, long count, AnchorMarkInfo *anchor) {
 static void initAnchorListRec(void *ctx, long count, AnchorListRec *anchorListRec) {
 	long i;
 	AnchorMarkInfo *anchor = &anchorListRec->anchor;
-	for (i = 0; i < count; i++) {
-		anchor->x = 0;
-		anchor->y = 0;
-		anchor->contourpoint = 0;
-		anchor->format = 0;
-		anchor->markClass = 0;
-		anchor->markClassIndex = 0;
-		anchor->componentIndex = 0;
-		anchor++;
-	}
+    initAnchorArray(ctx, count, anchor);
 	return;
 }
 
@@ -3977,7 +3968,7 @@ static void GPOSAddMark(hotCtx g, SubtableInfo *si, GNode *targ, int anchorCount
 			if (prevComponentIndex != anchorMarkInfo[j].componentIndex) {
 				baseRec = dnaNEXT(si->baseList);
 				dnaINIT(g->dnaCtx, baseRec->anchorMarkInfo, 4, 4);
-				baseRec->anchorMarkInfo.func = initAnchor;
+				baseRec->anchorMarkInfo.func = initAnchorArray;
 				baseRec->gid =  nextNode->gid;
 				baseRec->lineNum = lineNum;
 				prevComponentIndex = anchorMarkInfo[j].componentIndex;
@@ -4565,7 +4556,7 @@ static void GPOSAdCursive(hotCtx g, SubtableInfo *si, GNode *targ, int anchorCou
 		int j;
 		BaseGlyphRec *baseRec = dnaNEXT(si->baseList);
 		dnaINIT(g->dnaCtx, baseRec->anchorMarkInfo, 4, 4);
-		baseRec->anchorMarkInfo.func = initAnchor;
+		baseRec->anchorMarkInfo.func = initAnchorArray;
 		baseRec->gid =  nextNode->gid;
 
 		for (j = 0; j < anchorCount; j++) {

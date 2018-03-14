@@ -1845,7 +1845,7 @@ void CDECL hotMsg(hotCtx g, int level, char *fmt, ...) {
 }
 
 /* Output OTF data as 2-byte number in big-endian order */
-void hotOut2(hotCtx g, short value) {
+void hotOut2(hotCtx g, int16_t value) {
 	g->cb.otfWrite1(g->cb.ctx, value >> 8);
 	g->cb.otfWrite1(g->cb.ctx, value);
 }
