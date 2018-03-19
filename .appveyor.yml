@@ -4,8 +4,9 @@ install:
   - python setup.py bdist_wheel
   - for %%f in (dist\*.whl) do pip install %%f
 
+build: false
+
 test_script:
-  - make check
   - cd afdko\Tools\SharedData\FDKScripts
   - python CheckOutlinesUFO.py --test
   - pip uninstall --yes afdko
