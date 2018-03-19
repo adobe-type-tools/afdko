@@ -5,7 +5,7 @@ install:
   - dir
   - dir dist
   - dir dist\*.whl
-  - pip install .\dist\*.whl
+  - pip install --no-index --find-links dist afdko
 
 test_script:
   - make check
