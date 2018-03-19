@@ -2,10 +2,7 @@ install:
   - python -m pip install --upgrade pip
   - pip install wheel
   - python setup.py bdist_wheel
-  - dir
-  - dir dist
-  - dir dist\*.whl
-  - pip install --no-index --find-links dist afdko
+  - for %%f in (dist\*.whl) do pip install %%f
 
 test_script:
   - make check
