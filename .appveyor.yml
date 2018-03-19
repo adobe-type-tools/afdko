@@ -1,10 +1,11 @@
 install:
+  - python -m pip install --upgrade pip
   - pip install wheel
   - python setup.py bdist_wheel
-  - pip install dist/*.whl
+  - pip install dist\*.whl
 
 test_script:
   - make check
-  - cd afdko/Tools/SharedData/FDKScripts
+  - cd afdko\Tools\SharedData\FDKScripts
   - python CheckOutlinesUFO.py --test
   - pip uninstall --yes afdko
