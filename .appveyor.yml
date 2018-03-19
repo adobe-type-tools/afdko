@@ -5,7 +5,7 @@ install:
   - dir
   - dir dist
   - dir dist\*.whl
-  - pip install dist\*.whl
+  - pip install .\dist\*.whl
 
 test_script:
   - make check
