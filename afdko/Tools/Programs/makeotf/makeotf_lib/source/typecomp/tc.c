@@ -571,7 +571,7 @@ static void showStats(tcprivCtx h) {
 		       "     count      size avg.size  orig %%\n"
 		       "       ---------------------------"
 		       "  -----------------------------------\n"
-		       "flat   %8ld %9ld %8ld  %8ld#%9ld %8ld %6.1f%%\n",
+		       "flat   %8ld %9ld %8d  %8ld#%9ld %8ld %6.1f%%\n",
 		       g->stats.nChars,
 		       g->stats.flatSize,
 		       AVG(g->stats.flatSize, g->stats.nChars),
@@ -581,7 +581,7 @@ static void showStats(tcprivCtx h) {
 		       ((double)comp.flatSize * g->stats.nChars * 100.0) /
 		       ((double)comp.nChars * g->stats.flatSize));
 
-		printf("subrs  %8ld %9ld*%8ld  %8ld %9ld %8ld     -\n",
+		printf("subrs  %8ld %9ld*%8d  %8ld %9ld %8d     -\n",
 		       g->stats.nSubrs,
 		       g->stats.subrSize,
 		       AVG(g->stats.subrSize, g->stats.nSubrs),
@@ -591,7 +591,7 @@ static void showStats(tcprivCtx h) {
 
 		origDataSize = g->stats.subrSize + g->stats.charSize;
 		compDataSize = comp.subrSize + comp.charSize;
-		printf("chars  %8ld %9ld*%8ld  %8ld#%9ld %8ld %6.1f%%$\n",
+		printf("chars  %8ld %9ld*%8d  %8ld#%9ld %8d %6.1f%%$\n",
 		       g->stats.nChars,
 		       g->stats.charSize,
 		       AVG(g->stats.charSize, g->stats.nChars),
@@ -606,7 +606,7 @@ static void showStats(tcprivCtx h) {
 		origOther = g->stats.fontSize -
 		    (g->stats.subrSize + g->stats.charSize);
 		compOther = h->FontSet.size - (comp.subrSize + comp.charSize);
-		printf("other@ %8ld %9ld %8ld  %8ld %9ld %8ld %6.1f%%\n",
+		printf("other@ %8ld %9ld %8d  %8ld %9ld %8d %6.1f%%\n",
 		       h->set.cnt,
 		       origOther,
 		       AVG(origOther, h->set.cnt),
@@ -615,7 +615,7 @@ static void showStats(tcprivCtx h) {
 		       AVG(compOther, h->set.cnt),
 		       compOther * 100.0 / origOther);
 
-		printf("fonts  %8ld %9ld %8ld  %8ld %9ld %8ld %6.1f%%\n"
+		printf("fonts  %8ld %9ld %8d  %8ld %9ld %8d %6.1f%%\n"
 		       "\n"
 		       "* original subr and char sizes without lenIV bytes.\n"
 		       "@ other.size=fonts.size-(subrs.size+chars.size)\n"

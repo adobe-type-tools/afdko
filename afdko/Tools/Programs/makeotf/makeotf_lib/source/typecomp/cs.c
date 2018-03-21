@@ -588,7 +588,7 @@ void csDumpSubrs(tcCtx g, Font *font) {
 	else {
 		bias = 32768;
 	}
-	printf("bias=%ld\n", bias);
+	printf("bias=%d\n", bias);
 
 	offset = 0;
 	for (i = 0; i < font->subrs.nStrings; i++) {
