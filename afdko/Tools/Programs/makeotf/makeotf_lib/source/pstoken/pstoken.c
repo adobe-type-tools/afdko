@@ -6,6 +6,7 @@
  * inside string, hex string, array, or procedure constructs.
  */
 
+#include <stdint.h>
 #include "pstoken.h"
 
 #include <stdarg.h>
