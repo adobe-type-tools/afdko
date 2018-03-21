@@ -117,7 +117,7 @@ typedef struct MetricsRec {
 typedef struct {                     /* Kerning pair */
 	KernGlyph first;
     KernGlyph second;
-    unsigned long lineIndex; /* used to sort records in order of occurrence. 
+    unsigned long lineIndex; /* used to sort records in order of occurrence.
                               Needed so keep first of conflicting records. */
 	short metricsCnt1; /* Allowable values are 1 ( x advance adjsutment only) or 4. */
 	short metricsRec1[4];
@@ -961,7 +961,7 @@ static unsigned makeValueFormat(hotCtx g, int xPla, int yPla, int xAdv, int yAdv
 	if (yAdv) {
 		val |= IS_MM(g) ? ValueYIdAdvance : ValueYAdvance;
 	}
-    
+
     if (xAdv) {
         if  ((val == 0) && (isVertFeature(h->new.feature)))
             val =  (IS_MM(g) ? ValueYIdAdvance: ValueYAdvance);
@@ -1090,7 +1090,7 @@ static void GPOSAddSingle(hotCtx g, SubtableInfo *si, GNode *targ, int xPla, int
 	GNode *p;
     unsigned valFmt;
     GPOSCtx h = g->ctx.GPOS;
-   
+
     valFmt = makeValueFormat(g, xPla, yPla, xAdv, yAdv);
 
 	if (g->hadError) {
@@ -1796,11 +1796,11 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second,  cha
     int pairFmt;
     unsigned valFmt1 = 0;
     unsigned valFmt2 = 0;
-    
+
 	if (first->metricsInfo == NULL) {
 		/* If the only metrics record is appplied to the second glyph,
 		then this is shorthand for applying a single kern value to the first glyph.
-		The parser enforces that if first->metricsInfo == null, then the 
+		The parser enforces that if first->metricsInfo == null, then the
 		second value record must exist.*/
 		first->metricsInfo = second->metricsInfo;
 		second->metricsInfo = NULL;
@@ -1817,7 +1817,7 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second,  cha
 		}
 	}
 
-	
+
 	enumerate = first->flags & FEAT_ENUMERATE;
 
 	/* The FEAT_GCLASS is essential for identifying a singleton gclass */
@@ -1846,7 +1846,7 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second,  cha
 			}
 		}
 	}
-	
+
 	if (second->metricsInfo != NULL) {
 		if (second->metricsInfo->cnt == 1) {
 			if (isVertFeature(h->new.feature)) {
@@ -2012,11 +2012,11 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second,  cha
 			else {
 				msg[0] = '\0';
 			}
-			
+
 			hotMsg(g, hotWARNING, "Start of new pair positioning subtable; "
 				   "some pairs may never be accessed: %s%s", g->note.array,
 				   msg);
-			
+
 			h->startNewPairPosSubtbl = 1;
 			GPOSAddPair(g, si, first, second, filename, lineNum);
 		}
@@ -2210,7 +2210,7 @@ static int CDECL cmpPairPos1(const void *first, const void *second) {
 	const KernRec *b = second;
 	int i;
 	int metricsCnt;
-	
+
 	if (a->first.gid == GID_UNDEF && b->first.gid == GID_UNDEF) {
 		return 0;
 	}
@@ -2263,7 +2263,7 @@ static int CDECL cmpPairPos1(const void *first, const void *second) {
 			return 1;
 		}
 	}
-	
+
 	if ((a->metricsRec2[0] == 0) && (b->metricsRec2[0] != 0)) {	/* Abs values in decr order */
 		return -1;
 	}
@@ -2295,7 +2295,7 @@ static int CDECL cmpPairPos2(const void *first, const void *second) {
 	const KernRec *a = first;
 	const KernRec *b = second;
 	int i;
-	
+
 	int metricsCnt;
 
 	if (a->first.gcl == NULL && b->first.gcl == NULL) {
@@ -2334,7 +2334,7 @@ static int CDECL cmpPairPos2(const void *first, const void *second) {
 	else if ((a->metricsRec1[0] != 0) && (b->metricsRec1[0] == 0)) {
 		return 1;
 	}
-	
+
 	metricsCnt = (a->metricsCnt1 > b->metricsCnt1) ?  b->metricsCnt1 : a->metricsCnt1;
 	for (i=0; i < metricsCnt; i++) {
 		if (ABS(a->metricsRec1[i]) > ABS(b->metricsRec1[i])) {	/* Abs values in decr order */
@@ -2736,7 +2736,7 @@ static void fillPairPos2(hotCtx g, GPOSCtx h) {
 				pair->metricsRec1[2],  pair->metricsRec1[3]);
 			}
 		}
-		
+
 		if ((pair->metricsCnt2 == 0) || ((pair->metricsCnt2 == 1) && (pair->metricsRec2[0] == 0))) {
 			dst->Value2 = VAL_REC_UNDEF;
 		}
@@ -3578,7 +3578,7 @@ static void initAnchorArray(void *ctx, long count, AnchorMarkInfo *anchor) {
 static void initAnchorListRec(void *ctx, long count, AnchorListRec *anchorListRec) {
 	long i;
 	AnchorMarkInfo *anchor = &anchorListRec->anchor;
-    initAnchorArray(ctx, count, anchor);
+	initAnchorArray(ctx, count, anchor);
 	return;
 }
 

@@ -1660,7 +1660,6 @@ static int32_t readIntKey(parseCtx h, int iKey) {
 /* Process literal */
 static void doLiteral(parseCtx h, psToken *literal) {
 	tcCtx g = h->g;
-	int32_t type;
 	String key;
 	DictKeyMap *map;
 
@@ -1700,6 +1699,8 @@ static void doLiteral(parseCtx h, psToken *literal) {
 		}
 	}
 	else {
+		int32_t type;
+
 		/* For CIDFonts check for key redefinition which signals new FD */
 		if (h->font->flags & FONT_CID && h->cid.fd != -1 &&
 		    map->index != iignore && SEEN_KEY(map->index)) {

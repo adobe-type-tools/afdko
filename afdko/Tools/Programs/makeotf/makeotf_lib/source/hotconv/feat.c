@@ -245,7 +245,7 @@ struct featCtx_ {
             unsigned short FirstParamUILabelNameID;
             dnaDCL(unsigned long, charValues);
     } cvParameters;
-    
+
 	/* --- Hash stuff --- */
 	HashElement *ht[HASH_SIZE]; /* Hash table */
 	HashElement *he;            /* Current hash element */
@@ -648,7 +648,7 @@ static void addNameString(long platformId, long platspecId,
     {
         hotMsg(g, hotWARNING,
                "name id %d cannot be set from the feature file. "
-               "ignoring record [%s %d]", nameId, 
+               "ignoring record [%s %d]", nameId,
                INCL.file, h->linenum);
         return;
     }
@@ -1131,7 +1131,7 @@ char *featTrimParensSpaces(char *text) {
 	e = &str[len - 2];
 
 
-    
+
     if (str[0] != '(' || str[len - 1] != ')') {
 		hotMsg(g, hotFATAL, "bad include file: <%s>", text);
 	}
@@ -1211,14 +1211,14 @@ static void blockListFree(hotCtx g) {
 
 /* Returns a glyph node, uninitialized except for flags */
 static void initAnchor(AnchorMarkInfo *anchor) {
-    anchor->x = 0;
-    anchor->y = 0;
-    anchor->contourpoint = 0;
-    anchor->format = 0;
-    anchor->markClass = NULL;
-    anchor->markClassIndex = 0;
-    anchor->componentIndex = 0;
-    return;
+	anchor->x = 0;
+	anchor->y = 0;
+	anchor->contourpoint = 0;
+	anchor->format = 0;
+	anchor->markClass = NULL;
+	anchor->markClassIndex = 0;
+	anchor->componentIndex = 0;
+	return;
 }
 
 static GNode *newNode(featCtx h) {
@@ -1544,11 +1544,11 @@ void featAddAnchorDef(short x, short y, unsigned short contourIndex, int hasCont
 static void featAddAnchor(short xVal, short yVal, unsigned short contourIndex, int isNULL, int hasContour, char *anchorName, int componentIndex) {
 	AnchorMarkInfo *anchorMarkInfo = dnaNEXT(h->anchorMarkInfo);
 	anchorMarkInfo->markClass = NULL;
-    initAnchor(anchorMarkInfo);
+	initAnchor(anchorMarkInfo);
 	if (anchorName != NULL) {
 		AnchorDef *ad;
 		ad = (AnchorDef *)bsearch(anchorName, h->anchorDefs.array, h->anchorDefs.cnt,
-		                          sizeof(AnchorDef), matchAnchorDef);
+								sizeof(AnchorDef), matchAnchorDef);
 
 		if (ad == NULL) {
 			featMsg(hotFATAL, "Named anchor reference '%s' is not in list of named anchors.", anchorName);
@@ -3264,9 +3264,9 @@ static int isUnmarkedGlyphSeq(GNode *node) {
 
 static void addFeatureNameParam(hotCtx g, unsigned short nameID) {
 	prepRule(GSUB_, GSUBFeatureNameParam, NULL, NULL);
-    
+
 	GSUBAddFeatureMenuParam(g, &nameID);
-    
+
 	wrapUpRule();
 }
 
@@ -3274,7 +3274,7 @@ static void addCVNameID(unsigned int nameID, int labelID)
 {
     switch(labelID)
     {
-            
+
         case cvUILabelEnum:
         {
             if (h->cvParameters.FeatUILabelNameID != 0)
@@ -3284,7 +3284,7 @@ static void addCVNameID(unsigned int nameID, int labelID)
             h->cvParameters.FeatUILabelNameID = h->featNameID;
             break;
         }
-            
+
         case cvToolTipEnum:
         {
             if (h->cvParameters.FeatUITooltipTextNameID != 0)
@@ -3294,7 +3294,7 @@ static void addCVNameID(unsigned int nameID, int labelID)
             h->cvParameters.FeatUITooltipTextNameID = h->featNameID;
             break;
         }
-            
+
         case cvSampletextEnum:
         {
             if (h->cvParameters.SampleTextNameID != 0)
@@ -3304,7 +3304,7 @@ static void addCVNameID(unsigned int nameID, int labelID)
             h->cvParameters.SampleTextNameID = h->featNameID;
             break;
         }
-            
+
         case kCVParameterLabelEnum:
         {
             h->cvParameters.NumNamedParameters++;
@@ -3323,14 +3323,14 @@ static void addCVParametersCharValue(unsigned long uv)
 {
     unsigned long *uvp = dnaNEXT(h->cvParameters.charValues);
     *uvp = uv;
-   
+
 }
 
 static void addCVParam(hotCtx g) {
 	prepRule(GSUB_, GSUBCVParam, NULL, NULL);
-    
+
 	GSUBAddCVParam(g, &h->cvParameters);
-    
+
 	wrapUpRule();
 }
 
@@ -4548,7 +4548,7 @@ void featReuse(hotCtx g) {
 	h->DFLTLkps.cnt = 0;
 	h->aalt.rules.cnt = 0;
     h->cvParameters.charValues.cnt = 0;
-    
+
 	hashFree(h);
 	hashInit(h);
 
