@@ -1,11 +1,13 @@
-os: osx
+matrix:
+  include:
+    - os: linux
+      python: 2.7
 
-language: generic
+    - os: osx
+      language: generic
+
 
 sudo: required
-
-#python:
-#  - "2.7"
 
 #before_install:
 
