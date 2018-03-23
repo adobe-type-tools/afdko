@@ -86,13 +86,13 @@ typedef struct {                  /* FDArray element */
 typedef union {                   /* Stack element */
 	double d;
 	Fixed f;
-	int32_t i;
+	int32_t l;
 } StkElement;
 
 typedef enum {                   /* Stack element type */
 	STK_DOUBLE,
 	STK_FIXED,
-	STK_INT32
+	STK_LONG
 } StkType;
 
 typedef struct {                  /* Per-glyph data */
@@ -376,21 +376,21 @@ static void pushFix(cffCtx h, Fixed f) {
 }
 
 /* Push integer number on stack (as fixed) */
-static void pushInt(cffCtx h, int32_t i) {
+static void pushInt(cffCtx h, int32_t l) {
 	if (h->stack.cnt >= h->stack.max) {
 		fatal(h, "stack overflow");
 	}
-	h->stack.array[h->stack.cnt].f = INT2FIX(i);
+	h->stack.array[h->stack.cnt].f = INT2FIX(l);
 	h->stack.type[h->stack.cnt++] = STK_FIXED;
 }
 
 /* Push long number on stack (as long) */
-static void pushInt32(cffCtx h, int32_t i) {
+static void pushLong(cffCtx h, int32_t l) {
 	if (h->stack.cnt >= h->stack.max) {
 		fatal(h, "stack overflow");
 	}
-	h->stack.array[h->stack.cnt].i = i;
-	h->stack.type[h->stack.cnt++] = STK_INT32;
+	h->stack.array[h->stack.cnt].l = l;
+	h->stack.type[h->stack.cnt++] = STK_LONG;
 }
 
 /* Pop number from stack (return double) */
@@ -405,8 +405,8 @@ static double popDbl(cffCtx h) {
 		case STK_FIXED:
 			return FIX2DBL(h->stack.array[h->stack.cnt].f);
 
-		case STK_INT32:
-			return h->stack.array[h->stack.cnt].i;
+		case STK_LONG:
+			return h->stack.array[h->stack.cnt].l;
 	}
 	return 0;    /* For quiet compilation */
 }
@@ -430,8 +430,8 @@ static Fixed popFix(cffCtx h) {
 		case STK_FIXED:
 			return h->stack.array[h->stack.cnt].f;
 
-		case STK_INT32: {
-			uint32_t l = h->stack.array[h->stack.cnt].i;
+		case STK_LONG: {
+			uint32_t l = h->stack.array[h->stack.cnt].l;
 			if (l < INT(FixedMin) || l > INT(FixedMax)) {
 				fatal(h, "range check\n");
 			}
@@ -462,8 +462,8 @@ static int32_t popInt(cffCtx h) {
 		case STK_FIXED:
 			return FIX2INT(h->stack.array[h->stack.cnt].f);
 
-		case STK_INT32:
-			return h->stack.array[h->stack.cnt].i;
+		case STK_LONG:
+			return h->stack.array[h->stack.cnt].l;
 	}
 	return 0;    /* For quiet compilation */
 }
@@ -487,8 +487,8 @@ static Fixed indexFix(cffCtx h, int i) {
 		case STK_FIXED:
 			return h->stack.array[i].f;
 
-		case STK_INT32:
-			return INT2FIX(h->stack.array[i].i);
+		case STK_LONG:
+			return INT2FIX(h->stack.array[i].l);
 	}
 	return 0;    /* For quiet compilation */
 }
@@ -512,8 +512,8 @@ static int32_t indexInt(cffCtx h, int i) {
 		case STK_FIXED:
 			return FIX2INT(h->stack.array[i].f);
 
-		case STK_INT32:
-			return h->stack.array[i].i;
+		case STK_LONG:
+			return h->stack.array[i].l;
 	}
 	return 0;    /* For quiet compilation */
 }
@@ -530,8 +530,8 @@ static double indexDbl(cffCtx h, int i) {
 		case STK_FIXED:
 			return FIX2DBL(h->stack.array[i].f);
 
-		case STK_INT32:
-			return h->stack.array[i].i;
+		case STK_LONG:
+			return h->stack.array[i].l;
 	}
 	return 0;    /* For quiet compilation */
 }
@@ -2058,7 +2058,7 @@ static void DICTRead(cffCtx h, int length, Offset offset, int enable) {
 				int32_t byte1 = GETBYTE(h);
 				int32_t byte2 = GETBYTE(h);
 				int32_t byte3 = GETBYTE(h);
-				pushInt32(h, byte1 << 24 | byte2 << 16 | byte3 << 8 | GETBYTE(h));
+				pushLong(h, byte1 << 24 | byte2 << 16 | byte3 << 8 | GETBYTE(h));
 			}
 			break;
 
@@ -2727,8 +2727,8 @@ static void dbstack(cffCtx h) {
 					printf("[%d]=%.4g ", i, h->stack.array[i].f / 65536.0);
 					break;
 
-				case STK_INT32:
-					printf("[%d]=%d ", i, h->stack.array[i].i);
+				case STK_LONG:
+					printf("[%d]=%ld ", i, h->stack.array[i].l);
 					break;
 			}
 		}
@@ -2756,7 +2756,7 @@ static void dbvecs(cffCtx h, int hex) {
 	printf("--- UDV\n");
 	for (i = 0; i < h->font.mm.nAxes; i++) {
 		if (hex) {
-			printf("[%d]=%08x ", i, h->UDV[i]);
+			printf("[%d]=%08lx ", i, h->UDV[i]);
 		}
 		else {
 			printf("[%d]=%.4g ", i, h->UDV[i] / 65536.0);
@@ -2767,7 +2767,7 @@ static void dbvecs(cffCtx h, int hex) {
 	printf("--- NDV\n");
 	for (i = 0; i < h->font.mm.nAxes; i++) {
 		if (hex) {
-			printf("[%d]=%08x ", i, h->NDV[i]);
+			printf("[%d]=%08lx ", i, h->NDV[i]);
 		}
 		else {
 			printf("[%d]=%.4g ", i, h->NDV[i] / 65536.0);
@@ -2778,7 +2778,7 @@ static void dbvecs(cffCtx h, int hex) {
 	printf("--- WV\n");
 	for (i = 0; i < h->font.mm.nMasters; i++) {
 		if (hex) {
-			printf("[%d]=%08x ", i, h->WV[i]);
+			printf("[%d]=%08lx ", i, h->WV[i]);
 		}
 		else {
 			printf("[%d]=%.4g ", i, h->WV[i] / 65536.0);
