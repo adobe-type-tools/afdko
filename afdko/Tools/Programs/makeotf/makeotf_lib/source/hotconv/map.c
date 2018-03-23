@@ -2583,7 +2583,7 @@ static void dbgPrintInfo(hotCtx g) {
 			hotGlyphInfo *gi = &g->font.glyphs.array[i];
 
 			if (nGlyphs <= SUBSET_MAX || gi->addlUV != NULL) {
-				fprintf(stderr, "%4X(%4d) ", i, i);
+				fprintf(stderr, "%4X(%4ud) ", i, i);
 				if (i != gi->id) {
 					fprintf(stderr, "%4hX(%4d) ", gi->id, gi->id);
 				}

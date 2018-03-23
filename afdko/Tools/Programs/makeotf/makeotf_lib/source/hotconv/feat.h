@@ -8,8 +8,8 @@
 #include "common.h"
 
 #if HOT_DEBUG
-#define DF_LEVEL (g->font.debug & HOT_DB_FEAT_2 ? 2 : \
-	              (g->font.debug & HOT_DB_FEAT_1 ? 1 : 0))
+#define DF_LEVEL ((g->font.debug & HOT_DB_FEAT_2) ? 2 : \
+	              ((g->font.debug & HOT_DB_FEAT_1) ? 1 : 0))
 #define DF(L, p)  do { if (DF_LEVEL >= L) { fprintf p; } \
 } \
 	while (0)
