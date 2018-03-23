@@ -23,11 +23,12 @@ install:
       pip install collective.checkdocs;
       pip install pygments;
       pip install flake8;
+      pip install --upgrade wheel cython;
     fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       sudo apt-get install g++-multilib;
+      pip install --user --upgrade wheel cython;
     fi
-  - pip install --upgrade wheel cython
 
 script:
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
