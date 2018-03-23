@@ -37,7 +37,7 @@ script:
     fi
   - python setup.py bdist_wheel
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-      pip install dist/*.whl
+      pip install dist/*.whl;
       flake8 setup.py;
       cd afdko/Tools/SharedData/FDKScripts;
       flake8 buildCFF2VF.py;
