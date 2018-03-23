@@ -1,6 +1,7 @@
 matrix:
   include:
     - os: linux
+      env: NAME=Linux
       python: 2.7
       install:
         - sudo apt-get install g++-multilib
@@ -11,6 +12,7 @@ matrix:
         - pip uninstall --yes afdko
 
     - os: osx
+      env: NAME=OSX
       language: generic
       install:
         - curl -O https://bootstrap.pypa.io/get-pip.py
