@@ -25,7 +25,7 @@ install:
       pip install flake8;
     fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      sudo apt-get install g++.multilib;
+      sudo apt-get install g++-multilib;
     fi
   - pip install --upgrade wheel cython
 
