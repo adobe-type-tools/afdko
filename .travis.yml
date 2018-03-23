@@ -36,8 +36,8 @@ script:
       python setup.py check --restructuredtext --strict;
     fi
   - python setup.py bdist_wheel
-  - pip install dist/*.whl
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+      pip install dist/*.whl
       flake8 setup.py;
       cd afdko/Tools/SharedData/FDKScripts;
       flake8 buildCFF2VF.py;
@@ -49,6 +49,10 @@ script:
       flake8 ufoTools.py;
       coverage run --source=. CheckOutlinesUFO.py --test;
     fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      pip install --user dist/*.whl;
+    fi
+
   - pip uninstall --yes afdko
 
 after_success:
