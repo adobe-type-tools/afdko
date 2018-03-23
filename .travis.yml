@@ -46,7 +46,7 @@ script:
       flake8 FDKUtils.py;
       flake8 MakeOTF.py;
       flake8 ufoTools.py;
-      coverage run --source=. CheckOutlinesUFO.py --test
+      coverage run --source=. CheckOutlinesUFO.py --test;
     fi
   - pip uninstall --yes afdko
 
