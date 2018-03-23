@@ -2549,7 +2549,7 @@ static void dbgPrintUV(UV uv) {
 
 static void dbgPrintInfo(hotCtx g) {
 	mapCtx h = g->ctx.map;
-	int32_t i;
+	uint32_t i;
 	uint32_t nGlyphs = g->font.glyphs.cnt;
 #define SUBSET_MAX  1000        /* Heuristic for printing */
 
@@ -2607,7 +2607,7 @@ static void dbgPrintInfo(hotCtx g) {
 	        "uv...      enc...  gid    sid      flg gname\n"
 	        "--------------------------------------------------\n");
 
-	for (i = 0; i < h->sort.gname.cnt; i++) {
+	for (i = 0; i < (uint32_t)h->sort.gname.cnt; i++) {
 		cffSupCode *sup;
 		AddlUV *addlUV;
 		hotGlyphInfo *gi = h->sort.gname.array[i];

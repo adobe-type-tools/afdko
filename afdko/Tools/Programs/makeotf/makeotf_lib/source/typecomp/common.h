@@ -38,7 +38,7 @@ typedef struct {                /* INDEX table header */
 	((items) == 0 ? sizeCard16 : \
 	 (sizeCard16 + sizeCard8 + ((items) + 1) * INDEX_OFF_SIZE(size) + (size)))
 #define FixedHalf   ((Fixed)0x00008000)
-#define INT2FIX(i)  ((Fixed)(i) << 16)
+#define INT2FIX(i)  ((Fixed)((uint32_t)i) << 16)
 #define DBL2FIX(d)  ((Fixed)((double)(d) * 65536.0 + ((d) < 0 ? -0.5 : 0.5)))
 #define FIX2DBL(f)  ((double)(f) / 65536.0)
 #define RNDFIX(f)   (((f) + FixedHalf) & 0xffff0000)

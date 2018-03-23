@@ -647,7 +647,7 @@ finish:
 /* Match token */
 int psMatchToken(psCtx h, psToken *token, int type, char *value) {
 	size_t length = strlen(value);
-	return token->type == type && token->length == length &&
+	return token->type == type && token->length == (long)length &&
 	       memcmp(&h->cb.buf->array[token->index], value, length) == 0;
 }
 
@@ -667,7 +667,7 @@ psToken *psFindToken(psCtx h, int type, char *value) {
 /* Match token's value */
 int psMatchValue(psCtx h, psToken *token, char *value) {
 	size_t length = strlen(value);
-	return token->length == length &&
+	return token->length == (long)length &&
 	       memcmp(&h->cb.buf->array[token->index], value, length) == 0;
 }
 

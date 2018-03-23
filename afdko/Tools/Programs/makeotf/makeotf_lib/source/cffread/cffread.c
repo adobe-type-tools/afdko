@@ -2728,7 +2728,7 @@ static void dbstack(cffCtx h) {
 					break;
 
 				case STK_INT32:
-					printf("[%d]=ld ", i, h->stack.array[i].i);
+					printf("[%d]=%d ", i, h->stack.array[i].i);
 					break;
 			}
 		}
@@ -2756,7 +2756,7 @@ static void dbvecs(cffCtx h, int hex) {
 	printf("--- UDV\n");
 	for (i = 0; i < h->font.mm.nAxes; i++) {
 		if (hex) {
-			printf("[%d]=%08lx ", i, h->UDV[i]);
+			printf("[%d]=%08x ", i, (uint32_t)h->UDV[i]);
 		}
 		else {
 			printf("[%d]=%.4g ", i, h->UDV[i] / 65536.0);
