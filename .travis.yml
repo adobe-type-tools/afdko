@@ -12,7 +12,6 @@ sudo: required
 #before_install:
 
 install:
-#  - sudo apt-get install libc6-i386
 #  - pip install --upgrade pip
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
       curl -O https://bootstrap.pypa.io/get-pip.py;
@@ -20,32 +19,41 @@ install:
       python -m pip install --user virtualenv;
       python -m virtualenv .venv/;
       source .venv/bin/activate;
+      pip install codecov;
+      pip install collective.checkdocs;
+      pip install pygments;
+      pip install flake8;
     fi
-  - pip install --user --upgrade wheel cython
-  - pip install --user codecov
-  - pip install --user collective.checkdocs
-  - pip install --user pygments
-  - pip install --user flake8
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      sudo apt-get install g++.multilib;
+    fi
+  - pip install --upgrade wheel cython
 
 script:
-  - python setup.py checkdocs
-  - python setup.py check --restructuredtext --strict
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+      python setup.py checkdocs;
+      python setup.py check --restructuredtext --strict;
+    fi
   - python setup.py bdist_wheel
-  - pip install --user dist/*.whl
-  - flake8 setup.py
-  - cd afdko/Tools/SharedData/FDKScripts
-  - flake8 buildCFF2VF.py
-  - flake8 buildMasterOTFs.py
-  - flake8 CheckOutlinesUFO.py
-  - flake8 ConvertFontToCID.py
-  - flake8 FDKUtils.py
-  - flake8 MakeOTF.py
-  - flake8 ufoTools.py
-  - coverage run --source=. CheckOutlinesUFO.py --test
+  - pip install dist/*.whl
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+      flake8 setup.py;
+      cd afdko/Tools/SharedData/FDKScripts;
+      flake8 buildCFF2VF.py;
+      flake8 buildMasterOTFs.py;
+      flake8 CheckOutlinesUFO.py;
+      flake8 ConvertFontToCID.py;
+      flake8 FDKUtils.py;
+      flake8 MakeOTF.py;
+      flake8 ufoTools.py;
+      coverage run --source=. CheckOutlinesUFO.py --test
+    fi
   - pip uninstall --yes afdko
 
 after_success:
-  - codecov
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+      codecov;
+    fi
 
 notifications:
   slack: typekit:TRAVIS_SLACK_TOKEN
