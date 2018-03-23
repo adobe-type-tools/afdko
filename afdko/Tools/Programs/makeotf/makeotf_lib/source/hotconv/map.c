@@ -2549,8 +2549,8 @@ static void dbgPrintUV(UV uv) {
 
 static void dbgPrintInfo(hotCtx g) {
 	mapCtx h = g->ctx.map;
-	long i;
-	unsigned nGlyphs = g->font.glyphs.cnt;
+	int32_t i;
+	uint32_t nGlyphs = g->font.glyphs.cnt;
 #define SUBSET_MAX  1000        /* Heuristic for printing */
 
 	if (!IS_CID(g)) {
@@ -2583,7 +2583,7 @@ static void dbgPrintInfo(hotCtx g) {
 			hotGlyphInfo *gi = &g->font.glyphs.array[i];
 
 			if (nGlyphs <= SUBSET_MAX || gi->addlUV != NULL) {
-				fprintf(stderr, "%4lX(%4ld) ", i, i);
+				fprintf(stderr, "%4X(%4d) ", i, i);
 				if (i != gi->id) {
 					fprintf(stderr, "%4hX(%4d) ", gi->id, gi->id);
 				}
