@@ -5,7 +5,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define CFFREAD_H
 
 #include <stddef.h>             /* For size_t */
-#include <stdint.h>             /* For size_t */
+#include <stdint.h>             /* For int32_t */
 
 #define CFF_VERSION 0x010005    /* Library version */
 
