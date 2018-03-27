@@ -117,7 +117,7 @@ typedef struct MetricsRec {
 typedef struct {                     /* Kerning pair */
 	KernGlyph first;
     KernGlyph second;
-    unsigned long lineIndex; /* used to sort records in order of occurrence. 
+    unsigned long lineIndex; /* used to sort records in order of occurrence.
                               Needed so keep first of conflicting records. */
 	short metricsCnt1; /* Allowable values are 1 ( x advance adjsutment only) or 4. */
 	short metricsRec1[4];
@@ -895,7 +895,7 @@ void GPOSFeatureEnd(hotCtx g) {
 #define ValueYIdAdvance     (1 << 11)
 
 #define VAL_REC_UNDEF       (-1)
-typedef long ValueRecord;   /* Stores index into h->values, which is read at write time. If -1, then write 0; */
+typedef int32_t ValueRecord;   /* Stores index into h->values, which is read at write time. If -1, then write 0; */
 
 
 
@@ -961,7 +961,7 @@ static unsigned makeValueFormat(hotCtx g, int xPla, int yPla, int xAdv, int yAdv
 	if (yAdv) {
 		val |= IS_MM(g) ? ValueYIdAdvance : ValueYAdvance;
 	}
-    
+
     if (xAdv) {
         if  ((val == 0) && (isVertFeature(h->new.feature)))
             val =  (IS_MM(g) ? ValueYIdAdvance: ValueYAdvance);
@@ -1090,7 +1090,7 @@ static void GPOSAddSingle(hotCtx g, SubtableInfo *si, GNode *targ, int xPla, int
 	GNode *p;
     unsigned valFmt;
     GPOSCtx h = g->ctx.GPOS;
-   
+
     valFmt = makeValueFormat(g, xPla, yPla, xAdv, yAdv);
 
 	if (g->hadError) {
@@ -1494,8 +1494,8 @@ static void fillSinglePos(hotCtx g, GPOSCtx h) {
 	size2 = fillAllSinglePos2(g, h, 1 /* simulate */, &nSub2);
 
 #if 1
-	DF(2, (stderr, "### singlePos1 size=%lu (%d subtables)\n", size1, nSub1));
-	DF(2, (stderr, "### singlePos2 size=%lu (%d subtables)\n", size2, nSub2));
+	DF(2, (stderr, "### singlePos1 size=%u (%d subtables)\n", size1, nSub1));
+	DF(2, (stderr, "### singlePos2 size=%u (%d subtables)\n", size2, nSub2));
 #endif
 
 	/* Select subtable format */
@@ -1796,11 +1796,11 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second,  cha
     int pairFmt;
     unsigned valFmt1 = 0;
     unsigned valFmt2 = 0;
-    
+
 	if (first->metricsInfo == NULL) {
 		/* If the only metrics record is appplied to the second glyph,
 		then this is shorthand for applying a single kern value to the first glyph.
-		The parser enforces that if first->metricsInfo == null, then the 
+		The parser enforces that if first->metricsInfo == null, then the
 		second value record must exist.*/
 		first->metricsInfo = second->metricsInfo;
 		second->metricsInfo = NULL;
@@ -1817,7 +1817,7 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second,  cha
 		}
 	}
 
-	
+
 	enumerate = first->flags & FEAT_ENUMERATE;
 
 	/* The FEAT_GCLASS is essential for identifying a singleton gclass */
@@ -1846,7 +1846,7 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second,  cha
 			}
 		}
 	}
-	
+
 	if (second->metricsInfo != NULL) {
 		if (second->metricsInfo->cnt == 1) {
 			if (isVertFeature(h->new.feature)) {
@@ -2012,11 +2012,11 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second,  cha
 			else {
 				msg[0] = '\0';
 			}
-			
+
 			hotMsg(g, hotWARNING, "Start of new pair positioning subtable; "
 				   "some pairs may never be accessed: %s%s", g->note.array,
 				   msg);
-			
+
 			h->startNewPairPosSubtbl = 1;
 			GPOSAddPair(g, si, first, second, filename, lineNum);
 		}
@@ -2210,7 +2210,7 @@ static int CDECL cmpPairPos1(const void *first, const void *second) {
 	const KernRec *b = second;
 	int i;
 	int metricsCnt;
-	
+
 	if (a->first.gid == GID_UNDEF && b->first.gid == GID_UNDEF) {
 		return 0;
 	}
@@ -2263,7 +2263,7 @@ static int CDECL cmpPairPos1(const void *first, const void *second) {
 			return 1;
 		}
 	}
-	
+
 	if ((a->metricsRec2[0] == 0) && (b->metricsRec2[0] != 0)) {	/* Abs values in decr order */
 		return -1;
 	}
@@ -2295,7 +2295,7 @@ static int CDECL cmpPairPos2(const void *first, const void *second) {
 	const KernRec *a = first;
 	const KernRec *b = second;
 	int i;
-	
+
 	int metricsCnt;
 
 	if (a->first.gcl == NULL && b->first.gcl == NULL) {
@@ -2334,7 +2334,7 @@ static int CDECL cmpPairPos2(const void *first, const void *second) {
 	else if ((a->metricsRec1[0] != 0) && (b->metricsRec1[0] == 0)) {
 		return 1;
 	}
-	
+
 	metricsCnt = (a->metricsCnt1 > b->metricsCnt1) ?  b->metricsCnt1 : a->metricsCnt1;
 	for (i=0; i < metricsCnt; i++) {
 		if (ABS(a->metricsRec1[i]) > ABS(b->metricsRec1[i])) {	/* Abs values in decr order */
@@ -2736,7 +2736,7 @@ static void fillPairPos2(hotCtx g, GPOSCtx h) {
 				pair->metricsRec1[2],  pair->metricsRec1[3]);
 			}
 		}
-		
+
 		if ((pair->metricsCnt2 == 0) || ((pair->metricsCnt2 == 1) && (pair->metricsRec2[0] == 0))) {
 			dst->Value2 = VAL_REC_UNDEF;
 		}
@@ -2761,7 +2761,7 @@ static void fillPairPos2(hotCtx g, GPOSCtx h) {
 	                      numValues(fmt->ValueFormat2));
 #if HOT_DEBUG
 	DF(1, (stderr, "#Cl kern: %d of %u(%hux%u) array is filled "
-		   "(%4.2f%%), excl ClassDef2's class 0. Subtbl size: %lu\n",
+		   "(%4.2f%%), excl ClassDef2's class 0. Subtbl size: %u\n",
 		   nFilled,
 		   fmt->Class1Count * (fmt->Class2Count - 1),
 		   fmt->Class1Count,
@@ -3560,14 +3560,14 @@ typedef struct {
 	EntryExitRecord *EntryExitRecord;               /* [EntryExitCount] */
 } CursivePosFormat1;
 
-static void initAnchor(void *ctx, long count, AnchorMarkInfo *anchor) {
+static void initAnchorArray(void *ctx, long count, AnchorMarkInfo *anchor) {
 	long i;
 	for (i = 0; i < count; i++) {
 		anchor->x = 0;
 		anchor->y = 0;
 		anchor->contourpoint = 0;
 		anchor->format = 0;
-		anchor->markClass = 0;
+		anchor->markClass = NULL;
 		anchor->markClassIndex = 0;
 		anchor->componentIndex = 0;
 		anchor++;
@@ -3578,16 +3578,7 @@ static void initAnchor(void *ctx, long count, AnchorMarkInfo *anchor) {
 static void initAnchorListRec(void *ctx, long count, AnchorListRec *anchorListRec) {
 	long i;
 	AnchorMarkInfo *anchor = &anchorListRec->anchor;
-	for (i = 0; i < count; i++) {
-		anchor->x = 0;
-		anchor->y = 0;
-		anchor->contourpoint = 0;
-		anchor->format = 0;
-		anchor->markClass = 0;
-		anchor->markClassIndex = 0;
-		anchor->componentIndex = 0;
-		anchor++;
-	}
+	initAnchorArray(ctx, count, anchor);
 	return;
 }
 
@@ -3977,7 +3968,7 @@ static void GPOSAddMark(hotCtx g, SubtableInfo *si, GNode *targ, int anchorCount
 			if (prevComponentIndex != anchorMarkInfo[j].componentIndex) {
 				baseRec = dnaNEXT(si->baseList);
 				dnaINIT(g->dnaCtx, baseRec->anchorMarkInfo, 4, 4);
-				baseRec->anchorMarkInfo.func = initAnchor;
+				baseRec->anchorMarkInfo.func = initAnchorArray;
 				baseRec->gid =  nextNode->gid;
 				baseRec->lineNum = lineNum;
 				prevComponentIndex = anchorMarkInfo[j].componentIndex;
@@ -4565,7 +4556,7 @@ static void GPOSAdCursive(hotCtx g, SubtableInfo *si, GNode *targ, int anchorCou
 		int j;
 		BaseGlyphRec *baseRec = dnaNEXT(si->baseList);
 		dnaINIT(g->dnaCtx, baseRec->anchorMarkInfo, 4, 4);
-		baseRec->anchorMarkInfo.func = initAnchor;
+		baseRec->anchorMarkInfo.func = initAnchorArray;
 		baseRec->gid =  nextNode->gid;
 
 		for (j = 0; j < anchorCount; j++) {
@@ -4764,7 +4755,7 @@ static void writeExtension(hotCtx g, GPOSCtx h, Subtable *sub) {
 	/* Adjust offset */
 	fmt->ExtensionOffset += h->offset.extensionSection - sub->offset;
 
-	DF(1, (stderr, "  GPOS Extension: fmt=%1d, lkpType=%2d, offset=%08lx\n",
+	DF(1, (stderr, "  GPOS Extension: fmt=%1d, lkpType=%2d, offset=%08ux\n",
 	       fmt->PosFormat, fmt->ExtensionLookupType, fmt->ExtensionOffset));
 
 	OUT2(fmt->PosFormat);

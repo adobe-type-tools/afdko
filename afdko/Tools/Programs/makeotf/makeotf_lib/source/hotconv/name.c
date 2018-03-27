@@ -324,6 +324,7 @@ static void addStdNames(nameCtx h, int win, int mac) {
 	}
 
     /* Don't add if one has already been provided from the feature file */
+    index = 0; //ensure we start from beginning of array.
     index = enumNames(h, index,
                       MATCH_ANY,
                       MATCH_ANY,

@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <math.h>
-
+#include <stdio.h>
 #include "cffread.h"
 #include "dictops.h"
 
@@ -34,7 +34,7 @@ static short exenc[] = {
 #define ABS(v)            ((v) < 0 ? -(v) : (v))
 
 /* 16.16 fixed point arithmetic */
-typedef long Fixed;
+typedef int32_t Fixed;
 #define fixedScale    65536.0
 #define FixedMax    ((Fixed)0x7FFFFFFF)
 #define FixedMin    ((Fixed)0x80000000)
@@ -48,7 +48,7 @@ typedef long Fixed;
 #define FIX2INT(f)    ((short)(((f) + FixedHalf) >> 16))
 #define FIX2DBL(f)    ((double)((f) / fixedScale))
 #define DBL2FIX(d)    ((Fixed)((d) * fixedScale + ((d) < 0 ? -0.5 : 0.5)))
-#define DBL2INT(d)    ((long)((d) + ((d) < 0 ? -0.5 : 0.5)))
+#define DBL2INT(d)    ((int32_t)((d) + ((d) < 0 ? -0.5 : 0.5)))
 #define CEIL(f)        ((Fixed)(((f) + 0xffff) & 0xffff0000))
 #define FLOOR(f)    ((Fixed)((f) & 0xffff0000))
 #define PATH_FUNC_DEFINED(func) (h->path.cb != NULL && h->path.cb->func != NULL)
@@ -86,13 +86,13 @@ typedef struct {                  /* FDArray element */
 typedef union {                   /* Stack element */
 	double d;
 	Fixed f;
-	long l;
+	int32_t i;
 } StkElement;
 
 typedef enum {                   /* Stack element type */
 	STK_DOUBLE,
 	STK_FIXED,
-	STK_LONG
+	STK_INT32
 } StkType;
 
 typedef struct {                  /* Per-glyph data */
@@ -376,21 +376,21 @@ static void pushFix(cffCtx h, Fixed f) {
 }
 
 /* Push integer number on stack (as fixed) */
-static void pushInt(cffCtx h, long l) {
+static void pushIntAsFixed(cffCtx h, int32_t i) {
 	if (h->stack.cnt >= h->stack.max) {
 		fatal(h, "stack overflow");
 	}
-	h->stack.array[h->stack.cnt].f = INT2FIX(l);
+	h->stack.array[h->stack.cnt].f = INT2FIX(i);
 	h->stack.type[h->stack.cnt++] = STK_FIXED;
 }
 
 /* Push long number on stack (as long) */
-static void pushLong(cffCtx h, long l) {
+static void pushInt32(cffCtx h, int32_t i) {
 	if (h->stack.cnt >= h->stack.max) {
 		fatal(h, "stack overflow");
 	}
-	h->stack.array[h->stack.cnt].l = l;
-	h->stack.type[h->stack.cnt++] = STK_LONG;
+	h->stack.array[h->stack.cnt].i = i;
+	h->stack.type[h->stack.cnt++] = STK_INT32;
 }
 
 /* Pop number from stack (return double) */
@@ -405,8 +405,8 @@ static double popDbl(cffCtx h) {
 		case STK_FIXED:
 			return FIX2DBL(h->stack.array[h->stack.cnt].f);
 
-		case STK_LONG:
-			return h->stack.array[h->stack.cnt].l;
+		case STK_INT32:
+			return h->stack.array[h->stack.cnt].i;
 	}
 	return 0;    /* For quiet compilation */
 }
@@ -430,8 +430,8 @@ static Fixed popFix(cffCtx h) {
 		case STK_FIXED:
 			return h->stack.array[h->stack.cnt].f;
 
-		case STK_LONG: {
-			unsigned long l = h->stack.array[h->stack.cnt].l;
+		case STK_INT32: {
+			uint32_t l = h->stack.array[h->stack.cnt].i;
 			if (l < INT(FixedMin) || l > INT(FixedMax)) {
 				fatal(h, "range check\n");
 			}
@@ -443,15 +443,15 @@ static Fixed popFix(cffCtx h) {
 	return 0;    /* For quiet compilation */
 }
 
-/* Pop number from stack (return long) */
-static long popInt(cffCtx h) {
+/* Pop number from stack (return int32_t) */
+static int32_t popInt(cffCtx h) {
 	if (h->stack.cnt < 1) {
 		fatal(h, "stack underflow");
 	}
 	switch (h->stack.type[--h->stack.cnt]) {
 		case STK_DOUBLE: {
 			double d = h->stack.array[h->stack.cnt].d;
-			if (d < LONG_MIN || d > LONG_MAX) {
+			if (d < INT32_MIN || d > INT32_MAX) {
 				fatal(h, "range check\n");
 			}
 			else {
@@ -462,8 +462,8 @@ static long popInt(cffCtx h) {
 		case STK_FIXED:
 			return FIX2INT(h->stack.array[h->stack.cnt].f);
 
-		case STK_LONG:
-			return h->stack.array[h->stack.cnt].l;
+		case STK_INT32:
+			return h->stack.array[h->stack.cnt].i;
 	}
 	return 0;    /* For quiet compilation */
 }
@@ -487,21 +487,21 @@ static Fixed indexFix(cffCtx h, int i) {
 		case STK_FIXED:
 			return h->stack.array[i].f;
 
-		case STK_LONG:
-			return INT2FIX(h->stack.array[i].l);
+		case STK_INT32:
+			return INT2FIX(h->stack.array[i].i);
 	}
 	return 0;    /* For quiet compilation */
 }
 
 /* Return indexed stack element (as long) */
-static long indexInt(cffCtx h, int i) {
+static int32_t indexInt(cffCtx h, int i) {
 	if (i < 0 || i >= h->stack.cnt) {
 		fatal(h, "stack check");
 	}
 	switch (h->stack.type[i]) {
 		case STK_DOUBLE: {
 			double d = h->stack.array[i].d;
-			if (d < LONG_MIN || d > LONG_MAX) {
+			if (d < INT32_MIN || d > INT32_MAX) {
 				fatal(h, "range check\n");
 			}
 			else {
@@ -512,8 +512,8 @@ static long indexInt(cffCtx h, int i) {
 		case STK_FIXED:
 			return FIX2INT(h->stack.array[i].f);
 
-		case STK_LONG:
-			return h->stack.array[i].l;
+		case STK_INT32:
+			return h->stack.array[i].i;
 	}
 	return 0;    /* For quiet compilation */
 }
@@ -530,8 +530,8 @@ static double indexDbl(cffCtx h, int i) {
 		case STK_FIXED:
 			return FIX2DBL(h->stack.array[i].f);
 
-		case STK_LONG:
-			return h->stack.array[i].l;
+		case STK_INT32:
+			return h->stack.array[i].i;
 	}
 	return 0;    /* For quiet compilation */
 }
@@ -563,17 +563,17 @@ static void seekbyte(cffCtx h, Offset offset) {
 	((unsigned char)(((h)->data.left-- == 0) ? fillbuf(h) : *(h)->data.next++))
 
 /* Get integer of specified size starting at buffer pointer */
-static unsigned long getnum(cffCtx h, int size) {
-	unsigned long value;
+static uint32_t getnum(cffCtx h, int size) {
+	uint32_t value;
 	switch (size) {
 		case 4:
-			value = (unsigned long)GETBYTE(h) << 24;
-			value |= (unsigned long)GETBYTE(h) << 16;
+			value = (uint32_t)GETBYTE(h) << 24;
+			value |= (uint32_t)GETBYTE(h) << 16;
 			value |= GETBYTE(h) << 8;
 			return value | GETBYTE(h);
 
 		case 3:
-			value = (unsigned long)GETBYTE(h) << 16;
+			value = (uint32_t)GETBYTE(h) << 16;
 			value |= GETBYTE(h) << 8;
 			return value | GETBYTE(h);
 
@@ -621,7 +621,7 @@ static Offset INDEXGet(cffCtx h, INDEX *index,
 		fatal(h, "INDEX bounds");    /* Requested element out-of-bounds */
 	}
 	/* Get offset */
-	seekbyte(h, index->offset + (unsigned long)element * index->offSize);
+	seekbyte(h, index->offset + (uint32_t)element * index->offSize);
 	offset = getnum(h, index->offSize);
 
 	/* Compute length */
@@ -974,10 +974,10 @@ static Fixed PMRand(void) {
 #define M 2147483647
 #define Q (M / A)
 #define R (M % A)
-	static long seed = 1;
-	long hi = seed / Q;
-	long lo = seed % Q;
-	long test = A * lo - R * hi;
+	static int32_t seed = 1;
+	int32_t hi = seed / Q;
+	int32_t lo = seed % Q;
+	int32_t test = A * lo - R * hi;
 	seed = (test > 0) ? test : test + M;
 	return seed % FixedOne + 1;
 #undef A
@@ -992,9 +992,9 @@ static Fixed PMRand(void) {
    the algorithm listed there doesn't round up the remainder which is required
    in order to obtain a result that is correct to the nearest bit. */
 static Fixed FixedSqrt(Fixed radicand) {
-	unsigned long radical = 0;
-	unsigned long remHi = 0;
-	unsigned long remLo = radicand;
+	uint32_t radical = 0;
+	uint32_t remHi = 0;
+	uint32_t remLo = radicand;
 	int count = 23;    /* = 15+FracBits/2; adjust for other precisions */
 
 	if (radicand <= 0) {
@@ -1002,7 +1002,7 @@ static Fixed FixedSqrt(Fixed radicand) {
 	}
 
 	do {
-		unsigned long term;
+		uint32_t term;
 
 		/* Get next 2 bits of the radicand */
 		remHi = remHi << 2 | remLo >> 30;
@@ -1406,18 +1406,18 @@ static void t2Read(cffCtx h, Offset offset, int init) {
 					case tx_and:
 						b = popFix(h);
 						a = popFix(h);
-						pushInt(h, a && b);
+						pushIntAsFixed(h, a && b);
 						break;
 
 					case tx_or:
 						b = popFix(h);
 						a = popFix(h);
-						pushInt(h, a || b);
+						pushIntAsFixed(h, a || b);
 						break;
 
 					case tx_not:
 						a = popFix(h);
-						pushInt(h, !a);
+						pushIntAsFixed(h, !a);
 						break;
 
 					case tx_store: {
@@ -1482,7 +1482,7 @@ static void t2Read(cffCtx h, Offset offset, int init) {
 					case tx_eq:
 						b = popFix(h);
 						a = popFix(h);
-						pushInt(h, a == b);
+						pushIntAsFixed(h, a == b);
 						break;
 
 					case tx_drop:
@@ -1651,8 +1651,8 @@ static void t2Read(cffCtx h, Offset offset, int init) {
 
 			case t2_shortint: {
 				/* 2 byte number */
-				long byte1 = GETBYTE(h);
-				pushInt(h, byte1 << 8 | GETBYTE(h));
+				int32_t byte1 = GETBYTE(h);
+				pushIntAsFixed(h, byte1 << 8 | GETBYTE(h));
 			}
 			break;
 
@@ -1661,7 +1661,7 @@ static void t2Read(cffCtx h, Offset offset, int init) {
 			case 249:
 			case 250:
 				/* Positive 2 byte number */
-				pushInt(h, 108 + 256 * (byte0 - 247) + GETBYTE(h));
+				pushIntAsFixed(h, 108 + 256 * (byte0 - 247) + GETBYTE(h));
 				break;
 
 			case 251:
@@ -1669,21 +1669,21 @@ static void t2Read(cffCtx h, Offset offset, int init) {
 			case 253:
 			case 254:
 				/* Negative 2 byte number */
-				pushInt(h, -108 - 256 * (byte0 - 251) - GETBYTE(h));
+				pushIntAsFixed(h, -108 - 256 * (byte0 - 251) - GETBYTE(h));
 				break;
 
 			case 255: {
 				/* 5 byte number */
-				long byte1 = GETBYTE(h);
-				long byte2 = GETBYTE(h);
-				long byte3 = GETBYTE(h);
+				int32_t byte1 = GETBYTE(h);
+				int32_t byte2 = GETBYTE(h);
+				int32_t byte3 = GETBYTE(h);
 				pushFix(h, byte1 << 24 | byte2 << 16 | byte3 << 8 | GETBYTE(h));
 			}
 			break;
 
 			default:
 				/* 1 byte number */
-				pushInt(h, byte0 - 139);
+				pushIntAsFixed(h, byte0 - 139);
 				break;
 		}
 	}
@@ -2048,17 +2048,17 @@ static void DICTRead(cffCtx h, int length, Offset offset, int enable) {
 
 			case cff_shortint: {
 				/* 2 byte number */
-				long byte1 = GETBYTE(h);
-				pushInt(h, byte1 << 8 | GETBYTE(h));
+				int32_t byte1 = GETBYTE(h);
+				pushIntAsFixed(h, byte1 << 8 | GETBYTE(h));
 			}
 			break;
 
 			case cff_longint: {
 				/* 5 byte number */
-				long byte1 = GETBYTE(h);
-				long byte2 = GETBYTE(h);
-				long byte3 = GETBYTE(h);
-				pushLong(h, byte1 << 24 | byte2 << 16 | byte3 << 8 | GETBYTE(h));
+				int32_t byte1 = GETBYTE(h);
+				int32_t byte2 = GETBYTE(h);
+				int32_t byte3 = GETBYTE(h);
+				pushInt32(h, byte1 << 24 | byte2 << 16 | byte3 << 8 | GETBYTE(h));
 			}
 			break;
 
@@ -2075,7 +2075,7 @@ static void DICTRead(cffCtx h, int length, Offset offset, int enable) {
 			case 249:
 			case 250:
 				/* +ve 2 byte number */
-				pushInt(h, 108 + 256 * (byte0 - 247) + GETBYTE(h));
+				pushIntAsFixed(h, 108 + 256 * (byte0 - 247) + GETBYTE(h));
 				break;
 
 			case 251:
@@ -2083,7 +2083,7 @@ static void DICTRead(cffCtx h, int length, Offset offset, int enable) {
 			case 253:
 			case 254:
 				/* -ve 2 byte number */
-				pushInt(h, -108 - 256 * (byte0 - 251) - GETBYTE(h));
+				pushIntAsFixed(h, -108 - 256 * (byte0 - 251) - GETBYTE(h));
 				break;
 
 			case cff_reserved255:
@@ -2091,7 +2091,7 @@ static void DICTRead(cffCtx h, int length, Offset offset, int enable) {
 
 			default:
 				/* 1 byte number */
-				pushInt(h, byte0 - 139);
+				pushIntAsFixed(h, byte0 - 139);
 				break;
 		}
 	}
@@ -2199,7 +2199,9 @@ static void cffRead(cffCtx h) {
 	}
 	else {
 		/* Read Private DICT */
-		DICTRead(h, h->dict.Private.length, h->dict.Private.offset, 1);
+                if (h->dict.Private.length > 0) {
+    		    DICTRead(h, h->dict.Private.length, h->dict.Private.offset, 1);
+                }
 
 		/* Read Subrs index */
 		if (h->dict.Subrs != 0) {
@@ -2725,8 +2727,8 @@ static void dbstack(cffCtx h) {
 					printf("[%d]=%.4g ", i, h->stack.array[i].f / 65536.0);
 					break;
 
-				case STK_LONG:
-					printf("[%d]=%ld ", i, h->stack.array[i].l);
+				case STK_INT32:
+					printf("[%d]=%d ", i, h->stack.array[i].i);
 					break;
 			}
 		}
@@ -2754,7 +2756,7 @@ static void dbvecs(cffCtx h, int hex) {
 	printf("--- UDV\n");
 	for (i = 0; i < h->font.mm.nAxes; i++) {
 		if (hex) {
-			printf("[%d]=%08lx ", i, h->UDV[i]);
+			printf("[%d]=%08x ", i, (uint32_t)h->UDV[i]);
 		}
 		else {
 			printf("[%d]=%.4g ", i, h->UDV[i] / 65536.0);
@@ -2765,7 +2767,7 @@ static void dbvecs(cffCtx h, int hex) {
 	printf("--- NDV\n");
 	for (i = 0; i < h->font.mm.nAxes; i++) {
 		if (hex) {
-			printf("[%d]=%08lx ", i, h->NDV[i]);
+			printf("[%d]=%08x ", i, h->NDV[i]);
 		}
 		else {
 			printf("[%d]=%.4g ", i, h->NDV[i] / 65536.0);
@@ -2776,7 +2778,7 @@ static void dbvecs(cffCtx h, int hex) {
 	printf("--- WV\n");
 	for (i = 0; i < h->font.mm.nMasters; i++) {
 		if (hex) {
-			printf("[%d]=%08lx ", i, h->WV[i]);
+			printf("[%d]=%08x ", i, h->WV[i]);
 		}
 		else {
 			printf("[%d]=%.4g ", i, h->WV[i] / 65536.0);

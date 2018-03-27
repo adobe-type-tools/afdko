@@ -118,7 +118,7 @@ struct Edge_ {
 struct Node_ {
 	Node *suffix;       /* Suffix link */
 	Edge edge;          /* First linking edge */
-	long misc;          /* Initially longest path from root, then subr index */
+	int32_t misc;          /* Initially longest path from root, then subr index */
 	unsigned short paths;   /* Paths through node */
 	unsigned short id;  /* Font id */
 #define NODE_GLOBAL USHRT_MAX   /* Identifies global subr */
@@ -730,7 +730,7 @@ static void saveSubr(subrCtx h, unsigned char *label, Node *node,
 
 /* Find candidate subrs in DAWG */
 static void findCandSubrs(subrCtx h, Edge *edge, int maskcnt) {
-	long misc;
+	int32_t misc;
 	Node *node;
 	unsigned char *label;
 
@@ -1673,7 +1673,7 @@ reselect:
 	if (++pass == 2) {
 		#if 1
 		/* Discard extra subrs if exceeds capacity */
-		long limit = h->g->maxNumSubrs;
+		int32_t limit = h->g->maxNumSubrs;
 		if (limit == 0) {
 			limit = 65536L;
 		}
@@ -1885,7 +1885,7 @@ static void subrizeChars(subrCtx h, CSData *chars, unsigned id) {
 		long iStart = h->cstrs.cnt;
 
 		/* Initially allocate space for entire charstring */
-		pdst = (unsigned char *)dnaEXTEND(h->cstrs, (long)length);
+		pdst = (unsigned char *)dnaEXTEND(h->cstrs, (int32_t)length);
 
 #if DB_CHARS
 		printf("[%3ld]    =  ", i);
@@ -1930,7 +1930,7 @@ static void subrizeChars(subrCtx h, CSData *chars, unsigned id) {
    font using combined subr INDEXes. The global subrs are selected from even
    temporary array indexes and local subrs are chosen from odd indexes */
 static void reorderCombined(subrCtx h, int local) {
-	long bias;
+	int32_t bias;
 	long count; /* Element in reorder array */
 	long i;     /* Reorder array index */
 	long j;     /* Temporary array index */
@@ -2009,7 +2009,7 @@ static void reorderCombined(subrCtx h, int local) {
 /* Create biased reordering for a non-singleton font */
 static void reorderSubrs(subrCtx h) {
 	long i;
-	long bias;
+	int32_t bias;
 
 	/* Assign reording index */
 	dnaSET_CNT(h->reorder, h->tmp.cnt);
@@ -2482,7 +2482,7 @@ static void dbnode(subrCtx h, Node *node) {
 	printf("--- node[%ld]\n", dbnodeid(h, node));
 	printf("suffix=%ld (%08lx)\n",
 	       dbnodeid(h, node->suffix), (unsigned long)node->suffix);
-	printf("misc  =%ld\n", node->misc);
+	printf("misc  =%d\n", node->misc);
 	printf("paths =%hu\n", node->paths);
 	printf("id    =%hu\n", node->id);
 	printf("flags =%04hx (", (unsigned short)node->flags);

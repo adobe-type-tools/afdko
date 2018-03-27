@@ -8,8 +8,8 @@
 #include "common.h"
 
 #if HOT_DEBUG
-#define DF_LEVEL (g->font.debug & HOT_DB_FEAT_2 ? 2 : \
-	              (g->font.debug & HOT_DB_FEAT_1 ? 1 : 0))
+#define DF_LEVEL ((g->font.debug & HOT_DB_FEAT_2) ? 2 : \
+	              ((g->font.debug & HOT_DB_FEAT_1) ? 1 : 0))
 #define DF(L, p)  do { if (DF_LEVEL >= L) { fprintf p; } \
 } \
 	while (0)
@@ -114,7 +114,7 @@ struct GNode_ {
 	MetricsInfo *metricsInfo;
 	int lookupLabel;
 	char *markClassName;
-	AnchorMarkInfo markClassAnchorInfo; /* Used obnly be mark class definitions */
+	AnchorMarkInfo markClassAnchorInfo; /* Used only be mark class definitions */
 };
 
 
