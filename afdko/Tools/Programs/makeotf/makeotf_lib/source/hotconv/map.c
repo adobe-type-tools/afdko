@@ -956,7 +956,7 @@ static void addHorMapping(hotCtx g, unsigned long code, CID cid, short flags,
 	hotGlyphInfo *gi = mapCID2Glyph(g, cid);
 	if (gi != NULL) {
 		if (isMac) {
-			cmapAddMapping(g, code, GET_GID(gi), flags & CODE_1BYTE ? 1 : 2);
+			cmapAddMapping(g, code, GET_GID(gi), (flags & CODE_1BYTE) ? 1 : 2);
 		}
 		else {
 			addUVToGlyph(g, gi, code);
@@ -2253,7 +2253,7 @@ static void makeCIDMaccmap(hotCtx g) {
 	for (i = 0; i < h->cid.mac.codespace.cnt; i++) {
 		Range *range = &h->cid.mac.codespace.array[i];
 		cmapAddCodeSpaceRange(g, range->lo, range->hi,
-		                      range->flags & CODE_1BYTE ? 1 : 2);
+		                      (range->flags & CODE_1BYTE) ? 1 : 2);
 	}
 	addRanges(g, 1);
 	cmapEndEncoding(g); /* CID Mac  */

@@ -1052,7 +1052,7 @@ static void saveIntArray(cfrCtx h, size_t max, long *cnt, long *array,
 						 int delta)
 {
 	int i;
-	if (h->stack.cnt == 0 || h->stack.cnt > (size_t)max)
+	if (h->stack.cnt == 0 || h->stack.cnt > (int)max)
 		fatal(h, cfrErrDICTArray);
 	array[0] = INDEX_INT(0);
 	for (i = 1; i < h->stack.cnt; i++)
@@ -1124,7 +1124,7 @@ static char *savePostScript(cfrCtx h, char *str)
 		/* Extract FSType from string */
 		n = -1;
 		q = p + sizeof("/FSType") - 1;
-		if (SSCANF_S(q, " %ld def%n", &value, &n) == 1 && n != -1 &&
+		if (SSCANF_S(q, " %d def%n", &value, &n) == 1 && n != -1 &&
 			0 <= value && value < 65536)
         {
 			/* Sucessfully parsed value; remove definition from string */
