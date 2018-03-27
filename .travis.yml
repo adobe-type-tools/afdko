@@ -1,49 +1,48 @@
-os: osx
+matrix:
+  include:
+    - os: linux
+      env: NAME=Linux
+      python: 2.7
+      install:
+        - sudo apt-get install g++-multilib
+        - pip install --user --upgrade wheel cython
+      script:
+        - python setup.py bdist_wheel
+        - pip install --user dist/*.whl
+        - pip uninstall --yes afdko
 
-language: generic
-
-sudo: required
-
-#python:
-#  - "2.7"
-
-#before_install:
-
-install:
-#  - sudo apt-get install libc6-i386
-#  - pip install --upgrade pip
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-      curl -O https://bootstrap.pypa.io/get-pip.py;
-      python get-pip.py --user;
-      python -m pip install --user virtualenv;
-      python -m virtualenv .venv/;
-      source .venv/bin/activate;
-    fi
-  - pip install --upgrade wheel cython
-  - pip install codecov
-  - pip install collective.checkdocs
-  - pip install pygments
-  - pip install flake8
-
-script:
-  - python setup.py checkdocs
-  - python setup.py check --restructuredtext --strict
-  - python setup.py bdist_wheel
-  - pip install dist/*.whl
-  - flake8 setup.py
-  - cd afdko/Tools/SharedData/FDKScripts
-  - flake8 buildCFF2VF.py
-  - flake8 buildMasterOTFs.py
-  - flake8 CheckOutlinesUFO.py
-  - flake8 ConvertFontToCID.py
-  - flake8 FDKUtils.py
-  - flake8 MakeOTF.py
-  - flake8 ufoTools.py
-  - coverage run --source=. CheckOutlinesUFO.py --test
-  - pip uninstall --yes afdko
-
-after_success:
-  - codecov
+    - os: osx
+      env: NAME=OSX
+      language: generic
+      install:
+        - curl -O https://bootstrap.pypa.io/get-pip.py
+        - python get-pip.py --user
+        - python -m pip install --user virtualenv
+        - python -m virtualenv .venv/
+        - source .venv/bin/activate
+        - pip install codecov
+        - pip install collective.checkdocs
+        - pip install pygments
+        - pip install flake8
+        - pip install --upgrade wheel cython
+      script:
+        - python setup.py checkdocs
+        - python setup.py check --restructuredtext --strict
+        - python setup.py bdist_wheel
+        - pip install dist/*.whl
+        - flake8 setup.py
+        - cd afdko/Tools/SharedData/FDKScripts
+        - flake8 buildCFF2VF.py
+        - flake8 buildMasterOTFs.py
+        - flake8 CheckOutlinesUFO.py
+        - flake8 ConvertFontToCID.py
+        - flake8 FDKUtils.py
+        - flake8 MakeOTF.py
+        - flake8 ufoTools.py
+        - coverage run --source=. CheckOutlinesUFO.py --test
+        - pip uninstall --yes afdko
+      after_success:
+        - codecov
 
 notifications:
   slack: typekit:TRAVIS_SLACK_TOKEN

@@ -1,4 +1,4 @@
-|Travis Build Status| |Codacy| |Coverage Status| |PyPI|
+|Travis Build Status| |AppVeyor Build Status| |Codacy| |Coverage Status| |PyPI|
 
 Adobe Font Development Kit for OpenType (AFDKO)
 ===============================================
@@ -148,6 +148,8 @@ On Windows, you need to download and install Visual C++ 6, and add all the servi
 
 .. |Travis Build Status| image:: https://travis-ci.org/adobe-type-tools/afdko.svg
    :target: https://travis-ci.org/adobe-type-tools/afdko
+.. |Appveyor Build status| image:: https://ci.appveyor.com/api/projects/status/4e2utb80ptw759ps/branch/master?svg=true
+   :target: https://ci.appveyor.com/project/adobe-type-tools/afdko/branch/master
 .. |Codacy| image:: https://api.codacy.com/project/badge/Grade/08ceff914833445685924ebb1f040070
    :alt: Codacy Badge
    :target: https://www.codacy.com/app/adobe-type-tools/afdko?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=adobe-type-tools/afdko&amp;utm_campaign=Badge_Grade
