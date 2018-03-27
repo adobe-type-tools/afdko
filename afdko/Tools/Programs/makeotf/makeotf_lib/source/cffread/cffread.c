@@ -376,11 +376,11 @@ static void pushFix(cffCtx h, Fixed f) {
 }
 
 /* Push integer number on stack (as fixed) */
-static void pushInt(cffCtx h, int32_t l) {
+static void pushIntAsFixed(cffCtx h, int32_t i) {
 	if (h->stack.cnt >= h->stack.max) {
 		fatal(h, "stack overflow");
 	}
-	h->stack.array[h->stack.cnt].f = INT2FIX(l);
+	h->stack.array[h->stack.cnt].f = INT2FIX(i);
 	h->stack.type[h->stack.cnt++] = STK_FIXED;
 }
 
@@ -1406,18 +1406,18 @@ static void t2Read(cffCtx h, Offset offset, int init) {
 					case tx_and:
 						b = popFix(h);
 						a = popFix(h);
-						pushInt(h, a && b);
+						pushIntAsFixed(h, a && b);
 						break;
 
 					case tx_or:
 						b = popFix(h);
 						a = popFix(h);
-						pushInt(h, a || b);
+						pushIntAsFixed(h, a || b);
 						break;
 
 					case tx_not:
 						a = popFix(h);
-						pushInt(h, !a);
+						pushIntAsFixed(h, !a);
 						break;
 
 					case tx_store: {
@@ -1482,7 +1482,7 @@ static void t2Read(cffCtx h, Offset offset, int init) {
 					case tx_eq:
 						b = popFix(h);
 						a = popFix(h);
-						pushInt(h, a == b);
+						pushIntAsFixed(h, a == b);
 						break;
 
 					case tx_drop:
@@ -1652,7 +1652,7 @@ static void t2Read(cffCtx h, Offset offset, int init) {
 			case t2_shortint: {
 				/* 2 byte number */
 				int32_t byte1 = GETBYTE(h);
-				pushInt(h, byte1 << 8 | GETBYTE(h));
+				pushIntAsFixed(h, byte1 << 8 | GETBYTE(h));
 			}
 			break;
 
@@ -1661,7 +1661,7 @@ static void t2Read(cffCtx h, Offset offset, int init) {
 			case 249:
 			case 250:
 				/* Positive 2 byte number */
-				pushInt(h, 108 + 256 * (byte0 - 247) + GETBYTE(h));
+				pushIntAsFixed(h, 108 + 256 * (byte0 - 247) + GETBYTE(h));
 				break;
 
 			case 251:
@@ -1669,7 +1669,7 @@ static void t2Read(cffCtx h, Offset offset, int init) {
 			case 253:
 			case 254:
 				/* Negative 2 byte number */
-				pushInt(h, -108 - 256 * (byte0 - 251) - GETBYTE(h));
+				pushIntAsFixed(h, -108 - 256 * (byte0 - 251) - GETBYTE(h));
 				break;
 
 			case 255: {
@@ -1683,7 +1683,7 @@ static void t2Read(cffCtx h, Offset offset, int init) {
 
 			default:
 				/* 1 byte number */
-				pushInt(h, byte0 - 139);
+				pushIntAsFixed(h, byte0 - 139);
 				break;
 		}
 	}
@@ -2049,7 +2049,7 @@ static void DICTRead(cffCtx h, int length, Offset offset, int enable) {
 			case cff_shortint: {
 				/* 2 byte number */
 				int32_t byte1 = GETBYTE(h);
-				pushInt(h, byte1 << 8 | GETBYTE(h));
+				pushIntAsFixed(h, byte1 << 8 | GETBYTE(h));
 			}
 			break;
 
@@ -2075,7 +2075,7 @@ static void DICTRead(cffCtx h, int length, Offset offset, int enable) {
 			case 249:
 			case 250:
 				/* +ve 2 byte number */
-				pushInt(h, 108 + 256 * (byte0 - 247) + GETBYTE(h));
+				pushIntAsFixed(h, 108 + 256 * (byte0 - 247) + GETBYTE(h));
 				break;
 
 			case 251:
@@ -2083,7 +2083,7 @@ static void DICTRead(cffCtx h, int length, Offset offset, int enable) {
 			case 253:
 			case 254:
 				/* -ve 2 byte number */
-				pushInt(h, -108 - 256 * (byte0 - 251) - GETBYTE(h));
+				pushIntAsFixed(h, -108 - 256 * (byte0 - 251) - GETBYTE(h));
 				break;
 
 			case cff_reserved255:
@@ -2091,7 +2091,7 @@ static void DICTRead(cffCtx h, int length, Offset offset, int enable) {
 
 			default:
 				/* 1 byte number */
-				pushInt(h, byte0 - 139);
+				pushIntAsFixed(h, byte0 - 139);
 				break;
 		}
 	}
