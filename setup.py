@@ -3,6 +3,7 @@ import os
 import platform
 import subprocess
 import sys
+import time
 from distutils.util import get_platform
 
 import setuptools.command.build_py
@@ -168,7 +169,7 @@ def main():
     platform_name = get_platform()
 
     setup(name="afdko",
-          version="2.6.25b2",
+          version="2.6.25.dev" + time.strftime("%Y%m%d%H%M%S"),
           description="Adobe Font Development Kit for OpenType",
           long_description=long_description,
           url='https://github.com/adobe-type-tools/afdko',
