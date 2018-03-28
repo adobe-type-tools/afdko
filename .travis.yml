@@ -5,6 +5,7 @@ matrix:
       python: 2.7
       install:
         - sudo apt-get install g++-multilib
+        - pip install --upgrade pip
         - pip install --user --upgrade wheel cython
       script:
         - python setup.py bdist_wheel
