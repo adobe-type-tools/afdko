@@ -1870,7 +1870,7 @@ class TTXNTTFont(TTFont):
 			ignoreDecompileErrors=ignoreDecompileErrors, recalcTimestamp=recalcTimestamp,
 			fontNumber=fontNumber, lazy=lazy, quiet=quiet)
 
-	def _tableToXML(self, writer, tag, progress, quiet=None):
+	def _tableToXML(self, writer, tag, quiet=None, splitGlyphs=False):
 		if quiet is not None:
 			from fontTools.misc.loggingTools import deprecateArgument
 			deprecateArgument("quiet", "configure logging instead")
@@ -1879,8 +1879,6 @@ class TTXNTTFont(TTFont):
 			report = "Dumping '%s' table..." % tag
 		else:
 			report = "No '%s' table found." % tag
-		if progress:
-			progress.setLabel(report)
 		log.info(report)
 		if tag not in self:
 			return
@@ -1897,7 +1895,7 @@ class TTXNTTFont(TTFont):
 		elif tag in ("GSUB", "GPOS"):
 			dumpOTLAsFeatureFile(tag, writer, self)
 		else:
-			table.toXML(writer, self)
+			table.toXML(writer, self, splitGlyphs=splitGlyphs)
 		writer.endtag(xmlTag)
 		writer.newline()
 		writer.newline()
@@ -2109,6 +2107,7 @@ def ttnDump(input, output, options, showExtensionFlag, supressHints=0, supressVe
 			tables=onlyTables,
 			skipTables=options.skipTables,
 			splitTables=options.splitTables,
+			splitGlyphs=options.splitGlyphs,
 			disassembleInstructions=options.disassembleInstructions,
 			bitmapGlyphDataFormat=options.bitmapGlyphDataFormat)
 	ttf.close()
@@ -2183,6 +2182,6 @@ def run(args):
 
 def main():
 	run(sys.argv[1:])
-	
+
 if __name__ == "__main__":
 	main()
