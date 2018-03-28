@@ -1621,7 +1621,8 @@ class OTLConverter:
         # do feature defs
         self.doFeatures(writer, featDictByLangSys)
 
-    def addLangSysEntry(self, pfeatList, scriptTag, langTag, langSys,
+    @staticmethod
+    def addLangSysEntry(pfeatList, scriptTag, langTag, langSys,
                         featDictByLangSys, featDictByIndex):
         for featIndex in langSys.FeatureIndex:
             try:
