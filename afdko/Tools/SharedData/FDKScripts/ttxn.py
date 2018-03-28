@@ -129,21 +129,21 @@ def getAnchorString(anchorTable):
 
 class ClassRecord:
 
-    def __init__(self, lookupIndex, subtableIndex, classIndex, type="",
+    def __init__(self, lookupIndex, subtableIndex, classIndex, side="",
                  anchor=None):
         self.lookupIndex = lookupIndex
         self.subtableIndex = subtableIndex
         self.classIndex = classIndex
-        self.type = type  # None if not a kern pair, else "Left" or "Right"
+        self.side = side  # None if not a kern pair, else "Left" or "Right"
         self.anchor = anchor
 
     def __repr__(self):
-        return "(lookup %s subtable %s class %s type %s anchor %s)" % (
-            self.lookupIndex, self.subtableIndex, self.classIndex, self.type,
+        return "(lookup %s subtable %s class %s side %s anchor %s)" % (
+            self.lookupIndex, self.subtableIndex, self.classIndex, self.side,
             self.anchor)
 
 
-def addClassDef(otlConv, classDefs, coverage, type=None, anchor=None):
+def addClassDef(otlConv, classDefs, coverage, side=None, anchor=None):
     classDict = {}
     glyphDict = copy.deepcopy(otlConv.glyphDict)
 
@@ -173,12 +173,12 @@ def addClassDef(otlConv, classDefs, coverage, type=None, anchor=None):
         nameList.sort()
         key = tuple(nameList)
         classRec = ClassRecord(otlConv.curLookupIndex,
-                               otlConv.curSubTableIndex, classIndex, type)
+                               otlConv.curSubTableIndex, classIndex, side)
         otlConv.classesByNameList[key].append(classRec)
     return
 
 
-def AddMarkClassDef(otlConv, markCoverage, markArray, type):
+def AddMarkClassDef(otlConv, markCoverage, markArray, tag):
     markGlyphList = markCoverage.glyphs
     markClass = collections.defaultdict(list)
 
@@ -198,7 +198,7 @@ def AddMarkClassDef(otlConv, markCoverage, markArray, type):
             defList.append((tuple(glyphList), anchor))
         defList.sort()
         classRec = ClassRecord(otlConv.curLookupIndex,
-                               otlConv.curSubTableIndex, c, type)
+                               otlConv.curSubTableIndex, c, tag)
         otlConv.markClassesByDefList[tuple(defList)].append(classRec)
 
 
@@ -276,12 +276,12 @@ class ContextRecord:
 def checkGlyphInSequence(glyphName, contextSequence, i):
     retVal = 0
     try:
-        input = contextSequence[i]
-        if isinstance(input, list):
-            if glyphName in input:
+        input_seq = contextSequence[i]
+        if isinstance(input_seq, list):
+            if glyphName in input_seq:
                 retVal = 1
-        elif isinstance(input, basestring):
-            if glyphName == input:
+        elif isinstance(input_seq, basestring):
+            if glyphName == input_seq:
                 retVal = 1
     except IndexError:
         pass
@@ -2123,13 +2123,13 @@ def dumpFont(writer, fontPath, supressHints=0):
 
 
 @Timer(log, 'Done dumping TTX in %(time).3f seconds')
-def ttnDump(input, output, options, showExtensionFlag, supressHints=0,
+def ttnDump(input_file, output, options, showExtensionFlag, supressHints=0,
             supressVersions=0, supressTTFDiffs=0):
-    log.info('Dumping "%s" to "%s"...', input, output)
+    log.info('Dumping "%s" to "%s"...', input_file, output)
     if options.unicodedata:
         from fontTools.unicode import setUnicodeData
         setUnicodeData(options.unicodedata)
-    ttf = TTXNTTFont(input, 0, allowVID=options.allowVID,
+    ttf = TTXNTTFont(input_file, 0, allowVID=options.allowVID,
                      ignoreDecompileErrors=options.ignoreDecompileErrors,
                      fontNumber=options.fontNumber, supressHints=supressHints)
 
@@ -2338,12 +2338,12 @@ def run(args):
     configLogger(logger=root, level=options.logLevel)
 
     try:
-        for action, input, output in jobs:
+        for action, input_file, output in jobs:
             if action != ttx.ttDump:
                 log.error("ttxn can only dump font files.")
                 sys.exit(1)
-            ttnDump(input, output, options, showExtensionFlag, supressHints,
-                    supressVersions, supressTTFDiffs)
+            ttnDump(input_file, output, options, showExtensionFlag,
+                    supressHints, supressVersions, supressTTFDiffs)
     except KeyboardInterrupt:
         log.error("(Cancelled.)")
         sys.exit(1)
