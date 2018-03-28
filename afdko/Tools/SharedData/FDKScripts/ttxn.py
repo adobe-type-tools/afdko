@@ -718,7 +718,6 @@ def ruleContextPOS(subtable, otlConv, context=None):
         inputTxt = "' ".join(inputList) + "'"
 
         rule = "pos %s;" % (inputTxt)
-        pLookupList = otlConv.table.LookupList.Lookup
         posRules = []
         for i in range(len(subtable.PosLookupRecord)):
             subRec = subtable.PosLookupRecord[i]
@@ -832,6 +831,8 @@ def ruleContextPOS(subtable, otlConv, context=None):
 
 def ruleChainContextPOS(subtable, otlConv, context=None):
     chainRules = []
+    pLookupList = otlConv.table.LookupList.Lookup
+
     if subtable.Format == 3:
         backtrackList = []
         for i in range(len(subtable.BacktrackCoverage)):
@@ -867,7 +868,6 @@ def ruleChainContextPOS(subtable, otlConv, context=None):
         lookAheadTxt = " ".join(lookAheadList)
 
         rule = "pos %s %s %s;" % (backTxt, inputTxt, lookAheadTxt)
-        pLookupList = otlConv.table.LookupList.Lookup
         posRules = []
         for subRec in subtable.PosLookupRecord:
             if not subRec:
@@ -1168,7 +1168,6 @@ def ruleContextSUB(subtable, otlConv, context=None):
         inputTxt = "' ".join(inputList) + "'"
 
         rule = "sub %s;" % (inputTxt)
-        pLookupList = otlConv.table.LookupList.Lookup
         posRules = []
         for subRec in subtable.SubstLookupRecord:
             if not subRec:
