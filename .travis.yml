@@ -45,6 +45,13 @@ matrix:
       after_success:
         - codecov
 
+# only build for *pushes* to master,
+# not for pushes to other branches
+# (build for PRs from any branch)
+branches:
+  only:
+    - master
+
 notifications:
   slack: typekit:TRAVIS_SLACK_TOKEN
   email:
