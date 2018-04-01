@@ -39,6 +39,7 @@ matrix:
         - flake8 ConvertFontToCID.py
         - flake8 FDKUtils.py
         - flake8 MakeOTF.py
+        - flake8 ttfcomponentizer.py
         - flake8 ufoTools.py
         - coverage run --source=. CheckOutlinesUFO.py --test
         - pip uninstall --yes afdko
