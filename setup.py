@@ -116,6 +116,7 @@ def get_console_scripts():
         ('otc2otf', 'otc2otf:main'),
         ('otf2otc', 'otf2otc:main'),
         ('stemhist', 'StemHist:main'),
+        ('ttfcomponentizer', 'ttfcomponentizer:main'),
         ('ttxn', 'ttxn:main'),
         ('charplot', 'ProofPDF:charplot'),
         ('digiplot', 'ProofPDF:digiplot'),
