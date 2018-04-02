@@ -11,3 +11,5 @@ dist/
 
 # coverage data
 .coverage
+htmlcov
+.pytest_cache

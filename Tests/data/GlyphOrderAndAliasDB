@@ -1,0 +1,19 @@
+production_name	design_name	unicode_override
+invalid_line
+# comment line
+
+.notdef	.notdef
+space	space
+a	a
+agrave	agrave
+aacute	aacute
+acircumflex	acircumflex
+atilde	atilde
+uni01CE	acaron
+uni0300	gravecmb
+uni0301	acutecmb
+uni0303	tildecmb
+uni030C	caroncmb
+
+dup_design_name	a
+a	dup_production_name

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>public.glyphOrder</key>
+		<array>
+			<string>.notdef</string>
+			<string>space</string>
+			<string>a</string>
+			<string>agrave</string>
+			<string>aacute</string>
+			<string>acircumflex</string>
+			<string>atilde</string>
+			<string>acaron</string>
+			<string>adieresis</string>
+			<string>gravecmb</string>
+			<string>acutecmb</string>
+			<string>tildecmb</string>
+			<string>caroncmb</string>
+			<string>dieresiscmb</string>
+		</array>
+		<key>public.postscriptNames</key>
+		<dict>
+			<key>acaron</key>
+			<string>uni01CE</string>
+			<key>acutecmb</key>
+			<string>uni0301</string>
+			<key>caroncmb</key>
+			<string>uni030C</string>
+			<key>design_name</key>
+			<string>production_name</string>
+			<key>gravecmb</key>
+			<string>uni0300</string>
+			<key>tildecmb</key>
+			<string>uni0303</string>
+		</dict>
+	</dict>
+</plist>
