@@ -1,0 +1,29 @@
+[run]
+# measure 'branch' coverage in addition to 'statement' coverage
+# See: http://coverage.readthedocs.io/en/coverage-4.5.1/branch.html
+branch = True
+
+# list of directories or packages to measure
+source =
+    afdko/Tools/SharedData/FDKScripts
+    Tests
+
+omit = */__init__.py
+
+[report]
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    # keywords to use in inline comments to skip coverage
+    pragma: no cover
+
+    # don't complain if tests don't hit defensive assertion code
+    # ...
+
+    # don't complain if non-runnable code isn't run
+    if __name__ == .__main__.:
+
+# ignore source code that can’t be found
+ignore_errors = True
+
+# when running a summary report, show missing lines
+show_missing = True

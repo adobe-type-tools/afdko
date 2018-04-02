@@ -10,8 +10,6 @@ The script only supports components that are not scaled, rotated or flipped.
 
 from __future__ import print_function
 
-__version__ = '0.1.0'
-
 import argparse
 import os
 import sys
@@ -20,6 +18,9 @@ from fontTools.ttLib import TTFont, getTableModule
 from fontTools.misc.py23 import open
 from defcon import Font
 from ufoLib import UFOLibError
+
+
+__version__ = '0.1.0'
 
 
 PUBLIC_PSNAMES = "public.postscriptNames"
