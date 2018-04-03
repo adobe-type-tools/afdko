@@ -170,7 +170,7 @@ def main():
     platform_name = get_platform()
 
     setup(name="afdko",
-          version="2.6.25.dev" + time.strftime("%Y%m%d%H%M%S"),
+          version="2.6.26.dev" + time.strftime("%Y%m%d%H%M%S"),
           description="Adobe Font Development Kit for OpenType",
           long_description=long_description,
           url='https://github.com/adobe-type-tools/afdko',
