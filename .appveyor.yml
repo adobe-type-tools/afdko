@@ -8,7 +8,5 @@ install:
 build: false
 
 test_script:
-  - cd Tests
-  - python checkoutlinesufo_test.py
-  - python ttfcomponentizer_test.py
+  - pytest -v Tests/
   - pip uninstall --yes afdko

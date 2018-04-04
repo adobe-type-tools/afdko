@@ -1,11 +1,12 @@
 from __future__ import print_function, division, absolute_import
+
 import os
 import pytest
 from shutil import copy2, copytree
 import tempfile
 
-from fontTools.ttLib import TTFont
 from fontTools.misc.py23 import open
+from fontTools.ttLib import TTFont
 
 from afdko.Tools.SharedData.FDKScripts.ttfcomponentizer import (
     main, get_options, get_ufo_path, get_goadb_path, GOADB_FILENAME,
@@ -223,4 +224,5 @@ def test_assemble_components():
 
 if __name__ == "__main__":
     import sys
+
     sys.exit(pytest.main(sys.argv))
