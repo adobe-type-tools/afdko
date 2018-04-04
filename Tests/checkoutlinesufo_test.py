@@ -1,7 +1,9 @@
 from __future__ import print_function, division, absolute_import
 
-from defcon import Glyph
+import pytest
+
 from booleanOperations.booleanGlyph import BooleanGlyph
+from defcon import Glyph
 
 from afdko.Tools.SharedData.FDKScripts.CheckOutlinesUFO import (
     remove_tiny_sub_paths)
@@ -41,6 +43,5 @@ def test_remove_tiny_sub_paths_small_contour():
 
 if __name__ == "__main__":
     import sys
-    import pytest
 
     sys.exit(pytest.main(sys.argv))
