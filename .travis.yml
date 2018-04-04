@@ -32,7 +32,7 @@ matrix:
         - python setup.py check --restructuredtext --strict
         - python setup.py bdist_wheel
         - pip install dist/*.whl
-        - coverage run -a afdko/Tools/SharedData/FDKScripts/CheckOutlinesUFO.py --test
+        - coverage run -a Tests/checkoutlinesufo_test.py
         - coverage run -a Tests/ttfcomponentizer_test.py
         - flake8 setup.py
         - pushd afdko/Tools/SharedData/FDKScripts

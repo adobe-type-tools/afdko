@@ -6,10 +6,9 @@ Tool that performs outline quality checks and can remove path overlaps.
 
 from __future__ import print_function
 
-__version__ = '2.0.1'
+__version__ = '2.0.2'
 
 import argparse
-import doctest
 import hashlib
 import os
 import re
@@ -283,28 +282,6 @@ class CustomHelpFormatter(argparse.RawDescriptionHelpFormatter):
         return [item for sublist in text_rows for item in sublist] + ['']
 
 
-class TestAction(argparse.Action):
-    """
-    This class allows the "--test" option to not require a positional argument.
-    """
-    SUPPRESS = '==SUPPRESS=='
-
-    def __init__(self,
-                 option_strings,
-                 dest=SUPPRESS,
-                 default=SUPPRESS,
-                 help=None):
-        super(TestAction, self).__init__(
-            option_strings=option_strings,
-            dest=dest,
-            default=default,
-            nargs=0,
-            help=help)
-
-    def __call__(self, parser, namespace, values, option_string=None):
-        parser.exit(doctest.testmod(verbose=True).failed)
-
-
 def get_options(args):
     parser = argparse.ArgumentParser(
         formatter_class=CustomHelpFormatter,
@@ -419,11 +396,6 @@ def get_options(args):
         help='force all glyphs to be processed\n'
              'Makes the tool ignore the stored hashes thus checking all the '
              'glyphs, even if they have already been processed.'
-    )
-    parser.add_argument(
-        '--test',
-        action=TestAction,
-        help='run internal tests'
     )
     parser.add_argument(
         'ufo_file',
@@ -603,41 +575,6 @@ def remove_tiny_sub_paths(bool_glyph, min_area, msg):
     """
     Removes tiny subpaths that are created by overlap removal when the start
     and end path segments cross each other, rather than meet.
-
-    >>> from defcon.objects.glyph import Glyph
-    >>> import booleanOperations.booleanGlyph
-
-    # large contour
-    >>> g = Glyph()
-    >>> p = g.getPen()
-    >>> p.moveTo((100,100))
-    >>> p.lineTo((200,200))
-    >>> p.lineTo((0,100))
-    >>> p.closePath()
-    >>> assert (len(g[0]) == 3), \
-            "Contour does not have the expected number of points"
-    >>> assert (g.bounds == (0, 100, 200, 200)), \
-            "The contour's bounds do not match the expected"
-    >>> bool_glyph = booleanOperations.booleanGlyph.BooleanGlyph(g)
-    >>> remove_tiny_sub_paths(bool_glyph, 25, []) == []
-    True
-
-    # small contour
-    >>> g = Glyph()
-    >>> p = g.getPen()
-    >>> p.moveTo((1,1))
-    >>> p.lineTo((2,2))
-    >>> p.lineTo((0,1))
-    >>> p.closePath()
-    >>> assert (len(g[0]) == 3), \
-            "Contour does not have the expected number of points"
-    >>> assert (g.bounds == (0, 1, 2, 2)), \
-            "The contour's bounds do not match the expected"
-    >>> bg = booleanOperations.booleanGlyph.BooleanGlyph(g)
-    >>> remove_tiny_sub_paths(bg, 25, []) == \
-            ['Contour 0 is too small: bounding box is less than minimum '\
-             'area. Start point: ((1, 1)).']
-    True
     """
     num_contours = len(bool_glyph.contours)
     ci = 0
