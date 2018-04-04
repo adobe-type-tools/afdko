@@ -1,6 +1,5 @@
 from __future__ import print_function, division, absolute_import
 import os
-import pytest
 from shutil import copy2, copytree
 import tempfile
 
@@ -223,4 +222,6 @@ def test_assemble_components():
 
 if __name__ == "__main__":
     import sys
+    import pytest
+
     sys.exit(pytest.main(sys.argv))

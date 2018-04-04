@@ -1,5 +1,4 @@
 from __future__ import print_function, division, absolute_import
-import pytest
 
 from defcon import Glyph
 from booleanOperations.booleanGlyph import BooleanGlyph
@@ -42,4 +41,6 @@ def test_remove_tiny_sub_paths_small_contour():
 
 if __name__ == "__main__":
     import sys
+    import pytest
+
     sys.exit(pytest.main(sys.argv))
