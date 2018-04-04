@@ -23,6 +23,7 @@ matrix:
         - source .venv/bin/activate
         - pip install codecov
         - pip install pytest
+        - pip install pytest-cov
         - pip install collective.checkdocs
         - pip install pygments
         - pip install flake8
@@ -32,8 +33,7 @@ matrix:
         - python setup.py check --restructuredtext --strict
         - python setup.py bdist_wheel
         - pip install dist/*.whl
-        - coverage run -a Tests/checkoutlinesufo_test.py
-        - coverage run -a Tests/ttfcomponentizer_test.py
+        - py.test --cov=afdko Tests/
         - flake8 setup.py
         - pushd afdko/Tools/SharedData/FDKScripts
         - flake8 buildCFF2VF.py
