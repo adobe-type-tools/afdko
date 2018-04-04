@@ -35,7 +35,7 @@ matrix:
         - coverage run -a afdko/Tools/SharedData/FDKScripts/CheckOutlinesUFO.py --test
         - coverage run -a Tests/ttfcomponentizer_test.py
         - flake8 setup.py
-        - cd afdko/Tools/SharedData/FDKScripts
+        - pushd afdko/Tools/SharedData/FDKScripts
         - flake8 buildCFF2VF.py
         - flake8 buildMasterOTFs.py
         - flake8 CheckOutlinesUFO.py
@@ -44,6 +44,7 @@ matrix:
         - flake8 MakeOTF.py
         - flake8 ttfcomponentizer.py
         - flake8 ufoTools.py
+        - popd
         - pip uninstall --yes afdko
       after_success:
         - codecov
