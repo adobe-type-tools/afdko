@@ -5,10 +5,11 @@ coverage:
     patch: off
 
 fixes:
-#  - "before/::after/"  # move path   e.g., "before/path" => "after/path"
+ # - "before/::after/"  # move path   e.g., "before/path" => "after/path"
+ - ".venv/lib/python2.7/site-packages/afdko/Tools/SharedData/FDKScripts::afdko/Tools/SharedData/FDKScripts"
 
 #  - "::after/"         # move root   e.g., "path/" => "after/path/"
 #  - "::/Users/travis/build/adobe-type-tools/afdko/"
 
 #  - "before/::"        # reduce root e.g., "before/path/" => "path/"
-  - ".venv/lib/python2.7/site-packages/::"
+#  - ".venv/lib/python2.7/site-packages/::"
