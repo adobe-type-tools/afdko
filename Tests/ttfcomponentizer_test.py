@@ -8,7 +8,7 @@ import tempfile
 from fontTools.misc.py23 import open
 from fontTools.ttLib import TTFont
 
-from afdko.Tools.SharedData.FDKScripts.ttfcomponentizer import (
+from ttfcomponentizer import (
     main, get_options, get_ufo_path, get_goadb_path, GOADB_FILENAME,
     get_goadb_names_mapping, get_glyph_names_mapping, get_composites_data,
     assemble_components)
