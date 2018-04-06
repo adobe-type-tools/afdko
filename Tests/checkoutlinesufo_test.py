@@ -39,9 +39,3 @@ def test_remove_tiny_sub_paths_small_contour():
     assert remove_tiny_sub_paths(bg, 25, []) == \
         ['Contour 0 is too small: bounding box is less than minimum area. '
          'Start point: ((1, 1)).']
-
-
-if __name__ == "__main__":
-    import sys
-
-    sys.exit(pytest.main(sys.argv))
