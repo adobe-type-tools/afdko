@@ -33,17 +33,17 @@ matrix:
         - python setup.py bdist_wheel
         - pip install dist/*.whl
         - pytest --cov
-        - flake8 setup.py
-        - pushd afdko/Tools/SharedData/FDKScripts
-        - flake8 buildCFF2VF.py
-        - flake8 buildMasterOTFs.py
-        - flake8 CheckOutlinesUFO.py
-        - flake8 ConvertFontToCID.py
-        - flake8 FDKUtils.py
-        - flake8 MakeOTF.py
-        - flake8 ttfcomponentizer.py
-        - flake8 ufoTools.py
-        - popd
+        # - flake8 setup.py
+        # - pushd afdko/Tools/SharedData/FDKScripts
+        # - flake8 buildCFF2VF.py
+        # - flake8 buildMasterOTFs.py
+        # - flake8 CheckOutlinesUFO.py
+        # - flake8 ConvertFontToCID.py
+        # - flake8 FDKUtils.py
+        # - flake8 MakeOTF.py
+        # - flake8 ttfcomponentizer.py
+        # - flake8 ufoTools.py
+        # - popd
         - pip uninstall --yes afdko
       after_success:
         - coverage combine --append
