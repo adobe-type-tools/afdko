@@ -32,7 +32,8 @@ class Object(object):
 
 
 def _get_test_file_path(file_name):
-    return os.path.join(os.path.split(__file__)[0], 'data', file_name)
+    return os.path.join(
+        os.path.split(__file__)[0], 'ttfcomponentizer_data', file_name)
 
 
 def _get_test_ttf_path():
