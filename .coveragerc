@@ -17,6 +17,8 @@ omit = */__init__.py
 [paths]
 source =
     afdko/Tools/SharedData/FDKScripts
+    */afdko/Tools/SharedData/FDKScripts
+    */site-packages/afdko
     /Users/travis/build/adobe-type-tools/afdko/afdko/Tools/SharedData/FDKScripts
     /Users/travis/build/adobe-type-tools/afdko/*/afdko/Tools/SharedData/FDKScripts
     /usr/local/lib/python*/site-packages/afdko/Tools/SharedData/FDKScripts
