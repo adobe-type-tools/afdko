@@ -8,5 +8,5 @@ install:
 build: false
 
 test_script:
-  - pytest -v Tests/
+  - pytest
   - pip uninstall --yes afdko
