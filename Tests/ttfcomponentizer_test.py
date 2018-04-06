@@ -220,9 +220,3 @@ def test_assemble_components():
     assert (comp_two.x, comp_two.y) == (263, 0)
     assert comp_one.flags == 0x204
     assert comp_two.flags == 0x4
-
-
-if __name__ == "__main__":
-    import sys
-
-    sys.exit(pytest.main(sys.argv))
