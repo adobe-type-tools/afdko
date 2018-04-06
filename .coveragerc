@@ -2,6 +2,7 @@
 # measure 'branch' coverage in addition to 'statement' coverage
 # See: http://coverage.readthedocs.io/en/coverage-4.5.1/branch.html
 branch = True
+parallel = True
 
 # list of directories or packages to measure
 #source =

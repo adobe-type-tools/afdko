@@ -81,7 +81,7 @@ class CustomBuild(setuptools.command.build_py.build_py):
     """Custom build command."""
     def run(self):
         pkg_dir = 'afdko'
-        compile_package(pkg_dir)
+        # compile_package(pkg_dir)
         setuptools.command.build_py.build_py.run(self)
 
 
