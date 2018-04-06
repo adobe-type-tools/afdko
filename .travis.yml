@@ -48,7 +48,7 @@ matrix:
       after_success:
         - coverage report
         - coverage xml
-        - cat coverage
+        - cat coverage.xml
         - codecov
 
 # only build for *pushes* to master,
