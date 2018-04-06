@@ -5,4 +5,4 @@ fixes:
 #  - "::/Users/travis/build/adobe-type-tools/afdko/"
 
 #  - "before/::"        # reduce root e.g., "before/path/" => "path/"
-  - "/Users/travis/build/adobe-type-tools/afdko/::"
+  - ".venv/lib/python2.7/site-packages/::"
