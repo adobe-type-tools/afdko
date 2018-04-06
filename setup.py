@@ -80,8 +80,8 @@ def compile_package(pkg_dir):
 class CustomBuild(setuptools.command.build_py.build_py):
     """Custom build command."""
     def run(self):
-        pkg_dir = 'afdko'
-        compile_package(pkg_dir)
+        # pkg_dir = 'afdko'
+        # compile_package(pkg_dir)
         setuptools.command.build_py.build_py.run(self)
 
 
@@ -144,7 +144,7 @@ def main():
         'Programming Language :: Python :: 2.7',
     ]
 
-    scripts = get_scripts()
+    # scripts = get_scripts()
     console_scripts = get_console_scripts()
 
     platform_system = platform.system()
@@ -195,7 +195,7 @@ def main():
               'ufonormalizer>=0.3.2',
               'fontPens>=0.1.0'
           ],
-          scripts=scripts,
+          # scripts=scripts,
           entry_points={
               'console_scripts': console_scripts,
           },
