@@ -5,9 +5,10 @@ branch = True
 parallel = True
 
 # list of directories or packages to measure
-#source =
-#    afdko/Tools/SharedData/FDKScripts
-#    Tests
+source =
+    afdko
+    */site-packages/afdko
+    Tests
 
 omit = */__init__.py
 
