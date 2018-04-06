@@ -46,8 +46,9 @@ matrix:
         - popd
         - pip uninstall --yes afdko
       after_success:
-        - coverage combine
         - coverage report
+        - coverage xml
+        - cat coverage
         - codecov
 
 # only build for *pushes* to master,

@@ -2,26 +2,13 @@
 # measure 'branch' coverage in addition to 'statement' coverage
 # See: http://coverage.readthedocs.io/en/coverage-4.5.1/branch.html
 branch = True
-parallel = True
 
 # list of directories or packages to measure
 source =
-    afdko
     afdko/Tools/SharedData/FDKScripts
     Tests
-    /Users/travis/build/adobe-type-tools/afdko/afdko/Tools/SharedData/FDKScripts
 
 omit = */__init__.py
-
-# these are treated as equivalent when combining data
-[paths]
-source =
-    afdko/Tools/SharedData/FDKScripts
-    */afdko/Tools/SharedData/FDKScripts
-    */site-packages/afdko
-    /Users/travis/build/adobe-type-tools/afdko/afdko/Tools/SharedData/FDKScripts
-    /Users/travis/build/adobe-type-tools/afdko/*/afdko/Tools/SharedData/FDKScripts
-    /usr/local/lib/python*/site-packages/afdko/Tools/SharedData/FDKScripts
 
 [report]
 # Regexes for lines to exclude from consideration

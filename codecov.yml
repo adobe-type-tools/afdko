@@ -2,7 +2,7 @@ fixes:
 #  - "before/::after/"  # move path   e.g., "before/path" => "after/path"
 
 #  - "::after/"         # move root   e.g., "path/" => "after/path/"
-  - "::/Users/travis/build/adobe-type-tools/afdko/"
+#  - "::/Users/travis/build/adobe-type-tools/afdko/"
 
 #  - "before/::"        # reduce root e.g., "before/path/" => "path/"
-#  - "/Users/travis/build/adobe-type-tools/afdko/::"
+  - "/Users/travis/build/adobe-type-tools/afdko/::"
