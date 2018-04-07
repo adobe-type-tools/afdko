@@ -178,6 +178,8 @@ def main():
           zip_safe=False,
           python_requires='>=2.7',
           setup_requires=['wheel'],
+          tests_require=[
+              'pytest',
           ],
           install_requires=_get_requirements(),
           scripts=_get_scripts(),
