@@ -76,7 +76,7 @@ class CustomBuild(setuptools.command.build_py.build_py):
         setuptools.command.build_py.build_py.run(self)
 
 
-def get_scripts():
+def _get_scripts():
     bin_dir = get_executable_dir()
     script_names = [
         'autohintexe', 'detype1', 'makeotfexe', 'mergeFonts', 'rotateFont',
@@ -92,7 +92,7 @@ def get_scripts():
     return scripts
 
 
-def get_console_scripts():
+def _get_console_scripts():
     script_entries = [
         ('autohint', 'autohint:main'),
         ('buildcff2vf', 'buildCFF2VF:run'),
@@ -134,9 +134,6 @@ def main():
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 2.7',
     ]
-
-    scripts = get_scripts()
-    console_scripts = get_console_scripts()
 
     platform_system = platform.system()
     if platform_system == "Darwin":
@@ -186,11 +183,13 @@ def main():
               'ufonormalizer>=0.3.2',
               'fontPens>=0.1.0'
           ],
-          scripts=scripts,
+          scripts=_get_scripts(),
           entry_points={
-              'console_scripts': console_scripts,
+              'console_scripts': _get_console_scripts(),
           },
-          cmdclass={'build_py': CustomBuild, 'bdist_wheel': CustomBDistWheel},
+          cmdclass={
+              'build_py': CustomBuild,
+              'bdist_wheel': CustomBDistWheel},
           )
 
 
