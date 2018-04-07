@@ -28,6 +28,8 @@ matrix:
         - pip install flake8
         - pip install --upgrade wheel cython
         - pip install -r requirements.txt
+      before_script:
+        - export PYTHONPATH=$PYTHONPATH:$(pwd)
       script:
         - python setup.py checkdocs
         - python setup.py check --restructuredtext --strict
