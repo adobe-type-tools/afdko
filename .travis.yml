@@ -30,8 +30,6 @@ matrix:
       script:
         - python setup.py checkdocs
         - python setup.py check --restructuredtext --strict
-        - python setup.py bdist_wheel
-        - pip install dist/*.whl
         - pytest --cov
         - flake8 setup.py
         - pushd afdko/Tools/SharedData/FDKScripts
@@ -44,6 +42,8 @@ matrix:
         - flake8 ttfcomponentizer.py
         - flake8 ufoTools.py
         - popd
+        - python setup.py bdist_wheel
+        - pip install dist/*.whl
         - pip uninstall --yes afdko
       after_success:
         - codecov
