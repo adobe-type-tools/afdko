@@ -125,6 +125,11 @@ def _get_console_scripts():
     return scripts
 
 
+def _get_requirements():
+    with io.open("requirements.txt", encoding="utf-8") as requirements:
+        return requirements.read().splitlines()
+
+
 def main():
     pkg_list = find_packages()
     classifiers = [
@@ -173,16 +178,8 @@ def main():
           zip_safe=False,
           python_requires='>=2.7',
           setup_requires=['wheel'],
-          install_requires=[
-              'fonttools>=3.19.0',
-              'booleanOperations>=0.7.1',
-              'fontMath>=0.4.4',
-              'defcon>=0.3.5',
-              'mutatorMath>=2.1.0',
-              'ufolib>=2.1.1',
-              'ufonormalizer>=0.3.2',
-              'fontPens>=0.1.0'
           ],
+          install_requires=_get_requirements(),
           scripts=_get_scripts(),
           entry_points={
               'console_scripts': _get_console_scripts(),
