@@ -10,15 +10,6 @@ import setuptools.command.build_py
 from setuptools import setup, find_packages
 
 """
-Notes:
-In order to upolad the afdko wheel to testpypi to test the package, I had to
-first update the Mac OSX system python ssl module with 'pip install pyOpenSSL
-ndg-httpsclient pyasn1'. Otherwise, the command 'twine upload --repository-url
-https://test.pypi.org/legacy/ dist/*' would fail with
-'SSLError: [SSL: TLSV1_ALERT_PROTOCOL_VERSION]'
-"""
-
-"""
 We need a customized version of the 'bdist_wheel' command, because otherwise
 the wheel is identified as being non-platform specific. This is because the
 afdko has no Python extensions and the command line tools are installed as
