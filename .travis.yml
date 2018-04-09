@@ -2,6 +2,7 @@ matrix:
   include:
     - os: linux
       env: NAME=Linux
+      if: type = pull_request
       python: 2.7
       install:
         - sudo apt-get install g++-multilib
@@ -14,6 +15,7 @@ matrix:
 
     - os: osx
       env: NAME=OSX
+      if: type = pull_request
       language: generic
       install:
         - curl -O https://bootstrap.pypa.io/get-pip.py
@@ -51,6 +53,13 @@ matrix:
       after_success:
         - codecov
 
+    - os: osx
+      env:
+        - NAME=OSX-deploy
+        - BUILD_DIST=true
+      if: type = push
+      language: generic
+
 # only build for *pushes* to master,
 # not for pushes to other branches
 # (build for PRs from any branch)
@@ -75,3 +84,4 @@ deploy:
   on:
     tags: true
     repo: adobe-type-tools/afdko
+    condition: "$BUILD_DIST == true"
