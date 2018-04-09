@@ -63,6 +63,7 @@ notifications:
   email:
     on_success: change
     on_failure: always
+
 deploy:
   provider: pypi
   user: afdko-travis
@@ -72,4 +73,5 @@ deploy:
   edge:
     branch: v1.8.45
   on:
+    tags: true
     repo: adobe-type-tools/afdko
