@@ -57,7 +57,7 @@ matrix:
       env:
         - NAME=OSX-deploy
         - BUILD_DIST=true
-      if: branch = master
+      if: type = push
       language: generic
 
 notifications:
