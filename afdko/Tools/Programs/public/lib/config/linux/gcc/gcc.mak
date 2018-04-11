@@ -11,9 +11,10 @@
 
 # Configuration
 PLATFORM = linux
-HARDWARE = i86
+HARDWARE = x86-64
 COMPILER = gcc
-XFLAGS = -m32
+SYS_LIBS = -lm
+
 # Directories (relative to build directory)
 LIB_DIR = $(ROOT_DIR)/lib/$(PLATFORM)/$(CONFIG)
 
