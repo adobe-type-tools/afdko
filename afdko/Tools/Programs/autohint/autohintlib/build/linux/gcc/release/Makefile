@@ -96,7 +96,7 @@ LIB_OBJS = \
 	rawPStobez.o
 
 # Standard definitions
-include  $(ROOT_DIR)/../../public/lib/config/linux/gcc/gcc.mak
+include  $(ROOT_DIR)/config/linux/gcc/gcc.mak
 
 	
 # Lib Object rules
