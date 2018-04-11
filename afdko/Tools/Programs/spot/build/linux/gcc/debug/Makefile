@@ -13,7 +13,7 @@ PRG_TARGET = $(EXE_DIR)/spot
 # Build targets
 TARGETS = $(PRG_TARGET)
 
-CFLAGS = $(STD_OPTS) -m32 -g -I$(ROOT_DIR)/sfnt_includes -I$(SRC_DIR) -DEXECUTABLE=1 -g
+CFLAGS = $(STD_OPTS) -g -I$(ROOT_DIR)/sfnt_includes -I$(SRC_DIR) -DEXECUTABLE=1 -g
 
 # Program
 PRG_SRCS = $(SRC_DIR)/BASE.c \
