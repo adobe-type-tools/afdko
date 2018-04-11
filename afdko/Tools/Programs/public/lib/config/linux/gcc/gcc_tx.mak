@@ -3,11 +3,9 @@
 # Copyright 2014 Adobe Systems Incorporated.                       #
 # All rights reserved.                                                  #
 #                                                                       #
-# Patents Pending                                                       #
-#                                                                       #
 #########################################################################
 
-# Make definitions for Linux platform (i86)
+# Make definitions for Linux platform (x86-64)
 
 # Configuration
 PLATFORM = linux
