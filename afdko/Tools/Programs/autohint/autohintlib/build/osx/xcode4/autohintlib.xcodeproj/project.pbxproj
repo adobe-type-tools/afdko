@@ -132,8 +132,8 @@
 		BD5BF39F0D9AC8350015F645 /* optable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = optable.h; path = ../../../source/bf/optable.h; sourceTree = "<group>"; };
 		BD5BF3A00D9AC8350015F645 /* rawPStobez.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rawPStobez.c; sourceTree = "<group>"; };
 		BD5BF3A10D9AC8350015F645 /* transitionalchars.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = transitionalchars.h; path = ../../../source/bf/transitionalchars.h; sourceTree = "<group>"; };
-		BD5BF3C20D9AC9890015F645 /* debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../../../../../public/lib/config/xcconfig/debug.xcconfig; sourceTree = SOURCE_ROOT; };
-		BD5BF3C30D9AC9900015F645 /* release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = release.xcconfig; path = ../../../../../public/lib/config/xcconfig/release.xcconfig; sourceTree = SOURCE_ROOT; };
+		BD5BF3C20D9AC9890015F645 /* debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../../../config/xcconfig/debug.xcconfig; sourceTree = SOURCE_ROOT; };
+		BD5BF3C30D9AC9900015F645 /* release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = release.xcconfig; path = ../../../config/xcconfig/release.xcconfig; sourceTree = SOURCE_ROOT; };
 		BD5BF3CD0D9ACD300015F645 /* ac_C_lib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ac_C_lib.h; sourceTree = "<group>"; };
 		BD5BF3CE0D9ACD300015F645 /* memcheck.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = memcheck.h; sourceTree = "<group>"; };
 		BD5BF3D00D9ACD300015F645 /* numtypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = numtypes.h; sourceTree = "<group>"; };
