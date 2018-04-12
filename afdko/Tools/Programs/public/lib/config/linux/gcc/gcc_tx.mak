@@ -3,17 +3,15 @@
 # Copyright 2014 Adobe Systems Incorporated.                       #
 # All rights reserved.                                                  #
 #                                                                       #
-# Patents Pending                                                       #
-#                                                                       #
 #########################################################################
 
-# Make definitions for Linux platform (i86)
+# Make definitions for Linux platform (x86-64)
 
 # Configuration
 PLATFORM = linux
-HARDWARE = i86
+HARDWARE = x86-64
 COMPILER = gcc
-XFLAGS = -m32
+SYS_LIBS = -lm
 
 # Directories (relative to build directory)
 LIB_DIR = $(ROOT_DIR)/lib/$(PLATFORM)/$(CONFIG)

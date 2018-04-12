@@ -5,13 +5,14 @@
 #                                                                       #
 #########################################################################
 
-# Make definitions for Linux platform (x86-64)
+# Make definitions for Linux platform (i86)
 
 # Configuration
 PLATFORM = linux
-HARDWARE = x86-64
+HARDWARE = i86
 COMPILER = gcc
-SYS_LIBS = -lm
+SYS_LIBS =  -lm
+XFLAGS = -m32
 
 # Directories (relative to build directory)
 CT_LIB_DIR = $(ROOT_DIR)/../public/lib/lib/$(PLATFORM)/$(CONFIG)

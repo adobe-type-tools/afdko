@@ -3,8 +3,6 @@
 # Copyright 2014 Adobe Systems Incorporated.                       #
 # All rights reserved.                                                  #
 #                                                                       #
-# Patents Pending                                                       #
-#                                                                       #
 #########################################################################
 
 
