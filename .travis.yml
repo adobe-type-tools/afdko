@@ -60,12 +60,17 @@ matrix:
       if: type = push
       language: generic
 
-# only build for *pushes* to master,
+# Only build for *pushes* to master,
 # not for pushes to other branches
-# (build for PRs from any branch)
+# (build for PRs from any branch).
+# The regex below is because Travis treats a tag on the master branch as if it
+# were a different branch. The regex below is meant to match:
+# digit(s).digit(s).digit(s) plus optional additional characters.
 branches:
   only:
     - master
+    - /^\d+\.\d+\.\d+.*$/
+
 
 notifications:
   slack: typekit:TRAVIS_SLACK_TOKEN
