@@ -1,3 +1,4 @@
+sudo: required
 matrix:
   include:
     - os: linux
@@ -85,8 +86,6 @@ deploy:
   password:
     secure: fkjaRurDm3ccb9IUPqDNd5VX1PkZnPrraedHigbpRmc11e0xn+AwWEBuI9EhFLlIl3omzxmajw4UXQb2qw0pIyLPUGnASZvsHWFE9mUz6v2XHYSI1RLG+xpyd0F7ZGExAW6U5fca1uTUTIo68/CJCMk0NSrcVGi6WkaFOXsQ+45UX7uSfCvPsA80w1DnA3tgrrbaLPaz2y9IZmdmMU8DQzE5IU8ODtXS1exQV1YUhlapRvvOkmhv61edVlTeqzd9dCQPWHxegqs6hkiUVX01H0wYNQkaomY6K1O8AmOmDvacXRQILkB/H5luQNGtOhRMGIwr65VIjLl2xNVgEzVAT3rYQ31oz794AkpjDGvzccNgUT9BjwVjxbBrYqpltfYs6q8HlQ8etl1GMjMXrHoZLdNlemKsyAghpNOrQD9pTHYM8OU7m6tCxSDzLnMwnGpjHohsfDg6WWfoBybyAK2RwJ0/Okv/lgdPdupaPOmsJb8h0ymuQB7StAoWYAql2VO+JrFOLlBar+n/2LtjVvW6KISpDSE7qrJEtEfO0ElU8Pc/T+cE5qBlBxa3wh87nqBPee/oOcJNuNmHCk7YzWCXShj+fiDjPQYy6WLHZ1/e8I1AV3DEWlqOAnGja46FARRHLZ8GNLhZ8DAiRsgV4rd9NCl3v7UJWp036Tr7KAZP2nc=
   distributions: bdist_wheel
-  edge:
-    branch: v1.8.45
   on:
     tags: true
     repo: adobe-type-tools/afdko
