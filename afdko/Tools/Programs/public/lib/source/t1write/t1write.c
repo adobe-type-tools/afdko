@@ -1326,8 +1326,10 @@ static void writePrivateDict(t1wCtx h, abfPrivateDict *private, long SDBytes)
    applicable. */
 static void writeIdentComment(t1wCtx h)
 	{
-	writeFmt(h, "%%ADOt1write: (%d.%d.%d)%s",
-			 CTL_SPLIT_VERSION(T1W_VERSION), h->arg.newline);
+	enum { MAX_VERSION_SIZE = 100 };
+	char version_buf[MAX_VERSION_SIZE+1];
+	writeFmt(h, "%%ADOt1write: (%s)%s",
+			 CTL_SPLIT_VERSION(version_buf, T1W_VERSION), h->arg.newline);
 	if ((h->top->Notice.ptr == ABF_UNSET_PTR ||
 		 strstr(h->top->Notice.ptr, "Adobe") == NULL) &&
 		(h->top->Copyright.ptr == ABF_UNSET_PTR ||

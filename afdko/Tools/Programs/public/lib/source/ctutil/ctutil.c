@@ -290,6 +290,14 @@ void ctuGetVersion(ctlVersionCallbacks *cb) {
 	cb->called |= 1 << CTU_LIB_ID;
 }
 
+char* CTL_SPLIT_VERSION(char* version_buf, unsigned int version) {
+	sprintf(version_buf, "%d.%d.%d", (int)((version)>>16&0xff),
+			(int)((version)>>8&0xff),
+			(int)((version)&0xff));
+	return version_buf;
+}
+
+
 #if !defined(_UCRT)
 float roundf(float x)
 {

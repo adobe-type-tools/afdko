@@ -1671,7 +1671,10 @@ static int t1Decode(t1cCtx h, long offset)
 					i = 0;	/* Duplicate top element */
 				if (i >= h->stack.cnt)
 					return t1cErrIndexBounds;
-				PUSH(h->stack.array[h->stack.cnt - 1 - i]);
+				{
+					float t = h->stack.array[h->stack.cnt - 1 - i];
+					PUSH(t);
+				}
 				}
 				continue;
 			case tx_roll:

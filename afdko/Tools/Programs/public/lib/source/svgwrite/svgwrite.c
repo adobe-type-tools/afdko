@@ -436,10 +436,12 @@ int svwEndFont(svwCtx h, abfTopDict *top)
 
     if(h->arg.flags & SVW_STANDALONE)
     {
-      char tmpBuf[64];
+      enum { MAX_VERSION_SIZE = 100 };
+      char tmpBuf[MAX_VERSION_SIZE+1];
+      char version_buf[MAX_VERSION_SIZE+1];
       writeLine(h, "<?xml version=\"1.0\" encoding=\"utf-8\"?>");
       writeStr(h, "<!-- Generator: Adobe svgwrite library ");
-      sprintf(tmpBuf, "%1d.%1d.%1d", CTL_SPLIT_VERSION(SVW_VERSION));
+      sprintf(tmpBuf, "%s", CTL_SPLIT_VERSION(version_buf, SVW_VERSION));
       writeStr(h, tmpBuf);
       writeLine(h, " -->");
       writeLine(h, "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.0//EN\" \"http://www.w3.org/TR/SVG/DTD/svg10.dtd\">");

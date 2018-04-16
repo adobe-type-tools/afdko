@@ -9,11 +9,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef _WIN32
 #include <time.h>
-#else
-#include <sys/time.h>
-#endif
 #include <math.h>
 #include <string.h>
 
