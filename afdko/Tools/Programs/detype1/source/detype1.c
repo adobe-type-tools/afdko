@@ -57,7 +57,6 @@ static uchar decrypt(uchar cipher, unsigned short *keyp) {
 
 static uchar *charstring(uchar *prefix, uchar *s, int lenIV, FILE *fp) {
 	int i;
-    int afterOpName = 0;
 	uchar *end;
 	unsigned short key = key_charstring;
 	static const char
@@ -179,8 +178,16 @@ void eeappend(int c) {
 			eelen = BUFSIZ;
 			eebuf = malloc(eelen);
 		} else {
+			unsigned char *p;
 			eelen *= 4;
-			eebuf = realloc(eebuf, eelen);
+			p = realloc(eebuf, eelen);
+			if (p == NULL) {
+				free(eebuf);
+				eebuf = NULL;
+			}
+			else {
+				eebuf = p;
+			}
 		}
 		if (eebuf == NULL)
 			panic("out of memory");
@@ -363,10 +370,11 @@ static void binaryfile(FILE *fp1, FILE *fp2, uchar initial[4]) {
 }
 
 static void ciphertext(FILE *fp1, FILE *fp2) {
-	int i, j;
+	int i;
 	uchar initial[4];
 	bool isbinary = FALSE;
 	for (i = 0; i < 4; i++){
+		int j;
 		initial[i] = j = get1(fp1);
 		if (j == EOF)
 			panic("EOF too early in ciphertext");
@@ -545,19 +553,24 @@ int main(int argc, char *argv[]) {
 	//	_setmode(_fileno(stdout),_O_BINARY);
 #endif /* _MSC_VER */
 		detype1(fp,stdout);
+		fclose(fp);
 	} else if (optind +2 == argc) {
 		FILE *fp1 = fopen(argv[optind], "rb");
-		FILE *fp2 = fopen(argv[optind+1], "w");
+		FILE *fp2;
 		if (fp1 == NULL) {
                         perror(argv[optind]);
                         return 1;
                 }
+		fp2 = fopen(argv[optind+1], "w");
 		if (fp2 == NULL) {
+						fclose(fp1);
                         perror(argv[optind+1]);
                         return 1;
                 }
 		panicname = argv[optind];
 		detype1(fp1,fp2);
+		fclose(fp1);
+		fclose(fp2);
 	} else
 		usage();
 	return 0;
