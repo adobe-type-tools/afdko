@@ -306,9 +306,9 @@ static void ttcfDump(Card8 which, LongN start)
 		if (!ttc1.loaded)
 		  return;	/* Not a TT Collection */
 		
-		DL(1, ("### [ttcf] (%08lx)\n", start));
+		DL(1, ("### [ttcf] (%08x)\n", start));
 		
-		DL(2, ("TTCTag        =%c%c%c%c (%08lx)\n", 
+		DL(2, ("TTCTag        =%c%c%c%c (%08x)\n", 
 			   TAG_ARG(ttcf1.TTCTag), ttcf1.TTCTag));
 		DLV(2, "Version       =", ttcf1.Version);
 		DLU(2, "DirectoryCount=", ttcf1.DirectoryCount);
@@ -323,7 +323,7 @@ static void ttcfDump(Card8 which, LongN start)
 		if (!ttc2.loaded)
 		  return;	/* Not a TT Collection */
 		
-		DL(1, ("### [ttcf] (%08lx)\n", start));
+		DL(1, ("### [ttcf] (%08x)\n", start));
 		
 		DL(2, ("TTCTag        =%c%c%c%c (%08lx)\n", 
 			   TAG_ARG(ttcf2.TTCTag), ttcf2.TTCTag));
@@ -646,7 +646,7 @@ void hexDump(Card8 which, Card32 tag, LongN start, Card32 length)
 
 	SEEK_ABS(which, start);
 
-	printf( "### [%c%c%c%c] (%08lx)\n", TAG_ARG(tag), start);
+	printf( "### [%c%c%c%c] (%08x)\n", TAG_ARG(tag), start);
 	while (left > 0)
 		{
 		/* Dump one line */
@@ -656,7 +656,7 @@ void hexDump(Card8 which, Card32 tag, LongN start, Card32 length)
 		IN_BYTES(which, (left < 16) ? left : 16, data);
 
 		/* Dump 8 hexadecimal words of data */
-		printf( "%08lx  ", addr);
+		printf( "%08x  ", addr);
 
 		for (i = 0; i < 16; i++)
 			{
@@ -739,7 +739,7 @@ void hexDiff(Card32 tag,
 			  else if (level == 2) 
 				{
 				  /* Dump 8 hexadecimal words of data */
-				  printf( "< %08lx  ", addr);
+				  printf( "< %08x  ", addr);
 
 				  for (i = 0; i < 16; i++)
 					{
@@ -760,7 +760,7 @@ void hexDiff(Card32 tag,
 				  printf( "|\n");
 
 				  /* Dump 8 hexadecimal words of data */
-				  printf( "> %08lx  ", addr);
+				  printf( "> %08x  ", addr);
 
 				  for (i = 0; i < 16; i++)
 					{
@@ -815,7 +815,7 @@ static void dirDiff3(LongN start1, LongN start2)
 		else if (sfnt1.version == VERSION(1,0))
 		  DL(3, ("version= 1.0  [TrueType]"));
 		else
-		  DL(3, ("version=%c%c%c%c (%08lx) [????]", 
+		  DL(3, ("version=%c%c%c%c (%08x) [????]", 
 			 TAG_ARG(sfnt1.version), sfnt1.version));
 
 		note ("> sfnt ");
@@ -828,7 +828,7 @@ static void dirDiff3(LongN start1, LongN start2)
 		else if (sfnt2.version == VERSION(1,0))
 		  DL(3, ("version= 1.0  [TrueType]"));
 		else
-		  DL(3, ("version=%c%c%c%c (%08lx) [????]", 
+		  DL(3, ("version=%c%c%c%c (%08x) [????]", 
 			 TAG_ARG(sfnt2.version), sfnt2.version));
 	  }
 
@@ -1162,7 +1162,7 @@ int sfntTTCScan(int argc, char *argv[], int argi, opt_Option *opt)
 			{
 			Card32 offset;
 
-			if (sscanf(p, "%li", &offset) == 1)
+			if (sscanf(p, "%u", &offset) == 1)
 				*da_NEXT(ttc.sel) = offset;
 			else
 				opt_Error(opt_Format, opt, arg);
