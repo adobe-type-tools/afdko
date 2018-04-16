@@ -3,22 +3,9 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 /* Font conversion database manager */
 
-#if __CENTERLINE__
-#include "dynarr.h"
-#include "hotconv.h"
-#else
-
-#ifndef PACKAGE_SPECS
-#define PACKAGE_SPECS "package.h"
-#endif
-#ifndef PACKAGE_SPECS_H
-#include PACKAGE_SPECS
-#endif
-
+#include "package.h"
 #include DYNARR
 #include HOTCONV
-
-#endif
 
 #include "lstdio.h"
 #include "lstring.h"
@@ -199,7 +186,6 @@ void fcdbAddFile(fcdbCtx h, unsigned fileid, void *callBackCtx) {
 				rptError(h, fcdbSyntaxErr);
 			}
 			if (actn & S_) {
-				size_t index;
 
 				/* Terminate section key */
 				key[iKey] = '\0';
@@ -212,6 +198,7 @@ void fcdbAddFile(fcdbCtx h, unsigned fileid, void *callBackCtx) {
 					state = 1;
 				}
 				else {
+					size_t index;
 					/* Not found in list */
 					index = h->refs.cnt;
 					ref = &dnaGROW(h->refs,index)[index];
@@ -775,11 +762,11 @@ void fcdbFree(fcdbCtx h) {
 #if DEBUG
 
 static void dbbyte(unsigned byte) {
-	static char hex[] = "0123456789abcdef";
 	if (byte < 0x80) {
 		printf("%c", byte);
 	}
 	else {
+		static char hex[] = "0123456789abcdef";
 		printf(":%c%c", hex[byte>>4 & 0xf], hex[byte & 0xf]);
 	}
 }

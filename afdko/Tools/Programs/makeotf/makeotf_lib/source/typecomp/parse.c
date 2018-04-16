@@ -1141,10 +1141,10 @@ static char *keyName(int iKey) {
 	unsigned int i;
 	for (i = 0; i < TABLE_LEN(keyMap); i++) {
 		if (keyMap[i].index == iKey) {
-			break;
+			return keyMap[i].name;
 		}
 	}
-	return keyMap[i].name;
+	return "missing key";
 }
 
 /* Report bad dict value */

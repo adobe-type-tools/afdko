@@ -1937,7 +1937,7 @@ static void addNumRange(GID first, GID last, char *firstName, char *p1,
 		GID gid;
 		char fmt[128];
 		char preNum[MAX_TOKEN];
-
+		fmt[0] = '\0';
 		if (i == firstNum) {
 			gid = first;
 		}

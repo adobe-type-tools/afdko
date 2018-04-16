@@ -200,6 +200,7 @@ va_dcl
 	bad_tok = va_arg(ap, int *);
 	bad_text = va_arg(ap, char **);
 	err_k = va_arg(ap, int *);
+	va_end(ap):
 	if ( i>k )
 	{
 		/* bad; lookahead is permutation that cannot be matched,
