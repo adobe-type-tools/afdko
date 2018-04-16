@@ -9,6 +9,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <unix.h>
 #endif
 #include <stdio.h>
+#include <stdint.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -48,24 +49,24 @@ jmp_buf mark;
 #define uint32_	4
 #define	int32_	4
 
-typedef long Fixed;
+typedef int32_t Fixed;
 
 /* Tag support */
-typedef unsigned long Tag;
+typedef uint32_t Tag;
 #define TAG(a,b,c,d) ((Tag)(a)<<24|(Tag)(b)<<16|(c)<<8|(d))
 #define TAG_ARG(t) (char)((t)>>24&0xff),(char)((t)>>16&0xff), \
 	(char)((t)>>8&0xff),(char)((t)&0xff)
 
 typedef struct			/* sfnt table directory entry */
 	{
-	unsigned long tag;
-	unsigned long checksum;
-	unsigned long offset;
-	unsigned long length;
-	unsigned short flags;		/* Option flags */
+	uint32_t tag;
+	uint32_t checksum;
+	uint32_t offset;
+	uint32_t length;
+	uint16_t flags;		/* Option flags */
 #define TBL_SRC	(1<<10)	/* Flags table in source sfnt */
 #define TBL_DST	(1<<11)	/* Flags table in destination sfnt */
-	short order;		/* Table ordering */
+	int16_t order;		/* Table ordering */
 	char *xfilename;	/* Extract filename */
 	char *afilename;	/* Add filename */
 	} Table;
@@ -75,10 +76,10 @@ typedef struct			/* sfnt table directory entry */
 typedef struct			/* sfnt header */
 	{
 	Fixed version;
-	unsigned short numTables;
-	unsigned short searchRange;
-	unsigned short entrySelector;
-	unsigned short rangeShift;
+	uint16_t numTables;
+	uint16_t searchRange;
+	uint16_t entrySelector;
+	uint16_t rangeShift;
 	Table directory[MAX_TABLES];	/* [numTables] */
 	} sfntHdr;
 #define DIR_HDR_SIZE (int32_+uint16_*4)	/* Size of written fields */
@@ -135,7 +136,7 @@ static File dstfile;
 char *tmpname = "sfntedit.tmp";	/* Temporary filename */
 #define BACKUPNAME  "sfntedit.BAK"
 
-static long options;	/* Options seen */
+static uint32_t options;	/* Options seen */
 #define OPT_EXTRACT	(1<<0)
 #define OPT_DELETE	(1<<1)
 #define OPT_ADD		(1<<2)
@@ -143,23 +144,7 @@ static long options;	/* Options seen */
 #define OPT_CHECK	(1<<4)
 #define OPT_FIX		(1<<5)
 
-volatile int doingScripting = 0;
-int foundXswitch = 0;
-
-static char scriptfilename[256];
 char *sourcepath="";
-
-typedef struct _cmdlinetype
-{
-  da_DCL(char *, args); /* arg list */  
-} cmdlinetype;
-
-static struct
-{
-  char *buf; /* input buffer */
-  da_DCL(cmdlinetype, cmdline);
-} script;
-
 
 char * MakeFullPath(char *source)
 {
@@ -210,7 +195,6 @@ fprintf(stderr,
 "    -f fix checksums (implies -c)\n"
 "    -u print usage\n"
 "    -h print help\n"
-"    -X execute command-lines from <scriptfile> [default: sfntedit.scr]\n"
 "Build:\n"
 "    Version: %s\n", 
 	 global.progname,	 
@@ -299,95 +283,6 @@ fprintf(stderr,
 	quit(0); 
 	}
 	
-static void makeArgs(char *filename)
-      {
-      int state;
-      long i;
-      long length;
-      File file;
-      char *start = NULL;     /* Suppress optimizer warning */
-      cmdlinetype *cmdl;
-
-      /* Read whole file into buffer */
-      fileOpenRead(filename, &file);
-      length = fileLength(&file);
-      if (length < 1) 
-      	fatal(SFED_MSG_BADSCRIPTFILE, filename);
-      script.buf = memNew(length + 2);
-
-      fileSeek(&file, 0, 0);
-      fileReadN(&file, length, script.buf);
-      fileClose(&file);
-
-      script.buf[length] = '\n';      /* Ensure termination */
-      script.buf[length+1] = '\0';    /* Ensure termination */
-      /* Parse buffer into args */
-      state = 0;
-      da_INIT(script.cmdline, 10, 10);
-      cmdl = da_NEXT(script.cmdline);
-      da_INIT(cmdl->args, 10, 10);
-      *da_NEXT(cmdl->args) = global.progname;
-      for (i = 0; i < length + 1; i++)
-              {
-              char c = script.buf[i];
-              switch (state)
-                      {
-              case 0:
-                      switch ((int)c)
-                              {
-                      case '\n':
-                      case '\r':
-                              cmdl = da_NEXT(script.cmdline);
-                              da_INIT(cmdl->args, 10, 10);
-                              *da_NEXT(cmdl->args) = global.progname;
-                              break;
-                      case '\f': 
-                      case '\t': 
-                              break;
-                      case ' ': 
-                              break;
-                      case '#': 
-                              state = 1;
-                              break;
-                      case '"': 
-                              start = &script.buf[i + 1];
-                              state = 2; 
-                              break;
-                      default:  
-                              start = &script.buf[i];
-                              state = 3; 
-                              break;
-                              }
-                      break;
-              case 1: /* Comment */
-                      if (c == '\n' || c == '\r')
-                              state = 0;
-                      break;
-              case 2: /* Quoted string */
-                      if (c == '"')
-                              {
-                              script.buf[i] = '\0';   /* Terminate string */
-                              *da_NEXT(cmdl->args) = start;
-                              state = 0;
-                              }
-                      break;
-              case 3: /* Space-delimited string */
-                      if (isspace((int)c))
-                              {
-                              script.buf[i] = '\0';   /* Terminate string */
-                              *da_NEXT(cmdl->args) = start;
-                              state = 0;
-                              if ((c == '\n') || (c == '\r')) 
-                                {
-                                      cmdl = da_NEXT(script.cmdline);
-                                      da_INIT(cmdl->args, 10, 10);
-                                      *da_NEXT(cmdl->args) = global.progname;
-                                }
-                              }
-                      break;
-                      }
-              }
-      }
 
 /* ---------------------------- Argument Parsing --------------------------- */
 
@@ -498,9 +393,9 @@ static void parseTagList(char *arg, int option, int flag)
 	}
 
 /* Count bits in word */
-static int countbits(long value)
+static uint32_t countbits(uint32_t value)
 	{
-	int count;
+	uint32_t count;
 	for (count = 0; value; count++)
 		value &= value - 1;
 	return count;
@@ -522,19 +417,6 @@ static int parseArgs(int argc, char *argv[])
 		case '-':
 			switch (arg[1])
 				{
-			case 'X': /* script file to execute */
-				foundXswitch = 1;
-				if ((argsleft > 0) && argv[i+1][0] != '-')
-					{
-					   strcpy(scriptfilename, argv[++i]);
-					   if (doingScripting) /* disallow nesting */
-					   {
-					   	 foundXswitch = 0;
-					   	 scriptfilename[0] = '\0'; 
-					   }
-					 }
-
-				break;
 			case 'x':		/* Extract table */
 				if (arg[2] != '\0')
 					fatal(SFED_MSG_BADOPTION, arg);
@@ -651,7 +533,7 @@ static int parseArgs(int argc, char *argv[])
 static void sfntReadHdr(void)
 	{
 	int i;
-	short numTables=0;
+	int16_t numTables=0;
 
 	/* Read and validate version */
 	fileReadObject(&srcfile, 4, &sfnt.version);
@@ -706,7 +588,7 @@ static void sfntDumpHdr(void)
 	if (sfnt.version == 0x00010000)
 		fprintf(stderr,"version      =1.0 (00010000)\n");
 	else
-		fprintf(stderr,"version      =%c%c%c%c (%08lx)\n", 
+		fprintf(stderr,"version      =%c%c%c%c (%08x)\n", 
 			   TAG_ARG(sfnt.version), sfnt.version);
 	fprintf(stderr,"numTables    =%hu\n", sfnt.numTables);
 	fprintf(stderr,"searchRange  =%hu\n", sfnt.searchRange);
@@ -717,19 +599,19 @@ static void sfntDumpHdr(void)
 	for (i = 0; i < sfnt.numTables; i++)
 		{
 		Table *tbl = &sfnt.directory[i];
-		fprintf(stderr,"[%2d]={%c%c%c%c,%08lx,%08lx,%08lx}\n", i, 
+		fprintf(stderr,"[%2d]={%c%c%c%c,%08x,%08x,%08x}\n", i, 
 			   TAG_ARG(tbl->tag), tbl->checksum, tbl->offset, tbl->length);
 		}
 	}
 
 /* Calculate values of binary search table parameters */
 static void calcSearchParams(unsigned nUnits, 
-					  unsigned short *searchRange, 
-					  unsigned short *entrySelector, 
-					  unsigned short *rangeShift)
+					  uint16_t *searchRange, 
+					  uint16_t *entrySelector, 
+					  uint16_t *rangeShift)
 	{
-	unsigned log2;
-	unsigned pwr2;
+	uint32_t log2;
+	uint32_t pwr2;
 
 	pwr2 = 2;
 	for (log2 = 0; pwr2 <= nUnits; log2++)
@@ -746,13 +628,13 @@ static void calcSearchParams(unsigned nUnits,
 static void checkChecksums(void)
 	{
 	int i;
-	long nLongs;
+	int32_t nInt32;
 	int fail = 0;
-	unsigned short searchRange;
-	unsigned short entrySelector;
-	unsigned short rangeShift;
-	unsigned long checkSumAdjustment;
-	unsigned long totalsum = 0;
+	uint16_t searchRange;
+	uint16_t entrySelector;
+	uint16_t rangeShift;
+	uint32_t checkSumAdjustment;
+	uint32_t totalsum = 0;
 
 	/* Validate sfnt search fields */
 	calcSearchParams(sfnt.numTables, &searchRange, &entrySelector,&rangeShift);
@@ -774,25 +656,25 @@ static void checkChecksums(void)
 
 	/* Read directory header */
 	fileSeek(&srcfile, 0, SEEK_SET);
-	nLongs = (DIR_HDR_SIZE + ENTRY_SIZE * sfnt.numTables) / 4;
-	while (nLongs--)
+	nInt32 = (DIR_HDR_SIZE + ENTRY_SIZE * sfnt.numTables) / 4;
+	while (nInt32--)
 		{
-		unsigned long amt;
+		uint32_t amt;
 		fileReadObject(&srcfile, 4, &amt);
 		totalsum += amt; 
 		}
 
 	for (i = 0; i < sfnt.numTables; i++)
 		{
-		unsigned long checksum = 0;
-		unsigned long amt;
+		uint32_t checksum = 0;
+		uint32_t amt;
 
 		Table *entry = &sfnt.directory[i];
 
 		fileSeek(&srcfile, entry->offset, SEEK_SET);
 
-		nLongs = (entry->length + 3) / 4;
-		while (nLongs--)
+		nInt32 = (entry->length + 3) / 4;
+		while (nInt32--)
 			{
 			fileReadObject(&srcfile, 4, &amt);
 			checksum += amt;
@@ -827,9 +709,10 @@ static void checkChecksums(void)
 /* Return tail component of path */
 static char *tail(char *path)
 	{
-	char *p = NULL;
+	char *p;
 	p = strrchr(path, '/');
-	p = strrchr(path, '\\');
+	if (p== NULL)
+		p = strrchr(path, '\\');
 	return (p == NULL)? path: p + 1;
 	}
 
@@ -872,7 +755,7 @@ static char *makexFilename(Table *tbl)
 		if (q == NULL)
 			sprintf(filename, "%s.%s", p, tag);
 		else
-			sprintf(filename, "%.*s.%s", q - p, p, tag);
+			sprintf(filename, "%.*s.%s", (int)(q - p), p, tag);
 
 		return filename;
 		}
@@ -915,11 +798,11 @@ static int cmpOrder(const void *first, const void *second)
 	}
 
 /* Copy table and compute its checksum */
-static unsigned long tableCopy(File *src, File *dst, long offset, long length)
+static uint32_t tableCopy(File *src, File *dst, long offset, long length)
 	{
 	int i;
-	long value;
-	unsigned long checksum = 0;
+	int32_t value;
+	uint32_t checksum = 0;
 
 	fileSeek(src, offset, SEEK_SET);
 	for (; length > 3; length -= 4)
@@ -936,7 +819,7 @@ static unsigned long tableCopy(File *src, File *dst, long offset, long length)
 	value = 0;
 	for (i = 0; i < length; i++)
 		{
-		unsigned char b;
+		uint8_t b;
 		fileReadN(src, 1, &b);
 		value = value<<8 | b;
 		}
@@ -947,10 +830,10 @@ static unsigned long tableCopy(File *src, File *dst, long offset, long length)
 	}
 
 /* Add table from file */
-static unsigned long addTable(Table *tbl, unsigned long *length)
+static uint32_t addTable(Table *tbl, uint32_t *length)
 	{
 	File file;
-	long checksum;
+	int32_t checksum;
 
 	fileOpenRead(tbl->afilename, &file);
 	fileSeek(&file, 0, SEEK_END);
@@ -981,20 +864,23 @@ static void sfntCopy(void)
 	int i;
 	int nLongs;
 	Tag *tags;
-	unsigned short numDstTables;
-	unsigned long checksum;
-	unsigned long offset;
-	unsigned long length;
-	unsigned long adjustOff;
-	unsigned long totalsum;
+	uint16_t numDstTables;
+	uint32_t checksum;
+	uint32_t offset;
+	uint32_t length;
+	uint32_t adjustOff;
+	uint32_t totalsum;
 	int headSeen = 0;
 	char outputfilename[FILENAME_MAX];
 	char *dstfilename = dstfile.name;
-
+		FILE* f;		
 	
 	strcpy(outputfilename, dstfile.name);
-	freopen(outputfilename, "r+b", dstfile.fp);
-	
+	f = freopen(outputfilename, "r+b", dstfile.fp);
+	if (f==NULL)
+	{
+		fatal(SFED_MSG_sysFERRORSTR, strerror(errno), dstfile.name);
+	}
 	/* Count destination tables */
 	numDstTables = 0;
 	for (i = 0; i < sfnt.numTables; i++)
@@ -1052,7 +938,7 @@ static void sfntCopy(void)
 
 		if (tbl->tag == TAG('h','e','a','d'))
 			{
-			  unsigned long b;
+			  uint32_t b;
 			/* Adjust sum to ignore head.checkSumAdjustment field */
 			
 			
@@ -1115,7 +1001,7 @@ static void sfntCopy(void)
 	nLongs = (DIR_HDR_SIZE + ENTRY_SIZE * numDstTables) / 4;
 	for (i = 0; i < nLongs; i++)
 		{
-		unsigned long b;
+		uint32_t b;
 		fileReadObject(&dstfile, 4, &b);
 		totalsum += b;
 		}
@@ -1134,22 +1020,8 @@ static void sfntCopy(void)
 int main(int argc, char *argv[])
 	{
 	int argi;
-	volatile int i;
-	cmdlinetype *cmdl;
-	int status = 0; /*setjmp(global.env); Not needed as lib */
+	int i;
 	
-	
-
-	if (status)
-	  {
-	  	if (doingScripting)
-	  		{
-	  		  goto scriptAbEnd;
-	  		}
-	  	else
-			exit(status - 1);	/* Finish processing */
-	  }
-
 	/* Set signal handler */
 	if (signal(SIGINT, SIG_IGN) != SIG_IGN)
 		signal(SIGINT, cleanup);
@@ -1157,244 +1029,94 @@ int main(int argc, char *argv[])
 	da_SetMemFuncs(memNew, memResize, memFree);
 	global.progname = "sfntedit";
 	
-	scriptfilename[0] = '\0'; /* init */
-	foundXswitch = 0;
-	for (i = 0; i < argc; i++)
-	{
-		if (strcmp(argv[i], "-X") == 0)
+
+	/* Initialize */
+	sfnt.numTables = 0;
+	for (i = 0; i < MAX_TABLES; i++)
 		{
-			if ((argv[i+1] != NULL) && (argv[i+1][0] != '\0'))
-			{
-				strcpy(scriptfilename, argv[i+1]);
-				foundXswitch = 1;
-			}
-			break;
+		sfnt.directory[i].tag = 0;
+		sfnt.directory[i].flags = 0;
+		sfnt.directory[i].xfilename = NULL;
+		sfnt.directory[i].afilename = NULL;
 		}
-	}
+	srcfile.name = NULL;	srcfile.fp = NULL;
+	dstfile.name = NULL;	dstfile.fp = NULL;		
 	
-	if (!foundXswitch && (argc < 2))
-	  strcpy(scriptfilename, "sfntedit.scr");
+	argi = parseArgs(--argc, ++argv);
+	if (argi == 0)
+		showUsage();
+	
+	if ((srcfile.name == NULL) && 
+			(argc > 1)
 
-/* see if scriptfile exists to Auto-execute */
-	if (
-
-		sysFileExists(scriptfilename)
-
-		)
+	) /* no files on commandline, but other switches */
 		{
-			doingScripting = 1;
-			makeArgs(scriptfilename);
-		}	  
-		   
-
-	if (!doingScripting)
-		{
-		/* Initialize */
-		sfnt.numTables = 0;
-		for (i = 0; i < MAX_TABLES; i++)
-			{
-			sfnt.directory[i].tag = 0;
-			sfnt.directory[i].flags = 0;
-			sfnt.directory[i].xfilename = NULL;
-			sfnt.directory[i].afilename = NULL;
-			}
-		srcfile.name = NULL;	srcfile.fp = NULL;
-		dstfile.name = NULL;	dstfile.fp = NULL;		
-		
-		argi = parseArgs(--argc, ++argv);
-		if (argi == 0)
-			showUsage();
-		
-		if (!doingScripting && foundXswitch)
-			{
-				if (scriptfilename && scriptfilename[0] != '\0')
-				{
-				doingScripting = 1;
-				makeArgs(scriptfilename);
-				goto execscript;
-				}
-
-			}
-		if ((srcfile.name == NULL) && 
- 				(argc > 1)
-
-		) /* no files on commandline, but other switches */
-			{
-			fatal(SFED_MSG_MISSINGFILENAME);
-			showUsage();			
-			}
-
-		fileOpenRead(srcfile.name, &srcfile);
-		
-		{
-			char * end;
-
-			end=strrchr(srcfile.name, '\\');
-			if(end==NULL)
-				sourcepath="";
-			else{
-				char *scurr = srcfile.name;
-				char *dcurr;
-				
-				sourcepath=(char *)malloc(strlen(srcfile.name));
-				dcurr = sourcepath;
-				while(scurr!=end)
-				{
-					*dcurr++=*scurr++;
-				}		
-				*dcurr=0;
-			}
-		
+		fatal(SFED_MSG_MISSINGFILENAME);
+		showUsage();			
 		}
 
-		if (dstfile.name != NULL) /* Open destination file */
-			fileOpenWrite(dstfile.name, &dstfile);
+	fileOpenRead(srcfile.name, &srcfile);
+	
+	{
+		char * end;
 
-		/* Read sfnt header */
-		sfntReadHdr();
-
-		/* Process font */
-		if (options & OPT_LIST)
-			sfntDumpHdr();
-		else if (options & OPT_CHECK)
-			checkChecksums();
-		else
+		end=strrchr(srcfile.name, '\\');
+		if(end==NULL)
+			sourcepath="";
+		else{
+			char *scurr = srcfile.name;
+			char *dcurr;
+			
+			sourcepath=(char *)malloc(strlen(srcfile.name));
+			dcurr = sourcepath;
+			while(scurr!=end)
 			{
-			if (options & OPT_EXTRACT)
-				extractTables();
-			if (options & (OPT_DELETE|OPT_ADD|OPT_FIX))
-				sfntCopy();
-			}
-
-		/* Close files */
-		fileClose(&srcfile);
-		if (dstfile.fp != NULL)
-			{
-			fileClose(&dstfile);
-
-			if (strcmp(dstfile.name + strlen(dstfile.name) - strlen(tmpname), tmpname)==0)
-				{	/* Rename tmp file to source file */
-				if (rename(srcfile.name, BACKUPNAME) == -1)
-					fatal(SFED_MSG_BADRENAME, strerror(errno), srcfile.name);	
-				if (rename(dstfile.name, srcfile.name) == -1)
-					fatal(SFED_MSG_BADRENAME, strerror(errno), dstfile.name);
-				if (remove(BACKUPNAME) == -1)
-					fatal(SFED_MSG_REMOVEERR, strerror(errno), BACKUPNAME);	
-				}
-			}			
-
+				*dcurr++=*scurr++;
+			}		
+			*dcurr=0;
 		}
-		
-	else /* executing cmdlines from a script file */
+	
+	}
+
+	if (dstfile.name != NULL) /* Open destination file */
+		fileOpenWrite(dstfile.name, &dstfile);
+
+	/* Read sfnt header */
+	sfntReadHdr();
+
+	/* Process font */
+	if (options & OPT_LIST)
+		sfntDumpHdr();
+	else if (options & OPT_CHECK)
+		checkChecksums();
+	else
 		{
-execscript:
-		
-
-			{
-				char * end;
-				
-
-			end=strrchr(scriptfilename, '\\');
-				if(end==NULL)
-					sourcepath="";
-				else{
-					char *scurr = scriptfilename;
-					char *dcurr;
-					
-					sourcepath=(char *)malloc(strlen(scriptfilename));
-					dcurr = sourcepath;
-					while(scurr!=end)
-					{
-						*dcurr++=*scurr++;
-					}		
-					*dcurr=0;
-				}
-			
-			}
-		
-
-		  for (i = 0; i < script.cmdline.cnt ; i++) 
-			{
-			int j;
-			/* Initialize */
-			sfnt.numTables = 0;
-			for (j = 0; j < MAX_TABLES; j++)
-				{
-				sfnt.directory[j].tag = 0;
-				sfnt.directory[j].flags = 0;
-				sfnt.directory[j].xfilename = NULL;
-				sfnt.directory[j].afilename = NULL;
-				}
-			srcfile.name = NULL;	srcfile.fp = NULL;
-			dstfile.name = NULL;	dstfile.fp = NULL;	
-					
-			cmdl = da_INDEX(script.cmdline, i);
-			if (cmdl->args.cnt < 2) continue;
-			
-			{
-			int a;				
-			inform(SFED_MSG_EOLN);
-			message(SFED_MSG_ECHOSCRIPTCMD);
-			for (a = 1; a < cmdl->args.cnt; a++)
-				inform(SFED_MSG_RAWSTRING, cmdl->args.array[a]);					
-			inform(SFED_MSG_EOLN);
-			}
-			
-			argi = parseArgs(cmdl->args.cnt - 1, cmdl->args.array +1);	
-			if (argi == 0)
-				{
-				fatal(SFED_MSG_MISSINGFILENAME);
-				showUsage();
-				}
-
-			fileOpenRead(srcfile.name, &srcfile);
-
-			if (dstfile.name != NULL) /* Open destination file */
-				fileOpenWrite(dstfile.name, &dstfile);
-
-			/* Read sfnt header */
-			sfntReadHdr();
-
-			/* Process font */
-			if (options & OPT_LIST)
-				sfntDumpHdr();
-			else if (options & OPT_CHECK)
-				checkChecksums();
-			else
-				{
-				if (options & OPT_EXTRACT)
-					extractTables();
-				if (options & (OPT_DELETE|OPT_ADD|OPT_FIX))
-					sfntCopy();
-				}
-
-scriptAbEnd:
-			/* Close files */
-			fileClose(&srcfile);
-			if (dstfile.fp != NULL)
-				{
-				char * fullbackupname;
-				fullbackupname = MakeFullPath(BACKUPNAME);
-				fileClose(&dstfile);
-
-				if (strcmp(dstfile.name + strlen(dstfile.name) - strlen(tmpname), tmpname)==0)
-					{	/* Rename tmp file to source file */
-					if (rename(srcfile.name, fullbackupname) == -1)
-						fatal(SFED_MSG_BADRENAME, strerror(errno), srcfile.name);	
-					if (rename(dstfile.name, srcfile.name) == -1)
-						fatal(SFED_MSG_BADRENAME, strerror(errno), dstfile.name);
-					if (remove(fullbackupname) == -1)
-						fatal(SFED_MSG_REMOVEERR, strerror(errno), fullbackupname);	
-					}
-					free(fullbackupname);
-				}
-			}
-
-		doingScripting = 0;	
+		if (options & OPT_EXTRACT)
+			extractTables();
+		if (options & (OPT_DELETE|OPT_ADD|OPT_FIX))
+			sfntCopy();
 		}
+
+	/* Close files */
+	fileClose(&srcfile);
+	if (dstfile.fp != NULL)
+		{
+		fileClose(&dstfile);
+
+		if (strcmp(dstfile.name + strlen(dstfile.name) - strlen(tmpname), tmpname)==0)
+			{	/* Rename tmp file to source file */
+			if (rename(srcfile.name, BACKUPNAME) == -1)
+				fatal(SFED_MSG_BADRENAME, strerror(errno), srcfile.name);	
+			if (rename(dstfile.name, srcfile.name) == -1)
+				fatal(SFED_MSG_BADRENAME, strerror(errno), dstfile.name);
+			if (remove(BACKUPNAME) == -1)
+				fatal(SFED_MSG_REMOVEERR, strerror(errno), BACKUPNAME);	
+			}
+		}			
+
 		
 	fprintf(stdout, "\nDone.\n");
-	return status;
+	return 0;
 	}
 
 

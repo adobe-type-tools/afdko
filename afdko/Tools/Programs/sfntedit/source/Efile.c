@@ -22,7 +22,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "Esys.h"
 #include "errno.h"
 
-extern int doingScripting;
 extern char *sourcepath;
 
 #if SUNOS
@@ -63,27 +62,17 @@ void fileOpenWrite(char *filename, File *fyl)
 	{
 	  static char Wfnam[256];
 		{
-		  if (!doingScripting)
-		  	{
-			  fyl->fp = sysOpenWrite(filename);
-			  if (fyl->fp == NULL)
-			  	fileError(fyl);
-			  fyl->name = filename;
-			 }
-		   else
-		   	{ 
-		   		/* make certain that "filename" is unique */
-		   		int try = 0;
-		  		strcpy(Wfnam, filename);
-		   		while (fileExists(Wfnam))
-		   		{
-		   			sprintf(Wfnam, "%s%d", filename, try++);	
-		   		}
-		   		fyl->fp = sysOpenWrite(Wfnam);
-			    if (fyl->fp == NULL)
-			  	  fileError(fyl);
-			    fyl->name = Wfnam;
-		   	}
+		/* make certain that "filename" is unique */
+		int try = 0;
+		strcpy(Wfnam, filename);
+		while (fileExists(Wfnam))
+		{
+			sprintf(Wfnam, "%s%d", filename, try++);	
+		}
+		fyl->fp = sysOpenWrite(Wfnam);
+		if (fyl->fp == NULL)
+		  fileError(fyl);
+		fyl->name = Wfnam;
 		}
 	}
 
@@ -107,9 +96,11 @@ void fileClose(File *fyl)
 /* Return file position */
 unsigned long fileTell(File *file)
 	{
-	long posn;
+	long posn = 0;
 	if (file->fp != NULL)
-		posn = ftell(file->fp);
+	{
+			posn = ftell(file->fp);
+	}
 	else
 		fileError(file);
 	return posn;
@@ -165,7 +156,7 @@ void fileReadObject(File *fyl, int size, void *obj)
 		GET1B;  value = value<<8 | b;
 		GET1B;  value = value<<8 | b;
 		GET1B;  value = value<<8 | b;
-		*((unsigned long *)obj) = value;
+		*((uint32_t *)obj) = value;
 		break;
 	default:
 		fatal(SFED_MSG_BADREADSIZE, size);

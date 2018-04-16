@@ -10,6 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <setjmp.h>
 
 #include "Efile.h"
@@ -27,7 +28,7 @@ extern Global global;
 /* ### Constants */
 #define MAX_PATH 1024
 
-#define STR2TAG(s) ((unsigned long)(s)[0]<<24|(unsigned long)(s)[1]<<16|(s)[2]<<8|(s)[3])
+#define STR2TAG(s) ((uint32_t)(s)[0]<<24|(uint32_t)(s)[1]<<16|(s)[2]<<8|(s)[3])
 
 /* ### Error reporting */
 extern void fatal(int msgfmtID, ...);
