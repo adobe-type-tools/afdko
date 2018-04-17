@@ -126,7 +126,7 @@ static void readMarkGlyphSetsDef(Card32 offset, MarkGlyphSetsDef* markGlyphSetsD
 	SEEK_SURE(save);
 	}
 	
-void GDEFRead(LongN start, Card32 length)
+void GDEFRead(Int32N start, Card32 length)
 	{
 	if (loaded)
 		return;
@@ -383,7 +383,7 @@ static void dumpMarkGlyphSetsDef(Offset offset, MarkGlyphSetsDef* markGlyphSetsD
 	DL(2, (OUTPUTBUFF, "--- Coverage[index]=offset\n"));
 	for (i = 0; i < markGlyphSetsDef->MarkSetCount; i++)
 		{
-		DL(2, (OUTPUTBUFF, "[%d]=%04lx ", i, markGlyphSetsDef->Coverage[i]));
+		DL(2, (OUTPUTBUFF, "[%d]=%04x ", i, markGlyphSetsDef->Coverage[i]));
 		}
 	DL(2, (OUTPUTBUFF, "\n"));
 	for (i = 0; i < markGlyphSetsDef->MarkSetCount; i++)
@@ -419,7 +419,7 @@ const char* kGlyphClassNames[] = {
 							"Component Glyphs - Class 4",
 							};
 							
-void GDEFDump(IntX level, LongN start)
+void GDEFDump(IntX level, Int32N start)
 	{
 	  if (!loaded) 
 		{
@@ -431,7 +431,7 @@ void GDEFDump(IntX level, LongN start)
 	if (level == 7)
 		fprintf(OUTPUTBUFF, "table GDEF {\n");
 		
-	DL(1, (OUTPUTBUFF, "### [GDEF] (%08lx)\n", start));
+	DL(1, (OUTPUTBUFF, "### [GDEF] (%08x)\n", start));
 
 	DLV(2, "Version    =", GDEF.Version);
 	DLx(2, "GlyphClassDef =", GDEF.GlyphClassDef);

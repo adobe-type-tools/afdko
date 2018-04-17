@@ -12,10 +12,10 @@ static hdmxTbl *hdmx = NULL;
 static IntX loaded = 0;
 static Card16 nGlyphs;
 
-void hdmxRead(LongN start, Card32 length)
+void hdmxRead(Int32N start, Card32 length)
 	{
 	IntX i;
-	LongN recordOffset = start + TBL_HDR_SIZE;
+	Int32N recordOffset = start + TBL_HDR_SIZE;
 
 	if (loaded)
 		return;
@@ -51,11 +51,11 @@ void hdmxRead(LongN start, Card32 length)
 	loaded = 1;
 	}
 
-void hdmxDump(IntX level, LongN start)
+void hdmxDump(IntX level, Int32N start)
 	{
 	IntX i;
 
-	DL(1, (OUTPUTBUFF, "### [hdmx->] (%08lx)\n", start));
+	DL(1, (OUTPUTBUFF, "### [hdmx->] (%08x)\n", start));
 	
 	DLu(2, "version   =", hdmx->version);
 	DLu(2, "nRecords  =", hdmx->nRecords);

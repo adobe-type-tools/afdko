@@ -10,7 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static LTSHTbl *LTSH = NULL;
 static IntX loaded = 0;
 
-void LTSHRead(LongN start, Card32 length)
+void LTSHRead(Int32N start, Card32 length)
 	{
 	IntX i;
 
@@ -31,11 +31,11 @@ void LTSHRead(LongN start, Card32 length)
 	loaded = 1;
 	}
 
-void LTSHDump(IntX level, LongN start)
+void LTSHDump(IntX level, Int32N start)
 	{
 	IntX i;
 
-	DL(1, (OUTPUTBUFF, "### [LTSH] (%08lx)\n", start));
+	DL(1, (OUTPUTBUFF, "### [LTSH] (%08x)\n", start));
 
 	DLu(2, "version  =", LTSH->version);
 	DLu(2, "numGlyphs=", LTSH->numGlyphs);

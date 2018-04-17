@@ -13,8 +13,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void postRead(LongN offset, Card32 length);
-extern void postDump(IntX level, LongN offset);
+extern void postRead(Int32N offset, Card32 length);
+extern void postDump(IntX level, Int32N offset);
 extern void postFree(void);
 
 extern IntX postInitName(void);

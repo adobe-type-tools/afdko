@@ -14,7 +14,7 @@ static IntX loaded = 0;
 extern char VORGfound;
 
 
-void VORGRead(LongN start, Card32 length)
+void VORGRead(Int32N start, Card32 length)
 	{
 	IntX i;
 
@@ -70,7 +70,7 @@ static void proofVORGGlyph(ProofContextPtr proofctx, GlyphId glyphId, Int16 orig
 						   );
 		}
 
-void VORGDump(IntX level, LongN start)
+void VORGDump(IntX level, Int32N start)
 	{
 	IntX i;
 	initGlyphNames();
@@ -98,7 +98,7 @@ void VORGDump(IntX level, LongN start)
  		}
 	else
 		{
-		DL(4, (OUTPUTBUFF, "### [VORG] (%08lx)\n", start));
+		DL(4, (OUTPUTBUFF, "### [VORG] (%08x)\n", start));
 		DL(4, (OUTPUTBUFF,"majorVersion            = %d\n", VORG->major));
 		DL(4, (OUTPUTBUFF,"minorVersion            = %d\n", VORG->minor));
 		DL(4, (OUTPUTBUFF, "defaultVertOriginY     = %d\n", VORG->defaultVertOriginY));

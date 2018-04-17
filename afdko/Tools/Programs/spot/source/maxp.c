@@ -11,7 +11,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static maxpTbl *maxp = NULL;
 static IntX loaded = 0;
 
-void maxpRead(LongN start, Card32 length)
+void maxpRead(Int32N start, Card32 length)
 	{
 	if (loaded)
 		return;
@@ -42,9 +42,9 @@ void maxpRead(LongN start, Card32 length)
 	loaded = 1;
 	}
 
-void maxpDump(IntX level, LongN start)
+void maxpDump(IntX level, Int32N start)
 	{
-	DL(1, (OUTPUTBUFF, "### [maxp] (%08lx)\n", start));
+	DL(1, (OUTPUTBUFF, "### [maxp] (%08x)\n", start));
 
 	DLV(2, "version              =", maxp->version);
 	DLu(2, "numGlyphs            =", maxp->numGlyphs);

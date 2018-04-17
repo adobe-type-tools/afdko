@@ -295,10 +295,10 @@ static Compound *readCompound(void)
 	return compound;
 	}
 
-void glyfRead(LongN start, Card32 length)
+void glyfRead(Int32N start, Card32 length)
 	{
 	IntX i;
-	LongN offset;
+	Int32N offset;
 	Card32 datalen;
 
 	if (loaded)
@@ -319,7 +319,7 @@ void glyfRead(LongN start, Card32 length)
 		Glyph *glyph = &glyf->glyph[i];
 		
 		(void)locaGetOffset(i, &offset, &datalen, glyf_);
-		if (offset > (LongN)(length - datalen)) /* offset can be equal to length if the last few glyphs are non-marking. */
+		if (offset > (Int32N)(length - datalen)) /* offset can be equal to length if the last few glyphs are non-marking. */
 			{
 			warning(SPOT_MSG_glyfBADLOCA, i);
 			glyph->numberOfContours = 0;
@@ -1642,11 +1642,11 @@ static void selectDump(GlyphId glyphId, IntX level)
 		warning(SPOT_MSG_GIDTOOLARGE, glyphId);
 	}
 
-void glyfDump(IntX level, LongN start)
+void glyfDump(IntX level, Int32N start)
 	{
 	IntX i;
 
-	DL(1, (OUTPUTBUFF, "### [glyf] (%08lx)\n", start));
+	DL(1, (OUTPUTBUFF, "### [glyf] (%08x)\n", start));
 
 	if (unitsPerEm < 1)
 	  {

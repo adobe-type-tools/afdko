@@ -40,25 +40,27 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /* have the number of bits specified.  If you need a minimum of a      */
 /* certain number of bits, use types from the IntX.../CardX... group.  */
 /***********************************************************************/
-typedef long            Int32;
+#include <stdint.h>
+
+typedef int32_t            Int32;
 #define MAX_INT32       ((Int32)0x7FFFFFFF)
 #define MIN_INT32       ((Int32)0x80000000)
 
-typedef unsigned long   Card32;
+typedef uint32_t   Card32;
 #define MAX_CARD32      ((Card32)0xFFFFFFFF)
 
-typedef short           Int16;
+typedef int16_t           Int16;
 #define MAX_INT16       ((Int16)0x7FFF)
 #define MIN_INT16       ((Int16)0x8000)
 
-typedef unsigned short  Card16;
+typedef uint16_t  Card16;
 #define MAX_CARD16      ((Card16)0xFFFF)
 
-typedef signed char     Int8;
+typedef int8_t    Int8;
 #define MAX_INT8        ((Int8)0x7F)
 #define MIN_INT8        ((Int8)0x80)
 
-typedef unsigned char   Card8;
+typedef uint8_t   Card8;
 #define MAX_CARD8       ((Card8)0xFF)
 
 typedef char            Byte8;
@@ -101,35 +103,35 @@ typedef char            Byte8;
 
 #else
 
-   typedef int          IntX;
+   typedef int32_t          IntX;
 #  define MAX_INTX      ((IntX)((1<<(sizeof(IntX)*8-1))-1))
 #  define MIN_INTX      ((IntX)(1<<(sizeof(IntX)*8-1)))
-   typedef unsigned     CardX;
+   typedef uint32_t     CardX;
 #  define MAX_CARDX     ((CardX)(MAX_INTX|MIN_INTX))
 #endif
 
                                     /***********************************/
                                     /* Optimize for space...           */
                                     /***********************************/
-typedef long            IntX32;
+typedef int32_t            IntX32;
 #define MAX_INTX32      MAX_INT32
 #define MIN_INTX32      MIN_INT32
 
-typedef unsigned long   CardX32;
+typedef uint32_t   CardX32;
 #define MAX_CARDX32     MAX_CARD32
 
-typedef short           IntX16;
+typedef int16_t           IntX16;
 #define MAX_INTX16      MAX_INT16
 #define MIN_INTX16      MIN_INT16
 
-typedef unsigned short  CardX16;
+typedef uint16_t  CardX16;
 #define MAX_CARDX16     MAX_CARD16
 
-typedef signed char     IntX8;
+typedef int8_t     IntX8;
 #define MAX_INTX8       MAX_INT8
 #define MIN_INTX8       MIN_INT8
 
-typedef unsigned char   CardX8;
+typedef uint8_t   CardX8;
 #define MAX_CARDX8      MAX_CARD8
 
 typedef char            ByteX8;
@@ -139,24 +141,24 @@ typedef char            ByteX8;
 /***********************************************************************/
 /* Use this type for use with variables connected with system calls.   */
 /***********************************************************************/
-typedef int             IntN;
+typedef int32_t             IntN;
 #define MAX_INTN        ((IntN)((1<<(sizeof(IntN)*8-1))-1))
 #define MIN_INTN        ((IntN)(1<<(sizeof(IntN)*8-1)))
 
-typedef unsigned        CardN;
+typedef int32_t        CardN;
 #define MAX_CARDN       ((CardN)(MAX_INTN|MIN_INTN))
 
-typedef short           ShortN;
-typedef unsigned short  ShortCardN;
-typedef long            LongN;
-typedef unsigned long   LongCardN;
+typedef int16_t           ShortN;
+typedef uint16_t  ShortCardN;
+typedef int32_t            Int32N;
+typedef uint32_t   UInt32N;
 typedef float           FloatN;
 typedef double          DoubleN;
 
 /***********************************************************************/
 /* Use these macros with scanf and fprintf(OUTPUTBUFF, .                             */
 /***********************************************************************/
-#define FMT_32          "l"
+#define FMT_32          ""
 #define FMT_16          "h"
 
 #if FORCE_INT_BITS == 32

@@ -14,8 +14,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "global.h"
 #include "opt.h"
 
-extern void sfntTTCRead(LongN start);
-extern void sfntRead(LongN start, IntX id);
+extern void sfntTTCRead(Int32N start);
+extern void sfntRead(Int32N start, IntX id);
 extern IntX sfntReadTable(Card32 tag);
 extern void sfntDump(void);
 extern void sfntFree(IntX freeTTC);

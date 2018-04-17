@@ -13,8 +13,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void vheaRead(LongN offset, Card32 length);
-extern void vheaDump(IntX level, LongN offset);
+extern void vheaRead(Int32N offset, Card32 length);
+extern void vheaDump(IntX level, Int32N offset);
 extern void vheaFree(void);
 
 extern IntX vheaGetNLongVerMetrics(Card16 *nLongVerMetrics, Card32 client);

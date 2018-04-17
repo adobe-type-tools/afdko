@@ -13,8 +13,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void gaspRead(LongN offset, Card32 length);
-extern void gaspDump(IntX level, LongN offset);
+extern void gaspRead(Int32N offset, Card32 length);
+extern void gaspDump(IntX level, Int32N offset);
 extern void gaspFree(void);
 
 #endif /* GASP_H */

@@ -13,8 +13,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void BBOXRead(LongN offset, Card32 length);
-extern void BBOXDump(IntX level, LongN offset);
+extern void BBOXRead(Int32N offset, Card32 length);
+extern void BBOXDump(IntX level, Int32N offset);
 extern void BBOXFree(void);
 
 #endif /* BBOX_H */

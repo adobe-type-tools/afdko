@@ -285,7 +285,7 @@ static void CFFdumpGlyphEndChar(void *ctx)
 
 
 
-void CFF_Read(LongN start, Card32 length)
+void CFF_Read(Int32N start, Card32 length)
 	{
 	if (loaded)
 		return;
@@ -554,10 +554,10 @@ static void gcrnewPage(IntX page)
 	/* Initialize synopsis mode */
 	workstr[0] = '\0';
 	sprintf(workstr, "%% page %hu\n"
-			   "<</PageSize [%ld %ld]>> setpagedevice\n"
+			   "<</PageSize [%d %d]>> setpagedevice\n"
 			   "%g %g translate\n"
 			   "/Helvetica findfont 12 scalefont setfont\n"
-			   "0 %ld moveto ",
+			   "0 %d moveto ",
 			   synopsis.page,
 			   synopsis.pagewidth+((Card32)INCH(0.25)), synopsis.pageheight+((Card32)INCH(0.25)),
 			   INCH(0.125), INCH(0.125),
@@ -566,7 +566,7 @@ static void gcrnewPage(IntX page)
 	proofPSOUT(cffproofctx, workstr);
 	workstr[0] = '\0';
 	
-	sprintf(workstr, "%ld (%hu) stringwidth pop sub %ld moveto (%hu) show\n"
+	sprintf(workstr, "%d (%hu) stringwidth pop sub %d moveto (%hu) show\n"
 			   "/Helvetica-Narrow findfont %d scalefont setfont\n",
 			   synopsis.pagewidth, synopsis.page, synopsis.pageheight +((Card32)9), synopsis.page,
 			   TEXT_SIZE);
@@ -961,16 +961,12 @@ int IsSynthetic(GlyphId glyphId)
 {
 	Byte8 *name = getGlyphName(glyphId, 1);
 	int i;
-	
-	if(syntheticGlyphs[NUM_SYN_GLYPHS][0]!='\0'){
-		fprintf(OUTPUTBUFF, "%s: WARNING: NUM_SYN_GLYPHS is not set correctly. ", global.progname);
-		for(i=0; i<NUM_SYN_GLYPHS*2; i++)
-			if(syntheticGlyphs[i][0]=='\0')
-			{
-				fprintf(OUTPUTBUFF, "Should be %d.\n", i);
-				return 0;
-			}
-	}
+	/* The old code did a dynamic check to see if anyone has changed the
+	 program so that NUM_SYN_GLYPHS is not the same as the number of
+	 glyph names in the static syntheticGlyphs array. If these didn't
+	 match, it then tried to find and report the actual end of the array
+	 by looking for the first index that was an empty string - and
+	 indexing past the end of the array by NUM_SYN_GLYPHS! Wow. */
 		
 	for(i=0; i<NUM_SYN_GLYPHS; i++)
 		if (!strcmp(name, syntheticGlyphs[i])) return 1;
@@ -1314,7 +1310,7 @@ static void CFF_dumpfi(IntX level)
   Card8 *ptr;
   unsigned len;
   cffFontInfo *fi = CFF_.fi;
-  IntX i;
+  Card32 i;
 
   {
 	long cnt;
@@ -1348,7 +1344,7 @@ static void CFF_dumpfi(IntX level)
   {
   	DL(2, (OUTPUTBUFF, "XUID        ="));
   	for (i=0; i<fi->XUID[0]; i++)
-  		DL(2, (OUTPUTBUFF, "%ld ", fi->XUID[i+1]));
+  		DL(2, (OUTPUTBUFF, "%d ", fi->XUID[i+1]));
   	DL(2, (OUTPUTBUFF, "\n"));
   }
 
@@ -1365,7 +1361,7 @@ static void CFF_dumpfi(IntX level)
 	
 
 	DL(2, (OUTPUTBUFF, "UDV         =["));
-	for (i = 0; i < fi->mm.nAxes; i++)
+	for (i = 0; i < (Card32)fi->mm.nAxes; i++)
 	  {
 		if (fi->mm.UDV[i] > 0)
 		  {
@@ -1377,7 +1373,7 @@ static void CFF_dumpfi(IntX level)
 	DL(2, (OUTPUTBUFF, "]\n"));
 
 	DL(2, (OUTPUTBUFF, "axisTypes   =[ "));
-	for (i = 0; i < fi->mm.nAxes; i++)
+	for (i = 0; i < (Card32)fi->mm.nAxes; i++)
 	  {
 		ptr = getCFFstring(fi->mm.axisTypes[i], &len);
 		DL(2, (OUTPUTBUFF, "<%.*s> ", (int)len, ptr));
@@ -1437,7 +1433,7 @@ void dumpByName()
 
 }
 
-void CFF_Dump(IntX level, LongN start)
+void CFF_Dump(IntX level, Int32N start)
 	{
 	  IntX i;
 	  
@@ -1448,7 +1444,7 @@ void CFF_Dump(IntX level, LongN start)
 			  return;
 			}
 		}
-	  DL(1, (OUTPUTBUFF, "### [CFF_] (%08lx)\n", start));
+	  DL(1, (OUTPUTBUFF, "### [CFF_] (%08x)\n", start));
 
 	  initGlyphNames();
 	  headGetUnitsPerEm(&unitsPerEm, CFF__);

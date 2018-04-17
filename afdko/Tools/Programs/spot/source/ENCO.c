@@ -52,7 +52,7 @@ static Format2 *readFormat2(void)
 	return format;
 	}
 
-void ENCORead(LongN start, Card32 length)
+void ENCORead(Int32N start, Card32 length)
 	{
 	IntX i;
 
@@ -138,17 +138,17 @@ static void dumpFormat2(Format2 *format, IntX level)
 	DL(3, (OUTPUTBUFF, "\n"));
 	}
 
-void ENCODump(IntX level, LongN start)
+void ENCODump(IntX level, Int32N start)
 	{
 	IntX i;
 
-	DL(1, (OUTPUTBUFF, "### [ENCO] (%08lx)\n", start));
+	DL(1, (OUTPUTBUFF, "### [ENCO] (%08x)\n", start));
 
 	DLV(2, "version  =", ENCO->version);
 
 	DL(2, (OUTPUTBUFF, "--- offset[index]=value\n"));
 	for (i = 0; i <= nEncodings; i++)
-		DL(2, (OUTPUTBUFF, "[%d]=%08lx ", i, ENCO->offset[i]));
+		DL(2, (OUTPUTBUFF, "[%d]=%08x ", i, ENCO->offset[i]));
 	DL(2, (OUTPUTBUFF, "\n"));
 
 	for (i = 0; i < nEncodings; i++)

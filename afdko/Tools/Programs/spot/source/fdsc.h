@@ -13,8 +13,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void fdscRead(LongN offset, Card32 length);
-extern void fdscDump(IntX level, LongN offset);
+extern void fdscRead(Int32N offset, Card32 length);
+extern void fdscDump(IntX level, Int32N offset);
 extern void fdscFree(void);
 
 #endif /* FDSC_H */

@@ -326,7 +326,7 @@ void resRead(long origin)
 		for (i = 0; i < map->cnt; i++)
 			{
 			res_Info *res = &map->res[i];
-			fprintf(OUTPUTBUFF,  "%c%c%c%c %5hu  %02hx  %08lx %7lu (%08lx) %s\n",
+			fprintf(OUTPUTBUFF,  "%c%c%c%c %5hu  %02hx  %08x %7u (%08x) %s\n",
 				   TAG_ARG(res->type),
 				   res->id, (Card16)res->attrs, res->offset, res->length, res->length,
 				   (res->name == NULL) ? "--none--" : res->name);

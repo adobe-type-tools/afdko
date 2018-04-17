@@ -39,7 +39,7 @@ static Format1 *readFormat1(void)
 	return format;
 	}
 
-void locaRead(LongN start, Card32 length)
+void locaRead(Int32N start, Card32 length)
 	{
 	if (loaded)
 		return;
@@ -85,13 +85,13 @@ static void dumpFormat1(Format1 *format, IntX level)
 
 	DL(2, (OUTPUTBUFF, "--- offsets[index]=long\n"));
 	for (i = 0; i < nGlyphs + 1; i++)
-		DL(2, (OUTPUTBUFF, "[%d]=%08lx ", i, format->offsets[i]));
+		DL(2, (OUTPUTBUFF, "[%d]=%08x ", i, format->offsets[i]));
 	DL(2, (OUTPUTBUFF, "\n"));
 	}
 
-void locaDump(IntX level, LongN start)
+void locaDump(IntX level, Int32N start)
 	{
-	DL(1, (OUTPUTBUFF, "### [loca] (%08lx)\n", start));
+	DL(1, (OUTPUTBUFF, "### [loca] (%08x)\n", start));
 
 	switch (locFormat)
 		{
@@ -125,7 +125,7 @@ void locaFree(void)
 	loaded = 0;
 	}
 
-IntX locaGetOffset(GlyphId glyphId, LongN *offset, Card32 *length,
+IntX locaGetOffset(GlyphId glyphId, Int32N *offset, Card32 *length,
 				   Card32 client)
 	{
 	if (!loaded)

@@ -13,7 +13,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void METARead(LongN offset, Card32 length);
-extern void METADump(IntX level, LongN offset);
+extern void METARead(Int32N offset, Card32 length);
+extern void METADump(IntX level, Int32N offset);
 extern void METAFree(void);
 #endif /* META_H */

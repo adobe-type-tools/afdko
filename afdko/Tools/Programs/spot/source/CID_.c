@@ -11,7 +11,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static CID_Tbl *CID_ = NULL;
 static IntX loaded = 0;
 
-void CID_Read(LongN start, Card32 length)
+void CID_Read(Int32N start, Card32 length)
 	{
 	  if (loaded)
 		return;
@@ -31,9 +31,9 @@ void CID_Read(LongN start, Card32 length)
 	loaded = 1;
 	}
 
-void CID_Dump(IntX level, LongN start)
+void CID_Dump(IntX level, Int32N start)
 	{
-	DL(1, (OUTPUTBUFF, "### [CID ] (%08lx)\n", start));
+	DL(1, (OUTPUTBUFF, "### [CID ] (%08x)\n", start));
 
 	DLV(2, "Version     =", CID_->Version);
 	DLx(2, "Flags       =", CID_->Flags);

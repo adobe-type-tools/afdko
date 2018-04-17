@@ -11,7 +11,7 @@ static trakTbl *trak = NULL;
 static IntX loaded = 0;
 
 /* Read track data table */
-static void readData(Data *data, LongN start, Card16 offset)
+static void readData(Data *data, Int32N start, Card16 offset)
 	{
 	IntX i;
 	IntX j;
@@ -54,7 +54,7 @@ static void readData(Data *data, LongN start, Card16 offset)
 		}
 	}
 
-void trakRead(LongN start, Card32 length)
+void trakRead(Int32N start, Card32 length)
 	{
 	if (loaded)
 		return;
@@ -92,14 +92,14 @@ static void dumpData(Data *data, Byte8 *name, IntX level)
 		{
 		Entry *entry = &data->track[i];
 
-		DL(2, (OUTPUTBUFF, "[%d]={%1.3f (%08lx),%hu,%04hx} ", i, 
+		DL(2, (OUTPUTBUFF, "[%d]={%1.3f (%08x),%hu,%04hx} ", i, 
 			   FIXED_ARG(entry->level), entry->nameId, entry->offset));
 		}
 	DL(2, (OUTPUTBUFF, "\n"));
 
 	DL(2, (OUTPUTBUFF, "--- size[index]=value\n"));	
 	for (i = 0; i < data->nSizes; i++)
-		DL(2, (OUTPUTBUFF, "[%d]=%1.3f (%08lx) ", i, FIXED_ARG(data->size[i])));
+		DL(2, (OUTPUTBUFF, "[%d]=%1.3f (%08x) ", i, FIXED_ARG(data->size[i])));
 	DL(2, (OUTPUTBUFF, "\n"));
 
 	DL(2, (OUTPUTBUFF, "--- value[index]=value\n"));	
@@ -115,9 +115,9 @@ static void dumpData(Data *data, Byte8 *name, IntX level)
 	DL(2, (OUTPUTBUFF, "\n"));
 	}
 
-void trakDump(IntX level, LongN start)
+void trakDump(IntX level, Int32N start)
 	{
-	DL(1, (OUTPUTBUFF, "### [trak] (%08lx)\n", start));
+	DL(1, (OUTPUTBUFF, "### [trak] (%08x)\n", start));
 
 	DLV(2, "version    =", trak->version);
 	DLu(2, "format     =", trak->format);

@@ -13,7 +13,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void MMSDRead(LongN offset, Card32 length);
-extern void MMSDDump(IntX level, LongN offset);
+extern void MMSDRead(Int32N offset, Card32 length);
+extern void MMSDDump(IntX level, Int32N offset);
 extern void MMSDFree(void);
 #endif /* MMSD_H */

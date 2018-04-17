@@ -58,7 +58,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "TTdumpinstrs.h"
 
 
-static void dirDump(IntX level, LongN start);
+static void dirDump(IntX level, Int32N start);
 static void dirFree(void);
 static void addDumpTable(Card32 tag);
 static void sfntTTCList(void);
@@ -67,8 +67,8 @@ static void sfntTTCList(void);
 typedef struct
 	{
 	Card32 tag;						/* Table tag */
-	void (*read)(LongN, Card32);	/* Reads table data structures */
-	void (*dump)(IntX, LongN);		/* Dumps table data structures */
+	void (*read)(Int32N, Card32);	/* Reads table data structures */
+	void (*dump)(IntX, Int32N);		/* Dumps table data structures */
 	void (*free)(void);				/* Frees table data structures */
 	void (*usage)(void);			/* Prints table usage */
 	} Function;
@@ -200,7 +200,7 @@ static IntN cmpCard32s(const void *first, const void *second)
 	}
 
 /* Read TT Collection header */
-void sfntTTCRead(LongN start)
+void sfntTTCRead(Int32N start)
 	{
 	IntX i;
 	SEEK_ABS(start);
@@ -258,21 +258,21 @@ void sfntTTCRead(LongN start)
 	}
 
 /* Dump TT Collection header */
-static void ttcfDump(IntX level, LongN start)
+static void ttcfDump(IntX level, Int32N start)
 	{
 	IntX i;
 
 	if (!ttc.loaded)
 		return;	/* Not a TT Collection */
 
-	DL(1, (OUTPUTBUFF, "### [ttcf] (%08lx)\n", start));
+	DL(1, (OUTPUTBUFF, "### [ttcf] (%08x)\n", start));
 
-	DL(2, (OUTPUTBUFF, "TTCTag        =%c%c%c%c (%08lx)\n", 
+	DL(2, (OUTPUTBUFF, "TTCTag        =%c%c%c%c (%08x)\n", 
 		   TAG_ARG(ttcf.TTCTag), ttcf.TTCTag));
 	DLV(2, "Version       =", ttcf.Version);
 	if (ttc.Version ==  0x00020000)
 		{
-		DL(2, (OUTPUTBUFF, "TTC DSIG Tag  =%c%c%c%c (%08lx)\n", 
+		DL(2, (OUTPUTBUFF, "TTC DSIG Tag  =%c%c%c%c (%08x)\n", 
 			   TAG_ARG(ttcf.DSIGTag), ttcf.DSIGTag));
 		DLU(2, "DSIG Length   =", ttcf.DSIGLength);
 		DLU(2, "DSIG Offset   =", ttcf.DSIGOffset);
@@ -281,13 +281,13 @@ static void ttcfDump(IntX level, LongN start)
 	DLU(2, "DirectoryCount=", ttcf.DirectoryCount);
 	DL(2, (OUTPUTBUFF, "--- TableDirectory[index]=offset\n"));
 	for (i = 0; i < (IntX)ttcf.DirectoryCount; i++)
-		DL(2, (OUTPUTBUFF, "[%d]=%08lx ", i, ttcf.TableDirectory[i]));
+		DL(2, (OUTPUTBUFF, "[%d]=%08x ", i, ttcf.TableDirectory[i]));
 	DL(2, (OUTPUTBUFF, "\n"));
 	
 	}
 
 /* Read sfnt directory */
-static void dirRead(LongN start)
+static void dirRead(Int32N start)
 	{
 	IntX i;
 
@@ -503,14 +503,14 @@ static void makeDump(void)
   }
 
 /* Dump sfnt directory */
-static void dirDump(IntX level, LongN start)
+static void dirDump(IntX level, Int32N start)
 	{
 	IntX i;
 
 	if (dir.id < 0)
-		DL(1, (OUTPUTBUFF, "### [sfnt] (%08lx)\n", start));
+		DL(1, (OUTPUTBUFF, "### [sfnt] (%08x)\n", start));
 	else
-		DL(1, (OUTPUTBUFF, "### [sfnt] (%08lx) id=%d\n", start, dir.id));
+		DL(1, (OUTPUTBUFF, "### [sfnt] (%08x) id=%d\n", start, dir.id));
 
 	DL(2, (OUTPUTBUFF, "--- offset subtable\n"));
 	if (sfnt.version == OTTO_)
@@ -524,7 +524,7 @@ static void dirDump(IntX level, LongN start)
 	else if (sfnt.version == VERSION(1,0))
 		DL(2, (OUTPUTBUFF, "version      =1.0  [TrueType]\n"));
 	else
-		DL(2, (OUTPUTBUFF, "version      =%c%c%c%c (%08lx) [unknown]\n", 
+		DL(2, (OUTPUTBUFF, "version      =%c%c%c%c (%08x) [unknown]\n", 
 			   TAG_ARG(sfnt.version), sfnt.version));
 	DLu(2, "numTables    =", sfnt.numTables);
 	DLu(2, "searchRange  =", sfnt.searchRange);
@@ -536,7 +536,7 @@ static void dirDump(IntX level, LongN start)
 		{
 		Entry *entry = &sfnt.directory[i];
 
-		DL(2, (OUTPUTBUFF, "[%2d]={'%c%c%c%c',%08lx,%08lx,%08lx}\n", i, TAG_ARG(entry->tag),
+		DL(2, (OUTPUTBUFF, "[%2d]={'%c%c%c%c',%08x,%08x,%08x}\n", i, TAG_ARG(entry->tag),
 			   entry->checksum, entry->offset, entry->length));
 		}
 	}
@@ -776,14 +776,14 @@ static Entry *findEntry(Card32 tag)
 	}
 
 /* Hexadecimal table dump */
-static void hexDump(Card32 tag, LongN start, Card32 length)
+static void hexDump(Card32 tag, Int32N start, Card32 length)
 	{
 	Card32 addr = 0;
 	Int32 left = length;
 
 	SEEK_ABS(start);
 
-	fprintf(OUTPUTBUFF,  "### [%c%c%c%c] (%08lx)\n", TAG_ARG(tag), start);
+	fprintf(OUTPUTBUFF,  "### [%c%c%c%c] (%08x)\n", TAG_ARG(tag), start);
 	while (left > 0)
 		{
 		/* Dump one line */
@@ -793,7 +793,7 @@ static void hexDump(Card32 tag, LongN start, Card32 length)
 		IN_BYTES(left < 16 ? left : 16, data);
 
 		/* Dump 8 hexadecimal words of data */
-		fprintf(OUTPUTBUFF,  "%08lx  ", addr);
+		fprintf(OUTPUTBUFF,  "%08x  ", addr);
 		for (i = 0; i < 16; i++)
 			{
 			if (i < left)
@@ -819,31 +819,31 @@ static void hexDump(Card32 tag, LongN start, Card32 length)
 	}
 
 /* Dump as an array of FWORD*/
-static void arrayDump(Card32 tag, LongN start, Card32 length)
+static void arrayDump(Card32 tag, Int32N start, Card32 length)
 {
 	FWord data;
 	Card32 i;
 	
 	SEEK_ABS(start);
 
-	fprintf(OUTPUTBUFF,  "### [%c%c%c%c] (%08lx)\n", TAG_ARG(tag), start);
+	fprintf(OUTPUTBUFF,  "### [%c%c%c%c] (%08x)\n", TAG_ARG(tag), start);
 	fprintf(OUTPUTBUFF,  "--- [index] = value\n");
 	
 	for (i=0; i<length/2; i++)
 	{
 		IN_BYTES(2, (unsigned char *)(&data));
-		fprintf(OUTPUTBUFF, "[%lu] = %d\n", i, data);
+		fprintf(OUTPUTBUFF, "[%u] = %d\n", i, data);
 	}
 }
 
 /* Dump as a set of TT instructions*/
 
-static void TTDump(Card32 tag, LongN start, Card32 length)
+static void TTDump(Card32 tag, Int32N start, Card32 length)
 {
 	Card8 *data;
 	SEEK_ABS(start);
 
-	fprintf(OUTPUTBUFF,  "### [%c%c%c%c] (%08lx)\n", TAG_ARG(tag), start);
+	fprintf(OUTPUTBUFF,  "### [%c%c%c%c] (%08x)\n", TAG_ARG(tag), start);
 	data=(Card8 *)memNew(length+1);
 	
 	IN_BYTES(length, data);
@@ -981,7 +981,7 @@ static void doTables(IntX read)
 	}
 
 /* Read sfnt */
-void sfntRead(LongN start, IntX id)
+void sfntRead(Int32N start, IntX id)
 	{
 	  dir.id = id;
 	  dir.reportedMissing = 0;
@@ -1091,7 +1091,7 @@ int sfntTTCScan(int argc, char *argv[], int argi, opt_Option *opt)
 			{
 			Card32 offset;
 
-			if (sscanf(p, "%li", &offset) == 1)
+			if (sscanf(p, "%i", &offset) == 1)
 				*da_NEXT(ttc.sel) = offset;
 			else
 				opt_Error(opt_Format, opt, arg);
@@ -1107,9 +1107,9 @@ static void sfntTTCList(void)
 	fprintf(OUTPUTBUFF,"(offsets: ");
 	for(i=0; i<ttc.sel.cnt; i++)
 		if (i==0)
-			fprintf(OUTPUTBUFF, "%ld", (Card32)da_INDEX(ttc.sel, i));
+			fprintf(OUTPUTBUFF, "%d", (Card32)*da_INDEX(ttc.sel, i));
 		else
-			fprintf(OUTPUTBUFF, ", %ld", (Card32)da_INDEX(ttc.sel, i));
+			fprintf(OUTPUTBUFF, ", %d", (Card32)*da_INDEX(ttc.sel, i));
 	fprintf(OUTPUTBUFF,")");
 }	
 

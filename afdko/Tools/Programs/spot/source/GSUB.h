@@ -13,8 +13,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void GSUBRead(LongN offset, Card32 length);
-extern void GSUBDump(IntX level, LongN offset);
+extern void GSUBRead(Int32N offset, Card32 length);
+extern void GSUBDump(IntX level, Int32N offset);
 extern void GSUBFree(void);
 extern void GSUBEval(IntX GSUBLookupListIndex, 
 			  IntX numinputglyphs, GlyphId *inputglyphs, 

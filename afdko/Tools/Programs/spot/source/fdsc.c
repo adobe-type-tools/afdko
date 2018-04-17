@@ -10,7 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static fdscTbl *fdsc = NULL;
 static IntX loaded = 0;
 
-void fdscRead(LongN start, Card32 length)
+void fdscRead(Int32N start, Card32 length)
 	{
 	IntX i;
 
@@ -36,22 +36,22 @@ void fdscRead(LongN start, Card32 length)
 	loaded = 1;
 	}
 
-void fdscDump(IntX level, LongN start)
+void fdscDump(IntX level, Int32N start)
 	{
 	IntX i;
 
-	DL(1, (OUTPUTBUFF, "### [fdsc] (%08lx)\n", start));
+	DL(1, (OUTPUTBUFF, "### [fdsc] (%08x)\n", start));
 	
 	/* Dump header */
 	DLV(2, "version     =", fdsc->version);
-	DL(2, (OUTPUTBUFF, "nDescriptors=%lu\n", fdsc->nDescriptors));
+	DL(2, (OUTPUTBUFF, "nDescriptors=%u\n", fdsc->nDescriptors));
 
 	/* Dump descriptors */
 	DL(2, (OUTPUTBUFF, "--- descriptor[index]={tag,value}\n"));
 	for (i = 0; i < (IntX)fdsc->nDescriptors; i++)
 		{
 		FontDescriptor *desc = &fdsc->descriptor[i];
-		DL(2, (OUTPUTBUFF, "[%d]={%c%c%c%c,%1.3f (%08lx)}\n", i,
+		DL(2, (OUTPUTBUFF, "[%d]={%c%c%c%c,%1.3f (%08x)}\n", i,
 			   TAG_ARG(desc->tag), FIXED_ARG(desc->value)));
 		}
 	}

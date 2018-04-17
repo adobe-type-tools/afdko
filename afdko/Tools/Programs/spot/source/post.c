@@ -72,7 +72,7 @@ static Format2_5 *read2_5(void)
 	return format;
 	}
 
-static Format4_0 *read4_0(LongN start)
+static Format4_0 *read4_0(Int32N start)
 	{
 	IntX i;
 	Format4_0 *format;
@@ -93,7 +93,7 @@ static Format4_0 *read4_0(LongN start)
 	return format;
 	}
 
-void postRead(LongN start, Card32 length)
+void postRead(Int32N start, Card32 length)
 	{
 	if (loaded)
 		return;
@@ -319,9 +319,9 @@ static void dump4_0(Format4_0 *format, IntX level)
 	DL(2, (OUTPUTBUFF, "\n"));
 	}
 	
-void postDump(IntX level, LongN start)
+void postDump(IntX level, Int32N start)
 	{
-	DL(1, (OUTPUTBUFF, "### [post] (%08lx)\n", start));
+	DL(1, (OUTPUTBUFF, "### [post] (%08x)\n", start));
 
 	if (!loaded)
 		return;

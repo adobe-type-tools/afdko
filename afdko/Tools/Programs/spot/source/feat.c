@@ -10,7 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static featTbl *feat = NULL;
 static IntX loaded = 0;
 
-void featRead(LongN start, Card32 length)
+void featRead(Int32N start, Card32 length)
 	{
 	IntX i;
 
@@ -58,17 +58,17 @@ void featRead(LongN start, Card32 length)
 	loaded = 1;
 	}
 
-void featDump(IntX level, LongN start)
+void featDump(IntX level, Int32N start)
 	{
 	IntX i;
 
-	DL(1, (OUTPUTBUFF, "### [feat] (%08lx)\n", start));
+	DL(1, (OUTPUTBUFF, "### [feat] (%08x)\n", start));
 
 	/* Dump header */
 	DLV(2, "version  =", feat->version);
 	DL(2, (OUTPUTBUFF, "nNames   =%hu\n", feat->nNames));
 	DL(2, (OUTPUTBUFF, "nSets    =%hu\n", feat->nSets));
-	DL(2, (OUTPUTBUFF, "setOffset=%08lx\n", feat->setOffset));
+	DL(2, (OUTPUTBUFF, "setOffset=%08x\n", feat->setOffset));
 	
 	/* Dump feature names */
 	DL(2, (OUTPUTBUFF, "--- featureNames[index]="
@@ -77,7 +77,7 @@ void featDump(IntX level, LongN start)
 		{
 		FeatureName *feature = &feat->feature[i];
 
-		DL(2, (OUTPUTBUFF, "[%2d]={%2hu,%2hu,%08lx,%04hx,%hu}\n", i, feature->feature,
+		DL(2, (OUTPUTBUFF, "[%2d]={%2hu,%2hu,%08x,%04hx,%hu}\n", i, feature->feature,
 			   feature->nSettings, feature->settingOffset,
 			   feature->featureFlags, feature->nameId));
 		}

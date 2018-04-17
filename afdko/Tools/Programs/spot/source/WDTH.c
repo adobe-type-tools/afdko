@@ -10,7 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static WDTHTbl *WDTH = NULL;
 static IntX loaded = 0;
 
-void WDTHRead(LongN start, Card32 length)
+void WDTHRead(Int32N start, Card32 length)
 	{
 	IntX i;
 	IntX size;
@@ -60,7 +60,7 @@ void WDTHRead(LongN start, Card32 length)
 	loaded = 1;
 	}
 
-void WDTHDump(IntX level, LongN start)
+void WDTHDump(IntX level, Int32N start)
 	{
 	IntX i;
 	IntX j;
@@ -68,7 +68,7 @@ void WDTHDump(IntX level, LongN start)
 	IntX iWidth;
 	IntX nElements = WDTH->nRanges + 1;
 
-	DL(1, (OUTPUTBUFF, "### [WDTH] (%08lx)\n", start));
+	DL(1, (OUTPUTBUFF, "### [WDTH] (%08x)\n", start));
 
 	DLV(2, "version =", WDTH->version);
 	DLu(2, "flags   =", WDTH->flags);
@@ -83,7 +83,7 @@ void WDTHDump(IntX level, LongN start)
 	DL(3, (OUTPUTBUFF, "--- offset[index]=offset\n"));
 	if (WDTH->flags & LONG_OFFSETS)
 		for (i = 0; i < nElements; i++)
-			DL(3, (OUTPUTBUFF, "[%d]=%08lx ", i, ((Card32 *)WDTH->offset)[i]));
+			DL(3, (OUTPUTBUFF, "[%d]=%08x ", i, ((Card32 *)WDTH->offset)[i]));
 	else
 		for (i = 0; i < nElements; i++)
 			DL(3, (OUTPUTBUFF, "[%d]=%04hx ", i, ((Card16 *)WDTH->offset)[i]));

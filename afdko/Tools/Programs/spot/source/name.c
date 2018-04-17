@@ -14,7 +14,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static nameTbl *name = NULL;
 static IntX loaded = 0;
 
-void nameRead(LongN start, Card32 length)
+void nameRead(Int32N start, Card32 length)
 {
 	IntX i;
 	IntX nameSize;
@@ -97,7 +97,7 @@ static void dumpString(NameRecord *record, IntX level)
 		if ((code & 0xff00) == 0 && isprint(code))
 			DL(3, (OUTPUTBUFF, "%c", (IntN)code));
 		else
-			DL(3, (OUTPUTBUFF, "\\%0*lx", precision, code));
+			DL(3, (OUTPUTBUFF, "\\%0*x", precision, code));
 		}
 	DL(3, (OUTPUTBUFF, ">\n"));
 	}
@@ -119,7 +119,7 @@ static void dumpLanguageTagString(LangTagRecord *langTagRec, IntX level)
 		if ((code & 0xff00) == 0 && isprint(code))
 			DL(3, (OUTPUTBUFF, "%c", (IntN)code));
 		else
-			DL(3, (OUTPUTBUFF, "\\%0*lx", precision, code));
+			DL(3, (OUTPUTBUFF, "\\%0*x", precision, code));
 		}
 	DL(3, (OUTPUTBUFF, ">\n"));
 	}
@@ -151,7 +151,7 @@ static void makeString(NameRecord *record, Byte8 *str)
 	}
 
 
-void nameDump(IntX level, LongN start)
+void nameDump(IntX level, Int32N start)
 	{
 	IntX i;
 	Card16 *index;
@@ -201,7 +201,7 @@ void nameDump(IntX level, LongN start)
 	}
 	else
 	{
-		DL(1, (OUTPUTBUFF, "### [name] (%08lx)\n", start));
+		DL(1, (OUTPUTBUFF, "### [name] (%08x)\n", start));
 
 		/* Dump header */
 		DLu(2, "format      =", name->format);

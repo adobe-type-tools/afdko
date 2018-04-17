@@ -1111,7 +1111,7 @@ static void *readSubtable(Card32 offset, Card16 type)
 	return result;
 	}
 
-void GPOSRead(LongN start, Card32 length)
+void GPOSRead(Int32N start, Card32 length)
 	{
 	if (loaded)
 		return;
@@ -1663,7 +1663,7 @@ static void dumpExtension1(ExtensionPosFormat1 *fmt, IntX level, void *feattag)
 	{
 	  DL(2, (OUTPUTBUFF, "PosFormat = 1\n"));
 	  DL(2, (OUTPUTBUFF, "LookupType  = %d\n", fmt->ExtensionLookupType));
-	  DL(2, (OUTPUTBUFF, "Offset      = %08lx\n", fmt->ExtensionOffset));
+	  DL(2, (OUTPUTBUFF, "Offset      = %08x\n", fmt->ExtensionOffset));
 	  
 	  dumpSubtable(fmt->ExtensionOffset, fmt->ExtensionLookupType, fmt->subtable, 
 						 level, feattag, GPOSLookupIndex, GPOStableindex, GPOStableCount, 1);
@@ -2702,7 +2702,7 @@ static void dumpAnchorFormat3(AnchorFormat3 *fmt, IntX level)
 
 static void dumpAnchorRecord(Card32 offset, void *fmt, IntX level)
 	{
-	 DL(2, (OUTPUTBUFF, "--- AnchorRecord (%0lx)\n", offset));
+	 DL(2, (OUTPUTBUFF, "--- AnchorRecord (%0x)\n", offset));
 	if (offset == 0)
 		return;
 		
@@ -2813,7 +2813,7 @@ static void dumpMarkArray(Card32 offset, MarkArray *markarray, IntX level)
 	 IntX i;
 	 IntX j;
 	 da_DCL(MarkRecord*, uniqueAnchorTables);
-	 DL(2, (OUTPUTBUFF, "--- MarkArray (%04lx)\n", offset));
+	 DL(2, (OUTPUTBUFF, "--- MarkArray (%04x)\n", offset));
 	 DLu(2, "MarkCount =", markarray->MarkCount);
 	 DL(2, (OUTPUTBUFF, "--- MarkRecord[index] = Class, AnchorRecord\n"));
 	
@@ -2855,7 +2855,7 @@ static void dumpBaseArray(Card32 offset, BaseArray *basearray, Card32 classCount
 	 IntX j;
 	 IntX m;
 	 da_DCL(AnchorRecord, uniqueAnchorTables);
-	 DL(2, (OUTPUTBUFF, "--- BaseArray (%04lx)\n", offset));
+	 DL(2, (OUTPUTBUFF, "--- BaseArray (%04x)\n", offset));
 	 DLu(2, "BaseCount =", basearray->BaseCount);
 	
 	 da_INIT(uniqueAnchorTables, classCount, classCount);
@@ -3021,7 +3021,7 @@ static void dumpLigatureAttach(Card32 offset, LigatureAttach *ligatureAttach, Ca
 	 IntX j;
 	 IntX m;
 	 da_DCL(AnchorRecord, uniqueAnchorTables);
-	 DL(2, (OUTPUTBUFF, "--- LigatureAttach (%04lx)\n", offset));
+	 DL(2, (OUTPUTBUFF, "--- LigatureAttach (%04x)\n", offset));
 	 DLu(2, "  ComponentCount =", ligatureAttach->ComponentCount);
 	
 	 da_INIT(uniqueAnchorTables, classCount, classCount);
@@ -3078,7 +3078,7 @@ static void dumpLigatureArray(Card32 offset, LigatureArray *ligatureArray, Card3
 	{
 	 IntX i;
 	 da_DCL(AnchorRecord, uniqueAnchorTables);
-	 DL(2, (OUTPUTBUFF, "--- LigatureArray (%04lx)\n", offset));
+	 DL(2, (OUTPUTBUFF, "--- LigatureArray (%04x)\n", offset));
 	 DLu(2, "LigatureCount =", ligatureArray->LigatureCount);
 	
 	 da_INIT(uniqueAnchorTables, classCount, classCount);
@@ -4817,7 +4817,7 @@ static void dumpSubtable(LOffset offset, Card16 type, void *subtable,
 	  else
 	  	offset=offset+prev_offset;
 	  	
-	  DL(2, (OUTPUTBUFF, "--- Subtable [%d] (%04lx)\n", subTableIndex, offset));
+	  DL(2, (OUTPUTBUFF, "--- Subtable [%d] (%04x)\n", subTableIndex, offset));
 	  if (!recursion)
 			{
 			GPOStableCount = subTableCount; /* store for later use in text dump only */
@@ -5277,11 +5277,12 @@ static int strcmpAFM(const void * p1, const void *p2)
 	return 0;
 }
 	  
-void GPOSDump(IntX level, LongN start)
+void GPOSDump(IntX level, Int32N start)
 	{
-		IntX i;
+	IntX i;
 	LookupList *lookuplist;
-	   contextPrefix[0] = 0;
+	contextPrefix[0] = 0;
+	char tempFileName[MAXAFMLINESIZE];
 	  if (!loaded) 
 		{
 		  if (sfntReadTable(GPOS_))
@@ -5323,11 +5324,13 @@ void GPOSDump(IntX level, LongN start)
 	  else if ( (level == 6) || (level == 7) ) /* AFM or features-file text syntax dump */
 	  {
 	  	char afmFilePath[128];
+		afmFilePath[0] = 0;
 	  	/*Write to temporary buffer in order to be able to sort AFM data before it is printed*/
 	  	if (level==6)
 	  		{
-	  		tmpnam(afmFilePath);
-	  		AFMout=fopen(afmFilePath, "w");
+			strcpy(tempFileName, afmFilePath);
+			strcat(tempFileName, "temp.txt");
+	  		AFMout=fopen(tempFileName, "w");
 	  		}
 	    /* dump FeatureLookup-subtables according to Script */
 	  	ttoDecompileByScript(&GPOS._ScriptList, &GPOS._FeatureList, &GPOS._LookupList, dumpSubtable, level);
@@ -5454,12 +5457,12 @@ void GPOSDump(IntX level, LongN start)
 	  			}
 	  		da_FREE(afmLines);
 	  		fclose(AFMout);
-	  		
+			remove(tempFileName);
 	  		remove(afmFilePath);
 	  	} /* end if level 6 */
 	  }
 	  else { /* straight text dump */
-		DL(1, (OUTPUTBUFF, "### [GPOS] (%08lx)\n", start));
+		DL(1, (OUTPUTBUFF, "### [GPOS] (%08x)\n", start));
 		
 		DLV(2, "Version    =", GPOS.Version);
 		DLx(2, "ScriptList =", GPOS.ScriptList);

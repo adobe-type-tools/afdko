@@ -19,7 +19,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static headTbl *head = NULL;
 static IntX loaded = 0;
 
-void headRead(LongN start, Card32 length)
+void headRead(Int32N start, Card32 length)
 	{
 	if (loaded)
 		return;
@@ -174,9 +174,9 @@ Byte8 * headGetModifiedDate(Card32 client)
 	}
 
 
-void headDump(IntX level, LongN start)
+void headDump(IntX level, Int32N start)
 	{
-	DL(1, (OUTPUTBUFF, "### [head] (%08lx)\n", start));
+	DL(1, (OUTPUTBUFF, "### [head] (%08x)\n", start));
 
 	DLV(2, "version           =", head->version);
 	DLF(2, "fontRevision      =", head->fontRevision);

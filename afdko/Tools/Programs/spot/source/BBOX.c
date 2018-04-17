@@ -10,7 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static BBOXTbl *BBOX = NULL;
 static IntX loaded = 0;
 
-void BBOXRead(LongN start, Card32 length)
+void BBOXRead(Int32N start, Card32 length)
 	{
 	IntX i;
 
@@ -52,12 +52,12 @@ void BBOXRead(LongN start, Card32 length)
 	loaded = 1;
 	}
 
-void BBOXDump(IntX level, LongN start)
+void BBOXDump(IntX level, Int32N start)
 	{
 	IntX i;
 	IntX j;
 
-	DL(1, (OUTPUTBUFF, "### [BBOX] (%08lx)\n", start));
+	DL(1, (OUTPUTBUFF, "### [BBOX] (%08x)\n", start));
 
 	DLV(2, "version =", BBOX->version);
 	DLu(2, "flags   =", BBOX->flags);
