@@ -560,20 +560,6 @@
 		BD49905B0D7DE65D005EF88C /* options.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = options.h; path = ../../../source/options.h; sourceTree = SOURCE_ROOT; };
 		BD49905C0D7DE65D005EF88C /* dump.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = dump.h; path = ../../../source/dump.h; sourceTree = SOURCE_ROOT; };
 		BD49906C0D7DE66E005EF88C /* tx.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = tx.c; path = ../../../source/tx.c; sourceTree = SOURCE_ROOT; };
-		BD49906E0D7DE67C005EF88C /* mtx.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = mtx.txt; path = ../../../source/mtx.txt; sourceTree = SOURCE_ROOT; };
-		BD49906F0D7DE67C005EF88C /* pdf.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = pdf.txt; path = ../../../source/pdf.txt; sourceTree = SOURCE_ROOT; };
-		BD4990700D7DE67C005EF88C /* path.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = path.txt; path = ../../../source/path.txt; sourceTree = SOURCE_ROOT; };
-		BD4990710D7DE67C005EF88C /* svg.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = svg.txt; path = ../../../source/svg.txt; sourceTree = SOURCE_ROOT; };
-		BD4990720D7DE67C005EF88C /* ps.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = ps.txt; path = ../../../source/ps.txt; sourceTree = SOURCE_ROOT; };
-		BD4990730D7DE67C005EF88C /* cff.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = cff.txt; path = ../../../source/cff.txt; sourceTree = SOURCE_ROOT; };
-		BD4990740D7DE67C005EF88C /* dcf.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = dcf.txt; path = ../../../source/dcf.txt; sourceTree = SOURCE_ROOT; };
-		BD4990750D7DE67C005EF88C /* cef.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = cef.txt; path = ../../../source/cef.txt; sourceTree = SOURCE_ROOT; };
-		BD4990760D7DE67C005EF88C /* dump.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = dump.txt; path = ../../../source/dump.txt; sourceTree = SOURCE_ROOT; };
-		BD4990770D7DE67C005EF88C /* bc.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = bc.txt; path = ../../../source/bc.txt; sourceTree = SOURCE_ROOT; };
-		BD4990780D7DE67C005EF88C /* help.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = help.txt; path = ../../../source/help.txt; sourceTree = SOURCE_ROOT; };
-		BD4990790D7DE67C005EF88C /* usage.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = usage.txt; path = ../../../source/usage.txt; sourceTree = SOURCE_ROOT; };
-		BD49907A0D7DE67C005EF88C /* t1.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = t1.txt; path = ../../../source/t1.txt; sourceTree = SOURCE_ROOT; };
-		BD49907B0D7DE67C005EF88C /* afm.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = afm.txt; path = ../../../source/afm.txt; sourceTree = SOURCE_ROOT; };
 		BD49908A0D7DE69A005EF88C /* tx */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = tx; sourceTree = BUILT_PRODUCTS_DIR; };
 		BD4990940D7DE82C005EF88C /* absfont.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = absfont.h; path = ../../../../public/lib/api/absfont.h; sourceTree = SOURCE_ROOT; };
 		BD4990960D7DE869005EF88C /* cffread.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = cffread.h; path = ../../../../public/lib/api/cffread.h; sourceTree = SOURCE_ROOT; };
@@ -664,7 +650,6 @@
 				BD4990490D7DE614005EF88C /* xcconfig */,
 				BD4990480D7DE60A005EF88C /* Headers */,
 				08FB7795FE84155DC02AAC07 /* Source */,
-				C6A0FF2B0290797F04C91782 /* Documentation */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
 			);
 			name = tx;
@@ -960,27 +945,6 @@
 				BDAF345717D6A9AF004B2EA0 /* libufowrite.a */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		C6A0FF2B0290797F04C91782 /* Documentation */ = {
-			isa = PBXGroup;
-			children = (
-				BD49906E0D7DE67C005EF88C /* mtx.txt */,
-				BD49906F0D7DE67C005EF88C /* pdf.txt */,
-				BD4990700D7DE67C005EF88C /* path.txt */,
-				BD4990710D7DE67C005EF88C /* svg.txt */,
-				BD4990720D7DE67C005EF88C /* ps.txt */,
-				BD4990730D7DE67C005EF88C /* cff.txt */,
-				BD4990740D7DE67C005EF88C /* dcf.txt */,
-				BD4990750D7DE67C005EF88C /* cef.txt */,
-				BD4990760D7DE67C005EF88C /* dump.txt */,
-				BD4990770D7DE67C005EF88C /* bc.txt */,
-				BD4990780D7DE67C005EF88C /* help.txt */,
-				BD4990790D7DE67C005EF88C /* usage.txt */,
-				BD49907A0D7DE67C005EF88C /* t1.txt */,
-				BD49907B0D7DE67C005EF88C /* afm.txt */,
-			);
-			name = Documentation;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
