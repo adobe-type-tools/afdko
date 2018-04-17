@@ -3,7 +3,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /***********************************************************************/
 /* read.c */
 
-
+#include <math.h>
 #include "ac.h"
 #include "bftoac.h"
 #include "charpath.h"

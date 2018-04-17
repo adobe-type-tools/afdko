@@ -289,11 +289,6 @@ public boolean AutoColor(
     		result = DoArgsIgnoreTime(total_files, fileNamePtr, extracolor, &renameLog, release);
     
     }
-#ifndef IS_GGL
-	if (doAll)
-   	 if (scalinghints)
-      result = DoAllIgnoreTime(extracolor, IncludeFile);
-#endif
 
   return(result);
 }
