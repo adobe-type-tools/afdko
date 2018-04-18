@@ -3,7 +3,6 @@ import os
 import platform
 import subprocess
 import sys
-import time
 from distutils.util import get_platform
 
 import setuptools.command.build_py
