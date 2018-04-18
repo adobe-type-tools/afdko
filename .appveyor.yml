@@ -1,9 +1,7 @@
 environment:
-  # XXX replace pypi credentials and encrypt password:
-  # https://www.appveyor.com/docs/build-configuration/#secure-variables
-  TWINE_USERNAME: "anthrotype"
+  TWINE_USERNAME: "afdko-travis"
   TWINE_PASSWORD:
-    secure: 3MYRWT1R2pwRunaCYHAqlQ==
+    secure: myMd6E3niwjGvxEHeChOlg==
 
 install:
   - python -m pip install --upgrade pip setuptools
