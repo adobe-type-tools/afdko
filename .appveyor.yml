@@ -3,6 +3,11 @@ environment:
   TWINE_PASSWORD:
     secure: myMd6E3niwjGvxEHeChOlg==
 
+branches:
+  only:
+    - master
+    - /^\d+\.\d+\.\d+.*$/
+
 install:
   - python -m pip install --upgrade pip setuptools
   - pip install setuptools_scm
