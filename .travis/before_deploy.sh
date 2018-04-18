@@ -11,5 +11,12 @@ if $(ls ./dist/afdko*.zip > /dev/null 2>&1) && \
 		$(ls ./dist/afdko*.whl > /dev/null 2>&1); then
 	echo "Distribution packages already exists; skipping"
 else
-	tox -e bdist
+	curl -O https://bootstrap.pypa.io/get-pip.py
+	python get-pip.py --user
+	python -m pip install --user virtualenv
+	python -m virtualenv .venv/
+	source .venv/bin/activate
+	pip install --upgrade wheel cython
+	pip install -r requirements.txt
+	python setup.py bdist_wheel
 fi

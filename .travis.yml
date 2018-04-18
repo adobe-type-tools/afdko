@@ -61,6 +61,11 @@ matrix:
       if: type = push
       language: generic
 
+cache:
+  - pip
+  - directories:
+    - $HOME/.pyenv_cache
+
 # Only build for *pushes* to master,
 # not for pushes to other branches
 # (build for PRs from any branch).
