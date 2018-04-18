@@ -6,7 +6,7 @@ environment:
 branches:
   only:
     - master
-    - /^\d+\.\d+\.\d+.*$/
+    - /\d+\.\d+\.\d+.*/
 
 install:
   - python -m pip install --upgrade pip setuptools
