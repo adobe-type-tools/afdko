@@ -1,5 +1,5 @@
 install:
-  - python -m pip install --upgrade pip
+  - python -m pip install --upgrade pip setuptools
   - pip install wheel
   - pip install pytest
   - python setup.py bdist_wheel
