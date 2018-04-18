@@ -1,11 +1,8 @@
 #!/bin/bash
 
-curl -O https://bootstrap.pypa.io/get-pip.py
-python get-pip.py --user
-python -m pip install --user virtualenv
-python -m virtualenv .venv/
+# the .travis/before_deploy.sh script must be run first to create
+# the virtual environment and build the distribution packages
 source .venv/bin/activate
-pip install -r requirements.txt
 pip install twine
 
 export TWINE_USERNAME=afdko-travis

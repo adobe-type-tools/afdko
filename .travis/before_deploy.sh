@@ -16,7 +16,6 @@ else
 	python -m pip install --user virtualenv
 	python -m virtualenv .venv/
 	source .venv/bin/activate
-	pip install --upgrade wheel cython
-	pip install -r requirements.txt
-	python setup.py bdist_wheel
+	pip install --upgrade setuptools setuptools_scm wheel
+	python setup.py sdist bdist_wheel
 fi

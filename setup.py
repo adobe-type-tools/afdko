@@ -3,7 +3,6 @@ import os
 import platform
 import subprocess
 import sys
-import time
 from distutils.util import get_platform
 
 import setuptools.command.build_py
@@ -183,7 +182,7 @@ def main():
     platform_name = get_platform()
 
     setup(name="afdko",
-          version="2.6.26.dev" + time.strftime("%Y%m%d%H%M%S"),
+          use_scm_version=True,
           description="Adobe Font Development Kit for OpenType",
           long_description=long_description,
           url='https://github.com/adobe-type-tools/afdko',
@@ -197,7 +196,10 @@ def main():
           include_package_data=True,
           zip_safe=False,
           python_requires='>=2.7',
-          setup_requires=['wheel'],
+          setup_requires=[
+              'wheel',
+              'setuptools_scm',
+          ],
           tests_require=[
               'pytest',
           ],

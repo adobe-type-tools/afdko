@@ -5,6 +5,7 @@
 afdko.egg-info/
 build/
 dist/
+.eggs/
 
 # PyCharm directory
 .idea/
