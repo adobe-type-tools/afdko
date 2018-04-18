@@ -1,3 +1,10 @@
+environment:
+  # XXX replace pypi credentials and encrypt password:
+  # https://www.appveyor.com/docs/build-configuration/#secure-variables
+  TWINE_USERNAME: "anthrotype"
+  TWINE_PASSWORD:
+    secure: 3MYRWT1R2pwRunaCYHAqlQ==
+
 install:
   - python -m pip install --upgrade pip setuptools
   - pip install setuptools_scm
@@ -11,3 +18,18 @@ build: false
 test_script:
   - pytest
   - pip uninstall --yes afdko
+
+artifacts:
+  # archive the generated packages in the ci.appveyor.com build report
+  - path: dist\*.whl
+
+# Deploy wheels on tags to PyPI
+on_success:
+  - ps: >-
+      if($env:APPVEYOR_REPO_TAG -eq 'true') {
+        Write-Output ("Deploying " + $env:APPVEYOR_REPO_TAG_NAME + " to PyPI...")
+        pip install --upgrade twine
+        twine upload dist\*.whl
+      } else {
+        Write-Output "Not deploying as this is not a tagged commit"
+      }
