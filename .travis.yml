@@ -8,7 +8,7 @@ matrix:
       install:
         - sudo apt-get install g++-multilib
         - sudo -H pip install --upgrade pip
-        - pip install --user --upgrade setuptools wheel cython
+        - pip install --user --upgrade setuptools setuptools_scm wheel cython
       script:
         - python setup.py bdist_wheel
         - pip install --user dist/*.whl
@@ -30,7 +30,7 @@ matrix:
         - pip install collective.checkdocs
         - pip install pygments
         - pip install flake8
-        - pip install --upgrade wheel cython
+        - pip install --upgrade setuptools_scm wheel cython
         - pip install -r requirements.txt
       before_script:
         - export PYTHONPATH=$PYTHONPATH:$(pwd)
