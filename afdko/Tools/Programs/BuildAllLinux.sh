@@ -10,6 +10,10 @@ do
 	shFile=`basename $shFile`
 	cd $newDir
 	sh  $shFile $1
+	failed=$?
 	cd $curDir
+	if [ "$failed" -ne 0 ]; then
+		exit "$failed"
+	fi
 done
 echo "Done"
