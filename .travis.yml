@@ -55,6 +55,17 @@ matrix:
       after_success:
         - codecov
 
+    - os: linux
+      sudo: required
+      services:
+        - docker
+      env:
+        - NAME=Linux-deploy
+        - DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
+        - BUILD_DIST=true
+      if: type = push
+      python: 2.7
+
     - os: osx
       env:
         - NAME=OSX-deploy
