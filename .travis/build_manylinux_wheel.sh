@@ -19,15 +19,11 @@ yum install -y glibc-devel.i386 libgcc_s.so.1
 # For now we only compile wheels for Linux python2.7 64-bit
 PYTHON=/opt/python/cp27-cp27mu/bin/python
 
-if [ ! -d ".venv" ]; then
-    ${PYTHON} -m pip install --upgrade pip
-    ${PYTHON} -m pip install virtualenv
-    ${PYTHON} -m virtualenv .venv
-fi
-source .venv/bin/activate
+# get latest pip
+${PYTHON} -m pip install --upgrade pip
 
 # build the wheel
-pip wheel -v --no-deps .
+${PYTHON} -m pip wheel -v --no-deps --wheel-dir wheelhouse .
 
 # repair and save manylinux1 wheel to dist/
 for whl in wheelhouse/*.whl; do
