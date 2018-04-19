@@ -6,7 +6,8 @@ import sys
 from distutils.util import get_platform
 
 import setuptools.command.build_py
-from setuptools import setup, find_packages, Command
+import setuptools.command.install
+from setuptools import setup, find_packages
 
 """
 We need a customized version of the 'bdist_wheel' command, because otherwise
@@ -27,6 +28,25 @@ except ImportError:
     print("setup requires that the Python package 'wheel' be installed. "
           "Try the command 'pip install wheel'.")
     sys.exit(1)
+
+
+class InstallPlatlib(setuptools.command.install.install):
+    """This is to force installing all the modules to the non-pure, platform-
+    specific lib directory, even though we haven't defined any 'ext_modules'.
+
+    The distutils 'install' command, in 'finalize_options' method, picks
+    either 'install_platlib' or 'install_purelib' based on whether the
+    'self.distribution.ext_modules' list is not empty.
+
+    Without this hack, auditwheel would flag the afdko wheel as invalid since
+    it contains native executables inside the pure lib folder.
+
+    TODO Remove this hack if/when in the future we install extension modules.
+    """
+
+    def finalize_options(self):
+        setuptools.command.install.install.finalize_options(self)
+        self.install_lib = self.install_platlib
 
 
 def get_executable_dir():
@@ -129,26 +149,6 @@ def _get_requirements():
         return requirements.read().splitlines()
 
 
-class PassCommand(Command):
-    """ This is used with Travis `dpl` tool so that it skips creating sdist
-    and wheel packages, but simply uploads to PyPI the files found in ./dist
-    folder, that were previously built inside the tox 'bdist' environment.
-    This ensures that the same files are uploaded to Github Releases and PyPI.
-    """
-
-    description = "do nothing"
-    user_options = []
-
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        pass
-
-
 def main():
     pkg_list = find_packages()
     classifiers = [
@@ -211,7 +211,7 @@ def main():
           cmdclass={
               'build_py': CustomBuild,
               'bdist_wheel': CustomBDistWheel,
-              'pass': PassCommand,
+              'install': InstallPlatlib,
           },
           )
 
