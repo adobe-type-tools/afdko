@@ -4846,7 +4846,8 @@ static void dcf_getvsIndices(txCtx h, const ctlRegion *region)
     unsigned int i = 0;
     FILE *fp = h->dst.stm.fp;
 
-    
+    if (region->begin <= 0)
+        return;
     unsigned long regionListOffset;
     unsigned short ivdSubtableCount;
     dnaDCL(unsigned long, ivdSubtableOffsets);
@@ -5157,6 +5158,20 @@ static void initSubrInfo(txCtx h, const ctlRegion *region, SubrInfo *info)
 		info->bias = 32768;
 	}
 
+static void dcf_setNumRegions(txCtx h, abfGlyphInfo *info)
+    {
+    /* If there is a Variation Region, then we get the regionCount for the current vsIndex.
+     We need this in order to count stems when blends are present. */
+    if (h->dcf.varRegionInfo.cnt == 0)
+        {
+        h->dcf.numRegions = 0;
+        }
+    else
+        {
+        h->dcf.numRegions = h->dcf.varRegionInfo.array[info->blendInfo.vsindex].regionCount;
+        }
+    }
+
 /* Glyph begin callback to save count stems. */
 static int dcf_SaveStemCount(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 	{
@@ -5165,16 +5180,8 @@ static int dcf_SaveStemCount(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 	h->dcf.fd = &h->dcf.local.array[info->iFD];
 	h->dcf.stemcnt = 0;
     h->dcf.flags &= ~DCF_END_HINTS;
-    /* If there is a Variation Region, then we get the regionCount for the current vsIndex.
-     We need this in order to count stems when blends are present. */
-    if (h->dcf.varRegionInfo.cnt == 0)
-    {
-        h->dcf.numRegions = 0;
-    }
-    else
-    {
-        h->dcf.numRegions = h->dcf.varRegionInfo.array[info->blendInfo.vsindex].regionCount;
-    }
+    dcf_setNumRegions(h, info);
+
 	h->stack.cnt = 0;
 	dumpCstr(h, &info->sup, 0);
 	h->dcf.glyph.array[info->tag] = (unsigned char)h->dcf.stemcnt;
@@ -5199,16 +5206,7 @@ static int dcf_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 	h->dcf.fd = &h->dcf.local.array[info->iFD];
 	h->dcf.stemcnt = 0;
     h->dcf.flags &= ~DCF_END_HINTS;
-    /* If there is a Variation Region, then we get the regionCount for the current vsIndex.
-     We need this in order to count stems when blends are present. */
-    if (h->dcf.varRegionInfo.cnt == 0)
-    {
-        h->dcf.numRegions = 0;
-    }
-    else
-    {
-        h->dcf.numRegions = h->dcf.varRegionInfo.array[info->blendInfo.vsindex].regionCount;
-    }
+    dcf_setNumRegions(h, info);
         
 	h->stack.cnt = 0;
 	dumpCstr(h, &info->sup, 0);
@@ -5301,8 +5299,7 @@ static void dcf_BegFont(txCtx h, abfTopDict *top)
     else
     {
         /* number of regions needs to be known for reading charstrings */
-		if (single->VarStore.begin > 0)
-        	dcf_getvsIndices(h, &single->VarStore);
+        dcf_getvsIndices(h, &single->VarStore);
         h->dcf.flags |= DCF_IS_CFF2;
         h->maxOpStack = CFF2_MAX_OP_STACK;
         initCstrs(h, top);
