@@ -5179,8 +5179,8 @@ static int dcf_SaveStemCount(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 
 	h->dcf.fd = &h->dcf.local.array[info->iFD];
 	h->dcf.stemcnt = 0;
-    h->dcf.flags &= ~DCF_END_HINTS;
-    dcf_setNumRegions(h, info);
+	h->dcf.flags &= ~DCF_END_HINTS;
+	dcf_setNumRegions(h, info);
 
 	h->stack.cnt = 0;
 	dumpCstr(h, &info->sup, 0);
@@ -5205,8 +5205,8 @@ static int dcf_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 
 	h->dcf.fd = &h->dcf.local.array[info->iFD];
 	h->dcf.stemcnt = 0;
-    h->dcf.flags &= ~DCF_END_HINTS;
-    dcf_setNumRegions(h, info);
+	h->dcf.flags &= ~DCF_END_HINTS;
+	dcf_setNumRegions(h, info);
         
 	h->stack.cnt = 0;
 	dumpCstr(h, &info->sup, 0);
