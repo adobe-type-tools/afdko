@@ -256,11 +256,13 @@ def parse_glyph_list_arg(glyph_string):
     return glyph_list
 
 
+def add_whitespace(indent_index, indent_space, arg):
+    if indent_index == 0:
+        return arg
+    return (" " * indent_space) + arg
+
+
 class InlineHelpFormatter(argparse.RawDescriptionHelpFormatter):
-    def add_whitespace(self, indent_index, indent_space, arg):
-        if indent_index == 0:
-            return arg
-        return (" " * indent_space) + arg
 
     def _split_lines(self, arg, width):
         arg_rows = arg.splitlines()
@@ -270,12 +272,13 @@ class InlineHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 arg_rows[line_index] = " "
             elif search:
                 indent_space = search.end()
-                lines = [self.add_whitespace(i, indent_space, x)
-                         for i, x in enumerate(textwrap.wrap(text_line, width))]
+                lines = [add_whitespace(i, indent_space, x) for i, x in
+                         enumerate(textwrap.wrap(text_line, width))]
                 arg_rows[line_index] = lines
 
         # The  [''] adds an empty line between arguments.
         return [item for sublist in arg_rows for item in sublist] + ['']
+
 
 def get_options(args):
     parser = argparse.ArgumentParser(
