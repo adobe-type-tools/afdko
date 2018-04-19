@@ -5163,13 +5163,13 @@ static void dcf_setNumRegions(txCtx h, abfGlyphInfo *info)
     /* If there is a Variation Region, then we get the regionCount for the current vsIndex.
      We need this in order to count stems when blends are present. */
     if (h->dcf.varRegionInfo.cnt == 0)
-        {
+    {
         h->dcf.numRegions = 0;
-        }
+    }
     else
-        {
+    {
         h->dcf.numRegions = h->dcf.varRegionInfo.array[info->blendInfo.vsindex].regionCount;
-        }
+    }
     }
 
 /* Glyph begin callback to save count stems. */
