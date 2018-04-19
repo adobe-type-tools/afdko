@@ -244,7 +244,7 @@ typedef enum {                  /* Char id type */
 #define DEG_2_RAD   (3.141592653589793 / 180)
 
 /* Round double and convert to Fixed */
-#define RND2FIX(d)  ((Fixed)((long)((double)(d) + 0.5) * 65536.0))
+#define RND2FIX(d)  ((Fixed)((int32_t)((double)(d) + 0.5) * 65536.0))
 
 /* --- template glyph data for auto glyph addition --- */
 typedef struct {
@@ -913,7 +913,7 @@ static void addWidth(recodeCtx h, Fixed width) {
 
 			/* Write width and copy rest of charstring */
 			bytes = csEncInteger(this->width, dst);
-			memcpy(dst + bytes,
+			memmove(dst + bytes,
 			       &h->cstrs.array[this->icstr + DUMMY_WIDTH_SIZE], length);
 
 			length += bytes;
@@ -1756,8 +1756,8 @@ static int t1parse(recodeCtx h, unsigned length, unsigned char *cstr,
 
 			case 255: {
 				/* 5 byte number */
-				long value = (long)cstr[i + 1] << 24 | (long)cstr[i + 2] << 16 |
-				    (long)cstr[i + 3] << 8 | (long)cstr[i + 4];
+				int32_t value = (int32_t)cstr[i + 1] << 24 | (int32_t)cstr[i + 2] << 16 |
+				    (int32_t)cstr[i + 3] << 8 | (int32_t)cstr[i + 4];
 				if (-32000 <= value && value <= 32000) {
 					value <<= 16;
 				}
@@ -2359,7 +2359,7 @@ static Blend *setCntrMask(recodeCtx h, Blend *p, int vert, HintMask cntrmask) {
 #endif
 			{
 				/* Stem list full; just find the best match */
-				Fixed smallest = LONG_MAX;
+				Fixed smallest = INT32_MAX;
 
 				for (i = 0; i < h->stem.list.cnt; i++) {
 					int j;
@@ -2907,7 +2907,7 @@ static void recodePath(recodeCtx h) {
 	setBlend(h, h->path.y, 0);
 
 	/* Handle charstring width */
-	if (h->path.width[0] == LONG_MIN) {
+	if (h->path.width[0] == INT32_MIN) {
 		if (h->idType != SubrType) {
 			badChar(h); /* Charstring has no width! */
 		}
@@ -3349,7 +3349,7 @@ static void cstrRecode(tcCtx g, unsigned length, unsigned char *cstr,
 	h->pend.move = 1;
 	h->pend.trans = 0;
 
-	h->path.width[0] = LONG_MIN;
+	h->path.width[0] = INT32_MIN;
 	h->path.segs.cnt = 0;
 	h->path.ops.cnt = 0;
 	h->path.args.cnt = 0;
@@ -4220,7 +4220,7 @@ static void saveTemplateGlyphData(recodeCtx h, TemplateGlyphData *templateGlyph)
 
 	for (h->newGlyph.iMaster = 0; h->newGlyph.iMaster < h->nMasters; h->newGlyph.iMaster++) {
 		int iMaster = h->newGlyph.iMaster;
-		templateGlyph->bbox.left[iMaster] = LONG_MAX;
+		templateGlyph->bbox.left[iMaster] = INT32_MAX;
 		templateGlyph->bbox.bottom[iMaster] = 0;
 		templateGlyph->bbox.right[iMaster] = 0;
 		templateGlyph->bbox.top[iMaster] = 0;

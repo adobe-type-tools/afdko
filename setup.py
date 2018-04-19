@@ -6,16 +6,7 @@ import sys
 from distutils.util import get_platform
 
 import setuptools.command.build_py
-from setuptools import setup, find_packages
-
-"""
-Notes:
-In order to upolad the afdko wheel to testpypi to test the package, I had to
-first update the Mac OSX system python ssl module with 'pip install pyOpenSSL
-ndg-httpsclient pyasn1'. Otherwise, the command 'twine upload --repository-url
-https://test.pypi.org/legacy/ dist/*' would fail with
-'SSLError: [SSL: TLSV1_ALERT_PROTOCOL_VERSION]'
-"""
+from setuptools import setup, find_packages, Command
 
 """
 We need a customized version of the 'bdist_wheel' command, because otherwise
@@ -84,7 +75,7 @@ class CustomBuild(setuptools.command.build_py.build_py):
         setuptools.command.build_py.build_py.run(self)
 
 
-def get_scripts():
+def _get_scripts():
     bin_dir = get_executable_dir()
     script_names = [
         'autohintexe', 'detype1', 'makeotfexe', 'mergeFonts', 'rotateFont',
@@ -100,7 +91,7 @@ def get_scripts():
     return scripts
 
 
-def get_console_scripts():
+def _get_console_scripts():
     script_entries = [
         ('autohint', 'autohint:main'),
         ('buildcff2vf', 'buildCFF2VF:run'),
@@ -115,6 +106,7 @@ def get_console_scripts():
         ('otc2otf', 'otc2otf:main'),
         ('otf2otc', 'otf2otc:main'),
         ('stemhist', 'StemHist:main'),
+        ('ttfcomponentizer', 'ttfcomponentizer:main'),
         ('ttxn', 'ttxn:main'),
         ('charplot', 'ProofPDF:charplot'),
         ('digiplot', 'ProofPDF:digiplot'),
@@ -132,6 +124,31 @@ def get_console_scripts():
     return scripts
 
 
+def _get_requirements():
+    with io.open("requirements.txt", encoding="utf-8") as requirements:
+        return requirements.read().splitlines()
+
+
+class PassCommand(Command):
+    """ This is used with Travis `dpl` tool so that it skips creating sdist
+    and wheel packages, but simply uploads to PyPI the files found in ./dist
+    folder, that were previously built inside the tox 'bdist' environment.
+    This ensures that the same files are uploaded to Github Releases and PyPI.
+    """
+
+    description = "do nothing"
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        pass
+
+
 def main():
     pkg_list = find_packages()
     classifiers = [
@@ -141,9 +158,6 @@ def main():
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 2.7',
     ]
-
-    scripts = get_scripts()
-    console_scripts = get_console_scripts()
 
     platform_system = platform.system()
     if platform_system == "Darwin":
@@ -168,7 +182,7 @@ def main():
     platform_name = get_platform()
 
     setup(name="afdko",
-          version="2.6.25b2",
+          use_scm_version=True,
           description="Adobe Font Development Kit for OpenType",
           long_description=long_description,
           url='https://github.com/adobe-type-tools/afdko',
@@ -182,25 +196,27 @@ def main():
           include_package_data=True,
           zip_safe=False,
           python_requires='>=2.7',
-          setup_requires=['wheel'],
-          install_requires=[
-              'fonttools>=3.19.0',
-              'booleanOperations>=0.7.1',
-              'fontMath>=0.4.4',
-              'robofab>=1.2.1',
-              'defcon>=0.3.5',
-              'mutatorMath>=2.1.0',
-              'ufolib>=2.1.1',
-              'ufonormalizer>=0.3.2',
-              'fontPens>=0.1.0'
+          setup_requires=[
+              'wheel',
+              'setuptools_scm',
           ],
-          scripts=scripts,
+          tests_require=[
+              'pytest',
+          ],
+          install_requires=_get_requirements(),
+          scripts=_get_scripts(),
           entry_points={
-              'console_scripts': console_scripts,
+              'console_scripts': _get_console_scripts(),
           },
-          cmdclass={'build_py': CustomBuild, 'bdist_wheel': CustomBDistWheel},
+          cmdclass={
+              'build_py': CustomBuild,
+              'bdist_wheel': CustomBDistWheel,
+              'pass': PassCommand,
+          },
           )
 
 
 if __name__ == '__main__':
     main()
+
+# PyPI deployment test 2018-04-09 15:42

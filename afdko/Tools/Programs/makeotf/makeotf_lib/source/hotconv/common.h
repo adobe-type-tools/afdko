@@ -38,7 +38,7 @@
 /* Apple's TrueType definitions */
 typedef short FWord;            /* Signed metric in font (em) units */
 typedef unsigned short uFWord;  /* Unsigned metric in font (em) units */
-#define VERSION(a, b) (((long)(a) << 16) | (b) << 12) /* Table version */
+#define VERSION(a, b) (((int32_t)(a) << 16) | (b) << 12) /* Table version */
 
 /* Size of types (bytes) */
 #define int8    1
@@ -56,7 +56,7 @@ typedef unsigned short uFWord;  /* Unsigned metric in font (em) units */
    OFFSET macros allow a simple declaration of both the byte offset field and a
    structure containing the data for that offset. (In header definitions the
    symbol |-> is used as a shorthand for "relative to".) */
-typedef unsigned long LOffset;
+typedef uint32_t LOffset;
 typedef unsigned short Offset;
 #define NULL_OFFSET 0
 #define DCL_OFFSET(type, name) \
@@ -67,7 +67,7 @@ typedef unsigned short Offset;
 	type *name ## _
 
 /* Tag support */
-typedef unsigned long Tag;
+typedef uint32_t Tag;
 #define TAG(a, b, c, d) ((Tag)(a) << 24 | (Tag)(b) << 16 | (c) << 8 | (d))
 #define TAG_ARG(t) (char)((t) >> 24 & 0xff), (char)((t) >> 16 & 0xff), \
 	(char)((t) >> 8 & 0xff), (char)((t) & 0xff)
@@ -89,7 +89,7 @@ typedef unsigned long Tag;
 #define IN4(v)              (v) = hotIn4(h->g)
 
 /* Specify scale normalized em units (1000/em) to font units */
-#define EM_SCALE(u)         (g->font.unitsPerEm * (long)(u) / 1000)
+#define EM_SCALE(u)         (g->font.unitsPerEm * (int32_t)(u) / 1000)
 #define ARRAY_LEN(t)        (sizeof(t) / sizeof((t)[0]))
 #define RAD_DEG             57.2958
 #define INT2FIX(i)          ((Fixed)(i) << 16)
@@ -97,7 +97,7 @@ typedef unsigned long Tag;
 #define FIX2INT(f)          ((short)(((f) + 0x00008000) >> 16)) /* xxx Doesn't
 	                                                               round correctly for -ve numbers, but OK since used only with MMs */
 
-#define RND(d)              ((long)(((d) > 0) ? (d) + 0.5 : (d) - 0.5))
+#define RND(d)              ((int32_t)(((d) > 0) ? (d) + 0.5 : (d) - 0.5))
 #define ABS(v)              ((v) < 0 ? -(v) : (v))
 #define MIN(a, b)            ((a) < (b) ? (a) : (b))
 #define MAX(a, b)            ((a) > (b) ? (a) : (b))
@@ -115,7 +115,7 @@ typedef unsigned long Tag;
 
 /* -------------------------------- Typedefs ------------------------------- */
 
-typedef long Fixed;
+typedef int32_t Fixed;
 
 /* Glyph index */
 typedef unsigned short GID;
@@ -130,7 +130,7 @@ typedef unsigned short SID;
 typedef unsigned short CID;
 
 /* Unicode value */
-typedef unsigned long UV;                   /* Unicode scalar value */
+typedef uint32_t UV;                   /* Unicode scalar value */
 typedef unsigned short UV_BMP;              /* Unicode BMP value */
 #define UV_UNDEF          ((unsigned)0xFFFF)        /* Indicates undefined UV */
 #define UV_SURR_HI_BEG    ((unsigned)0xD800)        /* High surrogate range begin */
@@ -148,7 +148,7 @@ typedef unsigned short UV_BMP;              /* Unicode BMP value */
 	(((((c) & ((unsigned)0xFFFF)) == ((unsigned)0xFFFE) || ((c) & ((unsigned)0xFFFF)) == ((unsigned)0xFFFF)) && ((c) >> 16) <= 0x10) \
 	 || IN_RANGE((c), ((unsigned)0xFDD0), ((unsigned)0xFDEF)))
 
-#define IS_SUPP_UV(c) ((c) > ((unsigned long)0xFFFF)) /* Is "c" a supplementary (ie non-BMP) UV?*/
+#define IS_SUPP_UV(c) ((c) > ((uint32_t)0xFFFF)) /* Is "c" a supplementary (ie non-BMP) UV?*/
 
 /* Various heuristic glyphs */
 #define UV_CAP_HEIGHT     ((unsigned)0x0048)  /* "H" */
@@ -240,7 +240,7 @@ typedef struct {            /* Glyph information */
 
 	/* --- Additional fields: */
 	union {
-		long inx;           /* (tmp) Index into string da in mapCtx */
+		int32_t inx;           /* (tmp) Index into string da in mapCtx */
 		char *str;          /* Actual pointer to glyph name */
 	} gname;
     char* srcName;          /* Actual pointer to development glyph name */
@@ -335,8 +335,8 @@ typedef struct {            /* Font information */
 	} win;
 	struct {
 		/* Mac-specific data */
-		long cmapScript;    /* Platform-specific field for Mac cmap */
-		long cmapLanguage;  /* Language field for Mac cmap */
+		int32_t cmapScript;    /* Platform-specific field for Mac cmap */
+		int32_t cmapLanguage;  /* Language field for Mac cmap */
 	} mac;
 	struct {                /* --- Kerning data */
 		dnaDCL(KernPair_, pairs);
@@ -432,7 +432,7 @@ struct hotCtx_ {
 	dnaDCL(char, note);     /* Buffer for messages */
 
 	short hadError;         /* Flags if error occurred */
-	unsigned long convertFlags;     /* flags for building final OTF. */
+	uint32_t convertFlags;     /* flags for building final OTF. */
 };
 
 /* Functions */
@@ -440,8 +440,8 @@ void CDECL hotMsg(hotCtx g, int level, char *fmt, ...);
 void hotQuitOnError(hotCtx g);
 
 void hotOut2(hotCtx g, short value);
-void hotOut3(hotCtx g, long value);
-void hotOut4(hotCtx g, long value);
+void hotOut3(hotCtx g, int32_t value);
+void hotOut4(hotCtx g, int32_t value);
 
 void hotCalcSearchParams(unsigned unitSize, long nUnits,
                          unsigned short *searchRange,

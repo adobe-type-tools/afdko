@@ -9,11 +9,12 @@
 
 #include "dynarr.h"
 #include "typecomp.h"
+#include "stdint.h"
 
 /* Types */
-/*typedef long Fixed;	*/			/* 16.16 fixed point */
+typedef int32_t Fixed;			/* 16.16 fixed point */
 typedef unsigned char OffSize;  /* Offset size indicator */
-typedef unsigned long Offset;   /* 1, 2, 3, or 4-byte offset */
+typedef uint32_t Offset;   /* 1, 2, 3, or 4-byte offset */
 typedef unsigned short SID;     /* String id */
 typedef struct {                /* INDEX table header */
 	unsigned short count;
@@ -37,7 +38,7 @@ typedef struct {                /* INDEX table header */
 	((items) == 0 ? sizeCard16 : \
 	 (sizeCard16 + sizeCard8 + ((items) + 1) * INDEX_OFF_SIZE(size) + (size)))
 #define FixedHalf   ((Fixed)0x00008000)
-#define INT2FIX(i)  ((Fixed)(i) << 16)
+#define INT2FIX(i)  ((Fixed)((uint32_t)i) << 16)
 #define DBL2FIX(d)  ((Fixed)((double)(d) * 65536.0 + ((d) < 0 ? -0.5 : 0.5)))
 #define FIX2DBL(f)  ((double)(f) / 65536.0)
 #define RNDFIX(f)   (((f) + FixedHalf) & 0xffff0000)
@@ -121,7 +122,7 @@ typedef struct tcprivCtx_ *tcprivCtx;
 typedef struct {
 	int (*oplen)(unsigned char *);
 	unsigned char *(*cstrcpy)(unsigned char *, unsigned char *, unsigned);
-	int (*encInteger)(long, char *);
+	int (*encInteger)(int32_t, char *);
 	short maxCallStack;
 	short hintmask;
 	short cntrmask;
@@ -135,12 +136,12 @@ typedef struct {
 /* Package context */
 struct tcCtx_ {
 	tcCallbacks cb;     /* Client callbacks */
-	long flags;         /* Compression specification flags */
-	long status;        /* Program status flags */
+	int32_t flags;         /* Compression specification flags */
+	int32_t status;        /* Program status flags */
 #define TC_MESSAGE      (1 << 0)  /* Flags message for font already posted */
 #define TC_EURO_ADDED   (1 << 1)  /* Flags Euro glyph added to font */
 	short nMasters;     /* Number of masters */
-	unsigned long maxNumSubrs;
+	uint32_t maxNumSubrs;
 	SubrParseData *spd; /* Subroutinizer parse data */
 	struct {            /* --- Module contexts */
 		dnaCtx dnaCtx;

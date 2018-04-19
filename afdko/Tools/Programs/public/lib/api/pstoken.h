@@ -168,7 +168,7 @@ int pstMatch(pstCtx h, pstToken *token, char *value);
    null-terminated string specified by the "value" parameter, otherwise it
    returns 0. The value parameter is specified as a null-terminated string. */
 
-long pstConvInteger(pstCtx h, pstToken *token);
+int32_t pstConvInteger(pstCtx h, pstToken *token);
 
 /* pstConvInteger() converts the integer "token" parameter to an integer
    number. If the token isn't an integer, 0 is returned. Integers requiring
@@ -193,7 +193,7 @@ char *pstConvLiteral(pstCtx h, pstToken *token, long *length);
    literal "token" parameter and returns a new pointer and length accordingly.
    If the token isn't a literal, NULL is returned. */
  
-unsigned long pstConvHexString(pstCtx h, pstToken *token);
+uint32_t pstConvHexString(pstCtx h, pstToken *token);
 
 /* pstConvHexString() converts the hexadecimal string "token" parameter to an
    integer number. If the token isn't a hexadecimal string 0 is returned.

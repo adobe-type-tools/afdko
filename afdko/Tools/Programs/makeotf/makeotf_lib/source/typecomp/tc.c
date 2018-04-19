@@ -486,10 +486,10 @@ static void fillWrapHeader(tcCtx g, char *wrapHeader) {
 	char call[128];
 
 	if (h->FontSet.master == NULL) {
-		sprintf(call, "/%s %lu StartData ", h->FontSet.name, h->FontSet.size);
+		sprintf(call, "/%s %ld StartData ", h->FontSet.name, h->FontSet.size);
 	}
 	else {
-		sprintf(call, "/%s %lu /%s StartData ",
+		sprintf(call, "/%s %ld /%s StartData ",
 		        h->FontSet.name, h->FontSet.size, h->FontSet.master);
 	}
 	sprintf(wrapHeader,
@@ -523,7 +523,7 @@ static void fillWrapTrailer(tcCtx g, char *wrapTrailer) {
 #if TC_STATISTICS
 /* Show compression statistics */
 static void showStats(tcprivCtx h) {
-#define AVG(v, c) ((long)((c) ? (double)(v) / (c) + .5 : 0))
+#define AVG(v, c) ((int32_t)((c) ? (double)(v) / (c) + .5 : 0))
 	tcCtx g = h->g;
 	int i;
 	struct {
@@ -571,7 +571,7 @@ static void showStats(tcprivCtx h) {
 		       "     count      size avg.size  orig %%\n"
 		       "       ---------------------------"
 		       "  -----------------------------------\n"
-		       "flat   %8ld %9ld %8ld  %8ld#%9ld %8ld %6.1f%%\n",
+		       "flat   %8ld %9ld %8d  %8ld#%9ld %8d %6.1f%%\n",
 		       g->stats.nChars,
 		       g->stats.flatSize,
 		       AVG(g->stats.flatSize, g->stats.nChars),
@@ -581,7 +581,7 @@ static void showStats(tcprivCtx h) {
 		       ((double)comp.flatSize * g->stats.nChars * 100.0) /
 		       ((double)comp.nChars * g->stats.flatSize));
 
-		printf("subrs  %8ld %9ld*%8ld  %8ld %9ld %8ld     -\n",
+		printf("subrs  %8ld %9ld*%8d  %8ld %9ld %8d     -\n",
 		       g->stats.nSubrs,
 		       g->stats.subrSize,
 		       AVG(g->stats.subrSize, g->stats.nSubrs),
@@ -591,7 +591,7 @@ static void showStats(tcprivCtx h) {
 
 		origDataSize = g->stats.subrSize + g->stats.charSize;
 		compDataSize = comp.subrSize + comp.charSize;
-		printf("chars  %8ld %9ld*%8ld  %8ld#%9ld %8ld %6.1f%%$\n",
+		printf("chars  %8ld %9ld*%8d  %8ld#%9ld %8d %6.1f%%$\n",
 		       g->stats.nChars,
 		       g->stats.charSize,
 		       AVG(g->stats.charSize, g->stats.nChars),
@@ -606,7 +606,7 @@ static void showStats(tcprivCtx h) {
 		origOther = g->stats.fontSize -
 		    (g->stats.subrSize + g->stats.charSize);
 		compOther = h->FontSet.size - (comp.subrSize + comp.charSize);
-		printf("other@ %8ld %9ld %8ld  %8ld %9ld %8ld %6.1f%%\n",
+		printf("other@ %8ld %9ld %8d  %8ld %9ld %8d %6.1f%%\n",
 		       h->set.cnt,
 		       origOther,
 		       AVG(origOther, h->set.cnt),
@@ -615,7 +615,7 @@ static void showStats(tcprivCtx h) {
 		       AVG(compOther, h->set.cnt),
 		       compOther * 100.0 / origOther);
 
-		printf("fonts  %8ld %9ld %8ld  %8ld %9ld %8ld %6.1f%%\n"
+		printf("fonts  %8ld %9ld %8d  %8ld %9ld %8d %6.1f%%\n"
 		       "\n"
 		       "* original subr and char sizes without lenIV bytes.\n"
 		       "@ other.size=fonts.size-(subrs.size+chars.size)\n"
@@ -1211,10 +1211,10 @@ static void dblayout(tcprivCtx h) {
 	printf("strings     %7ld        -\n", h->size.strings);
 	printf("gsubrs      %7ld        -\n", h->size.gsubrs);
 	printf("FontNames   %7ld        -\n", h->size.FontNames);
-	printf("encodings   %7ld  %7ld\n", h->size.encodings, h->offset.encodings);
-	printf("charsets    %7ld  %7ld\n", h->size.charsets, h->offset.charsets);
-	printf("FDSelects   %7ld  %7ld\n", h->size.FDSelects, h->offset.FDSelects);
-	printf("copyright         -  %7ld\n", h->offset.copyright);
+	printf("encodings   %7ld  %7u\n", h->size.encodings, h->offset.encodings);
+	printf("charsets    %7ld  %7u\n", h->size.charsets, h->offset.charsets);
+	printf("FDSelects   %7ld  %7u\n", h->size.FDSelects, h->offset.FDSelects);
+	printf("copyright         -  %7u\n", h->offset.copyright);
 
 	for (i = 0; i < h->set.cnt; i++) {
 		Font *font = &h->set.array[i];
@@ -1222,16 +1222,16 @@ static void dblayout(tcprivCtx h) {
 		printf("=== font[%3d] ==============\n", i);
 		printf("FontName    %7ld        -\n", font->size.FontName);
 		printf("dict        %7ld        -\n", font->size.dict);
-		printf("encoding          -  %7ld\n", font->offset.encoding);
-		printf("charset           -  %7ld\n", font->offset.charset);
-		printf("fdselect          -  %7ld\n", font->offset.fdselect);
-		printf("CharStrings %7ld  %7ld\n",
+		printf("encoding          -  %7u\n", font->offset.encoding);
+		printf("charset           -  %7u\n", font->offset.charset);
+		printf("fdselect          -  %7u\n", font->offset.fdselect);
+		printf("CharStrings %7ld  %7u\n",
 		       font->size.CharStrings, font->offset.CharStrings);
-		printf("FDArray     %7ld  %7ld\n",
+		printf("FDArray     %7ld  %7u\n",
 		       font->size.FDArray, font->offset.FDArray);
-		printf("Private     %7ld  %7ld\n",
+		printf("Private     %7ld  %7u\n",
 		       font->size.Private, font->offset.Private);
-		printf("Subrs       %7ld  %7ld\n",
+		printf("Subrs       %7ld  %7u\n",
 		       font->size.Subrs, font->offset.Subrs);
 		if (font->flags & FONT_CID) {
 			int j;
@@ -1241,9 +1241,9 @@ static void dblayout(tcprivCtx h) {
 				if (info->seenChar) {
 					printf("--- FD[%2d] -----------------\n", iFD++);
 					printf("FD          %7ld        -\n", info->size.FD);
-					printf("Private     %7ld  %7ld\n",
+					printf("Private     %7ld  %7u\n",
 					       info->size.Private, info->offset.Private);
-					printf("Subrs       %7ld  %7ld\n",
+					printf("Subrs       %7ld  %7u\n",
 					       info->size.Subrs, info->offset.Subrs);
 				}
 			}

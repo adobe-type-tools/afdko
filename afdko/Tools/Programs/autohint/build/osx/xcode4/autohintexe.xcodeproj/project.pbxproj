@@ -52,8 +52,8 @@
 
 /* Begin PBXFileReference section */
 		56AE0BA71A633867000ECBEE /* libautohintlib.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libautohintlib.a; path = "../../../../../../../../../Library/Developer/Xcode/DerivedData/autohintexe-aqaujhwuqqtoouhccdzyzjbhhmcb/Build/Products/Debug/libautohintlib.a"; sourceTree = "<group>"; };
-		BD5BF40F0D9AD0A50015F645 /* debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../../../../public/config/xcconfig/debug.xcconfig; sourceTree = SOURCE_ROOT; };
-		BD5BF4100D9AD0A50015F645 /* release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = release.xcconfig; path = ../../../../public/config/xcconfig/release.xcconfig; sourceTree = SOURCE_ROOT; };
+		BD5BF40F0D9AD0A50015F645 /* debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../../../config/xcconfig/debug.xcconfig; sourceTree = SOURCE_ROOT; };
+		BD5BF4100D9AD0A50015F645 /* release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = release.xcconfig; path = ../../../config/xcconfig/release.xcconfig; sourceTree = SOURCE_ROOT; };
 		BD5BF4130D9AD0DB0015F645 /* ac_C_lib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ac_C_lib.h; path = ../../../autohintlib/source/public/ac/ac_C_lib.h; sourceTree = SOURCE_ROOT; };
 		BD5BF4160D9AD1F80015F645 /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = main.c; path = ../../../source/main.c; sourceTree = SOURCE_ROOT; };
 		BD5BF4180D9AD2120015F645 /* autohintexe */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = autohintexe; sourceTree = BUILT_PRODUCTS_DIR; };

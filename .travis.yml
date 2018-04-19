@@ -1,52 +1,110 @@
-os: osx
-
-language: generic
-
 sudo: required
+matrix:
+  include:
+    - os: linux
+      env: NAME=Linux
+      if: type = pull_request
+      python: 2.7
+      install:
+        - sudo apt-get install g++-multilib
+        - sudo -H pip install --upgrade pip
+        - pip install --user --upgrade setuptools setuptools_scm wheel cython
+      script:
+        - python setup.py bdist_wheel
+        - pip install --user dist/*.whl
+        - pip uninstall --yes afdko
 
-#python:
-#  - "2.7"
+    - os: osx
+      env: NAME=OSX
+      if: type = pull_request
+      language: generic
+      install:
+        - curl -O https://bootstrap.pypa.io/get-pip.py
+        - python get-pip.py --user
+        - python -m pip install --user virtualenv
+        - python -m virtualenv .venv/
+        - source .venv/bin/activate
+        - pip install --upgrade pip setuptools
+        - pip install codecov
+        - pip install pytest-cov
+        - pip install collective.checkdocs
+        - pip install pygments
+        - pip install flake8
+        - pip install --upgrade setuptools_scm wheel cython
+        - pip install -r requirements.txt
+      before_script:
+        - export PYTHONPATH=$PYTHONPATH:$(pwd)
+      script:
+        - python setup.py checkdocs
+        - python setup.py check --restructuredtext --strict
+        - pytest --cov
+        - flake8 setup.py
+        - pushd afdko/Tools/SharedData/FDKScripts
+        - flake8 buildCFF2VF.py
+        - flake8 buildMasterOTFs.py
+        - flake8 CheckOutlinesUFO.py
+        - flake8 ConvertFontToCID.py
+        - flake8 FDKUtils.py
+        - flake8 MakeOTF.py
+        - flake8 ttfcomponentizer.py
+        - flake8 ufoTools.py
+        - popd
+        - python setup.py bdist_wheel
+        - pip install dist/*.whl
+        - pip uninstall --yes afdko
+      after_success:
+        - codecov
 
-#before_install:
+    - os: osx
+      env:
+        - NAME=OSX-deploy
+        - BUILD_DIST=true
+      if: type = push
+      language: generic
 
-install:
-#  - sudo apt-get install libc6-i386
-#  - pip install --upgrade pip
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-      curl -O https://bootstrap.pypa.io/get-pip.py;
-      python get-pip.py --user;
-      python -m pip install --user virtualenv;
-      python -m virtualenv .venv/;
-      source .venv/bin/activate;
-    fi
-  - pip install --upgrade wheel cython
-  - pip install codecov
-  - pip install collective.checkdocs
-  - pip install pygments
-  - pip install flake8
+cache:
+  - pip
+  - directories:
+    - $HOME/.pyenv_cache
 
-script:
-  - python setup.py checkdocs
-  - python setup.py check --restructuredtext --strict
-  - python setup.py bdist_wheel
-  - pip install dist/*.whl
-  - flake8 setup.py
-  - cd afdko/Tools/SharedData/FDKScripts
-  - flake8 buildCFF2VF.py
-  - flake8 buildMasterOTFs.py
-  - flake8 CheckOutlinesUFO.py
-  - flake8 ConvertFontToCID.py
-  - flake8 FDKUtils.py
-  - flake8 MakeOTF.py
-  - flake8 ufoTools.py
-  - coverage run --source=. CheckOutlinesUFO.py --test
-  - pip uninstall --yes afdko
-
-after_success:
-  - codecov
+# Only build for *pushes* to master,
+# not for pushes to other branches
+# (build for PRs from any branch).
+# The regex below is because Travis treats a tag on the master branch as if it
+# were a different branch. The regex below is meant to match:
+# digit(s).digit(s).digit(s) plus optional additional characters.
+branches:
+  only:
+    - master
+    - /^\d+\.\d+\.\d+.*$/
 
 notifications:
-  slack: typekit:y89H3n4sxK0ORpapm8zHDu3l
+  slack: typekit:TRAVIS_SLACK_TOKEN
   email:
     on_success: change
     on_failure: always
+
+before_deploy:
+  - ./.travis/before_deploy.sh
+
+deploy:
+  # deploy to Github Releases on tags
+  - provider: releases
+    api_key:
+      secure: JYAxvC7A46oY0mmhEknUzJ5iTeLwBWyV0ZnNXlx3t6uhKmmPadxSSkTR4uI87DXfYQBlvNnw+VDHaTeaaaXZOUXmcLn7UIjHsBqdhCGKWMKQ2Z0HpSMvYEUVUezHsLteZvdeL1i4c/q7Iaf2SuNuzOlnNvWomxC24yI/cSzRpqP0wumyXh8Qewod7B5/X2mBO8ICxkEETJBFlwHiWyN8p0lF/aaRIOmujHTqQCBy7xN81rGUcsmY5EaU4ojdwybUaa9e1XRNwwWxO3XOVMsSrlAOb8+PLlegi+LY5vi6e2udVHcRtm/2f0RZuKKjfQ6RMPumqkcCerKE5IdZr2NK0P74HXIrqJ4YX8dSIDk8IVEWgZxiYqBpAtXJvq40V90Mh0atR5318WtcUhPzZftVp5JajU+EU1FmyusNdjnHSYosNKVjCEkwqf3fySLk2uxqiDnyIwMUBsvmewwWCMw0NUOFHyG5uOKqRO4n5NWDnrqaUgcenbB/EZtIE/jrGddW7OgHCVS1jcqcTFK0yfz7X98ej6V1OJqEIwLZe2ZDNTGspcIsP83mtahJFF4lLuyfa5/cN7t/1Gc3rC0qNYa3diMK4gV8K3r1c7yjAy5d3siXspx/2Rb7u7jdbI8JLzWGfuByJj9MuN1RRP7nkqMkxpyDzib4QEG169Lb5Rus+Aw=
+    skip_cleanup: true
+    file_glob: true
+    file: "dist/*"
+    on:
+      tags: true
+      repo: adobe-type-tools/afdko
+      condition: "$BUILD_DIST == true"
+  # deploy to PyPI on tags
+  - provider: script
+    script: bash ./.travis/deploy.sh
+    skip_cleanup: true
+    distributions: pass
+    on:
+      tags: true
+      repo: adobe-type-tools/afdko
+      condition: "$BUILD_DIST == true"

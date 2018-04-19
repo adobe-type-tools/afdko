@@ -20,23 +20,23 @@
 
 /* Common header for formats 0, 2, 4, 6. Access by the GET_* macros below */
 typedef struct {
-	unsigned short format;
-	unsigned short length;
-	unsigned short language;
+	uint16_t format;
+	uint16_t length;
+	uint16_t language;
 } FormatHdr;
 
 /* Common header for the extended formats: 8, 10, 12. Access by the GET_* macros below */
 typedef struct {
-	unsigned short format;
-	unsigned short reserved;
-	unsigned long length;
-	unsigned long language;
+	uint16_t format;
+	uint16_t reserved;
+	uint32_t length;
+	uint32_t language;
 } FormatHdrExt;
 
 typedef struct {
-	unsigned short format;
-	unsigned long length;
-	unsigned long numUVS;
+	uint16_t format;
+	uint32_t length;
+	uint32_t numUVS;
 } FormatHdr14;
 
 #define IS_EXT_FORMAT(f) ((f) == 8 || (f) == 10 || (f) == 12) /* Extended formats */
@@ -44,9 +44,9 @@ typedef struct {
 #define GET_FORMAT(p)   (*((unsigned short *)p))
 
 typedef struct {
-	unsigned short format;
-	unsigned short length;
-	unsigned short language;
+	uint16_t format;
+	uint16_t length;
+	uint16_t language;
 	unsigned char glyphId[256];
 } Format0;
 #define FORMAT0_SIZE (uint16 * 3 + uint8 * 256)
@@ -100,31 +100,31 @@ typedef struct {
 
 /* Segment for formats 8 and 12: */
 typedef struct {
-	unsigned long startCharCode;
-	unsigned long endCharCode;
-	unsigned long startGlyphID;
+	uint32_t startCharCode;
+	uint32_t endCharCode;
+	uint32_t startGlyphID;
 } Segment8_12;
 #define SEGMENT8_12_SIZE (3 * uint32)
 
 typedef struct {
-	unsigned short format;
-	unsigned short reserved;
-	unsigned long length;
-	unsigned long language;
-	unsigned long nGroups;
+	uint16_t format;
+	uint16_t reserved;
+	uint32_t length;
+	uint32_t language;
+	uint32_t nGroups;
 	dnaDCL(Segment8_12, segment);
 } Format12;
 
 #define FORMAT12_SIZE(nSegs) (2 * uint16 + 3 * uint32 + SEGMENT8_12_SIZE * (nSegs))
 
 typedef struct {
-	unsigned long uv;
-	unsigned short addtlCnt;
+	uint32_t uv;
+	uint32_t addtlCnt;
 } DefaultUVSEntryRange;
 
 typedef struct {
-	unsigned long uv;
-	unsigned short glyphID;
+	uint32_t uv;
+	uint16_t glyphID;
 } ExtUVSEntry;
 
 typedef struct {
@@ -134,28 +134,28 @@ typedef struct {
 } UVSRecord;
 
 typedef struct {
-	unsigned short format;
-	unsigned long length;
-	unsigned long numUVS;
+	uint16_t format;
+	uint32_t length;
+	uint32_t numUVS;
 } Format14;
 
 #define FORMAT14_SIZE(nUVSRecs) (uint16 + 2 * uint32 + nUVSRecs * (uint24 + 2 * uint32))
 
 typedef struct {
-	short id;   /* Internal use. All Encoding's that have the same id will end
+	int16_t id;   /* Internal use. All Encoding's that have the same id will end
 	               up pointing to the same subtable in the OTF. Of all the
 	               Encoding's with the same id, exactly one will have a
 	               non-NULL format field. */
-	unsigned short platformId;
-	unsigned short scriptId;
-	unsigned long offset;
+	uint16_t platformId;
+	uint16_t scriptId;
+	uint32_t offset;
 	void *format;
 } Encoding;
 #define ENCODING_SIZE (uint16 * 2 + uint32 * 1)
 
 typedef struct {
-	unsigned short version;
-	unsigned short nEncodings;
+	uint16_t version;
+	uint16_t nEncodings;
 	dnaDCL(Encoding, encoding);
 } cmapTbl;
 #define TBL_HDR_SIZE (uint16 * 2)
@@ -719,21 +719,57 @@ static Format2 *makeFormat2(cmapCtx h) {
 
 /* ------- end format 2 */
 
+static void setOrdered( Mapping *mapping, int codeBreak, int span, int index)
+{
+	int threshold;
+	/* If the ordered segment starts with a code break or ends with a code
+	break, then the cost of keeping this as a separate segment is just one new
+	segment break (the following segment break). Else, the cost is adding two
+	new segment breaks - the one to start this segment, and to start the next
+	segment. We mark as NOT ordered those segments that are no larger than the
+	threshold.
+	 */
+	if ( (mapping[index-span].flags & CODE_BREAK) || codeBreak)
+		threshold = 4;
+	else
+		threshold = 8;
+	if (span > threshold)
+		mapping[index - span].ordered = 1;
+
+}
+
 /* Partition mappings optimally for format 4. Assumes mapping in code order */
 static int partitionRanges(cmapCtx h, Mapping *mapping) {
 	int span;
 	int ordered;
-	int overflow;
+	int lastOrdered;
 	int total;
 	int i;
 	int nSegments;
-
-	/* Create ordered partitioning */
+	
+	/* mapping is sorted by charCode, then by glyphID. If there is a break on
+	the character code sequence, we always make a new segment. If there is a
+	break in the glyph ID sequence, then we may make a segment break, if doing
+	so saves more bytes than not doing so. 
+	If a segment has more than one glyph and no breaks in its glyphID sequence,
+	then it is set as  ordered. Ordered segments are dropped only if keeping
+	them costs less than the new segment cost. All other segments are merged
+	togther. idRangeOffset for an ordered segment is set to 0, and its glyphID's
+	are not added to the glyphId array, as its glyphIDs can be calculated from
+	startCode/endCode/idDelta alone.
+	*/
+	
+	/* Create ordered partitioning. */
 	span = 1;
 	for (i = 1; i < h->mapping.cnt; i++) {
 		int codeBreak = (mapping[i - 1].code + 1 != mapping[i].code);
 		if (codeBreak || mapping[i - 1].glyphId + 1 != mapping[i].glyphId) {
 			mapping[i - span].span = span;
+			mapping[i - span].ordered = 0; /* default */
+			if (span > 1) /* an ordered segment is a segment with more than one code point with consecutive glyph ID's */
+			{
+				setOrdered(mapping, codeBreak, span, i);
+			}
 			if (codeBreak) {
 				mapping[i].flags |= CODE_BREAK;
 			}
@@ -744,27 +780,31 @@ static int partitionRanges(cmapCtx h, Mapping *mapping) {
 		}
 	}
 	mapping[i - span].span = span;
-
+	if (span > 1)
+		setOrdered(mapping, 1, span, i - span);
+	else
+		mapping[i - span].ordered = 0;
+	
 	/* Coalesce ranges */
 	nSegments = 0;
-	total = ordered = span = mapping[0].span;
+	total  = span = mapping[0].span;
+	lastOrdered =  mapping[0].ordered;
 	for (i = span; i < h->mapping.cnt; i += span) {
+		int codeBreak = mapping[i].flags & CODE_BREAK;
+		ordered = mapping[i].ordered;
 		span = mapping[i].span;
-		if (!(mapping[i].flags & CODE_BREAK) && ordered + span < 4) {
-			total += span;
-			ordered = 0;
+		/* merge a segement with the previous segment if
+		 1) it does not start with a code break, and
+		 2) it is not ordered, and the previous segment is not ordered.
+		*/
+		if ((!codeBreak) && (!ordered) && (!lastOrdered)) {
+			mapping[i - total].span += span;
+			total = mapping[i - total].span;
+			lastOrdered = ordered;
 		}
 		else {
-			mapping[i - total].span = total;
-			mapping[i - total].ordered = ordered;
-			total = ordered = span;
-			overflow = abs((int)mapping[i].glyphId - (long)mapping[i].code); // Posible int overflow as mapping[i].code is unsigned long a overflow is int; the casts are needed to trigger signed substraction otherwise the abs() is useless.
-			if (overflow >= 1 << 15) {
-				ordered = 0;
-			}
-			else {
-				ordered = 1;
-			}
+			lastOrdered = mapping[i].ordered;
+			total = span;
 			nSegments++;
 		}
 	}
@@ -772,11 +812,32 @@ static int partitionRanges(cmapCtx h, Mapping *mapping) {
 	mapping[i - total].ordered = ordered;
 	nSegments += 2; /* Add last segment and sentinel */
 
+	/* Previously, 'ordered' has been used to mean "keep this as a segment, and
+	don't merge it with the prior segment or following segment". Now we need to
+	set it to really mean 'the glyphID's in this segment are sequential', as
+	this field is used to decide how to use idDelta and idRange.
+	 */
+	for (i = 0; i < h->mapping.cnt; i += span)
+		{
+			int j;
+			int ordered = 1;
+			span = mapping[i].span;
+			for (j = i+1; j< i+span;j++)
+			{
+			   if (mapping[j].glyphId-1 != mapping[j-1].glyphId)
+			   {
+				   ordered = 0;
+				   break;
+			   }
+			}
+			mapping[i].ordered = ordered;
+	   }
+
 	return nSegments;
 }
 
 /* Make format 4 segment */
-static void makeSegment4(Format4 *fmt, int nSegments, int segment,
+static void makeSegment4(hotCtx g, Format4 *fmt, int nSegments, int segment,
                          Mapping *mapping, int start) {
 	int i;
 	int end = start + mapping[start].span - 1;
@@ -787,20 +848,18 @@ static void makeSegment4(Format4 *fmt, int nSegments, int segment,
 	if (mapping[start].ordered) {
 		fmt->idDelta[segment] = mapping[start].glyphId - (unsigned short)mapping[start].code;
 		fmt->idRangeOffset[segment] = 0;
-		if ((fmt->idDelta[segment] + (unsigned short)mapping[start].code) < 0) {
-			printf("STop!\n");
-		}
 	}
 	else {
 		fmt->idDelta[segment] = 0;
 		fmt->idRangeOffset[segment] = (unsigned short)
 		    (uint16 * (nSegments - segment) + uint16 * fmt->glyphId.cnt);
-/*			sizeof(fmt->idRangeOffset[0]) * (nSegments - segment) +
-            sizeof(fmt->glyphId.array[0]) * fmt->glyphId.cnt;
- */
 		for (i = start; i <= end; i++) {
 			*dnaNEXT(fmt->glyphId) = mapping[i].glyphId;
 		}
+	/* Future improvement: when you are using idRangeOffset, you do not have to
+	set idDelta to 0. This could be used to combine sequential segments that are
+	not ordered.
+	 */
 	}
 }
 
@@ -839,28 +898,25 @@ static Format4 *makeFormat4(cmapCtx h, unsigned long *length) {
 	Format4 *fmt = MEM_NEW(h->g, sizeof(Format4));
 	dnaINIT(h->g->dnaCtx, fmt->glyphId, 256, 64);
 
-    if (g->convertFlags & HOT_STUB_CMAP4)
-        truncateCmap = 1;
+	if (g->convertFlags & HOT_STUB_CMAP4)
+		truncateCmap = 1;
 
 	while (notOK) {
-		unsigned int numOrdered = 0;
-		unsigned int numNotOrdered = 0;
-
 		fmt->glyphId.cnt = 0;
-        if (h->mapping.cnt == 0)
-        {
-            Mapping *stub_mapping = dnaNEXT(h->mapping);
-            
-            stub_mapping->code = 0;
-            stub_mapping->glyphId = 0;
-            stub_mapping->span = 1;
-            stub_mapping->ordered = 1;
-            stub_mapping->flags = 0;
-            nSegments = 1;
-            mapping = h->mapping.array;
-        }
-        nSegments = partitionRanges(h, mapping);
-        
+		if (h->mapping.cnt == 0)
+		{
+			Mapping *stub_mapping = dnaNEXT(h->mapping);
+			
+			stub_mapping->code = 0;
+			stub_mapping->glyphId = 0;
+			stub_mapping->span = 1;
+			stub_mapping->ordered = 1;
+			stub_mapping->flags = 0;
+			nSegments = 1;
+			mapping = h->mapping.array;
+		}
+		nSegments = partitionRanges(h, mapping);
+
 		if (truncateCmap) {
 			nSegments = 2;
 		}
@@ -870,19 +926,12 @@ static Format4 *makeFormat4(cmapCtx h, unsigned long *length) {
 		fmt->idRangeOffset =
 		    MEM_NEW(h->g, sizeof(fmt->idRangeOffset[0]) * nSegments);
 
-
 		segment = 0;
 		for (i = 0; i < h->mapping.cnt; i += mapping[i].span) {
 			if (truncateCmap && (segment >= (nSegments - 1))) {
 				break;
 			}
-			makeSegment4(fmt, nSegments, segment++, mapping, i);
-			if (mapping[i].ordered == 1) {
-				numOrdered++;
-			}
-			else {
-				numNotOrdered++;
-			}
+			makeSegment4(g, fmt, nSegments, segment++, mapping, i);
 		}
 
 		/* Add sentinel */

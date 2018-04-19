@@ -462,7 +462,7 @@ static void readEncoding(parseCtx h) {
 	if (!h->encoding.std) {
 		int i;
 		char *p;
-		int length;
+		int length = 0;
 		long index[256]; /* Glyph name index, b31-8 buf. index, b7-0 length */
 
 		length = 0;
@@ -1525,6 +1525,8 @@ void parseFont(tcCtx g, Font *font) {
 	h->subrs.cnt = 0;
 	h->component.chars.cnt = 0;
 	h->component.inorder = 0;
+	h->subset.nGlyphs = 0;
+
 	h->font->synthetic.oblique_term = 0.0;
 
 	if (g->flags & TC_NOOLDOPS) {
@@ -1647,7 +1649,7 @@ static void readFontName(parseCtx h) {
 }
 
 /* Read integer-valued dict key */
-static long readIntKey(parseCtx h, int iKey) {
+static int32_t readIntKey(parseCtx h, int iKey) {
 	psToken *token = psGetToken(h->ps);
 	if (token->type != PS_INTEGER) {
 		badKeyValue(h, iKey);
@@ -1658,7 +1660,6 @@ static long readIntKey(parseCtx h, int iKey) {
 /* Process literal */
 static void doLiteral(parseCtx h, psToken *literal) {
 	tcCtx g = h->g;
-	long type;
 	String key;
 	DictKeyMap *map;
 
@@ -1698,6 +1699,8 @@ static void doLiteral(parseCtx h, psToken *literal) {
 		}
 	}
 	else {
+		int32_t type;
+
 		/* For CIDFonts check for key redefinition which signals new FD */
 		if (h->font->flags & FONT_CID && h->cid.fd != -1 &&
 		    map->index != iignore && SEEN_KEY(map->index)) {
@@ -1900,7 +1903,7 @@ static void calcUDV(parseCtx h, double *BDM, double *BDP,
 }
 
 /* Get integer value from dict key */
-static long getKeyInt(parseCtx h, int iKey, int required) {
+static int32_t getKeyInt(parseCtx h, int iKey, int required) {
 	psToken *token = &h->keys[iKey].value;
 
 	if (!SEEN_KEY(iKey)) {
@@ -2005,7 +2008,7 @@ static void saveMM(parseCtx h, DICT *dict, int iKey) {
 			order[i] = 0;
 			for (j = 0; j < nAxes; j++) {
 				double d = BDP[k++];
-				long n = (long)d;
+				int32_t n = (int32_t)d;
 
 				if (n != d || (n != 0 && n != 1)) {
 					/* Non-integer master coordinates must have CDV support */
@@ -2093,6 +2096,7 @@ static void saveString(parseCtx h, DICT *dict, int iKey) {
 		strng = psConvLiteral(h->ps, token, &length);
 	}
 	else {
+                length = 0;
 		badKeyValue(h, iKey);
 	}
 
@@ -2234,7 +2238,7 @@ static void saveNumber(parseCtx h, DICT *dict, int iKey) {
 	psToken *token = &key->value;
 
 	if (token->type == PS_INTEGER) {
-		long i = psConvInteger(h->ps, token);
+		int32_t i = psConvInteger(h->ps, token);
 		if (key->dflt != NULL && i == strtol(key->dflt, NULL, 0)) {
 			return; /* Matched default */
 		}
@@ -2713,7 +2717,7 @@ static int defaultNumber(parseCtx h, int iKey) {
 	psToken *token = &key->value;
 
 	if (token->type == PS_INTEGER) {
-		long i = psConvInteger(h->ps, token);
+		int32_t i = psConvInteger(h->ps, token);
 		if (key->dflt != NULL && i == strtol(key->dflt, NULL, 0)) {
 			return 1; /* Matched default */
 		}
@@ -2748,7 +2752,7 @@ static void saveDicts(parseCtx h) {
 
 	if (!SEEN_KEY(iStdVW)) {
 		/* StdVW not found (old font) so use 16th erode proc token! */
-		long StdVW = getStdVWFromErodeProc(h);
+		int32_t StdVW = getStdVWFromErodeProc(h);
 		if (StdVW != -1) {
 			dictSaveInt(&h->font->Private, StdVW);
 			DICTSAVEOP(h->font->Private, cff_StdVW);
@@ -3029,7 +3033,6 @@ static void cidReadChars(parseCtx h) {
 	unsigned nChars = 0;
 	int tableBytes = h->cid.GDBytes + h->cid.FDBytes;
 	SID *sid = MEM_NEW(g, sizeof(SID) * h->cid.Count);
-	unsigned short *subsetSID = NULL;
 	unsigned short *pSubsetSID = NULL;
 
 

@@ -420,7 +420,7 @@ class UFOFontData(object):
 
     def getUnitsPerEm(self):
         unitsPerEm = "1000"
-        if not self.fontInfo:
+        if self.fontInfo is None:
             self.loadFontInfo()
         if self.fontInfo:
             unitsPerEm = int(self.fontInfo["unitsPerEm"])
@@ -429,7 +429,7 @@ class UFOFontData(object):
 
     def getPSName(self):
         psName = "PSName-Undefined"
-        if not self.fontInfo:
+        if self.fontInfo is None:
             self.loadFontInfo()
         if self.fontInfo:
             psName = self.fontInfo.get("postscriptFontName", psName)
@@ -556,7 +556,7 @@ class UFOFontData(object):
         return
 
     def getCurGlyphPath(self, glyphName):
-        if not self.curSrcDir:
+        if self.curSrcDir is None:
             self.curSrcDir = self.glyphDefaultDir
 
         # Get the glyph file name.
@@ -706,7 +706,7 @@ class UFOFontData(object):
         outlineXML = glifXML.find("outline")
         try:
             widthXML = glifXML.find("advance")
-            if widthXML:
+            if widthXML is not None:
                 width = int(eval(widthXML.get("width")))
             else:
                 width = 1000
@@ -729,7 +729,7 @@ class UFOFontData(object):
             return None, None, skip
         width, glifXML, outlineXML = self.getGlyphXML(self.glyphDefaultDir,
                                                       glyphFileName)
-        if not glifXML:
+        if glifXML is None:
             skip = 1
             return None, None, skip
 
@@ -750,7 +750,7 @@ class UFOFontData(object):
             if os.path.exists(glyphPath):
                 width, glifXML, outlineXML = self.getGlyphXML(
                     self.glyphLayerDir, glyphFileName)
-                if not glifXML:
+                if glifXML is None:
                     skip = 1
                     return None, None, skip
 
@@ -772,7 +772,7 @@ class UFOFontData(object):
         self.glyphMap, self.glyphList = parsePList(contentsPath)
         orderPath = os.path.join(self.parentPath, kLibName)
         self.orderMap = parseGlyphOrder(orderPath)
-        if self.orderMap:
+        if self.orderMap is not None:
             orderIndex = len(self.orderMap)
             orderList = []
 
@@ -861,10 +861,10 @@ class UFOFontData(object):
 
     def getFontInfo(self, fontPSName, inputPath, allow_no_blues, noFlex,
                     vCounterGlyphs, hCounterGlyphs, fdIndex=0):
-        if self.fontDict:
+        if self.fontDict is not None:
             return self.fontDict
 
-        if not self.fontInfo:
+        if self.fontInfo is None:
             self.loadFontInfo()
 
         fdDict = ConvertFontToCID.FDDict()
@@ -1011,7 +1011,7 @@ class UFOFontData(object):
                     ConvertFontToCID.parseFontInfoFile(
                         fontDictList, fontInfoData, glyphList,
                         maxY, minY, psName, blueFuzz)
-                if not finalFDict:
+                if finalFDict is None:
                     # If a font dict was not explicitly specified for the
                     # output font, use the first user-specified font dict.
                     ConvertFontToCID.mergeFDDicts(
@@ -1198,7 +1198,7 @@ def parseGlyphOrder(filePath):
     orderMap = None
     if os.path.exists(filePath):
         publicOrderDict, temp = parsePList(filePath, kPublicGlyphOrderKey)
-        if publicOrderDict:
+        if publicOrderDict is not None:
             orderMap = {}
             glyphList = publicOrderDict[kPublicGlyphOrderKey]
             numGlyphs = len(glyphList)
@@ -1221,7 +1221,7 @@ def parsePList(filePath, dictKey=None):
     fp.close()
     contents = XML(data)
     contents_dict = contents.find("dict")
-    if contents_dict:
+    if contents_dict is None:
         raise UFOParseError("In '%s', failed to find dict. '%s'." % (
             filePath, contents_dict))
     lastTag = "string"
@@ -1234,7 +1234,7 @@ def parsePList(filePath, dictKey=None):
             skipKeyData = False
             lastName = child.text
             lastTag = "key"
-            if dictKey:
+            if dictKey is not None:
                 if lastName != dictKey:
                     skipKeyData = True
         elif child.tag != "key":
@@ -1305,14 +1305,14 @@ class UFOTransform:
         for tag in self.kTransformTagList:
             val = componentXML.attrib.get(tag, None)
             if tag in ["xScale", "yScale"]:
-                if not val:
+                if val is None:
                     val = 1.0
                 else:
                     val = float(val)
                     if val != 1.0:
                         hasScale = True
             else:
-                if not val:
+                if val is None:
                     val = 0
                 else:
                     val = float(val)
@@ -1334,7 +1334,7 @@ class UFOTransform:
             self.isOffsetOnly = False
 
     def concat(self, transform):
-        if not transform:
+        if transform is None:
             return
         if transform.isDefault:
             return
@@ -1411,7 +1411,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY,
     allowDecimals = ufoFontData.allowDecimalCoords
 
     bezStringList = []
-    if not outlineXML:
+    if outlineXML is None:
         bezstring = ""
     else:
         for outlineItem in outlineXML:
@@ -1419,12 +1419,12 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY,
             if outlineItem.tag == "component":
                 newTransform = UFOTransform(outlineItem)
                 if newTransform.isDefault:
-                    if transform:
+                    if transform is not None:
                         newTransform.concat(transform)
                     else:
                         newTransform = None
                 else:
-                    if transform:
+                    if transform is not None:
                         newTransform.concat(transform)
                 componentOutline = ufoFontData.getComponentOutline(outlineItem)
                 if componentOutline:
@@ -1458,7 +1458,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY,
                     outlineItem.append(lastItem)
                 x = float(lastItem.attrib["x"])
                 y = float(lastItem.attrib["y"])
-                if transform:
+                if transform is not None:
                     x, y = transform.apply(x, y)
 
                 if (not allowDecimals):
@@ -1493,7 +1493,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY,
                     lastType = curLastItem.attrib["type"]
                     x = float(curLastItem.attrib["x"])
                     y = float(curLastItem.attrib["y"])
-                    if transform:
+                    if transform is not None:
                         x, y = transform.apply(x, y)
 
                     if (not allowDecimals):
@@ -1531,7 +1531,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY,
                     continue
                 x = float(contourItem.attrib["x"])
                 y = float(contourItem.attrib["y"])
-                if transform:
+                if transform is not None:
                     x, y = transform.apply(x, y)
 
                 if not allowDecimals:
@@ -1597,7 +1597,7 @@ def convertGLIFToBez(ufoFontData, glyphName, doAll=0):
     if skip:
         return None, width
 
-    if not outlineXML:
+    if outlineXML is None:
         return None, width
 
     curX = curY = 0
@@ -1814,19 +1814,19 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
             value = argList[-2] / float(argList[-1])
             argList[-2:] = [value]
         elif token == "rb":
-            if not newHintMaskName:
+            if newHintMaskName is None:
                 newHintMaskName = hintMask.pointName
             hintMask.hList.append(argList)
             argList = []
             seenHints = 1
         elif token == "ry":
-            if not newHintMaskName:
+            if newHintMaskName is None:
                 newHintMaskName = hintMask.pointName
             hintMask.vList.append(argList)
             argList = []
             seenHints = 1
         elif token == "rm":  # vstem3's are vhints
-            if not newHintMaskName:
+            if newHintMaskName is None:
                 newHintMaskName = hintMask.pointName
             seenHints = 1
             vStem3Args.append(argList)
@@ -1892,7 +1892,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                 i += 1
             # attach the point name to the first point of the first curve.
             outlineItem[-6].set(kPointName, flexPointName)
-            if newHintMaskName:
+            if newHintMaskName is not None:
                 # We have a hint mask that we want to attach to the first
                 # point of the flex op. However, there is already a flex
                 # name in that attribute. What we do is set the flex point
@@ -1936,7 +1936,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                 i += 1
             # attach the point name to the first point of the first curve.
             outlineItem[-6].set(kPointName, flexPointName)
-            if newHintMaskName:
+            if newHintMaskName is not None:
                 # We have a hint mask that we want to attach to the first
                 # point of the flex op. However, there is already a flex name
                 # in that attribute. What we do is set the flex point name
@@ -1982,7 +1982,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                               "type": "%s" % (opName)})
 
                 if opName == "move":
-                    if outlineItem:
+                    if outlineItem is not None:
                         if len(outlineItem) == 1:
                             # Just in case we see 2 moves in a row, delete the
                             # previous outlineItem if it has only the move-to
@@ -1998,7 +1998,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                     outlineItem = XMLElement('contour')
                     newOutline.append(outlineItem)
 
-                if newHintMaskName:
+                if newHintMaskName is not None:
                     newPoint.set(kPointName, newHintMaskName)
                     newHintMaskName = None
                 outlineItem.append(newPoint)
@@ -2081,13 +2081,13 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                             "point", {"x": "%s" % showX, "y": "%s" % showY,
                                       "type": "%s" % (opName)})
                         outlineItem.append(newPoint)
-                if newHintMaskName:
+                if newHintMaskName is not None:
                     # attach the pointName to the first point of the curve.
                     outlineItem[-3].set(kPointName, newHintMaskName)
                     newHintMaskName = None
                 opList.append([opName, curX, curY])
             argList = []
-    if outlineItem:
+    if outlineItem is not None:
         if len(outlineItem) == 1:
             # Just in case we see two moves in a row, delete the previous
             # outlineItem if it has zero length.
@@ -2164,8 +2164,8 @@ def addWhiteSpace(parent, level):
     for child in parent:
         child.tail = childIndent
         addWhiteSpace(child, level + 1)
-    if child:
-        if not parent.text:
+    if child is not None:
+        if parent.text is None:
             parent.text = childIndent
         child.tail = prentIndent
         # print("lastChild Tag", child.tag, repr(child.text),
@@ -2199,7 +2199,7 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
     # print xmlToString(stemHints)
 
     if not hintsOnly:
-        if not outlineItem:
+        if outlineItem is None:
             # need to add it. Add it before the lib item, if any.
             if libIndex > 0:
                 glifXML.insert(libIndex, newOutlineElement)
@@ -2216,9 +2216,9 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
     # entry for this glyph.
     ufoFontData.updateHashEntry(glyphName, changed=True)
     # Add the stem hints.
-    if hintInfoDict:
+    if hintInfoDict is not None:
         widthXML = glifXML.find("advance")
-        if widthXML:
+        if widthXML is not None:
             width = int(eval(widthXML.get("width")))
         else:
             width = 1000
@@ -2235,7 +2235,7 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
             glifXML.append(libItem)
 
         dictItem = libItem.find("dict")
-        if not dictItem:
+        if dictItem is None:
             dictItem = XMLElement("dict")
             libItem.append(dictItem)
 
@@ -2296,11 +2296,11 @@ def checkHashMaps(fontPath, doSync):
             glifXML = etRoot.parse(glyphPath)
             outlineXML = glifXML.find("outline")
             failedMatch = 0
-            if outlineXML:
+            if outlineXML is not None:
                 hashMap = ufoFontData.hashMap
                 try:
                     widthXML = glifXML.find("advance")
-                    if widthXML:
+                    if widthXML is not None:
                         width = int(eval(widthXML.get("width")))
                     else:
                         width = 1000

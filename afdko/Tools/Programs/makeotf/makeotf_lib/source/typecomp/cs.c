@@ -290,7 +290,7 @@ void csSetConvProcs(tcCtx g, csConvProcs *procs) {
 }
 
 /* Encode integer and return length */
-int csEncInteger(long i, char *t) {
+int csEncInteger(int32_t i, char *t) {
 	if (-107 <= i && i <= 107) {
 		/* Single byte number */
 		t[0] = (char)(i + 139);
@@ -542,10 +542,10 @@ unsigned csDump(long length, unsigned char *cstr, int nMasters, int t1) {
 
 			case 255: {
 				/* 5 byte number */
-				long value = (long)cstr[i + 1] << 24 | (long)cstr[i + 2] << 16 |
-				    (long)cstr[i + 3] << 8 | (long)cstr[i + 4];
+				int32_t value = (int32_t)cstr[i + 1] << 24 | (int32_t)cstr[i + 2] << 16 |
+				    (int32_t)cstr[i + 3] << 8 | (int32_t)cstr[i + 4];
 				if (t1) {
-					printf("%ld ", value);
+					printf("%d ", value);
 				}
 				else {
 					printf("%.4g ", value / 65536.0);
@@ -570,7 +570,7 @@ unsigned csDump(long length, unsigned char *cstr, int nMasters, int t1) {
 
 void csDumpSubrs(tcCtx g, Font *font) {
 	long i;
-	long bias;
+	int32_t bias;
 	long offset;
 
 	printf("--- subrs (count=%hu)\n", font->subrs.nStrings);
@@ -588,7 +588,7 @@ void csDumpSubrs(tcCtx g, Font *font) {
 	else {
 		bias = 32768;
 	}
-	printf("bias=%ld\n", bias);
+	printf("bias=%d\n", bias);
 
 	offset = 0;
 	for (i = 0; i < font->subrs.nStrings; i++) {

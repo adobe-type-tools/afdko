@@ -6,6 +6,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
  * inside string, hex string, array, or procedure constructs.
  */
 
+#include <stdint.h>
 #include "pstoken.h"
 #include "dynarr.h"
 #include "ctutil.h"
@@ -984,7 +985,7 @@ int pstFindToken(pstCtx h, pstToken *token, char *value)
 	}
 
 /* Convert integer token to integer value. */
-long pstConvInteger(pstCtx h, pstToken *token)
+int32_t pstConvInteger(pstCtx h, pstToken *token)
 	{
 	int base = 10;
 	long value = 0;
@@ -1053,7 +1054,7 @@ char *pstConvLiteral(pstCtx h, pstToken *token, long *length)
 /* Convert hexadecimal string to integer value. Only hexadecimal strings of
    eight digits or fewer may be converted by this function. Longer strings are
    likely to cause undiagnosed overflow on certain platforms. */
-unsigned long pstConvHexString(pstCtx h, pstToken *token)
+uint32_t pstConvHexString(pstCtx h, pstToken *token)
 	{
 	char *p = token->value + 1;
 	int digits = 0;

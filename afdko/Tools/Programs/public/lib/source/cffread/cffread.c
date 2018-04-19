@@ -89,7 +89,7 @@ typedef struct					/* Operand Stack element */
     int is_int;
     union
     {
-        long int_val;		/* allow at least 32-bit int */
+        int32_t int_val;		/* allow at least 32-bit int */
         float real_val;
     } u;
         unsigned short numBlends;    /* the last operand before the blend operator.
@@ -481,7 +481,7 @@ static void seekbuf(cfrCtx h, long offset)
 static char nextbuf(cfrCtx h)
 {
 	/* 64-bit warning fixed by cast here */
-	fillbuf(h, (long)(h->src.offset + h->src.length));
+	fillbuf(h, (int32_t)(h->src.offset + h->src.length));
 	return *h->src.next++;
 }
 
@@ -514,7 +514,7 @@ static void srcRead(cfrCtx h, size_t count, char *ptr)
         
 		/* Refill buffer */
 		/* 64-bit warning fixed by cast here */
-		fillbuf(h, (long)(h->src.offset + h->src.length));
+		fillbuf(h, (int32_t)(h->src.offset + h->src.length));
 		left = h->src.length;
     }
     
@@ -534,9 +534,9 @@ static unsigned short read2(cfrCtx h)
 }
 
 /* Read 1-, 2-, 3-, or 4-byte number. */
-static unsigned long readN(cfrCtx h, int N)
+static uint32_t readN(cfrCtx h, int N)
 {
-	unsigned long value = 0;
+	uint32_t value = 0;
 	switch (N)
     {
         case 4:
@@ -657,7 +657,7 @@ do if(h->stack.cnt+(n)>h->top.maxstack)fatal(h,cfrErrStackOverflow);while(0)
 
 /* Stack access without check. */
 #define INDEX(i) (h->stack.array[i])
-#define INDEX_INT(i) (INDEX(i).is_int? INDEX(i).u.int_val: (long)INDEX(i).u.real_val)
+#define INDEX_INT(i) (INDEX(i).is_int? INDEX(i).u.int_val: (int32_t)INDEX(i).u.real_val)
 #define PUSH_INT(v) { stack_elem*	elem = &h->stack.array[h->stack.cnt++];	\
 elem->is_int = 1; elem->u.int_val = (v); elem->numBlends = 0; }
 #define INDEX_REAL(i) (INDEX(i).is_int? (float)INDEX(i).u.int_val: INDEX(i).u.real_val)
@@ -1052,7 +1052,7 @@ static void saveIntArray(cfrCtx h, size_t max, long *cnt, long *array,
 						 int delta)
 {
 	int i;
-	if (h->stack.cnt == 0 || h->stack.cnt > (long)max)
+	if (h->stack.cnt == 0 || h->stack.cnt > (int)max)
 		fatal(h, cfrErrDICTArray);
 	array[0] = INDEX_INT(0);
 	for (i = 1; i < h->stack.cnt; i++)
@@ -1113,7 +1113,7 @@ static void readVarStore(cfrCtx h)
 /* Save PostScript operator string. */
 static char *savePostScript(cfrCtx h, char *str)
 {
-	long value;
+	int32_t value;
 	int n;
 	char *p;
 	char *q;
@@ -1124,7 +1124,7 @@ static char *savePostScript(cfrCtx h, char *str)
 		/* Extract FSType from string */
 		n = -1;
 		q = p + sizeof("/FSType") - 1;
-		if (SSCANF_S(q, " %ld def%n", &value, &n) == 1 && n != -1 &&
+		if (SSCANF_S(q, " %d def%n", &value, &n) == 1 && n != -1 &&
 			0 <= value && value < 65536)
         {
 			/* Sucessfully parsed value; remove definition from string */
@@ -1549,15 +1549,10 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict)
                 /* 5 byte number */
                 CHKOFLOW(1);
 			{
-                long value = read1(h);
+                int32_t value = read1(h);
                 value = value<<8 | read1(h);
                 value = value<<8 | read1(h);
                 value = value<<8 | read1(h);
-#if LONG_MAX > 2147483647
-                /* long greater that 4 bytes; handle negative range */
-                if (value > 2417483647)
-                    value -= 4294967296;
-#endif
                 PUSH_INT(value);
 			}
                 continue;

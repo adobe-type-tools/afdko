@@ -5,12 +5,13 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define HOT_H
 
 #include <stddef.h>             /* For size_t */
+#include <stdint.h>             /* For int32_t */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define HOT_VERSION 0x01006A /* Library version (1.0.106) */
+#define HOT_VERSION 0x01006B /* Library version (1.0.107) */
 /* 	Major, minor, build = (HOT_VERSION >> 16) & 0xff, (HOT_VERSION >> 8) & 0xff, HOT_VERSION & 0xff) */
 /*Warning: this string is now part of heuristic used by CoolType to identify the
 first round of CoolType fonts which had the backtrack sequence of a chaining 
@@ -637,7 +638,7 @@ void hotAddUnencChar(hotCtx g, int iChar, char *name);
    glyphs of a kern pair with a name when one or both glyphs are unencoded.
    This name is subsequently converted into a glyph id by the library. */
 
-typedef long hotFixed;          /* 16.16 fixed point */
+typedef int32_t hotFixed;          /* 16.16 fixed point */
 void hotAddAxisData(hotCtx g, int iAxis,
                     char *type, char *longLabel, char *shortLabel,
                     hotFixed minRange, hotFixed maxRange);

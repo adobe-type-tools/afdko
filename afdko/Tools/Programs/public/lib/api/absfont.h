@@ -10,6 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #define ABF_VERSION CTL_MAKE_VERSION(1,0,53)
 
+#include <stdint.h>
 #include <stdio.h>
 
 #ifdef __cplusplus
