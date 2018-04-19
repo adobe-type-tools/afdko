@@ -21,11 +21,6 @@ artifacts:
   # archive the generated packages in the ci.appveyor.com build report
   - path: dist\*.whl
 
-branches:
-  only:
-    - master
-    - /^\d+\.\d+\.\d+.*$/
-
 # Deploy wheels on tags to PyPI
 on_success:
   - ps: >-
