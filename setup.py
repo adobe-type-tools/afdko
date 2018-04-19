@@ -6,6 +6,7 @@ import sys
 from distutils.util import get_platform
 
 import setuptools.command.build_py
+import setuptools.command.install
 from setuptools import setup, find_packages, Command
 
 """
@@ -27,6 +28,25 @@ except ImportError:
     print("setup requires that the Python package 'wheel' be installed. "
           "Try the command 'pip install wheel'.")
     sys.exit(1)
+
+
+class InstallPlatlib(setuptools.command.install.install):
+    """This is to force installing all the modules to the non-pure, platform-
+    specific lib directory, even though we haven't defined any 'ext_modules'.
+
+    The distutils 'install' command, in 'finalize_options' method, picks
+    either 'install_platlib' or 'install_purelib' based on whether the
+    'self.distribution.ext_modules' list is not empty.
+
+    Without this hack, auditwheel would flag the afdko wheel as invalid since
+    it contains native executables inside the pure lib folder.
+
+    TODO Remove this hack if/when in the future we install extension modules.
+    """
+
+    def finalize_options(self):
+        setuptools.command.install.install.finalize_options(self)
+        self.install_lib = self.install_platlib
 
 
 def get_executable_dir():
@@ -211,6 +231,7 @@ def main():
           cmdclass={
               'build_py': CustomBuild,
               'bdist_wheel': CustomBDistWheel,
+              'install': InstallPlatlib,
               'pass': PassCommand,
           },
           )
