@@ -4846,13 +4846,13 @@ static void dcf_getvsIndices(txCtx h, const ctlRegion *region)
     unsigned int i = 0;
     FILE *fp = h->dst.stm.fp;
 
-    if (region->begin <= 0)
-        return;
     unsigned long regionListOffset;
     unsigned short ivdSubtableCount;
     dnaDCL(unsigned long, ivdSubtableOffsets);
     long ivsStart = region->begin + 2;
     
+    if (region->begin <= 0)
+        return;
     bufSeek(h, region->begin);
     length = read2(h);
     format =read2(h);
