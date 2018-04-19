@@ -148,7 +148,7 @@ On Windows, you need to download and install Visual C++ 6, and add all the servi
 
 .. |Travis Build Status| image:: https://travis-ci.org/adobe-type-tools/afdko.svg
    :target: https://travis-ci.org/adobe-type-tools/afdko
-.. |Appveyor Build status| image:: https://ci.appveyor.com/api/projects/status/4e2utb80ptw759ps/branch/master?svg=true
+.. |Appveyor Build status| image:: https://ci.appveyor.com/api/projects/status/qurx2si4x54b97mt/branch/master?svg=true
    :target: https://ci.appveyor.com/project/adobe-type-tools/afdko/branch/master
 .. |Codacy| image:: https://api.codacy.com/project/badge/Grade/08ceff914833445685924ebb1f040070
    :alt: Codacy Badge
