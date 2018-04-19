@@ -4893,8 +4893,6 @@ static void dcf_DumpVarStore(txCtx h, const ctlRegion *region)
     unsigned int i = 0;
     
     FILE *fp = h->dst.stm.fp;
-    if (region->begin >0 )
-        dcf_getvsIndices(h, region);
     
     if (!(h->dcf.flags & DCF_FDSelect) || region->begin == -1)
         return;
@@ -5166,6 +5164,17 @@ static int dcf_SaveStemCount(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 
 	h->dcf.fd = &h->dcf.local.array[info->iFD];
 	h->dcf.stemcnt = 0;
+    h->dcf.flags &= ~DCF_END_HINTS;
+    /* If there is a Variation Region, then we get the regionCount for the current vsIndex.
+     We need this in order to count stems when blends are present. */
+    if (h->dcf.varRegionInfo.cnt == 0)
+    {
+        h->dcf.numRegions = 0;
+    }
+    else
+    {
+        h->dcf.numRegions = h->dcf.varRegionInfo.array[info->blendInfo.vsindex].regionCount;
+    }
 	h->stack.cnt = 0;
 	dumpCstr(h, &info->sup, 0);
 	h->dcf.glyph.array[info->tag] = (unsigned char)h->dcf.stemcnt;
@@ -5291,6 +5300,9 @@ static void dcf_BegFont(txCtx h, abfTopDict *top)
     }
     else
     {
+        /* number of regions needs to be known for reading charstrings */
+		if (single->VarStore.begin > 0)
+        	dcf_getvsIndices(h, &single->VarStore);
         h->dcf.flags |= DCF_IS_CFF2;
         h->maxOpStack = CFF2_MAX_OP_STACK;
         initCstrs(h, top);
