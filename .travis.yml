@@ -64,6 +64,7 @@ matrix:
         - DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
         - BUILD_DIST=true
       if: type = push
+      language: python
       python: 2.7
 
     - os: osx
