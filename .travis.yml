@@ -66,6 +66,8 @@ matrix:
       if: type = push
       language: python
       python: 2.7
+      # skip default installation step
+      install: true
 
     - os: osx
       env:
