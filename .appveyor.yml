@@ -20,6 +20,7 @@ test_script:
 artifacts:
   # archive the generated packages in the ci.appveyor.com build report
   - path: dist\*.whl
+    name: release_wheel
 
 # Deploy wheel on tags to PyPI
 # on_success:
@@ -31,3 +32,15 @@ artifacts:
 #       } else {
 #         Write-Output "Not deploying as this is not a tagged commit"
 #       }
+
+# Deploy wheel on tags to GitHub
+deploy:
+  provider: GitHub
+  auth_token:
+    secure: UyKfsObr/shlpP+0U5Zb3EPvmXt0kyKYu940CFNFdNZ8J7Fu54k415R0UNP78t0j
+  artifact: release_wheel
+  draft: false
+  prerelease: false
+  on:
+    branch: $(APPVEYOR_REPO_TAG_NAME)
+    appveyor_repo_tag: true
