@@ -2308,6 +2308,15 @@ static void readCharset(cfrCtx h)
             MVARread(h);
         if (!(h->flags & CID_FONT))
             readCharSetFromPost(h);
+        else
+        {
+            long gid;
+            for (gid = 0; gid < h->glyphs.cnt; gid++)
+            {
+                abfGlyphInfo *info = &h->glyphs.array[gid];
+                info->cid = (unsigned short)gid;
+            }
+        }
         return;
     }
     
