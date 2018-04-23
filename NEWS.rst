@@ -2,20 +2,57 @@
 Changelog
 ~~~~~~~~~
 
+2.7.x (released 2018-xx-xx)
+---------------------------
+- [CheckOutlinesUFO] Replaced Robofab's pens with FontPens'
+  (`#230 <https://github.com/adobe-type-tools/afdko/issues/230>`__)
+- Removed ``extractSVGTableSVGDocs.py`` and ``importSVGDocsToSVGTable.py``.
+  These are superseded by the scripts at
+  https://github.com/adobe-type-tools/opentype-svg/
+- Removed ``cmap-tool.pl``, ``fdarray-check.pl``, ``fix-fontbbox.pl``,
+  ``glyph-list.pl``, ``hintcidfont.pl``, ``setsnap.pl`` and ``subr-check.pl``.
+  These Perl scripts are available from
+  https://github.com/adobe-type-tools/perl-scripts
+- Removed **CID_font_support** folder and its contents.
+- [tx] Fixed assert "out of range region index found in item variation store
+  subtable" (`#266 <https://github.com/adobe-type-tools/afdko/pull/266>`__)
+- [makeotfexe] Fixed unnecessary truncation of the Format 4 'cmap' subtable
+  (`#242 <https://github.com/adobe-type-tools/afdko/issues/242>`__)
+- [buildCFF2VF] Fix support for CFF2 fonts with multiple FontDicts
+  (`#279 <https://github.com/adobe-type-tools/afdko/pull/279>`__)
+- [ttxn] Update for latest FontTools version
+  (`#288 <https://github.com/adobe-type-tools/afdko/pull/288>`__)
+- New ``ttfcomponentizer`` tool that componentizes TrueType fonts using the
+  component data of a related UFO font.
+- 64-bit support for Mac OSX and Linux
+  (`#271 <https://github.com/adobe-type-tools/afdko/pull/271>`__,
+  `#312 <https://github.com/adobe-type-tools/afdko/pull/312>`__)
+- [tx] Fixed -dcf mode failing to dump hinted CFF2 variable font
+  (`#322 <https://github.com/adobe-type-tools/afdko/issues/322>`__)
+- Wheels for all three environments (macOS, Windows, Linux) are now available
+  on `PyPI <https://pypi.org/project/afdko>`_ and
+  `GitHub <https://github.com/adobe-type-tools/afdko/releases>`_
+
+
 2.6.25 (released 2018-01-26)
 ----------------------------
-
 This release fixes the following issues:
 
+- [CheckOutlinesUFO] Skip glyphs whose names are referenced in the UFO's lib
+  but do not exist
+  (`#228 <https://github.com/adobe-type-tools/afdko/issues/228>`__)
+- Partial Python 3 support in ``BezTools.py``, ``ConvertFontToCID.py``,
+  ``FDKUtils.py``, ``MakeOTF.py``, ``StemHist.py``, ``autohint.py``,
+  ``buildMasterOTFs.py`` and ``ufoTools.py``
+  (`#231 <https://github.com/adobe-type-tools/afdko/issues/231>`__, #232, #233)
 - [makeotfexe] Fixed parsing of Character Variant (cvXX) feature number
   (`#237 <https://github.com/adobe-type-tools/afdko/issues/237>`__)
 - [pip] Fixed ``pip uninstall afdko``
   (`#241 <https://github.com/adobe-type-tools/afdko/issues/241>`__)
 
 
-2.6.24 (released 2018-01-03)
+2.6.22 (released 2018-01-03)
 ----------------------------
-
 The **afdko** has been restructured so that it can be installed as a Python
 package. It now depends on the user's Python interpreter, and no longer
 contains its own Python interpreter.
@@ -28,9 +65,7 @@ current intent is to migrate the many tests in checkOutlines to the newer
 currently does only overlap detection and removal, and a few basic path checks).
 
 Older releases can be downloaded and installed from the
-`Adobe afdko home page <http://www.adobe.com/devnet/opentype/afdko.html>`_.
-
-Work in progress: auto update the changelog, more installation checks.
+`Adobe's AFDKO home page <http://www.adobe.com/devnet/opentype/afdko.html>`_.
 
 
 2.5.66097 (released 2017-12-01)
