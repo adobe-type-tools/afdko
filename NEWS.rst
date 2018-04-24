@@ -29,6 +29,8 @@ Changelog
   `#312 <https://github.com/adobe-type-tools/afdko/pull/312>`__)
 - [tx] Fixed -dcf mode failing to dump hinted CFF2 variable font
   (`#322 <https://github.com/adobe-type-tools/afdko/issues/322>`__)
+- [tx] Fixed conversion of multi-FD CFF2 font to CID-flavored CFF font
+  (`#329 <https://github.com/adobe-type-tools/afdko/issues/329>`__)
 - Wheels for all three environments (macOS, Windows, Linux) are now available
   on `PyPI <https://pypi.org/project/afdko>`_ and
   `GitHub <https://github.com/adobe-type-tools/afdko/releases>`_
