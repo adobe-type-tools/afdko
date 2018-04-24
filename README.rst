@@ -26,7 +26,6 @@ The AFDKO requires Python_ 2.7.x. It does not yet support Python 3.x.
 
 Releases are available on the `Python Package Index`_ (PyPI) and can be installed with pip_.
 
-**The current PyPI package is a beta release for Mac OS X only.**
 
 Installing
 ~~~~~~~~~~
@@ -58,7 +57,7 @@ Installing
 
     .. code:: sh
 
-       source afdko_env/bin/activate.bat
+       afdko_env\Scripts\activate.bat
 
 
 * Install `afdko`_:
