@@ -20,6 +20,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #elif WIN32
 #include <windows.h>
 #include <winspool.h>
+#define TYPEDEF_boolean 1
 #endif
 #include "global.h"
 #include "GLOB.h"
