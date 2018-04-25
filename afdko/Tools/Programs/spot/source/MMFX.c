@@ -84,7 +84,7 @@ void MMFXDump(IntX level, LongN start)
 	else
 	  {
 		for (i = 0; i < MMFX->nMetrics; i++)
-		  DL(2, (OUTPUTBUFF, "[%d]=%08lx ", i, MMFX->offset[i]) );
+		  DL(2, (OUTPUTBUFF, "[%d]=%08x ", i, MMFX->offset[i]) );
 		DL(2, (OUTPUTBUFF, "\n"));
 	  }
 	DL(2, (OUTPUTBUFF, "\n"));

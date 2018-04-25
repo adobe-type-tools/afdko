@@ -119,7 +119,7 @@ void METADump(IntX level, LongN start)
 	DLu(2, "metaEntriesVersionMajor=", META->metaEntriesVersionMajor);
 	DLu(2, "metaEntriesVersionMinor=", META->metaEntriesVersionMinor);
 	DL(2, (OUTPUTBUFF, 
-		   "unicodeVersion         =%ld.%ld.%ld (%ld) (0x%08lx)\n", 
+		   "unicodeVersion         =%d.%d.%d (%d) (0x%08x)\n",
 		META->unicodeVersion / 10000,
 		(META->unicodeVersion / 100) % 100,
 		(META->unicodeVersion % 100),
@@ -144,7 +144,7 @@ void METADump(IntX level, LongN start)
 			if (!metatag) metatag = "Unknown";
 			if (level >= 5)
 				{
-				DL(5, (OUTPUTBUFF, "String #%03d <%s>\tID=%3hu Len=%3hu Offset=%08lx \t<",
+				DL(5, (OUTPUTBUFF, "String #%03d <%s>\tID=%3hu Len=%3hu Offset=%08x \t<",
 					j, metatag, s->labelID, s->stringLen, s->stringOffset));
 				}
 			else

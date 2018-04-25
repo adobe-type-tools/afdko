@@ -1292,7 +1292,7 @@ static void dumpOverflow1(OverflowSubstFormat1 *fmt, IntX level, void *feattag)
 	{
 	  DL(2, (OUTPUTBUFF, "SubstFormat = 1\n"));
 	  DL(2, (OUTPUTBUFF, "LookupType  = %d\n", fmt->OverflowLookupType));
-	  DL(2, (OUTPUTBUFF, "Offset      = %08lx\n", fmt->OverflowOffset));
+	  DL(2, (OUTPUTBUFF, "Offset      = %08x\n", fmt->OverflowOffset));
 	  
 	  dumpSubtable(fmt->OverflowOffset, fmt->OverflowLookupType, fmt->subtable, 
 						 level, feattag, GSUBLookupIndex, GSUBSubtableindex, GSUBSubtableCnt, 1);
@@ -4037,7 +4037,7 @@ centerline_stop();
 	else
 		prev_offset=offset;
 	
-	DL(2, (OUTPUTBUFF, "--- Subtable [%d] (%08lx)\n", subTableIndex, offset));
+	DL(2, (OUTPUTBUFF, "--- Subtable [%d] (%08x)\n", subTableIndex, offset));
 	  if (!recursion)
 		{
 		GSUBSubtableindex = subTableIndex; /* store for later use */

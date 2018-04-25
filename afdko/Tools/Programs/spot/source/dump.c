@@ -218,7 +218,7 @@ void dump_csDump (Int32 length, Card8 *strng, Int32 nMasters)
 		default:
 			/* 1 byte number */
 			single = strng[i] - 139;
-			fprintf(OUTPUTBUFF,  "%ld ", single); 
+			fprintf(OUTPUTBUFF,  "%d ", single);
 			args++;
 			i++;
 			break;
@@ -257,7 +257,7 @@ void dump_csDumpDerel (Card8 *strng, Int32 nMasters)
 			  arg0 = val;
 			else
 			  val += arg0;
-			fprintf(OUTPUTBUFF,  "%ld ", val);
+			fprintf(OUTPUTBUFF,  "%d ", val);
 			args++;
 			i += 3;
 			break;
@@ -271,7 +271,7 @@ void dump_csDumpDerel (Card8 *strng, Int32 nMasters)
 			  arg0 = val;
 			else
 			  val += arg0;
-			fprintf(OUTPUTBUFF,  "%ld ", val);
+			fprintf(OUTPUTBUFF,  "%d ", val);
 			args++;
 			i += 2;
 			break;
@@ -285,7 +285,7 @@ void dump_csDumpDerel (Card8 *strng, Int32 nMasters)
 			  arg0 = val;
 			else
 			  val += arg0;
-			fprintf(OUTPUTBUFF,  "%ld ", val);
+			fprintf(OUTPUTBUFF,  "%d ", val);
 			i += 2;
 			args++;
 			break;
@@ -310,7 +310,7 @@ void dump_csDumpDerel (Card8 *strng, Int32 nMasters)
 			  arg0 = single;
 			else
 			  single += arg0;
-			fprintf(OUTPUTBUFF,  "%ld ", single); 
+			fprintf(OUTPUTBUFF,  "%d ", single); 
 			args++;
 			i++;
 			break;

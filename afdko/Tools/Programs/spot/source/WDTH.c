@@ -83,7 +83,7 @@ void WDTHDump(IntX level, LongN start)
 	DL(3, (OUTPUTBUFF, "--- offset[index]=offset\n"));
 	if (WDTH->flags & LONG_OFFSETS)
 		for (i = 0; i < nElements; i++)
-			DL(3, (OUTPUTBUFF, "[%d]=%08lx ", i, ((Card32 *)WDTH->offset)[i]));
+			DL(3, (OUTPUTBUFF, "[%d]=%08x ", i, ((Card32 *)WDTH->offset)[i]));
 	else
 		for (i = 0; i < nElements; i++)
 			DL(3, (OUTPUTBUFF, "[%d]=%04hx ", i, ((Card16 *)WDTH->offset)[i]));

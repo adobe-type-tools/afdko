@@ -44,14 +44,14 @@ void fdscDump(IntX level, LongN start)
 	
 	/* Dump header */
 	DLV(2, "version     =", fdsc->version);
-	DL(2, (OUTPUTBUFF, "nDescriptors=%lu\n", fdsc->nDescriptors));
+	DL(2, (OUTPUTBUFF, "nDescriptors=%u\n", fdsc->nDescriptors));
 
 	/* Dump descriptors */
 	DL(2, (OUTPUTBUFF, "--- descriptor[index]={tag,value}\n"));
 	for (i = 0; i < (IntX)fdsc->nDescriptors; i++)
 		{
 		FontDescriptor *desc = &fdsc->descriptor[i];
-		DL(2, (OUTPUTBUFF, "[%d]={%c%c%c%c,%1.3f (%08lx)}\n", i,
+		DL(2, (OUTPUTBUFF, "[%d]={%c%c%c%c,%1.3f (%08x)}\n", i,
 			   TAG_ARG(desc->tag), FIXED_ARG(desc->value)));
 		}
 	}

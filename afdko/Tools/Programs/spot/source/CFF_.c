@@ -554,10 +554,10 @@ static void gcrnewPage(IntX page)
 	/* Initialize synopsis mode */
 	workstr[0] = '\0';
 	sprintf(workstr, "%% page %hu\n"
-			   "<</PageSize [%ld %ld]>> setpagedevice\n"
+			   "<</PageSize [%d %d]>> setpagedevice\n"
 			   "%g %g translate\n"
 			   "/Helvetica findfont 12 scalefont setfont\n"
-			   "0 %ld moveto ",
+			   "0 %d moveto ",
 			   synopsis.page,
 			   synopsis.pagewidth+((Card32)INCH(0.25)), synopsis.pageheight+((Card32)INCH(0.25)),
 			   INCH(0.125), INCH(0.125),
@@ -566,7 +566,7 @@ static void gcrnewPage(IntX page)
 	proofPSOUT(cffproofctx, workstr);
 	workstr[0] = '\0';
 	
-	sprintf(workstr, "%ld (%hu) stringwidth pop sub %ld moveto (%hu) show\n"
+	sprintf(workstr, "%d (%hu) stringwidth pop sub %d moveto (%hu) show\n"
 			   "/Helvetica-Narrow findfont %d scalefont setfont\n",
 			   synopsis.pagewidth, synopsis.page, synopsis.pageheight +((Card32)9), synopsis.page,
 			   TEXT_SIZE);
@@ -1339,11 +1339,11 @@ static void CFF_dumpfi(IntX level)
 
   DLs(2, "unitsPerEm  =",fi->unitsPerEm);
   DLs(2, "isFixedPitch=", fi->isFixedPitch);
-  DLF(2, "ItalicAngle =", fi->ItalicAngle);
+  DLF(2, "ItalicAngle =", (Fixed)fi->ItalicAngle);
   DLs(2, "UnderlinePosition =", fi->UnderlinePosition);
   DLs(2, "UnderlineThickness=", fi->UnderlineThickness);
   if (fi->UniqueID!=4000000)
-  	DLU(2, "UniqueID    =", fi->UniqueID);
+  	DLU(2, "UniqueID    =", (Card32)fi->UniqueID);
   if (fi->XUID[0]!=0)
   {
   	DL(2, (OUTPUTBUFF, "XUID        ="));
@@ -1369,7 +1369,7 @@ static void CFF_dumpfi(IntX level)
 	  {
 		if (fi->mm.UDV[i] > 0)
 		  {
-			DLF(2, " ", fi->mm.UDV[i]);
+			DLF(2, " ", (Fixed)fi->mm.UDV[i]);
 		  }
 		else
 		  DL(2, (OUTPUTBUFF, " ? "));

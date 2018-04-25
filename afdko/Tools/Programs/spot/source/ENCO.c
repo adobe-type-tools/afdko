@@ -148,7 +148,7 @@ void ENCODump(IntX level, LongN start)
 
 	DL(2, (OUTPUTBUFF, "--- offset[index]=value\n"));
 	for (i = 0; i <= nEncodings; i++)
-		DL(2, (OUTPUTBUFF, "[%d]=%08lx ", i, ENCO->offset[i]));
+		DL(2, (OUTPUTBUFF, "[%d]=%08x ", i, ENCO->offset[i]));
 	DL(2, (OUTPUTBUFF, "\n"));
 
 	for (i = 0; i < nEncodings; i++)

@@ -383,7 +383,7 @@ static void dumpMarkGlyphSetsDef(Offset offset, MarkGlyphSetsDef* markGlyphSetsD
 	DL(2, (OUTPUTBUFF, "--- Coverage[index]=offset\n"));
 	for (i = 0; i < markGlyphSetsDef->MarkSetCount; i++)
 		{
-		DL(2, (OUTPUTBUFF, "[%d]=%04lx ", i, markGlyphSetsDef->Coverage[i]));
+		DL(2, (OUTPUTBUFF, "[%d]=%04x ", i, markGlyphSetsDef->Coverage[i]));
 		}
 	DL(2, (OUTPUTBUFF, "\n"));
 	for (i = 0; i < markGlyphSetsDef->MarkSetCount; i++)

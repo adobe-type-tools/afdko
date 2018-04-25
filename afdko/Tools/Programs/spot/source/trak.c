@@ -92,14 +92,14 @@ static void dumpData(Data *data, Byte8 *name, IntX level)
 		{
 		Entry *entry = &data->track[i];
 
-		DL(2, (OUTPUTBUFF, "[%d]={%1.3f (%08lx),%hu,%04hx} ", i, 
+		DL(2, (OUTPUTBUFF, "[%d]={%1.3f (%08x),%hu,%04hx} ", i, 
 			   FIXED_ARG(entry->level), entry->nameId, entry->offset));
 		}
 	DL(2, (OUTPUTBUFF, "\n"));
 
 	DL(2, (OUTPUTBUFF, "--- size[index]=value\n"));	
 	for (i = 0; i < data->nSizes; i++)
-		DL(2, (OUTPUTBUFF, "[%d]=%1.3f (%08lx) ", i, FIXED_ARG(data->size[i])));
+		DL(2, (OUTPUTBUFF, "[%d]=%1.3f (%08x) ", i, FIXED_ARG(data->size[i])));
 	DL(2, (OUTPUTBUFF, "\n"));
 
 	DL(2, (OUTPUTBUFF, "--- value[index]=value\n"));	
