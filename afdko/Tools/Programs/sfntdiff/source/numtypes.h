@@ -8,6 +8,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #ifndef _NUMTYPES_H
 #define _NUMTYPES_H
 
+#define TYPEDEF_boolean 1
 /* import type definitions for Int16, Card16 etc from shared header file */
 #include "supportpublictypes.h"
 
