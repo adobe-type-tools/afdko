@@ -207,7 +207,7 @@ void ttoDumpFeatureList(Card16 offset, FeatureList *list, IntX level)
 		for (i = 0; i < list->FeatureCount; i++)
 		  {
 			FeatureRecord *record = &list->FeatureRecord[i];
-			printf( "[%d]='%c%c%c%c' (0x%lx)\n", i, TAG_ARG(record->FeatureTag), record->FeatureTag);
+			printf( "[%d]='%c%c%c%c' (0x%x)\n", i, TAG_ARG(record->FeatureTag), record->FeatureTag);
 		  }
 		printf( "\n");
 	  }
