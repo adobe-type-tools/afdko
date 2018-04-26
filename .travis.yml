@@ -15,6 +15,7 @@ matrix:
         - pip uninstall --yes afdko
 
     - os: osx
+      osx_image: xcode6.4
       env: NAME=OSX
       if: type = pull_request
       language: generic
