@@ -4,22 +4,24 @@ environment:
     secure: myMd6E3niwjGvxEHeChOlg==
 
   matrix:
-    # - PYTHON: "C:\\Python27"
+    - PYTHON: "C:\\Python27"
     - PYTHON: "C:\\Python27-x64"
 
 install:
-  - python -m pip install --upgrade pip setuptools
-  - pip install setuptools_scm
-  - pip install wheel
-  - pip install pytest
+  - set "PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%"
+  - python -m pip install -U pip setuptools
+  - python -m pip install setuptools_scm
+  - python -m pip install wheel
+  - python -m pip install pytest
   - python setup.py bdist_wheel
-  - for %%f in (dist\*.whl) do pip install %%f
+  - for %%f in (dist\*.whl) do (set "WHEEL=%%f")
+  - python -m pip install -U --force-reinstall %WHEEL%
 
 build: false
 
 test_script:
-  - pytest
-  - pip uninstall --yes afdko
+  - python -m pytest
+  - python -m pip uninstall --yes afdko
 
 artifacts:
   # archive the generated packages in the ci.appveyor.com build report
