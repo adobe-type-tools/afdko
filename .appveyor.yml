@@ -4,7 +4,7 @@ environment:
     secure: myMd6E3niwjGvxEHeChOlg==
 
   matrix:
-    - PYTHON: "C:\\Python27"
+    # - PYTHON: "C:\\Python27"
     - PYTHON: "C:\\Python27-x64"
 
 install:
