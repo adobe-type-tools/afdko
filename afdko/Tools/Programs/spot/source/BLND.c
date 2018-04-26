@@ -190,7 +190,7 @@ void BLNDRead(LongN start, Card32 length)
 static Card8 *dumpString(Card8 *p, Card8 *base, IntX level)
 	{
 	IntX length = *p;
-	DL(2, (OUTPUTBUFF, "[%02lx]={%u,<%.*s>}\n", p - base, length, length, p + 1));
+	DL(2, (OUTPUTBUFF, "[%02x]={%u,<%.*s>}\n", (unsigned)(p - base), length, length, p + 1));
 	return p + 1 + length + (~length & 1);
 	}
 

@@ -107,7 +107,7 @@ void fileClose(File *fyl)
 /* Return file position */
 Card32 fileTell(File *file)
 	{
-	long posn;
+	long posn = 0;
 	if (file->fp != NULL)
 		posn = ftell(file->fp);
 	else

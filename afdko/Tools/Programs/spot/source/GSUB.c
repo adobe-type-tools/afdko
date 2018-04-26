@@ -4002,7 +4002,7 @@ static void dumpReverseChainContext(void *fmt, IntX level, void* feattag)
 			dumpReverseChainContext1(fmt, level);
 			break;
 		default:
-			DL(2, (OUTPUTBUFF, "Error. ReverseChainingContextSubst %d not supported.\n", format));
+			DL(2, (OUTPUTBUFF, "Error. ReverseChainingContextSubst %u not supported.\n", format));
 		
 		}
 	  GSUBContextRecursionCnt--;
@@ -4976,7 +4976,6 @@ static void freeLigatureSubsType (void *subtable)
 	{
 	IntX i, j;
 	LigatureSubstFormat1 *LigatureSubstfmt1;
-    LigatureSet *ligatureSet;
   	switch (((LigatureSubstFormat1 *)(subtable))->SubstFormat)
 		{
 			case 1:
@@ -4984,7 +4983,7 @@ static void freeLigatureSubsType (void *subtable)
 				ttoFreeCoverage(LigatureSubstfmt1->_Coverage);	
 				for (i = 0; i < (IntX)(LigatureSubstfmt1->LigSetCount); i++)
 					{
-						ligatureSet = &LigatureSubstfmt1->_LigatureSet[i];
+						LigatureSet *ligatureSet = &LigatureSubstfmt1->_LigatureSet[i];
 						for (j = 0; j < (IntX)(ligatureSet->LigatureCount); j++)
 							{
 							 memFree(ligatureSet->_Ligature[j].Component);

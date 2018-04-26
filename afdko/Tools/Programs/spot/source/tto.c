@@ -591,7 +591,7 @@ static void dumpFeatureParams(FeatureRecord *record, Feature *feature, IntX leve
                     while (c < CharCount)
                     {
                         Card32 uv = uvp[c];
-                        DL(2, (OUTPUTBUFF, "   Character Variant index: %d. Character: 0x%04x\n", c, uv));
+                        DL(2, (OUTPUTBUFF, "   Character Variant index: %u. Character: 0x%04x\n", c, uv));
                         c++;
                     }
                 }

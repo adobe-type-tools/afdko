@@ -426,7 +426,7 @@ static void printUVSMapping(Card32 uvs, Card32 uv, GlyphId glyphId, IntX level)
 		break;
 	case 9: case 10:
 		{
-		Byte8 str[10];
+		Byte8 str[20];
 		IntX origShift, lsb, rsb, width, tsb, bsb, vwidth, yorig;
 		Byte8 *name = getGlyphName(glyphId, 0);
 		
