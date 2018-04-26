@@ -294,13 +294,7 @@ typedef unsigned BitField;
 typedef float real, *Preal;
 typedef double longreal;
 
-#if !MACROM || __GNUC__         /* MACROM is defined only for 68k Mac builds */
-#if (ARCH_64BIT == 1)
-typedef      int Fixed; /*  16 bits of integer, 16 bits of fraction */
-#else /* (ARCH_64BIT == 1) */
-typedef long int Fixed;	/*  16 bits of integer, 16 bits of fraction */
-#endif /* (ARCH_64BIT == 1) */
-#endif
+typedef Int32 Fixed; /*  16 bits of integer, 16 bits of fraction */
 typedef Fixed *PFixed;
 
 /* Co-ordinates */
