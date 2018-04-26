@@ -3,6 +3,10 @@ environment:
   TWINE_PASSWORD:
     secure: myMd6E3niwjGvxEHeChOlg==
 
+  matrix:
+    - PYTHON: "C:\\Python27"
+    - PYTHON: "C:\\Python27-x64"
+
 install:
   - python -m pip install --upgrade pip setuptools
   - pip install setuptools_scm
