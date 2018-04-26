@@ -106,7 +106,7 @@ void fvarDump(IntX level, LongN start)
 		DLx(2, "flags= ", instance->flags);
 
 		for (j = 0; j < fvar->axisCount; j++)
-			DL(2, (OUTPUTBUFF, "coord[%d]=%08lx (%1.3f)\n", j, instance->coord[j],
+			DL(2, (OUTPUTBUFF, "coord[%d]=%08x (%1.3f)\n", j, instance->coord[j],
 				   FIX2FLT(instance->coord[j])));
         if ( instance->psNameId != MAX_CARD16)
             DLu(2, "psNameId=", instance->psNameId);

@@ -1663,7 +1663,7 @@ static void dumpExtension1(ExtensionPosFormat1 *fmt, IntX level, void *feattag)
 	{
 	  DL(2, (OUTPUTBUFF, "PosFormat = 1\n"));
 	  DL(2, (OUTPUTBUFF, "LookupType  = %d\n", fmt->ExtensionLookupType));
-	  DL(2, (OUTPUTBUFF, "Offset      = %08lx\n", fmt->ExtensionOffset));
+	  DL(2, (OUTPUTBUFF, "Offset      = %08x\n", fmt->ExtensionOffset));
 	  
 	  dumpSubtable(fmt->ExtensionOffset, fmt->ExtensionLookupType, fmt->subtable, 
 						 level, feattag, GPOSLookupIndex, GPOStableindex, GPOStableCount, 1);
@@ -2702,7 +2702,7 @@ static void dumpAnchorFormat3(AnchorFormat3 *fmt, IntX level)
 
 static void dumpAnchorRecord(Card32 offset, void *fmt, IntX level)
 	{
-	 DL(2, (OUTPUTBUFF, "--- AnchorRecord (%0lx)\n", offset));
+	 DL(2, (OUTPUTBUFF, "--- AnchorRecord (%0x)\n", offset));
 	if (offset == 0)
 		return;
 		
@@ -2813,7 +2813,7 @@ static void dumpMarkArray(Card32 offset, MarkArray *markarray, IntX level)
 	 IntX i;
 	 IntX j;
 	 da_DCL(MarkRecord*, uniqueAnchorTables);
-	 DL(2, (OUTPUTBUFF, "--- MarkArray (%04lx)\n", offset));
+	 DL(2, (OUTPUTBUFF, "--- MarkArray (%04x)\n", offset));
 	 DLu(2, "MarkCount =", markarray->MarkCount);
 	 DL(2, (OUTPUTBUFF, "--- MarkRecord[index] = Class, AnchorRecord\n"));
 	
@@ -2855,7 +2855,7 @@ static void dumpBaseArray(Card32 offset, BaseArray *basearray, Card32 classCount
 	 IntX j;
 	 IntX m;
 	 da_DCL(AnchorRecord, uniqueAnchorTables);
-	 DL(2, (OUTPUTBUFF, "--- BaseArray (%04lx)\n", offset));
+	 DL(2, (OUTPUTBUFF, "--- BaseArray (%04x)\n", offset));
 	 DLu(2, "BaseCount =", basearray->BaseCount);
 	
 	 da_INIT(uniqueAnchorTables, classCount, classCount);
@@ -3021,7 +3021,7 @@ static void dumpLigatureAttach(Card32 offset, LigatureAttach *ligatureAttach, Ca
 	 IntX j;
 	 IntX m;
 	 da_DCL(AnchorRecord, uniqueAnchorTables);
-	 DL(2, (OUTPUTBUFF, "--- LigatureAttach (%04lx)\n", offset));
+	 DL(2, (OUTPUTBUFF, "--- LigatureAttach (%04x)\n", offset));
 	 DLu(2, "  ComponentCount =", ligatureAttach->ComponentCount);
 	
 	 da_INIT(uniqueAnchorTables, classCount, classCount);
@@ -3078,7 +3078,7 @@ static void dumpLigatureArray(Card32 offset, LigatureArray *ligatureArray, Card3
 	{
 	 IntX i;
 	 da_DCL(AnchorRecord, uniqueAnchorTables);
-	 DL(2, (OUTPUTBUFF, "--- LigatureArray (%04lx)\n", offset));
+	 DL(2, (OUTPUTBUFF, "--- LigatureArray (%04x)\n", offset));
 	 DLu(2, "LigatureCount =", ligatureArray->LigatureCount);
 	
 	 da_INIT(uniqueAnchorTables, classCount, classCount);
@@ -3493,14 +3493,14 @@ static void showContext2(ContextPosFormat2 *fmt, IntX level, void *feattag)
 	{
 		ttoEnumRec *classList;
 		Card32 cnt, scscnt, psIndex;
-		IntX i, forProofing, isVert;
+		IntX i, forProofing;
 		char proofString[kProofBufferLen];
 		classList = memNew(sizeof(ttoEnumRec) * (fmt->PosClassSetCnt));
 		ttoEnumerateClass(fmt->ClassDef, fmt->_ClassDef, 
 						  fmt->PosClassSetCnt,
 						  classList, &cnt);
 		
-		forProofing = isVert = 0;
+		forProofing = 0;
 		if (level == 8)
 			{
 			forProofing = 1;
@@ -4817,7 +4817,7 @@ static void dumpSubtable(LOffset offset, Card16 type, void *subtable,
 	  else
 	  	offset=offset+prev_offset;
 	  	
-	  DL(2, (OUTPUTBUFF, "--- Subtable [%d] (%04lx)\n", subTableIndex, offset));
+	  DL(2, (OUTPUTBUFF, "--- Subtable [%d] (%04x)\n", subTableIndex, offset));
 	  if (!recursion)
 			{
 			GPOStableCount = subTableCount; /* store for later use in text dump only */
@@ -5377,7 +5377,7 @@ void GPOSDump(IntX level, LongN start)
 	  				char name2[65];
 	  				int val1 = 0, val2 = 0, val3 = 0;
 	  				kernEntry = da_INDEX(afmLines, lineCount);
-	  				scanNum = sscanf(inLine,"%s %s %s %d %d %d", prefix, name1, name2, &val1, &val2, &val3);
+	  				scanNum = sscanf(inLine,"%5s %64s %64s %d %d %d", prefix, name1, name2, &val1, &val2, &val3);
 	  				sprintf(kernEntry->kernPair, "%s %s %s", prefix, name1, name2);
 	  				kernEntry->kernValue = val1;
 	  				if (scanNum == 5)

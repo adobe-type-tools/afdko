@@ -656,7 +656,7 @@ void hexDump(Card8 which, Card32 tag, LongN start, Card32 length)
 		IN_BYTES(which, (left < 16) ? left : 16, data);
 
 		/* Dump 8 hexadecimal words of data */
-		printf( "%08lx  ", addr);
+		printf( "%08x  ", addr);
 
 		for (i = 0; i < 16; i++)
 			{
@@ -739,7 +739,7 @@ void hexDiff(Card32 tag,
 			  else if (level == 2) 
 				{
 				  /* Dump 8 hexadecimal words of data */
-				  printf( "< %08lx  ", addr);
+				  printf( "< %08x  ", addr);
 
 				  for (i = 0; i < 16; i++)
 					{
@@ -760,7 +760,7 @@ void hexDiff(Card32 tag,
 				  printf( "|\n");
 
 				  /* Dump 8 hexadecimal words of data */
-				  printf( "> %08lx  ", addr);
+				  printf( "> %08x  ", addr);
 
 				  for (i = 0; i < 16; i++)
 					{
@@ -815,7 +815,7 @@ static void dirDiff3(LongN start1, LongN start2)
 		else if (sfnt1.version == VERSION(1,0))
 		  DL(3, ("version= 1.0  [TrueType]"));
 		else
-		  DL(3, ("version=%c%c%c%c (%08lx) [????]", 
+		  DL(3, ("version=%c%c%c%c (%08x) [????]", 
 			 TAG_ARG(sfnt1.version), sfnt1.version));
 
 		note ("> sfnt ");
@@ -828,7 +828,7 @@ static void dirDiff3(LongN start1, LongN start2)
 		else if (sfnt2.version == VERSION(1,0))
 		  DL(3, ("version= 1.0  [TrueType]"));
 		else
-		  DL(3, ("version=%c%c%c%c (%08lx) [????]", 
+		  DL(3, ("version=%c%c%c%c (%08x) [????]", 
 			 TAG_ARG(sfnt2.version), sfnt2.version));
 	  }
 

@@ -85,7 +85,7 @@ static void dumpFormat1(Format1 *format, IntX level)
 
 	DL(2, (OUTPUTBUFF, "--- offsets[index]=long\n"));
 	for (i = 0; i < nGlyphs + 1; i++)
-		DL(2, (OUTPUTBUFF, "[%d]=%08lx ", i, format->offsets[i]));
+		DL(2, (OUTPUTBUFF, "[%d]=%08x ", i, format->offsets[i]));
 	DL(2, (OUTPUTBUFF, "\n"));
 	}
 

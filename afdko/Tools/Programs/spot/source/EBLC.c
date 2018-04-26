@@ -96,7 +96,7 @@ static void EBLCDumpBitmapSizeTables(IntX level)
 	{
 	  tblptr = &(EBLC->bitmapSizeTable[i]);
 	  DL(2, (OUTPUTBUFF, "--- bitmapSizeTable[%d]\n",i));
-	  DL(2, (OUTPUTBUFF, "indexSubTableArrayOffset (%08lx)\n", tblptr->indexSubTableArrayOffset));
+	  DL(2, (OUTPUTBUFF, "indexSubTableArrayOffset (%08x)\n", tblptr->indexSubTableArrayOffset));
 	  DLU(2, "indexSubTableArraySize =", tblptr->indexTableSize);
 	  DLU(2, "numberofIndexSubTables =", tblptr->numberofIndexSubTables);
 	  DLU(2, "colorRef =", tblptr->colorRef);

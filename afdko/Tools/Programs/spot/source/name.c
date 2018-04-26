@@ -97,7 +97,7 @@ static void dumpString(NameRecord *record, IntX level)
 		if ((code & 0xff00) == 0 && isprint(code))
 			DL(3, (OUTPUTBUFF, "%c", (IntN)code));
 		else
-			DL(3, (OUTPUTBUFF, "\\%0*lx", precision, code));
+			DL(3, (OUTPUTBUFF, "\\%0*x", precision, code));
 		}
 	DL(3, (OUTPUTBUFF, ">\n"));
 	}
@@ -119,7 +119,7 @@ static void dumpLanguageTagString(LangTagRecord *langTagRec, IntX level)
 		if ((code & 0xff00) == 0 && isprint(code))
 			DL(3, (OUTPUTBUFF, "%c", (IntN)code));
 		else
-			DL(3, (OUTPUTBUFF, "\\%0*lx", precision, code));
+			DL(3, (OUTPUTBUFF, "\\%0*x", precision, code));
 		}
 	DL(3, (OUTPUTBUFF, ">\n"));
 	}

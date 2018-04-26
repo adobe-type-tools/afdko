@@ -267,12 +267,12 @@ static void ttcfDump(IntX level, LongN start)
 
 	DL(1, (OUTPUTBUFF, "### [ttcf] (%08lx)\n", start));
 
-	DL(2, (OUTPUTBUFF, "TTCTag        =%c%c%c%c (%08lx)\n", 
+	DL(2, (OUTPUTBUFF, "TTCTag        =%c%c%c%c (%08x)\n",
 		   TAG_ARG(ttcf.TTCTag), ttcf.TTCTag));
 	DLV(2, "Version       =", ttcf.Version);
 	if (ttc.Version ==  0x00020000)
 		{
-		DL(2, (OUTPUTBUFF, "TTC DSIG Tag  =%c%c%c%c (%08lx)\n", 
+		DL(2, (OUTPUTBUFF, "TTC DSIG Tag  =%c%c%c%c (%08x)\n",
 			   TAG_ARG(ttcf.DSIGTag), ttcf.DSIGTag));
 		DLU(2, "DSIG Length   =", ttcf.DSIGLength);
 		DLU(2, "DSIG Offset   =", ttcf.DSIGOffset);
@@ -281,7 +281,7 @@ static void ttcfDump(IntX level, LongN start)
 	DLU(2, "DirectoryCount=", ttcf.DirectoryCount);
 	DL(2, (OUTPUTBUFF, "--- TableDirectory[index]=offset\n"));
 	for (i = 0; i < (IntX)ttcf.DirectoryCount; i++)
-		DL(2, (OUTPUTBUFF, "[%d]=%08lx ", i, ttcf.TableDirectory[i]));
+		DL(2, (OUTPUTBUFF, "[%d]=%08x ", i, ttcf.TableDirectory[i]));
 	DL(2, (OUTPUTBUFF, "\n"));
 	
 	}
@@ -524,7 +524,7 @@ static void dirDump(IntX level, LongN start)
 	else if (sfnt.version == VERSION(1,0))
 		DL(2, (OUTPUTBUFF, "version      =1.0  [TrueType]\n"));
 	else
-		DL(2, (OUTPUTBUFF, "version      =%c%c%c%c (%08lx) [unknown]\n", 
+		DL(2, (OUTPUTBUFF, "version      =%c%c%c%c (%08x) [unknown]\n",
 			   TAG_ARG(sfnt.version), sfnt.version));
 	DLu(2, "numTables    =", sfnt.numTables);
 	DLu(2, "searchRange  =", sfnt.searchRange);
@@ -536,7 +536,7 @@ static void dirDump(IntX level, LongN start)
 		{
 		Entry *entry = &sfnt.directory[i];
 
-		DL(2, (OUTPUTBUFF, "[%2d]={'%c%c%c%c',%08lx,%08lx,%08lx}\n", i, TAG_ARG(entry->tag),
+		DL(2, (OUTPUTBUFF, "[%2d]={'%c%c%c%c',%08x,%08x,%08x}\n", i, TAG_ARG(entry->tag),
 			   entry->checksum, entry->offset, entry->length));
 		}
 	}
@@ -793,7 +793,7 @@ static void hexDump(Card32 tag, LongN start, Card32 length)
 		IN_BYTES(left < 16 ? left : 16, data);
 
 		/* Dump 8 hexadecimal words of data */
-		fprintf(OUTPUTBUFF,  "%08lx  ", addr);
+		fprintf(OUTPUTBUFF,  "%08x  ", addr);
 		for (i = 0; i < 16; i++)
 			{
 			if (i < left)
@@ -832,7 +832,7 @@ static void arrayDump(Card32 tag, LongN start, Card32 length)
 	for (i=0; i<length/2; i++)
 	{
 		IN_BYTES(2, (unsigned char *)(&data));
-		fprintf(OUTPUTBUFF, "[%lu] = %d\n", i, data);
+		fprintf(OUTPUTBUFF, "[%u] = %d\n", i, data);
 	}
 }
 
@@ -1091,7 +1091,7 @@ int sfntTTCScan(int argc, char *argv[], int argi, opt_Option *opt)
 			{
 			Card32 offset;
 
-			if (sscanf(p, "%li", &offset) == 1)
+			if (sscanf(p, "%i", &offset) == 1)
 				*da_NEXT(ttc.sel) = offset;
 			else
 				opt_Error(opt_Format, opt, arg);
@@ -1107,9 +1107,9 @@ static void sfntTTCList(void)
 	fprintf(OUTPUTBUFF,"(offsets: ");
 	for(i=0; i<ttc.sel.cnt; i++)
 		if (i==0)
-			fprintf(OUTPUTBUFF, "%ld", (Card32)da_INDEX(ttc.sel, i));
+			fprintf(OUTPUTBUFF, "%d", (Card32)da_INDEX(ttc.sel, i));
 		else
-			fprintf(OUTPUTBUFF, ", %ld", (Card32)da_INDEX(ttc.sel, i));
+			fprintf(OUTPUTBUFF, ", %d", (Card32)da_INDEX(ttc.sel, i));
 	fprintf(OUTPUTBUFF,")");
 }	
 

@@ -122,11 +122,11 @@ static Format3 *read3(Card32 offset, Card32 length)
 	{
 		if (tableSize > length)
 		{
-			fprintf(OUTPUTBUFF, "Error: kern subtable format 3 size '%lu' is greater than subtable length '%lu'. Skipping.\n", tableSize, length);
+			fprintf(OUTPUTBUFF, "Error: kern subtable format 3 size '%u' is greater than subtable length '%u'. Skipping.\n", tableSize, length);
 			return fmt;
 		}
 		else
-			fprintf(OUTPUTBUFF, "Error: kern subtable format 3 size '%lu' is less than subtable length '%lu'.\n", tableSize, length);
+			fprintf(OUTPUTBUFF, "Error: kern subtable format 3 size '%u' is less than subtable length '%u'.\n", tableSize, length);
 	}
 
 	
@@ -403,7 +403,7 @@ static void dump3(Format3 *fmt, Card32 length, IntX level)
 	for (i = 0; i < fmt->kernValueCount; i++)
 		{
 
-		DL(3, (OUTPUTBUFF, "[%lu]=", i));
+		DL(3, (OUTPUTBUFF, "[%u]=", i));
 		dumpValue(&fmt->kernValue[i], level);
 		DL(3, (OUTPUTBUFF, ", "));
 		}
@@ -414,10 +414,10 @@ static void dump3(Format3 *fmt, Card32 length, IntX level)
 		{
 		if (dumpNames)
 			{
-			fprintf(OUTPUTBUFF,  "[%lu]<%s>=%d ", i, getGlyphName((GlyphId)i, 0), fmt->leftClass[i]);
+			fprintf(OUTPUTBUFF,  "[%u]<%s>=%d ", i, getGlyphName((GlyphId)i, 0), fmt->leftClass[i]);
 			}
 		else
-			DL(3, (OUTPUTBUFF,  "[%lu=%d ", i, fmt->leftClass[i]));
+			DL(3, (OUTPUTBUFF,  "[%u=%d ", i, fmt->leftClass[i]));
 		}
 	DL(3, (OUTPUTBUFF, "\n"));
 	
@@ -426,17 +426,17 @@ static void dump3(Format3 *fmt, Card32 length, IntX level)
 		{
 		if (dumpNames)
 			{
-			fprintf(OUTPUTBUFF,  "[%lu]<%s>=%d ", i, getGlyphName((GlyphId)i, 0), fmt->rightClass[i]);
+			fprintf(OUTPUTBUFF,  "[%u]<%s>=%d ", i, getGlyphName((GlyphId)i, 0), fmt->rightClass[i]);
 			}
 		else
-			DL(3, (OUTPUTBUFF,  "[%lu]=%d ", i, fmt->rightClass[i]));
+			DL(3, (OUTPUTBUFF,  "[%u]=%d ", i, fmt->rightClass[i]));
 		}
 	DL(3, (OUTPUTBUFF, "\n"));
 	
 	DL(3, (OUTPUTBUFF, "--- kernValueIndex[index]=kern value index\n"));
 	for (i = 0; i < kernIndexSize; i++)
 		{
-			DL(3, (OUTPUTBUFF,  "[%lu]=%d ", i, fmt->kernIndex[i]));
+			DL(3, (OUTPUTBUFF,  "[%u]=%d ", i, fmt->kernIndex[i]));
 		}
 	DL(3, (OUTPUTBUFF, "\n"));
 	}
@@ -517,7 +517,7 @@ static void run3(Format3 *fmt, Card32 length, IntX level)
 
 	if (tableSize > length)
 	{
-		fprintf(OUTPUTBUFF, "Error: kern subtable format 3 size '%lu' is greater than subtable length '%lu'. Skipping.\n", tableSize, length);
+		fprintf(OUTPUTBUFF, "Error: kern subtable format 3 size '%u' is greater than subtable length '%u'. Skipping.\n", tableSize, length);
 		return ;
 	}
 	initGlyphNames();

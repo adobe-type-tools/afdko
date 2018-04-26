@@ -973,7 +973,7 @@ void dumpRangeDesc(Byte8 *fieldName, Card32 fieldValue, const Byte8 *rangeDesc[]
 	IntX set = 0;
 	IntX mask = 1;
 
-	fprintf(OUTPUTBUFF,  "%-18s=%08lx", fieldName, fieldValue);
+	fprintf(OUTPUTBUFF,  "%-18s=%08x", fieldName, fieldValue);
 	for (j = 0; j < 32; j++)
 		{
 		if (fieldValue & mask)

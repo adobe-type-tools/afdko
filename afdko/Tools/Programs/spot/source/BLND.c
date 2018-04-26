@@ -190,7 +190,7 @@ void BLNDRead(LongN start, Card32 length)
 static Card8 *dumpString(Card8 *p, Card8 *base, IntX level)
 	{
 	IntX length = *p;
-	DL(2, (OUTPUTBUFF, "[%02x]={%u,<%.*s>}\n", p - base, length, length, p + 1));
+	DL(2, (OUTPUTBUFF, "[%02x]={%u,<%.*s>}\n", (unsigned)(p - base), length, length, p + 1));
 	return p + 1 + length + (~length & 1);
 	}
 
@@ -250,7 +250,7 @@ void BLNDDump(IntX level, LongN offset)
 	/* Dump offsets */
 	DL(2, (OUTPUTBUFF, "--- offsets\n"));
 	for (i = 0; i < BLND->nAxes; i++)
-		DL(2, (OUTPUTBUFF, "axisOffset[%d]     =%08lx\n", i, BLND->axisOffset[i]));
+		DL(2, (OUTPUTBUFF, "axisOffset[%d]     =%08x\n", i, BLND->axisOffset[i]));
 
 	DLX(2, "masterNameOffset  =", BLND->masterNameOffset);
 	DLX(2, "styleOffset       =", BLND->styleOffset);
@@ -277,7 +277,7 @@ void BLNDDump(IntX level, LongN offset)
 			DLu(2, "nMaps     =", info->nMaps);
 			DL(2, (OUTPUTBUFF, "--- map[index]={designCoord,normalizedValue}\n"));
 			for (j = 0; j < info->nMaps; j++)
-				DL(2, (OUTPUTBUFF, "[%d]={%hu,%1.3f (%08lx)} ", j, 
+				DL(2, (OUTPUTBUFF, "[%d]={%hu,%1.3f (%08x)} ", j,
 					   info->map[j].designCoord,
 					   FIXED_ARG(info->map[j].normalizedValue)));
 			DL(2, (OUTPUTBUFF, "\n"));
@@ -304,7 +304,7 @@ void BLNDDump(IntX level, LongN offset)
 
 		DL(2, (OUTPUTBUFF, "--- delta[index]={start,delta}\n"));
 		for (j = 0; j < style->nDeltas; j++)
-			DL(2, (OUTPUTBUFF, "[%d]={%1.3f (%08lx),%1.3f (%08lx)}\n", j, 
+			DL(2, (OUTPUTBUFF, "[%d]={%1.3f (%08x),%1.3f (%08x)}\n", j, 
 				   FIXED_ARG(style->delta[j].start), 
 				   FIXED_ARG(style->delta[j].delta)));
 		}

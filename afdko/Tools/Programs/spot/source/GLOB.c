@@ -102,13 +102,13 @@ static void hybridDump(Byte8 *name, FWord *value, IntX level)
 static void FixedDump(Byte8 *name, Fixed *value, IntX level)
 	{
 	if (GLOB->nMasters == 1)
-		DL(2, (OUTPUTBUFF, "%s%1.3f (%08lx)\n", name, FIXED_ARG(*value)));
+		DL(2, (OUTPUTBUFF, "%s%1.3f (%08x)\n", name, FIXED_ARG(*value)));
 	else
 		{
 		IntX i;
 		DL(2, (OUTPUTBUFF, "%s{", name));
 		for (i = 0; i < GLOB->nMasters; i++)
-			DL(2, (OUTPUTBUFF, "%1.3f (%08lx)%s", FIXED_ARG(value[i]), 
+			DL(2, (OUTPUTBUFF, "%1.3f (%08x)%s", FIXED_ARG(value[i]), 
 				   (i + 1 == GLOB->nMasters) ? "}\n" : ","));
 		}
 	}
@@ -125,7 +125,7 @@ void GLOBDump(IntX level, LongN start)
 
 	DL(2, (OUTPUTBUFF, "--- matrix[index]=value\n"));
 	for (i = 0; i < 6; i++)
-		DL(2, (OUTPUTBUFF, "[%d]=%1.3f (%08lx)\n", i, FIXED_ARG(GLOB->matrix[i])));
+		DL(2, (OUTPUTBUFF, "[%d]=%1.3f (%08x)\n", i, FIXED_ARG(GLOB->matrix[i])));
 
 	FixedDump("italicAngle       =", GLOB->italicAngle, level);
 

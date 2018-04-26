@@ -568,7 +568,7 @@ static void dumpFeatureParams(FeatureRecord *record, Feature *feature, IntX leve
                             while (c < CharCount)
                             {
                                 Card32 uv = uvp[c];
-                                fprintf (OUTPUTBUFF, "\tCharacter 0x%04lx;\n", uv);
+                                fprintf (OUTPUTBUFF, "\tCharacter 0x%04x;\n", uv);
                                 c++;
                             }
                         }
@@ -591,7 +591,7 @@ static void dumpFeatureParams(FeatureRecord *record, Feature *feature, IntX leve
                     while (c < CharCount)
                     {
                         Card32 uv = uvp[c];
-                        DL(2, (OUTPUTBUFF, "   Character Variant index: %d. Character: 0x%04lx\n", c, uv));
+                        DL(2, (OUTPUTBUFF, "   Character Variant index: %u. Character: 0x%04x\n", c, uv));
                         c++;
                     }
                 }
@@ -623,7 +623,7 @@ void ttoDumpFeatureList(Card16 offset, FeatureList *list, IntX level)
 		  {
 			FeatureRecord *record = &list->FeatureRecord[i];
 			Feature *feature = &record->_Feature;
-			fprintf(OUTPUTBUFF, "[%2d]='%c%c%c%c' (0x%lx) LookupListIndex: ", i, TAG_ARG(record->FeatureTag), record->FeatureTag);
+			fprintf(OUTPUTBUFF, "[%2d]='%c%c%c%c' (0x%x) LookupListIndex: ", i, TAG_ARG(record->FeatureTag), record->FeatureTag);
 			
 			
 			for (j = 0; j < feature->LookupCount; j++)

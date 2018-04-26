@@ -5,12 +5,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
  * Changed:    6/26/98 11:17:38
  ***********************************************************************/
 
-#if __bool_true_false_are_defined
-typedef bool boolean;
-#else
-typedef enum {false, true} boolean;
-#endif
-
 #define FREENONNULL(p) if (p != NULL) {memFree((char *) p); p = NULL;}
 
 /* define types for moveto, lineto, curveto, line-closepath, point-closepath */

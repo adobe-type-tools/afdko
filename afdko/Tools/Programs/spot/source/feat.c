@@ -68,7 +68,7 @@ void featDump(IntX level, LongN start)
 	DLV(2, "version  =", feat->version);
 	DL(2, (OUTPUTBUFF, "nNames   =%hu\n", feat->nNames));
 	DL(2, (OUTPUTBUFF, "nSets    =%hu\n", feat->nSets));
-	DL(2, (OUTPUTBUFF, "setOffset=%08lx\n", feat->setOffset));
+	DL(2, (OUTPUTBUFF, "setOffset=%08x\n", feat->setOffset));
 	
 	/* Dump feature names */
 	DL(2, (OUTPUTBUFF, "--- featureNames[index]="
@@ -77,7 +77,7 @@ void featDump(IntX level, LongN start)
 		{
 		FeatureName *feature = &feat->feature[i];
 
-		DL(2, (OUTPUTBUFF, "[%2d]={%2hu,%2hu,%08lx,%04hx,%hu}\n", i, feature->feature,
+		DL(2, (OUTPUTBUFF, "[%2d]={%2hu,%2hu,%08x,%04hx,%hu}\n", i, feature->feature,
 			   feature->nSettings, feature->settingOffset,
 			   feature->featureFlags, feature->nameId));
 		}

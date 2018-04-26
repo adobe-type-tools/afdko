@@ -350,19 +350,19 @@ static void printMapping(Card32 code, GlyphId glyphId,
 	switch (level)
 		{
 	case 5:
-		fprintf(OUTPUTBUFF,  "[%0*lX]=%hu \n", precision, code, glyphId);
+		fprintf(OUTPUTBUFF,  "[%0*X]=%hu \n", precision, code, glyphId);
 		break;
 	case 6:
-		fprintf(OUTPUTBUFF,  "[%lu]=%hu \n", code, glyphId);
+		fprintf(OUTPUTBUFF,  "[%u]=%hu \n", code, glyphId);
 		break;
 	case 7: case 8:
 		{
 		Byte8 *name = getGlyphName(glyphId, 0);
 				
 		if (level == 7)
-			fprintf(OUTPUTBUFF,  "[%0*lX]=<%s> \n", precision, code, name);
+			fprintf(OUTPUTBUFF,  "[%0*X]=<%s> \n", precision, code, name);
 		else
-			fprintf(OUTPUTBUFF,  "[%lu]= <%s> \n", code, name);
+			fprintf(OUTPUTBUFF,  "[%u]= <%s> \n", code, name);
 		}
 		break;
 	case 9: case 10:
@@ -372,9 +372,9 @@ static void printMapping(Card32 code, GlyphId glyphId,
 		Byte8 *name = getGlyphName(glyphId, 0);
 		
 		if (level == 9)
-			sprintf(str, "%0*lX", precision, code);
+			sprintf(str, "%0*X", precision, code);
 		else
-			sprintf(str, "%lu", code);
+			sprintf(str, "%u", code);
 			
 		getMetrics(glyphId, &origShift, &lsb, &rsb, &width, &tsb, &bsb, &vwidth, &yorig);
 		proofCheckAdvance(proofctx, 1000 + 2*width);
@@ -400,15 +400,15 @@ static void printUVSMapping(Card32 uvs, Card32 uv, GlyphId glyphId, IntX level)
 		{
 	case 5:
 		if (glyphId == 0xffff)
-			fprintf(OUTPUTBUFF,  "[%04lX %04lX]= -\n", uv, uvs);
+			fprintf(OUTPUTBUFF,  "[%04X %04X]= -\n", uv, uvs);
 		else
-			fprintf(OUTPUTBUFF,  "[%04lX %04lX]= %hu\n", uv, uvs, glyphId);
+			fprintf(OUTPUTBUFF,  "[%04X %04X]= %hu\n", uv, uvs, glyphId);
 		break;
 	case 6:
 		if (glyphId == 0xffff)
-			fprintf(OUTPUTBUFF,  "[%lu %lu]= -\n", uv, uvs);
+			fprintf(OUTPUTBUFF,  "[%u %u]= -\n", uv, uvs);
 		else
-			fprintf(OUTPUTBUFF,  "[%lu %lu]= %hu\n", uv, uvs, glyphId);
+			fprintf(OUTPUTBUFF,  "[%u %u]= %hu\n", uv, uvs, glyphId);
 		break;
 	case 7: case 8:
 		{
@@ -419,21 +419,21 @@ static void printUVSMapping(Card32 uvs, Card32 uv, GlyphId glyphId, IntX level)
 			name = getGlyphName(glyphId, 0);
 				
 		if (level == 7)
-			fprintf(OUTPUTBUFF,  "[%04lX %04lX]= <%s>\n", uv, uvs, name);
+			fprintf(OUTPUTBUFF,  "[%04X %04X]= <%s>\n", uv, uvs, name);
 		else
-			fprintf(OUTPUTBUFF,  "[%lu %lu]= <%s>\n", uv, uvs, name);
+			fprintf(OUTPUTBUFF,  "[%u %u]= <%s>\n", uv, uvs, name);
 		}
 		break;
 	case 9: case 10:
 		{
-		Byte8 str[10];
+		Byte8 str[20];
 		IntX origShift, lsb, rsb, width, tsb, bsb, vwidth, yorig;
 		Byte8 *name = getGlyphName(glyphId, 0);
 		
 		if (level == 9)
-			sprintf(str, "UVS: %04lX %04lX", uv, uvs);
+			sprintf(str, "UVS: %04X %04X", uv, uvs);
 		else
-			sprintf(str, "UVS: %lu %lu", uv, uvs);
+			sprintf(str, "UVS: %u %u", uv, uvs);
 
 		getMetrics(glyphId, &origShift, &lsb, &rsb, &width, &tsb, &bsb, &vwidth, &yorig);
 		proofCheckAdvance(proofctx, 1000 + 2*width);
@@ -871,15 +871,15 @@ static void dumpFormat12(Format12 *fmt, Card16 platformId, IntX level)
 	IntX i;
 
 	DL(2, (OUTPUTBUFF, "format    =%hu\n", fmt->format));
-	DL(2, (OUTPUTBUFF, "length    =%04lx\n", fmt->length));
-	DL(2, (OUTPUTBUFF, "languageId=%lu ", fmt->languageId));
+	DL(2, (OUTPUTBUFF, "length    =%04x\n", fmt->length));
+	DL(2, (OUTPUTBUFF, "languageId=%u ", fmt->languageId));
 	DL(4, (OUTPUTBUFF, "[%s]", descLang(1, platformId, (Card16)fmt->languageId)));
 	DL(2, (OUTPUTBUFF, "\n"));
-	DL(3, (OUTPUTBUFF, "nGroups=%lu\n", fmt->nGroups));
+	DL(3, (OUTPUTBUFF, "nGroups=%u\n", fmt->nGroups));
 
 	DL(3, (OUTPUTBUFF, "--- Group[index]={startCharCode,endCharCode,startGlyphID}  \n"));
 	for (i = 0; i < (IntX)fmt->nGroups; i++)
-		DL(3, (OUTPUTBUFF, "[%d]={%lu,%lu,%lu} ", i, fmt->group[i].startCharCode, fmt->group[i].endCharCode, fmt->group[i].startGlyphID));
+		DL(3, (OUTPUTBUFF, "[%d]={%u,%u,%u} ", i, fmt->group[i].startCharCode, fmt->group[i].endCharCode, fmt->group[i].startGlyphID));
 	DL(3, (OUTPUTBUFF, "\n"));
 	}
 
@@ -889,13 +889,13 @@ static void dumpFormat14(Format14 *fmt,  IntX level)
 	Card32 numEntries;
 	
 	DL(2, (OUTPUTBUFF, "format    =%hu\n", fmt->format));
-	DL(2, (OUTPUTBUFF, "length    =%04lx\n", fmt->length));
-	DL(2, (OUTPUTBUFF, "number Variation Sequence Records   =%lu ", fmt->numUVSRecords));
+	DL(2, (OUTPUTBUFF, "length    =%04x\n", fmt->length));
+	DL(2, (OUTPUTBUFF, "number Variation Sequence Records   =%u ", fmt->numUVSRecords));
 	DL(2, (OUTPUTBUFF, "\n"));
 
 	DL(3, (OUTPUTBUFF, "---UVS Record [ndex]={uvs, default UVS Table Offset  non-default UVS Table Offset}  \n"));
 	for (i = 0; i < fmt->numUVSRecords; i++)
-		DL(3, (OUTPUTBUFF, "[%ld]={%04lx,%04lx,%04lx} \n", i, fmt->uvsRecs[i].uvs, fmt->uvsRecs[i].defaultUVSoffset, fmt->uvsRecs[i].extUVSOffset));
+		DL(3, (OUTPUTBUFF, "[%d]={%04x,%04x,%04x} \n", i, fmt->uvsRecs[i].uvs, fmt->uvsRecs[i].defaultUVSoffset, fmt->uvsRecs[i].extUVSOffset));
 	DL(3, (OUTPUTBUFF, "\n"));
 
 	for (i = 0; i < fmt->numUVSRecords; i++)
@@ -904,20 +904,20 @@ static void dumpFormat14(Format14 *fmt,  IntX level)
 		ExtendedUVSRecord* uvsRecs2 =  fmt->uvsRecs[i].extUVSEntries;
 		
 		numEntries = fmt->uvsRecs[i].numDefEntries;
-		DL(3, (OUTPUTBUFF,  "---UVS Record [%ld]\n", i));
-		DL(3, (OUTPUTBUFF,  "   Default entry offset [%04lx] numEntries %ld.  Default UVS Entry[index] = {uv, additonal UV count}\n", fmt->uvsRecs[i].defaultUVSoffset, numEntries));
+		DL(3, (OUTPUTBUFF,  "---UVS Record [%d]\n", i));
+		DL(3, (OUTPUTBUFF,  "   Default entry offset [%04x] numEntries %d.  Default UVS Entry[index] = {uv, additonal UV count}\n", fmt->uvsRecs[i].defaultUVSoffset, numEntries));
 		for (j = 0; j < numEntries; j++)
 			{
-			DL(3, (OUTPUTBUFF,  "   [%ld]={%04lx,%d} ", j,  uvsRecs1[j].uv, uvsRecs1[j].addlCnt));
+			DL(3, (OUTPUTBUFF,  "   [%d]={%04x,%d} ", j,  uvsRecs1[j].uv, uvsRecs1[j].addlCnt));
 			}
 		if (numEntries)
 			DL(3, (OUTPUTBUFF, "\n\n"));
 		
 		numEntries = fmt->uvsRecs[i].numExtEntries;
-		DL(3, (OUTPUTBUFF,  "   Extended entry offset [%04lx] numEntries %ld.  Extended UVS Entry[index] = {uv, glyphID}\n", fmt->uvsRecs[i].extUVSOffset, numEntries));
+		DL(3, (OUTPUTBUFF,  "   Extended entry offset [%04x] numEntries %d.  Extended UVS Entry[index] = {uv, glyphID}\n", fmt->uvsRecs[i].extUVSOffset, numEntries));
 		for (j = 0; j < numEntries; j++)
 			{
-			DL(3, (OUTPUTBUFF,  "   [%ld]={%04lx,%d} ", j,  uvsRecs2[j].uv, uvsRecs2[j].glyphID));
+			DL(3, (OUTPUTBUFF,  "   [%d]={%04x,%d} ", j,  uvsRecs2[j].uv, uvsRecs2[j].glyphID));
 			}
 		if (numEntries)
 			DL(3, (OUTPUTBUFF, "\n"));
@@ -964,7 +964,7 @@ void cmapDump(IntX level, LongN start)
 		DL(2, (OUTPUTBUFF, "scriptId  =%hu ", scriptId));
 		DL(4, (OUTPUTBUFF, "[%s]", descScript(platformId, scriptId)));
 		DL(2, (OUTPUTBUFF, "\n"));
-		DL(2, (OUTPUTBUFF, "offset    =%08lx\n", cmap.encoding[i].offset));
+		DL(2, (OUTPUTBUFF, "offset    =%08x\n", cmap.encoding[i].offset));
 		}
 
 	for (i = 0; i < cmap.nEncodings; i++)
@@ -978,7 +978,7 @@ void cmapDump(IntX level, LongN start)
 			  continue;
 		  }
 
-		DL(2, (OUTPUTBUFF, "--- mapping[%08lx]\n", cmap.encoding[i].offset));
+		DL(2, (OUTPUTBUFF, "--- mapping[%08x]\n", cmap.encoding[i].offset));
 		switch (*(Card16 *)format)
 			{
 		case 0:

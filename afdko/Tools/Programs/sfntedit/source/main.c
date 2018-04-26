@@ -48,24 +48,22 @@ jmp_buf mark;
 #define uint32_	4
 #define	int32_	4
 
-typedef long Fixed;
-
 /* Tag support */
-typedef unsigned long Tag;
+typedef Card32 Tag;
 #define TAG(a,b,c,d) ((Tag)(a)<<24|(Tag)(b)<<16|(c)<<8|(d))
 #define TAG_ARG(t) (char)((t)>>24&0xff),(char)((t)>>16&0xff), \
 	(char)((t)>>8&0xff),(char)((t)&0xff)
 
 typedef struct			/* sfnt table directory entry */
 	{
-	unsigned long tag;
-	unsigned long checksum;
-	unsigned long offset;
-	unsigned long length;
-	unsigned short flags;		/* Option flags */
+	Card32 tag;
+	Card32 checksum;
+	Card32 offset;
+	Card32 length;
+	Card16 flags;		/* Option flags */
 #define TBL_SRC	(1<<10)	/* Flags table in source sfnt */
 #define TBL_DST	(1<<11)	/* Flags table in destination sfnt */
-	short order;		/* Table ordering */
+	Int16 order;		/* Table ordering */
 	char *xfilename;	/* Extract filename */
 	char *afilename;	/* Add filename */
 	} Table;
@@ -75,10 +73,10 @@ typedef struct			/* sfnt table directory entry */
 typedef struct			/* sfnt header */
 	{
 	Fixed version;
-	unsigned short numTables;
-	unsigned short searchRange;
-	unsigned short entrySelector;
-	unsigned short rangeShift;
+	Card16 numTables;
+	Card16 searchRange;
+	Card16 entrySelector;
+	Card16 rangeShift;
 	Table directory[MAX_TABLES];	/* [numTables] */
 	} sfntHdr;
 #define DIR_HDR_SIZE (int32_+uint16_*4)	/* Size of written fields */
@@ -651,7 +649,7 @@ static int parseArgs(int argc, char *argv[])
 static void sfntReadHdr(void)
 	{
 	int i;
-	short numTables=0;
+	Int16 numTables=0;
 
 	/* Read and validate version */
 	fileReadObject(&srcfile, 4, &sfnt.version);
@@ -706,7 +704,7 @@ static void sfntDumpHdr(void)
 	if (sfnt.version == 0x00010000)
 		fprintf(stderr,"version      =1.0 (00010000)\n");
 	else
-		fprintf(stderr,"version      =%c%c%c%c (%08lx)\n", 
+		fprintf(stderr,"version      =%c%c%c%c (%08x)\n", 
 			   TAG_ARG(sfnt.version), sfnt.version);
 	fprintf(stderr,"numTables    =%hu\n", sfnt.numTables);
 	fprintf(stderr,"searchRange  =%hu\n", sfnt.searchRange);
@@ -717,16 +715,16 @@ static void sfntDumpHdr(void)
 	for (i = 0; i < sfnt.numTables; i++)
 		{
 		Table *tbl = &sfnt.directory[i];
-		fprintf(stderr,"[%2d]={%c%c%c%c,%08lx,%08lx,%08lx}\n", i, 
+		fprintf(stderr,"[%2d]={%c%c%c%c,%08x,%08x,%08x}\n", i, 
 			   TAG_ARG(tbl->tag), tbl->checksum, tbl->offset, tbl->length);
 		}
 	}
 
 /* Calculate values of binary search table parameters */
 static void calcSearchParams(unsigned nUnits, 
-					  unsigned short *searchRange, 
-					  unsigned short *entrySelector, 
-					  unsigned short *rangeShift)
+					  Card16 *searchRange,
+					  Card16 *entrySelector,
+					  Card16 *rangeShift)
 	{
 	unsigned log2;
 	unsigned pwr2;
@@ -748,11 +746,11 @@ static void checkChecksums(void)
 	int i;
 	long nLongs;
 	int fail = 0;
-	unsigned short searchRange;
-	unsigned short entrySelector;
-	unsigned short rangeShift;
-	unsigned long checkSumAdjustment;
-	unsigned long totalsum = 0;
+	Card16 searchRange;
+	Card16 entrySelector;
+	Card16 rangeShift;
+	Card32 checkSumAdjustment;
+	Card32 totalsum = 0;
 
 	/* Validate sfnt search fields */
 	calcSearchParams(sfnt.numTables, &searchRange, &entrySelector,&rangeShift);
@@ -777,15 +775,15 @@ static void checkChecksums(void)
 	nLongs = (DIR_HDR_SIZE + ENTRY_SIZE * sfnt.numTables) / 4;
 	while (nLongs--)
 		{
-		unsigned long amt;
+		Card32 amt;
 		fileReadObject(&srcfile, 4, &amt);
 		totalsum += amt; 
 		}
 
 	for (i = 0; i < sfnt.numTables; i++)
 		{
-		unsigned long checksum = 0;
-		unsigned long amt;
+		Card32 checksum = 0;
+		Card32 amt;
 
 		Table *entry = &sfnt.directory[i];
 
@@ -872,7 +870,7 @@ static char *makexFilename(Table *tbl)
 		if (q == NULL)
 			sprintf(filename, "%s.%s", p, tag);
 		else
-			sprintf(filename, "%.*s.%s", q - p, p, tag);
+			sprintf(filename, "%.*s.%s", (int)(q - p), p, tag);
 
 		return filename;
 		}
@@ -915,11 +913,11 @@ static int cmpOrder(const void *first, const void *second)
 	}
 
 /* Copy table and compute its checksum */
-static unsigned long tableCopy(File *src, File *dst, long offset, long length)
+static Card32 tableCopy(File *src, File *dst, long offset, long length)
 	{
 	int i;
-	long value;
-	unsigned long checksum = 0;
+	Card32 value;
+	Card32 checksum = 0;
 
 	fileSeek(src, offset, SEEK_SET);
 	for (; length > 3; length -= 4)
@@ -936,7 +934,7 @@ static unsigned long tableCopy(File *src, File *dst, long offset, long length)
 	value = 0;
 	for (i = 0; i < length; i++)
 		{
-		unsigned char b;
+		Card8 b;
 		fileReadN(src, 1, &b);
 		value = value<<8 | b;
 		}
@@ -947,10 +945,10 @@ static unsigned long tableCopy(File *src, File *dst, long offset, long length)
 	}
 
 /* Add table from file */
-static unsigned long addTable(Table *tbl, unsigned long *length)
+static Card32 addTable(Table *tbl, Card32 *length)
 	{
 	File file;
-	long checksum;
+	Card32 checksum;
 
 	fileOpenRead(tbl->afilename, &file);
 	fileSeek(&file, 0, SEEK_END);
@@ -981,12 +979,12 @@ static void sfntCopy(void)
 	int i;
 	int nLongs;
 	Tag *tags;
-	unsigned short numDstTables;
-	unsigned long checksum;
-	unsigned long offset;
-	unsigned long length;
-	unsigned long adjustOff;
-	unsigned long totalsum;
+	Card16 numDstTables;
+	Card32 checksum;
+	Card32 offset;
+	Card32 length;
+	Card32 adjustOff;
+	Card32 totalsum;
 	int headSeen = 0;
 	char outputfilename[FILENAME_MAX];
 	char *dstfilename = dstfile.name;
@@ -1052,7 +1050,7 @@ static void sfntCopy(void)
 
 		if (tbl->tag == TAG('h','e','a','d'))
 			{
-			  unsigned long b;
+			  Card32 b;
 			/* Adjust sum to ignore head.checkSumAdjustment field */
 			
 			
@@ -1115,7 +1113,7 @@ static void sfntCopy(void)
 	nLongs = (DIR_HDR_SIZE + ENTRY_SIZE * numDstTables) / 4;
 	for (i = 0; i < nLongs; i++)
 		{
-		unsigned long b;
+		Card32 b;
 		fileReadObject(&dstfile, 4, &b);
 		totalsum += b;
 		}
