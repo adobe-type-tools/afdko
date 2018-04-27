@@ -9,9 +9,7 @@ environment:
 
 install:
   - set "PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%"
-  - python -m pip install -U pip setuptools
-  - python -m pip install setuptools_scm
-  - python -m pip install wheel
+  - python -m pip install -U pip setuptools setuptools_scm wheel
   - python -m pip install pytest
   - python setup.py bdist_wheel
   - for %%f in (dist\*.whl) do (set "WHEEL=%%f")
