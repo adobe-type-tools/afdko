@@ -22,6 +22,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "Esys.h"
 #include "errno.h"
 
+extern int doingScripting;
 extern char *sourcepath;
 
 #if SUNOS
@@ -62,17 +63,27 @@ void fileOpenWrite(char *filename, File *fyl)
 	{
 	  static char Wfnam[256];
 		{
-		/* make certain that "filename" is unique */
-		int try = 0;
-		strcpy(Wfnam, filename);
-		while (fileExists(Wfnam))
-		{
-			sprintf(Wfnam, "%s%d", filename, try++);	
-		}
-		fyl->fp = sysOpenWrite(Wfnam);
-		if (fyl->fp == NULL)
-		  fileError(fyl);
-		fyl->name = Wfnam;
+		  if (!doingScripting)
+		  	{
+			  fyl->fp = sysOpenWrite(filename);
+			  if (fyl->fp == NULL)
+			  	fileError(fyl);
+			  fyl->name = filename;
+			 }
+		   else
+		   	{ 
+		   		/* make certain that "filename" is unique */
+		   		int try = 0;
+		  		strcpy(Wfnam, filename);
+		   		while (fileExists(Wfnam))
+		   		{
+		   			sprintf(Wfnam, "%s%d", filename, try++);	
+		   		}
+		   		fyl->fp = sysOpenWrite(Wfnam);
+			    if (fyl->fp == NULL)
+			  	  fileError(fyl);
+			    fyl->name = Wfnam;
+		   	}
 		}
 	}
 
@@ -94,16 +105,14 @@ void fileClose(File *fyl)
 	}
 
 /* Return file position */
-unsigned long fileTell(File *file)
+Card32 fileTell(File *file)
 	{
 	long posn = 0;
 	if (file->fp != NULL)
-	{
-			posn = ftell(file->fp);
-	}
+		posn = ftell(file->fp);
 	else
 		fileError(file);
-	return posn;
+	return (Card32)posn;
 	}
 
 /* Seek on file */
@@ -134,29 +143,29 @@ long fileLength(File *fyl)
 
 
 /* 1, 2, and 4 byte big-endian machine independent input */
-void fileReadObject(File *fyl, int size, void *obj)
+void fileReadObject(File *fyl, IntX size, void *obj)
 	{
-	long value;
-	unsigned char b;
+	Card32 value;
+	Card8 b;
 #define GET1B fileReadN(fyl, 1, &b)
 	
 	switch (size)
 		{
 	case 1:
 		GET1B;
-		*((unsigned char *)obj) = b;
+		*((Card8 *)obj) = b;
 		break;
 	case 2:
 		GET1B;	value = b;
 		GET1B;  value = value<<8 | b;
-		*((unsigned short *)obj) = (unsigned short)value;
+		*((Card16 *)obj) = (Card16)value;
 		break;
 	case 4:
 		GET1B;	value = b;
 		GET1B;  value = value<<8 | b;
 		GET1B;  value = value<<8 | b;
 		GET1B;  value = value<<8 | b;
-		*((uint32_t *)obj) = value;
+		*((Card32 *)obj) = value;
 		break;
 	default:
 		fatal(SFED_MSG_BADREADSIZE, size);
@@ -173,31 +182,31 @@ void fileReadObject(File *fyl, int size, void *obj)
 	return n;
 	}
 /* 1, 2, and 4 byte big-endian machine independent input */
-void fileWriteObject(File *fyl, int size, unsigned long value)
+void fileWriteObject(File *fyl, IntX size, Card32 value)
 	{
-	unsigned char b;
+	Card8 b;
 #define PUT1B fileWriteN(fyl, 1, &(b))
 	
 	switch (size)
 		{
 	case 1:
-		b = (unsigned char)(value & 0xFF);
+		b = (Card8)(value & 0xFF);
 		PUT1B;
 		break;
 	case 2:
-		b = (unsigned char)(value>>8 & 0xFF);
+		b = (Card8)(value>>8 & 0xFF);
 		PUT1B;
-		b = (unsigned char)(value    & 0xFF);
+		b = (Card8)(value    & 0xFF);
 		PUT1B;
 		break;
 	case 4:
-		b = (unsigned char)(value>>24 & 0xFF); 
+		b = (Card8)(value>>24 & 0xFF);
 		PUT1B;
-		b = (unsigned char)(value>>16 & 0xFF); 
+		b = (Card8)(value>>16 & 0xFF);
 		PUT1B;
-		b = (unsigned char)(value>>8  & 0xFF); 
+		b = (Card8)(value>>8  & 0xFF);
 		PUT1B;
-		b = (unsigned char)(value     & 0xFF); 
+		b = (Card8)(value     & 0xFF);
 		PUT1B;
 		break;
 	default:

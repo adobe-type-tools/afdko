@@ -8,4 +8,4 @@ GCC_OPTIMIZATION_LEVEL = 0
 GCC_ENABLE_FIX_AND_CONTINUE = NO
 GCC_DYNAMIC_NO_PIC = NO
 CONFIGURATION_BUILD_DIR = ../../../exe/osx/debug/
-HEADER_SEARCH_PATHS =  $(SDKROOT)/usr/include ../../../sfnt_includes
+HEADER_SEARCH_PATHS =  $(SDKROOT)/usr/include ../../../../spot/sfnt_includes ../../../../public/lib/api

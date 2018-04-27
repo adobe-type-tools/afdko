@@ -27,7 +27,7 @@ typedef struct _Global
 	jmp_buf env;		/* Termination environment */
 	char *progname;
 	volatile int doingScripting;
-	uint32_t gTag;
+	unsigned long gTag;
 	unsigned long flags;
 	} Global;
 extern Global global;
@@ -78,7 +78,7 @@ extern char *dateFormat;
 #define	DDLT(l,s,v) DDL(l,(OUTPUTBUFF, s "%c%c%c%c",TAG_ARG(v)))
 #define	DDLV(l,s,v) DDL(l,(OUTPUTBUFF, s "%d.%d (%08x)",VERSION_ARG(v)))
 #define	DDLF(l,s,v) DDL(l,(OUTPUTBUFF, s "%1.3f (%08x)",FIXED_ARG(v)))
-#define	DDLP(l,s,v) DDL(l,(OUTPUTBUFF, s "{%ul,<%s>}",STR_ARG(v)))
+#define	DDLP(l,s,v) DDL(l,(OUTPUTBUFF, s "{%lu,<%s>}",STR_ARG(v)))
 #define	DDLs(l,s,v) DDL(l,(OUTPUTBUFF, s "%hd",(v)))
 #define	DDLu(l,s,v) DDL(l,(OUTPUTBUFF, s "%hu",(v)))
 #define	DDLS(l,s,v) DDL(l,(OUTPUTBUFF, s "%d",(v)))

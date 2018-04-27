@@ -1,12 +1,50 @@
+environment:
+  TWINE_USERNAME: "afdko-travis"
+  TWINE_PASSWORD:
+    secure: myMd6E3niwjGvxEHeChOlg==
+
+  matrix:
+    - PYTHON: "C:\\Python27"
+    - PYTHON: "C:\\Python27-x64"
+
 install:
-  - python -m pip install --upgrade pip
-  - pip install wheel
-  - pip install pytest
+  - set "PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%"
+  - python -m pip install -U pip setuptools setuptools_scm wheel
+  - python -m pip install pytest
   - python setup.py bdist_wheel
-  - for %%f in (dist\*.whl) do pip install %%f
+  - for %%f in (dist\*.whl) do (set "WHEEL=%%f")
+  - python -m pip install -U --force-reinstall %WHEEL%
 
 build: false
 
 test_script:
-  - pytest
-  - pip uninstall --yes afdko
+  - python -m pytest
+  - python -m pip uninstall --yes afdko
+
+artifacts:
+  # archive the generated packages in the ci.appveyor.com build report
+  - path: dist\*.whl
+    name: release_wheel
+
+# Deploy wheel on tags to PyPI
+on_success:
+  - ps: >-
+      if($env:APPVEYOR_REPO_TAG -eq 'true') {
+        Write-Output ("Deploying " + $env:APPVEYOR_REPO_TAG_NAME + " to PyPI...")
+        pip install --upgrade twine
+        twine upload dist\*.whl
+      } else {
+        Write-Output "Not deploying as this is not a tagged commit"
+      }
+
+# Deploy wheel on tags to GitHub
+deploy:
+  provider: GitHub
+  auth_token:
+    secure: UyKfsObr/shlpP+0U5Zb3EPvmXt0kyKYu940CFNFdNZ8J7Fu54k415R0UNP78t0j
+  artifact: release_wheel
+  draft: false
+  prerelease: false
+  on:
+    branch: $(APPVEYOR_REPO_TAG_NAME)
+    appveyor_repo_tag: true

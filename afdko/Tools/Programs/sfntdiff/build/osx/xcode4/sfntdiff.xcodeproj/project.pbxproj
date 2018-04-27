@@ -196,7 +196,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BDB5C6E80DAEBC8E003A4375 /* debug.xcconfig */;
 			buildSettings = {
-				HEADER_SEARCH_PATHS = "../../../../spot/sfnt_includes/**";
 				PRODUCT_NAME = sfntdiff;
 			};
 			name = Debug;
@@ -205,7 +204,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BDB5C6E90DAEBC8E003A4375 /* release.xcconfig */;
 			buildSettings = {
-				HEADER_SEARCH_PATHS = "../../../../spot/sfnt_includes/**";
 				PRODUCT_NAME = sfntdiff;
 			};
 			name = Release;

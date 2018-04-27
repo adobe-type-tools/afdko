@@ -44,7 +44,7 @@ static Card8 *readD2WVSubr(Card16 num, Card16 length)
 		return NULL;
 	}
 		
-void BLNDRead(Int32N start, Card32 length)
+void BLNDRead(LongN start, Card32 length)
 	{
 	IntX i;
 	IntX j;
@@ -190,7 +190,7 @@ void BLNDRead(Int32N start, Card32 length)
 static Card8 *dumpString(Card8 *p, Card8 *base, IntX level)
 	{
 	IntX length = *p;
-	DL(2, (OUTPUTBUFF, "[%02lx]={%u,<%.*s>}\n", p - base, length, length, p + 1));
+	DL(2, (OUTPUTBUFF, "[%02x]={%u,<%.*s>}\n", (unsigned)(p - base), length, length, p + 1));
 	return p + 1 + length + (~length & 1);
 	}
 
@@ -230,13 +230,13 @@ static void dumpD2WVSubr(Byte8 *name, Card8 *subr, Card16 length, IntX level)
 		}
 	}
 
-void BLNDDump(IntX level, Int32N offset)
+void BLNDDump(IntX level, LongN offset)
 	{
 	IntX i;
 	IntX j;
 	Card8 *p;
 
-	DL(1, (OUTPUTBUFF, "### [BLND] (%08x)\n", offset));
+	DL(1, (OUTPUTBUFF, "### [BLND] (%08lx)\n", offset));
 
 	/* Dump header */
 	DLu(2, "version   =", BLND->version);
@@ -277,7 +277,7 @@ void BLNDDump(IntX level, Int32N offset)
 			DLu(2, "nMaps     =", info->nMaps);
 			DL(2, (OUTPUTBUFF, "--- map[index]={designCoord,normalizedValue}\n"));
 			for (j = 0; j < info->nMaps; j++)
-				DL(2, (OUTPUTBUFF, "[%d]={%hu,%1.3f (%08x)} ", j, 
+				DL(2, (OUTPUTBUFF, "[%d]={%hu,%1.3f (%08x)} ", j,
 					   info->map[j].designCoord,
 					   FIXED_ARG(info->map[j].normalizedValue)));
 			DL(2, (OUTPUTBUFF, "\n"));

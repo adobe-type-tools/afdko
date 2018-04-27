@@ -1335,11 +1335,11 @@ static void CFF_dumpfi(IntX level)
 
   DLs(2, "unitsPerEm  =",fi->unitsPerEm);
   DLs(2, "isFixedPitch=", fi->isFixedPitch);
-  DLF(2, "ItalicAngle =", fi->ItalicAngle);
+  DLF(2, "ItalicAngle =", (Fixed)fi->ItalicAngle);
   DLs(2, "UnderlinePosition =", fi->UnderlinePosition);
   DLs(2, "UnderlineThickness=", fi->UnderlineThickness);
   if (fi->UniqueID!=4000000)
-  	DLU(2, "UniqueID    =", fi->UniqueID);
+  	DLU(2, "UniqueID    =", (Card32)fi->UniqueID);
   if (fi->XUID[0]!=0)
   {
   	DL(2, (OUTPUTBUFF, "XUID        ="));
@@ -1365,7 +1365,7 @@ static void CFF_dumpfi(IntX level)
 	  {
 		if (fi->mm.UDV[i] > 0)
 		  {
-			DLF(2, " ", fi->mm.UDV[i]);
+			DLF(2, " ", (Fixed)fi->mm.UDV[i]);
 		  }
 		else
 		  DL(2, (OUTPUTBUFF, " ? "));

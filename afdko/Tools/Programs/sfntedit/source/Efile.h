@@ -23,12 +23,12 @@ extern long fileLength(File *fyl);
 extern int fileIsOpened(File *fyl);
 extern int fileExists(char *filename);
 extern void fileClose(File *fyl);
-extern unsigned long fileTell(File *fyl);
+extern Card32 fileTell(File *fyl);
 extern void fileSeek(File *file, long offset, int wherefrom);
 extern int fileReadN(File *file, size_t count, void *ptr);
 extern int fileWriteN(File *file, size_t count, void *ptr);
-extern void fileReadObject(File *fyl, int size, void *obj);
-extern void fileWriteObject(File *fyl, int size, unsigned long value);
+extern void fileReadObject(File *fyl, IntX size, void *obj);
+extern void fileWriteObject(File *fyl, IntX size, Card32 value);
 extern void fileCopy(File *src, File *dst, size_t count);
 
 

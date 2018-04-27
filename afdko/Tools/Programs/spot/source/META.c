@@ -58,7 +58,7 @@ static void readMetaStrings(METARecord *rec, CardX fourbyteoffsets, Card32 table
 	SEEK_ABS(save);
 	}
 
-void METARead(Int32N start, Card32 length)
+void METARead(LongN start, Card32 length)
 	{
 	IntX i;
 	CardX fourbyteoffsets = 0;
@@ -108,18 +108,18 @@ void METARead(Int32N start, Card32 length)
 	}
 
 
-void METADump(IntX level, Int32N start)
+void METADump(IntX level, LongN start)
 	{
 	IntX i, j;
 
-	DL(1, (OUTPUTBUFF, "### [META] (%08x)\n", start));
+	DL(1, (OUTPUTBUFF, "### [META] (%08lx)\n", start));
 
 	DLu(2, "tableVersionMajor      =", META->tableVersionMajor);
 	DLu(2, "tableVersionMinor      =", META->tableVersionMinor);
 	DLu(2, "metaEntriesVersionMajor=", META->metaEntriesVersionMajor);
 	DLu(2, "metaEntriesVersionMinor=", META->metaEntriesVersionMinor);
 	DL(2, (OUTPUTBUFF, 
-		   "unicodeVersion         =%d.%d.%d (%d) (0x%08x)\n", 
+		   "unicodeVersion         =%d.%d.%d (%d) (0x%08x)\n",
 		META->unicodeVersion / 10000,
 		(META->unicodeVersion / 100) % 100,
 		(META->unicodeVersion % 100),

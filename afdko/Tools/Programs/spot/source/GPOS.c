@@ -3493,14 +3493,14 @@ static void showContext2(ContextPosFormat2 *fmt, IntX level, void *feattag)
 	{
 		ttoEnumRec *classList;
 		Card32 cnt, scscnt, psIndex;
-		IntX i, forProofing, isVert;
+		IntX i, forProofing;
 		char proofString[kProofBufferLen];
 		classList = memNew(sizeof(ttoEnumRec) * (fmt->PosClassSetCnt));
 		ttoEnumerateClass(fmt->ClassDef, fmt->_ClassDef, 
 						  fmt->PosClassSetCnt,
 						  classList, &cnt);
 		
-		forProofing = isVert = 0;
+		forProofing = 0;
 		if (level == 8)
 			{
 			forProofing = 1;
@@ -5380,7 +5380,7 @@ void GPOSDump(IntX level, Int32N start)
 	  				char name2[65];
 	  				int val1 = 0, val2 = 0, val3 = 0;
 	  				kernEntry = da_INDEX(afmLines, lineCount);
-	  				scanNum = sscanf(inLine,"%s %s %s %d %d %d", prefix, name1, name2, &val1, &val2, &val3);
+	  				scanNum = sscanf(inLine,"%5s %64s %64s %d %d %d", prefix, name1, name2, &val1, &val2, &val3);
 	  				sprintf(kernEntry->kernPair, "%s %s %s", prefix, name1, name2);
 	  				kernEntry->kernValue = val1;
 	  				if (scanNum == 5)

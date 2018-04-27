@@ -266,7 +266,7 @@ static Format14 *readFormat14(void)
 }
 
 
-void cmapRead(Int32N start, Card32 length)
+void cmapRead(LongN start, Card32 length)
 	{
 	IntX i;
 
@@ -426,7 +426,7 @@ static void printUVSMapping(Card32 uvs, Card32 uv, GlyphId glyphId, IntX level)
 		break;
 	case 9: case 10:
 		{
-		Byte8 str[32];
+		Byte8 str[20];
 		IntX origShift, lsb, rsb, width, tsb, bsb, vwidth, yorig;
 		Byte8 *name = getGlyphName(glyphId, 0);
 		
@@ -927,11 +927,11 @@ static void dumpFormat14(Format14 *fmt,  IntX level)
 	DL(3, (OUTPUTBUFF, "\n"));
 	}
 
-void cmapDump(IntX level, Int32N start)
+void cmapDump(IntX level, LongN start)
 	{
 	IntX i;
 
-	DL(1, (OUTPUTBUFF, "### [cmap] (%08x)\n", start));
+	DL(1, (OUTPUTBUFF, "### [cmap] (%08lx)\n", start));
 
 	switch (level)
 		{

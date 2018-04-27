@@ -256,35 +256,33 @@ def parse_glyph_list_arg(glyph_string):
     return glyph_list
 
 
-class CustomHelpFormatter(argparse.RawDescriptionHelpFormatter):
-    # This class is based on PreserveWhiteSpaceWrapRawTextHelpFormatter
-    # from: https://stackoverflow.com/questions/35917547/
+class InlineHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
-    # noinspection PyMethodMayBeStatic
-    def __add_whitespace(self, idx, i_w_space, text):
-        if idx is 0:
-            return text
-        return (" " * i_w_space) + text
+    @staticmethod
+    def __add_whitespace(indent_index, indent_space, arg):
+        if indent_index == 0:
+            return arg
+        return (" " * indent_space) + arg
 
-    def _split_lines(self, text, width):
-        text_rows = text.splitlines()
-        for idx, line in enumerate(text_rows):
-            search = re.search('\s*[0-9\-]{0,}\.?\s*', line)
-            if line.strip() is "":
-                text_rows[idx] = " "
+    def _split_lines(self, arg, width):
+        arg_rows = arg.splitlines()
+        for line_index, text_line in enumerate(arg_rows):
+            search = re.search('\s*[0-9\-]{0,}\.?\s*', text_line)
+            if text_line.strip() is "":
+                arg_rows[line_index] = " "
             elif search:
-                l_w_space = search.end()
-                lines = [self.__add_whitespace(i, l_w_space, x)
-                         for i, x in enumerate(textwrap.wrap(line, width))]
-                text_rows[idx] = lines
+                indent_space = search.end()
+                lines = [self.__add_whitespace(i, indent_space, x) for i, x in
+                         enumerate(textwrap.wrap(text_line, width))]
+                arg_rows[line_index] = lines
 
-        # I added the " + ['']" below for a blank line between args.  -- CJC
-        return [item for sublist in text_rows for item in sublist] + ['']
+        # The  [''] adds an empty line between arguments.
+        return [item for sublist in arg_rows for item in sublist] + ['']
 
 
 def get_options(args):
     parser = argparse.ArgumentParser(
-        formatter_class=CustomHelpFormatter,
+        formatter_class=InlineHelpFormatter,
         prog='checkOutlinesUFO',
         description=__doc__
     )

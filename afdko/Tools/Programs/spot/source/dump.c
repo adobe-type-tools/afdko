@@ -218,7 +218,7 @@ void dump_csDump (Int32 length, Card8 *strng, Int32 nMasters)
 		default:
 			/* 1 byte number */
 			single = strng[i] - 139;
-			fprintf(OUTPUTBUFF,  "%d ", single); 
+			fprintf(OUTPUTBUFF,  "%d ", single);
 			args++;
 			i++;
 			break;
