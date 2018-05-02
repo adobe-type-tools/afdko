@@ -544,6 +544,8 @@ static void flushStemBlends(cstrCtx h)
 
 static void pushBlend(cstrCtx h, abfBlendArg* arg1)
 {
+    if (h->glyph.info->blendInfo.numRegions == 0)
+        return;
     if ((arg1 == NULL) || (!arg1->hasBlend))
     {
         if (h->numBlends > 0)
@@ -563,6 +565,8 @@ static void pushBlend(cstrCtx h, abfBlendArg* arg1)
 
 static void pushStemBlends(cstrCtx h, abfBlendArg* arg1)
 {
+    if (h->glyph.info->blendInfo.numRegions == 0)
+        return;
     if ((arg1 == NULL) || (!arg1->hasBlend))
     {
         if (h->numBlends > 0)

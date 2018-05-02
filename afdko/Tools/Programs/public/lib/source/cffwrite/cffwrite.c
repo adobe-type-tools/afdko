@@ -738,8 +738,11 @@ static Offset calcFontOffsets(controlCtx h, cff_Font *font, Offset offset) {
     font->offset.FDSelect =
     cfwFdselectGetOffset(g, font->iObject.FDSelect, h->offset.FDSelect);
 
-    font->offset.VarStore = offset;
-    font->offset.CharStrings = font->offset.VarStore + font->size.VarStore;
+    if (font->size.VarStore > 0) {
+        font->offset.VarStore = offset;
+        offset += font->size.VarStore;
+    }
+    font->offset.CharStrings = offset;
     font->offset.FDArray = font->offset.CharStrings + font->size.CharStrings;
 	font->offset.Private = font->offset.FDArray    + font->size.FDArray;
 	font->offset.Subrs  = font->offset.Private    + font->size.Private;
@@ -958,6 +961,7 @@ static int calcSetOffsets(controlCtx h) {
     cfwCtx g = h->g;
 
     if (g->flags & CFW_WRITE_CFF2) {
+        Offset	offset;
         h->offset.name      = 0;
         h->offset.string    = 0;
         h->offset.charset   = 0;
@@ -965,15 +969,16 @@ static int calcSetOffsets(controlCtx h) {
         
         h->offset.top       = h->size.header;
         h->offset.gsubr     = h->offset.top + h->size.top;
-        h->offset.varStore  = h->offset.gsubr + h->size.gsubr;
+        offset = h->offset.gsubr + h->size.gsubr;
+        if (h->size.varStore > 0) {
+            h->offset.varStore  = offset;
+            offset += h->size.varStore;
+        }
         if (h->size.FDSelect > 0) {
-            h->offset.FDSelect  = h->offset.varStore + h->size.varStore;
-            h->offset.end       = h->offset.FDSelect + h->size.FDSelect;
+            h->offset.FDSelect  = offset;
+            offset += h->size.FDSelect;
         }
-        else {
-            h->offset.FDSelect = 0;
-            h->offset.end       = h->offset.gsubr + h->size.gsubr;
-        }
+        h->offset.end = offset;
     } else {
         h->offset.varStore = 0;
 
@@ -1373,7 +1378,8 @@ static void writeCharStringsINDEX(controlCtx h, cff_Font *font) {
 		}
 
 		/* Copy charstring */
-		tmp2dstCopy(g, glyph->cstr.length, glyph->cstr.offset);
+		if (glyph->cstr.length > 0)
+			tmp2dstCopy(g, glyph->cstr.length, glyph->cstr.offset);
 	}
 }
 
