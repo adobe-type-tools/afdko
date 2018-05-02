@@ -13,11 +13,11 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void locaRead(Int32N offset, Card32 length);
-extern void locaDump(IntX level, Int32N offset);
+extern void locaRead(LongN offset, Card32 length);
+extern void locaDump(IntX level, LongN offset);
 extern void locaFree(void);
 
-extern IntX locaGetOffset(GlyphId glyphId, Int32N *offset, Card32 *length,
+extern IntX locaGetOffset(GlyphId glyphId, LongN *offset, Card32 *length,
 						  Card32 client);
 
 #endif /* LOCA_H */

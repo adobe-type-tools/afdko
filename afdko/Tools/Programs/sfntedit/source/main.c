@@ -825,8 +825,10 @@ static void checkChecksums(void)
 /* Return tail component of path */
 static char *tail(char *path)
 	{
-	char *p = NULL;
+	char *p;
 	p = strrchr(path, '/');
+	if (p== NULL)
+		p = strrchr(path, '\\');
 	p = strrchr(path, '\\');
 	return (p == NULL)? path: p + 1;
 	}
@@ -988,10 +990,14 @@ static void sfntCopy(void)
 	int headSeen = 0;
 	char outputfilename[FILENAME_MAX];
 	char *dstfilename = dstfile.name;
-
+	FILE* f;
 	
 	strcpy(outputfilename, dstfile.name);
-	freopen(outputfilename, "r+b", dstfile.fp);
+	f = freopen(outputfilename, "r+b", dstfile.fp);
+	if (f==NULL)
+	{
+		fatal(SFED_MSG_sysFERRORSTR, strerror(errno), dstfile.name);
+	}
 	
 	/* Count destination tables */
 	numDstTables = 0;

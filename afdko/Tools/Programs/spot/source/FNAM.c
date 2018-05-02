@@ -13,7 +13,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static FNAMTbl *FNAM = NULL;
 static IntX loaded = 0;
 
-void FNAMRead(Int32N start, Card32 length)
+void FNAMRead(LongN start, Card32 length)
 	{
 	IntX i;
 
@@ -69,11 +69,11 @@ void FNAMRead(Int32N start, Card32 length)
 	loaded = 1;
 	}
 
-void FNAMDump(IntX level, Int32N start)
+void FNAMDump(IntX level, LongN start)
 	{
 	IntX i;
 
-	DL(1, (OUTPUTBUFF, "### [FNAM] (%08x)\n", start));
+	DL(1, (OUTPUTBUFF, "### [FNAM] (%08lx)\n", start));
 
 	DLV(2, "version   =", FNAM->version);
 	DLu(2, "nEncodings=", FNAM->nEncodings);

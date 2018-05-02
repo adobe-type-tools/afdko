@@ -13,8 +13,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void GPOSRead(Int32N offset, Card32 length);
-extern void GPOSDump(IntX level, Int32N offset);
+extern void GPOSRead(LongN offset, Card32 length);
+extern void GPOSDump(IntX level, LongN offset);
 extern void GPOSFree(void);
 extern void GPOSUsage(void);
 #endif /* GPOS_H */

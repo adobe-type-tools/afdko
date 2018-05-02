@@ -10,7 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static gaspTbl *gasp = NULL;
 static IntX loaded = 0;
 
-void gaspRead(Int32N start, Card32 length)
+void gaspRead(LongN start, Card32 length)
 	{
 	IntX i;
 
@@ -34,11 +34,11 @@ void gaspRead(Int32N start, Card32 length)
 	loaded = 1;
 	}
 
-void gaspDump(IntX level, Int32N start)
+void gaspDump(IntX level, LongN start)
 	{
 	IntX i;
 
-	DL(1, (OUTPUTBUFF, "### [gasp] (%08x)\n", start));
+	DL(1, (OUTPUTBUFF, "### [gasp] (%08lx)\n", start));
 
 	DLu(2, "version=", gasp->version);
 	DLu(2, "numRanges=", gasp->numRanges);

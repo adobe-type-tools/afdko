@@ -15,8 +15,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "opt.h"
 #include "proof.h"
 
-extern void glyfRead(Int32N offset, Card32 length);
-extern void glyfDump(IntX level, Int32N offset);
+extern void glyfRead(LongN offset, Card32 length);
+extern void glyfDump(IntX level, LongN offset);
 extern void glyfFree(void);
 extern void glyfUsage(void);
 extern IntX glyfLoaded(void);

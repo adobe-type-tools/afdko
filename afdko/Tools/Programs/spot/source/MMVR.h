@@ -13,8 +13,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void MMVRRead(Int32N offset, Card32 length);
-extern void MMVRDump(IntX level, Int32N offset);
+extern void MMVRRead(LongN offset, Card32 length);
+extern void MMVRDump(IntX level, LongN offset);
 extern void MMVRFree(void);
 
 #endif /* MMVR_H */

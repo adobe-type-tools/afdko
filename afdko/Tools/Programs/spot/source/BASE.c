@@ -223,7 +223,7 @@ static void readAxis(Card32 base, Offset offset, Axis *axis)
 	readBaseScriptList(newBase, axis->BaseScriptList, &axis->_BaseScriptList);
 	}
 
-void BASERead(Int32N start, Card32 length)
+void BASERead(LongN start, Card32 length)
 	{
 	if (loaded)
 		return;
@@ -559,10 +559,10 @@ static void dumpAxis(Offset offset, Axis *axis, Byte8 *type, IntX level)
 		memFree(prevvalues);
 }
 
-void BASEDump(IntX level, Int32N start)
+void BASEDump(IntX level, LongN start)
 {
 	if (level==4){
-			DL(1, (OUTPUTBUFF, "### [BASE] (%08x)\n", start));
+			DL(1, (OUTPUTBUFF, "### [BASE] (%08lx)\n", start));
 
 		DLV(2, "Version  =", BASE->Version);
 		DLx(2, "HorizAxis=", BASE->HorizAxis);

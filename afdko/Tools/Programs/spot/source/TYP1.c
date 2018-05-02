@@ -11,7 +11,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static TYP1Tbl *TYP1 = NULL;
 static IntX loaded = 0;
 
-void TYP1Read(Int32N start, Card32 length)
+void TYP1Read(LongN start, Card32 length)
 	{
 	  if (loaded)
 		return;
@@ -30,9 +30,9 @@ void TYP1Read(Int32N start, Card32 length)
 	loaded = 1;
 	}
 
-void TYP1Dump(IntX level, Int32N start)
+void TYP1Dump(IntX level, LongN start)
 	{
-	DL(1, (OUTPUTBUFF, "### [TYP1] (%08x)\n", start));
+	DL(1, (OUTPUTBUFF, "### [TYP1] (%08lx)\n", start));
 
 	DLV(2, "Version      =", TYP1->Version);
 	DLx(2, "Flags        =", TYP1->Flags);

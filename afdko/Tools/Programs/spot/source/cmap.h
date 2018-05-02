@@ -13,8 +13,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void cmapRead(Int32N offset, Card32 length);
-extern void cmapDump(IntX level, Int32N offset);
+extern void cmapRead(LongN offset, Card32 length);
+extern void cmapDump(IntX level, LongN offset);
 extern void cmapFree(void);
 
 extern IntX cmapInitName(void);

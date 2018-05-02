@@ -16,7 +16,7 @@ static Card32 minoffset = MAX_CARD32;
 static Card32 maxoffset = 0;
 
 
-void MMFXRead(Int32N start, Card32 length)
+void MMFXRead(LongN start, Card32 length)
 	{
 	IntX i;
 	Card32 lenstr;
@@ -58,14 +58,14 @@ void MMFXRead(Int32N start, Card32 length)
 	loaded = 1;
 	}
 
-void MMFXDump(IntX level, Int32N start)
+void MMFXDump(IntX level, LongN start)
 	{
 	IntX i, pos;
 	Int16 tmp;
 	Card8 *ptr;
 	Card16 nMasters;
 
-	DL(1, (OUTPUTBUFF, "### [MMFX] (%08x)\n", start));
+	DL(1, (OUTPUTBUFF, "### [MMFX] (%08lx)\n", start));
 
 	DLV(2, "Version  =", MMFX->version);
 	DLu(2, "nMetrics =", MMFX->nMetrics);

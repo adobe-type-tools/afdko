@@ -11,7 +11,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static hheaTbl *hhea = NULL;
 static IntX loaded = 0;
 
-void hheaRead(Int32N start, Card32 length)
+void hheaRead(LongN start, Card32 length)
 	{
 	if (loaded)
 		return;
@@ -41,9 +41,9 @@ void hheaRead(Int32N start, Card32 length)
 	loaded = 1;
 	}
 
-void hheaDump(IntX level, Int32N start)
+void hheaDump(IntX level, LongN start)
 	{
-	DL(1, (OUTPUTBUFF, "### [hhea] (%08x)\n", start));
+	DL(1, (OUTPUTBUFF, "### [hhea] (%08lx)\n", start));
 
 	DLV(2, "version               =", hhea->version);
 	DLs(2, "ascender              =", hhea->ascender);

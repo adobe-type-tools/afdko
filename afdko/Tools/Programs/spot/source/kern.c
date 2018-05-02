@@ -166,10 +166,10 @@ static void *readSubtable(IntX type, Card32 offset, Card32 length)
 	}
 
 /* Read Microsoft-style kern table */
-static void readMS(Int32N start)
+static void readMS(LongN start)
 	{
 	IntX i;
-	Int32N offset = start + MS_TBL_HDR_SIZE;
+	LongN offset = start + MS_TBL_HDR_SIZE;
 
 	ms = 1;
 	MSkern = (MSkernTbl *)memNew(sizeof(MSkernTbl));
@@ -195,7 +195,7 @@ static void readMS(Int32N start)
 	}
 
 /* Read Apple-style kern table */
-static void readApple(Int32N start)
+static void readApple(LongN start)
 	{
 	IntX i;
 	Card32 offset = start + TBL_HDR_SIZE;
@@ -221,7 +221,7 @@ static void readApple(Int32N start)
 		}
 	}
 
-void kernRead(Int32N start, Card32 length)
+void kernRead(LongN start, Card32 length)
 	{
 	if (loaded)
 		return;
@@ -623,9 +623,9 @@ static void dumpApple(IntX level)
 		}
 	}
 
-void kernDump(IntX level, Int32N start)
+void kernDump(IntX level, LongN start)
 	{
-	DL(1, (OUTPUTBUFF, "### [%s] (%08x) [%s format]\n", 
+	DL(1, (OUTPUTBUFF, "### [%s] (%08lx) [%s format]\n", 
 		   (nMasters == 1) ? "kern" : "KERN", start, 
 		   ms ? "Microsoft" : "Apple"));
 	if (ms)

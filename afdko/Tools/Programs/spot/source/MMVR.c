@@ -10,7 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static MMVRTbl *MMVR = NULL;
 static IntX loaded = 0;
 
-void MMVRRead(Int32N start, Card32 length)
+void MMVRRead(LongN start, Card32 length)
 	{
 	IntX i;
 	
@@ -37,11 +37,11 @@ void MMVRRead(Int32N start, Card32 length)
 	loaded = 1;
 	}
 
-void MMVRDump(IntX level, Int32N start)
+void MMVRDump(IntX level, LongN start)
 	{
 	IntX i;
 
-	DL(1, (OUTPUTBUFF, "### [MMVR] (%08x)\n", start));
+	DL(1, (OUTPUTBUFF, "### [MMVR] (%08lx)\n", start));
 
 	DLV(2, "Version  =", MMVR->Version);
 	DLx(2, "Flags    =", MMVR->Flags);

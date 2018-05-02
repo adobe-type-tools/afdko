@@ -13,8 +13,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void GDEFRead(Int32N offset, Card32 length);
-extern void GDEFDump(IntX level, Int32N offset);
+extern void GDEFRead(LongN offset, Card32 length);
+extern void GDEFDump(IntX level, LongN offset);
 extern void GDEFFree(void);
 extern void GDEFUsage(void);
 #endif /* GDEF_H */

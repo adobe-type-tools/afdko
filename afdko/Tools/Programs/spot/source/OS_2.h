@@ -13,8 +13,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void OS_2Read(Int32N offset, Card32 length);
-extern void OS_2Dump(IntX level, Int32N offset);
+extern void OS_2Read(LongN offset, Card32 length);
+extern void OS_2Dump(IntX level, LongN offset);
 extern void OS_2GetTypocenders(Int32 *ascender, Int32*descender);
 extern void OS_2Free(void);
 

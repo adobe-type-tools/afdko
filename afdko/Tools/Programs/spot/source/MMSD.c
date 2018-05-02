@@ -10,7 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static MMSDTbl *(MMSD) = NULL;
 static IntX loaded = 0;
 
-void MMSDRead(Int32N start, Card32 length)
+void MMSDRead(LongN start, Card32 length)
 	{
 	if (loaded)
 		return;
@@ -21,9 +21,9 @@ void MMSDRead(Int32N start, Card32 length)
 	loaded = 1;
 	}
 
-void MMSDDump(IntX level, Int32N start)
+void MMSDDump(IntX level, LongN start)
 	{
-	DL(1, (stderr, "### [MMSD] (%08x)\n", start));
+	DL(1, (stderr, "### [MMSD] (%08lx)\n", start));
 	}
 
 void MMSDFree(void)

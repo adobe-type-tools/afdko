@@ -10,7 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static fvarTbl *fvar = NULL;
 static IntX loaded = 0;
 
-void fvarRead(Int32N start, Card32 length)
+void fvarRead(LongN start, Card32 length)
 	{
 	IntX i;
     int hasInstancePSNames = 0;
@@ -67,11 +67,11 @@ void fvarRead(Int32N start, Card32 length)
 	loaded = 1;
 	}
 
-void fvarDump(IntX level, Int32N start)
+void fvarDump(IntX level, LongN start)
 	{
 	IntX i;
 
-	DL(1, (OUTPUTBUFF, "### [fvar] (%08x)\n", start));
+	DL(1, (OUTPUTBUFF, "### [fvar] (%08lx)\n", start));
 
 	DLV(2, "version       =", fvar->version);
 	DLx(2, "offsetToData  =", fvar->offsetToData);

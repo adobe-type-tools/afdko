@@ -13,8 +13,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void BLNDRead(Int32N offset, Card32 length);
-extern void BLNDDump(IntX level, Int32N offset);
+extern void BLNDRead(LongN offset, Card32 length);
+extern void BLNDDump(IntX level, LongN offset);
 extern void BLNDFree(void);
 
 extern IntX BLNDGetNMasters(void);

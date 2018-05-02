@@ -13,8 +13,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void HFMXRead(Int32N offset, Card32 length);
-extern void HFMXDump(IntX level, Int32N offset);
+extern void HFMXRead(LongN offset, Card32 length);
+extern void HFMXDump(IntX level, LongN offset);
 extern void HFMXFree(void);
 
 #endif /* HFMX_H */

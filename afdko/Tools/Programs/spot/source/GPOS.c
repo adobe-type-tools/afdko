@@ -1111,7 +1111,7 @@ static void *readSubtable(Card32 offset, Card16 type)
 	return result;
 	}
 
-void GPOSRead(Int32N start, Card32 length)
+void GPOSRead(LongN start, Card32 length)
 	{
 	if (loaded)
 		return;
@@ -5277,7 +5277,7 @@ static int strcmpAFM(const void * p1, const void *p2)
 	return 0;
 }
 	  
-void GPOSDump(IntX level, Int32N start)
+void GPOSDump(IntX level, LongN start)
 	{
 	IntX i;
 	LookupList *lookuplist;
@@ -5462,7 +5462,7 @@ void GPOSDump(IntX level, Int32N start)
 	  	} /* end if level 6 */
 	  }
 	  else { /* straight text dump */
-		DL(1, (OUTPUTBUFF, "### [GPOS] (%08x)\n", start));
+		DL(1, (OUTPUTBUFF, "### [GPOS] (%08lx)\n", start));
 		
 		DLV(2, "Version    =", GPOS.Version);
 		DLx(2, "ScriptList =", GPOS.ScriptList);

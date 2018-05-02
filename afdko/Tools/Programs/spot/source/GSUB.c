@@ -825,7 +825,7 @@ static void *readSubtable(Card32 offset, Card16 type)
 	return result;
 	}
 
-void GSUBRead(Int32N start, Card32 length)
+void GSUBRead(LongN start, Card32 length)
 	{
 	if (loaded)
 		return;
@@ -4399,7 +4399,7 @@ centerline_stop();
 	prev_offset=0;
 	}
 
-void GSUBDump(IntX level, Int32N start)
+void GSUBDump(IntX level, LongN start)
 	{
 		IntX i;
 		LookupList *lookuplist;
@@ -4448,7 +4448,7 @@ void GSUBDump(IntX level, Int32N start)
 	  	}
 	  else /* text format dump */ 
 		{
-		  DL(1, (OUTPUTBUFF, "### [GSUB] (%08x)\n", start));
+		  DL(1, (OUTPUTBUFF, "### [GSUB] (%08lx)\n", start));
 		  
 		  DLV(2, "Version    =", GSUB.Version);
 		  DLx(2, "ScriptList =", GSUB.ScriptList);

@@ -10,7 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static fdscTbl *fdsc = NULL;
 static IntX loaded = 0;
 
-void fdscRead(Int32N start, Card32 length)
+void fdscRead(LongN start, Card32 length)
 	{
 	IntX i;
 
@@ -36,11 +36,11 @@ void fdscRead(Int32N start, Card32 length)
 	loaded = 1;
 	}
 
-void fdscDump(IntX level, Int32N start)
+void fdscDump(IntX level, LongN start)
 	{
 	IntX i;
 
-	DL(1, (OUTPUTBUFF, "### [fdsc] (%08x)\n", start));
+	DL(1, (OUTPUTBUFF, "### [fdsc] (%08lx)\n", start));
 	
 	/* Dump header */
 	DLV(2, "version     =", fdsc->version);

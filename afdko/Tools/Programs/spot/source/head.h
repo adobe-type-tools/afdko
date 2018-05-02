@@ -13,8 +13,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void headRead(Int32N offset, Card32 length);
-extern void headDump(IntX level, Int32N offset);
+extern void headRead(LongN offset, Card32 length);
+extern void headDump(IntX level, LongN offset);
 extern void headFree(void);
 
 extern IntX headGetLocFormat(Card16 *locFormat, Card32 client);

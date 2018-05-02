@@ -13,8 +13,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void FNAMRead(Int32N offset, Card32 length);
-extern void FNAMDump(IntX level, Int32N offset);
+extern void FNAMRead(LongN offset, Card32 length);
+extern void FNAMDump(IntX level, LongN offset);
 extern void FNAMFree(void);
 
 extern IntX FNAMGetNEncodings(Card16 *nEncoings, Card32 client);

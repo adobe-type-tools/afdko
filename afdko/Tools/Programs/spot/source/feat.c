@@ -10,7 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static featTbl *feat = NULL;
 static IntX loaded = 0;
 
-void featRead(Int32N start, Card32 length)
+void featRead(LongN start, Card32 length)
 	{
 	IntX i;
 
@@ -58,11 +58,11 @@ void featRead(Int32N start, Card32 length)
 	loaded = 1;
 	}
 
-void featDump(IntX level, Int32N start)
+void featDump(IntX level, LongN start)
 	{
 	IntX i;
 
-	DL(1, (OUTPUTBUFF, "### [feat] (%08x)\n", start));
+	DL(1, (OUTPUTBUFF, "### [feat] (%08lx)\n", start));
 
 	/* Dump header */
 	DLV(2, "version  =", feat->version);

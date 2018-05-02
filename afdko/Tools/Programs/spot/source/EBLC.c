@@ -55,7 +55,7 @@ static void EBLCReadBitmapSizeTables(void)
 }
 
 
-void EBLCRead(Int32N start, Card32 length)
+void EBLCRead(LongN start, Card32 length)
 	{
 	  if (loaded)
 		return;
@@ -118,9 +118,9 @@ static void EBLCDumpBitmapSizeTables(IntX level)
 }
 
 
-void EBLCDump(IntX level, Int32N start)
+void EBLCDump(IntX level, LongN start)
 	{
-	DL(1, (OUTPUTBUFF, "### [EBLC] (%08x)\n", start));
+	DL(1, (OUTPUTBUFF, "### [EBLC] (%08lx)\n", start));
 
 	DLV(2, "Version     =", EBLC->version);
 	EBLCDumpBitmapSizeTables(level);

@@ -2680,7 +2680,7 @@ static void dbvecs(cffCtx h, int hex)
 	printf("--- UDV\n");
 	for (i = 0; i < h->font.mm.nAxes; i++)
 		if (hex)
-			printf("[%d]=%08lx ", i, h->UDV[i]);
+			printf("[%d]=%08lx ", i, (uint32_t)h->UDV[i]);
 		else
 			printf("[%d]=%.4g ", i, h->UDV[i] / 65536.0);
 	printf("\n");
@@ -2688,7 +2688,7 @@ static void dbvecs(cffCtx h, int hex)
 	printf("--- NDV\n");
 	for (i = 0; i < h->font.mm.nAxes; i++)
 		if (hex)
-			printf("[%d]=%08lx ", i, h->NDV[i]);
+			printf("[%d]=%08lx ", i, (uint32_t)h->NDV[i]);
 		else
 			printf("[%d]=%.4g ", i, h->NDV[i] / 65536.0);
 	printf("\n");
@@ -2696,7 +2696,7 @@ static void dbvecs(cffCtx h, int hex)
 	printf("--- WV\n");
 	for (i = 0; i < h->font.mm.nMasters; i++)
 		if (hex)
-			printf("[%d]=%08lx ", i, h->WV[i]);
+			printf("[%d]=%08lx ", i, (uint32_t)h->WV[i]);
 		else
 			printf("[%d]=%.4g ", i, h->WV[i] / 65536.0);
 	printf("\n");

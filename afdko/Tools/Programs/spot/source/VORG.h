@@ -13,8 +13,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void VORGRead(Int32N offset, Card32 length);
-extern void VORGDump(IntX level, Int32N offset);
+extern void VORGRead(LongN offset, Card32 length);
+extern void VORGDump(IntX level, LongN offset);
 extern void VORGFree(void);
 extern void VORGUsage(void);
 

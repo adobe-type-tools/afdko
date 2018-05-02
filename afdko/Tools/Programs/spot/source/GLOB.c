@@ -38,7 +38,7 @@ static Card8 *readString(void)
 	return new;
 	}
 
-void GLOBRead(Int32N start, Card32 length)
+void GLOBRead(LongN start, Card32 length)
 	{
 	IntX i;
 
@@ -113,11 +113,11 @@ static void FixedDump(Byte8 *name, Fixed *value, IntX level)
 		}
 	}
 
-void GLOBDump(IntX level, Int32N start)
+void GLOBDump(IntX level, LongN start)
 	{
 	IntX i;
 
-	DL(1, (OUTPUTBUFF, "### [GLOB] (%08x)\n", start));
+	DL(1, (OUTPUTBUFF, "### [GLOB] (%08lx)\n", start));
 
 	DLV(2, "version           =", GLOB->version);
 	DLx(2, "flags             =", GLOB->flags);

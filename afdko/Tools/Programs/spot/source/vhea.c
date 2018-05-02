@@ -11,7 +11,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static vheaTbl *vhea = NULL;
 static IntX loaded = 0;
 
-void vheaRead(Int32N start, Card32 length)
+void vheaRead(LongN start, Card32 length)
 	{
 	if (loaded)
 		return;
@@ -41,9 +41,9 @@ void vheaRead(Int32N start, Card32 length)
 	loaded = 1;
 	}
 
-void vheaDump(IntX level, Int32N start)
+void vheaDump(IntX level, LongN start)
 	{
-	DL(1, (OUTPUTBUFF, "### [vhea] (%08x)\n", start));
+	DL(1, (OUTPUTBUFF, "### [vhea] (%08lx)\n", start));
 
 	DLV(2, "version               =", vhea->version);
 	DLs(2, "vertTypoAscender      =", vhea->vertTypoAscender);

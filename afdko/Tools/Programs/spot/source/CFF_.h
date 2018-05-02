@@ -27,8 +27,8 @@ typedef struct
 	}GlyphComplementReportT;
 
 
-extern void CFF_Read(Int32N offset, Card32 length);
-extern void CFF_Dump(IntX level, Int32N offset);
+extern void CFF_Read(LongN offset, Card32 length);
+extern void CFF_Dump(IntX level, LongN offset);
 extern void CFF_Free(void);
 extern IntX CFF_Loaded(void);
 extern void CFF_Usage(void);

@@ -14,7 +14,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static nameTbl *name = NULL;
 static IntX loaded = 0;
 
-void nameRead(Int32N start, Card32 length)
+void nameRead(LongN start, Card32 length)
 {
 	IntX i;
 	IntX nameSize;
@@ -151,7 +151,7 @@ static void makeString(NameRecord *record, Byte8 *str)
 	}
 
 
-void nameDump(IntX level, Int32N start)
+void nameDump(IntX level, LongN start)
 	{
 	IntX i;
 	Card16 *index;
@@ -201,7 +201,7 @@ void nameDump(IntX level, Int32N start)
 	}
 	else
 	{
-		DL(1, (OUTPUTBUFF, "### [name] (%08x)\n", start));
+		DL(1, (OUTPUTBUFF, "### [name] (%08lx)\n", start));
 
 		/* Dump header */
 		DLu(2, "format      =", name->format);

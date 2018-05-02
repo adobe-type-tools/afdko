@@ -10,7 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static WDTHTbl *WDTH = NULL;
 static IntX loaded = 0;
 
-void WDTHRead(Int32N start, Card32 length)
+void WDTHRead(LongN start, Card32 length)
 	{
 	IntX i;
 	IntX size;
@@ -60,7 +60,7 @@ void WDTHRead(Int32N start, Card32 length)
 	loaded = 1;
 	}
 
-void WDTHDump(IntX level, Int32N start)
+void WDTHDump(IntX level, LongN start)
 	{
 	IntX i;
 	IntX j;
@@ -68,7 +68,7 @@ void WDTHDump(IntX level, Int32N start)
 	IntX iWidth;
 	IntX nElements = WDTH->nRanges + 1;
 
-	DL(1, (OUTPUTBUFF, "### [WDTH] (%08x)\n", start));
+	DL(1, (OUTPUTBUFF, "### [WDTH] (%08lx)\n", start));
 
 	DLV(2, "version =", WDTH->version);
 	DLu(2, "flags   =", WDTH->flags);

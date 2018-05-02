@@ -13,8 +13,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void BASERead(Int32N offset, Card32 length);
-extern void BASEDump(IntX level, Int32N offset);
+extern void BASERead(LongN offset, Card32 length);
+extern void BASEDump(IntX level, LongN offset);
 extern void BASEFree(void);
 extern void BASEUsage(void);
 extern int  BASEgetValue(Card32 tag, char axis, Int16 *value);

@@ -52,7 +52,7 @@ static Format2 *readFormat2(void)
 	return format;
 	}
 
-void ENCORead(Int32N start, Card32 length)
+void ENCORead(LongN start, Card32 length)
 	{
 	IntX i;
 
@@ -138,11 +138,11 @@ static void dumpFormat2(Format2 *format, IntX level)
 	DL(3, (OUTPUTBUFF, "\n"));
 	}
 
-void ENCODump(IntX level, Int32N start)
+void ENCODump(IntX level, LongN start)
 	{
 	IntX i;
 
-	DL(1, (OUTPUTBUFF, "### [ENCO] (%08x)\n", start));
+	DL(1, (OUTPUTBUFF, "### [ENCO] (%08lx)\n", start));
 
 	DLV(2, "version  =", ENCO->version);
 

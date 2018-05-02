@@ -285,7 +285,7 @@ static void CFFdumpGlyphEndChar(void *ctx)
 
 
 
-void CFF_Read(Int32N start, Card32 length)
+void CFF_Read(LongN start, Card32 length)
 	{
 	if (loaded)
 		return;
@@ -1344,7 +1344,7 @@ static void CFF_dumpfi(IntX level)
   {
   	DL(2, (OUTPUTBUFF, "XUID        ="));
   	for (i=0; i<fi->XUID[0]; i++)
-  		DL(2, (OUTPUTBUFF, "%d ", fi->XUID[i+1]));
+  		DL(2, (OUTPUTBUFF, "%u ", fi->XUID[i+1]));
   	DL(2, (OUTPUTBUFF, "\n"));
   }
 
@@ -1433,7 +1433,7 @@ void dumpByName()
 
 }
 
-void CFF_Dump(IntX level, Int32N start)
+void CFF_Dump(IntX level, LongN start)
 	{
 	  IntX i;
 	  
@@ -1444,7 +1444,7 @@ void CFF_Dump(IntX level, Int32N start)
 			  return;
 			}
 		}
-	  DL(1, (OUTPUTBUFF, "### [CFF_] (%08x)\n", start));
+	  DL(1, (OUTPUTBUFF, "### [CFF_] (%08lx)\n", start));
 
 	  initGlyphNames();
 	  headGetUnitsPerEm(&unitsPerEm, CFF__);

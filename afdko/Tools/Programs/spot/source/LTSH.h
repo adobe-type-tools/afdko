@@ -13,8 +13,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void LTSHRead(Int32N offset, Card32 length);
-extern void LTSHDump(IntX level, Int32N offset);
+extern void LTSHRead(LongN offset, Card32 length);
+extern void LTSHDump(IntX level, LongN offset);
 extern void LTSHFree(void);
 
 #endif /* LTSH_H */

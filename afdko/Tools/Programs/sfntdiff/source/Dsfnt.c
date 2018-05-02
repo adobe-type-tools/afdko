@@ -306,7 +306,7 @@ static void ttcfDump(Card8 which, LongN start)
 		if (!ttc1.loaded)
 		  return;	/* Not a TT Collection */
 		
-		DL(1, ("### [ttcf] (%08x)\n", start));
+		DL(1, ("### [ttcf] (%08lx)\n", start));
 		
 		DL(2, ("TTCTag        =%c%c%c%c (%08x)\n", 
 			   TAG_ARG(ttcf1.TTCTag), ttcf1.TTCTag));
@@ -323,7 +323,7 @@ static void ttcfDump(Card8 which, LongN start)
 		if (!ttc2.loaded)
 		  return;	/* Not a TT Collection */
 		
-		DL(1, ("### [ttcf] (%08x)\n", start));
+		DL(1, ("### [ttcf] (%08lx)\n", start));
 		
 		DL(2, ("TTCTag        =%c%c%c%c (%08lx)\n", 
 			   TAG_ARG(ttcf2.TTCTag), ttcf2.TTCTag));
@@ -646,7 +646,7 @@ void hexDump(Card8 which, Card32 tag, LongN start, Card32 length)
 
 	SEEK_ABS(which, start);
 
-	printf( "### [%c%c%c%c] (%08x)\n", TAG_ARG(tag), start);
+	printf( "### [%c%c%c%c] (%08lx)\n", TAG_ARG(tag), start);
 	while (left > 0)
 		{
 		/* Dump one line */

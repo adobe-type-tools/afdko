@@ -23,7 +23,7 @@ static FWord *hybridRead(void)
 	return hybrid;
 	}
 
-void HFMXRead(Int32N start, Card32 length)
+void HFMXRead(LongN start, Card32 length)
 	{
 	if (loaded)
 		return;
@@ -58,9 +58,9 @@ static void hybridDump(Byte8 *name, FWord *value, IntX level)
 		}
 	}
 
-void HFMXDump(IntX level, Int32N start)
+void HFMXDump(IntX level, LongN start)
 	{
-	DL(1, (OUTPUTBUFF, "### [HFMX] (%08x)\n", start));
+	DL(1, (OUTPUTBUFF, "### [HFMX] (%08lx)\n", start));
 
 	DLV(2, "Version           =", HFMX->Version);
 

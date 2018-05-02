@@ -28,7 +28,7 @@ static Card8 *readString(void)
 	return newstr;
 	}
 
-void SINGRead(Int32N start, Card32 length)
+void SINGRead(LongN start, Card32 length)
 	{
 	if (loaded)
 		return;
@@ -74,11 +74,11 @@ IntX SINGGetUnitsPerEm(Card16 *unitsPerEm, Card32 client)
 	
 #define VERSION88_ARG(v) (v)>>8&0xff,(v)&0xff,(v)
 
-void SINGDump(IntX level, Int32N start)
+void SINGDump(IntX level, LongN start)
 	{
 	IntX i;
 	char nam[64];
-	DL(1, (OUTPUTBUFF, "### [SING] (%08x)\n", start));
+	DL(1, (OUTPUTBUFF, "### [SING] (%08lx)\n", start));
 
 	DLu(2, "tableVersionMajor =", SING->tableVersionMajor);
 	DLu(2, "tableVersionMinor =", SING->tableVersionMinor);

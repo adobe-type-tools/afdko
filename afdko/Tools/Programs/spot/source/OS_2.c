@@ -10,7 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static OS_2Tbl *OS_2 = NULL;
 static IntX loaded = 0;
 
-void OS_2Read(Int32N start, Card32 length)
+void OS_2Read(LongN start, Card32 length)
 	{
 	if (loaded)
 		return;
@@ -1287,9 +1287,9 @@ void dumpSelection(IntX level)
 		}
 	}
 
-void OS_2Dump(IntX level, Int32N start)
+void OS_2Dump(IntX level, LongN start)
 	{
-	DL(1, (OUTPUTBUFF, "### [OS/2] (%08x)\n", start));
+	DL(1, (OUTPUTBUFF, "### [OS/2] (%08lx)\n", start));
 
 	DLu(2, "version           =", OS_2->version);
 	DLs(2, "averageWidth      =", OS_2->averageWidth);

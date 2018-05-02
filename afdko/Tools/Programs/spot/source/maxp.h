@@ -13,8 +13,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "global.h"
 
-extern void maxpRead(Int32N offset, Card32 length);
-extern void maxpDump(IntX level, Int32N offset);
+extern void maxpRead(LongN offset, Card32 length);
+extern void maxpDump(IntX level, LongN offset);
 extern void maxpFree(void);
 
 extern IntX maxpGetNGlyphs(Card16 *nGlyphs, Card32 client);

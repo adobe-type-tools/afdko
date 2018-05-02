@@ -20,7 +20,7 @@ static Card16 unitsPerEm;
 
 #define RND(x)	((IntX)((x) + 0.5))
 
-void hmtxRead(Int32N start, Card32 length)
+void hmtxRead(LongN start, Card32 length)
 	{
 	IntX i;
 
@@ -155,14 +155,14 @@ static void dumpFormat7_8(IntX level)
 	fprintf(OUTPUTBUFF,  "\n");
 	}
 
-void hmtxDump(IntX level, Int32N start)
+void hmtxDump(IntX level, LongN start)
 	{
 	IntX i;
 
 	if (!loaded)
 		return;
 
-	DL(1, (OUTPUTBUFF, "### [hmtx] (%08x)\n", start));
+	DL(1, (OUTPUTBUFF, "### [hmtx] (%08lx)\n", start));
 
 	switch (level)
 		{
