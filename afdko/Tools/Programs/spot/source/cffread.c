@@ -37,7 +37,6 @@ static short exenc[] =
 #endif
 
 #define ARRAY_LEN(t) 	(sizeof(t)/sizeof((t)[0]))
-#define ABS(v)			((v)<0?-(v):(v))
 
 /* 16.16 fixed point arithmetic */
 typedef Int32 Fixed;

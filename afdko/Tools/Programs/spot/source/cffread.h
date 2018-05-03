@@ -5,6 +5,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define CFFREAD_H
 
 #include <stddef.h>             /* For size_t */
+#include "numtypes.h"
 
 #define CFF_VERSION 0x010005    /* Library version */
 #define MAX_XUID_SIZE 50
@@ -371,7 +372,7 @@ void cffGetGlyphWidth(cffCtx h, unsigned gid, cffFWord *hAdv, cffFWord *vAdv);
    or vAdv may be set to NULL if not needed. */
 
 void cffGetGlyphOrg(cffCtx h, unsigned gid, 
-                    Card16 *id, short *code, cffSupCode **sup);
+                    Int16 *id, short *code, cffSupCode **sup);
 
 /* cffGetGlyphOrg() provides quick access to the SID/CID and the encoding(s) of
    the specified glyph without the overhead of parsing the entire charstring
