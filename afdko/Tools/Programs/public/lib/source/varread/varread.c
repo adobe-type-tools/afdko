@@ -986,7 +986,14 @@ static float var_applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb, var_itemVa
     }
 
     subtable = &dataList->ivdSubtables.array[pair->outerIndex];
-    if (subtable->regionCount > regionCount) {
+	/* If glyphs specific glyphs do not have any variation, they will be referenced by an
+	 ivdSubtable with a region count of 0. This is valid.
+	 */
+	if (subtable->regionCount == 0) 
+		return netAdjustment;
+	
+
+	if (subtable->regionCount > regionCount) {
         sscb->message(sscb, "out of range region count in item variation store subtable");
         return netAdjustment;
     }
