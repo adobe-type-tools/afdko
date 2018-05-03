@@ -18,7 +18,7 @@ End Edit History
 #include <sys/stat.h>
 #ifdef WIN32
 #include <file.h>
-##else
+#else
 #include <sys/file.h>
 #endif
 #include <time.h>
