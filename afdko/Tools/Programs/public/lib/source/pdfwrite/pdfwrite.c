@@ -1336,6 +1336,7 @@ static long writeInfoObj(pdwCtx h)
 	{
 	enum { MAX_VERSION_SIZE = 100 };
 	char version[MAX_VERSION_SIZE + 1];
+	char version_buf[MAX_VERSION_SIZE];
 	OBJ num;
 
 	/* Make font version */
@@ -1354,13 +1355,13 @@ static long writeInfoObj(pdwCtx h)
 	num = dstBegObj(h);
 	dstPrint(h, 
 			 "/Title (%s %s)\n"
-			 "/Creator (absfont %d.%d.%d)\n" 
-			 "/Producer (pdfwrite %d.%d.%d)\n"
+			 "/Creator (absfont %s)\n" 
+			 "/Producer (pdfwrite %s)\n"
 			 "/CreationDate (%s)\n"
 			 "/ModDate (%s)\n",
 			 h->FontName, version,
-			 CTL_SPLIT_VERSION(ABF_VERSION),
-			 CTL_SPLIT_VERSION(PDW_VERSION),
+			 CTL_SPLIT_VERSION(version_buf, ABF_VERSION),
+			 CTL_SPLIT_VERSION(version_buf, PDW_VERSION),
 			 h->pdfdate,
 			 h->pdfdate);
 	dstEndObj(h);

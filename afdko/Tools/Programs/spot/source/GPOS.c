@@ -5279,9 +5279,11 @@ static int strcmpAFM(const void * p1, const void *p2)
 	  
 void GPOSDump(IntX level, LongN start)
 	{
-		IntX i;
+	IntX i;
 	LookupList *lookuplist;
-	   contextPrefix[0] = 0;
+	char tempFileName[MAXAFMLINESIZE];
+		
+	contextPrefix[0] = 0;
 	  if (!loaded) 
 		{
 		  if (sfntReadTable(GPOS_))
@@ -5323,11 +5325,13 @@ void GPOSDump(IntX level, LongN start)
 	  else if ( (level == 6) || (level == 7) ) /* AFM or features-file text syntax dump */
 	  {
 	  	char afmFilePath[128];
+		afmFilePath[0] = 0;
 	  	/*Write to temporary buffer in order to be able to sort AFM data before it is printed*/
 	  	if (level==6)
 	  		{
-	  		tmpnam(afmFilePath);
-	  		AFMout=fopen(afmFilePath, "w");
+			strcpy(tempFileName, afmFilePath);
+			strcat(tempFileName, "temp.txt");
+	  		AFMout=fopen(tempFileName, "w");
 	  		}
 	    /* dump FeatureLookup-subtables according to Script */
 	  	ttoDecompileByScript(&GPOS._ScriptList, &GPOS._FeatureList, &GPOS._LookupList, dumpSubtable, level);
@@ -5454,7 +5458,7 @@ void GPOSDump(IntX level, LongN start)
 	  			}
 	  		da_FREE(afmLines);
 	  		fclose(AFMout);
-	  		
+			remove(tempFileName);
 	  		remove(afmFilePath);
 	  	} /* end if level 6 */
 	  }

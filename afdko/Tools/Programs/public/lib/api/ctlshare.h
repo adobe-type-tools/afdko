@@ -31,14 +31,11 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /* CTL_MAKE_VERSION combines the "major", "branch", and "minor" parameters into
    a single value of type long. */
 
-#define CTL_SPLIT_VERSION(version) \
-    (int)((version)>>16&0xff), \
-    (int)((version)>>8&0xff), \
-    (int)((version)&0xff)
+char* CTL_SPLIT_VERSION(char* version_buf, unsigned int version);
 
 /* CTL_SPLIT_VERSION splits the "version" parameter into its comma-separated
-   major, branch, and minor component values that may be passed to printf and
-   printed using a %d.%d.%d format. */
+   major, branch, and minor component values that may be passed to printf,
+and prints this to version_buf */
 
 /* --------------------------------- CDECL --------------------------------- */
 

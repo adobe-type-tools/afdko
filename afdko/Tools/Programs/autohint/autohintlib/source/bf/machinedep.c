@@ -18,11 +18,10 @@ End Edit History
 #include <sys/stat.h>
 #ifdef WIN32
 #include <file.h>
-#include <time.h>
 #else
 #include <sys/file.h>
-#include <sys/time.h>
 #endif
+#include <time.h>
 
 #include <signal.h>
 extern char *ctime();
@@ -675,94 +674,6 @@ float roundf(float x)
     return val;
 }
 #endif
-
-
-#ifdef WIN32
-	
-int BFscandir(char* dirName, struct direct ***nameList, includeFile IncludeFile, sortFn Sort)
-{
-	int fail=0;
-	int count=0;
-	HANDLE hFind; 
-    WIN32_FIND_DATA finddata; 
-	struct direct dp;
-	char * searchstring;
-
-#if DOMEMCHECK
-	searchstring=(char*) memck_malloc((6+strlen(dirName)) * sizeof(char));
-#else
-	searchstring=(char*) AllocateMem(6+((unsigned int)strlen(dirName)), sizeof(char), "scandir dirname");
-#endif
-	strcpy(searchstring, ".\\");
-	strcat(searchstring, dirName);
-	if(searchstring[strlen(searchstring)-1]=='\\')
-		strcat(searchstring, "*");
-	else
-		strcat(searchstring, "\\*");
-
-	hFind = FindFirstFile(searchstring, &finddata); 
-
-	while (hFind!=INVALID_HANDLE_VALUE)
-	{
-		if (!strcmp(finddata.cFileName, ".")==0 && !strcmp(finddata.cFileName, "..")==0)
-			++count;
-		if(!FindNextFile(hFind, &finddata))
-			break;
-	}
-	FindClose(hFind);
-
-	if(count>0)
-	{
-		int i;
-#if DOMEMCHECK
-		*nameList = (struct direct **) memck_malloc(count * sizeof(struct direct *));
-#else
-		*nameList = (struct direct **) AllocateMem(count, sizeof(struct direct *), "scandir namelist");
-#endif
-		for (i = 0 ; i<count; i++)
-		{
-#if DOMEMCHECK
-			(*nameList)[i]=(struct direct *) memck_malloc(sizeof(struct direct));
-#else
-			(*nameList)[i]=(struct direct *) AllocateMem(1, sizeof(struct direct), "scandir direct");
-#endif
-		}
-	}
-	count=0;
-	
-	hFind = FindFirstFile(searchstring, &finddata); 
-
-	while (hFind!=INVALID_HANDLE_VALUE)
-	{
-		if (!strcmp(finddata.cFileName, ".")==0 && !strcmp(finddata.cFileName, "..")==0)
-		{
-			strncpy(dp.d_name, finddata.cFileName, MAXNAMLEN);
-			if(IncludeFile((struct direct *)&dp))
-			{
-				*((*nameList)[count++])=dp;
-			}
-		}
-		if(!FindNextFile(hFind, &finddata))
-			break;
-	}
-	FindClose(hFind);
-	
-	if(count>0)
-	{
-		qsort(*nameList, count,sizeof(struct direct *), Sort);
-	}
-	return count;
-}
-#else
-int BFscandir(const char* dirName, struct direct ***nameList, includeFile IncludeFile, sortFn Sort)
-{
-	int count=0;
-	count =  scandir(dirName, nameList, IncludeFile, Sort);
-	/* qsort(*nameList, count,sizeof(struct direct *), Sort); */
-	return count;
-}
-#endif
-
 
 
  unsigned char *CtoPstr(char *filename)

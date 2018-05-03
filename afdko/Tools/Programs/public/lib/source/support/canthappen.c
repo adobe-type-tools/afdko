@@ -29,7 +29,7 @@ PUBLIC procedure AssertForANSIDevelop
 		 readonly char*  pAssertCond) 
 {
    
-  fprintf(stderr, "ErrID: %ld; %s %s L:%d (%s)\n", errID, pMessage, pPgmFileName, pgmLineNum, pAssertCond);
+  fprintf(stderr, "ErrID: %u; %s %s L:%d (%s)\n", errID, pMessage, pPgmFileName, pgmLineNum, pAssertCond);
   os_abort();
 
 } 
@@ -41,7 +41,7 @@ PUBLIC procedure AssertForNonANSIDevelop
 		  IntX             pgmLineNum)
 
 {
-  fprintf(stderr, "ErrID: %ld; %s %s L:%d \n", errID, pMessage, pPgmFileName, pgmLineNum);
+  fprintf(stderr, "ErrID: %u; %s %s L:%d \n", errID, pMessage, pPgmFileName, pgmLineNum);
   os_abort();
 } 
 

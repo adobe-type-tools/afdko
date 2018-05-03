@@ -326,7 +326,7 @@ Byte8 *getGlyphName(GlyphId glyphId, IntX forProofing)
 	{
 #define NAME_LEN 128
 	static Byte8 name[NAME_LEN + 1];
-	static Byte8 nicename[NAME_LEN + 1];
+	static Byte8 nicename[NAME_LEN + 7]; /* allow an extra 6 chars for GID. */
 	Byte8 *p;
 	IntX length = 0;
 
@@ -402,8 +402,10 @@ Byte8 *getGlyphName(GlyphId glyphId, IntX forProofing)
 					}
 			  	if ((( (nameLookupType == 1) || (nameLookupType == 2) )) && (!(global.flags & SUPPRESS_GID_IN_NAME)))
 			  		{
-			  		newlen = (newlen > (NAME_LEN-6) ) ? (NAME_LEN-6) : newlen;
-			  		sprintf(nicename, "%.*s@%hu", newlen, nicename, glyphId);
+					/* Don't need to shorten name is if is < NAME_LEN
+						when the GID is added; nicename has the space. */
+					char* p  = &nicename[newlen];
+			  		sprintf(p, "@%hu",glyphId);
 			  		}
 			  		
 				return nicename;

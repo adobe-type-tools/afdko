@@ -162,10 +162,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-/* MR6 2-Jun-97	Fixes false dependency caused by VC++ #include scanner	*/
-/* MR6		   Reported by Brad Schick (schick@interaccess.com)	*/
-#define MPW_CursorCtl_Header <CursorCtl.h>
-#include MPW_CursorCtl_Header
 #ifdef __cplusplus
 extern "C" {
 #endif

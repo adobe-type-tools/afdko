@@ -5,6 +5,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define CFFREAD_H
 
 #include <stddef.h>             /* For size_t */
+#include "numtypes.h"
 
 #define CFF_VERSION 0x010005    /* Library version */
 #define MAX_XUID_SIZE 50
@@ -127,7 +128,7 @@ struct cffStdCallbacks_
        input functions. */
     };
 
-typedef long cffFixed;          /* 16.16 fixed point */
+typedef Int32 cffFixed;          /* 16.16 fixed point */
 
 void cffSetUDV(cffCtx h, int nAxes, cffFixed *UDV);
 void cffSetWV(cffCtx h, int nMasters, cffFixed *WV);
@@ -154,9 +155,10 @@ cffFontInfo *cffGetFontInfo(cffCtx h);
 #endif
 
 #include "txops.h"
+#include "numtypes.h"
 
-typedef unsigned short cffSID;  /* String identifier */
-typedef short cffFWord;         /* Font metric in em-relative units */
+typedef Card16 cffSID;  /* String identifier */
+typedef Int16 cffFWord;         /* Font metric in em-relative units */
 
 #define CFF_SID_UNDEF   0xffff  /* SID of undefined string */
 #define CFF_UNENC       (-1)    /* Unencoded glyph code */
@@ -173,8 +175,8 @@ struct cffFontInfo_
     {
     struct                  /* PostScript font name */
         {
-        short length;
-        long offset;
+        Int16 length;
+        Int32 offset;
         } FontName;
     cffSID version;         /* Optional */
     cffSID Notice;          /* Optional */
@@ -182,20 +184,20 @@ struct cffFontInfo_
     cffSID FamilyName;      /* Optional */
     cffSID FullName;        /* Optional */
     cffBBox FontBBox;
-    unsigned short unitsPerEm;
+    Card16 unitsPerEm;
     cffFWord isFixedPitch;
     cffFixed ItalicAngle;
     cffFWord UnderlinePosition;
     cffFWord UnderlineThickness;
-    long UniqueID;
-    long XUID[MAX_XUID_SIZE+1];
-    short Encoding;         /* Predefined or custom encoding (see below) */
-    short charset;          /* Predefined or custom charset (see below) */
+    Card32 UniqueID;
+    Card32 XUID[MAX_XUID_SIZE+1];
+    Int16 Encoding;         /* Predefined or custom encoding (see below) */
+    Int16 charset;          /* Predefined or custom charset (see below) */
     struct
         {
-        short nAxes;    
-        short nMasters;
-        short lenBuildCharArray;
+        Int16 nAxes;    
+        Int16 nMasters;
+        Int16 lenBuildCharArray;
         cffSID NDV;
         cffSID CDV;
         cffFixed UDV[TX_MAX_AXES]; /* Default User design vector */
@@ -213,7 +215,7 @@ struct cffFontInfo_
             cffFWord y;
             } vOrig;
         } cid;
-    unsigned short nGlyphs; /* Glyph count */
+    Card16 nGlyphs; /* Glyph count */
     };
 
 enum                        /* Encoding type */
@@ -256,8 +258,8 @@ struct cffSupCode_          /* Supplementary encoding */
 
 struct cffGlyphInfo_        /* Glyph information */
     {
-    unsigned short id;      /* SID/CID */
-    short code;             /* Encoding (unencoded=-1) */
+    Card16 id;      /* SID/CID */
+    Int16 code;             /* Encoding (unencoded=-1) */
     cffFWord hAdv;          /* Horizontal advance width */
     cffFWord vAdv;          /* Vertical advance width */
     cffBBox bbox;           /* Bounding box */
@@ -370,7 +372,7 @@ void cffGetGlyphWidth(cffCtx h, unsigned gid, cffFWord *hAdv, cffFWord *vAdv);
    or vAdv may be set to NULL if not needed. */
 
 void cffGetGlyphOrg(cffCtx h, unsigned gid, 
-                    unsigned short *id, short *code, cffSupCode **sup);
+                    Int16 *id, short *code, cffSupCode **sup);
 
 /* cffGetGlyphOrg() provides quick access to the SID/CID and the encoding(s) of
    the specified glyph without the overhead of parsing the entire charstring

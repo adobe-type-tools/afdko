@@ -286,7 +286,7 @@ static Byte8 *unknown = "--unknown--";
 /* Return platform decription */
 Byte8 *descPlat(Card16 platformId)
 	{
-	if (platformId <= SIZE(platform))
+	if (platformId < SIZE(platform))
 		return platform[platformId];
 	else
 		return unknown;
@@ -320,22 +320,22 @@ Byte8 *descScript(Card16 platformId, Card16 scriptId)
 	switch (platformId)
 		{
 	case 0:
-		if (scriptId <= SIZE(uniScript))
+		if (scriptId < SIZE(uniScript))
 			return uniScript[scriptId];
 		else 
 			return unknown;
 	case 1:
-		if (scriptId <= SIZE(macScript))
+		if (scriptId < SIZE(macScript))
 			return macScript[scriptId];
 		else
 			return unknown;
 	case 2:
-		if (scriptId <= SIZE(ISOScript))
+		if (scriptId < SIZE(ISOScript))
 			return ISOScript[scriptId];
 		else
 			return unknown;
 	case 3:
-		if (scriptId <= SIZE(MSScript))
+		if (scriptId < SIZE(MSScript))
 			return MSScript[scriptId];
 		else
 			return unknown;
@@ -352,7 +352,7 @@ Byte8 *descLang(Card16 cmap, Card16 platformId, Card16 languageId)
 	switch (platformId)
 		{
 	case 0:
-		if (languageId <= SIZE(uniLanguage))
+		if (languageId < SIZE(uniLanguage))
 			return uniLanguage[languageId];
 		else 
 			return unknown;
@@ -365,7 +365,7 @@ Byte8 *descLang(Card16 cmap, Card16 platformId, Card16 languageId)
 			else
 				languageId--;
 			}
-		if (languageId <= SIZE(macLanguage))
+		if (languageId < SIZE(macLanguage))
 			return macLanguage[languageId];
 		else
 			return unknown;
@@ -386,7 +386,7 @@ Byte8 *descLang(Card16 cmap, Card16 platformId, Card16 languageId)
 /* Return name description */
 Byte8 *descName(Card16 nameId)
 	{
-	if (nameId <= SIZE(name))
+	if (nameId < SIZE(name))
 		return name[nameId];
 	else if (nameId <= 255)
 		return "Standard";

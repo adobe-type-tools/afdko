@@ -14,27 +14,14 @@
    do not need to include this module; it is mearly provided for reference.
  */
 
-#if __CENTERLINE__
-#include "cb.h"
-#include "hotconv.h"
-#include "dynarr.h"
-#else
-
-#ifndef PACKAGE_SPECS
-#define PACKAGE_SPECS "package.h"
-#endif
-#ifndef PACKAGE_SPECS_H
-#include PACKAGE_SPECS
-#endif
+#include "package.h"
+#include HOTCONV
+#include DYNARR
 
 #include "setjmp.h"
 
 extern jmp_buf mark;
 
-#include HOTCONV
-#include DYNARR
-
-#endif
 
 #include "cb.h"
 /*#include "sun.h"*/
@@ -481,7 +468,7 @@ static char *findFeatInclFile(cbCtx h, char *filename) {
     else
     {
 		if (fileExists(filename)) {
-			char *t = strcpy((char*)path, filename);
+			strcpy((char*)path, filename);
 		}
         else
         {
@@ -491,7 +478,6 @@ static char *findFeatInclFile(cbCtx h, char *filename) {
 found:
     { /* set the current include directory */
         char *p;
-        char featDir[FILENAME_MAX];
 
         p = strrchr(path, sepch());
 		if (p == NULL) {
@@ -501,6 +487,7 @@ found:
 		}
         else
         {
+		char featDir[FILENAME_MAX];
         strncpy(featDir, path, p - path);
         featDir[p - path] = '\0';
         if (h->feat.includeDir[1] != 0)
@@ -696,15 +683,15 @@ current working directory if TMP is not defined). Then we open the temporary fil
 and return its pointer */
 static FILE *_tmpfile()
 	{
-	FILE *fp = NULL;
+	FILE *fp;
 #ifdef _WIN32
-	char* tempname = NULL;
-	int fd, flags, mode;
-	flags = _O_BINARY|_O_CREAT|_O_EXCL|_O_RDWR|_O_TEMPORARY;
-	mode = _S_IREAD | _S_IWRITE;
+	char* tempname;
 	tempname = _tempnam(NULL, "tx_tmpfile");
 	if(tempname != NULL)
 		{
+		int fd, flags, mode;
+		flags = _O_BINARY|_O_CREAT|_O_EXCL|_O_RDWR|_O_TEMPORARY;
+		mode = _S_IREAD | _S_IWRITE;
 		fd = _open(tempname, flags, mode);
 		if (fd != -1)
 			fp = _fdopen(fd, "w+b");
@@ -1704,7 +1691,6 @@ static int isRegularInstance(char *instanceName, char *regCoords, int nAxes) {
 static void parseStyles(char *stylestring, int *point0, int *delta0, int *point1, int *delta1) {
 	char *p;
 	char str[HOT_MAX_MENU_NAME];
-	int n;
 
 	strcpy(str, stylestring);
 	p = str;
@@ -1716,7 +1702,7 @@ static void parseStyles(char *stylestring, int *point0, int *delta0, int *point1
 	}
 
 	*point0 = *delta0 = *point1 = *delta1 = 0;
-	n = sscanf(str, "%d %d %d %d", point0, delta0, point1, delta1);
+	sscanf(str, "%d %d %d %d", point0, delta0, point1, delta1);
 }
 
 /*This used to be handled in sun.c but is now platform independent in this Python version.
@@ -1771,13 +1757,11 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
 			   unsigned short os2Version, char *licenseID) {
 	int psinfo;
 	int type;
-	char *p;
 	char *FontName;
 	char pfbpath[FILENAME_MAX + 1];
 	char otfpath[FILENAME_MAX + 1];
 	int freeFeatName = 0;
 	unsigned long hotConvertFlags = 0;
-	int releasemode = otherflags & OTHERFLAGS_RELEASEMODE;
 
 
 	if (otherflags & OTHERFLAGS_DO_ID2_GSUB_CHAIN_CONXT) {
@@ -1874,6 +1858,7 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
 	/* Determine dir that feature file's in */
 	h->feat.mainFile = featurefile;
 	if (featurefile != NULL) {
+		char *p;
 		p = strrchr(featurefile, sepch());	/* xxx won't work for '\' delimiters */
 		if (p == NULL) {
 			h->feat.includeDir[0] = curdir();

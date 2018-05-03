@@ -21,9 +21,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 	#define SEEK	_lseek
 	#define READ	_read
 #else
-	#ifdef OSX
-		#include <unistd.h>
-	#endif
+	#include <unistd.h>
 	#define OPEN	open
 	#define OMODE	O_RDONLY
 	#define CLOSE	close

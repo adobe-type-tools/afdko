@@ -236,7 +236,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
    opt_UInt     unsigned int
    opt_ULong    unsigned long
    opt_Double   double
-   opt_String   char *
 
    opt_char()'s value argument may consist of a single character whose value is
    the character itself or an "escape character" which can be used to represent
@@ -270,9 +269,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
    0x<hex digits>   hexadecimal conversion
    0<oct digits>    octal conversion
    [^0]<dec digits> decimal conversion
-
-   opt_String()'s min and max range check fields store the minimum and maximum 
-   allowable string lengths, respectively.
 
    Two more scanners are provided:
 
@@ -479,7 +475,6 @@ extern opt_Scanner opt_UShort;  /* (usigned short) */
 extern opt_Scanner opt_UInt;    /* (unsigned int) */
 extern opt_Scanner opt_ULong;   /* (unsigned long) */
 extern opt_Scanner opt_Double;  /* (double) */
-extern opt_Scanner opt_String;  /* (char *) */
 extern opt_Scanner opt_Call;    /* void (*function)(void) */
 extern opt_Scanner opt_Flag;    /* no value */
 

@@ -308,7 +308,7 @@ static void ttcfDump(Card8 which, LongN start)
 		
 		DL(1, ("### [ttcf] (%08lx)\n", start));
 		
-		DL(2, ("TTCTag        =%c%c%c%c (%08lx)\n", 
+		DL(2, ("TTCTag        =%c%c%c%c (%08x)\n", 
 			   TAG_ARG(ttcf1.TTCTag), ttcf1.TTCTag));
 		DLV(2, "Version       =", ttcf1.Version);
 		DLU(2, "DirectoryCount=", ttcf1.DirectoryCount);
@@ -1162,7 +1162,7 @@ int sfntTTCScan(int argc, char *argv[], int argi, opt_Option *opt)
 			{
 			Card32 offset;
 
-			if (sscanf(p, "%li", &offset) == 1)
+			if (sscanf(p, "%u", &offset) == 1)
 				*da_NEXT(ttc.sel) = offset;
 			else
 				opt_Error(opt_Format, opt, arg);

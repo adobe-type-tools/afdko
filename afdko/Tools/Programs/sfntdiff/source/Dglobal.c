@@ -13,11 +13,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <stdarg.h> 
 #include <string.h>
 #include <ctype.h>
-#ifdef _WINDOWS
-  #include <time.h>
-#else
-  #include <sys/time.h>
-#endif
+#include <time.h>
 #include "Dglobal.h"
 #include "Dopt.h"
 #include "Dsfnt.h"
@@ -101,10 +97,10 @@ IntX parseIdList(Byte8 *list, IdList *ids)
 		/* Add id range */
 		if (one > two)
 			while (one >= two)
-				*da_NEXT(*ids) = one--;
+				*da_NEXT(*(IdList*)ids) = one--;
 		else
 			while (one <= two)
-				*da_NEXT(*ids) = one++;
+				*da_NEXT(*(IdList*)ids) = one++;
 		}
 	return 0;
 	}
@@ -222,7 +218,7 @@ static Byte8 tday[32];
 
 Byte8 * fileModTimeString(Card8 which, Byte8 *fname)
 {
-  Byte8 *str = NULL;
+  Byte8 *str;
   struct stat s;
 
   str = headGetModifiedDate(which, TAG('f','i','l','e'));

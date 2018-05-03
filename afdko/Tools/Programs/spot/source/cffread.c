@@ -7,26 +7,15 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <limits.h>
 #include <math.h>
 #include <stdio.h>
+#include "cffread.h"
+#include "dictops.h"
 
 #include "spot.h"
 
-#if __CENTERLINE__
-#include "cffread.h"
-#include "dictops.h"
-#else
-
-#ifndef PACKAGE_SPECS
-#include "package.h"
-#else
-#include PACKAGE_SPECS
-#endif
-
-#include "cffread.h"
-#include "dictops.h"
-#endif
 
 /* Define to supply Microsoft-specific function calling info, e.g. __cdecl */
 #ifndef CDECL
@@ -48,10 +37,9 @@ static short exenc[] =
 #endif
 
 #define ARRAY_LEN(t) 	(sizeof(t)/sizeof((t)[0]))
-#define ABS(v)			((v)<0?-(v):(v))
 
 /* 16.16 fixed point arithmetic */
-typedef long Fixed;
+typedef Int32 Fixed;
 #define fixedScale	65536.0
 #define FixedMax	((Fixed)0x7FFFFFFF)
 #define FixedMin	((Fixed)0x80000000)
@@ -61,7 +49,7 @@ typedef long Fixed;
 /* Type conversions */
 #define INT(f)		(((f)&0xffff0000)>>16)
 #define FRAC(f)		((f)&0x0000ffff)
-#define INT2FIX(i)	((Fixed)(i)<<16)
+#define INT2FIX(i)	((Fixed)((Card32)i)<<16)
 #define FIX2INT(f)	((short)(((f)+FixedHalf)>>16))
 #define FIX2DBL(f)	((double)((f)/fixedScale))
 #define DBL2FIX(d)	((Fixed)((d)*fixedScale+((d)<0?-0.5:0.5)))
@@ -697,9 +685,10 @@ static void setComponentBounds(cffCtx h, int accent,
 /* Compute and save glyph advances */
 static int setAdvance(cffCtx h)
 	{
+	Int32 defaultvAdv = -1000;
 	h->path.hAdv = (h->stack.cnt & 1)? 
 		indexFix(h, 0) + h->dict.nominalWidthX: h->dict.defaultWidthX;
-	h->path.vAdv = INT2FIX(-1000);	/* xxx set from VMetrics */
+	h->path.vAdv = INT2FIX(defaultvAdv);	/* xxx set from VMetrics */
 	if (h->dict.FontMatrix != NULL)
 		{
 		/* Adjust values */
@@ -2494,7 +2483,7 @@ void cffGetGlyphWidth(cffCtx h, unsigned gid, cffFWord *hAdv, cffFWord *vAdv)
 
 /* Get glyph organization only */
 void cffGetGlyphOrg(cffCtx h, unsigned gid, 
-					unsigned short *id, short *code, cffSupCode **sup)
+					Int16 *id, short *code, cffSupCode **sup)
 	{
 	Glyph *glyph;
 
@@ -2559,7 +2548,7 @@ cffFontInfo *cffGetFontInfo(cffCtx h)
 	}
 
 /* Execute metric charstring at offset (result[0] is stack bottom) */
-int cffExecMetric(cffCtx h, long offset, Fixed *result)
+int cffExecMetric(cffCtx h, long offset, cffFixed *result)
 	{
 	int i;
 
@@ -2690,7 +2679,7 @@ static void dbvecs(cffCtx h, int hex)
 	printf("--- UDV\n");
 	for (i = 0; i < h->font.mm.nAxes; i++)
 		if (hex)
-			printf("[%d]=%08lx ", i, h->UDV[i]);
+			printf("[%d]=%08lx ", i, (Card32)h->UDV[i]);
 		else
 			printf("[%d]=%.4g ", i, h->UDV[i] / 65536.0);
 	printf("\n");
@@ -2698,7 +2687,7 @@ static void dbvecs(cffCtx h, int hex)
 	printf("--- NDV\n");
 	for (i = 0; i < h->font.mm.nAxes; i++)
 		if (hex)
-			printf("[%d]=%08lx ", i, h->NDV[i]);
+			printf("[%d]=%08lx ", i, (Card32)h->NDV[i]);
 		else
 			printf("[%d]=%.4g ", i, h->NDV[i] / 65536.0);
 	printf("\n");
@@ -2706,7 +2695,7 @@ static void dbvecs(cffCtx h, int hex)
 	printf("--- WV\n");
 	for (i = 0; i < h->font.mm.nMasters; i++)
 		if (hex)
-			printf("[%d]=%08lx ", i, h->WV[i]);
+			printf("[%d]=%08lx ", i, (Card32)h->WV[i]);
 		else
 			printf("[%d]=%.4g ", i, h->WV[i] / 65536.0);
 	printf("\n");

@@ -57,7 +57,6 @@
 		BD5263020CF2B52F0052C7B8 /* sfnt.c in Sources */ = {isa = PBXBuildFile; fileRef = BD5262760CF2B52F0052C7B8 /* sfnt.c */; };
 		BD5263040CF2B52F0052C7B8 /* SING.c in Sources */ = {isa = PBXBuildFile; fileRef = BD5262780CF2B52F0052C7B8 /* SING.c */; };
 		BD5263070CF2B52F0052C7B8 /* spotmsgs.c in Sources */ = {isa = PBXBuildFile; fileRef = BD52627B0CF2B52F0052C7B8 /* spotmsgs.c */; };
-		BD52630D0CF2B52F0052C7B8 /* strftime.c in Sources */ = {isa = PBXBuildFile; fileRef = BD5262810CF2B52F0052C7B8 /* strftime.c */; };
 		BD52630E0CF2B52F0052C7B8 /* sys.c in Sources */ = {isa = PBXBuildFile; fileRef = BD5262820CF2B52F0052C7B8 /* sys.c */; };
 		BD5263130CF2B52F0052C7B8 /* trak.c in Sources */ = {isa = PBXBuildFile; fileRef = BD5262870CF2B52F0052C7B8 /* trak.c */; };
 		BD5263150CF2B52F0052C7B8 /* TTdumpinstrs.c in Sources */ = {isa = PBXBuildFile; fileRef = BD5262890CF2B52F0052C7B8 /* TTdumpinstrs.c */; };
@@ -188,7 +187,6 @@
 		BD52627E0CF2B52F0052C7B8 /* stdenccd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stdenccd.h; path = ../../../source/stdenccd.h; sourceTree = SOURCE_ROOT; };
 		BD52627F0CF2B52F0052C7B8 /* stdstr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stdstr.h; path = ../../../source/stdstr.h; sourceTree = SOURCE_ROOT; };
 		BD5262800CF2B52F0052C7B8 /* stdstr1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stdstr1.h; path = ../../../source/stdstr1.h; sourceTree = SOURCE_ROOT; };
-		BD5262810CF2B52F0052C7B8 /* strftime.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = strftime.c; path = ../../../source/strftime.c; sourceTree = SOURCE_ROOT; };
 		BD5262820CF2B52F0052C7B8 /* sys.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = sys.c; path = ../../../source/sys.c; sourceTree = SOURCE_ROOT; };
 		BD5262830CF2B52F0052C7B8 /* sys.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sys.h; path = ../../../source/sys.h; sourceTree = SOURCE_ROOT; };
 		BD5262860CF2B52F0052C7B8 /* TAGS */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = TAGS; path = ../../../source/TAGS; sourceTree = SOURCE_ROOT; };
@@ -354,7 +352,6 @@
 				BD52627E0CF2B52F0052C7B8 /* stdenccd.h */,
 				BD52627F0CF2B52F0052C7B8 /* stdstr.h */,
 				BD5262800CF2B52F0052C7B8 /* stdstr1.h */,
-				BD5262810CF2B52F0052C7B8 /* strftime.c */,
 				BD5262820CF2B52F0052C7B8 /* sys.c */,
 				BD5262830CF2B52F0052C7B8 /* sys.h */,
 				BD5262860CF2B52F0052C7B8 /* TAGS */,
@@ -498,7 +495,6 @@
 				BD5263020CF2B52F0052C7B8 /* sfnt.c in Sources */,
 				BD5263040CF2B52F0052C7B8 /* SING.c in Sources */,
 				BD5263070CF2B52F0052C7B8 /* spotmsgs.c in Sources */,
-				BD52630D0CF2B52F0052C7B8 /* strftime.c in Sources */,
 				BD52630E0CF2B52F0052C7B8 /* sys.c in Sources */,
 				BD5263130CF2B52F0052C7B8 /* trak.c in Sources */,
 				BD5263150CF2B52F0052C7B8 /* TTdumpinstrs.c in Sources */,

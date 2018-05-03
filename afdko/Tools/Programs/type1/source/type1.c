@@ -49,8 +49,16 @@ static void put1(int c){
         mainlen = BUFSIZ;
         mainbuffer = malloc(mainlen);
       } else {
+		unsigned char* p;
         mainlen *= 4;
-        mainbuffer = realloc(mainbuffer, mainlen);
+        p = realloc(mainbuffer, mainlen);
+		if (p == NULL) {
+			free(mainbuffer);
+			mainbuffer = NULL;
+		}
+		else {
+			mainbuffer = p;
+		}
       }
       if (mainbuffer == NULL)
         panic("out of memory");
@@ -116,9 +124,8 @@ static Card8 Encrypt(Card8 plain, unsigned short *keyp) {
 }
 
 static int get1(FILE *fp){
-    int c;
     if(inmode == 0){
-	c = getc(fp);
+	int c = getc(fp);
 	if(c == '~'){
 	    inmode = 1;
 	    return getc(fp);
@@ -193,12 +200,12 @@ nexttoken:
 			--s;
 		return (char *) s;
 	}
-	for (i = 0; i < length_of(cmd); i++)
+	for (i = 0; i < (int)length_of(cmd); i++)
 		if (cmd[i] != NULL && streq(cmd[i], token)) {
 			*cs++ = i;
 			goto nexttoken;
 		}
-	for (i = 0; i < length_of(esc); i++)
+	for (i = 0; i < (int)length_of(esc); i++)
 		if (esc[i] != NULL && streq(esc[i], token)) {
 			*cs++ = 12;
 			*cs++ = i;
@@ -256,12 +263,20 @@ static char *eebuf = 0;
 static int eecount = 0, eelen = 0;
 static void eeappend(int c) {
 	if (eecount >= eelen) {
+		char *p;
 		if (eelen == 0) {
 			eelen = BUFSIZ;
 			eebuf = malloc(eelen);
 		} else {
 			eelen *= 4;
-			eebuf = realloc(eebuf, eelen);
+			p = realloc(eebuf, eelen);
+			if (p == NULL) {
+				free(eebuf);
+				eebuf = NULL;
+			}
+			else {
+				eebuf = p;
+			}
 		}
 		if (eebuf == NULL)
 			panic("out of memory");
@@ -302,7 +317,7 @@ static void writeeexec(void) {
 			s = charstring(csbuf, s, &len);
 			if (s >= end)
 				panic("charstring extended past end of encrypted region");
-			if (len > sizeof csbuf)
+			if (len > (int)sizeof(csbuf))
 				panic("charstring too long");
 
 			if(lenIV >= 0){
@@ -493,19 +508,24 @@ int main(int argc, char *argv[]) {
                 _setmode(_fileno(stdout),_O_BINARY);
 #endif /* _MSC_VER */
                 type1(fp,stdout);
+				fclose(fp);
         } else if (optind +2 == argc) {
                 FILE *fp1 = fopen(argv[optind], "rb");
-                FILE *fp2 = fopen(argv[optind+1], "wb");
+                FILE *fp2;
                 if (fp1 == NULL) {
                         perror(argv[optind]);
                         return 1;
                 }
-                if (fp2 == NULL) {
+				fp2 = fopen(argv[optind+1], "wb");
+				if (fp2 == NULL) {
+						fclose(fp1);
                         perror(argv[optind+1]);
                         return 1;
                 }
                 panicname = argv[optind];
                 type1(fp1,fp2);
+				fclose(fp1);
+				fclose(fp2);
 	} else
 		usage();
 	return 0;

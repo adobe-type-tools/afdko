@@ -7,22 +7,10 @@
 #if BUILDLIB
 #include "makeotflib.h"
 #endif
-#include <stdio.h>
-#if __CENTERLINE__
-#include "dynarr.h"
-#include "hotconv.h"
-#else
 
-#ifndef PACKAGE_SPECS
 #include "package.h"
-#else
-#include PACKAGE_SPECS
-#endif
-
 #include DYNARR
 #include HOTCONV
-
-#endif
 
 #include "cb.h"
 #include "file.h"

@@ -961,16 +961,12 @@ int IsSynthetic(GlyphId glyphId)
 {
 	Byte8 *name = getGlyphName(glyphId, 1);
 	int i;
-	
-	if(syntheticGlyphs[NUM_SYN_GLYPHS][0]!='\0'){
-		fprintf(OUTPUTBUFF, "%s: WARNING: NUM_SYN_GLYPHS is not set correctly. ", global.progname);
-		for(i=0; i<NUM_SYN_GLYPHS*2; i++)
-			if(syntheticGlyphs[i][0]=='\0')
-			{
-				fprintf(OUTPUTBUFF, "Should be %d.\n", i);
-				return 0;
-			}
-	}
+	/* The old code did a dynamic check to see if anyone has changed the
+	 program so that NUM_SYN_GLYPHS is not the same as the number of
+	 glyph names in the static syntheticGlyphs array. If these didn't
+	 match, it then tried to find and report the actual end of the array
+	 by looking for the first index that was an empty string - and
+	 indexing past the end of the array by NUM_SYN_GLYPHS! Wow. */
 		
 	for(i=0; i<NUM_SYN_GLYPHS; i++)
 		if (!strcmp(name, syntheticGlyphs[i])) return 1;
@@ -1314,7 +1310,7 @@ static void CFF_dumpfi(IntX level)
   Card8 *ptr;
   unsigned len;
   cffFontInfo *fi = CFF_.fi;
-  IntX i;
+  Card32 i;
 
   {
 	long cnt;
@@ -1348,7 +1344,7 @@ static void CFF_dumpfi(IntX level)
   {
   	DL(2, (OUTPUTBUFF, "XUID        ="));
   	for (i=0; i<fi->XUID[0]; i++)
-  		DL(2, (OUTPUTBUFF, "%ld ", fi->XUID[i+1]));
+  		DL(2, (OUTPUTBUFF, "%u ", fi->XUID[i+1]));
   	DL(2, (OUTPUTBUFF, "\n"));
   }
 
@@ -1365,7 +1361,7 @@ static void CFF_dumpfi(IntX level)
 	
 
 	DL(2, (OUTPUTBUFF, "UDV         =["));
-	for (i = 0; i < fi->mm.nAxes; i++)
+	for (i = 0; i < (Card32)fi->mm.nAxes; i++)
 	  {
 		if (fi->mm.UDV[i] > 0)
 		  {
@@ -1377,7 +1373,7 @@ static void CFF_dumpfi(IntX level)
 	DL(2, (OUTPUTBUFF, "]\n"));
 
 	DL(2, (OUTPUTBUFF, "axisTypes   =[ "));
-	for (i = 0; i < fi->mm.nAxes; i++)
+	for (i = 0; i < (Card32)fi->mm.nAxes; i++)
 	  {
 		ptr = getCFFstring(fi->mm.axisTypes[i], &len);
 		DL(2, (OUTPUTBUFF, "<%.*s> ", (int)len, ptr));

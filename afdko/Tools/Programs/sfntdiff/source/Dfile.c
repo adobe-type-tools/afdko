@@ -22,8 +22,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "Dfile.h"
 #include "Dsys.h"
 
-extern IntX doingScripting;
-
 typedef struct
 	{
 	IntX id;			/* File identifier */
@@ -153,9 +151,6 @@ static void fillBuf(_file_ *file)
 /* Supply specified number of bytes */
 void fileReadBytes(Card8 which, Int32 count, Card8 *buf)
 	{
-	  IntX size;
-	  IntX left;
-
 	  if (which == 1) 
 		filep = &file1;
 	  else
@@ -163,7 +158,8 @@ void fileReadBytes(Card8 which, Int32 count, Card8 *buf)
 	  
 	  while (count > 0)
 		{
-		  left = filep->end - filep->next;			  
+		  IntX size;
+		  IntX left = filep->end - filep->next;			  
 		  if (left == 0)
 			{
 			  fillBuf(filep);

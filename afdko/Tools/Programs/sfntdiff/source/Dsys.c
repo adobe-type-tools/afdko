@@ -69,7 +69,7 @@ static void error(Byte8 *filename)
 		fatal("file error (%d) [%s]\n", errno, filename);
 	  }
 #else
-	  fatal("file error <%s> [%s]\n", sys_errlist[errno], filename);
+	  fatal("file error <%s> [%s]\n", strerror(errno), filename);
 #endif
 	}
 

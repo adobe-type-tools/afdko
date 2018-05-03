@@ -73,8 +73,7 @@ static void message(char *fmt, char *arg)
 static void message2(char *fmt, char *optarg, char *arg)
 {
 	printf( "%s [ERROR]: ", opt_progname);
-	printf( fmt);
-	printf( "<%s> (%s)\n", optarg, arg);
+	printf(fmt, optarg, arg);
 }	 
 
 
@@ -90,10 +89,10 @@ static int defaultHandler(int error, opt_Option *opt, char *arg, void *client)
 		message("no value(s) (%s)\n", opt->name);
 		break;
 	case opt_Format:
-		message2("bad value ", arg, opt->name);
+		message2("bad value <%s> (%s)\n", arg, opt->name);
 		break;
 	case opt_Range:
-		message2("value out of range ", arg, opt->name);
+		message2("value out of range <%s> (%s)\n", arg, opt->name);
 		break;
 	case opt_Required:
 		message("required option missing (%s)\n",  opt->name);
@@ -235,7 +234,7 @@ void *opt_Value(char *name)
 		message("unknown option (%s)\n",  name);
 		return NULL;
 		}
-	return (opt->flags & opt_PRESENT) ? opt->value : NULL;
+	return (opt->flags & opt_PRESENT) ? opt->value : (void*)NULL;
 	}
 
 /* --- Standard value scanners --- */
@@ -279,9 +278,9 @@ int opt_##n(int argc, char *argv[], int argi, opt_Option *opt) \
 DECLARE(Short, short, "%hi")
 DECLARE(Int, int, "%i")
 DECLARE(Long, long, "%li")
-DECLARE(UShort, unsigned short, "%hi")
-DECLARE(UInt, unsigned int, "%i")
-DECLARE(ULong, unsigned long, "%li")
+DECLARE(UShort, unsigned short, "%hu")
+DECLARE(UInt, unsigned int, "%u")
+DECLARE(ULong, unsigned long, "%lu")
 DECLARE(Double, double, "%lf")
 
 /* (char) scanner */

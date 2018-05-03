@@ -9,6 +9,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define CTU_VERSION CTL_MAKE_VERSION(2,0,2)
 
 #include <stddef.h> /* For size_t */
+#include <stdio.h> /* For size_t */
 #include <time.h>   /* For struct tm */
 
 #ifdef __cplusplus

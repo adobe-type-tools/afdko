@@ -2565,7 +2565,7 @@ static void addSubrs(subrCtx h, subr_CSData *subrs, unsigned id, int preflight) 
         h->cstrs.cnt = 0;
     }
 	for (i = 0; i < h->reorder.cnt; i++) {
-		unsigned char *pdst;
+		unsigned char *pdst = NULL;
 		Subr *subr = h->reorder.array[i];
 		long iStart = h->cstrs.cnt;
 

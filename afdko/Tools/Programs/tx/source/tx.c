@@ -107,6 +107,7 @@ static const char *options[] =
 #define sig_UFO            CTL_TAG('<',  '?','x','m')
 /* Generate n-bit mask */
 #define N_BIT_MASK(n)	(~(~0UL<<(n)))
+enum { MAX_VERSION_SIZE = 100 };
 
 typedef struct txCtx_ *txCtx;/* tx program context */
 
@@ -518,7 +519,6 @@ struct txCtx_
 		ctlStreamCallbacks stm;
 		abfGlyphCallbacks glyph;
 		abfGlyphBegCallback saveGlyphBeg;
-		abfGlyphWidthCallback saveGlyphWidth;
     abfGlyphCallbacks save;
     int selected;
 		} cb;
@@ -695,21 +695,22 @@ current working directory if TMP is not defined). Then we open the temporary fil
 and return its pointer */
 static FILE *_tmpfile()
 	{
-	FILE *fp = NULL;
 #ifdef _WIN32
-	char* tempname = NULL;
-	int fd, flags, mode;
+	FILE *fp = NULL;
+	char* tempname;
+	int flags, mode;
 	flags = _O_BINARY|_O_CREAT|_O_EXCL|_O_RDWR|_O_TEMPORARY;
 	mode = _S_IREAD | _S_IWRITE;
 	tempname = _tempnam(NULL, "tx_tmpfile");
 	if(tempname != NULL)
 		{
-		fd = _open(tempname, flags, mode);
+		int fd = _open(tempname, flags, mode);
 		if (fd != -1)
 			fp = _fdopen(fd, "w+b");
 		free(tempname);
 		}
 #else
+	FILE *fp;
 	/* Use the default tmpfile on non-Windows platforms */
 	fp = tmpfile();
 #endif
@@ -770,9 +771,9 @@ static size_t tmp_read(Stream *s, char **ptr)
 /* Write to tmp stream. */
 static size_t tmp_write(Stream *s, size_t count, char *ptr)
 	{
-	size_t length;
 	if (s->pos < TMPSIZE)
 		{
+		size_t length;
 		/* Writing to buffer */
 		length = TMPSIZE - s->pos;
 		if (length > count)
@@ -887,10 +888,10 @@ static void *stm_open(ctlStreamCallbacks *cb, int id, size_t size)
 		break;
     case UFW_DST_STREAM_ID:
     {
-        char buffer[FILENAME_MAX];
         
        if (cb->clientFileName != NULL)
         {
+			char buffer[FILENAME_MAX];
             sprintf(buffer, "%s/%s", h->file.dst, cb->clientFileName);
             s = &h->dst.stm;
             
@@ -3073,9 +3074,8 @@ static int t1_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 	else
 		sprintf(gname, "cid%hu", info->cid);
     nameLen = strlen(gname) + 1;
-    if (((unsigned long)h->t1w.gnames.size) < (h->t1w.gnames.cnt + nameLen))
+    if ((h->t1w.gnames.size) < (h->t1w.gnames.cnt + nameLen))
     {
-        t1wCtx g = h->t1w.ctx;
         dnaINDEX(h->t1w.gnames,h->t1w.gnames.size + nameLen);
          /* Update all the gname ptrs, as we just moved h->t1w.gnames.array,and all the info->gname.ptr are invalid. */
         t1wUpdateGlyphNames(h->t1w.ctx, h->t1w.gnames.array);
@@ -3348,7 +3348,7 @@ static void writeLWFN(txCtx h, FILE *font, char *fontfile,
 	write2(tmp, (unsigned short)maplen);
 
 	/* Write type list */
-	write2(tmp, 1 - 1);
+	write2(tmp, 0);
 	write4(tmp, CTL_TAG('P','O','S','T'));
 	write2(tmp, (unsigned short)(rescnt - 1));
 	write2(tmp, TYPE_LIST_LEN);
@@ -3752,8 +3752,6 @@ static void ufw_BegSet(txCtx h)
 /* Begin new glyph definition. */
 static int ufw_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 {
-	txCtx h = cb->indirect_ctx;
-    
 	return ufwGlyphCallbacks.beg(cb, info);
 }
 
@@ -3762,7 +3760,6 @@ static void ufw_BegFont(txCtx h, abfTopDict *top)
 {
     struct stat fileStat;
     int statErrNo;
-    char buffer[FILENAME_MAX];
 
 	h->cb.glyph.beg = ufw_GlyphBeg;
 	h->cb.glyph.indirect_ctx = h;
@@ -3781,6 +3778,7 @@ static void ufw_BegFont(txCtx h, abfTopDict *top)
     }
     else
     {
+		char buffer[FILENAME_MAX];
         mkdir_tx(h, h->dst.stm.filename);
         if (h->ufr.altLayerDir != NULL)
             sprintf(buffer, "%s/%s", h->file.dst, h->ufr.altLayerDir);
@@ -4709,12 +4707,12 @@ static void dcf_DumpEncoding(txCtx h, const ctlRegion *region)
 		break;
 	default:
 		{
-		long gid;
-		long i;
 
 		dumpTagLine(h, "Encoding", region);
 		if (h->dcf.level > 0)
 			{
+			long gid;
+			long i;
 			long cnt;
 			unsigned char fmt;
 			
@@ -4788,13 +4786,13 @@ static void dcf_DumpCharset(txCtx h, const ctlRegion *region)
 		break;		
 	default:
 		{
-		long i;
-		long gid;
 
 		dumpTagLine(h, "Charset", region);
 		if (h->dcf.level > 0)
 			{
 			unsigned char fmt;
+			long i;
+			long gid;
 			
 			bufSeek(h, region->begin);
 			fmt = read1(h);
@@ -4842,11 +4840,7 @@ static void dcf_DumpCharset(txCtx h, const ctlRegion *region)
 /* Dump VarStore table. */
 static void dcf_getvsIndices(txCtx h, const ctlRegion *region)
 {
-    unsigned short length, format;
     unsigned int i = 0;
-    FILE *fp = h->dst.stm.fp;
-
-    unsigned long regionListOffset;
     unsigned short ivdSubtableCount;
     dnaDCL(unsigned long, ivdSubtableOffsets);
     long ivsStart = region->begin + 2;
@@ -4854,10 +4848,10 @@ static void dcf_getvsIndices(txCtx h, const ctlRegion *region)
     if (region->begin <= 0)
         return;
     bufSeek(h, region->begin);
-    length = read2(h);
-    format =read2(h);
+    read2(h); /* length */
+    read2(h); /* format */
     
-    regionListOffset = read4(h);
+    read4(h); /* regionListOffset */
     ivdSubtableCount = read2(h);
     
     dnaINIT(h->ctx.dna, ivdSubtableOffsets, ivdSubtableCount, ivdSubtableCount);
@@ -4870,15 +4864,13 @@ static void dcf_getvsIndices(txCtx h, const ctlRegion *region)
     
     /* item variation data list */
     for (i = 0; i < ivdSubtableCount; i++) {
-        unsigned short  itemCount;
-        unsigned short  shortDeltaCount;
         unsigned short regionIndexCount;
         RegionInfo *regionIndexCountEntry;
         
         bufSeek(h, ivsStart + ivdSubtableOffsets.array[i]);
         
-        itemCount = read2(h);
-        shortDeltaCount = read2(h);
+        read2(h); /* itemCount */
+        read2(h); /* shortDeltaCount*/
         regionIndexCount = read2(h);
         regionIndexCountEntry = dnaNEXT(h->dcf.varRegionInfo);
         regionIndexCountEntry->regionCount = regionIndexCount;
@@ -4890,8 +4882,6 @@ static void dcf_getvsIndices(txCtx h, const ctlRegion *region)
 
 static void dcf_DumpVarStore(txCtx h, const ctlRegion *region)
 {
-    unsigned short length;
-    unsigned int i = 0;
     
     FILE *fp = h->dst.stm.fp;
     
@@ -4903,6 +4893,8 @@ static void dcf_DumpVarStore(txCtx h, const ctlRegion *region)
         return;
     else
     {
+		unsigned short length;
+		unsigned int i = 0;
         unsigned long regionListOffset;
         unsigned short ivdSubtableCount;
         dnaDCL(unsigned long, ivdSubtableOffsets);
@@ -4925,7 +4917,7 @@ static void dcf_DumpVarStore(txCtx h, const ctlRegion *region)
         fprintf(fp, "--- subtableOffsets[index]={offset}\n");
         for (i = 0; i < ivdSubtableCount; i++) {
             ivdSubtableOffsets.array[i] = read4(h);
-            fprintf(fp, "[%d]={%08lx}\n", i, ivdSubtableOffsets.array[i]);
+            fprintf(fp, "[%u]={%08lx}\n", i, ivdSubtableOffsets.array[i]);
         }
 
         bufSeek(h, ivsStart + regionListOffset);
@@ -4942,7 +4934,7 @@ static void dcf_DumpVarStore(txCtx h, const ctlRegion *region)
                 float start = ((float)read2(h))/(1<<14);
                 float peak = ((float)read2(h))/(1<<14);
                 float end = ((float)read2(h))/(1<<14);
-                fprintf(fp, "[%d,%d]={%g,%g,%g}\n", i, axis, start, peak, end);
+                fprintf(fp, "[%u,%u]={%g,%g,%g}\n", i, axis, start, peak, end);
             }
         }
 
@@ -4953,7 +4945,7 @@ static void dcf_DumpVarStore(txCtx h, const ctlRegion *region)
             unsigned short regionIndexCount;
             unsigned short  r, t;
 
-            fprintf(fp, "--- VarStoreSubtable[%d]\n", i);
+            fprintf(fp, "--- VarStoreSubtable[%u]\n", i);
 
             bufSeek(h, ivsStart + ivdSubtableOffsets.array[i]);
 
@@ -5462,7 +5454,6 @@ static void makeRandSubset(txCtx h, char *opt, char *arg)
 		}
 
 	/* Trim array to specified percentage */
-	i = h->subset.glyphs.cnt;
 	h->subset.glyphs.cnt = (long)(percent/100.0*h->subset.glyphs.cnt + 0.5);
 	if (h->subset.glyphs.cnt == 0)
 		h->subset.glyphs.cnt = 1;
@@ -5611,8 +5602,6 @@ static void prepSubset(txCtx h)
 	are not such glyphs, it returns. Else, it then proceeds to build the glyph list arg in
 	makeSubsetArgList() */
 	
-    long i;
-    
     if (h->flags & SHOW_NAMES)
     {
         fflush(stdout);
@@ -5662,6 +5651,7 @@ static void prepSubset(txCtx h)
 		{
 		char *p;
 		char *q;
+		long i;
 
 		/* Print subset */
 		fprintf(stderr,
@@ -5910,13 +5900,11 @@ static void ufoReadFont(txCtx h, long origin)
 /* Read format 12 Unicode cmap. Assumes format field already read. */
 static void readCmap14(txCtx h)
 {
-    unsigned long numVarSelectorRecords;
-    
     /* Skip format and length fields */
     (void)read2(h);
     (void)read4(h);
     
-    numVarSelectorRecords = read4(h);
+    read4(h); /* numVarSelectorRecords */
     
     /* Not yet implemented - not sure it is worth the effort: spot and ttx are more useful outputs for this Unicode format. */
     return;
@@ -6351,11 +6339,12 @@ static void addTTC(txCtx h, long origin)
     /* sfrGetNextTTCOffset() returns 0 when it is asked to get the next offset after the last real font,
     so it serves effectively as a test for iterating through all the fonts in the TTC.
      */
-	long i,j;
+	long i;
     long offset;
     
 	if (h->arg.i != NULL)
     {
+		int j;
 		i = strtol(h->arg.i, NULL, 0);
 		if (i < 0)
 			fatal(h, "bad TTC index (-i)");
@@ -6505,16 +6494,10 @@ static void doResMap(txCtx h, long origin)
 	/* Macintosh resource structures */
 	struct
 		{
-		unsigned long dataOffset;
 		unsigned long mapOffset;
-		unsigned long dataLength;
-		unsigned long mapLength;
 		} header;
 	struct
 		{
-		char reserved1[16];
-		unsigned long reserved2;
-		unsigned short reserved3;
 		unsigned short attrs;
 		unsigned short typeListOffset;
 		unsigned short nameListOffset;
@@ -6681,25 +6664,6 @@ static void doResMap(txCtx h, long origin)
 /* Process AppleSingle/Double format data. */
 static void doASDFormats(txCtx h, ctlTag magic)
 	{
-	static char *desc[] =
-		{
-		/* 00 */	"--unknown--",
-		/* 01 */	"Data Fork",
-		/* 02 */	"Resource Fork",
-		/* 03 */	"Real Name",
-		/* 04 */	"Comment",
-		/* 05 */	"Icon, B&W",
-		/* 06 */	"Icon, Color",
-		/* 07 */	"File Info (old format)",
-		/* 08 */	"File Dates Info",
-		/* 09 */	"Finder Info",
-		/* 10 */	"Macintosh File Info",
-		/* 11 */	"ProDOS File Info",
-		/* 12 */	"MS-DOS File Info",
-		/* 13 */	"Short Name",
-		/* 14 */	"AFP File Info",
-		/* 15 */	"Directory ID",
-		};
 	char junk[16];
 	long i;
 
@@ -6734,6 +6698,25 @@ static void doASDFormats(txCtx h, ctlTag magic)
 
 		for (i = 0; i < h->asd.entries.cnt; i++)
 			{
+			static char *desc[] =
+			{
+				/* 00 */	"--unknown--",
+				/* 01 */	"Data Fork",
+				/* 02 */	"Resource Fork",
+				/* 03 */	"Real Name",
+				/* 04 */	"Comment",
+				/* 05 */	"Icon, B&W",
+				/* 06 */	"Icon, Color",
+				/* 07 */	"File Info (old format)",
+				/* 08 */	"File Dates Info",
+				/* 09 */	"Finder Info",
+				/* 10 */	"Macintosh File Info",
+				/* 11 */	"ProDOS File Info",
+				/* 12 */	"MS-DOS File Info",
+				/* 13 */	"Short Name",
+				/* 14 */	"AFP File Info",
+				/* 15 */	"Directory ID",
+			};
 			EntryDesc *entry = &h->asd.entries.array[i];
 			printf("%02lx %08lx %08lx %s\n",
 				   entry->id, entry->offset, entry->length,
@@ -6776,7 +6759,7 @@ static void buildFontList(txCtx h)
     {
         /* We get here only if h->file.src is a directory. Check if it is UFO font */
         char tempFileName[FILENAME_MAX];
-        FILE* tempFP = NULL;
+        FILE* tempFP;
         sprintf(tempFileName, "%s/glyphs/contents.plist", h->file.src);
         tempFP = fopen(tempFileName, "rt");
         if (tempFP != NULL)
@@ -6988,16 +6971,18 @@ static void addArgs(txCtx h, char *filename)
 /* Get version callback function. */
 static void getversion(ctlVersionCallbacks *cb, long version, char *libname)
 	{
-	printf("    %-10s%d.%d.%d\n", libname, CTL_SPLIT_VERSION(version));
+	char version_buf[MAX_VERSION_SIZE];
+	printf("    %-10s%s\n", libname, CTL_SPLIT_VERSION(version_buf, version));
 	}
 
 /* Print library version numbers. */
 static void printVersions(txCtx h)
 	{
 	ctlVersionCallbacks cb;
+	char version_buf[MAX_VERSION_SIZE];
 
 	printf("Versions:\n"
-		   "    tx        %d.%d.%d\n", CTL_SPLIT_VERSION(TX_VERSION));
+		   "    tx        %s\n", CTL_SPLIT_VERSION(version_buf, TX_VERSION));
 	
 	cb.ctx = NULL;
 	cb.called = 0;

@@ -70,7 +70,7 @@ static char * MakeFullPath(char *source)
 
 /* File signatures */
 
-typedef unsigned long ctlTag;
+typedef Card32 ctlTag;
 #define CTL_TAG(a,b,c,d) \
     ((ctlTag)(a)<<24|(ctlTag)(b)<<16|(ctlTag)(c)<<8|(ctlTag)(d))
 
@@ -84,9 +84,9 @@ typedef unsigned long ctlTag;
 #define sig_AppleDouble	((ctlTag)0x00051607)
 typedef struct				/* AppleSingle/Double entry descriptor */
 	{
-	unsigned long id;
-	long offset;
-	unsigned long length;
+	Card32 id;
+	Int32 offset;
+	Card32 length;
 } EntryDesc;
 
 
@@ -98,8 +98,8 @@ static void doASDFormats(ctlTag magic)
 	Card16 entryCount = 0;
 	struct					/* AppleSingle/Double data */
 		{
-		unsigned long magic;/* Magic #, 00051600-single, 00051607-double */
-		unsigned long version;/* Format version */
+		Card32 magic;/* Magic #, 00051600-single, 00051607-double */
+		Card32 version;/* Format version */
 		da_DCL(EntryDesc, entries);/* Entry descriptors */
 	} asd;
 

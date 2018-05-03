@@ -20,51 +20,14 @@ public int IncludeFile(struct direct * direntry)
   return (FALSE);
 }
 
-public boolean DoAllIgnoreTime(extracolor, includefile)
-boolean extracolor;
-	int (*includefile) (struct direct *); 
-{
-  indx ix;
-  boolean result = TRUE;
-  short count;
-  struct direct **namelist;
- 
-#ifdef WIN32
-  count = BFscandir(inPrefix, &namelist, includefile, bf_alphasort);
-#else
-int BFscandir(const char* dirName, struct direct ***nameList, includeFile IncludeFile, sortFn Sort);
-#endif
-
-  count = BFscandir(inPrefix, &namelist, includefile, bf_alphasort);
-  if (count == -1)
-  {
-    sprintf(globmsg, "Can't read the %s directory.\n", inPrefix);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
-  }
-  
-  for (ix = 0; ix < count; ix++)
-    if (!DoFile(namelist[ix]->d_name, extracolor)) 
-    {
-      result = FALSE; 
-      continue; 
-    }
-#if DOMEMCHECK
-	memck_free(namelist);
-#else
-	ACFREEMEM(namelist);
-#endif
-  return result;
-  }
-
 public boolean DoArgsIgnoreTime(cnt, nms, extracolor)
 int cnt; char *nms[]; boolean extracolor; {
-  int i;
-  boolean result = TRUE;
-  
-  for (i = 0; i < cnt; i++) {
-    if (!DoFile(nms[i], extracolor))
-      result = FALSE;
-    }
-  return result;
-  }
-
+	int i;
+	boolean result = TRUE;
+	
+	for (i = 0; i < cnt; i++) {
+		if (!DoFile(nms[i], extracolor))
+			result = FALSE;
+	}
+	return result;
+}

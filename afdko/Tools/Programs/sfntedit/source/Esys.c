@@ -23,7 +23,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static void error(char *filename)
 	{
 
-	fatal(SFED_MSG_sysFERRORSTR, sys_errlist[errno], filename);
+	fatal(SFED_MSG_sysFERRORSTR, strerror(errno), filename);
 	}
 
 int sysFileExists(char *filename)
@@ -80,7 +80,6 @@ FILE * sysOpenWrite(char *filename)
 
 FILE * sysOpenSearchpath(char *filename)
 {
- FILE *f;
 	char **p;
 	static char *path[] = {
 	  "%s",
@@ -94,6 +93,7 @@ FILE * sysOpenSearchpath(char *filename)
 	  struct stat st;
 	  char file[256];
 	  short fd;
+	  FILE *f;
 	  
 	  file[0] = '\0';
 	  sprintf(file, *p, filename);
