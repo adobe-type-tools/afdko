@@ -5281,8 +5281,9 @@ void GPOSDump(IntX level, LongN start)
 	{
 	IntX i;
 	LookupList *lookuplist;
-	contextPrefix[0] = 0;
 	char tempFileName[MAXAFMLINESIZE];
+		
+	contextPrefix[0] = 0;
 	  if (!loaded) 
 		{
 		  if (sfntReadTable(GPOS_))

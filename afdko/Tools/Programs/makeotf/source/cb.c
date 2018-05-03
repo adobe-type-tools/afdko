@@ -683,6 +683,7 @@ current working directory if TMP is not defined). Then we open the temporary fil
 and return its pointer */
 static FILE *_tmpfile()
 	{
+	FILE *fp;
 #ifdef _WIN32
 	char* tempname;
 	tempname = _tempnam(NULL, "tx_tmpfile");
@@ -697,7 +698,6 @@ static FILE *_tmpfile()
 		free(tempname);
 		}
 #else
-	FILE *fp;
 	/* Use the default tmpfile on non-Windows platforms */
 	fp = tmpfile();
 #endif
