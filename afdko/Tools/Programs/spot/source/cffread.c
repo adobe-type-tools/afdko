@@ -40,7 +40,7 @@ static short exenc[] =
 #define ABS(v)			((v)<0?-(v):(v))
 
 /* 16.16 fixed point arithmetic */
-typedef int32_t Fixed;
+typedef Int32 Fixed;
 #define fixedScale	65536.0
 #define FixedMax	((Fixed)0x7FFFFFFF)
 #define FixedMin	((Fixed)0x80000000)
@@ -50,7 +50,7 @@ typedef int32_t Fixed;
 /* Type conversions */
 #define INT(f)		(((f)&0xffff0000)>>16)
 #define FRAC(f)		((f)&0x0000ffff)
-#define INT2FIX(i)	((Fixed)((uint32_t)i)<<16)
+#define INT2FIX(i)	((Fixed)((Card32)i)<<16)
 #define FIX2INT(f)	((short)(((f)+FixedHalf)>>16))
 #define FIX2DBL(f)	((double)((f)/fixedScale))
 #define DBL2FIX(d)	((Fixed)((d)*fixedScale+((d)<0?-0.5:0.5)))
@@ -686,7 +686,7 @@ static void setComponentBounds(cffCtx h, int accent,
 /* Compute and save glyph advances */
 static int setAdvance(cffCtx h)
 	{
-	int32_t defaultvAdv = -1000;
+	Int32 defaultvAdv = -1000;
 	h->path.hAdv = (h->stack.cnt & 1)? 
 		indexFix(h, 0) + h->dict.nominalWidthX: h->dict.defaultWidthX;
 	h->path.vAdv = INT2FIX(defaultvAdv);	/* xxx set from VMetrics */
@@ -2484,7 +2484,7 @@ void cffGetGlyphWidth(cffCtx h, unsigned gid, cffFWord *hAdv, cffFWord *vAdv)
 
 /* Get glyph organization only */
 void cffGetGlyphOrg(cffCtx h, unsigned gid, 
-					int16_t *id, short *code, cffSupCode **sup)
+					Int16 *id, short *code, cffSupCode **sup)
 	{
 	Glyph *glyph;
 
@@ -2680,7 +2680,7 @@ static void dbvecs(cffCtx h, int hex)
 	printf("--- UDV\n");
 	for (i = 0; i < h->font.mm.nAxes; i++)
 		if (hex)
-			printf("[%d]=%08lx ", i, (uint32_t)h->UDV[i]);
+			printf("[%d]=%08lx ", i, (Card32)h->UDV[i]);
 		else
 			printf("[%d]=%.4g ", i, h->UDV[i] / 65536.0);
 	printf("\n");
@@ -2688,7 +2688,7 @@ static void dbvecs(cffCtx h, int hex)
 	printf("--- NDV\n");
 	for (i = 0; i < h->font.mm.nAxes; i++)
 		if (hex)
-			printf("[%d]=%08lx ", i, (uint32_t)h->NDV[i]);
+			printf("[%d]=%08lx ", i, (Card32)h->NDV[i]);
 		else
 			printf("[%d]=%.4g ", i, h->NDV[i] / 65536.0);
 	printf("\n");
@@ -2696,7 +2696,7 @@ static void dbvecs(cffCtx h, int hex)
 	printf("--- WV\n");
 	for (i = 0; i < h->font.mm.nMasters; i++)
 		if (hex)
-			printf("[%d]=%08lx ", i, (uint32_t)h->WV[i]);
+			printf("[%d]=%08lx ", i, (Card32)h->WV[i]);
 		else
 			printf("[%d]=%.4g ", i, h->WV[i] / 65536.0);
 	printf("\n");
