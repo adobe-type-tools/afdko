@@ -64,7 +64,7 @@ from __future__ import print_function, absolute_import
 
 
 __help__ = """
-ttxn v1.18 Mar 30 2017
+ttxn v1.19 May 4 2018
 
 Based on the ttx tool, with the same options, except that it is limited to
 dumping, and cannot compile. Makes a normalized dump of the font, or of
@@ -1738,7 +1738,7 @@ class OTLConverter:
             self.classesByClassName[className] = nameList
             for classRec in classRecList:
                 key = (classRec.lookupIndex, classRec.subtableIndex,
-                       classRec.classIndex, classRec.type)
+                       classRec.classIndex, classRec.side)
                 self.classesByLookup[key] = className
 
         for defList in sorted(self.markClassesByDefList.keys()):
@@ -1766,7 +1766,7 @@ class OTLConverter:
 
             for classRec in classRecList:
                 key = (classRec.lookupIndex, classRec.subtableIndex,
-                       classRec.classIndex, classRec.type)
+                       classRec.classIndex, classRec.side)
                 self.markClassesByLookup[key] = className
 
         return
