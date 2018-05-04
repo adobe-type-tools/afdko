@@ -83,7 +83,7 @@ cache:
   - directories:
     - $HOME/.pyenv_cache
 
-# Only build for *pushes* to master,
+# Only build for *pushes* to 'master' and 'develop',
 # not for pushes to other branches
 # (build for PRs from any branch).
 # The regex below is because Travis treats a tag on the master branch as if it
@@ -93,6 +93,7 @@ branches:
   only:
     - master
     - /^\d+\.\d+\.\d+.*$/
+    - develop
 
 notifications:
   slack: typekit:TRAVIS_SLACK_TOKEN
