@@ -25,8 +25,6 @@ matrix:
         - python -m virtualenv .venv/
         - source .venv/bin/activate
         - pip install --upgrade pip setuptools setuptools_scm wheel cython
-        - pip install codecov
-        - pip install pytest-cov
         - pip install collective.checkdocs
         - pip install pygments
         - pip install flake8
@@ -36,7 +34,6 @@ matrix:
       script:
         - python setup.py checkdocs
         - python setup.py check --restructuredtext --strict
-        - pytest --cov
         - flake8 setup.py
         - pushd afdko/Tools/SharedData/FDKScripts
         - flake8 buildCFF2VF.py
@@ -49,8 +46,13 @@ matrix:
         - flake8 ufoTools.py
         - popd
         - python setup.py bdist_wheel
-        - pip install dist/*.whl
-        - pip uninstall --yes afdko
+        - deactivate
+        - export PATH=$PATH:'/Users/travis/Library/Python/2.7/bin'
+        - python -m pip install --user -U --force-reinstall dist/*.whl
+        - python -m pip install --user codecov
+        - python -m pip install --user pytest-cov
+        - pytest --cov
+        - python -m pip uninstall --yes afdko
       after_success:
         - codecov
 
