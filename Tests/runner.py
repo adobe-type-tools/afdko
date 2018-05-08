@@ -92,6 +92,13 @@ def _check_tool(tool_name):
     """
     if platform.system() == 'Windows':
         tool_name += '.exe'
+    # XXX start hack to bypass these issues
+    # https://github.com/adobe-type-tools/afdko/issues/347
+    # https://github.com/adobe-type-tools/afdko/issues/348
+    if tool_name.split('.')[0] in ('sfntdiff', 'sfntedit', 'makeotfexe',
+                                   'type1', 'detype1'):
+        return tool_name
+    # XXX end hack
     try:
         subprocess.check_output([tool_name, '-h'])
         return tool_name
