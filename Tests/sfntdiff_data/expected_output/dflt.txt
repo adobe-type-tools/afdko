@@ -1,0 +1,12 @@
+Sun Apr 29 01:35:33 2018
+sfntdiff (2.21217) (-d 0)  files:
+< sfntdiff_data/regular.otf
+> sfntdiff_data/bold.otf
+'sfnt' differs.
+'CFF ' differs.
+'GPOS' differs.
+'OS/2' differs.
+'head' differs.
+'hhea' differs.
+'hmtx' differs.
+'name' differs.
