@@ -1,0 +1,20 @@
+--- sfnt header [sfntedit_data/light.otf]
+version      =OTTO (4f54544f)
+numTables    =13
+searchRange  =128
+entrySelector=3
+rangeShift   =80
+--- table directory [index]={tag,checksum,offset,length}
+[ 0]={BASE,651e5dbd,00000ffc,00000046}
+[ 1]={CFF ,a2a35f73,000000e4,00000590}
+[ 2]={GDEF,0011000a,00001044,00000016}
+[ 3]={GPOS,50463fcf,0000105c,0000015a}
+[ 4]={GSUB,417a3062,000011b8,00000090}
+[ 5]={OS/2,5a9f74af,000006f8,00000060}
+[ 6]={cmap,00a402c1,00000f68,00000074}
+[ 7]={head,09d77a61,00000674,00000036}
+[ 8]={hhea,0a8605cd,000006d4,00000024}
+[ 9]={hmtx,14790268,000006ac,00000028}
+[10]={maxp,000a5000,000000dc,00000006}
+[11]={name,0df254c5,00000758,00000810}
+[12]={post,ffb80032,00000fdc,00000020}
