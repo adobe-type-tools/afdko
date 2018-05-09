@@ -1,4 +1,7 @@
 #! /bin/sh
+set -e
+set -x
+
 target=spot
 curdir=`pwd`
 
