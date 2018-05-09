@@ -2,7 +2,7 @@
 Changelog
 ~~~~~~~~~
 
-2.7.x (released 2018-xx-xx)
+2.7.0 (released 2018-05-09)
 ---------------------------
 - [CheckOutlinesUFO] Replaced Robofab's pens with FontPens'
   (`#230 <https://github.com/adobe-type-tools/afdko/issues/230>`__)
@@ -24,13 +24,16 @@ Changelog
   (`#288 <https://github.com/adobe-type-tools/afdko/pull/288>`__)
 - New ``ttfcomponentizer`` tool that componentizes TrueType fonts using the
   component data of a related UFO font.
-- 64-bit support for Mac OSX and Linux
+- Added 64-bit support for Mac OSX and Linux
   (`#271 <https://github.com/adobe-type-tools/afdko/pull/271>`__,
-  `#312 <https://github.com/adobe-type-tools/afdko/pull/312>`__)
+  `#312 <https://github.com/adobe-type-tools/afdko/pull/312>`__,
+  `#344 <https://github.com/adobe-type-tools/afdko/pull/344>`__)
 - [tx] Fixed -dcf mode failing to dump hinted CFF2 variable font
   (`#322 <https://github.com/adobe-type-tools/afdko/issues/322>`__)
 - [tx] Fixed conversion of multi-FD CFF2 font to CID-flavored CFF font
   (`#329 <https://github.com/adobe-type-tools/afdko/issues/329>`__)
+- [tx] Fixed -cff2 failing to convert CID/CFF1 to multi-FD CFF2
+  (`#345 <https://github.com/adobe-type-tools/afdko/issues/345>`__)
 - Wheels for all three environments (macOS, Windows, Linux) are now available
   on `PyPI <https://pypi.org/project/afdko>`_ and
   `GitHub <https://github.com/adobe-type-tools/afdko/releases>`_
