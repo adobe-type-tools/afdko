@@ -1,4 +1,7 @@
 #! /bin/sh
+set -e
+set -x
+
 target=type1
 curdir=`pwd`
 

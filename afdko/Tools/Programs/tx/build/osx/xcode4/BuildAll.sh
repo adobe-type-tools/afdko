@@ -1,4 +1,7 @@
 #! /bin/sh
+set -e
+set -x
+
 target=tx
 xcodebuild -target BuildAll -project $target.xcodeproj -configuration Debug $1
 xcodebuild -target BuildAll -project $target.xcodeproj -configuration Release $1
