@@ -2,7 +2,7 @@ booleanOperations==0.8.0
 defcon==0.5.1
 fontMath==0.4.4
 fontPens==0.1.0
-fontTools==3.25.0
+fontTools==3.26.0
 mutatorMath==2.1.0
 ufoLib==2.1.1
 ufonormalizer==0.3.2
