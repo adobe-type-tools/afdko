@@ -1,0 +1,4 @@
+# see https://pyup.io/docs/configuration/ for all available options
+
+branch: develop
+schedule: every week
