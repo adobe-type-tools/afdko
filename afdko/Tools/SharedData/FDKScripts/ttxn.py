@@ -1958,7 +1958,8 @@ class OTLConverter:
                 else:
                     nameIndex += 1
                     lookupName = "%s_%s_%s_%s" % (featRecord.FeatureTag,
-                                                  langSysKey[0], langSysKey[1],
+                                                  langSysKey[0].strip(),
+                                                  langSysKey[1].strip(),
                                                   nameIndex)
                     self.seenLookup[li] = lookupName
                     writer.write("lookup %s%s%s;" % (lookupName, lookupFlagTxt,
