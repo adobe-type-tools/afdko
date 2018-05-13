@@ -81,11 +81,18 @@ Install `afdko`_ globally:
 
 Updating
 ~~~~~~~~
-Use the ``-U`` (or ``--upgrade``) option to update the afdko and its dependencies to the newest available release:
+Use the ``-U`` (or ``--upgrade``) option to update the afdko (and its dependencies) to the newest stable release:
 
 .. code:: sh
 
   pip install -U afdko
+
+
+To get pre-release and in-development versions, use the ``--pre`` flag:
+
+.. code:: sh
+
+  pip install -U afdko --pre
 
 
 Uninstalling
