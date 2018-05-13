@@ -998,14 +998,14 @@
     feature locl {
       script latn;
       language AZE ;
-      lookup locl_latn_AZE _1;
+      lookup locl_latn_AZE_1;
         sub i by i.trk;
-      } locl_latn_AZE _1;
+      } locl_latn_AZE_1;
 
       language CRT ;
-      lookup locl_latn_AZE _1;
+      lookup locl_latn_AZE_1;
       language TRK ;
-      lookup locl_latn_AZE _1;
+      lookup locl_latn_AZE_1;
     } locl;
 
     feature numr {
