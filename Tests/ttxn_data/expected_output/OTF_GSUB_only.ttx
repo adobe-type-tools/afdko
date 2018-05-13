@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont sfntVersion="OTTO" ttLibVersion="3.25">
+
+  <GSUB>
+    languagesystem latn dflt;
+    languagesystem grek dflt;
+    languagesystem cyrl dflt;
+    languagesystem DFLT dflt;
+
+
+
+    feature smcp {
+      lookup smcp_DFLT_dflt_1 {
+        sub a by A.sc;
+        sub b by B.sc;
+        sub c by C.sc;
+      } smcp_DFLT_dflt_1;
+
+    } smcp;
+
+  </GSUB>
+
+</ttFont>
