@@ -17,7 +17,7 @@ import subprocess
 import sys
 import tempfile
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 logger = logging.getLogger(__file__)
 
@@ -70,15 +70,19 @@ def run_tool(opts):
             "Invalid input path found.")
         args.extend(files)
 
-    args.append(save_loc)
+    if not opts.no_save_path:
+        args.append(save_loc)
 
     logger.debug(
         "About to run the command below\n==>{}<==".format(' '.join(args)))
     try:
-        output = subprocess.check_output(args)
-        if opts.redirect:
-            _write_file(save_loc, output)
-        return save_loc
+        if opts.no_save_path:
+            return subprocess.check_call(args)
+        else:
+            output = subprocess.check_output(args)
+            if opts.redirect:
+                _write_file(save_loc, output)
+            return save_loc
     except (subprocess.CalledProcessError, OSError) as err:
         logger.error(err)
         return None
@@ -173,6 +177,13 @@ def get_options(args):
              "'{tool_name}_data' directory."
     )
     parser.add_argument(
+        '-r',
+        '--redirect',
+        action='store_true',
+        help="redirect the tool's output to a file"
+    )
+    save_parser = parser.add_mutually_exclusive_group()
+    save_parser.add_argument(
         '-s',
         '--save',
         dest='save_path',
@@ -181,11 +192,12 @@ def get_options(args):
         help="path to save the tool's output to\n"
              'The default is to use a temporary location.'
     )
-    parser.add_argument(
-        '-r',
-        '--redirect',
+    save_parser.add_argument(
+        '-n',
+        '--no-save',
+        dest='no_save_path',
         action='store_true',
-        help="redirect the tool's output to a file"
+        help="don't set a path to save the tool's output to"
     )
     options = parser.parse_args(args)
 
@@ -214,4 +226,4 @@ def main(args=None):
 
 
 if __name__ == "__main__":
-    sys.exit(0 if main() is not None else 1)
+    sys.exit(1 if main() in [None, 1] else 0)
