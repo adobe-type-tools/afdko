@@ -2223,12 +2223,8 @@ def ttnDump(input_file, output, options, showExtensionFlag, supressHints=0,
         GDEF = ttf["GDEF"]
         gt = GDEF.table
         if gt.GlyphClassDef:
-            # XXX why is 'gtc' assigned here but never used?
-            gtc = gt.GlyphClassDef.classDefs
             gt.GlyphClassDef.Format = 0
         if gt.MarkAttachClassDef:
-            # XXX why is 'gtc' assigned here but never used?
-            gtc = gt.MarkAttachClassDef.classDefs
             gt.MarkAttachClassDef.Format = 0
         if gt.AttachList:
             if not gt.AttachList.Coverage.glyphs:
@@ -2280,9 +2276,6 @@ def ttnDump(input_file, output, options, showExtensionFlag, supressHints=0,
                 cmapSubtable.nGroups = 0
             if hasattr(cmapSubtable, "length"):
                 cmapSubtable.length = 0
-    if ('OS/2' in onlyTables) and supressTTFDiffs:
-        # XXX why is 'os2Table' assigned here but never used?
-        os2Table = ttf["OS/2"]
 
     if onlyTables:
         ttf.saveXML(output,
