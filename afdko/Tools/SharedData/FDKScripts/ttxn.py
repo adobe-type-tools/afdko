@@ -2064,7 +2064,7 @@ class TTXNTTFont(TTFont):
         elif tag in ("GSUB", "GPOS"):
             dumpOTLAsFeatureFile(tag, writer, self)
         else:
-            table.toXML(writer, self, splitGlyphs=splitGlyphs)
+            table.toXML(writer, self)
         writer.endtag(xmlTag)
         writer.newline()
         writer.newline()
