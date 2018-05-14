@@ -1,0 +1,2 @@
+--- [name]=advance width,left side bearing (1000 units/em)
+[.notdef]=704,76 [A]=584,-9 [B]=612,72 [C]=586,44 [a]=536,38 [b]=580,58 [c]=472,32 [A.sc]=516,-9 [B.sc]=554,72 [C.sc]=526,44 

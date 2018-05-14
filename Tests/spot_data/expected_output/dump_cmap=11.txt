@@ -1,0 +1,5 @@
+--- encoding[index]={platform,script,language}
+[ 0]={Unicode,UTF-16 BMP,Default}
+[ 1]={Unicode,UTF-32,Default}
+[ 2]={Microsoft,Unicode BMP only,--vers--}
+[ 3]={Microsoft,Unicode UCS-4,--vers--}

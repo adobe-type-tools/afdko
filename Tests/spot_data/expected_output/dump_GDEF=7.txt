@@ -1,0 +1,11 @@
+table GDEF {
+
+	# Glyph Class Definitions
+	GlyphClassDef
+		# Base Glyphs - Class 1
+		[ A B C a b c A.sc B.sc C.sc],
+		, # Ligature Glyphs - Class 2
+		, # Mark Glyphs - Class 3
+		; # Component Glyphs - Class 4
+	# end GlyphClass definitions
+} GDEF;
