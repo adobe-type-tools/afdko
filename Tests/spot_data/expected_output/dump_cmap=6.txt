@@ -1,0 +1,48 @@
+--- encoding[0]
+platformId=0
+scriptId  =3
+languageId=0
+--- [code]=glyphId
+[65]=1 
+[66]=2 
+[67]=3 
+[97]=4 
+[98]=5 
+[99]=6 
+
+--- encoding[1]
+platformId=0
+scriptId  =4
+languageId=0
+--- [code]=glyphId
+[65]=1 
+[66]=2 
+[67]=3 
+[97]=4 
+[98]=5 
+[99]=6 
+
+--- encoding[2]
+platformId=3
+scriptId  =1
+languageId=0
+--- [code]=glyphId
+[65]=1 
+[66]=2 
+[67]=3 
+[97]=4 
+[98]=5 
+[99]=6 
+
+--- encoding[3]
+platformId=3
+scriptId  =10
+languageId=0
+--- [code]=glyphId
+[65]=1 
+[66]=2 
+[67]=3 
+[97]=4 
+[98]=5 
+[99]=6 
+
