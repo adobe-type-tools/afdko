@@ -18,7 +18,7 @@ import sys
 
 from fontTools.misc.py23 import open
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 logger = logging.getLogger(__file__)
 
@@ -26,6 +26,7 @@ logger = logging.getLogger(__file__)
 TXT_MODE = 'txt'
 BIN_MODE = 'bin'
 SPLIT_MARKER = '_+:+_'
+DFLT_ENC = 'utf-8'
 
 
 class Differ(object):
@@ -38,6 +39,7 @@ class Differ(object):
         self.skip_strings = opts.skip_strings
         # tuple of integers for the line numbers to skip
         self.skip_lines = opts.skip_lines
+        self.encoding = opts.encoding
 
     def diff_paths(self):
         """
@@ -80,7 +82,7 @@ class Differ(object):
         # Hard code a first line; this way the difflib results start
         # from 1 instead of zero, thus matching the file's line numbers
         lines = ['']
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, "r", encoding=self.encoding) as f:
             for i, line in enumerate(f.readlines(), 1):
                 # Skip lines that change, such as timestamps
                 if self._line_to_skip(line):
@@ -298,6 +300,13 @@ def get_options(args):
              'For multiple line numbers, separate them with a comma (,).\n'
              'For ranges of lines, use a minus (-) between two numbers.\n'
              'For a line delta, use a plus (+) between two numbers.'
+    )
+    parser.add_argument(
+        '-e',
+        '--encoding',
+        default=DFLT_ENC,
+        choices=(DFLT_ENC, 'macroman'),
+        help='encoding to use when opening text files (default: %(default)s)'
     )
     parser.add_argument(
         'path1',
