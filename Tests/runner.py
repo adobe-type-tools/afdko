@@ -13,7 +13,7 @@ import argparse
 import logging
 import os
 import platform
-import subprocess
+import subprocess32 as subprocess
 import sys
 import tempfile
 
