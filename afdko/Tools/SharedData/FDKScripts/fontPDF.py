@@ -24,6 +24,15 @@ right, with the positive Y axis pointing down.
 
 from __future__ import print_function, absolute_import
 
+import os
+import re
+import time
+
+from . import FDKUtils
+from . import pdfgen
+from . import pdfmetrics
+from .pdfutils import LINEEND
+
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
@@ -264,19 +273,6 @@ quotes and parentheses, and commas separated, as shown. "(0,0,0)" is
 black, "(1.0, 1.0, 1.0)" is page white, "(1.0, 0, 0)" is red.
 --pointLabelSize 12  #Change the size of the point label text.
 """
-
-import time
-import os
-import re
-import sys
-
-from . import FDKUtils
-from . import pdfdoc
-from . import pdfgen
-from . import pdfgeom
-from . import pdfmetrics
-from . import pdfutils
-from .pdfutils import LINEEND
 
 inch = INCH = 72
 cm = CM = inch / 2.54
@@ -1258,7 +1254,8 @@ class FontPDFGlyph:
 				hintDir = rec[1]
 				rowDir = rec[2]
 			except (KeyError, TypeError):
-				rowFont = "RowFont: CID not in layout file"
+				hintDir = None
+				rowDir = None
 		else:
 			# it is name-keyed font that is not helpfully usiing cidXXXX names. Assume that it is in the
 			# std development heirarchy.
@@ -1277,7 +1274,6 @@ class FontPDFGlyph:
 
 
 def getTitleHeight(params):
-	pageTitleFont = params.pageTitleFont
 	pageTitleSize = params.pageTitleSize
 	cur_y = params.pageSize[1] - (params.pageTopMargin + pageTitleSize)
 	cur_y -= pageTitleSize*1.2
@@ -1483,24 +1479,20 @@ def getLayoutFromGPP(params, extraY, yTop):
 					scale = scale1
 					numAcross = numAcross1
 					numDown = numDown1
-					numGlyphs = numGlyphs1
 				else:
 					scale = scale2
 					numAcross = numAcross2
 					numDown = numDown2
-					numGlyphs = numGlyphs2
 				break
 			elif (numGlyphs2 >= glyphsPerPage):
 				scale = scale2
 				numAcross = numAcross2
 				numDown = numDown2
-				numGlyphs = numGlyphs2
 				break
 			elif (numGlyphs1 >= glyphsPerPage):
 				scale = scale1
 				numAcross = numAcross1
 				numDown = numDown1
-				numGlyphs = numGlyphs1
 				break
 
 		if tryCount > 0:

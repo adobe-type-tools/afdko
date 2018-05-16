@@ -25,17 +25,15 @@ import cStringIO
 from types import *
 from math import sin, cos, pi, ceil
 
+from . import pdfutils
+from .pdfutils import LINEEND   # this constant needed in both
+
 Log = sys.stderr  # reassign this if you don't want err output to console
 
 try:
     import zlib
 except:
     Log.write("zlib not available, page compression not available\n")
-
-from . import pdfmetrics
-from . import pdfutils
-from .pdfgeom import bezierArc
-from .pdfutils import LINEEND   # this constant needed in both
 
 ##############################################################
 #
@@ -53,10 +51,14 @@ StandardEnglishFonts = [
 
 kDefaultEncoding = '/MacRoman'
 kDefaultFontType = "/Type1"
-PDFError = 'PDFError'
 AFMDIR = '.'
 
 A4 = (595.27,841.89)   #default page size
+
+
+class PDFError(KeyError):
+    pass
+
 
 class PDFDocument:
     """Responsible for linking and writing out the whole document.
@@ -137,14 +139,13 @@ class PDFDocument:
         "embeds in PDF file"
         self.info.subject = subject
 
-
     def printXref(self):
         self.startxref = sys.stdout.tell()
         Log.write('xref\n')
-        Log.write("%s %s" % (0,len(self.objects) + 1) )
+        Log.write("%s %s" % (0, len(self.objects) + 1))
         Log.write('0000000000 65535 f')
         for pos in self.xref:
-            Log.write( '%0.10d 00000 n\n' % pos)
+            Log.write('%0.10d 00000 n\n' % pos)
 
     def writeXref(self, f):
         self.startxref = f.tell()
@@ -153,7 +154,6 @@ class PDFDocument:
         f.write('0000000000 65535 f' + LINEEND)
         for pos in self.xref:
             f.write('%0.10d 00000 n' % pos + LINEEND)
-
 
     def printTrailer(self):
         print('trailer')
@@ -313,7 +313,7 @@ class PDFDocument:
             pdfFont = entry[1]
             return "/%s" % (pdfFont.keyname)
         except:
-            raise (PDFError, "Font %s not available in document" % psfontname)
+            raise PDFError("Font %s not available in document" % psfontname)
 
     def getAvailableFonts(self):
         # There may be more

@@ -117,36 +117,37 @@ class Canvas:
         self._currentPageHasImages = 1
         self._pageTransitionString = ''
 
-        self._pageCompression = 1  #on by default - turn off when debugging!
+        self._pageCompression = 1  # on by default - turn off when debugging!
         self._pageNumber = 1   # keep a count
-        self._code = []    #where the current page's marking operators accumulate
+        # where the current page's marking operators accumulate
+        self._code = []
 
-        #PostScript has the origin at bottom left. It is easy to achieve a top-
-        #down coord system by translating to the top of the page and setting y
-        #scale to -1, but then text is inverted.  So self.bottomup is used
-        #to also set the text matrix accordingly.  You can now choose your
-        #drawing coordinates.
+        # PostScript has the origin at bottom left. It is easy to achieve a
+        # top-down coord system by translating to the top of the page and
+        # setting y scale to -1, but then text is inverted. So self.bottomup
+        # is used to also set the text matrix accordingly. You can now choose
+        # your drawing coordinates.
         self.bottomup = bottomup
         if self.bottomup:
-            #set initial font
-            #self._preamble = 'BT /F9 12 Tf 14.4 TL ET'
+            # set initial font
+            # self._preamble = 'BT /F9 12 Tf 14.4 TL ET'
             self._preamble = '1 0 0 1 0 0 cm BT /F9 12 Tf 14.4 TL ET'
         else:
-            #switch coordinates, flip text and set font
-            #self._preamble = '1 0 0 -1 0 %0.4f cm BT /F9 12 Tf 14.4 TL ET' % self._pagesize[1]
-            self._preamble = '1 0 0 -1 0 %0.4f cm BT /F9 12 Tf 14.4 TL ET' % self._pagesize[1]
+            # switch coordinates, flip text and set font
+            self._preamble = ('1 0 0 -1 0 %0.4f cm BT /F9 12 Tf 14.4 TL ET' %
+                              self._pagesize[1])
 
-        #initial graphics state
+        # initial graphics state
         self._x = 0
         self._y = 0
         self._fontname = 'Times-Roman'
         self._fontsize = 12
-        self._textMode = 0  #track if between BT/ET
+        self._textMode = 0  # track if between BT/ET
         self._leading = 14.4
         self._currentMatrix = (1., 0., 0., 1., 0., 0.)
-        self._fillMode = 0   #even-odd
+        self._fillMode = 0  # even-odd
 
-        #text state
+        # text state
         self._charSpace = 0
         self._wordSpace = 0
         self._horizScale = 100
@@ -158,7 +159,7 @@ class Canvas:
         # line drawing
         self._lineCap = 0
         self._lineJoin = 0
-        self._lineDash = None  #not done
+        self._lineDash = None  # not done
         self._lineWidth = 0
         self._mitreLimit = 0
 
@@ -168,12 +169,12 @@ class Canvas:
     def _escape(self, s):
         """PDF escapes are like Python ones, but brackets need slashes before them too.
         Use Python's repr function and chop off the quotes first"""
-        #s = repr(s)[1:-1]
+        # s = repr(s)[1:-1]
         s = string.replace(s, '(','\(')
         s = string.replace(s, ')','\)')
         return s
 
-    #info functions - non-standard
+    # info functions - non-standard
     def setAuthor(self, author):
         self._doc.setAuthor(author)
 
@@ -195,11 +196,11 @@ class Canvas:
         page.hasImages = self._currentPageHasImages
         page.pageTransitionString = self._pageTransitionString
         page.setCompression(self._pageCompression)
-        #print stream
+        # print stream
         page.setStream([self._preamble] + self._code)
         self._doc.addPage(page)
 
-        #now get ready for the next one
+        # now get ready for the next one
         self._pageNumber = self._pageNumber + 1
         self._code = []    # ready for more...
         self._currentPageHasImages = 0
@@ -349,7 +350,7 @@ class Canvas:
         Jim Fitzsimmon's TeX tutorial <URL: http://www.tinaja.com/bezarc1.pdf>."""
 
         pointList = pdfgeom.bezierArc(x1,y1, x2,y2, startAng, extent)
-        #move to first point
+        # move to first point
         self._code.append('n %0.4f %0.4f m' % pointList[0][:2])
         for curve in pointList:
             self._code.append('%0.4f %0.4f %0.4f %0.4f %0.4f %0.4f c' % curve[2:])
