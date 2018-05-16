@@ -1,5 +1,5 @@
 """
-fontPDF v1.24 Dec 4 2017. This module is not run stand-alone; it requires
+fontPDF v1.25 May 15 2018. This module is not run stand-alone; it requires
 another module, such as ProofPDF.py, in order to collect the options, and call
 the MakePDF function.
 
@@ -66,6 +66,7 @@ the command-line tools, the values be enclosed in quotes, such as:
 --pageRightMargin  36.0               # Integer. Point size
 --pageTitleFont  Times-Bold           # Text string. Font for title
 --pageTitleSize  14                   # Integer. Point size used in title
+--pageIncludeTitle  1                 # 0 or 1. Whether to include a title on each page
 --fontsetGroupPtSize  14              # Integer. Point size for group header and PS name in fontsetplot.
 
 # Page layout attributes
@@ -324,6 +325,7 @@ class FontPDFParams:
 		self.descenderSpace = None # The amout of space allowed for descenders. By default is  Font BBox.ymin, but can be set by parameter.
 		self.pageTitleFont = 'Times-Bold'  # Font used for page titles.
 		self.pageTitleSize = 14		# point size for page titles
+		self.pageIncludeTitle = 1  # include or not the page titles
 		self.fontsetGroupPtSize = 14 # pt size for group header text font fontsetplot
 		self.pointLabelFont = 'Helvetica'  # Font used for all text in glyph tile.
 		self.pointLabelSize = 16 # point size for all text in glyph tile. This is is relative to a glyph tile fo width kGlyphSquare;
@@ -1306,14 +1308,17 @@ def doFontSetTitle(rt_canvas, params, numPages):
 def doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages = None):
 	pageTitleFont = params.pageTitleFont
 	pageTitleSize = params.pageTitleSize
+	pageIncludeTitle = params.pageIncludeTitle
 	# Set 0,0 to be at top right of page.
 
-	rt_canvas.setFont(pageTitleFont, pageTitleSize)
+	if pageIncludeTitle:
+		rt_canvas.setFont(pageTitleFont, pageTitleSize)
 	title = "%s   OT version %s " % (pdfFont.getPSName(), pdfFont.getOTVersion() )
 	rightMarginPos = params.pageSize[0]-params.pageRightMargin
 	cur_y = params.pageSize[1] - (params.pageTopMargin + pageTitleSize)
-	rt_canvas.drawString(params.pageLeftMargin, cur_y, title)
-	rt_canvas.drawRightString(rightMarginPos, cur_y, time.asctime())
+	if pageIncludeTitle:
+		rt_canvas.drawString(params.pageLeftMargin, cur_y, title)
+		rt_canvas.drawRightString(rightMarginPos, cur_y, time.asctime())
 	cur_y -= pageTitleSize*1.2
 	path = repr(params.rt_filePath) # Can be non-ASCII
 	if numPages == None:
@@ -1331,13 +1336,16 @@ def doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages = None):
 
 	if adjustedWidth:
 		path = "..." + path[3:]
-	rt_canvas.drawString(params.pageLeftMargin, cur_y, path)
-	rt_canvas.drawRightString(rightMarginPos, cur_y, pageString)
+	if pageIncludeTitle:
+		rt_canvas.drawString(params.pageLeftMargin, cur_y, path)
+		rt_canvas.drawRightString(rightMarginPos, cur_y, pageString)
 	cur_y -= pageTitleSize/2
-	rt_canvas.setLineWidth(3)
-	rt_canvas.line(params.pageLeftMargin, cur_y, rightMarginPos, cur_y)
+	if pageIncludeTitle:
+		rt_canvas.setLineWidth(3)
+		rt_canvas.line(params.pageLeftMargin, cur_y, rightMarginPos, cur_y)
 	#reset carefully afterwards
-	rt_canvas.setLineWidth(1)
+	if pageIncludeTitle:
+		rt_canvas.setLineWidth(1)
 	return  cur_y - pageTitleSize # Add some space below the title line.
 
 def  getMetaDataHeight(params, fontYMin) :
