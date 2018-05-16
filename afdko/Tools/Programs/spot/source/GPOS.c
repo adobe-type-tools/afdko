@@ -5276,12 +5276,25 @@ static int strcmpAFM(const void * p1, const void *p2)
 		return -1;
 	return 0;
 }
-	  
+
+static void makeTempFile()
+{
+/* Replace use of deprecated 'tmpnam()'. */
+
+	AFMout=tmpfile();
+	if (AFMout == NULL)
+		fatal(SPOT_MSG_GPOS_TEMP_OPEN);
+}
+
+static void closeTempFile()
+{
+	fclose(AFMout);
+}
+
 void GPOSDump(IntX level, LongN start)
 	{
 	IntX i;
 	LookupList *lookuplist;
-	char tempFileName[MAXAFMLINESIZE];
 		
 	contextPrefix[0] = 0;
 	  if (!loaded) 
@@ -5324,14 +5337,10 @@ void GPOSDump(IntX level, LongN start)
 		}
 	  else if ( (level == 6) || (level == 7) ) /* AFM or features-file text syntax dump */
 	  {
-	  	char afmFilePath[128];
-		afmFilePath[0] = 0;
 	  	/*Write to temporary buffer in order to be able to sort AFM data before it is printed*/
 	  	if (level==6)
 	  		{
-			strcpy(tempFileName, afmFilePath);
-			strcat(tempFileName, "temp.txt");
-	  		AFMout=fopen(tempFileName, "w");
+	  		makeTempFile();
 	  		}
 	    /* dump FeatureLookup-subtables according to Script */
 	  	ttoDecompileByScript(&GPOS._ScriptList, &GPOS._FeatureList, &GPOS._LookupList, dumpSubtable, level);
@@ -5347,8 +5356,7 @@ void GPOSDump(IntX level, LongN start)
 	  		kernPairEntry *kernEntry;
 	  		da_DCL( kernPairEntry, afmLines);
 	  		da_INIT(afmLines, 1000, 100);
-	  		fclose(AFMout);
-	  		AFMout=fopen(afmFilePath, "r");
+	  		fseek(AFMout,0, 0); /* We just wrote a lot of data; now read it back */
 	  		
 	  		/* first data line is expected to be a script/language comment line. */
 	  		kernEntry = da_INDEX(afmLines, 0);
@@ -5457,9 +5465,7 @@ void GPOSDump(IntX level, LongN start)
 	  				}
 	  			}
 	  		da_FREE(afmLines);
-	  		fclose(AFMout);
-			remove(tempFileName);
-	  		remove(afmFilePath);
+	  		closeTempFile();
 	  	} /* end if level 6 */
 	  }
 	  else { /* straight text dump */
