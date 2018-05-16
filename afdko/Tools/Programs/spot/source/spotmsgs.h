@@ -115,6 +115,7 @@ extern const Byte8 *spotMsg(IntX msgId);
 #define SPOT_MSG_CNTX_RECURSION		102
 #define SPOT_MSG_DUP_IN_COV	103
 #define SPOT_MSG_GSUBMULTIPLEINPUTS	104
+#define SPOT_MSG_GPOS_TEMP_OPEN		105
 
 
 

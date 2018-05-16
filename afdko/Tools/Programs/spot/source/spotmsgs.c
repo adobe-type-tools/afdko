@@ -111,8 +111,9 @@ const Byte8 *EnglishMessages[] =
 "proof and feature file format dumps not yet supported for lookup Type 5 context format %d.\n",/* SPOT_MSG_GSUBUFMTCTX */
 "proof and feature file format dumps not yet supported for lookup Type 6 chaining  context format %d.\n", /* SPOT_MSG_GSUBUFMTCCTX */
 "proof and feature file format dumps do not support recursive calls to contextual lookups. context format %d.\n", /* SPOT_MSG_CNTX_RECURSION */
-    "Duplicate glyph in coverage Type1. gid: '%d'.\n", /* SPOT_MSG_DUP_IN_COV */
-    "Cannot proof multiple inputs with more than one group greater than 1. Not all substitutions may be displayed.\n", /* SPOT_MSG_GSUBMULTIPLEINPUTS */
+"Duplicate glyph in coverage Type1. gid: '%d'.\n", /* SPOT_MSG_DUP_IN_COV */
+"Cannot proof multiple inputs with more than one group greater than 1. Not all substitutions may be displayed.\n", /* SPOT_MSG_GSUBMULTIPLEINPUTS */
+"Failed to make temporary file when writing AFM file output.\n", /* SPOT_MSG_GPOS_TEMP_OPEN */
 };
 
 
