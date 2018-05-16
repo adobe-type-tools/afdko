@@ -1762,6 +1762,7 @@ static void cff_BegFont(txCtx h, abfTopDict *top)
             h->cb.glyph.moveVF = NULL;
             h->cb.glyph.lineVF = NULL;
             h->cb.glyph.curveVF = NULL;
+            h->cb.glyph.stemVF = NULL;
         }
         
         if (cfwBegFont(h->cfw.ctx, NULL, h->cfw.maxNumSubrs))
@@ -1793,6 +1794,7 @@ static void cff_EndFont(txCtx h)
             h->cb.glyph.moveVF = NULL;
             h->cb.glyph.lineVF = NULL;
             h->cb.glyph.curveVF = NULL;
+            h->cb.glyph.stemVF = NULL;
         }
         if (h->flags & PATH_SUPRESS_HINTS)
         {
@@ -1861,6 +1863,7 @@ static void cff_SetMode(txCtx h)
             h->cb.glyph.moveVF = NULL;
             h->cb.glyph.lineVF = NULL;
             h->cb.glyph.curveVF = NULL;
+            h->cb.glyph.stemVF = NULL;
         }
 
         if (h->abf.ctx == NULL)
