@@ -22,6 +22,8 @@ however, that the coordinate system for the page puts (0,0) at the top
 right, with the positive Y axis pointing down.
 """
 
+from __future__ import print_function, absolute_import
+
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
@@ -262,16 +264,18 @@ black, "(1.0, 1.0, 1.0)" is page white, "(1.0, 0, 0)" is red.
 --pointLabelSize 12  #Change the size of the point label text.
 """
 
-import pdfdoc
-import pdfgen
-import pdfgeom
-import pdfmetrics
-import pdfutils
 import time
 import os
 import re
-from pdfutils import LINEEND
-import FDKUtils
+import sys
+
+from . import FDKUtils
+from . import pdfdoc
+from . import pdfgen
+from . import pdfgeom
+from . import pdfmetrics
+from . import pdfutils
+from .pdfutils import LINEEND
 
 inch = INCH = 72
 cm = CM = inch / 2.54
@@ -1615,7 +1619,7 @@ class ProgressBar:
 		self.startTime = time.time()
 		self.tickCount = 0
 		if startText:
-			print startText
+			print(startText)
 
 	def DoProgress(self, tickCount):
 		if  tickCount and ((tickCount % self.kProgressBarTickStep) == 0):
@@ -1625,10 +1629,11 @@ class ProgressBar:
 			timeleft = int(perGlyph * (self.maxCount - tickCount))
 			minutesLeft = int(timeleft /60)
 			secondsLeft = timeleft % 60
-			print self.kText % (tickCount, self.maxCount, minutesLeft, secondsLeft)
+			print(self.kText % (tickCount, self.maxCount, minutesLeft,
+								     secondsLeft))
 
 	def EndProgress(self):
-		print "Saving file..."
+		print("Saving file...")
 
 
 def makePDF(pdfFont, params, doProgressBar=True):
@@ -1835,7 +1840,7 @@ class  FontInfo:
 			formatName = "/FontFile2"
 			fontType = "/TrueType"
 		else:
-			print "Font type not supported."
+			print("Font type not supported.")
 			raise TypeError
 
 		text = []
@@ -2173,7 +2178,8 @@ def makeProofPDF(pdfFont, params, doProgressBar=True):
 	# Collect log file text, if any.
 	if params.errorLogFilePath:
 		if not os.path.isfile(params.errorLogFilePath):
-			print "Warning: log file %s does not exist or is not a file." % (repr(params.errorLogFilePath))
+			print("Warning: log file %s does not exist or is not a file." %
+					repr(params.errorLogFilePath))
 		else:
 			lf = file(params.errorLogFilePath, "rU")
 			errorLines = lf.readlines()

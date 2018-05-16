@@ -52,6 +52,8 @@ Modified 7/25/2006 read rooberts. Added supported for embedding fonts.
 ##
 ##
 ##
+from __future__ import print_function, absolute_import
+
 import os
 import sys
 import string
@@ -61,10 +63,10 @@ import cStringIO
 from types import *
 from math import sin, cos, tan, pi, ceil
 
-import pdfutils
-import pdfdoc
-import pdfmetrics
-import pdfgeom
+from . import pdfdoc
+from . import pdfgeom
+from . import pdfmetrics
+from . import pdfutils
 
 # Robert Kern
 # Constants for closing paths.
@@ -578,12 +580,12 @@ class Canvas:
         try:
             import Image
         except ImportError:
-            print 'Python Imaging Library not available'
+            print('Python Imaging Library not available')
             return
         try:
             import zlib
         except ImportError:
-            print 'zlib not available'
+            print('zlib not available')
             return
 
         self._currentPageHasImages = 1
@@ -1065,4 +1067,4 @@ class PDFTextObject:
 
 
 if __name__ == '__main__':
-    print 'For test scripts, run testpdfgen.py'
+    print('For test scripts, run testpdfgen.py')
