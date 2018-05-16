@@ -79,7 +79,7 @@ def run_tool(opts):
         if opts.no_save_path:
             return subprocess.check_call(args)
         else:
-            output = subprocess.check_output(args), timeout=60)
+            output = subprocess.check_output(args, timeout=60)
             if opts.redirect:
                 _write_file(save_loc, output)
             return save_loc
