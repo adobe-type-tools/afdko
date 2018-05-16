@@ -187,13 +187,13 @@ unsigned short var_getIVSRegionCount(var_itemVariationStore ivs);
     ivs - a pointer to the IVS data.
 */
 
-unsigned short var_getIVSRegionCountForIndex(var_itemVariationStore ivs, unsigned short vsIndex);
+unsigned short var_getIVDRegionCountForIndex(var_itemVariationStore ivs, unsigned short vsIndex);
 
-/*  var_getIVSRegionCountForIndex() returns the number of sub-regions applicable to an IVS sub-table.
+/*  var_getIVDRegionCountForIndex() returns the number of sub-regions applicable to an IVS sub-table.
 
     ivs - a pointer to the IVS data.
 
-    vsIndex - IVS sub-table index.
+    vsIndex - IVS ItemVariationData sub-table index.
 */
 
 long var_getIVSRegionIndices(var_itemVariationStore ivs, unsigned short vsIndex, unsigned short *regionIndices, long regionCount);
