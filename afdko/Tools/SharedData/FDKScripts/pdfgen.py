@@ -55,13 +55,9 @@ Modified 7/25/2006 read rooberts. Added supported for embedding fonts.
 from __future__ import print_function, absolute_import
 
 import os
-import sys
 import string
-import time
-import tempfile
 import cStringIO
-from types import *
-from math import sin, cos, tan, pi, ceil
+from math import sin, cos, tan, pi
 
 from . import pdfdoc
 from . import pdfgeom
@@ -529,9 +525,9 @@ class Canvas:
 
     def setDash(self, array=[], phase=0):
         """Two notations.  pass two numbers, or an array and phase"""
-        if type(array) == IntType or type(array) == FloatType:
+        if isinstance(array, int) or isinstance(array, float):
             self._code.append('[%s %s] 0 d' % (array, phase))
-        elif type(array) == ListType or type(Array) == TupleType:
+        elif isinstance(array, list) or isinstance(array, tuple):
             assert phase <= len(array), "setDash phase must be l.t.e. length of array"
             textarray = string.join(map(str, array))
             self._code.append('[%s] %s d' % (textarray, phase))
@@ -579,11 +575,6 @@ class Canvas:
         caching mechanism"""
         # print "drawInlineImage: x=%s, y=%s, width = %s, height=%s " % (x,y, width, height)
         try:
-            import Image
-        except ImportError:
-            print('Python Imaging Library not available')
-            return
-        try:
             import zlib
         except ImportError:
             print('zlib not available')
@@ -591,7 +582,7 @@ class Canvas:
 
         self._currentPageHasImages = 1
 
-        if type(image) == StringType:
+        if isinstance(image, str):
             if os.path.splitext(image)[1] in ['.jpg', '.JPG']:
             #directly process JPEG files
             #open file, needs some error handling!!
@@ -1043,13 +1034,13 @@ class PDFTextObject:
         since this may be indented, by default it trims whitespace
         off each line and from the beginning; set trim=0 to preserve
         whitespace."""
-        if type(stuff) == StringType:
+        if isinstance(stuff, str):
             lines = string.split(string.strip(stuff), '\n')
             if trim==1:
                 lines = map(string.strip,lines)
-        elif type(stuff) == ListType:
+        elif isinstance(stuff, list):
             lines = stuff
-        elif type(stuff) == TupleType:
+        elif isinstance(stuff, tuple):
             lines = stuff
         else:
             assert 1==0, "argument to textlines must be string,, list or tuple"

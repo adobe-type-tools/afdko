@@ -16,14 +16,9 @@ Modified 7/25/2006 read rooberts. Added supported for embedding fonts.
 """
 from __future__ import print_function, absolute_import
 
-import os
-import sys
 import string
+import sys
 import time
-import tempfile
-import cStringIO
-from types import *
-from math import sin, cos, pi, ceil
 
 from . import pdfutils
 from .pdfutils import LINEEND   # this constant needed in both
@@ -192,17 +187,6 @@ class PDFDocument:
         self.writeXref(f)
         self.writeTrailer(f)
         f.write('%%EOF')  # no lineend needed on this one!
-
-        # with the Mac, we need to tag the file in a special
-        #way so the system knows it is a PDF file.
-        #This supplied by Joe Strout
-        if os.name == 'mac':
-            import macfs
-            try:
-                macfs.FSSpec(filename).SetCreatorType('CARO','PDF ')
-            except:
-                pass
-
 
     def printPDF(self):
         "prints it to standard output.  Logs positions for doing trailer"
@@ -552,7 +536,7 @@ class PDFPage(PDFObject):
         self.drawables = []
 
     def setStream(self, data):
-        if type(data) is ListType:
+        if isinstance(data, list):
             data = string.join(data, LINEEND)
         self.stream.setStream(data)
 
