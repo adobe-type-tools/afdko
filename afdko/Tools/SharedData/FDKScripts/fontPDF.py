@@ -1,5 +1,5 @@
 """
-fontPDF v1.24 Dec 4 2017. This module is not run stand-alone; it requires
+fontPDF v1.25 May 15 2018. This module is not run stand-alone; it requires
 another module, such as ProofPDF.py, in order to collect the options, and call
 the MakePDF function.
 
@@ -21,6 +21,17 @@ All coordinates are in points, in the usual PostScript model. Note,.
 however, that the coordinate system for the page puts (0,0) at the top
 right, with the positive Y axis pointing down.
 """
+
+from __future__ import print_function, absolute_import
+
+import os
+import re
+import time
+
+from . import FDKUtils
+from . import pdfgen
+from . import pdfmetrics
+from .pdfutils import LINEEND
 
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
@@ -64,6 +75,7 @@ the command-line tools, the values be enclosed in quotes, such as:
 --pageRightMargin  36.0               # Integer. Point size
 --pageTitleFont  Times-Bold           # Text string. Font for title
 --pageTitleSize  14                   # Integer. Point size used in title
+--pageIncludeTitle  1                 # 0 or 1. Whether to include a title on each page
 --fontsetGroupPtSize  14              # Integer. Point size for group header and PS name in fontsetplot.
 
 # Page layout attributes
@@ -262,17 +274,6 @@ black, "(1.0, 1.0, 1.0)" is page white, "(1.0, 0, 0)" is red.
 --pointLabelSize 12  #Change the size of the point label text.
 """
 
-import pdfdoc
-import pdfgen
-import pdfgeom
-import pdfmetrics
-import pdfutils
-import time
-import os
-import re
-from pdfutils import LINEEND
-import FDKUtils
-
 inch = INCH = 72
 cm = CM = inch / 2.54
 kShowMetaTag = "drawMeta_"
@@ -320,6 +321,7 @@ class FontPDFParams:
 		self.descenderSpace = None # The amout of space allowed for descenders. By default is  Font BBox.ymin, but can be set by parameter.
 		self.pageTitleFont = 'Times-Bold'  # Font used for page titles.
 		self.pageTitleSize = 14		# point size for page titles
+		self.pageIncludeTitle = 1  # include or not the page titles
 		self.fontsetGroupPtSize = 14 # pt size for group header text font fontsetplot
 		self.pointLabelFont = 'Helvetica'  # Font used for all text in glyph tile.
 		self.pointLabelSize = 16 # point size for all text in glyph tile. This is is relative to a glyph tile fo width kGlyphSquare;
@@ -1252,7 +1254,8 @@ class FontPDFGlyph:
 				hintDir = rec[1]
 				rowDir = rec[2]
 			except (KeyError, TypeError):
-				rowFont = "RowFont: CID not in layout file"
+				hintDir = None
+				rowDir = None
 		else:
 			# it is name-keyed font that is not helpfully usiing cidXXXX names. Assume that it is in the
 			# std development heirarchy.
@@ -1271,7 +1274,6 @@ class FontPDFGlyph:
 
 
 def getTitleHeight(params):
-	pageTitleFont = params.pageTitleFont
 	pageTitleSize = params.pageTitleSize
 	cur_y = params.pageSize[1] - (params.pageTopMargin + pageTitleSize)
 	cur_y -= pageTitleSize*1.2
@@ -1302,14 +1304,17 @@ def doFontSetTitle(rt_canvas, params, numPages):
 def doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages = None):
 	pageTitleFont = params.pageTitleFont
 	pageTitleSize = params.pageTitleSize
+	pageIncludeTitle = params.pageIncludeTitle
 	# Set 0,0 to be at top right of page.
 
-	rt_canvas.setFont(pageTitleFont, pageTitleSize)
+	if pageIncludeTitle:
+		rt_canvas.setFont(pageTitleFont, pageTitleSize)
 	title = "%s   OT version %s " % (pdfFont.getPSName(), pdfFont.getOTVersion() )
 	rightMarginPos = params.pageSize[0]-params.pageRightMargin
 	cur_y = params.pageSize[1] - (params.pageTopMargin + pageTitleSize)
-	rt_canvas.drawString(params.pageLeftMargin, cur_y, title)
-	rt_canvas.drawRightString(rightMarginPos, cur_y, time.asctime())
+	if pageIncludeTitle:
+		rt_canvas.drawString(params.pageLeftMargin, cur_y, title)
+		rt_canvas.drawRightString(rightMarginPos, cur_y, time.asctime())
 	cur_y -= pageTitleSize*1.2
 	path = repr(params.rt_filePath) # Can be non-ASCII
 	if numPages == None:
@@ -1327,13 +1332,16 @@ def doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages = None):
 
 	if adjustedWidth:
 		path = "..." + path[3:]
-	rt_canvas.drawString(params.pageLeftMargin, cur_y, path)
-	rt_canvas.drawRightString(rightMarginPos, cur_y, pageString)
+	if pageIncludeTitle:
+		rt_canvas.drawString(params.pageLeftMargin, cur_y, path)
+		rt_canvas.drawRightString(rightMarginPos, cur_y, pageString)
 	cur_y -= pageTitleSize/2
-	rt_canvas.setLineWidth(3)
-	rt_canvas.line(params.pageLeftMargin, cur_y, rightMarginPos, cur_y)
+	if pageIncludeTitle:
+		rt_canvas.setLineWidth(3)
+		rt_canvas.line(params.pageLeftMargin, cur_y, rightMarginPos, cur_y)
 	#reset carefully afterwards
-	rt_canvas.setLineWidth(1)
+	if pageIncludeTitle:
+		rt_canvas.setLineWidth(1)
 	return  cur_y - pageTitleSize # Add some space below the title line.
 
 def  getMetaDataHeight(params, fontYMin) :
@@ -1471,24 +1479,20 @@ def getLayoutFromGPP(params, extraY, yTop):
 					scale = scale1
 					numAcross = numAcross1
 					numDown = numDown1
-					numGlyphs = numGlyphs1
 				else:
 					scale = scale2
 					numAcross = numAcross2
 					numDown = numDown2
-					numGlyphs = numGlyphs2
 				break
 			elif (numGlyphs2 >= glyphsPerPage):
 				scale = scale2
 				numAcross = numAcross2
 				numDown = numDown2
-				numGlyphs = numGlyphs2
 				break
 			elif (numGlyphs1 >= glyphsPerPage):
 				scale = scale1
 				numAcross = numAcross1
 				numDown = numDown1
-				numGlyphs = numGlyphs1
 				break
 
 		if tryCount > 0:
@@ -1615,7 +1619,7 @@ class ProgressBar:
 		self.startTime = time.time()
 		self.tickCount = 0
 		if startText:
-			print startText
+			print(startText)
 
 	def DoProgress(self, tickCount):
 		if  tickCount and ((tickCount % self.kProgressBarTickStep) == 0):
@@ -1625,10 +1629,11 @@ class ProgressBar:
 			timeleft = int(perGlyph * (self.maxCount - tickCount))
 			minutesLeft = int(timeleft /60)
 			secondsLeft = timeleft % 60
-			print self.kText % (tickCount, self.maxCount, minutesLeft, secondsLeft)
+			print(self.kText % (tickCount, self.maxCount, minutesLeft,
+								     secondsLeft))
 
 	def EndProgress(self):
-		print "Saving file..."
+		print("Saving file...")
 
 
 def makePDF(pdfFont, params, doProgressBar=True):
@@ -1835,7 +1840,7 @@ class  FontInfo:
 			formatName = "/FontFile2"
 			fontType = "/TrueType"
 		else:
-			print "Font type not supported."
+			print("Font type not supported.")
 			raise TypeError
 
 		text = []
@@ -2173,7 +2178,8 @@ def makeProofPDF(pdfFont, params, doProgressBar=True):
 	# Collect log file text, if any.
 	if params.errorLogFilePath:
 		if not os.path.isfile(params.errorLogFilePath):
-			print "Warning: log file %s does not exist or is not a file." % (repr(params.errorLogFilePath))
+			print("Warning: log file %s does not exist or is not a file." %
+					repr(params.errorLogFilePath))
 		else:
 			lf = file(params.errorLogFilePath, "rU")
 			errorLines = lf.readlines()
