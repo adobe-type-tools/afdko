@@ -77,7 +77,7 @@ def run_tool(opts):
         "About to run the command below\n==>{}<==".format(' '.join(args)))
     try:
         if opts.no_save_path:
-            return subprocess.check_call(args)
+            return subprocess.check_call(args, timeout=60)
         else:
             output = subprocess.check_output(args, timeout=60)
             if opts.redirect:
@@ -104,7 +104,7 @@ def _check_tool(tool_name):
         return tool_name
     # XXX end hack
     try:
-        subprocess.check_output([tool_name, '-h'])
+        subprocess.check_output([tool_name, '-h'], timeout=60)
         return tool_name
     except (subprocess.CalledProcessError, OSError) as err:
         logger.error(err)
