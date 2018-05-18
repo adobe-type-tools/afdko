@@ -13,7 +13,7 @@ import argparse
 import logging
 import os
 import platform
-import subprocess
+import subprocess32 as subprocess
 import sys
 import tempfile
 
@@ -77,9 +77,9 @@ def run_tool(opts):
         "About to run the command below\n==>{}<==".format(' '.join(args)))
     try:
         if opts.no_save_path:
-            return subprocess.check_call(args)
+            return subprocess.check_call(args, timeout=60)
         else:
-            output = subprocess.check_output(args)
+            output = subprocess.check_output(args, timeout=60)
             if opts.redirect:
                 _write_file(save_loc, output)
             return save_loc
@@ -104,7 +104,7 @@ def _check_tool(tool_name):
         return tool_name
     # XXX end hack
     try:
-        subprocess.check_output([tool_name, '-h'])
+        subprocess.check_output([tool_name, '-h'], timeout=60)
         return tool_name
     except (subprocess.CalledProcessError, OSError) as err:
         logger.error(err)
