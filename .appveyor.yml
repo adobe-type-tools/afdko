@@ -4,12 +4,12 @@ environment:
     secure: myMd6E3niwjGvxEHeChOlg==
 
   matrix:
-    - PYTHON: "C:\\Python27-x64"
-    - PYTHON: "C:\\Python27"
+    - PYTHON_HOME: "C:\\Python27-x64"
+    - PYTHON_HOME: "C:\\Python27"
 
 install:
   - git branch
-  - set "PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%"
+  - set "PATH=%PYTHON_HOME%;%PYTHON_HOME%\\Scripts;%PATH%"
   - set
   - python --version
   - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
