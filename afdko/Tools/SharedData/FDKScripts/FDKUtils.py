@@ -27,7 +27,7 @@ def findFDKDirs():
     then add the os.name for the executables, and 'FDKScripts'
     for the scripts.
     """
-    fdkScriptsDir = None
+    fdkSharedDataDir = None
     fdkToolsDir = None
     _dir = os.path.dirname(__file__)
 

@@ -16,7 +16,7 @@ import tempfile
 import time
 import traceback
 
-from fontTools.ttLib import TTFont, getTableModule
+from fontTools.ttLib import TTFont, getTableModule, TTLibError
 
 from fontPDF import (FontPDFParams, makePDF, makeFontSetPDF, kDrawTag,
                      kDrawPointTag, kShowMetaTag, params_doc)
@@ -221,13 +221,21 @@ def CheckEnvironment():
 	txPath = 'tx'
 	txError = 0
 
-	command = "%s -u 2>&1" % (txPath)
+	try:
+		exe_dir, _ = FDKUtils.findFDKDirs()
+	except FDKUtils.FDKEnvError:
+		logMsg("Please re-install the afdko. Cannot find the "
+			   "afdko/Tools/SharedData directory.")
+		raise FDKEnvironmentError
+
+	command = "%s -u 2>&1" % txPath
 	report = FDKUtils.runShellCmd(command)
 	if "options" not in report:
-			txError = 1
+		txError = 1
 
-	if  txError:
-		logMsg("Please re-install the FDK. The executable directory \"%s\" is missing the tool: < %s >." % (exe_dir, txPath ))
+	if txError:
+		logMsg("Please re-install the afdko. The executable directory \"%s\" "
+			   "is missing the tool: < %s >." % (exe_dir, txPath))
 		logMsg("or the files referenced by the shell script is missing.")
 		raise FDKEnvironmentError
 
