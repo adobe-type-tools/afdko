@@ -9,14 +9,13 @@ import sys
 import traceback
 
 __doc__ = """
-FDKUtils.py v1.2.4 Feb 07 2018
+FDKUtils.py v1.2.5 May 17 2018
 A module of functions that are needed by several of the AFDKO scripts.
 """
 
 curSystem = platform.system()
 
 AdobeCMAPS = "Adobe Cmaps"
-AdobeCharsets = "CID charsets"
 
 
 class FDKEnvError(KeyError):
@@ -28,7 +27,7 @@ def findFDKDirs():
     then add the os.name for the executables, and 'FDKScripts'
     for the scripts.
     """
-    fdkScriptsDir = None
+    fdkSharedDataDir = None
     fdkToolsDir = None
     _dir = os.path.dirname(__file__)
 
