@@ -7,6 +7,7 @@ matrix:
       python: 2.7
       install:
         - sudo apt-get install g++-multilib
+        - sudo apt-get install -f
         - sudo -H pip install --upgrade pip
         - pip install --user --upgrade setuptools setuptools_scm wheel cython
       script:
