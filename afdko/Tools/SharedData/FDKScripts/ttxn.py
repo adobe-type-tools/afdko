@@ -99,6 +99,12 @@ log = logging.getLogger(__name__)
 
 
 curSystem = platform.system()
+
+if curSystem == "Windows":
+    TX_TOOL = "tx.exe"
+else:
+    TX_TOOL = "tx"
+
 INDENT = "  "
 ChainINDENT = INDENT + "C "
 kMaxLineLength = 80
@@ -2083,7 +2089,7 @@ def shellcmd(cmdList):
 
 
 def dumpFont(writer, fontPath, supressHints=0):
-    dictTxt = shellcmd(["tx", "-dump", "-0", fontPath])
+    dictTxt = shellcmd([TX_TOOL, "-dump", "-0", fontPath])
     if curSystem == "Windows":
         dictTxt = re.sub(r"[\r\n]+", "\n", dictTxt)
     dictTxt = re.sub(r"##[^\r\n]*Filename[^\r\n]+", "", dictTxt, 1).strip()
@@ -2097,9 +2103,9 @@ def dumpFont(writer, fontPath, supressHints=0):
     writer.newline()
 
     if supressHints:
-        charData = shellcmd(["tx", "-dump", "-6", "-n", fontPath])
+        charData = shellcmd([TX_TOOL, "-dump", "-6", "-n", fontPath])
     else:
-        charData = shellcmd(["tx", "-dump", "-6", fontPath])
+        charData = shellcmd([TX_TOOL, "-dump", "-6", fontPath])
 
     if curSystem == "Windows":
         charData = re.sub(r"[\r\n]+", "\n", charData)
