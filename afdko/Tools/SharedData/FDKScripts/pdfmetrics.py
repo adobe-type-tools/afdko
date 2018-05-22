@@ -3,21 +3,21 @@
 be used for any other PIDDLE back ends or packages which use the standard
 Type 1 postscript fonts.
 
-Its main function is to let you work out the width of strings; it exposes a 
-single function, stringwidth(text, fontname), which works out the width of a 
+Its main function is to let you work out the width of strings; it exposes a
+single function, stringwidth(text, fontname), which works out the width of a
 string in the given font. This is an integer defined in em-square units - each
 character is defined in a 1000 x 1000 box called the em-square - for a 1-point high
 character.  So to convert to points, multiply by 1000 and then by point size.
 
 The AFM loading stuff worked for me but is not being heavily tested, as pre-canning
 the widths for the standard 14 fonts in Acrobat Reader is so much more useful. One
-could easily extend it to get the exact bounding box for each characterm useful for 
+could easily extend it to get the exact bounding box for each characterm useful for
 kerning.
 
 
 The ascent_descent attribute of the module is a dictionary mapping font names
 (with the proper Postscript capitalisation) to ascents and descents.  I ought
-to sort out the fontname case issue and the resolution of PIDDLE fonts to 
+to sort out the fontname case issue and the resolution of PIDDLE fonts to
 Postscript font names within this module, but have not yet done so.
 
 
@@ -29,8 +29,8 @@ import string
 
 
 StandardEnglishFonts = [
-	'Courier', 'Courier-Bold', 'Courier-Oblique', 'Courier-BoldOblique',  
-	'Helvetica', 'Helvetica-Bold', 'Helvetica-Oblique', 
+	'Courier', 'Courier-Bold', 'Courier-Oblique', 'Courier-BoldOblique',
+	'Helvetica', 'Helvetica-Bold', 'Helvetica-Oblique',
 	'Helvetica-BoldOblique',
 	'Times-Roman', 'Times-Bold', 'Times-Italic', 'Times-BoldItalic',
 	'Symbol','ZapfDingbats']
@@ -63,19 +63,19 @@ def parseAFMfile(filename):
             metriclines.append(line)
         if string.find(string.lower(line), 'startcharmetrics') > -1:
             between = 1
-            
+
     # break up - very shaky assumption about array size
     widths = [0] * 255
-    
+
     for line in metriclines:
         chunks = string.split(line, ';')
-        
+
         (c, cid) = string.split(chunks[0])
         (wx, width) = string.split(chunks[1])
         #(n, name) = string.split(chunks[2])
         #(b, x1, y1, x2, y2) = string.split(chunks[3])
         widths[string.atoi(cid)] = string.atoi(width)
-    
+
     # by default, any empties should get the width of a space
     for i in range(len(widths)):
         if widths[i] == 0:
@@ -91,7 +91,7 @@ class FontCache:
         global widths
         self.__widtharrays = widths
 
-        
+
     def loadfont(self, fontname):
         filename = AFMDIR + os.sep + fontname + '.afm'
         print 'cache loading',filename
@@ -110,7 +110,7 @@ class FontCache:
                 # font not found, use Courier
                 print 'Font',fontname,'not found - using Courier for widths'
                 return self.getfont('courier')
-    
+
 
     def stringwidth(self, text, font):
         widths = self.getfont(string.lower(font))
@@ -122,10 +122,8 @@ class FontCache:
     def status(self):
         #returns loaded fonts
         return self.__widtharrays.keys()
-        
+
 TheFontCache = FontCache()
 
 #expose the singleton as a single function
 stringwidth = TheFontCache.stringwidth
-
-
