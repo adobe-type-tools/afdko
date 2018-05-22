@@ -136,7 +136,6 @@ def _get_console_scripts():
         ('hintplot', 'ProofPDF:hintplot'),
         ('waterfallplot', 'ProofPDF:waterfallplot'),
         ('clean_afdko', 'FDKUtils:clean_afdko'),
-        ('check_afdko', 'FDKUtils:check_afdko')
     ]
     scripts_path = 'afdko.Tools.SharedData.FDKScripts'
     scripts = ['{} = {}.{}'.format(name, scripts_path, entry)

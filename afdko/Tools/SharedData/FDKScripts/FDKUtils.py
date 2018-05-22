@@ -134,7 +134,6 @@ def clean_afdko():
         "fontsetplot",
         "hintplot",
         "waterfallplot",
-        "check_afdko",
         "clean_afdko",
         "autohintexe",
         "makeotfexe",
@@ -183,11 +182,6 @@ def clean_afdko():
         except OSError:
             pass
 
-    return
-
-
-def check_afdko():
-    print('NOT IMPLEMENTED!')
     return
 
 
