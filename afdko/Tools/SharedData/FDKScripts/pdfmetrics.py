@@ -70,8 +70,8 @@ def parseAFMfile(filename):
     for line in metriclines:
         chunks = line.split(';')
 
-        c, cid = chunks[0].split()
-        wx, width = chunks[1].split()
+        _, cid = chunks[0].split()
+        _, width = chunks[1].split()
         # n, name = chunks[2].split()
         # b, x1, y1, x2, y2 = chunks[3].split()
         widths[int(cid)] = int(width)

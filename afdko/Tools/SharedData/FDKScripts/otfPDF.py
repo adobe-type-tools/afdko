@@ -8,24 +8,26 @@ run alone.
 from __future__ import print_function, absolute_import
 
 from fontTools.pens.boundsPen import BoundsPen, BasePen
-from fontTools.misc.psCharStrings import T2CharString, T2OutlineExtractor
+from fontTools.misc.psCharStrings import T2OutlineExtractor
 
 from .fontPDF import FontPDFGlyph, FontPDFFont, FontPDFPoint
 
+
 class FontPDFPen(BasePen):
-	def __init__(self, glyphSet = None):
+	def __init__(self, glyphSet=None):
 		BasePen.__init__(self, glyphSet)
 		self.pathList = []
-		self.numMT = self.numLT =  self.numCT = self.numPaths = self.total = 0 # These all get set when thge outline is drawn.
-		self.curPt = [0,0]
+		# These all get set when the outline is drawn
+		self.numMT = self.numLT = self.numCT = self.numPaths = self.total = 0
+		self.curPt = [0, 0]
 		self.noPath = 1
 
 	def _moveTo(self, pt):
 		if self.noPath:
 			self.pathList.append([])
-		self.noPath  = 0
+		self.noPath = 0
 		self.numMT +=1
-		pdfPoint = FontPDFPoint(FontPDFPoint.MT,  pt, index = self.total )
+		pdfPoint = FontPDFPoint(FontPDFPoint.MT, pt, index=self.total)
 		self.total += 1
 		self.curPt = pt
 		curPath = self.pathList[-1]
@@ -34,9 +36,9 @@ class FontPDFPen(BasePen):
 	def _lineTo(self, pt):
 		if self.noPath:
 			self.pathList.append([])
-		self.noPath  = 0
+		self.noPath = 0
 		self.numLT += 1
-		pdfPoint = FontPDFPoint(FontPDFPoint.LT,  pt, index = self.total)
+		pdfPoint = FontPDFPoint(FontPDFPoint.LT, pt, index=self.total)
 		self.total += 1
 		self.pathList[-1].append(pdfPoint)
 		self.curPt = pt
@@ -45,7 +47,8 @@ class FontPDFPen(BasePen):
 		if self.noPath:
 			self.pathList.append([])
 		self.numCT += 1
-		pdfPoint = FontPDFPoint(FontPDFPoint.CT,  pt3, pt1, pt2, index = self.total )
+		pdfPoint = FontPDFPoint(
+			FontPDFPoint.CT, pt3, pt1, pt2, index=self.total)
 		self.total += 1
 		self.pathList[-1].append(pdfPoint)
 		self.curPt = pt3
@@ -55,15 +58,11 @@ class FontPDFPen(BasePen):
 		self.noPath = 1
 		curPath = self.pathList[-1]
 
-		#if self.curPt != curPath[0].pt0:
-		#	curPath.append( FontPDFPoint(FontPDFPoint.LT,  curPath[0].pt0, index = self.total))
-		#	self.total += 1
-
 	def _endPath(self):
 		self.numPaths += 1
 
 
-class  txPDFFont(FontPDFFont):
+class txPDFFont(FontPDFFont):
 
 	def __init__(self, clientFont, params):
 		self.clientFont = clientFont
@@ -184,18 +183,18 @@ class  txPDFFont(FontPDFFont):
 	def clientGetAscentDescent(self):
 		txFont = self.clientFont
 		try:
-			os2Table =  self.clientFont['OS/2']
+			os2Table = self.clientFont['OS/2']
 			return os2Table.sTypoAscender, os2Table.sTypoDescender
 		except KeyError:
 			return None, None
 
 
-def hintOn( i, hintMaskBytes):
+def hintOn(i, hintMaskBytes):
 	# used to add the active hints to the bez string, when a  T2 hintmask operator is encountered.
-	byteIndex = i/8
-	byteValue =  ord(hintMaskBytes[byteIndex])
-	offset = 7 -  (i %8)
-	return ((2**offset) & byteValue) > 0
+	byteIndex = i / 8
+	byteValue = ord(hintMaskBytes[byteIndex])
+	offset = 7 - (i % 8)
+	return ((2 ** offset) & byteValue) > 0
 
 
 class FontPDFT2OutlineExtractor(T2OutlineExtractor):
@@ -291,7 +290,6 @@ class FontPDFT2OutlineExtractor(T2OutlineExtractor):
 		self.hintCount = self.hintCount + len(args) / 2
 
 
-
 def drawCharString(charString, pen):
 	subrs = getattr(charString.private, "Subrs", [])
 	extractor = FontPDFT2OutlineExtractor(pen, subrs, charString.globalSubrs,
@@ -379,14 +377,9 @@ class  txPDFGlyph(FontPDFGlyph):
 			self.yAdvance = self.parentFont.getEmSquare()
 			self.tsb = self.yOrigin - self.BBox[3] + self.parentFont.getBaseLine()
 
-
-
 		# Get the fdIndex, so we can laterdetermine which set of blue values to use.
 		self.fdIndex = 0
 		if hasattr(fTopDict, "ROS"):
 			gid =  fTopDict.CharStrings.charStrings[self.name]
 			self.fdIndex = fTopDict.FDSelect[gid]
 		return
-
-
-
