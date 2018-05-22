@@ -1,7 +1,7 @@
 [![Travis](https://travis-ci.org/adobe-type-tools/afdko.svg)](https://travis-ci.org/adobe-type-tools/afdko)
-[![Appveyor](https://ci.appveyor.com/api/projects/status/qurx2si4x54b97mt/branch/master?svg=true)](https://ci.appveyor.com/project/adobe-type-tools/afdko/branch/master)
+[![Appveyor](https://ci.appveyor.com/api/projects/status/qurx2si4x54b97mt/branch/develop?svg=true)](https://ci.appveyor.com/project/adobe-type-tools/afdko/branch/develop)
 [![Codacy](https://api.codacy.com/project/badge/Grade/08ceff914833445685924ebb1f040070)](https://www.codacy.com/app/adobe-type-tools/afdko?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=adobe-type-tools/afdko&amp;utm_campaign=Badge_Grade)
-[![Coverage](https://codecov.io/gh/adobe-type-tools/afdko/branch/master/graph/badge.svg)](https://codecov.io/gh/adobe-type-tools/afdko)
+[![Coverage](https://codecov.io/gh/adobe-type-tools/afdko/branch/develop/graph/badge.svg)](https://codecov.io/gh/adobe-type-tools/afdko)
 [![PyPI](https://img.shields.io/pypi/v/afdko.svg)](https://pypi.org/project/afdko)
 
 Adobe Font Development Kit for OpenType (AFDKO)
