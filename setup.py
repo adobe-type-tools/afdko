@@ -171,12 +171,12 @@ def main():
             "Do not recognize target OS: {}".format(platform_system))
     classifiers.extend(more_keywords)
 
-    # concatenate README.rst and NEWS.rest into long_description so they are
+    # concatenate README and NEWS into long_description so they are
     # displayed on the afdko project page on PyPI
     # Copied from fonttools setup.py
-    with io.open("README.rst", encoding="utf-8") as readme:
+    with io.open("README.md", encoding="utf-8") as readme:
         long_description = readme.read()
-    with io.open("NEWS.rst", encoding="utf-8") as changelog:
+    with io.open("NEWS.md", encoding="utf-8") as changelog:
         long_description += changelog.read()
 
     platform_name = get_platform()
@@ -185,6 +185,7 @@ def main():
           use_scm_version=True,
           description="Adobe Font Development Kit for OpenType",
           long_description=long_description,
+          long_description_content_type='text/markdown',
           url='https://github.com/adobe-type-tools/afdko',
           author='Adobe Type team & friends',
           author_email='afdko@adobe.com',
