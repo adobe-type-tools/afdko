@@ -1,16 +1,16 @@
+# Copyright 2014 Adobe . All rights reserved.
 """
-otfPDF v1.5 Nov 30 2010
+otfPDF v1.5.1 May 21 2018
 provides support for the ProofPDF script,  for working with OpenType/CFF
 fonts. Provides an implementation of the fontPDF font object. Cannot be
 run alone.
 """
-__copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-"""
+from __future__ import print_function, absolute_import
 
 from fontTools.pens.boundsPen import BoundsPen, BasePen
 from fontTools.misc.psCharStrings import T2CharString, T2OutlineExtractor
 
-from  fontPDF import FontPDFGlyph, FontPDFFont, FontPDFPoint
+from .fontPDF import FontPDFGlyph, FontPDFFont, FontPDFPoint
 
 class FontPDFPen(BasePen):
 	def __init__(self, glyphSet = None):
@@ -145,7 +145,7 @@ class  txPDFFont(FontPDFFont):
 					baseScript = baseRecord.BaseScript
 					baseLine = baseScript.BaseValues.BaseCoord[baseTagIndex].Coordinate
 					break
-		except KeyError, AttributeError:
+		except (KeyError, AttributeError):
 			topDict = txFont['CFF '].cff.topDictIndex[0]
 			if hasattr(topDict, "ROS"):
 				baseLine = -120

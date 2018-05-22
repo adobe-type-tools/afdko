@@ -16,7 +16,6 @@ Modified 7/25/2006 read rooberts. Added supported for embedding fonts.
 """
 from __future__ import print_function, absolute_import
 
-import string
 import sys
 import time
 
@@ -27,7 +26,7 @@ Log = sys.stderr  # reassign this if you don't want err output to console
 
 try:
     import zlib
-except:
+except ImportError:
     Log.write("zlib not available, page compression not available\n")
 
 ##############################################################
@@ -337,6 +336,7 @@ class PDFDocument:
             font = PDFType1Font('F'+str(fontIndex), psName, encoding, objectNumber, type, firstChar, lastChar, widths)
         return font
 
+
 ##############################################################
 #
 #            Utilities
@@ -354,12 +354,13 @@ class OutputGrabber:
         sys.stdout = self
         self.closed = 0
         self.data = []
+
     def write(self, x):
         if not self.closed:
             self.data.append(x)
 
     def getData(self):
-        return string.join(self.data)
+        return ''.join(self.data)
 
     def close(self):
         sys.stdout = self.oldoutput
@@ -414,14 +415,13 @@ class PDFLiteral(PDFObject):
 class PDFCatalog(PDFObject):
     "requires RefPages and RefOutlines set"
     def __init__(self):
-        self.template = string.join([
+        self.template = LINEEND.join([
                         '<<',
                         '/Type /Catalog',
                         '/Pages %d 0 R',
                         '/Outlines %d 0 R',
                         '>>'
-                        ],LINEEND
-                        )
+                        ])
     def save(self, file):
         file.write(self.template % (self.RefPages, self.RefOutlines) + LINEEND)
 
@@ -439,15 +439,14 @@ class PDFInfo(PDFObject):
         self.datestr = '%04d%02d%02d%02d%02d%02d' % tuple(now[0:6])
 
     def save(self, file):
-        file.write(string.join([
+        file.write(LINEEND.join([
                 "<</Title (%s)",
                 "/Author (%s)",
                 "/CreationDate (D:%s)",
                 "/Producer (PDFgen)",
                 "/Subject (%s)",
                 ">>"
-                ], LINEEND
-            ) % (
+                ]) % (
     pdfutils._escape(self.title),
     pdfutils._escape(self.author),
     self.datestr,
@@ -459,12 +458,11 @@ class PDFInfo(PDFObject):
 class PDFOutline(PDFObject):
     "null outline, does nothing yet"
     def __init__(self):
-        self.template = string.join([
+        self.template = LINEEND.join([
                 '<<',
                 '/Type /Outlines',
                 '/Count 0',
-                '>>'],
-                LINEEND)
+                '>>'])
     def save(self, file):
         file.write(self.template + LINEEND)
 
@@ -484,7 +482,7 @@ class PDFPageCollection(PDFObject):
             lines.append(str(page) + ' 0 R ')
         lines.append(']')
         lines.append('>>')
-        text = string.join(lines, LINEEND)
+        text = LINEEND.join(lines)
         file.write(text + LINEEND)
 
 
@@ -501,7 +499,7 @@ class PDFPage(PDFObject):
         self.pageTransitionString = ''  # presentation effects
         # editors on different systems may put different things in the line end
         # without me noticing.  No triple-quoted strings allowed!
-        self.template = string.join([
+        self.template = LINEEND.join([
                 '<<',
                 '/Type /Page',
                 '/Parent %(parentpos)d 0 R',
@@ -513,11 +511,11 @@ class PDFPage(PDFObject):
                 '/MediaBox [0 0 %(pagewidth)d %(pageheight)d]',  #A4 by default
                 '/Contents %(contentspos)d 0 R',
                 '%(transitionString)s',
-                '>>'],
-            LINEEND)
+                '>>'])
+
     def setCompression(self, onoff=0):
         "Turns page compression on or off"
-        assert onoff in [0,1], "Page compression options are 1=on, 2=off"
+        assert onoff in [0, 1], "Page compression options are 1=on, 2=off"
         self.stream.compression = onoff
 
     def save(self, file):
@@ -537,7 +535,7 @@ class PDFPage(PDFObject):
 
     def setStream(self, data):
         if isinstance(data, list):
-            data = string.join(data, LINEEND)
+            data = LINEEND.join(data)
         self.stream.setStream(data)
 
 TestStream = "BT /F6 24 Tf 80 672 Td 24 TL (   ) Tj T* ET"
@@ -581,7 +579,7 @@ class PDFStream(PDFObject):
 class PDFImage(PDFObject):
     # sample one while developing.  Currently, images go in a literals
     def save(self, file):
-        file.write(string.join([
+        file.write(LINEEND.join([
                 '<<',
                 '/Type /XObject',
                 '/Subtype /Image',
@@ -600,7 +598,7 @@ class PDFImage(PDFObject):
                 '1E1800 1FF800>',
                 'endstream',
                 'endobj'
-                ], LINEEND) + LINEEND)
+                ]) + LINEEND)
 
 class PDFEmbddedFont(PDFStream):
     def __init__(self, fontStreamType):
@@ -686,15 +684,11 @@ class PDFontDescriptor(PDFObject):
 
 def MakeFontDictionary(fontMapping):
     # fontMapping[psName] = [fontIndex, pdfFont, objIndex]
-    dict = "  <<" + LINEEND
-    entries = fontMapping.values()
-    entries.sort() # sorts by font index.
+    dict_ = "  <<" + LINEEND
+    entries = sorted(fontMapping.values())
     for entry in entries:
-       objectPos = entry[2]
-       pdfFont = entry[1]
-       dict = dict + '\t\t/%s %d 0 R ' % (pdfFont.keyname, objectPos) + LINEEND
-    dict = dict + "\t\t>>" + LINEEND
-    return dict
-
-if __name__ == '__main__':
-    print('For test scripts, run test1.py to test6.py')
+        objectPos = entry[2]
+        pdfFont = entry[1]
+        dict_ = dict_ + '\t\t/%s %d 0 R ' % (pdfFont.keyname, objectPos) + LINEEND
+    dict_ = dict_ + "\t\t>>" + LINEEND
+    return dict_

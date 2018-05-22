@@ -24,8 +24,7 @@ Postscript font names within this module, but have not yet done so.
 13th June 1999
 """
 # 1
-import string
-
+from __future__ import print_function, absolute_import
 
 
 StandardEnglishFonts = [
@@ -48,6 +47,7 @@ widths = {'courier': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 
 ascent_descent = {'Courier': (629, -157), 'Courier-Bold': (626, -142), 'Courier-BoldOblique': (626, -142), 'Courier-Oblique': (629, -157), 'Helvetica': (718, -207), 'Helvetica-Bold': (718, -207), 'Helvetica-BoldOblique': (718, -207), 'Helvetica-Oblique': (718, -207), 'Symbol': (0, 0), 'Times-Bold': (676, -205), 'Times-BoldItalic': (699, -205), 'Times-Italic': (683, -205), 'Times-Roman': (683, -217), 'ZapfDingbats': (0, 0)}
 
+
 def parseAFMfile(filename):
     """Returns an array holding the widths of all characters in the font.
     Ultra-crude parser"""
@@ -56,25 +56,25 @@ def parseAFMfile(filename):
     metriclines = []
     between = 0
     for line in alllines:
-        if string.find(string.lower(line), 'endcharmetrics') > -1:
+        if 'endcharmetrics' in line.lower():
             between = 0
             break
         if between:
             metriclines.append(line)
-        if string.find(string.lower(line), 'startcharmetrics') > -1:
+        if 'startcharmetrics' in line.lower():
             between = 1
 
     # break up - very shaky assumption about array size
     widths = [0] * 255
 
     for line in metriclines:
-        chunks = string.split(line, ';')
+        chunks = line.split(';')
 
-        (c, cid) = string.split(chunks[0])
-        (wx, width) = string.split(chunks[1])
-        #(n, name) = string.split(chunks[2])
-        #(b, x1, y1, x2, y2) = string.split(chunks[3])
-        widths[string.atoi(cid)] = string.atoi(width)
+        c, cid = chunks[0].split()
+        wx, width = chunks[1].split()
+        # n, name = chunks[2].split()
+        # b, x1, y1, x2, y2 = chunks[3].split()
+        widths[int(cid)] = int(width)
 
     # by default, any empties should get the width of a space
     for i in range(len(widths)):
@@ -94,7 +94,7 @@ class FontCache:
 
     def loadfont(self, fontname):
         filename = AFMDIR + os.sep + fontname + '.afm'
-        print 'cache loading',filename
+        print('cache loading', filename)
         assert os.path.exists(filename)
         widths = parseAFMfile(filename)
         self.__widtharrays[fontname] = widths
@@ -108,12 +108,11 @@ class FontCache:
                 return self.__widtharrays[fontname]
             except:
                 # font not found, use Courier
-                print 'Font',fontname,'not found - using Courier for widths'
+                print('Font', fontname, 'not found - using Courier for widths')
                 return self.getfont('courier')
 
-
     def stringwidth(self, text, font):
-        widths = self.getfont(string.lower(font))
+        widths = self.getfont(font.lower())
         w = 0
         for char in text:
             w = w + widths[ord(char)]

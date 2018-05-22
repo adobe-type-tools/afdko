@@ -1,9 +1,13 @@
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
 # 1
+from __future__ import print_function, absolute_import
+
 import os
-import string
-import cStringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 LINEEND = '\015\012'
 
@@ -32,9 +36,9 @@ def cacheImageFile(filename):
     encoded = _AsciiBase85Encode(compressed) #...sadly this isn't
 
     #write in blocks of 60 characters per line
-    outstream = cStringIO.StringIO(encoded)
+    outstream = StringIO(encoded)
     dataline = outstream.read(60)
-    while dataline <> "":
+    while dataline != "":
         code.append(dataline)
         dataline = outstream.read(60)
 
@@ -43,9 +47,9 @@ def cacheImageFile(filename):
     #save it to a file
     cachedname = os.path.splitext(filename)[0] + '.a85'
     f = open(cachedname,'wb')
-    f.write(string.join(code, LINEEND)+LINEEND)
+    f.write(LINEEND.join(code) + LINEEND)
     f.close()
-    print 'cached image as %s' % cachedname
+    print('cached image as %s' % cachedname)
 
 
 def preProcessImages(spec):
@@ -61,7 +65,7 @@ def preProcessImages(spec):
 
     for filename in filelist:
         if cachedImageExists(filename):
-            print 'cached version of %s already exists' % filename
+            print('cached version of %s already exists' % filename)
         else:
             cacheImageFile(filename)
 
@@ -93,64 +97,64 @@ def _escape(s):
     need slashes before them too. Use Python's repr function
     and chop off the quotes first"""
     s = repr(s)[1:-1]
-    s = string.replace(s, '(','\(')
-    s = string.replace(s, ')','\)')
+    s = s.replace('(', '\(')
+    s = s.replace(')', '\)')
     return s
 
 
 def _normalizeLineEnds(text,desired=LINEEND):
     """ensures all instances of CR, LF and CRLF end up as the specified one"""
     unlikely = '\000\001\002\003'
-    text = string.replace(text, '\015\012', unlikely)
-    text = string.replace(text, '\015', unlikely)
-    text = string.replace(text, '\012', unlikely)
-    text = string.replace(text, unlikely, desired)
+    text = text.replace('\015\012', unlikely)
+    text = text.replace('\015', unlikely)
+    text = text.replace('\012', unlikely)
+    text = text.replace(unlikely, desired)
     return text
 
 def _AsciiHexEncode(input):
     """This is a verbose encoding used for binary data within
     a PDF file.  One byte binary becomes two bytes of ASCII."""
     "Helper function used by images"
-    output = cStringIO.StringIO()
+    output = StringIO()
     for char in input:
         output.write('%02x' % ord(char))
     output.write('>')
-    output.reset()
+    output.seek(0)
     return output.read()
 
 def _AsciiHexDecode(input):
     "Not used except to provide a test of the preceding"
     #strip out all whitespace
-    stripped = string.join(string.split(input),'')
+    stripped = ''.join(input.split())
     assert stripped[-1] == '>', 'Invalid terminator for Ascii Hex Stream'
     stripped = stripped[:-1]  #chop off terminator
     assert len(stripped) % 2 == 0, 'Ascii Hex stream has odd number of bytes'
     i = 0
-    output = cStringIO.StringIO()
+    output = StringIO()
     while i < len(stripped):
         twobytes = stripped[i:i+2]
         output.write(chr(eval('0x'+twobytes)))
         i = i + 2
-    output.reset()
+    output.seek(0)
     return output.read()
 
 def _AsciiHexTest(text='What is the average velocity of a sparrow?'):
     "Do the obvious test for whether Ascii Hex encoding works"
-    print 'Plain text:', text
+    print('Plain text:', text)
     encoded = _AsciiHexEncode(text)
-    print 'Encoded:', encoded
+    print('Encoded:', encoded)
     decoded = _AsciiHexDecode(encoded)
-    print 'Decoded:', decoded
+    print('Decoded:', decoded)
     if decoded == text:
-        print 'Passed'
+        print('Passed')
     else:
-        print 'Failed!'
+        print('Failed!')
 
 def _AsciiBase85Encode(input):
     """This is a compact encoding used for binary data within
     a PDF file.  Four bytes of binary data become five bytes of
     ASCII.  This is the default method used for encoding images."""
-    outstream = cStringIO.StringIO()
+    outstream = StringIO()
     # special rules apply if not a multiple of four bytes.
     whole_word_count, remainder_size = divmod(len(input), 4)
     cut = 4 * whole_word_count
@@ -163,7 +167,7 @@ def _AsciiBase85Encode(input):
         b3 = ord(body[offset+2])
         b4 = ord(body[offset+3])
 
-        num = 16777216L * b1 + 65536 * b2 + 256 * b3 + b4
+        num = 16777216 * b1 + 65536 * b2 + 256 * b3 + b4
 
         if num == 0:
             #special case
@@ -194,7 +198,7 @@ def _AsciiBase85Encode(input):
         b3 = ord(lastbit[2])
         b4 = ord(lastbit[3])
 
-        num = 16777216L * b1 + 65536 * b2 + 256 * b3 + b4
+        num = 16777216 * b1 + 65536 * b2 + 256 * b3 + b4
 
         #solve for c1..c5
         temp, c5 = divmod(num, 85)
@@ -210,26 +214,26 @@ def _AsciiBase85Encode(input):
 
     #terminator code for ascii 85
     outstream.write('~>')
-    outstream.reset()
+    outstream.seek(0)
     return outstream.read()
 
 
 def _AsciiBase85Decode(input):
     """This is not used - Acrobat Reader decodes for you - but a round
     trip is essential for testing."""
-    outstream = cStringIO.StringIO()
+    outstream = StringIO()
     #strip all whitespace
-    stripped = string.join(string.split(input),'')
+    stripped = ''.join(input.split())
     #check end
     assert stripped[-2:] == '~>', 'Invalid terminator for Ascii Base 85 Stream'
     stripped = stripped[:-2]  #chop off terminator
 
     #may have 'z' in it which complicates matters - expand them
-    stripped = string.replace(stripped,'z','!!!!!')
+    stripped = stripped.replace('z', '!!!!!')
     # special rules apply if not a multiple of five bytes.
     whole_word_count, remainder_size = divmod(len(stripped), 5)
     #print '%d words, %d leftover' % (whole_word_count, remainder_size)
-    assert remainder_size <> 1, 'invalid Ascii 85 stream!'
+    assert remainder_size != 1, 'invalid Ascii 85 stream!'
     cut = 5 * whole_word_count
     body, lastbit = stripped[0:cut], stripped[cut:]
 
@@ -282,7 +286,7 @@ def _AsciiBase85Decode(input):
         outstream.write(lastword)
 
     #terminator code for ascii 85
-    outstream.reset()
+    outstream.seek(0)
     return outstream.read()
 
 def _wrap(input, columns=60):
@@ -295,20 +299,18 @@ def _wrap(input, columns=60):
         i = i + 1
         pos = columns * i
 
-    return string.join(output, LINEEND)
+    return LINEEND.join(output)
 
 
 
 def _AsciiBase85Test(text='What is the average velocity of a sparrow?'):
     "Do the obvious test for whether Base 85 encoding works"
-    print 'Plain text:', text
+    print('Plain text:', text)
     encoded = _AsciiBase85Encode(text)
-    print 'Encoded:', encoded
+    print('Encoded:', encoded)
     decoded = _AsciiBase85Decode(encoded)
-    print 'Decoded:', decoded
+    print('Decoded:', decoded)
     if decoded == text:
-        print 'Passed'
+        print('Passed')
     else:
-        print 'Failed!'
-
-
+        print('Failed!')
