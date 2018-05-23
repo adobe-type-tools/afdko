@@ -1507,7 +1507,6 @@ static void proofSinglePos2(SinglePosFormat2 *fmt, IntX glyphtoproof)
 	  ttoEnumerateCoverage(fmt->Coverage, fmt->_Coverage, &CovList, &nitems);
 	  for ((glyphtoproof!=-1)?(i=glyphtoproof):(i = 0); (glyphtoproof!=-1)?(i<=glyphtoproof):(i < (IntX)nitems); i++) 
 		{
-		  char name[MAX_NAME_LEN];
 		  char label[80];
 		  GlyphId glyphId = *da_INDEX(CovList.glyphidlist, i);
 		  if (glyphtoproof ==-1 && !opt_Present("-f")) {
@@ -1520,6 +1519,7 @@ static void proofSinglePos2(SinglePosFormat2 *fmt, IntX glyphtoproof)
 				proofRec->vert=proofIsVerticalMode();
 				curproofrec++;
 		  }else{
+			  char name[MAX_NAME_LEN];
 			  strcpy(name, getGlyphName(glyphId, 1));
 			  xpla = fmt->Value[i].XPlacement;
 			  ypla = fmt->Value[i].YPlacement;
