@@ -59,10 +59,10 @@ def test_dump_gpos_equal_5():
 
 # Segmentation fault: 11
 # https://github.com/adobe-type-tools/afdko/issues/371
-# def test_dump_gpos_equal_6():
-#     actual_path = runner(CMD + ['-r', '-o', 't', '_GPOS=6', '-f', BLACK])
-#     expected_path = _get_expected_path('dump_GPOS=6.txt')
-#     assert differ([expected_path, actual_path]) is True
+def test_dump_gpos_equal_6():
+    actual_path = runner(CMD + ['-r', '-o', 't', '_GPOS=6', '-f', BLACK])
+    expected_path = _get_expected_path('dump_GPOS=6.txt')
+    assert differ([expected_path, actual_path]) is True
 
 
 def test_dump_gpos_equal_7():
@@ -110,11 +110,11 @@ def test_bug373_dump_gsub_equal_7_long_glyph_name_otf():
 
 # Abort trap: 6
 # https://github.com/adobe-type-tools/afdko/issues/373
-# def test_bug373_dump_gsub_equal_7_long_glyph_name_ttf():
-#     actual_path = runner(CMD + ['-r', '-o', 't', '_GSUB=7',
-#                                 '-f', 'long_glyph_name.ttf'])
-#     expected_path = _get_expected_path('bug373_ttf.txt')
-#     assert differ([expected_path, actual_path]) is True
+def test_bug373_dump_gsub_equal_7_long_glyph_name_ttf():
+    actual_path = runner(CMD + ['-r', '-o', 't', '_GSUB=7',
+                                '-f', 'long_glyph_name.ttf'])
+    expected_path = _get_expected_path('bug373_ttf.txt')
+    assert differ([expected_path, actual_path]) is True
 
 
 def test_dump_cmap_equal_5():
