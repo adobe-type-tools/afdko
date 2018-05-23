@@ -1,42 +1,44 @@
+# Copyright 2014 Adobe . All rights reserved.
 """
-otfPDF v1.5 Nov 30 2010
+otfPDF v1.5.1 May 21 2018
 provides support for the ProofPDF script,  for working with OpenType/CFF
 fonts. Provides an implementation of the fontPDF font object. Cannot be
 run alone.
 """
-__copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-"""
+from __future__ import print_function, absolute_import
 
 from fontTools.pens.boundsPen import BoundsPen, BasePen
-from fontTools.misc.psCharStrings import T2CharString, T2OutlineExtractor
+from fontTools.misc.psCharStrings import T2OutlineExtractor
 
-from  fontPDF import FontPDFGlyph, FontPDFFont, FontPDFPoint
+from .fontPDF import FontPDFGlyph, FontPDFFont, FontPDFPoint
+
 
 class FontPDFPen(BasePen):
-	def __init__(self, glyphSet = None):
+	def __init__(self, glyphSet=None):
 		BasePen.__init__(self, glyphSet)
 		self.pathList = []
-		self.numMT = self.numLT =  self.numCT = self.numPaths = self.total = 0 # These all get set when thge outline is drawn.
-		self.curPt = [0,0]
+		# These all get set when the outline is drawn
+		self.numMT = self.numLT = self.numCT = self.numPaths = self.total = 0
+		self.curPt = [0, 0]
 		self.noPath = 1
 
 	def _moveTo(self, pt):
 		if self.noPath:
 			self.pathList.append([])
-		self.noPath  = 0
+		self.noPath = 0
 		self.numMT +=1
-		pdfPoint = FontPDFPoint(FontPDFPoint.MT,  pt, index = self.total )
+		pdfPoint = FontPDFPoint(FontPDFPoint.MT, pt, index=self.total)
 		self.total += 1
 		self.curPt = pt
-		curPath = self.pathList[-1] 
+		curPath = self.pathList[-1]
 		curPath.append(pdfPoint)
 
 	def _lineTo(self, pt):
 		if self.noPath:
 			self.pathList.append([])
-		self.noPath  = 0
+		self.noPath = 0
 		self.numLT += 1
-		pdfPoint = FontPDFPoint(FontPDFPoint.LT,  pt, index = self.total)
+		pdfPoint = FontPDFPoint(FontPDFPoint.LT, pt, index=self.total)
 		self.total += 1
 		self.pathList[-1].append(pdfPoint)
 		self.curPt = pt
@@ -45,7 +47,8 @@ class FontPDFPen(BasePen):
 		if self.noPath:
 			self.pathList.append([])
 		self.numCT += 1
-		pdfPoint = FontPDFPoint(FontPDFPoint.CT,  pt3, pt1, pt2, index = self.total )
+		pdfPoint = FontPDFPoint(
+			FontPDFPoint.CT, pt3, pt1, pt2, index=self.total)
 		self.total += 1
 		self.pathList[-1].append(pdfPoint)
 		self.curPt = pt3
@@ -53,28 +56,23 @@ class FontPDFPen(BasePen):
 	def _closePath(self):
 		self.numPaths += 1
 		self.noPath = 1
-		curPath = self.pathList[-1] 
-
-		#if self.curPt != curPath[0].pt0:
-		#	curPath.append( FontPDFPoint(FontPDFPoint.LT,  curPath[0].pt0, index = self.total))
-		#	self.total += 1
 
 	def _endPath(self):
 		self.numPaths += 1
 
 
-class  txPDFFont(FontPDFFont):
+class txPDFFont(FontPDFFont):
 
 	def __init__(self, clientFont, params):
 		self.clientFont = clientFont
-		if params.userBaseLine != None:
+		if params.userBaseLine is not None:
 			self.baseLine = params.userBaseLine
 		else:
 			self.baseLine = None
 		self.path = params.rt_filePath
 		self.isCID = 0
-		self.psName = None;
-		self.OTVersion = None;
+		self.psName = None
+		self.OTVersion = None
 		self.emSquare = None
 		self.bbox = None
 		self.ascent = None
@@ -96,23 +94,23 @@ class  txPDFFont(FontPDFFont):
 
 	def clientGetOTVersion(self):
 		try:
-			version =  self.clientFont['head'].fontRevision
+			version = self.clientFont['head'].fontRevision
 		except KeyError:
-			# Maybe its a dummy OTF made from a Type 1 font, and has only a CFF table.
+			# Maybe its a dummy OTF made from a Type 1 font,
+			# and has only a CFF table.
 			try:
 				topDict = self.clientFont['CFF '].cff.topDictIndex[0]
 				if hasattr(topDict, "ROS"):
-					version = topDict.CIDFontVersion # a number
+					version = topDict.CIDFontVersion  # a number
 				else:
-					version = topDict.version # a string
+					version = topDict.version  # a string
 					version = eval(version)
 			except AttributeError:
 				version = 1.0
-			
+
 		majorVersion = int(version)
 		minorVersion = str(int( 1000*(0.0005 + version -majorVersion) )).zfill(3)
 		versionString = "%s.%s" % (majorVersion, minorVersion)
-		#print versionString
 		return versionString
 
 	def clientGetGlyph(self, glyphName):
@@ -122,11 +120,12 @@ class  txPDFFont(FontPDFFont):
 		try:
 			emSquare =  self.clientFont['head'].unitsPerEm
 		except KeyError:
-			# Maybe its a dummy OTF made from a Type 1 font, and has only a CFF table.
+			# Maybe its a dummy OTF made from a Type 1 font,
+			# and has only a CFF table.
 			topDict = self.clientFont['CFF '].cff.topDictIndex[0]
 			scale = topDict.FontMatrix[0]
 			emSquare = int(0.5 + 1/scale)
-		return emSquare 
+		return emSquare
 
 	def clientGetBaseline(self):
 		baseLine = 0
@@ -145,14 +144,14 @@ class  txPDFFont(FontPDFFont):
 					baseScript = baseRecord.BaseScript
 					baseLine = baseScript.BaseValues.BaseCoord[baseTagIndex].Coordinate
 					break
-		except KeyError, AttributeError:
+		except (KeyError, AttributeError):
 			topDict = txFont['CFF '].cff.topDictIndex[0]
 			if hasattr(topDict, "ROS"):
 				baseLine = -120
 			else:
 				baseLine = 0
-				
-		return baseLine 
+
+		return baseLine
 
 	def clientGetBBox(self):
 		try:
@@ -163,7 +162,7 @@ class  txPDFFont(FontPDFFont):
 			topDict = self.clientFont['CFF '].cff.topDictIndex[0]
 			bbox = topDict.FontBBox
 			return [bbox[0], bbox[1], bbox[2], bbox[3]]
-			
+
 	def clientGetBlueZones(self):
 		blueValues = []
 		txFont = self.clientFont
@@ -180,22 +179,21 @@ class  txPDFFont(FontPDFFont):
 				blueList.append( (rawBlueList[i], rawBlueList[i+1]) )
 			blueValues.append(blueList)
 		return blueValues
-		
+
 	def clientGetAscentDescent(self):
-		txFont = self.clientFont
 		try:
-			os2Table =  self.clientFont['OS/2']
+			os2Table = self.clientFont['OS/2']
 			return os2Table.sTypoAscender, os2Table.sTypoDescender
 		except KeyError:
 			return None, None
-		
 
-def hintOn( i, hintMaskBytes):
+
+def hintOn(i, hintMaskBytes):
 	# used to add the active hints to the bez string, when a  T2 hintmask operator is encountered.
-	byteIndex = i/8
-	byteValue =  ord(hintMaskBytes[byteIndex])
-	offset = 7 -  (i %8)
-	return ((2**offset) & byteValue) > 0
+	byteIndex = i / 8
+	byteValue = ord(hintMaskBytes[byteIndex])
+	offset = 7 - (i % 8)
+	return ((2 ** offset) & byteValue) > 0
 
 
 class FontPDFT2OutlineExtractor(T2OutlineExtractor):
@@ -261,7 +259,7 @@ class FontPDFT2OutlineExtractor(T2OutlineExtractor):
 
 		for i in range(numhhints):
 			if hintOn(i, hintMaskBytes):
-				curhhints.append(i)	
+				curhhints.append(i)
 		numvhints = len(self.vhints)
 		for i in range(numvhints):
 			if hintOn(i + numhhints, hintMaskBytes):
@@ -269,7 +267,6 @@ class FontPDFT2OutlineExtractor(T2OutlineExtractor):
 		return curhhints, curvhints
 
 	def doMask(self, index, maskCommand):
-		args = []
 		if not self.hintMaskBytes:
 			args = self.popallWidth()
 			if args:
@@ -280,8 +277,6 @@ class FontPDFT2OutlineExtractor(T2OutlineExtractor):
 		self.hintMaskString, index = self.callingStack[-1].getBytes(index, self.hintMaskBytes)
 
 		curhhints, curvhints = self.getCurHints( self.hintMaskString)
-		strout = ""
-		mask = [strout + hex(ord(ch)) for ch in self.hintMaskString]
 
 		self.hintTable.append([curhhints,curvhints, self.pen.total])
 
@@ -289,7 +284,6 @@ class FontPDFT2OutlineExtractor(T2OutlineExtractor):
 
 	def countHints(self, args):
 		self.hintCount = self.hintCount + len(args) / 2
-
 
 
 def drawCharString(charString, pen):
@@ -316,7 +310,7 @@ class  txPDFGlyph(FontPDFGlyph):
 				txFont.vorg = txFont['VORG']
 			except KeyError:
 				txFont.vorg = None
-		
+
 		fTopDict = txFont['CFF '].cff.topDictIndex[0]
 		self.isCID = self.parentFont.isCID
 		charstring = fTopDict.CharStrings[self.name]
@@ -353,7 +347,7 @@ class  txPDFGlyph(FontPDFGlyph):
 		self.BBox = pen.bounds
 		if not self.BBox :
 			self.BBox  = [0,0,0,0]
-			
+
 		self.yOrigin = self.parentFont.emSquare + self.parentFont.getBaseLine()
 		if txFont.vorg:
 			try:
@@ -372,21 +366,16 @@ class  txPDFGlyph(FontPDFGlyph):
 				mtx = txFont.vmetrics[self.name]
 				self.yAdvance = mtx[0]
 				self.tsb = mtx[1]
-				haveVMTX =1 
+				haveVMTX =1
 			except KeyError:
 				pass
 		if not haveVMTX:
 			self.yAdvance = self.parentFont.getEmSquare()
 			self.tsb = self.yOrigin - self.BBox[3] + self.parentFont.getBaseLine()
-		
-
 
 		# Get the fdIndex, so we can laterdetermine which set of blue values to use.
-		self.fdIndex = 0	
+		self.fdIndex = 0
 		if hasattr(fTopDict, "ROS"):
 			gid =  fTopDict.CharStrings.charStrings[self.name]
 			self.fdIndex = fTopDict.FDSelect[gid]
 		return
-
-
-
