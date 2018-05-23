@@ -3,6 +3,7 @@
 # 1
 from __future__ import print_function, absolute_import
 
+import glob
 import os
 try:
     from StringIO import StringIO
@@ -57,8 +58,7 @@ def preProcessImages(spec):
     of image filenames, crunches them all to save time.  Run this
     to save huge amounts of time when repeatedly building image
     documents."""
-    import types
-    if type(spec) is types.StringType:
+    if isinstance(spec, str):
         filelist = glob.glob(spec)
     else:  #list or tuple OK
         filelist = spec

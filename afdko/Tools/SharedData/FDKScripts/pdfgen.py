@@ -225,15 +225,13 @@ class Canvas:
         else:
             self._doc.SaveToFile(self._filename)
 
-
     def setPageSize(self, size):
         """accepts a 2-tuple in points for paper size for this
         and subsequent pages"""
         self._pagesize = size
 
-
     def addLiteral(self, s, escaped=1):
-        if escaped==0:
+        if escaped == 0:
             s = self._escape(s)
         self._code.append(s)
 
@@ -399,7 +397,6 @@ class Canvas:
 
     def circle(self, x_cen, y_cen, r, stroke=1, fill=0):
         """special case of ellipse"""
-
         x1 = x_cen - r
         x2 = x_cen + r
         y1 = y_cen - r
@@ -477,22 +474,24 @@ class Canvas:
         """Draws a string right-aligned with the y coordinate.  I
         am British so the spelling is correct, OK?"""
         width = self.stringWidth(text, self._fontname, self._fontsize)
-        t = self.beginText(x - 0.5*width, y)
+        t = self.beginText(x - 0.5 * width, y)
         t.textLine(text)
         self.drawText(t)
 
     def getAvailableFonts(self):
         """Returns the list of PostScript font names available.
         Standard set now, but may grow in future with font embedding."""
-        fontEntries = self._doc.getAvailableFonts()
-        fontEntries.sort()
-        return fontEntries # list of (psName, Encoding)
+        fontEntries = sorted(self._doc.getAvailableFonts())
+        return fontEntries  # list of (psName, Encoding)
 
-    def addFont(self, psfontname, encoding=None, clientCtx=None, getFontDescriptor=None, getEncodingInfo=None):
-    	self._doc.addFont(psfontname, encoding, clientCtx, getFontDescriptor, getEncodingInfo) # this function will not add the font or font decriptor if theu already exists.
+    def addFont(self, psfontname, encoding=None, clientCtx=None,
+                getFontDescriptor=None, getEncodingInfo=None):
+        # this function will not add the font or
+        # font descriptor if they already exist
+        self._doc.addFont(psfontname, encoding, clientCtx, getFontDescriptor,
+                          getEncodingInfo)
 
-
-    def setFont(self, psfontname, size, leading = None, encoding = None):
+    def setFont(self, psfontname, size, leading=None, encoding=None):
         """Sets the font.  If leading not specified, defaults to 1.2 x
         font size. Raises a readable exception if an illegal font
         is supplied.  Font names are case-sensitive! Keeps track
@@ -530,7 +529,7 @@ class Canvas:
         self._miterLimit = limit
         self._code.append('%0.4f M' % limit)
 
-    def setDash(self, array=[], phase=0):
+    def setDash(self, array=None, phase=0):
         """Two notations.  pass two numbers, or an array and phase"""
         if isinstance(array, int) or isinstance(array, float):
             self._code.append('[%s %s] 0 d' % (array, phase))
@@ -602,7 +601,7 @@ class Canvas:
                     colorSpace = 'DeviceRGB'
                 else: #maybe should generate an error, is this right for CMYK?
                     colorSpace = 'DeviceCMYK'
-                imageFile.seek(0)		#reset file pointer
+                imageFile.seek(0)  # reset file pointer
                 imagedata = []
                 imagedata.append('BI')   # begin image
                 # this describes what is in the image itself
@@ -723,7 +722,6 @@ class Canvas:
                 y = struct.unpack('B', image.read(1))
                 color = y[0]
                 return width, height, color
-                done = 1
             elif x[0] in unsupportedMarkers:
                 raise PDFError('Unsupported JPEG marker: %0.2x' % x[0])
             elif x[0] not in noParamMarkers:
@@ -740,9 +738,8 @@ class Canvas:
         is next called."""
         self._pageCompression = onoff
 
-
     def setPageTransition(self, effectname=None, duration=1,
-                        direction=0,dimension='H',motion='I'):
+                          direction=0, dimension='H', motion='I'):
         """PDF allows page transition effects for use when giving
         presentations.  There are six possible effects.  You can
         just guive the effect name, or supply more advanced options
@@ -790,25 +787,18 @@ class Canvas:
             'Split': [direction_arg, motion_arg],
             'Blinds': [dimension_arg],
             'Box': [motion_arg],
-            'Wipe' : [direction_arg],
-            'Dissolve' : [],
-            'Glitter':[direction_arg]
+            'Wipe': [direction_arg],
+            'Dissolve': [],
+            'Glitter': [direction_arg]
             }
 
         try:
             args = PageTransitionEffects[effectname]
         except KeyError:
             raise PDFError('Unknown Effect Name "%s"' % effectname)
-            self._pageTransitionString = ''
-            return
-
 
         self._pageTransitionString = (('/Trans <</D %d /S /%s ' % (duration, effectname)) +
             ' '.join(args) + ' >>')
-
-
-
-
 
 
 class PDFPathObject:
@@ -872,10 +862,6 @@ class PDFPathObject:
 
     def circle(self, x_cen, y_cen, r):
         """adds a circle to the path"""
-        x1 = x_cen - r
-        x2 = x_cen + r
-        y1 = y_cen - r
-        y2 = y_cen + r
         self.ellipse(x_cen - r, y_cen - r, x_cen + r, y_cen + r)
 
     def close(self):
@@ -948,7 +934,7 @@ class PDFTextObject:
         """Returns current y position relative to the last origin."""
         return self._y
 
-    def setFont(self, psfontname, size, leading = None):
+    def setFont(self, psfontname, size, leading=None):
         """Sets the font.  If leading not specified, defaults to 1.2 x
         font size. Raises a readable exception if an illegal font
         is supplied.  Font names are case-sensitive! Keeps track
@@ -961,11 +947,10 @@ class PDFTextObject:
         self._leading = leading
         self._code.append('%s %0.1f Tf %0.1f TL' % (pdffontname, size, leading))
 
-
     def setCharSpace(self, charSpace):
-         """Adjusts inter-character spacing"""
-         self._charSpace = charSpace
-         self._code.append('%0.4f Tc' % charSpace)
+        """Adjusts inter-character spacing"""
+        self._charSpace = charSpace
+        self._code.append('%0.4f Tc' % charSpace)
 
     def setWordSpace(self, wordSpace):
         """Adjust inter-word spacing.  This can be used

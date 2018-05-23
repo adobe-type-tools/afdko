@@ -56,7 +56,6 @@ class FontPDFPen(BasePen):
 	def _closePath(self):
 		self.numPaths += 1
 		self.noPath = 1
-		curPath = self.pathList[-1]
 
 	def _endPath(self):
 		self.numPaths += 1
@@ -66,14 +65,14 @@ class txPDFFont(FontPDFFont):
 
 	def __init__(self, clientFont, params):
 		self.clientFont = clientFont
-		if params.userBaseLine != None:
+		if params.userBaseLine is not None:
 			self.baseLine = params.userBaseLine
 		else:
 			self.baseLine = None
 		self.path = params.rt_filePath
 		self.isCID = 0
-		self.psName = None;
-		self.OTVersion = None;
+		self.psName = None
+		self.OTVersion = None
 		self.emSquare = None
 		self.bbox = None
 		self.ascent = None
@@ -95,15 +94,16 @@ class txPDFFont(FontPDFFont):
 
 	def clientGetOTVersion(self):
 		try:
-			version =  self.clientFont['head'].fontRevision
+			version = self.clientFont['head'].fontRevision
 		except KeyError:
-			# Maybe its a dummy OTF made from a Type 1 font, and has only a CFF table.
+			# Maybe its a dummy OTF made from a Type 1 font,
+			# and has only a CFF table.
 			try:
 				topDict = self.clientFont['CFF '].cff.topDictIndex[0]
 				if hasattr(topDict, "ROS"):
-					version = topDict.CIDFontVersion # a number
+					version = topDict.CIDFontVersion  # a number
 				else:
-					version = topDict.version # a string
+					version = topDict.version  # a string
 					version = eval(version)
 			except AttributeError:
 				version = 1.0
@@ -111,7 +111,6 @@ class txPDFFont(FontPDFFont):
 		majorVersion = int(version)
 		minorVersion = str(int( 1000*(0.0005 + version -majorVersion) )).zfill(3)
 		versionString = "%s.%s" % (majorVersion, minorVersion)
-		#print versionString
 		return versionString
 
 	def clientGetGlyph(self, glyphName):
@@ -121,7 +120,8 @@ class txPDFFont(FontPDFFont):
 		try:
 			emSquare =  self.clientFont['head'].unitsPerEm
 		except KeyError:
-			# Maybe its a dummy OTF made from a Type 1 font, and has only a CFF table.
+			# Maybe its a dummy OTF made from a Type 1 font,
+			# and has only a CFF table.
 			topDict = self.clientFont['CFF '].cff.topDictIndex[0]
 			scale = topDict.FontMatrix[0]
 			emSquare = int(0.5 + 1/scale)
@@ -181,7 +181,6 @@ class txPDFFont(FontPDFFont):
 		return blueValues
 
 	def clientGetAscentDescent(self):
-		txFont = self.clientFont
 		try:
 			os2Table = self.clientFont['OS/2']
 			return os2Table.sTypoAscender, os2Table.sTypoDescender
@@ -268,7 +267,6 @@ class FontPDFT2OutlineExtractor(T2OutlineExtractor):
 		return curhhints, curvhints
 
 	def doMask(self, index, maskCommand):
-		args = []
 		if not self.hintMaskBytes:
 			args = self.popallWidth()
 			if args:
@@ -279,8 +277,6 @@ class FontPDFT2OutlineExtractor(T2OutlineExtractor):
 		self.hintMaskString, index = self.callingStack[-1].getBytes(index, self.hintMaskBytes)
 
 		curhhints, curvhints = self.getCurHints( self.hintMaskString)
-		strout = ""
-		mask = [strout + hex(ord(ch)) for ch in self.hintMaskString]
 
 		self.hintTable.append([curhhints,curvhints, self.pen.total])
 
