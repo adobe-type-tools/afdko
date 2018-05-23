@@ -24,82 +24,82 @@ def _get_expected_path(file_name):
 # Tests
 # -----
 
-# def test_dump_otf():
-#     with tempfile.NamedTemporaryFile(delete=False) as tmp:
-#         runner(CMD + ['-o', 'o{}'.format(tmp.name),
-#                       '-f', OTF_FONT, '-n'])
-#         expected_path = _get_expected_path('OTF.ttx')
-#         assert differ([expected_path, tmp.name,
-#                        '-s', '<ttFont sfntVersion']) is True
+def test_dump_otf():
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        runner(CMD + ['-o', 'o{}'.format(tmp.name),
+                      '-f', OTF_FONT, '-n'])
+        expected_path = _get_expected_path('OTF.ttx')
+        assert differ([expected_path, tmp.name,
+                       '-s', '<ttFont sfntVersion']) is True
 
 
-# def test_dump_otf_no_hints():
-#     with tempfile.NamedTemporaryFile(delete=False) as tmp:
-#         runner(CMD + ['-o', 'nh', 'o{}'.format(tmp.name),
-#                       '-f', OTF_FONT, '-n'])
-#         expected_path = _get_expected_path('OTF_no_hints.ttx')
-#         assert differ([expected_path, tmp.name,
-#                        '-s', '<ttFont sfntVersion']) is True
+def test_dump_otf_no_hints():
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        runner(CMD + ['-o', 'nh', 'o{}'.format(tmp.name),
+                      '-f', OTF_FONT, '-n'])
+        expected_path = _get_expected_path('OTF_no_hints.ttx')
+        assert differ([expected_path, tmp.name,
+                       '-s', '<ttFont sfntVersion']) is True
 
 
-# def test_dump_otf_gpos_only():
-#     with tempfile.NamedTemporaryFile(delete=False) as tmp:
-#         runner(CMD + ['-o', 'tGPOS', 'o{}'.format(tmp.name),
-#                       '-f', OTF_FONT, '-n'])
-#         expected_path = _get_expected_path('OTF_GPOS_only.ttx')
-#         assert differ([expected_path, tmp.name,
-#                        '-s', '<ttFont sfntVersion']) is True
+def test_dump_otf_gpos_only():
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        runner(CMD + ['-o', 'tGPOS', 'o{}'.format(tmp.name),
+                      '-f', OTF_FONT, '-n'])
+        expected_path = _get_expected_path('OTF_GPOS_only.ttx')
+        assert differ([expected_path, tmp.name,
+                       '-s', '<ttFont sfntVersion']) is True
 
 
-# def test_dump_otf_gsub_only():
-#     with tempfile.NamedTemporaryFile(delete=False) as tmp:
-#         runner(CMD + ['-o', 'tGSUB', 'o{}'.format(tmp.name),
-#                       '-f', OTF_FONT, '-n'])
-#         expected_path = _get_expected_path('OTF_GSUB_only.ttx')
-#         assert differ([expected_path, tmp.name,
-#                        '-s', '<ttFont sfntVersion']) is True
+def test_dump_otf_gsub_only():
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        runner(CMD + ['-o', 'tGSUB', 'o{}'.format(tmp.name),
+                      '-f', OTF_FONT, '-n'])
+        expected_path = _get_expected_path('OTF_GSUB_only.ttx')
+        assert differ([expected_path, tmp.name,
+                       '-s', '<ttFont sfntVersion']) is True
 
 
-# def test_dump_otf2_gpos_only():
-#     with tempfile.NamedTemporaryFile(delete=False) as tmp:
-#         runner(CMD + ['-o', 'tGPOS', 'o{}'.format(tmp.name),
-#                       '-f', OTF2_FONT, '-n'])
-#         expected_path = _get_expected_path('OTF2_GPOS_only.ttx')
-#         assert differ([expected_path, tmp.name,
-#                        '-s', '<ttFont sfntVersion']) is True
+def test_dump_otf2_gpos_only():
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        runner(CMD + ['-o', 'tGPOS', 'o{}'.format(tmp.name),
+                      '-f', OTF2_FONT, '-n'])
+        expected_path = _get_expected_path('OTF2_GPOS_only.ttx')
+        assert differ([expected_path, tmp.name,
+                       '-s', '<ttFont sfntVersion']) is True
 
 
-# def test_dump_otf2_gsub_only():
-#     with tempfile.NamedTemporaryFile(delete=False) as tmp:
-#         runner(CMD + ['-o', 'tGSUB', 'o{}'.format(tmp.name),
-#                       '-f', OTF2_FONT, '-n'])
-#         expected_path = _get_expected_path('OTF2_GSUB_only.ttx')
-#         assert differ([expected_path, tmp.name,
-#                        '-s', '<ttFont sfntVersion']) is True
+def test_dump_otf2_gsub_only():
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        runner(CMD + ['-o', 'tGSUB', 'o{}'.format(tmp.name),
+                      '-f', OTF2_FONT, '-n'])
+        expected_path = _get_expected_path('OTF2_GSUB_only.ttx')
+        assert differ([expected_path, tmp.name,
+                       '-s', '<ttFont sfntVersion']) is True
 
 
-# def test_dump_otf3_gpos_only():
-#     with tempfile.NamedTemporaryFile(delete=False) as tmp:
-#         runner(CMD + ['-o', 'tGPOS', 'o{}'.format(tmp.name),
-#                       '-f', OTF3_FONT, '-n'])
-#         expected_path = _get_expected_path('OTF3_GPOS_only.ttx')
-#         assert differ([expected_path, tmp.name,
-#                        '-s', '<ttFont sfntVersion']) is True
+def test_dump_otf3_gpos_only():
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        runner(CMD + ['-o', 'tGPOS', 'o{}'.format(tmp.name),
+                      '-f', OTF3_FONT, '-n'])
+        expected_path = _get_expected_path('OTF3_GPOS_only.ttx')
+        assert differ([expected_path, tmp.name,
+                       '-s', '<ttFont sfntVersion']) is True
 
 
-# def test_dump_otf3_gsub_only():
-#     with tempfile.NamedTemporaryFile(delete=False) as tmp:
-#         runner(CMD + ['-o', 'tGSUB', 'o{}'.format(tmp.name),
-#                       '-f', OTF3_FONT, '-n'])
-#         expected_path = _get_expected_path('OTF3_GSUB_only.ttx')
-#         assert differ([expected_path, tmp.name,
-#                        '-s', '<ttFont sfntVersion']) is True
+def test_dump_otf3_gsub_only():
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        runner(CMD + ['-o', 'tGSUB', 'o{}'.format(tmp.name),
+                      '-f', OTF3_FONT, '-n'])
+        expected_path = _get_expected_path('OTF3_GSUB_only.ttx')
+        assert differ([expected_path, tmp.name,
+                       '-s', '<ttFont sfntVersion']) is True
 
 
-# def test_dump_ttf():
-#     with tempfile.NamedTemporaryFile(delete=False) as tmp:
-#         runner(CMD + ['-o', 'o{}'.format(tmp.name),
-#                       '-f', TTF_FONT, '-n'])
-#         expected_path = _get_expected_path('TTF.ttx')
-#         assert differ([expected_path, tmp.name,
-#                        '-s', '<ttFont sfntVersion']) is True
+def test_dump_ttf():
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        runner(CMD + ['-o', 'o{}'.format(tmp.name),
+                      '-f', TTF_FONT, '-n'])
+        expected_path = _get_expected_path('TTF.ttx')
+        assert differ([expected_path, tmp.name,
+                       '-s', '<ttFont sfntVersion']) is True

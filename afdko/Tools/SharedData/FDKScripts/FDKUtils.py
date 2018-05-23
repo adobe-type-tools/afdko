@@ -9,14 +9,13 @@ import sys
 import traceback
 
 __doc__ = """
-FDKUtils.py v1.2.4 Feb 07 2018
+FDKUtils.py v1.2.5 May 17 2018
 A module of functions that are needed by several of the AFDKO scripts.
 """
 
 curSystem = platform.system()
 
 AdobeCMAPS = "Adobe Cmaps"
-AdobeCharsets = "CID charsets"
 
 
 class FDKEnvError(KeyError):
@@ -28,7 +27,7 @@ def findFDKDirs():
     then add the os.name for the executables, and 'FDKScripts'
     for the scripts.
     """
-    fdkScriptsDir = None
+    fdkSharedDataDir = None
     fdkToolsDir = None
     _dir = os.path.dirname(__file__)
 
@@ -109,88 +108,3 @@ def runShellCmdLogging(cmd):
         print(msg)
         return 1
     return 0
-
-
-def clean_afdko():
-    runShellCmd("pip uninstall afdko -y")
-    bin_fileList = [
-        "autohint",
-        "buildCFF2VF",
-        "buildMasterOTFs",
-        "compareFamily",
-        "checkOutlinesUFO",
-        "copyCFFCharstrings",
-        "kernCheck",
-        "makeotf",
-        "makeInstances",
-        "makeInstancesUFO",
-        "otc2otf",
-        "otf2otc",
-        "stemHist",
-        "ttxn",
-        "charplot",
-        "digiplot",
-        "fontplot",
-        "fontplot2",
-        "fontsetplot",
-        "hintplot",
-        "waterfallplot",
-        "check_afdko",
-        "clean_afdko",
-        "autohintexe",
-        "makeotfexe",
-        "mergeFonts",
-        "rotateFont",
-        "sfntdiff",
-        "sfntedit",
-        "spot",
-        "tx",
-        "type1",
-    ]
-    log = ""
-    if curSystem in ["Darwin", "Linux"]:
-        log = runShellCmd("which autohintexe")
-    elif curSystem == "Windows":
-        log = runShellCmd("where autohintexe")
-    log = log.strip()
-    if not log:
-        print("Did not find AFDKO tools in the Python bin directory:")
-    else:
-        basepath = os.path.dirname(log)
-        for fileName in bin_fileList:
-            binPath = os.path.join(basepath, fileName)
-            try:
-                os.remove(binPath)
-                print("Deleted", binPath)
-            except OSError:
-                pass
-    basepath = None
-    foundFDK = False
-    # the command "pip uninstall afdko" should already have gotten
-    # rid of the module, but just in case there is another copy of
-    # the module on another Python path, we wil try to do it by
-    # removing the dir tree.
-    try:
-        import FDK
-        foundFDK = True
-    except ImportError:
-        pass
-    if foundFDK:
-        import shutil
-        basepath = os.path.dirname(FDK.__file__)
-        try:
-            shutil.rmtree(basepath)
-            print("Deleted", basepath)
-        except OSError:
-            pass
-
-    return
-
-
-def check_afdko():
-    print('NOT IMPLEMENTED!')
-    return
-
-
-if __name__ == "__main__":
-    clean_afdko()

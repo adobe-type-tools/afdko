@@ -171,78 +171,73 @@ def test_convert_type1_to_cff():
 # Dump Type1
 # ----------
 
-# The tests below *sometimes* fail to run on Windows because 'actual_path'
-# ends up being a folder whereas it should always be a file.
-# https://ci.appveyor.com/project/adobe-type-tools/afdko/build/1.0.160
-# https://ci.appveyor.com/project/adobe-type-tools/afdko/build/1.0.163
-
-# def test_dump_dflt_type1():
-#     actual_path = runner(CMD + ['-f', TYPE1_NAME])
-#     expected_path = _get_expected_path('type1.dump1.txt')
-#     assert differ([expected_path, actual_path,
-#                    '-s', '## Filename']) is True
+def test_dump_dflt_type1():
+    actual_path = runner(CMD + ['-f', TYPE1_NAME])
+    expected_path = _get_expected_path('type1.dump1.txt')
+    assert differ([expected_path, actual_path,
+                   '-s', '## Filename']) is True
 
 
-# def test_dump_0_type1():
-#     actual_path = runner(CMD + ['-o', '0', '-f', TYPE1_NAME])
-#     expected_path = _get_expected_path('type1.dump0.txt')
-#     assert differ([expected_path, actual_path,
-#                    '-s', '## Filename']) is True
+def test_dump_0_type1():
+    actual_path = runner(CMD + ['-o', '0', '-f', TYPE1_NAME])
+    expected_path = _get_expected_path('type1.dump0.txt')
+    assert differ([expected_path, actual_path,
+                   '-s', '## Filename']) is True
 
 
-# def test_dump_0_type1_explicit_options():
-#     actual_path = runner(CMD + ['-o', 'dump', '0', '-f', TYPE1_NAME])
-#     expected_path = _get_expected_path('type1.dump0.txt')
-#     assert differ([expected_path, actual_path,
-#                    '-s', '## Filename']) is True
+def test_dump_0_type1_explicit_options():
+    actual_path = runner(CMD + ['-o', 'dump', '0', '-f', TYPE1_NAME])
+    expected_path = _get_expected_path('type1.dump0.txt')
+    assert differ([expected_path, actual_path,
+                   '-s', '## Filename']) is True
 
 
-# def test_dump_1_type1():
-#     actual_path = runner(CMD + ['-o', '1', '-f', TYPE1_NAME])
-#     expected_path = _get_expected_path('type1.dump1.txt')
-#     assert differ([expected_path, actual_path,
-#                    '-s', '## Filename']) is True
+def test_dump_1_type1():
+    actual_path = runner(CMD + ['-o', '1', '-f', TYPE1_NAME])
+    expected_path = _get_expected_path('type1.dump1.txt')
+    assert differ([expected_path, actual_path,
+                   '-s', '## Filename']) is True
 
 
-# def test_dump_2_type1():
-#     actual_path = runner(CMD + ['-o', '2', '-f', TYPE1_NAME])
-#     expected_path = _get_expected_path('type1.dump2.txt')
-#     assert differ([expected_path, actual_path,
-#                    '-s', '## Filename']) is True
+def test_dump_2_type1():
+    actual_path = runner(CMD + ['-o', '2', '-f', TYPE1_NAME])
+    expected_path = _get_expected_path('type1.dump2.txt')
+    assert differ([expected_path, actual_path,
+                   '-s', '## Filename']) is True
 
 
-# def test_dump_3_type1():
-#     actual_path = runner(CMD + ['-o', '3', '-f', TYPE1_NAME])
-#     expected_path = _get_expected_path('type1.dump3.txt')
-#     assert differ([expected_path, actual_path,
-#                    '-s', '## Filename']) is True
+def test_dump_3_type1():
+    actual_path = runner(CMD + ['-o', '3', '-f', TYPE1_NAME])
+    expected_path = _get_expected_path('type1.dump3.txt')
+    assert differ([expected_path, actual_path,
+                   '-s', '## Filename']) is True
 
 
-# def test_dump_4_type1():
-#     actual_path = runner(CMD + ['-o', '4', '-f', TYPE1_NAME])
-#     expected_path = _get_expected_path('type1.dump4.txt')
-#     assert differ([expected_path, actual_path]) is True
+def test_dump_4_type1():
+    actual_path = runner(CMD + ['-o', '4', '-f', TYPE1_NAME])
+    expected_path = _get_expected_path('type1.dump4.txt')
+    assert differ([expected_path, actual_path]) is True
 
 
-# def test_dump_5_type1():
-#     actual_path = runner(CMD + ['-o', '5', '-f', TYPE1_NAME])
-#     expected_path = _get_expected_path('type1.dump5.txt')
-#     assert differ([expected_path, actual_path]) is True
+def test_dump_5_type1():
+    actual_path = runner(CMD + ['-o', '5', '-f', TYPE1_NAME])
+    expected_path = _get_expected_path('type1.dump5.txt')
+    assert differ([expected_path, actual_path]) is True
 
 
-# def test_dump_6_type1():
-#     actual_path = runner(CMD + ['-o', '6', '-f', TYPE1_NAME])
-#     expected_path = _get_expected_path('type1.dump6.txt')
-#     assert differ([expected_path, actual_path]) is True
+def test_dump_6_type1():
+    actual_path = runner(CMD + ['-o', '6', '-f', TYPE1_NAME])
+    expected_path = _get_expected_path('type1.dump6.txt')
+    assert differ([expected_path, actual_path]) is True
 
 
-# def test_dump_6_d_type1():
-#     actual_path = runner(CMD + ['-o', '6', 'd', '-f', TYPE1_NAME])
-#     expected_path = _get_expected_path('type1.dump6d.txt')
-#     assert differ([expected_path, actual_path]) is True
+def test_dump_6_d_type1():
+    actual_path = runner(CMD + ['-o', '6', 'd', '-f', TYPE1_NAME])
+    expected_path = _get_expected_path('type1.dump6d.txt')
+    assert differ([expected_path, actual_path]) is True
 
 
-# def test_dump_6_n_type1():
-#     actual_path = runner(CMD + ['-o', '6', 'n', '-f', TYPE1_NAME])
-#     expected_path = _get_expected_path('type1.dump6n.txt')
-#     assert differ([expected_path, actual_path]) is True
+def test_dump_6_n_type1():
+    actual_path = runner(CMD + ['-o', '6', 'n', '-f', TYPE1_NAME])
+    expected_path = _get_expected_path('type1.dump6n.txt')
+    assert differ([expected_path, actual_path]) is True

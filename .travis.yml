@@ -25,15 +25,11 @@ matrix:
         - python -m virtualenv .venv/
         - source .venv/bin/activate
         - pip install --upgrade pip setuptools setuptools_scm wheel cython
-        - pip install collective.checkdocs
-        - pip install pygments
         - pip install flake8
         - pip install -r requirements.txt
       before_script:
         - export PYTHONPATH=$PYTHONPATH:$(pwd)
       script:
-        - python setup.py checkdocs
-        - python setup.py check --restructuredtext --strict
         - flake8 setup.py
         - pushd afdko/Tools/SharedData/FDKScripts
         - flake8 buildCFF2VF.py
