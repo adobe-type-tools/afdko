@@ -53,7 +53,7 @@ StandardEnglishFonts = [
 ##############################################################
 
 # XXX TO-DO streamline the list duplications below
-widths = {
+FONT_WIDTHS = {
     'courier': [
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 600, 600, 600, 600, 600, 600, 600, 600, 600,
@@ -345,7 +345,7 @@ def parseAFMfile(filename):
     # by default, any empties should get the width of a space
     for i in range(len(widths)):
         if widths[i] == 0:
-            widths[i] == widths[32]
+            widths[i] = widths[32]
 
     return widths
 
@@ -354,8 +354,8 @@ class FontCache:
     """Loads and caches font width information on demand.  Font names
     converted to lower case for indexing.  Public interface is stringwidth"""
     def __init__(self):
-        global widths
-        self.__widtharrays = widths
+        global FONT_WIDTHS
+        self.__widtharrays = FONT_WIDTHS
 
     def loadfont(self, fontname):
         filename = fontname + '.afm'
