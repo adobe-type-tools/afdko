@@ -50,7 +50,7 @@ matrix:
         - pytest --cov
         - python -m pip uninstall --yes afdko
       after_success:
-        - codecov -F mac
+        - codecov
 
     - os: linux
       sudo: required

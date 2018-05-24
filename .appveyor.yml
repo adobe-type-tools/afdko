@@ -22,16 +22,15 @@ install:
   - python --version
   - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
   - python -m pip install -U pip setuptools setuptools_scm wheel
+  - python -m pip install pytest
   - python setup.py bdist_wheel
   - for %%f in (dist\*.whl) do (set "WHEEL=%%f")
   - python -m pip install -U --force-reinstall %WHEEL%
-  - python -m pip install codecov
-  - python -m pip install pytest-cov
 
 build: false
 
 test_script:
-  - python -m pytest -v --cov
+  - python -m pytest -v
   - python -m pip uninstall --yes afdko
 
 artifacts:
@@ -39,9 +38,8 @@ artifacts:
   - path: dist\*.whl
     name: release_wheel
 
+# Deploy wheel on tags to PyPI
 on_success:
-  - codecov -F win
-  # Deploy wheel on tags to PyPI
   - ps: >-
       if($env:APPVEYOR_REPO_TAG -eq 'true') {
         Write-Output ("Deploying " + $env:APPVEYOR_REPO_TAG_NAME + " to PyPI...")
