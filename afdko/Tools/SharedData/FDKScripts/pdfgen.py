@@ -55,8 +55,10 @@ Modified 7/25/2006 read rooberts. Added supported for embedding fonts.
 from __future__ import print_function, absolute_import
 
 import os
-import string
-import cStringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 from math import sin, cos, tan, pi
 
 from . import pdfdoc
@@ -95,6 +97,11 @@ fillStroke = 'B'
 closeFillStroke = 'b'
 eoFillStroke = 'B*'
 closeEoFillStroke = 'b*'
+
+
+class PDFError(Exception):
+    pass
+
 
 class Canvas:
     """This is a low-level interface to the PDF file format.  The plan is to
@@ -166,8 +173,8 @@ class Canvas:
         """PDF escapes are like Python ones, but brackets need slashes before them too.
         Use Python's repr function and chop off the quotes first"""
         # s = repr(s)[1:-1]
-        s = string.replace(s, '(','\(')
-        s = string.replace(s, ')','\)')
+        s = s.replace('(', '\(')
+        s = s.replace(')', '\)')
         return s
 
     # info functions - non-standard
@@ -218,15 +225,13 @@ class Canvas:
         else:
             self._doc.SaveToFile(self._filename)
 
-
     def setPageSize(self, size):
         """accepts a 2-tuple in points for paper size for this
         and subsequent pages"""
         self._pagesize = size
 
-
     def addLiteral(self, s, escaped=1):
-        if escaped==0:
+        if escaped == 0:
             s = self._escape(s)
         self._code.append(s)
 
@@ -392,7 +397,6 @@ class Canvas:
 
     def circle(self, x_cen, y_cen, r, stroke=1, fill=0):
         """special case of ellipse"""
-
         x1 = x_cen - r
         x2 = x_cen + r
         y1 = y_cen - r
@@ -470,22 +474,24 @@ class Canvas:
         """Draws a string right-aligned with the y coordinate.  I
         am British so the spelling is correct, OK?"""
         width = self.stringWidth(text, self._fontname, self._fontsize)
-        t = self.beginText(x - 0.5*width, y)
+        t = self.beginText(x - 0.5 * width, y)
         t.textLine(text)
         self.drawText(t)
 
     def getAvailableFonts(self):
         """Returns the list of PostScript font names available.
         Standard set now, but may grow in future with font embedding."""
-        fontEntries = self._doc.getAvailableFonts()
-        fontEntries.sort()
-        return fontEntries # list of (psName, Encoding)
+        fontEntries = sorted(self._doc.getAvailableFonts())
+        return fontEntries  # list of (psName, Encoding)
 
-    def addFont(self, psfontname, encoding=None, clientCtx=None, getFontDescriptor=None, getEncodingInfo=None):
-    	self._doc.addFont(psfontname, encoding, clientCtx, getFontDescriptor, getEncodingInfo) # this function will not add the font or font decriptor if theu already exists.
+    def addFont(self, psfontname, encoding=None, clientCtx=None,
+                getFontDescriptor=None, getEncodingInfo=None):
+        # this function will not add the font or
+        # font descriptor if they already exist
+        self._doc.addFont(psfontname, encoding, clientCtx, getFontDescriptor,
+                          getEncodingInfo)
 
-
-    def setFont(self, psfontname, size, leading = None, encoding = None):
+    def setFont(self, psfontname, size, leading=None, encoding=None):
         """Sets the font.  If leading not specified, defaults to 1.2 x
         font size. Raises a readable exception if an illegal font
         is supplied.  Font names are case-sensitive! Keeps track
@@ -523,13 +529,13 @@ class Canvas:
         self._miterLimit = limit
         self._code.append('%0.4f M' % limit)
 
-    def setDash(self, array=[], phase=0):
+    def setDash(self, array=None, phase=0):
         """Two notations.  pass two numbers, or an array and phase"""
         if isinstance(array, int) or isinstance(array, float):
             self._code.append('[%s %s] 0 d' % (array, phase))
         elif isinstance(array, list) or isinstance(array, tuple):
             assert phase <= len(array), "setDash phase must be l.t.e. length of array"
-            textarray = string.join(map(str, array))
+            textarray = ''.join(map(str, array))
             self._code.append('[%s] %s d' % (textarray, phase))
 
     def setFillColorRGB(self, r, g, b):
@@ -595,7 +601,7 @@ class Canvas:
                     colorSpace = 'DeviceRGB'
                 else: #maybe should generate an error, is this right for CMYK?
                     colorSpace = 'DeviceCMYK'
-                imageFile.seek(0)		#reset file pointer
+                imageFile.seek(0)  # reset file pointer
                 imagedata = []
                 imagedata.append('BI')   # begin image
                 # this describes what is in the image itself
@@ -607,9 +613,9 @@ class Canvas:
                 #write in blocks of (??) 60 characters per line to a list
                 compressed = imageFile.read()
                 encoded = pdfutils._AsciiBase85Encode(compressed)
-                outstream = cStringIO.StringIO(encoded)
+                outstream = StringIO(encoded)
                 dataline = outstream.read(60)
-                while dataline <> "":
+                while dataline != "":
                     imagedata.append(dataline)
                     dataline = outstream.read(60)
                 imagedata.append('EI')
@@ -620,12 +626,12 @@ class Canvas:
                 cachedname = os.path.splitext(image)[0] + '.a85'
                 imagedata = open(cachedname,'rb').readlines()
                 #trim off newlines...
-                imagedata = map(string.strip, imagedata)
+                imagedata = list(map(str.strip, imagedata))
 
                 #parse line two for width, height
-                words = string.split(imagedata[1])
-                imgwidth = string.atoi(words[1])
-                imgheight = string.atoi(words[3])
+                words = imagedata[1].split()
+                imgwidth = int(words[1])
+                imgheight = int(words[3])
         else:
             #PIL Image
             #work out all dimensions
@@ -645,9 +651,9 @@ class Canvas:
             encoded = pdfutils._AsciiBase85Encode(compressed) #...sadly this isn't
 
             #write in blocks of (??) 60 characters per line to a list
-            outstream = cStringIO.StringIO(encoded)
+            outstream = StringIO(encoded)
             dataline = outstream.read(60)
-            while dataline <> "":
+            while dataline != "":
                 imagedata.append(dataline)
                 dataline = outstream.read(60)
             imagedata.append('EI')
@@ -682,48 +688,47 @@ class Canvas:
     # This is based on Thomas Merz's code from GhostScript (viewjpeg.ps)
     def readJPEGInfo(self, image):
         "Read width, height and number of components from JPEG file"
-    	import struct
+        import struct
 
-	#Acceptable JPEG Markers:
-	#  SROF0=baseline, SOF1=extended sequential or SOF2=progressive
-	validMarkers = [0xC0, 0xC1, 0xC2]
+        # Acceptable JPEG Markers:
+        #  SROF0=baseline, SOF1=extended sequential or SOF2=progressive
+        validMarkers = [0xC0, 0xC1, 0xC2]
 
-	#JPEG markers without additional parameters
-	noParamMarkers = \
-	    [ 0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8, 0x01 ]
+        # JPEG markers without additional parameters
+        noParamMarkers = [0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7,
+                          0xD8, 0x01]
 
-	#Unsupported JPEG Markers
-	unsupportedMarkers = \
-	    [ 0xC3, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF ]
+        # Unsupported JPEG Markers
+        unsupportedMarkers = [0xC3, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB,
+                              0xCD, 0xCE, 0xCF]
 
-	#read JPEG marker segments until we find SOFn marker or EOF
-	done = 0
-	while not done:
-	    x = struct.unpack('B', image.read(1))
-	    if x[0] == 0xFF:			#found marker
-	    	x = struct.unpack('B', image.read(1))
-		#print "Marker: ", '%0.2x' % x[0]
-		#check marker type is acceptable and process it
-		if x[0] in validMarkers:
-		    image.seek(2, 1)		#skip segment length
-		    x = struct.unpack('B', image.read(1)) #data precision
-		    if x[0] != 8:
-			raise 'PDFError', ' JPEG must have 8 bits per component'
-		    y = struct.unpack('BB', image.read(2))
-		    height = (y[0] << 8) + y[1]
-		    y = struct.unpack('BB', image.read(2))
-		    width =  (y[0] << 8) + y[1]
-		    y = struct.unpack('B', image.read(1))
-		    color =  y[0]
-		    return width, height, color
-		    done = 1
-		elif x[0] in unsupportedMarkers:
-		    raise 'PDFError', ' Unsupported JPEG marker: %0.2x' % x[0]
-		elif x[0] not in noParamMarkers:
-		    #skip segments with parameters
-		    #read length and skip the data
-		    x = struct.unpack('BB', image.read(2))
-		    image.seek( (x[0] << 8) + x[1] - 2, 1)
+        # read JPEG marker segments until we find SOFn marker or EOF
+        done = 0
+        while not done:
+            x = struct.unpack('B', image.read(1))
+            if x[0] == 0xFF:  # found marker
+                x = struct.unpack('B', image.read(1))
+            # print "Marker: ", '%0.2x' % x[0]
+            # check marker type is acceptable and process it
+            if x[0] in validMarkers:
+                image.seek(2, 1)  # skip segment length
+                x = struct.unpack('B', image.read(1))  # data precision
+                if x[0] != 8:
+                    raise PDFError('JPEG must have 8 bits per component')
+                y = struct.unpack('BB', image.read(2))
+                height = (y[0] << 8) + y[1]
+                y = struct.unpack('BB', image.read(2))
+                width = (y[0] << 8) + y[1]
+                y = struct.unpack('B', image.read(1))
+                color = y[0]
+                return width, height, color
+            elif x[0] in unsupportedMarkers:
+                raise PDFError('Unsupported JPEG marker: %0.2x' % x[0])
+            elif x[0] not in noParamMarkers:
+                # skip segments with parameters
+                # read length and skip the data
+                x = struct.unpack('BB', image.read(2))
+                image.seek((x[0] << 8) + x[1] - 2, 1)
 
     def setPageCompression(self, onoff=1):
         """Possible values 1 or 0 (1 for 'on' is the default).
@@ -733,9 +738,8 @@ class Canvas:
         is next called."""
         self._pageCompression = onoff
 
-
     def setPageTransition(self, effectname=None, duration=1,
-                        direction=0,dimension='H',motion='I'):
+                          direction=0, dimension='H', motion='I'):
         """PDF allows page transition effects for use when giving
         presentations.  There are six possible effects.  You can
         just guive the effect name, or supply more advanced options
@@ -765,17 +769,17 @@ class Canvas:
         if direction in [0,90,180,270]:
             direction_arg = '/Di /%d' % direction
         else:
-            raise 'PDFError', ' directions allowed are 0,90,180,270'
+            raise PDFError('directions allowed are 0, 90, 180, 270')
 
         if dimension in ['H', 'V']:
             dimension_arg = '/Dm /%s' % dimension
         else:
-            raise'PDFError','dimension values allowed are H and V'
+            raise PDFError('dimension values allowed are H and V')
 
         if motion in ['I','O']:
             motion_arg = '/M /%s' % motion
         else:
-            raise'PDFError','motion values allowed are I and O'
+            raise PDFError('motion values allowed are I and O')
 
 
         # this says which effects require which argument types from above
@@ -783,25 +787,18 @@ class Canvas:
             'Split': [direction_arg, motion_arg],
             'Blinds': [dimension_arg],
             'Box': [motion_arg],
-            'Wipe' : [direction_arg],
-            'Dissolve' : [],
-            'Glitter':[direction_arg]
+            'Wipe': [direction_arg],
+            'Dissolve': [],
+            'Glitter': [direction_arg]
             }
 
         try:
             args = PageTransitionEffects[effectname]
         except KeyError:
-            raise 'PDFError', 'Unknown Effect Name "%s"' % effectname
-            self._pageTransitionString = ''
-            return
-
+            raise PDFError('Unknown Effect Name "%s"' % effectname)
 
         self._pageTransitionString = (('/Trans <</D %d /S /%s ' % (duration, effectname)) +
-            string.join(args, ' ') + ' >>')
-
-
-
-
+            ' '.join(args) + ' >>')
 
 
 class PDFPathObject:
@@ -819,7 +816,7 @@ class PDFPathObject:
 
     def getCode(self):
         "pack onto one line; used internally"
-        return string.join(self._code, ' ')
+        return ' '.join(self._code)
     def moveTo(self, x, y):
         self._code.append('%0.4f %0.4f m' % (x,y))
     def lineTo(self, x, y):
@@ -865,10 +862,6 @@ class PDFPathObject:
 
     def circle(self, x_cen, y_cen, r):
         """adds a circle to the path"""
-        x1 = x_cen - r
-        x2 = x_cen + r
-        y1 = y_cen - r
-        y2 = y_cen + r
         self.ellipse(x_cen - r, y_cen - r, x_cen + r, y_cen + r)
 
     def close(self):
@@ -900,7 +893,7 @@ class PDFTextObject:
     def getCode(self):
         "pack onto one line; used internally"
         self._code.append('ET')
-        return string.join(self._code, ' ')
+        return ' '.join(self._code)
 
     def setTextOrigin(self, x, y):
         if self._canvas.bottomup:
@@ -941,7 +934,7 @@ class PDFTextObject:
         """Returns current y position relative to the last origin."""
         return self._y
 
-    def setFont(self, psfontname, size, leading = None):
+    def setFont(self, psfontname, size, leading=None):
         """Sets the font.  If leading not specified, defaults to 1.2 x
         font size. Raises a readable exception if an illegal font
         is supplied.  Font names are case-sensitive! Keeps track
@@ -954,11 +947,10 @@ class PDFTextObject:
         self._leading = leading
         self._code.append('%s %0.1f Tf %0.1f TL' % (pdffontname, size, leading))
 
-
     def setCharSpace(self, charSpace):
-         """Adjusts inter-character spacing"""
-         self._charSpace = charSpace
-         self._code.append('%0.4f Tc' % charSpace)
+        """Adjusts inter-character spacing"""
+        self._charSpace = charSpace
+        self._code.append('%0.4f Tc' % charSpace)
 
     def setWordSpace(self, wordSpace):
         """Adjust inter-word spacing.  This can be used
@@ -1035,15 +1027,15 @@ class PDFTextObject:
         off each line and from the beginning; set trim=0 to preserve
         whitespace."""
         if isinstance(stuff, str):
-            lines = string.split(string.strip(stuff), '\n')
-            if trim==1:
-                lines = map(string.strip,lines)
+            lines = stuff.strip().split('\n')
+            if trim == 1:
+                lines = list(map(str.strip, lines))
         elif isinstance(stuff, list):
             lines = stuff
         elif isinstance(stuff, tuple):
             lines = stuff
         else:
-            assert 1==0, "argument to textlines must be string,, list or tuple"
+            assert False, "argument to textlines must be string, list or tuple"
 
         for line in lines:
             escaped_text = self._canvas._escape(line)
@@ -1053,10 +1045,3 @@ class PDFTextObject:
             else:
                 self._y = self._y + self._leading
         self._x = self._x0
-
-
-
-
-
-if __name__ == '__main__':
-    print('For test scripts, run testpdfgen.py')
