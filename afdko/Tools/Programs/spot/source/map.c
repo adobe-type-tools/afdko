@@ -53,7 +53,7 @@ void InitAliasFromFile(void)
 			return;
 		}
 	while(1){
-		char temp1[32], temp2[32], c;
+		char temp1[MAX_NAME_LEN], temp2[MAX_NAME_LEN], c;
 		value = fscanf(file, "%s %s", temp1, temp2);
 		if (value==EOF || value == 0)
 			break;

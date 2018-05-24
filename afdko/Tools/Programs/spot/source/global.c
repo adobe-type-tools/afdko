@@ -324,7 +324,6 @@ void initGlyphNames(void)
    pointer to SINGLE static buffer so subsequent calls will overwrite. */
 Byte8 *getGlyphName(GlyphId glyphId, IntX forProofing)
 	{
-#define NAME_LEN 128
 	static Byte8 name[NAME_LEN + 1];
 	static Byte8 nicename[NAME_LEN + 7]; /* allow an extra 6 chars for GID. */
 	Byte8 *p;
