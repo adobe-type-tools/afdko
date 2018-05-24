@@ -1,3 +1,6 @@
+image:
+- Visual Studio 2017
+
 environment:
   TWINE_USERNAME: "afdko-travis"
   TWINE_PASSWORD:

@@ -28,7 +28,7 @@ call %~dp0sfntedit\build\win\vc10\BuildAll.cmd %1 || EXIT /B 1
 
 echo " "
 echo "Building spot..."
-call %~dp0spot\build\win\vc10\BuildAll.cmd %1 || EXIT /B 1
+call %~dp0spot\build\win\vs2017\BuildAll.cmd %1 || EXIT /B 1
 
 echo " "
 echo "Building type1..."

@@ -253,7 +253,7 @@ static void dumpAttachList(Offset attachListOffset, AttachList * attachList, int
 
 	for (i = 0; i < attachList->GlyphCount; i++)
 		{
-		char name[64];
+		char name[MAX_NAME_LEN];
 		GlyphId glyphId = *da_INDEX(CovList.glyphidlist, i);
 		AttachPoint * attachPoint = &attachList->_AttachPoint[i];
 
@@ -311,7 +311,7 @@ static void dumpLigCaretList(Offset ligCaretListoffset, LigCaretList* ligCaretLi
 	
 	for (i = 0; i < ligCaretList->LigGlyphCount; i++)
 		{
-		char name[64];
+		char name[MAX_NAME_LEN];
 		CaretValueFormat3 * caretValue;
 		GlyphId glyphId = *da_INDEX(CovList.glyphidlist, i);
 		LigGlyph * ligGlyph = &ligCaretList->_LigGlyph[i];
