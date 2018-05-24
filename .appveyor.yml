@@ -40,7 +40,7 @@ artifacts:
     name: release_wheel
 
 on_success:
-  - codecov
+  - codecov -F win
   # Deploy wheel on tags to PyPI
   - ps: >-
       if($env:APPVEYOR_REPO_TAG -eq 'true') {
