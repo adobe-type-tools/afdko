@@ -1,0 +1,51 @@
+Sun Apr 29 01:40:54 2018
+sfntdiff (2.21217) (-d 3)  files:
+< sfntdiff_data/regular.otf
+> sfntdiff_data/bold.otf
+< 'CFF ' table checksum=8472c5fa
+> 'CFF ' table checksum=4581066f
+< 'CFF ' table length=0000058d
+> 'CFF ' table length=000005c1
+< 'GPOS' table checksum=503b3fce
+> 'GPOS' table checksum=500b3fec
+< 'OS/2' table checksum=5b067608
+> 'OS/2' table checksum=5c387814
+< 'head' table checksum=09d57a77
+> 'head' table checksum=09d17a75
+< 'hhea' table checksum=0a8405cc
+> 'hhea' table checksum=0a7f05c9
+< 'hmtx' table checksum=14f8022f
+> 'hmtx' table checksum=15d401c9
+< 'name' table checksum=fb964877
+> 'name' table checksum=3da50b15
+< 'name' table length=000007cc
+> 'name' table length=000007e2
+'CFF ' differs.
+'GPOS' differs.
+'OS/2' differs.
+< head checkSumAdjustment=d755cd6a
+> head checkSumAdjustment=cd71c0b0
+< head created=0000d2a18eb (Mon Aug 31 14:44:59 2015)
+> head created=0000d2a18e1 (Mon Aug 31 14:44:49 2015)
+< head modified=0000d2a18eb (Mon Aug 31 14:44:59 2015)
+> head modified=0000d2a18e1 (Mon Aug 31 14:44:49 2015)
+< head xMin=-454
+> head xMin=-457
+< head yMin=-293
+> head yMin=-316
+< head xMax=2159
+> head xMax=2157
+< head yMax=968
+> head yMax=1009
+< head macStyle=0000
+> head macStyle=0001
+'hhea' differs.
+'hmtx' differs.
+< name record[ 2]={platId= 3, scriptId= 1, langId= 409, nameId=   2} "Regular"
+> name record[ 2]={platId= 3, scriptId= 1, langId= 409, nameId=   2} "Bold"
+< name record[ 3]={platId= 3, scriptId= 1, langId= 409, nameId=   3} "2.020;ADBO;SourceSansPro-Regular;ADOBE"
+> name record[ 3]={platId= 3, scriptId= 1, langId= 409, nameId=   3} "2.020;ADBO;SourceSansPro-Bold;ADOBE"
+< name record[ 4]={platId= 3, scriptId= 1, langId= 409, nameId=   4} "Source Sans Pro"
+> name record[ 4]={platId= 3, scriptId= 1, langId= 409, nameId=   4} "Source Sans Pro Bold"
+< name record[ 6]={platId= 3, scriptId= 1, langId= 409, nameId=   6} "SourceSansPro-Regular"
+> name record[ 6]={platId= 3, scriptId= 1, langId= 409, nameId=   6} "SourceSansPro-Bold"

@@ -1,0 +1,681 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont sfntVersion="OTTO" ttLibVersion="3.26">
+
+  <BASE>
+    <Version value="0x00010000"/>
+    <HorizAxis>
+      <BaseTagList>
+        <!-- BaseTagCount=2 -->
+        <BaselineTag index="0" value="ideo"/>
+        <BaselineTag index="1" value="romn"/>
+      </BaseTagList>
+      <BaseScriptList>
+        <!-- BaseScriptCount=4 -->
+        <BaseScriptRecord index="0">
+          <BaseScriptTag value="DFLT"/>
+          <BaseScript>
+            <BaseValues>
+              <DefaultIndex value="1"/>
+              <!-- BaseCoordCount=2 -->
+              <BaseCoord index="0" Format="1">
+                <Coordinate value="-170"/>
+              </BaseCoord>
+              <BaseCoord index="1" Format="1">
+                <Coordinate value="0"/>
+              </BaseCoord>
+            </BaseValues>
+            <!-- BaseLangSysCount=0 -->
+          </BaseScript>
+        </BaseScriptRecord>
+        <BaseScriptRecord index="1">
+          <BaseScriptTag value="cyrl"/>
+          <BaseScript>
+            <BaseValues>
+              <DefaultIndex value="1"/>
+              <!-- BaseCoordCount=2 -->
+              <BaseCoord index="0" Format="1">
+                <Coordinate value="-170"/>
+              </BaseCoord>
+              <BaseCoord index="1" Format="1">
+                <Coordinate value="0"/>
+              </BaseCoord>
+            </BaseValues>
+            <!-- BaseLangSysCount=0 -->
+          </BaseScript>
+        </BaseScriptRecord>
+        <BaseScriptRecord index="2">
+          <BaseScriptTag value="grek"/>
+          <BaseScript>
+            <BaseValues>
+              <DefaultIndex value="1"/>
+              <!-- BaseCoordCount=2 -->
+              <BaseCoord index="0" Format="1">
+                <Coordinate value="-170"/>
+              </BaseCoord>
+              <BaseCoord index="1" Format="1">
+                <Coordinate value="0"/>
+              </BaseCoord>
+            </BaseValues>
+            <!-- BaseLangSysCount=0 -->
+          </BaseScript>
+        </BaseScriptRecord>
+        <BaseScriptRecord index="3">
+          <BaseScriptTag value="latn"/>
+          <BaseScript>
+            <BaseValues>
+              <DefaultIndex value="1"/>
+              <!-- BaseCoordCount=2 -->
+              <BaseCoord index="0" Format="1">
+                <Coordinate value="-170"/>
+              </BaseCoord>
+              <BaseCoord index="1" Format="1">
+                <Coordinate value="0"/>
+              </BaseCoord>
+            </BaseValues>
+            <!-- BaseLangSysCount=0 -->
+          </BaseScript>
+        </BaseScriptRecord>
+      </BaseScriptList>
+    </HorizAxis>
+  </BASE>
+
+  <CFF>
+    <FontTopDict>
+      ## Top Dict
+      version             "2.0"
+      Notice              "Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries."
+      Copyright           "Copyright 2010, 2012, 2014 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name 'Source'."
+      FamilyName          "Source Sans Pro"
+      FontBBox            {-458,-326,2156,1024}
+      FSType              0
+      sup.srcFontType     CFF (name-keyed)
+      sup.nGlyphs         10
+      ## FontDict[0]
+      FontName            "SourceSansPro-Black"
+      ## Private
+      BlueValues          {-12,0,500,512,532,544,580,592,634,646,650,662,696,708}
+      OtherBlues          {-188,-176}
+      FamilyBlues         {-12,0,486,498,518,530,574,586,638,650,656,668,712,724}
+      FamilyOtherBlues    {-217,-205}
+      BlueScale           0.0625
+      BlueFuzz            0
+      StdHW               134
+      StdVW               172
+      StemSnapH           {134,144}
+      StemSnapV           {172,176}
+    </FontTopDict>
+    <FontOutlines>
+      .notdef
+        704 width
+        0 104 hstem
+        556 660 hstem
+        76 188 vstem
+        516 628 vstem
+        76 0 move
+        628 0 line
+        628 660 line
+        76 660 line
+        288 104 move
+        314 160 line
+        350 256 line
+        354 256 line
+        390 160 line
+        416 104 line
+        350 424 move
+        310 520 line
+        292 556 line
+        412 556 line
+        394 520 line
+        354 424 line
+        188 172 move
+        188 508 line
+        270 340 line
+        516 172 move
+        434 340 line
+        516 508 line
+        endchar
+      A
+        584 width
+        0 bottomedge
+        138 271 hstem
+        522 650 hstem
+        -10 594 vstem
+        240 316 move
+        256 378 272 456 286 522 curve
+        290 522 line
+        306 457 322 378 338 316 curve
+        349 271 line
+        229 271 line
+        -10 0 move
+        166 0 line
+        198 138 line
+        380 138 line
+        412 0 line
+        594 0 line
+        396 650 line
+        188 650 line
+        endchar
+      A.sc
+        516 width
+        0 bottomedge
+        94 216 hstem
+        409 532 hstem
+        -10 526 vstem
+        219 244 move
+        230 292 241 358 252 409 curve
+        256 409 line
+        269 359 280 292 291 244 curve
+        297 216 line
+        213 216 line
+        -10 0 move
+        164 0 line
+        185 94 line
+        325 94 line
+        346 0 line
+        526 0 line
+        361 532 line
+        155 532 line
+        endchar
+      B
+        612 width
+        0 132 hstem
+        270 396 hstem
+        518 650 hstem
+        72 244 vstem
+        414 582 vstem
+        72 0 move
+        326 0 line
+        466 0 582 58 582 192 curve
+        582 278 532 326 470 344 curve
+        470 348 line
+        newhints
+        0 132 hstem
+        270 396 hstem
+        518 650 hstem
+        72 244 vstem
+        384 552 vstem
+        520 368 552 432 552 488 curve
+        552 616 442 650 306 650 curve
+        72 650 line
+        244 396 move
+        244 518 line
+        302 518 line
+        358 518 384 502 384 462 curve
+        384 422 358 396 302 396 curve
+        244 132 move
+        244 270 line
+        newhints
+        0 132 hstem
+        270 396 hstem
+        518 650 hstem
+        72 244 vstem
+        414 582 vstem
+        314 270 line
+        382 270 414 252 414 204 curve
+        414 156 382 132 314 132 curve
+        endchar
+      B.sc
+        554 width
+        0 124 hstem
+        218 324 hstem
+        408 532 hstem
+        72 244 vstem
+        359 524 vstem
+        72 0 move
+        301 0 line
+        421 0 524 44 524 155 curve
+        524 226 487 264 409 280 curve
+        409 284 line
+        newhints
+        0 124 hstem
+        218 324 hstem
+        408 532 hstem
+        72 244 vstem
+        345 501 vstem
+        475 300 501 355 501 398 curve
+        501 507 401 532 283 532 curve
+        72 532 line
+        244 324 move
+        244 408 line
+        287 408 line
+        327 408 345 398 345 370 curve
+        345 344 329 324 288 324 curve
+        244 124 move
+        244 218 line
+        newhints
+        0 124 hstem
+        218 324 hstem
+        408 532 hstem
+        72 244 vstem
+        359 524 vstem
+        291 218 line
+        339 218 359 202 359 172 curve
+        359 145 340 124 291 124 curve
+        endchar
+      C
+        586 width
+        -12 136 hstem
+        514 662 hstem
+        44 220 vstem
+        354 -12 move
+        438 -12 513 20 568 84 curve
+        478 192 line
+        450 162 410 136 360 136 curve
+        276 136 220 204 220 326 curve
+        220 444 286 514 362 514 curve
+        406 514 438 494 470 466 curve
+        560 576 line
+        514 622 444 662 358 662 curve
+        194 662 44 538 44 320 curve
+        44 98 188 -12 354 -12 curve
+        endchar
+      C.sc
+        526 width
+        -12 128 hstem
+        404 544 hstem
+        44 218 vstem
+        317 -12 move
+        389 -12 459 13 508 66 curve
+        416 166 line
+        395 146 365 128 325 128 curve
+        261 128 218 174 218 267 curve
+        218 354 271 404 329 404 curve
+        362 404 384 393 412 370 curve
+        504 472 line
+        462 512 398 544 327 544 curve
+        180 544 44 443 44 261 curve
+        44 74 172 -12 317 -12 curve
+        endchar
+      a
+        536 width
+        -12 bottomedge
+        376 512 hstem
+        38 202 vstem
+        310 482 vstem
+        188 -12 move
+        242 -12 286 12 326 48 curve
+        330 48 line
+        newhints
+        0 bottomedge
+        376 512 hstem
+        38 202 vstem
+        310 482 vstem
+        342 0 line
+        482 0 line
+        482 278 line
+        482 442 404 512 274 512 curve
+        196 512 124 488 54 446 curve
+        114 334 line
+        166 362 204 376 240 376 curve
+        284 376 306 360 310 324 curve
+        118 304 38 246 38 142 curve
+        newhints
+        -12 bottomedge
+        376 512 hstem
+        38 202 vstem
+        310 482 vstem
+        38 60 94 -12 188 -12 curve
+        newhints
+        -12 120 hstem
+        376 512 hstem
+        38 202 vstem
+        310 482 vstem
+        248 120 move
+        218 120 202 133 202 156 curve
+        202 184 228 210 310 222 curve
+        310 154 line
+        292 134 276 120 248 120 curve
+        endchar
+      b
+        580 width
+        -12 bottomedge
+        372 512 hstem
+        696 topedge
+        58 230 vstem
+        368 544 vstem
+        336 -12 move
+        442 -12 544 86 544 259 curve
+        544 412 467 512 349 512 curve
+        305 512 261 494 226 462 curve
+        230 534 line
+        230 696 line
+        58 696 line
+        newhints
+        0 bottomedge
+        372 512 hstem
+        696 topedge
+        58 230 vstem
+        368 544 vstem
+        58 0 line
+        192 0 line
+        newhints
+        -12 bottomedge
+        372 512 hstem
+        696 topedge
+        58 230 vstem
+        368 544 vstem
+        206 54 line
+        210 54 line
+        248 10 292 -12 336 -12 curve
+        newhints
+        -12 128 hstem
+        372 512 hstem
+        696 topedge
+        58 230 vstem
+        368 544 vstem
+        294 128 move
+        272 128 250 134 230 152 curve
+        230 336 line
+        252 362 272 372 298 372 curve
+        344 372 368 338 368 256 curve
+        368 160 334 128 294 128 curve
+        endchar
+      c
+        472 width
+        -12 126 hstem
+        374 512 hstem
+        32 208 vstem
+        284 -12 move
+        336 -12 400 2 450 46 curve
+        384 158 line
+        360 140 332 126 304 126 curve
+        250 126 208 174 208 250 curve
+        208 326 246 374 310 374 curve
+        328 374 344 368 366 350 curve
+        446 460 line
+        408 492 360 512 300 512 curve
+        158 512 32 416 32 250 curve
+        32 84 142 -12 284 -12 curve
+        endchar
+    </FontOutlines>
+  </CFF>
+
+  <GDEF>
+    <Version value="0x00010000"/>
+    <GlyphClassDef Format="0">
+      <ClassDef glyph="A" class="1"/>
+      <ClassDef glyph="A.sc" class="1"/>
+      <ClassDef glyph="B" class="1"/>
+      <ClassDef glyph="B.sc" class="1"/>
+      <ClassDef glyph="C" class="1"/>
+      <ClassDef glyph="C.sc" class="1"/>
+      <ClassDef glyph="a" class="1"/>
+      <ClassDef glyph="b" class="1"/>
+      <ClassDef glyph="c" class="1"/>
+    </GlyphClassDef>
+  </GDEF>
+
+  <GPOS>
+    languagesystem latn dflt;
+    languagesystem grek dflt;
+    languagesystem cyrl dflt;
+    languagesystem DFLT dflt;
+
+
+    # Class definitions *********************************
+    @empty = [  ];
+
+
+    feature kern {
+      lookup kern_DFLT_dflt_1 {
+        pos [A.sc] [A.sc] 10;
+        pos [A] [C.sc] 20;
+        pos [A] [C] -10;
+        pos [A] [a] 10;
+        pos [B] [A.sc] 10;
+        pos [B] [C.sc] 10;
+        pos [C.sc] [C.sc] -20;
+        pos [C] [A.sc] 10;
+        pos [C] [C] -40;
+        pos [b] [a] -10;
+        pos [c] [a] -10;
+        pos [c] [c] -30;
+      } kern_DFLT_dflt_1;
+
+    } kern;
+
+  </GPOS>
+
+  <GSUB>
+    languagesystem latn dflt;
+    languagesystem grek dflt;
+    languagesystem cyrl dflt;
+    languagesystem DFLT dflt;
+
+
+
+    feature smcp {
+      lookup smcp_DFLT_dflt_1 {
+        sub a by A.sc;
+        sub b by B.sc;
+        sub c by C.sc;
+      } smcp_DFLT_dflt_1;
+
+    } smcp;
+
+  </GSUB>
+
+  <OS_2>
+    <!-- The fields 'usFirstCharIndex' and 'usLastCharIndex'
+         will be recalculated by the compiler -->
+    <version value="3"/>
+    <xAvgCharWidth value="570"/>
+    <usWeightClass value="900"/>
+    <usWidthClass value="5"/>
+    <fsType value="00000000 00000000"/>
+    <ySubscriptXSize value="650"/>
+    <ySubscriptYSize value="600"/>
+    <ySubscriptXOffset value="0"/>
+    <ySubscriptYOffset value="75"/>
+    <ySuperscriptXSize value="650"/>
+    <ySuperscriptYSize value="600"/>
+    <ySuperscriptXOffset value="0"/>
+    <ySuperscriptYOffset value="350"/>
+    <yStrikeoutSize value="50"/>
+    <yStrikeoutPosition value="300"/>
+    <sFamilyClass value="0"/>
+    <panose>
+      <bFamilyType value="2"/>
+      <bSerifStyle value="11"/>
+      <bWeight value="8"/>
+      <bProportion value="3"/>
+      <bContrast value="3"/>
+      <bStrokeVariation value="4"/>
+      <bArmStyle value="3"/>
+      <bLetterForm value="2"/>
+      <bMidline value="2"/>
+      <bXHeight value="4"/>
+    </panose>
+    <ulUnicodeRange1 value="00000000 00000000 00000000 00000001"/>
+    <ulUnicodeRange2 value="00000000 00000000 00000000 00000000"/>
+    <ulUnicodeRange3 value="00000000 00000000 00000000 00000000"/>
+    <ulUnicodeRange4 value="00000000 00000000 00000000 00000000"/>
+    <achVendID value="ADBO"/>
+    <fsSelection value="00000000 00000000"/>
+    <usFirstCharIndex value="65"/>
+    <usLastCharIndex value="99"/>
+    <sTypoAscender value="750"/>
+    <sTypoDescender value="-250"/>
+    <sTypoLineGap value="0"/>
+    <usWinAscent value="984"/>
+    <usWinDescent value="273"/>
+    <ulCodePageRange1 value="00100000 00000000 00000001 10011111"/>
+    <ulCodePageRange2 value="00000000 00000000 00000000 00000000"/>
+    <sxHeight value="500"/>
+    <sCapHeight value="660"/>
+    <usDefaultChar value="0"/>
+    <usBreakChar value="32"/>
+    <usMaxContext value="3"/>
+  </OS_2>
+
+  <cmap>
+    <tableVersion version="0"/>
+    <cmap_format_4 platformID="0" platEncID="3" language="0">
+      <map code="0x41" name="A"/><!-- LATIN CAPITAL LETTER A -->
+      <map code="0x42" name="B"/><!-- LATIN CAPITAL LETTER B -->
+      <map code="0x43" name="C"/><!-- LATIN CAPITAL LETTER C -->
+      <map code="0x61" name="a"/><!-- LATIN SMALL LETTER A -->
+      <map code="0x62" name="b"/><!-- LATIN SMALL LETTER B -->
+      <map code="0x63" name="c"/><!-- LATIN SMALL LETTER C -->
+    </cmap_format_4>
+    <cmap_format_12 platformID="0" platEncID="4" format="12" reserved="0" length="0" language="0" nGroups="0">
+      <map code="0x41" name="A"/><!-- LATIN CAPITAL LETTER A -->
+      <map code="0x42" name="B"/><!-- LATIN CAPITAL LETTER B -->
+      <map code="0x43" name="C"/><!-- LATIN CAPITAL LETTER C -->
+      <map code="0x61" name="a"/><!-- LATIN SMALL LETTER A -->
+      <map code="0x62" name="b"/><!-- LATIN SMALL LETTER B -->
+      <map code="0x63" name="c"/><!-- LATIN SMALL LETTER C -->
+    </cmap_format_12>
+    <cmap_format_4 platformID="3" platEncID="1" language="0">
+      <map code="0x41" name="A"/><!-- LATIN CAPITAL LETTER A -->
+      <map code="0x42" name="B"/><!-- LATIN CAPITAL LETTER B -->
+      <map code="0x43" name="C"/><!-- LATIN CAPITAL LETTER C -->
+      <map code="0x61" name="a"/><!-- LATIN SMALL LETTER A -->
+      <map code="0x62" name="b"/><!-- LATIN SMALL LETTER B -->
+      <map code="0x63" name="c"/><!-- LATIN SMALL LETTER C -->
+    </cmap_format_4>
+    <cmap_format_12 platformID="3" platEncID="10" format="12" reserved="0" length="0" language="0" nGroups="0">
+      <map code="0x41" name="A"/><!-- LATIN CAPITAL LETTER A -->
+      <map code="0x42" name="B"/><!-- LATIN CAPITAL LETTER B -->
+      <map code="0x43" name="C"/><!-- LATIN CAPITAL LETTER C -->
+      <map code="0x61" name="a"/><!-- LATIN SMALL LETTER A -->
+      <map code="0x62" name="b"/><!-- LATIN SMALL LETTER B -->
+      <map code="0x63" name="c"/><!-- LATIN SMALL LETTER C -->
+    </cmap_format_12>
+  </cmap>
+
+  <head>
+    <!-- Most of this table will be recalculated by the compiler -->
+    <tableVersion value="1.0"/>
+    <fontRevision value="2.01999"/>
+    <checkSumAdjustment value="0x0"/>
+    <magicNumber value="0x0"/>
+    <flags value="00000000 00000011"/>
+    <unitsPerEm value="1000"/>
+    <created value="Thu Jan  1 00:00:00 1970"/>
+    <modified value="Thu Jan  1 00:00:00 1970"/>
+    <xMin value="-458"/>
+    <yMin value="-326"/>
+    <xMax value="2156"/>
+    <yMax value="1024"/>
+    <macStyle value="00000000 00000000"/>
+    <lowestRecPPEM value="3"/>
+    <fontDirectionHint value="2"/>
+    <indexToLocFormat value="0"/>
+    <glyphDataFormat value="0"/>
+  </head>
+
+  <hhea>
+    <tableVersion value="0x00010000"/>
+    <ascent value="984"/>
+    <descent value="-273"/>
+    <lineGap value="0"/>
+    <advanceWidthMax value="2200"/>
+    <minLeftSideBearing value="-458"/>
+    <minRightSideBearing value="-458"/>
+    <xMaxExtent value="2156"/>
+    <caretSlopeRise value="1"/>
+    <caretSlopeRun value="0"/>
+    <caretOffset value="0"/>
+    <reserved0 value="0"/>
+    <reserved1 value="0"/>
+    <reserved2 value="0"/>
+    <reserved3 value="0"/>
+    <metricDataFormat value="0"/>
+    <numberOfHMetrics value="0"/>
+  </hhea>
+
+  <hmtx>
+    <mtx name=".notdef" width="704" lsb="76"/>
+    <mtx name="A" width="584" lsb="-10"/>
+    <mtx name="A.sc" width="516" lsb="-10"/>
+    <mtx name="B" width="612" lsb="72"/>
+    <mtx name="B.sc" width="554" lsb="72"/>
+    <mtx name="C" width="586" lsb="44"/>
+    <mtx name="C.sc" width="526" lsb="44"/>
+    <mtx name="a" width="536" lsb="38"/>
+    <mtx name="b" width="580" lsb="58"/>
+    <mtx name="c" width="472" lsb="32"/>
+  </hmtx>
+
+  <maxp>
+    <tableVersion value="0x5000"/>
+    <numGlyphs value="10"/>
+  </maxp>
+
+  <name>
+    <namerecord nameID="0" platformID="3" platEncID="1" langID="0x409">
+      Copyright 2010, 2012, 2014 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name ‘Source’.
+    </namerecord>
+    <namerecord nameID="1" platformID="3" platEncID="1" langID="0x409">
+      Source Sans Pro Black
+    </namerecord>
+    <namerecord nameID="2" platformID="3" platEncID="1" langID="0x409">
+      Regular
+    </namerecord>
+    <namerecord nameID="3" platformID="3" platEncID="1" langID="0x409">
+      2.020;ADBO;SourceSansPro-Black;ADOBE
+    </namerecord>
+    <namerecord nameID="4" platformID="3" platEncID="1" langID="0x409">
+      Source Sans Pro Black
+    </namerecord>
+    <namerecord nameID="5" platformID="3" platEncID="1" langID="0x409">
+      Version 2.020;PS 2.0;hotconv 1.0.86;makeotf.lib2.5.63406
+    </namerecord>
+    <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
+      SourceSansPro-Black
+    </namerecord>
+    <namerecord nameID="7" platformID="3" platEncID="1" langID="0x409">
+      Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries.
+    </namerecord>
+    <namerecord nameID="8" platformID="3" platEncID="1" langID="0x409">
+      Adobe Systems Incorporated
+    </namerecord>
+    <namerecord nameID="9" platformID="3" platEncID="1" langID="0x409">
+      Paul D. Hunt
+    </namerecord>
+    <namerecord nameID="11" platformID="3" platEncID="1" langID="0x409">
+      http://www.adobe.com/type
+    </namerecord>
+    <namerecord nameID="13" platformID="3" platEncID="1" langID="0x409">
+      This Font Software is licensed under the SIL Open Font License, Version 1.1. This license is available with a FAQ at: http://scripts.sil.org/OFL. This Font Software is distributed on an ‘AS IS’ BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the SIL Open Font License for the specific language, permissions and limitations governing your use of this Font Software.
+    </namerecord>
+    <namerecord nameID="14" platformID="3" platEncID="1" langID="0x409">
+      http://scripts.sil.org/OFL
+    </namerecord>
+    <namerecord nameID="16" platformID="3" platEncID="1" langID="0x409">
+      Source Sans Pro
+    </namerecord>
+    <namerecord nameID="17" platformID="3" platEncID="1" langID="0x409">
+      Black
+    </namerecord>
+    <namerecord nameID="256" platformID="3" platEncID="1" langID="0x409">
+      Slashed zero
+    </namerecord>
+    <namerecord nameID="257" platformID="3" platEncID="1" langID="0x409">
+      Straight l
+    </namerecord>
+    <namerecord nameID="258" platformID="3" platEncID="1" langID="0x409">
+      Alternate a
+    </namerecord>
+    <namerecord nameID="259" platformID="3" platEncID="1" langID="0x409">
+      Alternate g
+    </namerecord>
+    <namerecord nameID="260" platformID="3" platEncID="1" langID="0x409">
+      Serifed I
+    </namerecord>
+  </name>
+
+  <post>
+    <formatType value="3.0"/>
+    <italicAngle value="0.0"/>
+    <underlinePosition value="-75"/>
+    <underlineThickness value="50"/>
+    <isFixedPitch value="0"/>
+    <minMemType42 value="0"/>
+    <maxMemType42 value="0"/>
+    <minMemType1 value="0"/>
+    <maxMemType1 value="0"/>
+  </post>
+
+</ttFont>

@@ -46,9 +46,10 @@ static IntX GPOSLookupIndex = 0;
 static IntX GPOSLookupCnt = 0;
 static IntX GPOSContextRecursionCnt = 0;
 
-static Byte8 contextPrefix[40]; /* when dumping the context sub rules, this cntains the context string for the rule, if any. */
+static Byte8 contextPrefix[MAX_NAME_LEN]; /* when dumping the context sub rules, this cntains the context string for the rule, if any. */
 
 static FILE * AFMout;
+static char* tempFileName;
 
 static void *readSubtable(Card32 offset, Card16 type);
 
@@ -1374,7 +1375,6 @@ static void proofSinglePos1(SinglePosFormat1 *fmt, IntX glyphtoproof)
 	  ttoEnumerateCoverage(fmt->Coverage, fmt->_Coverage, &CovList, &nitems);
 	  for ((glyphtoproof!=-1)?(i=glyphtoproof):(i = 0); (glyphtoproof!=-1)?(i<=glyphtoproof):(i < (IntX)nitems); i++) 
 		{
-		  char name[40];
 		  char label[80];
 		  GlyphId glyphId = *da_INDEX(CovList.glyphidlist, i);
 		  if (glyphtoproof==-1 && !opt_Present("-f")) {
@@ -1387,6 +1387,7 @@ static void proofSinglePos1(SinglePosFormat1 *fmt, IntX glyphtoproof)
 				proofRec->vert=proofIsVerticalMode();
 				curproofrec++;
 		  }else{
+			  char name[MAX_NAME_LEN];
 			  strcpy(name, getGlyphName(glyphId, 1));
 			  getMetrics(glyphId, &origShift, &lsb, &rsb, &width, &tsb, &bsb, &vwidth, &yorig);
 			  if (isVert)
@@ -1451,7 +1452,7 @@ static void dumpSinglePos1(SinglePosFormat1 *fmt, IntX level, IntX glyphtoproof)
 	  	ttoEnumerateCoverage(fmt->Coverage, fmt->_Coverage, &CovList, &nitems);
 	    for (i = 0; i < (IntX)nitems; i++) 
 		{
-		  char name[40];
+		  char name[MAX_NAME_LEN];
 		  GlyphId glyphId = *da_INDEX(CovList.glyphidlist, i);
 
 		  strcpy(name, getGlyphName(glyphId, 0));
@@ -1506,7 +1507,6 @@ static void proofSinglePos2(SinglePosFormat2 *fmt, IntX glyphtoproof)
 	  ttoEnumerateCoverage(fmt->Coverage, fmt->_Coverage, &CovList, &nitems);
 	  for ((glyphtoproof!=-1)?(i=glyphtoproof):(i = 0); (glyphtoproof!=-1)?(i<=glyphtoproof):(i < (IntX)nitems); i++) 
 		{
-		  char name[40];
 		  char label[80];
 		  GlyphId glyphId = *da_INDEX(CovList.glyphidlist, i);
 		  if (glyphtoproof ==-1 && !opt_Present("-f")) {
@@ -1519,6 +1519,7 @@ static void proofSinglePos2(SinglePosFormat2 *fmt, IntX glyphtoproof)
 				proofRec->vert=proofIsVerticalMode();
 				curproofrec++;
 		  }else{
+			  char name[MAX_NAME_LEN];
 			  strcpy(name, getGlyphName(glyphId, 1));
 			  xpla = fmt->Value[i].XPlacement;
 			  ypla = fmt->Value[i].YPlacement;
@@ -1594,7 +1595,7 @@ static void dumpSinglePos2(SinglePosFormat2 *fmt, IntX level , IntX glyphtoproof
 		  	ttoEnumerateCoverage(fmt->Coverage, fmt->_Coverage, &CovList, &nitems);
 		  	for (i = 0; i < (IntX)nitems; i++) 
 			{
-			  char name[40];
+			  char name[MAX_NAME_LEN];
 			  GlyphId glyphId = *da_INDEX(CovList.glyphidlist, i);
 			  strcpy(name, getGlyphName(glyphId, 0));
 			  
@@ -1771,7 +1772,7 @@ static void proofPosPair1(PosPairFormat1 *fmt, IntX glyphtoproof1, IntX glyphtop
 	  /* generate the pairs list */
 	  for ((glyphtoproof1!=-1)?(i=glyphtoproof1):(i = 0); (glyphtoproof1!=-1)?(i<=glyphtoproof1):(i < (IntX)nitems); i++) 
 		{
-		  char nam1[40];
+		  char nam1[MAX_NAME_LEN];
 		  GlyphId glyphId = *da_INDEX(CovList.glyphidlist, i);
 		  PairSet *pairset = &(fmt->_PairSet[i]);
 		  
@@ -1780,7 +1781,7 @@ static void proofPosPair1(PosPairFormat1 *fmt, IntX glyphtoproof1, IntX glyphtop
 		  for ((glyphtoproof2!=-1)?(j=glyphtoproof2):(j = 0); (glyphtoproof2!=-1)?(j<=glyphtoproof2):(j < pairset->PairValueCount); j++) 
 			{
 			  PairValueRecord *pv = &(pairset->PairValueRecord[j]);
-			  char nam2[40];	
+			  char nam2[MAX_NAME_LEN];	
 			  char label[80];
 			  IntX width2, vwidth2, yorig2;
 			  strcpy(nam2, getGlyphName(pv->SecondGlyph, 1));
@@ -1953,7 +1954,7 @@ static void dumpPosPair1(PosPairFormat1 *fmt, IntX level, IntX glyphtoproof1, In
 
 		  for (i = 0; i < (IntX)nitems; i++) 
 			{
-			  char nam1[40];
+			  char nam1[MAX_NAME_LEN];
 			  GlyphId glyphId = *da_INDEX(CovList.glyphidlist, i);
 			  PairSet *pairset = &(fmt->_PairSet[i]);
 			  strcpy(nam1, getGlyphName(glyphId, 0));			  
@@ -1961,7 +1962,7 @@ static void dumpPosPair1(PosPairFormat1 *fmt, IntX level, IntX glyphtoproof1, In
 			  for (j = 0; j < pairset->PairValueCount; j++) 
 				{
 				  PairValueRecord *pv = &(pairset->PairValueRecord[j]);
-				  char nam2[40];	
+				  char nam2[MAX_NAME_LEN];	
 				  strcpy(nam2, getGlyphName(pv->SecondGlyph, 0));
 				  if (level == 7)
 				  {
@@ -2018,8 +2019,8 @@ static void proofPosPair2(PosPairFormat2 *fmt, IntX glyphtoproof1, IntX glyphtop
 	  IntX origShift, lsb, rsb, width, width2, tsb, bsb, vwidth, vwidth2, yorig , yorig2;
 	  proofOptions options;
 	  IntX isVert = proofIsVerticalMode();
-	  char nam1[40];
-	  char nam2[40];
+	  char nam1[MAX_NAME_LEN];
+	  char nam2[MAX_NAME_LEN];
 	  char label[80];
 	  ttoEnumRec CovList;
 	  Card32 nitems, i;
@@ -2187,8 +2188,8 @@ static void dumpPosPair2(PosPairFormat2 *fmt, IntX level, IntX glyphtoproof1, In
 		  ttoEnumRec *class2;
 		  Card32 class2count;
 		  IntX c1, c2, c1g, c2g;
-		  char nam1[40];
-		  char nam2[40];
+		  char nam1[MAX_NAME_LEN];
+		  char nam2[MAX_NAME_LEN];
 		  bit_declp(CoverageSet);
 
 		  class1 = memNew(sizeof(ttoEnumRec) * fmt->Class1Count);
@@ -2335,8 +2336,8 @@ static void dumpPosPair2(PosPairFormat2 *fmt, IntX level, IntX glyphtoproof1, In
 		  Card32 class2count;
 		  IntX c1, c2, c1g, c2g;
 		  IntX xpla, xadv, ypla, yadv;
-		  char nam1[40];
-		  char nam2[40];
+		  char nam1[MAX_NAME_LEN];
+		  char nam2[MAX_NAME_LEN];
 		  bit_declp(CoverageSet);
 
 		  class1 = memNew(sizeof(ttoEnumRec) * fmt->Class1Count);
@@ -2735,7 +2736,7 @@ static void dumpCursiveAttachPos(CursivePosFormat1 *fmt, IntX level)
 	  	ttoEnumerateCoverage(fmt->Coverage, fmt->_Coverage, &CovList, &nitems);
 	    for (i = 0; i < (IntX)nitems; i++) 
 			{
-			char name[40];
+			char name[MAX_NAME_LEN];
 			GlyphId glyphId = *da_INDEX(CovList.glyphidlist, i);
 			IntX offsetAnchor;
 			void * anchorTable;
@@ -2926,7 +2927,7 @@ static void dumpMarkToBase(MarkBasePosFormat1 *fmt, IntX level, int isMarkToMark
 		ttoEnumerateCoverage(fmt->MarkCoverage, fmt->_MarkCoverage, &MarkCovList, &nitems);
 		for (i = 0; i < (IntX)nitems; i++) 
 			{
-			char name[40];
+			char name[MAX_NAME_LEN];
 			GlyphId glyphId = *da_INDEX(MarkCovList.glyphidlist, i);
 			IntX offsetAnchor;
 			void * anchorTable;
@@ -2953,7 +2954,7 @@ static void dumpMarkToBase(MarkBasePosFormat1 *fmt, IntX level, int isMarkToMark
 	  	ttoEnumerateCoverage(fmt->BaseCoverage, fmt->_BaseCoverage, &BaseCovList, &mitems);
 	    for (i = 0; i < (IntX)mitems; i++) 
 			{
-			char name[40];
+			char name[MAX_NAME_LEN];
 			GlyphId glyphId = *da_INDEX(BaseCovList.glyphidlist, i);
 			
  		 	BaseRecord *record = &basearray->BaseRecord[i];
@@ -3113,7 +3114,7 @@ static void dumpMarkToLigatureAttach(MarkToLigPosFormat1 *fmt, IntX level)
 	  	ttoEnumerateCoverage(fmt->MarkCoverage, fmt->_MarkCoverage, &MarkCovList, &nitems);
 	    for (i = 0; i < (IntX)nitems; i++) 
 			{
-			char name[40];
+			char name[MAX_NAME_LEN];
 			GlyphId glyphId = *da_INDEX(MarkCovList.glyphidlist, i);
 			IntX offsetAnchor;
 			void * anchorTable;
@@ -3140,7 +3141,7 @@ static void dumpMarkToLigatureAttach(MarkToLigPosFormat1 *fmt, IntX level)
 	  	ttoEnumerateCoverage(fmt->LigatureCoverage, fmt->_LigatureCoverage, &LigatureCoverage, &mitems);
 	    for (i = 0; i < (IntX)mitems; i++) 
 			{
-			char name[40];
+			char name[MAX_NAME_LEN];
 			GlyphId glyphId = *da_INDEX(LigatureCoverage.glyphidlist, i);
 			
  		 	LigatureAttach *ligatureAttachRec = &ligArray->_LigatureAttach[i];
@@ -3318,7 +3319,7 @@ static void dumpContext1(ContextPosFormat1 *fmt, IntX level)
 	  	ttoEnumerateCoverage(fmt->Coverage, fmt->_Coverage, &CovList, &nitems);
 		for (i = 0; i < nitems; i++) 
 		{
-		  	char name[40];
+		  	char name[MAX_NAME_LEN];
 		  	PosRuleSet *posruleset = &fmt->_PosRuleSet[i];
 		  	GlyphId glyphId = *da_INDEX(CovList.glyphidlist, i);
 
@@ -3427,7 +3428,7 @@ static void dumpContext1(ContextPosFormat1 *fmt, IntX level)
 		
 		for (i = 0; i < nitems; i++)
 		  {
-			char name1[40];
+			char name1[MAX_NAME_LEN];
 			IntX srscnt;
 			IntX origShift, lsb, rsb, width1, tsb, bsb, vwidth, yorig;
 			GlyphId glyphId = *da_INDEX(CovList.glyphidlist, i);
@@ -3538,7 +3539,7 @@ static void showContext2(ContextPosFormat2 *fmt, IntX level, void *feattag)
 					CR = &(classList[classId]);
 					for (c = 0; c < CR->glyphidlist.cnt; c++)
 					  {
-						char name2[64];
+						char name2[MAX_NAME_LEN];
 						GlyphId glyphId2 = *da_INDEX(CR->glyphidlist, c);
 						strcpy(name2, getGlyphName(glyphId2, forProofing));
 						psIndex = strlen(proofString);
@@ -3561,7 +3562,7 @@ static void showContext2(ContextPosFormat2 *fmt, IntX level, void *feattag)
 						sprintf(&proofString[psIndex],"[");
 						for (c = 0; c < CR->glyphidlist.cnt; c++)
 						  {
-							char name2[64];
+							char name2[MAX_NAME_LEN];
 							GlyphId glyphId2 = *da_INDEX(CR->glyphidlist, c);
 							strcpy(name2, getGlyphName(glyphId2, forProofing));
                               if ((psIndex + strlen(name2) + 10) >= kProofBufferLen)
@@ -3632,7 +3633,7 @@ static void proofContext2(ContextPosFormat2 *fmt)
 		ttoEnumerateCoverage(fmt->Coverage, fmt->_Coverage, &CovList, &nitems);
 		for (i = 0; i < nitems; i++)
 		  {
-			char name1[40];
+			char name1[MAX_NAME_LEN];
 			IntX scscnt;
 			GlyphId glyphId = *da_INDEX(CovList.glyphidlist, i);
 			strcpy(name1, getGlyphName(glyphId, 1));
@@ -3680,7 +3681,7 @@ static void proofContext2(ContextPosFormat2 *fmt)
 						CR = &(classList[classId]);
 						for (c = 0; c < CR->glyphidlist.cnt; c++)
 						  {
-							char name2[40];
+							char name2[MAX_NAME_LEN];
 							GlyphId inputgid[4];
 							GlyphId outputgid[4];
 							IntX inputcount, outputcount, o;
@@ -3739,7 +3740,7 @@ static void proofContext2(ContextPosFormat2 *fmt)
 							for (o = 0; o < outputcount; o++)
 							  {
 								IntX owid, OW;
-								char oname[40];
+								char oname[MAX_NAME_LEN];
 								GlyphId ogid = outputgid[o];
 								strcpy(oname, getGlyphName(ogid, 1));
 								getMetrics(ogid, &origShift, &lsb, &rsb, &owid, &tsb, &bsb, &vwidth, &yorig3);
@@ -4365,7 +4366,7 @@ static void  proofPosChainContext3(ChainContextPosFormat3 *fmt, int level, void*
 			Card32 nitems1;
 			IntX j = fmt->BacktrackGlyphCount - (i+1);
 			GlyphId gId1;
-			char name1[40];
+			char name1[MAX_NAME_LEN];
 			ttoEnumRec *ter1 = da_NEXT(BacktrackGlyphCovListArray);
 			ttoEnumerateCoverage(fmt->Backtrack[j], fmt->_Backtrack[j], ter1, &nitems1);
 			if (nitems1 > 1)
@@ -4414,7 +4415,7 @@ static void  proofPosChainContext3(ChainContextPosFormat3 *fmt, int level, void*
 			Card32 nitems1;
 			IntX j;
 			GlyphId gId1;
-			char name1[40];
+			char name1[MAX_NAME_LEN];
 			ttoEnumRec *ter1 = da_NEXT(InputGlyphCovListArray);
 			ttoEnumerateCoverage(fmt->Input[i], fmt->_Input[i], ter1, &nitems1);
 			if (nitems1 > 1)
@@ -4468,7 +4469,7 @@ static void  proofPosChainContext3(ChainContextPosFormat3 *fmt, int level, void*
 			Card32 nitems1;
 			IntX j;
 			GlyphId gId1;
-			char name1[40];
+			char name1[MAX_NAME_LEN];
 			ttoEnumRec *ter1 = da_NEXT(LookaheadGlyphCovListArray);
 			ttoEnumerateCoverage(fmt->Lookahead[i], fmt->_Lookahead[i], ter1, &nitems1);
 			if (nitems1 > 1)
@@ -4525,7 +4526,7 @@ static void  proofPosChainContext3(ChainContextPosFormat3 *fmt, int level, void*
 			Card32 nitems1, nitems2 ;
 			IntX j, k;
 			GlyphId gId1, gId2;
-			char name1[40], name2[40];
+			char name1[MAX_NAME_LEN], name2[MAX_NAME_LEN];
 			ttoEnumRec *ter1, *ter2;
 			char label[100];
 			
@@ -5377,8 +5378,8 @@ void GPOSDump(IntX level, LongN start)
 	  				{
 	  				/* collect data from temp AFM file line */
 	  				char prefix[6];
-	  				char name1[65];
-	  				char name2[65];
+	  				char name1[MAX_NAME_LEN];
+	  				char name2[MAX_NAME_LEN];
 	  				int val1 = 0, val2 = 0, val3 = 0;
 	  				kernEntry = da_INDEX(afmLines, lineCount);
 	  				scanNum = sscanf(inLine,"%5s %64s %64s %d %d %d", prefix, name1, name2, &val1, &val2, &val3);

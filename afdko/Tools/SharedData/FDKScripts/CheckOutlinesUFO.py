@@ -4,9 +4,9 @@
 Tool that performs outline quality checks and can remove path overlaps.
 """
 
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 
-__version__ = '2.0.2'
+__version__ = '2.0.3'
 
 import argparse
 import hashlib
@@ -22,11 +22,11 @@ import defcon
 import ufoLib
 from fontPens.digestPointPen import DigestPointPen
 
-import ufoTools
+from . import ufoTools
 # noinspection PyPep8Naming
-from ufoTools import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
+from .ufoTools import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
 # noinspection PyPep8Naming
-from ufoTools import kProcessedGlyphsLayerName as PROCD_GLYPHS_LAYER_NAME
+from .ufoTools import kProcessedGlyphsLayerName as PROCD_GLYPHS_LAYER_NAME
 
 
 class FocusOptionParseError(KeyError):
@@ -580,7 +580,7 @@ def remove_tiny_sub_paths(bool_glyph, min_area, msg):
         contour = bool_glyph.contours[ci]
         ci += 1
         on_line_pts = filter(lambda pt: pt[0] is not None, contour._points)
-        num_pts = len(on_line_pts)
+        num_pts = len(list(on_line_pts))
         if num_pts <= 4:
             c_bounds = contour.bounds
             c_area = (c_bounds[2] - c_bounds[0]) * (c_bounds[3] - c_bounds[1])

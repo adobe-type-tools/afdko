@@ -77,7 +77,7 @@ IntX SINGGetUnitsPerEm(Card16 *unitsPerEm, Card32 client)
 void SINGDump(IntX level, LongN start)
 	{
 	IntX i;
-	char nam[64];
+	char nam[MAX_NAME_LEN];
 	DL(1, (OUTPUTBUFF, "### [SING] (%08lx)\n", start));
 
 	DLu(2, "tableVersionMajor =", SING->tableVersionMajor);

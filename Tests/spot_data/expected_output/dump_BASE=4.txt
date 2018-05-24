@@ -1,0 +1,75 @@
+### [BASE] (0000106c)
+Version  =1.0 (00010000)
+HorizAxis=0008
+VertAxis =0000
+--- Axis (0008) [horiz]
+BaseTagList   =0004
+BaseScriptList=000e
+--- BaseTagList (0004)
+BaseTagCount=2
+--- BaselineTag[index]=tag
+[0]=ideo [1]=romn 
+--- BaseScriptList (000e)
+BaseScriptCount=4
+--- BaseScriptRecord[index]={BaseScriptTag,BaseScript}
+[0]={DFLT,001a} [1]={cyrl,001a} [2]={grek,001a} [3]={latn,001a} 
+--- BaseScript (001a) [DFLT]
+BaseValues      =0006
+DefaultMinMax   =0000
+BaseLangSysCount=0
+--- BaseValues (0006)
+DefaultIndex  =1
+BaseCoordCount=2
+--- BaseCoord[index]=offset
+[0]=0008 [1]=000c 
+--- BaseCoord (0008)
+BaseCoordFormat=1
+Coordinate     =-170
+--- BaseCoord (000c)
+BaseCoordFormat=1
+Coordinate     =0
+--- BaseScript (001a) [cyrl]
+BaseValues      =0006
+DefaultMinMax   =0000
+BaseLangSysCount=0
+--- BaseValues (0006)
+DefaultIndex  =1
+BaseCoordCount=2
+--- BaseCoord[index]=offset
+[0]=0008 [1]=000c 
+--- BaseCoord (0008)
+BaseCoordFormat=1
+Coordinate     =-170
+--- BaseCoord (000c)
+BaseCoordFormat=1
+Coordinate     =0
+--- BaseScript (001a) [grek]
+BaseValues      =0006
+DefaultMinMax   =0000
+BaseLangSysCount=0
+--- BaseValues (0006)
+DefaultIndex  =1
+BaseCoordCount=2
+--- BaseCoord[index]=offset
+[0]=0008 [1]=000c 
+--- BaseCoord (0008)
+BaseCoordFormat=1
+Coordinate     =-170
+--- BaseCoord (000c)
+BaseCoordFormat=1
+Coordinate     =0
+--- BaseScript (001a) [latn]
+BaseValues      =0006
+DefaultMinMax   =0000
+BaseLangSysCount=0
+--- BaseValues (0006)
+DefaultIndex  =1
+BaseCoordCount=2
+--- BaseCoord[index]=offset
+[0]=0008 [1]=000c 
+--- BaseCoord (0008)
+BaseCoordFormat=1
+Coordinate     =-170
+--- BaseCoord (000c)
+BaseCoordFormat=1
+Coordinate     =0

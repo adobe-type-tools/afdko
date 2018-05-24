@@ -1,0 +1,6 @@
+horizAxis.BaseTagList            ideo     romn     
+horizAxis.BaseScriptList DFLT    -170  <     0> 
+.                        cyrl    -170  <     0> 
+.                        grek    -170  <     0> 
+.                        latn    -170  <     0> 
+

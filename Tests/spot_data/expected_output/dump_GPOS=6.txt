@@ -1,0 +1,64 @@
+Comment Begin Script DFLT Language dflt
+StartKernPairs 12
+KPX A C -10
+KPX A C.sc 20
+KPX A a 10
+KPX A.sc A.sc 10
+KPX B A.sc 10
+KPX B C.sc 10
+KPX C A.sc 10
+KPX C C -40
+KPX C.sc C.sc -20
+KPX b a -10
+KPX c a -10
+KPX c c -30
+EndKernPairs
+Comment End Script
+Comment Begin Script cyrl Language dflt
+StartKernPairs 12
+KPX A C -10
+KPX A C.sc 20
+KPX A a 10
+KPX A.sc A.sc 10
+KPX B A.sc 10
+KPX B C.sc 10
+KPX C A.sc 10
+KPX C C -40
+KPX C.sc C.sc -20
+KPX b a -10
+KPX c a -10
+KPX c c -30
+EndKernPairs
+Comment End Script
+Comment Begin Script grek Language dflt
+StartKernPairs 12
+KPX A C -10
+KPX A C.sc 20
+KPX A a 10
+KPX A.sc A.sc 10
+KPX B A.sc 10
+KPX B C.sc 10
+KPX C A.sc 10
+KPX C C -40
+KPX C.sc C.sc -20
+KPX b a -10
+KPX c a -10
+KPX c c -30
+EndKernPairs
+Comment End Script
+Comment Begin Script latn Language dflt
+StartKernPairs 12
+KPX A C -10
+KPX A C.sc 20
+KPX A a 10
+KPX A.sc A.sc 10
+KPX B A.sc 10
+KPX B C.sc 10
+KPX C A.sc 10
+KPX C C -40
+KPX C.sc C.sc -20
+KPX b a -10
+KPX c a -10
+KPX c c -30
+EndKernPairs
+Comment End Script

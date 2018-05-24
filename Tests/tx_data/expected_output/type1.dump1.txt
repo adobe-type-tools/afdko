@@ -1,0 +1,24 @@
+## Filename tx_data/type1.pfa
+## Top Dict
+version             "2.20"
+Notice              "Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries."
+Copyright           "Copyright 2010, 2012, 2014 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name 'Source'."
+FamilyName          "Source Sans Pro"
+UnderlinePosition   -75
+FontBBox            {52,-12,565,660}
+sup.srcFontType     Type 1 (name-keyed)
+sup.nGlyphs         2
+## FontDict[0]
+FontName            "SourceSansPro-Regular"
+## Private
+BlueValues          {-12,0,486,498,518,530,574,586,638,650,656,668,712,724}
+OtherBlues          {-217,-205}
+BlueScale           0.0625
+BlueFuzz            0
+StdHW               67
+StdVW               84
+StemSnapH           {67,78}
+StemSnapV           {84,95}
+## glyph[tag] {name,encoding}
+glyph[0] {.notdef,-}
+glyph[1] {a,0x61}

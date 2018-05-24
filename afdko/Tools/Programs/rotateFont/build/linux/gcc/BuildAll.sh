@@ -1,4 +1,7 @@
 #! /bin/sh
+set -e
+set -x
+
 target=rotateFont
 curdir=`pwd`
 
