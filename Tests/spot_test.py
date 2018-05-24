@@ -108,13 +108,12 @@ def test_bug373_dump_gsub_equal_7_long_glyph_name_otf():
     assert differ([expected_path, actual_path]) is True
 
 
-# Abort trap: 6
 # https://github.com/adobe-type-tools/afdko/issues/373
-# def test_bug373_dump_gsub_equal_7_long_glyph_name_ttf():
-#     actual_path = runner(CMD + ['-r', '-o', 't', '_GSUB=7',
-#                                 '-f', 'long_glyph_name.ttf'])
-#     expected_path = _get_expected_path('bug373_ttf.txt')
-#     assert differ([expected_path, actual_path]) is True
+def test_bug373_dump_gsub_equal_7_long_glyph_name_ttf():
+    actual_path = runner(CMD + ['-r', '-o', 't', '_GSUB=7',
+                                '-f', 'long_glyph_name.ttf'])
+    expected_path = _get_expected_path('bug373_ttf.txt')
+    assert differ([expected_path, actual_path]) is True
 
 
 def test_dump_cmap_equal_5():
