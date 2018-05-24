@@ -285,7 +285,7 @@ int opt_##n(int argc, char *argv[], int argi, opt_Option *opt) \
 	else \
 		{ \
 		t value; \
-		char s[128]; \
+		char s[64]; \
 		strncpy(s, argv[argi], 63); \
 		s[63] = '\0'; \
 		if (sscanf(s, f, &value) != 1) \
