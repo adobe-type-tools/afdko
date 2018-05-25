@@ -24,9 +24,7 @@ matrix:
         - python -m pip install --user virtualenv
         - python -m virtualenv .venv/
         - source .venv/bin/activate
-        - pip install --upgrade pip setuptools setuptools_scm wheel cython
-        - pip install flake8
-        - pip install -r requirements.txt
+        - pip install -U -r requirements-dev.txt
       before_script:
         - export PYTHONPATH=$PYTHONPATH:$(pwd)
       script:
@@ -45,8 +43,7 @@ matrix:
         - deactivate
         - export PATH=$PATH:'/Users/travis/Library/Python/2.7/bin'
         - python -m pip install --user -U --force-reinstall dist/*.whl
-        - python -m pip install --user codecov
-        - python -m pip install --user pytest-cov
+        - python -m pip install --user -r requirements-dev.txt
         - pytest --cov
         - python -m pip uninstall --yes afdko
       after_success:
