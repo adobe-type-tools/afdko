@@ -1,6 +1,26 @@
 Changelog
 =========
 
+2.7.1 (released 2018-XX-XX)
+---------------------------
+
+- Implemented an integration testing framework
+  ([#346](https://github.com/adobe-type-tools/afdko/pull/346))
+- \[ttxn\] Fixed ClassRecord AttributeError
+  ([#350](https://github.com/adobe-type-tools/afdko/issues/350))
+- \[ttxn\] Trailing spaces are now stripped from script and language tags
+- \[tx\] Get blended glyph stems when the output is not CFF2
+  ([#378](https://github.com/adobe-type-tools/afdko/pull/378))
+- \[spot\] Fixed crash due to buffer overrun errors from long glyph names
+  ([#373](https://github.com/adobe-type-tools/afdko/issues/373))
+- \[ProofPDF\] Added 'pageIncludeTitle' option
+  ([#379](https://github.com/adobe-type-tools/afdko/pull/379))
+- \[ProofPDF\] Removed search for 'CID charsets' folder
+  ([#368](https://github.com/adobe-type-tools/afdko/pull/368))
+- Removed **CID charsets** folder and its contents
+  ([#264](https://github.com/adobe-type-tools/afdko/issues/264),
+  [#368](https://github.com/adobe-type-tools/afdko/pull/368))
+
 2.7.0 (released 2018-05-09)
 ---------------------------
 
