@@ -1,7 +1,7 @@
 codecov==2.0.15
 cython==0.28.3
 flake8==3.5.0
-pip
+pip==10.0.1
 pytest-cov
 setuptools
 setuptools_scm
