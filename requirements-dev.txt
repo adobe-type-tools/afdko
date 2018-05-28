@@ -1,4 +1,4 @@
-codecov
+codecov==2.0.15
 cython
 flake8
 pip
