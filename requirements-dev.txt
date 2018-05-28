@@ -1,6 +1,6 @@
 codecov==2.0.15
 cython==0.28.3
-flake8
+flake8==3.5.0
 pip
 pytest-cov
 setuptools
