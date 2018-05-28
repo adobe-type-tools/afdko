@@ -2,7 +2,7 @@ codecov==2.0.15
 cython==0.28.3
 flake8==3.5.0
 pip==10.0.1
-pytest-cov
+pytest-cov==2.5.1
 setuptools
 setuptools_scm
 subprocess32>=3.5.0
