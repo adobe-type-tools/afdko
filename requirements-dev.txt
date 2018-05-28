@@ -1,5 +1,5 @@
 codecov==2.0.15
-cython
+cython==0.28.3
 flake8
 pip
 pytest-cov
