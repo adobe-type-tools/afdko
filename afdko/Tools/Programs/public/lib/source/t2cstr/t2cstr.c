@@ -78,10 +78,10 @@ struct _t2cCtx
 		{
 		long cnt;
 		float array[CFF2_MAX_OP_STACK];
-        unsigned short numRegions;
-        long blendCnt;
-        abfOpEntry blendArray[CFF2_MAX_OP_STACK];
-        abfBlendArg blendArgs[T2_MAX_STEMS];
+		unsigned short numRegions;
+		long blendCnt;
+		abfOpEntry blendArray[CFF2_MAX_OP_STACK];
+		abfBlendArg blendArgs[T2_MAX_STEMS];
 		} stack;
 	long maxOpStack;
 	float BCA[TX_BCA_LENGTH];	/* BuildCharArray */
@@ -1414,11 +1414,7 @@ static void convertToAbsolute(t2cCtx h, float x1, float y1, abfBlendArg* blendAr
 static void setNumMasters(t2cCtx h)
 {
     unsigned short vsindex = h->glyph->info->blendInfo.vsindex;
-    h->stack.numRegions = var_getIVSRegionCountForIndex(h->aux->varStore, vsindex);
-	if (h->stack.numRegions > CFF2_MAX_MASTERS) {
-		message(h, "too many regions %d for vsindex %d", h->stack.numRegions, vsindex);
-		h->stack.numRegions = 0;
-	}
+    h->stack.numRegions = var_getIVDRegionCountForIndex(h->aux->varStore, vsindex);
 	h->glyph->info->blendInfo.numRegions = h->stack.numRegions;
     if (!var_getIVSRegionIndices(h->aux->varStore, vsindex, h->regionIndices, h->stack.numRegions)) {
         message(h, "inconsistent region indices detected in item variation store subtable %d", vsindex);
