@@ -17,7 +17,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static GSUBTbl GSUB;
 static IntX loaded = 0;
 static Card32 GSUBStart;
-static Byte8 contextPrefix[40];
+static Byte8 contextPrefix[MAX_NAME_LEN];
 
 static ProofContextPtr proofctx = NULL;
 /*static Card32 featuretag = 0;*/
@@ -1055,8 +1055,8 @@ static void proofSingle1(SingleSubstFormat1 *fmt)
 	ttoEnumerateCoverage(fmt->Coverage, fmt->_Coverage, &CovList, &nitems);
 	for (i = 0; i < nitems; i++)
 	  {
-		char name[40];
-		char name2[40];
+		char name[MAX_NAME_LEN];
+		char name2[MAX_NAME_LEN];
 		IntX glyphId2;
 		GlyphId glyphId = *da_INDEX(CovList.glyphidlist, (Int32)i);
 		strcpy(name, getGlyphName(glyphId, 1));
@@ -1122,7 +1122,7 @@ static void dumpSingle1(SingleSubstFormat1 *fmt, IntX level)
 	  	ttoEnumerateCoverage(fmt->Coverage, fmt->_Coverage, &CovList, &nitems);
 	    for (i = 0; i < (Int32)nitems; i++) 
 		{
-		  char name[40];
+		  char name[MAX_NAME_LEN];
 		  GlyphId glyphId = *da_INDEX(CovList.glyphidlist, i);
 
 		  strcpy(name, getGlyphName(glyphId, 0));
@@ -1158,8 +1158,8 @@ static void proofSingle2(SingleSubstFormat2 *fmt)
 
 		for (i = 0; i < (Int32)nitems; i++)
 		  {
-			char name[40];
-			char name2[40];
+			char name[MAX_NAME_LEN];
+			char name2[MAX_NAME_LEN];
 			IntX glyphId2;
 			IntX origShift, lsb, rsb, width, tsb, bsb, vwidth, yorig, W;
 			GlyphId glyphId = *da_INDEX(CovList.glyphidlist, i);
@@ -1229,7 +1229,7 @@ static void dumpSingle2(SingleSubstFormat2 *fmt, IntX level)
 	  	ttoEnumerateCoverage(fmt->Coverage, fmt->_Coverage, &CovList, &nitems);
 	    for (i = 0; i < (Int32)nitems; i++) 
 		{
-		  char name[40];
+		  char name[MAX_NAME_LEN];
 		  GlyphId glyphId = *da_INDEX(CovList.glyphidlist, i);
 
 		  strcpy(name, getGlyphName(glyphId, 0));
@@ -1325,8 +1325,8 @@ static void proofMultiple1(MultipleSubstFormat1 *fmt)
 
 		for (i = 0; i < (Int32)nitems; i++)
 		  {
-			char name[40];
-			char name2[40];
+			char name[MAX_NAME_LEN];
+			char name2[MAX_NAME_LEN];
 			IntX glyphId2;
 			IntX j;
 			Sequence *sequence;
@@ -1474,8 +1474,8 @@ static void proofAlternate1(AlternateSubstFormat1 *fmt)
 
 		for (i = 0; i < (IntX)nitems; i++)
 		  {
-			char name[40];
-			char name2[40];
+			char name[MAX_NAME_LEN];
+			char name2[MAX_NAME_LEN];
 			IntX glyphId2;
 			AlternateSet *altset;
 			IntX origShift, lsb, rsb, width, tsb, bsb, vwidth, yorig, W;
@@ -1624,9 +1624,9 @@ static void proofLigature1(LigatureSubstFormat1 *fmt)
 		for (i = 0; i < (IntX)nitems; i++)
 		  {
 			LigatureSet *ligatureSet;
-			char name1[40];
-			char name2[40];
-			char ligname[40];
+			char name1[MAX_NAME_LEN];
+			char name2[MAX_NAME_LEN];
+			char ligname[MAX_NAME_LEN];
 			IntX glyphId2, ligId;
 			IntX j;
 			IntX origShift, lsb, rsb, width1, width2, tsb, bsb, vwidth, W1, W2;
@@ -1723,7 +1723,7 @@ static void dumpLigature1(LigatureSubstFormat1 *fmt, IntX level)
 	  	ttoEnumerateCoverage(fmt->Coverage, fmt->_Coverage, &CovList, (Card32*)&nitems);
 		for (i = 0; i < (Int32)nitems; i++) 
 		{
-		  char name[40];
+		  char name[MAX_NAME_LEN];
 		  IntX j;
 		  LigatureSet *ligatureSet = &fmt->_LigatureSet[i];
 		  GlyphId glyphId = *da_INDEX(CovList.glyphidlist, i);
@@ -1908,7 +1908,7 @@ static void dumpContext1(ContextSubstFormat1 *fmt, IntX level)
 		
 		for (i = 0; i < (IntX)nitems; i++)
 		  {
-			char name1[40];
+			char name1[MAX_NAME_LEN];
 			IntX srscnt;
 			IntX origShift, lsb, rsb, width1, tsb, bsb, vwidth, yorig;
 			GlyphId glyphId = *da_INDEX(CovList.glyphidlist, i);
@@ -1939,7 +1939,7 @@ static void dumpContext1(ContextSubstFormat1 *fmt, IntX level)
 	  	ttoEnumerateCoverage(fmt->Coverage, fmt->_Coverage, &CovList, &nitems);
 		for (i = 0; i < nitems; i++) 
 		{
-		  	char name[40];
+		  	char name[MAX_NAME_LEN];
 		  	SubRuleSet *subruleset = &fmt->_SubRuleSet[i];
 		  	GlyphId glyphId = *da_INDEX(CovList.glyphidlist, i);
 
@@ -2099,7 +2099,7 @@ static void showContext2(ContextSubstFormat2 *fmt, IntX level, void *feattag)
 					CR = &(classList[classId]);
 					for (c = 0; c < CR->glyphidlist.cnt; c++)
 					  {
-						char name2[64];
+						char name2[MAX_NAME_LEN];
 						GlyphId glyphId2 = *da_INDEX(CR->glyphidlist, c);
 						strcpy(name2, getGlyphName(glyphId2, forProofing));
 						psIndex = strlen(proofString);
@@ -2122,7 +2122,7 @@ static void showContext2(ContextSubstFormat2 *fmt, IntX level, void *feattag)
 						sprintf(&proofString[psIndex],"[");
 						for (c = 0; c < CR->glyphidlist.cnt; c++)
 						  {
-							char name2[64];
+							char name2[MAX_NAME_LEN];
 							GlyphId glyphId2 = *da_INDEX(CR->glyphidlist, c);
 							strcpy(name2, getGlyphName(glyphId2, forProofing));
 							psIndex = strlen(proofString);
@@ -2192,7 +2192,7 @@ static void proofContext2(ContextSubstFormat2 *fmt)
 		ttoEnumerateCoverage(fmt->Coverage, fmt->_Coverage, &CovList, &nitems);
 		for (i = 0; i < nitems; i++)
 		  {
-			char name1[40];
+			char name1[MAX_NAME_LEN];
 			IntX scscnt;
 			GlyphId glyphId = *da_INDEX(CovList.glyphidlist, i);
 			strcpy(name1, getGlyphName(glyphId, 1));
@@ -2240,7 +2240,7 @@ static void proofContext2(ContextSubstFormat2 *fmt)
 						CR = &(classList[classId]);
 						for (c = 0; c < CR->glyphidlist.cnt; c++)
 						  {
-							char name2[40];
+							char name2[MAX_NAME_LEN];
 							GlyphId inputgid[4];
 							GlyphId outputgid[4];
 							IntX inputcount, outputcount, o;
@@ -2297,7 +2297,7 @@ static void proofContext2(ContextSubstFormat2 *fmt)
 							for (o = 0; o < outputcount; o++)
 							  {
 								IntX owid, OW;
-								char oname[40];
+								char oname[MAX_NAME_LEN];
 								GlyphId ogid = outputgid[o];
 								strcpy(oname, getGlyphName(ogid, 1));
 								getMetrics(ogid, &origShift, &lsb, &rsb, &owid, &tsb, &bsb, &vwidth, &yorig3);
@@ -3012,7 +3012,7 @@ static void proofChainContext3(ChainContextSubstFormat3 *fmt)
 			Card32 nitems;
 			IntX j = fmt->BacktrackGlyphCount - (i+1); /* Backtack is enumerated in reverse order from the offset order */
 			GlyphId gId;
-			char name[40];
+			char name[MAX_NAME_LEN];
 			ttoEnumRec *ter = da_INDEX(BacktrackGlyphCovListArray, i);
 			ttoEnumerateCoverage(fmt->Backtrack[j], fmt->_Backtrack[j], ter, &nitems);
 			if (nitems > 1)
@@ -3061,7 +3061,7 @@ static void proofChainContext3(ChainContextSubstFormat3 *fmt)
 			Card32 nitems;
 			IntX j;
 			GlyphId gId;
-			char name[40];
+			char name[MAX_NAME_LEN];
 			ttoEnumRec *ter = da_INDEX(InputGlyphCovListArray, i);
 			ttoEnumerateCoverage(fmt->Input[i], fmt->_Input[i], ter, &nitems);
 			if (nitems > 1)
@@ -3115,7 +3115,7 @@ static void proofChainContext3(ChainContextSubstFormat3 *fmt)
 			Card32 nitems;
 			IntX j;
 			GlyphId gId;
-			char name[40];
+			char name[MAX_NAME_LEN];
 			ttoEnumRec *ter = da_INDEX(LookaheadGlyphCovListArray, i);
 			ttoEnumerateCoverage(fmt->Lookahead[i], fmt->_Lookahead[i], ter, &nitems);
 			if (nitems > 1)
@@ -3188,7 +3188,7 @@ static void proofChainContext3(ChainContextSubstFormat3 *fmt)
 			Card32 nitems;
 			IntX j = fmt->BacktrackGlyphCount - (i+1); /* Backtrack is enumerated in the feaure syntax in reverse order form the offset order. */
 			GlyphId gId;
-			char name[40];
+			char name[MAX_NAME_LEN];
 			ttoEnumRec *ter = da_INDEX(BacktrackGlyphCovListArray, i);
 			ttoEnumerateCoverage(fmt->Backtrack[j], fmt->_Backtrack[j], ter, &nitems);
 			if (nitems > 1)
@@ -3268,7 +3268,7 @@ static void proofChainContext3(ChainContextSubstFormat3 *fmt)
 				for (o = 0; o < outputcount; o++)
 				  {
 					IntX owid, OW;
-					char oname[40];
+					char oname[MAX_NAME_LEN];
 					GlyphId ogid = outputgid[o];
 					strcpy(oname, getGlyphName(ogid, 1));
 					getMetrics(ogid, &origShift, &lsb, &rsb, &owid, &tsb, &bsb, &vwidth, &yorig);
@@ -3367,7 +3367,7 @@ static void proofChainContext3(ChainContextSubstFormat3 *fmt)
 			  	for (o = 0; o < outputcount; o++)
 					{
 					  IntX owid, OW;
-					  char oname[40];
+					  char oname[MAX_NAME_LEN];
 					  GlyphId ogid = outputgid[o];
 					  strcpy(oname, getGlyphName(ogid, 1));
 					  getMetrics(ogid, &origShift, &lsb, &rsb, &owid, &tsb, &bsb, &vwidth, &yorig);
@@ -3414,7 +3414,7 @@ static void proofChainContext3(ChainContextSubstFormat3 *fmt)
 			Card32 nitems;
 			IntX j;
 			GlyphId gId;
-			char name[40];
+			char name[MAX_NAME_LEN];
 			ttoEnumRec *ter = da_INDEX(LookaheadGlyphCovListArray, i);
 			ttoEnumerateCoverage(fmt->Lookahead[i], fmt->_Lookahead[i], ter, &nitems);
 			if (nitems > 1)
@@ -3723,7 +3723,7 @@ static void proofReverseChainContext1(ReverseChainContextSubstFormat1 *fmt)
 			Card32 nitems;
 			IntX j = fmt->BacktrackGlyphCount - (i+1); /* Backtrack is enumerated in the feaure syntax in reverse order form the offset order. */
 			GlyphId gId;
-			char name[40];
+			char name[MAX_NAME_LEN];
 			ttoEnumRec *ter = da_INDEX(BacktrackGlyphCovListArray, i);
 			ttoEnumerateCoverage(fmt->Backtrack[j], fmt->_Backtrack[j], ter, &nitems);
 			if (nitems > 1)
@@ -3771,7 +3771,7 @@ static void proofReverseChainContext1(ReverseChainContextSubstFormat1 *fmt)
 			Card32 nitems;
 			IntX j;
 			GlyphId gId;
-			char name[40];
+			char name[MAX_NAME_LEN];
 			ttoEnumRec *ter = &InputGlyphCovList;
 			ttoEnumerateCoverage(fmt->InputCoverage, fmt->_InputCoverage, ter, &nitems);
 			if (nitems > 1)
@@ -3825,7 +3825,7 @@ static void proofReverseChainContext1(ReverseChainContextSubstFormat1 *fmt)
 			Card32 nitems;
 			IntX j;
 			GlyphId gId;
-			char name[40];
+			char name[MAX_NAME_LEN];
 			ttoEnumRec *ter = da_INDEX(LookaheadGlyphCovListArray, i);
 			ttoEnumerateCoverage(fmt->Lookahead[i], fmt->_Lookahead[i], ter, &nitems);
 			if (nitems > 1)
@@ -3883,7 +3883,7 @@ static void proofReverseChainContext1(ReverseChainContextSubstFormat1 *fmt)
 			{
 			GlyphId	gId = fmt->Substitutions[i];
 			IntX owid, OW;
-			char oname[40];
+			char oname[MAX_NAME_LEN];
 			strcpy(oname, getGlyphName(gId, 1));
 			getMetrics(gId, &origShift, &lsb, &rsb, &owid, &tsb, &bsb, &vwidth, &yorig);
 			if (isVert)

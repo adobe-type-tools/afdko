@@ -19,9 +19,9 @@ install:
           throw "There are newer queued builds for this pull request, failing early." }
 
   - set "PATH=%PYTHON_HOME%;%PYTHON_HOME%\\Scripts;%PATH%"
-  - python --version
-  - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
-  - python -m pip install -U pip setuptools setuptools_scm wheel
+  # - python --version
+  # - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
+  - python -m pip install -U -r requirements-dev.txt
   - python -m pip install pytest
   - python setup.py bdist_wheel
   - for %%f in (dist\*.whl) do (set "WHEEL=%%f")

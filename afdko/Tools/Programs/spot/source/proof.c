@@ -1144,7 +1144,7 @@ ProofContextPtr proofInitContext(proofOutputType where,
 		{
 			if (isPatt) 
 			{
-				char tempname[64];
+				char tempname[MAX_NAME_LEN];
 				if(outputfilebase)
 					sprintf(tempname,"%s_%s.ps", outputfilebase, PSFilenameorPATTorNULL);
 				else
@@ -1176,7 +1176,7 @@ ProofContextPtr proofInitContext(proofOutputType where,
 		}
 		else 
 		{
-			char tempname[64];
+			char tempname[MAX_NAME_LEN];
 			if(outputfilebase)
 				sprintf(tempname, "%s.ps", outputfilebase);
 			else
@@ -1213,7 +1213,7 @@ ProofContextPtr proofInitContext(proofOutputType where,
 			 {
 			 if (isPatt) 
 			   {
-				 char tempname[64];
+				 char tempname[MAX_NAME_LEN];
 				 sprintf(tempname,"/tmp/%s_%s_XXXXXX", global.progname, PSFilenameorPATTorNULL);
 				 mktemp(tempname);
 				 len = strlen(tempname);
@@ -1235,7 +1235,7 @@ ProofContextPtr proofInitContext(proofOutputType where,
 		   }
 		   else 
 			 {
-			 char tempname[64];
+			 char tempname[MAX_NAME_LEN];
 			 sprintf(tempname,"/tmp/%s.ps_XXXXXX", global.progname);
 			 mktemp(tempname);
 			 len = strlen(tempname);
