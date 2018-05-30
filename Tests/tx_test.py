@@ -251,6 +251,6 @@ def test_dump_6_n_type1():
 def test_varread():
     # Test read CCF2 VF, write snapshot.
     actual_path = runner(CMD + ['-o', 't1', '-f', CFF2_SIMPLE_VF_NAME])
-    new_file = CFF2_SIMPLE_VF_NAME.rsplit('.',1)[0] + '.pfa'
+    new_file = CFF2_SIMPLE_VF_NAME.rsplit('.', 1)[0] + '.pfa'
     expected_path = _get_expected_path(new_file)
     assert differ([expected_path, actual_path]) is True
