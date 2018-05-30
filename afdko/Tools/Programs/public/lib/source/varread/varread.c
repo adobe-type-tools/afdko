@@ -824,8 +824,8 @@ unsigned short var_getIVSRegionCount(var_itemVariationStore ivs)
     return (unsigned short)ivs->regionList.regionCount;
 }
 
-/* get the region count for a given variation store index */
-unsigned short var_getIVSRegionCountForIndex(var_itemVariationStore ivs, unsigned short vsIndex)
+/* get the region count for the ItemVariationData table with a given variation store index */
+unsigned short var_getIVDRegionCountForIndex(var_itemVariationStore ivs, unsigned short vsIndex)
 {
     if (!ivs || vsIndex >= ivs->dataList.ivdSubtables.cnt)
         return 0;
@@ -946,7 +946,7 @@ static void lookupIndexMap(indexMap *map, unsigned short gid, indexPair *index)
     }
 }
 
-long var_getIVSRegionIndices(var_itemVariationStore ivs, unsigned short vsIndex, unsigned short *regionIndices, long regionCount)
+long var_getIVSRegionIndices(var_itemVariationStore ivs, unsigned short vsIndex, unsigned short *regionIndices, long regionListCount)
 {
     itemVariationDataSubtableList *dataList = &ivs->dataList;
     itemVariationDataSubtable   *subtable;
@@ -957,12 +957,12 @@ long var_getIVSRegionIndices(var_itemVariationStore ivs, unsigned short vsIndex,
 
     subtable = &dataList->ivdSubtables.array[vsIndex];
 
-    if (regionCount < subtable->regionIndices.cnt)
+    if (regionListCount < subtable->regionIndices.cnt)
         return 0;
 
     for (i = 0; i < subtable->regionIndices.cnt; i++) {
 		unsigned short index = subtable->regionIndices.array[i];
-		if (index >= regionCount) {
+		if (index >= regionListCount) {
 			return 0;
 		}
 		regionIndices[i] = index;
@@ -971,7 +971,7 @@ long var_getIVSRegionIndices(var_itemVariationStore ivs, unsigned short vsIndex,
     return subtable->regionIndices.cnt;
 }
 
-static float var_applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb, var_itemVariationStore ivs, indexPair *pair, float *scalars, long regionCount)
+static float var_applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb, var_itemVariationStore ivs, indexPair *pair, float *scalars, long regionListCount)
 {
     itemVariationDataSubtableList *dataList = &ivs->dataList;
     float   netAdjustment = .0f;
@@ -986,7 +986,7 @@ static float var_applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb, var_itemVa
     }
 
     subtable = &dataList->ivdSubtables.array[pair->outerIndex];
-    if (subtable->regionCount > regionCount) {
+    if (subtable->regionCount > regionListCount) {
         sscb->message(sscb, "out of range region count in item variation store subtable");
         return netAdjustment;
     }
@@ -998,7 +998,7 @@ static float var_applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb, var_itemVa
         return netAdjustment;
     }
 
-    subRegionCount = var_getIVSRegionIndices(ivs, pair->outerIndex, regionIndices, regionCount);
+    subRegionCount = var_getIVSRegionIndices(ivs, pair->outerIndex, regionIndices, regionListCount);
     if (subRegionCount == 0) {
         sscb->message(sscb, "out of range region index found in item variation store subtable");
     }
@@ -1013,7 +1013,7 @@ static float var_applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb, var_itemVa
     return netAdjustment;
 }
 
-static float   var_applyDeltasForGid(ctlSharedStmCallbacks *sscb, var_itemVariationStore ivs, indexMap *map, unsigned short gid, float *scalars, long regionCount)
+static float   var_applyDeltasForGid(ctlSharedStmCallbacks *sscb, var_itemVariationStore ivs, indexMap *map, unsigned short gid, float *scalars, long regionListCount)
 {
     indexPair   pair;
 
@@ -1025,7 +1025,7 @@ static float   var_applyDeltasForGid(ctlSharedStmCallbacks *sscb, var_itemVariat
     else
         lookupIndexMap(map, gid, &pair);
 
-    return var_applyDeltasForIndexPair(sscb, ivs, &pair, scalars, regionCount);
+    return var_applyDeltasForIndexPair(sscb, ivs, &pair, scalars, regionListCount);
 }
 
 /* HVAR / vmtx tables */
@@ -1196,11 +1196,11 @@ int var_lookuphmtx(ctlSharedStmCallbacks *sscb, var_hmtx hmtx, unsigned short ax
 
     /* modify the default metrics if the font has variable font tables */
     if (hmtx->ivs && scalars && (axisCount > 0)) {
-        long        regionCount = hmtx->ivs->regionList.regionCount;
+        long regionListCount = hmtx->ivs->regionList.regionCount;
 
-        metrics->width += var_applyDeltasForGid(sscb, hmtx->ivs, &hmtx->widthMap, gid, scalars, regionCount);
+        metrics->width += var_applyDeltasForGid(sscb, hmtx->ivs, &hmtx->widthMap, gid, scalars, regionListCount);
         if (hmtx->lsbMap.offset > 0)    /* if side bearing variation data are provided, index map must exist */
-            metrics->sideBearing += var_applyDeltasForGid(sscb, hmtx->ivs, &hmtx->lsbMap, gid, scalars, regionCount);
+            metrics->sideBearing += var_applyDeltasForGid(sscb, hmtx->ivs, &hmtx->lsbMap, gid, scalars, regionListCount);
     }
 
     return 0;
@@ -1422,11 +1422,11 @@ int var_lookupvmtx(ctlSharedStmCallbacks *sscb, var_vmtx vmtx, unsigned short ax
 
     /* modify the default metrics if the font has variable font tables */
     if (vmtx->ivs && scalars && (axisCount > 0)) {
-        long        regionCount = vmtx->ivs->regionList.regionCount;
+        long regionListCount = vmtx->ivs->regionList.regionCount;
 
-        metrics->width += var_applyDeltasForGid(sscb, vmtx->ivs, &vmtx->widthMap, gid, scalars, regionCount);
+        metrics->width += var_applyDeltasForGid(sscb, vmtx->ivs, &vmtx->widthMap, gid, scalars, regionListCount);
         if (vmtx->tsbMap.offset > 0)    /* if side bearing variation data are provided, index map must exist */
-            metrics->sideBearing += var_applyDeltasForGid(sscb, vmtx->ivs, &vmtx->tsbMap, gid, scalars, regionCount);
+            metrics->sideBearing += var_applyDeltasForGid(sscb, vmtx->ivs, &vmtx->tsbMap, gid, scalars, regionListCount);
     }
 
     return 0;

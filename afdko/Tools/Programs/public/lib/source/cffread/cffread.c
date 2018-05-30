@@ -190,7 +190,7 @@ struct cfrCtx_					/* Context */
 		float           *UDV;	/* From client */
         Fixed     ndv[CFF2_MAX_AXES];     /* normalized weight vector */
         float           scalars[CFF2_MAX_MASTERS];               /* scalar values for regions */
-        unsigned short  regionCount;          /* number of all regions */
+        unsigned short  regionListCount;          /* number of all regions */
         unsigned short  regionIndices[CFF2_MAX_MASTERS];  /* region indices for the current vsindex */
 
         unsigned short  axisCount;
@@ -1062,17 +1062,13 @@ static void saveIntArray(cfrCtx h, size_t max, long *cnt, long *array,
 
 static int setNumMasters(cfrCtx h, unsigned short vsindex)
 {
-    int numRegions = h->stack.numRegions = var_getIVSRegionCountForIndex(h->cff2.varStore, vsindex);
+    int numMasters = h->stack.numRegions = var_getIVDRegionCountForIndex(h->cff2.varStore, vsindex);
     
-	if (numRegions > CFF2_MAX_MASTERS) {
-		message(h, "too many regions %d for vsindex %d", numRegions, vsindex);
-		numRegions = 0;
-	}
-    if (!var_getIVSRegionIndices(h->cff2.varStore, vsindex, h->cff2.regionIndices, (long)numRegions)) {
+    if (!var_getIVSRegionIndices(h->cff2.varStore, vsindex, h->cff2.regionIndices, h->cff2.regionListCount)) {
         message(h, "inconsistent region indices detected in item variation store subtable %d", vsindex);
-		numRegions = 0;
+		numMasters = 0;
     }
-    return numRegions;
+    return numMasters;
 }
 
 /* -------------------------------- VarStore ------------------------------- */
@@ -1102,8 +1098,8 @@ static void readVarStore(cfrCtx h)
     h->cff2.varStore = var_loadItemVariationStore(&h->cb.shstm, (unsigned long)vstoreStart, length, 0);
 	if (!h->cff2.varStore)
 		return;
-    h->cff2.regionCount = var_getIVSRegionCount(h->cff2.varStore);
-	if (h->cff2.regionCount > CFF2_MAX_MASTERS)
+    h->cff2.regionListCount = var_getIVSRegionCount(h->cff2.varStore);
+	if (h->cff2.regionListCount > CFF2_MAX_MASTERS)
 		fatal(h, cfrErrGeometry);
     h->top.varStore = h->cff2.varStore;
     /* pre-calculate scalars for all regions for the current weight vector */
