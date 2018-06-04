@@ -5,4 +5,4 @@ fontPens==0.1.0
 fontTools==3.26.0
 mutatorMath==2.1.0
 ufoLib==2.1.1
-ufonormalizer==0.3.4
+ufonormalizer==0.3.5
