@@ -113,6 +113,8 @@ extern IntX parseIdList(Byte8 *list, IdList *ids);
 extern IntX getNGlyphs(Card16 *nGlyphs, Card32 client);
 extern void quit(IntN status);
 extern void initGlyphNames(void);
+#define NAME_LEN 128 /*  base glyph name length returned by getGlyphName */
+#define MAX_NAME_LEN  NAME_LEN+7 /* max glyph name length returned by getGlyphName */
 extern Byte8 *getGlyphName(GlyphId glyphId, IntX forProofing);
 extern void dumpAllGlyphNames(IntN docrlfs);
 extern void getMetrics(GlyphId glyphId, 

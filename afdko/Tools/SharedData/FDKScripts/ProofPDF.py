@@ -1,4 +1,5 @@
 #!/bin/env python
+# Copyright 2014 Adobe. All rights reserved.
 """
 ProofPDF.py. A wrapper for the fontPDF.py module. This script verifies
 the existence of the specified font files, creates a font class object
@@ -6,12 +7,28 @@ with the call-backs required by fontPDF, and translates the command line
 options to arguments for the fontPDF module; the latter produces a proof
 file using the provided options annd font instance.
 """
-__copyright__ = """Copyright 2014-2017 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-"""
+import copy
+import os
+import platform
+import re
+import sys
+import tempfile
+import time
+import traceback
+
+from fontTools.ttLib import TTFont, getTableModule, TTLibError
+
+from fontPDF import (FontPDFParams, makePDF, makeFontSetPDF, kDrawTag,
+                     kDrawPointTag, kShowMetaTag, params_doc)
+import ttfPDF
+import otfPDF
+import FDKUtils
+
+curSystem = platform.system()
 
 
 __usage__ = """
-ProofPDF v1.17 Dec 1 2017
+ProofPDF v1.20 May 17 2018
 ProofPDF [-h] [-u]
 ProofPDF -help_params
 ProofPDF [-g <glyph list>] [-gf <filename>] [-gpp <number>] [-pt <number>] [-dno] [-baseline <number>] [-black] [-lf <filename>] [-select_hints <0,1,2..> ]  \
@@ -187,25 +204,6 @@ parentheses, and commas separated, as shown. "(0,0,0)" is black,
 """
 
 
-
-import sys
-import os
-import re
-import time
-from fontTools import ttLib
-from fontPDF import FontPDFParams, makePDF, makeFontSetPDF, kDrawTag, kDrawPointTag, kShowMetaTag, params_doc
-import ttfPDF
-import otfPDF
-import FDKUtils
-import tempfile
-import copy
-import traceback
-import platform
-curSystem = platform.system()
-
-kCharsetDir = "CID charsets" # relative path to the parent directory for all the layout and subset files
-
-
 def logMsg(*args):
 	for arg in args:
 		print arg
@@ -224,22 +222,24 @@ def CheckEnvironment():
 	txError = 0
 
 	try:
-		exe_dir, fdkSharedDataDir = FDKUtils.findFDKDirs()
+		exe_dir, _ = FDKUtils.findFDKDirs()
 	except FDKUtils.FDKEnvError:
-		logMsg("Please re-install the FDK. Cannot find the FDK/Tools/SharedData directory.")
+		logMsg("Please re-install the afdko. Cannot find the "
+			   "afdko/Tools/SharedData directory.")
 		raise FDKEnvironmentError
 
-	command = "%s -u 2>&1" % (txPath)
+	command = "%s -u 2>&1" % txPath
 	report = FDKUtils.runShellCmd(command)
 	if "options" not in report:
-			txError = 1
+		txError = 1
 
-	if  txError:
-		logMsg("Please re-install the FDK. The executable directory \"%s\" is missing the tool: < %s >." % (exe_dir, txPath ))
+	if txError:
+		logMsg("Please re-install the afdko. The executable directory \"%s\" "
+			   "is missing the tool: < %s >." % (exe_dir, txPath))
 		logMsg("or the files referenced by the shell script is missing.")
 		raise FDKEnvironmentError
 
-	return txPath, fdkSharedDataDir
+	return txPath
 
 def fixGlyphNames(glyphName):
 	glyphRange = glyphName.split("-")
@@ -281,31 +281,6 @@ def parsePtSizeListArg(ptSizeString):
 	for ptEntry in ptEntryList:
 		ptSizeList.extend(ptEntry)
 	return ptSizeList
-
-
-def findLayoutFile(filePath, sharedDataDirectory):
-	layoutFilePath = None
-	tryDir =  os.path.dirname(os.path.abspath(filePath))
-	tries = 1
-	cfData = None
-	while tries < 3:
-		cfPath = os.path.join(tryDir, "cidfontinfo")
-		if os.path.exists(cfPath):
-			cfp = open(cfPath, "rt")
-			cfData = cfp.read()
-			cfp.close()
-			break
-		tryDir =  os.path.dirname(tryDir)
-		tries += 1
-
-	if cfData:
-		mR = re.search(r"Registry\s+\((\S+)\)", cfData)
-		mO = re.search(r"Ordering\s+\((\S+)\)", cfData)
-		mL = re.search(r"Layout\s+\((\S+)\)", cfData)
-		if (mR and mL):
-			layoutFilePath = os.path.join(sharedDataDirectory, kCharsetDir,  mL.group(1))
-			print "derived default layout file path '%s' from cidfontifno file at '%s'." % (layoutFilePath, cfPath)
-	return layoutFilePath
 
 
 def parseLayoutFile(filePath):
@@ -469,15 +444,6 @@ def getOptions(params):
 			params.pageRightMargin  = 20
 			params.glyphVPadding  = 0
 			params.glyphHPadding   = 0
-
-			# Look for layout file in default location.
-			layoutFilePath = findLayoutFile(params.rt_filePath, params.rt_fdkSharedDataDir)
-			if layoutFilePath:
-				params.rt_optionLayoutDict = parseLayoutFile(layoutFilePath)
-				if not params.rt_optionLayoutDict :
-					logMsg( "\tWarning. Layout file at '%s' could not be parsed. You can use the option '-lf' to specify another layout file." % (layoutFilePath))
-			else:
-				logMsg( "\tWarning. Layout file not found for this font. Please specify the path with option '-lf'.")
 
 			rightGlyphParams = copy.copy(params)
 			setDefaultDigiplotRightSideOptions(rightGlyphParams)
@@ -776,7 +742,6 @@ def openFile(path, txPath):
 			data = ff.read(10)
 			ff.close()
 		except (IOError, OSError):
-			import traceback
 			traceback.print_exc()
 			raise FontError("Failed to open and read font file %s. Check file/directory permissions." % path)
 
@@ -784,7 +749,7 @@ def openFile(path, txPath):
 			raise FontError("Error: font file was zero size: may be a resource fork font, which this program does not process. <%s>." % path)
 		if (data[:4] == "OTTO") or (data[:4] == "true") or (data[:4] == "\0\1\0\0"): # it is an OTF/TTF font, can process file directly
 			try:
-				ttFont = ttLib.TTFont(path)
+				ttFont = TTFont(path)
 			except (IOError, OSError):
 				raise FontError("Error opening or reading from font file <%s>." % path)
 			except TTLibError:
@@ -819,13 +784,12 @@ def openFile(path, txPath):
 	data = ff.read()
 	ff.close()
 	try:
-		ttFont = ttLib.TTFont()
-		cffModule = ttLib.getTableModule('CFF ')
+		ttFont = TTFont()
+		cffModule = getTableModule('CFF ')
 		cffTable = cffModule.table_C_F_F_('CFF ')
 		ttFont['CFF '] = cffTable
 		cffTable.decompile(data, ttFont)
 	except:
-		import traceback
 		traceback.print_exc()
 		logMsg("Attempted to read font %s  as CFF." % path)
 		raise FontError("Error parsing font file <%s>." % path)
@@ -956,44 +920,50 @@ def proofMakePDF(pathList, params, txPath):
 					command = "open \"" + pdfFilePath  + "\"" + " &"
 					FDKUtils.runShellCmdLogging(command)
 
+
 def charplot():
 	sys.argv.insert(1, "-charplot")
 	main()
-	
+
+
 def digiplot():
 	sys.argv.insert(1, "-digiplot")
 	main()
-	
+
+
 def fontplot():
 	sys.argv.insert(1, "-fontplot")
 	main()
-	
+
+
 def fontplot2():
 	sys.argv.insert(1, "-fontplot2")
 	main()
-	
+
+
 def fontsetplot():
 	sys.argv.insert(1, "-fontsetplot")
 	main()
-	
+
+
 def hintplot():
 	sys.argv.insert(1, "-hintplot")
 	main()
-	
+
+
 def waterfallplot():
 	sys.argv.insert(1, "-waterfallplot")
 	main()
-	
+
+
 def main():
 	try:
-		txPath, fdkSharedDataDir = CheckEnvironment()
+		txPath = CheckEnvironment()
 	except FDKEnvironmentError,e:
 		print e
 		return
 	try:
-		params = FontPDFParams()
-		params.rt_fdkSharedDataDir = fdkSharedDataDir
-		params = getOptions(params)
+		params = getOptions(FontPDFParams())
 	except OptionParseError,e:
 		print e
 		print __usage__
@@ -1019,5 +989,3 @@ def main():
 
 if __name__=='__main__':
 	main()
-
-

@@ -1,0 +1,35 @@
+## Filename tx_data/type1.pfa
+## Top Dict
+version             "2.20"
+Notice              "Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries."
+Copyright           "Copyright 2010, 2012, 2014 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name 'Source'."
+FamilyName          "Source Sans Pro"
+UnderlinePosition   -75
+FontBBox            {52,-12,565,660}
+sup.srcFontType     Type 1 (name-keyed)
+sup.nGlyphs         2
+## FontDict[0]
+FontName            "SourceSansPro-Regular"
+## Private
+BlueValues          {-12,0,486,498,518,530,574,586,638,650,656,668,712,724}
+OtherBlues          {-217,-205}
+BlueScale           0.0625
+BlueFuzz            0
+StdHW               67
+StdVW               84
+StemSnapH           {67,78}
+StemSnapV           {84,95}
+## glyph[tag] {name,encoding,path}
+glyph[0] {.notdef,-,
+ 653 width 0 58 hstem 600 660 hstem 89 154 vstem 498 565 vstem 89 0 move 565 0
+ line 565 660 line 89 660 line 197 58 move 271 190 line 325 293 line 329 293
+ line 381 190 line 454 58 line 325 387 move 275 481 line 209 600 line 444 600
+ line 378 481 line 329 387 line 154 110 move 154 572 line 281 340 line 498 110
+ move 372 340 line 498 572 line endchar}
+glyph[1] {a,0x61,
+ 504 width 194 -12 move 255 -12 309 20 355 58 curve 358 58 line 365 0 line 433
+ 0 line 433 298 line 433 419 383 498 264 498 curve 186 498 118 464 73 435
+ curve 105 378 line 143 404 194 430 250 430 curve 330 430 350 370 350 308
+ curve 143 285 52 232 52 126 curve 52 39 113 -12 194 -12 curve 218 54 move 170
+ 54 132 77 132 132 curve 132 194 188 234 350 254 curve 350 119 line 303 77 265
+ 54 218 54 curve endchar}

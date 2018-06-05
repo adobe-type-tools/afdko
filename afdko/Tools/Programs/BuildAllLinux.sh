@@ -1,5 +1,9 @@
 # How to find and add all the xcode files for a new program:
 # find .   \( -path "*/xcode4/*" \)  -and \( \(  -name BuildAll.sh \) -or \( -name project.pbxproj \) -or \( -name contents.xcworkspacedata  \) \)  -exec p4 add {} \;curDir=`pwd`
+
+set -e
+set -x
+
 curDir=`pwd`
 
 buildAllList=`ls -1 */build/linux/gcc/BuildAll.sh`

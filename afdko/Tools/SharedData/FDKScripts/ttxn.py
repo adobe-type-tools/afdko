@@ -64,7 +64,7 @@ from __future__ import print_function, absolute_import
 
 
 __help__ = """
-ttxn v1.18 Mar 30 2017
+ttxn v1.19 May 4 2018
 
 Based on the ttx tool, with the same options, except that it is limited to
 dumping, and cannot compile. Makes a normalized dump of the font, or of
@@ -99,6 +99,12 @@ log = logging.getLogger(__name__)
 
 
 curSystem = platform.system()
+
+if curSystem == "Windows":
+    TX_TOOL = "tx.exe"
+else:
+    TX_TOOL = "tx"
+
 INDENT = "  "
 ChainINDENT = INDENT + "C "
 kMaxLineLength = 80
@@ -1738,7 +1744,7 @@ class OTLConverter:
             self.classesByClassName[className] = nameList
             for classRec in classRecList:
                 key = (classRec.lookupIndex, classRec.subtableIndex,
-                       classRec.classIndex, classRec.type)
+                       classRec.classIndex, classRec.side)
                 self.classesByLookup[key] = className
 
         for defList in sorted(self.markClassesByDefList.keys()):
@@ -1766,7 +1772,7 @@ class OTLConverter:
 
             for classRec in classRecList:
                 key = (classRec.lookupIndex, classRec.subtableIndex,
-                       classRec.classIndex, classRec.type)
+                       classRec.classIndex, classRec.side)
                 self.markClassesByLookup[key] = className
 
         return
@@ -1958,7 +1964,8 @@ class OTLConverter:
                 else:
                     nameIndex += 1
                     lookupName = "%s_%s_%s_%s" % (featRecord.FeatureTag,
-                                                  langSysKey[0], langSysKey[1],
+                                                  langSysKey[0].strip(),
+                                                  langSysKey[1].strip(),
                                                   nameIndex)
                     self.seenLookup[li] = lookupName
                     writer.write("lookup %s%s%s;" % (lookupName, lookupFlagTxt,
@@ -2064,7 +2071,7 @@ class TTXNTTFont(TTFont):
         elif tag in ("GSUB", "GPOS"):
             dumpOTLAsFeatureFile(tag, writer, self)
         else:
-            table.toXML(writer, self, splitGlyphs=splitGlyphs)
+            table.toXML(writer, self)
         writer.endtag(xmlTag)
         writer.newline()
         writer.newline()
@@ -2082,7 +2089,7 @@ def shellcmd(cmdList):
 
 
 def dumpFont(writer, fontPath, supressHints=0):
-    dictTxt = shellcmd(["tx", "-dump", "-0", fontPath])
+    dictTxt = shellcmd([TX_TOOL, "-dump", "-0", fontPath])
     if curSystem == "Windows":
         dictTxt = re.sub(r"[\r\n]+", "\n", dictTxt)
     dictTxt = re.sub(r"##[^\r\n]*Filename[^\r\n]+", "", dictTxt, 1).strip()
@@ -2096,9 +2103,9 @@ def dumpFont(writer, fontPath, supressHints=0):
     writer.newline()
 
     if supressHints:
-        charData = shellcmd(["tx", "-dump", "-6", "-n", fontPath])
+        charData = shellcmd([TX_TOOL, "-dump", "-6", "-n", fontPath])
     else:
-        charData = shellcmd(["tx", "-dump", "-6", fontPath])
+        charData = shellcmd([TX_TOOL, "-dump", "-6", fontPath])
 
     if curSystem == "Windows":
         charData = re.sub(r"[\r\n]+", "\n", charData)
@@ -2222,12 +2229,8 @@ def ttnDump(input_file, output, options, showExtensionFlag, supressHints=0,
         GDEF = ttf["GDEF"]
         gt = GDEF.table
         if gt.GlyphClassDef:
-            # XXX why is 'gtc' assigned here but never used?
-            gtc = gt.GlyphClassDef.classDefs
             gt.GlyphClassDef.Format = 0
         if gt.MarkAttachClassDef:
-            # XXX why is 'gtc' assigned here but never used?
-            gtc = gt.MarkAttachClassDef.classDefs
             gt.MarkAttachClassDef.Format = 0
         if gt.AttachList:
             if not gt.AttachList.Coverage.glyphs:
@@ -2279,9 +2282,6 @@ def ttnDump(input_file, output, options, showExtensionFlag, supressHints=0,
                 cmapSubtable.nGroups = 0
             if hasattr(cmapSubtable, "length"):
                 cmapSubtable.length = 0
-    if ('OS/2' in onlyTables) and supressTTFDiffs:
-        # XXX why is 'os2Table' assigned here but never used?
-        os2Table = ttf["OS/2"]
 
     if onlyTables:
         ttf.saveXML(output,

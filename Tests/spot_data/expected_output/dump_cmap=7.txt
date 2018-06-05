@@ -1,0 +1,48 @@
+--- encoding[0]
+platformId=0
+scriptId  =3
+languageId=0
+--- [code]=<name/CID>
+[0041]=<A> 
+[0042]=<B> 
+[0043]=<C> 
+[0061]=<a> 
+[0062]=<b> 
+[0063]=<c> 
+
+--- encoding[1]
+platformId=0
+scriptId  =4
+languageId=0
+--- [code]=<name/CID>
+[00000041]=<A> 
+[00000042]=<B> 
+[00000043]=<C> 
+[00000061]=<a> 
+[00000062]=<b> 
+[00000063]=<c> 
+
+--- encoding[2]
+platformId=3
+scriptId  =1
+languageId=0
+--- [code]=<name/CID>
+[0041]=<A> 
+[0042]=<B> 
+[0043]=<C> 
+[0061]=<a> 
+[0062]=<b> 
+[0063]=<c> 
+
+--- encoding[3]
+platformId=3
+scriptId  =10
+languageId=0
+--- [code]=<name/CID>
+[00000041]=<A> 
+[00000042]=<B> 
+[00000043]=<C> 
+[00000061]=<a> 
+[00000062]=<b> 
+[00000063]=<c> 
+

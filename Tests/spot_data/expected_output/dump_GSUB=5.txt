@@ -1,0 +1,13 @@
+GSUB Features:
+Script 'DFLT'
+	Default language system
+		[ 0]='smcp' LookupListIndex: 0 
+Script 'cyrl'
+	Default language system
+		[ 0]='smcp' LookupListIndex: 0 
+Script 'grek'
+	Default language system
+		[ 0]='smcp' LookupListIndex: 0 
+Script 'latn'
+	Default language system
+		[ 0]='smcp' LookupListIndex: 0 

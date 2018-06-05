@@ -1,0 +1,9 @@
+codecov
+cython
+flake8
+pip
+pytest-cov
+setuptools
+setuptools_scm
+subprocess32>=3.5.0
+wheel
