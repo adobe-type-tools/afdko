@@ -163,6 +163,7 @@ class Differ(object):
 
         # Make the paths relative
         all_paths = [path.replace(start_path, '') for path in all_paths]
+        all_paths.sort()
 
         logger.debug("All paths: {}".format(all_paths))
 
