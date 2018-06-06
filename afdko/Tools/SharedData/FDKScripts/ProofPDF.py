@@ -219,7 +219,7 @@ class FontError(KeyError):
 	pass
 
 def CheckEnvironment():
-	if curSystem=="Windows":
+	if curSystem == "Windows":
 		txPath=subprocess.check_output(["where","tx.exe"]).strip()
 	else:
 		txPath=subprocess.check_output(["which", "tx"]).strip()
@@ -853,7 +853,7 @@ def proofMakePDF(pathList, params, txPath):
 
 		logMsg( "Wrote proof file %s. End time: %s." % (pdfFilePath, time.asctime()))
 		if pdfFilePath and params.openPDFWhenDone:
-			if curSystem=="Windows":
+			if curSystem == "Windows":
 				curdir = os.getcwdu()
 				basedir, pdfName = os.path.split(pdfFilePath)
 				os.chdir(basedir)
@@ -908,7 +908,7 @@ def proofMakePDF(pathList, params, txPath):
 			if not params.quietMode:
 				logMsg("Wrote proof file %s. End time: %s." % (pdfFilePath, time.asctime()))
 			if pdfFilePath and params.openPDFWhenDone:
-				if curSystem=="Windows":
+				if curSystem == "Windows":
 					curdir = os.getcwdu()
 					basedir, pdfName = os.path.split(pdfFilePath)
 					os.chdir(basedir)
@@ -916,7 +916,7 @@ def proofMakePDF(pathList, params, txPath):
 					print command
 					FDKUtils.runShellCmdLogging(command)
 					os.chdir(curdir)
-				elif curSystem=="Linux":
+				elif curSystem == "Linux":
 					command = "xdg-open \"" + pdfFilePath  + "\"" + " &"
 					print command
 					FDKUtils.runShellCmdLogging(command)
@@ -991,5 +991,5 @@ def main():
 	return
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	main()
