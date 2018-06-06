@@ -218,8 +218,8 @@ class FontError(KeyError):
 	pass
 
 def CheckEnvironment():
-	import subprocess32 as subprocess
-	if curSystem == "Windows":
+	import subprocess
+	if curSystem=="Windows":
 		txPath=subprocess.check_output(["where","tx.exe"]).strip()
 	else:
 		txPath=subprocess.check_output(["which", "tx"]).strip()

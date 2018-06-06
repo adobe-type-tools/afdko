@@ -71,7 +71,7 @@ def test_run_invalid_font():
 def test_run_ufo_not_found():
     ttf_path = _get_test_ttf_path()
     temp_dir = tempfile.mkdtemp()
-    save_path = tempfile.mkstemp(dir = temp_dir)[1]
+    save_path = tempfile.mkstemp(dir=temp_dir)[1]
     copy2(ttf_path, save_path)
     assert main([save_path]) == 1
 
@@ -79,7 +79,7 @@ def test_run_ufo_not_found():
 def test_run_invalid_ufo():
     ttf_path = _get_test_ttf_path()
     temp_dir = tempfile.mkdtemp()
-    save_path = tempfile.mkstemp(dir = temp_dir)[1]
+    save_path = tempfile.mkstemp(dir=temp_dir)[1]
     ufo_path = save_path + '.ufo'
     copy2(ttf_path, save_path)
     copy2(ttf_path, ufo_path)
@@ -101,7 +101,7 @@ def test_run_without_output_path():
     ufo_path = _get_test_ufo_path()
     temp_dir = tempfile.mkdtemp()
     tmp_ufo_path = os.path.join(temp_dir, os.path.basename(ufo_path))
-    save_path = tempfile.mkstemp(dir = temp_dir)[1]
+    save_path = tempfile.mkstemp(dir=temp_dir)[1]
     copy2(ttf_path, save_path)
     copytree(ufo_path, tmp_ufo_path)
     main([save_path])

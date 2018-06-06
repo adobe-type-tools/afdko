@@ -99,7 +99,7 @@ log = logging.getLogger(__name__)
 
 
 curSystem = platform.system()
-    
+
 if curSystem == "Windows":
     TX_TOOL=subprocess.check_output(["where","tx.exe"]).strip()
 else:
@@ -2081,7 +2081,7 @@ class TTXNTTFont(TTFont):
 def shellcmd(cmdList):
     # In all cases, assume that cmdList does NOT specify the output file.
     # I use this because tx -dump -6 can be very large.
-    n,tempPath = tempfile.mkstemp()
+    tempPath = tempfile.mkstemp()[1]
     cmdList.append(tempPath)
     subprocess.check_call(cmdList)
     fp = open(tempPath, "rt")
