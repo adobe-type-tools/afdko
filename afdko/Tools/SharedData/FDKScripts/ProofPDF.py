@@ -15,6 +15,7 @@ import sys
 import tempfile
 import time
 import traceback
+import subprocess
 
 from fontTools.ttLib import TTFont, getTableModule, TTLibError
 
@@ -218,7 +219,6 @@ class FontError(KeyError):
 	pass
 
 def CheckEnvironment():
-	import subprocess
 	if curSystem=="Windows":
 		txPath=subprocess.check_output(["where","tx.exe"]).strip()
 	else:
