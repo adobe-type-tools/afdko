@@ -161,9 +161,8 @@ class Differ(object):
             all_paths.extend(
                 [os.path.join(dir_name, f_name) for f_name in file_names])
 
-        # Make the paths relative
-        all_paths = [path.replace(start_path, '') for path in all_paths]
-        all_paths.sort()
+        # Make the paths relative, and enforce order.
+        all_paths = sorted([path.replace(start_path, '') for path in all_paths])
 
         logger.debug("All paths: {}".format(all_paths))
 
