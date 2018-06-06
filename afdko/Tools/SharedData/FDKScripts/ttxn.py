@@ -85,7 +85,7 @@ from fontTools.ttLib.tables.DefaultTable import DefaultTable
 from fontTools.misc.loggingTools import Timer
 from fontTools.misc.py23 import basestring, tostr
 import copy
-import subprocess32 as subprocess
+import subprocess
 import re
 import collections
 import textwrap
