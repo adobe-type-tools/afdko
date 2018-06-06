@@ -40,7 +40,7 @@ def _get_save_location(save_path):
     create a temporary location.
     """
     if not save_path:
-        n,save_path = tempfile.mkstemp()
+        save_path = tempfile.mkstemp()[1]
     return save_path
 
 

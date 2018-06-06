@@ -26,7 +26,7 @@ def _get_test_path(file_name):
 
 
 def _get_temp_file_path():
-    return tempfile.NamedTemporaryFile(delete=False).name
+    return tempfile.mkstemp()[1]
 
 
 def _font_has_table(font_path, table_tag):

@@ -197,6 +197,9 @@ def _paths_are_same_kind(path1, path2):
 
 
 def _validate_path(path_str):
+    if path_str == None:
+        raise argparse.ArgumentTypeError(
+            "{} is not a valid path.".format(path_str))
     valid_path = os.path.abspath(os.path.realpath(path_str))
     if not os.path.exists(valid_path):
         raise argparse.ArgumentTypeError(
