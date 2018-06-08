@@ -50,12 +50,11 @@ def run_tool(opts):
     Runs the tool using the parameters provided.
     """
     # Temporary debug code.
-    import platform
-    curSystem = platform.system()
-    if curSystem == "Windows":
-        opts.tool=subprocess.check_output(["where",opts.tool]).strip()
+    cur_system = platform.system()
+    if cur_system == "Windows":
+        opts.tool = subprocess.check_output(["where", opts.tool]).strip()
     else:
-        opts.tool=subprocess.check_output(["which", opts.tool]).strip()
+        opts.tool = subprocess.check_output(["which", opts.tool]).strip()
 
     input_dir = _get_input_dir_path(opts.tool)
     save_loc = _get_save_location(opts.save_path)
