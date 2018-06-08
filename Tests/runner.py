@@ -28,6 +28,7 @@ def _write_file(file_path, data):
 
 
 def _get_input_dir_path(tool_name):
+    tool_name = os.path.basename(tool_name)
     tool_name = tool_name.split('.')[0]  # Windows tool name contains '.exe'
     input_dir = os.path.join(os.path.split(__file__)[0], tool_name + '_data',
                              'input')
