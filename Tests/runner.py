@@ -85,7 +85,7 @@ def run_tool(opts):
             return save_loc
     except (subprocess.CalledProcessError, OSError) as err:
         logger.error(err)
-        return None
+        raise
 
 
 def _check_tool(tool_name):
