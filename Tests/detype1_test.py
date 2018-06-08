@@ -25,9 +25,3 @@ def test_run_on_pfa_data():
     actual_path = runner(CMD + ['-f', TYPE1_PFA])
     expected_path = _get_expected_path('type1_from_pfa.txt')
     assert differ([expected_path, actual_path]) is True
-
-
-def test_run_on_txt_data():
-    # type1.txt: EOF in eexec section
-    # command 'detype1 type1.txt' returned non-zero exit status 1
-    assert runner(CMD + ['-f', TYPE1_TXT]) is None
