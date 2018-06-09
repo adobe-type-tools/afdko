@@ -18,7 +18,7 @@ import sys
 
 from fontTools.misc.py23 import open
 
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 logger = logging.getLogger(__file__)
 
