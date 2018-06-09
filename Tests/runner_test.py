@@ -18,3 +18,5 @@ def test_bad_tx_cmd():
         runner(['-t', 'tx', '-n', '-o', 'bad_opt'])
     except subprocess.CalledProcessError:
         pass
+    else:
+     raise OSError("test_bad_tx_cmd() should fail, but did not do so.")
