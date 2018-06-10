@@ -15,6 +15,7 @@ import sys
 import tempfile
 import time
 import traceback
+import subprocess
 
 from fontTools.ttLib import TTFont, getTableModule, TTLibError
 
@@ -218,28 +219,32 @@ class FontError(KeyError):
 	pass
 
 def CheckEnvironment():
-	txPath = 'tx'
+	if curSystem == "Windows":
+		tx_path = subprocess.check_output(["where", "tx.exe"]).strip()
+	else:
+		tx_path = subprocess.check_output(["which", "tx"]).strip()
 	txError = 0
 
 	try:
 		exe_dir, _ = FDKUtils.findFDKDirs()
 	except FDKUtils.FDKEnvError:
 		logMsg("Please re-install the afdko. Cannot find the "
-			   "afdko/Tools/SharedData directory.")
+									"afdko/Tools/SharedData directory.")
 		raise FDKEnvironmentError
 
-	command = "%s -u 2>&1" % txPath
+	command = "%s -u 2>&1" % tx_path
 	report = FDKUtils.runShellCmd(command)
 	if "options" not in report:
 		txError = 1
 
 	if txError:
 		logMsg("Please re-install the afdko. The executable directory \"%s\" "
-			   "is missing the tool: < %s >." % (exe_dir, txPath))
+									"is missing the tool: < %s >." % (exe_dir, tx_path))
 		logMsg("or the files referenced by the shell script is missing.")
 		raise FDKEnvironmentError
 
-	return txPath
+	return tx_path
+
 
 def fixGlyphNames(glyphName):
 	glyphRange = glyphName.split("-")
@@ -987,5 +992,5 @@ def main():
 	return
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	main()

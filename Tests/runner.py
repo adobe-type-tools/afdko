@@ -17,7 +17,7 @@ import subprocess32 as subprocess
 import sys
 import tempfile
 
-__version__ = '0.1.2'
+__version__ = '0.2.0'
 
 logger = logging.getLogger(__file__)
 
@@ -27,8 +27,9 @@ def _write_file(file_path, data):
         f.write(data)
 
 
-def _get_input_dir_path(tool_name):
-    tool_name = tool_name.split('.')[0]  # Windows tool name contains '.exe'
+def _get_input_dir_path(tool_path):
+    # Windows tool name contains '.exe'
+    tool_name = os.path.splitext(os.path.basename(tool_path))[0]
     input_dir = os.path.join(os.path.split(__file__)[0], tool_name + '_data',
                              'input')
     return os.path.abspath(os.path.realpath(input_dir))
@@ -40,7 +41,7 @@ def _get_save_location(save_path):
     create a temporary location.
     """
     if not save_path:
-        save_path = tempfile.NamedTemporaryFile(delete=False).name
+        save_path = tempfile.mkstemp()[1]
     return save_path
 
 
@@ -48,6 +49,16 @@ def run_tool(opts):
     """
     Runs the tool using the parameters provided.
     """
+    # XXX start temporary debug code
+    cur_system = platform.system()
+    if cur_system == "Windows":
+        cmd = "where"
+    else:
+        cmd = "which"
+    tool_path = subprocess.check_output([cmd, opts.tool])
+    opts.tool = tool_path.decode().strip()
+    # XXX end temporary debug code
+
     input_dir = _get_input_dir_path(opts.tool)
     save_loc = _get_save_location(opts.save_path)
 
@@ -85,7 +96,7 @@ def run_tool(opts):
             return save_loc
     except (subprocess.CalledProcessError, OSError) as err:
         logger.error(err)
-        return None
+        raise
 
 
 def _check_tool(tool_name):
@@ -218,7 +229,7 @@ def get_options(args):
 def main(args=None):
     """
     Returns the path to the result/output file if the command is successful,
-    and None if it isn't.
+    and an exception if it isn't.
     """
     opts = get_options(args)
 
@@ -226,4 +237,4 @@ def main(args=None):
 
 
 if __name__ == "__main__":
-    sys.exit(1 if main() in [None, 1] else 0)
+    sys.exit(main())

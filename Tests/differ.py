@@ -18,7 +18,7 @@ import sys
 
 from fontTools.misc.py23 import open
 
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 logger = logging.getLogger(__file__)
 
@@ -161,8 +161,9 @@ class Differ(object):
             all_paths.extend(
                 [os.path.join(dir_name, f_name) for f_name in file_names])
 
-        # Make the paths relative
-        all_paths = [path.replace(start_path, '') for path in all_paths]
+        # Make the paths relative, and enforce order.
+        all_paths = sorted(
+            [path.replace(start_path, '') for path in all_paths])
 
         logger.debug("All paths: {}".format(all_paths))
 

@@ -29,6 +29,7 @@ matrix:
         - export PYTHONPATH=$PYTHONPATH:$(pwd)
       script:
         - flake8 setup.py
+        - flake8 Tests/*.py
         - pushd afdko/Tools/SharedData/FDKScripts
         - flake8 buildCFF2VF.py
         - flake8 buildMasterOTFs.py

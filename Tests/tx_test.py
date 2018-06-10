@@ -75,7 +75,7 @@ def test_convert_ufo2_to_pdf():
                    '(Filename:' + SPLIT_MARKER +
                    '(Date:' + SPLIT_MARKER +
                    '(Time:',
-                   '-l', '36,240-254,262'
+                   '-l', '36,38,240-254,262'
                    ]) is True
 
 
@@ -147,7 +147,7 @@ def test_convert_type1_to_pdf():
                    '(Filename:' + SPLIT_MARKER +
                    '(Date:' + SPLIT_MARKER +
                    '(Time:',
-                   '-l', '36,240-254,262'
+                   '-l', '36,38,240-254,262'
                    ]) is True
 
 

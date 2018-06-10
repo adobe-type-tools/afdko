@@ -101,9 +101,10 @@ log = logging.getLogger(__name__)
 curSystem = platform.system()
 
 if curSystem == "Windows":
-    TX_TOOL = "tx.exe"
+    TX_TOOL=subprocess.check_output(["where","tx.exe"]).strip()
 else:
-    TX_TOOL = "tx"
+    TX_TOOL=subprocess.check_output(["which", "tx"]).strip()
+
 
 INDENT = "  "
 ChainINDENT = INDENT + "C "
@@ -2078,12 +2079,14 @@ class TTXNTTFont(TTFont):
 
 
 def shellcmd(cmdList):
+    # In all cases, assume that cmdList does NOT specify the output file.
     # I use this because tx -dump -6 can be very large.
-    with tempfile.TemporaryFile() as tempFile:
-        subprocess.check_call(cmdList, stdout=tempFile,
-                              stderr=subprocess.STDOUT)
-        tempFile.seek(0)
-        data = tempFile.read()
+    tempPath = tempfile.mkstemp()[1]
+    cmdList.append(tempPath)
+    subprocess.check_call(cmdList)
+    fp = open(tempPath, "rt")
+    data = fp.read()
+    fp.close()
     # XXX is UTF-8 the correct encoding to decode tx output for py3?
     return tostr(data, encoding="utf8")
 

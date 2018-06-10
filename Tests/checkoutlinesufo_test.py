@@ -1,7 +1,5 @@
 from __future__ import print_function, division, absolute_import
 
-import pytest
-
 from booleanOperations.booleanGlyph import BooleanGlyph
 from defcon import Glyph
 
