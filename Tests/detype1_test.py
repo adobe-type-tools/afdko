@@ -23,5 +23,5 @@ def _get_expected_path(file_name):
 
 def test_run_on_pfa_data():
     actual_path = runner(CMD + ['-f', TYPE1_PFA])
-    expected_path = _get_expected_path('type1_from_pfa.txt')
+    expected_path = _get_expected_path(TYPE1_TXT)
     assert differ([expected_path, actual_path]) is True
