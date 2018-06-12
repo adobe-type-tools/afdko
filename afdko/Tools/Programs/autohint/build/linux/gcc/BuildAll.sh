@@ -5,19 +5,25 @@ set -x
 target=autohintexe
 curdir=`pwd`
 
-cd debug
-make $1
-cd $curdir
-
-cd release
-make $1
-cd $curdir
-
-if [ -z "$1" ]
+if [ -z "$1" ] || [ $1 = "release" ]
 then
-	if [ $OSX ]; then
-		cp -R ../../../exe/linux/release/$target ../../../../../linux/
-	else
-		cp -dR ../../../exe/linux/release/$target ../../../../../linux/
-	fi
+	cd release
+	make
+	cd $curdir
+	cp -dR ../../../exe/linux/release/$target ../../../../../linux/
+elif [ $1 = "debug" ]
+then
+	cd debug
+	make
+	cd $curdir
+elif [ $1 = "clean" ]
+then
+	cd release
+	make $1
+	cd $curdir
+	cd debug
+	make $1
+	cd $curdir
+else
+   echo "Build target must be 'release', 'debug', 'clean', or simply omitted (same as 'release')"
 fi
