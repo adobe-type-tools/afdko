@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>public.glyphOrder</key>
+		<array>
+			<string>A</string>
+			<string>Y</string>
+			<string>a</string>
+			<string>y</string>
+			<string>Aacute</string>
+			<string>Atilde</string>
+			<string>Adieresis</string>
+			<string>Yacute</string>
+			<string>Ydieresis</string>
+			<string>Ytilde</string>
+			<string>aacute</string>
+			<string>atilde</string>
+			<string>adieresis</string>
+			<string>yacute</string>
+			<string>ydieresis</string>
+			<string>ytilde</string>
+			<string>acutecmb</string>
+			<string>acutecmb.cap</string>
+			<string>tildecmb</string>
+			<string>tildecmb.cap</string>
+			<string>dieresiscmb</string>
+			<string>dieresiscmb.cap</string>
+		</array>
+	</dict>
+</plist>
