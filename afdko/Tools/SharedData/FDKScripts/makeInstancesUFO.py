@@ -411,7 +411,7 @@ def run(args):
 	if options.doNormalize and haveUfONormalizer:
 		logMsg.log("Applying UFO normalization...")
 		for instancePath in newInstancesList:
-				ufonormalizer.normalizeUFO(instancePath, outputPath=None, onlyModified=True)
+				ufonormalizer.normalizeUFO(instancePath, outputPath=None, onlyModified=True, writeModTimes=False)
 
 	if options.doAutoHint or options.doOverlapRemoval:
 		logMsg.log("Applying post-processing...")
@@ -428,7 +428,7 @@ def run(args):
 	if options.doOverlapRemoval or options.doAutoHint: # The defcon library renames glyphs. Need to fix them again.
 		for instancePath in newInstancesList:
 			if haveUfONormalizer and options.doNormalize:
-				ufonormalizer.normalizeUFO(instancePath, outputPath=None, onlyModified=False)
+				ufonormalizer.normalizeUFO(instancePath, outputPath=None, onlyModified=False, writeModTimes=False)
 
 def main():
 	try:
