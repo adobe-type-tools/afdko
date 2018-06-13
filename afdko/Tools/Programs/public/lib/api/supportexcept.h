@@ -23,7 +23,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "supportenvironment.h"
 #include "supportpublictypes.h"
-#if OS == os_sun || OS == os_mach
+#if OS == os_mach
 #include "supportossyslib.h"
 #elif !WINATM
 #include <stdlib.h>

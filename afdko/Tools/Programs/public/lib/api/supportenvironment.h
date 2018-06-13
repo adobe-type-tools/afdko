@@ -76,7 +76,6 @@ that changes to environment.h be upward-compatible, as described above.
 #define isp_rs6000	8
 #define isp_r2000be	9	/* MIPS, big-endian */
 #define isp_r2000le	10	/* MIPS, little-endian */
-#define isp_sparc	11
 #define isp_i80486	15
 #define isp_amd29k	16
 #define isp_i960ca      17
@@ -114,7 +113,6 @@ that changes to environment.h be upward-compatible, as described above.
 
 #define os_ps		1	/* Adobe PostScript runtime package */
 #define os_bsd		2	/* Unix -- Berkeley Software Distribution */
-#define os_sun		3	/* Unix -- Sun Microsystems */
 #define os_sysv		4	/* Unix -- AT&T System V */
 #define os_aux		5	/* Unix -- Apple A/UX */
 #define os_xenix	6	/* Unix -- MicroSoft Xenix */
@@ -134,7 +132,6 @@ that changes to environment.h be upward-compatible, as described above.
 #define os_os2_32bit	21	/* Microsoft OS/2 32-bit (>= ver 2.0) */
 #define os_macgcc	22	/* Mac target, Unix GCC cross-compiler */
 #define os_ncd		23	/* NCD's X terminal environment */
-#define os_solaris	24	/* Sun Micronsystems SVR4 */
 #define os_irix		25	/* SGI IRIX 4.0.5, NOT SVR4 */
 #define	os_hpux		26	/* HP HP-UX */
 #define	os_irixV	27	/* SGI IRIX 5.0.1, NOT SVR4 */
@@ -262,31 +259,6 @@ that changes to environment.h be upward-compatible, as described above.
 #define ANSI_C 0
 #endif /* __STDC__ */
 #endif /* ANSI_C */
-
-/*
- * PROTOTYPES indicates whether or not ANSI function prototypes
- * are to be used (or else ignored as comments) in compiling.
- * See PROTOS (protos.h in environment package) for a set of macros
- * that optionally generate ANSI function prototypes, depending on the
- * PROTOTYPES switch.  These macros serve as good documentation, and
- * can help ANSI compilers catch type-mismatch errors.
- * The PROTOTYPES switch now defaults to false, but and at some future time
- * it may default to the value ANSI_C.
- *
- * Portability warning:  Prototypes alter the rules for function argument
- * type conversions.  Be sure that all references
- * to prototype-defined functions are in the scope of prototyped
- * declarations, and that any function that is prototype-declared
- * is also prototype-defined.  The latter can be checked by the compiler,
- * but the former generally cannot.  Since prototyped definitions
- * serve as prototyped declarations, a PRIVATE function does not
- * need a separate declaration if its definition textually precedes
- * its first use.  This definition-before-use is normal Pascal order.
- */
-
-#ifndef PROTOTYPES
-#define PROTOTYPES	(OS!=os_sun)
-#endif /* PROTOTYPES */
 
 /*
  * CAT(a,b) produces a single lexical token consisting of a and b
@@ -481,7 +453,7 @@ that changes to environment.h be upward-compatible, as described above.
 #define REGISTERVARS 6		/* data regs, plus up to 4 address regs */
 #endif
 
-#if ISP==isp_mc68020 && (OS==os_sun || OS==os_ps)
+#if ISP==isp_mc68020 && OS==os_ps
 #define MC68K 1
 #define IEEEFLOAT 1
 #define IEEESOFT 1
@@ -670,28 +642,6 @@ that changes to environment.h be upward-compatible, as described above.
 #define MINALIGN 4
 #define PREFERREDALIGN 4
 #define REGISTERVARS 9
-#endif
-
-#if ISP==isp_sparc && OS==os_solaris
-#define MC68K 0
-#define IEEEFLOAT 1
-#define IEEESOFT 0
-#define SWAPBITS 0
-#define UNSIGNEDCHARS 0
-#define MINALIGN 4
-#define PREFERREDALIGN 4
-#define REGISTERVARS 16		/* ? */
-#endif
-
-#if ISP==isp_sparc && OS==os_ps
-#define MC68K 0
-#define IEEEFLOAT 1
-#define IEEESOFT 0
-#define SWAPBITS 0
-#define UNSIGNEDCHARS 0
-#define MINALIGN 4
-#define PREFERREDALIGN 4
-#define REGISTERVARS 16		/* ? */
 #endif
 
 #if ISP==isp_amd29k && OS==os_ps
