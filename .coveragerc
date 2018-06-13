@@ -6,6 +6,8 @@ branch = True
 # list of directories or packages to measure
 source =
     afdko/Tools/SharedData/FDKScripts
+    Tests/runner.py
+    Tests/differ.py
 
 omit = */__init__.py
 
