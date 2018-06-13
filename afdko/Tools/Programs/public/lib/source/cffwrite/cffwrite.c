@@ -18,12 +18,7 @@
 #include "cffwrite_t2cstr.h"
 #include "cffwrite_subr.h"
 
-#if PLAT_SUN4
-#include "sun4/fixstring.h"
-#else /* PLAT_SUN4 */
 #include <string.h>
-#endif  /* PLAT_SUN4 */
-
 #include <stdlib.h>
 #include <stdarg.h>
 

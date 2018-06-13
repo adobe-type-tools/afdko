@@ -203,19 +203,3 @@ that specifies which path element was used to create this hint.
 This comment is used by BuildFont for hinting multiple master
 fonts.
 
-Platforms
----------
-
-AC currently runs on a sun3, a sun4 running SunOS 4.1.x, and a
-sun4 running SunOS 5.x in compatibility mode. It has been ported
-to the Mac by Jon von who at the time had to add prototyping and
-convert int to long int because he was using LightSpeed C. This
-latter case shouldn't be an issue if the Metrowerks development
-environment is used. To my knowledge AC has never been ported to
-a PC.
-
-AC consists of one header file and about 28 C files. The sun3 version
-contains one assembler file that converts a floating point value to
-fixed. I don't think the assembly code is necessary because there is
-also a C version of the procedure.
-

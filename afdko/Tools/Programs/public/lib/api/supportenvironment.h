@@ -683,21 +683,6 @@ that changes to environment.h be upward-compatible, as described above.
 #define REGISTERVARS 16		/* ? */
 #endif
 
-#if ISP==isp_sparc && OS==os_sun
-#define MC68K 0
-#define IEEEFLOAT 1
-#define IEEESOFT 0
-#define SWAPBITS 0
-#define UNSIGNEDCHARS 0
-#define MINALIGN 4
-#define PREFERREDALIGN 4
-#define REGISTERVARS 16		/* ? */
-#include "sun4/fixstdio.h"
-#include "sun4/fixstdlib.h"
-#include "sun4/fixstring.h"
-#include "sun4/fixtime.h"
-#endif
-
 #if ISP==isp_sparc && OS==os_ps
 #define MC68K 0
 #define IEEEFLOAT 1

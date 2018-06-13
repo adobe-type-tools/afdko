@@ -17,12 +17,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <string.h>
 #include <math.h>
 #include <limits.h>
-
-#if PLAT_SUN4
-#include "sun4/fixstdlib.h"
-#else /* PLAT_SUN4 */
 #include <stdlib.h>
-#endif /* PLAT_SUN4 */
 
 /* Make up operator for internal use */
 #define t2_cntroff	t2_reservedESC33

@@ -7,12 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "sfntread.h"
 #include "supportexcept.h"
 
-#if PLAT_SUN4
-#include "sun4/fixstring.h"
-#else /* PLAT_SUN4 */
 #include <string.h>
-#endif  /* PLAT_SUN4 */
-
 #include <stdlib.h>
 #include <limits.h>
 #include <math.h>

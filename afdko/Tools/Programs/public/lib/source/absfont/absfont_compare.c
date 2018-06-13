@@ -7,11 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "absfont.h"
 
-#if PLAT_SUN4
-#include "sun4/fixstring.h"
-#else /* PLAT_SUN4 */
 #include <string.h>
-#endif  /* PLAT_SUN4 */
 
 static int compareOpEntries(abfOpEntry *opEntry1, abfOpEntry *opEntry2)
 {
