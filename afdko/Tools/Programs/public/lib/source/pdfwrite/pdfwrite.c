@@ -5,12 +5,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "dynarr.h"
 #include "supportexcept.h"
 
-#if PLAT_SUN4
-#include "sun4/fixtime.h"
-#else /* PLAT_SUN4 */
 #include <time.h>
-#endif  /* PLAT_SUN4 */
-
 #include <stdarg.h>
 #include <string.h>
 #include <math.h>

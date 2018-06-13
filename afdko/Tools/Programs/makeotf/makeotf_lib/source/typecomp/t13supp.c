@@ -10,12 +10,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#if PLAT_SUN4
-#include "sun4/fixstring.h"
-#else /* PLAT_SUN4 */
 #include <string.h>
-#endif  /* PLAT_SUN4 */
 
 /*
  * Type 13  charstring operators.

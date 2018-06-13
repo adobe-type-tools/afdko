@@ -31,13 +31,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #undef global	/* Remove conflicting definition from buildch */
 
-#if PLAT_SUN4
-#include "sun4/fixstdio.h"
-#include "sun4/fixstdlib.h"
-#else /* PLAT_SUN4 */
 #include <stdio.h>
 #include <stdlib.h>
-#endif  /* PLAT_SUN4 */
 
 #if PLAT_MAC
 #include <console.h>
@@ -665,17 +660,6 @@ static void CTL_CDECL fatal(txCtx h, char *fmt, ...)
 	txFree(h);
 	exit(EXIT_FAILURE);
 	}
-
-#if PLAT_SUN4
-/* Sun4 doesn't define strerror in libc. */
-char *strerror(int errno)
-	{
-	extern int sys_nerr;
-	extern char *sys_errlist[];
-	return (errno >= 0 && errno <= sys_nerr)? 
-		sys_errlist[errno]: "unknown error";
-	}
-#endif /* PLAT_SUN4 */
 
 /* Print file error message and quit */
 static void fileError(txCtx h, char *filename)

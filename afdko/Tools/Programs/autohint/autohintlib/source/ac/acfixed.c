@@ -10,12 +10,9 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 public procedure acfixtopflt(x, pf)
   Fixed x; float *pf;
-
-#ifdef sun3
- { *pf = (float) x; fixscale(pf); }
-#else /* sun4 */
- {*pf = (float) x / fixedScale;}
-#endif
+  {
+  	*pf = (float) x / fixedScale;
+  }
 
 public Fixed acpflttofix(pf)
   float *pf;
