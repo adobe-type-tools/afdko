@@ -549,7 +549,7 @@ class UFOFontData(object):
             data.append("'%s': %s," % (gName, hashMap[gName]))
         data.append("}")
         data.append("")
-        data = os.linesep.join(data)
+        data = '\n'.join(data)
         fp = open(hashPath, "wt")
         fp.write(data)
         fp.close()
@@ -2158,8 +2158,8 @@ def addHintList(hints, hintsStem3, newHintSetArray, isH):
 
 def addWhiteSpace(parent, level):
     child = None
-    childIndent = os.linesep + ("  " * (level + 1))
-    prentIndent = os.linesep + ("  " * (level))
+    childIndent = '\n' + ("  " * (level + 1))
+    prentIndent = '\n' + ("  " * (level))
     # print("parent Tag", parent.tag, repr(parent.text), repr(parent.tail))
     for child in parent:
         child.tail = childIndent
@@ -2551,7 +2551,7 @@ def makeUFOFMNDB(srcFontPath):
     parts.append("\tf=%s" % (familyName))
     parts.append("\ts=%s" % (styleName))
     parts.append("")
-    data = os.linesep.join(parts)
+    data = '\n'.join(parts)
     fp = open(fmndbPath, "wt")
     fp.write(data)
     fp.close()
