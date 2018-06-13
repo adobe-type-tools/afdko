@@ -1,3 +1,13 @@
+set do_target=0
+if "%1"=="" set do_target=1
+if "%1"=="release" set do_target=1
+if "%1"=="debug" set do_target=1
+if "%1"=="clean" set do_target=1
+if %do_target%==0 (
+	echo "Build target must be 'release', 'debug', 'clean', or simply omitted (same as 'release')"
+	exit /B
+)
+
 echo " "
 echo "Building autohint..."
 call %~dp0autohint\build\win\vc10\BuildAll.cmd %1 || EXIT /B 1
