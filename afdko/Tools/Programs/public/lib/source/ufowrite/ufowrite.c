@@ -31,23 +31,22 @@ typedef struct				/* Glyph data */
     char glifFileName[FILENAME_MAX];
 } Glyph;
 
+typedef enum
+{
+    movetoType,
+    linetoType,
+    curvetoType,
+    initialCurvetoType,
+    finalCurvetoType,
+    closepathType,
+} OpType;
+
 typedef struct
 {
-    int opType;
+    OpType opType;
     float coords[6];	/* Float matrix */
     char* pointName;
 } OpRec;
-
-enum
-{
-	movetoType,
-	linetoType,
-	curvetoType,
-    initialCurvetoType,
-    finalCurvetoType,
-	closepathType,
-} OpType;
-
 
 struct ufwCtx_
 {
