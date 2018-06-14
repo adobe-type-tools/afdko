@@ -2007,25 +2007,29 @@ static void preserveCubeTransform(abfGlyphCallbacks *cb, float rotate, float sca
 
 /* preserve mode callbacks template. */
 static abfGlyphCallbacks preserveGlyphCallbacks =
-	{
-	NULL,
-	NULL,
-	NULL,
-	preserveGlyphBeg,
-	preserveGlyphWidth,
-	preserveGlyphMove,
-	preserveGlyphLine,
-	preserveGlyphCurve,
-  preserveGlyphStem,
-	preserveGlyphFlex,
-	preserveGlyphGenop,
-	preserveGlyphSeac,
-	preserveGlyphEnd,
+{
+    NULL,
+    NULL,
+    NULL,
+    preserveGlyphBeg,
+    preserveGlyphWidth,
+    preserveGlyphMove,
+    preserveGlyphLine,
+    preserveGlyphCurve,
+    preserveGlyphStem,
+    preserveGlyphFlex,
+    preserveGlyphGenop,
+    preserveGlyphSeac,
+    preserveGlyphEnd,
     preserveCubeBlend,
     preserveCubeSetwv,
     preserveCubeCompose,
     preserveCubeTransform,
-	};
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+};
 
 /* ------------------------------- Glyph List ------------------------------ */
 
@@ -2894,21 +2898,29 @@ static void mtxGlyphEnd(abfGlyphCallbacks *cb)
 
 /* Mtx mode callbacks template. */
 static abfGlyphCallbacks mtxGlyphCallbacks =
-	{
-	NULL,
-	NULL,
-	NULL,
-	mtxGlyphBeg,
-	mtxGlyphWidth,
-	mtxGlyphMove,
-	mtxGlyphLine,
-	mtxGlyphCurve,
-	NULL,
-	NULL,
-	mtxGlyphGenop,
-	mtxGlyphSeac,
-	mtxGlyphEnd,
-	};
+{
+    NULL,
+    NULL,
+    NULL,
+    mtxGlyphBeg,
+    mtxGlyphWidth,
+    mtxGlyphMove,
+    mtxGlyphLine,
+    mtxGlyphCurve,
+    NULL,
+    NULL,
+    mtxGlyphGenop,
+    mtxGlyphSeac,
+    mtxGlyphEnd,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+};
 
 /* Begin font set. */
 static void mtx_BegSet(txCtx h)
