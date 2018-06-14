@@ -17,9 +17,9 @@ import subprocess32 as subprocess
 import sys
 import tempfile
 
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger('runner')
 
 
 def _write_file(file_path, data):
@@ -75,7 +75,10 @@ def run_tool(opts):
     args.insert(0, opts.tool)
 
     if opts.files:
-        files = [os.path.join(input_dir, fname) for fname in opts.files]
+        if opts.abs_paths:
+            files = opts.files
+        else:
+            files = [os.path.join(input_dir, fname) for fname in opts.files]
         assert all([os.path.exists(fpath) for fpath in files]), (
             "Invalid input path found.")
         args.extend(files)
@@ -181,10 +184,18 @@ def get_options(args):
         '-f',
         '--files',
         nargs='+',
-        metavar='FILE_NAME',
-        help='names of the files to provide to the tool\n'
+        metavar='FILE_NAME/PATH',
+        help='names or full paths of the files to provide to the tool\n'
              "The files will be sourced from the 'input' folder inside the "
-             "'{tool_name}_data' directory."
+             "'{tool_name}_data' directory, unless the option '--abs-paths' "
+             "is used."
+    )
+    parser.add_argument(
+        '-a',
+        '--abs-paths',
+        action='store_true',
+        help="treat the input paths as absolute\n"
+             "(instead of deriving them from the tool's name)"
     )
     parser.add_argument(
         '-r',
