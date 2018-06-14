@@ -105,7 +105,7 @@ class CustomBuildScripts(distutils.command.build_scripts.build_scripts):
         attempting to adjust the !# shebang. The default build_scripts command
         in python3 calls tokenize to detect the text encoding, treating all
         scripts as python scripts. But all our 'scripts' are native C
-        executables, thus the python3 tokenize module fails witn SyntaxError
+        executables, thus the python3 tokenize module fails with SyntaxError
         on them. Here we just skip the if branch where distutils attempts
         to ajust the shebang.
         """
