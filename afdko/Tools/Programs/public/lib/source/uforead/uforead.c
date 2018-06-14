@@ -112,20 +112,20 @@ typedef struct
     char* glyphName;
 } GlIFOrderRec;
 
+typedef enum
+{
+    movetoType,
+    linetoType,
+    curvetoType,
+    closepathType,
+} OpType;
+
 typedef struct
 {
-    int opType;
+    OpType opType;
     float coords[6];	/* Float matrix */
     char* pointName;
 } OpRec;
-
-enum
-{
-	movetoType,
-	linetoType,
-	curvetoType,
-	closepathType,
-} OpType;
 
 enum
 {
