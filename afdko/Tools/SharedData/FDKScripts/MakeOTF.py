@@ -1,14 +1,14 @@
 # Copyright 2014 Adobe. All rights reserved.
 
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import functools
 import os
 import re
 import sys
 import traceback
 
-import FDKUtils
-import ufoTools
+from . import FDKUtils
+from . import ufoTools
 
 from xml.etree.ElementTree import XML
 from xml.etree.ElementTree import tostring as xmlToString
