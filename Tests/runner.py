@@ -50,8 +50,7 @@ def run_tool(opts):
     Runs the tool using the parameters provided.
     """
     # XXX start temporary debug code
-    cur_system = platform.system()
-    if cur_system == "Windows":
+    if platform.system() == "Windows":
         cmd = "where"
     else:
         cmd = "which"
