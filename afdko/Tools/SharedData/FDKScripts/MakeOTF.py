@@ -3069,7 +3069,6 @@ def main():
                 if os.path.exists(tempPath):
                     os.remove(tempPath)
     print("Done.")
-    return
 
 
 if __name__ == '__main__':
