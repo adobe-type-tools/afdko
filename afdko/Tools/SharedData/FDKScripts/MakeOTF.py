@@ -2732,8 +2732,6 @@ def runMakeOTF(makeOTFParams):
             makeOTFParams.tempPathList.append(inputFontPath)
         raise MakeOTFRunError
 
-    if os.path.exists(outputPath):
-        os.remove(outputPath)
     tempOutPath = outputPath
 
     # The following is because fontPath may not be the same
