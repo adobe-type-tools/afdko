@@ -18,9 +18,9 @@ import sys
 
 from fontTools.misc.py23 import open
 
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger('differ')
 
 
 TXT_MODE = 'txt'
