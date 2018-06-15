@@ -562,7 +562,7 @@ static token* setToken(ufoCtx h)
  */
 static token* getToken(ufoCtx h, int state)
 {
-    char ch;
+    char ch = 0;
     token* tk = NULL;
     h->mark = NULL;
 
@@ -629,7 +629,7 @@ static token* getToken(ufoCtx h, int state)
 /* return actual tokens, ignores comments, preserves white space */
 static token* getAttribute(ufoCtx h, int state)
 {
-    char ch;
+    char ch = 0;
     token* tk = NULL;
     int lastWasQuote = 0;
     h->mark = NULL;
@@ -1813,7 +1813,7 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag)
     int state = 0; /* 0 == start, 1= seen start of glyph,  4 in comment.  */
     int prevState = 0;
     long i;
-    long char_begin;
+    long char_begin = 0;
     long char_end;
     long defaultWidth = 1000;
     long glyphWidth;
@@ -2281,7 +2281,7 @@ static int parsePoint(ufoCtx h, abfGlyphCallbacks *glyph_cb, GLIF_Rec* glifRec, 
     int type = 0;
     char * end;
     char * pointName = NULL;
-    int prevState;
+    int prevState = outlineStart;
     int result = ufoSuccess;
 
     while (1)
@@ -2418,11 +2418,11 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
 static int parseComponent(ufoCtx h, GLIF_Rec* glifRec, abfGlyphCallbacks *glyph_cb, int state, Transform* transform)
 {
     int result = ufoSuccess;
-    abfGlyphInfo* gi;
+    abfGlyphInfo* gi = NULL;
 
     token* tk;
     char * end;
-    int prevState;
+    int prevState = outlineStart;
     Transform localTransform; // transform specified in component
     Transform* newTransform = NULL; // result of multiplication with existing transform.
     float val;
@@ -2894,7 +2894,7 @@ static int parseType1HintSet(ufoCtx h, GLIF_Rec* glifRec, char* pointName, Trans
     int result = ufoSuccess;
     int state = outlineInHintSet;
     token* tk;
-    int prevState;
+    int prevState = outlineInHintSet;
     int stemFlags = 0;
     HintMask * curHintMask;
 
@@ -2985,7 +2985,7 @@ static int parseType1HintDataV1(ufoCtx h, GLIF_Rec* glifRec, Transform* transfor
     char * pointName = NULL;
 
     token* tk;
-    int prevState;
+    int prevState = outlineInHintData;
     //printf("Parsing Type1 hint data.\n");
     /* This is Adobe private T1 hint data, so we report a fatal error if the struture is not as expected */
     while (1)
@@ -3372,7 +3372,7 @@ static int parseHintSetV2(ufoCtx h, GLIF_Rec* glifRec, char* pointName, Transfor
     int result = ufoSuccess;
     int state = outlineInHintSet;
     token* tk;
-    int prevState;
+    int prevState = outlineInHintSet;
     int stemFlags = 0;
     HintMask * curHintMask;
 
@@ -3467,7 +3467,7 @@ static int parseHintSetListV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
     int result = ufoSuccess;
     int state = outlineInHintData;
     token* tk;
-    int prevState;
+    int prevState = outlineInHintData;
     int stemFlags = 0;
     char* pointName = NULL;
 
@@ -3625,7 +3625,7 @@ static int parseFlexListV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
     int result = ufoSuccess;
     int state = outlineInHintData;
     token* tk;
-    int prevState;
+    int prevState = outlineInHintData;
     char* pointName;
 
     while (1)
@@ -3718,7 +3718,7 @@ static int parseType1HintDataV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transfor
     char * pointName = NULL;
 
     token* tk;
-    int prevState;
+    int prevState = outlineInHintData;
     //printf("Parsing Type1 hint data.\n");
     /* This is Adobe private T1 hint data, so we report a fatal error if the struture is not as expected */
     while (1)
@@ -3810,7 +3810,7 @@ static void skipData(ufoCtx h, GLIF_Rec* glifRec)
     int state = otherDictKey;
     int prevState = otherDictKey;
     token* tk;
-    token* lastToken;
+    token* lastToken = NULL;
     dnaDCL(token, tokenList);
     dnaINIT(h->dna, tokenList, 10,10);
 
