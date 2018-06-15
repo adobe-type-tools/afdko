@@ -1094,10 +1094,8 @@ static void doOp_ed(ufoCtx h, abfGlyphCallbacks *glyph_cb)
 static int tkncmp(token* tk, char* str)
 {
     size_t len = strlen(str);
-    int retVal;
-    if (len != tk->length)
-        retVal =  1;
-    else
+    int retVal = 1;
+    if ((tk != NULL) && (len == tk->length))
         retVal = strncmp(tk->val, str, tk->length);
     return retVal;
 }
@@ -1114,7 +1112,10 @@ static int tokenEqualStrN(token* tk, char* str, int n)
 
 static int isUnknownAttribute(token* tk)
 {
-    return tk->val[tk->length-1] == '=';
+    if (tk == NULL)
+        return true;
+    else
+        return tk->val[tk->length-1] == '=';
 }
 
 static int matchOps(const void *l, const void *r)
@@ -1814,7 +1815,7 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag)
     int prevState = 0;
     long i;
     long char_begin = 0;
-    long char_end;
+    long char_end = 0;
     long defaultWidth = 1000;
     long glyphWidth;
     unsigned long unicode = ABF_GLYPH_UNENC;
@@ -3673,14 +3674,10 @@ static int parseFlexListV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
             if (tk == NULL)
             {
                 fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph.. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-            }
-
-            if (tk->val[0] == '<')
+            } else if (tk->val[0] == '<')
             {
                 fatal(h,ufoErrParse,  "Entry in flexList was empty. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-            }
-
-            if ((transform == NULL) || ( (transform->mtx[1] == 0) && (transform->mtx[2] == 0)))
+            } else if ((transform == NULL) || ( (transform->mtx[1] == 0) && (transform->mtx[2] == 0)))
             { /* Omit flex if the transform exists and has any skew. */
                 pointName = memNew(h, tk->length+1);
                 strcpy(pointName, tk->val);
@@ -3850,7 +3847,7 @@ static void skipData(ufoCtx h, GLIF_Rec* glifRec)
                     if (tk->val[1] == '/')
                     {
                         /* An end token! this should match lastToken, which is the last item pushed on the stack.*/
-                        if (0 == strncmp(&tk->val[2], &lastToken->val[1], lastToken->length-1))
+                        if ((lastToken != NULL) && (0 == strncmp(&tk->val[2], &lastToken->val[1], lastToken->length-1)))
                         {
                             tokenList.cnt--;
                             if (tokenList.cnt == 0)
