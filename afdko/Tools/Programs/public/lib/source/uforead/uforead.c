@@ -40,10 +40,10 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 enum
 {
-	ufoUnknown,
-	ufoNumeric,
-	ufoOperator,
-	ufoNotSet,
+    ufoUnknown,
+    ufoNumeric,
+    ufoOperator,
+    ufoNotSet,
 };
 
 #define kMaxToken 1024
@@ -54,15 +54,15 @@ const char * t1HintKeyV2 = "com.adobe.type.autohint.v2";
 
 typedef struct
 {
-	int type;
-	char val[kMaxToken];
-	size_t length;
-	size_t offset;	/* into buffer */
+    int type;
+    char val[kMaxToken];
+    size_t length;
+    size_t offset;  /* into buffer */
 } token;
 
-typedef unsigned short STI;		/* String index */
-#define STI_UNDEF	0xffff		/* Undefined string index */
-#define ARRAY_LEN(a)	(sizeof(a)/sizeof(a[0]))
+typedef unsigned short STI;     /* String index */
+#define STI_UNDEF   0xffff      /* Undefined string index */
+#define ARRAY_LEN(a)    (sizeof(a)/sizeof(a[0]))
 #ifdef _WIN32
 #define round round_int
 #endif
@@ -73,7 +73,7 @@ enum
 #define DCL_KEY(key,index) index,
 #include "ufo_ops.h"
 #undef DCL_KEY
-	kKeyCount
+    kKeyCount
 };
 
 static const char op_keys[] =
@@ -85,17 +85,17 @@ static const char op_keys[] =
 
 typedef struct
 {
-    float mtx[6];	/* Float matrix */
+    float mtx[6];   /* Float matrix */
     int isDefault;
     int isOffsetOnly;
 } Transform;
 
 typedef struct _floatRect
 {
-	float left;
-	float bottom;
-	float right;
-	float top;
+    float left;
+    float bottom;
+    float right;
+    float top;
 } floatRect;
 
 typedef struct
@@ -123,27 +123,27 @@ typedef enum
 typedef struct
 {
     OpType opType;
-    float coords[6];	/* Float matrix */
+    float coords[6];    /* Float matrix */
     char* pointName;
 } OpRec;
 
 enum
 {
-	outlineStart,
-	outlineInContour,
-	outlineInPoint,
-	outlineInComponent,
-	outlineInComment,
-	outlineInLib,
-	outlineInLibDict,
-	outlineInID,
-	outlineInHintData,
-	outlineInHintSetList,
+    outlineStart,
+    outlineInContour,
+    outlineInPoint,
+    outlineInComponent,
+    outlineInComment,
+    outlineInLib,
+    outlineInLibDict,
+    outlineInID,
+    outlineInHintData,
+    outlineInHintSetList,
     outlineInFlexList,
-	outlineInHintSet,
-	outlineInHintSetName,
-	outlineInHintSetStemList,
-	outlineInStemHint,
+    outlineInHintSet,
+    outlineInHintSetName,
+    outlineInHintSetStemList,
+    outlineInStemHint,
     otherDictKey,
     otherInElement,
     otherInTag,
@@ -163,92 +163,92 @@ typedef struct {
 
 struct ufoCtx_
 {
-	abfTopDict top;
-	abfFontDict fdict;
-	int flags;
-#define SEEN_END			1
-	struct
+    abfTopDict top;
+    abfFontDict fdict;
+    int flags;
+#define SEEN_END            1
+    struct
     {
-		void *dbg;
-		void *src;
+        void *dbg;
+        void *src;
     } stm;
-	struct
+    struct
     {
-		long offset;
-		char *buf;
-		size_t length;
-		char *end;
-		char *next;
-		token tk;
+        long offset;
+        char *buf;
+        size_t length;
+        char *end;
+        char *next;
+        token tk;
     } src;
-	struct
+    struct
     {
-		dnaDCL(GLIF_Rec, glifRecs);
-		dnaDCL(GlIFOrderRec, glifOrder);
-		dnaDCL(OpRec, opList);
+        dnaDCL(GLIF_Rec, glifRecs);
+        dnaDCL(GlIFOrderRec, glifOrder);
+        dnaDCL(OpRec, opList);
     } data;
-	struct
+    struct
     {
         StemHint stems[T2_MAX_STEMS];
-		dnaDCL(HintMask, hintMasks);
-		dnaDCL(char*, flexOpList);
+        dnaDCL(HintMask, hintMasks);
+        dnaDCL(char*, flexOpList);
         char * pointName; /* used save the hint refernce from the first point of a curve, since it has to be used in trh last point of the curve. */
     } hints;
     
-    dnaDCL(char*, valueArray);	/* used when parsing <array> elements */
+    dnaDCL(char*, valueArray);  /* used when parsing <array> elements */
     char *parseKeyName; /* used to keep track of current top element name. */
- 	dnaDCL(char, tmp);		/* Temporary buffer */
-	char *mark;				/* Buffer position marker */
+    dnaDCL(char, tmp);      /* Temporary buffer */
+    char *mark;             /* Buffer position marker */
     char *altLayerDir;
     char *defaultLayerDir;
-	struct
+    struct
     {
-		int cnt;
-		unsigned long flags;
-#define PARSE_INIT 			(1<<0)
-#define PARSE_PATH			(1<<1)
+        int cnt;
+        unsigned long flags;
+#define PARSE_INIT          (1<<0)
+#define PARSE_PATH          (1<<1)
 #define PARSE_STARTHINT     (1<<2)
-#define PARSE_HINT			(1<<3)
-#define PARSE_ENDHINT		(1<<4)
+#define PARSE_HINT          (1<<3)
+#define PARSE_ENDHINT       (1<<4)
 #define PARSE_SEEN_MOVETO   (1<<6) // have seen an explicit a "move". IF there is no subsequent marking operator, we skip the operation.
-#define PARSE_END			(1<<7)
+#define PARSE_END           (1<<7)
         
-		int hintflags;
+        int hintflags;
 #define UFO_MAX_OP_STACK 18
         
-		float array[UFO_MAX_OP_STACK];
+        float array[UFO_MAX_OP_STACK];
     } stack;
     
-	floatRect aggregatebounds;
-	struct /* Metric data */
+    floatRect aggregatebounds;
+    struct /* Metric data */
     {
         struct abfMetricsCtx_ ctx;
-		abfGlyphInfo gi;
+        abfGlyphInfo gi;
         abfGlyphCallbacks cb;
-		long defaultWidth;
+        long defaultWidth;
     } metrics;
     
-	struct
+    struct
     {
-		dnaDCL(abfGlyphInfo, index);
-		dnaDCL(long, byName);	/* In glyph name order */
-        dnaDCL(long, widths);	/* In index order; [SRI]->width */
+        dnaDCL(abfGlyphInfo, index);
+        dnaDCL(long, byName);   /* In glyph name order */
+        dnaDCL(long, widths);   /* In index order; [SRI]->width */
     } chars;
-	struct						/* String pool */
+    struct                      /* String pool */
     {
-		dnaDCL(long, index);	/* In index order; [SRI]->iBuf */
-		dnaDCL(char, buf);		/* String buffer */
+        dnaDCL(long, index);    /* In index order; [SRI]->iBuf */
+        dnaDCL(char, buf);      /* String buffer */
     } strings;
-	struct
+    struct
     {
-		ctlMemoryCallbacks mem;
-		ctlStreamCallbacks stm;
+        ctlMemoryCallbacks mem;
+        ctlStreamCallbacks stm;
     } cb;
-	dnaCtx dna;
-	struct
+    dnaCtx dna;
+    struct
     {
-		_Exc_Buf env;
-		int code;
+        _Exc_Buf env;
+        int code;
     } err;
 };
 
@@ -258,7 +258,7 @@ typedef struct
     float array[14];
 } BluesArray;
 
-typedef abfGlyphInfo Char;		/* Character record */
+typedef abfGlyphInfo Char;      /* Character record */
 
 
 static STI addString(ufoCtx h, size_t length, const char *value);
@@ -270,58 +270,58 @@ static void setWidth(ufoCtx h, STI sti, long value);
 static long getWidth(ufoCtx h, STI sti);
 static int addChar(ufoCtx h, STI sti, Char **chr);
 static int CTL_CDECL postMatchChar(const void *key, const void *value,
-								   void *ctx);
+                                   void *ctx);
 
 /* -------------------------- Error Support ------------------------ */
 
 char *ufoErrStr(int err_code)
 {
-	static char *errstrs[] =
+    static char *errstrs[] =
     {
 #undef CTL_DCL_ERR
-#define CTL_DCL_ERR(name,string)	string,
+#define CTL_DCL_ERR(name,string)    string,
 #include "ufoerr.h"
     };
-	return (err_code < 0 || err_code >= (int)ARRAY_LEN(errstrs))?
+    return (err_code < 0 || err_code >= (int)ARRAY_LEN(errstrs))?
     (char*)"unknown error": errstrs[err_code];
 }
 
 /* Write message to debug stream from va_list. */
 static void vmessage(ufoCtx h, char *fmt, va_list ap)
 {
-	char text[BUFSIZ];
+    char text[BUFSIZ];
     
-	if (h->stm.dbg == NULL)
-		return;	/* Debug stream not available */
+    if (h->stm.dbg == NULL)
+        return; /* Debug stream not available */
     
-	vsprintf(text, fmt, ap);
-	(void)h->cb.stm.write(&h->cb.stm, h->stm.dbg, strlen(text), text);
+    vsprintf(text, fmt, ap);
+    (void)h->cb.stm.write(&h->cb.stm, h->stm.dbg, strlen(text), text);
 }
 
 /* Write message to debug stream from varargs. */
 static void CTL_CDECL message(ufoCtx h, char *fmt, ...)
 {
-	va_list ap;
-	va_start(ap, fmt);
-	vmessage(h, fmt, ap);
-	va_end(ap);
+    va_list ap;
+    va_start(ap, fmt);
+    vmessage(h, fmt, ap);
+    va_end(ap);
 }
 
 static void CTL_CDECL fatal(ufoCtx h, int err_code, char *fmt, ...)
 {
-	if (fmt == NULL)
+    if (fmt == NULL)
     /* Write standard error message */
-		message(h, "%s", ufoErrStr(err_code));
-	else
+        message(h, "%s", ufoErrStr(err_code));
+    else
     {
-		/* Write font-specific error message */
-		va_list ap;
-		va_start(ap, fmt);
-		vmessage(h, fmt, ap);
-		va_end(ap);
+        /* Write font-specific error message */
+        va_list ap;
+        va_start(ap, fmt);
+        vmessage(h, fmt, ap);
+        va_end(ap);
     }
-	h->err.code = err_code;
-	RAISE(&h->err.env, err_code, NULL);
+    h->err.code = err_code;
+    RAISE(&h->err.env, err_code, NULL);
 }
 
 /* --------------------------- Memory Management --------------------------- */
@@ -329,16 +329,16 @@ static void CTL_CDECL fatal(ufoCtx h, int err_code, char *fmt, ...)
 /* Allocate memory. */
 static void *memNew(ufoCtx h, size_t size)
 {
-	void *ptr = h->cb.mem.manage(&h->cb.mem, NULL, size);
-	if (ptr == NULL)
-		fatal(h, ufoErrNoMemory, NULL);
-	return ptr;
+    void *ptr = h->cb.mem.manage(&h->cb.mem, NULL, size);
+    if (ptr == NULL)
+        fatal(h, ufoErrNoMemory, NULL);
+    return ptr;
 }
 
 /* Free memory. */
 static void memFree(ufoCtx h, void *ptr)
 {
-	(void)h->cb.mem.manage(&h->cb.mem, ptr, 0);
+    (void)h->cb.mem.manage(&h->cb.mem, ptr, 0);
 }
 
 /* -------------------------- Safe dynarr Callbacks ------------------------ */
@@ -346,20 +346,20 @@ static void memFree(ufoCtx h, void *ptr)
 /* Manage memory. */
 static void *dna_manage(ctlMemoryCallbacks *cb, void *old, size_t size)
 {
-	ufoCtx h = (ufoCtx)cb->ctx;
-	void *ptr = h->cb.mem.manage(&h->cb.mem, old, size);
-	if (size > 0 && ptr == NULL)
-		fatal(h, ufoErrNoMemory, NULL);
-	return ptr;
+    ufoCtx h = (ufoCtx)cb->ctx;
+    void *ptr = h->cb.mem.manage(&h->cb.mem, old, size);
+    if (size > 0 && ptr == NULL)
+        fatal(h, ufoErrNoMemory, NULL);
+    return ptr;
 }
 
 /* Initialize error handling dynarr context. */
 static void dna_init(ufoCtx h)
 {
-	ctlMemoryCallbacks cb;
-	cb.ctx 		= h;
-	cb.manage 	= dna_manage;
-	h->dna		= dnaNew(&cb, DNA_CHECK_ARGS);
+    ctlMemoryCallbacks cb;
+    cb.ctx      = h;
+    cb.manage   = dna_manage;
+    h->dna      = dnaNew(&cb, DNA_CHECK_ARGS);
 }
 /* ------------------------ Context handling ------------------------------ */
 
@@ -380,8 +380,8 @@ static void initHintMask(void *ctx, long cnt, HintMask *base)
 
 void ufoFree(ufoCtx h)
 {
-	if (h == NULL)
-		return;
+    if (h == NULL)
+        return;
     
     dnaFREE(h->valueArray);
      {
@@ -396,51 +396,51 @@ void ufoFree(ufoCtx h)
     dnaFREE(h->hints.hintMasks);
     dnaFREE(h->hints.flexOpList);
     dnaFREE(h->chars.index);
-	dnaFREE(h->chars.byName);
-	dnaFREE(h->chars.widths);
-	dnaFREE(h->tmp);
-	dnaFREE(h->data.glifRecs);
-	dnaFREE(h->data.glifOrder);
-	dnaFREE(h->data.opList);
-	freeStrings(h);
-	dnaFree(h->dna);
+    dnaFREE(h->chars.byName);
+    dnaFREE(h->chars.widths);
+    dnaFREE(h->tmp);
+    dnaFREE(h->data.glifRecs);
+    dnaFREE(h->data.glifOrder);
+    dnaFREE(h->data.opList);
+    freeStrings(h);
+    dnaFree(h->dna);
     
-	/* Close debug stream */
-	if (h->stm.dbg != NULL)
-		(void)h->cb.stm.close(&h->cb.stm, h->stm.dbg);
+    /* Close debug stream */
+    if (h->stm.dbg != NULL)
+        (void)h->cb.stm.close(&h->cb.stm, h->stm.dbg);
     
-	/* Free library context */
-	memFree(h, h);
+    /* Free library context */
+    memFree(h, h);
 }
 
 /* Validate client and create context */
 ufoCtx ufoNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
               CTL_CHECK_ARGS_DCL)
 {
-	ufoCtx h;
+    ufoCtx h;
     
-	/* Check client/library compatibility */
-	if (CTL_CHECK_ARGS_TEST(UFO_VERSION))
-		return NULL;
+    /* Check client/library compatibility */
+    if (CTL_CHECK_ARGS_TEST(UFO_VERSION))
+        return NULL;
     
-	/* Allocate context */
-	h = (ufoCtx)mem_cb->manage(mem_cb, NULL, sizeof(struct ufoCtx_));
-	if (h == NULL)
-		return NULL;
+    /* Allocate context */
+    h = (ufoCtx)mem_cb->manage(mem_cb, NULL, sizeof(struct ufoCtx_));
+    if (h == NULL)
+        return NULL;
 
     /* Safety initialization */
     memset(h, 0, sizeof(*h));
     
-	h->metrics.defaultWidth = 1000;
- 	h->altLayerDir = "glyphs.com.adobe.type.processedGlyphs";
- 	h->defaultLayerDir = "glyphs";
+    h->metrics.defaultWidth = 1000;
+    h->altLayerDir = "glyphs.com.adobe.type.processedGlyphs";
+    h->defaultLayerDir = "glyphs";
     
     
-	/* Copy callbacks */
-	h->cb.mem = *mem_cb;
-	h->cb.stm = *stm_cb;
+    /* Copy callbacks */
+    h->cb.mem = *mem_cb;
+    h->cb.stm = *stm_cb;
     
-	/* Set error handler */
+    /* Set error handler */
   DURING_EX(h->err.env)
   
     /* Initialize service library */
@@ -463,62 +463,62 @@ ufoCtx ufoNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     /* Open debug stream */
     h->stm.dbg = h->cb.stm.open(&h->cb.stm, UFO_DBG_STREAM_ID, 0);
 
-	HANDLER
+    HANDLER
     /* Initialization failed */
     ufoFree(h);
     h = NULL;
   END_HANDLER
 
-	return h;
+    return h;
 }
 
 static void prepClientData(ufoCtx h)
 {
-	h->top.sup.nGlyphs = h->chars.index.cnt;
-	if (h->stm.dbg == NULL)
-		abfCheckAllDicts(NULL, &h->top);
+    h->top.sup.nGlyphs = h->chars.index.cnt;
+    if (h->stm.dbg == NULL)
+        abfCheckAllDicts(NULL, &h->top);
 }
 
 /* ---------------------- Buffer handling ---------------------------- */
 static void fillbuf(ufoCtx h, long offset)
 {
-	h->src.length = h->cb.stm.read(&h->cb.stm, h->stm.src, &h->src.buf);
-	if (h->src.length == 0)
-		h->flags |= SEEN_END;
-	h->src.offset = offset;
-	h->src.next = h->src.buf;
-	h->src.end = h->src.buf + h->src.length;
+    h->src.length = h->cb.stm.read(&h->cb.stm, h->stm.src, &h->src.buf);
+    if (h->src.length == 0)
+        h->flags |= SEEN_END;
+    h->src.offset = offset;
+    h->src.next = h->src.buf;
+    h->src.end = h->src.buf + h->src.length;
 }
 
 static int nextbuf(ufoCtx h)
 {
-	if ( h->flags & SEEN_END)
-		return 0;
+    if ( h->flags & SEEN_END)
+        return 0;
     
-	/* buffer read must be able to contain a full token */
-	if ( h->mark && h->mark != h->src.buf)
+    /* buffer read must be able to contain a full token */
+    if ( h->mark && h->mark != h->src.buf)
     {
-		size_t new_offset = h->src.offset + ( h->mark - h->src.buf );
-		h->cb.stm.seek(&h->cb.stm, h->stm.src, new_offset);
-		fillbuf(h, new_offset);
+        size_t new_offset = h->src.offset + ( h->mark - h->src.buf );
+        h->cb.stm.seek(&h->cb.stm, h->stm.src, new_offset);
+        fillbuf(h, new_offset);
         
-		/* make sure we are still pointing at the beginning of token */
-		h->mark = h->src.buf;
+        /* make sure we are still pointing at the beginning of token */
+        h->mark = h->src.buf;
     }
-	if ( h->src.next == h->src.end )
+    if ( h->src.next == h->src.end )
     {
-		fillbuf(h, h->src.offset + h->src.length);
+        fillbuf(h, h->src.offset + h->src.length);
     }
     
-	return ((h->flags & SEEN_END) == 0);
+    return ((h->flags & SEEN_END) == 0);
 }
 
 static int bufferReady(ufoCtx h)
 {
-	if ( h->src.next == h->src.end )
-		return nextbuf(h);
-	
-	return 1;
+    if ( h->src.next == h->src.end )
+        return nextbuf(h);
+    
+    return 1;
 }
 
 static char* getBufferContextPtr(ufoCtx h)
@@ -539,22 +539,22 @@ static char* getBufferContextPtr(ufoCtx h)
 
 static token* setToken(ufoCtx h)
 {
-	size_t len;
-	if ( h->src.buf == NULL || h->mark == NULL)
-		return NULL;
+    size_t len;
+    if ( h->src.buf == NULL || h->mark == NULL)
+        return NULL;
     
-	len = h->src.next - h->mark;
-	if ((len+1) > kMaxToken)
-		return NULL;
+    len = h->src.next - h->mark;
+    if ((len+1) > kMaxToken)
+        return NULL;
     
-	if (len >0)
+    if (len >0)
         memcpy(h->src.tk.val, h->mark, len);
-	h->src.tk.val[len] = 0;
-	h->src.tk.length = len;
-	h->src.tk.offset = h->src.offset + (h->mark - h->src.buf);
-	h->src.tk.type = ufoUnknown;
+    h->src.tk.val[len] = 0;
+    h->src.tk.length = len;
+    h->src.tk.offset = h->src.offset + (h->mark - h->src.buf);
+    h->src.tk.type = ufoUnknown;
     
-	return &h->src.tk;
+    return &h->src.tk;
 }
 
 /* Tokens are separated by whitespace and '"'
@@ -562,51 +562,51 @@ static token* setToken(ufoCtx h)
  */
 static token* getToken(ufoCtx h, int state)
 {
-	char ch;
+    char ch;
     token* tk = NULL;
-	h->mark = NULL;
+    h->mark = NULL;
     
-	while (bufferReady(h))
+    while (bufferReady(h))
     {
-		ch = *h->src.next;
-		if ( ch == 0 )
+        ch = *h->src.next;
+        if ( ch == 0 )
         {
-			break;
+            break;
         }
-		if ( isspace(ch) || (ch == '"'))
-			h->src.next++;
-		else
-			break;
+        if ( isspace(ch) || (ch == '"'))
+            h->src.next++;
+        else
+            break;
     }
     
-	while (bufferReady(h))
+    while (bufferReady(h))
     {
-		if ( ch == 0 )
+        if ( ch == 0 )
         {
-			break;
+            break;
         }
-		else if ( h->mark == NULL )
+        else if ( h->mark == NULL )
         {
-			h->mark = h->src.next++;
-			if (( ch == 0 ) || (!bufferReady(h)))
-				break;
-			ch = *h->src.next;
+            h->mark = h->src.next++;
+            if (( ch == 0 ) || (!bufferReady(h)))
+                break;
+            ch = *h->src.next;
             if ((ch == '<') && (h->mark != h->src.next))
                 break;
-			while ( (!isspace(ch)) &&  ( ch != '"'))
+            while ( (!isspace(ch)) &&  ( ch != '"'))
             {
-				h->src.next++;
-				if (( ch == 0 )  || ( ch == '>' )|| (!bufferReady(h)))
-					break;
-				ch = *h->src.next;
+                h->src.next++;
+                if (( ch == 0 )  || ( ch == '>' )|| (!bufferReady(h)))
+                    break;
+                ch = *h->src.next;
                 if ((ch == '<') && (h->mark != h->src.next))
                     break;
             }
-			break;
+            break;
         }
-		else
+        else
         {
-			break;
+            break;
         }
     }
     
@@ -629,25 +629,25 @@ static token* getToken(ufoCtx h, int state)
 /* return actual tokens, ignores comments, preserves white space */
 static token* getAttribute(ufoCtx h, int state)
 {
-	char ch;
+    char ch;
     token* tk = NULL;
     int lastWasQuote = 0;
-	h->mark = NULL;
+    h->mark = NULL;
     
-	while (bufferReady(h))
+    while (bufferReady(h))
     {
-		ch = *h->src.next;
-		if ( ch == 0 )
+        ch = *h->src.next;
+        if ( ch == 0 )
         {
-			break;
+            break;
         }
-		if ( isspace(ch))
-		{
+        if ( isspace(ch))
+        {
             lastWasQuote = 0;
             h->src.next++;
         }
-		else if (ch == '"')
-		{
+        else if (ch == '"')
+        {
             if (lastWasQuote)
             {
                 ch = 0; /* we have an empty attribute */
@@ -660,34 +660,34 @@ static token* getAttribute(ufoCtx h, int state)
                 lastWasQuote = 1;
             }
         }
-		else
-			break;
+        else
+            break;
     }
     
-	while (bufferReady(h))
+    while (bufferReady(h))
     {
-		if ( ch == 0 )
+        if ( ch == 0 )
         {
-			break;
+            break;
         }
-		else if ( h->mark == NULL )
+        else if ( h->mark == NULL )
         {
-			h->mark = h->src.next++;
-			if (( ch == 0 ) || (!bufferReady(h)))
-				break;
-			ch = *h->src.next;
-			while  (!( ch == '"'))
+            h->mark = h->src.next++;
+            if (( ch == 0 ) || (!bufferReady(h)))
+                break;
+            ch = *h->src.next;
+            while  (!( ch == '"'))
             {
-				h->src.next++;
-				if (( ch == 0 ) || (!bufferReady(h)))
-					break;
-				ch = *h->src.next;
+                h->src.next++;
+                if (( ch == 0 ) || (!bufferReady(h)))
+                    break;
+                ch = *h->src.next;
             }
-			break;
+            break;
         }
-		else
+        else
         {
-			break;
+            break;
         }
     }
     // Back up and remove any final whitespace.
@@ -709,47 +709,47 @@ static token* getAttribute(ufoCtx h, int state)
 /* return value between begin/end element, skipping white space before and after. */
 static token* getElementValue(ufoCtx h, int state)
 {
-	char ch;
+    char ch;
     token* tk = NULL;
-	h->mark = NULL;
+    h->mark = NULL;
     
-	while (bufferReady(h))
+    while (bufferReady(h))
     {
-		ch = *h->src.next;
-		if ( ch == 0 )
+        ch = *h->src.next;
+        if ( ch == 0 )
         {
-			break;
+            break;
         }
-		if (ch == '"')
-			h->src.next++;
-		else
-			break;
+        if (ch == '"')
+            h->src.next++;
+        else
+            break;
     }
     
-	while (bufferReady(h))
+    while (bufferReady(h))
     {
-		if ( ch == 0 )
+        if ( ch == 0 )
         {
-			break;
+            break;
         }
-		else if ( h->mark == NULL )
+        else if ( h->mark == NULL )
         {
-			h->mark = h->src.next++;
-			if (( ch == 0 ) || (!bufferReady(h)))
-				break;
-			ch = *h->src.next;
-			while (ch != '<')
+            h->mark = h->src.next++;
+            if (( ch == 0 ) || (!bufferReady(h)))
+                break;
+            ch = *h->src.next;
+            while (ch != '<')
             {
-				h->src.next++;
-				if (( ch == 0 ) || (!bufferReady(h)))
-					break;
-				ch = *h->src.next;
+                h->src.next++;
+                if (( ch == 0 ) || (!bufferReady(h)))
+                    break;
+                ch = *h->src.next;
             }
-			break;
+            break;
         }
-		else
+        else
         {
-			break;
+            break;
         }
     }
     // Back up and remove any final whitespace.
@@ -770,130 +770,130 @@ static token* getElementValue(ufoCtx h, int state)
 
 static long getPathLength(ufoCtx h)
 {
-	char ch;
-	int startOffset = h->src.offset + (h->src.next - h->src.buf);
-	int endOffset;
-	while (bufferReady(h))
+    char ch;
+    int startOffset = h->src.offset + (h->src.next - h->src.buf);
+    int endOffset;
+    while (bufferReady(h))
     {
-		ch = *h->src.next;
-		if ( ch == 0 )
+        ch = *h->src.next;
+        if ( ch == 0 )
         {
-			break;
+            break;
         }
-		if ( isspace(ch) || (ch == ',') || (ch == '"'))
-			h->src.next++;
-		else if (( ch == '%' ) || ( ch == '#' ))
+        if ( isspace(ch) || (ch == ',') || (ch == '"'))
+            h->src.next++;
+        else if (( ch == '%' ) || ( ch == '#' ))
         {
-			ch = *h->src.next++;
-			if (!bufferReady(h))
-				break;
-			while ( !(ch == '\n' || ch == '\r' || ch == '\f') )
+            ch = *h->src.next++;
+            if (!bufferReady(h))
+                break;
+            while ( !(ch == '\n' || ch == '\r' || ch == '\f') )
             {
-				ch = *h->src.next++;
-				if (!bufferReady(h))
-					break;
+                ch = *h->src.next++;
+                if (!bufferReady(h))
+                    break;
             }
         }
-		else if (ch == '/' || ch == '"' )
-			break;
-		else
-			ch = *h->src.next++;
+        else if (ch == '/' || ch == '"' )
+            break;
+        else
+            ch = *h->src.next++;
     }
-	endOffset = h->src.offset + (h->src.next - h->src.buf);
-	return endOffset - startOffset;
+    endOffset = h->src.offset + (h->src.next - h->src.buf);
+    return endOffset - startOffset;
 }
 
 
 static token* setPathToken(ufoCtx h, int tokenType)
 {
-	size_t len;
-	if ( h->src.buf == NULL || h->mark == NULL)
-		return NULL;
+    size_t len;
+    if ( h->src.buf == NULL || h->mark == NULL)
+        return NULL;
     
-	len = h->src.next - h->mark;
-	if ((len+1) > kMaxToken)
-		return NULL;
+    len = h->src.next - h->mark;
+    if ((len+1) > kMaxToken)
+        return NULL;
     
-	memcpy(h->src.tk.val, h->mark, len);
-	h->src.tk.val[len] = 0;
-	h->src.tk.length = len;
-	h->src.tk.offset = h->src.offset + (h->mark - h->src.buf);
-	h->src.tk.type = tokenType;
-	return &h->src.tk;
+    memcpy(h->src.tk.val, h->mark, len);
+    h->src.tk.val[len] = 0;
+    h->src.tk.length = len;
+    h->src.tk.offset = h->src.offset + (h->mark - h->src.buf);
+    h->src.tk.type = tokenType;
+    return &h->src.tk;
 }
 
 /* return actual tokens, ignores comments as well */
 static token* getPathToken(ufoCtx h, long endOffset)
 {
-	char ch;
-	int tokenType = ufoUnknown;
-	h->mark = NULL;
-	
-	if (endOffset == 0) /* A non-marking glyph. */
-		return NULL;
-		
-	while (bufferReady(h))
-		{
-		ch = *h->src.next;
-		if ( ch == 0 )
-			{
-			return NULL;
-			}
-		if ( isspace(ch) || (ch == ',') || (ch == '"'))
-			h->src.next++;
-		else 
-			break;
-		}
-		
-	if ( (h->src.offset + (h->src.next - h->src.buf)) >=endOffset)
-		return NULL;
-		
-	h->mark = h->src.next;
-	/* If we reload the buffer while processing the token, h->mark is outdated. Make sure that we have
-	enough text to be able to deal with the entire token. */
-	if ((h->src.end - h->src.next) < kMaxToken)
-	{
-		nextbuf(h); /* refills the buffer with h->mark as the first glyph, and resets h->mark to point to the start of the buffer. */
-	}
+    char ch;
+    int tokenType = ufoUnknown;
+    h->mark = NULL;
+    
+    if (endOffset == 0) /* A non-marking glyph. */
+        return NULL;
+        
+    while (bufferReady(h))
+        {
+        ch = *h->src.next;
+        if ( ch == 0 )
+            {
+            return NULL;
+            }
+        if ( isspace(ch) || (ch == ',') || (ch == '"'))
+            h->src.next++;
+        else 
+            break;
+        }
+        
+    if ( (h->src.offset + (h->src.next - h->src.buf)) >=endOffset)
+        return NULL;
+        
+    h->mark = h->src.next;
+    /* If we reload the buffer while processing the token, h->mark is outdated. Make sure that we have
+    enough text to be able to deal with the entire token. */
+    if ((h->src.end - h->src.next) < kMaxToken)
+    {
+        nextbuf(h); /* refills the buffer with h->mark as the first glyph, and resets h->mark to point to the start of the buffer. */
+    }
 
-	ch = *h->src.next;
-	if ( ch == 0 )
-		{
-		return NULL;
-		}
-	else
-		{
-		if (isdigit(ch) || (ch == '-') || (ch == '.')) /* Possible chars for start of numeric coordinate */
-			{
-			tokenType =  ufoNumeric;
-			h->src.next++; /* This is safe, since we have at least kMaxToken bytes at this point.*/
-			while (1)
-				{
-					ch = *h->src.next;
-					if ( ch == 0 )
-						break;
-					else if (isdigit(ch) || (ch == '.'))
-						{
-						h->src.next++;
-						if (h->src.next >= h->src.end)
-							return NULL;
-						}
-					else
-						break;
-				}
-			}
-		else if (isalpha(ch))
-				{
-				/* The non-digit, no whitespace values are assumed to be single-letter oparators */
-				tokenType =  ufoOperator;
-				h->src.next++;
-				}
-		else /* Found something other than digit or alphabetic.*/
-				{
-				h->src.next++;
-				}
-		}
-	return setPathToken(h, tokenType);
+    ch = *h->src.next;
+    if ( ch == 0 )
+        {
+        return NULL;
+        }
+    else
+        {
+        if (isdigit(ch) || (ch == '-') || (ch == '.')) /* Possible chars for start of numeric coordinate */
+            {
+            tokenType =  ufoNumeric;
+            h->src.next++; /* This is safe, since we have at least kMaxToken bytes at this point.*/
+            while (1)
+                {
+                    ch = *h->src.next;
+                    if ( ch == 0 )
+                        break;
+                    else if (isdigit(ch) || (ch == '.'))
+                        {
+                        h->src.next++;
+                        if (h->src.next >= h->src.end)
+                            return NULL;
+                        }
+                    else
+                        break;
+                }
+            }
+        else if (isalpha(ch))
+                {
+                /* The non-digit, no whitespace values are assumed to be single-letter oparators */
+                tokenType =  ufoOperator;
+                h->src.next++;
+                }
+        else /* Found something other than digit or alphabetic.*/
+                {
+                h->src.next++;
+                }
+        }
+    return setPathToken(h, tokenType);
 }
 
 static void copyToken(token *src, token* dst)
@@ -912,15 +912,15 @@ static int round_int( double r )
 
 /* Construct matrix from args. */
 static void setTransformMtx(Transform* transform,
-					float a, float b, float c, float d, float tx, float ty, int isDefault, int isOffsetOnly)
+                    float a, float b, float c, float d, float tx, float ty, int isDefault, int isOffsetOnly)
 {
     float* val = transform->mtx;
-	val[0] = a;
-	val[1] = b;
-	val[2] = c;
-	val[3] = d;
-	val[4] = tx;
-	val[5] = ty;
+    val[0] = a;
+    val[1] = b;
+    val[2] = c;
+    val[3] = d;
+    val[4] = tx;
+    val[5] = ty;
     transform->isDefault = isDefault;
     transform->isOffsetOnly = isOffsetOnly;
 }
@@ -928,12 +928,12 @@ static void setTransformMtx(Transform* transform,
 /* Multiple matices a and b giving result. */
 static void matMult(float *result, float * a, float * b)
 {
-	result[0] = a[0]*b[0] + a[1]*b[2];
-	result[1] = a[0]*b[1] + a[1]*b[3];
-	result[2] = a[2]*b[0] + a[3]*b[2];
-	result[3] = a[2]*b[1] + a[3]*b[3];
-	result[4] = a[4]*b[0] + a[5]*b[2] + b[4];
-	result[5] = a[4]*b[1] + a[5]*b[3] + b[5];
+    result[0] = a[0]*b[0] + a[1]*b[2];
+    result[1] = a[0]*b[1] + a[1]*b[3];
+    result[2] = a[2]*b[0] + a[3]*b[2];
+    result[3] = a[2]*b[1] + a[3]*b[3];
+    result[4] = a[4]*b[0] + a[5]*b[2] + b[4];
+    result[5] = a[4]*b[1] + a[5]*b[3] + b[5];
 }
 
 static void setTransformValue(Transform* transform, float val, int valIndex)
@@ -980,12 +980,12 @@ static void EnsureState(ufoCtx h, int flags)
 
 static void doOp_mt(ufoCtx h, abfGlyphCallbacks *glyph_cb, char * pointName)
 {
-	float dy, dx;
+    float dy, dx;
     OpRec* opRec;
-	CHKUFLOW(2);
-	dy = POP();
-	dx = POP();
-	
+    CHKUFLOW(2);
+    dy = POP();
+    dx = POP();
+    
     opRec = dnaNEXT(h->data.opList);
     opRec->opType = movetoType;
     opRec->coords[0] = dx;
@@ -993,19 +993,19 @@ static void doOp_mt(ufoCtx h, abfGlyphCallbacks *glyph_cb, char * pointName)
     opRec->pointName = pointName; /* pointName may or may not be NULL */
     h->stack.flags |= PARSE_SEEN_MOVETO;
     //printf("moveto %f %f. opIndex: %ld \n", dx, dy, h->data.opList.cnt-1);
-	h->metrics.cb.move(&h->metrics.cb, dx, dy);
+    h->metrics.cb.move(&h->metrics.cb, dx, dy);
     
 }
 
 
 static void doOp_dt(ufoCtx h, abfGlyphCallbacks *glyph_cb, char * pointName)
 {
-	float dy, dx;
+    float dy, dx;
     OpRec* opRec;
-	CHKUFLOW(2);
+    CHKUFLOW(2);
     
-	dy = POP();
-	dx = POP();
+    dy = POP();
+    dx = POP();
     
     opRec = dnaNEXT(h->data.opList);
     opRec->opType = linetoType;
@@ -1027,7 +1027,7 @@ static void doOp_dt(ufoCtx h, abfGlyphCallbacks *glyph_cb, char * pointName)
 
 static void doOp_ct(ufoCtx h, abfGlyphCallbacks *glyph_cb, char * pointName)
 {
-	float dy3, dx3, dy2, dx2, dy1, dx1;
+    float dy3, dx3, dy2, dx2, dy1, dx1;
     OpRec* opRec;
 
     opRec = dnaNEXT(h->data.opList);
@@ -1076,17 +1076,17 @@ static void doOp_ct(ufoCtx h, abfGlyphCallbacks *glyph_cb, char * pointName)
 
 static void doOp_ed(ufoCtx h, abfGlyphCallbacks *glyph_cb)
 {
-	abfMetricsCtx g = &h->metrics.ctx;
+    abfMetricsCtx g = &h->metrics.ctx;
     
-	/* get the bounding box and compute the aggregate */
-	if (h->aggregatebounds.left > g->real_mtx.left)
-		h->aggregatebounds.left = g->real_mtx.left;
-	if (h->aggregatebounds.bottom > g->real_mtx.bottom)
-		h->aggregatebounds.bottom = g->real_mtx.bottom;
-	if (h->aggregatebounds.right < g->real_mtx.right)
-		h->aggregatebounds.right = g->real_mtx.right;
-	if (h->aggregatebounds.top < g->real_mtx.top)
-		h->aggregatebounds.top = g->real_mtx.top;
+    /* get the bounding box and compute the aggregate */
+    if (h->aggregatebounds.left > g->real_mtx.left)
+        h->aggregatebounds.left = g->real_mtx.left;
+    if (h->aggregatebounds.bottom > g->real_mtx.bottom)
+        h->aggregatebounds.bottom = g->real_mtx.bottom;
+    if (h->aggregatebounds.right < g->real_mtx.right)
+        h->aggregatebounds.right = g->real_mtx.right;
+    if (h->aggregatebounds.top < g->real_mtx.top)
+        h->aggregatebounds.top = g->real_mtx.top;
     
     glyph_cb->end(glyph_cb); /* I call glyph_cb->end directly, unlike the path operators, as the opList has already been played back. */
 }
@@ -1099,34 +1099,34 @@ static int tkncmp(token* tk, char* str)
         retVal =  1;
     else
         retVal = strncmp(tk->val, str, tk->length);   
-	return retVal;
+    return retVal;
 }
 
 static int tokenEqualStr(token* tk, char* str)
 {
-	return tkncmp(tk, str) == 0;
+    return tkncmp(tk, str) == 0;
 }
 
 static int tokenEqualStrN(token* tk, char* str, int n)
 {
-	return 0 == strncmp(tk->val, str, n);
+    return 0 == strncmp(tk->val, str, n);
 }
 
 static int isUnknownAttribute(token* tk)
 {
-	return tk->val[tk->length-1] == '=';
+    return tk->val[tk->length-1] == '=';
 }
 
 static int matchOps(const void *l, const void *r)
 {
-	int retval;
-	token* tk = (token*)l;
-	char * c = (char*)r;
+    int retval;
+    token* tk = (token*)l;
+    char * c = (char*)r;
     if ( tk->length != 1)
         return -1;
     
-	retval =  strncmp( tk->val,c, 1);
-	return retval;
+    retval =  strncmp( tk->val,c, 1);
+    return retval;
 }
 
 
@@ -1182,14 +1182,14 @@ static void setFontDictKey(ufoCtx h, char * keyValue)
     
     /* If we do not use a keyValue, we need to dispose of it
      */
- 	if (!strcmp(keyName, "copyright"))
+    if (!strcmp(keyName, "copyright"))
     {
         top->Copyright.ptr = keyValue;
     }
     else if (!strcmp(keyName, "trademark"))
     {
         char * copySymbol;
-		top->Notice.ptr = keyValue;
+        top->Notice.ptr = keyValue;
         copySymbol = strstr(keyValue, "\u00A9");
         if (copySymbol != NULL)
         {
@@ -1436,9 +1436,9 @@ static int getGlyphOrderIndex(ufoCtx h, char * glyphName)
     int orderIndex = ABF_UNSET_INT;
     int recIndex = 0;
     
- 	if (ctuLookup(glyphName, h->data.glifOrder.array, h->data.glifOrder.cnt,
-				   sizeof(h->data.glifOrder.array[0]), matchGLIFOrderRec, (size_t*)&recIndex, h))
-	{
+    if (ctuLookup(glyphName, h->data.glifOrder.array, h->data.glifOrder.cnt,
+                   sizeof(h->data.glifOrder.array[0]), matchGLIFOrderRec, (size_t*)&recIndex, h))
+    {
         orderIndex = h->data.glifOrder.array[recIndex].order;
     }
     else
@@ -1452,7 +1452,7 @@ static int getGlyphOrderIndex(ufoCtx h, char * glyphName)
 
 static void  addGLIFRec(ufoCtx h, int state)
 {
-	char* fileName;
+    char* fileName;
     GLIF_Rec* newGLIFRec;
     long int glyphOrder;
     int k;
@@ -1484,48 +1484,48 @@ static int parseGlyphOrder(ufoCtx h)
     h->src.next = h->mark = NULL;
     
     h->cb.stm.clientFileName = "lib.plist";
-	h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
-	if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0))
+    h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
+    if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0))
     {
         fprintf(stderr, "Failed to read lib.plist\n");
-		return ufoErrSrcStream;
+        return ufoErrSrcStream;
     }
     
     dnaSET_CNT(h->valueArray,0);
-	fillbuf(h, 0);
+    fillbuf(h, 0);
     /* Read in file, then sort by glyph name */
 
-	while (!(seenGO || (h->flags & SEEN_END)))
+    while (!(seenGO || (h->flags & SEEN_END)))
     {
-		tk = getToken(h, state);
+        tk = getToken(h, state);
         
         if (tk == NULL)
             break;
-		
-		if (tokenEqualStr(tk, "<!--"))
-		{
-			prevState = state;
-			state = IN_COMMENT;
-		}
-		else if (tokenEqualStr(tk, "-->"))
+        
+        if (tokenEqualStr(tk, "<!--"))
         {
-			if (state != IN_COMMENT)
-				fatal(h,ufoErrParse,  "Encountered end comment token while not in comment.");
-			state = prevState;
+            prevState = state;
+            state = IN_COMMENT;
         }
-		else if (state == IN_COMMENT)
+        else if (tokenEqualStr(tk, "-->"))
         {
-			continue;
+            if (state != IN_COMMENT)
+                fatal(h,ufoErrParse,  "Encountered end comment token while not in comment.");
+            state = prevState;
         }
-		else if (tokenEqualStrN(tk, "<dict", 5))
+        else if (state == IN_COMMENT)
+        {
+            continue;
+        }
+        else if (tokenEqualStrN(tk, "<dict", 5))
         {
             state++;
         }
-		else if (tokenEqualStr(tk, "</dict>"))
+        else if (tokenEqualStr(tk, "</dict>"))
         {
             state--;
         }
-		else if (tokenEqualStrN(tk, "<key", 4) && (state == 1)) /* if we are at the top level of the lib dict, check the key values */
+        else if (tokenEqualStrN(tk, "<key", 4) && (state == 1)) /* if we are at the top level of the lib dict, check the key values */
         {
             if ((tk->val[tk->length-2] == '/') && (tk->val[tk->length-1] == '>'))
             {
@@ -1607,8 +1607,8 @@ static int parseGlyphOrder(ufoCtx h)
     {
         /* Sort the array by glyph name. */
         
-		ctuQSort(h->data.glifOrder.array, h->data.glifOrder.cnt,
-				 sizeof(h->data.glifOrder.array[0]), cmpOrderRecs, h);
+        ctuQSort(h->data.glifOrder.array, h->data.glifOrder.cnt,
+                 sizeof(h->data.glifOrder.array[0]), cmpOrderRecs, h);
         
         /* weed out duplicates - these casue sorting to work differently depending on whether
          we approach the pair from the top or bottom. */
@@ -1631,7 +1631,7 @@ static int parseGlyphOrder(ufoCtx h)
     h->cb.stm.close(&h->cb.stm, h->stm.src);
     h->stm.src = NULL;
     
-	return ufoSuccess;
+    return ufoSuccess;
 }
 
 static int parseGlyphList(ufoCtx h)
@@ -1642,54 +1642,54 @@ static int parseGlyphList(ufoCtx h)
     h->src.next = h->mark = NULL;
     
     h->cb.stm.clientFileName = "glyphs/contents.plist";
-	h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
-	if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0))
+    h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
+    if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0))
     {
         fprintf(stderr, "Failed to read glyphs/contents.plist\n");
-		return ufoErrSrcStream;
+        return ufoErrSrcStream;
     }
     
     dnaSET_CNT(h->valueArray,0);
-	fillbuf(h, 0);
+    fillbuf(h, 0);
     
-	h->metrics.defaultWidth = 0;
-	h->flags &= ~SEEN_END;
+    h->metrics.defaultWidth = 0;
+    h->flags &= ~SEEN_END;
     
-	while (!(h->flags & SEEN_END))
+    while (!(h->flags & SEEN_END))
     {
-		tk = getToken(h, state);
-		
-		if (tokenEqualStr(tk, "<!--"))
-		{
-			prevState = state;
-			state = 4;
-		}
-		else if (tokenEqualStr(tk, "-->"))
+        tk = getToken(h, state);
+        
+        if (tokenEqualStr(tk, "<!--"))
         {
-			if (state != 4)
-				fatal(h,ufoErrParse,  "Encountered end comment token while not in comment.");
-			state = prevState;
+            prevState = state;
+            state = 4;
         }
-		else if (state == 4)
+        else if (tokenEqualStr(tk, "-->"))
         {
-			continue;
+            if (state != 4)
+                fatal(h,ufoErrParse,  "Encountered end comment token while not in comment.");
+            state = prevState;
         }
-		else if (tokenEqualStr(tk, "<dict>"))
+        else if (state == 4)
         {
-			if (state > 0)
-				fatal(h,ufoErrParse,  "Encountered second <dict while in first");
+            continue;
+        }
+        else if (tokenEqualStr(tk, "<dict>"))
+        {
+            if (state > 0)
+                fatal(h,ufoErrParse,  "Encountered second <dict while in first");
             state = 1;
         }
-		else if (tokenEqualStr(tk, "</dict>"))
+        else if (tokenEqualStr(tk, "</dict>"))
         {
             state = 0;
             h->flags |=  SEEN_END;
             break;  // end processing at end of first dict.
         }
-		else if (tokenEqualStr(tk, "<key>"))
+        else if (tokenEqualStr(tk, "<key>"))
         {
-			if (state != 1)
-				fatal(h,ufoErrParse,  "Encountered <key> while not in top level of first <dict>");
+            if (state != 1)
+                fatal(h,ufoErrParse,  "Encountered <key> while not in top level of first <dict>");
             // get key name
             tk = getElementValue(h, state);
             if (tokenEqualStr(tk, "</key>"))
@@ -1714,7 +1714,7 @@ static int parseGlyphList(ufoCtx h)
             addGLIFRec(h, state);
             state = 1;
         }
- 		else if (state != 0)
+        else if (state != 0)
         {
             message(h, "Warning: discarding token '%s", tk->val);
         }
@@ -1728,8 +1728,8 @@ static int parseGlyphList(ufoCtx h)
     
     if (h->data.glifOrder.cnt > 0)
     {
-		ctuQSort(h->data.glifRecs.array, h->data.glifRecs.cnt,
-				 sizeof(h->data.glifRecs.array[0]), cmpGlifRecs, h);
+        ctuQSort(h->data.glifRecs.array, h->data.glifRecs.cnt,
+                 sizeof(h->data.glifRecs.array[0]), cmpGlifRecs, h);
         
     }
     if (h->data.glifRecs.cnt > 0)
@@ -1746,7 +1746,7 @@ static int parseGlyphList(ufoCtx h)
     h->cb.stm.close(&h->cb.stm, h->stm.src);
     h->stm.src = NULL;
     
-	return ufoSuccess;
+    return ufoSuccess;
 }
 
 static int preParseGLIF(ufoCtx h, GLIF_Rec* newGLIFRec, int tag);
@@ -1782,11 +1782,11 @@ static void addCharFromGLIF(ufoCtx h, int tag, char* glyphName, long char_begin,
     }
     else
     {
-        chr->flags 		= 0;
-        chr->tag		= tag;
-        chr->gname.ptr	= glyphName;
-        chr->gname.impl	= tag;
-        chr->iFD		= 0;
+        chr->flags      = 0;
+        chr->tag        = tag;
+        chr->gname.ptr  = glyphName;
+        chr->gname.impl = tag;
+        chr->iFD        = 0;
         if (unicode != ABF_GLYPH_UNENC)
         {
             chr->flags |= ABF_GLYPH_UNICODE;
@@ -1854,7 +1854,7 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag)
 
     fillbuf(h, 0);
     
-	h->flags &= ~SEEN_END;
+    h->flags &= ~SEEN_END;
     while (!(h->flags & SEEN_END))
     {
         tk = getToken(h, state);
@@ -2053,8 +2053,8 @@ static void fixUnsetDictValues(ufoCtx h)
         {
         pd->StdHW  = pd->StemSnapH.array[0];
         }
-  		ctuQSort(pd->StemSnapH.array, pd->StemSnapH.cnt,
-				 sizeof(pd->StemSnapH.array[0]), cmpNumeric, h);
+        ctuQSort(pd->StemSnapH.array, pd->StemSnapH.cnt,
+                 sizeof(pd->StemSnapH.array[0]), cmpNumeric, h);
   }
     if (pd->StemSnapV.cnt > ABF_EMPTY_ARRAY)
     {
@@ -2062,8 +2062,8 @@ static void fixUnsetDictValues(ufoCtx h)
         {
             pd->StdVW = pd->StemSnapV.array[0];
         }
-  		ctuQSort(pd->StemSnapV.array, pd->StemSnapV.cnt,
-				 sizeof(pd->StemSnapV.array[0]), cmpNumeric, h);
+        ctuQSort(pd->StemSnapV.array, pd->StemSnapV.cnt,
+                 sizeof(pd->StemSnapV.array[0]), cmpNumeric, h);
     }
     top->sup.srcFontType = abfSrcFontTypeUFOName;
     
@@ -2098,31 +2098,31 @@ static int parseFontInfo(ufoCtx h)
     int prevState = 0; /* used to save prev state while in comment. */
     token* tk;
     int seenDict = 0;
-	h->src.next = h->mark = NULL;
+    h->src.next = h->mark = NULL;
     h->cb.stm.clientFileName = "fontinfo.plist";
-	h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
-	if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0))
+    h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
+    if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0))
     {
         message(h, "Warning: Failed to open fontinfo.plist in source UFO font. No PostScript FontDict values are specified. \n");
         fixUnsetDictValues(h);
-		return ufoSuccess;
+        return ufoSuccess;
     }
    
     dnaSET_CNT(h->valueArray, 0);
-	fillbuf(h, 0);
+    fillbuf(h, 0);
     
     h->flags &= ~((unsigned long)SEEN_END);
     
-	while (!(h->flags & SEEN_END))
+    while (!(h->flags & SEEN_END))
     {
-		tk = getToken(h, state);
-		
-		if (tokenEqualStr(tk, "<!--"))
-		{
-			prevState = state;
-			state = 4;
-		}
-		else if (tokenEqualStr(tk, "-->"))
+        tk = getToken(h, state);
+        
+        if (tokenEqualStr(tk, "<!--"))
+        {
+            prevState = state;
+            state = 4;
+        }
+        else if (tokenEqualStr(tk, "-->"))
         {
             if (state != 4)
             {
@@ -2130,29 +2130,29 @@ static int parseFontInfo(ufoCtx h)
             }
             state = prevState;
         }
-		else if (state == 4)
+        else if (state == 4)
         {
-			continue;
+            continue;
         }
-		else if (tokenEqualStr(tk, "<dict>"))
+        else if (tokenEqualStr(tk, "<dict>"))
         {
-			if (state > 0)
+            if (state > 0)
             {
                 skipToDictEnd(h);
             }
             else
                 state = 1;
         }
-		else if (tokenEqualStr(tk, "</dict>"))
+        else if (tokenEqualStr(tk, "</dict>"))
         {
                 seenDict = 1;
                 break;
         }
-		else if (state > 4)
+        else if (state > 4)
             continue;
-		else if (tokenEqualStr(tk, "<key>"))
+        else if (tokenEqualStr(tk, "<key>"))
         {
-			if (state != 1)
+            if (state != 1)
             {
                 fatal(h,ufoErrParse,  "Encountered '<key>' while not in top level of first <dict>, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
             }
@@ -2185,7 +2185,7 @@ static int parseFontInfo(ufoCtx h)
                 state = 3;
             dnaSET_CNT(h->valueArray, 0);
         }
-		else if (tokenEqualStr(tk, "</array>"))
+        else if (tokenEqualStr(tk, "</array>"))
         {
             if (state != 3)
             {
@@ -2227,7 +2227,7 @@ static int parseFontInfo(ufoCtx h)
             setFontDictKey(h, "1");
             state--;
         }
- 		else if (state != 0)
+        else if (state != 0)
         {
             tk->val[tk->length -1] = 0;
              message(h, "Warning: discarding token '%s', in fontinfo.plist file. Context: '%s'.", tk->val, getBufferContextPtr(h));
@@ -2252,12 +2252,12 @@ static int parseFontInfo(ufoCtx h)
     
     h->cb.stm.close(&h->cb.stm, h->stm.src);
     h->stm.src = NULL;
-	return ufoSuccess;
+    return ufoSuccess;
 }
 
 static int parseUFO(ufoCtx h)
 {
-	/* This does a first pass through the font, loading the glyph name/ID and the path to each glyph file.
+    /* This does a first pass through the font, loading the glyph name/ID and the path to each glyph file.
      Open the UFO fontinfo.plist, and extract the PS infop
      Open the glyphs/contents.plist file, and extract any glyphs that are not in the glyphs.ac/contents.plist file
      */
@@ -2311,19 +2311,19 @@ static int parsePoint(ufoCtx h, abfGlyphCallbacks *glyph_cb, GLIF_Rec* glifRec, 
         }
         else if (tokenEqualStr(tk, "x="))
         {
-			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             end = tk->val+tk->length;
             x = (float)strtod(tk->val, &end);
         }
         else if (tokenEqualStr(tk, "y="))
         {
-			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             end = tk->val+tk->length;
             y =  (float)strtod(tk->val, &end);
         }
         else if (tokenEqualStr(tk, "name="))
         {
-			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             if (tk->length > 0)
             {
                 pointName = memNew(h, tk->length+1);
@@ -2336,7 +2336,7 @@ static int parsePoint(ufoCtx h, abfGlyphCallbacks *glyph_cb, GLIF_Rec* glifRec, 
         
         else if (tokenEqualStr(tk, "type="))
         {
-			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             if (tokenEqualStr(tk, "move"))
                 type = 1;
             else if (tokenEqualStr(tk, "line"))
@@ -2368,8 +2368,8 @@ static int parsePoint(ufoCtx h, abfGlyphCallbacks *glyph_cb, GLIF_Rec* glifRec, 
             switch(type)
             {
                 case 0:
-					if (pointName != NULL)
-						h->hints.pointName = pointName; /* we need to save the point name for later reference only for off-curve points, to be passed into the curve OpRec */
+                    if (pointName != NULL)
+                        h->hints.pointName = pointName; /* we need to save the point name for later reference only for off-curve points, to be passed into the curve OpRec */
                    break;
                 case 1:
                     {
@@ -2458,7 +2458,7 @@ static int parseComponent(ufoCtx h, GLIF_Rec* glifRec, abfGlyphCallbacks *glyph_
         {
             size_t index;
             char* glyphName;
-			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             end = tk->val+tk->length;
             *end = 0;
             glyphName = tk->val;
@@ -2474,7 +2474,7 @@ static int parseComponent(ufoCtx h, GLIF_Rec* glifRec, abfGlyphCallbacks *glyph_
         }
         else if (tokenEqualStr(tk, "xScale="))
         {
- 			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             end = tk->val+tk->length;
             *end = 0;
            val =  (float)strtod(tk->val, &end);
@@ -2482,7 +2482,7 @@ static int parseComponent(ufoCtx h, GLIF_Rec* glifRec, abfGlyphCallbacks *glyph_
         }
         else if (tokenEqualStr(tk, "yScale="))
         {
- 			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             end = tk->val+tk->length;
             *end = 0;
            val =  (float)strtod(tk->val, &end);
@@ -2490,7 +2490,7 @@ static int parseComponent(ufoCtx h, GLIF_Rec* glifRec, abfGlyphCallbacks *glyph_
         }
         else if (tokenEqualStr(tk, "xyScale="))
         {
- 			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             end = tk->val+tk->length;
             *end = 0;
             val =  (float)strtod(tk->val, &end);
@@ -2498,7 +2498,7 @@ static int parseComponent(ufoCtx h, GLIF_Rec* glifRec, abfGlyphCallbacks *glyph_
         }
         else if (tokenEqualStr(tk, "yxScale="))
         {
- 			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             end = tk->val+tk->length;
             *end = 0;
              val =  (float)strtod(tk->val, &end);
@@ -2506,7 +2506,7 @@ static int parseComponent(ufoCtx h, GLIF_Rec* glifRec, abfGlyphCallbacks *glyph_
         }
         else if (tokenEqualStr(tk, "xOffset="))
         {
- 			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             end = tk->val+tk->length;
             *end = 0;
             val =  (float)strtod(tk->val, &end);
@@ -2514,7 +2514,7 @@ static int parseComponent(ufoCtx h, GLIF_Rec* glifRec, abfGlyphCallbacks *glyph_
         }
         else if (tokenEqualStr(tk, "yOffset="))
         {
- 			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             end = tk->val+tk->length;
             *end = 0;
             val =  (float)strtod(tk->val, &end);
@@ -3968,7 +3968,7 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
     h->stack.cnt = 0;
     h->stack.hintflags = 0;
     h->stack.flags = 0;
- 	h->hints.pointName = NULL;
+    h->hints.pointName = NULL;
    
     do
     {
@@ -3990,19 +3990,19 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                 state = outlineInComment;
             }
             else if (tokenEqualStr(tk, "-->"))
-			{
+            {
                 if (state != outlineInComment)
                 {
                     fatal(h,ufoErrParse,  "Encountered end comment token while not in comment. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
                 }
                 state = prevState;
-			}
+            }
             else if (state == outlineInComment)
-			{
+            {
                 continue;
-			}
+            }
             else if (tokenEqualStrN(tk, "<contour", 8))
-			{
+            {
                 if (state != outlineStart)
                 {
                     fatal(h,ufoErrParse,  "Encountered </contour> token unexpectedly. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
@@ -4019,9 +4019,9 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                 contourStartOpIndex = h->data.opList.cnt; // This will be the index of the first op in the new contour.
                 h->stack.flags |= PARSE_PATH;
                 h->stack.flags &= ~((unsigned long)PARSE_SEEN_MOVETO);
-			}
+            }
             else if (tokenEqualStr(tk, "</contour>"))
-			{
+            {
                  if (state != outlineInContour)
                 {
                     fatal(h,ufoErrParse,  "Encountered </contour> token unexpectedly. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
@@ -4065,9 +4065,9 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                     
                  }
                  h->stack.flags &= ~((unsigned long)(PARSE_PATH | PARSE_SEEN_MOVETO));
-			}
+            }
             else if (tokenEqualStr(tk, "<point"))
-			{
+            {
                 if (state != outlineInContour)
                 {
                     fatal(h,ufoErrParse,  "Encountered <point token unexpectedly. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
@@ -4077,9 +4077,9 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                 state = outlineInContour;
                 if (ufoSuccess != result)
                     break;
- 			}
+            }
             else if (tokenEqualStr(tk, "<component"))
-			{
+            {
                 if (state != outlineStart)
                 {
                     fatal(h,ufoErrParse,  "Encountered <component token unexpectedly. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
@@ -4089,7 +4089,7 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                 state = outlineStart;
                 if (ufoSuccess != result)
                     break;
- 			}
+            }
             else if (tokenEqualStr(tk, "<lib>"))
             {
                 if (state == outlineStart)
@@ -4204,24 +4204,24 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
 
 static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb)
 {
-	int result;
-	token op_tk;
-	abfGlyphInfo* gi;
-	long width;
+    int result;
+    token op_tk;
+    abfGlyphInfo* gi;
+    long width;
     int i;
-	
-	op_tk.type = ufoNotSet;
-	
-	gi = &h->chars.index.array[tag];
     
-	/* note that gname.ptr is not stable: it is a pointer into the h->string->buf array, which moves when it gets resized. */
-	gi->gname.ptr = getString(h, (STI)gi->tag);
-	result = glyph_cb->beg(glyph_cb, gi);
-	gi->flags |= ABF_GLYPH_SEEN;
+    op_tk.type = ufoNotSet;
+    
+    gi = &h->chars.index.array[tag];
+    
+    /* note that gname.ptr is not stable: it is a pointer into the h->string->buf array, which moves when it gets resized. */
+    gi->gname.ptr = getString(h, (STI)gi->tag);
+    result = glyph_cb->beg(glyph_cb, gi);
+    gi->flags |= ABF_GLYPH_SEEN;
     
     
-	/* Check result */
-	switch (result)
+    /* Check result */
+    switch (result)
     {
         case ABF_SKIP_RET:
             return ufoSuccess;
@@ -4230,7 +4230,7 @@ static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb)
         case ABF_FAIL_RET:
             fatal(h, ufoErrParseFail, NULL);
     }
-	result = h->metrics.cb.beg(&h->metrics.cb, &h->metrics.gi);
+    result = h->metrics.cb.beg(&h->metrics.cb, &h->metrics.gi);
     width = getWidth(h, (STI)gi->tag);
     glyph_cb->width(glyph_cb, (float)width );
     if (result == ABF_WIDTH_RET)
@@ -4242,10 +4242,10 @@ static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb)
     doOp_ed(h, glyph_cb); //  we do this outside of parseGLIFOutline so that we can use parseGLIFOutline to process component glyphs.
 
     /* set the FontBBox field in the abfTopDict */
-	h->top.FontBBox[0] = h->aggregatebounds.left;
-	h->top.FontBBox[1] = h->aggregatebounds.bottom;
-	h->top.FontBBox[2] = h->aggregatebounds.right;
-	h->top.FontBBox[3] = h->aggregatebounds.top;
+    h->top.FontBBox[0] = h->aggregatebounds.left;
+    h->top.FontBBox[1] = h->aggregatebounds.bottom;
+    h->top.FontBBox[2] = h->aggregatebounds.right;
+    h->top.FontBBox[3] = h->aggregatebounds.top;
     
     /* clear out any point names from the last run */
     if (h->data.opList.cnt > 0)
@@ -4253,13 +4253,13 @@ static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb)
         for (i=0; i < h->data.opList.cnt; i++)
         {
             OpRec* opRec =  &h->data.opList.array[i++];
-			if (opRec->pointName != NULL)
-			{
-			memFree(h,  opRec->pointName);
+            if (opRec->pointName != NULL)
+            {
+            memFree(h,  opRec->pointName);
             opRec->pointName = NULL;
-			}
+            }
         }
-		h->data.opList.cnt = 0; /* zero the list of ops in the glyph */
+        h->data.opList.cnt = 0; /* zero the list of ops in the glyph */
     }
     /* reset all the hint masks */
     if (h->hints.hintMasks.cnt > 0)
@@ -4268,28 +4268,28 @@ static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb)
         {
              HintMask* curMask = dnaINDEX(h->hints.hintMasks, i );
             curMask->maskStems.cnt = 0;
-			if (curMask->pointName != NULL)
+            if (curMask->pointName != NULL)
             {
                 memFree(h, curMask->pointName);
                 curMask->pointName = NULL;
             }
  
         }
-		h->hints.hintMasks.cnt = 0;
+        h->hints.hintMasks.cnt = 0;
     }
 
-	/* clear the list of flex names */
-	 if (h->hints.flexOpList.cnt > 0)
-	 {
+    /* clear the list of flex names */
+     if (h->hints.flexOpList.cnt > 0)
+     {
        for (i=0; i < h->hints.flexOpList.cnt; i++)
        {
-		   char* flexPointName = h->hints.flexOpList.array[i++];
-		   memFree(h, flexPointName);
-	   }
-	   h->hints.flexOpList.cnt = 0;
-	 }
+           char* flexPointName = h->hints.flexOpList.array[i++];
+           memFree(h, flexPointName);
+       }
+       h->hints.flexOpList.cnt = 0;
+     }
     
-	return ufoSuccess;
+    return ufoSuccess;
 }
 
 /* --------------------------- String Management --------------------------- */
@@ -4297,22 +4297,22 @@ static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb)
 /* Initialize strings. */
 static void newStrings(ufoCtx h)
 {
-	dnaINIT(h->dna, h->strings.index, 50, 200);
-	dnaINIT(h->dna, h->strings.buf, 32000, 6000);
+    dnaINIT(h->dna, h->strings.index, 50, 200);
+    dnaINIT(h->dna, h->strings.buf, 32000, 6000);
 }
 
 /* Reinitilize strings for new font. */
 static void initStrings(ufoCtx h)
 {
-	h->strings.index.cnt = 0;
-	h->strings.buf.cnt = 0;
+    h->strings.index.cnt = 0;
+    h->strings.buf.cnt = 0;
 }
 
 /* Free strings. */
 static void freeStrings(ufoCtx h)
 {
-	dnaFREE(h->strings.index);
-	dnaFREE(h->strings.buf);
+    dnaFREE(h->strings.index);
+    dnaFREE(h->strings.buf);
 }
 
 /* Add string. */
@@ -4320,55 +4320,55 @@ static void freeStrings(ufoCtx h)
 /* static STI addString(ufoCtx h, unsigned length, const char *value) */
 static STI addString(ufoCtx h, size_t length, const char *value)
 {
-	STI sti = (STI)h->strings.index.cnt;
+    STI sti = (STI)h->strings.index.cnt;
     
-	if (length == 0)
+    if (length == 0)
     {
-		/* A null name (/) is legal in PostScript but could lead to unexpected
+        /* A null name (/) is legal in PostScript but could lead to unexpected
          behaviour elsewhere in the coretype libraries so it is substituted
          for a name that is very likely to be unique in the font */
-		const char subs_name[] = "_null_name_substitute_";
-		value = subs_name;
-		length = sizeof(subs_name) - 1;
-		message(h, "null charstring name");
+        const char subs_name[] = "_null_name_substitute_";
+        value = subs_name;
+        length = sizeof(subs_name) - 1;
+        message(h, "null charstring name");
     }
     
-	/* Add new string index */
-	*dnaNEXT(h->strings.index) = h->strings.buf.cnt;
+    /* Add new string index */
+    *dnaNEXT(h->strings.index) = h->strings.buf.cnt;
     
-	/* Add null-terminated string to buffer */
-	/* 64-bit warning fixed by cast here HO */
-	memcpy(dnaEXTEND(h->strings.buf, (long)(length + 1)), value, length);
-	h->strings.buf.array[h->strings.buf.cnt - 1] = '\0';
+    /* Add null-terminated string to buffer */
+    /* 64-bit warning fixed by cast here HO */
+    memcpy(dnaEXTEND(h->strings.buf, (long)(length + 1)), value, length);
+    h->strings.buf.array[h->strings.buf.cnt - 1] = '\0';
     
-	return sti;
+    return sti;
 }
 
 /* Get string from STI. */
 static char *getString(ufoCtx h, STI sti)
 {
-	return &h->strings.buf.array[h->strings.index.array[sti]];
+    return &h->strings.buf.array[h->strings.index.array[sti]];
 }
 
 /* ----------------------Width management -----------------------*/
 static void addWidth(ufoCtx h, STI sti, long value)
 {
-	if (sti != h->chars.widths.cnt)
-	{
-		fatal(h, ufoErrParse, "Width index does not match glyph name index. Glyph index %d.", sti);
-	}
-	*dnaNEXT(h->chars.widths) = value;
+    if (sti != h->chars.widths.cnt)
+    {
+        fatal(h, ufoErrParse, "Width index does not match glyph name index. Glyph index %d.", sti);
+    }
+    *dnaNEXT(h->chars.widths) = value;
     
 }
 
 static long getWidth(ufoCtx h, STI sti)
 {
-	return h->chars.widths.array[sti];
+    return h->chars.widths.array[sti];
 }
 
 static void setWidth(ufoCtx h, STI sti, long value)
 {
-	h->chars.widths.array[sti] = value;
+    h->chars.widths.array[sti] = value;
 }
 
 /* ----------------------Char management -----------------------*/
@@ -4376,50 +4376,50 @@ static void setWidth(ufoCtx h, STI sti, long value)
 /* Match glyph name. */
 static int CTL_CDECL matchChar(const void *key, const void *value, void *ctx)
 {
-	ufoCtx h = ctx;
-	return strcmp((char *)key, getString(h, (STI)h->chars.index.array
-										 [*(long *)value].tag) );
+    ufoCtx h = ctx;
+    return strcmp((char *)key, getString(h, (STI)h->chars.index.array
+                                         [*(long *)value].tag) );
 }
 
 /* Add char record. Return 1 if record exists else 0. Char record returned by
  "chr" parameter. */
 static int addChar(ufoCtx h, STI sti, Char **chr)
 {
-	size_t index;
-	int found =
+    size_t index;
+    int found =
     ctuLookup(getString(h, sti),
               h->chars.byName.array, h->chars.byName.cnt,
               sizeof(h->chars.byName.array[0]), matchChar, &index, h);
-	
-	if (found)
+    
+    if (found)
     /* Match found; return existing record */
-		*chr = &h->chars.index.array[h->chars.byName.array[index]];
-	else
+        *chr = &h->chars.index.array[h->chars.byName.array[index]];
+    else
     {
-		/* Not found; add to table and return new record */
-		long *new = &dnaGROW(h->chars.byName, h->chars.byName.cnt)[index];
-		
-		/* Make and fill hole */
-		memmove(new + 1, new, (h->chars.byName.cnt++ - index) *
-				sizeof(h->chars.byName.array[0]));
-		*new = h->chars.index.cnt;
+        /* Not found; add to table and return new record */
+        long *new = &dnaGROW(h->chars.byName, h->chars.byName.cnt)[index];
         
-		*chr = dnaNEXT(h->chars.index);
+        /* Make and fill hole */
+        memmove(new + 1, new, (h->chars.byName.cnt++ - index) *
+                sizeof(h->chars.byName.array[0]));
+        *new = h->chars.index.cnt;
+        
+        *chr = dnaNEXT(h->chars.index);
     }
     
-	return found;
+    return found;
 }
 
 /* Find char by name. NULL if not found else char record. */
 static Char *findChar(ufoCtx h, STI sti)
 {
-	size_t index;
-	if (ctuLookup(getString(h, sti),
-				  h->chars.byName.array, h->chars.byName.cnt,
-				  sizeof(h->chars.byName.array[0]), matchChar, &index, h))
-		return &h->chars.index.array[h->chars.byName.array[index]];
-	else
-		return NULL;
+    size_t index;
+    if (ctuLookup(getString(h, sti),
+                  h->chars.byName.array, h->chars.byName.cnt,
+                  sizeof(h->chars.byName.array[0]), matchChar, &index, h))
+        return &h->chars.index.array[h->chars.byName.array[index]];
+    else
+        return NULL;
 }
 
 
@@ -4428,10 +4428,10 @@ static Char *findChar(ufoCtx h, STI sti)
 /* Parse files */
 int ufoBegFont(ufoCtx h, long flags, abfTopDict **top,  char *altLayerDir)
 {
-	int result;
+    int result;
     char *dummy;
     
-	/* Set error handler */
+    /* Set error handler */
   DURING_EX(h->err.env)
   
     /* Initialize */
@@ -4469,27 +4469,27 @@ int ufoBegFont(ufoCtx h, long flags, abfTopDict **top,  char *altLayerDir)
     prepClientData(h);
     *top = &h->top;
 
-	HANDLER
-  	result = Exception.Code;
+    HANDLER
+    result = Exception.Code;
   END_HANDLER
   
-	return result;
+    return result;
 }
 
 int ufoEndFont(ufoCtx h)
 {
-	if ( h->stm.src )
-		h->cb.stm.close(&h->cb.stm, h->stm.src);
-	memFree(h,  h->top.FullName.ptr);
-	return ufoSuccess;
+    if ( h->stm.src )
+        h->cb.stm.close(&h->cb.stm, h->stm.src);
+    memFree(h,  h->top.FullName.ptr);
+    return ufoSuccess;
 }
 
 int ufoIterateGlyphs(ufoCtx h, abfGlyphCallbacks *glyph_cb)
 {
-	unsigned short i;
-	int res;
+    unsigned short i;
+    int res;
     
-	/* Set error handler */
+    /* Set error handler */
   DURING_EX(h->err.env)
   
     for (i = 0; i < h->chars.index.cnt; i++)
@@ -4500,81 +4500,81 @@ int ufoIterateGlyphs(ufoCtx h, abfGlyphCallbacks *glyph_cb)
       }
   
   HANDLER
-  	return Exception.Code;
+    return Exception.Code;
   END_HANDLER
   
-	return ufoSuccess;
+    return ufoSuccess;
 }
 
 int ufoGetGlyphByTag(ufoCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb)
 {
-	int res =  ufoSuccess;
+    int res =  ufoSuccess;
     
-	if (tag >= h->chars.index.cnt)
-		return ufoErrNoGlyph;
+    if (tag >= h->chars.index.cnt)
+        return ufoErrNoGlyph;
     
-	/* Set error handler */
+    /* Set error handler */
   DURING_EX(h->err.env)
   
-		res = readGlyph(h, tag, glyph_cb);
+        res = readGlyph(h, tag, glyph_cb);
   
   HANDLER
-  	res = Exception.Code;
+    res = Exception.Code;
   END_HANDLER
   
-	return res;
+    return res;
 }
 
 /* Match glyph name after font fully parsed. */
 static int CTL_CDECL postMatchChar(const void *key, const void *value,
-								   void *ctx)
+                                   void *ctx)
 {
-	ufoCtx h = ctx;
+    ufoCtx h = ctx;
     char * testKey = getString(h, (STI)h->chars.index.array
                                [*(long *)value].tag);
-	return strcmp((char *)key, testKey );
+    return strcmp((char *)key, testKey );
 }
 
 int ufoGetGlyphByName(ufoCtx h, char *gname, abfGlyphCallbacks *glyph_cb)
 {
-	size_t index;
-	int result;
+    size_t index;
+    int result;
     
-	if (!ctuLookup(gname, h->chars.byName.array, h->chars.byName.cnt,
-				   sizeof(h->chars.byName.array[0]), postMatchChar, &index, h))
-		return ufoErrNoGlyph;
-	
-	/* Set error handler */
+    if (!ctuLookup(gname, h->chars.byName.array, h->chars.byName.cnt,
+                   sizeof(h->chars.byName.array[0]), postMatchChar, &index, h))
+        return ufoErrNoGlyph;
+    
+    /* Set error handler */
   DURING_EX(h->err.env)
   
-	result = readGlyph(h,  (unsigned short)h->chars.byName.array[index], glyph_cb);
+    result = readGlyph(h,  (unsigned short)h->chars.byName.array[index], glyph_cb);
 
-	HANDLER
-  	result = Exception.Code;
+    HANDLER
+    result = Exception.Code;
   END_HANDLER
 
-	return result;
-}	
+    return result;
+}   
 
 int ufoResetGlyphs(ufoCtx h)
 { 
-	long i;
-	
-	for (i = 0; i < h->chars.index.cnt; i++)
-		h->chars.index.array[i].flags &= ~((unsigned long)ABF_GLYPH_SEEN);
+    long i;
     
-	return ufoSuccess;
+    for (i = 0; i < h->chars.index.cnt; i++)
+        h->chars.index.array[i].flags &= ~((unsigned long)ABF_GLYPH_SEEN);
+    
+    return ufoSuccess;
 }
 
 void ufoGetVersion(ctlVersionCallbacks *cb)
 {
-	if (cb->called & 1<<UFR_LIB_ID)
-		return;	/* Already enumerated */
+    if (cb->called & 1<<UFR_LIB_ID)
+        return; /* Already enumerated */
     
-	abfGetVersion(cb);
-	dnaGetVersion(cb);
+    abfGetVersion(cb);
+    dnaGetVersion(cb);
     
-	cb->getversion(cb, UFO_VERSION, "uforead");
+    cb->getversion(cb, UFO_VERSION, "uforead");
     
-	cb->called |= 1<<UFR_LIB_ID;
+    cb->called |= 1<<UFR_LIB_ID;
 }
