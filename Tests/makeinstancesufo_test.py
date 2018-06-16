@@ -44,4 +44,4 @@ def test_options(args, ufo_filename):
             '_{}'.format(_get_input_path('font.designspace')), 'i'] + args)
     expected_path = _get_output_path(ufo_filename, 'expected_output')
     actual_path = _get_output_path(ufo_filename, 'temp_output')
-    assert differ([expected_path, actual_path]) is True
+    assert differ([expected_path, actual_path])

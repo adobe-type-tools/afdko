@@ -9,13 +9,14 @@ from afdko.Tools.SharedData.FDKScripts.otfPDF import txPDFFont
 from afdko.Tools.SharedData.FDKScripts.pdfgen import Canvas
 
 
-TOOL = 'fontPDF'
+TOOL = 'fontpdf'
 OTF_FONT = 'OTF.otf'
+
+data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
 
 
 def _get_input_path(file_name):
-    return os.path.join(os.path.split(__file__)[0], TOOL + '_data',
-                        'input', file_name)
+    return os.path.join(data_dir_path, 'input', file_name)
 
 
 # -----

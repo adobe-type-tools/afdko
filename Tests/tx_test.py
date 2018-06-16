@@ -11,7 +11,6 @@ from differ import SPLIT_MARKER
 TOOL = 'tx'
 CMD = ['-t', TOOL]
 
-CFF2_SIMPLE_VF_NAME = 'test_simple_cff2_vf.otf'
 data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
 
 
@@ -149,12 +148,11 @@ def test_dump(args, exp_filename):
 
 
 # ----------
-# Test CFF2 font functions
+# CFF2 tests
 # ----------
 
-def test_varread():
-    # Test read CCF2 VF, write snapshot.
-    actual_path = runner(CMD + ['-o', 't1', '-f', CFF2_SIMPLE_VF_NAME])
-    new_file = CFF2_SIMPLE_VF_NAME.rsplit('.', 1)[0] + '.pfa'
-    expected_path = _get_expected_path(new_file)
-    assert differ([expected_path, actual_path]) is True
+def test_varread_pr355():
+    # read CFF2 VF, write Type1 snapshot
+    actual_path = runner(CMD + ['-o', 't1', '-f', 'cff2_vf.otf'])
+    expected_path = _get_expected_path('cff2_vf.pfa')
+    assert differ([expected_path, actual_path])

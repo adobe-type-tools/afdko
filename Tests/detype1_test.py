@@ -6,15 +6,12 @@ from runner import main as runner
 from differ import main as differ
 
 TOOL = 'detype1'
-CMD = ['-t', TOOL]
 
-TYPE1_PFA = 'type1.pfa'
-TYPE1_TXT = 'type1.txt'
+data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
 
 
 def _get_expected_path(file_name):
-    return os.path.join(os.path.split(__file__)[0], TOOL + '_data',
-                        'expected_output', file_name)
+    return os.path.join(data_dir_path, 'expected_output', file_name)
 
 
 # -----
@@ -22,6 +19,6 @@ def _get_expected_path(file_name):
 # -----
 
 def test_run_on_pfa_data():
-    actual_path = runner(CMD + ['-f', TYPE1_PFA])
-    expected_path = _get_expected_path(TYPE1_TXT)
-    assert differ([expected_path, actual_path]) is True
+    actual_path = runner(['-t', TOOL, '-f', 'type1.pfa'])
+    expected_path = _get_expected_path('type1.txt')
+    assert differ([expected_path, actual_path])
