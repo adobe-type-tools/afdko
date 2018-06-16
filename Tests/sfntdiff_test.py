@@ -1,63 +1,37 @@
 from __future__ import print_function, division, absolute_import
 
 import os
+import pytest
 
 from runner import main as runner
 from differ import main as differ
 
 TOOL = 'sfntdiff'
-CMD = ['-t', TOOL]
 
-REGULAR = 'regular.otf'
-BOLD = 'bold.otf'
+data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
 
 
 def _get_expected_path(file_name):
-    return os.path.join(os.path.split(__file__)[0], TOOL + '_data',
-                        'expected_output', file_name)
+    return os.path.join(data_dir_path, 'expected_output', file_name)
 
 
 # -----
 # Tests
 # -----
 
-def test_default_diff():
-    actual_path = runner(CMD + ['-r', '-f', REGULAR, BOLD])
-    expected_path = _get_expected_path('dflt.txt')
-    assert differ([expected_path, actual_path, '-l', '1-4']) is True
-
-
-def test_default_with_timestamp_diff():
-    actual_path = runner(CMD + ['-r', '-o', 'T', '-f', REGULAR, BOLD])
-    expected_path = _get_expected_path('dflt.txt')
-    assert differ([expected_path, actual_path, '-l', '1-4']) is True
-
-
-def test_level_0_diff():
-    actual_path = runner(CMD + ['-r', '-o', 'd', '_0', '-f', REGULAR, BOLD])
-    expected_path = _get_expected_path('dflt.txt')
-    assert differ([expected_path, actual_path, '-l', '1-4']) is True
-
-
-def test_level_1_diff():
-    actual_path = runner(CMD + ['-r', '-o', 'd', '_1', '-f', REGULAR, BOLD])
-    expected_path = _get_expected_path('level1.txt')
-    assert differ([expected_path, actual_path, '-l', '1-4']) is True
-
-
-def test_level_2_diff():
-    actual_path = runner(CMD + ['-r', '-o', 'd', '_2', '-f', REGULAR, BOLD])
-    expected_path = _get_expected_path('level2.txt')
-    assert differ([expected_path, actual_path, '-l', '1-4']) is True
-
-
-def test_level_3_diff():
-    actual_path = runner(CMD + ['-r', '-o', 'd', '_3', '-f', REGULAR, BOLD])
-    expected_path = _get_expected_path('level3.txt')
-    assert differ([expected_path, actual_path, '-l', '1-4']) is True
-
-
-def test_level_4_diff():
-    actual_path = runner(CMD + ['-r', '-o', 'd', '_4', '-f', REGULAR, BOLD])
-    expected_path = _get_expected_path('level4.txt')
-    assert differ([expected_path, actual_path, '-l', '1-4']) is True
+@pytest.mark.parametrize('args, txt_filename', [
+    ([], 'dflt.txt'),
+    (['T'], 'dflt.txt'),  # default diff with timestamp
+    (['d', '_0'], 'dflt.txt'),  # level 0 diff
+    (['d', '_1'], 'level1.txt'),
+    (['d', '_2'], 'level2.txt'),
+    (['d', '_3'], 'level3.txt'),
+    (['d', '_4'], 'level4.txt'),
+])
+def test_diff(args, txt_filename):
+    if args:
+        args.insert(0, '-o')
+    actual_path = runner(
+        ['-t', TOOL, '-r', '-f', 'regular.otf', 'bold.otf'] + args)
+    expected_path = _get_expected_path(txt_filename)
+    assert differ([expected_path, actual_path, '-l', '1-4'])
