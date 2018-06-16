@@ -8410,6 +8410,7 @@ int CTL_CDECL main(int argc, char *argv[])
 		fprintf(stderr, "%s: out of memory\n", progname);
 		return EXIT_FAILURE;
 		}
+	memset(h, 0, sizeof(struct txCtx_));
 
 	txNew(h, progname);
 
