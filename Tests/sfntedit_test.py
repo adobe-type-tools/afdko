@@ -14,15 +14,15 @@ CMD = ['-t', TOOL]
 LIGHT = 'light.otf'
 ITALIC = 'italic.otf'
 
+data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
+
 
 def _get_expected_path(file_name):
-    return os.path.join(os.path.split(__file__)[0], TOOL + '_data',
-                        'expected_output', file_name)
+    return os.path.join(data_dir_path, 'expected_output', file_name)
 
 
 def _get_test_path(file_name):
-    return os.path.join(os.path.split(__file__)[0], TOOL + '_data',
-                        'input', file_name)
+    return os.path.join(data_dir_path, 'input', file_name)
 
 
 def _get_temp_file_path():
@@ -49,7 +49,7 @@ def _generate_ttx_dump(font_path):
 # def test_no_options():
 #     actual_path = runner(CMD + ['-r', '-f', LIGHT])
 #     expected_path = _get_expected_path('list_sfnt.txt')
-#     assert differ([expected_path, actual_path, '-l', '1']) is True
+#     assert differ([expected_path, actual_path, '-l', '1'])
 
 
 def test_extract_table():
@@ -57,7 +57,7 @@ def test_extract_table():
     actual_path = runner(CMD + ['-o', 'x', '_GDEF={}'.format(save_path),
                                 '-f', LIGHT, '-s', save_path])
     expected_path = _get_expected_path('GDEF_light.tb')
-    assert differ([expected_path, actual_path, '-m', 'bin']) is True
+    assert differ([expected_path, actual_path, '-m', 'bin'])
 
 # This test fails on Windows and passes on Mac
 # https://ci.appveyor.com/project/adobe-type-tools/afdko/build/1.0.108
@@ -65,7 +65,7 @@ def test_extract_table():
 # def test_delete_table():
 #     actual_path = runner(CMD + ['-o', 'd', '_GDEF', '-f', LIGHT])
 #     expected_path = _get_expected_path('light_n_GDEF.otf')
-#     assert differ([expected_path, actual_path, '-m', 'bin']) is True
+#     assert differ([expected_path, actual_path, '-m', 'bin'])
 
 
 def test_add_table():
@@ -75,8 +75,8 @@ def test_add_table():
                                 '-f', ITALIC])
     expected_path = _get_expected_path('italic_w_GDEF.otf')
     assert differ([expected_path, actual_path, '-m', 'bin']) is False
-    assert _font_has_table(actual_path, 'GDEF') is True
+    assert _font_has_table(actual_path, 'GDEF')
     actual_ttx = _generate_ttx_dump(actual_path)
     expected_ttx = _generate_ttx_dump(expected_path)
     assert differ([expected_ttx, actual_ttx,
-                   '-s', '    <checkSumAdjustment']) is True
+                   '-s', '    <checkSumAdjustment'])
