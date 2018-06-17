@@ -570,17 +570,6 @@
 		BDA34B130D6F3F690009FF85 /* path.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = path.h; path = ../../../source/path.h; sourceTree = SOURCE_ROOT; };
 		BDA34B140D6F3F690009FF85 /* help.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = help.h; path = ../../../source/help.h; sourceTree = SOURCE_ROOT; };
 		BDA34B170D6F3F690009FF85 /* usage.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = usage.h; path = ../../../source/usage.h; sourceTree = SOURCE_ROOT; };
-		BDA34B440D6F3F9C0009FF85 /* usage.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = usage.txt; path = ../../../source/usage.txt; sourceTree = SOURCE_ROOT; };
-		BDA34B450D6F3F9C0009FF85 /* mtx.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = mtx.txt; path = ../../../source/mtx.txt; sourceTree = SOURCE_ROOT; };
-		BDA34B460D6F3F9C0009FF85 /* ps.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = ps.txt; path = ../../../source/ps.txt; sourceTree = SOURCE_ROOT; };
-		BDA34B470D6F3F9C0009FF85 /* pdf.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = pdf.txt; path = ../../../source/pdf.txt; sourceTree = SOURCE_ROOT; };
-		BDA34B480D6F3F9C0009FF85 /* path.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = path.txt; path = ../../../source/path.txt; sourceTree = SOURCE_ROOT; };
-		BDA34B490D6F3F9C0009FF85 /* cef.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = cef.txt; path = ../../../source/cef.txt; sourceTree = SOURCE_ROOT; };
-		BDA34B4A0D6F3F9C0009FF85 /* t1.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = t1.txt; path = ../../../source/t1.txt; sourceTree = SOURCE_ROOT; };
-		BDA34B4B0D6F3F9C0009FF85 /* afm.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = afm.txt; path = ../../../source/afm.txt; sourceTree = SOURCE_ROOT; };
-		BDA34B4C0D6F3F9C0009FF85 /* cff.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = cff.txt; path = ../../../source/cff.txt; sourceTree = SOURCE_ROOT; };
-		BDA34B4D0D6F3F9C0009FF85 /* help.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = help.txt; path = ../../../source/help.txt; sourceTree = SOURCE_ROOT; };
-		BDA34B4E0D6F3F9C0009FF85 /* dump.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = dump.txt; path = ../../../source/dump.txt; sourceTree = SOURCE_ROOT; };
 		BDA34B5B0D6F3FDB0009FF85 /* release_tx.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; name = release_tx.xcconfig; path = ../../../../public/config/xcconfig/release_tx.xcconfig; sourceTree = SOURCE_ROOT; };
 		BDA34B5D0D6F3FE00009FF85 /* debug_tx.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; name = debug_tx.xcconfig; path = ../../../../public/config/xcconfig/debug_tx.xcconfig; sourceTree = SOURCE_ROOT; };
 		BDA34E4C0D6F64B10009FF85 /* cfembed.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = cfembed.xcodeproj; path = ../../../../public/lib/build/cfembed/osx/xcode4/cfembed.xcodeproj; sourceTree = SOURCE_ROOT; };
@@ -638,7 +627,6 @@
 			children = (
 				BDA34E3F0D6F64730009FF85 /* lib projects */,
 				BDA34B5A0D6F3FB10009FF85 /* xcconfig */,
-				BDA34B430D6F3F8A0009FF85 /* Help source files */,
 				BDA34AEC0D6F3F530009FF85 /* Headers */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
@@ -750,24 +738,6 @@
 				BDA34B170D6F3F690009FF85 /* usage.h */,
 			);
 			name = Headers;
-			sourceTree = "<group>";
-		};
-		BDA34B430D6F3F8A0009FF85 /* Help source files */ = {
-			isa = PBXGroup;
-			children = (
-				BDA34B440D6F3F9C0009FF85 /* usage.txt */,
-				BDA34B450D6F3F9C0009FF85 /* mtx.txt */,
-				BDA34B460D6F3F9C0009FF85 /* ps.txt */,
-				BDA34B470D6F3F9C0009FF85 /* pdf.txt */,
-				BDA34B480D6F3F9C0009FF85 /* path.txt */,
-				BDA34B490D6F3F9C0009FF85 /* cef.txt */,
-				BDA34B4A0D6F3F9C0009FF85 /* t1.txt */,
-				BDA34B4B0D6F3F9C0009FF85 /* afm.txt */,
-				BDA34B4C0D6F3F9C0009FF85 /* cff.txt */,
-				BDA34B4D0D6F3F9C0009FF85 /* help.txt */,
-				BDA34B4E0D6F3F9C0009FF85 /* dump.txt */,
-			);
-			name = "Help source files";
 			sourceTree = "<group>";
 		};
 		BDA34B5A0D6F3FB10009FF85 /* xcconfig */ = {
