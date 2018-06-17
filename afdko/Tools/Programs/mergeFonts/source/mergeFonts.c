@@ -2,12 +2,12 @@
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 /*
-* mergeFonts. A minor modification of the tx code base. 
+ * mergeFonts. A minor modification of the tx code base.
  */
 
 #include "ctlshare.h"
 
-#define MERGEFONTS_VERSION CTL_MAKE_VERSION(1,0,65) /* derived from tx */
+#define MERGEFONTS_VERSION CTL_MAKE_VERSION(1,1,0) /* derived from tx */
 
 #include "cfembed.h"
 #include "cffread.h"
@@ -9332,6 +9332,7 @@ int CTL_CDECL main(int argc, char *argv[])
 		fprintf(stderr, "%s: out of memory\n", progname);
 		return EXIT_FAILURE;
 		}
+	memset(h, 0, sizeof(struct txCtx_));
 
 	txNew(h, progname);
 
