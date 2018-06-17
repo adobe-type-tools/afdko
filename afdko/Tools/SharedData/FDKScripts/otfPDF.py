@@ -26,7 +26,7 @@ class FontPDFPen(BasePen):
         if self.noPath:
             self.pathList.append([])
         self.noPath = 0
-        self.numMT +=1
+        self.numMT += 1
         pdfPoint = FontPDFPoint(FontPDFPoint.MT, pt, index=self.total)
         self.total += 1
         self.curPt = pt
@@ -109,7 +109,8 @@ class txPDFFont(FontPDFFont):
                 version = 1.0
 
         majorVersion = int(version)
-        minorVersion = str(int( 1000*(0.0005 + version -majorVersion) )).zfill(3)
+        minorVersion = str(
+            int(1000 * (0.0005 + version - majorVersion))).zfill(3)
         versionString = "%s.%s" % (majorVersion, minorVersion)
         return versionString
 
@@ -118,13 +119,13 @@ class txPDFFont(FontPDFFont):
 
     def clientGetEmSquare(self):
         try:
-            emSquare =  self.clientFont['head'].unitsPerEm
+            emSquare = self.clientFont['head'].unitsPerEm
         except KeyError:
             # Maybe its a dummy OTF made from a Type 1 font,
             # and has only a CFF table.
             topDict = self.clientFont['CFF '].cff.topDictIndex[0]
             scale = topDict.FontMatrix[0]
-            emSquare = int(0.5 + 1/scale)
+            emSquare = int(0.5 + 1 / scale)
         return emSquare
 
     def clientGetBaseline(self):
@@ -132,17 +133,16 @@ class txPDFFont(FontPDFFont):
         txFont = self.clientFont
         try:
             unicodeRange2 = txFont["OS/2"].ulUnicodeRange2
-            if unicodeRange2 & 0x10000: # supports CJK  ideographs
+            if unicodeRange2 & 0x10000:  # supports CJK ideographs
                 baseTag = "ideo"
             else:
                 baseTag = "romn"
-            baseTable =  self.clientFont['BASE']
-            baseTagIndex = baseTable.table.HorizAxis.BaseTagList.BaselineTag.index( baseTag)
-            baseScript = None
-            for baseRecord in baseTable.table.HorizAxis.BaseScriptList.BaseScriptRecord:
+            horiz_axis = self.clientFont['BASE'].table.HorizAxis
+            baseTagIndex = horiz_axis.BaseTagList.BaselineTag.index(baseTag)
+            for baseRecord in horiz_axis.BaseScriptList.BaseScriptRecord:
                 if baseRecord.BaseScriptTag == "latn":
-                    baseScript = baseRecord.BaseScript
-                    baseLine = baseScript.BaseValues.BaseCoord[baseTagIndex].Coordinate
+                    baseValues = baseRecord.BaseScript.BaseValues
+                    baseLine = baseValues.BaseCoord[baseTagIndex].Coordinate
                     break
         except (KeyError, AttributeError):
             topDict = txFont['CFF '].cff.topDictIndex[0]
@@ -155,10 +155,12 @@ class txPDFFont(FontPDFFont):
 
     def clientGetBBox(self):
         try:
-            headTable =  self.clientFont['head']
-            return [headTable.xMin, headTable.yMin, headTable.xMax, headTable.yMax]
+            headTable = self.clientFont['head']
+            return [headTable.xMin, headTable.yMin,
+                    headTable.xMax, headTable.yMax]
         except KeyError:
-            # Maybe its a dummy OTF made from a Type 1 font, and has only a CFF table.
+            # Maybe it's a dummy OTF made from a Type 1 font,
+            # and has only a CFF table.
             topDict = self.clientFont['CFF '].cff.topDictIndex[0]
             bbox = topDict.FontBBox
             return [bbox[0], bbox[1], bbox[2], bbox[3]]
@@ -176,7 +178,7 @@ class txPDFFont(FontPDFFont):
             rawBlueList = fontDict.Private.BlueValues
             blueList = []
             for i in range(0, len(rawBlueList), 2):
-                blueList.append( (rawBlueList[i], rawBlueList[i+1]) )
+                blueList.append((rawBlueList[i], rawBlueList[i + 1]))
             blueValues.append(blueList)
         return blueValues
 
@@ -189,7 +191,8 @@ class txPDFFont(FontPDFFont):
 
 
 def hintOn(i, hintMaskBytes):
-    # used to add the active hints to the bez string, when a  T2 hintmask operator is encountered.
+    # used to add the active hints to the bez string,
+    # when a T2 hintmask operator is encountered.
     byteIndex = i / 8
     byteValue = ord(hintMaskBytes[byteIndex])
     offset = 7 - (i % 8)
@@ -198,8 +201,10 @@ def hintOn(i, hintMaskBytes):
 
 class FontPDFT2OutlineExtractor(T2OutlineExtractor):
 
-    def __init__(self, pen, localSubrs, globalSubrs, nominalWidthX, defaultWidthX):
-        T2OutlineExtractor.__init__(self, pen, localSubrs, globalSubrs, nominalWidthX, defaultWidthX)
+    def __init__(self, pen, localSubrs, globalSubrs, nominalWidthX,
+                 defaultWidthX):
+        T2OutlineExtractor.__init__(self, pen, localSubrs, globalSubrs,
+                                    nominalWidthX, defaultWidthX)
         self.hintTable = []
         self.vhints = []
         self.hhints = []
@@ -223,32 +228,31 @@ class FontPDFT2OutlineExtractor(T2OutlineExtractor):
         self.updateHints(args, self.vhints)
 
     def op_hintmask(self, index):
-        hintMaskString, index =  self.doMask(index, "hintmask")
+        hintMaskString, index = self.doMask(index, "hintmask")
         self.firstOpSeen = 1
         return hintMaskString, index
 
     def op_cntrmask(self, index):
-        hintMaskString, index =   self.doMask(index, "cntrmask")
+        hintMaskString, index = self.doMask(index, "cntrmask")
         self.firstOpSeen = 1
         return hintMaskString, index
 
-    def updateHints(self, args,  hintList):
+    def updateHints(self, args, hintList):
         self.countHints(args)
 
         # first hint value is absolute hint coordinate, second is hint width
-
         lastval = args[0]
         arg = str(lastval)
         hint1 = arg
 
         for i in range(len(args))[1:]:
             val = args[i]
-            newVal =  lastval + val
+            newVal = lastval + val
             lastval = newVal
 
             if i % 2:
                 hint2 = str(val)
-                hintList.append( (hint1, hint2) )
+                hintList.append((hint1, hint2))
             else:
                 hint1 = str(newVal)
 
@@ -274,11 +278,12 @@ class FontPDFT2OutlineExtractor(T2OutlineExtractor):
                 self.updateHints(args, self.vhints)
             self.hintMaskBytes = (self.hintCount + 7) / 8
 
-        self.hintMaskString, index = self.callingStack[-1].getBytes(index, self.hintMaskBytes)
+        self.hintMaskString, index = (
+            self.callingStack[-1].getBytes(index, self.hintMaskBytes))
 
-        curhhints, curvhints = self.getCurHints( self.hintMaskString)
+        curhhints, curvhints = self.getCurHints(self.hintMaskString)
 
-        self.hintTable.append([curhhints,curvhints, self.pen.total])
+        self.hintTable.append([curhhints, curvhints, self.pen.total])
 
         return self.hintMaskString, index
 
@@ -288,8 +293,9 @@ class FontPDFT2OutlineExtractor(T2OutlineExtractor):
 
 def drawCharString(charString, pen):
     subrs = getattr(charString.private, "Subrs", [])
-    extractor = FontPDFT2OutlineExtractor(pen, subrs, charString.globalSubrs,
-            charString.private.nominalWidthX, charString.private.defaultWidthX)
+    extractor = FontPDFT2OutlineExtractor(
+        pen, subrs, charString.globalSubrs, charString.private.nominalWidthX,
+        charString.private.defaultWidthX)
     extractor.execute(charString)
     charString.width = extractor.width
     charString.hintTable = extractor.hintTable
@@ -297,7 +303,7 @@ def drawCharString(charString, pen):
     charString.vhints = extractor.vhints
 
 
-class  txPDFGlyph(FontPDFGlyph):
+class txPDFGlyph(FontPDFGlyph):
 
     def clientInitData(self):
         txFont = self.parentFont.clientFont
@@ -319,7 +325,7 @@ class  txPDFGlyph(FontPDFGlyph):
         pen = FontPDFPen(None)
         drawCharString(charstring, pen)
         self.hintTable = charstring.hintTable
-        #
+
         self.hhints = charstring.hhints
         self.vhints = charstring.vhints
         self.numMT = pen.numMT
@@ -327,7 +333,7 @@ class  txPDFGlyph(FontPDFGlyph):
         self.numCT = pen.numCT
         self.numPaths = pen.numPaths
         self.pathList = pen.pathList
-        for path in self.pathList :
+        for path in self.pathList:
             lenPath = len(path)
             path[-1].next = path[0]
             path[0].last = path[-1]
@@ -336,22 +342,24 @@ class  txPDFGlyph(FontPDFGlyph):
                 path[-1].last = path[-2]
                 for i in range(lenPath)[1:-1]:
                     pt = path[i]
-                    pt.next =  path[i+1]
-                    pt.last =  path[i-1]
+                    pt.next = path[i + 1]
+                    pt.last = path[i - 1]
 
-        assert len(self.pathList) == self.numPaths, " Path lengths don't match %s %s" % (len(self.pathList) , self.numPaths)
+        assert len(self.pathList) == self.numPaths, (
+            "Path lengths don't match %s %s" % (len(self.pathList),
+                                                self.numPaths))
         # get the bbox and width.
         pen = BoundsPen(None)
         charstring.draw(pen)
         self.xAdvance = charstring.width
         self.BBox = pen.bounds
-        if not self.BBox :
-            self.BBox  = [0,0,0,0]
+        if not self.BBox:
+            self.BBox = [0, 0, 0, 0]
 
         self.yOrigin = self.parentFont.emSquare + self.parentFont.getBaseLine()
         if txFont.vorg:
             try:
-                self.yOrigin  = txFont.vorg[self.name]
+                self.yOrigin = txFont.vorg[self.name]
             except KeyError:
                 if txFont.vmetrics:
                     try:
@@ -366,16 +374,18 @@ class  txPDFGlyph(FontPDFGlyph):
                 mtx = txFont.vmetrics[self.name]
                 self.yAdvance = mtx[0]
                 self.tsb = mtx[1]
-                haveVMTX =1
+                haveVMTX = 1
             except KeyError:
                 pass
         if not haveVMTX:
             self.yAdvance = self.parentFont.getEmSquare()
-            self.tsb = self.yOrigin - self.BBox[3] + self.parentFont.getBaseLine()
+            self.tsb = (
+                self.yOrigin - self.BBox[3] + self.parentFont.getBaseLine())
 
-        # Get the fdIndex, so we can laterdetermine which set of blue values to use.
+        # Get the fdIndex, so we can later determine
+        # which set of blue values to use.
         self.fdIndex = 0
         if hasattr(fTopDict, "ROS"):
-            gid =  fTopDict.CharStrings.charStrings[self.name]
+            gid = fTopDict.CharStrings.charStrings[self.name]
             self.fdIndex = fTopDict.FDSelect[gid]
         return
