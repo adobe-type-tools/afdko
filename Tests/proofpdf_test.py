@@ -62,7 +62,11 @@ def test_glyphs_2_7(tool_name, font_filename):
 
 
 @pytest.mark.parametrize('font_filename', [
+    'cidfont_noHints.otf',
+    'cidfont_noStems.otf',
     'cidfont_noZones.otf',
+    'font_noHints.otf',
+    'font_noStems.otf',
     'font_noZones.otf',
 ])
 @pytest.mark.parametrize('tool_name', [
