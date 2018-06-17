@@ -175,11 +175,15 @@ class txPDFFont(FontPDFFont):
         else:
             FDArray = [topDict]
         for fontDict in FDArray:
-            rawBlueList = fontDict.Private.BlueValues
-            blueList = []
-            for i in range(0, len(rawBlueList), 2):
-                blueList.append((rawBlueList[i], rawBlueList[i + 1]))
-            blueValues.append(blueList)
+            try:
+                rawBlueList = fontDict.Private.BlueValues
+                blueList = []
+                for i in range(0, len(rawBlueList), 2):
+                    blueList.append((rawBlueList[i], rawBlueList[i + 1]))
+                blueValues.append(blueList)
+            except AttributeError:
+                # the font has no BlueValues
+                pass
         return blueValues
 
     def clientGetAscentDescent(self):

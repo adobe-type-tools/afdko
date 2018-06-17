@@ -987,7 +987,10 @@ class FontPDFGlyph:
 		rt_canvas.restoreState()
 
 	def drawGlyph_BlueZones(self, params):
-		blueZones = self.parentFont.GetBlueZones()[self.fdIndex]
+		try:
+			blueZones = self.parentFont.GetBlueZones()[self.fdIndex]
+		except IndexError:
+			return
 		blueZones.sort()
 		rt_canvas = params.rt_canvas
 		rt_canvas.saveState()
