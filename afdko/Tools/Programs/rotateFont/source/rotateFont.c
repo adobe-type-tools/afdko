@@ -247,9 +247,9 @@ enum						/* Operation modes */
 	mode_pdf,
 	mode_mtx,
 	mode_t1,
-    mode_bc, /* is deprecated, but still support the option in order to be able to print an error message */
+	mode_bc, /* is deprecated, but still support the option in order to be able to print an error message */
 	mode_svg,
-    mode_ufow,
+	mode_ufow,
 	mode_dcf
 	};
 
@@ -295,7 +295,7 @@ struct txCtx_
 		dnaDCL(abfGlyphInfo *, glyphs);/* Source glyph list when subsetting */
 		dnaDCL(abfGlyphInfo *, exclude);/* Excluded glyph list when subsetting */
 		dnaDCL(float, widths);/* Source glyph width for -t1 -3 mode */
-        dnaDCL(Stream, streamStack);/* support recursive opening of source stream files ( for components) */
+		dnaDCL(Stream, streamStack);/* support recursive opening of source stream files ( for components) */
 		} src;
 	struct					/* Destination data */
 		{
@@ -381,21 +381,21 @@ struct txCtx_
 		Stream dbg;
 		long flags;
 		} ttr;
-    struct					/* svread library */
-    {
-        svrCtx ctx;
-        Stream tmp;
-        Stream dbg;
-        long flags;
-    } svr;
-    struct					/* uforead library */
-    {
-        ufoCtx ctx;
-        Stream src;
-        Stream dbg;
-        long flags;
-        char* altLayerDir;
-    } ufr;
+	struct					/* svread library */
+	{
+		svrCtx ctx;
+		Stream tmp;
+		Stream dbg;
+		long flags;
+	} svr;
+	struct					/* uforead library */
+	{
+		ufoCtx ctx;
+		Stream src;
+		Stream dbg;
+		long flags;
+		char* altLayerDir;
+	} ufr;
 	struct					/* cffwrite library */
 		{
 		cfwCtx ctx;
@@ -475,12 +475,12 @@ struct txCtx_
 		Stream dbg;
 		long flags;			/* Library flags */
 		} svw;
-        struct					/* ufowrite library */
+	struct					/* ufowrite library */
 		{
-            ufwCtx ctx;
-            Stream tmp;
-            Stream dbg;
-            long flags;			/* Library flags */
+		ufwCtx ctx;
+		Stream tmp;
+		Stream dbg;
+		long flags;			/* Library flags */
 		} ufow;
 	struct					/* Dump cff mode */
 		{
@@ -519,7 +519,7 @@ struct txCtx_
 		} stack;
 	struct					/* Font Dict filter */
 		{
-        dnaDCL(int, fdIndices);/* Source glyph width for -t1 -3 mode */
+		dnaDCL(int, fdIndices);/* Source glyph width for -t1 -3 mode */
 		} fd;
 	struct					/* OTF cmap encoding */
 		{
@@ -537,8 +537,8 @@ struct txCtx_
 		ctlStreamCallbacks stm;
 		abfGlyphCallbacks glyph;
 		abfGlyphBegCallback saveGlyphBeg;
-    abfGlyphCallbacks save;
-    int selected;
+		abfGlyphCallbacks save;
+		int selected;
 		} cb;
 	struct					/* Memory allocation failure simulation data */
 		{
@@ -821,11 +821,11 @@ static int tmp_close(txCtx h, Stream *s)
 
 /* Open stream. */
 static void *stm_open(ctlStreamCallbacks *cb, int id, size_t size)
-    {
-    txCtx h = cb->direct_ctx;
+	{
+	txCtx h = cb->direct_ctx;
 	Stream *s = NULL;	/* Suppress optimizer warning */
-    switch (id)
-        {
+	switch (id)
+		{
 	case CEF_SRC_STREAM_ID:
 		/* Open CEF source stream */
 		s = &h->cef.src;
@@ -845,26 +845,26 @@ static void *stm_open(ctlStreamCallbacks *cb, int id, size_t size)
 		/* Source stream already open; just return it */
 		s = &h->src.stm;
 		break;
-    case UFO_SRC_STREAM_ID:
-        {
-        if (cb->clientFileName != NULL)
-            {
-            char buffer[FILENAME_MAX];
-            sprintf(buffer, "%s/%s", h->file.src, cb->clientFileName);
-            s = &h->src.stm;
+	case UFO_SRC_STREAM_ID:
+		{
+		if (cb->clientFileName != NULL)
+			{
+			char buffer[FILENAME_MAX];
+			sprintf(buffer, "%s/%s", h->file.src, cb->clientFileName);
+			s = &h->src.stm;
 
-            s->fp = fopen(buffer, "rb");
-            if (s->fp == NULL)
-                {
-                return NULL;
-                }
-            *dnaNEXT(h->src.streamStack) = *s;
+			s->fp = fopen(buffer, "rb");
+			if (s->fp == NULL)
+				{
+				return NULL;
+				}
+			*dnaNEXT(h->src.streamStack) = *s;
 
-            }
-        else
-            return NULL;
-       break;
-        }
+			}
+		else
+			return NULL;
+		break;
+		}
 	case CEF_DST_STREAM_ID:
 		/* Open CEF destination stream */
 		s = &h->dst.stm;
@@ -892,26 +892,26 @@ static void *stm_open(ctlStreamCallbacks *cb, int id, size_t size)
 				return NULL;
 			}
 		break;
-    case UFW_DST_STREAM_ID:
-    {
+	case UFW_DST_STREAM_ID:
+	{
 
-       if (cb->clientFileName != NULL)
-        {
+		if (cb->clientFileName != NULL)
+		{
 			char buffer[FILENAME_MAX];
-            sprintf(buffer, "%s/%s", h->file.dst, cb->clientFileName);
-            s = &h->dst.stm;
+			sprintf(buffer, "%s/%s", h->file.dst, cb->clientFileName);
+			s = &h->dst.stm;
 
-            s->fp = fopen(buffer, "wt");
-            if (s->fp == NULL)
-            {
-                return NULL;
-            }
+			s->fp = fopen(buffer, "wt");
+			if (s->fp == NULL)
+			{
+				return NULL;
+			}
 
-        }
-        else
-            return NULL;
-        break;
-    }
+		}
+		else
+			return NULL;
+		break;
+	}
 	case CEF_TMP0_STREAM_ID:
 		s = &h->cef.tmp0;
 		tmp_open(h, s);
@@ -924,10 +924,10 @@ static void *stm_open(ctlStreamCallbacks *cb, int id, size_t size)
 		s = &h->t1r.tmp;
 		tmp_open(h, s);
 		break;
-    case SVR_TMP_STREAM_ID:
-        s = &h->svr.tmp;
-        tmp_open(h, s);
-        break;
+	case SVR_TMP_STREAM_ID:
+		s = &h->svr.tmp;
+		tmp_open(h, s);
+		break;
 	case CFW_TMP_STREAM_ID:
 		s = &h->cfw.tmp;
 		tmp_open(h, s);
@@ -943,15 +943,15 @@ static void *stm_open(ctlStreamCallbacks *cb, int id, size_t size)
 	case T1R_DBG_STREAM_ID:
 		s = &h->t1r.dbg;
 		break;
-    case SVR_DBG_STREAM_ID:
-        s = &h->svr.dbg;
-        break;
-    case UFO_DBG_STREAM_ID:
-        s = &h->ufr.dbg;
-        break;
-    case UFW_DBG_STREAM_ID:
-        s = &h->ufow.dbg;
-        break;
+	case SVR_DBG_STREAM_ID:
+		s = &h->svr.dbg;
+		break;
+	case UFO_DBG_STREAM_ID:
+		s = &h->ufr.dbg;
+		break;
+	case UFW_DBG_STREAM_ID:
+		s = &h->ufow.dbg;
+		break;
 	case CFR_DBG_STREAM_ID:
 		s = &h->cfr.dbg;
 		break;
@@ -975,13 +975,13 @@ static void *stm_open(ctlStreamCallbacks *cb, int id, size_t size)
 		break;
 	default:
 		fatal(h, "invalid stream open");
-        }
-    return s;
-    }
+		}
+	return s;
+	}
 
 /* Seek to stream position. */
 static int stm_seek(ctlStreamCallbacks *cb, void *stream, long offset)
-    {
+	{
 	if (offset >= 0)
 		{
 		Stream *s = stream;
@@ -1000,7 +1000,7 @@ static int stm_seek(ctlStreamCallbacks *cb, void *stream, long offset)
 
 /* Return stream position. */
 static long stm_tell(ctlStreamCallbacks *cb, void *stream)
-    {
+	{
 	Stream *s = stream;
 	switch (s->type)
 		{
@@ -1010,18 +1010,18 @@ static long stm_tell(ctlStreamCallbacks *cb, void *stream)
 		break;
 	case stm_Dst:
 		if (0 != strcmp("-", s->filename))
-		return ftell(s->fp);
+			return ftell(s->fp);
 		break;
 
 	case stm_Tmp:
 		return (long)tmp_tell(s);
 		}
 	return 0;	/* Suppress compiler warning */
-    }
+	}
 
 /* Read from stream. */
 static size_t stm_read(ctlStreamCallbacks *cb, void *stream, char **ptr)
-    {
+	{
 	Stream *s = stream;
 	switch (s->type)
 		{
@@ -1039,12 +1039,12 @@ static size_t stm_read(ctlStreamCallbacks *cb, void *stream, char **ptr)
 		return tmp_read(s, ptr);
 		}
 	return 0;	/* Suppress compiler warning */
-    }
+	}
 
 /* Write to stream. */
 static size_t stm_write(ctlStreamCallbacks *cb, void *stream,
 						size_t count, char *ptr)
-    {
+	{
 	Stream *s = stream;
 	switch (s->type)
 		{
@@ -1063,7 +1063,7 @@ static size_t stm_write(ctlStreamCallbacks *cb, void *stream,
 		return count;
 		}
 	return 0;	/* Suppress compiler warning */
-    }
+	}
 
 /* Return stream status. */
 static int stm_status(ctlStreamCallbacks *cb, void *stream)
@@ -1086,8 +1086,8 @@ static int stm_status(ctlStreamCallbacks *cb, void *stream)
 
 /* Close stream. */
 static int stm_close(ctlStreamCallbacks *cb, void *stream)
-    {
-    txCtx h = cb->direct_ctx;
+	{
+	txCtx h = cb->direct_ctx;
 	Stream *s = stream;
 	if (s->type == stm_Tmp)
 		return tmp_close(cb->direct_ctx, s);
@@ -1095,19 +1095,19 @@ static int stm_close(ctlStreamCallbacks *cb, void *stream)
 		return 0;
 	else
 		{
-        int retval;
+		int retval;
 		FILE *fp = s->fp;
 		retval =  fclose(fp);
 		s->fp = NULL;	/* Avoid re-close */
-        if (s->type == stm_Src)
-        {
-        h->src.streamStack.cnt--;
-        if (h->src.streamStack.cnt > 0)
-            *s = h->src.streamStack.array[h->src.streamStack.cnt-1];
-        }
-        return retval;
+		if (s->type == stm_Src)
+		{
+		h->src.streamStack.cnt--;
+		if (h->src.streamStack.cnt > 0)
+			*s = h->src.streamStack.array[h->src.streamStack.cnt-1];
 		}
-    }
+		return retval;
+		}
+	}
 
 /* Initialize stream record. */
 static void stmSet(Stream *s, int type, char *filename, char *buf)
@@ -1143,7 +1143,7 @@ static void stmInit(txCtx h)
 	{
 	h->cb.stm.direct_ctx	= h;
 	h->cb.stm.indirect_ctx 	= NULL;
-    h->cb.stm.clientFileName = NULL;
+	h->cb.stm.clientFileName = NULL;
 	h->cb.stm.open			= stm_open;
 	h->cb.stm.seek			= stm_seek;
 	h->cb.stm.tell			= stm_tell;
@@ -1167,9 +1167,9 @@ static void stmInit(txCtx h)
 
 	dbgSet(&h->t1r.dbg, "t1r");
 	dbgSet(&h->cfr.dbg, "cfr");
-    dbgSet(&h->svr.dbg, "svr");
-    dbgSet(&h->ufr.dbg, "ufr");
-    dbgSet(&h->ufow.dbg, "ufw");
+	dbgSet(&h->svr.dbg, "svr");
+	dbgSet(&h->ufr.dbg, "ufr");
+	dbgSet(&h->ufow.dbg, "ufw");
 	dbgSet(&h->ttr.dbg, "ttr");
 	dbgSet(&h->cfw.dbg, "cfw");
 	dbgSet(&h->t1w.dbg, "t1w");
@@ -1618,8 +1618,8 @@ static void path_BegFont(txCtx h, abfTopDict *top)
 		/* Prepare dump facility */
 		h->abf.dump.fp = h->dst.stm.fp;
 		h->abf.dump.left = 0;
-        h->abf.dump.excludeSubset = 0;
-        h->abf.dump.fdCnt = 0;
+		h->abf.dump.excludeSubset = 0;
+		h->abf.dump.fdCnt = 0;
 		abfDumpBegFont(&h->abf.dump, top);
 		}
 
@@ -1714,7 +1714,7 @@ static void cff_BegFont(txCtx h, abfTopDict *top)
 	{
 	dstFileSetAutoName(h, top);
 
-        // we do not support subroutinzation in rotateFont, so can pass default maxSubr value.
+	// we do not support subroutinzation in rotateFont, so can pass the default maxSubr value.
 	if (cfwBegFont(h->cfw.ctx, NULL, 0))
 		fatal(h, NULL);
 	}
@@ -1758,21 +1758,21 @@ static void cff_SetMode(txCtx h)
 			fatal(h, "(cfw) can't init lib");
 		}
 
-    /* Initialize glyph callbacks */
-    h->cb.glyph = cfwGlyphCallbacks;
-    h->cb.glyph.direct_ctx = h->cfw.ctx;
+	/* Initialize glyph callbacks */
+	h->cb.glyph = cfwGlyphCallbacks;
+	h->cb.glyph.direct_ctx = h->cfw.ctx;
 
-    if (!(h->cfw.flags & CFW_WRITE_CFF2))
-    {
-        /* This keeps these callbacks from being used when
-         writing a regular CFF, and avoids the overhead of trying to process the
-         source CFF2 blend args */
-        h->cb.glyph.moveVF = NULL;
-        h->cb.glyph.lineVF = NULL;
-        h->cb.glyph.curveVF = NULL;
-    }
+	if (!(h->cfw.flags & CFW_WRITE_CFF2))
+	{
+		/* This keeps these callbacks from being used when
+		 writing a regular CFF, and avoids the overhead of trying to process the
+		 source CFF2 blend args */
+		h->cb.glyph.moveVF = NULL;
+		h->cb.glyph.lineVF = NULL;
+		h->cb.glyph.curveVF = NULL;
+	}
 
-    /* Set source library flags */
+	/* Set source library flags */
 	/* These are now set at the start of parseArgs
 	h->t1r.flags = 0;
 	h->cfr.flags = 0;
@@ -1930,15 +1930,15 @@ static abfGlyphCallbacks preserveGlyphCallbacks =
 	preserveGlyphMove,
 	preserveGlyphLine,
 	preserveGlyphCurve,
-  preserveGlyphStem,
+	preserveGlyphStem,
 	preserveGlyphFlex,
 	preserveGlyphGenop,
 	preserveGlyphSeac,
 	preserveGlyphEnd,
-    preserveCubeBlend,
-    preserveCubeSetwv,
-    preserveCubeCompose,
-    preserveCubeTransform,
+	preserveCubeBlend,
+	preserveCubeSetwv,
+	preserveCubeCompose,
+	preserveCubeTransform,
 	};
 
 /* ------------------------------- Glyph List ------------------------------ */
@@ -2049,22 +2049,22 @@ static void makeSubsetGlyphList(txCtx h)
 
 /* Construct arg buffer from subset list to simulated -g option. */
 static void makeSubsetArgList(txCtx h)
-{
+	{
 	long i;
 	long rangecnt = 0;
 	unsigned short first = h->subset.glyphs.array[0];
 	unsigned short last = first;
 	h->subset.args.cnt = 0;
 	for (i = 1; i <= h->subset.glyphs.cnt; i++)
-    {
-        unsigned short curr;
-        if (i < h->subset.glyphs.cnt)
-            curr = h->subset.glyphs.array[i];
-        else
-            curr = 0;
+		{
+		unsigned short curr;
+		if (i < h->subset.glyphs.cnt)
+			curr = h->subset.glyphs.array[i];
+		else
+			curr = 0;
 
 		if (last + 1 != curr)
-        {
+			{
 			char buf[12];	/* 5 digits + hyphen + 5 digits + nul */
 			if (first == last)
 				sprintf(buf, "%hu", last);
@@ -2073,12 +2073,12 @@ static void makeSubsetArgList(txCtx h)
 			strcpy(dnaEXTEND(h->subset.args, (long)strlen(buf) + 1), buf);
 			first = curr;
 			rangecnt++;
-        }
+			}
 		last = curr;
-    }
+		}
 	h->arg.g.cnt = rangecnt;
 	h->arg.g.substrs = h->subset.args.array;
-}
+	}
 
 /* ----------------------------- Subset Parsing ---------------------------- */
 
@@ -4290,9 +4290,9 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr)
 		/* 45 */ "setwv2",
 		/* 46 */ "setwv3",
 		/* 47 */ "setwv4",
-        /* 48 */ "setwv5",
-        /* 49 */ "setwvN",
-        /* 50 */ "transform",
+		/* 48 */ "setwv5",
+		/* 49 */ "setwvN",
+		/* 50 */ "transform",
 		};
 	long left = sizeRegion(region);
 
@@ -4496,10 +4496,10 @@ static void dcf_DumpEncoding(txCtx h, const ctlRegion *region)
 		dumpTagLine(h, "Encoding", region);
 		if (h->dcf.level > 0)
 			{
-			long cnt;
-			unsigned char fmt;
 			long gid;
 			long i;
+			long cnt;
+			unsigned char fmt;
 
 			bufSeek(h, region->begin);
 			gid = 1;			/* Skip glyph 0 (.notdef) */
@@ -5075,33 +5075,33 @@ static void makeFDSubset(txCtx h)
 	for (i = 0; i < h->src.glyphs.cnt; i++)
 		{
 		abfGlyphInfo *info = h->src.glyphs.array[i];
-        if (h->flags & SUBSET__EXCLUDE_OPT)
-        {
-            unsigned int match = 0;
-            for (j = 0; j < h->fd.fdIndices.cnt; j++)
-            {
-                if (info->iFD == h->fd.fdIndices.array[j])
-                {
-                    match = 1;
-                    break;
-                }
-            }
-            if (!match)
-			*dnaNEXT(h->subset.glyphs) = info->tag;
+		if (h->flags & SUBSET__EXCLUDE_OPT)
+		{
+			unsigned int match = 0;
+			for (j = 0; j < h->fd.fdIndices.cnt; j++)
+			{
+				if (info->iFD == h->fd.fdIndices.array[j])
+				{
+					match = 1;
+					break;
+				}
+			}
+			if (!match)
+				*dnaNEXT(h->subset.glyphs) = info->tag;
 
-        }
-        else
-        {
-            for (j = 0; j < h->fd.fdIndices.cnt; j++)
-            {
-                if (info->iFD == h->fd.fdIndices.array[j])
-                {
-                    *dnaNEXT(h->subset.glyphs) = info->tag;
-                    break;
-               }
-            }
-        }
 		}
+		else
+		{
+			for (j = 0; j < h->fd.fdIndices.cnt; j++)
+			{
+				if (info->iFD == h->fd.fdIndices.array[j])
+				{
+					*dnaNEXT(h->subset.glyphs) = info->tag;
+					break;
+			   }
+			}
+		}
+	}
 
 	if (h->subset.glyphs.cnt == 0)
 		fatal(h, "no glyphs selected by -fd argument");
@@ -5226,24 +5226,24 @@ static void prepSubset(txCtx h)
 		makeRandSubset(h, "-p", h->arg.p);
 	else if (h->arg.P != NULL)
 		makeRandSubset(h, "-P", h->arg.P);
-    else if (h->fd.fdIndices.cnt > 0)
+	else if (h->fd.fdIndices.cnt > 0)
 		makeFDSubset(h);
 	else if (h->flags & SUBSET__EXCLUDE_OPT)
 		invertSubset(h);
 	else
-    {
-    if (h->flags & SUBSET_OPT) {
-      if (h->flags & PRESERVE_GID) {
-        getGlyphList(h);
-        parseSubset(h, callbackPreserveGlyph);
-        h->src.glyphs.array[0]->flags |= PRESERVE_CHARSTRING;
-        h->arg.g.cnt = 0;
-        h->cb.save = h->cb.glyph;
-        h->cb.glyph = preserveGlyphCallbacks;
-        h->cb.glyph.direct_ctx = h;
-      }
-    }
-    }
+	{
+		if (h->flags & SUBSET_OPT) {
+			if (h->flags & PRESERVE_GID) {
+				getGlyphList(h);
+				parseSubset(h, callbackPreserveGlyph);
+				h->src.glyphs.array[0]->flags |= PRESERVE_CHARSTRING;
+				h->arg.g.cnt = 0;
+				h->cb.save = h->cb.glyph;
+				h->cb.glyph = preserveGlyphCallbacks;
+				h->cb.glyph.direct_ctx = h;
+			}
+		}
+	}
 
 	if (h->subset.glyphs.cnt == 0)
 		return; /* no subset */
@@ -5372,17 +5372,17 @@ static void callbackSubset(txCtx h)
 	parseSubset(h, callbackGlyph);
 	if (!((SUBSET_SKIP_NOTDEF & h->flags)||(SUBSET_HAS_NOTDEF & h->flags)))
 		{
-	switch (h->mode)
-		{
-	case mode_cff:
-		addNotdef(h);
-		break;
-	case mode_t1:
-		if (!(h->t1w.flags & T1W_TYPE_ADDN) && !(h->t1w.options & T1W_DECID))
+		switch (h->mode)
+			{
+		case mode_cff:
 			addNotdef(h);
-		break;
+			break;
+		case mode_t1:
+			if (!(h->t1w.flags & T1W_TYPE_ADDN) && !(h->t1w.options & T1W_DECID))
+				addNotdef(h);
+			break;
+			}
 		}
-	}
 	}
 
 /* ----------------------------- t1read Library ---------------------------- */
@@ -5468,12 +5468,12 @@ static void svrReadFont(txCtx h, long origin)
 static void ufoReadFont(txCtx h, long origin)
 {
 	if (h->ufr.ctx == NULL)
-    {
+	{
 		/* Initialize library */
 		h->ufr.ctx = ufoNew(&h->cb.mem, &h->cb.stm, UFO_CHECK_ARGS);
 		if (h->ufr.ctx == NULL)
 			fatal(h, "(ufr) can't init lib");
-    }
+	}
 
 
 	if (ufoBegFont(h->ufr.ctx, h->ufr.flags, &h->top, h->ufr.altLayerDir))
@@ -5484,12 +5484,12 @@ static void ufoReadFont(txCtx h, long origin)
 	h->dst.begfont(h, h->top);
 
 	if (h->mode != mode_cef)
-    {
+	{
 		if (h->arg.g.cnt != 0)
 			callbackSubset(h);
 		else if (ufoIterateGlyphs(h->ufr.ctx, &h->cb.glyph))
 			fatal(h, NULL);
-    }
+	}
 
 	h->dst.endfont(h);
 
@@ -5878,44 +5878,44 @@ static void addFont(txCtx h, int type, int iTTC, long offset)
 
 static void addTTCFont(txCtx h, int ttcIndex, long origin, long offset)
 {
-    ctlTag version;
-    int result;
+	ctlTag version;
+	int result;
 	result = sfrBegFont(h->ctx.sfr, &h->src.stm, offset, &version);
 	switch (result)
 	{
-        case sfrSuccess:
-        {    switch (version)
-            {
-                case sfr_v1_0_tag:
-                case sfr_true_tag:
-                    /* TrueType */
-                    addFont(h, src_TrueType, ttcIndex, origin);
-                    break;
-                case sfr_OTTO_tag:
-                    /* OTF */
-                    addFont(h, src_OTF, ttcIndex, origin);
-                    break;
-                default:
-                    fatal(h, "(sfr) %s", sfrErrStr(sfrErrBadSfnt));
-            }
-            break;
-        case sfrErrBadSfnt:
-            break;
-        default:
-            fatal(h, "(sfr) %s", sfrErrStr(result));
-        }
-    }
+		case sfrSuccess:
+		{    switch (version)
+			{
+				case sfr_v1_0_tag:
+				case sfr_true_tag:
+					/* TrueType */
+					addFont(h, src_TrueType, ttcIndex, origin);
+					break;
+				case sfr_OTTO_tag:
+					/* OTF */
+					addFont(h, src_OTF, ttcIndex, origin);
+					break;
+				default:
+					fatal(h, "(sfr) %s", sfrErrStr(sfrErrBadSfnt));
+			}
+			break;
+		case sfrErrBadSfnt:
+			break;
+		default:
+			fatal(h, "(sfr) %s", sfrErrStr(result));
+		}
+	}
 
 }
 
 /* Add TrueType Collection font. */
 static void addTTC(txCtx h, long origin)
-{
-    /* sfrGetNextTTCOffset() returns 0 when it is asked to get the next offset after the last real font,
-    so it serves effectively as a test for iterating through all the fonts in the TTC.
-     */
+	{
+	/* sfrGetNextTTCOffset() returns 0 when it is asked to get the next offset after the last real font,
+	   so it serves effectively as a test for iterating through all the fonts in the TTC.
+	*/
 	long i;
-    long offset;
+	long offset;
 
 	if (h->arg.i != NULL)
 		{
@@ -5924,21 +5924,21 @@ static void addTTC(txCtx h, long origin)
 		if (i < 0)
 			fatal(h, "bad TTC index (-i)");
 
-        for (j = 0; (offset = sfrGetNextTTCOffset(h->ctx.sfr)); j++)
-        {
-            if (j < i)
-                continue;
-            addTTCFont(h, i, origin, offset);
-            break;
-        }
+		for (j = 0; (offset = sfrGetNextTTCOffset(h->ctx.sfr)); j++)
+		{
+			if (j < i)
+				continue;
+			addTTCFont(h, i, origin, offset);
+			break;
+		}
 
 		}
 	else if (h->flags & EVERY_FONT)
 		/* -y option; add whole collection */
 		for (i = 0; (offset = sfrGetNextTTCOffset(h->ctx.sfr)); i++)
-        {
-            addTTCFont(h, i, origin, offset);
-        }
+		{
+			addTTCFont(h, i, origin, offset);
+		}
 	else
 		{
 
@@ -6241,6 +6241,7 @@ static void doASDFormats(txCtx h, ctlTag magic)
 	{
 	char junk[16];
 	long i;
+
 	h->asd.magic = magic;
 	h->asd.version = read4(h);
 
@@ -6291,7 +6292,6 @@ static void doASDFormats(txCtx h, ctlTag magic)
 				/* 14 */	"AFP File Info",
 				/* 15 */	"Directory ID",
 			};
-
 			EntryDesc *entry = &h->asd.entries.array[i];
 			printf("%02lx %08lx %08lx %s\n",
 				   entry->id, entry->offset, entry->length,
@@ -6324,7 +6324,7 @@ static void doASDFormats(txCtx h, ctlTag magic)
 static void buildFontList(txCtx h)
 	{
 	ctlTag sig;
-    int fillErr = 0;
+	int fillErr = 0;
 	h->fonts.cnt = 0;
 
 	/* Initialize segment */
@@ -6389,11 +6389,11 @@ static void buildFontList(txCtx h)
 		}
 
 	if (h->fonts.cnt == 0)
-        {
-            if ((0 == strncmp(h->src.buf, "<font", 5)) || (0 == strncmp(h->src.buf, "<svg", 4) ))
-                addFont(h, src_SVG, 0, 0);
-        }
-    }
+		{
+		if ((0 == strncmp(h->src.buf, "<font", 5)) || (0 == strncmp(h->src.buf, "<svg", 4) ))
+			addFont(h, src_SVG, 0, 0);
+		}
+	}
 	if (h->fonts.cnt == 0)
 		fatal(h, "bad font file: %s", h->src.stm.filename);
 	}
@@ -6451,9 +6451,9 @@ static void help(txCtx h)
 		case mode_dcf:
 			dcf_Help(h);
 			break;
-        case mode_ufow:
-            ufo_Help(h);
-            break;
+		case mode_ufow:
+			ufo_Help(h);
+			break;
 			}
 	else
 		{
@@ -6575,8 +6575,8 @@ static void printVersions(txCtx h)
 	ttrGetVersion(&cb);
 	t1wGetVersion(&cb);
 	svwGetVersion(&cb);
-    ufoGetVersion(&cb);
-    ufwGetVersion(&cb);
+	ufoGetVersion(&cb);
+	ufwGetVersion(&cb);
 
 	exit(0);
 	}
@@ -6624,8 +6624,8 @@ static void setMode(txCtx h, int mode)
 	case mode_svg:
 		svg_SetMode(h);
 		break;
-    case mode_ufow:
-        ufo_SetMode(h);
+	case mode_ufow:
+		ufo_SetMode(h);
 		break;
 	case mode_dcf:
 		dcf_SetMode(h);
@@ -6639,7 +6639,7 @@ static void setMode(txCtx h, int mode)
 static int CTL_CDECL matchOpts(const void *key, const void *value)
 	{
 	return strcmp((char *)key, *(char **)value);
- 	}
+	}
 
 /* Return option index from key or opt_None if not found. */
 static int getOptionIndex(char *key)
@@ -7481,8 +7481,8 @@ static void doFile(txCtx h, char *srcname)
 	{
 	long i;
 	char *p;
-    struct stat fileStat;
-    int statErrNo;
+	struct stat fileStat;
+	int statErrNo;
 
 	/* Set src name */
 	if (h->file.sr != NULL)
@@ -7499,15 +7499,15 @@ static void doFile(txCtx h, char *srcname)
 
 	/* Open file */
 
-    /* Need to first check if it is a directory-based font format, like UFO. */
-    statErrNo = stat(h->src.stm.filename,  &fileStat);
+	/* Need to first check if it is a directory-based font format, like UFO. */
+	statErrNo = stat(h->src.stm.filename,  &fileStat);
 	if (strcmp(h->src.stm.filename, "-") == 0)
 		h->src.stm.fp = stdin;
-    else if ((statErrNo == 0) && ((fileStat.st_mode & S_IFDIR) != 0))
-    {
-        /* maybe it is a dir-based font, like UFO. Will verify this in buildFontList(h) */
-        h->src.stm.fp = NULL;
-    }
+	else if ((statErrNo == 0) && ((fileStat.st_mode & S_IFDIR) != 0))
+		{
+		/* maybe it is a dir-based font, like UFO. Will verify this in buildFontList(h) */
+		h->src.stm.fp = NULL;
+		}
 	else
 		{
 		h->src.stm.fp = fopen(h->src.stm.filename, "rb");
@@ -7570,7 +7570,7 @@ static void doFile(txCtx h, char *srcname)
 			svrReadFont(h, rec->offset);
 			break;
 		case src_UFO:
-            ufoReadFont(h, rec->offset);
+			ufoReadFont(h, rec->offset);
 			break;
 			}
 		}
@@ -7736,18 +7736,18 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 		case opt_svg:
 			setMode(h, mode_svg);
 			break;
-        case opt_ufo:
-            setMode(h, mode_ufow);
-            break;
+		case opt_ufo:
+			setMode(h, mode_ufow);
+			break;
 		case opt_bc:
-            goto bc_gone;
+			goto bc_gone;
 			break;
 		case opt_dcf:
 			setMode(h, mode_dcf);
 			break;
-        case opt_altLayer:
-            h->ufr.altLayerDir = argv[++i];
-            break;
+		case opt_altLayer:
+			h->ufr.altLayerDir = argv[++i];
+			break;
 		case opt_row:
 			h->rotateInfo.flags |= ROT_OVERRIDE_WIDTH_FLAGS;
 			break;
@@ -8187,13 +8187,13 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 			h->t1w.options |= T1W_REFORMAT;
 			break;
 		case opt_z:				/* bc mode options */
-            goto bc_gone;
+			goto bc_gone;
 			break;
 		case opt_sha1:
-            goto bc_gone;
+			goto bc_gone;
 			break;
 		case opt_cmp:
-            goto bc_gone;
+			goto bc_gone;
 			break;
 		case opt_cube2:
 			h->cfr.flags |= CFR_CUBE_RND;
@@ -8212,7 +8212,7 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 				h->cfw.flags |= CFW_IS_CUBE;
 				break;
 			case mode_bc:
-                goto bc_gone;
+				goto bc_gone;
 				break;
 			case mode_dcf:
 				h->dcf.flags |= DCF_IS_CUBE;
@@ -8249,7 +8249,7 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 				h->t1w.flags |= T1W_ENCODE_ASCII85;
 				break;
 			case mode_bc:
-                goto bc_gone;
+				goto bc_gone;
 				break;
 			default:
 				goto wrongmode;
@@ -8340,7 +8340,7 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 					}
 				break;
 			case mode_bc:
-                goto bc_gone;
+				goto bc_gone;
 				break;
 			default:
 				goto wrongmode;
@@ -8431,9 +8431,9 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 			srand(0);
 			h->flags |= SUBSET_OPT;
 			break;
-    case opt_pg:
-      h->flags |= PRESERVE_GID;
-      break;
+		case opt_pg:
+			h->flags |= PRESERVE_GID;
+			break;
 		case opt_P:
 			if (!argsleft)
 				goto noarg;
@@ -8453,32 +8453,32 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 			h->flags |= NO_UDV_CLAMPING;
 			break;
 
-        case opt_fdx:
-            if ((h->flags & SUBSET_OPT) || (h->flags & SUBSET__EXCLUDE_OPT))
-                goto subsetclash;
-            h->flags |= SUBSET__EXCLUDE_OPT;
+		case opt_fdx:
+			if ((h->flags & SUBSET_OPT) || (h->flags & SUBSET__EXCLUDE_OPT))
+				goto subsetclash;
+			h->flags |= SUBSET__EXCLUDE_OPT;
 		case opt_fd:
 			if (!argsleft)
 				goto noarg;
-            else if ( (h->arg.g.cnt > 0) && ((h->flags & SUBSET_OPT) || (h->flags & SUBSET__EXCLUDE_OPT)))
+			else if ( (h->arg.g.cnt > 0) && ((h->flags & SUBSET_OPT) || (h->flags & SUBSET__EXCLUDE_OPT)))
 				goto subsetclash;
 			else
 				{
-                    /* Convert comma-terminated substrings to null-terminated*/
-				char *p;
-                    h->arg.g.cnt = 1;
-                    h->arg.g.substrs = argv[++i];
-                    for (p = strchr(h->arg.g.substrs, ',');
-                         p != NULL;
-                         p = strchr(p, ','))
+					/* Convert comma-terminated substrings to null-terminated*/
+					char *p;
+					h->arg.g.cnt = 1;
+					h->arg.g.substrs = argv[++i];
+					for (p = strchr(h->arg.g.substrs, ',');
+						p != NULL;
+						p = strchr(p, ','))
 					{
-                        *p++ = '\0';
-                        h->arg.g.cnt++;
+						*p++ = '\0';
+						h->arg.g.cnt++;
 					}
 				}
 			h->flags |= SUBSET_OPT;
-            // Parse FD argument.
-            parseFDSubset(h);
+			// Parse FD argument.
+			parseFDSubset(h);
 			break;
 		case opt_i:
 			if (!argsleft)
@@ -8601,7 +8601,7 @@ static void parseArgs(txCtx h, int argc, char *argv[])
  t1clash:
 	fatal(h, "options -pfb or -LWFN may not be used with other options");
  bc_gone:
-        fatal(h, "options -bc is no longer supported.");
+	fatal(h, "options -bc is no longer supported.");
 	}
 
 /* Return tail component of path. */
@@ -8654,14 +8654,14 @@ static void txNew(txCtx h, char *progname)
 	h->pdw.ctx = NULL;
 	h->t1w.ctx = NULL;
 	h->svw.ctx = NULL;
-    h->svw.flags = 0;
-    h->svr.ctx = NULL;
-    h->svr.flags = 0;
-    h->ufr.ctx = NULL;
-    h->ufr.flags = 0;
-    h->ufow.ctx = NULL;
-    h->ufow.flags = 0;
-    h->ufr.altLayerDir = NULL;
+	h->svw.flags = 0;
+	h->svr.ctx = NULL;
+	h->svr.flags = 0;
+	h->ufr.ctx = NULL;
+	h->ufr.flags = 0;
+	h->ufow.ctx = NULL;
+	h->ufow.flags = 0;
+	h->ufr.altLayerDir = NULL;
 	h->ctx.sfr = NULL;
 
 	memInit(h);
@@ -8680,7 +8680,7 @@ static void txNew(txCtx h, char *progname)
 	dnaINIT(h->ctx.dna, h->src.glyphs, 256, 768);
 	dnaINIT(h->ctx.dna, h->src.exclude, 256, 768);
 	dnaINIT(h->ctx.dna, h->src.widths, 256, 768);
-    dnaINIT(h->ctx.dna, h->src.streamStack, 10, 10);
+	dnaINIT(h->ctx.dna, h->src.streamStack, 10, 10);
 	dnaINIT(h->ctx.dna, h->fonts, 1, 10);
 	dnaINIT(h->ctx.dna, h->subset.glyphs, 256, 768);
 	dnaINIT(h->ctx.dna, h->subset.args, 250, 500);
@@ -8696,7 +8696,7 @@ static void txNew(txCtx h, char *progname)
 	dnaINIT(h->ctx.dna, h->dcf.local, 1, 15);
 	h->dcf.local.func = initLocal;
 	dnaINIT(h->ctx.dna, h->cmap.encoding, 1, 1);
-    dnaINIT(h->ctx.dna, h->fd.fdIndices, 16, 16);
+	dnaINIT(h->ctx.dna, h->fd.fdIndices, 16, 16);
 	dnaINIT(h->ctx.dna, h->cmap.segment, 1, 1);
 	dnaINIT(h->ctx.dna, h->dcf.glyph, 256, 768);
 
@@ -8716,7 +8716,7 @@ static void txFree(txCtx h)
 	dnaFREE(h->src.glyphs);
 	dnaFREE(h->src.exclude);
 	dnaFREE(h->src.widths);
-    dnaFREE(h->src.streamStack);
+	dnaFREE(h->src.streamStack);
 	dnaFREE(h->fonts);
 	dnaFREE(h->subset.glyphs);
 	dnaFREE(h->subset.args);
@@ -8734,10 +8734,10 @@ static void txFree(txCtx h)
 	dnaFREE(h->dcf.local);
 	dnaFREE(h->dcf.glyph);
 	dnaFREE(h->cmap.encoding);
-    dnaFREE(h->fd.fdIndices);
+	dnaFREE(h->fd.fdIndices);
 	dnaFREE(h->cmap.segment);
 	if (h->t1r.ctx != NULL)
-	t1rFree(h->t1r.ctx);
+		t1rFree(h->t1r.ctx);
 	cfrFree(h->cfr.ctx);
 	ttrFree(h->ttr.ctx);
 	cfwFree(h->cfw.ctx);

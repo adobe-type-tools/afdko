@@ -129,8 +129,8 @@ typedef struct				/* Glyph name to Unicode value mapping */
 
 enum						/* Stream types */
 	{
-    stm_Src,				/* Source */
-    stm_SrcUFO,				/* Source */
+	stm_Src,				/* Source */
+	stm_SrcUFO,				/* Source */
 	stm_Dst,				/* Destination */
 	stm_Tmp,				/* Temporary */
 	stm_Dbg					/* Debug */
@@ -301,9 +301,9 @@ enum						/* Operation modes */
 	mode_pdf,
 	mode_mtx,
 	mode_t1,
-    mode_bc, /* is deprecated, but still support the option in order to be able to print an error message */
+	mode_bc, /* is deprecated, but still support the option in order to be able to print an error message */
 	mode_svg,
-    mode_ufow,
+	mode_ufow,
 	mode_dcf
 	};
 
@@ -348,7 +348,7 @@ struct txCtx_
 		dnaDCL(abfGlyphInfo *, glyphs);/* Source glyph list when subsetting */
 		dnaDCL(abfGlyphInfo *, exclude);/* Excluded glyph list when subsetting */
 		dnaDCL(float, widths);/* Source glyph width for -t1 -3 mode */
-        dnaDCL(Stream, streamStack);/* support recursive opening of source stream files ( for components) */
+		dnaDCL(Stream, streamStack);/* support recursive opening of source stream files ( for components) */
 		} src;
 	struct					/* Destination data */
 		{
@@ -436,20 +436,20 @@ struct txCtx_
 		long flags;
 		} ttr;
 	struct					/* svread library */
-		{
+	{
 		svrCtx ctx;
 		Stream tmp;
 		Stream dbg;
 		long flags;
-		} svr;
-    struct					/* uforead library */
-    {
-        ufoCtx ctx;
-        Stream src;
-        Stream dbg;
-        long flags;
-        char* altLayerDir;
-    } ufr;
+	} svr;
+	struct					/* uforead library */
+	{
+		ufoCtx ctx;
+		Stream src;
+		Stream dbg;
+		long flags;
+		char* altLayerDir;
+	} ufr;
 	struct					/* cffwrite library */
 		{
 		cfwCtx ctx;
@@ -529,12 +529,12 @@ struct txCtx_
 		Stream dbg;
 		long flags;			/* Library flags */
 		} svw;
-        struct					/* ufowrite library */
+	struct					/* ufowrite library */
 		{
-            ufwCtx ctx;
-            Stream tmp;
-            Stream dbg;
-            long flags;			/* Library flags */
+		ufwCtx ctx;
+		Stream tmp;
+		Stream dbg;
+		long flags;			/* Library flags */
 		} ufow;
 	struct					/* Dump cff mode */
 		{
@@ -573,7 +573,7 @@ struct txCtx_
 		} stack;
 	struct					/* Font Dict filter */
 		{
-        dnaDCL(int, fdIndices);/* Source glyph width for -t1 -3 mode */
+		dnaDCL(int, fdIndices);/* Source glyph width for -t1 -3 mode */
 		} fd;
 	struct					/* OTF cmap encoding */
 		{
@@ -591,8 +591,8 @@ struct txCtx_
 		ctlStreamCallbacks stm;
 		abfGlyphCallbacks glyph;
 		abfGlyphBegCallback saveGlyphBeg;
-    	abfGlyphCallbacks save;
-    int selected;
+		abfGlyphCallbacks save;
+		int selected;
 		} cb;
 	struct					/* Memory allocation failure simulation data */
 		{
@@ -757,7 +757,7 @@ and return its pointer */
 static FILE *_tmpfile()
 	{
 #ifdef _WIN32
-	FILE *fp=NULL;
+	FILE *fp = NULL;
 	char* tempname;
 	int flags, mode;
 	flags = _O_BINARY|_O_CREAT|_O_EXCL|_O_RDWR|_O_TEMPORARY;
@@ -771,8 +771,8 @@ static FILE *_tmpfile()
 		free(tempname);
 		}
 #else
-	/* Use the default tmpfile on non-Windows platforms */
 	FILE *fp;
+	/* Use the default tmpfile on non-Windows platforms */
 	fp = tmpfile();
 #endif
 	return fp;
@@ -875,11 +875,11 @@ static int tmp_close(txCtx h, Stream *s)
 
 /* Open stream. */
 static void *stm_open(ctlStreamCallbacks *cb, int id, size_t size)
-    {
-    txCtx h = cb->direct_ctx;
+	{
+	txCtx h = cb->direct_ctx;
 	Stream *s = NULL;	/* Suppress optimizer warning */
-    switch (id)
-        {
+	switch (id)
+		{
 	case CEF_SRC_STREAM_ID:
 		/* Open CEF source stream */
 		s = &h->cef.src;
@@ -899,26 +899,26 @@ static void *stm_open(ctlStreamCallbacks *cb, int id, size_t size)
 		/* Source stream already open; just return it */
 		s = &h->src.stm;
 		break;
-    case UFO_SRC_STREAM_ID:
-        {
-        if (cb->clientFileName != NULL)
-            {
-            char buffer[FILENAME_MAX];
-            sprintf(buffer, "%s/%s", h->file.src, cb->clientFileName);
-            s = &h->src.stm;
-            s->type = stm_SrcUFO;
-            s->fp = fopen(buffer, "rb");
-            if (s->fp == NULL)
-                {
-                return NULL;
-                }
-            *dnaNEXT(h->src.streamStack) = *s;
+	case UFO_SRC_STREAM_ID:
+		{
+		if (cb->clientFileName != NULL)
+			{
+			char buffer[FILENAME_MAX];
+			sprintf(buffer, "%s/%s", h->file.src, cb->clientFileName);
+			s = &h->src.stm;
+			s->type = stm_SrcUFO;
+			s->fp = fopen(buffer, "rb");
+			if (s->fp == NULL)
+				{
+				return NULL;
+				}
+			*dnaNEXT(h->src.streamStack) = *s;
 
-            }
-        else
-            return NULL;
-       break;
-        }
+			}
+		else
+			return NULL;
+		break;
+		}
 	case CEF_DST_STREAM_ID:
 		/* Open CEF destination stream */
 		s = &h->dst.stm;
@@ -946,26 +946,26 @@ static void *stm_open(ctlStreamCallbacks *cb, int id, size_t size)
 				return NULL;
 			}
 		break;
-    case UFW_DST_STREAM_ID:
-    {
+	case UFW_DST_STREAM_ID:
+	{
 
-       if (cb->clientFileName != NULL)
-        {
+		if (cb->clientFileName != NULL)
+		{
 			char buffer[FILENAME_MAX];
-            sprintf(buffer, "%s/%s", h->file.dst, cb->clientFileName);
-            s = &h->dst.stm;
+			sprintf(buffer, "%s/%s", h->file.dst, cb->clientFileName);
+			s = &h->dst.stm;
 
-            s->fp = fopen(buffer, "wt");
-            if (s->fp == NULL)
-            {
-                return NULL;
-            }
+			s->fp = fopen(buffer, "wt");
+			if (s->fp == NULL)
+			{
+				return NULL;
+			}
 
-        }
-        else
-            return NULL;
-        break;
-    }
+		}
+		else
+			return NULL;
+		break;
+	}
 	case CEF_TMP0_STREAM_ID:
 		s = &h->cef.tmp0;
 		tmp_open(h, s);
@@ -1000,12 +1000,12 @@ static void *stm_open(ctlStreamCallbacks *cb, int id, size_t size)
 	case SVR_DBG_STREAM_ID:
 		s = &h->svr.dbg;
 		break;
-    case UFO_DBG_STREAM_ID:
-        s = &h->ufr.dbg;
-        break;
-    case UFW_DBG_STREAM_ID:
-        s = &h->ufow.dbg;
-        break;
+	case UFO_DBG_STREAM_ID:
+		s = &h->ufr.dbg;
+		break;
+	case UFW_DBG_STREAM_ID:
+		s = &h->ufow.dbg;
+		break;
 	case CFR_DBG_STREAM_ID:
 		s = &h->cfr.dbg;
 		break;
@@ -1029,20 +1029,20 @@ static void *stm_open(ctlStreamCallbacks *cb, int id, size_t size)
 		break;
 	default:
 		fatal(h, "invalid stream open");
-        }
-    return s;
-    }
+		}
+	return s;
+	}
 
 /* Seek to stream position. */
 static int stm_seek(ctlStreamCallbacks *cb, void *stream, long offset)
-    {
+	{
 	if (offset >= 0)
 		{
 		Stream *s = stream;
 		switch (s->type)
 			{
-        case stm_Src:
-        case stm_SrcUFO:
+		case stm_Src:
+		case stm_SrcUFO:
 		case stm_Dst:
 		case stm_Dbg:
 			return fseek(s->fp, offset, SEEK_SET);
@@ -1055,12 +1055,12 @@ static int stm_seek(ctlStreamCallbacks *cb, void *stream, long offset)
 
 /* Return stream position. */
 static long stm_tell(ctlStreamCallbacks *cb, void *stream)
-    {
+	{
 	Stream *s = stream;
 	switch (s->type)
 		{
-            case stm_Src:
-            case stm_SrcUFO:
+	case stm_Src:
+	case stm_SrcUFO:
 	case stm_Dbg:
 		return ftell(s->fp);
 		break;
@@ -1073,16 +1073,16 @@ static long stm_tell(ctlStreamCallbacks *cb, void *stream)
 		return (long)tmp_tell(s);
 		}
 	return 0;	/* Suppress compiler warning */
-    }
+	}
 
 /* Read from stream. */
 static size_t stm_read(ctlStreamCallbacks *cb, void *stream, char **ptr)
-    {
+	{
 	Stream *s = stream;
 	switch (s->type)
 		{
-    case stm_Src:
-    case stm_SrcUFO:
+	case stm_Src:
+	case stm_SrcUFO:
 		{
 		txCtx h = cb->direct_ctx;
 		if (h->seg.refill != NULL)
@@ -1096,17 +1096,17 @@ static size_t stm_read(ctlStreamCallbacks *cb, void *stream, char **ptr)
 		return tmp_read(s, ptr);
 		}
 	return 0;	/* Suppress compiler warning */
-    }
+	}
 
 /* Write to stream. */
 static size_t stm_write(ctlStreamCallbacks *cb, void *stream,
 						size_t count, char *ptr)
-    {
+	{
 	Stream *s = stream;
 	switch (s->type)
 		{
-    case stm_Src:
-    case stm_SrcUFO:
+	case stm_Src:
+	case stm_SrcUFO:
 	case stm_Dst:
 		return fwrite(ptr, 1, count, s->fp);
 	case stm_Tmp:
@@ -1121,7 +1121,7 @@ static size_t stm_write(ctlStreamCallbacks *cb, void *stream,
 		return count;
 		}
 	return 0;	/* Suppress compiler warning */
-    }
+	}
 
 /* Return stream status. */
 static int stm_status(ctlStreamCallbacks *cb, void *stream)
@@ -1144,8 +1144,8 @@ static int stm_status(ctlStreamCallbacks *cb, void *stream)
 
 /* Close stream. */
 static int stm_close(ctlStreamCallbacks *cb, void *stream)
-    {
-    txCtx h = cb->direct_ctx;
+	{
+	txCtx h = cb->direct_ctx;
 	Stream *s = stream;
 	if (s->type == stm_Tmp)
 		return tmp_close(cb->direct_ctx, s);
@@ -1153,19 +1153,19 @@ static int stm_close(ctlStreamCallbacks *cb, void *stream)
 		return 0;
 	else
 		{
-        int retval;
+		int retval;
 		FILE *fp = s->fp;
 		retval =  fclose(fp);
 		s->fp = NULL;	/* Avoid re-close */
-        if (s->type == stm_SrcUFO)
-        {
-        h->src.streamStack.cnt--;
-        if (h->src.streamStack.cnt > 0)
-            *s = h->src.streamStack.array[h->src.streamStack.cnt-1];
-        }
-        return retval;
+		if (s->type == stm_SrcUFO)
+		{
+		h->src.streamStack.cnt--;
+		if (h->src.streamStack.cnt > 0)
+			*s = h->src.streamStack.array[h->src.streamStack.cnt-1];
 		}
-    }
+		return retval;
+		}
+	}
 
 /* Initialize stream record. */
 static void stmSet(Stream *s, int type, char *filename, char *buf)
@@ -1201,7 +1201,7 @@ static void stmInit(txCtx h)
 	{
 	h->cb.stm.direct_ctx	= h;
 	h->cb.stm.indirect_ctx 	= NULL;
-    h->cb.stm.clientFileName = NULL;
+	h->cb.stm.clientFileName = NULL;
 	h->cb.stm.open			= stm_open;
 	h->cb.stm.seek			= stm_seek;
 	h->cb.stm.tell			= stm_tell;
@@ -1226,8 +1226,8 @@ static void stmInit(txCtx h)
 	dbgSet(&h->t1r.dbg, "t1r");
 	dbgSet(&h->cfr.dbg, "cfr");
 	dbgSet(&h->svr.dbg, "svr");
-    dbgSet(&h->ufr.dbg, "ufr");
-    dbgSet(&h->ufow.dbg, "ufw");
+	dbgSet(&h->ufr.dbg, "ufr");
+	dbgSet(&h->ufow.dbg, "ufw");
 	dbgSet(&h->ttr.dbg, "ttr");
 	dbgSet(&h->cfw.dbg, "cfw");
 	dbgSet(&h->t1w.dbg, "t1w");
@@ -1315,7 +1315,7 @@ static void fillbuf(txCtx h, long offset)
 		if (feof(h->src.stm.fp))
 			fatal(h, "end of file [%s]", h->src.stm.filename);
 		else
-            fileError(h, h->src.stm.filename);
+			fileError(h, h->src.stm.filename);
 		}
     else
         {
@@ -1676,8 +1676,8 @@ static void path_BegFont(txCtx h, abfTopDict *top)
 		/* Prepare dump facility */
 		h->abf.dump.fp = h->dst.stm.fp;
 		h->abf.dump.left = 0;
-        h->abf.dump.excludeSubset = 0;
-        h->abf.dump.fdCnt = 0;
+		h->abf.dump.excludeSubset = 0;
+		h->abf.dump.fdCnt = 0;
 		abfDumpBegFont(&h->abf.dump, top);
 		}
 
@@ -1772,7 +1772,7 @@ static void cff_BegFont(txCtx h, abfTopDict *top)
 	{
 	dstFileSetAutoName(h, top);
 
-     // we do not support subroutinzation in mergeFonts, so can pass the default maxSubr value.
+	// we do not support subroutinzation in mergeFonts, so can pass the default maxSubr value.
 	if (cfwBegFont(h->cfw.ctx, NULL, 0))
 		fatal(h, NULL);
 	}
@@ -1816,18 +1816,19 @@ static void cff_SetMode(txCtx h)
 			fatal(h, "(cfw) can't init lib");
 		}
 
-    /* Initialize glyph callbacks */
-    h->cb.glyph = cfwGlyphCallbacks;
-    h->cb.glyph.direct_ctx = h->cfw.ctx;
-    if (!(h->cfw.flags & CFW_WRITE_CFF2))
-    {
-        /* This keeps these callbacks from being used when
-         writing a regular CFF, and avoids the overhead of trying to process the
-         source CFF2 blend args */
-        h->cb.glyph.moveVF = NULL;
-        h->cb.glyph.lineVF = NULL;
-        h->cb.glyph.curveVF = NULL;
-    }
+	/* Initialize glyph callbacks */
+	h->cb.glyph = cfwGlyphCallbacks;
+	h->cb.glyph.direct_ctx = h->cfw.ctx;
+
+	if (!(h->cfw.flags & CFW_WRITE_CFF2))
+	{
+		/* This keeps these callbacks from being used when
+		 writing a regular CFF, and avoids the overhead of trying to process the
+		 source CFF2 blend args */
+		h->cb.glyph.moveVF = NULL;
+		h->cb.glyph.lineVF = NULL;
+		h->cb.glyph.curveVF = NULL;
+	}
 
 	/* Set source library flags */
 	/* These are now set at the start of parseArgs
@@ -1987,15 +1988,15 @@ static abfGlyphCallbacks preserveGlyphCallbacks =
 	preserveGlyphMove,
 	preserveGlyphLine,
 	preserveGlyphCurve,
-  preserveGlyphStem,
+	preserveGlyphStem,
 	preserveGlyphFlex,
 	preserveGlyphGenop,
 	preserveGlyphSeac,
 	preserveGlyphEnd,
-    preserveCubeBlend,
-    preserveCubeSetwv,
-    preserveCubeCompose,
-    preserveCubeTransform,
+	preserveCubeBlend,
+	preserveCubeSetwv,
+	preserveCubeCompose,
+	preserveCubeTransform,
 	};
 
 /* ------------------------------- Glyph List ------------------------------ */
@@ -2106,22 +2107,22 @@ static void makeSubsetGlyphList(txCtx h)
 
 /* Construct arg buffer from subset list to simulated -g option. */
 static void makeSubsetArgList(txCtx h)
-{
+	{
 	long i;
 	long rangecnt = 0;
 	unsigned short first = h->subset.glyphs.array[0];
 	unsigned short last = first;
 	h->subset.args.cnt = 0;
 	for (i = 1; i <= h->subset.glyphs.cnt; i++)
-    {
-        unsigned short curr;
-        if (i < h->subset.glyphs.cnt)
-            curr = h->subset.glyphs.array[i];
-        else
-            curr = 0;
+		{
+		unsigned short curr;
+		if (i < h->subset.glyphs.cnt)
+			curr = h->subset.glyphs.array[i];
+		else
+			curr = 0;
 
 		if (last + 1 != curr)
-        {
+			{
 			char buf[12];	/* 5 digits + hyphen + 5 digits + nul */
 			if (first == last)
 				sprintf(buf, "%hu", last);
@@ -2130,12 +2131,12 @@ static void makeSubsetArgList(txCtx h)
 			strcpy(dnaEXTEND(h->subset.args, (long)strlen(buf) + 1), buf);
 			first = curr;
 			rangecnt++;
-        }
+			}
 		last = curr;
-    }
+		}
 	h->arg.g.cnt = rangecnt;
 	h->arg.g.substrs = h->subset.args.array;
-}
+	}
 
 /* ----------------------------- Subset Parsing ---------------------------- */
 
@@ -4460,8 +4461,8 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr)
 		/* 46 */ "setwv3",
 		/* 47 */ "setwv4",
 		/* 48 */ "setwv5",
-        /* 49 */ "setwvN",
-        /* 50 */ "transform",
+		/* 49 */ "setwvN",
+		/* 50 */ "transform",
 		};
 	long left = sizeRegion(region);
 
@@ -4665,10 +4666,10 @@ static void dcf_DumpEncoding(txCtx h, const ctlRegion *region)
 		dumpTagLine(h, "Encoding", region);
 		if (h->dcf.level > 0)
 			{
-			long cnt;
-			unsigned char fmt;
 			long gid;
 			long i;
+			long cnt;
+			unsigned char fmt;
 
 			bufSeek(h, region->begin);
 			gid = 1;			/* Skip glyph 0 (.notdef) */
@@ -4745,8 +4746,8 @@ static void dcf_DumpCharset(txCtx h, const ctlRegion *region)
 		if (h->dcf.level > 0)
 			{
 			unsigned char fmt;
-			long gid;
 			long i;
+			long gid;
 
 			bufSeek(h, region->begin);
 			fmt = read1(h);
@@ -4755,7 +4756,6 @@ static void dcf_DumpCharset(txCtx h, const ctlRegion *region)
 
 			switch (fmt)
 				{
-
 			case 0:
 				flowTitle(h, (h->top->sup.flags & ABF_CID_FONT)?
 						"glyph[gid]=cid": "glyph[gid]=sid");
@@ -5245,33 +5245,33 @@ static void makeFDSubset(txCtx h)
 	for (i = 0; i < h->src.glyphs.cnt; i++)
 		{
 		abfGlyphInfo *info = h->src.glyphs.array[i];
-        if (h->flags & SUBSET__EXCLUDE_OPT)
-        {
-            unsigned int match = 0;
-            for (j = 0; j < h->fd.fdIndices.cnt; j++)
-            {
-                if (info->iFD == h->fd.fdIndices.array[j])
-                {
-                    match = 1;
-                    break;
-                }
-            }
-            if (!match)
-			*dnaNEXT(h->subset.glyphs) = info->tag;
+		if (h->flags & SUBSET__EXCLUDE_OPT)
+		{
+			unsigned int match = 0;
+			for (j = 0; j < h->fd.fdIndices.cnt; j++)
+			{
+				if (info->iFD == h->fd.fdIndices.array[j])
+				{
+					match = 1;
+					break;
+				}
+			}
+			if (!match)
+				*dnaNEXT(h->subset.glyphs) = info->tag;
 
-        }
-        else
-        {
-            for (j = 0; j < h->fd.fdIndices.cnt; j++)
-            {
-                if (info->iFD == h->fd.fdIndices.array[j])
-                {
-                    *dnaNEXT(h->subset.glyphs) = info->tag;
-                    break;
-               }
-            }
-        }
 		}
+		else
+		{
+			for (j = 0; j < h->fd.fdIndices.cnt; j++)
+			{
+				if (info->iFD == h->fd.fdIndices.array[j])
+				{
+					*dnaNEXT(h->subset.glyphs) = info->tag;
+					break;
+			   }
+			}
+		}
+	}
 
 	if (h->subset.glyphs.cnt == 0)
 		fatal(h, "no glyphs selected by -fd argument");
@@ -5396,32 +5396,31 @@ static void prepSubset(txCtx h)
 		makeRandSubset(h, "-p", h->arg.p);
 	else if (h->arg.P != NULL)
 		makeRandSubset(h, "-P", h->arg.P);
-    else if (h->fd.fdIndices.cnt > 0)
+	else if (h->fd.fdIndices.cnt > 0)
 		makeFDSubset(h);
 	else if (h->flags & SUBSET__EXCLUDE_OPT)
 		invertSubset(h);
 	else
-    {
+	{
 		if (h->flags & SUBSET_OPT) {
-		  if (h->flags & PRESERVE_GID) {
-			getGlyphList(h);
-			parseSubset(h, callbackPreserveGlyph);
-			h->src.glyphs.array[0]->flags |= PRESERVE_CHARSTRING;
-			h->arg.g.cnt = 0;
-			h->cb.save = h->cb.glyph;
-			h->cb.glyph = preserveGlyphCallbacks;
-			h->cb.glyph.direct_ctx = h;
-		  }
+			if (h->flags & PRESERVE_GID) {
+				getGlyphList(h);
+				parseSubset(h, callbackPreserveGlyph);
+				h->src.glyphs.array[0]->flags |= PRESERVE_CHARSTRING;
+				h->arg.g.cnt = 0;
+				h->cb.save = h->cb.glyph;
+				h->cb.glyph = preserveGlyphCallbacks;
+				h->cb.glyph.direct_ctx = h;
+			}
 		}
-    }
+	}
 
 	if (h->subset.glyphs.cnt == 0)
 		return; /* no subset */
 
 	/* Make subset arg list */
 	makeSubsetArgList(h);
-	if ((h->mode == mode_cff || h->mode == mode_t1 || h->mode == mode_svg || h->mode == mode_ufow) &&
-        (h->flags & SHOW_NAMES))
+	if ((h->mode == mode_cff || h->mode == mode_t1 || h->mode == mode_svg || h->mode == mode_ufow) && (h->flags & SHOW_NAMES))
 		{
 		char *p;
 		char *q;
@@ -5664,11 +5663,11 @@ static void t1rMergeFont(txCtx h, long origin, boolean isFirstFont, sourceCtx *s
 		if (h->mergeInfo.hintsOnly && parentIsCID)
 			fatal(h, "Error. The -hints option cannot be used with CID fonts.");
 
-        /* Apply the CIDFontInfo file, if oen was specified. */
-        parentIsCID = applyCIDFontInfo(h, parentIsCID); /* can set parentIsCID true, if it was false */
+		/* Apply the CIDFontInfo file, if oen was specified. */
+		parentIsCID = applyCIDFontInfo(h, parentIsCID); /* can set parentIsCID true, if it was false */
 
-        /* If there is a glyph alias file for the first font, make sure it is the right type, or that baoth fonts are name keyed or CID. */
-        gaf = checkIFParentCIDCompatible(h, h->top, parentIsCID, parentIsCID);
+		/* If there is a glyph alias file for the first font, make sure it is the right type, or that baoth fonts are name keyed or CID. */
+		gaf = checkIFParentCIDCompatible(h, h->top, parentIsCID, parentIsCID);
 
 
 		prepSubset(h);
@@ -5710,7 +5709,7 @@ static void t1rMergeFont(txCtx h, long origin, boolean isFirstFont, sourceCtx *s
 		unsigned int fileIndex = h->mergeInfo.fileIndex;
 		t1rCtx local_t1r_ctx;
 		abfTopDict *local_top = NULL;
-        boolean localFontIsCID = 0;
+		boolean localFontIsCID = 0;
 		parentIsCID = h->top->sup.flags & ABF_CID_FONT;
 
 		local_t1r_ctx =  t1rNew(&h->cb.mem, &h->cb.stm, T1R_CHECK_ARGS);
@@ -5730,7 +5729,7 @@ static void t1rMergeFont(txCtx h, long origin, boolean isFirstFont, sourceCtx *s
 		if (t1rBegFont(local_t1r_ctx, h->t1r.flags, origin, &local_top, getUDV(h)))
 			fatal(h, NULL);
 
-        localFontIsCID = local_top->sup.flags & ABF_CID_FONT;
+		localFontIsCID = local_top->sup.flags & ABF_CID_FONT;
 		if (h->mergeInfo.hintsOnly)
 			{
 			int k;
@@ -5744,8 +5743,8 @@ static void t1rMergeFont(txCtx h, long origin, boolean isFirstFont, sourceCtx *s
 				h->top->FontBBox[k] = local_top->FontBBox[k];
 			}
 
-        /* If there is a glyph alias file for the first font, make sure it is the right type, or that baoth fonts are name keyed or CID. */
-        gaf = checkIFParentCIDCompatible(h, local_top, parentIsCID, localFontIsCID);
+		/* If there is a glyph alias file for the first font, make sure it is the right type, or that baoth fonts are name keyed or CID. */
+		gaf = checkIFParentCIDCompatible(h, local_top, parentIsCID, localFontIsCID);
 
 		/* provide data for mergeGlyphBegin function,
 		which is patched over the &h->cb.glyph.beg() function ptr */
@@ -5828,8 +5827,8 @@ static void svrMergeFont(txCtx h, long origin, boolean isFirstFont, sourceCtx *s
 		{
 		svrCtx local_svr_ctx;
 		abfTopDict *local_top = NULL;
-        boolean parentIsCID = h->top->sup.flags & ABF_CID_FONT;
-        boolean localFontIsCID = 0;
+		boolean parentIsCID = h->top->sup.flags & ABF_CID_FONT;
+		boolean localFontIsCID = 0;
 
 		local_svr_ctx =  svrNew(&h->cb.mem, &h->cb.stm, SVR_CHECK_ARGS);
 
@@ -5844,9 +5843,9 @@ static void svrMergeFont(txCtx h, long origin, boolean isFirstFont, sourceCtx *s
 		if (svrBegFont(local_svr_ctx, h->svr.flags, &local_top))
 			fatal(h, NULL);
 
-        localFontIsCID = local_top->sup.flags & ABF_CID_FONT;
-        /* If there is a glyph alias file for the first font, make sure it is the right type, or that baoth fonts are name keyed or CID. */
-        gaf = checkIFParentCIDCompatible(h, local_top, parentIsCID, localFontIsCID);
+		localFontIsCID = local_top->sup.flags & ABF_CID_FONT;
+		/* If there is a glyph alias file for the first font, make sure it is the right type, or that baoth fonts are name keyed or CID. */
+		gaf = checkIFParentCIDCompatible(h, local_top, parentIsCID, localFontIsCID);
 
 
 		/* provide data for mergeGlyphBegin function,
@@ -5854,8 +5853,8 @@ static void svrMergeFont(txCtx h, long origin, boolean isFirstFont, sourceCtx *s
 
 		h->mergeInfo.srcTopDict = local_top;
 
-        if (parentIsCID)
-            mergeFDArray(h, local_top);
+		if (parentIsCID)
+			mergeFDArray(h, local_top);
 
 		updateFontBBox(h->top, local_top);
 
@@ -5866,13 +5865,13 @@ static void svrMergeFont(txCtx h, long origin, boolean isFirstFont, sourceCtx *s
 			callbackMergeGASubset(h, gaf);
 		}
 		else
-        {
-            if (parentIsCID)
-                fatal(h, "The first font is CID. You must provide a glyph alias file that converts this svg file to CID.");
+		{
+			if (parentIsCID)
+				fatal(h, "The first font is CID. You must provide a glyph alias file that converts this svg file to CID.");
 
-            if (svrIterateGlyphs(local_svr_ctx, &h->cb.glyph))
-                fatal(h, NULL);
-        }
+			if (svrIterateGlyphs(local_svr_ctx, &h->cb.glyph))
+				fatal(h, NULL);
+		}
 
 		/* h->dst.endfont is called after the all fonts have been merged, by
 		doMergeFontSet
@@ -5893,12 +5892,12 @@ static void svrMergeFont(txCtx h, long origin, boolean isFirstFont, sourceCtx *s
 static void ufoReadFont(txCtx h, long origin)
 {
 	if (h->ufr.ctx == NULL)
-    {
+	{
 		/* Initialize library */
 		h->ufr.ctx = ufoNew(&h->cb.mem, &h->cb.stm, UFO_CHECK_ARGS);
 		if (h->ufr.ctx == NULL)
 			fatal(h, "(ufr) can't init lib");
-    }
+	}
 
 
 	if (ufoBegFont(h->ufr.ctx, h->ufr.flags, &h->top, h->ufr.altLayerDir))
@@ -5909,12 +5908,12 @@ static void ufoReadFont(txCtx h, long origin)
 	h->dst.begfont(h, h->top);
 
 	if (h->mode != mode_cef)
-    {
+	{
 		if (h->arg.g.cnt != 0)
 			callbackSubset(h);
 		else if (ufoIterateGlyphs(h->ufr.ctx, &h->cb.glyph))
 			fatal(h, NULL);
-    }
+	}
 
 	h->dst.endfont(h);
 
@@ -5922,52 +5921,50 @@ static void ufoReadFont(txCtx h, long origin)
 		fatal(h, NULL);
 }
 
-/* Merge font with svread library. */
+/* Merge font with uforead library. */
 static void ufoMergeFont(txCtx h, long origin, boolean isFirstFont, sourceCtx *srcCtx)
 {
 	GAFileInfo *gaf = NULL;
-    boolean parentIsCID = 0;
+	boolean parentIsCID = 0;
 
-    if (isFirstFont)
-    {
+	if (isFirstFont)
+	{
 		h->mergeInfo.mode = mode_ufow;
 		if (h->ufr.ctx == NULL)
-        {
+		{
 			/* Initialize library */
-            h->ufr.ctx =  ufoNew(&h->cb.mem, &h->cb.stm, UFO_CHECK_ARGS);
+			h->ufr.ctx =  ufoNew(&h->cb.mem, &h->cb.stm, UFO_CHECK_ARGS);
 
-            if (h->ufr.ctx == NULL)
-                fatal(h, "(ufr) can't init lib");
-        }
+			if (h->ufr.ctx == NULL)
+				fatal(h, "(ufr) can't init lib");
+		}
 
 		dnaNext(&srcCtx->ufr, sizeof(ufoCtx));
 		srcCtx->ufr.array[srcCtx->ufr.cnt-1] = h->ufr.ctx;
 
-        if (ufoBegFont(h->ufr.ctx , h->ufr.flags, &h->top, h->ufr.altLayerDir))
-            fatal(h, NULL);
+		if (ufoBegFont(h->ufr.ctx , h->ufr.flags, &h->top, h->ufr.altLayerDir))
+			fatal(h, NULL);
 
-        parentIsCID = h->top->sup.flags & ABF_CID_FONT;
+		parentIsCID = h->top->sup.flags & ABF_CID_FONT;
 
-        /* Apply the CIDFontInfo file, if oen was specified. */
+		/* Apply the CIDFontInfo file, if oen was specified. */
 		parentIsCID = applyCIDFontInfo(h, parentIsCID); /* can set parentIsCID true, if it was false */
 
 		/* If there is a glyph alias file for the first font, make sure it is the right type, or that baoth fonts are name keyed or CID. */
-        gaf = checkIFParentCIDCompatible(h, h->top, parentIsCID, parentIsCID);
+		gaf = checkIFParentCIDCompatible(h, h->top, parentIsCID, parentIsCID);
 
 		prepSubset(h);
 
 		h->dst.begfont(h, h->top);
 
-
 		/* provide data for mergeGlyphBegin function,
-         which is patched over the &h->cb.glyph.beg() function ptr */
+		 which is patched over the &h->cb.glyph.beg() function ptr */
 		h->mergeInfo.srcTopDict = h->top;
 
-
-        if (parentIsCID)
+		if (parentIsCID)
 			mergeFDArray(h, h->top);
 
-        h->cb.glyph.indirect_ctx = h;
+		h->cb.glyph.indirect_ctx = h;
 
 		if (h->arg.g.cnt != 0)
 			callbackSubset(h);
@@ -5976,11 +5973,11 @@ static void ufoMergeFont(txCtx h, long origin, boolean isFirstFont, sourceCtx *s
 			callbackMergeGASubset(h, gaf);
 		}
 		else if (ufoIterateGlyphs(h->ufr.ctx, &h->cb.glyph))
-            fatal(h, NULL);
+			fatal(h, NULL);
 
 		/* h->dst.endfont is called after the all fonts have been merged, by
-         doMergeFontSet
-         */
+		 doMergeFontSet
+		 */
 
 		if (ufoEndFont(h->ufr.ctx))
 			fatal(h, NULL);
@@ -5989,12 +5986,12 @@ static void ufoMergeFont(txCtx h, long origin, boolean isFirstFont, sourceCtx *s
 		h->flags &= ~SUBSET__EXCLUDE_OPT;
 		h->arg.g.cnt = 0; /* we don't want to subset twice if a glyph list was specified */
 		gaf = NULL;
-    }
-    else
-    {
+	}
+	else
+	{
 		ufoCtx local_ufr_ctx;
 		abfTopDict *local_top = NULL;
-        boolean parentIsCID = h->top->sup.flags & ABF_CID_FONT;
+		boolean parentIsCID = h->top->sup.flags & ABF_CID_FONT;
 		boolean localFontIsCID;
 
 		local_ufr_ctx =  ufoNew(&h->cb.mem, &h->cb.stm, UFO_CHECK_ARGS);
@@ -6006,20 +6003,19 @@ static void ufoMergeFont(txCtx h, long origin, boolean isFirstFont, sourceCtx *s
 		srcCtx->ufr.array[srcCtx->ufr.cnt-1] = local_ufr_ctx;
 
 		h->ufr.ctx = local_ufr_ctx;
-        if (ufoBegFont(local_ufr_ctx, h->ufr.flags, &local_top, h->ufr.altLayerDir))
-            fatal(h, NULL);
+		if (ufoBegFont(local_ufr_ctx, h->ufr.flags, &local_top, h->ufr.altLayerDir))
+			fatal(h, NULL);
 
-        localFontIsCID = local_top->sup.flags & ABF_CID_FONT;
+		localFontIsCID = local_top->sup.flags & ABF_CID_FONT;
 		/* If there is a glyph alias file for the first font, make sure it is the right type, or that baoth fonts are name keyed or CID. */
-        gaf = checkIFParentCIDCompatible(h, local_top, parentIsCID, localFontIsCID);
-
+		gaf = checkIFParentCIDCompatible(h, local_top, parentIsCID, localFontIsCID);
 
 		/* provide data for mergeGlyphBegin function,
-         which is patched over the &h->cb.glyph.beg() function ptr */
+		 which is patched over the &h->cb.glyph.beg() function ptr */
 
 		h->mergeInfo.srcTopDict = local_top;
 
-        if (parentIsCID)
+		if (parentIsCID)
 			mergeFDArray(h, local_top);
 
 		updateFontBBox(h->top, local_top);
@@ -6031,23 +6027,22 @@ static void ufoMergeFont(txCtx h, long origin, boolean isFirstFont, sourceCtx *s
 			callbackMergeGASubset(h, gaf);
 		}
 		else
-        {
-            if (parentIsCID)
-                fatal(h, "The first font is CID. You must provide a glyph alias file that converts this ufo font to CID.");
+		{
+			if (parentIsCID)
+				fatal(h, "The first font is CID. You must provide a glyph alias file that converts this ufo font to CID.");
 
-
-            if (ufoIterateGlyphs(local_ufr_ctx, &h->cb.glyph))
-                fatal(h, NULL);
-        }
+			if (ufoIterateGlyphs(local_ufr_ctx, &h->cb.glyph))
+				fatal(h, NULL);
+		}
 
 		/* h->dst.endfont is called after the all fonts have been merged, by
-         doMergeFontSet
-         */
+		 doMergeFontSet
+		 */
 
 		if (ufoEndFont(local_ufr_ctx))
 			fatal(h, NULL);
-    }
-     /* the accumulated local_svr_ctx's are freed in doMergeFontSet */
+	}
+	 /* the accumulated local_svr_ctx's are freed in doMergeFontSet */
 }
 
 /* ---------------------------- cffread Library ---------------------------- */
@@ -6556,67 +6551,67 @@ static void addFont(txCtx h, int type, int iTTC, long offset)
 
 static void addTTCFont(txCtx h, int ttcIndex, long origin, long offset)
 {
-    ctlTag version;
-    int result;
+	ctlTag version;
+	int result;
 	result = sfrBegFont(h->ctx.sfr, &h->src.stm, offset, &version);
 	switch (result)
-    {
-        case sfrSuccess:
-        {    switch (version)
-            {
-                case sfr_v1_0_tag:
-                case sfr_true_tag:
-                    /* TrueType */
-                    addFont(h, src_TrueType, ttcIndex, origin);
-                    break;
-                case sfr_OTTO_tag:
-                    /* OTF */
-                    addFont(h, src_OTF, ttcIndex, origin);
-                    break;
-                default:
-                    fatal(h, "(sfr) %s", sfrErrStr(sfrErrBadSfnt));
-            }
-            break;
-        case sfrErrBadSfnt:
-            break;
-        default:
-            fatal(h, "(sfr) %s", sfrErrStr(result));
-        }
-    }
+	{
+		case sfrSuccess:
+		{    switch (version)
+			{
+				case sfr_v1_0_tag:
+				case sfr_true_tag:
+					/* TrueType */
+					addFont(h, src_TrueType, ttcIndex, origin);
+					break;
+				case sfr_OTTO_tag:
+					/* OTF */
+					addFont(h, src_OTF, ttcIndex, origin);
+					break;
+				default:
+					fatal(h, "(sfr) %s", sfrErrStr(sfrErrBadSfnt));
+			}
+			break;
+		case sfrErrBadSfnt:
+			break;
+		default:
+			fatal(h, "(sfr) %s", sfrErrStr(result));
+		}
+	}
 
 }
 
 /* Add TrueType Collection font. */
 static void addTTC(txCtx h, long origin)
 	{
-    /* sfrGetNextTTCOffset() returns 0 when it is asked to get the next offset after the last real font,
-    so it serves effectively as a test for iterating through all the fonts in the TTC.
-     */
+	/* sfrGetNextTTCOffset() returns 0 when it is asked to get the next offset after the last real font,
+	   so it serves effectively as a test for iterating through all the fonts in the TTC.
+	*/
 	long i;
-    long offset;
+	long offset;
 
 	if (h->arg.i != NULL)
 		{
-			int j;
+		int j;
 		i = strtol(h->arg.i, NULL, 0);
 		if (i < 0)
 			fatal(h, "bad TTC index (-i)");
 
-        for (j = 0; (offset = sfrGetNextTTCOffset(h->ctx.sfr)); j++)
-        {
-            if (j < i)
-                continue;
-            addTTCFont(h, i, origin, offset);
-            break;
-        }
+		for (j = 0; (offset = sfrGetNextTTCOffset(h->ctx.sfr)); j++)
+		{
+			if (j < i)
+				continue;
+			addTTCFont(h, i, origin, offset);
+			break;
+		}
 
 		}
 	else if (h->flags & EVERY_FONT)
 		/* -y option; add whole collection */
 		for (i = 0; (offset = sfrGetNextTTCOffset(h->ctx.sfr)); i++)
-        {
-            addTTCFont(h, i, origin, offset);
-        }
+		{
+			addTTCFont(h, i, origin, offset);
+		}
 	else
 		{
 
@@ -7002,7 +6997,7 @@ static void doASDFormats(txCtx h, ctlTag magic)
 static void buildFontList(txCtx h)
 	{
 	ctlTag sig;
-    int fillErr = 0;
+	int fillErr = 0;
 	h->fonts.cnt = 0;
 
 	/* Initialize segment */
@@ -7071,7 +7066,7 @@ static void buildFontList(txCtx h)
 		if ((0 == strncmp(h->src.buf, "<font", 5)) || (0 == strncmp(h->src.buf, "<svg", 4) ))
 			addFont(h, src_SVG, 0, 0);
 		}
-    }
+	}
 	if (h->fonts.cnt == 0)
 		fatal(h, "bad font file: %s", h->src.stm.filename);
 	}
@@ -7129,9 +7124,9 @@ static void help(txCtx h)
 		case mode_dcf:
 			dcf_Help(h);
 			break;
-        case mode_ufow:
-            ufo_Help(h);
-            break;
+		case mode_ufow:
+			ufo_Help(h);
+			break;
 			}
 	else
 		{
@@ -7254,8 +7249,8 @@ static void printVersions(txCtx h)
 	ttrGetVersion(&cb);
 	t1wGetVersion(&cb);
 	svwGetVersion(&cb);
-    ufoGetVersion(&cb);
-    ufwGetVersion(&cb);
+	ufoGetVersion(&cb);
+	ufwGetVersion(&cb);
 
 	exit(0);
 	}
@@ -7303,9 +7298,9 @@ static void setMode(txCtx h, int mode)
 	case mode_svg:
 		svg_SetMode(h);
 		break;
-    case mode_ufow:
-        ufo_SetMode(h);
-        break;
+	case mode_ufow:
+		ufo_SetMode(h);
+		break;
 	case mode_dcf:
 		dcf_SetMode(h);
 		break;
@@ -7318,7 +7313,7 @@ static void setMode(txCtx h, int mode)
 static int CTL_CDECL matchOpts(const void *key, const void *value)
 	{
 	return strcmp((char *)key, *(char **)value);
- 	}
+	}
 
 /* Return option index from key or opt_None if not found. */
 static int getOptionIndex(char *key)
@@ -7334,8 +7329,8 @@ static void doFile(txCtx h, char *srcname)
 	{
 	long i;
 	char *p;
-    struct stat fileStat;
-    int statErrNo;
+	struct stat fileStat;
+	int statErrNo;
 
 	/* Set src name */
 	if (h->file.sr != NULL)
@@ -7352,15 +7347,15 @@ static void doFile(txCtx h, char *srcname)
 
 	/* Open file */
 
-    /* Need to first check if it is a directory-based font format, like UFO. */
-    statErrNo = stat(h->src.stm.filename,  &fileStat);
+	/* Need to first check if it is a directory-based font format, like UFO. */
+	statErrNo = stat(h->src.stm.filename,  &fileStat);
 	if (strcmp(h->src.stm.filename, "-") == 0)
 		h->src.stm.fp = stdin;
-    else if ((statErrNo == 0) && ((fileStat.st_mode & S_IFDIR) != 0))
-    {
-        /* maybe it is a dir-based font, like UFO. Will verify this in buildFontList(h) */
-        h->src.stm.fp = NULL;
-    }
+	else if ((statErrNo == 0) && ((fileStat.st_mode & S_IFDIR) != 0))
+		{
+		/* maybe it is a dir-based font, like UFO. Will verify this in buildFontList(h) */
+		h->src.stm.fp = NULL;
+		}
 	else
 		{
 		h->src.stm.fp = fopen(h->src.stm.filename, "rb");
@@ -7419,7 +7414,7 @@ static void doFile(txCtx h, char *srcname)
 			svrReadFont(h, rec->offset);
 			break;
 		case src_UFO:
-            ufoReadFont(h, rec->offset);
+			ufoReadFont(h, rec->offset);
 			break;
 			}
 		}
@@ -7473,7 +7468,7 @@ static void doSingleFileSet(txCtx h, char *srcname)
 	{
 	h->dst.begset(h);
 	doFile(h, srcname);
-    h->dst.endset(h);
+	h->dst.endset(h);
 	}
 
 /* Process auto-file set. Return index of last used arg. */
@@ -7885,29 +7880,28 @@ static void mergeFile(txCtx h, char *srcname, boolean isFirstFont, sourceCtx* sr
 	{
 	long i;
 	char *p;
-    struct stat fileStat;
-    int statErrNo;
+	struct stat fileStat;
+	int statErrNo;
 
 	/* Set src name */
 	p = h->file.src;
 	strcpy(p, srcname);
 
-        /* Need to first check if it is a directory-based font format, like UFO. */
-        statErrNo = stat(h->src.stm.filename,  &fileStat);
-        if (strcmp(h->src.stm.filename, "-") == 0)
-            h->src.stm.fp = stdin;
-        else if ((statErrNo == 0) && ((fileStat.st_mode & S_IFDIR) != 0))
-        {
-            /* maybe it is a dir-based font, like UFO. Will verify this in buildFontList(h) */
-            h->src.stm.fp = NULL;
-        }
-        else
-        {
-            h->src.stm.fp = fopen(h->src.stm.filename, "rb");
-            if (h->src.stm.fp == NULL)
-                fileError(h, h->src.stm.filename);
-
-        }
+	/* Need to first check if it is a directory-based font format, like UFO. */
+	statErrNo = stat(h->src.stm.filename,  &fileStat);
+	if (strcmp(h->src.stm.filename, "-") == 0)
+		h->src.stm.fp = stdin;
+	else if ((statErrNo == 0) && ((fileStat.st_mode & S_IFDIR) != 0))
+		{
+		/* maybe it is a dir-based font, like UFO. Will verify this in buildFontList(h) */
+		h->src.stm.fp = NULL;
+		}
+	else
+		{
+		h->src.stm.fp = fopen(h->src.stm.filename, "rb");
+		if (h->src.stm.fp == NULL)
+			fileError(h, h->src.stm.filename);
+		}
 
 	h->src.print_file = 1;
 
@@ -7940,18 +7934,18 @@ static void mergeFile(txCtx h, char *srcname, boolean isFirstFont, sourceCtx* sr
 		case src_Type1:
 			t1rMergeFont(h, rec->offset, isFirstFont, srcCtx);
 			break;
-        case src_OTF:
-            h->cfr.flags |= CFR_NO_ENCODING;
-            /* Fall through */
-        case src_CFF:
+		case src_OTF:
+			h->cfr.flags |= CFR_NO_ENCODING;
+			/* Fall through */
+		case src_CFF:
 			cfrMergeFont(h, rec->offset, isFirstFont, srcCtx);
 			break;
-        case src_SVG:
-            svrMergeFont(h, rec->offset, isFirstFont, srcCtx);
-            break;
-        case src_UFO:
-            ufoMergeFont(h, rec->offset, isFirstFont, srcCtx);
-            break;
+		case src_SVG:
+			svrMergeFont(h, rec->offset, isFirstFont, srcCtx);
+			break;
+		case src_UFO:
+			ufoMergeFont(h, rec->offset, isFirstFont, srcCtx);
+			break;
 		case src_TrueType:
 			fatal(h, "Merging not supported for TT fonts");
 			break;
@@ -8008,7 +8002,6 @@ static boolean readGlyphAliasFile(txCtx h,  int fileIndex, char *filePath)
 	gaf->LanguageGroup = -1;
 	gaf->FontName[0] = 0;
 
-
 	ga_fp = fopen(filePath, "rb");
 	if (ga_fp == NULL)
 		fatal(h, "Failed to open file %s.", filePath);
@@ -8031,7 +8024,6 @@ static boolean readGlyphAliasFile(txCtx h,  int fileIndex, char *filePath)
 		fclose(ga_fp);
 		return isGA;
 		}
-
 
 	isGA = 1;
 	lineno = 1;
@@ -8231,7 +8223,7 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 		switch (getOptionIndex(arg))
 			{
 		case opt_None:
-		  /* In mergeFonts, act like 'tx' if seen mode, else enter mergeFonts mode. */
+			/* In mergeFonts, act like 'tx' if seen mode, else enter mergeFonts mode. */
 			if (h->flags & SEEN_MODE)
 				{
 				/* Not option, assume filename */
@@ -8273,7 +8265,6 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 					remove(h->file.src); /* Under Windows, rename fails if dst file exists. */
 					rename( h->file.dst, h->file.src);
 					}
-
 				}
 			break;
 		case opt_dump:			/* mode selection options */
@@ -8311,18 +8302,18 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 		case opt_svg:
 			setMode(h, mode_svg);
 			break;
-        case opt_ufo:
-            setMode(h, mode_ufow);
-            break;
+		case opt_ufo:
+			setMode(h, mode_ufow);
+			break;
 		case opt_bc:
-            goto bc_gone;
+			goto bc_gone;
 			break;
 		case opt_dcf:
 			setMode(h, mode_dcf);
 			break;
-        case opt_altLayer:
-            h->ufr.altLayerDir = argv[++i];
-            break;
+		case opt_altLayer:
+			h->ufr.altLayerDir = argv[++i];
+			break;
 		case opt_l:
 			switch (h->mode)
 				{
@@ -8726,13 +8717,13 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 			h->t1w.options |= T1W_REFORMAT;
 			break;
 		case opt_z:				/* bc mode options */
-            goto bc_gone;
+			goto bc_gone;
 			break;
 		case opt_sha1:
-            goto bc_gone;
+			goto bc_gone;
 			break;
 		case opt_cmp:
-            goto bc_gone;
+			goto bc_gone;
 			break;
 		case opt_cube2:
 			h->cfr.flags |= CFR_CUBE_RND;
@@ -8751,7 +8742,7 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 				h->cfw.flags |= CFW_IS_CUBE;
 				break;
 			case mode_bc:
-                goto bc_gone;
+				goto bc_gone;
 				break;
 			case mode_dcf:
 				h->dcf.flags |= DCF_IS_CUBE;
@@ -8779,7 +8770,7 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 			default:
 				break;
 				}
-				break;
+			break;
 		case opt_c:
 			switch (h->mode)
 				{
@@ -8788,7 +8779,7 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 				h->t1w.flags |= T1W_ENCODE_ASCII85;
 				break;
 			case mode_bc:
-                goto bc_gone;
+				goto bc_gone;
 				break;
 			default:
 				goto wrongmode;
@@ -8879,7 +8870,7 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 					}
 				break;
 			case mode_bc:
-                goto bc_gone;
+				goto bc_gone;
 				break;
 			default:
 				goto wrongmode;
@@ -8971,8 +8962,8 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 			h->flags |= SUBSET_OPT;
 			break;
 		case opt_pg:
-		  h->flags |= PRESERVE_GID;
-		  break;
+			h->flags |= PRESERVE_GID;
+			break;
 		case opt_P:
 			if (!argsleft)
 				goto noarg;
@@ -8992,32 +8983,32 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 			h->flags |= NO_UDV_CLAMPING;
 			break;
 
-        case opt_fdx:
-            if ((h->flags & SUBSET_OPT) || (h->flags & SUBSET__EXCLUDE_OPT))
-                goto subsetclash;
-            h->flags |= SUBSET__EXCLUDE_OPT;
+		case opt_fdx:
+			if ((h->flags & SUBSET_OPT) || (h->flags & SUBSET__EXCLUDE_OPT))
+				goto subsetclash;
+			h->flags |= SUBSET__EXCLUDE_OPT;
 		case opt_fd:
 			if (!argsleft)
 				goto noarg;
-            else if ( (h->arg.g.cnt > 0) && ((h->flags & SUBSET_OPT) || (h->flags & SUBSET__EXCLUDE_OPT)))
+			else if ( (h->arg.g.cnt > 0) && ((h->flags & SUBSET_OPT) || (h->flags & SUBSET__EXCLUDE_OPT)))
 				goto subsetclash;
 			else
 				{
-                    /* Convert comma-terminated substrings to null-terminated*/
-				char *p;
-                    h->arg.g.cnt = 1;
-                    h->arg.g.substrs = argv[++i];
-                    for (p = strchr(h->arg.g.substrs, ',');
-                         p != NULL;
-                         p = strchr(p, ','))
+					/* Convert comma-terminated substrings to null-terminated*/
+					char *p;
+					h->arg.g.cnt = 1;
+					h->arg.g.substrs = argv[++i];
+					for (p = strchr(h->arg.g.substrs, ',');
+						p != NULL;
+						p = strchr(p, ','))
 					{
-                        *p++ = '\0';
-                        h->arg.g.cnt++;
+						*p++ = '\0';
+						h->arg.g.cnt++;
 					}
 				}
 			h->flags |= SUBSET_OPT;
-            // Parse FD argument.
-            parseFDSubset(h);
+			// Parse FD argument.
+			parseFDSubset(h);
 			break;
 		case opt_i:
 			if (!argsleft)
@@ -9140,7 +9131,7 @@ static void parseArgs(txCtx h, int argc, char *argv[])
  t1clash:
 	fatal(h, "options -pfb or -LWFN may not be used with other options");
  bc_gone:
-        fatal(h, "options -bc is no longer supported.");
+	fatal(h, "options -bc is no longer supported.");
 	}
 
 /* Return tail component of path. */
@@ -9190,14 +9181,14 @@ static void txNew(txCtx h, char *progname)
 	h->pdw.ctx = NULL;
 	h->t1w.ctx = NULL;
 	h->svw.ctx = NULL;
-    h->svw.flags = 0;
-    h->svr.ctx = NULL;
-    h->svr.flags = 0;
-    h->ufr.ctx = NULL;
-    h->ufr.flags = 0;
-    h->ufow.ctx = NULL;
-    h->ufow.flags = 0;
-    h->ufr.altLayerDir = NULL;
+	h->svw.flags = 0;
+	h->svr.ctx = NULL;
+	h->svr.flags = 0;
+	h->ufr.ctx = NULL;
+	h->ufr.flags = 0;
+	h->ufow.ctx = NULL;
+	h->ufow.flags = 0;
+	h->ufr.altLayerDir = NULL;
 	h->mergeInfo.cidinfo.CIDFontName[0] = 0;
 	h->mergeInfo.seenNotdef = 0;
 	h->mergeInfo.mode = 0;
@@ -9220,7 +9211,7 @@ static void txNew(txCtx h, char *progname)
 	dnaINIT(h->ctx.dna, h->src.glyphs, 256, 768);
 	dnaINIT(h->ctx.dna, h->src.exclude, 256, 768);
 	dnaINIT(h->ctx.dna, h->src.widths, 256, 768);
-    dnaINIT(h->ctx.dna, h->src.streamStack, 10, 10);
+	dnaINIT(h->ctx.dna, h->src.streamStack, 10, 10);
 	dnaINIT(h->ctx.dna, h->fonts, 1, 10);
 	dnaINIT(h->ctx.dna, h->subset.glyphs, 256, 768);
 	dnaINIT(h->ctx.dna, h->subset.args, 250, 500);
@@ -9236,7 +9227,7 @@ static void txNew(txCtx h, char *progname)
 	dnaINIT(h->ctx.dna, h->dcf.local, 1, 15);
 	h->dcf.local.func = initLocal;
 	dnaINIT(h->ctx.dna, h->cmap.encoding, 1, 1);
-    dnaINIT(h->ctx.dna, h->fd.fdIndices, 16, 16);
+	dnaINIT(h->ctx.dna, h->fd.fdIndices, 16, 16);
 	dnaINIT(h->ctx.dna, h->cmap.segment, 1, 1);
 	dnaINIT(h->ctx.dna, h->dcf.glyph, 256, 768);
 
@@ -9255,7 +9246,7 @@ static void txFree(txCtx h)
 	dnaFREE(h->src.glyphs);
 	dnaFREE(h->src.exclude);
 	dnaFREE(h->src.widths);
-    dnaFREE(h->src.streamStack);
+	dnaFREE(h->src.streamStack);
 	dnaFREE(h->fonts);
 	dnaFREE(h->subset.glyphs);
 	dnaFREE(h->subset.args);
@@ -9273,7 +9264,7 @@ static void txFree(txCtx h)
 	dnaFREE(h->dcf.local);
 	dnaFREE(h->dcf.glyph);
 	dnaFREE(h->cmap.encoding);
-    dnaFREE(h->fd.fdIndices);
+	dnaFREE(h->fd.fdIndices);
 	dnaFREE(h->cmap.segment);
 	if (h->t1r.ctx != NULL)
 		t1rFree(h->t1r.ctx);
