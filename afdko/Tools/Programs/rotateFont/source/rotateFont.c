@@ -2,12 +2,12 @@
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 /*
- * Type eXchange. 
+ * rotateFont. A minor modification of the tx code base.
  */
 
 #include "ctlshare.h"
 
-#define ROTATE_VERSION CTL_MAKE_VERSION(1,0,53)
+#define ROTATE_VERSION CTL_MAKE_VERSION(1,1,0)
 
 #include "cfembed.h"
 #include "cffread.h"
@@ -8793,6 +8793,7 @@ int CTL_CDECL main(int argc, char *argv[])
 		fprintf(stderr, "%s: out of memory\n", progname);
 		return EXIT_FAILURE;
 		}
+	memset(h, 0, sizeof(struct txCtx_));
 
 	txNew(h, progname);
 
