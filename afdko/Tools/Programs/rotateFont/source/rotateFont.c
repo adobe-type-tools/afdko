@@ -101,14 +101,14 @@ static const char *options[] =
 /* Generate n-bit mask */
 #define N_BIT_MASK(n)	(~(~0UL<<(n)))
 #define kHADV_NOT_SPECIFIED 11111.0  /* If the value is this, we don't overwrite the glyphs original advance width*/
-#define kkHADV_NOT_SPECIFIED_NAME	"None" 
+#define kkHADV_NOT_SPECIFIED_NAME	"None"
 enum { MAX_VERSION_SIZE = 100 };
 
 typedef struct txCtx_ *txCtx;/* tx program context */
 
 typedef struct				/* Macintosh resource info */
 	{
-	ctlTag type; 
+	ctlTag type;
 	unsigned short id;
 	unsigned long name;		/* Name offset then name index */
 	unsigned char attrs;
@@ -207,7 +207,7 @@ typedef struct
 	#define ROT_TRANSFORM_WIDTHS 	1<<8	 /* set undefined widths to the original width times the transform */
 	#define ROT_SET_WIDTH_EM 	1<<9	 /* Set undefined widths to the em-size */
 	#define ROTATE_UPDATE_FONTMATRIX 	1<<10	 /* Scale FontMatrix as well as coordinates. */
-	
+
 	unsigned short flags;
 	float origMatrix[6]; /* rotation/translation matric specified by user. */
 	float curMatrix[6]; /* rotation/translation matric currently in use. */
@@ -227,7 +227,7 @@ typedef void (*abfGlyphWidthCallback)(abfGlyphCallbacks *cb, float hAdv);
 typedef void (*DumpElementProc)(txCtx h, long index, const ctlRegion *region);
 
 enum						/* Source font technology types */
-	{						
+	{
 	src_Type1,				/* Type 1 */
 	src_OTF,				/* OTF */
 	src_CFF,				/* Naked CFF */
@@ -267,7 +267,7 @@ struct txCtx_
 #define SEEN_MODE	(1<<0)	/* Flags mode option seen */
 #define DONE_FILE	(1<<1)	/* Processed font file */
 #define DUMP_RES	(1<<2)	/* Print mac resource map */
-#define DUMP_ASD	(1<<3)	/* Print AppleSingle/Double data */	
+#define DUMP_ASD	(1<<3)	/* Print AppleSingle/Double data */
 #define AUTO_FILE_FROM_FILE	(1<<4)	/* Gen. dst filename from src filename */
 #define AUTO_FILE_FROM_FONT	(1<<5)	/* Gen. dst filename from src FontName */
 #define SUBSET_OPT	(1<<6)	/* Subsetting option specified */
@@ -623,7 +623,7 @@ static void *memNew(txCtx h, size_t size)
 		fatal(h, "no memory");
 	return ptr;
 	}
-	
+
 /* Free memory. */
 static void memFree(txCtx h, void *ptr)
 	{
@@ -642,27 +642,27 @@ static void *mem_manage(ctlMemoryCallbacks *cb, void *old, size_t size)
 		if (h->failmem.iCall++ == h->failmem.iFail)
 			{
 			/* Simulate memory allocation failure */
-			fprintf(stderr, "mem_manage() failed on call %ld.\n", 
+			fprintf(stderr, "mem_manage() failed on call %ld.\n",
 					h->failmem.iCall - 1L);
 			return NULL;
 			}
 		else if (old == NULL)
 			return malloc(size);		/* size != 0, old == NULL */
-		else							
+		else
 			return realloc(old, size);	/* size != 0, old != NULL */
-		}								
-	else								
-		{								
-		if (old == NULL)				
+		}
+	else
+		{
+		if (old == NULL)
 			return NULL;				/* size == 0, old == NULL */
-		else							
-			{							
+		else
+			{
 			free(old);					/* size == 0, old != NULL */
 			return NULL;
 			}
 		}
 	}
-	
+
 /* Initialize memory callbacks. */
 static void memInit(txCtx h)
 	{
@@ -671,7 +671,7 @@ static void memInit(txCtx h)
 	h->failmem.iCall = 0;
 	h->failmem.iFail = FAIL_INACTIVE;
 	}
-		
+
 /* Manage memory and handle failure. */
 static void *safeManage(ctlMemoryCallbacks *cb, void *old, size_t size)
 	{
@@ -788,7 +788,7 @@ static size_t tmp_write(Stream *s, size_t count, char *ptr)
 			{
 			/* Buffer overflow; completely fill buffer */
 			memcpy(s->buf + s->pos, ptr, length);
-				
+
 			/* Write rest to tmp file */
 			if (fseek(s->fp, 0, SEEK_SET) == -1)
 				{
@@ -852,14 +852,14 @@ static void *stm_open(ctlStreamCallbacks *cb, int id, size_t size)
             char buffer[FILENAME_MAX];
             sprintf(buffer, "%s/%s", h->file.src, cb->clientFileName);
             s = &h->src.stm;
-            
+
             s->fp = fopen(buffer, "rb");
             if (s->fp == NULL)
                 {
                 return NULL;
                 }
             *dnaNEXT(h->src.streamStack) = *s;
-            
+
             }
         else
             return NULL;
@@ -870,7 +870,7 @@ static void *stm_open(ctlStreamCallbacks *cb, int id, size_t size)
 		s = &h->dst.stm;
 		if (strcmp(s->filename, "-") == 0)
 			s->fp = stdout;
-		else 
+		else
 			{
 			s->fp = fopen(s->filename, "w+b");
 			if (s->fp == NULL)
@@ -885,7 +885,7 @@ static void *stm_open(ctlStreamCallbacks *cb, int id, size_t size)
 		s = &h->dst.stm;
 		if (strcmp(s->filename, "-") == 0)
 			s->fp = stdout;
-		else 
+		else
 			{
 			s->fp = fopen(s->filename, "wb");
 			if (s->fp == NULL)
@@ -894,19 +894,19 @@ static void *stm_open(ctlStreamCallbacks *cb, int id, size_t size)
 		break;
     case UFW_DST_STREAM_ID:
     {
-        
+
        if (cb->clientFileName != NULL)
         {
 			char buffer[FILENAME_MAX];
             sprintf(buffer, "%s/%s", h->file.dst, cb->clientFileName);
             s = &h->dst.stm;
-            
+
             s->fp = fopen(buffer, "wt");
             if (s->fp == NULL)
             {
                 return NULL;
             }
-            
+
         }
         else
             return NULL;
@@ -1042,7 +1042,7 @@ static size_t stm_read(ctlStreamCallbacks *cb, void *stream, char **ptr)
     }
 
 /* Write to stream. */
-static size_t stm_write(ctlStreamCallbacks *cb, void *stream, 
+static size_t stm_write(ctlStreamCallbacks *cb, void *stream,
 						size_t count, char *ptr)
     {
 	Stream *s = stream;
@@ -1057,7 +1057,7 @@ static size_t stm_write(ctlStreamCallbacks *cb, void *stream,
 		{
 		txCtx h = cb->direct_ctx;
 		printFilename(h);
-		fprintf(stderr, "%s: (%s) %.*s\n", 
+		fprintf(stderr, "%s: (%s) %.*s\n",
 				h->progname, s->filename, (int)count, ptr);
 		}
 		return count;
@@ -1080,7 +1080,7 @@ static int stm_status(ctlStreamCallbacks *cb, void *stream)
 		return CTL_STREAM_END;
 	else if (ferror(s->fp))
 		return CTL_STREAM_ERROR;
-	else 
+	else
 		return CTL_STREAM_OK;
 	}
 
@@ -1154,7 +1154,7 @@ static void stmInit(txCtx h)
 
 	stmSet(&h->src.stm, stm_Src, h->file.src, h->src.buf);
 	stmSet(&h->dst.stm, stm_Dst, h->file.dst, h->dst.buf);
-											  
+
 	stmSet(&h->cef.src, stm_Src, h->file.src, h->src.buf);
 
 	tmpSet(&h->cef.tmp0, "(cef) tmpfile0");
@@ -1164,7 +1164,7 @@ static void stmInit(txCtx h)
 	tmpSet(&h->t1w.tmp, "(t1w) tmpfile");
 	tmpSet(&h->svw.tmp, "(svw) tmpfile");
 	tmpSet(&h->svw.tmp, "(ufw) tmpfile");
-	
+
 	dbgSet(&h->t1r.dbg, "t1r");
 	dbgSet(&h->cfr.dbg, "cfr");
     dbgSet(&h->svr.dbg, "svr");
@@ -1282,7 +1282,7 @@ static void bufSeek(txCtx h, long offset)
 	if (delta >= 0 && delta < h->src.length)
 		/* Offset within current buffer; reposition next byte */
 		h->src.next = h->src.buf + delta;
-	else 
+	else
 		{
 		if (fseek(h->src.stm.fp, offset, SEEK_SET))
 			fileError(h, h->src.stm.filename);
@@ -1306,7 +1306,7 @@ static void readN(txCtx h, size_t count, char *ptr)
 		fillbuf(h, h->src.offset + h->src.length);
 		left = h->src.length;
 		}
-		
+
 	memcpy(ptr, h->src.next, count);
 	h->src.next += count;
 	}
@@ -1393,7 +1393,7 @@ static void dump_BegFont(txCtx h, abfTopDict *top)
         h->abf.dump.fdCnt = h->fd.fdIndices.cnt;
         h->abf.dump.fdArray = h->fd.fdIndices.array;
     }
-	top->sup.filename = 
+	top->sup.filename =
 		(strcmp(h->src.stm.filename, "-") == 0)? "stdin": h->src.stm.filename;
 	abfDumpBegFont(&h->abf.dump, top);
 	}
@@ -1422,7 +1422,7 @@ static void dump_SetMode(txCtx h)
 	h->dst.begset	= dump_BegSet;
 	h->dst.begfont	= dump_BegFont;
 	h->dst.endfont	= dump_EndFont;
-	h->dst.endset	= dump_EndSet;	
+	h->dst.endset	= dump_EndSet;
 
 	/* Initialize glyph callbacks */
 	h->cb.glyph = abfGlyphDumpCallbacks;
@@ -1464,7 +1464,7 @@ static void ps_BegSet(txCtx h)
 static void ps_BegFont(txCtx h, abfTopDict *top)
 	{
 	if (h->abf.draw.level == 1 && h->arg.g.cnt == 0)
-		fatal(h, 
+		fatal(h,
 			  "to use -1 option with all glyphs specify "
 			  "an all-glyph range with -g 0-N option");
 	dstFileOpen(h, top);
@@ -1473,7 +1473,7 @@ static void ps_BegFont(txCtx h, abfTopDict *top)
 		h->abf.draw.flags |= ABF_FLIP_TICS;
 	else
 		h->abf.draw.flags &= ~ABF_FLIP_TICS;
-	top->sup.filename = 
+	top->sup.filename =
 		(strcmp(h->src.stm.filename, "-") == 0)? "stdin": h->src.stm.filename;
 	abfDrawBegFont(&h->abf.draw, top);
 	}
@@ -1504,7 +1504,7 @@ static void ps_SetMode(txCtx h)
 	h->dst.begset	= ps_BegSet;
 	h->dst.begfont	= ps_BegFont;
 	h->dst.endfont	= ps_EndFont;
-	h->dst.endset	= ps_EndSet;	
+	h->dst.endset	= ps_EndSet;
 
 	/* Initialize glyph callbacks */
 	h->cb.glyph = abfGlyphDrawCallbacks;
@@ -1539,7 +1539,7 @@ static void afm_BegFont(txCtx h, abfTopDict *top)
 	{
 	dstFileOpen(h, top);
 	h->abf.afm.fp = h->dst.stm.fp;
-	top->sup.filename = 
+	top->sup.filename =
 		(strcmp(h->src.stm.filename, "-") == 0)? "stdin": h->src.stm.filename;
 	abfAFMBegFont(&h->abf.afm, top);
 	}
@@ -1566,7 +1566,7 @@ static void afm_SetMode(txCtx h)
 	h->dst.begset	= afm_BegSet;
 	h->dst.begfont	= afm_BegFont;
 	h->dst.endfont	= afm_EndFont;
-	h->dst.endset	= afm_EndSet;	
+	h->dst.endset	= afm_EndSet;
 
 	/* Initialize glyph callbacks */
 	h->cb.glyph = abfGlyphAFMCallbacks;
@@ -1600,7 +1600,7 @@ static void path_BegSet(txCtx h)
 static void path_BegFont(txCtx h, abfTopDict *top)
 	{
 	dstFileOpen(h, top);
-	top->sup.filename = 
+	top->sup.filename =
 		(strcmp(h->src.stm.filename, "-") == 0)? "stdin": h->src.stm.filename;
 
 	if (h->arg.path.level == 1)
@@ -1670,7 +1670,7 @@ static void path_SetMode(txCtx h)
 	h->dst.begset	= path_BegSet;
 	h->dst.begfont	= path_BegFont;
 	h->dst.endfont	= path_EndFont;
-	h->dst.endset	= path_EndSet;	
+	h->dst.endset	= path_EndSet;
 
 	if (h->abf.ctx == NULL)
 		{
@@ -1715,7 +1715,7 @@ static void cff_BegFont(txCtx h, abfTopDict *top)
 	dstFileSetAutoName(h, top);
 
         // we do not support subroutinzation in rotateFont, so can pass default maxSubr value.
-	if (cfwBegFont(h->cfw.ctx, NULL, 0)) 
+	if (cfwBegFont(h->cfw.ctx, NULL, 0))
 		fatal(h, NULL);
 	}
 
@@ -1748,7 +1748,7 @@ static void cff_SetMode(txCtx h)
 	h->dst.begset	= cff_BegSet;
 	h->dst.begfont	= cff_BegFont;
 	h->dst.endfont	= cff_EndFont;
-	h->dst.endset	= cff_EndSet;	
+	h->dst.endset	= cff_EndSet;
 
 	if (h->cfw.ctx == NULL)
 		{
@@ -1761,7 +1761,7 @@ static void cff_SetMode(txCtx h)
     /* Initialize glyph callbacks */
     h->cb.glyph = cfwGlyphCallbacks;
     h->cb.glyph.direct_ctx = h->cfw.ctx;
-    
+
     if (!(h->cfw.flags & CFW_WRITE_CFF2))
     {
         /* This keeps these callbacks from being used when
@@ -1804,7 +1804,7 @@ static void callbackPreserveGlyph(txCtx h, int type, unsigned short id,
 static int preserveGlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
 	txCtx h = cb->direct_ctx;
   cb->info = info;
-  h->cb.selected = 
+  h->cb.selected =
     (h->src.glyphs.array[info->tag]->flags & PRESERVE_CHARSTRING) != 0;
   return h->cb.save.beg(&h->cb.save, info);
 }
@@ -1833,15 +1833,15 @@ static void preserveGlyphLine(abfGlyphCallbacks *cb, float x1, float y1) {
 
 /* Add curve to path. */
 static void preserveGlyphCurve(abfGlyphCallbacks *cb,
-					   float x1, float y1, 
-					   float x2, float y2, 
+					   float x1, float y1,
+					   float x2, float y2,
 					   float x3, float y3) {
 	txCtx h = cb->direct_ctx;
   if (h->cb.selected) {
 	  h->cb.save.curve(&h->cb.save, x1, y1, x2, y2, x3, y3);
   }
 }
-    
+
 static void preserveGlyphStem(abfGlyphCallbacks *cb,
                               int flags, float edge0, float edge1) {
   txCtx h = cb->direct_ctx;
@@ -1851,11 +1851,11 @@ static void preserveGlyphStem(abfGlyphCallbacks *cb,
 }
 
 static void preserveGlyphFlex(abfGlyphCallbacks *cb, float depth,
-                 float x1, float y1, 
-                 float x2, float y2, 
+                 float x1, float y1,
+                 float x2, float y2,
                  float x3, float y3,
-                 float x4, float y4, 
-                 float x5, float y5, 
+                 float x4, float y4,
+                 float x5, float y5,
                  float x6, float y6) {
   txCtx h = cb->direct_ctx;
   if (h->cb.selected) {
@@ -1864,7 +1864,7 @@ static void preserveGlyphFlex(abfGlyphCallbacks *cb, float depth,
 }
 
 /* Ignore general glyph operator. */
-static void preserveGlyphGenop(abfGlyphCallbacks *cb, 
+static void preserveGlyphGenop(abfGlyphCallbacks *cb,
 					   int cnt, float *args, int op) {
 	txCtx h = cb->direct_ctx;
   if (h->cb.selected) {
@@ -1873,7 +1873,7 @@ static void preserveGlyphGenop(abfGlyphCallbacks *cb,
 }
 
 /* Handle seac operator. */
-static void preserveGlyphSeac(abfGlyphCallbacks *cb, 
+static void preserveGlyphSeac(abfGlyphCallbacks *cb,
 					  float adx, float ady, int bchar, int achar) {
 	txCtx h = cb->direct_ctx;
   if (h->cb.selected) {
@@ -1893,7 +1893,7 @@ static void preserveCubeBlend(abfGlyphCallbacks *cb, unsigned int nBlends, unsig
     if (h->cb.selected) {
         h->cb.save.cubeBlend(&h->cb.save, nBlends, numVals, blendVals);
     }
-  
+
 }
 static void preserveCubeSetwv(abfGlyphCallbacks *cb, unsigned int numDV)
 {
@@ -1957,7 +1957,7 @@ static void getGlyphList(txCtx h)
 	if (h->src.glyphs.cnt > 0)
 		return;	/* Already have list for this font */
 
-	h->cb.saveGlyphBeg = h->cb.glyph.beg; 
+	h->cb.saveGlyphBeg = h->cb.glyph.beg;
 
 	/* Insert data gather function */
 	h->cb.glyph.beg = getGlyphBeg;
@@ -1987,13 +1987,13 @@ static void getGlyphList(txCtx h)
 			svrResetGlyphs(h->svr.ctx))
 			fatal(h, NULL);
 		break;
-		
+
 	case src_UFO:
 		if (ufoIterateGlyphs(h->ufr.ctx, &h->cb.glyph) ||
 			ufoResetGlyphs(h->ufr.ctx))
 			fatal(h, NULL);
 		break;
-		
+
 		}
 
 	/* Restore saved function */
@@ -2010,7 +2010,7 @@ static int CTL_CDECL cmpByName(const void *first, const void *second)
 /* Sort glyph list by glyph name. */
 static void sortGlyphsByName(txCtx h)
 	{
-	qsort(h->src.glyphs.array, h->src.glyphs.cnt, 
+	qsort(h->src.glyphs.array, h->src.glyphs.cnt,
 		  sizeof(h->src.glyphs.array[0]), cmpByName);
 	}
 
@@ -2062,7 +2062,7 @@ static void makeSubsetArgList(txCtx h)
             curr = h->subset.glyphs.array[i];
         else
             curr = 0;
-        
+
 		if (last + 1 != curr)
         {
 			char buf[12];	/* 5 digits + hyphen + 5 digits + nul */
@@ -2090,7 +2090,7 @@ enum				/* Glyph selector types */
 	};
 
 /* Parse subset args. */
-static void parseSubset(txCtx h, void (*select)(txCtx h, int type, 
+static void parseSubset(txCtx h, void (*select)(txCtx h, int type,
 												unsigned short id, char *name))
 	{
 	long i;
@@ -2114,7 +2114,7 @@ static void parseSubset(txCtx h, void (*select)(txCtx h, int type,
 
 			for (id = lo; id <= hi; id++)
 				select(h, sel_by_cid, id, NULL);
-				
+
 			}
 		else if (isdigit(*p))
 			{
@@ -2145,13 +2145,13 @@ static void parseFDSubset(txCtx h)
 {
 	long i;
 	char *p = h->arg.g.substrs;
-    
+
 	for (i = 0; i < h->arg.g.cnt; i++)
     {
 		unsigned short id;
 		unsigned short lo;
 		unsigned short hi;
-        
+
         if (isdigit(*p))
         {
 			/* Tag */
@@ -2161,7 +2161,7 @@ static void parseFDSubset(txCtx h)
 				hi = lo;
 			else
 				goto next;
-            
+
 			for (id = lo; id <= hi; id++)
                 *dnaNEXT(h->fd.fdIndices)= id;
        }
@@ -2192,7 +2192,7 @@ static void cef_BegFont(txCtx h, abfTopDict *top)
 	}
 
 /* Compare glyphs by their CID. */
-static int CTL_CDECL cef_cmpByCID(const void *first, const void *second, 
+static int CTL_CDECL cef_cmpByCID(const void *first, const void *second,
 								  void *ctx)
 	{
 	txCtx h = ctx;
@@ -2207,7 +2207,7 @@ static int CTL_CDECL cef_cmpByCID(const void *first, const void *second,
 	}
 
 /* Match glyph by its CID. */
-static int CTL_CDECL cef_matchByCID(const void *key, const void *value, 
+static int CTL_CDECL cef_matchByCID(const void *key, const void *value,
 									void *ctx)
 	{
 	txCtx h = ctx;
@@ -2222,7 +2222,7 @@ static int CTL_CDECL cef_matchByCID(const void *key, const void *value,
  	}
 
 /* Compare glyphs by their name. */
-static int CTL_CDECL cef_cmpByName(const void *first, const void *second, 
+static int CTL_CDECL cef_cmpByName(const void *first, const void *second,
 								   void *ctx)
 	{
 	txCtx h = ctx;
@@ -2231,11 +2231,11 @@ static int CTL_CDECL cef_cmpByName(const void *first, const void *second,
 	}
 
 /* Match glyph by its name. */
-static int CTL_CDECL cef_matchByName(const void *key, const void *value, 
+static int CTL_CDECL cef_matchByName(const void *key, const void *value,
 									 void *ctx)
 	{
 	txCtx h = ctx;
-	return strcmp(key, 
+	return strcmp(key,
 				  h->src.glyphs.array[*(unsigned short *)value]->gname.ptr);
 	}
 
@@ -2250,7 +2250,7 @@ static void makeGlyphLookup(txCtx h, ctuCmpFunc cmp)
 		h->cef.lookup.array[i] = (unsigned short)i;
 
 	/* Sort array */
-	ctuQSort(h->cef.lookup.array, h->cef.lookup.cnt, 
+	ctuQSort(h->cef.lookup.array, h->cef.lookup.cnt,
 			 sizeof(unsigned short), cmp, h);
 	}
 
@@ -2260,7 +2260,7 @@ static void lookupGlyph(txCtx h, void *key, ctuMatchFunc match)
 	size_t index;
 	if (ctuLookup(key, h->cef.lookup.array, h->cef.lookup.cnt,
 				  sizeof(unsigned short), match, &index, h))
-		dnaNEXT(h->cef.subset)->id = 
+		dnaNEXT(h->cef.subset)->id =
 			h->src.glyphs.array[h->cef.lookup.array[index]]->tag;
 	}
 
@@ -2323,7 +2323,7 @@ static unsigned short mapName2UV(txCtx h, char *gname, unsigned short *unrec)
 		isxdigit(gname[4]) && !islower(gname[4]) &&
 		isxdigit(gname[5]) && !islower(gname[5]) &&
 		isxdigit(gname[6]) && !islower(gname[6]) &&
-		gname[7] == '\0')	
+		gname[7] == '\0')
 		/* uni<CODE> name; return hex part */
 		return (unsigned short)strtol(&gname[3], NULL, 16);
 
@@ -2356,7 +2356,7 @@ static float *getUDV(txCtx h)
 			break;
 		p = q + 1;
 		}
-		
+
 	return UDV;
 	}
 
@@ -2373,7 +2373,7 @@ static void printSpec(txCtx h, cefEmbedSpec *spec)
 		   "DST glyphs	%ld\n",
 		   h->cef.src.filename, h->src.glyphs.cnt,
 		   h->dst.stm.filename, spec->subset.cnt);
-	
+
 	p = (h->top->sup.flags & ABF_CID_FONT)? "/": "";
 	for (i = 0; i < spec->subset.cnt; i++)
 		{
@@ -2400,7 +2400,7 @@ static void printSpec(txCtx h, cefEmbedSpec *spec)
 	}
 
 /* CEF glyph mapping callback. */
-static void cefGlyphMap(cefMapCallback *cb, 
+static void cefGlyphMap(cefMapCallback *cb,
 						unsigned short gid, abfGlyphInfo *info)
 	{
 	int cid = info->flags & ABF_GLYPH_CID;
@@ -2410,7 +2410,7 @@ static void cefGlyphMap(cefMapCallback *cb,
 			printf("DST map [gid]=/cid\n");
 		else
 			printf("DST map [gid]=<gname>\n");
-		}			
+		}
 	if (cid)
 		printf("[%hu]=/%hu ", gid, info->cid);
 	else
@@ -2506,7 +2506,7 @@ static void cef_EndFont(txCtx h)
 	spec.subset.array	= h->cef.subset.array;
 	spec.subset.names	= (h->cef.gnames.cnt > 0)? h->cef.gnames.array: NULL;
 	spec.kern.cnt		= 0;
-	
+
 	printSpec(h, &spec);
 
 	/* Turn off segmentation on source stream */
@@ -2547,7 +2547,7 @@ static void cef_SetMode(txCtx h)
 	h->dst.begset	= cef_BegSet;
 	h->dst.begfont	= cef_BegFont;
 	h->dst.endfont	= cef_EndFont;
-	h->dst.endset	= cef_EndSet;	
+	h->dst.endset	= cef_EndSet;
 
 	if (h->cef.ctx == NULL)
 		{
@@ -2584,7 +2584,7 @@ static void pdf_BegSet(txCtx h)
 static void pdf_BegFont(txCtx h, abfTopDict *top)
 	{
 	dstFileOpen(h, top);
-	top->sup.filename = 
+	top->sup.filename =
 		(strcmp(h->src.stm.filename, "-") == 0)? "stdin": h->src.stm.filename;
 
 	if (h->src.type == src_TrueType)
@@ -2621,7 +2621,7 @@ static void pdf_SetMode(txCtx h)
 	h->dst.begset	= pdf_BegSet;
 	h->dst.begfont	= pdf_BegFont;
 	h->dst.endfont	= pdf_EndFont;
-	h->dst.endset	= pdf_EndSet;	
+	h->dst.endset	= pdf_EndSet;
 
 	if (h->pdw.ctx == NULL)
 		{
@@ -2684,8 +2684,8 @@ static void mtxGlyphLine(abfGlyphCallbacks *cb, float x1, float y1)
 
 /* Add curve to path. */
 static void mtxGlyphCurve(abfGlyphCallbacks *cb,
-					   float x1, float y1, 
-					   float x2, float y2, 
+					   float x1, float y1,
+					   float x2, float y2,
 					   float x3, float y3)
 	{
 	txCtx h = cb->direct_ctx;
@@ -2693,14 +2693,14 @@ static void mtxGlyphCurve(abfGlyphCallbacks *cb,
 	}
 
 /* Ignore general glyph operator. */
-static void mtxGlyphGenop(abfGlyphCallbacks *cb, 
+static void mtxGlyphGenop(abfGlyphCallbacks *cb,
 					   int cnt, float *args, int op)
 	{
 	/* Nothing to do */
 	}
 
 /* Handle seac operator. */
-static void mtxGlyphSeac(abfGlyphCallbacks *cb, 
+static void mtxGlyphSeac(abfGlyphCallbacks *cb,
 					  float adx, float ady, int bchar, int achar)
 	{
 	/* Nothing to do */
@@ -2840,10 +2840,10 @@ static void mtx_BegFont(txCtx h, abfTopDict *top)
 	h->mtx.bbox.top = 0;
 
 	if (top->sup.flags & ABF_CID_FONT)
-		fprintf(h->dst.stm.fp, 
+		fprintf(h->dst.stm.fp,
 				"### glyph[tag] {cid,fd,width,{left,bottom,right,top}}\n");
 	else
-		fprintf(h->dst.stm.fp, 
+		fprintf(h->dst.stm.fp,
 				"### glyph[tag] {gname,enc,width,{left,bottom,right,top}}\n");
 	}
 
@@ -2908,7 +2908,7 @@ static void mtx_SetMode(txCtx h)
 	h->dst.begset	= mtx_BegSet;
 	h->dst.begfont	= mtx_BegFont;
 	h->dst.endfont	= mtx_EndFont;
-	h->dst.endset	= mtx_EndSet;	
+	h->dst.endset	= mtx_EndSet;
 
 	/* Initialize glyph callbacks */
 	h->cb.glyph = mtxGlyphCallbacks;
@@ -2962,10 +2962,10 @@ static int t1_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 		info->iFD = h->t1w.fd;	/* Force glyph to use selected fd */
 		}
 	else if (info->iFD != h->t1w.fd)
-		{ 
+		{
 			if (h->t1w.options & T1W_USEFD)
 				info->iFD = h->t1w.fd;
-			else 
+			else
 				fatal(h, "selected glyphs span multiple FDs");
 		}
 	/* Create glyph name */
@@ -2995,8 +2995,8 @@ static void t1_BegFont(txCtx h, abfTopDict *top)
 
 		/* Initialize */
 		h->t1w.fd = -1;
-		(void)dnaGROW(h->t1w.gnames, 
-					  ((h->subset.glyphs.cnt > 0)? 
+		(void)dnaGROW(h->t1w.gnames,
+					  ((h->subset.glyphs.cnt > 0)?
 					   h->subset.glyphs.cnt: top->sup.nGlyphs)*8);
 		h->t1w.gnames.cnt = 0;
 
@@ -3006,9 +3006,9 @@ static void t1_BegFont(txCtx h, abfTopDict *top)
 		}
 	if (h->t1w.options & T1W_WAS_EMBEDDED)
 		top->WasEmbedded = 1;
-	
+
 	if (h->t1w.flags & T1W_TYPE_BASE)
-		maxglyphs = (top->sup.flags & ABF_CID_FONT)? 
+		maxglyphs = (top->sup.flags & ABF_CID_FONT)?
 			top->cid.CIDCount: top->sup.nGlyphs;
 
 	dstFileSetAutoName(h, top);
@@ -3058,7 +3058,7 @@ static void copyPFBSegment(txCtx h, int type, long length,
 	}
 
 /* Write PFB format file. */
-static void writePFB(txCtx h, FILE *font, char *fontfile, 
+static void writePFB(txCtx h, FILE *font, char *fontfile,
 					 long begBinary, long begTrailer, long endTrailer)
 	{
 	char *tmpfil = "(t1w) reformat tmpfil";
@@ -3163,7 +3163,7 @@ static void writeRefs(FILE *fp, int *id, long *offset, long length)
 	}
 
 /* Write LWFN format file. */
-static void writeLWFN(txCtx h, FILE *font, char *fontfile, 
+static void writeLWFN(txCtx h, FILE *font, char *fontfile,
 					  long begBinary, long begTrailer, long endTrailer)
 	{
 	enum
@@ -3178,7 +3178,7 @@ static void writeLWFN(txCtx h, FILE *font, char *fontfile,
 	long length1 = begTrailer - begBinary;		/* Binary section */
 	long length2 = endTrailer - begTrailer;		/* Text trailer */
 	long length3 = 0;							/* End-of-font program */
-	int rescnt = ((length0 + 2045)/2046 + 
+	int rescnt = ((length0 + 2045)/2046 +
 				  (length1 + 2045)/2046 +
 				  (length2 + 2045)/2046 +
 				  1);
@@ -3203,7 +3203,7 @@ static void writeLWFN(txCtx h, FILE *font, char *fontfile,
 	writeSection(h, 2, length1, font, fontfile, tmp, tmpfil);
 	writeSection(h, 1, length2, font, fontfile, tmp, tmpfil);
 	writeSection(h, 5, length3, font, fontfile, tmp, tmpfil);
-	
+
 	/* Write map header */
 	writePad(tmp, 16 + 4 + 2);
 	write2(tmp, 0);
@@ -3355,7 +3355,7 @@ static void t1_EndFont(txCtx h)
 		/* Add .notdef (if not already added) */
 		if (h->src.type == src_Type1)
 			(void)t1rGetGlyphByCID(h->t1r.ctx, 0, &h->cb.glyph);
-			
+
 		else if (h->src.type == src_CFF)
 			(void)cfrGetGlyphByCID(h->cfr.ctx, 0, &h->cb.glyph);
 
@@ -3373,10 +3373,10 @@ static void t1_EndFont(txCtx h)
 		h->top->cid.UIDBase = ABF_UNSET_INT;
 		}
 
-	if (h->t1w.options & T1W_REFORMAT && 
+	if (h->t1w.options & T1W_REFORMAT &&
 		strcmp(h->dst.stm.filename, "-") == 0)
 		fatal(h, "stdout can't be used with -pfb or -LWFN options");
-	
+
 	if (t1wEndFont(h->t1w.ctx, h->top))
 		fatal(h, NULL);
 
@@ -3429,7 +3429,7 @@ static void t1_SetMode(txCtx h)
 	h->dst.begset	= t1_BegSet;
 	h->dst.begfont	= t1_BegFont;
 	h->dst.endfont	= t1_EndFont;
-	h->dst.endset	= t1_EndSet;	
+	h->dst.endset	= t1_EndSet;
 
 	if (h->t1w.ctx == NULL)
 		{
@@ -3531,7 +3531,7 @@ static void svg_SetMode(txCtx h)
 	h->dst.begset	= svg_BegSet;
 	h->dst.begfont	= svg_BegFont;
 	h->dst.endfont	= svg_EndFont;
-	h->dst.endset	= svg_EndSet;	
+	h->dst.endset	= svg_EndSet;
 
 	if (h->svw.ctx == NULL)
 		{
@@ -3597,7 +3597,7 @@ static void ufw_BegFont(txCtx h, abfTopDict *top)
 
 	h->cb.glyph.beg = ufw_GlyphBeg;
 	h->cb.glyph.indirect_ctx = h;
- 
+
     /* Make sure the user isn't sending the output to std out */
     if (strcmp(h->dst.stm.filename, "-") == 0)
     {
@@ -3619,9 +3619,9 @@ static void ufw_BegFont(txCtx h, abfTopDict *top)
         else
             sprintf(buffer, "%s/%s", h->file.dst, "glyphs");
         mkdir_tx(h, buffer);
-        
+
     }
-   
+
 	dstFileSetAutoName(h, top);
 	if (ufwBegFont(h->ufow.ctx, h->ufow.flags, h->ufr.altLayerDir))
 		fatal(h, NULL);
@@ -3644,16 +3644,16 @@ static void ufo_SetMode(txCtx h)
 {
 	/* Initialize control data */
 	h->ufow.flags = 0;
-    
+
 	/* Set mode name */
 	h->modename	= "ufo_w";
-    
+
 	/* Set library functions */
 	h->dst.begset	= ufw_BegSet;
 	h->dst.begfont	= ufw_BegFont;
 	h->dst.endfont	= ufw_EndFont;
 	h->dst.endset	= ufw_EndSet;
-    
+
 	if (h->ufow.ctx == NULL)
     {
 		/* Create library context */
@@ -3661,15 +3661,15 @@ static void ufo_SetMode(txCtx h)
 		if (h->ufow.ctx == NULL)
 			fatal(h, "(ufow) can't init lib");
     }
-    
+
 	/* Initialize glyph callbacks */
 	h->cb.glyph = ufwGlyphCallbacks;
 	h->cb.glyph.direct_ctx = h->ufow.ctx;
-    
+
 	/* Set source library flags. It is harmless to declare a font to be cune, and we have to flatten them if going to UFO */
 	h->t1r.flags = T1R_UPDATE_OPS|T1R_FLATTEN_CUBE|T1R_IS_CUBE;
 	h->cfr.flags = CFR_UPDATE_OPS|CFR_FLATTEN_CUBE|T1R_IS_CUBE;
-    
+
 	h->mode = mode_ufow;
 }
 
@@ -3788,12 +3788,12 @@ static void dumpTagLine(txCtx h, char *title, const ctlRegion *region)
 	if (h->dcf.level < 1)
 		{
 		static char dots[] = " ................";
-		fprintf(h->dst.stm.fp, "### %s%.*s (%08lx-%08lx)\n", 
+		fprintf(h->dst.stm.fp, "### %s%.*s (%08lx-%08lx)\n",
 				title, (int)(sizeof(dots) - 1 - strlen(title)), dots,
 				region->begin, region->end - 1L);
 		}
 	else
-		fprintf(h->dst.stm.fp, "### %s (%08lx-%08lx)\n", 
+		fprintf(h->dst.stm.fp, "### %s (%08lx-%08lx)\n",
 				title, region->begin, region->end - 1L);
 	}
 
@@ -3804,7 +3804,7 @@ static void dcf_DumpHeader(txCtx h, const ctlRegion *region)
 
 	if (!(h->dcf.flags & DCF_Header) || region->begin == -1)
 		return;
-		
+
 	dumpTagLine(h, "Header", region);
 	if (h->dcf.level < 1)
 		return;
@@ -3817,7 +3817,7 @@ static void dcf_DumpHeader(txCtx h, const ctlRegion *region)
 	}
 
 /* Dump CFF INDEX. */
-static void dumpINDEX(txCtx h, char *title, const ctlRegion *region, 
+static void dumpINDEX(txCtx h, char *title, const ctlRegion *region,
 					  DumpElementProc dumpElement)
 	{
 	dumpTagLine(h, title, region);
@@ -3862,7 +3862,7 @@ static void dumpINDEX(txCtx h, char *title, const ctlRegion *region,
 		/* Compute offset array base and data reference offset */
 		offset = region->begin + 2 + 1;
 		dataref = offset + (count + 1)*offSize - 1;
-		
+
 		/* Dump object data */
 		flowTitle(h, "object[index]={value}");
 		bufSeek(h, offset);
@@ -4094,9 +4094,9 @@ static void dumpDICT(txCtx h, const ctlRegion *region)
 				}
 			}
 			break;
-		case 247: 
-		case 248: 
-		case 249: 
+		case 247:
+		case 248:
+		case 249:
 		case 250:
 			/* Positive 2-byte number */
 			flowArg(h, "%d", 108 + 256*(byte - 247) + read1(h));
@@ -4174,9 +4174,9 @@ static void flowCommand(txCtx h, char *opname)
 	}
 
 /* Call subr. */
-static void callsubr(txCtx h, 
+static void callsubr(txCtx h,
 					 SubrInfo *info, const ctlRegion *caller, long left)
-	{	
+	{
 	long arg;
 	ctlRegion callee;
 	long saveoff = caller->end - left;
@@ -4201,7 +4201,7 @@ static void callsubr(txCtx h,
 	if (left > 0)
 		bufSeek(h, saveoff);
 	}
-		
+
 /* Dump Type 2 charstring. */
 static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr)
 	{
@@ -4399,9 +4399,9 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr)
 			PUSH(value);
 			}
 			continue;
-		case 247: 
-		case 248: 
-		case 249: 
+		case 247:
+		case 248:
+		case 249:
 		case 250:
 			/* Positive 2-byte number */
 			CHKOFLOW(1);
@@ -4441,7 +4441,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr)
 			continue;
 			}
 		}
-	if (!inSubr && (h->dcf.flags & DCF_BreakFlowed) && 
+	if (!inSubr && (h->dcf.flags & DCF_BreakFlowed) &&
 		!(h->dcf.flags & DCF_SaveStemCnt))
 		{
 		/* Handle left over args (if any) */
@@ -4477,7 +4477,7 @@ static void dcf_DumpEncoding(txCtx h, const ctlRegion *region)
 	{
 	FILE *fp = h->dst.stm.fp;
 
-	if (!(h->dcf.flags & DCF_Encoding) || 
+	if (!(h->dcf.flags & DCF_Encoding) ||
 		region->begin == -1 ||
 		h->top->sup.flags & ABF_CID_FONT)
 		return;
@@ -4500,10 +4500,10 @@ static void dcf_DumpEncoding(txCtx h, const ctlRegion *region)
 			unsigned char fmt;
 			long gid;
 			long i;
-			
+
 			bufSeek(h, region->begin);
 			gid = 1;			/* Skip glyph 0 (.notdef) */
-		
+
 			fmt = read1(h);
 			fprintf(fp, "format =%x\n", fmt);
 			switch (fmt & 0x7f)
@@ -4568,7 +4568,7 @@ static void dcf_DumpCharset(txCtx h, const ctlRegion *region)
 		break;
 	case cff_ExpertSubsetCharset:
 		fprintf(fp, "### Charset ......... (Expert Subset)\n");
-		break;		
+		break;
 	default:
 		{
 
@@ -4578,7 +4578,7 @@ static void dcf_DumpCharset(txCtx h, const ctlRegion *region)
 			unsigned char fmt;
 			long i;
 			long gid;
-			
+
 			bufSeek(h, region->begin);
 			fmt = read1(h);
 			fprintf(fp, "format=%u\n", fmt);
@@ -4587,7 +4587,7 @@ static void dcf_DumpCharset(txCtx h, const ctlRegion *region)
 			switch (fmt)
 				{
 			case 0:
-				flowTitle(h, (h->top->sup.flags & ABF_CID_FONT)? 
+				flowTitle(h, (h->top->sup.flags & ABF_CID_FONT)?
 						"glyph[gid]=cid": "glyph[gid]=sid");
 				for (; gid < h->top->sup.nGlyphs; gid++)
 					flowBreak(h, "[%ld]=%hu", gid, read2(h));
@@ -4656,7 +4656,7 @@ static void dcf_DumpFDSelect(txCtx h, const ctlRegion *region)
 			{
 			long i;
 			long nRanges = read2(h);
-			fprintf(fp, "nRanges=%ld\n", nRanges);	
+			fprintf(fp, "nRanges=%ld\n", nRanges);
 			flowTitle(h, "Range3[index]={first,fd}");
 			for (i = 0; i < nRanges; i++)
 				{
@@ -4679,7 +4679,7 @@ static void dcf_DumpFDArrayINDEX(txCtx h, const ctlRegion *region)
 	{
 	if (!(h->dcf.flags & DCF_FDArrayINDEX) || region->begin == -1)
 		return;
-	
+
 	dumpINDEX(h, "FDArray INDEX", region, dumpDICTElement);
 	}
 
@@ -4706,13 +4706,13 @@ static void dcf_DumpCharStringsINDEX(txCtx h, const ctlRegion *region)
 		if (h->dcf.level < 1)
 			return;
 		flowBeg(h);
-		fprintf(h->dst.stm.fp, "--- glyph[tag]={%s,path}\n", 
+		fprintf(h->dst.stm.fp, "--- glyph[tag]={%s,path}\n",
 				(h->top->sup.flags & ABF_CID_FONT)? "cid": "name");
 		h->dcf.flags |= DCF_Flatten;
 		callbackSubset(h);
 		flowEnd(h);
 		}
-	
+
 	else
 		{
 		/* Dump entire INDEX */
@@ -4781,7 +4781,7 @@ static void initSubrInfo(txCtx h, const ctlRegion *region, SubrInfo *info)
 		info->bias = 107;
 	else if (info->count < 33900)
 		info->bias = 1131;
-	else 
+	else
 		info->bias = 32768;
 	}
 
@@ -4834,15 +4834,15 @@ static void initCstrs(txCtx h, abfTopDict *top)
 		return;	/* Nothing to do */
 
 	/* Initialize global subrs */
-	initSubrInfo(h, 
-				 &cfrGetSingleRegions(h->cfr.ctx)->GlobalSubrINDEX, 
+	initSubrInfo(h,
+				 &cfrGetSingleRegions(h->cfr.ctx)->GlobalSubrINDEX,
 				 &h->dcf.global);
 
 	/* Initialize local subrs */
 	dnaSET_CNT(h->dcf.local, top->FDArray.cnt);
 	for (i = 0; i < h->dcf.local.cnt; i++)
-		initSubrInfo(h, 
-					 &cfrGetRepeatRegions(h->cfr.ctx, i)->LocalSubrINDEX, 
+		initSubrInfo(h,
+					 &cfrGetRepeatRegions(h->cfr.ctx, i)->LocalSubrINDEX,
 					 &h->dcf.local.array[i]);
 
 	if (!subrDump && h->arg.g.cnt > 0)
@@ -4850,7 +4850,7 @@ static void initCstrs(txCtx h, abfTopDict *top)
 
 	/* Initialize glyph charstrings */
 	dnaSET_CNT(h->dcf.glyph, top->sup.nGlyphs);
-	memset(h->dcf.glyph.array, 0, h->dcf.glyph.cnt);	
+	memset(h->dcf.glyph.array, 0, h->dcf.glyph.cnt);
 
 	/* Save stem counts */
 	h->dcf.flags |= (DCF_Flatten|DCF_SaveStemCnt);
@@ -4908,7 +4908,7 @@ static void dcf_BegFont(txCtx h, abfTopDict *top)
 	for (i = 0; i < top->FDArray.cnt; i++)
 		{
 		const cfrRepeatRegions *repeat = cfrGetRepeatRegions(h->cfr.ctx, i);
-		if (top->FDArray.cnt > 1 && 
+		if (top->FDArray.cnt > 1 &&
 			(h->dcf.flags & (DCF_PrivateDICT|DCF_LocalSubrINDEX)))
 			fprintf(h->dst.stm.fp, "--- FD[%ld]\n", i);
 		dcf_DumpPrivateDICT(h,		&repeat->PrivateDICT);
@@ -4943,7 +4943,7 @@ static void dcf_SetMode(txCtx h)
 	h->dst.begset	= dcf_BegSet;
 	h->dst.begfont	= dcf_BegFont;
 	h->dst.endfont	= dcf_EndFont;
-	h->dst.endset	= dcf_EndSet;	
+	h->dst.endset	= dcf_EndSet;
 
 	/* Initialize glyph callbacks */
 	h->cb.glyph.beg = dcf_GlyphBeg;
@@ -5025,7 +5025,7 @@ static void dcf_ParseTableArg(txCtx h, char *arg)
 				}
 			/* Fall through */
 		default:
-			fprintf(stderr, "%s: option -T invalid selector '%c' (ignored)\n", 
+			fprintf(stderr, "%s: option -T invalid selector '%c' (ignored)\n",
 					h->progname, c);
 			}
 		}
@@ -5088,7 +5088,7 @@ static void makeFDSubset(txCtx h)
             }
             if (!match)
 			*dnaNEXT(h->subset.glyphs) = info->tag;
-            
+
         }
         else
         {
@@ -5115,12 +5115,12 @@ static int getExcludeGlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 	if (info->flags & ABF_GLYPH_CID)
 		{
 		if 	(info->cid == 0)
-			h->flags &= ~SUBSET_HAS_NOTDEF; 
+			h->flags &= ~SUBSET_HAS_NOTDEF;
 		}
 	else
 		{
 		if 	(strcmp(info->gname.ptr, ".notdef") == 0)
-			h->flags &= ~SUBSET_HAS_NOTDEF; 
+			h->flags &= ~SUBSET_HAS_NOTDEF;
 		}
 
 	return ABF_SKIP_RET;
@@ -5141,7 +5141,7 @@ static int CTL_CDECL cmpExcludeByTag(const void *first, const void *second)
 
 
 /* Match glyph by its tag. */
-static int CTL_CDECL matchExcludedByTag(const void *key, const void *value, 
+static int CTL_CDECL matchExcludedByTag(const void *key, const void *value,
 									void *ctx)
 	{
 	unsigned short a = *(unsigned short *)key;
@@ -5160,7 +5160,7 @@ static void invertSubset(txCtx h)
 	long cnt;
 
 	/* iterate over all glyphs such that h->exclude.array will be filled with tags of glyphs that match. */
-	h->cb.saveGlyphBeg = h->cb.glyph.beg; 
+	h->cb.saveGlyphBeg = h->cb.glyph.beg;
 
 	/* Insert data gather function */
 	h->cb.glyph.beg = getExcludeGlyphBeg;
@@ -5169,12 +5169,12 @@ static void invertSubset(txCtx h)
 	h->flags |= SUBSET_HAS_NOTDEF; /* This gets cleared by the getExcludeGlyphBeg if the .notdef is seen.*/
 	callbackSubset(h);
 	h->flags &= ~SUBSET_SKIP_NOTDEF;
-	qsort(h->src.exclude.array, h->src.exclude.cnt, 
+	qsort(h->src.exclude.array, h->src.exclude.cnt,
 		  sizeof(h->src.exclude.array[0]), cmpExcludeByTag);
-		
+
 	/* Restore saved function */
 	h->cb.glyph.beg = h->cb.saveGlyphBeg;
-	
+
 	getGlyphList(h);
 	dnaSET_CNT(h->subset.glyphs, h->src.glyphs.cnt);
 	cnt = 0;
@@ -5197,14 +5197,14 @@ static void prepSubset(txCtx h)
 	{
 	/* in the <mode>ReadFont function, the reader library iterates through
 	the glyphs specified by the glyph list argument. What this function does is to create
-	 the glyph list argument, according to which is specified of the several options 
-	which request a subset. Note that even if the user is excluding only one or two glyphs 
+	 the glyph list argument, according to which is specified of the several options
+	which request a subset. Note that even if the user is excluding only one or two glyphs
 	with the the -gx option, the glyph list arg is still very short, as it uses ranges of GIDs.
-	
+
 	This function first creates a list of selected glyphs in the h->subset.glyphs DNA. IF there
 	are not such glyphs, it returns. Else, it then proceeds to build the glyph list arg in
 	makeSubsetArgList() */
-	
+
 	if (h->flags & SHOW_NAMES)
 		{
 		fflush(stdout);
@@ -5212,7 +5212,7 @@ static void prepSubset(txCtx h)
 			fprintf(stderr, "--- CIDFontName: %s\n",
 					h->top->cid.CIDFontName.ptr);
 		else
-			fprintf(stderr, "--- FontName: %s\n", 
+			fprintf(stderr, "--- FontName: %s\n",
 					h->top->FDArray.array[0].FontName.ptr);
 		}
 
@@ -5474,15 +5474,15 @@ static void ufoReadFont(txCtx h, long origin)
 		if (h->ufr.ctx == NULL)
 			fatal(h, "(ufr) can't init lib");
     }
-    
-    
+
+
 	if (ufoBegFont(h->ufr.ctx, h->ufr.flags, &h->top, h->ufr.altLayerDir))
 		fatal(h, NULL);
-    
+
 	prepSubset(h);
-    
+
 	h->dst.begfont(h, h->top);
-    
+
 	if (h->mode != mode_cef)
     {
 		if (h->arg.g.cnt != 0)
@@ -5490,9 +5490,9 @@ static void ufoReadFont(txCtx h, long origin)
 		else if (ufoIterateGlyphs(h->ufr.ctx, &h->cb.glyph))
 			fatal(h, NULL);
     }
-    
+
 	h->dst.endfont(h);
-    
+
 	if (ufoEndFont(h->ufr.ctx))
 		fatal(h, NULL);
 }
@@ -5523,7 +5523,7 @@ static void readCmap12(txCtx h)
 			h->cmap.encoding.array[startGlyphId++] = startCharCode++;
 		}
 	}
-}	
+}
 
 /* Read format 4 Unicode cmap. */
 static void readCmap(txCtx h, size_t offset)
@@ -5569,7 +5569,7 @@ static void readCmap(txCtx h, size_t offset)
 	offset = h->src.next - h->src.buf + h->src.offset;
 	for (segment = h->cmap.segment.array; segment != segmentEnd; ++segment) {
 		unsigned short idRangeOffset = read2(h);
-		segment->idRangeOffset = 
+		segment->idRangeOffset =
 			(idRangeOffset == 0)? 0: (unsigned long)(offset + idRangeOffset);
 		offset += 2;
 	}
@@ -5642,7 +5642,7 @@ static void prepOTF(txCtx h)
 	/* Force seek */
 	h->src.offset = LONG_MAX;
 	bufSeek(h, table->offset);
-	
+
 	/* Read and check version */
 	version = read2(h);
 	if (version != 0)
@@ -5694,7 +5694,7 @@ static void cfrReadFont(txCtx h, long origin, int ttcIndex)
 		if (h->cfr.ctx == NULL)
 			fatal(h, "(cfr) can't init lib");
 		}
-	
+
 	if (h->flags & SUBSET_OPT && h->mode != mode_dump)
 		h->cfr.flags |= CFR_UPDATE_OPS;	/* Convert seac for subsets */
 
@@ -5741,7 +5741,7 @@ static void ttrReadFont(txCtx h, long origin, int iTTC)
 		if (h->ttr.ctx == NULL)
 			fatal(h, "(ttr) can't init lib");
 		}
-	
+
 	if (ttrBegFont(h->ttr.ctx, h->ttr.flags, origin, iTTC, &h->top))
 		fatal(h, NULL);
 
@@ -5803,7 +5803,7 @@ static size_t PFBRefill(txCtx h, char **ptr)
 		/* New segment; read segment header */
 		int escape = read1(h);
 		int type = read1(h);
-		
+
 		/* Check segment header */
 		if (escape != 128 || (type != 1 && type != 2 && type != 3))
 			fatal(h, "bad PFB segment type");
@@ -5844,7 +5844,7 @@ static size_t POSTRefill(txCtx h, char **ptr)
 		/* Process resource data */
 		switch (type)
 			{
-		case 0:	
+		case 0:
 			/* Comment; skip data */
 			bufSeek(h, h->src.offset + (long)h->seg.left);
 			h->seg.left = 0;
@@ -5871,7 +5871,7 @@ static size_t POSTRefill(txCtx h, char **ptr)
 static void addFont(txCtx h, int type, int iTTC, long offset)
 	{
 	FontRec *rec = dnaNEXT(h->fonts);
-	rec->type = type;	
+	rec->type = type;
 	rec->iTTC = iTTC;
 	rec->offset = offset;
 	}
@@ -5905,7 +5905,7 @@ static void addTTCFont(txCtx h, int ttcIndex, long origin, long offset)
             fatal(h, "(sfr) %s", sfrErrStr(result));
         }
     }
-    
+
 }
 
 /* Add TrueType Collection font. */
@@ -5916,7 +5916,7 @@ static void addTTC(txCtx h, long origin)
      */
 	long i;
     long offset;
-    
+
 	if (h->arg.i != NULL)
 		{
 		int j;
@@ -5960,13 +5960,13 @@ static void addTTC(txCtx h, long origin)
 /* Read 4-byte signature and try to match against sfnt. */
 static void readsfnt(txCtx h, long origin)
 	{
-        /* Note that 'origin' is the offset from the file to the beginning of the 
-        font data for either a TTC, OTF or TTF font. It is NOT the offset to an SFNT-based font 
+        /* Note that 'origin' is the offset from the file to the beginning of the
+        font data for either a TTC, OTF or TTF font. It is NOT the offset to an SFNT-based font
         in a TTC. The sfr functions access tables in an sfnt-based font at an
         offset equal to the table offset from the sfnt table directory plus the 'origin' offset.
-        in 
+        in
          */
-	enum 
+	enum
 		{
 		CID__HDR_SIZE = 4*4 + 3*2,	/* 'CID ' table header size */
 		TYP1_HDR_SIZE = 5*4 + 2*2	/* 'TYP1' table header size */
@@ -5978,7 +5978,7 @@ static void readsfnt(txCtx h, long origin)
 	if (h->ctx.sfr == NULL)
 		{
 		/* Initialize library */
-		h->ctx.sfr = 
+		h->ctx.sfr =
 			sfrNew(&h->cb.mem, &h->cb.stm, SFR_CHECK_ARGS);
 		if (h->ctx.sfr == NULL)
 			fatal(h, "(sfr) can't init lib");
@@ -6025,7 +6025,7 @@ static void readsfnt(txCtx h, long origin)
 
 	result = sfrEndFont(h->ctx.sfr);
 	if (result)
-		fatal(h, "(sfr) %s", sfrErrStr(result));		
+		fatal(h, "(sfr) %s", sfrErrStr(result));
 	}
 
 /* ------------------------- Macintosh Resource Map ------------------------ */
@@ -6042,7 +6042,7 @@ static void printResMap(txCtx h, long origin)
 		{
 		ResInfo *res = &h->res.map.array[i];
 		printf("%c%c%c%c %5hu  %02hhx  %08lx %08lx %s\n",
-			   (int)(res->type>>24&0xff), (int)(res->type>>16&0xff), 
+			   (int)(res->type>>24&0xff), (int)(res->type>>16&0xff),
 			   (int)(res->type>>8&0xff), (int)(res->type&0xff),
 			   res->id, res->attrs, res->offset, res->length,
 			   (res->name == 0xffff)? "--none--":
@@ -6058,7 +6058,7 @@ static void printNote(txCtx h, long origin)
 	printResMap(h, origin);
 	printf("\n"
 		   "Re-run %s and select a single sfnt resource with the\n"
-		   "-i option or every sfnt resource with the -y option.\n", 
+		   "-i option or every sfnt resource with the -y option.\n",
 		   h->progname);
 	exit(1);
 	}
@@ -6094,7 +6094,7 @@ static void doResMap(txCtx h, long origin)
 		unsigned long reserved;
 		} refList;
 #endif
-	enum 
+	enum
 		{
 		HEADER_SIZE = 256,				/* Resource header size */
 		MAP_SKIP_SIZE = 16 + 4 + 2*2,	/* Skip to typeListOffset */
@@ -6214,7 +6214,7 @@ static void doResMap(txCtx h, long origin)
 				if (h->flags & EVERY_FONT)
 					/* -y option; add sfnt */
 					readsfnt(h, res->offset);
-				else if (i + 1 == h->res.map.cnt || 
+				else if (i + 1 == h->res.map.cnt ||
 						 h->res.map.array[i + 1].type != sfnt_)
 					{
 					/* Singleton sfnt resource */
@@ -6266,7 +6266,7 @@ static void doASDFormats(txCtx h, ctlTag magic)
 			   "\n",
 			   (h->asd.magic == sig_AppleSingle)? "AppleSingle": "AppleDouble",
 			   h->asd.version/65536.0);
-		
+
 		printf("Id  Offset   Length   Description\n"
 			   "-- -------- -------- -------------\n");
 
@@ -6291,11 +6291,11 @@ static void doASDFormats(txCtx h, ctlTag magic)
 				/* 14 */	"AFP File Info",
 				/* 15 */	"Directory ID",
 			};
-				
+
 			EntryDesc *entry = &h->asd.entries.array[i];
 			printf("%02lx %08lx %08lx %s\n",
 				   entry->id, entry->offset, entry->length,
-				   (entry->id < ARRAY_LEN(desc))? 
+				   (entry->id < ARRAY_LEN(desc))?
 				   desc[entry->id]: "--unknown--");
 			}
 		exit(0);
@@ -6464,7 +6464,7 @@ static void help(txCtx h)
 			};
 		printText(ARRAY_LEN(text), text);
 		}
-	exit(0); 
+	exit(0);
 	}
 
 /* Add arguments from script file. */
@@ -6484,7 +6484,7 @@ static void addArgs(txCtx h, char *filename)
 	/* Size file and allocate buffer */
 	length = ftell(fp) + 1;
 	h->script.buf = memNew(h, length);
-	
+
 	/* Read whole file into buffer and close file */
 	if (fseek(fp, 0, SEEK_SET) == -1 ||
 		fread(h->script.buf, 1, length, fp) != length - 1 ||
@@ -6505,16 +6505,16 @@ static void addArgs(txCtx h, char *filename)
 				{
 			case ' ': case '\n': case '\t': case '\r': case '\f':
 				break;
-			case '#': 
+			case '#':
 				state = 1;
 				break;
-			case '"': 
+			case '"':
 				start = &h->script.buf[i + 1];
-				state = 2; 
+				state = 2;
 				break;
-			default:  
+			default:
 				start = &h->script.buf[i];
-				state = 3; 
+				state = 3;
 				break;
 				}
 			break;
@@ -6557,7 +6557,7 @@ static void printVersions(txCtx h)
 
 	printf("Versions:\n"
 		   "    rotateFont        %s\n", CTL_SPLIT_VERSION(version_buf, ROTATE_VERSION));
-	
+
 	cb.ctx = NULL;
 	cb.called = 0;
 	cb.getversion = getversion;
@@ -6644,8 +6644,8 @@ static int CTL_CDECL matchOpts(const void *key, const void *value)
 /* Return option index from key or opt_None if not found. */
 static int getOptionIndex(char *key)
 	{
-	const char **optstr = 
-		(const char **)bsearch(key, options, ARRAY_LEN(options), 
+	const char **optstr =
+		(const char **)bsearch(key, options, ARRAY_LEN(options),
 							   sizeof(options[0]), matchOpts);
 	return (int)((optstr == NULL)? opt_None: optstr - options + 1);
 	}
@@ -6707,7 +6707,7 @@ static void scaleDicts(abfTopDict* top, float invScaleFactor)
 	return;
 
 	}
-	
+
 /* Scale coordinates by matrix. */
 #define SX(x)	RND(rotateInfo->curMatrix[0]*(x))
 #define SY(y)	RND(rotateInfo->curMatrix[3]*(y))
@@ -6774,7 +6774,7 @@ static void rotateEndFont(txCtx h)
 				topFontBBox[i+2] = FontBBox[i+6];
 			}
 
-		/* This new Box is now probably bigger than needed, but it certainly contains all glyphs. */		
+		/* This new Box is now probably bigger than needed, but it certainly contains all glyphs. */
 		}
 
 
@@ -7004,16 +7004,16 @@ static int rotate_beg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 	if (rotateInfo->rotateGlyphEntries.cnt > 0)
 		{
 		if (info->flags & ABF_GLYPH_CID)
-			rge = (RotateGlyphEntry*)bsearch(&srcCID, rotateInfo->rotateGlyphEntries.array, rotateInfo->rotateGlyphEntries.cnt, 
+			rge = (RotateGlyphEntry*)bsearch(&srcCID, rotateInfo->rotateGlyphEntries.array, rotateInfo->rotateGlyphEntries.cnt,
 					sizeof(RotateGlyphEntry), matchRGE);
 		else
-			rge = (RotateGlyphEntry*)bsearch(srcName, rotateInfo->rotateGlyphEntries.array, rotateInfo->rotateGlyphEntries.cnt, 
+			rge = (RotateGlyphEntry*)bsearch(srcName, rotateInfo->rotateGlyphEntries.array, rotateInfo->rotateGlyphEntries.cnt,
 					sizeof(RotateGlyphEntry), matchRGE);
-	
+
 		rotateInfo->curRGE = rge;
 		if (rge == NULL)
 			return ABF_SKIP_RET;
-	
+
 		if (info->flags & ABF_GLYPH_CID)
 			info->cid = (unsigned short)rge->dstCID;
 		else
@@ -7033,9 +7033,9 @@ static void  rotate_width(abfGlyphCallbacks *cb, float hAdv)
 	txCtx h = cb->indirect_ctx;
 	RotateInfo* rotateInfo = &h->rotateInfo;
 	int seenRGEVal = 0;
-	
+
 	if (h->rotateInfo.curRGE != NULL)
-		{ 
+		{
 		float tmp = (float)h->rotateInfo.curRGE->hAdv;
 		if (tmp!= kHADV_NOT_SPECIFIED)
 			{
@@ -7050,7 +7050,7 @@ static void  rotate_width(abfGlyphCallbacks *cb, float hAdv)
 		else if (rotateInfo->flags &  ROT_SET_WIDTH_EM)
 			hAdv = (float)h->top->sup.UnitsPerEm;
 		}
-		
+
 	rotateInfo->savedGlyphCB.width(&rotateInfo->savedGlyphCB,  hAdv);
 	}
 
@@ -7075,14 +7075,14 @@ static void  rotate_line(abfGlyphCallbacks *cb, float x1, float y1)
 	}
 
 static void  rotate_curve(abfGlyphCallbacks *cb,
-                     float x1, float y1, 
-                     float x2, float y2, 
+                     float x1, float y1,
+                     float x2, float y2,
                      float x3, float y3)
 	{
 	float xn1, yn1, xn2, yn2, xn3, yn3;
 	txCtx h = cb->indirect_ctx;
 	RotateInfo* rotateInfo = &h->rotateInfo;
-	xn1 = TX(x1, y1); 
+	xn1 = TX(x1, y1);
 	yn1 = TY(x1, y1),
 	xn2 = TX(x2, y2);
 	yn2 = TY(x2, y2),
@@ -7177,7 +7177,7 @@ static void  rotate_stem(abfGlyphCallbacks *cb,
 			edge1= offset + RND(scale*temp);
 			}
 		}
-	else 
+	else
 		{
 		if (farray[1] == 0) /* X-scaling, Y shear and translation only. Can keep hhints. */
 			{
@@ -7198,16 +7198,16 @@ static void  rotate_stem(abfGlyphCallbacks *cb,
 		else
 			fatal(h, "Program error - glyph stem hint callback called when rotation is not a multiple of 90 degrees.\n");
 		}
-		
+
 	rotateInfo->savedGlyphCB.stem(&rotateInfo->savedGlyphCB, flags, edge0, edge1);
 	}
 
 static void  rotate_flex (abfGlyphCallbacks *cb, float depth,
-                     float x1, float y1, 
-                     float x2, float y2, 
+                     float x1, float y1,
+                     float x2, float y2,
                      float x3, float y3,
-                     float x4, float y4, 
-                     float x5, float y5, 
+                     float x4, float y4,
+                     float x5, float y5,
                      float x6, float y6)
 	{
 	float xn1, yn1, xn2, yn2, xn3, yn3, xn4, yn4, xn5, yn5, xn6, yn6;
@@ -7236,7 +7236,7 @@ static void  rotate_genop(abfGlyphCallbacks *cb, int cnt, float *args, int op)
 	rotateInfo->savedGlyphCB.genop(&rotateInfo->savedGlyphCB, cnt, args, op);
 	}
 
-static void  rotate_seac(abfGlyphCallbacks *cb, 
+static void  rotate_seac(abfGlyphCallbacks *cb,
                      float adx, float ady, int bchar, int achar)
 	{
 	txCtx h = cb->indirect_ctx;
@@ -7269,7 +7269,7 @@ static void rotateLoadGlyphList(txCtx h, char* filePath)
 	RotateInfo* rotateInfo = &h->rotateInfo;
 	int namesAreCID = -1;
 	FILE *rtf_fp;
-	char lineBuffer[MAX_PS_NAMELEN*2]; 
+	char lineBuffer[MAX_PS_NAMELEN*2];
 	int lineno, len;
 
 
@@ -7293,7 +7293,7 @@ static void rotateLoadGlyphList(txCtx h, char* filePath)
 			continue;
 
 		cp = lineBuffer;
-		while (((*cp == ' ') || (*cp == '\t')) && (cp < &lineBuffer[MAX_PS_NAMELEN])) 
+		while (((*cp == ' ') || (*cp == '\t')) && (cp < &lineBuffer[MAX_PS_NAMELEN]))
 			cp++;
 
 		if ((*cp == '#') || (*cp =='\r') || (*cp =='\n'))
@@ -7498,7 +7498,7 @@ static void doFile(txCtx h, char *srcname)
 		strcpy(p, srcname);
 
 	/* Open file */
-        
+
     /* Need to first check if it is a directory-based font format, like UFO. */
     statErrNo = stat(h->src.stm.filename,  &fileStat);
 	if (strcmp(h->src.stm.filename, "-") == 0)
@@ -7514,7 +7514,7 @@ static void doFile(txCtx h, char *srcname)
 		if (h->src.stm.fp == NULL)
 			fileError(h, h->src.stm.filename);
 		}
-        
+
 	h->src.print_file = 1;
 
 	if (h->flags & SHOW_NAMES)
@@ -7537,11 +7537,11 @@ static void doFile(txCtx h, char *srcname)
 
 		if (i + 1 == h->fonts.cnt)
 			h->src.stm.flags &= ~STM_DONT_CLOSE;
-		
+
 		h->src.type = rec->type;
 
 		if (h->seg.refill != NULL)
-			{	
+			{
 			/* Prep source filter */
 			h->seg.left = 0;
 			h->src.next = h->src.end;
@@ -7679,7 +7679,7 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 	h->svr.flags = 0;
 	h->ufr.flags = 0;
 	h->ufow.flags = 0;
-	
+
 	for (i = 0; i < argc; i++)
 		{
 		int argsleft = argc - i - 1;
@@ -8356,15 +8356,15 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 			else
 				{
 				char *p;
-				
+
 				if ( (h->arg.g.cnt > 0) && ((h->flags & SUBSET_OPT) || (h->flags & SUBSET__EXCLUDE_OPT)))
 					goto subsetclash;
 
 				/* Convert comma-terminated substrings to null-terminated*/
 				h->arg.g.cnt = 1;
 				h->arg.g.substrs = argv[++i];
-				for (p = strchr(h->arg.g.substrs, ','); 
-					 p != NULL; 
+				for (p = strchr(h->arg.g.substrs, ',');
+					 p != NULL;
 					 p = strchr(p, ','))
 					{
 					*p++ = '\0';
@@ -8452,7 +8452,7 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 		case opt_UNC:
 			h->flags |= NO_UDV_CLAMPING;
 			break;
-			
+
         case opt_fdx:
             if ((h->flags & SUBSET_OPT) || (h->flags & SUBSET__EXCLUDE_OPT))
                 goto subsetclash;
@@ -8514,7 +8514,7 @@ static void parseArgs(txCtx h, int argc, char *argv[])
 			h->flags |= AUTO_FILE_FROM_FONT;
 			i = doAutoFileSet(h, argc, argv, i + 1);
 			h->flags &= ~AUTO_FILE_FROM_FONT;
-			break;			
+			break;
 		case opt_dd:
 			if (!argsleft)
 				goto noarg;
@@ -8664,7 +8664,7 @@ static void txNew(txCtx h, char *progname)
     h->ufr.altLayerDir = NULL;
 	h->ctx.sfr = NULL;
 
-	memInit(h);	
+	memInit(h);
 	stmInit(h);
 
 	/* Initialize dynarr library */
@@ -8780,7 +8780,7 @@ int CTL_CDECL main(int argc, char *argv[])
 	   correct unbuffered mode */
 	(void)setvbuf(stderr, NULL, _IONBF, 0);
 #endif /* PLAT_WIN */
-	
+
 	/* Get program name */
 	progname = tail(argv[0]);
 	--argc;
