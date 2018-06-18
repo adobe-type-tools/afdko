@@ -1,5 +1,5 @@
 """
-fontPDF v1.25 May 15 2018. This module is not run stand-alone; it requires
+fontPDF v1.26 Jun 18 2018. This module is not run stand-alone; it requires
 another module, such as ProofPDF.py, in order to collect the options, and call
 the MakePDF function.
 
@@ -1184,7 +1184,7 @@ class FontPDFGlyph:
 				entry = params.rt_optionLayoutDict[reversekey]
 				cidName =  entry[0].zfill(5)
 			except KeyError:
-				cidName = "cidName: unknown as'%s  %s  %s' not in layout file." % (hintDir, rowDir, self.name)
+				cidName = ''
 			nameString = "%s   %s" % (gName, cidName)
 		else:
 			nameString = gName
@@ -1225,49 +1225,37 @@ class FontPDFGlyph:
 		numVhints = len(self.vhints)
 		params.rt_canvas.drawString(self.cur_x, self.cur_y, "Hints:  %s horiz: %s, vert: %s" % (numHhints + numVhints, numHhints, numVhints))
 
-	def drawMeta_HintDir(self, params):
-		if self.parentFont.isCID or (self.name.startswith("cid") and re.match(r"\d+", self.name[3:])):
-			# use CIO key to access layout dict
-			try:
-				hintDir = params.rt_optionLayoutDict[self.name][0]
-			except KeyError:
-				hintDir = "HintDir: CID not in layout file. %s." % (self.name)
-		else:
-			# it is name-keyed font that is not helpfully usiing cidXXXX names. Assume that it is in the
-			# std development heirarchy.
-			rowDir = os.path.dirname(params.rt_filePath)
-			hintDir = os.path.basename(os.path.dirname(rowDir))
-			rowDir = os.path.basename(rowDir)
-			reversekey = repr((hintDir, rowDir, self.name))
-			try:
-				entry = params.rt_optionLayoutDict[reversekey]
-			except KeyError:
-				hintDir = "HintDir: '%s  %s  %s' not in layout file." % (hintDir, rowDir, self.name)
+	def _get_cid_layout_entry(self, params):
+		if (self.parentFont.isCID or (self.name.startswith("cid") and
+			re.match(r"\d+", self.name[3:]))):
+			# use CID key to access layout dict
+			# zero-pad the CID glyph name
+			glyph_name = "cid" + self.name[3:].zfill(5)
+			return params.rt_optionLayoutDict.get(glyph_name, None)
 
-		params.rt_canvas.drawString(self.cur_x, self.cur_y, "HintDir = %s" %(hintDir))
+	def drawMeta_HintDir(self, params):
+		hintDir = None
+		layout_entry = self._get_cid_layout_entry(params)
+		if layout_entry:
+			try:
+				hintDir = layout_entry[0]
+			except IndexError:
+				pass
+		if hintDir:
+			params.rt_canvas.drawString(
+				self.cur_x, self.cur_y, "HintDir = %s" % hintDir)
 
 	def drawMeta_RowFont(self, params):
-		if self.parentFont.isCID or (self.name.startswith("cid") and re.match(r"\d+", self.name[3:])):
-			# use CIO key to access layout dict
+		rowDir = None
+		layout_entry = self._get_cid_layout_entry(params)
+		if layout_entry:
 			try:
-				rec = params.rt_optionLayoutDict[self.name]
-				hintDir = rec[1]
-				rowDir = rec[2]
-			except (KeyError, TypeError):
-				hintDir = None
-				rowDir = None
-		else:
-			# it is name-keyed font that is not helpfully usiing cidXXXX names. Assume that it is in the
-			# std development heirarchy.
-			rowDir = os.path.dirname(params.rt_filePath)
-			hintDir = os.path.basename(os.path.dirname(rowDir))
-			rowDir = os.path.basename(rowDir)
-			reversekey = repr((hintDir, rowDir, self.name))
-			try:
-				entry = params.rt_optionLayoutDict[reversekey]
-			except KeyError:
-				rowDir = "RowFont: '%s  %s  %s' not in layout file." % (hintDir, rowDir, self.name)
-		params.rt_canvas.drawString(self.cur_x, self.cur_y, "RowDir = %s/%s" % (hintDir, rowDir))
+				rowDir = layout_entry[1:3]
+			except IndexError:
+				pass
+		if rowDir:
+			params.rt_canvas.drawString(
+				self.cur_x, self.cur_y, "RowDir = %s" % '/'.join(rowDir))
 
 	def drawMeta_WidthOnly(self, params):
 		params.rt_canvas.drawString(self.cur_x, self.cur_y, "Width = %s, Y Advance = %s" % ( self.xAdvance, self.yAdvance))
