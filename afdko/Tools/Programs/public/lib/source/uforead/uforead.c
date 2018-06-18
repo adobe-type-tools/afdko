@@ -1036,6 +1036,7 @@ static void setFontDictKey(ufoCtx h, char * keyValue)
         {
             char* cpy = "Copyright";
             char* newString = memNew(h, strlen(cpy) + strlen(keyValue) + 2);
+            *copySymbol = '\0';
             sprintf(newString, "%s%s%s", keyValue, "Copyright", copySymbol + 1);
             top->Notice.ptr = newString;
         }
