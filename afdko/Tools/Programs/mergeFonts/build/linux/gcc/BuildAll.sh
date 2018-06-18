@@ -16,6 +16,7 @@ then
 	cd debug
 	make
 	cd $curdir
+	cp -dR ../../../exe/linux/debug/$target ../../../../../linux/
 elif [ $1 = "clean" ]
 then
 	cd release
