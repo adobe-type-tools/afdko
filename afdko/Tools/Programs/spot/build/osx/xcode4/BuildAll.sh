@@ -11,6 +11,7 @@ then
 elif [ "$1" == "debug" ]
 then
 	xcodebuild -target $target -project $target.xcodeproj -configuration Debug
+	cp ../../../exe/osx/debug/$target ../../../../../osx/
 elif [ "$1" == "clean" ]
 then
 	xcodebuild -target $target -project $target.xcodeproj -configuration Debug $1
