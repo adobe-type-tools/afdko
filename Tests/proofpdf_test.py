@@ -52,3 +52,25 @@ def test_font_glyphs_2_7(tool_name, font_filename):
     expected_path = _get_expected_path(pdf_filename)
     assert differ([expected_path, save_path,
                    '-s', '/CreationDate', '-e', 'macroman'])
+
+
+@pytest.mark.parametrize('font_filename, glyphs', [
+    ('cidfont.otf', '_0-5,98-101'),
+    ('font.otf', '_0-2,4,5'),
+])
+def test_fontplot2_lf_option(font_filename, glyphs):
+    tool_name = 'fontplot2'
+    if 'cid' in font_filename:
+        font_format = 'cid'
+    else:
+        font_format = 'otf'
+    layout_path = _get_input_path('CID_layout')
+    font_path = _get_input_path(font_filename)
+    pdf_filename = '{}_{}_lf_option.pdf'.format(tool_name, font_format)
+    save_path = tempfile.mkstemp()[1]
+    runner(['-t', tool_name, '-o', 'o', '_{}'.format(save_path), 'dno',
+            'g', glyphs, 'lf', '_{}'.format(layout_path),
+            '=pageIncludeTitle', '_0', '-f', font_path, '-n', '-a'])
+    expected_path = _get_expected_path(pdf_filename)
+    assert differ([expected_path, save_path,
+                   '-s', '/CreationDate', '-e', 'macroman'])
