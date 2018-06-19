@@ -1031,7 +1031,8 @@ static void setFontDictKey(ufoCtx h, char * keyValue)
     {
         char * copySymbol;
         top->Notice.ptr = keyValue;
-        copySymbol = strstr(keyValue, "\u00A9");  /* 0xC2, 0xA9 in UTF-8 */
+        /* look for the (c) symbol U+00A9, which is 0xC2, 0xA9 in UTF-8 */
+        copySymbol = strstr(keyValue, "\xC2\xA9");
         if (copySymbol != NULL)
         {
             /* if there is a copyright symbol (U+00A9),
