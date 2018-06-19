@@ -9,9 +9,9 @@ import tempfile
 
 from fontTools.ttLib import TTFont
 
-from runner import main as runner
-from differ import main as differ
-from differ import SPLIT_MARKER
+from .runner import main as runner
+from .differ import main as differ
+from .differ import SPLIT_MARKER
 
 TOOL = 'makeotf'
 CMD = ['-t', TOOL]

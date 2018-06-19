@@ -5,8 +5,8 @@ import tempfile
 
 from fontTools.ttLib import TTFont
 
-from runner import main as runner
-from differ import main as differ
+from .runner import main as runner
+from .differ import main as differ
 
 TOOL = 'sfntedit'
 CMD = ['-t', TOOL]

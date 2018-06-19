@@ -3,9 +3,9 @@ from __future__ import print_function, division, absolute_import
 import os
 import pytest
 
-from runner import main as runner
-from differ import main as differ
-from differ import SPLIT_MARKER
+from .runner import main as runner
+from .differ import main as differ
+from .differ import SPLIT_MARKER
 
 TOOL = 'spot'
 CMD = ['-t', TOOL]

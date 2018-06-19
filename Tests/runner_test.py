@@ -3,7 +3,7 @@ from __future__ import print_function, division, absolute_import
 import pytest
 import subprocess32 as subprocess
 
-from runner import main as runner
+from .runner import main as runner
 
 
 def test_bad_tx_cmd():

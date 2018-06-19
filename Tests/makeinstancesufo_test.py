@@ -4,8 +4,8 @@ import os
 import pytest
 from shutil import rmtree
 
-from runner import main as runner
-from differ import main as differ
+from .runner import main as runner
+from .differ import main as differ
 
 TOOL = 'makeinstancesufo'
 
