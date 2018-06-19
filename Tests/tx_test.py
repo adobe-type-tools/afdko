@@ -168,3 +168,9 @@ def test_trademark_string_pr425():
     actual_path = runner(CMD + ['-o', 't1', '-f', 'trademark.ufo'])
     expected_path = _get_expected_path('trademark.pfa')
     assert differ([expected_path, actual_path])
+
+
+def test_remove_hints_bug180():
+    actual_path = runner(CMD + ['-o', 't1', 'n', '-f', 'cid.otf'])
+    expected_path = _get_expected_path('cid_nohints.ps')
+    assert differ([expected_path, actual_path, '-m', 'bin'])
