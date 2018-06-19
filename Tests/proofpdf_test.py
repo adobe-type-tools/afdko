@@ -4,8 +4,8 @@ import os
 import pytest
 import tempfile
 
-from runner import main as runner
-from differ import main as differ
+from .runner import main as runner
+from .differ import main as differ
 
 TOOL = 'proofpdf'
 
