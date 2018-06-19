@@ -3,6 +3,7 @@ from __future__ import print_function, division, absolute_import
 import os
 import platform
 import pytest
+from shutil import copytree
 import subprocess32 as subprocess
 import tempfile
 
@@ -85,3 +86,14 @@ def test_input_formats(arg, input_filename, otf_filename):
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value='])
+
+
+def test_ufo_with_trailing_slash_bug280():
+    # makeotf will now save the OTF alongside the UFO instead of inside of it
+    ufo_path = _get_input_path(UFO2_NAME)
+    temp_dir = tempfile.mkdtemp()
+    tmp_ufo_path = os.path.join(temp_dir, UFO2_NAME)
+    copytree(ufo_path, tmp_ufo_path)
+    runner(CMD + ['-n', '-a', '-o', 'f', '_{}{}'.format(tmp_ufo_path, os.sep)])
+    expected_path = os.path.join(temp_dir, 'SourceSansPro-Regular.otf')
+    assert os.path.isfile(expected_path)
