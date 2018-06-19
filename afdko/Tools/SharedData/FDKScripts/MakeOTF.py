@@ -994,7 +994,7 @@ def getOptions(makeOTFParams):
         elif arg == kMOTFOptions[kInputFont][1]:
             kMOTFOptions[kInputFont][0] = i + optionIndex
             try:
-                file_path = args[i]
+                file_path = os.path.abspath(os.path.realpath(args[i]))
                 exec("makeOTFParams.%s%s = file_path" % (kFileOptPrefix,
                                                          kInputFont))
             except IndexError:
