@@ -18,7 +18,7 @@ import sys
 
 from fontTools.misc.py23 import open
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 
 logger = logging.getLogger('differ')
 
@@ -82,26 +82,31 @@ class Differ(object):
         # Hard code a first line; this way the difflib results start
         # from 1 instead of zero, thus matching the file's line numbers
         lines = ['']
-        with open(path, "r", encoding=self.encoding) as f:
-            for i, line in enumerate(f.readlines(), 1):
-                # Skip lines that change, such as timestamps
-                if self._line_to_skip(line):
-                    logger.debug("Matched begin of line. Skipped: {}"
-                                 "".format(line.rstrip()))
-                    # Blank the line instead of actually skipping (via
-                    # 'continue'); this way the difflib results show the
-                    # correct line numbers
-                    line = ''
-                # Skip specific lines, referenced by number
-                elif i in self.skip_lines:
-                    logger.debug("Matched line #{}. Skipped: {}"
-                                 "".format(i, line.rstrip()))
-                    # Blank the line instead of actually skipping (via
-                    # 'continue'); this way the difflib results show the
-                    # correct line numbers
-                    line = ''
-                # Use os-native line separator to enable running difflib
-                lines.append(line.rstrip() + os.linesep)
+        try:
+            with open(path, "r", encoding=self.encoding) as f:
+                for i, line in enumerate(f.readlines(), 1):
+                    # Skip lines that change, such as timestamps
+                    if self._line_to_skip(line):
+                        logger.debug("Matched begin of line. Skipped: {}"
+                                     "".format(line.rstrip()))
+                        # Blank the line instead of actually skipping (via
+                        # 'continue'); this way the difflib results show the
+                        # correct line numbers
+                        line = ''
+                    # Skip specific lines, referenced by number
+                    elif i in self.skip_lines:
+                        logger.debug("Matched line #{}. Skipped: {}"
+                                     "".format(i, line.rstrip()))
+                        # Blank the line instead of actually skipping (via
+                        # 'continue'); this way the difflib results show the
+                        # correct line numbers
+                        line = ''
+                    # Use os-native line separator to enable running difflib
+                    lines.append(line.rstrip() + os.linesep)
+        except UnicodeDecodeError:
+            logger.error("Couldn't read text file using '{}' encoding.\n"
+                         "      File path: {}".format(self.encoding, path))
+            sys.exit(1)
         return lines
 
     def _line_to_skip(self, line):

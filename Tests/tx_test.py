@@ -156,3 +156,15 @@ def test_varread_pr355():
     actual_path = runner(CMD + ['-o', 't1', '-f', 'cff2_vf.otf'])
     expected_path = _get_expected_path('cff2_vf.pfa')
     assert differ([expected_path, actual_path])
+
+
+# -----------
+# Other tests
+# -----------
+
+def test_trademark_string_pr425():
+    # the copyright symbol used in the trademark field of a UFO is
+    # converted to 'Copyright' and stored in Notice field of a Type1
+    actual_path = runner(CMD + ['-o', 't1', '-f', 'trademark.ufo'])
+    expected_path = _get_expected_path('trademark.pfa')
+    assert differ([expected_path, actual_path])

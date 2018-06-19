@@ -344,8 +344,6 @@ typedef unsigned char character, *string, *charptr;
 
 #define	NIL	NULL
 
-typedef	void (*PVoidProc)();	/* Pointer to procedure returning no result */
-
 #if 0   /* XXX */
 /* Codes for exit system calls */
 

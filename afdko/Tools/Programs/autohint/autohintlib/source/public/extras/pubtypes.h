@@ -172,9 +172,6 @@ typedef character       *charptr;
 #endif
 #define NIL             NULL
 
-typedef void            (*PVoidProc)();
-                                    /* Pointer to procedure returning  */
-                                    /* no result                       */
 #ifndef __MWERKS__
 typedef Card32          GenericID;  /* Generic ID for contexts,        */
                                     /* spaces, name cache, etc.        */

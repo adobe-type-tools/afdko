@@ -3,26 +3,26 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 /*
  * Simple ufo file parser.
- 
- If a glif file exists in the processed glyph layer, I trust that the data is up to date, and use it, 
+
+ If a glif file exists in the processed glyph layer, I trust that the data is up to date, and use it,
  else I use the glif from the default layer. I read both the hint and drawing operator list before
  calling any call backs, and I need to have both in hand to do so.
- 
+
   - parse points into a list of operators
   - parse ADobe t1 hint data, if any, into a list of hint mask operators
   - play back the list of operators, calling the abf call backs.
- 
- Hint processing. 
+
+ Hint processing.
  The hint data is stored as an separate XML element from the outline data, This is so that outline editors do not need
  to understand this info, and it can be private data.
- 
+
  Read the hint data into list of hint mask pointers. The hint mask pointer list is expanded to include a pointer for each point index,
  up to the highest point referenced in any hintmask. Hint mask pointers not referenced by a hint mask are set to null.
  The list of hint mask pointers is passed into the point processing function, which checks to see if there is a non-null
  hintmask pointer for the current point. If so, the function  plays back the current hint list through the call backs.
- 
+
  The flex operator is also kept in the hint data.
- 
+
  */
 
 #include "absfont.h"
@@ -40,10 +40,10 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 enum
 {
-	ufoUnknown,
-	ufoNumeric,
-	ufoOperator,
-	ufoNotSet,
+    ufoUnknown,
+    ufoNumeric,
+    ufoOperator,
+    ufoNotSet,
 };
 
 #define kMaxToken 1024
@@ -54,15 +54,15 @@ const char * t1HintKeyV2 = "com.adobe.type.autohint.v2";
 
 typedef struct
 {
-	int type;
-	char val[kMaxToken];
-	size_t length;
-	size_t offset;	/* into buffer */
+    int type;
+    char val[kMaxToken];
+    size_t length;
+    size_t offset;  /* into buffer */
 } token;
 
-typedef unsigned short STI;		/* String index */
-#define STI_UNDEF	0xffff		/* Undefined string index */
-#define ARRAY_LEN(a)	(sizeof(a)/sizeof(a[0]))
+typedef unsigned short STI;     /* String index */
+#define STI_UNDEF   0xffff      /* Undefined string index */
+#define ARRAY_LEN(a)    (sizeof(a)/sizeof(a[0]))
 #ifdef _WIN32
 #define round round_int
 #endif
@@ -73,29 +73,22 @@ enum
 #define DCL_KEY(key,index) index,
 #include "ufo_ops.h"
 #undef DCL_KEY
-	kKeyCount
-};
-
-static const char op_keys[] =
-{
-#define DCL_KEY(key,index) key,
-#include "ufo_ops.h"
-#undef DCL_KEY
+    kKeyCount
 };
 
 typedef struct
 {
-    float mtx[6];	/* Float matrix */
+    float mtx[6];   /* Float matrix */
     int isDefault;
     int isOffsetOnly;
 } Transform;
 
 typedef struct _floatRect
 {
-	float left;
-	float bottom;
-	float right;
-	float top;
+    float left;
+    float bottom;
+    float right;
+    float top;
 } floatRect;
 
 typedef struct
@@ -106,9 +99,9 @@ typedef struct
     long int glyphOrder; // used to sort the glypfRecs by glyph order from lib.plist.
 } GLIF_Rec;
 
-typedef struct 
+typedef struct
 {
-    int order;
+    long order;
     char* glyphName;
 } GlIFOrderRec;
 
@@ -123,27 +116,27 @@ typedef enum
 typedef struct
 {
     OpType opType;
-    float coords[6];	/* Float matrix */
+    float coords[6];    /* Float matrix */
     char* pointName;
 } OpRec;
 
 enum
 {
-	outlineStart,
-	outlineInContour,
-	outlineInPoint,
-	outlineInComponent,
-	outlineInComment,
-	outlineInLib,
-	outlineInLibDict,
-	outlineInID,
-	outlineInHintData,
-	outlineInHintSetList,
+    outlineStart,
+    outlineInContour,
+    outlineInPoint,
+    outlineInComponent,
+    outlineInComment,
+    outlineInLib,
+    outlineInLibDict,
+    outlineInID,
+    outlineInHintData,
+    outlineInHintSetList,
     outlineInFlexList,
-	outlineInHintSet,
-	outlineInHintSetName,
-	outlineInHintSetStemList,
-	outlineInStemHint,
+    outlineInHintSet,
+    outlineInHintSetName,
+    outlineInHintSetStemList,
+    outlineInStemHint,
     otherDictKey,
     otherInElement,
     otherInTag,
@@ -163,92 +156,92 @@ typedef struct {
 
 struct ufoCtx_
 {
-	abfTopDict top;
-	abfFontDict fdict;
-	int flags;
-#define SEEN_END			1
-	struct
+    abfTopDict top;
+    abfFontDict fdict;
+    int flags;
+#define SEEN_END            1
+    struct
     {
-		void *dbg;
-		void *src;
+        void *dbg;
+        void *src;
     } stm;
-	struct
+    struct
     {
-		long offset;
-		char *buf;
-		size_t length;
-		char *end;
-		char *next;
-		token tk;
+        long offset;
+        char *buf;
+        size_t length;
+        char *end;
+        char *next;
+        token tk;
     } src;
-	struct
+    struct
     {
-		dnaDCL(GLIF_Rec, glifRecs);
-		dnaDCL(GlIFOrderRec, glifOrder);
-		dnaDCL(OpRec, opList);
+        dnaDCL(GLIF_Rec, glifRecs);
+        dnaDCL(GlIFOrderRec, glifOrder);
+        dnaDCL(OpRec, opList);
     } data;
-	struct
+    struct
     {
         StemHint stems[T2_MAX_STEMS];
-		dnaDCL(HintMask, hintMasks);
-		dnaDCL(char*, flexOpList);
+        dnaDCL(HintMask, hintMasks);
+        dnaDCL(char*, flexOpList);
         char * pointName; /* used save the hint refernce from the first point of a curve, since it has to be used in trh last point of the curve. */
     } hints;
-    
-    dnaDCL(char*, valueArray);	/* used when parsing <array> elements */
+
+    dnaDCL(char*, valueArray);  /* used when parsing <array> elements */
     char *parseKeyName; /* used to keep track of current top element name. */
- 	dnaDCL(char, tmp);		/* Temporary buffer */
-	char *mark;				/* Buffer position marker */
+    dnaDCL(char, tmp);      /* Temporary buffer */
+    char *mark;             /* Buffer position marker */
     char *altLayerDir;
     char *defaultLayerDir;
-	struct
+    struct
     {
-		int cnt;
-		unsigned long flags;
-#define PARSE_INIT 			(1<<0)
-#define PARSE_PATH			(1<<1)
+        int cnt;
+        unsigned long flags;
+#define PARSE_INIT          (1<<0)
+#define PARSE_PATH          (1<<1)
 #define PARSE_STARTHINT     (1<<2)
-#define PARSE_HINT			(1<<3)
-#define PARSE_ENDHINT		(1<<4)
+#define PARSE_HINT          (1<<3)
+#define PARSE_ENDHINT       (1<<4)
 #define PARSE_SEEN_MOVETO   (1<<6) // have seen an explicit a "move". IF there is no subsequent marking operator, we skip the operation.
-#define PARSE_END			(1<<7)
-        
-		int hintflags;
+#define PARSE_END           (1<<7)
+
+        int hintflags;
 #define UFO_MAX_OP_STACK 18
-        
-		float array[UFO_MAX_OP_STACK];
+
+        float array[UFO_MAX_OP_STACK];
     } stack;
-    
-	floatRect aggregatebounds;
-	struct /* Metric data */
+
+    floatRect aggregatebounds;
+    struct /* Metric data */
     {
         struct abfMetricsCtx_ ctx;
-		abfGlyphInfo gi;
+        abfGlyphInfo gi;
         abfGlyphCallbacks cb;
-		long defaultWidth;
+        long defaultWidth;
     } metrics;
-    
-	struct
+
+    struct
     {
-		dnaDCL(abfGlyphInfo, index);
-		dnaDCL(long, byName);	/* In glyph name order */
-        dnaDCL(long, widths);	/* In index order; [SRI]->width */
+        dnaDCL(abfGlyphInfo, index);
+        dnaDCL(long, byName);   /* In glyph name order */
+        dnaDCL(long, widths);   /* In index order; [SRI]->width */
     } chars;
-	struct						/* String pool */
+    struct                      /* String pool */
     {
-		dnaDCL(long, index);	/* In index order; [SRI]->iBuf */
-		dnaDCL(char, buf);		/* String buffer */
+        dnaDCL(long, index);    /* In index order; [SRI]->iBuf */
+        dnaDCL(char, buf);      /* String buffer */
     } strings;
-	struct
+    struct
     {
-		ctlMemoryCallbacks mem;
-		ctlStreamCallbacks stm;
+        ctlMemoryCallbacks mem;
+        ctlStreamCallbacks stm;
     } cb;
-	dnaCtx dna;
-	struct
+    dnaCtx dna;
+    struct
     {
-		_Exc_Buf env;
-		int code;
+        _Exc_Buf env;
+        int code;
     } err;
 };
 
@@ -258,7 +251,7 @@ typedef struct
     float array[14];
 } BluesArray;
 
-typedef abfGlyphInfo Char;		/* Character record */
+typedef abfGlyphInfo Char;      /* Character record */
 
 
 static STI addString(ufoCtx h, size_t length, const char *value);
@@ -270,58 +263,58 @@ static void setWidth(ufoCtx h, STI sti, long value);
 static long getWidth(ufoCtx h, STI sti);
 static int addChar(ufoCtx h, STI sti, Char **chr);
 static int CTL_CDECL postMatchChar(const void *key, const void *value,
-								   void *ctx);
+                                   void *ctx);
 
 /* -------------------------- Error Support ------------------------ */
 
 char *ufoErrStr(int err_code)
 {
-	static char *errstrs[] =
+    static char *errstrs[] =
     {
 #undef CTL_DCL_ERR
-#define CTL_DCL_ERR(name,string)	string,
+#define CTL_DCL_ERR(name,string)    string,
 #include "ufoerr.h"
     };
-	return (err_code < 0 || err_code >= (int)ARRAY_LEN(errstrs))?
+    return (err_code < 0 || err_code >= (int)ARRAY_LEN(errstrs))?
     (char*)"unknown error": errstrs[err_code];
 }
 
 /* Write message to debug stream from va_list. */
 static void vmessage(ufoCtx h, char *fmt, va_list ap)
 {
-	char text[BUFSIZ];
-    
-	if (h->stm.dbg == NULL)
-		return;	/* Debug stream not available */
-    
-	vsprintf(text, fmt, ap);
-	(void)h->cb.stm.write(&h->cb.stm, h->stm.dbg, strlen(text), text);
+    char text[BUFSIZ];
+
+    if (h->stm.dbg == NULL)
+        return; /* Debug stream not available */
+
+    vsprintf(text, fmt, ap);
+    (void)h->cb.stm.write(&h->cb.stm, h->stm.dbg, strlen(text), text);
 }
 
 /* Write message to debug stream from varargs. */
 static void CTL_CDECL message(ufoCtx h, char *fmt, ...)
 {
-	va_list ap;
-	va_start(ap, fmt);
-	vmessage(h, fmt, ap);
-	va_end(ap);
+    va_list ap;
+    va_start(ap, fmt);
+    vmessage(h, fmt, ap);
+    va_end(ap);
 }
 
 static void CTL_CDECL fatal(ufoCtx h, int err_code, char *fmt, ...)
 {
-	if (fmt == NULL)
+    if (fmt == NULL)
     /* Write standard error message */
-		message(h, "%s", ufoErrStr(err_code));
-	else
+        message(h, "%s", ufoErrStr(err_code));
+    else
     {
-		/* Write font-specific error message */
-		va_list ap;
-		va_start(ap, fmt);
-		vmessage(h, fmt, ap);
-		va_end(ap);
+        /* Write font-specific error message */
+        va_list ap;
+        va_start(ap, fmt);
+        vmessage(h, fmt, ap);
+        va_end(ap);
     }
-	h->err.code = err_code;
-	RAISE(&h->err.env, err_code, NULL);
+    h->err.code = err_code;
+    RAISE(&h->err.env, err_code, NULL);
 }
 
 /* --------------------------- Memory Management --------------------------- */
@@ -329,16 +322,16 @@ static void CTL_CDECL fatal(ufoCtx h, int err_code, char *fmt, ...)
 /* Allocate memory. */
 static void *memNew(ufoCtx h, size_t size)
 {
-	void *ptr = h->cb.mem.manage(&h->cb.mem, NULL, size);
-	if (ptr == NULL)
-		fatal(h, ufoErrNoMemory, NULL);
-	return ptr;
+    void *ptr = h->cb.mem.manage(&h->cb.mem, NULL, size);
+    if (ptr == NULL)
+        fatal(h, ufoErrNoMemory, NULL);
+    return ptr;
 }
 
 /* Free memory. */
 static void memFree(ufoCtx h, void *ptr)
 {
-	(void)h->cb.mem.manage(&h->cb.mem, ptr, 0);
+    (void)h->cb.mem.manage(&h->cb.mem, ptr, 0);
 }
 
 /* -------------------------- Safe dynarr Callbacks ------------------------ */
@@ -346,20 +339,20 @@ static void memFree(ufoCtx h, void *ptr)
 /* Manage memory. */
 static void *dna_manage(ctlMemoryCallbacks *cb, void *old, size_t size)
 {
-	ufoCtx h = (ufoCtx)cb->ctx;
-	void *ptr = h->cb.mem.manage(&h->cb.mem, old, size);
-	if (size > 0 && ptr == NULL)
-		fatal(h, ufoErrNoMemory, NULL);
-	return ptr;
+    ufoCtx h = (ufoCtx)cb->ctx;
+    void *ptr = h->cb.mem.manage(&h->cb.mem, old, size);
+    if (size > 0 && ptr == NULL)
+        fatal(h, ufoErrNoMemory, NULL);
+    return ptr;
 }
 
 /* Initialize error handling dynarr context. */
 static void dna_init(ufoCtx h)
 {
-	ctlMemoryCallbacks cb;
-	cb.ctx 		= h;
-	cb.manage 	= dna_manage;
-	h->dna		= dnaNew(&cb, DNA_CHECK_ARGS);
+    ctlMemoryCallbacks cb;
+    cb.ctx      = h;
+    cb.manage   = dna_manage;
+    h->dna      = dnaNew(&cb, DNA_CHECK_ARGS);
 }
 /* ------------------------ Context handling ------------------------------ */
 
@@ -380,9 +373,9 @@ static void initHintMask(void *ctx, long cnt, HintMask *base)
 
 void ufoFree(ufoCtx h)
 {
-	if (h == NULL)
-		return;
-    
+    if (h == NULL)
+        return;
+
     dnaFREE(h->valueArray);
      {
         int i = 0;
@@ -396,56 +389,56 @@ void ufoFree(ufoCtx h)
     dnaFREE(h->hints.hintMasks);
     dnaFREE(h->hints.flexOpList);
     dnaFREE(h->chars.index);
-	dnaFREE(h->chars.byName);
-	dnaFREE(h->chars.widths);
-	dnaFREE(h->tmp);
-	dnaFREE(h->data.glifRecs);
-	dnaFREE(h->data.glifOrder);
-	dnaFREE(h->data.opList);
-	freeStrings(h);
-	dnaFree(h->dna);
-    
-	/* Close debug stream */
-	if (h->stm.dbg != NULL)
-		(void)h->cb.stm.close(&h->cb.stm, h->stm.dbg);
-    
-	/* Free library context */
-	memFree(h, h);
+    dnaFREE(h->chars.byName);
+    dnaFREE(h->chars.widths);
+    dnaFREE(h->tmp);
+    dnaFREE(h->data.glifRecs);
+    dnaFREE(h->data.glifOrder);
+    dnaFREE(h->data.opList);
+    freeStrings(h);
+    dnaFree(h->dna);
+
+    /* Close debug stream */
+    if (h->stm.dbg != NULL)
+        (void)h->cb.stm.close(&h->cb.stm, h->stm.dbg);
+
+    /* Free library context */
+    memFree(h, h);
 }
 
 /* Validate client and create context */
 ufoCtx ufoNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
               CTL_CHECK_ARGS_DCL)
 {
-	ufoCtx h;
-    
-	/* Check client/library compatibility */
-	if (CTL_CHECK_ARGS_TEST(UFO_VERSION))
-		return NULL;
-    
-	/* Allocate context */
-	h = (ufoCtx)mem_cb->manage(mem_cb, NULL, sizeof(struct ufoCtx_));
-	if (h == NULL)
-		return NULL;
+    ufoCtx h;
+
+    /* Check client/library compatibility */
+    if (CTL_CHECK_ARGS_TEST(UFO_VERSION))
+        return NULL;
+
+    /* Allocate context */
+    h = (ufoCtx)mem_cb->manage(mem_cb, NULL, sizeof(struct ufoCtx_));
+    if (h == NULL)
+        return NULL;
 
     /* Safety initialization */
     memset(h, 0, sizeof(*h));
-    
-	h->metrics.defaultWidth = 1000;
- 	h->altLayerDir = "glyphs.com.adobe.type.processedGlyphs";
- 	h->defaultLayerDir = "glyphs";
-    
-    
-	/* Copy callbacks */
-	h->cb.mem = *mem_cb;
-	h->cb.stm = *stm_cb;
-    
-	/* Set error handler */
+
+    h->metrics.defaultWidth = 1000;
+    h->altLayerDir = "glyphs.com.adobe.type.processedGlyphs";
+    h->defaultLayerDir = "glyphs";
+
+
+    /* Copy callbacks */
+    h->cb.mem = *mem_cb;
+    h->cb.stm = *stm_cb;
+
+    /* Set error handler */
   DURING_EX(h->err.env)
-  
+
     /* Initialize service library */
     dna_init(h);
-      
+
       dnaINIT(h->dna, h->valueArray, 256, 50);
     dnaINIT(h->dna, h->tmp, 100, 250);
     dnaINIT(h->dna, h->chars.index, 256, 1000);
@@ -457,68 +450,68 @@ ufoCtx ufoNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     dnaINIT(h->dna, h->hints.hintMasks, 10, 10);
     dnaINIT(h->dna, h->hints.flexOpList, 10, 10);
       h->hints.hintMasks.func = initHintMask;
-      
+
     newStrings(h);
-    
+
     /* Open debug stream */
     h->stm.dbg = h->cb.stm.open(&h->cb.stm, UFO_DBG_STREAM_ID, 0);
 
-	HANDLER
+    HANDLER
     /* Initialization failed */
     ufoFree(h);
     h = NULL;
   END_HANDLER
 
-	return h;
+    return h;
 }
 
 static void prepClientData(ufoCtx h)
 {
-	h->top.sup.nGlyphs = h->chars.index.cnt;
-	if (h->stm.dbg == NULL)
-		abfCheckAllDicts(NULL, &h->top);
+    h->top.sup.nGlyphs = h->chars.index.cnt;
+    if (h->stm.dbg == NULL)
+        abfCheckAllDicts(NULL, &h->top);
 }
 
 /* ---------------------- Buffer handling ---------------------------- */
 static void fillbuf(ufoCtx h, long offset)
 {
-	h->src.length = h->cb.stm.read(&h->cb.stm, h->stm.src, &h->src.buf);
-	if (h->src.length == 0)
-		h->flags |= SEEN_END;
-	h->src.offset = offset;
-	h->src.next = h->src.buf;
-	h->src.end = h->src.buf + h->src.length;
+    h->src.length = h->cb.stm.read(&h->cb.stm, h->stm.src, &h->src.buf);
+    if (h->src.length == 0)
+        h->flags |= SEEN_END;
+    h->src.offset = offset;
+    h->src.next = h->src.buf;
+    h->src.end = h->src.buf + h->src.length;
 }
 
 static int nextbuf(ufoCtx h)
 {
-	if ( h->flags & SEEN_END)
-		return 0;
-    
-	/* buffer read must be able to contain a full token */
-	if ( h->mark && h->mark != h->src.buf)
+    if ( h->flags & SEEN_END)
+        return 0;
+
+    /* buffer read must be able to contain a full token */
+    if ( h->mark && h->mark != h->src.buf)
     {
-		size_t new_offset = h->src.offset + ( h->mark - h->src.buf );
-		h->cb.stm.seek(&h->cb.stm, h->stm.src, new_offset);
-		fillbuf(h, new_offset);
-        
-		/* make sure we are still pointing at the beginning of token */
-		h->mark = h->src.buf;
+        size_t new_offset = h->src.offset + ( h->mark - h->src.buf );
+        h->cb.stm.seek(&h->cb.stm, h->stm.src, new_offset);
+        fillbuf(h, new_offset);
+
+        /* make sure we are still pointing at the beginning of token */
+        h->mark = h->src.buf;
     }
-	if ( h->src.next == h->src.end )
+    if ( h->src.next == h->src.end )
     {
-		fillbuf(h, h->src.offset + h->src.length);
+        fillbuf(h, h->src.offset + h->src.length);
     }
-    
-	return ((h->flags & SEEN_END) == 0);
+
+    return ((h->flags & SEEN_END) == 0);
 }
 
 static int bufferReady(ufoCtx h)
 {
-	if ( h->src.next == h->src.end )
-		return nextbuf(h);
-	
-	return 1;
+    if ( h->src.next == h->src.end )
+        return nextbuf(h);
+
+    return 1;
 }
 
 static char* getBufferContextPtr(ufoCtx h)
@@ -534,27 +527,27 @@ static char* getBufferContextPtr(ufoCtx h)
     if (strlen(p) > 128)
         p[128] = 0;
     return p;
-    
+
 }
 
 static token* setToken(ufoCtx h)
 {
-	size_t len;
-	if ( h->src.buf == NULL || h->mark == NULL)
-		return NULL;
-    
-	len = h->src.next - h->mark;
-	if ((len+1) > kMaxToken)
-		return NULL;
-    
-	if (len >0)
+    size_t len;
+    if ( h->src.buf == NULL || h->mark == NULL)
+        return NULL;
+
+    len = h->src.next - h->mark;
+    if ((len+1) > kMaxToken)
+        return NULL;
+
+    if (len >0)
         memcpy(h->src.tk.val, h->mark, len);
-	h->src.tk.val[len] = 0;
-	h->src.tk.length = len;
-	h->src.tk.offset = h->src.offset + (h->mark - h->src.buf);
-	h->src.tk.type = ufoUnknown;
-    
-	return &h->src.tk;
+    h->src.tk.val[len] = 0;
+    h->src.tk.length = len;
+    h->src.tk.offset = h->src.offset + (h->mark - h->src.buf);
+    h->src.tk.type = ufoUnknown;
+
+    return &h->src.tk;
 }
 
 /* Tokens are separated by whitespace and '"'
@@ -562,58 +555,58 @@ static token* setToken(ufoCtx h)
  */
 static token* getToken(ufoCtx h, int state)
 {
-	char ch;
+    char ch = 0;
     token* tk = NULL;
-	h->mark = NULL;
-    
-	while (bufferReady(h))
+    h->mark = NULL;
+
+    while (bufferReady(h))
     {
-		ch = *h->src.next;
-		if ( ch == 0 )
+        ch = *h->src.next;
+        if ( ch == 0 )
         {
-			break;
+            break;
         }
-		if ( isspace(ch) || (ch == '"'))
-			h->src.next++;
-		else
-			break;
+        if ( isspace(ch) || (ch == '"'))
+            h->src.next++;
+        else
+            break;
     }
-    
-	while (bufferReady(h))
+
+    while (bufferReady(h))
     {
-		if ( ch == 0 )
+        if ( ch == 0 )
         {
-			break;
+            break;
         }
-		else if ( h->mark == NULL )
+        else if ( h->mark == NULL )
         {
-			h->mark = h->src.next++;
-			if (( ch == 0 ) || (!bufferReady(h)))
-				break;
-			ch = *h->src.next;
+            h->mark = h->src.next++;
+            if (( ch == 0 ) || (!bufferReady(h)))
+                break;
+            ch = *h->src.next;
             if ((ch == '<') && (h->mark != h->src.next))
                 break;
-			while ( (!isspace(ch)) &&  ( ch != '"'))
+            while ( (!isspace(ch)) &&  ( ch != '"'))
             {
-				h->src.next++;
-				if (( ch == 0 )  || ( ch == '>' )|| (!bufferReady(h)))
-					break;
-				ch = *h->src.next;
+                h->src.next++;
+                if (( ch == 0 )  || ( ch == '>' )|| (!bufferReady(h)))
+                    break;
+                ch = *h->src.next;
                 if ((ch == '<') && (h->mark != h->src.next))
                     break;
             }
-			break;
+            break;
         }
-		else
+        else
         {
-			break;
+            break;
         }
     }
-    
+
      // Back up and remove any final whitespace.
     while ((h->mark != NULL) && (h->src.next != h->mark ) && (isspace(*(h->src.next-1))))
         h->src.next--;
-    
+
     tk = setToken(h);
     if (tk == NULL)
     {
@@ -622,32 +615,32 @@ static token* getToken(ufoCtx h, int state)
             fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph.%s.", getBufferContextPtr(h));
         }
     }
-    
+
     return tk;
 }
 
 /* return actual tokens, ignores comments, preserves white space */
 static token* getAttribute(ufoCtx h, int state)
 {
-	char ch;
+    char ch = 0;
     token* tk = NULL;
     int lastWasQuote = 0;
-	h->mark = NULL;
-    
-	while (bufferReady(h))
+    h->mark = NULL;
+
+    while (bufferReady(h))
     {
-		ch = *h->src.next;
-		if ( ch == 0 )
+        ch = *h->src.next;
+        if ( ch == 0 )
         {
-			break;
+            break;
         }
-		if ( isspace(ch))
-		{
+        if ( isspace(ch))
+        {
             lastWasQuote = 0;
             h->src.next++;
         }
-		else if (ch == '"')
-		{
+        else if (ch == '"')
+        {
             if (lastWasQuote)
             {
                 ch = 0; /* we have an empty attribute */
@@ -660,40 +653,40 @@ static token* getAttribute(ufoCtx h, int state)
                 lastWasQuote = 1;
             }
         }
-		else
-			break;
+        else
+            break;
     }
-    
-	while (bufferReady(h))
+
+    while (bufferReady(h))
     {
-		if ( ch == 0 )
+        if ( ch == 0 )
         {
-			break;
+            break;
         }
-		else if ( h->mark == NULL )
+        else if ( h->mark == NULL )
         {
-			h->mark = h->src.next++;
-			if (( ch == 0 ) || (!bufferReady(h)))
-				break;
-			ch = *h->src.next;
-			while  (!( ch == '"'))
+            h->mark = h->src.next++;
+            if (( ch == 0 ) || (!bufferReady(h)))
+                break;
+            ch = *h->src.next;
+            while  (!( ch == '"'))
             {
-				h->src.next++;
-				if (( ch == 0 ) || (!bufferReady(h)))
-					break;
-				ch = *h->src.next;
+                h->src.next++;
+                if (( ch == 0 ) || (!bufferReady(h)))
+                    break;
+                ch = *h->src.next;
             }
-			break;
+            break;
         }
-		else
+        else
         {
-			break;
+            break;
         }
     }
     // Back up and remove any final whitespace.
     while ((h->mark != NULL) && (h->src.next != h->mark ) && (isspace(*(h->src.next-1))))
         h->src.next--;
-    
+
     tk = setToken(h);
     if (tk == NULL)
     {
@@ -702,60 +695,60 @@ static token* getAttribute(ufoCtx h, int state)
             fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph.%s.", getBufferContextPtr(h));
         }
     }
-    
+
     return tk;
 }
 
 /* return value between begin/end element, skipping white space before and after. */
 static token* getElementValue(ufoCtx h, int state)
 {
-	char ch;
+    char ch;
     token* tk = NULL;
-	h->mark = NULL;
-    
-	while (bufferReady(h))
+    h->mark = NULL;
+
+    while (bufferReady(h))
     {
-		ch = *h->src.next;
-		if ( ch == 0 )
+        ch = *h->src.next;
+        if ( ch == 0 )
         {
-			break;
+            break;
         }
-		if (ch == '"')
-			h->src.next++;
-		else
-			break;
+        if (ch == '"')
+            h->src.next++;
+        else
+            break;
     }
-    
-	while (bufferReady(h))
+
+    while (bufferReady(h))
     {
-		if ( ch == 0 )
+        if ( ch == 0 )
         {
-			break;
+            break;
         }
-		else if ( h->mark == NULL )
+        else if ( h->mark == NULL )
         {
-			h->mark = h->src.next++;
-			if (( ch == 0 ) || (!bufferReady(h)))
-				break;
-			ch = *h->src.next;
-			while (ch != '<')
+            h->mark = h->src.next++;
+            if (( ch == 0 ) || (!bufferReady(h)))
+                break;
+            ch = *h->src.next;
+            while (ch != '<')
             {
-				h->src.next++;
-				if (( ch == 0 ) || (!bufferReady(h)))
-					break;
-				ch = *h->src.next;
+                h->src.next++;
+                if (( ch == 0 ) || (!bufferReady(h)))
+                    break;
+                ch = *h->src.next;
             }
-			break;
+            break;
         }
-		else
+        else
         {
-			break;
+            break;
         }
     }
     // Back up and remove any final whitespace.
     while ((h->mark != NULL) && (h->src.next != h->mark ) && (isspace(*(h->src.next-1))))
         h->src.next--;
-    
+
     tk = setToken(h);
     if (tk == NULL)
     {
@@ -764,143 +757,8 @@ static token* getElementValue(ufoCtx h, int state)
             fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph.%s.",getBufferContextPtr(h));
         }
     }
-    
+
     return tk;
-}
-
-static long getPathLength(ufoCtx h)
-{
-	char ch;
-	int startOffset = h->src.offset + (h->src.next - h->src.buf);
-	int endOffset;
-	while (bufferReady(h))
-    {
-		ch = *h->src.next;
-		if ( ch == 0 )
-        {
-			break;
-        }
-		if ( isspace(ch) || (ch == ',') || (ch == '"'))
-			h->src.next++;
-		else if (( ch == '%' ) || ( ch == '#' ))
-        {
-			ch = *h->src.next++;
-			if (!bufferReady(h))
-				break;
-			while ( !(ch == '\n' || ch == '\r' || ch == '\f') )
-            {
-				ch = *h->src.next++;
-				if (!bufferReady(h))
-					break;
-            }
-        }
-		else if (ch == '/' || ch == '"' )
-			break;
-		else
-			ch = *h->src.next++;
-    }
-	endOffset = h->src.offset + (h->src.next - h->src.buf);
-	return endOffset - startOffset;
-}
-
-
-static token* setPathToken(ufoCtx h, int tokenType)
-{
-	size_t len;
-	if ( h->src.buf == NULL || h->mark == NULL)
-		return NULL;
-    
-	len = h->src.next - h->mark;
-	if ((len+1) > kMaxToken)
-		return NULL;
-    
-	memcpy(h->src.tk.val, h->mark, len);
-	h->src.tk.val[len] = 0;
-	h->src.tk.length = len;
-	h->src.tk.offset = h->src.offset + (h->mark - h->src.buf);
-	h->src.tk.type = tokenType;
-	return &h->src.tk;
-}
-
-/* return actual tokens, ignores comments as well */
-static token* getPathToken(ufoCtx h, long endOffset)
-{
-	char ch;
-	int tokenType = ufoUnknown;
-	h->mark = NULL;
-	
-	if (endOffset == 0) /* A non-marking glyph. */
-		return NULL;
-		
-	while (bufferReady(h))
-		{
-		ch = *h->src.next;
-		if ( ch == 0 )
-			{
-			return NULL;
-			}
-		if ( isspace(ch) || (ch == ',') || (ch == '"'))
-			h->src.next++;
-		else 
-			break;
-		}
-		
-	if ( (h->src.offset + (h->src.next - h->src.buf)) >=endOffset)
-		return NULL;
-		
-	h->mark = h->src.next;
-	/* If we reload the buffer while processing the token, h->mark is outdated. Make sure that we have
-	enough text to be able to deal with the entire token. */
-	if ((h->src.end - h->src.next) < kMaxToken)
-	{
-		nextbuf(h); /* refills the buffer with h->mark as the first glyph, and resets h->mark to point to the start of the buffer. */
-	}
-
-	ch = *h->src.next;
-	if ( ch == 0 )
-		{
-		return NULL;
-		}
-	else
-		{
-		if (isdigit(ch) || (ch == '-') || (ch == '.')) /* Possible chars for start of numeric coordinate */
-			{
-			tokenType =  ufoNumeric;
-			h->src.next++; /* This is safe, since we have at least kMaxToken bytes at this point.*/
-			while (1)
-				{
-					ch = *h->src.next;
-					if ( ch == 0 )
-						break;
-					else if (isdigit(ch) || (ch == '.'))
-						{
-						h->src.next++;
-						if (h->src.next >= h->src.end)
-							return NULL;
-						}
-					else
-						break;
-				}
-			}
-		else if (isalpha(ch))
-				{
-				/* The non-digit, no whitespace values are assumed to be single-letter oparators */
-				tokenType =  ufoOperator;
-				h->src.next++;
-				}
-		else /* Found something other than digit or alphabetic.*/
-				{
-				h->src.next++;
-				}
-		}
-	return setPathToken(h, tokenType);
-}
-
-static void copyToken(token *src, token* dst)
-{
-    *dst = *src;
-    memcpy(dst->val, src->val, src->length);
-    src->val[src->length] = 0;
 }
 
 #if _WIN32
@@ -912,15 +770,15 @@ static int round_int( double r )
 
 /* Construct matrix from args. */
 static void setTransformMtx(Transform* transform,
-					float a, float b, float c, float d, float tx, float ty, int isDefault, int isOffsetOnly)
+                    float a, float b, float c, float d, float tx, float ty, int isDefault, int isOffsetOnly)
 {
     float* val = transform->mtx;
-	val[0] = a;
-	val[1] = b;
-	val[2] = c;
-	val[3] = d;
-	val[4] = tx;
-	val[5] = ty;
+    val[0] = a;
+    val[1] = b;
+    val[2] = c;
+    val[3] = d;
+    val[4] = tx;
+    val[5] = ty;
     transform->isDefault = isDefault;
     transform->isOffsetOnly = isOffsetOnly;
 }
@@ -928,12 +786,12 @@ static void setTransformMtx(Transform* transform,
 /* Multiple matices a and b giving result. */
 static void matMult(float *result, float * a, float * b)
 {
-	result[0] = a[0]*b[0] + a[1]*b[2];
-	result[1] = a[0]*b[1] + a[1]*b[3];
-	result[2] = a[2]*b[0] + a[3]*b[2];
-	result[3] = a[2]*b[1] + a[3]*b[3];
-	result[4] = a[4]*b[0] + a[5]*b[2] + b[4];
-	result[5] = a[4]*b[1] + a[5]*b[3] + b[5];
+    result[0] = a[0]*b[0] + a[1]*b[2];
+    result[1] = a[0]*b[1] + a[1]*b[3];
+    result[2] = a[2]*b[0] + a[3]*b[2];
+    result[3] = a[2]*b[1] + a[3]*b[3];
+    result[4] = a[4]*b[0] + a[5]*b[2] + b[4];
+    result[5] = a[4]*b[1] + a[5]*b[3] + b[5];
 }
 
 static void setTransformValue(Transform* transform, float val, int valIndex)
@@ -953,7 +811,7 @@ static void setTransformValue(Transform* transform, float val, int valIndex)
         if ((valIndex == 1) || (valIndex == 2))
             transform->isOffsetOnly = 0;
     }
-    
+
 }
 
 /* -------------------------- Parsing routines ------------------------ */
@@ -971,21 +829,16 @@ do if(h->stack.cnt+(n)>UFO_MAX_OP_STACK)fatal(h,ufoErrStackOverflow,"");while(0)
 #define POP() (h->stack.array[--h->stack.cnt])
 #define PUSH(v) (h->stack.array[h->stack.cnt++]=(float)(v))
 
-static void EnsureState(ufoCtx h, int flags)
-{
-    if (!(h->stack.flags & flags))
-        fatal(h, ufoErrParse, "Invalid token");
-}
 /* hints */
 
 static void doOp_mt(ufoCtx h, abfGlyphCallbacks *glyph_cb, char * pointName)
 {
-	float dy, dx;
+    float dy, dx;
     OpRec* opRec;
-	CHKUFLOW(2);
-	dy = POP();
-	dx = POP();
-	
+    CHKUFLOW(2);
+    dy = POP();
+    dx = POP();
+
     opRec = dnaNEXT(h->data.opList);
     opRec->opType = movetoType;
     opRec->coords[0] = dx;
@@ -993,20 +846,20 @@ static void doOp_mt(ufoCtx h, abfGlyphCallbacks *glyph_cb, char * pointName)
     opRec->pointName = pointName; /* pointName may or may not be NULL */
     h->stack.flags |= PARSE_SEEN_MOVETO;
     //printf("moveto %f %f. opIndex: %ld \n", dx, dy, h->data.opList.cnt-1);
-	h->metrics.cb.move(&h->metrics.cb, dx, dy);
-    
+    h->metrics.cb.move(&h->metrics.cb, dx, dy);
+
 }
 
 
 static void doOp_dt(ufoCtx h, abfGlyphCallbacks *glyph_cb, char * pointName)
 {
-	float dy, dx;
+    float dy, dx;
     OpRec* opRec;
-	CHKUFLOW(2);
-    
-	dy = POP();
-	dx = POP();
-    
+    CHKUFLOW(2);
+
+    dy = POP();
+    dx = POP();
+
     opRec = dnaNEXT(h->data.opList);
     opRec->opType = linetoType;
     opRec->coords[0] = dx;
@@ -1022,12 +875,12 @@ static void doOp_dt(ufoCtx h, abfGlyphCallbacks *glyph_cb, char * pointName)
     {
         h->metrics.cb.line(&h->metrics.cb, dx, dy);
     }
-    
+
 }
 
 static void doOp_ct(ufoCtx h, abfGlyphCallbacks *glyph_cb, char * pointName)
 {
-	float dy3, dx3, dy2, dx2, dy1, dx1;
+    float dy3, dx3, dy2, dx2, dy1, dx1;
     OpRec* opRec;
 
     opRec = dnaNEXT(h->data.opList);
@@ -1050,14 +903,14 @@ static void doOp_ct(ufoCtx h, abfGlyphCallbacks *glyph_cb, char * pointName)
     else
     {
         CHKUFLOW(6);
-        
+
         dy3 = POP();
         dx3 = POP();
         dy2 = POP();
         dx2 = POP();
         dy1 = POP();
         dx1 = POP();
-        
+
         opRec->coords[0] = dx1;
         opRec->coords[1] = dy1;
         opRec->coords[2] = dx2;
@@ -1065,70 +918,58 @@ static void doOp_ct(ufoCtx h, abfGlyphCallbacks *glyph_cb, char * pointName)
         opRec->coords[4] = dx3;
         opRec->coords[5] = dy3;
         //printf("curveo %f %f. opIndex: %ld \n", dx3, dy3, h->data.opList.cnt-1);
-        
+
         h->metrics.cb.curve(&h->metrics.cb,
                             dx1, dy1,
                             dx2, dy2,
                             dx3, dy3);
     }
-    
+
 }
 
 static void doOp_ed(ufoCtx h, abfGlyphCallbacks *glyph_cb)
 {
-	abfMetricsCtx g = &h->metrics.ctx;
-    
-	/* get the bounding box and compute the aggregate */
-	if (h->aggregatebounds.left > g->real_mtx.left)
-		h->aggregatebounds.left = g->real_mtx.left;
-	if (h->aggregatebounds.bottom > g->real_mtx.bottom)
-		h->aggregatebounds.bottom = g->real_mtx.bottom;
-	if (h->aggregatebounds.right < g->real_mtx.right)
-		h->aggregatebounds.right = g->real_mtx.right;
-	if (h->aggregatebounds.top < g->real_mtx.top)
-		h->aggregatebounds.top = g->real_mtx.top;
-    
+    abfMetricsCtx g = &h->metrics.ctx;
+
+    /* get the bounding box and compute the aggregate */
+    if (h->aggregatebounds.left > g->real_mtx.left)
+        h->aggregatebounds.left = g->real_mtx.left;
+    if (h->aggregatebounds.bottom > g->real_mtx.bottom)
+        h->aggregatebounds.bottom = g->real_mtx.bottom;
+    if (h->aggregatebounds.right < g->real_mtx.right)
+        h->aggregatebounds.right = g->real_mtx.right;
+    if (h->aggregatebounds.top < g->real_mtx.top)
+        h->aggregatebounds.top = g->real_mtx.top;
+
     glyph_cb->end(glyph_cb); /* I call glyph_cb->end directly, unlike the path operators, as the opList has already been played back. */
 }
 
 static int tkncmp(token* tk, char* str)
 {
     size_t len = strlen(str);
-    int retVal;
-    if (len != tk->length)
-        retVal =  1;
-    else
-        retVal = strncmp(tk->val, str, tk->length);   
-	return retVal;
+    int retVal = 1;
+    if ((tk != NULL) && (len == tk->length))
+        retVal = strncmp(tk->val, str, tk->length);
+    return retVal;
 }
 
 static int tokenEqualStr(token* tk, char* str)
 {
-	return tkncmp(tk, str) == 0;
+    return tkncmp(tk, str) == 0;
 }
 
 static int tokenEqualStrN(token* tk, char* str, int n)
 {
-	return 0 == strncmp(tk->val, str, n);
+    return 0 == strncmp(tk->val, str, n);
 }
 
 static int isUnknownAttribute(token* tk)
 {
-	return tk->val[tk->length-1] == '=';
+    if (tk == NULL)
+        return true;
+    else
+        return tk->val[tk->length-1] == '=';
 }
-
-static int matchOps(const void *l, const void *r)
-{
-	int retval;
-	token* tk = (token*)l;
-	char * c = (char*)r;
-    if ( tk->length != 1)
-        return -1;
-    
-	retval =  strncmp( tk->val,c, 1);
-	return retval;
-}
-
 
 /* --------------------- Glyph Processing ----------------------- */
 static char* copyStr(ufoCtx h, char* oldString)
@@ -1143,7 +984,7 @@ static char* getKeyValue(ufoCtx h, char* endName, int state)
 {
     char *value = NULL;
     token* tk;
-    
+
     tk =  getElementValue(h, state);
     if (!tokenEqualStr(tk, endName))
     {
@@ -1156,7 +997,7 @@ static char* getKeyValue(ufoCtx h, char* endName, int state)
             fatal(h,ufoErrParse,  "Encountered element '%s' when reading value for element '%s'.", tk->val, endName);
     }
     return value;
-    
+
 }
 
 static void setBluesArrayValue(ufoCtx h, BluesArray* bluesArray, int numElements)
@@ -1179,24 +1020,30 @@ static void setFontDictKey(ufoCtx h, char * keyValue)
     abfFontDict* fd0 = &h->top.FDArray.array[0];
     abfPrivateDict* pd = &fd0->Private;
     BluesArray* bluesArray;
-    
+
     /* If we do not use a keyValue, we need to dispose of it
      */
- 	if (!strcmp(keyName, "copyright"))
+    if (!strcmp(keyName, "copyright"))
     {
         top->Copyright.ptr = keyValue;
     }
     else if (!strcmp(keyName, "trademark"))
     {
         char * copySymbol;
-		top->Notice.ptr = keyValue;
-        copySymbol = strstr(keyValue, "\u00A9");
+        top->Notice.ptr = keyValue;
+        /* look for the (c) symbol U+00A9, which is 0xC2, 0xA9 in UTF-8 */
+        copySymbol = strstr(keyValue, "\xC2\xA9");
         if (copySymbol != NULL)
         {
+            /* if there is a copyright symbol (U+00A9),
+               replace it with the word "Copyright" */
             char* cpy = "Copyright";
             char* newString = memNew(h, strlen(cpy) + strlen(keyValue) + 2);
-            copySymbol = '\0';
-            sprintf(newString, "%s%s%s", keyValue, "Copyright", copySymbol + 5);
+            /* set the 0xC2 to NULL to terminate the left side of the string */
+            *copySymbol = '\0';
+            /* use copySymbol + 2 to skip the NULL and the 0xA9 
+               to get the right side of the string */
+            sprintf(newString, "%s%s%s", keyValue, "Copyright", copySymbol + 2);
             top->Notice.ptr = newString;
         }
     }
@@ -1297,7 +1144,7 @@ static void setFontDictKey(ufoCtx h, char * keyValue)
     {
         pd->ForceBold = atol(keyValue);
     }
-    
+
     else if (!strcmp(keyName, "postscriptBlueValues"))
     {
         bluesArray = (BluesArray*)&pd->BlueValues;
@@ -1338,13 +1185,13 @@ static void setFontDictKey(ufoCtx h, char * keyValue)
         bluesArray = (BluesArray*)&pd->StemSnapV;
         setBluesArrayValue(h, bluesArray, 12);
     }
-    
+
     else
     {
         // if it isn't used, free the string.
         memFree(h, keyValue);
     }
-    
+
 }
 
 
@@ -1360,7 +1207,7 @@ static int doFontDictValue(ufoCtx h, char* keyName, char* endKeyName, int state)
         /* It is valid and common for styleName can be present and empty, when the style is "Regular".*/
         }
     }
-    
+
     if (state == 2) // we are processing a key value.
     {
 
@@ -1384,7 +1231,6 @@ static int doFontDictValue(ufoCtx h, char* keyName, char* endKeyName, int state)
 
 static int CTL_CDECL cmpOrderRecs(const void *first, const void *second, void *ctx)
 {
-    ufoCtx h = ctx;
     GlIFOrderRec* orderRec1= (GlIFOrderRec *)first;
     GlIFOrderRec* orderRec2= (GlIFOrderRec *)second;
     int retVal = 0;
@@ -1394,7 +1240,6 @@ static int CTL_CDECL cmpOrderRecs(const void *first, const void *second, void *c
 
 static int CTL_CDECL cmpGlifRecs(const void *first, const void *second, void *ctx)
 {
-    ufoCtx h = ctx;
     GLIF_Rec* glifRec1= (GLIF_Rec *)first;
     GLIF_Rec* glifRec2= (GLIF_Rec *)second;
     int retVal = 0;
@@ -1412,7 +1257,7 @@ static int CTL_CDECL cmpGlifRecs(const void *first, const void *second, void *ct
     }
     else if (glifRec2->glyphOrder == ABF_UNSET_INT)
     {
-        
+
     }
     else {
         if (glifRec1->glyphOrder > glifRec2->glyphOrder)
@@ -1426,40 +1271,37 @@ static int CTL_CDECL cmpGlifRecs(const void *first, const void *second, void *ct
 
 static int matchGLIFOrderRec(const void *key, const void *value, void *ctx)
 {
-    ufoCtx h = ctx;
     GlIFOrderRec* orderRec= (GlIFOrderRec *)value;
     return strcmp((char *)key, orderRec->glyphName);
 }
 
-static int getGlyphOrderIndex(ufoCtx h, char * glyphName)
+static long getGlyphOrderIndex(ufoCtx h, char * glyphName)
 {
-    int orderIndex = ABF_UNSET_INT;
+    long orderIndex = ABF_UNSET_INT;
     int recIndex = 0;
-    
- 	if (ctuLookup(glyphName, h->data.glifOrder.array, h->data.glifOrder.cnt,
-				   sizeof(h->data.glifOrder.array[0]), matchGLIFOrderRec, (size_t*)&recIndex, h))
-	{
+
+    if (ctuLookup(glyphName, h->data.glifOrder.array, h->data.glifOrder.cnt,
+                   sizeof(h->data.glifOrder.array[0]), matchGLIFOrderRec, (size_t*)&recIndex, h))
+    {
         orderIndex = h->data.glifOrder.array[recIndex].order;
     }
     else
     {
         message(h, "Warning: glyph order does not contain glyph name '%s'.", glyphName);
     }
-   
+
     return orderIndex;
 }
 
 
 static void  addGLIFRec(ufoCtx h, int state)
 {
-	char* fileName;
+    char* fileName;
     GLIF_Rec* newGLIFRec;
     long int glyphOrder;
-    int k;
 
     glyphOrder = getGlyphOrderIndex(h,  h->parseKeyName);
     newGLIFRec = dnaNEXT(h->data.glifRecs);
-    k = h->data.glifRecs.cnt-1;
     newGLIFRec->glyphName = h->parseKeyName;
     newGLIFRec->glyphOrder = glyphOrder;
     fileName = getKeyValue(h,  "</string>", state);
@@ -1482,50 +1324,50 @@ static int parseGlyphOrder(ufoCtx h)
     int prevState = 0;
     token* tk;
     h->src.next = h->mark = NULL;
-    
+
     h->cb.stm.clientFileName = "lib.plist";
-	h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
-	if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0))
+    h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
+    if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0))
     {
         fprintf(stderr, "Failed to read lib.plist\n");
-		return ufoErrSrcStream;
+        return ufoErrSrcStream;
     }
-    
+
     dnaSET_CNT(h->valueArray,0);
-	fillbuf(h, 0);
+    fillbuf(h, 0);
     /* Read in file, then sort by glyph name */
 
-	while (!(seenGO || (h->flags & SEEN_END)))
+    while (!(seenGO || (h->flags & SEEN_END)))
     {
-		tk = getToken(h, state);
-        
+        tk = getToken(h, state);
+
         if (tk == NULL)
             break;
-		
-		if (tokenEqualStr(tk, "<!--"))
-		{
-			prevState = state;
-			state = IN_COMMENT;
-		}
-		else if (tokenEqualStr(tk, "-->"))
+
+        if (tokenEqualStr(tk, "<!--"))
         {
-			if (state != IN_COMMENT)
-				fatal(h,ufoErrParse,  "Encountered end comment token while not in comment.");
-			state = prevState;
+            prevState = state;
+            state = IN_COMMENT;
         }
-		else if (state == IN_COMMENT)
+        else if (tokenEqualStr(tk, "-->"))
         {
-			continue;
+            if (state != IN_COMMENT)
+                fatal(h,ufoErrParse,  "Encountered end comment token while not in comment.");
+            state = prevState;
         }
-		else if (tokenEqualStrN(tk, "<dict", 5))
+        else if (state == IN_COMMENT)
+        {
+            continue;
+        }
+        else if (tokenEqualStrN(tk, "<dict", 5))
         {
             state++;
         }
-		else if (tokenEqualStr(tk, "</dict>"))
+        else if (tokenEqualStr(tk, "</dict>"))
         {
             state--;
         }
-		else if (tokenEqualStrN(tk, "<key", 4) && (state == 1)) /* if we are at the top level of the lib dict, check the key values */
+        else if (tokenEqualStrN(tk, "<key", 4) && (state == 1)) /* if we are at the top level of the lib dict, check the key values */
         {
             if ((tk->val[tk->length-2] == '/') && (tk->val[tk->length-1] == '>'))
             {
@@ -1566,21 +1408,19 @@ static int parseGlyphOrder(ufoCtx h)
         }
         else if ((tokenEqualStr(tk, "</array>")) && (state == IN_PUBLIC_ORDER))
         {
-            state = prevState;
-            seenGO = 1;
             break;
         }
         else if ((tokenEqualStrN(tk, "<string", 7)) && (state == IN_PUBLIC_ORDER))
         {
             GlIFOrderRec* newGLIFOrderRec;
-            
+
             if ((tk->val[tk->length-2] == '/') && (tk->val[tk->length-1] == '>'))
             {
                 message(h, "Warning: Encountered empty <string/> in public.glyphOrder. Text: '%s'.", getBufferContextPtr(h));
             }
             else
             {
-                 
+
                 tk = getElementValue(h, state);
                 if (tokenEqualStr(tk, "</string>"))
                 {
@@ -1600,16 +1440,16 @@ static int parseGlyphOrder(ufoCtx h)
                 }
             }
         }
-        
+
     } /* end while more tokens */
-    
+
     if (h->data.glifOrder.cnt > 0)
     {
         /* Sort the array by glyph name. */
-        
-		ctuQSort(h->data.glifOrder.array, h->data.glifOrder.cnt,
-				 sizeof(h->data.glifOrder.array[0]), cmpOrderRecs, h);
-        
+
+        ctuQSort(h->data.glifOrder.array, h->data.glifOrder.cnt,
+                 sizeof(h->data.glifOrder.array[0]), cmpOrderRecs, h);
+
         /* weed out duplicates - these casue sorting to work differently depending on whether
          we approach the pair from the top or bottom. */
         {
@@ -1627,11 +1467,11 @@ static int parseGlyphOrder(ufoCtx h)
              }
         }
     }
-    
+
     h->cb.stm.close(&h->cb.stm, h->stm.src);
     h->stm.src = NULL;
-    
-	return ufoSuccess;
+
+    return ufoSuccess;
 }
 
 static int parseGlyphList(ufoCtx h)
@@ -1640,56 +1480,55 @@ static int parseGlyphList(ufoCtx h)
     int prevState = 0;
     token* tk;
     h->src.next = h->mark = NULL;
-    
+
     h->cb.stm.clientFileName = "glyphs/contents.plist";
-	h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
-	if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0))
+    h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
+    if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0))
     {
         fprintf(stderr, "Failed to read glyphs/contents.plist\n");
-		return ufoErrSrcStream;
+        return ufoErrSrcStream;
     }
-    
+
     dnaSET_CNT(h->valueArray,0);
-	fillbuf(h, 0);
-    
-	h->metrics.defaultWidth = 0;
-	h->flags &= ~SEEN_END;
-    
-	while (!(h->flags & SEEN_END))
+    fillbuf(h, 0);
+
+    h->metrics.defaultWidth = 0;
+    h->flags &= ~SEEN_END;
+
+    while (!(h->flags & SEEN_END))
     {
-		tk = getToken(h, state);
-		
-		if (tokenEqualStr(tk, "<!--"))
-		{
-			prevState = state;
-			state = 4;
-		}
-		else if (tokenEqualStr(tk, "-->"))
+        tk = getToken(h, state);
+
+        if (tokenEqualStr(tk, "<!--"))
         {
-			if (state != 4)
-				fatal(h,ufoErrParse,  "Encountered end comment token while not in comment.");
-			state = prevState;
+            prevState = state;
+            state = 4;
         }
-		else if (state == 4)
+        else if (tokenEqualStr(tk, "-->"))
         {
-			continue;
+            if (state != 4)
+                fatal(h,ufoErrParse,  "Encountered end comment token while not in comment.");
+            state = prevState;
         }
-		else if (tokenEqualStr(tk, "<dict>"))
+        else if (state == 4)
         {
-			if (state > 0)
-				fatal(h,ufoErrParse,  "Encountered second <dict while in first");
+            continue;
+        }
+        else if (tokenEqualStr(tk, "<dict>"))
+        {
+            if (state > 0)
+                fatal(h,ufoErrParse,  "Encountered second <dict while in first");
             state = 1;
         }
-		else if (tokenEqualStr(tk, "</dict>"))
+        else if (tokenEqualStr(tk, "</dict>"))
         {
-            state = 0;
             h->flags |=  SEEN_END;
             break;  // end processing at end of first dict.
         }
-		else if (tokenEqualStr(tk, "<key>"))
+        else if (tokenEqualStr(tk, "<key>"))
         {
-			if (state != 1)
-				fatal(h,ufoErrParse,  "Encountered <key> while not in top level of first <dict>");
+            if (state != 1)
+                fatal(h,ufoErrParse,  "Encountered <key> while not in top level of first <dict>");
             // get key name
             tk = getElementValue(h, state);
             if (tokenEqualStr(tk, "</key>"))
@@ -1714,7 +1553,7 @@ static int parseGlyphList(ufoCtx h)
             addGLIFRec(h, state);
             state = 1;
         }
- 		else if (state != 0)
+        else if (state != 0)
         {
             message(h, "Warning: discarding token '%s", tk->val);
         }
@@ -1723,14 +1562,14 @@ static int parseGlyphList(ufoCtx h)
             if (h->data.glifRecs.cnt > 0) // If we have seen the glifs, then we are done with any additional parsing
                 break;
         }
-        
+
     } /* end while more tokens */
-    
+
     if (h->data.glifOrder.cnt > 0)
     {
-		ctuQSort(h->data.glifRecs.array, h->data.glifRecs.cnt,
-				 sizeof(h->data.glifRecs.array[0]), cmpGlifRecs, h);
-        
+        ctuQSort(h->data.glifRecs.array, h->data.glifRecs.cnt,
+                 sizeof(h->data.glifRecs.array[0]), cmpGlifRecs, h);
+
     }
     if (h->data.glifRecs.cnt > 0)
     {
@@ -1742,11 +1581,11 @@ static int parseGlyphList(ufoCtx h)
             addString(h, strlen(glifRec->glyphName), glifRec->glyphName);
          }
     }
-   
+
     h->cb.stm.close(&h->cb.stm, h->stm.src);
     h->stm.src = NULL;
-    
-	return ufoSuccess;
+
+    return ufoSuccess;
 }
 
 static int preParseGLIF(ufoCtx h, GLIF_Rec* newGLIFRec, int tag);
@@ -1755,7 +1594,7 @@ static int preParseGLIFS(ufoCtx h)
 {
     int tag = 0;
     int retVal = ufoSuccess;
-    
+
     h->metrics.defaultWidth = 0;
     while (tag < h->data.glifRecs.cnt)
     {
@@ -1776,17 +1615,17 @@ static void addCharFromGLIF(ufoCtx h, int tag, char* glyphName, long char_begin,
 
     if (addChar(h, tag, &chr))
     {
-        
+
         message(h, "Warning: duplicate charstring <%s> (discarded)",
                 getString(h, tag));
     }
     else
     {
-        chr->flags 		= 0;
-        chr->tag		= tag;
-        chr->gname.ptr	= glyphName;
-        chr->gname.impl	= tag;
-        chr->iFD		= 0;
+        chr->flags      = 0;
+        chr->tag        = tag;
+        chr->gname.ptr  = glyphName;
+        chr->gname.impl = tag;
+        chr->iFD        = 0;
         if (unicode != ABF_GLYPH_UNENC)
         {
             chr->flags |= ABF_GLYPH_UNICODE;
@@ -1802,9 +1641,9 @@ static void addCharFromGLIF(ufoCtx h, int tag, char* glyphName, long char_begin,
         chr->sup.begin  = char_begin;
         chr->sup.end    = char_end;
         //chr->width  = width;
-        
+
     }
-   
+
 }
 
 static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag)
@@ -1813,16 +1652,15 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag)
     int state = 0; /* 0 == start, 1= seen start of glyph,  4 in comment.  */
     int prevState = 0;
     long i;
-    long char_begin;
-    long char_end;
-    long defaultWidth = 1000;
+    long char_begin = 0;
+    long char_end = 0;
     long glyphWidth;
     unsigned long unicode = ABF_GLYPH_UNENC;
     char tempVal[kMaxName];
     char tempName[kMaxName];
     token* tk;
     h->src.next = h->mark = NULL;
-    
+
     h->flags &= ~((unsigned long)SEEN_END);
 
     /* First, try the alt layer directory */
@@ -1837,7 +1675,7 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag)
         memFree(h, glifRec->glifFilePath);
         glifRec->glifFilePath = memNew(h, 2 + strlen(h->defaultLayerDir) + strlen(glifRec->glifFileName));
         sprintf(glifRec->glifFilePath, "%s/%s", h->defaultLayerDir, glifRec->glifFileName);
-        
+
         h->cb.stm.clientFileName = glifRec->glifFilePath;
         h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
     }
@@ -1853,8 +1691,8 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag)
     }
 
     fillbuf(h, 0);
-    
-	h->flags &= ~SEEN_END;
+
+    h->flags &= ~SEEN_END;
     while (!(h->flags & SEEN_END))
     {
         tk = getToken(h, state);
@@ -1868,7 +1706,7 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag)
             else
                 break;
         }
-        
+
         if (tokenEqualStr(tk, "<!--"))
         {
             prevState = state;
@@ -1894,7 +1732,6 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag)
             char_begin = 0;
             char_end = 0;
             /* Set default width and name, to be used if these values are not supplied by the glyph attributes. */
-            glyphWidth = defaultWidth;
             sprintf(tempName, "gid%05d", (unsigned short)h->chars.index.cnt);
         }
         else if ( tokenEqualStr(tk, "<glyph>"))
@@ -1907,14 +1744,12 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag)
             char_begin = 0;
             char_end = 0;
             /* Set default width and name, to be used if these values are not supplied by the glyph attributes. */
-            glyphWidth = defaultWidth;
             sprintf(tempName, "gid%05d", (unsigned short)h->chars.index.cnt);
         }
         else if (tokenEqualStr(tk, "</glyph>"))
         {
             if (char_begin == 0) // happens when there is no <outline> element, which can happen with spaces.
                 addCharFromGLIF(h, tag, glifRec->glyphName, char_begin, char_end, unicode);
-            state = 0;
             h->flags |= SEEN_END;
             break;
         }
@@ -1925,16 +1760,16 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag)
             tk = getToken(h, state);
             if (!tokenEqualStr(tk, "hex="))
                 fatal(h,ufoErrParse,  "Encountered unknown attribute of <unicode>.%s.", tk->val);
-            
+
             tk = getAttribute(h, state);
             {
                 strncpy(tempVal, tk->val+1, tk->length-2); /* remove final ";" and initial '&' */
                 tempVal[0] = '0';
                 tempVal[tk->length-1] = 0;
-                
+
                 unicode = strtol(tk->val, NULL, 16);
             }
-            
+
         }
         else if (tokenEqualStr(tk, "<advance"))
         {
@@ -1974,15 +1809,13 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag)
         else if (tokenEqualStr(tk, "</outline>"))
         {
              char_end=tk->offset;
-            
+
             if (state != 2)
             {
                 continue;
             }
-            state = 1;
             char_end = tk->offset;
             addCharFromGLIF(h, tag, glifRec->glyphName, char_begin, char_end, unicode);
-            state = 0;
             break;
         }
         else if (tokenEqualStr(tk, "lib"))
@@ -1991,27 +1824,26 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag)
              end we need to add the current glyph to the char list with no outline content. */
             char_begin= 0;
             char_end = 0;
-            
+
             if (state != 1)
             {
                 continue;
             }
             addCharFromGLIF(h, tag, glifRec->glyphName, char_begin, char_end, unicode);
-            state = 0;
             break;
         }
         else if (isUnknownAttribute(tk))
         {
-            tk = getToken(h, state);
+            getToken(h, state);
             /* discard its value.*/
         }
         else if (tokenEqualStr(tk, "/>"))
         {
             continue;
         }
-        
+
     } /* end while more tokens */
-    
+
     h->cb.stm.close(&h->cb.stm, h->stm.src);
     h->stm.src = NULL;
     return ufoSuccess;
@@ -2034,27 +1866,27 @@ static void fixUnsetDictValues(ufoCtx h)
     abfTopDict* top = &h->top;
     abfFontDict* fd0 = &h->top.FDArray.array[0];
     abfPrivateDict* pd = &fd0->Private;
-  
+
     if ( fd0->FontName.ptr == NULL)
     {
         fd0->FontName.ptr = "PSNameNotSpecified";
         message(h, "Warning: No PS name specified in source UFO font. Using 'PSNameNotSpecified'.");
     }
-    
+
     if ( top->version.ptr == NULL)
     {
         top->version.ptr  = "1.000";
         message(h, "Warning: No version specified in source UFO font. Using '1.000'.");
     }
-    
+
     if (pd->StemSnapH.cnt > ABF_EMPTY_ARRAY)
     {
         if (pd->StdHW == ABF_UNSET_REAL)
         {
         pd->StdHW  = pd->StemSnapH.array[0];
         }
-  		ctuQSort(pd->StemSnapH.array, pd->StemSnapH.cnt,
-				 sizeof(pd->StemSnapH.array[0]), cmpNumeric, h);
+        ctuQSort(pd->StemSnapH.array, pd->StemSnapH.cnt,
+                 sizeof(pd->StemSnapH.array[0]), cmpNumeric, h);
   }
     if (pd->StemSnapV.cnt > ABF_EMPTY_ARRAY)
     {
@@ -2062,23 +1894,22 @@ static void fixUnsetDictValues(ufoCtx h)
         {
             pd->StdVW = pd->StemSnapV.array[0];
         }
-  		ctuQSort(pd->StemSnapV.array, pd->StemSnapV.cnt,
-				 sizeof(pd->StemSnapV.array[0]), cmpNumeric, h);
+        ctuQSort(pd->StemSnapV.array, pd->StemSnapV.cnt,
+                 sizeof(pd->StemSnapV.array[0]), cmpNumeric, h);
     }
     top->sup.srcFontType = abfSrcFontTypeUFOName;
-    
+
 }
 
 static void skipToDictEnd(ufoCtx h)
 {
     int state = 0; /* 0 == start, 1=in first dict, 2 in key, 3= in value, 4=in array 4 in comment, 5 in child dict.*/
-    int prevState = 0; /* used to save prev state while in comment. */
     token* tk;
 
     while (!(h->flags & SEEN_END))
     {
         tk = getToken(h, state);
-        
+
         if (tokenEqualStr(tk, "<dict>"))
         {
             skipToDictEnd(h);
@@ -2087,7 +1918,7 @@ static void skipToDictEnd(ufoCtx h)
         {
             break;
         }
-        
+
     } /* end while more tokens */
 
 }
@@ -2098,31 +1929,31 @@ static int parseFontInfo(ufoCtx h)
     int prevState = 0; /* used to save prev state while in comment. */
     token* tk;
     int seenDict = 0;
-	h->src.next = h->mark = NULL;
+    h->src.next = h->mark = NULL;
     h->cb.stm.clientFileName = "fontinfo.plist";
-	h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
-	if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0))
+    h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
+    if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0))
     {
         message(h, "Warning: Failed to open fontinfo.plist in source UFO font. No PostScript FontDict values are specified. \n");
         fixUnsetDictValues(h);
-		return ufoSuccess;
+        return ufoSuccess;
     }
-   
+
     dnaSET_CNT(h->valueArray, 0);
-	fillbuf(h, 0);
-    
+    fillbuf(h, 0);
+
     h->flags &= ~((unsigned long)SEEN_END);
-    
-	while (!(h->flags & SEEN_END))
+
+    while (!(h->flags & SEEN_END))
     {
-		tk = getToken(h, state);
-		
-		if (tokenEqualStr(tk, "<!--"))
-		{
-			prevState = state;
-			state = 4;
-		}
-		else if (tokenEqualStr(tk, "-->"))
+        tk = getToken(h, state);
+
+        if (tokenEqualStr(tk, "<!--"))
+        {
+            prevState = state;
+            state = 4;
+        }
+        else if (tokenEqualStr(tk, "-->"))
         {
             if (state != 4)
             {
@@ -2130,29 +1961,28 @@ static int parseFontInfo(ufoCtx h)
             }
             state = prevState;
         }
-		else if (state == 4)
+        else if (state == 4)
         {
-			continue;
+            continue;
         }
-		else if (tokenEqualStr(tk, "<dict>"))
+        else if (tokenEqualStr(tk, "<dict>"))
         {
-			if (state > 0)
+            if (state > 0)
             {
                 skipToDictEnd(h);
             }
             else
                 state = 1;
         }
-		else if (tokenEqualStr(tk, "</dict>"))
+        else if (tokenEqualStr(tk, "</dict>"))
         {
-                seenDict = 1;
                 break;
         }
-		else if (state > 4)
+        else if (state > 4)
             continue;
-		else if (tokenEqualStr(tk, "<key>"))
+        else if (tokenEqualStr(tk, "<key>"))
         {
-			if (state != 1)
+            if (state != 1)
             {
                 fatal(h,ufoErrParse,  "Encountered '<key>' while not in top level of first <dict>, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
             }
@@ -2185,7 +2015,7 @@ static int parseFontInfo(ufoCtx h)
                 state = 3;
             dnaSET_CNT(h->valueArray, 0);
         }
-		else if (tokenEqualStr(tk, "</array>"))
+        else if (tokenEqualStr(tk, "</array>"))
         {
             if (state != 3)
             {
@@ -2227,7 +2057,7 @@ static int parseFontInfo(ufoCtx h)
             setFontDictKey(h, "1");
             state--;
         }
- 		else if (state != 0)
+        else if (state != 0)
         {
             tk->val[tk->length -1] = 0;
              message(h, "Warning: discarding token '%s', in fontinfo.plist file. Context: '%s'.", tk->val, getBufferContextPtr(h));
@@ -2235,36 +2065,35 @@ static int parseFontInfo(ufoCtx h)
                 state = 1;
             else if (state == 3)
                 state = 2;
-            
+
         }
         else
         {
             if (seenDict) // If we have seen the <dict>, then we are done with any additional parsing
                 break;
         }
-        
+
     } /* end while more tokens */
-    
+
     /* Currently, proscriptStdHW and postscriptStdVW have to be hand-edited in. If they haven't been provided,
      use the first value of the stemsnap entries.
     */
     fixUnsetDictValues(h);
-    
+
     h->cb.stm.close(&h->cb.stm, h->stm.src);
     h->stm.src = NULL;
-	return ufoSuccess;
+    return ufoSuccess;
 }
 
 static int parseUFO(ufoCtx h)
 {
-	/* This does a first pass through the font, loading the glyph name/ID and the path to each glyph file.
+    /* This does a first pass through the font, loading the glyph name/ID and the path to each glyph file.
      Open the UFO fontinfo.plist, and extract the PS infop
      Open the glyphs/contents.plist file, and extract any glyphs that are not in the glyphs.ac/contents.plist file
      */
-    int dummy;
     int retVal = parseFontInfo(h);
     if (retVal == ufoSuccess)
-        dummy = parseGlyphOrder(h);
+        retVal = parseGlyphOrder(h); /* return value was being ignored prior to 15 June 2018, not sure why -- CJC */
     if (retVal == ufoSuccess)
         retVal = parseGlyphList(h);
     if (retVal == ufoSuccess)
@@ -2281,9 +2110,9 @@ static int parsePoint(ufoCtx h, abfGlyphCallbacks *glyph_cb, GLIF_Rec* glifRec, 
     int type = 0;
     char * end;
     char * pointName = NULL;
-    int prevState;
+    int prevState = outlineStart;
     int result = ufoSuccess;
-    
+
     while (1)
     {
         tk = getToken(h, state);
@@ -2291,7 +2120,7 @@ static int parsePoint(ufoCtx h, abfGlyphCallbacks *glyph_cb, GLIF_Rec* glifRec, 
         {
            fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph.%s. Context: %s\n", glifRec->glifFilePath, getBufferContextPtr(h));
         }
-        
+
         else if (tokenEqualStr(tk, "<!--"))
         {
             prevState = state;
@@ -2311,19 +2140,19 @@ static int parsePoint(ufoCtx h, abfGlyphCallbacks *glyph_cb, GLIF_Rec* glifRec, 
         }
         else if (tokenEqualStr(tk, "x="))
         {
-			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             end = tk->val+tk->length;
             x = (float)strtod(tk->val, &end);
         }
         else if (tokenEqualStr(tk, "y="))
         {
-			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             end = tk->val+tk->length;
             y =  (float)strtod(tk->val, &end);
         }
         else if (tokenEqualStr(tk, "name="))
         {
-			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             if (tk->length > 0)
             {
                 pointName = memNew(h, tk->length+1);
@@ -2332,11 +2161,11 @@ static int parsePoint(ufoCtx h, abfGlyphCallbacks *glyph_cb, GLIF_Rec* glifRec, 
                 pointName[tk->length] = 0;
             }
          }
-        
-        
+
+
         else if (tokenEqualStr(tk, "type="))
         {
-			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             if (tokenEqualStr(tk, "move"))
                 type = 1;
             else if (tokenEqualStr(tk, "line"))
@@ -2368,8 +2197,8 @@ static int parsePoint(ufoCtx h, abfGlyphCallbacks *glyph_cb, GLIF_Rec* glifRec, 
             switch(type)
             {
                 case 0:
-					if (pointName != NULL)
-						h->hints.pointName = pointName; /* we need to save the point name for later reference only for off-curve points, to be passed into the curve OpRec */
+                    if (pointName != NULL)
+                        h->hints.pointName = pointName; /* we need to save the point name for later reference only for off-curve points, to be passed into the curve OpRec */
                    break;
                 case 1:
                     {
@@ -2387,11 +2216,11 @@ static int parsePoint(ufoCtx h, abfGlyphCallbacks *glyph_cb, GLIF_Rec* glifRec, 
                 {
                     /* The hint set which precedes a curve is referenced in the point name for the first point of the curve.
                     This is currently stored in h->hints.pointName. Save, it, then set h->hints.pointName to NULL.
-                     
+
                      A curve has a point name in teh final point only when the point is the first point of the contour,
                      and the last two points are at the end of the contour. Im this case,  h->hints.pointName is always NULL,
                      and the hint reference is applied before the move-to of the contour.*/
-                    
+
                     if (pointName != NULL)
                         doOp_ct(h, glyph_cb, pointName);
                     else if (h->hints.pointName != NULL)
@@ -2418,17 +2247,17 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
 static int parseComponent(ufoCtx h, GLIF_Rec* glifRec, abfGlyphCallbacks *glyph_cb, int state, Transform* transform)
 {
     int result = ufoSuccess;
-    abfGlyphInfo* gi;
-    
+    abfGlyphInfo* gi = NULL;
+
     token* tk;
     char * end;
-    int prevState;
+    int prevState = outlineStart;
     Transform localTransform; // transform specified in component
     Transform* newTransform = NULL; // result of multiplication with existing transform.
     float val;
 
     setTransformMtx(&localTransform, 1.0 ,0 ,0 ,1.0 ,0 ,0, 1, 1);
-    
+
     while (1)
     {
         tk = getToken(h, state);
@@ -2436,7 +2265,7 @@ static int parseComponent(ufoCtx h, GLIF_Rec* glifRec, abfGlyphCallbacks *glyph_
         {
              fatal(h,ufoErrParse,  "Encountered end of buffer before end of component. Glyph: %s, Context: %s.\n", glifRec->glifFilePath,  getBufferContextPtr(h));
         }
-        
+
         else if (tokenEqualStr(tk, "<!--"))
         {
             prevState = state;
@@ -2458,7 +2287,7 @@ static int parseComponent(ufoCtx h, GLIF_Rec* glifRec, abfGlyphCallbacks *glyph_
         {
             size_t index;
             char* glyphName;
-			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             end = tk->val+tk->length;
             *end = 0;
             glyphName = tk->val;
@@ -2469,12 +2298,12 @@ static int parseComponent(ufoCtx h, GLIF_Rec* glifRec, abfGlyphCallbacks *glyph_
                 result = ufoErrNoGlyph;
                 break;
             }
-            
+
             gi = &h->chars.index.array[h->chars.byName.array[index]];
         }
         else if (tokenEqualStr(tk, "xScale="))
         {
- 			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             end = tk->val+tk->length;
             *end = 0;
            val =  (float)strtod(tk->val, &end);
@@ -2482,7 +2311,7 @@ static int parseComponent(ufoCtx h, GLIF_Rec* glifRec, abfGlyphCallbacks *glyph_
         }
         else if (tokenEqualStr(tk, "yScale="))
         {
- 			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             end = tk->val+tk->length;
             *end = 0;
            val =  (float)strtod(tk->val, &end);
@@ -2490,7 +2319,7 @@ static int parseComponent(ufoCtx h, GLIF_Rec* glifRec, abfGlyphCallbacks *glyph_
         }
         else if (tokenEqualStr(tk, "xyScale="))
         {
- 			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             end = tk->val+tk->length;
             *end = 0;
             val =  (float)strtod(tk->val, &end);
@@ -2498,7 +2327,7 @@ static int parseComponent(ufoCtx h, GLIF_Rec* glifRec, abfGlyphCallbacks *glyph_
         }
         else if (tokenEqualStr(tk, "yxScale="))
         {
- 			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             end = tk->val+tk->length;
             *end = 0;
              val =  (float)strtod(tk->val, &end);
@@ -2506,7 +2335,7 @@ static int parseComponent(ufoCtx h, GLIF_Rec* glifRec, abfGlyphCallbacks *glyph_
         }
         else if (tokenEqualStr(tk, "xOffset="))
         {
- 			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             end = tk->val+tk->length;
             *end = 0;
             val =  (float)strtod(tk->val, &end);
@@ -2514,7 +2343,7 @@ static int parseComponent(ufoCtx h, GLIF_Rec* glifRec, abfGlyphCallbacks *glyph_
         }
         else if (tokenEqualStr(tk, "yOffset="))
         {
- 			tk = getAttribute(h, state);
+            tk = getAttribute(h, state);
             end = tk->val+tk->length;
             *end = 0;
             val =  (float)strtod(tk->val, &end);
@@ -2522,7 +2351,7 @@ static int parseComponent(ufoCtx h, GLIF_Rec* glifRec, abfGlyphCallbacks *glyph_
         }
         else if (tokenEqualStr(tk, "/>"))
         {
-            int filePos;
+            long filePos;
             Transform concatTransform;
             if (gi == NULL)
             {
@@ -2532,7 +2361,7 @@ static int parseComponent(ufoCtx h, GLIF_Rec* glifRec, abfGlyphCallbacks *glyph_
             }
             /* save the current stream */
             filePos = h->src.offset + (h->src.next - h->src.buf);
-            
+
             /* Figure out transforms */
             if (transform == NULL)
             {
@@ -2577,27 +2406,27 @@ static int parseComponent(ufoCtx h, GLIF_Rec* glifRec, abfGlyphCallbacks *glyph_
 static void doOpList(ufoCtx h, abfGlyphInfo* gi,  abfGlyphCallbacks *glyph_cb)
 {
     int i = 0;
-    
+
     /* At this point, we have parsed the outline data, and build a list of pointNameRecs, mapping point names to point index.
     We have also parsed the hint data, and have a a list of hint masks and flexCurves by point name.
     I then step through all the points. We first play back the hintset, if there is one for that pointName.
     */
-    
+
     if (h->data.opList.cnt < 2) // if there is only 1 op, it is a move to. We skip - these are GLIF format 1 anchors.
         return;
-    
+
     while ( i < h->data.opList.cnt)
     {
         int isFlex = 0;
        OpRec* opRec= &h->data.opList.array[i];
-        
+
         if (opRec->pointName != NULL)
         {
             /* We might have a hint set.  play back hints, if any, and if we are being called from a glyph_cb that supports hints ( the metrics cb doesn't) */
             if ((glyph_cb->stem != NULL) && (h->hints.hintMasks.cnt > 0))
             {
                 int m;
-                
+
                 for (m=0; m < h->hints.hintMasks.cnt; m++)
                 {
                     HintMask* hintMask = &h->hints.hintMasks.array[m];
@@ -2613,15 +2442,15 @@ static void doOpList(ufoCtx h, abfGlyphInfo* gi,  abfGlyphCallbacks *glyph_cb)
                     }
                 }
              }
-            
+
             if (opRec->opType == curvetoType)
             {
                 /* check for flex */
-                
+
                 if (h->hints.flexOpList.cnt > 0)
                 {
                     int m;
-                    
+
                     for (m=0; m < h->hints.flexOpList.cnt; m++)
                     {
                         char* flexPointName = h->hints.flexOpList.array[m];
@@ -2634,14 +2463,14 @@ static void doOpList(ufoCtx h, abfGlyphInfo* gi,  abfGlyphCallbacks *glyph_cb)
                 }
             }
         }
-        
+
         /* if the opIndex matches an opIndexFlex value, send a flex op instead. */
         switch (opRec->opType)
         {
             case movetoType:
             {
                 OpRec* nextOpRec;
-                
+
                 /* UFO format fonts can have paths with a single move-to, used as anchor points during design.Moti these. */
                 if ((i+1) == h->data.opList.cnt)
                     break;
@@ -2661,10 +2490,9 @@ static void doOpList(ufoCtx h, abfGlyphInfo* gi,  abfGlyphCallbacks *glyph_cb)
                 int callCurve = 1;
                 if ((glyph_cb->stem != NULL) && isFlex)
                 {
-                    
+
                     OpRec* opRec1= &h->data.opList.array[i+1];
                     /* despite the T1 reference guide, autohint has always emitted a fixed flex depth of 50. */
-                    callCurve = 0;
                     glyph_cb->flex(glyph_cb, 50,
                                    opRec->coords[0], opRec->coords[1],
                                    opRec->coords[2], opRec->coords[3],
@@ -2675,8 +2503,8 @@ static void doOpList(ufoCtx h, abfGlyphInfo* gi,  abfGlyphCallbacks *glyph_cb)
                     i++; /* we skip the next op, since we just cappsed throught the flex callback. */
                     break;
                 }
-                
-                
+
+
                 if (callCurve)
                 {
                     glyph_cb->curve(glyph_cb,
@@ -2686,7 +2514,13 @@ static void doOpList(ufoCtx h, abfGlyphInfo* gi,  abfGlyphCallbacks *glyph_cb)
                 }
                 break;
             }
-                
+            case closepathType:
+            {
+              /* do nothing */
+              /* prior to 15 June 2018 there was no explicit case for closepathType -- CJC */
+              break;
+            }
+
         }
         i++;
     }
@@ -2702,7 +2536,7 @@ static int parseStem(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int st
     float width = 0;
     StemHint* stem;
     int isH = !(stemFlags & ABF_VERT_STEM);
-    
+
     if ((transform != NULL) && (!transform->isOffsetOnly))
     {
         /* We omit stems if the stems are being skewed */
@@ -2711,8 +2545,8 @@ static int parseStem(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int st
         if ( (!isH) && (transform->mtx[1] != 0.0))
             return result;
     }
-    
-    
+
+
     while (1)
     {
         tk = getToken(h, state);
@@ -2720,22 +2554,22 @@ static int parseStem(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int st
         {
             fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph when parsing stem.%s.", glifRec->glyphName);
         }
-        
+
         else if (tokenEqualStr(tk, "pos="))
         {
             tk = getAttribute(h, state);
             end = tk->val+tk->length;
             pos = (float)strtod(tk->val, &end);
         }
-        
+
         else if (tokenEqualStr(tk, "width="))
         {
             tk = getAttribute(h, state);
             end = tk->val+tk->length;
             width = (float)strtod(tk->val, &end);
         }
-        
-        
+
+
         else if (tokenEqualStr(tk, "/>"))
         {
             state = outlineInHintSet;
@@ -2745,14 +2579,14 @@ static int parseStem(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int st
         {
             break;
         }
-        
+
     }
-    
+
     if (state != outlineInHintSet)
     {
         fatal(h,ufoErrParse,  "Encountered unexpected token when parsing stem hint. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
     }
-    
+
     if ((transform != NULL) && (!transform->isDefault))
     {
         float *mtx = (float*)transform->mtx;
@@ -2769,13 +2603,13 @@ static int parseStem(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int st
             }
         }
     }
-    
+
     stem = dnaNEXT(curHintMask->maskStems);
     stem->edge = pos;
     stem->width = width;
     stem->flags = stemFlags;
     return result;
-    
+
 }
 
 
@@ -2789,7 +2623,7 @@ static int parseStem3(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int s
     int i;
     StemHint* stem;
     int isH = !(stemFlags & ABF_VERT_STEM);
-   
+
     if ((transform != NULL) && (!transform->isOffsetOnly))
     {
         /* We omit stems if the stems are being skewed */
@@ -2798,8 +2632,8 @@ static int parseStem3(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int s
         if ( (!isH) && (transform->mtx[1] != 0.0))
             return result;
     }
-    
-    
+
+
     while (1)
     {
         tk = getToken(h, state);
@@ -2807,7 +2641,7 @@ static int parseStem3(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int s
         {
             fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph when parsing stem3.%s.", glifRec->glyphName);
         }
-        
+
         else if (tokenEqualStr(tk, "stem3List="))
         {
             char* start;
@@ -2831,7 +2665,7 @@ static int parseStem3(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int s
                 fatal(h,ufoErrParse,  "When parsing stem3, did not find 6 coordinates. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
             }
         }
-        
+
         else if (tokenEqualStr(tk, "/>"))
         {
             state = outlineInHintSet;
@@ -2841,14 +2675,14 @@ static int parseStem3(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int s
         {
             break;
         }
-        
+
     }
-    
+
     if (state != outlineInHintSet)
     {
         fatal(h,ufoErrParse,  "Encountered unexpected token when parsing stem3 hint. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
     }
-    
+
     if ((transform != NULL) && (!transform->isDefault))
     {
         float *mtx = (float*)transform->mtx;
@@ -2871,11 +2705,11 @@ static int parseStem3(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int s
             }
         }
     }
-    
+
     // Add the stems
     i = 0;
     while (i < 6)
-    { 
+    {
         stem = dnaNEXT(curHintMask->maskStems);
         stem->edge = coords[i++];
         stem->width = coords[i++];
@@ -2884,7 +2718,7 @@ static int parseStem3(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int s
             stemFlags &= ~ABF_NEW_HINTS;
     }
     return result;
-    
+
 }
 
 
@@ -2894,7 +2728,7 @@ static int parseType1HintSet(ufoCtx h, GLIF_Rec* glifRec, char* pointName, Trans
     int result = ufoSuccess;
     int state = outlineInHintSet;
     token* tk;
-    int prevState;
+    int prevState = outlineInHintSet;
     int stemFlags = 0;
     HintMask * curHintMask;
 
@@ -2912,7 +2746,7 @@ static int parseType1HintSet(ufoCtx h, GLIF_Rec* glifRec, char* pointName, Trans
         {
             fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
         }
-        
+
         else if (tokenEqualStr(tk, "<!--"))
         {
             prevState = state;
@@ -2930,7 +2764,7 @@ static int parseType1HintSet(ufoCtx h, GLIF_Rec* glifRec, char* pointName, Trans
         {
             continue;
         }
-        
+
         else if (tokenEqualStr(tk, "<hstem"))
         {
             parseStem(h, glifRec, curHintMask, stemFlags, transform);
@@ -2942,7 +2776,7 @@ static int parseType1HintSet(ufoCtx h, GLIF_Rec* glifRec, char* pointName, Trans
             parseStem3(h, glifRec, curHintMask, stemFlags, transform);
             stemFlags = 0;
         }
-        
+
         else if (tokenEqualStr(tk, "<vstem"))
         {
             stemFlags |= ABF_VERT_STEM;
@@ -2956,7 +2790,7 @@ static int parseType1HintSet(ufoCtx h, GLIF_Rec* glifRec, char* pointName, Trans
             parseStem3(h, glifRec, curHintMask, stemFlags, transform);
             stemFlags = 0;
        }
-        
+
         else if (tokenEqualStr(tk, "</hintset>"))
         {
             if (state != outlineInHintSet)
@@ -2970,11 +2804,11 @@ static int parseType1HintSet(ufoCtx h, GLIF_Rec* glifRec, char* pointName, Trans
             printf("parseT1HintSet: unhandled token: %s\n", tk->val);
             continue;
         }
-        
-        
+
+
     }
-    
-    
+
+
     return result;
 }
 
@@ -2983,9 +2817,9 @@ static int parseType1HintDataV1(ufoCtx h, GLIF_Rec* glifRec, Transform* transfor
     int result = ufoSuccess;
     int state = outlineInHintData;
     char * pointName = NULL;
-    
+
     token* tk;
-    int prevState;
+    int prevState = outlineInHintData;
     //printf("Parsing Type1 hint data.\n");
     /* This is Adobe private T1 hint data, so we report a fatal error if the struture is not as expected */
     while (1)
@@ -2995,7 +2829,7 @@ static int parseType1HintDataV1(ufoCtx h, GLIF_Rec* glifRec, Transform* transfor
         {
             fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
         }
-        
+
         else if (tokenEqualStr(tk, "<!--"))
         {
             prevState = state;
@@ -3028,10 +2862,10 @@ static int parseType1HintDataV1(ufoCtx h, GLIF_Rec* glifRec, Transform* transfor
                 {
                     fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
                 }
-                
+
                 if (tokenEqualStr(tk, "id="))
                 {
-                    tk = getAttribute(h, state);
+                    getAttribute(h, state);
                     /* We discard the ID - tx assumes the file is up to date */
                     tk = getToken(h, state);
                 }
@@ -3049,10 +2883,9 @@ static int parseType1HintDataV1(ufoCtx h, GLIF_Rec* glifRec, Transform* transfor
             }
             state = outlineInHintData;
         }
- 
+
         else if (tokenEqualStr(tk, "<hintset"))
         {
-            char* end;
             if (state != outlineInHintSetList)
             {
                 fatal(h,ufoErrParse,  "Encountered <hintset> when not under <hintSetList>. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
@@ -3062,28 +2895,27 @@ static int parseType1HintDataV1(ufoCtx h, GLIF_Rec* glifRec, Transform* transfor
             {
                 fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph.. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
             }
-            
+
             if (!tokenEqualStr(tk, "pointTag="))
             {
                 fatal(h,ufoErrParse,  "Failed to find pointIndex attribute in <hintset pointIndex='n'>. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
             }
-            
+
             tk = getAttribute(h, state);
-            end = tk->val+tk->length;
             pointName = memNew(h, tk->length+1);
             strcpy(pointName, tk->val);
             /* We discard the ID - tx assumes the file is up to date */
-            
+
             tk = getToken(h, state);
             if (!tokenEqualStr(tk, ">"))
             {
                 fatal(h,ufoErrParse, "Failed to find end of element for <hintset pointIndex='n'> element. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
             }
-            
+
             parseType1HintSet(h, glifRec, pointName, transform);
             pointName = NULL;
         }
-        
+
         else if (tokenEqualStr(tk, "<flexList>"))
         {
             if (state != outlineInHintSetList)
@@ -3102,8 +2934,6 @@ static int parseType1HintDataV1(ufoCtx h, GLIF_Rec* glifRec, Transform* transfor
         }
         else if (tokenEqualStr(tk, "<flex"))
         {
-            char* end;
-            
             if (state != outlineInFlexList)
             {
                 fatal(h,ufoErrParse,  "Encountered <flex> when not under <outlineInFlexList>. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
@@ -3113,32 +2943,31 @@ static int parseType1HintDataV1(ufoCtx h, GLIF_Rec* glifRec, Transform* transfor
             {
                 fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph.. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
             }
-            
+
             if (!tokenEqualStr(tk, "pointTag="))
             {
                 fatal(h,ufoErrParse,  "Failed to find pointTag attribute in <flex pointTag='n'>. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
             }
 
-            
+
             if ((transform == NULL) || ( (transform->mtx[1] == 0) && (transform->mtx[2] == 0)))
             { /* Omit flex if the transform exists and has any skew. */
                 tk = getAttribute(h, state);
-                end = tk->val+tk->length;
                 pointName = memNew(h, tk->length+1);
                 strncpy(pointName, tk->val, tk->length);
                 pointName[tk->length] = 0;
-                
+
                 tk = getToken(h, state);
                 if (!tokenEqualStr(tk, "/>"))
                 {
                     fatal(h,ufoErrParse, "Failed to find end of element for <hintset pointIndex='n'> element. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
                 }
-                
+
                 *dnaNEXT(h->hints.flexOpList) = pointName;
                 pointName = NULL;
             }
         }
-        
+
         else if (tokenEqualStr(tk, "</data>"))
         {
             if (state != outlineInHintData)
@@ -3176,8 +3005,8 @@ static int parseStemV2(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int 
         if ( (!isH) && (transform->mtx[1] != 0.0))
             return result;
     }
-    
-    
+
+
     while (1)
     {
         tk = getToken(h, state);
@@ -3185,7 +3014,7 @@ static int parseStemV2(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int 
         {
             fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph when parsing stem.%s.", glifRec->glyphName);
         }
-        
+
         else if (tokenEqualStr(tk, "</string>"))
         {
             if (count != 2)
@@ -3195,39 +3024,39 @@ static int parseStemV2(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int 
             state = outlineInHintSet;
             break;
         }
-        
+
         else if (tk->val[0] == '<')
         {
             fatal(h,ufoErrParse,  "Encountered new XML element before seeing both pos and width. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
             return result;
         }
-        
+
         else if (count == 0)
         {
             end = tk->val+tk->length;
             pos = (float)strtod(tk->val, &end);
             count++;
         }
-        
+
         else if (count == 1)
         {
             end = tk->val+tk->length;
             width = (float)strtod(tk->val, &end);
             count++;
         }
-        
+
         else
         {
             break;
         }
-        
+
     }
-    
+
     if (state != outlineInHintSet)
     {
         fatal(h,ufoErrParse,  "Encountered unexpected token when parsing stem hint. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
     }
-    
+
     if ((transform != NULL) && (!transform->isDefault))
     {
         float *mtx = (float*)transform->mtx;
@@ -3244,13 +3073,13 @@ static int parseStemV2(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int 
             }
         }
     }
-    
+
     stem = dnaNEXT(curHintMask->maskStems);
     stem->edge = pos;
     stem->width = width;
     stem->flags = stemFlags;
     return result;
-    
+
 }
 
 
@@ -3264,7 +3093,7 @@ static int parseStem3V2(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int
     StemHint* stem;
     int isH = !(stemFlags & ABF_VERT_STEM);
     int count = 0;
-    
+
     if ((transform != NULL) && (!transform->isOffsetOnly))
     {
         /* We omit stems if the stems are being skewed */
@@ -3273,8 +3102,8 @@ static int parseStem3V2(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int
         if ( (!isH) && (transform->mtx[1] != 0.0))
             return result;
     }
-    
-    
+
+
     while (1)
     {
         tk = getToken(h, state);
@@ -3296,7 +3125,7 @@ static int parseStem3V2(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int
             fatal(h,ufoErrParse,  "Encountered new XML element before seeing both pos and width in stem3 hint. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
             return result;
         }
-        
+
         else
         {
             char* start;
@@ -3311,7 +3140,6 @@ static int parseStem3V2(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int
                 start = tk->val;
                 end = start + tk->length;
                 coords[count] = (float)strtod(start, &end);
-                start = end +1;
                 count++;
             }
             if (count != 6)
@@ -3319,14 +3147,14 @@ static int parseStem3V2(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int
                 fatal(h,ufoErrParse,  "When parsing stem3, did not find 6 coordinates. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
             }
         }
-         
+
     }
-    
+
     if (state != outlineInStemHint)
     {
         fatal(h,ufoErrParse,  "Encountered unexpected token when parsing stem3 hint. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
     }
-    
+
     if ((transform != NULL) && (!transform->isDefault))
     {
         float *mtx = (float*)transform->mtx;
@@ -3349,7 +3177,7 @@ static int parseStem3V2(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int
             }
         }
     }
-    
+
     // Add the stems
     count = 0;
     while (count < 6)
@@ -3362,7 +3190,7 @@ static int parseStem3V2(ufoCtx h, GLIF_Rec* glifRec, HintMask * curHintMask, int
             stemFlags &= ~ABF_NEW_HINTS;
     }
     return result;
-    
+
 }
 
 
@@ -3372,13 +3200,13 @@ static int parseHintSetV2(ufoCtx h, GLIF_Rec* glifRec, char* pointName, Transfor
     int result = ufoSuccess;
     int state = outlineInHintSet;
     token* tk;
-    int prevState;
+    int prevState = outlineInHintSet;
     int stemFlags = 0;
     HintMask * curHintMask;
-    
+
     curHintMask = dnaNEXT(h->hints.hintMasks);
     curHintMask->pointName = pointName;
-    
+
     //printf("Parsing Type1 hint set.\n");
     if (h->hints.hintMasks.cnt > 1)
         stemFlags |= ABF_NEW_HINTS;
@@ -3389,7 +3217,7 @@ static int parseHintSetV2(ufoCtx h, GLIF_Rec* glifRec, char* pointName, Transfor
         {
             fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
         }
-        
+
         else if (tokenEqualStr(tk, "<!--"))
         {
             prevState = state;
@@ -3407,22 +3235,22 @@ static int parseHintSetV2(ufoCtx h, GLIF_Rec* glifRec, char* pointName, Transfor
         {
             continue;
         }
-        
+
         else if (tokenEqualStr(tk, "</array>"))
         {
             return result;
         }
-        
+
         else if (tokenEqualStr(tk, "<string>"))
         {
             continue;
         }
-        
+
         else if (tokenEqualStr(tk, "</string>"))
         {
             continue;
         }
-        
+
         else if (tokenEqualStr(tk, "hstem"))
         {
             parseStemV2(h, glifRec, curHintMask, stemFlags, transform);
@@ -3434,7 +3262,7 @@ static int parseHintSetV2(ufoCtx h, GLIF_Rec* glifRec, char* pointName, Transfor
             parseStem3V2(h, glifRec, curHintMask, stemFlags, transform);
             stemFlags = 0;
         }
-        
+
         else if (tokenEqualStr(tk, "vstem"))
         {
             stemFlags |= ABF_VERT_STEM;
@@ -3448,17 +3276,17 @@ static int parseHintSetV2(ufoCtx h, GLIF_Rec* glifRec, char* pointName, Transfor
             parseStem3V2(h, glifRec, curHintMask, stemFlags, transform);
             stemFlags = 0;
         }
-        
+
         else
         {
             printf("parseT1HintSet: unhandled token: %s\n", tk->val);
             continue;
         }
-        
-        
+
+
     }
-    
-    
+
+
     return result;
 }
 
@@ -3467,14 +3295,11 @@ static int parseHintSetListV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
     int result = ufoSuccess;
     int state = outlineInHintData;
     token* tk;
-    int prevState;
-    int stemFlags = 0;
+    int prevState = outlineInHintData;
     char* pointName = NULL;
-    
-    
+
+
     //printf("Parsing Type1 hint set.\n");
-    if (h->hints.hintMasks.cnt > 1)
-        stemFlags |= ABF_NEW_HINTS;
     while (1)
     {
         tk = getToken(h, state);
@@ -3482,7 +3307,7 @@ static int parseHintSetListV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
         {
             fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
         }
-        
+
         else if (tokenEqualStr(tk, "<!--"))
         {
             prevState = state;
@@ -3500,19 +3325,18 @@ static int parseHintSetListV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
         {
             continue;
         }
-        
+
         else if (tokenEqualStr(tk, "<array>") && (state == outlineInHintData))
         {
             state = outlineInHintSetList;
             continue;
         }
-        
+
         else if (tokenEqualStr(tk, "</array>") && (state == outlineInHintSetList))
         {
-            state = outlineInHintData;
             return result;
         }
-        
+
         else if (tokenEqualStr(tk, "<key>") && (state == outlineInHintSet))
         {
             tk = getToken(h, state);
@@ -3524,7 +3348,7 @@ static int parseHintSetListV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
             {
                 fatal(h,ufoErrParse,  "hintSet entry was empty. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
             }
-            
+
             if (!strcmp(tk->val, "pointTag"))
             {
                 state = outlineInHintSetName;
@@ -3551,13 +3375,13 @@ static int parseHintSetListV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
             pointName = memNew(h, tk->length+1);
             strcpy(pointName, tk->val);
             //pointName[tk->length+1] = 0;
-            
+
             tk = getToken(h, state);
             if (!tokenEqualStr(tk, "</string>"))
             {
                 fatal(h,ufoErrParse, "Failed to find end of element for <string>hintSet name. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
             }
-            
+
             state = outlineInHintSetStemList;
             continue;
         }
@@ -3572,7 +3396,7 @@ static int parseHintSetListV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
             {
                 fatal(h,ufoErrParse,  "hintSet entry was empty. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
             }
-            
+
             if (!strcmp(tk->val, "stems"))
             {
                 tk = getToken(h, state);
@@ -3595,7 +3419,7 @@ static int parseHintSetListV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
             continue;
         }
 
-        
+
         else if (tokenEqualStr(tk, "</dict>") && (state == outlineInHintSet))
         {
             state = outlineInHintSetList;
@@ -3606,17 +3430,17 @@ static int parseHintSetListV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
             state = outlineInHintSet;
             continue;
         }
-        
+
         else
         {
             printf("parseHintSetListV2: unhandled token: %s. Glyph: %s. Context: %s\n.", tk->val, glifRec->glyphName, getBufferContextPtr(h));
             continue;
         }
-        
-        
+
+
     }
-    
-    
+
+
     return result;
 }
 
@@ -3625,9 +3449,9 @@ static int parseFlexListV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
     int result = ufoSuccess;
     int state = outlineInHintData;
     token* tk;
-    int prevState;
+    int prevState = outlineInHintData;
     char* pointName;
-     
+
     while (1)
     {
         tk = getToken(h, state);
@@ -3635,7 +3459,7 @@ static int parseFlexListV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
         {
             fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
         }
-        
+
         else if (tokenEqualStr(tk, "<!--"))
         {
             prevState = state;
@@ -3653,60 +3477,55 @@ static int parseFlexListV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
         {
             continue;
         }
-        
+
         else if (tokenEqualStr(tk, "<array>") && (state == outlineInHintData))
         {
             state = outlineInFlexList;
             continue;
         }
-        
+
         else if (tokenEqualStr(tk, "</array>") && (state == outlineInFlexList))
         {
-            state = outlineInFlexList;
             return result;
         }
-        
-        
+
+
         else if (tokenEqualStr(tk, "<string>") && (state == outlineInFlexList))
         {
             tk = getToken(h, state);
             if (tk == NULL)
             {
                 fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph.. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-            }
-            
-            if (tk->val[0] == '<')
+            } else if (tk->val[0] == '<')
             {
                 fatal(h,ufoErrParse,  "Entry in flexList was empty. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-            }
-            
-            if ((transform == NULL) || ( (transform->mtx[1] == 0) && (transform->mtx[2] == 0)))
+            } else if ((transform == NULL) || ( (transform->mtx[1] == 0) && (transform->mtx[2] == 0)))
             { /* Omit flex if the transform exists and has any skew. */
                 pointName = memNew(h, tk->length+1);
                 strcpy(pointName, tk->val);
                 //pointName[tk->length+1] = 0;
-                
+
                 tk = getToken(h, state);
                 if (!tokenEqualStr(tk, "</string>"))
                 {
                     fatal(h,ufoErrParse, "Failed to find end of element for <string>flexPointName. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
                 }
-                
+
                 *dnaNEXT(h->hints.flexOpList) = pointName;
                 pointName = NULL;
             }
         }
- 
+
         else
         {
             fatal(h,ufoErrParse, "parseFlexListV2: unhandled token: %s. Glyph: %s. Context: %s\n.", tk->val, glifRec->glyphName, getBufferContextPtr(h));
             continue;
         }
-        
-        
+
+
     }
-    
-    
+
+
     return result;
 }
 
@@ -3715,10 +3534,9 @@ static int parseType1HintDataV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transfor
 {
     int result = ufoSuccess;
     int state = outlineInHintData;
-    char * pointName = NULL;
-    
+
     token* tk;
-    int prevState;
+    int prevState = outlineInHintData;
     //printf("Parsing Type1 hint data.\n");
     /* This is Adobe private T1 hint data, so we report a fatal error if the struture is not as expected */
     while (1)
@@ -3728,7 +3546,7 @@ static int parseType1HintDataV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transfor
         {
             fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
         }
-        
+
         else if (tokenEqualStr(tk, "<!--"))
         {
             prevState = state;
@@ -3746,7 +3564,7 @@ static int parseType1HintDataV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transfor
         {
             continue;
         }
-        
+
         else if (tokenEqualStr(tk, "</dict>"))
         {
             return result;
@@ -3760,19 +3578,19 @@ static int parseType1HintDataV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transfor
             }
             if (!strcmp(tk->val, "id"))
             {
-                tk = getToken(h, state); /* skip the close key */
+                getToken(h, state); /* skip the close key */
                 state = outlineInID;
                 continue;
             }
             else if (!strcmp(tk->val, "hintSetList"))
             {
-                tk = getToken(h, state); /* skip the close key */
+                getToken(h, state); /* skip the close key */
                 parseHintSetListV2(h, glifRec, transform);
                 continue;
             }
             else if (!strcmp(tk->val, "flexList"))
             {
-                tk = getToken(h, state); /* skip the close key */
+                getToken(h, state); /* skip the close key */
                 parseFlexListV2(h, glifRec, transform);
                 continue;
             }
@@ -3780,8 +3598,8 @@ static int parseType1HintDataV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transfor
             {
                 fatal(h,ufoErrParse, "parseType1HintDataV2: unhandled key value: %s. Glyph: %s. Context: %s\n.", tk->val, glifRec->glyphName, getBufferContextPtr(h));
             }
-           
-           
+
+
        }
         else if ((tokenEqualStr(tk, "<string>")) && (state == outlineInID))
         {
@@ -3810,14 +3628,14 @@ static void skipData(ufoCtx h, GLIF_Rec* glifRec)
     int state = otherDictKey;
     int prevState = otherDictKey;
     token* tk;
-    token* lastToken;
+    token* lastToken = NULL;
     dnaDCL(token, tokenList);
     dnaINIT(h->dna, tokenList, 10,10);
-    
+
     /* We just saw a third party <lib>/<dict>/<key>xx</key>. Now we want to skip until the following item is consumed. */
     do
     {
-        
+
         tk =  getToken(h, state);
         if (tk == NULL)
         {
@@ -3850,7 +3668,7 @@ static void skipData(ufoCtx h, GLIF_Rec* glifRec)
                     if (tk->val[1] == '/')
                     {
                         /* An end token! this should match lastToken, which is the last item pushed on the stack.*/
-                        if (0 == strncmp(&tk->val[2], &lastToken->val[1], lastToken->length-1))
+                        if ((lastToken != NULL) && (0 == strncmp(&tk->val[2], &lastToken->val[1], lastToken->length-1)))
                         {
                             tokenList.cnt--;
                             if (tokenList.cnt == 0)
@@ -3864,7 +3682,7 @@ static void skipData(ufoCtx h, GLIF_Rec* glifRec)
                     }
                     else
                     {
-                       
+
                         if (tk->val[tk->length-1] == '>')
                         { /* A start element */
                             if (tk->val[tk->length-2] == '/')
@@ -3880,7 +3698,7 @@ static void skipData(ufoCtx h, GLIF_Rec* glifRec)
                                 *lastToken = *tk;
                                 state = otherInElement;
                             }
-                            
+
                         }
                         else
                         {
@@ -3889,7 +3707,7 @@ static void skipData(ufoCtx h, GLIF_Rec* glifRec)
                             *lastToken = *tk;
                             state = otherInTag;
                        }
-                   }                   
+                   }
                 }
                 else if ((tk->val[0] == '>') && (tk->length == 1))
                 {
@@ -3924,28 +3742,28 @@ static void skipData(ufoCtx h, GLIF_Rec* glifRec)
 
 static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Transform* transform)
 {
-    
+
     /* The first point in a GLIF outlne serves two purposes: it is the start point, but also the end-point.
      We need to to convert it to the initial move-to, but we also need to
      re-issue it as the original point type at the end of the path.
      */
-    
+
     int result = ufoSuccess;
     int state = outlineStart;
     int prevState = outlineStart;
-    int contourStartOpIndex = 0;
+    long contourStartOpIndex = 0;
     token* tk;
-    
+
     STI sti =  (STI)gi->tag;
     GLIF_Rec* glifRec = &h->data.glifRecs.array[sti];
-    
+
     /* open the file */
     h->src.next = h->mark = NULL;
     h->flags &= ~((unsigned long)SEEN_END);
-    
+
     h->cb.stm.clientFileName = glifRec->glifFilePath;
     h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
-    
+
     /* Note that in preParseGlyph, we found the start of the <outline> element, and set gi->sup.begin
     to that, so we can seek to this and skip all the preceding stuff, if any.
     */
@@ -3954,7 +3772,7 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
         fprintf(stderr, "Failed to open glif file in parseGLIFOutline. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
         fatal(h, ufoErrSrcStream, 0);
     }
-    
+
     if (gi->sup.begin == 0)
     {
         /* This is a non-marking glyph. Just return. */
@@ -3962,17 +3780,17 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
         h->cb.stm.close(&h->cb.stm, h->stm.src);
         return result;
     }
-    
+
     fillbuf(h, gi->sup.begin);
-    
+
     h->stack.cnt = 0;
     h->stack.hintflags = 0;
     h->stack.flags = 0;
- 	h->hints.pointName = NULL;
-   
+    h->hints.pointName = NULL;
+
     do
     {
-        
+
         tk = getToken(h, state);
         if (tk == NULL)
         {
@@ -3990,19 +3808,19 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                 state = outlineInComment;
             }
             else if (tokenEqualStr(tk, "-->"))
-			{
+            {
                 if (state != outlineInComment)
                 {
                     fatal(h,ufoErrParse,  "Encountered end comment token while not in comment. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
                 }
                 state = prevState;
-			}
+            }
             else if (state == outlineInComment)
-			{
+            {
                 continue;
-			}
+            }
             else if (tokenEqualStrN(tk, "<contour", 8))
-			{
+            {
                 if (state != outlineStart)
                 {
                     fatal(h,ufoErrParse,  "Encountered </contour> token unexpectedly. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
@@ -4013,15 +3831,15 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                     tk = getToken(h, state);
                     while (tk->val[tk->length-1] != '>')
                         tk = getToken(h, state);
-                    
+
                     // advance to end token
                 }
                 contourStartOpIndex = h->data.opList.cnt; // This will be the index of the first op in the new contour.
                 h->stack.flags |= PARSE_PATH;
                 h->stack.flags &= ~((unsigned long)PARSE_SEEN_MOVETO);
-			}
+            }
             else if (tokenEqualStr(tk, "</contour>"))
-			{
+            {
                  if (state != outlineInContour)
                 {
                     fatal(h,ufoErrParse,  "Encountered </contour> token unexpectedly. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
@@ -4033,7 +3851,7 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                     OpRec* firstOpRec = &h->data.opList.array[contourStartOpIndex];
                    /* Now we need to fix up the OpList. In GLIF, there is usually no explicit start point, as the format expresses
                      the path segments as a complete closed path, with no explicit start point.
-                     
+
                      I use the first path operator end point as the start point, and convert this first operator to move-to.
                      If the first path operator was a line-to, then I do not add it to the end of the op-list, as it should become an implicit rather than explicit close path.
                      If it is a curve, then I need to add it to the oplist as the final path segment. */
@@ -4054,20 +3872,20 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                         PUSH(firstOpRec->coords[0]);
                         PUSH(firstOpRec->coords[1]);
                         doOp_ct(h, glyph_cb, h->hints.pointName); /* adds a new curve opRec to the op list, using the point name (if any) of the first point of the curve.  */
-                        
+
                         /* doOp_ct can resize the opList array, invalidating the firstOpRec pointer */
                         firstOpRec = &h->data.opList.array[contourStartOpIndex];
                         firstOpRec->opType = movetoType;
-                        
+
                         h->hints.pointName = NULL;
 
                      }
-                    
+
                  }
                  h->stack.flags &= ~((unsigned long)(PARSE_PATH | PARSE_SEEN_MOVETO));
-			}
+            }
             else if (tokenEqualStr(tk, "<point"))
-			{
+            {
                 if (state != outlineInContour)
                 {
                     fatal(h,ufoErrParse,  "Encountered <point token unexpectedly. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
@@ -4077,9 +3895,9 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                 state = outlineInContour;
                 if (ufoSuccess != result)
                     break;
- 			}
+            }
             else if (tokenEqualStr(tk, "<component"))
-			{
+            {
                 if (state != outlineStart)
                 {
                     fatal(h,ufoErrParse,  "Encountered <component token unexpectedly. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
@@ -4089,7 +3907,7 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                 state = outlineStart;
                 if (ufoSuccess != result)
                     break;
- 			}
+            }
             else if (tokenEqualStr(tk, "<lib>"))
             {
                 if (state == outlineStart)
@@ -4134,7 +3952,7 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                         fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
                         h->stack.flags = PARSE_END;
                     }
-                    
+
                     if (0 == strcmp(valueString, t1HintKeyV1))
                     {
                         tk = getToken(h, state);
@@ -4143,7 +3961,7 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                             fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph when parsing t1 hint key. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
                             h->stack.flags = PARSE_END;
                         }
-                        
+
                         if (tokenEqualStr(tk, "<data>"))
                         {
                             parseType1HintDataV1(h, glifRec, transform);
@@ -4157,7 +3975,7 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                             fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph when parsing t1 hint key. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
                             h->stack.flags = PARSE_END;
                         }
-                        
+
                         if (tokenEqualStr(tk, "<dict>"))
                         {
                             parseType1HintDataV2(h, glifRec, transform);
@@ -4168,7 +3986,7 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                         /* We just saw a <key>data<\key> for a  third party <lib><dict>. We want to skip tokens until we see the end of the data. */
                         skipData(h, glifRec);
                     }
-                    
+
                 }
             }
            else if (tokenEqualStr(tk, "</outline>"))
@@ -4189,13 +4007,13 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                 if ((state != outlineInLib) && (state != outlineInLibDict))
                     printf("parseGlyphOutline: unhandled token: %s. Glyph: %s. Context: %s.\n", tk->val, glifRec->glyphName, getBufferContextPtr(h));
             }
-            
-            
-            
+
+
+
         }
     }
     while (!(h->stack.flags & PARSE_END));
-    
+
     /* An odd exit - didn't see  "</glyph>"  */
     h->cb.stm.close(&h->cb.stm, h->stm.src);
     return result;
@@ -4204,24 +4022,24 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
 
 static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb)
 {
-	int result;
-	token op_tk;
-	abfGlyphInfo* gi;
-	long width;
+    int result;
+    token op_tk;
+    abfGlyphInfo* gi;
+    long width;
     int i;
-	
-	op_tk.type = ufoNotSet;
-	
-	gi = &h->chars.index.array[tag];
-    
-	/* note that gname.ptr is not stable: it is a pointer into the h->string->buf array, which moves when it gets resized. */
-	gi->gname.ptr = getString(h, (STI)gi->tag);
-	result = glyph_cb->beg(glyph_cb, gi);
-	gi->flags |= ABF_GLYPH_SEEN;
-    
-    
-	/* Check result */
-	switch (result)
+
+    op_tk.type = ufoNotSet;
+
+    gi = &h->chars.index.array[tag];
+
+    /* note that gname.ptr is not stable: it is a pointer into the h->string->buf array, which moves when it gets resized. */
+    gi->gname.ptr = getString(h, (STI)gi->tag);
+    result = glyph_cb->beg(glyph_cb, gi);
+    gi->flags |= ABF_GLYPH_SEEN;
+
+
+    /* Check result */
+    switch (result)
     {
         case ABF_SKIP_RET:
             return ufoSuccess;
@@ -4230,36 +4048,36 @@ static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb)
         case ABF_FAIL_RET:
             fatal(h, ufoErrParseFail, NULL);
     }
-	result = h->metrics.cb.beg(&h->metrics.cb, &h->metrics.gi);
+    result = h->metrics.cb.beg(&h->metrics.cb, &h->metrics.gi);
     width = getWidth(h, (STI)gi->tag);
     glyph_cb->width(glyph_cb, (float)width );
     if (result == ABF_WIDTH_RET)
         return ufoSuccess;
-    
+
     parseGLIF(h, gi, glyph_cb, NULL);
     doOpList(h, gi, glyph_cb);
     h->stm.src = NULL;
     doOp_ed(h, glyph_cb); //  we do this outside of parseGLIFOutline so that we can use parseGLIFOutline to process component glyphs.
 
     /* set the FontBBox field in the abfTopDict */
-	h->top.FontBBox[0] = h->aggregatebounds.left;
-	h->top.FontBBox[1] = h->aggregatebounds.bottom;
-	h->top.FontBBox[2] = h->aggregatebounds.right;
-	h->top.FontBBox[3] = h->aggregatebounds.top;
-    
+    h->top.FontBBox[0] = h->aggregatebounds.left;
+    h->top.FontBBox[1] = h->aggregatebounds.bottom;
+    h->top.FontBBox[2] = h->aggregatebounds.right;
+    h->top.FontBBox[3] = h->aggregatebounds.top;
+
     /* clear out any point names from the last run */
     if (h->data.opList.cnt > 0)
     {
         for (i=0; i < h->data.opList.cnt; i++)
         {
             OpRec* opRec =  &h->data.opList.array[i++];
-			if (opRec->pointName != NULL)
-			{
-			memFree(h,  opRec->pointName);
+            if (opRec->pointName != NULL)
+            {
+            memFree(h,  opRec->pointName);
             opRec->pointName = NULL;
-			}
+            }
         }
-		h->data.opList.cnt = 0; /* zero the list of ops in the glyph */
+        h->data.opList.cnt = 0; /* zero the list of ops in the glyph */
     }
     /* reset all the hint masks */
     if (h->hints.hintMasks.cnt > 0)
@@ -4268,28 +4086,28 @@ static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb)
         {
              HintMask* curMask = dnaINDEX(h->hints.hintMasks, i );
             curMask->maskStems.cnt = 0;
-			if (curMask->pointName != NULL)
+            if (curMask->pointName != NULL)
             {
                 memFree(h, curMask->pointName);
                 curMask->pointName = NULL;
             }
- 
+
         }
-		h->hints.hintMasks.cnt = 0;
+        h->hints.hintMasks.cnt = 0;
     }
 
-	/* clear the list of flex names */
-	 if (h->hints.flexOpList.cnt > 0)
-	 {
+    /* clear the list of flex names */
+     if (h->hints.flexOpList.cnt > 0)
+     {
        for (i=0; i < h->hints.flexOpList.cnt; i++)
        {
-		   char* flexPointName = h->hints.flexOpList.array[i++];
-		   memFree(h, flexPointName);
-	   }
-	   h->hints.flexOpList.cnt = 0;
-	 }
-    
-	return ufoSuccess;
+           char* flexPointName = h->hints.flexOpList.array[i++];
+           memFree(h, flexPointName);
+       }
+       h->hints.flexOpList.cnt = 0;
+     }
+
+    return ufoSuccess;
 }
 
 /* --------------------------- String Management --------------------------- */
@@ -4297,22 +4115,15 @@ static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb)
 /* Initialize strings. */
 static void newStrings(ufoCtx h)
 {
-	dnaINIT(h->dna, h->strings.index, 50, 200);
-	dnaINIT(h->dna, h->strings.buf, 32000, 6000);
-}
-
-/* Reinitilize strings for new font. */
-static void initStrings(ufoCtx h)
-{
-	h->strings.index.cnt = 0;
-	h->strings.buf.cnt = 0;
+    dnaINIT(h->dna, h->strings.index, 50, 200);
+    dnaINIT(h->dna, h->strings.buf, 32000, 6000);
 }
 
 /* Free strings. */
 static void freeStrings(ufoCtx h)
 {
-	dnaFREE(h->strings.index);
-	dnaFREE(h->strings.buf);
+    dnaFREE(h->strings.index);
+    dnaFREE(h->strings.buf);
 }
 
 /* Add string. */
@@ -4320,55 +4131,55 @@ static void freeStrings(ufoCtx h)
 /* static STI addString(ufoCtx h, unsigned length, const char *value) */
 static STI addString(ufoCtx h, size_t length, const char *value)
 {
-	STI sti = (STI)h->strings.index.cnt;
-    
-	if (length == 0)
+    STI sti = (STI)h->strings.index.cnt;
+
+    if (length == 0)
     {
-		/* A null name (/) is legal in PostScript but could lead to unexpected
+        /* A null name (/) is legal in PostScript but could lead to unexpected
          behaviour elsewhere in the coretype libraries so it is substituted
          for a name that is very likely to be unique in the font */
-		const char subs_name[] = "_null_name_substitute_";
-		value = subs_name;
-		length = sizeof(subs_name) - 1;
-		message(h, "null charstring name");
+        const char subs_name[] = "_null_name_substitute_";
+        value = subs_name;
+        length = sizeof(subs_name) - 1;
+        message(h, "null charstring name");
     }
-    
-	/* Add new string index */
-	*dnaNEXT(h->strings.index) = h->strings.buf.cnt;
-    
-	/* Add null-terminated string to buffer */
-	/* 64-bit warning fixed by cast here HO */
-	memcpy(dnaEXTEND(h->strings.buf, (long)(length + 1)), value, length);
-	h->strings.buf.array[h->strings.buf.cnt - 1] = '\0';
-    
-	return sti;
+
+    /* Add new string index */
+    *dnaNEXT(h->strings.index) = h->strings.buf.cnt;
+
+    /* Add null-terminated string to buffer */
+    /* 64-bit warning fixed by cast here HO */
+    memcpy(dnaEXTEND(h->strings.buf, (long)(length + 1)), value, length);
+    h->strings.buf.array[h->strings.buf.cnt - 1] = '\0';
+
+    return sti;
 }
 
 /* Get string from STI. */
 static char *getString(ufoCtx h, STI sti)
 {
-	return &h->strings.buf.array[h->strings.index.array[sti]];
+    return &h->strings.buf.array[h->strings.index.array[sti]];
 }
 
 /* ----------------------Width management -----------------------*/
 static void addWidth(ufoCtx h, STI sti, long value)
 {
-	if (sti != h->chars.widths.cnt)
-	{
-		fatal(h, ufoErrParse, "Width index does not match glyph name index. Glyph index %d.", sti);
-	}
-	*dnaNEXT(h->chars.widths) = value;
-    
+    if (sti != h->chars.widths.cnt)
+    {
+        fatal(h, ufoErrParse, "Width index does not match glyph name index. Glyph index %d.", sti);
+    }
+    *dnaNEXT(h->chars.widths) = value;
+
 }
 
 static long getWidth(ufoCtx h, STI sti)
 {
-	return h->chars.widths.array[sti];
+    return h->chars.widths.array[sti];
 }
 
 static void setWidth(ufoCtx h, STI sti, long value)
 {
-	h->chars.widths.array[sti] = value;
+    h->chars.widths.array[sti] = value;
 }
 
 /* ----------------------Char management -----------------------*/
@@ -4376,205 +4187,191 @@ static void setWidth(ufoCtx h, STI sti, long value)
 /* Match glyph name. */
 static int CTL_CDECL matchChar(const void *key, const void *value, void *ctx)
 {
-	ufoCtx h = ctx;
-	return strcmp((char *)key, getString(h, (STI)h->chars.index.array
-										 [*(long *)value].tag) );
+    ufoCtx h = ctx;
+    return strcmp((char *)key, getString(h, (STI)h->chars.index.array
+                                         [*(long *)value].tag) );
 }
 
 /* Add char record. Return 1 if record exists else 0. Char record returned by
  "chr" parameter. */
 static int addChar(ufoCtx h, STI sti, Char **chr)
 {
-	size_t index;
-	int found =
+    size_t index;
+    int found =
     ctuLookup(getString(h, sti),
               h->chars.byName.array, h->chars.byName.cnt,
               sizeof(h->chars.byName.array[0]), matchChar, &index, h);
-	
-	if (found)
+
+    if (found)
     /* Match found; return existing record */
-		*chr = &h->chars.index.array[h->chars.byName.array[index]];
-	else
+        *chr = &h->chars.index.array[h->chars.byName.array[index]];
+    else
     {
-		/* Not found; add to table and return new record */
-		long *new = &dnaGROW(h->chars.byName, h->chars.byName.cnt)[index];
-		
-		/* Make and fill hole */
-		memmove(new + 1, new, (h->chars.byName.cnt++ - index) *
-				sizeof(h->chars.byName.array[0]));
-		*new = h->chars.index.cnt;
-        
-		*chr = dnaNEXT(h->chars.index);
+        /* Not found; add to table and return new record */
+        long *new = &dnaGROW(h->chars.byName, h->chars.byName.cnt)[index];
+
+        /* Make and fill hole */
+        memmove(new + 1, new, (h->chars.byName.cnt++ - index) *
+                sizeof(h->chars.byName.array[0]));
+        *new = h->chars.index.cnt;
+
+        *chr = dnaNEXT(h->chars.index);
     }
-    
-	return found;
-}
 
-/* Find char by name. NULL if not found else char record. */
-static Char *findChar(ufoCtx h, STI sti)
-{
-	size_t index;
-	if (ctuLookup(getString(h, sti),
-				  h->chars.byName.array, h->chars.byName.cnt,
-				  sizeof(h->chars.byName.array[0]), matchChar, &index, h))
-		return &h->chars.index.array[h->chars.byName.array[index]];
-	else
-		return NULL;
+    return found;
 }
-
 
 /* ---------------------- Public API -----------------------*/
 
 /* Parse files */
 int ufoBegFont(ufoCtx h, long flags, abfTopDict **top,  char *altLayerDir)
 {
-	int result;
-    char *dummy;
-    
-	/* Set error handler */
+    int result;
+
+    /* Set error handler */
   DURING_EX(h->err.env)
-  
+
     /* Initialize */
     abfInitTopDict(&h->top);
     abfInitFontDict(&h->fdict);
-      
+
     h->top.FDArray.cnt = 1;
     h->top.FDArray.array = &h->fdict;
-      
+
     /* init glyph data structures used */
     h->valueArray.cnt = 0;
     h->chars.index.cnt = 0;
     h->data.glifRecs.cnt = 0;
     h->data.opList.cnt = 0;
     h->hints.hintMasks.cnt = 0;
-      
+
     h->aggregatebounds.left = 0.0;
     h->aggregatebounds.bottom = 0.0;
     h->aggregatebounds.right = 0.0;
     h->aggregatebounds.top = 0.0;
-      
+
     h->metrics.cb = abfGlyphMetricsCallbacks;
     h->metrics.cb.direct_ctx = &h->metrics.ctx;
     h->metrics.ctx.flags = 0x0;
-      
+
       if (altLayerDir != NULL)
           h->altLayerDir = altLayerDir;
-      
-      dummy = *dnaGROW(h->valueArray,14);
-      
+
+    dnaGROW(h->valueArray,14);
+
     result = parseUFO(h);
     if (result)
       fatal(h,result, NULL);
-      
+
     prepClientData(h);
     *top = &h->top;
 
-	HANDLER
-  	result = Exception.Code;
+    HANDLER
+    result = Exception.Code;
   END_HANDLER
-  
-	return result;
+
+    return result;
 }
 
 int ufoEndFont(ufoCtx h)
 {
-	if ( h->stm.src )
-		h->cb.stm.close(&h->cb.stm, h->stm.src);
-	memFree(h,  h->top.FullName.ptr);
-	return ufoSuccess;
+    if ( h->stm.src )
+        h->cb.stm.close(&h->cb.stm, h->stm.src);
+    memFree(h,  h->top.FullName.ptr);
+    return ufoSuccess;
 }
 
 int ufoIterateGlyphs(ufoCtx h, abfGlyphCallbacks *glyph_cb)
 {
-	unsigned short i;
-	int res;
-    
-	/* Set error handler */
+    unsigned short i;
+    int res;
+
+    /* Set error handler */
   DURING_EX(h->err.env)
-  
+
     for (i = 0; i < h->chars.index.cnt; i++)
       {
       res = readGlyph(h, i, glyph_cb);
       if (res != ufoSuccess)
         return res;
       }
-  
+
   HANDLER
-  	return Exception.Code;
+    return Exception.Code;
   END_HANDLER
-  
-	return ufoSuccess;
+
+    return ufoSuccess;
 }
 
 int ufoGetGlyphByTag(ufoCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb)
 {
-	int res =  ufoSuccess;
-    
-	if (tag >= h->chars.index.cnt)
-		return ufoErrNoGlyph;
-    
-	/* Set error handler */
+    int res =  ufoSuccess;
+
+    if (tag >= h->chars.index.cnt)
+        return ufoErrNoGlyph;
+
+    /* Set error handler */
   DURING_EX(h->err.env)
-  
-		res = readGlyph(h, tag, glyph_cb);
-  
+
+        res = readGlyph(h, tag, glyph_cb);
+
   HANDLER
-  	res = Exception.Code;
+    res = Exception.Code;
   END_HANDLER
-  
-	return res;
+
+    return res;
 }
 
 /* Match glyph name after font fully parsed. */
 static int CTL_CDECL postMatchChar(const void *key, const void *value,
-								   void *ctx)
+                                   void *ctx)
 {
-	ufoCtx h = ctx;
+    ufoCtx h = ctx;
     char * testKey = getString(h, (STI)h->chars.index.array
                                [*(long *)value].tag);
-	return strcmp((char *)key, testKey );
+    return strcmp((char *)key, testKey );
 }
 
 int ufoGetGlyphByName(ufoCtx h, char *gname, abfGlyphCallbacks *glyph_cb)
 {
-	size_t index;
-	int result;
-    
-	if (!ctuLookup(gname, h->chars.byName.array, h->chars.byName.cnt,
-				   sizeof(h->chars.byName.array[0]), postMatchChar, &index, h))
-		return ufoErrNoGlyph;
-	
-	/* Set error handler */
-  DURING_EX(h->err.env)
-  
-	result = readGlyph(h,  (unsigned short)h->chars.byName.array[index], glyph_cb);
+    size_t index;
+    int result;
 
-	HANDLER
-  	result = Exception.Code;
+    if (!ctuLookup(gname, h->chars.byName.array, h->chars.byName.cnt,
+                   sizeof(h->chars.byName.array[0]), postMatchChar, &index, h))
+        return ufoErrNoGlyph;
+
+    /* Set error handler */
+  DURING_EX(h->err.env)
+
+    result = readGlyph(h,  (unsigned short)h->chars.byName.array[index], glyph_cb);
+
+    HANDLER
+    result = Exception.Code;
   END_HANDLER
 
-	return result;
-}	
+    return result;
+}
 
 int ufoResetGlyphs(ufoCtx h)
-{ 
-	long i;
-	
-	for (i = 0; i < h->chars.index.cnt; i++)
-		h->chars.index.array[i].flags &= ~((unsigned long)ABF_GLYPH_SEEN);
-    
-	return ufoSuccess;
+{
+    long i;
+
+    for (i = 0; i < h->chars.index.cnt; i++)
+        h->chars.index.array[i].flags &= ~((unsigned long)ABF_GLYPH_SEEN);
+
+    return ufoSuccess;
 }
 
 void ufoGetVersion(ctlVersionCallbacks *cb)
 {
-	if (cb->called & 1<<UFR_LIB_ID)
-		return;	/* Already enumerated */
-    
-	abfGetVersion(cb);
-	dnaGetVersion(cb);
-    
-	cb->getversion(cb, UFO_VERSION, "uforead");
-    
-	cb->called |= 1<<UFR_LIB_ID;
+    if (cb->called & 1<<UFR_LIB_ID)
+        return; /* Already enumerated */
+
+    abfGetVersion(cb);
+    dnaGetVersion(cb);
+
+    cb->getversion(cb, UFO_VERSION, "uforead");
+
+    cb->called |= 1<<UFR_LIB_ID;
 }
