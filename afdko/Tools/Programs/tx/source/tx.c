@@ -679,25 +679,25 @@ current working directory if TMP is not defined). Then we open the temporary fil
 and return its pointer */
 static FILE *_tmpfile()
 	{
-#ifdef _WIN32
-	FILE *fp = NULL;
-	char* tempname;
-	int flags, mode;
-	flags = _O_BINARY|_O_CREAT|_O_EXCL|_O_RDWR|_O_TEMPORARY;
-	mode = _S_IREAD | _S_IWRITE;
-	tempname = _tempnam(NULL, "tx_tmpfile");
-	if(tempname != NULL)
-		{
-		int fd = _open(tempname, flags, mode);
-		if (fd != -1)
-			fp = _fdopen(fd, "w+b");
-		free(tempname);
-		}
-#else
+// #ifdef _WIN32
+// 	FILE *fp = NULL;
+// 	char* tempname;
+// 	int flags, mode;
+// 	flags = _O_BINARY|_O_CREAT|_O_EXCL|_O_RDWR|_O_TEMPORARY;
+// 	mode = _S_IREAD | _S_IWRITE;
+// 	tempname = _tempnam(NULL, "tx_tmpfile");
+// 	if(tempname != NULL)
+// 		{
+// 		int fd = _open(tempname, flags, mode);
+// 		if (fd != -1)
+// 			fp = _fdopen(fd, "w+b");
+// 		free(tempname);
+// 		}
+// #else
 	FILE *fp;
 	/* Use the default tmpfile on non-Windows platforms */
 	fp = tmpfile();
-#endif
+// #endif
 	return fp;
 	}
 
