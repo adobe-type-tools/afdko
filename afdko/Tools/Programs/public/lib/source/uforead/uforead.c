@@ -1031,13 +1031,18 @@ static void setFontDictKey(ufoCtx h, char * keyValue)
     {
         char * copySymbol;
         top->Notice.ptr = keyValue;
-        copySymbol = strstr(keyValue, "\u00A9");
+        copySymbol = strstr(keyValue, "\u00A9");  /* 0xC2, 0xA9 in UTF-8 */
         if (copySymbol != NULL)
         {
+            /* if there is a copyright symbol (U+00A9),
+               replace it with the word "Copyright" */
             char* cpy = "Copyright";
             char* newString = memNew(h, strlen(cpy) + strlen(keyValue) + 2);
+            /* set the 0xC2 to NULL to terminate the left side of the string */
             *copySymbol = '\0';
-            sprintf(newString, "%s%s%s", keyValue, "Copyright", copySymbol + 1);
+            /* use copySymbol + 2 to skip the NULL and the 0xA9 
+               to get the right side of the string */
+            sprintf(newString, "%s%s%s", keyValue, "Copyright", copySymbol + 2);
             top->Notice.ptr = newString;
         }
     }
