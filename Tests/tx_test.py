@@ -116,6 +116,21 @@ def test_convert(from_format, to_format):
     assert differ([expected_path, actual_path] + skip + diff_mode)
 
 
+def test_convert_ufo3():
+    # simple test to convert ufo3 to type1;
+    # once tx can handle ufo3 this test should be superseded by test_convert()
+    from_filename = 'ufo3.ufo'
+    exp_filename = 'ufo3.pfa'
+    format_arg = 't1'
+    runn_args = []
+    skip = []
+    diff_mode = []
+    actual_path = runner(
+        CMD + ['-f', from_filename, '-o', format_arg] + runn_args)
+    expected_path = _get_expected_path(exp_filename)
+    assert differ([expected_path, actual_path] + skip + diff_mode)
+
+
 # ----------
 # Dump tests
 # ----------
