@@ -4005,11 +4005,10 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
            else
             {
                 if ((state != outlineInLib) && (state != outlineInLibDict))
-                    printf("parseGlyphOutline: unhandled token: %s. Glyph: %s. Context: %s.\n", tk->val, glifRec->glyphName, getBufferContextPtr(h));
+                {
+                    fatal(h,ufoErrParse, "parseGlyphOutline: unhandled token: %s. Glyph: %s. Context: %s.\n", tk->val, glifRec->glyphName, getBufferContextPtr(h));
+                }
             }
-
-
-
         }
     }
     while (!(h->stack.flags & PARSE_END));
