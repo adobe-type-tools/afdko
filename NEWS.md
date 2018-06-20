@@ -20,6 +20,23 @@ Changelog
 - Removed **CID charsets** folder and its contents
   ([#264](https://github.com/adobe-type-tools/afdko/issues/264),
   [#368](https://github.com/adobe-type-tools/afdko/pull/368))
+- \[ProofPDF\] Fixed broken 'lf' option (CID layout)
+  ([#382](https://github.com/adobe-type-tools/afdko/issues/382))
+- \[ProofPDF\] Fixed crash when font has no BlueValues
+  ([#394](https://github.com/adobe-type-tools/afdko/issues/394))
+- \[makeinstancesufo\] Disabled ufonormalizer's writeModTimes option;
+  Fixed Windows command
+  ([#413](https://github.com/adobe-type-tools/afdko/pull/413))
+- \[ufoTools\] Fixed line breaks when writting UFOs files on Windows
+  ([#413](https://github.com/adobe-type-tools/afdko/pull/413))
+- \[makeotf\] Implemented correct exit codes
+  ([#417](https://github.com/adobe-type-tools/afdko/issues/417))
+- \[tx\] Fixed Windows crash
+  ([#195](https://github.com/adobe-type-tools/afdko/issues/195))
+- \[tx\] Fixed crash handling copyright symbol in UFO trademark string
+  ([#425](https://github.com/adobe-type-tools/afdko/pull/425))
+- \[makeotf\] Ignore trailing slashes in input font path
+  ([#280](https://github.com/adobe-type-tools/afdko/issues/280))
 
 2.7.0 (released 2018-05-09)
 ---------------------------
