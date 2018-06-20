@@ -195,7 +195,7 @@ def _get_requirements():
 
 
 def main():
-    pkg_list = find_packages()
+    pkg_list = find_packages(exclude=["Tests"])
     classifiers = [
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
