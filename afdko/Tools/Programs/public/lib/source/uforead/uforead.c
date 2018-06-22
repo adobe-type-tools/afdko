@@ -97,7 +97,7 @@ typedef struct
     char* glyphName;
     char* glifFileName;
     char* glifFilePath;
-    long int glyphOrder; // used to sort the glypfRecs by glyph order from lib.plist.
+    long int glyphOrder; // used to sort the glifRecs by glyph order from lib.plist.
 } GLIF_Rec;
 
 typedef struct
