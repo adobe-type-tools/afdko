@@ -37,6 +37,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include <float.h>
 
 enum
 {
@@ -4244,10 +4245,10 @@ int ufoBegFont(ufoCtx h, long flags, abfTopDict **top,  char *altLayerDir)
     h->data.opList.cnt = 0;
     h->hints.hintMasks.cnt = 0;
 
-    h->aggregatebounds.left = 0.0;
-    h->aggregatebounds.bottom = 0.0;
-    h->aggregatebounds.right = 0.0;
-    h->aggregatebounds.top = 0.0;
+    h->aggregatebounds.left = FLT_MAX;
+    h->aggregatebounds.bottom = FLT_MAX;
+    h->aggregatebounds.right = -FLT_MAX;
+    h->aggregatebounds.top = -FLT_MAX;
 
     h->metrics.cb = abfGlyphMetricsCallbacks;
     h->metrics.cb.direct_ctx = &h->metrics.ctx;
