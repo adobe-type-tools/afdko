@@ -94,6 +94,15 @@ typedef struct _floatRect
 
 typedef struct
 {
+    float x;
+    float y;
+    char *name;
+    char *color;
+    char *identifier;
+} anchorRec;
+
+typedef struct
+{
     char* glyphName;
     char* glifFileName;
     char* glifFilePath;
@@ -141,6 +150,7 @@ enum
     otherDictKey,
     otherInElement,
     otherInTag,
+    otherInAnchor
 } outlineState;
 
 typedef struct {
@@ -2102,6 +2112,102 @@ static int parseUFO(ufoCtx h)
     return retVal;
 }
 
+static int parseAnchor(ufoCtx h, GLIF_Rec* glifRec, int state)
+{
+    token* tk;
+    int type = 0;
+    char * end;
+    int prevState = outlineStart;
+    int result = ufoSuccess;
+    anchorRec *anchor;
+
+    anchor = memNew(h, sizeof(anchorRec));
+    memset(anchor, 0, sizeof(anchorRec));
+
+    while (1)
+    {
+        tk = getToken(h, state);
+        if (tk == NULL)
+        {
+           fatal(h,ufoErrParse,  "Encountered end of buffer before end of glyph.%s. Context: %s\n", glifRec->glifFilePath, getBufferContextPtr(h));
+        }
+        else if (tokenEqualStr(tk, "<!--"))
+        {
+            prevState = state;
+            state = outlineInComment;
+        }
+        else if (tokenEqualStr(tk, "-->"))
+        {
+            if (state != outlineInComment)
+            {
+                fatal(h,ufoErrParse,  "Encountered end comment token while not in comment. Glyph %s. Context: %s\n", glifRec->glifFilePath, getBufferContextPtr(h));
+            }
+            state = prevState;
+        }
+        else if (state == outlineInComment)
+        {
+            continue;
+        }
+        else if (tokenEqualStr(tk, "x="))
+        {
+            tk = getAttribute(h, state);
+            end = tk->val+tk->length;
+            anchor->x = (float)strtod(tk->val, &end);
+        }
+        else if (tokenEqualStr(tk, "y="))
+        {
+            tk = getAttribute(h, state);
+            end = tk->val+tk->length;
+            anchor->y = (float)strtod(tk->val, &end);
+        }
+        else if (tokenEqualStr(tk, "name="))
+        {
+            tk = getAttribute(h, state);
+            if (tk->length > 0)
+            {
+                anchor->name = memNew(h, tk->length+1);
+                end = tk->val+tk->length;
+                strncpy(anchor->name, tk->val, tk->length);
+                anchor->name[tk->length] = 0;
+            }
+        }
+        else if (tokenEqualStr(tk, "color="))
+        {
+            tk = getAttribute(h, state);
+            if (tk->length > 0)
+            {
+                anchor->color = memNew(h, tk->length+1);
+                end = tk->val+tk->length;
+                strncpy(anchor->color, tk->val, tk->length);
+                anchor->color[tk->length] = 0;
+            }
+        }
+        else if (tokenEqualStr(tk, "identifier="))
+        {
+            tk = getAttribute(h, state);
+            if (tk->length > 0)
+            {
+                anchor->identifier = memNew(h, tk->length+1);
+                end = tk->val+tk->length;
+                strncpy(anchor->identifier, tk->val, tk->length);
+                anchor->identifier[tk->length] = 0;
+            }
+        }
+        else if (tokenEqualStr(tk, "/>"))
+        {
+            memFree(h, anchor);
+            /* ToDo: instead of freeing it, append the anchor record to a 
+                     dynamic array in, or associated with, the glyph record */
+            break;
+        }
+        else
+        {
+            continue;
+        }
+    }
+    return result;
+}
+
 static int parsePoint(ufoCtx h, abfGlyphCallbacks *glyph_cb, GLIF_Rec* glifRec, int state, Transform* transform)
 {
     // we've seen the point element name, Parse until we see the end.
@@ -4003,7 +4109,19 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                 h->cb.stm.close(&h->cb.stm, h->stm.src);
                 return result;
             }
-           else
+            else if(tokenEqualStr(tk, "<anchor"))
+            {
+                if (state != outlineStart)
+                {
+                    fatal(h,ufoErrParse,  "Encountered <anchor token unexpectedly. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+                }
+                state = otherInAnchor;
+                result =  parseAnchor(h, glifRec, state);
+                state = outlineStart;
+                if (ufoSuccess != result)
+                    break;
+            }
+            else
             {
                 if ((state != outlineInLib) && (state != outlineInLibDict))
                 {
