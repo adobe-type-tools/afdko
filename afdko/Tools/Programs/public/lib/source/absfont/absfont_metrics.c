@@ -8,6 +8,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "absfont.h"
 
 #include <math.h>
+#include <float.h>
+
 
 #define SEEN_MOVE	(1UL<<31)	/* Flags seen move operator */
 
@@ -32,10 +34,10 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 	h->err_code = abfSuccess;
 	
 	/* Initialize bounding box */
-	h->real_mtx.left	= 0;
-	h->real_mtx.bottom	= 0;
-	h->real_mtx.right	= 0;
-	h->real_mtx.top 	= 0;
+	h->real_mtx.left	= FLT_MAX;
+	h->real_mtx.bottom	= FLT_MAX;
+	h->real_mtx.right	= -FLT_MAX;
+	h->real_mtx.top 	= -FLT_MAX;
 
 	h->flags &= ~SEEN_MOVE;
 
