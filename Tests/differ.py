@@ -18,7 +18,7 @@ import sys
 
 from fontTools.misc.py23 import open
 
-__version__ = '0.2.4'
+__version__ = '0.2.5'
 
 logger = logging.getLogger('differ')
 
@@ -142,6 +142,26 @@ class Differ(object):
                 return False
         return True
 
+    def _report_dir_diffs(self, all_paths1, all_paths2):
+        """
+        Returns a string listing the paths that exist in folder 1 but not in 2,
+        and vice-versa.
+        """
+        diffs_str = ''
+        set_1st = set(all_paths1)
+        set_2nd = set(all_paths2)
+        diff1 = sorted(list(set_1st - set_2nd))
+        diff2 = sorted(list(set_2nd - set_1st))
+        if diff1:
+            dir1 = os.path.basename(self.path1)
+            diffs_str += ("\n  In 1st folder ({}) but not in 2nd:\n    {}"
+                          "".format(dir1, '\n    '.join(diff1)))
+        if diff2:
+            dir2 = os.path.basename(self.path2)
+            diffs_str += ("\n  In 2nd folder ({}) but not in 1st:\n    {}"
+                          "".format(dir2, '\n    '.join(diff2)))
+        return diffs_str
+
     def _compare_dir_contents(self):
         """
         Checks if two directory trees have the same files and folders.
@@ -151,7 +171,8 @@ class Differ(object):
         all_paths1 = self._get_all_file_paths_in_dir_tree(self.path1)
         all_paths2 = self._get_all_file_paths_in_dir_tree(self.path2)
         if all_paths1 != all_paths2:
-            logger.debug("Folders' contents don't match.")
+            logger.info("Folders' contents don't match.{}".format(
+                self._report_dir_diffs(all_paths1, all_paths2)))
             return None
         return all_paths1
 
