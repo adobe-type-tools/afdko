@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
     <head>
-        <title>Open Type Feature File Specification</title>
+        <title>OpenType Feature File Specification</title>
     </head>
     <body>
 		<h1>OpenType&trade; Feature File Specification</h1>
@@ -262,7 +262,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
   @    at sign         Identifies glyph class names
   \    backslash       Identifies CIDs. Distinguishes glyph names from an identical keyword
   -    hyphen          Denotes glyph ranges in a glyph class
-  =    equalsign       Glyph class assignment operator
+  =    equal sign       Glyph class assignment operator
   '    single quote    Marks a glyph or glyph class for contextual substitution or positioning
   &quot; &quot;  double quotes   Enclose a name table string
   { }  braces          Enclose a feature, lookup, table, or anonymous block
@@ -271,7 +271,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
   ( )  parentheses     Enclose the file name to be included</pre>
 <p><a name="2.e"></a><b>2.e. Numbers and other metrics</b></p>
 <p><a name="2.e.i"></a><b>2.e.i. Number</b></p>
-<p>A &lt;number&gt; is a signed decimal integer (without leading zeroes). For example:</p>
+<p>A &lt;number&gt; is a signed decimal integer (without leading zeros). For example:</p>
 <pre>
   -150
   1000</pre>
@@ -308,7 +308,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 <pre>
 -3                 # without &lt;&gt;</pre>
 
-<p>Note that the use of a single value as Y advance can only be triggered when the value record definition is contained within a 'vkrn', 'vpal', 'vhal', or 'valt' feature definition. If it is in a stand-alone lookup, then the value will be interpreted as an X advance, even if the lookup is referenced from within one of the vertail metric features. </p>
+<p>Note that the use of a single value as Y advance can only be triggered when the value record definition is contained within a 'vkrn', 'vpal', 'vhal', or 'valt' feature definition. If it is in a standalone lookup, then the value will be interpreted as an X advance, even if the lookup is referenced from within one of the vertical metric features. </p>
 <ul>
 <li>Value record format B:</li>
 <li><code> &lt; &lt;metric&gt; &lt;metric&gt; &lt;metric&gt; &lt;metric&gt; &gt;</code></li>
@@ -655,9 +655,9 @@ include<code>(../features.family);</code></pre>
   <b>lookup</b> &lt;label&gt; [<b>useExtension</b>] {
      # rules to be grouped
   } &lt;label&gt;;</pre>
-<p>A named lookup block may be defined either inside or outside of a feature block. In either case, it may be referenced in different feature blocks. If it is defined outside a feature block, is is referred to as a 'stand-alone' lookup.</p>
+<p>A named lookup block may be defined either inside or outside of a feature block. In either case, it may be referenced in different feature blocks. If it is defined outside a feature block, is is referred to as a 'standalone' lookup.</p>
 <p>The lookup will be created with a GSUB or GPOS Extension lookup type if and only if the optional &quot;useExtension&quot; keyword is used.</p>
-<p>A lookup block may be defined either inside or outside of feature blocks. You may not use the <b>script</b> or <b>language</b> keywords within a stand-alone lookup block.</p>
+<p>A lookup block may be defined either inside or outside of feature blocks. You may not use the <b>script</b> or <b>language</b> keywords within a standalone lookup block.</p>
 <p>The useExtension keyword has two effects: all the records of all types that are referenced by a lookup qualifier placed in one contiguous block of data, and the offset to the lookup may be 32 bits rather limited to 16 bits.</p>
 <p>When you font cannot be built because of an offset overflow error (meaning that the offset from one record to another record exceeds the 64 Kbyte limit imposed by the maximum size possible for a 16-bit offset field), then add this qualifier to the largest lookup. Keep adding it to more lookups until your font will build.</p>
 <p>Note that since the Extension lookup types were added in OpenType specification v1.3, they will not be recognized by all OpenType layout parsers.</p>
@@ -889,7 +889,7 @@ include<code>(../features.family);</code></pre>
 <p>For each glyph or glyph class in the input sequence, the contextual rule may specify one lookup (&sect;<a href="#4.e">4.e</a>) to be applied at that position. Note that the specified lookup may contain many rules; the implementation must ensure that only one rule in a referenced lookup will match at that position in the input sequence. Lookups cannot be specified for the glyphs or glyph classes in the backtrack and lookahead sequences.</p>
 <p>The input sequence is defined by appending the mark (') character to all the glyph names and class names within the input sequence.</p>
 <p>The most general form of the contextual substitution rule is to explicitly reference named lookups in the rule.</p>
-<p><b>Example 1.</b> Define two stand-alone lookups (&sect;<a href="#4.e">4.e</a>), and then reference them in the input sequence of contextual substitution rules with the keyword &quot;lookup&quot; and the lookup name.</p>
+<p><b>Example 1.</b> Define two standalone lookups (&sect;<a href="#4.e">4.e</a>), and then reference them in the input sequence of contextual substitution rules with the keyword &quot;lookup&quot; and the lookup name.</p>
 <pre>
 <b>lookup</b> CNTXT_LIGS {
      <b>substitute </b>f i by f_i;
@@ -907,7 +907,7 @@ include<code>(../features.family);</code></pre>
  } test;</pre>
 <p>Note that both the contextual substitution rules use the same lookups. This is because there is more than one rule in each referenced lookup, and different rules within the referenced lookups will match in the different contexts. In the first contextual substitution rule, the lookup <code>CNTXT_LIGS</code> will be applied at the input sequence glyph &quot;f&quot;, and the glyphs &quot;f&quot; and &quot;i&quot; will be replaced by &quot;f_i&quot;. The lookup <code>CNTXT_SUB </code>will be applied at the input sequence glyph &quot;n&quot;, and the glyph &quot;n&quot; will be replaced by &quot;n.end&quot;. This will happen only when the sequence &quot;f i n&quot; is preceded by any one of the glyphs &quot;a e i o u&quot;. Likewise, in the second contextual substitution rule the glyphs &quot;c&quot; and &quot;t&quot; will be replaced by &quot;c_t&quot;, and the glyph &quot;s&quot; will be replaced by &quot;s.end&quot;. This will happen only when the sequence &quot;c t s&quot; is preceded by any one of the glyphs &quot;a e i o u&quot;.</p>
 <p>This form of the contextual substitution rule is the most flexible. You can specify a substitution lookup for more than one input sequence glyph or glyph class, the referenced lookups can be of different types, and the referenced lookups can have different lookup flags that the parent contextual lookup. The drawback is that it is difficult to understand what substitution rule will be applied, and the implementation may not warn if the referenced lookup does not contain a rule that matches the context.</p>
-<p>If there is only a single substitution operation, and it is either single substitution or ligature substitution, then the operation can be specified in-line and its type will be auto-detected from the input and replacement sequence in the same way as in their corresponding stand-alone (i.e. non-contextual) statements.</p>
+<p>If there is only a single substitution operation, and it is either single substitution or ligature substitution, then the operation can be specified in-line and its type will be auto-detected from the input and replacement sequence in the same way as in their corresponding standalone (i.e. non-contextual) statements.</p>
 <p><b>Example 2.</b> This calls a Single Sub rule. The rule below means: in sequences &quot;a d&quot; or &quot;e d&quot; or &quot;n d&quot;, substitute &quot;d&quot; by &quot;d.alt&quot;.</p>
 <pre>
   <b>substitute</b> [a e n] d' <b>by</b> d.alt;</pre>
@@ -1165,7 +1165,7 @@ include<code>(../features.family);</code></pre>
 <p>The input sequence is defined by appending the mark (') character to all the glyph names and class names (and only these names) within the input sequence. Applying the mark (') character to keywords such as anchor and mark or a value record will result in a syntax error.</p>
 <p><a name="6.h.ii"></a>6.h.ii. Specifying Contextual Positioning with explicit lookup references</p>
 <p>The most general form of the contextual substitution rule is to explicitly reference named lookups in the rule.</p>
-<p><b>Example 1.</b> Define two stand-alone lookups (&sect;<a href="#4.e">4.e</a>), and then reference them in the input sequence of contextual positioning rules with the keyword &quot;lookup&quot; and the lookup name.</p>
+<p><b>Example 1.</b> Define two standalone lookups (&sect;<a href="#4.e">4.e</a>), and then reference them in the input sequence of contextual positioning rules with the keyword &quot;lookup&quot; and the lookup name.</p>
 <pre>
 <b>markClass</b> [acute grave] &lt;<b>anchor</b> 150 -10&gt; @ALL_MARKS;
 
@@ -1213,13 +1213,13 @@ include<code>(../features.family);</code></pre>
   <b>position</b> L' -150 quoteright;
   <b>position</b> quoteright' -120 A;
   <b>position</b> s f' 10 t period;</pre>
-<p>In order to make pair positioning rules easier to read and write as contextual kern pairs, the feature file syntax will identify a special case of contextual rule which contains only one marked glyph or glyph class, followed by one or more un-marked glyph or glyph class, plus a value record. This will be treated as a contextual pair positioning statement, and will be the only one case where a value record may follow an un-marked glyph. Example 3B can thus be written as example 3C. Both examples are exactly equivalent.</p>
+<p>In order to make pair positioning rules easier to read and write as contextual kern pairs, the feature file syntax will identify a special case of contextual rule which contains only one marked glyph or glyph class, followed by one or more unmarked glyph or glyph class, plus a value record. This will be treated as a contextual pair positioning statement, and will be the only one case where a value record may follow an unmarked glyph. Example 3B can thus be written as example 3C. Both examples are exactly equivalent.</p>
 <p>Example 3C:</p>
 <pre>
   <b>position</b> L' -100 quoteright' -50 A;
   <b>position</b> L' quoteright -150; # special cases of contextual positioning
   <b>position</b> quoteright' A -120; # where
-value record follows un-marked glyph,
+value record follows unmarked glyph,
 
 # making them exactly equivalent to 3B.
   <b>position</b> s f' t 10 period;
@@ -1394,7 +1394,7 @@ If this is a (chain) contextual lookup do the following [(10)-(11)] in the subta
 <p>The parameter &quot;sizemenuname&quot; provides the menu name to be used for a group of fonts with the same subfamily identifier.</p>
 <p>If the font is part of such a group, then the &quot;sizemenuname&quot; statement must be provided in order for the members of the group to be grouped together in a sub-menu under the specified menu name.</p>
 <p>In the this case, we strongly recommend providing at least the two entries for Windows and Macintosh platform Roman script name strings. You may also include as any another localized name strings that may be useful.</p>
-<p>If the font is not part of such a group, then the &quot;sizemenuname&quot; statements must be omitted, and all fields but the first (design size) for the parameter statement must be set to 0. This form may be be abbreviated by setting the subfmaily identifer to 0, and omitting the two remaining zeroes. For example:</p>
+<p>If the font is not part of such a group, then the &quot;sizemenuname&quot; statements must be omitted, and all fields but the first (design size) for the parameter statement must be set to 0. This form may be be abbreviated by setting the subfmaily identifer to 0, and omitting the two remaining zeros. For example:</p>
 <pre>
      <b>parameters</b> 10.0 0; # Indicate intended design size to be 10 pts.
 </pre>
@@ -1428,9 +1428,9 @@ If this is a (chain) contextual lookup do the following [(10)-(11)] in the subta
 <p>As of the OpenType specification 1.6, UI label names are allowed for Character Variant features. These names are specified within the feature block for a Character Variant feature. The implementation will store the name strings in the name table, and will create a feature parameter data block which references them.</p>
 <p>A set of NameID entries are specified within a parameter block entry. The parameter block must precede any of the rules in the feature. There are four distinct NameID entry types. The 'ParamUILabelNameID' entry may be omitted or repeated as often as needed. The other NameID types may be omitted, or defined only once. The NameID entries must be specified in the order listed below. A single Character Variant NameID entry may contain more than one name string entry in order to support different languages and platforms.</p>
 
-<P>Following the set of NameID entries, a series of 24 bit Unicode values may be specified. These provide Unicode values for the base glyphs referenced by the feature. The developer may specify none, some, or all of the Unicode values for the base glyphs. The Unicode value may be written with either decimal or hexadecimal notation: the value must be preceded by '0x' if it is a hexadecimal value. The 24 bit field means that the lasrget Unicode value allowed is ((1<<24) -1), aka, 0xFFFFFF</p>
+<P>Following the set of NameID entries, a series of 24 bit Unicode values may be specified. These provide Unicode values for the base glyphs referenced by the feature. The developer may specify none, some, or all of the Unicode values for the base glyphs. The Unicode value may be written with either decimal or hexadecimal notation: the value must be preceded by '0x' if it is a hexadecimal value. The 24 bit field means that the largest Unicode value allowed is ((1<<24) -1), aka, 0xFFFFFF</p>
 
-<p>The intent of the NameID entries is decribed in the OpenType spec document :
+<p>The intent of the NameID entries is described in the OpenType spec document :
 <a href="http://www.microsoft.com/typography/otspec/features_ae.htm#cv01-cv99">OpenType Layout tag registry" section on feature tags, tag name 'cv01' - 'cv99'</a>. Note: The ParamUILabelNameID  entries are used when one base glyph is mapped to more than one variant; the font designer may then specify one ParamUILabelNameID for each variant, in order to uniquely describe that variant. If any ParamUILabelNameID entries are specified, the number of ParamUILabelNameID entries must match the number of variants for each base glyph. If the Character Variant feature specifies more than one base glyph, then the set of NameID entries in the parameter block will be used for each base glyph and its variants.</p>
 
 <p>The syntax for a &quot;cvParameters&quot; block is:</p>
@@ -1570,8 +1570,8 @@ table GDEF {
      <b>LigatureCaretByIndex </b>f_f_i 23 46;
 } GDEF;</pre>
 <p>The four class names in the GlyphClassDef are separated by commas. If you omit a class definition, you must still indicate its position with a comma. By the OpenType spec, any glyph not included in one of the class definition will be assigned glyph class index 0, and will not be included in any of the GlyphClass classes.</p>
-<p>The MarkAttach classes of the GDEF table may not be specified explicitly in feature file syntax. They are instead created by the implementation from use of the &quot;lookupflag MarkAttachmentType &lt;class name&gt;&quot; statements. The class names may be from either regular classes definitions or mark class defintions.</p>
-<p>The MarkGlyphSets classes of the GDEF table may not be specified explicitly in feature file syntax. They are instead created by the implementation from use of the &quot;lookupflag UseMarkFilteringSet &lt;class name&gt;&quot; statements. The class names may be from either regular classes definitions or mark class defintions.</p>
+<p>The MarkAttach classes of the GDEF table may not be specified explicitly in feature file syntax. They are instead created by the implementation from use of the &quot;lookupflag MarkAttachmentType &lt;class name&gt;&quot; statements. The class names may be from either regular classes definitions or mark class definitions.</p>
+<p>The MarkGlyphSets classes of the GDEF table may not be specified explicitly in feature file syntax. They are instead created by the implementation from use of the &quot;lookupflag UseMarkFilteringSet &lt;class name&gt;&quot; statements. The class names may be from either regular classes definitions or mark class definitions.</p>
 <p>If any mark class has been defined, or if any of the lookup flags for skipping glyphs of a certain class have been seen, the implementation will check if the GDEF keywords for defining the GlyphClassDefinition has been seen. If not, the implementation will fill them from the substitution and positioning rules, and will create a GDEF table even if there is no GDEF definition in the feature file. The LIGATURE and COMPONENT classes well be filled from the glyphs used in any GSUB Lookup Type 4, Ligature Substitution. The Marks class will be filled from all the glyphs in any of the mark classes used in positioning rules.</p>
 <p><a name="9.c"></a><b>9.c. head table</b></p>
 <p>The head table FontRevision value is used as the overall font version number, and should be incremented whenever any data in the fonts is changed. It is both specified and reported as a decimal number with three significant decimal places. The actual value stored in the font will, however, be a Fixed number (16.16 bit format). Due to the limited precision of this format, the value stored may differ by a small decimal fraction from that specified, but will always round to the same value when rounded to three fractional decimal places.</p>
@@ -1652,7 +1652,7 @@ nameid I 1 &lt;string&gt;;        I   1          0           0
 nameid I 1 S L &lt;string&gt;;    I   1          S           L</pre>
 <p>A string is composed of 1-byte ASCII characters enclosed by ASCII double quote characters (&quot;). Newlines embedded within the string are removed from the character sequence to be stored.</p>
 <p>Strings are converted to Unicode for the Windows platform by adding a high byte of 0. 2-byte Unicode values for the Windows platform may be specified using a special character sequence of a backslash character (\) followed by exactly four hexadecimal numbers (of either case) which may not all be zero, e.g. \4e2d. The ASCII backslash character must be represented as the sequence \005c or \005C and the ASCII double quote character must be represented as the sequence \0022.</p>
-<p>There is no corresponding conversion to Unicode for the Macintosh platform but character codes in the range 128-255 may be specified using a special character sequence of a backslash character (\) followed by exactly two hexadecimal numbers (of either case) which may not both be zero, e.g. \83 . The ASCII blackslash character must be represented as the sequence \5c or \5C and the ASCII double quote character must be represented as the sequence \22.</p>
+<p>There is no corresponding conversion to Unicode for the Macintosh platform but character codes in the range 128-255 may be specified using a special character sequence of a backslash character (\) followed by exactly two hexadecimal numbers (of either case) which may not both be zero, e.g. \83 . The ASCII backslash character must be represented as the sequence \5c or \5C and the ASCII double quote character must be represented as the sequence \22.</p>
 <p>Example (add designer's name that includes non-ASCII characters for Mac and Windows platforms):</p>
 <pre>
   <b>table</b> name {
@@ -1779,14 +1779,14 @@ nameid I 1 S L &lt;string&gt;;    I   1          S           L</pre>
 </ul>
 <p><b>v1.20 [6 Feb 2017]:</b></p>
 <ul>
-<li>Updated glyph name rules in section <a href="#2.f.i">2.f.i glyph name</a> to allow additional characters for development names.</li></li>
+<li>Updated glyph name rules in section <a href="#2.f.i">2.f.i glyph name</a> to allow additional characters for development names.</li>
 </ul>
 <p><b>v1.19 [26 April 2016]:</b></p>
 <ul>
 <li>Corrected statement about assigning glyphs to GDEF mark GlyphClass in section <a href="#4.f">4.f markClass</a></li>
 <li>Added statement about single vs enum kern pair priorities when kern pair position rules conflict: see section <a href="#6.b.ii">6.b.ii Enumerating pairs</a>.</li>
 <li>Fixed missing angle brackets in ValueRecordDef example.</li>
-<li>Clarified that langsys rules cannot be used in stand-alone lookups.</li>
+<li>Clarified that langsys rules cannot be used in standalone lookups.</li>
 <li>Clarified 'ignore sub' syntax.</li>
 <li>Clarified keyword scoping rules.</li>
 <li>Clarified that a glyph can have only either one position or index caret  rule, as well as one device caret position rule. in the GDEF table, and fixed example.</li>
@@ -1844,7 +1844,7 @@ nameid I 1 S L &lt;string&gt;;    I   1          S           L</pre>
 <li>Revised syntax for the lookupflag statement.</li>
 <li>Added new syntax for contextual rules</li>
 <li>Revised the description of how language systems work.</li>
-<li>Revised syntax to allow stand-alone lookups.</li>
+<li>Revised syntax to allow standalone lookups.</li>
 <li>Added syntax for named value records and anchors</li>
 <li>Added syntax for descriptive names for stylistic substitution features</li>
 </ul>
@@ -1896,7 +1896,7 @@ nameid I 1 S L &lt;string&gt;;    I   1          S           L</pre>
 <li>Value records and anchors in GPOS rules (except for the AFM-style Pair Pos format) now immediately follow the glyphs they correspond to; no commas are needed. GDEF LigatureCaret statement: removed commas between caret values. (Implementation not affected, since these sections were implemented.)</li>
 <li>Added ability to handle Single Sub rules with a single replacement glyph for 2 or more glyphs in the target glyph class; e.g. &quot;sub [one.fitted one.oldstyle one.tab.oldstyle] by one&quot;.</li>
 <li>Added support for named lookupflag attributes e.g. &quot;lookupflag IgnoreLigatures;&quot;.</li>
-<li>Updated the OT layout algorithm pseudocode.</li>
+<li>Updated the OT layout algorithm pseudo-code.</li>
 <li>Clarified that a pair positioning rule is treated as a class pair if and only if at least one glyph class is present, even if that class is a singleton glyph class.</li>
 </ul>
 <p><b>v1.1 [1 December 2000; HOT library v01.00.28]:</b></p>
