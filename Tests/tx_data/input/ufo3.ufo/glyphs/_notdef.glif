@@ -35,4 +35,20 @@
 			<point x="498" y="572" type="line"/>
 		</contour>
 	</outline>
+	<lib>
+		<dict>
+			<key>com.adobe.type.autohint.v2</key>
+			<dict>
+				<key>hintSetList</key>
+				<array/>
+			</dict>
+			<key>public.postscript.hints</key>
+			<dict>
+				<key>formatVersion</key>
+				<string>1</string>
+				<key>hintSetList</key>
+				<array/>
+			</dict>
+		</dict>
+	</lib>
 </glyph>

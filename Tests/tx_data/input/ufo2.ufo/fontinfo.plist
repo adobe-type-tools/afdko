@@ -123,10 +123,7 @@
 			<integer>724</integer>
 		</array>
 		<key>postscriptFamilyOtherBlues</key>
-		<array>
-			<integer>-217</integer>
-			<integer>-205</integer>
-		</array>
+		<array/>
 		<key>postscriptFontName</key>
 		<string>SourceSansPro-Regular</string>
 		<key>postscriptForceBold</key>
