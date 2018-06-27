@@ -1,0 +1,15 @@
+## Filename /Users/cchapman/GitHub/adobe-type-tools/afdko/Tests/tx_data/input/CJK-VarTest.otf
+## Top Dict
+version             "1.0"
+Notice              "Copyright  2018 Adobe. All Rights Reserved."
+Copyright           "Copyright  2018 Adobe. All Rights Reserved."
+FullName            "CJKTest w0.00"
+FamilyName          "CJKTest w0.00"
+FontBBox            {14,-98,976,842}
+FSType              4
+sup.srcFontType     CFF (name-keyed)
+sup.nGlyphs         2
+## FontDict[0]
+FontName            "MasterSet_Kanji-w0.00"
+## Private
+BlueValues          {0,0}
