@@ -158,6 +158,14 @@ def test_varread_pr355():
     assert differ([expected_path, actual_path])
 
 
+def test_long_charstring_pr446():
+    # test fix for issue #444, in PR #446
+    # read a CFF2 VF with a long charstring, check output
+    actual_path = runner(CMD + ['-o', '0', '-f', 'CJK-VarTest.otf'])
+    expected_path = _get_expected_path('CJK-VarTest.txt')
+    assert differ([expected_path, actual_path])
+
+
 # -----------
 # Other tests
 # -----------
