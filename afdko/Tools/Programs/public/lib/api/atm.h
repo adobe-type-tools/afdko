@@ -62,12 +62,7 @@ buildch and other ATM modules (font parser).
 #define DEBUG (0)
 #endif
 
-/*
- * Some of the PSENVIRONMENT configurations won't compile with ENABLE_ASSERT,
- * so we only turn it on for isp_sparc.  
- * This is enough to find machine-independent PSENVIRONMENT problems.
- */
-#if STAGE==DEVELOP && ((defined PSENVIRONMENT && !PSENVIRONMENT) || ISP==isp_sparc)
+#if STAGE==DEVELOP && (defined PSENVIRONMENT && !PSENVIRONMENT)
 #define ENABLE_ASSERT 1
 #else
 #define ENABLE_ASSERT 0
@@ -124,14 +119,6 @@ buildch and other ATM modules (font parser).
 
 
 /**********  System-dependent include files  *********/
-
-#if OS==os_sun
-/*  removed because of conflict with gcc built-in #include <memory.h> */
-#define STRING_H /* added because of conflicts with gcc built-in */
-#include <fcntl.h>              /* main.c needs this */
-#include "supportossyslib.h"   /* EDIT FOR POSTSCRIPT@COMMENT@ */
-#define labs(x) ((x)<0?-(x):(x))
-#endif
 
 #if OS==os_mach
 #define MALLOC_H
@@ -250,7 +237,7 @@ extern Int32 asm_labs ( Int32  i MW_D0);
 /* MEMZERO(dest, len)  Zero out a region in memory.  len in bytes. */
 
 
-#if OS==os_sun || OS==os_solaris || OS==os_mri
+#if OS==os_mri
 #define MEMMOVE(src, dest, len) memcpy(dest, src, len)
 #define MEMZERO(dest, len) memset(dest, 0, len)
 #endif

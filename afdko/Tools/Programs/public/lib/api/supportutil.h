@@ -30,7 +30,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
  */
 #if !PSENVIRONMENT
 
-#if (OS == os_sun || OS == os_mach)
+#if OS == os_mach
 #include "supportossyslib.h"               /* include declarations not available from a standard place */
 
 /* the following definition is a compromise. There is a conflict between the
@@ -52,29 +52,22 @@ extern int strncmp();
 #else /* Metaware Compiler */
 #include <string.h> 
 #endif /* Microsoft Compiler */
-#else /* ! ((OS == os_sun || OS == os_mach) || WINATM) */
+#else /* ! (OS == os_mach || WINATM) */
 #include <stdio.h>
 #include <string.h>
 
-#endif /* (OS == os_sun || OS == os_mach) */
+#endif /* OS == os_mach */
 
 #define os_strlen       strlen
-#if OS == os_solaris || OS==os_msdos || OS==os_os2 || OS==os_windows3 || OS==os_os2_32bit || OS==os_mac || OS==os_windowsNT || OS==os_windows95
+#if OS==os_msdos || OS==os_os2 || OS==os_windows3 || OS==os_os2_32bit || OS==os_mac || OS==os_windowsNT || OS==os_windows95
 #define os_bcopy(from,to,cnt)  	memmove(to,from, (unsigned)(cnt&0x0FFFFL))
 #else /* OS */
 #define os_bcopy    	memmove
 #endif
-#if OS==os_sun || OS==os_solaris || OS==os_windowsNT || OS==os_mac || OS==os_windows3 || OS==os_windows95
+#if OS==os_windowsNT || OS==os_mac || OS==os_windows3 || OS==os_windows95
 #define os_bzero(b, len)		memset(b, 0, len)
 #else
 #define os_bzero    	bzero
-#endif
-
-#if OS==os_sun
-#include <stdarg.h>
-/*
-extern int vprintf(char *, va_list);
-*/
 #endif
 
 #define os_strcat	strcat

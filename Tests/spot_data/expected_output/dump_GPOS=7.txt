@@ -1,0 +1,139 @@
+
+# Printing lookup 0 in feature 'kern' for script 'DFLT' language 'dflt'.
+# --- Start Lookup [0])
+# -------- SubTable 0
+# -------- Glyph Classes
+@LEFT_CLASS_c0_s0_l0 = [
+	a 
+	
+];
+@LEFT_CLASS_c1_s0_l0 = [
+	A.sc 
+];
+@LEFT_CLASS_c2_s0_l0 = [
+	A 
+];
+@LEFT_CLASS_c3_s0_l0 = [
+	B.sc 
+];
+@LEFT_CLASS_c4_s0_l0 = [
+	B 
+];
+@LEFT_CLASS_c5_s0_l0 = [
+	c 
+];
+@LEFT_CLASS_c6_s0_l0 = [
+	C.sc 
+];
+@LEFT_CLASS_c7_s0_l0 = [
+	C 
+];
+@LEFT_CLASS_c8_s0_l0 = [
+	b 
+];
+@RIGHT_CLASS_c0_s0_l0 = [
+	B b 
+];
+@RIGHT_CLASS_c1_s0_l0 = [
+	A.sc 
+];
+@RIGHT_CLASS_c2_s0_l0 = [
+	a 
+];
+@RIGHT_CLASS_c3_s0_l0 = [
+	C.sc 
+];
+@RIGHT_CLASS_c4_s0_l0 = [
+	C 
+];
+@RIGHT_CLASS_c5_s0_l0 = [
+	c 
+];
+@RIGHT_CLASS_c6_s0_l0 = [
+	A 
+];
+@RIGHT_CLASS_c7_s0_l0 = [
+	B.sc 
+];
+ pos @LEFT_CLASS_c0_s0_l0 @RIGHT_CLASS_c0_s0_l0   0;
+ pos @LEFT_CLASS_c0_s0_l0 @RIGHT_CLASS_c1_s0_l0   0;
+ pos @LEFT_CLASS_c0_s0_l0 @RIGHT_CLASS_c2_s0_l0   0;
+ pos @LEFT_CLASS_c0_s0_l0 @RIGHT_CLASS_c3_s0_l0   0;
+ pos @LEFT_CLASS_c0_s0_l0 @RIGHT_CLASS_c4_s0_l0   0;
+ pos @LEFT_CLASS_c0_s0_l0 @RIGHT_CLASS_c5_s0_l0   0;
+ pos @LEFT_CLASS_c0_s0_l0 @RIGHT_CLASS_c6_s0_l0   0;
+ pos @LEFT_CLASS_c0_s0_l0 @RIGHT_CLASS_c7_s0_l0   0;
+ pos @LEFT_CLASS_c1_s0_l0 @RIGHT_CLASS_c0_s0_l0   0;
+ pos @LEFT_CLASS_c1_s0_l0 @RIGHT_CLASS_c1_s0_l0   10;
+ pos @LEFT_CLASS_c1_s0_l0 @RIGHT_CLASS_c2_s0_l0   0;
+ pos @LEFT_CLASS_c1_s0_l0 @RIGHT_CLASS_c3_s0_l0   0;
+ pos @LEFT_CLASS_c1_s0_l0 @RIGHT_CLASS_c4_s0_l0   0;
+ pos @LEFT_CLASS_c1_s0_l0 @RIGHT_CLASS_c5_s0_l0   0;
+ pos @LEFT_CLASS_c1_s0_l0 @RIGHT_CLASS_c6_s0_l0   0;
+ pos @LEFT_CLASS_c1_s0_l0 @RIGHT_CLASS_c7_s0_l0   0;
+ pos @LEFT_CLASS_c2_s0_l0 @RIGHT_CLASS_c0_s0_l0   0;
+ pos @LEFT_CLASS_c2_s0_l0 @RIGHT_CLASS_c1_s0_l0   0;
+ pos @LEFT_CLASS_c2_s0_l0 @RIGHT_CLASS_c2_s0_l0   10;
+ pos @LEFT_CLASS_c2_s0_l0 @RIGHT_CLASS_c3_s0_l0   20;
+ pos @LEFT_CLASS_c2_s0_l0 @RIGHT_CLASS_c4_s0_l0   -10;
+ pos @LEFT_CLASS_c2_s0_l0 @RIGHT_CLASS_c5_s0_l0   0;
+ pos @LEFT_CLASS_c2_s0_l0 @RIGHT_CLASS_c6_s0_l0   0;
+ pos @LEFT_CLASS_c2_s0_l0 @RIGHT_CLASS_c7_s0_l0   0;
+ pos @LEFT_CLASS_c3_s0_l0 @RIGHT_CLASS_c0_s0_l0   0;
+ pos @LEFT_CLASS_c3_s0_l0 @RIGHT_CLASS_c1_s0_l0   0;
+ pos @LEFT_CLASS_c3_s0_l0 @RIGHT_CLASS_c2_s0_l0   0;
+ pos @LEFT_CLASS_c3_s0_l0 @RIGHT_CLASS_c3_s0_l0   0;
+ pos @LEFT_CLASS_c3_s0_l0 @RIGHT_CLASS_c4_s0_l0   0;
+ pos @LEFT_CLASS_c3_s0_l0 @RIGHT_CLASS_c5_s0_l0   0;
+ pos @LEFT_CLASS_c3_s0_l0 @RIGHT_CLASS_c6_s0_l0   0;
+ pos @LEFT_CLASS_c3_s0_l0 @RIGHT_CLASS_c7_s0_l0   0;
+ pos @LEFT_CLASS_c4_s0_l0 @RIGHT_CLASS_c0_s0_l0   0;
+ pos @LEFT_CLASS_c4_s0_l0 @RIGHT_CLASS_c1_s0_l0   10;
+ pos @LEFT_CLASS_c4_s0_l0 @RIGHT_CLASS_c2_s0_l0   0;
+ pos @LEFT_CLASS_c4_s0_l0 @RIGHT_CLASS_c3_s0_l0   10;
+ pos @LEFT_CLASS_c4_s0_l0 @RIGHT_CLASS_c4_s0_l0   0;
+ pos @LEFT_CLASS_c4_s0_l0 @RIGHT_CLASS_c5_s0_l0   0;
+ pos @LEFT_CLASS_c4_s0_l0 @RIGHT_CLASS_c6_s0_l0   0;
+ pos @LEFT_CLASS_c4_s0_l0 @RIGHT_CLASS_c7_s0_l0   0;
+ pos @LEFT_CLASS_c5_s0_l0 @RIGHT_CLASS_c0_s0_l0   0;
+ pos @LEFT_CLASS_c5_s0_l0 @RIGHT_CLASS_c1_s0_l0   0;
+ pos @LEFT_CLASS_c5_s0_l0 @RIGHT_CLASS_c2_s0_l0   -10;
+ pos @LEFT_CLASS_c5_s0_l0 @RIGHT_CLASS_c3_s0_l0   0;
+ pos @LEFT_CLASS_c5_s0_l0 @RIGHT_CLASS_c4_s0_l0   0;
+ pos @LEFT_CLASS_c5_s0_l0 @RIGHT_CLASS_c5_s0_l0   -30;
+ pos @LEFT_CLASS_c5_s0_l0 @RIGHT_CLASS_c6_s0_l0   0;
+ pos @LEFT_CLASS_c5_s0_l0 @RIGHT_CLASS_c7_s0_l0   0;
+ pos @LEFT_CLASS_c6_s0_l0 @RIGHT_CLASS_c0_s0_l0   0;
+ pos @LEFT_CLASS_c6_s0_l0 @RIGHT_CLASS_c1_s0_l0   0;
+ pos @LEFT_CLASS_c6_s0_l0 @RIGHT_CLASS_c2_s0_l0   0;
+ pos @LEFT_CLASS_c6_s0_l0 @RIGHT_CLASS_c3_s0_l0   -20;
+ pos @LEFT_CLASS_c6_s0_l0 @RIGHT_CLASS_c4_s0_l0   0;
+ pos @LEFT_CLASS_c6_s0_l0 @RIGHT_CLASS_c5_s0_l0   0;
+ pos @LEFT_CLASS_c6_s0_l0 @RIGHT_CLASS_c6_s0_l0   0;
+ pos @LEFT_CLASS_c6_s0_l0 @RIGHT_CLASS_c7_s0_l0   0;
+ pos @LEFT_CLASS_c7_s0_l0 @RIGHT_CLASS_c0_s0_l0   0;
+ pos @LEFT_CLASS_c7_s0_l0 @RIGHT_CLASS_c1_s0_l0   10;
+ pos @LEFT_CLASS_c7_s0_l0 @RIGHT_CLASS_c2_s0_l0   0;
+ pos @LEFT_CLASS_c7_s0_l0 @RIGHT_CLASS_c3_s0_l0   0;
+ pos @LEFT_CLASS_c7_s0_l0 @RIGHT_CLASS_c4_s0_l0   -40;
+ pos @LEFT_CLASS_c7_s0_l0 @RIGHT_CLASS_c5_s0_l0   0;
+ pos @LEFT_CLASS_c7_s0_l0 @RIGHT_CLASS_c6_s0_l0   0;
+ pos @LEFT_CLASS_c7_s0_l0 @RIGHT_CLASS_c7_s0_l0   0;
+ pos @LEFT_CLASS_c8_s0_l0 @RIGHT_CLASS_c0_s0_l0   0;
+ pos @LEFT_CLASS_c8_s0_l0 @RIGHT_CLASS_c1_s0_l0   0;
+ pos @LEFT_CLASS_c8_s0_l0 @RIGHT_CLASS_c2_s0_l0   -10;
+ pos @LEFT_CLASS_c8_s0_l0 @RIGHT_CLASS_c3_s0_l0   0;
+ pos @LEFT_CLASS_c8_s0_l0 @RIGHT_CLASS_c4_s0_l0   0;
+ pos @LEFT_CLASS_c8_s0_l0 @RIGHT_CLASS_c5_s0_l0   0;
+ pos @LEFT_CLASS_c8_s0_l0 @RIGHT_CLASS_c6_s0_l0   0;
+ pos @LEFT_CLASS_c8_s0_l0 @RIGHT_CLASS_c7_s0_l0   0;
+# --- End Lookup [0])
+
+# Skipping lookup 0 in feature 'kern' for script 'cyrl' language 'dflt'
+# because already dumped in script 'DFLT', language 'dflt'.
+
+# Skipping lookup 0 in feature 'kern' for script 'grek' language 'dflt'
+# because already dumped in script 'DFLT', language 'dflt'.
+
+# Skipping lookup 0 in feature 'kern' for script 'latn' language 'dflt'
+# because already dumped in script 'DFLT', language 'dflt'.

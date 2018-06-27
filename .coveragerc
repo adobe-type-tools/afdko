@@ -6,8 +6,11 @@ branch = True
 # list of directories or packages to measure
 source =
     afdko/Tools/SharedData/FDKScripts
+    Tests
 
-omit = */__init__.py
+omit =
+    */__init__.py
+    Tests/*_test.py
 
 [report]
 # Regexes for lines to exclude from consideration

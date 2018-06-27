@@ -31,7 +31,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #endif
 
 #ifndef os_abort
-#if OS == os_sun || OS == os_mach
+#if OS == os_mach
 #define os_abort abort
 #include "supportossyslib.h"
 #elif OS == os_mac

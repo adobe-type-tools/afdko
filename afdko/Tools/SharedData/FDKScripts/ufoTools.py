@@ -1,6 +1,6 @@
 # Copyright 2017 Adobe. All rights reserved.
 
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 
 import hashlib
 import os
@@ -13,10 +13,10 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
-import ConvertFontToCID
+from . import ConvertFontToCID
 
 __doc__ = """
-ufoTools.py v1.30.3 Feb 01 2018
+ufoTools.py v1.30.4 Apr 29 2018
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -549,7 +549,7 @@ class UFOFontData(object):
             data.append("'%s': %s," % (gName, hashMap[gName]))
         data.append("}")
         data.append("")
-        data = os.linesep.join(data)
+        data = '\n'.join(data)
         fp = open(hashPath, "wt")
         fp.write(data)
         fp.close()
@@ -2158,8 +2158,8 @@ def addHintList(hints, hintsStem3, newHintSetArray, isH):
 
 def addWhiteSpace(parent, level):
     child = None
-    childIndent = os.linesep + ("  " * (level + 1))
-    prentIndent = os.linesep + ("  " * (level))
+    childIndent = '\n' + ("  " * (level + 1))
+    prentIndent = '\n' + ("  " * (level))
     # print("parent Tag", parent.tag, repr(parent.text), repr(parent.tail))
     for child in parent:
         child.tail = childIndent
@@ -2551,7 +2551,7 @@ def makeUFOFMNDB(srcFontPath):
     parts.append("\tf=%s" % (familyName))
     parts.append("\ts=%s" % (styleName))
     parts.append("")
-    data = os.linesep.join(parts)
+    data = '\n'.join(parts)
     fp = open(fmndbPath, "wt")
     fp.write(data)
     fp.close()

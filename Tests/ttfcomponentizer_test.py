@@ -71,29 +71,29 @@ def test_run_invalid_font():
 def test_run_ufo_not_found():
     ttf_path = _get_test_ttf_path()
     temp_dir = tempfile.mkdtemp()
-    with tempfile.NamedTemporaryFile(delete=False, dir=temp_dir) as tmp:
-        copy2(ttf_path, tmp.name)
-        assert main([tmp.name]) == 1
+    save_path = tempfile.mkstemp(dir=temp_dir)[1]
+    copy2(ttf_path, save_path)
+    assert main([save_path]) == 1
 
 
 def test_run_invalid_ufo():
     ttf_path = _get_test_ttf_path()
     temp_dir = tempfile.mkdtemp()
-    with tempfile.NamedTemporaryFile(delete=False, dir=temp_dir) as tmp:
-        ufo_path = tmp.name + '.ufo'
-        copy2(ttf_path, tmp.name)
-        copy2(ttf_path, ufo_path)
-        assert main([tmp.name]) == 1
+    save_path = tempfile.mkstemp(dir=temp_dir)[1]
+    ufo_path = save_path + '.ufo'
+    copy2(ttf_path, save_path)
+    copy2(ttf_path, ufo_path)
+    assert main([save_path]) == 1
 
 
 def test_run_with_output_path():
     ttf_path = _get_test_ttf_path()
-    with tempfile.NamedTemporaryFile(delete=False) as tmp:
-        main(['-o', tmp.name, ttf_path])
-        gtable = TTFont(tmp.name)['glyf']
-        composites = [gname for gname in gtable.glyphs if (
-            gtable[gname].isComposite())]
-        assert sorted(composites) == ['aacute', 'uni01CE']
+    save_path = tempfile.mkstemp()[1]
+    main(['-o', save_path, ttf_path])
+    gtable = TTFont(save_path)['glyf']
+    composites = [gname for gname in gtable.glyphs if (
+        gtable[gname].isComposite())]
+    assert sorted(composites) == ['aacute', 'uni01CE']
 
 
 def test_run_without_output_path():
@@ -101,13 +101,13 @@ def test_run_without_output_path():
     ufo_path = _get_test_ufo_path()
     temp_dir = tempfile.mkdtemp()
     tmp_ufo_path = os.path.join(temp_dir, os.path.basename(ufo_path))
-    with tempfile.NamedTemporaryFile(delete=False, dir=temp_dir) as tmp:
-        copy2(ttf_path, tmp.name)
-        copytree(ufo_path, tmp_ufo_path)
-        main([tmp.name])
-        gtable = TTFont(tmp.name)['glyf']
-        assert gtable['agrave'].isComposite() is False
-        assert gtable['aacute'].isComposite() is True
+    save_path = tempfile.mkstemp(dir=temp_dir)[1]
+    copy2(ttf_path, save_path)
+    copytree(ufo_path, tmp_ufo_path)
+    main([save_path])
+    gtable = TTFont(save_path)['glyf']
+    assert gtable['agrave'].isComposite() is False
+    assert gtable['aacute'].isComposite() is True
 
 
 def test_options_help():

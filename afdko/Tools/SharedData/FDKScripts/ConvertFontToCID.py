@@ -1,17 +1,17 @@
 #!/bin/env python
 # Copyright 2014 Adobe. All rights reserved.
 
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 
 import os
 import re
 import sys
 import types
 
-import FDKUtils
+from . import FDKUtils
 
 __doc__ = """
-ConvertFontToCID.py. v 1.11.2 Feb 01 2018
+ConvertFontToCID.py. v 1.11.3 Apr 29 2018
 
 Convert a Type 1 font to CID, given multiple hint dict defs in the
 "fontinfo" file. See AC.py help, with the "-hfd" option, or the MakeOTF

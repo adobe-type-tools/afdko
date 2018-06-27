@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="acutecmb" format="1">
+	<unicode hex="0301"/>
+	<outline>
+		<contour>
+			<point x="-58.8639240506" y="576.4525316456" type="curve"/>
+			<point x="-33.1234177215" y="556.7943037975" type="line"/>
+			<point x="7.9715189873" y="592.8069620253"/>
+			<point x="47.1487341772" y="627.9018987342"/>
+			<point x="88.2183544304" y="665.2721518987" type="curve" smooth="yes"/>
+			<point x="115.917721519" y="690.5189873418"/>
+			<point x="121.9873417722" y="706.0949367089"/>
+			<point x="121.9873417722" y="720.0411392405" type="curve" smooth="yes"/>
+			<point x="121.9873417722" y="745.6170886076"/>
+			<point x="103.4525316456" y="758.1107594937"/>
+			<point x="84" y="758.1107594937" type="curve" smooth="yes"/>
+			<point x="66.0949367089" y="758.1107594937"/>
+			<point x="48.9715189873" y="747.6170886076"/>
+			<point x="29.5189873418" y="716.7943037975" type="curve" smooth="yes"/>
+			<point x="-2.1392405063" y="668.5189873418"/>
+			<point x="-30.5221518987" y="622.5063291139"/>
+		</contour>
+		<contour>
+			<point name="_aboveLC" x="0" y="506.5759493671" type="move"/>
+		</contour>
+	</outline>
+</glyph>

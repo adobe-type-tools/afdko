@@ -1,13 +1,14 @@
 # Copyright 2014 Adobe. All rights reserved.
 
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import functools
 import os
 import re
 import sys
+import traceback
 
-import FDKUtils
-import ufoTools
+from . import FDKUtils
+from . import ufoTools
 
 from xml.etree.ElementTree import XML
 from xml.etree.ElementTree import tostring as xmlToString
@@ -28,7 +29,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.1.3 Feb 07 2018
+makeotf.py v2.2.0 Jun 13 2018
 """
 
 __methods__ = """
@@ -910,15 +911,15 @@ def getOptions(makeOTFParams):
     optionIndex = 0
     if "-v" in args:
         print(__version__)
-        raise MakeOTFOptionsError
+        sys.exit()
 
     if "-h" in args:
         print(__help__)
-        raise MakeOTFOptionsError
+        sys.exit()
 
     if "-u" in args:
         print(__usage__)
-        raise MakeOTFOptionsError
+        sys.exit()
 
     # Get the absolute path to the current directory.
     makeOTFParams.currentDir = os.getcwd()
@@ -993,7 +994,7 @@ def getOptions(makeOTFParams):
         elif arg == kMOTFOptions[kInputFont][1]:
             kMOTFOptions[kInputFont][0] = i + optionIndex
             try:
-                file_path = args[i]
+                file_path = os.path.abspath(os.path.realpath(args[i]))
                 exec("makeOTFParams.%s%s = file_path" % (kFileOptPrefix,
                                                          kInputFont))
             except IndexError:
@@ -2731,8 +2732,6 @@ def runMakeOTF(makeOTFParams):
             makeOTFParams.tempPathList.append(inputFontPath)
         raise MakeOTFRunError
 
-    if os.path.exists(outputPath):
-        os.remove(outputPath)
     tempOutPath = outputPath
 
     # The following is because fontPath may not be the same
@@ -2986,7 +2985,6 @@ def runMakeOTF(makeOTFParams):
             ConvertFontToCID.convertFontToCID(outputPath, tempPath)
             ConvertFontToCID.mergeFontToCFF(tempPath, outputPath, doSubr)
         except ConvertFontToCID.FontInfoParseError:
-            import traceback
             traceback.print_exc()
             print("makeotf [Error] Failed to convert font '%s' to CID." %
                   outputPath)
@@ -3045,7 +3043,7 @@ def main():
     try:
         _, fdkSharedDataDir = CheckEnvironment()
     except FDKEnvironmentError:
-        return
+        return 1
 
     try:
         makeOTFParams = MakeOTFParams()
@@ -3061,10 +3059,10 @@ def main():
             saveOptionsFile(makeOTFParams)
         runMakeOTF(makeOTFParams)
     except (MakeOTFOptionsError, MakeOTFTXError, MakeOTFRunError):
-        pass
+        return 1
     except Exception:
-        import traceback
         traceback.print_exc()
+        return 1
     finally:
         if not makeOTFParams.debug:
             for tempPath in makeOTFParams.tempPathList:
@@ -3074,4 +3072,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

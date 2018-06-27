@@ -1,0 +1,17 @@
+
+# Printing lookup 0 in feature 'smcp' for script 'DFLT' language 'dflt'.
+# --- Start Lookup [0])
+# -------- SubTable 0
+ sub name_that_is_quite_very_extremely_long by A.sc;
+ sub b by B.sc;
+ sub c by C.sc;
+# --- End Lookup [0])
+
+# Skipping lookup 0 in feature 'smcp' for script 'cyrl' language 'dflt'
+# because already dumped in script 'DFLT', language 'dflt'.
+
+# Skipping lookup 0 in feature 'smcp' for script 'grek' language 'dflt'
+# because already dumped in script 'DFLT', language 'dflt'.
+
+# Skipping lookup 0 in feature 'smcp' for script 'latn' language 'dflt'
+# because already dumped in script 'DFLT', language 'dflt'.

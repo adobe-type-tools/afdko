@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>@MMK_L_LAT_A</key>
+	<dict>
+		<key>@MMK_R_LAT_Y</key>
+		<integer>-90</integer>
+		<key>@MMK_R_LAT_a</key>
+		<integer>-10</integer>
+		<key>@MMK_R_LAT_y</key>
+		<integer>-60</integer>
+	</dict>
+	<key>@MMK_L_LAT_Y</key>
+	<dict>
+		<key>@MMK_R_LAT_A</key>
+		<integer>-100</integer>
+		<key>@MMK_R_LAT_Y</key>
+		<integer>10</integer>
+		<key>@MMK_R_LAT_a</key>
+		<integer>-80</integer>
+		<key>@MMK_R_LAT_y</key>
+		<integer>-50</integer>
+		<key>adieresis</key>
+		<integer>-50</integer>
+	</dict>
+	<key>@MMK_L_LAT_a</key>
+	<dict>
+		<key>@MMK_R_LAT_Y</key>
+		<integer>-70</integer>
+		<key>@MMK_R_LAT_y</key>
+		<integer>-20</integer>
+	</dict>
+	<key>@MMK_L_LAT_v</key>
+	<dict>
+		<key>@MMK_R_LAT_A</key>
+		<integer>-100</integer>
+		<key>@MMK_R_LAT_Y</key>
+		<integer>-60</integer>
+		<key>@MMK_R_LAT_a</key>
+		<integer>-30</integer>
+		<key>@MMK_R_LAT_y</key>
+		<integer>-10</integer>
+	</dict>
+</dict>
+</plist>

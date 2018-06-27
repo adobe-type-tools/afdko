@@ -7,12 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "absfont.h"
 
-#if PLAT_SUN4
-#include "sun4/fixtime.h"
-#else /* PLAT_SUN4 */
 #include <time.h>
-#endif  /* PLAT_SUN4 */
-
 #include <string.h>
 
 /* Print key name and string if set. */

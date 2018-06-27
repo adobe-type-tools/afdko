@@ -6,7 +6,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 __doc__ = """
 """
 __usage__ = """
-   makeInstancesUFO program v1.3.1 Dec 13 2017
+   makeInstancesUFO program v1.3.2 Jun 12 2018
    makeInstancesUFO -h
    makeInstancesUFO -u
    makeInstancesUFO [-d <design space file name>] [-a] [-c] [-n] [-dec] [-i 0,1,..n]
@@ -220,7 +220,7 @@ def updateInstance(options, fontInstancePath):
 		if options.allowDecimalCoords:
 			opList.insert(0, "-d")
 		if os.name == "nt":
-			opList.insert(0, 'checkOutlinesUFO.cmd')
+			opList.insert(0, 'checkOutlinesUFO.exe')
 			proc = Popen(opList, stdout=PIPE)
 		else:
 			opList.insert(0, 'checkOutlinesUFO')
@@ -252,7 +252,7 @@ def updateInstance(options, fontInstancePath):
 		if options.allowDecimalCoords:
 			opList.insert(0, "-dec")
 		if os.name == "nt":
-			opList.insert(0, 'autohint.cmd')
+			opList.insert(0, 'autohint.exe')
 			proc = Popen(opList, stdout=PIPE)
 		else:
 			opList.insert(0, 'autohint')
@@ -411,7 +411,7 @@ def run(args):
 	if options.doNormalize and haveUfONormalizer:
 		logMsg.log("Applying UFO normalization...")
 		for instancePath in newInstancesList:
-				ufonormalizer.normalizeUFO(instancePath, outputPath=None, onlyModified=True)
+				ufonormalizer.normalizeUFO(instancePath, outputPath=None, onlyModified=True, writeModTimes=False)
 
 	if options.doAutoHint or options.doOverlapRemoval:
 		logMsg.log("Applying post-processing...")
@@ -428,7 +428,7 @@ def run(args):
 	if options.doOverlapRemoval or options.doAutoHint: # The defcon library renames glyphs. Need to fix them again.
 		for instancePath in newInstancesList:
 			if haveUfONormalizer and options.doNormalize:
-				ufonormalizer.normalizeUFO(instancePath, outputPath=None, onlyModified=False)
+				ufonormalizer.normalizeUFO(instancePath, outputPath=None, onlyModified=False, writeModTimes=False)
 
 def main():
 	try:

@@ -1,0 +1,96 @@
+### [GSUB] (00001228)
+Version    =1.0 (00010000)
+ScriptList =000a
+FeatureList=0054
+LookupList =0074
+--- ScriptList (000a)
+ScriptCount=4
+--- ScriptRecord[index]={ScriptTag,Script}
+[0]={DFLT,001a} [1]={cyrl,0026} [2]={grek,0032} [3]={latn,003e} 
+--- Script [0] (001a)
+DefaultLangSys=0004
+LangSysCount  =0
+
+--- LangSys [-1] (0004)
+LookupOrder    =0000
+ReqFeatureIndex=65535
+FeatureCount   =1
+--- FeatureIndex[index]=value
+[0]=0 
+--- Script [1] (0026)
+DefaultLangSys=0004
+LangSysCount  =0
+
+--- LangSys [-1] (0004)
+LookupOrder    =0000
+ReqFeatureIndex=65535
+FeatureCount   =1
+--- FeatureIndex[index]=value
+[0]=1 
+--- Script [2] (0032)
+DefaultLangSys=0004
+LangSysCount  =0
+
+--- LangSys [-1] (0004)
+LookupOrder    =0000
+ReqFeatureIndex=65535
+FeatureCount   =1
+--- FeatureIndex[index]=value
+[0]=2 
+--- Script [3] (003e)
+DefaultLangSys=0004
+LangSysCount  =0
+
+--- LangSys [-1] (0004)
+LookupOrder    =0000
+ReqFeatureIndex=65535
+FeatureCount   =1
+--- FeatureIndex[index]=value
+[0]=3 
+
+--- FeatureList (0054)
+FeatureCount=4
+--- FeatureRecord[index]={FeatureTag,Feature}
+[0]={'smcp',001a} [1]={'smcp',001a} [2]={'smcp',001a} [3]={'smcp',001a} 
+
+--- FeatureTable (001a)
+FeatureParam=0000
+LookupCount =1
+--- LookupListIndex[index]=value
+[0]=0 
+--- FeatureTable (001a)
+FeatureParam=0000
+LookupCount =1
+--- LookupListIndex[index]=value
+[0]=0 
+--- FeatureTable (001a)
+FeatureParam=0000
+LookupCount =1
+--- LookupListIndex[index]=value
+[0]=0 
+--- FeatureTable (001a)
+FeatureParam=0000
+LookupCount =1
+--- LookupListIndex[index]=value
+[0]=0 
+--- LookupList (0074)
+LookupCount=1
+--- Lookup[index]=offset
+[0]=0004 
+--- Lookup [0] (0004)
+LookupType   =0001
+LookupFlag   =0000
+SubTableCount=1
+--- SubTable[index]=offset
+[0]=0008 
+--- Subtable [0] (00000008)
+--- SingleSubst
+SubstFormat =1
+Coverage    =0006
+DeltaGlyphId=3
+--- Coverage (0006)
+CoverageFormat=1
+GlyphCount    =3
+--- GlyphArray[index]=glyphId glyphName/CID
+[0]=4 (a) [1]=5 (b) [2]=6 (c) 
+ 

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont sfntVersion="OTTO" ttLibVersion="3.25">
+
+  <GPOS>
+    languagesystem latn dflt;
+    languagesystem grek dflt;
+    languagesystem cyrl dflt;
+    languagesystem DFLT dflt;
+
+
+    # Class definitions *********************************
+    @empty = [  ];
+
+
+    feature kern {
+      lookup kern_DFLT_dflt_1 {
+        pos [A.sc] [A.sc] 10;
+        pos [A] [C.sc] 20;
+        pos [A] [C] -10;
+        pos [A] [a] 10;
+        pos [B] [A.sc] 10;
+        pos [B] [C.sc] 10;
+        pos [C.sc] [C.sc] -20;
+        pos [C] [A.sc] 10;
+        pos [C] [C] -40;
+        pos [b] [a] -10;
+        pos [c] [a] -10;
+        pos [c] [c] -30;
+      } kern_DFLT_dflt_1;
+
+    } kern;
+
+  </GPOS>
+
+</ttFont>

@@ -16,12 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-
-#if PLAT_SUN4
-#include "sun4/fixstring.h"
-#else /* PLAT_SUN4 */
 #include <string.h>
-#endif  /* PLAT_SUN4 */
 
 /* CFF header */
 typedef struct {

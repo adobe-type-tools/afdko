@@ -19,13 +19,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <stdarg.h>
 #include <math.h>
 #include <limits.h>
-
-#if PLAT_SUN4
-#include "sun4/fixstdlib.h"
-#else /* PLAT_SUN4 */
 #include <stdlib.h>
-#endif /* PLAT_SUN4 */
-
 #include <errno.h>
 
 /* Make uzoperator for internal use */
@@ -1414,11 +1408,7 @@ static void convertToAbsolute(t2cCtx h, float x1, float y1, abfBlendArg* blendAr
 static void setNumMasters(t2cCtx h)
 {
     unsigned short vsindex = h->glyph->info->blendInfo.vsindex;
-    h->stack.numRegions = var_getIVSRegionCountForIndex(h->aux->varStore, vsindex);
-	if (h->stack.numRegions > CFF2_MAX_MASTERS) {
-		message(h, "too many regions %d for vsindex %d", h->stack.numRegions, vsindex);
-		h->stack.numRegions = 0;
-	}
+    h->stack.numRegions = var_getIVDRegionCountForIndex(h->aux->varStore, vsindex);
 	h->glyph->info->blendInfo.numRegions = h->stack.numRegions;
     if (!var_getIVSRegionIndices(h->aux->varStore, vsindex, h->regionIndices, h->stack.numRegions)) {
         message(h, "inconsistent region indices detected in item variation store subtable %d", vsindex);

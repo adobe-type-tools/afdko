@@ -1,5 +1,5 @@
 """
-fontPDF v1.24 Dec 4 2017. This module is not run stand-alone; it requires
+fontPDF v1.26 Jun 18 2018. This module is not run stand-alone; it requires
 another module, such as ProofPDF.py, in order to collect the options, and call
 the MakePDF function.
 
@@ -21,6 +21,17 @@ All coordinates are in points, in the usual PostScript model. Note,.
 however, that the coordinate system for the page puts (0,0) at the top
 right, with the positive Y axis pointing down.
 """
+
+from __future__ import print_function, absolute_import
+
+import os
+import re
+import time
+
+from . import FDKUtils
+from . import pdfgen
+from . import pdfmetrics
+from .pdfutils import LINEEND
 
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
@@ -64,6 +75,7 @@ the command-line tools, the values be enclosed in quotes, such as:
 --pageRightMargin  36.0               # Integer. Point size
 --pageTitleFont  Times-Bold           # Text string. Font for title
 --pageTitleSize  14                   # Integer. Point size used in title
+--pageIncludeTitle  1                 # 0 or 1. Whether to include a title on each page
 --fontsetGroupPtSize  14              # Integer. Point size for group header and PS name in fontsetplot.
 
 # Page layout attributes
@@ -262,17 +274,6 @@ black, "(1.0, 1.0, 1.0)" is page white, "(1.0, 0, 0)" is red.
 --pointLabelSize 12  #Change the size of the point label text.
 """
 
-import pdfdoc
-import pdfgen
-import pdfgeom
-import pdfmetrics
-import pdfutils
-import time
-import os
-import re
-from pdfutils import LINEEND
-import FDKUtils
-
 inch = INCH = 72
 cm = CM = inch / 2.54
 kShowMetaTag = "drawMeta_"
@@ -320,6 +321,7 @@ class FontPDFParams:
 		self.descenderSpace = None # The amout of space allowed for descenders. By default is  Font BBox.ymin, but can be set by parameter.
 		self.pageTitleFont = 'Times-Bold'  # Font used for page titles.
 		self.pageTitleSize = 14		# point size for page titles
+		self.pageIncludeTitle = 1  # include or not the page titles
 		self.fontsetGroupPtSize = 14 # pt size for group header text font fontsetplot
 		self.pointLabelFont = 'Helvetica'  # Font used for all text in glyph tile.
 		self.pointLabelSize = 16 # point size for all text in glyph tile. This is is relative to a glyph tile fo width kGlyphSquare;
@@ -985,7 +987,10 @@ class FontPDFGlyph:
 		rt_canvas.restoreState()
 
 	def drawGlyph_BlueZones(self, params):
-		blueZones = self.parentFont.GetBlueZones()[self.fdIndex]
+		try:
+			blueZones = self.parentFont.GetBlueZones()[self.fdIndex]
+		except IndexError:
+			return
 		blueZones.sort()
 		rt_canvas = params.rt_canvas
 		rt_canvas.saveState()
@@ -1182,7 +1187,7 @@ class FontPDFGlyph:
 				entry = params.rt_optionLayoutDict[reversekey]
 				cidName =  entry[0].zfill(5)
 			except KeyError:
-				cidName = "cidName: unknown as'%s  %s  %s' not in layout file." % (hintDir, rowDir, self.name)
+				cidName = ''
 			nameString = "%s   %s" % (gName, cidName)
 		else:
 			nameString = gName
@@ -1223,55 +1228,43 @@ class FontPDFGlyph:
 		numVhints = len(self.vhints)
 		params.rt_canvas.drawString(self.cur_x, self.cur_y, "Hints:  %s horiz: %s, vert: %s" % (numHhints + numVhints, numHhints, numVhints))
 
-	def drawMeta_HintDir(self, params):
-		if self.parentFont.isCID or (self.name.startswith("cid") and re.match(r"\d+", self.name[3:])):
-			# use CIO key to access layout dict
-			try:
-				hintDir = params.rt_optionLayoutDict[self.name][0]
-			except KeyError:
-				hintDir = "HintDir: CID not in layout file. %s." % (self.name)
-		else:
-			# it is name-keyed font that is not helpfully usiing cidXXXX names. Assume that it is in the
-			# std development heirarchy.
-			rowDir = os.path.dirname(params.rt_filePath)
-			hintDir = os.path.basename(os.path.dirname(rowDir))
-			rowDir = os.path.basename(rowDir)
-			reversekey = repr((hintDir, rowDir, self.name))
-			try:
-				entry = params.rt_optionLayoutDict[reversekey]
-			except KeyError:
-				hintDir = "HintDir: '%s  %s  %s' not in layout file." % (hintDir, rowDir, self.name)
+	def _get_cid_layout_entry(self, params):
+		if (self.parentFont.isCID or (self.name.startswith("cid") and
+			re.match(r"\d+", self.name[3:]))):
+			# use CID key to access layout dict
+			# zero-pad the CID glyph name
+			glyph_name = "cid" + self.name[3:].zfill(5)
+			return params.rt_optionLayoutDict.get(glyph_name, None)
 
-		params.rt_canvas.drawString(self.cur_x, self.cur_y, "HintDir = %s" %(hintDir))
+	def drawMeta_HintDir(self, params):
+		hintDir = None
+		layout_entry = self._get_cid_layout_entry(params)
+		if layout_entry:
+			try:
+				hintDir = layout_entry[0]
+			except IndexError:
+				pass
+		if hintDir:
+			params.rt_canvas.drawString(
+				self.cur_x, self.cur_y, "HintDir = %s" % hintDir)
 
 	def drawMeta_RowFont(self, params):
-		if self.parentFont.isCID or (self.name.startswith("cid") and re.match(r"\d+", self.name[3:])):
-			# use CIO key to access layout dict
+		rowDir = None
+		layout_entry = self._get_cid_layout_entry(params)
+		if layout_entry:
 			try:
-				rec = params.rt_optionLayoutDict[self.name]
-				hintDir = rec[1]
-				rowDir = rec[2]
-			except (KeyError, TypeError):
-				rowFont = "RowFont: CID not in layout file"
-		else:
-			# it is name-keyed font that is not helpfully usiing cidXXXX names. Assume that it is in the
-			# std development heirarchy.
-			rowDir = os.path.dirname(params.rt_filePath)
-			hintDir = os.path.basename(os.path.dirname(rowDir))
-			rowDir = os.path.basename(rowDir)
-			reversekey = repr((hintDir, rowDir, self.name))
-			try:
-				entry = params.rt_optionLayoutDict[reversekey]
-			except KeyError:
-				rowDir = "RowFont: '%s  %s  %s' not in layout file." % (hintDir, rowDir, self.name)
-		params.rt_canvas.drawString(self.cur_x, self.cur_y, "RowDir = %s/%s" % (hintDir, rowDir))
+				rowDir = layout_entry[1:3]
+			except IndexError:
+				pass
+		if rowDir:
+			params.rt_canvas.drawString(
+				self.cur_x, self.cur_y, "RowDir = %s" % '/'.join(rowDir))
 
 	def drawMeta_WidthOnly(self, params):
 		params.rt_canvas.drawString(self.cur_x, self.cur_y, "Width = %s, Y Advance = %s" % ( self.xAdvance, self.yAdvance))
 
 
 def getTitleHeight(params):
-	pageTitleFont = params.pageTitleFont
 	pageTitleSize = params.pageTitleSize
 	cur_y = params.pageSize[1] - (params.pageTopMargin + pageTitleSize)
 	cur_y -= pageTitleSize*1.2
@@ -1302,14 +1295,17 @@ def doFontSetTitle(rt_canvas, params, numPages):
 def doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages = None):
 	pageTitleFont = params.pageTitleFont
 	pageTitleSize = params.pageTitleSize
+	pageIncludeTitle = params.pageIncludeTitle
 	# Set 0,0 to be at top right of page.
 
-	rt_canvas.setFont(pageTitleFont, pageTitleSize)
+	if pageIncludeTitle:
+		rt_canvas.setFont(pageTitleFont, pageTitleSize)
 	title = "%s   OT version %s " % (pdfFont.getPSName(), pdfFont.getOTVersion() )
 	rightMarginPos = params.pageSize[0]-params.pageRightMargin
 	cur_y = params.pageSize[1] - (params.pageTopMargin + pageTitleSize)
-	rt_canvas.drawString(params.pageLeftMargin, cur_y, title)
-	rt_canvas.drawRightString(rightMarginPos, cur_y, time.asctime())
+	if pageIncludeTitle:
+		rt_canvas.drawString(params.pageLeftMargin, cur_y, title)
+		rt_canvas.drawRightString(rightMarginPos, cur_y, time.asctime())
 	cur_y -= pageTitleSize*1.2
 	path = repr(params.rt_filePath) # Can be non-ASCII
 	if numPages == None:
@@ -1327,13 +1323,16 @@ def doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages = None):
 
 	if adjustedWidth:
 		path = "..." + path[3:]
-	rt_canvas.drawString(params.pageLeftMargin, cur_y, path)
-	rt_canvas.drawRightString(rightMarginPos, cur_y, pageString)
+	if pageIncludeTitle:
+		rt_canvas.drawString(params.pageLeftMargin, cur_y, path)
+		rt_canvas.drawRightString(rightMarginPos, cur_y, pageString)
 	cur_y -= pageTitleSize/2
-	rt_canvas.setLineWidth(3)
-	rt_canvas.line(params.pageLeftMargin, cur_y, rightMarginPos, cur_y)
+	if pageIncludeTitle:
+		rt_canvas.setLineWidth(3)
+		rt_canvas.line(params.pageLeftMargin, cur_y, rightMarginPos, cur_y)
 	#reset carefully afterwards
-	rt_canvas.setLineWidth(1)
+	if pageIncludeTitle:
+		rt_canvas.setLineWidth(1)
 	return  cur_y - pageTitleSize # Add some space below the title line.
 
 def  getMetaDataHeight(params, fontYMin) :
@@ -1471,24 +1470,20 @@ def getLayoutFromGPP(params, extraY, yTop):
 					scale = scale1
 					numAcross = numAcross1
 					numDown = numDown1
-					numGlyphs = numGlyphs1
 				else:
 					scale = scale2
 					numAcross = numAcross2
 					numDown = numDown2
-					numGlyphs = numGlyphs2
 				break
 			elif (numGlyphs2 >= glyphsPerPage):
 				scale = scale2
 				numAcross = numAcross2
 				numDown = numDown2
-				numGlyphs = numGlyphs2
 				break
 			elif (numGlyphs1 >= glyphsPerPage):
 				scale = scale1
 				numAcross = numAcross1
 				numDown = numDown1
-				numGlyphs = numGlyphs1
 				break
 
 		if tryCount > 0:
@@ -1615,7 +1610,7 @@ class ProgressBar:
 		self.startTime = time.time()
 		self.tickCount = 0
 		if startText:
-			print startText
+			print(startText)
 
 	def DoProgress(self, tickCount):
 		if  tickCount and ((tickCount % self.kProgressBarTickStep) == 0):
@@ -1625,10 +1620,11 @@ class ProgressBar:
 			timeleft = int(perGlyph * (self.maxCount - tickCount))
 			minutesLeft = int(timeleft /60)
 			secondsLeft = timeleft % 60
-			print self.kText % (tickCount, self.maxCount, minutesLeft, secondsLeft)
+			print(self.kText % (tickCount, self.maxCount, minutesLeft,
+								     secondsLeft))
 
 	def EndProgress(self):
-		print "Saving file..."
+		print("Saving file...")
 
 
 def makePDF(pdfFont, params, doProgressBar=True):
@@ -1835,7 +1831,7 @@ class  FontInfo:
 			formatName = "/FontFile2"
 			fontType = "/TrueType"
 		else:
-			print "Font type not supported."
+			print("Font type not supported.")
 			raise TypeError
 
 		text = []
@@ -2173,7 +2169,8 @@ def makeProofPDF(pdfFont, params, doProgressBar=True):
 	# Collect log file text, if any.
 	if params.errorLogFilePath:
 		if not os.path.isfile(params.errorLogFilePath):
-			print "Warning: log file %s does not exist or is not a file." % (repr(params.errorLogFilePath))
+			print("Warning: log file %s does not exist or is not a file." %
+					repr(params.errorLogFilePath))
 		else:
 			lf = file(params.errorLogFilePath, "rU")
 			errorLines = lf.readlines()

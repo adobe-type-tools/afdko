@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>A</key>
+	<string>A_.glif</string>
+	<key>Aacute</key>
+	<string>A_acute.glif</string>
+	<key>Adieresis</key>
+	<string>A_dieresis.glif</string>
+	<key>Atilde</key>
+	<string>A_tilde.glif</string>
+	<key>Y</key>
+	<string>Y_.glif</string>
+	<key>Yacute</key>
+	<string>Y_acute.glif</string>
+	<key>Ydieresis</key>
+	<string>Y_dieresis.glif</string>
+	<key>Ytilde</key>
+	<string>Y_tilde.glif</string>
+	<key>a</key>
+	<string>a.glif</string>
+	<key>aacute</key>
+	<string>aacute.glif</string>
+	<key>adieresis</key>
+	<string>adieresis.glif</string>
+	<key>atilde</key>
+	<string>atilde.glif</string>
+	<key>y</key>
+	<string>y.glif</string>
+	<key>yacute</key>
+	<string>yacute.glif</string>
+	<key>ydieresis</key>
+	<string>ydieresis.glif</string>
+	<key>ytilde</key>
+	<string>ytilde.glif</string>
+</dict>
+</plist>

@@ -10,12 +10,7 @@
 #include "txops.h"
 #include "ctutil.h"
 
-#if PLAT_SUN4
-#include "sun4/fixstring.h"
-#else /* PLAT_SUN4 */
 #include <string.h>
-#endif  /* PLAT_SUN4 */
-
 #include <stdlib.h>
 #include <math.h>
 

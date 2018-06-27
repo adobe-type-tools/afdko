@@ -13,12 +13,7 @@
 #include "varread.h"
 
 #include <math.h>
-#if PLAT_SUN4
-#include "sun4/fixstring.h"
-#else /* PLAT_SUN4 */
 #include <string.h>
-#endif /* PLAT_SUN4 */
-
 #include <stdio.h>
 #include <stdlib.h>
 

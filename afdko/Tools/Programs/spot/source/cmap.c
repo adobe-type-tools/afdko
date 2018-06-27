@@ -658,7 +658,7 @@ static void dumpMapping(IntX level)
 			break;
 		case 9: case 10:
 			{
-			Byte8 title[64];
+			Byte8 title[MAX_NAME_LEN];
 			Card16 platformId = encoding->platformId;
 			Card16 scriptId = encoding->scriptId;
 			Card16 languageId = ((FormatHdr *)encoding->format)->languageId;
