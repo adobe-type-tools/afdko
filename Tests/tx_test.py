@@ -180,5 +180,4 @@ def test_long_charstring_bug444():
     # read a CFF2 VF with a charstring longer that 65535, check output
     actual_path = runner(CMD + ['-o', '0', '-f', 'CJK-VarTest.otf'])
     expected_path = _get_expected_path('CJK-VarTest.txt')
-    skip = ['-s', '## Filename']
-    assert differ([expected_path, actual_path] + skip)
+    assert differ([expected_path, actual_path, '-s', '## Filename'])
