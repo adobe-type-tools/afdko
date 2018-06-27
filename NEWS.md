@@ -1,7 +1,7 @@
 Changelog
 =========
 
-2.7.1 (released 2018-XX-XX)
+2.7.1 (released 2018-07-27)
 ---------------------------
 
 - Implemented an integration testing framework
