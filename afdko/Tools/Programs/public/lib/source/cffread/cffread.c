@@ -1919,17 +1919,12 @@ static void readCharStringsINDEX(cfrCtx h, short flags)
         
 		/* Validate object length */
 		length = info->sup.end - info->sup.begin;
-        if (h->flags & CFR_IS_CFF2)
-        {
-            if (length > 65535)
-                fatal(h, cfrErrINDEXOffset);
-        }
-        else
-        {
-            if (length < 1 || length > 65535)
-                fatal(h, cfrErrINDEXOffset);
-        }
-        
+		if (length > 65535)
+		{
+			message(h, "Warning: CharString is %d bytes long. CharStrings "
+					   "longer than 65535 bytes might not be supported by "
+					   "some implementations.", length);
+		}
 		offset = info->sup.end;
     }
 }
