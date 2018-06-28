@@ -1033,7 +1033,7 @@ void ufwGetVersion(ctlVersionCallbacks *cb)
 	dnaGetVersion(cb);
     
 	/* This library */
-	cb->getversion(cb, UFW_VERSION, "ufwrite");
+	cb->getversion(cb, UFW_VERSION, "ufowrite");
     
 	/* Record this call */
 	cb->called |= 1<<UFW_LIB_ID;
