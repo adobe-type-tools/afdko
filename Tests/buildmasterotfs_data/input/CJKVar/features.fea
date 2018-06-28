@@ -1,0 +1,36 @@
+
+table head {
+	FontRevision 1.000;
+} head;
+
+table OS/2 {
+	TypoAscender 880;
+	TypoDescender -120;
+	TypoLineGap 200;
+	winAscent 880;
+	winDescent 120;
+	include(weight.fea);
+	include(../width.fea);
+	FSType 8;
+	Vendor "ADBE";
+	XHeight 380;
+	CapHeight 760;
+} OS/2;
+
+table hhea {
+	CaretOffset 0;
+	Ascender 880;
+	Descender -120;
+	LineGap 0;
+} hhea;
+
+table name {
+	nameid 0 "\00A9 2018 Adobe. All Rights Reserved.";
+	nameid 8 "Adobe";
+	nameid 9 "Ryoko Nishizuka";
+	nameid 11 "http://www.adobe.com";
+	nameid 19 "\8619";
+	nameid 25 "CJKVar";
+} name;
+
+languagesystem DFLT dflt;
