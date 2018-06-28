@@ -2038,6 +2038,19 @@ static int parseFontInfo(ufoCtx h)
                 state = 1;
             }
         }
+        else if (tokenEqualStr(tk, "<array/>"))
+        {
+          if (state != 2)
+          {
+            fatal(h,ufoErrParse,  "Encountered <array/> when not after <key> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
+          }
+          else
+          {
+            dnaSET_CNT(h->valueArray, 0);
+            setFontDictKey(h, NULL);
+            state = 1;
+          }
+        }
         else if (tokenEqualStr(tk, "<string>"))
         {
             state = doFontDictValue(h, "<string>", "</string>", state);
@@ -3440,6 +3453,11 @@ static int parseHintSetListV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
         }
 
         else if (tokenEqualStr(tk, "</array>") && (state == outlineInHintSetList))
+        {
+            return result;
+        }
+
+        else if (tokenEqualStr(tk, "<array/>") && (state == outlineInHintData))
         {
             return result;
         }
