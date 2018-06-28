@@ -130,9 +130,10 @@ def buildTempDesignSpace(dsPath):
     ds = ET.parse(dsPath).getroot()
     masterList = ds.find('sources').findall('source')
 
-    # Delete the existing instances
+    # Delete any existing instances
     instances = ds.find('instances')
-    ds.remove(instances)
+    if instances:
+        ds.remove(instances)
     ds.append(XMLElement('instances'))
     instances = ds.find('instances')
 
