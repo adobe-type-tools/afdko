@@ -18,6 +18,14 @@ static void writeString(abfAFMCtx h, char *key, abfString *value)
 	fprintf(h->fp, "%s %s\n", key, value->ptr);
 	}
 
+static void printFontBBoxDisclaimer(abfAFMCtx h)
+{
+	fprintf(h->fp,
+		"Comment NOTE: The FontBBox values may be incorrect because tx will\n"
+		"Comment either copy precomputed values directly from the source\n"
+		"Comment file (if available) or set them to zero (if not).\n");
+}
+
 void abfAFMBegFont(abfAFMCtx h, abfTopDict *top)
 	{
 	time_t now = time(NULL);
@@ -47,6 +55,7 @@ void abfAFMBegFont(abfAFMCtx h, abfTopDict *top)
 		fprintf(h->fp, "MetricsSets 2\n");
 		writeString(h, "FontName", &top->cid.CIDFontName);
 		writeString(h, "Weight", &top->Weight);
+		printFontBBoxDisclaimer(h);
 		fprintf(h->fp, "FontBBox %g %g %g %g\n",
 				top->FontBBox[0], top->FontBBox[1], 
 				top->FontBBox[2], top->FontBBox[3]);
@@ -76,6 +85,7 @@ void abfAFMBegFont(abfAFMCtx h, abfTopDict *top)
 		fprintf(h->fp, "ItalicAngle %g\n", top->ItalicAngle);
 		fprintf(h->fp, "IsFixedPitch %s\n", 
 				top->isFixedPitch? "true": "false");
+		printFontBBoxDisclaimer(h);
 		fprintf(h->fp, "FontBBox %g %g %g %g\n",
 				top->FontBBox[0], top->FontBBox[1], 
 				top->FontBBox[2], top->FontBBox[3]);
