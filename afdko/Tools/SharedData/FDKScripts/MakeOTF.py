@@ -29,7 +29,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.2.0 Jun 13 2018
+makeotf.py v2.3.0 Jun 28 2018
 """
 
 __methods__ = """
@@ -2027,10 +2027,19 @@ def setMissingParams(makeOTFParams):
             isCID = 0
             match = re.search(r"\sFontName\s+\"(\S+)\"", report)
             if not match:
-                print("makeotf [Error] Could not find FontName in FontDict of "
-                      "file '%s'." % inputFilePath)
+                print("makeotf [Error] Could not find FontName (a.k.a. "
+                      "PostScript name) in FontDict of file "
+                      "'{}'".format(inputFilePath))
                 raise MakeOTFTXError
         psName = match.group(1)
+
+        if psName == 'PSNameNotSpecified':
+            # 'tx' fills-in the PostScript font name if the UFO doesn't have it
+            # https://github.com/adobe-type-tools/afdko/issues/437
+            # This condition makes the UFO pipeline behave the same as Type 1
+            print("makeotf [Error] Could not find 'postscriptFontName' "
+                  "in file '{}'".format(inputFilePath))
+            raise MakeOTFTXError
 
         if makeOTFParams.srcIsTTF or inputFontPath.lower().endswith(".ttf"):
             path = psName + ".ttf"
