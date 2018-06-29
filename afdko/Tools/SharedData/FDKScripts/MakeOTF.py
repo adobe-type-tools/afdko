@@ -29,7 +29,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.2.0 Jun 13 2018
+makeotf.py v2.3.0 Jun 28 2018
 """
 
 __methods__ = """
@@ -71,7 +71,8 @@ __usage__ = __version__ + """
                 for 'font.ufo, 'font.pfa', and cidfont.ps, all in the
                 current directory.
 -o <output font>        Specify output font path. Default is
-                '<PostScript-Name>.otf'.
+                '<PostScript-Name>.otf'. If the path is an existing folder,
+                a default-named font will be saved to it.
 -b                      Set style to Bold. Affects style-linking.
                 Default is not bold
 -nb                     Turn off the -b option, if it has previously
@@ -2012,7 +2013,13 @@ def setMissingParams(makeOTFParams):
                 error = setCIDCMAPPaths(makeOTFParams, Reg, Ord, Sup)
 
     # output file path.
-    path = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kOutputFont))
+    path = getattr(makeOTFParams, kFileOptPrefix + kOutputFont)
+    output_dir = None
+    if path and os.path.isdir(path):
+        # support '-o' option to be a folder only
+        # https://github.com/adobe-type-tools/afdko/issues/281
+        output_dir = path
+        path = None
     if not path:
         # need to figure out PS name in order to derive default output path.
         command = "%s -dump -0 \"%s\" 2>&1" % (makeOTFParams.txPath,
@@ -2027,18 +2034,32 @@ def setMissingParams(makeOTFParams):
             isCID = 0
             match = re.search(r"\sFontName\s+\"(\S+)\"", report)
             if not match:
-                print("makeotf [Error] Could not find FontName in FontDict of "
-                      "file '%s'." % inputFilePath)
+                print("makeotf [Error] Could not find FontName (a.k.a. "
+                      "PostScript name) in FontDict of file "
+                      "'{}'".format(inputFilePath))
                 raise MakeOTFTXError
         psName = match.group(1)
+
+        if psName == 'PSNameNotSpecified':
+            # 'tx' fills-in the PostScript font name if the UFO doesn't have it
+            # https://github.com/adobe-type-tools/afdko/issues/437
+            # This condition makes the UFO pipeline behave the same as Type 1
+            print("makeotf [Error] Could not find 'postscriptFontName' "
+                  "in file '{}'".format(inputFilePath))
+            raise MakeOTFTXError
 
         if makeOTFParams.srcIsTTF or inputFontPath.lower().endswith(".ttf"):
             path = psName + ".ttf"
         else:
             path = psName + ".otf"
         if not isCID:
-            path = os.path.join(makeOTFParams.fontDirPath, path)
-        exec("makeOTFParams.%s%s = path" % (kFileOptPrefix, kOutputFont))
+            if output_dir:
+                path = os.path.join(output_dir, path)
+            else:
+                path = os.path.join(makeOTFParams.fontDirPath, path)
+
+        path = os.path.abspath(os.path.realpath(path))
+        setattr(makeOTFParams, kFileOptPrefix + kOutputFont, path)
 
     if error:
         raise MakeOTFOptionsError

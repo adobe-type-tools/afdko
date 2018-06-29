@@ -17,9 +17,12 @@ import subprocess32 as subprocess
 import sys
 import tempfile
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 
 logger = logging.getLogger('runner')
+
+
+TIMEOUT = 120  # seconds
 
 
 def _write_file(file_path, data):
@@ -90,9 +93,9 @@ def run_tool(opts):
         "About to run the command below\n==>{}<==".format(' '.join(args)))
     try:
         if opts.no_save_path:
-            return subprocess.check_call(args, timeout=60)
+            return subprocess.check_call(args, timeout=TIMEOUT)
         else:
-            output = subprocess.check_output(args, timeout=60)
+            output = subprocess.check_output(args, timeout=TIMEOUT)
             if opts.redirect:
                 _write_file(save_loc, output)
             return save_loc
@@ -117,7 +120,7 @@ def _check_tool(tool_name):
         return tool_name
     # XXX end hack
     try:
-        subprocess.check_output([tool_name, '-h'], timeout=60)
+        subprocess.check_output([tool_name, '-h'], timeout=TIMEOUT)
         return tool_name
     except (subprocess.CalledProcessError, OSError) as err:
         logger.error(err)

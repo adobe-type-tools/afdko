@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>familyName</key>
+		<string>MasterSet_Kanji_75</string>
+		<key>postscriptBlueFuzz</key>
+		<integer>1</integer>
+		<key>postscriptBlueScale</key>
+		<real>0.039625</real>
+		<key>postscriptBlueShift</key>
+		<integer>7</integer>
+		<key>postscriptBlueValues</key>
+		<array>
+			<integer>0</integer>
+			<integer>0</integer>
+		</array>
+		<key>postscriptFamilyBlues</key>
+		<array>
+		</array>
+		<key>postscriptFamilyOtherBlues</key>
+		<array>
+		</array>
+		<key>postscriptFontName</key>
+		<string>MasterSet_Kanji_75-w669.00</string>
+		<key>postscriptOtherBlues</key>
+		<array>
+		</array>
+		<key>postscriptStemSnapH</key>
+		<array>
+		</array>
+		<key>postscriptStemSnapV</key>
+		<array>
+		</array>
+		<key>styleName</key>
+		<string>w669.00</string>
+		<key>unitsPerEm</key>
+		<integer>1000</integer>
+	</dict>
+</plist>

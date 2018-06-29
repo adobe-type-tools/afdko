@@ -189,3 +189,10 @@ def test_remove_hints_bug180():
     actual_path = runner(CMD + ['-o', 't1', 'n', '-f', 'cid.otf'])
     expected_path = _get_expected_path('cid_nohints.ps')
     assert differ([expected_path, actual_path, '-m', 'bin'])
+
+
+def test_long_charstring_bug444():
+    # read a CFF2 VF with a charstring longer that 65535, check output
+    actual_path = runner(CMD + ['-o', '0', '-f', 'CJK-VarTest.otf'])
+    expected_path = _get_expected_path('CJK-VarTest.txt')
+    assert differ([expected_path, actual_path, '-s', '## Filename'])

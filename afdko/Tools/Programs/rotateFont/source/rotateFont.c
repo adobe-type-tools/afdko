@@ -7,7 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define ROTATE_VERSION CTL_MAKE_VERSION(1,1,0)
+#define ROTATE_VERSION CTL_MAKE_VERSION(1,2,0)
 
 #include "cfembed.h"
 #include "cffread.h"
