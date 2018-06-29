@@ -53,4 +53,7 @@
 			<point name="belowLC" x="252" y="-22" type="move"/>
 		</contour>
 	</outline>
+	<note>
+		A note comment on a glif file
+	</note>
 </glyph>
