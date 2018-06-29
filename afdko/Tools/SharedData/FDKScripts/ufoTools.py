@@ -16,7 +16,7 @@ except ImportError:
 from . import ConvertFontToCID
 
 __doc__ = """
-ufoTools.py v1.30.4 Apr 29 2018
+ufoTools.py v1.30.5 Jun 28 2018
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -2527,7 +2527,7 @@ def makeUFOFMNDB(srcFontPath):
         if len(parts) > 1:
             styleName = parts[1]
     except KeyError:
-        print("[Warning] UFO font is missing PostScript Name")
+        print("ufoTools [Warning] UFO font is missing 'postscriptFontName'")
 
     try:
         familyName = fiMap["openTypeNamePreferredFamilyName"]
@@ -2535,7 +2535,7 @@ def makeUFOFMNDB(srcFontPath):
         try:
             familyName = fiMap["familyName"]
         except KeyError:
-            print("[Warning] UFO font is missing familyName")
+            print("ufoTools [Warning] UFO font is missing 'familyName'")
 
     try:
         styleName = fiMap["openTypeNamePreferredSubfamilyName"]
@@ -2543,7 +2543,7 @@ def makeUFOFMNDB(srcFontPath):
         try:
             styleName = fiMap["styleName"]
         except KeyError:
-            print("[Warning] UFO font is missing styleName")
+            print("ufoTools [Warning] UFO font is missing 'styleName'")
 
     fmndbPath = os.path.join(srcFontPath, kDefaultFMNDBPath)
     parts = []

@@ -61,8 +61,8 @@ def test_exit_unknown_option(arg):
     assert err.value.returncode == 1
 
 
-# makeotf [Error] Could not find GlyphOrderAndAliasDB file at '...'
 def test_type1_pfa_release_mode():
+    # makeotf [Error] Could not find GlyphOrderAndAliasDB file at '...'
     with pytest.raises(subprocess.CalledProcessError) as err:
         runner(CMD + ['-n', '-o',
                       'f', '_{}'.format(_get_input_path(T1PFA_NAME)), 'r'])
@@ -97,3 +97,12 @@ def test_ufo_with_trailing_slash_bug280():
     runner(CMD + ['-n', '-a', '-o', 'f', '_{}{}'.format(tmp_ufo_path, os.sep)])
     expected_path = os.path.join(temp_dir, 'SourceSansPro-Regular.otf')
     assert os.path.isfile(expected_path)
+
+
+@pytest.mark.parametrize('input_filename', ['t1pfa-noPSname.pfa',
+                                            'ufo2-noPSname.ufo'])
+def test_no_postscript_name_bug282(input_filename):
+    # makeotf will fail for both UFO and Type 1 inputs
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        runner(CMD + ['-n', '-o', 'f', '_{}'.format(input_filename)])
+    assert err.value.returncode == 1
