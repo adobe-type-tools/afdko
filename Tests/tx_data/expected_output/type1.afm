@@ -5,6 +5,9 @@ FontName SourceSansPro-Regular
 FamilyName Source Sans Pro
 ItalicAngle 0
 IsFixedPitch false
+Comment NOTE: The FontBBox values may be incorrect because tx will
+Comment either copy precomputed values directly from the source
+Comment file (if available) or set them to zero (if not).
 FontBBox 52 -12 565 660
 UnderlinePosition -75
 UnderlineThickness 50
