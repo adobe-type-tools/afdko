@@ -52,15 +52,6 @@ def run_tool(opts):
     """
     Runs the tool using the parameters provided.
     """
-    # XXX start temporary debug code
-    if platform.system() == "Windows":
-        cmd = "where"
-    else:
-        cmd = "which"
-    tool_path = subprocess.check_output([cmd, opts.tool])
-    opts.tool = tool_path.decode().strip()
-    # XXX end temporary debug code
-
     input_dir = _get_input_dir_path(opts.tool)
     save_loc = _get_save_location(opts.save_path)
 
