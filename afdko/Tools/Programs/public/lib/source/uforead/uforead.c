@@ -150,7 +150,8 @@ enum
     otherDictKey,
     otherInElement,
     otherInTag,
-    otherInAnchor
+    otherInAnchor,
+    otherInNote
 } outlineState;
 
 typedef struct {
@@ -2221,6 +2222,26 @@ static int parseAnchor(ufoCtx h, GLIF_Rec* glifRec, int state)
     return result;
 }
 
+static int parseNote(ufoCtx h, GLIF_Rec* glifRec, int state)
+{
+    token* tk;
+    int result = ufoSuccess;
+
+    while (1)
+    {
+        tk = getToken(h, state);
+        if (tk == NULL)
+        {
+           fatal(h,ufoErrParse,  "Encountered end of buffer before end of note. Glyph %s. Context: %s\n", glifRec->glifFilePath, getBufferContextPtr(h));
+        }
+        else if (tokenEqualStr(tk, "</note>"))
+        {
+            break;
+        }
+    }
+    return result;
+}
+
 static int parsePoint(ufoCtx h, abfGlyphCallbacks *glyph_cb, GLIF_Rec* glifRec, int state, Transform* transform)
 {
     // we've seen the point element name, Parse until we see the end.
@@ -4136,6 +4157,15 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks *glyph_cb, Tr
                 state = otherInAnchor;
                 result =  parseAnchor(h, glifRec, state);
                 state = outlineStart;
+                if (ufoSuccess != result)
+                    break;
+            }
+            else if(tokenEqualStr(tk, "<note>"))
+            {
+                prevState = state;
+                state = otherInNote;
+                parseNote(h, glifRec, state);
+                state = prevState;
                 if (ufoSuccess != result)
                     break;
             }
