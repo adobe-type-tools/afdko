@@ -71,7 +71,8 @@ __usage__ = __version__ + """
                 for 'font.ufo, 'font.pfa', and cidfont.ps, all in the
                 current directory.
 -o <output font>        Specify output font path. Default is
-                '<PostScript-Name>.otf'.
+                '<PostScript-Name>.otf'. If the path is an existing folder,
+                a default-named font will be saved to it.
 -b                      Set style to Bold. Affects style-linking.
                 Default is not bold
 -nb                     Turn off the -b option, if it has previously
@@ -2012,7 +2013,13 @@ def setMissingParams(makeOTFParams):
                 error = setCIDCMAPPaths(makeOTFParams, Reg, Ord, Sup)
 
     # output file path.
-    path = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kOutputFont))
+    path = getattr(makeOTFParams, kFileOptPrefix + kOutputFont)
+    output_dir = None
+    if path and os.path.isdir(path):
+        # support '-o' option to be a folder only
+        # https://github.com/adobe-type-tools/afdko/issues/281
+        output_dir = path
+        path = None
     if not path:
         # need to figure out PS name in order to derive default output path.
         command = "%s -dump -0 \"%s\" 2>&1" % (makeOTFParams.txPath,
@@ -2046,8 +2053,13 @@ def setMissingParams(makeOTFParams):
         else:
             path = psName + ".otf"
         if not isCID:
-            path = os.path.join(makeOTFParams.fontDirPath, path)
-        exec("makeOTFParams.%s%s = path" % (kFileOptPrefix, kOutputFont))
+            if output_dir:
+                path = os.path.join(output_dir, path)
+            else:
+                path = os.path.join(makeOTFParams.fontDirPath, path)
+
+        path = os.path.abspath(os.path.realpath(path))
+        setattr(makeOTFParams, kFileOptPrefix + kOutputFont, path)
 
     if error:
         raise MakeOTFOptionsError
