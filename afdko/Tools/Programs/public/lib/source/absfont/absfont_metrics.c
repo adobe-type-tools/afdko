@@ -11,8 +11,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <float.h>
 
 
-#define SEEN_MOVE	(1UL<<31)	/* Flags seen move operator */
-
 /* Transform x and y coordinates by matrix. */
 #define TX(x, y)	(h->matrix[0]*x + h->matrix[2]*y + h->matrix[4])
 #define TY(x, y)	(h->matrix[1]*x + h->matrix[3]*y + h->matrix[5])
@@ -39,8 +37,6 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 	h->real_mtx.right	= -FLT_MAX;
 	h->real_mtx.top 	= -FLT_MAX;
 
-	h->flags &= ~SEEN_MOVE;
-
 	return ABF_CONT_RET;
 	}
 
@@ -66,49 +62,33 @@ static void boundPoint(abfMetricsCtx h, float x, float y)
 
 /* Add move to path. */
 static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0)
-	{
-	abfMetricsCtx h = (abfMetricsCtx)cb->direct_ctx;
-	float x;
-	float y;
-
-	if (h->flags & ABF_MTX_TRANSFORM)
-		{
-		x = TX(x0, y0);
-		y = TY(x0, y0);
-		}
-	else
-		{
-		x = x0;
-		y = y0;
-		}
-
-	if (h->flags & SEEN_MOVE)
-		boundPoint(h, x, y);
-	else
-		{
-		/* Set bounds to first point */
-		h->real_mtx.left = h->real_mtx.right = x;
-		h->real_mtx.bottom = h->real_mtx.top = y;
-		}
-
-	h->x = x0;
-	h->y = y0;
-	h->flags |= SEEN_MOVE;
-	}
+{
+    /* Note: do not call boundPoint() nor directly set h->real_mtx here as
+       a moveTo may be used for an anchor point in UFO2. We will instead
+       update the bounds before/after commands that actually draw. */
+    abfMetricsCtx h = (abfMetricsCtx)cb->direct_ctx;
+    h->x = x0;
+    h->y = y0;
+}
 
 /* Add line to path. */
 static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1)
-	{
-	abfMetricsCtx h = (abfMetricsCtx)cb->direct_ctx;
+{
+    abfMetricsCtx h = (abfMetricsCtx)cb->direct_ctx;
 
-	if (h->flags & ABF_MTX_TRANSFORM)
-		boundPoint(h, TX(x1, y1), TY(x1, y1));
-	else
-		boundPoint(h, x1, y1);
-
-	h->x = x1;
-	h->y = y1;
-	}
+    if (h->flags & ABF_MTX_TRANSFORM)
+    {
+        boundPoint(h, TX(h->x, h->y), TY(h->x, h->y));
+        boundPoint(h, TX(x1, y1), TY(x1, y1));
+    }
+    else
+    {
+        boundPoint(h, h->x, h->y);
+        boundPoint(h, x1, y1);
+    }
+    h->x = x1;
+    h->y = y1;
+}
 
 /* Set bounds on line from x0,y0 to x1,y1. */
 static void setLineBounds(Rect *r, float x0, float y0, float x1, float y1)
