@@ -17,7 +17,7 @@ import subprocess32 as subprocess
 import sys
 import tempfile
 
-__version__ = '0.3.1'
+__version__ = '0.4.0'
 
 logger = logging.getLogger('runner')
 
@@ -33,8 +33,8 @@ def _write_file(file_path, data):
 def _get_input_dir_path(tool_path):
     # Windows tool name contains '.exe'
     tool_name = os.path.splitext(os.path.basename(tool_path))[0]
-    input_dir = os.path.join(os.path.split(__file__)[0], tool_name + '_data',
-                             'input')
+    input_dir = os.path.join(
+        os.path.split(__file__)[0], '{}_data'.format(tool_name), 'input')
     return os.path.abspath(os.path.realpath(input_dir))
 
 
@@ -53,7 +53,6 @@ def run_tool(opts):
     Runs the tool using the parameters provided.
     """
     input_dir = _get_input_dir_path(opts.tool)
-    save_loc = _get_save_location(opts.save_path)
 
     args = []
     for opt in opts.options:
@@ -78,6 +77,7 @@ def run_tool(opts):
         args.extend(files)
 
     if not opts.no_save_path:
+        save_loc = _get_save_location(opts.save_path)
         args.append(save_loc)
 
     logger.debug(
