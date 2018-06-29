@@ -99,6 +99,18 @@ def test_ufo_with_trailing_slash_bug280():
     assert os.path.isfile(expected_path)
 
 
+@pytest.mark.parametrize('input_filename', [T1PFA_NAME, UFO2_NAME])
+def test_output_is_folder_only_bug281(input_filename):
+    # makeotf will output a default-named font to the folder
+    input_path = _get_input_path(input_filename)
+    temp_dir = tempfile.mkdtemp()
+    expected_path = os.path.join(temp_dir, 'SourceSansPro-Regular.otf')
+    assert os.path.exists(expected_path) is False
+    runner(CMD + ['-n', '-a', '-o', 'f', '_{}'.format(input_path),
+                                    'o', '_{}'.format(temp_dir)])
+    assert os.path.isfile(expected_path)
+
+
 @pytest.mark.parametrize('input_filename', ['t1pfa-noPSname.pfa',
                                             'ufo2-noPSname.ufo'])
 def test_no_postscript_name_bug282(input_filename):
