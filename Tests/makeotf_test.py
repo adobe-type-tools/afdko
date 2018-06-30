@@ -1,9 +1,11 @@
+# coding: utf-8
+
 from __future__ import print_function, division, absolute_import
 
 import os
 import platform
 import pytest
-from shutil import copytree
+from shutil import copy2, copytree
 import subprocess32 as subprocess
 import tempfile
 
@@ -88,13 +90,30 @@ def test_input_formats(arg, input_filename, otf_filename):
                    '    <modified value='])
 
 
+@pytest.mark.parametrize('input_filename', [T1PFA_NAME, UFO2_NAME])
+def test_path_with_non_ascii_chars_bug222(input_filename):
+    temp_dir = os.path.join(tempfile.mkdtemp(), 'á意ê  ï薨õ 巽ù')
+    os.makedirs(temp_dir)
+    assert os.path.isdir(temp_dir)
+    input_path = _get_input_path(input_filename)
+    temp_path = os.path.join(temp_dir, input_filename)
+    if os.path.isdir(input_path):
+        copytree(input_path, temp_path)
+    else:
+        copy2(input_path, temp_path)
+    expected_path = os.path.join(temp_dir, 'SourceSansPro-Regular.otf')
+    assert os.path.exists(expected_path) is False
+    runner(CMD + ['-n', '-o', 'f', '_{}'.format(temp_path)])
+    assert os.path.isfile(expected_path)
+
+
 def test_ufo_with_trailing_slash_bug280():
     # makeotf will now save the OTF alongside the UFO instead of inside of it
     ufo_path = _get_input_path(UFO2_NAME)
     temp_dir = tempfile.mkdtemp()
     tmp_ufo_path = os.path.join(temp_dir, UFO2_NAME)
     copytree(ufo_path, tmp_ufo_path)
-    runner(CMD + ['-n', '-a', '-o', 'f', '_{}{}'.format(tmp_ufo_path, os.sep)])
+    runner(CMD + ['-n', '-o', 'f', '_{}{}'.format(tmp_ufo_path, os.sep)])
     expected_path = os.path.join(temp_dir, 'SourceSansPro-Regular.otf')
     assert os.path.isfile(expected_path)
 
@@ -106,8 +125,8 @@ def test_output_is_folder_only_bug281(input_filename):
     temp_dir = tempfile.mkdtemp()
     expected_path = os.path.join(temp_dir, 'SourceSansPro-Regular.otf')
     assert os.path.exists(expected_path) is False
-    runner(CMD + ['-n', '-a', '-o', 'f', '_{}'.format(input_path),
-                                    'o', '_{}'.format(temp_dir)])
+    runner(CMD + ['-n', '-o', 'f', '_{}'.format(input_path),
+                              'o', '_{}'.format(temp_dir)])
     assert os.path.isfile(expected_path)
 
 
