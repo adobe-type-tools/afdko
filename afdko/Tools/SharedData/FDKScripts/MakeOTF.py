@@ -1998,9 +1998,9 @@ def setMissingParams(makeOTFParams):
     if os.path.exists(inputFontPath):
         Reg, Ord, Sup = makeOTFParams.ROS
         if Reg:
-            featPath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kFeature))
+            featPath = getattr(makeOTFParams, kFileOptPrefix + kFeature)
             foundVert = checkIfVertInFeature(featPath)
-            if os.path.exists(featPath) and not foundVert:
+            if featPath and os.path.exists(featPath) and not foundVert:
                 print("makeotf [Warning] the feature file does not contain a "
                       "'vert' feature %s." % featPath)
 
