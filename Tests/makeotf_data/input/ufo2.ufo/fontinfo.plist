@@ -11,7 +11,7 @@
 		<key>descender</key>
 		<integer>-205</integer>
 		<key>familyName</key>
-		<string>Source Sans Pro</string>
+		<string>Source Sans</string>
 		<key>italicAngle</key>
 		<integer>0</integer>
 		<key>openTypeHheaAscender</key>
@@ -128,7 +128,7 @@
 			<integer>-205</integer>
 		</array>
 		<key>postscriptFontName</key>
-		<string>SourceSansPro-Regular</string>
+		<string>SourceSans-Test</string>
 		<key>postscriptForceBold</key>
 		<false/>
 		<key>postscriptOtherBlues</key>

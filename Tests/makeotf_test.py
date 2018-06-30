@@ -20,6 +20,7 @@ CMD = ['-t', TOOL]
 
 T1PFA_NAME = 't1pfa.pfa'
 UFO2_NAME = 'ufo2.ufo'
+OTF_NAME = 'SourceSans-Test.otf'
 
 data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
 
@@ -101,7 +102,7 @@ def test_path_with_non_ascii_chars_bug222(input_filename):
         copytree(input_path, temp_path)
     else:
         copy2(input_path, temp_path)
-    expected_path = os.path.join(temp_dir, 'SourceSansPro-Regular.otf')
+    expected_path = os.path.join(temp_dir, OTF_NAME)
     assert os.path.exists(expected_path) is False
     runner(CMD + ['-n', '-o', 'f', '_{}'.format(temp_path)])
     assert os.path.isfile(expected_path)
@@ -114,7 +115,7 @@ def test_ufo_with_trailing_slash_bug280():
     tmp_ufo_path = os.path.join(temp_dir, UFO2_NAME)
     copytree(ufo_path, tmp_ufo_path)
     runner(CMD + ['-n', '-o', 'f', '_{}{}'.format(tmp_ufo_path, os.sep)])
-    expected_path = os.path.join(temp_dir, 'SourceSansPro-Regular.otf')
+    expected_path = os.path.join(temp_dir, OTF_NAME)
     assert os.path.isfile(expected_path)
 
 
@@ -123,7 +124,7 @@ def test_output_is_folder_only_bug281(input_filename):
     # makeotf will output a default-named font to the folder
     input_path = _get_input_path(input_filename)
     temp_dir = tempfile.mkdtemp()
-    expected_path = os.path.join(temp_dir, 'SourceSansPro-Regular.otf')
+    expected_path = os.path.join(temp_dir, OTF_NAME)
     assert os.path.exists(expected_path) is False
     runner(CMD + ['-n', '-o', 'f', '_{}'.format(input_path),
                               'o', '_{}'.format(temp_dir)])
