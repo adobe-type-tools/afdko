@@ -20,6 +20,7 @@ CMD = ['-t', TOOL]
 
 T1PFA_NAME = 't1pfa.pfa'
 UFO2_NAME = 'ufo2.ufo'
+CID_NAME = 'cidfont.ps'
 OTF_NAME = 'SourceSans-Test.otf'
 
 data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
@@ -76,6 +77,8 @@ def test_type1_pfa_release_mode():
     ([], T1PFA_NAME, 't1pfa-dev.otf'),  # Type 1 development mode
     ([], UFO2_NAME, 'ufo2-dev.otf'),  # UFO2 development mode
     (['r'], UFO2_NAME, 'ufo2-rel.otf'),  # UFO2 release mode
+    ([], CID_NAME, 'cidfont-dev.otf'),
+    (['r'], CID_NAME, 'cidfont-rel.otf'),
 ])
 def test_input_formats(arg, input_filename, otf_filename):
     actual_path = _get_temp_file_path()

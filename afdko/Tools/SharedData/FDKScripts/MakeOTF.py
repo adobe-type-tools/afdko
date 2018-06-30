@@ -18,6 +18,7 @@ from xml.etree.ElementTree import tostring as xmlToString
 from fontTools.ttLib.standardGlyphOrder import standardGlyphOrder as kStdNames
 
 PY2 = sys.version_info[0] == 2
+ADOBE_CMAPS_FOLDER = "Adobe Cmaps"
 
 __doc__ = """
 MakeOTF.py.
@@ -29,7 +30,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.3.0 Jun 28 2018
+makeotf.py v2.3.1 Jun 30 2018
 """
 
 __methods__ = """
@@ -551,7 +552,7 @@ def readOptionFile(filePath, makeOTFParams, optionIndex):
     """ Paths in this file are stored relative to it's directory.
     However, we want to set the paths relative to the current directory.
     """
-    error = 0
+    error = False
     fprDir = os.path.dirname(os.path.abspath(filePath))
     currentDir = makeOTFParams.currentDir
     try:
@@ -906,7 +907,7 @@ def getOptions(makeOTFParams):
     args = sys.argv[1:]
     numArgs = len(args)
     i = 0
-    error = 0
+    error = False
     # We use this to allow for the indices used
     # when reading the options file.
     optionIndex = 0
@@ -1542,7 +1543,7 @@ def getOptions(makeOTFParams):
 
 def checkInputFile(makeOTFParams):
     # The path to the original src font file
-    inputFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kInputFont))
+    inputFilePath = getattr(makeOTFParams, kFileOptPrefix + kInputFont)
     # path to font file was not specified.
     if not inputFilePath:
         return None
@@ -1551,7 +1552,7 @@ def checkInputFile(makeOTFParams):
     newFontDirPath = os.path.dirname(file_path)
     if newFontDirPath:
         makeOTFParams.fontDirPath = newFontDirPath
-    exec("makeOTFParams.%s%s = file_path" % (kFileOptPrefix, kInputFont))
+    setattr(makeOTFParams, kFileOptPrefix + kInputFont, file_path)
 
     convertFontIfNeeded(makeOTFParams)
 
@@ -1574,7 +1575,7 @@ def checkInputFile(makeOTFParams):
     if Reg:
         makeOTFParams.ROS = (Reg, Ord, Sup)
         # Since we have the ROS, let's set default Mac Script value.
-        script = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kMacScript))
+        script = getattr(makeOTFParams, kFileOptPrefix + kMacScript)
         if not script:
             if Ord.startswith("Japan"):
                 script = "1"
@@ -1587,7 +1588,7 @@ def checkInputFile(makeOTFParams):
             else:
                 print("makeotf [Warning] Did not recognize the ordering '%s'. "
                       "The Mac cmap script id will be set to Roman (0)." % Ord)
-            exec("makeOTFParams.%s%s = script" % (kFileOptPrefix, kMacScript))
+            setattr(makeOTFParams, kFileOptPrefix + kMacScript, script)
     return fontPath
 
 
@@ -1629,10 +1630,6 @@ def getROS(fontPath):
     fp = open(fontPath, "rb")
     data = fp.read(5000)
     fp.close()
-    try:
-        data = data.decode("latin-1")
-    except ValueError:
-        return Reg, Ord, Sup
     match = re.search(r"/Registry\s+\((\S+)\)", data)
     if not match:
         return Reg, Ord, Sup
@@ -1662,75 +1659,58 @@ def setCIDCMAPPaths(makeOTFParams, Reg, Ord, Sup):
     wanted for CID fonts have not been specified on the command-line.
     Only the Uni-H file is required.
     """
-    error = 0
-    cmapPath = os.path.join(makeOTFParams.fdkSharedDataDir,
-                            FDKUtils.AdobeCMAPS)
+    error = False
+    cmapPath = os.path.join(makeOTFParams.fdkSharedDataDir, ADOBE_CMAPS_FOLDER)
     ROPath = os.path.join(cmapPath, "%s-%s" % (Reg, Ord))
     ROSPath = "%s-%s" % (ROPath, Sup)
-    foundIt = 0
-    # Try counting up to 9.
+    foundIt = False
+
     if os.path.exists(ROPath):
-        foundIt = 1
+        foundIt = True
         ROSPath = ROPath
-    # Try counting up to 9.
     elif os.path.exists(ROSPath):
-        foundIt = 1
+        foundIt = True
+    # Try counting up to 9.
     else:
-        s = 1 + eval(Sup)
-        while s < 10:
+        for s in range(int(Sup) + 1, 9 + 1):
             ROSPath = "%s-%s" % (ROPath, s)
             if os.path.exists(ROSPath):
-                foundIt = 1
+                foundIt = True
                 break
-            s += 1
 
-    macFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kMacCMAPPath))
-    uniHFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kHUniCMAPPath))
-    uvsFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kUVSPath))
+    macFilePath = getattr(makeOTFParams, kFileOptPrefix + kMacCMAPPath)
+    uniHFilePath = getattr(makeOTFParams, kFileOptPrefix + kHUniCMAPPath)
+    uvsFilePath = getattr(makeOTFParams, kFileOptPrefix + kUVSPath)
     if foundIt:
-        fileList = os.listdir(ROSPath)
-        fileList.sort()
-        for _file in fileList:
-            if not uniHFilePath and (Reg == "Adobe") and (Ord == "Japan1"):
-                testPath = os.path.join(ROSPath, "UniJIS2004-UTF32-H")
-                if os.path.exists(testPath):
-                    uniHFilePath = testPath
-                    exec("makeOTFParams.%s%s = uniHFilePath" % (
-                        kFileOptPrefix, kHUniCMAPPath))
-
-            if (not uniHFilePath and _file.startswith("Uni") and
-               _file.endswith("UTF32-H")):
-                uniHFilePath = os.path.join(ROSPath, _file)
-                exec("makeOTFParams.%s%s = uniHFilePath" % (
-                    kFileOptPrefix, kHUniCMAPPath))
-            elif not uvsFilePath and _file.endswith("sequences.txt"):
+        for file_name in sorted(os.listdir(ROSPath)):
+            if (not uniHFilePath and file_name.startswith("Uni") and
+               file_name.endswith("UTF32-H")):
+                uniHFilePath = os.path.join(ROSPath, file_name)
+                setattr(makeOTFParams, kFileOptPrefix + kHUniCMAPPath,
+                        uniHFilePath)
+            elif not uvsFilePath and file_name.endswith("sequences.txt"):
                 uvsName = "%s-%s_%s" % (Reg, Ord, "sequences.txt")
-                if uvsName == _file:
-                    uvsFilePath = os.path.join(ROSPath, _file)
-                    exec("makeOTFParams.%s%s = uvsFilePath" % (
-                        kFileOptPrefix, kUVSPath))
+                if uvsName == file_name:
+                    uvsFilePath = os.path.join(ROSPath, file_name)
+                    setattr(makeOTFParams, kFileOptPrefix + kUVSPath,
+                            uvsFilePath)
                 else:
                     print("makeotf [Note] Found UVS file '%s' that doesn't "
-                          "match expected name '%s'." % (_file, uvsName))
-            elif not macFilePath and _file.endswith("-H"):
-                if "R" == "Adobe":
-                    if ("O" == "Japan1" and (_file == "83pv-RKSJ-H")) or \
-                       ("O" == "GB1" and (_file == "GBpc-EUC-H")) or \
-                       ("O" == "CNS1" and (_file == "B5pc-H")) or \
-                       ("O" == "Korea1" and (_file == "KSCpc-EUC-H")):
-                        macFilePath = os.path.join(ROSPath, _file)
-                else:
-                    # We don't know this ROS, but anything beginning
-                    # with "Uni" and which ends in "-H" is probably right.
-                    macFilePath = os.path.join(ROSPath, _file)
-            if macFilePath:
-                exec("makeOTFParams.%s%s = macFilePath" % (
-                    kFileOptPrefix, kMacCMAPPath))
+                          "match expected name '%s'." % (file_name, uvsName))
+            elif not macFilePath and file_name.endswith("-H"):
+                if Reg == "Adobe":
+                    if (Ord == "Japan1" and (file_name == "83pv-RKSJ-H")) or \
+                       (Ord == "GB1" and (file_name == "GBpc-EUC-H")) or \
+                       (Ord == "CNS1" and (file_name == "B5pc-H")) or \
+                       (Ord == "Korea1" and (file_name == "KSCpc-EUC-H")):
+                        macFilePath = os.path.join(ROSPath, file_name)
+                        setattr(makeOTFParams, kFileOptPrefix + kMacCMAPPath,
+                                macFilePath)
 
     if not uniHFilePath:
         print("makeotf [Error] Could not find an Adobe CMAP Unicode mapping "
               "file. Please specify one with the '-ch' option.")
-        error = 1
+        error = True
 
     if not macFilePath:
         print("makeotf [Warning] Could not find an Adobe CMAP Mac encoding "
@@ -1739,8 +1719,7 @@ def setCIDCMAPPaths(makeOTFParams, Reg, Ord, Sup):
 
     if not uvsFilePath:
         print("makeotf [Warning] Could not find a Unicode Variation Sequence "
-              "file in the appropriate 'FDK/Tools/SharedData/Adobe Cmaps/' "
-              "subdirectory.")
+              "file in the expected '{}' subdirectory.".format(cmapPath))
 
     return error
 
@@ -1867,7 +1846,7 @@ def parsePList(filePath, dictKey=None):
 
 
 def setMissingParams(makeOTFParams):
-    error = 0
+    error = False
     # The path to the original src font file
     inputFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kInputFont))
     srcFontPath = inputFilePath
@@ -2004,12 +1983,9 @@ def setMissingParams(makeOTFParams):
                 print("makeotf [Warning] the feature file does not contain a "
                       "'vert' feature %s." % featPath)
 
-            if (not eval("makeOTFParams.%s%s" % (
-                kFileOptPrefix, kMacCMAPPath)) and
-                eval("makeOTFParams.%s%s" % (
-                    kFileOptPrefix, kHUniCMAPPath)) and
-                eval("makeOTFParams.%s%s" % (
-                    kFileOptPrefix, kUVSPath))):
+            if not (getattr(makeOTFParams, kFileOptPrefix + kMacCMAPPath) and
+               getattr(makeOTFParams, kFileOptPrefix + kHUniCMAPPath) and
+               getattr(makeOTFParams, kFileOptPrefix + kUVSPath)):
                 error = setCIDCMAPPaths(makeOTFParams, Reg, Ord, Sup)
 
     # output file path.
@@ -2072,18 +2048,18 @@ def convertFontIfNeeded(makeOTFParams):
 
     # If the font doesn't look like a Unix ASCII
     # Type 1 font file, convert it with 'tx'
-    filePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kInputFont))
+    filePath = getattr(makeOTFParams, kFileOptPrefix + kInputFont)
 
-    needsConversion = 0
-    needsSEACRemoval = 0
-    isTextPS = 0
+    needsConversion = False
+    needsSEACRemoval = False
+    isTextPS = False
     # Empty, but not None. Means we have already checked.
     makeOTFParams.tempFontPath = ""
 
     # Check if input is UFO font or TTF or OTF font
     if os.path.isdir(filePath):
         if os.path.exists(os.path.join(filePath, "fontinfo.plist")):
-            needsConversion = 1
+            needsConversion = True
             doSync = False
             allMatch, msgList = ufoTools.checkHashMaps(filePath, doSync)
             if not allMatch:
@@ -2110,7 +2086,7 @@ def convertFontIfNeeded(makeOTFParams):
         commandString = "spot \"%s\" 2>&1" % filePath
         report = FDKUtils.runShellCmd(commandString)
         if ("sfnt" in report):
-            needsConversion = 1
+            needsConversion = True
             if "glyf" in report:
                 makeOTFParams.srcIsTTF = 1
         else:
@@ -2120,11 +2096,11 @@ def convertFontIfNeeded(makeOTFParams):
                 data = fp.read(1024)
                 fp.close()
                 if ("%" not in data[:4]) and ('/FontName' not in data):
-                    needsConversion = 1
+                    needsConversion = True
                 else:
                     if "/Private" in data:
-                        isTextPS = 1
-                        needsConversion = 1
+                        isTextPS = True
+                        needsConversion = True
             except (IOError, OSError):
                 print("makeotf [Error] Could not read font file at '%s'." %
                       filePath)
@@ -2141,8 +2117,8 @@ def convertFontIfNeeded(makeOTFParams):
                 print("makeotf [Warning] Font at '%s' contains deprecated "
                       "SEAC operator. These composite glyphs will be "
                       "decomposed by makeOTF:\n%s" % (filePath, glyphList))
-                needsConversion = 1
-                needsSEACRemoval = 1
+                needsConversion = True
+                needsSEACRemoval = True
 
     if needsConversion:
         fontPath = filePath + kTempFontSuffix
