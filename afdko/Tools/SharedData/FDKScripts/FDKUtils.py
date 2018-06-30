@@ -83,7 +83,7 @@ def runShellCmd(cmd):
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT).stdout
         log = p.read()
-        return log.decode("latin-1")
+        return log
     except (OSError, ValueError):
         msg = "Error executing command '%s'. %s" % (cmd, traceback.print_exc())
         print(msg)
