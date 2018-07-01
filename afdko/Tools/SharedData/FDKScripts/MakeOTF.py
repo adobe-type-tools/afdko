@@ -30,7 +30,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.3.1 Jun 30 2018
+makeotf.py v2.4.0 Jun 30 2018
 """
 
 __methods__ = """
@@ -2002,18 +2002,13 @@ def setMissingParams(makeOTFParams):
                                                inputFontPath)
         report = FDKUtils.runShellCmd(command)
 
-        match = re.search(r"CIDFontName\s+\"(\S+)\"", report)
-        if match:
-            # It is a CID font. these we write to the current directory
-            isCID = 1
-        else:
-            isCID = 0
-            match = re.search(r"\sFontName\s+\"(\S+)\"", report)
-            if not match:
-                print("makeotf [Error] Could not find FontName (a.k.a. "
-                      "PostScript name) in FontDict of file "
-                      "'{}'".format(inputFilePath))
-                raise MakeOTFTXError
+        match = re.search(r"(?:CID)?FontName\s+\"(\S+)\"", report)
+        if not match:
+            print("makeotf [Error] Could not find FontName (a.k.a. "
+                  "PostScript name) in FontDict of file "
+                  "'{}'".format(inputFilePath))
+            raise MakeOTFTXError
+
         psName = match.group(1)
 
         if psName == 'PSNameNotSpecified':
@@ -2028,11 +2023,11 @@ def setMissingParams(makeOTFParams):
             path = psName + ".ttf"
         else:
             path = psName + ".otf"
-        if not isCID:
-            if output_dir:
-                path = os.path.join(output_dir, path)
-            else:
-                path = os.path.join(makeOTFParams.fontDirPath, path)
+
+        if output_dir:
+            path = os.path.join(output_dir, path)
+        else:
+            path = os.path.join(makeOTFParams.fontDirPath, path)
 
         path = os.path.abspath(os.path.realpath(path))
         setattr(makeOTFParams, kFileOptPrefix + kOutputFont, path)
