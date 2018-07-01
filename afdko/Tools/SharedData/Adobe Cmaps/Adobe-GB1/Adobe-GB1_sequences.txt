@@ -1,0 +1,13 @@
+# 9 Standardized Variants (Unicode 6.3)
+# Version 2017-10-10
+# Prepared by Dr. Ken Lunde (lunde@adobe.com), Adobe Systems Incorporated
+5140 FE00; Standardized_Variants; CID+4697
+51C9 FE00; Standardized_Variants; CID+2562
+55C0 FE00; Standardized_Variants; CID+22032
+793C FE00; Standardized_Variants; CID+22038
+79CA FE00; Standardized_Variants; CID+16595
+8612 FE00; Standardized_Variants; CID+22040
+88CF FE00; Standardized_Variants; CID+8204
+90CE FE00; Standardized_Variants; CID+22031
+96A3 FE00; Standardized_Variants; CID+20611
+# EOF

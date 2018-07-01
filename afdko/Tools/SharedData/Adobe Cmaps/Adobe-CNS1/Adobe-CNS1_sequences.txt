@@ -1,6 +1,6 @@
 # 14 Standardized Variants (Unicode 6.3)
-# Version 12/03/2013
-# Prepared by Ken Lunde (lunde@adobe.com), Adobe Systems Incorporated
+# Version 2017-10-09
+# Prepared by Dr. Ken Lunde (lunde@adobe.com), Adobe Systems Incorporated
 456B FE00; Standardized_Variants; CID+14339
 5140 FE00; Standardized_Variants; CID+628
 52C7 FE01; Standardized_Variants; CID+15704

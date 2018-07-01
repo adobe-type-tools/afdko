@@ -3,9 +3,9 @@
 %%IncludeResource: ProcSet (CIDInit)
 %%BeginResource: CMap (KSCpc-EUC-H)
 %%Title: (KSCpc-EUC-H Adobe Korea1 0)
-%%Version: 9.003
+%%Version: 9.005
 %%Copyright: -----------------------------------------------------------
-%%Copyright: Copyright 1990-2009 Adobe Systems Incorporated.
+%%Copyright: Copyright 1990-2015 Adobe Systems Incorporated.
 %%Copyright: All rights reserved.
 %%Copyright:
 %%Copyright: Redistribution and use in source and binary forms, with or
@@ -55,7 +55,7 @@ begincmap
 end def
 
 /CMapName /KSCpc-EUC-H def
-/CMapVersion 9.003 def
+/CMapVersion 9.005 def
 /CMapType 1 def
 
 /UIDOffset 0 def
