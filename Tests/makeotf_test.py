@@ -134,8 +134,11 @@ def test_output_is_folder_only_bug281(input_filename):
     assert os.path.isfile(expected_path)
 
 
-@pytest.mark.parametrize('input_filename', ['t1pfa-noPSname.pfa',
-                                            'ufo2-noPSname.ufo'])
+@pytest.mark.parametrize('input_filename', [
+    't1pfa-noPSname.pfa',
+    'ufo2-noPSname.ufo',
+    'cidfont-noPSname.ps',
+])
 def test_no_postscript_name_bug282(input_filename):
     # makeotf will fail for both UFO and Type 1 inputs
     with pytest.raises(subprocess.CalledProcessError) as err:
