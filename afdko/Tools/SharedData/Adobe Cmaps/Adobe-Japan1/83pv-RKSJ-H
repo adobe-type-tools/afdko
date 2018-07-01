@@ -3,9 +3,9 @@
 %%IncludeResource: ProcSet (CIDInit)
 %%BeginResource: CMap (83pv-RKSJ-H)
 %%Title: (83pv-RKSJ-H Adobe Japan1 1)
-%%Version: 10.003
+%%Version: 10.005
 %%Copyright: -----------------------------------------------------------
-%%Copyright: Copyright 1990-2009 Adobe Systems Incorporated.
+%%Copyright: Copyright 1990-2015 Adobe Systems Incorporated.
 %%Copyright: All rights reserved.
 %%Copyright:
 %%Copyright: Redistribution and use in source and binary forms, with or
@@ -55,7 +55,7 @@ begincmap
 end def
 
 /CMapName /83pv-RKSJ-H def
-/CMapVersion 10.003 def
+/CMapVersion 10.005 def
 /CMapType 1 def
 
 /UIDOffset 0 def
