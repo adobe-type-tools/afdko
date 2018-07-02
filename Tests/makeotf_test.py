@@ -94,7 +94,7 @@ def test_input_formats(arg, input_filename, otf_filename):
                    '    <modified value='])
 
 
-@pytest.mark.parametrize('input_filename', [T1PFA_NAME, UFO2_NAME])
+@pytest.mark.parametrize('input_filename', [T1PFA_NAME, UFO2_NAME, CID_NAME])
 def test_path_with_non_ascii_chars_bug222(input_filename):
     temp_dir = os.path.join(tempfile.mkdtemp(), 'á意ê  ï薨õ 巽ù')
     os.makedirs(temp_dir)
@@ -122,7 +122,7 @@ def test_ufo_with_trailing_slash_bug280():
     assert os.path.isfile(expected_path)
 
 
-@pytest.mark.parametrize('input_filename', [T1PFA_NAME, UFO2_NAME])
+@pytest.mark.parametrize('input_filename', [T1PFA_NAME, UFO2_NAME, CID_NAME])
 def test_output_is_folder_only_bug281(input_filename):
     # makeotf will output a default-named font to the folder
     input_path = _get_input_path(input_filename)
