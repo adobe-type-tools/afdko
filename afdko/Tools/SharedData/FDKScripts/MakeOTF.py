@@ -1942,36 +1942,18 @@ def setMissingParams(makeOTFParams):
         makeOTFParams.ROS = getROS(inputFontPath)
 
     required = not makeOTFParams.ROS[0] and (
-        ('true' == eval("makeOTFParams.%s%s" % (kFileOptPrefix, kDoAlias))) or
-        ('true' == eval("makeOTFParams.%s%s" % (kFileOptPrefix, kRelease))))
+        ('true' == getattr(makeOTFParams, kFileOptPrefix + kDoAlias)) or
+        ('true' == getattr(makeOTFParams, kFileOptPrefix + kRelease)))
 
-    path = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kGOADB))
+    goadb_path = getattr(makeOTFParams, kFileOptPrefix + kGOADB)
+
     # GOADB path was not specified.
-    if not path and required:
+    if not goadb_path and required:
         newpath = os.path.join(makeOTFParams.fontDirPath, kDefaultGOADBPath)
-        found = 0
         for path in [newpath, lookUpDirTree(newpath)]:
             if path and os.path.exists(path):
-                found = 1
+                setattr(makeOTFParams, kFileOptPrefix + kGOADB, path)
                 break
-        if found:
-            exec("makeOTFParams.%s%s = path" % (kFileOptPrefix, kGOADB))
-        else:
-            if makeOTFParams.srcIsUFO:
-                path = ufoTools.makeUFOGOADB(srcFontPath)
-                if path:
-                    makeOTFParams.ufoGAODBPath = path
-                    makeOTFParams.tempPathList.append(path)
-                    exec("makeOTFParams.%s%s = path" % (kFileOptPrefix,
-                                                        kGOADB))
-                else:
-                    print("makeotf [Warning] Could not  make a temp "
-                          "GlyphOrderAndAliasDB file for '%s'." %
-                          makeOTFParams.fontDirPath)
-            else:
-                print("makeotf [Error] Could not find GlyphOrderAndAliasDB "
-                      "file at '%s'." % newpath)
-                error = 1
 
     # If font is CID, look in the SharedData folder.
     if os.path.exists(inputFontPath):

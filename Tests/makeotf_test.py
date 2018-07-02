@@ -65,19 +65,12 @@ def test_exit_unknown_option(arg):
     assert err.value.returncode == 1
 
 
-def test_type1_pfa_release_mode():
-    # makeotf [Error] Could not find GlyphOrderAndAliasDB file at '...'
-    with pytest.raises(subprocess.CalledProcessError) as err:
-        runner(CMD + ['-n', '-o',
-                      'f', '_{}'.format(_get_input_path(T1PFA_NAME)), 'r'])
-    assert err.value.returncode == 1
-
-
 @pytest.mark.parametrize('arg, input_filename, ttx_filename', [
-    ([], T1PFA_NAME, 't1pfa-dev.ttx'),  # Type 1 development mode
-    ([], UFO2_NAME, 'ufo2-dev.ttx'),  # UFO2 development mode
-    (['r'], UFO2_NAME, 'ufo2-rel.ttx'),  # UFO2 release mode
+    ([], T1PFA_NAME, 't1pfa-dev.ttx'),
+    ([], UFO2_NAME, 'ufo2-dev.ttx'),
     ([], CID_NAME, 'cidfont-dev.ttx'),
+    (['r'], T1PFA_NAME, 't1pfa-rel.ttx'),
+    (['r'], UFO2_NAME, 'ufo2-rel.ttx'),
     (['r'], CID_NAME, 'cidfont-rel.ttx'),
 ])
 def test_input_formats(arg, input_filename, ttx_filename):
