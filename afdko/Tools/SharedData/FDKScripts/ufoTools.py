@@ -16,7 +16,7 @@ except ImportError:
 from . import ConvertFontToCID
 
 __doc__ = """
-ufoTools.py v1.30.5 Jun 28 2018
+ufoTools.py v1.30.6 Jul 1 2018
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -2493,25 +2493,6 @@ def validateLayers(ufoFontPath, doWarning=True):
     # the glyph in the default layer.
     cleanUpGLIFFiles(defaultContentsFilePath, glyphDirPath, doWarning)
     cleanupContentsList(glyphDirPath, doWarning)
-
-
-def makeUFOGOADB(srcFontPath):
-    # Make a GOADB file for a UFO font.
-    # Use public.glyphOrder if it exists, else use the contents.plist file.
-    ufoFont = UFOFontData(srcFontPath, False, "")
-    try:
-        ufoFont.loadGlyphMap()
-    except UFOParseError:
-        return None
-
-    goadbList = [[i, glyphName] for glyphName, i in ufoFont.orderMap.items()]
-    goadbList.sort()
-    ufoGOADBPath = os.path.join(srcFontPath, kDefaultGOADBPath)  # default
-    fp = open(ufoGOADBPath, "wt")
-    for i, glyphName in goadbList:
-        fp.write("%s\t%s%s" % (glyphName, glyphName, os.linesep))
-    fp.close()
-    return ufoGOADBPath
 
 
 def makeUFOFMNDB(srcFontPath):
