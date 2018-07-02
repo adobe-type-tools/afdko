@@ -73,20 +73,20 @@ def test_type1_pfa_release_mode():
     assert err.value.returncode == 1
 
 
-@pytest.mark.parametrize('arg, input_filename, otf_filename', [
-    ([], T1PFA_NAME, 't1pfa-dev.otf'),  # Type 1 development mode
-    ([], UFO2_NAME, 'ufo2-dev.otf'),  # UFO2 development mode
-    (['r'], UFO2_NAME, 'ufo2-rel.otf'),  # UFO2 release mode
-    ([], CID_NAME, 'cidfont-dev.otf'),
-    (['r'], CID_NAME, 'cidfont-rel.otf'),
+@pytest.mark.parametrize('arg, input_filename, ttx_filename', [
+    ([], T1PFA_NAME, 't1pfa-dev.ttx'),  # Type 1 development mode
+    ([], UFO2_NAME, 'ufo2-dev.ttx'),  # UFO2 development mode
+    (['r'], UFO2_NAME, 'ufo2-rel.ttx'),  # UFO2 release mode
+    ([], CID_NAME, 'cidfont-dev.ttx'),
+    (['r'], CID_NAME, 'cidfont-rel.ttx'),
 ])
-def test_input_formats(arg, input_filename, otf_filename):
+def test_input_formats(arg, input_filename, ttx_filename):
     actual_path = _get_temp_file_path()
     runner(CMD + ['-n', '-o',
                   'f', '_{}'.format(_get_input_path(input_filename)),
                   'o', '_{}'.format(actual_path)] + arg)
     actual_ttx = _generate_ttx_dump(actual_path)
-    expected_ttx = _generate_ttx_dump(_get_expected_path(otf_filename))
+    expected_ttx = _get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx,
                    '-s',
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
