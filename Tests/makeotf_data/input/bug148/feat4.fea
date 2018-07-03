@@ -1,0 +1,7 @@
+
+# similar to 'feat3.fea' but with the order of the 'include' swapped;
+# this is to test that the second 'include' will NOT prevent 'vert' from being found,
+# and to also test the inclusion of files that are located in a different folder.
+
+include(folder/vert.fea);
+include(missing_file);
