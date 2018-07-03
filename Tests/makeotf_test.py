@@ -11,6 +11,8 @@ import tempfile
 
 from fontTools.ttLib import TTFont
 
+from afdko.Tools.SharedData.FDKScripts.MakeOTF import checkIfVertInFeature
+
 from .runner import main as runner
 from .differ import main as differ
 from .differ import SPLIT_MARKER
@@ -137,3 +139,20 @@ def test_no_postscript_name_bug282(input_filename):
     with pytest.raises(subprocess.CalledProcessError) as err:
         runner(CMD + ['-n', '-o', 'f', '_{}'.format(input_filename)])
     assert err.value.returncode == 1
+
+
+@pytest.mark.parametrize('fea_filename, result', [
+    (None, 0),  # No feature path at...
+    ('missing_file', 0),  # No feature path at...
+    ('feat0.fea', 0),
+    ('feat1.fea', 1),
+    ('feat2.fea', 0),  # Could not find the include file...
+    ('feat3.fea', 0),  # Could not find the include file...
+    ('feat4.fea', 1),
+])
+def test_find_vert_feature_bug148(fea_filename, result):
+    fea_path = None
+    if fea_filename:
+        input_dir = _get_input_path('bug148')
+        fea_path = os.path.join(input_dir, fea_filename)
+    assert checkIfVertInFeature(fea_path) == result

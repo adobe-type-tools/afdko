@@ -1724,6 +1724,10 @@ def setCIDCMAPPaths(makeOTFParams, Reg, Ord, Sup):
     return error
 
 
+RE_FEATURE = re.compile(r"^(?!#)\s*feature\s+vert\s*{", re.MULTILINE)
+RE_INCLUDE = re.compile(r"^(?!#)\s*include\s*\(\s*([^ )]+)\s*\)", re.MULTILINE)
+
+
 def checkIfVertInFeature(featurePath):
     # report that vert CMAP is needed to synthesize
     # the vert feature, if the feature file exists
@@ -1738,11 +1742,11 @@ def checkIfVertInFeature(featurePath):
     data = fp.read()
     fp.close()
 
-    match = re.search(r"[^#]\s*feature\s+vert\s+{", data)
+    match = re.search(RE_FEATURE, data)
     if match:
         return 1
 
-    includeList = re.findall(r"[^ #] *include *\( *([^ )]+) *\)", data)
+    includeList = re.findall(RE_INCLUDE, data)
     for _file in includeList:
         # First, look for include files relative to parent feature file
         fdir = os.path.dirname(featurePath)

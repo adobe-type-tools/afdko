@@ -1,0 +1,9 @@
+
+# file with 'include' that points to a non-existing file;
+# this is to test that the 'vert' feature will be found nonetheless
+
+include(missing_file);
+
+feature vert {
+  sub \1125 by \1126;
+} vert;
