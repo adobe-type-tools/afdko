@@ -892,7 +892,7 @@ def getRelativeDirPath(absPath1, abspath2):
     return relPath
 
 
-def getOptions(makeOTFParams):
+def getOptions(makeOTFParams, args):
     """
     Fill in the MakeOTF parameters from first the defaults,
     then the project file, and finally any other options.
@@ -904,7 +904,6 @@ def getOptions(makeOTFParams):
     working directory. However, relative paths saved in a
     project file are relative to the project file location.
     """
-    args = sys.argv[1:]
     numArgs = len(args)
     i = 0
     error = False
@@ -3017,7 +3016,10 @@ def CheckEnvironment():
     return fdkToolsDir, fdkSharedDataDir
 
 
-def main():
+def main(args=None):
+    if not args:
+        args = sys.argv[1:]
+
     try:
         _, fdkSharedDataDir = CheckEnvironment()
     except FDKEnvironmentError:
@@ -3028,7 +3030,7 @@ def main():
         makeOTFParams.fdkSharedDataDir = fdkSharedDataDir
         makeOTFParams.txPath = "tx"
         makeOTFParams.makeotfPath = "makeotfexe"
-        getOptions(makeOTFParams)
+        getOptions(makeOTFParams, args)
         setMissingParams(makeOTFParams)
         setOptionsFromFontInfo(makeOTFParams)
         if makeOTFParams.saveOptions == 'true':
