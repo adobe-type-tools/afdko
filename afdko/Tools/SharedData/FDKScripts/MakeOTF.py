@@ -225,11 +225,11 @@ __usage__ = __version__ + """
 -ncn                    Turn off converting the CFF table to a CID-keyed
                 CFF that specifies the Adobe-Identity-0 ROS;
                 otherwise has no effect.
--shw/-nshw              Do/Do Not suppress warnings about unhinted glyphs.
+-shw/-nshw              Show/Hide warnings about unhinted glyphs.
                 This is useful when processing unhinted fonts.
 -swo/-nswo              Suppress CFF width optimization (use of defaultWidthX
                 and nominalWidthX). Useful when poking at charstrings
-                with other  tools.
+                with other tools.
 -stubCmap4              Build only a "stub" Format 4 'cmap' subtable, with
                 only two segments. This is useful only for special-
                 purpose fonts such as AdobeBlank, whose size is an
@@ -773,8 +773,8 @@ def setOptionsFromFontInfo(makeOTFParams):
 
     if kMOTFOptions[kSuppressHintWarnings][0] == kOptionNotSeen:
         if re.search(r"SuppressHintWarnings\s+([Tt]rue|1)", data):
-            exec("makeOTFParams.%s%s = 'true'" % (
-                kFileOptPrefix, kSuppressHintWarnings))
+            setattr(makeOTFParams, kFileOptPrefix + kSuppressHintWarnings,
+                    'true')
 
     if kMOTFOptions[kSuppressWidthOptimization][0] == kOptionNotSeen:
         if re.search(r"SuppressWidthOptimization\s+([Tt]rue|1)", data):
@@ -1480,14 +1480,16 @@ def getOptions(makeOTFParams, args):
             kMOTFOptions[kConvertToCID][0] = i + optionIndex
             exec("makeOTFParams.%s%s = 'false'" % (kFileOptPrefix,
                                                    kConvertToCID))
+        # -shw
         elif arg == kMOTFOptions[kSuppressHintWarnings][1]:
             kMOTFOptions[kSuppressHintWarnings][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix,
-                                                  kSuppressHintWarnings))
+            setattr(makeOTFParams, kFileOptPrefix + kSuppressHintWarnings,
+                    None)
+        # -nshw
         elif arg == kMOTFOptions[kSuppressHintWarnings][2]:
             kMOTFOptions[kSuppressHintWarnings][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'None'" % (kFileOptPrefix,
-                                                  kSuppressHintWarnings))
+            setattr(makeOTFParams, kFileOptPrefix + kSuppressHintWarnings,
+                    'true')
 
         elif arg == kMOTFOptions[kSuppressWidthOptimization][1]:
             kMOTFOptions[kSuppressWidthOptimization][0] = i + optionIndex
@@ -2773,13 +2775,13 @@ def runMakeOTF(makeOTFParams):
                                                 kUseOldNameID4))
         # We also need to suppress the warnings about
         # no hints: all glyphs will be un-hinted.
-        exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix,
-                                              kSuppressHintWarnings))
+        setattr(makeOTFParams, kFileOptPrefix + kSuppressHintWarnings, 'true')
 
-    # Suppress hint warnings if not in release mode.
-    if 'true' != eval("makeOTFParams.%s%s" % (kFileOptPrefix, kRelease)):
-        exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix,
-                                              kSuppressHintWarnings))
+    # Suppress hint warnings if not in release mode, but
+    # only if the option was NOT used on the command line
+    if (getattr(makeOTFParams, kFileOptPrefix + kRelease) != 'true' and
+            kMOTFOptions[kSuppressHintWarnings][0] == kOptionNotSeen):
+        setattr(makeOTFParams, kFileOptPrefix + kSuppressHintWarnings, 'true')
 
     # check if the OS/2 version table needs to be set to 4
     # because the new fsSelection bits are being used.

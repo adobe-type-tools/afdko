@@ -11,7 +11,8 @@ import tempfile
 
 from fontTools.ttLib import TTFont
 
-from afdko.Tools.SharedData.FDKScripts.MakeOTF import checkIfVertInFeature
+from afdko.Tools.SharedData.FDKScripts.MakeOTF import (
+    checkIfVertInFeature, getOptions, MakeOTFParams)
 
 from .runner import main as runner
 from .differ import main as differ
@@ -156,3 +157,24 @@ def test_find_vert_feature_bug148(fea_filename, result):
         input_dir = _get_input_path('bug148')
         fea_path = os.path.join(input_dir, fea_filename)
     assert checkIfVertInFeature(fea_path) == result
+
+
+@pytest.mark.parametrize('args, result', [
+    # 'result' corresponds to the values of the
+    # options 'ReleaseMode' and 'SuppressHintWarnings'
+    ([], (None, None)),
+    (['-r'], ('true', None)),
+    (['-shw'], (None, None)),
+    (['-nshw'], (None, 'true')),
+    (['-r', '-shw'], ('true', None)),
+    (['-r', '-nshw'], ('true', 'true')),
+    # makeotf option parsing has no mechanism for mutual exclusivity,
+    # so the last option typed on the command line wins
+    (['-shw', '-nshw'], (None, 'true')),
+    (['-nshw', '-shw'], (None, None)),
+])
+def test_options_shw_nshw_bug457(args, result):
+    params = MakeOTFParams()
+    getOptions(params, args)
+    assert params.opt_ReleaseMode == result[0]
+    assert params.opt_SuppressHintWarnings == result[1]
