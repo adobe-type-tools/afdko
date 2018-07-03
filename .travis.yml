@@ -3,7 +3,14 @@ matrix:
   include:
     - os: linux
       env: NAME=Linux
-      if: type = pull_request
+      # BUILD NOTE:
+      # Travis treats git tags as if they're branches.
+      # All branches (with and without a PR) are allowed to be built as
+      # long as they do NOT match the regex below. Git tags matching the
+      # regex below are used when we want a deployment to happen.
+      # The regex is meant to match:
+      # digit(s).digit(s).digit(s) plus optional additional characters.
+      if: NOT branch =~ /^\d+\.\d+\.\d+.*$/
       python: 2.7
       install:
         - sudo apt-get install g++-multilib
@@ -16,7 +23,8 @@ matrix:
 
     - os: osx
       env: NAME=OSX
-      if: type = pull_request
+      # See 'BUILD NOTE' above.
+      if: NOT branch =~ /^\d+\.\d+\.\d+.*$/
       language: generic
       install:
         - curl -O https://bootstrap.pypa.io/get-pip.py
@@ -58,7 +66,10 @@ matrix:
         - NAME=Linux-deploy
         - DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
         - BUILD_DIST=true
-      if: type = push
+      # DEPLOYMENT NOTE:
+      # Deploy only when a git tag matching the regex below is pushed.
+      # Travis treats git tags as if they're branches.
+      if: type = push AND branch =~ /^\d+\.\d+\.\d+.*$/
       language: python
       python: 2.7
       # skip default 'install' and 'script' steps: all the work is in
@@ -71,26 +82,14 @@ matrix:
       env:
         - NAME=OSX-deploy
         - BUILD_DIST=true
-      if: type = push
+      # See 'DEPLOYMENT NOTE' above.
+      if: type = push AND branch =~ /^\d+\.\d+\.\d+.*$/
       language: generic
 
 cache:
   - pip
   - directories:
     - $HOME/.pyenv_cache
-
-# Only build for *pushes* to 'master', 'develop' and 'release',
-# not for pushes to other branches
-# (build for PRs from any branch).
-# The regex below is because Travis treats a tag on the master branch as if it
-# were a different branch. The regex below is meant to match:
-# digit(s).digit(s).digit(s) plus optional additional characters.
-branches:
-  only:
-    - master
-    - /^\d+\.\d+\.\d+.*$/
-    - develop
-    - release
 
 notifications:
   slack: typekit:TRAVIS_SLACK_TOKEN
