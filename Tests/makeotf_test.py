@@ -41,10 +41,10 @@ def _get_temp_file_path():
     return tempfile.mkstemp()[1]
 
 
-def _generate_ttx_dump(font_path):
+def _generate_ttx_dump(font_path, tables=None):
     font = TTFont(font_path)
     temp_path = _get_temp_file_path()
-    font.saveXML(temp_path)
+    font.saveXML(temp_path, tables=tables)
     return temp_path
 
 
@@ -85,6 +85,7 @@ def test_input_formats(arg, input_filename, ttx_filename):
     expected_ttx = _get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx,
                    '-s',
+                   '<ttFont sfntVersion' + SPLIT_MARKER +
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value='])
@@ -178,3 +179,40 @@ def test_options_shw_nshw_bug457(args, result):
     getOptions(params, args)
     assert params.opt_ReleaseMode == result[0]
     assert params.opt_SuppressHintWarnings == result[1]
+
+
+@pytest.mark.parametrize('args, result', [
+    # 'result' corresponds to the values of the
+    # options 'MacCmapScriptID' and 'MacCmapLanguageID'
+    # CJK MacCmapScriptIDs: Japan/1, CN/2, Korea/3, GB/25
+    ([], (None, None)),
+    (['-cs', '1'], (1, None)),
+    (['-cl', '2'], (None, 2)),
+    (['-cs', '4', '-cl', '5'], (4, 5)),
+])
+def test_options_cs_cl_bug459(args, result):
+    params = MakeOTFParams()
+    getOptions(params, args)
+    assert params.opt_MacCmapScriptID == result[0]
+    assert params.opt_MacCmapLanguageID == result[1]
+
+
+@pytest.mark.parametrize('args, input_filename, ttx_filename', [
+    (['r'], T1PFA_NAME, 't1pfa-cmap.ttx'),
+    (['r', 'cs', '_1'], T1PFA_NAME, 't1pfa-cmap_cs1.ttx'),
+    (['r', 'cl', '_2'], T1PFA_NAME, 't1pfa-cmap_cl2.ttx'),
+    (['r'], UFO2_NAME, 'ufo2-cmap.ttx'),
+    (['r', 'cs', '_4'], UFO2_NAME, 'ufo2-cmap_cs4.ttx'),
+    (['r', 'cl', '_5'], UFO2_NAME, 'ufo2-cmap_cl5.ttx'),
+    (['r'], CID_NAME, 'cidfont-cmap.ttx'),
+    (['r', 'cs', '_2'], CID_NAME, 'cidfont-cmap_cs2.ttx'),
+    (['r', 'cl', '_3'], CID_NAME, 'cidfont-cmap_cl3.ttx'),
+])
+def test_build_options_cs_cl_bug459(args, input_filename, ttx_filename):
+    actual_path = _get_temp_file_path()
+    runner(CMD + ['-n', '-o',
+                  'f', '_{}'.format(_get_input_path(input_filename)),
+                  'o', '_{}'.format(actual_path)] + args)
+    actual_ttx = _generate_ttx_dump(actual_path, ['cmap'])
+    expected_ttx = _get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])

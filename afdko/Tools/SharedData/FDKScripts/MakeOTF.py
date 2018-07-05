@@ -160,11 +160,9 @@ __usage__ = __version__ + """
 -sans                   Specify that any added glyphs will use the
                 sans-serif built-in multiple master glyph data.
 -cs                     Override the heuristics, and specify the
-                ScriptID for the Macintosh 'cmap' subtable;
-                CID-keyed fonts only.
+                ScriptID for the Macintosh 'cmap' subtable.
 -cl                     Override the heuristics, and specify the
-                LanguageID for the Macintosh 'cmap' subtable;
-                CID-keyed fonts only.
+                LanguageID for the Macintosh 'cmap' subtable.
 -cm <path>              Path to the Macintosh CMap resource; CID-keyed
                 fonts only.
 -ch <path>              Path to the UTF-32 CMap resource for horizontal
@@ -800,8 +798,7 @@ def setOptionsFromFontInfo(makeOTFParams):
             else:
                 script = None
             if script is not None:
-                exec("makeOTFParams.%s%s = script" % (kFileOptPrefix,
-                                                      kMacScript))
+                setattr(makeOTFParams, kFileOptPrefix + kMacScript, script)
 
     if kMOTFOptions[kSetfsSelectionBitsOn][0] == kOptionNotSeen:
         m = re.search(r"PreferOS/2TypoMetrics"
@@ -925,8 +922,6 @@ def getOptions(makeOTFParams, args):
     # Get the absolute path to the current directory.
     makeOTFParams.currentDir = os.getcwd()
     # makeOTFParams.fontDirPath is currently set to "."
-
-    defaultScriptWarning = ""
 
     while i < numArgs:
         arg = args[i]
@@ -1318,13 +1313,9 @@ def getOptions(makeOTFParams, args):
             # The next arg needs to a valid integer
             kMOTFOptions[kMacScript][0] = i + optionIndex
             try:
-                val = args[i]
-                val = int(val)
+                val = int(args[i])
                 i += 1
-                exec("makeOTFParams.%s%s = val" % (kFileOptPrefix, kMacScript))
-                if defaultScriptWarning:
-                    # Can ignore this, as the user supplied a specific script
-                    defaultScriptWarning = ""
+                setattr(makeOTFParams, kFileOptPrefix + kMacScript, val)
             except (IndexError, ValueError):
                 error = 1
                 print("makeotf [Error] The '%s' option must be followed by a "
@@ -1334,10 +1325,9 @@ def getOptions(makeOTFParams, args):
             kMOTFOptions[kMacLang][0] = i + optionIndex
             # The next arg needs to a valid integer
             try:
-                val = args[i]
-                val = int(val)
+                val = int(args[i])
                 i += 1
-                exec("makeOTFParams.%s%s = val" % (kFileOptPrefix, kMacLang))
+                setattr(makeOTFParams, kFileOptPrefix + kMacLang, val)
             except (IndexError, ValueError):
                 error = 1
                 print("makeotf [Error] The '%s' option must be followed by a "
@@ -1532,9 +1522,6 @@ def getOptions(makeOTFParams, args):
         else:
             error = 1
             print("makeotf [Error] Did not recognize option '%s'." % arg)
-
-    if defaultScriptWarning:
-        print(defaultScriptWarning)
 
     if error:
         raise MakeOTFOptionsError
