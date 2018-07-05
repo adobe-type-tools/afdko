@@ -886,6 +886,20 @@ static int lookupWidth(recodeCtx h, int width, int *index) {
 
 /* Add width to accumulator */
 static void addWidth(recodeCtx h, Fixed width) {
+	if (width < 0)
+	{
+		width = 0;
+		switch (h->idType) {
+			case SIDType:
+				parseWarning(h->g, "glyph '%s' has a negative advance width. Setting width to 0.\n", sindexGetString(h->g, (SID)h->id));
+				break;
+			case CIDType:
+				parseWarning(h->g, "glyph 'cid#%hu' has a negative advance width. Setting width to 0.\n", h->id);
+				break;
+			default:
+				;
+		}
+	}
 	if (width & 0xffff) {
 		/* Fractional width char (very rare but found in Tex fonts) */
 		int i;
