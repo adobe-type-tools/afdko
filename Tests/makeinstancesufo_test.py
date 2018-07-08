@@ -31,17 +31,22 @@ def teardown_module(module):
 # Tests
 # -----
 
-@pytest.mark.parametrize('args, ufo_filename', [
-    (['_0'], 'extralight.ufo'),  # hint/remove overlap/normalize/round
-    (['_1', 'a'], 'light.ufo'),  # no hint
-    (['_2', 'dec'], 'regular.ufo'),  # no round
-    (['_3', 'c'], 'semibold.ufo'),  # no remove overlap
-    (['_4', 'n'], 'bold.ufo'),  # no normalize
-    (['_5', 'a', 'c', 'n'], 'black.ufo'),  # round only
+@pytest.mark.parametrize('args, ufo_filename, num', [
+    (['_0'], 'extralight.ufo', 0),  # hint/remove overlap/normalize/round
+    (['_1', 'a'], 'light.ufo', 0),  # no hint
+    (['_2', 'dec'], 'regular.ufo', 0),  # no round
+    (['_2', 'dec', 'n'], 'regular.ufo', 1),  # no round & no normalize
+    (['_3', 'c'], 'semibold.ufo', 0),  # no remove overlap
+    (['_4', 'n'], 'bold.ufo', 0),  # no normalize
+    (['_5', 'a', 'c', 'n'], 'black.ufo', 0),  # round only
 ])
-def test_options(args, ufo_filename):
+def test_options(args, ufo_filename, num):
     runner(['-t', TOOL, '-n', '-o', 'd',
             '_{}'.format(_get_input_path('font.designspace')), 'i'] + args)
-    expected_path = _get_output_path(ufo_filename, 'expected_output')
+    if num:
+        expct_filename = '{}{}.ufo'.format(ufo_filename[:-4], num)
+    else:
+        expct_filename = ufo_filename
+    expected_path = _get_output_path(expct_filename, 'expected_output')
     actual_path = _get_output_path(ufo_filename, 'temp_output')
     assert differ([expected_path, actual_path])
