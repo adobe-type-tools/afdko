@@ -75,7 +75,7 @@ struct _t2cCtx
         unsigned short numRegions;
         long blendCnt;
         abfOpEntry blendArray[CFF2_MAX_OP_STACK];
-        abfBlendArg blendArgs[6];
+        abfBlendArg blendArgs[T2_MAX_STEMS];
 		} stack;
 	long maxOpStack;
 	float BCA[TX_BCA_LENGTH];	/* BuildCharArray */
