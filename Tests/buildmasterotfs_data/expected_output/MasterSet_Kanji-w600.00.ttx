@@ -174,7 +174,7 @@
       CJKVar
     </namerecord>
     <namerecord nameID="5" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      Version 1.000;hotconv 1.0.107;makeotfexe 2.5.65593
+      Version 1.000;hotconv 1.0.108;makeotfexe 2.5.65593
     </namerecord>
     <namerecord nameID="6" platformID="1" platEncID="0" langID="0x0" unicode="True">
       MasterSet_Kanji-w600.00
@@ -198,7 +198,7 @@
       CJKVar
     </namerecord>
     <namerecord nameID="5" platformID="3" platEncID="1" langID="0x409">
-      Version 1.000;hotconv 1.0.107;makeotfexe 2.5.65593
+      Version 1.000;hotconv 1.0.108;makeotfexe 2.5.65593
     </namerecord>
     <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
       MasterSet_Kanji-w600.00
