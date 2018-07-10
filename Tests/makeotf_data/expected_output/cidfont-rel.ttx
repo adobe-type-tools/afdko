@@ -7,6 +7,7 @@
     <GlyphID id="1" name="cid00001"/>
     <GlyphID id="2" name="cid01125"/>
     <GlyphID id="3" name="cid01143"/>
+    <GlyphID id="4" name="cid23058"/>
   </GlyphOrder>
 
   <head>
@@ -47,12 +48,12 @@
     <reserved2 value="0"/>
     <reserved3 value="0"/>
     <metricDataFormat value="0"/>
-    <numberOfHMetrics value="3"/>
+    <numberOfHMetrics value="5"/>
   </hhea>
 
   <maxp>
     <tableVersion value="0x5000"/>
-    <numGlyphs value="4"/>
+    <numGlyphs value="5"/>
   </maxp>
 
   <OS_2>
@@ -122,7 +123,7 @@
       SourceSans
     </namerecord>
     <namerecord nameID="5" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      Version 1.000;hotconv 1.0.107;makeotfexe 2.5.65593
+      Version 1.000;hotconv 1.0.108;makeotfexe 2.5.65593
     </namerecord>
     <namerecord nameID="6" platformID="1" platEncID="0" langID="0x0" unicode="True">
       SourceSans-Test
@@ -143,7 +144,7 @@
       SourceSans
     </namerecord>
     <namerecord nameID="5" platformID="3" platEncID="1" langID="0x409">
-      Version 1.000;hotconv 1.0.107;makeotfexe 2.5.65593
+      Version 1.000;hotconv 1.0.108;makeotfexe 2.5.65593
     </namerecord>
     <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
       SourceSans-Test
@@ -304,7 +305,7 @@
       <CIDFontVersion value="1"/>
       <CIDFontRevision value="0"/>
       <CIDFontType value="0"/>
-      <CIDCount value="1144"/>
+      <CIDCount value="23059"/>
       <!-- charset is dumped separately as the 'GlyphOrder' element -->
       <FDSelect format="0"/>
       <FDArray>
@@ -362,7 +363,7 @@
             <LanguageGroup value="0"/>
             <ExpansionFactor value="0.06"/>
             <initialRandomSeed value="0"/>
-            <defaultWidthX value="224"/>
+            <defaultWidthX value="0"/>
             <nominalWidthX value="0"/>
           </Private>
         </FontDict>
@@ -384,7 +385,7 @@
           endchar
         </CharString>
         <CharString name="cid00001" fdSelectIndex="2">
-          endchar
+          224 endchar
         </CharString>
         <CharString name="cid01125" fdSelectIndex="1">
           415 211 rmoveto
@@ -455,6 +456,9 @@
           40 -84 72 -86 69 -45 10 17 22 24 14 11 -59 33 -63 65 -39 65 rrcurveto
           endchar
         </CharString>
+        <CharString name="cid23058" fdSelectIndex="2">
+          0 endchar
+        </CharString>
       </CharStrings>
     </CFFFont>
 
@@ -475,6 +479,7 @@
     <mtx name="cid00001" width="224" lsb="0"/>
     <mtx name="cid01125" width="1000" lsb="52"/>
     <mtx name="cid01143" width="1000" lsb="37"/>
+    <mtx name="cid23058" width="0" lsb="0"/>
   </hmtx>
 
   <vhea>
@@ -502,6 +507,7 @@
     <mtx name="cid00001" height="1000" tsb="880"/>
     <mtx name="cid01125" height="1000" tsb="107"/>
     <mtx name="cid01143" height="1000" tsb="43"/>
+    <mtx name="cid23058" height="1000" tsb="880"/>
   </vmtx>
 
   <DSIG>

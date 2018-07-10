@@ -5,6 +5,7 @@
     <!-- The 'id' attribute is only for humans; it is ignored when parsed. -->
     <GlyphID id="0" name=".notdef"/>
     <GlyphID id="1" name="a"/>
+    <GlyphID id="2" name="negative"/>
   </GlyphOrder>
 
   <head>
@@ -45,12 +46,12 @@
     <reserved2 value="0"/>
     <reserved3 value="0"/>
     <metricDataFormat value="0"/>
-    <numberOfHMetrics value="2"/>
+    <numberOfHMetrics value="3"/>
   </hhea>
 
   <maxp>
     <tableVersion value="0x5000"/>
-    <numGlyphs value="2"/>
+    <numGlyphs value="3"/>
   </maxp>
 
   <OS_2>
@@ -120,7 +121,7 @@
       SourceSans
     </namerecord>
     <namerecord nameID="5" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      Version 1.000;hotconv 1.0.107;makeotfexe 2.5.65593 DEVELOPMENT
+      Version 1.000;hotconv 1.0.108;makeotfexe 2.5.65593 DEVELOPMENT
     </namerecord>
     <namerecord nameID="6" platformID="1" platEncID="0" langID="0x0" unicode="True">
       SourceSans-Test
@@ -141,7 +142,7 @@
       SourceSans
     </namerecord>
     <namerecord nameID="5" platformID="3" platEncID="1" langID="0x409">
-      Version 1.000;hotconv 1.0.107;makeotfexe 2.5.65593 DEVELOPMENT
+      Version 1.000;hotconv 1.0.108;makeotfexe 2.5.65593 DEVELOPMENT
     </namerecord>
     <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
       SourceSans-Test
@@ -248,6 +249,9 @@
           -42 -47 -38 -23 -47 hhcurveto
           endchar
         </CharString>
+        <CharString name="negative">
+          0 endchar
+        </CharString>
       </CharStrings>
     </CFFFont>
 
@@ -259,6 +263,7 @@
   <hmtx>
     <mtx name=".notdef" width="653" lsb="89"/>
     <mtx name="a" width="504" lsb="52"/>
+    <mtx name="negative" width="0" lsb="0"/>
   </hmtx>
 
 </ttFont>
