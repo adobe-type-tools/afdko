@@ -965,10 +965,6 @@ static int calcSetOffsets(controlCtx h) {
         h->offset.top       = h->size.header;
         h->offset.gsubr     = h->offset.top + h->size.top;
         offset = h->offset.gsubr + h->size.gsubr;
-        if (h->size.varStore > 0) {
-            h->offset.varStore  = offset;
-            offset += h->size.varStore;
-        }
         if (h->size.FDSelect > 0) {
             h->offset.FDSelect  = offset;
             offset += h->size.FDSelect;
