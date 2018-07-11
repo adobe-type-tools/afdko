@@ -197,6 +197,7 @@ def test_long_charstring_bug444():
     expected_path = _get_expected_path('CJK-VarTest.txt')
     assert differ([expected_path, actual_path, '-s', '## Filename'])
 
+
 def test_many_hints_string_bug354():
     # The glyph T@gid002 has 33 hstem hints. This tests a bug where
     # tx defined an array of only 6 operants.
@@ -205,4 +206,3 @@ def test_many_hints_string_bug354():
     dcf_txt_path = runner(CMD + ['-a', '-f', cff2_path, '-o', 'dcf'])
     expected_path = _get_expected_path('cff2_vf.dcf.txt')
     assert differ([expected_path, dcf_txt_path])
-
