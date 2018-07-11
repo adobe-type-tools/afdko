@@ -733,10 +733,9 @@ static Offset calcFontOffsets(controlCtx h, cff_Font *font, Offset offset) {
     font->offset.FDSelect =
     cfwFdselectGetOffset(g, font->iObject.FDSelect, h->offset.FDSelect);
 
-    if (font->size.VarStore > 0) {
-        font->offset.VarStore = offset;
-        offset += font->size.VarStore;
-    }
+	if (font->size.VarStore > 0) {
+		font->offset.VarStore = h->offset.varStore;
+	}
     font->offset.CharStrings = offset;
     font->offset.FDArray = font->offset.CharStrings + font->size.CharStrings;
 	font->offset.Private = font->offset.FDArray    + font->size.FDArray;
@@ -965,10 +964,14 @@ static int calcSetOffsets(controlCtx h) {
         h->offset.top       = h->size.header;
         h->offset.gsubr     = h->offset.top + h->size.top;
         offset = h->offset.gsubr + h->size.gsubr;
-        if (h->size.FDSelect > 0) {
-            h->offset.FDSelect  = offset;
-            offset += h->size.FDSelect;
-        }
+		if (h->size.varStore > 0) {
+			h->offset.varStore  = offset;
+			offset += h->size.varStore;
+		}
+		if (h->size.FDSelect > 0) {
+			h->offset.FDSelect  = offset;
+			offset += h->size.FDSelect;
+		}
         h->offset.end = offset;
     } else {
         h->offset.varStore = 0;
