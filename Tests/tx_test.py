@@ -201,8 +201,8 @@ def test_many_hints_string_bug354():
     # The glyph T@gid002 has 33 hstem hints. This tests a bug where
     # tx defined an array of only 6 operants.
     # This is encountered only when wrinting to a VF CFF2.
-    actual_path = runner(CMD + ['-o', 'cff2', '-f', 'cff2_vf.otf'])
-    actual_path = runner(CMD + ['-f', actual_path, '-o', 'dcf'])
+    cff2_path = runner(CMD + ['-o', 'cff2', '-f', 'cff2_vf.otf'])
+    dcf_txt_path = runner(CMD + ['-a', '-f', cff2_path, '-o', 'dcf'])
     expected_path = _get_expected_path('cff2_vf.dcf.txt')
-    assert differ([expected_path, actual_path])
+    assert differ([expected_path, dcf_txt_path])
 
