@@ -1,0 +1,11 @@
+include (../../../../featuresVar.fea);
+
+table OS/2 {
+	include (../os2.fea);
+	include (../../../../familyOS2.fea);
+} OS/2;
+
+# GPOS -----------------------------------
+feature kern {
+	include (../kern.fea);
+} kern;
