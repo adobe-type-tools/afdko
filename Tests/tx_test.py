@@ -206,3 +206,14 @@ def test_many_hints_string_bug354():
     dcf_txt_path = runner(CMD + ['-a', '-f', cff2_path, '-o', 'dcf'])
     expected_path = _get_expected_path('cff2_vf.dcf.txt')
     assert differ([expected_path, dcf_txt_path])
+
+
+def test_non_varying_glyphs_bug356():
+    """A glyph which is non-varying in a variable font may be referenced by a
+    VariationStore data item subtable which has a region count of 0. The VF
+    support code assumed that this was an error, and issued a false warning.
+    File 'bug356.otf' is a handcrafted modification of 'cff2_vf.otf'. The
+    latter cannot be used as-is to validate the fix."""
+    stderr_path = runner(CMD + ['-r', '-e', '-o', 'cff', '-f', 'bug356.otf'])
+    expected_path = _get_expected_path('bug356.txt')
+    assert differ([expected_path, stderr_path, '-l', '1'])
