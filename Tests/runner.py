@@ -17,7 +17,7 @@ import subprocess32 as subprocess
 import sys
 import tempfile
 
-__version__ = '0.4.0'
+__version__ = '0.5.0'
 
 logger = logging.getLogger('runner')
 
@@ -54,7 +54,7 @@ def run_tool(opts):
     """
     input_dir = _get_input_dir_path(opts.tool)
 
-    args = []
+    args = [opts.tool]
     for opt in opts.options:
         if opt.startswith('='):
             args.append('--{}'.format(opt[1:]))
@@ -64,8 +64,6 @@ def run_tool(opts):
             args.append('{}'.format(opt[1:]))
         else:
             args.append('-{}'.format(opt))
-
-    args.insert(0, opts.tool)
 
     if opts.files:
         if opts.abs_paths:
@@ -80,13 +78,18 @@ def run_tool(opts):
         save_loc = _get_save_location(opts.save_path)
         args.append(save_loc)
 
+    stderr = None
+    if opts.std_error:
+        stderr = subprocess.STDOUT
+
     logger.debug(
         "About to run the command below\n==>{}<==".format(' '.join(args)))
     try:
         if opts.no_save_path:
             return subprocess.check_call(args, timeout=TIMEOUT)
         else:
-            output = subprocess.check_output(args, timeout=TIMEOUT)
+            output = subprocess.check_output(args, stderr=stderr,
+                                             timeout=TIMEOUT)
             if opts.redirect:
                 _write_file(save_loc, output)
             return save_loc
@@ -196,6 +199,12 @@ def get_options(args):
         '--redirect',
         action='store_true',
         help="redirect the tool's output to a file"
+    )
+    parser.add_argument(
+        '-e',
+        '--std-error',
+        action='store_true',
+        help="capture stderr instead of stdout"
     )
     save_parser = parser.add_mutually_exclusive_group()
     save_parser.add_argument(
