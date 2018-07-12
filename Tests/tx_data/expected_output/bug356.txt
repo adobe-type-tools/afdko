@@ -1,0 +1,2 @@
+tx: --- /afdko/Tests/tx_data/input/bug356.otf
+tx: (cfr) out of range region index found in item variation store subtable
