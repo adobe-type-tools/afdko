@@ -730,15 +730,14 @@ static Offset calcFontOffsets(controlCtx h, cff_Font *font, Offset offset) {
 	    cfwCharsetGetOffset(g, font->iObject.charset, h->offset.charset);
 	font->offset.Encoding =
 	    cfwEncodingGetOffset(g, font->iObject.Encoding, h->offset.Encoding);
-    font->offset.FDSelect =
-    cfwFdselectGetOffset(g, font->iObject.FDSelect, h->offset.FDSelect);
+	font->offset.FDSelect =
+	cfwFdselectGetOffset(g, font->iObject.FDSelect, h->offset.FDSelect);
 
-    if (font->size.VarStore > 0) {
-        font->offset.VarStore = offset;
-        offset += font->size.VarStore;
-    }
-    font->offset.CharStrings = offset;
-    font->offset.FDArray = font->offset.CharStrings + font->size.CharStrings;
+	if (font->size.VarStore > 0) {
+		font->offset.VarStore = h->offset.varStore;
+	}
+	font->offset.CharStrings = offset;
+	font->offset.FDArray = font->offset.CharStrings + font->size.CharStrings;
 	font->offset.Private = font->offset.FDArray    + font->size.FDArray;
 	font->offset.Subrs  = font->offset.Private    + font->size.Private;
 	/* Compute individual Private DICT offsets */
