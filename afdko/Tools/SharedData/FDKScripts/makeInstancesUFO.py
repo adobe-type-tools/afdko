@@ -21,7 +21,7 @@ except ImportError:
 from .ufoTools import validateLayers
 
 __usage__ = """
-   makeInstancesUFO v1.4.0 Jul 5 2018
+   makeInstancesUFO v1.4.1 Jul 13 2018
    makeInstancesUFO -h
    makeInstancesUFO -u
    makeInstancesUFO [-d <design space file name>] [-a] [-c] [-n] [-dec]
@@ -182,7 +182,7 @@ def readDesignSpaceFile(options):
         familyName = instanceXML.attrib["familyname"]
         styleName = instanceXML.attrib["stylename"]
         curPath = instanceXML.attrib["filename"]
-        print("adding %s %s to build list." % (familyName, styleName))
+        print("Adding %s %s to build list." % (familyName, styleName))
         instanceEntryList.append(curPath)
         if os.path.exists(curPath):
             glyphDir = os.path.join(curPath, "glyphs")
@@ -207,7 +207,7 @@ def updateInstance(options, fontInstancePath):
     Run checkoutlinesufo and autohint, unless explicitly suppressed.
     """
     if options.doOverlapRemoval:
-        logMsg.log("\tdoing overlap removal with checkoutlinesufo %s ..." %
+        logMsg.log("Doing overlap removal with checkoutlinesufo %s ..." %
                    fontInstancePath)
         logList = []
         opList = ["-e", fontInstancePath]
@@ -222,25 +222,25 @@ def updateInstance(options, fontInstancePath):
         while 1:
             output = proc.stdout.readline()
             if output:
-                print(".",)
+                print('.', end='')
                 logList.append(output)
             if proc.poll() is not None:
                 output = proc.stdout.readline()
                 if output:
-                    print(output,)
+                    print(output, end='')
                     logList.append(output)
                 break
         log = "".join(logList)
         if not ("Done with font" in log):
-            print('')
+            print()
             logMsg.log(log)
             logMsg.log("Error in checkoutlinesufo %s" % (fontInstancePath))
             raise(SnapShotError)
         else:
-            print('')
+            print()
 
     if options.doAutoHint:
-        logMsg.log("\tautohinting %s ..." % (fontInstancePath))
+        logMsg.log("Autohinting %s ..." % (fontInstancePath))
         logList = []
         opList = ['-q', '-nb', fontInstancePath]
         if options.allowDecimalCoords:
@@ -254,22 +254,22 @@ def updateInstance(options, fontInstancePath):
         while 1:
             output = proc.stdout.readline()
             if output:
-                print(output,)
+                print(output, end='')
                 logList.append(output)
             if proc.poll() is not None:
                 output = proc.stdout.readline()
                 if output:
-                    print(output,)
+                    print(output, end='')
                     logList.append(output)
                 break
         log = "".join(logList)
         if not ("Done with font" in log):
-            print('')
+            print()
             logMsg.log(log)
             logMsg.log("Error in autohinting %s" % (fontInstancePath))
             raise(SnapShotError)
         else:
-            print('')
+            print()
     return
 
 
