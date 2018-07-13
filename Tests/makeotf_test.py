@@ -23,6 +23,7 @@ CMD = ['-t', TOOL]
 
 T1PFA_NAME = 't1pfa.pfa'
 UFO2_NAME = 'ufo2.ufo'
+UFO3_NAME = 'ufo3.ufo'
 CID_NAME = 'cidfont.ps'
 OTF_NAME = 'SourceSans-Test.otf'
 
@@ -71,9 +72,11 @@ def test_exit_unknown_option(arg):
 @pytest.mark.parametrize('arg, input_filename, ttx_filename', [
     ([], T1PFA_NAME, 't1pfa-dev.ttx'),
     ([], UFO2_NAME, 'ufo2-dev.ttx'),
+    ([], UFO3_NAME, 'ufo3-dev.ttx'),
     ([], CID_NAME, 'cidfont-dev.ttx'),
     (['r'], T1PFA_NAME, 't1pfa-rel.ttx'),
     (['r'], UFO2_NAME, 'ufo2-rel.ttx'),
+    (['r'], UFO3_NAME, 'ufo3-rel.ttx'),
     (['r'], CID_NAME, 'cidfont-rel.ttx'),
 ])
 def test_input_formats(arg, input_filename, ttx_filename):
@@ -91,7 +94,8 @@ def test_input_formats(arg, input_filename, ttx_filename):
                    '    <modified value='])
 
 
-@pytest.mark.parametrize('input_filename', [T1PFA_NAME, UFO2_NAME, CID_NAME])
+@pytest.mark.parametrize('input_filename', [
+    T1PFA_NAME, UFO2_NAME, UFO3_NAME, CID_NAME])
 def test_path_with_non_ascii_chars_bug222(input_filename):
     temp_dir = os.path.join(tempfile.mkdtemp(), 'á意ê  ï薨õ 巽ù')
     os.makedirs(temp_dir)
@@ -108,18 +112,20 @@ def test_path_with_non_ascii_chars_bug222(input_filename):
     assert os.path.isfile(expected_path)
 
 
-def test_ufo_with_trailing_slash_bug280():
+@pytest.mark.parametrize('input_filename', [UFO2_NAME, UFO3_NAME])
+def test_ufo_with_trailing_slash_bug280(input_filename):
     # makeotf will now save the OTF alongside the UFO instead of inside of it
-    ufo_path = _get_input_path(UFO2_NAME)
+    ufo_path = _get_input_path(input_filename)
     temp_dir = tempfile.mkdtemp()
-    tmp_ufo_path = os.path.join(temp_dir, UFO2_NAME)
+    tmp_ufo_path = os.path.join(temp_dir, input_filename)
     copytree(ufo_path, tmp_ufo_path)
     runner(CMD + ['-n', '-o', 'f', '_{}{}'.format(tmp_ufo_path, os.sep)])
     expected_path = os.path.join(temp_dir, OTF_NAME)
     assert os.path.isfile(expected_path)
 
 
-@pytest.mark.parametrize('input_filename', [T1PFA_NAME, UFO2_NAME, CID_NAME])
+@pytest.mark.parametrize('input_filename', [
+    T1PFA_NAME, UFO2_NAME, UFO3_NAME, CID_NAME])
 def test_output_is_folder_only_bug281(input_filename):
     # makeotf will output a default-named font to the folder
     input_path = _get_input_path(input_filename)
@@ -134,6 +140,7 @@ def test_output_is_folder_only_bug281(input_filename):
 @pytest.mark.parametrize('input_filename', [
     't1pfa-noPSname.pfa',
     'ufo2-noPSname.ufo',
+    'ufo3-noPSname.ufo',
     'cidfont-noPSname.ps',
 ])
 def test_no_postscript_name_bug282(input_filename):
@@ -204,6 +211,9 @@ def test_options_cs_cl_bug459(args, result):
     (['r'], UFO2_NAME, 'ufo2-cmap.ttx'),
     (['r', 'cs', '_4'], UFO2_NAME, 'ufo2-cmap_cs4.ttx'),
     (['r', 'cl', '_5'], UFO2_NAME, 'ufo2-cmap_cl5.ttx'),
+    (['r'], UFO3_NAME, 'ufo3-cmap.ttx'),
+    (['r', 'cs', '_4'], UFO3_NAME, 'ufo3-cmap_cs4.ttx'),
+    (['r', 'cl', '_5'], UFO3_NAME, 'ufo3-cmap_cl5.ttx'),
     (['r'], CID_NAME, 'cidfont-cmap.ttx'),
     (['r', 'cs', '_2'], CID_NAME, 'cidfont-cmap_cs2.ttx'),
     (['r', 'cl', '_3'], CID_NAME, 'cidfont-cmap_cl3.ttx'),
