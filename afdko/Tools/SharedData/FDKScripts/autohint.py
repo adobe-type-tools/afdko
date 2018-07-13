@@ -5,7 +5,7 @@ __copyright__ = """Copyright 2016 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-autohint  AutoHinting program v1.49 April 27 2016
+autohint  AutoHinting program v1.50 Jul 13 2018
 autohint -h
 autohint -u
 autohint -hfd
@@ -501,32 +501,26 @@ class ACHintError(KeyError):
 class FDKEnvironmentError(AttributeError):
 	pass
 
-kProgressChar = "."
-
 def logMsg(*args):
 	for arg in args:
 		msg = str(arg).strip()
 		if not msg:
-			print('')
+			print()
 			sys.stdout.flush()
 			if gLogFile:
 				gLogFile.write(os.linesep)
 				gLogFile.flush()
 			return
 
-		msg = re.sub(r"[\r\n]", " ", msg)
+		msg = re.sub(r"[\t]", "", msg)
 		if msg[-1] == ",":
 			msg = msg[:-1]
-			if msg == kProgressChar:
-				sys.stdout.write(msg) # avoid space, which is added by 'print'
-			else:
-				print(msg, end=' ')
+			print(msg, end='')
 			sys.stdout.flush()
 			if gLogFile:
 				gLogFile.write(msg)
 				gLogFile.flush()
 		else:
-
 			print(msg)
 			sys.stdout.flush()
 			if gLogFile:
@@ -536,9 +530,9 @@ def logMsg(*args):
 def ACreport(*args):
 	# long function used by the hinting library
 	for arg in args:
-		print(arg, end=' ')
+		print(arg, end='')
 	if arg[-1] != os.linesep:
-		print('')
+		print()
 
 def CheckEnvironment():
 	txPath = 'tx'
@@ -1241,12 +1235,6 @@ def hintFile(options):
 				logMsg("Hinting %s." % aliasName(name))
 		else:
 			logMsg(".,")
-			dotCount += 1
-			if dotCount > 40:
-				dotCount = 0
-				logMsg("") # I do this to never have more than 40 dots on a line.
-				# This in turn give reasonable performance when calling autohint in a subprocess
-				# and getting output with std.readline()
 
 		# 	Call auto-hint library on bez string.
 		bp = open(tempBez, "wt")
@@ -1311,7 +1299,7 @@ def hintFile(options):
 			fontPlist[kACIDKey][name] = (ACidentifier, time.asctime(), bezString, newBezString )
 
 	if not options.verbose:
-		print("") # print final new line after progress dots.
+		print() # print final new line after progress dots.
 
 	if  options.debug:
 		print("Wrote input AC bez file to %s" % tempBez)

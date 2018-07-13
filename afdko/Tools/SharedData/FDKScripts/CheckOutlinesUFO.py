@@ -6,7 +6,7 @@ Tool that performs outline quality checks and can remove path overlaps.
 
 from __future__ import print_function, absolute_import
 
-__version__ = '2.0.3'
+__version__ = '2.0.4'
 
 import argparse
 import hashlib
@@ -1081,10 +1081,10 @@ def run(args=None):
             if len(msg) == 0:
                 if last_had_msg:
                     print()
-                print(".", end=' ')
+                print('.', end='')
                 last_had_msg = False
             else:
-                print(os.linesep + glyph_name, " ".join(msg), end=' ')
+                print(os.linesep + glyph_name, ' '.join(msg), end='')
                 last_had_msg = True
         if changed and options.allow_changes:
             font_changed = True
