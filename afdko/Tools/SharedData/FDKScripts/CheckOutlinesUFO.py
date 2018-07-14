@@ -6,7 +6,7 @@ Tool that performs outline quality checks and can remove path overlaps.
 
 from __future__ import print_function, absolute_import
 
-__version__ = '2.0.4'
+__version__ = '2.1.0'
 
 import argparse
 import hashlib
@@ -121,36 +121,42 @@ class FontFile(object):
 
     def save(self):
         print("Saving font...")
-        """ A real hack here.
-        If the font format was less than 3, we need to save it with the
-        original format. I care specifically about RoboFont, which can still
-        read only format 2. However, dfont.save() will save the processed
-        layer only if the format is 3. If I ask to save(formatVersion=3)
-        when the dfont format is 2, then the save function will first mark all
-        the glyphs in all the layers as being 'dirty' and needing to be saved.
-        and also causes the defcon font.py:save to delete the original font
-        and write everything anew.
-
-        In order to avoid this, I reach into the defcon code and save only
-        the processed glyphs layer. I also set glyph_set.ufoFormatVersion so
-        that the glif files will be set to format 1.
-        """
-        from ufoLib import UFOWriter
-        writer = UFOWriter(self.defcon_font.path, formatVersion=2)
         if self.save_to_default_layer:
             self.defcon_font.save()
         else:
+            """
+            XXX A real hack here XXX
+            RoboFont did not support layers (UFO3 feature) until version 3.
+            So in order to allow editing (in RF 1.x) UFOs that contain
+            a processed glyphs layer, CheckOutlinesUFO generates UFOs that
+            are structured like UFO3, but advertise themselves as UFO2.
+            To achieve this, the code below hacks ufoLib to surgically save
+            only the processed layer.
+            This hack is only performed if the original UFO is format 2.
+            """
+            writer = ufoLib.UFOWriter(
+                self.defcon_font.path, formatVersion=self.ufo_format)
+            writer.layerContents[
+                PROCD_GLYPHS_LAYER_NAME] = PROCD_GLYPHS_LAYER
             layers = self.defcon_font.layers
             layer = layers[PROCD_GLYPHS_LAYER_NAME]
-            writer._formatVersion = 3
-            writer.layerContents[PROCD_GLYPHS_LAYER_NAME] = \
-                PROCD_GLYPHS_LAYER
+
+            if self.ufo_format == 2:
+                # Override the UFO's formatVersion. This disguises a UFO2 to
+                # be seen as UFO3 by ufoLib, thus enabling it to write the
+                # layer without raising an error.
+                writer._formatVersion = 3
+
             glyph_set = writer.getGlyphSet(
                 layerName=PROCD_GLYPHS_LAYER_NAME, defaultLayer=False)
             writer.writeLayerContents(layers.layerOrder)
-            glyph_set.ufoFormatVersion = 2
+
+            if self.ufo_format == 2:
+                # Restore the UFO's formatVersion to the original value.
+                # This makes the glif files be set to format 1 instead of 2.
+                glyph_set.ufoFormatVersion = self.ufo_format
+
             layer.save(glyph_set)
-            layer.dirty = False
 
         if self.font_type == UFO_FONT_TYPE:
             # Write the hash data, if it has changed.
