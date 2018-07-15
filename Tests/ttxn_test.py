@@ -9,10 +9,10 @@ from .differ import main as differ
 
 TOOL = 'ttxn'
 
-OTF_FONT = 'OTF.otf'
-OTF2_FONT = 'OTF2.otf'
-OTF3_FONT = 'OTF3.otf'
-TTF_FONT = 'TTF.ttf'
+OTF_FONT = 'SourceSansPro-Black_subset.otf'
+TTF_FONT = 'SourceSansPro-Black_subset.ttf'
+OTF2_FONT = 'SourceSansPro-ExtraLightIt.otf'
+OTF3_FONT = 'SourceSansPro-Light.otf'
 
 data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
 
