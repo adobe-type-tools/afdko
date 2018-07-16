@@ -1,0 +1,53 @@
+# [PostScriptName]
+#   f=FamilyName
+#   s=StyleName
+#   l=Windows_Compatible_MenuName
+#   m=1,Macintosh_Compatible_MenuName
+
+# Variable fonts -----------------------------
+
+# Master 1
+[SourceSerifVariable-Roman]
+    f=Source Serif Variable
+    s=Roman
+
+[SourceSerif_ExtraLight]
+    f=Source Serif Variable
+    s=Roman Master 0
+
+[SourceSerif_Black]
+    f=Source Serif Variable
+    s=Roman Master 2
+
+
+# Roman --------------------------------------
+
+[TestVF-ExtraLight]
+    f=Test VF
+    s=ExtraLight
+    l=Test VF ExtraLight
+
+[TestVF-Light]
+    f=Test VF
+    s=Light
+    l=Test VF Light
+
+[TestVF-Roman]
+    f=Test VF
+    s=Regular
+    l=Test VF
+
+[TestVF-Semibold]
+    f=Test VF
+    s=Semibold
+    l=Test VF Semibold
+
+[TestVF-Bold]
+    f=Test VF
+    s=Bold
+    l=Test VF
+
+[TestVF-Black]
+    f=Test VF
+    s=Black
+    l=Test VF Black
