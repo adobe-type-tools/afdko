@@ -11,7 +11,7 @@ Extract all OpenType fonts from the parent OpenType Collection font.
 -r  Optional. Report TTC fonts and tables, Will not write the output files.
 
 example:
- AFDKOPython otc2otf.py  -r  LogoCutStd.ttc
+ python otc2otf.py  -r  LogoCutStd.ttc
 
 The script may be invoked with either the FDK command:
   otc2otf
