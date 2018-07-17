@@ -52,10 +52,6 @@ files expected by the 'makeotf' command:
 the child element <info copy="1">; this is used to identify which master is
 the default font.
 
-Any Python interpreter may be used, not just the AFDKO Python. If the AFDKO
-is installed, the command 'buildMasterOTFs' will call the script with the
-AFDKOPython.
-
 The script will build a master source OpenType/CFF font for each master source
 UFO font, using the same file name, but with the extension '.otf'.
 

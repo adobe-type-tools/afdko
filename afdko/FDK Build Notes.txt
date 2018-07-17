@@ -1,6 +1,6 @@
 FDK Build Notes
 
-v1.08 April 20 2016
+v1.1.0 July 17 2018
 
 1) FDK build directory tree.
 
@@ -47,113 +47,6 @@ The FDK distribution directory tree is built by:
 2.1) building all programs with the script FDK/Tools/Programs/BuildAll.sh (Mac), FDK/Tools/Programs/BuildAll.cmd (Windows), FDK/Tools/Programs/BuildAllLinux.sh (Linux).
 
 2.2) deleting the Programs directory and any unused programs and files (e.g Tools/osx and Tools/Linux under Windows).
-
-2.3) building the Python interpreter for the FDK, and copying it into the correct location in the directory tree. (See section 3. following).
-
-
-3) Building the Python interpreter for the FDK.
-
-Note that the FDK will use the Python interpreter whose path is specified in the file "setFDKPaths".
-This line can be changed to point to any other Python interpreter program on the
-system. However, if you choose to use another Python interpreter, you must add
-the several third party packages.
-
-The FDK contains a copy of the Python interpreter. This is used to run the FDK Python scripts. 
-
-To build Python for Mac OSX:
- - download the latest Python 2.7 source from www.python.org to a local directory.
- - unzip it
- - Open a Terminal window, and change the current directory to the directory <local directory>/Python-2.7/.
- - For Mac OSX, specify the Xcode SDK to use by setting the environment variable:
-  "$> export MACOSX_DEPLOYMENT_TARGET=10.6"
- - enter "./configure --prefix=<path to temp directory to hold the installed Python>"
- - When this is done, enter "make install"
- - when this is done, move the temp Python directory to "FDK/Tools/osx|win/Python/AFDKOPython27".
-
-
-For building the 64 bit Linux Python, use a 64 bit Linux VM system. Use the same
-steps as above, but the path to the AFDKOPythonBuild must be an absolute path.
-Also, you must first get the build-essentials and readline packages, with the
-commands: sudo apt-get install build-essential
-sudo apt-get install zlib1g-dev # gets you the zlib.h file and zlib library.
-sudo apt-get install libreadline-dev
-You must also edit the Modules/Setup.dist file, BEFORE running ./configure, to enable the readlines library by removing the comment at the start of the line:
-readline readline.c -lreadline -ltermcap # line 166 at the moment.
-After building the Python interpreter, copy the file '/lib/i386-linux-gnu/libz.so.1.2.3.4'  to Python/lib/python2.7/lib-dynload/.
-Then cd there, and make a symbolic link named 'libz.so.1' to the libz.so.1.2.3. file.
-
-For Windows, I just use the std x64 Windows MSI installer, and then move it
-under FDK/Tools/win/Python27. I do not use the std Python installers for the
-other platforms, because they come with compiled-in search paths for modules that
-conflicts with any user/system installed Python interpreter.
-
-Once you have built the AFDKO Python, you need to install the various modules that it needs.
-
-Note that the parent directories of the modules almost all change name with every version release, so you need to delete the older versions before you add the new versions.
-
-
-3.1 FontTools.
-
-This module is needed for the ttx and ttxn tools to work. I use Behdad Esfahbod's GitHub v2.5 branch, as it fixes a number of bugs, and is not dependent on the numPy module.
-
-Get the master branch of fontTools from https://github.com/behdad/fonttools.
-Download the zip file, cd to the unpacked directory, and use the command
-"AFDKOPython setup.py install".
-
-In order to support WOFF generation by the 'ttx' command in FontTools, you also need to install the 'brotli' data compression module from:
-https://github.com/google/brotli
-"AFDKOPython setup.py install".
-
-Note that unlike any of the other modules, this requires comoiler tools for your system Xocde for Mac OSX, Visual Studio C for Windows. See the instructions for 64 bit Linux Python for the Linux tools.
-
-
-
-3.2 BooleanOperations support
-This is needed for the checkOutlinesUFO command.
-
-booleanOperations: master branch of booleanOperations at:
-https://github.com/typemytype/booleanOperations/. 
-Follow the installation instructions on the main page for the github project.
-Under Linux, you will need to install g++: 'sudo apt-get install g++'
-then copy the Python/include/python2.7/* to /user/include/python2.7/
-then get the source wheel with: " pip install --find-links https://github.com/typemytype/booleanOperations/releases/latest booleanOperations"
-then cd to build/booleanOperations, and run <Linux AFDKO Python> setup.py install
-Note the source wheel is not always up to date with the main branch: compare
-what you get with the main branch, and update as needed. You need the source
-wheel in order to easily compiled the pyClipper library; else you need to
-
-3.3 MutatorMath support.
-
-Install in order:
-As of April 20, 2016, several of the modules must be installed from the ufo3 branch. However, it may no longer be necessary to do this if the ufo3 branches have been merged into the main branch.
-
-defcon: ufo3 branch of defcon library at https://github.com/typesupply/defcon/tree/ufo3.
-Install with "AFDKOPython setup.py install"
-
-fontMath: ufo3 branch of fontMath at: https://github.com/typesupply/fontMath/tree/ufo3/.
-Install with "AFDKOPython setup.py install"
-
-MutatorMath: master branch of MutatorMath at https://github.com/LettError/MutatorMath
-Install with "AFDKOPython setup.py install"
-
-robofab: ufo3K branch of robofab library from https://github.com/robofab-developers/robofab/tree/ufo3k.
-Install with "AFDKOPython setup.py install"
-
-
-Check all the *.pth files in
-"FDK/Tools/osx/Python/AFDKOPython27/lib/python2.7/site-packages", and make sure
-the path references are all relative to the site-packages directory, so that
-they don't break when the FDK directory is moved.
-
-Do this for the osx, win and Linux AFDKOPython directories.
-
-
-install Cython and do a lot more work.
-
-3.4 ufoNormalizer support 
-This is needed for all the scripts that create or modify UFO fonts.
-https://github.com/unified-font-object/ufoNormalizer
-Install with "AFDKOPython setup.py install"
 
 
 4) Testing/building systems.
