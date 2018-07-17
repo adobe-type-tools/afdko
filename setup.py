@@ -165,8 +165,6 @@ def _get_console_scripts():
         ('buildmasterotfs', 'buildMasterOTFs:main'),
         ('comparefamily', 'CompareFamily:main'),
         ('checkoutlinesufo', 'CheckOutlinesUFO:main'),
-        ('copycffcharstrings', 'copyCFFCharstrings:run'),
-        ('kerncheck', 'kernCheck:run'),
         ('makeotf', 'MakeOTF:main'),
         ('makeinstances', 'makeInstances:main'),
         ('makeinstancesufo', 'makeInstancesUFO:main'),
