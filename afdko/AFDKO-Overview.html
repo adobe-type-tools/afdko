@@ -24,7 +24,7 @@
 
   <p>See the <a href="https://github.com/adobe-type-tools/afdko">afdko</a> home page for installation instructions.</p>
 
-  
+
   <p>Once the AFDKO is installed, all the command-line programs can be run by entering the command name in a Terminal window (OSX, Windows, Linux), along with the necessary option text. All command-line tools provide usage and help text with the options -u and -h.</p>
 
   <h3 id="a_programs">2. Overview of Programs</h3>
@@ -134,12 +134,6 @@
   <h5>compareFamily</h5>
 
   <p>The tool examines all the fonts in a directory and runs many quality checks. It is the only tool which checks consistency and compares data across a family of fonts, as well as in a single font. It will point out any errors in naming within a style-linked group. Every time the Adobe Type Department finds a bug in the Adobe OpenType fonts, we try to put a check in here. It is not a complete validation tool, but it does represents several years of experience of mistakes made by typographers.</p>
-
-  <h5>kernCheck</h5>
-
-  <p>This tool will report collisions between kern pairs, or, with the option -a, will report any collisions between any pair of glyphs. It will also report when rules in one GPOS table kern feature mask rules in a different subtable of the same lookup.</p>
-
-  <p class="note">NOTE! the time needed is related to the square of the number of glyphs. This script will run in a few minutes for a font with 300 glyphs, but can take more than an hour for a font with 3000 glyphs.</p>
 
   <h5>sfntdiff</h5>
 
