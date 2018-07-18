@@ -153,6 +153,22 @@ def test_dump(args, exp_filename):
 # CFF2 tests
 # ----------
 
+@pytest.mark.parametrize('args, exp_filename', [
+    ([], 'SourceCodeVar-Roman_CFF2'),
+    # The result is not the same across environments
+    # https://ci.appveyor.com/project/adobe-type-tools/afdko/build/1.0.721
+    # https://travis-ci.org/adobe-type-tools/afdko/builds/405208971
+    # The result file was generated on a MBP running macOS 10.13.6
+    # (['*S', '*b', 'std'], 'SourceCodeVar-Roman_CFF2_subr'),  # subroutinize
+])
+def test_cff2_extract(args, exp_filename):
+    # read CFF2 VF, write CFF2 table
+    actual_path = runner(CMD + ['-f', 'SourceCodeVariable-Roman.otf',
+                                '-o', 'cff2'] + args)
+    expected_path = _get_expected_path(exp_filename)
+    assert differ([expected_path, actual_path, '-m', 'bin'])
+
+
 def test_varread_pr355():
     # read CFF2 VF, write Type1 snapshot
     actual_path = runner(CMD + ['-o', 't1', '-f', 'cff2_vf.otf'])
@@ -187,7 +203,7 @@ def test_long_charstring_bug444():
 
 def test_many_hints_string_bug354():
     # The glyph T@gid002 has 33 hstem hints. This tests a bug where
-    # tx defined an array of only 6 operants.
+    # tx defined an array of only 6 operands.
     # This is encountered only when wrinting to a VF CFF2.
     cff2_path = runner(CMD + ['-o', 'cff2', '-f', 'cff2_vf.otf'])
     dcf_txt_path = runner(CMD + ['-a', '-f', cff2_path, '-o', 'dcf'])
