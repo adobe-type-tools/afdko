@@ -21,12 +21,15 @@ PUBLIC procedure os_raise (_Exc_Buf *buf, int  code, char * msg)
 #ifdef USE_CXX_EXCEPTION
 	(void)buf;
 	_Exc_Buf e(code, msg);
-    throw e;
+	throw e;
 #else
 
-  buf->Code = code;
-  buf->Message = msg;
+	/* Replacing setjmp/longjmp  with a simple call to exit().
+	buf->Code = code;
+	buf->Message = msg;
 
-  longjmp(buf->Environ, 1);
+	longjmp(buf->Environ, 1);
+	*/
+	exit(code);
 #endif
 }
