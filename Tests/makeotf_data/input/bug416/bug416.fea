@@ -1,0 +1,10 @@
+languagesystem DLFT dflt;
+markClass cedilla <anchor 89 -3> @MC_bottom;
+markClass acute <anchor 141 462> @MC_top;
+
+feature mark {
+    lookup mark2base {
+        pos base o <anchor 225 -3> mark @MC_bottom <anchor 231 505> mark @MC_top;
+        pos base a <anchor 99 799> mark @MC_top;
+    } mark2base;
+} mark;
