@@ -99,4 +99,4 @@ def test_bug373(font_format):
 def test_bug371():
     with pytest.raises(subprocess.CalledProcessError) as err:
         runner(CMD + ['-r', '-o', 't', '_GPOS=6', '-f', 'black.otf'])
-    assert err.value.returncode in[-11, -1073740777]
+    assert err.value.returncode in [-11, -1073740777]
