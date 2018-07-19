@@ -232,9 +232,11 @@ def test_bug416():
     input_filename = "bug416/bug416.pfa"
     input_featurename = "bug416/bug416.fea"
     actual_path = _get_temp_file_path()
-    with pytest.raises(subprocess.CalledProcessError) as err:
-        runner(CMD + ['-n', '-o',
-                      'f', '_{}'.format(_get_input_path(input_filename)),
-                      'ff', '_{}'.format(_get_input_path(input_featurename)),
-                      'o', '_{}'.format(actual_path)])
-    assert err.value.returncode == 1
+    ttx_filename = "bug416.ttx"
+    runner(CMD + ['-n', '-o',
+                  'f', '_{}'.format(_get_input_path(input_filename)),
+                  'ff', '_{}'.format(_get_input_path(input_featurename)),
+                  'o', '_{}'.format(actual_path)])
+    actual_ttx = _generate_ttx_dump(actual_path, ['GPOS'])
+    expected_ttx = _get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
