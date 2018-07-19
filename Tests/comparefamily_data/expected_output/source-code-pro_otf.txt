@@ -3460,20 +3460,20 @@ FONT METRICS REPORT
 Report 1: 
 Preferred Family: Source Code Pro
 Num glyphs from maxp.numGlyphs:
+SourceCodePro-BlackIt:                   1266
 SourceCodePro-BoldIt:                    1266
-SourceCodePro-SemiboldIt:                1266
-SourceCodePro-LightIt:                   1266
 SourceCodePro-ExtraLightIt:              1266
 SourceCodePro-It:                        1266
+SourceCodePro-LightIt:                   1266
 SourceCodePro-MediumIt:                  1266
-SourceCodePro-BlackIt:                   1266
+SourceCodePro-SemiboldIt:                1266
+SourceCodePro-Black:                     1549
+SourceCodePro-Bold:                      1549
+SourceCodePro-ExtraLight:                1549
 SourceCodePro-Light:                     1549
 SourceCodePro-Medium:                    1549
-SourceCodePro-Semibold:                  1549
-SourceCodePro-Bold:                      1549
-SourceCodePro-Black:                     1549
 SourceCodePro-Regular:                   1549
-SourceCodePro-ExtraLight:                1549
+SourceCodePro-Semibold:                  1549
 
 Preferred Family: Source Code Pro
 OS/2 sTypoAscender/sTypoDescender/sTypoLineGap/sCapHeight/sxHeight
