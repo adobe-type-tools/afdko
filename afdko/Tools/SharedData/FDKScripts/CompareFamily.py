@@ -843,11 +843,12 @@ def sort_font(fontlist):
 					break
 	return newlist
 
-def sort_by_numGlyphs(fontlist):
-	newList = map(lambda font: [font.numGlyphs, font], fontlist)
-	newList.sort()
-	newList = map(lambda entry: entry[1], newList)
-	return newList
+def sort_by_numGlyphs_and_PostScriptName1(fontlist):
+	"""
+	Returns a new list that is first sorted by the font's numGlyphs,
+	and secondly by the font's PostScriptName1.
+	"""
+	return sorted(fontlist, key=lambda font: (font.numGlyphs, font.PostScriptName1))
 
 def sort_angle(fontlist):
 	newlist = [fontlist[0]]
@@ -4312,7 +4313,7 @@ def print_font_metric_report():
 		if diff == 0:
 			print "All fonts have the same value:", font0.numGlyphs
 			continue
-		for font in sort_by_numGlyphs(preferredSubFamilyList1):
+		for font in sort_by_numGlyphs_and_PostScriptName1(preferredSubFamilyList1):
 			print string.ljust(font.PostScriptName1+":", 40), font.numGlyphs
 
 	for name in preferredFamilyList1.keys():
