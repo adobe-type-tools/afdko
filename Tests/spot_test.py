@@ -2,6 +2,7 @@ from __future__ import print_function, division, absolute_import
 
 import os
 import pytest
+import subprocess32 as subprocess
 
 from .runner import main as runner
 from .differ import main as differ
@@ -93,3 +94,9 @@ def test_bug373(font_format):
     actual_path = runner(CMD + ['-r', '-o', 't', '_GSUB=7', '-f', file_name])
     expected_path = _get_expected_path('bug373_{}.txt'.format(font_format))
     assert differ([expected_path, actual_path])
+
+
+def test_bug371():
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        runner(CMD + ['-r', '-o', 't', '_GPOS=6', '-f', 'black.otf'])
+    assert err.value.returncode == -11
