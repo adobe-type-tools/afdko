@@ -240,3 +240,27 @@ def test_bug416():
     actual_ttx = _generate_ttx_dump(actual_path, ['GPOS'])
     expected_ttx = _get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
+def test_bug438():
+    """ The feature file bug438/feat.fea contains languagesystem
+    statements for a language other than 'dflt' with the 'DFLT' script
+    tag. With the fix, makeotf will build an otf which is identical to
+    't1pfa-dev.ttx'. Without the fix, it will fail to build an OTF."""
+    input_filename = T1PFA_NAME
+    feat_filename = 'bug438/feat.fea'
+    ttx_filename = 't1pfa-dev.ttx'
+    actual_path = _get_temp_file_path()
+    runner(CMD + ['-n', '-o',
+                  'f', '_{}'.format(_get_input_path(input_filename)),
+                  'ff', '_{}'.format(_get_input_path(feat_filename)),
+                  'o', '_{}'.format(actual_path)])
+    actual_ttx = _generate_ttx_dump(actual_path)
+    expected_ttx = _get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx,
+                   '-s',
+                   '<ttFont sfntVersion' + SPLIT_MARKER +
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <created value=' + SPLIT_MARKER +
+                   '    <modified value='])
