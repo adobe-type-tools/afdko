@@ -176,6 +176,15 @@ def test_varread_pr355():
     assert differ([expected_path, actual_path])
 
 
+def test_cff2_no_vf_bug353():
+    # read CFF2 WITHOUT VF info, write a CFF2 out. 'regular_CFF2.otf'
+    # is derived by taking the regular.otf file from the sfntdiff
+    # 'input_data' directory, and converting the CFF table to CFF2.
+    actual_path = runner(CMD + ['-o', 'cff2', '-f', 'regular_CFF2.otf'])
+    expected_path = _get_expected_path('regular_CFF2.cff2')
+    assert differ([expected_path, actual_path, '-m', 'bin'])
+
+
 # -----------
 # Other tests
 # -----------
