@@ -121,7 +121,7 @@ This tool does a low-level comparison of two OpenType font files. It is most use
 
 ### ttx
 
-The best way to see in detail how two fonts differ is to use the ttx tool to dump XML files, and then compare them with a good difference editor, such as BBEdit on the Mac, or UltraEdit on the PC. This tool was developed by Just von Rossum of LettError, and is available under OpenSource licensing from: http://sourceforge.net/projects/fonttools/
+The best way to see in detail how two fonts differ is to use the ttx tool to dump XML files, and then compare them with a good difference editor, such as BBEdit on the Mac, or UltraEdit on the PC. This tool was developed by Just von Rossum of LettError, and is available under OpenSource licensing from: https://github.com/fonttools/fonttools
 
 ### ttxn
 
