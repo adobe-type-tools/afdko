@@ -226,3 +226,17 @@ def test_build_options_cs_cl_bug459(args, input_filename, ttx_filename):
     actual_ttx = _generate_ttx_dump(actual_path, ['cmap'])
     expected_ttx = _get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
+def test_bug416():
+    input_filename = "bug416/bug416.pfa"
+    input_featurename = "bug416/bug416.fea"
+    actual_path = _get_temp_file_path()
+    ttx_filename = "bug416.ttx"
+    runner(CMD + ['-n', '-o',
+                  'f', '_{}'.format(_get_input_path(input_filename)),
+                  'ff', '_{}'.format(_get_input_path(input_featurename)),
+                  'o', '_{}'.format(actual_path)])
+    actual_ttx = _generate_ttx_dump(actual_path, ['GPOS'])
+    expected_ttx = _get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
