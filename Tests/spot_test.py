@@ -32,9 +32,7 @@ def _get_expected_path(file_name):
     (['t', '_BASE=5'], 'dump_BASE=5.txt'),
     (['t', '_GDEF=7'], 'dump_GDEF=7.txt'),
     (['t', '_GPOS=5'], 'dump_GPOS=5.txt'),
-    # Segmentation fault: 11
-    # https://github.com/adobe-type-tools/afdko/issues/371
-    # (['t', '_GPOS=6'], 'dump_GPOS=6.txt'),
+    (['t', '_GPOS=6'], 'dump_GPOS=6.txt'),
     (['t', '_GPOS=7'], 'dump_GPOS=7.txt'),
     (['t', '_GPOS=8'], 'dump_GPOS=8.ps'),
     (['t', '_GSUB=4'], 'dump_GSUB=4.txt'),
