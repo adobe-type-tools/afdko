@@ -25,8 +25,8 @@ jmp_buf mark;
 #define MAX_ARGS 200
 
 
-Byte8 *version = "3.5.65516";	/* Program version */
-Byte8 *libversion = "3.5.65516";	/* Library version */
+Byte8 *version = "3.5.65517";	/* Program version */
+Byte8 *libversion = "3.5.65517";	/* Library version */
 char * sourcepath;
 char * outputfilebase = NULL;
 char *infilename=NULL;
@@ -59,7 +59,7 @@ static char * MakeFullPath(char *source)
 {
 	char * dest;
 		
-	dest = (char *) memNew(256);
+	dest = (char *) memNew(_MAX_PATH);
 	if(sourcepath[0]=='\0' || strchr(source, '\\')!=NULL)
 		sprintf(dest, "%s", source);
 	else

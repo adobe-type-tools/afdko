@@ -14,6 +14,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "proof.h"
 #include "MMFX.h"
 #include "bitstr.h"
+#include "file.h"
 
 #define MAXAFMLINESIZE 80
 #define kScriptLabel "Script"
@@ -49,7 +50,6 @@ static IntX GPOSContextRecursionCnt = 0;
 static Byte8 contextPrefix[MAX_NAME_LEN]; /* when dumping the context sub rules, this cntains the context string for the rule, if any. */
 
 static FILE * AFMout;
-static char* tempFileName;
 
 static void *readSubtable(Card32 offset, Card16 type);
 
@@ -5282,7 +5282,6 @@ void GPOSDump(IntX level, LongN start)
 	{
 	IntX i;
 	LookupList *lookuplist;
-	char tempFileName[MAXAFMLINESIZE];
 		
 	contextPrefix[0] = 0;
 	  if (!loaded) 
@@ -5325,14 +5324,14 @@ void GPOSDump(IntX level, LongN start)
 		}
 	  else if ( (level == 6) || (level == 7) ) /* AFM or features-file text syntax dump */
 	  {
-	  	char afmFilePath[128];
-		afmFilePath[0] = 0;
+	  	char afmFilePath[_MAX_PATH];
+	  	afmFilePath[0] = 0;
 	  	/*Write to temporary buffer in order to be able to sort AFM data before it is printed*/
 	  	if (level==6)
 	  		{
-			strcpy(tempFileName, afmFilePath);
-			strcat(tempFileName, "temp.txt");
-	  		AFMout=fopen(tempFileName, "w");
+	  		strcpy(afmFilePath, fileName());
+	  		strcat(afmFilePath, ".temp.txt");
+	  		AFMout=fopen(afmFilePath, "w");
 	  		}
 	    /* dump FeatureLookup-subtables according to Script */
 	  	ttoDecompileByScript(&GPOS._ScriptList, &GPOS._FeatureList, &GPOS._LookupList, dumpSubtable, level);
@@ -5459,7 +5458,6 @@ void GPOSDump(IntX level, LongN start)
 	  			}
 	  		da_FREE(afmLines);
 	  		fclose(AFMout);
-			remove(tempFileName);
 	  		remove(afmFilePath);
 	  	} /* end if level 6 */
 	  }

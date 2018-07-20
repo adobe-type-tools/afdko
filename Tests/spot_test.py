@@ -33,9 +33,7 @@ def _get_expected_path(file_name):
     (['t', '_BASE=5'], 'dump_BASE=5.txt'),
     (['t', '_GDEF=7'], 'dump_GDEF=7.txt'),
     (['t', '_GPOS=5'], 'dump_GPOS=5.txt'),
-    # Segmentation fault: 11
-    # https://github.com/adobe-type-tools/afdko/issues/371
-    # (['t', '_GPOS=6'], 'dump_GPOS=6.txt'),
+    (['t', '_GPOS=6'], 'dump_GPOS=6.txt'),
     (['t', '_GPOS=7'], 'dump_GPOS=7.txt'),
     (['t', '_GPOS=8'], 'dump_GPOS=8.ps'),
     (['t', '_GSUB=4'], 'dump_GSUB=4.txt'),
@@ -94,9 +92,3 @@ def test_bug373(font_format):
     actual_path = runner(CMD + ['-r', '-o', 't', '_GSUB=7', '-f', file_name])
     expected_path = _get_expected_path('bug373_{}.txt'.format(font_format))
     assert differ([expected_path, actual_path])
-
-
-def test_bug371():
-    with pytest.raises(subprocess.CalledProcessError) as err:
-        runner(CMD + ['-r', '-o', 't', '_GPOS=6', '-f', 'black.otf'])
-    assert err.value.returncode in [-11, -1073740777]
