@@ -64,7 +64,7 @@ from __future__ import print_function, absolute_import
 
 
 __help__ = """
-ttxn v1.19 May 4 2018
+ttxn v1.20.0 Jul 20 2018
 
 Based on the ttx tool, with the same options, except that it is limited to
 dumping, and cannot compile. Makes a normalized dump of the font, or of
@@ -723,6 +723,7 @@ def ruleContextPOS(subtable, otlConv, context=None):
             otlConv.curLookupIndex = curLI
         chainRules.append([rule, posRules])
 
+    # ruleContextPOS 7-2
     elif subtable.Format == 2:
         subRules = []
         for i, ctxClassSet in enumerate(subtable.PosClassSet):
@@ -1169,6 +1170,7 @@ def ruleContextSUB(subtable, otlConv, context=None):
             otlConv.curLookupIndex = curLI
         chainRules.append([rule, posRules])
 
+    # ruleContextSUB 5-2
     elif subtable.Format == 2:
         subRules = []
         for i, ctxClassSet in enumerate(subtable.SubClassSet):
@@ -1310,17 +1312,17 @@ def ruleChainContextSUB(subtable, otlConv, context=None):
             otlConv.curLookupIndex = curLI
         chainRules.append([rule, subRules])
 
+    # ruleChainContextSUB 6-2
     elif subtable.Format == 2:
         subRules = []
-        for i in range(len(subtable.ChainSubClassSet)):
-            ctxClassSet = subtable.ChainSubClassSet[i]
+        for i, ctxClassSet in enumerate(subtable.ChainSubClassSet):
             if not ctxClassSet:
                 continue
+
             for ctxClassRule in ctxClassSet.ChainSubClassRule:
-                inputList = []
                 backTrackList = []
-                for c in range(len(ctxClassRule.Backtrack)):
-                    classIndex = ctxClassRule.Backtrack[c]
+
+                for classIndex in ctxClassRule.Backtrack:
                     className = otlConv.classesByLookup[
                         otlConv.curLookupIndex, otlConv.curSubTableIndex,
                         classIndex, otlConv.backtrackTag]
@@ -1332,6 +1334,7 @@ def ruleChainContextSUB(subtable, otlConv, context=None):
                     otlConv.InputTag]
                 inputList = [className]
                 inputList2 = [otlConv.classesByClassName[className]]
+
                 for classIndex in ctxClassRule.Input:
                     className = otlConv.classesByLookup[
                         otlConv.curLookupIndex, otlConv.curSubTableIndex,
@@ -1347,24 +1350,27 @@ def ruleChainContextSUB(subtable, otlConv, context=None):
                         classIndex, otlConv.lookAheadTag]
                     lookAheadList.append(className)
                 lookTxt = " ".join(lookAheadList)
-
                 rule = "sub %s %s' %s;" % (backTxt, inputTxt, lookTxt)
+
                 subRules = []
                 for subsRec in ctxClassRule.SubstLookupRecord:
+                    if not subsRec:
+                        continue
                     lookup = pLookupList[subsRec.LookupListIndex]
                     lookupType = lookup.LookupType
                     curLI = otlConv.curLookupIndex
                     otlConv.curLookupIndex = subsRec.LookupListIndex
                     handler = otlConv.ruleHandlers[(lookupType)]
-                    contextRec = ContextRecord(inputList,
-                                               subsRec.SequenceIndex)
-                    for si in range(len(lookup.SubTable)):
+                    contextRec = ContextRecord(
+                        inputList, subsRec.SequenceIndex)
+
+                    for si, sub_table in enumerate(lookup.SubTable):
                         curSI = otlConv.curSubTableIndex
                         otlConv.curSubTableIndex = si
-                        subtablerules = handler(lookup.SubTable[si], otlConv,
-                                                contextRec)
+                        subtablerules = handler(sub_table, otlConv, contextRec)
                         otlConv.curSubTableIndex = curSI
                         subRules.extend(subtablerules)
+
                     otlConv.curLookupIndex = curLI
                 chainRules.append([rule, subRules])
 
@@ -1571,7 +1577,7 @@ class OTLConverter:
             self.classHandlers = {
                 (5, 2): classContext,
                 (6, 2): classChainContext,
-                (7, 2): classExt,
+                (7, 1): classExt,
             }
             self.ruleHandlers = {
                 (1): ruleSingleSub,
