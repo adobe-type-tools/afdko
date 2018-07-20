@@ -11,7 +11,7 @@
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0.
 </p>
 <p><b>Version</b></p>
-<p>[Document version 1.21.1 Last updated 24 Jun 2018]</p>
+<p>[Document version 1.22 Last updated 22 July 2018]</p>
 <p><b>Caution:</b></p>
 <p>Portions of the syntax unimplemented by Adobe are subject to change.</p>
 <ol>
@@ -253,7 +253,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 <pre>
   DFLT  # can be used only with the script keyword and as the script value with the languagesystem keyword.
   dflt  # can be used only with the language keyword and as the language value with the languagesystem keyword.</pre>
-<p>The only permitted language tag for the 'DFLT script is 'dflt'.</p>
 <p><a name="2.d"></a><b>2.d. Special characters</b></p>
 <pre>
   #    pound sign      Denotes start of comment
@@ -559,7 +558,7 @@ include<code>(../features.family);</code></pre>
 <pre>
   <b>languagesystem</b> DFLT dflt;</pre>
 <p>must be specified explicitly; if not, this languagesystem will not be included in the font. This script/language pair is special: it is used if a program cannot find a match in the font to the current writing script and language. If it is not in your font, then all the rules may be invisible to the program if your font does not have a match for the current script and language. It is strongly recommended to use the statement 'languagesystem DFLT dflt;'.</p>
-<p>If the statement 'languagesystem DFLT dflt;' is present, it must be the first of the languagesystem statements. Note that the only permitted language tag for the 'DFLT' script is 'dflt'.</p>
+<p>If the statement 'languagesystem DFLT dflt;' is present, it must be the first of the languagesystem statements. Any other language statements using the 'DFLT' script tag must preceed all other language statements.</p>
 <p>Please see example 1 in &sect;<a href="#4.g">4.g</a> below.</p>
 <p><a name="4.b.ii"></a><b>4.b.ii. script and language</b></p>
 <p>Occasionally a feature may need to be specified whose lookups vary across the language systems of the feature, or whose language systems vary from the set of language systems of the rest of the features in the file, as specified by the &quot;languagesystem&quot; statements). In these cases, &quot;script&quot; and &quot;language&quot; statements will need to be used within the feature block itself. Such statements affect only that feature.</p>
@@ -603,7 +602,6 @@ include<code>(../features.family);</code></pre>
 <ul>
 <li>'DFLT' is a valid value for the 'script' tag, and 'dflt' is not.</li>
 <li>'dflt' is a valid value for the 'language' tag, and 'DFLT' is not.</li>
-<li>The DFLT script cannot have any language systems other then 'dflt'.</li>
 <li>There is no such thing as a 'dflt' language tag in the actual OpenType data structures; the data structures hold these rules in a special record, rather than referencing them from the list of language tags for the current script. The 'dflt' language tag is just a convenience in the feature file syntax for setting the current language to be the default language system.</li>
 </ul>
 <p>Please see &sect;<a href="#4.g">4.g</a> below for detailed examples.</p>
@@ -1095,12 +1093,6 @@ include<code>(../features.family);</code></pre>
 
   <b>position</b> <b>base</b> [a e o u] &lt;<b>anchor</b> 250 450&gt; <b>mark</b> @TOP_MARKS
                           &lt;<b>anchor</b> 250 -10&gt; <b>mark</b> @BOTTOM_MARKS;</pre>
-<p>All the base glyphs in a base glyph class must share the same anchor points for all mark classes, otherwise separate statements are needed.</p>
-<pre>
-<b>position</b> <b>base</b> [e o] &lt;<b>anchor</b> 250 450&gt; <b>mark</b> @TOP_MARKS
-                    &lt;<b>anchor</b> 250 -12&gt; <b>mark</b> @BOTTOM_MARKS;
-<b>position</b> <b>base</b> [a u] &lt;<b>anchor</b> 265 450&gt; <b>mark</b> @TOP_MARKS
-                    &lt;<b>anchor</b> 250-10&gt; <b>mark</b> @BOTTOM_MARKS;</pre>
 <p><a name="6.e"></a><b>6.e. [GPOS LookupType 5] Mark-to-Ligature attachment positioning</b></p>
 <p>A Mark-to-Ligature Pos rule is specified as:</p>
 <pre>
@@ -1771,6 +1763,12 @@ nameid I 1 S L &lt;string&gt;;    I   1          S           L</pre>
   }</pre>
 <p>along with the tag 'sbit'.</p>
 <p><a name="11"></a><b>11. Document revisions</b></p>
+<p><b>v1.22 [20 July 2018]:</b></p>
+<ul>
+<li>Removed the restriction that 'DFLT' script is allowed to have only the 'dflt' language. This now matches the changes made for version 1.8.2 of the OpenType spec.</li>
+<li>Removed the restriction that that all mark-to-base statements in a lookup and mark-to-mark must reference the the same set of mark glyph classes.
+</li>
+</ul>
 <p><b>v1.21.1 [24 Jun 2018]:</b></p>
 <ul>
 <li>Minor updates to TOC.</li>
