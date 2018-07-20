@@ -231,7 +231,7 @@ def markMarkClassPOS(subtable, otlConv=None):
 
 
 def classContext(subtable, otlConv):
-    addClassDef(otlConv, subtable.ClassDef.classDefs)
+    addClassDef(otlConv, subtable.ClassDef.classDefs, None)
 
 
 def classChainContext(subtable, otlConv):
@@ -1174,26 +1174,25 @@ def ruleContextSUB(subtable, otlConv, context=None):
 
     elif subtable.Format == 2:
         subRules = []
-        for i in range(len(subtable.SubClassSet)):
-            ctxClassSet = subtable.SubClassSet[i]
+        for i, ctxClassSet in enumerate(subtable.SubClassSet):
             if not ctxClassSet:
                 continue
+
             for ctxClassRule in ctxClassSet.SubClassRule:
-                inputList = []
                 className = otlConv.classesByLookup[
-                    otlConv.curLookupIndex, otlConv.curSubTableIndex, i,
-                    otlConv.InputTag]
+                    otlConv.curLookupIndex, otlConv.curSubTableIndex, i, None]
                 inputList = [className]
                 inputList2 = [otlConv.classesByClassName[className]]
-                for classIndex in ctxClassRule.Input:
+
+                for classIndex in ctxClassRule.Class:
                     className = otlConv.classesByLookup[
                         otlConv.curLookupIndex, otlConv.curSubTableIndex,
-                        classIndex, otlConv.InputTag]
+                        classIndex, None]
                     inputList.append(className)
                     inputList2.append(otlConv.classesByClassName[className])
                 inputTxt = "' ".join(inputList) + "'"
-
                 rule = "sub %s;" % (inputTxt)
+
                 subRules = []
                 for subsRec in ctxClassRule.SubstLookupRecord:
                     if not subsRec:
@@ -1203,15 +1202,16 @@ def ruleContextSUB(subtable, otlConv, context=None):
                     curLI = otlConv.curLookupIndex
                     otlConv.curLookupIndex = subsRec.LookupListIndex
                     handler = otlConv.ruleHandlers[(lookupType)]
-                    contextRec = ContextRecord(inputList,
-                                               subsRec.SequenceIndex)
-                    for si in range(len(lookup.SubTable)):
+                    contextRec = ContextRecord(
+                        inputList, subsRec.SequenceIndex)
+
+                    for si, sub_table in enumerate(lookup.SubTable):
                         curSI = otlConv.curSubTableIndex
                         otlConv.curSubTableIndex = si
-                        subtablerules = handler(lookup.SubTable[si], otlConv,
-                                                contextRec)
+                        subtablerules = handler(sub_table, otlConv, contextRec)
                         otlConv.curSubTableIndex = curSI
                         subRules.extend(subtablerules)
+
                     otlConv.curLookupIndex = curLI
                 chainRules.append([rule, subRules])
 
