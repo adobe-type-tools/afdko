@@ -230,42 +230,21 @@ def markMarkClassPOS(subtable, otlConv=None):
                     otlConv.mark1Tag)
 
 
-def classContexGPOS(subtable, otlConv):
+def classContext(subtable, otlConv):
     addClassDef(otlConv, subtable.ClassDef.classDefs)
 
 
-def classChainContextGPOS(subtable, otlConv):
-    addClassDef(otlConv, subtable.BacktrackClassDef.classDefs, None,
-                otlConv.backtrackTag)
-    addClassDef(otlConv, subtable.InputClassDef.classDefs, None,
-                otlConv.InputTag)
-    addClassDef(otlConv, subtable.LookAheadClassDef.classDefs, None,
-                otlConv.lookAheadTag)
+def classChainContext(subtable, otlConv):
+    for class_def_name in ('BacktrackClassDef', 'InputClassDef',
+                           'LookAheadClassDef'):
+        class_def = getattr(subtable, class_def_name)
+        if class_def:
+            addClassDef(otlConv, class_def.classDefs, None, class_def_name)
 
 
-def classExtPOS(subtable, otlConv):
-    handler = otlConv.classHandlers.get((subtable.ExtensionLookupType,
-                                         subtable.ExtSubTable.Format), None)
-    if handler:
-        handler(subtable.ExtSubTable, otlConv)
-
-
-def classContextGSUB(subtable, otlConv):
-    addClassDef(otlConv, subtable.ClassDef.classDefs)
-
-
-def classChainContextGSUB(subtable, otlConv):
-    addClassDef(otlConv, subtable.BacktrackClassDef.classDefs, None,
-                otlConv.backtrackTag)
-    addClassDef(otlConv, subtable.InputClassDef.classDefs, None,
-                otlConv.InputTag)
-    addClassDef(otlConv, subtable.LookAheadClassDef.classDefs, None,
-                otlConv.lookAheadTag)
-
-
-def classExtSUB(subtable, otlConv):
-    handler = otlConv.classHandlers.get((subtable.ExtensionLookupType,
-                                         subtable.ExtSubTable.Format), None)
+def classExt(subtable, otlConv):
+    handler = otlConv.classHandlers.get(
+        (subtable.ExtensionLookupType, subtable.ExtSubTable.Format), None)
     if handler:
         handler(subtable.ExtSubTable, otlConv)
 
@@ -1545,7 +1524,7 @@ class OTLConverter:
     rightSideTag = "Right"
     backtrackTag = "BacktrackClassDef"
     InputTag = "InputClassDef"
-    lookAheadTag = "LookaheadClassDef"
+    lookAheadTag = "LookAheadClassDef"
     markTag = "MarkClass"
     mark1Tag = "MarkMarkClass1"
     mark2Tag = "MarkMarkClass2"
@@ -1574,9 +1553,9 @@ class OTLConverter:
                 (4, 1): markClassPOS,
                 (5, 1): markLigClassPOS,
                 (6, 1): markMarkClassPOS,
-                (7, 2): classContexGPOS,
-                (8, 2): classChainContextGPOS,
-                (9, 1): classExtPOS,
+                (7, 2): classContext,
+                (8, 2): classChainContext,
+                (9, 1): classExt,
             }
             self.ruleHandlers = {
                 (1): ruleSinglePos,
@@ -1593,9 +1572,9 @@ class OTLConverter:
         elif table.tableTag == "GSUB":
             self.ExtensionIndex = 7
             self.classHandlers = {
-                (5, 2): classContextGSUB,
-                (6, 2): classChainContextGSUB,
-                (7, 2): classExtSUB,
+                (5, 2): classContext,
+                (6, 2): classChainContext,
+                (7, 2): classExt,
             }
             self.ruleHandlers = {
                 (1): ruleSingleSub,
