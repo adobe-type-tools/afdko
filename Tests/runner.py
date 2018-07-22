@@ -17,12 +17,12 @@ import subprocess32 as subprocess
 import sys
 import tempfile
 
-__version__ = '0.5.0'
+__version__ = '0.5.1'
 
 logger = logging.getLogger('runner')
 
 
-TIMEOUT = 120  # seconds
+TIMEOUT = 240  # seconds
 
 
 def _write_file(file_path, data):
