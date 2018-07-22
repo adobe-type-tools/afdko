@@ -558,7 +558,7 @@ include<code>(../features.family);</code></pre>
 <pre>
   <b>languagesystem</b> DFLT dflt;</pre>
 <p>must be specified explicitly; if not, this languagesystem will not be included in the font. This script/language pair is special: it is used if a program cannot find a match in the font to the current writing script and language. If it is not in your font, then all the rules may be invisible to the program if your font does not have a match for the current script and language. It is strongly recommended to use the statement 'languagesystem DFLT dflt;'.</p>
-<p>If the statement 'languagesystem DFLT dflt;' is present, it must be the first of the languagesystem statements. Any other language statements using the 'DFLT' script tag must preceed all other language statements.</p>
+<p>If the statement 'languagesystem DFLT dflt;' is present, it must be the first of the languagesystem statements. Any other language statements using the 'DFLT' script tag must precede all other language statements.</p>
 <p>Please see example 1 in &sect;<a href="#4.g">4.g</a> below.</p>
 <p><a name="4.b.ii"></a><b>4.b.ii. script and language</b></p>
 <p>Occasionally a feature may need to be specified whose lookups vary across the language systems of the feature, or whose language systems vary from the set of language systems of the rest of the features in the file, as specified by the &quot;languagesystem&quot; statements). In these cases, &quot;script&quot; and &quot;language&quot; statements will need to be used within the feature block itself. Such statements affect only that feature.</p>
@@ -1061,7 +1061,7 @@ include<code>(../features.family);</code></pre>
 <pre>
   <b>subtable</b>;</pre>
 <p>between two class kerning rules. The new subtable created will still be in the same lookup, so the editor must ensure that the coverages of the subtables thus created do not overlap, since the processing rules will not find and report a conflict.</p>
-<p>When seeking to decrease the class table size, it is best to place subtable breaks between blocks of rules where there is no cross linking, such that no left side class in one block is used with any right side class in the other block. However, in most large Western fonts, such groups are so small that breaking them into separate subtables does not yield much decrease in the the overall lookup size. In this common case, an adequate strategy is to first divide the entire list of kern class rules in two roughly equal blocks with a subtable break. If this does not make the class kern tables small enough, then continue to subdivide each block of rules in two with a subtable break. Because the class definitions must be repeated for each subtable, a point of diminishing returns usually comes with around 6 subtable breaks.</p>
+<p>When seeking to decrease the class table size, it is best to place subtable breaks between blocks of rules where there is no cross linking, such that no left side class in one block is used with any right side class in the other block. However, in most large Western fonts, such groups are so small that breaking them into separate subtables does not yield much decrease in the overall lookup size. In this common case, an adequate strategy is to first divide the entire list of kern class rules in two roughly equal blocks with a subtable break. If this does not make the class kern tables small enough, then continue to subdivide each block of rules in two with a subtable break. Because the class definitions must be repeated for each subtable, a point of diminishing returns usually comes with around 6 subtable breaks.</p>
 <p><a name="6.c"></a><b>6.c. [GPOS LookupType 3] Cursive attachment positioning</b></p>
 <p>A Cursive Pos rule is specified as:</p>
 <pre>
@@ -1259,7 +1259,7 @@ meem.medial' &lt;<b>anchor</b> 500 20&gt; &lt;<b>anchor</b> 0 -20&gt; @LOOKAHEAD
 <p><a name="7.a"></a><b>7.a. An OpenType Layout engine's layout algorithm</b></p>
 <p>The following is a reference summary of the algorithm used by an OpenType layout (OTL) engine to perform substitutions and positionings. The important aspect of this for a feature file editor is that each lookup corresponds to one &quot;pass&quot; over the glyph run (see step 4 below). Thus, each lookup has as input the accumulated result of all previous lookups in the LookupList (whether in the same feature or in other features).</p>
 <pre>
-  1. All glyphs in the client's glyph run must belong to the same language system. (Glyph sequence matching may not occur across language      systems.)
+  1. All glyphs in the client's glyph run must belong to the same language system. (Glyph sequence matching may not occur across language systems.)
 
   --- Do the following first for the GSUB and then for the GPOS: ---
 
@@ -1703,7 +1703,7 @@ nameid I 1 S L &lt;string&gt;;    I   1          S           L</pre>
      <b>WidthClass</b> 3;
      <b>Vendor</b> &quot;ADBE&quot;;
   } OS/2;</pre>
-<p>Note that that for the code page ranges, the list numbers may be separated by any amount of white space. Note that the terminal semi-colon cannot follow a comment character on a line, as all text on a line following the comment character is removed before processing.</p>
+<p>Note that for the codepage ranges, the list numbers may be separated by any amount of white space. Note that the terminal semicolon cannot follow a comment character on a line, as all text on a line following the comment character is removed before processing.</p>
 <p><a name="9.g"></a><b>9.g. vhea table</b></p>
 <pre>
   <b>table</b> vhea {
@@ -1766,7 +1766,7 @@ nameid I 1 S L &lt;string&gt;;    I   1          S           L</pre>
 <p><b>v1.22 [20 July 2018]:</b></p>
 <ul>
 <li>Removed the restriction that 'DFLT' script is allowed to have only the 'dflt' language. This now matches the changes made in version 1.8.2 of the OpenType spec.</li>
-<li>Removed the restriction that that all mark-to-base and mark-to-mark statements in a lookup must reference the the same set of mark glyph classes.
+<li>Removed the restriction that all mark-to-base and mark-to-mark statements in a lookup must reference the same set of mark glyph classes.
 </li>
 </ul>
 <p><b>v1.21.1 [24 Jun 2018]:</b></p>
