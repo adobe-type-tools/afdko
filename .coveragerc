@@ -5,12 +5,18 @@ branch = True
 
 # list of directories or packages to measure
 source =
-    python/afdko
-    Tests
+    afdko
+    tests
 
 omit =
     */__init__.py
-    Tests/*_test.py
+    tests/*_test.py
+
+# these are treated as equivalent when combining data
+[paths]
+source =
+    python/afdko
+    */site-packages/afdko
 
 [report]
 # Regexes for lines to exclude from consideration
