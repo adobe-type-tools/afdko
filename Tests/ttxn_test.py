@@ -40,7 +40,7 @@ def _get_expected_path(file_name):
     (['tGPOS'], TTF2_FONT, 'TTF2_GPOS_only.ttx'),
     (['tGSUB'], TTF2_FONT, 'TTF2_GSUB_only.ttx'),
     (['tGPOS', 'se'], TTF3_FONT, 'TTF3_GPOS_only.ttx'),
-    # (['tGSUB'], TTF3_FONT, 'TTF3_GSUB_only.ttx'),
+    (['tGSUB', 'se'], TTF3_FONT, 'TTF3_GSUB_only.ttx'),
 ])
 def test_dump(args, font_filename, exp_filename):
     save_path = tempfile.mkstemp()[1]

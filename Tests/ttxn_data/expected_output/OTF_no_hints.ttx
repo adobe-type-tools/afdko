@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont sfntVersion="OTTO" ttLibVersion="3.26">
+<ttFont sfntVersion="OTTO" ttLibVersion="3.28">
 
   <BASE>
     <Version value="0x00010000"/>
@@ -320,7 +320,7 @@
 
 
     feature kern {
-      lookup kern_DFLT_dflt_1 {
+      lookup kern_DFLT_dflt_0 {
         pos [A.sc] [A.sc] 10;
         pos [A] [C.sc] 20;
         pos [A] [C] -10;
@@ -333,7 +333,7 @@
         pos [b] [a] -10;
         pos [c] [a] -10;
         pos [c] [c] -30;
-      } kern_DFLT_dflt_1;
+      } kern_DFLT_dflt_0;
 
     } kern;
 
@@ -348,11 +348,11 @@
 
 
     feature smcp {
-      lookup smcp_DFLT_dflt_1 {
+      lookup smcp_DFLT_dflt_0 {
         sub a by A.sc;
         sub b by B.sc;
         sub c by C.sc;
-      } smcp_DFLT_dflt_1;
+      } smcp_DFLT_dflt_0;
 
     } smcp;
 

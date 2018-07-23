@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont sfntVersion="OTTO" ttLibVersion="3.26">
+<ttFont sfntVersion="OTTO" ttLibVersion="3.28">
 
   <GSUB>
     languagesystem latn dflt;
@@ -11,7 +11,7 @@
 
 
     feature aalt {
-      lookup aalt_DFLT_dflt_1 {
+      lookup aalt_DFLT_dflt_0 {
         sub AE by AE.sc;
         sub Aacute by Aacute.sc;
         sub Abreve by Abreve.sc;
@@ -379,9 +379,9 @@
         sub zdotaccent by Zdotaccent.sc;
         sub zero.pnum by zero.onum;
         sub zero.tnum by zero.onum;
-      } aalt_DFLT_dflt_1;
+      } aalt_DFLT_dflt_0;
 
-      lookup aalt_DFLT_dflt_2 {
+      lookup aalt_DFLT_dflt_1 {
         sub A from [A.sc A.sups];
         sub B from [B.sc B.sups];
         sub C from [C.sc C.sups];
@@ -433,15 +433,12 @@
         sub e from [E.sc e.sups];
         sub eacute from [Eacute.sc eacute.sups];
         sub egrave from [Egrave.sc egrave.sups];
-        sub eight from [eight.dnom eight.numr eight.pnum eight.sc eight.subs eight.sups
-            eight.tnum];
+        sub eight from [eight.dnom eight.numr eight.pnum eight.sc eight.subs eight.sups eight.tnum];
         sub emdash from [emdash.sc emdash.sups];
         sub endash from [endash.sc endash.sups];
         sub f from [F.sc f.sups];
-        sub five from [five.dnom five.numr five.pnum five.sc five.subs five.sups
-            five.tnum];
-        sub four from [four.dnom four.numr four.pnum four.sc four.subs four.sups
-            four.tnum];
+        sub five from [five.dnom five.numr five.pnum five.sc five.subs five.sups five.tnum];
+        sub four from [four.dnom four.numr four.pnum four.sc four.subs four.sups four.tnum];
         sub g from [G.sc g.a g.sups];
         sub gbreve from [Gbreve.sc gbreve.a];
         sub gcaron from [Gcaron.sc gcaron.a];
@@ -459,25 +456,20 @@
         sub lslash from [Lslash.sc lslash.a];
         sub m from [M.sc m.sups];
         sub n from [N.sc n.sups];
-        sub nine from [nine.dnom nine.numr nine.pnum nine.sc nine.subs nine.sups
-            nine.tnum];
+        sub nine from [nine.dnom nine.numr nine.pnum nine.sc nine.subs nine.sups nine.tnum];
         sub o from [O.sc o.sups];
         sub one from [one.dnom one.numr one.pnum one.sc one.subs one.sups one.tnum];
         sub p from [P.sc p.sups];
-        sub parenleft from [parenleft.dnom parenleft.numr parenleft.subs
-            parenleft.sups];
-        sub parenright from [parenright.dnom parenright.numr parenright.subs
-            parenright.sups];
+        sub parenleft from [parenleft.dnom parenleft.numr parenleft.subs parenleft.sups];
+        sub parenright from [parenright.dnom parenright.numr parenright.subs parenright.sups];
         sub period from [period.dnom period.numr period.subs period.sups];
         sub q from [Q.sc q.sups];
         sub r from [R.sc r.sups];
         sub s from [S.sc s.sups];
-        sub seven from [seven.dnom seven.numr seven.pnum seven.sc seven.subs seven.sups
-            seven.tnum];
+        sub seven from [seven.dnom seven.numr seven.pnum seven.sc seven.subs seven.sups seven.tnum];
         sub six from [six.dnom six.numr six.pnum six.sc six.subs six.sups six.tnum];
         sub t from [T.sc t.sups];
-        sub three from [three.dnom three.numr three.pnum three.sc three.subs three.sups
-            three.tnum];
+        sub three from [three.dnom three.numr three.pnum three.sc three.subs three.sups three.tnum];
         sub two from [two.dnom two.numr two.pnum two.sc two.subs two.sups two.tnum];
         sub u from [U.sc u.sups];
         sub uni00670303 from [uni00470303.sc uni00670303.a];
@@ -509,14 +501,13 @@
         sub x from [X.sc x.sups];
         sub y from [Y.sc y.sups];
         sub z from [Z.sc z.sups];
-        sub zero from [zero.dnom zero.numr zero.pnum zero.sc zero.subs zero.sups
-            zero.tnum];
-      } aalt_DFLT_dflt_2;
+        sub zero from [zero.dnom zero.numr zero.pnum zero.sc zero.subs zero.sups zero.tnum];
+      } aalt_DFLT_dflt_1;
 
     } aalt;
 
     feature c2sc {
-      lookup c2sc_DFLT_dflt_1 {
+      lookup c2sc_DFLT_dflt_0 {
         sub A by A.sc;
         sub AE by AE.sc;
         sub Aacute by Aacute.sc;
@@ -724,9 +715,9 @@
         sub uni1EF4 by uni1EF4.sc;
         sub uni1EF6 by uni1EF6.sc;
         sub uni1EF8 by uni1EF8.sc;
-      } c2sc_DFLT_dflt_1;
+      } c2sc_DFLT_dflt_0;
 
-      lookup c2sc_DFLT_dflt_2 {
+      lookup c2sc_DFLT_dflt_1 {
         sub ampersand by ampersand.sc;
         sub eight by eight.sc;
         sub emdash by emdash.sc;
@@ -741,12 +732,12 @@
         sub three by three.sc;
         sub two by two.sc;
         sub zero by zero.sc;
-      } c2sc_DFLT_dflt_2;
+      } c2sc_DFLT_dflt_1;
 
     } c2sc;
 
     feature case {
-      lookup case_DFLT_dflt_1 {
+      lookup case_DFLT_dflt_0 {
         sub at by at.case;
         sub uni0300 by uni0300.cap;
         sub uni0301 by uni0301.cap;
@@ -776,32 +767,22 @@
         sub uni030F by uni030F.cap;
         sub uni0327 by uni0327.cap;
         sub uni0328 by uni0328.cap;
-      } case_DFLT_dflt_1;
+      } case_DFLT_dflt_0;
 
     } case;
 
     feature ccmp {
-      lookup ccmp_DFLT_dflt_1 {
+      lookup ccmp_DFLT_dflt_0 {
         sub  [Ecircumflex Ocircumflex ecircumflex ocircumflex]' [uni0306];
-          C sub Ecircumflex by [E uni0302];
-          C sub Ocircumflex by [O uni0302];
-          C sub ecircumflex by [e uni0302];
-          C sub ocircumflex by [o uni0302];
         sub  [Emacron Omacron emacron omacron]' [uni0301];
-          C sub Emacron by [E uni0304];
-          C sub Omacron by [O uni0304];
-          C sub emacron by [e uni0304];
-          C sub omacron by [o uni0304];
+      } ccmp_DFLT_dflt_0;
+
+      lookup ccmp_DFLT_dflt_1 {
+        sub  [i]' [uni0328]' [uni0301];
+        sub  [iogonek]' [uni0301];
       } ccmp_DFLT_dflt_1;
 
       lookup ccmp_DFLT_dflt_2 {
-        sub  [i]' [uni0328]' [uni0301];
-          C sub i uni0328 by iogonek.d;
-        sub  [iogonek]' [uni0301];
-          C sub iogonek by iogonek.d;
-      } ccmp_DFLT_dflt_2;
-
-      lookup ccmp_DFLT_dflt_3 {
         sub uni0302 uni0300 by uni03020300;
         sub uni0302 uni0301 by uni03020301;
         sub uni0302 uni0303 by uni03020303;
@@ -815,9 +796,9 @@
         sub uni0308 uni0301 by uni03080301;
         sub uni0308 uni0304 by uni03080304;
         sub uni0308 uni030C by uni0308030C;
-      } ccmp_DFLT_dflt_3;
+      } ccmp_DFLT_dflt_2;
 
-      lookup ccmp_DFLT_dflt_4 {
+      lookup ccmp_DFLT_dflt_3 {
         sub A uni0328 by Aogonek;
         sub E uni0328 by Eogonek;
         sub G uni0303 by uni00470303;
@@ -835,9 +816,9 @@
         sub o uni0328 by uni01EB;
         sub t uni030C by tcaron;
         sub u uni0328 by uogonek;
-      } ccmp_DFLT_dflt_4;
+      } ccmp_DFLT_dflt_3;
 
-      lookup ccmp_DFLT_dflt_5 {
+      lookup ccmp_DFLT_dflt_4 {
         sub [A AE Aacute Abreve Acircumflex Adieresis Agrave Amacron Aogonek Aring
             Atilde B C Cacute Ccaron Ccedilla Ccircumflex Cdotaccent D Dcaron Dcroat E
             Eacute Ebreve Ecaron Ecircumflex Edieresis Edotaccent Egrave Emacron Eogonek
@@ -859,44 +840,16 @@
             uni1EC2 uni1EC4 uni1EC6 uni1EC8 uni1ECA uni1ECC uni1ECE uni1ED0 uni1ED2
             uni1ED4 uni1ED6 uni1ED8 uni1EDA uni1EDC uni1EDE uni1EE0 uni1EE2 uni1EE4
             uni1EE6 uni1EE8 uni1EEA uni1EEC uni1EEE uni1EF0 uni1EF4 uni1EF6 uni1EF8]
-          [uni0300 uni0301 uni0302 uni03020300 uni03020301 uni03020303 uni03020306
+            [uni0300 uni0301 uni0302 uni03020300 uni03020301 uni03020303 uni03020306
             uni03020309 uni0303 uni0304 uni0306 uni03060300 uni03060301 uni03060303
             uni03060309 uni0307 uni0308 uni03080300 uni03080301 uni03080304 uni0308030C
             uni0309 uni030A uni030B uni030C uni030F uni0327 uni0328]' ;
-          C sub uni0300 by uni0300.cap;
-          C sub uni0301 by uni0301.cap;
-          C sub uni0302 by uni0302.cap;
-          C sub uni03020300 by uni03020300.cap;
-          C sub uni03020301 by uni03020301.cap;
-          C sub uni03020303 by uni03020303.cap;
-          C sub uni03020306 by uni03020306.cap;
-          C sub uni03020309 by uni03020309.cap;
-          C sub uni0303 by uni0303.cap;
-          C sub uni0304 by uni0304.cap;
-          C sub uni0306 by uni0306.cap;
-          C sub uni03060300 by uni03060300.cap;
-          C sub uni03060301 by uni03060301.cap;
-          C sub uni03060303 by uni03060303.cap;
-          C sub uni03060309 by uni03060309.cap;
-          C sub uni0307 by uni0307.cap;
-          C sub uni0308 by uni0308.cap;
-          C sub uni03080300 by uni03080300.cap;
-          C sub uni03080301 by uni03080301.cap;
-          C sub uni03080304 by uni03080304.cap;
-          C sub uni0308030C by uni0308030C.cap;
-          C sub uni0309 by uni0309.cap;
-          C sub uni030A by uni030A.cap;
-          C sub uni030B by uni030B.cap;
-          C sub uni030C by uni030C.cap;
-          C sub uni030F by uni030F.cap;
-          C sub uni0327 by uni0327.cap;
-          C sub uni0328 by uni0328.cap;
-      } ccmp_DFLT_dflt_5;
+      } ccmp_DFLT_dflt_4;
 
     } ccmp;
 
     feature dnom {
-      lookup dnom_DFLT_dflt_1 {
+      lookup dnom_DFLT_dflt_0 {
         sub comma by comma.dnom;
         sub eight by eight.dnom;
         sub five by five.dnom;
@@ -911,12 +864,12 @@
         sub three by three.dnom;
         sub two by two.dnom;
         sub zero by zero.dnom;
-      } dnom_DFLT_dflt_1;
+      } dnom_DFLT_dflt_0;
 
     } dnom;
 
     feature frac {
-      lookup frac_DFLT_dflt_1 {
+      lookup frac_DFLT_dflt_0 {
         sub comma by comma.numr;
         sub eight by eight.numr;
         sub five by five.numr;
@@ -931,89 +884,56 @@
         sub three by three.numr;
         sub two by two.numr;
         sub zero by zero.numr;
+      } frac_DFLT_dflt_0;
+
+      lookup frac_DFLT_dflt_1 {
+        sub slash by slash.frac;
       } frac_DFLT_dflt_1;
 
       lookup frac_DFLT_dflt_2 {
-        sub slash by slash.frac;
-      } frac_DFLT_dflt_2;
-
-      lookup frac_DFLT_dflt_3 {
         sub [eight.numr five.numr four.numr nine.numr one.numr seven.numr six.numr
-            three.numr two.numr zero.numr]
-          [space uni00A0]' ;
-          C sub space by space.frac;
-          C sub uni00A0 by nbspace.frac;
+            three.numr two.numr zero.numr] [space uni00A0]' ;
         sub [comma.dnom eight.dnom five.dnom four.dnom fraction nine.dnom one.dnom
             parenleft.dnom parenright.dnom period.dnom seven.dnom six.dnom slash.frac
-            three.dnom two.dnom uni2215 zero.dnom]
-          [comma.numr eight.numr five.numr four.numr nine.numr one.numr parenleft.numr
-            parenright.numr period.numr seven.numr six.numr three.numr two.numr
-            zero.numr]' ;
-          C sub comma.numr by comma.dnom;
-          C sub eight.numr by eight.dnom;
-          C sub five.numr by five.dnom;
-          C sub four.numr by four.dnom;
-          C sub nine.numr by nine.dnom;
-          C sub one.numr by one.dnom;
-          C sub parenleft.numr by parenleft.dnom;
-          C sub parenright.numr by parenright.dnom;
-          C sub period.numr by period.dnom;
-          C sub seven.numr by seven.dnom;
-          C sub six.numr by six.dnom;
-          C sub three.numr by three.dnom;
-          C sub two.numr by two.dnom;
-          C sub zero.numr by zero.dnom;
+            three.dnom two.dnom uni2215 zero.dnom] [comma.numr eight.numr five.numr
+            four.numr nine.numr one.numr parenleft.numr parenright.numr period.numr
+            seven.numr six.numr three.numr two.numr zero.numr]' ;
         sub [eight.dnom five.dnom four.dnom nine.dnom one.dnom seven.dnom six.dnom
-            three.dnom two.dnom zero.dnom]
-          [nbspace.frac space.frac]
-          [comma.numr eight.numr five.numr four.numr nine.numr one.numr parenleft.numr
+            three.dnom two.dnom zero.dnom] [nbspace.frac space.frac] [comma.numr
+            eight.numr five.numr four.numr nine.numr one.numr parenleft.numr
             parenright.numr period.numr seven.numr six.numr three.numr two.numr
             zero.numr]' ;
-          C sub comma.numr by comma.dnom;
-          C sub eight.numr by eight.dnom;
-          C sub five.numr by five.dnom;
-          C sub four.numr by four.dnom;
-          C sub nine.numr by nine.dnom;
-          C sub one.numr by one.dnom;
-          C sub parenleft.numr by parenleft.dnom;
-          C sub parenright.numr by parenright.dnom;
-          C sub period.numr by period.dnom;
-          C sub seven.numr by seven.dnom;
-          C sub six.numr by six.dnom;
-          C sub three.numr by three.dnom;
-          C sub two.numr by two.dnom;
-          C sub zero.numr by zero.dnom;
-      } frac_DFLT_dflt_3;
+      } frac_DFLT_dflt_2;
 
     } frac;
 
     feature liga {
-      lookup liga_DFLT_dflt_1 {
+      lookup liga_DFLT_dflt_0 {
         sub f f by f_f;
         sub f t by f_t;
-      } liga_DFLT_dflt_1;
+      } liga_DFLT_dflt_0;
 
     } liga;
 
     feature locl {
       script latn;
       language AZE ;
-      lookup locl_latn_AZE_1;
+      lookup locl_latn_AZE_0 {
         sub i by i.trk;
-      } locl_latn_AZE_1;
+      } locl_latn_AZE_0;
 
       language CRT ;
-      lookup locl_latn_AZE_1;
+      lookup locl_latn_AZE_0;
       language TRK ;
-      lookup locl_latn_AZE_1;
+      lookup locl_latn_AZE_0;
     } locl;
 
     feature numr {
-      lookup frac_DFLT_dflt_1;
+      lookup frac_DFLT_dflt_0;
     } numr;
 
     feature onum {
-      lookup onum_DFLT_dflt_1 {
+      lookup onum_DFLT_dflt_0 {
         sub eight by eight.tnum;
         sub eight.pnum by eight.onum;
         sub five by five.tnum;
@@ -1034,12 +954,12 @@
         sub two.pnum by two.onum;
         sub zero by zero.tnum;
         sub zero.pnum by zero.onum;
-      } onum_DFLT_dflt_1;
+      } onum_DFLT_dflt_0;
 
     } onum;
 
     feature ordn {
-      lookup ordn_DFLT_dflt_1 {
+      lookup ordn_DFLT_dflt_0 {
         sub a by a.sups;
         sub b by b.sups;
         sub c by c.sups;
@@ -1069,12 +989,12 @@
         sub x by x.sups;
         sub y by y.sups;
         sub z by z.sups;
-      } ordn_DFLT_dflt_1;
+      } ordn_DFLT_dflt_0;
 
     } ordn;
 
     feature pnum {
-      lookup pnum_DFLT_dflt_1 {
+      lookup pnum_DFLT_dflt_0 {
         sub eight by eight.pnum;
         sub eight.tnum by eight.onum;
         sub five by five.pnum;
@@ -1095,12 +1015,12 @@
         sub two.tnum by two.onum;
         sub zero by zero.pnum;
         sub zero.tnum by zero.onum;
-      } pnum_DFLT_dflt_1;
+      } pnum_DFLT_dflt_0;
 
     } pnum;
 
     feature salt {
-      lookup salt_DFLT_dflt_1 {
+      lookup salt_DFLT_dflt_0 {
         sub l by l.a;
         sub l.sups by l.supa;
         sub lacute by lacute.a;
@@ -1111,9 +1031,9 @@
         sub uni1E37 by uni1E37.a;
         sub uni1E39 by uni1E39.a;
         sub uni1E3B by uni1E3B.a;
-      } salt_DFLT_dflt_1;
+      } salt_DFLT_dflt_0;
 
-      lookup salt_DFLT_dflt_2 {
+      lookup salt_DFLT_dflt_1 {
         sub a by a.a;
         sub a.sups by a.supa;
         sub aacute by aacute.a;
@@ -1139,9 +1059,9 @@
         sub uni1EB3 by uni1EB3.a;
         sub uni1EB5 by uni1EB5.a;
         sub uni1EB7 by uni1EB7.a;
-      } salt_DFLT_dflt_2;
+      } salt_DFLT_dflt_1;
 
-      lookup salt_DFLT_dflt_3 {
+      lookup salt_DFLT_dflt_2 {
         sub g by g.a;
         sub g.sups by g.supa;
         sub gbreve by gbreve.a;
@@ -1151,9 +1071,9 @@
         sub uni00670303 by uni00670303.a;
         sub uni0123 by uni0123.a;
         sub uni1E21 by uni1E21.a;
-      } salt_DFLT_dflt_3;
+      } salt_DFLT_dflt_2;
 
-      lookup salt_DFLT_dflt_4 {
+      lookup salt_DFLT_dflt_3 {
         sub I by I.a;
         sub Iacute by Iacute.a;
         sub Icircumflex by Icircumflex.a;
@@ -1166,12 +1086,12 @@
         sub uni01CF by uni01CF.a;
         sub uni1EC8 by uni1EC8.a;
         sub uni1ECA by uni1ECA.a;
-      } salt_DFLT_dflt_4;
+      } salt_DFLT_dflt_3;
 
     } salt;
 
     feature sinf {
-      lookup sinf_DFLT_dflt_1 {
+      lookup sinf_DFLT_dflt_0 {
         sub comma by comma.subs;
         sub eight by eight.subs;
         sub five by five.subs;
@@ -1186,13 +1106,13 @@
         sub three by three.subs;
         sub two by two.subs;
         sub zero by zero.subs;
-      } sinf_DFLT_dflt_1;
+      } sinf_DFLT_dflt_0;
 
     } sinf;
 
     feature smcp {
-      lookup c2sc_DFLT_dflt_2;
-      lookup smcp_DFLT_dflt_1 {
+      lookup c2sc_DFLT_dflt_1;
+      lookup smcp_DFLT_dflt_0 {
         sub a by A.sc;
         sub aacute by Aacute.sc;
         sub abreve by Abreve.sc;
@@ -1401,41 +1321,41 @@
         sub zacute by Zacute.sc;
         sub zcaron by Zcaron.sc;
         sub zdotaccent by Zdotaccent.sc;
-      } smcp_DFLT_dflt_1;
+      } smcp_DFLT_dflt_0;
 
     } smcp;
 
     feature ss01 {
-      lookup salt_DFLT_dflt_1;
+      lookup salt_DFLT_dflt_0;
     } ss01;
 
     feature ss02 {
-      lookup salt_DFLT_dflt_2;
+      lookup salt_DFLT_dflt_1;
     } ss02;
 
     feature ss03 {
-      lookup salt_DFLT_dflt_3;
+      lookup salt_DFLT_dflt_2;
     } ss03;
 
     feature ss04 {
-      lookup salt_DFLT_dflt_4;
+      lookup salt_DFLT_dflt_3;
     } ss04;
 
     feature ss05 {
-      lookup ss05_DFLT_dflt_1 {
+      lookup ss05_DFLT_dflt_0 {
         sub zero by zero.0s;
         sub zero.pnum by zero.0ps;
-      } ss05_DFLT_dflt_1;
+      } ss05_DFLT_dflt_0;
 
     } ss05;
 
     feature subs {
-      lookup sinf_DFLT_dflt_1;
+      lookup sinf_DFLT_dflt_0;
     } subs;
 
     feature sups {
-      lookup ordn_DFLT_dflt_1;
-      lookup sups_DFLT_dflt_1 {
+      lookup ordn_DFLT_dflt_0;
+      lookup sups_DFLT_dflt_0 {
         sub A by A.sups;
         sub B by B.sups;
         sub C by C.sups;
@@ -1462,9 +1382,9 @@
         sub X by X.sups;
         sub Y by Y.sups;
         sub Z by Z.sups;
-      } sups_DFLT_dflt_1;
+      } sups_DFLT_dflt_0;
 
-      lookup sups_DFLT_dflt_2 {
+      lookup sups_DFLT_dflt_1 {
         sub comma by comma.sups;
         sub eight by eight.sups;
         sub five by five.sups;
@@ -1479,22 +1399,22 @@
         sub three by three.sups;
         sub two by two.sups;
         sub zero by zero.sups;
-      } sups_DFLT_dflt_2;
+      } sups_DFLT_dflt_1;
 
-      lookup sups_DFLT_dflt_3 {
+      lookup sups_DFLT_dflt_2 {
         sub colon by colon.sups;
         sub emdash by emdash.sups;
         sub endash by endash.sups;
         sub hyphen by hyphen.sups;
-      } sups_DFLT_dflt_3;
+      } sups_DFLT_dflt_2;
 
     } sups;
 
     feature zero {
-      lookup zero_DFLT_dflt_1 {
+      lookup zero_DFLT_dflt_0 {
         sub zero by zero.0;
         sub zero.pnum by zero.0p;
-      } zero_DFLT_dflt_1;
+      } zero_DFLT_dflt_0;
 
     } zero;
 

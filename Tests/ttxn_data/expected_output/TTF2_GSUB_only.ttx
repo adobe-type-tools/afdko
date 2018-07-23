@@ -11,29 +11,36 @@
 
     # Class definitions *********************************
     @empty = [  ];
-    @uni0030_32_uni06F9 = [ uni0030 uni0031 uni0032 uni0033 uni0034 uni0035 uni0036 uni0037 uni0038 uni0039
-       uni0660 uni0661 uni0662 uni0663 uni0664 uni0665 uni0666 uni0667 uni0668 uni0669
-       uni06F0 uni06F1 uni06F2 uni06F3 uni06F4 uni06F4.urdu uni06F5 uni06F6 uni06F7 uni06F7.urdu
-       uni06F8 uni06F9 ];
-    @uni00B2.small_25_uni2079.small = [ uni00B2.small uni00B3.small uni00B9.small uni0660.small uni0661.small uni0662.small uni0663.small uni0664.small uni0665.small uni0666.small
-       uni0667.small uni0668.small uni0669.small uni06F4.small uni06F4.urdu.small uni06F5.small uni06F6.small uni06F7.urdu.small uni2070.small uni2074.small
-       uni2075.small uni2076.small uni2077.small uni2078.small uni2079.small ];
-    @uni0600.alt_6_uni06DD.alt = [ uni0600.alt uni0601.alt uni0602.alt uni0603.alt uni0604.alt uni06DD.alt ];
+    @uni0030_32_uni06F9 = [ uni0030 uni0031 uni0032 uni0033 uni0034 uni0035 uni0036
+        uni0037 uni0038 uni0039 uni0660 uni0661 uni0662 uni0663 uni0664 uni0665
+        uni0666 uni0667 uni0668 uni0669 uni06F0 uni06F1 uni06F2 uni06F3 uni06F4
+        uni06F4.urdu uni06F5 uni06F6 uni06F7 uni06F7.urdu uni06F8 uni06F9 ];
+    @uni00B2.small_25_uni2079.small = [ uni00B2.small uni00B3.small uni00B9.small
+        uni0660.small uni0661.small uni0662.small uni0663.small uni0664.small
+        uni0665.small uni0666.small uni0667.small uni0668.small uni0669.small
+        uni06F4.small uni06F4.urdu.small uni06F5.small uni06F6.small
+        uni06F7.urdu.small uni2070.small uni2074.small uni2075.small uni2076.small
+        uni2077.small uni2078.small uni2079.small ];
+    @uni0600.alt_6_uni06DD.alt = [ uni0600.alt uni0601.alt uni0602.alt uni0603.alt
+        uni0604.alt uni06DD.alt ];
     @uni0600_6_uni06DD = [ uni0600 uni0601 uni0602 uni0603 uni0604 uni06DD ];
-    @uni0622.fina_8_uniFD3D = [ uni0622.fina uni0623.fina uni0625.fina uni0627.fina uni0671.fina uni0672.fina uni0673.fina uniFD3D ];
-    @uni0644.init_7_uni08A6.init = [ uni0644.init uni06B5.init uni06B6.init uni06B7.init uni06B8.init uni076A.init uni08A6.init ];
-    @uni0644.medi_8_uniFD3C = [ uni0644.medi uni06B5.medi uni06B6.medi uni06B7.medi uni06B8.medi uni076A.medi uni08A6.medi uniFD3C ];
+    @uni0622.fina_8_uniFD3D = [ uni0622.fina uni0623.fina uni0625.fina uni0627.fina
+        uni0671.fina uni0672.fina uni0673.fina uniFD3D ];
+    @uni0644.init_7_uni08A6.init = [ uni0644.init uni06B5.init uni06B6.init
+        uni06B7.init uni06B8.init uni076A.init uni08A6.init ];
+    @uni0644.medi_8_uniFD3C = [ uni0644.medi uni06B5.medi uni06B6.medi uni06B7.medi
+        uni06B8.medi uni076A.medi uni08A6.medi uniFD3C ];
 
 
     feature ccmp {
       script arab;
       language FAR ;
-      lookup ccmp_arab_FAR_1;
+      lookup ccmp_arab_FAR_0 {
         sub uni0623 by [uni0627 uni0654];
         sub uni0625 by [uni0627 uni0655];
-      } ccmp_arab_FAR_1;
+      } ccmp_arab_FAR_0;
 
-      lookup ccmp_arab_FAR_2;
+      lookup ccmp_arab_FAR_1 {
         sub uni064B uni0651 by uni0651064B;
         sub uni064B uni0654 by uni0654064B;
         sub uni064C uni0651 by uni0651064C;
@@ -62,427 +69,27 @@
         sub uni0655 uni064D by uni0655064D;
         sub uni0655 uni0650 by uni06550650;
         sub uni0670 uni0651 by uni06510670;
-      } ccmp_arab_FAR_2;
+      } ccmp_arab_FAR_1;
 
-      lookup ccmp_arab_FAR_3;
+      lookup ccmp_arab_FAR_2 {
         sub uni0627 uni0654 by uni0623;
         sub uni0627 uni0655 by uni0625;
+      } ccmp_arab_FAR_2;
+
+      lookup ccmp_arab_FAR_3 {
+        sub @uni0600_6_uni06DD' @uni0030_32_uni06F9' @uni0030_32_uni06F9' @uni0030_32_uni06F9' @uni0030_32_uni06F9';
+        sub @uni0600_6_uni06DD' @uni0030_32_uni06F9' @uni0030_32_uni06F9' @uni0030_32_uni06F9';
+        sub @uni0600_6_uni06DD' @uni0030_32_uni06F9' @uni0030_32_uni06F9';
+        sub @uni0600_6_uni06DD' @uni0030_32_uni06F9';
       } ccmp_arab_FAR_3;
 
-      lookup ccmp_arab_FAR_4;
-        sub @uni0600_6_uni06DD' @uni0030_32_uni06F9' @uni0030_32_uni06F9'
-            @uni0030_32_uni06F9' @uni0030_32_uni06F9';
-          C sub uni0600 by uni0600.alt; # Note! Not in input sequence
-          C sub uni0601 by uni0601.alt; # Note! Not in input sequence
-          C sub uni0602 by uni0602.alt; # Note! Not in input sequence
-          C sub uni0603 by uni0603.alt; # Note! Not in input sequence
-          C sub uni0604 by uni0604.alt; # Note! Not in input sequence
-          C sub uni06DD by uni06DD.alt; # Note! Not in input sequence
-          C sub uni0030 by uni2070.small; # Note! Not in input sequence
-          C sub uni0031 by uni00B9.small; # Note! Not in input sequence
-          C sub uni0032 by uni00B2.small; # Note! Not in input sequence
-          C sub uni0033 by uni00B3.small; # Note! Not in input sequence
-          C sub uni0034 by uni2074.small; # Note! Not in input sequence
-          C sub uni0035 by uni2075.small; # Note! Not in input sequence
-          C sub uni0036 by uni2076.small; # Note! Not in input sequence
-          C sub uni0037 by uni2077.small; # Note! Not in input sequence
-          C sub uni0038 by uni2078.small; # Note! Not in input sequence
-          C sub uni0039 by uni2079.small; # Note! Not in input sequence
-          C sub uni0660 by uni0660.small; # Note! Not in input sequence
-          C sub uni0661 by uni0661.small; # Note! Not in input sequence
-          C sub uni0662 by uni0662.small; # Note! Not in input sequence
-          C sub uni0663 by uni0663.small; # Note! Not in input sequence
-          C sub uni0664 by uni0664.small; # Note! Not in input sequence
-          C sub uni0665 by uni0665.small; # Note! Not in input sequence
-          C sub uni0666 by uni0666.small; # Note! Not in input sequence
-          C sub uni0667 by uni0667.small; # Note! Not in input sequence
-          C sub uni0668 by uni0668.small; # Note! Not in input sequence
-          C sub uni0669 by uni0669.small; # Note! Not in input sequence
-          C sub uni06F0 by uni0660.small; # Note! Not in input sequence
-          C sub uni06F1 by uni0661.small; # Note! Not in input sequence
-          C sub uni06F2 by uni0662.small; # Note! Not in input sequence
-          C sub uni06F3 by uni0663.small; # Note! Not in input sequence
-          C sub uni06F4 by uni06F4.small; # Note! Not in input sequence
-          C sub uni06F4.urdu by uni06F4.urdu.small; # Note! Not in input sequence
-          C sub uni06F5 by uni06F5.small; # Note! Not in input sequence
-          C sub uni06F6 by uni06F6.small; # Note! Not in input sequence
-          C sub uni06F7 by uni0667.small; # Note! Not in input sequence
-          C sub uni06F7.urdu by uni06F7.urdu.small; # Note! Not in input sequence
-          C sub uni06F8 by uni0668.small; # Note! Not in input sequence
-          C sub uni06F9 by uni0669.small; # Note! Not in input sequence
-          C sub uni0030 by uni2070.small; # Note! Not in input sequence
-          C sub uni0031 by uni00B9.small; # Note! Not in input sequence
-          C sub uni0032 by uni00B2.small; # Note! Not in input sequence
-          C sub uni0033 by uni00B3.small; # Note! Not in input sequence
-          C sub uni0034 by uni2074.small; # Note! Not in input sequence
-          C sub uni0035 by uni2075.small; # Note! Not in input sequence
-          C sub uni0036 by uni2076.small; # Note! Not in input sequence
-          C sub uni0037 by uni2077.small; # Note! Not in input sequence
-          C sub uni0038 by uni2078.small; # Note! Not in input sequence
-          C sub uni0039 by uni2079.small; # Note! Not in input sequence
-          C sub uni0660 by uni0660.small; # Note! Not in input sequence
-          C sub uni0661 by uni0661.small; # Note! Not in input sequence
-          C sub uni0662 by uni0662.small; # Note! Not in input sequence
-          C sub uni0663 by uni0663.small; # Note! Not in input sequence
-          C sub uni0664 by uni0664.small; # Note! Not in input sequence
-          C sub uni0665 by uni0665.small; # Note! Not in input sequence
-          C sub uni0666 by uni0666.small; # Note! Not in input sequence
-          C sub uni0667 by uni0667.small; # Note! Not in input sequence
-          C sub uni0668 by uni0668.small; # Note! Not in input sequence
-          C sub uni0669 by uni0669.small; # Note! Not in input sequence
-          C sub uni06F0 by uni0660.small; # Note! Not in input sequence
-          C sub uni06F1 by uni0661.small; # Note! Not in input sequence
-          C sub uni06F2 by uni0662.small; # Note! Not in input sequence
-          C sub uni06F3 by uni0663.small; # Note! Not in input sequence
-          C sub uni06F4 by uni06F4.small; # Note! Not in input sequence
-          C sub uni06F4.urdu by uni06F4.urdu.small; # Note! Not in input sequence
-          C sub uni06F5 by uni06F5.small; # Note! Not in input sequence
-          C sub uni06F6 by uni06F6.small; # Note! Not in input sequence
-          C sub uni06F7 by uni0667.small; # Note! Not in input sequence
-          C sub uni06F7.urdu by uni06F7.urdu.small; # Note! Not in input sequence
-          C sub uni06F8 by uni0668.small; # Note! Not in input sequence
-          C sub uni06F9 by uni0669.small; # Note! Not in input sequence
-          C sub uni0030 by uni2070.small; # Note! Not in input sequence
-          C sub uni0031 by uni00B9.small; # Note! Not in input sequence
-          C sub uni0032 by uni00B2.small; # Note! Not in input sequence
-          C sub uni0033 by uni00B3.small; # Note! Not in input sequence
-          C sub uni0034 by uni2074.small; # Note! Not in input sequence
-          C sub uni0035 by uni2075.small; # Note! Not in input sequence
-          C sub uni0036 by uni2076.small; # Note! Not in input sequence
-          C sub uni0037 by uni2077.small; # Note! Not in input sequence
-          C sub uni0038 by uni2078.small; # Note! Not in input sequence
-          C sub uni0039 by uni2079.small; # Note! Not in input sequence
-          C sub uni0660 by uni0660.small; # Note! Not in input sequence
-          C sub uni0661 by uni0661.small; # Note! Not in input sequence
-          C sub uni0662 by uni0662.small; # Note! Not in input sequence
-          C sub uni0663 by uni0663.small; # Note! Not in input sequence
-          C sub uni0664 by uni0664.small; # Note! Not in input sequence
-          C sub uni0665 by uni0665.small; # Note! Not in input sequence
-          C sub uni0666 by uni0666.small; # Note! Not in input sequence
-          C sub uni0667 by uni0667.small; # Note! Not in input sequence
-          C sub uni0668 by uni0668.small; # Note! Not in input sequence
-          C sub uni0669 by uni0669.small; # Note! Not in input sequence
-          C sub uni06F0 by uni0660.small; # Note! Not in input sequence
-          C sub uni06F1 by uni0661.small; # Note! Not in input sequence
-          C sub uni06F2 by uni0662.small; # Note! Not in input sequence
-          C sub uni06F3 by uni0663.small; # Note! Not in input sequence
-          C sub uni06F4 by uni06F4.small; # Note! Not in input sequence
-          C sub uni06F4.urdu by uni06F4.urdu.small; # Note! Not in input sequence
-          C sub uni06F5 by uni06F5.small; # Note! Not in input sequence
-          C sub uni06F6 by uni06F6.small; # Note! Not in input sequence
-          C sub uni06F7 by uni0667.small; # Note! Not in input sequence
-          C sub uni06F7.urdu by uni06F7.urdu.small; # Note! Not in input sequence
-          C sub uni06F8 by uni0668.small; # Note! Not in input sequence
-          C sub uni06F9 by uni0669.small; # Note! Not in input sequence
-          C sub uni0030 by uni2070.small; # Note! Not in input sequence
-          C sub uni0031 by uni00B9.small; # Note! Not in input sequence
-          C sub uni0032 by uni00B2.small; # Note! Not in input sequence
-          C sub uni0033 by uni00B3.small; # Note! Not in input sequence
-          C sub uni0034 by uni2074.small; # Note! Not in input sequence
-          C sub uni0035 by uni2075.small; # Note! Not in input sequence
-          C sub uni0036 by uni2076.small; # Note! Not in input sequence
-          C sub uni0037 by uni2077.small; # Note! Not in input sequence
-          C sub uni0038 by uni2078.small; # Note! Not in input sequence
-          C sub uni0039 by uni2079.small; # Note! Not in input sequence
-          C sub uni0660 by uni0660.small; # Note! Not in input sequence
-          C sub uni0661 by uni0661.small; # Note! Not in input sequence
-          C sub uni0662 by uni0662.small; # Note! Not in input sequence
-          C sub uni0663 by uni0663.small; # Note! Not in input sequence
-          C sub uni0664 by uni0664.small; # Note! Not in input sequence
-          C sub uni0665 by uni0665.small; # Note! Not in input sequence
-          C sub uni0666 by uni0666.small; # Note! Not in input sequence
-          C sub uni0667 by uni0667.small; # Note! Not in input sequence
-          C sub uni0668 by uni0668.small; # Note! Not in input sequence
-          C sub uni0669 by uni0669.small; # Note! Not in input sequence
-          C sub uni06F0 by uni0660.small; # Note! Not in input sequence
-          C sub uni06F1 by uni0661.small; # Note! Not in input sequence
-          C sub uni06F2 by uni0662.small; # Note! Not in input sequence
-          C sub uni06F3 by uni0663.small; # Note! Not in input sequence
-          C sub uni06F4 by uni06F4.small; # Note! Not in input sequence
-          C sub uni06F4.urdu by uni06F4.urdu.small; # Note! Not in input sequence
-          C sub uni06F5 by uni06F5.small; # Note! Not in input sequence
-          C sub uni06F6 by uni06F6.small; # Note! Not in input sequence
-          C sub uni06F7 by uni0667.small; # Note! Not in input sequence
-          C sub uni06F7.urdu by uni06F7.urdu.small; # Note! Not in input sequence
-          C sub uni06F8 by uni0668.small; # Note! Not in input sequence
-          C sub uni06F9 by uni0669.small; # Note! Not in input sequence
-        sub @uni0600_6_uni06DD' @uni0030_32_uni06F9' @uni0030_32_uni06F9'
-            @uni0030_32_uni06F9';
-          C sub uni0600 by uni0600.alt; # Note! Not in input sequence
-          C sub uni0601 by uni0601.alt; # Note! Not in input sequence
-          C sub uni0602 by uni0602.alt; # Note! Not in input sequence
-          C sub uni0603 by uni0603.alt; # Note! Not in input sequence
-          C sub uni0604 by uni0604.alt; # Note! Not in input sequence
-          C sub uni06DD by uni06DD.alt; # Note! Not in input sequence
-          C sub uni0030 by uni2070.small; # Note! Not in input sequence
-          C sub uni0031 by uni00B9.small; # Note! Not in input sequence
-          C sub uni0032 by uni00B2.small; # Note! Not in input sequence
-          C sub uni0033 by uni00B3.small; # Note! Not in input sequence
-          C sub uni0034 by uni2074.small; # Note! Not in input sequence
-          C sub uni0035 by uni2075.small; # Note! Not in input sequence
-          C sub uni0036 by uni2076.small; # Note! Not in input sequence
-          C sub uni0037 by uni2077.small; # Note! Not in input sequence
-          C sub uni0038 by uni2078.small; # Note! Not in input sequence
-          C sub uni0039 by uni2079.small; # Note! Not in input sequence
-          C sub uni0660 by uni0660.small; # Note! Not in input sequence
-          C sub uni0661 by uni0661.small; # Note! Not in input sequence
-          C sub uni0662 by uni0662.small; # Note! Not in input sequence
-          C sub uni0663 by uni0663.small; # Note! Not in input sequence
-          C sub uni0664 by uni0664.small; # Note! Not in input sequence
-          C sub uni0665 by uni0665.small; # Note! Not in input sequence
-          C sub uni0666 by uni0666.small; # Note! Not in input sequence
-          C sub uni0667 by uni0667.small; # Note! Not in input sequence
-          C sub uni0668 by uni0668.small; # Note! Not in input sequence
-          C sub uni0669 by uni0669.small; # Note! Not in input sequence
-          C sub uni06F0 by uni0660.small; # Note! Not in input sequence
-          C sub uni06F1 by uni0661.small; # Note! Not in input sequence
-          C sub uni06F2 by uni0662.small; # Note! Not in input sequence
-          C sub uni06F3 by uni0663.small; # Note! Not in input sequence
-          C sub uni06F4 by uni06F4.small; # Note! Not in input sequence
-          C sub uni06F4.urdu by uni06F4.urdu.small; # Note! Not in input sequence
-          C sub uni06F5 by uni06F5.small; # Note! Not in input sequence
-          C sub uni06F6 by uni06F6.small; # Note! Not in input sequence
-          C sub uni06F7 by uni0667.small; # Note! Not in input sequence
-          C sub uni06F7.urdu by uni06F7.urdu.small; # Note! Not in input sequence
-          C sub uni06F8 by uni0668.small; # Note! Not in input sequence
-          C sub uni06F9 by uni0669.small; # Note! Not in input sequence
-          C sub uni0030 by uni2070.small; # Note! Not in input sequence
-          C sub uni0031 by uni00B9.small; # Note! Not in input sequence
-          C sub uni0032 by uni00B2.small; # Note! Not in input sequence
-          C sub uni0033 by uni00B3.small; # Note! Not in input sequence
-          C sub uni0034 by uni2074.small; # Note! Not in input sequence
-          C sub uni0035 by uni2075.small; # Note! Not in input sequence
-          C sub uni0036 by uni2076.small; # Note! Not in input sequence
-          C sub uni0037 by uni2077.small; # Note! Not in input sequence
-          C sub uni0038 by uni2078.small; # Note! Not in input sequence
-          C sub uni0039 by uni2079.small; # Note! Not in input sequence
-          C sub uni0660 by uni0660.small; # Note! Not in input sequence
-          C sub uni0661 by uni0661.small; # Note! Not in input sequence
-          C sub uni0662 by uni0662.small; # Note! Not in input sequence
-          C sub uni0663 by uni0663.small; # Note! Not in input sequence
-          C sub uni0664 by uni0664.small; # Note! Not in input sequence
-          C sub uni0665 by uni0665.small; # Note! Not in input sequence
-          C sub uni0666 by uni0666.small; # Note! Not in input sequence
-          C sub uni0667 by uni0667.small; # Note! Not in input sequence
-          C sub uni0668 by uni0668.small; # Note! Not in input sequence
-          C sub uni0669 by uni0669.small; # Note! Not in input sequence
-          C sub uni06F0 by uni0660.small; # Note! Not in input sequence
-          C sub uni06F1 by uni0661.small; # Note! Not in input sequence
-          C sub uni06F2 by uni0662.small; # Note! Not in input sequence
-          C sub uni06F3 by uni0663.small; # Note! Not in input sequence
-          C sub uni06F4 by uni06F4.small; # Note! Not in input sequence
-          C sub uni06F4.urdu by uni06F4.urdu.small; # Note! Not in input sequence
-          C sub uni06F5 by uni06F5.small; # Note! Not in input sequence
-          C sub uni06F6 by uni06F6.small; # Note! Not in input sequence
-          C sub uni06F7 by uni0667.small; # Note! Not in input sequence
-          C sub uni06F7.urdu by uni06F7.urdu.small; # Note! Not in input sequence
-          C sub uni06F8 by uni0668.small; # Note! Not in input sequence
-          C sub uni06F9 by uni0669.small; # Note! Not in input sequence
-          C sub uni0030 by uni2070.small; # Note! Not in input sequence
-          C sub uni0031 by uni00B9.small; # Note! Not in input sequence
-          C sub uni0032 by uni00B2.small; # Note! Not in input sequence
-          C sub uni0033 by uni00B3.small; # Note! Not in input sequence
-          C sub uni0034 by uni2074.small; # Note! Not in input sequence
-          C sub uni0035 by uni2075.small; # Note! Not in input sequence
-          C sub uni0036 by uni2076.small; # Note! Not in input sequence
-          C sub uni0037 by uni2077.small; # Note! Not in input sequence
-          C sub uni0038 by uni2078.small; # Note! Not in input sequence
-          C sub uni0039 by uni2079.small; # Note! Not in input sequence
-          C sub uni0660 by uni0660.small; # Note! Not in input sequence
-          C sub uni0661 by uni0661.small; # Note! Not in input sequence
-          C sub uni0662 by uni0662.small; # Note! Not in input sequence
-          C sub uni0663 by uni0663.small; # Note! Not in input sequence
-          C sub uni0664 by uni0664.small; # Note! Not in input sequence
-          C sub uni0665 by uni0665.small; # Note! Not in input sequence
-          C sub uni0666 by uni0666.small; # Note! Not in input sequence
-          C sub uni0667 by uni0667.small; # Note! Not in input sequence
-          C sub uni0668 by uni0668.small; # Note! Not in input sequence
-          C sub uni0669 by uni0669.small; # Note! Not in input sequence
-          C sub uni06F0 by uni0660.small; # Note! Not in input sequence
-          C sub uni06F1 by uni0661.small; # Note! Not in input sequence
-          C sub uni06F2 by uni0662.small; # Note! Not in input sequence
-          C sub uni06F3 by uni0663.small; # Note! Not in input sequence
-          C sub uni06F4 by uni06F4.small; # Note! Not in input sequence
-          C sub uni06F4.urdu by uni06F4.urdu.small; # Note! Not in input sequence
-          C sub uni06F5 by uni06F5.small; # Note! Not in input sequence
-          C sub uni06F6 by uni06F6.small; # Note! Not in input sequence
-          C sub uni06F7 by uni0667.small; # Note! Not in input sequence
-          C sub uni06F7.urdu by uni06F7.urdu.small; # Note! Not in input sequence
-          C sub uni06F8 by uni0668.small; # Note! Not in input sequence
-          C sub uni06F9 by uni0669.small; # Note! Not in input sequence
-        sub @uni0600_6_uni06DD' @uni0030_32_uni06F9' @uni0030_32_uni06F9';
-          C sub uni0600 by uni0600.alt; # Note! Not in input sequence
-          C sub uni0601 by uni0601.alt; # Note! Not in input sequence
-          C sub uni0602 by uni0602.alt; # Note! Not in input sequence
-          C sub uni0603 by uni0603.alt; # Note! Not in input sequence
-          C sub uni0604 by uni0604.alt; # Note! Not in input sequence
-          C sub uni06DD by uni06DD.alt; # Note! Not in input sequence
-          C sub uni0030 by uni2070.small; # Note! Not in input sequence
-          C sub uni0031 by uni00B9.small; # Note! Not in input sequence
-          C sub uni0032 by uni00B2.small; # Note! Not in input sequence
-          C sub uni0033 by uni00B3.small; # Note! Not in input sequence
-          C sub uni0034 by uni2074.small; # Note! Not in input sequence
-          C sub uni0035 by uni2075.small; # Note! Not in input sequence
-          C sub uni0036 by uni2076.small; # Note! Not in input sequence
-          C sub uni0037 by uni2077.small; # Note! Not in input sequence
-          C sub uni0038 by uni2078.small; # Note! Not in input sequence
-          C sub uni0039 by uni2079.small; # Note! Not in input sequence
-          C sub uni0660 by uni0660.small; # Note! Not in input sequence
-          C sub uni0661 by uni0661.small; # Note! Not in input sequence
-          C sub uni0662 by uni0662.small; # Note! Not in input sequence
-          C sub uni0663 by uni0663.small; # Note! Not in input sequence
-          C sub uni0664 by uni0664.small; # Note! Not in input sequence
-          C sub uni0665 by uni0665.small; # Note! Not in input sequence
-          C sub uni0666 by uni0666.small; # Note! Not in input sequence
-          C sub uni0667 by uni0667.small; # Note! Not in input sequence
-          C sub uni0668 by uni0668.small; # Note! Not in input sequence
-          C sub uni0669 by uni0669.small; # Note! Not in input sequence
-          C sub uni06F0 by uni0660.small; # Note! Not in input sequence
-          C sub uni06F1 by uni0661.small; # Note! Not in input sequence
-          C sub uni06F2 by uni0662.small; # Note! Not in input sequence
-          C sub uni06F3 by uni0663.small; # Note! Not in input sequence
-          C sub uni06F4 by uni06F4.small; # Note! Not in input sequence
-          C sub uni06F4.urdu by uni06F4.urdu.small; # Note! Not in input sequence
-          C sub uni06F5 by uni06F5.small; # Note! Not in input sequence
-          C sub uni06F6 by uni06F6.small; # Note! Not in input sequence
-          C sub uni06F7 by uni0667.small; # Note! Not in input sequence
-          C sub uni06F7.urdu by uni06F7.urdu.small; # Note! Not in input sequence
-          C sub uni06F8 by uni0668.small; # Note! Not in input sequence
-          C sub uni06F9 by uni0669.small; # Note! Not in input sequence
-          C sub uni0030 by uni2070.small; # Note! Not in input sequence
-          C sub uni0031 by uni00B9.small; # Note! Not in input sequence
-          C sub uni0032 by uni00B2.small; # Note! Not in input sequence
-          C sub uni0033 by uni00B3.small; # Note! Not in input sequence
-          C sub uni0034 by uni2074.small; # Note! Not in input sequence
-          C sub uni0035 by uni2075.small; # Note! Not in input sequence
-          C sub uni0036 by uni2076.small; # Note! Not in input sequence
-          C sub uni0037 by uni2077.small; # Note! Not in input sequence
-          C sub uni0038 by uni2078.small; # Note! Not in input sequence
-          C sub uni0039 by uni2079.small; # Note! Not in input sequence
-          C sub uni0660 by uni0660.small; # Note! Not in input sequence
-          C sub uni0661 by uni0661.small; # Note! Not in input sequence
-          C sub uni0662 by uni0662.small; # Note! Not in input sequence
-          C sub uni0663 by uni0663.small; # Note! Not in input sequence
-          C sub uni0664 by uni0664.small; # Note! Not in input sequence
-          C sub uni0665 by uni0665.small; # Note! Not in input sequence
-          C sub uni0666 by uni0666.small; # Note! Not in input sequence
-          C sub uni0667 by uni0667.small; # Note! Not in input sequence
-          C sub uni0668 by uni0668.small; # Note! Not in input sequence
-          C sub uni0669 by uni0669.small; # Note! Not in input sequence
-          C sub uni06F0 by uni0660.small; # Note! Not in input sequence
-          C sub uni06F1 by uni0661.small; # Note! Not in input sequence
-          C sub uni06F2 by uni0662.small; # Note! Not in input sequence
-          C sub uni06F3 by uni0663.small; # Note! Not in input sequence
-          C sub uni06F4 by uni06F4.small; # Note! Not in input sequence
-          C sub uni06F4.urdu by uni06F4.urdu.small; # Note! Not in input sequence
-          C sub uni06F5 by uni06F5.small; # Note! Not in input sequence
-          C sub uni06F6 by uni06F6.small; # Note! Not in input sequence
-          C sub uni06F7 by uni0667.small; # Note! Not in input sequence
-          C sub uni06F7.urdu by uni06F7.urdu.small; # Note! Not in input sequence
-          C sub uni06F8 by uni0668.small; # Note! Not in input sequence
-          C sub uni06F9 by uni0669.small; # Note! Not in input sequence
-        sub @uni0600_6_uni06DD' @uni0030_32_uni06F9';
-          C sub uni0600 by uni0600.alt; # Note! Not in input sequence
-          C sub uni0601 by uni0601.alt; # Note! Not in input sequence
-          C sub uni0602 by uni0602.alt; # Note! Not in input sequence
-          C sub uni0603 by uni0603.alt; # Note! Not in input sequence
-          C sub uni0604 by uni0604.alt; # Note! Not in input sequence
-          C sub uni06DD by uni06DD.alt; # Note! Not in input sequence
-          C sub uni0030 by uni2070.small; # Note! Not in input sequence
-          C sub uni0031 by uni00B9.small; # Note! Not in input sequence
-          C sub uni0032 by uni00B2.small; # Note! Not in input sequence
-          C sub uni0033 by uni00B3.small; # Note! Not in input sequence
-          C sub uni0034 by uni2074.small; # Note! Not in input sequence
-          C sub uni0035 by uni2075.small; # Note! Not in input sequence
-          C sub uni0036 by uni2076.small; # Note! Not in input sequence
-          C sub uni0037 by uni2077.small; # Note! Not in input sequence
-          C sub uni0038 by uni2078.small; # Note! Not in input sequence
-          C sub uni0039 by uni2079.small; # Note! Not in input sequence
-          C sub uni0660 by uni0660.small; # Note! Not in input sequence
-          C sub uni0661 by uni0661.small; # Note! Not in input sequence
-          C sub uni0662 by uni0662.small; # Note! Not in input sequence
-          C sub uni0663 by uni0663.small; # Note! Not in input sequence
-          C sub uni0664 by uni0664.small; # Note! Not in input sequence
-          C sub uni0665 by uni0665.small; # Note! Not in input sequence
-          C sub uni0666 by uni0666.small; # Note! Not in input sequence
-          C sub uni0667 by uni0667.small; # Note! Not in input sequence
-          C sub uni0668 by uni0668.small; # Note! Not in input sequence
-          C sub uni0669 by uni0669.small; # Note! Not in input sequence
-          C sub uni06F0 by uni0660.small; # Note! Not in input sequence
-          C sub uni06F1 by uni0661.small; # Note! Not in input sequence
-          C sub uni06F2 by uni0662.small; # Note! Not in input sequence
-          C sub uni06F3 by uni0663.small; # Note! Not in input sequence
-          C sub uni06F4 by uni06F4.small; # Note! Not in input sequence
-          C sub uni06F4.urdu by uni06F4.urdu.small; # Note! Not in input sequence
-          C sub uni06F5 by uni06F5.small; # Note! Not in input sequence
-          C sub uni06F6 by uni06F6.small; # Note! Not in input sequence
-          C sub uni06F7 by uni0667.small; # Note! Not in input sequence
-          C sub uni06F7.urdu by uni06F7.urdu.small; # Note! Not in input sequence
-          C sub uni06F8 by uni0668.small; # Note! Not in input sequence
-          C sub uni06F9 by uni0669.small; # Note! Not in input sequence
+      lookup ccmp_arab_FAR_4 {
+        sub @uni00B2.small_25_uni2079.small @uni0600.alt_6_uni06DD.alt @uni00B2.small_25_uni2079.small' ;
+        sub @uni00B2.small_25_uni2079.small [baseNum] @uni00B2.small_25_uni2079.small' ;
       } ccmp_arab_FAR_4;
 
-      lookup ccmp_arab_FAR_5;
-        sub @uni00B2.small_25_uni2079.small @uni0600.alt_6_uni06DD.alt
-            @uni00B2.small_25_uni2079.small' ;
-          C sub uni00B2.small by [baseNum uni00B2.small]; # Note! Not in input sequence
-          C sub uni00B3.small by [baseNum uni00B3.small]; # Note! Not in input sequence
-          C sub uni00B9.small by [baseNum uni00B9.small]; # Note! Not in input sequence
-          C sub uni0660.small by [baseNum uni0660.small]; # Note! Not in input sequence
-          C sub uni0661.small by [baseNum uni0661.small]; # Note! Not in input sequence
-          C sub uni0662.small by [baseNum uni0662.small]; # Note! Not in input sequence
-          C sub uni0663.small by [baseNum uni0663.small]; # Note! Not in input sequence
-          C sub uni0664.small by [baseNum uni0664.small]; # Note! Not in input sequence
-          C sub uni0665.small by [baseNum uni0665.small]; # Note! Not in input sequence
-          C sub uni0666.small by [baseNum uni0666.small]; # Note! Not in input sequence
-          C sub uni0667.small by [baseNum uni0667.small]; # Note! Not in input sequence
-          C sub uni0668.small by [baseNum uni0668.small]; # Note! Not in input sequence
-          C sub uni0669.small by [baseNum uni0669.small]; # Note! Not in input sequence
-          C sub uni06F4.small by [baseNum uni06F4.small]; # Note! Not in input sequence
-          C sub uni06F4.urdu.small by [baseNum uni06F4.urdu.small]; # Note! Not in input
-            sequence
-          C sub uni06F5.small by [baseNum uni06F5.small]; # Note! Not in input sequence
-          C sub uni06F6.small by [baseNum uni06F6.small]; # Note! Not in input sequence
-          C sub uni06F7.urdu.small by [baseNum uni06F7.urdu.small]; # Note! Not in input
-            sequence
-          C sub uni2070.small by [baseNum uni2070.small]; # Note! Not in input sequence
-          C sub uni2074.small by [baseNum uni2074.small]; # Note! Not in input sequence
-          C sub uni2075.small by [baseNum uni2075.small]; # Note! Not in input sequence
-          C sub uni2076.small by [baseNum uni2076.small]; # Note! Not in input sequence
-          C sub uni2077.small by [baseNum uni2077.small]; # Note! Not in input sequence
-          C sub uni2078.small by [baseNum uni2078.small]; # Note! Not in input sequence
-          C sub uni2079.small by [baseNum uni2079.small]; # Note! Not in input sequence
-        sub @uni00B2.small_25_uni2079.small [baseNum] @uni00B2.small_25_uni2079.small' ;
-          C sub uni00B2.small by [baseNum uni00B2.small]; # Note! Not in input sequence
-          C sub uni00B3.small by [baseNum uni00B3.small]; # Note! Not in input sequence
-          C sub uni00B9.small by [baseNum uni00B9.small]; # Note! Not in input sequence
-          C sub uni0660.small by [baseNum uni0660.small]; # Note! Not in input sequence
-          C sub uni0661.small by [baseNum uni0661.small]; # Note! Not in input sequence
-          C sub uni0662.small by [baseNum uni0662.small]; # Note! Not in input sequence
-          C sub uni0663.small by [baseNum uni0663.small]; # Note! Not in input sequence
-          C sub uni0664.small by [baseNum uni0664.small]; # Note! Not in input sequence
-          C sub uni0665.small by [baseNum uni0665.small]; # Note! Not in input sequence
-          C sub uni0666.small by [baseNum uni0666.small]; # Note! Not in input sequence
-          C sub uni0667.small by [baseNum uni0667.small]; # Note! Not in input sequence
-          C sub uni0668.small by [baseNum uni0668.small]; # Note! Not in input sequence
-          C sub uni0669.small by [baseNum uni0669.small]; # Note! Not in input sequence
-          C sub uni06F4.small by [baseNum uni06F4.small]; # Note! Not in input sequence
-          C sub uni06F4.urdu.small by [baseNum uni06F4.urdu.small]; # Note! Not in input
-            sequence
-          C sub uni06F5.small by [baseNum uni06F5.small]; # Note! Not in input sequence
-          C sub uni06F6.small by [baseNum uni06F6.small]; # Note! Not in input sequence
-          C sub uni06F7.urdu.small by [baseNum uni06F7.urdu.small]; # Note! Not in input
-            sequence
-          C sub uni2070.small by [baseNum uni2070.small]; # Note! Not in input sequence
-          C sub uni2074.small by [baseNum uni2074.small]; # Note! Not in input sequence
-          C sub uni2075.small by [baseNum uni2075.small]; # Note! Not in input sequence
-          C sub uni2076.small by [baseNum uni2076.small]; # Note! Not in input sequence
-          C sub uni2077.small by [baseNum uni2077.small]; # Note! Not in input sequence
-          C sub uni2078.small by [baseNum uni2078.small]; # Note! Not in input sequence
-          C sub uni2079.small by [baseNum uni2079.small]; # Note! Not in input sequence
-      } ccmp_arab_FAR_5;
-
-      lookup ccmp_arab_FAR_6 IgnoreMarks;
+      lookup ccmp_arab_FAR_5 {
+        lookupflag IgnoreMarks;
         sub uni0600.alt baseNum baseNum by uni0600.alt2;
         sub uni0600.alt baseNum by uni0600.alt1;
         sub uni0601.alt baseNum baseNum baseNum by uni0601.alt3;
@@ -497,35 +104,35 @@
         sub uni0604.alt baseNum by uni0604.alt1;
         sub uni06DD.alt baseNum baseNum by uni06DD.alt2;
         sub uni06DD.alt baseNum by uni06DD.alt1;
-      } ccmp_arab_FAR_6;
+      } ccmp_arab_FAR_5;
 
       language SND ;
+      lookup ccmp_arab_FAR_0;
       lookup ccmp_arab_FAR_1;
       lookup ccmp_arab_FAR_2;
       lookup ccmp_arab_FAR_3;
       lookup ccmp_arab_FAR_4;
       lookup ccmp_arab_FAR_5;
-      lookup ccmp_arab_FAR_6;
       language URD ;
+      lookup ccmp_arab_FAR_0;
       lookup ccmp_arab_FAR_1;
       lookup ccmp_arab_FAR_2;
       lookup ccmp_arab_FAR_3;
       lookup ccmp_arab_FAR_4;
       lookup ccmp_arab_FAR_5;
-      lookup ccmp_arab_FAR_6;
       language dflt;
+      lookup ccmp_arab_FAR_0;
       lookup ccmp_arab_FAR_1;
       lookup ccmp_arab_FAR_2;
       lookup ccmp_arab_FAR_3;
       lookup ccmp_arab_FAR_4;
       lookup ccmp_arab_FAR_5;
-      lookup ccmp_arab_FAR_6;
     } ccmp;
 
     feature fina {
       script arab;
       language FAR ;
-      lookup fina_arab_FAR_1;
+      lookup fina_arab_FAR_0 {
         sub uni0620 by uni0620.fina;
         sub uni0622 by uni0622.fina;
         sub uni0623 by uni0623.fina;
@@ -733,20 +340,20 @@
         sub uni08A9 by uni08A9.fina;
         sub uni08AA by uni08AA.fina;
         sub uni08AB by uni08AB.fina;
-      } fina_arab_FAR_1;
+      } fina_arab_FAR_0;
 
       language SND ;
-      lookup fina_arab_FAR_1;
+      lookup fina_arab_FAR_0;
       language URD ;
-      lookup fina_arab_FAR_1;
+      lookup fina_arab_FAR_0;
       language dflt;
-      lookup fina_arab_FAR_1;
+      lookup fina_arab_FAR_0;
     } fina;
 
     feature init {
       script arab;
       language FAR ;
-      lookup init_arab_FAR_1;
+      lookup init_arab_FAR_0 {
         sub uni0620 by uni0620.init;
         sub uni0626 by uni0626.init;
         sub uni0628 by uni0628.init;
@@ -890,74 +497,75 @@
         sub uni08A7 by uni08A7.init;
         sub uni08A8 by uni08A8.init;
         sub uni08A9 by uni08A9.init;
-      } init_arab_FAR_1;
+      } init_arab_FAR_0;
 
       language SND ;
-      lookup init_arab_FAR_1;
+      lookup init_arab_FAR_0;
       language URD ;
-      lookup init_arab_FAR_1;
+      lookup init_arab_FAR_0;
       language dflt;
-      lookup init_arab_FAR_1;
+      lookup init_arab_FAR_0;
     } init;
 
     feature liga {
       script arab;
       language FAR ;
-      lookup liga_arab_FAR_1;
+      lookup liga_arab_FAR_0 {
         sub uni0627 uni0644.init uni0644.medi uni06510670 uni0647.fina by DivineName;
+      } liga_arab_FAR_0;
+
+      lookup liga_arab_FAR_1 {
+        lookupflag IgnoreMarks;
+        sub uni0644.init uni0644.medi uni0647.fina by uniFDF2.pt1;
       } liga_arab_FAR_1;
 
-      lookup liga_arab_FAR_2 IgnoreMarks;
-        sub uni0644.init uni0644.medi uni0647.fina by uniFDF2.pt1;
-      } liga_arab_FAR_2;
-
       language SND ;
+      lookup liga_arab_FAR_0;
       lookup liga_arab_FAR_1;
-      lookup liga_arab_FAR_2;
       language URD ;
+      lookup liga_arab_FAR_0;
       lookup liga_arab_FAR_1;
-      lookup liga_arab_FAR_2;
       language dflt;
+      lookup liga_arab_FAR_0;
       lookup liga_arab_FAR_1;
-      lookup liga_arab_FAR_2;
     } liga;
 
     feature locl {
       script arab;
       language FAR ;
-      lookup locl_arab_FAR_1;
+      lookup locl_arab_FAR_0 {
         sub uni00AB by uni00AB.far;
         sub uni00BB by uni00BB.far;
         sub uni066B by DecimalPointFarsi;
         sub uni066C by ThousandsSepFarsi;
-      } locl_arab_FAR_1;
+      } locl_arab_FAR_0;
 
       language SND ;
-      lookup locl_arab_SND_1;
+      lookup locl_arab_SND_0 {
         sub uni06F6 by uni0666;
         sub uni06F7 by uni06F7.urdu;
-      } locl_arab_SND_1;
+      } locl_arab_SND_0;
 
       language URD ;
-      lookup locl_arab_URD_1;
+      lookup locl_arab_URD_0 {
         sub uni06F4 by uni06F4.urdu;
         sub uni06F6 by uni0666;
         sub uni06F7 by uni06F7.urdu;
-      } locl_arab_URD_1;
+      } locl_arab_URD_0;
 
       script latn;
       language dflt;
-      lookup locl_latn_dflt_1;
+      lookup locl_latn_dflt_0 {
         sub uni0021.ar by uni0021;
         sub uni002E.ar by uni002E;
-      } locl_latn_dflt_1;
+      } locl_latn_dflt_0;
 
     } locl;
 
     feature medi {
       script arab;
       language FAR ;
-      lookup medi_arab_FAR_1;
+      lookup medi_arab_FAR_0 {
         sub uni0620 by uni0620.medi;
         sub uni0626 by uni0626.medi;
         sub uni0628 by uni0628.medi;
@@ -1101,20 +709,21 @@
         sub uni08A7 by uni08A7.medi;
         sub uni08A8 by uni08A8.medi;
         sub uni08A9 by uni08A9.medi;
-      } medi_arab_FAR_1;
+      } medi_arab_FAR_0;
 
       language SND ;
-      lookup medi_arab_FAR_1;
+      lookup medi_arab_FAR_0;
       language URD ;
-      lookup medi_arab_FAR_1;
+      lookup medi_arab_FAR_0;
       language dflt;
-      lookup medi_arab_FAR_1;
+      lookup medi_arab_FAR_0;
     } medi;
 
     feature rlig {
       script arab;
       language FAR ;
-      lookup rlig_arab_FAR_1 IgnoreMarks;
+      lookup rlig_arab_FAR_0 {
+        lookupflag IgnoreMarks;
         sub uni0644.init uni0622.fina by uni06440622.isol;
         sub uni0644.init uni0623.fina by uni06440623.isol;
         sub uni0644.init uni0625.fina by uni06440625.isol;
@@ -1141,84 +750,29 @@
         sub uni06B8.medi uni0627.fina by uni06B80627.fina;
         sub uni076A.init uni0627.fina by uni076A0627.isol;
         sub uni076A.medi uni0627.fina by uni076A0627.fina;
+      } rlig_arab_FAR_0;
+
+      lookup rlig_arab_FAR_1 {
+        lookupflag IgnoreMarks;
+        sub @uni0644.init_7_uni08A6.init' @uni0622.fina_8_uniFD3D';
+        sub @uni0644.medi_8_uniFD3C' @uni0622.fina_8_uniFD3D';
       } rlig_arab_FAR_1;
 
-      lookup rlig_arab_FAR_2 IgnoreMarks;
-        sub @uni0644.init_7_uni08A6.init' @uni0622.fina_8_uniFD3D';
-          C sub uni0622.fina by LA_AlefMadda.isol; # Note! Not in input sequence
-          C sub uni0623.fina by LA_AlefHamzaAbove.isol; # Note! Not in input sequence
-          C sub uni0625.fina by LA_AlefHamzaBelow.isol; # Note! Not in input sequence
-          C sub uni0627.fina by LA_Alef.isol; # Note! Not in input sequence
-          C sub uni0644.init by LA_Lam.isol; # Note! Not in input sequence
-          C sub uni0671.fina by LA_AlefWasla.isol; # Note! Not in input sequence
-          C sub uni0672.fina by LA_AlefWHamzaAbove.isol; # Note! Not in input sequence
-          C sub uni0673.fina by LA_AlefWHamzaBelow.isol; # Note! Not in input sequence
-          C sub uni06B5.init by LA_LamSmallVAbove.isol; # Note! Not in input sequence
-          C sub uni06B6.init by LA_LamDotAbove.isol; # Note! Not in input sequence
-          C sub uni06B7.init by LA_LamThreeDotsAbove.isol; # Note! Not in input sequence
-          C sub uni06B8.init by LA_LamThreeDotsBelow.isol; # Note! Not in input sequence
-          C sub uni076A.init by LA_Lambarshort.isol; # Note! Not in input sequence
-          C sub uni08A6.init by LA_Lamdoublebar.isol; # Note! Not in input sequence
-          C sub uni0622.fina by LA_AlefMadda.isol; # Note! Not in input sequence
-          C sub uni0623.fina by LA_AlefHamzaAbove.isol; # Note! Not in input sequence
-          C sub uni0625.fina by LA_AlefHamzaBelow.isol; # Note! Not in input sequence
-          C sub uni0627.fina by LA_Alef.isol; # Note! Not in input sequence
-          C sub uni0644.init by LA_Lam.isol; # Note! Not in input sequence
-          C sub uni0671.fina by LA_AlefWasla.isol; # Note! Not in input sequence
-          C sub uni0672.fina by LA_AlefWHamzaAbove.isol; # Note! Not in input sequence
-          C sub uni0673.fina by LA_AlefWHamzaBelow.isol; # Note! Not in input sequence
-          C sub uni06B5.init by LA_LamSmallVAbove.isol; # Note! Not in input sequence
-          C sub uni06B6.init by LA_LamDotAbove.isol; # Note! Not in input sequence
-          C sub uni06B7.init by LA_LamThreeDotsAbove.isol; # Note! Not in input sequence
-          C sub uni06B8.init by LA_LamThreeDotsBelow.isol; # Note! Not in input sequence
-          C sub uni076A.init by LA_Lambarshort.isol; # Note! Not in input sequence
-          C sub uni08A6.init by LA_Lamdoublebar.isol; # Note! Not in input sequence
-        sub @uni0644.medi_8_uniFD3C' @uni0622.fina_8_uniFD3D';
-          C sub uni0622.fina by LA_AlefMadda.fina; # Note! Not in input sequence
-          C sub uni0623.fina by LA_AlefHamzaAbove.fina; # Note! Not in input sequence
-          C sub uni0625.fina by LA_AlefHamzaBelow.fina; # Note! Not in input sequence
-          C sub uni0627.fina by LA_Alef.fina; # Note! Not in input sequence
-          C sub uni0644.medi by LA_Lam.fina; # Note! Not in input sequence
-          C sub uni0671.fina by LA_AlefWasla.fina; # Note! Not in input sequence
-          C sub uni0672.fina by LA_AlefWHamzaAbove.fina; # Note! Not in input sequence
-          C sub uni0673.fina by LA_AlefWHamzaBelow.fina; # Note! Not in input sequence
-          C sub uni06B5.medi by LA_LamSmallVAbove.fina; # Note! Not in input sequence
-          C sub uni06B6.medi by LA_LamDotAbove.fina; # Note! Not in input sequence
-          C sub uni06B7.medi by LA_LamThreeDotsAbove.fina; # Note! Not in input sequence
-          C sub uni06B8.medi by LA_LamThreeDotsBelow.fina; # Note! Not in input sequence
-          C sub uni076A.medi by LA_Lambarshort.fina; # Note! Not in input sequence
-          C sub uniFD3D by LA_AlefFathatan.fina; # Note! Not in input sequence
-          C sub uni0622.fina by LA_AlefMadda.fina; # Note! Not in input sequence
-          C sub uni0623.fina by LA_AlefHamzaAbove.fina; # Note! Not in input sequence
-          C sub uni0625.fina by LA_AlefHamzaBelow.fina; # Note! Not in input sequence
-          C sub uni0627.fina by LA_Alef.fina; # Note! Not in input sequence
-          C sub uni0644.medi by LA_Lam.fina; # Note! Not in input sequence
-          C sub uni0671.fina by LA_AlefWasla.fina; # Note! Not in input sequence
-          C sub uni0672.fina by LA_AlefWHamzaAbove.fina; # Note! Not in input sequence
-          C sub uni0673.fina by LA_AlefWHamzaBelow.fina; # Note! Not in input sequence
-          C sub uni06B5.medi by LA_LamSmallVAbove.fina; # Note! Not in input sequence
-          C sub uni06B6.medi by LA_LamDotAbove.fina; # Note! Not in input sequence
-          C sub uni06B7.medi by LA_LamThreeDotsAbove.fina; # Note! Not in input sequence
-          C sub uni06B8.medi by LA_LamThreeDotsBelow.fina; # Note! Not in input sequence
-          C sub uni076A.medi by LA_Lambarshort.fina; # Note! Not in input sequence
-          C sub uniFD3D by LA_AlefFathatan.fina; # Note! Not in input sequence
-      } rlig_arab_FAR_2;
-
       language SND ;
+      lookup rlig_arab_FAR_0;
       lookup rlig_arab_FAR_1;
-      lookup rlig_arab_FAR_2;
       language URD ;
+      lookup rlig_arab_FAR_0;
       lookup rlig_arab_FAR_1;
-      lookup rlig_arab_FAR_2;
       language dflt;
+      lookup rlig_arab_FAR_0;
       lookup rlig_arab_FAR_1;
-      lookup rlig_arab_FAR_2;
     } rlig;
 
     feature tnum {
       script arab;
       language FAR ;
-      lookup tnum_arab_FAR_1;
+      lookup tnum_arab_FAR_0 {
         sub uni0660 by uni0660.tab;
         sub uni0661 by uni0661.tab;
         sub uni0662 by uni0662.tab;
@@ -1241,14 +795,14 @@
         sub uni06F7.urdu by uni06F7.urdu.tab;
         sub uni06F8 by uni0668.tab;
         sub uni06F9 by uni0669.tab;
-      } tnum_arab_FAR_1;
+      } tnum_arab_FAR_0;
 
       language SND ;
-      lookup tnum_arab_FAR_1;
+      lookup tnum_arab_FAR_0;
       language URD ;
-      lookup tnum_arab_FAR_1;
+      lookup tnum_arab_FAR_0;
       language dflt;
-      lookup tnum_arab_FAR_1;
+      lookup tnum_arab_FAR_0;
     } tnum;
 
   </GSUB>
