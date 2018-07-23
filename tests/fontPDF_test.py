@@ -4,9 +4,9 @@ import os
 
 from fontTools.ttLib import TTFont
 
-from afdko.Tools.SharedData.FDKScripts.fontPDF import (doTitle, FontPDFParams)
-from afdko.Tools.SharedData.FDKScripts.otfPDF import txPDFFont
-from afdko.Tools.SharedData.FDKScripts.pdfgen import Canvas
+from afdko.fontPDF import (doTitle, FontPDFParams)
+from afdko.otfPDF import txPDFFont
+from afdko.pdfgen import Canvas
 
 
 TOOL = 'fontpdf'

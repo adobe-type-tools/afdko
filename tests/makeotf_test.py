@@ -11,7 +11,7 @@ import tempfile
 
 from fontTools.ttLib import TTFont
 
-from afdko.Tools.SharedData.FDKScripts.MakeOTF import (
+from afdko.MakeOTF import (
     checkIfVertInFeature, getOptions, MakeOTFParams)
 
 from .runner import main as runner

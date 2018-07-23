@@ -8,8 +8,7 @@ import tempfile
 from booleanOperations.booleanGlyph import BooleanGlyph
 from defcon import Glyph
 
-from afdko.Tools.SharedData.FDKScripts.CheckOutlinesUFO import (
-    remove_tiny_sub_paths)
+from afdko.CheckOutlinesUFO import remove_tiny_sub_paths
 
 from .runner import main as runner
 from .differ import main as differ
