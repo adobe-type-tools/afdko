@@ -38,7 +38,7 @@ matrix:
       script:
         - flake8 setup.py
         - flake8 Tests/*.py
-        - pushd afdko/Tools/SharedData/FDKScripts
+        - pushd python/afdko
         - flake8 buildCFF2VF.py
         - flake8 buildMasterOTFs.py
         - flake8 CheckOutlinesUFO.py
