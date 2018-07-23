@@ -7,7 +7,7 @@ v1.1.0 July 17 2018
 The FDK build directory tree is pretty straightforward.
 
 The basic structure is:
-FDK/Tools/Programs/
+afdko/c/
 	<component>/
 			build/
 				<platform>/<compiler>/<debug|release>
@@ -28,7 +28,7 @@ with sub-directories for build/ and lib/ being the same as for the program build
 Special cases.
 
 tx, mergeFonts, and rotateFonts share a common set of libraries and resource files. These libraries are grouped under the public directory in:
-FDK/Tools/Programs/public/lib/
+afdko/c/public/lib/
 			build/
 			lib/
 			api/
@@ -44,12 +44,12 @@ For Linux, programs are built with the Ubuntu 12.04 release.
 
 The FDK distribution directory tree is built by:
 
-2.1) building all programs with the script FDK/Tools/Programs/BuildAll.sh (Mac), FDK/Tools/Programs/BuildAll.cmd (Windows), FDK/Tools/Programs/BuildAllLinux.sh (Linux).
+2.1) building all programs with the script afdko/c/BuildAll.sh (Mac), afdko/c/BuildAll.cmd (Windows), afdko/c/BuildAllLinux.sh (Linux).
 
 2.2) deleting the Programs directory and any unused programs and files (e.g Tools/osx and Tools/Linux under Windows).
 
 
-4) Testing/building systems.
+3) Testing/building systems.
 
 The command-line tools are all implemented as either binary C programs or shell scripts. Each shell script 1) finds the Python included in the FDK and then 2) uses that Python to run a specific Python script with appropriate options.
 
