@@ -1663,12 +1663,12 @@ class OTLConverter(object):
         pfeatList = self.table.FeatureList.FeatureRecord
         featDictByLangSys = {}
         featDictByIndex = {}
-        haveDFLT = 0
+        haveDFLT = False
         lsList = []
         for scriptRecord in self.table.ScriptList.ScriptRecord:
             scriptTag = scriptRecord.ScriptTag
-            if scriptTag == "DFLT":
-                haveDFLT = 1
+            if scriptTag in ("DFLT", "dflt"):
+                haveDFLT = True
             if scriptRecord.Script.DefaultLangSys:
                 langTag = "dflt"
                 lsList.insert(0, (
@@ -1688,12 +1688,12 @@ class OTLConverter(object):
 
         if not haveDFLT:
             # Synthesize a DFLT dflt entry.
-            addedDFLT = 0
+            addedDFLT = False
             scriptCount = len(self.table.ScriptList.ScriptRecord)
             for langsysList in featDictByIndex.values():
                 if len(langsysList) == scriptCount:
                     langsysList.insert(0, ("DFLT", "dflt", 0xFFFF))
-                    addedDFLT = 1
+                    addedDFLT = True
 
             if addedDFLT:
                 lsList.insert(0, ("DFLT", "dflt", 0xFFFF))
