@@ -71,7 +71,7 @@ def get_executable_dir():
 
 def compile_package(pkg_dir):
     bin_dir = get_executable_dir()
-    programs_dir = os.path.join(pkg_dir, "Tools", "Programs")
+    programs_dir = 'c'
     cmd = None
     if bin_dir == 'osx':
         cmd = "sh BuildAll.sh"
@@ -107,7 +107,7 @@ class CustomBuildScripts(distutils.command.build_scripts.build_scripts):
         scripts as python scripts. But all our 'scripts' are native C
         executables, thus the python3 tokenize module fails with SyntaxError
         on them. Here we just skip the if branch where distutils attempts
-        to ajust the shebang.
+        to adjust the shebang.
         """
         self.mkpath(self.build_dir)
         outfiles = []
@@ -143,7 +143,6 @@ class CustomBuildScripts(distutils.command.build_scripts.build_scripts):
 
 
 def _get_scripts():
-    bin_dir = get_executable_dir()
     script_names = [
         'autohintexe', 'detype1', 'makeotfexe', 'mergeFonts', 'rotateFont',
         'sfntdiff', 'sfntedit', 'spot', 'tx', 'type1'
@@ -153,7 +152,7 @@ def _get_scripts():
     else:
         extension = ''
 
-    scripts = ['afdko/Tools/{}/{}{}'.format(bin_dir, script_name, extension)
+    scripts = ['c/build_all/{}{}'.format(script_name, extension)
                for script_name in script_names]
     return scripts
 
@@ -181,7 +180,7 @@ def _get_console_scripts():
         ('hintplot', 'ProofPDF:hintplot'),
         ('waterfallplot', 'ProofPDF:waterfallplot'),
     ]
-    scripts_path = 'afdko.Tools.SharedData.FDKScripts'
+    scripts_path = 'afdko'
     scripts = ['{} = {}.{}'.format(name, scripts_path, entry)
                for name, entry in script_entries]
     return scripts
@@ -193,7 +192,7 @@ def _get_requirements():
 
 
 def main():
-    pkg_list = find_packages(exclude=["Tests"])
+    pkg_list = find_packages(where='python', exclude=['tests'])
     classifiers = [
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
@@ -236,8 +235,18 @@ def main():
           classifiers=classifiers,
           keywords='font development tools',
           platforms=[platform_name],
-          packages=pkg_list,
+          package_dir={'': 'python'},
+          packages=['afdko'],
           include_package_data=True,
+          package_data={
+              'afdko': [
+                  'resources/*.txt',
+                  'resources/Adobe-CNS1/*',
+                  'resources/Adobe-GB1/*',
+                  'resources/Adobe-Japan1/*',
+                  'resources/Adobe-Korea1/*'
+              ],
+          },
           zip_safe=False,
           python_requires='>=2.7',
           setup_requires=[
