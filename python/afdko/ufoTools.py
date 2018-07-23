@@ -13,7 +13,7 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
-from . import ConvertFontToCID
+from afdko import ConvertFontToCID
 
 __doc__ = """
 ufoTools.py v1.30.6 Jul 1 2018

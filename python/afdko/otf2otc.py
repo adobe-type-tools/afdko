@@ -16,7 +16,7 @@ example:
 The script mbe invoked with either the FDK command:
   otf2otc
 or directly with the command:
-  python <path to FDK directory>/FDK/Tools/SharedData/FDKScripts/otf2otc.py
+  python <path to FDK directory>/python/afdko/otf2otc.py
 
 Build an OpenType Collection font file from two or more OpenType font
 files. The fonts are ordered in the output 'ttc' file in the same order

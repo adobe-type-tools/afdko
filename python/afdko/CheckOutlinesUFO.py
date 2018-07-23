@@ -22,11 +22,11 @@ import defcon
 import ufoLib
 from fontPens.digestPointPen import DigestPointPen
 
-from . import ufoTools
+from afdko import ufoTools
 # noinspection PyPep8Naming
-from .ufoTools import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
+from afdko.ufoTools import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
 # noinspection PyPep8Naming
-from .ufoTools import kProcessedGlyphsLayerName as PROCD_GLYPHS_LAYER_NAME
+from afdko.ufoTools import kProcessedGlyphsLayerName as PROCD_GLYPHS_LAYER_NAME
 
 
 class FocusOptionParseError(KeyError):

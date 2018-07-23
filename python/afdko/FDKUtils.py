@@ -5,7 +5,6 @@ from __future__ import print_function, absolute_import
 import os
 import platform
 import subprocess
-import sys
 import traceback
 
 __doc__ = """
@@ -20,60 +19,15 @@ class FDKEnvError(KeyError):
     pass
 
 
-def findFDKDirs():
+def get_resources_dir():
     """ Look up the file path to find the "Tools" directory;
     then add the os.name for the executables, and 'FDKScripts'
     for the scripts.
     """
-    fdkSharedDataDir = None
-    fdkToolsDir = None
-    _dir = os.path.dirname(__file__)
-
-    while _dir:
-        if os.path.basename(_dir) == "Tools":
-            fdkScriptsDir = os.path.join(_dir, "SharedData", "FDKScripts")
-            if curSystem == "Darwin":
-                fdkToolsDir = os.path.join(_dir, "osx")
-            elif curSystem == "Windows":
-                fdkToolsDir = os.path.join(_dir, "win")
-            elif curSystem == "Linux":
-                fdkToolsDir = os.path.join(_dir, "linux")
-            else:
-                print("Fatal error: un-supported platform %s %s." % (
-                    os.name, sys.platform))
-                raise FDKEnvError
-
-            if (not (os.path.exists(fdkScriptsDir) and
-               os.path.exists(fdkToolsDir))):
-                print("Fatal error: could not find  the FDK scripts dir %s "
-                      "and the tools directory %s." %
-                      (fdkScriptsDir, fdkToolsDir))
-                raise FDKEnvError
-
-            # the FDK.py bootstrap program already adds fdkScriptsDir
-            # to the  sys.path; this is useful only when running the
-            # calling script directly using an external Python.
-            if fdkScriptsDir not in sys.path:
-                sys.path.append(fdkScriptsDir)
-            fdkSharedDataDir = os.path.join(_dir, "SharedData")
-            break
-        _dir = os.path.dirname(_dir)
-    return fdkToolsDir, fdkSharedDataDir
-
-
-def findFDKFile(fdkDir, fileName):
-    path = os.path.join(fdkDir, fileName)
-    if os.path.exists(path):
-        return path
-    p1 = path + ".exe"
-    if os.path.exists(p1):
-        return p1
-    p2 = path + ".cmd"
-    if os.path.exists(p2):
-        return p2
-    if fileName not in ["addGlobalColor"]:
-        print("Fatal error: could not find '%s or %s or %s'." % (path, p1, p2))
-    raise FDKEnvError
+    cjk_dir = os.path.join(
+        os.path.dirname(__file__),
+        'resources')
+    return cjk_dir
 
 
 def runShellCmd(cmd):

@@ -7,8 +7,8 @@ import re
 import sys
 import traceback
 
-from . import FDKUtils
-from . import ufoTools
+from afdko import FDKUtils
+from afdko import ufoTools
 
 from xml.etree.ElementTree import XML
 from xml.etree.ElementTree import tostring as xmlToString
@@ -18,7 +18,6 @@ from xml.etree.ElementTree import tostring as xmlToString
 from fontTools.ttLib.standardGlyphOrder import standardGlyphOrder as kStdNames
 
 PY2 = sys.version_info[0] == 2
-ADOBE_CMAPS_FOLDER = "Adobe Cmaps"
 
 __doc__ = """
 MakeOTF.py.
@@ -49,14 +48,14 @@ __methods__ = """
     1) the current directory
     2) one up from the current
     3) two up from the current directory
-    4) in FDK/Tools/SharedData/
+    4) in afdko/resources
  - if the GlyphOrderAndAliasDB file is not specified look in:
     1) the current directory
     2) one up from the current
     3) two up from the current directory
-    4) in FDK/Tools/SharedData/
+    4) in afdko/resources
  - if the input font is a CID font and the Mac Adobe CMAP files are
-    not specified: look in FDK/Tools/SharedData/Adobe Cmaps/<R-O-S>.
+    not specified: look in afdko/resources/<R-O-S>.
     Look up the file name based on R-O from a hard-coded table.
 
 Project file.
@@ -508,7 +507,6 @@ class MakeOTFParams(object):
     def __init__(self):
         self.makeotfPath = None
         self.txPath = None
-        self.fdkSharedDataDir = None
         self.optionFilePath = None
         # option path when different then the input option path.
         self.newOptionFilePath = None
@@ -1648,7 +1646,8 @@ def setCIDCMAPPaths(makeOTFParams, Reg, Ord, Sup):
     Only the Uni-H file is required.
     """
     error = False
-    cmapPath = os.path.join(makeOTFParams.fdkSharedDataDir, ADOBE_CMAPS_FOLDER)
+
+    cmapPath = FDKUtils.get_resources_dir()
     ROPath = os.path.join(cmapPath, "%s-%s" % (Reg, Ord))
     ROSPath = "%s-%s" % (ROPath, Sup)
     foundIt = False
@@ -2984,10 +2983,6 @@ def runMakeOTF(makeOTFParams):
 
 
 def CheckEnvironment():
-    try:
-        fdkToolsDir, fdkSharedDataDir = FDKUtils.findFDKDirs()
-    except FDKUtils.FDKEnvError:
-        raise FDKEnvironmentError
 
     missingTools = []
     for name in ["tx", "makeotfexe"]:
@@ -2997,12 +2992,9 @@ def CheckEnvironment():
             missingTools.append(name)
 
     if missingTools:
-        print("Please re-install the FDK. The executable directory '%s' is "
-              "missing the tools: %s." % (fdkToolsDir, missingTools))
-        print("for the files referenced by the shell script is missing.")
+        print("Please check your PATH, and if necessary re-install the FDK. "
+              "Unable to find these tools: %s." % (missingTools))
         raise FDKEnvironmentError
-
-    return fdkToolsDir, fdkSharedDataDir
 
 
 def main(args=None):
@@ -3010,13 +3002,12 @@ def main(args=None):
         args = sys.argv[1:]
 
     try:
-        _, fdkSharedDataDir = CheckEnvironment()
+        CheckEnvironment()
     except FDKEnvironmentError:
         return 1
 
     try:
         makeOTFParams = MakeOTFParams()
-        makeOTFParams.fdkSharedDataDir = fdkSharedDataDir
         makeOTFParams.txPath = "tx"
         makeOTFParams.makeotfPath = "makeotfexe"
         getOptions(makeOTFParams, args)

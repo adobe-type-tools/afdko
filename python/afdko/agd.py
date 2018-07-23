@@ -6,12 +6,12 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 __doc__ = """ This module provideds a set of functions for working with glyph name
 dictionaries. In particular, to load the latest set of recommended Adobe Glyph
 names and Unicode values, from one of the scripts in
-FDK/Tools/SharedData/FDKScripts/, the set of commands is:
+python/afdko, the set of commands is:
 	import agd
 	import os
-	sharedData = os.path.dirname(__file__)
-	sharedData = os.path.dirname(sharedData)
-	kAGD_TXTPath = os.path.join(sharedData, "AGD.TXT")
+    import FDKUtils
+	resources_dir = FDKUtils.get_resources_dir()
+	kAGD_TXTPath = os.path.join(resources_dir, "AGD.txt")
 	fp = open(kAGD_TXTPath, "rU")
 	agdTextPath = fp.read()
 	fp.close()

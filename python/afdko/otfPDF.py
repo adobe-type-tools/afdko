@@ -10,7 +10,7 @@ from __future__ import print_function, absolute_import
 from fontTools.pens.boundsPen import BoundsPen, BasePen
 from fontTools.misc.psCharStrings import T2OutlineExtractor
 
-from .fontPDF import FontPDFGlyph, FontPDFFont, FontPDFPoint
+from afdko.fontPDF import FontPDFGlyph, FontPDFFont, FontPDFPoint
 
 
 class FontPDFPen(BasePen):
