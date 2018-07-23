@@ -10,13 +10,13 @@ then
 	cd release
 	make
 	cd $curdir
-	cp -dR ../../../exe/linux/release/$target ../../../../../linux/
+	cp -dR ../../../exe/linux/release/$target ../../../../build_all
 elif [ $1 = "debug" ]
 then
 	cd debug
 	make
 	cd $curdir
-	cp -dR ../../../exe/linux/debug/$target ../../../../../linux/
+	cp -dR ../../../exe/linux/debug/$target ../../../../build_all
 elif [ $1 = "clean" ]
 then
 	cd release
