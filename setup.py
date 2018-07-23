@@ -1,16 +1,17 @@
+import distutils.command.build_scripts
 import io
 import os
 import platform
 import subprocess
 import sys
-from distutils.util import get_platform
-import distutils.command.build_scripts
-from distutils.dep_util import newer
 from distutils import log
+from distutils.dep_util import newer
 from distutils.util import convert_path
+from distutils.util import get_platform
+
 import setuptools.command.build_py
 import setuptools.command.install
-from setuptools import setup, find_packages
+from setuptools import setup
 
 """
 We need a customized version of the 'bdist_wheel' command, because otherwise
@@ -192,7 +193,6 @@ def _get_requirements():
 
 
 def main():
-    pkg_list = find_packages(where='python', exclude=['tests'])
     classifiers = [
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
