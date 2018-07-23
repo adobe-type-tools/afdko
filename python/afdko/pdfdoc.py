@@ -19,8 +19,8 @@ from __future__ import print_function, absolute_import
 import sys
 import time
 
-from . import pdfutils
-from .pdfutils import LINEEND   # this constant needed in both
+from afdko import pdfutils
+from afdko.pdfutils import LINEEND   # this constant needed in both
 
 Log = sys.stderr  # reassign this if you don't want err output to console
 

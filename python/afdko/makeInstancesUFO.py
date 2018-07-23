@@ -18,7 +18,7 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
-from .ufoTools import validateLayers
+from afdko.ufoTools import validateLayers
 
 __usage__ = """
    makeInstancesUFO v1.4.1 Jul 13 2018

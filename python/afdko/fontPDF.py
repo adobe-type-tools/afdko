@@ -28,10 +28,10 @@ import os
 import re
 import time
 
-from . import FDKUtils
-from . import pdfgen
-from . import pdfmetrics
-from .pdfutils import LINEEND
+from afdko import FDKUtils
+from afdko import pdfgen
+from afdko import pdfmetrics
+from afdko.pdfutils import LINEEND
 
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
@@ -308,7 +308,6 @@ class FontPDFParams:
 		self.rt_glyphVPadding = None # Extra space around glyph
 		self.rt_emBoxScale = None # A scaling factor to allow for the difference between the std 1000 em-square and the font's em-square.
 		self.rt_maxHintLabelWidth = None #  This calculated and used only when showing h hintsl is the added to self.glyphHPadding to set self.rt_glyphHPadding.
-		self.rt_fdkSharedDataDir = None # Location of shared data dir, Used by digiplot to find layoout file
 
 
 		# real parameters

@@ -17,7 +17,7 @@ single font and between members of a family.
 
 Some of the tests are specific to Adobe Type Dept practices; if you don't like them,
 feel free to edit or disable them in the source script file at:
-{FDK Root Directory}/FDK/Tools/SharedData/FDKScripts/CompareFamily.py
+{FDK Root Directory}/python/afdko/CompareFamily.py
 
 See 'compareFamily -h' for details.
 """
@@ -4889,9 +4889,8 @@ def main():
 	print "Directory:", os.path.abspath(directory)
 	print "Loading Adobe Glyph Dict..."
 	import agd
-	fdkToolsDir, fdkSharedDataDir = FDKUtils.findFDKDirs()
-	sys.path.append(fdkSharedDataDir)
-	kAGD_TXTPath = os.path.join(fdkSharedDataDir, "AGD.txt")
+	resources_dir = FDKUtils.get_resources_dir()
+	kAGD_TXTPath = os.path.join(resources_dir, "AGD.txt")
 	fp = open(kAGD_TXTPath, "rU")
 	agdTextPath = fp.read()
 	fp.close()

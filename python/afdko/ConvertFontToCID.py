@@ -8,7 +8,7 @@ import re
 import sys
 import types
 
-from . import FDKUtils
+from afdko import FDKUtils
 
 __doc__ = """
 ConvertFontToCID.py. v 1.11.3 Apr 29 2018

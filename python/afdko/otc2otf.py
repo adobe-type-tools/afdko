@@ -16,7 +16,7 @@ example:
 The script may be invoked with either the FDK command:
   otc2otf
 or directly with the command:
-  python <path to FDK directory>/FDK/Tools/SharedData/FDKScripts/otc2otf.py
+  python <path to FDK directory>/python/afdko/otc2otf.py
 
 
 """
