@@ -49,6 +49,7 @@ matrix:
         - flake8 otfPDF.py
         - flake8 pdfmetrics.py
         - flake8 ttfcomponentizer.py
+        - flake8 ttxn.py
         - flake8 ufoTools.py
         - popd
         - python setup.py bdist_wheel

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont sfntVersion="OTTO" ttLibVersion="3.26">
+<ttFont sfntVersion="OTTO" ttLibVersion="3.28">
 
   <GPOS>
     languagesystem latn dflt;
@@ -7,19 +7,22 @@
 
 
     # Class definitions *********************************
-    @A_20_uni1EB6 = [ A Aacute Abreve Acircumflex Adieresis Agrave Amacron Aogonek Aring Atilde
-       uni01CD uni1EA0 uni1EA4 uni1EA6 uni1EAA uni1EAC uni1EAE uni1EB0 uni1EB4 uni1EB6 ];
+    @A_20_uni1EB6 = [ A Aacute Abreve Acircumflex Adieresis Agrave Amacron Aogonek
+        Aring Atilde uni01CD uni1EA0 uni1EA4 uni1EA6 uni1EAA uni1EAC uni1EAE uni1EB0
+        uni1EB4 uni1EB6 ];
     @B_3_uni1E06 = [ B uni0243 uni1E06 ];
-    @C_39_uni1EE2 = [ C Cacute Ccaron Ccedilla Ccircumflex Cdotaccent G Gbreve Gcaron Gcircumflex
-       Gdotaccent O OE Oacute Ocircumflex Odieresis Ograve Ohorn Ohungarumlaut Omacron
-       Oslash Otilde Q uni00470303 uni0122 uni014E uni01D1 uni01EA uni1E20 uni1E52
-       uni1ECC uni1ED0 uni1ED2 uni1ED6 uni1ED8 uni1EDA uni1EDC uni1EE0 uni1EE2 ];
+    @C_39_uni1EE2 = [ C Cacute Ccaron Ccedilla Ccircumflex Cdotaccent G Gbreve
+        Gcaron Gcircumflex Gdotaccent O OE Oacute Ocircumflex Odieresis Ograve Ohorn
+        Ohungarumlaut Omacron Oslash Otilde Q uni00470303 uni0122 uni014E uni01D1
+        uni01EA uni1E20 uni1E52 uni1ECC uni1ED0 uni1ED2 uni1ED6 uni1ED8 uni1EDA
+        uni1EDC uni1EE0 uni1EE2 ];
     @C_6_Cdotaccent = [ C Cacute Ccaron Ccedilla Ccircumflex Cdotaccent ];
-    @D_26_uni1ED8 = [ D Dcaron Dcroat Eth O Oacute Ocircumflex Odieresis Ograve Ohungarumlaut
-       Omacron Oslash Otilde Q uni014E uni018F uni01D1 uni01EA uni1E0C uni1E0E
-       uni1E52 uni1ECC uni1ED0 uni1ED2 uni1ED6 uni1ED8 ];
+    @D_26_uni1ED8 = [ D Dcaron Dcroat Eth O Oacute Ocircumflex Odieresis Ograve
+        Ohungarumlaut Omacron Oslash Otilde Q uni014E uni018F uni01D1 uni01EA
+        uni1E0C uni1E0E uni1E52 uni1ECC uni1ED0 uni1ED2 uni1ED6 uni1ED8 ];
     @Dcroat_3_uni0243 = [ Dcroat Eth uni0243 ];
-    @G_8_uni1E20 = [ G Gbreve Gcaron Gcircumflex Gdotaccent uni00470303 uni0122 uni1E20 ];
+    @G_8_uni1E20 = [ G Gbreve Gcaron Gcircumflex Gdotaccent uni00470303 uni0122
+        uni1E20 ];
     @J_Jcircumflex = [ J Jcircumflex ];
     @K_3_uni1E34 = [ K uni0136 uni1E34 ];
     @L_8_uni1E3A = [ L Lacute Ldot Lslash uni013B uni1E36 uni1E38 uni1E3A ];
@@ -27,57 +30,64 @@
     @R_7_uni1E5E = [ R Racute Rcaron uni0156 uni1E5A uni1E5C uni1E5E ];
     @S_8_uni1E62 = [ S Sacute Scaron Scircumflex uni015E uni0218 uni1E60 uni1E62 ];
     @T_6_uni1E6E = [ T Tcaron uni0162 uni021A uni1E6C uni1E6E ];
-    @U_17_uni1EE4 = [ U Uacute Ubreve Ucircumflex Udieresis Ugrave Uhungarumlaut Umacron Uogonek Uring
-       Utilde uni01D3 uni01D5 uni01D7 uni01D9 uni01DB uni1EE4 ];
-    @U_22_uni1EF0 = [ U Uacute Ubreve Ucircumflex Udieresis Ugrave Uhorn Uhungarumlaut Umacron Uogonek
-       Uring Utilde uni01D3 uni01D5 uni01D7 uni01D9 uni01DB uni1EE4 uni1EE8 uni1EEA
-       uni1EEE uni1EF0 ];
+    @U_17_uni1EE4 = [ U Uacute Ubreve Ucircumflex Udieresis Ugrave Uhungarumlaut
+        Umacron Uogonek Uring Utilde uni01D3 uni01D5 uni01D7 uni01D9 uni01DB uni1EE4
+        ];
+    @U_22_uni1EF0 = [ U Uacute Ubreve Ucircumflex Udieresis Ugrave Uhorn
+        Uhungarumlaut Umacron Uogonek Uring Utilde uni01D3 uni01D5 uni01D7 uni01D9
+        uni01DB uni1EE4 uni1EE8 uni1EEA uni1EEE uni1EF0 ];
     @Uhorn_5_uni1EF0 = [ Uhorn uni1EE8 uni1EEA uni1EEE uni1EF0 ];
     @W_5_Wgrave = [ W Wacute Wcircumflex Wdieresis Wgrave ];
-    @Y_8_uni1EF8 = [ Y Yacute Ycircumflex Ydieresis Ygrave uni1E8E uni1EF4 uni1EF8 ];
+    @Y_8_uni1EF8 = [ Y Yacute Ycircumflex Ydieresis Ygrave uni1E8E uni1EF4 uni1EF8
+        ];
     @Z_5_uni1E92 = [ Z Zacute Zcaron Zdotaccent uni1E92 ];
-    @a.a_20_uni1EB7.a = [ a.a aacute.a abreve.a acircumflex.a adieresis.a agrave.a amacron.a aogonek.a aring.a atilde.a
-       uni01CE.a uni1EA1.a uni1EA5.a uni1EA7.a uni1EAB.a uni1EAD.a uni1EAF.a uni1EB1.a uni1EB5.a uni1EB7.a ];
-    @a.a_21_uni1EB7.a = [ a.a aacute.a abreve.a acircumflex.a adieresis.a ae agrave.a amacron.a aogonek.a aring.a
-       atilde.a uni01CE.a uni1EA1.a uni1EA5.a uni1EA7.a uni1EAB.a uni1EAD.a uni1EAF.a uni1EB1.a uni1EB5.a
-       uni1EB7.a ];
-    @a_48_utilde = [ a aacute abreve acircumflex adieresis agrave amacron aogonek aring atilde
-       dotlessi g gbreve gcaron gcircumflex gdotaccent q u uacute ubreve
-       ucircumflex udieresis ugrave uhungarumlaut umacron uni00670303 uni0123 uni01CE uni01D4 uni01D6
-       uni01D8 uni01DA uni01DC uni0261 uni1E21 uni1EA1 uni1EA5 uni1EA7 uni1EAB uni1EAD
-       uni1EAF uni1EB1 uni1EB5 uni1EB7 uni1EE5 uogonek uring utilde ];
-    @a_82_uni1EE3 = [ a aacute abreve acircumflex adieresis agrave amacron aogonek aring atilde
-       c cacute ccaron ccedilla ccircumflex cdotaccent d dcaron dcroat e
-       eacute ebreve ecaron ecircumflex edieresis edotaccent egrave emacron eogonek g
-       gbreve gcaron gcircumflex gdotaccent o oacute ocircumflex odieresis oe ograve
-       ohorn ohungarumlaut omacron oslash otilde q uni00670303 uni0123 uni014F uni01CE
-       uni01D2 uni01EB uni0261 uni1E0D uni1E0F uni1E17 uni1E21 uni1E53 uni1EA1 uni1EA5
-       uni1EA7 uni1EAB uni1EAD uni1EAF uni1EB1 uni1EB5 uni1EB7 uni1EB9 uni1EBD uni1EBF
-       uni1EC1 uni1EC5 uni1EC7 uni1ECD uni1ED1 uni1ED3 uni1ED7 uni1ED9 uni1EDB uni1EDD
-       uni1EE1 uni1EE3 ];
-    @ae_19_uni1EC7 = [ ae e eacute ebreve ecaron ecircumflex edieresis edotaccent egrave emacron
-       eogonek oe uni1E17 uni1EB9 uni1EBD uni1EBF uni1EC1 uni1EC5 uni1EC7 ];
-    @b_24_uni1ED9 = [ b o oacute ocircumflex odieresis ograve ohungarumlaut omacron oslash otilde
-       p thorn uni014F uni0180 uni01D2 uni01EB uni0259 uni1E07 uni1E53 uni1ECD
-       uni1ED1 uni1ED3 uni1ED7 uni1ED9 ];
+    @a.a_20_uni1EB7.a = [ a.a aacute.a abreve.a acircumflex.a adieresis.a agrave.a
+        amacron.a aogonek.a aring.a atilde.a uni01CE.a uni1EA1.a uni1EA5.a uni1EA7.a
+        uni1EAB.a uni1EAD.a uni1EAF.a uni1EB1.a uni1EB5.a uni1EB7.a ];
+    @a.a_21_uni1EB7.a = [ a.a aacute.a abreve.a acircumflex.a adieresis.a ae
+        agrave.a amacron.a aogonek.a aring.a atilde.a uni01CE.a uni1EA1.a uni1EA5.a
+        uni1EA7.a uni1EAB.a uni1EAD.a uni1EAF.a uni1EB1.a uni1EB5.a uni1EB7.a ];
+    @a_48_utilde = [ a aacute abreve acircumflex adieresis agrave amacron aogonek
+        aring atilde dotlessi g gbreve gcaron gcircumflex gdotaccent q u uacute
+        ubreve ucircumflex udieresis ugrave uhungarumlaut umacron uni00670303
+        uni0123 uni01CE uni01D4 uni01D6 uni01D8 uni01DA uni01DC uni0261 uni1E21
+        uni1EA1 uni1EA5 uni1EA7 uni1EAB uni1EAD uni1EAF uni1EB1 uni1EB5 uni1EB7
+        uni1EE5 uogonek uring utilde ];
+    @a_82_uni1EE3 = [ a aacute abreve acircumflex adieresis agrave amacron aogonek
+        aring atilde c cacute ccaron ccedilla ccircumflex cdotaccent d dcaron dcroat
+        e eacute ebreve ecaron ecircumflex edieresis edotaccent egrave emacron
+        eogonek g gbreve gcaron gcircumflex gdotaccent o oacute ocircumflex
+        odieresis oe ograve ohorn ohungarumlaut omacron oslash otilde q uni00670303
+        uni0123 uni014F uni01CE uni01D2 uni01EB uni0261 uni1E0D uni1E0F uni1E17
+        uni1E21 uni1E53 uni1EA1 uni1EA5 uni1EA7 uni1EAB uni1EAD uni1EAF uni1EB1
+        uni1EB5 uni1EB7 uni1EB9 uni1EBD uni1EBF uni1EC1 uni1EC5 uni1EC7 uni1ECD
+        uni1ED1 uni1ED3 uni1ED7 uni1ED9 uni1EDB uni1EDD uni1EE1 uni1EE3 ];
+    @ae_19_uni1EC7 = [ ae e eacute ebreve ecaron ecircumflex edieresis edotaccent
+        egrave emacron eogonek oe uni1E17 uni1EB9 uni1EBD uni1EBF uni1EC1 uni1EC5
+        uni1EC7 ];
+    @b_24_uni1ED9 = [ b o oacute ocircumflex odieresis ograve ohungarumlaut omacron
+        oslash otilde p thorn uni014F uni0180 uni01D2 uni01EB uni0259 uni1E07
+        uni1E53 uni1ECD uni1ED1 uni1ED3 uni1ED7 uni1ED9 ];
     @braceleft_3_parenleft = [ braceleft bracketleft parenleft ];
     @braceright_3_parenright = [ braceright bracketright parenright ];
     @c_6_cdotaccent = [ c cacute ccaron ccedilla ccircumflex cdotaccent ];
     @colon_semicolon = [ colon semicolon ];
     @comma_3_period = [ comma ellipsis period ];
     @dcaron_3_lcaron.a = [ dcaron lcaron lcaron.a ];
-    @dotlessi_20_uni1E5F = [ dotlessi kgreenlandic m n nacute ncaron ntilde p r racute
-       rcaron uni0146 uni0157 uni1E43 uni1E45 uni1E47 uni1E49 uni1E5B uni1E5D uni1E5F ];
+    @dotlessi_20_uni1E5F = [ dotlessi kgreenlandic m n nacute ncaron ntilde p r
+        racute rcaron uni0146 uni0157 uni1E43 uni1E45 uni1E47 uni1E49 uni1E5B
+        uni1E5D uni1E5F ];
     @emdash_6_uni2015 = [ emdash endash figuredash hyphen uni00AD uni2015 ];
     @empty = [  ];
     @f_6_fl.a = [ f f_f f_t fi fl fl.a ];
     @f_f_f = [ f f_f ];
     @f_t_8_uni1E97 = [ f_t t tcaron uni0163 uni021B uni1E6D uni1E6F uni1E97 ];
-    @g.a_8_uni1E21.a = [ g.a gbreve.a gcaron.a gcircumflex.a gdotaccent.a uni00670303.a uni0123.a uni1E21.a ];
+    @g.a_8_uni1E21.a = [ g.a gbreve.a gcaron.a gcircumflex.a gdotaccent.a
+        uni00670303.a uni0123.a uni1E21.a ];
     @guillemotleft_guilsinglleft = [ guillemotleft guilsinglleft ];
     @guillemotright_guilsinglright = [ guillemotright guilsinglright ];
-    @h_16_uni1E49 = [ h hbar hcircumflex m n nacute napostrophe ncaron ntilde uni0146
-       uni1E25 uni1E2B uni1E43 uni1E45 uni1E47 uni1E49 ];
+    @h_16_uni1E49 = [ h hbar hcircumflex m n nacute napostrophe ncaron ntilde
+        uni0146 uni1E25 uni1E2B uni1E43 uni1E45 uni1E47 uni1E49 ];
     @j_3_uni0237 = [ j jcircumflex uni0237 ];
     @k_4_uni1E35 = [ k kgreenlandic uni0137 uni1E35 ];
     @ohorn_5_uni1EE3 = [ ohorn uni1EDB uni1EDD uni1EE1 uni1EE3 ];
@@ -88,24 +98,28 @@
     @r_7_uni1E5F = [ r racute rcaron uni0157 uni1E5B uni1E5D uni1E5F ];
     @s_8_uni1E63 = [ s sacute scaron scircumflex uni015F uni0219 uni1E61 uni1E63 ];
     @t_7_uni1E97 = [ t tcaron uni0163 uni021B uni1E6D uni1E6F uni1E97 ];
-    @u_22_utilde = [ u uacute ubreve ucircumflex udieresis ugrave uhorn uhungarumlaut umacron uni01D4
-       uni01D6 uni01D8 uni01DA uni01DC uni1EE5 uni1EE9 uni1EEB uni1EEF uni1EF1 uogonek
-       uring utilde ];
+    @u_22_utilde = [ u uacute ubreve ucircumflex udieresis ugrave uhorn
+        uhungarumlaut umacron uni01D4 uni01D6 uni01D8 uni01DA uni01DC uni1EE5
+        uni1EE9 uni1EEB uni1EEF uni1EF1 uogonek uring utilde ];
     @uhorn_5_uni1EF1 = [ uhorn uni1EE9 uni1EEB uni1EEF uni1EF1 ];
-    @uni1E8F_8_ygrave = [ uni1E8F uni1EF5 uni1EF9 y yacute ycircumflex ydieresis ygrave ];
+    @uni1E8F_8_ygrave = [ uni1E8F uni1EF5 uni1EF9 y yacute ycircumflex ydieresis
+        ygrave ];
     @uni1E93_5_zdotaccent = [ uni1E93 z zacute zcaron zdotaccent ];
     @w_5_wgrave = [ w wacute wcircumflex wdieresis wgrave ];
 
 
     # Mark Class definitions *********************************
-    mark [uni0300.cap uni0301.cap uni03020300.cap uni03020301.cap uni03020303.cap uni03020309.cap uni0303.cap uni0304.cap uni0306.cap uni03060300.cap
-       uni03060301.cap uni03060303.cap uni03060309.cap uni0307.cap uni0308.cap uni03080300.cap uni03080301.cap uni03080304.cap uni0308030C.cap uni0309.cap
-       uni030A.cap uni030B.cap uni030C.cap uni030F.cap] <anchor 136 682> @uni0300.cap_26_uni03020306.cap_mark;
+    mark [uni0300.cap uni0301.cap uni03020300.cap uni03020301.cap uni03020303.cap
+        uni03020309.cap uni0303.cap uni0304.cap uni0306.cap uni03060300.cap
+        uni03060301.cap uni03060303.cap uni03060309.cap uni0307.cap uni0308.cap
+        uni03080300.cap uni03080301.cap uni03080304.cap uni0308030C.cap uni0309.cap
+        uni030A.cap uni030B.cap uni030C.cap uni030F.cap] <anchor 136 682> @uni0300.cap_26_uni03020306.cap_mark;
     mark [uni0302.cap] <anchor 136 683> @uni0300.cap_26_uni03020306.cap_mark;
     mark [uni03020306.cap] <anchor 62 682> @uni0300.cap_26_uni03020306.cap_mark;
-    mark [uni0300 uni0301 uni0302 uni03020300 uni03020301 uni03020303 uni03020309 uni0303 uni0304 uni0306
-       uni03060300 uni03060301 uni03060303 uni03060309 uni0307 uni0308 uni03080300 uni03080301 uni03080304 uni0308030C
-       uni0309 uni030A uni030B uni030C uni030F uni0312 uni0313 uni0326.a] <anchor 104 502> @uni0300_29_uni03020306_mark;
+    mark [uni0300 uni0301 uni0302 uni03020300 uni03020301 uni03020303 uni03020309 uni0303
+        uni0304 uni0306 uni03060300 uni03060301 uni03060303 uni03060309 uni0307
+        uni0308 uni03080300 uni03080301 uni03080304 uni0308030C uni0309 uni030A
+        uni030B uni030C uni030F uni0312 uni0313 uni0326.a] <anchor 104 502> @uni0300_29_uni03020306_mark;
     mark [uni03020306] <anchor 62 502> @uni0300_29_uni03020306_mark;
     mark [uni0323 uni0324 uni0326 uni032E uni0331] <anchor -6 -30> @uni0323_5_uni0331_mark;
     mark [uni0327 uni0327.cap] <anchor 0 0> @uni0327_uni0327.cap_mark;
@@ -114,7 +128,7 @@
     mark [uni0328] <anchor 0 0> uni0328_mark;
 
     feature kern {
-      lookup kern_DFLT_dflt_1 {
+      lookup kern_DFLT_dflt_0 {
         pos Euro five.onum 10;
         pos Euro five.pnum 20;
         pos Euro four.onum 20;
@@ -962,20 +976,19 @@
         pos [x] [periodcentered] -20;
         pos [x] [registered] 60;
         pos [x] [trademark] 20;
-      } kern_DFLT_dflt_1;
+      } kern_DFLT_dflt_0;
 
     } kern;
 
     feature mark {
-      lookup mark_DFLT_dflt_1 {
+      lookup mark_DFLT_dflt_0 {
         pos base [a.a aogonek.a] <anchor 292 502> mark @uni0300_29_uni03020306_mark;
         pos base [a] <anchor 314 502> mark @uni0300_29_uni03020306_mark;
         pos base [aogonek g] <anchor 312 502> mark @uni0300_29_uni03020306_mark;
         pos base [b h thorn] <anchor 208 730> mark @uni0300_29_uni03020306_mark;
         pos base [c] <anchor 302 502> mark @uni0300_29_uni03020306_mark;
         pos base [d] <anchor 476 730> mark @uni0300_29_uni03020306_mark;
-        pos base [dotlessi iogonek.d]
-          <anchor 166 502> mark @uni0300_29_uni03020306_mark;
+        pos base [dotlessi iogonek.d] <anchor 166 502> mark @uni0300_29_uni03020306_mark;
         pos base [e eogonek] <anchor 294 502> mark @uni0300_29_uni03020306_mark;
         pos base [f] <anchor 308 740> mark @uni0300_29_uni03020306_mark;
         pos base [g.a] <anchor 276 502> mark @uni0300_29_uni03020306_mark;
@@ -984,8 +997,7 @@
         pos base [l l.a] <anchor 206 730> mark @uni0300_29_uni03020306_mark;
         pos base [m oe] <anchor 460 502> mark @uni0300_29_uni03020306_mark;
         pos base [n] <anchor 320 502> mark @uni0300_29_uni03020306_mark;
-        pos base [o ohorn oslash q uni01EB]
-          <anchor 318 502> mark @uni0300_29_uni03020306_mark;
+        pos base [o ohorn oslash q uni01EB] <anchor 318 502> mark @uni0300_29_uni03020306_mark;
         pos base [p] <anchor 330 502> mark @uni0300_29_uni03020306_mark;
         pos base [r] <anchor 236 502> mark @uni0300_29_uni03020306_mark;
         pos base [s y] <anchor 248 502> mark @uni0300_29_uni03020306_mark;
@@ -996,22 +1008,19 @@
         pos base [w] <anchor 392 502> mark @uni0300_29_uni03020306_mark;
         pos base [x] <anchor 252 504> mark @uni0300_29_uni03020306_mark;
         pos base [z] <anchor 262 502> mark @uni0300_29_uni03020306_mark;
-      } mark_DFLT_dflt_1;
+      } mark_DFLT_dflt_0;
 
-      lookup mark_DFLT_dflt_2 {
+      lookup mark_DFLT_dflt_1 {
         pos base [A Aogonek] <anchor 344 682> mark @uni0300.cap_26_uni03020306.cap_mark;
         pos base [AE] <anchor 534 694> mark @uni0300.cap_26_uni03020306.cap_mark;
         pos base [B V] <anchor 326 682> mark @uni0300.cap_26_uni03020306.cap_mark;
-        pos base [C G O Ohorn Oslash Q uni01EA]
-          <anchor 406 682> mark @uni0300.cap_26_uni03020306.cap_mark;
+        pos base [C G O Ohorn Oslash Q uni01EA] <anchor 406 682> mark @uni0300.cap_26_uni03020306.cap_mark;
         pos base [D] <anchor 370 682> mark @uni0300.cap_26_uni03020306.cap_mark;
         pos base [E Eogonek] <anchor 362 682> mark @uni0300.cap_26_uni03020306.cap_mark;
         pos base [F] <anchor 366 682> mark @uni0300.cap_26_uni03020306.cap_mark;
         pos base [H] <anchor 388 682> mark @uni0300.cap_26_uni03020306.cap_mark;
-        pos base [I Iogonek L]
-          <anchor 202 682> mark @uni0300.cap_26_uni03020306.cap_mark;
-        pos base [I.a Iogonek.a]
-          <anchor 240 682> mark @uni0300.cap_26_uni03020306.cap_mark;
+        pos base [I Iogonek L] <anchor 202 682> mark @uni0300.cap_26_uni03020306.cap_mark;
+        pos base [I.a Iogonek.a] <anchor 240 682> mark @uni0300.cap_26_uni03020306.cap_mark;
         pos base [J] <anchor 422 682> mark @uni0300.cap_26_uni03020306.cap_mark;
         pos base [K] <anchor 386 682> mark @uni0300.cap_26_uni03020306.cap_mark;
         pos base [M] <anchor 420 682> mark @uni0300.cap_26_uni03020306.cap_mark;
@@ -1028,18 +1037,18 @@
         pos base [Y] <anchor 304 682> mark @uni0300.cap_26_uni03020306.cap_mark;
         pos base [Z] <anchor 354 682> mark @uni0300.cap_26_uni03020306.cap_mark;
         pos base [uni018F] <anchor 445 682> mark @uni0300.cap_26_uni03020306.cap_mark;
-      } mark_DFLT_dflt_2;
+      } mark_DFLT_dflt_1;
 
-      lookup mark_DFLT_dflt_3 {
+      lookup mark_DFLT_dflt_2 {
         pos base [C] <anchor 274 0> mark @uni0327_uni0327.cap_mark;
         pos base [S] <anchor 218 0> mark @uni0327_uni0327.cap_mark;
         pos base [T] <anchor 208 0> mark @uni0327_uni0327.cap_mark;
         pos base [c] <anchor 196 0> mark @uni0327_uni0327.cap_mark;
         pos base [s] <anchor 166 0> mark @uni0327_uni0327.cap_mark;
         pos base [t] <anchor 158 0> mark @uni0327_uni0327.cap_mark;
-      } mark_DFLT_dflt_3;
+      } mark_DFLT_dflt_2;
 
-      lookup mark_DFLT_dflt_4 {
+      lookup mark_DFLT_dflt_3 {
         pos base [A e] <anchor 212 -22> mark @uni0323_5_uni0331_mark;
         pos base [B u uhorn] <anchor 240 -22> mark @uni0323_5_uni0331_mark;
         pos base [C] <anchor 268 -22> mark @uni0323_5_uni0331_mark;
@@ -1090,16 +1099,16 @@
         pos base [x] <anchor 152 -22> mark @uni0323_5_uni0331_mark;
         pos base [y] <anchor 88 -242> mark @uni0323_5_uni0331_mark;
         pos base [z] <anchor 164 -22> mark @uni0323_5_uni0331_mark;
-      } mark_DFLT_dflt_4;
+      } mark_DFLT_dflt_3;
 
-      lookup mark_DFLT_dflt_5 {
+      lookup mark_DFLT_dflt_4 {
         pos base [O] <anchor 498 650> mark uni031B_mark;
         pos base [U] <anchor 570 670> mark uni031B_mark;
         pos base [o] <anchor 390 478> mark uni031B_mark;
         pos base [u] <anchor 440 488> mark uni031B_mark;
-      } mark_DFLT_dflt_5;
+      } mark_DFLT_dflt_4;
 
-      lookup mark_DFLT_dflt_6 {
+      lookup mark_DFLT_dflt_5 {
         pos base [a.a] <anchor 300 0> mark uni0328_mark;
         pos base [a] <anchor 334 0> mark uni0328_mark;
         pos base [dotlessi] <anchor 58 0> mark uni0328_mark;
@@ -1107,24 +1116,25 @@
         pos base [i] <anchor 44 0> mark uni0328_mark;
         pos base [o] <anchor 214 0> mark uni0328_mark;
         pos base [u] <anchor 324 0> mark uni0328_mark;
-      } mark_DFLT_dflt_6;
+      } mark_DFLT_dflt_5;
 
-      lookup mark_DFLT_dflt_7 {
+      lookup mark_DFLT_dflt_6 {
         pos base [A] <anchor 408 0> mark uni0328.cap_mark;
         pos base [E] <anchor 330 0> mark uni0328.cap_mark;
         pos base [I.a] <anchor 94 0> mark uni0328.cap_mark;
         pos base [I] <anchor 54 0> mark uni0328.cap_mark;
         pos base [O] <anchor 276 0> mark uni0328.cap_mark;
         pos base [U] <anchor 260 0> mark uni0328.cap_mark;
-      } mark_DFLT_dflt_7;
+      } mark_DFLT_dflt_6;
 
     } mark;
 
     feature mkmk {
-      lookup mkmk_DFLT_dflt_1 {
+      lookup mkmk_DFLT_dflt_0 {
+        lookupflag MarkAttachmentTypedef 1;
         pos mark [uni0302] <anchor 144 710> mark @uni0300_29_uni03020306_mark;
         pos mark [uni0307 uni0308] <anchor 136 680> mark @uni0300_29_uni03020306_mark;
-      } mkmk_DFLT_dflt_1;
+      } mkmk_DFLT_dflt_0;
 
     } mkmk;
 

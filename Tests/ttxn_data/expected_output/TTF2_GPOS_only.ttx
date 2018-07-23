@@ -1,0 +1,1247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont sfntVersion="\x00\x01\x00\x00" ttLibVersion="3.28">
+
+  <GPOS>
+    languagesystem DFLT dflt;
+    languagesystem arab dflt;
+
+
+
+    # Mark Class definitions *********************************
+    mark [circumflex.arabic] <anchor 276 770 21> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [largev.arabic] <anchor 337 778 22> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0610] <anchor 203 960 30> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0611] <anchor 186 960 41> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0612] <anchor 57 1000 46> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0613] <anchor 79 925 59> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0614] <anchor 91 1026 24> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0615] <anchor 98 876 31> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0616] <anchor 0 981 46> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0617] <anchor 0 836 28> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0618] <anchor 0 916 9> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0619] <anchor 0 897 31> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni064B] <anchor 175 922 16> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni064C] <anchor 185 893 48> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni064E] <anchor 184 925 8> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni064F] <anchor 152 889 34> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0651] <anchor 141 897 38> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0651064B] <anchor 136 914 53> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0651064C] <anchor 134 907 87> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0651064D] <anchor 180 647 53> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0651064E] <anchor 136 905 45> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0651064F] <anchor 133 914 74> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni06510650] <anchor 142 745 46> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni06510670] <anchor 148 918 51> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0652] <anchor 136 920 25> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0653] <anchor 138 1131 16> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0654] <anchor 136 1057 27> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0654064B] <anchor 115 1040 43> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0654064C] <anchor 120 1040 73> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0654064E] <anchor 117 1040 35> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0654064F] <anchor 120 1040 57> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni06540652] <anchor 122 1059 50> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0657] <anchor 153 935 37> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0658] <anchor 188 1033 15> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0659] <anchor 256 927 9> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni065A] <anchor 282 633 23> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni065B] <anchor 243 676 22> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni065D] <anchor 162 972 37> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni065E] <anchor 212 998 26> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni0670] <anchor 22 838 13> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni06D6] <anchor 19 981 71> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni06D7] <anchor 0 981 75> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni06D8] <anchor -2 900 0> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni06D9] <anchor 0 933 46> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni06DA] <anchor 0 769 44> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni06DB] <anchor 0 561 22> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni06DC] <anchor 153 865 60> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni06DF] <anchor 0 906 0> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni06E0] <anchor 0 826 0> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni06E1] <anchor 0 905 31> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni06E2] <anchor 30 825 31> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni06E4] <anchor 0 952 20> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni06E7] <anchor -12 897 28> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni06E8] <anchor -19 840 32> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni06EB] <anchor 0 927 8> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni06EC] <anchor 0 880 12> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni08E4 uni08E7] <anchor 96 1146 38> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni08E5] <anchor 170 868 59> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni08E8] <anchor 123 1291 58> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni08EA] <anchor 8 1273 8> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni08EB] <anchor 9 1297 15> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni08EC] <anchor -8 1084 47> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni08F0] <anchor 284 925 11> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni08F1] <anchor 352 869 75> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni08F3] <anchor -4 787 37> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni08F4] <anchor 11 963 59> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni08F5] <anchor -9 902 9> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni08F7] <anchor -50 847 29> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni08F8 uni08FD] <anchor 0 892 30> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni08FB uni08FC] <anchor -42 859 60> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uni08FE] <anchor 122 889 34> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [uniFDF2.pt2] <anchor 1140 1039 50> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [wasla] <anchor 90 1084 33> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [wavyhamza_above] <anchor 99 1026 42> @circumflex.arabic_77_wavyhamza_above_mark;
+    mark [circumflex.below] <anchor 190 -211 23> @circumflex.below_23_wavyhamza_below_mark;
+    mark [smallv.below] <anchor 255 -212 23> @circumflex.below_23_wavyhamza_below_mark;
+    mark [uni061A] <anchor 0 -183 9> @circumflex.below_23_wavyhamza_below_mark;
+    mark [uni064D] <anchor 161 12 18> @circumflex.below_23_wavyhamza_below_mark;
+    mark [uni0650] <anchor 144 -12 8> @circumflex.below_23_wavyhamza_below_mark;
+    mark [uni0655] <anchor 173 92 27> @circumflex.below_23_wavyhamza_below_mark;
+    mark [uni0655064D] <anchor 173 92 43> @circumflex.below_23_wavyhamza_below_mark;
+    mark [uni06550650] <anchor 173 92 35> @circumflex.below_23_wavyhamza_below_mark;
+    mark [uni0656] <anchor 18 -5 14> @circumflex.below_23_wavyhamza_below_mark;
+    mark [uni065C] <anchor 0 -356 0> @circumflex.below_23_wavyhamza_below_mark;
+    mark [uni06E3] <anchor 0 -88 57> @circumflex.below_23_wavyhamza_below_mark;
+    mark [uni06EA] <anchor 0 -402 8> @circumflex.below_23_wavyhamza_below_mark;
+    mark [uni06ED] <anchor 0 -204 30> @circumflex.below_23_wavyhamza_below_mark;
+    mark [uni08E6] <anchor 6 -431 37> @circumflex.below_23_wavyhamza_below_mark;
+    mark [uni08E9] <anchor -70 -239 76> @circumflex.below_23_wavyhamza_below_mark;
+    mark [uni08ED] <anchor 5 -224 9> @circumflex.below_23_wavyhamza_below_mark;
+    mark [uni08EE] <anchor -7 -253 14> @circumflex.below_23_wavyhamza_below_mark;
+    mark [uni08EF] <anchor -2 -278 46> @circumflex.below_23_wavyhamza_below_mark;
+    mark [uni08F2] <anchor 223 -12 21> @circumflex.below_23_wavyhamza_below_mark;
+    mark [uni08F6] <anchor -36 -163 8> @circumflex.below_23_wavyhamza_below_mark;
+    mark [uni08F9] <anchor 107 -530 27> @circumflex.below_23_wavyhamza_below_mark;
+    mark [uni08FA] <anchor 0 -527 30> @circumflex.below_23_wavyhamza_below_mark;
+    mark [wavyhamza_below] <anchor 162 135 44> @circumflex.below_23_wavyhamza_below_mark;
+    mark [uni00B2.small] <anchor 243 -276 25> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni00B3.small] <anchor 245 -276 34> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni00B9.small] <anchor 249 -276 11> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni0660.small] <anchor 206 -276 10> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni0661.small] <anchor 212 -276 17> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni0662.small] <anchor 271 -276 44> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni0663.small] <anchor 313 -276 65> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni0664.small] <anchor 275 -276 35> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni0665.small] <anchor 250 -276 27> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni0666.small] <anchor 292 -276 22> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni0667.small uni0668.small] <anchor 285 -276 33> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni0669.small] <anchor 284 -276 43> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni06F4.small] <anchor 305 -276 60> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni06F4.urdu.small] <anchor 305 -276 33> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni06F5.small] <anchor 297 -276 53> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni06F6.small] <anchor 292 -276 49> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni06F7.urdu.small] <anchor 275 -276 29> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni2070.small] <anchor 256 -276 22> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni2074.small] <anchor 274 -276 18> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni2075.small] <anchor 247 -277 31> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni2076.small] <anchor 267 -276 35> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni2077.small] <anchor 255 -276 7> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni2078.small] <anchor 259 -276 46> @uni00B2.small_25_uni2079.small_mark;
+    mark [uni2079.small] <anchor 251 -276 34> @uni00B2.small_25_uni2079.small_mark;
+
+    feature mark {
+      script arab;
+      language dflt;
+      lookup mark_arab_dflt_0 {
+        pos base [LA_Alef.fina LA_AlefHamzaBelow.fina LA_AlefWHamzaBelow.fina] <anchor 183 1188 21> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [LA_Alef.isol LA_AlefHamzaBelow.isol LA_AlefWHamzaBelow.isol] <anchor 131 1212 51> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [LA_AlefFathatan.fina] <anchor 137 1580 40> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [LA_AlefHamzaAbove.fina] <anchor 163 1577 51> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [LA_AlefHamzaAbove.isol] <anchor 111 1602 81> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [LA_AlefMadda.fina] <anchor 184 1384 40> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [LA_AlefMadda.isol] <anchor 132 1408 70> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [LA_AlefWHamzaAbove.fina] <anchor 195 1600 66> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [LA_AlefWHamzaAbove.isol] <anchor 143 1624 96> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [LA_AlefWasla.fina] <anchor 213 1488 57> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [LA_AlefWasla.isol] <anchor 161 1512 87> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [LA_Lam.fina LA_LamThreeDotsBelow.fina LA_Lambarshort.fina] <anchor 928 1474 55> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [LA_Lam.isol LA_LamThreeDotsBelow.isol LA_Lambarshort.isol LA_Lamdoublebar.isol] <anchor 768 1509 34> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [LA_LamDotAbove.fina] <anchor 924 1827 67> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [LA_LamDotAbove.isol] <anchor 764 1862 45> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [LA_LamSmallVAbove.fina] <anchor 901 1879 82> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [LA_LamSmallVAbove.isol] <anchor 741 1914 60> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [LA_LamThreeDotsAbove.fina] <anchor 927 1907 82> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [LA_LamThreeDotsAbove.isol] <anchor 767 1942 60> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [Tatweel] <anchor 203 926 12> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [alef_alt.fina] <anchor 232 1178 18> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [alef_alt.isol] <anchor 249 1172 0> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [beh_dotless_alt.init uni064A.init uni067E.init uni0680.init uni06CC.init
+            uni06D0.init uni0752.init uni0755.init] <anchor 394 866 25> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [beh_dotless_alt.medi uni064A.medi uni067E.medi uni0680.medi uni06CC.medi
+            uni06D0.medi uni0752.medi uni0755.medi uni0777.medi uni08A0.medi] <anchor 443 566 31> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [beh_dotless_alt_1.init] <anchor 306 671 21> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [qaf_dotless_alt.init] <anchor 380 922 35> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni060B] <anchor 448 1403 51> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni060F] <anchor 467 1190 67> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0620 uni0649 uni064A uni0678 uni06CC uni06D0 uni06D1 uni0777] <anchor 420 493 46> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0620.fina uni0649.fina uni064A.fina uni06CC.fina uni06D0.fina uni06D1.fina
+            uni0777.fina] <anchor 687 320 42> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0620.init uni0628.init uni0649.init uni066E.init uni067B.init uni0777.init] <anchor 284 866 24> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0620.medi uni0628.medi uni0649.medi uni066E.medi uni067B.medi] <anchor 303 566 30> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0621] <anchor 421 667 63> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0622.fina] <anchor 233 1670 37> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0622] <anchor 251 1670 36> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0623.fina] <anchor 212 1863 48> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0623] <anchor 230 1863 47> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0624.fina] <anchor 475 1202 77> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0624] <anchor 505 1185 73> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0625 uni0627 uni0673 uni0675] <anchor 250 1474 17> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0625.fina uni0627.fina uni0673.fina uni0675.fina] <anchor 232 1474 18> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0626.fina] <anchor 451 759 74> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0626.init] <anchor 251 1315 56> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0626.medi] <anchor 270 1015 62> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0626] <anchor 387 942 78> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0628 uni066E uni067B uni067E uni0680 uni0750 uni0752 uni0755 uni08A0] <anchor 748 816 33> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0628.fina uni066E.fina uni067B.fina uni067E.fina uni0680.fina uni0750.fina
+            uni0752.fina uni0755.fina uni08A0.fina] <anchor 828 624 39> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0629.fina] <anchor 495 1318 55> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0629] <anchor 366 1279 52> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni062A.fina uni067C.fina] <anchor 818 967 58> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni062A.init uni063E.init] <anchor 274 1209 44> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni062A.medi uni063E.medi uni067C.medi uni0753.medi] <anchor 433 909 51> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni062A] <anchor 738 1159 53> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni062B.fina] <anchor 827 1057 65> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni062B.init uni063F.init] <anchor 283 1299 51> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni062B.medi uni063F.medi] <anchor 442 999 58> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni062B] <anchor 748 1248 60> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni062C uni062D uni0683 uni0684 uni0686 uni0687 uni0758 uni076E uni076F uni077C] <anchor 700 880 44> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni062C.fina uni062D.fina uni0683.fina uni0684.fina uni0686.fina uni0687.fina
+            uni0758.fina uni076E.fina uni076F.fina uni077C.fina] <anchor 700 836 54> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni062C.init uni062D.init uni0683.init uni0684.init uni0686.init uni0687.init
+            uni0758.init uni076E.init uni076F.init uni077C.init] <anchor 660 796 41> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni062C.medi uni062D.medi uni0683.medi uni0684.medi uni0686.medi uni0687.medi
+            uni0758.medi uni076E.medi uni076F.medi uni077C.medi] <anchor 662 796 52> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni062E.fina] <anchor 696 1189 67> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni062E.init uni06BF.init] <anchor 656 1149 53> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni062E.medi] <anchor 658 1149 64> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni062E] <anchor 696 1233 57> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni062F uni0689 uni068A uni068D uni075A] <anchor 448 916 28> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni062F.fina uni0689.fina uni068A.fina uni068D.fina uni075A.fina] <anchor 462 916 31> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0630.fina] <anchor 458 1269 43> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0630] <anchor 444 1249 40> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0631 uni0693 uni0694 uni0695 uni0696 uni075B] <anchor 372 798 26> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0631.fina uni0693.fina uni0694.fina uni0695.fina uni0696.fina] <anchor 402 798 34> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0632.fina] <anchor 398 1151 45> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0632] <anchor 368 1151 37> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0633 uni069B] <anchor 1413 676 68> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0633.fina uni069B.fina] <anchor 1485 676 79> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0633.init uni069B.init] <anchor 695 676 62> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0633.medi uni069B.medi] <anchor 717 676 74> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0634 uni069C uni06FA] <anchor 1412 1109 95> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0634.fina uni069C.fina uni06FA.fina] <anchor 1484 1109 106> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0634.init] <anchor 695 1112 89> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0634.medi] <anchor 722 1105 101> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0635 uni069D] <anchor 1473 831 53> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0635.fina uni069D.fina] <anchor 1493 831 64> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0635.init uni069D.init] <anchor 831 831 43> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0635.medi uni069D.medi] <anchor 831 831 54> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0636 uni06FB] <anchor 1469 1184 65> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0636.fina] <anchor 1489 1184 76> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0636.init uni06FB.init] <anchor 828 1184 55> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0636.medi] <anchor 827 1185 66> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0637.fina] <anchor 1086 891 58> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0637.init] <anchor 863 915 47> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0637.medi] <anchor 866 915 58> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0637] <anchor 1087 891 43> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0638.fina] <anchor 1083 1244 70> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0638.init] <anchor 859 1268 59> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0638.medi] <anchor 862 1268 70> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0638] <anchor 1083 1244 55> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0639.fina] <anchor 506 866 61> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0639.init] <anchor 439 866 39> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0639.medi] <anchor 433 866 50> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0639] <anchor 459 1051 44> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni063A.fina uni06FC.fina] <anchor 502 1219 73> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni063A.init uni06FC.init] <anchor 435 1219 51> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni063A.medi uni06FC.medi] <anchor 429 1219 62> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni063A] <anchor 459 1404 56> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni063B uni063C uni06A9 uni06AB uni0762 uni0763 uni0764] <anchor 728 1178 43> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni063B.fina uni063C.fina uni06A9.fina uni06AB.fina uni0762.fina uni0763.fina
+            uni0764.fina] <anchor 751 1179 53> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni063B.init uni063C.init uni0643.init uni06A9.init uni06AB.init uni06AC.init
+            uni06AD.init uni06AE.init uni0762.init uni0763.init uni0764.init
+            uni077F.init] <anchor 100 1180 37> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni063B.medi uni063C.medi uni0643.medi uni06A9.medi uni06AB.medi uni06AC.medi
+            uni06AD.medi uni06AE.medi uni0762.medi uni0763.medi uni0764.medi
+            uni077F.medi] <anchor 102 1162 47> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni063D.fina] <anchor 658 762 67> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni063D.init] <anchor 365 1308 50> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni063D.medi] <anchor 413 1009 56> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni063D] <anchor 391 935 71> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni063E.fina] <anchor 677 663 62> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni063E] <anchor 410 856 66> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni063F.fina] <anchor 686 753 69> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni063F] <anchor 419 926 73> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0641.fina uni06A3.fina] <anchor 1265 1254 63> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0641.init uni06A3.init] <anchor 398 1403 51> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0641.medi uni06A3.medi] <anchor 405 1219 57> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0641] <anchor 1213 1438 55> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0642 uni08A5] <anchor 796 1139 70> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0642.fina] <anchor 755 1156 72> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0642.init uni08A5.init] <anchor 392 1393 59> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0642.medi uni08A5.medi] <anchor 399 1209 65> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0643 uni06AE] <anchor 473 856 75> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0643.fina uni06AE.fina] <anchor 733 856 80> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0644 uni06B8 uni076A uni08A6] <anchor 818 1474 35> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0644.fina uni06B8.fina uni076A.fina uni08A6.fina] <anchor 828 1474 47> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0644.init uni076A.init uni08A6.init] <anchor 162 1474 20> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0644.medi uni06B8.medi uni076A.medi uni08A6.medi] <anchor 162 1474 28> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0645 uni0766] <anchor 455 815 36> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0645.fina uni0766.fina] <anchor 565 796 46> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0645.init uni0766.init] <anchor 506 796 34> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0645.medi uni0766.medi] <anchor 399 796 42> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0646 uni06B9 uni06BC uni0767] <anchor 534 816 40> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0646.fina uni06BC.fina] <anchor 537 766 49> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0646.init] <anchor 281 1219 36> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0646.medi uni06B9.medi] <anchor 299 919 42> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0647 uni06C1 uni06D5] <anchor 346 936 32> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0647.fina] <anchor 474 975 35> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0647.init uni06BE.init] <anchor 368 987 46> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0647.medi] <anchor 470 966 62> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0648 uni06C4] <anchor 525 796 42> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0648.fina uni06C4.fina] <anchor 495 813 46> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni066F.fina] <anchor 765 813 52> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni066F.init uni06A2.init uni06A5.init uni0760.init uni0761.init] <anchor 402 1050 39> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni066F.medi uni06A2.medi uni06A5.medi uni0760.medi uni0761.medi] <anchor 409 866 45> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni066F] <anchor 806 796 50> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0671.fina] <anchor 262 1774 54> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0671] <anchor 279 1774 53> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0672.fina] <anchor 244 1886 63> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0672] <anchor 262 1886 62> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0676 uni0677 uni0778 uni0779] <anchor 514 1174 44> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0676.fina uni0677.fina uni0778.fina uni0779.fina] <anchor 515 1090 48> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0678.fina] <anchor 914 769 74> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0678.init] <anchor 550 1314 56> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0678.medi] <anchor 548 1064 62> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0679.fina] <anchor 887 1097 76> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0679.init] <anchor 345 1339 62> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0679.medi] <anchor 502 1039 69> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0679] <anchor 807 1319 71> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni067A.fina] <anchor 800 1185 58> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni067A.init] <anchor 366 1428 45> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni067A.medi] <anchor 415 1128 51> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni067A] <anchor 721 1379 53> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni067C.init] <anchor 274 1209 78> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni067C] <anchor 738 1159 87> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni067D.fina] <anchor 818 1078 66> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni067D.init] <anchor 384 1320 53> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni067D.medi] <anchor 433 1020 59> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni067D] <anchor 738 1270 61> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni067F.fina] <anchor 825 1068 73> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni067F.init] <anchor 391 1310 60> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni067F.medi] <anchor 440 1010 66> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni067F] <anchor 745 1260 68> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0681.fina] <anchor 666 1285 87> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0681.init] <anchor 626 1245 73> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0681.medi] <anchor 628 1245 84> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0681] <anchor 666 1328 77> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0682.fina] <anchor 672 1398 75> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0682.init] <anchor 632 1358 61> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0682.medi] <anchor 635 1357 72> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0682] <anchor 672 1442 65> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0685.fina] <anchor 699 1269 82> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0685.init] <anchor 659 1229 68> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0685.medi] <anchor 661 1229 79> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0685] <anchor 699 1313 72> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0688 uni0759] <anchor 514 1389 66> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0688.fina] <anchor 521 1389 69> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni068B.fina] <anchor 521 1389 81> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni068B] <anchor 513 1389 78> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni068C.fina] <anchor 452 1259 51> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni068C] <anchor 438 1259 48> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni068E.fina] <anchor 461 1349 58> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni068E] <anchor 447 1349 55> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni068F.fina] <anchor 452 1370 59> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni068F] <anchor 438 1370 56> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0690.fina] <anchor 459 1360 66> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0690] <anchor 445 1360 63> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0691.fina] <anchor 461 1271 71> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0691] <anchor 432 1271 63> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0692.fina] <anchor 379 1237 59> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0692] <anchor 349 1237 51> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0697.fina] <anchor 392 1141 53> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0697] <anchor 362 1141 45> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0698.fina] <anchor 401 1231 60> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0698] <anchor 371 1231 52> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0699.fina] <anchor 399 1242 68> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0699] <anchor 370 1243 60> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni069A.fina] <anchor 1481 1029 91> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni069A.init] <anchor 691 1029 74> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni069A.medi] <anchor 713 1029 86> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni069A] <anchor 1409 1029 80> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni069C.init uni06FA.init] <anchor 694 1109 89> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni069C.medi uni06FA.medi] <anchor 716 1109 101> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni069E.fina] <anchor 1492 1264 91> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni069E.init] <anchor 830 1264 70> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni069E.medi] <anchor 830 1265 81> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni069E] <anchor 1472 1264 80> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni069F.fina] <anchor 1085 1324 85> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni069F.init] <anchor 862 1348 74> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni069F.medi] <anchor 865 1348 85> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni069F] <anchor 1086 1324 70> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06A0.fina] <anchor 505 1299 88> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06A0.init] <anchor 438 1299 66> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06A0.medi] <anchor 432 1299 77> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06A0] <anchor 458 1484 72> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06A1 uni06A2 uni06A5 uni0760 uni0761] <anchor 1217 1085 45> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06A1.fina uni06A2.fina uni06A5.fina uni0760.fina uni0761.fina] <anchor 1269 901 51> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06A3] <anchor 1213 1438 67> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06A4.fina uni08A4.fina] <anchor 1268 1334 78> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06A4.init uni08A4.init] <anchor 379 1355 62> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06A4.medi uni08A4.medi] <anchor 408 1299 72> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06A4] <anchor 1216 1518 70> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06A6.fina] <anchor 1266 1345 86> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06A6.init] <anchor 377 1366 70> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06A6.medi] <anchor 406 1310 80> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06A6] <anchor 1214 1529 78> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06A7.fina] <anchor 761 1166 64> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06A7] <anchor 802 1128 62> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06A8.fina] <anchor 764 1246 79> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06A8] <anchor 805 1209 77> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06AA.fina] <anchor 796 1162 60> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06AA.init] <anchor 531 1162 47> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06AA.medi] <anchor 541 1162 55> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06AA] <anchor 793 1142 50> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06AC.fina] <anchor 729 1209 90> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06AC] <anchor 469 1208 85> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06AD.fina] <anchor 733 1289 105> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06AD] <anchor 472 1289 100> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06AF uni06B2 uni06B3] <anchor 670 1324 61> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06AF.fina] <anchor 672 1312 72> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06AF.init uni06B1.init uni06B2.init uni06B4.init] <anchor 48 1324 54> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06AF.medi uni06B0.medi uni06B1.medi uni06B2.medi uni06B3.medi uni06B4.medi] <anchor 34 1312 67> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06B0.fina] <anchor 895 1168 105> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06B0.init uni06B3.init] <anchor 52 1324 54> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06B0] <anchor 958 1229 94> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06B1 uni06B4] <anchor 666 1324 61> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06B1.fina uni06B3.fina uni06B4.fina] <anchor 661 1312 72> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06B2.fina] <anchor 680 1312 72> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06B5.fina] <anchor 800 1879 74> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06B5.init] <anchor 135 1879 47> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06B5.medi] <anchor 135 1879 53> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06B5] <anchor 791 1879 63> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06B6.fina] <anchor 824 1827 59> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06B6.init] <anchor 158 1827 32> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06B6.medi] <anchor 159 1827 38> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06B6] <anchor 813 1827 48> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06B7.fina] <anchor 827 1907 74> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06B7.init] <anchor 161 1907 47> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06B7.medi] <anchor 161 1908 53> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06B7] <anchor 817 1907 63> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06B8.init] <anchor 412 1474 44> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06B9.fina] <anchor 537 766 61> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06B9.init uni06BC.init] <anchor 280 1219 36> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06BA.fina] <anchor 541 413 37> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06BA] <anchor 538 463 28> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06BB.fina] <anchor 600 886 75> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06BB] <anchor 597 916 66> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06BC.medi] <anchor 303 566 75> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06BD.fina] <anchor 540 846 64> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06BD] <anchor 537 896 55> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06BE.fina] <anchor 578 1017 103> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06BE.medi] <anchor 328 1017 100> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06BE] <anchor 548 987 43> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06BF.fina] <anchor 697 1189 93> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06BF.medi] <anchor 658 1148 64> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06BF] <anchor 696 1233 83> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06C0.fina] <anchor 441 1424 67> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06C0] <anchor 313 1386 64> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06C1.fina] <anchor 470 484 22> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06C1.init] <anchor 254 866 40> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06C1.medi] <anchor 474 376 41> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06C2.fina] <anchor 437 933 54> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06C2.init] <anchor 221 1315 70> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06C2.medi] <anchor 441 825 72> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06C2] <anchor 313 1385 64> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06C3.fina] <anchor 460 827 42> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06C3] <anchor 367 1278 52> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06C5.fina] <anchor 495 813 60> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06C5] <anchor 525 796 56> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06C6.fina] <anchor 472 1252 72> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06C6] <anchor 502 1235 68> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06C7.fina] <anchor 461 1215 84> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06C7] <anchor 491 1198 80> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06C8.fina] <anchor 491 1345 63> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06C8] <anchor 521 1328 59> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06C9.fina] <anchor 465 1255 71> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06C9] <anchor 496 1238 67> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06CA.fina] <anchor 485 1156 66> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06CA] <anchor 515 1139 62> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06CB.fina] <anchor 494 1246 73> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06CB] <anchor 524 1229 69> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06CD.fina] <anchor 964 317 50> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06CD] <anchor 757 643 55> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06CE.fina] <anchor 664 759 68> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06CE.init] <anchor 371 1305 70> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06CE.medi uni0756.medi] <anchor 420 1006 57> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06CE] <anchor 397 932 72> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06CF.fina] <anchor 491 1166 58> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06CF] <anchor 521 1149 54> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06D2.fina] <anchor 477 256 30> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06D2] <anchor 496 739 33> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06D3.fina] <anchor 413 705 61> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06D3] <anchor 463 1188 65> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06E5] <anchor 207 901 35> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06E6] <anchor 354 901 30> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06EE.fina] <anchor 433 1358 56> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06EE] <anchor 419 1358 53> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06EF.fina] <anchor 373 1240 58> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06EF] <anchor 343 1240 50> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06FB.fina] <anchor 1489 1184 88> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06FB.medi] <anchor 827 1184 78> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06FC] <anchor 455 1404 57> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06FF.fina] <anchor 549 1459 128> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06FF.init] <anchor 339 1429 71> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06FF.medi] <anchor 299 1459 125> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni06FF] <anchor 519 1430 67> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0750.init] <anchor 656 866 27> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0750.medi] <anchor 617 566 34> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0751.fina] <anchor 827 1057 77> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0751.init] <anchor 283 1299 63> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0751.medi] <anchor 302 999 69> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0751] <anchor 747 1249 72> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0753.fina] <anchor 818 967 85> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0753.init] <anchor 384 1209 72> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0753] <anchor 738 1149 80> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0754.fina] <anchor 824 977 50> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0754.init uni0767.init] <anchor 390 1219 56> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0754.medi uni08A9.medi] <anchor 439 919 62> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0754] <anchor 745 1168 64> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0756.fina] <anchor 805 1063 64> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0756.init] <anchor 371 1305 51> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0756] <anchor 725 1255 59> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0757.fina uni08A2.fina] <anchor 690 1179 75> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0757.init uni08A2.init] <anchor 650 1139 61> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0757.medi] <anchor 651 1139 72> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0757] <anchor 690 1222 65> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0759.fina] <anchor 521 1389 88> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni075B.fina] <anchor 387 798 40> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni075C.fina] <anchor 1482 1120 114> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni075C.init] <anchor 692 1120 97> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni075C.medi] <anchor 714 1120 109> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni075C] <anchor 1410 1120 103> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni075D.fina] <anchor 496 1209 81> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni075D.init] <anchor 429 1209 59> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni075D.medi] <anchor 423 1209 70> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni075D] <anchor 449 1394 65> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni075E.fina] <anchor 496 1320 89> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni075E.init] <anchor 429 1320 67> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni075E.medi] <anchor 440 1320 78> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni075E] <anchor 450 1505 73> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni075F.fina] <anchor 478 1428 81> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni075F.init] <anchor 411 1428 59> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni075F.medi] <anchor 422 1428 70> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni075F] <anchor 431 1613 65> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0765.fina] <anchor 561 1149 58> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0765.init] <anchor 502 1149 46> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0765.medi] <anchor 394 1149 54> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0765] <anchor 451 1168 47> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0767.fina] <anchor 537 766 68> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0767.medi] <anchor 439 919 43> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0768.fina] <anchor 596 1240 85> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0768.init] <anchor 361 1497 69> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0768.medi] <anchor 345 1392 78> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0768] <anchor 593 1289 76> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0769.fina] <anchor 515 1187 73> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0769.init] <anchor 279 1463 57> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0769.medi] <anchor 276 1358 66> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0769] <anchor 511 1255 64> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni076B.fina] <anchor 374 1360 53> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni076B] <anchor 344 1360 45> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni076C.fina] <anchor 382 1187 64> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni076C] <anchor 352 1187 56> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni076D.fina] <anchor 1457 1238 99> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni076D.init] <anchor 667 1238 82> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni076D.medi] <anchor 689 1238 94> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni076D] <anchor 1385 1238 88> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0770.fina] <anchor 1528 1337 131> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0770.init] <anchor 738 1337 114> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0770.medi] <anchor 760 1337 126> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0770] <anchor 1458 1337 120> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0771.fina] <anchor 445 1459 85> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0771] <anchor 416 1459 77> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0772.fina] <anchor 759 1309 93> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0772.init] <anchor 719 1269 79> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0772.medi] <anchor 721 1269 90> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0772] <anchor 762 1353 83> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0773.fina] <anchor 86 1472 44> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0773] <anchor 103 1465 42> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0774.fina] <anchor 103 1472 64> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0774] <anchor 120 1466 62> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0775.fina] <anchor 795 656 69> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0775.init] <anchor 148 1169 70> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0775.medi] <anchor 297 994 77> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0775] <anchor 483 951 73> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0776.fina] <anchor 814 658 89> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0776.init] <anchor 166 1170 90> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0776.medi] <anchor 315 996 97> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni0776] <anchor 503 956 93> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni077A.fina] <anchor 290 764 56> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni077A.init] <anchor 148 1169 51> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni077A.medi] <anchor 297 994 58> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni077A] <anchor 358 1174 60> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni077B.fina] <anchor 309 764 76> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni077B.init] <anchor 166 1170 71> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni077B.medi] <anchor 315 996 78> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni077B] <anchor 377 1175 80> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni077D.fina] <anchor 1473 1310 116> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni077D.init] <anchor 683 1310 99> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni077D.medi] <anchor 705 1310 111> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni077D] <anchor 1430 1226 105> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni077E.fina] <anchor 1456 1118 104> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni077E.init] <anchor 666 1118 87> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni077E.medi] <anchor 688 1118 99> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni077E] <anchor 1384 1118 93> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni077F.fina] <anchor 717 1091 95> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni077F] <anchor 457 1091 90> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08A0.init] <anchor 396 866 25> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08A2.medi] <anchor 652 1139 72> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08A2] <anchor 690 1223 65> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08A3.fina] <anchor 1076 1234 78> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08A3.init] <anchor 853 1259 67> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08A3.medi] <anchor 856 1258 78> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08A3] <anchor 1077 1234 63> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08A4] <anchor 1216 1518 82> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08A5.fina] <anchor 755 1176 72> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08A7.fina] <anchor 564 1229 73> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08A7.init] <anchor 505 1229 61> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08A7.medi] <anchor 398 1229 69> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08A7] <anchor 454 1248 62> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08A8.fina] <anchor 654 769 93> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08A8.init] <anchor 361 1315 76> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08A8.medi] <anchor 410 1015 82> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08A8] <anchor 378 668 97> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08A9.fina] <anchor 683 673 73> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08A9.init] <anchor 389 1219 56> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08A9] <anchor 416 845 77> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08AA.fina] <anchor 537 798 65> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08AA] <anchor 537 798 59> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08AB.fina] <anchor 515 813 63> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08AB] <anchor 515 796 61> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni08AC.fina] <anchor 781 901 74> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos base [uni25CC] <anchor 618 926 48> mark @circumflex.arabic_77_wavyhamza_above_mark;
+      } mark_arab_dflt_0;
+
+      lookup mark_arab_dflt_1 {
+        pos base [LA_Alef.fina LA_AlefFathatan.fina LA_AlefHamzaAbove.fina LA_AlefMadda.fina
+            LA_AlefWHamzaAbove.fina LA_AlefWasla.fina] <anchor 484 -106 22> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [LA_Alef.isol LA_AlefHamzaAbove.isol LA_AlefMadda.isol LA_AlefWHamzaAbove.isol
+            LA_AlefWasla.isol] <anchor 414 -106 52> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [LA_AlefHamzaBelow.fina] <anchor 519 -474 51> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [LA_AlefHamzaBelow.isol] <anchor 449 -474 81> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [LA_AlefWHamzaBelow.fina] <anchor 522 -497 68> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [LA_AlefWHamzaBelow.isol] <anchor 452 -497 98> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [LA_Lam.fina LA_LamDotAbove.fina LA_LamSmallVAbove.fina LA_LamThreeDotsAbove.fina
+            LA_Lambarshort.fina] <anchor 1038 -106 56> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [LA_Lam.isol LA_LamDotAbove.isol LA_LamSmallVAbove.isol LA_LamThreeDotsAbove.isol
+            LA_Lambarshort.isol LA_Lamdoublebar.isol] <anchor 858 -106 35> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [LA_LamThreeDotsBelow.fina] <anchor 1004 -529 83> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [LA_LamThreeDotsBelow.isol] <anchor 794 -529 61> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [Tatweel] <anchor 203 -294 13> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [alef_alt.fina uni0622.fina uni0623.fina uni0627.fina uni0671.fina uni0672.fina
+            uni0675.fina uni0773.fina uni0774.fina] <anchor 355 -106 19> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [alef_alt.isol uni0773 uni0774] <anchor 269 -106 17> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [beh_dotless_alt.init uni067A.init uni067D.init uni067F.init uni0756.init] <anchor 360 -106 27> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [beh_dotless_alt.medi uni062A.medi uni062B.medi uni0679.medi uni067A.medi
+            uni067D.medi uni067F.medi uni0756.medi uni077A.medi uni077B.medi] <anchor 387 -106 33> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [beh_dotless_alt_1.init uni0768.init uni0769.init] <anchor 222 -106 23> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [qaf_dotless_alt.init uni06A4.init uni06A6.init] <anchor 502 -106 37> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni060B] <anchor 428 -619 66> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni060F] <anchor 693 -675 69> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0620.fina] <anchor 589 -939 77> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0620.init] <anchor 269 -412 59> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0620.medi] <anchor 356 -412 65> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0620] <anchor 569 -942 81> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0621] <anchor 485 -176 62> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0622 uni0623 uni0627 uni0671 uni0672 uni0675] <anchor 269 -106 18> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0624 uni0648 uni0676 uni0677 uni06C4 uni06C6 uni06C7 uni06C8 uni06C9 uni06CA
+            uni06CB uni06CF uni0778 uni0779] <anchor 396 -516 43> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0624.fina uni0648.fina uni0676.fina uni0677.fina uni06C4.fina uni06C6.fina
+            uni06C7.fina uni06C8.fina uni06C9.fina uni06CA.fina uni06CB.fina
+            uni06CF.fina uni0778.fina uni0779.fina] <anchor 445 -516 47> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0625.fina] <anchor 390 -474 48> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0625] <anchor 304 -474 47> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0626 uni063D uni063E uni063F uni0649 uni0678 uni06CC uni06CE uni0775 uni0776] <anchor 560 -636 48> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0626.fina uni063D.fina uni063E.fina uni063F.fina uni0649.fina uni0678.fina
+            uni06CC.fina uni06CE.fina uni0775.fina uni0776.fina] <anchor 580 -634 44> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0626.init uni062A.init uni062B.init uni0646.init uni0649.init uni066E.init
+            uni0678.init uni077A.init uni077B.init] <anchor 260 -106 26> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0626.medi uni0646.medi uni0649.medi uni066E.medi uni0678.medi uni0769.medi] <anchor 347 -106 32> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0628 uni0751] <anchor 778 -430 46> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0628.fina uni0751.fina] <anchor 941 -430 51> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0628.init uni0751.init] <anchor 264 -430 37> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0628.medi uni0751.medi] <anchor 351 -430 43> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0629 uni06C3] <anchor 472 -106 34> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0629.fina] <anchor 616 -126 37> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni062A uni062B uni066E uni0679 uni067A uni067D uni067F uni0756] <anchor 774 -106 35> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni062A.fina uni062B.fina uni066E.fina uni0679.fina uni067A.fina uni067D.fina
+            uni067F.fina uni0756.fina] <anchor 937 -106 40> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni062C uni062D uni062E uni0681 uni0682 uni0683 uni0684 uni0685 uni0686 uni0687
+            uni06BF uni0757 uni0758 uni076E uni076F uni0772 uni077C uni08A2] <anchor 708 -688 47> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni062C.fina uni062D.fina uni062E.fina uni0681.fina uni0682.fina uni0683.fina
+            uni0684.fina uni0685.fina uni0686.fina uni0687.fina uni06BF.fina
+            uni0757.fina uni0758.fina uni076E.fina uni076F.fina uni0772.fina
+            uni077C.fina uni08A2.fina] <anchor 658 -685 57> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni062C.init] <anchor 658 -430 54> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni062C.medi] <anchor 656 -430 65> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni062D.init uni062E.init uni0681.init uni0682.init uni0685.init uni0757.init
+            uni0772.init] <anchor 654 -106 43> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni062D.medi uni062E.medi uni0681.medi uni0682.medi uni0685.medi uni0757.medi
+            uni0772.medi] <anchor 652 -106 54> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni062F uni0630 uni068C uni068E uni068F uni0690 uni06EE] <anchor 439 -106 30> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni062F.fina uni0630.fina uni0688.fina uni068C.fina uni068E.fina uni068F.fina
+            uni0690.fina uni06EE.fina] <anchor 489 -106 33> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0631 uni0632 uni0691 uni0692 uni0697 uni0698 uni0699 uni06EF uni075B uni076B
+            uni076C uni0771] <anchor 204 -518 27> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0631.fina uni0632.fina uni0691.fina uni0692.fina uni0697.fina uni0698.fina
+            uni0699.fina uni06EF.fina uni076B.fina uni076C.fina uni0771.fina] <anchor 207 -518 35> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0633 uni0634 uni075C uni076D uni0770 uni077D uni077E] <anchor 1471 -156 70> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0633.fina uni0634.fina uni075C.fina uni076D.fina uni0770.fina uni077D.fina
+            uni077E.fina] <anchor 1501 -156 81> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0633.init uni0634.init uni075C.init uni076D.init uni0770.init uni077D.init
+            uni077E.init] <anchor 689 -106 64> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0633.medi uni0634.medi uni075C.medi uni076D.medi uni0770.medi uni077D.medi
+            uni077E.medi] <anchor 681 -106 76> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0635 uni0636 uni069E] <anchor 1619 -106 55> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0635.fina uni0636.fina uni069E.fina] <anchor 1640 -106 66> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0635.init uni0636.init uni069E.init] <anchor 996 -106 45> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0635.medi uni0636.medi uni069E.medi] <anchor 996 -106 56> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0637 uni0638 uni069F uni08A3] <anchor 802 -106 45> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0637.fina uni0638.fina uni069F.fina uni08A3.fina] <anchor 922 -126 60> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0637.init uni0638.init uni069F.init uni08A3.init] <anchor 732 -106 49> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0637.medi uni0638.medi uni069F.medi uni08A3.medi] <anchor 732 -106 60> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0639 uni063A uni06A0 uni06FC uni075D uni075E uni075F] <anchor 722 -685 47> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0639.fina uni063A.fina uni06A0.fina uni06FC.fina uni075D.fina uni075E.fina
+            uni075F.fina] <anchor 610 -685 63> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0639.init uni063A.init uni06A0.init uni075D.init uni075E.init uni075F.init] <anchor 569 -106 41> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0639.medi uni063A.medi uni06A0.medi uni075D.medi] <anchor 452 -106 52> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni063B uni06A9 uni06AB uni06AF uni06B0 uni06B1 uni06B4 uni0762 uni0763] <anchor 921 -106 46> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni063B.fina uni06A9.fina uni06AB.fina uni06AF.fina uni06B0.fina uni06B1.fina
+            uni06B4.fina uni0762.fina uni0763.fina] <anchor 969 -106 55> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni063B.init uni0643.init uni06A9.init uni06AB.init uni06AC.init uni06AD.init
+            uni06AF.init uni06B0.init uni06B1.init uni06B4.init uni0762.init
+            uni0763.init uni077F.init] <anchor 401 -106 39> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni063B.medi uni0643.medi uni06A9.medi uni06AB.medi uni06AC.medi uni06AD.medi
+            uni0762.medi uni0763.medi uni077F.medi] <anchor 406 -106 50> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni063C.fina] <anchor 985 -529 81> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni063C.init uni06AE.init] <anchor 417 -529 65> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni063C.medi uni06AE.medi] <anchor 422 -529 76> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni063C] <anchor 935 -527 72> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni063D.init] <anchor 365 -419 69> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni063D.medi] <anchor 393 -419 75> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni063E.init] <anchor 266 -419 64> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni063E.medi] <anchor 393 -420 71> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni063F.init] <anchor 267 -419 70> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni063F.medi] <anchor 392 -419 77> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0641 uni06A1 uni06A4 uni06A6] <anchor 1326 -106 44> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0641.fina uni06A1.fina uni06A4.fina uni06A6.fina] <anchor 1267 -106 53> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0641.init uni0642.init uni066F.init] <anchor 464 -106 41> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0641.medi uni0642.medi uni066F.medi uni06A4.medi uni06A6.medi] <anchor 397 -106 47> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0642 uni066F uni06A7 uni06A8] <anchor 595 -636 52> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0642.fina uni066F.fina uni06A7.fina uni06A8.fina] <anchor 595 -636 54> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0643 uni06AC uni06AD uni077F] <anchor 537 -106 32> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0643.fina uni06AC.fina uni06AD.fina uni077F.fina] <anchor 764 -106 37> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0644 uni06B5 uni06B6 uni06B7 uni076A uni08A6] <anchor 630 -636 38> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0644.fina uni06B5.fina uni06B6.fina uni06B7.fina uni076A.fina uni08A6.fina] <anchor 630 -636 49> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0644.init uni06B5.init uni06B6.init uni06B7.init uni076A.init uni08A6.init] <anchor 246 -106 22> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0644.medi uni06B5.medi uni06B6.medi uni06B7.medi uni076A.medi uni08A6.medi] <anchor 271 -106 27> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0645 uni0765 uni08A7] <anchor 600 -102 37> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0645.fina uni0765.fina uni08A7.fina] <anchor 691 -200 48> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0645.init uni0765.init uni08A7.init] <anchor 474 -126 36> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0645.medi uni0765.medi uni08A7.medi] <anchor 495 -126 44> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0646 uni06BA uni06BB uni06BD uni0768 uni0769] <anchor 540 -636 30> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0646.fina uni06BA.fina uni06BB.fina uni06BD.fina uni0768.fina uni0769.fina] <anchor 540 -636 39> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0647 uni06C0 uni06C1 uni06C2 uni06D5] <anchor 441 -106 34> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0647.fina uni06C0.fina] <anchor 585 -126 37> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0647.init uni06BE.init uni06FF.init] <anchor 458 -146 48> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0647.medi] <anchor 519 -518 63> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni064A.fina] <anchor 587 -947 63> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni064A.init uni06CE.init uni0754.init uni0767.init uni08A8.init uni08A9.init] <anchor 366 -419 46> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni064A.medi uni06CC.medi uni0754.medi] <anchor 393 -419 52> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni064A] <anchor 566 -948 67> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0673.fina] <anchor 393 -497 65> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0673] <anchor 307 -497 64> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0679.init] <anchor 262 -106 26> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni067B.fina] <anchor 965 -639 59> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni067B.init] <anchor 288 -639 45> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni067B.medi] <anchor 375 -639 51> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni067B] <anchor 802 -639 54> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni067C.fina] <anchor 946 -412 92> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni067C.init] <anchor 269 -367 59> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni067C.medi] <anchor 396 -412 85> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni067C] <anchor 783 -411 68> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni067E.fina] <anchor 953 -529 66> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni067E.init] <anchor 376 -529 53> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni067E.medi] <anchor 403 -529 59> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni067E] <anchor 790 -529 61> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0680.fina] <anchor 940 -521 74> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0680.init] <anchor 363 -521 61> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0680.medi] <anchor 390 -521 67> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0680] <anchor 776 -522 69> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0683.init] <anchor 660 -419 62> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0683.medi] <anchor 658 -419 73> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0684.init] <anchor 682 -639 62> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0684.medi] <anchor 680 -639 73> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0686.init] <anchor 670 -529 69> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0686.medi] <anchor 668 -529 80> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0687.init] <anchor 657 -521 77> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0687.medi] <anchor 655 -521 88> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0688] <anchor 446 -106 30> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0689.fina] <anchor 498 -412 66> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0689] <anchor 448 -412 63> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni068A uni068B] <anchor 446 -431 41> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni068A.fina uni068B.fina] <anchor 494 -430 44> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni068D.fina] <anchor 495 -420 52> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni068D] <anchor 445 -418 49> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0693.fina] <anchor 216 -824 68> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0693] <anchor 212 -823 60> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0694.fina] <anchor 211 -842 46> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0694] <anchor 209 -843 38> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0695.fina] <anchor 234 -903 58> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0695] <anchor 231 -903 50> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0696.fina] <anchor 211 -842 58> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0696] <anchor 209 -842 50> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni069A.fina] <anchor 1505 -480 102> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni069A.init] <anchor 693 -430 85> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni069A.medi] <anchor 685 -430 97> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni069A] <anchor 1476 -467 91> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni069B.fina] <anchor 1517 -579 107> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni069B.init] <anchor 705 -529 90> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni069B.medi] <anchor 697 -529 102> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni069B] <anchor 1487 -577 96> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni069C.fina] <anchor 1517 -579 132> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni069C.init] <anchor 705 -529 115> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni069C.medi] <anchor 697 -529 127> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni069C] <anchor 1488 -577 121> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni069D.fina] <anchor 1646 -419 85> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni069D.init] <anchor 1002 -419 64> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni069D.medi] <anchor 1003 -419 75> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni069D] <anchor 1625 -419 74> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06A2 uni06A3] <anchor 1330 -384 56> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06A2.fina] <anchor 1271 -430 64> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06A2.init] <anchor 468 -430 52> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06A2.medi] <anchor 401 -430 58> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06A3.fina] <anchor 1271 -430 74> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06A3.init] <anchor 468 -430 62> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06A3.medi] <anchor 401 -430 68> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06A5.fina] <anchor 1283 -529 79> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06A5.init] <anchor 480 -529 67> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06A5.medi] <anchor 413 -529 73> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06A5] <anchor 1342 -529 71> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06AA.fina] <anchor 1623 -106 62> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06AA.init] <anchor 1346 -106 49> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06AA.medi] <anchor 1392 -106 57> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06AA] <anchor 1586 -106 52> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06AE.fina] <anchor 780 -529 106> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06AE] <anchor 553 -529 101> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06AF.medi uni06B0.medi uni06B1.medi uni06B4.medi] <anchor 429 -106 50> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06B2.fina] <anchor 975 -419 91> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06B2.init] <anchor 407 -419 73> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06B2.medi] <anchor 432 -419 86> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06B2] <anchor 925 -418 80> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06B3.fina] <anchor 997 -639 91> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06B3.init] <anchor 429 -639 73> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06B3.medi] <anchor 457 -639 86> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06B3] <anchor 949 -639 80> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06B8.fina] <anchor 646 -1059 75> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06B8.init] <anchor 281 -529 45> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06B8.medi] <anchor 287 -529 54> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06B8] <anchor 646 -1059 64> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06B9.fina] <anchor 544 -960 50> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06B9.init] <anchor 264 -429 47> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06B9.medi] <anchor 351 -430 53> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06B9] <anchor 544 -960 51> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06BC.fina] <anchor 549 -942 82> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06BC.init] <anchor 269 -367 69> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06BC.medi] <anchor 357 -412 65> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06BC] <anchor 549 -942 73> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06BE uni06FF] <anchor 656 -137 44> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06BE.fina uni06FF.fina] <anchor 658 -126 105> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06BE.medi uni06FF.medi] <anchor 408 -126 102> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06BF.init] <anchor 670 -529 79> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06BF.medi] <anchor 668 -529 90> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06C1.fina uni06C2.fina uni06C3.fina] <anchor 582 -106 24> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06C1.init uni06C2.init] <anchor 315 -535 39> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06C1.medi uni06C2.medi] <anchor 297 -548 42> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06C5.fina] <anchor 386 -516 61> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06C5] <anchor 394 -516 57> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06CC.init] <anchor 367 -419 46> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06CD.fina] <anchor 857 -637 52> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06CD] <anchor 787 -636 56> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06CE.medi] <anchor 394 -419 76> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06D0.fina] <anchor 608 -1167 63> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06D0.init] <anchor 388 -639 46> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06D0.medi] <anchor 415 -639 52> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06D0] <anchor 588 -1169 67> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06D1.fina] <anchor 596 -1057 70> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06D1] <anchor 576 -1059 74> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06D2 uni06D3] <anchor 940 -106 35> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06D2.fina] <anchor 663 -518 31> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06D3.fina] <anchor 632 -518 31> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06E5] <anchor 190 -193 34> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06E6] <anchor 348 -193 29> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06FA.fina] <anchor 1505 -480 117> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06FA.init] <anchor 693 -430 100> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06FA.medi] <anchor 685 -430 112> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06FA] <anchor 1475 -478 106> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06FB.fina] <anchor 1644 -460 77> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06FB.init] <anchor 1000 -460 66> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06FB.medi] <anchor 1001 -459 67> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06FB] <anchor 1623 -430 76> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06FC.init] <anchor 573 -459 62> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni06FC.medi] <anchor 456 -460 73> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0750.fina] <anchor 941 -419 67> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0750.init] <anchor 445 -419 55> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0750.medi] <anchor 566 -419 62> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0750] <anchor 778 -419 62> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0752 uni0753] <anchor 784 -535 62> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0752.fina uni0753.fina] <anchor 947 -535 67> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0752.init uni0753.init] <anchor 370 -535 54> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0752.medi] <anchor 397 -535 60> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0753.medi] <anchor 397 -535 79> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0754.fina] <anchor 943 -419 69> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0754] <anchor 780 -419 54> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0755.fina] <anchor 990 -492 63> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0755.init] <anchor 413 -492 50> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0755.medi] <anchor 440 -492 56> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0755] <anchor 826 -491 58> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0758.init] <anchor 664 -535 70> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0758.medi] <anchor 662 -535 81> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0759.fina] <anchor 517 -639 52> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0759] <anchor 474 -639 87> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni075A.fina] <anchor 542 -492 56> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni075A] <anchor 492 -492 53> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni075B.fina] <anchor 213 -518 41> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni075E.medi uni075F.medi] <anchor 469 -106 52> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0760.fina] <anchor 1272 -419 72> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0760.init] <anchor 470 -419 60> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0760.medi] <anchor 404 -419 66> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0760] <anchor 1332 -419 64> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0761.fina] <anchor 1277 -535 80> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0761.init] <anchor 474 -535 68> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0761.medi] <anchor 409 -535 74> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0761] <anchor 1336 -535 72> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0764.fina] <anchor 979 -535 82> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0764.init] <anchor 411 -535 66> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0764.medi] <anchor 416 -535 77> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0764] <anchor 931 -535 73> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0766.fina] <anchor 695 -522 59> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0766.init] <anchor 478 -450 47> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0766.medi] <anchor 499 -450 55> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0766] <anchor 604 -352 48> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0767.fina] <anchor 546 -949 58> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0767.medi] <anchor 394 -419 62> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0767] <anchor 546 -949 59> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0768.medi] <anchor 334 -106 32> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni076E.init] <anchor 595 -483 81> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni076E.medi] <anchor 593 -483 92> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni076F.init] <anchor 843 -547 94> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni076F.medi] <anchor 843 -547 105> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0775.init uni0776.init] <anchor 266 -419 45> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0775.medi uni0776.medi uni08A8.medi uni08A9.medi] <anchor 394 -419 52> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0777.fina] <anchor 591 -1268 78> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0777.init] <anchor 273 -694 60> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0777.medi] <anchor 399 -694 67> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni0777] <anchor 573 -1270 82> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni077A uni077B] <anchor 968 -106 35> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni077A.fina uni077B.fina] <anchor 629 -518 31> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni077C.init] <anchor 891 -567 77> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni077C.medi] <anchor 664 -740 88> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08A0.fina] <anchor 964 -491 63> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08A0.init] <anchor 389 -491 50> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08A0.medi] <anchor 414 -491 56> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08A0] <anchor 799 -491 58> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08A2.init] <anchor 658 -430 73> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08A2.medi] <anchor 656 -430 84> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08A4.fina] <anchor 1253 -430 89> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08A4.init] <anchor 506 -430 73> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08A4.medi] <anchor 401 -430 83> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08A4] <anchor 1330 -430 56> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08A5.fina] <anchor 600 -960 84> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08A5.init] <anchor 464 -106 70> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08A5.medi] <anchor 397 -106 76> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08A5] <anchor 600 -960 82> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08A8 uni08A9] <anchor 566 -949 67> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08A8.fina] <anchor 585 -946 63> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08A9.fina] <anchor 586 -947 63> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08AA.fina] <anchor 384 -518 66> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08AA] <anchor 384 -518 60> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08AB.fina] <anchor 445 -586 64> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08AB] <anchor 445 -586 62> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni08AC.fina] <anchor 757 -438 94> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos base [uni25CC] <anchor 618 -294 49> mark @circumflex.below_23_wavyhamza_below_mark;
+      } mark_arab_dflt_1;
+
+      lookup mark_arab_dflt_2 {
+        pos base [uni0600.alt] <anchor 967 -226 31> mark @uni00B2.small_25_uni2079.small_mark;
+        pos base [uni0601.alt] <anchor 1661 -196 72> mark @uni00B2.small_25_uni2079.small_mark;
+        pos base [uni0602.alt] <anchor 1505 -146 56> mark @uni00B2.small_25_uni2079.small_mark;
+        pos base [uni0603.alt] <anchor 937 -146 74> mark @uni00B2.small_25_uni2079.small_mark;
+        pos base [uni0604.alt] <anchor 1225 -26 126> mark @uni00B2.small_25_uni2079.small_mark;
+        pos base [uni06DD.alt] <anchor 1245 -66 260> mark @uni00B2.small_25_uni2079.small_mark;
+      } mark_arab_dflt_2;
+
+      lookup mark_arab_dflt_3 {
+        pos ligature uni06440622.fina <anchor 928 1474 46> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 192 1389 67> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06440622.isol <anchor 768 1509 53> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 132 1408 74> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06440623.fina <anchor 928 1474 46> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 172 1582 78> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06440623.isol <anchor 768 1509 53> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 111 1601 85> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06440625.fina <anchor 928 1474 46> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 191 1193 47> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06440625.isol <anchor 768 1509 53> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 131 1212 54> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06440627.fina <anchor 928 1474 46> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 191 1193 47> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06440627.isol <anchor 768 1509 53> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 131 1212 54> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06440671.fina <anchor 928 1474 46> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 222 1493 84> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06440671.isol <anchor 768 1509 53> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 161 1512 91> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06440672.fina <anchor 928 1474 46> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 203 1605 93> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06440672.isol <anchor 768 1509 53> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 143 1624 100> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06440673.fina <anchor 928 1474 46> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 191 1193 47> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06440673.isol <anchor 768 1509 53> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 131 1212 54> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06440675.fina <anchor 928 1474 46> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 435 1587 78> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06440675.isol <anchor 768 1509 53> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 402 1605 85> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06B50627.fina <anchor 901 1879 74> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 191 1193 47> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06B50627.isol <anchor 741 1914 81> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 131 1212 54> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06B60627.fina <anchor 924 1827 59> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 191 1193 47> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06B60627.isol <anchor 764 1862 66> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 131 1212 54> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06B70627.fina <anchor 926 1908 74> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 191 1193 47> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06B70627.isol <anchor 768 1942 81> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 131 1212 54> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06B80627.fina <anchor 928 1474 46> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 191 1193 47> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni06B80627.isol <anchor 768 1509 53> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 131 1212 54> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni076A0627.fina <anchor 928 1474 46> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 191 1193 47> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uni076A0627.isol <anchor 768 1509 53> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 131 1212 54> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos ligature uniFDF2.pt1 <anchor 1627 1474 65> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 1154 1145 62> mark @circumflex.arabic_77_wavyhamza_above_mark
+          ligComponent <anchor 472 1050 66> mark @circumflex.arabic_77_wavyhamza_above_mark;
+      } mark_arab_dflt_3;
+
+      lookup mark_arab_dflt_4 {
+        pos ligature uni06440622.fina <anchor 958 -106 48> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 484 -106 49> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06440622.isol <anchor 797 -106 55> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 414 -106 56> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06440623.fina <anchor 958 -106 48> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 484 -106 49> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06440623.isol <anchor 797 -106 55> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 414 -106 56> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06440625.fina <anchor 958 -106 48> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 519 -474 78> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06440625.isol <anchor 797 -106 55> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 449 -474 85> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06440627.fina <anchor 958 -106 48> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 484 -106 49> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06440627.isol <anchor 797 -106 55> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 414 -106 56> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06440671.fina <anchor 958 -106 48> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 484 -106 49> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06440671.isol <anchor 797 -106 55> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 414 -106 56> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06440672.fina <anchor 958 -106 48> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 484 -106 49> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06440672.isol <anchor 797 -106 55> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 414 -106 56> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06440673.fina <anchor 958 -106 48> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 522 -497 95> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06440673.isol <anchor 797 -106 55> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 452 -495 102> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06440675.fina <anchor 958 -106 48> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 484 -106 49> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06440675.isol <anchor 797 -106 55> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 414 -106 56> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06B50627.fina <anchor 958 -106 48> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 484 -106 49> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06B50627.isol <anchor 797 -106 55> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 414 -106 56> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06B60627.fina <anchor 958 -106 48> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 484 -106 49> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06B60627.isol <anchor 797 -106 55> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 414 -106 56> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06B70627.fina <anchor 958 -106 48> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 484 -106 49> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06B70627.isol <anchor 797 -106 55> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 414 -106 56> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06B80627.fina <anchor 974 -529 75> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 484 -106 49> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni06B80627.isol <anchor 784 -529 82> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 414 -106 56> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni076A0627.fina <anchor 958 -106 48> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 484 -106 49> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uni076A0627.isol <anchor 797 -106 55> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 414 -106 56> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos ligature uniFDF2.pt1 <anchor 1710 -106 63> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 1214 -106 64> mark @circumflex.below_23_wavyhamza_below_mark
+          ligComponent <anchor 625 -106 67> mark @circumflex.below_23_wavyhamza_below_mark;
+      } mark_arab_dflt_4;
+
+      lookup mark_arab_dflt_5 {
+        pos ligature uni0600.alt1 <anchor 687 -226 28> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 1247 -226 29> mark @uni00B2.small_25_uni2079.small_mark;
+        pos ligature uni0600.alt2 <anchor 407 -226 30> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 967 -226 31> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 1527 -226 32> mark @uni00B2.small_25_uni2079.small_mark;
+        pos ligature uni0601.alt1 <anchor 1381 -196 76> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 1941 -196 75> mark @uni00B2.small_25_uni2079.small_mark;
+        pos ligature uni0601.alt2 <anchor 1101 -196 74> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 1661 -196 72> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 2221 -196 73> mark @uni00B2.small_25_uni2079.small_mark;
+        pos ligature uni0601.alt3 <anchor 821 -196 78> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 1381 -196 76> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 1941 -196 75> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 2501 -196 77> mark @uni00B2.small_25_uni2079.small_mark;
+        pos ligature uni0602.alt1 <anchor 1225 -146 54> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 1785 -146 55> mark @uni00B2.small_25_uni2079.small_mark;
+        pos ligature uni0602.alt2 <anchor 945 -146 57> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 1505 -146 56> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 2065 -146 58> mark @uni00B2.small_25_uni2079.small_mark;
+        pos ligature uni0603.alt1 <anchor 657 -146 76> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 1217 -146 77> mark @uni00B2.small_25_uni2079.small_mark;
+        pos ligature uni0603.alt2 <anchor 377 -146 75> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 937 -146 74> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 1497 -146 78> mark @uni00B2.small_25_uni2079.small_mark;
+        pos ligature uni0604.alt1 <anchor 945 -26 125> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 1505 -26 127> mark @uni00B2.small_25_uni2079.small_mark;
+        pos ligature uni0604.alt2 <anchor 665 -26 124> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 1225 -26 126> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 1785 -26 128> mark @uni00B2.small_25_uni2079.small_mark;
+        pos ligature uni0604.alt3 <anchor 385 -26 123> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 945 -26 125> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 1505 -26 127> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 2065 -26 129> mark @uni00B2.small_25_uni2079.small_mark;
+        pos ligature uni06DD.alt1 <anchor 965 -66 264> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 1525 -66 263> mark @uni00B2.small_25_uni2079.small_mark;
+        pos ligature uni06DD.alt2 <anchor 685 -66 262> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 1245 -66 260> mark @uni00B2.small_25_uni2079.small_mark
+          ligComponent <anchor 1805 -66 261> mark @uni00B2.small_25_uni2079.small_mark;
+      } mark_arab_dflt_5;
+
+    } mark;
+
+    feature mkmk {
+      script arab;
+      language dflt;
+      lookup mkmk_arab_dflt_0 {
+        lookupflag MarkAttachmentTypedef 1;
+        pos mark [circumflex.arabic] <anchor 247 1212 22> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [largev.arabic] <anchor 314 1217 23> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0610] <anchor 149 1407 31> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0611] <anchor 135 1403 42> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0612] <anchor 98 1481 47> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0613] <anchor 166 1490 60> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0614] <anchor 135 1289 25> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0615] <anchor 150 1331 32> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0616] <anchor 0 1689 47> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0617] <anchor 3 1478 29> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0618] <anchor -7 1169 10> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0619] <anchor -1 1285 32> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni064B] <anchor 129 1314 17> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni064C] <anchor 157 1291 49> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni064E] <anchor 157 1179 9> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni064F] <anchor 118 1291 35> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0651064B] <anchor 79 1498 54> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0651064C] <anchor 63 1559 88> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0651064D] <anchor 116 1209 54> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0651064E] <anchor 92 1393 46> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0651064F] <anchor 47 1559 75> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni06510650] <anchor 116 1220 47> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni06510670] <anchor 60 1651 52> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0651] <anchor 111 1215 39> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0652] <anchor 136 1220 26> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0653] <anchor 139 1327 17> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0654064B] <anchor 51 1654 44> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0654064C] <anchor 47 1684 74> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0654064E] <anchor 66 1571 36> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0654064F] <anchor 64 1684 58> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni06540652] <anchor 31 1644 51> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0654] <anchor 116 1446 28> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0657] <anchor 160 1403 38> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0658] <anchor 208 1355 16> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0659] <anchor 250 1089 10> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni065A] <anchor 255 1038 24> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni065B] <anchor 190 1082 23> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni065D] <anchor 176 1460 38> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni065E] <anchor 273 1412 27> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni0670] <anchor 18 1370 14> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni06D6] <anchor 102 1707 72> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni06D7] <anchor -192 1698 76> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni06D8] <anchor -19 1231 1> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni06D9] <anchor -78 1524 47> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni06DA] <anchor -15 1370 45> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni06DB] <anchor -3 955 23> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni06DC] <anchor 11 1325 61> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni06DF] <anchor 0 1192 1> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni06E0] <anchor 0 1192 21> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni06E1] <anchor 0 1238 32> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni06E2] <anchor -15 1311 32> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni06E4] <anchor 3 1113 19> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni06E7] <anchor -7 1210 29> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni06E8] <anchor -35 1336 33> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni06EB] <anchor 0 1265 9> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni06EC] <anchor 3 1250 13> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni08E4] <anchor 6 1374 37> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni08E5] <anchor 123 1291 58> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni08E7] <anchor -100 1599 76> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni08E8] <anchor -55 1346 117> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni08EA] <anchor 5 1557 9> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni08EB] <anchor -7 1532 14> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni08EC] <anchor -2 1383 46> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni08F0] <anchor 236 1416 22> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni08F1] <anchor 318 1291 74> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni08F3] <anchor 9 1277 36> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni08F4] <anchor -5 1334 58> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni08F5] <anchor -37 1312 22> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni08F7] <anchor -50 1272 28> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni08F8 uni08FD] <anchor 0 1317 27> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni08FB uni08FC] <anchor 23 1317 28> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uni08FE] <anchor 88 1291 35> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [uniFDF2.pt2] <anchor 1093 1721 51> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [wasla] <anchor 120 1384 34> mark @circumflex.arabic_77_wavyhamza_above_mark;
+        pos mark [wavyhamza_above] <anchor 111 1438 43> mark @circumflex.arabic_77_wavyhamza_above_mark;
+      } mkmk_arab_dflt_0;
+
+      lookup mkmk_arab_dflt_1 {
+        lookupflag MarkAttachmentTypedef 2;
+        pos mark [circumflex.below] <anchor 243 -597 22> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [smallv.below] <anchor 282 -597 22> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [uni061A] <anchor 15 -386 10> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [uni064D] <anchor 208 -274 19> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [uni0650] <anchor 176 -223 9> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [uni0655064D] <anchor 188 -501 44> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [uni06550650] <anchor 185 -408 36> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [uni0655] <anchor 208 -276 28> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [uni0656] <anchor 22 -537 13> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [uni065C] <anchor 0 -706 13> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [uni06E3] <anchor 153 -528 58> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [uni06EA] <anchor -3 -720 9> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [uni06ED] <anchor 30 -670 31> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [uni08E6] <anchor 96 -659 38> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [uni08E9] <anchor 126 -692 38> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [uni08ED] <anchor 8 -508 8> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [uni08EE] <anchor 9 -488 15> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [uni08EF] <anchor -8 -577 47> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [uni08F2] <anchor 176 -460 9> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [uni08F6] <anchor 21 -582 23> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [uni08F9] <anchor -50 -140 28> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [uni08FA] <anchor 0 -102 27> mark @circumflex.below_23_wavyhamza_below_mark;
+        pos mark [wavyhamza_below] <anchor 200 -256 45> mark @circumflex.below_23_wavyhamza_below_mark;
+      } mkmk_arab_dflt_1;
+
+    } mkmk;
+
+  </GPOS>
+
+</ttFont>
