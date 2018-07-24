@@ -18,9 +18,9 @@ Please refer to the file
 [AFDKO-Overview.html](https://rawgit.com/adobe-type-tools/afdko/master/afdko/AFDKO-Overview.html)
 for a more detailed description of what is included in the package.
 
-Please see the 
+Please see the
 [wiki](https://github.com/adobe-type-tools/afdko/wiki)
-for additional information, such as links to reference materials and related 
+for additional information, such as links to reference materials and related
 projects.
 
 Major Changes
@@ -30,10 +30,10 @@ The AFDKO has been restructured so that it can be installed as a Python
 package. It now depends on the user\'s Python interpreter, and no longer
 contains its own Python interpreter. In order to do this, two
 Adobe-owned, non-open source programs were dropped: **IS** and
-**checkOutlines**. If these turn out to be sorely missed, an installer
+**checkoutlines**. If these turn out to be sorely missed, an installer
 for them will be added to the old Adobe AFDKO website. The current
-intent is to migrate the many tests in checkOutlines to the newer
-**checkOutlinesUFO** (which does work with OpenType and Type 1 fonts,
+intent is to migrate the many tests in checkoutlines to the newer
+**checkoutlinesufo** (which does work with OpenType and Type 1 fonts,
 but currently does only overlap detection and removal, and a few basic
 path checks).
 
@@ -117,7 +117,7 @@ environment variable in the System control panel.
 
 You can download older versions of the tools from the [Adobe AFDKO
 homepage](http://www.adobe.com/devnet/opentype/afdko.html). The tools IS
-and checkOutlines are included in these downloads.
+and checkoutlines are included in these downloads.
 
 Build from Source
 -----------------

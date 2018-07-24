@@ -3,12 +3,12 @@
 from __future__ import print_function, division, absolute_import
 
 __usage__ = """
-buildCFF2VF.py  1.13.4 Feb 07 2018
+buildcff2vf.py  1.13.4 Feb 07 2018
 Build a variable font from a designspace file and the UFO master source fonts.
 
-python buildCFF2VF.py -h
-python buildCFF2VF.py -u
-python buildCFF2VF.py <path to designspace file> (<optional path to output
+python buildcff2vf.py -h
+python buildcff2vf.py -u
+python buildcff2vf.py <path to designspace file> (<optional path to output
                                                                variable font>)
 """
 
@@ -22,7 +22,7 @@ The script makes a number of assumptions.
    fonts, and have the same file name but with an extension of '.otf'
    rather than '.ufo'.
 3) The master source OTF fonts were built with the companion script
-   'buildMasterOTFs.py'. This does a first pass of compatibilization
+   'buildmasterotfs.py'. This does a first pass of compatibilization
    by using 'tx' with the '-no_opt' option to undo T2 charstring
    optimization applied by makeotf.
 
@@ -35,7 +35,7 @@ The width values and the GPOS positioning data are drawn from all the
 master source fonts, so each must be built with with a full set of GPOS
 features.
 
-The companion script buildMasterOTFs.py will build the master source OTFs
+The companion script buildmasterotfs.py will build the master source OTFs
 from the designspace file.
 
 Any python interpreter may be used to run the script, as long as it has
@@ -966,7 +966,7 @@ def run(args=None):
 
     if parse_version(fontToolsVersion) < parse_version("3.19"):
         print("Quitting. The Python fonttools module must be at least 3.19.0 "
-              "in order for buildCFF2VF to work.")
+              "in order for buildcff2vf to work.")
         return
 
     if len(args) == 2:

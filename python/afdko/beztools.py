@@ -11,10 +11,10 @@ except:
 	LongType = int
 
 """
-BezTools.py v 1.13 July 11 2017
+beztools.py v 1.13 July 11 2017
 
 Utilities for converting between T2 charstrings and the bez data format.
-Used by AC and focus/CheckOutlines.
+Used by autohint and checkoutlines.
 """
 __copyright__ = """Copyright 2014-2017 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
@@ -22,8 +22,8 @@ __copyright__ = """Copyright 2014-2017 Adobe Systems Incorporated (http://www.ad
 import re
 import time
 import os
-import FDKUtils
-import ConvertFontToCID
+import fdkutils
+import convertfonttocid
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
 from fontTools.pens.basePen import BasePen
 debug = 0
@@ -1221,7 +1221,7 @@ class CFFFontData:
 				tf.close()
 				finalPath = outFilePath
 				command="tx  -t1 -std \"%s\" \"%s\" 2>&1" % (tempPath, outFilePath)
-				report = FDKUtils.runShellCmd(command)
+				report = fdkutils.runShellCmd(command)
 				self.logMsg(report)
 				if "fatal" in report:
 					raise IOError("Failed to convert hinted font temp file with tx %s. Maybe target font font file '%s' is set to read-only. %s" % (tempPath, outFilePath, report))
@@ -1250,7 +1250,7 @@ class CFFFontData:
 			pDict = pTopDict
 		privateDict = pDict.Private
 
-		fdDict = ConvertFontToCID.FDDict()
+		fdDict = convertfonttocid.FDDict()
 		if  hasattr(privateDict, "LanguageGroup"):
 			fdDict.LanguageGroup = privateDict.LanguageGroup
 		else:
@@ -1298,9 +1298,9 @@ class CFFFontData:
 			blueValues[i] = blueValues[i] - blueValues[i-1]
 
 		blueValues = [str(v) for v in blueValues]
-		numBlueValues = min(numBlueValues, len(ConvertFontToCID.kBlueValueKeys))
+		numBlueValues = min(numBlueValues, len(convertfonttocid.kBlueValueKeys))
 		for i in range(numBlueValues):
-			key = ConvertFontToCID.kBlueValueKeys[i]
+			key = convertfonttocid.kBlueValueKeys[i]
 			value = blueValues[i]
 			exec("fdDict.%s = %s" % (key, value))
 
@@ -1317,9 +1317,9 @@ class CFFFontData:
 			for i in range(0, numBlueValues,2):
 				blueValues[i] = blueValues[i] - blueValues[i+1]
 			blueValues = map(str, blueValues)
-			numBlueValues = min(numBlueValues, len(ConvertFontToCID.kOtherBlueValueKeys))
+			numBlueValues = min(numBlueValues, len(convertfonttocid.kOtherBlueValueKeys))
 			for i in range(numBlueValues):
-				key = ConvertFontToCID.kOtherBlueValueKeys[i]
+				key = convertfonttocid.kOtherBlueValueKeys[i]
 				value = blueValues[i]
 				exec("fdDict.%s = %s" % (key, value))
 
@@ -1404,13 +1404,13 @@ class CFFFontData:
 		if "FDDict" in fontInfoData:
 			maxY = topDict.FontBBox[3]
 			minY = topDict.FontBBox[1]
-			blueFuzz = ConvertFontToCID.getBlueFuzz(inputPath)
-			fdGlyphDict, fontDictList, finalFDict = ConvertFontToCID.parseFontInfoFile(fontDictList, fontInfoData, glyphList, maxY, minY, fontPSName, blueFuzz)
+			blueFuzz = convertfonttocid.getBlueFuzz(inputPath)
+			fdGlyphDict, fontDictList, finalFDict = convertfonttocid.parseFontInfoFile(fontDictList, fontInfoData, glyphList, maxY, minY, fontPSName, blueFuzz)
 			if finalFDict == None:
 				# If a font dict was not explicitly specified for the output font, use the first user-specified font dict.
-				ConvertFontToCID.mergeFDDicts( fontDictList[1:], topDict.Private )
+				convertfonttocid.mergeFDDicts( fontDictList[1:], topDict.Private )
 			else:
-				ConvertFontToCID.mergeFDDicts( [finalFDict], topDict.Private )
+				convertfonttocid.mergeFDDicts( [finalFDict], topDict.Private )
 		return fdGlyphDict, fontDictList
 
 if __name__=='__main__':

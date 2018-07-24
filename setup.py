@@ -75,11 +75,11 @@ def compile_package(pkg_dir):
     programs_dir = 'c'
     cmd = None
     if bin_dir == 'osx':
-        cmd = "sh BuildAll.sh"
+        cmd = "sh buildall.sh"
     elif bin_dir == 'win':
-        cmd = "BuildAll.cmd"
+        cmd = "buildall.cmd"
     elif bin_dir == 'linux':
-        cmd = "sh BuildAllLinux.sh"
+        cmd = "sh buildalllinux.sh"
     cur_dir = os.getcwd()
     assert cmd, 'Unable to form build command for this platform.'
     try:
@@ -145,7 +145,7 @@ class CustomBuildScripts(distutils.command.build_scripts.build_scripts):
 
 def _get_scripts():
     script_names = [
-        'autohintexe', 'detype1', 'makeotfexe', 'mergeFonts', 'rotateFont',
+        'autohintexe', 'detype1', 'makeotfexe', 'mergefonts', 'rotatefont',
         'sfntdiff', 'sfntedit', 'spot', 'tx', 'type1'
     ]
     if platform.system() == 'Windows':
@@ -161,25 +161,25 @@ def _get_scripts():
 def _get_console_scripts():
     script_entries = [
         ('autohint', 'autohint:main'),
-        ('buildcff2vf', 'buildCFF2VF:run'),
-        ('buildmasterotfs', 'buildMasterOTFs:main'),
-        ('comparefamily', 'CompareFamily:main'),
-        ('checkoutlinesufo', 'CheckOutlinesUFO:main'),
-        ('makeotf', 'MakeOTF:main'),
-        ('makeinstances', 'makeInstances:main'),
-        ('makeinstancesufo', 'makeInstancesUFO:main'),
+        ('buildcff2vf', 'buildcff2vf:run'),
+        ('buildmasterotfs', 'buildmasterotfs:main'),
+        ('comparefamily', 'comparefamily:main'),
+        ('checkoutlinesufo', 'checkoutlinesufo:main'),
+        ('makeotf', 'makeotf:main'),
+        ('makeinstances', 'makeinstances:main'),
+        ('makeinstancesufo', 'makeinstancesufo:main'),
         ('otc2otf', 'otc2otf:main'),
         ('otf2otc', 'otf2otc:main'),
-        ('stemhist', 'StemHist:main'),
+        ('stemhist', 'stemhist:main'),
         ('ttfcomponentizer', 'ttfcomponentizer:main'),
         ('ttxn', 'ttxn:main'),
-        ('charplot', 'ProofPDF:charplot'),
-        ('digiplot', 'ProofPDF:digiplot'),
-        ('fontplot', 'ProofPDF:fontplot'),
-        ('fontplot2', 'ProofPDF:fontplot2'),
-        ('fontsetplot', 'ProofPDF:fontsetplot'),
-        ('hintplot', 'ProofPDF:hintplot'),
-        ('waterfallplot', 'ProofPDF:waterfallplot'),
+        ('charplot', 'proofpdf:charplot'),
+        ('digiplot', 'proofpdf:digiplot'),
+        ('fontplot', 'proofpdf:fontplot'),
+        ('fontplot2', 'proofpdf:fontplot2'),
+        ('fontsetplot', 'proofpdf:fontsetplot'),
+        ('hintplot', 'proofpdf:hintplot'),
+        ('waterfallplot', 'proofpdf:waterfallplot'),
     ]
     scripts_path = 'afdko'
     scripts = ['{} = {}.{}'.format(name, scripts_path, entry)

@@ -1,5 +1,5 @@
 #!/public/bin/python
-#	CompareFamily.py
+#	comparefamily.py
 #	This is not code to copy . The original developer did not know Python well,
 #	and had odd ideas about design. However, it works.
 
@@ -7,7 +7,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-CompareFamily 2.0.53 May 2 2017
+comparefamily 2.0.53 May 2 2017
 
 comparefamily [u] -h] [-d <directory path>] [-tolerance <n>] -rm] [-rn] [-rp] [-nohints] [-l] [-rf] [-st n1,..] [-ft n1,..]
 where 'n1' stands for the number of a test, such as "-st 26" to run Single Test 26.
@@ -17,22 +17,28 @@ single font and between members of a family.
 
 Some of the tests are specific to Adobe Type Dept practices; if you don't like them,
 feel free to edit or disable them in the source script file at:
-{FDK Root Directory}/python/afdko/CompareFamily.py
+{afdko Root Directory}/python/afdko/comparefamily.py
 
-See 'compareFamily -h' for details.
+See 'comparefamily -h' for details.
 """
 
 __help__ = """
 
-CompareFamily will look in the specified directory and examine and
+comparefamily will look in the specified directory and examine and
    report on all the OpenType fonts it finds in that directory.
+
    -h:  write this help text
+
    -u  write usage
+
    -d <path>: Look in the specified directory for fonts. Default
       is the current directory
-   -toleranance <integer.  set the tolerance for metrics differences in design space units.
-        Default is 0.  Set to a larger value to see only big problems.Affects  Single Test 11 BASE table metrics,
+
+   -toleranance <integer>:  Set the tolerance for metrics differences
+        in design space units. Default is 0. Set to a larger value to see
+        only big problems. Affects Single Test 11 BASE table metrics,
         Single Test 22 ligature widths, and Single Test 23 Accent Widths.
+
    -rm:  Write the font menu name report. This prints out a table of the
        font menu names, and enables the font menu name checks.
 
@@ -46,7 +52,7 @@ CompareFamily will look in the specified directory and examine and
        appropriately between faces in each family.
 
 	-nohints:  Supresses checking stem hint widths and positions. If not
-		specified. then  compareFamily will check that the stem hints
+		specified, then comparefamily will check that the stem hints
 		are not absurdly wide, and that the hints are within the
 		FontBBox.
 
@@ -63,7 +69,7 @@ CompareFamily will look in the specified directory and examine and
 
 
 
-CompareFamily now depends on some configurable data for a few tests.
+comparefamily now depends on some configurable data for a few tests.
 
 Single Face Test 6 requires that you have set an environment variable
 named 'CF_DEFAULT_URL' in order to check if this string is in the name
@@ -86,7 +92,7 @@ import os
 import re
 import copy
 import math
-import FDKUtils
+import fdkutils
 from fontTools import ttLib
 
 
@@ -669,7 +675,7 @@ def readGlyphInfo(cmpfFont):
 	### glyph[tag] {gname,enc,width,{left,bottom,right,top}}
 	# glyph[1] {space,0x0020,250,{0,0,0,0}}
 	command = "tx -mtx \"%s\" 2>&1" % (cmpfFont.path)
-	report = FDKUtils.runShellCmd(command)
+	report = fdkutils.runShellCmd(command)
 	metrics = re.findall(r"glyph\S+\s+{([^,]+),[^,]+,([^,]+),{([-0-9]+),([-0-9]+),([-0-9]+),([-0-9]+)}}", report)
 	if not metrics:
 		print "Error: Quitting. Could not run 'tx' against the font %s to get font metrics." % (cmpfFont.path)
@@ -681,7 +687,7 @@ def readGlyphInfo(cmpfFont):
 		cmpfFont.metricsDict[entry[0]] = valList
 	# use spot to get ligature defintions.
 	command = "spot -t GSUB=7 \"%s\" 2>&1" % (cmpfFont.path)
-	report = FDKUtils.runShellCmd(command)
+	report = fdkutils.runShellCmd(command)
 	if cmpfFont.isTTF:
 		report = re.sub(r"(\S+)@\d+", r"\1", report)
 	if cmpfFont.isCID:
@@ -1489,7 +1495,7 @@ def doSingleTest7():
 		if not font.ttFont.has_key('CFF '):
 			continue
 		command = "tx -dump -5 -n \"%s\" 2>&1" % (font.path)
-		report = FDKUtils.runShellCmd(command)
+		report = fdkutils.runShellCmd(command)
 		glyphList = re.findall(r"glyph[^{]+?\{([^,]+),[^[\]]+\sdotsection\s", report)
 		if glyphList:
 			glyphList = ", ".join(glyphList)
@@ -1618,7 +1624,7 @@ def getItalicAngle(fontPath):
 	# Get the itlaic angle from the middle third of the left side contour.
 	for gname in ["B", "D", "E", "H", "I", "L"]:
 		command = "tx -bc -z 1000 -g %s \"%s\" 2>&1" % (gname, fontPath)
-		report = FDKUtils.runShellCmd(command)
+		report = fdkutils.runShellCmd(command)
 		scanLines = re.findall(r"([ .#]+)(-*\d+)", report)
 		testLines = filter(lambda line: "#" in line[0], scanLines)
 		if not testLines:
@@ -1987,7 +1993,7 @@ def doSingleTest18():
 			return
 
 		command = "tx -dump -6 \"%s\" 2>&1" % (cmpfFont.path)
-		report = FDKUtils.runShellCmd(command)
+		report = fdkutils.runShellCmd(command)
 		if not re.search(r"## glyph", report[:1000]):
 			print "Error: could not check hinting for %s. 'tx' command found some error. See following log." % (cmpfFont.PostScriptName1)
 			print report
@@ -2428,7 +2434,7 @@ def doSingleTest24():
 		font.sizeMenuName = "NoSizefeature"
 
 		command = "spot -t GPOS \"%s\" 2>&1" % (font.path)
-		report = FDKUtils.runShellCmd(command)
+		report = fdkutils.runShellCmd(command)
 		if "size" in report:
 			match = re.search(r"Design Size:\s*(\d+).+?Subfamily Identifier:\s*(\d+).+name table [^:]+:\s*(\d+).+Range Start:\s*(\d+).+?Range End:\s*(\d+)", report, re.DOTALL)
 			if match:
@@ -2676,7 +2682,7 @@ def doSingleTest27():
 def doSingleTest28():
 	global fontlist
 
-	# Copied from makeOTF.
+	# Copied from makeotf.
 	codePageTable = [{  "bitNum": 0, "uv1": 0x00EA, "gname1": "ecircumflex",     "uv2": None, "gname2": None,       "isSupported": -1, "script": "latn_"}, #1252 Latin 1 (ANSI)     Roman
 		{ "bitNum": 1, "uv1": 0x0148, "gname1": "ncaron", "uv2": 0x010C, "gname2": "Ccaron", "isSupported": -1, "script": "latn_" }, #  1250 Latin 2 (CE)       CE
 		{ "bitNum": 2, "uv1": 0x0451, "gname1": "afii10071", "uv2": 0x042F, "gname2": "afii10049", "isSupported": -1, "script": "cyrl_" }, #  1251 Cyrillic (Slavic)  9.0 Cyrillic
@@ -3251,7 +3257,7 @@ def doFamilyTest4():
 		font.sizeMenuName = "NoSizefeature"
 
 		command = "spot -t GPOS \"%s\" 2>&1" % (font.path)
-		report = FDKUtils.runShellCmd(command)
+		report = fdkutils.runShellCmd(command)
 		if "size" in report:
 			match = re.search(r"Design Size:\s*(\d+).+?Subfamily Identifier:\s*(\d+).+name table [^:]+:\s*(\d+).+Range Start:\s*(\d+).+?Range End:\s*(\d+)", report, re.DOTALL)
 			if match:
@@ -3495,7 +3501,7 @@ def doFamilyTest9():
 def doFamilyTest10():
 
 	def getPanoseStatus(panoseList):
-		# MakeOTF sets only the first four values. If any of the rest are non-zero, it is a real value.
+		# makeotf sets only the first four values. If any of the rest are non-zero, it is a real value.
 		panoseStatus = 0
 		for value in panoseList[4:]:
 			if value != 0:
@@ -3507,7 +3513,7 @@ def doFamilyTest10():
 					panoseStatus = 1
 					break
 
-		return panoseStatus # 0 means all the values are 0; 1 means they were probably derived by MakeOTF; 2 means they exist, and were not derived by MakeOTF.
+		return panoseStatus # 0 means all the values are 0; 1 means they were probably derived by makeotf; 2 means they exist, and were not derived by makeotf.
 	firstFontName = ""
 	print "\nFamily Test 10: Check that if all faces in family have a Panose number and that CFF ISFixedPtch matches the Panose monospace setting."
 	for name in preferredFamilyList1.keys():
@@ -3521,7 +3527,7 @@ def doFamilyTest10():
 			fontPanoseStatus= getPanoseStatus(font.panose)
 			if not fontPanoseStatus == 2:
 				if fontPanoseStatus == 1:
-					print "	Warning: ", font.PostScriptName1, " has only the first 4 Panose values set; these are may be default values derived by MakeOTF."
+					print "	Warning: ", font.PostScriptName1, " has only the first 4 Panose values set; these are may be default values derived by makeotf."
 				elif fontPanoseStatus == 0:
 					print "	Error: ", font.PostScriptName1, " has only  0 Panose values."
 			else:
@@ -4889,7 +4895,7 @@ def main():
 	print "Directory:", os.path.abspath(directory)
 	print "Loading Adobe Glyph Dict..."
 	import agd
-	resources_dir = FDKUtils.get_resources_dir()
+	resources_dir = fdkutils.get_resources_dir()
 	kAGD_TXTPath = os.path.join(resources_dir, "AGD.txt")
 	fp = open(kAGD_TXTPath, "rU")
 	agdTextPath = fp.read()

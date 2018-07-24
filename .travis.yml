@@ -39,18 +39,18 @@ matrix:
         - flake8 setup.py
         - flake8 Tests/*.py
         - pushd python/afdko
-        - flake8 buildCFF2VF.py
-        - flake8 buildMasterOTFs.py
-        - flake8 CheckOutlinesUFO.py
-        - flake8 ConvertFontToCID.py
-        - flake8 FDKUtils.py
-        - flake8 makeInstancesUFO.py
-        - flake8 MakeOTF.py
-        - flake8 otfPDF.py
+        - flake8 buildcff2vf.py
+        - flake8 buildmasterotfs.py
+        - flake8 checkoutlinesufo.py
+        - flake8 convertfonttocid.py
+        - flake8 fdkutils.py
+        - flake8 makeinstancesufo.py
+        - flake8 makeotf.py
+        - flake8 otfpdf.py
         - flake8 pdfmetrics.py
         - flake8 ttfcomponentizer.py
         - flake8 ttxn.py
-        - flake8 ufoTools.py
+        - flake8 ufotools.py
         - popd
         - python setup.py bdist_wheel
         - deactivate

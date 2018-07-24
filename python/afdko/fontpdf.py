@@ -1,6 +1,6 @@
 """
-fontPDF v1.26 Jun 18 2018. This module is not run stand-alone; it requires
-another module, such as ProofPDF.py, in order to collect the options, and call
+fontpdf v1.26 Jun 18 2018. This module is not run stand-alone; it requires
+another module, such as proofpdf, in order to collect the options, and call
 the MakePDF function.
 
 Prints PDF proof sheet for a font.  It will print a standard title at
@@ -28,7 +28,7 @@ import os
 import re
 import time
 
-from afdko import FDKUtils
+from afdko import fdkutils
 from afdko import pdfgen
 from afdko import pdfmetrics
 from afdko.pdfutils import LINEEND
@@ -1700,7 +1700,7 @@ class  FontInfo:
 			### glyph[tag] {gname,enc,width,{left,bottom,right,top}}
 			# glyph[1] {space,0x0020,250,{0,0,0,0}}
 			command = "tx -mtx \"%s\"" % (self.pdfFont.path)
-			txreport = FDKUtils.runShellCmd(command)
+			txreport = fdkutils.runShellCmd(command)
 			widths = re.findall(r"glyph\S+\s+{([^,]+),[^,]+,([^,]+),{[-0-9]+,[-0-9]+,[-0-9]+,[-0-9]+}}", txreport)
 			if pdfFont.isCID:
 				for name, width in widths:
@@ -1721,7 +1721,7 @@ class  FontInfo:
 		else:
 			if txreport == None:
 				command = "tx -mtx \"%s\"" % (self.pdfFont.path)
-				txreport = FDKUtils.runShellCmd(command)
+				txreport = fdkutils.runShellCmd(command)
 			# try for "H"
 			match = re.search(r"glyph\S+\s+{H,[^,]+,[^,]+,{[-0-9]+,[-0-9]+,[-0-9]+,([-0-9]+)}}", txreport)
 			if match:

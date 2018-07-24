@@ -21,23 +21,23 @@ The tools fall into several different functional groups.
 
 This program is the Adobe auto-hinter. It can be applied to both OpenType/CFF and Type 1 fonts. Works with Type 1 and OpenType/CFF fonts only. It uses Just von Rossum's fontTools Python package for accessing and changing the font data.
 
-### makeOTF
+### makeotf
 
 This program will build an OpenType/CFF font from a feature file that defines the OpenType layout rules, and overrides for default values, and a font file: a Type 1 font, TrueType font, 'detype1' text version of a Type 1 font, or UFO font and It also requires some other meta-data files. It will also build an OpenType/TTF font from a TrueType source font file.
 
-### makeInstances
+### makeinstances
 
-This script will generate Type 1 fonts from an MM Type 1 font, using a tab-delimited file to set values in the instances. The Adoeb developers now use makeInstancesUFO, but this version is still supported.
+This script will generate Type 1 fonts from an MM Type 1 font, using a tab-delimited file to set values in the instances. The Adobe developers now use makeinstancesufo, but this version is still supported.
 
-### makeInstancesUFO
+### makeinstancesufo
 
 This script will generate UFO fonts from a set of Superpolator master designs.
 
-### mergeFonts
+### mergefonts
 
 This program will merge glyphs from one font into another, optionally copying a subset from the source fonts, and changing the names of the glyphs. It can also be used to subset and change the glyph names in a font. By using the same font more than once as a source with different mapping files, glyphs can be duplicated under other names. It can also convert a named-keyed font to a CID-keyed font.
 
-### rotateFont
+### rotatefont
 
 This tool will rotate and translate glyphs in a font, including the hints. However, hints will be discarded if the rotation is not a multiple of 90 degrees.
 
@@ -45,7 +45,7 @@ This tool will rotate and translate glyphs in a font, including the hints. Howev
 
 This allows you to cut and past the entire binary block of a font table from one font to another. You do this by first using it on a source font with the "-x" option to copy a table from the source font to a separate file, and then using it with the "-a" option to add that table to a target font. It can also be used to simply delete a table, and to fix the font table checksums.
 
-### stemHist
+### stemhist
 
 This program provides reports which help in selecting the global hint data and alignment zones for Type 1 hinting. You should look at the reports from this tool in order to select the most common stem widths, and then use a program such as FontLab or Robofont to set the values in the font. This should be done before hinting the font. Works with Type 1 and OpenType/CFF fonts only.
 
@@ -107,11 +107,11 @@ Note that the tools ending in "plot" are all simply small command-file scripts t
 
 The auto-hinting program will report at length about hinting issues. Some of these you can ignore, such as reports about near misses when a stem could be controlled by a hint-zone but is just a little too wide or too narrow. By adjusting either the stem widths or the hint-zones according to these reports, you can include more stems in the set that are controlled by hints, but you can also reasonably decide that is not worth the effort. However, many complaints do need fixing, such not having nodes at vertical or horizontal extremes of a curve.
 
-### checkOutlinesUFO
+### checkoutlinesufo
 
 This tool will check the quality of the glyph outline data, and should always be used. It is very good at detecting serious problems, such as overlap and incorrect path direction. It is overly enthusiastic about finding a number of smaller issues, but is right often enough to be worth checking all the error messages. It can also fix the problems it finds, but you should always check any glyphs that it changed - the fixes are not always better than the original problem.
 
-### compareFamily
+### comparefamily
 
 The tool examines all the fonts in a directory and runs many quality checks. It is the only tool which checks consistency and compares data across a family of fonts, as well as in a single font. It will point out any errors in naming within a style-linked group. Every time the Adobe Type Department finds a bug in the Adobe OpenType fonts, we try to put a check in here. It is not a complete validation tool, but it does represents several years of experience of mistakes made by typographers.
 

@@ -21,12 +21,12 @@ echo "Building makeotf..."
 call %~dp0makeotf\build\win\vc10\BuildAll.cmd %1 || EXIT /B 1
 
 echo " "
-echo "Building mergeFonts..."
-call %~dp0mergeFonts\build\win\vc10\BuildAll.cmd %1 || EXIT /B 1
+echo "Building mergefonts..."
+call %~dp0mergefonts\build\win\vc10\BuildAll.cmd %1 || EXIT /B 1
 
 echo " "
-echo "Building rotateFont..."
-call %~dp0rotateFont\build\win\vc10\BuildAll.cmd %1 || EXIT /B 1
+echo "Building rotatefont..."
+call %~dp0rotatefont\build\win\vc10\BuildAll.cmd %1 || EXIT /B 1
 
 echo " "
 echo "Building sfntdiff..."

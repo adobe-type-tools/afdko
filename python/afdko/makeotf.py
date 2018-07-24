@@ -7,8 +7,8 @@ import re
 import sys
 import traceback
 
-from afdko import FDKUtils
-from afdko import ufoTools
+from afdko import fdkutils
+from afdko import ufotools
 
 from xml.etree.ElementTree import XML
 from xml.etree.ElementTree import tostring as xmlToString
@@ -20,7 +20,7 @@ from fontTools.ttLib.standardGlyphOrder import standardGlyphOrder as kStdNames
 PY2 = sys.version_info[0] == 2
 
 __doc__ = """
-MakeOTF.py.
+makeotf.py.
 Wrapper for the makeotfexe C program. The C program requires that all the
 important input files be explicitly specified on the command-line. This wrapper
 supplies default values, and can read values in from a text project file. It
@@ -123,7 +123,7 @@ __usage__ = __version__ + """
 -oldNameID4             Set Windows name.ID=4 to the PS name, and Mac
                 name.ID=4 to Preferred Family + space +
                 Preferred Style name, as in all releases of
-                MakeOTF before Dec 2010.
+                makeotf before Dec 2010.
 -newNameID4             Set Windows and Mac name.ID=4 to Preferred
                 Family + space + Preferred Style name, as in
                 the current OpenType spec. This is the default
@@ -269,15 +269,15 @@ format and contents of the fontinfo and project files.
 """
 
 __help__ = __usage__ + """
-MakeOTF parts.
+makeotf parts.
 
-MakeOTF now comes in two parts. One is the C program 'makeotfexe',
+makeotf now comes in two parts. One is the C program 'makeotfexe',
 which requires that all input files be specified as command-line
-parameters.  This is the program that reads in all the data, and build
+parameters. This is the program that reads in all the data, and build
 the final OpenType font. You can build OpenType fonts using only this
 program.
 
-The other part is the 'MakeOTF.py' Python script, which is invoked
+The other part is the 'makeotf.py' Python script, which is invoked
 indirectly by the command-shell script 'makeotf'. The script is a
 wrapper for the 'makeotfexe', and does several useful things for you:
 
@@ -889,7 +889,7 @@ def getRelativeDirPath(absPath1, abspath2):
 
 def getOptions(makeOTFParams, args):
     """
-    Fill in the MakeOTF parameters from first the defaults,
+    Fill in the makeotf parameters from first the defaults,
     then the project file, and finally any other options.
     We require that the -fp option, if used, be the first;
     that way the project file is read in before any other
@@ -1647,7 +1647,7 @@ def setCIDCMAPPaths(makeOTFParams, Reg, Ord, Sup):
     """
     error = False
 
-    cmapPath = FDKUtils.get_resources_dir()
+    cmapPath = fdkutils.get_resources_dir()
     ROPath = os.path.join(cmapPath, "%s-%s" % (Reg, Ord))
     ROSPath = "%s-%s" % (ROPath, Sup)
     foundIt = False
@@ -1907,7 +1907,7 @@ def setMissingParams(makeOTFParams):
             exec("makeOTFParams.%s%s = path" % (kFileOptPrefix, kFMB))
         else:
             if makeOTFParams.srcIsUFO:
-                path = ufoTools.makeUFOFMNDB(srcFontPath)
+                path = ufotools.makeUFOFMNDB(srcFontPath)
                 if path:
                     makeOTFParams.ufoFMNDBPath = path
                     makeOTFParams.tempPathList.append(path)
@@ -1973,7 +1973,7 @@ def setMissingParams(makeOTFParams):
         # need to figure out PS name in order to derive default output path.
         command = "%s -dump -0 \"%s\" 2>&1" % (makeOTFParams.txPath,
                                                inputFontPath)
-        report = FDKUtils.runShellCmd(command)
+        report = fdkutils.runShellCmd(command)
 
         match = re.search(r"(?:CID)?FontName\s+\"(\S+)\"", report)
         if not match:
@@ -2029,7 +2029,7 @@ def convertFontIfNeeded(makeOTFParams):
         if os.path.exists(os.path.join(filePath, "fontinfo.plist")):
             needsConversion = True
             doSync = False
-            allMatch, msgList = ufoTools.checkHashMaps(filePath, doSync)
+            allMatch, msgList = ufotools.checkHashMaps(filePath, doSync)
             if not allMatch:
                 for msg in msgList:
                     print(msg)
@@ -2052,7 +2052,7 @@ def convertFontIfNeeded(makeOTFParams):
 
     else:
         commandString = "spot \"%s\" 2>&1" % filePath
-        report = FDKUtils.runShellCmd(commandString)
+        report = fdkutils.runShellCmd(commandString)
         if ("sfnt" in report):
             needsConversion = True
             if "glyf" in report:
@@ -2077,7 +2077,7 @@ def convertFontIfNeeded(makeOTFParams):
         # Warn if there are any seac operators in the input file.
         if not (makeOTFParams.srcIsTTF or isTextPS):
             command = "tx -dump -5 -n \"%s\" 2>&1" % filePath
-            report = FDKUtils.runShellCmd(command)
+            report = fdkutils.runShellCmd(command)
             glyphList = re.findall(r"glyph[^{]+?\{([^,]+),[^[\]]+\sseac\s",
                                    report)
             if glyphList:
@@ -2096,12 +2096,12 @@ def convertFontIfNeeded(makeOTFParams):
             makeOTFParams.tempPathList.append(tempTxtPath)
             commandString = "type1 \"%s\" \"%s\"  2>&1" % (
                 filePath, tempTxtPath)
-            report1 = FDKUtils.runShellCmd(commandString)
+            report1 = fdkutils.runShellCmd(commandString)
             if report1:
                 report1 = "type1 output: <%s>" % report1
             commandString = "%s -t1 \"%s\" \"%s\"  2>&1" % (
                 makeOTFParams.txPath, tempTxtPath, fontPath)
-            report2 = FDKUtils.runShellCmd(commandString)
+            report2 = fdkutils.runShellCmd(commandString)
             if report2:
                 report2 = "tx output: <%s>" % report2
             report = "%s %s" % (report1, report2)
@@ -2112,21 +2112,21 @@ def convertFontIfNeeded(makeOTFParams):
                 makeOTFParams.tempPathList.append(seacPath)
                 commandString = "%s -cff -Z +b \"%s\" \"%s\"  2>&1" % (
                     makeOTFParams.txPath, filePath, seacPath)
-                report1 = FDKUtils.runShellCmd(commandString)
+                report1 = fdkutils.runShellCmd(commandString)
                 if report1:
                     report1 = "converting to CFF with seac removal: <%s>" % (
                         report1)
 
                 commandString = "%s -t1 \"%s\" \"%s\"  2>&1" % (
                     makeOTFParams.txPath, seacPath, fontPath)
-                report2 = FDKUtils.runShellCmd(commandString)
+                report2 = fdkutils.runShellCmd(commandString)
                 if report2:
                     report2 = "tx converting to T1 font: <%s>" % report2
                 report = report1 + report2
             else:
                 commandString = "%s -t1 \"%s\" \"%s\"  2>&1" % (
                     makeOTFParams.txPath, filePath, fontPath)
-                report = FDKUtils.runShellCmd(commandString)
+                report = fdkutils.runShellCmd(commandString)
                 if report:
                     report = "tx converting to T1 font: <%s>" % report
 
@@ -2189,7 +2189,7 @@ def updateFontRevision(featuresPath, fontRevision):
 
 def checkFSTypeValue(FSType, outputPath):
     command = "spot -t OS/2 \"%s\" 2>&1" % outputPath
-    report = FDKUtils.runShellCmd(command)
+    report = fdkutils.runShellCmd(command)
     match = re.search(r"type\s+=(\S+)", report)
     if not match:
         print("makeotf [Error] Could not find 'type' in spot dump of OS/2 "
@@ -2209,7 +2209,7 @@ def checkFSTypeValue(FSType, outputPath):
 def getSourceGOADBData(inputFilePath):
     # First, get the Unicode mapping from the TTF cmap table.
     command = "spot -t cmap=7 \"%s\" 2>&1" % inputFilePath
-    report = FDKUtils.runShellCmd(command)
+    report = fdkutils.runShellCmd(command)
     glyphList = re.findall("[\n\t]\[(....+)\]=<([^>]+)>", report)
 
     # Because this dumps all the Unicode map tables, there are a number
@@ -2233,7 +2233,7 @@ def getSourceGOADBData(inputFilePath):
     # this can differ from spot. I don't use tx for Unicode values.
     # as tx doesn't check 32 bit UV's, and doesn't report double-encodings.
     command = "tx -mtx \"%s\" 2>&1" % inputFilePath
-    report = FDKUtils.runShellCmd(command)
+    report = fdkutils.runShellCmd(command)
     glyphList = re.findall("[\n\r]glyph\[(\d+)\]\s+\{([^,]+)", report)
     gnameDict = {}
     for gid, gname in glyphList:
@@ -2304,13 +2304,13 @@ def copyTTFGlyphTables(inputFilePath, tempOutputPath, outputPath,
     # outputPath does not yet exist, or is the same as inputFilePath.
 
     command = "spot \"%s\"" % tempOutputPath
-    tableDump = FDKUtils.runShellCmd(command)
+    tableDump = fdkutils.runShellCmd(command)
 
     # Get the final glyph name list.
     tempTablePath = inputFilePath + ".temp.table"
     makeOTFParams.tempPathList.append(tempTablePath)
     command = "tx -mtx \"%s\" 2>&1" % tempOutputPath
-    report = FDKUtils.runShellCmd(command)
+    report = fdkutils.runShellCmd(command)
     glyphList = re.findall("[\n\r]glyph\[\d+\]\s+\{([^,]+)", report)
 
     if os.path.exists(outputPath):
@@ -2334,7 +2334,7 @@ def copyTTFGlyphTables(inputFilePath, tempOutputPath, outputPath,
             continue
         command = "sfntedit -x \"%s\"=\"%s\" \"%s\" 2>&1" % (
             tableTag, tempTablePath, tempOutputPath)
-        log = FDKUtils.runShellCmd(command)
+        log = fdkutils.runShellCmd(command)
         if not ("Done." in log):
             print(log)
             print("Error in merging makeotf tables with TrueType source font "
@@ -2343,7 +2343,7 @@ def copyTTFGlyphTables(inputFilePath, tempOutputPath, outputPath,
 
         command = "sfntedit -a \"%s\"=\"%s\" \"%s\" 2>&1" % (
             tableTag, tempTablePath, outputPath)
-        log = FDKUtils.runShellCmd(command)
+        log = fdkutils.runShellCmd(command)
         if not ("Done." in log):
             print(log)
             print("Error in merging makeotf tables with TrueType source font "
@@ -2353,7 +2353,7 @@ def copyTTFGlyphTables(inputFilePath, tempOutputPath, outputPath,
         print("\tcopied \"%s\"." % tableTag)
 
     command = "sfntedit -f \"%s\" 2>&1" % outputPath
-    log = FDKUtils.runShellCmd(command)
+    log = fdkutils.runShellCmd(command)
 
     print("Succeeded in merging makeotf tables with TrueType source font to "
           "final TrueType output font at '%s'." % outputPath)
@@ -2366,7 +2366,7 @@ def fixPost(glyphList, inputFilePath, outputPath, makeOTFParams):
     tempPostPath = os.path.splitext(outputPath)[0] + ".ttx"
     makeOTFParams.tempPathList.append(tempPostPath)
     command = "ttx -t GlyphOrder -t post \"%s\"" % inputFilePath
-    report = FDKUtils.runShellCmd(command)
+    report = fdkutils.runShellCmd(command)
 
     # get xml file name:
     m = re.search(r"to\s+\"([^\"]+)\"", report)
@@ -2419,7 +2419,7 @@ def fixPost(glyphList, inputFilePath, outputPath, makeOTFParams):
     fp.close()
 
     command = "ttx -m \"%s\" \"%s\"" % (inputFilePath, tempPostPath)
-    report = FDKUtils.runShellCmd(command)
+    report = fdkutils.runShellCmd(command)
 
     m = re.search(r"to\s+\"([^\"]+)\"", report)
     if not m:
@@ -2442,7 +2442,7 @@ def fixHead(tempOTFFilePath, outputPath, makeOTFParams):
     makeOTFParams.tempPathList.append(tempHeadPath)
 
     command = "ttx -t head \"%s\"" % outputPath
-    report = FDKUtils.runShellCmd(command)
+    report = fdkutils.runShellCmd(command)
 
     # get xml file name:
     m = re.search(r"to\s+\"([^\"]+)\"", report)
@@ -2460,7 +2460,7 @@ def fixHead(tempOTFFilePath, outputPath, makeOTFParams):
     fp.close()
 
     command = "ttx -t head \"%s\"" % tempOTFFilePath
-    report = FDKUtils.runShellCmd(command)
+    report = fdkutils.runShellCmd(command)
 
     # get xml file name:
     m = re.search(r"to\s+\"([^\"]+)\"", report)
@@ -2486,7 +2486,7 @@ def fixHead(tempOTFFilePath, outputPath, makeOTFParams):
     fp.close()
 
     command = "ttx -m \"%s\" \"%s\"" % (outputPath, tempHeadPath)
-    report = FDKUtils.runShellCmd(command)
+    report = fdkutils.runShellCmd(command)
 
     m = re.search(r"to\s+\"([^\"]+)\"", report)
     if not m:
@@ -2528,7 +2528,7 @@ def fixHhea(tempOTFFilePath, outputPath, makeOTFParams):
     tempHheaPath = os.path.splitext(outputPath)[0] + ".hhea.ttx"
     makeOTFParams.tempPathList.append(tempHheaPath)
     command = "ttx -t hhea \"%s\"" % outputPath
-    report = FDKUtils.runShellCmd(command)
+    report = fdkutils.runShellCmd(command)
     # get xml file name:
     m = re.search(r"to\s+\"([^\"]+)\"", report)
     if not m:
@@ -2545,7 +2545,7 @@ def fixHhea(tempOTFFilePath, outputPath, makeOTFParams):
     fp.close()
 
     command = "ttx -t hhea \"%s\"" % tempOTFFilePath
-    report = FDKUtils.runShellCmd(command)
+    report = fdkutils.runShellCmd(command)
     # get xml file name:
     m = re.search(r"to\s+\"([^\"]+)\"", report)
     if not m:
@@ -2572,7 +2572,7 @@ def fixHhea(tempOTFFilePath, outputPath, makeOTFParams):
     fp.close()
 
     command = "ttx -m \"%s\" \"%s\"" % (outputPath, tempHheaPath)
-    report = FDKUtils.runShellCmd(command)
+    report = fdkutils.runShellCmd(command)
 
     m = re.search(r"to\s+\"([^\"]+)\"", report)
     if not m:
@@ -2892,7 +2892,7 @@ def runMakeOTF(makeOTFParams):
     # I use os.system rather than os.pipe so that the user
     # will see the log messages from the C program during
     # processing, rather than only at the end.
-    FDKUtils.runShellCmdLogging(commandString)
+    fdkutils.runShellCmdLogging(commandString)
 
     # the actual input file was a temp file.
     if inputFontPath != inputFilePath:
@@ -2928,8 +2928,8 @@ def runMakeOTF(makeOTFParams):
     # If we need to convert this to a CID keyed font,
     # we do this as a post processing step on the OTF.
     if doConvertToCID == "true":
-        import ConvertFontToCID
-        ConvertFontToCID.debug = makeOTFParams.debug
+        import convertfonttocid
+        convertfonttocid.debug = makeOTFParams.debug
         print("Converting CFF table to CID-keyed CFF...")
         tempPath = "%s.temp.cid" % outputPath
         if os.path.exists(tempPath):
@@ -2941,15 +2941,15 @@ def runMakeOTF(makeOTFParams):
             if kMOTFOptions[kDoSubr][0] == kOptionNotSeen:
                 doSubr = 'true' == eval("makeOTFParams.%s%s" % (kFileOptPrefix,
                                                                 kRelease))
-            # Send the font.pfa file to ConvertFontToCID.py
+            # Send the font.pfa file to convertfonttocid.py
             # rather than the OTF because the GlyphSet
             # definitions in the fontinfo files use production
             # glyph names not final glyph names.
             # I'm not sure what the side effects of that may be.
             # msousa: May 12 2012
-            ConvertFontToCID.convertFontToCID(outputPath, tempPath)
-            ConvertFontToCID.mergeFontToCFF(tempPath, outputPath, doSubr)
-        except ConvertFontToCID.FontInfoParseError:
+            convertfonttocid.convertFontToCID(outputPath, tempPath)
+            convertfonttocid.mergeFontToCFF(tempPath, outputPath, doSubr)
+        except convertfonttocid.FontInfoParseError:
             traceback.print_exc()
             print("makeotf [Error] Failed to convert font '%s' to CID." %
                   outputPath)
@@ -2965,7 +2965,7 @@ def runMakeOTF(makeOTFParams):
     if eval("makeOTFParams.%s%s" % (kFileOptPrefix, kRelease)):
         try:
             command = "spot -t head \"%s\" 2>&1" % outputPath
-            report = FDKUtils.runShellCmd(command)
+            report = fdkutils.runShellCmd(command)
             match = re.search(r"fontRevision\s+=(\S+)", report)
             if not match:
                 print("makeotf [Error] Could not find fontRevision in spot "
@@ -2987,7 +2987,7 @@ def CheckEnvironment():
     missingTools = []
     for name in ["tx", "makeotfexe"]:
         command = "%s -u 2>&1" % name
-        report = FDKUtils.runShellCmd(command)
+        report = fdkutils.runShellCmd(command)
         if ("options" not in report) and ("Option" not in report):
             missingTools.append(name)
 

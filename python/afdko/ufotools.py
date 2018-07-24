@@ -13,10 +13,10 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
-from afdko import ConvertFontToCID
+from afdko import convertfonttocid
 
 __doc__ = """
-ufoTools.py v1.30.6 Jul 1 2018
+ufotools.py v1.30.6 Jul 1 2018
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -26,11 +26,11 @@ requiring that the AFDKO contain the robofab libraries.
 Modified in Nov 2014, when AFDKO added the robofab libraries. It can now
 be used with UFO fonts only to support the hash mechanism.
 
-Developed in order to support checkOutlines and autohint, the code
+Developed in order to support checkoutlines and autohint, the code
 supports two main functions:
 - convert between UFO GLIF and bez formats
 - keep a history of processing in a hash map, so that the (lengthy)
-processing by autohint and checkOutlines can be avoided if the glyph has
+processing by autohint and checkoutlines can be avoided if the glyph has
 already been processed, and the source data has not changed.
 
 The basic model is:
@@ -43,30 +43,30 @@ After all glyphs are done save all the new GLIF XML elements to GLIF
 files, and update the hash map.
 
 A complication in the Adobe UFO workflow comes from the fact we want to
-make sure that checkOutlines and autohint have been run on each glyph in
+make sure that checkoutlines and autohint have been run on each glyph in
 a UFO font, when building an OTF font from the UFO font. We need to run
-checkOutlines, because we no longer remove overlaps from source UFO font
+checkoutlines, because we no longer remove overlaps from source UFO font
 data, because this can make revising a glyph much easier. We need to run
-autohint, because the glyphs must be hinted after checkOutlines is run,
+autohint, because the glyphs must be hinted after checkoutlines is run,
 and in any case we want all glyphs to have been autohinted. The problem
 with this is that it can take a minute or two to run autohint or
-checkOutlines on a 2K-glyph font. The way we avoid this is to make and
+checkoutlines on a 2K-glyph font. The way we avoid this is to make and
 keep a hash of the source glyph drawing operators for each tool. When
 the tool is run, it calculates a hash of the source glyph, and compares
 it to the saved hash. If these are the same, the tool can skip the
-glyph. This saves a lot of time: if checkOutlines and autohint are run
+glyph. This saves a lot of time: if checkoutlines and autohint are run
 on all glyphs in a font, then a second pass is under 2 seconds.
 
 Another issue is that since we no longer remove overlaps from the source
-glyph files, checkOutlines must write any edited glyph data to a
-different layer in order to not destroy the source data. The ufoTools
+glyph files, checkoutlines must write any edited glyph data to a
+different layer in order to not destroy the source data. The ufotools
 defines an Adobe-specific glyph layer for processed glyphs, named
 "glyphs.com.adobe.type.processedGlyphs".
-checkOutlines writes new glyph files to the processed glyphs layer only
+checkoutlines writes new glyph files to the processed glyphs layer only
 when it makes a change to the glyph data.
 
-When the autohint program is run, the ufoTools must be able to tell
-whether checkOutlines has been run and has altered a glyph: if so, the
+When the autohint program is run, the ufotools must be able to tell
+whether checkoutlines has been run and has altered a glyph: if so, the
 input file needs to be from the processed glyph layer, else it needs to
 be from the default glyph layer.
 
@@ -83,35 +83,35 @@ program may or may not have altered the outline data. For example, autohint
 adds private hint data, and adds names to points, but does not change any
 paths.
 
-If the stored hash for the glyph does not exist, the ufoTools lib will save the
+If the stored hash for the glyph does not exist, the ufotools lib will save the
 new hash in the hash map entry and will set the history list to contain just
 the current program. The program will read the glyph from the default layer.
 
 If the stored hash matches the hash for the current glyph file in the default
-layer, and the current program name is in the history list,then ufoTools
+layer, and the current program name is in the history list,then ufotools
 will return "skip=1", and the calling program may skip the glyph.
 
 If the stored hash matches the hash for the current glyph file in the default
 layer, and the current program name is not in the history list, then the
-ufoTools will return "skip=0". If the font object field 'usedProcessedLayer' is
+ufotools will return "skip=0". If the font object field 'usedProcessedLayer' is
 set True, the program will read the glyph from the from the Adobe processed
 layer, if it exists, else it will always read from the default layer.
 
 If the hash differs between the hash map entry and the current glyph in the
-default layer, and usedProcessedLayer is False, then ufoTools will return
+default layer, and usedProcessedLayer is False, then ufotools will return
 "skip=0". If usedProcessedLayer is True, then the program will consult the list
 of required programs. If any of these are in the history list, then the program
 will report an error and return skip =1, else it will return skip=1. The
 program will then save the new hash in the hash map entry and reset the history
 list to contain just the current program. If the old and new hash match, but
-the program name is not in the history list, then the ufoTools will not skip
+the program name is not in the history list, then the ufotools will not skip
 the glyph, and will add the program name to the history list.
 
 
-The only tools using this are, at the moment, checkOutlines, checkOutlinesUFO
-and autohint. checkOutlines and checkOutlinesUFO use the hash map to skip
+The only tools using this are, at the moment, checkoutlines, checkoutlinesufo
+and autohint. checkoutlines and checkoutlinesufo use the hash map to skip
 processing only when being used to edit glyphs, not when reporting them.
-checkOutlines necessarily flattens any components in the source glyph file to
+checkoutlines necessarily flattens any components in the source glyph file to
 actual outlines. autohint adds point names, and saves the hint data as a
 private data in the new GLIF file.
 
@@ -799,7 +799,7 @@ class UFOFontData(object):
 
         # We also need to get the glyph map for the processed layer,
         # and use this when the glyph is read from the processed layer.
-        # Because checkOutlinesUFO used the defcon library, it can write
+        # Because checkoutlinesufo used the defcon library, it can write
         # glyph file names that differ from what is in the default glyph layer.
         contentsPath = os.path.join(self.glyphLayerDir, kContentsName)
         if os.path.exists(contentsPath):
@@ -867,7 +867,7 @@ class UFOFontData(object):
         if self.fontInfo is None:
             self.loadFontInfo()
 
-        fdDict = ConvertFontToCID.FDDict()
+        fdDict = convertfonttocid.FDDict()
         # should be 1 if the glyphs are ideographic, else 0.
         fdDict.LanguageGroup = self.fontInfo.get("languagegroup", "0")
         fdDict.OrigEmSqUnits = self.getUnitsPerEm()
@@ -904,9 +904,9 @@ class UFOFontData(object):
 
         blueValues = map(str, blueValues)
         numBlueValues = min(
-            numBlueValues, len(ConvertFontToCID.kBlueValueKeys))
+            numBlueValues, len(convertfonttocid.kBlueValueKeys))
         for i in range(numBlueValues):
-            key = ConvertFontToCID.kBlueValueKeys[i]
+            key = convertfonttocid.kBlueValueKeys[i]
             value = blueValues[i]
             exec("fdDict.%s = %s" % (key, value))
 
@@ -921,9 +921,9 @@ class UFOFontData(object):
                 otherBlues[i] = otherBlues[i] - otherBlues[i + 1]
             otherBlues = map(str, otherBlues)
             numBlueValues = min(
-                numBlueValues, len(ConvertFontToCID.kOtherBlueValueKeys))
+                numBlueValues, len(convertfonttocid.kOtherBlueValueKeys))
             for i in range(numBlueValues):
-                key = ConvertFontToCID.kOtherBlueValueKeys[i]
+                key = convertfonttocid.kOtherBlueValueKeys[i]
                 value = otherBlues[i]
                 exec("fdDict.%s = %s" % (key, value))
 
@@ -1006,18 +1006,18 @@ class UFOFontData(object):
             fontInfoData = re.sub(r"#[^\r\n]+", "", fontInfoData)
 
             if "FDDict" in fontInfoData:
-                blueFuzz = ConvertFontToCID.getBlueFuzz(inputPath)
+                blueFuzz = convertfonttocid.getBlueFuzz(inputPath)
                 fdGlyphDict, fontDictList, finalFDict = \
-                    ConvertFontToCID.parseFontInfoFile(
+                    convertfonttocid.parseFontInfoFile(
                         fontDictList, fontInfoData, glyphList,
                         maxY, minY, psName, blueFuzz)
                 if finalFDict is None:
                     # If a font dict was not explicitly specified for the
                     # output font, use the first user-specified font dict.
-                    ConvertFontToCID.mergeFDDicts(
+                    convertfonttocid.mergeFDDicts(
                         fontDictList[1:], self.fontDict)
                 else:
-                    ConvertFontToCID.mergeFDDicts(
+                    convertfonttocid.mergeFDDicts(
                         [finalFDict], self.topDict)
 
         return fdGlyphDict, fontDictList
@@ -1397,7 +1397,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY,
                     call convertGlyphOutlineToBezString with transform
                     add to bez string
     I don't bother adding in any hinting info, as this is used only for making
-    temp bez files as input to checkOutlines or autohint, which invalidate
+    temp bez files as input to checkoutlines or autohint, which invalidate
     hinting data by changing the outlines data, or at best ignore hinting data.
 
     bez ops output: ["rrmt", "dt", "rct", "cp" , "ed"]
@@ -2461,7 +2461,7 @@ def validateLayers(ufoFontPath, doWarning=True):
     # file which are not in the glyph files. Filter contents list with what's
     # in /processed glyphs: write to process/plist file.' The most common way
     # that this is needed in the AFDKO workflow is if someone kills
-    # checkOutlines/checkOutlinesUFO or autohint while it is running. Since
+    # checkoutlines/checkoutlinesufo or autohint while it is running. Since
     # the program may delete glyphs from the processed layer while running,
     # and the contents.plist file is updated only when the changed font is
     # saved, the contents.plist file in the processed layer ends up referencing
@@ -2508,7 +2508,7 @@ def makeUFOFMNDB(srcFontPath):
         if len(parts) > 1:
             styleName = parts[1]
     except KeyError:
-        print("ufoTools [Warning] UFO font is missing 'postscriptFontName'")
+        print("ufotools [Warning] UFO font is missing 'postscriptFontName'")
 
     try:
         familyName = fiMap["openTypeNamePreferredFamilyName"]
@@ -2516,7 +2516,7 @@ def makeUFOFMNDB(srcFontPath):
         try:
             familyName = fiMap["familyName"]
         except KeyError:
-            print("ufoTools [Warning] UFO font is missing 'familyName'")
+            print("ufotools [Warning] UFO font is missing 'familyName'")
 
     try:
         styleName = fiMap["openTypeNamePreferredSubfamilyName"]
@@ -2524,7 +2524,7 @@ def makeUFOFMNDB(srcFontPath):
         try:
             styleName = fiMap["styleName"]
         except KeyError:
-            print("ufoTools [Warning] UFO font is missing 'styleName'")
+            print("ufotools [Warning] UFO font is missing 'styleName'")
 
     fmndbPath = os.path.join(srcFontPath, kDefaultFMNDBPath)
     parts = []

@@ -827,11 +827,11 @@ complete list see:
   changes to the source code tree and build process, to make it easier
   to build the open source AFDKO. Unfortunately, the source code for
   the **IS** and **checkOutlines** programs cannot be open sourced.
-- \[tx/mergeFonts/rotateFonts\] Removed '-bc' option support, as
+- \[tx/mergeFonts/rotateFont\] Removed '-bc' option support, as
   this includes patents that cannot be shared in open source.
 - \[tx\] All tx-related tools now report when a font exceeds the max
   allowed subroutine recursion depth.
-- \[tx/mergeFonts/rotateFonts\] Added common options to all when
+- \[tx/mergeFonts/rotateFont\] Added common options to all when
   possible: all now support UFO and SVG fonts, the '-gx' option to
   exclude fonts, the '-std' option for cff output, and the '-b'
   option for cff output.

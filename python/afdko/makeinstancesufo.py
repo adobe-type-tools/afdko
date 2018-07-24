@@ -18,13 +18,13 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
-from afdko.ufoTools import validateLayers
+from afdko.ufotools import validateLayers
 
 __usage__ = """
-   makeInstancesUFO v1.4.1 Jul 13 2018
-   makeInstancesUFO -h
-   makeInstancesUFO -u
-   makeInstancesUFO [-d <design space file name>] [-a] [-c] [-n] [-dec]
+   makeinstancesufo v1.4.1 Jul 13 2018
+   makeinstancesufo -h
+   makeinstancesufo -u
+   makeinstancesufo [-d <design space file name>] [-a] [-c] [-n] [-dec]
                     [-i 0,1,..n]
 
    -d <design space file path>
@@ -43,7 +43,7 @@ __usage__ = """
 """
 
 __help__ = __usage__ + """
-    makeInstancesUFO generates UFO font instances from a set of master design
+    makeinstancesufo generates UFO font instances from a set of master design
     UFO fonts. It uses the mutatorMath library. The paths to the masters and
     instances fonts are specified in the .designspace file.
 
@@ -408,7 +408,7 @@ def run(args):
             # make new instance font.
             updateInstance(options, instancePath)
 
-    # checkoutlinesufo does ufoTools.validateLayers()
+    # checkoutlinesufo does ufotools.validateLayers()
     if not options.doOverlapRemoval:
         for instancePath in newInstancesList:
             # make sure that that there are no old glyphs left in the

@@ -15,7 +15,7 @@ CFLAGS = $(STD_OPTS)
 # Program
 PRG_SRCS = $(SRC_DIR)/rotateFont.c
 PRG_OBJS = rotateFont.o
-PRG_TARGET = $(EXE_DIR)/rotateFont
+PRG_TARGET = $(EXE_DIR)/rotatefont
 
 # Build targets
 TARGETS = $(PRG_TARGET)

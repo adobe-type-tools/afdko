@@ -1,10 +1,10 @@
 #!/bin/env python
 # Copyright 2014 Adobe. All rights reserved.
 """
-ProofPDF.py. A wrapper for the fontPDF.py module. This script verifies
+proofpdf.py. A wrapper for the fontpdf.py module. This script verifies
 the existence of the specified font files, creates a font class object
-with the call-backs required by fontPDF, and translates the command line
-options to arguments for the fontPDF module; the latter produces a proof
+with the call-backs required by fontpdf, and translates the command line
+options to arguments for the fontpdf module; the latter produces a proof
 file using the provided options annd font instance.
 """
 import copy
@@ -19,20 +19,20 @@ import subprocess
 
 from fontTools.ttLib import TTFont, getTableModule, TTLibError
 
-from fontPDF import (FontPDFParams, makePDF, makeFontSetPDF, kDrawTag,
+from fontpdf import (FontPDFParams, makePDF, makeFontSetPDF, kDrawTag,
                      kDrawPointTag, kShowMetaTag, params_doc)
-import ttfPDF
-import otfPDF
-import FDKUtils
+import ttfpdf
+import otfpdf
+import fdkutils
 
 curSystem = platform.system()
 
 
 __usage__ = """
-ProofPDF v1.20 May 17 2018
-ProofPDF [-h] [-u]
-ProofPDF -help_params
-ProofPDF [-g <glyph list>] [-gf <filename>] [-gpp <number>] [-pt <number>] [-dno] [-baseline <number>] [-black] [-lf <filename>] [-select_hints <0,1,2..> ]  \
+proofpdf v1.20 May 17 2018
+proofpdf [-h] [-u]
+proofpdf -help_params
+proofpdf [-g <glyph list>] [-gf <filename>] [-gpp <number>] [-pt <number>] [-dno] [-baseline <number>] [-black] [-lf <filename>] [-select_hints <0,1,2..> ]  \
 [-o <PDF file path> ] -hintplot ] [-charplot] [-digiplot] [-fontplot]  [-waterfallplot] [-wfr <point size list>] font-path1  fontpath2 ...
 
 Glyph Proofing program for OpenType fonts
@@ -40,8 +40,8 @@ Glyph Proofing program for OpenType fonts
 __help__= __usage__ + """
 
 "charplot", "digiplot", "fontplot", "hintplot", and "waterfallplot" are
-all command files that call the ProofPDF script with different options.
-ProofPDF takes as options a list of fonts, and an optional list of
+all command files that call the proofpdf script with different options.
+proofpdf takes as options a list of fonts, and an optional list of
 glyphs, and prints a PDF file for the specified font, showing the glyphs
 as specified by options.
 
@@ -132,8 +132,8 @@ in the list.
 of glyphs. The list must be comma-delimited, with no white space. The
 glyph ID's may be glyph indices, glyph names, or glyph CID's. If the latter,
 the CID value must be prefixed with the string "cid". There must be no
-white-space in the glyph list. Examples: proofPDF -g A,B,C,69 myFont
-proofPDF -g cid01030,cid00034,cid03455,69 myCIDFont.otf
+white-space in the glyph list. Examples: proofpdf -g A,B,C,69 myFont
+proofpdf -g cid01030,cid00034,cid03455,69 myCIDFont.otf
 
 A range of glyphs may be specified by providing two names separated only
 by a hyphen:
@@ -226,7 +226,7 @@ def CheckEnvironment():
 	txError = 0
 
 	command = "%s -u 2>&1" % tx_path
-	report = FDKUtils.runShellCmd(command)
+	report = fdkutils.runShellCmd(command)
 	if "options" not in report:
 		txError = 1
 
@@ -699,12 +699,12 @@ def openFile(path, txPath):
 	# If it is CID-keyed font, we need to convert it to a name-keyed font. This is a hack, but I really don't want to add CID support to
 	# the very simple-minded PDF library.
 	command="%s   -dump -0  \"%s\" 2>&1" % (txPath, path)
-	report = FDKUtils.runShellCmd(command)
+	report = fdkutils.runShellCmd(command)
 	if "CIDFontName" in report:
 		tfd,tempPath1 = tempfile.mkstemp()
 		os.close(tfd)
 		command="%s   -t1 -decid -usefd 0  \"%s\" \"%s\" 2>&1" % (txPath, path, tempPath1)
-		report = FDKUtils.runShellCmd(command)
+		report = fdkutils.runShellCmd(command)
 		if "fatal" in report:
 			logMsg(report)
 			logMsg("Failed to convert CID-keyed font %s to a temporary Typ1 data file." % path)
@@ -712,7 +712,7 @@ def openFile(path, txPath):
 		tfd,tempPathCFF = tempfile.mkstemp()
 		os.close(tfd)
 		command="%s   -cff +b  \"%s\" \"%s\" 2>&1" % (txPath, tempPath1, tempPathCFF)
-		report = FDKUtils.runShellCmd(command)
+		report = fdkutils.runShellCmd(command)
 		if "fatal" in report:
 			logMsg(report)
 			logMsg("Failed to convert CID-keyed font %s to a temporary CFF data file." % path)
@@ -721,7 +721,7 @@ def openFile(path, txPath):
 	elif os.path.isdir(path):
 		# See if it is a UFO font by truing to dump it.
 		command="%s   -dump -0  \"%s\" 2>&1" % (txPath, path)
-		report = FDKUtils.runShellCmd(command)
+		report = fdkutils.runShellCmd(command)
 		if not "sup.srcFontType" in report:
 			logMsg(report)
 			logMsg("Failed to open directory %s as a UFO font." % path)
@@ -729,7 +729,7 @@ def openFile(path, txPath):
 		tfd,tempPathCFF = tempfile.mkstemp()
 		os.close(tfd)
 		command="%s   -cff +b  \"%s\" \"%s\" 2>&1" % (txPath, path, tempPathCFF)
-		report = FDKUtils.runShellCmd(command)
+		report = fdkutils.runShellCmd(command)
 		if "fatal" in report:
 			logMsg(report)
 			logMsg("Failed to convert ufo font %s to a temporary CFF data file." % path)
@@ -771,7 +771,7 @@ def openFile(path, txPath):
 			os.close(tfd)
 			cffPath = tempPathCFF
 			command="%s   -cff +b  \"%s\" \"%s\" 2>&1" % (txPath, path, tempPathCFF)
-			report = FDKUtils.runShellCmd(command)
+			report = fdkutils.runShellCmd(command)
 			if "fatal" in report:
 				logMsg("Attempted to convert font %s  from PS to a temporary CFF data file." % path)
 				logMsg(report)
@@ -825,9 +825,9 @@ def proofMakePDF(pathList, params, txPath):
 			params.rt_reporter = logMsg
 
 			if ttFont.has_key("CFF "):
-				pdfFont = otfPDF.txPDFFont(ttFont, params)
+				pdfFont = otfpdf.txPDFFont(ttFont, params)
 			elif ttFont.has_key("glyf"):
-				pdfFont = ttfPDF.txPDFFont(ttFont, params)
+				pdfFont = ttfpdf.txPDFFont(ttFont, params)
 			else:
 				logMsg( "Quitting. Font type is not recognized. %s.." % (path))
 				break
@@ -853,14 +853,14 @@ def proofMakePDF(pathList, params, txPath):
 				os.chdir(basedir)
 				command = "start %s" % (pdfName)
 				print command
-				FDKUtils.runShellCmdLogging(command)
+				fdkutils.runShellCmdLogging(command)
 				os.chdir(curdir)
 			elif os.name == "Linux":
 				command = "xdg-open \"" + pdfFilePath  + "\"" + " &"
-				FDKUtils.runShellCmdLogging(command)
+				fdkutils.runShellCmdLogging(command)
 			else:
 				command = "open \"" + pdfFilePath  + "\"" + " &"
-				FDKUtils.runShellCmdLogging(command)
+				fdkutils.runShellCmdLogging(command)
 	else:
 		tmpList = []
 		for path in pathList:
@@ -884,9 +884,9 @@ def proofMakePDF(pathList, params, txPath):
 			params.rt_reporter = logMsg
 
 			if ttFont.has_key("CFF "):
-				pdfFont = otfPDF.txPDFFont(ttFont, params)
+				pdfFont = otfpdf.txPDFFont(ttFont, params)
 			elif ttFont.has_key("glyf"):
-				pdfFont = ttfPDF.txPDFFont(ttFont, params)
+				pdfFont = ttfpdf.txPDFFont(ttFont, params)
 			else:
 				logMsg( "Quitting. Font type is not recognized. %s.." % (path))
 				return
@@ -908,15 +908,15 @@ def proofMakePDF(pathList, params, txPath):
 					os.chdir(basedir)
 					command = "start %s" % (pdfName)
 					print command
-					FDKUtils.runShellCmdLogging(command)
+					fdkutils.runShellCmdLogging(command)
 					os.chdir(curdir)
 				elif curSystem == "Linux":
 					command = "xdg-open \"" + pdfFilePath  + "\"" + " &"
 					print command
-					FDKUtils.runShellCmdLogging(command)
+					fdkutils.runShellCmdLogging(command)
 				else:
 					command = "open \"" + pdfFilePath  + "\"" + " &"
-					FDKUtils.runShellCmdLogging(command)
+					fdkutils.runShellCmdLogging(command)
 
 
 def charplot():

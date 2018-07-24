@@ -15,7 +15,7 @@ autohint [-g <glyph list>] [-gf <filename>] [-xg <glyph list>] [-xgf <filename>]
 Auto-hinting program for PostScript and OpenType/CFF fonts.
 """
 
-from ufoTools import kProcessedGlyphsLayerName, kProcessedGlyphsLayer
+from ufotools import kProcessedGlyphsLayerName, kProcessedGlyphsLayer
 
 __help__ = __usage__ + """
 
@@ -26,7 +26,7 @@ specified glyphs.
 Note that the hinting is better if the font's global alignment zones are
 set usefully; at the very least, you should have entered values that
 capture capital height, x height, ascender and descender heights, and
-ascender and descender overshoot. The reports provided by the stemHist
+ascender and descender overshoot. The reports provided by the stemhist
 tool are useful for choosing these.
 
 By default, autothint will hint all glyphs in the font. Options allow you to
@@ -113,7 +113,7 @@ alignment zones in an "fontinfo" file.
 	When this is turned on, the autohint program will fix a few issues:
 	if there are many hint substitutions, it will try and shuffle the order
 	of paths to reduce this, and it will flatten nearly straight curves.
-	It no longer blunts sharp angles.That is better done with checkOutlines
+	It no longer blunts sharp angles.That is better done with checkoutlines
 
 -nf	Suppress generation of flex commands
 
@@ -447,9 +447,9 @@ import tempfile
 from fontTools.ttLib import TTFont, getTableModule
 import plistlib
 import warnings
-from BezTools import *
-import FDKUtils
-import ufoTools
+from beztools import *
+import fdkutils
+import ufotools
 import traceback
 import shutil
 
@@ -538,7 +538,7 @@ def CheckEnvironment():
 	txPath = 'tx'
 	txError = 0
 	command = "%s -u 2>&1" % (txPath)
-	report = FDKUtils.runShellCmd(command)
+	report = fdkutils.runShellCmd(command)
 	if "options" not in report:
 			txError = 1
 
@@ -547,7 +547,7 @@ def CheckEnvironment():
 		raise FDKEnvironmentError
 
 	command = "autohintexe -u 2>&1"
-	report = FDKUtils.runShellCmd(command)
+	report = fdkutils.runShellCmd(command)
 	if "version" not in report:
 		logMsg("Please re-install the FDK. The path to the program 'autohintexe' is not in the environment variable PATH.")
 		raise FDKEnvironmentError
@@ -652,13 +652,13 @@ def getOptions():
 		if arg == "-h":
 			print(__help__)
 			command = "autohintexe -v"
-			report = FDKUtils.runShellCmd(command)
+			report = fdkutils.runShellCmd(command)
 			logMsg( report)
 			raise ACOptionParseError
 		elif arg == "-u":
 			print(__usage__)
 			command = "autohintexe -v"
-			report = FDKUtils.runShellCmd(command)
+			report = fdkutils.runShellCmd(command)
 			logMsg( report)
 			raise ACOptionParseError
 		elif arg == "-hfd":
@@ -945,9 +945,9 @@ def openUFOFile(path, outFilePath, useHashMap):
 			shutil.rmtree(outFilePath)
 		shutil.copytree(path , outFilePath)
 		path = outFilePath
-	font = ufoTools.UFOFontData(path, useHashMap, ufoTools.kAutohintName)
+	font = ufotools.UFOFontData(path, useHashMap, ufotools.kAutohintName)
 	font.useProcessedLayer = True
-	font.requiredHistory.append(ufoTools.kCheckOutlineName) # Programs in this list must be run before autohint, if the outlines have been edited.
+	font.requiredHistory.append(ufotools.kCheckOutlineName) # Programs in this list must be run before autohint, if the outlines have been edited.
 	return font
 
 def openOpenTypeFile(path, outFilePath):
@@ -990,7 +990,7 @@ def openOpenTypeFile(path, outFilePath):
 			fontType =  2
 			print("Converting Type1 font to temp CFF font file...")
 			command="tx  -cff +b -std \"%s\" \"%s\" 2>&1" % (path, tempPathCFF)
-			report = FDKUtils.runShellCmd(command)
+			report = fdkutils.runShellCmd(command)
 			if "fatal" in report:
 				logMsg("Attempted to convert font %s  from PS to a temporary CFF data file." % path)
 				logMsg(report)
@@ -1253,7 +1253,7 @@ def hintFile(options):
 			command = "autohintexe %s%s%s%s -s .new -f \"%s\" \"%s\"" % (verboseArg, suppressEditArg, supressHintSubArg, decimalArg, tempFI, tempBez)
 			if  options.debug:
 				print(command)
-			report = FDKUtils.runShellCmd(command)
+			report = fdkutils.runShellCmd(command)
 			if report:
 				if not options.verbose:
 					logMsg("") # end series of "."
@@ -1346,7 +1346,7 @@ def main():
 	# verify that all files exist.
 	try:
 		hintFile(options)
-	except (ACFontError, ufoTools.UFOParseError) as e:
+	except (ACFontError, ufotools.UFOParseError) as e:
 		logMsg("\t%s" % e)
 	if gLogFile:
 		gLogFile.close()

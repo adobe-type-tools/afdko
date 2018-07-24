@@ -2,7 +2,7 @@
 set -e
 set -x
 
-target=rotateFont
+target=rotatefont
 curdir=`pwd`
 
 if [ -z "$1" ] || [ $1 = "release" ]

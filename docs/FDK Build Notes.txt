@@ -27,7 +27,7 @@ with sub-directories for build/ and lib/ being the same as for the program build
 
 Special cases.
 
-tx, mergeFonts, and rotateFonts share a common set of libraries and resource files. These libraries are grouped under the public directory in:
+tx, mergefonts, and rotatefont share a common set of libraries and resource files. These libraries are grouped under the public directory in:
 afdko/c/public/lib/
 			build/
 			lib/

@@ -22,11 +22,11 @@ import defcon
 import ufoLib
 from fontPens.digestPointPen import DigestPointPen
 
-from afdko import ufoTools
+from afdko import ufotools
 # noinspection PyPep8Naming
-from afdko.ufoTools import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
+from afdko.ufotools import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
 # noinspection PyPep8Naming
-from afdko.ufoTools import kProcessedGlyphsLayerName as PROCD_GLYPHS_LAYER_NAME
+from afdko.ufotools import kProcessedGlyphsLayerName as PROCD_GLYPHS_LAYER_NAME
 
 
 class FocusOptionParseError(KeyError):
@@ -58,16 +58,16 @@ class FontFile(object):
     def open(self, use_hash_map):
         font_path = self.font_path
         try:
-            ufoTools.validateLayers(font_path)
+            ufotools.validateLayers(font_path)
             self.defcon_font = defcon.Font(font_path)
             self.ufo_format = self.defcon_font.ufoFormatVersion
             if self.ufo_format < 2:
                 self.ufo_format = 2
             self.font_type = UFO_FONT_TYPE
             self.use_hash_map = use_hash_map
-            self.ufo_font_hash_data = ufoTools.UFOFontData(
+            self.ufo_font_hash_data = ufotools.UFOFontData(
                 font_path, self.use_hash_map,
-                programName=ufoTools.kCheckOutlineName)
+                programName=ufotools.kCheckOutlineName)
             self.ufo_font_hash_data.readHashMap()
 
         except ufoLib.UFOLibError as e:
@@ -128,7 +128,7 @@ class FontFile(object):
             XXX A real hack here XXX
             RoboFont did not support layers (UFO3 feature) until version 3.
             So in order to allow editing (in RF 1.x) UFOs that contain
-            a processed glyphs layer, CheckOutlinesUFO generates UFOs that
+            a processed glyphs layer, checkoutlinesufo generates UFOs that
             are structured like UFO3, but advertise themselves as UFO2.
             To achieve this, the code below hacks ufoLib to surgically save
             only the processed layer.
@@ -370,7 +370,7 @@ def get_options(args):
              'or glyph names. There must be no white-space in the '
              'glyph list.\n'
              'Example:\n'
-             '    checkOutlinesUFO -g A,B,C,69 MyFont.ufo'
+             '    checkoutlinesufo -g A,B,C,69 MyFont.ufo'
     )
     parser.add_argument(
         '-f',
@@ -389,7 +389,7 @@ def get_options(args):
              'By default, a file containing compact descriptions '
              '(a.k.a. hashes) of the glyphs is saved inside the '
              'UFO on the first time the font is checked. Storing '
-             'these hashes allows checkOutlinesUFO to be much faster '
+             'these hashes allows checkoutlinesufo to be much faster '
              'on successive checks of the same UFO (because the '
              'tool will skip processing glyphs that were not '
              'modified since the last time the font was checked).'
@@ -741,9 +741,9 @@ def remove_colinear_lines(new_glyph, changed, msg, options):
 
 # noinspection PyProtectedMember
 def split_touching_paths(new_glyph):
-    """ This hack fixes a design difference between the Adobe checkOutlines
+    """ This hack fixes a design difference between the Adobe checkoutlines
     logic and booleanGlyph, and is used only when comparing the two. With
-    checkOutlines, if only a single point on a contour lines is coincident
+    checkoutlines, if only a single point on a contour lines is coincident
     with the path of the another contour, the paths are NOT merged. With
     booleanGlyph, they are merged. An example is the vertex of a diamond
     shape having the same y coordinate as a horizontal line in another path,
@@ -1129,7 +1129,7 @@ def run(args=None):
     # processed layer.writer.getGlyphSet()
     # will fail unless we update the contents.plist file to match.
     if options.allow_changes:
-        ufoTools.validateLayers(font_path, False)
+        ufotools.validateLayers(font_path, False)
 
     if not font_changed:
         # Even if the program didn't change any glyphs,

@@ -2,7 +2,7 @@
 set -e
 set -x
 
-target=mergeFonts
+target=mergefonts
 curdir=`pwd`
 
 if [ -z "$1" ] || [ $1 = "release" ]
