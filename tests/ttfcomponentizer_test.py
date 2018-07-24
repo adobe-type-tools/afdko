@@ -13,6 +13,8 @@ from afdko.ttfcomponentizer import (
     get_goadb_names_mapping, get_glyph_names_mapping, get_composites_data,
     assemble_components)
 
+TOOL = 'ttfcomponentizer'
+
 TEST_TTF_FILENAME = 'ttfcomponentizer.ttf'
 DESIGN_NAMES_LIST = ['acaron', 'acutecmb', 'caroncmb', 'design_name',
                      'gravecmb', 'tildecmb']
@@ -31,13 +33,15 @@ class Object(object):
     pass
 
 
-def _get_test_file_path(file_name):
-    return os.path.join(
-        os.path.split(__file__)[0], 'ttfcomponentizer_data', file_name)
+data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
+
+
+def _get_input_path(file_name):
+    return os.path.join(data_dir_path, 'input', file_name)
 
 
 def _get_test_ttf_path():
-    return _get_test_file_path(TEST_TTF_FILENAME)
+    return _get_input_path(TEST_TTF_FILENAME)
 
 
 def _get_test_ufo_path():
@@ -133,7 +137,7 @@ def test_options_invalid_font_path():
 
 
 def test_options_invalid_font():
-    path = _get_test_file_path('not_a_font.ttf')
+    path = _get_input_path('not_a_font.ttf')
     assert get_options([path]).font_path is None
 
 
