@@ -5,29 +5,29 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __doc__ = """
-stemHist. Wrapper for the Adobe auto-hinting C library. The AC C library
+stemhist. Wrapper for the Adobe auto-hinting C library. The AC C library
 works on only one glyph at a time, expressed in the old 'bez' format, a
 bezier-curve language much like PostScript Type 1, but with text
 operators and coordinates.
 
-The stemHist script uses Just von Rossum's fontTools library to read and write a
+The stemhist script uses Just von Rossum's fontTools library to read and write a
 font file. It extracts the PostScript T2 charstring program for each selected
 glyph in turn. It converts this into a 'bez language file, and calls the
-autohintexe program to work on this file. stemHist returns a returns a list of
+autohintexe program to work on this file. stemhist returns a returns a list of
 either stem hints or alignment zones.
 
 
 In order to work on Type 1 font files as well as the OpenType/CFF fonts
-supported directly by the fontTools library, stemHist uses the 'tx' tool
+supported directly by the fontTools library, stemhist uses the 'tx' tool
 to convert the font to a 'CFF' font program, and then builds a partial
 OpenType font for the fontTools to work with.
 
 """
 __usage__ = """
-stemHist program v1.27 June 10 2016
-stemHist -h
-stemHist -u
-stemHist [-g <glyph list>] [-gf <filename>] [-xg <glyph list>] [-xgf <filename>] [-all] [-a] [-new] -q font-path1 font-path2...
+stemhist program v1.27 June 10 2016
+stemhist -h
+stemhist -u
+stemhist [-g <glyph list>] [-gf <filename>] [-xg <glyph list>] [-xgf <filename>] [-all] [-a] [-new] -q font-path1 font-path2...
 
 Stem and Alignment zone report for OT/CFF fonts.
 Copyright (c) 2006 Adobe Systems Incorporated
@@ -66,8 +66,8 @@ Options:
 	list of glyphs. The list must be comma-delimited. The glyph ID's may
 	be glyphID's, glyph names, or glyph CID's. If the latter, the CID
 	value must be prefixed with the string "cid". There must be no
-	white-space in the glyph list. Examples: stemHist -g A,B,C,69 myFont
-	stemHist -g cid1030,cid34,cid3455,69 myCIDFont
+	white-space in the glyph list. Examples: stemhist -g A,B,C,69 myFont
+	stemhist -g cid1030,cid34,cid3455,69 myCIDFont
 
 A range of glyphs may be specified by providing two names separated only
 	by a hyphen: AC -g zero-nine,onehalf myFont Note that the range will
@@ -87,7 +87,7 @@ A range of glyphs may be specified by providing two names separated only
 	only stems formed by straight line segments.
 
 -new Skip processing a font if the report files already exist. This
-	allows you to use the command: stemHist -new */*/*ps, and apply the
+	allows you to use the command: stemhist -new */*/*ps, and apply the
 	tool only to fonts where the report has not yet been run.
 
 -o report path
@@ -113,10 +113,10 @@ import os
 import re
 import time
 from fontTools.ttLib import TTFont, getTableModule
-from BezTools import *
+from beztools import *
 import warnings
-import FDKUtils
-import ufoTools
+import fdkutils
+import ufotools
 import traceback
 
 kTempCFFSuffix = ".temp.ac.cff"
@@ -194,7 +194,7 @@ def CheckEnvironment():
 	txPath = 'tx'
 	txError = 0
 	command = "%s -u 2>&1" % (txPath)
-	report = FDKUtils.runShellCmd(command)
+	report = fdkutils.runShellCmd(command)
 	if "options" not in report:
 			txError = 1
 
@@ -437,7 +437,7 @@ def openUFOFile(path, outFilePath, useHashMap):
 		msg = "Copying from source UFO font to output UFO fot before processing..."
 		logMsg(msg)
 		path = outFilePath
-	font = ufoTools.UFOFontData(path, useHashMap, ufoTools.kAutohintName)
+	font = ufotools.UFOFontData(path, useHashMap, ufotools.kAutohintName)
 	return font
 
 def openOpenTypeFile(path, outFilePath):
@@ -480,7 +480,7 @@ def openOpenTypeFile(path, outFilePath):
 			fontType =  2
 			print("Converting Type1 font to temp CFF font file...")
 			command="tx  -cff +b -std \"%s\" \"%s\" 2>&1" % (path, tempPathCFF)
-			report = FDKUtils.runShellCmd(command)
+			report = fdkutils.runShellCmd(command)
 			if "fatal" in report:
 				logMsg("Attempted to convert font %s  from PS to a temporary CFF data file." % path)
 				logMsg(report)
@@ -857,7 +857,7 @@ def collectStemsFont(path, options, txPath):
 		command = "autohintexe -q %s %s  -f \"%s\" \"%s\" 2>&1" % (doAlign, allStems, tempFI, tempBez)
 		if options.debug:
 			print(command)
-		log = FDKUtils.runShellCmd(command)
+		log = fdkutils.runShellCmd(command)
 		if log:
 			print(log)
 			if "number terminator while" in log:
@@ -926,7 +926,7 @@ def main():
 				continue
 		try:
 			collectStemsFont(path, options, txPath)
-		except (ACFontError, ufoTools.UFOParseError) as e:
+		except (ACFontError, ufotools.UFOParseError) as e:
 			logMsg( "\t%s" % e)
 		if options.debug:
 			fp = open("rawdata.txt", "wt")

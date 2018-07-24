@@ -8,7 +8,7 @@ import subprocess
 import traceback
 
 __doc__ = """
-FDKUtils.py v1.2.6 Jun 30 2018
+fdkutils.py v1.2.6 Jun 30 2018
 A module of functions that are needed by several of the AFDKO scripts.
 """
 

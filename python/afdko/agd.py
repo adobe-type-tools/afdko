@@ -9,8 +9,8 @@ names and Unicode values, from one of the scripts in
 python/afdko, the set of commands is:
 	import agd
 	import os
-    import FDKUtils
-	resources_dir = FDKUtils.get_resources_dir()
+    import fdkutils
+	resources_dir = fdkutils.get_resources_dir()
 	kAGD_TXTPath = os.path.join(resources_dir, "AGD.txt")
 	fp = open(kAGD_TXTPath, "rU")
 	agdTextPath = fp.read()

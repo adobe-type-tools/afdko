@@ -1,8 +1,8 @@
 # Copyright 2014 Adobe . All rights reserved.
 """
-otfPDF v1.5.1 May 21 2018
-provides support for the ProofPDF script,  for working with OpenType/CFF
-fonts. Provides an implementation of the fontPDF font object. Cannot be
+otfpdf v1.5.1 May 21 2018
+provides support for the proofpdf script, for working with OpenType/CFF
+fonts. Provides an implementation of the fontpdf font object. Cannot be
 run alone.
 """
 from __future__ import print_function, absolute_import
@@ -10,7 +10,7 @@ from __future__ import print_function, absolute_import
 from fontTools.pens.boundsPen import BoundsPen, BasePen
 from fontTools.misc.psCharStrings import T2OutlineExtractor
 
-from afdko.fontPDF import FontPDFGlyph, FontPDFFont, FontPDFPoint
+from afdko.fontpdf import FontPDFGlyph, FontPDFFont, FontPDFPoint
 
 
 class FontPDFPen(BasePen):

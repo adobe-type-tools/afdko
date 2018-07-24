@@ -1,6 +1,6 @@
 cd %~dp0
 setlocal enabledelayedexpansion
-set targetProgram=rotateFont
+set targetProgram=rotatefont
 set VCPATH="C:/Windows/Microsoft.NET/Framework/v4.0.30319/msbuild.exe"
 
 set do_release=0
@@ -33,5 +33,5 @@ if "%1"=="clean" (
 	set do_target=1
 )
 if %do_target%==0 (
-	echo "Build target must be 'release', 'debug', 'clean', or simply omitted (same as 'release')" 
+	echo "Build target must be 'release', 'debug', 'clean', or simply omitted (same as 'release')"
 )

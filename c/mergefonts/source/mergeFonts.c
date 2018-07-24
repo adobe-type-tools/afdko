@@ -3117,7 +3117,7 @@ static int t1_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 	txCtx h = cb->indirect_ctx;
 	char gname[9];
 
-	/* In mergeFonts, we do NOT skip a glyph if it has lready been seen: the same glyph may get copied
+	/* In mergeFonts, we do NOT skip a glyph if it has already been seen: the same glyph may get copied
 	more than once to a different target font name.
 	*/
 	if (h->t1w.fd == -1)
@@ -7230,7 +7230,7 @@ static void printVersions(txCtx h)
 	char version_buf[MAX_VERSION_SIZE+1];
 
 	printf("Versions:\n"
-		   "    mergeFonts        %s\n", CTL_SPLIT_VERSION(version_buf, MERGEFONTS_VERSION));
+		   "    mergefonts        %s\n", CTL_SPLIT_VERSION(version_buf, MERGEFONTS_VERSION));
 
 	cb.ctx = NULL;
 	cb.called = 0;
@@ -8019,7 +8019,7 @@ static boolean readGlyphAliasFile(txCtx h,  int fileIndex, char *filePath)
 		return isGA;
 		}
 
-	if (strcmp(progName, "mergeFonts"))
+	if (strcmp(progName, "mergefonts"))
 		{
 		fclose(ga_fp);
 		return isGA;

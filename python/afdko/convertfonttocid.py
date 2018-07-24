@@ -8,13 +8,13 @@ import re
 import sys
 import types
 
-from afdko import FDKUtils
+from afdko import fdkutils
 
 __doc__ = """
-ConvertFontToCID.py. v 1.11.3 Apr 29 2018
+convertfonttocid.py. v 1.11.3 Apr 29 2018
 
 Convert a Type 1 font to CID, given multiple hint dict defs in the
-"fontinfo" file. See AC.py help, with the "-hfd" option, or the MakeOTF
+"fontinfo" file. See autohint help, with the "-hfd" option, or the makeotf
 user guide for details on this format. The output file produced by
 convertFontToCID() is a CID Type 1 font, no matter what the input is.
 
@@ -34,11 +34,11 @@ ordered by original GID, and belong to the same fdDict. This allows the
 glyphs to be merged back into a single CID font while maintaining glyph
 order.
 4) for each glyph set:
-    use mergeFonts to subset the font to the glyph set
+    use mergefonts to subset the font to the glyph set
     use detype1 to make it editable
     edit in the FontDict values
     use type1 to convert back to type1
-5) Use mergeFonts to merge fonts as a CID font.
+5) Use mergefonts to merge fonts as a CID font.
 """
 
 debug = 0
@@ -613,7 +613,7 @@ def mergeFDDicts(prevDictList, privateDict):
 
 def getGlyphList(fPath, removeNotdef=0):
     command = "tx -dump -4 \"%s\" 2>&1" % fPath
-    data = FDKUtils.runShellCmd(command)
+    data = fdkutils.runShellCmd(command)
     if not data:
         print("Error: Failed getting glyph names from %s with tx." % fPath)
         return []
@@ -632,7 +632,7 @@ def getGlyphList(fPath, removeNotdef=0):
 def getFontBBox(fPath):
     fontBBox = [-200, -200, 1000, 100]
     command = "tx -mtx -2  \"%s\" 2>&1" % fPath
-    data = FDKUtils.runShellCmd(command)
+    data = fdkutils.runShellCmd(command)
     if not data:
         raise FontInfoParseError("Error: Failed getting log from tx from %s, "
                                  "when trying to get FontBBox." % fPath)
@@ -649,7 +649,7 @@ def getFontBBox(fPath):
 
 def getFontName(fPath):
     command = "tx -dump -0 \"%s\" 2>&1" % fPath
-    data = FDKUtils.runShellCmd(command)
+    data = fdkutils.runShellCmd(command)
     if not data:
         raise FontInfoParseError("Error: Failed getting log from tx from %s, "
                                  "when trying to get FontName." % fPath)
@@ -665,7 +665,7 @@ def getFontName(fPath):
 def getBlueFuzz(fPath):
     blueFuzz = 1.0
     command = "tx -dump -0 \"%s\" 2>&1" % (fPath)
-    data = FDKUtils.runShellCmd(command)
+    data = fdkutils.runShellCmd(command)
     if not data:
         raise FontInfoParseError("Error: Failed getting log from tx from %s, "
                                  "when trying to get FontName." % fPath)
@@ -710,7 +710,7 @@ def makeSortedGlyphSets(glyphList, fdGlyphDict):
 def fixFontDict(tempPath, fdDict):
     txtPath = tempPath + ".txt"
     command = "detype1 \"%s\" \"%s\" 2>&1" % (tempPath, txtPath)
-    log = FDKUtils.runShellCmd(command)
+    log = fdkutils.runShellCmd(command)
     if log:
         print(log)
     fp = open(txtPath, "rt")
@@ -806,7 +806,7 @@ def fixFontDict(tempPath, fdDict):
     fp.close()
 
     command = "type1 \"%s\" \"%s\" 2>&1" % (txtPath, tempPath)
-    log = FDKUtils.runShellCmd(command)
+    log = fdkutils.runShellCmd(command)
     if log:
         print(log)
 
@@ -826,7 +826,7 @@ def makeTempFonts(fontDictList, glyphSetList, fdGlyphDict, inputPath):
         tempPath = "%s.temp.%s.pfa" % (inputPath, setIndex)
         command = "tx -t1 -g \"%s\" \"%s\" \"%s\" 2>&1" % (arg, inputPath,
                                                            tempPath)
-        log = FDKUtils.runShellCmd(command)
+        log = fdkutils.runShellCmd(command)
         if log:
             print("Have log output in subsetting command for %s to %s with "
                   "%s glyphs." % (inputPath, tempPath, len(glyphList)))
@@ -851,7 +851,7 @@ def makeCIDFontInfo(fontPath, cidfontinfoPath):
 
     # get regular FontDict.
     command = "tx -0 \"%s\" 2>&1" % fontPath
-    report = FDKUtils.runShellCmd(command)
+    report = fdkutils.runShellCmd(command)
     if ("fatal" in report) or ("error" in report):
         print(report)
         raise FontInfoParseError("Failed to dump font dict using tx from "
@@ -914,7 +914,7 @@ def makeGAFile(gaPath, fontPath, glyphList, fontDictList, fdGlyphDict,
         gid = glyphList.index(glyphTag)
         lineList.append("%s\t%s" % (gid, glyphTag))
     lineList.append("")
-    gaText = "mergeFonts %s%s%s" % (dictName, langGroup,
+    gaText = "mergefonts %s%s%s" % (dictName, langGroup,
                                     os.linesep.join(lineList))
     gf = open(gaPath, "wb")
     gf.write(gaText)
@@ -922,7 +922,7 @@ def makeGAFile(gaPath, fontPath, glyphList, fontDictList, fdGlyphDict,
     return
 
 
-def mergeFonts(inputFontPath, outputPath, fontList, glyphList, fontDictList,
+def mergefonts(inputFontPath, outputPath, fontList, glyphList, fontDictList,
                fdGlyphDict):
     cidfontinfoPath = "%s.temp.cidfontinfo" % (inputFontPath)
     makeCIDFontInfo(inputFontPath, cidfontinfoPath)
@@ -940,12 +940,12 @@ def mergeFonts(inputFontPath, outputPath, fontList, glyphList, fontDictList,
         makeGAFile(gaPath, fontPath, glyphList, fontDictList, fdGlyphDict,
                    removeNotdef)
         if lastFont:
-            command = 'mergeFonts -std -cid "%s" "%s" "%s" "%s" "%s" 2>&1' % (
+            command = 'mergefonts -std -cid "%s" "%s" "%s" "%s" "%s" 2>&1' % (
                 cidfontinfoPath, dstPath, lastFont, gaPath, fontPath)
         else:
-            command = 'mergeFonts -std -cid "%s" "%s" "%s" "%s" 2>&1' % (
+            command = 'mergefonts -std -cid "%s" "%s" "%s" "%s" 2>&1' % (
                 cidfontinfoPath, dstPath, gaPath, fontPath)
-        log = FDKUtils.runShellCmd(command)
+        log = fdkutils.runShellCmd(command)
         if debug:
             print(command)
             print(log)
@@ -992,7 +992,7 @@ def convertFontToCID(inputPath, outputPath):
     glyphSetList = makeSortedGlyphSets(glyphList, fdGlyphDict)
     fontList = makeTempFonts(fontDictList, glyphSetList, fdGlyphDict,
                              inputPath)
-    mergeFonts(inputPath, outputPath, fontList, glyphList, fontDictList,
+    mergefonts(inputPath, outputPath, fontList, glyphList, fontDictList,
                fdGlyphDict)
     # print(fdGlyphDict)
     # print(fontDictList)
@@ -1011,7 +1011,7 @@ def mergeFontToCFF(srcPath, outputPath, doSubr):
     if doSubr:
         subrArg = " +S"
     command = "tx -cff +b%s \"%s\" \"%s\" 2>&1" % (subrArg, srcPath, tempPath)
-    report = FDKUtils.runShellCmd(command)
+    report = fdkutils.runShellCmd(command)
     if ("fatal" in report) or ("error" in report):
         print(report)
         raise FontInfoParseError(
@@ -1019,7 +1019,7 @@ def mergeFontToCFF(srcPath, outputPath, doSubr):
 
     # Now merge it into the output file.
     command = "sfntedit -a CFF=\"%s\" \"%s\" 2>&1" % (tempPath, outputPath)
-    report = FDKUtils.runShellCmd(command)
+    report = fdkutils.runShellCmd(command)
     if not debug:
         if os.path.exists(tempPath):
             os.remove(tempPath)

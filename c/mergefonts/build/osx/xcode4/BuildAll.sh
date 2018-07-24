@@ -2,7 +2,7 @@
 set -e
 set -x
 
-target=mergeFonts
+target=mergefonts
 
 if [ -z "$1" ] || [ "$1" == "release" ]
 then

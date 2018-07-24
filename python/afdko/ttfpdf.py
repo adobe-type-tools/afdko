@@ -1,14 +1,14 @@
 """
-otfPDF v1.3 Nov 30 2010
-provides support for the ProofPDF script,  for working with OpenType/TTF
-fonts. Provides an implementation of the fontPDF font object. Cannot be
+otfpdf v1.3 Nov 30 2010
+provides support for the proofpdf script,  for working with OpenType/TTF
+fonts. Provides an implementation of the fontpdf font object. Cannot be
 run alone.
 """
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
 from fontTools.pens.boundsPen import BoundsPen, BasePen
-from  fontPDF import FontPDFGlyph, FontPDFFont, FontPDFPoint
+from  fontpdf import FontPDFGlyph, FontPDFFont, FontPDFPoint
 
 class FontPDFPen(BasePen):
 	def __init__(self, glyphSet = None):
@@ -26,7 +26,7 @@ class FontPDFPen(BasePen):
 		pdfPoint = FontPDFPoint(FontPDFPoint.MT,  pt, index = self.total )
 		self.total += 1
 		self.curPt = pt
-		curPath = self.pathList[-1] 
+		curPath = self.pathList[-1]
 		curPath.append(pdfPoint)
 
 	def _lineTo(self, pt):
@@ -51,7 +51,7 @@ class FontPDFPen(BasePen):
 	def _closePath(self):
 		self.numPaths += 1
 		self.noPath = 1
-		curPath = self.pathList[-1] 
+		curPath = self.pathList[-1]
 
 		#if self.curPt != curPath[0].pt0:
 		#	curPath.append( FontPDFPoint(FontPDFPoint.LT,  curPath[0].pt0, index = self.total))
@@ -107,7 +107,7 @@ class  txPDFFont(FontPDFFont):
 
 	def clientGetEmSquare(self):
 		emSquare =  self.clientFont['head'].unitsPerEm
-		return emSquare 
+		return emSquare
 
 	def clientGetBaseline(self):
 		baseLine = 0
@@ -128,12 +128,12 @@ class  txPDFFont(FontPDFFont):
 					break
 		except KeyError, AttributeError:
 			baseLine = 0
-				
-		return baseLine 
+
+		return baseLine
 
 	def clientGetBBox(self):
 		headTable =  self.clientFont['head']
-		return [headTable.xMin, headTable.yMin, headTable.xMax, headTable.yMax] 
+		return [headTable.xMin, headTable.yMin, headTable.xMax, headTable.yMax]
 
 	def clientGetBlueZones(self):
 		blueValues = [[]]
@@ -145,7 +145,7 @@ class  txPDFFont(FontPDFFont):
 			return os2Table.sTypoAscender, os2Table.sTypoDescender
 		except KeyError:
 			return None, None
-			
+
 class  txPDFGlyph(FontPDFGlyph):
 
 	def clientInitData(self):
@@ -214,15 +214,15 @@ class  txPDFGlyph(FontPDFGlyph):
 				mtx = txFont.vmetrics[self.name]
 				self.yAdvance = mtx[0]
 				self.tsb = mtx[1]
-				haveVMTX =1 
+				haveVMTX =1
 			except KeyError:
 				pass
 		if not haveVMTX:
 			self.yAdvance = self.parentFont.getEmSquare()
 			self.tsb = self.yOrigin - self.BBox[3] + self.parentFont.getBaseLine()
-		
+
 		# Get the fdIndex, so we can laterdetermine which set of blue values to use.
-		self.fdIndex = 0	
+		self.fdIndex = 0
 		return
 
 

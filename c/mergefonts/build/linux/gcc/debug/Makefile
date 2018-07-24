@@ -15,7 +15,7 @@ CFLAGS = $(STD_OPTS) -g
 # Program
 PRG_SRCS = $(SRC_DIR)/mergeFonts.c
 PRG_OBJS = mergeFonts.o
-PRG_TARGET = $(EXE_DIR)/mergeFonts
+PRG_TARGET = $(EXE_DIR)/mergefonts
 
 # Build targets
 TARGETS = $(PRG_TARGET)

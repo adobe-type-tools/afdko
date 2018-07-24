@@ -6556,7 +6556,7 @@ static void printVersions(txCtx h)
 	char version_buf[MAX_VERSION_SIZE];
 
 	printf("Versions:\n"
-		   "    rotateFont        %s\n", CTL_SPLIT_VERSION(version_buf, ROTATE_VERSION));
+		   "    rotatefont        %s\n", CTL_SPLIT_VERSION(version_buf, ROTATE_VERSION));
 
 	cb.ctx = NULL;
 	cb.called = 0;

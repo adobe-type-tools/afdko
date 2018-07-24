@@ -24,18 +24,18 @@ kTempDSExt = ".temp.designspace"
 kFeaturesFile = "features.fea"
 
 __usage__ = """
-buildMasterOTFs.py  1.7.2 Feb 01 2018
+buildmasterotfs.py  1.7.2 Feb 01 2018
 Build master source OpenType/CFF fonts from a Superpolator design space file
 and the UFO master source fonts.
 
-python buildMasterOTFs.py -h
-python buildMasterOTFs.py -u
-python buildMasterOTFs.py  <path to design space file>
+python buildmasterotfs.py -h
+python buildmasterotfs.py -u
+python buildmasterotfs.py  <path to design space file>
 """
 
 __help__ = __usage__ + """
 Options:
---mkot   Allows passing a comma-separated set of options to MakeOTF
+--mkot   Allows passing a comma-separated set of options to makeotf
 
 The script makes a number of assumptions.
 1) all the master source fonts are blend compatible in all their data.
