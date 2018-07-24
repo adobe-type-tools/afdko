@@ -8,10 +8,7 @@ import tempfile
 from fontTools.misc.py23 import open
 from fontTools.ttLib import TTFont
 
-from afdko.ttfcomponentizer import (
-    main, get_options, get_ufo_path, get_goadb_path, GOADB_FILENAME,
-    get_goadb_names_mapping, get_glyph_names_mapping, get_composites_data,
-    assemble_components)
+from afdko import ttfcomponentizer as ttfcomp
 
 TOOL = 'ttfcomponentizer'
 
@@ -64,12 +61,12 @@ def _write_file(file_path, data):
 
 def test_run_no_args():
     with pytest.raises(SystemExit) as exc_info:
-        main()
+        ttfcomp.main()
     assert exc_info.value.code == 2
 
 
 def test_run_invalid_font():
-    assert main(['not_a_file']) == 1
+    assert ttfcomp.main(['not_a_file']) == 1
 
 
 def test_run_ufo_not_found():
@@ -77,7 +74,7 @@ def test_run_ufo_not_found():
     temp_dir = tempfile.mkdtemp()
     save_path = tempfile.mkstemp(dir=temp_dir)[1]
     copy2(ttf_path, save_path)
-    assert main([save_path]) == 1
+    assert ttfcomp.main([save_path]) == 1
 
 
 def test_run_invalid_ufo():
@@ -87,13 +84,13 @@ def test_run_invalid_ufo():
     ufo_path = save_path + '.ufo'
     copy2(ttf_path, save_path)
     copy2(ttf_path, ufo_path)
-    assert main([save_path]) == 1
+    assert ttfcomp.main([save_path]) == 1
 
 
 def test_run_with_output_path():
     ttf_path = _get_test_ttf_path()
     save_path = tempfile.mkstemp()[1]
-    main(['-o', save_path, ttf_path])
+    ttfcomp.main(['-o', save_path, ttf_path])
     gtable = TTFont(save_path)['glyf']
     composites = [gname for gname in gtable.glyphs if (
         gtable[gname].isComposite())]
@@ -108,7 +105,7 @@ def test_run_without_output_path():
     save_path = tempfile.mkstemp(dir=temp_dir)[1]
     copy2(ttf_path, save_path)
     copytree(ufo_path, tmp_ufo_path)
-    main([save_path])
+    ttfcomp.main([save_path])
     gtable = TTFont(save_path)['glyf']
     assert gtable['agrave'].isComposite() is False
     assert gtable['aacute'].isComposite() is True
@@ -116,75 +113,78 @@ def test_run_without_output_path():
 
 def test_options_help():
     with pytest.raises(SystemExit) as exc_info:
-        main(['-h'])
+        ttfcomp.main(['-h'])
     assert exc_info.value.code == 0
 
 
 def test_options_version():
     with pytest.raises(SystemExit) as exc_info:
-        main(['--version'])
+        ttfcomp.main(['--version'])
     assert exc_info.value.code == 0
 
 
 def test_options_bogus_option():
     with pytest.raises(SystemExit) as exc_info:
-        main(['--bogus'])
+        ttfcomp.main(['--bogus'])
     assert exc_info.value.code == 2
 
 
 def test_options_invalid_font_path():
-    assert get_options(['not_a_file']).font_path is None
+    assert ttfcomp.get_options(['not_a_file']).font_path is None
 
 
 def test_options_invalid_font():
     path = _get_input_path('not_a_font.ttf')
-    assert get_options([path]).font_path is None
+    assert ttfcomp.get_options([path]).font_path is None
 
 
 def test_options_valid_font():
     path = _get_test_ttf_path()
-    assert os.path.basename(get_options([path]).font_path) == TEST_TTF_FILENAME
+    assert os.path.basename(
+        ttfcomp.get_options([path]).font_path) == TEST_TTF_FILENAME
 
 
 def test_get_ufo_path_found():
     path = _get_test_ttf_path()
-    assert get_ufo_path(path) == _get_test_ufo_path()
+    assert ttfcomp.get_ufo_path(path) == _get_test_ufo_path()
 
 
 def test_get_ufo_path_not_found():
     # the UFO font is intentionally used as a test folder
     path = os.path.join(_get_test_ufo_path(), 'lib.plist')
-    assert get_ufo_path(path) is None
+    assert ttfcomp.get_ufo_path(path) is None
 
 
 def test_get_goadb_path_found_same_folder():
     path = _get_test_ttf_path()
-    assert os.path.basename(get_goadb_path(path)) == GOADB_FILENAME
+    assert os.path.basename(
+        ttfcomp.get_goadb_path(path)) == ttfcomp.GOADB_FILENAME
 
 
 def test_get_goadb_path_found_3_folders_up():
     # the UFO's glif file is intentionally used as a test file
     path = os.path.join(_get_test_ufo_path(), 'glyphs', 'a.glif')
-    assert os.path.basename(get_goadb_path(path)) == GOADB_FILENAME
+    assert os.path.basename(
+        ttfcomp.get_goadb_path(path)) == ttfcomp.GOADB_FILENAME
 
 
 def test_get_goadb_path_not_found():
     path = os.path.dirname(_get_test_ttf_path())
-    assert get_goadb_path(path) is None
+    assert ttfcomp.get_goadb_path(path) is None
 
 
 def test_get_goadb_names_mapping_goadb_not_found():
     path = os.path.dirname(_get_test_ttf_path())
-    assert get_goadb_names_mapping(path) == {}
+    assert ttfcomp.get_goadb_names_mapping(path) == {}
 
 
 def test_get_glyph_names_mapping_invalid_ufo():
     path = _get_test_ttf_path()
-    assert get_glyph_names_mapping(path) == (None, None)
+    assert ttfcomp.get_glyph_names_mapping(path) == (None, None)
 
 
 def test_get_glyph_names_mapping_names_from_lib():
-    result = get_glyph_names_mapping(_get_test_ufo_path())
+    result = ttfcomp.get_glyph_names_mapping(_get_test_ufo_path())
     assert sorted(result[1].keys()) == DESIGN_NAMES_LIST
     assert sorted(result[1].values()) == PRODCT_NAMES_LIST
 
@@ -196,15 +196,15 @@ def test_get_glyph_names_mapping_names_from_goadb():
     lib_path = os.path.join(ufo_path, 'lib.plist')
     lib_data = _read_txt_file(lib_path)
     _write_file(lib_path, EMPTY_LIB)
-    result = get_glyph_names_mapping(ufo_path)
+    result = ttfcomp.get_glyph_names_mapping(ufo_path)
     _write_file(lib_path, lib_data)
     assert sorted(result[1].keys()) == DESIGN_NAMES_LIST
     assert sorted(result[1].values()) == PRODCT_NAMES_LIST
 
 
 def test_get_composites_data():
-    ufo, ps_names = get_glyph_names_mapping(_get_test_ufo_path())
-    comps_data = get_composites_data(ufo, ps_names)
+    ufo, ps_names = ttfcomp.get_glyph_names_mapping(_get_test_ufo_path())
+    comps_data = ttfcomp.get_composites_data(ufo, ps_names)
     comps_name_list = sorted(list(comps_data.keys()))
     comps_comp_list = [comps_data[gname] for gname in comps_name_list]
     assert comps_name_list == ['aacute', 'adieresis', 'atilde', 'uni01CE']
@@ -218,7 +218,7 @@ def test_assemble_components():
     comps_data = Object()
     setattr(comps_data, 'names', ('a', 'uni01CE'))
     setattr(comps_data, 'positions', ((0, 0), (263, 0)))
-    comp_one, comp_two = assemble_components(comps_data)
+    comp_one, comp_two = ttfcomp.assemble_components(comps_data)
     assert comp_one.glyphName == 'a'
     assert comp_two.glyphName == 'uni01CE'
     assert (comp_one.x, comp_one.y) == (0, 0)
