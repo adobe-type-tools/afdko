@@ -3,6 +3,7 @@ from __future__ import print_function, division, absolute_import
 import os
 import pytest
 from shutil import copy2, copytree
+import subprocess32 as subprocess
 import tempfile
 
 from fontTools.misc.py23 import open
@@ -10,7 +11,11 @@ from fontTools.ttLib import TTFont
 
 from afdko import ttfcomponentizer as ttfcomp
 
+from .runner import main as runner
+from .differ import main as differ
+
 TOOL = 'ttfcomponentizer'
+CMD = ['-t', TOOL]
 
 TEST_TTF_FILENAME = 'ttfcomponentizer.ttf'
 DESIGN_NAMES_LIST = ['acaron', 'acutecmb', 'caroncmb', 'design_name',
@@ -33,8 +38,23 @@ class Object(object):
 data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
 
 
+def _get_expected_path(file_name):
+    return os.path.join(data_dir_path, 'expected_output', file_name)
+
+
 def _get_input_path(file_name):
     return os.path.join(data_dir_path, 'input', file_name)
+
+
+def _get_temp_file_path(directory=None):
+    return tempfile.mkstemp(dir=directory)[1]
+
+
+def _generate_ttx_dump(font_path, tables=None):
+    font = TTFont(font_path)
+    temp_path = _get_temp_file_path()
+    font.saveXML(temp_path, tables=tables)
+    return temp_path
 
 
 def _get_test_ttf_path():
@@ -65,6 +85,12 @@ def test_run_no_args():
     assert exc_info.value.code == 2
 
 
+def test_run_cli_no_args():
+    with pytest.raises(subprocess.CalledProcessError) as exc_info:
+        runner(CMD + ['-n'])
+    assert exc_info.value.returncode == 2
+
+
 def test_run_invalid_font():
     assert ttfcomp.main(['not_a_file']) == 1
 
@@ -72,7 +98,7 @@ def test_run_invalid_font():
 def test_run_ufo_not_found():
     ttf_path = _get_test_ttf_path()
     temp_dir = tempfile.mkdtemp()
-    save_path = tempfile.mkstemp(dir=temp_dir)[1]
+    save_path = _get_temp_file_path(directory=temp_dir)
     copy2(ttf_path, save_path)
     assert ttfcomp.main([save_path]) == 1
 
@@ -80,7 +106,7 @@ def test_run_ufo_not_found():
 def test_run_invalid_ufo():
     ttf_path = _get_test_ttf_path()
     temp_dir = tempfile.mkdtemp()
-    save_path = tempfile.mkstemp(dir=temp_dir)[1]
+    save_path = _get_temp_file_path(directory=temp_dir)
     ufo_path = save_path + '.ufo'
     copy2(ttf_path, save_path)
     copy2(ttf_path, ufo_path)
@@ -89,7 +115,7 @@ def test_run_invalid_ufo():
 
 def test_run_with_output_path():
     ttf_path = _get_test_ttf_path()
-    save_path = tempfile.mkstemp()[1]
+    save_path = _get_temp_file_path()
     ttfcomp.main(['-o', save_path, ttf_path])
     gtable = TTFont(save_path)['glyf']
     composites = [gname for gname in gtable.glyphs if (
@@ -97,12 +123,21 @@ def test_run_with_output_path():
     assert sorted(composites) == ['aacute', 'uni01CE']
 
 
+def test_run_cli_with_output_path():
+    actual_path = _get_temp_file_path()
+    runner(CMD + ['-n', '-o', 'o', '_{}'.format(actual_path),
+                  '_{}'.format(_get_input_path(TEST_TTF_FILENAME))])
+    actual_ttx = _generate_ttx_dump(actual_path, ['maxp', 'glyf'])
+    expected_ttx = _get_expected_path('ttfcomponentizer.ttx')
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
 def test_run_without_output_path():
     ttf_path = _get_test_ttf_path()
     ufo_path = _get_test_ufo_path()
     temp_dir = tempfile.mkdtemp()
     tmp_ufo_path = os.path.join(temp_dir, os.path.basename(ufo_path))
-    save_path = tempfile.mkstemp(dir=temp_dir)[1]
+    save_path = _get_temp_file_path(directory=temp_dir)
     copy2(ttf_path, save_path)
     copytree(ufo_path, tmp_ufo_path)
     ttfcomp.main([save_path])
