@@ -5,48 +5,50 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "ac.h"
 
 /* Procedures defined in stems/stemreport.c - StemHist */
-public procedure AddVStem(top, bottom, curved)
-Fixed top;
+public
+procedure AddVStem(top, bottom, curved)
+    Fixed top;
 Fixed bottom;
 boolean curved;
 {
-  if (curved && !allstems)
-    return;
-  
-  if (addVStemCB != NULL)
-  	{
-  	addVStemCB(top, bottom, bezGlyphName);
-  	}
+    if (curved && !allstems)
+        return;
+
+    if (addVStemCB != NULL) {
+        addVStemCB(top, bottom, bezGlyphName);
+    }
 }
 
-public procedure AddHStem(right, left, curved)
-Fixed right;
+public
+procedure AddHStem(right, left, curved)
+    Fixed right;
 Fixed left;
 boolean curved;
 {
-  if (curved && !allstems)
-    return;
-  
-  if (addHStemCB != NULL)
-  	{
-  	addHStemCB(right, left, bezGlyphName);
-  	}
+    if (curved && !allstems)
+        return;
+
+    if (addHStemCB != NULL) {
+        addHStemCB(right, left, bezGlyphName);
+    }
 }
 
-public procedure AddCharExtremes(bot, top)
-Fixed bot, top;
+public
+procedure AddCharExtremes(bot, top)
+    Fixed bot,
+    top;
 {
-  if (addCharExtremesCB != NULL)
-  	{
-  	addCharExtremesCB(top, bot, bezGlyphName);
-  	}
+    if (addCharExtremesCB != NULL) {
+        addCharExtremesCB(top, bot, bezGlyphName);
+    }
 }
 
-public procedure AddStemExtremes(bot, top)
-Fixed bot, top;
+public
+procedure AddStemExtremes(bot, top)
+    Fixed bot,
+    top;
 {
-  if (addStemExtremesCB != NULL)
-  	{
-  	addStemExtremesCB(top, bot, bezGlyphName);
-  	}
+    if (addStemExtremesCB != NULL) {
+        addStemExtremesCB(top, bot, bezGlyphName);
+    }
 }

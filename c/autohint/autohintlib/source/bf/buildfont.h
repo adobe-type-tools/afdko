@@ -12,127 +12,122 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define OUTPUTBUFF stderr
 #endif
 
-#define ASCIIFONTNAME            "font.ps"
-#define CHARSTRINGSFILENAME      ".bfees.bin"
-#define COMPAFMFILE              ".bfcomposites.afm"
-#define COMPFILE                 "composites.ps"
-#define COMPOSITESFILENAME       ".bfees2.bin"
-#define DEFAULTWIDTH             500
-#define ENCFILENAME              ".bfencodingfile"
-#define FONTBBOXFILENAME         ".bffontbbox"
-#define FONTSTKLIMIT             22
-                                    /*****************************************/
-                                    /* font interpreter stack limit - Note   */
-                                    /* that the actual limit is 24, but      */
-                                    /* because the # of parameters and       */
-                                    /* callothersubr # are also pushed on    */
-                                    /* the stack, the effective value is 22. */
-                                    /*****************************************/
+#define ASCIIFONTNAME "font.ps"
+#define CHARSTRINGSFILENAME ".bfees.bin"
+#define COMPAFMFILE ".bfcomposites.afm"
+#define COMPFILE "composites.ps"
+#define COMPOSITESFILENAME ".bfees2.bin"
+#define DEFAULTWIDTH 500
+#define ENCFILENAME ".bfencodingfile"
+#define FONTBBOXFILENAME ".bffontbbox"
+#define FONTSTKLIMIT 22
+/*****************************************/
+/* font interpreter stack limit - Note   */
+/* that the actual limit is 24, but      */
+/* because the # of parameters and       */
+/* callothersubr # are also pushed on    */
+/* the stack, the effective value is 22. */
+/*****************************************/
 #define INTEGER 0
-#define KERNAFMFILE              "kerning.afm"
-#define MAXBYTES                 13000
-                                    /*****************************************/
-                                    /* max number of bytes in a decrypted    */
-                                    /* bez file or encoded charstring        */
-                                    /*****************************************/
-#define MAXCHARNAME              37
-                                    /*****************************************/
-                                    /* max character name length (including  */
-                                    /* byte for null terminator) - a bug in  */
-                                    /* early LW ROMs limits PS names to      */
-                                    /* 36 bytes                              */
-                                    /*****************************************/
-#define MAXCHARS                 400
-                                    /*****************************************/
-                                    /* max characters in a font (including   */
-                                    /* composites)                           */
-                                    /*****************************************/
-#define MAXENCLINE               65000L
-                                    /*****************************************/
-                                    /* linelength used when encrypting       */
-                                    /*****************************************/
-#define MAXFILENAME              32
-                                    /*****************************************/
-                                    /* max relative file name length         */
-                                    /* (including byte for null terminator)  */
-                                    /* - limit imposed by max Mac filename   */
-                                    /* length - note that max Mac foldername */
-                                    /* would be 34 chars because of colons   */
-                                    /* and that for root is 29 chars         */
-                                    /*****************************************/
+#define KERNAFMFILE "kerning.afm"
+#define MAXBYTES 13000
+/*****************************************/
+/* max number of bytes in a decrypted    */
+/* bez file or encoded charstring        */
+/*****************************************/
+#define MAXCHARNAME 37
+/*****************************************/
+/* max character name length (including  */
+/* byte for null terminator) - a bug in  */
+/* early LW ROMs limits PS names to      */
+/* 36 bytes                              */
+/*****************************************/
+#define MAXCHARS 400
+/*****************************************/
+/* max characters in a font (including   */
+/* composites)                           */
+/*****************************************/
+#define MAXENCLINE 65000L
+/*****************************************/
+/* linelength used when encrypting       */
+/*****************************************/
+#define MAXFILENAME 32
+/*****************************************/
+/* max relative file name length         */
+/* (including byte for null terminator)  */
+/* - limit imposed by max Mac filename   */
+/* length - note that max Mac foldername */
+/* would be 34 chars because of colons   */
+/* and that for root is 29 chars         */
+/*****************************************/
 #ifndef MAXINT
-#define MAXINT                   32767L
+#define MAXINT 32767L
 #endif
-#define MAXLINE                  1000
-                                    /*****************************************/
-                                    /* maximum length of a line              */
-                                    /*****************************************/
+#define MAXLINE 1000
+/*****************************************/
+/* maximum length of a line              */
+/*****************************************/
 #ifndef MININT
-#define MININT                   -32768L
+#define MININT -32768L
 #endif
-#define MULTIFONTBBOXFILENAME    ".bfmultifontbbox"
-#define SCALEDHINTSINFO          "scaledhintsinfo"
-#define SUBRSFILENAME            ".bfsubrs.bin"
-#define TEMPFILE                 ".bftempfile"
-#define UNINITWIDTH              -1          
-                                    /*****************************************/
-                                    /* width value if no width seen yet      */
-                                    /*****************************************/
-#define UNSCALEDASCIIFONT        "font.unscaled"
-#define WIDTHSFILENAME           "widths.ps"
-#define diskfontmax              65000L
-
+#define MULTIFONTBBOXFILENAME ".bfmultifontbbox"
+#define SCALEDHINTSINFO "scaledhintsinfo"
+#define SUBRSFILENAME ".bfsubrs.bin"
+#define TEMPFILE ".bftempfile"
+#define UNINITWIDTH -1
+/*****************************************/
+/* width value if no width seen yet      */
+/*****************************************/
+#define UNSCALEDASCIIFONT "font.unscaled"
+#define WIDTHSFILENAME "widths.ps"
+#define diskfontmax 65000L
 
 /*****************************************************************************/
 /* the following are for scanning "PostScript format" input file lines       */
 /*****************************************************************************/
 
-#define COMMENT(s)               s[strspn(s, " \n\r\t\v\f")] == '%'
-#define BLANK(s)                 sscanf(s, "%*s") == EOF
-#define STREQ(a,b)               (((a)[0] == (b)[0]) && (strcmp((a),(b)) == 0))
-#define STRNEQ(a,b)              (((a)[0] != (b)[0]) || (strcmp((a),(b)) != 0))
+#define COMMENT(s) s[strspn(s, " \n\r\t\v\f")] == '%'
+#define BLANK(s) sscanf(s, "%*s") == EOF
+#define STREQ(a, b) (((a)[0] == (b)[0]) && (strcmp((a), (b)) == 0))
+#define STRNEQ(a, b) (((a)[0] != (b)[0]) || (strcmp((a), (b)) != 0))
 
-#define NL                       '\012'
-                                    /*****************************************/
-                                    /* Since the Mac treats both '\n' and    */
-                                    /* '\r' as ASCII 13 (i.e. carr. return)  */
-                                    /* need to define this.                  */
-                                    /*****************************************/
+#define NL '\012'
+/*****************************************/
+/* Since the Mac treats both '\n' and    */
+/* '\r' as ASCII 13 (i.e. carr. return)  */
+/* need to define this.                  */
+/*****************************************/
 
 /*****************************************************************************/
 /* Defines character bounding box.                                           */
 /*****************************************************************************/
-typedef struct Bbox
-   {
-   long int llx, lly, urx, ury;
-   } Bbox, *BboxPtr;
+typedef struct Bbox {
+    long int llx, lly, urx, ury;
+} Bbox, *BboxPtr;
 
 /*****************************************************************************/
 /* Defines character point coordinates.                                      */
 /*****************************************************************************/
 typedef struct
-   {
-   long int x, y;
-   } Cd, *CdPtr;
-
-
+{
+    long int x, y;
+} Cd, *CdPtr;
 
 /*****************************************************************************/
 /* Defines parsing method based on fontinfo key CharacterSetFileType         */
 /*****************************************************************************/
-typedef enum
-   {
-   bf_CHARSET_STANDARD,
-   bf_CHARSET_CID
-   } CharsetParser;
+typedef enum {
+    bf_CHARSET_STANDARD,
+    bf_CHARSET_CID
+} CharsetParser;
 
-#define BF_LAYOUTS               "layouts"
-#define BF_SUBSETS               "subsets"
-#define BF_STD_LAYOUT            "standard"
+#define BF_LAYOUTS "layouts"
+#define BF_SUBSETS "subsets"
+#define BF_STD_LAYOUT "standard"
 
-#define OPENERROR                2
-#define OPENWARN                 1
-#define OPENOK                   0
+#define OPENERROR 2
+#define OPENWARN 1
+#define OPENOK 0
 
 extern char bezdir[MAXPATHLEN];
 extern boolean scalinghints;
@@ -179,7 +174,7 @@ make_composites(boolean, boolean, long *, char *, boolean, char **);
 /* Returns the max number of composites for the font.                        */
 /*****************************************************************************/
 extern int
-readcomposite(boolean, indx);
+    readcomposite(boolean, indx);
 
 /*****************************************************************************/
 /* Computes the character bounding box.                                      */
@@ -224,7 +219,7 @@ set_uniqueIDFile(char *);
 /* Transforms a point using the global variable, matrix.                     */
 /*****************************************************************************/
 extern int
-TransformPoint(long *, long*, boolean);
+TransformPoint(long *, long *, boolean);
 
 /*****************************************************************************/
 /* Returns the name of the character set file.                               */
@@ -236,7 +231,7 @@ getcharsetname(char *);
 /* Returns the name of the character set file.                               */
 /*****************************************************************************/
 extern void
-setcharsetname(boolean , char *, char *);
+setcharsetname(boolean, char *, char *);
 
 /*****************************************************************************/
 /* Returns the name of the encoding file.                                    */
@@ -294,13 +289,13 @@ convert_PScharfile(const char *, const char *);
 /* Converts raw PS files to relativized bez format.                          */
 /*****************************************************************************/
 extern int
-convert_rawPSfiles(boolean);
+    convert_rawPSfiles(boolean);
 
 extern void
 convert_illcharfile(const char *, const char *);
 
 extern void
-convert_illfiles(boolean);
+    convert_illfiles(boolean);
 
 extern long
 process_chars(boolean, boolean, boolean, long *, long *, boolean, boolean);
@@ -311,17 +306,16 @@ set_scale(float *);
 extern short
 strindex(char *, char *);
 
-extern boolean ConvertCharFiles(char *inputDir,	
-				boolean release,				
-				float scale,				
-				void (*convertFunc)(const char *, const char *)	
-				);
+extern boolean ConvertCharFiles(char *inputDir,
+                                boolean release,
+                                float scale,
+                                void (*convertFunc)(const char *, const char *));
 
 /*****************************************************************************/
 /* Creates an Adobe Font Metrics (AFM) file.                                 */
 /*****************************************************************************/
 extern int
-make_afm(boolean);
+    make_afm(boolean);
 
 extern int
 ReadWriteFile(FILE *, char *);
@@ -358,7 +352,7 @@ extern int
 cleanup(short);
 
 extern char *
-GetBaseFontPath(boolean);
+    GetBaseFontPath(boolean);
 
 extern void
 FileNameLenOK(char *);

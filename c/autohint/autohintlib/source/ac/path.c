@@ -3,12 +3,11 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /***********************************************************************/
 /* path.c */
 
-
 #include "ac.h"
 
 #if 0
-#define GetSubpathNext(e) ((e)->type == CLOSEPATH)? GetDest(e) : (e)->next
-#define GetSubpathPrev(e) ((e)->type == MOVETO)? GetClosedBy(e) : (e)->prev
+#define GetSubpathNext(e) ((e)->type == CLOSEPATH) ? GetDest(e) : (e)->next
+#define GetSubpathPrev(e) ((e)->type == MOVETO) ? GetClosedBy(e) : (e)->prev
 
 private procedure NumberSubpath(e) register PPathElt e; {
   /* number the elements of the subpath starting at e */

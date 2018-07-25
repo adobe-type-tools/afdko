@@ -13,12 +13,12 @@ struct FItoAFMCharSetMap {
 };
 
 struct AFMCharSetTbl {
-  char *defaultCSVal;
-  struct FItoAFMCharSetMap *charSetMap;
+    char *defaultCSVal;
+    struct FItoAFMCharSetMap *charSetMap;
 };
 
 extern struct AFMCharSetTbl *AFMCharSet_Parse(FILE *file);
-extern void FreeAFMCharSetTbl ();
+extern void FreeAFMCharSetTbl();
 extern char *GetFItoAFMCharSetName(void);
 
 #endif

@@ -8,29 +8,29 @@
  * types.h included all the time and so that we can include this in
  * the lint libs instead of termios.h which conflicts with ioctl.h.
  */
-#ifndef	__sys_stdtypes_h
-#define	__sys_stdtypes_h
+#ifndef __sys_stdtypes_h
+#define __sys_stdtypes_h
 
 #ifndef __MWERKS__
 
-typedef	int		sigset_t;	/* signal mask - may change */
+typedef int sigset_t; /* signal mask - may change */
 
-typedef	unsigned int	speed_t;	/* tty speeds */
-typedef	unsigned long	tcflag_t;	/* tty line disc modes */
-typedef	unsigned char	cc_t;		/* tty control char */
-typedef	int		pid_t;		/* process id */
+typedef unsigned int speed_t;   /* tty speeds */
+typedef unsigned long tcflag_t; /* tty line disc modes */
+typedef unsigned char cc_t;     /* tty control char */
+typedef int pid_t;              /* process id */
 
-typedef	unsigned short	mode_t;		/* file mode bits */
-typedef	short		nlink_t;	/* links to a file */
+typedef unsigned short mode_t; /* file mode bits */
+typedef short nlink_t;         /* links to a file */
 
-typedef	long		clock_t;	/* units=ticks (typically 60/sec) */
-typedef	long		time_t;		/* value = secs since epoch */
+typedef long clock_t; /* units=ticks (typically 60/sec) */
+typedef long time_t;  /* value = secs since epoch */
 
-typedef	int		size_t;		/* ??? */
-typedef int		ptrdiff_t;	/* result of subtracting two pointers */
+typedef int size_t;    /* ??? */
+typedef int ptrdiff_t; /* result of subtracting two pointers */
 
-typedef	unsigned short	wchar_t;	/* big enough for biggest char set */
+typedef unsigned short wchar_t; /* big enough for biggest char set */
 
 #endif
 
-#endif	/* !__sys_stdtypes_h */
+#endif /* !__sys_stdtypes_h */

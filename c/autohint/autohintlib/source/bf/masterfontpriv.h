@@ -5,11 +5,10 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define MASTERFONTPRIV_H
 
 typedef struct _MasterDesignPosit {
-  char *MasterDirName;
-  float posit[4];
+    char *MasterDirName;
+    float posit[4];
 } MasterDesignPosit;
-
 
 extern void GetMasterDesignPositions(MasterDesignPosit **MDP, int *nummast, int *numaxes);
 
-#endif  /* MASTERFONTPRIV_H */
+#endif /* MASTERFONTPRIV_H */

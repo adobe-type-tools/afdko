@@ -12,7 +12,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 extern boolean AutoColor(boolean, boolean, boolean, boolean, boolean, short, char *[], boolean, boolean, boolean, boolean);
 
-extern boolean CreateACTimes (void);
+extern boolean CreateACTimes(void);
 typedef void (*tConvertfunc)(const char *, const char *);
 extern boolean ConvertCharFiles(char *, boolean, float, tConvertfunc);
 
@@ -20,7 +20,7 @@ extern void FindCurveBBox(Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed
 
 extern boolean GetInflectionPoint(Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed *);
 
-extern boolean ReadCharFileNames (char *, boolean *);
+extern boolean ReadCharFileNames(char *, boolean *);
 
 extern void setPrefix(char *);
 

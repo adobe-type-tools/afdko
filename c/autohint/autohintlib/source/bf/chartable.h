@@ -9,12 +9,12 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 extern void WriteCharMetrics(FILE *, indx);
 
 extern indx create_entry(char *name,
-			 char *filename,
-			 short width,
-			 boolean derived,
-			 indx dirix,
-			 short masters,
-			 short hintDir);
+                         char *filename,
+                         short width,
+                         boolean derived,
+                         indx dirix,
+                         short masters,
+                         short hintDir);
 
 extern long setnoncomps(void);
 
