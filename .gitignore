@@ -11,7 +11,9 @@ dist/
 .idea/
 
 # coverage data
+# DO NOT use '.coverage*' because that matches '.coveragerc'
 .coverage
+.coverage.*
 htmlcov
 .pytest_cache
 
@@ -26,9 +28,6 @@ sfntedit
 spot
 tx
 type1
-
-# ignore the Windows compiled programs
-*.exe
 
 # ignore the temp build directories and files
 *.o
