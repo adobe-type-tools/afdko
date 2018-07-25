@@ -3,7 +3,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /***********************************************************************/
 /* This source file should contain any procedure(s) that are called
    from AC.  It should not contain calls to procedures implemented
-   in object files that are not bound into AC. */ 
+   in object files that are not bound into AC. */
 
 #include "basic.h"
 #include "bftoac.h"
@@ -12,27 +12,22 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 long clsize = 0;
 struct cl_elem *charlist = NULL;
 
-extern boolean ReadCharFileNames (fname, start)
-char *fname;
+extern boolean ReadCharFileNames(fname, start) char *fname;
 boolean *start;
 {
-  static indx i;
-  if (*start)
-  {
-    i = 0;
-    *start = FALSE;
-  }
-  while (i < clsize)
-  {
-    if (charlist[i].derived || charlist[i].composite)
-    {
-      i++;
-      continue;
+    static indx i;
+    if (*start) {
+        i = 0;
+        *start = FALSE;
     }
-    strcpy (fname, charlist[i].filename);
-    i++;
-    return TRUE;
-  }
-  return FALSE;
+    while (i < clsize) {
+        if (charlist[i].derived || charlist[i].composite) {
+            i++;
+            continue;
+        }
+        strcpy(fname, charlist[i].filename);
+        i++;
+        return TRUE;
+    }
+    return FALSE;
 }
-

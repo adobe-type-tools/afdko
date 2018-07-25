@@ -9,18 +9,17 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <ctype.h>
 #include "pubtypes.h"
 
-#if __MWERKS__ 
+#if __MWERKS__
 
 #ifndef __dead2
-#define	__dead2
-#define	__pure2
-#define	__unused
+#define __dead2
+#define __pure2
+#define __unused
 #endif
 #include <stdlib.h>
 
 #include <stdio.h>
 #include <setjmp.h>
-
 
 /*#include <unistd.h>*/
 
@@ -51,11 +50,10 @@ typedef unsigned char boolean;
 #endif
 #define ABS(a) ((a) >= 0 ? (a) : -(a))
 /* Round the same way as PS. i.e. -6.5 ==> -6.0 */
-#define LROUND(a) ((a > 0) ? (long)(a + 0.5) : ((a + (long)(-a)) == -0.5) ? (long) a : (long)(a - 0.5))
-#define	 SCALEDRTOL(a, s) (a<0 ? (long) ((a*s) - 0.5) : (long) ((a*s) + 0.5))
+#define LROUND(a) ((a > 0) ? (long)(a + 0.5) : ((a + (long)(-a)) == -0.5) ? (long)a : (long)(a - 0.5))
+#define SCALEDRTOL(a, s) (a < 0 ? (long)((a * s) - 0.5) : (long)((a * s) + 0.5))
 
-
-typedef int indx;		/* for indexes that could be either short or
+typedef int indx; /* for indexes that could be either short or
 				   long - let the compiler decide */
 
 #define RAWPSDIR "pschars"
@@ -66,8 +64,8 @@ typedef int indx;		/* for indexes that could be either short or
 #ifdef MAXPATHLEN
 #undef MAXPATHLEN
 #endif
-#define MAXPATHLEN 1024		/* max path name len for a dir or folder
-				   (includes 1 byte for null terminator) */
+#define MAXPATHLEN 1024 /* max path name len for a dir or folder \
+                           (includes 1 byte for null terminator) */
 
 /* defines for LogMsg code param */
 #define OK 0
@@ -79,19 +77,16 @@ typedef int indx;		/* for indexes that could be either short or
 #define WARNING 1
 #define LOGERROR 2
 
-#define MAXMSGLEN 500		/* maximum message length */
-extern char globmsg[MAXMSGLEN + 1];	/* used to format the string passed to LogMsg */
+#define MAXMSGLEN 500               /* maximum message length */
+extern char globmsg[MAXMSGLEN + 1]; /* used to format the string passed to LogMsg */
 
 extern void LogMsg(
-    char *, short, short, boolean
-);
+    char *, short, short, boolean);
 
 extern short WarnCount(
-    void
-);
+    void);
 
 extern void ResetWarnCount(
-    void
-);
+    void);
 
 #endif /*BASIC_H*/

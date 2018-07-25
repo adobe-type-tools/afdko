@@ -6,64 +6,49 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #ifndef MASTERFONT_H
 #define MASTERFONT_H
 
-
 #define MAXDESIGNS 16 /* maximum number of base designs for a multiple master font. */
 
 extern void BlendIntArray(
-  int *, int, int, char *
-);
+    int *, int, int, char *);
 
 extern void BlendFltArray(
-  float *, int, int, char *
-);
+    float *, int, int, char *);
 
 /* Returns the default weight value for this directory. */
 extern float DefaultWeightForDir(
-  int
-);
+    int);
 
 extern void DefaultWeightVector(
-  char *
-);
+    char *);
 
 extern void FreeDirEntries(
-  void
-);
+    void);
 
 extern void GetMasterDirName(
-  char *, indx
-);
+    char *, indx);
 
 extern int GetMasterDirIx(
-  char *
-);
+    char *);
 
 extern short GetMasterFontList(
-  char *
-);
+    char *);
 
 extern int InteriorDesignsExist(
-  void
-);
+    void);
 
 extern void PrintInputDirNames(
-  void
-);
+    void);
 
 extern void SetDefaultWeightVector(
-  void
-);
+    void);
 
 extern void SetMasterDir(
-indx
-);
+    indx);
 
 extern int TotalWtVecs(
-  void
-);
+    void);
 
 extern void WritePhantomIntercepts(
-FILE *
-);
+    FILE *);
 
 #endif /*MASTERFONT_H*/

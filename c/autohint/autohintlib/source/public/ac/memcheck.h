@@ -3,12 +3,11 @@
 
 #if DOMEMCHECK
 
-#if defined(MACINTOSH) || defined(macintosh) || defined (OSX) || defined(__MWERKS__)
+#if defined(MACINTOSH) || defined(macintosh) || defined(OSX) || defined(__MWERKS__)
 #define SINGEXPORT __declspec(export)
-#define SINGSTDCALL 
+#define SINGSTDCALL
 #define SINGCALLBACK
 #endif
-
 
 #if WIN32
 #define SINGEXPORT __declspec(dllexport)
@@ -18,71 +17,58 @@
 
 #ifndef SINGLIB_CDECL
 #define SINGLIB_CDECL SINGCALLBACK
-#endif 
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
-typedef enum e_MemCheck_MemStore
-{
-    memck_store_default = 0,    /* default - calls OS-provided malloc() directly */
-    memck_store_app,            /* for mem want to keep for the app's life */
-    memck_store_maxMemStore     /* must be the last */
-}MemCheck_MemStore;
-
+typedef enum e_MemCheck_MemStore {
+    memck_store_default = 0, /* default - calls OS-provided malloc() directly */
+    memck_store_app,         /* for mem want to keep for the app's life */
+    memck_store_maxMemStore  /* must be the last */
+} MemCheck_MemStore;
 
 SINGEXPORT void *memck_mallocinternal(
-    int          size, 
+    int size,
     MemCheck_MemStore index,
-	char    *filename,
-	int     lineno
-    );
+    char *filename,
+    int lineno);
 
 SINGEXPORT void *memck_callocinternal(
-    int          count, 
-    int          size,
+    int count,
+    int size,
     MemCheck_MemStore index,
-	char    *filename,
-	int     lineno
-    );
+    char *filename,
+    int lineno);
 
 SINGEXPORT void memck_freeinternal(
-    void    *ptr,
-	char    *filename,
-	int     lineno
-    );
+    void *ptr,
+    char *filename,
+    int lineno);
 
 SINGEXPORT void *memck_reallocinternal(
-    void    * ptr, 
-    int     size,
-	char    *filename,
-	int     lineno
-    );
-
-
-
+    void *ptr,
+    int size,
+    char *filename,
+    int lineno);
 
 /* PUBLIC */
 SINGEXPORT int memck_PrintAllAllocFreeCalls;
 
 SINGEXPORT int memck_Startup(char *logfilePathname); /* returns non-0 if failure */
 
-
 /* PUBLIC
   Use these macros instead of calling the *alloc/free functions above */
 
-#define memck_malloc(x)           memck_mallocinternal((x), memck_store_app, __FILE__, __LINE__)
+#define memck_malloc(x) memck_mallocinternal((x), memck_store_app, __FILE__, __LINE__)
 #define memck_calloc(count, size) memck_callocinternal((count), (size), memck_store_app, __FILE__, __LINE__)
 
+#define memck_free(x) memck_freeinternal((x), __FILE__, __LINE__)
+#define memck_realloc(ptr, size) memck_reallocinternal((ptr), (size), __FILE__, __LINE__)
 
-#define memck_free(x)             memck_freeinternal((x), __FILE__, __LINE__)
-#define memck_realloc(ptr, size)  memck_reallocinternal((ptr), (size), __FILE__, __LINE__)
-
-
-#define memck_os_malloc(x)            memck_mallocinternal((x), memck_store_default, __FILE__, __LINE__)
-#define memck_os_calloc(count, size)  memck_callocinternal((count), (size), memck_store_default, __FILE__, __LINE__)
+#define memck_os_malloc(x) memck_mallocinternal((x), memck_store_default, __FILE__, __LINE__)
+#define memck_os_calloc(count, size) memck_callocinternal((count), (size), memck_store_default, __FILE__, __LINE__)
 
 /* PUBLIC */
 SINGEXPORT void memck_ResetMemLeakDetection(void);

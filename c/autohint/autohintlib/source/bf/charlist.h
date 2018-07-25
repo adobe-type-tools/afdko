@@ -3,20 +3,16 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /***********************************************************************/
 
 extern void AddCharListEntry(
-char *, char *, long, long, boolean, boolean, boolean, boolean
-);
+    char *, char *, long, long, boolean, boolean, boolean, boolean);
 
 extern boolean CheckCharListEntry(
-char *, char *, boolean, boolean, boolean, boolean, indx
-);
+    char *, char *, boolean, boolean, boolean, boolean, indx);
 
-extern boolean NameInCharList (
-char *
-);
+extern boolean NameInCharList(
+    char *);
 
 extern indx FindCharListEntry(
-char *
-);
+    char *);
 
 /*
 extern void makecharlist(
@@ -24,26 +20,20 @@ boolean, boolean, char *, indx
 );*/
 
 extern void sortcharlist(
-boolean
-);
+    boolean);
 
-extern boolean CompareCharListToBez (
-char *, boolean, indx, boolean
-);
+extern boolean CompareCharListToBez(
+    char *, boolean, indx, boolean);
 /*
 extern void CopyCharListToTable (
 void
 );*/
 
-extern void CheckAllListInTable (
-boolean
-);
+extern void CheckAllListInTable(
+    boolean);
 
-extern void FreeCharList (
-void
-);
+extern void FreeCharList(
+    void);
 
 extern void ResetCharListBools(
-boolean, indx
-);
-
+    boolean, indx);
