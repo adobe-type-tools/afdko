@@ -58,6 +58,7 @@ matrix:
         - python -m pip install --user -U --force-reinstall dist/*.whl
         - python -m pip install --user -r requirements-dev.txt
         - pytest --cov
+        - coverage combine
         - python -m pip uninstall --yes afdko
       after_success:
         - codecov
