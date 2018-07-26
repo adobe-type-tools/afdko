@@ -264,3 +264,61 @@ def test_bug438():
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value='])
+
+
+@pytest.mark.parametrize('opts', [
+    [],
+    ['r'],
+    ['ga'],
+    ['r', 'ga'],
+    ['nga'],
+    ['r', 'nga'],
+    ['gf'],
+    ['r', 'gf'],
+    ['gf', 'ga'],
+    ['gf', 'ga', 'nga'],  # GOADB will be applied, because 'ga' is first
+    ['gf', 'nga'],
+    ['gf', 'nga', 'ga'],  # GOADB not applied, because 'nga' is first
+    ['r', 'ga', 'gf'],
+    ['bit7n', 'bit8n', 'bit9n'],
+    ['bit7y', 'bit8y', 'bit9y'],
+    ['bit7y', 'bit8n', 'bit9n'],
+    ['bit7y', 'bit8n', 'bit7n', 'bit8y'],
+])
+def test_bug497(opts):
+    font_path = _get_input_path(T1PFA_NAME)
+    feat_path = _get_input_path('bug497/feat.fea')
+    fmndb_path = _get_input_path('bug497/fmndb.txt')
+    goadb_path = _get_input_path('bug497/goadb.txt')
+    actual_path = _get_temp_file_path()
+    ttx_filename = '-'.join(['opts'] + opts) + '.ttx'
+
+    args = []
+    for opt in opts:  # order of the opts is important
+        if opt == 'r':
+            args.append(opt)
+        elif opt == 'ga':
+            args.append(opt)
+        elif opt == 'nga':
+            args.append(opt)
+        elif opt == 'gf':
+            args.extend([opt, '_{}'.format(goadb_path)])
+        elif 'bit' in opt:
+            bit_num = int(opt[3])
+            bit_bol = 'osbOn' if opt[4] == 'y' else 'osbOff'
+            args.extend([bit_bol, '_{}'.format(bit_num)])
+
+    runner(CMD + ['-n', '-o',
+                  'f', '_{}'.format(font_path),
+                  'o', '_{}'.format(actual_path),
+                  'ff', '_{}'.format(feat_path),
+                  'mf', '_{}'.format(fmndb_path)] + args)
+    actual_ttx = _generate_ttx_dump(actual_path)
+    expected_ttx = _get_expected_path('bug497/{}'.format(ttx_filename))
+    assert differ([expected_ttx, actual_ttx,
+                   '-s',
+                   '<ttFont sfntVersion' + SPLIT_MARKER +
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <created value=' + SPLIT_MARKER +
+                   '    <modified value='])

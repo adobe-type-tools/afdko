@@ -1,0 +1,4 @@
+
+[SourceSans-Test]
+	f=Bug 497
+	s=Condensed
