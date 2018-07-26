@@ -70,9 +70,9 @@ boolean vert;
 public
 procedure DoPrune() {
     /* Step through valList to the first item which is not pruned; set
-	that to be the head of the list. Then remove from the list
-	any subsequent element for which 'pruned' is true.
-	*/
+       that to be the head of the list. Then remove from the list
+       any subsequent element for which 'pruned' is true.
+    */
     PClrVal vL = valList, vPrv;
     while (vL != NULL && vL->pruned)
         vL = vL->vNxt;
@@ -225,9 +225,9 @@ procedure PruneHVals() {
             sg2 = sL->vSeg2; /* sg1 is b, sg2 is t */
             v = sL->vVal;
             if (!ghst && sL->vGhst && !PruneVeryMuchGt(val, v))
-                goto NxtSL; /* Do not bother checking if we should prune, if slSt is not ghost hint, sL is ghost hint,
-							 and not (sL->vVal is  more than 50* bigger than sLst->vVal. 
-							 Basically, we prefer non-ghost hints over ghost unless vVal is really low. */
+                goto NxtSL; /* Do not bother checking if we should prune, if slSt is not ghost hint, sL is ghost hint, */
+                            /* and not (sL->vVal is  more than 50* bigger than sLst->vVal.                             */
+                            /* Basically, we prefer non-ghost hints over ghost unless vVal is really low.              */
             b = sL->vLoc1;
             t = sL->vLoc2;
             if (t == top && b == bot)
@@ -246,8 +246,8 @@ procedure PruneHVals() {
 
                 (val < Fix16 ||
                  /* needs to be greater than FixOne << 3 for
-				   HelveticaNeue 95 Black G has val == 2.125
-				   Poetica/ItalicOne H has val == .66  */
+                    HelveticaNeue 95 Black G has val == 2.125
+                    Poetica/ItalicOne H has val == .66  */
                  (
                      (!topInBlue || top == t) &&
                      (!botInBlue || bot == b))) /* either val is small ( < Fixed 16) or, for both bot and top, the value is the same as SL, and not in a blue zone. */
@@ -300,7 +300,7 @@ procedure PruneHVals() {
 
             if (otherBot && otherTop) {
                 /* if v less than  val by a factor of 3, and the sl stem width is less than the sLst stem width,
-				 and the tops and bottoms are close */
+                   and the tops and bottoms are close */
                 sLst = PruneOne(sLst, TRUE, sL, 8L);
                 flg = FALSE;
                 break;

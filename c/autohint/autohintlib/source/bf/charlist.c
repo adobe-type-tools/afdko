@@ -47,12 +47,12 @@ readcharset(boolean release)
     charsetexists = (strlen(charsetfilename) > 0);
     if (!charsetexists) return;
 
-#if 0  /*DEBUG*/
-   {
-   char wd[MAXPATHLEN];
-   getwd(wd);
-   fprintf(OUTPUTBUFF, "open wd:%s\nfile: %s\n", wd, charsetfilename);
-   }
+#if 0 /*DEBUG*/
+    {
+        char wd[MAXPATHLEN];
+        getwd(wd);
+        fprintf(OUTPUTBUFF, "open wd:%s\nfile: %s\n", wd, charsetfilename);
+    }
 #endif /*0*/
 
 #if OLD
@@ -315,18 +315,14 @@ CheckCharListEntry(char *cname, char *fname, boolean derived,
                     cname);
             LogMsg(globmsg, LOGERROR, OK, TRUE);
             error = TRUE;
-        }
-
-        else if (release && transitional) {
+        } else if (release && transitional) {
             sprintf(globmsg,
                     "Transitional character: %s is not found"
                     " in the character set.\n",
                     cname);
             LogMsg(globmsg, LOGERROR, OK, TRUE);
             error = TRUE;
-        }
-
-        else if (charsetexists) {
+        } else if (charsetexists) {
             if (transitional)
                 sprintf(globmsg,
                         "Transitional character: %s is not found"

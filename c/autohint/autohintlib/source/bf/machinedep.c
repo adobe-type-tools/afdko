@@ -5,7 +5,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 history:
 
-JLee	April 8, 1988
+JLee    April 8, 1988
 
 Judy Lee: Wed Jul  6 17:55:30 1988
 End Edit History
@@ -379,8 +379,7 @@ char *CheckBFPath(baseFontPath) char *baseFontPath;
     if (strchr(baseFontPath, *Delimiter) == NULL) {
         if (*baseFontPath == *Delimiter)
             LogMsg(
-                "BaseFontPath keyword in fontinfo file must indicate\
-  a relative path name.\n",
+                "BaseFontPath keyword in fontinfo file must indicate a relative path name.\n",
                 LOGERROR, NONFATALERROR, TRUE);
         return baseFontPath;
     }
@@ -391,8 +390,7 @@ char *CheckBFPath(baseFontPath) char *baseFontPath;
             break;
         case (1):
             LogMsg(
-                "BaseFontPath keyword in fontinfo file must indicate\
-  a relative path name.\n",
+                "BaseFontPath keyword in fontinfo file must indicate a relative path name.\n",
                 LOGERROR, NONFATALERROR, TRUE);
             break;
         default:

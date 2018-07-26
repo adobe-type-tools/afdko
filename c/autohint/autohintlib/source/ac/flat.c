@@ -369,7 +369,7 @@ procedure FltnCurve(c0, c1, c2, c3, pfr)
 PFltnRec pfr;
 {
     pfr->limit = 6;     /* limit on how many times a bez curve can be split in half by recursive calls to FFltnCurve() */
-                        //pfr->feps = FixHalf;
+    /* pfr->feps = FixHalf; */
     pfr->feps = FixOne; /* DEBUG 8 BIT FIX */
     FFltnCurve(c0, c1, c2, c3, pfr, TRUE);
 }

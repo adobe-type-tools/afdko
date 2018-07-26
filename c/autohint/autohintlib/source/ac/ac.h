@@ -101,21 +101,21 @@ typedef SegLnkLst *PSegLnkLst;
 
 #if 0
 typedef struct _clrrep {
-  Fixed vVal, vSpc, vLoc1, vLoc2;
-  struct _clrval *vBst;
-  } ClrRep, *PClrRep;
+    Fixed vVal, vSpc, vLoc1, vLoc2;
+    struct _clrval *vBst;
+} ClrRep, *PClrRep;
 
 typedef struct _clrval {
-  struct _clrval *vNxt;
-  Fixed vVal, vSpc, initVal;
-  Fixed vLoc1, vLoc2;
-    /* vBot=vLoc1, vTop=vLoc2, vLft=vLoc1, vRght=vLoc2 */ 
-  short int vGhst:8;
-  short int pruned:8;
-  PClrSeg vSeg1, vSeg2;
-  struct _clrval *vBst;
-  PClrRep vRep;
-  } ClrVal, *PClrVal;
+    struct _clrval *vNxt;
+    Fixed vVal, vSpc, initVal;
+    Fixed vLoc1, vLoc2;
+    /* vBot=vLoc1, vTop=vLoc2, vLft=vLoc1, vRght=vLoc2 */
+    short int vGhst : 8;
+    short int pruned : 8;
+    PClrSeg vSeg1, vSeg2;
+    struct _clrval *vBst;
+    PClrRep vRep;
+} ClrVal, *PClrVal;
 #else
 typedef struct _clrval {
     struct _clrval *vNxt;

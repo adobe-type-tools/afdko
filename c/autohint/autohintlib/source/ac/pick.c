@@ -167,8 +167,7 @@ boolean locFlg, hFlg;
                  CompareValues(vList, best, spcBonus, 3L)) &&
                 /* last arg is "ghostshift" that penalizes ghost values */
                 /* ghost values are set to 20 */
-                /* so ghostshift of 3 means prefer nonghost if its
-				 value is > (20 >> 3) */
+                /* so ghostshift of 3 means prefer nonghost if its value is > (20 >> 3) */
                 ConsiderValForSeg(vList, seg, loc, nb, b, ns, s, TRUE))
                 best = vList;
             vList = vList->vNxt;
@@ -206,7 +205,7 @@ Fixed *b, *s;
         if (best->vVal < FixSixteenth &&
             (ghst == NULL || ghst->vVal < FixSixteenth)) best = NULL;
         /* threshold must be > .035 for Monotype/Plantin/Bold Thorn
-		 and < .08 for Bookman2/Italic asterisk */
+           and < .08 for Bookman2/Italic asterisk */
         else
             best->pruned = FALSE;
     }
@@ -288,16 +287,16 @@ procedure PickHVals(valList) PClrVal valList;
                 FindRealVal(valList, best->vLoc2, best->vLoc1, &seg1, &seg2);
             }
             if (seg1->sType == sGHOST) {
-                /*newBst = FindBestValForSeg(seg2, FALSE, valList,
-				 (PClrVal)NULL, 0L, (Fixed *)NIL, 0L, (Fixed *)NIL, TRUE);*/
+                /* newBst = FindBestValForSeg(seg2, FALSE, valList,
+                       (PClrVal)NULL, 0L, (Fixed *)NIL, 0L, (Fixed *)NIL, TRUE);*/
                 newBst = seg2->sLnk;
                 if (newBst != NULL && newBst != best && MembValList(newBst, valList)) {
                     best = newBst;
                     bestPrev = PrevVal(best, valList);
                 }
             } else if (seg2->sType == sGHOST) {
-                /*newBst = FindBestValForSeg(seg1, TRUE, valList,
-				 (PClrVal)NULL, 0L, (Fixed *)NIL, 0L, (Fixed *)NIL, TRUE); */
+                /* newBst = FindBestValForSeg(seg1, TRUE, valList,
+                       (PClrVal)NULL, 0L, (Fixed *)NIL, 0L, (Fixed *)NIL, TRUE); */
                 newBst = seg2->sLnk;
                 if (newBst != NULL && newBst != best && MembValList(newBst, valList)) {
                     best = newBst;
@@ -317,8 +316,8 @@ procedure PickHVals(valList) PClrVal valList;
         bot = best->vLoc1;
         top = best->vLoc2;
         /* The next if statement was added so that ghost bands are given
-		 0 width for doing the conflict tests for bands too close together.
-		 This was a problem in Minion/DisplayItalic onequarter and onehalf. */
+           0 width for doing the conflict tests for bands too close together.
+           This was a problem in Minion/DisplayItalic onequarter and onehalf. */
         if (best->vGhst) { /* collapse width */
             if (best->vSeg1->sType == sGHOST)
                 bot = top;
@@ -339,7 +338,7 @@ procedure PickHVals(valList) PClrVal valList;
             vbot = vlist->vLoc1;
             vtop = vlist->vLoc2;
             /* The next if statement was added so that ghost bands are given
-			 0 width for doing the conflict tests for bands too close together. */
+               0 width for doing the conflict tests for bands too close together. */
             if (vlist->vGhst) { /* collapse width */
                 if (vlist->vSeg1->sType == sGHOST)
                     vbot = vtop;

@@ -1,9 +1,5 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
-/***********************************************************************
- * SCCS Id:    @(#)numtypes.h	1.10
- * Changed:    7/21/95 14:08:20
- ***********************************************************************/
 
 #ifndef _NUMTYPES_H
 #define _NUMTYPES_H

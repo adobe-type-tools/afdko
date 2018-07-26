@@ -46,7 +46,6 @@ static void skippsstring(const char **current) {
             return;
 
         (*current)++;
-
     } while (parencount > 0);
 }
 
@@ -300,8 +299,8 @@ ACLIB_API int AutoColorString(const char *srcbezdata, const char *fontinfo, char
         roundCoords, /* doAll*/
         FALSE);      /* do log */
     /* result == TRUE is good */
-    /* The following call to cleanup() always returns control to just after the setjmp() function call above,,
-	but with value set to 1 if success, or -1 if not */
+    /* The following call to cleanup() always returns control to just after the setjmp() function call above,
+       but with value set to 1 if success, or -1 if not */
     cleanup((result == TRUE) ? OK : NONFATALERROR);
 
     return AC_UnknownError; /*Shouldn't get here*/

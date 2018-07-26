@@ -102,7 +102,8 @@ extern unsigned long CheckFileBufferLen(buffer, filename) char **buffer, *filena
     filelen = ACGetFileSize(filename);
     if (filelen > MaxBytes) { /* renner Tue Sep 11 14:59:37 1990 */
 #if 0
-    fprintf(stderr,"Calling realloc: %ld vs %ld\n", filelen, MaxBytes); fflush(stderr);
+        fprintf(stderr, "Calling realloc: %ld vs %ld\n", filelen, MaxBytes);
+        fflush(stderr);
 #endif
         MaxBytes = filelen + 5;
 #if DOMEMCHECK

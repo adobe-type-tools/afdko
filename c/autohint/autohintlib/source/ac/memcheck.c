@@ -284,7 +284,6 @@ typedef struct t_MemStore {
     int maxBlock;  /* max block size */
     int numBlocks; /* blocks left over */
     int reqBlocks; /* num of blocks requested - inlcuding freed ones */
-
 } MemStore, *PMemStore;
 
 #define PD_BLOCK_MIN_SIZE 0x4000 /* default min size */

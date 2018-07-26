@@ -195,7 +195,7 @@ boolean IsCCW(x0, y0, x1, y1, x2, y2)
     y0, x1, y1, x2, y2;
 {
     /* returns true if (x0,y0) -> (x1,y1) -> (x2,y2) is counter clockwise
-	 in character space */
+       in character space */
     integer dx0, dy0, dx1, dy1;
     boolean ccw;
     dx0 = FRound(x1 - x0);
@@ -481,7 +481,7 @@ procedure (*nm)();
             nxtmax = nxt->sMax;
             if (lstmax >= nxtmin && lstmin <= nxtmax) {
                 /* do not worry about YgoesUp since "sMax" is really max in
-				 device space, not in character space */
+                   device space, not in character space */
                 if (abs(lstmax - lstmin) > abs(nxtmax - nxtmin)) {
                     /* merge into lst and remove nxt */
                     (*nm)(nxt, lst);

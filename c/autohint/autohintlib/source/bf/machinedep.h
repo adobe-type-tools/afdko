@@ -25,11 +25,11 @@ End Edit History
 #define fileeof(p) feof(p)
 #define fileerror(p) ferror(p)
 
-#define ACFILE ".ACLOCK" /* zero length file to indicate that AC \
-                        is running in current directory. */
+#define ACFILE ".ACLOCK" /* zero length file to indicate that AC */
+                         /* is running in current directory.     */
 
-#define BFFILE ".BFLOCK" /* zero length file to indicate that buildfont \
-                        is running in current directory. */
+#define BFFILE ".BFLOCK" /* zero length file to indicate that buildfont */
+                         /* is running in current directory.            */
 
 extern void FlushLogMsg(void);
 

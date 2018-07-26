@@ -1,9 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
-/* SCCS Id:    @(#)atan.c	1.1
-/* Changed:    11/14/91 17:11:16
-/***********************************************************************/
 /*
   atan.c
 
@@ -16,17 +13,17 @@ End Edit History.
 */
 
 /*
-	floating-point arctangent
+    floating-point arctangent
 
-	os_atan returns the value of the arctangent of its
-	argument in the range [-pi/2,pi/2].
+    os_atan returns the value of the arctangent of its
+    argument in the range [-pi/2,pi/2].
 
-	os_atan2 returns the arctangent of arg1/arg2
-	in the range [-pi,pi].
+    os_atan2 returns the arctangent of arg1/arg2
+    in the range [-pi,pi].
 
-	there are no error returns.
+    there are no error returns.
 
-	coefficients are #5077 from Hart & Cheney. (19.56D)
+    coefficients are #5077 from Hart & Cheney. (19.56D)
 */
 
 static double sq2p1 = 2.414213562373095048802e0;
@@ -45,8 +42,8 @@ static double q1 = .207933497444540981287275926e4;
 static double q0 = .89678597403663861962481162e3;
 
 /*
-	xatan evaluates a series valid in the
-	range [-0.414...,+0.414...].
+    xatan evaluates a series valid in the
+    range [-0.414...,+0.414...].
 */
 static double
     xatan(arg) double arg;
@@ -61,8 +58,8 @@ static double
 }
 
 /*
-	satan reduces its argument (known to be positive)
-	to the range [0,0.414...] and calls xatan.
+    satan reduces its argument (known to be positive)
+    to the range [0,0.414...] and calls xatan.
 */
 
 static double
@@ -78,24 +75,23 @@ static double
 
 #if false /* not needed */
 /*
-	os_atan makes its argument positive and
-	calls the inner routine satan.
+    os_atan makes its argument positive and
+    calls the inner routine satan.
 */
 
 double
-os_atan(arg)
-double arg;
+    os_atan(arg) double arg;
 {
-	if(arg>0)
-		return(satan(arg));
-	else
-		return(-satan(-arg));
+    if (arg > 0)
+        return (satan(arg));
+    else
+        return (-satan(-arg));
 }
 #endif    /*false*/
 
 /*
-	os_atan2 discovers what quadrant the angle
-	is in and calls os_atan.
+    os_atan2 discovers what quadrant the angle
+    is in and calls os_atan.
 */
 
 #if defined(__MWERKS__) && (!IS_MACHO)

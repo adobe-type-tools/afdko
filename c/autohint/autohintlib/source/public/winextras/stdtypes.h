@@ -1,4 +1,4 @@
-/*	@(#)stdtypes.h 1.6 90/01/04 SMI	*/
+/* @(#)stdtypes.h 1.6 90/01/04 SMI */
 
 /*
  * Suppose you have an ANSI C or POSIX thingy that needs a typedef

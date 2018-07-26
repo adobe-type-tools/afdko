@@ -2074,7 +2074,7 @@ static void CombinePaths() {
 extern short GetOperandCount(short op) {
     short count;
 
-    if (op < ESCVAL)
+    if (op < ESCVAL) {
         switch (op) {
             case CP:
             case HDT:
@@ -2102,13 +2102,14 @@ extern short GetOperandCount(short op) {
                 LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
                 break;
         }
-    else /* handle escape operators */
+    } else { /* handle escape operators */
         switch (op - ESCVAL) {
             case RM:
             case RV:
                 count = 2;
                 break;
         }
+    }
     return count;
 }
 
@@ -2265,70 +2266,76 @@ extern void SetHintsDir(dirIx)
 extern int GetHintsDir(void) {
     return hintsdirIx;
 }
-/*
- extern boolean MergeCharPaths(outbuffer, charname, filename,
- fortransit, tr, trgroupnum)
- char **outbuffer, *charname, *filename;
- boolean fortransit;
- Transitions *tr;
- int trgroupnum;
- {
- boolean ok;
- int i, ix;
- 
- byteCount = 1;  
- buffSize = GetMaxBytes();
- outbuff = outbuffer;
- startbuff = *outbuffer;
- memset(startbuff, 0, buffSize);
- currentChar = charname;
- 
- #if DEBUG_PCP
- fprintf(OUTPUTBUFF, "start character %s\n", charname);
- #endif 
- 
- if (!fortransit) {
- dirCount = GetTotalInputDirs();
- for (i = 0; i < dirCount; i++) {
- GetMasterDirName(Path_Names[i].dirnam, i);
- sprintf(Path_Names[i].fullfilepath, "%s/%s/%s", 
- Path_Names[i].dirnam, BEZDIR, filename);
- }
- }
- else {
- i = GetNumAxes();
- switch (i) {
- case 1:       dirCount = 2;       break;
- case 2:       dirCount = 4;       break;
- case 3:       dirCount = 8;       break;
- case 4:       dirCount = 16;      break;
- default: dirCount = 0; break;
- }
- for (i = 0; i < dirCount; i++) {
- strcpy(Path_Names[i].fullfilepath, tr->transitgrouparray[trgroupnum].assembledfilename[i]);
- ix = strindex(Path_Names[i].fullfilepath, "/");
- strncpy(Path_Names[i].dirnam, Path_Names[i].fullfilepath, ix);
- Path_Names[i].dirnam[ix] = '\0';
- }
- }
- 
- if (ok = CompareCharPaths(filename, fortransit))
- {
- CheckForZeroLengthCP();
- SetSbandWidth(charname, fortransit, tr, trgroupnum);
- if (addHints && hintsdirIx >= 0 && path_entries > 0)
- {
- if (ReadandAssignHints()) {
- sprintf(globmsg, "Path problem in ReadAndAssignHints, character %s.\n", charname);
- LogMsg(globmsg, LOGERROR, FATALERROR, TRUE);
- }
- CheckHandVStem3();
- }
- CombinePaths();
- }
- FreePathElements(0, dirCount);
- return ok;
- }
- 
- 
- */
+
+#if 0
+extern boolean MergeCharPaths(outbuffer, charname, filename,
+                              fortransit, tr, trgroupnum) char **outbuffer,
+    *charname, *filename;
+boolean fortransit;
+Transitions *tr;
+int trgroupnum;
+{
+    boolean ok;
+    int i, ix;
+
+    byteCount = 1;
+    buffSize = GetMaxBytes();
+    outbuff = outbuffer;
+    startbuff = *outbuffer;
+    memset(startbuff, 0, buffSize);
+    currentChar = charname;
+
+#if DEBUG_PCP
+    fprintf(OUTPUTBUFF, "start character %s\n", charname);
+#endif
+
+    if (!fortransit) {
+        dirCount = GetTotalInputDirs();
+        for (i = 0; i < dirCount; i++) {
+            GetMasterDirName(Path_Names[i].dirnam, i);
+            sprintf(Path_Names[i].fullfilepath, "%s/%s/%s",
+                    Path_Names[i].dirnam, BEZDIR, filename);
+        }
+    } else {
+        i = GetNumAxes();
+        switch (i) {
+            case 1:
+                dirCount = 2;
+                break;
+            case 2:
+                dirCount = 4;
+                break;
+            case 3:
+                dirCount = 8;
+                break;
+            case 4:
+                dirCount = 16;
+                break;
+            default:
+                dirCount = 0;
+                break;
+        }
+        for (i = 0; i < dirCount; i++) {
+            strcpy(Path_Names[i].fullfilepath, tr->transitgrouparray[trgroupnum].assembledfilename[i]);
+            ix = strindex(Path_Names[i].fullfilepath, "/");
+            strncpy(Path_Names[i].dirnam, Path_Names[i].fullfilepath, ix);
+            Path_Names[i].dirnam[ix] = '\0';
+        }
+    }
+
+    if (ok = CompareCharPaths(filename, fortransit)) {
+        CheckForZeroLengthCP();
+        SetSbandWidth(charname, fortransit, tr, trgroupnum);
+        if (addHints && hintsdirIx >= 0 && path_entries > 0) {
+            if (ReadandAssignHints()) {
+                sprintf(globmsg, "Path problem in ReadAndAssignHints, character %s.\n", charname);
+                LogMsg(globmsg, LOGERROR, FATALERROR, TRUE);
+            }
+            CheckHandVStem3();
+        }
+        CombinePaths();
+    }
+    FreePathElements(0, dirCount);
+    return ok;
+}
+#endif

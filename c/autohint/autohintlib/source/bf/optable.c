@@ -147,7 +147,7 @@ void GetOperator(short encoding, char *operator) {
 }
 
 /* Checks if the operator passed in is a recognized PS operator.
-   If it is the associated opcode is returned.	 */
+   If it is the associated opcode is returned. */
 extern short op_known(operator) char *operator;
 
 {

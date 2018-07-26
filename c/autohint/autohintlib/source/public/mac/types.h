@@ -1,4 +1,4 @@
-/*	@(#)types.h 2.32 94/08/18 SMI; from UCB 7.1 6/4/86	*/
+/* @(#)types.h 2.32 94/08/18 SMI; from UCB 7.1 6/4/86 */
 
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
@@ -55,11 +55,11 @@ typedef struct _quad_t {
 } quad_t;
 typedef long daddr_t;
 typedef char* caddr_t;
-/*typedef	unsigned long	ino_t;
-typedef	short	dev_t;
-typedef	long	off_t;
-typedef	unsigned short	uid_t;
-typedef	unsigned short	gid_t;*/
+/*typedef unsigned long ino_t;
+typedef short dev_t;
+typedef long off_t;
+typedef unsigned short uid_t;
+typedef unsigned short gid_t;*/
 typedef long key_t;
 typedef char* addr_t;
 

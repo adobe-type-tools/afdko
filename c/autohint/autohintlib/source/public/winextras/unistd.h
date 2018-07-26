@@ -1,4 +1,4 @@
-/*	@(#)unistd.h 1.12 89/10/04 SMI; from S5R3 1.5 */
+/* @(#)unistd.h 1.12 89/10/04 SMI; from S5R3 1.5 */
 
 #ifndef __sys_unistd_h
 #define __sys_unistd_h
@@ -76,7 +76,7 @@
 #include <sys/types.h>
 #endif
 
-/*extern void	_exit(int status );*/
+/* extern void _exit(int status );*/
 extern int access(/* char *path, int amode */);
 extern unsigned alarm(/* unsigned secs */);
 extern int chdir(/* char *path */);
@@ -114,7 +114,7 @@ extern unsigned sleep(/* unsigned int seconds */);
 extern long sysconf(/* int name */);
 extern int tcsetpgrp(/* int fildes, pid_t pgrp_id */);
 extern char *ttyname(/* int fildes */);
-/*extern int	unlink(const char *path );*/
+/* extern int unlink(const char *path );*/
 extern int write(/* int fildes, char *buf, unsigned int nbyte */);
 
 #endif /* !KERNEL */

@@ -130,10 +130,10 @@ void *defaultAC_memmanage(void *ctxptr, void *old, unsigned long size) {
 }
 
 /* SEE MACROS in ac.h:
- ACNEWMEM(size) 
- ACREALLOCMEM(oldptr, newsize) 
- ACFREEMEM(ptr) 
-	*/
+   ACNEWMEM(size) 
+   ACREALLOCMEM(oldptr, newsize) 
+   ACFREEMEM(ptr) 
+*/
 
 public
 AC_MEMMANAGEFUNCPTR AC_memmanageFuncPtr = defaultAC_memmanage;

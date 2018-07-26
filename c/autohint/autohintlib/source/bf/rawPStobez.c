@@ -2,7 +2,7 @@
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 /* rawPStobez.c - converts character description files in raw
-   PostScript format to relativized bez format.	 The only
+   PostScript format to relativized bez format. The only
    operators allowed are moveto, lineto, curveto and closepath.
    This program assumes that the rawPS files are located in a
    directory named chars and stores the converted and encrypted

@@ -1,4 +1,4 @@
-/*	@(#)file.h 2.20 91/06/18 SMI; from UCB 7.1 6/4/86	*/
+/* @(#)file.h 2.20 91/06/18 SMI; from UCB 7.1 6/4/86 */
 
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
