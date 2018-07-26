@@ -17,10 +17,10 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #endif
 #define EOS ""
 #define NOMATCH -1
-#define MAXFONTNAME 30 /* max length of the FontName = 36 chars  PS \
-                          name length max due to LW ROM bug - 7     \
-                          chars for Mac coordinating + 1 for null   \
-                          terminator */
+#define MAXFONTNAME 30 /* max length of the FontName = 36 chars  PS */
+                       /* name length max due to LW ROM bug - 7     */
+                       /* chars for Mac coordinating + 1 for null   */
+                       /* terminator                                */
 
 #define DEFAULTOVRSHTPTSIZE 9.51 /* Default overshoot point size. */
 
@@ -281,8 +281,7 @@ static void check_for_string(key, lineargs) char *key, *lineargs;
         make_error_return(ERROR_RETURN, globmsg, key, "\n  instead of ", lineargs);
         return;
     }
-    rp[0] = '\0'; /* trash character after ) to put in string
-               terminator */
+    rp[0] = '\0'; /* trash character after ) to put in string terminator */
     make_normal_return(lp + 1, TRUE);
 }
 

@@ -1,4 +1,4 @@
-/*	@(#)dir.h 2.11 88/08/19 SMI 	*/
+/* @(#)dir.h 2.11 88/08/19 SMI */
 
 /*
  * Filesystem-independent directory information. 

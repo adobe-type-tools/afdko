@@ -53,8 +53,8 @@ typedef unsigned char boolean;
 #define LROUND(a) ((a > 0) ? (long)(a + 0.5) : ((a + (long)(-a)) == -0.5) ? (long)a : (long)(a - 0.5))
 #define SCALEDRTOL(a, s) (a < 0 ? (long)((a * s) - 0.5) : (long)((a * s) + 0.5))
 
-typedef int indx; /* for indexes that could be either short or
-				   long - let the compiler decide */
+typedef int indx; /* for indexes that could be either short or */
+                  /* long - let the compiler decide            */
 
 #define RAWPSDIR "pschars"
 #define ILLDIR "ill"
@@ -64,8 +64,8 @@ typedef int indx; /* for indexes that could be either short or
 #ifdef MAXPATHLEN
 #undef MAXPATHLEN
 #endif
-#define MAXPATHLEN 1024 /* max path name len for a dir or folder \
-                           (includes 1 byte for null terminator) */
+#define MAXPATHLEN 1024 /* max path name len for a dir or folder */
+                        /* (includes 1 byte for null terminator) */
 
 /* defines for LogMsg code param */
 #define OK 0

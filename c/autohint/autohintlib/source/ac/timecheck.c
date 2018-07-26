@@ -1,9 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
-/* SCCS Id:    @(#)timecheck.c	1.5
-/* Changed:    4/22/98 13:00:28
-/***********************************************************************/
 /* timecheck.c */
 
 /* File modification time recording and cross-checking module. This
@@ -423,8 +420,8 @@ void writeTimesFile(boolean convert, /* Flags if writing .Converttimes */
     chksum = calcChksum(fp, lines);
 
     /* Must do this when changing from read to write on a file opened
-	 * for update, see fopen(3S).
-	 */
+     * for update, see fopen(3S).
+     */
     fseek(fp, 0L, L_XTND);
 
     fprintf(fp, "%%%% Checksum %04x\n", chksum);
@@ -672,7 +669,6 @@ boolean readTimesFile(
             goto error;
         linesRead += 1;
     } else { /* Read and check .ACtimes header */
-
         if (fscanf(fp, "FlexOK %s\n", tmp) != 1 ||
             strcmp(tmp, (flexOK) ? "true" : "false") ||
             !compareArrays(fp, "HStems", NumHStems, HStems) ||
@@ -708,9 +704,8 @@ boolean readTimesFile(
     fclose(fp);
     return TRUE;
 
-error: /* Just tidy up and return. Yes I've used a goto! I think this is
-		* one of the few legitimate uses.
-		*/
+error: /* Just tidy up and return. Yes I've used a goto! I think this is */
+       /* one of the few legitimate uses. */
     fclose(fp);
 #if DOMEMCHECK
     memck_free(oldFileTimes);
@@ -1240,9 +1235,9 @@ fileTime* checkFile(
                 ((newTime != (*oldp)->modTime) && (strcmp(name, ".notdef") != 0)) ||
                 !FileExists(bezFile, FALSE))
                 /* The name wasn't in the old timestamp file or the
-				 * file time has changed or the bez file doesn't
-				 * exist or has the wrong permissions.
-				 */
+                 * file time has changed or the bez file doesn't
+                 * exist or has the wrong permissions.
+                 */
                 return newp;
             else
                 newp->modTime = (*oldp)->modTime;

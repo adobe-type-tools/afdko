@@ -1,4 +1,4 @@
-/*	@(#)sysmacros.h 1.4 88/08/19 SMI	*/
+/* @(#)sysmacros.h 1.4 88/08/19 SMI */
 
 /*
  * Major/minor device constructing/busting macros.

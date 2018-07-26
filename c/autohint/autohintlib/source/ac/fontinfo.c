@@ -92,39 +92,37 @@ boolean ReadFontInfo() {
     boolean ORDINARYCOLORING = !scalinghints && writecoloredbez;
 
     AscenderHeight =
-        AscenderOvershoot =
-            BaselineYCoord =
-                BaselineOvershoot =
-                    Baseline5 =
-                        Baseline5Overshoot =
-                            Baseline6 =
-                                Baseline6Overshoot =
-                                    CapHeight =
-                                        CapOvershoot =
-                                            DescenderHeight =
-                                                DescenderOvershoot =
-                                                    FigHeight =
-                                                        FigOvershoot =
-                                                            Height5 =
-                                                                Height5Overshoot =
-                                                                    Height6 =
-                                                                        Height6Overshoot =
-                                                                            LcHeight =
-                                                                                LcOvershoot =
-                                                                                    OrdinalBaseline =
-                                                                                        OrdinalOvershoot =
-                                                                                            SuperiorBaseline =
-                                                                                                SuperiorOvershoot = UNDEFINED; /* mark as undefined */
+    AscenderOvershoot =
+    BaselineYCoord =
+    BaselineOvershoot =
+    Baseline5 =
+    Baseline5Overshoot =
+    Baseline6 =
+    Baseline6Overshoot =
+    CapHeight =
+    CapOvershoot =
+    DescenderHeight =
+    DescenderOvershoot =
+    FigHeight =
+    FigOvershoot =
+    Height5 =
+    Height5Overshoot =
+    Height6 =
+    Height6Overshoot =
+    LcHeight =
+    LcOvershoot =
+    OrdinalBaseline =
+    OrdinalOvershoot =
+    SuperiorBaseline =
+    SuperiorOvershoot = UNDEFINED; /* mark as undefined */
     NumHStems = NumVStems = 0;
     NumHColors = NumVColors = 0;
     lenBotBands = lenTopBands = 0;
 
     if (scalinghints) {
         SetFntInfoFileName(SCALEDHINTSINFO);
-    }
-    /* check for FlexOK, AuxHStems, AuxVStems */
-    else /* for intelligent scaling, it's too hard to check these */
-    {
+    } else { /* check for FlexOK, AuxHStems, AuxVStems */
+             /* for intelligent scaling, it's too hard to check these */
         ParseStems("StemSnapH", HStems, &NumHStems);
         ParseStems("StemSnapV", VStems, &NumVStems);
         if (NumHStems == 0) {
@@ -150,7 +148,7 @@ boolean ReadFontInfo() {
 #endif
 
     /* get bluefuzz. It is already set to its default value in ac.c::InitData().
-	GetKeyFixedValue does nto change the value if it is not present in fontinfo.  */
+       GetKeyFixedValue does nto change the value if it is not present in fontinfo.  */
     GetKeyFixedValue("BlueFuzz", ACOPTIONAL, &bluefuzz);
 
     /* Check for counter coloring characters. */

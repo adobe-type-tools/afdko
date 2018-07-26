@@ -17,8 +17,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define ACOPTIONAL 1
 #define MANDATORY 0
 
-#define DEFAULTBLUEFUZZ FixOne /* Default value used by PS interpreter and Adobe's fonts \
-                          to extend the range of alignment zones. */
+#define DEFAULTBLUEFUZZ FixOne /* Default value used by PS interpreter and Adobe's fonts */
+                               /* to extend the range of alignment zones.                */
 #define MAXDOMINANTSTEMS 2
 #define MAXSTEMSNAP 12
 #define MMFINAME "mmfontinfo"
@@ -45,7 +45,7 @@ extern void FreeFontInfo(
 
 /* Looks up the value of the specified keyword in the fontinfo
    file.  If the keyword doesn't exist and this is an optional
-   key, returns a NULL.	 Otherwise, returns the value string. */
+   key, returns a NULL.  Otherwise, returns the value string. */
 extern char *GetFntInfo(
     char *, boolean);
 

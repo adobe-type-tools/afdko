@@ -59,8 +59,7 @@ typedef struct char_width {
 /* Globals */
 static boolean firstpath;   /* 1st path in this character */
 static boolean width_found; /* width comment in ill. file */
-static boolean err;         /* whether error occurred during
-                         conversion */
+static boolean err;         /* whether error occurred during conversion */
 static boolean printmsg;    /* whether to print Converting msg */
 static boolean release;     /* indicates release version */
 static indx np;             /* number of points in path */
@@ -494,8 +493,7 @@ static void do_path(boolean white, FILE *outfile, const char *name) {
     fprintf(OUTPUTBUFF, "%s\n", (white ? "WHITE" : "BLACK"));
 #endif
     reverse = ((white && !cw) || (!white && cw));
-    if (reverse) /* reverse path
-                     direction */
+    if (reverse) /* reverse path direction */
     {
         n = np;
         p = &path[np - 1];
@@ -570,13 +568,11 @@ static void do_path(boolean white, FILE *outfile, const char *name) {
             fp++;
         }
 
-        for (n = 1; n < np; n++) { /* copies from path [elem] or path[elem-1] to
-                         path[0] */
+        for (n = 1; n < np; n++) { /* copies from path [elem] or path[elem-1] to path[0] */
             *fp = *p;
             fp++;
             p--;
-            if (--elem < 0) { /* resets p to copy from path[np-1] to
-                             path[elem] */
+            if (--elem < 0) { /* resets p to copy from path[np-1] to path[elem] */
                 p = &path[np - 1];
                 elem = np - 1;
             }
@@ -616,8 +612,7 @@ static void do_path(boolean white, FILE *outfile, const char *name) {
             fp->coord = path[elem - 1].coord;
         }
         fp++;
-        for (n = 1; n < np; n++) { /* copies from path[elem] or path[elem+1] to
-                         path[np] */
+        for (n = 1; n < np; n++) { /* copies from path[elem] or path[elem+1] to path[np] */
             *fp = *p;
             fp++;
             p++;

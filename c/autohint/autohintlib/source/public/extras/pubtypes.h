@@ -1,9 +1,5 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
-/***********************************************************************
- * SCCS Id:    @(#)pubtypes.h	1.4
- * Changed:    7/25/95 18:37:56
- ***********************************************************************/
 
 #ifndef _PUBTYPES_H
 #define _PUBTYPES_H

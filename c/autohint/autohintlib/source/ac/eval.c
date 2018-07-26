@@ -123,12 +123,12 @@ Fixed *pspc, *pv;
         rdst = ac_abs(trght - blft);
         dx = MIN(ldst, rdst);
         dist = GapDist(dx);
-        dist += (7 * dy) / 5; /* extra penalty for nonoverlap
-										* changed from 7/5 to 12/5 for Perpetua/Regular/
-										* n, r ,m and other lowercase serifs;
-										* undid change for Berthold/AkzidenzGrotesk 9/16/91;
-										* this did not make Perpetua any worse. */
-        DEBUG_ROUND(dist)     /* DEBUG 8 BIT */
+        dist += (7 * dy) / 5; /* extra penalty for nonoverlap                       */
+                              /* changed from 7/5 to 12/5 for Perpetua/Regular/     */
+                              /* n, r ,m and other lowercase serifs;                */
+                              /* undid change for Berthold/AkzidenzGrotesk 9/16/91; */
+                              /* this did not make Perpetua any worse.              */
+        DEBUG_ROUND(dist)     /* DEBUG 8 BIT                                        */
         if (dx > dy)
             dist *= dx / dy;
     }
