@@ -499,10 +499,6 @@ class MakeOTFRunError(KeyError):
     pass
 
 
-class UFOParseError(KeyError):
-    pass
-
-
 class MakeOTFParams(object):
     def __init__(self):
         self.makeotfPath = None
@@ -1747,90 +1743,6 @@ def checkIfVertInFeature(featurePath):
             break
 
     return foundVert
-
-
-def parsePList(filePath, dictKey=None):
-    # if dictKey is defined, parse and return only the data for that key.
-    # This helps avoid needing to parse all plist types. I need to support
-    # only data for known keys and lists.
-    plistDict = {}
-    plistKeys = []
-
-    # I uses this rather than the plistlib in order
-    # to get a list that allows preserving key order.
-    fp = open(filePath, "r")
-    data = fp.read()
-    fp.close()
-    contents = XML(data)
-    ufo_dict = contents.find("dict")
-    if ufo_dict is None:
-        raise UFOParseError("In '%s', failed to find dict. '%s'." % filePath)
-    lastTag = "string"
-    for child in ufo_dict:
-        if child.tag == "key":
-            if lastTag == "key":
-                raise UFOParseError(
-                    "In contents.plist, key name '%s' followed another key "
-                    "name '%s'." % (xmlToString(child), lastTag))
-            skipKeyData = False
-            lastName = child.text
-            lastTag = "key"
-            if dictKey is not None:
-                if lastName != dictKey:
-                    skipKeyData = True
-        elif child.tag != "key":
-            if lastTag != "key":
-                raise UFOParseError(
-                    "In contents.plist, key value '%s' followed a non-key tag "
-                    "'%s'." % (xmlToString(child), lastTag))
-            lastTag = child.tag
-
-            if skipKeyData:
-                continue
-
-            if lastName in plistDict:
-                raise UFOParseError(
-                    "Encountered duplicate key name '%s' in '%s'." %
-                    (lastName, filePath))
-            if child.tag == "array":
-                _list = []
-                for listChild in child:
-                    val = listChild.text
-                    if listChild.tag == "integer":
-                        val = int(eval(val))
-                    elif listChild.tag == "real":
-                        val = float(eval(val))
-                    elif listChild.tag == "string":
-                        pass
-                    else:
-                        raise UFOParseError(
-                            "In plist file, encountered unknown key type '%s' "
-                            "in '%s' for parent key %s. %s." %
-                            (listChild.tag, child.tag, lastName, filePath))
-                    _list.append(val)
-                plistDict[lastName] = _list
-            elif child.tag == "integer":
-                plistDict[lastName] = int(eval(child.text))
-            elif child.tag == "real":
-                plistDict[lastName] = float(eval(child.text))
-            elif child.tag == "false":
-                plistDict[lastName] = 0
-            elif child.tag == "true":
-                plistDict[lastName] = 1
-            elif child.tag == "string":
-                plistDict[lastName] = child.text
-            else:
-                raise UFOParseError(
-                    "In plist file, encountered unknown key type '%s' for "
-                    "key %s. %s." % (child.tag, lastName, filePath))
-            plistKeys.append(lastName)
-        else:
-            raise UFOParseError(
-                "In plist file, encountered unexpected element '%s'. %s." %
-                (xmlToString(child), filePath))
-    if len(plistDict) == 0:
-        plistDict = None
-    return plistDict, plistKeys
 
 
 def setMissingParams(makeOTFParams):
