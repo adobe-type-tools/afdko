@@ -29,7 +29,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.4.0 Jun 30 2018
+makeotf.py v2.4.1 Jul 25 2018
 """
 
 __methods__ = """
@@ -407,7 +407,7 @@ kDefaultFeaturesPath = "features"
 kDefaultUFOFeaturesPath = "features.fea"
 kDefaultOptionsFile = "current.fpr"
 kDefaultFMNDBPath = "FontMenuNameDB"
-kDefaultGOADBPath = "GlyphOrderAndAliasDB"
+GOADB_NAME = "GlyphOrderAndAliasDB"
 kTempFontSuffix = ".tmp"
 kTemp2FontSuffix = ".tmp2"
 kAddStubDSIG = "AddStubDSIG"
@@ -528,7 +528,7 @@ class MakeOTFParams(object):
         self.verbose = 0
         self.debug = False
         for item in kMOTFOptions.items():
-            exec("self.%s%s = None" % (kFileOptPrefix, item[0]))
+            setattr(self, kFileOptPrefix + item[0], None)
         # USE_TYPO_METRICS Remove comment from next
         # line to turn on bits 7 and 8 by default.
         # exec("self.%s%s = [7,8]" % (kFileOptPrefix, kSetfsSelectionBitsOn))
@@ -1094,6 +1094,7 @@ def getOptions(makeOTFParams, args):
                     continue
                 exec("makeOTFParams.%s%s = file_path" % (kFileOptPrefix, kFMB))
 
+        # -gf
         elif arg == kMOTFOptions[kGOADB][1]:
             kMOTFOptions[kGOADB][0] = i + optionIndex
             try:
@@ -1103,38 +1104,40 @@ def getOptions(makeOTFParams, args):
             if (file_path is None) or (file_path[0] == "-"):
                 error = 1
                 print("makeotf [Error] The '%s' option must be followed by "
-                      "the path to the GlyphOrderingAndAliasDB file." % arg)
+                      "the path to the %s file." % (arg, GOADB_NAME))
                 continue
             i += 1
             if not os.path.exists(file_path):
                 error = 1
                 print("makeotf [Error] Could not find the "
-                      "GlyphOrderingAndAliasDB at '%s'." % file_path)
+                      "%s at '%s'." % (GOADB_NAME, file_path))
                 continue
-            exec("makeOTFParams.%s%s = file_path" % (kFileOptPrefix, kGOADB))
+            setattr(makeOTFParams, kFileOptPrefix + kGOADB, file_path)
 
+        # -r
         elif arg == kMOTFOptions[kRelease][1]:
             kMOTFOptions[kRelease][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kRelease))
+            setattr(makeOTFParams, kFileOptPrefix + kRelease, 'true')
             # If the -r option is specified, we don't want
             # the -q and -S options showing up unless the
             # user specified them later.
             exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kDoSubr))
-            exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kDoAlias))
+            setattr(makeOTFParams, kFileOptPrefix + kDoAlias, None)
 
+        # -nr
         # makeotfexe does not have a not-release option;
         # we need to suppress the release option.
         elif arg == kMOTFOptions[kRelease][2]:
             kMOTFOptions[kRelease][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kRelease))
+            setattr(makeOTFParams, kFileOptPrefix + kRelease, None)
             # If the -r option is specified being off,
             # we also turn off the -q and -S options.
             kMOTFOptions[kDoSubr][0] = i + optionIndex
             exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kDoSubr))
             kMOTFOptions[kDoAlias][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kDoAlias))
+            setattr(makeOTFParams, kFileOptPrefix + kDoAlias, None)
             kMOTFOptions[kGOADB][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kGOADB))
+            setattr(makeOTFParams, kFileOptPrefix + kGOADB, None)
 
         elif arg == kMOTFOptions[kDoSubr][1]:
             kMOTFOptions[kDoSubr][0] = i + optionIndex
@@ -1146,8 +1149,7 @@ def getOptions(makeOTFParams, args):
 
         elif arg == kMOTFOptions[kMaxSubrs][1]:
             try:
-                val = args[i]
-                val = int(val)
+                val = int(args[i])
                 i += 1
                 exec("makeOTFParams.%s%s = val" % (kFileOptPrefix, kMaxSubrs))
             except (IndexError, ValueError):
@@ -1155,20 +1157,19 @@ def getOptions(makeOTFParams, args):
                 print("makeotf [Error] The '%s' option must be followed by an "
                       "integer value." % arg)
 
+        # -ga
         elif arg == kMOTFOptions[kDoAlias][1]:
-            if (not eval("makeOTFParams.%s%s" % (kFileOptPrefix, kRelease))) \
-                and (eval("makeOTFParams.%s%s" % (kFileOptPrefix, kDoAlias)
-                     is None)):
-
-                # we don't need to turn Alias on if release mode is on,
-                # and Alias has not been explicitly disabled.
+            if kMOTFOptions[kDoAlias][0] == kOptionNotSeen:
                 kMOTFOptions[kDoAlias][0] = i + optionIndex
-                exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix,
-                                                      kDoAlias))
+                setattr(makeOTFParams, kFileOptPrefix + kDoAlias, 'true')
+
+        # -nga
         elif arg == kMOTFOptions[kDoAlias][2]:
-            exec("makeOTFParams.%s%s = 'false'" % (kFileOptPrefix, kDoAlias))
-            kMOTFOptions[kGOADB][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kGOADB))
+            if kMOTFOptions[kDoAlias][0] == kOptionNotSeen:
+                kMOTFOptions[kDoAlias][0] = i + optionIndex
+                setattr(makeOTFParams, kFileOptPrefix + kDoAlias, 'false')
+                kMOTFOptions[kGOADB][0] = i + optionIndex
+                setattr(makeOTFParams, kFileOptPrefix + kGOADB, None)
 
         elif arg == kMOTFOptions[kDoSubset][1]:
             kMOTFOptions[kDoSubset][0] = i + optionIndex
@@ -1225,8 +1226,7 @@ def getOptions(makeOTFParams, args):
         elif arg == kMOTFOptions[kSetfsSelectionBitsOn][1]:
             kMOTFOptions[kSetfsSelectionBitsOn][0] = i + optionIndex
             try:
-                val = args[i]
-                val = int(val)
+                val = int(args[i])
                 i += 1
                 if val in [7, 8, 9]:
                     makeOTFParams.seenOS2v4Bits[val - 7] = 1
@@ -1248,8 +1248,7 @@ def getOptions(makeOTFParams, args):
         elif arg == kMOTFOptions[kSetfsSelectionBitsOff][1]:
             kMOTFOptions[kSetfsSelectionBitsOff][0] = i + optionIndex
             try:
-                val = args[i]
-                val = int(val)
+                val = int(args[i])
                 i += 1
                 if val in [7, 8, 9]:
                     makeOTFParams.seenOS2v4Bits[val - 7] = 1
@@ -1270,8 +1269,7 @@ def getOptions(makeOTFParams, args):
         elif arg == kMOTFOptions[kSetOS2Version][1]:
             kMOTFOptions[kSetOS2Version][0] = i + optionIndex
             try:
-                val = args[i]
-                val = int(val)
+                val = int(args[i])
                 i += 1
             except (IndexError, ValueError):
                 print("makeotf [Error] The '%s' option must be followed by "
@@ -1285,8 +1283,7 @@ def getOptions(makeOTFParams, args):
             # the override for the design weight of the synthetic glyphs.
             kMOTFOptions[kAddSymbol][0] = i + optionIndex
             try:
-                val = args[i]
-                val = int(val)
+                val = int(args[i])
                 i += 1
             except (IndexError, ValueError):
                 val = 'true'
@@ -1940,7 +1937,7 @@ def setMissingParams(makeOTFParams):
 
     # GOADB path was not specified.
     if not goadb_path and required:
-        newpath = os.path.join(makeOTFParams.fontDirPath, kDefaultGOADBPath)
+        newpath = os.path.join(makeOTFParams.fontDirPath, GOADB_NAME)
         for path in [newpath, lookUpDirTree(newpath)]:
             if path and os.path.exists(path):
                 setattr(makeOTFParams, kFileOptPrefix + kGOADB, path)
@@ -2631,10 +2628,10 @@ def makeRelativePaths(makeOTFParams):
     if fmndbFilePath:
         exec("makeOTFParams.%s%s = fmndbFilePath" % (kFileOptPrefix, kFMB))
 
-    goadbFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kGOADB))
-    goadbFilePath = makeRelativePath(fontDir, goadbFilePath)
+    goadbFilePath = makeRelativePath(
+        fontDir, getattr(makeOTFParams, kFileOptPrefix + kGOADB))
     if goadbFilePath:
-        exec("makeOTFParams.%s%s = goadbFilePath" % (kFileOptPrefix, kGOADB))
+        setattr(makeOTFParams, kFileOptPrefix + kGOADB, goadbFilePath)
 
     maccmapFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix,
                                                    kMacCMAPPath))
@@ -2722,10 +2719,10 @@ def runMakeOTF(makeOTFParams):
 
         # if the user has asked to use an existing GOADB file, we need
         # to make sure that it will preserve the src glyph order.
-        use_alias = eval("makeOTFParams.%s%s " % (kFileOptPrefix, kDoAlias)) \
-            or eval("makeOTFParams.%s%s" % (kFileOptPrefix, kRelease))
+        use_alias = getattr(makeOTFParams, kFileOptPrefix + kDoAlias) \
+            or getattr(makeOTFParams, kFileOptPrefix + kRelease)
         if use_alias:
-            goadbPath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kGOADB))
+            goadbPath = getattr(makeOTFParams, kFileOptPrefix + kGOADB)
             realGOADBList = getGOADBData(goadbPath)
             result, onlyInSrc, onlyInReal = compareSrcNames(srcGOADBList,
                                                             realGOADBList)
@@ -2746,9 +2743,8 @@ def runMakeOTF(makeOTFParams):
             # we need to make and use one in order to preserve glyph order.
             tempGOADBPath = writeTempGOADB(inputFilePath, srcGOADBList)
             makeOTFParams.tempPathList.append(tempGOADBPath)
-            exec("makeOTFParams.%s%s = tempGOADBPath" % (kFileOptPrefix,
-                                                         kGOADB))
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kDoAlias))
+            setattr(makeOTFParams, kFileOptPrefix + kGOADB, tempGOADBPath)
+            setattr(makeOTFParams, kFileOptPrefix + kDoAlias, 'true')
 
         # if the source is TTF, then the name table must
         # be built without the -useOldNameID4 option.
@@ -2771,29 +2767,28 @@ def runMakeOTF(makeOTFParams):
 
     # check if the OS/2 version table needs to be set to 4
     # because the new fsSelection bits are being used.
-    bitsOff = eval("makeOTFParams.%s%s" % (kFileOptPrefix,
-                                           kSetfsSelectionBitsOff))
-    bitsOn = eval("makeOTFParams.%s%s" % (kFileOptPrefix,
-                                          kSetfsSelectionBitsOn))
-    if bitsOff is not None:
-        for bitIndex in bitsOff:
+    bitsOff = getattr(makeOTFParams, kFileOptPrefix + kSetfsSelectionBitsOff)
+    bitsOn = getattr(makeOTFParams, kFileOptPrefix + kSetfsSelectionBitsOn)
+
+    if bitsOff and bitsOn:  # neither can be None
+        # remove any OFF values that were also (mistakenly?) requested to be ON
+        for bit_val in bitsOff:
             try:
-                bitsOn.remove(bitIndex)
+                bitsOn.remove(bit_val)
             except ValueError:
-                pass
+                continue
 
     hasOS2V4Bit = False
     if bitsOn:
-        for bitIndex in bitsOn:
-            if bitIndex > 6:
-                hasOS2V4Bit = True
+        if sorted(bitsOn)[0] > 6:
+            hasOS2V4Bit = True
 
-    os2Version = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kSetOS2Version))
+    os2Version = getattr(makeOTFParams, kFileOptPrefix + kSetOS2Version)
     if hasOS2V4Bit and (os2Version is None):
         # If the OS/2 table version has not been explicitly specified,
         # and the kSetfsSelectionBits is being set to greater than 6,
         # then bump the OS/2 table version to 4.
-        exec("makeOTFParams.%s%s = 4" % (kFileOptPrefix, kSetOS2Version))
+        setattr(makeOTFParams, kFileOptPrefix + kSetOS2Version, 4)
 
     if hasOS2V4Bit:
         osv4Err = False
@@ -2939,8 +2934,8 @@ def runMakeOTF(makeOTFParams):
             doSubr = 'true' == eval("makeOTFParams.%s%s" % (kFileOptPrefix,
                                                             kDoSubr))
             if kMOTFOptions[kDoSubr][0] == kOptionNotSeen:
-                doSubr = 'true' == eval("makeOTFParams.%s%s" % (kFileOptPrefix,
-                                                                kRelease))
+                doSubr = 'true' == getattr(makeOTFParams,
+                                           kFileOptPrefix + kRelease)
             # Send the font.pfa file to convertfonttocid.py
             # rather than the OTF because the GlyphSet
             # definitions in the fontinfo files use production
@@ -2962,7 +2957,7 @@ def runMakeOTF(makeOTFParams):
                   outputPath)
             raise MakeOTFRunError
 
-    if eval("makeOTFParams.%s%s" % (kFileOptPrefix, kRelease)):
+    if getattr(makeOTFParams, kFileOptPrefix + kRelease):
         try:
             command = "spot -t head \"%s\" 2>&1" % outputPath
             report = fdkutils.runShellCmd(command)
