@@ -231,9 +231,9 @@ def test_non_varying_glyphs_bug356():
     assert differ([expected_path, stderr_path, '-l', '1'])
 
 
-import subprocess32 as subprocess
 def test_bug473():
+    import subprocess32 as subprocess
     with pytest.raises(subprocess.CalledProcessError) as err:
         save_path = os.path.join(_get_temp_dir_path(), 'bug473.ufo')
         runner(CMD + ['-o', 'ufo', '-f', 'bug473.ufo', '-s', save_path])
-    assert err.value.returncode in [-6, -1073740791] # Mac, Win error codes
+    assert err.value.returncode in [-6, -1073740791]  # Mac, Win error codes
