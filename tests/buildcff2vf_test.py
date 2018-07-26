@@ -35,9 +35,6 @@ def _generate_ttx_dump(font_path, tables=None):
 # -----
 
 def test_cjk_vf():
-    # this test is expected to start failing once we integrate a version of
-    # fontTools that includes https://github.com/fonttools/fonttools/pull/1282
-    # when that happens, 'CJKVar.ttx' needs to be updated/optimized
     input_dir = _get_input_path('CJKVar')
     temp_dir = os.path.join(tempfile.mkdtemp(), 'CJKVar')
     copytree(input_dir, temp_dir)
