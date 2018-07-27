@@ -7,8 +7,7 @@ import re
 import sys
 import traceback
 
-from afdko import fdkutils
-from afdko import ufotools
+from afdko import convertfonttocid, fdkutils, ufotools
 
 from xml.etree.ElementTree import XML
 from xml.etree.ElementTree import tostring as xmlToString
@@ -29,7 +28,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.4.1 Jul 25 2018
+makeotf.py v2.4.2 Jul 30 2018
 """
 
 __methods__ = """
@@ -669,9 +668,8 @@ def setOptionsFromFontInfo(makeOTFParams):
     """ This sets options from the fontinfo file
         *if they have not already been set *
     """
-    data = None
-    fontinfoFile = makeOTFParams.fontinfoPath
-    if not fontinfoFile:
+    fontinfo_path = makeOTFParams.fontinfoPath
+    if not fontinfo_path:
         # The user did not specify the fontinfo file
         # path with an option. We will look for it in the
         # font directory, then in the current directory.
@@ -680,14 +678,15 @@ def setOptionsFromFontInfo(makeOTFParams):
         fipath3 = os.path.join(makeOTFParams.fontDirPath, fipath2)
         for fiPath in [fipath1, fipath2, fipath3]:
             if os.path.exists(fiPath):
-                fontinfoFile = fiPath
+                fontinfo_path = fiPath
                 break
 
-    if fontinfoFile and os.path.exists(fontinfoFile):
+    data = ''
+    if fontinfo_path and os.path.exists(fontinfo_path):
         try:
-            fi = open(fontinfoFile, "r")
-            data = fi.read()
-            fi.close()
+            with open(fontinfo_path, "r") as fi:
+                data = fi.read()
+            makeOTFParams.fontinfoPath = fontinfo_path
         except (OSError, IOError):
             print("makeotf [Error] Failed to find and open fontinfo file: "
                   "FSType, OS/2 V4 bits, and Bold and Italic settings may "
@@ -811,7 +810,7 @@ def setOptionsFromFontInfo(makeOTFParams):
                         kFileOptPrefix, kSetfsSelectionBitsOn))
             elif not m.group(1) in ["False", "false", "0"]:
                 print("makeotf [Error] Failed to parse value for "
-                      "PreferOS/2TypoMetrics in file '%s'." % fontinfoFile)
+                      "PreferOS/2TypoMetrics in file '%s'." % fontinfo_path)
             print("makeotf [Note] setting the USE_TYPO_METRICS OS/2 "
                   "fsSelection bit 7 from fontinfo keyword.")
 
@@ -835,7 +834,7 @@ def setOptionsFromFontInfo(makeOTFParams):
                         kFileOptPrefix, kSetfsSelectionBitsOn))
             elif not m.group(1) in ["False", "false", "0"]:
                 print("makeotf [Error] Failed to parse value for "
-                      "PreferOS/2TypoMetrics in file '%s'." % fontinfoFile)
+                      "PreferOS/2TypoMetrics in file '%s'." % fontinfo_path)
             print("makeotf [Note] setting the WEIGHT_WIDTH_SLOPE_ONLY OS/2 "
                   "fsSelection bit 8 from fontinfo keyword.")
 
@@ -854,7 +853,7 @@ def setOptionsFromFontInfo(makeOTFParams):
                         kFileOptPrefix, kSetfsSelectionBitsOn))
             elif not m.group(1) in ["False", "false", "0"]:
                 print("makeotf [Error] Failed to parse value for "
-                      "PreferOS/2TypoMetrics in file '%s'." % fontinfoFile)
+                      "PreferOS/2TypoMetrics in file '%s'." % fontinfo_path)
             print("makeotf [Note] setting the OBLIQUE OS/2 fsSelection bit 9 "
                   "from fontinfo keyword.")
 
@@ -867,7 +866,7 @@ def setOptionsFromFontInfo(makeOTFParams):
             val = eval(m.group(1))
         except (NameError, SyntaxError):
             print("makeotf [Error] Failed to parse value '%s' for FSType in "
-                  "file '%s'." % (m.group(1), fontinfoFile))
+                  "file '%s'." % (m.group(1), fontinfo_path))
         makeOTFParams.FSType = val
 
     return
@@ -937,7 +936,7 @@ def getOptions(makeOTFParams, args):
 
         elif arg == "-fi":
             try:
-                file_path = args[i]
+                file_path = os.path.abspath(os.path.realpath(args[i]))
             except IndexError:
                 file_path = None
             if (file_path is None) or (file_path[0] == "-"):
@@ -985,8 +984,7 @@ def getOptions(makeOTFParams, args):
             kMOTFOptions[kInputFont][0] = i + optionIndex
             try:
                 file_path = os.path.abspath(os.path.realpath(args[i]))
-                exec("makeOTFParams.%s%s = file_path" % (kFileOptPrefix,
-                                                         kInputFont))
+                setattr(makeOTFParams, kFileOptPrefix + kInputFont, file_path)
             except IndexError:
                 file_path = None
             if (file_path is None) or (file_path[0] == "-"):
@@ -1005,7 +1003,7 @@ def getOptions(makeOTFParams, args):
         elif arg == kMOTFOptions[kOutputFont][1]:
             kMOTFOptions[kOutputFont][0] = i + optionIndex
             try:
-                file_path = args[i]
+                file_path = os.path.abspath(os.path.realpath(args[i]))
             except IndexError:
                 file_path = None
             if (file_path is None) or (file_path[0] == "-"):
@@ -1014,8 +1012,7 @@ def getOptions(makeOTFParams, args):
                       "path to the output font file." % arg)
                 continue
             i += 1
-            exec("makeOTFParams.%s%s = file_path" % (kFileOptPrefix,
-                                                     kOutputFont))
+            setattr(makeOTFParams, kFileOptPrefix + kOutputFont, file_path)
 
         elif arg == kMOTFOptions[kBold][1]:
             kMOTFOptions[kBold][0] = i + optionIndex
@@ -2302,8 +2299,7 @@ def fixPost(glyphList, inputFilePath, outputPath, makeOTFParams):
     # build glyph lists.
     extraNameList = []
     glyphOrderList = []
-    for i in range(len(glyphList)):
-        gname = glyphList[i]
+    for i, gname in enumerate(glyphList):
         glyphOrderList.append("\t<GlyphID id=\"%d\" name=\"%s\"/>" % (i,
                                                                       gname))
         if not (gname in kStdNames):
@@ -2598,7 +2594,7 @@ def runMakeOTF(makeOTFParams):
 
     # If the output file already exists, delete it;
     # we want to know if making the new output file fails.
-    outputPath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kOutputFont))
+    outputPath = getattr(makeOTFParams, kFileOptPrefix + kOutputFont)
     if os.path.abspath(outputPath) == os.path.abspath(inputFilePath):
         print("makeotf [Error] Source and output files cannot be the "
               "same. %s." % outputPath)
@@ -2743,8 +2739,7 @@ def runMakeOTF(makeOTFParams):
     # if converting to CID, save the setting, but
     # remove the option from makeOTFParams so we don't
     # pass the -cn arg/-ncn arg on to makeotfexe.
-    doConvertToCID = eval("makeOTFParams.%s%s" % (kFileOptPrefix,
-                                                  kConvertToCID))
+    doConvertToCID = getattr(makeOTFParams, kFileOptPrefix + kConvertToCID)
     if doConvertToCID is not None:
         if makeOTFParams.srcIsTTF:
             doConvertToCID = None
@@ -2831,14 +2826,13 @@ def runMakeOTF(makeOTFParams):
     if hasattr(makeOTFParams, 'FSType'):
         checkFSTypeValue(makeOTFParams.FSType, outputPath)
 
-    # NOTE: See comment about font.pfa below.
     # If we need to convert this to a CID keyed font,
     # we do this as a post processing step on the OTF.
+    # NOTE: See comment about font.pfa below.
     if doConvertToCID == "true":
-        import convertfonttocid
         convertfonttocid.debug = makeOTFParams.debug
         print("Converting CFF table to CID-keyed CFF...")
-        tempPath = "%s.temp.cid" % outputPath
+        tempPath = "%s.temp.cid" % os.path.abspath(outputPath)
         if os.path.exists(tempPath):
             os.remove(tempPath)
         try:
@@ -2850,13 +2844,14 @@ def runMakeOTF(makeOTFParams):
                                            kFileOptPrefix + kRelease)
             # Send the font.pfa file to convertfonttocid.py
             # rather than the OTF because the GlyphSet
-            # definitions in the fontinfo files use production
+            # definitions in the 'fontinfo' files use production
             # glyph names not final glyph names.
-            # I'm not sure what the side effects of that may be.
-            # msousa: May 12 2012
-            convertfonttocid.convertFontToCID(outputPath, tempPath)
+            convertfonttocid.convertFontToCID(
+                outputPath, tempPath, makeOTFParams.fontinfoPath)
             convertfonttocid.mergeFontToCFF(tempPath, outputPath, doSubr)
-        except convertfonttocid.FontInfoParseError:
+
+        except(convertfonttocid.FontInfoParseError,
+               convertfonttocid.FontParseError):
             traceback.print_exc()
             print("makeotf [Error] Failed to convert font '%s' to CID." %
                   outputPath)

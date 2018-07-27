@@ -39,14 +39,16 @@ def _get_input_path(file_name):
 
 
 def _get_temp_file_path():
-    return tempfile.mkstemp()[1]
+    file_descriptor, path = tempfile.mkstemp()
+    os.close(file_descriptor)
+    return path
 
 
 def _generate_ttx_dump(font_path, tables=None):
-    font = TTFont(font_path)
-    temp_path = _get_temp_file_path()
-    font.saveXML(temp_path, tables=tables)
-    return temp_path
+    with TTFont(font_path) as font:
+        temp_path = _get_temp_file_path()
+        font.saveXML(temp_path, tables=tables)
+        return temp_path
 
 
 # -----
@@ -264,6 +266,37 @@ def test_bug438():
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value='])
+
+
+@pytest.mark.parametrize('args, font, fontinfo', [
+    (['cn'], 'type1', ''),
+    (['cn'], 'no_notdef', ''),
+    (['cn'], 'blank_notdef', ''),
+    (['cn'], 'notdef_not1st', ''),
+    (['cn', 'fi'], 'type1', 'fi'),
+    (['cn', 'fi'], 'type1', 'fi2'),
+    (['cn', 'fi'], 'no_notdef', 'fi'),
+    (['cn', 'fi'], 'no_notdef', 'fi2'),
+    (['cn', 'fi'], 'blank_notdef', 'fi'),
+    (['cn', 'fi'], 'blank_notdef', 'fi2'),
+    (['cn', 'fi'], 'notdef_not1st', 'fi'),
+    (['cn', 'fi'], 'notdef_not1st', 'fi2'),
+])
+def test_cid_keyed_cff_bug470(args, font, fontinfo):
+    if 'fi' in args:
+        fontinfo_file = 'bug470/{}.txt'.format(fontinfo)
+        args.append('_{}'.format(_get_input_path(fontinfo_file)))
+        ttx_file = 'bug470/{}-{}.ttx'.format(font, 'fi')
+    else:
+        ttx_file = 'bug470/{}.ttx'.format(font)
+    font_file = 'bug470/{}.pfa'.format(font)
+    actual_path = _get_temp_file_path()
+    runner(CMD + ['-n', '-o',
+                  'f', '_{}'.format(_get_input_path(font_file)),
+                  'o', '_{}'.format(actual_path)] + args)
+    actual_ttx = _generate_ttx_dump(actual_path, ['CFF '])
+    expected_ttx = _get_expected_path(ttx_file)
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
 
 
 @pytest.mark.parametrize('opts', [
