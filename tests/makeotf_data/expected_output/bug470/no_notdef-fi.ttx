@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont sfntVersion="OTTO" ttLibVersion="3.29">
+
+  <CFF>
+    <major value="1"/>
+    <minor value="0"/>
+    <CFFFont name="SourceSans-Test">
+      <ROS Registry="Adobe" Order="Identity" Supplement="0"/>
+      <Notice value="Copyright 2010, 2012, 2014 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name 'Source'."/>
+      <FamilyName value="Source Sans"/>
+      <Weight value="Regular"/>
+      <isFixedPitch value="0"/>
+      <ItalicAngle value="0"/>
+      <UnderlinePosition value="-75"/>
+      <UnderlineThickness value="50"/>
+      <PaintType value="0"/>
+      <CharstringType value="2"/>
+      <FontMatrix value="0.001 0 0 0.001 0 0"/>
+      <FontBBox value="52 -12 565 660"/>
+      <StrokeWidth value="0"/>
+      <CIDFontVersion value="2.20000005"/>
+      <CIDFontRevision value="0"/>
+      <CIDFontType value="0"/>
+      <CIDCount value="3"/>
+      <!-- charset is dumped separately as the 'GlyphOrder' element -->
+      <FDSelect format="0"/>
+      <FDArray>
+        <FontDict index="0">
+          <FontName value="SourceSans-Test_No"/>
+          <Private>
+            <BlueValues value="-112 -112 800 800"/>
+            <BlueScale value="0.0625"/>
+            <BlueShift value="7"/>
+            <BlueFuzz value="0"/>
+            <StdHW value="67"/>
+            <StdVW value="84"/>
+            <ForceBold value="0"/>
+            <LanguageGroup value="0"/>
+            <ExpansionFactor value="0.06"/>
+            <initialRandomSeed value="0"/>
+            <defaultWidthX value="500"/>
+            <nominalWidthX value="0"/>
+          </Private>
+        </FontDict>
+        <FontDict index="1">
+          <FontName value="SourceSans-Test_OTHER"/>
+          <Private>
+            <BlueValues value="-12 0 656 668"/>
+            <BlueScale value="0.0625"/>
+            <BlueShift value="7"/>
+            <BlueFuzz value="0"/>
+            <StdHW value="68"/>
+            <StdVW value="86"/>
+            <ForceBold value="0"/>
+            <LanguageGroup value="0"/>
+            <ExpansionFactor value="0.06"/>
+            <initialRandomSeed value="0"/>
+            <defaultWidthX value="0"/>
+            <nominalWidthX value="0"/>
+          </Private>
+        </FontDict>
+        <FontDict index="2">
+          <FontName value="SourceSans-Test_LOWERCASE"/>
+          <Private>
+            <BlueValues value="-12 0 486 498 712 724"/>
+            <OtherBlues value="-217 -205"/>
+            <BlueScale value="0.0625"/>
+            <BlueShift value="7"/>
+            <BlueFuzz value="0"/>
+            <StdHW value="68"/>
+            <StdVW value="82"/>
+            <ForceBold value="0"/>
+            <LanguageGroup value="0"/>
+            <ExpansionFactor value="0.06"/>
+            <initialRandomSeed value="0"/>
+            <defaultWidthX value="504"/>
+            <nominalWidthX value="0"/>
+          </Private>
+        </FontDict>
+      </FDArray>
+      <CharStrings>
+        <CharString name=".notdef" fdSelectIndex="0">
+          0 50 600 50 hstem
+          0 50 400 50 vstem
+          0 vmoveto
+          500 700 -500 hlineto
+          250 -305 rmoveto
+          -170 255 rlineto
+          340 hlineto
+          -140 -300 rmoveto
+          170 255 rlineto
+          -510 vlineto
+          -370 -45 rmoveto
+          170 255 170 -255 rlineto
+          -370 555 rmoveto
+          170 -255 -170 -255 rlineto
+          endchar
+        </CharString>
+        <CharString name="cid00001" fdSelectIndex="2">
+          194 -12 rmoveto
+          61 54 32 38 46 hvcurveto
+          3 hlineto
+          7 -58 rlineto
+          68 298 hlineto
+          121 -50 79 -119 -78 -68 -34 -29 -45 vhcurveto
+          32 -57 rlineto
+          26 38 51 26 56 hhcurveto
+          80 20 -60 -62 hvcurveto
+          -207 -23 -91 -53 -106 vvcurveto
+          -87 61 -51 81 vhcurveto
+          24 66 rmoveto
+          -48 -38 23 55 62 56 40 162 20 hvcurveto
+          -135 vlineto
+          -42 -47 -38 -23 -47 hhcurveto
+          endchar
+        </CharString>
+        <CharString name="cid00002" fdSelectIndex="1">
+          endchar
+        </CharString>
+      </CharStrings>
+    </CFFFont>
+
+    <GlobalSubrs>
+      <!-- The 'index' attribute is only for humans; it is ignored when parsed. -->
+    </GlobalSubrs>
+  </CFF>
+
+</ttFont>
