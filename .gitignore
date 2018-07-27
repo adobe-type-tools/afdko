@@ -18,16 +18,8 @@ htmlcov
 .pytest_cache
 
 # ignore the OSX and linux compiled programs
-autohintexe
-detype1
-makeotfexe
-mergefonts
-rotatefont
-sfntdiff
-sfntedit
-spot
-tx
-type1
+c/build_all/*
+!c/build_all/this_folder_intentionally_left_empty
 
 # ignore the temp build directories and files
 *.o
