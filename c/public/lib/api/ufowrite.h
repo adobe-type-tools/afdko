@@ -6,7 +6,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define UFW_VERSION CTL_MAKE_VERSION(1,0,7)
+#define UFW_VERSION CTL_MAKE_VERSION(1,0,8)
 
 #include "absfont.h"
 
@@ -114,6 +114,8 @@ void ufwGetVersion(ctlVersionCallbacks *cb);
 /* ufwGetVersion() returns the library version number and name via the client
    callbacks passed with the "cb" parameter (see ctlshare.h). */
 
+#define MAX_UFO_GLYPH_NAME 256
+	
 #ifdef __cplusplus
 }
 #endif
