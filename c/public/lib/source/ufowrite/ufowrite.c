@@ -1067,14 +1067,14 @@ static void mapGlyphToGLIFName(char* glyphName, char*glifName)
     
     while (*p != 0x00)
     {
-        if ((q-&glifName[0]) >= FILENAME_MAX)
+        if ((q-&glifName[0]) >= MAX_UFO_GLYPH_NAME)
         {
-            glifName[FILENAME_MAX-1] = 0;
-            printf("Warning! glif name '%s' is longer than the file name buffer size.\n", glifName);
+            glifName[MAX_UFO_GLYPH_NAME-6] = 0; /* allow for extension */
+            printf("Warning! glif name '%s' is longer than the glyph name buffer size.\n", glifName);
             break;
         }
         
-        if (((*p >= 'A') && (*p <= 'Z')) || ((*p >= 0x00) && (*p <= 0x1F)))
+        if ((*p >= 'A') && (*p <= 'Z'))
         {
             *q++ = *p++;
             *q++ = '_';
@@ -1091,6 +1091,8 @@ static void mapGlyphToGLIFName(char* glyphName, char*glifName)
             char code = *p;
             switch (code)
             {
+                case '(':
+                case ')':
                 case '*':
                 case '+':
                 case '/':
@@ -1102,7 +1104,8 @@ static void mapGlyphToGLIFName(char* glyphName, char*glifName)
                 case '\\':
                 case ']':
                 case 0x7F:
-                    *q++ = '_';
+                   p++;
+                   *q++ = '_';
                     break;
                 default:
                     *q++ = *p++;
@@ -1121,8 +1124,8 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info)
 {
 	ufwCtx h = cb->direct_ctx;
 	char buf[9];
-    char glyphName[FILENAME_MAX];
-    char glifName[FILENAME_MAX];
+    char glyphName[MAX_UFO_GLYPH_NAME];
+    char glifName[MAX_UFO_GLYPH_NAME];
     char glifRelPath[FILENAME_MAX];
     Glyph *glyphRec;
     

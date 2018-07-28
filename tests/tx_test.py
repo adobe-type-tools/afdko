@@ -229,3 +229,10 @@ def test_non_varying_glyphs_bug356():
     stderr_path = runner(CMD + ['-r', '-e', '-o', 'cff', '-f', 'bug356.otf'])
     expected_path = _get_expected_path('bug356.txt')
     assert differ([expected_path, stderr_path, '-l', '1'])
+
+
+def test_bug473():
+    save_path = os.path.join(_get_temp_dir_path(), 'bug473.ufo')
+    ufo_path = runner(CMD + ['-o', 'ufo', '-f', 'bug473.ufo', '-s', save_path])
+    expected_path = _get_expected_path('bug473.ufo')
+    assert differ([expected_path, ufo_path])
