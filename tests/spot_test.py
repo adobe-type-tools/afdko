@@ -91,3 +91,18 @@ def test_bug373(font_format):
     actual_path = runner(CMD + ['-r', '-o', 't', '_GSUB=7', '-f', file_name])
     expected_path = _get_expected_path('bug373_{}.txt'.format(font_format))
     assert differ([expected_path, actual_path])
+
+
+def test_bug465():
+    """ Fix bug where a fixed length string buffer was overrun. The test
+    font was built by building an otf from
+    makeotf/data/innput/t1pfa.pfa, dumping this to ttx, and then
+    hand-editing the ttx file to have empty charstrings, and a
+    ContextPos lookup type 7, format 2. Hand-editing the ttx was needed
+    as makeotf does not build this lookup type, nor this post rule
+    format. This test validates that the current spot code fails with
+    the test font."""
+    import subprocess32 as subprocess
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        runner(CMD + ['-o', 't', '_GPOS=7', '-f', "bug465/bug465.otf"])
+    assert err.value.returncode != 0
