@@ -102,7 +102,7 @@ def test_bug465():
     as makeotf does not build this lookup type, nor this post rule
     format. This test validates that the current spot code fails with
     the test font."""
-    import subprocess32 as subprocess
-    with pytest.raises(subprocess.CalledProcessError) as err:
-        runner(CMD + ['-r', '-o', 't', '_GPOS=7', '-f', "bug465/bug465.otf"])
-    assert err.value.returncode != 0
+    file_name = "bug465/bug465.otf"
+    actual_path = runner(CMD + ['-r', '-o', 't', '_GPOS=7', '-f', file_name])
+    expected_path = _get_expected_path('bug465_otf.txt')
+    assert differ([expected_path, actual_path])

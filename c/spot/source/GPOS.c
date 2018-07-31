@@ -3543,6 +3543,15 @@ static void showContext2(ContextPosFormat2 *fmt, IntX level, void *feattag)
 						GlyphId glyphId2 = *da_INDEX(CR->glyphidlist, c);
 						strcpy(name2, getGlyphName(glyphId2, forProofing));
 						psIndex = strlen(proofString);
+						if ((psIndex + strlen(name2) + 2) >= kProofBufferLen)
+							{
+								if (level == 7)
+									fprintf(OUTPUTBUFF, "%s", proofString);
+								else if (level == 8)
+									dumpMessage(proofString, ((Card32 *)feattag)[0]);
+								proofString[0] = 0;
+								psIndex = 0;
+							}
 						sprintf(&proofString[psIndex]," %s", name2);
 					  }
 					  
@@ -3565,16 +3574,16 @@ static void showContext2(ContextPosFormat2 *fmt, IntX level, void *feattag)
 							char name2[MAX_NAME_LEN];
 							GlyphId glyphId2 = *da_INDEX(CR->glyphidlist, c);
 							strcpy(name2, getGlyphName(glyphId2, forProofing));
-                              if ((psIndex + strlen(name2) + 10) >= kProofBufferLen)
-                              {
-                                  if (level == 7)
-                                      fprintf(OUTPUTBUFF, "\n    %s", proofString);
-                                  else if (level == 8)
-                                      dumpMessage(proofString, ((Card32 *)feattag)[0]);
-                                  proofString[0] = 0;
-                                  psIndex = 0;
-                              }
-							psIndex = strlen(proofString);
+							  psIndex = strlen(proofString);
+							  if ((psIndex + strlen(name2) + 10) >= kProofBufferLen)
+							  {
+								  if (level == 7)
+									  fprintf(OUTPUTBUFF, "\n	 %s", proofString);
+								  else if (level == 8)
+									  dumpMessage(proofString, ((Card32 *)feattag)[0]);
+								  proofString[0] = 0;
+								  psIndex = 0;
+							  }
 							sprintf(&proofString[psIndex]," %s", name2);
 						  }
 						psIndex = strlen(proofString);
@@ -3607,9 +3616,12 @@ static void showContext2(ContextPosFormat2 *fmt, IntX level, void *feattag)
 		for (i = 0; i < fmt->PosClassSetCnt; i++)
 		  {
 			if (classList[i].glyphidlist.size > 0)
-			  da_FREE(classList[i].glyphidlist);
+			{
+				da_FREE(classList[i].glyphidlist);
+			}
 		  }
-		memFree(classList);  	
+		memFree(classList);
+		return;
 	}
 	
 
