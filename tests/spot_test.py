@@ -104,5 +104,5 @@ def test_bug465():
     the test font."""
     import subprocess32 as subprocess
     with pytest.raises(subprocess.CalledProcessError) as err:
-        runner(CMD + ['-o', 't', '_GPOS=7', '-f', "bug465/bug465.otf"])
+        runner(CMD + ['-r', '-o', 't', '_GPOS=7', '-f', "bug465/bug465.otf"])
     assert err.value.returncode != 0
