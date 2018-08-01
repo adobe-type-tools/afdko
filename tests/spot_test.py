@@ -95,7 +95,7 @@ def test_bug373(font_format):
 
 def test_bug465():
     """ Fix bug where a fixed length string buffer was overrun. The test
-    font was built by building an otf from makeotf/data/input/t1pfa.pfa,
+    font was built by building an otf from makeotf_data/input/t1pfa.pfa,
     dumping this to ttx, and then hand-editing the ttx file to have
     empty charstrings, and a ContextPos lookup type 7, format 2.
     Hand-editing the ttx was needed as makeotf does not build this
