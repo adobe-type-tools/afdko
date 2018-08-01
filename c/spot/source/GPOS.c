@@ -3578,7 +3578,7 @@ static void showContext2(ContextPosFormat2 *fmt, IntX level, void *feattag)
 							  if ((psIndex + strlen(name2) + 10) >= kProofBufferLen)
 							  {
 								  if (level == 7)
-									  fprintf(OUTPUTBUFF, "\n	 %s", proofString);
+									  fprintf(OUTPUTBUFF, "\n    %s", proofString);
 								  else if (level == 8)
 									  dumpMessage(proofString, ((Card32 *)feattag)[0]);
 								  proofString[0] = 0;
