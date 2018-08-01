@@ -5,7 +5,8 @@ import functools
 import os
 import re
 import sys
-import traceback
+
+from fontTools.misc.py23 import tounicode
 
 from afdko import convertfonttocid, fdkutils, ufotools
 
@@ -482,19 +483,19 @@ kFileOptPrefix = "opt_"
 kFileOptPrefixLen = len(kFileOptPrefix)
 
 
-class FDKEnvironmentError(AttributeError):
+class FDKEnvironmentError(Exception):
     pass
 
 
-class MakeOTFOptionsError(KeyError):
+class MakeOTFOptionsError(Exception):
     pass
 
 
-class MakeOTFTXError(KeyError):
+class MakeOTFTXError(Exception):
     pass
 
 
-class MakeOTFRunError(KeyError):
+class MakeOTFRunError(Exception):
     pass
 
 
@@ -502,6 +503,7 @@ class MakeOTFParams(object):
     def __init__(self):
         self.makeotfPath = None
         self.txPath = None
+        self.currentDir = None
         self.optionFilePath = None
         # option path when different then the input option path.
         self.newOptionFilePath = None
@@ -529,13 +531,9 @@ class MakeOTFParams(object):
         # exec("self.%s%s = [7,8]" % (kFileOptPrefix, kSetfsSelectionBitsOn))
 
     def __repr__(self):
-        text = ""
-        fields = dir(self)
-        fields.sort()
-        for field in fields:
-            if not field.startswith("_"):
-                text += "%s: %s, " % (field, eval("self.%s" % field)) + \
-                    os.linesep
+        text = '{}:\n'.format(self.__class__.__name__)
+        for key, val in sorted(vars(self).items()):
+            text += '  {}: {}\n'.format(key, val)
         return text
 
 
@@ -777,7 +775,7 @@ def setOptionsFromFontInfo(makeOTFParams):
             exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kStubCmap4))
 
     if kMOTFOptions[kMacScript][0] == kOptionNotSeen:
-        m = re.search(r"Language\s+\(([^\)]+)\)", data)
+        m = re.search(r"Language\s+\(([^)]+)\)", data)
         if m:
             lang = m.group(1).strip()
             if lang == "Japanese":
@@ -800,14 +798,15 @@ def setOptionsFromFontInfo(makeOTFParams):
             makeOTFParams.seenOS2v4Bits[0] = 1
             if m.group(1) in ["True", "true", "1"]:
                 val = 7
-                bitsOn = eval("makeOTFParams.%s%s" % (
-                    kFileOptPrefix, kSetfsSelectionBitsOn))
+                bitsOn = getattr(makeOTFParams,
+                                 kFileOptPrefix + kSetfsSelectionBitsOn)
                 if bitsOn is None:
-                    exec("makeOTFParams.%s%s = [val]" % (
-                        kFileOptPrefix, kSetfsSelectionBitsOn))
+                    setattr(makeOTFParams,
+                            kFileOptPrefix + kSetfsSelectionBitsOn, [val])
                 else:
-                    exec("makeOTFParams.%s%s += [val]" % (
-                        kFileOptPrefix, kSetfsSelectionBitsOn))
+                    setattr(makeOTFParams,
+                            kFileOptPrefix + kSetfsSelectionBitsOn,
+                            bitsOn + [val])
             elif not m.group(1) in ["False", "false", "0"]:
                 print("makeotf [Error] Failed to parse value for "
                       "PreferOS/2TypoMetrics in file '%s'." % fontinfo_path)
@@ -824,14 +823,15 @@ def setOptionsFromFontInfo(makeOTFParams):
             makeOTFParams.seenOS2v4Bits[1] = 1
             if m.group(1) in ["True", "true", "1"]:
                 val = 8
-                bitsOn = eval("makeOTFParams.%s%s" % (
-                    kFileOptPrefix, kSetfsSelectionBitsOn))
+                bitsOn = getattr(makeOTFParams,
+                                 kFileOptPrefix + kSetfsSelectionBitsOn)
                 if bitsOn is None:
-                    exec("makeOTFParams.%s%s = [val]" % (
-                        kFileOptPrefix, kSetfsSelectionBitsOn))
+                    setattr(makeOTFParams,
+                            kFileOptPrefix + kSetfsSelectionBitsOn, [val])
                 else:
-                    exec("makeOTFParams.%s%s += [val]" % (
-                        kFileOptPrefix, kSetfsSelectionBitsOn))
+                    setattr(makeOTFParams,
+                            kFileOptPrefix + kSetfsSelectionBitsOn,
+                            bitsOn + [val])
             elif not m.group(1) in ["False", "false", "0"]:
                 print("makeotf [Error] Failed to parse value for "
                       "PreferOS/2TypoMetrics in file '%s'." % fontinfo_path)
@@ -843,14 +843,15 @@ def setOptionsFromFontInfo(makeOTFParams):
             makeOTFParams.seenOS2v4Bits[2] = 1
             if m.group(1) in ["True", "true", "1"]:
                 val = 9
-                bitsOn = eval("makeOTFParams.%s%s" % (
-                    kFileOptPrefix, kSetfsSelectionBitsOn))
+                bitsOn = getattr(makeOTFParams,
+                                 kFileOptPrefix + kSetfsSelectionBitsOn)
                 if bitsOn is None:
-                    exec("makeOTFParams.%s%s = [val]" % (
-                        kFileOptPrefix, kSetfsSelectionBitsOn))
+                    setattr(makeOTFParams,
+                            kFileOptPrefix + kSetfsSelectionBitsOn, [val])
                 else:
-                    exec("makeOTFParams.%s%s += [val]" % (
-                        kFileOptPrefix, kSetfsSelectionBitsOn))
+                    setattr(makeOTFParams,
+                            kFileOptPrefix + kSetfsSelectionBitsOn,
+                            bitsOn + [val])
             elif not m.group(1) in ["False", "false", "0"]:
                 print("makeotf [Error] Failed to parse value for "
                       "PreferOS/2TypoMetrics in file '%s'." % fontinfo_path)
@@ -864,12 +865,10 @@ def setOptionsFromFontInfo(makeOTFParams):
     if m:
         try:
             val = eval(m.group(1))
+            makeOTFParams.FSType = val
         except (NameError, SyntaxError):
             print("makeotf [Error] Failed to parse value '%s' for FSType in "
                   "file '%s'." % (m.group(1), fontinfo_path))
-        makeOTFParams.FSType = val
-
-    return
 
 
 def getRelativeDirPath(absPath1, abspath2):
@@ -1144,7 +1143,7 @@ def getOptions(makeOTFParams, args):
             try:
                 val = int(args[i])
                 i += 1
-                exec("makeOTFParams.%s%s = val" % (kFileOptPrefix, kMaxSubrs))
+                setattr(makeOTFParams, kFileOptPrefix + kMaxSubrs, val)
             except (IndexError, ValueError):
                 error = 1
                 print("makeotf [Error] The '%s' option must be followed by an "
@@ -1199,7 +1198,6 @@ def getOptions(makeOTFParams, args):
                       "integer or a fractional value with three decimal "
                       "places, e.g. 1.001." % arg)
                 error = 1
-                val = 0
                 continue
 
             kMOTFOptions[kRenumber][0] = i + optionIndex
@@ -1229,14 +1227,14 @@ def getOptions(makeOTFParams, args):
                       "integer between 0 and 15." % arg)
                 error = 1
                 val = 0
-            bitsOn = eval("makeOTFParams.%s%s" % (kFileOptPrefix,
-                                                  kSetfsSelectionBitsOn))
+            bitsOn = getattr(makeOTFParams,
+                             kFileOptPrefix + kSetfsSelectionBitsOn)
             if bitsOn is None:
-                exec("makeOTFParams.%s%s = [val]" % (kFileOptPrefix,
-                                                     kSetfsSelectionBitsOn))
+                setattr(makeOTFParams, kFileOptPrefix + kSetfsSelectionBitsOn,
+                        [val])
             else:
-                exec("makeOTFParams.%s%s += [val]" % (kFileOptPrefix,
-                                                      kSetfsSelectionBitsOn))
+                setattr(makeOTFParams, kFileOptPrefix + kSetfsSelectionBitsOn,
+                        bitsOn + [val])
 
         elif arg == kMOTFOptions[kSetfsSelectionBitsOff][1]:
             kMOTFOptions[kSetfsSelectionBitsOff][0] = i + optionIndex
@@ -1250,14 +1248,14 @@ def getOptions(makeOTFParams, args):
                       "integer between 0 and 15." % arg)
                 error = 1
                 val = 0
-            bitsoff = eval("makeOTFParams.%s%s" % (kFileOptPrefix,
-                                                   kSetfsSelectionBitsOff))
-            if bitsoff is None:
-                exec("makeOTFParams.%s%s = [val]" % (kFileOptPrefix,
-                                                     kSetfsSelectionBitsOff))
+            bitsOff = getattr(makeOTFParams,
+                              kFileOptPrefix + kSetfsSelectionBitsOff)
+            if bitsOff is None:
+                setattr(makeOTFParams, kFileOptPrefix + kSetfsSelectionBitsOff,
+                        [val])
             else:
-                exec("makeOTFParams.%s%s += [val]" % (kFileOptPrefix,
-                                                      kSetfsSelectionBitsOff))
+                setattr(makeOTFParams, kFileOptPrefix + kSetfsSelectionBitsOff,
+                        bitsOff + [val])
 
         elif arg == kMOTFOptions[kSetOS2Version][1]:
             kMOTFOptions[kSetOS2Version][0] = i + optionIndex
@@ -1269,7 +1267,7 @@ def getOptions(makeOTFParams, args):
                       "an integer greater than 0." % arg)
                 error = 1
                 val = 0
-            exec("makeOTFParams.%s%s = val" % (kFileOptPrefix, kSetOS2Version))
+            setattr(makeOTFParams, kFileOptPrefix + kSetOS2Version, val)
 
         elif arg == kMOTFOptions[kAddSymbol][1]:
             # If the next argument is a valid integer, use it as
@@ -1280,22 +1278,22 @@ def getOptions(makeOTFParams, args):
                 i += 1
             except (IndexError, ValueError):
                 val = 'true'
-            exec("makeOTFParams.%s%s = val" % (kFileOptPrefix, kAddSymbol))
+            setattr(makeOTFParams, kFileOptPrefix + kAddSymbol, val)
 
         elif arg == kMOTFOptions[kAddSymbol][2]:
             kMOTFOptions[kAddSymbol][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'false'" % (kFileOptPrefix, kAddSymbol))
+            setattr(makeOTFParams, kFileOptPrefix + kAddSymbol, 'false')
 
         # For -serif and -sans, the meaning is to override the heuristics;
         # makeOTFParams..kSerif ==== None is different than false; the latter
         # means make it sans, the former means 'depend on the heuristics.
         elif arg == kMOTFOptions[kSerif][1]:
             kMOTFOptions[kSerif][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kSerif))
+            setattr(makeOTFParams, kFileOptPrefix + kSerif, 'true')
 
         elif arg == kMOTFOptions[kSerif][2]:
             kMOTFOptions[kSerif][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'false'" % (kFileOptPrefix, kSerif))
+            setattr(makeOTFParams, kFileOptPrefix + kSerif, 'false')
 
         elif arg == kMOTFOptions[kMacScript][1]:
             # The next arg needs to a valid integer
@@ -1576,19 +1574,16 @@ def lookUpDirTree(fileName):
     as they are shared by the font family.
     """
 
-    maxLevels = 4
+    MAX_LEVELS = 4
+    path = None
     i = 0
-    found = 0
     dirPath, fileName = os.path.split(fileName)
-    while i <= maxLevels:
+    while i <= MAX_LEVELS:
         path = os.path.join(dirPath, fileName)
         if os.path.exists(path):
-            found = 1
-            break
+            return path
         dirPath = os.path.join(dirPath, "..")
         i += 1
-    if not found:
-        path = None
     return path
 
 
@@ -1752,7 +1747,7 @@ def setMissingParams(makeOTFParams):
     # path to font file was not specified.
     if not inputFilePath:
         for fileName in kDefaultFontPathList:
-            inputFilePath = inputFontPath = fileName
+            inputFilePath = fileName
             if os.path.exists(inputFilePath):
                 srcFontPath = inputFilePath
                 break
@@ -1761,7 +1756,6 @@ def setMissingParams(makeOTFParams):
         if not os.path.exists(inputFilePath):
             print("makeotf [Error] Could not find any of the default input "
                   "font file '%s'." % kDefaultFontPathList)
-            error = 1
             # stop here already, otherwise getROS() will generate an IOError.
             raise MakeOTFOptionsError
 
@@ -1959,7 +1953,7 @@ def convertFontIfNeeded(makeOTFParams):
     else:
         commandString = "spot \"%s\" 2>&1" % filePath
         report = fdkutils.runShellCmd(commandString)
-        if ("sfnt" in report):
+        if "sfnt" in report:
             needsConversion = True
             if "glyf" in report:
                 makeOTFParams.srcIsTTF = 1
@@ -1984,7 +1978,7 @@ def convertFontIfNeeded(makeOTFParams):
         if not (makeOTFParams.srcIsTTF or isTextPS):
             command = "tx -dump -5 -n \"%s\" 2>&1" % filePath
             report = fdkutils.runShellCmd(command)
-            glyphList = re.findall(r"glyph[^{]+?\{([^,]+),[^[\]]+\sseac\s",
+            glyphList = re.findall(r"glyph[^{]+?{([^,]+),[^[\]]+\sseac\s",
                                    report)
             if glyphList:
                 glyphList = ", ".join(glyphList)
@@ -2116,22 +2110,22 @@ def getSourceGOADBData(inputFilePath):
     # First, get the Unicode mapping from the TTF cmap table.
     command = "spot -t cmap=7 \"%s\" 2>&1" % inputFilePath
     report = fdkutils.runShellCmd(command)
-    glyphList = re.findall("[\n\t]\[(....+)\]=<([^>]+)>", report)
+    spotGlyphList = re.findall(
+        "[\n\t]\[(....+)\]=<([^>]+)>", tounicode(report))
 
     # Because this dumps all the Unicode map tables, there are a number
     # of duplicates; weed them out, and strip out gid part of spot name
     gDict = {}
-    for entry in glyphList:
-        gname, gid = entry[1].split('@')
+    for entry in sorted(set(spotGlyphList)):
         uni = entry[0]
-        try:
-            uniList = gDict[gid]
-            if int(uni, 16) not in [int(i, 16) for i in uniList]:
-                print("makeotf [Warning] Source TTF font contains multiple "
-                      "Unicode values '%s' for glyph '%s'. Only the first "
-                      "will be used." % (uniList + [uni], gname))
-        except KeyError:
-            gDict[gid] = [uni]
+        gname, gid = entry[1].split('@')
+        if gid in gDict:
+            print("makeotf [Warning] Source TTF font contains multiple "
+                  "Unicode values for glyph '%s'. Only the first ('%s') "
+                  "will be used. Additional Unicode value: %s" %
+                  (gname, gDict[gid], uni))
+        else:
+            gDict[gid] = uni
 
     # Now get the font glyph name list, so as to get the glyphs with
     # no unicode mapping. We'll also use this to set the glyph order.
@@ -2140,28 +2134,25 @@ def getSourceGOADBData(inputFilePath):
     # as tx doesn't check 32 bit UV's, and doesn't report double-encodings.
     command = "tx -mtx \"%s\" 2>&1" % inputFilePath
     report = fdkutils.runShellCmd(command)
-    glyphList = re.findall("[\n\r]glyph\[(\d+)\]\s+\{([^,]+)", report)
+    txGlyphList = re.findall(
+        "[\n\r]glyph\[(\d+)\]\s+{([^,]+)", tounicode(report))
+
     gnameDict = {}
-    for gid, gname in glyphList:
+    for gid, gname in txGlyphList:
         gnameDict[gid] = gname
         if gid not in gDict:
-            gDict[gid] = [None]
+            gDict[gid] = None
 
     # Now flatten this to a GOADB list.
-    gdItems = gDict.items()
     goadbList = []
-    for gid, uniList in gdItems:
+    for gid, uni_val in sorted(gDict.items()):
         gname = gnameDict[gid]
-        uniValue = uniList[0]
-        if uniValue is None:
-            uniValue = ""
+        if uni_val is None:
+            uniValue = ''
         else:
-            uniValue = 'uni' + uniValue
-        goadbList.append([eval(gid), gname, gname, uniValue])
-    # sorts by gid
-    goadbList.sort()
-    # remove gid from front of each entry.
-    goadbList = map(lambda entry: entry[1:], goadbList)
+            uniValue = 'uni%s' % uni_val
+        goadbList.append([gname, gname, uniValue])
+
     return goadbList
 
 
@@ -2217,7 +2208,7 @@ def copyTTFGlyphTables(inputFilePath, tempOutputPath, outputPath,
     makeOTFParams.tempPathList.append(tempTablePath)
     command = "tx -mtx \"%s\" 2>&1" % tempOutputPath
     report = fdkutils.runShellCmd(command)
-    glyphList = re.findall("[\n\r]glyph\[\d+\]\s+\{([^,]+)", report)
+    glyphList = re.findall("[\n\r]glyph\[\d+\]\s+{([^,]+)", report)
 
     if os.path.exists(outputPath):
         os.remove(outputPath)
@@ -2259,11 +2250,10 @@ def copyTTFGlyphTables(inputFilePath, tempOutputPath, outputPath,
         print("\tcopied \"%s\"." % tableTag)
 
     command = "sfntedit -f \"%s\" 2>&1" % outputPath
-    log = fdkutils.runShellCmd(command)
+    fdkutils.runShellCmd(command)
 
     print("Succeeded in merging makeotf tables with TrueType source font to "
           "final TrueType output font at '%s'." % outputPath)
-    return
 
 
 def fixPost(glyphList, inputFilePath, outputPath, makeOTFParams):
@@ -2510,54 +2500,48 @@ def makeRelativePath(curDir, targetPath):
 
 
 def makeRelativePaths(makeOTFParams):
-    inputFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kInputFont))
+    inputFilePath = getattr(makeOTFParams, kFileOptPrefix + kInputFont)
     fontDir = os.path.dirname(os.path.abspath(inputFilePath))
 
     # Change file paths to be relative to fontDir,
     # if possible, else to absolute paths.
-    inputFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kInputFont))
     inputFilePath = makeRelativePath(fontDir, inputFilePath)
-    exec("makeOTFParams.%s%s = inputFilePath" % (kFileOptPrefix, kInputFont))
+    setattr(makeOTFParams, kFileOptPrefix + kInputFont, inputFilePath)
 
-    outputFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kOutputFont))
-    outputFilePath = makeRelativePath(fontDir, outputFilePath)
+    outputFilePath = makeRelativePath(
+        fontDir, getattr(makeOTFParams, kFileOptPrefix + kOutputFont))
     if outputFilePath:
-        exec("makeOTFParams.%s%s = outputFilePath" % (kFileOptPrefix,
-                                                      kOutputFont))
+        setattr(makeOTFParams, kFileOptPrefix + kOutputFont, outputFilePath)
 
-    featuresFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kFeature))
-    featuresFilePath = makeRelativePath(fontDir, featuresFilePath)
+    featuresFilePath = makeRelativePath(
+        fontDir, getattr(makeOTFParams, kFileOptPrefix + kFeature))
     if featuresFilePath:
-        exec("makeOTFParams.%s%s = featuresFilePath" % (kFileOptPrefix,
-                                                        kFeature))
+        setattr(makeOTFParams, kFileOptPrefix + kFeature, featuresFilePath)
 
-    fmndbFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kFMB))
-    fmndbFilePath = makeRelativePath(fontDir, fmndbFilePath)
+    fmndbFilePath = makeRelativePath(
+        fontDir, getattr(makeOTFParams, kFileOptPrefix + kFMB))
     if fmndbFilePath:
-        exec("makeOTFParams.%s%s = fmndbFilePath" % (kFileOptPrefix, kFMB))
+        setattr(makeOTFParams, kFileOptPrefix + kFMB, fmndbFilePath)
 
     goadbFilePath = makeRelativePath(
         fontDir, getattr(makeOTFParams, kFileOptPrefix + kGOADB))
     if goadbFilePath:
         setattr(makeOTFParams, kFileOptPrefix + kGOADB, goadbFilePath)
 
-    maccmapFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix,
-                                                   kMacCMAPPath))
-    maccmapFilePath = makeRelativePath(fontDir, maccmapFilePath)
+    maccmapFilePath = makeRelativePath(
+        fontDir, getattr(makeOTFParams, kFileOptPrefix + kMacCMAPPath))
     if maccmapFilePath:
-        exec("makeOTFParams.%s%s = maccmapFilePath" % (kFileOptPrefix,
-                                                       kMacCMAPPath))
+        setattr(makeOTFParams, kFileOptPrefix + kMacCMAPPath, maccmapFilePath)
 
-    uniHFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kHUniCMAPPath))
-    uniHFilePath = makeRelativePath(fontDir, uniHFilePath)
+    uniHFilePath = makeRelativePath(
+        fontDir, getattr(makeOTFParams, kFileOptPrefix + kHUniCMAPPath))
     if uniHFilePath:
-        exec("makeOTFParams.%s%s = uniHFilePath" % (kFileOptPrefix,
-                                                    kHUniCMAPPath))
+        setattr(makeOTFParams, kFileOptPrefix + kHUniCMAPPath, uniHFilePath)
 
-    uvsFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kUVSPath))
-    uvsFilePath = makeRelativePath(fontDir, uvsFilePath)
+    uvsFilePath = makeRelativePath(
+        fontDir, getattr(makeOTFParams, kFileOptPrefix + kUVSPath))
     if uvsFilePath:
-        exec("makeOTFParams.%s%s = uvsFilePath" % (kFileOptPrefix, kUVSPath))
+        setattr(makeOTFParams, kFileOptPrefix + kUVSPath, uvsFilePath)
 
     if makeOTFParams.tempFontPath:
         makeOTFParams.tempFontPath = makeRelativePath(
@@ -2789,8 +2773,8 @@ def runMakeOTF(makeOTFParams):
     if makeOTFParams.verbose:
         print("makeotf [Note] Running %s with commands:" %
               os.path.basename(makeOTFParams.makeotfPath))
-        print("   cd \"%s\"" % (fontDir))
-        print("   %s" % (commandString))
+        print("   cd \"%s\"" % fontDir)
+        print("   %s" % commandString)
     # I use os.system rather than os.pipe so that the user
     # will see the log messages from the C program during
     # processing, rather than only at the end.
@@ -2837,8 +2821,8 @@ def runMakeOTF(makeOTFParams):
             os.remove(tempPath)
         try:
             makeOTFParams.tempPathList.append(tempPath)
-            doSubr = 'true' == eval("makeOTFParams.%s%s" % (kFileOptPrefix,
-                                                            kDoSubr))
+            doSubr = 'true' == getattr(makeOTFParams, kFileOptPrefix + kDoSubr)
+
             if kMOTFOptions[kDoSubr][0] == kOptionNotSeen:
                 doSubr = 'true' == getattr(makeOTFParams,
                                            kFileOptPrefix + kRelease)
@@ -2852,7 +2836,6 @@ def runMakeOTF(makeOTFParams):
 
         except(convertfonttocid.FontInfoParseError,
                convertfonttocid.FontParseError):
-            traceback.print_exc()
             print("makeotf [Error] Failed to convert font '%s' to CID." %
                   outputPath)
             if os.path.exists(outputPath):
@@ -2895,7 +2878,7 @@ def CheckEnvironment():
 
     if missingTools:
         print("Please check your PATH, and if necessary re-install the FDK. "
-              "Unable to find these tools: %s." % (missingTools))
+              "Unable to find these tools: %s." % missingTools)
         raise FDKEnvironmentError
 
 
@@ -2908,8 +2891,9 @@ def main(args=None):
     except FDKEnvironmentError:
         return 1
 
+    makeOTFParams = MakeOTFParams()
+
     try:
-        makeOTFParams = MakeOTFParams()
         makeOTFParams.txPath = "tx"
         makeOTFParams.makeotfPath = "makeotfexe"
         getOptions(makeOTFParams, args)
@@ -2923,14 +2907,12 @@ def main(args=None):
     except (MakeOTFOptionsError, MakeOTFTXError, MakeOTFRunError):
         return 1
     except Exception:
-        traceback.print_exc()
-        return 1
+        raise
     finally:
         if not makeOTFParams.debug:
             for tempPath in makeOTFParams.tempPathList:
                 if os.path.exists(tempPath):
                     os.remove(tempPath)
-    print("Done.")
 
 
 if __name__ == '__main__':
