@@ -17,7 +17,7 @@ import subprocess32 as subprocess
 import sys
 import tempfile
 
-__version__ = '0.5.1'
+__version__ = '0.5.2'
 
 logger = logging.getLogger('runner')
 
@@ -36,16 +36,6 @@ def _get_input_dir_path(tool_path):
     input_dir = os.path.join(
         os.path.split(__file__)[0], '{}_data'.format(tool_name), 'input')
     return os.path.abspath(os.path.realpath(input_dir))
-
-
-def _get_save_location(save_path):
-    """
-    If save_path is not provided ('--save' option wasn't used),
-    create a temporary location.
-    """
-    if not save_path:
-        save_path = tempfile.mkstemp()[1]
-    return save_path
 
 
 def run_tool(opts):
@@ -75,7 +65,15 @@ def run_tool(opts):
         args.extend(files)
 
     if not opts.no_save_path:
-        save_loc = _get_save_location(opts.save_path)
+        # NOTE: the handling of 'opts.save_path' is nested under
+        # 'opts.no_save_path' to avoid creating unnecessary temporary files
+        if opts.save_path:
+            # '--save' option was used. Use the path provided
+            save_loc = opts.save_path
+        else:
+            # '--save' option was NOT used. Create a temporary file
+            file_descriptor, save_loc = tempfile.mkstemp()
+            os.close(file_descriptor)
         args.append(save_loc)
 
     stderr = None
