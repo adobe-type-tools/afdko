@@ -184,11 +184,11 @@ TX_FIELDS = [  # [field name in tx, key name in cidfontinfo, value]
 ]
 
 
-class FontInfoParseError(ValueError):
+class FontInfoParseError(Exception):
     pass
 
 
-class FontParseError(KeyError):
+class FontParseError(Exception):
     pass
 
 
@@ -217,15 +217,15 @@ class FDDict(object):
         return "\n".join(fiList)
 
     def buildBlueLists(self):
-        if self.BaselineOvershoot is None:
+        baseline_overshoot = getattr(self, 'BaselineOvershoot')
+        if baseline_overshoot is None:
             print("Error: FDDict definition %s is missing the "
                   "BaselineYCoord/BaselineOvershoot values. These are "
                   "required." % self.DictName)
-        elif int(self.BaselineOvershoot) > 0:
+        elif int(baseline_overshoot) > 0:
             print("Error: The BaselineYCoord/BaselineOvershoot in FDDict "
-                  "definition %s must be a bottom zone - the "
-                  "BaselineOvershoot must be negative, not positive." %
-                  self.DictName)
+                  "'%s' must be a bottom zone therefore BaselineOvershoot "
+                  "must be negative, not positive." % self.DictName)
 
         blueKeyList = [kBlueValueKeys, kOtherBlueValueKeys]
         bluePairListNames = [kFontDictBluePairsName,
@@ -272,7 +272,7 @@ class FDDict(object):
                             bottomPos = zonePos
                             topPos = zonePos + width
                             isBottomZone = 0
-                            if (i == 1):
+                            if i == 1:
                                 print("Error: FontDict %s. Zone %s is a "
                                       "bottom zone, and so the width (%s) "
                                       "must be negative.." % (
@@ -283,7 +283,7 @@ class FDDict(object):
             if bluePairList:
                 bluePairList.sort()
                 prevPair = bluePairList[0]
-                zoneBuffer = 2 * self.BlueFuzz + 1
+                zoneBuffer = 2 * getattr(self, 'BlueFuzz', 0) + 1
                 for pair in bluePairList[1:]:
                     if prevPair[0] > pair[1]:
                         print("Error in FDDict %s. The top of zone %s at %s "
@@ -713,7 +713,6 @@ def getGlyphList(fPath, removeNotdef=False, original_font=False):
 
 
 def getFontBBox(fPath):
-    fontBBox = [-200, -200, 1000, 1000]
     command = "tx -mtx -2  \"%s\" 2>&1" % fPath
     data = fdkutils.runShellCmd(command)
     if not data:
@@ -747,7 +746,7 @@ def getFontName(fPath):
 
 def getBlueFuzz(fPath):
     blueFuzz = 1.0
-    command = "tx -dump -0 \"%s\" 2>&1" % (fPath)
+    command = "tx -dump -0 \"%s\" 2>&1" % fPath
     data = fdkutils.runShellCmd(command)
     if not data:
         raise FontInfoParseError("Error: Failed getting log from tx from %s, "
@@ -807,7 +806,7 @@ def fixFontDict(tempPath, fdDict):
         raise FontParseError("Failed to find FontName in input font! "
                              "%s" % tempPath)
     if fdDict.FontName:
-        target = "/FontName /%s def" % (fdDict.FontName)
+        target = "/FontName /%s def" % fdDict.FontName
         data = data[:m.start(1)] + target + data[m.end(1):]
 
     # fix em square
@@ -836,7 +835,7 @@ def fixFontDict(tempPath, fdDict):
     # is not defined, else set it.
     m = re.search(r"/StemSnapV\s+\[.+?\]\s+def", data)
     if fdDict.DominantV:
-        target = "/StemSnapV %s def" % (fdDict.DominantV)
+        target = "/StemSnapV %s def" % fdDict.DominantV
         data = data[:m.start()] + target + data[m.end():]
         insertIndex = m.start() + len(target)
     else:
@@ -853,8 +852,8 @@ def fixFontDict(tempPath, fdDict):
             data = data[:insertIndex] + data[insertIndex] + target + \
                 data[insertIndex:]
         else:
+            target = "/LanguageGroup %s def" % fdDict.LanguageGroup
             data = data[:m.start()] + target + data[m.end():]
-        target = "/LanguageGroup %s def" % fdDict.LanguageGroup
     else:
         m = re.search(r"/LanguageGroup\s+\d+\s+def", data)
         if m:
@@ -924,7 +923,7 @@ def makeTempFonts(fontDictList, glyphSetList, fdGlyphDict, inputPath):
 
 def makeCIDFontInfo(fontPath, cidfontinfoPath):
     cfiDict = {}
-    for key in kRequiredCIDFontInfoFields + kOptionalFields:
+    for key in kCIDFontInfokeyList:
         cfiDict[key] = None
     cfiDict["Weight"] = "(Regular)"
     cfiDict["AdobeCopyright"] = "0"
@@ -982,8 +981,6 @@ def makeGAFile(gaPath, fontPath, glyphList, fontDictList, fdGlyphDict,
         fdIndex = 0
 
     fdDict = fontDictList[fdIndex]
-    langGroup = ""  # values for default dict is empty string.
-    dictName = ""
     lineList = [""]
 
     lang_group = fdDict.LanguageGroup

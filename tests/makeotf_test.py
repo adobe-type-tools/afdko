@@ -12,7 +12,7 @@ import tempfile
 from fontTools.ttLib import TTFont
 
 from afdko.makeotf import (
-    checkIfVertInFeature, getOptions, MakeOTFParams)
+    checkIfVertInFeature, getOptions, MakeOTFParams, getSourceGOADBData)
 
 from .runner import main as runner
 from .differ import main as differ
@@ -94,6 +94,13 @@ def test_input_formats(arg, input_filename, ttx_filename):
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value='])
+
+
+def test_getSourceGOADBData():
+    ttf_path = _get_input_path('font.ttf')
+    assert getSourceGOADBData(ttf_path) == [['.notdef', '.notdef', ''],
+                                            ['a', 'a', 'uni0041'],
+                                            ['g2', 'g2', '']]
 
 
 @pytest.mark.parametrize('input_filename', [
