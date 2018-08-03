@@ -1,0 +1,6 @@
+InputFontPath	font.pfa
+kSetfsSelectionBitsOn	[7]
+ConvertToCID	true
+kSetOS2Version	3
+kSetfsSelectionBitsOff	[9, 8]
+OutputFontPath	fôñt.otf

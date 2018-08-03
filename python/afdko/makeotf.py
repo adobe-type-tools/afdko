@@ -17,8 +17,6 @@ from xml.etree.ElementTree import tostring as xmlToString
 # std names in the fontTools, as we use ttx to import/export the post table.
 from fontTools.ttLib.standardGlyphOrder import standardGlyphOrder as kStdNames
 
-PY2 = sys.version_info[0] == 2
-
 __doc__ = """
 makeotf.py.
 Wrapper for the makeotfexe C program. The C program requires that all the
@@ -480,7 +478,6 @@ kFileOptList = [kInputFont, kOutputFont, kFeature, kFMB, kGOADB, kMacCMAPPath,
 # can differentiate the fields in MakeOTFParams which derived from
 # kMOTFOptions, and which are defined and used only at run-time.
 kFileOptPrefix = "opt_"
-kFileOptPrefixLen = len(kFileOptPrefix)
 
 
 class FDKEnvironmentError(Exception):
@@ -522,7 +519,7 @@ class MakeOTFParams(object):
         self.ufoFMNDBPath = None
         self.ufoGAODBPath = None
         self.tempPathList = []
-        self.verbose = 0
+        self.verbose = False
         self.debug = False
         for item in kMOTFOptions.items():
             setattr(self, kFileOptPrefix + item[0], None)
@@ -545,27 +542,25 @@ def readOptionFile(filePath, makeOTFParams, optionIndex):
     fprDir = os.path.dirname(os.path.abspath(filePath))
     currentDir = makeOTFParams.currentDir
     try:
-        fp = open(filePath, "rU")
-        data = fp.read()
-        fp.close()
+        with open(filePath, "rU") as fp:
+            data = fp.read()
     except (IOError, OSError):
         print("makeotf [Error] Could not read the options file %s. "
               "Please check the file protection settings." % filePath)
-        error = 1
+        error = True
         return error, optionIndex
 
-    entries = re.findall(r"[ \t]*(\S+)\s+([^\r\n]+)", data)
     i = optionIndex
+    entries = re.findall(r"[ \t]*(\S+)\s+([^\r\n]+)", data)
     for entry in entries:
-        key = entry[0]
+        key, value = entry
+        value.strip()
         # skip comment lines.
         if key[0] == "#":
             continue
-        value = entry[1]
-        value.strip()
         attrName = kFileOptPrefix + key
-        kMOTFOptions[key][0] = i
         if hasattr(makeOTFParams, attrName):
+            kMOTFOptions[key][0] = i
             try:
                 value = int(value)
             except ValueError:
@@ -573,13 +568,13 @@ def readOptionFile(filePath, makeOTFParams, optionIndex):
             if key in kFileOptList:
                 # Convert fpr path to a relative path if
                 # possible, else an absolute path.
-                path = os.path.join(fprDir, value)
-                path = os.path.abspath(path)
+                path = os.path.abspath(os.path.join(fprDir, value))
                 fileDir, fileName = os.path.split(path)
                 relativeDirPath = getRelativeDirPath(
                     fileDir, os.path.abspath(currentDir))
                 if relativeDirPath:
-                    path = os.path.join(relativeDirPath, fileName)
+                    path = os.path.normpath(os.path.join(relativeDirPath,
+                                                         fileName))
                 # Now let's see if we can reduce this to
                 # a path relative to the current directory.
                 value = path
@@ -591,14 +586,14 @@ def readOptionFile(filePath, makeOTFParams, optionIndex):
             if key == kSetfsSelectionBitsOn:
                 makeOTFParams.seenOS2v4Bits = [1, 1, 1]
                 value = eval(value)
-            exec("makeOTFParams.%s = value" % attrName)
+            setattr(makeOTFParams, attrName, value)
         else:
             print("makeotf [Error] When reading options file, did not "
                   "recognize the keyword %s." % key)
-            error = 1
+            error = True
         i += 1
 
-    return error, optionIndex
+    return error, i
 
 
 def writeOptionsFile(makeOTFParams, filePath):
@@ -608,50 +603,42 @@ def writeOptionsFile(makeOTFParams, filePath):
     fprDir = os.path.dirname(os.path.abspath(filePath))
     currentDir = makeOTFParams.currentDir
 
-    fieldList = dir(makeOTFParams)
-    fieldList.sort()
-    data = []
-    for field in fieldList:
+    data_list = []
+    for field, value in vars(makeOTFParams).items():
+        if value is None:
+            continue
         if field.startswith(kFileOptPrefix):
-            fieldName = field[kFileOptPrefixLen:]
+            fieldName = field[len(kFileOptPrefix):]
             optionOrder = kMOTFOptions[fieldName][0]
-            value = eval("makeOTFParams.%s" % field)
-            if value is None:
-                continue
 
             if fieldName in kFileOptList:
                 # Convert fpr path to a relative path
                 # if possible, else an absolute path.
-                path = os.path.join(currentDir, value)
-                path = os.path.abspath(path)
+                path = os.path.abspath(os.path.join(currentDir, value))
                 fileDir, fileName = os.path.split(path)
                 relativeDirPath = getRelativeDirPath(fileDir, fprDir)
                 if relativeDirPath:
-                    path = os.path.join(relativeDirPath, fileName)
+                    path = os.path.normpath(os.path.join(relativeDirPath,
+                                                         fileName))
                 # Now let's see if we can reduce this to
                 # a path relative to the current directory.
                 value = path
 
-            data.append([optionOrder, "%s\t%s" % (fieldName, value)])
-    if data:
-        # sort by order in which the options were added
-        data.sort()
-        # reduce list to just the strings
-        data = map(lambda entry: entry[1], data)
-        data = os.linesep.join(data) + os.linesep
-        if PY2:
-            data = data.encode('utf-8')
+            data_list.append([optionOrder, "%s\t%s" % (fieldName, value)])
+
+    if data_list:
+        # reduce list to just the strings,
+        # sorting by order in which the options were added
+        data = '\n'.join([entry[1] for entry in sorted(data_list)])
         if makeOTFParams.verbose:
             print("makeotf [Note] Writing options file %s" % filePath)
-        if filePath is not None:
-            try:
-                fp = open(filePath, "w")
+        try:
+            with open(filePath, "w") as fp:
                 fp.write(data)
-                fp.close()
-            except (IOError, OSError):
-                print("makeotf [Warning] Could not write the options file %s. "
-                      "Please check the file protection settings for the file "
-                      "and for the directory." % filePath)
+        except (IOError, OSError):
+            print("makeotf [Warning] Could not write the options file %s. "
+                  "Please check the file protection settings for the file "
+                  "and for the directory." % filePath)
 
 
 def saveOptionsFile(makeOTFParams):
@@ -873,12 +860,20 @@ def setOptionsFromFontInfo(makeOTFParams):
 
 def getRelativeDirPath(absPath1, abspath2):
     """
-    Return a relative path to the first dir from the second directory
+    Return a relative path to the first dir from the second directory.
     If the paths have no common prefix, return None
     """
-    relPath = os.path.relpath(absPath1, abspath2)
+    norm_paths = [os.path.normpath(os.path.realpath(p)) + os.path.sep
+                  for p in (absPath1, abspath2)]
 
-    return relPath
+    root = os.path.dirname(norm_paths[0])
+    while os.path.basename(root):
+        root = os.path.dirname(root)
+
+    if os.path.dirname(os.path.commonprefix(norm_paths)) == root:
+        return None
+    else:
+        return os.path.normpath(os.path.relpath(absPath1, abspath2))
 
 
 def getOptions(makeOTFParams, args):

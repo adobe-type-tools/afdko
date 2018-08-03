@@ -1,0 +1,2 @@
+InputFontPath	font.pfa
+OutputFontPath	font.otf
