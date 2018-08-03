@@ -35,7 +35,6 @@ matrix:
         - pip install -U -r requirements-dev.txt
       before_script:
         - export PYTHONPATH=$PYTHONPATH:$(pwd)
-      script:
         - flake8 setup.py
         - flake8 Tests/*.py
         - pushd python/afdko
@@ -53,6 +52,8 @@ matrix:
         - flake8 ufotools.py
         - popd
         - cpplint --recursive c/autohint
+        - cpplint --recursive c/detype1
+      script:
         - python setup.py bdist_wheel
         - deactivate
         - export PATH=$PATH:'/Users/travis/Library/Python/2.7/bin'
