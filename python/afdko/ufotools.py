@@ -13,10 +13,10 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
-from afdko import convertfonttocid
+from afdko import convertfonttocid, fdkutils
 
 __doc__ = """
-ufotools.py v1.30.6 Jul 1 2018
+ufotools.py v1.30.7 Aug 4 2018
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -367,15 +367,12 @@ kPointName = "name"
 kStackLimit = 46
 kStemLimit = 96
 
-kDefaultFMNDBPath = "FontMenuNameDB"
-kDefaultGOADBPath = "GlyphOrderAndAliasDB"
 
-
-class UFOParseError(ValueError):
+class UFOParseError(Exception):
     pass
 
 
-class BezParseError(ValueError):
+class BezParseError(Exception):
     pass
 
 
@@ -2526,16 +2523,15 @@ def makeUFOFMNDB(srcFontPath):
         except KeyError:
             print("ufotools [Warning] UFO font is missing 'styleName'")
 
-    fmndbPath = os.path.join(srcFontPath, kDefaultFMNDBPath)
+    fmndbPath = fdkutils.get_temp_file_path()
     parts = []
     parts.append("[%s]" % (psName))
     parts.append("\tf=%s" % (familyName))
     parts.append("\ts=%s" % (styleName))
     parts.append("")
     data = '\n'.join(parts)
-    fp = open(fmndbPath, "wt")
-    fp.write(data)
-    fp.close()
+    with open(fmndbPath, "wt") as fp:
+        fp.write(data)
     return fmndbPath
 
 

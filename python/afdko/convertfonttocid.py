@@ -1016,7 +1016,9 @@ def merge_fonts(inputFontPath, outputPath, fontList, glyphList, fontDictList,
 
         lastFont = dstPath
 
-    os.rename(dstPath, outputPath)
+    if os.path.exists(outputPath):
+        os.remove(outputPath)
+        os.rename(dstPath, outputPath)
 
 
 def convertFontToCID(inputPath, outputPath, fontinfoPath=None):
