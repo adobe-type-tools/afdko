@@ -8,13 +8,6 @@ Convert a Type 1 font to CID, given multiple hint dict defs in the
 user guide for details on this format. The output file produced by
 convertFontToCID() is a CID Type 1 font, no matter what the input is.
 
-The "fontinfo" file is expected to be in the same directory as the input
-font file.
-
-Note that this file makes a lot of temporary files, using the input font
-path as the base file path, so the parent directory needs to be
-read/write enabled.
-
 PROCEDURE:
 1. convertFontToCID()
    - read 'fontinfo' file
@@ -67,8 +60,6 @@ import re
 import sys
 
 from afdko import fdkutils
-
-debug = 0
 
 # Tokens seen in font info file that are not part
 # of a FDDict or GlyphSet definition.
@@ -789,7 +780,7 @@ def makeSortedGlyphLists(glyphList, fdGlyphDict):
 
 
 def fixFontDict(tempPath, fdDict):
-    txtPath = tempPath + ".txt"
+    txtPath = fdkutils.get_temp_file_path()
     command = "detype1 \"%s\" \"%s\" 2>&1" % (tempPath, txtPath)
     log = fdkutils.runShellCmd(command)
     if log:
@@ -890,15 +881,12 @@ def fixFontDict(tempPath, fdDict):
     if log:
         print(log)
 
-    if not debug:
-        os.remove(txtPath)
-
 
 def makeTempFonts(fontDictList, glyphSetList, fdGlyphDict, inputPath):
     fontList = []
-    for setIndex, glyphList in enumerate(glyphSetList, 1):
+    for glyphList in glyphSetList:
         arg = ",".join(glyphList)
-        tempPath = "%s.temp.%s.pfa" % (inputPath, setIndex)
+        tempPath = fdkutils.get_temp_file_path()
         command = "tx -t1 -g \"%s\" \"%s\" \"%s\" 2>&1" % (
             arg, inputPath, tempPath)
         log = fdkutils.runShellCmd(command)
@@ -1004,15 +992,14 @@ def makeGAFile(gaPath, fontPath, glyphList, fontDictList, fdGlyphDict,
 
 def merge_fonts(inputFontPath, outputPath, fontList, glyphList, fontDictList,
                 fdGlyphDict):
-    cidfontinfoPath = "%s.temp.cidfontinfo" % inputFontPath
+    cidfontinfoPath = fdkutils.get_temp_file_path()
     makeCIDFontInfo(inputFontPath, cidfontinfoPath)
     lastFont = ""
     dstPath = ''
-    tempfileList = []
 
     for i, fontPath in enumerate(fontList):
-        gaPath = fontPath + ".ga"
-        dstPath = "%s.temp.merge.%s" % (inputFontPath, i)
+        gaPath = fdkutils.get_temp_file_path()
+        dstPath = fdkutils.get_temp_file_path()
         removeNotdef = i != 0
         makeGAFile(gaPath, fontPath, glyphList, fontDictList, fdGlyphDict,
                    removeNotdef)
@@ -1028,16 +1015,8 @@ def merge_fonts(inputFontPath, outputPath, fontList, glyphList, fontDictList,
                 "Error merging font %s. Log: %s." % (fontPath, log))
 
         lastFont = dstPath
-        tempfileList.append(gaPath)
-        tempfileList.append(dstPath)
 
     os.rename(dstPath, outputPath)
-
-    if not debug:
-        for path in tempfileList:
-            if os.path.exists(path):
-                os.remove(path)
-        os.remove(cidfontinfoPath)
 
 
 def convertFontToCID(inputPath, outputPath, fontinfoPath=None):
@@ -1070,10 +1049,6 @@ def convertFontToCID(inputPath, outputPath, fontinfoPath=None):
     merge_fonts(inputPath, outputPath, fontList, glyphList, fontDictList,
                 fdGlyphDict)
 
-    if not debug:
-        for fontPath in fontList:
-            os.remove(fontPath)
-
 
 def mergeFontToCFF(srcPath, outputPath, doSubr):
     """
@@ -1081,7 +1056,7 @@ def mergeFontToCFF(srcPath, outputPath, doSubr):
     Assumes srcPath is a type 1 font,and outputPath is an OTF font.
     """
     # First, convert src font to cff, and subroutinize it if so requested.
-    tempPath = srcPath + ".temp.cff"
+    tempPath = fdkutils.get_temp_file_path()
     subrArg = ""
     if doSubr:
         subrArg = " +S"
@@ -1094,18 +1069,30 @@ def mergeFontToCFF(srcPath, outputPath, doSubr):
     # Now merge it into the output file.
     command = "sfntedit -a CFF=\"%s\" \"%s\" 2>&1" % (tempPath, outputPath)
     report = fdkutils.runShellCmd(command)
-    if not debug:
-        if os.path.exists(tempPath):
-            os.remove(tempPath)
     if ("fatal" in report) or ("error" in report):
         raise FontInfoParseError(
             "Failed to run 'sfntedit -a CFF=' on file %s" % srcPath)
 
 
 def main():
-    inputPath = sys.argv[1]
-    outputPath = inputPath + ".temp.cid"
-    convertFontToCID(inputPath, outputPath)
+    args = sys.argv
+
+    if len(args) >= 2:
+        inputPath = args[1]
+        outputPath = fdkutils.get_temp_file_path()
+
+        fontinfoPath = None
+        if len(args) == 3:
+            fontinfoPath = args[2]
+
+        convertFontToCID(inputPath, outputPath, fontinfoPath)
+
+        save_path = '{}{}'.format(os.path.splitext(inputPath)[0], '-CID.ps')
+
+        if os.path.isfile(outputPath):
+            os.rename(outputPath, save_path)
+    else:
+        print('ERROR: Missing path to font to convert.')
 
 
 if __name__ == '__main__':

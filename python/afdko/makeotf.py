@@ -2809,7 +2809,6 @@ def runMakeOTF(makeOTFParams):
     # we do this as a post processing step on the OTF.
     # NOTE: See comment about font.pfa below.
     if doConvertToCID == "true":
-        convertfonttocid.debug = makeOTFParams.debug
         print("Converting CFF table to CID-keyed CFF...")
         tempPath = "%s.temp.cid" % os.path.abspath(outputPath)
         if os.path.exists(tempPath):
@@ -2833,8 +2832,6 @@ def runMakeOTF(makeOTFParams):
                convertfonttocid.FontParseError):
             print("makeotf [Error] Failed to convert font '%s' to CID." %
                   outputPath)
-            if os.path.exists(outputPath):
-                makeOTFParams.tempPathList.append(outputPath)
             raise MakeOTFRunError
 
         if not os.path.exists(outputPath):
