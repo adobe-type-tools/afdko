@@ -5,6 +5,7 @@ from __future__ import print_function, absolute_import
 import os
 import platform
 import subprocess
+import tempfile
 import traceback
 
 __doc__ = """
@@ -17,6 +18,12 @@ curSystem = platform.system()
 
 class FDKEnvError(KeyError):
     pass
+
+
+def get_temp_file_path():
+    file_descriptor, path = tempfile.mkstemp()
+    os.close(file_descriptor)
+    return path
 
 
 def get_resources_dir():
