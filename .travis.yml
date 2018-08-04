@@ -53,6 +53,7 @@ matrix:
         - popd
         - cpplint --recursive --quiet c/autohint
         - cpplint --recursive --quiet c/detype1
+        - cpplint --recursive --quiet c/makeotf/makeotf_lib/source/cffread
       script:
         - python setup.py bdist_wheel
         - deactivate
