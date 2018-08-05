@@ -5,7 +5,7 @@ __copyright__ = """Copyright 2016 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-autohint  AutoHinting program v1.50 Jul 13 2018
+autohint  AutoHinting program v1.51 Aug 4 2018
 autohint -h
 autohint -u
 autohint -hfd
@@ -456,10 +456,9 @@ import shutil
 # warnings.simplefilter("ignore", RuntimeWarning) # supress waring about use of os.tempnam().
 
 kACIDKey = "AutoHintKey"
-
+NEWBEZ_SUFFIX = '.new'
 gLogFile = None
 kFontPlistSuffix  = ".plist"
-kTempCFFSuffix = ".temp.ac.cff"
 
 class ACOptions:
 	def __init__(self):
@@ -954,7 +953,7 @@ def openOpenTypeFile(path, outFilePath):
 	# If input font is  CFF or PS, build a dummy ttFont in memory..
 	# return ttFont, and flag if is a real OTF font Return flag is 0 if OTF, 1 if CFF, and 2 if PS/
 	fontType  = 0 # OTF
-	tempPathCFF = path + kTempCFFSuffix
+	tempPathCFF = fdkutils.get_temp_file_path()
 	try:
 		ff = open(path, "rb")
 		data = ff.read(10)
@@ -1015,11 +1014,6 @@ def openOpenTypeFile(path, outFilePath):
 	return fontData
 
 
-def removeTempFiles(fileList):
-	for filePath in fileList:
-		if os.path.exists(filePath):
-			os.remove(filePath)
-
 def cmpFDDictEntries(entry1, entry2):
 	# entry = [glyphName, [fdIndex, glyphListIndex] ]
 	if entry1[1][1] > entry2[1][1]:
@@ -1055,12 +1049,10 @@ def hintFile(options):
 		raise ACFontError("Error: selected glyph list is empty for font <%s>." % fontFileName)
 
 	# temp file names for input and output bez files, and for the fontinfo file.
-	tempBaseName = os.path.join(tempfile.gettempdir(), "fdkautohint")
-	tempBez = tempBaseName + ".bez"
-	tempBezNew = tempBez + ".new"
-	tempFI = tempBaseName + ".fi"
+	tempBez = fdkutils.get_temp_file_path()
+	tempBezNew = '{}{}'.format(tempBez, NEWBEZ_SUFFIX)
+	tempFI = fdkutils.get_temp_file_path()
 
-	#print "tempBaseName", tempBaseName
 	psName = fontData.getPSName()
 
 	if (not options.logOnly) and options.usePlistFile:
@@ -1110,8 +1102,6 @@ def hintFile(options):
 				logMsg(gTxt)
 		else:
 			logMsg("There are no user-defined FontDict Values.")
-		tempPathCFF = options.inputPath + kTempCFFSuffix
-		removeTempFiles( [tempPathCFF] )
 		fontData.close()
 		return
 
@@ -1250,7 +1240,7 @@ def hintFile(options):
 		else:
 			if os.path.exists(tempBezNew):
 				os.remove(tempBezNew)
-			command = "autohintexe %s%s%s%s -s .new -f \"%s\" \"%s\"" % (verboseArg, suppressEditArg, supressHintSubArg, decimalArg, tempFI, tempBez)
+			command = "autohintexe %s%s%s%s -s %s -f \"%s\" \"%s\"" % (verboseArg, suppressEditArg, supressHintSubArg, decimalArg, NEWBEZ_SUFFIX, tempFI, tempBez)
 			if  options.debug:
 				print(command)
 			report = fdkutils.runShellCmd(command)
@@ -1303,9 +1293,6 @@ def hintFile(options):
 
 	if  options.debug:
 		print("Wrote input AC bez file to %s" % tempBez)
-	else:
-		tempPathCFF = options.inputPath + kTempCFFSuffix # created when a PS file is opened.
-		removeTempFiles( [tempBez, tempBezNew, tempFI, tempPathCFF] )
 
 	if not options.logOnly:
 		if anyGlyphChanged:
