@@ -1,6 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-   This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. *//***********************************************************************/
-
+   This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+/***********************************************************************/
 
 #ifndef GPOS_H
 #define GPOS_H
@@ -8,7 +8,7 @@
 #include "common.h"
 #include "feat.h"
 
-#define GPOS_   TAG('G', 'P', 'O', 'S')
+#define GPOS_ TAG('G', 'P', 'O', 'S')
 
 /* Standard functions */
 
@@ -25,16 +25,16 @@ void GPOSFeatureEnd(hotCtx g);
 
 /* Lookup types */
 enum {
-	GPOSSingle = 1,
-	GPOSPair,
-	GPOSCursive,
-	GPOSMarkToBase,
-	GPOSMarkToLigature,
-	GPOSMarkToMark,
-	GPOSContext,
-	GPOSChain,
-	GPOSExtension,      /* Handled specially: it points to any of the above */
-	GPOSFeatureParam,   /* Treated like a lookup in the code */
+    GPOSSingle = 1,
+    GPOSPair,
+    GPOSCursive,
+    GPOSMarkToBase,
+    GPOSMarkToLigature,
+    GPOSMarkToMark,
+    GPOSContext,
+    GPOSChain,
+    GPOSExtension,    /* Handled specially: it points to any of the above */
+    GPOSFeatureParam, /* Treated like a lookup in the code */
 };
 
 void GPOSRuleAdd(hotCtx g, int lkpType, GNode *targ, char *fileName, long lineNum, int anchorCount, AnchorMarkInfo *anchorMarkInfo);

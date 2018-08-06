@@ -1,5 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-   This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. *//***********************************************************************
+   This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+/***********************************************************************
  * SCCS Id:    %W%
  * Changed:    %G% %U%
  ***********************************************************************/
@@ -37,7 +38,7 @@ GID mapUV2GID(hotCtx g, UV uv);
 hotGlyphInfo *mapName2Glyph(hotCtx g, char *gname, char **useAliasDB);
 GID mapName2GID(hotCtx g, char *gname, char **useAliasDB);
 
-void mapGID2Name(hotCtx g, GID gid, char* msg);
+void mapGID2Name(hotCtx g, GID gid, char *msg);
 
 hotGlyphInfo *mapCID2Glyph(hotCtx g, CID cid);
 GID mapCID2GID(hotCtx g, CID cid);

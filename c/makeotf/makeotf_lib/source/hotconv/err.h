@@ -36,10 +36,10 @@
 #define ERR_H
 
 #include "config.h"
-/*									      */
-/*  7-Apr-97  133MR1							      */
-/*		Proper choice of STDC and cplusplus pre-processor symbols (?) */
-/*									      */
+/*                                                                    */
+/* 7-Apr-97  133MR1                                                  */
+/* Proper choice of STDC and cplusplus pre-processor symbols (?) */
+/*                                                                    */
 #include <string.h>
 #ifdef __STDC__
 #include <stdarg.h>
@@ -65,50 +65,49 @@
 #endif
 
 #define BSETWORDSIZE 8
-#define BSETLOGWORDSIZE 3       /* SetWordType is 8bits */
+#define BSETLOGWORDSIZE 3 /* SetWordType is 8bits */
 
-#define BSETMODWORD(x) ((x) & (BSETWORDSIZE - 1))     /* x % BSETWORDSIZE */
-#define BSETDIVWORD(x) ((x) >> BSETLOGWORDSIZE)     /* x / BSETWORDSIZE */
+#define BSETMODWORD(x) ((x) & (BSETWORDSIZE - 1)) /* x % BSETWORDSIZE */
+#define BSETDIVWORD(x) ((x) >> BSETLOGWORDSIZE)   /* x / BSETWORDSIZE */
 
 /* This is not put into the global pccts_parser structure because it is
  * hidden and does not need to be saved during a "save state" operation
  */
 /* maximum of 32 bits/unsigned int and must be 8 bits/byte */
 static SetWordType bitmask[] = {
-	0x00000001, 0x00000002, 0x00000004, 0x00000008,
-	0x00000010, 0x00000020, 0x00000040, 0x00000080
-};
+    0x00000001, 0x00000002, 0x00000004, 0x00000008,
+    0x00000010, 0x00000020, 0x00000040, 0x00000080};
 
 void
 #ifdef __USE_PROTOS
 zzresynch(SetWordType *wd, SetWordType mask)
 #else
-zzresynch(wd, mask)
-SetWordType * wd, mask;
+    zzresynch(wd, mask)
+        SetWordType *wd,
+    mask;
 
 #endif
 {
-	static int consumed = 1;
+    static int consumed = 1;
 
-	/* if you enter here without having consumed a token from last resynch
-	 * force a token consumption.
-	 */
-	if (!consumed) {
-		zzCONSUME;
-		return;
-	}
+    /* if you enter here without having consumed a token from last resynch */
+    /* force a token consumption.                                          */
+    if (!consumed) {
+        zzCONSUME;
+        return;
+    }
 
-	/* if current token is in resynch set, we've got what we wanted */
-	if (wd[LA(1)] & mask || LA(1) == zzEOF_TOKEN) {
-		consumed = 0;
-		return;
-	}
+    /* if current token is in resynch set, we've got what we wanted */
+    if (wd[LA(1)] & mask || LA(1) == zzEOF_TOKEN) {
+        consumed = 0;
+        return;
+    }
 
-	/* scan until we find something in the resynch set */
-	while (!(wd[LA(1)] & mask) && LA(1) != zzEOF_TOKEN) {
-		zzCONSUME;
-	}
-	consumed = 1;
+    /* scan until we find something in the resynch set */
+    while (!(wd[LA(1)] & mask) && LA(1) != zzEOF_TOKEN) {
+        zzCONSUME;
+    }
+    consumed = 1;
 }
 
 /*                                                                          */
@@ -120,16 +119,16 @@ void
 #ifdef __USE_PROTOS
 zzconsumeUntil(SetWordType *st)
 #else
-zzconsumeUntil(st)
-SetWordType * st;
+    zzconsumeUntil(st)
+        SetWordType *st;
 
 #endif
 {
-	int tmp;                                                         /* MR7 */
-	while (!zzset_el((tmp = LA(1)), st) && tmp != 1 /* Eof */) {
-		/* MR7 */
-		zzCONSUME;
-	}                                                                /* MR7 */
+    int tmp; /* MR7 */
+    while (!zzset_el((tmp = LA(1)), st) && tmp != 1 /* Eof */) {
+        /* MR7 */
+        zzCONSUME;
+    } /* MR7 */
 }
 
 /*                                                                          */
@@ -141,148 +140,145 @@ void
 #ifdef __USE_PROTOS
 zzconsumeUntilToken(int t)
 #else
-zzconsumeUntilToken(t)
-int t;
+    zzconsumeUntilToken(t) int t;
 
 #endif
 {
-	int tmp;                                                         /* MR7 */
-	while ((tmp = LA(1)) != t && tmp != 1 /* Eof */) {
-		zzCONSUME;
-	}                                                                /* MR7 */
+    int tmp; /* MR7 */
+    while ((tmp = LA(1)) != t && tmp != 1 /* Eof */) {
+        zzCONSUME;
+    } /* MR7 */
 }
 
-/* input looks like:
- *		zzFAIL(k, e1, e2, ...,&zzMissSet,&zzMissText,&zzBadTok,&zzBadText)
- * where the zzMiss stuff is set here to the token that did not match
- * (and which set wasn't it a member of).
- */
+/* input looks like:                                                  */
+/* zzFAIL(k, e1, e2, ...,&zzMissSet,&zzMissText,&zzBadTok,&zzBadText) */
+/* where the zzMiss stuff is set here to the token that did not match */
+/* (and which set wasn't it a member of).                             */
 void
 #ifdef __USE_PROTOS
-CDECL zzFAIL(int k, ...)
+    CDECL
+    zzFAIL(int k, ...)
 #else
 zzFAIL(va_alist)
-va_dcl
+    va_dcl
 #endif
 {
 #ifdef LL_K
-	static char text[LL_K * ZZLEXBUFSIZE + 1];
-	SetWordType *f[LL_K];
+    static char text[LL_K * ZZLEXBUFSIZE + 1];
+    SetWordType *f[LL_K];
 #else
-	static char text[ZZLEXBUFSIZE + 1];
-	SetWordType *f[1];
+    static char text[ZZLEXBUFSIZE + 1];
+    SetWordType *f[1];
 #endif
-	SetWordType **miss_set;
-	char **miss_text;
-	int *bad_tok;
-	char **bad_text;
-	int *err_k;
-	int i;
-	va_list ap;
+    SetWordType **miss_set;
+    char **miss_text;
+    int *bad_tok;
+    char **bad_text;
+    int *err_k;
+    int i;
+    va_list ap;
 #ifndef __USE_PROTOS
-	int k;
+    int k;
 #endif
 #ifdef __USE_PROTOS
-	va_start(ap, k);
+    va_start(ap, k);
 #else
-	va_start(ap);
-	k = va_arg(ap, int);    /* how many lookahead sets? */
+    va_start(ap);
+    k = va_arg(ap, int); /* how many lookahead sets? */
 #endif
-	text[0] = '\0';
-	for (i = 1; i <= k; i++) {
-		/* collect all lookahead sets */
-		f[i - 1] = va_arg(ap, SetWordType *);
-	}
-	for (i = 1; i <= k; i++) {
-		/* look for offending token */
-		if (i > 1) {
-			strcat(text, " ");
-		}
-		strcat(text, LATEXT(i));
-		if (!zzset_el((unsigned)LA(i), f[i - 1])) {
-			break;
-		}
-	}
-	miss_set = va_arg(ap, SetWordType * *);
-	miss_text = va_arg(ap, char **);
-	bad_tok = va_arg(ap, int *);
-	bad_text = va_arg(ap, char **);
-	err_k = va_arg(ap, int *);
-	va_end(ap);
-	if (i > k) {
-		/* bad; lookahead is permutation that cannot be matched,
-		 * but, the ith token of lookahead is valid at the ith position
-		 * (The old LL sub 1 (k) versus LL(k) parsing technique)
-		 */
-		*miss_set = NULL;
-		*miss_text = zzlextext;
-		*bad_tok = LA(1);
-		*bad_text = LATEXT(1);
-		*err_k = k;
-		return;
-	}
-/*	fprintf(stderr, "%s not in %dth set\n", zztokens[LA(i)], i);*/
-	*miss_set = f[i - 1];
-	*miss_text = text;
-	*bad_tok = LA(i);
-	*bad_text = LATEXT(i);
-	if (i == 1) {
-		*err_k = 1;
-	}
-	else {
-		*err_k = k;
-	}
+    text[0] = '\0';
+    for (i = 1; i <= k; i++) {
+        /* collect all lookahead sets */
+        f[i - 1] = va_arg(ap, SetWordType *);
+    }
+    for (i = 1; i <= k; i++) {
+        /* look for offending token */
+        if (i > 1) {
+            strcat(text, " ");
+        }
+        strcat(text, LATEXT(i));
+        if (!zzset_el((unsigned)LA(i), f[i - 1])) {
+            break;
+        }
+    }
+    miss_set = va_arg(ap, SetWordType **);
+    miss_text = va_arg(ap, char **);
+    bad_tok = va_arg(ap, int *);
+    bad_text = va_arg(ap, char **);
+    err_k = va_arg(ap, int *);
+    va_end(ap);
+    if (i > k) {
+        /* bad; lookahead is permutation that cannot be matched,        */
+        /* but, the ith token of lookahead is valid at the ith position */
+        /* (The old LL sub 1 (k) versus LL(k) parsing technique)        */
+        *miss_set = NULL;
+        *miss_text = zzlextext;
+        *bad_tok = LA(1);
+        *bad_text = LATEXT(1);
+        *err_k = k;
+        return;
+    }
+    /* fprintf(stderr, "%s not in %dth set\n", zztokens[LA(i)], i);*/
+    *miss_set = f[i - 1];
+    *miss_text = text;
+    *bad_tok = LA(i);
+    *bad_text = LATEXT(i);
+    if (i == 1) {
+        *err_k = 1;
+    } else {
+        *err_k = k;
+    }
 }
 
 void
 #ifdef __USE_PROTOS
 zzsave_antlr_state(zzantlr_state *buf)
 #else
-zzsave_antlr_state(buf)
-zzantlr_state * buf;
+    zzsave_antlr_state(buf)
+        zzantlr_state *buf;
 
 #endif
 {
 #ifdef LL_K
-	int i;
+    int i;
 #endif
 
 #ifdef ZZCAN_GUESS
-	buf->guess_start = zzguess_start;
-	buf->guessing = zzguessing;
+    buf->guess_start = zzguess_start;
+    buf->guessing = zzguessing;
 #endif
-	buf->asp = zzasp;
+    buf->asp = zzasp;
 #ifdef GENAST
-	buf->ast_sp = zzast_sp;
+    buf->ast_sp = zzast_sp;
 #endif
 #ifdef ZZINF_LOOK
-	buf->inf_labase = zzinf_labase;
-	buf->inf_last = zzinf_last;
+    buf->inf_labase = zzinf_labase;
+    buf->inf_last = zzinf_last;
 
-/* MR6  Gunnar Rxnning (gunnar@candleweb.no)                                */
-/* MR6	  Additional state needs to be saved/restored                       */
+    /* MR6  Gunnar Rxnning (gunnar@candleweb.no)                             */
+    /* MR6  Additional state needs to be saved/restored                      */
 
-	buf->inf_tokens = zzinf_tokens;                                  /* MR6 */
-	buf->inf_text = zzinf_text;                                      /* MR6 */
-	buf->inf_text_buffer = zzinf_text_buffer;                        /* MR6 */
-	buf->inf_line = zzinf_line;                                      /* MR6 */
+    buf->inf_tokens = zzinf_tokens;           /* MR6 */
+    buf->inf_text = zzinf_text;               /* MR6 */
+    buf->inf_text_buffer = zzinf_text_buffer; /* MR6 */
+    buf->inf_line = zzinf_line;               /* MR6 */
 
 #endif
 #ifdef DEMAND_LOOK
-	buf->dirty = zzdirty;
+    buf->dirty = zzdirty;
 #endif
 #ifdef LL_K
-	for (i = 0; i < LL_K; i++) {
-		buf->tokenLA[i] = zztokenLA[i];
-	}
-	for (i = 0; i < LL_K; i++) {
-		strcpy(buf->textLA[i], zztextLA[i]);
-	}
-	buf->lap = zzlap;
-	buf->labase = zzlabase;
+    for (i = 0; i < LL_K; i++) {
+        buf->tokenLA[i] = zztokenLA[i];
+    }
+    for (i = 0; i < LL_K; i++) {
+        strcpy(buf->textLA[i], zztextLA[i]);
+    }
+    buf->lap = zzlap;
+    buf->labase = zzlabase;
 #else
-	buf->token = zztoken;
-	strcpy(buf->text, zzlextext);
+    buf->token = zztoken;
+    strcpy(buf->text, zzlextext);
 #endif
 }
 
@@ -290,50 +286,50 @@ void
 #ifdef __USE_PROTOS
 zzrestore_antlr_state(zzantlr_state *buf)
 #else
-zzrestore_antlr_state(buf)
-zzantlr_state * buf;
+    zzrestore_antlr_state(buf)
+        zzantlr_state *buf;
 
 #endif
 {
 #ifdef LL_K
-	int i;
+    int i;
 #endif
 
 #ifdef ZZCAN_GUESS
-	zzguess_start = buf->guess_start;
-	zzguessing = buf->guessing;
+    zzguess_start = buf->guess_start;
+    zzguessing = buf->guessing;
 #endif
-	zzasp = buf->asp;
+    zzasp = buf->asp;
 #ifdef GENAST
-	zzast_sp = buf->ast_sp;
+    zzast_sp = buf->ast_sp;
 #endif
 #ifdef ZZINF_LOOK
-	zzinf_labase = buf->inf_labase;
-	zzinf_last = buf->inf_last;
+    zzinf_labase = buf->inf_labase;
+    zzinf_last = buf->inf_last;
 
-/* MR6  Gunnar Rxnning (gunnar@candleweb.no)                                */
-/* MR6	  Additional state needs to be saved/restored                       */
+    /* MR6  Gunnar Rxnning (gunnar@candleweb.no)                             */
+    /* MR6  Additional state needs to be saved/restored                      */
 
-	zzinf_tokens = buf->inf_tokens;                                  /* MR6 */
-	zzinf_text = buf->inf_text;                                      /* MR6 */
-	zzinf_text_buffer = buf->inf_text_buffer;                        /* MR6 */
-	zzinf_line = buf->inf_line;                                      /* MR6 */
+    zzinf_tokens = buf->inf_tokens;           /* MR6 */
+    zzinf_text = buf->inf_text;               /* MR6 */
+    zzinf_text_buffer = buf->inf_text_buffer; /* MR6 */
+    zzinf_line = buf->inf_line;               /* MR6 */
 #endif
 #ifdef DEMAND_LOOK
-	zzdirty = buf->dirty;
+    zzdirty = buf->dirty;
 #endif
 #ifdef LL_K
-	for (i = 0; i < LL_K; i++) {
-		zztokenLA[i] = buf->tokenLA[i];
-	}
-	for (i = 0; i < LL_K; i++) {
-		strcpy(zztextLA[i], buf->textLA[i]);
-	}
-	zzlap = buf->lap;
-	zzlabase = buf->labase;
+    for (i = 0; i < LL_K; i++) {
+        zztokenLA[i] = buf->tokenLA[i];
+    }
+    for (i = 0; i < LL_K; i++) {
+        strcpy(zztextLA[i], buf->textLA[i]);
+    }
+    zzlap = buf->lap;
+    zzlabase = buf->labase;
 #else
-	zztoken = buf->token;
-	strcpy(zzlextext, buf->text);
+    zztoken = buf->token;
+    strcpy(zzlextext, buf->text);
 #endif
 }
 
@@ -341,34 +337,32 @@ void
 #ifdef __USE_PROTOS
 zzedecode(SetWordType *a)
 #else
-zzedecode(a)
-SetWordType * a;
+    zzedecode(a)
+        SetWordType *a;
 
 #endif
 {
-	register SetWordType *p = a;
-	register SetWordType *endp = &(p[zzSET_SIZE]);
-	register unsigned e = 0;
+    register SetWordType *p = a;
+    register SetWordType *endp = &(p[zzSET_SIZE]);
+    register unsigned e = 0;
 
-	if (zzset_deg(a) > 1) {
-		fprintf(stderr, " {");
-	}
-	do {
-		register SetWordType t = *p;
-		register SetWordType *b = &(bitmask[0]);
-		do {
-			if (t & *b) {
-				fprintf(stderr, " ");
-				zztokenPrint(stderr, e);
-			}
-			e++;
-		}
-		while (++b < &(bitmask[sizeof(SetWordType) * 8]));
-	}
-	while (++p < endp);
-	if (zzset_deg(a) > 1) {
-		fprintf(stderr, " }");
-	}
+    if (zzset_deg(a) > 1) {
+        fprintf(stderr, " {");
+    }
+    do {
+        register SetWordType t = *p;
+        register SetWordType *b = &(bitmask[0]);
+        do {
+            if (t & *b) {
+                fprintf(stderr, " ");
+                zztokenPrint(stderr, e);
+            }
+            e++;
+        } while (++b < &(bitmask[sizeof(SetWordType) * 8]));
+    } while (++p < endp);
+    if (zzset_deg(a) > 1) {
+        fprintf(stderr, " }");
+    }
 }
 
 /* Remove std zzsyn() so that USER_ZZSYN won't have to be set */
@@ -380,8 +374,8 @@ void
 #ifdef __USE_PROTOS
 zzsyn(char *text, int tok, char *egroup, SetWordType *eset, int etok, int k, char *bad_text)
 #else
-zzsyn(text, tok, egroup, eset, etok, k, bad_text)
-char *text, *egroup, *bad_text;
+    zzsyn(text, tok, egroup, eset, etok, k, bad_text) char *text,
+    *egroup, *bad_text;
 
 int tok;
 int etok;
@@ -389,30 +383,28 @@ int k;
 SetWordType *eset;
 #endif
 {
-	fprintf(stderr, "line %d: syntax error at \"%s\"", zzline, (tok == zzEOF_TOKEN) ? "EOF" : bad_text);
-	if (!etok && !eset) {
-		fprintf(stderr, "\n");
-		return;
-	}
-	if (k == 1) {
-		fprintf(stderr, " missing");
-	}
-	else {
-		fprintf(stderr, "; \"%s\" not", bad_text);
-		if (zzset_deg(eset) > 1) {
-			fprintf(stderr, " in");
-		}
-	}
-	if (zzset_deg(eset) > 0) {
-		zzedecode(eset);
-	}
-	else {
-		fprintf(stderr, " %s", zztokens[etok]);
-	}
-	if (strlen(egroup) > 0) {
-		fprintf(stderr, " in %s", egroup);
-	}
-	fprintf(stderr, "\n");
+    fprintf(stderr, "line %d: syntax error at \"%s\"", zzline, (tok == zzEOF_TOKEN) ? "EOF" : bad_text);
+    if (!etok && !eset) {
+        fprintf(stderr, "\n");
+        return;
+    }
+    if (k == 1) {
+        fprintf(stderr, " missing");
+    } else {
+        fprintf(stderr, "; \"%s\" not", bad_text);
+        if (zzset_deg(eset) > 1) {
+            fprintf(stderr, " in");
+        }
+    }
+    if (zzset_deg(eset) > 0) {
+        zzedecode(eset);
+    } else {
+        fprintf(stderr, " %s", zztokens[etok]);
+    }
+    if (strlen(egroup) > 0) {
+        fprintf(stderr, " in %s", egroup);
+    }
+    fprintf(stderr, "\n");
 }
 #endif
 
@@ -423,48 +415,45 @@ int
 #ifdef __USE_PROTOS
 zzset_el(unsigned b, SetWordType *p)
 #else
-zzset_el(b, p)
-unsigned b;
+    zzset_el(b, p) unsigned b;
 
 SetWordType *p;
 #endif
 {
-	return(p[BSETDIVWORD(b)] & bitmask[BSETMODWORD(b)]);
+    return (p[BSETDIVWORD(b)] & bitmask[BSETMODWORD(b)]);
 }
 
 int
 #ifdef __USE_PROTOS
 zzset_deg(SetWordType *a)
 #else
-zzset_deg(a)
-SetWordType * a;
+    zzset_deg(a)
+        SetWordType *a;
 
 #endif
 {
-	/* Fast compute degree of a set... the number
-	   of elements present in the set.  Assumes
-	   that all word bits are used in the set
-	 */
-	register SetWordType *p = a;
-	register SetWordType *endp = &(a[zzSET_SIZE]);
-	register int degree = 0;
+    /* Fast compute degree of a set... the number */
+    /* of elements present in the set.  Assumes   */
+    /* that all word bits are used in the set     */
+    register SetWordType *p = a;
+    register SetWordType *endp = &(a[zzSET_SIZE]);
+    register int degree = 0;
 
-	if (a == NULL) {
-		return 0;
-	}
-	while (p < endp) {
-		register SetWordType t = *p;
-		register SetWordType *b = &(bitmask[0]);
-		do {
-			if (t & *b) {
-				++degree;
-			}
-		}
-		while (++b < &(bitmask[sizeof(SetWordType) * 8]));
-		p++;
-	}
+    if (a == NULL) {
+        return 0;
+    }
+    while (p < endp) {
+        register SetWordType t = *p;
+        register SetWordType *b = &(bitmask[0]);
+        do {
+            if (t & *b) {
+                ++degree;
+            }
+        } while (++b < &(bitmask[sizeof(SetWordType) * 8]));
+        p++;
+    }
 
-	return(degree);
+    return (degree);
 }
 
 #ifdef DEMAND_LOOK
@@ -476,8 +465,7 @@ _zzmatch(int _t, char **zzBadText, char **zzMissText,
          int *zzMissTok, int *zzBadTok,
          SetWordType **zzMissSet)
 #else
-_zzmatch(_t, zzBadText, zzMissText, zzMissTok, zzBadTok, zzMissSet)
-int _t;
+    _zzmatch(_t, zzBadText, zzMissText, zzMissTok, zzBadTok, zzMissSet) int _t;
 
 char **zzBadText;
 char **zzMissText;
@@ -485,41 +473,40 @@ int *zzMissTok, *zzBadTok;
 SetWordType **zzMissSet;
 #endif
 {
-	if (zzdirty == LL_K) {
-		zzCONSUME;
-	}
-	if (LA(1) != _t) {
-		*zzBadText = *zzMissText = LATEXT(1);
-		*zzMissTok = _t;
-		*zzBadTok = LA(1);
-		*zzMissSet = NULL;
-		return 0;
-	}
-	zzMakeAttr
-	    zzdirty++;
-	zzlabase++;
-	return 1;
+    if (zzdirty == LL_K) {
+        zzCONSUME;
+    }
+    if (LA(1) != _t) {
+        *zzBadText = *zzMissText = LATEXT(1);
+        *zzMissTok = _t;
+        *zzBadTok = LA(1);
+        *zzMissSet = NULL;
+        return 0;
+    }
+    zzMakeAttr
+        zzdirty++;
+    zzlabase++;
+    return 1;
 }
 
 int
 #ifdef __USE_PROTOS
 _zzmatch_wsig(int _t)
 #else
-_zzmatch_wsig(_t)
-int _t;
+    _zzmatch_wsig(_t) int _t;
 
 #endif
 {
-	if (zzdirty == LL_K) {
-		zzCONSUME;
-	}
-	if (LA(1) != _t) {
-		return 0;
-	}
-	zzMakeAttr
-	    zzdirty++;
-	zzlabase++;
-	return 1;
+    if (zzdirty == LL_K) {
+        zzCONSUME;
+    }
+    if (LA(1) != _t) {
+        return 0;
+    }
+    zzMakeAttr
+        zzdirty++;
+    zzlabase++;
+    return 1;
 }
 
 #else
@@ -529,8 +516,7 @@ int
 _zzmatch(int _t, char **zzBadText, char **zzMissText,
          int *zzMissTok, int *zzBadTok, SetWordType **zzMissSet)
 #else
-_zzmatch(_t, zzBadText, zzMissText, zzMissTok, zzBadTok, zzMissSet)
-int _t;
+    _zzmatch(_t, zzBadText, zzMissText, zzMissTok, zzBadTok, zzMissSet) int _t;
 
 char **zzBadText;
 char **zzMissText;
@@ -538,39 +524,36 @@ int *zzMissTok, *zzBadTok;
 SetWordType **zzMissSet;
 #endif
 {
-	if (zzdirty) {
-		zzCONSUME;
-	}
-	if (LA(1) != _t) {
-		*zzBadText = *zzMissText = LATEXT(1);
-		*zzMissTok = _t;
-		*zzBadTok = LA(1);
-		*zzMissSet = NULL;
-		return 0;
-	}
-	zzdirty = 1;
-	zzMakeAttr
-	return 1;
+    if (zzdirty) {
+        zzCONSUME;
+    }
+    if (LA(1) != _t) {
+        *zzBadText = *zzMissText = LATEXT(1);
+        *zzMissTok = _t;
+        *zzBadTok = LA(1);
+        *zzMissSet = NULL;
+        return 0;
+    }
+    zzdirty = 1;
+    zzMakeAttr return 1;
 }
 
 int
 #ifdef __USE_PROTOS
 _zzmatch_wsig(int _t)
 #else
-_zzmatch_wsig(_t)
-int _t;
+    _zzmatch_wsig(_t) int _t;
 
 #endif
 {
-	if (zzdirty) {
-		zzCONSUME;
-	}
-	if (LA(1) != _t) {
-		return 0;
-	}
-	zzdirty = 1;
-	zzMakeAttr
-	return 1;
+    if (zzdirty) {
+        zzCONSUME;
+    }
+    if (LA(1) != _t) {
+        return 0;
+    }
+    zzdirty = 1;
+    zzMakeAttr return 1;
 }
 
 #endif /*LL_K*/
@@ -583,8 +566,7 @@ _zzmatch(int _t, char **zzBadText, char **zzMissText,
          int *zzMissTok, int *zzBadTok,
          SetWordType **zzMissSet)
 #else
-_zzmatch(_t, zzBadText, zzMissText, zzMissTok, zzBadTok, zzMissSet)
-int _t;
+    _zzmatch(_t, zzBadText, zzMissText, zzMissTok, zzBadTok, zzMissSet) int _t;
 
 char **zzBadText;
 char **zzMissText;
@@ -592,31 +574,28 @@ int *zzMissTok, *zzBadTok;
 SetWordType **zzMissSet;
 #endif
 {
-	if (LA(1) != _t) {
-		*zzBadText = *zzMissText = LATEXT(1);
-		*zzMissTok = _t;
-		*zzBadTok = LA(1);
-		*zzMissSet = NULL;
-		return 0;
-	}
-	zzMakeAttr
-	return 1;
+    if (LA(1) != _t) {
+        *zzBadText = *zzMissText = LATEXT(1);
+        *zzMissTok = _t;
+        *zzBadTok = LA(1);
+        *zzMissSet = NULL;
+        return 0;
+    }
+    zzMakeAttr return 1;
 }
 
 int
 #ifdef __USE_PROTOS
 _zzmatch_wsig(int _t)
 #else
-_zzmatch_wsig(_t)
-int _t;
+    _zzmatch_wsig(_t) int _t;
 
 #endif
 {
-	if (LA(1) != _t) {
-		return 0;
-	}
-	zzMakeAttr
-	return 1;
+    if (LA(1) != _t) {
+        return 0;
+    }
+    zzMakeAttr return 1;
 }
 
 #endif /*DEMAND_LOOK*/
@@ -629,16 +608,15 @@ _inf_zzgettok(void)
 _inf_zzgettok()
 #endif
 {
-	if (zzinf_labase >= zzinf_last) {
-		NLA = zzEOF_TOKEN;
-		strcpy(NLATEXT, "");
-	}
-	else {
-		NLA = zzinf_tokens[zzinf_labase];
-		zzline = zzinf_line[zzinf_labase];  /* wrong in 1.21 */
-		strcpy(NLATEXT, zzinf_text[zzinf_labase]);
-		zzinf_labase++;
-	}
+    if (zzinf_labase >= zzinf_last) {
+        NLA = zzEOF_TOKEN;
+        strcpy(NLATEXT, "");
+    } else {
+        NLA = zzinf_tokens[zzinf_labase];
+        zzline = zzinf_line[zzinf_labase]; /* wrong in 1.21 */
+        strcpy(NLATEXT, zzinf_text[zzinf_labase]);
+        zzinf_labase++;
+    }
 }
 #endif
 
@@ -655,89 +633,88 @@ zzfill_inf_look(void)
 zzfill_inf_look()
 #endif
 {
-	int tok, line;
-	int zzinf_token_buffer_size = ZZINF_DEF_TOKEN_BUFFER_SIZE;
-	int zzinf_text_buffer_size = ZZINF_DEF_TEXT_BUFFER_SIZE;
-	int zzinf_text_buffer_index = 0;
-	int zzinf_lap = 0;
+    int tok, line;
+    int zzinf_token_buffer_size = ZZINF_DEF_TOKEN_BUFFER_SIZE;
+    int zzinf_text_buffer_size = ZZINF_DEF_TEXT_BUFFER_SIZE;
+    int zzinf_text_buffer_index = 0;
+    int zzinf_lap = 0;
 
-	/* allocate text/token buffers */
-	zzinf_text_buffer = (char *)malloc(zzinf_text_buffer_size);
-	if (zzinf_text_buffer == NULL) {
-		fprintf(stderr, "cannot allocate lookahead text buffer (%d bytes)\n",
-		        zzinf_text_buffer_size);
-		exit(PCCTS_EXIT_FAILURE);
-	}
-	zzinf_tokens = (int *)calloc(zzinf_token_buffer_size, sizeof(int));
-	if (zzinf_tokens == NULL) {
-		fprintf(stderr, "cannot allocate token buffer (%d tokens)\n",
-		        zzinf_token_buffer_size);
-		exit(PCCTS_EXIT_FAILURE);
-	}
-	zzinf_line = (int *)calloc(zzinf_token_buffer_size, sizeof(int));
-	if (zzinf_line == NULL) {
-		fprintf(stderr, "cannot allocate line buffer (%d ints)\n",
-		        zzinf_token_buffer_size);
-		exit(PCCTS_EXIT_FAILURE);
-	}
+    /* allocate text/token buffers */
+    zzinf_text_buffer = (char *)malloc(zzinf_text_buffer_size);
+    if (zzinf_text_buffer == NULL) {
+        fprintf(stderr, "cannot allocate lookahead text buffer (%d bytes)\n",
+                zzinf_text_buffer_size);
+        exit(PCCTS_EXIT_FAILURE);
+    }
+    zzinf_tokens = (int *)calloc(zzinf_token_buffer_size, sizeof(int));
+    if (zzinf_tokens == NULL) {
+        fprintf(stderr, "cannot allocate token buffer (%d tokens)\n",
+                zzinf_token_buffer_size);
+        exit(PCCTS_EXIT_FAILURE);
+    }
+    zzinf_line = (int *)calloc(zzinf_token_buffer_size, sizeof(int));
+    if (zzinf_line == NULL) {
+        fprintf(stderr, "cannot allocate line buffer (%d ints)\n",
+                zzinf_token_buffer_size);
+        exit(PCCTS_EXIT_FAILURE);
+    }
 
-	/* get tokens, copying text to text buffer */
-	zzinf_text_buffer_index = 0;
-	do {
-		zzgettok();
-		line = zzreal_line;
-		while (zzinf_lap >= zzinf_token_buffer_size) {
-			zzinf_token_buffer_size += ZZINF_BUFFER_TOKEN_CHUNK_SIZE;
-			zzinf_tokens = (int *)realloc(zzinf_tokens,
-			                              zzinf_token_buffer_size * sizeof(int));
-			if (zzinf_tokens == NULL) {
-				fprintf(stderr, "cannot allocate lookahead token buffer (%d tokens)\n",
-				        zzinf_token_buffer_size);
-				exit(PCCTS_EXIT_FAILURE);
-			}
-			zzinf_line = (int *)realloc(zzinf_line,
-			                            zzinf_token_buffer_size * sizeof(int));
-			if (zzinf_line == NULL) {
-				fprintf(stderr, "cannot allocate lookahead line buffer (%d ints)\n",
-				        zzinf_token_buffer_size);
-				exit(PCCTS_EXIT_FAILURE);
-			}
-		}
-		while ((zzinf_text_buffer_index + strlen(NLATEXT) + 1) >= zzinf_text_buffer_size) {
-			zzinf_text_buffer_size += ZZINF_BUFFER_TEXT_CHUNK_SIZE;
-			zzinf_text_buffer = (char *)realloc(zzinf_text_buffer,
-			                                    zzinf_text_buffer_size);
-			if (zzinf_text_buffer == NULL) {
-				fprintf(stderr, "cannot allocate lookahead text buffer (%d bytes)\n",
-				        zzinf_text_buffer_size);
-				exit(PCCTS_EXIT_FAILURE);
-			}
-		}
-		/* record token and text and line of input symbol */
-		tok = zzinf_tokens[zzinf_lap] = NLA;
-		strcpy(&zzinf_text_buffer[zzinf_text_buffer_index], NLATEXT);
-		zzinf_text_buffer_index += strlen(NLATEXT) + 1;
-		zzinf_line[zzinf_lap] = line;
-		zzinf_lap++;
-	}
-	while (tok != zzEOF_TOKEN);
-	zzinf_labase = 0;
-	zzinf_last = zzinf_lap - 1;
+    /* get tokens, copying text to text buffer */
+    zzinf_text_buffer_index = 0;
+    do {
+        zzgettok();
+        line = zzreal_line;
+        while (zzinf_lap >= zzinf_token_buffer_size) {
+            zzinf_token_buffer_size += ZZINF_BUFFER_TOKEN_CHUNK_SIZE;
+            zzinf_tokens = (int *)realloc(zzinf_tokens,
+                                          zzinf_token_buffer_size * sizeof(int));
+            if (zzinf_tokens == NULL) {
+                fprintf(stderr, "cannot allocate lookahead token buffer (%d tokens)\n",
+                        zzinf_token_buffer_size);
+                exit(PCCTS_EXIT_FAILURE);
+            }
+            zzinf_line = (int *)realloc(zzinf_line,
+                                        zzinf_token_buffer_size * sizeof(int));
+            if (zzinf_line == NULL) {
+                fprintf(stderr, "cannot allocate lookahead line buffer (%d ints)\n",
+                        zzinf_token_buffer_size);
+                exit(PCCTS_EXIT_FAILURE);
+            }
+        }
+        while ((zzinf_text_buffer_index + strlen(NLATEXT) + 1) >= zzinf_text_buffer_size) {
+            zzinf_text_buffer_size += ZZINF_BUFFER_TEXT_CHUNK_SIZE;
+            zzinf_text_buffer = (char *)realloc(zzinf_text_buffer,
+                                                zzinf_text_buffer_size);
+            if (zzinf_text_buffer == NULL) {
+                fprintf(stderr, "cannot allocate lookahead text buffer (%d bytes)\n",
+                        zzinf_text_buffer_size);
+                exit(PCCTS_EXIT_FAILURE);
+            }
+        }
+        /* record token and text and line of input symbol */
+        tok = zzinf_tokens[zzinf_lap] = NLA;
+        strcpy(&zzinf_text_buffer[zzinf_text_buffer_index], NLATEXT);
+        zzinf_text_buffer_index += strlen(NLATEXT) + 1;
+        zzinf_line[zzinf_lap] = line;
+        zzinf_lap++;
+    } while (tok != zzEOF_TOKEN);
+    zzinf_labase = 0;
+    zzinf_last = zzinf_lap - 1;
 
-	/* allocate ptrs to text of ith token */
-	zzinf_text = (char **)calloc(zzinf_last + 1, sizeof(char *));
-	if (zzinf_text == NULL) {
-		fprintf(stderr, "cannot allocate lookahead text buffer (%d)\n",
-		        zzinf_text_buffer_size);
-		exit(PCCTS_EXIT_FAILURE);
-	}
-	zzinf_text_buffer_index = 0;
-	zzinf_lap = 0;
-	/* set ptrs so that zzinf_text[i] is the text of the ith token found on input */
-	while (zzinf_lap <= zzinf_last) {
-		zzinf_text[zzinf_lap++] = &zzinf_text_buffer[zzinf_text_buffer_index];
-		zzinf_text_buffer_index += strlen(&zzinf_text_buffer[zzinf_text_buffer_index]) + 1;
-	}
+    /* allocate ptrs to text of ith token */
+    zzinf_text = (char **)calloc(zzinf_last + 1, sizeof(char *));
+    if (zzinf_text == NULL) {
+        fprintf(stderr, "cannot allocate lookahead text buffer (%d)\n",
+                zzinf_text_buffer_size);
+        exit(PCCTS_EXIT_FAILURE);
+    }
+    zzinf_text_buffer_index = 0;
+    zzinf_lap = 0;
+    /* set ptrs so that zzinf_text[i] is the text of the ith token found on input */
+    while (zzinf_lap <= zzinf_last) {
+        zzinf_text[zzinf_lap++] = &zzinf_text_buffer[zzinf_text_buffer_index];
+        zzinf_text_buffer_index += strlen(&zzinf_text_buffer[zzinf_text_buffer_index]) + 1;
+    }
 }
 #endif
 
@@ -747,8 +724,8 @@ _zzsetmatch(SetWordType *e, char **zzBadText, char **zzMissText,
             int *zzMissTok, int *zzBadTok,
             SetWordType **zzMissSet)
 #else
-_zzsetmatch(e, zzBadText, zzMissText, zzMissTok, zzBadTok, zzMissSet)
-SetWordType * e;
+    _zzsetmatch(e, zzBadText, zzMissText, zzMissTok, zzBadTok, zzMissSet)
+        SetWordType *e;
 
 char **zzBadText;
 char **zzMissText;
@@ -758,89 +735,86 @@ SetWordType **zzMissSet;
 {
 #ifdef DEMAND_LOOK
 #ifdef LL_K
-	if (zzdirty == LL_K) {
-		zzCONSUME;
-	}
+    if (zzdirty == LL_K) {
+        zzCONSUME;
+    }
 #else
-	if (zzdirty) {
-		zzCONSUME;
-	}
+    if (zzdirty) {
+        zzCONSUME;
+    }
 #endif
 #endif
-	if (!zzset_el((unsigned)LA(1), e)) {
-		*zzBadText = LATEXT(1);
-		*zzMissText = NULL;
-		*zzMissTok = 0;
-		*zzBadTok = LA(1);
-		*zzMissSet = e;
-		return 0;
-	}
+    if (!zzset_el((unsigned)LA(1), e)) {
+        *zzBadText = LATEXT(1);
+        *zzMissText = NULL;
+        *zzMissTok = 0;
+        *zzBadTok = LA(1);
+        *zzMissSet = e;
+        return 0;
+    }
 #ifdef DEMAND_LOOK
 #ifdef LL_K
-	zzdirty++;
+    zzdirty++;
 #else
-	zzdirty = 1;
+    zzdirty = 1;
 #endif
 #endif
-	zzMakeAttr
-	return 1;
+    zzMakeAttr return 1;
 }
 
 int
 #ifdef __USE_PROTOS
 _zzmatch_wdfltsig(int tokenWanted, SetWordType *whatFollows)
 #else
-_zzmatch_wdfltsig(tokenWanted, whatFollows)
-int tokenWanted;
+    _zzmatch_wdfltsig(tokenWanted, whatFollows) int tokenWanted;
 
 SetWordType *whatFollows;
 #endif
 {
 #ifdef DEMAND_LOOK
 #ifdef LL_K
-	if (zzdirty == LL_K) {
-		zzCONSUME;
-	}
+    if (zzdirty == LL_K) {
+        zzCONSUME;
+    }
 #else
-	if (zzdirty) {
-		zzCONSUME;
-	}
+    if (zzdirty) {
+        zzCONSUME;
+    }
 #endif
 #endif
 
-	if (LA(1) != tokenWanted) {
-		fprintf(stderr,
-		        "line %d: syntax error at \"%s\" missing %s\n",
-		        zzline,
-		        (LA(1) == zzEOF_TOKEN) ? "<eof>" : LATEXT(1),
-		        zztokens[tokenWanted]);
-		zzconsumeUntil(whatFollows);
-		return 0;
-	}
-	else {
-		zzMakeAttr
+    if (LA(1) != tokenWanted) {
+        fprintf(stderr,
+                "line %d: syntax error at \"%s\" missing %s\n",
+                zzline,
+                (LA(1) == zzEOF_TOKEN) ? "<eof>" : LATEXT(1),
+                zztokens[tokenWanted]);
+        zzconsumeUntil(whatFollows);
+        return 0;
+    } else {
+        zzMakeAttr
 #ifdef DEMAND_LOOK
 #ifdef LL_K
-		zzdirty++;
-		zzlabase++;
+        zzdirty++;
+        zzlabase++;
 #else
-		zzdirty = 1;
+        zzdirty = 1;
 #endif
 #else
-/*		zzCONSUME;		 consume if not demand lookahead */
+        /* zzCONSUME;*/ /*consume if not demand lookahead */
 #endif
-		return 1;
-	}
+        return 1;
+    }
 }
 
 int
 #ifdef __USE_PROTOS
 _zzsetmatch_wdfltsig(SetWordType *tokensWanted,
-                     int          tokenTypeOfSet,
+                     int tokenTypeOfSet,
                      SetWordType *whatFollows)
 #else
-_zzsetmatch_wdfltsig(tokensWanted, tokenTypeOfSet, whatFollows)
-SetWordType * tokensWanted;
+    _zzsetmatch_wdfltsig(tokensWanted, tokenTypeOfSet, whatFollows)
+        SetWordType *tokensWanted;
 
 int tokenTypeOfSet;
 SetWordType *whatFollows;
@@ -848,78 +822,75 @@ SetWordType *whatFollows;
 {
 #ifdef DEMAND_LOOK
 #ifdef LL_K
-	if (zzdirty == LL_K) {
-		zzCONSUME;
-	}
+    if (zzdirty == LL_K) {
+        zzCONSUME;
+    }
 #else
-	if (zzdirty) {
-		zzCONSUME;
-	}
+    if (zzdirty) {
+        zzCONSUME;
+    }
 #endif
 #endif
-	if (!zzset_el((unsigned)LA(1), tokensWanted)) {
-		fprintf(stderr,
-		        "line %d: syntax error at \"%s\" missing %s\n",
-		        zzline,
-		        (LA(1) == zzEOF_TOKEN) ? "<eof>" : LATEXT(1),
-		        zztokens[tokenTypeOfSet]);
-		zzconsumeUntil(whatFollows);
-		return 0;
-	}
-	else {
-		zzMakeAttr
+    if (!zzset_el((unsigned)LA(1), tokensWanted)) {
+        fprintf(stderr,
+                "line %d: syntax error at \"%s\" missing %s\n",
+                zzline,
+                (LA(1) == zzEOF_TOKEN) ? "<eof>" : LATEXT(1),
+                zztokens[tokenTypeOfSet]);
+        zzconsumeUntil(whatFollows);
+        return 0;
+    } else {
+        zzMakeAttr
 #ifdef DEMAND_LOOK
 #ifdef LL_K
-		zzdirty++;
-		zzlabase++;
+        zzdirty++;
+        zzlabase++;
 #else
-		zzdirty = 1;
+        zzdirty = 1;
 #endif
 #else
-/*		zzCONSUME;		consume if not demand lookahead */
+        /* zzCONSUME; */ /* consume if not demand lookahead */
 #endif
-		return 1;
-	}
+        return 1;
+    }
 }
 
 int
 #ifdef __USE_PROTOS
 _zzsetmatch_wsig(SetWordType *e)
 #else
-_zzsetmatch_wsig(e)
-SetWordType * e;
+    _zzsetmatch_wsig(e)
+        SetWordType *e;
 
 #endif
 {
 #ifdef DEMAND_LOOK
 #ifdef LL_K
-	if (zzdirty == LL_K) {
-		zzCONSUME;
-	}
+    if (zzdirty == LL_K) {
+        zzCONSUME;
+    }
 #else
-	if (zzdirty) {
-		zzCONSUME;
-	}
+    if (zzdirty) {
+        zzCONSUME;
+    }
 #endif
 #endif
-	if (!zzset_el((unsigned)LA(1), e)) {
-		return 0;
-	}
+    if (!zzset_el((unsigned)LA(1), e)) {
+        return 0;
+    }
 #ifdef DEMAND_LOOK
 #ifdef LL_K
-	zzdirty++;
+    zzdirty++;
 #else
-	zzdirty = 1;
+    zzdirty = 1;
 #endif
 #endif
-	zzMakeAttr
-	return 1;
+    zzMakeAttr return 1;
 }
 
 #ifdef USER_ZZMODE_STACK
 static int zzmstk[ZZMAXSTK] = {
-	-1
-};
+    -1};
 static int zzmdep = 0;
 static char zzmbuf[70];
 
@@ -927,19 +898,17 @@ void
 #ifdef __USE_PROTOS
 zzmpush(int m)
 #else
-zzmpush(m)
-int m;
+    zzmpush(m) int m;
 
 #endif
 {
-	if (zzmdep == ZZMAXSTK - 1) {
-		sprintf(zzmbuf, "Mode stack overflow ");
-		zzerr(zzmbuf);
-	}
-	else {
-		zzmstk[zzmdep++] = zzauto;
-		zzmode(m);
-	}
+    if (zzmdep == ZZMAXSTK - 1) {
+        sprintf(zzmbuf, "Mode stack overflow ");
+        zzerr(zzmbuf);
+    } else {
+        zzmstk[zzmdep++] = zzauto;
+        zzmode(m);
+    }
 }
 
 void
@@ -949,50 +918,47 @@ zzmpop(void)
 zzmpop()
 #endif
 {
-	if (zzmdep == 0) {
-		sprintf(zzmbuf, "Mode stack underflow ");
-		zzerr(zzmbuf);
-	}
-	else {
-		zzmdep--;
-		zzmode(zzmstk[zzmdep]);
-	}
+    if (zzmdep == 0) {
+        sprintf(zzmbuf, "Mode stack underflow ");
+        zzerr(zzmbuf);
+    } else {
+        zzmdep--;
+        zzmode(zzmstk[zzmdep]);
+    }
 }
 
 void
 #ifdef __USE_PROTOS
 zzsave_mode_stack(int modeStack[], int *modeLevel)
 #else
-zzsave_mode_stack(modeStack, modeLevel)
-int modeStack[];
+    zzsave_mode_stack(modeStack, modeLevel) int modeStack[];
 
 int *modeLevel;
 #endif
 {
-	int i;
-	memcpy(modeStack, zzmstk, sizeof(zzmstk));
-	*modeLevel = zzmdep;
-	zzmdep = 0;
+    int i;
+    memcpy(modeStack, zzmstk, sizeof(zzmstk));
+    *modeLevel = zzmdep;
+    zzmdep = 0;
 
-	return;
+    return;
 }
 
 void
 #ifdef __USE_PROTOS
 zzrestore_mode_stack(int modeStack[], int *modeLevel)
 #else
-zzrestore_mode_stack(modeStack, modeLevel)
-int modeStack[];
+    zzrestore_mode_stack(modeStack, modeLevel) int modeStack[];
 
 int *modeLevel;
 #endif
 {
-	int i;
+    int i;
 
-	memcpy(zzmstk, modeStack, sizeof(zzmstk));
-	zzmdep = *modeLevel;
+    memcpy(zzmstk, modeStack, sizeof(zzmstk));
+    zzmdep = *modeLevel;
 
-	return;
+    return;
 }
 #endif /* USER_ZZMODE_STACK */
 
