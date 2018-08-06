@@ -121,15 +121,15 @@
 #define T_STRING 139
 
 #ifdef __USE_PROTOS
-extern GID glyph(char * tok,int allowNotdef);
+extern GID glyph(char* tok, int allowNotdef);
 #else
 extern GID glyph();
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode * glyphClass(int named,char * gcname);
+extern GNode* glyphClass(int named, char* gcname);
 #else
-extern GNode * glyphClass();
+extern GNode* glyphClass();
 #endif
 
 #ifdef __USE_PROTOS
@@ -229,21 +229,21 @@ extern int anchor();
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode * pattern(int markedOK);
+extern GNode* pattern(int markedOK);
 #else
-extern GNode * pattern();
+extern GNode* pattern();
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode * pattern2(int markedOK,GNode** headP);
+extern GNode* pattern2(int markedOK, GNode** headP);
 #else
-extern GNode * pattern2();
+extern GNode* pattern2();
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode * pattern3(int markedOK,GNode** headP);
+extern GNode* pattern3(int markedOK, GNode** headP);
 #else
-extern GNode * pattern3();
+extern GNode* pattern3();
 #endif
 
 #ifdef __USE_PROTOS
@@ -295,21 +295,21 @@ extern void cvParameterBlock();
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode * cursive(int markedOK,GNode** headP);
+extern GNode* cursive(int markedOK, GNode** headP);
 #else
-extern GNode * cursive();
+extern GNode* cursive();
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode * baseToMark(int markedOK,GNode** headP);
+extern GNode* baseToMark(int markedOK, GNode** headP);
 #else
-extern GNode * baseToMark();
+extern GNode* baseToMark();
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode * ligatureMark(int markedOK,GNode** headP);
+extern GNode* ligatureMark(int markedOK, GNode** headP);
 #else
-extern GNode * ligatureMark();
+extern GNode* ligatureMark();
 #endif
 
 #ifdef __USE_PROTOS
@@ -331,7 +331,7 @@ extern void languageAssign();
 #endif
 
 #ifdef __USE_PROTOS
-void namedLookupFlagValue(unsigned short * val);
+void namedLookupFlagValue(unsigned short* val);
 #else
 extern void namedLookupFlagValue();
 #endif
@@ -385,7 +385,7 @@ extern void featureBlock();
 #endif
 
 #ifdef __USE_PROTOS
-void baseScript(int vert,long nTag);
+void baseScript(int vert, long nTag);
 #else
 extern void baseScript();
 #endif
@@ -409,9 +409,9 @@ extern void table_OS_2();
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode * glyphClassOptional(void);
+extern GNode* glyphClassOptional(void);
 #else
-extern GNode * glyphClassOptional();
+extern GNode* glyphClassOptional();
 #endif
 
 #ifdef __USE_PROTOS

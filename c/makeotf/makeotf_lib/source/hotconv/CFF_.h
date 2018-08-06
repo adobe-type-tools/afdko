@@ -1,12 +1,13 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-   This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. *//***********************************************************************/
+   This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+/***********************************************************************/
 
 #ifndef CFF__H
 #define CFF__H
 
 #include "common.h"
 
-#define CFF__   TAG('C', 'F', 'F', ' ')
+#define CFF__ TAG('C', 'F', 'F', ' ')
 
 /* Standard functions */
 void CFF_New(hotCtx g);

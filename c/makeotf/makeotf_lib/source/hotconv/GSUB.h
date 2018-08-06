@@ -1,6 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-   This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. *//***********************************************************************/
-
+   This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+/***********************************************************************/
 
 #ifndef GSUB_H
 #define GSUB_H
@@ -8,7 +8,7 @@
 #include "common.h"
 #include "feat.h"
 
-#define GSUB_   TAG('G', 'S', 'U', 'B')
+#define GSUB_ TAG('G', 'S', 'U', 'B')
 
 /* Standard functions */
 
@@ -25,15 +25,15 @@ void GSUBFeatureEnd(hotCtx g);
 
 /* Lookup types */
 enum {
-	GSUBSingle = 1,
-	GSUBMultiple,
-	GSUBAlternate,
-	GSUBLigature,
-	GSUBContext,
-	GSUBChain,
-	GSUBExtension,  /* Handled specially: it points to any of the above */
-	GSUBReverse,
-	GSUBFeatureNameParam,
+    GSUBSingle = 1,
+    GSUBMultiple,
+    GSUBAlternate,
+    GSUBLigature,
+    GSUBContext,
+    GSUBChain,
+    GSUBExtension, /* Handled specially: it points to any of the above */
+    GSUBReverse,
+    GSUBFeatureNameParam,
     GSUBCVParam,
 };
 
@@ -54,7 +54,7 @@ void GSUBAddCVParam(hotCtx g, void *param);
    glyphs.
                     target                replacement
                     ------                -----------
-   Single:			Single|Class          Single|Class
+   Single:          Single|Class          Single|Class
    Ligature:        Sequence              Single
    Alternate:       Single                Class
    Contextual:      Sequence              Single
@@ -65,8 +65,8 @@ void GSUBAddCVParam(hotCtx g, void *param);
 
    GSUBLookupBegin(g, GSUBLigature, 0, label, 0, 0);
 
-   GSUBRuleAdd(g, targ, repl);	// targ->("f")->("i"), repl->("fi")
-   GSUBRuleAdd(g, targ, repl);	// targ->("f")->("l"), repl->("fl")
+   GSUBRuleAdd(g, targ, repl); // targ->("f")->("i"), repl->("fi")
+   GSUBRuleAdd(g, targ, repl); // targ->("f")->("l"), repl->("fl")
 
    GSUBLookupEnd(g);
 

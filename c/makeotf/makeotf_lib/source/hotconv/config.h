@@ -52,17 +52,17 @@
  *  makefiles for this to work correctly.
  */
 #ifdef PC
-# if (defined(__WATCOM__) || defined(_WIN32) || defined(__WIN32__) || \
-    defined(__GNUC__) || defined(__GNUG__))
-#     ifndef PC32
-#        define PC32
-#     endif
-#  endif
+#if (defined(__WATCOM__) || defined(_WIN32) || defined(__WIN32__) || \
+     defined(__GNUC__) || defined(__GNUG__))
+#ifndef PC32
+#define PC32
+#endif
+#endif
 #endif
 
-/* MR1  10-Apr-97  Default for PC is short file names			            */
-/* MR1		   Default for non-PC is long file names                        */
-/* MR1		   Can override via command line option LONGFILENAMES           */
+/* MR1  10-Apr-97  Default for PC is short file names                        */
+/* MR1             Default for non-PC is long file names                     */
+/* MR1             Can override via command line option LONGFILENAMES        */
 
 #ifndef LONGFILENAMES
 #ifndef PC
@@ -71,39 +71,39 @@
 #endif
 
 #ifndef LONGFILENAMES
-#define ATOKEN_H            "AToken.h"
-#define ATOKPTR_H           "ATokPtr.h"
-#define ATOKPTR_C           "ATokPtr.cpp"
-#define ATOKENBUFFER_H      "ATokBuf.h"
-#define ATOKENBUFFER_C      "ATokBuf.cpp"
-#define ATOKENSTREAM_H      "ATokStr.h"
-#define APARSER_H           "AParser.h"
-#define APARSER_C           "AParser.cpp"
-#define ASTBASE_H           "ASTBase.h"
-#define ASTBASE_C           "ASTBase.cpp"
-#define PCCTSAST_C          "PCCTSAST.cpp"
-#define LIST_C              "List.cpp"
-#define DLEXERBASE_H        "DLexBase.h"
-#define DLEXERBASE_C        "DLexBase.cpp"
-#define DLEXER_C            "DLexer.cpp"
-#define STREESUPPORT_C      "STreeSup.C"
+#define ATOKEN_H "AToken.h"
+#define ATOKPTR_H "ATokPtr.h"
+#define ATOKPTR_C "ATokPtr.cpp"
+#define ATOKENBUFFER_H "ATokBuf.h"
+#define ATOKENBUFFER_C "ATokBuf.cpp"
+#define ATOKENSTREAM_H "ATokStr.h"
+#define APARSER_H "AParser.h"
+#define APARSER_C "AParser.cpp"
+#define ASTBASE_H "ASTBase.h"
+#define ASTBASE_C "ASTBase.cpp"
+#define PCCTSAST_C "PCCTSAST.cpp"
+#define LIST_C "List.cpp"
+#define DLEXERBASE_H "DLexBase.h"
+#define DLEXERBASE_C "DLexBase.cpp"
+#define DLEXER_C "DLexer.cpp"
+#define STREESUPPORT_C "STreeSup.C"
 #else
-#define ATOKEN_H            "AToken.h"
-#define ATOKPTR_H           "ATokPtr.h"
-#define ATOKPTR_C           "ATokPtr.cpp"
-#define ATOKENBUFFER_H      "ATokenBuffer.h"
-#define ATOKENBUFFER_C      "ATokenBuffer.cpp"
-#define ATOKENSTREAM_H      "ATokenStream.h"
-#define APARSER_H           "AParser.h"
-#define APARSER_C           "AParser.cpp"
-#define ASTBASE_H           "ASTBase.h"
-#define ASTBASE_C           "ASTBase.cpp"
-#define PCCTSAST_C          "PCCTSAST.cpp"
-#define LIST_C              "List.cpp"
-#define DLEXERBASE_H        "DLexerBase.h"
-#define DLEXERBASE_C        "DLexerBase.cpp"
-#define DLEXER_C            "DLexer.cpp"
-#define STREESUPPORT_C      "STreeSupport.cpp"
+#define ATOKEN_H "AToken.h"
+#define ATOKPTR_H "ATokPtr.h"
+#define ATOKPTR_C "ATokPtr.cpp"
+#define ATOKENBUFFER_H "ATokenBuffer.h"
+#define ATOKENBUFFER_C "ATokenBuffer.cpp"
+#define ATOKENSTREAM_H "ATokenStream.h"
+#define APARSER_H "AParser.h"
+#define APARSER_C "AParser.cpp"
+#define ASTBASE_H "ASTBase.h"
+#define ASTBASE_C "ASTBase.cpp"
+#define PCCTSAST_C "PCCTSAST.cpp"
+#define LIST_C "List.cpp"
+#define DLEXERBASE_H "DLexerBase.h"
+#define DLEXERBASE_C "DLexerBase.cpp"
+#define DLEXER_C "DLexer.cpp"
+#define STREESUPPORT_C "STreeSupport.cpp"
 #endif
 
 /* SORCERER Stuff */
@@ -111,46 +111,45 @@
 /* MR8 6-Aug-97     Change from ifdef PC to ifndef LONGFILENAMES            */
 
 #ifndef LONGFILENAMES
-#define STPARSER_H          "STreePar.h"
-#define STPARSER_C          "STreePar.C"
+#define STPARSER_H "STreePar.h"
+#define STPARSER_C "STreePar.C"
 #else
-#define STPARSER_H          "STreeParser.h"
-#define STPARSER_C          "STreeParser.cpp"
+#define STPARSER_H "STreeParser.h"
+#define STPARSER_C "STreeParser.cpp"
 #endif
 
 #ifdef MPW
-#define CPP_FILE_SUFFIX     ".cp"
-#define CPP_FILE_SUFFIX_NO_DOT  "cp"
-#define OBJ_FILE_SUFFIX     ".o"
+#define CPP_FILE_SUFFIX ".cp"
+#define CPP_FILE_SUFFIX_NO_DOT "cp"
+#define OBJ_FILE_SUFFIX ".o"
 #else
 #ifdef PC
-#define CPP_FILE_SUFFIX     ".cpp"
-#define CPP_FILE_SUFFIX_NO_DOT  "cpp"
-#define OBJ_FILE_SUFFIX     ".obj"
+#define CPP_FILE_SUFFIX ".cpp"
+#define CPP_FILE_SUFFIX_NO_DOT "cpp"
+#define OBJ_FILE_SUFFIX ".obj"
 #else
-#define CPP_FILE_SUFFIX     ".cpp"
-#define CPP_FILE_SUFFIX_NO_DOT  "cpp"
-#define OBJ_FILE_SUFFIX     ".o"
+#define CPP_FILE_SUFFIX ".cpp"
+#define CPP_FILE_SUFFIX_NO_DOT "cpp"
+#define OBJ_FILE_SUFFIX ".o"
 #endif
 #endif
 
-/* User may redefine how line information looks */     /* make it #line MR7 */
+/* User may redefine how line information looks */ /* make it #line MR7 */
 #define LineInfoFormatStr "#line %d \"%s\"\n"
-
 
 /* must assume old K&R cpp here, can't use #if defined(..)... */
 
 #ifdef MPW
-#define TopDirectory    ":"
+#define TopDirectory ":"
 #define DirectorySymbol ":"
 #define OutputDirectoryOption "Directory where all output files should go (default=\":\")"
 #else
 #ifdef PC
-#define TopDirectory    "."
+#define TopDirectory "."
 #define DirectorySymbol "\\"
 #define OutputDirectoryOption "Directory where all output files should go (default=\".\")"
 #else
-#define TopDirectory    "."
+#define TopDirectory "."
 #define DirectorySymbol "/"
 #define OutputDirectoryOption "Directory where all output files should go (default=\".\")"
 #endif
@@ -173,18 +172,18 @@ extern void fsetfileinfo(char *filename, unsigned long newcreator, unsigned long
 
 /* File creators for various popular development environments */
 
-#define MAC_FILE_CREATOR 'MPS '   /* MPW Text files */
+#define MAC_FILE_CREATOR 'MPS ' /* MPW Text files */
 #if 0
-#define MAC_FILE_CREATOR 'KAHL'   /* THINK C/Symantec C++ Text files */
+#define MAC_FILE_CREATOR 'KAHL' /* THINK C/Symantec C++ Text files */
 #endif
 #if 0
-#define MAC_FILE_CREATOR 'MMCC'   /* Metrowerks C/C++ Text files */
+#define MAC_FILE_CREATOR 'MMCC' /* Metrowerks C/C++ Text files */
 #endif
 
 #endif
 
 #ifdef MPW
-#define DAWDLE  SpinCursor(1)
+#define DAWDLE SpinCursor(1)
 #else
 #define DAWDLE
 #endif
@@ -200,8 +199,9 @@ inline
 #else
 static
 #endif
-void special_inits() {
-	InitCursorCtl((acurHandle)0);
+    void
+    special_inits() {
+    InitCursorCtl((acurHandle)0);
 }
 
 #endif
@@ -212,19 +212,20 @@ inline
 #else
 static
 #endif
-void special_fopen_actions(char * /* s */) {
-	fsetfileinfo(s, MAC_FILE_CREATOR, 'TEXT');
+    void
+    special_fopen_actions(char * /* s */) {
+    fsetfileinfo(s, MAC_FILE_CREATOR, 'TEXT');
 }
 
 #endif
 
 /* Define usable bits for set.c stuff */
-#define BytesPerWord    sizeof(unsigned)
+#define BytesPerWord sizeof(unsigned)
 #ifndef WORDSIZE
-#define WORDSIZE        (sizeof(unsigned) * 8)
+#define WORDSIZE (sizeof(unsigned) * 8)
 #endif
 #ifndef LogWordSize
-#define LogWordSize     (WORDSIZE == 16 ? 4 : 5)
+#define LogWordSize (WORDSIZE == 16 ? 4 : 5)
 #endif
 
 #ifndef TRUE
@@ -237,23 +238,23 @@ void special_fopen_actions(char * /* s */) {
 #ifdef VAXC
 #define PCCTS_EXIT_SUCCESS 1
 #define PCCTS_EXIT_FAILURE 0
-#define zzDIE       return 0;
-#define zzDONE  return 1;
+#define zzDIE return 0;
+#define zzDONE return 1;
 
 #else /* !VAXC */
 
 #define PCCTS_EXIT_SUCCESS 0
 #define PCCTS_EXIT_FAILURE 1
-#define zzDIE       return 1;
-#define zzDONE  return 0;
+#define zzDIE return 1;
+#define zzDONE return 0;
 
 #endif
 
 #ifdef USER_ZZMODE_STACK
-# ifndef ZZSTACK_MAX_MODE
-#  define  ZZSTACK_MAX_MODE 32
-# endif
-# define  ZZMAXSTK (ZZSTACK_MAX_MODE * 2)
+#ifndef ZZSTACK_MAX_MODE
+#define ZZSTACK_MAX_MODE 32
+#endif
+#define ZZMAXSTK (ZZSTACK_MAX_MODE * 2)
 #endif
 
 #endif

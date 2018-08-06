@@ -1,5 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-   This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. *//***********************************************************************/
+   This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+/***********************************************************************/
 
 #ifndef GDEF_H
 #define GDEF_H
@@ -7,7 +8,7 @@
 #include "common.h"
 #include "feat.h"
 
-#define GDEF_   TAG('G', 'D', 'E', 'F')
+#define GDEF_ TAG('G', 'D', 'E', 'F')
 #define kMaxMarkAttachClasses 15
 
 /* Standard functions */
@@ -27,6 +28,5 @@ int addLigCaretEntryGDEF(hotCtx g, GNode *glyphNode, unsigned short caretValue, 
 unsigned short addGlyphMarkClassGDEF(hotCtx g, GNode *markClass);
 
 unsigned short addMarkSetClassGDEF(hotCtx g, GNode *markClass);
-
 
 #endif /* GDEF_H */
