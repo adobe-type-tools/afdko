@@ -406,9 +406,9 @@ static void drawText(GlyphId glyphId, IntX lsb, IntX rsb, IntX width)
 	  sprintf(workstr, "318 96 moveto (BBox:  min = %.0f, %.0f  max = %.0f, %.0f) show\n"
 			 "318 84 moveto "
 			 "(SideBearings:  L = %.0f  R = %.0f  Width = %.0f) show\n",
-			 OUTPUT(h, cffgi->bbox.left), OUTPUT(v, cffgi->bbox.bottom),
-			 OUTPUT(h, cffgi->bbox.right), OUTPUT(v, cffgi->bbox.top),
-			 OUTPUT(h, lsb), OUTPUT(h, rsb), OUTPUT(h, width));
+			 round(OUTPUT(h, cffgi->bbox.left)), round(OUTPUT(v, cffgi->bbox.bottom)),
+			 round(OUTPUT(h, cffgi->bbox.right)), round(OUTPUT(v, cffgi->bbox.top)),
+			 round(OUTPUT(h, lsb)), round(OUTPUT(h, rsb)), round(OUTPUT(h, width)));
 	  proofPSOUT(cffproofctx, workstr);
 	  workstr[0] = '\0';
 	  sprintf(workstr, "318 72 moveto "
@@ -526,14 +526,14 @@ static void newPage(IntX page)
 			sprintf(workstr, "(Widths: %.0f units/em   [%s] ) show\n"
 			   "%g (%hu) stringwidth pop sub %g moveto (%hu) show\n"
 			   "/Helvetica-Narrow findfont %d scalefont setfont\n",
-			   OUTPUT(h, unitsPerEm), synopsis.title, 
+			   round(OUTPUT(h, unitsPerEm)), synopsis.title, 
 			   PAGE_WIDTH, synopsis.page, PAGE_HEIGHT + 9, synopsis.page,
 			   TEXT_SIZE);
 		else		
 			sprintf(workstr, "(CFF:%s  head vers: %.3f  Widths: %.0f units/em   %s) show\n"
 			   "%g (%hu) stringwidth pop sub %g moveto (%hu) show\n"
 			   "/Helvetica-Narrow findfont %d scalefont setfont\n",
-			   shortfilename, fontRevision, OUTPUT(h, unitsPerEm), date,
+			   shortfilename, fontRevision, round(OUTPUT(h, unitsPerEm)), date,
 			   PAGE_WIDTH, synopsis.page, PAGE_HEIGHT + 9, synopsis.page,
 			   TEXT_SIZE);
 	}
@@ -704,7 +704,7 @@ static void drawTic(IntX marks, Pelt A)
 		  {
 			workstr[0] = '\0';
 			sprintf(workstr, "(%.0f %.0f) stringwidth pop neg %g rmoveto\n",
-				   OUTPUT(h, Bx), OUTPUT(v, By), y);
+				   round(OUTPUT(h, Bx)), round(OUTPUT(v, By)), y);
 			proofPSOUT(cffproofctx, workstr);
 		  }
 
@@ -712,7 +712,7 @@ static void drawTic(IntX marks, Pelt A)
 		sprintf(workstr, "(%.0f %.0f) show\n"
 			   "0 setlinewidth stroke\n"
 			   "grestore %% tic\n", 
-				OUTPUT(h, Bx), OUTPUT(v, By));
+				round(OUTPUT(h, Bx)), round(OUTPUT(v, By)));
 		proofPSOUT(cffproofctx, workstr);
 		}
 	}
@@ -1158,8 +1158,8 @@ int CFF_DrawTile(GlyphId glyphId, Byte8 *code)
 	workstr[0] = '\0';
 	sprintf(workstr, "closepath 0 setlinewidth stroke\n"
 		   "%g (%.0f) stringwidth pop sub %g moveto (%.0f) show\n",
-		   synopsis.hTile + TILE_WIDTH - 1, OUTPUT(h, width), 
-		   synopsis.vTile - (TEXT_BASE + 1), OUTPUT(h, width));
+		   synopsis.hTile + TILE_WIDTH - 1, round(OUTPUT(h, width)), 
+		   synopsis.vTile - (TEXT_BASE + 1), round(OUTPUT(h, width)));
 	proofPSOUT(cffproofctx, workstr);
 
 	/* Draw [code/]glyphId */
