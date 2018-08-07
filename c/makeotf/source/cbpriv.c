@@ -1,6 +1,7 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
+#include <stdio.h>
 #include <stdarg.h>
 
 
@@ -9,7 +10,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 extern void myfatal(void *ctx);
 extern void message(void *ctx, int type, char *text);
-extern int vsprintf(char *, const char *, va_list);
 
 extern int KeepGoing;
 
