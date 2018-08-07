@@ -246,20 +246,10 @@ def test_bug494():
     The bug is that two subr's in the win output cff are swapped in
     index order from the Mac version. This is because of an unstable
     qsort done on the subroutines in the final stage of selection.
-    This test validates that the orders differ, before the code fix.
     """
-
-    import platform
-    platform_system = platform.system()
-    if platform_system == "Windows":
-        dump_differs = True
-    elif platform_system == "Darwin":
-        dump_differs = False
-    else:
-        assert 0, "Test does not support " + platform_system
 
     cff_path = runner(
         CMD + ['-o', 'cff', "*S", "std", "*b", '-f', 'bug494.cff'])
     dcf_txt_path = runner(CMD + ['-a', '-f', cff_path, '-o', 'dcf'])
     expected_path = _get_expected_path('bug494.dcf.txt')
-    assert (not dump_differs) == differ([expected_path, dcf_txt_path])
+    assert differ([expected_path, dcf_txt_path])
