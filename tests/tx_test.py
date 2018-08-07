@@ -236,3 +236,30 @@ def test_bug473():
     ufo_path = runner(CMD + ['-o', 'ufo', '-f', 'bug473.ufo', '-s', save_path])
     expected_path = _get_expected_path('bug473.ufo')
     assert differ([expected_path, ufo_path])
+
+
+def test_bug494():
+    """ The input file was made with the command:
+    tx -t1 -g 0-5
+        <github src path>/source-serif-pro/Roman/Instances/Regular/font.ufo
+        subr.cff
+    The bug is that two subr's in the win output cff are swapped in
+    index order from the Mac version. This is because of an unstable
+    qsort done on the subroutines in the final stage of selection.
+    This test validates that the orders differ, before the code fix.
+    """
+
+    import platform
+    platform_system = platform.system()
+    if platform_system == "Windows":
+        dump_differs = True
+    elif platform_system == "Darwin":
+        dump_differs = False
+    else:
+        assert 0, "Test does not support " + platform_system
+
+    cff_path = runner(
+        CMD + ['-o', 'cff', "*S", "std", "*b", '-f', 'bug494.cff'])
+    dcf_txt_path = runner(CMD + ['-a', '-f', cff_path, '-o', 'dcf'])
+    expected_path = _get_expected_path('bug494.dcf.txt')
+    assert (not dump_differs) == differ([expected_path, dcf_txt_path])
