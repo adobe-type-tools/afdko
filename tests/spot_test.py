@@ -61,10 +61,7 @@ def _get_expected_path(file_name):
     (['t', '_CFF_=6', 'c'], 'dump_CFF_=6c.ps'),
     (['t', '_CFF_=6', 'R'], 'dump_CFF_=6R.ps'),
     (['t', '_CFF_=6', 'g2,5-7'], 'dump_CFF_=6g.ps'),
-    # Fails on Windows, passes on Mac
-    # https://ci.appveyor.com/project/adobe-type-tools/afdko/build/1.0.217
-    # https://travis-ci.org/adobe-type-tools/afdko/builds/378601819
-    # (['t', '_CFF_=6', 's1.5,0.5'], 'dump_CFF_=6s.ps'),
+    (['t', '_CFF_=6', 's1.5,0.5'], 'dump_CFF_=6s.ps'),
     (['t', '_CFF_=6', 'b-10,-10,200,500', 'g4'], 'dump_CFF_=6b.ps'),
     (['t', '_CFF_=7'], 'dump_CFF_=7.ps'),
     (['t', '_CFF_=7', 'g2,5-7'], 'dump_CFF_=7g.ps'),
@@ -105,27 +102,3 @@ def test_bug465():
     actual_path = runner(CMD + ['-r', '-o', 't', '_GPOS=7', '-f', file_name])
     expected_path = _get_expected_path('bug465_otf.txt')
     assert differ([expected_path, actual_path])
-
-
-@pytest.mark.parametrize('args, exp_filename', [
-    # Fails on Windows, passes on Mac
-    # https://ci.appveyor.com/project/adobe-type-tools/afdko/build/1.0.217
-    # https://travis-ci.org/adobe-type-tools/afdko/builds/378601819
-    (['t', '_CFF_=6', 's1.5,0.5'], 'dump_CFF_=6s.ps'),
-])
-def test_bug469(args, exp_filename):
-    import platform
-    platform_system = platform.system()
-    if platform_system == "Windows":
-        dump_differs = True
-    elif platform_system == "Darwin":
-        dump_differs = False
-    else:
-        assert 0, "Test does not support " + platform_system
-
-    skip = ['318 764 moveto (' + SPLIT_MARKER + '72 750 moveto (']
-    if skip:
-        skip.insert(0, '-s')
-    actual_path = runner(CMD + ['-r', '-f', 'black.otf', '-o'] + args)
-    expected_path = _get_expected_path(exp_filename)
-    assert (not dump_differs) == differ([expected_path, actual_path] + skip)
