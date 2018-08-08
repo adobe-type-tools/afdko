@@ -1,0 +1,28 @@
+languagesystem DFLT dflt;
+
+@base_glyphs = [a b c];
+
+@above_base = [caron caron.alt];
+@below_base = [commabelowcmb brevebelowcmb];
+
+feature test {
+
+    lookup one {
+        lookupflag UseMarkFilteringSet @above_base;
+
+        sub a' @base_glyphs b by c;
+    } one;
+
+    lookup two {
+        lookupflag UseMarkFilteringSet @below_base;
+
+        sub b' @base_glyphs c by b;
+    } two;
+    
+    lookup three {
+        lookupflag UseMarkFilteringSet @below_base;
+
+        sub a @base_glyphs c' by a;
+    } three;
+
+} test;
