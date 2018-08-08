@@ -462,3 +462,17 @@ def test_bug497(opts):
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value=',
                    '-r', '^\s+Version.*;hotconv.*;makeotfexe'])
+
+
+def test_useMarkFilteringSet_flag_bug196():
+    input_filename = "bug196/bug196.pfa"
+    input_featurename = "bug196/bug196.fea"
+    actual_path = _get_temp_file_path()
+    ttx_filename = "bug196.ttx"
+    runner(CMD + ['-n', '-o',
+                  'f', '_{}'.format(_get_input_path(input_filename)),
+                  'ff', '_{}'.format(_get_input_path(input_featurename)),
+                  'o', '_{}'.format(actual_path)])
+    actual_ttx = _generate_ttx_dump(actual_path, ['GSUB'])
+    expected_ttx = _get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
