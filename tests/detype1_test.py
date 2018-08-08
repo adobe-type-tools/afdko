@@ -1,6 +1,9 @@
 from __future__ import print_function, division, absolute_import
 
 import os
+import platform
+import pytest
+import subprocess32 as subprocess
 
 from .runner import main as runner
 from .differ import main as differ
@@ -17,6 +20,24 @@ def _get_expected_path(file_name):
 # -----
 # Tests
 # -----
+
+@pytest.mark.parametrize('arg', ['-h', '-u'])
+def test_exit_known_option(arg):
+    if platform.system() == 'Windows':
+        tool_name = TOOL + '.exe'
+    else:
+        tool_name = TOOL
+    assert subprocess.call([tool_name, arg]) == 1
+
+
+@pytest.mark.parametrize('arg', ['-v', '-a'])
+def test_exit_unknown_option(arg):
+    if platform.system() == 'Windows':
+        tool_name = TOOL + '.exe'
+    else:
+        tool_name = TOOL
+    assert subprocess.call([tool_name, arg]) == 1
+
 
 def test_run_on_pfa_data():
     actual_path = runner(['-t', TOOL, '-f', 'type1.pfa'])
