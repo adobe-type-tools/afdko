@@ -61,10 +61,7 @@ def _get_expected_path(file_name):
     (['t', '_CFF_=6', 'c'], 'dump_CFF_=6c.ps'),
     (['t', '_CFF_=6', 'R'], 'dump_CFF_=6R.ps'),
     (['t', '_CFF_=6', 'g2,5-7'], 'dump_CFF_=6g.ps'),
-    # Fails on Windows, passes on Mac
-    # https://ci.appveyor.com/project/adobe-type-tools/afdko/build/1.0.217
-    # https://travis-ci.org/adobe-type-tools/afdko/builds/378601819
-    # (['t', '_CFF_=6', 's1.5,0.5'], 'dump_CFF_=6s.ps'),
+    (['t', '_CFF_=6', 's1.5,0.5'], 'dump_CFF_=6s.ps'),
     (['t', '_CFF_=6', 'b-10,-10,200,500', 'g4'], 'dump_CFF_=6b.ps'),
     (['t', '_CFF_=7'], 'dump_CFF_=7.ps'),
     (['t', '_CFF_=7', 'g2,5-7'], 'dump_CFF_=7g.ps'),
