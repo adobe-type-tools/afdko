@@ -30,7 +30,7 @@
       </FeatureRecord>
     </FeatureList>
     <LookupList>
-      <!-- LookupCount=4 -->
+      <!-- LookupCount=5 -->
       <Lookup index="0">
         <LookupType value="6"/>
         <LookupFlag value="16"/>
@@ -80,7 +80,7 @@
           <!-- SubstCount=1 -->
           <SubstLookupRecord index="0">
             <SequenceIndex value="0"/>
-            <LookupListIndex value="3"/>
+            <LookupListIndex value="4"/>
           </SubstLookupRecord>
         </ChainContextSubst>
         <MarkFilteringSet value="1"/>
@@ -107,7 +107,7 @@
           <!-- SubstCount=1 -->
           <SubstLookupRecord index="0">
             <SequenceIndex value="0"/>
-            <LookupListIndex value="3"/>
+            <LookupListIndex value="4"/>
           </SubstLookupRecord>
         </ChainContextSubst>
         <MarkFilteringSet value="1"/>
@@ -116,12 +116,20 @@
         <LookupType value="1"/>
         <LookupFlag value="16"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0" Format="2">
+        <SingleSubst index="0" Format="1">
           <Substitution in="a" out="c"/>
+        </SingleSubst>
+        <MarkFilteringSet value="0"/>
+      </Lookup>
+      <Lookup index="4">
+        <LookupType value="1"/>
+        <LookupFlag value="16"/>
+        <!-- SubTableCount=1 -->
+        <SingleSubst index="0" Format="2">
           <Substitution in="b" out="b"/>
           <Substitution in="c" out="a"/>
         </SingleSubst>
-        <MarkFilteringSet value="0"/>
+        <MarkFilteringSet value="1"/>
       </Lookup>
     </LookupList>
   </GSUB>

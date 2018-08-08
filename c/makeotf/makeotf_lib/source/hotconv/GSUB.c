@@ -2228,8 +2228,7 @@ static Label addAnonRule(hotCtx g, GSUBCtx h, GNode *pMarked, unsigned nMarked,
         int i = h->anonSubtable.cnt;
 
         si = dnaINDEX(h->anonSubtable, i - 1);
-        /* Don't need to match lkpFlag */
-        if (si->lkpType == lkpType && addToAnonSubtbl(g, h, si, targCp, replCp)) {
+        if ((si->lkpType == lkpType) && (si->lkpFlag == lkpFlag) && (si->markSetIndex == markSetIndex) && addToAnonSubtbl(g, h, si, targCp, replCp)) {
             return si->label;
         }
     }
