@@ -636,8 +636,9 @@ int main(int argc, char *argv[]) {
         detype1(fp1, fp2);
         fclose(fp1);
         fclose(fp2);
-    } else
+    } else {
         usage();
         return 1;
+    }
     return 0;
 }
