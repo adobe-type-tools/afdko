@@ -245,8 +245,7 @@ def test_bug494():
         subr.cff
     The bug is that two subr's in the win output cff are swapped in
     index order from the Mac version. This is because of an unstable
-    qsort done on the subroutines in the final stage of selection.
-    """
+    qsort done on the subroutines in the final stage of selection."""
 
     cff_path = runner(
         CMD + ['-o', 'cff', "*S", "std", "*b", '-f', 'bug494.cff'])
