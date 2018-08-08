@@ -21,16 +21,16 @@ def _get_expected_path(file_name):
 # Tests
 # -----
 
-@pytest.mark.parametrize('arg', ['-h', '-u'])
+@pytest.mark.parametrize('arg', ['-h'])
 def test_exit_known_option(arg):
     if platform.system() == 'Windows':
         tool_name = TOOL + '.exe'
     else:
         tool_name = TOOL
-    assert subprocess.call([tool_name, arg]) == 1
+    assert subprocess.call([tool_name, arg]) == 0
 
 
-@pytest.mark.parametrize('arg', ['-v', '-a'])
+@pytest.mark.parametrize('arg', ['-v', '-u'])
 def test_exit_unknown_option(arg):
     if platform.system() == 'Windows':
         tool_name = TOOL + '.exe'

@@ -534,8 +534,7 @@ static void detype1(FILE *fp1, FILE *fp2) {
  */
 
 static void usage(void) {
-    fprintf(stderr, "usage: detype1 [font [text]]\n");
-    exit(1);
+    printf("usage: detype1 [font [text]]\n");
 }
 
 #ifndef _MSC_VER /* unix */
@@ -593,10 +592,14 @@ int getopt(int argc, char **argv, char *opstring) {
 
 int main(int argc, char *argv[]) {
     int c;
-    while ((c = getopt(argc, argv, "?uh")) != EOF)
+    while ((c = getopt(argc, argv, "h")) != EOF)
         switch (c) {
+            case 'h':
+                usage();
+                exit(0);
             default:
                 usage();
+                exit(1);
         }
     if (optind == argc) {
 #if _MSC_VER
@@ -635,5 +638,6 @@ int main(int argc, char *argv[]) {
         fclose(fp2);
     } else
         usage();
+        return 1;
     return 0;
 }
