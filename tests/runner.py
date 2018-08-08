@@ -17,7 +17,7 @@ import subprocess32 as subprocess
 import sys
 import tempfile
 
-__version__ = '0.5.3'
+__version__ = '0.5.4'
 
 logger = logging.getLogger('runner')
 
@@ -104,11 +104,9 @@ def _check_tool(tool_name):
     """
     if platform.system() == 'Windows':
         tool_name += '.exe'
-    # XXX start hack to bypass these issues
-    # https://github.com/adobe-type-tools/afdko/issues/347
+    # XXX start hack to bypass this issue
     # https://github.com/adobe-type-tools/afdko/issues/348
-    if tool_name.split('.')[0] in ('sfntdiff', 'sfntedit', 'makeotfexe',
-                                   'type1'):
+    if tool_name.split('.')[0] in ('sfntdiff', 'sfntedit', 'makeotfexe'):
         return tool_name
     # XXX end hack
     try:

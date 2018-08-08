@@ -428,8 +428,7 @@ for(;;){
  */
 
 static void usage(void) {
-	fprintf(stderr, "usage: type1 [text [font]]\n");
-	exit(1);
+	printf("usage: type1 [text [font]]\n");
 }
 
 #ifndef _MSC_VER  /* unix */
@@ -486,11 +485,16 @@ int getopt  (int argc, char **argv, char *opstring) {
 #endif /* getopt(3) definition for dos */
 
 int main(int argc, char *argv[]) {
-	int c;
-        while ((c = getopt(argc, argv, "?")) != EOF)
-                switch (c) {
-                default:        usage();
-                }
+    int c;
+    while ((c = getopt(argc, argv, "h")) != EOF)
+        switch (c) {
+            case 'h':
+                usage();
+                exit(0);
+            default:
+                usage();
+                exit(1);
+        }
         if (optind == argc){
 #if _MSC_VER
                 _setmode(_fileno(stdin),_O_BINARY);
@@ -526,7 +530,9 @@ int main(int argc, char *argv[]) {
                 type1(fp1,fp2);
 				fclose(fp1);
 				fclose(fp2);
-	} else
-		usage();
-	return 0;
+    } else {
+        usage();
+        return 1;
+    }
+    return 0;
 }
