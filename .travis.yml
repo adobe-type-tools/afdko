@@ -55,6 +55,7 @@ matrix:
         - cpplint --recursive --quiet c/detype1
         - cpplint --recursive --quiet c/makeotf/makeotf_lib/source/cffread
         - cpplint --recursive --quiet c/makeotf/makeotf_lib/source/hotconv
+        - cpplint --recursive --quiet c/type1
       script:
         - python setup.py bdist_wheel
         - deactivate

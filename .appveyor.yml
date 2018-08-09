@@ -36,6 +36,7 @@ before_build:
   - cpplint --recursive --quiet c\detype1
   - cpplint --recursive --quiet c\makeotf\makeotf_lib\source\cffread
   - cpplint --recursive --quiet c\makeotf\makeotf_lib\source\hotconv
+  - cpplint --recursive --quiet c\type1
 
 # to run your custom scripts instead of automatic MSBuild
 build_script:
