@@ -67,17 +67,6 @@ void nameRead(LongN start, Card32 length)
 	loaded = 1;
 }
 
-/* Compare nameRecord offsets and lengths */
-static int cmpOffsets(const void *a, const void *b)
-	{
-	NameRecord *first = &name->record[*(Card16 *)a];
-	NameRecord *second = &name->record[*(Card16 *)b];
-	IntX cmp = first->offset - second->offset;
-	if (cmp != 0)
-		return cmp;
-	return first->length - second->length;
-	}
-
 /* Dump string */
 static void dumpString(NameRecord *record, IntX level)
 	{
@@ -154,19 +143,12 @@ static void makeString(NameRecord *record, Byte8 *str)
 void nameDump(IntX level, LongN start)
 	{
 	IntX i;
-	Card16 *index;
 	IntX lastOffset;
 	IntX lastLength;
 	if (level == 3)
 	{
 		DL(2, (OUTPUTBUFF, "### [name] \n"));
 		
-		/* Build nameRecord index sorted by offset */
-		index = memNew(sizeof(index[0]) * name->count);
-		for (i = 0; i < name->count; i++)
-			index[i] = i;
-		qsort(index, name->count, sizeof(index[0]), cmpOffsets);
-
 		/* Dump string table (unique strings only) */
 		lastOffset = -1;
 		lastLength = -1;
@@ -174,7 +156,7 @@ void nameDump(IntX level, LongN start)
 			   "{platformId,scriptId,languageId,nameId,length,offset} = <name value>\n"));
 		for (i = 0; i < name->count; i++)
 		{
-			NameRecord *record = &name->record[index[i]];
+			NameRecord *record = &name->record[i];
 			DL(2, (OUTPUTBUFF, "[%2d]={%2hx,%2hx,%4hx,%4hu,%4hu,%04hx} ", i,
 				   record->platformId, record->scriptId, record->languageId,
 				   record->nameId, record->length, record->offset));
@@ -240,19 +222,13 @@ void nameDump(IntX level, LongN start)
 			DL(2, (OUTPUTBUFF, "\n"));
 			}
 
-		/* Build nameRecord index sorted by offset */
-		index = memNew(sizeof(index[0]) * name->count);
-		for (i = 0; i < name->count; i++)
-			index[i] = i;
-		qsort(index, name->count, sizeof(index[0]), cmpOffsets);
-
 		/* Dump string table (unique strings only) */
 		DL(2, (OUTPUTBUFF, "--- string[name string offset]=<string>\n"));
 		lastOffset = -1;
 		lastLength = -1;
 		for (i = 0; i < name->count; i++)
 			{
-			NameRecord *record = &name->record[index[i]];
+			NameRecord *record = &name->record[i];
 
 			if (lastOffset != record->offset || lastLength != record->length)
 				{
@@ -276,9 +252,8 @@ void nameDump(IntX level, LongN start)
 			dumpLanguageTagString(record, level);
 			}
 	}
-
-	memFree(index);
 	}
+
 void nameFree(void)
 	{
 	if (!loaded)

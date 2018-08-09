@@ -51,10 +51,7 @@ def _get_expected_path(file_name):
     (['t', '_hmtx=7'], 'dump_hmtx=7.txt'),
     (['t', '_hmtx=8'], 'dump_hmtx=8.txt'),
     (['t', '_name=2'], 'dump_name=2.txt'),
-    # Fails on Windows, passes on Mac
-    # https://ci.appveyor.com/project/adobe-type-tools/afdko/build/1.0.217
-    # https://travis-ci.org/adobe-type-tools/afdko/builds/378601819
-    # (['t', '_name=3'], 'dump_name=3.txt'),
+    (['t', '_name=3'], 'dump_name=3.txt'),
     (['t', '_name=4'], 'dump_name=4.txt'),
     (['t', '_CFF_=6'], 'dump_CFF_=6.ps'),
     (['t', '_CFF_=6', 'a'], 'dump_CFF_=6a.ps'),
