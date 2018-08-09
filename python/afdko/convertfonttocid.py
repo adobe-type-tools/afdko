@@ -1012,7 +1012,7 @@ def merge_fonts(inputFontPath, outputPath, fontList, glyphList, fontDictList,
         log = fdkutils.runShellCmd(command)
         if "rror" in log:
             raise FontInfoParseError(
-                "Error merging font %s. Log: %s." % (fontPath, log))
+                "Error running command '%s'\nLog: %s" % (command, log))
 
         lastFont = dstPath
 

@@ -2779,9 +2779,7 @@ def runMakeOTF(makeOTFParams):
 
         except(convertfonttocid.FontInfoParseError,
                convertfonttocid.FontParseError):
-            print("makeotf [Error] Failed to convert font '%s' to CID." %
-                  outputPath)
-            raise MakeOTFRunError
+            raise
 
         if not os.path.exists(outputPath):
             print("makeotf [Error] Failed to convert font '%s' to CID." %
