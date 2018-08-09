@@ -102,3 +102,27 @@ def test_bug465():
     actual_path = runner(CMD + ['-r', '-o', 't', '_GPOS=7', '-f', file_name])
     expected_path = _get_expected_path('bug465_otf.txt')
     assert differ([expected_path, actual_path])
+
+
+@pytest.mark.parametrize('args, exp_filename', [(['t', '_name=3'], 'dump_name=3.txt')])
+def test_bug468(args, exp_filename):
+    """ verify that with current code, this test fails on Windows.
+    Using the same logic as test_options().
+    spot currently sorts the name records by offset to the string, rather
+    than name record order. If the offsets for two different names are the same,
+    then the qsort is unstable, and Windows sorts differently than Mac.
+    The fix is to NOT sort, and report the records by name record order.
+    """
+
+    import platform
+    platform_system = platform.system()
+    if platform_system == "Windows":
+        dump_differs = True
+    elif platform_system == "Darwin":
+        dump_differs = False
+    else:
+        assert 0, "Test does not support " + platform_system
+
+    actual_path = runner(CMD + ['-r', '-f', 'black.otf', '-o'] + args)
+    expected_path = _get_expected_path(exp_filename)
+    assert (not dump_differs) == differ([expected_path, actual_path])
