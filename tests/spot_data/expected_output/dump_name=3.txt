@@ -2,9 +2,9 @@
 --- record[index]={platformId,scriptId,languageId,nameId,length,offset} = <name value>
 [ 0]={ 3, 1, 409,   0, 224,0000} [0000]=<Copyright 2010, 2012, 2014 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name \2018Source\2019.>
 [ 1]={ 3, 1, 409,   1,  42,00e0} [00e0]=<Source Sans Pro Black>
-[ 2]={ 3, 1, 409,   4,  42,00e0} [00e0]=<Source Sans Pro Black>
-[ 3]={ 3, 1, 409,   2,  14,010a} [010a]=<Regular>
-[ 4]={ 3, 1, 409,   3,  72,0118} [0118]=<2.020;ADBO;SourceSansPro-Black;ADOBE>
+[ 2]={ 3, 1, 409,   2,  14,010a} [010a]=<Regular>
+[ 3]={ 3, 1, 409,   3,  72,0118} [0118]=<2.020;ADBO;SourceSansPro-Black;ADOBE>
+[ 4]={ 3, 1, 409,   4,  42,00e0} [00e0]=<Source Sans Pro Black>
 [ 5]={ 3, 1, 409,   5, 112,0160} [0160]=<Version 2.020;PS 2.0;hotconv 1.0.86;makeotf.lib2.5.63406>
 [ 6]={ 3, 1, 409,   6,  38,01d0} [01d0]=<SourceSansPro-Black>
 [ 7]={ 3, 1, 409,   7, 192,01f6} [01f6]=<Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries.>

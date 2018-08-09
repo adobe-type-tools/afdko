@@ -29,6 +29,7 @@ stringOffset=00f6
 [00e0]=<Source Sans Pro Black>
 [010a]=<Regular>
 [0118]=<2.020;ADBO;SourceSansPro-Black;ADOBE>
+[00e0]=<Source Sans Pro Black>
 [0160]=<Version 2.020;PS 2.0;hotconv 1.0.86;makeotf.lib2.5.63406>
 [01d0]=<SourceSansPro-Black>
 [01f6]=<Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries.>
