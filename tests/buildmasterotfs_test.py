@@ -59,4 +59,5 @@ def test_cjk_var():
                        '<ttFont sfntVersion' + SPLIT_MARKER +
                        '    <checkSumAdjustment value=' + SPLIT_MARKER +
                        '    <created value=' + SPLIT_MARKER +
-                       '    <modified value='])
+                       '    <modified value=',
+                       '-r', '^\s+Version.*;hotconv.*;makeotfexe'])
