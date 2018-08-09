@@ -1,0 +1,5 @@
+table GDEF {
+    GlyphClassDef , [f_i f_f_i], , ;
+    LigatureCaretByIndex f_f_i 77 101;
+    LigatureCaretByIndex f_i 55;
+} GDEF;
