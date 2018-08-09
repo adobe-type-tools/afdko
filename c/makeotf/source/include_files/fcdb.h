@@ -1,5 +1,7 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. *//***********************************************************************/
+This software is licensed as OpenSource, under the Apache License, Version 2.0.
+This license is available at: http://opensource.org/licenses/Apache-2.0. */
+/***********************************************************************/
 
 #ifndef FCDB_H
 #define FCDB_H
@@ -34,13 +36,12 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 typedef struct fcdbCallbacks_ fcdbCallbacks;
 typedef struct fcdbCtx_ *fcdbCtx;
-enum
-    {
+enum {
     fcdbStyleBold = 1,
     fcdbStyleItalic,
     fcdbStyleBoldItalic
-    };
-  
+};
+
 fcdbCtx fcdbNew(fcdbCallbacks *cb, void *dna_ctx);
 
 /* fcdbNew() initializes the library and returns an opaque context that is
@@ -49,17 +50,16 @@ fcdbCtx fcdbNew(fcdbCallbacks *cb, void *dna_ctx);
    of callback functions to the library via the cb argument which is an
    fcdbCallbacks data structure whose fields are described below. */
 
-struct fcdbCallbacks_
-    {
+struct fcdbCallbacks_ {
     void *ctx;
-    
-/* [Optional] ctx is a client context that is passed back to the client as the
+
+    /* [Optional] ctx is a client context that is passed back to the client as the
    first argument to each callback function. It is intended to be used in
    multi-threaded environments. */
 
     char *(*refill)(void *ctx, unsigned fileid, size_t *count);
 
-/* [Required] refill() is called in order to refill the library's database
+    /* [Required] refill() is called in order to refill the library's database
    input buffer. It is called in response to a client call to fcdbAddFile(). It
    returns a pointer to the new data and the count of the number of bytes of
    new data available via the count argument. The client must arrange that
@@ -70,10 +70,10 @@ struct fcdbCallbacks_
    returned buffer. (A client might implement refill() with fread() and fill
    buffers of BUFSIZ bytes.) */
 
-    void (*getbuf)(void *ctx, 
+    void (*getbuf)(void *ctx,
                    unsigned fileid, long offset, long length, char *buf);
 
-/* [Required] getbuf() is called in order to retrieve the data associated with
+    /* [Required] getbuf() is called in order to retrieve the data associated with
    a particular database record. It is called in response to a client call to
    fcdbGetRec(). The client must copy length bytes of data into buf (which is
    guaranteed to be length-bytes long) from the database file identified by
@@ -82,22 +82,22 @@ struct fcdbCallbacks_
    fseek(), with a SEEK_SET argument, and then fread().) */
 
     int (*addname)(void *ctx,
-                    unsigned short platformId, unsigned short platspecId,
-                    unsigned short languageId, unsigned short nameId,
-                    char *str);
+                   unsigned short platformId, unsigned short platspecId,
+                   unsigned short languageId, unsigned short nameId,
+                   char *str);
 
-/* [Optional] addname() is called in order to pass back name data to the
+    /* [Optional] addname() is called in order to pass back name data to the
    client. It is called in response to a client call to fcdbGetRec() during the
    record parse and may be called several times, once per name, for each call
    to fcdbGetRec(). The platformId, platspecId, languageId, and nameId
    arguments correspond to name attributes in the sfnt name table. The str
    argument points to a null-terminated name string extracted from the database
    file. Return 0 on success and 1 on failure (for example if the string fails
-   validation). */ 
+   validation). */
 
     void (*addlink)(void *ctx, int style, char *fontname);
 
-/* [Optional] addlink() is called in order to pass back the style and linked
+    /* [Optional] addlink() is called in order to pass back the style and linked
    FontName to the client. It is called in response to a client call to
    fcdbGetRec() during the record parse and may be called up to 3 times, once
    per style. The style argument encodes the style as a number that may be
@@ -107,7 +107,7 @@ struct fcdbCallbacks_
 
     void (*addenc)(void *ctx, int code, char *gname);
 
-/* [Optional] addenc() is called in order to pass back encoding data to the
+    /* [Optional] addenc() is called in order to pass back encoding data to the
    client. It is called in response to a client call to fcdbGetRec() during the
    record parse and may be called several times, once per encoding, for each
    call to fcdbGetRec(). The code argument is the encoding in the range 0-255
@@ -116,10 +116,9 @@ struct fcdbCallbacks_
 
     void (*error)(void *ctx, unsigned fileid, long line, int errid);
 
-/* Required. Indicates which version of syntax is being used. */
-	void (*setMenuVersion)(void *ctx, unsigned fileid, unsigned short syntaxVersion);	
-
-	};
+    /* Required. Indicates which version of syntax is being used. */
+    void (*setMenuVersion)(void *ctx, unsigned fileid, unsigned short syntaxVersion);
+};
 
 /* [Required] error() is called to report error conditions that may arise as a
    result of calling fcdbAddFile() or fcdbGetRec(). The fileid argument
@@ -127,18 +126,17 @@ struct fcdbCallbacks_
    the line number in that file where the error occurred. The errid argument
    may be one of the following values: */
 
-enum 
-    {
-    fcdbSyntaxErr,      /* Syntax error */
-    fcdbDuplicateErr,   /* Duplicate record */
-    fcdbKeyLengthErr,   /* Maximum record key length exceeded (63 chars) */
-    fcdbIdRangeErr,     /* Name id range exceeded (0-65535) */
-    fcdbCodeRangeErr,   /* Code range exceeded (0-255) */
-    fcdbEmptyNameErr,   /* Empty name string */
-	fcdbWinCompatibleFullError, /* The version 2 syntax is allowed only for Mac platform */
-	fcdbMixedSyntax, /* Both version 1 and 2 font menu name syntax is present in the file */
+enum {
+    fcdbSyntaxErr,              /* Syntax error */
+    fcdbDuplicateErr,           /* Duplicate record */
+    fcdbKeyLengthErr,           /* Maximum record key length exceeded (63 chars) */
+    fcdbIdRangeErr,             /* Name id range exceeded (0-65535) */
+    fcdbCodeRangeErr,           /* Code range exceeded (0-255) */
+    fcdbEmptyNameErr,           /* Empty name string */
+    fcdbWinCompatibleFullError, /* The version 2 syntax is allowed only for Mac platform */
+    fcdbMixedSyntax,            /* Both version 1 and 2 font menu name syntax is present in the file */
     fcdbErrCnt
-    };
+};
 
 /* The fcdbDuplicateErr error is reported when record with a key (FontName)
    that matched an earlier key was found. The second and subsequent duplicate
@@ -160,7 +158,6 @@ int fcdbGetRec(fcdbCtx h, char *FontName);
    from the record. Functions cb.addname() and cb.addenc() pass names as null
    terminated string pointers back to the client. These pointers are guaranteed
    to remain stable until a subsequent call to fcdbGetRec(). */
-
 
 void fcdbFree(fcdbCtx h);
 
@@ -346,4 +343,3 @@ void fcdbFree(fcdbCtx h);
 	*/
 
 #endif /* FCDB_H */
-
