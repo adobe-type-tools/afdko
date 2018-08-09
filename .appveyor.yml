@@ -34,8 +34,7 @@ before_build:
   - flake8 python\afdko\ufotools.py
   - cpplint --recursive --quiet c\autohint
   - cpplint --recursive --quiet c\detype1
-  - cpplint --recursive --quiet c\makeotf\makeotf_lib\source\cffread
-  - cpplint --recursive --quiet c\makeotf\makeotf_lib\source\hotconv
+  - cpplint --recursive --quiet c\makeotf\makeotf_lib\source
   - cpplint --recursive --quiet c\type1
 
 # to run your custom scripts instead of automatic MSBuild
