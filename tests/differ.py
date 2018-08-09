@@ -14,11 +14,12 @@ import difflib
 import filecmp
 import logging
 import os
+import re
 import sys
 
 from fontTools.misc.py23 import open
 
-__version__ = '0.2.5'
+__version__ = '0.3.0'
 
 logger = logging.getLogger('differ')
 
@@ -39,6 +40,8 @@ class Differ(object):
         self.skip_strings = opts.skip_strings
         # tuple of integers for the line numbers to skip
         self.skip_lines = opts.skip_lines
+        # regex pattern matching the beginning of line
+        self.skip_regex = opts.skip_regex
         self.encoding = opts.encoding
 
     def diff_paths(self):
@@ -97,9 +100,11 @@ class Differ(object):
                     elif i in self.skip_lines:
                         logger.debug("Matched line #{}. Skipped: {}"
                                      "".format(i, line.rstrip()))
-                        # Blank the line instead of actually skipping (via
-                        # 'continue'); this way the difflib results show the
-                        # correct line numbers
+                        line = ''
+                    # Skip lines that match regex
+                    elif self.skip_regex and self.skip_regex.match(line):
+                        logger.debug("Matched regex begin of line. Skipped: {}"
+                                     "".format(line.rstrip()))
                         line = ''
                     # Use os-native line separator to enable running difflib
                     lines.append(line.rstrip() + os.linesep)
@@ -283,6 +288,17 @@ def _split_linenumber_sequence(str_seq):
     return tuple(_convert_seq_to_ints(num_seq))
 
 
+def _compile_regex(str_seq):
+    if str_seq[0] != '^':
+        raise argparse.ArgumentTypeError(
+            "The expression must start with the caret '^' character")
+    try:
+        return re.compile(str_seq)
+    except re.error as err:
+        raise argparse.ArgumentTypeError(
+            'The expression is invalid: {}'.format(err))
+
+
 def get_options(args):
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
@@ -329,6 +345,16 @@ def get_options(args):
              'For a line delta, use a plus (+) between two numbers.'
     )
     parser.add_argument(
+        '-r',
+        '--regex',
+        dest='skip_regex',
+        type=_compile_regex,
+        help='regular expression matching the beginning of a line to skip\n'
+             "The expression must start with the caret '^' character, "
+             'and characters such as backslash, semicolon, and space need '
+             'to be escaped.'
+    )
+    parser.add_argument(
         '-e',
         '--encoding',
         default=DFLT_ENC,
@@ -364,6 +390,8 @@ def get_options(args):
                          _get_path_kind(options.path2)))
 
     logger.debug("Line numbers: {}".format(options.skip_lines))
+    logger.debug("Regular expression: {}".format(
+        getattr(options.skip_regex, 'pattern', None)))
 
     return options
 
