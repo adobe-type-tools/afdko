@@ -1,23 +1,24 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. *//***********************************************************************/
+This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+/***********************************************************************/
 
 #ifndef HOT_H
 #define HOT_H
 
-#include <stddef.h>             /* For size_t */
-#include <stdint.h>             /* For int32_t */
+#include <stddef.h> /* For size_t */
+#include <stdint.h> /* For int32_t */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define HOT_VERSION 0x01006D /* Library version (1.0.109) */
-/* 	Major, minor, build = (HOT_VERSION >> 16) & 0xff, (HOT_VERSION >> 8) & 0xff, HOT_VERSION & 0xff) */
-/*Warning: this string is now part of heuristic used by CoolType to identify the
+/* Major, minor, build = (HOT_VERSION >> 16) & 0xff, (HOT_VERSION >> 8) & 0xff, HOT_VERSION & 0xff) */
+/* Warning: this string is now part of heuristic used by CoolType to identify the
 first round of CoolType fonts which had the backtrack sequence of a chaining 
 contextual substitution ordered incorrectly.  Fonts with the old ordering MUST match
 the regex:
-	 "(Version|OTF) 1.+;Core 1\.0\..+;makeotflib1\."
+    "(Version|OTF) 1.+;Core 1\.0\..+;makeotflib1\."
 inside the (1,0,0) nameID 5 "Version: string. */
 
 /***********************************************************************/
@@ -175,48 +176,45 @@ hotCtx hotNew(hotCallbacks *cb);
    BUFSIZ would be a good choice because it will match the underlying low-level
    system input functions. */
 
-
 /* Message types (for use with message callback) */
-enum
-    {
+enum {
     hotNOTE,
     hotWARNING,
     hotERROR,
     hotFATAL
-    };
+};
 
-struct hotCallbacks_
-    {
-    void *ctx;          /* Client context (optional) */
+struct hotCallbacks_ {
+    void *ctx; /* Client context (optional) */
 
-/* [Optional] This is a client context that is passed back to the client as the
+    /* [Optional] This is a client context that is passed back to the client as the
    first parameter to the callback functions. It is intended to be used in
    multi-threaded environments.
 
    Exception handling: */
 
-    void (*fatal)       (void *ctx);
+    void (*fatal)(void *ctx);
 
-/* [Required] fatal() is an exception handler that is called if an
+    /* [Required] fatal() is an exception handler that is called if an
    unrecoverable error is encountered during conversion. The client should
    immediately call hotFree() to release the current context. This function
    must NOT return and the client should use longjmp() to return control to a
    point prior to calling tcNew(). */
 
-    void (*message)     (void *ctx, int type, char *text);  /* (optional) */
+    void (*message)(void *ctx, int type, char *text); /* (optional) */
 
-/* [Optional] message() simply passes a message back to the client as a
+    /* [Optional] message() simply passes a message back to the client as a
    null-terminated string. Four message types are supported: hotNOTE,
    hotWARNING, hotERROR, and hotFATAL. A client is free to handle messages in
    any manner they choose.
 
    Memory management: */
 
-    void *(*malloc)     (void *ctx, size_t size);
-    void *(*realloc)    (void *ctx, void *old, size_t size);
-    void (*free)        (void *ctx, void *ptr);
+    void *(*malloc)(void *ctx, size_t size);
+    void *(*realloc)(void *ctx, void *old, size_t size);
+    void (*free)(void *ctx, void *ptr);
 
-/* [Required] These three memory management functions manage memory in the same
+    /* [Required] These three memory management functions manage memory in the same
    manner as the Standard C Library functions of the same name. (This means
    that they must observe the alignment requirements imposed by the standard.)
    The client is required to handle any error conditions that may arise.
@@ -225,15 +223,15 @@ struct hotCallbacks_
 
    PostScript data input: */
 
-    char *(*psId)       (void *ctx);
+    char *(*psId)(void *ctx);
 
-/* [Optional] psId() should provide a way of identifying the source of the
+    /* [Optional] psId() should provide a way of identifying the source of the
    current PostScript input font data. This would typically be a filename and
    is used in conjunction with the message() callback. */
 
-    char *(*psRefill)   (void *ctx, long *count);
+    char *(*psRefill)(void *ctx, long *count);
 
-/* [Required] psRefill() is called in order to refill the library's PostScript
+    /* [Required] psRefill() is called in order to refill the library's PostScript
    font data input buffer. It returns a pointer to the new data and the count
    of the number of bytes of new data available via the count parameter. The
    client must arrange that successive calls to psRefill() return consecutive
@@ -242,23 +240,23 @@ struct hotCallbacks_
 
    CFF data input/output: */
 
-    char *(*cffId)      (void *ctx);
+    char *(*cffId)(void *ctx);
 
-/* [Optional] cffId() should provide a way of identifying the destination of
+    /* [Optional] cffId() should provide a way of identifying the destination of
    the CFF data that is produced during conversion. This would typically be a
    filename in a file-based implementation and is used in conjunction with the
    message() callback. */
 
-    void (*cffWrite1)   (void *ctx, int c);
-    void (*cffWriteN)   (void *ctx, long count, char *ptr);
+    void (*cffWrite1)(void *ctx, int c);
+    void (*cffWriteN)(void *ctx, long count, char *ptr);
 
-/* [Required] These functions are called to handle the output of a single byte
+    /* [Required] These functions are called to handle the output of a single byte
    (cffWrite1()) or multiple bytes (cffWriteN()) of CFF data. (A file-based
    client might map these functions to putc() and fwrite().) */
 
-    char *(*cffSeek)    (void *ctx, long offset, long *count);
+    char *(*cffSeek)(void *ctx, long offset, long *count);
 
-/* [Required] cffSeek() is called in order to seek to an absolute position in
+    /* [Required] cffSeek() is called in order to seek to an absolute position in
    the CFF data specified by the offset parameter. It returns a pointer to the
    new data (beginning at that offset) and the count of the number of bytes of
    new data available via the count parameter. A client should protect itself
@@ -266,17 +264,17 @@ struct hotCallbacks_
    client might map this function to fseek() followed by fread().)
    */
 
-    char *(*cffRefill)  (void *ctx, long *count);
+    char *(*cffRefill)(void *ctx, long *count);
 
-/* [Required] cffRefill() is called in order to refill the library's CFF input
+    /* [Required] cffRefill() is called in order to refill the library's CFF input
    buffer. It returns a pointer to the new data and the count of the number of
    bytes of new data available via the count parameter. The client must arrange
    that successive calls to cffRefill() return consecutive blocks of CFF data.
    (A file-based client might map this function to fread().) */
 
-    void (*cffSize)     (void *ctx, long size, int euroAdded);
+    void (*cffSize)(void *ctx, long size, int euroAdded);
 
-/* [Optional] cffSize() is called just prior to calling output functions
+    /* [Optional] cffSize() is called just prior to calling output functions
    cffWrite1() and cffWriteN() with the size of the CFF data in bytes. It
    permits a memory-based client to allocate the exact amount of space for the
    CFF data in memory, for example. The euroAdded argument is set to 1 if the
@@ -284,14 +282,14 @@ struct hotCallbacks_
 
    OTF data input/output: */
 
-    char *(*otfId)      (void *ctx);
-    void (*otfWrite1)   (void *ctx, int c);
-    void (*otfWriteN)   (void *ctx, long count, char *ptr);
-    long (*otfTell)     (void *ctx);
-    void (*otfSeek)     (void *ctx, long offset);
-    char *(*otfRefill)  (void *ctx, long *count);
+    char *(*otfId)(void *ctx);
+    void (*otfWrite1)(void *ctx, int c);
+    void (*otfWriteN)(void *ctx, long count, char *ptr);
+    long (*otfTell)(void *ctx);
+    void (*otfSeek)(void *ctx, long offset);
+    char *(*otfRefill)(void *ctx, long *count);
 
-/* [Required, except for otfId()] These functions are identical to the
+    /* [Required, except for otfId()] These functions are identical to the
    similarly named cff functions except that the operate on OTF data and
    otfSeek just performs positioning and doesn't return data.
 
@@ -301,13 +299,13 @@ struct hotCallbacks_
 
    Feature file data input: */
 
-    char *(*featOpen)       (void *ctx, char *name, long offset);
-    char *(*featRefill)     (void *ctx, long *count);
-    void (*featClose)       (void *ctx);
-    void (*featAddAnonData) (void *ctx, char *data, long count,
-                             unsigned long tag);
+    char *(*featOpen)(void *ctx, char *name, long offset);
+    char *(*featRefill)(void *ctx, long *count);
+    void (*featClose)(void *ctx);
+    void (*featAddAnonData)(void *ctx, char *data, long count,
+                            unsigned long tag);
 
-/* [Optional] These functions are called to handle feature file support.
+    /* [Optional] These functions are called to handle feature file support.
    featOpen() is called to open either the main feature file for the font
    (indicated by name being NULL) or a feature include file (name will be the
    file name indicated in the "include" directive in a feature file).
@@ -338,13 +336,13 @@ struct hotCallbacks_
 
    Temporary file I/O (all optional) */
 
-    void (*tmpOpen)     (void *ctx);
-    void (*tmpWriteN)   (void *ctx, long count, char *ptr);
-    void (*tmpRewind)   (void *ctx);
-    char *(*tmpRefill)  (void *ctx, long *count);
-    void (*tmpClose)    (void *ctx);
+    void (*tmpOpen)(void *ctx);
+    void (*tmpWriteN)(void *ctx, long count, char *ptr);
+    void (*tmpRewind)(void *ctx);
+    char *(*tmpRefill)(void *ctx, long *count);
+    void (*tmpClose)(void *ctx);
 
-/* [Optional] These functions are called to handle large CID-keyed fonts when
+    /* [Optional] These functions are called to handle large CID-keyed fonts when
    memory is at a premium. If tmpOpen() is non-NULL the library will use these
    functions to reduce memory requirements. The idea behind this mode is that
    rather than keep entire fonts in memory they are accumulated in a temporary
@@ -353,44 +351,42 @@ struct hotCallbacks_
    fclose(), respectively.) */
 
     char *(*getFinalGlyphName)(void *ctx, char *gname);
-    
-/* [Optional] getFinalGlyphName() is called in order to convert an aliased
+
+    /* [Optional] getFinalGlyphName() is called in order to convert an aliased
      glyph name (a user-friendly glyph name used within the feature file and
      source font) to a final name that is used internally within the OpenType
      font. If no such mapping exists the gname argument is returned. */
-        
+
     char *(*getSrcGlyphName)(void *ctx, char *gname);
-        
-/* [Optional] getSrcGlyphName() is called in order to retrieve an aliased
+
+    /* [Optional] getSrcGlyphName() is called in order to retrieve an aliased
      glyph name (a user-friendly glyph name used within the feature file and
      source font) from the final name that is used  within the output OpenType
      font. If no such mapping exists the gname argument is returned. */
-        
+
     char *(*getUVOverrideName)(void *ctx, char *gname);
 
-/* [Optional] getUVOverrideName() is called in order to get a user-supplied UV value for
-	the glyph, in the form of a u<UV hex Code> glyph name. If there is no
-	override value for the glyph, then the function returns NULL. isFinal specifies whether
-	the gname passed in is a final name or an alias name */
+    /* [Optional] getUVOverrideName() is called in order to get a user-supplied UV value for
+       the glyph, in the form of a u<UV hex Code> glyph name. If there is no
+       override value for the glyph, then the function returns NULL. isFinal specifies whether
+       the gname passed in is a final name or an alias name */
 
-   void (*getAliasAndOrder) (void *ctx, char* oldName, char** newName, long int *order);
-/* Optional. If present,  parse.c wil call it to get a new name, and an ordering index. These are
-	used to rename the glyphs in teh font, and establish a new glyph order.
-*/
+    void (*getAliasAndOrder)(void *ctx, char *oldName, char **newName, long int *order);
+    /* Optional. If present,  parse.c wil call it to get a new name, and an ordering index. These are
+       used to rename the glyphs in teh font, and establish a new glyph order. */
 
- /*  Unicode Variation Selection file data input: */
+    /*  Unicode Variation Selection file data input: */
 
-    char *(*uvsOpen)       (void *ctx, char *name);
-    char *(*uvsGetLine)     (void *ctx, char *buffer, long *count);
-    void (*uvsClose)       (void *ctx);
-
-    };
+    char *(*uvsOpen)(void *ctx, char *name);
+    char *(*uvsGetLine)(void *ctx, char *buffer, long *count);
+    void (*uvsClose)(void *ctx);
+};
 
 typedef struct hotReadFontOverrides_ hotReadFontOverrides;
 
-void hotSetConvertFlags(hotCtx g, unsigned long hotConvFlags); // set flags before any hot unctions are called.
+void hotSetConvertFlags(hotCtx g, unsigned long hotConvFlags);  // set flags before any hot unctions are called.
 
-char *hotReadFont(hotCtx g, int flags, int *psinfo, hotReadFontOverrides *fontOverride );
+char *hotReadFont(hotCtx g, int flags, int *psinfo, hotReadFontOverrides *fontOverride);
 
 /* hotReadFont() is called to read the PostScript outline font. The flags
    argument debugging and font processing: */
@@ -405,36 +401,35 @@ char *hotReadFont(hotCtx g, int flags, int *psinfo, hotReadFontOverrides *fontOv
 #define HOT_ADD_EURO        (1<<6)  /* Add euro glyph to standard fonts */
 #define HOT_NO_OLD_OPS      (1<<7)  /* Convert seac, remove dotsection */
 #define HOT_IS_SERIF        (1<<8)  /* Target font is serif: used when synthesizing  glyphs */
-#define HOT_SUPRESS_HINT_WARNINGS   (1<<9)  /* Emit warnings during target font processing */
-#define HOT_FORCE_NOTDEF  (1<<10)  /* Force replacement of source font notdef by markign notdef. */
-#define HOT_IS_SANSSERIF        (1<<11)  /* Target font is sans serif: used when synthesizing  glyphs */
-										/* heuristic is used when neither HOT_IS_SANSSERIF nor HOT_IS_SERIF is used. */
-#define HOT_RENAME  (1<<12)  /*Use client call-back to rename and reorder glyphs. */
-#define HOT_SUBSET (1<<13)
- 
+#define HOT_SUPRESS_HINT_WARNINGS (1<<9)  /* Emit warnings during target font processing */
+#define HOT_FORCE_NOTDEF    (1<<10) /* Force replacement of source font notdef by markign notdef. */
+#define HOT_IS_SANSSERIF    (1<<11) /* Target font is sans serif: used when synthesizing  glyphs */
+                                    /* heuristic is used when neither HOT_IS_SANSSERIF nor HOT_IS_SERIF is used. */
+#define HOT_RENAME          (1<<12) /*Use client call-back to rename and reorder glyphs. */
+#define HOT_SUBSET          (1<<13)
 #define HOT_SUPRESS__WIDTH_OPT (1<<14) /* supress width optimization in CFF: makes it easier to poke at charstrings with other tools */
-#define HOT_VERBOSE (1<<15)             /* Print all warnings and notes: else suppress the most annoying ones. */
-    
+#define HOT_VERBOSE            (1<<15) /* Print all warnings and notes: else suppress the most annoying ones. */
+
 struct hotReadFontOverrides_           /* Record for instructions to modify font as it is read in. */
     {
     long syntheticWeight;
     unsigned long maxNumSubrs;
-    };
-										
+};
+
 /* hotReadFont() returns the font type via the low order bits of the psinfo
    argument. Whether the font specified Standard Encoding is also returned via
    this argument. The structure hotReadFontOverrides contains data to modify the font
    as it is read in. This currently only carries an override for the weight coordinate
    of the built-in substitution MM font, for adding new glyphs. */
 
-enum                            /* Font types */
-    {
+enum /* Font types */
+{
     hotSingleMaster,
     hotMultipleMaster,
     hotCID
-    };
-#define HOT_TYPE_MASK   0x0f    /* Type returned in low 4 bits */
-#define HOT_STD_ENC     0x10    /* Bit flags if font is standard encoded */
+};
+#define HOT_TYPE_MASK 0x0f /* Type returned in low 4 bits */
+#define HOT_STD_ENC 0x10   /* Bit flags if font is standard encoded */
 
 /* hotReadFont() itself returns the FontName which is not guaranteed to remain
    stable after subsequent calls to the library so should be copied if needed
@@ -454,45 +449,47 @@ void hotAddMiscData(hotCtx g,
 /* 8-bit encoding that maps code (index) to glyph name */
 typedef char *hotEncoding[256];
 
-struct hotCommonData_           /* Miscellaneous data record */
-    {
-    long flags;				/* This filed is masked with 0x1ff (bits 0-8), and the result is used in the
-    							input font processing modules. this is copied into txCtx->fonts.flags, for which  additional
-    							bits are defined starting at (1<<12)  - see FI_MISC_FLAGS_MASK in comman.h */
-#define HOT_BOLD            (1<<0)  /* Bold font */
-#define HOT_ITALIC          (1<<1)  /* Italic font */
-#define HOT_USE_FOR_SUBST   (1<<2)  /* MM: May be used for substitution */
-#define HOT_CANT_INSTANCE   (1<<3)  /* MM: Can't make instance */
-#define HOT_DOUBLE_MAP_GLYPHS      (1<<4)    /* Provide 2 unicode values for a hard-coded list of glyphs - see agl2uv.h:
+struct hotCommonData_ /* Miscellaneous data record */
+{
+    long flags; /* This filed is masked with 0x1ff (bits 0-8), and the       */
+                /* result is used in the input font processing modules. This */
+                /* is copied into txCtx->fonts.flags, for which additional   */
+                /* bits are defined starting at (1<<12)  - see               */
+                /* FI_MISC_FLAGS_MASK in common.h */
 
-									{ "Delta",                0x2206 },
-									{ "Delta%",               0x0394 },
-									{ "Omega",                0x2126 },
-									{ "Omega%",               0x03A9 },
-									{ "Scedilla",             0x015E },
-									{ "Scedilla%",            0xF6C1 },
-									{ "Tcommaaccent",         0x0162 },
-									{ "Tcommaaccent%",        0x021A },
-									{ "fraction",             0x2044 },
-									{ "fraction%",            0x2215 },
-									{ "hyphen",               0x002D },
-									{ "hyphen%",              0x00AD },
-									{ "macron",               0x00AF },
-									{ "macron%",              0x02C9 },
-									{ "mu",                   0x00B5 },
-									{ "mu%",                  0x03BC },
-									{ "periodcentered",       0x00B7 },
-									{ "periodcentered%",      0x2219 },
-									{ "scedilla",             0x015F },
-									{ "scedilla%",            0xF6C2 },
-									{ "space%",               0x00A0 },
-									{ "spade",                0x2660 },
-									{ "tcommaaccent",         0x0163 },
-									{ "tcommaaccent%",        0x021B },
-										*/
-#define HOT_WIN             (1<<6)  /* Windows data */
-#define HOT_MAC             (1<<7)  /* Macintosh data */
-#define HOT_EURO_ADDED      (1<<8)  /* Flags Euro glyph added to CFF data */
+#define HOT_BOLD (1 << 0)              /* Bold font */
+#define HOT_ITALIC (1 << 1)            /* Italic font */
+#define HOT_USE_FOR_SUBST (1 << 2)     /* MM: May be used for substitution */
+#define HOT_CANT_INSTANCE (1 << 3)     /* MM: Can't make instance */
+#define HOT_DOUBLE_MAP_GLYPHS (1 << 4) /* Provide 2 unicode values for a hard-coded list of glyphs - see agl2uv.h: */
+    /* { "Delta",                0x2206 }, */
+    /* { "Delta%",               0x0394 }, */
+    /* { "Omega",                0x2126 }, */
+    /* { "Omega%",               0x03A9 }, */
+    /* { "Scedilla",             0x015E }, */
+    /* { "Scedilla%",            0xF6C1 }, */
+    /* { "Tcommaaccent",         0x0162 }, */
+    /* { "Tcommaaccent%",        0x021A }, */
+    /* { "fraction",             0x2044 }, */
+    /* { "fraction%",            0x2215 }, */
+    /* { "hyphen",               0x002D }, */
+    /* { "hyphen%",              0x00AD }, */
+    /* { "macron",               0x00AF }, */
+    /* { "macron%",              0x02C9 }, */
+    /* { "mu",                   0x00B5 }, */
+    /* { "mu%",                  0x03BC }, */
+    /* { "periodcentered",       0x00B7 }, */
+    /* { "periodcentered%",      0x2219 }, */
+    /* { "scedilla",             0x015F }, */
+    /* { "scedilla%",            0xF6C2 }, */
+    /* { "space%",               0x00A0 }, */
+    /* { "spade",                0x2660 }, */
+    /* { "tcommaaccent",         0x0163 }, */
+    /* { "tcommaaccent%",        0x021B }, */
+
+#define HOT_WIN (1 << 6)               /* Windows data */
+#define HOT_MAC (1 << 7)               /* Macintosh data */
+#define HOT_EURO_ADDED (1 << 8)        /* Flags Euro glyph added to CFF data */
     char *clientVers;
     long nKernPairs;
     short nStyles;
@@ -502,7 +499,7 @@ struct hotCommonData_           /* Miscellaneous data record */
     short fsSelectionMask_off;
     unsigned short os2Version;
     char *licenseID;
-    };
+};
 
 /* The flags field passes style information and the data source (Windows or
    Macintosh).
@@ -552,8 +549,8 @@ struct hotCommonData_           /* Miscellaneous data record */
      field. The client would typically access this information from a font
      conversion database. */
 
-struct hotWinData_              /* Windows-specific data */
-    {
+struct hotWinData_ /* Windows-specific data */
+{
     short nUnencChars;
     unsigned char Family;
 #define HOT_DONTCARE    0
@@ -565,7 +562,7 @@ struct hotWinData_              /* Windows-specific data */
     unsigned char CharSet;
     unsigned char DefaultChar;
     unsigned char BreakChar;
-    };
+};
 
 /* The nUnencChars field specifies the number of unencoded character names
    to be subsequently added with hotAddUnencChar(). (See kerning section below
@@ -585,13 +582,13 @@ struct hotWinData_              /* Windows-specific data */
    BreakChar should be set from pfm.FirstChar + pfm.BreakChar. Also see
    description of the Family field. */
 
-struct hotMacData_              /* Macintosh-specific data */
-    {
+struct hotMacData_ /* Macintosh-specific data */
+{
     hotEncoding *encoding;
     long cmapScript;
     long cmapLanguage;
 #define HOT_CMAP_UNKNOWN (-1)
-    };
+};
 
 /* The hotMacData.encoding field, along with hotCommonData.encoding described
    earlier, specifies the encoding that the library should use to decode kern
@@ -638,7 +635,7 @@ void hotAddUnencChar(hotCtx g, int iChar, char *name);
    glyphs of a kern pair with a name when one or both glyphs are unencoded.
    This name is subsequently converted into a glyph id by the library. */
 
-typedef int32_t hotFixed;          /* 16.16 fixed point */
+typedef int32_t hotFixed; /* 16.16 fixed point */
 void hotAddAxisData(hotCtx g, int iAxis,
                     char *type, char *longLabel, char *shortLabel,
                     hotFixed minRange, hotFixed maxRange);
@@ -698,7 +695,7 @@ void hotAddCMap(hotCtx g, hotCMapId id, hotCMapRefill refill);
    (A file-based client might map this function to fread() and fill buffers of
    BUFSIZ bytes.) */
 
-void hotAddUVSMap(hotCtx g, char* uvsFileName);
+void hotAddUVSMap(hotCtx g, char *uvsFileName);
 
 /* hotAddUVSMap() parses hte input file uvsFileName to build a cmap format 14 subtable.
 The uvsFileName is the file path to a specifiaction for a set of Unicode variation Selectors.
@@ -823,37 +820,52 @@ void hotConvert(hotCtx g);
 /* hotConvert() is used to initiate the final conversion to OTF after all the
    miscellaneous data has been provided via the other library functions. 
    
-   	convertFlags is used to control the processing of the data. */
+   convertFlags is used to control the processing of the data. */
 
 /* convertFlags values */
-#define HOT_ID2_CHAIN_CONTXT3  (1 << 0)  /* Index the backup glyph node list backwards  (relative to the spec)
-											in GSUB Lookup 6/GPOS Lookup 8,
-											as required by InDesign 2 and other consumers of the CoolType
-											OpenType libraries of Aug 2002 and earlier*/
+#define HOT_ID2_CHAIN_CONTXT3         (1 << 0) /* Index the backup glyph node list   */
+                                               /* backwards (relative to the spec)   */
+                                               /* in GSUB Lookup 6/GPOS Lookup 8, as */
+                                               /* required by InDesign 2 and other   */
+                                               /* consumers of the CoolType OpenType */
+                                               /* libraries of Aug 2002 and earlier  */
 
-#define HOT_ALLOW_STUB_GSUB  (1 << 1)  /* If no GSUB rules are specified, make a stub GSUB table */
-#define HOT_OLD_SPACE_DEFAULT_CHAR  (1 << 2) /* Spec says use notdef, but QuarkXPress 6.5 needs space; CJK publishers still use this. */
-#define HOT_USE_V1_MENU_NAMES (1 << 3) /* Build name table Mac menu names as Apple originally asked in 1999, and per FDK through 2.0, rather
-										by the OpenType spec. This mode writes the Preferred Family and Style names in name ID's 1 and 2
-										 rather than 16 and 17, when these differ from the Compatible Family/Style names */
+#define HOT_ALLOW_STUB_GSUB           (1 << 1) /* If no GSUB rules are specified, make a stub GSUB table */
+#define HOT_OLD_SPACE_DEFAULT_CHAR    (1 << 2) /* Spec says use notdef, but QuarkXPress 6.5 needs space; CJK publishers still use this. */
+#define HOT_USE_V1_MENU_NAMES         (1 << 3) /* Build name table Mac menu names as */
+                                               /* Apple originally asked in 1999,    */
+                                               /* and per FDK through 2.0, rather by */
+                                               /* the OpenType spec. This mode       */
+                                               /* writes the Preferred Family and    */
+                                               /* Style names in name ID's 1 and 2   */
+                                               /* rather than 16 and 17, when these  */
+                                               /* differ from the Compatible         */
+                                               /* Family/Style names                 */
+
 #define HOT_SEEN_VERT_ORIGIN_OVERRIDE (1 << 4) /* IF an explicit glyph origin override, or a vrt2 feature, is seen, then write the vmtx table  */
-#define HOT_USE_OLD_NAMEID4 (1 << 5) /* For fonts with previous shipped versions, build name ID 4 compatible with previously shipped versions:
-									Windows name ID 4 == PS name, and Mac name ID 4 built from preferred family and style names.  Else,
-									do both by OT spec: name id 1 + space + name ID 2, or "" if nme ID 2 is "Regular". */
+#define HOT_USE_OLD_NAMEID4           (1 << 5) /* For fonts with previous shipped      */
+                                               /* versions, build name ID 4 compatible */
+                                               /* with previously shipped versions:    */
+                                               /* Windows name ID 4 == PS name, and    */
+                                               /* Mac name ID 4 built from preferred   */
+                                               /* family and style names.  Else, do    */
+                                               /* both by OT spec: name id 1 + space + */
+                                               /* name ID 2, or "" if nme ID 2 is      */
+                                               /* "Regular".                           */
 
-#define HOT_OMIT_MAC_NAMES (1 << 6) /* Build name table without Mac platform names */
-#define HOT_STUB_CMAP4 (1 << 7) /* Build only a stub cmap 4 table. Useful for AdobeBlank, and otehr cases where size is an issue. Font must contain cmap format 4 to work on Windows, but it doesn't have to be useful. */
-#define HOT_OVERRIDE_MENUNAMES (1<<8)
-#define HOT_DO_NOT_OPTIMIZE_KERN (1<<9) /* Do not use left side kern class 0 for non-zero kern values. Saves a a few hundred to thousand bytes, but confuses some developers. */
-#define HOT_ADD_STUB_DSIG (1<<10)
-#define HOT_CONVERT_VERBOSE (1<<11)
-#define HOT_CONVERT_FINAL_NAMES (1<<12) /* When showing error messages, use final names rather than source names. */
-    
+#define HOT_OMIT_MAC_NAMES            (1 << 6) /* Build name table without Mac platform names */
+#define HOT_STUB_CMAP4                (1 << 7) /* Build only a stub cmap 4 table. Useful for AdobeBlank, and otehr cases where size is an issue. Font must contain cmap format 4 to work on Windows, but it doesn't have to be useful. */
+#define HOT_OVERRIDE_MENUNAMES        (1 << 8)
+#define HOT_DO_NOT_OPTIMIZE_KERN      (1 << 9) /* Do not use left side kern class 0 for non-zero kern values. Saves a a few hundred to thousand bytes, but confuses some developers. */
+#define HOT_ADD_STUB_DSIG             (1 << 10)
+#define HOT_CONVERT_VERBOSE           (1 << 11)
+#define HOT_CONVERT_FINAL_NAMES       (1 << 12) /* When showing error messages, use final names rather than source names. */
+
 /* hotFree() destroys the library context and all the resources allocated to
    it. It must be the last function called by a client of the library. */
 
 void hotFree(hotCtx g);
-    
+
 /* Environment variables used to set default values */
 #define kFSTypeEnviron "FDK_FSTYPE"
 
