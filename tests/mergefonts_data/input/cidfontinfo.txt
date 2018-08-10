@@ -1,0 +1,9 @@
+FontName	(SourceSans-Test)
+Registry	Adobe
+Ordering	Identity
+Supplement	0
+FSType	4
+Weight	(Regular)
+FamilyName	(Source Sans)
+version	(2.20)
+AdobeCopyright	(Copyright 2010, 2012, 2014 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name 'Source'.)
