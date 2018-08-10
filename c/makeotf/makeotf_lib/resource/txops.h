@@ -1,15 +1,15 @@
-/* @(#)CM_VerSion txops.h atm08 1.2 16245.eco sum= 39626 atm08.002 */
-/* @(#)CM_VerSion txops.h atm07 1.2 16164.eco sum= 14310 atm07.012 */
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. *//***********************************************************************/
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
+/***********************************************************************/
 
 /*
  * Type 1 and 2 charstring operators.
  *
  * The Type 2 operator set was derived from the Type 1 set by the removal of
- * some old operators and the addition of new operators. In some cases the 
+ * some old operators and the addition of new operators. In some cases the
  * functionality of retained operators has also been extended by utilizing
- * operand count information. Spare (unassigned) operators are shown reserved. 
+ * operand count information. Spare (unassigned) operators are shown reserved.
  *
  * Macro prefixes:
  *
@@ -42,7 +42,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define t2_reserved15       15  /* Reserved */
 #define t2_blend            16
 #define t2_reserved17       17  /* Reserved */
-#define t2_hstemhm          18 
+#define t2_hstemhm          18
 #define t2_hintmask         19
 #define t2_cntrmask         20
 #define tx_rmoveto          21
@@ -79,41 +79,41 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 /* Make escape operator value; may be redefined to suit implementation */
 #ifndef tx_ESC
-#define tx_ESC(op)          (tx_escape<<8|(op))
+#define tx_ESC(op)          (tx_escape << 8|(op))
 #endif
 
 /* Type 2 */
 #define tx_dotsection       tx_ESC(0)   /* Deprecated */
 #define t2_reservedESC1     tx_ESC(1)   /* Reserved */
 #define t2_reservedESC2     tx_ESC(2)   /* Reserved */
-#define tx_and              tx_ESC(3)   
-#define tx_or               tx_ESC(4)   
-#define tx_not              tx_ESC(5)   
+#define tx_and              tx_ESC(3)
+#define tx_or               tx_ESC(4)
+#define tx_not              tx_ESC(5)
 #define t2_reservedESC6     tx_ESC(6)   /* Reserved */
 #define t2_reservedESC7     tx_ESC(7)   /* Reserved */
-#define tx_store            tx_ESC(8)   
-#define tx_abs              tx_ESC(9)   
-#define tx_add              tx_ESC(10) 
-#define tx_sub              tx_ESC(11) 
-#define tx_div              tx_ESC(12) 
-#define tx_load             tx_ESC(13) 
-#define tx_neg              tx_ESC(14) 
-#define tx_eq               tx_ESC(15) 
+#define tx_store            tx_ESC(8)
+#define tx_abs              tx_ESC(9)
+#define tx_add              tx_ESC(10)
+#define tx_sub              tx_ESC(11)
+#define tx_div              tx_ESC(12)
+#define tx_load             tx_ESC(13)
+#define tx_neg              tx_ESC(14)
+#define tx_eq               tx_ESC(15)
 #define t2_reservedESC16    tx_ESC(16)  /* Reserved */
 #define t2_reservedESC17    tx_ESC(17)
-#define tx_drop             tx_ESC(18) 
+#define tx_drop             tx_ESC(18)
 #define t2_reservedESC19    tx_ESC(19)  /* Reserved (Cube setwv) */
-#define tx_put              tx_ESC(20) 
-#define tx_get              tx_ESC(21) 
-#define tx_ifelse           tx_ESC(22) 
-#define tx_random           tx_ESC(23) 
-#define tx_mul              tx_ESC(24) 
+#define tx_put              tx_ESC(20)
+#define tx_get              tx_ESC(21)
+#define tx_ifelse           tx_ESC(22)
+#define tx_random           tx_ESC(23)
+#define tx_mul              tx_ESC(24)
 #define tx_reservedESC25    tx_ESC(25)
-#define tx_sqrt             tx_ESC(26) 
-#define tx_dup              tx_ESC(27) 
-#define tx_exch             tx_ESC(28) 
-#define tx_index            tx_ESC(29) 
-#define tx_roll             tx_ESC(30) 
+#define tx_sqrt             tx_ESC(26)
+#define tx_dup              tx_ESC(27)
+#define tx_exch             tx_ESC(28)
+#define tx_index            tx_ESC(29)
+#define tx_roll             tx_ESC(30)
 #define tx_reservedESC31    tx_ESC(31)  /* Reserved (Cube rotate) */
 #define tx_reservedESC32    tx_ESC(32)  /* Reserved (Cube attach) */
 #define t2_reservedESC33    tx_ESC(33)  /* Reserved */
@@ -128,11 +128,11 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define t1_vstem3           tx_ESC(1)
 #define t1_hstem3           tx_ESC(2)
 #define t1_seac             tx_ESC(6)   /* Deprecated */
-#define t1_sbw              tx_ESC(7)   
+#define t1_sbw              tx_ESC(7)
 #define t1_callother        tx_ESC(16)
-#define t1_pop              tx_ESC(17)  
+#define t1_pop              tx_ESC(17)
 #define t1_setwv            tx_ESC(19)
-#define t1_div2             tx_ESC(25) 
+#define t1_div2             tx_ESC(25)
 #define t1_setcurrentpt     tx_ESC(33)
 
 /* --- Othersubrs --- */

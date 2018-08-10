@@ -1,7 +1,7 @@
-/* @(#)CM_VerSion ps.h atm08 1.2 1.2 16245.eco sum= 45006 atm08.002 */
-/* @(#)CM_VerSion ps.h atm07 1.2 1.2 16164.eco sum= 03481 atm07.012 */
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-   This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. *//***********************************************************************/
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
+/***********************************************************************/
 
 /*
  * Simple top-level PostScript tokenizer.
@@ -23,58 +23,58 @@ extern "C" {
 #define CDECL
 #endif
 
-#define PSTOKEN_VERSION 0x010004    /* Library version */
+#define PSTOKEN_VERSION 0x010004 /* Library version */
 
 /* PostScript token types. Comments/whitespace skipped inside tokenizer */
 enum {
-	PS_EOI,         /*  0: End of input */
-	PS_INTEGER,     /*  1: Integer number */
-	PS_REAL,        /*  2: Real number */
-	PS_LITERAL,     /*  3: /... */
-	PS_IMMEDIATE,   /*  4: //... */
-	PS_STRING,      /*  5: ( ... ) */
-	PS_HEXSTRING,   /*  6: < ... > */
-	PS_ASCII85,     /*  7: <~ ... ~> */
-	PS_DICTIONARY,  /*  8: << ... >> */
-	PS_ARRAY,       /*  9: [ ... ] */
-	PS_PROCEDURE,   /* 10: { ... } */
-	PS_DOCTYPE,     /* 11: %!... (first line only) */
-	PS_OPERATOR     /* 12: Executable name, i.e. not one of the above */
+    PS_EOI,        /*  0: End of input */
+    PS_INTEGER,    /*  1: Integer number */
+    PS_REAL,       /*  2: Real number */
+    PS_LITERAL,    /*  3: /... */
+    PS_IMMEDIATE,  /*  4: / /... */ /* really just double-slash, the space between is for cpplint */
+    PS_STRING,     /*  5: ( ... ) */
+    PS_HEXSTRING,  /*  6: < ... > */
+    PS_ASCII85,    /*  7: <~ ... ~> */
+    PS_DICTIONARY, /*  8: << ... >> */
+    PS_ARRAY,      /*  9: [ ... ] */
+    PS_PROCEDURE,  /* 10: { ... } */
+    PS_DOCTYPE,    /* 11: %!... (first line only) */
+    PS_OPERATOR    /* 12: Executable name, i.e. not one of the above */
 };
 
 /* Input token */
 typedef struct {
-	short type;
-	long index;
-	long length;
+    short type;
+    long index;
+    long length;
 } psToken;
 
-typedef struct psCtx_ *psCtx;   /* Parse context */
-typedef dnaDCL (char, psBuf);    /* Client's grow buffer */
+typedef struct psCtx_ *psCtx; /* Parse context */
+typedef dnaDCL(char, psBuf);  /* Client's grow buffer */
 
 /* Message types (for use with message callback) */
 enum {
-	psWARNING = 1,
-	psERROR,
-	psFATAL
+    psWARNING = 1,
+    psERROR,
+    psFATAL
 };
 
 /* Callbacks */
 typedef struct {
-	void *ctx;          /* Client's callback context (optional) */
+    void *ctx; /* Client's callback context (optional) */
 
-	/* Exception handling */
-	void (*fatal)(void *ctx);
-	void (*message)(void *ctx, int type, char *text);       /* (optional) */
+    /* Exception handling */
+    void (*fatal)(void *ctx);
+    void (*message)(void *ctx, int type, char *text); /* (optional) */
 
-	/* Memory management */
-	void *(*malloc)(void *ctx, size_t size);
-	void (*free)(void *ctx, void *ptr);
+    /* Memory management */
+    void *(*malloc)(void *ctx, size_t size);
+    void (*free)(void *ctx, void *ptr);
 
-	/* PostScript data input */
-	char *(*psId)(void *ctx);           /* Data id (optional) */
-	char *(*psRefill)(void *ctx, long *count);
-	psBuf *buf;         /* Input grow buffer */
+    /* PostScript data input */
+    char *(*psId)(void *ctx); /* Data id (optional) */
+    char *(*psRefill)(void *ctx, long *count);
+    psBuf *buf; /* Input grow buffer */
 } psCallbacks;
 
 /* The following functions control the tokenizer:
