@@ -236,3 +236,17 @@ def test_bug473():
     ufo_path = runner(CMD + ['-o', 'ufo', '-f', 'bug473.ufo', '-s', save_path])
     expected_path = _get_expected_path('bug473.ufo')
     assert differ([expected_path, ufo_path])
+
+
+def test_subroutine_sorting_bug494():
+    """ The input file was made with the command:
+    tx -t1 -g 0-5 \
+        source-serif-pro/Roman/Instances/Regular/font.ufo bug494.pfa
+    The bug is that two subroutines in the Windows CFF output are swapped in
+    index order from the Mac version. This was because of an unstable
+    'qsort' done on the subroutines in the final stage of selection."""
+    cff_path = runner(
+        CMD + ['-o', 'cff', '*S', 'std', '*b', '-f', 'bug494.pfa'])
+    dcf_txt_path = runner(CMD + ['-a', '-f', cff_path, '-o', 'dcf'])
+    expected_path = _get_expected_path('bug494.dcf.txt')
+    assert differ([expected_path, dcf_txt_path])

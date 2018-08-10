@@ -183,6 +183,7 @@ struct Subr_ {
 	short maskcnt;          /* hint/cntrmask count */
 	short misc;             /* subrSaved value/call depth (transient) */
 	short flags;            /* Status flags */
+	size_t order;            /* index value used for stable sort. */
 #define SUBR_SELECT     (1 << 0)  /* Flags subr selected */
 #define SUBR_REJECT     (1 << 1)  /* Flags subr rejected */
 #define SUBR_MEMBER     (1 << 2)  /* Flags subr added to social group */
@@ -1553,6 +1554,7 @@ static void listUpSubrMatches(subrCtx h, unsigned char *pstart, long length, int
 
                     c = dnaNEXT(*callList);
                     c->subr = subr;
+                    c->subr->order = callList->cnt;
                     c->offset = (unsigned short)offset;
                 }
             }
@@ -1566,8 +1568,10 @@ static int CTL_CDECL cmpSubrLengths(const void *first, const void *second) {
 	Call *b = (Call *)second;
     if (a->subr->length != b->subr->length)
         return (int)b->subr->length - (int)a->subr->length;
+    else if (a->offset != b->offset)
+        return (int)b->offset - (int)a->offset;
     else
-        return (int)a->offset - (int)b->offset;
+        return (int)b->subr->order - (int)a->subr->order;
 }
 
 /* Scan charstring and build call list of subrs */
@@ -1881,6 +1885,7 @@ static void addMember(subrCtx h, Subr *subr) {
 			/* Add member and mark subr to avoid reselection */
 			*dnaNEXT(h->members) = subr;
 			subr->flags |= SUBR_MEMBER;
+			subr->order = h->members.cnt;
 
 			for (link = subr->sups; link != NULL; link = link->next) {
 				/* Add superior member to temporary list*/
@@ -1932,6 +1937,13 @@ static int CTL_CDECL cmpGlobalSetSubrs(const void *first, const void *second) {
 			if (asaved > bsaved) {
 				return -1;
 			}
+			else if (a->order > b->order) {
+				/* Preserve original order */
+				return 1;
+			}
+			else if (a->order < b->order) {
+				return -1;
+			}
 			else if (asaved < bsaved) {
 				return 1;
 			}
@@ -1947,6 +1959,13 @@ static int CTL_CDECL cmpGlobalSetSubrs(const void *first, const void *second) {
 	else if (b->node->id == NODE_GLOBAL) {
 		/* local global */
 		return 1;
+	}
+	else if (a->order > b->order) {
+		/* Preserve original order */
+		return 1;
+	}
+	else if (a->order < b->order) {
+		return -1;
 	}
 	else {
 		/* local local */
@@ -1973,6 +1992,13 @@ static int CTL_CDECL cmpLocalSetSubrs(const void *first, const void *second) {
 			}
 			else if (asaved < bsaved) {
 				return 1;
+			}
+			else if (a->order > b->order) {
+				/* Preserve original order */
+				return 1;
+			}
+			else if (a->order < b->order) {
+				return -1;
 			}
 			else {
 				return 0;
@@ -2156,6 +2182,13 @@ static int CTL_CDECL cmpSubrFitness(const void *first, const void *second) {
 		else if (a->count < b->count) {
 			return 1;
 		}
+		else if (a->order > b->order) {
+			/* Preserve original order */
+			return 1;
+		}
+		else if (a->order < b->order) {
+			return -1;
+		}
 		else {
 			return 0;
 		}
@@ -2242,6 +2275,7 @@ reselect:
 	/* Reset misc field for storing subr call depth by checkSubrStackOvl */
 	for (i = 0; i < h->tmp.cnt; i++) {
 		h->tmp.array[i]->misc = -1;
+		h->tmp.array[i]->order = i;
 	}
 
 	/* Remove membership so globals may be selected in other local sets and
