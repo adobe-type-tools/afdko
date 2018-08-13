@@ -57,6 +57,7 @@ matrix:
         - cpplint --recursive --quiet c/makeotf/makeotf_lib/api
         - cpplint --recursive --quiet c/makeotf/makeotf_lib/resource
         - cpplint --recursive --quiet c/makeotf/source
+        - cpplint --recursive --quiet c/mergefonts/source
         - cpplint --recursive --quiet c/type1
       script:
         - python setup.py bdist_wheel

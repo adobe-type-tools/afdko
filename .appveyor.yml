@@ -38,6 +38,7 @@ before_build:
   - cpplint --recursive --quiet c\makeotf\makeotf_lib\api
   - cpplint --recursive --quiet c\makeotf\makeotf_lib\resource
   - cpplint --recursive --quiet c\makeotf\source
+  - cpplint --recursive --quiet c\mergefonts\source
   - cpplint --recursive --quiet c\type1
 
 # to run your custom scripts instead of automatic MSBuild
