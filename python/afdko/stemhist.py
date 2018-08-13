@@ -114,15 +114,10 @@ import re
 import time
 from fontTools.ttLib import TTFont, getTableModule
 from beztools import *
-import warnings
 import fdkutils
 import ufotools
 import traceback
 from collections import defaultdict
-
-kTempCFFSuffix = ".temp.ac.cff"
-
-warnings.simplefilter("ignore", RuntimeWarning) # supress waring about use of os.tempnam().
 
 
 rawData = []
@@ -452,7 +447,7 @@ def openOpenTypeFile(path, outFilePath):
 	# If input font is  CFF or PS, build a dummy ttFont in memory..
 	# return ttFont, and flag if is a real OTF font Return flag is 0 if OTF, 1 if CFF, and 2 if PS/
 	fontType  = 0 # OTF
-	tempPathCFF = path + kTempCFFSuffix
+	tempPathCFF = fdkutils.get_temp_file_path()
 	try:
 		ff = open(path, "rb")
 		data = ff.read(10)
@@ -784,10 +779,9 @@ def collectStemsFont(path, options, txPath):
 	if not glyphList:
 		raise ACFontError("Error: selected glyph list is empty for font <%s>." % fontFileName)
 
-	tempBaseName = os.tempnam()
-	tempBez = tempBaseName + ".bez"
-	tempReport = tempBez + ".rpt"
-	tempFI = tempBaseName + ".fi"
+	tempBez = fdkutils.get_temp_file_path()
+	tempReport = '{}{}'.format(tempBez, ".rpt")
+	tempFI = fdkutils.get_temp_file_path()
 
 	#    open font plist file, if any. If not, create empty font plist.
 	psName = fontData.getPSName()
@@ -874,8 +868,6 @@ def collectStemsFont(path, options, txPath):
 		bp.write(bezString)
 		bp.close()
 
-		if os.path.exists(tempReport):
-			os.remove(tempReport)
 		if options.doAlign:
 			doAlign = "-ra"
 		else:
@@ -903,8 +895,6 @@ def collectStemsFont(path, options, txPath):
 			if options.debug:
 				print("Wrote AC fontinfo data file to", tempFI)
 				print("Wrote AC output rpt file to", tempReport)
-			else:
-				os.remove(tempReport)
 			report.strip()
 			if report:
 				glyphReports.addGlyphReport(report)
