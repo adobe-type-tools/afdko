@@ -1,0 +1,33 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2047
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "autohintexe", "autohintexe.vcxproj", "{72B7761C-7DAA-4729-9722-81CCE9550E12}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FDCEB06E-D2E3-4916-9208-3C70703BFB27} = {FDCEB06E-D2E3-4916-9208-3C70703BFB27}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "autohintlib", "..\..\..\autohintlib\build\win\visualstudio\autohintlib.vcxproj", "{FDCEB06E-D2E3-4916-9208-3C70703BFB27}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{72B7761C-7DAA-4729-9722-81CCE9550E12}.Debug|x86.ActiveCfg = Debug|Win32
+		{72B7761C-7DAA-4729-9722-81CCE9550E12}.Debug|x86.Build.0 = Debug|Win32
+		{72B7761C-7DAA-4729-9722-81CCE9550E12}.Release|x86.ActiveCfg = Release|Win32
+		{72B7761C-7DAA-4729-9722-81CCE9550E12}.Release|x86.Build.0 = Release|Win32
+		{FDCEB06E-D2E3-4916-9208-3C70703BFB27}.Debug|x86.ActiveCfg = Debug|Win32
+		{FDCEB06E-D2E3-4916-9208-3C70703BFB27}.Debug|x86.Build.0 = Debug|Win32
+		{FDCEB06E-D2E3-4916-9208-3C70703BFB27}.Release|x86.ActiveCfg = Release|Win32
+		{FDCEB06E-D2E3-4916-9208-3C70703BFB27}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8A4DAFD0-AB40-4310-A2A3-A0EA88C87AA7}
+	EndGlobalSection
+EndGlobal

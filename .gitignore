@@ -3,8 +3,8 @@
 
 # temporary wheel build directories
 afdko.egg-info/
-build/
-dist/
+build/*
+dist/*
 .eggs/
 
 # PyCharm directory
@@ -36,6 +36,6 @@ xcuserdata/
 
 # Windows build directories
 *vcxproj.user
-**/vc10/Debug/*
-**/vc10/Release/*
-
+**/visualstudio/Debug/*
+**/visualstudio/Release/*
+*.lib

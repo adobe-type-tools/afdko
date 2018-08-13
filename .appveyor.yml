@@ -1,3 +1,5 @@
+image: Visual Studio 2017
+
 environment:
   TWINE_USERNAME: "afdko-travis"
   TWINE_PASSWORD:
@@ -11,6 +13,7 @@ matrix:
 
 # scripts that run after cloning repository
 install:
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
   - set "PATH=%PYTHON_HOME%;%PYTHON_HOME%\\Scripts;%PATH%"
   - python -m pip install -U -r requirements-dev.txt
   - python -m pip install pytest
