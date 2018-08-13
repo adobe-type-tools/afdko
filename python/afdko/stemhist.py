@@ -715,11 +715,11 @@ def PrintReports(path, hStemDict, vStemDict,topZoneDict, bottomZoneDict):
 				continue
 			sawData = 1
 			fp = open(fName, "wt")
-			fp.write(title + os.linesep)
-			fp.write(header + os.linesep)
+			fp.write(title + '\n')
+			fp.write(header + '\n')
 			reportLines = formatReport(rDict, sortFunc)
 			for line in reportLines:
-				fp.write(line + os.linesep)
+				fp.write(line + '\n')
 			fp.close()
 			print("\tWrote  %s" % (fName))
 		except (IOError, OSError):
@@ -930,7 +930,7 @@ def main():
 			logMsg( "\t%s" % e)
 		if options.debug:
 			fp = open("rawdata.txt", "wt")
-			fp.write(os.linesep.join(rawData))
+			fp.write('\n'.join(rawData))
 			fp.close()
 	return
 
