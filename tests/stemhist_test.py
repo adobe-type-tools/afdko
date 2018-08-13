@@ -52,10 +52,11 @@ def test_exit_unknown_option(arg):
 
 
 @pytest.mark.parametrize('arg', ([], ['a'], ['all']))
-@pytest.mark.parametrize('font_filename', ['font.pfa', 'font.ufo'])
+@pytest.mark.parametrize('font_filename', [
+    'font.pfa', 'font.ufo', 'font.cff', 'font.otf', 'cidfont.ps'])
 def test_stems_and_zones(arg, font_filename):
     prefix = font_filename.split('.')[0]
-    if arg == ['a']:
+    if 'a' in arg:
         suffixes = ['.top.txt', '.bot.txt']
     else:
         suffixes = ['.hstm.txt', '.vstm.txt']
@@ -66,7 +67,7 @@ def test_stems_and_zones(arg, font_filename):
     for suffix in suffixes:
         actual_path = '{}{}'.format(report_path, suffix)
         exp_suffix = suffix
-        if arg == ['all']:
+        if 'all' in arg:
             exp_suffix = '.all' + suffix
         expected_path = _get_expected_path('{}{}'.format(prefix, exp_suffix))
         assert differ([expected_path, actual_path, '-l', '1'])
