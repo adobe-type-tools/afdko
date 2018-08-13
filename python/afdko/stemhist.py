@@ -118,6 +118,7 @@ import warnings
 import fdkutils
 import ufotools
 import traceback
+from collections import defaultdict
 
 kTempCFFSuffix = ".temp.ac.cff"
 
@@ -559,120 +560,150 @@ class GlyphReports:
 			else:
 				raise ACFontError("Error: Found unknown keyword %s in report file for glyph %s." % (key, self.glyphName))
 
+	@staticmethod
+	def round_value(val):
+		if val >= 0:
+			return int(val + 0.5)
+		else:
+			return int(val - 0.5)
 
-	def getReportDicts(self):
-		hStemDict = {}
-		vStemDict = {}
-		topZoneDict = {}
-		bottomZoneDict = {}
-		for item in  self.glyphs.items():
-			gName = item[0]
-			hStemList, vStemList, charZoneList, stemZoneStemList = item[1]
+	def parse_stem_dict(self, stem_dict):
+		"""
+		stem_dict: {45.5: 1, 47.0: 2}
+		"""
+		# key: stem width
+		# value: stem count
+		width_dict = defaultdict(int)
+		for width, count in stem_dict.items():
+			width = self.round_value(width)
+			width_dict[width] += count
+		return width_dict
 
-			for item in hStemList.items():
-				width, gcount = item
-				if width >= 0:
-					width = int(width + 0.5)
-				else:
-					width = int(width - 0.5)
-				try:
-					count, glyphList = hStemDict[width]
-					hStemDict[width][0] = count + gcount
-					hStemDict[width][1].append(gName)
-				except KeyError:
-					hStemDict[width] = [gcount,[gName]]
+	def parse_zone_dicts(self, char_dict, stem_dict):
+		all_zones_dict = char_dict.copy()
+		all_zones_dict.update(stem_dict)
+		# key: zone height
+		# value: zone count
+		top_dict = defaultdict(int)
+		bot_dict = defaultdict(int)
+		for top, bot in all_zones_dict.values():
+			top = self.round_value(top)
+			top_dict[top] += 1
+			bot = self.round_value(bot)
+			bot_dict[bot] += 1
+		return top_dict, bot_dict
 
-			for item in vStemList.items():
-				width, gcount = item
-				if width >= 0:
-					width = int(width + 0.5)
-				else:
-					width = int(width - 0.5)
-				try:
-					count, glyphList = vStemDict[width]
-					vStemDict[width][0] = count + gcount
-					vStemDict[width][1].append(gName)
-				except KeyError:
-					vStemDict[width] = [gcount,[gName]]
+	@staticmethod
+	def assemble_rep_list(items_dict, count_dict):
+		# item 0: stem/zone count
+		# item 1: stem width/zone height
+		# item 2: list of glyph names
+		rep_list = []
+		for item in items_dict:
+			rep_list.append((count_dict[item], item, sorted(items_dict[item])))
+		return rep_list
 
-			for btval in charZoneList.values():
-				top, bottom = btval
-				if top >= 0:
-					top = int(top + 0.5)
-				else:
-					top = int(top - 0.5)
-				if bottom >= 0:
-					bottom = int(bottom + 0.5)
-				else:
-					bottom = int(bottom - 0.5)
-				try:
-					count, glyphList = topZoneDict[top]
-					topZoneDict[top][0] = count + 1
-					topZoneDict[top][1].append(gName)
-				except KeyError:
-					topZoneDict[top] = [1,[gName]]
-				try:
-					count, glyphList = bottomZoneDict[bottom]
-					bottomZoneDict[bottom][0] = count + 1
-					bottomZoneDict[bottom][1].append(gName)
-				except KeyError:
-					bottomZoneDict[bottom] = [1,[gName]]
+	def getReportLists(self):
+		"""
+		self.glyphs is a dictionary:
+			key: glyph name
+			value: list of 4 dictionaries
+					self.hStemList
+					self.vStemList
+					self.charZoneList
+					self.stemZoneStemList
+		{
+		 'A': [{45.5: 1, 47.0: 2}, {229.0: 1}, {}, {}],
+		 'B': [{46.0: 2, 46.5: 2, 47.0: 1}, {94.0: 1, 95.0: 1, 100.0: 1}, {}, {}],
+		 'C': [{50.0: 2}, {109.0: 1}, {}, {}],
+		 'D': [{46.0: 1, 46.5: 2, 47.0: 1}, {95.0: 1, 109.0: 1}, {}, {}],
+		 'E': [{46.5: 2, 47.0: 1, 50.0: 2, 177.0: 1, 178.0: 1},
+		       {46.0: 1, 75.5: 2, 95.0: 1}, {}, {}],
+		 'F': [{46.5: 2, 47.0: 1, 50.0: 1, 177.0: 1},
+		       {46.0: 1, 60.0: 1, 75.5: 1, 95.0: 1}, {}, {}],
+		 'G': [{43.0: 1, 44.5: 1, 50.0: 1, 51.0: 1}, {94.0: 1, 109.0: 1}, {}, {}]
+		}
+		"""
+		h_stem_items_dict = defaultdict(set)
+		h_stem_count_dict = defaultdict(int)
+		v_stem_items_dict = defaultdict(set)
+		v_stem_count_dict = defaultdict(int)
 
-			for btval in stemZoneStemList.values():
-				top, bottom = btval
-				if top >= 0:
-					top = int(top + 0.5)
-				else:
-					top = int(top - 0.5)
-				if bottom >= 0:
-					bottom = int(bottom + 0.5)
-				else:
-					bottom = int(bottom - 0.5)
-				try:
-					count, glyphList = topZoneDict[top]
-					topZoneDict[top][0] = count + 1
-					topZoneDict[top][1].append(gName)
-				except KeyError:
-					topZoneDict[top] = [1,[gName]]
-				try:
-					count, glyphList = bottomZoneDict[bottom]
-					bottomZoneDict[bottom][0] = count + 1
-					bottomZoneDict[bottom][1].append(gName)
-				except KeyError:
-					bottomZoneDict[bottom] = [1,[gName]]
+		top_zone_items_dict = defaultdict(set)
+		top_zone_count_dict = defaultdict(int)
+		bot_zone_items_dict = defaultdict(set)
+		bot_zone_count_dict = defaultdict(int)
+
+		for gName, dicts in self.glyphs.items():
+			hStemDict, vStemDict, charZoneDict, stemZoneStemDict = dicts
+
+			glyph_h_stem_dict = self.parse_stem_dict(hStemDict)
+			glyph_v_stem_dict = self.parse_stem_dict(vStemDict)
+
+			for stem_width, stem_count in glyph_h_stem_dict.items():
+				h_stem_items_dict[stem_width].add(gName)
+				h_stem_count_dict[stem_width] += stem_count
+
+			for stem_width, stem_count in glyph_v_stem_dict.items():
+				v_stem_items_dict[stem_width].add(gName)
+				v_stem_count_dict[stem_width] += stem_count
+
+			glyph_top_zone_dict, glyph_bot_zone_dict = self.parse_zone_dicts(
+				charZoneDict, stemZoneStemDict)
+
+			for zone_height, zone_count in glyph_top_zone_dict.items():
+				top_zone_items_dict[zone_height].add(gName)
+				top_zone_count_dict[zone_height] += zone_count
+
+			for zone_height, zone_count in glyph_bot_zone_dict.items():
+				bot_zone_items_dict[zone_height].add(gName)
+				bot_zone_count_dict[zone_height] += zone_count
+
+		# item 0: stem count
+		# item 1: stem width
+		# item 2: list of glyph names
+		h_stem_list = self.assemble_rep_list(
+			h_stem_items_dict, h_stem_count_dict)
+
+		v_stem_list = self.assemble_rep_list(
+			v_stem_items_dict, v_stem_count_dict)
+
+		# item 0: zone count
+		# item 1: zone height
+		# item 2: list of glyph names
+		top_zone_list = self.assemble_rep_list(
+			top_zone_items_dict, top_zone_count_dict)
+
+		bot_zone_list = self.assemble_rep_list(
+			bot_zone_items_dict, bot_zone_count_dict)
+
+		return h_stem_list, v_stem_list, top_zone_list, bot_zone_list
 
 
-		return hStemDict, vStemDict,topZoneDict, bottomZoneDict
+def srtCnt():
+	"""
+	sort by: count (1st item), value (2nd item), list of glyph names (3rd item)
+	"""
+	return lambda t: (-t[0], -t[1], t[2])
 
 
-def srtCnt(first, second):
-	first = first[1][0]
-	second = second[1][0]
-	return cmp(second, first)
+def srtVal():
+	"""
+	sort by: value (2nd item), count (1st item), list of glyph names (3rd item)
+	"""
+	return lambda t: (t[1], -t[0], t[2])
 
 
-def srtVal(first, second):
-	first = first[0]
-	second = second[0]
-	return cmp(first, second)
+def srtRevVal():
+	"""
+	sort by: value (2nd item), count (1st item), list of glyph names (3rd item)
+	"""
+	return lambda t: (-t[1], -t[0], t[2])
 
 
-def srtRevVal(first, second):
-	first = first[0]
-	second = second[0]
-	return cmp(second, first)
-
-
-def  formatReport(rDict, sortFnc):
-	items = rDict.items()
-	items.sort(sortFnc)
-	# report in order count, value, glyph list.
-	items = [ [item[1][0], item[0], item[1][1]] for item in items]
-	# sort the glyph lists.
-	for item in items:
-		item[2].sort()
-	reportLines = [ "%s\t%s\t%s" % (item[0], item[1], item[2]) for item in items]
-	return reportLines
+def formatReport(rep_list, sortFunc):
+	rep_list.sort(key=sortFunc())
+	return ["%s\t%s\t%s\n" % (item[0], item[1], item[2]) for item in rep_list]
 
 
 def checkReportExists(path, doAlign):
@@ -689,43 +720,37 @@ def checkReportExists(path, doAlign):
 	return foundOne
 
 
-def PrintReports(path, hStemDict, vStemDict,topZoneDict, bottomZoneDict):
-	items = ([hStemDict,srtCnt], [vStemDict, srtCnt],[topZoneDict, srtRevVal], [bottomZoneDict, srtVal])
+def PrintReports(path, h_stem_list, v_stem_list, top_zone_list, bot_zone_list):
+	items = ([h_stem_list, srtCnt], [v_stem_list, srtCnt],
+		     [top_zone_list, srtRevVal], [bot_zone_list, srtVal])
 	atime = time.asctime()
 	suffixes = (".hstm.txt", ".vstm.txt", ".top.txt", ".bot.txt")
-	titles = ("Horizontal Stem List for %s on %s" % (path, atime),
-				"Vertical Stem List for %s on %s" % (path, atime),
-				"Top Zone List for %s on %s" % (path, atime),
-				"Bottom Zone List for %s on %s" % (path, atime),
+	titles = ("Horizontal Stem List for %s on %s\n" % (path, atime),
+				"Vertical Stem List for %s on %s\n" % (path, atime),
+				"Top Zone List for %s on %s\n" % (path, atime),
+				"Bottom Zone List for %s on %s\n" % (path, atime),
 			)
-	headers = ("Count\tWidth\tGlyph List",
-			"Count\tWidth\tGlyph List",
-			"Count\tTop Zone\tGlyph List",
-			"Count\tBottom Zone\tGlyph List",
+	headers = ("Count\tWidth\tGlyph List\n",
+			"Count\tWidth\tGlyph List\n",
+			"Count\tTop Zone\tGlyph List\n",
+			"Count\tBottom Zone\tGlyph List\n",
 			)
-	sawData = 0
-	for i in range(len(items)):
-		rDict = items[i][0]
-		sortFunc = items[i][1]
-		fName = path + suffixes[i]
+	for i, item in enumerate(items):
+		rep_list, sortFunc = item
+		if not rep_list:
+			continue
+		fName = '{}{}'.format(path, suffixes[i])
 		title = titles[i]
 		header = headers[i]
 		try:
-			if not rDict:
-				continue
-			sawData = 1
-			fp = open(fName, "wt")
-			fp.write(title + '\n')
-			fp.write(header + '\n')
-			reportLines = formatReport(rDict, sortFunc)
-			for line in reportLines:
-				fp.write(line + '\n')
-			fp.close()
-			print("\tWrote  %s" % (fName))
+			with open(fName, "wt") as fp:
+				fp.write(title)
+				fp.write(header)
+				fp.writelines(formatReport(rep_list, sortFunc))
+				print("Wrote %s" % fName)
 		except (IOError, OSError):
-			print("Has some error opening the file %s!" % fName)
-	if not sawData:
-		print("\tWarning. No reports printed - no stem data was collected.")
+			print("Error creating file %s!" % fName)
+
 
 def collectStemsFont(path, options, txPath):
 	#    use fontTools library to open font and extract CFF table.
@@ -882,12 +907,12 @@ def collectStemsFont(path, options, txPath):
 			print("Error - failure in processing outline data")
 			report = None
 
-	hStemDict, vStemDict,topZoneDict, bottomZoneDict = glyphReports.getReportDicts()
+	h_stem_list, v_stem_list, top_zone_list, bot_zone_list = glyphReports.getReportLists()
 	if options.reportPath:
 		reportPath = options.reportPath
 	else:
 		reportPath = path
-	PrintReports(reportPath, hStemDict, vStemDict,topZoneDict, bottomZoneDict)
+	PrintReports(reportPath, h_stem_list, v_stem_list, top_zone_list, bot_zone_list)
 	fontData.close()
 	logMsg( "Done with font %s. End time: %s." % (path, time.asctime()))
 
