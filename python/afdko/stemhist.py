@@ -168,21 +168,27 @@ class ACOptions:
 		self.verbose = 1
 		self.debug = 0
 
-class FDKEnvironmentError(AttributeError):
+
+class FDKEnvironmentError(Exception):
 	pass
 
-class ACOptionParseError(KeyError):
+
+class ACOptionParseError(Exception):
 	pass
 
-class ACFontError(KeyError):
+
+class ACFontError(Exception):
 	pass
 
-class ACHintError(KeyError):
+
+class ACHintError(Exception):
 	pass
+
 
 def logMsg(*args):
 	for s in args:
 		print(s)
+
 
 def ACreport(*args):
 	# long function used by the hinting library
@@ -190,6 +196,7 @@ def ACreport(*args):
 		print(arg, end=' ')
 	if arg[-1] != os.linesep:
 		print
+
 
 def CheckEnvironment():
 	txPath = 'tx'
@@ -240,10 +247,10 @@ def getOptions():
 
 		if arg == "-h":
 			logMsg(__help__)
-			raise ACOptionParseError
+			sys.exit(0)
 		elif arg == "-u":
 			logMsg(__usage__)
-			raise ACOptionParseError
+			sys.exit(0)
 		elif arg == "-all":
 			options.allStems = 1
 		elif arg == "-a":
@@ -922,22 +929,22 @@ def main():
 		txPath = CheckEnvironment()
 	except FDKEnvironmentError as e:
 		logMsg(e)
-		return
+		return 1
 
 	try:
 		options = getOptions()
 	except ACOptionParseError as e:
 		logMsg(e)
-		return
+		return 1
 
 	# verify that all files exist.
-	haveFiles = 1
+	haveFiles = True
 	for path in options.fileList:
 		if not os.path.exists(path):
 			logMsg( "File does not exist: <%s>." % path)
-			haveFiles = 0
+			haveFiles = False
 	if not haveFiles:
-		return
+		return 1
 
 	for path in options.fileList:
 		if options.new:
@@ -953,14 +960,12 @@ def main():
 			collectStemsFont(path, options, txPath)
 		except (ACFontError, ufotools.UFOParseError) as e:
 			logMsg( "\t%s" % e)
+			return 1
 		if options.debug:
 			fp = open("rawdata.txt", "wt")
 			fp.write('\n'.join(rawData))
 			fp.close()
-	return
 
 
 if __name__=='__main__':
-	main()
-
-
+	sys.exit(main())

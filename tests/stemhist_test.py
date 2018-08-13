@@ -48,7 +48,7 @@ def test_exit_unknown_option(arg):
         tool_name = TOOL + '.exe'
     else:
         tool_name = TOOL
-    assert subprocess.call([tool_name, arg]) == 0  # XXX should be 1
+    assert subprocess.call([tool_name, arg]) == 1
 
 
 @pytest.mark.parametrize('arg', ([], ['a'], ['all']))
