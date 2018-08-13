@@ -6,8 +6,7 @@
 "\n"
 "o the metrics data is expressed in the font's character space units which may\n"
 "  not be 1000 units/em as required by the specification. The character space\n"
-"  units are recorded in UnitPerEm comment in the font metrics section\n"
-,
+"  units are recorded in UnitPerEm comment in the font metrics section\n",
 "o the character count specified by the StartCharMetrics keyword may be too\n"
 "  large if the font has been subset using the -g option\n"
 "\n"

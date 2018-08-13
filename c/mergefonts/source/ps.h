@@ -9,16 +9,14 @@
 "glyphs in an abstract font. \n"
 "\n"
 "The -0 option shows 24 point filled glyphs up to maximum of 320 glyphs per\n"
-"page. The -e (encoding) option can be used in conjunction with the -1 option to\n"
-,
+"page. The -e (encoding) option can be used in conjunction with the -1 option to\n",
 "show glyphs in an 16x16 (8-bit) encoding grid. The -e option is only suitable\n"
 "for use with legacy Type 1 fonts that contain 8-bit encodings. Also, only the\n"
 "first of multiply encoded glyphs are shown with this option.\n"
 "\n"
 "The -1 option shows a single 500 point outline glyph per page. In order to\n"
 "prevent the inadvertent printing of a large number of pages with this option\n"
-"you must specify a glyph subset. Simply specify an all glyphs range: -g 0-N, if\n"
-,
+"you must specify a glyph subset. Simply specify an all glyphs range: -g 0-N, if\n",
 "you really need to print all the glyphs in the font. The printing of path\n"
 "coordinates may be suppressed with the -l (label) option when using the -1\n"
 "option.\n"
@@ -31,6 +29,5 @@
 "    tx -ps -1 -g aacute rdr_____.pfb\n"
 "\n"
 "will write, on standard output, a 500 point outline of the glyph named \"aacute\"\n"
-"from the font file \"rdr_____.pfb\". This may be piped to \"lpr\" for printing on\n"
-,
+"from the font file \"rdr_____.pfb\". This may be piped to \"lpr\" for printing on\n",
 "Unix or directed to \"lpt1:\" for printing from a DOS window on Windows.\n"
