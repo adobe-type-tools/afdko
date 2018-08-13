@@ -1,5 +1,5 @@
 booleanOperations~=0.8.0
-defcon==0.5.2
+defcon~=0.5.2
 fontMath~=0.4.5
 fontPens~=0.1.0
 fontTools~=3.29.0
