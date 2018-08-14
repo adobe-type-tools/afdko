@@ -357,9 +357,12 @@ static void writeeexec(void) {
     lenIV = getlenIV(s, end);
 
     while (s < end)
-        if (s[0] != '#' || s[1] != '#')
-            eeputchar(*s++);
-        else {
+        if (s[0] != '#' || s[1] != '#') {
+            if (s[0] == 0x0D) /* exclude CR so Win & Mac have same output */
+                s++;
+            else
+                eeputchar(*s++);
+        } else {
             int i, len;
             unsigned short key = key_charstring;
             char *t, RD[20], prefix[40];
