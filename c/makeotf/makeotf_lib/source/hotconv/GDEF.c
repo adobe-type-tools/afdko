@@ -40,7 +40,6 @@ typedef struct {
 typedef struct {
     Offset Coverage;
     unsigned short GlyphCount;
-    Offset AttachPoint;
     otlTbl otl;
 } AttachTable;
 #define ATTACH_TABLE_SIZE(glyphCount) (uint16 * 2 + uint16 * (glyphCount))
@@ -48,7 +47,6 @@ typedef struct {
 typedef struct {
     unsigned short Coverage;
     unsigned short LigGlyphCount;
-    Offset LigGlyph;
     otlTbl otl;
 } LigCaretTable;
 #define LIG_CARET_TABLE_SIZE(numGlyphs) (uint16 * 2 + uint16 * (numGlyphs))
@@ -63,6 +61,7 @@ typedef struct {
 typedef struct {
     unsigned short CaretCount;
     unsigned short gid;
+    unsigned short format;
     dnaDCL(CaretTable, caretTables);
     Offset offset;
 } LigGlyphEntry;
@@ -415,10 +414,10 @@ void setGlyphClassGDef(hotCtx g, GNode *simple, GNode *ligature, GNode *mark,
 unsigned short addMarkSetClassGDEF(hotCtx g, GNode *markClassNode) {
     int i;
     unsigned char classIndex = 0;
-    GNode *markNode;
     GDEFCtx h = g->ctx.GDEF;
 
     for (i = 0; i < h->markSetClasses.cnt; i++) {
+        GNode *markNode;
         markNode = *((GNode **)dnaINDEX(h->markSetClasses, i));
         if (markClassNode == markNode) {
             classIndex = i + 1; /* so that 0 means no value was assigned. */
@@ -437,10 +436,10 @@ unsigned short addMarkSetClassGDEF(hotCtx g, GNode *markClassNode) {
 unsigned short addGlyphMarkClassGDEF(hotCtx g, GNode *markClassNode) {
     int i;
     unsigned char classIndex = 0;
-    GNode *markNode;
     GDEFCtx h = g->ctx.GDEF;
 
     for (i = 0; i < h->markAttachClasses.cnt; i++) {
+        GNode *markNode;
         markNode = *((GNode **)dnaINDEX(h->markAttachClasses, i));
         if (markClassNode == markNode) {
             classIndex = i + 1; /* GDEF MarkAttachment class index starts at 1, not 0. */
@@ -471,7 +470,7 @@ int addAttachEntryGDEF(hotCtx g, GNode *glyphNode, unsigned short contour) {
     i = 0;
     while (i < h->attachEntries.cnt) {
         if (h->attachEntries.array[i].gid == gid) {
-            unsigned short j, *indexEntry;
+            int j;
             attachEntry = &h->attachEntries.array[i];
             /* make sure the contour isn't already in the list. */
             for (j = 0; j < attachEntry->contourIndices.cnt; j++) {
@@ -481,6 +480,7 @@ int addAttachEntryGDEF(hotCtx g, GNode *glyphNode, unsigned short contour) {
                 }
             }
             if (!seenContour) {
+                unsigned short *indexEntry;
                 indexEntry = dnaNEXT(attachEntry->contourIndices);
                 *indexEntry = contour;
             }
@@ -499,58 +499,38 @@ int addAttachEntryGDEF(hotCtx g, GNode *glyphNode, unsigned short contour) {
     return seenContour;
 }
 
-int addLigCaretEntryGDEF(hotCtx g, GNode *glyphNode, unsigned short caretValue, unsigned short format) {
+void addLigCaretEntryGDEF(
+    hotCtx g, GNode *glyphNode, unsigned short* caretValue,
+    int caretCount, unsigned short format) {
     int i;
     LigGlyphEntry *lge = NULL;
     GID gid = glyphNode->gid;
     GDEFCtx h = g->ctx.GDEF;
-    int seenCaretValue = 0;
-    CaretTable *ct;
 
-    if (h->ligCaretEntries.cnt == 0) {
-        lge = dnaNEXT(h->ligCaretEntries);
-        lge->gid = gid;
-        dnaINIT(g->dnaCtx, lge->caretTables, 10, 10);
-        ct = dnaNEXT(lge->caretTables);
-        ct->format = format;
-        ct->CaretValue = caretValue;
-    } else {
-        /* We allow only one device entry and either one byPos or byIndex entry */
-        i = 0;
-        while (i < h->ligCaretEntries.cnt) {
-            if (h->ligCaretEntries.array[i].gid == gid) {
-                unsigned short j;
-                CaretTable *ct;
-                lge = &h->ligCaretEntries.array[i];
-                for (j = 0; j < lge->caretTables.cnt; j++) {
-                    if (lge->caretTables.array[j].format == format) {
-                        seenCaretValue = 1;
-                        break;
-                    }
-                    if (((lge->caretTables.array[j].format == 1) &&
-                         (lge->caretTables.array[j].format == 2)) ||
-                        ((lge->caretTables.array[j].format == 2) &&
-                         (lge->caretTables.array[j].format == 1))) {
-                        featGlyphDump(g, gid, 0, 0);
-                        seenCaretValue = 1;
-                        break;
-                    }
-                }
-                if (!seenCaretValue) {
-                    ct = dnaNEXT(lge->caretTables);
-                    ct->format = format;
-                    ct->CaretValue = caretValue;
-                }
-                break;
-            }
-            i++;
+    /* First, make sure that there is not another LGE for the same glyph
+     We don't yet support format 3. */
+    for (i=0; i < h->ligCaretEntries.cnt;i++)
+    {
+        lge = &h->ligCaretEntries.array[i];
+        if (lge->gid == gid)
+        {
+            featGlyphDump(g, gid, 0, 0);
+            hotMsg(g, hotWARNING, "GDEF Ligature Caret List Table. Glyph '%s' gid '%d'.\n A glyph can have at most one ligature glyph entry. Skipping entry for format '%d'.", g->note.array, gid, format);
+            return;
         }
     }
-    if (seenCaretValue) {
-        featGlyphDump(g, gid, 0, 0);
-        hotMsg(g, hotWARNING, "GDEF Ligature Caret List Table. Glyph '%s' gid '%d'.\n A glyph can have at most one ligature caret device  statement and one of either\n ligature caret by position or ligature caret by index statetment. Skipping entry for format '%d'.", g->note.array, gid, format);
+    lge = dnaNEXT(h->ligCaretEntries);
+    lge->gid = gid;
+    lge->CaretCount = caretCount;
+    lge->format = format;
+    dnaINIT(g->dnaCtx, lge->caretTables, caretCount, caretCount);
+    for (i = 0; i < caretCount; i++)
+    {
+        CaretTable *ct;
+        ct = dnaNEXT(lge->caretTables);
+        ct->format = format;
+        ct->CaretValue = caretValue[i];
     }
-    return seenCaretValue;
 }
 
 static LOffset createGlyphClassDef(GDEFCtx h) {

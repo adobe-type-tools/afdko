@@ -1,7 +1,16 @@
-Read Roberts 9/14/2015
+Read Roberts 8/14/2018
 
 To build the new featXXX.[ch] files, just cd to this directory, under Mac OSX, and run
 "make".
+
+Note that this makefile will run the tools cpplint and clang-format in
+order to clean up the old code format. To install these tools, use the
+commands:
+	'brew install clang-format'
+	'pip install cpplint'
+Note that clang-format does NOT fix all the issues. Any warnings
+reported by cpplint must be fixed by hand. Currently, there are only
+four of these.
 
 The "make" references to the 'antlr' program at pccts/bin/antlr.
 
@@ -30,9 +39,6 @@ and had to uncomment line 18:
 #CC=cc
 to
 CC=cc
-
-In order to fix a compile bug, I also had to change all occurences of
-"zzerraction(void)" to zzerraction()" in all the sources.
 
 The grammar changed enough in the transition to ANTL2 and ANTLR 3 that
 the  PCCTS featgram.g  won't run under the ANTLR 3 programs.

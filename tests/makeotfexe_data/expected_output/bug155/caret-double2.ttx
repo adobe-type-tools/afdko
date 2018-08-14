@@ -12,9 +12,12 @@
       </Coverage>
       <!-- LigGlyphCount=1 -->
       <LigGlyph index="0">
-        <!-- CaretCount=1 -->
+        <!-- CaretCount=2 -->
         <CaretValue index="0" Format="2">
           <CaretValuePoint value="77"/>
+        </CaretValue>
+        <CaretValue index="1" Format="2">
+          <CaretValuePoint value="101"/>
         </CaretValue>
       </LigGlyph>
     </LigCaretList>

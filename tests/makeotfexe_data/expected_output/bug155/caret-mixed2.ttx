@@ -16,8 +16,8 @@
         <CaretValue index="0" Format="2">
           <CaretValuePoint value="77"/>
         </CaretValue>
-        <CaretValue index="1" Format="1">
-          <Coordinate value="315"/>
+        <CaretValue index="1" Format="2">
+          <CaretValuePoint value="101"/>
         </CaretValue>
       </LigGlyph>
     </LigCaretList>

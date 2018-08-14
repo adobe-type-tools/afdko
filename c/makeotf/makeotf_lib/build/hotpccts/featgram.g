@@ -1986,20 +1986,24 @@ table_GDEF
 			(
 				K_LigatureCaret1 
 				pattern[0]>[gc[0]]
+				<<initGDEFLigatureCaretValue();>>
 				(
 				metric>[val]
-				<<setGDEFLigatureCaret(gc[0], val, 1);>>
+				<<addGDEFLigatureCaretValue(val);>>
 				)+
+				<<setGDEFLigatureCaret(gc[0], 1);>>
 			)
 			|
 
 			(
 				K_LigatureCaret2
 				pattern[0]>[gc[0]]
+				<<initGDEFLigatureCaretValue();>>
 				(
 				metric>[val]
-				<<setGDEFLigatureCaret(gc[0], val, 2);>>
+				<<addGDEFLigatureCaretValue(val);>>
 				)+
+				<<setGDEFLigatureCaret(gc[0], 2);>>
 			)
 			|
 			)

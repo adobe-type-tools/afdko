@@ -40,12 +40,12 @@ def _generate_ttx_dump(font_path, tables=None):
 # Tests
 # -----
 
-@pytest.mark.parametrize('format', [
+@pytest.mark.parametrize('caret_format', [
     'bypos', 'byindex', 'mixed', 'mixed2', 'double', 'double2'])
-def test_GDEF_LigatureCaret_bug155(format):
+def test_GDEF_LigatureCaret_bug155(caret_format):
     input_filename = 'bug155/font.pfa'
-    feat_filename = 'bug155/caret-{}.fea'.format(format)
-    ttx_filename = 'bug155/caret-{}.ttx'.format(format)
+    feat_filename = 'bug155/caret-{}.fea'.format(caret_format)
+    ttx_filename = 'bug155/caret-{}.ttx'.format(caret_format)
     actual_path = _get_temp_file_path()
     runner(CMD + ['-n', '-o',
                   'f', '_{}'.format(_get_input_path(input_filename)),

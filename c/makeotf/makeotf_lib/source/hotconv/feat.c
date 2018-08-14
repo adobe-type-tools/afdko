@@ -260,7 +260,8 @@ struct featCtx_ {
     dnaDCL(GNode *, markClasses);  /* Container for head nodes or mark classes */
     dnaDCL(AnchorDef, anchorDefs); /* List of named anchors, sorted by name */
     dnaDCL(ValueDef, valueDefs);   /* List of named value records, sorted by name */
-    GNode *ligGlyphs;              /* Container for the ligature glyph  class */
+    GNode *ligGlyphs;              /* Container for the GDEF ligature glyph  class */
+    dnaDCL(unsigned short, ligCaretValues);   /* List of list of caret values for current GDEF ligature glyph record.*/
 
     /* --- Temp and misc stuff --- */
     dnaDCL(char, nameString);               /* Tmp for a nameid string */
@@ -540,8 +541,18 @@ static void addGDEFAttach(GNode *pat, unsigned short contour) {
     }
 }
 
-static void setGDEFLigatureCaret(GNode *pat, unsigned short caretValue, unsigned short format) {
-    int seenCaretValue;
+static void initGDEFLigatureCaretValue()
+{
+    h->ligCaretValues.cnt = 0;
+}
+
+static void addGDEFLigatureCaretValue(int value)
+{
+    *dnaNEXT(h->ligCaretValues) = value;
+}
+
+
+static void setGDEFLigatureCaret(GNode *pat, unsigned short format) {
     GNode *next = pat;
 
     if (pat->nextSeq != NULL) {
@@ -551,8 +562,7 @@ static void setGDEFLigatureCaret(GNode *pat, unsigned short caretValue, unsigned
     }
 
     while (next != NULL) {
-        seenCaretValue = 0;
-        seenCaretValue = addLigCaretEntryGDEF(g, next, caretValue, format);
+        addLigCaretEntryGDEF(g, next, h->ligCaretValues.array, h->ligCaretValues.cnt, format);
         next = next->nextCl;
     }
 }
@@ -3572,9 +3582,9 @@ static void addSub(GNode *targ, GNode *repl, int lkpType, int targLine) {
 
         if (validateGSUBLigature(g, targ, repl, 0)) {
             /* add glyphs to lig and component classes, in case we need to
-            /* make a default GDEF table. Note that we may make a lot of
-            /* duplicated. These get weeded out later. The components are
-            /* linked by the next->nextSeq fields. For each component*/
+            make a default GDEF table. Note that we may make a lot of
+            duplicated. These get weeded out later. The components are
+            linked by the next->nextSeq fields. For each component*/
             gcInsert = gcOpen(kDEFAULT_COMPONENTCLASS_NAME); /* looks up class, making if needed. Sets h->gcInsert to adress of nextCl of last node, and returns it.*/
             next = targ;
             while (next != NULL) {
@@ -4259,6 +4269,7 @@ void featNew(hotCtx hot) {
     dnaINIT(hot->dnaCtx, h->markClasses, 8, 8);
     dnaINIT(hot->dnaCtx, h->anchorDefs, 8, 8);
     dnaINIT(hot->dnaCtx, h->valueDefs, 8, 8);
+    dnaINIT(hot->dnaCtx, h->ligCaretValues, 10, 10);
 
 #endif /* HOT_FEAT_SUPPORT */
 
@@ -4394,6 +4405,7 @@ void featReuse(hotCtx g) {
     h->markClasses.cnt = 0;
     h->anchorDefs.cnt = 0;
     h->valueDefs.cnt = 0;
+    h->ligCaretValues.cnt = 0;
 
 #endif /* HOT_FEAT_SUPPORT */
 }
@@ -4448,6 +4460,8 @@ void featFree(hotCtx g) {
     dnaFREE(h->markClasses);
     dnaFREE(h->anchorDefs);
     dnaFREE(h->valueDefs);
+    dnaFREE(h->ligCaretValues);
+
 #endif /* HOT_FEAT_SUPPORT */
 
     MEM_FREE(g, g->ctx.feat);
