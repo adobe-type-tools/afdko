@@ -2866,7 +2866,7 @@ static int t1_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
     txCtx h = cb->indirect_ctx;
     char gname[9];
 
-    /* In mergeFonts, we do NOT skip a glyph if it has already been seen: 
+    /* In mergeFonts, we do NOT skip a glyph if it has already been seen:
        the same glyph may get copied more than once to a different target
        font name. */
     if (h->t1w.fd == -1) {
@@ -6948,7 +6948,7 @@ static void readCIDFontInfo(txCtx h, char *filePath) {
             value[i++] = 0;
         }
         lineno++;
-        len = sscanf(buf, "%127s %128c", key, value);
+        len = sscanf(buf, "%127s %128[^\n]", key, value);
         if (len != 2) {
             if (len == -1)
                 continue;
