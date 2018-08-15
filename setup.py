@@ -166,7 +166,6 @@ def _get_console_scripts():
         ('comparefamily', 'comparefamily:main'),
         ('checkoutlinesufo', 'checkoutlinesufo:main'),
         ('makeotf', 'makeotf:main'),
-        ('makeinstances', 'makeinstances:main'),
         ('makeinstancesufo', 'makeinstancesufo:main'),
         ('otc2otf', 'otc2otf:main'),
         ('otf2otc', 'otf2otc:main'),

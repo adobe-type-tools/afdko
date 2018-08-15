@@ -25,10 +25,6 @@ This program is the Adobe auto-hinter. It can be applied to both OpenType/CFF an
 
 This program will build an OpenType/CFF font from a feature file that defines the OpenType layout rules, and overrides for default values, and a font file: a Type 1 font, TrueType font, 'detype1' text version of a Type 1 font, or UFO font and It also requires some other meta-data files. It will also build an OpenType/TTF font from a TrueType source font file.
 
-### makeinstances
-
-This script will generate Type 1 fonts from an MM Type 1 font, using a tab-delimited file to set values in the instances. The Adobe developers now use makeinstancesufo, but this version is still supported.
-
 ### makeinstancesufo
 
 This script will generate UFO fonts from a set of Superpolator master designs.
