@@ -23,7 +23,7 @@ void setGlyphClassGDef(hotCtx g, GNode *simpl, GNode *ligature, GNode *mark,
 
 int addAttachEntryGDEF(hotCtx g, GNode *glyphNode, unsigned short contour);
 
-int addLigCaretEntryGDEF(hotCtx g, GNode *glyphNode, unsigned short caretValue, unsigned short format);
+void addLigCaretEntryGDEF(hotCtx g, GNode *glyphNode, unsigned short* caretValue, int caretCount, unsigned short format);
 
 unsigned short addGlyphMarkClassGDEF(hotCtx g, GNode *markClass);
 

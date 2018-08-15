@@ -1,6 +1,8 @@
 # Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 # This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 # This license is available at: http://opensource.org/licenses/Apache-2.0.
+# Install clang-format with 'brew install clang-format'
+# Install cpplint with 'pip install cpplint'
 
 all: pccts
 ROOT_DIR     = ../..
@@ -35,6 +37,8 @@ ANTLR_SPAWN = ${HOT}/featpars.dlg ${HOT}/featgram.c ${HOT}/feattoks.h \
 DLG_SPAWN 	= ${HOT}/featscan.c ${HOT}/featmode.h
 
 pccts: ${ANTLR_SPAWN} ${DLG_SPAWN}
+	clang-format -i ${HOT}/featgram.c ${HOT}/featscan.c ${HOT}/featerr.c ${HOT}/feattoks.h
+	cpplint ${HOT}/featgram.c ${HOT}/featscan.c ${HOT}/featerr.c ${HOT}/feattoks.h
 
 ${ANTLR_SPAWN}: featgram.g ${HOT}/feat.c ${HOT}/feat.h
 	${ANTLR} ${ANTLR_FLAGS} featgram.g

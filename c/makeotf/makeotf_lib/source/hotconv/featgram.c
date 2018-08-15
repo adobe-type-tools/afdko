@@ -4666,6 +4666,7 @@ table_GDEF()
                                                 zzCONSUME;
                                                 gc[0] = pattern(0);
 
+                                                initGDEFLigatureCaretValue();
                                                 {
                                                     zzBLOCK(zztasp5);
                                                     int zzcnt = 1;
@@ -4674,12 +4675,13 @@ table_GDEF()
                                                         do {
                                                             val = metric();
 
-                                                            setGDEFLigatureCaret(gc[0], val, 1);
+                                                            addGDEFLigatureCaretValue(val);
                                                             zzLOOP(zztasp5);
                                                         } while ((LA(1) == T_NUM));
                                                         zzEXIT(zztasp5);
                                                     }
                                                 }
+                                                setGDEFLigatureCaret(gc[0], 1);
                                                 zzEXIT(zztasp4);
                                             }
                                         }
@@ -4693,6 +4695,7 @@ table_GDEF()
                                                     zzCONSUME;
                                                     gc[0] = pattern(0);
 
+                                                    initGDEFLigatureCaretValue();
                                                     {
                                                         zzBLOCK(zztasp5);
                                                         int zzcnt = 1;
@@ -4701,12 +4704,13 @@ table_GDEF()
                                                             do {
                                                                 val = metric();
 
-                                                                setGDEFLigatureCaret(gc[0], val, 2);
+                                                                addGDEFLigatureCaretValue(val);
                                                                 zzLOOP(zztasp5);
                                                             } while ((LA(1) == T_NUM));
                                                             zzEXIT(zztasp5);
                                                         }
                                                     }
+                                                    setGDEFLigatureCaret(gc[0], 2);
                                                     zzEXIT(zztasp4);
                                                 }
                                             }
