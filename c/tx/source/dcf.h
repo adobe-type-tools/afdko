@@ -15,8 +15,7 @@
 "   all  all tables selected (can't be combined with other letters)\n"
 "-0      dump level 0\n"
 "-1      dump level 1\n"
-"-5      dump level 5\n"
-,
+"-5      dump level 5\n",
 "-b      don't break flowed objects\n"
 "\n"
 "Dump Compact Font (dcf) mode writes a literal dump of a Compact Font Format \n"
@@ -26,8 +25,7 @@
 "table selection letters from the above list or the string \"all\" which will\n"
 "select all tables. Only selected tables will be scheduled for dumping at the\n"
 "level specified by the dump level options: -0, -1, and -5.\n"
-"\n"
-,
+"\n",
 "The -0 (level 0) option simply lists the region a table occupies as an\n"
 "inclusive start and end pair of absolute hexadecimal byte offsets.\n"
 "\n"
@@ -38,8 +36,7 @@
 "includes and some of the table data may be modified to make it easier to use.\n"
 "\n"
 "The -b (no break) option flows array-like object data onto a single line.\n"
-"\n"
-,
+"\n",
 "There is no facility to map the Encoding or charset tables to glyph names since\n"
 "-dump mode option -4 already provides it. When the String INDEX is dumped at\n"
 "level 5 the indexes are converted to SIDs so that they can be used directly\n"
@@ -47,8 +44,7 @@
 "Global Subr INDEX or the Local Subr INDEX is dumped at level 5 the indexes are\n"
 "biased so that they can be used directly with the callgsubr and callsubr\n"
 "arguments.\n"
-"\n"
-,
+"\n",
 "The charstring data in the Global Subr INDEX, Local Subr INDEX, and the\n"
 "CharString INDEX is shown without flattening, i.e. the subroutine calls are not\n"
 "interpreted. However, this may be overridden by using the -g option to select\n"
@@ -58,8 +54,7 @@
 "option isn't needed.\n"
 "\n"
 "For example, the command:\n"
-"\n"
-,
+"\n",
 "    tx -dcf -g a BernhardModern-Roman.otf\n"
 "\n"
 "will write, on standard output, a flattened dump of the charstring data for\n"

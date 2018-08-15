@@ -9,8 +9,7 @@
 "-d      remove dotsection and convert seac charstring operators\n"
 "-n      no hints (suppress h/vstem, flex, and dotsection)\n"
 "\n"
-"Dump mode writes an ASCII text dump of an abstract font. The display of global\n"
-,
+"Dump mode writes an ASCII text dump of an abstract font. The display of global\n",
 "font data or glyph and charstring data is controlled by the various options\n"
 "described above. All charstring data is specified in absolute character space \n"
 "units.\n"

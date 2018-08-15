@@ -25,15 +25,13 @@
 "\n",
 "Type 1 mode writes a Type 1 conversion of an abstract font. The form of the\n"
 "Type 1 font is controlled by the options above.\n"
-"\n"
-,
+"\n",
 "The -0 (host) option generates a font that closely follows the specification in\n"
 "the \"Adobe Type 1 Font Format\" or the \"Adobe CMap and CIDFont Files\n"
 "Specification\" depending on whether the source font was name- or CID-keyed,\n"
 "respectively. The -1 (base) and -2 (addition) options generate a base or\n"
 "addition type in incremental download format that is suitable for PostScript\n"
-"printing. The +T (testing) option performs font and charstring optimizations\n"
-,
+"printing. The +T (testing) option performs font and charstring optimizations\n",
 "for incremental download fonts that are normally desirable but prevent bitmap\n"
 "comparisons from being performed on some charstrings. These optimizations may\n"
 "be disabled with the -T option.\n"
@@ -41,8 +39,7 @@
 "The -decid option converts a CID-keyed font into a name-keyed font. Since a\n"
 "name-keyed font only provides a single Private dictionary, source glyphs must\n"
 "be selected from a single dictionary in the FDArray. This means that you must\n"
-"normally specify a glyph subset, e.g. by using the -fd option. This restriction\n"
-,
+"normally specify a glyph subset, e.g. by using the -fd option. This restriction\n",
 "may be removed by forcing the choice of dictionary with the -usefd option. The\n"
 "-usefd option should be used with care since it can have a detrimental effect\n"
 "on hinting. A .notdef glyph will be added to the subset, if necessary. The\n"
@@ -51,8 +48,7 @@
 "\n"
 "The -pfb and -LWFN options imply the -0, +b, -E, -S, +q, -w, -e 4, and\n"
 "-crlf or -cr options, respectively.\n"
-"\n"
-,
+"\n",
 "The mutual exclusivity of options -b (binary), -l (long ASCII), and -c (compact\n"
 "ASCII) is automatically, and silently, enforced. Option -c is only different\n"
 "from option -l when options -1 or -2 are also specified.\n"
@@ -64,6 +60,5 @@
 "    tx -t1 -2 -g a -e -1 rdr_____.pfb\n"
 "\n"
 "converts the font file \"rdr_____.pfb\" to a Type 1 incremental download \n"
-"addition font containing the single glyph \"a\" in an unencrypted and \n"
-,
+"addition font containing the single glyph \"a\" in an unencrypted and \n",
 "ASCII-encoded form and writes the result to stdout.\n"

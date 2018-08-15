@@ -5,8 +5,7 @@
 "\n"
 "-gn0      Glyph names for no glyphs [default]\n"
 "-gn1      Glyph names for non-ASCII glyphs only\n"
-"-gn2      Glyph names for all glyphs\n"
-,
+"-gn2      Glyph names for all glyphs\n",
 "\n"
 "-sa       Standalone font file\n"
 "\n"
@@ -14,8 +13,7 @@
 "controlled by the options above.\n"
 "\n"
 "The options are reasonably self explanatory.\n"
-"\n"
-,
+"\n",
 "For example, the command:\n"
 "\n"
 "    tx -svg -crlf -gn1 rdr_____.pfb\n"
@@ -23,8 +21,7 @@
 "converts the font file \"rdr_____.pfb\" to an SVG font with Windows newlines and\n"
 "glyph names for non-ASCII Unicode characters, and writes the result to stdout.\n"
 "\n"
-"The command:\n"
-,
+"The command:\n",
 "\n"
 "    tx -svg -sa rdr_____.pfb test.svg\n"
 "\n"
