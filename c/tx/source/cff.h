@@ -13,8 +13,7 @@
 "-no_futile remove futile subrs during subroutinization\n"
 "\n"
 "CFF mode writes a CFF conversion of an abstract font. The precise form of the\n"
-"CFF font that is written can be controlled to a limited extent by the options\n"
-,
+"CFF font that is written can be controlled to a limited extent by the options\n",
 "above. The feature is enabled by the + form of the option and disabled by the \n"
 "- form of the option.\n"
 "\n"
@@ -22,8 +21,7 @@
 "affecting its rendering. The +F (Family) option removes FamilyBlues and\n"
 "FamilyOtherBlues from hint dictionaries if they are identical to the BlueValues\n"
 "and OtherBlues, respectively. The +O (optimize) option removes the same keys as\n"
-"the +E option as well as performing some charstring optimizations that are\n"
-,
+"the +E option as well as performing some charstring optimizations that are\n",
 "suitable for fonts embedded in printer ROMs. The +T (testing) option performs\n"
 "charstring optimizations that are normally desirable but prevent bitmap\n"
 "comparisons from being performed on some charstrings. These optimizations may\n"

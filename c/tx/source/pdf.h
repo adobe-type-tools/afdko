@@ -9,8 +9,7 @@
 "font.\n"
 "\n"
 "The -0 option shows a glyph palette of 24 point filled glyphs up to a maximum\n"
-"of 320 glyphs per page. The -1 option shows a single 500 point outline glyph\n"
-,
+"of 320 glyphs per page. The -1 option shows a single 500 point outline glyph\n",
 "per page that are linked to the corresponding glyph in the palette. Thus you\n"
 "can mouse click on a glyph in the palette to get to the outline page of the\n"
 "same glyph.\n"

@@ -8,8 +8,7 @@
 "metric values and the information displayed is controlled by the various\n"
 "options described above.\n"
 "\n"
-"The glyph metrics include the identity of the glyph, its width, and its\n"
-,
+"The glyph metrics include the identity of the glyph, its width, and its\n",
 "bounding box. A precise bounding box is computed from analysis of the path\n"
 "data. The aggregate bounding box is then computed from analysis of the bounding\n"
 "boxes for each glyph. The glyphs that set the values in the aggregate bounding\n"
