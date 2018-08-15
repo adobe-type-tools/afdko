@@ -6,7 +6,7 @@ environment:
     secure: myMd6E3niwjGvxEHeChOlg==
 
   matrix:
-    - PYTHON_HOME: "C:\\Python27-x64"
+    - PYTHON_HOME: "C:\\Python27"
 
 matrix:
   fast_finish: true
