@@ -2,6 +2,7 @@ from __future__ import print_function, division, absolute_import
 
 import os
 import pytest
+from shutil import copy2
 import tempfile
 
 from fontTools.ttLib import TTFont
@@ -36,6 +37,26 @@ def _generate_ttx_dump(font_path, tables=None):
         return temp_path
 
 
+def _copy_fontinfo_file():
+    """
+    Copies 'fontinfo.txt' to 'fontinfo'
+    """
+    fontinfo_source = _get_input_path('fontinfo.txt')
+    fontinfo_copy = fontinfo_source[:-4]
+    if not os.path.exists(fontinfo_copy):
+        copy2(fontinfo_source, fontinfo_copy)
+
+
+def teardown_module():
+    """
+    Deletes the temporary 'fontinfo' file
+    """
+    try:
+        os.remove(_get_input_path('fontinfo'))
+    except OSError:
+        pass
+
+
 # -----
 # Tests
 # -----
@@ -51,12 +72,21 @@ def _generate_ttx_dump(font_path, tables=None):
     ('ufo2.ufo', 'wd'),
     ('ufo3.ufo', ''),
     ('ufo3.ufo', 'wd'),
+    ('font.pfa', 'fi'),
+    ('font.pfb', 'fi'),
+    ('font.otf', 'fi'),
+    ('font.cff', 'fi'),
+    ('ufo2.ufo', 'fi'),
+    ('ufo3.ufo', 'fi'),
 ])
 def test_basic_hinting(font_filename, opt):
     arg = []
     expected_filename = font_filename
     if opt:
-        arg = [opt]
+        if opt == 'fi':
+            _copy_fontinfo_file()
+        else:
+            arg = [opt]
         head, tail = os.path.splitext(font_filename)
         expected_filename = '{}-{}{}'.format(head, opt, tail)
 
@@ -76,7 +106,10 @@ def test_basic_hinting(font_filename, opt):
 
     skip = []
     if 'otf' in font_filename:
-        expected_filename = os.path.splitext(font_filename)[0] + '.ttx'
+        fi = ''
+        if opt == 'fi':
+            fi = '-' + opt
+        expected_filename = os.path.splitext(font_filename)[0] + fi + '.ttx'
         actual_path = _generate_ttx_dump(actual_path, ['CFF '])
         skip = ['-l', '2']  # <ttFont sfntVersion=
 
