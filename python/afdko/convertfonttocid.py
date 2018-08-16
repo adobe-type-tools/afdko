@@ -298,9 +298,13 @@ class FDDict(object):
                 setattr(self, fieldName, bluesList)
 
 
-def parseFontInfoFile(fontInfoData, glyphList, maxY, minY, fontName, blueFuzz):
+def parseFontInfoFile(fontDictList, fontInfoData, glyphList, maxY, minY,
+                      fontName, blueFuzz):
     """
-    Returns fdGlyphDict and fontDictList.
+    fontDictList may or may not already contain a font dict taken from
+    the source font top FontDict.
+
+    Returns fdGlyphDict, fontDictList, finalFDict
 
     fdGlyphDict: { '.notdef': [0, 0],  # 'g_name': [FDDict_index, g_index]
                    'negative': [1, 2],
@@ -355,11 +359,12 @@ def parseFontInfoFile(fontInfoData, glyphList, maxY, minY, fontName, blueFuzz):
                            'OtherBlues': '[-217 -205]',
                            'BaselineYCoord': '0'}>]
     """
-    # Start with an uninitialized entry for the default FD Dict 0.
-    fontDictList = [FDDict()]
-
     # The map of glyph names to font dict: the index into fontDictList.
     fdGlyphDict = {}
+
+    # The user-specified set of blue values to write into the output font,
+    # some sort of merge of the individual font dicts. May not be supplied.
+    finalFDict = None
 
     # Get rid of comments.
     data = re.sub(r"#[^\r\n]+[\r\n]", "", fontInfoData)
@@ -393,9 +398,15 @@ def parseFontInfoFile(fontInfoData, glyphList, maxY, minY, fontName, blueFuzz):
                     i += 1
                     fdDict = FDDict()
                     fdDict.DictName = dictName
-                    # save dict and FDIndex.
-                    fdIndexDict[dictName] = len(fontDictList)
-                    fontDictList.append(fdDict)
+                    if dictName == "FinalFont":
+                        # This dict is NOT used to hint any glyphs;
+                        # it is used to supply the merged alignment zones
+                        # and stem widths for the final font.
+                        finalFDict = fdDict
+                    else:
+                        # save dict and FDIndex
+                        fdIndexDict[dictName] = len(fontDictList)
+                        fontDictList.append(fdDict)
 
                 elif token == kGlyphSetToken:
                     state = glyphSetState
@@ -528,7 +539,7 @@ def parseFontInfoFile(fontInfoData, glyphList, maxY, minY, fontName, blueFuzz):
     if fdGlyphDict:
         fdGlyphDict['.notdef'] = [0, 0]
 
-    return fdGlyphDict, fontDictList
+    return fdGlyphDict, fontDictList, finalFDict
 
 
 def mergeFDDicts(prevDictList, privateDict):
@@ -1039,9 +1050,11 @@ def convertFontToCID(inputPath, outputPath, fontinfoPath=None):
     maxY = fontBBox[3]
     minY = fontBBox[1]
 
-    fdGlyphDict, fontDictList = parseFontInfoFile(fontInfoData, glyphList,
-                                                  maxY, minY, fontName,
-                                                  blueFuzz)
+    # Start with an uninitialized entry for the default FDDict 0
+    fontDictList = [FDDict()]
+
+    fdGlyphDict, fontDictList, _ = parseFontInfoFile(
+        fontDictList, fontInfoData, glyphList, maxY, minY, fontName, blueFuzz)
 
     glyphSetList = makeSortedGlyphLists(glyphList, fdGlyphDict)
 
