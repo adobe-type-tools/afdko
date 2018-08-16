@@ -1015,7 +1015,7 @@ class UFOFontData(object):
                         fontDictList[1:], self.fontDict)
                 else:
                     convertfonttocid.mergeFDDicts(
-                        [finalFDict], self.topDict)
+                        [finalFDict], self.fontDict)
 
         return fdGlyphDict, fontDictList
 
