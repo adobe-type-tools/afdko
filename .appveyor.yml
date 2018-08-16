@@ -41,6 +41,7 @@ before_build:
   - cpplint --recursive --quiet c\makeotf\makeotf_lib\resource
   - cpplint --recursive --quiet c\makeotf\source
   - cpplint --recursive --quiet c\mergefonts
+  - cpplint --recursive --quiet c\public\lib\source\absfont
   - cpplint --recursive --quiet c\rotatefont
   - cpplint --recursive --quiet c\tx
   - cpplint --recursive --quiet c\type1
