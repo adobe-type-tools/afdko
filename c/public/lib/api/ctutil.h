@@ -1,15 +1,16 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef CTUTIL_H
 #define CTUTIL_H
 
 #include "ctlshare.h"
 
-#define CTU_VERSION CTL_MAKE_VERSION(2,0,2)
+#define CTU_VERSION CTL_MAKE_VERSION(2, 0, 2)
 
 #include <stddef.h> /* For size_t */
-#include <stdio.h> /* For size_t */
+#include <stdio.h>  /* For size_t */
 #include <time.h>   /* For struct tm */
 
 #ifdef __cplusplus
@@ -21,9 +22,8 @@ extern "C" {
    This library contains miscellaneous utility functions that are applicable
    across many applications and are therefore separated out into a library. */
 
-typedef int 
-    (CTL_CDECL *ctuCmpFunc)(const void *first, const void *second, void *ctx);
-void ctuQSort(void *base, size_t count, size_t size, ctuCmpFunc cmp,void *ctx);
+typedef int(CTL_CDECL *ctuCmpFunc)(const void *first, const void *second, void *ctx);
+void ctuQSort(void *base, size_t count, size_t size, ctuCmpFunc cmp, void *ctx);
 
 /* Sort array. 
 
@@ -36,8 +36,7 @@ void ctuQSort(void *base, size_t count, size_t size, ctuCmpFunc cmp,void *ctx);
    required by the comparison function but can't be provided by global
    variables for reentrancy reasons. */
 
-typedef int 
-    (CTL_CDECL *ctuMatchFunc)(const void *key, const void *value, void *ctx);
+typedef int(CTL_CDECL *ctuMatchFunc)(const void *key, const void *value, void *ctx);
 int ctuLookup(const void *key, const void *base, size_t count, size_t size,
               ctuMatchFunc match, size_t *index, void *ctx);
 
@@ -106,8 +105,8 @@ void ctuGetVersion(ctlVersionCallbacks *cb);
 /* ctuGetVersion() returns the library version number and name via the client
    callbacks passed with the "cb" parameter (see ctlshare.h). */
 
-#if !defined(_UCRT)  
-    float roundf(float x);
+#if !defined(_UCRT)
+float roundf(float x);
 #endif
 
 #ifdef __cplusplus

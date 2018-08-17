@@ -1,12 +1,13 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef SFNTWRITE_H
 #define SFNTWRITE_H
 
 #include "ctlshare.h"
 
-#define SFW_VERSION CTL_MAKE_VERSION(1,0,6)
+#define SFW_VERSION CTL_MAKE_VERSION(1, 0, 6)
 
 #include "absfont.h"
 
@@ -31,10 +32,10 @@ extern "C" {
    are called via the sfwFreeTables() function. */
 
 typedef struct sfwCtx_ *sfwCtx;
-sfwCtx sfwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb, 
+sfwCtx sfwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
               CTL_CHECK_ARGS_DCL);
 
-#define SFW_CHECK_ARGS  CTL_CHECK_ARGS_CALL(SFW_VERSION)
+#define SFW_CHECK_ARGS CTL_CHECK_ARGS_CALL(SFW_VERSION)
 
 /* sfwNew() initializes the library and returns an opaque context (sfwCtx) that
    is subsequently passed to all the other library functions. It must be the
@@ -46,20 +47,19 @@ sfwCtx sfwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
    order to perform a client/library compatibility check. */
 
 typedef struct sfwTableCallbacks_ sfwTableCallbacks;
-struct sfwTableCallbacks_
-    {
+struct sfwTableCallbacks_ {
     void *ctx;
     ctlTag table_tag;
     int (*new_table)(sfwTableCallbacks *cb);
     int (*fill_table)(sfwTableCallbacks *cb, int *dont_write);
-    int (*write_table)(sfwTableCallbacks *cb, 
-					   ctlStreamCallbacks *stm_cb, void *stm,
-					   int *use_checksum, unsigned long *checksum);
+    int (*write_table)(sfwTableCallbacks *cb,
+                       ctlStreamCallbacks *stm_cb, void *stm,
+                       int *use_checksum, unsigned long *checksum);
     int (*reuse_table)(sfwTableCallbacks *cb);
     int (*free_table)(sfwTableCallbacks *cb);
     int fill_seq;
     int write_seq;
-    };
+};
 
 int sfwRegisterTable(sfwCtx h, sfwTableCallbacks *cb);
 
@@ -206,13 +206,12 @@ void sfwFree(sfwCtx h);
 /* sfwFree() destroys the library context and all the resources allocated to
    it. It must be the last function called by a client of the library. */
 
-enum
-    {
+enum {
 #undef CTL_DCL_ERR
-#define CTL_DCL_ERR(name,string)    name,
+#define CTL_DCL_ERR(name, string) name,
 #include "sfwerr.h"
     sfwErrCount
-    };
+};
 
 /* Library functions return either 0 to indicate success or a positive non-zero
    error code that is defined in the above enumeration that is built from

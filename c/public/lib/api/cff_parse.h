@@ -1,12 +1,10 @@
-/* @(#)CM_VerSion cff_parse.h atm09 1.2 16563.eco sum= 65534 atm09.004 */
-/* @(#)CM_VerSion cff_parse.h atm08 1.5 16390.eco sum= 11493 atm08.007 */
-/* @(#)CM_VerSion cff_parse.h atm07 1.11 16164.eco sum= 16700 atm07.012 */
+/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
+
 /*
   cff_parse.h
 */
-/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
-
 
 /*
  * NOTE TO MAINTAINERS: The cff_parse package originates in the atm
@@ -103,31 +101,31 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /* PostScript headers */
 #include PACKAGE_SPECS
 #include CFF_STRUCT
-#else  /* PSENVIRONMENT */
+#else /* PSENVIRONMENT */
 /* standard coretype environment */
 #include "cff_struct.h"
 #endif /* PSENVIRONMENT */
 
 /* Predefined charsets (cff_charset operands) */
-#define cff_ISOAdobeCharset         0
-#define cff_ExpertCharset           1
-#define cff_ExpertSubsetCharset     2
+#define cff_ISOAdobeCharset     0
+#define cff_ExpertCharset       1
+#define cff_ExpertSubsetCharset 2
 
 /* Predefined encodings (cff_Encoding operands) */
-#define cff_StandardEncoding        0
-#define cff_ExpertEncoding          1
-   
+#define cff_StandardEncoding 0
+#define cff_ExpertEncoding   1
+
 typedef CardX CFFResult;
 
 /* the possible values for CFFResult: */
-#define CFFE_NOERR       0     /* No error */
-#define CFFE_READ        1     /* font data not accessible. */
-#define CFFE_CALLER      2     /* Callback proc reported problem */
-#define CFFE_BADFILE     3     /* Found something unexpected in font file */
-#define CFFE_CANTHAPPEN  4     /* assertion failure---internal problem */
-#define CFFE_BADVERSION  5     /* CFF version information was inconsistent */
-#define CFFE_BADARG      6     /* bad argument from client */
-#define CFFE_MEMORY      7     /* could not allocate memory */
+#define CFFE_NOERR      0 /* No error */
+#define CFFE_READ       1 /* font data not accessible. */
+#define CFFE_CALLER     2 /* Callback proc reported problem */
+#define CFFE_BADFILE    3 /* Found something unexpected in font file */
+#define CFFE_CANTHAPPEN 4 /* assertion failure---internal problem */
+#define CFFE_BADVERSION 5 /* CFF version information was inconsistent */
+#define CFFE_BADARG     6 /* bad argument from client */
+#define CFFE_MEMORY     7 /* could not allocate memory */
 
 /* Exceptions */
 
@@ -157,8 +155,7 @@ extern void CFFInitialize_FontInfo(
 
 /* CFFRelease_FontInfo cleans up memory allocated by CFFInitialize_FontInfo */
 extern CFFResult CFFRelease_FontInfo(
-    PCFFFontInfo pFontInfo
-);
+    PCFFFontInfo pFontInfo);
 
 /* CFFEnumerateDict parses the top (dicttype == TopDict) or font 
  * dictionary (dicttype == CIDFontDict) into a CFFFontInfo 
@@ -211,17 +208,14 @@ extern CFFResult CFFRelease_FontInfo(
  * calling SetUpValues.
  */
 extern CFFResult CFFEnumerateDict(
-      PCFFFontInfo pFontInfo,  /* (W) values found in dictionary will 
-                                * overwrite current values 
-                                */
-      DictID dicttype,         /* (R) type of dictionary to parse */
-      Card16 fontindex,        /* (R) which dictionary to parse 
-                                * (which entry in top dict index or fdindex) 
-                                */
-      Registrant registry[REGISTRY_ITEMS] /* (RW) contains the udv, ndv, and/or wv for 
-                                           * the desired instance.  If CFFEnumerateDict 
-                                           * computes the wv, it is returned in here.
-                                           */
+    PCFFFontInfo pFontInfo, /* (W) values found in dictionary will */
+                            /*      overwrite current values       */
+    DictID dicttype,        /* (R) type of dictionary to parse */
+    Card16 fontindex,       /* (R) which dictionary to parse                 */
+                            /*    (which entry in top dict index or fdindex) */
+    Registrant registry[REGISTRY_ITEMS] /* (RW) contains the udv, ndv, and/or wv for  */
+                                        /* the desired instance.  If CFFEnumerateDict */
+                                        /* computes the wv, it is returned in here.   */
 );
 
 /* CFFGet_FontName() looks up the name of a font at a given index.
@@ -233,9 +227,9 @@ extern CFFResult CFFEnumerateDict(
  */
 extern CFFResult CFFGet_FontName(
     PCFFSetInfo pSetInfo,   /* (R) */
-    Card16  fontIndex,      /* (R) index of font whose name is to be returned */
-    Char8 ** ppFontName,    /* (W) must be consumed before calling CFFGet_FontName again */
-    Card32* pFontNameLength /* (W) */
+    Card16 fontIndex,       /* (R) index of font whose name is to be returned */
+    Char8 **ppFontName,     /* (W) must be consumed before calling CFFGet_FontName again */
+    Card32 *pFontNameLength /* (W) */
 );
 
 /* CFFGet_String looks up a string from the string table.  
@@ -245,10 +239,10 @@ extern CFFResult CFFGet_FontName(
  * If the requested data is not in the font, CFFE_BADARG is returned.
  */
 extern CFFResult CFFGet_String(
-    PCFFSetInfo pSetInfo,  /* (R) */
-    Card16 sid,            /* (R) string to be read */
-    Char8 ** ppString,     /* (W) */
-    Card32 * pStringLength /* (W) */
+    PCFFSetInfo pSetInfo, /* (R) */
+    Card16 sid,           /* (R) string to be read */
+    Char8 **ppString,     /* (W) */
+    Card32 *pStringLength /* (W) */
 );
 
 /* CFFGet_IndexArrayOffset can look up the offset for an element in
@@ -261,7 +255,9 @@ extern Card32 CFFGet_IndexArrayOffset(
     Card32 i,           /* (R) */
     Card8 *offptr);     /* (R) */
 
-typedef enum {GLOBAL_SUBROUTINES, LOCAL_SUBROUTINES, CHARSTRINGS} CFFFetchType;
+typedef enum { GLOBAL_SUBROUTINES,
+               LOCAL_SUBROUTINES,
+               CHARSTRINGS } CFFFetchType;
 
 /* CFFGet_IndexedArray() can look up elements in the local subr index,
  * global subr index or charstring index.  The raw index data is
@@ -284,12 +280,12 @@ typedef enum {GLOBAL_SUBROUTINES, LOCAL_SUBROUTINES, CHARSTRINGS} CFFFetchType;
  * after SetUpValues has been called for the font.
  */
 extern CFFResult CFFGet_IndexedArray(
-    PCFFFontInfo pFontInfo,   /* (R) */
-    CFFFetchType fetchType,   /* (R) */
-    Card16       firstIndex,  /* (R) */
-    Card16       nentries,    /* (R) */
-    Card8 **     pOffsets,    /* (W)  returns a pointer to (nentries+1) offsets */
-    Card8 **     pData        /* (W) returns a biased pointer to (nentries) strings */
+    PCFFFontInfo pFontInfo, /* (R) */
+    CFFFetchType fetchType, /* (R) */
+    Card16 firstIndex,      /* (R) */
+    Card16 nentries,        /* (R) */
+    Card8 **pOffsets,       /* (W)  returns a pointer to (nentries+1) offsets */
+    Card8 **pData           /* (W) returns a biased pointer to (nentries) strings */
 );
 
 /*
@@ -302,9 +298,9 @@ extern CFFResult CFFRelease_IndexedArray(
     PArrayInfo pArrayInfo /* (RW) */
 );
 
-typedef void (* CFFArrayCallback) (
-    Card16   code,     /* (R) */
-    Card16   sid,      /* (R) */
+typedef void (*CFFArrayCallback)(
+    Card16 code, /* (R) */
+    Card16 sid,  /* (R) */
     FontSetHook hook);
 
 /* CFFGet_Encoding() looks up the entire encoding and calls the
@@ -315,9 +311,8 @@ typedef void (* CFFArrayCallback) (
  */
 extern CFFResult CFFGet_Encoding(
     PCFFFontInfo pFontInfo,       /* (R) */
-    CFFArrayCallback encCallback, /* (X) Sent the code and sid for each entry 
-                                   * in the encoding 
-                                   */
+    CFFArrayCallback encCallback, /* (X) Sent the code and sid for each entry */
+                                  /*     in the encoding                      */
     FontSetHook hook              /* argument sent to callback */
 );
 
@@ -335,16 +330,15 @@ extern boolean CFFCheckForIdentityCharset(
  * CFFGet_Charset is likely to be used with smallish fonts.
  */
 extern CFFResult CFFGet_Charset(
-    PCFFFontInfo pFontInfo,  /* (R) */
-    cffSID ** sidArray,      /* (W) the array of string ids */
-    Card16 * arrayLength     /* (W) the length of the returned sidArray */
+    PCFFFontInfo pFontInfo, /* (R) */
+    cffSID **sidArray,      /* (W) the array of string ids */
+    Card16 *arrayLength     /* (W) the length of the returned sidArray */
 );
 
 /* CFFRelease_Charset() frees the space allocated by CFFGet_Charset */
 extern CFFResult CFFRelease_Charset(
     PCFFFontInfo pFontInfo,
-    cffSID * sidArray
-);
+    cffSID *sidArray);
 
 /* CFFGet_CharsetElement() fetches the glyph id associated with a
  * given sid/cid.  This is likely to be used with larger fonts where
@@ -354,20 +348,18 @@ extern CFFResult CFFRelease_Charset(
  */
 extern CFFResult CFFGet_CharsetElement(
     PCFFFontInfo pFontInfo, /* (R) */
-    Card16 sid,             /* (R) the desired sid/cid */
-    Card16 *gid             /* (W) the gid matching the sid/cid. *gid will
-                             * be 0 if sid == 0 or if the sid/cid is not found
-                             * in the charset
-                             */
+    Card16 sid, /* (R) the desired sid/cid */
+    Card16 *gid /* (W) the gid matching the sid/cid. *gid will     */
+                /* be 0 if sid == 0 or if the sid/cid is not found */
+                /* in the charset                                  */
 );
-
 
 /* CFFGet_FDElement can be used to find index of the font dictionary that 
  * is associated with a gid in a cid font.  When
  * this routine calls GetData, it looks to see what it knows about the
  * fdSelect and adjusts its fetch size accordingly.  
  */
-extern CFFResult CFFGet_FDElement (
+extern CFFResult CFFGet_FDElement(
     PCFFFontInfo pFontInfo, /* (R) */
     Card16 gid,             /* (R) the gid whose fd index is desired */
     Card8 *fdindex          /* (W) the index of the font dict associated with gid  */
@@ -422,13 +414,13 @@ extern CFFResult CFFGet_FDElement (
 extern CFFResult ReadOffsetArrayEntry(
     GetDataProto GetData,         /* method to get font data from client */
     ReleaseDataProto ReleaseData, /* method to release data retrieved via GetData */
-    PArrayInfo pArrayInfo,      /* (R) */
-    Card8  firstElementLength,  /* (R) */
-    Card16 entryNumber,         /* (R) the entry in the array to be looked up */
-    Card32 *firstElement,       /* (W) */
-    Card32 *secondElement,      /* (W) */
-    Card16 *dataLength,         /* (W) */
-    FontSetHook hook            /* sent to GetData and ReleaseData */
+    PArrayInfo pArrayInfo,        /* (R) */
+    Card8 firstElementLength,     /* (R) */
+    Card16 entryNumber,           /* (R) the entry in the array to be looked up */
+    Card32 *firstElement,         /* (W) */
+    Card32 *secondElement,        /* (W) */
+    Card16 *dataLength,           /* (W) */
+    FontSetHook hook              /* sent to GetData and ReleaseData */
 );
 
-#endif  /* CFF_PARSE_H */
+#endif /* CFF_PARSE_H */

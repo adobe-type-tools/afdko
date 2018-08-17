@@ -1,8 +1,6 @@
-/* @(#)CM_VerSion ASBasic.h atm09 1.2 16563.eco sum= 49471 atm09.004 */
-/* @(#)CM_VerSion ASBasic.h atm08 1.3 16255.eco sum= 59023 atm08.003 */
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
-
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 /*
  * ASBasic.h -- Adobe Standard Definitions of "Basic" Types
@@ -24,11 +22,10 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
  *
  */
 
-
 #ifndef _H_ASBASIC
 #define _H_ASBASIC
 
-#include <stddef.h>	/* Include standard ANSI C stuff: size_t, NULL etc */
+#include <stddef.h> /* Include standard ANSI C stuff: size_t, NULL etc */
 
 /* Signed and unsigned integer types, and pointers
    to these.
@@ -66,42 +63,42 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #if ARCH_64BIT
 
-typedef int                 ASInt32, *ASInt32P;
-typedef unsigned int        ASUns32, *ASUns32P;
-typedef long int            ASInt64, *ASInt64P;
-#define ASMAXInt64          ((ASInt64)0x7FFFFFFFFFFFFFFF)
-#define ASMINInt64          ((ASInt64)0x8000000000000000)
+typedef int ASInt32, *ASInt32P;
+typedef unsigned int ASUns32, *ASUns32P;
+typedef long int ASInt64, *ASInt64P;
+#define ASMAXInt64 ((ASInt64)0x7FFFFFFFFFFFFFFF)
+#define ASMINInt64 ((ASInt64)0x8000000000000000)
 
-typedef unsigned long int   ASUns64, *ASUns64P;
-#define ASMAXUns64          ((ASUns64)0xFFFFFFFFFFFFFFFF)
+typedef unsigned long int ASUns64, *ASUns64P;
+#define ASMAXUns64 ((ASUns64)0xFFFFFFFFFFFFFFFF)
 
 #else /* ARCH_64BIT */
 
-typedef long int            ASInt32, *ASInt32P;
-typedef unsigned long int   ASUns32, *ASUns32P;
+typedef long int ASInt32, *ASInt32P;
+typedef unsigned long int ASUns32, *ASUns32P;
 
 #endif /* ARCH_64BIT */
 
-typedef signed char         ASInt8, *ASInt8P;
-typedef short int           ASInt16, *ASInt16P;
+typedef signed char ASInt8, *ASInt8P;
+typedef short int ASInt16, *ASInt16P;
 
-#define ASMAXInt8           ((ASInt8)0x7F)
-#define ASMINInt8           ((ASInt8)0x80)
-#define ASMAXInt16          ((ASInt16)0x7FFF)
-#define ASMINInt16          ((ASInt16)0x8000)
-#define ASMAXInt32          ((ASInt32)0x7FFFFFFF)
-#define ASMINInt32          ((ASInt32)0x80000000)
+#define ASMAXInt8 ((ASInt8)0x7F)
+#define ASMINInt8 ((ASInt8)0x80)
+#define ASMAXInt16 ((ASInt16)0x7FFF)
+#define ASMINInt16 ((ASInt16)0x8000)
+#define ASMAXInt32 ((ASInt32)0x7FFFFFFF)
+#define ASMINInt32 ((ASInt32)0x80000000)
 
 /* other unsigned integer types */
-typedef unsigned char       ASUns8, *ASUns8P;
-typedef unsigned short int  ASUns16, *ASUns16P;
+typedef unsigned char ASUns8, *ASUns8P;
+typedef unsigned short int ASUns16, *ASUns16P;
 
-#define ASMAXUns8           ((ASUns8)0xFF)
-#define ASMINUns8           ((ASUns8)0x00)
-#define ASMAXUns16          ((ASUns16)0xFFFF)
-#define ASMINUns16          ((ASUns16)0x0000)
-#define ASMAXUns32          ((ASUns32)0xFFFFFFFF)
-#define ASMINUns32          ((ASUns32)0x00000000)
+#define ASMAXUns8 ((ASUns8)0xFF)
+#define ASMINUns8 ((ASUns8)0x00)
+#define ASMAXUns16 ((ASUns16)0xFFFF)
+#define ASMINUns16 ((ASUns16)0x0000)
+#define ASMAXUns32 ((ASUns32)0xFFFFFFFF)
+#define ASMINUns32 ((ASUns32)0x00000000)
 
 /* ASIntX, ASUnsX, ASSize_t
 
@@ -128,23 +125,23 @@ typedef unsigned short int  ASUns16, *ASUns16P;
    to be the desired type.
 
  */
-#ifndef	AS_FORCE_X_16BITS
-#define	AS_FORCE_X_16BITS	0
-#endif	/* AS_FORCE_X_16BITS */
+#ifndef AS_FORCE_X_16BITS
+#define AS_FORCE_X_16BITS 0
+#endif /* AS_FORCE_X_16BITS */
 
 #ifndef AS_FORCE_X_32BITS
-#define AS_FORCE_X_32BITS   0
-#endif  /* AS_FORCE_X_32BITS */
+#define AS_FORCE_X_32BITS 0
+#endif /* AS_FORCE_X_32BITS */
 
 #if AS_FORCE_X_16BITS
-typedef short int           ASIntX;
-typedef unsigned short int  ASUnsX;
+typedef short int ASIntX;
+typedef unsigned short int ASUnsX;
 #elif AS_FORCE_X_32BITS && !ARCH_64BIT
-typedef long int            ASIntX;
-typedef unsigned long int   ASUnsX;
+typedef long int ASIntX;
+typedef unsigned long int ASUnsX;
 #else
-typedef int                 ASIntX;
-typedef unsigned int        ASUnsX;
+typedef int ASIntX;
+typedef unsigned int ASUnsX;
 #endif
 
 /* ASSize_t - canonical type for sizes of things in bytes. */
@@ -153,16 +150,15 @@ typedef unsigned int        ASUnsX;
 #endif
 typedef AS_SIZE_T ASSize_t;
 
-
 /* boolean */
-typedef ASUnsX              ASBool;
+typedef ASUnsX ASBool;
 
 /* "true" and "false" are usually in stddef.h, but not always ;) ... */
 #ifndef true
-#define true	1
+#define true 1
 #endif
 #ifndef false
-#define false	0
+#define false 0
 #endif
 
 /* Fixed-point numbers
@@ -175,7 +171,7 @@ typedef ASUnsX              ASBool;
    use library routines like the ones defined in ASFixed.h.
 */
 
-typedef ASInt32             ASFixed;
+typedef ASInt32 ASFixed;
 
 /* typedef of enums
 

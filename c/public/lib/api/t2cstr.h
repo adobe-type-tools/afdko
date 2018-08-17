@@ -1,5 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 /*
  * Type 2 charstring services.
@@ -10,7 +11,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define T2C_VERSION CTL_MAKE_VERSION(1,0,21)
+#define T2C_VERSION CTL_MAKE_VERSION(1, 0, 21)
 
 #include "absfont.h"
 
@@ -19,24 +20,27 @@ extern "C" {
 #endif
 
 typedef struct
-    {
+{
     long flags;
-#define T2C_WIDTH_ONLY  (1<<0)
-#define T2C_USE_MATRIX  (1<<1)
-#define T2C_UPDATE_OPS  (1<<2)
-#define T2C_IS_CUBE  (1<<3)
-#define T2C_FLATTEN_CUBE  (1<<4)
-#define T2C_CUBE_GSUBR (1<<5) /* current charstring is a subr. */
-#define T2C_CUBE_RND (1<<6) /* start (x,y) for a Cube element is rounded to a multiple of 4: used when building real Cube host fonts. Required to be rasterized by PFR. */
-#define T2C_IS_CFF2 (1<<7)
-#define T2C_FLATTEN_BLEND (1<<8)
-        
+#define T2C_WIDTH_ONLY    (1 << 0)
+#define T2C_USE_MATRIX    (1 << 1)
+#define T2C_UPDATE_OPS    (1 << 2)
+#define T2C_IS_CUBE       (1 << 3)
+#define T2C_FLATTEN_CUBE  (1 << 4)
+#define T2C_CUBE_GSUBR    (1 << 5) /* current charstring is a subr. */
+#define T2C_CUBE_RND      (1 << 6) /* start (x,y) for a Cube element is      */
+                                   /* rounded to a multiple of 4: used when  */
+                                   /* building real Cube host fonts.         */
+                                   /* Required to be rasterized by PFR.      */
+#define T2C_IS_CFF2       (1 << 7)
+#define T2C_FLATTEN_BLEND (1 << 8)
+
     void *src;
     ctlStreamCallbacks *stm;
     ctlSubrs subrs;
     ctlSubrs gsubrs;
-	long gsubrsEnd;
-	long subrsEnd;
+    long gsubrsEnd;
+    long subrsEnd;
     float defaultWidthX;
     float nominalWidthX;
     void *ctx;
@@ -49,15 +53,14 @@ typedef struct
     unsigned short default_vsIndex; /* this is the vsindex set in the private dict. */
     struct var_itemVariationStore_ *varStore;
     float *scalars;
-    } t2cAuxData;
+} t2cAuxData;
 
 typedef struct cff2GlyphCallbacks_ cff2GlyphCallbacks;
 
-struct cff2GlyphCallbacks_
-    {
+struct cff2GlyphCallbacks_ {
     void *direct_ctx;
-    float (*getWidth)   (cff2GlyphCallbacks *cb, unsigned short gid);
-    };
+    float (*getWidth)(cff2GlyphCallbacks *cb, unsigned short gid);
+};
 
 int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, cff2GlyphCallbacks *cff2, abfGlyphCallbacks *glyph, ctlMemoryCallbacks *mem);
 
@@ -157,20 +160,19 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
    t2cParse() returns zero (t2cSuccess) if successful, but otherwise returns a
    positive non-zero error code described below. 
 
-   The gsubr array must have one more entry than there actually are gsubrs, in order
-   to allow getting the end of the last gubsr.
+   The gsubr array must have one more entry than there actually are gsubrs, in
+   order to allow getting the end of the last gubsr.
 
    A charstring should terminate with one of the "endchar", "callsubr", or
    "callgsubr" operators. A subroutine should terminate with one of the
-   preceding operators or "return". */ 
+   preceding operators or "return". */
 
-enum
-    {
+enum {
 #undef CTL_DCL_ERR
-#define CTL_DCL_ERR(name,string)    name,
+#define CTL_DCL_ERR(name, string) name,
 #include "t2cerr.h"
     t2cErrCount
-    };
+};
 
 /* Library functions return either zero (t2cSuccess) to indicate success or a
    positive non-zero error code that is defined in the above enumeration that

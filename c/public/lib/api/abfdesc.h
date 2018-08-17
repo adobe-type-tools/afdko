@@ -1,5 +1,7 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
+
 /*
  * Abstract Font Descriptor.
  */
@@ -11,8 +13,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
    "abfFontDescHeader" followed by one or more variable-length
    "abfFontDescElement"s (see below). */
 
-typedef struct                      /* Font descriptor element */
-    {
+typedef struct /* Font descriptor element */
+{
     /* The following "flags" field is used to represent font parameters having
        values of fixed size. 
 
@@ -29,21 +31,21 @@ typedef struct                      /* Font descriptor element */
 
        Comments show default values: */
     unsigned short flags;
-#define ABF_DESC_CharstringType     (1<<0)  /* 2 */
-#define ABF_DESC_PaintType          (1<<1)  /* 0 */
-#define ABF_DESC_BlueScale          (1<<2)  /* 0.039625 */
-#define ABF_DESC_BlueShift          (1<<3)  /* 7 */
-#define ABF_DESC_BlueFuzz           (1<<4)  /* 1 */
-#define ABF_DESC_StdHW              (1<<5)  /* none */
-#define ABF_DESC_StdVW              (1<<6)  /* none */
-#define ABF_DESC_ForceBold          (1<<7)  /* 0=false */
-#define ABF_DESC_LanguageGroup      (1<<8)  /* 0 */
-#define ABF_DESC_ExpansionFactor    (1<<9)  /* 0.06 */
-#define ABF_DESC_initialRandomSeed  (1<<10) /* 0 */
-#define ABF_DESC_defaultWidthX      (1<<11) /* 0 */
-#define ABF_DESC_nominalWidthX      (1<<12) /* 0 */
-#define ABF_DESC_lenSubrArray       (1<<13) /* 0 (local subr count) */
-#define ABF_DESC_FontMatrix         (1<<14) /* [.001 0 0 .001 0 0] */
+#define ABF_DESC_CharstringType    (1 << 0)  /* 2 */
+#define ABF_DESC_PaintType         (1 << 1)  /* 0 */
+#define ABF_DESC_BlueScale         (1 << 2)  /* 0.039625 */
+#define ABF_DESC_BlueShift         (1 << 3)  /* 7 */
+#define ABF_DESC_BlueFuzz          (1 << 4)  /* 1 */
+#define ABF_DESC_StdHW             (1 << 5)  /* none */
+#define ABF_DESC_StdVW             (1 << 6)  /* none */
+#define ABF_DESC_ForceBold         (1 << 7)  /* 0=false */
+#define ABF_DESC_LanguageGroup     (1 << 8)  /* 0 */
+#define ABF_DESC_ExpansionFactor   (1 << 9)  /* 0.06 */
+#define ABF_DESC_initialRandomSeed (1 << 10) /* 0 */
+#define ABF_DESC_defaultWidthX     (1 << 11) /* 0 */
+#define ABF_DESC_nominalWidthX     (1 << 12) /* 0 */
+#define ABF_DESC_lenSubrArray      (1 << 13) /* 0 (local subr count) */
+#define ABF_DESC_FontMatrix        (1 << 14) /* [.001 0 0 .001 0 0] */
 
     /* The following fields are used to represent font parameters having
        values of variable size.
@@ -69,17 +71,17 @@ typedef struct                      /* Font descriptor element */
        actual number of elements in the array is provided in the "valueCnt"
        field. */
     unsigned long valueCnt;
-    float values[1];                /* [valueCnt] */
-    } abfFontDescElement;
+    float values[1]; /* [valueCnt] */
+} abfFontDescElement;
 
-typedef struct                  /* Font descriptor header */
-    {
-    unsigned short length;      /* Total size in bytes of descriptor */
-    unsigned short FDElementCnt;/* Count of "abfFontDescElement"s */
+typedef struct /* Font descriptor header */
+{
+    unsigned short length;       /* Total size in bytes of descriptor */
+    unsigned short FDElementCnt; /* Count of "abfFontDescElement"s */
     float FontBBox[4];
     float StrokeWidth;
-    float lenGSubrArray;        /* Global subr count */
-    } abfFontDescHeader;
+    float lenGSubrArray; /* Global subr count */
+} abfFontDescHeader;
 
 #define ABF_GET_FIRST_DESC(hdr) \
     (abfFontDescElement *)((char *)(hdr) + sizeof(abfFontDescHeader))
@@ -88,9 +90,9 @@ typedef struct                  /* Font descriptor header */
    abfFontDescElement in the font descriptor when supplied with a
    abfFontDescHeader pointer. */
 
-#define ABF_GET_NEXT_DESC(elem) \
+#define ABF_GET_NEXT_DESC(elem)                                          \
     (abfFontDescElement *)((char *)(elem) + sizeof(abfFontDescElement) + \
-     (((abfFontDescElement *)(elem))->valueCnt - 1)*sizeof(float))
+                           (((abfFontDescElement *)(elem))->valueCnt - 1) * sizeof(float))
 
 /* The ABF_GET_NEXT_DESC() macro returns a pointer to the next
    abfFontDescElement in the font descriptor when supplied with an

@@ -1,16 +1,13 @@
-/* @(#)CM_VerSion bcutil.h atm09 1.2 16563.eco sum= 63210 atm09.004 */
-/* @(#)CM_VerSion bcutil.h atm08 1.2 16248.eco sum= 61220 atm08.003 */
-/* @(#)CM_VerSion bcutil.h atm05 1.2 11580.eco sum= 18110 */
-/* @(#)CM_VerSion bcutil.h atm04 1.5 08720.eco sum= 51998 */
-/* $Header$ */
+/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
+
 /*
   bcutil.h
 */
-/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef	BCUTIL_H
-#define	BCUTIL_H
+#ifndef BCUTIL_H
+#define BCUTIL_H
 
 #include "buildch.h"
 
@@ -22,11 +19,9 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
    in the bcpriv.h file in the buildch package).
 */
 
-extern procedure BCGetForceBold 
-(
-  PFontInst  pFInst,
-  boolean *  pForceBold
-);
+extern procedure BCGetForceBold(
+    PFontInst pFInst,
+    boolean* pForceBold);
 
 /* BCGetForceBold assigns true to *pForceBold if bolding should be applied
   to the resulting bitmap to make it appear bold at small pt sizes. False is    
@@ -38,11 +33,9 @@ extern procedure BCGetForceBold
   will always assign a false value to pForceBold.
 */
 
-extern procedure BCGetFontBBox 
-(
-  PFontInst  pFInst, 
-  FCdBBox *  pFontBBox
-);
+extern procedure BCGetFontBBox(
+    PFontInst pFInst,
+    FCdBBox* pFontBBox);
 /*
   BCGetFontBBox returns the fontBBox stored in the FontInst structure. This 
   bounding box is in device space coordinates and has been blended according 
@@ -51,20 +44,16 @@ extern procedure BCGetFontBBox
   bounding box. 
 
 */
-extern Fixed BCGetFlatness 
-(
-  PFontInst  pFInst 
-);
+extern Fixed BCGetFlatness(
+    PFontInst pFInst);
 /*
   BCGetFlatness returns the flatness stored in the FontInst structure.  This 
   routine may only be used with the Type 1 software renderer.   
 */
 
-extern Fixed BCSetFlatness 
-(
-  PFontInst  pFInst,
-  Fixed  flatness 
-);
+extern Fixed BCSetFlatness(
+    PFontInst pFInst,
+    Fixed flatness);
 /*
   BCSetFlatness sets the flatness stored in the FontInst structure. This 
   routine may only be used with the Type 1 software renderer.
@@ -84,11 +73,9 @@ extern Fixed BCSetFlatness
    
 */
 
-extern Fixed BCSetQRedFlatnessOverride
-(
-  PFontInst  pFInst,
-  Fixed  len1000
-);
+extern Fixed BCSetQRedFlatnessOverride(
+    PFontInst pFInst,
+    Fixed len1000);
 /*
   BCSetQRedFlatnessOverride resets the flatness stored in the FontInst 
   structure, for large values of lines per em X or Y. This routine may 

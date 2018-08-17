@@ -1,5 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef ABSFONT_H
 #define ABSFONT_H
@@ -8,7 +9,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "dynarr.h"
 #include "txops.h"
 
-#define ABF_VERSION CTL_MAKE_VERSION(1,0,53)
+#define ABF_VERSION CTL_MAKE_VERSION(1, 0, 53)
 
 #include <stdint.h>
 #include <stdio.h>
@@ -27,24 +28,24 @@ extern "C" {
 
 #define ABF_EMPTY_ARRAY 0
 #define ABF_UNSET_PTR   0
-#define ABF_UNSET_INT   -1
-#define ABF_UNSET_REAL  -1.0
+#define ABF_UNSET_INT  -1
+#define ABF_UNSET_REAL -1.0
 
 /* These macros specify initial field values that may later be distinguished
    from explicitly set values. */
 
 typedef struct abfFontDict_ abfFontDict;
-typedef struct                  /* FontMatrix */
-    {
-    long cnt;                   /* ABF_EMPTY_ARRAY */
-    float array[6];         
-    } abfFontMatrix;
+typedef struct /* FontMatrix */
+{
+    long cnt; /* ABF_EMPTY_ARRAY */
+    float array[6];
+} abfFontMatrix;
 
-typedef struct                  /* String */
-    {
-    char *ptr;                  /* ABF_UNSET_PTR */
-    long impl;                  /* ABF_UNSET_INT */
-    } abfString;
+typedef struct /* String */
+{
+    char *ptr; /* ABF_UNSET_PTR */
+    long impl; /* ABF_UNSET_INT */
+} abfString;
 
 /* Textual data is represented by the abfString type which contains a
    null-terminated C string pointer field (ptr), and an
@@ -55,8 +56,8 @@ typedef struct                  /* String */
    impl field as they see fit since it will always be reinitialized by a
    library that makes use of it. */
 
-enum                            /* srcFontType values */
-    {
+enum /* srcFontType values */
+{
     abfSrcFontTypeType1Name,
     abfSrcFontTypeType1CID,
     abfSrcFontTypeCFFName,
@@ -64,23 +65,23 @@ enum                            /* srcFontType values */
     abfSrcFontTypeSVGName,
     abfSrcFontTypeUFOName,
     abfSrcFontTypeTrueType
-    };
+};
 
 typedef struct
-    {
-    long flags;                 /* 0 */
-#define ABF_CID_FONT    (1<<0)  /* CID-keyed font */
-#define ABF_SYN_FONT    (1<<1)  /* Synthethic font */
-#define ABF_SING_FONT   (1<<2)  /* SING glyphlet font */
-    long srcFontType;           /* ABF_UNSET_INT */
-    char *filename;             /* ABF_UNSET_PTR */
-    long UnitsPerEm;            /* 1000 */
-    long nGlyphs;               /* ABF_UNSET_INT */
-    } abfSupplement;
+{
+    long flags;                /* 0 */
+#define ABF_CID_FONT  (1 << 0) /* CID-keyed font */
+#define ABF_SYN_FONT  (1 << 1) /* Synthethic font */
+#define ABF_SING_FONT (1 << 2) /* SING glyphlet font */
+    long srcFontType;          /* ABF_UNSET_INT */
+    char *filename;            /* ABF_UNSET_PTR */
+    long UnitsPerEm;           /* 1000 */
+    long nGlyphs;              /* ABF_UNSET_INT */
+} abfSupplement;
 
 /* Supplementary data that has not traditionally been stored in font outline
    data is specified in the abfSupplement data structure. The "flags" field
-   will be consistently set and used by all libraries. 
+   will be consistently set and used by all libraries.
 
    The remaining supplementary fields are primarily intended for implementation
    use and will only be set if a library can do so reliably. Accordingly,
@@ -94,149 +95,147 @@ typedef struct
    and the SynBaseFontName field records the FontName of the font that the
    synthetic variant is based on. */
 
-enum                            /* OrigFontType field values */
-    {
+enum /* OrigFontType field values */
+{
     abfOrigFontTypeType1,
     abfOrigFontTypeCID,
     abfOrigFontTypeTrueType,
     abfOrigFontTypeOCF,
     abfOrigFontTypeUFO
-    };
+};
 
 /* item variation store  */
 struct var_itemVariationStore_;
 typedef struct var_itemVariationStore_ *var_itemVariationStore;
-    
 
 /* Top dictionary data. Comments indicate default/initial values. */
 typedef struct
-    {                           
-    abfString version;          /* Unset */
-    abfString Notice;           /* Unset */
-    abfString Copyright;        /* Unset */
-    abfString FullName;         /* Unset */
-    abfString FamilyName;       /* Unset */
-    abfString Weight;           /* Unset */
-    long isFixedPitch;          /* 0=false */
-    float ItalicAngle;          /* 0. */
-    float UnderlinePosition;    /* -100. */
-    float UnderlineThickness;   /* 50. */
-    long UniqueID;              /* ABF_UNSET_INT */
-    float FontBBox[4];          /* 0. 0. 0. 0. */
-    float StrokeWidth;          /* 0. */
+{
+    abfString version;        /* Unset */
+    abfString Notice;         /* Unset */
+    abfString Copyright;      /* Unset */
+    abfString FullName;       /* Unset */
+    abfString FamilyName;     /* Unset */
+    abfString Weight;         /* Unset */
+    long isFixedPitch;        /* 0=false */
+    float ItalicAngle;        /* 0. */
+    float UnderlinePosition;  /* -100. */
+    float UnderlineThickness; /* 50. */
+    long UniqueID;            /* ABF_UNSET_INT */
+    float FontBBox[4];        /* 0. 0. 0. 0. */
+    float StrokeWidth;        /* 0. */
     struct
-        {
-        long cnt;               /* ABF_EMPTY_ARRAY */
-        long array[16];         
-        } XUID;
-    abfString PostScript;       /* Unset (CFF PostScript op value) */
-    abfString BaseFontName;     /* Unset (Acrobat) */
+    {
+        long cnt; /* ABF_EMPTY_ARRAY */
+        long array[16];
+    } XUID;
+    abfString PostScript;   /* Unset (CFF PostScript op value) */
+    abfString BaseFontName; /* Unset (Acrobat) */
     struct
-        {
-        long cnt;               /* ABF_EMPTY_ARRAY */
+    {
+        long cnt; /* ABF_EMPTY_ARRAY */
         long array[15];
-        } BaseFontBlend;
-    long FSType;                /* ABF_UNSET_INT */
-    long OrigFontType;          /* ABF_UNSET_INT */
-    long WasEmbedded;           /* 0=false */
-    abfString SynBaseFontName;  /* Unset */
-    struct                      /* CID-specific extensions */
-        {
-        abfFontMatrix FontMatrix;/* 1. 0. 0. 1. 0. 0. */
-        abfString CIDFontName;  /* Unset */
-        abfString Registry;     /* Unset */
-        abfString Ordering;     /* Unset */
-        long Supplement;        /* ABF_UNSET_INT */
-        float CIDFontVersion;   /* 0. */
-        long CIDFontRevision;   /* 0 */
-        long CIDCount;          /* 8720 */
-        long UIDBase;           /* ABF_UNSET_INT */
-        } cid;
-        struct                      /* Font dict array */
-        {
-            long cnt;               /* Value set by client to match array */
-            abfFontDict *array;     /* Array allocated by client to match cnt */
-        } FDArray;
-        abfSupplement sup;          /* Supplementary data */
-        unsigned short maxstack;     /* Supplementary data */
-        var_itemVariationStore varStore;
-    } abfTopDict;
+    } BaseFontBlend;
+    long FSType;               /* ABF_UNSET_INT */
+    long OrigFontType;         /* ABF_UNSET_INT */
+    long WasEmbedded;          /* 0=false */
+    abfString SynBaseFontName; /* Unset */
+    struct                     /* CID-specific extensions */
+    {
+        abfFontMatrix FontMatrix; /* 1. 0. 0. 1. 0. 0. */
+        abfString CIDFontName;    /* Unset */
+        abfString Registry;       /* Unset */
+        abfString Ordering;       /* Unset */
+        long Supplement;          /* ABF_UNSET_INT */
+        float CIDFontVersion;     /* 0. */
+        long CIDFontRevision;     /* 0 */
+        long CIDCount;            /* 8720 */
+        long UIDBase;             /* ABF_UNSET_INT */
+    } cid;
+    struct /* Font dict array */
+    {
+        long cnt;           /* Value set by client to match array */
+        abfFontDict *array; /* Array allocated by client to match cnt */
+    } FDArray;
+    abfSupplement sup;       /* Supplementary data */
+    unsigned short maxstack; /* Supplementary data */
+    var_itemVariationStore varStore;
+} abfTopDict;
 
 /* Private dictionary data. Comments indicate default/initial values. */
 
-    typedef struct
-    {
-        /* Used to hold stack items from a font with blended values */
-        float value;
-        int numBlends;
-        float* blendValues;
-    } abfOpEntry;
-    
-    typedef struct
-    {
-        /* Used to hold stack items from a font with blended values */
-        float value;
-        int     hasBlend;
-        float blendValues[CFF2_MAX_OP_STACK];
-    } abfBlendArg;
-    
-    
 typedef struct
-    {
-        long cnt;               /* ABF_EMPTY_ARRAY */
-        abfOpEntry array[CFF2_MAX_OP_STACK];
-    } abfOpEntryArray;
+{
+    /* Used to hold stack items from a font with blended values */
+    float value;
+    int numBlends;
+    float *blendValues;
+} abfOpEntry;
 
 typedef struct
-    {
+{
+    /* Used to hold stack items from a font with blended values */
+    float value;
+    int hasBlend;
+    float blendValues[CFF2_MAX_OP_STACK];
+} abfBlendArg;
+
+typedef struct
+{
+    long cnt; /* ABF_EMPTY_ARRAY */
+    abfOpEntry array[CFF2_MAX_OP_STACK];
+} abfOpEntryArray;
+
+typedef struct
+{
     /* Note that even for a font with blended values,
      the non-blended values are always set, using the values from the default font.
      */
     struct
-        {
-        long cnt;               /* ABF_EMPTY_ARRAY */
+    {
+        long cnt; /* ABF_EMPTY_ARRAY */
         float array[96];
-        } BlueValues;
-    struct
-        {
-        long cnt;               /* ABF_EMPTY_ARRAY */
-        float array[96];
-        } OtherBlues;
-    struct
-        {
-        long cnt;               /* ABF_EMPTY_ARRAY */
-        float array[96];
-        } FamilyBlues;
-    struct
-        {
-        long cnt;               /* ABF_EMPTY_ARRAY */
-        float array[96];
-        } FamilyOtherBlues;
-    float BlueScale;            /* 0.039625 */
-    float BlueShift;            /* 7 */
-    float BlueFuzz;             /* 1 */
-    float StdHW;                /* ABF_UNSET_REAL */
-    float StdVW;                /* ABF_UNSET_REAL */
+    } BlueValues;
     struct
     {
-        long cnt;               /* ABF_EMPTY_ARRAY */
+        long cnt; /* ABF_EMPTY_ARRAY */
+        float array[96];
+    } OtherBlues;
+    struct
+    {
+        long cnt; /* ABF_EMPTY_ARRAY */
+        float array[96];
+    } FamilyBlues;
+    struct
+    {
+        long cnt; /* ABF_EMPTY_ARRAY */
+        float array[96];
+    } FamilyOtherBlues;
+    float BlueScale; /* 0.039625 */
+    float BlueShift; /* 7 */
+    float BlueFuzz;  /* 1 */
+    float StdHW;     /* ABF_UNSET_REAL */
+    float StdVW;     /* ABF_UNSET_REAL */
+    struct
+    {
+        long cnt; /* ABF_EMPTY_ARRAY */
         float array[96];
     } StemSnapH;
     struct
     {
-        long cnt;               /* ABF_EMPTY_ARRAY */
+        long cnt; /* ABF_EMPTY_ARRAY */
         float array[96];
     } StemSnapV;
-    long ForceBold;             /* 0=false */
-    long LanguageGroup;         /* 0 */
-    float ExpansionFactor;      /* 0.06 */
-    float initialRandomSeed;    /* 0. */
+    long ForceBold;          /* 0=false */
+    long LanguageGroup;      /* 0 */
+    float ExpansionFactor;   /* 0.06 */
+    float initialRandomSeed; /* 0. */
     unsigned short vsindex;
     int numRegions;
     struct
     {
-        abfOpEntryArray  BlueValues;
-        abfOpEntryArray  OtherBlues;
+        abfOpEntryArray BlueValues;
+        abfOpEntryArray OtherBlues;
         abfOpEntryArray FamilyBlues;
         abfOpEntryArray FamilyOtherBlues;
         abfOpEntry BlueScale;
@@ -246,17 +245,16 @@ typedef struct
         abfOpEntry StdVW;
         abfOpEntryArray StemSnapH;
         abfOpEntryArray StemSnapV;
-   } blendValues;
-    } abfPrivateDict;
+    } blendValues;
+} abfPrivateDict;
 
 /* Font dictionary data. Comments indicate default/initial values. */
-struct abfFontDict_
-    {                           
-    abfString FontName;         /* Unset (top level in name-keyed) */
-    long PaintType;             /* 0 (top level in name-keyed) */
-    abfFontMatrix FontMatrix;   /* .001 0. 0. .001 0. 0. (top in name-keyed) */
-    abfPrivateDict Private;     
-    };              
+struct abfFontDict_ {
+    abfString FontName;       /* Unset (top level in name-keyed) */
+    long PaintType;           /* 0 (top level in name-keyed) */
+    abfFontMatrix FontMatrix; /* .001 0. 0. .001 0. 0. (top in name-keyed) */
+    abfPrivateDict Private;
+};
 
 /* The data structures described here represent Postscript dictionary data for
    name-keyed (traditional Type 1) and CID-keyed fonts. The PostScript
@@ -283,11 +281,11 @@ struct abfFontDict_
        FDArray[N-1]                 FDArray[N-1]
            font dict
                Private dict
-           
+
    It can be seen that there is a direct mapping for CID-keyed fonts but the
    name-keyed fonts are represented using a single element FDArray whose font
    dict fields are treated as an extension of the font dict. */
-                                
+
 void abfInitAllDicts(abfTopDict *top);
 void abfInitTopDict(abfTopDict *top);
 void abfInitFontDict(abfFontDict *font);
@@ -314,11 +312,10 @@ void abfInitFontDict(abfFontDict *font);
    will typically have more than one element. */
 
 typedef struct abfErrCallbacks_ abfErrCallbacks;
-struct abfErrCallbacks_
-    {
+struct abfErrCallbacks_ {
     void *ctx;
     void (*report_error)(abfErrCallbacks *cb, int err_code, int iFD);
-    };
+};
 
 void abfCheckAllDicts(abfErrCallbacks *cb, abfTopDict *top);
 
@@ -348,22 +345,22 @@ int abfCompareTopDicts(abfTopDict *top1, abfTopDict *top2);
 
 /* abfCompareTopDicts() will compare two top dicts to see if they are similar
    enough to merge. It returns 0 if they can be merged else 1.
-   
+
    Fields in the top dict are checked for name-keyed and cid-keyed fonts but
    the font and private dicts are compared for name-keyed fonts only.
 
    FontNames are NOT checked.
-   
+
    For CID-keyed fonts, registry and order are checked, but not supplement. */
 
 int abfCompareFontDicts(abfFontDict *font1, abfFontDict *font2);
 
 /* abfCompareFontDicts() will compare two font dicts to see if they are
    similar enough to merge. It returns 0 if they can be merged else 1.
-    
+
    abfCompareFontDicts() compares the FontName, FontMatrix, and all the
    BlueValues.
-   
+
    abfCompareFontDicts() is used in the destination font writing module to
    compare FDArrays of fonts with more than one element in the FDArray,
    CID fonts. */
@@ -374,34 +371,34 @@ int abfCompareFontDicts(abfFontDict *font1, abfFontDict *font2);
    used whenever glyph information is passed from one component to the next. */
 
 typedef struct abfEncoding_ abfEncoding;
-struct abfEncoding_             /* Encoding node */
-    {
+struct abfEncoding_ /* Encoding node */
+{
     abfEncoding *next;
     unsigned long code;
-#define ABF_GLYPH_UNENC 0xffffffffUL    /* Unencoded glyph */
-    };
+#define ABF_GLYPH_UNENC 0xffffffffUL /* Unencoded glyph */
+};
 
-typedef struct                  /* Glyph information */
-    {
-    short flags;                /* Attribute flags */
-#define ABF_GLYPH_CID   (1<<0)  /* Glyph from CID-keyed font */
-#define ABF_GLYPH_SEEN  (1<<1)  /* Path data already returned to client */
-#define ABF_GLYPH_UNICODE (1<<2)/* Encoding is Unicode */
-#define ABF_GLYPH_LANG_1 (1<<3) /* Render with LanguageGroup 1 rules */
-#define ABF_GLYPH_CUBE_GSUBR (1<<4)		/* This a GSUBR charstring. */
-    unsigned short tag;         /* Unique tag */
-    abfString gname;            /* Name-keyed: glyph name */
-    abfEncoding encoding;       /* Name-keyed: encoding list */
-    unsigned short cid;         /* CID-keyed: CID */
-    unsigned char iFD;          /* CID-keyed: FD index */
-    ctlRegion sup;              /* Supplementary data */
+typedef struct /* Glyph information */
+{
+    short flags;                      /* Attribute flags */
+#define ABF_GLYPH_CID        (1 << 0) /* Glyph from CID-keyed font */
+#define ABF_GLYPH_SEEN       (1 << 1) /* Path data already returned to client */
+#define ABF_GLYPH_UNICODE    (1 << 2) /* Encoding is Unicode */
+#define ABF_GLYPH_LANG_1     (1 << 3) /* Render with LanguageGroup 1 rules */
+#define ABF_GLYPH_CUBE_GSUBR (1 << 4) /* This a GSUBR charstring. */
+    unsigned short tag;               /* Unique tag */
+    abfString gname;                  /* Name-keyed: glyph name */
+    abfEncoding encoding;             /* Name-keyed: encoding list */
+    unsigned short cid;               /* CID-keyed: CID */
+    unsigned char iFD;                /* CID-keyed: FD index */
+    ctlRegion sup;                    /* Supplementary data */
     struct {
         unsigned short vsindex;
         unsigned short maxstack;
         unsigned short numRegions;
         float *blendDeltaArgs;
-        } blendInfo;/* Supplementary data */
-    } abfGlyphInfo;
+    } blendInfo; /* Supplementary data */
+} abfGlyphInfo;
 
 /* The "flags" field specifies glyph attributes. Libraries may augment this
    definition by specifying additional bits (see specific library API for
@@ -431,17 +428,17 @@ typedef struct                  /* Glyph information */
    list. (Glyphs having more than one encoding (multiple encoding nodes) are
    rare.)
 
-   All the glyphs for one font are either name-keyed or CID-keyed. 
+   All the glyphs for one font are either name-keyed or CID-keyed.
 
    The ABF_GLYPH_SEEN bit in the flags field is set if the path data for this
    glyph has already been returned to the client. It is primarily intended to
    by used when fetching seac components in a font subset so as to avoid
-   repeated glyph definitions. 
+   repeated glyph definitions.
 
    The ABF_GLYPH_LANG_1 bit indicates that the glyph is rendered with
    LanguageGroup 1 rules. It is simply a copy of the value of the LanguageGroup
-   field taken from the corresponding Private dictionary. It is used by the 
-   t1write library in order to determine the encoding of counter stem hints. 
+   field taken from the corresponding Private dictionary. It is used by the
+   t1write library in order to determine the encoding of counter stem hints.
 
    The "sup" field specifies the stream region corresponding to the charstring
    data for the glyph. */
@@ -453,47 +450,46 @@ void abfInitGlyphInfo(abfGlyphInfo *info);
 
 typedef struct abfGlyphCallbacks_ abfGlyphCallbacks;
 
-struct abfGlyphCallbacks_
-    {
+struct abfGlyphCallbacks_ {
     void *direct_ctx;
     void *indirect_ctx;
     abfGlyphInfo *info;
-    int (*beg)      (abfGlyphCallbacks *cb, abfGlyphInfo *info); 
-    void (*width)   (abfGlyphCallbacks *cb, float hAdv);
-    void (*move)    (abfGlyphCallbacks *cb, float x0, float y0);
-    void (*line)    (abfGlyphCallbacks *cb, float x1, float y1);
-    void (*curve)   (abfGlyphCallbacks *cb,
-                     float x1, float y1, 
-                     float x2, float y2, 
-                     float x3, float y3);
-    void (*stem)    (abfGlyphCallbacks *cb,
-                     int flags, float edge0, float edge1);
-    void (*flex)    (abfGlyphCallbacks *cb, float depth,
-                     float x1, float y1, 
-                     float x2, float y2, 
-                     float x3, float y3,
-                     float x4, float y4, 
-                     float x5, float y5, 
-                     float x6, float y6);
-    void (*genop)   (abfGlyphCallbacks *cb, int cnt, float *args, int op);
-    void (*seac)    (abfGlyphCallbacks *cb, 
-                     float adx, float ady, int bchar, int achar);
-	void (*end)     (abfGlyphCallbacks *cb);
-	void (*cubeBlend)     (abfGlyphCallbacks *cb, unsigned int nBlends, unsigned int numVals, float* blendVals);
-	void (*cubeSetwv)     (abfGlyphCallbacks *cb, unsigned int numDV);
-	void (*cubeCompose)     (abfGlyphCallbacks *cb, int cubeLEIndex, float x0, float y0, int numDV, float* ndv);
-							/* Note: ndv is the raw value from the CFF, a value in the range -100 to +100, which corresponds to the
+    int (*beg)(abfGlyphCallbacks *cb, abfGlyphInfo *info);
+    void (*width)(abfGlyphCallbacks *cb, float hAdv);
+    void (*move)(abfGlyphCallbacks *cb, float x0, float y0);
+    void (*line)(abfGlyphCallbacks *cb, float x1, float y1);
+    void (*curve)(abfGlyphCallbacks *cb,
+                  float x1, float y1,
+                  float x2, float y2,
+                  float x3, float y3);
+    void (*stem)(abfGlyphCallbacks *cb,
+                 int flags, float edge0, float edge1);
+    void (*flex)(abfGlyphCallbacks *cb, float depth,
+                 float x1, float y1,
+                 float x2, float y2,
+                 float x3, float y3,
+                 float x4, float y4,
+                 float x5, float y5,
+                 float x6, float y6);
+    void (*genop)(abfGlyphCallbacks *cb, int cnt, float *args, int op);
+    void (*seac)(abfGlyphCallbacks *cb,
+                 float adx, float ady, int bchar, int achar);
+    void (*end)(abfGlyphCallbacks *cb);
+    void (*cubeBlend)(abfGlyphCallbacks *cb, unsigned int nBlends, unsigned int numVals, float *blendVals);
+    void (*cubeSetwv)(abfGlyphCallbacks *cb, unsigned int numDV);
+    void (*cubeCompose)(abfGlyphCallbacks *cb, int cubeLEIndex, float x0, float y0, int numDV, float *ndv);
+    /* Note: ndv is the raw value from the CFF, a value in the range -100 to +100, which corresponds to the
 							normalized design vector range 0.0-1.0.  x0 and y0 are the absolute x and y of the LE origin in the glyph design space.*/
-	void (*cubeTransform)     (abfGlyphCallbacks *cb, float rotate, float scaleX, float scaleY, float skewX, float skewY);
-    void (*moveVF)    (abfGlyphCallbacks *cb, abfBlendArg* x0, abfBlendArg* y0);
-    void (*lineVF)    (abfGlyphCallbacks *cb, abfBlendArg* x1, abfBlendArg* y1);
-    void (*curveVF)   (abfGlyphCallbacks *cb,
-                     abfBlendArg* x1, abfBlendArg* y1,
-                     abfBlendArg* x2, abfBlendArg* y2,
-                     abfBlendArg* x3, abfBlendArg* y3);
-    void (*stemVF)    (abfGlyphCallbacks *cb,
-                     int flags, abfBlendArg* edge0, abfBlendArg* edge1);
-    };
+    void (*cubeTransform)(abfGlyphCallbacks *cb, float rotate, float scaleX, float scaleY, float skewX, float skewY);
+    void (*moveVF)(abfGlyphCallbacks *cb, abfBlendArg *x0, abfBlendArg *y0);
+    void (*lineVF)(abfGlyphCallbacks *cb, abfBlendArg *x1, abfBlendArg *y1);
+    void (*curveVF)(abfGlyphCallbacks *cb,
+                    abfBlendArg *x1, abfBlendArg *y1,
+                    abfBlendArg *x2, abfBlendArg *y2,
+                    abfBlendArg *x3, abfBlendArg *y3);
+    void (*stemVF)(abfGlyphCallbacks *cb,
+                   int flags, abfBlendArg *edge0, abfBlendArg *edge1);
+};
 
 /* beg() is called to begin a new glyph definition and end() is called to
    terminate that definition. Between these bracketing calls the other
@@ -502,7 +498,7 @@ struct abfGlyphCallbacks_
    structure so that it is available to other callback functions.
 
    The width() callback is called with the horizontal advance width of the
-   glyph. 
+   glyph.
 
    Marking glyphs are drawn as an outline which is simply a sequence of
    coordinate points that describe a path (which may be empty for non-marking
@@ -529,14 +525,13 @@ struct abfGlyphCallbacks_
    parameter specifies stem attributes and additional hinting information as
    follows: */
 
-enum
-    {
-    ABF_VERT_STEM   = 1<<0,
-    ABF_CNTR_STEM   = 1<<1,
-    ABF_STEM3_STEM  = 1<<2,
-    ABF_NEW_HINTS   = 1<<3,
-    ABF_NEW_GROUP   = 1<<4
-    };
+enum {
+    ABF_VERT_STEM =  1 << 0,
+    ABF_CNTR_STEM =  1 << 1,
+    ABF_STEM3_STEM = 1 << 2,
+    ABF_NEW_HINTS =  1 << 3,
+    ABF_NEW_GROUP =  1 << 4
+};
 
 /* The ABF_VERT_STEM bit specifies a vertical stem direction if set and
    horizontal if clear.
@@ -564,16 +559,15 @@ enum
    positive except for two special cases which specify an edge (rather that
    stem) hint: */
 
-enum
-    {
-    ABF_EDGE_HINT_LO    =-21,   /* Bottom/left edge hint delta */
-    ABF_EDGE_HINT_HI    =-20    /* Top/right edge hint delta */
-    };
+enum {
+    ABF_EDGE_HINT_LO = -21, /* Bottom/left edge hint delta */
+    ABF_EDGE_HINT_HI = -20  /* Top/right edge hint delta */
+};
 
 /* Edge hints are not permitted for stems that set the ABF_CNTR_STEM bit.
 
    flex() describes two adjoining curves with coordinates 1-3 and 4-6 and the
-   flex depth via the "depth" parameter. 
+   flex depth via the "depth" parameter.
 
    The stem() and flex() callback functions may be disabled by setting them to
    NULL if hint information is of no interest to the client. In this case the
@@ -595,14 +589,14 @@ enum
    translation that should be applied to the accent glyph relative to the base
    glyph. */
 
-enum                    /* Callback return values */
-    {
+enum /* Callback return values */
+{
     ABF_CONT_RET,
     ABF_WIDTH_RET,
     ABF_SKIP_RET,
     ABF_QUIT_RET,
     ABF_FAIL_RET
-    };
+};
 
 /* A typical application of this callback set is to provide a link between a
    glyph data source like a font reading library (the caller), and a glyph data
@@ -627,7 +621,7 @@ enum                    /* Callback return values */
    returned from the callee if a fatal error is encountered during glyph
    processing. */
 
-typedef int (*abfGlyphBegCallback)(abfGlyphCallbacks *cb, abfGlyphInfo *info); 
+typedef int (*abfGlyphBegCallback)(abfGlyphCallbacks *cb, abfGlyphInfo *info);
 
 /* Another possible configuration is to have a client provide the glue layer
    between the two libraries described above. Glyph subset filtering can then
@@ -635,7 +629,7 @@ typedef int (*abfGlyphBegCallback)(abfGlyphCallbacks *cb, abfGlyphInfo *info);
    callee library's beg() function only for glyphs in a the subset. The
    "indirect_ctx" field is provided if this client layer needs its own context.
    The abfGlyphBegCallback typedef is provided as a convienence for clients
-   that need to implement this approach. 
+   that need to implement this approach.
 
    The required components of a glyph callback sequence are: beg(), width(),
    and end(), in that order. The call to width() must imediately follow the
@@ -648,7 +642,7 @@ typedef int (*abfGlyphBegCallback)(abfGlyphCallbacks *cb, abfGlyphInfo *info);
    call the glyph callback functions. When such a template exist it is
    guaranteed to have valid function address for all the glyph callbacks even
    if the facility ignores some of the calls. Thus, a client doesn't need to
-   check the function addresses against NULL before calling them. 
+   check the function addresses against NULL before calling them.
 
    The "info" field points to the "info" parameter that was passed to the beg()
    callback at the start of a glyph. The various beg() callback implementations
@@ -659,22 +653,21 @@ typedef int (*abfGlyphBegCallback)(abfGlyphCallbacks *cb, abfGlyphInfo *info);
 #include "abfdesc.h"
 
 typedef struct
-    {
+{
     long CharstringType;
     long lenSubrArray;
     float defaultWidthX;
     float nominalWidthX;
-    } abfFontDescSpecialValues;
+} abfFontDescSpecialValues;
 
 typedef struct abfFontDescCallbacks_ abfFontDescCallbacks;
-struct abfFontDescCallbacks_
-    {
-    void *ctx; 
-    void (*getSpecialValues)(abfFontDescCallbacks *cb, int iFD, 
+struct abfFontDescCallbacks_ {
+    void *ctx;
+    void (*getSpecialValues)(abfFontDescCallbacks *cb, int iFD,
                              abfFontDescSpecialValues *sv);
-    };
+};
 
-abfFontDescHeader *abfNewFontDesc(ctlMemoryCallbacks *mem_cb, 
+abfFontDescHeader *abfNewFontDesc(ctlMemoryCallbacks *mem_cb,
                                   abfFontDescCallbacks *desc_cb,
                                   long lenGSubrArray,
                                   abfTopDict *top);
@@ -726,31 +719,30 @@ float *abfGetFontDescMatrix(abfFontDescHeader *hdr, int iFD);
    interface defined in this section. */
 
 typedef struct abfMetricsCtx_ *abfMetricsCtx;
-struct abfMetricsCtx_
+struct abfMetricsCtx_ {
+    long flags;                    /* Control flags */
+#define ABF_MTX_TRANSFORM (1 << 0) /* Apply matrix to path */
+    float matrix[6];               /* Transformation matrix */
+    int err_code;                  /* Result code */
+    struct                         /* Real glyph metrics */
     {
-    long flags;         /* Control flags */
-#define ABF_MTX_TRANSFORM   (1<<0) /* Apply matrix to path */
-    float matrix[6];    /* Transformation matrix */
-    int err_code;        /* Result code */
-    struct              /* Real glyph metrics */
-        {
         float left;
         float bottom;
         float right;
         float top;
         float hAdv;
-        } real_mtx;
-    struct              /* Integer glyph metrics */
-        {
+    } real_mtx;
+    struct /* Integer glyph metrics */
+    {
         long left;
         long bottom;
         long right;
         long top;
         long hAdv;
-        } int_mtx;
-    float x;            /* Last segment x end-point */
-    float y;            /* Last segment y end-point */
-    };
+    } int_mtx;
+    float x; /* Last segment x end-point */
+    float y; /* Last segment y end-point */
+};
 
 /* abfMetricsCtx is an abstract font metrics context that is created by the
    client and used by the facility to keep intermediate data and return the
@@ -791,24 +783,23 @@ extern const abfGlyphCallbacks abfGlyphMetricsCallbacks;
    interface defined in this section. */
 
 typedef struct abfDumpCtx_ *abfDumpCtx;
-struct abfDumpCtx_
-    {
-    FILE *fp;       /* Output stream */
-    int flags;      /* Control flags */
-    int level;      /* Dump level */
-    int left;       /* Columns left in line (characters) */
+struct abfDumpCtx_ {
+    FILE *fp;  /* Output stream */
+    int flags; /* Control flags */
+    int level; /* Dump level */
+    int left;  /* Columns left in line (characters) */
     int excludeSubset;
-    int fdCnt;         /* Index of font dict to dump or -1 for all dicts */
-    int *fdArray;         /* Index of font dict to dump or -1 for all dicts */
-    };
-    
+    int fdCnt;    /* Index of font dict to dump or -1 for all dicts */
+    int *fdArray; /* Index of font dict to dump or -1 for all dicts */
+};
+
 /* abfDumpCtx is the abstract font dumping context. It must be created by the
    client and then initialized appropriately before each dump. It is
    subsequently passed to abfDumpBegFont() and used to set the "direct_ctx"
    field in the abfGlyphCallbacks structure.
-   
+
    The "fp" field specifies an open stream to which the dump data will be
-   written. 
+   written.
 
    The "flags" field is for internal use only.
 
@@ -845,50 +836,49 @@ extern const abfGlyphCallbacks abfGlyphDumpCallbacks;
    in this section. */
 
 typedef struct abfDrawCtx_ *abfDrawCtx;
-struct abfDrawCtx_
+struct abfDrawCtx_ {
+    long flags;                   /* Control flags */
+#define ABF_FLIP_TICS    (1 << 0) /* Flip coord tics to otherside of path */
+#define ABF_SHOW_BY_ENC  (1 << 1) /* Show by 8-bit encoding */
+#define ABF_NO_LABELS    (1 << 2) /* Don't show numeric labels */
+#define ABF_DUPLEX_PRINT (1 << 3) /* Prepend duplex print enable */
+    FILE *fp;                     /* Output stream */
+    int level;                    /* Draw level */
+    int showglyph;                /* Show the current glyph */
+    struct                        /* Metric data */
     {
-    long flags;         /* Control flags */
-#define ABF_FLIP_TICS   (1<<0)  /* Flip coord tics to otherside of path */
-#define ABF_SHOW_BY_ENC (1<<1)  /* Show by 8-bit encoding */
-#define ABF_NO_LABELS   (1<<2)  /* Don't show numeric labels */
-#define ABF_DUPLEX_PRINT (1<<3) /* Prepend duplex print enable */
-    FILE *fp;           /* Output stream */
-    int level;          /* Draw level */
-    int showglyph;      /* Show the current glyph */
-    struct              /* Metric data */
-        {
         struct abfMetricsCtx_ ctx;
         abfGlyphCallbacks cb;
-        } metrics;
-    struct              /* Tile mode data */
-        {
-        int h;          /* h origin */
-        int v;          /* v origin */
-        } tile;
-    struct              /* Glyph data */
-        {
-        float hAdv; 
-        float scale;    /* Glyph drawing scale factor (points/unit) */
-        } glyph;
-    struct              /* Path data */
-        {
-        float bx;       /* Last point */
+    } metrics;
+    struct /* Tile mode data */
+    {
+        int h; /* h origin */
+        int v; /* v origin */
+    } tile;
+    struct /* Glyph data */
+    {
+        float hAdv;
+        float scale; /* Glyph drawing scale factor (points/unit) */
+    } glyph;
+    struct /* Path data */
+    {
+        float bx; /* Last point */
         float by;
-        float cx;       /* Last but one point */
+        float cx; /* Last but one point */
         float cy;
-        float fx;       /* First point in path */
+        float fx; /* First point in path */
         float fy;
-        float sx;       /* Second point in path */
+        float sx; /* Second point in path */
         float sy;
-        int cnt;        /* Point count */
+        int cnt; /* Point count */
         int moves;
         int lines;
         int curves;
-        } path;
-    int pageno;         /* Page number */
+    } path;
+    int pageno; /* Page number */
     abfTopDict *top;
-    };
-    
+};
+
 /* abfDrawCtx is the abstract font drawing context. It must be created by the
    client and then initialized appropriately before each font is processed. It
    is subsequently passed to abfDrawBegFont() and used to set the "direct_ctx"
@@ -917,17 +907,16 @@ extern const abfGlyphCallbacks abfGlyphDrawCallbacks;
    to the AFM specification (TN#5004) is not guaranteed. */
 
 typedef struct abfAFMCtx_ *abfAFMCtx;
-struct abfAFMCtx_
-    {
-    FILE *fp;           /* Output stream */
+struct abfAFMCtx_ {
+    FILE *fp; /* Output stream */
     int err_code;
-    struct              /* Metric data */
-        {
+    struct /* Metric data */
+    {
         struct abfMetricsCtx_ ctx;
         abfGlyphCallbacks cb;
-        } metrics;
-    };
-    
+    } metrics;
+};
+
 void abfAFMBegFont(abfAFMCtx h, abfTopDict *top);
 void abfAFMEndFont(abfAFMCtx h);
 
@@ -959,10 +948,10 @@ int abfBegFont(abfCtx h, abfTopDict *top);
 
 int abfEndFont(abfCtx h, long flags, abfGlyphCallbacks *glyph_cb);
 
-enum                                /* abfEndFont(flags) bits */
-    {
-    ABF_PATH_REMOVE_OVERLAP = 1<<0  /* Remove overlapping paths */
-    };
+enum /* abfEndFont(flags) bits */
+{
+    ABF_PATH_REMOVE_OVERLAP = 1 << 0 /* Remove overlapping paths */
+};
 
 extern const abfGlyphCallbacks abfGlyphPathCallbacks;
 
@@ -982,13 +971,12 @@ int abfFree(abfCtx h);
 /* abfFree() destroys the library context and all the resources allocated to
    it. */
 
-enum
-    {
+enum {
 #undef CTL_DCL_ERR
-#define CTL_DCL_ERR(name,string)    name,
+#define CTL_DCL_ERR(name, string) name,
 #include "abferr.h"
     abfErrCount
-    };
+};
 
 /* Library functions return either zero (abfSuccess) to indicate success or a
    positive non-zero error code that is defined in the above enumeration that
@@ -996,7 +984,7 @@ enum
 
 char *abfErrStr(int err_code);
 
-/* abfErrStr() maps the "errcode" parameter to a null-terminated error 
+/* abfErrStr() maps the "errcode" parameter to a null-terminated error
    string. */
 
 void abfGetVersion(ctlVersionCallbacks *cb);

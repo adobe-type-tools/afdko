@@ -1,21 +1,15 @@
-/* @(#)CM_VerSion except.h atm09 1.3 16563.eco sum= 24132 atm09.004 */
-/* @(#)CM_VerSion except.h atm08 1.3 16359.eco sum= 60475 atm08.006 */
-/* @(#)CM_VerSion except.h atm07 1.2 16014.eco sum= 63954 atm07.006 */
-/* @(#)CM_VerSion except.h atm06 1.5 13928.eco sum= 54941 */
-/* @(#)CM_VerSion except.h atm05 1.2 11580.eco sum= 18098 */
-/* $Header$ */
+/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
+
 /*
   except.h
 */
-/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
-
 
 /* exception handling */
 
 #ifndef EXCEPT_H
 #define EXCEPT_H
-
 
 #ifndef WINATM
 #define WINATM 0
@@ -28,10 +22,10 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #elif !WINATM
 #include <stdlib.h>
 #endif
-/* #include CANTHAPPEN	*/	/* To include Abort processing, by reference */
+/* #include CANTHAPPEN */ /* To include Abort processing, by reference */
 
 #if defined(USE_CXX_EXCEPTION) && !defined(__cplusplus)
-    #error("must be compiled as C++ to use C++ exception as error handling")
+#error("must be compiled as C++ to use C++ exception as error handling")
 #endif
 
 #ifndef USE_CXX_EXCEPTION
@@ -40,13 +34,13 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
  */
 #ifdef setjmp_h
 #include setjmp_h
-#else   /* setjmp_h */
+#else /* setjmp_h */
 #ifdef VAXC
 #include setjmp
-#else   /* VAXC */
+#else /* VAXC */
 #include <setjmp.h>
-#endif  /* VAXC */
-#endif  /* setjmp_h */
+#endif /* VAXC */
+#endif /* setjmp_h */
 #endif
 
 /* 
@@ -131,17 +125,16 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
   value.
  */
 
-
 /* Data structures */
 
 typedef struct _t_Exc_buf {
 #ifdef USE_CXX_EXCEPTION
-    _t_Exc_buf(int code=0, char *msg=0) : Message(msg), Code(code) {}
+    _t_Exc_buf(int code = 0, char *msg = 0) : Message(msg), Code(code) {}
 #else
-	jmp_buf Environ;		/* saved environment */
+    jmp_buf Environ; /* saved environment */
 #endif
-	char *Message;			/* Human-readable cause */
-	int Code;			/* Exception code */
+    char *Message; /* Human-readable cause */
+    int Code;      /* Exception code */
 } _Exc_Buf;
 
 /* Macros defining the exception handler "syntax":
@@ -150,28 +143,46 @@ typedef struct _t_Exc_buf {
  */
 
 #ifdef USE_CXX_EXCEPTION
-#define DURING_EX(env)	DURING
-#define	DURING {_Exc_Buf Exception;\
-		try {
+#define DURING_EX(env) DURING
+#define DURING              \
+    {                       \
+        _Exc_Buf Exception; \
+        try {
+#define HANDLER            \
+    }                      \
+    catch (_Exc_Buf & e) { \
+        Exception = e;
 
-#define	HANDLER	} catch (_Exc_Buf& e) { Exception = e;
-
-#define	END_HANDLER }}
+#define END_HANDLER \
+    }               \
+    }
 
 #else /* USE_CXX_EXCEPTION */
-#define	DURING_EX(env) {_Exc_Buf Exception; _Exc_Buf *_EBP = &env;\
-		if (! setjmp(env.Environ)) {
-#define DURING { _Exc_Buf Exception; _Exc_Buf *_EBP=&Exception; Exception.Code=0;  if (1) {
+#define DURING_EX(env)         \
+    {                          \
+        _Exc_Buf Exception;    \
+        _Exc_Buf *_EBP = &env; \
+        if (!setjmp(env.Environ)) {
+#define DURING                       \
+    {                                \
+        _Exc_Buf Exception;          \
+        _Exc_Buf *_EBP = &Exception; \
+        Exception.Code = 0;          \
+        if (1) {
+#define HANDLER \
+    }           \
+    else {      \
+        Exception.Code = _EBP->Code;
 
-#define	HANDLER	} else { Exception.Code=_EBP->Code;
-
-#define	END_HANDLER }}
+#define END_HANDLER \
+    }               \
+    }
 
 #endif /* USE_CXX_EXCEPTION */
 
 /* Exported Procedures */
 
-extern procedure os_raise (_Exc_Buf *buf, int  Code, char * Message);
+extern procedure os_raise(_Exc_Buf *buf, int Code, char *Message);
 /* Initiates an exception; always called via the RAISE macro.
    This procedure never returns; instead, the stack is unwound and
    control passes to the beginning of the exception handler statements
@@ -189,10 +200,9 @@ extern procedure os_raise (_Exc_Buf *buf, int  Code, char * Message);
    writes an error message to os_stderr and aborts with CantHappen.
  */
 
-
-#if !defined(USE_CXX_EXCEPTION) && !WINATM && OS!=os_windowsNT
+#if !defined(USE_CXX_EXCEPTION) && !WINATM && OS != os_windowsNT
 #ifndef setjmp
-extern int setjmp (jmp_buf  buf);
+extern int setjmp(jmp_buf buf);
 #endif
 /* Saves the caller's environment in the buffer (which is an array
    type and therefore passed by pointer), then returns the value zero.
@@ -212,14 +222,14 @@ extern int setjmp (jmp_buf  buf);
    the signal cleanly in such a case.
  */
 
-#endif  /* !WINATM */
+#endif /* !WINATM */
 
 /* In-line Procedures */
 
 #define RAISE os_raise
 /* See os_raise above; defined as a macro simply for consistency */
 
-#define	RERAISE	RAISE(&Exception, Exception.Code, Exception.Message)
+#define RERAISE RAISE(&Exception, Exception.Code, Exception.Message)
 /* Called from within an exception handler (between HANDLER and
    END_HANDLER), propagates the same exception to the next outer
    dynamically enclosing exception handler; does not return.
@@ -234,6 +244,4 @@ extern int setjmp (jmp_buf  buf);
    component.
 */
 
-
-#endif  /* EXCEPT_H */
-
+#endif /* EXCEPT_H */

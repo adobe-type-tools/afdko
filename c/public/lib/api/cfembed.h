@@ -1,5 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef CFEMBED_H
 #define CFEMBED_H
@@ -7,7 +8,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "ctlshare.h"
 #include "sfntwrite.h"
 
-#define CEF_VERSION CTL_MAKE_VERSION(2,0,25)
+#define CEF_VERSION CTL_MAKE_VERSION(2, 0, 25)
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,7 +52,7 @@ extern "C" {
    for each font to be subset. */
 
 typedef struct cefCtx_ *cefCtx;
-cefCtx cefNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb, 
+cefCtx cefNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
               CTL_CHECK_ARGS_DCL);
 
 #define CEF_CHECK_ARGS CTL_CHECK_ARGS_CALL(CEF_VERSION)
@@ -67,16 +68,15 @@ cefCtx cefNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
    or the library can't be initialized for some other reason, NULL is returned.
    */
 
-enum                    
-    {
-    cef_CFF__FILL_SEQ = 10,     /* Predefined table fill sequence numbers */
+enum {
+    cef_CFF__FILL_SEQ = 10, /* Predefined table fill sequence numbers */
     cef_cmap_FILL_SEQ = 20,
     cef_GPOS_FILL_SEQ = 30,
 
-    cef_cmap_WRITE_SEQ = 10,    /* Predefined table write sequence numbers */
+    cef_cmap_WRITE_SEQ = 10, /* Predefined table write sequence numbers */
     cef_CFF__WRITE_SEQ = 20,
     cef_GPOS_WRITE_SEQ = 30
-    };
+};
 
 int cefRegisterTable(cefCtx h, sfwTableCallbacks *tbl_cb);
 
@@ -95,55 +95,53 @@ int cefRegisterTable(cefCtx h, sfwTableCallbacks *tbl_cb);
    numbers with the predefined values above in order to establish the desired
    table filling and writing order. */
 
-enum 
-    {
-    CEF_MAX_AXES = 4,       /* Maximum multiple master axes */
-    CEF_VID_BEGIN = 64000   /* Beginning of virtual id (VID) range */
-    };
+enum {
+    CEF_MAX_AXES = 4,     /* Maximum multiple master axes */
+    CEF_VID_BEGIN = 64000 /* Beginning of virtual id (VID) range */
+};
 
-typedef struct          /* Glyph specification */
-    {
-	unsigned short clientflags;
-    unsigned short id;  /* NID/GID/CID/VID */
+typedef struct /* Glyph specification */
+{
+    unsigned short clientflags;
+    unsigned short id; /* NID/GID/CID/VID */
     unsigned long uv;  /* was: short */
-    } cefSubsetGlyph;
+} cefSubsetGlyph;
 
-typedef struct          /* Kerning pair */
-    {
+typedef struct /* Kerning pair */
+{
     unsigned short first;
     unsigned short second;
     short value;
-    } cefKernPair;
+} cefKernPair;
 
-typedef struct          /* Embedding specification */
-    {
+typedef struct /* Embedding specification */
+{
     unsigned short flags;
-#define CEF_FORCE_LANG_1  (1<<0)  /* Force LanguageGroup 1 */
-#define CEF_WRITE_SVG     (1<<1)  /* Write SVG font instead of CEF font */
-#define CEF_FORCE_IDENTITY_ROS (1<<2) /* Force Registry-Ordering-Supplement in CFF to be "Adobe-Identity-0" */
+#define CEF_FORCE_LANG_1       (1 << 0) /* Force LanguageGroup 1 */
+#define CEF_WRITE_SVG          (1 << 1) /* Write SVG font instead of CEF font */
+#define CEF_FORCE_IDENTITY_ROS (1 << 2) /* Force Registry-Ordering-Supplement in CFF to be "Adobe-Identity-0" */
     char *newFontName;
     float *UDV;
     char *URL;
-    struct              /* Subset glyphs */
-        {
+    struct /* Subset glyphs */
+    {
         long cnt;
         cefSubsetGlyph *array;
         char **names;
-        } subset;
-    struct              /* Kern pairs */
-        {
+    } subset;
+    struct /* Kern pairs */
+    {
         long cnt;
         cefKernPair *array;
-        } kern;
-    } cefEmbedSpec;
+    } kern;
+} cefEmbedSpec;
 
 typedef struct cefMapCallback_ cefMapCallback;
-struct cefMapCallback_
-    {
+struct cefMapCallback_ {
     void *ctx;
-    void (*glyphmap)(cefMapCallback *cb, 
+    void (*glyphmap)(cefMapCallback *cb,
                      unsigned short gid, abfGlyphInfo *info);
-    };
+};
 
 int cefMakeEmbeddingFont(cefCtx h, cefEmbedSpec *spec, cefMapCallback *map);
 
@@ -217,7 +215,7 @@ int cefMakeEmbeddingFont(cefCtx h, cefEmbedSpec *spec, cefMapCallback *map);
    value via the "id" and "uv" fields, respectively. The "subset.names" field
    specifies the glyph names to be used for selection when appropriate (see
    above table). This field, when non-NULL, specifies an array of pointers to C
-   strings terminated by the NULL character. This array must end with a NULL 
+   strings terminated by the NULL character. This array must end with a NULL
    entry. (As a convenience to CoolType clients the "subset.names" field exactly
    matches the array returned by CTGetVal(... "charstringnames" ...)).
 
@@ -251,7 +249,7 @@ int cefMakeEmbeddingFont(cefCtx h, cefEmbedSpec *spec, cefMapCallback *map);
    The "uv"s in the "subset.array" are used to generate the cmap table in the
    embedding font. Some glyphs may legitimately not have a Unicode encoding if
    they are to be accessed directly. In such cases the "uv" field should be set
-   to the value 0xFFFF.  If duplicate "id"s are encountered the pair with the 
+   to the value 0xFFFF.  If duplicate "id"s are encountered the pair with the
    lowest "uv" value will be chosen.
 
    The "kern.cnt" field specifies the number of kerning pairs stored in the
@@ -288,13 +286,12 @@ int cefSetSvwFlags(cefCtx h, long flags);
    in the event of an error. The list of possible error codes is specified
    below. */
 
-enum
-    {
+enum {
 #undef CTL_DCL_ERR
-#define CTL_DCL_ERR(name,string)    name,
+#define CTL_DCL_ERR(name, string) name,
 #include "ceferr.h"
     cefErrCount
-    };
+};
 
 /* Library functions either return zero (cefSuccess) to indicate success or a
    positive non-zero error code that is defined in the above enumeration that
@@ -302,7 +299,7 @@ enum
 
 char *cefErrStr(int err_code);
 
-/* cefErrStr() maps the "err_code" parameter to a null-terminated error 
+/* cefErrStr() maps the "err_code" parameter to a null-terminated error
    string. */
 
 void cefGetVersion(ctlVersionCallbacks *cb);
@@ -315,123 +312,109 @@ void cefGetVersion(ctlVersionCallbacks *cb);
    This section illustrates a simple memory callback and simple file-based
    implemetation of the stream client callback functions. */
 
-#if 0   /* Example */
+#if 0 /* Example */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include "cfembed.h"
 
 typedef struct
-    {
+{
     FILE *fp;
     char buf[BUFSIZ];
-    } Stream;
-   
+} Stream;
+
 typedef struct
-    {
+{
     /* ... */
     char *srcfile;
     char *dstfile;
     struct
-        {
+    {
         Stream src;
         Stream dst;
         Stream tmp0;
         Stream tmp1;
-        } stm;
-    } ClientCtx;
+    } stm;
+} ClientCtx;
 
-void *mem_manage(ctlMemoryCallbacks *cb, void *old, size_t size)
-    {
-    if (size > 0)
-        {
+void *mem_manage(ctlMemoryCallbacks *cb, void *old, size_t size) {
+    if (size > 0) {
         if (old == NULL)
-            return malloc(size);        /* size != 0, old == NULL */
-        else                            
-            return realloc(old, size);  /* size != 0, old != NULL */
-        }                               
-    else                                
-        {                               
-        if (old == NULL)                
-            return NULL;                /* size == 0, old == NULL */
-        else                            
-            {                           
-            free(old);                  /* size == 0, old != NULL */
+            return malloc(size); /* size != 0, old == NULL */
+        else
+            return realloc(old, size); /* size != 0, old != NULL */
+    } else {
+        if (old == NULL)
+            return NULL; /* size == 0, old == NULL */
+        else {
+            free(old); /* size == 0, old != NULL */
             return NULL;
-            }
         }
     }
-    
-void *stm_open(ctlStreamCallbacks *cb, int id, size_t size)
-    {
+}
+
+void *stm_open(ctlStreamCallbacks *cb, int id, size_t size) {
     ClientCtx *h = cb->direct_ctx;
     Stream *s;
-    switch (id)
-        {
-    case CEF_SRC_STREAM_ID:
-        s = &h->stm.src;
-        s->fp = fopen(h->srcfile, "rb");
-        break;
-    case CEF_DST_STREAM_ID:
-        s = &h->stm.dst;
-        s->fp = fopen(h->dstfile, "w+b");
-        break;
-    case CEF_TMP0_STREAM_ID:
-        s = &h->stm.tmp0;
-        s->fp = tmpfile();
-        break;
-    case CEF_TMP1_STREAM_ID:
-        s = &h->stm.tmp1;
-        s->fp = tmpfile();
-        break;
-        }
-    return (s->fp == NULL)? NULL: s;
+    switch (id) {
+        case CEF_SRC_STREAM_ID:
+            s = &h->stm.src;
+            s->fp = fopen(h->srcfile, "rb");
+            break;
+        case CEF_DST_STREAM_ID:
+            s = &h->stm.dst;
+            s->fp = fopen(h->dstfile, "w+b");
+            break;
+        case CEF_TMP0_STREAM_ID:
+            s = &h->stm.tmp0;
+            s->fp = tmpfile();
+            break;
+        case CEF_TMP1_STREAM_ID:
+            s = &h->stm.tmp1;
+            s->fp = tmpfile();
+            break;
     }
-   
-int stm_seek(ctlStreamCallbacks *cb, void *stream, long offset)
-    {
+    return (s->fp == NULL) ? NULL : s;
+}
+
+int stm_seek(ctlStreamCallbacks *cb, void *stream, long offset) {
     Stream *s = stream;
     return fseek(s->fp, offset, SEEK_SET);
-    }
-   
-long stm_tell(ctlStreamCallbacks *cb, void *stream)
-    {
+}
+
+long stm_tell(ctlStreamCallbacks *cb, void *stream) {
     Stream *s = stream;
     return ftell(s->fp);
-    }
-   
-size_t stm_read(ctlStreamCallbacks *cb, void *stream, char **ptr)
-    {
+}
+
+size_t stm_read(ctlStreamCallbacks *cb, void *stream, char **ptr) {
     Stream *s = stream;
     *ptr = s->buf;
     return fread(s->buf, 1, sizeof(s->buf), s->fp);
-    }
-   
-size_t stm_write(ctlStreamCallbacks *cb, void *stream, size_t count, char *ptr)
-    {
+}
+
+size_t stm_write(ctlStreamCallbacks *cb, void *stream, size_t count, char *ptr) {
     Stream *s = stream;
     return fwrite(ptr, 1, count, s->fp) != count;
-    }
+}
 
-int stm_status(ctlStreamCallbacks *cb, void *stream)
-    {
+int stm_status(ctlStreamCallbacks *cb, void *stream) {
     Stream *s = stream;
     if (feof(s->fp))
         return CTL_STREAM_END;
     else if (ferror(s->fp))
         return CTL_STREAM_ERROR;
-    else 
+    else
         return CTL_STREAM_OK;
-    }
-   
-int stm_close(ctlStreamCallbacks *cb, void *stream)
-    {
+}
+
+int stm_close(ctlStreamCallbacks *cb, void *stream) {
     Stream *s = stream;
     return fclose(s->fp) == EOF;
-    }
+}
 
-int main(void)
-    {
+int main(void) {
     ClientCtx h;
     ctlMemoryCallbacks mem;
     ctlStreamCallbacks stm;
@@ -439,7 +422,7 @@ int main(void)
 
     mem.ctx = &h;
     mem.manage = mem_manage;
-    
+
     stm.direct_ctx = &h;
     stm.indirect_ctx = NULL;
     stm.open = stm_open;
@@ -454,14 +437,14 @@ int main(void)
 
     cef = cefNew(&mem, &stm, CEF_CHECK_ARGS);
     if (cef == NULL)
-        exit(1);    /* Can't initialize library */
+        exit(1); /* Can't initialize library */
 
     /* Use library */
 
     cefFree(cef);
 
     return 0;
-    }
+}
 #endif /* Example */
 
 #ifdef __cplusplus

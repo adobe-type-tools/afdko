@@ -1,12 +1,13 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef TTREAD_H
 #define TTREAD_H
 
 #include "ctlshare.h"
 
-#define TTR_VERSION CTL_MAKE_VERSION(1,0,21)
+#define TTR_VERSION CTL_MAKE_VERSION(1, 0, 21)
 
 #include "absfont.h"
 
@@ -30,10 +31,10 @@ extern "C" {
    font may be closed by calling ttrEndFont(). */
 
 typedef struct ttrCtx_ *ttrCtx;
-ttrCtx ttrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb, 
+ttrCtx ttrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
               CTL_CHECK_ARGS_DCL);
 
-#define TTR_CHECK_ARGS  CTL_CHECK_ARGS_CALL(TTR_VERSION)
+#define TTR_CHECK_ARGS CTL_CHECK_ARGS_CALL(TTR_VERSION)
 
 /* ttrNew() initializes the library and returns an opaque context (ttrCtx) that
    is subsequently passed to all the other library functions. It must be the
@@ -52,11 +53,10 @@ int ttrBegFont(ttrCtx h, long flags, long origin, int iTTC, abfTopDict **top);
    structure pointed to by the "top" parameter. The "flags" parameter specifies
    parse options: */
 
-enum
-    {
-    TTR_EXACT_PATH  = 1<<0, /* Return mathematically exact path conversion */
-    TTR_BOTH_PATHS  = 1<<1  /* Return combined approx and exact conversions */
-    };
+enum {
+    TTR_EXACT_PATH = 1 << 0, /* Return mathematically exact path conversion */
+    TTR_BOTH_PATHS = 1 << 1  /* Return combined approx and exact conversions */
+};
 
 /* TrueType curve segments are represented as quadratic Beziers but the path
    returned by the glyph callbacks described below represent curve segments
@@ -90,9 +90,9 @@ int ttrIterateGlyphs(ttrCtx h, abfGlyphCallbacks *glyph_cb);
    returned from beg() and can thus use this interface to select a subset of
    glyphs or just enumerate the glyph set without reading any path data. */
 
-int ttrGetGlyphByTag(ttrCtx h, 
+int ttrGetGlyphByTag(ttrCtx h,
                      unsigned short tag, abfGlyphCallbacks *glyph_cb);
-int ttrGetGlyphByName(ttrCtx h, 
+int ttrGetGlyphByName(ttrCtx h,
                       char *gname, abfGlyphCallbacks *glyph_cb);
 
 /* ttrGetGlyphByTag() and ttrGetGlyphByName() are called obtain glyph data from
@@ -121,13 +121,12 @@ void ttrFree(ttrCtx h);
 /* ttrFree() destroys the library context and all the resources allocated to
    it. It must be the last function called by a client of the library. */
 
-enum
-    {
+enum {
 #undef CTL_DCL_ERR
-#define CTL_DCL_ERR(name,string)    name,
+#define CTL_DCL_ERR(name, string) name,
 #include "ttrerr.h"
     ttrErrCount
-    };
+};
 
 /* Library functions return either 0 to indicate success or a positive non-zero
    error code that is defined in the above enumeration that is built from

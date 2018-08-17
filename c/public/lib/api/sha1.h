@@ -1,5 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef SHA1_H
 #define SHA1_H
@@ -44,18 +45,17 @@ Note:
 
 *******************************************************/
 
-
-typedef struct sha1_ctx *sha1_pctx;   /* pointer to sha1 private work area */
-                       /* the contents of this work area are private
+typedef struct sha1_ctx *sha1_pctx; /* pointer to sha1 private work area */
+                                    /* the contents of this work area are private
                                   to the implementation of sha1 and must
                                   be preserved without modification between
                                   calls to sha1_update and sha1_finalize.
                                   The size of this work area is about 100 
                                   bytes. */
 
-typedef void * sha1_malloc(size_t size, void *hook); 
-                               /* client supplied callback procedure */
-                               /* this client supplied malloc procedure
+typedef void *sha1_malloc(size_t size, void *hook);
+/* client supplied callback procedure */
+/* this client supplied malloc procedure
                                   has the same requirements as the standard C
                                   library malloc. The sha1 library depends on
                                   the client malloc procedure to honor alignment
@@ -63,9 +63,9 @@ typedef void * sha1_malloc(size_t size, void *hook);
                                   pointer passed through to the client
                                   callback proceedure unmodified by 
                                   sha1_init. */
-typedef void   sha1_free(sha1_pctx ctx, void *hook);
-                               /* client supplied callback procedure */
-                               /* this client supplied free procedure is used
+typedef void sha1_free(sha1_pctx ctx, void *hook);
+/* client supplied callback procedure */
+/* this client supplied free procedure is used
                                   to return the memory allocated during sha1_init
                                   via its callback to the client procedure.
                                   hook is a client contextpointer passed
@@ -73,21 +73,21 @@ typedef void   sha1_free(sha1_pctx ctx, void *hook);
                           unmodified by sha1_free. */
 
 typedef unsigned char sha1_hash[20];
-                               /* hash is returned into this client provided
+/* hash is returned into this client provided
                                   space */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-sha1_pctx  sha1_init(sha1_malloc client_malloc, void *hook);
-                               /* called once per hash generation */
-                               /* returned context must be passed with 
+sha1_pctx sha1_init(sha1_malloc client_malloc, void *hook);
+/* called once per hash generation */
+/* returned context must be passed with 
                                   unmodified contents to subsequent calls */
-                               /* sha1_malloc is client provided malloc 
+/* sha1_malloc is client provided malloc 
                                   procedure */
 
-                               /* return valid pointer for success, 
+/* return valid pointer for success, 
                                   NULL for failure.
                                   failure will occur 
                                      if client_malloc callback is NULL or
@@ -97,24 +97,23 @@ sha1_pctx  sha1_init(sha1_malloc client_malloc, void *hook);
                                         type exists)
                                 */
 
-
 int sha1_update(sha1_pctx ctx, unsigned char *buffer, size_t len);
-                               /* called 1 or more times to accumulate hash 
+/* called 1 or more times to accumulate hash 
                                   value.  */
 
-                               /* return 0 for success, 1 for failure.
+/* return 0 for success, 1 for failure.
                                   failure will occur if ctx is NULL or
                                   buffer is NULL and len > 0. */
 
-int sha1_finalize(sha1_pctx ctx, sha1_free client_free, 
+int sha1_finalize(sha1_pctx ctx, sha1_free client_free,
                   sha1_hash hash, void *hook);
-                               /* called once after all data has been accumulated
+/* called once after all data has been accumulated
                                   via calls to sha1 update. Note that hash value
                                   is returned to the client in hash and that the
                                   context (ctx) is freed via a call to 
                                   client_free */
 
-                               /* return 0 for success, 1 for failure.
+/* return 0 for success, 1 for failure.
                                   failure will occur if callback is NULL or
                                   hash is NULL, or ctx is NULL */
 

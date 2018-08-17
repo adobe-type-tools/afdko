@@ -1,21 +1,15 @@
-/* @(#)CM_VerSion except.h atm09 1.3 16563.eco sum= 24132 atm09.004 */
-/* @(#)CM_VerSion except.h atm08 1.3 16359.eco sum= 60475 atm08.006 */
-/* @(#)CM_VerSion except.h atm07 1.2 16014.eco sum= 63954 atm07.006 */
-/* @(#)CM_VerSion except.h atm06 1.5 13928.eco sum= 54941 */
-/* @(#)CM_VerSion except.h atm05 1.2 11580.eco sum= 18098 */
-/* $Header$ */
+/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
+
 /*
   except.h
 */
-/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
-
 
 /* exception handling */
 
 #ifndef EXCEPT_H
 #define EXCEPT_H
-
 
 #ifndef WINATM
 #define WINATM 0
@@ -28,21 +22,20 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #elif !WINATM
 #include <stdlib.h>
 #endif
-/* #include CANTHAPPEN	*/	/* To include Abort processing, by reference */
-
+/* #include CANTHAPPEN */ /* To include Abort processing, by reference */
 
 /* If the macro setjmp_h is defined, it is the #include path to be used
    instead of <setjmp.h>
  */
 #ifdef setjmp_h
 #include setjmp_h
-#else   /* setjmp_h */
+#else /* setjmp_h */
 #ifdef VAXC
 #include setjmp
-#else   /* VAXC */
+#else /* VAXC */
 #include <setjmp.h>
-#endif  /* VAXC */
-#endif  /* setjmp_h */
+#endif /* VAXC */
+#endif /* setjmp_h */
 
 /* 
   This interface defines a machine-independent exception handling
@@ -127,42 +120,53 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
   value.
  */
 
-
 /* Data structures */
 
 typedef struct _t_Exc_buf {
-	struct _t_Exc_buf *Prev;	/* exception chain back-pointer */
-	jmp_buf Environ;		/* saved environment */
-	char *Message;			/* Human-readable cause */
-	int Code;			/* Exception code */
+    struct _t_Exc_buf *Prev; /* exception chain back-pointer */
+    jmp_buf Environ;         /* saved environment */
+    char *Message;           /* Human-readable cause */
+    int Code;                /* Exception code */
 } _Exc_Buf;
 
-extern _Exc_Buf *_Exc_Header;	/* global exception chain header */     
+extern _Exc_Buf *_Exc_Header; /* global exception chain header */
 
 /* Macros defining the exception handler "syntax":
      DURING statements HANDLER statements END_HANDLER
    (see the description above)
  */
 
-#define	_E_RESTORE  _Exc_Header = Exception.Prev
+#define _E_RESTORE _Exc_Header = Exception.Prev
 
-#define	DURING {_Exc_Buf Exception;\
-		Exception.Prev =_Exc_Header;\
-		_Exc_Header = &Exception;\
-		if (! setjmp(Exception.Environ)) {
+#define DURING                        \
+    {                                 \
+        _Exc_Buf Exception;           \
+        Exception.Prev = _Exc_Header; \
+        _Exc_Header = &Exception;     \
+        if (!setjmp(Exception.Environ)) {
+#define HANDLER \
+    _E_RESTORE; \
+    }           \
+    else {
+#define END_HANDLER \
+    }               \
+    }
 
-#define	HANDLER	_E_RESTORE;} else {
+#define E_RETURN(x) \
+    {               \
+        _E_RESTORE; \
+        return (x); \
+    }
 
-#define	END_HANDLER }}
-
-#define	E_RETURN(x) {_E_RESTORE; return(x);}
-
-#define	E_RTRN_VOID {_E_RESTORE; return;}
-
+#define E_RTRN_VOID \
+    {               \
+        _E_RESTORE; \
+        return;     \
+    }
 
 /* Exported Procedures */
 
-extern procedure os_raise (int  Code, char * Message);
+extern procedure os_raise(int Code, char *Message);
 /* Initiates an exception; always called via the RAISE macro.
    This procedure never returns; instead, the stack is unwound and
    control passes to the beginning of the exception handler statements
@@ -180,17 +184,16 @@ extern procedure os_raise (int  Code, char * Message);
    writes an error message to os_stderr and aborts with CantHappen.
  */
 
-
-#if !WINATM && OS!=os_windowsNT
+#if !WINATM && OS != os_windowsNT
 #ifndef setjmp
-extern int setjmp (jmp_buf  buf);
+extern int setjmp(jmp_buf buf);
 #endif
 /* Saves the caller's environment in the buffer (which is an array
    type and therefore passed by pointer), then returns the value zero.
    It may return again if longjmp is executed subsequently (see below).
  */
 
-extern procedure longjmp (jmp_buf  buf, int  value);
+extern procedure longjmp(jmp_buf buf, int value);
 /* Restores the environment saved by an earlier call to setjmp,
    unwinding the stack and causing setjmp to return again with
    value as its return value (which must be non-zero).
@@ -203,14 +206,14 @@ extern procedure longjmp (jmp_buf  buf, int  value);
    the signal cleanly in such a case.
  */
 
-#endif  /* !WINATM */
+#endif /* !WINATM */
 
 /* In-line Procedures */
 
 #define RAISE os_raise
 /* See os_raise above; defined as a macro simply for consistency */
 
-#define	RERAISE	RAISE(Exception.Code, Exception.Message)
+#define RERAISE RAISE(Exception.Code, Exception.Message)
 /* Called from within an exception handler (between HANDLER and
    END_HANDLER), propagates the same exception to the next outer
    dynamically enclosing exception handler; does not return.
@@ -225,6 +228,4 @@ extern procedure longjmp (jmp_buf  buf, int  value);
    component.
 */
 
-
-#endif  /* EXCEPT_H */
-
+#endif /* EXCEPT_H */

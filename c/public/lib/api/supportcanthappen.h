@@ -1,14 +1,10 @@
-/* @(#)CM_VerSion canthappen.h atm09 1.2 16563.eco sum= 51485 atm09.004 */
-/* @(#)CM_VerSion canthappen.h atm08 1.6 16390.eco sum= 07013 atm08.007 */
-/* @(#)CM_VerSion canthappen.h atm07 1.2 16009.eco sum= 26989 atm07.005 */
-/* @(#)CM_VerSion canthappen.h atm06 1.7 14103.eco sum= 51592 */
-/* $Header$ */
+/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
+
 /*
   canthappen.h
 */
-/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
-
 
 /*
   Charter -- Provide an abnormal terminiation facility, which can identify the
@@ -38,9 +34,19 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define os_abort() DebugStr("\pcanthappen")
 #elif WINATM
 #ifdef CODE32
-#define os_abort() { char *n=NULL, m;                m = *n; }
+#define os_abort()         \
+    {                      \
+        char *n = NULL, m; \
+        m = *n;            \
+    }
 #else
-#define os_abort() { char *n=NULL, m; _asm{ int 3 }; m = *n; }
+#define os_abort()         \
+    {                      \
+        char *n = NULL, m; \
+        _asm { int 3}       \
+        ;                  \
+        m = *n;            \
+    }
 #endif
 #else
 #include <stdlib.h>
@@ -115,13 +121,13 @@ CantHappen();                     Quit
 /*----------------------------------------------------------------------*/
 /*  EXPORTED PROCEDURES -- Procedure called primarily by macros in this file */
 /*----------------------------------------------------------------------*/
-extern procedure CDECL CantHappenPrintf (
-                  readonly char* pPgmFileName, 
-		  IntX           pgmLineNum, 		 
-		  Card32         errID,
-		  readonly char* formatString, ...
-		  /* 0-n vars, as per formatString .... */
-		  ); 
+extern procedure CDECL CantHappenPrintf(
+    readonly char* pPgmFileName,
+    IntX pgmLineNum,
+    Card32 errID,
+    readonly char* formatString, ...
+    /* 0-n vars, as per formatString .... */
+);
 /* 
   This is called by the CantHappenMsg1, CantHappenMsg2, CantHappenMsg3 macros, 
   when STAGE == DEVELOP.  It has the same syntax as the ANSI C printf
@@ -144,11 +150,11 @@ extern procedure CDECL CantHappenPrintf (
 /*----------------------------------------------------------------------*/
 /*  EXPORTED PROCEDURES -- Procedures called only by macros in this file */
 /*----------------------------------------------------------------------*/
-extern procedure CantHappenForDevelop (
-                  Card32         errID,
-		  readonly char* pMessage,
-		  readonly char* pPgmFileName,
-		  IntX lineNum);
+extern procedure CantHappenForDevelop(
+    Card32 errID,
+    readonly char* pMessage,
+    readonly char* pPgmFileName,
+    IntX lineNum);
 /* 
   This is called by the CantHappenMsg macro when STAGE == DEVELOP.  
   It is passed a programmer-generated errID and termination message, plus the
@@ -163,8 +169,8 @@ extern procedure CantHappenForDevelop (
                          "MyProc: My abort msg", __FILE__,__LINE__);
 */
 
-extern procedure CantHappenForExport (
-		Card32 errID);
+extern procedure CantHappenForExport(
+    Card32 errID);
 
 /* 
   This is called by the CantHappenMsg, CantHappenMsg1, CantHappenMsg2 and
@@ -176,14 +182,13 @@ p  Note:
      CantHappenForExport(PSLIB_MUMBLE_ERR);
 */
 
-
 #if (ANSI_C)
-extern procedure AssertForANSIDevelop (
-                 Card32         errID,
-		 readonly char* pMessage,
-		 readonly char* pPgmFileName,
- 		 int            pgmLineNum,
-		 readonly char* pAssertCond); 
+extern procedure AssertForANSIDevelop(
+    Card32 errID,
+    readonly char* pMessage,
+    readonly char* pPgmFileName,
+    int pgmLineNum,
+    readonly char* pAssertCond);
 /* 
   This is called by the Assert and DebugAssert macros, when STAGE == DEVELOP 
   and an ANSI compiler is used. It is passed a programmer-generated errID and
@@ -197,11 +202,11 @@ extern procedure AssertForANSIDevelop (
 */
 #else  /* (ANSI_C) */
 
-extern procedure AssertForNonANSIDevelop (
-                  Card32         errID,
-		  readonly char* pMessage,
-		  readonly char* pPgmFileName,
-		  int            pgmLineNum);
+extern procedure AssertForNonANSIDevelop(
+    Card32 errID,
+    readonly char* pMessage,
+    readonly char* pPgmFileName,
+    int pgmLineNum);
 
 /* 
   This is called by the Assert and DebugAssert macros, when STAGE == DEVELOP
@@ -216,8 +221,8 @@ extern procedure AssertForNonANSIDevelop (
 */
 #endif /* (ANSI_C) */
 
-extern procedure AssertForExport (
-                 Card32 errID);
+extern procedure AssertForExport(
+    Card32 errID);
 
 /* 
   This is called by the Assert macro when STAGE == EXPORT, passing the
@@ -227,149 +232,143 @@ extern procedure AssertForExport (
 /*----------------------------------------------------------------------*/
 /*  IN-LINE PROCEDURES -- for new CantHappenMsg, AssertMsg, DebugAssertMsg */
 /*----------------------------------------------------------------------*/
-				/* Use these for New Development */
+/* Use these for New Development */
 /*-------------------------------------------------------------------------*/
-				/* AssertMsg Macro */
+/* AssertMsg Macro */
 #if (STAGE == DEVELOP)
 #if (ANSI_C)
-#define AssertMsg(cond,errID,msg) \
-  ((void)((cond) || \
-	   (AssertForANSIDevelop(errID,msg, __FILE__,__LINE__, #cond), 0) ))
- 				/* ANSI DEVELOP AssertMsg */ 
-#else /* not ANSI */ 
-#define AssertMsg(cond,errID,msg) \
-  ((void)((cond) || \
-	   (AssertForNonANSIDevelop(errID,msg, __FILE__, __LINE__), 0) ))
-				/* non_ANSI DEVELOP AssertMsg */ 
-#endif /* (ANSI_C) */ 
+#define AssertMsg(cond, errID, msg) \
+    ((void)((cond) ||               \
+            (AssertForANSIDevelop(errID, msg, __FILE__, __LINE__, #cond), 0)))
+/* ANSI DEVELOP AssertMsg */
+#else /* not ANSI */
+#define AssertMsg(cond, errID, msg) \
+    ((void)((cond) ||               \
+            (AssertForNonANSIDevelop(errID, msg, __FILE__, __LINE__), 0)))
+/* non_ANSI DEVELOP AssertMsg */
+#endif /* (ANSI_C) */
+#else  /* (STAGE == DEVELOP) */
+#define AssertMsg(cond, errID, msg) \
+    ((void)((cond) ||               \
+            (AssertForExport(errID), 0))) /* EXPORT AssertMsg */
+#endif                                    /* (STAGE == DEVELOP) */
+
+/*-------------------------------------------------------------------------*/
+/* DebugAssertMsg Macro */
+#if (STAGE == DEVELOP)
+#if (ANSI_C)
+#define DebugAssertMsg(cond, errID, msg) \
+    ((void)((cond) ||                    \
+            (AssertForANSIDevelop(errID, msg, __FILE__, __LINE__, #cond), 0)))
+/* ANSI DEVELOP DebugAssertMsg */
+#else /* not ANSI */
+#define DebugAssertMsg(cond, errID, msg) \
+    ((void)((cond) ||                    \
+            (AssertForNonANSIDevelop(errID, msg, __FILE__, __LINE__), 0)))
+/* non_ANSI DEVELOP DebugAssertMsg */
+#endif                                   /* (ANSI_C) */
+#else                                    /* (STAGE == DEVELOP) */
+#define DebugAssertMsg(cond, errID, msg) /* No-op if not DEVELOP stage */
+#endif                                   /* (STAGE == DEVELOP) */
+/*-------------------------------------------------------------------------*/
+/* CantHappenMsg Macro */
+
+#if (STAGE == DEVELOP)
+#define CantHappenMsg(errID, msg) \
+    CantHappenForDevelop(errID, msg, __FILE__, __LINE__)
+/* DEVELOP Cant Happen */
 #else /* (STAGE == DEVELOP) */
-#define AssertMsg(cond,errID,msg) \
-  ((void)((cond) || \
-	   (AssertForExport(errID), 0) )) /* EXPORT AssertMsg */
-#endif /* (STAGE == DEVELOP) */
-
+#define CantHappenMsg(errID, msg) \
+    CantHappenForExport(errID) /* EXPORT Cant Happen */
+#endif                         /* (STAGE == DEVELOP) */
 
 /*-------------------------------------------------------------------------*/
-				/* DebugAssertMsg Macro */
+/* CantHappenMsg1 Macro */
 #if (STAGE == DEVELOP)
-#if (ANSI_C)
-#define DebugAssertMsg(cond,errID,msg) \
-  ((void)((cond) || \
-	   (AssertForANSIDevelop(errID,msg, __FILE__, __LINE__, #cond), 0) ))
-				/* ANSI DEVELOP DebugAssertMsg */ 
-#else /* not ANSI */ 
-#define DebugAssertMsg(cond,errID,msg) \
-  ((void)((cond) || \
-	   (AssertForNonANSIDevelop(errID,msg, __FILE__,__LINE__), 0) ))
- 				/* non_ANSI DEVELOP DebugAssertMsg */ 
-#endif /* (ANSI_C) */ 
-#else /* (STAGE == DEVELOP) */ 
-#define DebugAssertMsg(cond,errID,msg)	/* No-op if not DEVELOP stage */ 
-#endif /* (STAGE == DEVELOP) */
+#define CantHappenMsg1(errID, format, v1) \
+    CantHappenPrintf(__FILE__, __LINE__, errID, format, v1)
+/* DEVELOP Cant Happen */
+#else /* (STAGE == DEVELOP) */
+#define CantHappenMsg1(errID, format, v1) \
+    CantHappenForExport(errID) /* EXPORT Cant Happen */
+#endif                         /* (STAGE == DEVELOP) */
 /*-------------------------------------------------------------------------*/
-				/* CantHappenMsg Macro */
-
-#if (STAGE == DEVELOP) 
-#define CantHappenMsg(errID,msg) \
-  CantHappenForDevelop(errID,msg, __FILE__,__LINE__)
-				/* DEVELOP Cant Happen */
-#else /* (STAGE == DEVELOP) */ 
-#define CantHappenMsg(errID,msg) \
-  CantHappenForExport(errID)	/* EXPORT Cant Happen */ 
-#endif /* (STAGE == DEVELOP) */
-
+/* CantHappenMsg2 Macro */
+#if (STAGE == DEVELOP)
+#define CantHappenMsg2(errID, format, v1, v2) \
+    CantHappenPrintf(__FILE__, __LINE__, errID, format, v1, v2)
+/* DEVELOP Cant Happen */
+#else /* (STAGE == DEVELOP) */
+#define CantHappenMsg2(errID, format, v1, v2) \
+    CantHappenForExport(errID) /* EXPORT Cant Happen */
+#endif                         /* (STAGE == DEVELOP) */
 /*-------------------------------------------------------------------------*/
-				/* CantHappenMsg1 Macro */ 
-#if (STAGE == DEVELOP) 
-#define CantHappenMsg1(errID,format,v1) \
-  CantHappenPrintf(__FILE__, __LINE__, errID, format, v1)
-				/* DEVELOP Cant Happen */ 
-#else /* (STAGE == DEVELOP) */ 
-#define CantHappenMsg1(errID,format,v1) \
-  CantHappenForExport(errID)	/* EXPORT Cant Happen */ 
-#endif /* (STAGE == DEVELOP) */
-/*-------------------------------------------------------------------------*/
-				/* CantHappenMsg2 Macro */ 
-#if (STAGE == DEVELOP) 
-#define CantHappenMsg2(errID,format,v1,v2) \
-  CantHappenPrintf(__FILE__, __LINE__, errID, format, v1,v2)
-				/* DEVELOP Cant Happen */ 
-#else /* (STAGE == DEVELOP) */ 
-#define CantHappenMsg2(errID,format,v1,v2) \
-  CantHappenForExport(errID)	/* EXPORT Cant Happen */ 
-#endif /* (STAGE == DEVELOP) */
-/*-------------------------------------------------------------------------*/
-				/* CantHappenMsg3 Macro */ 
-#if (STAGE == DEVELOP) 
-#define CantHappenMsg3(errID,format,v1,v2,v3) \
-  CantHappenPrintf(__FILE__, __LINE__, errID, format, v1,v2,v3)
-				/* DEVELOP Cant Happen */ 
-#else /* (STAGE == DEVELOP) */ 
-#define CantHappenMsg3(errID,format,v1,v2,v3) \
-  CantHappenForExport(errID)	/* EXPORT Cant Happen */ 
-#endif /* (STAGE == DEVELOP) */
+/* CantHappenMsg3 Macro */
+#if (STAGE == DEVELOP)
+#define CantHappenMsg3(errID, format, v1, v2, v3) \
+    CantHappenPrintf(__FILE__, __LINE__, errID, format, v1, v2, v3)
+/* DEVELOP Cant Happen */
+#else /* (STAGE == DEVELOP) */
+#define CantHappenMsg3(errID, format, v1, v2, v3) \
+    CantHappenForExport(errID) /* EXPORT Cant Happen */
+#endif                         /* (STAGE == DEVELOP) */
 /*-------------------------------------------------------------------------*/
 
 /*----------------------------------------------------------------------*/
 /*  IN-LINE PROCEDURES -- for old CantHappen, Assert, DebugAssert */
 /*----------------------------------------------------------------------*/
-				/* For Backward Compatibility;
+/* For Backward Compatibility;
 				   These calls are planned to be eliminated,
 				   after the conversion to the new facilities
 				   (which support messages, error numbers and
 				   which provide source filename and line
 				   numbers) are in full use. */
 /*-------------------------------------------------------------------------*/
-				/* CantHappen() */
-#if (STAGE == DEVELOP) 
-#define CantHappen() \
-  CantHappenForDevelop((Card32)0,NULL, __FILE__,__LINE__)
-				/* DEVELOP Cant Happen */
-#else /* (STAGE == DEVELOP) */ 
-#define CantHappen() \
-  CantHappenForExport((Card32)0)	/* EXPORT Cant Happen */ 
-#endif /* (STAGE == DEVELOP) */
-/*-------------------------------------------------------------------------*/
-				/* Assert(cond) */
+/* CantHappen() */
 #if (STAGE == DEVELOP)
-#if (ANSI_C)
-#define Assert(cond) \
-  ((void)((cond) || \
-	   (AssertForANSIDevelop((Card32)0,NULL, __FILE__,__LINE__, #cond), 0) ))
- 				/* ANSI DEVELOP Assert */ 
-#else /* not ANSI */ 
-#define Assert(cond) \
-  ((void)((cond) || \
-	   (AssertForNonANSIDevelop((Card32)0,NULL, __FILE__, __LINE__), 0) ))
-				/* non_ANSI DEVELOP Assert */ 
-#endif /* (ANSI_C) */ 
+#define CantHappen() \
+    CantHappenForDevelop((Card32)0, NULL, __FILE__, __LINE__)
+/* DEVELOP Cant Happen */
 #else /* (STAGE == DEVELOP) */
-#define Assert(cond) \
-  ((void)((cond) || \
-	   (CantHappenForExport((Card32)0), 0) )) /* EXPORT Assert */
-#endif /* (STAGE == DEVELOP) */
+#define CantHappen() \
+    CantHappenForExport((Card32)0) /* EXPORT Cant Happen */
+#endif                             /* (STAGE == DEVELOP) */
 /*-------------------------------------------------------------------------*/
-				/* DebugAssert(cond) */
+/* Assert(cond) */
+#if (STAGE == DEVELOP)
+#if (ANSI_C)
+#define Assert(cond)  \
+    ((void)((cond) || \
+            (AssertForANSIDevelop((Card32)0, NULL, __FILE__, __LINE__, #cond), 0)))
+/* ANSI DEVELOP Assert */
+#else /* not ANSI */
+#define Assert(cond)  \
+    ((void)((cond) || \
+            (AssertForNonANSIDevelop((Card32)0, NULL, __FILE__, __LINE__), 0)))
+/* non_ANSI DEVELOP Assert */
+#endif /* (ANSI_C) */
+#else  /* (STAGE == DEVELOP) */
+#define Assert(cond)  \
+    ((void)((cond) || \
+            (CantHappenForExport((Card32)0), 0))) /* EXPORT Assert */
+#endif                                            /* (STAGE == DEVELOP) */
+/*-------------------------------------------------------------------------*/
+/* DebugAssert(cond) */
 #if (STAGE == DEVELOP)
 #if (ANSI_C)
 #define DebugAssert(cond) \
-  ((void)((cond) || \
-	   (AssertForANSIDevelop((Card32)0,NULL, __FILE__, __LINE__, #cond), 0) ))
-				/* ANSI DEVELOP DebugAssert */ 
-#else /* not ANSI */ 
+    ((void)((cond) ||     \
+            (AssertForANSIDevelop((Card32)0, NULL, __FILE__, __LINE__, #cond), 0)))
+/* ANSI DEVELOP DebugAssert */
+#else /* not ANSI */
 #define DebugAssert(cond) \
-  ((void)((cond) || \
-	   (AssertForNonANSIDevelop((Card32)0,NULL, __FILE__,__LINE__), 0) ))
- 				/* non_ANSI DEVELOP DebugAssert */ 
-#endif /* (ANSI_C) */ 
-#else /* (STAGE == DEVELOP) */ 
-#define DebugAssert(cond)	/* No-op if not DEVELOP stage */ 
-#endif /* (STAGE == DEVELOP) */
+    ((void)((cond) ||     \
+            (AssertForNonANSIDevelop((Card32)0, NULL, __FILE__, __LINE__), 0)))
+/* non_ANSI DEVELOP DebugAssert */
+#endif                    /* (ANSI_C) */
+#else                     /* (STAGE == DEVELOP) */
+#define DebugAssert(cond) /* No-op if not DEVELOP stage */
+#endif                    /* (STAGE == DEVELOP) */
 /*-------------------------------------------------------------------------*/
 
-
-#endif  /* CANTHAPPEN_H */
-
-
-
-
+#endif /* CANTHAPPEN_H */

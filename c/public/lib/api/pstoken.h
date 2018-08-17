@@ -1,12 +1,13 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef PSTOKEN_H
 #define PSTOKEN_H
 
 #include "ctlshare.h"
 
-#define PST_VERSION CTL_MAKE_VERSION(2,0,9)
+#define PST_VERSION CTL_MAKE_VERSION(2, 0, 9)
 
 #ifdef __cplusplus
 extern "C" {
@@ -114,30 +115,29 @@ int pstRead(pstCtx h, size_t count, char **ptr);
    in the input stream, charstrings, for example. This function returns 0 if
    successful or an error code otherwise. */
 
-typedef enum
-    {
-    pstInteger,     /* Integer number */                            
-    pstReal,        /* Real number */                               
-    pstLiteral,     /* /... */                                      
-    pstImmediate,   /* //... */                                     
-    pstString,      /* ( ... ) */                                   
-    pstHexString,   /* < ... > */                                   
-    pstASCII85,     /* <~ ... ~> */                                 
-    pstDictionary,  /* << ... >> */                                 
-    pstArray,       /* [ ... ] */                                   
-    pstProcedure,   /* { ... } */                                   
-    pstOperator,    /* Executable name, i.e. not one of the above */
-    pstDocType,     /* %!... (first line only) */                   
+typedef enum {
+    pstInteger,    /* Integer number */
+    pstReal,       /* Real number */
+    pstLiteral,    /* /... */
+    pstImmediate,  /* / /... */  /* really double slash - space between for cpplint */
+    pstString,     /* ( ... ) */
+    pstHexString,  /* < ... > */
+    pstASCII85,    /* <~ ... ~> */
+    pstDictionary, /* << ... >> */
+    pstArray,      /* [ ... ] */
+    pstProcedure,  /* { ... } */
+    pstOperator,   /* Executable name, i.e. not one of the above */
+    pstDocType,    /* %!... (first line only) */
     pstTokenCnt
-    } pstType;
+} pstType;
 
 /* Input token */
 typedef struct
-    {
+{
     pstType type;
     long length;
     char *value;
-    } pstToken;
+} pstToken;
 
 /* Several functions use the pstToken data type to describe a single PostScript
    token. A token has a type, specified by the type field, which holds one of
@@ -192,7 +192,7 @@ char *pstConvLiteral(pstCtx h, pstToken *token, long *length);
 /* pstConvLiteral() forms a new string by removing the leading / from the
    literal "token" parameter and returns a new pointer and length accordingly.
    If the token isn't a literal, NULL is returned. */
- 
+
 uint32_t pstConvHexString(pstCtx h, pstToken *token);
 
 /* pstConvHexString() converts the hexadecimal string "token" parameter to an
@@ -235,13 +235,12 @@ int pstFree(pstCtx h);
 /* pstFree() destroys the library context and all the resources allocated to
    it. It must be the last function called by a client of the library. */
 
-enum
-    {
+enum {
 #undef CTL_DCL_ERR
-#define CTL_DCL_ERR(name,string)    name,
+#define CTL_DCL_ERR(name, string) name,
 #include "psterr.h"
     pstErrCount
-    };
+};
 
 /* Library functions return either 0 to indicate success or a positive non-zero
    error code that is defined in the above enumeration that is built from
