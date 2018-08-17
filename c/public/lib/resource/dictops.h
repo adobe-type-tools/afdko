@@ -1,12 +1,13 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef DICTOPS_H
 #define DICTOPS_H
 
 /*
  * CFF dictionary operator definitions.
- * 
+ *
  * There are several kinds of fonts that are supported by CFF that have
  * different dict organizations:
  *
@@ -15,7 +16,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
  * name-keyed       x       x
  * synthetic        x
  * CID-keyed        x                   x       x
- * chameleon        x       
+ * chameleon        x
  *
  * The Top dict, so named because of its position in the dictionary hierarchy,
  * is also known as the Font dict in all but CID-keyed fonts. CID-keyed fonts
@@ -25,13 +26,13 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
  * font.
  *
  * This file defines the dict operators that can appear in these dicts. In
- * order to aid font recognition and parsing, the following restrictions are 
+ * order to aid font recognition and parsing, the following restrictions are
  * imposed upon dict op ordering:
  *
  * Synthetic/top:   Must begin with cff_SyntheticBase.
  * CID/top:         Must begin with cff_ROS.
  * Chameleon/top:   Must begin with cff_Chameleon.
- * Private/PD:      cff_OtherBlues must follow cff_BlueValues and 
+ * Private/PD:      cff_OtherBlues must follow cff_BlueValues and
  *                  cff_FamilyOtherBlues must follow cff_FamilyBlues.
  *
  * If the top dict doesn't begin with one of the operators listed above it is
@@ -44,44 +45,44 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
  */
 
 /* One byte operators (0-31) */
-#define cff_version                 0   /* Top/FD */
-#define cff_Notice                  1   /* Top/FD */
-#define cff_FullName                2   /* Top/FD */
-#define cff_FamilyName              3   /* Top/FD */
-#define cff_Weight                  4   /* Top/FD */
-#define cff_FontBBox                5   /* Top/FD */
-#define cff_BlueValues              6   /* Private/PD (empty array) */
-#define cff_OtherBlues              7   /* Private/PD */
-#define cff_FamilyBlues             8   /* Private/PD */
-#define cff_FamilyOtherBlues        9   /* Private/PD */
-#define cff_StdHW                   10  /* Private/PD */
-#define cff_StdVW                   11  /* Private/PD */
-#define cff_escape                  12  /* All. Shared with T2 op */
-#define cff_UniqueID                13  /* Top/FD */
-#define cff_XUID                    14  /* Top/FD */
-#define cff_charset                 15  /* Top/FD (0) */
-#define cff_Encoding                16  /* Top/FD (0) */
-#define cff_CharStrings             17  /* Top/FD */
-#define cff_Private                 18  /* Top/FD */
-#define cff_Subrs                   19  /* Private/PD */
-#define cff_defaultWidthX           20  /* Private/PD (0) */
-#define cff_nominalWidthX           21  /* Private/PD (0) */
-#define cff_vsindex                 22
-#define cff_blend                   23
-#define cff_VarStore                24
-#define cff_maxstack                25
-#define cff_reserved26              26
-#define cff_reserved27              27
-#define cff_shortint                28  /* All. Shared with T2 ops */
-#define cff_longint                 29  /* All */
-#define cff_BCD                     30  /* All */  
-#define cff_BlendLE                 31
+#define cff_version                   0  /* Top/FD */
+#define cff_Notice                    1  /* Top/FD */
+#define cff_FullName                  2  /* Top/FD */
+#define cff_FamilyName                3  /* Top/FD */
+#define cff_Weight                    4  /* Top/FD */
+#define cff_FontBBox                  5  /* Top/FD */
+#define cff_BlueValues                6  /* Private/PD (empty array) */
+#define cff_OtherBlues                7  /* Private/PD */
+#define cff_FamilyBlues               8  /* Private/PD */
+#define cff_FamilyOtherBlues          9  /* Private/PD */
+#define cff_StdHW                    10  /* Private/PD */
+#define cff_StdVW                    11  /* Private/PD */
+#define cff_escape                   12  /* All. Shared with T2 op */
+#define cff_UniqueID                 13  /* Top/FD */
+#define cff_XUID                     14  /* Top/FD */
+#define cff_charset                  15  /* Top/FD (0) */
+#define cff_Encoding                 16  /* Top/FD (0) */
+#define cff_CharStrings              17  /* Top/FD */
+#define cff_Private                  18  /* Top/FD */
+#define cff_Subrs                    19  /* Private/PD */
+#define cff_defaultWidthX            20  /* Private/PD (0) */
+#define cff_nominalWidthX            21  /* Private/PD (0) */
+#define cff_vsindex                  22
+#define cff_blend                    23
+#define cff_VarStore                 24
+#define cff_maxstack                 25
+#define cff_reserved26               26
+#define cff_reserved27               27
+#define cff_shortint                 28  /* All. Shared with T2 ops */
+#define cff_longint                  29  /* All */
+#define cff_BCD                      30  /* All */
+#define cff_BlendLE                  31
 #define cff_reserved255             255
 #define cff_LAST_ONE_BYTE_OP        cff_BlendLE
 
 /* Make escape operator value; may be redefined to suit implementation */
 #ifndef cff_ESC
-#define cff_ESC(op)                 (cff_escape<<8|(op))
+#define cff_ESC(op)                 (cff_escape << 8 | (op))
 #endif
 
 /* Two byte operators */
@@ -109,7 +110,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define cff_PostScript              cff_ESC(21) /* Private/PD */
 #define cff_BaseFontName            cff_ESC(22) /* Top/FD */
 #define cff_BaseFontBlend           cff_ESC(23) /* Top/FD (instance UDV) */
-#define cff_numMasters           cff_ESC(24)
+#define cff_numMasters              cff_ESC(24)
 #define cff_reservedESC25           cff_ESC(25)
 #define cff_reservedESC26           cff_ESC(26)
 #define cff_reservedESC27           cff_ESC(27)
