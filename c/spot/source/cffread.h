@@ -1,13 +1,14 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. *//***********************************************************************/
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef CFFREAD_H
 #define CFFREAD_H
 
-#include <stddef.h>             /* For size_t */
+#include <stddef.h> /* For size_t */
 #include "numtypes.h"
 
-#define CFF_VERSION 0x010005    /* Library version */
+#define CFF_VERSION 0x010005 /* Library version */
 #define MAX_XUID_SIZE 50
 
 /* Compact Font Format (CFF) Parser Library
@@ -65,22 +66,20 @@ cffCtx cffNew(cffStdCallbacks *cb, long offset, unsigned long cffreadFlags);
 #define CFFREAD_SMALL_FONT 1 /* parse using Small Font rules */
 
 /* Message types (for use with message callback) */
-enum
-    {
+enum {
     cffWARNING = 1,
     cffERROR,
     cffFATAL
-    };
+};
 
-struct cffStdCallbacks_
-    {
+struct cffStdCallbacks_ {
     void *ctx;
 
     /* [Optional] ctx is a client context that is passed back to the client
        as the first parameter to the callback functions. It is intended to be
        used in multi-threaded environments. */
-                    
-    void (*fatal)      (void *ctx);
+
+    void (*fatal)(void *ctx);
 
     /* [Required] fatal() is an exception handler that is called if an
        irrecoverable error is encountered during parsing. The current context
@@ -88,15 +87,15 @@ struct cffStdCallbacks_
        called. This function must NOT return and the client should use
        longjmp() to return control to a point prior to calling cffNew(). */
 
-    void (*message)    (void *ctx, int type, char *text);
-                    
+    void (*message)(void *ctx, int type, char *text);
+
     /* [Optional] message() simply passes a message back to the client as a
        null-terminated string. Three message types are supported: cffWARNING,
        cffERROR, and cffFATAL. A client is free to handle messages in any
        manner they choose. */
 
-    void *(*malloc)    (void *ctx, size_t size);
-    void (*free)       (void *ctx, void *ptr);
+    void *(*malloc)(void *ctx, size_t size);
+    void (*free)(void *ctx, void *ptr);
 
     /* [Required] The malloc() and free() functions manage memory in the same
        manner as the Standard C Library functions of the same name. (This means
@@ -105,7 +104,7 @@ struct cffStdCallbacks_
        may arise. Specifically, a client must ensure requested memory is
        available and must never return a NULL pointer from malloc(). */
 
-    char *(*cffSeek)   (void *ctx, long offset, long *count);
+    char *(*cffSeek)(void *ctx, long offset, long *count);
 
     /* [Required] cffSeek() is called in order to seek to an absolute position
        in the input data specified by the offset parameter. It returns a
@@ -114,8 +113,8 @@ struct cffStdCallbacks_
        should protect itself by checking that the offset lies within the data
        region. (A file-based client might map this function to a call to
        fseek() followed by fread().) */
-                    
-    char *(*cffRefill) (void *ctx, long *count);
+
+    char *(*cffRefill)(void *ctx, long *count);
 
     /* [Required] cffRefill() is called in order to refill the library's input
        buffer. It returns a pointer to the new data and the count of the number
@@ -126,9 +125,9 @@ struct cffStdCallbacks_
        that isn't too small. For file-based clients a buffer size of BUFSIZ
        would be a good choice because it will match the underlying low-level
        input functions. */
-    };
+};
 
-typedef Int32 cffFixed;          /* 16.16 fixed point */
+typedef Int32 cffFixed; /* 16.16 fixed point */
 
 void cffSetUDV(cffCtx h, int nAxes, cffFixed *UDV);
 void cffSetWV(cffCtx h, int nMasters, cffFixed *WV);
@@ -158,31 +157,30 @@ cffFontInfo *cffGetFontInfo(cffCtx h);
 #include "numtypes.h"
 
 typedef Card16 cffSID;  /* String identifier */
-typedef Int16 cffFWord;         /* Font metric in em-relative units */
+typedef Int16 cffFWord; /* Font metric in em-relative units */
 
-#define CFF_SID_UNDEF   0xffff  /* SID of undefined string */
-#define CFF_UNENC       (-1)    /* Unencoded glyph code */
+#define CFF_SID_UNDEF 0xffff /* SID of undefined string */
+#define CFF_UNENC (-1)       /* Unencoded glyph code */
 
-typedef struct              /* Bounding box */
-    {
+typedef struct /* Bounding box */
+{
     cffFWord left;
     cffFWord bottom;
     cffFWord right;
     cffFWord top;
-    } cffBBox;
+} cffBBox;
 
-struct cffFontInfo_
+struct cffFontInfo_ {
+    struct /* PostScript font name */
     {
-    struct                  /* PostScript font name */
-        {
         Int16 length;
         Int32 offset;
-        } FontName;
-    cffSID version;         /* Optional */
-    cffSID Notice;          /* Optional */
-    cffSID Copyright;       /* Optional */
-    cffSID FamilyName;      /* Optional */
-    cffSID FullName;        /* Optional */
+    } FontName;
+    cffSID version;    /* Optional */
+    cffSID Notice;     /* Optional */
+    cffSID Copyright;  /* Optional */
+    cffSID FamilyName; /* Optional */
+    cffSID FullName;   /* Optional */
     cffBBox FontBBox;
     Card16 unitsPerEm;
     cffFWord isFixedPitch;
@@ -190,47 +188,47 @@ struct cffFontInfo_
     cffFWord UnderlinePosition;
     cffFWord UnderlineThickness;
     Card32 UniqueID;
-    Card32 XUID[MAX_XUID_SIZE+1];
-    Int16 Encoding;         /* Predefined or custom encoding (see below) */
-    Int16 charset;          /* Predefined or custom charset (see below) */
+    Card32 XUID[MAX_XUID_SIZE + 1];
+    Int16 Encoding; /* Predefined or custom encoding (see below) */
+    Int16 charset;  /* Predefined or custom charset (see below) */
     struct
-        {
-        Int16 nAxes;    
+    {
+        Int16 nAxes;
         Int16 nMasters;
         Int16 lenBuildCharArray;
         cffSID NDV;
         cffSID CDV;
         cffFixed UDV[TX_MAX_AXES]; /* Default User design vector */
         cffSID axisTypes[TX_MAX_AXES];
-        } mm;
-    struct                  /* CID data (optional) */
-        {
+    } mm;
+    struct /* CID data (optional) */
+    {
         double version;
         cffSID registry;
         cffSID ordering;
         short supplement;
-        struct              /* Vertical origin vector */
-            {
+        struct /* Vertical origin vector */
+        {
             cffFWord x;
             cffFWord y;
-            } vOrig;
-        } cid;
+        } vOrig;
+    } cid;
     Card16 nGlyphs; /* Glyph count */
-    };
+};
 
-enum                        /* Encoding type */
-    {
+enum /* Encoding type */
+{
     CFF_STD_ENC,
     CFF_EXP_ENC,
     CFF_CUSTOM_ENC
-    };
-enum                        /* Charset types */
-    {
+};
+enum /* Charset types */
+{
     CFF_ISO_CS,
     CFF_EXP_CS,
     CFF_EXPSUB_CS,
     CFF_CUSTOM_CS
-    };
+};
 
 /* Optional unset cffSID fields are indicated with an SID value of
    CFF_SID_UNDEF. A CID font is indicated by having a defined cid.registry SID
@@ -250,21 +248,21 @@ cffGlyphInfo *cffGetGlyphInfo(cffCtx h, unsigned gid, cffPathCallbacks *cb);
    the cb argument should be set to NULL. */
 
 typedef struct cffSupCode_ cffSupCode;
-struct cffSupCode_          /* Supplementary encoding */
-    {
+struct cffSupCode_ /* Supplementary encoding */
+{
     cffSupCode *next;
     unsigned char code;
-    };
+};
 
-struct cffGlyphInfo_        /* Glyph information */
-    {
-    Card16 id;      /* SID/CID */
-    Int16 code;             /* Encoding (unencoded=-1) */
-    cffFWord hAdv;          /* Horizontal advance width */
-    cffFWord vAdv;          /* Vertical advance width */
-    cffBBox bbox;           /* Bounding box */
-    cffSupCode *sup;        /* Supplementary encodings (linked list) */
-    };
+struct cffGlyphInfo_ /* Glyph information */
+{
+    Card16 id;       /* SID/CID */
+    Int16 code;      /* Encoding (unencoded=-1) */
+    cffFWord hAdv;   /* Horizontal advance width */
+    cffFWord vAdv;   /* Vertical advance width */
+    cffBBox bbox;    /* Bounding box */
+    cffSupCode *sup; /* Supplementary encodings (linked list) */
+};
 
 /* The id field is interpreted as a CID for CIDFonts and an SID otherwise. The
    sup field, when non-NULL, points to a chain of supplementary encodings for
@@ -297,48 +295,47 @@ struct cffGlyphInfo_        /* Glyph information */
 
 #define CFF_MAX_MASK_BYTES (T2_MAX_STEMS / 8) /* Maximum hint mask bytes */
 
-struct cffPathCallbacks_
-    {
-    void (*newpath)    (void *ctx);
+struct cffPathCallbacks_ {
+    void (*newpath)(void *ctx);
 
-/* [optional] newpath() is called immediately before the path construction
+    /* [optional] newpath() is called immediately before the path construction
    callbacks: moveto(), lineto(), and curveto(), are called for a new subpath.
-   */ 
+   */
 
-    void (*moveto)     (void *ctx, cffFixed x1, cffFixed y1);
+    void (*moveto)(void *ctx, cffFixed x1, cffFixed y1);
 
-/* [optional] moveto() is called at the beginning of a new subpath in order to
+    /* [optional] moveto() is called at the beginning of a new subpath in order to
    set the current point to (x1, y1). */
 
-    void (*lineto)     (void *ctx, cffFixed x1, cffFixed y1);
+    void (*lineto)(void *ctx, cffFixed x1, cffFixed y1);
 
-/* [optional] lineto() is called to add a line segment to the current path from
+    /* [optional] lineto() is called to add a line segment to the current path from
    the current point to (x1, y1). The current point becomes (x1, y1). */
 
-    void (*curveto)    (void *ctx, int flex,
-                        cffFixed x1, cffFixed y1, 
-                        cffFixed x2, cffFixed y2, 
-                        cffFixed x3, cffFixed y3);
+    void (*curveto)(void *ctx, int flex,
+                    cffFixed x1, cffFixed y1,
+                    cffFixed x2, cffFixed y2,
+                    cffFixed x3, cffFixed y3);
 
-/* [optional] curveto() is called to add a cubic bezier curve segment to the
+    /* [optional] curveto() is called to add a cubic bezier curve segment to the
    current path from the current point guided by control points (x1, y1) and
    (x2, y2) and terminating at point (x3, y3). The current point becomes (x3,
    y3). The flex argument is set to 1 if the curve is part of a flex feature
    and set to 0 otherwise. A flex feature consists of two consecutive curveto()
    calls with their flex arguments set to 1. */
 
-    void (*closepath)  (void *ctx);
+    void (*closepath)(void *ctx);
 
-/* [optional] closepath() is called to signal the end of a subpath. */
+    /* [optional] closepath() is called to signal the end of a subpath. */
 
-    void (*endchar)    (void *ctx);
+    void (*endchar)(void *ctx);
 
-/* [optional] endchar() is called to signal the end of the path definition of
+    /* [optional] endchar() is called to signal the end of the path definition of
    the current glyph. */
 
-    void (*hintstem)   (void *ctx, int vert, cffFixed edge0, cffFixed edge1);
+    void (*hintstem)(void *ctx, int vert, cffFixed edge0, cffFixed edge1);
 
-/* [optional] hintstem() is called before the first subpath to indicate a hint
+    /* [optional] hintstem() is called before the first subpath to indicate a hint
    stem that will be activated by a subsequent hintmask in the current glyph.
    Typically, multiple hint stems are used to construct a stem list for the
    current glyph. The vert argument is set to 1 to indicate a vertical stem and
@@ -351,9 +348,9 @@ struct cffPathCallbacks_
    by negative stem widths of -20 for a right or top edge and -21 for a left or
    bottom edge. */
 
-void (*hintmask) (void *ctx, int cntr, int n, char mask[CFF_MAX_MASK_BYTES]);
+    void (*hintmask)(void *ctx, int cntr, int n, char mask[CFF_MAX_MASK_BYTES]);
 
-/* [optional] hintmask() is called to establish a new set of stem hints. The
+    /* [optional] hintmask() is called to establish a new set of stem hints. The
    active stem hints are specified by bits set to 1 and inactive stem hints are
    specified by bits set to 0 in the mask argument. The number of valid data
    bytes in the mask is exactly the number needed to represent the number of
@@ -361,8 +358,7 @@ void (*hintmask) (void *ctx, int cntr, int n, char mask[CFF_MAX_MASK_BYTES]);
    passed in argument n and is fixed for all hintmask functions within a single
    glyph. The cntr argument is set to 1 to indicate that the stem hints are to
    be used for counter control and set to 0 to indicate stem control. */
- 
-   };
+};
 
 void cffGetGlyphWidth(cffCtx h, unsigned gid, cffFWord *hAdv, cffFWord *vAdv);
 
@@ -371,7 +367,7 @@ void cffGetGlyphWidth(cffCtx h, unsigned gid, cffFWord *hAdv, cffFWord *vAdv);
    of parsing the entire charstring that is implicit in cffGetGlyphInfo(). hAdv
    or vAdv may be set to NULL if not needed. */
 
-void cffGetGlyphOrg(cffCtx h, unsigned gid, 
+void cffGetGlyphOrg(cffCtx h, unsigned gid,
                     Int16 *id, short *code, cffSupCode **sup);
 
 /* cffGetGlyphOrg() provides quick access to the SID/CID and the encoding(s) of
@@ -416,7 +412,7 @@ int cffExecLocalMetric(cffCtx h, char *cstr, long length, cffFixed *result);
    useful in situations where the charstring is not within the CFF font
    itself. */
 
-int cffGetString(cffCtx h, 
+int cffGetString(cffCtx h,
                  cffSID sid, unsigned *length, char **ptr, long *offset);
 
 /* cffGetString() provides a facility for translating a string id (SID) into a

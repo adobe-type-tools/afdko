@@ -1,9 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
-/***********************************************************************
- * SCCS Id:    @(#)opt.h	1.3
- * Changed:    3/16/95 10:41:47
- ***********************************************************************/
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef OPT_H
 #define OPT_H
@@ -427,42 +424,40 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 /* HEADER DEFINITIONS */
 
-extern char *opt_progname;  /* Basename of program path */
+extern char *opt_progname; /* Basename of program path */
 
 /* Compute number of options in option array (t) */
-#define opt_NOPTS(t) (sizeof(t)/sizeof(t[0]))
+#define opt_NOPTS(t) (sizeof(t) / sizeof(t[0]))
 
 /* Standard error codes */
-enum
-    {
-    opt_NoScanner = 1,  /* No scanner supplied (NULL was supplied) */
-    opt_Missing,        /* Missing option value */
-    opt_Format,         /* Bad option value format */
-    opt_Range,          /* Option's value out of range */
-    opt_Required,       /* Required option missing */
-    opt_Unknown,        /* Unrecognised option */
-	opt_Exclusive,		/* Mutually exclusive option confict */
-    opt_Client          /* First available client error code */
-    };
+enum {
+    opt_NoScanner = 1, /* No scanner supplied (NULL was supplied) */
+    opt_Missing,       /* Missing option value */
+    opt_Format,        /* Bad option value format */
+    opt_Range,         /* Option's value out of range */
+    opt_Required,      /* Required option missing */
+    opt_Unknown,       /* Unrecognised option */
+    opt_Exclusive,     /* Mutually exclusive option confict */
+    opt_Client         /* First available client error code */
+};
 
 typedef struct _opt_Option opt_Option;
-typedef int (opt_Scanner)(int argc, char *argv[], int argi, opt_Option *opt);
-typedef int (opt_Handler)(int error, opt_Option *opt, char *arg, void *client);
+typedef int(opt_Scanner)(int argc, char *argv[], int argi, opt_Option *opt);
+typedef int(opt_Handler)(int error, opt_Option *opt, char *arg, void *client);
 
 /* Option specification */
-struct _opt_Option
-    {
-    char *name;                 /* Option prefix */
-    opt_Scanner *scan;          /* Value scanner */
-    void *value;                /* Option value */
-    char *dflt;                 /* Default value */
-    double min;                 /* Minimum value */
-    double max;                 /* Maximum value */
-    unsigned char flags;        /* Control flags */
-#define opt_REQUIRED    (1<<0)  /* Required option */
-#define opt_COMBINED    (1<<1)  /* Can combine with others sharing prefix */
-    unsigned char length;       /* Combined option prefix length */
-    };
+struct _opt_Option {
+    char *name;               /* Option prefix */
+    opt_Scanner *scan;        /* Value scanner */
+    void *value;              /* Option value */
+    char *dflt;               /* Default value */
+    double min;               /* Minimum value */
+    double max;               /* Maximum value */
+    unsigned char flags;      /* Control flags */
+#define opt_REQUIRED (1 << 0) /* Required option */
+#define opt_COMBINED (1 << 1) /* Can combine with others sharing prefix */
+    unsigned char length;     /* Combined option prefix length */
+};
 
 /* Interface functions */
 extern int opt_Scan(int argc, char *argv[], int nOpts, opt_Option *opt,
@@ -472,16 +467,16 @@ extern int opt_Present(char *name);
 extern int opt_hasError(); /* return if an option scan error has occured. */
 
 /* Standard value scanners */
-extern opt_Scanner opt_Char;    /* (char) */
-extern opt_Scanner opt_Short;   /* (short) */
-extern opt_Scanner opt_Int;     /* (int) */
-extern opt_Scanner opt_Long;    /* (long) */
-extern opt_Scanner opt_UShort;  /* (usigned short) */
-extern opt_Scanner opt_UInt;    /* (unsigned int) */
-extern opt_Scanner opt_ULong;   /* (unsigned long) */
-extern opt_Scanner opt_Double;  /* (double) */
-extern opt_Scanner opt_String;  /* (char *) */
-extern opt_Scanner opt_Call;    /* void (*function)(void) */
-extern opt_Scanner opt_Flag;    /* no value */
+extern opt_Scanner opt_Char;   /* (char) */
+extern opt_Scanner opt_Short;  /* (short) */
+extern opt_Scanner opt_Int;    /* (int) */
+extern opt_Scanner opt_Long;   /* (long) */
+extern opt_Scanner opt_UShort; /* (usigned short) */
+extern opt_Scanner opt_UInt;   /* (unsigned int) */
+extern opt_Scanner opt_ULong;  /* (unsigned long) */
+extern opt_Scanner opt_Double; /* (double) */
+extern opt_Scanner opt_String; /* (char *) */
+extern opt_Scanner opt_Call;   /* void (*function)(void) */
+extern opt_Scanner opt_Flag;   /* no value */
 
 #endif /* OPT_H */

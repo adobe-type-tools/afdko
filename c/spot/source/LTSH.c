@@ -1,8 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. *//***********************************************************************
- * SCCS Id:    @(#)LTSH.c	1.6
- * Changed:    5/19/99 17:21:00
- ***********************************************************************/
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #include "LTSH.h"
 #include "sfnt_LTSH.h"
@@ -10,49 +8,46 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static LTSHTbl *LTSH = NULL;
 static IntX loaded = 0;
 
-void LTSHRead(LongN start, Card32 length)
-	{
-	IntX i;
+void LTSHRead(LongN start, Card32 length) {
+    IntX i;
 
-	if (loaded)
-		return;
+    if (loaded)
+        return;
 
-	LTSH = (LTSHTbl *)memNew(sizeof(LTSHTbl));
+    LTSH = (LTSHTbl *)memNew(sizeof(LTSHTbl));
 
-	SEEK_ABS(start);
+    SEEK_ABS(start);
 
-	IN1(LTSH->version);
-	IN1(LTSH->numGlyphs);
-	
-	LTSH->yPels = memNew(sizeof(LTSH->yPels[0]) * LTSH->numGlyphs);
-	for (i = 0; i < LTSH->numGlyphs; i++)
-		IN1(LTSH->yPels[i]);
-	
-	loaded = 1;
-	}
+    IN1(LTSH->version);
+    IN1(LTSH->numGlyphs);
 
-void LTSHDump(IntX level, LongN start)
-	{
-	IntX i;
+    LTSH->yPels = memNew(sizeof(LTSH->yPels[0]) * LTSH->numGlyphs);
+    for (i = 0; i < LTSH->numGlyphs; i++)
+        IN1(LTSH->yPels[i]);
 
-	DL(1, (OUTPUTBUFF, "### [LTSH] (%08lx)\n", start));
+    loaded = 1;
+}
 
-	DLu(2, "version  =", LTSH->version);
-	DLu(2, "numGlyphs=", LTSH->numGlyphs);
+void LTSHDump(IntX level, LongN start) {
+    IntX i;
 
-	DL(2, (OUTPUTBUFF, "--- yPels[index]=value\n"));
-	for (i = 0; i < LTSH->numGlyphs; i++)
-		DL(2, (OUTPUTBUFF, "[%d]=%u ", i, LTSH->yPels[i]));
-	DL(2, (OUTPUTBUFF, "\n"));
-	}
+    DL(1, (OUTPUTBUFF, "### [LTSH] (%08lx)\n", start));
 
-void LTSHFree(void)
-	{
+    DLu(2, "version  =", LTSH->version);
+    DLu(2, "numGlyphs=", LTSH->numGlyphs);
+
+    DL(2, (OUTPUTBUFF, "--- yPels[index]=value\n"));
+    for (i = 0; i < LTSH->numGlyphs; i++)
+        DL(2, (OUTPUTBUFF, "[%d]=%u ", i, LTSH->yPels[i]));
+    DL(2, (OUTPUTBUFF, "\n"));
+}
+
+void LTSHFree(void) {
     if (!loaded)
-		return;
+        return;
 
-	memFree(LTSH->yPels);
-	memFree(LTSH); LTSH = NULL;
-	loaded = 0;
-	}
-
+    memFree(LTSH->yPels);
+    memFree(LTSH);
+    LTSH = NULL;
+    loaded = 0;
+}
