@@ -1084,7 +1084,6 @@ static int CTL_CDECL cmpGlifRecs(const void* first, const void* second, void* ct
         retVal = 1;
     } else if (glifRec2->glyphOrder == ABF_UNSET_INT) {
         retVal = -1;
-    } else if (glifRec2->glyphOrder == ABF_UNSET_INT) {
     } else {
         if (glifRec1->glyphOrder > glifRec2->glyphOrder)
             retVal = 1;
