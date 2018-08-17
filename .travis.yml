@@ -59,6 +59,7 @@ matrix:
         - cpplint --recursive --quiet c/makeotf/source
         - cpplint --recursive --quiet c/mergefonts
         - cpplint --recursive --quiet c/public/lib/source
+        - cpplint --recursive --quiet c/public/lib/api
         - cpplint --recursive --quiet c/rotatefont
         - cpplint --recursive --quiet c/tx
         - cpplint --recursive --quiet c/type1
