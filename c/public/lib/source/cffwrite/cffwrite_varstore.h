@@ -13,7 +13,6 @@
 #include "cffwrite_dict.h"
 #include "varread.h"
 
-
 void cfwDictFillVarStore(cfwCtx g, DICT *dst, abfTopDict *top);
 
 #endif /* cffwrite_varstore_h */
