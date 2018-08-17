@@ -1,5 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef CTLSHARE_H
 #define CTLSHARE_H
@@ -10,7 +11,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
    stdlib.h. */
 #include <stdlib.h>
 #else
-#include <stddef.h>     /* For size_t and NULL */
+#include <stddef.h> /* For size_t and NULL */
 #endif
 
 /* CoreType Library Shared Definitions
@@ -25,13 +26,13 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
    significant byte, respectively. The most significant byte is unused and
    should be set to 0. */
 
-#define CTL_MAKE_VERSION(major,branch,minor) \
-    ((long)major<<16|branch<<8|minor)
+#define CTL_MAKE_VERSION(major, branch, minor) \
+    ((long)major << 16 | branch << 8 | minor)
 
 /* CTL_MAKE_VERSION combines the "major", "branch", and "minor" parameters into
    a single value of type long. */
 
-char* CTL_SPLIT_VERSION(char* version_buf, unsigned int version);
+char *CTL_SPLIT_VERSION(char *version_buf, unsigned int version);
 
 /* CTL_SPLIT_VERSION splits the "version" parameter into its comma-separated
    major, branch, and minor component values that may be passed to printf,
@@ -60,11 +61,10 @@ and prints this to version_buf */
 /* ---------------------------- Memory Callbacks --------------------------- */
 
 typedef struct ctlMemoryCallbacks_ ctlMemoryCallbacks;
-struct ctlMemoryCallbacks_
-    {
+struct ctlMemoryCallbacks_ {
     void *ctx;
     void *(*manage)(ctlMemoryCallbacks *cb, void *old, size_t size);
-    };
+};
 
 /* The ctlMemoryCallbacks structure specifies a single memory management
    callback function and a context.
@@ -130,20 +130,19 @@ struct ctlMemoryCallbacks_
 /* --------------------------- Stream Callbacks ---------------------------- */
 
 typedef struct ctlStreamCallbacks_ ctlStreamCallbacks;
-struct ctlStreamCallbacks_
-    {
+struct ctlStreamCallbacks_ {
     void *direct_ctx;
     void *indirect_ctx;
-    char *clientFileName; // set by clients which need to open private files.
-    void *(*open)   (ctlStreamCallbacks *cb, int id, size_t size);
-    int (*seek)     (ctlStreamCallbacks *cb, void *stream, long offset);
-    long (*tell)    (ctlStreamCallbacks *cb, void *stream);
-    size_t (*read)  (ctlStreamCallbacks *cb, void *stream, char **ptr);
-    size_t (*write) (ctlStreamCallbacks *cb,
-                     void *stream, size_t count, char *ptr); 
-    int (*status)   (ctlStreamCallbacks *cb, void *stream);
-    int (*close)    (ctlStreamCallbacks *cb, void *stream);
-    };
+    char *clientFileName;  // set by clients which need to open private files.
+    void *(*open)(ctlStreamCallbacks *cb, int id, size_t size);
+    int (*seek)(ctlStreamCallbacks *cb, void *stream, long offset);
+    long (*tell)(ctlStreamCallbacks *cb, void *stream);
+    size_t (*read)(ctlStreamCallbacks *cb, void *stream, char **ptr);
+    size_t (*write)(ctlStreamCallbacks *cb,
+                    void *stream, size_t count, char *ptr);
+    int (*status)(ctlStreamCallbacks *cb, void *stream);
+    int (*close)(ctlStreamCallbacks *cb, void *stream);
+};
 
 /* The ctlStreamCallbacks structure specifies a standard set of functions that
    perform I/O on abstract data streams. They are modeled on the Standard C
@@ -209,12 +208,12 @@ struct ctlStreamCallbacks_
    [required] status() returns the status of a stream. The returns values are
    specified by the enumerations: */
 
-enum                    /* Stream status */
-    {
-    CTL_STREAM_OK,      /* Functioning normally */
-    CTL_STREAM_ERROR,   /* Error occurred */
-    CTL_STREAM_END      /* At end-of-stream */
-    };
+enum /* Stream status */
+{
+    CTL_STREAM_OK,    /* Functioning normally */
+    CTL_STREAM_ERROR, /* Error occurred */
+    CTL_STREAM_END    /* At end-of-stream */
+};
 
 /* status() is normally called after the read() callback returned 0 in order to
    distinguish end-of-stream from a read error.
@@ -223,63 +222,62 @@ enum                    /* Stream status */
    stream. Typically, a client would release any resources associated with the
    stream. The function returns 0 on success and -1 otherwise. */
 
-enum
-    {
-    T1R_SRC_STREAM_ID,  /* t1read */
+enum {
+    T1R_SRC_STREAM_ID, /* t1read */
     T1R_TMP_STREAM_ID,
     T1R_DBG_STREAM_ID,
 
-    TTR_SRC_STREAM_ID,  /* ttread */
+    TTR_SRC_STREAM_ID, /* ttread */
     TTR_DBG_STREAM_ID,
 
-    CFR_SRC_STREAM_ID,  /* cffread */
+    CFR_SRC_STREAM_ID, /* cffread */
     CFR_DBG_STREAM_ID,
 
-    SFR_SRC_STREAM_ID,  /* sfntread (default) */
+    SFR_SRC_STREAM_ID, /* sfntread (default) */
 
-    T1W_DST_STREAM_ID,  /* t1write */
+    T1W_DST_STREAM_ID, /* t1write */
     T1W_TMP_STREAM_ID,
     T1W_DBG_STREAM_ID,
 
-    CFW_DST_STREAM_ID,  /* cffwrite */
+    CFW_DST_STREAM_ID, /* cffwrite */
     CFW_TMP_STREAM_ID,
     CFW_DBG_STREAM_ID,
 
-    PDW_DST_STREAM_ID,  /* pdfwrite */
+    PDW_DST_STREAM_ID, /* pdfwrite */
 
-    SFW_DST_STREAM_ID,  /* sfntwrite */
+    SFW_DST_STREAM_ID, /* sfntwrite */
 
-    SVW_DST_STREAM_ID,  /* svgwrite */
+    SVW_DST_STREAM_ID, /* svgwrite */
     SVW_TMP_STREAM_ID,
     SVW_DBG_STREAM_ID,
 
-    CEF_SRC_STREAM_ID,  /* cfembed */
+    CEF_SRC_STREAM_ID, /* cfembed */
     CEF_DST_STREAM_ID,
     CEF_TMP0_STREAM_ID,
     CEF_TMP1_STREAM_ID,
 
-    T1C_SRC_STREAM_ID,  /* t1cstr */
+    T1C_SRC_STREAM_ID, /* t1cstr */
 
-    T2C_SRC_STREAM_ID,  /* t2cstr */
+    T2C_SRC_STREAM_ID, /* t2cstr */
 
-	BZR_SRC_STREAM_ID,  /* bezread */
-	BZR_DBG_STREAM_ID,
+    BZR_SRC_STREAM_ID, /* bezread */
+    BZR_DBG_STREAM_ID,
 
-    SVR_SRC_STREAM_ID,  /* svgread */
+    SVR_SRC_STREAM_ID, /* svgread */
     SVR_TMP_STREAM_ID,
     SVR_DBG_STREAM_ID,
-        
+
     UFO_SRC_STREAM_ID, /* ufo read format */
     UFO_DBG_STREAM_ID,
-        
-    UFW_DST_STREAM_ID,  /* ufowrite */
+
+    UFW_DST_STREAM_ID, /* ufowrite */
     UFW_TMP_STREAM_ID,
     UFW_DBG_STREAM_ID,
 
-    CTL_SRC_STREAM_ID,  /* ctlshare source stream */
-    
+    CTL_SRC_STREAM_ID, /* ctlshare source stream */
+
     CTL_STREAM_CNT
-    };
+};
 
 /* These enumeration constants are used by each library API file to establish a
    unique stream ids. A library client will use these to identify which stream
@@ -288,10 +286,10 @@ enum
 /* -------------------------- Stream Data Access -------------------------- */
 
 typedef struct
-    {
+{
     long cnt;
-    long *offset;   /* [cnt] */
-    } ctlSubrs;
+    long *offset; /* [cnt] */
+} ctlSubrs;
 
 /* The t1cstr and t2cstr libraries obtain charstring data via the stream
    interface described above. Consequently, character and subroutine
@@ -305,10 +303,10 @@ typedef struct
    is made by the t1read library. */
 
 typedef struct
-    {
+{
     long begin;
     long end;
-    } ctlRegion;
+} ctlRegion;
 
 /* A ctlRegion struct specifies a set of consecutive bytes within a stream. The
    "begin" field is the offset of the first byte in the set and the "end" field
@@ -317,14 +315,13 @@ typedef struct
    An empty region is indicated by setting both fields to -1. */
 
 typedef struct ctlSharedStmCallbacks_ ctlSharedStmCallbacks;
-struct ctlSharedStmCallbacks_
-    {
-    void *direct_ctx;           /* host library context */
+struct ctlSharedStmCallbacks_ {
+    void *direct_ctx; /* host library context */
 
-    struct dnaCtx_ *dna;        /* dynarr context */
+    struct dnaCtx_ *dna; /* dynarr context */
 
     /* Allocate memory. */
-    void* (*memNew)(ctlSharedStmCallbacks *h, size_t size);
+    void *(*memNew)(ctlSharedStmCallbacks *h, size_t size);
 
     /* Free memory. */
     void (*memFree)(ctlSharedStmCallbacks *h, void *ptr);
@@ -349,7 +346,7 @@ struct ctlSharedStmCallbacks_
 
     /* Error message. */
     void (*message)(ctlSharedStmCallbacks *h, char *msg, ...);
-    };
+};
 
 /* ctlSharedStmCallbacks is used for reading SFNT tables shared by multiple font formats.
  * Unlike other font reading libraries, none of stream data and stream reading functions are
@@ -368,14 +365,14 @@ struct ctlSharedStmCallbacks_
    CTL_TAG('s','f','n','t') . */
 
 typedef unsigned long ctlTag;
-#define CTL_TAG(a,b,c,d) \
-    ((ctlTag)(a)<<24|(ctlTag)(b)<<16|(ctlTag)(c)<<8|(ctlTag)(d))
+#define CTL_TAG(a, b, c, d) \
+    ((ctlTag)(a) << 24 | (ctlTag)(b) << 16 | (ctlTag)(c) << 8 | (ctlTag)(d))
 
-#define CTL_SPLIT_TAG(tag) \
-    (int)((tag)>>24&0xff), \
-    (int)((tag)>>16&0xff), \
-    (int)((tag)>>8&0xff), \
-    (int)((tag)&0xff)
+#define CTL_SPLIT_TAG(tag)         \
+    (int)((tag) >> 24 & 0xff),     \
+        (int)((tag) >> 16 & 0xff), \
+        (int)((tag) >> 8 & 0xff),  \
+        (int)((tag)&0xff)
 
 /* CTL_SPLIT_TAG splits the "tag" parameter into its 4 comma-separated
    characters so that it may be passed to printf and printed using a %c%c%c%c
@@ -409,34 +406,33 @@ typedef unsigned long ctlTag;
 
 /* ---------------------- Client/Library Compatibiliy ---------------------- */
 
-struct ctlPadStruct
-    {
+struct ctlPadStruct {
     char c;
     short s;
     long l;
     void *p;
     float f;
     double d;
-    };
+};
 
-#define CTL_CHECK_ARGS_DCL \
-    long version_arg, \
-    size_t size_short, size_t size_long, size_t size_ptr, \
-    size_t size_float, size_t size_double, size_t size_struct
+#define CTL_CHECK_ARGS_DCL                                    \
+    long version_arg,                                         \
+        size_t size_short, size_t size_long, size_t size_ptr, \
+        size_t size_float, size_t size_double, size_t size_struct
 
-#define CTL_CHECK_ARGS_CALL(version) \
-    version, \
-    sizeof(short),sizeof(long),sizeof(void*),sizeof(float),sizeof(double), \
-    sizeof(struct ctlPadStruct)
+#define CTL_CHECK_ARGS_CALL(version)                                                \
+    version,                                                                        \
+        sizeof(short), sizeof(long), sizeof(void *), sizeof(float), sizeof(double), \
+        sizeof(struct ctlPadStruct)
 
-#define CTL_CHECK_ARGS_TEST(version) \
-    version != version_arg || \
-    sizeof(short) != size_short || \
-    sizeof(long) != size_long || \
-    sizeof(void*) != size_ptr || \
-    sizeof(float) != size_float || \
-    sizeof(double) != size_double || \
-    sizeof(struct ctlPadStruct) != size_struct
+#define CTL_CHECK_ARGS_TEST(version)     \
+    version != version_arg ||            \
+        sizeof(short) != size_short ||   \
+        sizeof(long) != size_long ||     \
+        sizeof(void *) != size_ptr ||    \
+        sizeof(float) != size_float ||   \
+        sizeof(double) != size_double || \
+        sizeof(struct ctlPadStruct) != size_struct
 
 /* It is possible to compile library code and client code using different and
    incompatible options that will not be detected by the compiler or linker.
@@ -466,15 +462,13 @@ struct ctlPadStruct
    uniquely identifies library components. */
 
 typedef struct ctlVersionCallbacks_ ctlVersionCallbacks;
-struct ctlVersionCallbacks_
-    {
+struct ctlVersionCallbacks_ {
     void *ctx;
     unsigned long called;
     void (*getversion)(ctlVersionCallbacks *cb, long version, char *libname);
-    };
+};
 
-enum
-    {
+enum {
     DNA_LIB_ID,
     PST_LIB_ID,
     CTU_LIB_ID,
@@ -490,7 +484,7 @@ enum
     T1W_LIB_ID,
     SFR_LIB_ID,
     SFW_LIB_ID,
-	BZR_LIB_ID,
+    BZR_LIB_ID,
     SVR_LIB_ID,
     SVW_LIB_ID,
     UFR_LIB_ID,
@@ -498,7 +492,7 @@ enum
     VAR_LIB_ID,
     CTL_LIB_ID,
     CTL_LIB_ID_CNT
-    };
+};
 
 /* Each library component provides a function to obtain both the component's
    own version and also the versions of all the components it is dependent
@@ -523,38 +517,38 @@ enum
 /* ---------------------- Security Functions ---------------------- */
 
 #ifdef _MSC_VER
-#define FPRINTF_S   fprintf_s
-#define VFPRINTF_S  vfprintf_s
-#define SPRINTF_S   sprintf_s
-#define VSPRINTF_S  vsprintf_s
-#define SSCANF_S    sscanf_s
-#define STRCPY_S(d,ds,s) strcpy_s(d,ds,s)
-#define STRNCPY_S(d,ds,s,n) strncpy_s(d,ds,s,n)
-#define STRCAT_S(d,ds,s) strcat_s(d,ds,s)
+#define FPRINTF_S fprintf_s
+#define VFPRINTF_S vfprintf_s
+#define SPRINTF_S sprintf_s
+#define VSPRINTF_S vsprintf_s
+#define SSCANF_S sscanf_s
+#define STRCPY_S(d, ds, s) strcpy_s(d, ds, s)
+#define STRNCPY_S(d, ds, s, n) strncpy_s(d, ds, s, n)
+#define STRCAT_S(d, ds, s) strcat_s(d, ds, s)
 #else
 #ifndef FPRINTF_S
-#define FPRINTF_S   fprintf
+#define FPRINTF_S fprintf
 #endif
 #ifndef VFPRINTF_S
-#define VFPRINTF_S  vfprintf
+#define VFPRINTF_S vfprintf
 #endif
 #ifndef SPRINTF_S
-#define SPRINTF_S(b,l,f, ...)   sprintf(b,f, ##__VA_ARGS__)
+#define SPRINTF_S(b, l, f, ...) sprintf(b, f, ##__VA_ARGS__)
 #endif
 #ifndef VSPRINTF_S
-#define VSPRINTF_S(b,l,f, ...)   vsprintf(b,f, ##__VA_ARGS__)
+#define VSPRINTF_S(b, l, f, ...) vsprintf(b, f, ##__VA_ARGS__)
 #endif
 #ifndef SSCANF_S
-#define SSCANF_S    sscanf
+#define SSCANF_S sscanf
 #endif
 #ifndef STRCPY_S
-#define STRCPY_S(d,ds,s) strcpy(d,s)
+#define STRCPY_S(d, ds, s) strcpy(d, s)
 #endif
 #ifndef STRNCPY_S
-#define STRNCPY_S(d,ds,s,n) strncpy(d,s,n)
+#define STRNCPY_S(d, ds, s, n) strncpy(d, s, n)
 #endif
 #ifndef STRCAT_S
-#define STRCAT_S(d,ds,s) strcat(d,s)
+#define STRCAT_S(d, ds, s) strcat(d, s)
 #endif
 #endif
 

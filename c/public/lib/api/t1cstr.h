@@ -1,5 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 /*
  * Type 1 charstring services.
@@ -10,7 +11,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ctlshare.h"
 
-#define T1C_VERSION CTL_MAKE_VERSION(1,0,19)
+#define T1C_VERSION CTL_MAKE_VERSION(1, 0, 19)
 
 #include "absfont.h"
 
@@ -48,18 +49,18 @@ int t1cUnprotect(int lenIV, long *length, char *cipher, char *plain);
    operates identically to t1cDecrypt(). */
 
 typedef struct
-    {
+{
     long flags;
-#define T1C_WIDTH_ONLY  (1<<0)
-#define T1C_USE_MATRIX  (1<<1) /* Matrix applied to entire charstring; used by 'rotateFont'.*/
-#define T1C_UPDATE_OPS  (1<<2)
-#define T1C_IS_CUBE		(1<<3)
-#define T1C_FLATTEN_CUBE  (1<<4)
-#define T1C_CUBE_GSUBR (1<<5) /* current charstring is a subr. */
+#define T1C_WIDTH_ONLY   (1 << 0)
+#define T1C_USE_MATRIX   (1 << 1) /* Matrix applied to entire charstring; used by 'rotateFont'.*/
+#define T1C_UPDATE_OPS   (1 << 2)
+#define T1C_IS_CUBE      (1 << 3)
+#define T1C_FLATTEN_CUBE (1 << 4)
+#define T1C_CUBE_GSUBR   (1 << 5) /* current charstring is a subr. */
     void *src;
     ctlStreamCallbacks *stm;
     ctlSubrs subrs;
-	long subrsEnd;
+    long subrsEnd;
     void *ctx;
     long (*getStdEncGlyphOffset)(void *ctx, int stdcode);
     unsigned char bchar;
@@ -69,8 +70,8 @@ typedef struct
     float UDV[15];
     float NDV[15];
     float WV[64]; /* cube fonts can have up to 64 master designs*/
-    } t1cAuxData;
-    
+} t1cAuxData;
+
 int t1cParse(long offset, t1cAuxData *aux, abfGlyphCallbacks *glyph);
 
 /* t1cParse() is called to parse a plain text Type 1 charstring into its
@@ -166,15 +167,14 @@ int t1cParse(long offset, t1cAuxData *aux, abfGlyphCallbacks *glyph);
 
    A charstring should terminate with one of the "endchar", "seac", or
    "callsubr" operators. A subroutine should terminate with one of the
-   preceding operators or "return" operator. */ 
+   preceding operators or "return" operator. */
 
-enum
-    {
+enum {
 #undef CTL_DCL_ERR
-#define CTL_DCL_ERR(name,string)    name,
+#define CTL_DCL_ERR(name, string) name,
 #include "t1cerr.h"
     t1cErrCount
-    };
+};
 
 /* Library functions return either zero (t1cSuccess) to indicate success or a
    positive non-zero error code that is defined in the above enumeration that

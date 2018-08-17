@@ -1,10 +1,11 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef CFFSUB_H
 #define CFFSUB_H
 
-#include <stddef.h>             /* For size_t */
+#include <stddef.h> /* For size_t */
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,30 +58,29 @@ cffSubCtx cffSubNew(cffSubCallbacks *cb);
    fields should be passed with a NULL value if not required. This function
    returns NULL if the initialization failed. */
 
-struct cffSubCallbacks_
-    {
+struct cffSubCallbacks_ {
     void *ctx;
 
-/* [Optional] ctx is a client context that is passed back to the client as the
+    /* [Optional] ctx is a client context that is passed back to the client as the
    first parameter to the callback functions. It is intended to be used in
    multi-threaded environments.
 
    Memory management: */
 
-    void *(*malloc)     (void *ctx, size_t size);
-    void *(*realloc)    (void *ctx, void *old, size_t size);
-    void (*free)        (void *ctx, void *ptr);
+    void *(*malloc)(void *ctx, size_t size);
+    void *(*realloc)(void *ctx, void *old, size_t size);
+    void (*free)(void *ctx, void *ptr);
 
-/* [Required] The malloc(), realloc(), and free() functions manage memory in
+    /* [Required] The malloc(), realloc(), and free() functions manage memory in
    the same manner as the Standard C Library functions of the same name. (This
    means that they must observe the alignment requirements imposed by the
    standard.)
 
    CFF data input: */
 
-    char *(*srcSeek)    (void *ctx, long offset, long *count);
+    char *(*srcSeek)(void *ctx, long offset, long *count);
 
-/* [Required] srcSeek() is called in order to seek to an absolute position in
+    /* [Required] srcSeek() is called in order to seek to an absolute position in
    the CFF data specified by the offset parameter. It returns a pointer to the
    new data (beginning at that offset) and the count of the number of bytes of
    new data available via the count parameter. A client should protect itself
@@ -88,9 +88,9 @@ struct cffSubCallbacks_
    count of 0 in the event of an error. (A file-based client might map this
    function to fseek() followed by fread() using buffers of BUFSIZ bytes.) */
 
-    char *(*srcRefill)  (void *ctx, long *count);
+    char *(*srcRefill)(void *ctx, long *count);
 
-/* [Required] srcRefill() is called in order to refill the library's CFF input
+    /* [Required] srcRefill() is called in order to refill the library's CFF input
    buffer. It returns a pointer to the new data and the count of the number of
    bytes of new data available via the count parameter. The client must arrange
    that successive calls to srcRefill() return consecutive blocks of CFF data.
@@ -100,28 +100,28 @@ struct cffSubCallbacks_
 
    CFF data output: */
 
-    void (*dstSize)     (void *ctx, long size);
+    void (*dstSize)(void *ctx, long size);
 
-/* [Optional] dstSize() is called just prior to calling the output function
+    /* [Optional] dstSize() is called just prior to calling the output function
    dstWriteN() with the total size of the subset CFF data in bytes. It permits
    a memory-based client to allocate the exact amount of space for the subset
    CFF data in memory, for example. */
 
-    void (*dstWriteN)   (void *ctx, long count, char *ptr);
+    void (*dstWriteN)(void *ctx, long count, char *ptr);
 
-/* [Required] dstWriteN() is called to handle the output of one or more bytes
+    /* [Required] dstWriteN() is called to handle the output of one or more bytes
    of CFF data. (A file-based client might map this function fwrite().)
 
    Temporary file I/O: */
 
-    void *(*tmpOpen)    (void *ctx);                        
-    void (*tmpWriteN)   (void *ctx, void *file, long count, char *ptr); 
-    long (*tmpTell)     (void *ctx, void *file);
-    void (*tmpSeek)     (void *ctx, void *file, long offset);
-    char *(*tmpRefill)  (void *ctx, void *file, long *count);                
-    void (*tmpClose)    (void *ctx, void *file);
+    void *(*tmpOpen)(void *ctx);
+    void (*tmpWriteN)(void *ctx, void *file, long count, char *ptr);
+    long (*tmpTell)(void *ctx, void *file);
+    void (*tmpSeek)(void *ctx, void *file, long offset);
+    char *(*tmpRefill)(void *ctx, void *file, long *count);
+    void (*tmpClose)(void *ctx, void *file);
 
-/* [Required] The tmp functions are called to handle temporary intermediate
+    /* [Required] The tmp functions are called to handle temporary intermediate
    data so that rather than keep entire fonts in memory they can be accumulated
    in a temporary file that is re-read during the output of the CFF data.
    tmpOpen() returns an identifier to the temporary file object that is
@@ -134,9 +134,9 @@ struct cffSubCallbacks_
    position given by the offset argument (which is guaranteed to be valid). (A
    client might map these functions onto tmpfile(), fwrite(), rewind() or
    fseek(), fread(), and fclose(), respectively.) */
-    };
+};
 
-typedef long cffSubFixed;   /* 16.16 fixed point */
+typedef long cffSubFixed; /* 16.16 fixed point */
 
 int cffSubFont(cffSubCtx h, int flags, char *newFontName, long cffDataSize,
                long nSubsetGlyphs, unsigned short *subsetGlyphList,
@@ -150,10 +150,10 @@ int cffSubFont(cffSubCtx h, int flags, char *newFontName, long cffDataSize,
 
    The flags argument specifies the subsetting options below: */
 
-#define CFFSUB_ENCODE_BY_GID (1<<0) /* Create CIDFont with GID "encoding".
-                                       Implies CFFSUB_EMBED. */
-#define CFFSUB_REMOVE_UIDS   (1<<1) /* Remove UniqueID and XUID. */
-#define CFFSUB_EMBED         (1<<2) /* Perform embedding optimizations. */
+#define CFFSUB_ENCODE_BY_GID (1 << 0) /* Create CIDFont with GID "encoding". */
+                                      /* Implies CFFSUB_EMBED.               */
+#define CFFSUB_REMOVE_UIDS   (1 << 1) /* Remove UniqueID and XUID. */
+#define CFFSUB_EMBED         (1 << 2) /* Perform embedding optimizations. */
 
 /* The newFontName, if non-NULL, specifies a new FontName as a null-terminated
    string. This name will be stored in the Name INDEX of the subsetted font.
@@ -188,15 +188,14 @@ int cffSubFont(cffSubCtx h, int flags, char *newFontName, long cffDataSize,
    cffSubFont() returns 0 on success and a positive non-zero error code in the
    event of an error. The list of possible error codes is specified below. */
 
-enum
-    {
-    cffSubErrOK,            /* Subsetting completed successfully */
-    cffSubErrOutOfMemory,   /* Out of memory */
-    cffSubErrInvalidFont,   /* Invalid CFF font data */
-    cffSubErrGIDBounds,     /* Subset GID(s) out of valid range for font */
-    cffSubErrBadSubset,     /* subsetGlyphNames arg specified with CID font */
-    cffSubErrCantOpenTmp    /* Temporary file open failed */
-    };
+enum {
+    cffSubErrOK,          /* Subsetting completed successfully */
+    cffSubErrOutOfMemory, /* Out of memory */
+    cffSubErrInvalidFont, /* Invalid CFF font data */
+    cffSubErrGIDBounds,   /* Subset GID(s) out of valid range for font */
+    cffSubErrBadSubset,   /* subsetGlyphNames arg specified with CID font */
+    cffSubErrCantOpenTmp  /* Temporary file open failed */
+};
 
 void cffSubFree(cffSubCtx h);
 

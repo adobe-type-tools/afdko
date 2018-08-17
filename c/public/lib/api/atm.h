@@ -1,14 +1,16 @@
+/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
+
 /*
   atm.h
 */
 
-/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 /*
 This file includes definitions for ATM compiler switches, operating
 system, client, and environment dependent macros, and macros common to
-buildch and other ATM modules (font parser). 
+buildch and other ATM modules (font parser).
  */
 
 #ifndef ATM_H
@@ -29,7 +31,7 @@ buildch and other ATM modules (font parser).
 #include ENVIRONMENT
 #include PUBLICTYPES
 #include EXCEPT
-#else  /* PSENVIRONMENT */
+#else /* PSENVIRONMENT */
 /* standard coretype environment */
 #include "supportenvironment.h"
 #include "supportpublictypes.h"
@@ -47,7 +49,7 @@ buildch and other ATM modules (font parser).
 #endif
 
 #ifndef DEVICE_CONSISTENT
-#if ISP==isp_i80486 || ISP==isp_ppc || ISP==isp_x64 || ISP==isp_ia64
+#if ISP == isp_i80486 || ISP == isp_ppc || ISP == isp_x64 || ISP == isp_ia64
 #define DEVICE_CONSISTENT 0
 #else
 #define DEVICE_CONSISTENT 1
@@ -55,14 +57,14 @@ buildch and other ATM modules (font parser).
 #endif /*DEVICE_CONSISTENT*/
 
 #ifndef GLOBALCOLORING
-#define GLOBALCOLORING (1)    /* Turn on code for hinting Kanji Characters */
+#define GLOBALCOLORING (1) /* Turn on code for hinting Kanji Characters */
 #endif
 
 #ifndef DEBUG
 #define DEBUG (0)
 #endif
 
-#if STAGE==DEVELOP && (defined PSENVIRONMENT && !PSENVIRONMENT)
+#if STAGE == DEVELOP && (defined PSENVIRONMENT && !PSENVIRONMENT)
 #define ENABLE_ASSERT 1
 #else
 #define ENABLE_ASSERT 0
@@ -74,42 +76,44 @@ buildch and other ATM modules (font parser).
  */
 #if ENABLE_ASSERT
 #if defined PSENVIRONMENT && PSENVIRONMENT
-#define ASSERT(cond, str)     DebugAssertMsg(cond, BUILDCH_PKGID, str);
+#define ASSERT(cond, str) DebugAssertMsg(cond, BUILDCH_PKGID, str);
 #define PREFER(cond, str)
-#define ASSERT1(str)     DebugAssertMsg(false, BUILDCH_PKGID, str);
+#define ASSERT1(str) DebugAssertMsg(false, BUILDCH_PKGID, str);
 
 #else /* defined PSENVIRONMENT && PSENVIRONMENT */
 
-#define ASSERT(cond, str) { \
-    if (!(cond)) { \
-      fprintf(stderr, "%s:%d: %s (%s)\n", __FILE__, __LINE__, str, #cond); \
-      os_abort(); \
-    } \
-  }
-
-#define ASSERT1(str) { \
-	fprintf(stderr, "%s:%d: %s \n", __FILE__, __LINE__, str); \
-	os_abort(); \
+#define ASSERT(cond, str)                                                        \
+    {                                                                            \
+        if (!(cond)) {                                                           \
+            fprintf(stderr, "%s:%d: %s (%s)\n", __FILE__, __LINE__, str, #cond); \
+            os_abort();                                                          \
+        }                                                                        \
     }
 
-#define PREFER(cond, str) { \
-    if (!(cond)) { \
-      fprintf(stderr, "%s:%d: %s (%s)\n", __FILE__, __LINE__, str, #cond); \
-    } \
-  }
+#define ASSERT1(str)                                              \
+    {                                                             \
+        fprintf(stderr, "%s:%d: %s \n", __FILE__, __LINE__, str); \
+        os_abort();                                               \
+    }
+
+#define PREFER(cond, str)                                                        \
+    {                                                                            \
+        if (!(cond)) {                                                           \
+            fprintf(stderr, "%s:%d: %s (%s)\n", __FILE__, __LINE__, str, #cond); \
+        }                                                                        \
+    }
 #endif /* defined PSENVIRONMENT && PSENVIRONMENT */
 
-#define return_or_abort( code, str)     ASSERT1(str)
+#define return_or_abort(code, str) ASSERT1(str)
 
-#else  /* ENABLE_ASSERT */
+#else /* ENABLE_ASSERT */
 
 #define ASSERT(cond, str)
 #define PREFER(cond, str)
 
-#define return_or_abort( code, str)     return (code)
+#define return_or_abort(code, str) return (code)
 
 #endif /* ENABLE_ASSERT */
-
 
 #ifndef PSENVIRONMENT
 #define PSENVIRONMENT 0
@@ -117,31 +121,30 @@ buildch and other ATM modules (font parser).
 
 #if defined PSENVIRONMENT && !PSENVIRONMENT
 
-
 /**********  System-dependent include files  *********/
 
-#if OS==os_mach
+#if OS == os_mach
 #define MALLOC_H
 #include <memory.h>
-#include <fcntl.h>              /* main.c needs this */
+#include <fcntl.h> /* main.c needs this */
 #include <stdlib.h>
-#include "supportossyslib.h"    /* EDIT FOR POSTSCRIPT@COMMENT@ */
+#include "supportossyslib.h" /* EDIT FOR POSTSCRIPT@COMMENT@ */
 #endif
 
-#if OS==os_aix
+#if OS == os_aix
 #include <memory.h>
-#include <fcntl.h>              /* main.c needs this */
+#include <fcntl.h> /* main.c needs this */
 #include <stdlib.h>
-#include <stddef.h>             /* defines offsetof() macro */
+#include <stddef.h> /* defines offsetof() macro */
 #endif
 
-#if OS==os_msdos || OS==os_os2 || OS==os_os2_32bit
+#if OS == os_msdos || OS == os_os2 || OS == os_os2_32bit
 #include <stdlib.h>
 #include <memory.h>
-#include <fcntl.h>              /* main.c needs this */
+#include <fcntl.h> /* main.c needs this */
 #endif
 
-#if OS==os_windows3
+#if OS == os_windows3
 /* need strtol, atoi, atol, ...? */
 #include <stdlib.h>
 #include "atmtypes.h"
@@ -153,24 +156,24 @@ buildch and other ATM modules (font parser).
 #define NEARVAR
 #endif
 
-#if OS==os_mac
+#if OS == os_mac
 #define MALLOC_H
 #define STRING_H
 #include <string.h>
 #include <stdlib.h>
-#include <stddef.h>             /* supplies macro offset_of() */
+#include <stddef.h> /* supplies macro offset_of() */
 #if ASMARITH
 #define labs(x) asm_labs(x)
-extern Int32 asm_labs ( Int32  i MW_D0);
+extern Int32 asm_labs(Int32 i MW_D0);
 #endif /* ASMARITH */
 #endif
 
-#if 0 /* was OS!=os_osx */
+#if 0            /* was OS!=os_osx */
 /* Defaults */
-#ifndef MALLOC_H                /* Include malloc if we haven't already */
+#ifndef MALLOC_H /* Include malloc if we haven't already */
 #include <malloc.h>
 #endif
-#ifndef STRING_H                /* Include strings if we haven't already */
+#ifndef STRING_H /* Include strings if we haven't already */
 #include <string.h>
 #endif
 #endif /* not os_osx */
@@ -184,48 +187,48 @@ extern Int32 asm_labs ( Int32  i MW_D0);
 /**********  System-dependent procs *********/
 
 #ifndef os_free
-#define os_free         free
+#define os_free free
 #endif
 #ifndef os_labs
-#define os_labs         labs
+#define os_labs labs
 #endif
 #ifndef os_cos
-#define os_cos          cos
+#define os_cos cos
 #endif
 #ifndef os_sin
-#define os_sin          sin
+#define os_sin sin
 #endif
 
 #ifndef os_strcpy
-#define os_strcpy	strcpy
+#define os_strcpy strcpy
 #endif
 #ifndef os_strncpy
-#define os_strncpy	strncpy
+#define os_strncpy strncpy
 #endif
 #ifndef os_strcmp
-#define os_strcmp	strcmp
+#define os_strcmp strcmp
 #endif
 #ifndef os_strncmp
-#define os_strncmp	strncmp
+#define os_strncmp strncmp
 #endif
 #ifndef os_sprintf
-#define os_sprintf	sprintf
+#define os_sprintf sprintf
 #endif
 
 /* MEMMOVE doesn't check for overlap so I use memcpy here */
 #ifndef os_memcpy
-#define os_memcpy	memcpy
+#define os_memcpy memcpy
 #endif
 #ifndef os_isspace
-#define os_isspace	isspace
+#define os_isspace isspace
 #endif
 
-#if OS==os_msdos
+#if OS == os_msdos
 #define os_malloc(x) malloc((size_t)x)
-#define os_realloc(x,y) realloc(x,(size_t)y)
+#define os_realloc(x, y) realloc(x, (size_t)y)
 #else
-#define os_malloc       malloc
-#define os_realloc      realloc
+#define os_malloc malloc
+#define os_realloc realloc
 #endif /* os_msdos */
 
 #ifndef BCMAIN
@@ -233,31 +236,37 @@ extern Int32 asm_labs ( Int32  i MW_D0);
 #endif /* BCMAIN */
 
 /* MEMMOVE(src, dest, len)  Copy a region of memory.  len in bytes. */
-  /* WARNING: This does NOT check for overlapping memory areas */
+/* WARNING: This does NOT check for overlapping memory areas */
 /* MEMZERO(dest, len)  Zero out a region in memory.  len in bytes. */
 
-
-#if OS==os_mri
+#if OS == os_mri
 #define MEMMOVE(src, dest, len) memcpy(dest, src, len)
 #define MEMZERO(dest, len) memset(dest, 0, len)
 #endif
 
-#if OS==os_msdos || OS==os_os2 || OS==os_windows3 || OS==os_os2_32bit
+#if OS == os_msdos || OS == os_os2 || OS == os_windows3 || OS == os_os2_32bit
 #define MEMMOVE(src, dest, len) memcpy(dest, src, (unsigned)(len))
 #define MEMZERO(dest, len) memset(dest, 0, (unsigned)(len))
 #endif
 
-#if OS==os_thinkc
-#define MEMMOVE(src, dest, len) \
-  { register char *__s, *__d;  register long __l; \
-    __s = (char *)(src); __d = (char *)(dest);  __l = (long)(len); \
-    while (--__l >= 0) *__d++ = *__s++; \
-  }
-#define MEMZERO(dest, len) \
-  { register char *__d;  register long __l; \
-    __d = (char *)(dest);  __l = (long)(len); \
-    while (--__l >= 0) *__d++ = 0; \
-  }
+#if OS == os_thinkc
+#define MEMMOVE(src, dest, len)             \
+    {                                       \
+        register char *__s, *__d;           \
+        register long __l;                  \
+        __s = (char *)(src);                \
+        __d = (char *)(dest);               \
+        __l = (long)(len);                  \
+        while (--__l >= 0) *__d++ = *__s++; \
+    }
+#define MEMZERO(dest, len)             \
+    {                                  \
+        register char *__d;            \
+        register long __l;             \
+        __d = (char *)(dest);          \
+        __l = (long)(len);             \
+        while (--__l >= 0) *__d++ = 0; \
+    }
 
 /* If CScan cannot render the character with the initial cross buffer size,
    the client will get a callback to grow the buffer in increments of
@@ -266,23 +275,23 @@ extern Int32 asm_labs ( Int32  i MW_D0);
    This will repeat for CSCAN_RETRIES number of times.*/
 
 /* Define how to alloc memory during cscan.                             */
-#define CSCAN_MAX_BUFSIZE MAXInt32   /* Grow until there is no more memory */
+#define CSCAN_MAX_BUFSIZE MAXInt32 /* Grow until there is no more memory */
 #define CSCAN_BUF_INCR (7000)
-#define CSCAN_RETRIES   500     /* Ken - Really, I don't _care_ how many times it retries.... */
+#define CSCAN_RETRIES 500 /* Ken - Really, I don't _care_ how many times it retries.... */
 
 #endif
 
 /* DEFAULTS */
 #ifndef MEMMOVE
-#define MEMMOVE(src, dest, len) os_bcopy( (const char *)src, (char *)dest, len)
-#define MEMZERO(dest, len) os_bzero( (char *)dest, len)
+#define MEMMOVE(src, dest, len) os_bcopy((const char *)src, (char *)dest, len)
+#define MEMZERO(dest, len) os_bzero((char *)dest, len)
 #endif
 
 /************* end non-postscript environment */
 
-#else  /* PSENVIROMNEMT */
+#else /* PSENVIROMNEMT */
 
-#define BCMAIN  (0) /* for 2ps environment */
+#define BCMAIN (0) /* for 2ps environment */
 
 /* If CScan cannot render the character with the initial cross buffer size,
    the client will get a callback to grow the buffer in increments of
@@ -291,13 +300,12 @@ extern Int32 asm_labs ( Int32  i MW_D0);
    This will repeat for CSCAN_RETRIES number of times.
 */
 
-#define CSCAN_MAX_BUFSIZE 65536   /* Grow to  64K bytes */
+#define CSCAN_MAX_BUFSIZE 65536 /* Grow to  64K bytes */
 #define CSCAN_BUF_INCR 8192
-#define CSCAN_RETRIES   6
-
+#define CSCAN_RETRIES 6
 
 /* MEMMOVE(src, dest, len)  Copy a region of memory.  len in bytes. */
-  /* WARNING: This does NOT check for overlapping memory areas */
+/* WARNING: This does NOT check for overlapping memory areas */
 /* MEMZERO(dest, len)  Zero out a region in memory.  len in bytes. */
 
 #define MEMMOVE(src, dest, len) os_bcopy(src, dest, len)
@@ -306,22 +314,21 @@ extern Int32 asm_labs ( Int32  i MW_D0);
 #endif /* PSENVIROMNEMT */
 
 #ifndef CSCAN_BUF_INCR
-#define CSCAN_MAX_BUFSIZE 65504	/* Back off from 64K because overhead */
-				/* usually mean actual 64K cann't be reached */
-#define CSCAN_BUF_INCR (8188)	/* 1/8th the max.  Works with value below */
-#define CSCAN_RETRIES   8 /* After 8 tries it CAN'T get more guaranteed! */
+#define CSCAN_MAX_BUFSIZE 65504 /* Back off from 64K because overhead */
+                                /* usually mean actual 64K cann't be reached */
+#define CSCAN_BUF_INCR (8188) /* 1/8th the max.  Works with value below */
+#define CSCAN_RETRIES 8       /* After 8 tries it CAN'T get more guaranteed! */
 #endif
 
-#define FixedZero   (Fixed)0x0L
-#define FixedHalf       (Fixed)0x00008000L
-#define FixedOne        (Fixed)0x00010000L
-#define FixedTwo        (Fixed)0x00020000L
+#define FixedZero (Fixed)0x0L
+#define FixedHalf (Fixed)0x00008000L
+#define FixedOne  (Fixed)0x00010000L
+#define FixedTwo  (Fixed)0x00020000L
 
-#define FIXEDZERO   FixedZero
-#define FIXEDHALF       FixedHalf
-#define FIXEDONE        FixedOne
-#define FIXEDTWO        FixedTwo
-
+#define FIXEDZERO FixedZero
+#define FIXEDHALF FixedHalf
+#define FIXEDONE  FixedOne
+#define FIXEDTWO  FixedTwo
 
 #define MAXFixed MAXInt32
 #define MINFixed MINInt32
@@ -362,11 +369,11 @@ extern Int32 asm_labs ( Int32  i MW_D0);
    for equality is defined in that case.
 */
 
-#if ISP==isp_i80286 || SEGMENT_64K
-#define SubtractPtr(p0, p1)     \
-        ((unsigned)((char *)(p0)-(char *)(p1))/sizeof(*(p0)))
+#if ISP == isp_i80286 || SEGMENT_64K
+#define SubtractPtr(p0, p1) \
+    ((unsigned)((char *)(p0) - (char *)(p1)) / sizeof(*(p0)))
 #else
-#define SubtractPtr(p0, p1)     (Int32)((p0) - (p1))
+#define SubtractPtr(p0, p1) (Int32)((p0) - (p1))
 #endif
 
 /* offsetof should be in <stddef.h>, but not all machines have one. */
@@ -384,9 +391,9 @@ extern Int32 asm_labs ( Int32  i MW_D0);
 #include "supportasbasic.h"
 #endif
 
-#ifndef	offsetof
-#define offsetof(type,field) \
-	(Int32)((char *)&((type *)1)->field - (char *)1)
+#ifndef offsetof
+#define offsetof(type, field) \
+    (Int32)((char *)&((type *)1)->field - (char *)1)
 #endif /* offsetof */
 
 #endif /* ATM_H */

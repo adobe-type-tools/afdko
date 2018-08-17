@@ -1,12 +1,13 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef SVREAD_H
 #define SVREAD_H
 
 #include "ctlshare.h"
 
-#define SVR_VERSION CTL_MAKE_VERSION(1,0,6)
+#define SVR_VERSION CTL_MAKE_VERSION(1, 0, 6)
 
 #include "absfont.h"
 
@@ -51,10 +52,10 @@ svrCtx svrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
    svrErrStr(). If the client doesn't require the debug data stream NULL should
    be returned from its stream open call. */
 
-int svrBegFont(svrCtx h, 
+int svrBegFont(svrCtx h,
                long flags, abfTopDict **top);
 
-#define SVR_SEEN_GLYPH (1<<) /* have seen a glyph */
+#define SVR_SEEN_GLYPH (1 <<) /* have seen a glyph */
 
 /* svrBegFont() is called to initiate a new font parse. The source data stream
    (SVR_SRC_STREAM_ID) is opened, positioned at the offset specified by the
@@ -63,7 +64,7 @@ int svrBegFont(svrCtx h,
    parameter (which will remain stable until svrEndFont() is called).
    Charstring and subroutine data is then stored in the temporary stream for subsequent parsing.
 
-  */     
+  */
 
 int svrIterateGlyphs(svrCtx h, abfGlyphCallbacks *glyph_cb);
 
@@ -85,9 +86,9 @@ int svrIterateGlyphs(svrCtx h, abfGlyphCallbacks *glyph_cb);
    subset of glyphs or just enumerate the glyph set without reading any path
    data. */
 
-int svrGetGlyphByTag(svrCtx h, 
-                     unsigned short tag, abfGlyphCallbacks *glyph_cb); 
-int svrGetGlyphByName(svrCtx h, 
+int svrGetGlyphByTag(svrCtx h,
+                     unsigned short tag, abfGlyphCallbacks *glyph_cb);
+int svrGetGlyphByName(svrCtx h,
                       char *gname, abfGlyphCallbacks *glyph_cb);
 
 /* svrGetGlyphByTag(), svrGetGlyphByName() are called
@@ -97,7 +98,6 @@ int svrGetGlyphByName(svrCtx h,
 
    These functions return svrErrNoGlyph if the requested glyph is not present
    in the font or the access method is incompatible with the font type. */
-
 
 int svrResetGlyphs(svrCtx h);
 
@@ -115,7 +115,6 @@ int svrResetGlyphs(svrCtx h);
    above and then issue an ABF_SKIP_RET from the glyphBeg() callback so that
    the charstring is not parsed and called back in the usual manner. */
 
-
 int svrEndFont(svrCtx h);
 
 /* svrEndFont() is called to terminate a font parse initiated with
@@ -126,13 +125,12 @@ void svrFree(svrCtx h);
 /* svrFree() destroys the library context and all the resources allocated to
    it. The temporary and debug data streams are closed. */
 
-enum
-    {
+enum {
 #undef CTL_DCL_ERR
-#define CTL_DCL_ERR(name,string)    name,
+#define CTL_DCL_ERR(name, string) name,
 #include "svrerr.h"
     svrErrCount
-    };
+};
 
 /* Library functions return either zero (svrSuccess) to indicate success or a
    positive non-zero error code that is defined in the above enumeration that

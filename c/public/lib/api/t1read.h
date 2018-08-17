@@ -1,12 +1,13 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef T1READ_H
 #define T1READ_H
 
 #include "ctlshare.h"
 
-#define T1R_VERSION CTL_MAKE_VERSION(1,0,41)
+#define T1R_VERSION CTL_MAKE_VERSION(1, 0, 41)
 
 #include "absfont.h"
 
@@ -17,7 +18,7 @@ extern "C" {
 /* Type 1 (PostScript) Font Parser Library
    =======================================
    This library parses parses single master, multiple master, synthetic, and
-   CID-keyed Type 1 fonts. 
+   CID-keyed Type 1 fonts.
 
    This library is initialized with a single call to t1rNew() that allocates
    an opaque context (t1rCtx) which is passed to subsequent functions and is
@@ -32,7 +33,7 @@ extern "C" {
    t1rGetSubrs(), respectively.
 
    Multiple master fonts are always snapshot to a client-supplied instance that
-   is set via t1rBegFont(). 
+   is set via t1rBegFont().
 
    Memory management and source data functions are provided by two sets of
    client-supplied callbacks described in ctlshare.h. */
@@ -50,7 +51,7 @@ t1rCtx t1rNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
    the library via the mem_cb and stm_cb parameters.
 
    The T1R_CHECK_ARGS macro is passed as the last parameter to t1rNew() in
-   order to perform a client/library compatibility check. 
+   order to perform a client/library compatibility check.
 
    The temporary data stream (T1R_TMP_STREAM_ID) and the optional debug data
    stream (T1R_DBG_STREAM_ID) are opened by this call. The debug stream
@@ -58,17 +59,17 @@ t1rCtx t1rNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
    t1rErrStr(). If the client doesn't require the debug data stream NULL should
    be returned from its stream open call. */
 
-int t1rBegFont(t1rCtx h, 
+int t1rBegFont(t1rCtx h,
                long flags, long origin, abfTopDict **top, float *UDV);
 
-#define T1R_UPDATE_OPS  (1<<0)
-#define T1R_USE_MATRIX  (1<<1)
-#define T1R_DUMP_TOKENS (1<<2)
-#define T1R_KEEP_CID_CSTRS (1<<3)
-#define T1R_NO_UDV_CLAMPING (1<<4)
-#define T1R_IS_CUBE   (1<<5)
-#define T1R_FLATTEN_CUBE   (1<<6)
-#define T1R_SEEN_GLYPH (1<<7) /* have seen a glyph */
+#define T1R_UPDATE_OPS      (1 << 0)
+#define T1R_USE_MATRIX      (1 << 1)
+#define T1R_DUMP_TOKENS     (1 << 2)
+#define T1R_KEEP_CID_CSTRS  (1 << 3)
+#define T1R_NO_UDV_CLAMPING (1 << 4)
+#define T1R_IS_CUBE         (1 << 5)
+#define T1R_FLATTEN_CUBE    (1 << 6)
+#define T1R_SEEN_GLYPH      (1 << 7) /* have seen a glyph */
 
 /* t1rBegFont() is called to initiate a new font parse. The source data stream
    (T1R_SRC_STREAM_ID) is opened, positioned at the offset specified by the
@@ -106,14 +107,14 @@ int t1rBegFont(t1rCtx h,
    snapshotting a multiple master font. If NULL, the font is snapshot at the
    default instance. The parameter may be set to NULL for non-multiple master
    fonts.
-   
+
    T1R_IS_CUBE - the data contains cube font operators. Stack depth
    and operator defs are different. Cube subr's are found at the end of gsubr's
    for CID fonts, subrs for non-CID fonts.
-	   
+
    T1R_FLATTEN_CUBE - the data contains cube font operators. Stack depth
    and operator defs are different. The Cube compose ops must be flattened.
-*/     
+*/
 
 int t1rIterateGlyphs(t1rCtx h, abfGlyphCallbacks *glyph_cb);
 
@@ -121,7 +122,7 @@ int t1rIterateGlyphs(t1rCtx h, abfGlyphCallbacks *glyph_cb);
    font. (The number of glyphs in the font is passed back to the client via the
    "top" parameter to t1rBegFont() in the "sup.nGlyphs" field.) Glyph data is
    passed back to the client via the callbacks specified via the "glyph_cb"
-   parameter (see absfont.h). 
+   parameter (see absfont.h).
 
    Each glyph is introduced by calling the beg() glyph callback. The "info"
    parameter passed by this call provides a means of identifying each glyph.
@@ -140,17 +141,17 @@ int t1rIterateGlyphs(t1rCtx h, abfGlyphCallbacks *glyph_cb);
    subset of glyphs or just enumerate the glyph set without reading any path
    data. */
 
-int t1rGetGlyphByTag(t1rCtx h, 
-                     unsigned short tag, abfGlyphCallbacks *glyph_cb); 
-int t1rGetGlyphByName(t1rCtx h, 
+int t1rGetGlyphByTag(t1rCtx h,
+                     unsigned short tag, abfGlyphCallbacks *glyph_cb);
+int t1rGetGlyphByName(t1rCtx h,
                       char *gname, abfGlyphCallbacks *glyph_cb);
-int t1rGetGlyphByCID(t1rCtx h, 
+int t1rGetGlyphByCID(t1rCtx h,
                      unsigned short cid, abfGlyphCallbacks *glyph_cb);
 
 /* t1rGetGlyphByTag(), t1rGetGlyphByName(), t1rGetGlyphByCID() are called
    obtain glyph data from a glyph selected by its tag (described above), its
    name, or its CID, respectively. The glyph name is specified by as a
-   null-terminated string via the "gname" parameter. 
+   null-terminated string via the "gname" parameter.
 
    These functions return t1rErrNoGlyph if the requested glyph is not present
    in the font or the access method is incompatible with the font type. */
@@ -210,13 +211,12 @@ void t1rFree(t1rCtx h);
 /* t1rFree() destroys the library context and all the resources allocated to
    it. The temporary and debug data streams are closed. */
 
-enum
-    {
+enum {
 #undef CTL_DCL_ERR
-#define CTL_DCL_ERR(name,string)    name,
+#define CTL_DCL_ERR(name, string) name,
 #include "t1rerr.h"
     t1rErrCount
-    };
+};
 
 /* Library functions return either zero (t1rSuccess) to indicate success or a
    positive non-zero error code that is defined in the above enumeration that
@@ -224,7 +224,7 @@ enum
 
 char *t1rErrStr(int err_code);
 
-/* t1rErrStr() maps the "err_code" parameter to a null-terminated error 
+/* t1rErrStr() maps the "err_code" parameter to a null-terminated error
    string. */
 
 void t1rGetVersion(ctlVersionCallbacks *cb);

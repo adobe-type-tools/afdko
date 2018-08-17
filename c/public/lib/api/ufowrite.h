@@ -1,12 +1,13 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef UFOWRITE_H
 #define UFOWRITE_H
 
 #include "ctlshare.h"
 
-#define UFW_VERSION CTL_MAKE_VERSION(1,0,8)
+#define UFW_VERSION CTL_MAKE_VERSION(1, 0, 8)
 
 #include "absfont.h"
 
@@ -47,7 +48,7 @@ typedef struct ufwCtx_ *ufwCtx;
 ufwCtx ufwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
               CTL_CHECK_ARGS_DCL);
 
-#define UFW_CHECK_ARGS  CTL_CHECK_ARGS_CALL(UFW_VERSION)
+#define UFW_CHECK_ARGS CTL_CHECK_ARGS_CALL(UFW_VERSION)
 
 /* ufwNew() initializes the library and returns an opaque context that
    subsequently passed to all the other library functions. It must be the first
@@ -65,9 +66,9 @@ int ufwBegFont(ufwCtx h, long flags, char *glyphLayerDir);
    options enumerated below. Returns ufwSuccess on success. */
 
 enum /* enum too provide values for flags field. */
-    {
-    UFW_GLYPHNAMES_NONE     =    0, /* Include no glyph names (the default) */
-    };
+{
+    UFW_GLYPHNAMES_NONE = 0, /* Include no glyph names (the default) */
+};
 
 extern const abfGlyphCallbacks ufwGlyphCallbacks;
 
@@ -85,20 +86,19 @@ int ufwEndFont(ufwCtx h, abfTopDict *top);
 
 /* ufwEndFont() completes the definition of the font that commenced with
    ufwBegFont(). The "top" parameter specifies global font information via the
-   data structures described in absfont.h. */ 
+   data structures described in absfont.h. */
 
 void ufwFree(ufwCtx h);
 
 /* ufwFree() destroys the library context and all the resources allocated to
    it. It must be the last function called by a client of the library. */
 
-enum
-    {
+enum {
 #undef CTL_DCL_ERR
-#define CTL_DCL_ERR(name,string)    name,
+#define CTL_DCL_ERR(name, string) name,
 #include "ufowerr.h"
     ufwErrCount
-    };
+};
 
 /* Library functions return either zero (ufwSuccess) to indicate success or a
    positive non-zero error code that is defined in the above enumeration that
@@ -115,7 +115,7 @@ void ufwGetVersion(ctlVersionCallbacks *cb);
    callbacks passed with the "cb" parameter (see ctlshare.h). */
 
 #define MAX_UFO_GLYPH_NAME 256
-	
+
 #ifdef __cplusplus
 }
 #endif

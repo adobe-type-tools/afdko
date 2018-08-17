@@ -1,12 +1,13 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef DYNARR_H
 #define DYNARR_H
 
 #include "ctlshare.h"
 
-#define DNA_VERSION CTL_MAKE_VERSION(2,0,3)
+#define DNA_VERSION CTL_MAKE_VERSION(2, 0, 3)
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,15 +65,15 @@ extern "C" {
 
 typedef struct dnaCtx_ *dnaCtx;
 
-#define dnaDCL(type,da) \
-struct \
-    { \
-    dnaCtx ctx; \
-    type *array; \
-    long cnt; \
-    long size; \
-    long incr; \
-    void (*func)(void *ctx, long cnt, type *base); \
+#define dnaDCL(type, da)                               \
+    struct                                             \
+    {                                                  \
+        dnaCtx ctx;                                    \
+        type *array;                                   \
+        long cnt;                                      \
+        long size;                                     \
+        long incr;                                     \
+        void (*func)(void *ctx, long cnt, type *base); \
     } da
 
 /* dnaDCL() declares a dynamic array object with elements of type "type". */
@@ -108,8 +109,8 @@ dnaCtx dnaNew(ctlMemoryCallbacks *mem_cb, CTL_CHECK_ARGS_DCL);
 
 void dnaInit(dnaCtx ctx, void *object, size_t init, size_t incr, int check);
 
-#define dnaINIT(ctx,da,init,incr) \
-    dnaInit(ctx,(void *)(&(da)),init,incr,0)
+#define dnaINIT(ctx, da, init, incr) \
+    dnaInit(ctx, (void *)(&(da)), init, incr, 0)
 
 /* dnaINIT() initializes the dynamic array before its first use. The "init"
    parameter specifies the initial number of elements to be allocated to the
@@ -131,8 +132,8 @@ void dnaInit(dnaCtx ctx, void *object, size_t init, size_t incr, int check);
    parameter and is simply a copy of the client context provided to the dna
    library in ctlMemoryCallbacks.ctx field. */
 
-#define dnaINIT_FIRST(ctx,da,init,incr) \
-    dnaInit(ctx,(void *)(&(da)),init,incr,1)
+#define dnaINIT_FIRST(ctx, da, init, incr) \
+    dnaInit(ctx, (void *)(&(da)), init, incr, 1)
 
 /* dnaINIT_FIRST() is identical to dnaINIT() except that it will only
    initialize the dynamic array on its first call. */
@@ -169,48 +170,48 @@ long dnaExtend(void *object, size_t elemsize, long length);
    callback, for example by longjmp() or exit(). */
 
 #define DNA_DA_ADDR_(da) \
-	((void*)(&(da)))
+    ((void *)(&(da)))
 
 #define DNA_ELEM_SIZE_(da) \
-	(sizeof((da).array[0]))
+    (sizeof((da).array[0]))
 
-#define DNA_ELEM_ADDR_(da,i) \
-	(&(da).array[(i)])
+#define DNA_ELEM_ADDR_(da, i) \
+    (&(da).array[(i)])
 
-#define dnaSET_CNT(da,n) \
-    (void)dnaSetCnt(DNA_DA_ADDR_(da),DNA_ELEM_SIZE_(da),(n))
+#define dnaSET_CNT(da, n) \
+    (void)dnaSetCnt(DNA_DA_ADDR_(da), DNA_ELEM_SIZE_(da), (n))
 
 /* dnaSET_CNT() grows the array to accommodate a total of "n" elements and
    sets the da.cnt field to "n". */
 
-#define dnaGROW(da,i) \
-    ((void)dnaGrow(DNA_DA_ADDR_(da),DNA_ELEM_SIZE_(da),(i)),(da).array)
+#define dnaGROW(da, i) \
+    ((void)dnaGrow(DNA_DA_ADDR_(da), DNA_ELEM_SIZE_(da), (i)), (da).array)
 
 /* dnaGROW() grows the array to accommodate the "i"th element and returns
    the address of the first element of the array. The da.cnt field is
    unaltered. */
 
-#define dnaINDEX(da,i) \
-    ((void)dnaIndex(DNA_DA_ADDR_(da),DNA_ELEM_SIZE_(da),(i)),DNA_ELEM_ADDR_((da),(i)))
+#define dnaINDEX(da, i) \
+    ((void)dnaIndex(DNA_DA_ADDR_(da), DNA_ELEM_SIZE_(da), (i)), DNA_ELEM_ADDR_((da), (i)))
 
 /* dnaINDEX() grow the array to accommodate the "i"th element and returns
    its address. The da.cnt field is unaltered. */
 
-#define dnaMAX(da,i) \
-    ((void)dnaMax(DNA_DA_ADDR_(da),DNA_ELEM_SIZE_(da),(i)),DNA_ELEM_ADDR_((da),(i)))
+#define dnaMAX(da, i) \
+    ((void)dnaMax(DNA_DA_ADDR_(da), DNA_ELEM_SIZE_(da), (i)), DNA_ELEM_ADDR_((da), (i)))
 
 /* dnaMAX() is the same as dnaINDEX() except that the da.cnt field is set to
    be one greater than the maximum index accomodated. */
 
 #define dnaNEXT(da) \
-    ((void)dnaNext(DNA_DA_ADDR_(da),DNA_ELEM_SIZE_(da)),DNA_ELEM_ADDR_((da),(da).cnt-1))
+    ((void)dnaNext(DNA_DA_ADDR_(da), DNA_ELEM_SIZE_(da)), DNA_ELEM_ADDR_((da), (da).cnt - 1))
 
 /* dnaNEXT() grows the array to accommodate the next element (da.cnt) and
    returns its address. The da.cnt field is incremented by 1. */
 
-#define dnaEXTEND(da,len) \
-    ((void)dnaExtend(DNA_DA_ADDR_(da),DNA_ELEM_SIZE_(da),(len)),DNA_ELEM_ADDR_((da),(da).cnt-(len)))
-	 
+#define dnaEXTEND(da, len) \
+    ((void)dnaExtend(DNA_DA_ADDR_(da), DNA_ELEM_SIZE_(da), (len)), DNA_ELEM_ADDR_((da), (da).cnt - (len)))
+
 /* dnaEXTEND() extends the dynamic array by "len" elements and returns the
    address of the first element of the extension. The da.cnt fields is
    increment by "len". */

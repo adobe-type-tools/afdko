@@ -1,5 +1,6 @@
 /* Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef NAMEREAD_H
 #define NAMEREAD_H
@@ -19,57 +20,56 @@ extern "C" {
 
 /* constants/types */
 
-typedef struct					/* name record */
-	{
-	unsigned short platformId;
-	unsigned short platspecId;
-	unsigned short languageId;
-	unsigned short nameId;
-	unsigned short length;
-	unsigned long offset;
-	} nam_NameRecord;
+typedef struct /* name record */
+{
+    unsigned short platformId;
+    unsigned short platspecId;
+    unsigned short languageId;
+    unsigned short nameId;
+    unsigned short length;
+    unsigned long offset;
+} nam_NameRecord;
 
-struct nam_name_;					/* name table */
+struct nam_name_; /* name table */
 typedef struct nam_name_ *nam_name;
 
 /* name and cmap table platform and platform-specific ids */
-enum
-	{
-	/* Platform ids */
-	NAME_UNI_PLATFORM	= 0,		/* Unicode */
-	NAME_MAC_PLATFORM	= 1,		/* Macintosh */
-	NAME_WIN_PLATFORM	= 3,		/* Microsoft */
+enum {
+    /* Platform ids */
+    NAME_UNI_PLATFORM = 0, /* Unicode */
+    NAME_MAC_PLATFORM = 1, /* Macintosh */
+    NAME_WIN_PLATFORM = 3, /* Microsoft */
 
-	/* Unicode platform-specific ids */
-	NAME_UNI_DEFAULT	= 0,		/* Default semantics */
-	NAME_UNI_VER_1_1	= 1,		/* Version 1.1 semantics */
-	NAME_UNI_ISO_10646	= 2,		/* ISO 10646 semantics */
-	NAME_UNI_VER_2_0	= 3,		/* Version 2.0 semantics */
-	
-	/* Macintosh platform-specific and language ids */
-	NAME_MAC_ROMAN		= 0,		/* Roman */
-	NAME_MAC_ENGLISH	= 0,		/* English language */
-	
-	/* Windows platform-specific and language ids */
-	NAME_WIN_SYMBOL		= 0,		/* Undefined index scheme */
-	NAME_WIN_UGL		= 1,		/* UGL */
-	NAME_WIN_ENGLISH	= 0x409		/* English (American) language */
-	};
+    /* Unicode platform-specific ids */
+    NAME_UNI_DEFAULT =   0, /* Default semantics */
+    NAME_UNI_VER_1_1 =   1, /* Version 1.1 semantics */
+    NAME_UNI_ISO_10646 = 2, /* ISO 10646 semantics */
+    NAME_UNI_VER_2_0 =   3, /* Version 2.0 semantics */
+
+    /* Macintosh platform-specific and language ids */
+    NAME_MAC_ROMAN =   0, /* Roman */
+    NAME_MAC_ENGLISH = 0, /* English language */
+
+    /* Windows platform-specific and language ids */
+    NAME_WIN_SYMBOL =  0,    /* Undefined index scheme */
+    NAME_WIN_UGL =     1,    /* UGL */
+    NAME_WIN_ENGLISH = 0x409 /* English (American) language */
+};
 
 /* name IDs */
 enum {
-    NAME_ID_COPYRIGHT   = 0,         /* copyright notice */
-    NAME_ID_FAMILY      = 1,         /* family name */
-    NAME_ID_SUBFAMILY   = 2,         /* sub-family name */
-    NAME_ID_UNIQUEID    = 3,         /* unique font identifier */
-    NAME_ID_FULL        = 4,         /* full name */
-    NAME_ID_VERSION     = 5,         /* version */
-    NAME_ID_POSTSCRIPT  = 6,         /* Postscript font name */
-    NAME_ID_TRADEMARK   = 7,         /* trademark */
-    NAME_ID_TYPO_FAMILY = 16,        /* typographic family name */
-    NAME_ID_CIDFONTNAME = 20,        /* CID font name */
-    NAME_ID_POSTSCRIPT_PREFIX = 25   /* Postscript font name prefix */
-    };
+    NAME_ID_COPYRIGHT =          0, /* copyright notice */
+    NAME_ID_FAMILY =             1, /* family name */
+    NAME_ID_SUBFAMILY =          2, /* sub-family name */
+    NAME_ID_UNIQUEID =           3, /* unique font identifier */
+    NAME_ID_FULL =               4, /* full name */
+    NAME_ID_VERSION =            5, /* version */
+    NAME_ID_POSTSCRIPT =         6, /* Postscript font name */
+    NAME_ID_TRADEMARK =          7, /* trademark */
+    NAME_ID_TYPO_FAMILY =       16, /* typographic family name */
+    NAME_ID_CIDFONTNAME =       20, /* CID font name */
+    NAME_ID_POSTSCRIPT_PREFIX = 25  /* Postscript font name prefix */
+};
 
 /* functions */
 nam_name nam_loadname(sfrCtx sfr, ctlSharedStmCallbacks *sscb);
@@ -92,10 +92,10 @@ void nam_freename(ctlSharedStmCallbacks *sscb, nam_name tbl);
 */
 
 nam_NameRecord *nam_nameFind(nam_name tbl,
-							unsigned short platformId,
-							unsigned short platspecId,
-							unsigned short languageId,
-							unsigned short nameId);
+                             unsigned short platformId,
+                             unsigned short platspecId,
+                             unsigned short languageId,
+                             unsigned short nameId);
 
 /*  nam_nameFind() looks up the name table for a name record.
     A pointer to a found name record is returned.
@@ -113,16 +113,16 @@ nam_NameRecord *nam_nameFind(nam_name tbl,
 */
 
 enum {
-    NAME_READ_FAILED            = 0,
-    NAME_READ_NAME_NOT_FOUND    = -1,
-    NAME_READ_NAME_TOO_LONG     = -2
+    NAME_READ_FAILED =          0,
+    NAME_READ_NAME_NOT_FOUND = -1,
+    NAME_READ_NAME_TOO_LONG =  -2
 };
 
 long nam_getASCIIName(nam_name tbl,
-                    ctlSharedStmCallbacks *sscb,
-                    char *buffer, unsigned long bufferLen,
-                    unsigned short nameId,
-                    int isPS);
+                      ctlSharedStmCallbacks *sscb,
+                      char *buffer, unsigned long bufferLen,
+                      unsigned short nameId,
+                      int isPS);
 
 /*  nam_getASCIIName() looks up the name table for an ASCII name string specified by a name ID.
     If a name string contains any Unicode characters outside of the ASCII range,
@@ -148,8 +148,8 @@ long nam_getASCIIName(nam_name tbl,
 */
 
 long nam_getFamilyNamePrefix(nam_name nameTbl,
-                            ctlSharedStmCallbacks *sscb,
-                            char *buffer, unsigned long bufferLen);
+                             ctlSharedStmCallbacks *sscb,
+                             char *buffer, unsigned long bufferLen);
 /*  nam_getFamilyNamePrefix() returns a font name prefix string to be used
     to name a CFF2 variable font instance.
     The length of the name is returned as the result.
@@ -170,12 +170,12 @@ long nam_getFamilyNamePrefix(nam_name nameTbl,
     bufferLen-1. */
 
 long nam_getNamedInstancePSName(nam_name nameTbl,
-                            var_axes axesTbl,
-                            ctlSharedStmCallbacks *sscb,
-                            float *coords,
-                            unsigned short axisCount,
-                            int instanceIndex,
-                            char *instanceName, unsigned long instanceNameLen);
+                                var_axes axesTbl,
+                                ctlSharedStmCallbacks *sscb,
+                                float *coords,
+                                unsigned short axisCount,
+                                int instanceIndex,
+                                char *instanceName, unsigned long instanceNameLen);
 
 /*  nam_getNamedInstancePSName() looks up the fvar table for a named instnace of a CFF2 variable font
     specified either by its instance index or a design vector of the instance.
@@ -204,11 +204,11 @@ long nam_getNamedInstancePSName(nam_name nameTbl,
     instanceNameLen-1. */
 
 long nam_generateArbitraryInstancePSName(nam_name nameTbl,
-                            var_axes axesTbl,
-                            ctlSharedStmCallbacks *sscb,
-                            float *coords,
-                            unsigned short axisCount,
-                            char *instanceName, unsigned long instanceNameLen);
+                                         var_axes axesTbl,
+                                         ctlSharedStmCallbacks *sscb,
+                                         float *coords,
+                                         unsigned short axisCount,
+                                         char *instanceName, unsigned long instanceNameLen);
 
 /*  nam_generateArbitraryInstancePSName() generate a PS name of an arbitrary instance
     of a CFF2 variable font specified by a design vector of the instance.
@@ -233,11 +233,11 @@ long nam_generateArbitraryInstancePSName(nam_name nameTbl,
     instanceNameLen-1. */
 
 long nam_generateLastResortInstancePSName(nam_name nameTbl,
-                                var_axes axesTbl,
-                                ctlSharedStmCallbacks *sscb,
-                                float *coords,
-                                unsigned short axisCount,
-                                char *instanceName, unsigned long instanceNameLen);
+                                          var_axes axesTbl,
+                                          ctlSharedStmCallbacks *sscb,
+                                          float *coords,
+                                          unsigned short axisCount,
+                                          char *instanceName, unsigned long instanceNameLen);
 
 /*  nam_generateLastResortInstancePSName() generates a unique PostScript font name
     for the specified instance of a CFF2 variable font by hashing the coordinate values

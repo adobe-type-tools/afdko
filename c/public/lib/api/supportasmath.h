@@ -1,15 +1,13 @@
-/* @(#)CM_VerSion ASMath.h atm09 1.2 16563.eco sum= 55706 atm09.004 */
-/* @(#)CM_VerSion ASMath.h atm08 1.2 16390.eco sum= 08986 atm08.007 */
-/* @(#)CM_VerSion ASMath.h 3011 1.2 21403.eco sum= 64692 3011.002 */
-/* @(#)CM_VerSion ASMath.h 3010 1.3 19979.eco sum= 63982 3010.102 */
+/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
+
 /*
   ASMath.h
 */
-/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef	_H_ASMATH
-#define	_H_ASMATH
+#ifndef _H_ASMATH
+#define _H_ASMATH
 
 #include "supportenvironment.h"
 #include "supportasbasic.h"
@@ -82,7 +80,7 @@ extern "C" {
    compiler performs automatic float to double promotion.
  */
 
-extern double os_atan2( double num, double den);
+extern double os_atan2(double num, double den);
 /* Returns the angle (in radians between -pi and pi) whose tangent is
    num/den. Either num or den may be zero, but not both. The signs
    of num and den determine the quadrant in which the result will
@@ -90,49 +88,49 @@ extern double os_atan2( double num, double den);
    a positive den yields a result in the positive x plane.
  */
 
-extern double os_ceil( double x);
+extern double os_ceil(double x);
 /* Returns the least integer value greater than or equal to x. */
 
-extern double os_cos( double x);
+extern double os_cos(double x);
 /* Returns the cosine of x, where x represents an angle in radians. */
 
-extern double os_exp( double x);
+extern double os_exp(double x);
 /* Returns the exponential of x. */
 
-extern double os_floor( double x);
+extern double os_floor(double x);
 /* Returns the greatest integer value less than or equal to x. */
 
-extern double os_frexp( double x, ASInt32 * exp);
+extern double os_frexp(double x, ASInt32 *exp);
 /* Stores an exponent in *exp and returns a value in the interval
    [0.5, 1.0) such that value * 2**exponent = x. If x is zero,
    both *exp and the returned value are set to zero.
  */
 
-extern double os_ldexp( double x, ASInt32 exp);
+extern double os_ldexp(double x, ASInt32 exp);
 /* Returns the value x * 2**exp. If the result is too large to represent,
    an exception is raised; if an underflow occurs, zero is substituted. */
 
-extern double os_log( double x);
+extern double os_log(double x);
 /* Returns the natural (base e) logarithm of x. */
 
-extern double os_log10( double x);
+extern double os_log10(double x);
 /* Returns the common (base 10) logarithm of x. */
 
-extern double os_modf( double x, double * ipart);
+extern double os_modf(double x, double *ipart);
 /* Breaks the value x into integer and fractional parts; stores the
    integer part in *ipart and returns the fractional part. Both
    results have the same sign as x.
  */
 
-extern double os_pow( double base, double exp);
+extern double os_pow(double base, double exp);
 /* Returns base**exp, i.e., base raised to the exp power. If base is
    negative, exp must be an integer; otherwise an error is raised.
  */
 
-extern double os_sin( double x);
+extern double os_sin(double x);
 /* Returns the sine of x, where x represents an angle in radians. */
 
-extern double os_sqrt( double x);
+extern double os_sqrt(double x);
 /* Returns the square root of x. */
 
 #endif /* NOT_USE_NATIVE_MATH_LIBS */
@@ -150,7 +148,7 @@ extern double os_sqrt( double x);
 
 /* Exported Procedures */
 
-extern char *os_ecvt( double value, int ndigits, int * decpt, int * sign);
+extern char *os_ecvt(double value, int ndigits, int *decpt, int *sign);
 /* Converts value to a null-terminated string containing ndigits
    ASCII decimal digits and returns a pointer to the resulting string.
    The string contains no decimal point or other punctuation, only digits.
@@ -169,7 +167,7 @@ extern char *os_ecvt( double value, int ndigits, int * decpt, int * sign);
    again.
  */
 
-extern char *os_fcvt( double value, int ndigits, int * decpt, int * sign);
+extern char *os_fcvt(double value, int ndigits, int *decpt, int *sign);
 /* Similar to os_ecvt. However, ndigits specifies the number of digits
    to be produced to the right of the decimal point, rather than the
    total number of digits. Thus, the resulting string can have more
@@ -190,7 +188,7 @@ extern ASBool os_isnan(double d);
    other than infinity.
  */
 
-extern double os_atof( const char * str);
+extern double os_atof(const char *str);
 /* Converts a string *str to a floating point number and returns it.
    The string consists of zero or more tabs and spaces, an optional
    sign, a series of digits optionally containing a decimal point,
@@ -203,20 +201,17 @@ extern double os_atof( const char * str);
 
 /* Inline procedures */
 
-
-#define os_abs(x)	((x)<0?-(x):(x))
+#define os_abs(x) ((x) < 0 ? -(x) : (x))
 /* Returns the absolute value of whatever is passed in, no matter the
    type. Whatever is passed in may be evaluated twice, so it should never be
    used with an expression - those can be passed to  either os_labs for
    an integer expression or os_fabs for a float expression.
 */
 
-#define os_labs(x)	((ASInt32)((x)<0?-(x):(x)))
+#define os_labs(x) ((ASInt32)((x) < 0 ? -(x) : (x)))
 /* Similar to os_abs, but restricted to integers */
 
 /* See also os_fabs (below) */
-
-
 
 /*
  * Floating Point Interface
@@ -224,18 +219,22 @@ extern double os_atof( const char * str);
 
 /* Data Structures */
 
-typedef union {	/* Floating point representations */
-  float native;	/* whatever the native format is */
+typedef union {   /* Floating point representations */
+    float native; /* whatever the native format is */
 #if SWAPBITS
-  struct {unsigned fraction: 23, exponent: 8, sign: 1;} ieee;
+    struct {
+        unsigned fraction : 23, exponent : 8, sign : 1;
+    } ieee;
     /* IEEE float, low-order byte first */
-#else    /*  SWAPBITS  */
-  struct {unsigned sign: 1, exponent: 8, fraction: 23;} ieee;
+#else  /*  SWAPBITS  */
+    struct {
+        unsigned sign : 1, exponent : 8, fraction : 23;
+    } ieee;
     /* IEEE float, high-order byte first */
-#endif   /*  SWAPBITS  */
-  unsigned char bytes[4];
+#endif /*  SWAPBITS  */
+    unsigned char bytes[4];
     /* raw bytes, in whatever order they appear in memory */
-  } ASFloatRep;
+} ASFloatRep;
 
 /* Exported Procedures */
 
@@ -262,41 +261,41 @@ typedef union {	/* Floating point representations */
    to) type "FloatRep *" in order to satisfy alignment requirements.
 */
 
-#define ASCopySwap4(from, to) \
-  (((ASFloatRep *) to)->bytes[0] = ((ASFloatRep *) from)->bytes[3], \
-   ((ASFloatRep *) to)->bytes[1] = ((ASFloatRep *) from)->bytes[2], \
-   ((ASFloatRep *) to)->bytes[2] = ((ASFloatRep *) from)->bytes[1], \
-   ((ASFloatRep *) to)->bytes[3] = ((ASFloatRep *) from)->bytes[0] )
+#define ASCopySwap4(from, to)                                       \
+    (((ASFloatRep *)to)->bytes[0] = ((ASFloatRep *)from)->bytes[3], \
+     ((ASFloatRep *)to)->bytes[1] = ((ASFloatRep *)from)->bytes[2], \
+     ((ASFloatRep *)to)->bytes[2] = ((ASFloatRep *)from)->bytes[1], \
+     ((ASFloatRep *)to)->bytes[3] = ((ASFloatRep *)from)->bytes[0])
 
 #if AS_IEEEFLOAT
 
 #if SWAPBITS
-#define IEEELowToNative(from, to) *(to) = ((ASFloatRep *) from)->native
-#define NativeToIEEELow(from, to) ((ASFloatRep *) to)->native = *(from)
+#define IEEELowToNative(from, to) *(to) = ((ASFloatRep *)from)->native
+#define NativeToIEEELow(from, to) ((ASFloatRep *)to)->native = *(from)
 #define IEEEHighToNative(from, to) ASCopySwap4((from), (to))
 #define NativeToIEEEHigh(from, to) ASCopySwap4((from), (to))
-#else   /*  SWAPBITS  */
-#define IEEEHighToNative(from, to) *(to) = ((ASFloatRep *) from)->native
-#define NativeToIEEEHigh(from, to) ((ASFloatRep *) to)->native = *(from)
+#else /*  SWAPBITS  */
+#define IEEEHighToNative(from, to) *(to) = ((ASFloatRep *)from)->native
+#define NativeToIEEEHigh(from, to) ((ASFloatRep *)to)->native = *(from)
 #define IEEELowToNative(from, to) ASCopySwap4((from), (to))
 #define NativeToIEEELow(from, to) ASCopySwap4((from), (to))
-#endif  /*  SWAPBITS  */
+#endif /*  SWAPBITS  */
 
-#else   /*  AS_IEEEFLOAT  */
+#else /*  AS_IEEEFLOAT  */
 
-extern void IEEEHighToNative( ASFloatRep * from, float * to );
+extern void IEEEHighToNative(ASFloatRep *from, float *to);
 /* Converts from IEEE high-byte-first float to native float. */
 
-extern void NativeToIEEEHigh( float * from, ASFloatRep * to);
+extern void NativeToIEEEHigh(float *from, ASFloatRep *to);
 /* Converts from native float to IEEE high-byte-first float. */
 
-extern void IEEELowToNative( ASFloatRep * from, float * to);
+extern void IEEELowToNative(ASFloatRep *from, float *to);
 /* Converts from IEEE low-byte-first float to native float. */
 
-extern void NativeToIEEELow(float * from, ASFloatRep * to);
+extern void NativeToIEEELow(float *from, ASFloatRep *to);
 /* Converts from native float to IEEE low-byte-first float. */
 
-#endif  /*  AS_IEEEFLOAT  */
+#endif /*  AS_IEEEFLOAT  */
 
 /* Inline Procedures */
 
@@ -314,21 +313,21 @@ extern void NativeToIEEELow(float * from, ASFloatRep * to);
 
 #if AS_IEEESOFT
 #define ASRtoILOOPHOLE(r) (*(ASInt32 *)(&(r)))
-#define ASRealScheck(r) (sizeof(r)==sizeof(float))
-#define ASRealEq0(r) (ASRealScheck(r)?((ASRtoILOOPHOLE(r)<<1)==0):(r)==0)
-#define ASRealNe0(r) (ASRealScheck(r)?((ASRtoILOOPHOLE(r)<<1)!=0):(r)!=0)
-#define ASRealGt0(r) (ASRealScheck(r)?(ASRtoILOOPHOLE(r)>0):(r)>0)
-#define ASRealGe0(r) (ASRealScheck(r)?((ASRtoILOOPHOLE(r)>=0)||ASRealEq0(r)):(r)>=0)
-#define ASRealLt0(r) (ASRealScheck(r)?((ASRtoILOOPHOLE(r)<0)&&ASRealNe0(r)):(r)<0)
-#define ASRealLe0(r) (ASRealScheck(r)?(ASRtoILOOPHOLE(r)<=0):(r)<=0)
-#else   /*  AS_IEEESOFT  */
-#define ASRealEq0(r) ((r)==((float)0.0))
-#define ASRealNe0(r) ((r)!=((float)0.0))
-#define ASRealGt0(r) ((r)>((float)0.0))
-#define ASRealGe0(r) ((r)>=((float)0.0))
-#define ASRealLt0(r) ((r)<((float)0.0))
-#define ASRealLe0(r) ((r)<=((float)0.0))
-#endif  /*  AS_IEEESOFT  */
+#define ASRealScheck(r) (sizeof(r) == sizeof(float))
+#define ASRealEq0(r) (ASRealScheck(r) ? ((ASRtoILOOPHOLE(r) << 1) == 0) : (r) == 0)
+#define ASRealNe0(r) (ASRealScheck(r) ? ((ASRtoILOOPHOLE(r) << 1) != 0) : (r) != 0)
+#define ASRealGt0(r) (ASRealScheck(r) ? (ASRtoILOOPHOLE(r) > 0) : (r) > 0)
+#define ASRealGe0(r) (ASRealScheck(r) ? ((ASRtoILOOPHOLE(r) >= 0) || ASRealEq0(r)) : (r) >= 0)
+#define ASRealLt0(r) (ASRealScheck(r) ? ((ASRtoILOOPHOLE(r) < 0) && ASRealNe0(r)) : (r) < 0)
+#define ASRealLe0(r) (ASRealScheck(r) ? (ASRtoILOOPHOLE(r) <= 0) : (r) <= 0)
+#else /*  AS_IEEESOFT  */
+#define ASRealEq0(r) ((r) == ((float)0.0))
+#define ASRealNe0(r) ((r) != ((float)0.0))
+#define ASRealGt0(r) ((r) > ((float)0.0))
+#define ASRealGe0(r) ((r) >= ((float)0.0))
+#define ASRealLt0(r) ((r) < ((float)0.0))
+#define ASRealLe0(r) ((r) <= ((float)0.0))
+#endif /*  AS_IEEESOFT  */
 
 #define AS_RAD(a) ((a)*1.745329251994329577e-2)
 /* Converts the float or double value a from degrees to radians. */
@@ -337,10 +336,10 @@ extern void NativeToIEEELow(float * from, ASFloatRep * to);
 /* Converts the float or double value x from radians to degrees. */
 
 #if AS_IEEEFLOAT
-#define ASIsValidReal(pReal) (((ASFloatRep *) pReal)->ieee.exponent != 255)
-#else   /*  AS_IEEEFLOAT  */
-extern ASBool ASIsValidReal(float * pReal);
-#endif  /*  AS_IEEEFLOAT  */
+#define ASIsValidReal(pReal) (((ASFloatRep *)pReal)->ieee.exponent != 255)
+#else  /*  AS_IEEEFLOAT  */
+extern ASBool ASIsValidReal(float *pReal);
+#endif /*  AS_IEEEFLOAT  */
 /* Returns true iff the float at *pReal is a valid floating point number
    (i.e., not infinity, NaN, reserved operand, etc.) */
 
@@ -389,18 +388,17 @@ extern ASFixed ASTFixedDiv(ASFixed x, ASFixed y);
    representable value, it truncates toward zero. It thus guarantees
    that |q| * |y| <= |x|, where q is the returned quotient. */
 
-extern ASFixed ASUFixedRatio( ASUns32 x, ASUns32 y);
+extern ASFixed ASUFixedRatio(ASUns32 x, ASUns32 y);
 /* Divides the ASUns32 x by the ASUns32 y and returns a ASFixed result. */
-
 
 /* The following type conversions pass their float arguments and results
    by value; the C language forces them to be of type double.
  */
 
-extern double ASFixedToDouble( Fixed x);
+extern double ASFixedToDouble(Fixed x);
 /* Converts the ASFixed number x to a double. */
 
-extern Fixed ASDoubleToFixed( double  d);
+extern Fixed ASDoubleToFixed(double d);
 /* Converts the double d to a ASFixed. */
 
 /* The following type conversions pass their float arguments and results
@@ -411,48 +409,46 @@ extern Fixed ASDoubleToFixed( double  d);
    actually of type double!
  */
 
-extern void ASFixedToPFloat( ASFixed x, float * pf);
+extern void ASFixedToPFloat(ASFixed x, float *pf);
 /* Converts the ASFixed number x to a float and stores the result at *pf. */
 
-extern ASFixed ASPFloatToFixed(float * pf);
+extern ASFixed ASPFloatToFixed(float *pf);
 /* Converts the float number at *pf to a ASFixed and returns it. */
-
 
 /* Inline Procedures */
 
 /* ASInt32 <-> ASFixed */
-#define ASInt32ToFixed(i)		((ASFixed)(i) << 16)
+#define ASInt32ToFixed(i) ((ASFixed)(i) << 16)
 /* Converts the integer x to a ASFixed and returns it. */
 
-#define ASFixedRoundToInt32(f)	((ASInt32) (((f) + (1<<15)) >> 16))
+#define ASFixedRoundToInt32(f) ((ASInt32)(((f) + (1 << 15)) >> 16))
 /* Converts the ASFixed number x to an integer, rounding it to the
    nearest integer value, and returns it. */
 
-#define ASFixedTruncToInt32(f)	((ASInt32) ((f) >> 16))
+#define ASFixedTruncToInt32(f) ((ASInt32)((f) >> 16))
 /* Converts the ASFixed number x to an integer, truncating it to the
    next lower integer value, and returns it. */
 
-#define ASFCeil(x) (((ASInt32)((x)+0xFFFFL))>>16)
+#define ASFCeil(x) (((ASInt32)((x) + 0xFFFFL)) >> 16)
 /* Returns the smallest integer greater that or equal to the ASFixed number
    x. */
 
-#define ASFRound4(x) (((((ASInt32)(x))+(1<<17))>>18)<<2)
+#define ASFRound4(x) (((((ASInt32)(x)) + (1 << 17)) >> 18) << 2)
 /* Converts the ASFixed number x to an integer, rounding it to the
    nearest multiple of 4, and returns it. */
 
-#define ASFTruncF(x) ((ASFixed)((ASInt32)(x) & 0xFFFF0000L))
-#define ASFCeilF(x) ((ASFixed) (((x) + 0xFFFFL) & 0xFFFF0000L))
-#define ASFRoundF(x) ((((ASInt32)(x))+0x8000L) & (ASInt32)0xFFFF0000L)
+#define ASFTruncF(x) ((ASFixed)((ASInt32)(x)&0xFFFF0000L))
+#define ASFCeilF(x) ((ASFixed)(((x) + 0xFFFFL) & 0xFFFF0000L))
+#define ASFRoundF(x) ((((ASInt32)(x)) + 0x8000L) & (ASInt32)0xFFFF0000L)
 /* Like above but return ASFixed instead of integer. */
 
-#define ASFFloorF4(x) ((ASFixed)((ASInt32)(x) & 0xFFFC0000L))
-/* Takes ASFixed number x, rounding it down to the nearest 
+#define ASFFloorF4(x) ((ASFixed)((ASInt32)(x)&0xFFFC0000L))
+/* Takes ASFixed number x, rounding it down to the nearest
    multiple of 4, and returns it. */
 
 #define ASFCeilF4(x) (ASFFloorF4((x) + 0x3FFFF))
 /* Takes ASFixed number x, rounding it up to the nearest
    multiple of 4, and returns it. */
-
 
 /*
  * Double precision integer interface
@@ -460,13 +456,15 @@ extern ASFixed ASPFloatToFixed(float * pf);
 
 /* Data structures */
 
-typedef struct _t_ASInt64struct {		/* Double precision integer */
+typedef struct _t_ASInt64struct { /* Double precision integer */
 #if SWAPBITS
-  ASUns32 l; ASInt32 h;
-#else   /*  SWAPBITS  */
-  ASInt32 h; ASUns32 l;
-#endif  /*  SWAPBITS  */
-  } ASInt64struct;
+    ASUns32 l;
+    ASInt32 h;
+#else  /*  SWAPBITS  */
+    ASInt32 h;
+    ASUns32 l;
+#endif /*  SWAPBITS  */
+} ASInt64struct;
 
 /* Exported Procedures */
 
@@ -475,33 +473,33 @@ typedef struct _t_ASInt64struct {		/* Double precision integer */
    point numbers with their binary point in an arbitrary position.
    This does not hold for os_dpmul or os_dpdiv. */
 
-extern void os_dpneg( ASInt64struct* pa, ASInt64struct* pResult );
+extern void os_dpneg(ASInt64struct *pa, ASInt64struct *pResult);
 /* Computes the negative of the double-precision integer in *pa
    and stores the result in *pResult. Overflow is not detected.
    It is acceptable for pResult to be the same as pa. */
 
-extern void os_dpadd( ASInt64struct* pa, ASInt64struct* pb, ASInt64struct* pResult );
+extern void os_dpadd(ASInt64struct *pa, ASInt64struct *pb, ASInt64struct *pResult);
 /* Computes the sum of the double-precision integers in *pa and *pb
    and stores the result in *pResult. Overflow is not detected.
    It is acceptable for pResult to be the same as either pa or pb. */
 
-extern void os_dpsub( ASInt64struct* pa, ASInt64struct* pb, ASInt64struct* pResult );
+extern void os_dpsub(ASInt64struct *pa, ASInt64struct *pb, ASInt64struct *pResult);
 /* Computes the difference of the double-precision integers in *pa and *pb
    and stores the result in *pResult. Overflow is not detected.
    It is acceptable for pResult to be the same as either pa or pb. */
 
-extern void os_dpmul( ASInt32 a, ASInt32 b, ASInt64struct* pResult );
+extern void os_dpmul(ASInt32 a, ASInt32 b, ASInt64struct *pResult);
 /* Computes the signed product of a and b and stores the double-precision
    result in *pResult. It is not possible for an overflow to occur. */
 
-extern ASInt32 os_dpdiv( ASInt64struct* pa, ASInt32 b, ASBool round );
+extern ASInt32 os_dpdiv(ASInt64struct *pa, ASInt32 b, ASBool round);
 /* Divides the double-precision integer in *pa by the single-precision
    integer b and returns the quotient. If round is true, the quotient
    is rounded to the nearest integer; otherwise it is truncated
    toward zero. If an overflow occurs, MAXinteger or MINinteger is
    returned (no overflow or underflow traps ever occur). */
 
-extern ASInt32 os_muldiv( ASInt32 a, ASInt32 b, ASInt32 c, ASBool round );
+extern ASInt32 os_muldiv(ASInt32 a, ASInt32 b, ASInt32 c, ASBool round);
 /* Computes the expression (a*b)/c, retaining full intermediate precision;
    the result is rounded or truncated to single precision only after the
    division. The descriptions of os_dpmul and os_dpdiv pertain here also. */
@@ -509,4 +507,4 @@ extern ASInt32 os_muldiv( ASInt32 a, ASInt32 b, ASInt32 c, ASBool round );
 #ifdef __cplusplus
 }
 #endif
-#endif	 /* _H_ASMATH */
+#endif /* _H_ASMATH */

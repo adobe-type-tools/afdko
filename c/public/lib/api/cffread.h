@@ -1,12 +1,13 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef CFFREAD_H
 #define CFFREAD_H
 
 #include "ctlshare.h"
 
-#define CFR_VERSION CTL_MAKE_VERSION(2,1,0)
+#define CFR_VERSION CTL_MAKE_VERSION(2, 1, 0)
 
 #include "absfont.h"
 
@@ -58,17 +59,17 @@ cfrCtx cfrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 
 int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top, float *UDV);
 
-#define CFR_UPDATE_OPS  (1<<0)
-#define CFR_USE_MATRIX  (1<<1)
-#define CFR_NO_ENCODING (1<<2)
-#define CFR_SHALLOW_READ   (1<<3)
-#define CFR_IS_CUBE   (1<<4)
-#define CFR_FLATTEN_CUBE   (1<<5)
-#define CFR_SEEN_GLYPH (1<<6) /* have seen a glyph */
-#define CFR_CUBE_RND (1<<7)
-#define CFR_FLATTEN_VF   (1<<8)
-#define CFR_SHORT_VF_NAME   (1<<9)
-#define CFR_UNUSE_VF_NAMED_INSTANCE   (1<<10)
+#define CFR_UPDATE_OPS              (1 << 0)
+#define CFR_USE_MATRIX              (1 << 1)
+#define CFR_NO_ENCODING             (1 << 2)
+#define CFR_SHALLOW_READ            (1 << 3)
+#define CFR_IS_CUBE                 (1 << 4)
+#define CFR_FLATTEN_CUBE            (1 << 5)
+#define CFR_SEEN_GLYPH              (1 << 6) /* have seen a glyph */
+#define CFR_CUBE_RND                (1 << 7)
+#define CFR_FLATTEN_VF              (1 << 8)
+#define CFR_SHORT_VF_NAME           (1 << 9)
+#define CFR_UNUSE_VF_NAMED_INSTANCE (1 << 10)
 
 /* cfrBegFont() is called to initiate a new font parse. The source data stream
    (CFR_SRC_STREAM_ID) is opened, positioned at the offset specified by the
@@ -76,14 +77,14 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
    structure pointed to by the "top" parameter (which will remain stable until
    cfrEndFont() is called).
 
-    The "origin" parameter can either be the stream offset of the first
-    byte of a CFF header or the first byte of an OpenType font (OTF), or
-    the first byte of an TTC font which contains OTF fonts. In the latter
-    two cases the library will automatically locate the CFF table and
-    seek to it before attempting to parse the CFF data.
+   The "origin" parameter can either be the stream offset of the first
+   byte of a CFF header or the first byte of an OpenType font (OTF), or
+   the first byte of an TTC font which contains OTF fonts. In the latter
+   two cases the library will automatically locate the CFF table and
+   seek to it before attempting to parse the CFF data.
  
-   The ttcIndex parameter selects whcih font to use in a TTC. Thsi has effect only
-   when the font file is a TTC font.
+   The ttcIndex parameter selects whcih font to use in a TTC. This has effect
+   only when the font file is a TTC font.
  
    The "flags" parameter allows client control over the parse by setting bits
    as follows:
@@ -102,12 +103,12 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
    options should be used when reading the CFF table from an OTF font since
    the font is encoded using the data in the cmap table and not CFF table.
 
-   CFR_SHALLOW_READ - don't read FDArray or glyph related data like the charstring,
-   the charset, or the encoding data. This flag should be used when the client
-   wants to read only the following information quickly: name INDEX, string INDEX,
-   gsubrs INDEX, and top dict. Glyph access functions like cfrIterateGlyphs,
-   cfrGetGlyphByTag, cfrGetGlyphByName, cfrGetGlyphByCID may not be called
-   with a font parsed with this flag set.
+   CFR_SHALLOW_READ - don't read FDArray or glyph related data like the
+   charstring, the charset, or the encoding data. This flag should be used when
+   the client wants to read only the following information quickly: name INDEX,
+   string INDEX, gsubrs INDEX, and top dict. Glyph access functions like
+   cfrIterateGlyphs, cfrGetGlyphByTag, cfrGetGlyphByName, cfrGetGlyphByCID may
+   not be called with a font parsed with this flag set.
 
    CFR_IS_CUBE - the data contains cube font operators. Stack depth
    and operator defs are different. Cube subr's are found at the end of gsubr's
@@ -116,22 +117,23 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
    CFR_FLATTEN_CUBE - the data contains cube font operators. Stack depth
    and operator defs are different. The Cube compose ops must be flattened.
 
-   CFR_FLATTEN_VF - flatten CFF2 variable font data for a given user design vector.
+   CFR_FLATTEN_VF - flatten CFF2 variable font data for a given user design
+   vector.
 
-   CFR_SHORT_VF_NAME - when flattening a CFF2 variable font, a generated instance
-   PS name will be limited to 63 characters, as opposed to 127 characters as
-   documented in Adobe Tech Notes 5902.
+   CFR_SHORT_VF_NAME - when flattening a CFF2 variable font, a generated
+   instance PS name will be limited to 63 characters, as opposed to 127
+   characters as documented in Adobe Tech Notes 5902.
 
-   CFR_UNUSE_VF_NAMED_INSTANCE - when flattening a CFF2 variable font, the instance PS name
-   is generated from the design vector as documented in Tech Notes 5902 regarding named
-   instances in the fvar table. If the flag is unset, a PS name of a named instance is used
-   if there is a match.
+   CFR_UNUSE_VF_NAMED_INSTANCE - when flattening a CFF2 variable font, the
+   instance PS name is generated from the design vector as documented in Tech
+   Notes 5902 regarding named instances in the fvar table. If the flag is
+   unset, a PS name of a named instance is used if there is a match.
 
    The "UDV" parameter specifies the User Design Vector to be used in
-   flattening (snapshotting) a CFF2 variable font. If NULL, the font is flattened at the
-   default instance. The parameter may be set to NULL for non-variable fonts.
+   flattening (snapshotting) a CFF2 variable font. If NULL, the font is
+   flattened at the default instance. The parameter may be set to NULL for
+   non-variable fonts.
 */
-
 
 int cfrIterateGlyphs(cfrCtx h, abfGlyphCallbacks *glyph_cb);
 
@@ -149,11 +151,11 @@ int cfrIterateGlyphs(cfrCtx h, abfGlyphCallbacks *glyph_cb);
    returned from beg() and can thus use this interface to select a subset of
    glyphs or just enumerate the glyph set without reading any path data. */
 
-int cfrGetGlyphByTag(cfrCtx h, 
-                     unsigned short tag, abfGlyphCallbacks *glyph_cb); 
-int cfrGetGlyphByName(cfrCtx h, 
+int cfrGetGlyphByTag(cfrCtx h,
+                     unsigned short tag, abfGlyphCallbacks *glyph_cb);
+int cfrGetGlyphByName(cfrCtx h,
                       char *gname, abfGlyphCallbacks *glyph_cb);
-int cfrGetGlyphByCID(cfrCtx h, 
+int cfrGetGlyphByCID(cfrCtx h,
                      unsigned short cid, abfGlyphCallbacks *glyph_cb);
 
 /* cfrGetGlyphByTag(), cfrGetGlyphByName(), cfrGetGlyphByCID() are called
@@ -195,7 +197,7 @@ int cfrResetGlyphs(cfrCtx h);
    charstring is not parsed and called back in the usual manner. */
 
 typedef struct
-    {
+{
     ctlRegion Header;
     ctlRegion NameINDEX;
     ctlRegion TopDICTINDEX;
@@ -207,7 +209,7 @@ typedef struct
     ctlRegion VarStore;
     ctlRegion CharStringsINDEX;
     ctlRegion FDArrayINDEX;
-    } cfrSingleRegions;
+} cfrSingleRegions;
 
 const cfrSingleRegions *cfrGetSingleRegions(cfrCtx h);
 
@@ -224,10 +226,10 @@ const cfrSingleRegions *cfrGetSingleRegions(cfrCtx h);
    Predefined encoding and charset values are enumerated in dictops.h. */
 
 typedef struct
-    {
+{
     ctlRegion PrivateDICT;
     ctlRegion LocalSubrINDEX;
-    } cfrRepeatRegions;
+} cfrRepeatRegions;
 
 const cfrRepeatRegions *cfrGetRepeatRegions(cfrCtx h, int iFD);
 
@@ -240,7 +242,7 @@ const cfrRepeatRegions *cfrGetRepeatRegions(cfrCtx h, int iFD);
 
    Note: a Private DICT is required but it may be empty (0-length). */
 
-int cfrGetWidths(cfrCtx h, int iFD, 
+int cfrGetWidths(cfrCtx h, int iFD,
                  float *defaultWidthX, float *nominalWidthX);
 
 /* cfrGetWidths() is called to get the values of the default and nominal widths
@@ -269,10 +271,13 @@ void cfrFree(cfrCtx h);
    it. */
 
 typedef long (*cfrlastResortInstanceNameCallback)(void *clientCtx, float *udv, long numAxes,
-                                                    char *prefixStr, long prefixLen,
-                                                    char *nameBuffer, long nameBufferLen);
+                                                  char *prefixStr, long prefixLen,
+                                                  char *nameBuffer, long nameBufferLen);
 /* CFF2 variable font last resort naming callback
-   If successful, the function should return a postive length of the string returned in nameBuffer.
+
+   If successful, the function should return a postive length of the string 
+   returned in nameBuffer.
+
    If unsuccessful, the function returns a non-positive number.
 
    clientCtx - context pointer passed to cfrSetLastResortInstanceNameCallback
@@ -282,33 +287,34 @@ typedef long (*cfrlastResortInstanceNameCallback)(void *clientCtx, float *udv, l
    numAxes - the number of axes, or the length of udv array
 
    prefixStr - a null-terminated string of the variable font family name,
-        to be used as a prefix of the instance name
+               to be used as a prefix of the instance name
 
    prefixLen - length of the prefix stirng
 
-   nameBuffer - string buffer where a null-terminated Postscript name of the variable font
-        instance should be returned by the client
+   nameBuffer - string buffer where a null-terminated Postscript name of the
+                variable font instance should be returned by the client
 
    nameBufferLen - the length of the nameBuffer (including a null-byte) */
 
 void cfrSetLastResortInstanceNameCallback(cfrCtx h, cfrlastResortInstanceNameCallback cb, void *clientCtx);
 
-/* cfrSetLastResortInstanceNameCallback() allows a client to provide a callback function to be called
-   when a flattened CFF2 variable font cannot be determined with a named instance in the fvar table
-   or using the algorithm described in Adobe TechNotes 5902 "Generating PostScript Names for Fonts
-   Using OpenType Font Variations". The callback function is called to give the client a chance to
-   name a font instance adequately.
+/* cfrSetLastResortInstanceNameCallback() allows a client to provide a callback
+   function to be called when a flattened CFF2 variable font cannot be
+   determined with a named instance in the fvar table or using the algorithm
+   described in Adobe TechNotes 5902 "Generating PostScript Names for Fonts
+   Using OpenType Font Variations". The callback function is called to give the
+   client a chance to name a font instance adequately.
  
-   If no callback is provided, a last-resort instance is named as a font family name prefix followed
-   by "-<hex>" where <hex> is a hex string generated by hashing the design vector of the instance. */
+   If no callback is provided, a last-resort instance is named as a font family
+   name prefix followed by "-<hex>" where <hex> is a hex string generated by
+   hashing the design vector of the instance. */
 
-enum
-    {
+enum {
 #undef CTL_DCL_ERR
-#define CTL_DCL_ERR(name,string)    name,
+#define CTL_DCL_ERR(name, string) name,
 #include "cfrerr.h"
     cfrErrCount
-    };
+};
 
 /* Library functions return either zero (cfrSuccess) to indicate success or a
    positive non-zero error code that is defined in the above enumeration that

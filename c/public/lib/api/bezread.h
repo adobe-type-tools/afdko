@@ -1,13 +1,13 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
-
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef BEZREAD_H
 #define BEZREAD_H
 
 #include "ctlshare.h"
 
-#define BZR_VERSION CTL_MAKE_VERSION(0,7,0)
+#define BZR_VERSION CTL_MAKE_VERSION(0, 7, 0)
 
 #include "absfont.h"
 
@@ -53,10 +53,10 @@ bzrCtx bzrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
    available via bzrErrStr(). If the client doesn't require the debug data stream 
    NULL should be returned from its stream open call. */
 
-int bzrBegFont(bzrCtx h, 
+int bzrBegFont(bzrCtx h,
                long flags, abfTopDict **top);
 
-#define BZR_NO_AC (1<<0)
+#define BZR_NO_AC (1 << 0)
 
 /* bzrBegFont() is called to initiate a new parse.  The source data stream
    (BZR_SRC_STREAM_ID) is opened and each bez path is read. A bez path is defined
@@ -100,8 +100,8 @@ int bzrIterateGlyphs(bzrCtx h, abfGlyphCallbacks *glyph_cb);
    subset of glyphs or just enumerate the glyph set without reading any path
    data. */
 
-int bzrGetGlyphByTag(bzrCtx h, 
-                     unsigned short tag, abfGlyphCallbacks *glyph_cb); 
+int bzrGetGlyphByTag(bzrCtx h,
+                     unsigned short tag, abfGlyphCallbacks *glyph_cb);
 
 /* bzrGetGlyphByTag(), is called obtain glyph data from a glyph selected by 
    its tag (described above).
@@ -126,13 +126,12 @@ void bzrFree(bzrCtx h);
 /* bzrFree() destroys the library context and all the resources allocated to
    it. The debug data stream is closed. */
 
-enum
-    {
+enum {
 #undef CTL_DCL_ERR
-#define CTL_DCL_ERR(name,string)    name,
+#define CTL_DCL_ERR(name, string) name,
 #include "bzrerr.h"
     bzrErrCount
-    };
+};
 
 /* Library functions return either zero (bzrSuccess) to indicate success or a
    positive non-zero error code that is defined in the above enumeration that
@@ -148,10 +147,8 @@ void bzrGetVersion(ctlVersionCallbacks *cb);
 /* bzrGetVersion() returns the library version number and name via the client
    callbacks passed with the "cb" parameter (see ctlshare.h). */
 
-
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* BEZREAD_H */
-

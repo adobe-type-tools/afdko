@@ -1,12 +1,13 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef SFNTREAD_H
 #define SFNTREAD_H
 
 #include "ctlshare.h"
 
-#define SFR_VERSION CTL_MAKE_VERSION(1,0,5)
+#define SFR_VERSION CTL_MAKE_VERSION(1, 0, 5)
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,7 +16,7 @@ extern "C" {
 /* sfnt Format Table Handler
    =========================
    This library provides facilities for reading and returning table information
-   found in the header of sfnt-formatted data. 
+   found in the header of sfnt-formatted data.
 
    This library is initialized with a single call to sfrNew() which allocates
    an opaque context (sfrCtx) which is passed to subsequent functions and is
@@ -25,7 +26,7 @@ extern "C" {
    A new font is opened and the header is parsed and cached by calling
    sfrBegFont(). Table data described by the sfrTable data structure may then
    be accessed by using the sfrGetNextTable() and the sfrGetTableByTag()
-   functions. Finally, a font may be closed by calling sfrEndFont(). 
+   functions. Finally, a font may be closed by calling sfrEndFont().
 
    The library also provides support for reading TrueType Collections via the
    sfrGetNextTTCOffset() function. */
@@ -43,7 +44,7 @@ sfrCtx sfrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
    the library via the "mem_cb" and "stm_cb" parameters. If the library
    couldn't be initialized, NULL is returned.
 
-   The SFR_CHECK_ARGS macro is passed as the last parameter to sfrNew() in 
+   The SFR_CHECK_ARGS macro is passed as the last parameter to sfrNew() in
    order to perform a client/library compatibility check. */
 
 int sfrBegFont(sfrCtx h, void *stm, long origin, ctlTag *sfnt_tag);
@@ -60,11 +61,12 @@ int sfrBegFont(sfrCtx h, void *stm, long origin, ctlTag *sfnt_tag);
    field from the sfnt header. If it doesn't match one of the known sfnt types,
    listed below, the function returns an error. */
 
-#define sfr_v1_0_tag    CTL_TAG(  0,  1,  0,  0)    /* TrueType version 1.0 */
-#define sfr_true_tag    CTL_TAG('t','r','u','e')    /* TrueType */
-#define sfr_OTTO_tag    CTL_TAG('O','T','T','O')    /* OTF */
-#define sfr_typ1_tag    CTL_TAG('t','y','p','1')    /* Type 1 GX */
-#define sfr_ttcf_tag    CTL_TAG('t','t','c','f')    /* TrueType Collection */
+#define sfr_v1_0_tag CTL_TAG(0, 1, 0, 0) /* TrueType version 1.0 */
+
+#define sfr_true_tag CTL_TAG('t', 'r', 'u', 'e') /* TrueType */
+#define sfr_OTTO_tag CTL_TAG('O', 'T', 'T', 'O') /* OTF */
+#define sfr_typ1_tag CTL_TAG('t', 'y', 'p', '1') /* Type 1 GX */
+#define sfr_ttcf_tag CTL_TAG('t', 't', 'c', 'f') /* TrueType Collection */
 
 /* A version tag of 'ttcf' indicates that the data represents a TrueType
    Collection rather than a single sfnt. In this case the client must call
@@ -86,7 +88,7 @@ long sfrGetNextTTCOffset(sfrCtx h);
    origin parameter to sfrBegFont() in order to parse one of the members of a
    TrueType collection. Alternating calls to sfrGetNextTTCOffset() and
    sfrBegFont() allow each TrueType Collection member sfnt to be parsed in
-   turn. 
+   turn.
 
    Note that the "stm" parameter is ignored in all but the first call to
    sfrBegFont() when navigating TTC streams.
@@ -96,12 +98,12 @@ long sfrGetNextTTCOffset(sfrCtx h);
    absolute source data stream offset of the member sfnt. */
 
 typedef struct
-    {
+{
     ctlTag tag;
     unsigned long checksum;
     unsigned long offset;
     unsigned long length;
-    } sfrTable;
+} sfrTable;
 
 /* The sfrTable data structure represents the per-table data that is read from
    the sfnt table directory and returned to the client. The "offset" field is
@@ -142,13 +144,12 @@ void sfrFree(sfrCtx h);
 /* sfrFree() destroys the library context and all the resources allocated to
    it. */
 
-enum
-    {
+enum {
 #undef CTL_DCL_ERR
-#define CTL_DCL_ERR(name,string)    name,
+#define CTL_DCL_ERR(name, string) name,
 #include "sfrerr.h"
     sfrErrCount
-    };
+};
 
 /* Library functions return either zero (sfrSuccess) to indicate success or a
    positive non-zero error code that is defined in the above enumeration that
@@ -156,7 +157,7 @@ enum
 
 char *sfrErrStr(int err_code);
 
-/* sfrErrStr() maps the "err_code" parameter to a null-terminated error 
+/* sfrErrStr() maps the "err_code" parameter to a null-terminated error
    string. */
 
 void sfrGetVersion(ctlVersionCallbacks *cb);

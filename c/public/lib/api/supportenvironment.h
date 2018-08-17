@@ -1,8 +1,10 @@
+/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
+
 /*
   environment.h
 */
-/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 /*
 IMPORTANT: The definitions in this file comprise an extensible set.
@@ -17,8 +19,8 @@ updating of package versions. To maintain consistency, it is crucial
 that changes to environment.h be upward-compatible, as described above.
 */
 
-#ifndef	ENVIRONMENT_H
-#define	ENVIRONMENT_H
+#ifndef ENVIRONMENT_H
+#define ENVIRONMENT_H
 
 /* The following declarations are used to control various configurations
    of PostScript. The compile-time definitions ISP, OS, STAGE, and
@@ -68,37 +70,36 @@ that changes to environment.h be upward-compatible, as described above.
  * configuration for which an initial VM is to be built.
  */
 
-#define isp_mc68020	3	/* includes mc68030 */
-#define isp_mc68030     3       /* Hack -- see JBS */
-#define isp_i80286	4
-#define isp_i80386	5
-#define isp_ix86        5       /* Intel 386-compatible */
-#define isp_rs6000	8
-#define isp_r2000be	9	/* MIPS, big-endian */
-#define isp_r2000le	10	/* MIPS, little-endian */
-#define isp_i80486	15
-#define isp_amd29k	16
-#define isp_i960ca      17
-#define	isp_mc68040	18
-#define isp_i960b       19	/* covers KB and SB */
-#define isp_i960a       20	/* covers KA and SA */
-#define isp_i960kai     21      /* i960KA using Intel compiler */
-#define isp_mc88000     22      /* Motorola 88000 family */
-#define isp_hppa        23      /* HP Precision Architecture (PA-RISC) */
-#define isp_alpha	24	/* DEC Alpha, 64b. little-endian */
-#define isp_mppc	25	/* Motorola PowerPC (RiscPC) */
-#define isp_ppcpow      26      /* POWER & PowerPC common architecture */
-#define isp_sparclynx   27      /* LynxOS executable format */
-#define isp_r4000be     28      /* MIPS big-endian Xcomp on SGI, no shared lib*/
-#define isp_sparcv8     29      /* sparc using version 8 */
-#define isp_alpha32	30	/* DEC Alpha, 64/32 ptr/scnunit little-endian */
-#define isp_ia64	31	/* intel 64 bit Itanium */
-#define isp_alpha64	32	/* DEC Alpha, 64/64 ptr/scnunit little-endian */
-#define isp_ppc         33      /* Mac PPC */
-#define isp_x64         34      /* AMD64 and EM64T */
-#define isp_arm         35
-#define isp_arm64       36
-
+#define isp_mc68020    3 /* includes mc68030 */
+#define isp_mc68030    3 /* Hack -- see JBS */
+#define isp_i80286     4
+#define isp_i80386     5
+#define isp_ix86       5 /* Intel 386-compatible */
+#define isp_rs6000     8
+#define isp_r2000be    9 /* MIPS, big-endian */
+#define isp_r2000le   10 /* MIPS, little-endian */
+#define isp_i80486    15
+#define isp_amd29k    16
+#define isp_i960ca    17
+#define isp_mc68040   18
+#define isp_i960b     19 /* covers KB and SB */
+#define isp_i960a     20 /* covers KA and SA */
+#define isp_i960kai   21 /* i960KA using Intel compiler */
+#define isp_mc88000   22 /* Motorola 88000 family */
+#define isp_hppa      23 /* HP Precision Architecture (PA-RISC) */
+#define isp_alpha     24 /* DEC Alpha, 64b. little-endian */
+#define isp_mppc      25 /* Motorola PowerPC (RiscPC) */
+#define isp_ppcpow    26 /* POWER & PowerPC common architecture */
+#define isp_sparclynx 27 /* LynxOS executable format */
+#define isp_r4000be   28 /* MIPS big-endian Xcomp on SGI, no shared lib*/
+#define isp_sparcv8   29 /* sparc using version 8 */
+#define isp_alpha32   30 /* DEC Alpha, 64/32 ptr/scnunit little-endian */
+#define isp_ia64      31 /* intel 64 bit Itanium */
+#define isp_alpha64   32 /* DEC Alpha, 64/64 ptr/scnunit little-endian */
+#define isp_ppc       33 /* Mac PPC */
+#define isp_x64       34 /* AMD64 and EM64T */
+#define isp_arm       35
+#define isp_arm64     36
 
 /*
  * OS (Operating System) definitions -- these specify the operating
@@ -111,41 +112,41 @@ that changes to environment.h be upward-compatible, as described above.
  * be different from the host environment in which the building is done.
  */
 
-#define os_ps		1	/* Adobe PostScript runtime package */
-#define os_bsd		2	/* Unix -- Berkeley Software Distribution */
-#define os_sysv		4	/* Unix -- AT&T System V */
-#define os_aux		5	/* Unix -- Apple A/UX */
-#define os_xenix	6	/* Unix -- MicroSoft Xenix */
-#define os_vms		7	/* DEC VMS */
-#define os_domain	9	/* Apollo Domain */
-#define os_mpw		10	/* Apple Macintosh Programmer's Workshop */
-#define os_vm370	11	/* IBM VM */
-#define os_mvs370	12	/* IBM MVS */
-#define os_os2		13	/* MicroSoft OS/2 16-bit */
-#define os_ultrix	14	/* Unix -- DEC Ultrix */
-#define os_aix		15	/* IBM Adv. Interactive eXecutive */
-#define os_pharlap	16	/* Proprietary DOS extension for 386 */
-#define os_mach		17	/* MACH from CMU (Unix 4.3 compatible) */
-#define os_msdos	18	/* MicroSoft DOS */
-#define os_thinkc	19	/* Apple Macintosh Think Lightspeed C */
-#define os_windows3	20	/* Microsoft Windows 3.x, using Microsoft C */
-#define os_os2_32bit	21	/* Microsoft OS/2 32-bit (>= ver 2.0) */
-#define os_macgcc	22	/* Mac target, Unix GCC cross-compiler */
-#define os_ncd		23	/* NCD's X terminal environment */
-#define os_irix		25	/* SGI IRIX 4.0.5, NOT SVR4 */
-#define	os_hpux		26	/* HP HP-UX */
-#define	os_irixV	27	/* SGI IRIX 5.0.1, NOT SVR4 */
-#define	os_osf1		28	/* DEC OSF/1 */
-#define os_windowsNT	29	/* Microsoft NT - a surrogate for Win32 */
-#define os_win32		29  /* same as WindowsNT */
-#define os_windows95	30	/* Microsoft Windows 95 */
-#define os_win64        31      /* WindowsXP 64 bit edition */
+#define os_ps         1 /* Adobe PostScript runtime package */
+#define os_bsd        2 /* Unix -- Berkeley Software Distribution */
+#define os_sysv       4 /* Unix -- AT&T System V */
+#define os_aux        5 /* Unix -- Apple A/UX */
+#define os_xenix      6 /* Unix -- MicroSoft Xenix */
+#define os_vms        7 /* DEC VMS */
+#define os_domain     9 /* Apollo Domain */
+#define os_mpw       10 /* Apple Macintosh Programmer's Workshop */
+#define os_vm370     11 /* IBM VM */
+#define os_mvs370    12 /* IBM MVS */
+#define os_os2       13 /* MicroSoft OS/2 16-bit */
+#define os_ultrix    14 /* Unix -- DEC Ultrix */
+#define os_aix       15 /* IBM Adv. Interactive eXecutive */
+#define os_pharlap   16 /* Proprietary DOS extension for 386 */
+#define os_mach      17 /* MACH from CMU (Unix 4.3 compatible) */
+#define os_msdos     18 /* MicroSoft DOS */
+#define os_thinkc    19 /* Apple Macintosh Think Lightspeed C */
+#define os_windows3  20 /* Microsoft Windows 3.x, using Microsoft C */
+#define os_os2_32bit 21 /* Microsoft OS/2 32-bit (>= ver 2.0) */
+#define os_macgcc    22 /* Mac target, Unix GCC cross-compiler */
+#define os_ncd       23 /* NCD's X terminal environment */
+#define os_irix      25 /* SGI IRIX 4.0.5, NOT SVR4 */
+#define os_hpux      26 /* HP HP-UX */
+#define os_irixV     27 /* SGI IRIX 5.0.1, NOT SVR4 */
+#define os_osf1      28 /* DEC OSF/1 */
+#define os_windowsNT 29 /* Microsoft NT - a surrogate for Win32 */
+#define os_win32     29 /* same as WindowsNT */
+#define os_windows95 30 /* Microsoft Windows 95 */
+#define os_win64     31 /* WindowsXP 64 bit edition */
 
-#define os_osx          98      /* OS/X */
-#define os_linux	99	/* no official 2ps name or number */
+#define os_osx       98 /* OS/X */
+#define os_linux     99 /* no official 2ps name or number */
 
-#define os_mac          os_thinkc /* Apple Macintosh, 68K or PPC, any compiler.  
-                                     "os_thinkc" should not be used. */
+#define os_mac os_thinkc /* Apple Macintosh, 68K or PPC, any compiler. */
+                         /* "os_thinkc" should not be used.            */
 
 /* automatic Windows configuration */
 #ifndef OS
@@ -168,16 +169,16 @@ that changes to environment.h be upward-compatible, as described above.
 #endif
 #endif
 
-#if OS==os_osx
-  #if __x86_64__
-		#define ISP isp_x64
-  #else
-	#if __i386__
-		#define ISP isp_i80486
-	#else
-		#define ISP isp_ppc
-	#endif
-  #endif
+#if OS == os_osx
+#if __x86_64__
+#define ISP isp_x64
+#else
+#if __i386__
+#define ISP isp_i80486
+#else
+#define ISP isp_ppc
+#endif
+#endif
 #endif
 /*
  * STAGE = one of (order is important). If STAGE is DEVELOP, the runtime
@@ -185,10 +186,10 @@ that changes to environment.h be upward-compatible, as described above.
  */
 
 #ifndef DEVELOP
-#define DEVELOP		1
+#define DEVELOP 1
 #endif
 #ifndef EXPORT
-#define EXPORT		2
+#define EXPORT 2
 #endif
 
 /*
@@ -196,9 +197,9 @@ that changes to environment.h be upward-compatible, as described above.
  * Mercury sources.
  */
 
-#ifndef	MERCURY
-#define	MERCURY		1
-#endif	/* MERCURY */
+#ifndef MERCURY
+#define MERCURY 1
+#endif /* MERCURY */
 
 /*
  * LANGUAGE_LEVEL specifies the overall set of language features to be
@@ -213,13 +214,13 @@ that changes to environment.h be upward-compatible, as described above.
  * present in the host configuration.
  */
 
-#define level_1		1	/* original red book */
-#define level_2		2	/* PS level 2; new red book */
-#define level_dps	3	/* Display PostScript; assumed to be 
-				   a strict extension of level 2 */
-#define level_dps1	4	/* original red book + DPS + color extensions
-				   (note this is temporary and violates the
-				   superset rule stated above */
+#define level_1    1 /* original red book */
+#define level_2    2 /* PS level 2; new red book */
+#define level_dps  3 /* Display PostScript; assumed to be */
+                     /* a strict extension of level 2     */
+#define level_dps1 4 /* original red book + DPS + color extensions */
+                     /* (note this is temporary and violates the   */
+                     /* superset rule stated above                 */
 
 #ifndef LANGUAGE_LEVEL
 #if (OS == os_ps || OS == os_vaxeln)
@@ -230,7 +231,6 @@ that changes to environment.h be upward-compatible, as described above.
 #define LANGUAGE_LEVEL level_dps
 #endif
 #endif
-
 
 /*
  * C_LANGUAGE is a boolean switch that controls whether C language
@@ -268,10 +268,11 @@ that changes to environment.h be upward-compatible, as described above.
 
 #ifndef CAT
 #if ANSI_C
-#define CAT(a,b) a##b
+#define CAT(a, b) a##b
 #else /* ANSI_C */
 #define IDENT(x) x
-#define CAT(a,b) IDENT(a)b
+#define CAT(a, b) IDENT(a) \
+b
 #endif /* ANSI_C */
 #endif /* CAT */
 
@@ -280,12 +281,11 @@ that changes to environment.h be upward-compatible, as described above.
  */
 
 #if C_LANGUAGE && !ANSI_C
-#if 0 /* tsd - not sure who needed this, but this
-               interferes with MS VC6 */
+#if 0 /* tsd - not sure who needed this, but this interferes with MS VC6 */
 #define const
 #endif /* tsd */
 
- /* The mips compiler is not ANSI compatible, but does support (and the
+/* The mips compiler is not ANSI compatible, but does support (and the
   * implementation requires) the volatile storage class.
   */
 
@@ -294,7 +294,6 @@ that changes to environment.h be upward-compatible, as described above.
 #endif /* mips */
 
 #endif /* !ANSI_C */
-
 
 /* ***** Derived environmental switches *****
 
@@ -369,7 +368,7 @@ that changes to environment.h be upward-compatible, as described above.
   the most important.
  */
 
-#if (ISP==isp_i80486 || ISP==isp_arm) && ( OS==os_windowsNT || OS==os_osx)
+#if (ISP == isp_i80486 || ISP == isp_arm) && (OS == os_windowsNT || OS == os_osx)
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 0
@@ -385,8 +384,7 @@ that changes to environment.h be upward-compatible, as described above.
 #endif
 #endif
 
-
-#if ISP==isp_ia64 && OS==os_windowsNT
+#if ISP == isp_ia64 && OS == os_windowsNT
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 0
@@ -398,13 +396,13 @@ that changes to environment.h be upward-compatible, as described above.
 #define SCANUNIT 32
 #define ARCH_64BIT 1
 
-#ifndef ASMARITH 
+#ifndef ASMARITH
 #define ASMARITH 0
 #endif
 
 #endif
 
-#if ISP==isp_alpha && OS==os_osf1
+#if ISP == isp_alpha && OS == os_osf1
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 0
@@ -418,7 +416,7 @@ that changes to environment.h be upward-compatible, as described above.
 
 #endif
 
-#if ISP==isp_r2000be && OS==os_irix
+#if ISP == isp_r2000be && OS == os_irix
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 0
@@ -430,7 +428,7 @@ that changes to environment.h be upward-compatible, as described above.
 
 #endif
 
-#if ISP==isp_vax && (OS==os_bsd || OS==os_ultrix || OS==os_vms || OS==os_vaxeln)
+#if ISP == isp_vax && (OS == os_bsd || OS == os_ultrix || OS == os_vms || OS == os_vaxeln)
 #define MC68K 0
 #define IEEEFLOAT 0
 #define IEEESOFT 0
@@ -438,11 +436,11 @@ that changes to environment.h be upward-compatible, as described above.
 #define UNSIGNEDCHARS 0
 #define MINALIGN 1
 #define PREFERREDALIGN 4
-#define REGISTERVARS 8		/* actually, bsd supports up to 10 */
+#define REGISTERVARS 8 /* actually, bsd supports up to 10 */
 
 #endif
 
-#if ISP==isp_mc68010 && OS==os_ps
+#if ISP == isp_mc68010 && OS == os_ps
 #define MC68K 1
 #define IEEEFLOAT 1
 #define IEEESOFT 1
@@ -450,10 +448,10 @@ that changes to environment.h be upward-compatible, as described above.
 #define UNSIGNEDCHARS 0
 #define MINALIGN 2
 #define PREFERREDALIGN 2
-#define REGISTERVARS 6		/* data regs, plus up to 4 address regs */
+#define REGISTERVARS 6 /* data regs, plus up to 4 address regs */
 #endif
 
-#if ISP==isp_mc68020 && OS==os_ps
+#if ISP == isp_mc68020 && OS == os_ps
 #define MC68K 1
 #define IEEEFLOAT 1
 #define IEEESOFT 1
@@ -461,11 +459,11 @@ that changes to environment.h be upward-compatible, as described above.
 #define UNSIGNEDCHARS 0
 #define MINALIGN 1
 #define PREFERREDALIGN 4
-#define REGISTERVARS 6		/* data regs, plus up to 4 address regs */
+#define REGISTERVARS 6 /* data regs, plus up to 4 address regs */
 
 #endif
 
-#if ISP==isp_mc68020 && OS==os_mach
+#if ISP == isp_mc68020 && OS == os_mach
 #define MC68K 1
 #define IEEEFLOAT 1
 #define IEEESOFT 0
@@ -473,10 +471,10 @@ that changes to environment.h be upward-compatible, as described above.
 #define UNSIGNEDCHARS 0
 #define MINALIGN 1
 #define PREFERREDALIGN 4
-#define REGISTERVARS 6		/* data regs, plus up to 4 address regs */
+#define REGISTERVARS 6 /* data regs, plus up to 4 address regs */
 #endif
 
-#if ISP==isp_mc68020 && OS==os_mpw
+#if ISP == isp_mc68020 && OS == os_mpw
 #define MC68K 1
 #define MACROM 1
 #define IEEEFLOAT 1
@@ -485,10 +483,10 @@ that changes to environment.h be upward-compatible, as described above.
 #define UNSIGNEDCHARS 0
 #define MINALIGN 1
 #define PREFERREDALIGN 4
-#define REGISTERVARS 6		/* data regs, plus up to 4 address regs */
+#define REGISTERVARS 6 /* data regs, plus up to 4 address regs */
 #endif
 
-#if ISP==isp_mc68020 && OS==os_thinkc
+#if ISP == isp_mc68020 && OS == os_thinkc
 #define MC68K 1
 #define MACROM 1
 #define IEEEFLOAT 1
@@ -497,10 +495,10 @@ that changes to environment.h be upward-compatible, as described above.
 #define UNSIGNEDCHARS 0
 #define MINALIGN 2
 #define PREFERREDALIGN 4
-#define REGISTERVARS 5		/* data regs, plus up to 4 address regs */
+#define REGISTERVARS 5 /* data regs, plus up to 4 address regs */
 #endif
 
-#if ISP==isp_mc68000 && OS==os_thinkc
+#if ISP == isp_mc68000 && OS == os_thinkc
 #define MC68K 1
 #define MACROM 1
 #define IEEEFLOAT 1
@@ -509,10 +507,10 @@ that changes to environment.h be upward-compatible, as described above.
 #define UNSIGNEDCHARS 0
 #define MINALIGN 2
 #define PREFERREDALIGN 2
-#define REGISTERVARS 5		/* data regs, plus up to 4 address regs */
+#define REGISTERVARS 5 /* data regs, plus up to 4 address regs */
 #endif
 
-#if ISP==isp_mc68040 && OS==os_ps
+#if ISP == isp_mc68040 && OS == os_ps
 #define MC68K 1
 #define IEEEFLOAT 1
 #define IEEESOFT 1
@@ -520,10 +518,10 @@ that changes to environment.h be upward-compatible, as described above.
 #define UNSIGNEDCHARS 0
 #define MINALIGN 1
 #define PREFERREDALIGN 4
-#define REGISTERVARS 6		/* data regs, plus up to 4 address regs */
+#define REGISTERVARS 6 /* data regs, plus up to 4 address regs */
 #endif
 
-#if ISP==isp_i80286 && OS==os_msdos /* and/or others? */
+#if ISP == isp_i80286 && OS == os_msdos /* and/or others? */
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 0
@@ -531,13 +529,13 @@ that changes to environment.h be upward-compatible, as described above.
 #define UNSIGNEDCHARS 0
 #define MINALIGN 1
 #define PREFERREDALIGN 2
-#define REGISTERVARS 4		/* ? */
+#define REGISTERVARS 4 /* ? */
 #endif
 
-#if (OS==os_windows3 || OS==os_os2_32bit) && (ISP==isp_i80286 || ISP==isp_i80386 || ISP==isp_i80486)
+#if (OS == os_windows3 || OS == os_os2_32bit) && (ISP == isp_i80286 || ISP == isp_i80386 || ISP == isp_i80486)
 #define MC68K 0
 #define IEEEFLOAT 1
-#define IEEESOFT 1      /* need timing tests -- probably faster with SOFT */
+#define IEEESOFT 1 /* need timing tests -- probably faster with SOFT */
 #define SWAPBITS 1
 #define UNSIGNEDCHARS 0
 #define MINALIGN 1
@@ -546,13 +544,10 @@ that changes to environment.h be upward-compatible, as described above.
 
 #endif
 
-
-
 /** Unknown if these setting are correct **/
 /* Added for getting BC working on PC under Metaware HighC*/
 
-
-#if (ISP==isp_i80386 || ISP==isp_i80486) && (OS==os_msdos || OS==os_windows95)
+#if (ISP == isp_i80386 || ISP == isp_i80486) && (OS == os_msdos || OS == os_windows95)
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 0
@@ -560,11 +555,11 @@ that changes to environment.h be upward-compatible, as described above.
 #define UNSIGNEDCHARS 0
 #define MINALIGN 1
 #define PREFERREDALIGN 4
-#define REGISTERVARS 4		/* ? */
+#define REGISTERVARS 4 /* ? */
 
 #endif
 
-#if ISP==isp_i80386 && (OS==os_aix || OS==os_pharlap || OS==os_xenix)
+#if ISP == isp_i80386 && (OS == os_aix || OS == os_pharlap || OS == os_xenix)
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 0
@@ -576,7 +571,7 @@ that changes to environment.h be upward-compatible, as described above.
 
 #endif
 
-#if ISP==isp_rs6000 && OS==os_aix
+#if ISP == isp_rs6000 && OS == os_aix
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 1
@@ -584,10 +579,10 @@ that changes to environment.h be upward-compatible, as described above.
 #define UNSIGNEDCHARS 1
 #define MINALIGN 4
 #define PREFERREDALIGN 4
-#define REGISTERVARS 4		/* ? */
+#define REGISTERVARS 4 /* ? */
 #endif
 
-#if ISP==isp_rs6000 && OS==os_ps
+#if ISP == isp_rs6000 && OS == os_ps
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 1
@@ -595,10 +590,10 @@ that changes to environment.h be upward-compatible, as described above.
 #define UNSIGNEDCHARS 1
 #define MINALIGN 4
 #define PREFERREDALIGN 4
-#define REGISTERVARS 4          /* ? */
+#define REGISTERVARS 4 /* ? */
 #endif
 
-#if ISP==isp_rs6000 && OS==os_thinkc  /* PowerPC */
+#if ISP == isp_rs6000 && OS == os_thinkc /* PowerPC */
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 1
@@ -606,10 +601,10 @@ that changes to environment.h be upward-compatible, as described above.
 #define UNSIGNEDCHARS 0
 #define MINALIGN 4
 #define PREFERREDALIGN 4
-#define REGISTERVARS 4          /* ? */
+#define REGISTERVARS 4 /* ? */
 #endif
 
-#if ISP==isp_r2000be && (OS==os_sysv || OS==os_ps)
+#if ISP == isp_r2000be && (OS == os_sysv || OS == os_ps)
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 0
@@ -621,7 +616,7 @@ that changes to environment.h be upward-compatible, as described above.
 
 #endif
 
-#if ISP==isp_r2000le && OS==os_ultrix
+#if ISP == isp_r2000le && OS == os_ultrix
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 0
@@ -633,7 +628,7 @@ that changes to environment.h be upward-compatible, as described above.
 
 #endif
 
-#if ISP==isp_r2000le && OS==os_ps
+#if ISP == isp_r2000le && OS == os_ps
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 0
@@ -644,40 +639,40 @@ that changes to environment.h be upward-compatible, as described above.
 #define REGISTERVARS 9
 #endif
 
-#if ISP==isp_amd29k && OS==os_ps
+#if ISP == isp_amd29k && OS == os_ps
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 1
 #define SWAPBITS 0
-#define UNSIGNEDCHARS 1         /* Note that the compiler can do either one */
+#define UNSIGNEDCHARS 1 /* Note that the compiler can do either one */
 #define MINALIGN 4
 #define PREFERREDALIGN 4
-#define REGISTERVARS 15         /* probably does not matter */
+#define REGISTERVARS 15 /* probably does not matter */
 #endif
 
-#if ((ISP==isp_i960ca) || (ISP==isp_i960b) || (ISP==isp_i960a) || (ISP==isp_i960kai)) && OS==os_ps
+#if ((ISP == isp_i960ca) || (ISP == isp_i960b) || (ISP == isp_i960a) || (ISP == isp_i960kai)) && OS == os_ps
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 1
 #define SWAPBITS 1
-#define UNSIGNEDCHARS 1         /* Note that the compiler can do either one */
+#define UNSIGNEDCHARS 1 /* Note that the compiler can do either one */
 #define MINALIGN 1
 #define PREFERREDALIGN 4
-#define REGISTERVARS 10         /* probably does not matter */
+#define REGISTERVARS 10 /* probably does not matter */
 #endif
 
-#if ISP==isp_i960cabe && OS==os_ps
+#if ISP == isp_i960cabe && OS == os_ps
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 1
 #define SWAPBITS 0
-#define UNSIGNEDCHARS 1         /* Note that the compiler can do either one */
+#define UNSIGNEDCHARS 1 /* Note that the compiler can do either one */
 #define MINALIGN 1
 #define PREFERREDALIGN 4
-#define REGISTERVARS 10         /* probably does not matter */
+#define REGISTERVARS 10 /* probably does not matter */
 #endif
 
-#if ISP==isp_mc88000 && OS==os_ncd
+#if ISP == isp_mc88000 && OS == os_ncd
 #undef MC68K
 #define IEEEFLOAT 1
 #define IEEESOFT 0
@@ -685,11 +680,11 @@ that changes to environment.h be upward-compatible, as described above.
 #define UNSIGNEDCHARS 0
 #define MINALIGN 4
 #define PREFERREDALIGN 4
-#define REGISTERVARS 20         /* ? */
+#define REGISTERVARS 20 /* ? */
 #define USE_SIGNAL 0
 #endif
 
-#if ISP==isp_i80486 && ( OS==os_windowsNT || OS==os_osx)
+#if ISP == isp_i80486 && (OS == os_windowsNT || OS == os_osx)
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 0
@@ -700,12 +695,12 @@ that changes to environment.h be upward-compatible, as described above.
 #define REGISTERVARS 4
 #define SCANUNIT 8
 
-#ifndef ASMARITH 
+#ifndef ASMARITH
 #define ASMARITH 0
 #endif
 #endif
 
-#if ISP==isp_i80486 && OS==os_linux
+#if ISP == isp_i80486 && OS == os_linux
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 0
@@ -718,7 +713,7 @@ that changes to environment.h be upward-compatible, as described above.
 #define ASMARITH 0
 #endif /* isp_i80486 && os_linux */
 
-#if ISP==isp_alpha && OS==os_windowsNT
+#if ISP == isp_alpha && OS == os_windowsNT
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 0
@@ -731,7 +726,7 @@ that changes to environment.h be upward-compatible, as described above.
 #define ARCH_64BIT 1
 #endif
 
-#if ISP==isp_alpha64 && OS==os_windowsNT
+#if ISP == isp_alpha64 && OS == os_windowsNT
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 0
@@ -740,12 +735,12 @@ that changes to environment.h be upward-compatible, as described above.
 #define MINALIGN 8
 #define PREFERREDALIGN 8
 #define REGISTERVARS 9
-#define SCANUNIT 8    
+#define SCANUNIT 8
 #define ARCH_64BIT 1
 
 #endif
 
-#if ISP==isp_mppc && OS==os_windowsNT
+#if ISP == isp_mppc && OS == os_windowsNT
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 0
@@ -757,7 +752,7 @@ that changes to environment.h be upward-compatible, as described above.
 #define SCANUNIT 8
 #endif
 
-#if ISP==isp_ppc && OS==os_osx
+#if ISP == isp_ppc && OS == os_osx
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 0
@@ -769,7 +764,7 @@ that changes to environment.h be upward-compatible, as described above.
 #define SCANUNIT 8
 #endif
 
-#if ISP==isp_x64 && OS==os_osx
+#if ISP == isp_x64 && OS == os_osx
 #define MC68K 0
 #define IEEEFLOAT 1
 #define IEEESOFT 0
@@ -782,56 +777,55 @@ that changes to environment.h be upward-compatible, as described above.
 #define ARCH_64BIT 1
 #endif
 
-    #if ISP==isp_r2000le && OS==os_windowsNT
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 1
-    #define MINALIGN 4
-    #define PREFERREDALIGN 8
-    #define REGISTERVARS 9
-    #define SCANUNIT 8
-    #endif
+#if ISP == isp_r2000le && OS == os_windowsNT
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 1
+#define MINALIGN 4
+#define PREFERREDALIGN 8
+#define REGISTERVARS 9
+#define SCANUNIT 8
+#endif
 
-    #if (ISP==isp_x64 || ISP==isp_arm64) && OS==os_win64
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 1
-    #define PREFERREDALIGN 8
-    #define REGISTERVARS 4
-    #define SCANUNIT 8
-    #define ARCH_64BIT 1
+#if (ISP == isp_x64 || ISP == isp_arm64) && OS == os_win64
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 0
+#define MINALIGN 1
+#define PREFERREDALIGN 8
+#define REGISTERVARS 4
+#define SCANUNIT 8
+#define ARCH_64BIT 1
 
-    #ifndef ASMARITH 
-    #define ASMARITH 0
-    #endif
-    #endif
+#ifndef ASMARITH
+#define ASMARITH 0
+#endif
+#endif
 
-    #if ISP==isp_ia64 && OS==os_win64
-    /* this hasn't been validated yet */
-    #define MC68K 0
-    #define IEEEFLOAT 1
-    #define IEEESOFT 0
-    #define SWAPBITS 1
-    #define UNSIGNEDCHARS 0
-    #define MINALIGN 4
-    #define PREFERREDALIGN 8
-    #define REGISTERVARS 4
-    #define SCANUNIT 8
-    #define ARCH_64BIT 1
+#if ISP == isp_ia64 && OS == os_win64
+/* this hasn't been validated yet */
+#define MC68K 0
+#define IEEEFLOAT 1
+#define IEEESOFT 0
+#define SWAPBITS 1
+#define UNSIGNEDCHARS 0
+#define MINALIGN 4
+#define PREFERREDALIGN 8
+#define REGISTERVARS 4
+#define SCANUNIT 8
+#define ARCH_64BIT 1
 
-    #ifndef ASMARITH 
-    #define ASMARITH 0
-    #endif
-    #endif
-    #ifndef IEEEFLOAT
-    ConfigurationError("Unsupported ISP-OS combination");
-    #endif
-
+#ifndef ASMARITH
+#define ASMARITH 0
+#endif
+#endif
+#ifndef IEEEFLOAT
+ConfigurationError("Unsupported ISP-OS combination");
+#endif
 
 /* ***** Other configuration switches *****
  *
@@ -846,14 +840,13 @@ that changes to environment.h be upward-compatible, as described above.
  * they provoke compiler bugs.
  */
 
-#ifndef	NOREGISTER
-#define NOREGISTER (STAGE==DEVELOP)
-#endif	/* NOREGISTER */
+#ifndef NOREGISTER
+#define NOREGISTER (STAGE == DEVELOP)
+#endif /* NOREGISTER */
 
 #if NOREGISTER
 #define register
-#endif	/* NOREGISTER */
-
+#endif /* NOREGISTER */
 
 /* ***** Runtime Switches ***** */
 
@@ -865,14 +858,14 @@ that changes to environment.h be upward-compatible, as described above.
  */
 
 typedef struct {
-  unsigned char
-    _ISP,
-    _OS,
-    _STAGE,
-    _LANGUAGE_LEVEL,
-    _SWAPBITS,
-    _PREFERREDALIGN,
-    unused[2];	/* for nice alignment */
+    unsigned char
+        _ISP,
+        _OS,
+        _STAGE,
+        _LANGUAGE_LEVEL,
+        _SWAPBITS,
+        _PREFERREDALIGN,
+        unused[2]; /* for nice alignment */
 } Switches;
 
 extern Switches switches;
@@ -889,4 +882,4 @@ extern Switches switches;
 
 #endif /* C_LANGUAGE */
 
-#endif	/* ENVIRONMENT_H */
+#endif /* ENVIRONMENT_H */

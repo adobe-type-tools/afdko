@@ -1,12 +1,14 @@
+
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef CFFWRITE_H
 #define CFFWRITE_H
 
 #include "ctlshare.h"
 
-#define CFW_VERSION CTL_MAKE_VERSION(1,0,53)
+#define CFW_VERSION CTL_MAKE_VERSION(1, 0, 53)
 
 #include "absfont.h"
 
@@ -48,7 +50,7 @@ typedef struct cfwCtx_ *cfwCtx;
 cfwCtx cfwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
               CTL_CHECK_ARGS_DCL);
 
-#define CFW_CHECK_ARGS  CTL_CHECK_ARGS_CALL(CFW_VERSION)
+#define CFW_CHECK_ARGS CTL_CHECK_ARGS_CALL(CFW_VERSION)
 
 /* cfwNew() initializes the library and returns an opaque context that
    subsequently passed to all the other library functions. It must be the first
@@ -64,34 +66,30 @@ int cfwBegSet(cfwCtx h, long flags);
 /* cfwBegSet() is called to begin a new FontSet specification. The flags
    parameter specifies FontSet creation options below: */
 
-enum
-    {
-    CFW_SUBRIZE         = 1<<0, /* Subroutinize member fonts' charstrings */
-    CFW_EMBED_OPT       = 1<<1, /* Perform embedding optimization */
-    CFW_ROM_OPT         = 1<<2, /* Perform ROM-resident FontSet optimization */
-    CFW_NO_DEP_OPS      = 1<<3, /* Remove/convert deprecated ops */
-    CFW_NO_FAMILY_OPT   = 1<<4, /* Don't apply family value optimizations */
-    CFW_WARN_DUP_HINTSUBS = 1<<5, /* Report duplicate hintsubs warnings */
-    CFW_PRESERVE_GLYPH_ORDER = 1<<6, /* Preserve glyph addition order */
-    CFW_CHECK_IF_GLYPHS_DIFFER = 1<<7, /* When adding a charstring, check if
-                                        it is already present and same or different. */
-    CFW_ENABLE_CMP_TEST = 1<<8,  /* Enable testing by disabling optimizations */
-	CFW_IS_CUBE    = 1<<9,
-	
+enum {
+    CFW_SUBRIZE =                1 << 0, /* Subroutinize member fonts' charstrings */
+    CFW_EMBED_OPT =              1 << 1, /* Perform embedding optimization */
+    CFW_ROM_OPT =                1 << 2, /* Perform ROM-resident FontSet optimization */
+    CFW_NO_DEP_OPS =             1 << 3, /* Remove/convert deprecated ops */
+    CFW_NO_FAMILY_OPT =          1 << 4, /* Don't apply family value optimizations */
+    CFW_WARN_DUP_HINTSUBS =      1 << 5, /* Report duplicate hintsubs warnings */
+    CFW_PRESERVE_GLYPH_ORDER =   1 << 6, /* Preserve glyph addition order */
+    CFW_CHECK_IF_GLYPHS_DIFFER = 1 << 7, /* When adding a charstring, check if */
+                                         /* it is already present and same or different. */
+    CFW_ENABLE_CMP_TEST =        1 << 8, /* Enable testing by disabling optimizations */
+    CFW_IS_CUBE =                1 << 9,
     /* When bit 9 is set, the data contains cube font operators. Stack depth
-	and operator defs are different. Cube subr's are added at the end of gsubr's for CID fonts,
-	subrs for non-CID fonts. */
-	
-	CFW_FORCE_STD_ENCODING    = 1<<10,
-   /* When bit 10 is set, TopDict encoding vector is set to StandardEncoding, no matter
-	what is in the font. This is useful for working with font sources that will be used for
-	OpenType/CFF fonts */     
-
-    CFW_CUBE_RND    = 1<<11,
-    CFW_NO_OPTIMIZATION   = 1<<12,
-    CFW_WRITE_CFF2   = 1<<13,
-    CFW_NO_FUTILE_SUBRS = 1<<14  /* Remove futile subroutines during subroutinization */
-    };
+       and operator defs are different. Cube subr's are added at the end of
+       gsubr's for CID fonts, subrs for non-CID fonts. */
+    CFW_FORCE_STD_ENCODING =     1 << 10,
+    /* When bit 10 is set, TopDict encoding vector is set to StandardEncoding,
+       no matter what is in the font. This is useful for working with font
+       sources that will be used for OpenType/CFF fonts */
+    CFW_CUBE_RND =               1 << 11,
+    CFW_NO_OPTIMIZATION =        1 << 12,
+    CFW_WRITE_CFF2 =             1 << 13,
+    CFW_NO_FUTILE_SUBRS =        1 << 14 /* Remove futile subroutines during subroutinization */
+};
 
 /* If the CFW_PRESERVE_GLYPH_ORDER bit is not set, glyphs are accumulated and
    then sorted during cfwEndFont(), into an order that reduces the internal CFF
@@ -115,12 +113,11 @@ enum
    is both memory and CPU intensive, this option should be used cautiously. */
 
 typedef struct cfwMapCallback_ cfwMapCallback;
-struct cfwMapCallback_
-    {
+struct cfwMapCallback_ {
     void *ctx;
-    void (*glyphmap)(cfwMapCallback *cb, 
+    void (*glyphmap)(cfwMapCallback *cb,
                      unsigned short gid, abfGlyphInfo *info);
-    };
+};
 
 int cfwBegFont(cfwCtx h, cfwMapCallback *map, unsigned long maxNumSubrs);
 
@@ -231,13 +228,12 @@ void cfwFree(cfwCtx h);
 /* cfwFree() destroys the library context and all the resources allocated to
    it. It must be the last function called by a client of the library. */
 
-enum
-    {
+enum {
 #undef CTL_DCL_ERR
-#define CTL_DCL_ERR(name,string)    name,
+#define CTL_DCL_ERR(name, string) name,
 #include "cfwerr.h"
     cfwErrCount
-    };
+};
 
 /* Library functions return either zero (cfwSuccess) to indicate success or a
    positive non-zero error code that is defined in the above enumeration that
