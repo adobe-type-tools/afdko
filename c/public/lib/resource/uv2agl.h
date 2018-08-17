@@ -1,10 +1,11 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 /*
- * Adobe Glyph List v1.2, sorted by Unicode value. 
+ * Adobe Glyph List v1.2, sorted by Unicode value.
  * Search by Unicode value, get glyph name.
- * 
+ *
  * Derived from agl2uv.h by hand edit.
  */
 
