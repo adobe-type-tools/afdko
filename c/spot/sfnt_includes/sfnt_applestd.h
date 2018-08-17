@@ -1,11 +1,9 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. *//***********************************************************************
- * SCCS Id:    @(#)applestd.h	1.1
- * Changed:    4/13/95 10:15:20
- ***********************************************************************/
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 /*
- * Standard Apple glyph ordering aggregate initializer. 
+ * Standard Apple glyph ordering aggregate initializer.
  */
 
 /* 000 */ ".notdef",

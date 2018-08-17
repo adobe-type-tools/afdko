@@ -1,8 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. *//***********************************************************************
- * SCCS Id:    @(#)MMVR.c	1.6
- * Changed:    5/19/99 17:21:00
- ***********************************************************************/
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #include "MMVR.h"
 #include "sfnt_MMVR.h"
@@ -10,60 +8,56 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static MMVRTbl *MMVR = NULL;
 static IntX loaded = 0;
 
-void MMVRRead(LongN start, Card32 length)
-	{
-	IntX i;
-	
-	if (loaded)
-		return;
+void MMVRRead(LongN start, Card32 length) {
+    IntX i;
 
-	MMVR = (MMVRTbl *)memNew(sizeof(MMVRTbl));
-	SEEK_ABS(start);
+    if (loaded)
+        return;
 
-	IN1(MMVR->Version);
-	IN1(MMVR->Flags);
-	IN1(MMVR->AxisCount);
+    MMVR = (MMVRTbl *)memNew(sizeof(MMVRTbl));
+    SEEK_ABS(start);
 
-	MMVR->axis = memNew(sizeof(Axis) * MMVR->AxisCount);
-	for (i = 0; i < MMVR->AxisCount; i++)
-		{
-		Axis *axis = &MMVR->axis[i];
-		
-		IN1(axis->Tag);
-		IN1(axis->Default);
-		IN1(axis->Scale);
-		}
+    IN1(MMVR->Version);
+    IN1(MMVR->Flags);
+    IN1(MMVR->AxisCount);
 
-	loaded = 1;
-	}
+    MMVR->axis = memNew(sizeof(Axis) * MMVR->AxisCount);
+    for (i = 0; i < MMVR->AxisCount; i++) {
+        Axis *axis = &MMVR->axis[i];
 
-void MMVRDump(IntX level, LongN start)
-	{
-	IntX i;
+        IN1(axis->Tag);
+        IN1(axis->Default);
+        IN1(axis->Scale);
+    }
 
-	DL(1, (OUTPUTBUFF, "### [MMVR] (%08lx)\n", start));
+    loaded = 1;
+}
 
-	DLV(2, "Version  =", MMVR->Version);
-	DLx(2, "Flags    =", MMVR->Flags);
-	DLu(2, "AxisCount=", MMVR->AxisCount);
+void MMVRDump(IntX level, LongN start) {
+    IntX i;
 
-	for (i = 0; i < MMVR->AxisCount; i++)
-		{
-		Axis *axis = &MMVR->axis[i];
-		
-		DL(2, (OUTPUTBUFF, "--- axis[%d]\n", i));
-		DLT(2, "Tag    =", axis->Tag);
-		DLu(2, "Default=", axis->Default);
-		DLu(2, "Scale  =", axis->Scale);
-		}
-	}
+    DL(1, (OUTPUTBUFF, "### [MMVR] (%08lx)\n", start));
 
-void MMVRFree(void)
-	{
-	if (!loaded)
-		return;
+    DLV(2, "Version  =", MMVR->Version);
+    DLx(2, "Flags    =", MMVR->Flags);
+    DLu(2, "AxisCount=", MMVR->AxisCount);
 
-	memFree(MMVR->axis);
-	memFree(MMVR); MMVR = NULL;
-	loaded = 0;
-	}
+    for (i = 0; i < MMVR->AxisCount; i++) {
+        Axis *axis = &MMVR->axis[i];
+
+        DL(2, (OUTPUTBUFF, "--- axis[%d]\n", i));
+        DLT(2, "Tag    =", axis->Tag);
+        DLu(2, "Default=", axis->Default);
+        DLu(2, "Scale  =", axis->Scale);
+    }
+}
+
+void MMVRFree(void) {
+    if (!loaded)
+        return;
+
+    memFree(MMVR->axis);
+    memFree(MMVR);
+    MMVR = NULL;
+    loaded = 0;
+}

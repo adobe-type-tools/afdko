@@ -1,11 +1,10 @@
-/* @(#)CM_VerSion dictops.h atm08 1.2 16245.eco sum= 25275 atm08.002 */
-/* @(#)CM_VerSion dictops.h atm07 1.2 16164.eco sum= 01058 atm07.012 */
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. *//***********************************************************************/
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 /*
  * CFF dictionary operator definitions.
- * 
+ *
  * There are several kinds of fonts that are supported by CFF that have
  * different dict organizations:
  *
@@ -15,7 +14,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
  * synthetic        x
  * multiple master  x       x
  * CID              x                   x       x
- * chameleon        x       
+ * chameleon        x
  *
  * The Top dict, so named because of its position in the dictionary hierarchy,
  * is also known as the Font dict in all but CID fonts. CID fonts have two
@@ -23,14 +22,14 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
  * Synthetic fonts just have a Top dict containing a reference to another font.
  *
  * This file defines the dict operators that can appear in these dicts. In
- * order to aid font recognition and parsing, the following restrictions are 
+ * order to aid font recognition and parsing, the following restrictions are
  * imposed upon dict op ordering:
  *
  * Synthetic/top:   Must begin with cff_SyntheticBase.
  * MM/top:          Must begin cff_MultipleMaster.
  * CID/top:         Must begin with cff_ROS.
  * Chameleon/top:   Must begin with cff_Chameleon.
- * Private/PD:      cff_OtherBlues must follow cff_BlueValues and 
+ * Private/PD:      cff_OtherBlues must follow cff_BlueValues and
  *                  cff_FamilyOtherBlues must follow cff_FamilyBlues.
  *
  * If the top dict doesn't begin with one of the operators listed above it is
@@ -76,14 +75,14 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define cff_reserved27              27
 #define cff_shortint                28  /* All. Shared with T2 op */
 #define cff_longint                 29  /* All */
-#define cff_BCD                     30  /* All */  
+#define cff_BCD                     30  /* All */
 #define cff_T2                      31  /* Top/Private */
-#define cff_reserved255				255
+#define cff_reserved255             255
 #define cff_LAST_ONE_BYTE_OP        cff_T2
 
 /* Make escape operator value; may be redefined to suit implementation */
 #ifndef cff_ESC
-#define cff_ESC(op)                 (cff_escape<<8|(op))
+#define cff_ESC(op) (cff_escape << 8 | (op))
 #endif
 
 /* Two byte operators */
@@ -131,20 +130,18 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /*                                          40-255 Reserved */
 
 /* Predefined charsets (cff_charset operands) */
-enum
-    {
+enum {
     cff_ISOAdobeCharset,
     cff_ExpertCharset,
     cff_ExpertSubsetCharset,
     cff_PredefCharsetCount
-    };
+};
 
 /* Predefined encodings (cff_Encoding operands) */
-enum
-    {
+enum {
     cff_StandardEncoding,
     cff_ExpertEncoding,
     cff_PredefEncodingCount
-    };
+};
 
 #endif /* DICTOPS_H */
