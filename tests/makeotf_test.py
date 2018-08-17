@@ -236,15 +236,18 @@ def test_writeOptionsFile():
 
 
 def test_readOptionFile():
+    INPUT_FONT_NAME = 'font.pfa'
+    OUTPUT_FONT_NAME = 'font.otf'
     proj_path = _get_input_path('proj.txt')
+    abs_font_dir_path = os.path.dirname(proj_path)
     params = MakeOTFParams()
     assert params.fontDirPath == '.'
 
     params.currentDir = os.path.dirname(proj_path)
     assert readOptionFile(proj_path, params, 1) == (True, 7)
     assert params.fontDirPath == '.'
-    assert params.opt_InputFontPath == 'font.pfa'
-    assert params.opt_OutputFontPath == 'font.otf'
+    assert params.opt_InputFontPath == INPUT_FONT_NAME
+    assert params.opt_OutputFontPath == OUTPUT_FONT_NAME
     assert params.opt_ConvertToCID == 'true'
     assert params.opt_kSetfsSelectionBitsOff == '[8, 9]'
     assert params.opt_kSetfsSelectionBitsOn == [7]
@@ -252,20 +255,19 @@ def test_readOptionFile():
     assert params.opt_UseOldNameID4 is None
 
     params.currentDir = os.getcwd()
+    font_dir_path = os.path.relpath(abs_font_dir_path, params.currentDir)
+    input_font_path = os.path.join(font_dir_path, INPUT_FONT_NAME)
+    output_font_path = os.path.join(font_dir_path, OUTPUT_FONT_NAME)
     assert readOptionFile(proj_path, params, 1) == (True, 7)
-    assert params.fontDirPath == os.path.normpath(
-        'tests/makeotf_data/input')
-    assert params.opt_InputFontPath == os.path.normpath(
-        'tests/makeotf_data/input/font.pfa')
-    assert params.opt_OutputFontPath == os.path.normpath(
-        'tests/makeotf_data/input/font.otf')
+    assert params.fontDirPath == os.path.normpath(font_dir_path)
+    assert params.opt_InputFontPath == os.path.normpath(input_font_path)
+    assert params.opt_OutputFontPath == os.path.normpath(output_font_path)
 
 
 def test_readOptionFile_abspath():
     proj_path = _get_input_path('proj2.txt')
     params = MakeOTFParams()
 
-    # absolute path dir
     root = os.path.abspath(os.sep)
     params.currentDir = os.path.join(root, 'different_dir')
     assert readOptionFile(proj_path, params, 1) == (False, 3)
@@ -273,35 +275,31 @@ def test_readOptionFile_abspath():
     assert params.opt_InputFontPath.startswith(root)
     assert params.opt_OutputFontPath.startswith(root)
 
-    # relative path dir
-    params.currentDir = 'different_dir'
-    assert readOptionFile(proj_path, params, 1) == (False, 3)
-    assert params.fontDirPath == os.path.normpath(
-        '../tests/makeotf_data/input')
-    assert params.opt_InputFontPath == os.path.normpath(
-        '../tests/makeotf_data/input/font.pfa')
-    assert params.opt_OutputFontPath == os.path.normpath(
-        '../tests/makeotf_data/input/font.otf')
 
-    # relative path dir
-    params.currentDir = os.path.normpath('./different_dir')
-    assert readOptionFile(proj_path, params, 1) == (False, 3)
-    assert params.fontDirPath == os.path.normpath(
-        '../tests/makeotf_data/input')
-    assert params.opt_InputFontPath == os.path.normpath(
-        '../tests/makeotf_data/input/font.pfa')
-    assert params.opt_OutputFontPath == os.path.normpath(
-        '../tests/makeotf_data/input/font.otf')
+@pytest.mark.parametrize('cur_dir_str', [
+    'different_dir',
+    './different_dir',
+    '../different_dir',
+])
+def test_readOptionFile_relpath(cur_dir_str):
+    INPUT_FONT_NAME = 'font.pfa'
+    OUTPUT_FONT_NAME = 'font.otf'
+    proj_path = _get_input_path('proj2.txt')
+    abs_font_dir_path = os.path.dirname(proj_path)
+    params = MakeOTFParams()
 
-    # relative path dir
-    params.currentDir = os.path.normpath('../different_dir')
+    if '/' in cur_dir_str:
+        params.currentDir = os.path.normpath(cur_dir_str)
+    else:
+        params.currentDir = cur_dir_str
+
+    font_dir_path = os.path.relpath(abs_font_dir_path, params.currentDir)
+    input_font_path = os.path.join(font_dir_path, INPUT_FONT_NAME)
+    output_font_path = os.path.join(font_dir_path, OUTPUT_FONT_NAME)
     assert readOptionFile(proj_path, params, 1) == (False, 3)
-    assert params.fontDirPath == os.path.normpath(
-        '../afdko/tests/makeotf_data/input')
-    assert params.opt_InputFontPath == os.path.normpath(
-        '../afdko/tests/makeotf_data/input/font.pfa')
-    assert params.opt_OutputFontPath == os.path.normpath(
-        '../afdko/tests/makeotf_data/input/font.otf')
+    assert params.fontDirPath == os.path.normpath(font_dir_path)
+    assert params.opt_InputFontPath == os.path.normpath(input_font_path)
+    assert params.opt_OutputFontPath == os.path.normpath(output_font_path)
 
 
 def test_readOptionFile_filenotfound():
