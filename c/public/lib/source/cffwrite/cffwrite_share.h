@@ -1,5 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-   This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef CFFWRITE_SHARE_H
 #define CFFWRITE_SHARE_H
@@ -12,42 +13,40 @@
 
 /* --------------------------- Shared Definitions -------------------------- */
 
-#define ARRAY_LEN(a)    (sizeof(a) / sizeof((a)[0]))
+#define ARRAY_LEN(a) (sizeof(a) / sizeof((a)[0]))
 
-typedef unsigned char OffSize;  /* Offset size indicator */
-typedef long Offset;            /* 1-4 byte offset */
+typedef unsigned char OffSize; /* Offset size indicator */
+typedef long Offset;           /* 1-4 byte offset */
 
-typedef unsigned short SRI;     /* String record index */
-#define SRI_UNDEF   0xffff      /* SRI of undefined string */
+typedef unsigned short SRI; /* String record index */
+#define SRI_UNDEF 0xffff    /* SRI of undefined string */
 
-typedef unsigned short SID;     /* String id */
-#define SID_SIZE    2           /* SID CFF size */
-#define SID_UNDEF   0xffff      /* SID of undefined string */
-#define SID_NOTDEF  0           /* SID for .notdef */
+typedef unsigned short SID; /* String id */
+#define SID_SIZE 2          /* SID CFF size */
+#define SID_UNDEF 0xffff    /* SID of undefined string */
+#define SID_NOTDEF 0        /* SID for .notdef */
 
-typedef unsigned short GID;     /* Glyph id */
+typedef unsigned short GID; /* Glyph id */
 
 #define OFF_SIZE(o) \
-	((OffSize)(((o) > 0x00ffffff) ? 4 : (((o) > 0x0000ffff) ? 3 : (((o) > 0x000000ff) ? 2 : 1))))
+    ((OffSize)(((o) > 0x00ffffff) ? 4 : (((o) > 0x0000ffff) ? 3 : (((o) > 0x000000ff) ? 2 : 1))))
 
-typedef struct                  /* INDEX */
+typedef struct /* INDEX */
 {
-	unsigned long count;       /* Element count */
-	OffSize offSize;            /* Offset size */
-	long datasize;              /* Data size */
-	unsigned short bias;        /* Subr number bias */
+    unsigned long count; /* Element count */
+    OffSize offSize;     /* Offset size */
+    long datasize;       /* Data size */
+    unsigned short bias; /* Subr number bias */
 } INDEX;
 
 /* INDEX macros */
-#define INDEX_HDR_SIZE  (2 + 1)
-#define INDEX2_HDR_SIZE  (4 + 1)
+#define INDEX_HDR_SIZE (2 + 1)
+#define INDEX2_HDR_SIZE (4 + 1)
 #define INDEX_OFF_SIZE(size) OFF_SIZE((size) + 1)
 #define INDEX_SIZE(items, size) \
-(((items) == 0) ? 2 : \
-(INDEX_HDR_SIZE + ((items) + 1) * INDEX_OFF_SIZE(size) + (size)))
+    (((items) == 0) ? 2 : (INDEX_HDR_SIZE + ((items) + 1) * INDEX_OFF_SIZE(size) + (size)))
 #define INDEX2_SIZE(items, size) \
-	(((items) == 0) ? 4 : \
-	 (INDEX2_HDR_SIZE + ((items) + 1) * INDEX_OFF_SIZE(size) + (size)))
+    (((items) == 0) ? 4 : (INDEX2_HDR_SIZE + ((items) + 1) * INDEX_OFF_SIZE(size) + (size)))
 
 /* Library-wide utility functions */
 void CTL_CDECL cfwFatal(cfwCtx g, int err_code, char *fmt, ...);
@@ -114,49 +113,44 @@ typedef struct subrCtx_ *subrCtx;
 
 /* Library context (the one returned to client) */
 struct cfwCtx_ {
-	long flags;                 /* Control flags */
-	struct                      /* Client callbacks */
-	{
-		ctlMemoryCallbacks mem;
-		ctlStreamCallbacks stm;
-	}
-	cb;
-	struct                      /* Streams */
-	{
-		void *dst;
-		void *tmp;
-		void *dbg;
-	}
-	stm;
-	struct                      /* Temorary stream */
-	{
-		long offset;            /* Buffer offset */
-		size_t length;          /* Buffer length */
-		char *buf;              /* Buffer beginning */
-		char *end;              /* Buffer end */
-		char *next;             /* Next byte available (buf <= next < end) */
-	}
-	tmp;
-	struct                      /* Service library and module contexts */
-	{
-		dnaCtx dnaSafe;         /* longjmp on error */
-		dnaCtx dnaFail;         /* Return on error */
-		controlCtx control;
-		charsetCtx charset;
-		encodingCtx encoding;
-		fdselectCtx fdselect;
-		sindexCtx sindex;
-		dictCtx dict;
-		cstrCtx cstr;
-		subrCtx subr;
-	}
-	ctx;
-	struct                      /* Error handling */
-	{
-		_Exc_Buf env;
-		short code;
-	}
-	err;
+    long flags; /* Control flags */
+    struct      /* Client callbacks */
+    {
+        ctlMemoryCallbacks mem;
+        ctlStreamCallbacks stm;
+    } cb;
+    struct /* Streams */
+    {
+        void *dst;
+        void *tmp;
+        void *dbg;
+    } stm;
+    struct /* Temorary stream */
+    {
+        long offset;   /* Buffer offset */
+        size_t length; /* Buffer length */
+        char *buf;     /* Buffer beginning */
+        char *end;     /* Buffer end */
+        char *next;    /* Next byte available (buf <= next < end) */
+    } tmp;
+    struct /* Service library and module contexts */
+    {
+        dnaCtx dnaSafe; /* longjmp on error */
+        dnaCtx dnaFail; /* Return on error */
+        controlCtx control;
+        charsetCtx charset;
+        encodingCtx encoding;
+        fdselectCtx fdselect;
+        sindexCtx sindex;
+        dictCtx dict;
+        cstrCtx cstr;
+        subrCtx subr;
+    } ctx;
+    struct /* Error handling */
+    {
+        _Exc_Buf env;
+        short code;
+    } err;
     unsigned long maxNumSubrs;
 };
 

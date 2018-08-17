@@ -1,5 +1,6 @@
 /* Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #include "ctlshare.h"
 #include "nameread.h"
@@ -15,89 +16,85 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 /* --------------------------- Constants  --------------------------- */
 
-#define MAX_FAMILY_NAME_LENGTH      64
-#define MAX_COORD_STRING_LENGTH     16
+#define MAX_FAMILY_NAME_LENGTH 64
+#define MAX_COORD_STRING_LENGTH 16
 
 /* --------------------------- type Definitions  --------------------------- */
 
-typedef struct					/* bsearch id match record */
-	{
-	unsigned short platformId;
-	unsigned short platspecId;
-	unsigned short languageId;
-	unsigned short nameId;
-	} MatchIds;
+typedef struct /* bsearch id match record */
+{
+    unsigned short platformId;
+    unsigned short platspecId;
+    unsigned short languageId;
+    unsigned short nameId;
+} MatchIds;
 
-struct nam_name_					/* name table */
-	{
-	unsigned short format;		/* =0 */
-	unsigned short count;
-	unsigned short stringOffset;
-	dnaDCL(nam_NameRecord, records);
-	};
+struct nam_name_ /* name table */
+{
+    unsigned short format; /* =0 */
+    unsigned short count;
+    unsigned short stringOffset;
+    dnaDCL(nam_NameRecord, records);
+};
 
 /* --------------------------- Functions  --------------------------- */
 
 /* Load the name table. */
-nam_name nam_loadname(sfrCtx sfr, ctlSharedStmCallbacks *sscb)
-{
-	nam_name nameTbl = NULL;
-	int success = 0;
-	int i;
+nam_name nam_loadname(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
+    nam_name nameTbl = NULL;
+    int success = 0;
+    int i;
 
-	sfrTable *table = sfrGetTableByTag(sfr, CTL_TAG('n','a','m','e'));
-	if (table == NULL)
-    {
-		sscb->message(sscb, "name table missing");
-		return NULL;
+    sfrTable *table = sfrGetTableByTag(sfr, CTL_TAG('n', 'a', 'm', 'e'));
+    if (table == NULL) {
+        sscb->message(sscb, "name table missing");
+        return NULL;
     }
-	DURING
-		sscb->seek(sscb, table->offset);
+    DURING
+    sscb->seek(sscb, table->offset);
 
-		nameTbl = (nam_name)sscb->memNew(sscb, sizeof(*nameTbl));
-		if (!nameTbl)
-			goto cleanup;
+    nameTbl = (nam_name)sscb->memNew(sscb, sizeof(*nameTbl));
+    if (!nameTbl)
+        goto cleanup;
 
-		/* Read and validate table format */
-		nameTbl->format = sscb->read2(sscb);
-		if (nameTbl->format != 0) {
-			sscb->message(sscb, "invalid name table format");
-			goto cleanup;
-		}
+    /* Read and validate table format */
+    nameTbl->format = sscb->read2(sscb);
+    if (nameTbl->format != 0) {
+        sscb->message(sscb, "invalid name table format");
+        goto cleanup;
+    }
 
-		/* Read rest of header */
-		nameTbl->count			= sscb->read2(sscb);
-		nameTbl->stringOffset 	= sscb->read2(sscb);
+    /* Read rest of header */
+    nameTbl->count = sscb->read2(sscb);
+    nameTbl->stringOffset = sscb->read2(sscb);
 
-		/* Read name records */
-		dnaINIT(sscb->dna, nameTbl->records, nameTbl->count, nameTbl->count);
-		dnaSET_CNT(nameTbl->records, nameTbl->count);
-		for (i = 0; i < nameTbl->records.cnt; i++)
-		{
-			nam_NameRecord *rec = &nameTbl->records.array[i];
-			rec->platformId	= sscb->read2(sscb);
-			rec->platspecId = sscb->read2(sscb);
-			rec->languageId = sscb->read2(sscb);
-			rec->nameId 	= sscb->read2(sscb);
-			rec->length 	= sscb->read2(sscb);
-			rec->offset 	= table->offset + nameTbl->stringOffset + sscb->read2(sscb);
-		}
-		success = 1;
+    /* Read name records */
+    dnaINIT(sscb->dna, nameTbl->records, nameTbl->count, nameTbl->count);
+    dnaSET_CNT(nameTbl->records, nameTbl->count);
+    for (i = 0; i < nameTbl->records.cnt; i++) {
+        nam_NameRecord *rec = &nameTbl->records.array[i];
+        rec->platformId = sscb->read2(sscb);
+        rec->platspecId = sscb->read2(sscb);
+        rec->languageId = sscb->read2(sscb);
+        rec->nameId = sscb->read2(sscb);
+        rec->length = sscb->read2(sscb);
+        rec->offset = table->offset + nameTbl->stringOffset + sscb->read2(sscb);
+    }
+    success = 1;
 
 cleanup:;
-	HANDLER
-	END_HANDLER
+    HANDLER
+    END_HANDLER
 
-	if (!success) {
-		nam_freename(sscb, nameTbl);
-		nameTbl = NULL;
-	}
+    if (!success) {
+        nam_freename(sscb, nameTbl);
+        nameTbl = NULL;
+    }
 
     return nameTbl;
 }
 
-void nam_freename(ctlSharedStmCallbacks *sscb, nam_name tbl)
-{
+void nam_freename(ctlSharedStmCallbacks *sscb, nam_name tbl) {
     if (tbl) {
         dnaFREE(tbl->records);
         sscb->memFree(sscb, tbl);
@@ -105,78 +102,80 @@ void nam_freename(ctlSharedStmCallbacks *sscb, nam_name tbl)
 }
 
 /* Match ids. */
-static int CTL_CDECL matchIds(const void *key, const void *value)
-	{
-	MatchIds *a = (MatchIds *)key;
-	nam_NameRecord *b = (nam_NameRecord *)value;
-	if (a->platformId < b->platformId)
-		return -1;
-	else if (a->platformId > b->platformId)
-		return 1;
-	else if (a->platspecId < b->platspecId)
-		return -1;
-	else if (a->platspecId > b->platspecId)
-		return 1;
-	else if (a->languageId < b->languageId)
-		return -1;
-	else if (a->languageId > b->languageId)
-		return 1;
-	else if (a->nameId < b->nameId)
-		return -1;
-	else if (a->nameId > b->nameId)
-		return 1;
-	else 
-		return 0;
-	}
+static int CTL_CDECL matchIds(const void *key, const void *value) {
+    MatchIds *a = (MatchIds *)key;
+    nam_NameRecord *b = (nam_NameRecord *)value;
+    if (a->platformId < b->platformId)
+        return -1;
+    else if (a->platformId > b->platformId)
+        return 1;
+    else if (a->platspecId < b->platspecId)
+        return -1;
+    else if (a->platspecId > b->platspecId)
+        return 1;
+    else if (a->languageId < b->languageId)
+        return -1;
+    else if (a->languageId > b->languageId)
+        return 1;
+    else if (a->nameId < b->nameId)
+        return -1;
+    else if (a->nameId > b->nameId)
+        return 1;
+    else
+        return 0;
+}
 
 /* Return name record match specified ids or NULL if no match. */
 nam_NameRecord *nam_nameFind(nam_name tbl,
-							unsigned short platformId,
-							unsigned short platspecId,
-							unsigned short languageId,
-							unsigned short nameId)
-	{
-	MatchIds match;
+                             unsigned short platformId,
+                             unsigned short platspecId,
+                             unsigned short languageId,
+                             unsigned short nameId) {
+    MatchIds match;
 
-	if (tbl->records.cnt == 0)
-		return NULL;	/* name table missing */
+    if (tbl->records.cnt == 0)
+        return NULL; /* name table missing */
 
-	/* Initialize match record */
-	match.platformId	= platformId;
-	match.platspecId	= platspecId;
-	match.languageId	= languageId;
-	match.nameId		= nameId;
-	
-	return (nam_NameRecord *)
-		bsearch(&match, tbl->records.array, tbl->records.cnt, 
-				sizeof(nam_NameRecord), matchIds); 
-	}
+    /* Initialize match record */
+    match.platformId = platformId;
+    match.platspecId = platspecId;
+    match.languageId = languageId;
+    match.nameId = nameId;
 
-static int checkNameChar(unsigned char ch, int isPS)
-{
-    if (isPS)
-    {
+    return (nam_NameRecord *)
+        bsearch(&match, tbl->records.array, tbl->records.cnt,
+                sizeof(nam_NameRecord), matchIds);
+}
+
+static int checkNameChar(unsigned char ch, int isPS) {
+    if (isPS) {
         switch (ch) {
-        case '[': case ']': case '(': case ')': case '{':
-        case '}': case '<': case '>': case '/': case '%':
-            return 0;
-        default:
-            return (ch >= 33 && ch <= 126);
+            case '[':
+            case ']':
+            case '(':
+            case ')':
+            case '{':
+            case '}':
+            case '<':
+            case '>':
+            case '/':
+            case '%':
+                return 0;
+            default:
+                return (ch >= 33 && ch <= 126);
         }
-    }
-    else
+    } else
         return (ch >= 32) && (ch <= 126);
 }
 
-long nam_getASCIIName(nam_name nameTbl, ctlSharedStmCallbacks *sscb, char *buffer, unsigned long bufferLen, unsigned short nameId, int isPS)
-{
+long nam_getASCIIName(nam_name nameTbl, ctlSharedStmCallbacks *sscb, char *buffer, unsigned long bufferLen, unsigned short nameId, int isPS) {
     unsigned long i;
     long nameLen;
     unsigned char ch1, ch2;
-    nam_NameRecord  *rec;
+    nam_NameRecord *rec;
 
-	if (!nameTbl)
-		return NAME_READ_NAME_NOT_FOUND;
+    if (!nameTbl)
+        return NAME_READ_NAME_NOT_FOUND;
     rec = nam_nameFind(nameTbl, NAME_WIN_PLATFORM, NAME_WIN_UGL, NAME_WIN_ENGLISH, nameId);
     if (rec && rec->length > 0) {
         nameLen = 0;
@@ -216,14 +215,12 @@ long nam_getASCIIName(nam_name nameTbl, ctlSharedStmCallbacks *sscb, char *buffe
 }
 
 static long getPSName(nam_name nameTbl,
-                    ctlSharedStmCallbacks *sscb,
-                    char *nameBuffer, unsigned long nameBufferLen)
-{
+                      ctlSharedStmCallbacks *sscb,
+                      char *nameBuffer, unsigned long nameBufferLen) {
     return nam_getASCIIName(nameTbl, sscb, nameBuffer, nameBufferLen, NAME_ID_POSTSCRIPT, 1);
 }
 
-static unsigned long removeNonAlphanumChar(char *buffer, unsigned long len)
-{
+static unsigned long removeNonAlphanumChar(char *buffer, unsigned long len) {
     unsigned long i, j;
 
     for (i = j = 0; i < len; i++) {
@@ -237,10 +234,9 @@ static unsigned long removeNonAlphanumChar(char *buffer, unsigned long len)
 
 /* get the family name prefix for a variable font instance name */
 long nam_getFamilyNamePrefix(nam_name nameTbl,
-                            ctlSharedStmCallbacks *sscb,
-                            char *buffer, unsigned long bufferLen)
-{
-    long    nameLen;
+                             ctlSharedStmCallbacks *sscb,
+                             char *buffer, unsigned long bufferLen) {
+    long nameLen;
 
     nameLen = nam_getASCIIName(nameTbl, sscb, buffer, bufferLen, NAME_ID_POSTSCRIPT_PREFIX, 1);
     if (nameLen == NAME_READ_NAME_NOT_FOUND)
@@ -257,10 +253,9 @@ long nam_getFamilyNamePrefix(nam_name nameTbl,
     return nameLen;
 }
 
-    /* allocate a temporary buffer long enough to hold a generated instance name */
-static char *allocNameBuffer(ctlSharedStmCallbacks *sscb, long axisCount, unsigned long *bufferLen)
-{
-    char    *buffer;
+/* allocate a temporary buffer long enough to hold a generated instance name */
+static char *allocNameBuffer(ctlSharedStmCallbacks *sscb, long axisCount, unsigned long *bufferLen) {
+    char *buffer;
 
     *bufferLen = MAX_FAMILY_NAME_LENGTH + 10 + (MAX_COORD_STRING_LENGTH * axisCount);
     buffer = (char *)sscb->memNew(sscb, *bufferLen);
@@ -272,24 +267,22 @@ static char *allocNameBuffer(ctlSharedStmCallbacks *sscb, long axisCount, unsign
 }
 
 long nam_getNamedInstancePSName(nam_name nameTbl,
-                            var_axes axesTbl,
-                            ctlSharedStmCallbacks *sscb,
-                            float *coords,
-                            unsigned short axisCount,
-                            int instanceIndex,
-                            char *instanceName, unsigned long instanceNameLen)
-{
-    unsigned long   familyNameLen = 0;
-    long            nameLen = NAME_READ_NAME_NOT_FOUND;
-    unsigned short  subfamilyID = 0, postscriptID = 0;
-    char            *buffer = 0;
-    unsigned long   bufferLen;
+                                var_axes axesTbl,
+                                ctlSharedStmCallbacks *sscb,
+                                float *coords,
+                                unsigned short axisCount,
+                                int instanceIndex,
+                                char *instanceName, unsigned long instanceNameLen) {
+    unsigned long familyNameLen = 0;
+    long nameLen = NAME_READ_NAME_NOT_FOUND;
+    unsigned short subfamilyID = 0, postscriptID = 0;
+    char *buffer = 0;
+    unsigned long bufferLen;
 
     /* if the font is not a variable font or no coordinates are specified, return the default PS name */
     if (!axesTbl || !coords || !axisCount) {
         return getPSName(nameTbl, sscb, instanceName, instanceNameLen);
     }
-
 
     /* find a matching named instance in the fvar table */
     if (instanceIndex < 0)
@@ -313,25 +306,23 @@ long nam_getNamedInstancePSName(nam_name nameTbl,
     familyNameLen = (unsigned long)nameLen;
 
     /* append the style name from the instance if there is a matching one */
-	if (instanceIndex >= 0) {
-		char    *styleName = &buffer[nameLen];
-		unsigned long   styleBufferLen = bufferLen - nameLen;
-		long   styleLen;
+    if (instanceIndex >= 0) {
+        char *styleName = &buffer[nameLen];
+        unsigned long styleBufferLen = bufferLen - nameLen;
+        long styleLen;
 
-		styleLen = nam_getASCIIName(nameTbl, sscb, styleName, styleBufferLen, subfamilyID, 0);
-		if (styleLen < 0)
-			nameLen = styleLen;
-		else
-		{
-			styleLen = removeNonAlphanumChar(styleName, styleLen);
-			nameLen = nameLen + styleLen;
-			if ((unsigned long)nameLen + 1 > instanceNameLen)
-				nameLen = NAME_READ_NAME_TOO_LONG;
-			else
-				STRCPY_S(instanceName, instanceNameLen, buffer);
-		}
-    }
-    else
+        styleLen = nam_getASCIIName(nameTbl, sscb, styleName, styleBufferLen, subfamilyID, 0);
+        if (styleLen < 0)
+            nameLen = styleLen;
+        else {
+            styleLen = removeNonAlphanumChar(styleName, styleLen);
+            nameLen = nameLen + styleLen;
+            if ((unsigned long)nameLen + 1 > instanceNameLen)
+                nameLen = NAME_READ_NAME_TOO_LONG;
+            else
+                STRCPY_S(instanceName, instanceNameLen, buffer);
+        }
+    } else
         nameLen = NAME_READ_NAME_NOT_FOUND;
 
 cleanup:
@@ -345,16 +336,15 @@ cleanup:
  * function returns the length of the string.
  * the buffer is assumed to be long enough.
  */
-static unsigned long stringizeNum(char *buffer, unsigned long bufferLen, float value)
-{
-    unsigned long   i = 0;
-    float   eps = 0.5f / (1 << 16);
-    float   hi, lo;
-    int     intPart;
-    float   fractPart;
-    int     neg = 0;
-    int     power10;
-    int     digit;
+static unsigned long stringizeNum(char *buffer, unsigned long bufferLen, float value) {
+    unsigned long i = 0;
+    float eps = 0.5f / (1 << 16);
+    float hi, lo;
+    int intPart;
+    float fractPart;
+    int neg = 0;
+    int power10;
+    int digit;
 
     if (value < 0.0f) {
         neg = 1;
@@ -370,7 +360,7 @@ static unsigned long stringizeNum(char *buffer, unsigned long bufferLen, float v
     } else {
         fractPart = hi - intPart;
     }
-    
+
     if ((intPart == 0) && (fractPart == 0.0f)) {
         buffer[i++] = '0';
         return i;
@@ -409,23 +399,21 @@ static unsigned long stringizeNum(char *buffer, unsigned long bufferLen, float v
 }
 
 long nam_generateArbitraryInstancePSName(nam_name nameTbl,
-                            var_axes axesTbl,
-                            ctlSharedStmCallbacks *sscb,
-                            float *coords,
-                            unsigned short axisCount,
-                            char *instanceName, unsigned long instanceNameLen)
-{
-    unsigned long   familyNameLen = 0;
-    long            nameLen;
-    unsigned short  axis;
-    char            *buffer = 0;
-    unsigned long   bufferLen;
+                                         var_axes axesTbl,
+                                         ctlSharedStmCallbacks *sscb,
+                                         float *coords,
+                                         unsigned short axisCount,
+                                         char *instanceName, unsigned long instanceNameLen) {
+    unsigned long familyNameLen = 0;
+    long nameLen;
+    unsigned short axis;
+    char *buffer = 0;
+    unsigned long bufferLen;
 
     /* if the font is not a variable font or no coordinates are specified, return the default PS name */
     if (!axesTbl || !coords || !axisCount) {
         return getPSName(nameTbl, sscb, instanceName, instanceNameLen);
     }
-
 
     /* allocate a temporary buffer long enough to hold a generated instance name */
     buffer = allocNameBuffer(sscb, axisCount, &bufferLen);
@@ -441,9 +429,9 @@ long nam_generateArbitraryInstancePSName(nam_name nameTbl,
 
     /* create an arbitrary instance name from the coordinates */
     for (axis = 0; axis < axisCount; axis++) {
-        unsigned long   coordStrLen;
+        unsigned long coordStrLen;
         int i;
-        unsigned long   tag;
+        unsigned long tag;
 
         /* value range check */
         if (fabs(coords[axis]) > 32768.0f) {
@@ -464,7 +452,7 @@ long nam_generateArbitraryInstancePSName(nam_name nameTbl,
             goto cleanup;
         }
         for (i = 3; i >= 0; i--) {
-            char    ch = (char)((tag >> (i * 8)) & 0xff);
+            char ch = (char)((tag >> (i * 8)) & 0xff);
             if (ch < 32 || ch > 126) {
                 sscb->message(sscb, "invalid character found in an axis tag");
                 continue;
@@ -477,8 +465,7 @@ long nam_generateArbitraryInstancePSName(nam_name nameTbl,
     if (nameLen <= (long)instanceNameLen) {
         STRNCPY_S(instanceName, instanceNameLen, buffer, nameLen);
         instanceName[nameLen] = 0;
-     }
-    else
+    } else
         nameLen = NAME_READ_NAME_TOO_LONG;
 
 cleanup:
@@ -488,31 +475,28 @@ cleanup:
     return nameLen;
 }
 
-static void * nam_sha1_malloc(size_t size, void *hook)
-{
-    ctlSharedStmCallbacks   *sscb = (ctlSharedStmCallbacks *)hook;
+static void *nam_sha1_malloc(size_t size, void *hook) {
+    ctlSharedStmCallbacks *sscb = (ctlSharedStmCallbacks *)hook;
     return sscb->memNew(sscb, size);
 }
 
-static void nam_sha1_free(sha1_pctx ctx, void *hook)
-{
-    ctlSharedStmCallbacks   *sscb = (ctlSharedStmCallbacks *)hook;
+static void nam_sha1_free(sha1_pctx ctx, void *hook) {
+    ctlSharedStmCallbacks *sscb = (ctlSharedStmCallbacks *)hook;
     sscb->memFree(sscb, ctx);
 }
 
 long nam_generateLastResortInstancePSName(nam_name nameTbl,
-                                var_axes axesTbl,
-                                ctlSharedStmCallbacks *sscb,
-                                float *coords,
-                                unsigned short axisCount,
-                                char *instanceName, unsigned long instanceNameLen)
-{
-    unsigned long   familyNameLen = 0;
-    long            nameLen;
-    char            *buffer = 0;
-    unsigned long   bufferLen;
-    unsigned long   hashLen;
-    unsigned long   i;
+                                          var_axes axesTbl,
+                                          ctlSharedStmCallbacks *sscb,
+                                          float *coords,
+                                          unsigned short axisCount,
+                                          char *instanceName, unsigned long instanceNameLen) {
+    unsigned long familyNameLen = 0;
+    long nameLen;
+    char *buffer = 0;
+    unsigned long bufferLen;
+    unsigned long hashLen;
+    unsigned long i;
 
     /* if the font is not a variable font or no coordinates are specified, return the default PS name */
     if (!axesTbl || !coords || !axisCount) {
@@ -543,23 +527,23 @@ long nam_generateLastResortInstancePSName(nam_name nameTbl,
             nameLen = -2;
             goto cleanup;
         }
-        hashLen /= 2;   /* give it another chance by halvening the hash length */
+        hashLen /= 2; /* give it another chance by halvening the hash length */
     }
     nameLen = familyNameLen;
     STRNCPY_S(instanceName, instanceNameLen, buffer, nameLen);
     instanceName[nameLen++] = '-';
 
     {
-        sha1_pctx   sha1_ctx = sha1_init(nam_sha1_malloc, sscb);
-        sha1_hash   hash;
-        int         error;
-    
+        sha1_pctx sha1_ctx = sha1_init(nam_sha1_malloc, sscb);
+        sha1_hash hash;
+        int error;
+
         if (!sha1_ctx) {
             nameLen = 0;
             goto cleanup;
         }
 
-        error = sha1_update(sha1_ctx, (unsigned char*)buffer, nameLen - 1);
+        error = sha1_update(sha1_ctx, (unsigned char *)buffer, nameLen - 1);
         error |= sha1_finalize(sha1_ctx, nam_sha1_free, hash, sscb);
 
         if (error) {
@@ -571,7 +555,7 @@ long nam_generateLastResortInstancePSName(nam_name nameTbl,
         /* append the hash value has a hex string */
         for (i = 0; i < hashLen; i++) {
             static const char hexChar[] = "0123456789ABCDEF";
-            unsigned char   byte = hash[i];
+            unsigned char byte = hash[i];
             instanceName[nameLen++] = hexChar[byte >> 4];
             instanceName[nameLen++] = hexChar[byte & 0xF];
         }
@@ -582,7 +566,7 @@ long nam_generateLastResortInstancePSName(nam_name nameTbl,
         instanceName[nameLen++] = 0;
 
         sscb->message(sscb, "last resort variable font instance name %s generated for %s",
-                            instanceName, buffer);
+                      instanceName, buffer);
     }
 
 cleanup:
