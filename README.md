@@ -1,4 +1,4 @@
-[![Travis](https://travis-ci.org/adobe-type-tools/afdko.svg)](https://travis-ci.org/adobe-type-tools/afdko)
+[![Travis](https://travis-ci.org/adobe-type-tools/afdko.svg?branch=develop)](https://travis-ci.org/adobe-type-tools/afdko)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/qurx2si4x54b97mt/branch/develop?svg=true)](https://ci.appveyor.com/project/adobe-type-tools/afdko/branch/develop)
 [![Codacy](https://api.codacy.com/project/badge/Grade/08ceff914833445685924ebb1f040070)](https://www.codacy.com/app/adobe-type-tools/afdko?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=adobe-type-tools/afdko&amp;utm_campaign=Badge_Grade)
 [![Coverage](https://codecov.io/gh/adobe-type-tools/afdko/branch/develop/graph/badge.svg)](https://codecov.io/gh/adobe-type-tools/afdko/branch/develop)
@@ -14,8 +14,7 @@ This repository contains the data files, Python scripts, and sources for
 the command line programs that comprise the AFDKO. The project uses the
 [Apache 2.0 OpenSource license](LICENSE.md).
 
-Please refer to the file
-[AFDKO-Overview.html](https://rawgit.com/adobe-type-tools/afdko/master/afdko/AFDKO-Overview.html)
+Please refer to the file [AFDKO-Overview.md](docs/AFDKO-Overview.md)
 for a more detailed description of what is included in the package.
 
 Please see the
@@ -141,5 +140,4 @@ On Linux, install these with:
     apt-get -y install python-pip
     apt-get -y install python-dev
 
-On Windows, you need to download and install Visual C++ 6, and add all
-the service packs.
+On Windows, you need Visual Studio 2017.
