@@ -1,9 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
-/***********************************************************************
- * SCCS Id:    @(#)opt.h	1.3
- * Changed:    3/16/95 10:41:47
- ***********************************************************************/
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 #ifndef OPT_H
 #define OPT_H
@@ -25,7 +22,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
    option names into a single argument followed by a separate value argument
    list, e.g. "bf 20 /dev/rmt8", as an alternative to "b 20 f /dev/rmt8".
    This package supports all of these option types.
-   
+
    A program option is described by the "opt_Option" data type which contains
    information about an option's name, value scanning function, value
    variable, default initialization string, value range, attribute flags and
@@ -99,7 +96,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
                            initialization function is called. If used, this
                            string is interpreted as would a corresponding
                            command line argument to the option "name". This is
-                           an optional field. 
+                           an optional field.
 
    double min              For numeric arguments, this field represents the
                            minimum value that may be used. Despite being of
@@ -145,7 +142,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
    structure are referred to as "value scanners." Value scanners typically
    process one or more command-line arguments and store the result in the
    "value" field of the opt_Option structure. The value scanner functions are
-   prototyped as follows: 
+   prototyped as follows:
 
    <valueScanner>(int argc, char *argv[], int argi, opt_Option *opt);
 
@@ -164,7 +161,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
    "argc" and "argv" are the argument count and the argument list as passed to
    "main()". The "argi" parameter is the index of the first, and possibly only,
    value argument and the opt parameter is a pointer to the option's
-   "opt_Option" structure. 
+   "opt_Option" structure.
 
    Every value scanner is called initially with "argi" set to "0" and
    "argv[0]" set to "opt->dflt" so that the value field may be initialized.
@@ -185,7 +182,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
    Value scanners consume one or more arguments from the argument list and
    should therefore check that enough arguments are available and raise an
    error if not. The following code performs this test for a scanner that
-   consumes one argument: 
+   consumes one argument:
 
    if (argi == argc)
        opt_Error(opt_Missing, opt, NULL);
@@ -193,11 +190,11 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
    If arguments are available, the scanner should perform argument processing.
    Typically this will consist of argument conversion, validation, and storing
    although the scanner is free to do what ever processing is required. The
-   scanner should return the index of the next (unconsumed) argument. 
+   scanner should return the index of the next (unconsumed) argument.
 
    An example of a boolean scanner that accepts argument values of "true" and
    "false" and converts them to values 0 and 1 stored in a int variable
-   follows: 
+   follows:
 
    int boolScan(int argc, char *argv[], int argi, opt_Option *opt)
        {
@@ -241,11 +238,11 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
    the character itself or an "escape character" which can be used to represent
    character codes that would be difficult or impossible to represent directly.
    Two kinds of escape characters are supported: "numeric escapes" and
-   "character escapes". 
+   "character escapes".
 
    Numeric escapes allow characters to be represented by their numeric coding.
    Hexadecimal numbers are represented by the string "\x" followed by
-   hexadecimal digits. Octal numbers are represented by "\" followed by octal 
+   hexadecimal digits. Octal numbers are represented by "\" followed by octal
    digits.
 
    Character escapes are used to represent the following special characters:
@@ -262,7 +259,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
    \<other char>    the character itself.
 
    The standard numeric scanners' value arguments follow the normal
-   C conventions: 
+   C conventions:
 
    string           value
    ------           -----
@@ -301,7 +298,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
    Argument List Processing
    ========================
    The argument list is processed by opt_Scan() which has the following
-   prototype: 
+   prototype:
 
    int opt_Scan(int argc, char *argv[], int nOpts, opt_Option *opt,
                 opt_Handler *handler, void *client);
@@ -311,7 +308,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
    macro called opt_NOPTS() which takes an option array argument is provided to
    determine the element count, e.g. opt_NOPTS(opt). The handler and client
    parameters concern client error handling which is described in a separate
-   section. 
+   section.
 
    opt_Scan() returns 0 in the event of an error otherwise it returns the index
    of the next (unconsumed) argument. Typical usage is a follows:
@@ -328,7 +325,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
        ...
        // process remaining arguments
        for (; argi < argc; argi++)
-           { 
+           {
            ...
            }
        ...
@@ -342,8 +339,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
    [Warning: optScan() will modify option arguments under certain conditions.
    If you need an unmodified option list you should make a copy of argv and
-   all of the strings it references before calling opt_Scan().] 
-   
+   all of the strings it references before calling opt_Scan().]
+
    Error Handling
    ==============
    Error handling is accomplished by calling a function that processes
@@ -365,13 +362,13 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
    parameter is a pointer to the option's opt_Option structure, the "arg"
    parameter points to the value argument in error (NULL is some cases:
    beware!), and the "client" parameter is the client data pointer that was
-   originally passed to opt_Scan(). 
+   originally passed to opt_Scan().
 
    The handler returns non-zero if it's required that opt_Scan() return 0
    thereby indicating that an error occured, and returns 0 otherwise.
 
    A default error handling function is provided prints an error message on
-   stderr and returns 1 when it's called. 
+   stderr and returns 1 when it's called.
 
    The following error codes are defined:
 
@@ -406,7 +403,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
    Client scanners may call opt_Error() to report errors they encounter. This
    is simply a wrapper around the error handler. opt_Error()'s prototype is as
-   follows: 
+   follows:
 
    void opt_Error(int error, opt_Option *opt, char *arg);
 
@@ -423,42 +420,40 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 /* HEADER DEFINITIONS */
 
-extern char *opt_progname;  /* Basename of program path */
+extern char *opt_progname; /* Basename of program path */
 
 /* Compute number of options in option array (t) */
-#define opt_NOPTS(t) (sizeof(t)/sizeof(t[0]))
+#define opt_NOPTS(t) (sizeof(t) / sizeof(t[0]))
 
 /* Standard error codes */
-enum
-    {
-    opt_NoScanner = 1,  /* No scanner supplied (NULL was supplied) */
-    opt_Missing,        /* Missing option value */
-    opt_Format,         /* Bad option value format */
-    opt_Range,          /* Option's value out of range */
-    opt_Required,       /* Required option missing */
-    opt_Unknown,        /* Unrecognised option */
-	opt_Exclusive,		/* Mutually exclusive option confict */
-    opt_Client          /* First available client error code */
-    };
+enum {
+    opt_NoScanner = 1, /* No scanner supplied (NULL was supplied) */
+    opt_Missing,       /* Missing option value */
+    opt_Format,        /* Bad option value format */
+    opt_Range,         /* Option's value out of range */
+    opt_Required,      /* Required option missing */
+    opt_Unknown,       /* Unrecognised option */
+    opt_Exclusive,     /* Mutually exclusive option confict */
+    opt_Client         /* First available client error code */
+};
 
 typedef struct _opt_Option opt_Option;
-typedef int (opt_Scanner)(int argc, char *argv[], int argi, opt_Option *opt);
-typedef int (opt_Handler)(int error, opt_Option *opt, char *arg, void *client);
+typedef int(opt_Scanner)(int argc, char *argv[], int argi, opt_Option *opt);
+typedef int(opt_Handler)(int error, opt_Option *opt, char *arg, void *client);
 
 /* Option specification */
-struct _opt_Option
-    {
-    char *name;                 /* Option prefix */
-    opt_Scanner *scan;          /* Value scanner */
-    void *value;                /* Option value */
-    char *dflt;                 /* Default value */
-    double min;                 /* Minimum value */
-    double max;                 /* Maximum value */
-    unsigned char flags;        /* Control flags */
-#define opt_REQUIRED    (1<<0)  /* Required option */
-#define opt_COMBINED    (1<<1)  /* Can combine with others sharing prefix */
-    unsigned char length;       /* Combined option prefix length */
-    };
+struct _opt_Option {
+    char *name;               /* Option prefix */
+    opt_Scanner *scan;        /* Value scanner */
+    void *value;              /* Option value */
+    char *dflt;               /* Default value */
+    double min;               /* Minimum value */
+    double max;               /* Maximum value */
+    unsigned char flags;      /* Control flags */
+#define opt_REQUIRED (1 << 0) /* Required option */
+#define opt_COMBINED (1 << 1) /* Can combine with others sharing prefix */
+    unsigned char length;     /* Combined option prefix length */
+};
 
 /* Interface functions */
 extern int opt_Scan(int argc, char *argv[], int nOpts, opt_Option *opt,
@@ -467,15 +462,15 @@ extern void opt_Error(int error, opt_Option *opt, char *arg);
 extern int opt_Present(char *name);
 
 /* Standard value scanners */
-extern opt_Scanner opt_Char;    /* (char) */
-extern opt_Scanner opt_Short;   /* (short) */
-extern opt_Scanner opt_Int;     /* (int) */
-extern opt_Scanner opt_Long;    /* (long) */
-extern opt_Scanner opt_UShort;  /* (usigned short) */
-extern opt_Scanner opt_UInt;    /* (unsigned int) */
-extern opt_Scanner opt_ULong;   /* (unsigned long) */
-extern opt_Scanner opt_Double;  /* (double) */
-extern opt_Scanner opt_Call;    /* void (*function)(void) */
-extern opt_Scanner opt_Flag;    /* no value */
+extern opt_Scanner opt_Char;   /* (char) */
+extern opt_Scanner opt_Short;  /* (short) */
+extern opt_Scanner opt_Int;    /* (int) */
+extern opt_Scanner opt_Long;   /* (long) */
+extern opt_Scanner opt_UShort; /* (usigned short) */
+extern opt_Scanner opt_UInt;   /* (unsigned int) */
+extern opt_Scanner opt_ULong;  /* (unsigned long) */
+extern opt_Scanner opt_Double; /* (double) */
+extern opt_Scanner opt_Call;   /* void (*function)(void) */
+extern opt_Scanner opt_Flag;   /* no value */
 
 #endif /* OPT_H */
