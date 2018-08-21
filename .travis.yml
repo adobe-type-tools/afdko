@@ -55,6 +55,7 @@ before_script:
   - cpplint --recursive --quiet c/mergefonts
   - cpplint --recursive --quiet c/public
   - cpplint --recursive --quiet c/rotatefont
+  - cpplint --recursive --quiet c/sfntdiff
   - cpplint --recursive --quiet c/spot
   - cpplint --recursive --quiet c/tx
   - cpplint --recursive --quiet c/type1
