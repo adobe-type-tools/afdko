@@ -32,7 +32,7 @@ extern "C" {
    Memory management and stream I/O are implemented via two sets of
    client-supplied callback functions passed to t1wNew(). I/O is performed on
    two abstract data streams:
-   
+
    o Type 1 data (w)
    o temporary data (rw)
 
@@ -114,7 +114,7 @@ enum {
        single base part which is a complete font with a limited or empty glyph
        set, and one or more addition parts which just contain new glyph
        definitions to be added to the base part but aren't fonts in there own
-       right. 
+       right.
 
        The incremental cid-keyed fonts emitted by this library make use of the
        Adobe_CoolType_Utility ProcSet. It is the responsibility of the client
@@ -137,7 +137,7 @@ enum {
        T1W_ENCODE_BINARY option will keep the font data size smaller but must
        only be used if it is known that the font will be transmitted over an
        8-bit binary communications channel.
-       
+
        ASCII encoding is achieved by using a hexadecimal string representation
        of the binary data or by wrapping the binary data using the hexadecimal
        form of the "eexec" operator. The form of ASCII encoding is dependent on
@@ -200,13 +200,14 @@ enum {
     T1W_IS_CUBE = 1 << 14,
 
     /* When bit 14 is set, the data contains cube font operators. Stack depth
-	and operator defs are different. Cube subr's are added at the end of gsubr's for CID fonts,
-	subrs for non-CID fonts. */
+       and operator defs are different. Cube subr's are added at the end of
+       gsubr's for CID fonts, subrs for non-CID fonts. */
 
     T1W_FORCE_STD_ENCODING = 1 << 15,
-    /* When bit 15 is set, TopDict encoding vector is set to StandardEncoding, no matter
-	what is in the font. This is useful for working with font sources that will be used for
-	OpenType/CFF fonts */
+
+    /* When bit 15 is set, TopDict encoding vector is set to StandardEncoding,
+       no matter what is in the font. This is useful for working with font
+       sources that will be used for OpenType/CFF fonts */
 };
 
 /* The "lenIV" parameter controls charstring encryption as follows:
@@ -259,7 +260,7 @@ enum {
 
 char *t1wErrStr(int err_code);
 
-/* t1wErrStr() maps the "errcode" parameter to a null-terminated error 
+/* t1wErrStr() maps the "errcode" parameter to a null-terminated error
    string. */
 
 void t1wGetVersion(ctlVersionCallbacks *cb);

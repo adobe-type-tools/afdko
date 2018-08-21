@@ -354,7 +354,7 @@ extern ASBool ASIsValidReal(float *pReal);
    The integer n represents the fixed point value n/(2**f). The current
    definition is pretty heavily dependent on an integer being 32 bits.
 
-   ASFixed	i = 15, f = 16, range [-32768, 32768)
+   ASFixed i = 15, f = 16, range [-32768, 32768)
 
    The type "ASFixed", defined in the ASBasic interface, is simply
    a typedef for integer and is type-equivalent to integer as far

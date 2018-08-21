@@ -93,7 +93,7 @@
 #define HEXENCODING 1
 #endif
 
-/* COMPOSITE_FONT -- if true, the parser supports the postscript composite 
+/* COMPOSITE_FONT -- if true, the parser supports the postscript composite
    font extensions.  Older code uses the KANJI flag to indicate that
    composite fonts are desired.  Newer code uses the slightly more accurate
    DBCS flag. */
@@ -114,9 +114,9 @@
 
 #endif /* COMPOSITE_FONT */
 
-/* RANDOMACCESS -- if true, the callbacks for CharStrings are passed the 
-   GetBytes call *	number, character index, and current eexec decryption 
-   key in order that it can seek directly to the appropriate place in the 
+/* RANDOMACCESS -- if true, the callbacks for CharStrings are passed the
+   GetBytes call * number, character index, and current eexec decryption
+   key in order that it can seek directly to the appropriate place in the
    font file.  */
 
 #ifndef RANDOMACCESS
@@ -131,14 +131,13 @@ typedef struct _t_ParseProcs {
  */
 
     /*
-   * GetBytes -- read bytes to parse
-   *	a false return indicates some sort of I/O problem; early (unexpected)
-   *	end of file being the most common.  EOF is indicated by a return of
-   *	0 bytes read.  The client must write the his
-   *    pointer to the data into *hndl.  Also, if RANDOMACCESS is set,
-   *    the client should know that the number of calls to (*GetBytes),
-   *    is referred to later by the 'buffNum' arg to various callbacks.
-   */
+    GetBytes -- read bytes to parse a false return indicates some sort of I/O
+    problem; early (unexpected) end of file being the most common.  EOF is
+    indicated by a return of 0 bytes read.  The client must write the his
+    pointer to the data into *hndl.  Also, if RANDOMACCESS is set, the client
+    should know that the number of calls to (*GetBytes), is referred to later
+    by the 'buffNum' arg to various callbacks.
+    */
     boolean (*GetBytes)(char*** hndl, CardX* len, void* clientHook);
 
     /*
@@ -174,16 +173,16 @@ typedef struct _t_ParseProcs {
     boolean (*OrigFontType)(char* str, void* clientHook);
 
     /*
- * CharStrings
- *	AllocCharStrings is first called with an upper bound on the number
- *	of charstrings.  then CharString is called for each charstring;
- *	if RANDOMACCESS is on, enough information is returned that the
- *	caller can recreate the necessary state to read from the middle of
- *	the file.  ShareCharStrings is called before any calls to indicate
- *	that the CharStrings are identical to those from the named font;
- *	if the caller of ParseFont can get to those outlines, it should
- *	return true and the charstrings will be skipped
- */
+    CharStrings
+    AllocCharStrings is first called with an upper bound on the number
+    of charstrings.  then CharString is called for each charstring;
+    if RANDOMACCESS is on, enough information is returned that the
+    caller can recreate the necessary state to read from the middle of
+    the file.  ShareCharStrings is called before any calls to indicate
+    that the CharStrings are identical to those from the named font;
+    if the caller of ParseFont can get to those outlines, it should
+    return true and the charstrings will be skipped
+    */
 
     boolean (*AllocCharStrings)(IntX count, void* clientHook);
 #if RANDOMACCESS
@@ -195,12 +194,12 @@ typedef struct _t_ParseProcs {
     boolean (*ShareCharStrings)(char* fontname, void* clientHook);
 
     /*
- * Subroutines
- *	used similarly to the CharStrings procedures.  if AllocSubroutines
- *	gets called with 0, it means that the number of subroutines is not known
- *	ahead of time.  It should be assumed that the number of subroutines is
- *	at least 200.
- */
+    Subroutines
+    used similarly to the CharStrings procedures.  if AllocSubroutines
+    gets called with 0, it means that the number of subroutines is not known
+    ahead of time.  It should be assumed that the number of subroutines is
+    at least 200.
+    */
 
     boolean (*AllocSubroutines)(IntX count, void* clientHook);
     boolean (*Subroutine)(IntX index, CharDataPtr val, CardX len, void* clientHook);
@@ -226,31 +225,31 @@ typedef struct _t_ParseProcs {
 
 #if COMPOSITE_FONT
     /*
- * COMPOSITE_FONT/composite fonts
- *	TODO: document these
- *
- * procedures that take length arguments can also take -1 to imply
- * an unknown length until the end of the array is seen.  when the
- * call is made with UNKNOWN_LENGTH, the elements will follow, and
- * then an "allocation" call will be made again with the actual
- * length after all the elements have been called.  thus, the
- * /PGFArray field can be filled either with the sequence:
- *
- *	(*procs->AllocPGFArray)(2);
- *	(*procs->PGFArray)(0, "GothicBBB-Medium::JIS83-1");
- *	(*procs->PGFArray)(1, "GothicBBB-Medium::Symbol");
- *
- * or with
- *
- *	(*procs->AllocPGFArray)(UNKNOWN_LENGTH);
- *	(*procs->PGFArray)(0, "GothicBBB-Medium::JIS83-1");
- *	(*procs->PGFArray)(1, "GothicBBB-Medium::Symbol");
- *	(*procs->AllocPGFArray)(2);
- *
- * This is only true in the current implementation for PGFArray,
- * FDepVector, and MDFV; not, for example, any CID "procedures that take length
- * arguments".
- */
+    COMPOSITE_FONT/composite fonts
+    TODO: document these
+
+    procedures that take length arguments can also take -1 to imply
+    an unknown length until the end of the array is seen.  when the
+    call is made with UNKNOWN_LENGTH, the elements will follow, and
+    then an "allocation" call will be made again with the actual
+    length after all the elements have been called.  thus, the
+    /PGFArray field can be filled either with the sequence:
+
+        (*procs->AllocPGFArray)(2);
+        (*procs->PGFArray)(0, "GothicBBB-Medium::JIS83-1");
+        (*procs->PGFArray)(1, "GothicBBB-Medium::Symbol");
+
+    or with
+
+        (*procs->AllocPGFArray)(UNKNOWN_LENGTH);
+        (*procs->PGFArray)(0, "GothicBBB-Medium::JIS83-1");
+        (*procs->PGFArray)(1, "GothicBBB-Medium::Symbol");
+        (*procs->AllocPGFArray)(2);
+
+    This is only true in the current implementation for PGFArray,
+    FDepVector, and MDFV; not, for example, any CID "procedures that take length
+    arguments".
+    */
 
 #define UNKNOWN_LENGTH (-1)
 
@@ -349,7 +348,7 @@ typedef struct _t_ParseProcs {
 } ParseFontProcs, *PParseFontProcs;
 
 #if COMPOSITE_FONT
-/* The minimum must be long enough to hold the longest token in the font. 
+/* The minimum must be long enough to hold the longest token in the font.
    For composite fonts longets token is the string containing the Character
    offset data. The data is 6 bytes for each character in a row. The longest
    therefore is 6 * 256 = 1536. */
@@ -375,11 +374,11 @@ typedef struct _t_ParseProcs {
 /******************** I N T E R F A C E S ********************/
 
 /*
- * InitParseTables
- *	call at the dawn of time to initialize internal data structures for
- *	the parser.
- *
- *	can return either PE_NOERR or PE_CANTHAPPEN
+    InitParseTables
+    call at the dawn of time to initialize internal data structures for
+    the parser.
+
+    can return either PE_NOERR or PE_CANTHAPPEN
  */
 #ifdef __cplusplus
 extern "C" {
@@ -388,11 +387,11 @@ extern "C" {
 extern IntX InitParseTables();
 
 /*
- * ParseFont
- *	parse a font file.  the caller should have opened the file and
- *	should pass the contents to the ParseFont through the procs->GetBytes
- *	callback routine.
- */
+    ParseFont
+    Parse a font file. The caller should have opened the file and
+    should pass the contents to the ParseFont through the procs->GetBytes
+    callback routine.
+*/
 
 extern IntX ParseFont(
     FontDesc** fontdescp,      /* where to store the font data */

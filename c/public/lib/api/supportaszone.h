@@ -70,12 +70,12 @@ typedef void *(*ASCallocFcn)(ASZone z, ASSize_t count, ASSize_t nBytes);
 
       Allocates memory for an array of count elements, each of which occupies
       the specified number of bytes.
-    
+
       The pointer returned is guaranteed to be aligned so that it may be
       used to store any C data type.
-    
+
       The initial contents of the allocated memory are set to zero.
-    
+
       This returns NULL if z is unable to allocate the requested memory.
    */
 
@@ -91,18 +91,18 @@ typedef void *(*ASReallocFcn)(ASZone z, void *ptr, ASSize_t nBytes);
 
       Takes a pointer to memory previously allocated and changes
       its size, relocating it if necessary.
-    
+
       Returns a pointer to the new memory, or NULL if the request could
       not be satisfied. If NULL is returned, ASZReallocFcn leaves the
       existing memory undisturbed.
-    
+
       The memory contents within the minimum of the old and new sizes are
       preserved. If the new size is larger than the old, the extension has
       undefined contents. If the memory must be relocated, the old memory
       block is freed (hence the old pointer becomes invalid).
-    
+
       Note: if the memory was originally allocated by ASZMemAlignFcn,
-	  the original alignment is not necessarily preserved.
+      the original alignment is not necessarily preserved.
    */
 
 typedef void *(*ASMemAlignFcn)(
@@ -195,7 +195,7 @@ extern ASZone sysASZone;
 
 extern void ASZoneInitialize(ASZone zone);
 /* Call this to initialize the storage management package.
-  
+
      zone becomes the value of sysASZone.
    */
 

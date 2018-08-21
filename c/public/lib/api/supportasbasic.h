@@ -11,9 +11,9 @@
  *         all separately-built libraries.
  *
  * REQUIRED COMPILATION PARAMETERS:
- *	It is assumed that the following are defined when this is compiled:
- *		AS_ISP
- *		AS_OS
+ * It is assumed that the following are defined when this is compiled:
+ *    AS_ISP
+ *    AS_OS
  *
  * OPTIONAL COMPILATION PARAMETERS:
  *  AS_FORCE_X_16BITS (See below)
@@ -44,7 +44,7 @@
    |  ASInt16  |   16 | ASMAXInt16 | ASMINInt16 |
    | *ASInt16P |      |            |            |
    +-----------+------+------------+------------+
-   |  ASUns16  |   16 | ASMAXUns16 | ASMINUns16 | 
+   |  ASUns16  |   16 | ASMAXUns16 | ASMINUns16 |
    | *ASUns16P |      |            |            |
    +-----------+------+------------+------------+
    |  ASInt32  |   32 | ASMAXInt32 | ASMINInt32 |
@@ -106,7 +106,7 @@ typedef unsigned short int ASUns16, *ASUns16P;
    from "int", "unsigned int" and "size_t" because code using
    them indicates thereby that the implementation is free to
    use whatever number of bits it chooses, but at least 16.
-   
+
    The natural definitions for these are "int", "unsigned
    int" and "size_t", of course, but it is possible to define
    them to be (say) 16 or 32 bits when necessary, for example
@@ -114,13 +114,13 @@ typedef unsigned short int ASUns16, *ASUns16P;
    modules compiled by different compilers making different
    choices of the size of an int. Generally one has no such
    flexibility in specifying the size of an int.
-   
+
    To force X to be 16, define AS_FORCE_X_16BITS==1
-   
+
    To force X to be 32, define AS_FORCE_X_32BITS==1
-   
+
    Don't define both of the above to be 1 !!
-   
+
    To specify the definition of ASSize_t, define AS_SIZE_T
    to be the desired type.
 

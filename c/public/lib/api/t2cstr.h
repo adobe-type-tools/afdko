@@ -104,7 +104,7 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
    T2C_IS_CUBE - the data contains cube font operators. Stack depth
    and operator defs are different. Cube subr's are found at the end of gsubr's
    for CID fonts, subrs for non-CID fonts.
-	   
+
    T2C_FLATTEN_CUBE - the data contains cube font operators. Stack depth
    and operator defs are different. The Cube compose ops must be flattened.
 
@@ -153,12 +153,12 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
    o an endchar operator is encountered in the charstring or a subroutine
      (t2cSuccess is returned)
    o the end of the charstring is encountered.
-   o the width has be called back to the client and the T2C_WIDTH_ONLY bit 
+   o the width has be called back to the client and the T2C_WIDTH_ONLY bit
      is set (t1cSuccess is returned)
    o an error is encountered and returned
 
    t2cParse() returns zero (t2cSuccess) if successful, but otherwise returns a
-   positive non-zero error code described below. 
+   positive non-zero error code described below.
 
    The gsubr array must have one more entry than there actually are gsubrs, in
    order to allow getting the end of the last gubsr.
@@ -180,7 +180,7 @@ enum {
 
 char *t2cErrStr(int err_code);
 
-/* t2cErrStr() maps the "err_code" parameter to a null-terminated error 
+/* t2cErrStr() maps the "err_code" parameter to a null-terminated error
    string. */
 
 void t2cGetVersion(ctlVersionCallbacks *cb);
