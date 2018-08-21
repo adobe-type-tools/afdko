@@ -25,7 +25,7 @@ This license is available at: http://opensource.org/licenses/Apache-2.0. */
    The library can handle multiple database files and keeps track of them using
    a number called a "fileid". This number is provided by the client via
    fcdbAddFile() as each database file is added. It is the responsibility of
-   the client to devise a scheme based around the fileid concept. 
+   the client to devise a scheme based around the fileid concept.
 
    One suggestion is for the client to create an array whose elements
    correspond to data related to each database file and have the fileid be an
@@ -190,7 +190,7 @@ void fcdbFree(fcdbCtx h);
 
    Blank space surrounding the square brackets is ignored. The FontName may be
    up to 63 characters in length but may not contain blank characters.
-   
+
    Lines within a section are of the following form:
 
    <keyword>=<value>
@@ -235,9 +235,9 @@ void fcdbFree(fcdbCtx h);
 
    If some or all of the id numbers aren't specified their values are defaulted
    as follows:
-   
+
    platform id      3 (Windows)
-   
+
    Windows platform selected:
 
    platspec id      1 (Unicode)
@@ -328,7 +328,7 @@ void fcdbFree(fcdbCtx h);
         c=1,AdobeCorpID Bullet
         macenc=32,space
         macenc=165,bullet
-   
+
     [KozMin-Medium]
         f=Kozuka Mincho
         s=M
@@ -338,8 +338,8 @@ void fcdbFree(fcdbCtx h);
         c=3,1,0x0411,\5c0f\585a\660e\671dM
         s=1,1,11,M
         f=1,1,11,\8f\ac\92\cb\96\be\92\a9
-        c=1,1,11,\8f\ac\92\cb\96\be\92\a9M 
+        c=1,1,11,\8f\ac\92\cb\96\be\92\a9M
 
-	*/
+*/
 
 #endif /* FCDB_H */
