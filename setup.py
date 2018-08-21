@@ -22,10 +22,8 @@ data files.
 try:
     from wheel.bdist_wheel import bdist_wheel
 
-    # noinspection PyClassicStyleClass,PyAttributeOutsideInit
     class CustomBDistWheel(bdist_wheel):
         def finalize_options(self):
-            # noinspection PyArgumentList
             bdist_wheel.finalize_options(self)
             self.root_is_pure = False
 except ImportError:
@@ -90,7 +88,6 @@ def compile_package(pkg_dir):
     os.chdir(cur_dir)
 
 
-# noinspection PyClassicStyleClass
 class CustomBuild(setuptools.command.build_py.build_py):
     """Custom build command."""
     def run(self):
@@ -271,5 +268,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# PyPI deployment test 2018-04-09 15:42
