@@ -27,12 +27,12 @@ typedef struct {
 
 /*
  * cscan procedures
- *	IniCScan -- called whenever a new Cscan context is needed.
- *	ResetCScan -- called once per character
- *	CSNewPoint -- moveto operation
- *	CSNewLine -- lineto operation
- *	CSClose -- closepath
- *	CScan -- endchar and rasterize
+ * IniCScan -- called whenever a new Cscan context is needed.
+ * ResetCScan -- called once per character
+ * CSNewPoint -- moveto operation
+ * CSNewLine -- lineto operation
+ * CSClose -- closepath
+ * CScan -- endchar and rasterize
  */
 /* Note:
  * The CScan proceedures may "RAISE" an error (usually BE_INVLCHARSTRING)
@@ -43,9 +43,9 @@ typedef struct {
  * glyphs in the font may/may not work so this should not be treated
  * as a fatal error for the font.
  */
-/* IniCScan sets up memory that will be used by the rest of cscan. 
+/* IniCScan sets up memory that will be used by the rest of cscan.
  * The returned ctx should be put in the CScanArgs that is sent to the other
- * cscan calls.  zone should be an ASZone appropriate for allocating 
+ * cscan calls.  zone should be an ASZone appropriate for allocating
  * growable buffers
  */
 extern procedure IniCScan(

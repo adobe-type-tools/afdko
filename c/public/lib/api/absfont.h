@@ -478,8 +478,10 @@ struct abfGlyphCallbacks_ {
     void (*cubeBlend)(abfGlyphCallbacks *cb, unsigned int nBlends, unsigned int numVals, float *blendVals);
     void (*cubeSetwv)(abfGlyphCallbacks *cb, unsigned int numDV);
     void (*cubeCompose)(abfGlyphCallbacks *cb, int cubeLEIndex, float x0, float y0, int numDV, float *ndv);
-    /* Note: ndv is the raw value from the CFF, a value in the range -100 to +100, which corresponds to the
-							normalized design vector range 0.0-1.0.  x0 and y0 are the absolute x and y of the LE origin in the glyph design space.*/
+    /* Note: ndv is the raw value from the CFF, a value in the range
+             -100 to +100, which corresponds to the normalized design vector
+             range 0.0-1.0.  x0 and y0 are the absolute x and y of the LE
+             origin in the glyph design space. */
     void (*cubeTransform)(abfGlyphCallbacks *cb, float rotate, float scaleX, float scaleY, float skewX, float skewY);
     void (*moveVF)(abfGlyphCallbacks *cb, abfBlendArg *x0, abfBlendArg *y0);
     void (*lineVF)(abfGlyphCallbacks *cb, abfBlendArg *x1, abfBlendArg *y1);

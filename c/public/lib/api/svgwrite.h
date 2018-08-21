@@ -31,7 +31,7 @@ extern "C" {
    Memory management and stream I/O are implemented via two sets of
    client-supplied callback functions passed to svwNew(). I/O is performed on
    two abstract data streams:
-   
+
    o SVG font data (w)
    o debug diagnostics (w)
 
@@ -72,8 +72,8 @@ enum {
     SVW_GLYPHNAMES_MASK =     3 << 0,
 
     /* If bit 0 is set, then glyph name attributes will be written out for all
-	   glyphs. If bit 1 is set, then glyph names will only be written out for
-	   non-ASCII characters only. */
+       glyphs. If bit 1 is set, then glyph names will only be written out for
+       non-ASCII characters only. */
 
     SVW_NEWLINE_UNIX = 1 << 2, /* \n */
     SVW_NEWLINE_WIN =  1 << 3, /* \r\n */
@@ -88,7 +88,7 @@ enum {
     SVW_STANDALONE = 1 << 5,
 
     /* Indicates that the SVG font should be written as a standalone SVG file
-	   rather than as a font that will be embedded within another SVG file. */
+       rather than as a font that will be embedded within another SVG file. */
 
     SVW_ABSOLUTE = 1 << 6,
     /* Indicates that coordinates should be written as absolute rather than relative. */
@@ -100,9 +100,9 @@ extern const abfGlyphCallbacks svwGlyphCallbacks;
    passed to these callbacks to the current font. Clients should make a copy of
    this data structure and set the "direct_ctx" field to the context returned
    by svwNew().
-  
+
    Clients need to be aware that certain values are not valid in an XML 1.0 file.
-   Because of this the library will skip glyphs that have a unicode value 
+   Because of this the library will skip glyphs that have a unicode value
    that is equal to an invalid character.  These include all control chars (values
    less than 0x20) except 0x9, 0xa, 0xd which represent whitespace. */
 
@@ -130,7 +130,7 @@ enum {
 
 char *svwErrStr(int err_code);
 
-/* svwErrStr() maps the "err_code" parameter to a null-terminated error 
+/* svwErrStr() maps the "err_code" parameter to a null-terminated error
    string. */
 
 void svwGetVersion(ctlVersionCallbacks *cb);

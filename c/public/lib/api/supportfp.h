@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-/* 
-  fp.h	-- Interface to Floating/Fixed package.
+/*
+  fp.h -- Interface to Floating/Fixed package.
 */
 
 #ifndef FP_H
@@ -104,9 +104,9 @@
    definition is pretty heavily dependent on an integer being 32 bits.
 
    There are three kinds of fixed point numbers:
-	Fixed	i = 15, f = 16, range [-32768, 32768)
-	Frac	i = 1, f = 30, range [-2, 2)
-	UFrac	i = 2, f = 30, unsigned, range [0, 4)
+   Fixed i = 15, f = 16, range [-32768, 32768)
+   Frac  i = 1, f = 30, range [-2, 2)
+   UFrac i = 2, f = 30, unsigned, range [0, 4)
    The type "Fixed", defined in the basictypes interface, is simply
    a typedef for integer and is type-equivalent to integer as far
    as the C compiler is concerned.
@@ -227,7 +227,7 @@ extern procedure fractopflt(Frac x, float *pf);
 extern Frac pflttofrac(float *pf);
 /* Converts the float number at *pf to a Frac and returns it. */
 
-/* new code for DDR and anti-alias 
+/* new code for DDR and anti-alias
    probably make some/all of this macros later
 */
 
