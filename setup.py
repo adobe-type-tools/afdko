@@ -27,8 +27,8 @@ try:
             bdist_wheel.finalize_options(self)
             self.root_is_pure = False
 except ImportError:
-    print("setup requires that the Python package 'wheel' be installed. "
-          "Try the command 'pip install wheel'.")
+    print("afdko: setup.py requires that the Python package 'wheel' be "
+          "installed. Try the command 'pip install wheel'.")
     sys.exit(1)
 
 
@@ -64,7 +64,7 @@ def get_executable_dir():
         bin_dir = "osx"
     else:
         raise KeyError(
-            "Do not recognize target OS: {}".format(platform_system))
+            "afdko: Do not recognize target OS: {}".format(platform_system))
     return bin_dir
 
 
@@ -79,11 +79,11 @@ def compile_package(pkg_dir):
     elif bin_dir == 'linux':
         cmd = "sh buildalllinux.sh"
     cur_dir = os.getcwd()
-    assert cmd, 'Unable to form build command for this platform.'
+    assert cmd, 'afdko: Unable to form build command for this platform.'
     try:
         subprocess.check_call(cmd, cwd=programs_dir, shell=True)
     except subprocess.CalledProcessError:
-        print('Error executing build command.')
+        print('afdko: Error executing build command.')
         sys.exit(1)
     os.chdir(cur_dir)
 
@@ -116,7 +116,7 @@ class CustomBuildScripts(distutils.command.build_scripts.build_scripts):
             outfiles.append(outfile)
 
             if not self.force and not newer(script, outfile):
-                log.debug("not copying %s (up-to-date)", script)
+                log.debug("afdko: not copying %s (up-to-date)", script)
                 continue
 
             try:
@@ -129,7 +129,7 @@ class CustomBuildScripts(distutils.command.build_scripts.build_scripts):
                 first_line = f.readline()
                 if not first_line:
                     f.close()
-                    self.warn("%s is an empty file (skipping)" % script)
+                    self.warn("afdko: %s is an empty file (skipping)" % script)
                     continue
 
             if f:
@@ -206,7 +206,7 @@ def main():
         more_keywords = ['Operating System :: POSIX :: Linux']
     else:
         raise KeyError(
-            "Do not recognize target OS: {}".format(platform_system))
+            "afdko: Do not recognize target OS: {}".format(platform_system))
     classifiers.extend(more_keywords)
 
     # concatenate README and NEWS into long_description so they are
