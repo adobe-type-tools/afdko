@@ -737,8 +737,8 @@ static void checkPoint(cffCtx h, Fixed x, Fixed y) {
 
    (x0 + 3 * (x1 + x2) + x3) / 8, (y0 + 3 * (y1 + y2) + y3) / 8,
    (x1 + 2 * x2 + x3) / 4,        (y1 + 2 * y2 + y3) / 4,
-   (x2 + x3) / 2,				  (y2 + y3) / 2,
-   x3,							  y3,
+   (x2 + x3) / 2,                 (y2 + y3) / 2,
+   x3,                            y3,
 
    The stopping condition is governed by the bounding box on the curve
    baseline joining x0, y0 to x3, y3. If the control points fall within this
@@ -1322,7 +1322,7 @@ static void t2Read(cffCtx h, Offset offset, int init) {
                 }
                 if (h->path.flags & FIRST_MASK) {
                     /* The vstem(hm) op may be omitted if stem list is followed by
-					   a mask op. In this case count the additional stems */
+                       a mask op. In this case count the additional stems */
                     if (PATH_FUNC_DEFINED(hintstem)) {
                         b = h->path.vstem;
                         for (j = h->stack.cnt & 1; j < h->stack.cnt; j += 2) {
@@ -2344,7 +2344,7 @@ static void EncodingRead(cffCtx h) {
                     sup->code = GETBYTE(h);
 
                     /* Search for glyph with this SID. Glyphs with multiple
-					   encodings are rare so linear search is acceptable */
+                       encodings are rare so linear search is acceptable */
                     sid = (unsigned short)getnum(h, 2);
                     for (gid = 0; gid < h->index.CharStrings.count; gid++) {
                         if (sid == h->glyphs[gid].id) {
