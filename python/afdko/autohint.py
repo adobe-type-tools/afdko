@@ -15,7 +15,7 @@ autohint [-g <glyph list>] [-gf <filename>] [-xg <glyph list>] [-xgf <filename>]
 Auto-hinting program for PostScript and OpenType/CFF fonts.
 """
 
-from ufotools import kProcessedGlyphsLayerName, kProcessedGlyphsLayer
+from afdko.ufotools import kProcessedGlyphsLayerName, kProcessedGlyphsLayer
 
 __help__ = __usage__ + """
 
@@ -447,9 +447,9 @@ import tempfile
 from fontTools.ttLib import TTFont, getTableModule
 import plistlib
 import warnings
-from beztools import *
-import fdkutils
-import ufotools
+from afdko.beztools import *
+import afdko.fdkutils as fdkutils
+import afdko.ufotools as ufotools
 import traceback
 import shutil
 

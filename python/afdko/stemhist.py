@@ -113,9 +113,9 @@ import os
 import re
 import time
 from fontTools.ttLib import TTFont, getTableModule
-from beztools import *
-import fdkutils
-import ufotools
+from afdko.beztools import *
+import afdko.fdkutils as fdkutils
+import afdko.ufotools as ufotools
 import traceback
 from collections import defaultdict
 

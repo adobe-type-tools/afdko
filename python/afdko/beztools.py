@@ -22,8 +22,8 @@ __copyright__ = """Copyright 2014-2017 Adobe Systems Incorporated (http://www.ad
 import re
 import time
 import os
-import fdkutils
-import convertfonttocid
+import afdko.fdkutils as fdkutils
+import afdko.convertfonttocid as convertfonttocid
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
 from fontTools.pens.basePen import BasePen
 debug = 0
