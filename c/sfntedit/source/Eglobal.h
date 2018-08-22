@@ -1,12 +1,9 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
-/***********************************************************************
- * SCCS Id:    @(#)Eglobal.h	1.1
- * Changed:    2/12/99 13:36:16
- ***********************************************************************/
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef	GLOBAL_H
-#define	GLOBAL_H
+#ifndef GLOBAL_H
+#define GLOBAL_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,16 +18,16 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 /* Global data */
 typedef struct
-	{
-	jmp_buf env;		/* Termination environment */
-	char *progname;
-	} Global;
+{
+    jmp_buf env; /* Termination environment */
+    char *progname;
+} Global;
 extern Global global;
 
 /* ### Constants */
 #define MAX_PATH 1024
 
-#define STR2TAG(s) ((Card32)(s)[0]<<24|(Card32)(s)[1]<<16|(s)[2]<<8|(s)[3])
+#define STR2TAG(s) ((Card32)(s)[0] << 24 | (Card32)(s)[1] << 16 | (s)[2] << 8 | (s)[3])
 
 /* ### Error reporting */
 extern void fatal(int msgfmtID, ...);
@@ -50,7 +47,7 @@ extern void quit(int status);
 #ifdef SUNOS
 /* extern int _flsbuf(char c, FILE *p);
 extern int sscanf(char *s, const char *format, ...);
-extern int vfprintf(FILE *stream, const char *format, va_list arg); 
+extern int vfprintf(FILE *stream, const char *format, va_list arg);
 */
 #endif
 /*
@@ -66,5 +63,3 @@ extern int fprintf(FILE *stream, const char *format, ...);
 */
 
 #endif /* GLOBAL_H */
-
-
