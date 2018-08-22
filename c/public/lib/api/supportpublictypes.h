@@ -32,7 +32,7 @@
 #define procedure void
 
 /* ToDo: change this typedef to use bool instead of uint8_t, but note that
-         "bool" is currently for a variable name in some parts of the code */
+         "bool" is currently used for a variable name in some parts of the code */
 typedef uint8_t boolean;
 
 #define true 1
