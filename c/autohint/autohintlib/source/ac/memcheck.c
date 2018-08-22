@@ -19,14 +19,13 @@
 #define DebugAssert(x)
 #define Assert(x)
 
-/* for 32-bit architecures: */
-typedef unsigned long Card32;
-typedef unsigned long *pCard32;
-typedef long Int32;
-typedef unsigned short Card16;
-typedef unsigned char Card8;
-typedef unsigned char *pCard8;
-typedef unsigned short boolean;
+typedef uint32_t Card32;
+typedef uint32_t *pCard32;
+typedef int32_t Int32;
+typedef uint16_t Card16;
+typedef uint8_t Card8;
+typedef uint8_t *pCard8;
+typedef bool boolean;
 
 #define NUM_MEM_MASK 32
 #define NUM_MEM_BLK 32 * NUM_MEM_MASK
