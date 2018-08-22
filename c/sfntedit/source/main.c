@@ -1038,14 +1038,6 @@ int main(int argc, char *argv[]) {
     int argi;
     volatile int i;
     cmdlinetype *cmdl;
-    int status = 0; /*setjmp(global.env); Not needed as lib */
-
-    if (status) {
-        if (doingScripting) {
-            goto scriptAbEnd;
-        } else
-            exit(status - 1); /* Finish processing */
-    }
 
     /* Set signal handler */
     if (signal(SIGINT, SIG_IGN) != SIG_IGN)
@@ -1241,7 +1233,6 @@ int main(int argc, char *argv[]) {
                     sfntCopy();
             }
 
-        scriptAbEnd:
             /* Close files */
             fileClose(&srcfile);
             if (dstfile.fp != NULL) {
@@ -1265,5 +1256,4 @@ int main(int argc, char *argv[]) {
     }
 
     fprintf(stdout, "\nDone.\n");
-    return status;
 }
