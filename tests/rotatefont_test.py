@@ -78,6 +78,7 @@ def test_matrix(font_filename, i, matrix):
 ])
 @pytest.mark.parametrize('font_filename', ['font.pfa', 'cidfont.ps'])
 def test_rt_fd_options(font_filename, i, rt_args):
+    import subprocess32 as subprocess
     fd_args = []
     ext = 'pfa'
     diff_mode = []
@@ -87,10 +88,17 @@ def test_rt_fd_options(font_filename, i, rt_args):
         diff_mode = ['-m', 'bin']
 
     rt_values = ['_{}'.format(val) for val in rt_args.split()]
-    actual_path = runner(CMD + ['-f', font_filename,
-                                '-o', 't1', 'rt'] + rt_values + fd_args)
-    expected_path = _get_expected_path('rotatrans{}.{}'.format(i, ext))
-    assert differ([expected_path, actual_path] + diff_mode)
+
+    if platform.system() == 'Linux':
+        with pytest.raises(subprocess.CalledProcessError) as err:
+            runner(CMD + ['-f', font_filename,
+                          '-o', 't1', 'rt'] + rt_values + fd_args)
+        assert err.value.returncode == 10
+    else:
+        actual_path = runner(CMD + ['-f', font_filename,
+                                    '-o', 't1', 'rt'] + rt_values + fd_args)
+        expected_path = _get_expected_path('rotatrans{}.{}'.format(i, ext))
+        assert differ([expected_path, actual_path] + diff_mode)
 
 
 @pytest.mark.parametrize('font_filename', ['font.pfa', 'cidfont.ps'])
