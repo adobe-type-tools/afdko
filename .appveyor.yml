@@ -1,22 +1,19 @@
 image: Visual Studio 2017
 
 environment:
-  TWINE_USERNAME: "afdko-travis"
-  TWINE_PASSWORD:
-    secure: myMd6E3niwjGvxEHeChOlg==
-
-  matrix:
-    - PYTHON_HOME: "C:\\Python27"
+  global:
+    CIBW_SKIP: cp3* cp27-win_amd64
+    CIBW_TEST_REQUIRES: pytest-cov codecov subprocess32
+    CIBW_TEST_COMMAND: cd {project} && pytest --cov -v && coverage combine && codecov && pip uninstall --yes afdko
+    TWINE_USERNAME: afdko-travis
+    # Note: TWINE_PASSWORD is set in AppVeyor settings
 
 matrix:
   fast_finish: true
 
 # scripts that run after cloning repository
 install:
-  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
-  - set "PATH=%PYTHON_HOME%;%PYTHON_HOME%\\Scripts;%PATH%"
-  - python -m pip install -U -r requirements-dev.txt
-  - python -m pip install pytest
+  - pip install flake8 cpplint
 
 # scripts to run before build
 before_build:
@@ -51,38 +48,31 @@ before_build:
 
 # to run your custom scripts instead of automatic MSBuild
 build_script:
-  - python setup.py bdist_wheel
-  - for %%f in (dist\*.whl) do (set "WHEEL=%%f")
-  - python -m pip install -U --force-reinstall %WHEEL%
-
-test_script:
-  - python -m pytest -v
-  - python -m pip uninstall --yes afdko
+  # our setup.py requires 'wheel', which may not be already installed
+  - pip install cibuildwheel wheel
+  - cibuildwheel --output-dir wheelhouse
 
 artifacts:
   # archive the generated packages in the ci.appveyor.com build report
-  - path: dist\*.whl
-    name: release_wheel
+  - path: wheelhouse\*.whl
+    name: Wheels
 
-# Deploy wheel on tags to PyPI
 on_success:
+  # deploy wheels to PyPI on tags
   - ps: >-
-      if($env:APPVEYOR_REPO_TAG -eq 'true') {
+      if ($env:APPVEYOR_REPO_TAG -eq "true") {
         Write-Output ("Deploying " + $env:APPVEYOR_REPO_TAG_NAME + " to PyPI...")
-        pip install --upgrade twine
-        twine upload dist\*.whl
-      } else {
-        Write-Output "Not deploying as this is not a tagged commit"
+        python -m pip install twine
+        python -m twine upload wheelhouse/*.whl
       }
 
-# Deploy wheel on tags to GitHub
 deploy:
+  # deploy wheels to GitHub on tags
   provider: GitHub
   auth_token:
     secure: UyKfsObr/shlpP+0U5Zb3EPvmXt0kyKYu940CFNFdNZ8J7Fu54k415R0UNP78t0j
-  artifact: release_wheel
+  artifact: Wheels
   draft: false
   prerelease: false
   on:
-    branch: $(APPVEYOR_REPO_TAG_NAME)
     appveyor_repo_tag: true
