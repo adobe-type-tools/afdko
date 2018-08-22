@@ -37,32 +37,30 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /* certain number of bits, use types from the IntX.../CardX... group.  */
 /***********************************************************************/
 
-typedef long Fixed;
+typedef int32_t Fixed;
 
-typedef long Int32;
+typedef int32_t Int32;
 #define MAX_INT32 ((Int32)0x7FFFFFFF)
 #define MIN_INT32 ((Int32)0x80000000)
 
-typedef unsigned long Card32;
+typedef uint32_t Card32;
 #define MAX_CARD32 ((Card32)0xFFFFFFFF)
 
-typedef short Int16;
+typedef int16_t Int16;
 #define MAX_INT16 ((Int16)0x7FFF)
 #define MIN_INT16 ((Int16)0x8000)
 
-typedef unsigned short Card16;
+typedef uint16_t Card16;
 #define MAX_CARD16 ((Card16)0xFFFF)
 
-typedef signed char Int8;
+typedef int8_t Int8;
 #define MAX_INT8 ((Int8)0x7F)
 #define MIN_INT8 ((Int8)0x80)
 
-typedef unsigned char Card8;
+typedef uint8_t Card8;
 #define MAX_CARD8 ((Card8)0xFF)
 
-typedef char Byte8;
-/* MAX_BYTE8 and MIN_BYTE8 are omitted because it is not known whether */
-/* if a Byte8 (char) is signed or unsigned.                            */
+typedef uint8_t Byte8;
 
 /***********************************************************************/
 /* The following numeric types guarantee at least the number of bits   */
