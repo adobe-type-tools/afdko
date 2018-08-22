@@ -4,6 +4,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #ifndef _NUMTYPES_H
 #define _NUMTYPES_H
 
+#include <stdint.h>
+
 /***********************************************************************/
 /* GUIDELINES FOR SELECTION OF TYPE                                    */
 /*                                                                     */
