@@ -119,16 +119,6 @@ typedef long int ps_size_t;
 typedef float real;
 typedef real *Preal;
 typedef double longreal;
-
-/*
-#if !MACROM || __GNUC__
-typedef long int        Fixed;     */
-/* 16 bits of integer, 16 bits of  */
-/* fraction                        */
-/*
-#endif
-*/
-
 typedef Fixed *PFixed;
 
 /***********************************/
