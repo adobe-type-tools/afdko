@@ -1256,4 +1256,5 @@ int main(int argc, char *argv[]) {
     }
 
     fprintf(stdout, "\nDone.\n");
+    return 0;
 }
