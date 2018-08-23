@@ -3408,6 +3408,21 @@ int t1rResetGlyphs(t1rCtx h) {
     for (i = 0; i < h->chars.index.cnt; i++)
         h->chars.index.array[i].flags &= ~ABF_GLYPH_SEEN;
 
+    if (h->top.sup.flags & ABF_CID_FONT)
+    {
+        /* If the font is a Type1 CID font, the charstrings must be read
+         when building a subset, in order to get the FD index. When a CID
+         charstring is read, it is decrypted in place in the src buffer.
+         If the total charstrings are smaller than the src buffer, then
+         when the glyph data is later read again when the subset is
+         applied, the charstring data is just copied from the buffer.
+         However, they are now decrypted, leading to parsing failure. Set
+         the buffer length to 0 so that the src charstring data will get
+         reloaded again. */
+        h->src.offset = 0;
+        h->src.length = 0;
+    }
+
     return t1rSuccess;
 }
 
