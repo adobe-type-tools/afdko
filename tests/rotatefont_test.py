@@ -85,6 +85,7 @@ def test_rt_fd_options(font_filename, i, rt_args):
         fd_args = ['fd', '_{}'.format(i)]
         ext = 'ps'
         diff_mode = ['-m', 'bin']
+
     rt_values = ['_{}'.format(val) for val in rt_args.split()]
     actual_path = runner(CMD + ['-f', font_filename,
                                 '-o', 't1', 'rt'] + rt_values + fd_args)

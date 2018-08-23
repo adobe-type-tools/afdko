@@ -3422,7 +3422,7 @@ int t1rResetGlyphs(t1rCtx h) {
         h->src.offset = 0;
         h->src.length = 0;
     }
-    
+
     return t1rSuccess;
 }
 
