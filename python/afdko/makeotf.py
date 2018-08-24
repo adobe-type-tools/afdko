@@ -2098,7 +2098,8 @@ def getSourceGOADBData(inputFilePath):
     gDict = {}
     for entry in sorted(set(spotGlyphList)):
         uni = entry[0]
-        gname, gid = entry[1].split('@')
+        gname, gid_str = entry[1].split('@')
+        gid = int(gid_str)
         if gid in gDict:
             print("makeotf [Warning] Source TTF font contains multiple "
                   "Unicode values for glyph '%s'. Only the first ('%s') "
@@ -2118,7 +2119,8 @@ def getSourceGOADBData(inputFilePath):
         "[\n\r]glyph\[(\d+)\]\s+{([^,]+)", tounicode(report))
 
     gnameDict = {}
-    for gid, gname in txGlyphList:
+    for gid_str, gname in txGlyphList:
+        gid = int(gid_str)
         gnameDict[gid] = gname
         if gid not in gDict:
             gDict[gid] = None
