@@ -10,7 +10,9 @@
 #include <stdarg.h>
 #include <string.h>
 #include <math.h>
+#ifndef _WIN32
 #include <libgen.h>
+#endif
 
 #define ARRAY_LEN(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -1308,7 +1310,16 @@ static long writeHeaderObj(pdwCtx h) {
     else
         p = h->top->sup.filename;
     textSetPos(h, 0, y);
+
+    /* ToDo: find a single, portable way to get basename */
+#ifndef _WIN32
     textShow(h, "Filename:  %s", basename(p));
+#else
+    char filename[256];
+    char extension[16];
+    _splitpath(p, NULL, NULL, filename, extension);
+    textShow(h, "Filename:  %s%s", filename, extension);
+#endif
 
     /* Show FontName */
     textShow(h, "FontName:  %s", h->FontName);
