@@ -35,8 +35,6 @@ PDF_SKIP = [
     '/Producer' + SPLIT_MARKER +
     '/CreationDate' + SPLIT_MARKER +
     '/ModDate' + SPLIT_MARKER +
-    '<< /Length' + SPLIT_MARKER +
-    '(Filename:' + SPLIT_MARKER +
     '(Date:' + SPLIT_MARKER +
     '(Time:',
 ]
