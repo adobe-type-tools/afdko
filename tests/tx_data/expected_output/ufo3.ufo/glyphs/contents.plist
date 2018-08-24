@@ -6,5 +6,11 @@
 	<string>_notdef.glif</string>
 	<key>a</key>
 	<string>a.glif</string>
+	<key>space</key>
+	<string>space.glif</string>
+	<key>zerowidth</key>
+	<string>zerowidth.glif</string>
+	<key>negative</key>
+	<string>negative.glif</string>
 </dict>
 </plist>

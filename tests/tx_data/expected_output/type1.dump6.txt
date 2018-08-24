@@ -49,3 +49,12 @@ glyph[1] {a,0x61,
   350 119 line
   303 77 265 54 218 54 curve
   endchar}
+glyph[2] {space,0x20,
+  500 width
+  endchar}
+glyph[3] {zerowidth,-,
+  0 width
+  endchar}
+glyph[4] {negative,-,
+  -12 width
+  endchar}
