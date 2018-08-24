@@ -25,7 +25,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.4.2 Jul 30 2018
+makeotf.py v2.4.3 Aug 23 2018
 """
 
 __methods__ = """
@@ -2209,8 +2209,8 @@ def copyTTFGlyphTables(inputFilePath, tempOutputPath, outputPath):
         log = fdkutils.runShellCmd(command)
         if not ("Done." in log):
             print(log)
-            print("Error in merging makeotf tables with TrueType source font "
-                  "to final TrueType output font at '%s'." % outputPath)
+            print("Error removing table '%s' from OTF font reference." %
+                  tableTag)
             return
 
         command = "sfntedit -a \"%s\"=\"%s\" \"%s\" 2>&1" % (
@@ -2218,8 +2218,8 @@ def copyTTFGlyphTables(inputFilePath, tempOutputPath, outputPath):
         log = fdkutils.runShellCmd(command)
         if not ("Done." in log):
             print(log)
-            print("Error in merging makeotf tables with TrueType source font "
-                  "to final TrueType output font at '%s'." % outputPath)
+            print("Error adding makeotf-made table '%s' to TrueType font." %
+                  tableTag)
             return
 
         print("\tcopied \"%s\"." % tableTag)
