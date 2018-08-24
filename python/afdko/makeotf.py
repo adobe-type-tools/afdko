@@ -6,12 +6,10 @@ import os
 import re
 import sys
 
+from fontTools.ttLib import TTFont
 from fontTools.misc.py23 import tounicode
 
 from afdko import convertfonttocid, fdkutils, ufotools
-
-from xml.etree.ElementTree import XML
-from xml.etree.ElementTree import tostring as xmlToString
 
 # Used for compiling post table of TTF fonts. We need to stay in sync with the
 # std names in the fontTools, as we use ttx to import/export the post table.
@@ -2194,11 +2192,7 @@ def copyTTFGlyphTables(inputFilePath, tempOutputPath, outputPath):
         os.remove(outputPath)
 
     print("Fixing output font 'post' table...")
-    # This has the side-effect of creating outputPath if it doesn't yet exist.
     fixPost(glyphList, inputFilePath, outputPath)
-    # Need to update the head values. Can't just copy the entire table
-    # from the OTF temp font, as as some of the head table values control
-    # interpretation of the glyf data.
     print("Fixing output font 'head' table...")
     fixHead(tempOutputPath, outputPath)
     print("Fixing output font 'hhea' table...")
@@ -2237,219 +2231,58 @@ def copyTTFGlyphTables(inputFilePath, tempOutputPath, outputPath):
 
 
 def fixPost(glyphList, inputFilePath, outputPath):
-    """In order to change the 'post' table, you need to
-    export and change both the post and GlyphOrder tables."""
-    command = "ttx -t GlyphOrder -t post \"%s\"" % inputFilePath
-    report = fdkutils.runShellCmd(command)
-
-    # get xml file name:
-    m = re.search(r"to\s+\"([^\"]+)\"", report)
-    if not m:
-        print("makeotf [Error] Failed to extract source TTF font post table "
-              "with 'ttx' tool. Report follows.")
-        print(report)
-        raise MakeOTFRunError
-
-    postFileName = m.group(1)
-    with open(postFileName, "rt") as fp:
-        postData = fp.read()
-
-    startGlyphOrderIndex = re.search(r"<GlyphOrder>", postData).start()
-    endGlyphOrderIndex = re.search(r"</GlyphOrder>", postData).end()
-    startPostNamesIndex = re.search(r"<psNames>", postData).start()
-    endPostNamesIndex = re.search(r"</extraNames>", postData).end()
-    prefix = postData[:startGlyphOrderIndex]
-    middle = postData[endGlyphOrderIndex:startPostNamesIndex]
-    suffix = postData[endPostNamesIndex:]
-
-    # build glyph lists.
-    extraNameList = []
+    """
+    Replace 'post' table
+    """
     glyphOrderList = []
-    for i, gname in enumerate(glyphList):
-        glyphOrderList.append("\t<GlyphID id=\"%d\" name=\"%s\"/>" % (i,
-                                                                      gname))
-        if not (gname in kStdNames):
-            extraNameList.append("\t<psName name=\"%s\"/>" % gname)
+    extraNamesList = []
+    for gname in glyphList:
+        glyphOrderList.append(gname)
+        if gname not in kStdNames:
+            extraNamesList.append(gname)
 
-    # make sure we are using format 2.0 post table.
-    prefix = re.sub(r"formatType\s+value=\"\d\.\d\"",
-                    "formatType value=\"2.0\"", prefix)
+    font = TTFont(inputFilePath)
+    post_table = font['post']
+    post_table.formatType = 2
+    post_table.glyphOrder = glyphOrderList
+    post_table.extraNames = extraNamesList
+    font.save(outputPath)
 
-    # build new ttx file.
-    nameLists = [prefix, "<GlyphOrder>"]
-    nameLists.extend(glyphOrderList)
-    nameLists.extend(["</GlyphOrder>", middle, "<psNames>", "</psNames>",
-                      "<extraNames>"])
-    nameLists.extend(extraNameList)
-    nameLists.extend(["</extraNames>", suffix])
-    nameLists.append("")
 
-    postData = os.linesep.join(nameLists)
-    tempPostPath = fdkutils.get_temp_file_path()
-    with open(tempPostPath, "wt") as fp:
-        fp.write(postData)
+def update_table_items(table_tag, items_list, font1_path, font2_path):
+    """
+    font1 will get new values from font2
+    """
+    font1 = TTFont(font1_path)
+    font2 = TTFont(font2_path)
 
-    command = "ttx -m \"%s\" \"%s\"" % (inputFilePath, tempPostPath)
-    report = fdkutils.runShellCmd(command)
+    font1_table = font1[table_tag]
+    font2_table = font2[table_tag]
 
-    m = re.search(r"to\s+\"([^\"]+)\"", report)
-    if not m:
-        print("makeotf [Error] Failed to extract source TTF font post table "
-              "with 'ttx' tool. Report follows.")
-        print(report)
-        raise MakeOTFRunError
+    for item_name in items_list:
+        setattr(font1_table, item_name, getattr(font2_table, item_name))
 
-    newTTFName = m.group(1)
-
-    if newTTFName != outputPath:
-        if os.path.exists(outputPath):
-            os.remove(outputPath)
-        os.rename(newTTFName, outputPath)
+    font1.save(font1_path)
+    font1.close()
+    font2.close()
 
 
 def fixHead(tempOTFFilePath, outputPath):
-    command = "ttx -t head \"%s\"" % outputPath
-    report = fdkutils.runShellCmd(command)
-
-    # get xml file name:
-    m = re.search(r"to\s+\"([^\"]+)\"", report)
-    if not m:
-        print("makeotf [Error] Failed to extract output TTF font head table "
-              "with 'ttx' tool. Report follows.")
-        print(report)
-        raise MakeOTFRunError
-
-    headFileName = m.group(1)
-
-    with open(headFileName, "rt") as fp:
-        oldHeadData = fp.read()
-
-    command = "ttx -t head \"%s\"" % tempOTFFilePath
-    report = fdkutils.runShellCmd(command)
-
-    # get xml file name:
-    m = re.search(r"to\s+\"([^\"]+)\"", report)
-    if not m:
-        print("makeotf [Error] Failed to extract temp OTF font head table "
-              "with 'ttx' tool. Report follows.")
-        print(report)
-        raise MakeOTFRunError
-
-    headFileName = m.group(1)
-
-    with open(headFileName, "rt") as fp:
-        newHeadData = fp.read()
-
-    oldHead = HeadTable(oldHeadData)
-    newHead = HeadTable(newHeadData)
-    oldHead.updateFromTable(newHead)
-    headData = oldHead.toXMLFileString()
-
-    tempHeadPath = fdkutils.get_temp_file_path()
-    with open(tempHeadPath, "wt") as fp:
-        fp.write(headData)
-
-    command = "ttx -m \"%s\" \"%s\"" % (outputPath, tempHeadPath)
-    report = fdkutils.runShellCmd(command)
-
-    m = re.search(r"to\s+\"([^\"]+)\"", report)
-    if not m:
-        print("makeotf [Error] Failed to merge TTF font head table with "
-              "'ttx' tool. Report follows.")
-        print(report)
-        raise MakeOTFRunError
-
-    newTTFName = m.group(1)
-
-    if newTTFName != outputPath:
-        if os.path.exists(outputPath):
-            os.remove(outputPath)
-        os.rename(newTTFName, outputPath)
-
-
-class HeadTable(object):
-    tagName = "head"
-    updateFieldList = ["fontRevision", "created", "modified", "macStyle",
-                       "xMin", "xMax", "yMin", "yMax"]
-
-    def __init__(self, data):
-        self.fileXML = XML(data)
-        self.tableElement = self.fileXML.find(self.tagName)
-
-    def updateFromTable(self, newHead):
-        for fieldName in self.updateFieldList:
-            self.tableElement.find(fieldName).attrib["value"] = \
-                newHead.tableElement.find(fieldName).attrib["value"]
-
-    def toXMLFileString(self):
-        data = xmlToString(self.fileXML)
-        data = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>%s%s" % (
-            os.linesep, data)
-        return data
+    """
+    tempOTFFilePath is an OTF/CFF font.
+    outputPath is a TTF font.
+    Need to update the head values. Can't just copy the entire table
+    from the OTF temp font, as as some of the head table values control
+    interpretation of the glyf data.
+    """
+    head_items = ("fontRevision", "created", "modified", "macStyle",
+                  "xMin", "xMax", "yMin", "yMax")
+    update_table_items('head', head_items, outputPath, tempOTFFilePath)
 
 
 def fixHhea(tempOTFFilePath, outputPath):
-    command = "ttx -t hhea \"%s\"" % outputPath
-    report = fdkutils.runShellCmd(command)
-    # get xml file name:
-    m = re.search(r"to\s+\"([^\"]+)\"", report)
-    if not m:
-        print("makeotf [Error] Failed to extract output TTF font hhea table "
-              "with 'ttx' tool. Report follows.")
-        print(report)
-        raise MakeOTFRunError
-
-    hheaFileName = m.group(1)
-
-    with open(hheaFileName, "rt") as fp:
-        oldHheaData = fp.read()
-
-    command = "ttx -t hhea \"%s\"" % tempOTFFilePath
-    report = fdkutils.runShellCmd(command)
-    # get xml file name:
-    m = re.search(r"to\s+\"([^\"]+)\"", report)
-    if not m:
-        print("makeotf [Error] Failed to extract temp OTF font hhea table "
-              "with 'ttx' tool. Report follows.")
-        print(report)
-        raise MakeOTFRunError
-
-    hheaFileName = m.group(1)
-
-    with open(hheaFileName, "rt") as fp:
-        newHheaData = fp.read()
-
-    oldHhea = HheaTable(oldHheaData)
-    newHhea = HheaTable(newHheaData)
-
-    oldHhea.updateFromTable(newHhea)
-    hheaData = oldHhea.toXMLFileString()
-
-    tempHheaPath = fdkutils.get_temp_file_path()
-    with open(tempHheaPath, "wt") as fp:
-        fp.write(hheaData)
-
-    command = "ttx -m \"%s\" \"%s\"" % (outputPath, tempHheaPath)
-    report = fdkutils.runShellCmd(command)
-
-    m = re.search(r"to\s+\"([^\"]+)\"", report)
-    if not m:
-        print("makeotf [Error] Failed to extract source TTF font hhea table "
-              "with 'ttx' tool. Report follows.")
-        print(report)
-        raise MakeOTFRunError
-
-    newTTFName = m.group(1)
-
-    if newTTFName != outputPath:
-        if os.path.exists(outputPath):
-            os.remove(outputPath)
-        os.rename(newTTFName, outputPath)
-
-
-class HheaTable(HeadTable):
-    tagName = "hhea"
-    updateFieldList = ["ascent", "descent", "lineGap"]
+    hhea_items = ("ascent", "descent", "lineGap")
+    update_table_items('hhea', hhea_items, outputPath, tempOTFFilePath)
 
 
 def makeRelativePath(curDir, targetPath):
