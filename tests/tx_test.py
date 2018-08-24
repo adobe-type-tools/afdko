@@ -39,7 +39,7 @@ PDF_SKIP = [
     '(Filename:' + SPLIT_MARKER +
     '(Date:' + SPLIT_MARKER +
     '(Time:',
-    '-l', '36,38,240-254,262'
+    '-l', '36,38,365+22,394'
 ]
 
 PS_SKIP = [

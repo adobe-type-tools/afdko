@@ -6,6 +6,9 @@
 		<array>
 			<string>.notdef</string>
 			<string>a</string>
+			<string>space</string>
+			<string>zerowidth</string>
+			<string>negative</string>
 		</array>
 	</dict>
 </plist>
