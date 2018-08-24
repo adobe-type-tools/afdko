@@ -236,7 +236,13 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
     h->int_mtx.bottom = (long)floor(h->real_mtx.bottom);
     h->int_mtx.right = (long)ceil(h->real_mtx.right);
     h->int_mtx.top = (long)ceil(h->real_mtx.top);
-    h->int_mtx.hAdv = (long)(h->real_mtx.hAdv + 0.5);
+
+    /* Round advance away from zero. */
+    if (h->real_mtx.hAdv >= 0) {
+        h->int_mtx.hAdv = (long)(h->real_mtx.hAdv + 0.5);
+    } else {
+        h->int_mtx.hAdv = (long)(h->real_mtx.hAdv - 0.5);
+    }
 }
 
 /* Glyph metrics callbacks template. */
