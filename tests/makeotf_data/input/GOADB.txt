@@ -1,0 +1,5 @@
+
+# final name	friendly name
+.notdef	.notdef
+a	a
+g2	g2

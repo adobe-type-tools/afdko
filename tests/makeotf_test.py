@@ -26,6 +26,7 @@ T1PFA_NAME = 't1pfa.pfa'
 UFO2_NAME = 'ufo2.ufo'
 UFO3_NAME = 'ufo3.ufo'
 CID_NAME = 'cidfont.ps'
+TTF_NAME = 'font.ttf'
 OTF_NAME = 'SourceSans-Test.otf'
 
 data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
@@ -77,12 +78,16 @@ def test_exit_unknown_option(arg):
     ([], UFO2_NAME, 'ufo2-dev.ttx'),
     ([], UFO3_NAME, 'ufo3-dev.ttx'),
     ([], CID_NAME, 'cidfont-dev.ttx'),
+    ([], TTF_NAME, 'ttf-dev.ttx'),
     (['r'], T1PFA_NAME, 't1pfa-rel.ttx'),
     (['r'], UFO2_NAME, 'ufo2-rel.ttx'),
     (['r'], UFO3_NAME, 'ufo3-rel.ttx'),
     (['r'], CID_NAME, 'cidfont-rel.ttx'),
+    (['r', 'gf'], TTF_NAME, 'ttf-rel.ttx'),
 ])
 def test_input_formats(arg, input_filename, ttx_filename):
+    if 'gf' in arg:
+        arg.append('_{}'.format(_get_input_path('GOADB.txt')))
     actual_path = _get_temp_file_path()
     runner(CMD + ['-n', '-o',
                   'f', '_{}'.format(_get_input_path(input_filename)),
