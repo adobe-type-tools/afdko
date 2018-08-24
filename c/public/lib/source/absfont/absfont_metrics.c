@@ -220,6 +220,17 @@ static void glyphSeac(abfGlyphCallbacks *cb,
 static void glyphEnd(abfGlyphCallbacks *cb) {
     abfMetricsCtx h = (abfMetricsCtx)cb->direct_ctx;
 
+    /* If we didn't see ink, then zero out the bounding box. */
+    if ((h->real_mtx.left  == FLT_MAX) &&
+       (h->real_mtx.bottom == FLT_MAX) &&
+       (h->real_mtx.right  == -FLT_MAX) &&
+       (h->real_mtx.top    == -FLT_MAX)) {
+        h->real_mtx.left   = 0;
+        h->real_mtx.bottom = 0;
+        h->real_mtx.right  = 0;
+        h->real_mtx.top    = 0;
+    }
+
     /* Compute integer metrics */
     h->int_mtx.left = (long)floor(h->real_mtx.left);
     h->int_mtx.bottom = (long)floor(h->real_mtx.bottom);
