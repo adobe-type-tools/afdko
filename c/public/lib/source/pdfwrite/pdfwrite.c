@@ -10,6 +10,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <math.h>
+#include <libgen.h>
 
 #define ARRAY_LEN(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -1248,7 +1249,8 @@ static long writeInitPageObj(pdwCtx h) {
 static long writeInfoObj(pdwCtx h) {
     enum { MAX_VERSION_SIZE = 100 };
     char version[MAX_VERSION_SIZE + 1];
-    char version_buf[MAX_VERSION_SIZE];
+    char abf_version_buf[MAX_VERSION_SIZE];
+    char pdw_version_buf[MAX_VERSION_SIZE];
     OBJ num;
 
     /* Make font version */
@@ -1265,13 +1267,13 @@ static long writeInfoObj(pdwCtx h) {
     num = dstBegObj(h);
     dstPrint(h,
              "/Title (%s %s)\n"
-             "/Creator (absfont %s)\n"
-             "/Producer (pdfwrite %s)\n"
+             "/Creator (absfont %8s)\n"
+             "/Producer (pdfwrite %8s)\n"
              "/CreationDate (%s)\n"
              "/ModDate (%s)\n",
              h->FontName, version,
-             CTL_SPLIT_VERSION(version_buf, ABF_VERSION),
-             CTL_SPLIT_VERSION(version_buf, PDW_VERSION),
+             CTL_SPLIT_VERSION(abf_version_buf, ABF_VERSION),
+             CTL_SPLIT_VERSION(pdw_version_buf, PDW_VERSION),
              h->pdfdate,
              h->pdfdate);
     dstEndObj(h);
@@ -1306,7 +1308,7 @@ static long writeHeaderObj(pdwCtx h) {
     else
         p = h->top->sup.filename;
     textSetPos(h, 0, y);
-    textShow(h, "Filename:  %s", p);
+    textShow(h, "Filename:  %s", basename(p));
 
     /* Show FontName */
     textShow(h, "FontName:  %s", h->FontName);
