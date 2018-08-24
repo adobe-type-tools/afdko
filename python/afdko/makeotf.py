@@ -2137,27 +2137,29 @@ def getSourceGOADBData(inputFilePath):
 
 
 def getGOADBData(goadbPath):
-    fp = open(goadbPath, "rU")
-    lines = fp.readlines()
-    fp.close()
-    gaList = map(lambda line: re.sub(r"#.+", "", line), lines)
-    gaList = map(lambda line: line.strip(), gaList)
-    gaList = filter(lambda line: line, gaList)
-    gaList = map(lambda line: line.split(), gaList)
     goadbList = []
+    with open(goadbPath, "r") as fp:
+        for line in fp.readlines():
+            line = line.strip()
+            if not line:  # blank lines
+                continue
+            if line[0] == '#':  # comments
+                continue
 
-    for entry in gaList:
-        if len(entry) > 2:
-            uniName = entry[2]
-        else:
+            line_items = line.split()
+
             uniName = None
-        goadbList.append([entry[0], entry[1], uniName])
+            if len(line_items) > 2:
+                uniName = line_items[2]
+
+            goadbList.append([line_items[0], line_items[1], uniName])
+
     return goadbList
 
 
 def compareSrcNames(srcGOADBList, realGOADBList):
-    srcNameList = map(lambda entry: entry[1], srcGOADBList)
-    realNameList = map(lambda entry: entry[1], realGOADBList)
+    srcNameList = [entry[1] for entry in srcGOADBList]
+    realNameList = [entry[1] for entry in realGOADBList]
     if srcNameList != realNameList:
         # order or names don't match, report any missing names
         onlyInSrc = [n for n in srcNameList if n not in realNameList]
@@ -2168,10 +2170,9 @@ def compareSrcNames(srcGOADBList, realGOADBList):
 
 def writeTempGOADB(srcGOADBList):
     fpath = fdkutils.get_temp_file_path()
-    fp = open(fpath, "wt")
-    for entry in srcGOADBList:
-        fp.write("%s\t%s\t%s%s" % (entry[0], entry[1], entry[2], os.linesep))
-    fp.close()
+    with open(fpath, "w") as fp:
+        for entry in srcGOADBList:
+            fp.write("%s\t%s\t%s\n" % (entry[0], entry[1], entry[2]))
     return fpath
 
 
@@ -2407,6 +2408,9 @@ def runMakeOTF(makeOTFParams):
             or getattr(makeOTFParams, kFileOptPrefix + kRelease)
         if use_alias:
             goadbPath = getattr(makeOTFParams, kFileOptPrefix + kGOADB)
+            if not goadbPath:
+                print("makeotf [Error] GlyphOrderAndAliasDB file not found.")
+                raise MakeOTFRunError
             realGOADBList = getGOADBData(goadbPath)
             result, onlyInSrc, onlyInReal = compareSrcNames(srcGOADBList,
                                                             realGOADBList)
