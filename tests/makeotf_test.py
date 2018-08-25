@@ -294,11 +294,19 @@ def test_readOptionFile_relpath(cur_dir_str):
     params = MakeOTFParams()
 
     if '/' in cur_dir_str:
+        # flip the slashes used in the test's input string
         params.currentDir = os.path.normpath(cur_dir_str)
     else:
         params.currentDir = cur_dir_str
 
     font_dir_path = os.path.relpath(abs_font_dir_path, params.currentDir)
+
+    if cur_dir_str.startswith('..') and os.path.dirname(os.getcwd()) == os.sep:
+        # the project is inside a folder located at the root level;
+        # remove the two dots at the start of the path, otherwise
+        # testing input '../different_dir' will fail.
+        font_dir_path = font_dir_path[2:]
+
     input_font_path = os.path.join(font_dir_path, INPUT_FONT_NAME)
     output_font_path = os.path.join(font_dir_path, OUTPUT_FONT_NAME)
     assert readOptionFile(proj_path, params, 1) == (False, 3)
