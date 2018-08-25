@@ -12,6 +12,8 @@
 #include <math.h>
 #ifndef _WIN32
 #include <libgen.h>
+#else
+#define basename windows_basename
 #endif
 
 #define ARRAY_LEN(a) (sizeof(a) / sizeof((a)[0]))
@@ -1295,6 +1297,18 @@ static long writeFontObj(pdwCtx h, int iFont) {
     return num;
 }
 
+#ifdef _WIN32
+static char *windows_basename(char *full_path)
+{
+    char *last_slash;
+    char *base_name;
+
+    last_slash = strrchr(full_path, '\\');
+    base_name = last_slash ? last_slash + 1 : full_path;
+    return base_name;
+}
+#endif
+
 /* Write header object used by every page. */
 static long writeHeaderObj(pdwCtx h) {
     char *p;
@@ -1310,16 +1324,7 @@ static long writeHeaderObj(pdwCtx h) {
     else
         p = h->top->sup.filename;
     textSetPos(h, 0, y);
-
-    /* ToDo: find a single, portable way to get basename */
-#ifndef _WIN32
     textShow(h, "Filename:  %s", basename(p));
-#else
-    char filename[256];
-    char extension[16];
-    _splitpath(p, NULL, NULL, filename, extension);
-    textShow(h, "Filename:  %s%s", filename, extension);
-#endif
 
     /* Show FontName */
     textShow(h, "FontName:  %s", h->FontName);
