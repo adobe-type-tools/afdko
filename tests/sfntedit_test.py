@@ -21,24 +21,26 @@ def _get_expected_path(file_name):
     return os.path.join(data_dir_path, 'expected_output', file_name)
 
 
-def _get_test_path(file_name):
+def _get_input_path(file_name):
     return os.path.join(data_dir_path, 'input', file_name)
 
 
 def _get_temp_file_path():
-    return tempfile.mkstemp()[1]
+    file_descriptor, path = tempfile.mkstemp()
+    os.close(file_descriptor)
+    return path
+
+
+def _generate_ttx_dump(font_path, tables=None):
+    with TTFont(font_path) as font:
+        temp_path = _get_temp_file_path()
+        font.saveXML(temp_path, tables=tables)
+        return temp_path
 
 
 def _font_has_table(font_path, table_tag):
-    font = TTFont(font_path)
-    return table_tag in font
-
-
-def _generate_ttx_dump(font_path):
-    font = TTFont(font_path)
-    temp_path = _get_temp_file_path()
-    font.saveXML(temp_path)
-    return temp_path
+    with TTFont(font_path) as font:
+        return table_tag in font
 
 
 # -----
@@ -69,9 +71,9 @@ def test_extract_table():
 
 
 def test_add_table():
-    test_path = _get_test_path('GDEF_italic.tb')
-    assert _font_has_table(_get_test_path(ITALIC), 'GDEF') is False
-    actual_path = runner(CMD + ['-o', 'a', '_GDEF={}'.format(test_path),
+    input_path = _get_input_path('GDEF_italic.tb')
+    assert _font_has_table(_get_input_path(ITALIC), 'GDEF') is False
+    actual_path = runner(CMD + ['-o', 'a', '_GDEF={}'.format(input_path),
                                 '-f', ITALIC])
     expected_path = _get_expected_path('italic_w_GDEF.otf')
     assert differ([expected_path, actual_path, '-m', 'bin']) is False
