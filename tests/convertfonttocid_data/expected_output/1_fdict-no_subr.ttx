@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont sfntVersion="OTTO" ttLibVersion="3.29">
+
+  <CFF>
+    <major value="1"/>
+    <minor value="0"/>
+    <CFFFont name="SourceSans-Test">
+      <ROS Registry="Adobe" Order="Identity" Supplement="0"/>
+      <Notice value="Copyright 2010, 2012, 2014 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name 'Source'."/>
+      <FamilyName value="Source Sans"/>
+      <Weight value="Regular"/>
+      <isFixedPitch value="0"/>
+      <ItalicAngle value="0"/>
+      <UnderlinePosition value="-75"/>
+      <UnderlineThickness value="50"/>
+      <PaintType value="0"/>
+      <CharstringType value="2"/>
+      <FontMatrix value="0.001 0 0 0.001 0 0"/>
+      <FontBBox value="52 -12 565 660"/>
+      <StrokeWidth value="0"/>
+      <CIDFontVersion value="2.20000005"/>
+      <CIDFontRevision value="0"/>
+      <CIDFontType value="0"/>
+      <CIDCount value="3"/>
+      <!-- charset is dumped separately as the 'GlyphOrder' element -->
+      <FDSelect format="0"/>
+      <FDArray>
+        <FontDict index="0">
+          <FontName value="None_None"/>
+          <Private>
+            <BlueValues value="-12 0 486 498 518 530 574 586 638 650 656 668 712 724"/>
+            <BlueScale value="0.0625"/>
+            <BlueShift value="7"/>
+            <BlueFuzz value="0"/>
+            <StdHW value="67"/>
+            <StdVW value="84"/>
+            <ForceBold value="0"/>
+            <LanguageGroup value="0"/>
+            <ExpansionFactor value="0.06"/>
+            <initialRandomSeed value="0"/>
+            <defaultWidthX value="0"/>
+            <nominalWidthX value="0"/>
+          </Private>
+        </FontDict>
+      </FDArray>
+      <CharStrings>
+        <CharString name=".notdef" fdSelectIndex="0">
+          653 0 58 542 60 hstem
+          89 65 344 67 vstem
+          89 hmoveto
+          476 660 -476 hlineto
+          108 -602 rmoveto
+          74 132 54 103 rlineto
+          4 hlineto
+          52 -103 73 -132 rlineto
+          -129 329 rmoveto
+          -50 94 -66 119 rlineto
+          235 hlineto
+          -66 -119 -49 -94 rlineto
+          -175 -277 rmoveto
+          462 vlineto
+          127 -232 rlineto
+          217 -230 rmoveto
+          -126 230 126 232 rlineto
+          endchar
+        </CharString>
+        <CharString name="cid00001" fdSelectIndex="0">
+          504 194 -12 rmoveto
+          61 54 32 38 46 hvcurveto
+          3 hlineto
+          7 -58 rlineto
+          68 298 hlineto
+          121 -50 79 -119 -78 -68 -34 -29 -45 vhcurveto
+          32 -57 rlineto
+          26 38 51 26 56 hhcurveto
+          80 20 -60 -62 hvcurveto
+          -207 -23 -91 -53 -106 vvcurveto
+          -87 61 -51 81 vhcurveto
+          24 66 rmoveto
+          -48 -38 23 55 62 56 40 162 20 hvcurveto
+          -135 vlineto
+          -42 -47 -38 -23 -47 hhcurveto
+          endchar
+        </CharString>
+        <CharString name="cid00002" fdSelectIndex="0">
+          endchar
+        </CharString>
+      </CharStrings>
+    </CFFFont>
+
+    <GlobalSubrs>
+      <!-- The 'index' attribute is only for humans; it is ignored when parsed. -->
+    </GlobalSubrs>
+  </CFF>
+
+</ttFont>

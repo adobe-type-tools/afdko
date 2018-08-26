@@ -1078,6 +1078,7 @@ def mergeFontToCFF(srcPath, outputPath, doSubr):
     command = "tx -cff +b%s \"%s\" \"%s\" 2>&1" % (subrArg, srcPath, tempPath)
     report = fdkutils.runShellCmd(command)
     if ("fatal" in report) or ("error" in report):
+        print(report)
         raise FontInfoParseError(
             "Failed to run 'tx -cff +b' on file %s" % srcPath)
 
@@ -1085,6 +1086,7 @@ def mergeFontToCFF(srcPath, outputPath, doSubr):
     command = "sfntedit -a CFF=\"%s\" \"%s\" 2>&1" % (tempPath, outputPath)
     report = fdkutils.runShellCmd(command)
     if ("fatal" in report) or ("error" in report):
+        print(report)
         raise FontInfoParseError(
             "Failed to run 'sfntedit -a CFF=' on file %s" % srcPath)
 
