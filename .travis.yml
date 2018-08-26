@@ -6,7 +6,8 @@ env:
     - CIBW_BEFORE_BUILD_LINUX="yum install -y glibc-devel.i386 libgcc_s.so.1"
     - CIBW_ENVIRONMENT_LINUX="CODECOV_TOKEN=e0067bac-3ded-4432-83c8-667217c76660"
     - CIBW_TEST_REQUIRES="pytest-cov codecov subprocess32"
-    - CIBW_TEST_COMMAND="cd {project} && pytest --cov -v && coverage combine && codecov && pip uninstall --yes afdko"
+    - CIBW_TEST_COMMAND_MACOS="cd {project} && pytest --cov -v && coverage combine && codecov && pip uninstall --yes afdko"
+    - CIBW_TEST_COMMAND_LINUX="cd {project} && pytest -k bug570 -v && coverage combine && codecov && pip uninstall --yes afdko"
     - TWINE_USERNAME="afdko-travis"
     # Note: TWINE_PASSWORD is set in Travis settings
 
