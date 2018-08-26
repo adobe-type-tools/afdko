@@ -82,3 +82,11 @@ def test_add_table():
     expected_ttx = _generate_ttx_dump(expected_path)
     assert differ([expected_ttx, actual_ttx,
                    '-s', '    <checkSumAdjustment'])
+
+
+def test_linux_ci_failure_bug570():
+    input_path = _get_input_path('1_fdict.cff')
+    actual_path = runner(CMD + ['-o', 'a', '_CFF={}'.format(input_path),
+                                '-f', 'core.otf'])
+    expected_path = _get_expected_path('1_fdict.otf')
+    assert differ([expected_path, actual_path, '-m', 'bin'])
