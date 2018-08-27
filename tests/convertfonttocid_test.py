@@ -2,7 +2,7 @@ from __future__ import print_function, division, absolute_import
 
 import os
 import pytest
-from shutil import copy2
+from shutil import copy2, rmtree
 import tempfile
 
 from fontTools.ttLib import TTFont
@@ -14,6 +14,21 @@ from .differ import main as differ
 MODULE = 'convertfonttocid'
 
 data_dir_path = os.path.join(os.path.split(__file__)[0], MODULE + '_data')
+temp_dir_path = os.path.join(data_dir_path, 'temp_output')
+
+
+def setup_module():
+    """
+    Create the temporary output directory
+    """
+    os.mkdir(temp_dir_path)
+
+
+def teardown_module():
+    """
+    teardown the temporary output directory
+    """
+    rmtree(temp_dir_path)
 
 
 def _get_expected_path(file_name):
@@ -25,7 +40,8 @@ def _get_input_path(file_name):
 
 
 def _get_temp_file_path():
-    file_descriptor, path = tempfile.mkstemp()
+    # make sure temp data on same file system as other data for rename to work
+    file_descriptor, path = tempfile.mkstemp(dir=temp_dir_path)
     os.close(file_descriptor)
     return path
 
