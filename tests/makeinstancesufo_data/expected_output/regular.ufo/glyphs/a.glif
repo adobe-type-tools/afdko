@@ -74,10 +74,10 @@
 			<point name="aboveLC" x="244.8227848101" y="506.5759493671" type="move"/>
 		</contour>
 		<contour>
-			<point name="ogonek" x="446.7405063291" y="0" type="move"/>
+			<point name="belowLC" x="243.6170886076" y="-22" type="move"/>
 		</contour>
 		<contour>
-			<point name="belowLC" x="243.6170886076" y="-22" type="move"/>
+			<point name="ogonek" x="446.7405063291" y="0" type="move"/>
 		</contour>
 	</outline>
 </glyph>
