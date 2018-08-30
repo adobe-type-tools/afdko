@@ -7,7 +7,7 @@ import re
 import sys
 
 from fontTools.ttLib import TTFont
-from fontTools.misc.py23 import tounicode
+from fontTools.misc.py23 import open, tounicode, tobytes
 
 from afdko import convertfonttocid, fdkutils, ufotools
 
@@ -25,7 +25,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.4.3 Aug 23 2018
+makeotf.py v2.5.0 Aug 28 2018
 """
 
 __methods__ = """
@@ -535,7 +535,7 @@ def readOptionFile(filePath, makeOTFParams, optionIndex):
     fprDir = os.path.dirname(os.path.abspath(filePath))
     currentDir = makeOTFParams.currentDir
     try:
-        with open(filePath, "rU") as fp:
+        with open(filePath, "r", encoding='utf-8') as fp:
             data = fp.read()
     except (IOError, OSError):
         print("makeotf [Error] Could not read the options file %s. "
@@ -626,8 +626,8 @@ def writeOptionsFile(makeOTFParams, filePath):
         if makeOTFParams.verbose:
             print("makeotf [Note] Writing options file %s" % filePath)
         try:
-            with open(filePath, "w") as fp:
-                fp.write(data)
+            with open(filePath, "wb") as fp:
+                fp.write(tobytes(data, encoding='utf-8'))
         except (IOError, OSError):
             print("makeotf [Warning] Could not write the options file %s. "
                   "Please check the file protection settings for the file "
@@ -662,7 +662,7 @@ def setOptionsFromFontInfo(makeOTFParams):
     data = ''
     if fontinfo_path and os.path.exists(fontinfo_path):
         try:
-            with open(fontinfo_path, "r") as fi:
+            with open(fontinfo_path, "r", encoding='utf-8') as fi:
                 data = fi.read()
             makeOTFParams.fontinfoPath = fontinfo_path
         except (OSError, IOError):
@@ -1584,9 +1584,8 @@ def getROS(fontPath):
 
     """
     Reg = Ord = Sup = None
-    fp = open(fontPath, "rb")
-    data = fp.read(5000)
-    fp.close()
+    with open(fontPath, "r", encoding='macroman') as fp:
+        data = tounicode(fp.read(5000))
     match = re.search(r"/Registry\s+\((\S+)\)", data)
     if not match:
         return Reg, Ord, Sup
@@ -1696,9 +1695,8 @@ def checkIfVertInFeature(featurePath):
         print("No feature path at", featurePath)
         return 0
 
-    fp = open(featurePath, "rU")
-    data = fp.read()
-    fp.close()
+    with open(featurePath, "r", encoding='utf-8') as fp:
+        data = fp.read()
 
     match = re.search(RE_FEATURE, data)
     if match:
@@ -1873,17 +1871,17 @@ def setMissingParams(makeOTFParams):
             raise MakeOTFTXError
 
         if makeOTFParams.srcIsTTF or inputFontPath.lower().endswith(".ttf"):
-            path = psName + ".ttf"
+            font_filename = "{}.ttf".format(psName)
         else:
-            path = psName + ".otf"
+            font_filename = "{}.otf".format(psName)
 
         if output_dir:
-            path = os.path.join(output_dir, path)
+            font_path = os.path.join(output_dir, font_filename)
         else:
-            path = os.path.join(makeOTFParams.fontDirPath, path)
+            font_path = os.path.join(makeOTFParams.fontDirPath, font_filename)
 
-        path = os.path.abspath(os.path.realpath(path))
-        setattr(makeOTFParams, kFileOptPrefix + kOutputFont, path)
+        output_path = os.path.abspath(os.path.realpath(font_path))
+        setattr(makeOTFParams, kFileOptPrefix + kOutputFont, output_path)
 
     if error:
         raise MakeOTFOptionsError
@@ -1940,9 +1938,8 @@ def convertFontIfNeeded(makeOTFParams):
         else:
             # If not OTF or TTF, better be some legacy Type 1 font.
             try:
-                fp = open(filePath, "rb")
-                data = fp.read(1024)
-                fp.close()
+                with open(filePath, "rb") as fp:
+                    data = tounicode(fp.read(1024))
                 if ("%" not in data[:4]) and ('/FontName' not in data):
                     needsConversion = True
                 else:
@@ -2019,9 +2016,8 @@ def convertFontIfNeeded(makeOTFParams):
 
 def updateFontRevision(featuresPath, fontRevision):
     try:
-        fp = open(featuresPath, "rU")
-        data = fp.read()
-        fp.close()
+        with open(featuresPath, "r", encoding='utf-8') as fp:
+            data = fp.read()
     except (IOError, OSError):
         print("makeotf [Error] When trying to update the head table "
               "fontRevision field, failed to open '%s'." % featuresPath)
@@ -2056,9 +2052,8 @@ def updateFontRevision(featuresPath, fontRevision):
     newData = re.sub(match.group(0), "FontRevision %s.%s;" % (major, minor),
                      data)
     try:
-        fp = open(featuresPath, "wt")
-        fp.write(newData)
-        fp.close()
+        with open(featuresPath, "wb") as fp:
+            fp.write(tobytes(newData, encoding='utf-8'))
     except (IOError, OSError):
         print("makeotf [Error] When trying to update the head table "
               "fontRevision field, failed to write the new data to '%s'." %
@@ -2088,8 +2083,7 @@ def getSourceGOADBData(inputFilePath):
     # First, get the Unicode mapping from the TTF cmap table.
     command = "spot -t cmap=7 \"%s\" 2>&1" % inputFilePath
     report = fdkutils.runShellCmd(command)
-    spotGlyphList = re.findall(
-        "[\n\t]\[(....+)\]=<([^>]+)>", tounicode(report))
+    spotGlyphList = re.findall("[\n\t]\[(....+)\]=<([^>]+)>", report)
 
     # Because this dumps all the Unicode map tables, there are a number
     # of duplicates; weed them out, and strip out gid part of spot name
@@ -2113,8 +2107,7 @@ def getSourceGOADBData(inputFilePath):
     # as tx doesn't check 32 bit UV's, and doesn't report double-encodings.
     command = "tx -mtx \"%s\" 2>&1" % inputFilePath
     report = fdkutils.runShellCmd(command)
-    txGlyphList = re.findall(
-        "[\n\r]glyph\[(\d+)\]\s+{([^,]+)", tounicode(report))
+    txGlyphList = re.findall("[\n\r]glyph\[(\d+)\]\s+{([^,]+)", report)
 
     gnameDict = {}
     for gid_str, gname in txGlyphList:
@@ -2138,7 +2131,7 @@ def getSourceGOADBData(inputFilePath):
 
 def getGOADBData(goadbPath):
     goadbList = []
-    with open(goadbPath, "r") as fp:
+    with open(goadbPath, "r", encoding='utf-8') as fp:
         for line in fp.readlines():
             line = line.strip()
             if not line:  # blank lines
@@ -2509,10 +2502,8 @@ def runMakeOTF(makeOTFParams):
             featuresPath = os.path.join(featuresDir, "features")
             exec("makeOTFParams.%s%s = featuresPath" % (kFileOptPrefix,
                                                         kFeature))
-            fp = open(featuresPath, "wt")
-            fp.write(os.linesep + "table head {" + os.linesep + "FontRevision "
-                     "1.000;" + os.linesep + "} head;" + os.linesep)
-            fp.close()
+            with open(featuresPath, "w") as fp:
+                fp.write("\ntable head {\nFontRevision 1.000;\n} head;\n")
         updateFontRevision(featuresPath, fontRevision)
 
     # if converting to CID, save the setting, but
@@ -2570,9 +2561,7 @@ def runMakeOTF(makeOTFParams):
               os.path.basename(makeOTFParams.makeotfPath))
         print("   cd \"%s\"" % fontDir)
         print("   %s" % commandString)
-    # I use os.system rather than os.pipe so that the user
-    # will see the log messages from the C program during
-    # processing, rather than only at the end.
+
     fdkutils.runShellCmdLogging(commandString)
 
     if not os.path.exists(tempOutPath) or (os.path.getsize(tempOutPath) < 500):

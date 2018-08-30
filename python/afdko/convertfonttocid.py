@@ -1,7 +1,7 @@
 # Copyright 2014 Adobe. All rights reserved.
 
 """
-convertfonttocid.py. v 1.12.0 Jul 30 2018
+convertfonttocid.py. v 1.13.0 Aug 28 2018
 
 Convert a Type 1 font to CID, given multiple hint dict defs in the
 "fontinfo" file. See autohint help, with the "-hfd" option, or the makeotf
@@ -58,6 +58,8 @@ from __future__ import print_function, absolute_import
 import os
 import re
 import sys
+
+from fontTools.misc.py23 import open, tounicode, tobytes
 
 from afdko import fdkutils
 
@@ -293,7 +295,7 @@ class FDDict(object):
                 for pairEntry in bluePairList:
                     bluesList.append(pairEntry[1])
                     bluesList.append(pairEntry[0])
-                bluesList = map(str, bluesList)
+                bluesList = [str(val) for val in bluesList]
                 bluesList = "[%s]" % (" ".join(bluesList))
                 setattr(self, fieldName, bluesList)
 
@@ -578,7 +580,7 @@ def mergeFDDicts(prevDictList, privateDict):
             if dList is not None:
                 dList = dList[1:-1]  # remove the braces
                 dList = dList.split()
-                dList = map(int, dList)
+                dList = [int(val) for val in dList]
                 for width in dList:
                     stemDict[width] = prefDDict.DictName
 
@@ -727,7 +729,7 @@ def getFontBBox(fPath):
         raise FontInfoParseError("Error: Failed finding FontBBox in tx log "
                                  "from %s." % fPath)
     fontBBox = m.group(1).split(",")
-    fontBBox = map(int, fontBBox)
+    fontBBox = [int(val) for val in fontBBox]
     return fontBBox
 
 
@@ -797,7 +799,7 @@ def fixFontDict(tempPath, fdDict):
     if log:
         print(log)
 
-    with open(txtPath, "rt") as fp:
+    with open(txtPath, "r", encoding='utf-8') as fp:
         data = fp.read()
 
     # fix font name. We always search for it, as it is always present,
@@ -884,7 +886,7 @@ def fixFontDict(tempPath, fdDict):
         if m:
             data = data[:m.start()] + data[m.end():]
 
-    with open(txtPath, "wt") as fp:
+    with open(txtPath, "w") as fp:
         fp.write(data)
 
     command = "type1 \"%s\" \"%s\" 2>&1" % (txtPath, tempPath)
@@ -951,14 +953,14 @@ def makeCIDFontInfo(fontPath, cidfontinfoPath):
             print("Error: did not find required info '%s' in tx dump of "
                   "font '%s'." % (entry[1], fontPath))
     try:
-        with open(cidfontinfoPath, "wt") as fp:
+        with open(cidfontinfoPath, "w") as fp:
             for key in kCIDFontInfokeyList:
                 value = cfiDict[key]
                 if value is None:
                     continue
                 if value[0] == "\"":
                     value = "(" + value[1:-1] + ")"
-                string = "%s\t%s\n" % (key, value)
+                string = tounicode("%s\t%s\n" % (key, value))
                 fp.write(string)
     except (IOError, OSError):
         raise FontInfoParseError(
@@ -998,7 +1000,7 @@ def makeGAFile(gaPath, fontPath, glyphList, fontDictList, fdGlyphDict,
     gaText = "mergefonts %s%s%s" % (dictName, langGroup, '\n'.join(lineList))
 
     with open(gaPath, "wb") as gf:
-        gf.write(gaText)
+        gf.write(tobytes(gaText))
 
 
 def merge_fonts(inputFontPath, outputPath, fontList, glyphList, fontDictList,
@@ -1038,7 +1040,7 @@ def convertFontToCID(inputPath, outputPath, fontinfoPath=None):
     and an optional path to a '(cid)fontinfo' file.
     """
     if fontinfoPath and os.path.exists(fontinfoPath):
-        with open(fontinfoPath, "rU") as fi:
+        with open(fontinfoPath, "r", encoding='utf-8') as fi:
             fontInfoData = fi.read()
     else:
         fontInfoData = ''
