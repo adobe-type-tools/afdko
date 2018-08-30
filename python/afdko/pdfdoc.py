@@ -19,6 +19,8 @@ from __future__ import print_function, absolute_import
 import sys
 import time
 
+from fontTools.misc.py23 import open, tobytes
+
 from afdko import pdfutils
 from afdko.pdfutils import LINEEND   # this constant needed in both
 
@@ -143,11 +145,11 @@ class PDFDocument:
 
     def writeXref(self, f):
         self.startxref = f.tell()
-        f.write('xref' + LINEEND)
-        f.write('0 %d' % (len(self.objects) + 1) + LINEEND)
-        f.write('0000000000 65535 f' + LINEEND)
+        f.write(tobytes('xref' + LINEEND, encoding='utf-8'))
+        f.write(tobytes('0 %d' % (len(self.objects) + 1) + LINEEND, encoding='utf-8'))
+        f.write(tobytes('0000000000 65535 f' + LINEEND, encoding='utf-8'))
         for pos in self.xref:
-            f.write('%0.10d 00000 n' % pos + LINEEND)
+            f.write(tobytes('%0.10d 00000 n' % pos + LINEEND, encoding='utf-8'))
 
     def printTrailer(self):
         print('trailer')
@@ -157,15 +159,14 @@ class PDFDocument:
         print(self.startxref)
 
     def writeTrailer(self, f):
-        f.write('trailer' + LINEEND)
-        f.write('<< /Size %d /Root %d 0 R /Info %d 0 R>>' % (len(self.objects) + 1, 1, self.infopos)  + LINEEND)
-        f.write('startxref' + LINEEND)
-        f.write(str(self.startxref)  + LINEEND)
+        f.write(tobytes('trailer' + LINEEND, encoding='utf-8'))
+        f.write(tobytes('<< /Size %d /Root %d 0 R /Info %d 0 R>>' % (len(self.objects) + 1, 1, self.infopos)  + LINEEND, encoding='utf-8'))
+        f.write(tobytes('startxref' + LINEEND, encoding='utf-8'))
+        f.write(tobytes(str(self.startxref)  + LINEEND, encoding='utf-8'))
 
     def SaveToFile(self, filename):
-        fileobj = open(filename, 'wb')
-        self.SaveToFileObject(fileobj)
-        fileobj.close()
+        with open(filename, 'wb') as fileobj:
+            self.SaveToFileObject(fileobj)
 
     def SaveToFileObject(self, fileobj):
         """Open a file, and ask each object in turn to write itself to
@@ -174,18 +175,18 @@ class PDFDocument:
         f = fileobj
         i = 1
         self.xref = []
-        f.write("%PDF-1.2" + LINEEND)  # for CID support
-        f.write("%\xed\xec\xb6\xbe" + LINEEND)
+        f.write(tobytes("%PDF-1.2" + LINEEND, encoding='utf-8'))  # for CID support
+        f.write(tobytes(b"%\xed\xec\xb6\xbe\r\n", encoding='utf-8'))
         for obj in self.objects:
             pos = f.tell()
             self.xref.append(pos)
-            f.write(str(i) + ' 0 obj' + LINEEND)
+            f.write(tobytes(str(i) + ' 0 obj' + LINEEND, encoding='utf-8'))
             obj.save(f)
-            f.write('endobj' + LINEEND)
+            f.write(tobytes('endobj' + LINEEND, encoding='utf-8'))
             i = i + 1
         self.writeXref(f)
         self.writeTrailer(f)
-        f.write('%%EOF')  # no lineend needed on this one!
+        f.write(tobytes('%%EOF', encoding='utf-8'))  # no lineend needed on this one!
 
     def printPDF(self):
         "prints it to standard output.  Logs positions for doing trailer"
@@ -423,7 +424,7 @@ class PDFCatalog(PDFObject):
                         '>>'
                         ])
     def save(self, file):
-        file.write(self.template % (self.RefPages, self.RefOutlines) + LINEEND)
+        file.write(tobytes(self.template % (self.RefPages, self.RefOutlines) + LINEEND, encoding='utf-8'))
 
 
 class PDFInfo(PDFObject):
@@ -439,7 +440,7 @@ class PDFInfo(PDFObject):
         self.datestr = '%04d%02d%02d%02d%02d%02d' % tuple(now[0:6])
 
     def save(self, file):
-        file.write(LINEEND.join([
+        file.write(tobytes(LINEEND.join([
                 "<</Title (%s)",
                 "/Author (%s)",
                 "/CreationDate (D:%s)",
@@ -451,8 +452,7 @@ class PDFInfo(PDFObject):
     pdfutils._escape(self.author),
     self.datestr,
     pdfutils._escape(self.subject)
-    ) + LINEEND)
-
+    ) + LINEEND, encoding='utf-8'))
 
 
 class PDFOutline(PDFObject):
@@ -464,7 +464,7 @@ class PDFOutline(PDFObject):
                 '/Count 0',
                 '>>'])
     def save(self, file):
-        file.write(self.template + LINEEND)
+        file.write(tobytes(self.template + LINEEND, encoding='utf-8'))
 
 
 class PDFPageCollection(PDFObject):
@@ -483,7 +483,7 @@ class PDFPageCollection(PDFObject):
         lines.append(']')
         lines.append('>>')
         text = LINEEND.join(lines)
-        file.write(text + LINEEND)
+        file.write(tobytes(text + LINEEND, encoding='utf-8'))
 
 
 class PDFPage(PDFObject):
@@ -528,7 +528,7 @@ class PDFPage(PDFObject):
             self.info['procsettext'] = '[/PDF /Text]'
         self.info['transitionString'] = self.pageTransitionString
 
-        file.write(self.template % self.info + LINEEND)
+        file.write(tobytes(self.template % self.info + LINEEND, encoding='utf-8'))
 
     def clear(self):
         self.drawables = []
@@ -556,7 +556,7 @@ class PDFStream(PDFObject):
              self.data = TestStream
 
         if self.compression == 1:
-            comp = zlib.compress(self.data)   #this bit is very fast...
+            comp = zlib.compress(tobytes(self.data, encoding='utf-8'))   #this bit is very fast...
             base85 = pdfutils._AsciiBase85Encode(comp) #...sadly this isn't
             wrapped = pdfutils._wrap(base85)
             data_to_write = wrapped
@@ -569,12 +569,12 @@ class PDFStream(PDFObject):
         #length = len(self.data) + lines   # one extra LF each
         length = len(data_to_write) + len(LINEEND)    #AR 19980202
         if self.compression:
-            file.write('<< /Length %d /Filter [/ASCII85Decode /FlateDecode]>>' % length + LINEEND)
+            file.write(tobytes('<< /Length %d /Filter [/ASCII85Decode /FlateDecode]>>' % length + LINEEND, encoding='utf-8'))
         else:
-            file.write('<< /Length %d >>' % length + LINEEND)
-        file.write('stream' + LINEEND)
-        file.write(data_to_write + LINEEND)
-        file.write('endstream' + LINEEND)
+            file.write(tobytes('<< /Length %d >>' % length + LINEEND, encoding='utf-8'))
+        file.write(tobytes('stream' + LINEEND, encoding='utf-8'))
+        file.write(tobytes(data_to_write + LINEEND, encoding='utf-8'))
+        file.write(tobytes('endstream' + LINEEND, encoding='utf-8'))
 
 class PDFImage(PDFObject):
     # sample one while developing.  Currently, images go in a literals
@@ -613,8 +613,7 @@ class PDFEmbddedFont(PDFStream):
         if self.compression == 1:
             comp = zlib.compress(self.data)   #this bit is very fast...
             base85 = pdfutils._AsciiBase85Encode(comp) #...sadly this isn't
-            wrapped = pdfutils._wrap(base85)
-            data_to_write = wrapped
+            data_to_write = pdfutils._wrap(base85)
         else:
             data_to_write = self.data
         # the PDF length key should contain the length including
@@ -629,12 +628,12 @@ class PDFEmbddedFont(PDFStream):
             fontStreamEntry = "/Subtype %s" % (self.fontType)
 
         if self.compression:
-            file.write('<<  %s /Length %d /Filter [/ASCII85Decode /FlateDecode] >>' % (fontStreamEntry, length) + LINEEND)
+            file.write(tobytes('<<  %s /Length %d /Filter [/ASCII85Decode /FlateDecode] >>' % (fontStreamEntry, length) + LINEEND, encoding='utf-8'))
         else:
-            file.write('<< /Length %d %s >>' % (length,  fontStreamEntry) + LINEEND)
-        file.write('stream' + LINEEND)
-        file.write(data_to_write + LINEEND)
-        file.write('endstream' + LINEEND)
+            file.write(tobytes('<< /Length %d %s >>' % (length,  fontStreamEntry) + LINEEND, encoding='utf-8'))
+        file.write(tobytes('stream' + LINEEND, encoding='utf-8'))
+        file.write(data_to_write + b'\r\n')
+        file.write(tobytes('endstream' + LINEEND, encoding='utf-8'))
 
 class PDFType1Font(PDFObject):
     def __init__(self, key, psName, encoding=kDefaultEncoding, fontDescriptObjectNumber = None, type = kDefaultFontType, firstChar = None, lastChar = None, widths = None):
@@ -658,7 +657,7 @@ class PDFType1Font(PDFObject):
         self.template = LINEEND.join(textList)
 
     def save(self, file):
-        file.write(self.template % (self.keyname, self.fontname) + LINEEND)
+        file.write(tobytes(self.template % (self.keyname, self.fontname) + LINEEND, encoding='utf-8'))
 
 
 class PDFType0Font(PDFType1Font):
@@ -669,7 +668,7 @@ class PDFontDescriptor(PDFObject):
         self.text = text
 
     def save(self, file):
-        file.write(self.text + LINEEND)
+        file.write(tobytes(self.text + LINEEND, encoding='utf-8'))
 
 
 

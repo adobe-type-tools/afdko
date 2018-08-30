@@ -10,6 +10,8 @@ try:
 except ImportError:
     from io import StringIO
 
+from fontTools.misc.py23 import byteord
+
 LINEEND = '\015\012'
 
 ##########################################################
@@ -117,38 +119,10 @@ def _AsciiHexEncode(input):
     "Helper function used by images"
     output = StringIO()
     for char in input:
-        output.write('%02x' % ord(char))
+        output.write('%02x' % byteord(char))
     output.write('>')
     output.seek(0)
     return output.read()
-
-def _AsciiHexDecode(input):
-    "Not used except to provide a test of the preceding"
-    #strip out all whitespace
-    stripped = ''.join(input.split())
-    assert stripped[-1] == '>', 'Invalid terminator for Ascii Hex Stream'
-    stripped = stripped[:-1]  #chop off terminator
-    assert len(stripped) % 2 == 0, 'Ascii Hex stream has odd number of bytes'
-    i = 0
-    output = StringIO()
-    while i < len(stripped):
-        twobytes = stripped[i:i+2]
-        output.write(chr(eval('0x'+twobytes)))
-        i = i + 2
-    output.seek(0)
-    return output.read()
-
-def _AsciiHexTest(text='What is the average velocity of a sparrow?'):
-    "Do the obvious test for whether Ascii Hex encoding works"
-    print('Plain text:', text)
-    encoded = _AsciiHexEncode(text)
-    print('Encoded:', encoded)
-    decoded = _AsciiHexDecode(encoded)
-    print('Decoded:', decoded)
-    if decoded == text:
-        print('Passed')
-    else:
-        print('Failed!')
 
 def _AsciiBase85Encode(input):
     """This is a compact encoding used for binary data within
@@ -162,10 +136,10 @@ def _AsciiBase85Encode(input):
 
     for i in range(whole_word_count):
         offset = i*4
-        b1 = ord(body[offset])
-        b2 = ord(body[offset+1])
-        b3 = ord(body[offset+2])
-        b4 = ord(body[offset+3])
+        b1 = byteord(body[offset])
+        b2 = byteord(body[offset+1])
+        b3 = byteord(body[offset+2])
+        b4 = byteord(body[offset+3])
 
         num = 16777216 * b1 + 65536 * b2 + 256 * b3 + b4
 
@@ -192,11 +166,11 @@ def _AsciiBase85Encode(input):
     #encode however many bytes we have as usual
     if remainder_size > 0:
         while len(lastbit) < 4:
-            lastbit = lastbit + '\000'
-        b1 = ord(lastbit[0])
-        b2 = ord(lastbit[1])
-        b3 = ord(lastbit[2])
-        b4 = ord(lastbit[3])
+            lastbit = lastbit + b'\000'
+        b1 = byteord(lastbit[0])
+        b2 = byteord(lastbit[1])
+        b3 = byteord(lastbit[2])
+        b4 = byteord(lastbit[3])
 
         num = 16777216 * b1 + 65536 * b2 + 256 * b3 + b4
 
@@ -239,11 +213,11 @@ def _AsciiBase85Decode(input):
 
     for i in range(whole_word_count):
         offset = i*5
-        c1 = ord(body[offset]) - 33
-        c2 = ord(body[offset+1]) - 33
-        c3 = ord(body[offset+2]) - 33
-        c4 = ord(body[offset+3]) - 33
-        c5 = ord(body[offset+4]) - 33
+        c1 = byteord(body[offset]) - 33
+        c2 = byteord(body[offset+1]) - 33
+        c3 = byteord(body[offset+2]) - 33
+        c4 = byteord(body[offset+3]) - 33
+        c5 = byteord(body[offset+4]) - 33
 
         num = ((85**4) * c1) + ((85**3) * c2) + ((85**2) * c3) + (85*c4) + c5
 
@@ -261,11 +235,11 @@ def _AsciiBase85Decode(input):
     if remainder_size > 0:
         while len(lastbit) < 5:
             lastbit = lastbit + '!'
-        c1 = ord(lastbit[0]) - 33
-        c2 = ord(lastbit[1]) - 33
-        c3 = ord(lastbit[2]) - 33
-        c4 = ord(lastbit[3]) - 33
-        c5 = ord(lastbit[4]) - 33
+        c1 = byteord(lastbit[0]) - 33
+        c2 = byteord(lastbit[1]) - 33
+        c3 = byteord(lastbit[2]) - 33
+        c4 = byteord(lastbit[3]) - 33
+        c5 = byteord(lastbit[4]) - 33
         num = ((85**4) * c1) + ((85**3) * c2) + ((85**2) * c3) + (85*c4) + c5
         temp, b4 = divmod(num,256)
         temp, b3 = divmod(temp,256)
@@ -303,12 +277,45 @@ def _wrap(input, columns=60):
 
 
 
+##############################################################
+#
+#            TESTS
+#
+##############################################################
 def _AsciiBase85Test(text='What is the average velocity of a sparrow?'):
     "Do the obvious test for whether Base 85 encoding works"
     print('Plain text:', text)
     encoded = _AsciiBase85Encode(text)
     print('Encoded:', encoded)
     decoded = _AsciiBase85Decode(encoded)
+    print('Decoded:', decoded)
+    if decoded == text:
+        print('Passed')
+    else:
+        print('Failed!')
+
+def _AsciiHexDecode(input):
+    "Used only to enable testing _AsciiHexEncode"
+    #strip out all whitespace
+    stripped = ''.join(input.split())
+    assert stripped[-1] == '>', 'Invalid terminator for Ascii Hex Stream'
+    stripped = stripped[:-1]  #chop off terminator
+    assert len(stripped) % 2 == 0, 'Ascii Hex stream has odd number of bytes'
+    i = 0
+    output = StringIO()
+    while i < len(stripped):
+        twobytes = stripped[i:i+2]
+        output.write(chr(eval('0x'+twobytes)))
+        i = i + 2
+    output.seek(0)
+    return output.read()
+
+def _AsciiHexTest(text='What is the average velocity of a sparrow?'):
+    "Do the obvious test for whether Ascii Hex encoding works"
+    print('Plain text:', text)
+    encoded = _AsciiHexEncode(text)
+    print('Encoded:', encoded)
+    decoded = _AsciiHexDecode(encoded)
     print('Decoded:', decoded)
     if decoded == text:
         print('Passed')

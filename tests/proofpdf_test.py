@@ -20,6 +20,12 @@ def _get_input_path(file_name):
     return os.path.join(data_dir_path, 'input', file_name)
 
 
+def _get_temp_file_path():
+    file_descriptor, path = tempfile.mkstemp()
+    os.close(file_descriptor)
+    return path
+
+
 def _get_filename_label(file_name):
     sep_index = file_name.find('_')
     if sep_index == -1:
@@ -53,7 +59,7 @@ def test_glyphs_2_7(tool_name, font_filename):
         font_format = 'otf'
     pdf_filename = '{}_{}_glyphs_2-7.pdf'.format(tool_name, font_format)
     font_path = _get_input_path(font_filename)
-    save_path = tempfile.mkstemp()[1]
+    save_path = _get_temp_file_path()
     runner(['-t', tool_name, '-o', 'o', '_{}'.format(save_path), 'g', '_2-7',
             'dno', '=pageIncludeTitle', '_0', '-f', font_path, '-n', '-a'])
     expected_path = _get_expected_path(pdf_filename)
@@ -83,7 +89,7 @@ def test_hinting_data(tool_name, font_filename):
         font_format = 'otf'
     pdf_filename = '{}_{}{}.pdf'.format(tool_name, font_format, label)
     font_path = _get_input_path(font_filename)
-    save_path = tempfile.mkstemp()[1]
+    save_path = _get_temp_file_path()
     runner(['-t', tool_name, '-o', 'o', '_{}'.format(save_path), 'g', '_2-7',
             'dno', '=pageIncludeTitle', '_0', '-f', font_path, '-n', '-a'])
     expected_path = _get_expected_path(pdf_filename)
@@ -104,7 +110,7 @@ def test_fontplot2_lf_option(font_filename, glyphs):
     layout_path = _get_input_path('CID_layout')
     font_path = _get_input_path(font_filename)
     pdf_filename = '{}_{}_lf_option.pdf'.format(tool_name, font_format)
-    save_path = tempfile.mkstemp()[1]
+    save_path = _get_temp_file_path()
     runner(['-t', tool_name, '-o', 'o', '_{}'.format(save_path), 'dno',
             'g', glyphs, 'lf', '_{}'.format(layout_path),
             '=pageIncludeTitle', '_0', '-f', font_path, '-n', '-a'])

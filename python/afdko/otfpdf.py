@@ -1,6 +1,6 @@
 # Copyright 2014 Adobe . All rights reserved.
 """
-otfpdf v1.5.1 May 21 2018
+otfpdf v1.6.0 Aug 28 2018
 provides support for the proofpdf script, for working with OpenType/CFF
 fonts. Provides an implementation of the fontpdf font object. Cannot be
 run alone.
@@ -9,6 +9,7 @@ from __future__ import print_function, absolute_import
 
 from fontTools.pens.boundsPen import BoundsPen, BasePen
 from fontTools.misc.psCharStrings import T2OutlineExtractor
+from fontTools.misc.py23 import byteord
 
 from afdko.fontpdf import FontPDFGlyph, FontPDFFont, FontPDFPoint
 
@@ -83,7 +84,6 @@ class txPDFFont(FontPDFFont):
         self.getBBox()
         self.GetBlueZones()
         self.AscentDescent()
-        return
 
     def clientGetPSName(self):
         psName = self.clientFont['CFF '].cff.fontNames[0]
@@ -178,7 +178,7 @@ class txPDFFont(FontPDFFont):
             try:
                 rawBlueList = fontDict.Private.BlueValues
                 blueList = []
-                for i in range(0, len(rawBlueList), 2):
+                for i in list(range(0, len(rawBlueList), 2)):
                     blueList.append((rawBlueList[i], rawBlueList[i + 1]))
                 blueValues.append(blueList)
             except AttributeError:
@@ -197,8 +197,8 @@ class txPDFFont(FontPDFFont):
 def hintOn(i, hintMaskBytes):
     # used to add the active hints to the bez string,
     # when a T2 hintmask operator is encountered.
-    byteIndex = i / 8
-    byteValue = ord(hintMaskBytes[byteIndex])
+    byteIndex = i // 8
+    byteValue = byteord(hintMaskBytes[byteIndex])
     offset = 7 - (i % 8)
     return ((2 ** offset) & byteValue) > 0
 
@@ -249,7 +249,7 @@ class FontPDFT2OutlineExtractor(T2OutlineExtractor):
         arg = str(lastval)
         hint1 = arg
 
-        for i in range(len(args))[1:]:
+        for i in list(range(len(args))[1:]):
             val = args[i]
             newVal = lastval + val
             lastval = newVal
@@ -265,11 +265,11 @@ class FontPDFT2OutlineExtractor(T2OutlineExtractor):
         curvhints = []
         numhhints = len(self.hhints)
 
-        for i in range(numhhints):
+        for i in list(range(numhhints)):
             if hintOn(i, hintMaskBytes):
                 curhhints.append(i)
         numvhints = len(self.vhints)
-        for i in range(numvhints):
+        for i in list(range(numvhints)):
             if hintOn(i + numhhints, hintMaskBytes):
                 curvhints.append(i)
         return curhhints, curvhints
@@ -280,7 +280,7 @@ class FontPDFT2OutlineExtractor(T2OutlineExtractor):
             if args:
                 self.vhints = []
                 self.updateHints(args, self.vhints)
-            self.hintMaskBytes = (self.hintCount + 7) / 8
+            self.hintMaskBytes = (self.hintCount + 7) // 8
 
         self.hintMaskString, index = (
             self.callingStack[-1].getBytes(index, self.hintMaskBytes))
@@ -292,7 +292,7 @@ class FontPDFT2OutlineExtractor(T2OutlineExtractor):
         return self.hintMaskString, index
 
     def countHints(self, args):
-        self.hintCount = self.hintCount + len(args) / 2
+        self.hintCount = self.hintCount + len(args) // 2
 
 
 def drawCharString(charString, pen):
@@ -344,7 +344,7 @@ class txPDFGlyph(FontPDFGlyph):
             if lenPath > 1:
                 path[0].next = path[1]
                 path[-1].last = path[-2]
-                for i in range(lenPath)[1:-1]:
+                for i in list(range(lenPath)[1:-1]):
                     pt = path[i]
                     pt.next = path[i + 1]
                     pt.last = path[i - 1]
@@ -392,4 +392,3 @@ class txPDFGlyph(FontPDFGlyph):
         if hasattr(fTopDict, "ROS"):
             gid = fTopDict.CharStrings.charStrings[self.name]
             self.fdIndex = fTopDict.FDSelect[gid]
-        return

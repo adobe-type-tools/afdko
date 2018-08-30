@@ -1,5 +1,7 @@
-#!/bin/env python
+#!/usr/bin/env python
+
 # Copyright 2014 Adobe. All rights reserved.
+
 """
 proofpdf.py. A wrapper for the fontpdf.py module. This script verifies
 the existence of the specified font files, creates a font class object
@@ -7,6 +9,9 @@ with the call-backs required by fontpdf, and translates the command line
 options to arguments for the fontpdf module; the latter produces a proof
 file using the provided options annd font instance.
 """
+
+from __future__ import print_function
+
 import copy
 import os
 import platform
@@ -18,18 +23,17 @@ import traceback
 import subprocess
 
 from fontTools.ttLib import TTFont, getTableModule, TTLibError
+from fontTools.misc.py23 import open
 
-from fontpdf import (FontPDFParams, makePDF, makeFontSetPDF, kDrawTag,
-                     kDrawPointTag, kShowMetaTag, params_doc)
-import ttfpdf
-import otfpdf
-import fdkutils
+from afdko.fontpdf import (FontPDFParams, makePDF, makeFontSetPDF, kDrawTag,
+                           kDrawPointTag, kShowMetaTag, params_doc)
+from afdko import ttfpdf, otfpdf, fdkutils
 
 curSystem = platform.system()
 
 
 __usage__ = """
-proofpdf v1.20 May 17 2018
+proofpdf v1.21 Aug 28 2018
 proofpdf [-h] [-u]
 proofpdf -help_params
 proofpdf [-g <glyph list>] [-gf <filename>] [-gpp <number>] [-pt <number>] [-dno] [-baseline <number>] [-black] [-lf <filename>] [-select_hints <0,1,2..> ]  \
@@ -207,22 +211,19 @@ parentheses, and commas separated, as shown. "(0,0,0)" is black,
 
 def logMsg(*args):
 	for arg in args:
-		print arg
+		print(arg)
 
-class FDKEnvironmentError(AttributeError):
+class FDKEnvironmentError(Exception):
 	pass
 
-class OptionParseError(KeyError):
+class OptionParseError(Exception):
 	pass
 
-class FontError(KeyError):
+class FontError(Exception):
 	pass
 
 def CheckEnvironment():
-	if curSystem == "Windows":
-		tx_path = subprocess.check_output(["where", "tx.exe"]).strip()
-	else:
-		tx_path = subprocess.check_output(["which", "tx"]).strip()
+	tx_path = 'tx'
 	txError = 0
 
 	command = "%s -u 2>&1" % tx_path
@@ -285,17 +286,17 @@ def parseLayoutFile(filePath):
 	layoutDict = None
 
 	try:
-		fp = file(filePath, "rt")
+		fp = open(filePath, "rt")
 		data = fp.read()
 		fp.close()
 	except (IOError,OSError):
 		raise OptionParseError("Option Error: could not open and read the layout file <%s>." %  filePath)
 
 	entryList = re.findall(r"(\d+)\s+(\S+)\s+(\S+)\s+(\S+)", data)
-	if entryList < 2:
-		print "Error: Failed to parse layout file %s. Did not match expected entry format." % (filePath)
+	if len(entryList) < 2:
+		print("Error: Failed to parse layout file %s. Did not match expected entry format." % filePath)
 		raise OptionParseError
-	print "Found %s entries in layout file %s. Mac CID: %s" % (len(entryList), os.path.basename(filePath), entryList[-1][0])
+	print("Found %s entries in layout file %s. Mac CID: %s" % (len(entryList), os.path.basename(filePath), entryList[-1][0]))
 	layoutDict = {}
 	index = 0
 	for entry in entryList:
@@ -304,7 +305,7 @@ def parseLayoutFile(filePath):
 		reversekey = repr(entry[1:])
 		layoutDict[reversekey] = [gname, entry[1], entry[2], entry[3]] # add name key -> family, face, cid as cidXXXX
 		entryList = None
-	if layoutDict.has_key("cid00000"):
+	if "cid00000" in layoutDict:
 		layoutDict[".notdef"] = layoutDict["cid00000"]
 	return layoutDict
 
@@ -342,22 +343,22 @@ def getOptions(params):
 			raise OptionParseError("Option Error: All file names must follow all other params <%s>." % arg)
 
 		if arg == "-h":
-			print __help__
+			print(__help__)
 			sys.exit()
 
 		elif arg == "-u":
-			print __usage__
+			print(__usage__)
 			sys.exit()
 
 		elif arg == "-help_params":
-			print params_doc
+			print(params_doc)
 			sys.exit()
 
 		elif arg[:2] == "--":
 			name = arg[2:]
 			i +=1
 			if not hasattr(params, name):
-				print "Error: low level parameter name %s does not exist in list of display parameters." % (name)
+				print("Error: low level parameter name %s does not exist in list of display parameters." % name)
 				raise OptionParseError
 			else:
 				value = None
@@ -367,14 +368,14 @@ def getOptions(params):
 					if match:
 						value = ( eval(match.group(1)), eval(match.group(2)), eval(match.group(3)) )
 					else:
-						print "Error: parameter %s must take an RGB triplet, enclosed in quotes, such as '( 1.0, 0, 0)' for red." % (name)
+						print("Error: parameter %s must take an RGB triplet, enclosed in quotes, such as '( 1.0, 0, 0)' for red." % name)
 						raise OptionParseError
 				elif name == "pageSize":
 					match = re.search(r"\(\s*([0-9.-]+)\s*,\s*([0-9.-]+)\s*\)", arg)
 					if match:
 						value = ( eval(match.group(1)), eval(match.group(2)) )
 					else:
-						print "Error: parameter %s must take an (x,y) pair, enclosed in quotes, such as ' (612.0, 792.0)'." % (name)
+						print("Error: parameter %s must take an (x,y) pair, enclosed in quotes, such as ' (612.0, 792.0)'." % name)
 						raise OptionParseError
 				elif name.endswith("Font") or name.endswith("Path"):
 					value = arg # it is text - don't need to convert
@@ -383,7 +384,7 @@ def getOptions(params):
 					try:
 						value = int(arg)
 					except ValueError:
-						print "Error: value for parameter %s must be a number." % (name)
+						print("Error: value for parameter %s must be a number." % name)
 						raise OptionParseError
 				if value != None:
 					exec("params.%s = value" % (name))
@@ -432,7 +433,7 @@ def getOptions(params):
 			params.glyphsPerPage = 2
 			params.descenderSpace = -120
 			params.userBaseLine = -120
-			params.errorLogFilePath = "Error_file.log"
+			# params.errorLogFilePath = "Error_file.log"
 			params.errorLogColumnHeight = 250
 			params.metaDataAboveGlyph = 0 # write meta data below glyph square.
 			params.userPtSize = 255
@@ -569,7 +570,7 @@ def getOptions(params):
 			if rt_filePath[0] == "-":
 				raise OptionParseError("Option Error: it looks like the the glyph list file following '-gf' is another option.")
 			try:
-				gf = file(rt_filePath, "rt")
+				gf = open(rt_filePath, "rt")
 				glyphString = gf.read()
 				gf.close()
 			except (IOError,OSError):
@@ -718,6 +719,7 @@ def openFile(path, txPath):
 			logMsg("Failed to convert CID-keyed font %s to a temporary CFF data file." % path)
 		cffPath = tempPathCFF
 		os.remove(tempPath1)
+
 	elif os.path.isdir(path):
 		# See if it is a UFO font by truing to dump it.
 		command="%s   -dump -0  \"%s\" 2>&1" % (txPath, path)
@@ -734,35 +736,38 @@ def openFile(path, txPath):
 			logMsg(report)
 			logMsg("Failed to convert ufo font %s to a temporary CFF data file." % path)
 		cffPath = tempPathCFF
+
 	else:
 		try:
-			ff = file(path, "rb")
-			data = ff.read(10)
-			ff.close()
+			with open(path, "rb") as ff:
+				head = ff.read(10)
 		except (IOError, OSError):
 			traceback.print_exc()
 			raise FontError("Failed to open and read font file %s. Check file/directory permissions." % path)
 
-		if len(data) < 10:
+		if len(head) < 10:
 			raise FontError("Error: font file was zero size: may be a resource fork font, which this program does not process. <%s>." % path)
-		if (data[:4] == "OTTO") or (data[:4] == "true") or (data[:4] == "\0\1\0\0"): # it is an OTF/TTF font, can process file directly
+
+		# it is an OTF/TTF font, can process file directly
+		elif head[:4] in (b"OTTO", b"true", b"\0\1\0\0"):
 			try:
 				ttFont = TTFont(path)
 			except (IOError, OSError):
 				raise FontError("Error opening or reading from font file <%s>." % path)
 			except TTLibError:
-				raise FontError("Error parsing font file 333 <%s>." % path)
+				raise
 
-			if not (ttFont.has_key('CFF ') or ttFont.has_key('glyf')):
+			if 'CFF ' not in ttFont and 'glyf' not in ttFont:
 				raise FontError("Error: font is not a CFF or TrueType font <%s>." % path)
 
 			return ttFont, tempPathCFF
 
-		# It is not an OTF file.
-		if (data[0] == '\1') and (data[1] == '\0'): # CFF file
+		# It is not an SFNT file.
+		elif head[0:2] == b'\x01\x00': # CFF file
 			cffPath = path
-		elif not "%" in data:
-			#not a PS file either
+
+		elif b"%" not in head:
+			# not a PS file either
 			logMsg("Font file must be a PS, CFF or OTF  fontfile: %s." % path)
 			raise FontError("Font file must be PS, CFF or OTF file: %s." % path)
 
@@ -778,9 +783,8 @@ def openFile(path, txPath):
 				raise FontError("Failed to convert PS font %s to a temp CFF font." % path)
 
 	# now package the CFF font as an OTF font
-	ff = file(cffPath, "rb")
-	data = ff.read()
-	ff.close()
+	with open(cffPath, "rb") as ff:
+		data = ff.read()
 	try:
 		ttFont = TTFont()
 		cffModule = getTableModule('CFF ')
@@ -809,12 +813,12 @@ def proofMakePDF(pathList, params, txPath):
 			try:
 				ttFont, tempPathCFF = openFile(path, txPath)
 			except FontError:
-				print traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1]
+				print(traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1])
 				return
 			try:
 				fontGlyphList = ttFont.getGlyphOrder()
 			except FontError:
-				print traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1]
+				print(traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1])
 				return
 
 
@@ -852,7 +856,7 @@ def proofMakePDF(pathList, params, txPath):
 				basedir, pdfName = os.path.split(pdfFilePath)
 				os.chdir(basedir)
 				command = "start %s" % (pdfName)
-				print command
+				print(command)
 				fdkutils.runShellCmdLogging(command)
 				os.chdir(curdir)
 			elif os.name == "Linux":
@@ -873,9 +877,8 @@ def proofMakePDF(pathList, params, txPath):
 				ttFont, tempPathCFF = openFile(path, txPath)
 				fontGlyphList = ttFont.getGlyphOrder()
 			except FontError:
-				print traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1]
+				print(traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1])
 				return
-
 
 			#   filter specified list, if any, with font list.
 			params.rt_glyphList = filterGlyphList(params, fontGlyphList, fontFileName)
@@ -883,9 +886,9 @@ def proofMakePDF(pathList, params, txPath):
 				raise FontError("Error: selected glyph list is empty for font <%s>." % fontFileName)
 			params.rt_reporter = logMsg
 
-			if ttFont.has_key("CFF "):
+			if "CFF " in ttFont:
 				pdfFont = otfpdf.txPDFFont(ttFont, params)
-			elif ttFont.has_key("glyf"):
+			elif "glyf" in ttFont:
 				pdfFont = ttfpdf.txPDFFont(ttFont, params)
 			else:
 				logMsg( "Quitting. Font type is not recognized. %s.." % (path))
@@ -894,8 +897,10 @@ def proofMakePDF(pathList, params, txPath):
 			if tempPathCFF:
 				pdfFont.path = tempPathCFF
 			doProgressBar = not params.quietMode
+
 			pdfFilePath = makePDF(pdfFont, params, doProgressBar)
 			ttFont.close()
+
 			if tempPathCFF:
 				os.remove(tempPathCFF)
 
@@ -907,12 +912,12 @@ def proofMakePDF(pathList, params, txPath):
 					basedir, pdfName = os.path.split(pdfFilePath)
 					os.chdir(basedir)
 					command = "start %s" % (pdfName)
-					print command
+					print(command)
 					fdkutils.runShellCmdLogging(command)
 					os.chdir(curdir)
 				elif curSystem == "Linux":
 					command = "xdg-open \"" + pdfFilePath  + "\"" + " &"
-					print command
+					print(command)
 					fdkutils.runShellCmdLogging(command)
 				else:
 					command = "open \"" + pdfFilePath  + "\"" + " &"
@@ -957,14 +962,14 @@ def waterfallplot():
 def main():
 	try:
 		txPath = CheckEnvironment()
-	except FDKEnvironmentError,e:
-		print e
+	except FDKEnvironmentError as e:
+		print(e)
 		return
 	try:
 		params = getOptions(FontPDFParams())
-	except OptionParseError,e:
-		print e
-		print __usage__
+	except OptionParseError as e:
+		print(e)
+		print(__usage__)
 		return
 
 
@@ -972,15 +977,15 @@ def main():
 	haveFiles = 1
 	for path in params.rt_fileList:
 		if not os.path.exists(path):
-			print "File does not exist: <%s>." % path
+			print("File does not exist: <%s>." % path)
 			haveFiles = 0
 	if not haveFiles:
 		return
 
 	try:
 		proofMakePDF(params.rt_fileList, params, txPath)
-	except (FontError, NotImplementedError),e:
-		print "\t exception %s" % e
+	except (FontError, NotImplementedError) as e:
+		print("\t exception %s" % e)
 		traceback.print_exc()
 	return
 
