@@ -1,17 +1,8 @@
 from __future__ import print_function
 import sys
 
-if sys.version_info > (3,):
-	long = int
-try:
-	from types import FloatType, StringType, LongType
-except:
-	FloatType = float
-	StringType = str
-	LongType = int
-
 """
-beztools.py v 1.13 July 11 2017
+beztools.py v 1.14 Aug 28 2018
 
 Utilities for converting between T2 charstrings and the bez data format.
 Used by autohint and checkoutlines.
@@ -22,9 +13,9 @@ __copyright__ = """Copyright 2014-2017 Adobe Systems Incorporated (http://www.ad
 import re
 import time
 import os
-import afdko.fdkutils as fdkutils
-import afdko.convertfonttocid as convertfonttocid
+from afdko import fdkutils, convertfonttocid
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
+from fontTools.misc.py23 import byteord, bytechr
 from fontTools.pens.basePen import BasePen
 debug = 0
 def debugMsg(*args):
@@ -33,16 +24,16 @@ def debugMsg(*args):
 kStackLimit = 46
 kStemLimit = 96
 
-class ACFontError:
+class ACFontError(Exception):
 	pass
 
-class SEACError(KeyError):
+class SEACError(Exception):
 	pass
 
 def hintOn( i, hintMaskBytes):
 	# used to add the active hints to the bez string, when a  T2 hintmask operator is encountered.
-	byteIndex = i/8
-	byteValue =  ord(hintMaskBytes[byteIndex])
+	byteIndex = i // 8
+	byteValue = byteord(hintMaskBytes[byteIndex])
 	offset = 7 -  (i %8)
 	return ((2**offset) & byteValue) > 0
 
@@ -154,7 +145,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
 			return
 
 		lastval = args[0]
-		if type(lastval) == LongType:
+		if isinstance(lastval, int):
 			lastval = float(lastval)/0x10000
 			arg = str(lastval) + " 100 div"
 		else:
@@ -162,16 +153,16 @@ class T2ToBezExtractor(T2OutlineExtractor):
 		hintList.append(arg)
 		self.bezProgram.append(arg)
 
-		for i in range(len(args))[1:]:
+		for i in list(range(len(args))[1:]):
 			val = args[i]
-			if type(val) == LongType:
+			if isinstance(val, int):
 				val = float(val)/0x10000
 			newVal =  lastval + val
 			lastval = newVal
 
 			if i % 2:
-				if (type(val) == FloatType):
-					if (int(val) != val):
+				if isinstance(val, float):
+					if val % 1 != 0:
 						arg = str(int(val*100)) + " 100 div"
 					else:
 						arg = str(int(val))
@@ -181,8 +172,8 @@ class T2ToBezExtractor(T2OutlineExtractor):
 				self.bezProgram.append(arg)
 				self.bezProgram.append(bezCommand + "\n")
 			else:
-				if (type(newVal) == FloatType):
-					if (int(newVal) != newVal):
+				if isinstance(newVal, float):
+					if newVal % 1 != 0:
 						arg = str(int(newVal*100)) + " 100 div"
 					else:
 						arg = str(int(newVal))
@@ -221,12 +212,12 @@ class T2ToBezExtractor(T2OutlineExtractor):
 		curvhints = []
 		numhhints = len(self.hhints)
 
-		for i in range(numhhints/2):
+		for i in range(numhhints//2):
 			if hintOn(i, hintMaskBytes):
 				curhhints.extend(self.hhints[2*i:2*i+2])
 		numvhints = len(self.vhints)
-		for i in range(numvhints/2):
-			if hintOn(i + numhhints/2, hintMaskBytes):
+		for i in range(numvhints//2):
+			if hintOn(i + numhhints//2, hintMaskBytes):
 				curvhints.extend(self.vhints[2*i:2*i+2])
 		return curhhints, curvhints
 
@@ -237,14 +228,14 @@ class T2ToBezExtractor(T2OutlineExtractor):
 			if args:
 				self.vhints = []
 				self.updateHints(args, self.vhints, "ry")
-			self.hintMaskBytes = (self.hintCount + 7) / 8
+			self.hintMaskBytes = (self.hintCount + 7) // 8
 
 		self.hintMaskString, index = self.callingStack[-1].getBytes(index, self.hintMaskBytes)
 
 		if not  self.removeHints:
 			curhhints, curvhints = self.getCurHints( self.hintMaskString)
 			strout = ""
-			mask = [strout + hex(ord(ch)) for ch in self.hintMaskString]
+			mask = [strout + hex(byteord(ch)) for ch in self.hintMaskString]
 			debugMsg(bezCommand, mask, curhhints, curvhints, args)
 
 			self.bezProgram.append("beginsubr snc\n")
@@ -273,7 +264,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
 
 
 	def countHints(self, args):
-		self.hintCount = self.hintCount + len(args) / 2
+		self.hintCount = self.hintCount + len(args) // 2
 
 def convertT2GlyphToBez(t2CharString, removeHints = 0, allowDecimals = 0):
 	# wrapper for T2ToBezExtractor which applies it to the supplied T2 charstring
@@ -302,19 +293,19 @@ class HintMask:
 		maskVal = 0
 		byteIndex = 0
 		self.byteLength = byteLength = int((7 + numHHints + numVHints)/8)
-		mask = ""
+		mask = b""
 		self.hList.sort()
 		for hint in self.hList:
 			try:
 				i = hHints.index(hint)
 			except ValueError:
 				continue	# we get here if some hints have been dropped because of the stack limit
-			newbyteIndex = (i/8)
+			newbyteIndex = (i//8)
 			if newbyteIndex != byteIndex:
-				mask += chr(maskVal)
+				mask += bytechr(maskVal)
 				byteIndex +=1
 				while byteIndex < newbyteIndex:
-					mask += "\0"
+					mask += b"\0"
 					byteIndex +=1
 				maskVal = 0
 			maskVal += 2**(7 - (i %8))
@@ -325,21 +316,21 @@ class HintMask:
 				i = numHHints + vHints.index(hint)
 			except ValueError:
 				continue	# we get here if some hints have been dropped because of the stack limit
-			newbyteIndex = (i/8)
+			newbyteIndex = (i//8)
 			if newbyteIndex != byteIndex:
-				mask += chr(maskVal)
+				mask += bytechr(maskVal)
 				byteIndex +=1
 				while byteIndex < newbyteIndex:
-					mask += "\0"
+					mask += b"\0"
 					byteIndex +=1
 				maskVal = 0
 			maskVal += 2**(7 - (i %8))
 
 		if maskVal:
-			mask += chr(maskVal)
+			mask += bytechr(maskVal)
 
 		if len(mask) < byteLength:
-			mask += "\0"*(byteLength - len(mask))
+			mask += b"\0"*(byteLength - len(mask))
 		self.mask = mask
 		return mask
 
@@ -354,11 +345,11 @@ def makeHintList(hints, needHintMasks, isH):
 			continue
 		pos1 = hint[0]
 		pos = pos1 - lastPos
-		if (type(pos) == FloatType) and (int(pos) == pos):
+		if pos % 1 == 0:
 			pos = int(pos)
 		hintList.append(pos)
 		pos2 = hint[1]
-		if (type(pos2) == FloatType) and (int(pos2) == pos2):
+		if pos2 % 1 == 0:
 			pos2 = int(pos2)
 		lastPos = pos1 + pos2
 		hintList.append(pos2)
@@ -754,7 +745,7 @@ def needsDecryption(bezDataBuffer):
 
 LEN_IV  = 4 #/* Length of initial random byte sequence */
 def  bezDecrypt(bezDataBuffer):
-	r = long(11586)
+	r = 11586
 	i = 0 # input buffer byte position index
 	lenBuffer = len(bezDataBuffer)
 	byteCnt = 0 # output buffer byte count.
@@ -777,20 +768,20 @@ def  bezDecrypt(bezDataBuffer):
 			if not ch.islower():
 				ch = ch.lower()
 			if ch.isdigit():
-				ch = ord(ch) - ord('0')
+				ch = byteord(ch) - byteord('0')
 			else:
-				ch = ord(ch) - ord('a') + 10
-			cipher = (cipher << 4) & long(0xFFFF)
+				ch = byteord(ch) - byteord('a') + 10
+			cipher = (cipher << 4) & 0xFFFF
 			cipher = cipher | ch
 			i += 1
 
 		plain = cipher ^ (r >> 8)
-		r = (cipher + r) * long(902381661) + long(341529579)
-		if r  > long(0xFFFF):
-			r = r & long(0xFFFF)
+		r = (cipher + r) * 902381661 + 341529579
+		if r  > 0xFFFF:
+			r = r & 0xFFFF
 		byteCnt +=1
 		if (byteCnt > LEN_IV):
-			newBuffer += chr(plain)
+			newBuffer += bytechr(plain)
 		if i >= lenBuffer:
 			break
 
@@ -1186,7 +1177,7 @@ class CFFFontData:
 		overwriteOriginal = 0
 		if inputPath == outFilePath:
 			overwriteOriginal = 1
-		tempPath = inputPath +  ".temp.ac"
+		tempPath = "{}.temp.ac".format(inputPath)
 
 		if fontType == 0: # OTF
 			if overwriteOriginal:
@@ -1316,7 +1307,7 @@ class CFFFontData:
 			blueValues.sort()
 			for i in range(0, numBlueValues,2):
 				blueValues[i] = blueValues[i] - blueValues[i+1]
-			blueValues = map(str, blueValues)
+			blueValues = [str(val) for val in blueValues]
 			numBlueValues = min(numBlueValues, len(convertfonttocid.kOtherBlueValueKeys))
 			for i in range(numBlueValues):
 				key = convertfonttocid.kOtherBlueValueKeys[i]
@@ -1412,50 +1403,3 @@ class CFFFontData:
 			else:
 				convertfonttocid.mergeFDDicts( [finalFDict], topDict.Private )
 		return fdGlyphDict, fontDictList
-
-if __name__=='__main__':
-	import os
-
-def test():
-	# Test program. Takes first argument  font file path, optional second argument = glyph name.
-	# use form "cid0769" for CID keys references.
-	from fontTools.ttLib import TTFont
-	path = sys.argv[1]
-	ttFont = TTFont(path)
-	if len(sys.argv) > 2:
-		glyphNames = sys.argv[2:]
-	else:
-		glyphNames = ttFont.getGlyphOrder()
-	cffTable = ttFont["CFF "]
-	topDict =  cffTable.cff.topDictIndex[0]
-	charStrings = topDict.CharStrings
-	removeHints = 0
-
-	for glyphName in glyphNames:
-		print('')
-		print(glyphName)
-		t2CharString = charStrings[glyphName]
-		bezString, hasHints, t2Width = convertT2GlyphToBez(t2CharString, removeHints)
-		#print bezString
-		t2Program = convertBezToT2(bezString)
-		if t2Width != None:
-			t2Program.insert(0,t2Width)
-
-		#print len(t2Program),  ("t2Program",t2Program)
-
-def test2():
-	# Test program. Takes first argument = bez path, writes t2 string.
-	# use form "cid0769" for CID keys references.
-	from fontTools.ttLib import TTFont
-	path = sys.argv[1]
-	fp = open(path, "rt")
-	bezString = fp.read()
-	fp.close()
-	if needsDecryption(bezString):
-		bezString = bezDecrypt(bezString)
-
-	t2Program = convertBezToT2(bezString)
-
-
-if __name__=='__main__':
-	test2()
