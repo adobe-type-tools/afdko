@@ -1796,16 +1796,9 @@ class  FontInfo:
 		return
 
 	def getFontDescriptorText(self):
-		# Build font stream object.
-		""" TrueType and CId not yet working!
-		To Make a CID font work, I need to:
-		- build a Type0 font dict, which references the CID Font Dict as a decendant, whuch in turn references
-		the FontDescriptor.
-		TreuType works with the Apple Preview program, but not with Reader. To do it right,
-		I have to treat it like a CJK TrueType font, which is the same as a CID font, but with a different CID font decriptor, and
-		an additional dict to map from GID to CID.
 		"""
-
+      Build font stream object.
+      """
 		if self.pdfFont.clientFont.has_key('CFF '):
 			fontStream = self.pdfFont.clientFont['CFF '].compile(self.pdfFont.clientFont)
 			formatName = "/FontFile3"
