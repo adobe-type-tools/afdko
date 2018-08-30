@@ -5,7 +5,7 @@ __copyright__ = """Copyright 2016 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-autohint  AutoHinting program v1.51 Aug 4 2018
+autohint  AutoHinting program v1.6 Aug 28 2018
 autohint -h
 autohint -u
 autohint -hfd
@@ -444,12 +444,12 @@ import os
 import re
 import time
 import tempfile
+from fontTools.misc.py23 import open, tounicode
 from fontTools.ttLib import TTFont, getTableModule
 import plistlib
 import warnings
+from afdko import fdkutils, ufotools
 from afdko.beztools import *
-import afdko.fdkutils as fdkutils
-import afdko.ufotools as ufotools
 import traceback
 import shutil
 
@@ -485,19 +485,19 @@ class ACOptions:
 		self.allowDecimalCoords = 0
 		self.writeToDefaultLayer = 0
 
-class ACOptionParseError(KeyError):
+class ACOptionParseError(Exception):
 	pass
 
-class ACFontInfoParseError(KeyError):
+class ACFontInfoParseError(Exception):
 	pass
 
-class ACFontError(KeyError):
+class ACFontError(Exception):
 	pass
 
-class ACHintError(KeyError):
+class ACHintError(Exception):
 	pass
 
-class FDKEnvironmentError(AttributeError):
+class FDKEnvironmentError(Exception):
 	pass
 
 def logMsg(*args):
@@ -587,10 +587,11 @@ def expandNames(glyphName):
 	return glyphName
 
 def parseGlyphListArg(glyphString):
-	glyphString = re.sub(r"[ \t\r\n,]+",  ",",  glyphString)
-	glyphList = glyphString.split(",")
-	glyphList = map(expandNames, glyphList)
-	glyphList =  filter(None, glyphList)
+	glyphList = []
+	for item in re.sub(r"[ \t\r\n,]+", ",", glyphString).split(","):
+		name = expandNames(item)
+		if name:
+			glyphList.append(name)
 	return glyphList
 
 
@@ -770,6 +771,7 @@ def getGlyphID(glyphTag, fontGlyphList):
 			pass
 	return glyphID
 
+
 def getGlyphNames(glyphTag, fontGlyphList, fontFileName):
 	glyphNameList = []
 	rangeList = glyphTag.split("-")
@@ -793,6 +795,7 @@ def getGlyphNames(glyphTag, fontGlyphList, fontFileName):
 
 	return glyphNameList
 
+
 def filterGlyphList(options, fontGlyphList, fontFileName):
 	# Return the list of glyphs which are in the intersection of the argument list and the glyphs in the font
 	# Complain about glyphs in the argument list which are not in the font.
@@ -806,10 +809,8 @@ def filterGlyphList(options, fontGlyphList, fontFileName):
 			if glyphNames != None:
 				glyphList.extend(glyphNames)
 		if options.excludeGlyphList:
-			newList = filter(lambda name: name not in glyphList, fontGlyphList)
-			glyphList = newList
+			glyphList = [name for name in fontGlyphList if name not in glyphList[:]]
 	return glyphList
-
 
 
 def  openFontPlistFile(psName, dirPath):
@@ -918,7 +919,8 @@ def makeACIdentifier(bezText):
 	bezText = whiteSpacePattern.sub("", bezText)
 	return bezText
 
-def openFile(path, outFilePath, useHashMap):
+
+def openFile(path, outFilePath=None, useHashMap=False):
 	if os.path.isfile(path):
 		font =  openOpenTypeFile(path, outFilePath)
 	else:
@@ -926,6 +928,7 @@ def openFile(path, outFilePath, useHashMap):
 		# We always use the hash map to skip glyphs that have been previously processed, unless the user has report only, not make changes.
 		font =  openUFOFile(path, outFilePath, useHashMap)
 	return font
+
 
 def openUFOFile(path, outFilePath, useHashMap):
 	# Check if has glyphs/contents.plist
@@ -949,19 +952,19 @@ def openUFOFile(path, outFilePath, useHashMap):
 	font.requiredHistory.append(ufotools.kCheckOutlineName) # Programs in this list must be run before autohint, if the outlines have been edited.
 	return font
 
+
 def openOpenTypeFile(path, outFilePath):
 	# If input font is  CFF or PS, build a dummy ttFont in memory..
 	# return ttFont, and flag if is a real OTF font Return flag is 0 if OTF, 1 if CFF, and 2 if PS/
 	fontType  = 0 # OTF
 	tempPathCFF = fdkutils.get_temp_file_path()
 	try:
-		ff = open(path, "rb")
-		data = ff.read(10)
-		ff.close()
+		with open(path, "rb") as ff:
+			head = ff.read(4)
 	except (IOError, OSError):
 		logMsg("Failed to open and read font file %s." % path)
 
-	if data[:4] == b"OTTO": # it is an OTF font, can process file directly
+	if head == b"OTTO": # it is an OTF font, can process file directly
 		try:
 			ttFont = TTFont(path)
 		except (IOError, OSError):
@@ -975,16 +978,10 @@ def openOpenTypeFile(path, outFilePath):
 			raise ACFontError("Error: font is not a CFF font <%s>." % fontFileName)
 
 	else:
-
 		# It is not an OTF file.
-		if (data[0] == '\1') and (data[1] == '\0'): # CFF file
+		if head[0:2] == b'\x01\x00': # CFF file
 			fontType = 1
 			tempPathCFF = path
-		elif not b"%" in data:
-			#not a PS file either
-			logMsg("Font file must be a PS, CFF or OTF  fontfile: %s." % path)
-			raise ACFontError("Font file must be PS, CFF or OTF file: %s." % path)
-
 		else:  # It is a PS file. Convert to CFF.
 			fontType =  2
 			print("Converting Type1 font to temp CFF font file...")
@@ -996,9 +993,8 @@ def openOpenTypeFile(path, outFilePath):
 				raise ACFontError("Failed to convert PS font %s to a temp CFF font." % path)
 
 		# now package the CFF font as an OTF font.
-		ff = open(tempPathCFF, "rb")
-		data = ff.read()
-		ff.close()
+		with open(tempPathCFF, "rb") as ff:
+			data = ff.read()
 		try:
 			ttFont = TTFont()
 			cffModule = getTableModule('CFF ')
@@ -1107,9 +1103,8 @@ def hintFile(options):
 
 	if fdGlyphDict == None:
 		fdDict = fontDictList[0]
-		fp = open(tempFI, "wt")
-		fp.write(fdDict.getFontInfo())
-		fp.close()
+		with open(tempFI, "w") as fp:
+			fp.write(tounicode(fdDict.getFontInfo()))
 	else:
 		if not options.verbose:
 			logMsg("Note: Using alternate FDDict global values from fontinfo file for some glyphs. Remove option '-q' to see which dict is used for which glyphs.")
@@ -1172,9 +1167,8 @@ def hintFile(options):
 			if not fdIndex == lastFDIndex:
 				lastFDIndex = fdIndex
 				fdDict = fontData.getFontInfo(psName, path, options.allow_no_blues, options.noFlex, options.vCounterGlyphs, options.hCounterGlyphs, fdIndex)
-				fp = open(tempFI, "wt")
-				fp.write(fdDict.getFontInfo())
-				fp.close()
+				with open(tempFI, "w") as fp:
+					fp.write(tounicode(fdDict.getFontInfo()))
 		else:
 			if (fdGlyphDict != None):
 				try:
@@ -1185,9 +1179,8 @@ def hintFile(options):
 				if lastFDIndex != fdIndex:
 					lastFDIndex = fdIndex
 					fdDict = fontDictList[fdIndex]
-					fp = open(tempFI, "wt")
-					fp.write(fdDict.getFontInfo())
-					fp.close()
+					with open(tempFI, "w") as fp:
+						fp.write(tounicode(fdDict.getFontInfo()))
 
 
 		# 	Build autohint point list identifier
@@ -1227,9 +1220,8 @@ def hintFile(options):
 			logMsg(".,")
 
 		# 	Call auto-hint library on bez string.
-		bp = open(tempBez, "wt")
-		bp.write(bezString)
-		bp.close()
+		with open(tempBez, "wt") as bp:
+			bp.write(tounicode(bezString))
 
 		#print "oldBezString", oldBezString
 		#print ""
