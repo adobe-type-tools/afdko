@@ -1,13 +1,14 @@
-#!/public/bin/python
 #	comparefamily.py
 #	This is not code to copy . The original developer did not know Python well,
 #	and had odd ideas about design. However, it works.
+
+from __future__ import print_function, absolute_import
 
 __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
 __usage__ = """
-comparefamily 2.0.53 May 2 2017
+comparefamily 2.1.0 Aug 28 2018
 
 comparefamily [u] -h] [-d <directory path>] [-tolerance <n>] -rm] [-rn] [-rp] [-nohints] [-l] [-rf] [-st n1,..] [-ft n1,..]
 where 'n1' stands for the number of a test, such as "-st 26" to run Single Test 26.
@@ -86,14 +87,15 @@ the test.
 
 import sys
 import os
-import string
 import struct
-import os
 import re
 import copy
 import math
-import fdkutils
+
 from fontTools import ttLib
+from fontTools.misc.py23 import tounicode, byteord
+
+from afdko import fdkutils
 
 
 gDesignSpaceTolerance = 0 # don't complain about metrics differences greater than this amount.
@@ -678,12 +680,12 @@ def readGlyphInfo(cmpfFont):
 	report = fdkutils.runShellCmd(command)
 	metrics = re.findall(r"glyph\S+\s+{([^,]+),[^,]+,([^,]+),{([-0-9]+),([-0-9]+),([-0-9]+),([-0-9]+)}}", report)
 	if not metrics:
-		print "Error: Quitting. Could not run 'tx' against the font %s to get font metrics." % (cmpfFont.path)
-		print "\t tx log output <" + report + ">."
+		print("Error: Quitting. Could not run 'tx' against the font %s to get font metrics." % cmpfFont.path)
+		print("\t tx log output <" + report + ">.")
 		sys.exit(0)
 	cmpfFont.metricsDict = {}
 	for entry in metrics:
-		valList = map(lambda val: eval(val), entry[1:])
+		valList = [eval(val) for val in entry[1:]]
 		cmpfFont.metricsDict[entry[0]] = valList
 	# use spot to get ligature defintions.
 	command = "spot -t GSUB=7 \"%s\" 2>&1" % (cmpfFont.path)
@@ -737,91 +739,6 @@ def readCFFTable(cmpfFont):
 	except:
 		cmpfFont.isCID = 0
 		cmpfFont.FDArray = [first_font_topDict]
-
-# Empty structure for font info, to be filled later in the program.
-
-# For Mac only, to prompt user for Directory name.
-def GetMacDirectoryName():
-	import macfs
-	fsspec, ok = macfs.GetDirectory('Select a file in the target directory:')
-	if not ok:
-		return None
-	pathname = fsspec.as_pathname()
-	return pathname
-
-# Interactive mode for input options instead of command line arguments.
-def interact():
-	global directory, nreport, mreport, preport
-
-	if os.name == 'mac':
-		directory = GetMacDirectoryName()
-	else:
-		directory = raw_input("Directory Name? ")
-	inp = string.upper(raw_input('Print font name report?(Y/N)'))
-	if inp[0] == 'Y':
-		nreport = 1
-	inp = string.upper(raw_input('Print metrics report?(Y/N)'))
-	if inp[0] == 'Y':
-		mreport = 1
-	inp = string.upper(raw_input('Print panose report?(Y/N)'))
-	if inp[0] == 'Y':
-		preport = 1
-
-
-
-
-# Routines converting string to long, shorts and fixed binary value.
-# If the OS is 'nt', swap the word and byte order before converting.
-
-# For unsigned long integer
-def ulong_value(str):
-	if os.name == 'nt':
-		str1 = str[3] + str[2] + str[1] + str[0]
-		str = str1
-	return struct.unpack('L', str)[0]
-
-# For signed short integer
-def short_value(str):
-	if os.name == 'nt':
-		str1 = str[1] + str[0]
-		str = str1
-	return struct.unpack('h', str)[0]
-
-# For unsigned short integer
-def ushort_value(str):
-	if os.name == 'nt':
-		str1 = str[1] + str[0]
-		str = str1
-	return struct.unpack('H', str)[0]
-
-# Fixed value is composed of two words, an integer and a decimal in 1/65536 unit.
-def fixed_value(str):
-	integer = short_value(str[0:2])
-	decimal = ushort_value(str[2:4])
-	return integer + decimal / 65536.0
-
-# convert unicode string to ascii string, value above 127 will be escaped.
-def uni2asc(str0):
-	try:
-		newStr = str(str0)
-	except:
-		newStr = ""
-		for uniChar in str0:
-			try:
-				newStr += str(uniChar)
-			except:
-				newStr +=  "0u/" + str(ord(uniChar))
-	return newStr
-
-def upperascii_to_hex(str0):
-	str1 = ""
-	for i in range(len(str0)):
-		chrCode=ord(str0[i])
-		if (chrCode > 127) or (chrCode < 32):
-			str1 = str1 + "\\" + hex(chrCode)[2:]
-		else:
-			str1 = str1 + str0[i]
-	return str1
 
 
 # sorting routines for reports
@@ -938,122 +855,122 @@ def readNameTable(cmpfFont):
 	if cmpfFont.hasMacNames:
 		# Fill in font info with Mac Names from Mac Platform, Roman Encoding, English Language
 		try:
-			cmpfFont.PostScriptName1 = cmpfFont.nameIDDict[(1, 0, 0, 6)]
+			cmpfFont.PostScriptName1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 6)].decode('mac_roman'))
 		except KeyError:
-			print "	Error: Missing Mac Postcriptname from name table! Should be in record", (1, 0, 0, 6)
+			print("	Error: Missing Mac Postcriptname from name table! Should be in record", (1, 0, 0, 6))
 			cmpfFont.PostScriptName1 = ""
 
 		try:
-			cmpfFont.compatibleFamilyName1 = cmpfFont.nameIDDict[(1, 0, 0, 1)]
+			cmpfFont.compatibleFamilyName1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 1)].decode('mac_roman'))
 		except KeyError:
-			print "	Error: Missing Mac Compatible Family Name from name table! Should be in record", (1, 0, 0, 1) , cmpfFont.PostScriptName1
+			print("	Error: Missing Mac Compatible Family Name from name table! Should be in record", (1, 0, 0, 1) , cmpfFont.PostScriptName1)
 			cmpfFont.compatibleFamilyName1 = ""
 
 		try:
-			cmpfFont.compatibleSubFamilyName1 = cmpfFont.nameIDDict[(1, 0, 0, 2)]
+			cmpfFont.compatibleSubFamilyName1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 2)].decode('mac_roman'))
 		except KeyError:
-			print "	Error: Missing Mac Compatible SubFamily Name from name table! Should be in record", (1, 0, 0, 2), cmpfFont.PostScriptName1
+			print("	Error: Missing Mac Compatible SubFamily Name from name table! Should be in record", (1, 0, 0, 2), cmpfFont.PostScriptName1)
 			cmpfFont.compatibleSubFamilyName1 = ""
 
-		if cmpfFont.nameIDDict.has_key((1, 0, 0, 16)):
-			cmpfFont.preferredFamilyName1 = cmpfFont.nameIDDict[(1, 0, 0, 16)]
+		if (1, 0, 0, 16) in cmpfFont.nameIDDict:
+			cmpfFont.preferredFamilyName1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 16)].decode('mac_roman'))
 		else:
 			cmpfFont.preferredFamilyName1 = cmpfFont.compatibleFamilyName1
 
-		if cmpfFont.nameIDDict.has_key((1, 0, 0, 17)):
-			cmpfFont.preferredSubFamilyName1 =  cmpfFont.nameIDDict[(1, 0, 0, 17)]
+		if (1, 0, 0, 17) in cmpfFont.nameIDDict:
+			cmpfFont.preferredSubFamilyName1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 17)].decode('mac_roman'))
 		else:
-			cmpfFont.preferredSubFamilyName1 =  cmpfFont.compatibleSubFamilyName1
+			cmpfFont.preferredSubFamilyName1 = cmpfFont.compatibleSubFamilyName1
 
 
 		try:
-			cmpfFont.FullFontName1 = cmpfFont.nameIDDict[(1, 0, 0, 4)]
+			cmpfFont.FullFontName1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 4)].decode('mac_roman'))
 		except KeyError:
-			print "	Error: Missing Mac Full Font Name from name table! Should be in record", (1, 0, 0, 4), cmpfFont.PostScriptName1
+			print("	Error: Missing Mac Full Font Name from name table! Should be in record", (1, 0, 0, 4), cmpfFont.PostScriptName1)
 			cmpfFont.FullFontName1 = ""
 
 		try:
-			cmpfFont.VersionStr1 = cmpfFont.nameIDDict[(1, 0, 0, 5)]
+			cmpfFont.VersionStr1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 5)].decode('mac_roman'))
 		except KeyError:
-			print "	Warning: Missing Mac Version String from name table! Should be in record", (1, 0, 0, 5), cmpfFont.PostScriptName1
+			print("	Warning: Missing Mac Version String from name table! Should be in record", (1, 0, 0, 5), cmpfFont.PostScriptName1)
 			cmpfFont.VersionStr1 = ""
 
 		try:
-			cmpfFont.copyrightStr1 = cmpfFont.nameIDDict[(1, 0, 0, 0)]
+			cmpfFont.copyrightStr1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 0)].decode('mac_roman'))
 		except KeyError:
-			print "	Error: Missing Mac Copyright String from name table! Should be in record", (1, 0, 0, 0), cmpfFont.PostScriptName1
+			print("	Error: Missing Mac Copyright String from name table! Should be in record", (1, 0, 0, 0), cmpfFont.PostScriptName1)
 			cmpfFont.copyrightStr1 = ""
 
 		try:
-			cmpfFont.trademarkStr1 = cmpfFont.nameIDDict[(1, 0, 0, 7)]
+			cmpfFont.trademarkStr1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 7)].decode('mac_roman'))
 		except KeyError:
-			print "	Error: Missing Mac Trademark String from name table! Should be in record", (1, 0, 0, 7), cmpfFont.PostScriptName1
+			print("	Error: Missing Mac Trademark String from name table! Should be in record", (1, 0, 0, 7), cmpfFont.PostScriptName1)
 			cmpfFont.trademarkStr1 = ""
 
 
 		try:
-			temp = cmpfFont.nameIDDict[(1, 0, 0, 14)]
+			tounicode(cmpfFont.nameIDDict[(1, 0, 0, 14)].decode('mac_roman'))
 		except KeyError:
-			print "	Warning: Missing Mac platform License Notice URL  from name table! Should be in record", (1, 0, 0, 14)
+			print("	Warning: Missing Mac platform License Notice URL  from name table! Should be in record", (1, 0, 0, 14))
 
-		if cmpfFont.nameIDDict.has_key((1, 0, 0, 18)):
-			cmpfFont.MacCompatibleFullName1 = cmpfFont.nameIDDict[(1, 0, 0, 18)]
+		if (1, 0, 0, 18) in cmpfFont.nameIDDict:
+			cmpfFont.MacCompatibleFullName1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 18)].decode('mac_roman'))
 		else:
 			cmpfFont.MacCompatibleFullName1 = cmpfFont.FullFontName1
 
 # Fill in font info with Win Names from Win Platform, Unicode Encoding, English Language
 	try:
-		cmpfFont.PostScriptName3 = uni2asc(unicode(cmpfFont.nameIDDict[(3, 1, 1033, 6)], "utf_16_be"))
+		cmpfFont.PostScriptName3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 6)].decode('utf_16_be'))
 	except KeyError:
-		print "	Error: Missing Windows PostScript Name/Unicode encoding from name table! Should be in record", (3, 1, 1033, 6), cmpfFont.PostScriptName3
+		print("	Error: Missing Windows PostScript Name/Unicode encoding from name table! Should be in record", (3, 1, 1033, 6), cmpfFont.PostScriptName3)
 		cmpfFont.PostScriptName3 = ""
 
 	try:
-		cmpfFont.compatibleFamilyName3 =  uni2asc(unicode(cmpfFont.nameIDDict[(3, 1, 1033, 1)], "utf_16_be"))
+		cmpfFont.compatibleFamilyName3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 1)].decode('utf_16_be'))
 	except KeyError:
-		print "	Error: Missing Windows Compatible Family Name/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 1), cmpfFont.PostScriptName3
+		print("	Error: Missing Windows Compatible Family Name/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 1), cmpfFont.PostScriptName3)
 		cmpfFont.compatibleFamilyName3 = ""
 
-	if cmpfFont.nameIDDict.has_key((3, 1, 1033, 16)):
-		cmpfFont.preferredFamilyName3 =  uni2asc(unicode(cmpfFont.nameIDDict[(3, 1, 1033, 16)], "utf_16_be"))
+	if (3, 1, 1033, 16) in cmpfFont.nameIDDict:
+		cmpfFont.preferredFamilyName3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 16)].decode('utf_16_be'))
 	else:
 		cmpfFont.preferredFamilyName3 = cmpfFont.compatibleFamilyName3
 
 
 	try:
-		cmpfFont.compatibleSubFamilyName3 =  uni2asc(unicode(cmpfFont.nameIDDict[(3, 1, 1033, 2)], "utf_16_be"))
+		cmpfFont.compatibleSubFamilyName3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 2)].decode('utf_16_be'))
 	except KeyError:
-		print "	Error: Missing Windows Compatible SubFamily Name/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 2), cmpfFont.PostScriptName3
+		print("	Error: Missing Windows Compatible SubFamily Name/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 2), cmpfFont.PostScriptName3)
 		cmpfFont.compatibleSubFamilyName3 = ""
 
-	if cmpfFont.nameIDDict.has_key((3, 1, 1033, 17)):
-		cmpfFont.preferredSubFamilyName3 =  uni2asc(unicode(cmpfFont.nameIDDict[(3, 1, 1033, 17)], "utf_16_be"))
+	if (3, 1, 1033, 17) in cmpfFont.nameIDDict:
+		cmpfFont.preferredSubFamilyName3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 17)].decode('utf_16_be'))
 	else:
-		cmpfFont.preferredSubFamilyName3 =  cmpfFont.compatibleSubFamilyName3
+		cmpfFont.preferredSubFamilyName3 = cmpfFont.compatibleSubFamilyName3
 
 	try:
-		cmpfFont.FullFontName3 =  uni2asc(unicode(cmpfFont.nameIDDict[(3, 1, 1033, 4)], "utf_16_be"))
+		cmpfFont.FullFontName3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 4)].decode('utf_16_be'))
 	except KeyError:
-		print "	Error: Missing Windows Full Family Name/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 4), cmpfFont.PostScriptName3
+		print("	Error: Missing Windows Full Family Name/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 4), cmpfFont.PostScriptName3)
 		cmpfFont.FullFontName3 = ""
 
 	try:
-		cmpfFont.VersionStr3 =  uni2asc(unicode(cmpfFont.nameIDDict[(3, 1, 1033, 5)], "utf_16_be"))
+		cmpfFont.VersionStr3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 5)].decode('utf_16_be'))
 	except KeyError:
-		print "	Error: Missing Windows Version String/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 5), cmpfFont.PostScriptName3
+		print("	Error: Missing Windows Version String/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 5), cmpfFont.PostScriptName3)
 		cmpfFont.VersionStr3 = ""
 
 	try:
-		cmpfFont.copyrightStr3 =  uni2asc(unicode(cmpfFont.nameIDDict[(3, 1, 1033, 0)], "utf_16_be"))
+		cmpfFont.copyrightStr3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 0)].decode('utf_16_be'))
 	except KeyError:
-		print "	Error: Missing Windows Copyright String/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 0), cmpfFont.PostScriptName3
+		print("	Error: Missing Windows Copyright String/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 0), cmpfFont.PostScriptName3)
 		cmpfFont.copyrightStr3 = ""
 
 
 	try:
-		cmpfFont.trademarkStr3 =  uni2asc(unicode(cmpfFont.nameIDDict[(3, 1, 1033, 7)], "utf_16_be"))
+		cmpfFont.trademarkStr3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 7)].decode('utf_16_be'))
 	except KeyError:
-		print "	Error: Missing Windows Trademark String/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 7), cmpfFont.PostScriptName3
+		print("	Error: Missing Windows Trademark String/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 7), cmpfFont.PostScriptName3)
 		cmpfFont.trademarkStr3 = ""
 
 	if not cmpfFont.hasMacNames:
@@ -1071,19 +988,19 @@ def readNameTable(cmpfFont):
 	# Complain if preferred font name has preferred subfamily name, or std styles in name.
 	styleList = [cmpfFont.preferredSubFamilyName1] + [ "Regular", "Bold", "Italic", "Bold Italic"]
 	for style in styleList:
-		stylePat = " " + style + " "
+		stylePat = " %s " % format(style)
 		if stylePat in cmpfFont.preferredFamilyName1:
-			print "	Error: Preferred family name '%s' contains the style name '%s'. This is usually confusing to users. %s" % (cmpfFont.preferredFamilyName1, style, cmpfFont.PostScriptName1)
+			print("	Error: Preferred family name '%s' contains the style name '%s'. This is usually confusing to users. %s" % (cmpfFont.preferredFamilyName1, style, cmpfFont.PostScriptName1))
 
 	try:
 		temp = cmpfFont.nameIDDict[(3, 1, 1033, 14)]
 	except KeyError:
-		print "	Warning: Missing Windows License Notice URL from name table! Should be in record", (3, 1, 1033, 14)
+		print("	Warning: Missing Windows License Notice URL from name table! Should be in record", (3, 1, 1033, 14))
 
 	try:
 		temp = cmpfFont.nameIDDict[(3, 1, 1033, 8)]
 	except KeyError:
-		print "	Warning: Missing Windows Manufacturer from name table! Should be in record", (3, 1, 1033, 8)
+		print("	Warning: Missing Windows Manufacturer from name table! Should be in record", (3, 1, 1033, 8))
 
 
 # Fill in font info with values from OS/2 table
@@ -1143,7 +1060,7 @@ def readOS2Table(cmpfFont):
 			os2table.panose.bMidline,
 			os2table.panose.bXHeight ]
 	except KeyError:
-		print "	Error! No OS/2 table!", cmpfFont.PostScriptName1
+		print("	Error! No OS/2 table!", cmpfFont.PostScriptName1)
 		headTable = cmpfFont.ttFont['head']
 		cmpfFont.avgCharWidth	=  -1
 		cmpfFont.usWeightClass	=  -1
@@ -1173,7 +1090,7 @@ def readpostTable(cmpfFont):
 		cmpfFont.underlineThickness	= postTable.underlineThickness
 		cmpfFont.isFixedPitch	= postTable.isFixedPitch
 	except KeyError:
-		print "	Error! No post table!", cmpfFont.PostScriptName1
+		print("	Error! No post table!", cmpfFont.PostScriptName1)
 		cmpfFont.italicAngle	= -1
 		cmpfFont.underlinePos	= -1
 		cmpfFont.underlineThickness	= -1
@@ -1228,7 +1145,7 @@ def handle_resource_file(path):
 			res = Carbon.Res.Get1IndResource('sfnt', i)
 			resid, restype, resname = res.GetResInfo()
 			if not resname:
-				resname = filename + `i`
+				resname = filename + i
 			tt = ttLib.TTFont(path, i)
 	finally:
 		Carbon.Res.CloseResFile(resref)
@@ -1237,17 +1154,16 @@ def handle_resource_file(path):
 
 def guessfiletype(path):
 	try:
-		f = open(path, "rb")
-		data = f.read(512)
-		f.close()
+		with open(path, "rb") as f:
+			data = f.read(512)
 	except (IOError, OSError):
-		print "Unable to check file type of file %s. Skipping." % (path)
+		print("Unable to check file type of file %s. Skipping." % (path))
 		return "unknown"
 
 	if not data or len(data) < 512:
 		return "unknown"
 
-	if data[:4] in ("\000\001\000\000", "OTTO", "true", 0x00010000):
+	if data[:4] in (b"\000\001\000\000", b"OTTO", b"true", 0x00010000):
 		return "datafork"
 	elif os.name=='mac':
 		# assume res fork font
@@ -1283,7 +1199,7 @@ def build_fontlist_from_dir(directory):
 		# get all files in the directory
 		dirlist = os.listdir(directory)
 	except OSError:
-		print "No files found in the directory", directory
+		print("No files found in the directory", directory)
 		return []
 
 	fontlist = []
@@ -1318,38 +1234,38 @@ def build_fontlist_from_dir(directory):
 			fontlist.append(cmpfFont)
 
 	if not fontlist:
-		print "No TrueType or OpenType files found in the directory. ", directory
+		print("No TrueType or OpenType files found in the directory. ", directory)
 
 	return None
 
 def doSingleTest1():
 	global fontlist
 
-	print "\nSingle Face Test 1: Length overrun check for name ID 18. Max 63 characters, must be unique within 31 chars."
+	print("\nSingle Face Test 1: Length overrun check for name ID 18. Max 63 characters, must be unique within 31 chars.")
 	reporter1_fontname = []
 	reporter1_failedvalue = []
 	nameDict = {}
 	for font in fontlist:
 		if font.MacCompatibleFullName1:
 			key = font.MacCompatibleFullName1[:32]
-			if nameDict.has_key(key):
+			if key in nameDict:
 				nameDict[key].append(font.PostScriptName1)
-				print "	Error: The first 32 chars of the Mac platform name ID 18 Compatible Full Name must be unique within Preferred Family Name group. name: '%s'. Conflicting fonts: %s." % (font.MacCompatibleFullName1, nameDict[key])
+				print("	Error: The first 32 chars of the Mac platform name ID 18 Compatible Full Name must be unique within Preferred Family Name group. name: '%s'. Conflicting fonts: %s." % (font.MacCompatibleFullName1, nameDict[key]))
 			else:
 				nameDict[key] = [font.PostScriptName1]
 			if len(font.MacCompatibleFullName1) > 63:
 				reporter1_fontname.append(font.PostScriptName1)
 				reporter1_failedvalue.append(len(font.MacCompatibleFullName1))
 	for i in range(len(reporter1_fontname)):
-		print "	Error: Name ID 18, Mac-compatible full name, is",
-		print reporter1_failedvalue[i], "characters for Font", reporter1_fontname[i]
+		print("	Error: Name ID 18, Mac-compatible full name, is", end=' ')
+		print(reporter1_failedvalue[i], "characters for Font", reporter1_fontname[i])
 
 
 
 def doSingleTest2():
 	global fontlist
 
-	print "\nSingle Face Test 2: Length overrun check for name ID's 1,2, 4, 16, 17. Max 63 characters."
+	print("\nSingle Face Test 2: Length overrun check for name ID's 1,2, 4, 16, 17. Max 63 characters.")
 	reporter1_fontname = []
 	reporter1_failedvalue = []
 	reporter2_fontname = []
@@ -1368,9 +1284,9 @@ def doSingleTest2():
 		if (len(font.compatibleSubFamilyName3) > 63):
 			reporter2_fontname.append(font.PostScriptName1)
 			reporter2_failedvalue.append(len(font.compatibleSubFamilyName3))
-		if nameDict.has_key(font.FullFontName1):
+		if font.FullFontName1 in nameDict:
 			nameDict[font.FullFontName1].append(font.PostScriptName1)
-			print "	Error: The Mac platform name ID 4 Preferred Full Name must be unique within Preferred Family Name group. name: '%s'. Conflicting fonts: %s." % (nameDict[font.FullFontName1][0], nameDict[font.FullFontName1][-1])
+			print("	Error: The Mac platform name ID 4 Preferred Full Name must be unique within Preferred Family Name group. name: '%s'. Conflicting fonts: %s." % (nameDict[font.FullFontName1][0], nameDict[font.FullFontName1][-1]))
 		else:
 			nameDict[font.FullFontName1] = [font.FullFontName1]
 		if (len(font.FullFontName1) > 63):
@@ -1383,168 +1299,168 @@ def doSingleTest2():
 			reporter5_fontname.append(font.PostScriptName1)
 			reporter5_failedvalue.append(len(font.preferredSubFamilyName3))
 	for i in range(len(reporter1_fontname)):
-		print "	Error: Name ID 1, Font compatible family name, is",
-		print reporter1_failedvalue[i], "characters for Font", reporter1_fontname[i]
+		print("	Error: Name ID 1, Font compatible family name, is", end='')
+		print(reporter1_failedvalue[i], "characters for Font", reporter1_fontname[i])
 	for i in range(len(reporter2_fontname)):
-		print "	Error: Name ID 2, Font compatible subfamily name, is",
-		print reporter2_failedvalue[i], "characters for Font", reporter2_fontname[i]
+		print("	Error: Name ID 2, Font compatible subfamily name, is", end='')
+		print(reporter2_failedvalue[i], "characters for Font", reporter2_fontname[i])
 	for i in range(len(reporter3_fontname)):
-		print "	Error: Name ID 4, full font name, is",
-		print reporter3_failedvalue[i], "characters for Font", reporter3_fontname[i]
+		print("	Error: Name ID 4, full font name, is", end='')
+		print(reporter3_failedvalue[i], "characters for Font", reporter3_fontname[i])
 	for i in range(len(reporter4_fontname)):
-		print "	Error: Name ID 16, preferred family name, is",
-		print reporter4_failedvalue[i], "characters for Font", reporter4_fontname[i]
+		print("	Error: Name ID 16, preferred family name, is", end='')
+		print(reporter4_failedvalue[i], "characters for Font", reporter4_fontname[i])
 	for i in range(len(reporter5_fontname)):
-		print "	Error: Name ID 17, preferred subfamily name, is",
-		print reporter5_failedvalue[i], "characters for Font", reporter5_fontname[i]
+		print("	Error: Name ID 17, preferred subfamily name, is", end='')
+		print(reporter5_failedvalue[i], "characters for Font", reporter5_fontname[i])
 
 
 def doSingleTest3():
-	print "\nSingle Face Test 3: Check that name ID 4 (Full Name) starts with same string as Preferred Family Name, and is the same as the CFF font Full Name."
+	print("\nSingle Face Test 3: Check that name ID 4 (Full Name) starts with same string as Preferred Family Name, and is the same as the CFF font Full Name.")
 	for font in fontlist:
 		if not  font.FullFontName1.startswith(font.preferredFamilyName1):
-			print "	Error: Mac platform Full Name  name id 4) '%s' does not begin with the string used for font Preferred Family Name, '%s', for Font %s." %  (font.FullFontName1,  font.preferredFamilyName1,  font.PostScriptName1)
+			print("	Error: Mac platform Full Name  name id 4) '%s' does not begin with the string used for font Preferred Family Name, '%s', for Font %s." %  (font.FullFontName1,  font.preferredFamilyName1,  font.PostScriptName1))
 
-		if  font.ttFont.has_key('CFF '):
+		if 'CFF ' in font.ttFont:
 			try:
 				cffFullName = font.topDict.FullName
 				if (font.FullFontName1 != cffFullName):
-					print "	Warning: Mac platform Full Name  name id 4) '%s' is not the same as the font CFF table Full Name, '%s', for Font %s." %  (font.FullFontName1,  font.topDict.FullName,  font.PostScriptName1)
-					print "This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used. However, having different values for different copies of the same field and cause confusion when using font development tools."
+					print("	Warning: Mac platform Full Name  name id 4) '%s' is not the same as the font CFF table Full Name, '%s', for Font %s." %  (font.FullFontName1,  font.topDict.FullName,  font.PostScriptName1))
+					print("This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used. However, having different values for different copies of the same field and cause confusion when using font development tools.")
 			except AttributeError:
-				print "Note: font CFF table has no Full Name entry, for Font %s." %  (font.PostScriptName1)
-				print "This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used."
+				print("Note: font CFF table has no Full Name entry, for Font %s." %  (font.PostScriptName1))
+				print("This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used.")
 
 
 def doSingleTest4():
 	global fontlist
 
-	print "\nSingle Face Test 4: Version name string matches release font criteria and head table value"
+	print("\nSingle Face Test 4: Version name string matches release font criteria and head table value")
 	for font in fontlist:
-		if string.find(font.VersionStr1, "Development") != -1:
-			print "	Warning: Version string contains the word 'Development' for Font", font.PostScriptName1
+		if font.VersionStr1.find("Development") != -1:
+			print("	Warning: Version string contains the word 'Development' for Font", font.PostScriptName1)
 	for font in fontlist:
 		versionMatch = re.search(r"(Version|OTF)\s+(\d+\.(\d+))", font.VersionStr1)
 		if not versionMatch:
-			print "	Error: could not find a valid decimal font version with the prefix 'Version ' or 'OTF ' in the name table name ID 5 'Version'  string: %s, for Font %s." %  (font.VersionStr1,  font.PostScriptName1)
+			print("	Error: could not find a valid decimal font version with the prefix 'Version ' or 'OTF ' in the name table name ID 5 'Version'  string: %s, for Font %s." %  (font.VersionStr1,  font.PostScriptName1))
 			continue
 		if len(versionMatch.group(3)) != 3:
-			print "	Error: Version string does not have 3 decimal places in the name table name ID 5 'Version'  string: %s, for Font %s." %  (font.VersionStr1,  font.PostScriptName1)
+			print("	Error: Version string does not have 3 decimal places in the name table name ID 5 'Version'  string: %s, for Font %s." %  (font.VersionStr1,  font.PostScriptName1))
 			continue
 
 		ver = eval(versionMatch.group(2))
 		if  ver <= 1.0:
-			print "	Warning: Version string is not greater than 1.0000 for Font", font.PostScriptName1
+			print("	Warning: Version string is not greater than 1.0000 for Font", font.PostScriptName1)
 		if ver != font.OTFVersion:
-			print"Error: font version %.3f in name table name ID 5 'Version' string does not match the head table fontRevision value %.3f, for font %s." % (ver, font.OTFVersion,  font.PostScriptName1)
+			print("Error: font version %.3f in name table name ID 5 'Version' string does not match the head table fontRevision value %.3f, for font %s." % (ver, font.OTFVersion,  font.PostScriptName1))
 
 def doSingleTest5():
 	global fontlist
 
-	print "\nSingle Face Test 5: Check that CFF PostScript name is same as name table name ID 6."
+	print("\nSingle Face Test 5: Check that CFF PostScript name is same as name table name ID 6.")
 	for font in fontlist:
-		if font.ttFont.has_key('CFF '):
+		if 'CFF ' in font.ttFont:
 			cffPSName = font.ttFont['CFF '].cff.fontNames[0]
 			if cffPSName != font.PostScriptName1:
-				print "	Error: Postscript name in CFF table '%s' is not the same as name table Macintosh name ID 6 '%s'." % (cffPSName, font.PostScriptName1)
+				print("	Error: Postscript name in CFF table '%s' is not the same as name table Macintosh name ID 6 '%s'." % (cffPSName, font.PostScriptName1))
 		if font.PostScriptName3 != font.PostScriptName1:
-			print "	Error: Windows name table name id 6 '%s' is not the same as Macintosh name ID 6 '%s'." % (font.PostScriptName3, font.PostScriptName1)
+			print("	Error: Windows name table name id 6 '%s' is not the same as Macintosh name ID 6 '%s'." % (font.PostScriptName3, font.PostScriptName1))
 
 def doSingleTest6():
 	global fontlist
 
-	print "\nSingle Face Test 6: Check that Copyright, Trademark, Designer note, and foundry values are present, and match default values."
+	print("\nSingle Face Test 6: Check that Copyright, Trademark, Designer note, and foundry values are present, and match default values.")
 	try:
 		defaultURL = os.environ["CF_DEFAULT_URL"]
 	except KeyError:
-		print "	Error: Environment variable CF_DEFAULT_URL is not set, so I can't compare it to  Mac Foundry URL name id 11."
+		print("	Error: Environment variable CF_DEFAULT_URL is not set, so I can't compare it to  Mac Foundry URL name id 11.")
 		defaultURL = None
 	try:
 		defaultFoundryCode= os.environ["CF_DEFAULT_FOUNDRY_CODE"]
 	except KeyError:
-		print "	Error: Environment variable CF_DEFAULT_FOUNDRY_CODE is not set, so I can't compare it to  the OS/2 table foundry code."
+		print("	Error: Environment variable CF_DEFAULT_FOUNDRY_CODE is not set, so I can't compare it to  the OS/2 table foundry code.")
 		defaultFoundryCode = None
 
 	for font in fontlist:
 		# verify that there is no patent number in the copyright.
 		if font.copyrightStr1 and re.search("[ \t,]\d\d\d,*\d\d\d[ \t.,]", font.copyrightStr1):
-			print " Error: There is a patent number in the copyright string. Please check.", font.PostScriptName1
+			print(" Error: There is a patent number in the copyright string. Please check.", font.PostScriptName1)
 
 		# Missing Copyright and Trademark strings are actually already reported in the function Read Nmae Table
-		if not font.nameIDDict.has_key((1, 0, 0, 9)):
-			print "	Error: Missing Mac Designer Note name id 9 from name table! Should be in record", (1, 0, 0, 9), font.PostScriptName1
-		if not font.nameIDDict.has_key((3, 1, 1033, 9)):
-			print "	Error: Missing Windows Designer Note name id 9 from name table! Should be in record", (3, 1, 1033, 9), font.PostScriptName1
-		if not font.nameIDDict.has_key((1, 0, 0, 11)):
-			print "	Error: Missing Mac Foundry URL name id 11 from name table! Should be in record", (1, 0, 0, 11), font.PostScriptName1
+		if (1, 0, 0, 9) not in font.nameIDDict:
+			print("	Error: Missing Mac Designer Note name id 9 from name table! Should be in record", (1, 0, 0, 9), font.PostScriptName1)
+		if (3, 1, 1033, 9) not in font.nameIDDict:
+			print("	Error: Missing Windows Designer Note name id 9 from name table! Should be in record", (3, 1, 1033, 9), font.PostScriptName1)
+		if (1, 0, 0, 11) not in font.nameIDDict:
+			print("	Error: Missing Mac Foundry URL name id 11 from name table! Should be in record", (1, 0, 0, 11), font.PostScriptName1)
 		else:
 			foundryURL = font.nameIDDict[(1, 0, 0, 11)]
 			if defaultURL  and  (defaultURL != foundryURL):
-				print "	Error: Mac Foundry URL name id 11 '%s' is not the same as the default URL set by the environment variable CF_DEFAULT_URL '%s' for font %s." % (defaultURL, foundryURL, font.PostScriptName1)
+				print("	Error: Mac Foundry URL name id 11 '%s' is not the same as the default URL set by the environment variable CF_DEFAULT_URL '%s' for font %s." % (defaultURL, foundryURL, font.PostScriptName1))
 
-		if not font.nameIDDict.has_key((3, 1, 1033, 11)):
-			print "	Error: Missing Windows Foundry URL name id 11 from name table! Should be in record", (3, 1, 1033, 11), font.PostScriptName1
+		if (3, 1, 1033, 11) not in font.nameIDDict:
+			print("	Error: Missing Windows Foundry URL name id 11 from name table! Should be in record", (3, 1, 1033, 11), font.PostScriptName1)
 
 		if defaultFoundryCode  and  (defaultFoundryCode != font.achVendID):
-			print "	Error: OS/2 table foundry code '%s' is not the same as the default code set by the environment variable CF_DEFAULT_FOUNDRY_CODE '%s' for font %s." % (font.achVendID, defaultFoundryCode, font.PostScriptName1)
+			print("	Error: OS/2 table foundry code '%s' is not the same as the default code set by the environment variable CF_DEFAULT_FOUNDRY_CODE '%s' for font %s." % (font.achVendID, defaultFoundryCode, font.PostScriptName1))
 
 def doSingleTest7():
 	global fontlist
-	print "\nSingle Face Test 7: Checking for deprecated CFF operators."
+	print("\nSingle Face Test 7: Checking for deprecated CFF operators.")
 	for font in fontlist:
-		if not font.ttFont.has_key('CFF '):
+		if 'CFF ' not in font.ttFont:
 			continue
 		command = "tx -dump -5 -n \"%s\" 2>&1" % (font.path)
 		report = fdkutils.runShellCmd(command)
 		glyphList = re.findall(r"glyph[^{]+?\{([^,]+),[^[\]]+\sdotsection\s", report)
 		if glyphList:
 			glyphList = ", ".join(glyphList)
-			print "Error: font contains deprecated dotsection perator. These should be removed. %s. %s" % (font.PostScriptName1, glyphList)
+			print("Error: font contains deprecated dotsection perator. These should be removed. %s. %s" % (font.PostScriptName1, glyphList))
 		glyphList = re.findall(r"glyph[^{]+?\{([^,]+),[^[\]]+\sseac\s", report)
 		if glyphList:
 			glyphList = ", ".join(glyphList)
-			print "Error: font contains deprecated seac operator. These composite glyphs must be decomposed. %s. %s" % (font.PostScriptName1, glyphList)
+			print("Error: font contains deprecated seac operator. These composite glyphs must be decomposed. %s. %s" % (font.PostScriptName1, glyphList))
 
 def doSingleTest8():
 	global fontlist
 
-	print "\nSingle Face Test 8: Check SubFamily Name (name ID 2) for  Regular Style, Bold Style, Italic Style, and BoldItalic Style"
+	print("\nSingle Face Test 8: Check SubFamily Name (name ID 2) for  Regular Style, Bold Style, Italic Style, and BoldItalic Style")
 	if not fontlist[0].compatibleSubFamilyName3:
-		print "Skipping test - Windows Unicode SubFamily name does not exist.", fontlist[0].PostScriptName1
+		print("Skipping test - Windows Unicode SubFamily name does not exist.", fontlist[0].PostScriptName1)
 		return
 	for font in fontlist:
 		if font.isBold == 0 and font.isItalic == 0:
 			if font.compatibleSubFamilyName3 != "Regular":	#Unicode String
-				print "	Warning: Style bit not set, Compatible SubFamily Name with Win Platform is not 'Regular' for Font", font.PostScriptName3
+				print("	Warning: Style bit not set, Compatible SubFamily Name with Win Platform is not 'Regular' for Font", font.PostScriptName3)
 		elif font.isBold and font.isItalic == 0:
 			if font.compatibleSubFamilyName3 != "Bold":	 #Unicode String
-				print "	Warning: Only Bold style bit set, Compatible SubFamily Name with Win Platform is not 'Bold' for Font", font.PostScriptName3
+				print("	Warning: Only Bold style bit set, Compatible SubFamily Name with Win Platform is not 'Bold' for Font", font.PostScriptName3)
 		elif font.isBold == 0 and font.isItalic:
 			if font.compatibleSubFamilyName3 != "Italic":  #Unicode String
-				print "	Warning: Only Italic style bit set, Compatible SubFamily Name with Win Platform is not 'Italic' for Font", font.PostScriptName3
+				print("	Warning: Only Italic style bit set, Compatible SubFamily Name with Win Platform is not 'Italic' for Font", font.PostScriptName3)
 		elif font.isBold and font.isItalic:
 			if font.compatibleSubFamilyName3 != "Bold Italic" and font.compatibleSubFamilyName3 != "Bold Italic":
-				print "	Warning: Both Bold and Italic style bits set, Compatible SubFamily Name with Win Platform is not 'Bold Italic' for Font", font.PostScriptName3
-				print "It is", font.compatibleSubFamilyName3
+				print("	Warning: Both Bold and Italic style bits set, Compatible SubFamily Name with Win Platform is not 'Bold Italic' for Font", font.PostScriptName3)
+				print("It is", font.compatibleSubFamilyName3)
 
 def doSingleTest9():
 	global fontlist
 
-	print "\nSingle Face Test 9: Check that no OS/2.usWeightClass is less than 250"
+	print("\nSingle Face Test 9: Check that no OS/2.usWeightClass is less than 250")
 	if fontlist[0].usWeightClass == -1:
-		print "Skipping test - OS/2 table does not exist.", fontlist[0].PostScriptName1
+		print("Skipping test - OS/2 table does not exist.", fontlist[0].PostScriptName1)
 		return
 
 	for font in fontlist:
 		if font.usWeightClass < 250:
-			print "	Error: OS/2.usWeightClass is", font.usWeightClass, "for Font", font.PostScriptName1, "\nThis may cause the font glyphs to be smear-bolded under Windows 2000."
+			print("	Error: OS/2.usWeightClass is", font.usWeightClass, "for Font", font.PostScriptName1, "\nThis may cause the font glyphs to be smear-bolded under Windows 2000.")
 
 def doSingleTest10():
 	global fontlist
 
-	print "\nSingle Face Test 10: Check that no Bold Style face has OS/2.usWeightClass of less than 500"
+	print("\nSingle Face Test 10: Check that no Bold Style face has OS/2.usWeightClass of less than 500")
 	if fontlist[0].usWeightClass == -1:
-		print "Skipping test - OS/2 table does not exist.", fontlist[0].PostScriptName1
+		print("Skipping test - OS/2 table does not exist.", fontlist[0].PostScriptName1)
 		return
 	baseFont = None
 	boldFont = None
@@ -1552,25 +1468,25 @@ def doSingleTest10():
 		if font.isBold:
 			boldFont = font
 			if font.usWeightClass < 500:
-				print "	Error: OS/2.usWeightClass is", font.usWeightClass, "and Bold bit is set for Font", font.PostScriptName1
+				print("	Error: OS/2.usWeightClass is", font.usWeightClass, "and Bold bit is set for Font", font.PostScriptName1)
 
 		# warn if bold font has ForceBold set.
 		if not font.isTTF: #is CFF
 			for fontDict in font.FDArray:
 				try:
 					if fontDict.Private.ForceBold:
-						print "Warning: Font has ForceBold field. This is harmless, but is deprecated.", font.PostScriptName1
+						print("Warning: Font has ForceBold field. This is harmless, but is deprecated.", font.PostScriptName1)
 				except KeyError:
 					pass
 def doSingleTest11():
 	global fontlist
 
-	print "\nSingle Face Test 11: Check that BASE table exists, and has reasonable values"
+	print("\nSingle Face Test 11: Check that BASE table exists, and has reasonable values")
 	for font in fontlist:
 		try:
 			baseTable = font.ttFont['BASE']
 		except KeyError:
-			print "	Error: font %s does not have a BASE table. This is necessary for users who are editing in a different script than the font is designed for." % (font.PostScriptName1)
+			print("	Error: font %s does not have a BASE table. This is necessary for users who are editing in a different script than the font is designed for." % (font.PostScriptName1))
 			return
 		try:
 			baseDict = {}
@@ -1579,44 +1495,44 @@ def doSingleTest11():
 				if not hasattr(axisRecord, 'BaseTagList'):
 					continue
 				if not axisRecord.BaseScriptList.BaseScriptCount == len(axisRecord.BaseScriptList.BaseScriptRecord):
-					print "	Error: bad BASE table: %s.BaseScriptList.BaseScriptCount is not equal to the number of records in the list %s.BaseScriptList.BaseScriptRecord. %s." % (axisName, axisName, font.PostScriptName1)
+					print("	Error: bad BASE table: %s.BaseScriptList.BaseScriptCount is not equal to the number of records in the list %s.BaseScriptList.BaseScriptRecord. %s." % (axisName, axisName, font.PostScriptName1))
 					return
 				if not axisRecord.BaseTagList.BaseTagCount == len(axisRecord.BaseTagList.BaselineTag):
-					print "	Error: bad BASE table: %s.BaseTagList.BaseTagCount is not equal to the number of tags in the list %s.BaseTagList.BaselineTag. %s." % (axisName, axisName, font.PostScriptName1)
+					print("	Error: bad BASE table: %s.BaseTagList.BaseTagCount is not equal to the number of tags in the list %s.BaseTagList.BaselineTag. %s." % (axisName, axisName, font.PostScriptName1))
 					return
 				for tag in axisRecord.BaseTagList.BaselineTag:
 					if not tag in kKnownBaseTags:
-						print "	Error: Base table tag '%s' not in list of registered BASE table tags. %s." % (tag, font.PostScriptName1)
+						print("	Error: Base table tag '%s' not in list of registered BASE table tags. %s." % (tag, font.PostScriptName1))
 				baseDict[axisName] = {}
 				for baseRecord in axisRecord.BaseScriptList.BaseScriptRecord:
 					baseValues = baseRecord.BaseScript.BaseValues
 					if not baseValues.BaseCoordCount == axisRecord.BaseTagList.BaseTagCount:
-						print "	Error: bad BASE table: %s.BaseTagList.BaseTagCount is not equal to %s.BaseScriptList.BaseScriptRecord.BaseScript.BaseValues.BaseCoordCount. %s." % (axisName, axisName, font.PostScriptName1)
+						print("	Error: bad BASE table: %s.BaseTagList.BaseTagCount is not equal to %s.BaseScriptList.BaseScriptRecord.BaseScript.BaseValues.BaseCoordCount. %s." % (axisName, axisName, font.PostScriptName1))
 						return
 					if not (axisRecord.BaseTagList.BaseTagCount == len(axisRecord.BaseTagList.BaselineTag)):
-						print "	Error: bad BASE table: number of records in list %s.BaseScriptList.BaseScriptRecord.BaseScript.BaseValues.BaseCoord is not equal to  %s.BaseScriptList.BaseScriptRecord.BaseScript.BaseValues.BaseCoordCount. %s." % (axisName, axisName, font.PostScriptName1)
+						print("	Error: bad BASE table: number of records in list %s.BaseScriptList.BaseScriptRecord.BaseScript.BaseValues.BaseCoord is not equal to  %s.BaseScriptList.BaseScriptRecord.BaseScript.BaseValues.BaseCoordCount. %s." % (axisName, axisName, font.PostScriptName1))
 						return
 					defaultIndex = baseValues.DefaultIndex
 					coords = {}
 					scriptTag = baseRecord.BaseScriptTag
 					if not  scriptTag in kKnownScriptTags:
-						print "	Error: Base table script tag '%s' not in list of registered script  tags. %s." % (scriptTag, font.PostScriptName1)
+						print("	Error: Base table script tag '%s' not in list of registered script  tags. %s." % (scriptTag, font.PostScriptName1))
 					baseDict[axisName][scriptTag] = coords
 					for i in range(axisRecord.BaseTagList.BaseTagCount ):
 						tag = axisRecord.BaseTagList.BaselineTag[i]
 						coord = baseValues.BaseCoord[i].Coordinate
 						coords[tag] = coord
 						if (defaultIndex == i) and (coord != 0):
-							print "\tWarning: default BASE table offset for script '%s', tag '%s' is non-zero (%s) for the default font BASE tag. %s." % (scriptTag, tag, coord, font.PostScriptName1)
+							print("\tWarning: default BASE table offset for script '%s', tag '%s' is non-zero (%s) for the default font BASE tag. %s." % (scriptTag, tag, coord, font.PostScriptName1))
 						elif tag == 'ideo':
 							calculatedValue = -(font.unitsPerEm -  font.sCapHeight)/2
 							diff = abs(coord - calculatedValue)
 							if diff > gDesignSpaceTolerance:
-								print "\tWarning:  In order to center OS/2 Capheight in the ideo em-square, the BASE table offset for script '%s', tag '%s' should be '%s' rather than '%s'. %s." % (scriptTag, tag, calculatedValue, coord, font.PostScriptName1)
+								print("\tWarning:  In order to center OS/2 Capheight in the ideo em-square, the BASE table offset for script '%s', tag '%s' should be '%s' rather than '%s'. %s." % (scriptTag, tag, calculatedValue, coord, font.PostScriptName1))
 							#else:
-							#	print "\tGood values calculatedValue %s , coord %s,font.sCapHeight %s " % (calculatedValue, coord, font.sCapHeight)
-		except AttributeError,e :
-			print "	Error: I don't understand this BASE table: Could be bad BASE table, probably this programis out of date or incomplete. %s." % (font.PostScriptName1)
+							#	print("\tGood values calculatedValue %s , coord %s,font.sCapHeight %s " % (calculatedValue, coord, font.sCapHeight))
+		except AttributeError as e:
+			print("	Error: I don't understand this BASE table: Could be bad BASE table, probably this programis out of date or incomplete. %s." % (font.PostScriptName1))
 	return
 
 def getItalicAngle(fontPath):
@@ -1626,11 +1542,12 @@ def getItalicAngle(fontPath):
 		command = "tx -bc -z 1000 -g %s \"%s\" 2>&1" % (gname, fontPath)
 		report = fdkutils.runShellCmd(command)
 		scanLines = re.findall(r"([ .#]+)(-*\d+)", report)
-		testLines = filter(lambda line: "#" in line[0], scanLines)
+		testLines = [ln for ln in scanLines if not ln.startswith('#')]
+
 		if not testLines:
 			continue
 		numLines = len(scanLines)
-		oneThird = numLines/3
+		oneThird = numLines//3
 		twothird = oneThird*2
 
 		topX = scanLines[oneThird][0].find("#")
@@ -1654,45 +1571,44 @@ def getItalicAngle(fontPath):
 	for angle in angleList:
 		avgAngle += angle**2
 	avgAngle = (avgAngle / len(angleList))**0.5
-	diffList = map(lambda angle: (abs(avgAngle-angle), angle), angleList)
-	diffList.sort()
+	diffList = sorted(map(lambda angle: (abs(avgAngle-angle), angle), angleList))
 	angle = diffList[0][1]
 	return int(0.5 + angle)
 
 def doSingleTest12():
 	global fontlist
 
-	print "\nSingle Face Test 12: Check that Italic style is set when post table italic angle is non-zero, and that italic angle is reasonable."
+	print("\nSingle Face Test 12: Check that Italic style is set when post table italic angle is non-zero, and that italic angle is reasonable.")
 	if fontlist[0].italicAngle == -1:
-		print "Skipping test - post table does not exist.", fontlist[0].PostScriptName1
+		print("Skipping test - post table does not exist.", fontlist[0].PostScriptName1)
 		return
 
 	for font in fontlist:
 		if font.isItalic and (abs(font.italicAngle) <= 4):
-			print "\tWarning: Italic style bit is set, but Italic Angle '%s' is a smaller italic angle than -4 for Font %s." % (font.italicAngle, font.PostScriptName1)
+			print("\tWarning: Italic style bit is set, but Italic Angle '%s' is a smaller italic angle than -4 for Font %s." % (font.italicAngle, font.PostScriptName1))
 		if (font.italicAngle > 0.0):
-			print "\tWarning: Italic Angle '%s' is greater than zero. Is it really supposed to be leaning to the left, rather than the right?  %s." % (font.italicAngle, font.PostScriptName1)
+			print("\tWarning: Italic Angle '%s' is greater than zero. Is it really supposed to be leaning to the left, rather than the right?  %s." % (font.italicAngle, font.PostScriptName1))
 	for font in fontlist:
 		if (not font.isItalic) and  (abs(font.italicAngle) > 4):
-			print "\tWarning: Italic style bit is clear, but Italic Angle '%s' is a larger italic angle than -4 for Font %s." % (font.italicAngle, font.PostScriptName1)
+			print("\tWarning: Italic style bit is clear, but Italic Angle '%s' is a larger italic angle than -4 for Font %s." % (font.italicAngle, font.PostScriptName1))
 	for font in fontlist:
 		italicAngle = getItalicAngle(font.path)
 		if italicAngle != None:
 			diff = abs(italicAngle - font.italicAngle)
 			if diff > 3:
-				print "Warning: font ItalicAngle in the post table is %s, but a rough calculation based on [B, D, E, H, I, L], says it should be %s. Please check. %s" % (font.italicAngle, italicAngle, font.PostScriptName1)
+				print("Warning: font ItalicAngle in the post table is %s, but a rough calculation based on [B, D, E, H, I, L], says it should be %s. Please check. %s" % (font.italicAngle, italicAngle, font.PostScriptName1))
 
 def doSingleTest13():
 	global fontlist
 
-	print "\nSingle Face Test 13: Warn if post.isFixedPitch is set when font is not monospaced."
+	print("\nSingle Face Test 13: Warn if post.isFixedPitch is set when font is not monospaced.")
 
 	if fontlist[0].isFixedPitch == -1:
-		print "Skipping test - post table is missing", fontlist[0].PostScriptName1
+		print("Skipping test - post table is missing", fontlist[0].PostScriptName1)
 		return
 
 	if fontlist[0].isCID :
-		print "Skipping test - not useful for CID fonts", fontlist[0].PostScriptName1
+		print("Skipping test - not useful for CID fonts", fontlist[0].PostScriptName1)
 		return
 
 	for font in fontlist:
@@ -1705,68 +1621,68 @@ def doSingleTest13():
 		numWidthEntries = len(glyphwidths)
 		numMostPopularWidth = widthTable[-1][0]
 
-		if font.ttFont.has_key('CFF '):
+		if 'CFF ' in font.ttFont:
 			if font.topDict.isFixedPitch != font.isFixedPitch:
 				if font.isFixedPitch:
-					print "	Error: post table isFixedPitch indicates that the font is monospaced, but the CFF top dict IsFixedPitch is off."
+					print("	Error: post table isFixedPitch indicates that the font is monospaced, but the CFF top dict IsFixedPitch is off.")
 				else:
-					print "	Error: post table isFixedPitch indicates that the font is not monospaced, but the CFF top dict IsFixedPitch is on."
+					print("	Error: post table isFixedPitch indicates that the font is not monospaced, but the CFF top dict IsFixedPitch is on.")
 
 		if font.isFixedPitch:
 			if font.isFixedPitch == -1:
-				print "Skipping test for this face- post table is missing", font.PostScriptName1
+				print("Skipping test for this face- post table is missing", font.PostScriptName1)
 				continue
 
 			if len(widthTable) > 1:
-				print "	Error: Font is marked as being FIxedPitch in the post table, but not all glyphs are the same width. font", font.PostScriptName1
+				print("	Error: Font is marked as being FIxedPitch in the post table, but not all glyphs are the same width. font", font.PostScriptName1)
 				for entry in widthTable[:-1]:
-					print "non-std width " + str(entry[1]) + " Number of glyphs " + str(entry[0])
+					print("non-std width " + str(entry[1]) + " Number of glyphs " + str(entry[0]))
 					for name in entry[2]:
-						print "\t\t" + name
+						print("\t\t" + name)
 
 		else:
 			if (numWidthEntries * 0.80 < numMostPopularWidth):
-				print "	Warning: More than 80% of the glyphs in this font are the same width. Maybe it should be marked as FixedPitch. font", font.PostScriptName1
+				print("	Warning: More than 80% of the glyphs in this font are the same width. Maybe it should be marked as FixedPitch. font", font.PostScriptName1)
 				for entry in widthTable[:-1]:
-					print "non-std width " + str(entry[1]) + " Number of glyphs " + str(entry[0])
+					print("non-std width " + str(entry[1]) + " Number of glyphs " + str(entry[0]))
 					for name in entry[2]:
-						print "\t\t" + name
+						print("\t\t" + name)
 
 def doSingleTest14():
 	global fontlist
 
-	print "\nSingle Face Test 14: Warn if Bold/Italic style bits do not match between the head Table and OS/2 Table"
+	print("\nSingle Face Test 14: Warn if Bold/Italic style bits do not match between the head Table and OS/2 Table")
 	if fontlist[0].isItalic2 == -1:
-		print "Skipping test - OS/2 table does not exist.", fontlist[0].PostScriptName1
+		print("Skipping test - OS/2 table does not exist.", fontlist[0].PostScriptName1)
 		return
 
 	for font in fontlist:
 		if font.isItalic != font.isItalic2:
-			print "	Error: Italic style bit in head.macStyle does not match with OS/2.fsSelection for Font", font.PostScriptName1
-			print "\thead.macStyle:", font.isItalic, "OS/2.fsSelection:",font.isItalic2
+			print("	Error: Italic style bit in head.macStyle does not match with OS/2.fsSelection for Font", font.PostScriptName1)
+			print("\thead.macStyle:", font.isItalic, "OS/2.fsSelection:",font.isItalic2)
 	for font in fontlist:
 		if font.isBold != font.isBold2:
-			print "	Error: Bold style bit in head.macStyle does not match with OS/2.fsSelection for Font", font.PostScriptName1
-			print "\thead.macStyle:", font.isBold, "OS/2.fsSelection:",font.isBold2
+			print("	Error: Bold style bit in head.macStyle does not match with OS/2.fsSelection for Font", font.PostScriptName1)
+			print("\thead.macStyle:", font.isBold, "OS/2.fsSelection:",font.isBold2)
 
 
 def doSingleTest15():
 	global fontlist
 
-	print "\nSingle Face Test 15: Warn if Font BBox x/y coordinates are improbable, or differ between head table and CFF."
+	print("\nSingle Face Test 15: Warn if Font BBox x/y coordinates are improbable, or differ between head table and CFF.")
 	for font in fontlist:
 		limit1 = 2* font.unitsPerEm
 		limit2 = 1.5* font.unitsPerEm
 		if font.fontBBox[0] < -limit1 or font.fontBBox[0] > limit1:
-			print "	Warning: BBox X-Min '%s' is out of usual range for Font %s." % (font.fontBBox[0], font.PostScriptName1)
+			print("	Warning: BBox X-Min '%s' is out of usual range for Font %s." % (font.fontBBox[0], font.PostScriptName1))
 		if font.fontBBox[1] < -limit2 or font.fontBBox[1] > limit2:
-			print "	Warning: BBox Y-Min '%s' is out of usual range for Font %s." % (font.fontBBox[1], font.PostScriptName1)
+			print("	Warning: BBox Y-Min '%s' is out of usual range for Font %s." % (font.fontBBox[1], font.PostScriptName1))
 		if font.fontBBox[2] < -limit1 or font.fontBBox[2] > limit1:
-			print "	Warning: BBox X-Max '%s' is out of usual range for Font %s." % (font.fontBBox[2], font.PostScriptName1)
+			print("	Warning: BBox X-Max '%s' is out of usual range for Font %s." % (font.fontBBox[2], font.PostScriptName1))
 		if font.fontBBox[3] < -limit2 or font.fontBBox[3] > limit2:
-			print "	Warning: BBox Y-Max '%s' is out of usual range for Font %s." % (font.fontBBox[3], font.PostScriptName1)
+			print("	Warning: BBox Y-Max '%s' is out of usual range for Font %s." % (font.fontBBox[3], font.PostScriptName1))
 
-		if font.ttFont.has_key('CFF '):
+		if 'CFF ' in font.ttFont:
 			hheaBox =  font.fontBBox
 			cffBox = font.topDict.FontBBox
 			diff = 0
@@ -1775,14 +1691,14 @@ def doSingleTest15():
 					diff = 1
 					break
 			if diff:
-				print "The font bounding box in the hhea table '%s' differs from that in the CFF table '%s'. %s." % (hheaBox, cffBox, font.PostScriptName1)
+				print("The font bounding box in the hhea table '%s' differs from that in the CFF table '%s'. %s." % (hheaBox, cffBox, font.PostScriptName1))
 
 def doSingleTest16():
 	global fontlist
 
-	print "\nSingle Face Test 16: Check values of Ascender and Descender vs em-square."
+	print("\nSingle Face Test 16: Check values of Ascender and Descender vs em-square.")
 	if fontlist[0].sTypoAscender == -1:
-		print "Skipping test - OS/2 table does not exist", fontlist[0].PostScriptName1
+		print("Skipping test - OS/2 table does not exist", fontlist[0].PostScriptName1)
 		return
 
 	emSquareeDict = {}
@@ -1794,39 +1710,39 @@ def doSingleTest16():
 
 		diff = os2table.sTypoAscender - os2table.sTypoDescender
 		if diff != font.unitsPerEm:
-			print "	Warning: Difference of OS/2 sTypoAscender '%s' and sTypoDescender '%s' is not the same as the em-square'%s' for Font %s." % (os2table.sTypoAscender, os2table.sTypoDescender, font.unitsPerEm, font.PostScriptName1)
+			print("	Warning: Difference of OS/2 sTypoAscender '%s' and sTypoDescender '%s' is not the same as the em-square'%s' for Font %s." % (os2table.sTypoAscender, os2table.sTypoDescender, font.unitsPerEm, font.PostScriptName1))
 
 		# usWinDescent is a positive value when below the baseline; sTypoDescender is a negative value.
 		if font.isCID:
 			if  os2table.sTypoLineGap != font.unitsPerEm:
-				print "	Warning: OS/2 table sTypoLineGap '%s' is not equal to the font em-square '%s' for this CID font %s." %  (os2table.sTypoLineGap, font.unitsPerEm, font.PostScriptName1)
+				print("	Warning: OS/2 table sTypoLineGap '%s' is not equal to the font em-square '%s' for this CID font %s." %  (os2table.sTypoLineGap, font.unitsPerEm, font.PostScriptName1))
 
 		# compare with hhea values.
 		if font.sTypoAscender2 != os2table.sTypoAscender:
-			print "	Warning: hhea table ascent field '%s' is not the same as OS/2 table sTypoeAscender '%s'. %s" % (font.sTypoAscender2 , os2table.sTypoAscender, font.PostScriptName1)
+			print("	Warning: hhea table ascent field '%s' is not the same as OS/2 table sTypoeAscender '%s'. %s" % (font.sTypoAscender2 , os2table.sTypoAscender, font.PostScriptName1))
 		if font.sTypoDescender2 != os2table.sTypoDescender:
-			print "	Warning: hhea table descent field '%s' is not the same as OS/2 table sTypoDescender '%s'. %s" % (font.sTypoDescender2 , os2table.sTypoDescender, font.PostScriptName1)
+			print("	Warning: hhea table descent field '%s' is not the same as OS/2 table sTypoDescender '%s'. %s" % (font.sTypoDescender2 , os2table.sTypoDescender, font.PostScriptName1))
 		if font.sTypoLineGap2 != os2table.sTypoLineGap:
-			print "	Warning: hhea table lineGap field '%s' is not the same as OS/2 table sTypoLineGap '%s'. %s" % (font.sTypoLineGap2 , os2table.sTypoLineGap, font.PostScriptName1)
+			print("	Warning: hhea table lineGap field '%s' is not the same as OS/2 table sTypoLineGap '%s'. %s" % (font.sTypoLineGap2 , os2table.sTypoLineGap, font.PostScriptName1))
 
 		# check the sWin values are same as font Bbox.
 		if font.fontBBox[1] != -os2table.usWinDescent:
-			print "	Warning: OS/2 table usWinDescent field '%s' is not the same as the font bounding box y min '%s'. %s" % (-os2table.usWinDescent, font.fontBBox[1], font.PostScriptName1)
+			print("	Warning: OS/2 table usWinDescent field '%s' is not the same as the font bounding box y min '%s'. %s" % (-os2table.usWinDescent, font.fontBBox[1], font.PostScriptName1))
 		if font.fontBBox[3] != os2table.usWinAscent:
-			print "	Warning: OS/2 table usWinAscent field '%s' is not the same as the font bounding box y max '%s'. %s" % (os2table.usWinAscent, font.fontBBox[3], font.PostScriptName1)
+			print("	Warning: OS/2 table usWinAscent field '%s' is not the same as the font bounding box y max '%s'. %s" % (os2table.usWinAscent, font.fontBBox[3], font.PostScriptName1))
 		# make sure that USE_TYPO_METRICS is on
 		if not (font.fsSelection & (1<<7)):
 			if os2table.version >= 4:
-				print "	Warning. The OS/2 table version 4 fsSelection field bit 7 'USE_TYPO_METRICS' is not turned on. Windows applications will (eventually) use the OS/2 sTypo fields only if this bit is on. %s." % (font.PostScriptName1)
+				print("	Warning. The OS/2 table version 4 fsSelection field bit 7 'USE_TYPO_METRICS' is not turned on. Windows applications will (eventually) use the OS/2 sTypo fields only if this bit is on. %s." % (font.PostScriptName1))
 		else:
 			if os2table.version < 4:
-				print "	Error. The OS/2 table version 4 fsSelection field bit 7 'USE_TYPO_METRICS' is set on, but the OS/2 version '%s' is not 4 or greater.. %s." % (os2table.version, font.PostScriptName1)
+				print("	Error. The OS/2 table version 4 fsSelection field bit 7 'USE_TYPO_METRICS' is set on, but the OS/2 version '%s' is not 4 or greater.. %s." % (os2table.version, font.PostScriptName1))
 	if len(emSquareeDict.keys()) > 1:
-		print "	Error: fonts in family have different em-squares! %s." % (font.preferredFamilyName1)
+		print("	Error: fonts in family have different em-squares! %s." % (font.preferredFamilyName1))
 		for item in emSquareeDict.items():
-			print "\tEm square: %s. Fonts %s." % (item[0], item[1])
+			print("\tEm square: %s. Fonts %s." % (item[0], item[1]))
 	if font.unitsPerEm not in [1000, 2048]:
-		print "	Warning: Em square '%s' is not either 1000 or 2048. Some programs will behave oddly with this family. %s." % (font.unitsPerEm, font.preferredFamilyName1)
+		print("	Warning: Em square '%s' is not either 1000 or 2048. Some programs will behave oddly with this family. %s." % (font.unitsPerEm, font.preferredFamilyName1))
 
 def MakeWidthTable(glyphnames, glyphwidths ):
 	widthTableDict = {}
@@ -1836,10 +1752,10 @@ def MakeWidthTable(glyphnames, glyphwidths ):
 	for i in range(numWidths):
 		width = glyphwidths[i]
 
-		if widthTableDict.has_key(width):
+		if width in widthTableDict:
 			tableRecord = widthTableDict[width]
-			#print "tableRecord", tableRecord
-			#print "entry", entry
+			#print("tableRecord", tableRecord)
+			#print("entry", entry)
 			tableRecord[0] = tableRecord[0] + 1
 			tableRecord[1].append(glyphnames[i])
 		else:
@@ -1851,11 +1767,10 @@ def MakeWidthTable(glyphnames, glyphwidths ):
 		tableRecord = widthTableDict[key]
 		widthTableList.append([tableRecord[0], key, tableRecord[1]])
 
-	widthTableList.sort()
-	return widthTableList
+	return sorted(widthTableList)
 
 def doSingleTest17():
-	print "\nSingle Face Test 17: Verify that all tabular glyphs have the same width."
+	print("\nSingle Face Test 17: Verify that all tabular glyphs have the same width.")
 	for font in fontlist:
 		if font.PostScriptName1 in kFixedPitchExceptionList:
 			continue
@@ -1867,12 +1782,12 @@ def doSingleTest17():
 		if numWidthEntries > 9 :
 			numMostPopularWidth = widthTable[-1][0]
 			if (numWidthEntries * 0.5 < numMostPopularWidth) and (len(widthTable) > 1):
-				print "Tabular Width Check: tablining group, font", font.PostScriptName1
-				print "	Error: tablining More than 50% the glyphs are the same width - this set of numbers is meant to be tabular. ",font.PostScriptName1
+				print("Tabular Width Check: tablining group, font", font.PostScriptName1)
+				print("	Error: tablining More than 50% the glyphs are the same width - this set of numbers is meant to be tabular. ",font.PostScriptName1)
 				for entry in widthTable[:-1]:
-					print "non-std width " + str(entry[1]) + " Number of glyphs " + str(entry[0])
+					print("non-std width " + str(entry[1]) + " Number of glyphs " + str(entry[0]))
 					for name in entry[2]:
-						print "\t\t" + name
+						print("\t\t" + name)
 
 		glyphnames = font.glyph_name_list2
 		glyphwidths = font.glyph_width_list2
@@ -1882,12 +1797,12 @@ def doSingleTest17():
 		if numWidthEntries > 9 :
 			numMostPopularWidth = widthTable[-1][0]
 			if (numWidthEntries * 0.5 < numMostPopularWidth) and (len(widthTable) > 1):
-				print "Tabular Width Check: taboldstyle group, font", font.PostScriptName1
-				print "	Error: taboldstyle More than 50% the glyphs are the same width - this set of numbers is meant to be tabular. ",font.PostScriptName1
+				print("Tabular Width Check: taboldstyle group, font", font.PostScriptName1)
+				print("	Error: taboldstyle More than 50% the glyphs are the same width - this set of numbers is meant to be tabular. ",font.PostScriptName1)
 				for entry in widthTable[:-1]:
-					print "non-std width " + str(entry[1]) + " Number of glyphs " + str(entry[0])
+					print("non-std width " + str(entry[1]) + " Number of glyphs " + str(entry[0]))
 					for name in entry[2]:
-						print "\t\t" + name
+						print("\t\t" + name)
 
 		glyphnames = font.glyph_name_list3
 		glyphwidths = font.glyph_width_list3
@@ -1897,12 +1812,12 @@ def doSingleTest17():
 		if numWidthEntries > 9 :
 			numMostPopularWidth = widthTable[-1][0]
 			if (numWidthEntries * 0.5 < numMostPopularWidth) and (len(widthTable) > 1):
-				print "Tabular Width Check: tabnumerator group, font", font.PostScriptName1
-				print "	Error: tabnumerator More than 50% the glyphs are the same width - this set of numbers is meant to be tabular. ",font.PostScriptName1
+				print("Tabular Width Check: tabnumerator group, font", font.PostScriptName1)
+				print("	Error: tabnumerator More than 50% the glyphs are the same width - this set of numbers is meant to be tabular. ",font.PostScriptName1)
 				for entry in widthTable[:-1]:
-					print "non-std width " + str(entry[1]) + " Number of glyphs " + str(entry[0])
+					print("non-std width " + str(entry[1]) + " Number of glyphs " + str(entry[0]))
 					for name in entry[2]:
-						print "\t\t" + name
+						print("\t\t" + name)
 
 
 hintPat = re.compile(r"(?:(\s-*[0-9.]+)(\s-*[0-9.]+)*)\s([a-z]+)")
@@ -1950,20 +1865,20 @@ def checkHintEntry(entry, missingHintsGlyphs, glyphBox, fontPSName):
 				errMsgs += ["Error: edge hint %s %s in glyph %s has a value less than the low value of the glyph bbox (%s). %s." % (lo, op, name, min, fontPSName)]
 	if errMsgs:
 		for msg in errMsgs:
-			print msg
+			print(msg)
 	errorCount = len(errMsgs)
 	return errorCount
 
 
 def doSingleTest18():
-	print "\nSingle Face Test 18: Hint Check.  Verify that there is at least one hint for each charstring in each font, and that no charstring is > 32K limit for Mac OSX 10.3.x and earlier."
+	print("\nSingle Face Test 18: Hint Check.  Verify that there is at least one hint for each charstring in each font, and that no charstring is > 32K limit for Mac OSX 10.3.x and earlier.")
 	recursionLevel = 0
 	txDumpMathPat = re.compile(r"glyph\[\d+\] \{([^,]+),[^\s]+\s+(\S+)\s+width(.+?)(move|endchar)", re.DOTALL)
 	for cmpfFont in fontlist:
 
 		# Get glyph name list.
-		if not cmpfFont.ttFont.has_key('CFF '):
-			print "Skipping test - can't check hints in TrueType font.", cmpfFont.PostScriptName1
+		if 'CFF ' not in cmpfFont.ttFont:
+			print("Skipping test - can't check hints in TrueType font.", cmpfFont.PostScriptName1)
 			break
 
 		glyphnames = cmpfFont.glyphnames
@@ -1986,7 +1901,7 @@ def doSingleTest18():
 			if not t2CharString.bytecode:
 				t2CharString,compile()
 			if len(t2CharString.bytecode) > 32767:
-				print "Error: charstring for glyph %s is greater than 32k bytes. this can cause problems in Mac OSX 1.3.x and earlier." % (key)
+				print("Error: charstring for glyph %s is greater than 32k bytes. this can cause problems in Mac OSX 1.3.x and earlier." % (key))
 
 		# Now check the hints.
 		if not doStemWidthChecks:
@@ -1995,8 +1910,8 @@ def doSingleTest18():
 		command = "tx -dump -6 \"%s\" 2>&1" % (cmpfFont.path)
 		report = fdkutils.runShellCmd(command)
 		if not re.search(r"## glyph", report[:1000]):
-			print "Error: could not check hinting for %s. 'tx' command found some error. See following log." % (cmpfFont.PostScriptName1)
-			print report
+			print("Error: could not check hinting for %s. 'tx' command found some error. See following log." % (cmpfFont.PostScriptName1))
+			print(report)
 			return
 		hintList = txDumpMathPat.findall(report)
 		errorCount = 0
@@ -2004,20 +1919,20 @@ def doSingleTest18():
 			glyphBox = cmpfFont.metricsDict[entry[0]][-4:]
 			errorCount += checkHintEntry(entry, missingHintsGlyphs, glyphBox, cmpfFont.PostScriptName1)
 			if errorCount > 40:
-				print "Ending processing of hint errors - too many to enumerate."
+				print("Ending processing of hint errors - too many to enumerate.")
 				break
 
 		if missingHintsGlyphs:
-			print "\nError: No hint found in the following glyphs for font:", cmpfFont.PostScriptName1
-			print "Missing hints:", missingHintsGlyphs
+			print("\nError: No hint found in the following glyphs for font:", cmpfFont.PostScriptName1)
+			print("Missing hints:", missingHintsGlyphs)
 
 def doSingleTest19():
 	global fontlist
 
-	print "\nSingle Face Test 19: Warn if the Unicode cmap table does not exist, or there are double mapped glyphs in the Unicode cmap table"
+	print("\nSingle Face Test 19: Warn if the Unicode cmap table does not exist, or there are double mapped glyphs in the Unicode cmap table")
 	for cmpfFont in fontlist:
 		unicodeCmapList = []
-		if cmpfFont.ttFont.has_key('cmap'):
+		if 'cmap' in cmpfFont.ttFont:
 			cmap_table = cmpfFont.ttFont['cmap']
 			platformID = 0
 			platEncID = 3
@@ -2031,11 +1946,11 @@ def doSingleTest19():
 				unicodeCmapList = cmapUnicodeTable.cmap.items()
 
 		else:
-			print "	Error: font has no cmap table: ", cmpfFont.PostScriptName1
+			print("	Error: font has no cmap table: ", cmpfFont.PostScriptName1)
 			continue
 
 		if not unicodeCmapList:
-			print "	Error: font has no Unicode cmap table  (platform, encoding) (0,3) or (3,1) : ", cmpfFont.PostScriptName1
+			print("	Error: font has no Unicode cmap table  (platform, encoding) (0,3) or (3,1) : ", cmpfFont.PostScriptName1)
 			continue
 
 		if cmpfFont.isCID:
@@ -2046,7 +1961,7 @@ def doSingleTest19():
 		nameDict = {}
 		duplicateList = []
 		for code, glyphName in unicodeCmapList:
-			if nameDict.has_key(glyphName):
+			if glyphName in nameDict:
 				code2 = nameDict[glyphName]
 				unicodeComment1 = Unicode[code]
 				unicodeComment2 = Unicode[code2]
@@ -2056,15 +1971,15 @@ def doSingleTest19():
 				nameDict[glyphName] = code
 		cmpfFont.uniNameDict = nameDict
 		if duplicateList:
-			print "	Warning: font %s has glyphs mapped to more than one Unicode value. The OTF spec permits this, but it makes it hard for Acrobat to reverse map from Unicode encodings to char codes for searching." % (cmpfFont.PostScriptName1)
+			print("	Warning: font %s has glyphs mapped to more than one Unicode value. The OTF spec permits this, but it makes it hard for Acrobat to reverse map from Unicode encodings to char codes for searching." % (cmpfFont.PostScriptName1))
 			for message in duplicateList:
-				print message
+				print(message)
 
 
 def doSingleTest20():
 	global fontlist
 
-	print "\nSingle Face Test 20: Warn if there are double spaces in the name table font menu names."
+	print("\nSingle Face Test 20: Warn if there are double spaces in the name table font menu names.")
 
 	reporter1_fontname = []
 	reporter1_failedvalue = []
@@ -2080,51 +1995,51 @@ def doSingleTest20():
 	reporter6_failedvalue = []
 
 	for font in fontlist:
-		if (string.find(font.compatibleFamilyName3, "  ") != -1):
+		if (font.compatibleFamilyName3.find("  ") != -1):
 			reporter1_fontname.append(font.PostScriptName1)
 			reporter1_failedvalue.append(font.compatibleFamilyName3)
-		if (string.find(font.compatibleSubFamilyName3, "  ") != -1):
+		if (font.compatibleSubFamilyName3.find("  ") != -1):
 			reporter2_fontname.append(font.PostScriptName3)
 			reporter2_failedvalue.append(font.compatibleSubFamilyName3)
-		if (string.find(font.FullFontName1, "  ") != -1):
+		if (font.FullFontName1.find("  ") != -1):
 			reporter3_fontname.append(font.PostScriptName1)
 			reporter3_failedvalue.append(font.FullFontName1)
-		if	font.preferredFamilyName3 and (string.find(font.preferredFamilyName3, "  ") != -1):
-				if (string.find(font.preferredFamilyName3, "  ") != -1):
+		if	font.preferredFamilyName3 and (font.preferredFamilyName3.find("  ") != -1):
+				if (font.preferredFamilyName3.find("  ") != -1):
 					reporter4_fontname.append(font.PostScriptName1)
 					reporter4_failedvalue.append(font.preferredFamilyName3)
-		if font.compatibleSubFamilyName3 and (string.find(font.compatibleSubFamilyName3, "  ") != -1):
+		if font.compatibleSubFamilyName3 and (font.compatibleSubFamilyName3.find("  ") != -1):
 			reporter5_fontname.append(font.PostScriptName1)
 			reporter5_failedvalue.append(font.compatibleSubFamilyName3)
-		if font.MacCompatibleFullName1 and (string.find(font.MacCompatibleFullName1, "  ") != -1):
+		if font.MacCompatibleFullName1 and (font.MacCompatibleFullName1.find("  ") != -1):
 			reporter6_fontname.append(font.PostScriptName1)
 			reporter6_failedvalue.append(font.MacCompatibleFullName1)
 
 	for i in range(len(reporter1_fontname)):
-		print "	Error: Name ID 1, Font compatible family name <" +\
-		str(reporter1_failedvalue[i]) + "> has double spaces in name. ", reporter1_fontname[i]
+		print("	Error: Name ID 1, Font compatible family name <" +\
+		str(reporter1_failedvalue[i]) + "> has double spaces in name. ", reporter1_fontname[i])
 	for i in range(len(reporter2_fontname)):
-		print "	Error: Name ID 2, Font compatible subfamily name <" +\
-		str(reporter2_failedvalue[i]) + "> has double spaces in name. ", reporter2_fontname[i]
+		print("	Error: Name ID 2, Font compatible subfamily name <" +\
+		str(reporter2_failedvalue[i]) + "> has double spaces in name. ", reporter2_fontname[i])
 	for i in range(len(reporter3_fontname)):
-		print "	Error: Name ID 4, full font name <" +\
-		str(reporter3_failedvalue[i]) + "> has double spaces in name. ", reporter3_fontname[i]
+		print("	Error: Name ID 4, full font name <" +\
+		str(reporter3_failedvalue[i]) + "> has double spaces in name. ", reporter3_fontname[i])
 	for i in range(len(reporter4_fontname)):
-		print "	Error: Name ID 16, preferred family name <" +\
-		str(reporter4_failedvalue[i]) + "> has double spaces in name. ", reporter4_fontname[i]
+		print("	Error: Name ID 16, preferred family name <" +\
+		str(reporter4_failedvalue[i]) + "> has double spaces in name. ", reporter4_fontname[i])
 	for i in range(len(reporter5_fontname)):
-		print "	Error: Name ID 17, preferred subfamily name <" +\
-		str(reporter5_failedvalue[i]) + "> has double spaces in name. ", reporter5_fontname[i]
+		print("	Error: Name ID 17, preferred subfamily name <" +\
+		str(reporter5_failedvalue[i]) + "> has double spaces in name. ", reporter5_fontname[i])
 	for i in range(len(reporter6_fontname)):
-		print "	Error: Name ID 18, Mac-compatible full name <" +\
-		str(reporter6_failedvalue[i]) + "> has double spaces in name. ", reporter6_fontname[i]
+		print("	Error: Name ID 18, Mac-compatible full name <" +\
+		str(reporter6_failedvalue[i]) + "> has double spaces in name. ", reporter6_fontname[i])
 
 
 
 def doSingleTest21():
 	global fontlist
 
-	print "\nSingle Face Test 21: Warn if there trailing or leading spaces in the name table font menu names."
+	print("\nSingle Face Test 21: Warn if there trailing or leading spaces in the name table font menu names.")
 
 	reporter1_fontname = []
 	reporter1_failedvalue = []
@@ -2140,43 +2055,43 @@ def doSingleTest21():
 	reporter6_failedvalue = []
 
 	for font in fontlist:
-		if (len(string.strip(font.compatibleFamilyName3)) != len(font.compatibleFamilyName3)):
+		if (len(font.compatibleFamilyName3.strip()) != len(font.compatibleFamilyName3)):
 			reporter1_fontname.append(font.PostScriptName1)
 			reporter1_failedvalue.append(font.compatibleFamilyName3)
-		if (len(string.strip(font.compatibleSubFamilyName3)) != len(font.compatibleSubFamilyName3)):
+		if (len(font.compatibleSubFamilyName3.strip()) != len(font.compatibleSubFamilyName3)):
 			reporter2_fontname.append(font.PostScriptName1)
 			reporter2_failedvalue.append(font.compatibleSubFamilyName3)
-		if (len(string.strip(font.FullFontName1)) != len(font.FullFontName1)):
+		if (len(font.FullFontName1.strip()) != len(font.FullFontName1)):
 			reporter3_fontname.append(font.PostScriptName1)
 			reporter3_failedvalue.append(font.FullFontName1)
-		if font.preferredFamilyName3 and (len(string.strip(font.preferredFamilyName3)) != len(font.preferredFamilyName3)):
+		if font.preferredFamilyName3 and (len(font.preferredFamilyName3.strip()) != len(font.preferredFamilyName3)):
 			reporter4_fontname.append(font.PostScriptName1)
 			reporter4_failedvalue.append(font.preferredFamilyName3)
-		if font.preferredSubFamilyName3 and (len(string.strip(font.preferredSubFamilyName3)) != len(font.preferredSubFamilyName3)):
+		if font.preferredSubFamilyName3 and (len(font.preferredSubFamilyName3.strip()) != len(font.preferredSubFamilyName3)):
 			reporter5_fontname.append(font.PostScriptName1)
 			reporter5_failedvalue.append(font.preferredSubFamilyName3)
-		if font.MacCompatibleFullName1 and (len(string.strip(font.MacCompatibleFullName1)) != len(font.MacCompatibleFullName1)):
+		if font.MacCompatibleFullName1 and (len(font.MacCompatibleFullName1.strip()) != len(font.MacCompatibleFullName1)):
 			reporter6_fontname.append(font.PostScriptName1)
 			reporter6_failedvalue.append(font.MacCompatibleFullName1)
 
 	for i in range(len(reporter1_fontname)):
-		print "	Error: Name ID 1, Font compatible family name <" +\
-		str(reporter1_failedvalue[i]) +	 "> has trailing or leading spaces in name. ", reporter1_fontname[i]
+		print("	Error: Name ID 1, Font compatible family name <" +\
+		str(reporter1_failedvalue[i]) +	 "> has trailing or leading spaces in name. ", reporter1_fontname[i])
 	for i in range(len(reporter2_fontname)):
-		print "	Error: Name ID 2, Font compatible subfamily name <"+\
-		str(reporter2_failedvalue[i]) +	 "> has trailing or leading spaces in name. ", reporter2_fontname[i]
+		print("	Error: Name ID 2, Font compatible subfamily name <"+\
+		str(reporter2_failedvalue[i]) +	 "> has trailing or leading spaces in name. ", reporter2_fontname[i])
 	for i in range(len(reporter3_fontname)):
-		print "	Error: Name ID 4, full font name <"+\
-		str(reporter3_failedvalue[i]) +	 "> has trailing or leading spaces in name. ", reporter3_fontname[i]
+		print("	Error: Name ID 4, full font name <"+\
+		str(reporter3_failedvalue[i]) +	 "> has trailing or leading spaces in name. ", reporter3_fontname[i])
 	for i in range(len(reporter4_fontname)):
-		print "	Error: Name ID 16, preferred family name <"+\
-		str(reporter4_failedvalue[i]) +	 "> has trailing or leading spaces in name. ", reporter4_fontname[i]
+		print("	Error: Name ID 16, preferred family name <"+\
+		str(reporter4_failedvalue[i]) +	 "> has trailing or leading spaces in name. ", reporter4_fontname[i])
 	for i in range(len(reporter5_fontname)):
-		print "	Error: Name ID 17, preferred subfamily name <"+\
-		str(reporter5_failedvalue[i]) +	 "> has trailing or leading spaces in name. ", reporter5_fontname[i]
+		print("	Error: Name ID 17, preferred subfamily name <"+\
+		str(reporter5_failedvalue[i]) +	 "> has trailing or leading spaces in name. ", reporter5_fontname[i])
 	for i in range(len(reporter6_fontname)):
-		print "	Error: Name ID 18, Mac-compatible full name <"+\
-		str(reporter6_failedvalue[i]) +	 "> has trailing or leading spaces in name. ", reporter6_fontname[i]
+		print("	Error: Name ID 18, Mac-compatible full name <"+\
+		str(reporter6_failedvalue[i]) +	 "> has trailing or leading spaces in name. ", reporter6_fontname[i])
 
 
 #ae oe ct ff fi ffi fl ffl ij AE OE IJ CT ST TH TT Th  UE ue fk ft gg sl  NJ DZ Lj Nj Dz lj nj dz sp st tt zy
@@ -2295,11 +2210,11 @@ def getLigatureName(font, name):
 					altBaseName = baseName
 					baseName = baseName +  "." + ext
 					altligCompName = ligCompName+  "." + ext
-					if font.metricsDict.has_key(altligCompName):
+					if altligCompName in font.metricsDict:
 						ligCompName = altligCompName
 				elif suffixClass == kAddSuffixToEnd:
 					altligCompName = ligCompName+  "." + ext
-					if font.metricsDict.has_key(altligCompName):
+					if altligCompName in font.metricsDict:
 						ligCompName = altligCompName
 					else:
 						altBaseName = baseName
@@ -2310,11 +2225,11 @@ def getLigatureName(font, name):
 				else:
 					altBaseName = baseName
 					baseName = baseName +  "." + ext
-					if not font.metricsDict.has_key(baseName):
+					if baseName not in font.metricsDict:
 						baseName = altBaseName
 						altBaseName = None
 						altligCompName = ligCompName+  "." + ext
-						if font.metricsDict.has_key(altligCompName):
+						if altligCompName in font.metricsDict:
 							ligCompName = altligCompName
 
 			entry = [name, baseName, altBaseName, ligCompName]
@@ -2331,7 +2246,7 @@ def getLigatureNames(font):
 	return ligatureList
 
 def isAccent(glyphName):
-	if accentNames.has_key(glyphName):
+	if glyphName in accentNames:
 		return 1
 	if glyphName.startswith("uni0"):
 		return (glyphName >= "uni0300") and (glyphName <= "uni034F")
@@ -2341,7 +2256,7 @@ def isAccent(glyphName):
 def doSingleTest22():
 	global fontlist
 
-	print "\nSingle Face Test 22: Warn if any ligatures have a width which not larger than the width of the first glyph, or, if first glyph is not in font, if the RSB is negative."
+	print("\nSingle Face Test 22: Warn if any ligatures have a width which not larger than the width of the first glyph, or, if first glyph is not in font, if the RSB is negative.")
 	for font in fontlist:
 		# Ligature entry = [ligature name, base name, alternate base name, last ligature component].  Base glyph name may be None, if I couldn't find it
 		ligatureNames = font.ligDict.keys()
@@ -2354,7 +2269,7 @@ def doSingleTest22():
 				try:
 					widthLig, lsbLig, bottomLig, rightLig, topLig  = font.metricsDict[ligName]
 				except KeyError:
-					print "Skipping ligature glyph '%s'; not found in metrics dict." % (ligName)
+					print("Skipping ligature glyph '%s'; not found in metrics dict." % (ligName))
 					continue
 				rsbLig = widthLig - rightLig
 
@@ -2362,26 +2277,26 @@ def doSingleTest22():
 				try:
 					widthLeftComp, lsbLeftComp, bottomLeftComp, rightLeftComp, topLeftCompp  = font.metricsDict[leftComp]
 				except KeyError:
-					print "Skipping ligature left component glyph '%s'; not found in metrics dict." % (leftComp)
+					print("Skipping ligature left component glyph '%s'; not found in metrics dict." % (leftComp))
 					continue
 
 				rightComp = ligComponents[-1]
 				try:
 					widthRightComp, lsbRightComp, bottomRightComp, rightRightComp, topRightComp  = font.metricsDict[rightComp]
 				except KeyError:
-					print "Skipping ligature right component glyph  '%s'; not found in metrics dict." % (rightComp)
+					print("Skipping ligature right component glyph  '%s'; not found in metrics dict." % (rightComp))
 					continue
 
 				if widthLig <=  (widthLeftComp - gDesignSpaceTolerance):
-					print "	Warning: Width of ligature %s: %s is less than or the same as that of the left component glyph %s: %s for font %s." % (ligName, widthLig, leftComp, widthLeftComp, font.PostScriptName1)
+					print("	Warning: Width of ligature %s: %s is less than or the same as that of the left component glyph %s: %s for font %s." % (ligName, widthLig, leftComp, widthLeftComp, font.PostScriptName1))
 
 				diff = abs(lsbLig - lsbLeftComp)
 				if diff > gDesignSpaceTolerance:
-					print "	Warning: left side bearing %s of ligature %s is not equal to the lsb %s of the left side component %s for font %s." % (lsbLig, ligName, lsbLeftComp, leftComp, font.PostScriptName1)
+					print("	Warning: left side bearing %s of ligature %s is not equal to the lsb %s of the left side component %s for font %s." % (lsbLig, ligName, lsbLeftComp, leftComp, font.PostScriptName1))
 				rsbRightComp = widthRightComp - rightRightComp
 				diff = abs(rsbRightComp - rsbLig)
 				if diff > gDesignSpaceTolerance:
-					print "	Warning: right side bearing %s of ligature %s is not equal to the rsb %s of the last component %s for font %s." % (rsbLig, ligName, rsbRightComp, rightComp, font.PostScriptName1)
+					print("	Warning: right side bearing %s of ligature %s is not equal to the rsb %s of the last component %s for font %s." % (rsbLig, ligName, rsbRightComp, rightComp, font.PostScriptName1))
 
 accentedNames = accentNames.keys()
 def  getAcentEntries(font):
@@ -2405,7 +2320,7 @@ def  getAcentEntries(font):
 def doSingleTest23():
 	global fontlist
 
-	print "\nSingle Face Test 23: Warn if any accented glyphs have a width different than the base glyph."
+	print("\nSingle Face Test 23: Warn if any accented glyphs have a width different than the base glyph.")
 	for font in fontlist:
 		accentEntries = getAcentEntries(font) # get a list of entries [ accented glyph-name, base-glyph name]. base glyph name may be None, if I couldn't find it
 		hmtxTable = font.ttFont['hmtx']
@@ -2418,13 +2333,13 @@ def doSingleTest23():
 				widthAccent, lsbLig = hmtxTable[accentName]
 				diff = abs(widthAccent - widthbase)
 				if diff > gDesignSpaceTolerance:
-					print "\tWarning: Width of glyph %s: %s differs from that of the base glyph %s: %s for font %s." % (accentName, widthAccent, baseName, widthbase, font.PostScriptName1)
+					print("\tWarning: Width of glyph %s: %s differs from that of the base glyph %s: %s for font %s." % (accentName, widthAccent, baseName, widthbase, font.PostScriptName1))
 			except KeyError:
 				pass
 
 def doSingleTest24():
 	global fontlist
-	print "\nSingle Face Test 24: Warn if font has 'size' feature, and design size is not in specified range."
+	print("\nSingle Face Test 24: Warn if font has 'size' feature, and design size is not in specified range.")
 	for font in fontlist:
 		font.sizeDesignSize = 0
 		font.sizeSubfFamilyID = 0
@@ -2446,56 +2361,52 @@ def doSingleTest24():
 				if font.sizeNameID:
 					# only check range if there is one.
 					if (designSize < rangeStart) or (designSize > rangeEnd):
-						print "\tError: 'size' feature design size %s is not within design range %s - %s for font %s." % (designSize, rangeStart, rangeEnd, font.PostScriptName1)
+						print("\tError: 'size' feature design size %s is not within design range %s - %s for font %s." % (designSize, rangeStart, rangeEnd, font.PostScriptName1))
 				font.sizeMenuName = ""
 				for keyTuple in font.nameIDDict.keys():
 					if keyTuple[3] == font.sizeNameID:
 						font.sizeMenuName = font.nameIDDict[keyTuple]
 						break
 				if not font.sizeMenuName:
-					print "	Error: the 'size' feature refers to name table name ID '%s', but I can't find it. %s." % (font.sizeNameID, font.PostScriptName1)
+					print("	Error: the 'size' feature refers to name table name ID '%s', but I can't find it. %s." % (font.sizeNameID, font.PostScriptName1))
 			else:
-				print "Program error: font has 'size' feature, but could not parse the values for font %s." % ( font.PostScriptName1)
+				print("Program error: font has 'size' feature, but could not parse the values for font %s." % ( font.PostScriptName1))
 
 
 def doSingleTest25():
 	global fontlist
 
-	print "\nSingle Face Test 25: Check that fonts do not have UniqueID, UID, or XUID in CFF table."
+	print("\nSingle Face Test 25: Check that fonts do not have UniqueID, UID, or XUID in CFF table.")
 
-	if not fontlist[0].ttFont.has_key('CFF '):
-		print "Skipping test - applies only to CFF fonts."
-		return
-
-	if not fontlist[0].ttFont.has_key('CFF '):
-		print "Skipping test - applies only to CFF fonts."
+	if 'CFF ' not in fontlist[0].ttFont:
+		print("Skipping test - applies only to CFF fonts.")
 		return
 	if fontlist[0].isCID:
-		print "Skipping test - applies only to name-keyed CFF fonts."
+		print("Skipping test - applies only to name-keyed CFF fonts.")
 		return
 
 	hasError = 0
 	for font in fontlist:
 		if hasattr(font.topDict, "UniqueID"):
-			print "	Error: Font has UniqueID in CFF table.", font.PostScriptName1
+			print("	Error: Font has UniqueID in CFF table.", font.PostScriptName1)
 			hasError = 1
 		if hasattr(font.topDict, "XUID"):
-			print "	Error: Font has XUID in CFF table.", font.PostScriptName1
+			print("	Error: Font has XUID in CFF table.", font.PostScriptName1)
 			hasError = 1
 		if hasattr(font.topDict, "UIDBase"):
-			print "	Error: Font has UIDBase in CFF table.", font.PostScriptName1
+			print("	Error: Font has UIDBase in CFF table.", font.PostScriptName1)
 			hasError = 1
 	if hasError:
-		print """ Use of UniqueID/XUID is still syntactically correct. However,
+		print(""" Use of UniqueID/XUID is still syntactically correct. However, end=''
 		the advantage in caching the font in printers for fonts smaller than  1
 		Mbyte is small, and and the risk of conflicting with another font that
 		has an arbitrarily assigned UniqueID value is significant. The Adobe
-		Type Dept has stopped using them for non-CJK fonts."""
+		Type Dept has stopped using them for non-CJK fonts.""")
 
 def doSingleTest26():
 	global fontlist
 
-	print "\nSingle Face Test 26: Glyph name checks."
+	print("\nSingle Face Test 26: Glyph name checks.")
 
 	matchPats = [ re.compile(r"^uni([0-9A-F][0-9A-F][0-9A-F][0-9A-F])+$"), re.compile(r"^u[0-9A-F][0-9A-F][0-9A-F][0-9A-F]([0-9A-F]*[0-9A-F]*)$")]
 
@@ -2503,11 +2414,11 @@ def doSingleTest26():
 		if font.usDefaultChar == None:
 			break
 		if font.usDefaultChar!= 0:
-			print "	Warning: the OS/2 default char is set to char code '%s'; it is most usefully set to 0, aka .notdef. %s" % (font.usDefaultChar, font.PostScriptName1)
+			print("	Warning: the OS/2 default char is set to char code '%s'; it is most usefully set to 0, aka .notdef. %s" % (font.usDefaultChar, font.PostScriptName1))
 
 
 	for font in fontlist:
-		if not font.ttFont.has_key('CFF '):
+		if 'CFF ' not in font.ttFont:
 			glyphnames = font.glyphnames
 			notdefGlyphName = glyphnames[0]
 			nullGlyphName = glyphnames[1]
@@ -2516,28 +2427,28 @@ def doSingleTest26():
 			glyphnames = font.glyphnames[4:]
 
 			if  notdefGlyphName !=  ".notdef":
-				print "	Error: In TrueType fonts, glyphID 0 should be .notdef rather than '%s'. %s." % (notdefGlyphName, font.PostScriptName1)
+				print("	Error: In TrueType fonts, glyphID 0 should be .notdef rather than '%s'. %s." % (notdefGlyphName, font.PostScriptName1))
 				notdefGlyphName = None
 
 			if  nullGlyphName !=  "NULL":
 				if nullGlyphName ==  ".null":
-					print "	Warning: glyph ID 1 is named '.null'; should be 'NULL'", font.PostScriptName1
+					print("	Warning: glyph ID 1 is named '.null'; should be 'NULL'", font.PostScriptName1)
 				else:
-					print "	Error: In TrueType fonts, glyphID 1 should be NULL rather than '%s'. %s." % (nullGlyphName, font.PostScriptName1)
+					print("	Error: In TrueType fonts, glyphID 1 should be NULL rather than '%s'. %s." % (nullGlyphName, font.PostScriptName1))
 					nullGlyphName = None
 
 			if  crGlyphName !=  "CR":
 				if crGlyphName ==  "nonmarkingreturn":
-					print "	Warning: glyph ID 2 is named 'nonmarkingreturn'; should be 'CR'", font.PostScriptName1
+					print("	Warning: glyph ID 2 is named 'nonmarkingreturn'; should be 'CR'", font.PostScriptName1)
 				else:
-					print "	Error: In TrueType fonts, glyphID 2 should be 'CR' rather than '%s'. %s." % (crGlyphName, font.PostScriptName1)
+					print("	Error: In TrueType fonts, glyphID 2 should be 'CR' rather than '%s'. %s." % (crGlyphName, font.PostScriptName1))
 					crGlyphName = None
 
 			if font.isCID:
 				continue
 
 			if  spaceGlyphName !=  "space":
-				print "	Error: In TrueType fonts, glyphID 3 should be 'space' rather than '%s'. %s." % (spaceGlyphName, font.PostScriptName1)
+				print("	Error: In TrueType fonts, glyphID 3 should be 'space' rather than '%s'. %s." % (spaceGlyphName, font.PostScriptName1))
 				spaceGlyphName = None
 
 			if hasattr(font, "uniNameDict"):
@@ -2545,37 +2456,37 @@ def doSingleTest26():
 					try:
 						code = font.uniNameDict[nullGlyphName]
 						if code != 0:
-							print "	Error: TrueType font should have NULL glyph '%s' encoded at Unicode value 0 rather than %s. %s" % (nullGlyphName, hex(code), font.PostScriptName1)
+							print("	Error: TrueType font should have NULL glyph '%s' encoded at Unicode value 0 rather than %s. %s" % (nullGlyphName, hex(code), font.PostScriptName1))
 					except KeyError:
-						print "	Error: TrueType font should have NULL glyph '%s' encoded at Unicode value 0. %s" % (nullGlyphName, font.PostScriptName1)
+						print("	Error: TrueType font should have NULL glyph '%s' encoded at Unicode value 0. %s" % (nullGlyphName, font.PostScriptName1))
 				if crGlyphName:
 					try:
 						code = font.uniNameDict[crGlyphName]
 						if code != 0xD:
-							print "	Error: TrueType font should have CR glyph '%s' encoded at Unicode value 0xD rather than %s. %s" % (crGlyphName, hex(code), font.PostScriptName1)
+							print("	Error: TrueType font should have CR glyph '%s' encoded at Unicode value 0xD rather than %s. %s" % (crGlyphName, hex(code), font.PostScriptName1))
 					except KeyError:
-						print "	Error: TrueType font should have CR glyph '%s' encoded at Unicode value 0xD. %s" % (crGlyphName, font.PostScriptName1)
+						print("	Error: TrueType font should have CR glyph '%s' encoded at Unicode value 0xD. %s" % (crGlyphName, font.PostScriptName1))
 				if spaceGlyphName:
 					try:
 						code = font.uniNameDict[spaceGlyphName]
 						if code != 0x20:
-							print "	Error: TrueType font should have CR glyph '%s' encoded at Unicode value 0x20 rather than %s. %s" % (spaceGlyphName, hex(code), font.PostScriptName1)
+							print("	Error: TrueType font should have CR glyph '%s' encoded at Unicode value 0x20 rather than %s. %s" % (spaceGlyphName, hex(code), font.PostScriptName1))
 					except KeyError:
-						print "	Error: TrueType font should have CR glyph '%s' encoded at Unicode value 0x20. %s" % (spaceGlyphName, font.PostScriptName1)
+						print("	Error: TrueType font should have CR glyph '%s' encoded at Unicode value 0x20. %s" % (spaceGlyphName, font.PostScriptName1))
 
 	# Now to check if all names or AGL compliant.
 	for font in fontlist:
 		if font.isCID:
 				continue
 
-		if font.ttFont.has_key('CFF '):
+		if 'CFF ' in font.ttFont:
 			# Check that the total size of glyph names is less than the limit or Mac OSX 10.4.x and earlier.
 			gblock = "  ".join(font.glyphnames) + "  "
 			glyphNameBufferSize = len(gblock)
 			if glyphNameBufferSize > 32767:
-				print "\tError: The total size of the glyph names is greater than the safe limit of 32767 for Mac OSX 10.4.x and earlier by %s characters, and will cause crashes. %s." % (glyphNameBufferSize - 32767, font.PostScriptName1)
+				print("\tError: The total size of the glyph names is greater than the safe limit of 32767 for Mac OSX 10.4.x and earlier by %s characters, and will cause crashes. %s." % (glyphNameBufferSize - 32767, font.PostScriptName1))
 			elif ((2*len(font.glyphnames)) + glyphNameBufferSize) > 32767:
-				print "\tWarning: The total size of the glyph names is getting close to  than the safe limit of 32767 for Mac OSX 10.4.x..%s\tThe safety margin is  %s bytes. If this margin goes below zero, the font will cause crashes. %s" % (os.linesep, 32767 - glyphNameBufferSize, font.PostScriptName1);
+				print("\tWarning: The total size of the glyph names is getting close to  than the safe limit of 32767 for Mac OSX 10.4.x..%s\tThe safety margin is  %s bytes. If this margin goes below zero, the font will cause crashes. %s" % (os.linesep, 32767 - glyphNameBufferSize, font.PostScriptName1))
 
 		glyphnames = font.glyphnames
 		htmx_table = font.ttFont['hmtx']
@@ -2585,12 +2496,12 @@ def doSingleTest26():
 			if gname in ["endash ", "onedotenleader", "twodotenleader", "threedotenleader"]:
 				gwidth = htmx_table.metrics[gname][0]
 				if gwidth != enWidth:
-					print "\tError: glyph %s has a width of %s rather than 1/2 the em-square size. %s" % (gname, gwidth, font.PostScriptName1)
+					print("\tError: glyph %s has a width of %s rather than 1/2 the em-square size. %s" % (gname, gwidth, font.PostScriptName1))
 				continue
 			if gname == "emdash":
 				gwidth = htmx_table.metrics[gname][0]
 				if gwidth != font.unitsPerEm:
-					print "\tError: glyph %s has a width of %s rather than the em-square size. %s" % (gname, gwidth, font.PostScriptName1)
+					print("\tError: glyph %s has a width of %s rather than the em-square size. %s" % (gname, gwidth, font.PostScriptName1))
 				continue
 			if gname == "figurespace":
 				gwidth = htmx_table.metrics[gname][0]
@@ -2598,7 +2509,7 @@ def doSingleTest26():
 					try:
 						twidth = htmx_table.metrics[tname][0]
 						if twidth !=  gwidth:
-							print "\tError: Width (%s) of %s is not the same as the width (%s) of the tabular glyph %s. %s" % (gwidth, gname, twidth, tname, font.PostScriptName1)
+							print("\tError: Width (%s) of %s is not the same as the width (%s) of the tabular glyph %s. %s" % (gwidth, gname, twidth, tname, font.PostScriptName1))
 						break
 					except KeyError:
 						pass
@@ -2612,11 +2523,11 @@ def doSingleTest26():
 						if hasattr(dictGlyph, "fin") and dictGlyph.fin and (dictGlyph.fin != partName):
 							# complain if glyph is an AGD source name
 							if isLig:
-								print "	Warning. Font uses working name '%s' rather than Adobe final name '%s' in ligature name '%s'. %s" % (partName, dictGlyph.fin, gname, font.PostScriptName1)
+								print("	Warning. Font uses working name '%s' rather than Adobe final name '%s' in ligature name '%s'. %s" % (partName, dictGlyph.fin, gname, font.PostScriptName1))
 							elif (not dictGlyph.fin in glyphnames):
 								# but only if there is not another glyph with the same final name in the font. Some glypsh are duplicated under "old" and "new" names for legacy issues.
 								# This is becuase underMacmac OSX, glyphs are still encoded based on their glyph name in some cases, so changing Delta to uni0394 is a bad idea.
-								print "	Warning. Font uses working name '%s' rather than Adobe final name '%s'. %s" % (partName, dictGlyph.fin, font.PostScriptName1)
+								print("	Warning. Font uses working name '%s' rather than Adobe final name '%s'. %s" % (partName, dictGlyph.fin, font.PostScriptName1))
 						continue
 
 					# Not in AGD. Check if is an alternate name, and the alternate is in AGD.
@@ -2627,9 +2538,9 @@ def doSingleTest26():
 						if  dictGlyph:
 							if hasattr(dictGlyph, "fin") and dictGlyph.fin and (dictGlyph.fin != baseName):
 								if isLig:
-									print "	Warning. Font uses working name '%s' rather than Adobe final name '%s' in ligature name '%s'. %s" % (partName, dictGlyph.fin + "." + nameParts[1], gname, font.PostScriptName1)
+									print("	Warning. Font uses working name '%s' rather than Adobe final name '%s' in ligature name '%s'. %s" % (partName, dictGlyph.fin + "." + nameParts[1], gname, font.PostScriptName1))
 								else:
-									print "	Warning. Font uses working name '%s' rather than Adobe final name '%s'. %s" % (partName, dictGlyph.fin + "." + nameParts[1], font.PostScriptName1)
+									print("	Warning. Font uses working name '%s' rather than Adobe final name '%s'. %s" % (partName, dictGlyph.fin + "." + nameParts[1], font.PostScriptName1))
 							continue
 					# baseName is not in AGD either. Check if it is a valid uni name.
 					isUniName = 0
@@ -2639,15 +2550,15 @@ def doSingleTest26():
 							break
 					if not isUniName:
 						if isLig:
-							print "	Warning. Glyph name '%s' in ligature name '%s' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. %s" % (partName, gname, font.PostScriptName1)
+							print("	Warning. Glyph name '%s' in ligature name '%s' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. %s" % (partName, gname, font.PostScriptName1))
 						else:
-							print "	Warning. Glyph name '%s' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. %s" % (partName, font.PostScriptName1)
+							print("	Warning. Glyph name '%s' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. %s" % (partName, font.PostScriptName1))
 
 
 def doSingleTest27():
 	global fontlist
 
-	print "\nSingle Face Test 27: Check strikeout/subscript/superscript positions."
+	print("\nSingle Face Test 27: Check strikeout/subscript/superscript positions.")
 	for font in fontlist:
 		# Heurisitcs are from makeotf hotconv/source/hot.c::prepWinData()
 		yStrikeoutSize = font.underlineThickness
@@ -2676,7 +2587,7 @@ def doSingleTest27():
 						"ySuperscriptXSize","ySuperscriptYSize","ySuperscriptXOffset","ySuperscriptYOffset"]:
 			diff = abs(eval("font.%s - %s" % (fieldName, fieldName)))
 			if diff > 5:
-				print "\tWarning: OS/2 table field %s of %s differs from default calculated value %s. Please check. %s." % (fieldName, eval("font.%s" % (fieldName)),eval(fieldName), font.PostScriptName1)
+				print("\tWarning: OS/2 table field %s of %s differs from default calculated value %s. Please check. %s." % (fieldName, eval("font.%s" % (fieldName)),eval(fieldName), font.PostScriptName1))
 
 
 def doSingleTest28():
@@ -2770,13 +2681,13 @@ def doSingleTest28():
 	{ "firstUV": 0xFFF0, "secondUV": 0xFFFF, "numRequired": 16, "numFound": 0, "bitNum": 69, "isSupported": 0, "blockName": "Specials" },
 	]
 
-	print "\nSingle Face Test 28: Check font OS/2 code pages for the a common set of code page bits."
+	print("\nSingle Face Test 28: Check font OS/2 code pages for the a common set of code page bits.")
 	for font in fontlist:
 		cmapUnicodeTables = [None, None]
 		hmtxTable = font.ttFont['hmtx'].metrics
 		haveUVCmap =0
 		haveUVCmap32 =0
-		if font.ttFont.has_key('cmap'):
+		if 'cmap' in font.ttFont:
 			cmap_table = font.ttFont['cmap']
 			platformID = 3
 			platEncID = 1
@@ -2801,11 +2712,11 @@ def doSingleTest28():
 			codePage["isSupported"] = 0
 			for cmapUnicodeTable in cmapUnicodeTables:
 				if cmapUnicodeTable:
-					if (cmapUnicodeTable.has_key(codePage["uv1"]) or (codePage["uv2"] and cmapUnicodeTable.has_key(codePage["uv2"]))):
+					if (codePage["uv1"] in cmapUnicodeTable or (codePage["uv2"] and codePage["uv2"] in cmapUnicodeTable)):
 						codePage["isSupported"] = 1
 						break
 			if not haveUVCmap:
-				if hmtxTable.has_key(codePage["gname1"]) or (codePage["gname2"] and hmtxTable.has_key(codePage["gname2"])):
+				if codePage["gname1"] in hmtxTable or (codePage["gname2"] and codePage["gname2"] in hmtxTable):
 						codePage["isSupported"] = 1
 
 			codePageDict[codePage["bitNum"]] = codePage["isSupported"]
@@ -2815,21 +2726,21 @@ def doSingleTest28():
 				codeRange = eval("os2table.ulCodePageRange%s" % (codepageIndex+1))
 				for bitNum in range(32):
 					dictBit = bitNum + ( 32*(codepageIndex))
-					if codePageDict.has_key(dictBit):
+					if dictBit in codePageDict:
 						if codePageDict[dictBit] and not (codeRange & (1<<bitNum)):
-							print "\tError: font has OS/2.ulCodePageRange%s bit %s not set, but the test heuristics say it should  be set. %s." % (codepageIndex+1, bitNum, font.PostScriptName1)
+							print("\tError: font has OS/2.ulCodePageRange%s bit %s not set, but the test heuristics say it should  be set. %s." % (codepageIndex+1, bitNum, font.PostScriptName1))
 						elif  (not codePageDict[dictBit]) and (codeRange & (1<<bitNum)):
-							print "\tError: font has OS/2.ulCodePageRange%s bit %s set, but the test heuristics say it should not be set. %s." % (codepageIndex+1, bitNum, font.PostScriptName1)
+							print("\tError: font has OS/2.ulCodePageRange%s bit %s set, but the test heuristics say it should not be set. %s." % (codepageIndex+1, bitNum, font.PostScriptName1))
 					else:
-						if (codeRange & (1L<<bitNum)):
-							print "\tNote: Font has  OS/2.ulCodePageRange%s bit %s set, which is not covered by this programs rules. %s." % (codepageIndex+1, bitNum, font.PostScriptName1)
+						if (codeRange & (1<<bitNum)):
+							print("\tNote: Font has  OS/2.ulCodePageRange%s bit %s set, which is not covered by this programs rules. %s." % (codepageIndex+1, bitNum, font.PostScriptName1))
 		except AttributeError:
 			pass
 
 		# Check unicodeTable. Say block is supported if it has at least 1/3 of the necessary glyphs.
 		# Get Unicode cmap subtable
 		if not haveUVCmap:
-			print "\tError: font has no Unicode camp table! Skipping check of OS/2 ulUnicodeRanges. %s." % ()
+			print("\tError: font has no Unicode camp table! Skipping check of OS/2 ulUnicodeRanges. %s." % ())
 			continue
 
 		unitTableDict = {}
@@ -2841,7 +2752,7 @@ def doSingleTest28():
 				for cmapUnicodeTable in cmapUnicodeTables:
 					if not cmapUnicodeTable:
 						continue
-					if cmapUnicodeTable.has_key(uv):
+					if uv in cmapUnicodeTable:
 						cnt += 1
 						break
 
@@ -2855,18 +2766,18 @@ def doSingleTest28():
 			codeRange = eval("os2table.ulUnicodeRange%s" % (codepageIndex+1))
 			for bitNum in range(32):
 				blockIndex = bitNum + ( 32*(codepageIndex))
-				if unitTableDict.has_key(blockIndex):
+				if blockIndex in unitTableDict:
 					if unitTableDict[blockIndex][0] and not (codeRange & (1<<bitNum)):
-						print "\tError: font has OS/2.ulUnicodeRange%s bit %s not set for Unicode block %s, but the test heuristics say it should  be set. %s." % (codepageIndex+1, blockIndex, unitTableDict[blockIndex][1], font.PostScriptName1)
-					elif  (not unitTableDict[blockIndex][0]) and (codeRange & (1L<<bitNum)):
-						print "\tError: font has OS/2.ulUnicodeRange%s bit %s set for Unicode block %s, but the test heuristics say it should not be set. %s." % (codepageIndex+1, blockIndex, unitTableDict[blockIndex][1], font.PostScriptName1)
+						print("\tError: font has OS/2.ulUnicodeRange%s bit %s not set for Unicode block %s, but the test heuristics say it should  be set. %s." % (codepageIndex+1, blockIndex, unitTableDict[blockIndex][1], font.PostScriptName1))
+					elif  (not unitTableDict[blockIndex][0]) and (codeRange & (1<<bitNum)):
+						print("\tError: font has OS/2.ulUnicodeRange%s bit %s set for Unicode block %s, but the test heuristics say it should not be set. %s." % (codepageIndex+1, blockIndex, unitTableDict[blockIndex][1], font.PostScriptName1))
 				else:
-					if codeRange & (1L<<bitNum):
+					if codeRange & (1<<bitNum):
 						if (blockIndex == 57):
 							if not haveUVCmap32:
-								print "\tError: Font has  OS/2.ulUnicodeRange%s blockIndex %s set, but does not have a 32 bit Unicode cmap table. %s." % (codepageIndex+1, blockIndex, font.PostScriptName1)
+								print("\tError: Font has  OS/2.ulUnicodeRange%s blockIndex %s set, but does not have a 32 bit Unicode cmap table. %s." % (codepageIndex+1, blockIndex, font.PostScriptName1))
 						else:
-							print "\tNote: Font has  OS/2.ulUnicodeRange%s blockIndex %s set, which is not covered by this programs rules. %s." % (codepageIndex+1, blockIndex, font.PostScriptName1)
+							print("\tNote: Font has  OS/2.ulUnicodeRange%s blockIndex %s set, which is not covered by this programs rules. %s." % (codepageIndex+1, blockIndex, font.PostScriptName1))
 
 def doSingleTest29(): # Place-holder
 	pass
@@ -2874,140 +2785,140 @@ def doSingleTest29(): # Place-holder
 def doSingleTest30():
 	global preferredFamilyList1
 
-	print "\nSingle Face Test 30: Check that there are no more than 7 pairs of BlueValues and FamilyBlues in a font, and there is an even number of values."
+	print("\nSingle Face Test 30: Check that there are no more than 7 pairs of BlueValues and FamilyBlues in a font, and there is an even number of values.")
 
 	for name in preferredFamilyList1.keys():
 		fontgroup = preferredFamilyList1[name]
 		for font in fontgroup:
 			if not font.topDict: # not CFF
-				print "\t\tSkipping non-PostScript Font:", font.PostScriptName1
+				print("\t\tSkipping non-PostScript Font:", font.PostScriptName1)
 				break
 			for fontDict in font.FDArray:
 				try: # not all fonts have BlueValues, but they should.
 					if len(fontDict.Private.BlueValues) > 14:
-						print "\tError: The font has more than 7 pairs of BlueValues"
-						print "\t\tFont:", font.PostScriptName1
-						print "\t\tBlueValues:", fontDict.Private.BlueValues
+						print("\tError: The font has more than 7 pairs of BlueValues")
+						print("\t\tFont:", font.PostScriptName1)
+						print("\t\tBlueValues:", fontDict.Private.BlueValues)
 					if len(fontDict.Private.BlueValues) % 2 != 0:
-						print "\tError: The font does not have an even number of BlueValues"
-						print "\t\tFont:", font.PostScriptName1
-						print "\t\tBlueValues:", fontDict.Private.BlueValues
+						print("\tError: The font does not have an even number of BlueValues")
+						print("\t\tFont:", font.PostScriptName1)
+						print("\t\tBlueValues:", fontDict.Private.BlueValues)
 				except AttributeError:
-					print "\tError: Skipping test: the font has no BlueValues for", font.PostScriptName1
+					print("\tError: Skipping test: the font has no BlueValues for", font.PostScriptName1)
 					continue
 
 				try: # not all fonts have FamilyBlues.
 					if len(fontDict.Private.FamilyBlues) > 14:
-						print "\nError: The font has more than 7 pairs of FamilyBlues"
-						print "\tFont:", font.PostScriptName1
-						print "\tFamilyBlues:", fontDict.Private.FamilyBlues
+						print("\nError: The font has more than 7 pairs of FamilyBlues")
+						print("\tFont:", font.PostScriptName1)
+						print("\tFamilyBlues:", fontDict.Private.FamilyBlues)
 
 					if len(fontDict.Private.FamilyBlues) % 2 != 0:
-						print "\nError: The font does not have an even number of FamilyBlues"
-						print "\tFont:", font.PostScriptName1
-						print "\tFamilyBlues:", fontDict.Private.FamilyBlues
+						print("\nError: The font does not have an even number of FamilyBlues")
+						print("\tFont:", font.PostScriptName1)
+						print("\tFamilyBlues:", fontDict.Private.FamilyBlues)
 				except AttributeError:
 					pass
 
 def doSingleTest31():
 	global preferredFamilyList1
 
-	print "\nSingle Face Test 31: Check that there are no more than 5 pairs of OtherBlues and FamilyOtherBlues in a font, and there is an even number of values."
+	print("\nSingle Face Test 31: Check that there are no more than 5 pairs of OtherBlues and FamilyOtherBlues in a font, and there is an even number of values.")
 
 	for name in preferredFamilyList1.keys():
 		fontgroup = preferredFamilyList1[name]
 		for font in fontgroup:
 			if not font.topDict: # not CFF
-				print "\t\tSkipping non-PostScript Font:", font.PostScriptName1
+				print("\t\tSkipping non-PostScript Font:", font.PostScriptName1)
 				break
 			for fontDict in font.FDArray:
 				try: # not all fonts have FamilyOtherBlues.
 					if len(fontDict.Private.OtherBlues) > 10:
-						print "\tError: The font has more than 5 pairs of OtherBlues"
-						print "\t\tFont:", font.PostScriptName1
-						print "\t\tOtherBlues:", fontDict.Private.OtherBlues
+						print("\tError: The font has more than 5 pairs of OtherBlues")
+						print("\t\tFont:", font.PostScriptName1)
+						print("\t\tOtherBlues:", fontDict.Private.OtherBlues)
 					if len(fontDict.Private.OtherBlues) % 2 != 0:
-						print "\tError: The font does not have an even number of OtherBlues"
-						print "\t\tFont:", font.PostScriptName1
-						print "\t\tOtherBlues:", fontDict.Private.OtherBlues
+						print("\tError: The font does not have an even number of OtherBlues")
+						print("\t\tFont:", font.PostScriptName1)
+						print("\t\tOtherBlues:", fontDict.Private.OtherBlues)
 				except AttributeError:
-					print "Skipping test - font dict does not contain OtherBlues", font.PostScriptName1
+					print("Skipping test - font dict does not contain OtherBlues", font.PostScriptName1)
 					continue
 
 				try: # not all fonts have FamilyOtherBlues.
 					if len(fontDict.Private.FamilyOtherBlues) > 10:
-						print "\tError: The font has more than 5 pairs of FamilyOtherBlues"
-						print "\t\tFont:", font.PostScriptName1
-						print "\t\tFamilyOtherBlues:", fontDict.Private.FamilyOtherBlues
+						print("\tError: The font has more than 5 pairs of FamilyOtherBlues")
+						print("\t\tFont:", font.PostScriptName1)
+						print("\t\tFamilyOtherBlues:", fontDict.Private.FamilyOtherBlues)
 					if len(fontDict.Private.FamilyOtherBlues) % 2 != 0:
-						print "\tError: The font does not have an even number of FamilyOtherBlues"
-						print "\t\tFont:", font.PostScriptName1
-						print "\t\tFamilyOtherBlues:", fontDict.Private.FamilyOtherBlues
+						print("\tError: The font does not have an even number of FamilyOtherBlues")
+						print("\t\tFont:", font.PostScriptName1)
+						print("\t\tFamilyOtherBlues:", fontDict.Private.FamilyOtherBlues)
 				except AttributeError:
 					pass
 
 def doSingleTest32():
 	global preferredFamilyList1
 
-	print "\nSingle Face Test 32: Check that all fonts have blue value pairs with first integer is less than or equal to the second integer in pairs."
+	print("\nSingle Face Test 32: Check that all fonts have blue value pairs with first integer is less than or equal to the second integer in pairs.")
 
 	for name in preferredFamilyList1.keys():
 		fontgroup = preferredFamilyList1[name]
 		for font in fontgroup:
 			if not font.topDict: # not CFF
-				print "\t\tSkipping non-PostScript Font:", font.PostScriptName1
+				print("\t\tSkipping non-PostScript Font:", font.PostScriptName1)
 				break
 			for fontDict in font.FDArray:
 				try: # not all fonts have BlueValues, but they should.
 					for i in range(0, len(fontDict.Private.BlueValues), 2):
 						if fontDict.Private.BlueValues[i] > fontDict.Private.BlueValues[i+1]:
-							print "\nError: The font has BlueValues pairs with the first value is greater than the second value in pairs"
-							print "\tFont:", font.PostScriptName1
-							print "\tPairs:", fontDict.Private.BlueValues[i], fontDict.Private.BlueValues[i+1]
-							print "\tBlueValues:", fontDict.Private.BlueValues
+							print("\nError: The font has BlueValues pairs with the first value is greater than the second value in pairs")
+							print("\tFont:", font.PostScriptName1)
+							print("\tPairs:", fontDict.Private.BlueValues[i], fontDict.Private.BlueValues[i+1])
+							print("\tBlueValues:", fontDict.Private.BlueValues)
 				except AttributeError:
-					print "Skipping test - missing BlueValues - for ", font.PostScriptName1
+					print("Skipping test - missing BlueValues - for ", font.PostScriptName1)
 					continue
 
 				try: # not all fonts have OtherBlues.
 					for i in range(0, len(fontDict.Private.OtherBlues), 2):
 						if fontDict.Private.OtherBlues[i] > fontDict.Private.OtherBlues[i+1]:
-							print "\nError: The font has OtherBlues pairs with the first value is greater than the second value in pairs"
-							print "\tFont:", font.PostScriptName1
-							print "\tPairs:", fontDict.Private.OtherBlues[i], fontDict.Private.OtherBlues[i+1]
-							print "\tOtherBlues:", fontDict.Private.OtherBlues
+							print("\nError: The font has OtherBlues pairs with the first value is greater than the second value in pairs")
+							print("\tFont:", font.PostScriptName1)
+							print("\tPairs:", fontDict.Private.OtherBlues[i], fontDict.Private.OtherBlues[i+1])
+							print("\tOtherBlues:", fontDict.Private.OtherBlues)
 				except AttributeError:
 					pass
 
 				try: # not all fonts have FamilyBlues.
 					for i in range(0, len(fontDict.Private.FamilyBlues), 2):
 						if fontDict.Private.FamilyBlues[i] > fontDict.Private.FamilyBlues[i+1]:
-							print "\nError: The font has FamilyBlues pairs with the first value is greater than the second value in pairs"
-							print "\tFont:", font.PostScriptName1
-							print "\tPairs:", fontDict.Private.FamilyBlues[i], fontDict.Private.FamilyBlues[i+1]
-							print "\tFamilyBlues:", fontDict.Private.FamilyBlues
+							print("\nError: The font has FamilyBlues pairs with the first value is greater than the second value in pairs")
+							print("\tFont:", font.PostScriptName1)
+							print("\tPairs:", fontDict.Private.FamilyBlues[i], fontDict.Private.FamilyBlues[i+1])
+							print("\tFamilyBlues:", fontDict.Private.FamilyBlues)
 				except AttributeError:
 					pass
 
 				try: # not all fonts have FamilyOtherBlues.
 					for i in range(0, len(fontDict.Private.FamilyOtherBlues), 2):
 						if fontDict.Private.FamilyOtherBlues[i] > fontDict.Private.FamilyOtherBlues[i+1]:
-							print "\nError: The font has FamilyOtherBlues pairs with the first value is greater than the second value in pairs"
-							print "\tFont:", font.PostScriptName1
-							print "\tPairs:", fontDict.Private.FamilyOtherBlues[i], fontDict.Private.FamilyOtherBlues[i+1]
-							print "\tFamilyOtherBlues:", fontDict.Private.FamilyOtherBlues
+							print("\nError: The font has FamilyOtherBlues pairs with the first value is greater than the second value in pairs")
+							print("\tFont:", font.PostScriptName1)
+							print("\tPairs:", fontDict.Private.FamilyOtherBlues[i], fontDict.Private.FamilyOtherBlues[i+1])
+							print("\tFamilyOtherBlues:", fontDict.Private.FamilyOtherBlues)
 				except AttributeError:
 					pass
 
 def doSingleTest33():
 	global preferredFamilyList1
 
-	print "\nSingle Face Test 33: Check that Bottom Zone blue value pairs and Top Zone blue value pairs are at least (2*BlueFuzz+1) unit apart in a font."
+	print("\nSingle Face Test 33: Check that Bottom Zone blue value pairs and Top Zone blue value pairs are at least (2*BlueFuzz+1) unit apart in a font.")
 	for name in preferredFamilyList1.keys():
 		fontgroup = preferredFamilyList1[name]
 		for font in fontgroup:
 			if not font.topDict: # not CFF
-				print "\t\tSkipping non-PostScript Font:", font.PostScriptName1
+				print("\t\tSkipping non-PostScript Font:", font.PostScriptName1)
 				break
 			for fontDict in font.FDArray:
 				try: # not all fonts have OtherBlues.
@@ -3016,58 +2927,58 @@ def doSingleTest33():
 					try: # not all fonts have BlueValues.
 						bottomZone = fontDict.Private.BlueValues[0:2]
 					except AttributeError:
-						print "Skipping test - missing BlueValues - for ", font.PostScriptName1
+						print("Skipping test - missing BlueValues - for ", font.PostScriptName1)
 						continue
 
 				for i in range(0,len(bottomZone)-1,2):	# compare a pair to the rest
 					for j in range(i+2, len(bottomZone)):
 						if abs(bottomZone[i] - bottomZone[j]) < (2*fontDict.Private.BlueFuzz + 1):	# first integer in pair
-							print "\nError: The BottomZone have pairs less than %d units apart." % (2*fontDict.Private.BlueFuzz + 1)
-							print "\tFont:", font.PostScriptName1
-							print "\tValues:", bottomZone[i], bottomZone[j]
-							print "\tBottomZone:", bottomZone
+							print("\nError: The BottomZone have pairs less than %d units apart." % (2*fontDict.Private.BlueFuzz + 1))
+							print("\tFont:", font.PostScriptName1)
+							print("\tValues:", bottomZone[i], bottomZone[j])
+							print("\tBottomZone:", bottomZone)
 						if abs(bottomZone[i+1] - bottomZone[j]) < (2*fontDict.Private.BlueFuzz + 1):	# second integer in pair
-							print "\nError: The BottomZone have pairs less than %d units apart." % (2*fontDict.Private.BlueFuzz + 1)
-							print "\tFont:", font.PostScriptName1
-							print "\tValues:", bottomZone[i+1], bottomZone[j]
-							print "\tBottomZone:", bottomZone
+							print("\nError: The BottomZone have pairs less than %d units apart." % (2*fontDict.Private.BlueFuzz + 1))
+							print("\tFont:", font.PostScriptName1)
+							print("\tValues:", bottomZone[i+1], bottomZone[j])
+							print("\tBottomZone:", bottomZone)
 
 				topZone = fontDict.Private.BlueValues[2:]
 				for i in range(0,len(topZone)-1,2): # compare a pair to the rest
 					for j in range(i+2, len(topZone)):
 						if abs(topZone[i] - topZone[j]) < (2*fontDict.Private.BlueFuzz + 1):
-							print "\nError: The TopZone have pairs less than %d units apart." % (2*fontDict.Private.BlueFuzz + 1)
-							print "\tFont:", font.PostScriptName1
-							print "\tValues:", topZone[i], topZone[j]
-							print "\tTopZone:", topZone
+							print("\nError: The TopZone have pairs less than %d units apart." % (2*fontDict.Private.BlueFuzz + 1))
+							print("\tFont:", font.PostScriptName1)
+							print("\tValues:", topZone[i], topZone[j])
+							print("\tTopZone:", topZone)
 						if abs(topZone[i+1] - topZone[j]) < (2*fontDict.Private.BlueFuzz + 1):
-							print "\nError: The TopZone have pairs less than %d units apart." % (2*fontDict.Private.BlueFuzz + 1)
-							print "\tFont:", font.PostScriptName1
-							print "\tValues:", topZone[i+1], topZone[j]
-							print "\tTopZone:", topZone
+							print("\nError: The TopZone have pairs less than %d units apart." % (2*fontDict.Private.BlueFuzz + 1))
+							print("\tFont:", font.PostScriptName1)
+							print("\tValues:", topZone[i+1], topZone[j])
+							print("\tTopZone:", topZone)
 
 def doSingleTest34():
 	global preferredFamilyList1
 
-	print "\nSingle Face Test 34: Check that the difference between numbers in blue value pairs meet the requirement."
+	print("\nSingle Face Test 34: Check that the difference between numbers in blue value pairs meet the requirement.")
 	for name in preferredFamilyList1.keys():
 		fontgroup = preferredFamilyList1[name]
 		for font in fontgroup:
 			if not font.topDict: # not CFF
-				print "\t\tSkipping non-PostScript Font:", font.PostScriptName1
+				print("\t\tSkipping non-PostScript Font:", font.PostScriptName1)
 				break
 			for fontDict in font.FDArray:
 				try:
 					for i in range(0, len(fontDict.Private.BlueValues), 2):
 						diff = abs(fontDict.Private.BlueValues[i] - fontDict.Private.BlueValues[i+1])
 						if (fontDict.Private.BlueScale*240*diff) >= 240.0:
-							print "\nError: The BlueValues pair have distance greater than the maximum limit."
-							print "\tFont:", font.PostScriptName1
-							print "\tPairs:", fontDict.Private.BlueValues[i], fontDict.Private.BlueValues[i+1]
-							print "\tDistance (%d) is greater than 1/BlueScale (%5.2f) " % (diff, 1.0 / fontDict.Private.BlueScale)
-							print "\tBlueValues:", fontDict.Private.BlueValues
+							print("\nError: The BlueValues pair have distance greater than the maximum limit.")
+							print("\tFont:", font.PostScriptName1)
+							print("\tPairs:", fontDict.Private.BlueValues[i], fontDict.Private.BlueValues[i+1])
+							print("\tDistance (%d) is greater than 1/BlueScale (%5.2f) " % (diff, 1.0 / fontDict.Private.BlueScale))
+							print("\tBlueValues:", fontDict.Private.BlueValues)
 				except AttributeError:
-					print "Skipping test - font dict does not contain OtherBlues", font.PostScriptName1
+					print("Skipping test - font dict does not contain OtherBlues", font.PostScriptName1)
 					continue
 		try:
 			for font in fontgroup:
@@ -3075,11 +2986,11 @@ def doSingleTest34():
 					for i in range(0, len(fontDict.Private.OtherBlues), 2):
 						diff = abs(fontDict.Private.OtherBlues[i] - fontDict.Private.OtherBlues[i+1])
 						if (fontDict.Private.BlueScale*240*diff) >= 240.0:
-							print "\nError: The OtherBlues pair have distance greater than the maximum limit."
-							print "\tFont:", font.PostScriptName1
-							print "\tPairs:", fontDict.Private.OtherBlues[i], fontDict.Private.OtherBlues[i+1]
-							print "\tDistance (%d) is greater than 1/BlueScale (%5.2f) " % (diff, 1.0 / fontDict.Private.BlueScale)
-							print "\tOtherBlues:", fontDict.Private.OtherBlues
+							print("\nError: The OtherBlues pair have distance greater than the maximum limit.")
+							print("\tFont:", font.PostScriptName1)
+							print("\tPairs:", fontDict.Private.OtherBlues[i], fontDict.Private.OtherBlues[i+1])
+							print("\tDistance (%d) is greater than 1/BlueScale (%5.2f) " % (diff, 1.0 / fontDict.Private.BlueScale))
+							print("\tOtherBlues:", fontDict.Private.OtherBlues)
 		except AttributeError:
 			pass
 
@@ -3089,11 +3000,11 @@ def doSingleTest34():
 					for i in range(0, len(fontDict.Private.FamilyBlues), 2):
 						diff = abs(fontDict.Private.FamilyBlues[i] - fontDict.Private.FamilyBlues[i+1])
 						if (fontDict.Private.BlueScale*240*diff) >= 240.0:
-							print "\nError: The FamilyBlues pair have distance greater than the maximum limit."
-							print "\tFont:", font.PostScriptName1
-							print "\tPairs:", fontDict.Private.FamilyBlues[i], fontDict.Private.FamilyBlues[i+1]
-							print "\tDistance (%d) is greater than 1/BlueScale (%5.2f) " % (diff, 1.0 / fontDict.Private.BlueScale)
-							print "\tFamilyBlues:", fontDict.Private.FamilyBlues
+							print("\nError: The FamilyBlues pair have distance greater than the maximum limit.")
+							print("\tFont:", font.PostScriptName1)
+							print("\tPairs:", fontDict.Private.FamilyBlues[i], fontDict.Private.FamilyBlues[i+1])
+							print("\tDistance (%d) is greater than 1/BlueScale (%5.2f) " % (diff, 1.0 / fontDict.Private.BlueScale))
+							print("\tFamilyBlues:", fontDict.Private.FamilyBlues)
 		except AttributeError:
 			pass
 
@@ -3103,11 +3014,11 @@ def doSingleTest34():
 					for i in range(0, len(fontDict.Private.FamilyOtherBlues), 2):
 						diff = abs(fontDict.Private.FamilyOtherBlues[i] - fontDict.Private.FamilyOtherBlues[i+1])
 						if (fontDict.Private.BlueScale*240*diff) >= 240.0:
-							print "\nError: The FamilyOtherBlues pair have distance greater than the maximum limit."
-							print "\tFont:", font.PostScriptName1
-							print "\tPairs:", fontDict.Private.FamilyOtherBlues[i], fontDict.Private.FamilyOtherBlues[i+1]
-							print "\tDistance (%d) is greater than 1/BlueScale (%5.2f) " % (diff, 1.0 / fontDict.Private.BlueScale)
-							print "\tFamilyOtherBlues:", fontDict.Private.FamilyOtherBlues
+							print("\nError: The FamilyOtherBlues pair have distance greater than the maximum limit.")
+							print("\tFont:", font.PostScriptName1)
+							print("\tPairs:", fontDict.Private.FamilyOtherBlues[i], fontDict.Private.FamilyOtherBlues[i+1])
+							print("\tDistance (%d) is greater than 1/BlueScale (%5.2f) " % (diff, 1.0 / fontDict.Private.BlueScale))
+							print("\tFamilyOtherBlues:", fontDict.Private.FamilyOtherBlues)
 		except AttributeError:
 			pass
 
@@ -3119,8 +3030,8 @@ def doSingleFaceTests(singleTestList, familyTestList):
 			g = globals()
 			for val in singleTestList:
 				funcName = "doSingleTest%s" % (val)
-				if not g.has_key(funcName):
-					print "Error: cannot find function '%s' to execute." % (funcName)
+				if funcName not in g:
+					print("Error: cannot find function '%s' to execute." % (funcName))
 					continue
 				exec("%s()" % (funcName))
 	else:
@@ -3164,26 +3075,26 @@ def doSingleFaceTests(singleTestList, familyTestList):
 def doFamilyTest1():
 	global compatibleFamilyList3
 
-	print "\nFamily Test 1: Verify that each group of fonts with the same nameID 1 has maximum of 4 fonts."
+	print("\nFamily Test 1: Verify that each group of fonts with the same nameID 1 has maximum of 4 fonts.")
 	for name in compatibleFamilyList3.keys():
 		if len(compatibleFamilyList3[name]) > 4:
-			print "\nError: More than 4 fonts with the same nameID 1, compatible family name"
-			print "\t Compatible Family Name:", name
+			print("\nError: More than 4 fonts with the same nameID 1, compatible family name")
+			print("\t Compatible Family Name:", name)
 			for font in compatibleFamilyList3[name]:
-				print "\t PostScript Name:", font.PostScriptName3
+				print("\t PostScript Name:", font.PostScriptName3)
 
 
 def doFamilyTest2():
 	global compatibleFamilyList3
 	kUnicodeLanguageID = 1033
 
-	print "\nFamily Test 2: Check that the Compatible Family group has same name ID's in all languages except for the compatible names 16,17,18, 20, 21 and 22."
+	print("\nFamily Test 2: Check that the Compatible Family group has same name ID's in all languages except for the compatible names 16,17,18, 20, 21 and 22.")
 	for name in compatibleFamilyList3.keys():
 		fontgroup = compatibleFamilyList3[name]
 		LanguageDict = {}
 		fontList = ""
 		for font in fontgroup:
-			fontList += " " + font.PostScriptName1
+			fontList += " %s" % font.PostScriptName1
 			for nameID in font.nameIDDict.keys():
 				if (nameID[-1] in [16,17,18,20,21,22]) or (nameID[-1] > 255):
 					continue
@@ -3193,19 +3104,18 @@ def doFamilyTest2():
 		minCount = min(countList)
 		maxCount = max(countList)
 		if minCount != maxCount:
-			print "\tError: There are name table {platform, script, language, name ID} combinations that exist"
-			print "\tin some fonts but not all fonts within the Compatible Family '%s'. Please check fonts '%s'." % (name, fontList)
-			print "\t{platform, script, language, name ID} combination : Number of fonts in the family with this combination"
-			itemList =  LanguageDict.items()
-			itemList.sort()
+			print("\tError: There are name table {platform, script, language, name ID} combinations that exist")
+			print("\tin some fonts but not all fonts within the Compatible Family '%s'. Please check fonts '%s'." % (name, fontList))
+			print("\t{platform, script, language, name ID} combination : Number of fonts in the family with this combination")
+			itemList = sorted(LanguageDict.items())
 			for entry in itemList:
-				print "\t%s\t%s" % (entry[0], entry[1])
-			print "All fonts should have the same set of {platform, script, language, name ID} combinations, so the number of fonts for each combination should be the same, excepting name ID's 16,17,18, and 20."
+				print("\t%s\t%s" % (entry[0], entry[1]))
+			print("All fonts should have the same set of {platform, script, language, name ID} combinations, so the number of fonts for each combination should be the same, excepting name ID's 16,17,18, and 20.")
 
 def doFamilyTest3():
 	global compatibleFamilyList3
 
-	print "\nFamily Test 3: Check that the Compatible Family group has same Preferred Family name (name ID 16)in all languagesID 16 in all other languages."
+	print("\nFamily Test 3: Check that the Compatible Family group has same Preferred Family name (name ID 16)in all languagesID 16 in all other languages.")
 	for name in compatibleFamilyList3.keys():
 		fontgroup = compatibleFamilyList3[name]
 		LanguageList = []
@@ -3221,19 +3131,19 @@ def doFamilyTest3():
 		for Language in LanguageList:
 			try:
 				font1 = fontgroup[0]
-				nameID1 = uni2asc(unicode(font1.nameIDDict[(3, 1, Language, 16)], "utf_16_be"))
+				nameID1 = font1.nameIDDict[(3, 1, Language, 16)].decode('utf_16_be')
 			except KeyError:
 				nameID1 = None
 			for font in fontgroup[1:]:
 				try:
-					nameID = uni2asc(unicode(font.nameIDDict[(3, 1, Language, 16)], "utf_16_be"))
+					nameID = font.nameIDDict[(3, 1, Language, 16)].decode('utf_16_be')
 				except KeyError:
 					nameID = None
 				if nameID != nameID1:
-					print "\tError: NameID 16 '%s' for language ID %s in font %s is not the same as '%s' in font %s." % (nameID, Language, font.PostScriptName1, nameID1, font1.PostScriptName1)
+					print("\tError: NameID 16 '%s' for language ID %s in font %s is not the same as '%s' in font %s." % (nameID, Language, font.PostScriptName1, nameID1, font1.PostScriptName1))
 
 def doFamilyTest4():
-	print "\nFamily Test 4: Family-wide 'size' feature checks."
+	print("\nFamily Test 4: Family-wide 'size' feature checks.")
 	# make sure that all fonts with the same subgroup ID have the same size menu name
 	# make sure that within a size subgroup, there is no overlap
 	# make sure that within a size subgroup, coverage is continuous
@@ -3272,7 +3182,7 @@ def doFamilyTest4():
 						font.sizeMenuName = font.nameIDDict[keyTuple]
 						break
 			else:
-				print "Program error: font has 'size' feature, but could not parse the values for font %s." % ( font.PostScriptName1)
+				print("Program error: font has 'size' feature, but could not parse the values for font %s." % ( font.PostScriptName1))
 
 	for name in preferredFamilyList1.keys():
 		fontgroup = preferredFamilyList1[name]
@@ -3290,12 +3200,10 @@ def doFamilyTest4():
 			sizeGroupbyID[font.sizeSubfFamilyID] = gList
 		if not seenSize:
 			continue
-		fByID = sizeGroupbyID.values()
-		fByID.sort()
-		fByName = sizeGroupbyMenu.values()
-		fByName.sort()
+		fByID = sorted(sizeGroupbyID.values())
+		fByName = sorted(sizeGroupbyMenu.values())
 		if fByName != fByID:
-			print "	Error: in family %s, the fonts with the same size subgroup ID's do not all have the same menu names" % (name)
+			print("	Error: in family %s, the fonts with the same size subgroup ID's do not all have the same menu names" % (name))
 
 		# now check the ranges.
 		lastList = None
@@ -3305,9 +3213,9 @@ def doFamilyTest4():
 			menuName = fList[0].sizeMenuName
 			sid = fList[0].sizeSubfFamilyID
 			if lastList and len(pList) != len(lastList):
-				print "	Warning: in family %s, the 'size' group (id %s, menu name %s) has %s members, while the group (id %s, menu name %s) has %s members." % (name, sid, menuName, len(pList), lastSID, lastMenuName, len(lastList) )
-				print "\t (sub group id %s, menu name %s, fonts: %s" % ( sid, menuName, pList)
-				print "\t (sub group id %s, menu name %s, fonts: %s" % (lastSID, lastMenuName, lastList)
+				print("	Warning: in family %s, the 'size' group (id %s, menu name %s) has %s members, while the group (id %s, menu name %s) has %s members." % (name, sid, menuName, len(pList), lastSID, lastMenuName, len(lastList) ))
+				print("\t (sub group id %s, menu name %s, fonts: %s" % ( sid, menuName, pList))
+				print("\t (sub group id %s, menu name %s, fonts: %s" % (lastSID, lastMenuName, lastList))
 			lastList = pList
 			lastMenuName = menuName
 			lastSID = sid
@@ -3328,9 +3236,9 @@ def doFamilyTest4():
 					errorList.append([lastEntry, entry])
 				lastEntry = entry
 			if error:
-				print "	Error: design ranges for size subgroup ID %s, size menu %s in family %s are not contiguous." % (sid, font.sizeMenuName, name)
+				print("	Error: design ranges for size subgroup ID %s, size menu %s in family %s are not contiguous." % (sid, font.sizeMenuName, name))
 				for item in errorList:
-					print "previous range: %s - %s for %s, next range: %s - %s for %s. sub group ID %s." % (item[0][0], item[0][1], item[0][2], item[1][0], item[1][1], item[1][2], item[0][3])
+					print("previous range: %s - %s for %s, next range: %s - %s for %s. sub group ID %s." % (item[0][0], item[0][1], item[0][2], item[1][0], item[1][1], item[1][2], item[0][3]))
 
 
 
@@ -3338,23 +3246,23 @@ def doFamilyTest5():
 	global compatibleFamilyList3
 
 
-	print "\nFamily Test 5: Check that style settings for each face is unique within Compatible Family group, in all languages."
+	print("\nFamily Test 5: Check that style settings for each face is unique within Compatible Family group, in all languages.")
 	for name in compatibleFamilyList3.keys():
 		fontgroup = compatibleFamilyList3[name]
 		for i in range(len(fontgroup)):
 			font = fontgroup[i]
 			for font1 in fontgroup[i+1:]:
 				if font.isItalic == font1.isItalic and font.isBold == font1.isBold:
-					print "\nError: These two fonts have the same italic and bold style setting"
-					print "\tFont 1:", font.PostScriptName3
-					print "\t\tItalic Bit:", font.isItalic, "Bold Bit:", font.isBold
-					print "\tFont 2:", font1.PostScriptName3
-					print "\t\tItalic Bit:", font1.isItalic, "Bold Bit:", font1.isBold
+					print("\nError: These two fonts have the same italic and bold style setting")
+					print("\tFont 1:", font.PostScriptName3)
+					print("\t\tItalic Bit:", font.isItalic, "Bold Bit:", font.isBold)
+					print("\tFont 2:", font1.PostScriptName3)
+					print("\t\tItalic Bit:", font1.isItalic, "Bold Bit:", font1.isBold)
 
 def doFamilyTest6():
 	global compatibleFamilyList3
 
-	print "\nFamily Test 6: Check that the Compatible Family group has a base font and at least two faces, and check if weight class is valid."
+	print("\nFamily Test 6: Check that the Compatible Family group has a base font and at least two faces, and check if weight class is valid.")
 	baseBoldRangeDict = {250:(600,1000), 300:(600,950), 350:(600,900), 400:(600,850), 450:(600,800), 500:(650,750), 550:(600,800)}
 	for name in compatibleFamilyList3.keys():
 		basefont = ""
@@ -3367,15 +3275,15 @@ def doFamilyTest6():
 		if basefont == "":
 			basefont = boldfont
 		if basefont == "":
-			print "\tError: No base font in the group. Compatible family name:", name
+			print("\tError: No base font in the group. Compatible family name:", name)
 			continue
 
 		if basefont.usWeightClass == -1:
-			print "Skipping test - no OS/2 table.", basefont.PostScriptName1
+			print("Skipping test - no OS/2 table.", basefont.PostScriptName1)
 			return
 
 		if basefont == boldfont and len(compatibleFamilyList3[name]) > 2:
-			print "\tError: Base font is not Regular face and the group has more than two faces for the group. Compatible family name:", name
+			print("\tError: Base font is not Regular face and the group has more than two faces for the group. Compatible family name:", name)
 			continue
 		if basefont == boldfont or boldfont == "":
 			continue
@@ -3383,29 +3291,29 @@ def doFamilyTest6():
 			wgtValue = 50*int(basefont.usWeightClass/50)
 			boldRange = baseBoldRangeDict[wgtValue]
 		except KeyError:
-			print"\tError: usWeightClass %s of regular font %s is outside of range that allows style linking to a Bold face: this will result is fake bolding of the Regular face when the Bold style is chsoen." % (basefont.usWeightClass, font.PostScriptName1)
-			print "\t\tPermissible range for base font %s in order for it to link to a Bold font: %s - %s" % (basefont.PostScriptName1, 250, 550)
+			print("\tError: usWeightClass %s of regular font %s is outside of range that allows style linking to a Bold face: this will result is fake bolding of the Regular face when the Bold style is chsoen." % (basefont.usWeightClass, font.PostScriptName1))
+			print("\t\tPermissible range for base font %s in order for it to link to a Bold font: %s - %s" % (basefont.PostScriptName1, 250, 550))
 			continue
 
 		if boldfont.usWeightClass < boldRange[0] or boldfont.usWeightClass > boldRange[1]:
-			print "\tError: usWeightClass '%s'of the Bold font is outside of BOLD RANGE [%s - %s] for the group. Compatible family name: %s" % (boldfont.usWeightClass, boldRange[0], boldRange[1], name)
-			print "\t\tBase Font:", basefont.PostScriptName3
-			print "\t\tusWeightClass:", basefont.usWeightClass
-			print "\t\tBold Font:", boldfont.PostScriptName3
-			print "\tu\tsWeightClass:", boldfont.usWeightClass
-			print "\t\tBOLD RANGE:", boldRange[0], "-", boldRange[1]
+			print("\tError: usWeightClass '%s'of the Bold font is outside of BOLD RANGE [%s - %s] for the group. Compatible family name: %s" % (boldfont.usWeightClass, boldRange[0], boldRange[1], name))
+			print("\t\tBase Font:", basefont.PostScriptName3)
+			print("\t\tusWeightClass:", basefont.usWeightClass)
+			print("\t\tBold Font:", boldfont.PostScriptName3)
+			print("\tu\tsWeightClass:", boldfont.usWeightClass)
+			print("\t\tBOLD RANGE:", boldRange[0], "-", boldRange[1])
 			continue
 		if (boldfont.usWeightClass % 50) != 0:
-			print "\tWarning: usWeightClass of the Bold font is within range, but not in increments of 50 for the group. Compatible family name:", name
-			print "\t\tBase Font:", basefont.PostScriptName3
-			print "\t\tusWeightClass:", basefont.usWeightClass
-			print "\t\tBold Font:", boldfont.PostScriptName3
-			print "\t\tusWeightClass:", boldfont.usWeightClass
+			print("\tWarning: usWeightClass of the Bold font is within range, but not in increments of 50 for the group. Compatible family name:", name)
+			print("\t\tBase Font:", basefont.PostScriptName3)
+			print("\t\tusWeightClass:", basefont.usWeightClass)
+			print("\t\tBold Font:", boldfont.PostScriptName3)
+			print("\t\tusWeightClass:", boldfont.usWeightClass)
 
 def doFamilyTest7():
 	global preferredFamilyList1
 
-	print "\nFamily Test 7: Check that all faces in the Preferred Family group have the same Copyright and Trademark string."
+	print("\nFamily Test 7: Check that all faces in the Preferred Family group have the same Copyright and Trademark string.")
 	for name in preferredFamilyList1.keys():
 		fontgroup = preferredFamilyList1[name]
 		font = fontgroup[0]
@@ -3416,13 +3324,13 @@ def doFamilyTest7():
 				temp1 = re.sub("\s+", " ", temp1)
 				temp2 =	 re.sub("\s+", " ", temp2)
 				if temp1 != temp2:
-					print "\nWarning: These two fonts do not have the same Copyright String. Preferred family:", name
+					print("\nWarning: These two fonts do not have the same Copyright String. Preferred family:", name)
 				else:
-					print "\nNote: These two fonts differ only in the years in the	Copyright String. Preferred family:", name
-				print "\tFont 1:", font.PostScriptName1
-				print "\tCopyright:", font.copyrightStr1
-				print "\tFont 2:", font1.PostScriptName1
-				print "\tCopyright:", font1.copyrightStr1
+					print("\nNote: These two fonts differ only in the years in the	Copyright String. Preferred family:", name)
+				print("\tFont 1:", font.PostScriptName1)
+				print("\tCopyright:", font.copyrightStr1)
+				print("\tFont 2:", font1.PostScriptName1)
+				print("\tCopyright:", font1.copyrightStr1)
 		for font1 in fontgroup[1:]:
 			if font.trademarkStr1 != font1.trademarkStr1:
 				temp1 = re.sub(" *[21][980]\d\d,* *", "", font.trademarkStr1)
@@ -3430,24 +3338,24 @@ def doFamilyTest7():
 				temp1 = re.sub("\s+", " ", temp1)
 				temp2 =	 re.sub("\s+", " ", temp2)
 				if temp1 != temp2:
-					print "\nWarning: These two fonts do not have the same Trademark String. Preferred family:", name
+					print("\nWarning: These two fonts do not have the same Trademark String. Preferred family:", name)
 				else:
-					print "\nNote: These two fonts differ only in the years in the	Trademark String. Preferred family:", name
-				print "\tFont 1:", font.PostScriptName1
-				print "\tTrademark:", font.trademarkStr1
-				print "\tFont 2:", font1.PostScriptName1
-				print "\tTrademark:", font1.trademarkStr1
+					print("\nNote: These two fonts differ only in the years in the	Trademark String. Preferred family:", name)
+				print("\tFont 1:", font.PostScriptName1)
+				print("\tTrademark:", font.trademarkStr1)
+				print("\tFont 2:", font1.PostScriptName1)
+				print("\tTrademark:", font1.trademarkStr1)
 
 def doFamilyTest8():
 	global compatibleFamilyList3, fontlist
 
-	print "\nFamily Test 8: Check the Compatible Family group style vs OS/2.usWeightClass settings. Max 2 usWeightClass allowed."
+	print("\nFamily Test 8: Check the Compatible Family group style vs OS/2.usWeightClass settings. Max 2 usWeightClass allowed.")
 	for name in compatibleFamilyList3.keys():
 		fontgroup = compatibleFamilyList3[name]
 		weightClassList = []
 
 		if fontgroup[0].usWeightClass == -1:
-			print "Skipping test - no OS/2 table.", fontgroup[0].PostScriptName1
+			print("Skipping test - no OS/2 table.", fontgroup[0].PostScriptName1)
 			return
 
 		boldFont = None
@@ -3460,12 +3368,12 @@ def doFamilyTest8():
 			elif not font.isItalic:
 				baseFont = font
 		if len(weightClassList) > 2:
-			print "\nError: More than two usWeightClass values in the Group:", name
-			print "\tusWeightClass values:", weightClassList
+			print("\nError: More than two usWeightClass values in the Group:", name)
+			print("\tusWeightClass values:", weightClassList)
 			continue
 		if len(weightClassList) < 2:
 			if boldFont and baseFont:
-				print "\nError: Bold style font set with same usWeightClass value as the Regular face, for font", boldFont.PostScriptName3
+				print("\nError: Bold style font set with same usWeightClass value as the Regular face, for font", boldFont.PostScriptName3)
 			continue
 		if weightClassList[0] > weightClassList[1]:
 			usWeightClass1, usWeightClass2 = weightClassList[1], weightClassList[0]
@@ -3473,30 +3381,30 @@ def doFamilyTest8():
 			usWeightClass1, usWeightClass2 = weightClassList[0], weightClassList[1]
 		for font in fontgroup:
 			if font.usWeightClass == usWeightClass1 and font.isBold:
-				print "\nError: Bold style set with lower usWeightClass value for the Font", font.PostScriptName3
-				print "\tusWeightClass:", font.usWeightClass
+				print("\nError: Bold style set with lower usWeightClass value for the Font", font.PostScriptName3)
+				print("\tusWeightClass:", font.usWeightClass)
 			if font.usWeightClass == usWeightClass2 and not font.isBold:
-				print "\nError: Bold style not set with higher usWeightClass value for the Font", font.PostScriptName3
-				print "\tusWeightClass:", font.usWeightClass
+				print("\nError: Bold style not set with higher usWeightClass value for the Font", font.PostScriptName3)
+				print("\tusWeightClass:", font.usWeightClass)
 
 def doFamilyTest9():
 	global compatibleFamilyList3
 
-	print "\nFamily Test 9: Check that all faces in the Compatible Family group have the same OS/2.usWidthClass value."
+	print("\nFamily Test 9: Check that all faces in the Compatible Family group have the same OS/2.usWidthClass value.")
 	for name in compatibleFamilyList3.keys():
 		fontgroup = compatibleFamilyList3[name]
 		font = fontgroup[0]
 		if font.usWidthClass == -1:
-			print "Skipping test - no OS/2 table.", font.PostScriptName1
+			print("Skipping test - no OS/2 table.", font.PostScriptName1)
 			return
 
 		for font1 in fontgroup[1:]:
 			if font.usWidthClass != font1.usWidthClass:
-				print "\nWarning: These two fonts do not have the same usWidthClass in Group", name
-				print "\tFont 1:", font.PostScriptName3
-				print "\tusWidthClass:", font.usWidthClass
-				print "\tFont 2:", font1.PostScriptName3
-				print "\tusWidthClass:", font1.usWidthClass
+				print("\nWarning: These two fonts do not have the same usWidthClass in Group", name)
+				print("\tFont 1:", font.PostScriptName3)
+				print("\tusWidthClass:", font.usWidthClass)
+				print("\tFont 2:", font1.PostScriptName3)
+				print("\tusWidthClass:", font1.usWidthClass)
 
 def doFamilyTest10():
 
@@ -3515,11 +3423,11 @@ def doFamilyTest10():
 
 		return panoseStatus # 0 means all the values are 0; 1 means they were probably derived by makeotf; 2 means they exist, and were not derived by makeotf.
 	firstFontName = ""
-	print "\nFamily Test 10: Check that if all faces in family have a Panose number and that CFF ISFixedPtch matches the Panose monospace setting."
+	print("\nFamily Test 10: Check that if all faces in family have a Panose number and that CFF ISFixedPtch matches the Panose monospace setting.")
 	for name in preferredFamilyList1.keys():
 		fontgroup = preferredFamilyList1[name]
 		if not fontgroup[0].panose:
-			print "Skipping test: font is missing the OS.2 table", fontgroup[0].PostScriptName1
+			print("Skipping test: font is missing the OS.2 table", fontgroup[0].PostScriptName1)
 			return
 
 		for i in range(len(fontgroup)):
@@ -3527,9 +3435,9 @@ def doFamilyTest10():
 			fontPanoseStatus= getPanoseStatus(font.panose)
 			if not fontPanoseStatus == 2:
 				if fontPanoseStatus == 1:
-					print "	Warning: ", font.PostScriptName1, " has only the first 4 Panose values set; these are may be default values derived by makeotf."
+					print("	Warning: ", font.PostScriptName1, " has only the first 4 Panose values set; these are may be default values derived by makeotf.")
 				elif fontPanoseStatus == 0:
-					print "	Error: ", font.PostScriptName1, " has only  0 Panose values."
+					print("	Error: ", font.PostScriptName1, " has only  0 Panose values.")
 			else:
 				# if has real Panose value, check Monospace fields.
 				isPanoseMonospaced = 0
@@ -3541,21 +3449,21 @@ def doFamilyTest10():
 					isPanoseMonospaced = 1
 				else:
 					isPanoseMonospaced = 0
-				if font.ttFont.has_key('CFF ') and (isPanoseMonospaced != font.topDict.isFixedPitch):
+				if 'CFF ' in font.ttFont and (isPanoseMonospaced != font.topDict.isFixedPitch):
 					if isPanoseMonospaced:
-						print "	Error: OS/2 Panose digit 4 indicates that the font is monospaced, but the CFF top dict IsFixedPitch value is set false."
+						print("	Error: OS/2 Panose digit 4 indicates that the font is monospaced, but the CFF top dict IsFixedPitch value is set false.")
 					else:
-						print "	Error: OS/2 Panose digit 4 indicates that the font is not monospaced, but the CFF top dict IsFixedPitch value is set true."
+						print("	Error: OS/2 Panose digit 4 indicates that the font is not monospaced, but the CFF top dict IsFixedPitch value is set true.")
 				if  (isPanoseMonospaced != font.isFixedPitchfromHMTX):
 					if isPanoseMonospaced:
-						print "	Error: OS/2 Panose digit 4 indicates that the font is monospaced, but there is more than one width value in the htmx table."
+						print("	Error: OS/2 Panose digit 4 indicates that the font is monospaced, but there is more than one width value in the htmx table.")
 					else:
-						print "	Error: OS/2 Panose digit 4 indicates that the font is not monospaced, but there is only one width value in the hmtx table."
-				if  font.ttFont.has_key('CFF ') and (font.topDict.isFixedPitch != font.isFixedPitchfromHMTX):
+						print("	Error: OS/2 Panose digit 4 indicates that the font is not monospaced, but there is only one width value in the hmtx table.")
+				if 'CFF ' in font.ttFont and (font.topDict.isFixedPitch != font.isFixedPitchfromHMTX):
 					if font.topDict.isFixedPitch:
-						print "	Error: the CFF top dict IsFixedPitch value is set true, but there is more than one width value in the htmx table."
+						print("	Error: the CFF top dict IsFixedPitch value is set true, but there is more than one width value in the htmx table.")
 					else:
-						print "	Error: the CFF top dict IsFixedPitch value is set false, but there is only one width value in the hmtx table."
+						print("	Error: the CFF top dict IsFixedPitch value is set false, but there is only one width value in the hmtx table.")
 
 
 def doFamilyTest11():
@@ -3570,7 +3478,7 @@ def doFamilyTest11():
 			# might be the same!
 			isEqual = 1
 			for i in range(lenMac):
-				if ord(macMenuName[i]) > 127:
+				if byteord(macMenuName[i]) > 127:
 					continue # ignore upper ascii
 				if (winMenuName[i] == macMenuName[i]):
 					continue
@@ -3580,7 +3488,7 @@ def doFamilyTest11():
 		return isEqual
 
 
-	print "\nFamily Test 11: Check that Mac and Windows menu names differ for all but base font, and are the same for the base font."
+	print("\nFamily Test 11: Check that Mac and Windows menu names differ for all but base font, and are the same for the base font.")
 	for name in compatibleFamilyList3.keys():
 		basefont = ""
 
@@ -3592,25 +3500,25 @@ def doFamilyTest11():
 				Platform, Encoding, Language, ID = nameIDKey
 
 				if (Platform == 1) and (Encoding == 0)  and (ID == 18):
-					macMenuName = font.nameIDDict[nameIDKey]
+					macMenuName = tounicode(font.nameIDDict[nameIDKey])
 
 				if (Platform == 1) and (Encoding == 0) and (ID == 4) and not macMenuName:
-					macMenuName = font.nameIDDict[nameIDKey]
+					macMenuName = tounicode(font.nameIDDict[nameIDKey])
 
 				if Platform == 3 and Encoding == 1 and ID == 1:
-					winMenuName = uni2asc(unicode(font.nameIDDict[nameIDKey], "utf_16_be"))
+					winMenuName = tounicode(font.nameIDDict[nameIDKey].decode('utf_16_be'))
 			if font.isBold or font.isItalic:
 				if not font.isCID:
 					if CompareWinToMacMenuName(winMenuName, macMenuName):
-						print "\nError: The Mac and Windows Compatible Names should differ in a style-linked BOLD or Italic font, but do not. Font", font.PostScriptName1
-						print "\tMac Compatible Name:", macMenuName
-						print "\tWindows Compatible Name:", winMenuName
+						print("\nError: The Mac and Windows Compatible Names should differ in a style-linked BOLD or Italic font, but do not. Font", font.PostScriptName1)
+						print("\tMac Compatible Name:", macMenuName)
+						print("\tWindows Compatible Name:", winMenuName)
 			else:
 				if not font.isCID:
 					if not CompareWinToMacMenuName(winMenuName, macMenuName):
-						print "\nError: The  Mac and Windows Compatible Names for the regular face of a style-linked group should be the same. Font", font.PostScriptName1
-						print "\tMac Compatible Name:", macMenuName
-						print "\tWindows Compatible Name:", winMenuName
+						print("\nError: The  Mac and Windows Compatible Names for the regular face of a style-linked group should be the same. Font", font.PostScriptName1)
+						print("\tMac Compatible Name:", macMenuName)
+						print("\tWindows Compatible Name:", winMenuName)
 
 
 def doFamilyTest12():
@@ -3619,7 +3527,7 @@ def doFamilyTest12():
 	where lookupSetIndex is a number that uniquely identifies a set of lookups belonging to a feature. This mapping is kept
 	in lookupDefDict[lookupSetIndex] = <real lookup index list>
 	"""
-	print "\nFamily Test 12: Check that GSUB/GPOS script and language feature lists are the same in all faces, and that DFLT/dflt and latn/dflt are present."
+	print("\nFamily Test 12: Check that GSUB/GPOS script and language feature lists are the same in all faces, and that DFLT/dflt and latn/dflt are present.")
 	dictList = []
 	for name in preferredFamilyList1.keys():
 		fontgroup = preferredFamilyList1[name]
@@ -3638,7 +3546,7 @@ def doFamilyTest12():
 					for scriptRecord in layoutTable.table.ScriptList.ScriptRecord:
 						stag = scriptRecord.ScriptTag
 						scriptDict[stag] = {}
-						langSysRecords = map(lambda rec: [rec.LangSysTag, rec.LangSys],  scriptRecord.Script.LangSysRecord)
+						langSysRecords = list(map(lambda rec: [rec.LangSysTag, rec.LangSys],  scriptRecord.Script.LangSysRecord))
 						if scriptRecord.Script.DefaultLangSys:
 							langSysRecords.append( ['dflt', scriptRecord.Script.DefaultLangSys])
 						for langSysRecord in langSysRecords:
@@ -3648,12 +3556,12 @@ def doFamilyTest12():
 							for featIndex in langSysRecord[1].FeatureIndex:
 								featRecord = featList[featIndex]
 								lstr = str(featRecord.Feature.LookupListIndex)
-								if not lookupListDict.has_key(lstr):
+								if lstr not in lookupListDict:
 									lookupDef = 1 + len(lookupListDict.keys())
 									lookupListDict[lstr] = lookupDef
 									lookupDefDict[lookupDef] = lstr
 								lookupDef = lookupListDict[lstr]
-								if not featDict.has_key(featRecord.FeatureTag):
+								if featRecord.FeatureTag not in featDict:
 									featDict[featRecord.FeatureTag] = []
 								featDict[featRecord.FeatureTag].append( [stag, ltag, lookupDef])
 								scriptDict[stag][ltag][featRecord.FeatureTag] = lookupDef
@@ -3661,10 +3569,10 @@ def doFamilyTest12():
 								for featIndex in langSysRecord[1].ReqFeatureIndex:
 									featRecord = featList[featIndex]
 									lstr = str(featRecord.Feature.LookupListIndex)
-									if not lookupListDict.has_key(lstr):
+									if lstr not in lookupListDict:
 										lookupListDict[lstr] = 1 + len(lookupListDict.keys())
 									lookupDef = lookupListDict[lstr]
-									if not featDict.has_key(featRecord.FeatureTag):
+									if featRecord.FeatureTag not in featDict:
 										featDict[featRecord.FeatureTag] = []
 									featDict[featRecord.FeatureTag].append( [stag, ltag, lookupDef])
 									scriptDict[stag][ltag][featRecord.FeatureTag] = lookupDef
@@ -3675,23 +3583,23 @@ def doFamilyTest12():
 				# check script and language tags.
 				for tag in scriptDict.keys():
 					if tag not in kKnownScriptTags:
-						print "	Error: font uses unknown script tag %s. %s." % (tag, font.PostScriptName1)
+						print("	Error: font uses unknown script tag %s. %s." % (tag, font.PostScriptName1))
 				for tag in langDict.keys():
 					if tag not in kKnownLanguageTags:
-						print "	Error: font uses unknown language tag %s. %s." % (tag, font.PostScriptName1)
+						print("	Error: font uses unknown language tag %s. %s." % (tag, font.PostScriptName1))
 
 				fontDict[tableTag] = [scriptDict, featDict]
 				if featDict:
-						if langDict.has_key("TUR"):
-							print "	Error: font uses incorrect language tag TUR rather the TRK in table %s. %s." % (tableTag, font.PostScriptName1)
+						if "TUR" in langDict:
+							print("	Error: font uses incorrect language tag TUR rather the TRK in table %s. %s." % (tableTag, font.PostScriptName1))
 						try:
 							rec = scriptDict['DFLT']['dflt']
 						except:
-							print "	Warning: font does not have script 'DFLT' language 'dflt' in table %s. %s." % (tableTag, font.PostScriptName1)
+							print("	Warning: font does not have script 'DFLT' language 'dflt' in table %s. %s." % (tableTag, font.PostScriptName1))
 						try:
 							rec = scriptDict['latn']['dflt']
 						except:
-							print "	Warning: font does not have script 'latn' language 'dflt' in table %s. %s." % (tableTag, font.PostScriptName1)
+							print("	Warning: font does not have script 'latn' language 'dflt' in table %s. %s." % (tableTag, font.PostScriptName1))
 
 			dictList.append( [font.PostScriptName1,fontDict, lookupDefDict])
 
@@ -3700,78 +3608,73 @@ def doFamilyTest12():
 	for entry in dictList:
 		key = str(entry[1]) + str(entry[2])
 
-		if langSysDict.has_key(key):
+		if key in langSysDict:
 			langSysDict[key].append(entry)
 		else:
 			langSysDict[key] = [entry]
 
 	if len(langSysDict.keys()) > 1:
-		print "	Error: In GPOS/GUSB tables, the sets of lookups used by features in the script-language systems  differ between fonts."
-		print "\tThis may be intended if the faces have different charsets."
+		print("	Error: In GPOS/GUSB tables, the sets of lookups used by features in the script-language systems  differ between fonts.")
+		print("\tThis may be intended if the faces have different charsets.")
 
 	for value  in langSysDict.values():
-		print
-		print "Lang/Sys Table for font(s): ",
+		print()
+		print("Lang/Sys Table for font(s): ", end=' ')
 		for entry in  value:
-			print entry[0],
-		print
+			print(entry[0], end=' ')
+		print()
 		fontDict = entry[1]
 		lookupDefDict = entry[2]
-		for layoutTag in fontDict.keys():
-			print
-			print "\t%s Table - script:tag list." % layoutTag
+		for layoutTag in sorted(fontDict.keys()):
+			print()
+			print("\t%s Table - script:tag list." % layoutTag)
 			scriptDict = fontDict[layoutTag][0]
 			if not scriptDict:
-				print "\t\tNo features present for table %s" % (layoutTag)
+				print("\t\tNo features present for table %s" % (layoutTag))
 				break
 			featDict = fontDict[layoutTag][1]
-			scriptList = scriptDict.keys()
-			scriptList.sort()
+			scriptList = sorted(scriptDict.keys())
 
 			# print script/language lists
 			for stag in  scriptList:
-				print "\t",
-				print ("%s:" % stag).ljust(6),
-				langList =  scriptDict[stag].keys()
-				langList.sort()
+				print("\t", end='')
+				print(("%s:" % stag).ljust(6), end=' ')
+				langList = sorted(scriptDict[stag].keys())
 				for ltag in langList[:-1]:
-					print ltag.ljust(6),
-				print langList[-1]
-			print
+					print(ltag.ljust(6), end=' ')
+				print(langList[-1])
+			print()
 
 			# print print lookup def mappings
-			print "\tlookup group ID to lookup index list:"
+			print("\tlookup group ID to lookup index list:")
 			for key in lookupDefDict.keys():
-				print "\t",
-				print ("ID %s:" % key).ljust(6),
-				print (" maps to lookups %s." % lookupDefDict[key])
-			print
+				print("\t", end='')
+				print(("ID %s:" % key).ljust(6), end=' ')
+				print(" maps to lookups %s." % lookupDefDict[key])
+			print()
 			# print header for feature table
-			print "\t%s Table - feature lookup groups by script:tag column headers."  % layoutTag
-			print "\t(The lookup group ID assigned to each set of lookups is  an arbitrary - see list above for map to actual lookup indices.)"
-			print "\t",
+			print("\t%s Table - feature lookup groups by script:tag column headers."  % layoutTag)
+			print("\t(The lookup group ID assigned to each set of lookups is  an arbitrary - see list above for map to actual lookup indices.)")
+			print("\t", end='')
 			for stag in  scriptList:
-				print ("%s:" % stag).rjust(5),
-				langList =  scriptDict[stag].keys()
-				langList.sort()
+				print(("%s:" % stag).rjust(5), end=' ')
+				langList = sorted(scriptDict[stag].keys())
 				for ltag in langList:
-					print ltag.ljust(5),
-			print
+					print(ltag.ljust(5), end=' ')
+			print()
 
 
-			fList = featDict.keys()
-			fList.sort()
+			fList = sorted(featDict.keys())
 			for ftag in fList:
 				summary = ""
 				setsDiffer = 0
 				firstSet = None
-				print "\t" + ftag.ljust(5),
+				print("\t" + ftag.ljust(5), end=' ')
 				lastScript = scriptList[0]
 				for stag in  scriptList:
 					if lastScript != stag:
 						summary = summary +  " "*6
-					langList =  scriptDict[stag].keys()
-					langList.sort()
+					langList = sorted(scriptDict[stag].keys())
 					for ltag in langList:
 						try:
 							lookupSet = str(scriptDict[stag][ltag][ftag])
@@ -3784,13 +3687,13 @@ def doFamilyTest12():
 							setsDiffer = 1
 						summary  = summary + setText
 				if setsDiffer:
-					print summary
+					print(summary)
 				else:
-					print "<same>"
+					print("<same>")
 
 def doFamilyTest13():
 	kTestBit = 1 << 8
-	print "\nFamily Test 13: Check that no two faces in a preferred group have the same weight/width/Italic-style values when the OS/2 table fsSelection bit 8 (WEIGHT_WIDTH_SLOPE_ONLY) is set."
+	print("\nFamily Test 13: Check that no two faces in a preferred group have the same weight/width/Italic-style values when the OS/2 table fsSelection bit 8 (WEIGHT_WIDTH_SLOPE_ONLY) is set.")
 	dictList = []
 	for name in preferredFamilyList1.keys():
 		fontgroup = preferredFamilyList1[name]
@@ -3806,10 +3709,10 @@ def doFamilyTest13():
 				haveError = 1
 				break
 		if haveError:
-			print "\tError: fonts in family of %s do not all have the same setting for the WEIGHT_WIDTH_SLOPE_ONLY bit in the OS/2 selection table." % (name)
+			print("\tError: fonts in family of %s do not all have the same setting for the WEIGHT_WIDTH_SLOPE_ONLY bit in the OS/2 selection table." % (name))
 			for i in range(numFonts):
 				font = fontgroup[i]
-				print "\tError: for font %s, WEIGHT_WIDTH_SLOPE_ONLY bit value %s." % (font.FullFontName1, (font.fsSelection & kTestBit) != 0)
+				print("\tError: for font %s, WEIGHT_WIDTH_SLOPE_ONLY bit value %s." % (font.FullFontName1, (font.fsSelection & kTestBit) != 0))
 			break
 
 		# then check that OS/2 version is 4 if bit is on.
@@ -3817,7 +3720,7 @@ def doFamilyTest13():
 			for i in range(numFonts):
 				font = fontgroup[i]
 				if font.OS2version < 4:
-					print "\tError: font %s has WEIGHT_WIDTH_SLOPE_ONLY bit in the OS/2 selection table set, but the OS/2 table version is less than 4." % (font.FullFontName1)
+					print("\tError: font %s has WEIGHT_WIDTH_SLOPE_ONLY bit in the OS/2 selection table set, but the OS/2 table version is less than 4." % (font.FullFontName1))
 					haveError = 1
 		if haveError:
 			break
@@ -3830,42 +3733,42 @@ def doFamilyTest13():
 			hashStr = "%s %s %s" % (font.usWidthClass, font.usWeightClass, font.isItalic)
 			try:
 				prevName = groupDict[hashStr]
-				print "\tError: font %s has the same weight/width/Italic values as font %s in the same family group when WEIGHT_WIDTH_SLOPE_ONLY is set." % ( font.FullFontName1, prevName)
+				print("\tError: font %s has the same weight/width/Italic values as font %s in the same family group when WEIGHT_WIDTH_SLOPE_ONLY is set." % ( font.FullFontName1, prevName))
 			except KeyError:
 				groupDict[hashStr] = font.FullFontName1
 
 
 def doFamilyTest14():
 	kTestBit = 1 << 8
-	print "\nFamily Test 14: Check that all faces in a preferred group have the same fsType embedding values."
+	print("\nFamily Test 14: Check that all faces in a preferred group have the same fsType embedding values.")
 	dictList = []
 	for name in preferredFamilyList1.keys():
 		preferredSubFamilyList1 = preferredFamilyList1[name]
 		font0 = preferredSubFamilyList1[0]
 		if font0.fsType == -1:
-			print "\tError: Skipping Embedding permissions report - OS/2 table does not exist in first font", font0.PostScriptName1
+			print("\tError: Skipping Embedding permissions report - OS/2 table does not exist in first font", font0.PostScriptName1)
 			continue
 		if (font0.fsType != 8) and ((not font0.trademarkStr1) or ("Adobe Systems" in font0.trademarkStr1)):
-			print "\tError: fsType embedding permission '%s' for '%s' should be 8 for Adobe fonts." % (font0.fsType, font0.PostScriptName1)
+			print("\tError: fsType embedding permission '%s' for '%s' should be 8 for Adobe fonts." % (font0.fsType, font0.PostScriptName1))
 
 		for font in preferredSubFamilyList1[1:]:
 			if font.fsType == -1:
-				print "	Error: Skipping font - OS/2 table does not exist in base font", font.PostScriptName1
+				print("	Error: Skipping font - OS/2 table does not exist in base font", font.PostScriptName1)
 				continue
 
 			if font0.fsType != font.fsType:
-				print "\tError: fsType embedding permission '%s' for '%s' differs from value '%s' in '%s'." % (font.fsType, font.PostScriptName1, font0.fsType, font0.PostScriptName1 )
+				print("\tError: fsType embedding permission '%s' for '%s' differs from value '%s' in '%s'." % (font.fsType, font.PostScriptName1, font0.fsType, font0.PostScriptName1 ))
 			if (font.fsType != 8) and ((not font.trademarkStr1) or ("Adobe Systems" in font.trademarkStr1)):
-				print "\tError: fsType embedding permission '%s' for '%s' should be 8 for Adobe fonts, aka OS/2.achVendID == Adobe." % (font.fsType, font.PostScriptName1)
+				print("\tError: fsType embedding permission '%s' for '%s' should be 8 for Adobe fonts, aka OS/2.achVendID == Adobe." % (font.fsType, font.PostScriptName1))
 
 
 def doFamilyTest15():
-	print "\nFamily Test 15: Check that all faces in a preferred group have the same underline position and width."
+	print("\nFamily Test 15: Check that all faces in a preferred group have the same underline position and width.")
 	for name in preferredFamilyList1.keys():
 		preferredSubFamilyList1 = preferredFamilyList1[name]
 		font0 = preferredSubFamilyList1[0]
 		if font0.underlinePos == -1:
-			print "\tError: Skipping underline report - post table does not exist in first font", font0.PostScriptName1
+			print("\tError: Skipping underline report - post table does not exist in first font", font0.PostScriptName1)
 			continue
 
 		underlinePos = font0.underlinePos
@@ -3873,36 +3776,28 @@ def doFamilyTest15():
 
 		for font in preferredSubFamilyList1[1:]:
 			if font.underlinePos == -1:
-				print "\tError: Skipping font - post table does not exist in base font", font.PostScriptName1
+				print("\tError: Skipping font - post table does not exist in base font", font.PostScriptName1)
 				continue
 
 			if underlinePos != font.underlinePos:
-				print "\tError: 'post' table underline position '%s' for '%s' differs from value '%s' in '%s'." % (font.underlinePos, font.PostScriptName1, underlinePos, font0.PostScriptName1 )
+				print("\tError: 'post' table underline position '%s' for '%s' differs from value '%s' in '%s'." % (font.underlinePos, font.PostScriptName1, underlinePos, font0.PostScriptName1 ))
 			if underlineThickness != font.underlineThickness:
-				print "\tError: 'post' table underline thickness '%s' for '%s' differs from value '%s' in '%s'." % (font.underlineThickness, font.PostScriptName1, underlineThickness, font0.PostScriptName1 )
+				print("\tError: 'post' table underline thickness '%s' for '%s' differs from value '%s' in '%s'." % (font.underlineThickness, font.PostScriptName1, underlineThickness, font0.PostScriptName1 ))
+
 
 def doFamilyTest16():
 	kWidthMultiplier = 3
-	def byCharsetLength(item1, item2):
-		len1 = len(item1[0])
-		len2 = len(item2[0])
-		if len1 > len2:
-			return 1
-		if  len1 < len2:
-			return -1
-		return 0
 
-	print "\nFamily Test 16: Check that for all faces in a preferred family group, that the width of any glyph is not more than %s times the width of the same glyph in any other face." % (kWidthMultiplier)
+	print("\nFamily Test 16: Check that for all faces in a preferred family group, that the width of any glyph is not more than %s times the width of the same glyph in any other face." % (kWidthMultiplier))
 	for name in preferredFamilyList1.keys():
 		# First, collect charsets.
 		fontgroup = preferredFamilyList1[name]
 		if len(fontgroup) == 1:
-			print "\tSkipping Family Test 16: can't usefully compare glyph widths between fonts when there is only one font in a preferred family. %s." % (name)
+			print("\tSkipping Family Test 16: can't usefully compare glyph widths between fonts when there is only one font in a preferred family. %s." % (name))
 			continue
 		charsetDict = {}
 		for font in fontgroup:
-			charset = copy.copy(font.glyphnames)
-			charset.sort()
+			charset = sorted(copy.copy(font.glyphnames))
 			charset = tuple(charset)
 			fontList = charsetDict.get(charset, [])
 			fontList.append(font)
@@ -3920,8 +3815,7 @@ def doFamilyTest16():
 				del charsetDict[charset]
 				lastCharSet = charset
 		if charsetDict:
-			charsetList = charsetDict.keys()
-			charsetList.sort(byCharsetLength)
+			charsetList = sorted(list(charsetDict.keys()), key=len)
 			longestCharset = charsetList[-1]
 			charsetDict[longestCharset].extend(singletonFonts)
 		else:
@@ -3937,26 +3831,26 @@ def doFamilyTest16():
 					try:
 						widthList.append([htmx_table.metrics[gname][0], font.PostScriptName1])
 					except KeyError:
-						print "\tError: Glyph '%s' is in font, but is nt in the width list. This can happen when the number of glyphs in the maxp table is less than the actual number of glyphs." % (gname)
+						print("\tError: Glyph '%s' is in font, but is nt in the width list. This can happen when the number of glyphs in the maxp table is less than the actual number of glyphs." % (gname))
 						pass
 				if not widthList:
 					continue
 				widthList.sort()
 				if (widthList[0][0]*kWidthMultiplier < widthList[-1][0]):
-					print "\tWarning: width (%s) of glyph %s in %s is more than %s times the width (%s) in %s." % (widthList[-1][0], gname,  widthList[-1][1], kWidthMultiplier,widthList[0][0], widthList[0][1])
+					print("\tWarning: width (%s) of glyph %s in %s is more than %s times the width (%s) in %s." % (widthList[-1][0], gname,  widthList[-1][1], kWidthMultiplier,widthList[0][0], widthList[0][1]))
 
 def doFamilyTest17():
-	print "\nFamily Test 17: Check that fonts have OS/2 table version 4."
+	print("\nFamily Test 17: Check that fonts have OS/2 table version 4.")
 	for name in preferredFamilyList1.keys():
 		fontgroup = preferredFamilyList1[name]
 		for font in fontgroup:
 			if font.OS2version < 4:
-				print "\tWarning: The font %s should have an OS/2 table version of at least 4 instead of %s." % (font.PostScriptName1, font.OS2version)
+				print("\tWarning: The font %s should have an OS/2 table version of at least 4 instead of %s." % (font.PostScriptName1, font.OS2version))
 
 def doFamilyTest18():
 	global compatibleFamilyList3
 
-	print "\nFamily Test 18: Check that all faces in a Compatible Family group have the same array size of BlueValues and OtherBlues within a Compatible Family Name Italic or Regular sub-group of the family."
+	print("\nFamily Test 18: Check that all faces in a Compatible Family group have the same array size of BlueValues and OtherBlues within a Compatible Family Name Italic or Regular sub-group of the family.")
 	# start with Compatible Family Name groups
 	# divide these up into subgroups by charset
 	# further divide these groups by Italic vs Roman.
@@ -3974,7 +3868,7 @@ def doFamilyTest18():
 		for subgroup in groups:
 			font = subgroup[0]
 			if not font.topDict: # not CFF
-				print "\t\tSkipping non-PostScript Font:", font.PostScriptName1
+				print("\t\tSkipping non-PostScript Font:", font.PostScriptName1)
 				break
 			# check vs bbox, and check order
 			try:
@@ -3988,35 +3882,35 @@ def doFamilyTest18():
 
 			tempBlues = copy.copy(font.BlueValues)
 			if len(tempBlues) < 2:
-				print "	Error: font BlueValues field has no blue values! %s." % (font.PostScriptName1)
+				print("	Error: font BlueValues field has no blue values! %s." % (font.PostScriptName1))
 			if (len(tempBlues) == 2) and (tempBlues == [0,0]):
-				print "	Error: font BlueValues field has no blue values! %s." % (font.PostScriptName1)
+				print("	Error: font BlueValues field has no blue values! %s." % (font.PostScriptName1))
 
 			if len(tempBlues) > 14:
-				print "	Error: font BlueValues has '%s' zones, but is allowed to hold at most 7. %s" % (len(tempBlues)/2, font.PostScriptName1)
+				print("	Error: font BlueValues has '%s' zones, but is allowed to hold at most 7. %s" % (len(tempBlues)/2, font.PostScriptName1))
 			if (len(tempBlues) % 2) != 0:
-				print "	Error: font BlueValues has '%s' integer values, List of values must be even as it takes a pair to describe an alignment zone. %s" % (len(tempBlues), font.PostScriptName1)
+				print("	Error: font BlueValues has '%s' integer values, List of values must be even as it takes a pair to describe an alignment zone. %s" % (len(tempBlues), font.PostScriptName1))
 			tempBlues.sort()
 			#if tempBlues != font.BlueValues: # this turns out to be OK.
-			#	print "	Error: font BlueValues '%s' are not sorted in ascending order. %s." % (font.BlueValues, font.PostScriptName1)
+			#	print("	Error: font BlueValues '%s' are not sorted in ascending order. %s." % (font.BlueValues, font.PostScriptName1))
 			if tempBlues[1] < font.fontBBox[1]:
-				print "	Error: font BlueValues has lowest zone (%s,%s) outside of minimum y of font bounding box '%s'. %s" % (tempBlues[0], tempBlues[1], font.fontBBox[1], font.PostScriptName1)
+				print("	Error: font BlueValues has lowest zone (%s,%s) outside of minimum y of font bounding box '%s'. %s" % (tempBlues[0], tempBlues[1], font.fontBBox[1], font.PostScriptName1))
 			if tempBlues[-2] > font.fontBBox[3]:
-				print "	Error: font BlueValues has highest zone (%s,%s) outside of maximum y of font bounding box '%s'. %s" % (tempBlues[-2], tempBlues[-1], font.fontBBox[3], font.PostScriptName1)
+				print("	Error: font BlueValues has highest zone (%s,%s) outside of maximum y of font bounding box '%s'. %s" % (tempBlues[-2], tempBlues[-1], font.fontBBox[3], font.PostScriptName1))
 
 			if font.OtherBlues and (len(tempBlues) < 2):
 				tempBlues = copy.copy(font.OtherBlues)
 				if len(tempBlues) > 10:
-					print "	Error: font OtherBlues has '%s' zones, but is allowed to hold at most 5. %s" % (len(tempBlues)/2, font.PostScriptName1)
+					print("	Error: font OtherBlues has '%s' zones, but is allowed to hold at most 5. %s" % (len(tempBlues)/2, font.PostScriptName1))
 				if (len(tempBlues) % 2) != 0:
-					print "	Error: font OtherBlues has '%s' integer values, List of values must be even as it takes a pair to describe an alignment zone. %s" % (len(tempBlues), font.PostScriptName1)
+					print("	Error: font OtherBlues has '%s' integer values, List of values must be even as it takes a pair to describe an alignment zone. %s" % (len(tempBlues), font.PostScriptName1))
 				tempBlues.sort()
 				#if tempBlues != font.OtherBlues: # this turns out to be OK.
-				#	print "	Error: font OtherBlues '%s' are not sorted in ascending order. %s." % (font.OtherBlues, font.PostScriptName1)
+				#	print("	Error: font OtherBlues '%s' are not sorted in ascending order. %s." % (font.OtherBlues, font.PostScriptName1))
 				if tempBlues[1] < font.fontBBox[1]:
-					print "	Error: font OtherBlues has lowest zone (%s,%s) outside of minimum y of font bounding box '%s'. %s" % (tempBlues[0], tempBlues[1], font.fontBBox[1], font.PostScriptName1)
+					print("	Error: font OtherBlues has lowest zone (%s,%s) outside of minimum y of font bounding box '%s'. %s" % (tempBlues[0], tempBlues[1], font.fontBBox[1], font.PostScriptName1))
 				if tempBlues[-2] > font.fontBBox[3]:
-					print "	Error: font OtherBlues has highest zone (%s,%s) outside of maximum y of font bounding box '%s'. %s" % (tempBlues[-2], tempBlues[-1], font.fontBBox[3], font.PostScriptName1)
+					print("	Error: font OtherBlues has highest zone (%s,%s) outside of maximum y of font bounding box '%s'. %s" % (tempBlues[-2], tempBlues[-1], font.fontBBox[3], font.PostScriptName1))
 
 			for font1 in subgroup[1:]:
 				try:
@@ -4029,51 +3923,51 @@ def doFamilyTest18():
 					font1.OtherBlues = []
 
 				if len(font.BlueValues) != len(font1.BlueValues):
-					print "\nError: These two fonts do not have the same array size of BlueValues for", name
-					print "\tFont 1:", font.PostScriptName1
-					print "\tBlueValues:", font.BlueValues
-					print "\tFont 2:", font1.PostScriptName1
-					print "\tBlueValues:", font1.BlueValues
+					print("\nError: These two fonts do not have the same array size of BlueValues for", name)
+					print("\tFont 1:", font.PostScriptName1)
+					print("\tBlueValues:", font.BlueValues)
+					print("\tFont 2:", font1.PostScriptName1)
+					print("\tBlueValues:", font1.BlueValues)
 
 				# check vs bbox, and check order
 				tempBlues = copy.copy(font1.BlueValues )
 				if len(tempBlues) > 14:
-					print "	Error: font BlueValues has '%s' zones, but is allowed to hold at most 7. %s" % (len(tempBlues)/2, font1.PostScriptName1)
+					print("	Error: font BlueValues has '%s' zones, but is allowed to hold at most 7. %s" % (len(tempBlues)/2, font1.PostScriptName1))
 				if (len(tempBlues) % 2) != 0:
-					print "	Error: font BlueValues has '%s' integer values, List of values must be even as it takes a pair to describe an alignment zone. %s" % (len(tempBlues), font1.PostScriptName1)
+					print("	Error: font BlueValues has '%s' integer values, List of values must be even as it takes a pair to describe an alignment zone. %s" % (len(tempBlues), font1.PostScriptName1))
 				tempBlues.sort()
 				#if tempBlues != font1.BlueValues: # this turns out to be OK.
-				#	print "	Error: font BlueValues '%s' are not sorted in ascending order. %s." % (font1.BlueValues, font1.PostScriptName1)
+				#	print("	Error: font BlueValues '%s' are not sorted in ascending order. %s." % (font1.BlueValues, font1.PostScriptName1))
 				if tempBlues[1] < font1.fontBBox[1]:
-					print "	Error: font BlueValues has lowest zone (%s,%s) outside of minimum y of font bounding box '%s'. %s" % (tempBlues[0], tempBlues[1], font1.fontBBox[1], font1.PostScriptName1)
+					print("	Error: font BlueValues has lowest zone (%s,%s) outside of minimum y of font bounding box '%s'. %s" % (tempBlues[0], tempBlues[1], font1.fontBBox[1], font1.PostScriptName1))
 				if tempBlues[-2] > font1.fontBBox[3]:
-					print "	Error: font BlueValues has highest zone (%s,%s) outside of maximum y of font bounding box '%s'. %s" % (tempBlues[-2], tempBlues[-1], font1.fontBBox[3], font1.PostScriptName1)
+					print("	Error: font BlueValues has highest zone (%s,%s) outside of maximum y of font bounding box '%s'. %s" % (tempBlues[-2], tempBlues[-1], font1.fontBBox[3], font1.PostScriptName1))
 
 				if len(font.OtherBlues) != len(font1.OtherBlues):
-					print "\nError: These two fonts do not have the same array size of OtherBlues for", name
-					print "\tFont 1:", font.PostScriptName1
-					print "\tOtherBlues:", font.OtherBlues
-					print "\tFont 2:", font1.PostScriptName1
-					print "\tOtherBlues:", font1.OtherBlues
+					print("\nError: These two fonts do not have the same array size of OtherBlues for", name)
+					print("\tFont 1:", font.PostScriptName1)
+					print("\tOtherBlues:", font.OtherBlues)
+					print("\tFont 2:", font1.PostScriptName1)
+					print("\tOtherBlues:", font1.OtherBlues)
 
 				if font1.OtherBlues:
 					tempBlues = copy.copy(font1.OtherBlues)
 					if len(tempBlues) > 10:
-						print "	Error: font OtherBlues has '%s' zones, but is allowed to hold at most 5. %s" % (len(tempBlues)/2, font1.PostScriptName1)
+						print("	Error: font OtherBlues has '%s' zones, but is allowed to hold at most 5. %s" % (len(tempBlues)/2, font1.PostScriptName1))
 					if (len(tempBlues) % 2) != 0:
-						print "	Error: font OtherBlues has '%s' integer values, List of values must be even as it takes a pair to describe an alignment zone. %s" % (len(tempBlues), font1.PostScriptName1)
+						print("	Error: font OtherBlues has '%s' integer values, List of values must be even as it takes a pair to describe an alignment zone. %s" % (len(tempBlues), font1.PostScriptName1))
 					tempBlues.sort()
 					#if tempBlues != font1.OtherBlues: # this turns out to be OK.
-					#	print "	Error: font OtherBlues '%s' are not sorted in ascending order. %s." % (font1.OtherBlues, font1.PostScriptName1)
+					#	print("	Error: font OtherBlues '%s' are not sorted in ascending order. %s." % (font1.OtherBlues, font1.PostScriptName1))
 					if tempBlues[1] < font1.fontBBox[1]:
-						print "	Error: font OtherBlues has lowest zone (%s,%s) outside of minimum y of font bounding box '%s'. %s" % (tempBlues[0], tempBlues[1], font1.fontBBox[1], font1.PostScriptName1)
+						print("	Error: font OtherBlues has lowest zone (%s,%s) outside of minimum y of font bounding box '%s'. %s" % (tempBlues[0], tempBlues[1], font1.fontBBox[1], font1.PostScriptName1))
 					if tempBlues[-2] > font1.fontBBox[3]:
-						print "	Error: font OtherBlues has highest zone (%s,%s) outside of maximum y of font bounding box '%s'. %s" % (tempBlues[-2],tempBlues[-1], font1.fontBBox[3], font1.PostScriptName1)
+						print("	Error: font OtherBlues has highest zone (%s,%s) outside of maximum y of font bounding box '%s'. %s" % (tempBlues[-2],tempBlues[-1], font1.fontBBox[3], font1.PostScriptName1))
 
 def doFamilyTest19():
 	global compatibleFamilyList3
 
-	print "\nFamily Test 19: Check that all faces in the Preferred Family group have the same values of FamilyBlues and FamilyOtherBlues, and are valid."
+	print("\nFamily Test 19: Check that all faces in the Preferred Family group have the same values of FamilyBlues and FamilyOtherBlues, and are valid.")
 	# A preferred family can contain groups of fonts that have different Family Blues; different optical sizes, for example.
 	# What I will do is collect a dict of unique FamilyBlue values, and report on any that are unique, or do not contain a "regular" member".
 
@@ -4084,7 +3978,7 @@ def doFamilyTest19():
 		fontgroup = preferredFamilyList1[name]
 		for font in fontgroup:
 			if not font.topDict: # not CFF
-				print "\t\tSkipping non-PostScript Font:", font.PostScriptName1
+				print("\t\tSkipping non-PostScript Font:", font.PostScriptName1)
 				break
 			if not hasattr(font, 'BlueValues'):
 				try:
@@ -4106,7 +4000,7 @@ def doFamilyTest19():
 		maxYBBox = -1000
 		for font in fontgroup:
 			if not font.topDict: # not CFF
-				print "\t\tSkipping non-PostScript Font:", font.PostScriptName1
+				print("\t\tSkipping non-PostScript Font:", font.PostScriptName1)
 				break
 			if font.fontBBox[1] < minYBBox:
 				minYBBox = font.fontBBox[1]
@@ -4144,7 +4038,7 @@ def doFamilyTest19():
 					break
 			# if all the blue values are the same, then FamilyBlues are not needed.
 			if blueValuesDiffer:
-				print "	Warning. The fonts in the family group %s do not have  FamilyBlue values. This font feature helps with alignment of different styles of the same family on a text line." % (name)
+				print("	Warning. The fonts in the family group %s do not have  FamilyBlue values. This font feature helps with alignment of different styles of the same family on a text line." % (name))
 			continue
 
 		for FBEntry in FBList:
@@ -4164,12 +4058,12 @@ def doFamilyTest19():
 						regularFont = font
 				if len(fontList) > 1:
 					if not regularFont:
-						print "	Warning: In family %s, a group of fonts have %s, but there is no base font with the same value in its %s array. This affects" % (name, FBKey, BKey)
+						print("	Warning: In family %s, a group of fonts have %s, but there is no base font with the same value in its %s array. This affects" % (name, FBKey, BKey))
 						for font in fontList:
-							print "\t\t", font.PostScriptName1
+							print("\t\t", font.PostScriptName1)
 				else:
 					if tempBlues:
-						print "	Error: In family %s, a font has a unique %s array. This is certainly unintended. %s." % (name, FBKey, font.PostScriptName1)
+						print("	Error: In family %s, a font has a unique %s array. This is certainly unintended. %s." % (name, FBKey, font.PostScriptName1))
 				#print FBKey, tempBlues
 				#for font in fontList:
 				#	print font.PostScriptName1,
@@ -4177,13 +4071,13 @@ def doFamilyTest19():
 				if not tempBlues:
 					continue
 				if len(tempBlues) > 14:
-					print "	Error: In family %s, %s has '%s' zones, but is allowed to hold at most 7. This affects:" % (name, FBKey, len(tempBlues)/2)
+					print("	Error: In family %s, %s has '%s' zones, but is allowed to hold at most 7. This affects:" % (name, FBKey, len(tempBlues)/2))
 					for font in fontList:
-						print "\t\t", font.PostScriptName1
+						print("\t\t", font.PostScriptName1)
 				if (len(tempBlues) % 2) != 0:
-					print "	Error: In family %s, %s has '%s' integer values. List of values must be even as it takes a pair to describe an alignment zone. This affects:" % (name, FBKey, len(tempBlues))
+					print("	Error: In family %s, %s has '%s' integer values. List of values must be even as it takes a pair to describe an alignment zone. This affects:" % (name, FBKey, len(tempBlues)))
 					for font in fontList:
-						print "\t\t", font.PostScriptName1
+						print("\t\t", font.PostScriptName1)
 
 				# Note: It is not at error to have Family zones outside of font bbox.
 
@@ -4191,54 +4085,54 @@ def doFamilyTest19():
 def doFamilyTest20():
 	global compatibleFamilyList3
 
-	print "\nFamily Test 20: Check that all faces in the Compatible Family group have the same BlueScale value."
+	print("\nFamily Test 20: Check that all faces in the Compatible Family group have the same BlueScale value.")
 	for name in compatibleFamilyList3.keys():
 		fontgroup = compatibleFamilyList3[name]
 		font = fontgroup[0]
 		if not font.topDict: # not CFF
-			print "\t\tSkipping non-PostScript Font:", font.PostScriptName1
+			print("\t\tSkipping non-PostScript Font:", font.PostScriptName1)
 			continue
 		baseBlueScale = font.FDArray[0].Private.BlueScale
 		for font1 in fontgroup[1:]:
 			if not font1.topDict: # not CFF
-				print "\t\tSkipping non-PostScript Font:", font.PostScriptName1
+				print("\t\tSkipping non-PostScript Font:", font.PostScriptName1)
 				break
 			testBlueScale = font1.FDArray[0].Private.BlueScale
 			if baseBlueScale != testBlueScale:
-				print "\nNote: These two fonts do not have the same values of BlueScale for", name
-				print "\tFont 1:", font.PostScriptName1
-				print "\tBlueScale:", baseBlueScale
-				print "\tFont 2:", font1.PostScriptName1
-				print "\tBlueScale:", testBlueScale
+				print("\nNote: These two fonts do not have the same values of BlueScale for", name)
+				print("\tFont 1:", font.PostScriptName1)
+				print("\tBlueScale:", baseBlueScale)
+				print("\tFont 2:", font1.PostScriptName1)
+				print("\tBlueScale:", testBlueScale)
 
 def doFamilyTest21():
 	global compatibleFamilyList3
 
-	print "\nFamilyTest 21: Check that all faces in the Compatible Family group have the same BlueShift value."
+	print("\nFamilyTest 21: Check that all faces in the Compatible Family group have the same BlueShift value.")
 	for name in compatibleFamilyList3.keys():
 		fontgroup = compatibleFamilyList3[name]
 		font = fontgroup[0]
 		if not font.topDict: # not CFF
-			print "\t\tSkipping non-PostScript Font:", font.PostScriptName1
+			print("\t\tSkipping non-PostScript Font:", font.PostScriptName1)
 			continue
 		baseBlueShift = font.FDArray[0].Private.BlueShift
 		for font1 in fontgroup[1:]:
 			if not font1.topDict: # not CFF
-				print "\t\tSkipping non-PostScript Font:", font.PostScriptName1
+				print("\t\tSkipping non-PostScript Font:", font.PostScriptName1)
 				break
 			testBlueShift = font1.FDArray[0].Private.BlueShift
 			if baseBlueShift != testBlueShift:
-				print "\nNote: These two fonts do not have the same values of BlueShift for", name
-				print "\tFont 1:", font.PostScriptName1
-				print "\tBlueShift:", baseBlueShift
-				print "\tFont 2:", font1.PostScriptName1
-				print "\tBlueShift:", testBlueShift
+				print("\nNote: These two fonts do not have the same values of BlueShift for", name)
+				print("\tFont 1:", font.PostScriptName1)
+				print("\tBlueShift:", baseBlueShift)
+				print("\tFont 2:", font1.PostScriptName1)
+				print("\tBlueShift:", testBlueShift)
 
 def doFamilyTests(singleTestList, familyTestList):
 	global compatibleFamilyList3
 	# build a group of fonts with the same nameID 1(Win, Unicode, English) for later use in individual Family Test
 	for font in fontlist:
-		if compatibleFamilyList3.has_key(font.compatibleFamilyName3):
+		if font.compatibleFamilyName3 in compatibleFamilyList3:
 			compatibleSubFamilyList3 = compatibleFamilyList3[font.compatibleFamilyName3]
 		else:
 			compatibleSubFamilyList3 = []
@@ -4249,8 +4143,8 @@ def doFamilyTests(singleTestList, familyTestList):
 			g = globals()
 			for val in familyTestList:
 				funcName = "doFamilyTest%s" % (val)
-				if not g.has_key(funcName):
-					print "Error: cannot find function '%s' to execute." % (funcName)
+				if funcName not in g:
+					print("Error: cannot find function '%s' to execute." % (funcName))
 					continue
 				exec("%s()" % (funcName))
 	else:
@@ -4282,7 +4176,7 @@ def build_preferredFamilyList(fontlist):
 
 	preferredFamilyList1 = {}
 	for font in fontlist:
-		if preferredFamilyList1.has_key(font.preferredFamilyName1):
+		if font.preferredFamilyName1 in preferredFamilyList1:
 			preferredSubFamilyList1 = preferredFamilyList1[font.preferredFamilyName1]
 		else:
 			preferredSubFamilyList1 = []
@@ -4293,47 +4187,49 @@ def build_preferredFamilyList(fontlist):
 def print_menu_name_report():
 	global preferredFamilyList1
 
-	print "\nMenu Name Report:"
+	print("\nMenu Name Report:")
 	for name in preferredFamilyList1.keys():
 		preferredSubFamilyList1 = preferredFamilyList1[name]
-		print "\nPreferred Menu							  Mac Compatible Menu				 Windows Compatible Menu"
+		print("\nPreferred Menu							  Mac Compatible Menu				 Windows Compatible Menu")
 		for font in preferredSubFamilyList1:
-			print string.ljust(upperascii_to_hex(font.preferredFamilyName3)+"/"+upperascii_to_hex(font.preferredSubFamilyName3), 40), string.ljust(upperascii_to_hex(font.MacCompatibleFullName1), 34), string.ljust(font.compatibleFamilyName3+"/"+font.compatibleSubFamilyName3, 34)
+			print((font.preferredFamilyName3+"/"+font.preferredSubFamilyName3).ljust(40),
+				font.MacCompatibleFullName1.ljust(34),
+				font.compatibleFamilyName3+"/"+font.compatibleSubFamilyName3)
 
 
 
 def print_font_metric_report():
 	global preferredFamilyList1
 
-	print "\nFONT METRICS REPORT"
-	print "Report 1:",
+	print("\nFONT METRICS REPORT")
+	print("Report 1:", end=' ')
 	for name in preferredFamilyList1.keys():
-		print "\nPreferred Family:", upperascii_to_hex(name)
+		print("\nPreferred Family:", name)
 		preferredSubFamilyList1 = preferredFamilyList1[name]
-		print "Num glyphs from maxp.numGlyphs:"
+		print("Num glyphs from maxp.numGlyphs:")
 		font0 = preferredSubFamilyList1[0]
 		diff = 0
 		for font in preferredSubFamilyList1[1:]:
 			if font0.numGlyphs != font.numGlyphs:
 				diff = 1
 		if diff == 0:
-			print "All fonts have the same value:", font0.numGlyphs
+			print("All fonts have the same value:", font0.numGlyphs)
 			continue
 		for font in sort_by_numGlyphs_and_PostScriptName1(preferredSubFamilyList1):
-			print string.ljust(font.PostScriptName1+":", 40), font.numGlyphs
+			print(("%s:" % font.PostScriptName1).ljust(40), font.numGlyphs)
 
 	for name in preferredFamilyList1.keys():
-		print "\nPreferred Family:", upperascii_to_hex(name)
+		print("\nPreferred Family:", name)
 		preferredSubFamilyList1 = preferredFamilyList1[name]
 		font0 = preferredSubFamilyList1[0]
 		diff = 0
 
 		if font0.sTypoAscender == -1:
-			print "Skipping ascender/descender/linegap report - OS/2 table does not exist", font0.PostScriptName1
+			print("Skipping ascender/descender/linegap report - OS/2 table does not exist", font0.PostScriptName1)
 		else:
 			for font in preferredSubFamilyList1[1:]:
 				if font.sTypoAscender == -1:
-					print "Skipping font - OS/2 table does not exist", font.PostScriptName1
+					print("Skipping font - OS/2 table does not exist", font.PostScriptName1)
 					diff = 1
 					continue
 
@@ -4342,35 +4238,35 @@ def print_font_metric_report():
 						diff = 1
 
 			if diff == 0:
-				print "OS/2 sTypoAscender/sTypoDescender/sTypoLineGap/sCapHeight/sxHeight"
-				print "All fonts have the same value:",
-				print "%5d%5d%5d%5d%5d" % (font0.sTypoAscender, font0.sTypoDescender, font0.sTypoLineGap, font0.sCapHeight, font0.sxHeight)
+				print("OS/2 sTypoAscender/sTypoDescender/sTypoLineGap/sCapHeight/sxHeight")
+				print("All fonts have the same value:", end=' ')
+				print("%5d%5d%5d%5d%5d" % (font0.sTypoAscender, font0.sTypoDescender, font0.sTypoLineGap, font0.sCapHeight, font0.sxHeight))
 				continue
-			print "Font									TypoAscent/TypoDescent/LineGap/CapHeight/sxHeight"
+			print("Font									TypoAscent/TypoDescent/LineGap/CapHeight/sxHeight")
 			for font in preferredSubFamilyList1:
-				print "%40s%5d%8d%8d%8d%8d" % (string.ljust(font.PostScriptName1+":", 40), font.sTypoAscender, font.sTypoDescender, font.sTypoLineGap, font.sCapHeight, font.sxHeight)
+				print("%40s%5d%8d%8d%8d%8d" % (("%s:" % font.PostScriptName1).ljust(40), font.sTypoAscender, font.sTypoDescender, font.sTypoLineGap, font.sCapHeight, font.sxHeight))
 
 
 	for name in preferredFamilyList1.keys():
-		print "\nPreferred Family:", upperascii_to_hex(name)
+		print("\nPreferred Family:", name)
 		preferredSubFamilyList1 = preferredFamilyList1[name]
-		print "Italic Angle from post.italicAngle:"
+		print("Italic Angle from post.italicAngle:")
 		font0 = preferredSubFamilyList1[0]
 		diff = 0
 		for font in preferredSubFamilyList1[1:]:
 			if font0.italicAngle != font.italicAngle:
 				diff = 1
 		if diff == 0:
-			print "All fonts have the same value:", "%7.3f" % font0.italicAngle
+			print("All fonts have the same value:", "%7.3f" % font0.italicAngle)
 			continue
 		for font in sort_angle(preferredSubFamilyList1):
-			print string.ljust(font.PostScriptName1+":", 40), "%7.3f" % font.italicAngle
+			print(("%s:" % font.PostScriptName1).ljust(40), "%7.3f" % font.italicAngle)
 
 
 	for name in preferredFamilyList1.keys():
-		print "\nPreferred Family:", upperascii_to_hex(name)
+		print("\nPreferred Family:", name)
 		preferredSubFamilyList1 = preferredFamilyList1[name]
-		print "isBold from hhea.mscStyle:"
+		print("isBold from hhea.mscStyle:")
 		table = ["Not Bold", "	  Bold"]
 		font0 = preferredSubFamilyList1[0]
 		diff = 0
@@ -4378,7 +4274,7 @@ def print_font_metric_report():
 			if font0.isBold != font.isBold:
 				diff = 1
 		if diff == 0:
-			print "All fonts have the same value:", table[font0.isBold]
+			print("All fonts have the same value:", table[font0.isBold])
 			continue
 		boldlist = []
 		notboldlist = []
@@ -4388,14 +4284,14 @@ def print_font_metric_report():
 			else:
 				notboldlist.append(font)
 		for font in boldlist:
-			print string.ljust(font.PostScriptName1+":", 40), table[font.isBold]
+			print(("%s:" % font.PostScriptName1).ljust(40), table[font.isBold])
 		for font in notboldlist:
-			print string.ljust(font.PostScriptName1+":", 40), table[font.isBold]
+			print(("%s:" % font.PostScriptName1).ljust(40), table[font.isBold])
 
 	for name in preferredFamilyList1.keys():
-		print "\nPreferred Family:", upperascii_to_hex(name)
+		print("\nPreferred Family:", name)
 		preferredSubFamilyList1 = preferredFamilyList1[name]
-		print "isItalic from hhea.mscStyle:"
+		print("isItalic from hhea.mscStyle:")
 		table = ["Not Italic", "	Italic"]
 		font0 = preferredSubFamilyList1[0]
 		diff = 0
@@ -4403,7 +4299,7 @@ def print_font_metric_report():
 			if font0.isItalic != font.isItalic:
 				diff = 1
 		if diff == 0:
-			print "All fonts have the same value:", table[font0.isItalic]
+			print("All fonts have the same value:", table[font0.isItalic])
 			continue
 		italiclist = []
 		notitaliclist = []
@@ -4413,253 +4309,264 @@ def print_font_metric_report():
 			else:
 				notitaliclist.append(font)
 		for font in italiclist:
-			print string.ljust(font.PostScriptName1+":", 40), table[font.isItalic]
+			print(("%s:" % font.PostScriptName1).ljust(40), table[font.isItalic])
 		for font in notitaliclist:
-			print string.ljust(font.PostScriptName1+":", 40), table[font.isItalic]
+			print(("%s:" % font.PostScriptName1).ljust(40), table[font.isItalic])
 
 	for name in preferredFamilyList1.keys():
-		print "\nPreferred Family:", upperascii_to_hex(name)
+		print("\nPreferred Family:", name)
 		preferredSubFamilyList1 = preferredFamilyList1[name]
-		print "OTF version from head.fontRevision:"
+		print("OTF version from head.fontRevision:")
 		font0 = preferredSubFamilyList1[0]
 		diff = 0
 		for font in preferredSubFamilyList1[1:]:
 			if font0.OTFVersion != font.OTFVersion:
 				diff = 1
 		if diff == 0:
-			print "All fonts have the same value:", "%5.3f" % font0.OTFVersion
+			print("All fonts have the same value:", "%5.3f" % font0.OTFVersion)
 			continue
 		for font in sort_version(preferredSubFamilyList1):
-			print string.ljust(font.PostScriptName1+":", 40), "%5.3f" % font.OTFVersion
+			print(("%s:" % font.PostScriptName1).ljust(40), "%5.3f" % font.OTFVersion)
 
 	for name in preferredFamilyList1.keys():
-		print "\nPreferred Family:", upperascii_to_hex(name)
+		print("\nPreferred Family:", name)
 		preferredSubFamilyList1 = preferredFamilyList1[name]
-		print "Embedding permissions setting from OS/2.fsType:"
+		print("Embedding permissions setting from OS/2.fsType:")
 		font0 = preferredSubFamilyList1[0]
 		if font0.fsType == -1:
-			print "Skipping Embedding permissions report - OS/2 table does not exist in base font", font0.PostScriptName1
+			print("Skipping Embedding permissions report - OS/2 table does not exist in base font", font0.PostScriptName1)
 		else:
 
 			diff = 0
 			for font in preferredSubFamilyList1[1:]:
 				if font.fsType == -1:
-					print "Skipping font - OS/2 table does not exist in base font", font.PostScriptName1
+					print("Skipping font - OS/2 table does not exist in base font", font.PostScriptName1)
 					diff = 1
 					continue
 
 				if font0.fsType != font.fsType:
 					diff = 1
 			if diff == 0:
-				print "All fonts have the same value:", "0x%04x" % font0.fsType,
+				print("All fonts have the same value:", "0x%04x" % font0.fsType, end=' ')
 				if font0.fsType == 0:
-					print "'Installable embedding'",
+					print("'Installable embedding'", end=' ')
 				if font0.fsType & 2:
-					print "'restricted license embedding'",
+					print("'restricted license embedding'", end=' ')
 				if font0.fsType & 4:
-					print "'print and preview'",
+					print("'print and preview'", end=' ')
 				if font0.fsType & 8:
-					print "'editable embedding'",
+					print("'editable embedding'", end=' ')
 				if font0.fsType & 0x0100:
-					print "'no subsetting'",
+					print("'no subsetting'", end=' ')
 				if font0.fsType & 0x0200:
-					print "'bitmapping embedding only'",
-				print ""
+					print("'bitmapping embedding only'", end=' ')
+				print("")
 				continue
 			for font in preferredSubFamilyList1:
-				print string.ljust(font.PostScriptName1+":", 40), "0x%04x" % font.fsType,
+				print(("%s:" % font.PostScriptName1).ljust(40), "0x%04x" % font.fsType, end=' ')
 				if font.fsType == 0:
-					print "'Installable embedding'",
+					print("'Installable embedding'", end=' ')
 				if font.fsType & 2:
-					print "'restricted license embedding'",
+					print("'restricted license embedding'", end=' ')
 				if font.fsType & 4:
-					print "'print and preview'",
+					print("'print and preview'", end=' ')
 				if font.fsType & 8:
-					print "'editable embedding'",
+					print("'editable embedding'", end=' ')
 				if font.fsType & 0x0100:
-					print "'no subsetting'",
+					print("'no subsetting'", end=' ')
 				if font.fsType & 0x0200:
-					print "'bitmapping embedding only'",
-				print ""
+					print("'bitmapping embedding only'", end=' ')
+				print("")
 
-	print ("\nReport 2:")
+	print("\nReport 2:")
 	for name in preferredFamilyList1.keys():
-		print "\nPreferred Family:", upperascii_to_hex(name)
+		print("\nPreferred Family:", name)
 		preferredSubFamilyList1 = preferredFamilyList1[name]
-		print "FontBBox from head.XY min/max:\t\tX Min, YMin, XMax, YMax"
+		print("FontBBox from head.XY min/max:\t\tX Min, YMin, XMax, YMax")
 		for font in preferredSubFamilyList1:
-			print string.ljust(font.PostScriptName1+":", 40), font.fontBBox
+			print(("%s:" % font.PostScriptName1).ljust(40), font.fontBBox)
 
 	for name in preferredFamilyList1.keys():
-		print "\nPreferred Family:", upperascii_to_hex(name)
+		print("\nPreferred Family:", name)
 		preferredSubFamilyList1 = preferredFamilyList1[name]
-		print "usWeightClass from OS/2.usWeightClass:"
+		print("usWeightClass from OS/2.usWeightClass:")
 		font0 = preferredSubFamilyList1[0]
 		diff = 0
 		if font0.usWeightClass == -1:
-			print "Skipping weightClass - OS/2 table does not exist in base font", font0.PostScriptName1
+			print("Skipping weightClass - OS/2 table does not exist in base font", font0.PostScriptName1)
 		else:
 			for font in preferredSubFamilyList1[1:]:
 				if font.usWeightClass == -1:
-					print "Skipping font - OS/2 table does not exist in base font", font.PostScriptName1
+					print("Skipping font - OS/2 table does not exist in base font", font.PostScriptName1)
 					diff = 1
 					continue
 
 				if font0.usWeightClass != font.usWeightClass:
 					diff = 1
 			if diff == 0:
-				print "All fonts have the same value:", font0.usWeightClass,
+				print("All fonts have the same value:", font0.usWeightClass, end=' ')
 				if font0.usWeightClass == 100:
-					print "Thin"
+					print("Thin")
 				elif font0.usWeightClass == 200:
-					print "Extra-Light (Ultra-light)"
+					print("Extra-Light (Ultra-light)")
 				elif font0.usWeightClass == 300:
-					print "Light"
+					print("Light")
 				elif font0.usWeightClass == 400:
-					print "Normal (Regular)"
+					print("Normal (Regular)")
 				elif font0.usWeightClass == 500:
-					print "Medium"
+					print("Medium")
 				elif font0.usWeightClass == 600:
-					print "Semi-bold (Demi-bold)"
+					print("Semi-bold (Demi-bold)")
 				elif font0.usWeightClass == 700:
-					print "Bold"
+					print("Bold")
 				elif font0.usWeightClass == 800:
-					print "Extra-Bold (Ultra-bold)"
+					print("Extra-Bold (Ultra-bold)")
 				elif font0.usWeightClass == 900:
-					print "Black (Heavy)"
+					print("Black (Heavy)")
 				elif (font0.usWeightClass > 100) and (font0.usWeightClass < 200):
-					print "Thin to Extra-Light (Ultra-light)"
+					print("Thin to Extra-Light (Ultra-light)")
 				elif (font0.usWeightClass > 200) and (font0.usWeightClass < 300):
-					print "Extra-Light (Ultra-light) to Light"
+					print("Extra-Light (Ultra-light) to Light")
 				elif (font0.usWeightClass > 300) and (font0.usWeightClass < 400):
-					print "Light to Normal (Regular)"
+					print("Light to Normal (Regular)")
 				elif (font0.usWeightClass > 400) and (font0.usWeightClass < 500):
-					print "Normal (Regular) to Medium"
+					print("Normal (Regular) to Medium")
 				elif (font0.usWeightClass > 500) and (font0.usWeightClass < 600):
-					print "Medium to Semi-bold (Demi-bold)"
+					print("Medium to Semi-bold (Demi-bold)")
 				elif (font0.usWeightClass > 600) and (font0.usWeightClass < 700):
-					print "Semi-bold (Demi-bold) to Bold"
+					print("Semi-bold (Demi-bold) to Bold")
 				elif (font0.usWeightClass > 700) and (font0.usWeightClass < 800):
-					print "Bold to Extra-bold (Ultra-bold)"
+					print("Bold to Extra-bold (Ultra-bold)")
 				elif (font0.usWeightClass > 800) and (font0.usWeightClass < 900):
-					print "Extra-bold (Ultra-bold) to Black (Heavy)"
+					print("Extra-bold (Ultra-bold) to Black (Heavy)")
 				else:
-					print "value out of range"
+					print("value out of range")
 				continue
 			for font in sort_weight(preferredSubFamilyList1):
-				print string.ljust(font.PostScriptName1+":", 40), "%3d" % font.usWeightClass,
+				print(("%s:" % font.PostScriptName1).ljust(40), "%3d" % font.usWeightClass, end=' ')
 				if font.usWeightClass == 100:
-					print "Thin"
+					print("Thin")
 				elif font.usWeightClass == 200:
-					print "Extra-Light (Ultra-light)"
+					print("Extra-Light (Ultra-light)")
 				elif font.usWeightClass == 300:
-					print "Light"
+					print("Light")
 				elif font.usWeightClass == 400:
-					print "Normal (Regular)"
+					print("Normal (Regular)")
 				elif font.usWeightClass == 500:
-					print "Medium"
+					print("Medium")
 				elif font.usWeightClass == 600:
-					print "Semi-bold (Demi-bold)"
+					print("Semi-bold (Demi-bold)")
 				elif font.usWeightClass == 700:
-					print "Bold"
+					print("Bold")
 				elif font.usWeightClass == 800:
-					print "Extra-Bold (Ultra-bold)"
+					print("Extra-Bold (Ultra-bold)")
 				elif font.usWeightClass == 900:
-					print "Black (Heavy)"
+					print("Black (Heavy)")
 				elif (font.usWeightClass > 100) and (font.usWeightClass < 200):
-					print "Thin to Extra-Light (Ultra-light)"
+					print("Thin to Extra-Light (Ultra-light)")
 				elif (font.usWeightClass > 200) and (font.usWeightClass < 300):
-					print "Extra-Light (Ultra-light) to Light"
+					print("Extra-Light (Ultra-light) to Light")
 				elif (font.usWeightClass > 300) and (font.usWeightClass < 400):
-					print "Light to Normal (Regular)"
+					print("Light to Normal (Regular)")
 				elif (font.usWeightClass > 400) and (font.usWeightClass < 500):
-					print "Normal (Regular) to Medium"
+					print("Normal (Regular) to Medium")
 				elif (font.usWeightClass > 500) and (font.usWeightClass < 600):
-					print "Medium to Semi-bold (Demi-bold)"
+					print("Medium to Semi-bold (Demi-bold)")
 				elif (font.usWeightClass > 600) and (font.usWeightClass < 700):
-					print "Semi-bold (Demi-bold) to Bold"
+					print("Semi-bold (Demi-bold) to Bold")
 				elif (font.usWeightClass > 700) and (font.usWeightClass < 800):
-					print "Bold to Extra-bold (Ultra-bold)"
+					print("Bold to Extra-bold (Ultra-bold)")
 				elif (font.usWeightClass > 800) and (font.usWeightClass < 900):
-					print "Extra-bold (Ultra-bold) to Black (Heavy)"
+					print("Extra-bold (Ultra-bold) to Black (Heavy)")
 				else:
-					print "value out of range"
+					print("value out of range")
 
 	for name in preferredFamilyList1.keys():
-		print "\nPreferred Family:", upperascii_to_hex(name)
+		print("\nPreferred Family:", name)
 		preferredSubFamilyList1 = preferredFamilyList1[name]
 		widthClassTable = ['Ultra-condensed', 'Extra-condensed', 'Condensed', 'Semi-condensed', 'Medium (normal)', 'Semi-expanded', 'Expanded', 'Extra-expanded', 'Ultra-expanded']
-		print "usWidthClass from OS/2.usWidthClass:"
+		print("usWidthClass from OS/2.usWidthClass:")
 		font0 = preferredSubFamilyList1[0]
 		diff = 0
 		if font0.usWidthClass == -1:
-			print "Skipping WidthClass report - OS/2 table does not exist in base font", font0.PostScriptName1
+			print("Skipping WidthClass report - OS/2 table does not exist in base font", font0.PostScriptName1)
 		else:
 			for font in preferredSubFamilyList1[1:]:
 				if font.usWidthClass == -1:
-					print "Skipping font - OS/2 table does not exist in base font", font.PostScriptName1
+					print("Skipping font - OS/2 table does not exist in base font", font.PostScriptName1)
 					diff = 1
 					continue
 				if font0.usWidthClass != font.usWidthClass:
 					diff = 1
 			if diff == 0:
-				print "All fonts have the same value:", font0.usWidthClass, widthClassTable[font0.usWidthClass-1]
+				print("All fonts have the same value:", font0.usWidthClass, widthClassTable[font0.usWidthClass-1])
 				continue
 			for font in sort_width(preferredSubFamilyList1):
-				print string.ljust(font.PostScriptName1+":", 40), font.usWidthClass,
-				print widthClassTable[font.usWidthClass-1]
+				print(("%s:" % font.PostScriptName1).ljust(40), font.usWidthClass, widthClassTable[font.usWidthClass-1])
 
 	for name in preferredFamilyList1.keys():
-		print "\nPreferred Family:", upperascii_to_hex(name)
+		print("\nPreferred Family:", name)
 		preferredSubFamilyList1 = preferredFamilyList1[name]
-		print "underlinePosition from post.underlinePosition:"
+		print("underlinePosition from post.underlinePosition:")
 		font0 = preferredSubFamilyList1[0]
 		diff = 0
 		for font in preferredSubFamilyList1[1:]:
 			if font0.underlinePos != font.underlinePos:
 				diff = 1
 		if diff == 0:
-			print "All fonts have the same value:", font0.underlinePos
+			print("All fonts have the same value:", font0.underlinePos)
 			continue
 		for font in sort_underline(preferredSubFamilyList1):
-			print string.ljust(font.PostScriptName1+":", 40), font.underlinePos
+			print(("%s:" % font.PostScriptName1).ljust(40), font.underlinePos)
 
 	for name in preferredFamilyList1.keys():
-		print "\nPreferred Family:", upperascii_to_hex(name)
+		print("\nPreferred Family:", name)
 		preferredSubFamilyList1 = preferredFamilyList1[name]
-		print "Vendor ID from OS/2.achVendID:"
+		print("Vendor ID from OS/2.achVendID:")
 		font0 = preferredSubFamilyList1[0]
 		diff = 0
 		if font0.usWidthClass == -1:
-			print "Skipping vendor ID report - OS/2 table does not exist in base font", font0.PostScriptName1
+			print("Skipping vendor ID report - OS/2 table does not exist in base font", font0.PostScriptName1)
 		else:
 			for font in preferredSubFamilyList1[1:]:
 				if font.usWidthClass == -1:
-					print "Skipping font - OS/2 table does not exist in base font", font.PostScriptName1
+					print("Skipping font - OS/2 table does not exist in base font", font.PostScriptName1)
 					diff = 1
 					continue
 				if font0.achVendID != font.achVendID:
 					diff = 1
 			if diff == 0:
-				print "All fonts have the same value:", font0.achVendID
+				print("All fonts have the same value:", font0.achVendID)
 				continue
 			for font in preferredSubFamilyList1:
-				print string.ljust(font.PostScriptName1+":", 40), font.achVendID
+				print(("%s:" % font.PostScriptName1).ljust(40), font.achVendID)
 
-	print "\nReport 3:Copyright and Trademark strings for the first face in the group"
+	print("\nReport 3:Copyright and Trademark strings for the first face in the group")
 	for name in preferredFamilyList1.keys():
-		print "\nPreferred Family:", upperascii_to_hex(name)
+		print("\nPreferred Family:", name)
 		preferredSubFamilyList1 = preferredFamilyList1[name]
 		font = preferredSubFamilyList1[0]
-		print "First Face:", font.PostScriptName1
-		print "Copyright: ", font.copyrightStr1
-		print "Trademark: ", font.trademarkStr1
+
+		cprgt = font.copyrightStr1
+		console_encoding = sys.stdout.encoding
+		if not isinstance(cprgt, str):
+			# font.copyrightStr1 is bytes
+			cprgt = font.copyrightStr1.encode('utf-8')
+
+		elif console_encoding and console_encoding != 'UTF-8':
+			# The console's encoding is set and is different from 'UTF-8'.
+			# Convert the string to bytes, then decode using the console's encoding
+			cprgt = cprgt.encode('utf-8').decode(console_encoding)
+
+		print("First Face:", font.PostScriptName1)
+		print("Copyright: ", cprgt)
+		print("Trademark: ", font.trademarkStr1)
 
 def print_panose_report():
 	global preferredFamilyList1
 
 
-	print "\nPanose Report:"
+	print("\nPanose Report:")
 
 	familykind = ["Any","No Fit","Latin Text","Latin Hand Written","Latin Decorative","Latin Symbol"]
 	kind2 = [familykind]
@@ -4710,7 +4617,7 @@ def print_panose_report():
 
 	kindlist = ["Any", "No Fit", kind2, kind3, kind4, kind5]
 	for name in preferredFamilyList1.keys():
-		print "\nPreferred Family:", upperascii_to_hex(name)
+		print("\nPreferred Family:", name)
 		preferredSubFamilyList1 = preferredFamilyList1[name]
 	# find base font which has usWeightClass 400 (regular), usWidthClass 5 (regular) and not italic.
 		baselist = []
@@ -4725,19 +4632,19 @@ def print_panose_report():
 					font0 = font
 		else:
 			font0 = preferredSubFamilyList1[0]
-		print string.ljust(font0.PostScriptName1, 36),
+		print(font0.PostScriptName1.ljust(36), end=' ')
 		panose0 = font0.panose
 		if not panose0:
-			print "Skipping Panose report - OS/2 table does not exist in base font.", font0.PostScriptName1
+			print("Skipping Panose report - OS/2 table does not exist in base font.", font0.PostScriptName1)
 			continue
 
 		for p in panose0:
-			print "%3d" % p,
-		print ""
+			print("%3d" % p, end=' ')
+		print("")
 		kind = kindlist[panose0[0]]
 		field = fieldlist[panose0[0]]
 		if panose0[0] < 2 or panose0[0] > 5:
-			print "%5d" % panose0[0], kind
+			print("%5d" % panose0[0], kind)
 			continue
 		for i in range(10):
 			subkind = kind[i]
@@ -4746,19 +4653,19 @@ def print_panose_report():
 				subkindText = subkind[fieldValue]
 			except:
 				subkindText = "Error: Panose field value out of range"
-			print "\t" + string.ljust(field[i], 20) + "%5d" % fieldValue, subkindText
+			print("\t" + field[i].ljust(20) + "%5d" % fieldValue, subkindText)
 		for font in preferredSubFamilyList1:
 			if font == font0:
 				continue
-			print string.ljust(font.PostScriptName1, 36),
+			print(font.PostScriptName1.ljust(36), end=' ')
 			panose = font.panose
 			for p in panose:
-				print "%3d" % p,
-			print ""
+				print("%3d" % p, end=' ')
+			print("")
 			kind = kindlist[panose[0]]
 			field = fieldlist[panose[0]]
 			if panose[0] < 2 or panose[0] > 5:
-				print "\t" + string.ljust("Any", 20) + "%5d" % panose[0], kind
+				print("\t" + "Any".ljust(20) + "%5d" % panose[0], kind)
 				continue
 			for i in range(10):
 				subkind = kind[i]
@@ -4768,19 +4675,17 @@ def print_panose_report():
 				except:
 					subkindText = "Error: Panose field value out of range"
 				if panose[i] != panose0[i]:
-					print "\t" + string.ljust(field[i], 20) + "%5d" % fieldValue, subkindText
+					print("\t" + field[i].ljust(20) + "%5d" % fieldValue, subkindText)
 
 
 
 def print_std_charset_report(charSetName):
-	charsetList =  StdCharSets.CharSetDict.keys()
-	charsetList.sort()
-
+	charsetList = sorted(StdCharSets.CharSetDict.keys())
 
 	if charSetName:
 		charsetList = [ charSetName ]
 
-	print "\tCharset Report: Note Yet Implemented."
+	print("\tCharset Report: Note Yet Implemented.")
 
 
 
@@ -4799,15 +4704,15 @@ def read_options():
 		try:
 			option = flags.index(sys.argv[i])
 		except ValueError:
-			print"Error. did not recognize option '%s'." % (sys.argv[i])
-			print __usage__
+			print("Error. did not recognize option '%s'." % (sys.argv[i]))
+			print(__usage__)
 			sys.exit()
 		else:
 			if option == 1:
-				print __usage__
+				print(__usage__)
 				sys.exit()
 			elif option == 0:
-				print __help__
+				print(__help__)
 				sys.exit()
 			elif option == 2:
 				i = i + 1
@@ -4832,9 +4737,9 @@ def read_options():
 						charSetName = sys.argv[i]
 						charsetList =  StdCharSets.CharSetDict.keys()
 						if charSetName and (charSetName not in charsetList):
-							print "Charset name", charSetName,"is not in the known list of charsets:"
+							print("Charset name", charSetName,"is not in the known list of charsets:")
 							for name in charsetList:
-								print "\t" + name
+								print("\t" + name)
 							sys.exit(2)
 				except IndexError:
 					pass
@@ -4850,13 +4755,13 @@ def read_options():
 			elif option == 12:
 				i = i + 1
 				try:
-					gDesignSpaceTolerance = eval(sys.argv[i])
+					gDesignSpaceTolerance = abs(int(sys.argv[i]))
 				except:
-					print "Error: argument for option '-tolerance' must be an integer design space value."
+					print("Error: argument for option '-tolerance' must be an integer design space value.")
 					sys.exit()
 			else:
-				print "Argument '%s'  is not recognized." % (sys.argv[i])
-				print __usage__
+				print("Argument '%s'  is not recognized." % (sys.argv[i]))
+				print(__usage__)
 				sys.exit()
 			i = i + 1
 	return directory, nreport, mreport, preport, logfilename, creport, charSetName, doStemWidthChecks, doFeatureReportOnly, singleTestList, familyTestList
@@ -4877,11 +4782,11 @@ def main():
 	if directory != "":
 			build_fontlist_from_dir(directory)
 	else:
-			print "No directory available for processing."
+			print("No directory available for processing.")
 			sys.exit(0)
 
 	if fontlist == []:
-			print "No font available for processing."
+			print("No font available for processing.")
 			sys.exit(0)
 
 	try:
@@ -4889,12 +4794,12 @@ def main():
 					logfile = open(logfilename, "w")
 					sys.stdout = logfile
 	except IOError:
-			print "Invalid log file name"
+			print("Invalid log file name")
 			logfile = ""
 
-	print "Directory:", os.path.abspath(directory)
-	print "Loading Adobe Glyph Dict..."
-	import agd
+	print("Directory:", os.path.abspath(directory))
+	print("Loading Adobe Glyph Dict...")
+	from afdko import agd
 	resources_dir = fdkutils.get_resources_dir()
 	kAGD_TXTPath = os.path.join(resources_dir, "AGD.txt")
 	fp = open(kAGD_TXTPath, "rU")
@@ -4902,12 +4807,12 @@ def main():
 	fp.close()
 	gAGDDict = agd.dictionary(agdTextPath)
 
-	print "building lists of preferred families..."
+	print("building lists of preferred families...")
 	fontlist = sort_font(fontlist)
 	build_preferredFamilyList(fontlist)
-	print "Number of preferred families:", len(preferredFamilyList1.keys()), preferredFamilyList1.keys()
-	print "Number of font faces:", len(fontlist)
-	print
+	print("Number of preferred families:", len(preferredFamilyList1.keys()), "[%s]" % ', '.join(["'%s'" % name for name in preferredFamilyList1.keys()]))
+	print("Number of font faces:", len(fontlist))
+	print()
 	if doFeatureReportOnly:
 		doFamilyTest12()
 		return
