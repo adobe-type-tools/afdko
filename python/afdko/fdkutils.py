@@ -1,23 +1,17 @@
 # Copyright 2016 Adobe. All rights reserved.
 
-from __future__ import print_function, absolute_import
-
-import os
-import platform
-import subprocess
-import tempfile
-import traceback
-
-__doc__ = """
-fdkutils.py v1.2.6 Jun 30 2018
+"""
+fdkutils.py v1.2.7 Aug 28 2018
 A module of functions that are needed by several of the AFDKO scripts.
 """
 
-curSystem = platform.system()
+from __future__ import print_function, absolute_import
 
+import os
+import subprocess
+import tempfile
 
-class FDKEnvError(KeyError):
-    pass
+from fontTools.misc.py23 import tounicode
 
 
 def get_temp_file_path():
@@ -27,24 +21,17 @@ def get_temp_file_path():
 
 
 def get_resources_dir():
-    """ Look up the file path to find the "Tools" directory;
-    then add the os.name for the executables, and 'FDKScripts'
-    for the scripts.
-    """
-    cjk_dir = os.path.join(
-        os.path.dirname(__file__),
-        'resources')
-    return cjk_dir
+    return os.path.join(os.path.dirname(__file__), 'resources')
 
 
 def runShellCmd(cmd):
     try:
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT).stdout
-        log = p.read()
-        return log
-    except (OSError, ValueError):
-        msg = "Error executing command '%s'. %s" % (cmd, traceback.print_exc())
+                             stderr=subprocess.STDOUT)
+        stdoutdata, _ = p.communicate()
+        return tounicode(stdoutdata, encoding='utf-8')
+    except (subprocess.CalledProcessError, OSError) as err:
+        msg = "Error executing command '%s'\n%s" % (cmd, err)
         print(msg)
         return ""
 
@@ -62,8 +49,8 @@ def runShellCmdLogging(cmd):
                 if output:
                     print(output, end=' ')
                 break
-    except (OSError, ValueError):
-        msg = "Error executing command '%s'. %s" % (cmd, traceback.print_exc())
+    except (subprocess.CalledProcessError, OSError) as err:
+        msg = "Error executing command '%s'\n%s" % (cmd, err)
         print(msg)
         return 1
     return 0
