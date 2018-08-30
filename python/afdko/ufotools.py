@@ -6,17 +6,18 @@ import hashlib
 import os
 import plistlib
 import re
-import sys
 
 try:
     import xml.etree.cElementTree as ET
 except ImportError:
     import xml.etree.ElementTree as ET
 
+from fontTools.misc.py23 import open, tobytes, tounicode
+
 from afdko import convertfonttocid, fdkutils
 
 __doc__ = """
-ufotools.py v1.30.7 Aug 4 2018
+ufotools.py v1.31.0 Aug 28 2018
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -439,9 +440,8 @@ class UFOFontData(object):
         hasHints = 0
         glyphPath = self.getGlyphProcessedPath(glyphName)
         if glyphPath and os.path.exists(glyphPath):
-            fp = open(glyphPath, "rt")
-            data = fp.read()
-            fp.close()
+            with open(glyphPath, "r", encoding='utf-8') as fp:
+                data = fp.read()
             if "hintSetList" in data:
                 hasHints = 1
         return hasHints
@@ -472,10 +472,9 @@ class UFOFontData(object):
         for glyphName, glifXML in self.newGlyphMap.items():
             glyphPath = self.getWriteGlyphPath(glyphName)
             # print("Saving file", glyphPath)
-            fp = open(glyphPath, "wt")
-            et = ET.ElementTree(glifXML)
-            et.write(fp, encoding="UTF-8", xml_declaration=True)
-            fp.close()
+            with open(glyphPath, "wb") as fp:
+                et = ET.ElementTree(glifXML)
+                et.write(fp, encoding="UTF-8", xml_declaration=True)
 
         # Update the layer contents.plist file
         layerContentsFilePath = os.path.join(
@@ -508,9 +507,8 @@ class UFOFontData(object):
     def readHashMap(self):
         hashPath = os.path.join(self.parentPath, "data", kAdobHashMapName)
         if os.path.exists(hashPath):
-            fp = open(hashPath, "rt")
-            data = fp.read()
-            fp.close()
+            with open(hashPath, "r", encoding='utf-8') as fp:
+                data = fp.read()
             newMap = eval(data)
         else:
             newMap = {kAdobHashMapVersionName: kAdobHashMapVersion}
@@ -527,7 +525,6 @@ class UFOFontData(object):
             print("Updating hash map: was older version")
             newMap = {kAdobHashMapVersionName: kAdobHashMapVersion}
         self.hashMap = newMap
-        return
 
     def writeHashMap(self):
         hashMap = self.hashMap
@@ -539,18 +536,15 @@ class UFOFontData(object):
             os.makedirs(hashDir)
         hashPath = os.path.join(hashDir, kAdobHashMapName)
 
-        hasMapKeys = hashMap.keys()
-        hasMapKeys.sort()
+        hasMapKeys = sorted(hashMap.keys())
         data = ["{"]
         for gName in hasMapKeys:
             data.append("'%s': %s," % (gName, hashMap[gName]))
         data.append("}")
         data.append("")
         data = '\n'.join(data)
-        fp = open(hashPath, "wt")
-        fp.write(data)
-        fp.close()
-        return
+        with open(hashPath, "w") as fp:
+            fp.write(tounicode(data))
 
     def getCurGlyphPath(self, glyphName):
         if self.curSrcDir is None:
@@ -880,7 +874,7 @@ class UFOFontData(object):
         # Some fonts have bad BBox values, so we don't let this be smaller
         # than -upm*0.25, upm*1.25.
         inactiveAlignmentValues = [low, low, high, high]
-        blueValues = self.fontInfo.get("postscriptBlueValues", [])
+        blueValues = sorted(self.fontInfo.get("postscriptBlueValues", []))
         numBlueValues = len(blueValues)
         if numBlueValues < 4:
             if allow_no_blues:
@@ -891,7 +885,6 @@ class UFOFontData(object):
                     "ERROR: Font must have at least four values in its "
                     "BlueValues array for AC to work!")
 
-        blueValues.sort()
         # The first pair only is a bottom zone, where the first value
         # is the overshoot position; the rest are top zones, and second
         # value of the pair is the overshoot position.
@@ -899,7 +892,7 @@ class UFOFontData(object):
         for i in range(3, numBlueValues, 2):
             blueValues[i] = blueValues[i] - blueValues[i - 1]
 
-        blueValues = map(str, blueValues)
+        blueValues = [str(val) for val in blueValues]
         numBlueValues = min(
             numBlueValues, len(convertfonttocid.kBlueValueKeys))
         for i in range(numBlueValues):
@@ -916,7 +909,7 @@ class UFOFontData(object):
             otherBlues.sort()
             for i in range(0, numBlueValues, 2):
                 otherBlues[i] = otherBlues[i] - otherBlues[i + 1]
-            otherBlues = map(str, otherBlues)
+            otherBlues = [str(val) for val in otherBlues]
             numBlueValues = min(
                 numBlueValues, len(convertfonttocid.kOtherBlueValueKeys))
             for i in range(numBlueValues):
@@ -997,9 +990,8 @@ class UFOFontData(object):
         maxY = maxX
         minY = -self.getUnitsPerEm()
         if os.path.exists(srcFontInfo):
-            fi = open(srcFontInfo, "rU")
-            fontInfoData = fi.read()
-            fi.close()
+            with open(srcFontInfo, "r", encoding='utf-8') as fi:
+                fontInfoData = fi.read()
             fontInfoData = re.sub(r"#[^\r\n]+", "", fontInfoData)
 
             if "FDDict" in fontInfoData:
@@ -1124,7 +1116,7 @@ class UFOFontData(object):
         if len(data) < 128:
             hash = data
         else:
-            hash = hashlib.sha512(data).hexdigest()
+            hash = hashlib.sha512(data.encode("ascii")).hexdigest()
         return hash, dataList
 
     def getComponentOutline(self, componentItem):
@@ -1213,10 +1205,9 @@ def parsePList(filePath, dictKey=None):
 
     # We uses this rather than the plistlib in order to get a list that
     # allows preserving key order.
-    fp = open(filePath, "r")
-    data = fp.read()
-    fp.close()
-    contents = XML(data)
+    with open(filePath, "r", encoding='utf-8') as fp:
+        data = fp.read()
+    contents = XML(tobytes(data, encoding='utf-8'))
     contents_dict = contents.find("dict")
     if contents_dict is None:
         raise UFOParseError("In '%s', failed to find dict. '%s'." % (
@@ -2173,9 +2164,8 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
     # I need to replace the contours with data from the bez string.
     glyphPath = ufoFontData.getGlyphSrcPath(glyphName)
 
-    fp = open(glyphPath, "r")
-    data = fp.read()
-    fp.close()
+    with open(glyphPath, "r", encoding='utf-8') as fp:
+        data = fp.read()
 
     glifXML = XML(data)
 
@@ -2530,31 +2520,6 @@ def makeUFOFMNDB(srcFontPath):
     parts.append("\ts=%s" % (styleName))
     parts.append("")
     data = '\n'.join(parts)
-    with open(fmndbPath, "wt") as fp:
-        fp.write(data)
+    with open(fmndbPath, "w") as fp:
+        fp.write(tounicode(data))
     return fmndbPath
-
-
-def test1():
-    import pprint
-    ufoFontData = UFOFontData(sys.argv[1])
-
-    if len(sys.argv) > 2:
-        gNameList = sys.argv[2:]
-    else:
-        gm = ufoFontData.getGlyphMap()
-        gNameList = gm.keys()
-    doAll = 0
-    for glyphName in gNameList:
-        bezString, width = convertGLIFToBez(ufoFontData, glyphName, doAll)
-        glifXML = convertBezToGLIF(ufoFontData, glyphName, bezString)
-        pprint.pprint(xmlToString(glifXML))
-    print(len(gNameList))
-
-
-def test2():
-    checkHashMaps(sys.argv[1], False)
-
-
-if __name__ == '__main__':
-    test2()
