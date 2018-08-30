@@ -64,7 +64,7 @@ from __future__ import print_function, absolute_import
 
 
 __help__ = """
-ttxn v1.20.0 Jul 20 2018
+ttxn v1.21.0 Aug 30 2018
 
 Based on the ttx tool, with the same options, except that it is limited to
 dumping, and cannot compile. Makes a normalized dump of the font, or of
@@ -83,7 +83,7 @@ from fontTools import ttx
 from fontTools.ttLib import TTFont, tagToXML, TTLibError
 from fontTools.ttLib.tables.DefaultTable import DefaultTable
 from fontTools.misc.loggingTools import Timer
-from fontTools.misc.py23 import basestring, tostr
+from fontTools.misc.py23 import open, basestring
 import copy
 import subprocess
 import re
@@ -91,8 +91,9 @@ import collections
 import textwrap
 import platform
 import getopt
-import tempfile
 import logging
+
+from afdko.fdkutils import get_temp_file_path
 
 
 log = logging.getLogger('fontTools.ttx')
@@ -100,10 +101,7 @@ log = logging.getLogger('fontTools.ttx')
 
 curSystem = platform.system()
 
-if curSystem == "Windows":
-    TX_TOOL = subprocess.check_output(["where", "tx.exe"]).strip()
-else:
-    TX_TOOL = subprocess.check_output(["which", "tx"]).strip()
+TX_TOOL = 'tx'
 
 
 INDENT = "  "
@@ -2063,14 +2061,12 @@ class TTXNTTFont(TTFont):
 def shellcmd(cmdList):
     # In all cases, assume that cmdList does NOT specify the output file.
     # I use this because tx -dump -6 can be very large.
-    tempPath = tempfile.mkstemp()[1]
+    tempPath = get_temp_file_path()
     cmdList.append(tempPath)
     subprocess.check_call(cmdList)
-    fp = open(tempPath, "rt")
-    data = fp.read()
-    fp.close()
-    # XXX is UTF-8 the correct encoding to decode tx output for py3?
-    return tostr(data, encoding="utf8")
+    with open(tempPath, "r", encoding="utf-8") as fp:
+        data = fp.read()
+    return data
 
 
 def dumpFont(writer, fontPath, supressHints=False):
