@@ -1,5 +1,5 @@
 """
-otfpdf v1.3 Nov 30 2010
+otfpdf v1.4 Aug 28 2018
 provides support for the proofpdf script,  for working with OpenType/TTF
 fonts. Provides an implementation of the fontpdf font object. Cannot be
 run alone.
@@ -8,7 +8,7 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 from fontTools.pens.boundsPen import BoundsPen, BasePen
-from  fontpdf import FontPDFGlyph, FontPDFFont, FontPDFPoint
+from afdko.fontpdf import FontPDFGlyph, FontPDFFont, FontPDFPoint
 
 class FontPDFPen(BasePen):
 	def __init__(self, glyphSet = None):
@@ -85,14 +85,15 @@ class  txPDFFont(FontPDFFont):
 		return
 
 	def clientGetPSName(self):
-		namelist = self.clientFont['name'].names
-		for nameRec in namelist:
-			if nameRec.nameID != 6:
-				continue
-			psName = nameRec.string
-			break
-		namelist = None
-		return str(psName) # reduce Unicode from MS string to latin1.
+		psName = 'None'
+		name_tb = self.clientFont['name']
+		mac_name_id_6 = name_tb.getName(6, 1, 0, 0)
+		win_name_id_6 = name_tb.getName(6, 3, 1, 1033)
+		if mac_name_id_6:
+			return mac_name_id_6.string.decode()
+		elif win_name_id_6:
+			return win_name_id_6.string.decode('utf_16_be')
+		return psName
 
 	def clientGetOTVersion(self):
 		version =  self.clientFont['head'].fontRevision
@@ -126,7 +127,7 @@ class  txPDFFont(FontPDFFont):
 					baseScript = baseRecord.BaseScript
 					baseLine = baseScript.BaseValues.BaseCoord[baseTagIndex].Coordinate
 					break
-		except KeyError, AttributeError:
+		except (KeyError, AttributeError):
 			baseLine = 0
 
 		return baseLine

@@ -1,5 +1,5 @@
 """
-fontpdf v1.26 Jun 18 2018. This module is not run stand-alone; it requires
+fontpdf v1.27 Aug 28 2018. This module is not run stand-alone; it requires
 another module, such as proofpdf, in order to collect the options, and call
 the MakePDF function.
 
@@ -670,7 +670,6 @@ class FontPDFGlyph:
 					self.cur_y -= params.metaDataTextSize
 					eval("self." + methodName + "(params)")
 
-		return
 
 	def writeErrorList(self, errorList, params):
 		# At this point, I expect ErrorList to be a list of short strings.
@@ -697,9 +696,6 @@ class FontPDFGlyph:
 				posY = self.cur_y - ptSize
 				posX += columnAdvance
 
-
-
-		return
 
 	def drawGlyph_Outline(self, params, fill = 0):
 		if params.DrawFilledOutline:
@@ -763,8 +759,8 @@ class FontPDFGlyph:
 		rt_canvas.saveState()
 		xAdvanceColorRGB = params.xAdvanceColorRGB
 		rt_canvas.setStrokeColorRGB(xAdvanceColorRGB[0], xAdvanceColorRGB[1], xAdvanceColorRGB[2])
-		y2 = baseLine + (emSquare/2)
-		x2 = self.xAdvance/2
+		y2 = baseLine + (emSquare // 2)
+		x2 = self.xAdvance // 2
 		tickSize = 10
 		rt_canvas.setLineWidth(params.markLineWidth)
 		rt_canvas.line(-tickSize, y2, 0, y2)
@@ -873,10 +869,10 @@ class FontPDFGlyph:
 		rt_canvas.setFont( params.pointLabelFont,  ptSize)
 		prevHint = None
 		xOffset = params.hhintXOffset  # used to make the hint rect tick out a bit from the em-box on both sides
-		for i in range(numHints):
+		for i in list(range(numHints)):
 			hint = self.hhints[i]
-			h1 =  float(eval(hint[0]))
-			width =float( eval(hint[1]))
+			h1 = float(eval(hint[0]))
+			width = float( eval(hint[1]))
 			h2 = h1 + width
 			if params.rt_hintTableList:
 				showHint = 0 # only show hints that are in the matching hint replacement blocks.
@@ -884,7 +880,7 @@ class FontPDFGlyph:
 				showHint = 1 # by default, show all hints
 			hintString1 = "h(%s, %s)  %s"  % (h1, h2, width)
 			hintString2 = ""
-			for j in range(numTables):
+			for j in list(range(numTables)):
 				table = self.hintTable[j]
 				if not table: # there is no hint replacement in the glyph.
 					showHint = 1
@@ -933,10 +929,10 @@ class FontPDFGlyph:
 		rt_canvas.setFont( params.pointLabelFont,  ptSize)
 		prevHint = None
 		yOffset = params.vhintYOffset # used to make the hinte rect tick out a bit from the em-box on both sides
-		for i in range(numHints):
+		for i in list(range(numHints)):
 			hint = self.vhints[i]
-			h1 =  float(eval(hint[0]))
-			width =float( eval(hint[1]))
+			h1 = float(eval(hint[0]))
+			width = float( eval(hint[1]))
 			h2 = h1 + width
 			if params.rt_hintTableList:
 				showHint = 0 # only show hints that are in the matching hint replacement blocks.
@@ -944,7 +940,7 @@ class FontPDFGlyph:
 				showHint = 1 # by default, show all hints
 			hintString1 = "v(%s, %s)  %s"  % (h1, h2, width)
 			hintString2 = ""
-			for j in range(numTables):
+			for j in list(range(numTables)):
 				table = self.hintTable[j]
 				if not table: # there is no hint replacement in the glyph.
 					showHint = 1
@@ -1000,8 +996,7 @@ class FontPDFGlyph:
 		rt_canvas.setFillColorRGB(alignmentZoneColorRGB[0] *0.5, alignmentZoneColorRGB[1] *0.5, alignmentZoneColorRGB[2] *0.5)
 		blueZoneOffset = 5 # used to make the blue zone rect tick out a bit from the em-box on both sides
 		x0 = -blueZoneOffset
-		for i in range(len(blueZones)):
-			zone = blueZones[i]
+		for i, zone in enumerate(blueZones):
 			y0 = zone[0]
 			y1 = zone[1]
 			width =  y1 - y0
@@ -1308,7 +1303,7 @@ def doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages = None):
 	cur_y -= pageTitleSize*1.2
 	path = repr(params.rt_filePath) # Can be non-ASCII
 	if numPages == None:
-		numPages = numGlyphs/params.glyphsPerPage
+		numPages = numGlyphs // params.glyphsPerPage
 		if (numGlyphs % params.glyphsPerPage) > 0:
 			numPages +=1
 	pageString = '   %d of %s' % (rt_canvas.getPageNumber(), numPages)
@@ -1354,7 +1349,7 @@ def  getMetaDataHeight(params, fontYMin) :
 
 	if params.errorLogFilePath and (params.errorLogColumnHeight > yMeta):
 		params.rt_metaDataYOffset = params.errorLogColumnHeight
-	return
+
 
 def setDefaultHPadding(params, init = None):
 	 # Need to allow extra space for the horizontal and vertical hint labels
@@ -1630,12 +1625,11 @@ def makePDF(pdfFont, params, doProgressBar=True):
 	if not params.rt_filePath:
 		params.rt_reporter( "Skipping font. Calling program must set params.rt_filePath.")
 		return
-
 	fontPath = params.rt_filePath
 	if params.rt_pdfFileName:
 		pdfPath = params.rt_pdfFileName
 	else:
-		pdfPath = os.path.splitext(fontPath)[0] + ".pdf"
+		pdfPath = "{}.pdf".format(os.path.splitext(fontPath)[0])
 	params.rt_canvas = rt_canvas = pdfgen.Canvas(pdfPath, pagesize=params.pageSize, bottomup = 1)
 
 	if params.waterfallRange:
@@ -1824,9 +1818,8 @@ class  FontInfo:
 
 		elif self.pdfFont.clientFont.has_key('glyf'):
 			fontStreamType = None # don't need Subtype key/value in teh stream object for TrueType fonts.
-			fp = open(self.pdfFont.path, "rb")
-			fontStream = fp.read()
-			fp.close()
+			with open(self.pdfFont.path, "rb") as fp:
+				fontStream = fp.read()
 			formatName = "/FontFile2"
 			fontType = "/TrueType"
 		else:
@@ -2007,7 +2000,7 @@ def makeFontSetPDF(pdfFontList, params, doProgressBar=True):
 		# We put the PDF wherever the first font is.
 		firstPDFFont = pdfFontList[0][1]
 		fontPath = params.rt_filePath
-		pdfPath = os.path.splitext(fontPath)[0] + ".fontset.pdf"
+		pdfPath = "{}.fontset.pdf".format(os.path.splitext(fontPath)[0])
 	params.rt_canvas = rt_canvas = pdfgen.Canvas(pdfPath, pagesize=params.pageSize, bottomup = 1)
 
 	# figure out how much space to leave at start of line for PS names and fond index fields.
@@ -2081,7 +2074,7 @@ def makeFontSetPDF(pdfFontList, params, doProgressBar=True):
 
 
 	groupsOnPageCount = 0
-	for groupIndex in range(numGroups):
+	for groupIndex in list(range(numGroups)):
 		fountCount = 0
 		groupsOnPageCount += 1
 		if doWidowControl and (groupsOnPageCount > groupsPerPage):
@@ -2171,9 +2164,8 @@ def makeProofPDF(pdfFont, params, doProgressBar=True):
 			print("Warning: log file %s does not exist or is not a file." %
 					repr(params.errorLogFilePath))
 		else:
-			lf = file(params.errorLogFilePath, "rU")
-			errorLines = lf.readlines()
-			lf.close()
+			with open(params.errorLogFilePath, "r") as lf:
+				errorLines = lf.readlines()
 			params.rt_errorLogDict = parseErrorLog(errorLines, params.errorLogFilePath)
 			keys = params.rt_errorLogDict.keys()
 			keys.sort()
@@ -2221,7 +2213,7 @@ def makeProofPDF(pdfFont, params, doProgressBar=True):
 	cur_x = params.pageLeftMargin + leftPadding
 	cur_y = yTop - (topPadding + yAdvance)
 
-	giRange = range(numGlyphs)
+	giRange = list(range(numGlyphs))
 	if params.doAlphabeticOrder:
 		params.rt_glyphList.sort()
 	elif params.rt_optionLayoutDict and pdfFont.isCID:
@@ -2267,13 +2259,13 @@ def makeProofPDF(pdfFont, params, doProgressBar=True):
 		if not params.rt_repeatParamList:
 			params.rt_repeatParamList = [params]*params.rt_repeats
 
-		for ri in range(params.rt_repeats):
+		for ri in list(range(params.rt_repeats)):
 			curParams = params.rt_repeatParamList[ri]
 			if ri > 0:
-				fieldNames = dir(params)
-				fieldNames = filter(lambda name: name[:3] == "rt_", fieldNames)
+				fieldNames = vars(params)
+				fieldNames = [name for name in vars(params) if name.startswith("rt_")]
 				for name in fieldNames:
-					exec("curParams.%s = params.%s" % (name,name))
+					setattr(curParams, name, getattr(params, name))
 
 			rt_canvas.saveState()
 			rt_canvas.translate(cur_x, cur_y)
@@ -2286,7 +2278,7 @@ def makeProofPDF(pdfFont, params, doProgressBar=True):
 		progressBarInstance.EndProgress()
 	rt_canvas.showPage()
 	rt_canvas.save()
-	return
+
 
 def makeKernPairPDF(pdfFont, kernOverlapList, params, doProgressBar=True):
 	"""
