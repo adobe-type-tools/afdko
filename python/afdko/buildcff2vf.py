@@ -3,7 +3,7 @@
 from __future__ import print_function, division, absolute_import
 
 __usage__ = """
-buildcff2vf.py  1.13.4 Feb 07 2018
+buildcff2vf.py  1.14 Aug 28 2018
 Build a variable font from a designspace file and the UFO master source fonts.
 
 python buildcff2vf.py -h
@@ -49,6 +49,7 @@ import os
 import sys
 
 from fontTools import varLib, version as fontToolsVersion
+from fontTools.misc.py23 import tobytes
 from fontTools.ttLib import TTFont, newTable
 from fontTools.cffLib import (VarStoreData, buildOpcodeDict,
                               privateDictOperators)
@@ -916,7 +917,7 @@ def addSTATTable(varFont, varFontPath):
         print("Note: Generating simple STAT table from 'fvar' table in "
               "'%s'." % (statPath))
         fvar = varFont["fvar"]
-        xmlSTATData = makeSTAT(fvar)
+        xmlSTATData = tobytes(makeSTAT(fvar))
         statFile = io.BytesIO(xmlSTATData)
         varFont.importXML(statFile)
         varFont.saveXML(statPath, tables=["STAT"])
