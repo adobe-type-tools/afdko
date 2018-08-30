@@ -4,12 +4,15 @@ from __future__ import print_function, division, absolute_import
 
 import os
 import shutil
-import subprocess
 import sys
 import tempfile
 
+from fontTools.misc.py23 import tounicode
+
 import defcon
 from mutatorMath.ufo.document import DesignSpaceDocumentReader
+
+from afdko.fdkutils import runShellCmd
 
 try:
     import xml.etree.cElementTree as ET
@@ -24,7 +27,7 @@ kTempDSExt = ".temp.designspace"
 kFeaturesFile = "features.fea"
 
 __usage__ = """
-buildmasterotfs.py  1.7.2 Feb 01 2018
+buildmasterotfs.py  1.8.0 Aug 28 2018
 Build master source OpenType/CFF fonts from a Superpolator design space file
 and the UFO master source fonts.
 
@@ -57,19 +60,6 @@ UFO font, using the same file name, but with the extension '.otf'.
 
 UFO masters with partial glyphsets are supported.
 """
-
-
-def runShellCmd(cmd):
-    try:
-        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT).stdout
-        log = p.read()
-        return log
-    except OSError:
-        import traceback
-        msg = "Error executing command '%s'. %s" % (cmd, traceback.print_exc())
-        print(msg)
-        return ""
 
 
 def compatibilizePaths(otfPath):
@@ -158,9 +148,8 @@ def buildTempDesignSpace(dsPath):
         instance.attrib['postscriptfontname'] = ufo_info.postscriptFontName
         instances.append(instance)
     tempDSPath = os.path.splitext(dsPath)[0] + kTempDSExt
-    fp = open(tempDSPath, "wt")
-    fp.write(xmlToString(ds))
-    fp.close()
+    with open(tempDSPath, "w") as fp:
+        fp.write(tounicode(xmlToString(ds)))
     return tempDSPath, master_paths
 
 
