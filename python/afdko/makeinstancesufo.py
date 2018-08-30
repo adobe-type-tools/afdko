@@ -9,6 +9,8 @@ import shutil
 import sys
 from subprocess import PIPE, Popen
 
+from fontTools.misc.py23 import open, tounicode, tobytes
+
 from defcon import Font
 from mutatorMath.ufo import build as mutatorMathBuild
 from ufonormalizer import normalizeUFO
@@ -21,7 +23,7 @@ except ImportError:
 from afdko.ufotools import validateLayers
 
 __usage__ = """
-   makeinstancesufo v1.4.1 Jul 13 2018
+   makeinstancesufo v1.5.0 Aug 28 2018
    makeinstancesufo -h
    makeinstancesufo -u
    makeinstancesufo [-d <design space file name>] [-a] [-c] [-n] [-dec]
@@ -128,7 +130,7 @@ class LogMsg(object):
         self.logFilePath = logFilePath
         self.logFile = None
         if self.logFilePath:
-            self.logFile = open(logFilePath, "wt")
+            self.logFile = open(logFilePath, "w")
 
     def log(self, *args):
         txt = " ".join(args)
@@ -139,7 +141,7 @@ class LogMsg(object):
 
     def sendTo(self, logFilePath):
         self.logFilePath = logFilePath
-        self.logFile = open(logFilePath, "wt")
+        self.logFile = open(logFilePath, "w")
 
 
 logMsg = LogMsg()
@@ -158,9 +160,9 @@ def readDesignSpaceFile(options):
     instanceEntryList = []
     print("Reading design space file: %s ..." % options.dsPath)
 
-    f = open(options.dsPath, "rt")
-    data = f.read()
-    f.close()
+    with open(options.dsPath, "r", encoding='utf-8') as f:
+        data = f.read()
+
     ds = ET.XML(data)
 
     instances = ds.find("instances")
@@ -193,11 +195,10 @@ def readDesignSpaceFile(options):
               "postscriptfilename attribute" % options.dsPath)
         return None, None
 
-    dsPath = options.dsPath + ".temp"
+    dsPath = "{}.temp".format(options.dsPath)
     data = ET.tostring(ds)
-    f = open(dsPath, "wt")
-    f.write(data)
-    f.close()
+    with open(dsPath, "wb") as f:
+        f.write(tobytes(data, encoding='utf-8'))
 
     return dsPath, instanceEntryList
 
@@ -220,7 +221,7 @@ def updateInstance(options, fontInstancePath):
             opList.insert(0, 'checkoutlinesufo')
             proc = Popen(opList, stdout=PIPE)
         while 1:
-            output = proc.stdout.readline()
+            output = tounicode(proc.stdout.readline())
             if output:
                 print('.', end='')
                 logList.append(output)
@@ -252,7 +253,7 @@ def updateInstance(options, fontInstancePath):
             opList.insert(0, 'autohint')
             proc = Popen(opList, stdout=PIPE)
         while 1:
-            output = proc.stdout.readline()
+            output = tounicode(proc.stdout.readline())
             if output:
                 print(output, end='')
                 logList.append(output)
