@@ -39,8 +39,8 @@ path checks).
 Installation
 ------------
 
-The AFDKO requires [Python](http://www.python.org/download) 2.7.x. It
-does not yet support Python 3.x.
+The AFDKO requires [Python](http://www.python.org/download) 2.7.x. or
+3.6.x.
 
 Releases are available on the [Python Package
 Index](https://pypi.python.org/pypi/afdko) (PyPI) and can be installed
