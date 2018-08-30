@@ -39,10 +39,10 @@
 			<point name="aboveUC" x="318" y="686" type="move"/>
 		</contour>
 		<contour>
-			<point name="ogonek" x="555" y="0" type="move"/>
+			<point name="belowLC" x="320" y="-22" type="move"/>
 		</contour>
 		<contour>
-			<point name="belowLC" x="320" y="-22" type="move"/>
+			<point name="ogonek" x="555" y="0" type="move"/>
 		</contour>
 	</outline>
 </glyph>
