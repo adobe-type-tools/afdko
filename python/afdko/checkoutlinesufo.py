@@ -6,9 +6,10 @@ Tool that performs outline quality checks and can remove path overlaps.
 
 from __future__ import print_function, absolute_import
 
-__version__ = '2.1.0'
+__version__ = '2.2.0'
 
 import argparse
+from functools import cmp_to_key
 import hashlib
 import os
 import re
@@ -23,9 +24,7 @@ import ufoLib
 from fontPens.digestPointPen import DigestPointPen
 
 from afdko import ufotools
-# noinspection PyPep8Naming
 from afdko.ufotools import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
-# noinspection PyPep8Naming
 from afdko.ufotools import kProcessedGlyphsLayerName as PROCD_GLYPHS_LAYER_NAME
 
 
@@ -538,7 +537,6 @@ def get_digest(digest_glyph):
     return digest
 
 
-# noinspection PyProtectedMember
 def remove_coincident_points(bool_glyph, changed, msg):
     """ Remove coincident points.
     # a point is (segment_type, pt, smooth, name).
@@ -574,7 +572,6 @@ def remove_coincident_points(bool_glyph, changed, msg):
     return changed, msg
 
 
-# noinspection PyProtectedMember
 def remove_tiny_sub_paths(bool_glyph, min_area, msg):
     """
     Removes tiny subpaths that are created by overlap removal when the start
@@ -664,7 +661,6 @@ def is_colinear_line(b3, b2, b1, tolerance=0):
             return True
 
 
-# noinspection PyProtectedMember
 def remove_flat_curves(new_glyph, changed, msg, options):
     """ Remove flat curves.
     # a point is (segment_type, pt, smooth, name).
@@ -703,7 +699,6 @@ def remove_flat_curves(new_glyph, changed, msg, options):
     return changed, msg
 
 
-# noinspection PyProtectedMember
 def remove_colinear_lines(new_glyph, changed, msg, options):
     """ Remove colinear line- curves.
     # a point is (segment_type, pt, smooth, name).
@@ -739,7 +734,6 @@ def remove_colinear_lines(new_glyph, changed, msg, options):
     return changed, msg
 
 
-# noinspection PyProtectedMember
 def split_touching_paths(new_glyph):
     """ This hack fixes a design difference between the Adobe checkoutlines
     logic and booleanGlyph, and is used only when comparing the two. With
@@ -801,8 +795,7 @@ def split_touching_paths(new_glyph):
 
 
 def round_point(pt):
-    pt = map(int, pt)
-    return pt
+    return int(pt[0]), int(pt[1])
 
 
 def do_overlap_removal(bool_glyph, changed, msg, options):
@@ -814,9 +807,8 @@ def do_overlap_removal(bool_glyph, changed, msg, options):
     # I need to fix these in the source, or the old vs new digests will differ,
     # as BooleanOperations removes these even if it does not do overlap
     # removal.
-    old_digest = list(get_digest(bool_glyph))
-    old_digest.sort()
-    old_digest = map(round_point, old_digest)
+    old_digest = sorted(get_digest(bool_glyph))
+    old_digest = [round_point(pt) for pt in old_digest]
     new_digest = []
     prev_digest = old_digest
     new_glyph = bool_glyph
@@ -830,11 +822,10 @@ def do_overlap_removal(bool_glyph, changed, msg, options):
         # haven't yet looked.
         prev_digest = new_digest
         new_glyph = new_glyph.removeOverlap()
-        new_digest = list(get_digest(new_glyph))
-        new_digest.sort()
+        new_digest = sorted(get_digest(new_glyph))
         # The new path points sometimes come back with very small
         # fractional parts to to rounding issues.
-        new_digest = map(round_point, new_digest)
+        new_digest = [round_point(pt) for pt in new_digest]
 
     # Can't use change in path number to see if something has changed
     # - overlap removal can add and subtract paths.
@@ -922,7 +913,7 @@ def restore_contour_order(fixed_glyph, original_contours):
 
     new_contours = list(fixed_glyph)
     if len(new_contours) > 1:
-        new_contours.sort(sort_contours)
+        new_contours.sort(key=cmp_to_key(sort_contours))
     else:
         set_max_p(new_contours[0])
     new_index_list = range(len(new_contours))
@@ -935,8 +926,7 @@ def restore_contour_order(fixed_glyph, original_contours):
     # This will fix the order of the contours that have not been touched.
     num_contours = len(new_list)
     if num_contours > 0:  # If the new contours aren't already all matched..
-        new_index_list = range(num_contours)
-        for i in new_index_list:
+        for i in range(num_contours):
             ci, contour = new_list[i]
             for j in old_index_list:
                 ci2, old_contour = old_list[j]
@@ -949,12 +939,11 @@ def restore_contour_order(fixed_glyph, original_contours):
                 new_list[i] = None
                 break
 
-    new_list = filter(lambda entry: entry is not None, new_list)
+    new_list = [item for item in new_list if item]
     num_contours = len(new_list)
     # Check each extreme for a match.
     if num_contours > 0:
-        new_index_list = range(num_contours)
-        for i in new_index_list:
+        for i in range(num_contours):
             ci, contour = new_list[i]
             max_p = contour.maxP
             # Now search the old contour list.
@@ -970,11 +959,10 @@ def restore_contour_order(fixed_glyph, original_contours):
                         matched = True
                         # See if we can set the start point in the new contour
                         # to match the old one.
-                        if not ((old_contour[0].x == contour[0].x)
-                                and (old_contour[0].y == contour[0].y)):
+                        if not ((old_contour[0].x == contour[0].x) and
+                                (old_contour[0].y == contour[0].y)):
                             old_start_point = old_contour[0]
-                            for pi in range(len(contour)):
-                                point = contour[pi]
+                            for pi, point in enumerate(contour):
                                 if (point.x == old_start_point.x) \
                                         and (point.y == old_start_point.y) \
                                         and point.segmentType is not None:
@@ -983,7 +971,7 @@ def restore_contour_order(fixed_glyph, original_contours):
                         break
                 if matched:
                     break
-        new_list = filter(lambda entry: entry is not None, new_list)
+        new_list = [item for item in new_list if item]
         num_contours = len(new_list)
 
     # If the algorithm didn't work for some contours,
