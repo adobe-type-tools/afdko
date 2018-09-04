@@ -13,19 +13,21 @@ import setuptools.command.build_py
 import setuptools.command.install
 from setuptools import setup
 
-"""
-We need a customized version of the 'bdist_wheel' command, because otherwise
-the wheel is identified as being non-platform specific. This is because the
-afdko has no Python extensions and the command line tools are installed as
-data files.
-"""
 try:
     from wheel.bdist_wheel import bdist_wheel
 
     class CustomBDistWheel(bdist_wheel):
+        """Mark the wheel as "universal" (both python 2 and 3), yet
+        platform-specific, since it contains native C executables.
+        """
+
         def finalize_options(self):
             bdist_wheel.finalize_options(self)
             self.root_is_pure = False
+
+        def get_tag(self):
+            return ('py2.py3', 'none',) + bdist_wheel.get_tag(self)[2:]
+
 except ImportError:
     print("afdko: setup.py requires that the Python package 'wheel' be "
           "installed. Try the command 'pip install wheel'.")
