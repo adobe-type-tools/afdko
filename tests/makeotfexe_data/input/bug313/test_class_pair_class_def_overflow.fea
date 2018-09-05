@@ -1,0 +1,26 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+include (kern_classes.fea);
+
+feature krn1 {
+	lookup l1 {
+	include (class_kern.fea);
+	} l1;
+} krn1;
+
+feature last {
+		pos @left_0 @right_0 <1 1 1 1>;
+		pos @left_1 @right_1 <2 2 2 2>;
+		pos @left_2 @right_2 <3 3 3 3>;
+		pos @left_3 @right_3 <4 4 4 4>;
+		pos @left_4 @right_4 <5 5 5 5>;
+		pos @left_5 @right_5 <6 6 6 6>;
+		pos @left_6 @right_6 <7 7 7 7>;
+		pos @left_7 @right_7 <8 8 8 8>;
+		pos @left_8 @right_8 <9 9 9 9>;
+		pos @left_9 @right_9 <10 10 10 10>;
+		pos @left_10 @right_10 <11 11 11 11>;
+		pos @left_11 @right_11 <11 11 11 11>;
+} last;

@@ -1,0 +1,130 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+feature sps1 {
+	lookup lkup0 {
+		include(single_pos_list.fea);
+	} lkup0;
+	lookup lkup1 {
+		include(single_pos_list.fea);
+	} lkup1;
+	lookup lkup2 {
+		include(single_pos_list.fea);
+	} lkup2;
+	lookup lkup3 {
+		include(single_pos_list.fea);
+	} lkup3;
+	lookup lkup4 {
+		include(single_pos_list.fea);
+	} lkup4;
+	lookup lkup5 {
+		include(single_pos_list.fea);
+	} lkup5;
+	lookup lkup6 {
+		include(single_pos_list.fea);
+	} lkup6;
+	lookup lkup7 {
+		include(single_pos_list.fea);
+	} lkup7;
+	lookup lkup8 {
+		include(single_pos_list.fea);
+	} lkup8;
+	lookup lkup9 {
+		include(single_pos_list.fea);
+	} lkup9;
+	lookup lkup10 {
+		include(single_pos_list.fea);
+	} lkup10;
+	lookup lkup11 {
+		include(single_pos_list.fea);
+	} lkup11;
+	lookup lkup12 {
+		include(single_pos_list.fea);
+	} lkup12;
+	lookup lkup13 {
+		include(single_pos_list.fea);
+	} lkup13;
+	lookup lkup14 {
+		include(single_pos_list.fea);
+	} lkup14;
+	lookup lkup15 {
+		include(single_pos_list.fea);
+	} lkup15;
+	lookup lkup16 {
+		include(single_pos_list.fea);
+	} lkup16;
+	lookup lkup17 {
+		include(single_pos_list.fea);
+	} lkup17;
+	lookup lkup18 {
+		include(single_pos_list.fea);
+	} lkup18;
+	lookup lkup19 {
+		include(single_pos_list.fea);
+	} lkup19;
+	lookup lkup20 {
+		include(single_pos_list.fea);
+	} lkup20;
+	lookup lkup21 {
+		include(single_pos_list.fea);
+	} lkup21;
+	lookup lkup22 {
+		include(single_pos_list.fea);
+	} lkup22;
+	lookup lkup23 {
+		include(single_pos_list.fea);
+	} lkup23;
+	lookup lkup24 {
+		include(single_pos_list.fea);
+	} lkup24;
+	lookup lkup25 {
+		include(single_pos_list.fea);
+	} lkup25;
+	lookup lkup26 {
+		include(single_pos_list.fea);
+	} lkup26;
+	lookup lkup27 {
+		include(single_pos_list.fea);
+	} lkup27;
+	lookup lkup28 {
+		include(single_pos_list.fea);
+	} lkup28;
+	lookup lkup29 {
+		include(single_pos_list.fea);
+	} lkup29;
+	lookup lkup30 {
+		include(single_pos_list.fea);
+	} lkup30;
+	lookup lkup31 {
+		include(single_pos_list.fea);
+	} lkup31;
+	lookup lkup32 {
+		include(single_pos_list.fea);
+	} lkup32;
+	lookup lkup33 {
+		include(single_pos_list.fea);
+	} lkup33;
+	lookup lkup34 {
+		include(single_pos_list.fea);
+	} lkup34;
+	lookup lkup35 {
+		include(single_pos_list.fea);
+	} lkup35;
+	lookup lkup36 {
+		include(single_pos_list.fea);
+	} lkup36;
+	lookup lkup37 {
+		include(single_pos_list.fea);
+	} lkup37;
+	lookup lkup38 {
+		include(single_pos_list.fea);
+	} lkup38;
+	lookup lkup39 {
+		include(single_pos_list.fea);
+	} lkup39;
+	lookup lkup40 {
+		include(single_pos_list.fea);
+	} lkup40;
+} sps1;

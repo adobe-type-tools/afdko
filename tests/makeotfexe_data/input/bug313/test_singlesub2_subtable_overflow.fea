@@ -1,0 +1,18 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+# 40 format 2 is 00002f5e
+# 40 Format 1 is 420.
+
+include (single_sub2_class.fea);
+
+feature tss1 {
+include(single_sub2_lookups.fea);
+
+lookup lkup237 {
+sub @left_sub2_class by @right_sub2_class;
+} lkup237;
+
+} tss1;

@@ -1,0 +1,10 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+feature mrk1 {
+	include (mark_to_base.fea);
+	pos base [glyph101] <anchor 101 101> mark @MARK_CLASS_1;
+	pos base [glyph102] <anchor 102 101> mark @MARK_CLASS_1;
+} mrk1;
