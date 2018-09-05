@@ -115,3 +115,69 @@ def test_version_warning_bug610():
         output = f.read()
     assert (b"[WARNING] <SourceSans-Test> Major version number not in "
             b"range 1 .. 255") not in output
+
+
+@pytest.mark.parametrize('feat_name, error_msg', [
+    ('test_named_lookup',
+        b"[FATAL] <SourceSans-Test> GPOS feature 'last' causes overflow of "
+        b"offset to a subtable (0x100010020)"),
+    ('test_singlepos_subtable_overflow',
+        b"[FATAL] <SourceSans-Test> GPOS feature 'sps1' causes overflow of "
+        b"offset to a subtable (0x100010188)"),
+    ('test_class_pair_subtable_overflow',
+        b"[FATAL] <SourceSans-Test> GPOS feature 'last' causes overflow of "
+        b"offset to a subtable (0x100010020)"),
+    ('test_class_pair_class_def_overflow',
+        b"[FATAL] <SourceSans-Test> ClassDef offset overflow (0x1001a) in "
+        b"pair positioning"),
+    ('test_contextual_overflow',
+        b"[FATAL] <SourceSans-Test> Chain contextual lookup subtable in "
+        b"GPOS feature 'krn0' causes offset overflow."),
+    ('test_cursive_subtable_overflow',
+        b"[FATAL] <SourceSans-Test> Cursive Attach lookup subtable in "
+        b"GPOS feature 'curs' causes offset overflow."),
+    ('test_mark_to_base_coverage_overflow',
+        b"[FATAL] <SourceSans-Test> base coverage offset overflow "
+        b"(0x1002c) in MarkToBase positioning"),
+    ('test_mark_to_base_subtable_overflow',
+        b"[FATAL] <SourceSans-Test> MarkToBase lookup subtable in GPOS "
+        b"feature 'mrk1' causes offset overflow."),
+    ('test_mark_to_ligature_subtable_overflow',
+        b"[FATAL] <SourceSans-Test> ligature coverage offset overflow "
+        b"(0x1007a) in MarkToLigature positioning"),
+    ('test_singlesub1_subtable_overflow',
+        b"[FATAL] <SourceSans-Test> GSUB feature 'tss2' causes overflow "
+        b"of offset to a subtable"),
+    ('test_singlesub2_subtable_overflow',
+        b"[FATAL] <SourceSans-Test> GSUB feature 'tss1' causes overflow "
+        b"of offset to a subtable"),
+    ('test_multiplesub_subtable_overflow',
+        b"[FATAL] <SourceSans-Test> GSUB feature 'mts1' causes overflow "
+        b"of offset to a subtable"),
+    ('test_alternatesub_subtable_overflow',
+        b"[FATAL] <SourceSans-Test> GSUB feature 'ats1' causes overflow "
+        b"of offset to a subtable"),
+    ('test_ligaturesub_subtable_overflow',
+        b"[FATAL] <SourceSans-Test> GSUB feature 'lts1' causes overflow "
+        b"of offset to a subtable"),
+    ('test_chaincontextualsub_subtable_overflow',
+        b"[FATAL] <SourceSans-Test> GSUB feature '\xff\xff\xff\xff' causes "
+        b"overflow of offset to a subtable"),
+    ('test_reversechaincontextualsub_subtable_overflow',
+        b"[FATAL] <SourceSans-Test> Reverse Chain contextual lookup "
+        b"subtable in GSUB feature 'rts1' causes offset overflow"),
+])
+def test_oveflow_report_bug313(feat_name, error_msg):
+    input_filename = 'bug313/font.pfa'
+    feat_filename = 'bug313/{}.fea'.format(feat_name)
+    otf_path = get_temp_file_path()
+
+    stderr_path = runner(
+        CMD + ['-s', '-e', '-o', 'shw',
+               'f', '_{}'.format(get_input_path(input_filename)),
+               'ff', '_{}'.format(get_input_path(feat_filename)),
+               'o', '_{}'.format(otf_path)])
+
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert error_msg in output

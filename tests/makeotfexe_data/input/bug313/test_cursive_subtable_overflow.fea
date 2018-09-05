@@ -1,0 +1,70 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+feature curs {
+	lookup lk0 {
+		include (cursive_list.fea);
+	} lk0;
+	lookup lk1 {
+		include (cursive_list.fea);
+	} lk1;
+	lookup lk2 {
+		include (cursive_list.fea);
+	} lk2;
+	lookup lk3 {
+		include (cursive_list.fea);
+	} lk3;
+	lookup lk4 {
+		include (cursive_list.fea);
+	} lk4;
+	lookup lk5 {
+		include (cursive_list.fea);
+	} lk5;
+	lookup lk6 {
+		include (cursive_list.fea);
+	} lk6;
+	lookup lk7 {
+		include (cursive_list.fea);
+	} lk7;
+	lookup lk8 {
+		include (cursive_list.fea);
+	} lk8;
+	lookup lk9 {
+		include (cursive_list.fea);
+	} lk9;
+	lookup lk10 {
+		include (cursive_list.fea);
+	} lk10;
+	lookup lk11 {
+		include (cursive_list.fea);
+	} lk11;
+	lookup lk12 {
+		include (cursive_list.fea);
+	} lk12;
+	lookup lk13 {
+		include (cursive_list.fea);
+	} lk13;
+	lookup lk14 {
+		include (cursive_list.fea);
+	} lk14;
+	lookup lk15 {
+		include (cursive_list.fea);
+	} lk15;
+	lookup lk16 {
+		include (cursive_list.fea);
+	} lk16;
+	lookup lk17 {
+		include (cursive_list.fea);
+	} lk17;
+	lookup lk18 {
+		include (cursive_list.fea);
+	} lk18;
+	lookup lk19 {
+		include (cursive_list.fea);
+	} lk19;
+	lookup lk20 {
+		include (cursive_list.fea);
+	} lk20;
+} curs;

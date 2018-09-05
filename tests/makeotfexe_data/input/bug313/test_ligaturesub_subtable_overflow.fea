@@ -1,0 +1,25 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+# The single_sub2_lookups.fea are almost up to the overflow limit.
+# the multiple_subs_lookups then push it over
+
+include (single_sub2_class.fea);
+
+feature tss1 {
+include(single_sub2_lookups.fea);
+} tss1;
+
+include (single_sub1_class.fea);
+
+feature lts1 {
+	lookup lkup238 {
+		sub glyph10 glyph11 glyph12 glyph13 glyph14 glyph15 glyph16 glyph17 glyph18 glyph19 by glyph10;
+		sub glyph20 glyph21 glyph22 glyph23 glyph24 glyph25 glyph26 glyph27 glyph28 glyph29 by glyph20;
+		sub glyph30 glyph31 glyph32 glyph33 glyph34 glyph35 glyph36 glyph37 glyph38 glyph39 by glyph30;
+		sub glyph40 glyph41 glyph42 glyph43 glyph44 glyph45 glyph46 glyph47 glyph48 glyph49 by glyph40;
+		sub glyph50 glyph51 glyph52 glyph53 glyph54 glyph55 glyph56 glyph57 glyph58 glyph59 by glyph50;
+	} lkup238;
+} lts1;

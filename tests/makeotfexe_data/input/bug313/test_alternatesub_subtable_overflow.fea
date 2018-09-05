@@ -1,0 +1,21 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+# The single_sub2_lookups.fea are almost up to the overflow limit.
+# the multiple_subs_lookups then push it over
+
+include (single_sub2_class.fea);
+
+feature tss1 {
+include(single_sub2_lookups.fea);
+} tss1;
+
+include (single_sub1_class.fea);
+
+feature ats1 {
+	lookup lkup238 {
+		sub glyph1 from @left_sub2_class;
+	} lkup238;
+} ats1;
