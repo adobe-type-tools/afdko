@@ -1,0 +1,2 @@
+tx: --- afdko/tests/tx_data/input/CJK-VarTest.otf
+tx: (cfr) Warning: CharString of GID 1 is 71057 bytes long. CharStrings longer than 65535 bytes might not be supported by some implementations.

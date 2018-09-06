@@ -200,11 +200,23 @@ def test_remove_hints_bug180():
     assert differ([expected_path, actual_path, '-m', 'bin'])
 
 
-def test_long_charstring_bug444():
+def test_long_charstring_read_bug444():
     # read a CFF2 VF with a charstring longer that 65535, check output
     actual_path = runner(CMD + ['-o', '0', '-f', 'CJK-VarTest.otf'])
-    expected_path = _get_expected_path('CJK-VarTest.txt')
+    expected_path = _get_expected_path('CJK-VarTest_read.txt')
     assert differ([expected_path, actual_path, '-s', '## Filename'])
+
+
+def test_long_charstring_warning():
+    # read a CFF2 VF with a charstring longer that 65535, check warning message
+    # NOTE: can't diff the output against 'CJK-VarTest_warn.txt' because on
+    # Windows the lines start with 'tx.exe:' instead of just 'tx:'
+    actual_path = runner(
+        CMD + ['-r', '-e', '-o', '5', '-f', 'CJK-VarTest.otf'])
+    # expected_path = _get_expected_path('CJK-VarTest_warn.txt')
+    with open(actual_path, 'rb') as f:
+        output = f.read()
+    assert b"(cfr) Warning: CharString of GID 1 is 71057 bytes long" in output
 
 
 def test_many_hints_string_bug354():
