@@ -236,7 +236,7 @@ static void showHelp(void) {
             "    The extract option (-x) copies the table data into a file whose default\n"
             "name is the concatenation of the source filename (less its .otf or .ttf\n"
             "extension), a period character (.), and the table tag. If the tag contains\n"
-            "non-alphnumeric characters they are replaced by underscore characters (_)\n");
+            "non-alphanumeric characters they are replaced by underscore characters (_)\n");
     fprintf(stderr,
             "and finally trailing underscores are removed. The default filename may be\n"
             "overridden by appending an equals character (=) followed by an alternate\n"
@@ -405,7 +405,7 @@ static void parseTagList(char *arg, int option, int flag) {
         char *filename;
         Table *tbl;
 
-        /* Find filename separator and set to nul if present */
+        /* Find filename separator and set to null if present */
         filename = strchr(p, '=');
         if (filename != NULL) {
             *filename++ = '\0';
@@ -557,11 +557,6 @@ static int parseArgs(int argc, char *argv[]) {
                         char *fulltemp;
 
                         fulltemp = MakeFullPath(tmpname);
-                        /* rkr 5/11/2006 - I see no need for this.
-                        if (fileExists(fulltemp))
-                            fatal(SFED_MSG_TEMPFEXISTS, tmpname);
-                        */
-
                         dstfile.name = fulltemp;
                     }
                 } else if (argsleft == 1) {
@@ -583,10 +578,6 @@ static int parseArgs(int argc, char *argv[]) {
     /* No files provided */
     if ((options & (OPT_DELETE | OPT_ADD | OPT_FIX)) &&
         (dstfile.name == NULL)) {
-        /* rkr 5/11/2006 - I see no need for this.
-        if (fileExists(tmpname))
-            fatal(SFED_MSG_TEMPFEXISTS, tmpname);
-        */
         dstfile.name = tmpname;
     }
     return 0;
