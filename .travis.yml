@@ -89,6 +89,7 @@ deploy:
     file:
       - wheelhouse/*.whl
       - dist/*.tar.gz
+    prerelease: true
     on:
       tags: true
 
