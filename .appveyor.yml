@@ -52,7 +52,7 @@ before_build:
 # to run your custom scripts instead of automatic MSBuild
 build_script:
   # our setup.py requires 'wheel', which may not be already installed
-  - pip install cibuildwheel wheel
+  - pip install git+https://github.com/adobe-type-tools/cibuildwheel wheel
   - cibuildwheel --output-dir wheelhouse
 
 artifacts:
