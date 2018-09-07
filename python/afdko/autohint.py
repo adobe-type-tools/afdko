@@ -453,6 +453,11 @@ from afdko.beztools import *
 import traceback
 import shutil
 
+try:
+    from psautohint import AUTOHINTEXE
+except ImportError:
+    AUTOHINTEXE = "autohintexe"
+
 # warnings.simplefilter("ignore", RuntimeWarning) # supress waring about use of os.tempnam().
 
 kACIDKey = "AutoHintKey"
@@ -545,7 +550,7 @@ def CheckEnvironment():
 		logMsg("Please re-install the FDK. The path to the program 'tx' is not in the environment variable PATH.")
 		raise FDKEnvironmentError
 
-	command = "autohintexe -u 2>&1"
+	command = AUTOHINTEXE + " -u 2>&1"
 	report = fdkutils.runShellCmd(command)
 	if "version" not in report:
 		logMsg("Please re-install the FDK. The path to the program 'autohintexe' is not in the environment variable PATH.")
@@ -651,13 +656,13 @@ def getOptions():
 
 		if arg == "-h":
 			print(__help__)
-			command = "autohintexe -v"
+			command = AUTOHINTEXE + " -v"
 			report = fdkutils.runShellCmd(command)
 			logMsg( report)
 			raise ACOptionParseError
 		elif arg == "-u":
 			print(__usage__)
-			command = "autohintexe -v"
+			command = AUTOHINTEXE + " -v"
 			report = fdkutils.runShellCmd(command)
 			logMsg( report)
 			raise ACOptionParseError
@@ -1232,7 +1237,7 @@ def hintFile(options):
 		else:
 			if os.path.exists(tempBezNew):
 				os.remove(tempBezNew)
-			command = "autohintexe %s%s%s%s -s %s -f \"%s\" \"%s\"" % (verboseArg, suppressEditArg, supressHintSubArg, decimalArg, NEWBEZ_SUFFIX, tempFI, tempBez)
+			command = AUTOHINTEXE + " %s%s%s%s -s %s -f \"%s\" \"%s\"" % (verboseArg, suppressEditArg, supressHintSubArg, decimalArg, NEWBEZ_SUFFIX, tempFI, tempBez)
 			if  options.debug:
 				print(command)
 			report = fdkutils.runShellCmd(command)

@@ -116,7 +116,8 @@ from fontTools.ttLib import TTFont, getTableModule
 from fontTools.misc.py23 import open, tounicode
 from afdko.autohint import (
 	parseGlyphListArg, getGlyphID, getGlyphNames, filterGlyphList, openFile,
-	ACOptionParseError, ACFontError, logMsg, ACreport, expandNames)
+	ACOptionParseError, ACFontError, logMsg, ACreport, expandNames,
+	AUTOHINTEXE)
 from afdko.beztools import *
 import afdko.fdkutils as fdkutils
 import afdko.ufotools as ufotools
@@ -571,7 +572,7 @@ def collectStemsFont(path, options):
 		else:
 			allStems = ""
 
-		command = "autohintexe -q %s %s  -f \"%s\" \"%s\" 2>&1" % (doAlign, allStems, tempFI, tempBez)
+		command = AUTOHINTEXE + " -q %s %s  -f \"%s\" \"%s\" 2>&1" % (doAlign, allStems, tempFI, tempBez)
 		if options.debug:
 			print(command)
 		log = fdkutils.runShellCmd(command)
