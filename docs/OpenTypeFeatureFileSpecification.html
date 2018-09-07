@@ -1,0 +1,1969 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+        <title>OpenType Feature File Specification</title>
+    </head>
+    <body>
+		<h1>OpenType&trade; Feature File Specification</h1>
+
+<p><b>Copyright</b></p>
+<p>Copyright 2015-2018 Adobe. All Rights Reserved.
+This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0.
+</p>
+<p><b>Version</b></p>
+<p>[Document version 1.22 Last updated 22 July 2018]</p>
+<p><b>Caution:</b></p>
+<p>Portions of the syntax unimplemented by Adobe are subject to change.</p>
+<ol>
+<li><a href="#1">Introduction</a></li>
+<li><p><a href="#2">Syntax</a></p>
+<ol type="a">
+<li><a href="#2.a">Comments</a></li>
+<li><a href="#2.b">White space</a></li>
+<li><a href="#2.c">Keywords</a></li>
+<li><a href="#2.d">Special characters</a></li>
+<li><p><a href="#2.e"> Numbers and other metrics</a></p>
+<ol type="i">
+<li><a href="#2.e.i">Number</a></li>
+<li><a href="#2.e.ii">Metric</a></li>
+<li><a href="#2.e.iii">Device table</a></li>
+<li><a href="#2.e.iv">Value record</a></li>
+<li><a href="#2.e.vi">Contour point</a></li>
+<li><a href="#2.e.vii">Anchor</a></li>
+</ol>
+</li>
+<li><p><a href="#2.f">Glyphs</a></p>
+<ol type="i">
+<li><a href="#2.f.i">Glyph name</a></li>
+<li><a href="#2.f.ii">CID</a></li>
+</ol>
+</li>
+<li><p><a href="#2.g"> Glyph classes</a></p>
+<ol type="i">
+<li><a href="#2.g.i">Ranges</a></li>
+<li><a href="#2.g.ii">Named glyph classes</a></li>
+</ol>
+</li>
+<li><a href="#2.h">Tags</a></li>
+<li><a href="#2.i">Lookup block labels</a></li>
+</ol>
+</li>
+<li><a href="#3">Including files</a></li>
+<li><p><a href="#4">Specifying features</a></p>
+<ol type="a">
+<li><a href="#4.a">feature</a></li>
+<li><p><a href="#4.b"> Language system</a></p>
+<ol type="i">
+<li><a href="#4.b.i">languagesystem</a></li>
+<li><a href="#4.b.ii">script and language</a></li>
+</ol>
+</li>
+<li><a href="#4.c">parameters</a></li>
+<li><a href="#4.d">lookupflag</a></li>
+<li><a href="#4.e">lookup</a></li>
+<li><a href="#4.f">markClass</a></li>
+<li><a href="#4.g">subtable</a></li>
+<li><a href="#4.h">Examples</a></li>
+</ol>
+</li>
+<li><p><a href="#5"> Glyph substitution (GSUB) rules</a></p>
+<ol type="a">
+<li><a href="#5.a">[GSUB LookupType 1] Single substitution</a></li>
+<li><a href="#5.b">[GSUB LookupType 2] Multiple substitution</a></li>
+<li><a href="#5.c">[GSUB LookupType 3] Alternate substitution</a></li>
+<li><a href="#5.d">[GSUB LookupType 4] Ligature substitution</a></li>
+<li><a href="#5.e">[GSUB LookupType 5] Contextual substitution</a></li>
+<li><p><a href="#5.f"> [GSUB LookupType 6] Chaining contextual substitution</a></p>
+<ol type="i">
+<li><a href="#5.f.i">Specifying a Chain Sub rule and marking sub-runs</a></li>
+<li><a href="#5.f.ii">Specifying exceptions to the Chain Sub rule</a></li>
+</ol>
+</li>
+<li><a href="#5.g">[GSUB LookupType 7] Extension substitution</a></li>
+<li><a href="#5.h">[GSUB LookupType 8] Reverse Chaining Single Substitution</a></li>
+</ol>
+</li>
+<li><p><a href="#6"> Glyph positioning (GPOS) rules</a></p>
+<ol type="a">
+<li><a href="#6.a">[GPOS LookupType 1] Single adjustment positioning</a></li>
+<li><p><a href="#6.b"> [GPOS LookupType 2] Pair adjustment positioning</a></p>
+<ol type="i">
+<li><a href="#6.b.i">Specific and class pair kerning</a></li>
+<li><a href="#6.b.ii">Enumerating pairs</a></li>
+<li><a href="#6.b.iii">Subtable breaks</a></li>
+</ol>
+</li>
+<li><a href="#6.c">[GPOS LookupType 3] Cursive attachment positioning</a></li>
+<li><a href="#6.d">[GPOS LookupType 4] Mark-to-Base attachment positioning</a></li>
+<li><a href="#6.e">[GPOS LookupType 5] Mark-to-Ligature attachment positioning</a></li>
+<li><a href="#6.f">[GPOS LookupType 6] Mark-to-Mark attachment positioning</a></li>
+<li><a href="#6.g">[GPOS LookupType 7] Contextual positioning</a></li>
+<li><p><a href="#6.h"> [GPOS LookupType 8] Chaining contextual positioning</a></p>
+<ol type="i">
+<li><a href="#6.h.i">Specifying a Chain Pos rule and marking sub-runs</a></li>
+<li><a href="#6.h.ii">Specifying Contextual Positioning with explicit lookup references</a></li>
+<li><a href="#6.h.iii">Specifying Contextual Positioning with with in-line single positioning rules</a></li>
+<li><a href="#6.h.iv">Specifying Contextual Positioning with with in-line cursive positioning rules</a></li>
+<li><a href="#6.h.v">Specifying Contextual Positioning with with in-line in-line mark attachment positioning rules</a></li>
+<li><a href="#6.h.vi">Specifying exceptions to the Chain Pos rule</a></li>
+</ol>
+</li>
+<li><a href="#6.i">[GPOS LookupType 9] Extension positioning</a></li>
+</ol>
+</li>
+<li><p><a href="#7"> Ordering of lookups and rules in the feature file</a></p>
+<ol type="a">
+<li><a href="#7.a">An OpenType Layout engine's layout algorithm</a></li>
+<li><a href="#7.b">Ordering of lookups and subtables</a></li>
+<li><a href="#7.c">Ordering of rules within a lookup</a></li>
+</ol>
+</li>
+<li><p><a href="#8"> Specially handled features</a></p>
+<ol type="a">
+<li><a href="#8.a">The all alternates ('aalt') feature</a></li>
+<li><a href="#8.b">The optical size ('size') feature</a></li>
+<li><a href="#8.c">Descriptive names for Stylistic Set ('ss01 - ss20') features</a></li>
+<li><a href="#8.d">UI names Character Variation ('cv01 - cv99') features</a></li>
+</ol>
+</li>
+<li><p><a href="#9"> Specifying or overriding table values</a></p>
+<ol type="a">
+<li><a href="#9.a">BASE table</a></li>
+<li><a href="#9.b">GDEF table</a></li>
+<li><a href="#9.c">head table</a></li>
+<li><a href="#9.d">hhea table</a></li>
+<li><a href="#9.e">name table</a></li>
+<li><a href="#9.f">OS/2 table</a></li>
+<li><a href="#9.g">vhea table</a></li>
+<li><a href="#9.h">vmtx table</a></li>
+</ol>
+</li>
+<li><a href="#10">Specifying anonymous data blocks</a></li>
+<li><a href="#11">Document revisions</a></li>
+</ol>
+<p><a name="1"></a><b>1. Introduction</b></p>
+<p>An OpenType feature file is a text file that contains the typographic layout feature specifications for an OpenType font in an easy-to-read format. It may also contain override values for certain fields in the font tables. It is read in during the creation or editing of an OpenType font. This document specifies the feature file grammar.</p>
+<p>This is an example of a complete feature file (keywords are shown boldface):</p>
+<pre>
+         # Script and language coverage
+         <b>languagesystem</b> DFLT dflt;
+         <b>languagesystem</b> latn dflt;
+
+         # Ligature formation
+         <b>feature</b> liga {
+              <b>substitute</b> f i <b>by</b> f_i;
+              <b>substitute</b> f l <b>by</b> f_l;
+         } liga;
+
+         # Kerning
+         <b>feature</b> kern {
+              <b>position</b> A Y -100;
+              <b>position</b> a y -80;
+              <b>position</b> s f' &lt;0 0 10 0&gt; t;
+         } kern;</pre>
+<p>This file specifies the formation of the &quot;f_i&quot; and &quot;f_l&quot; ligatures, and the kern values of the glyph pairs &quot;A&quot; &quot;Y&quot; and &quot;a&quot; &quot;y&quot;. It also specifies a contextual positioning adjustment for &quot;f&quot; when preceded by &quot;s&quot; and followed by &quot;t&quot;. It also specifies that all features will be applied under all languages in the latn script, and for all scripts not named in the feature file.</p>
+<p class="note"><b>Note:</b> all &quot;Implementation Notes&quot; and &quot;Currently not implemented&quot; comments in the rest of the specification below refer to the Adobe implementation of the feature file grammar in the makeotf program, unless otherwise indicated.</p>
+<p><a name="2"></a><b>2. Syntax</b></p>
+<p><a name="2.a"></a><b>2.a. Comments</b></p>
+<p>The &quot;#&quot; character indicates the start of a comment; the comment extends until the end of the line. Text on a line after the comment is discarded before processing.</p>
+<p><a name="2.b"></a><b>2.b. White space</b></p>
+<p>White space is not significant except for delimiting tokens. You can have multiple line endings, spaces, and tabs between tokens. Macintosh, UNIX and PC line endings are all supported.</p>
+<p><a name="2.c"></a><b>2.c. Keywords</b></p>
+<p>This is a complete list of keywords in the feature file language. They are shown in <b>boldface</b> in examples. Note that all keywords have a global scope. Although many keywords may be used only in specific contexts, the same keyword is never used in different ways in different contexts.</p>
+<pre>
+  <a href="#2.e.vii">anchor</a>
+  <a href="#2.e.viii">anchorDef</a>
+  <a href="#10">anonymous</a> (or anon)
+  <a href="#5">by</a>
+  <a href="#2.e.vi">contour</a>
+  <a href="#6.c">cursive</a>
+ *<a href="#2.e.iii">device</a>
+  <a href="#6.b.ii">enumerate</a> (or enum)
+  <a href="#4.b.ii">excludeDFLT (deprecated)</a>
+  <a href="#4.b.ii">exclude_dflt</a>
+  <a href="#4.a">feature</a> block; <a href="#8.a">feature</a> statement
+  <a href="#5.c">from</a>
+  <a href="#5.f.ii">ignore</a> substitute; <a href="#6.h">ignore</a> position
+  <a href="#4.d">IgnoreBaseGlyphs</a>
+  <a href="#4.d">IgnoreLigatures</a>
+  <a href="#4.d">IgnoreMarks</a>
+  <a href="#4.d">MarkAttachmentType</a>
+  <a href="#4.d">UseMarkFilteringSet</a>
+  <a href="#3">include</a>
+  <a href="#4.b.ii">includeDFLT (deprecated)</a>
+  <a href="#4.b.ii">include_dflt</a>
+  <a href="#4.b.ii">language</a>
+  <a href="#4.b.i">languagesystem</a>
+  <a href="#4.e">lookup</a> block and statement
+  <a href="#4.d">lookupflag</a>
+  <a href="#6.d">mark</a>
+  <a href="#4.f">markClass</a>
+  <a href="#9.e">nameid</a>
+  <a href="#2.e.iii">NULL</a> device; <a href="#2.e.iv">NULL</a> value record; <a href="#2.e.vii">NULL</a> anchor
+  <a href="#4.c">parameters</a>
+  <a href="#6">position</a> (or pos)
+ *<a href="#4.b.ii">required</a>
+  <a href="#4.d">RightToLeft</a>
+  <a href="#5">reversesub</a> (or rsub)
+  <a href="#4.b.ii">script</a>
+  <a href="#5">substitute</a> (or sub)
+  <a href="#4.f">subtable</a>
+  <a href="#9">table</a>
+  <a href="#4.e">useExtension</a>
+  <a href="#2.e.v">valueRecordDef</a>
+</pre>
+<p>The following are keywords only in their corresponding table/feature blocks, and are shown in <b>boldface</b> in examples:</p>
+<pre>
+<a href="#9.a">  HorizAxis.BaseTagList</a>     # BASE table
+  <a href="#9.a">HorizAxis.BaseScriptList</a>  &quot;
+ *<a href="#9.a">HorizAxis.MinMax</a>          &quot;
+  <a href="#9.a">VertAxis.BaseTagList</a>      &quot;
+  <a href="#9.a">VertAxis.BaseScriptList</a>   &quot;
+ *<a href="#9.a">VertAxis.MinMax</a>           &quot;
+  <a href="#9.b">GlyphClassDef</a>             # GDEF table
+  <a href="#9.b">Attach</a>                    &quot;
+ *<a href="#9.b">LigatureCaretByDev</a>        &quot;
+  <a href="#9.b">LigatureCaretByIndex</a>      &quot;
+  <a href="#9.b">LigatureCaretByPos</a>        &quot;
+  <a href="#9.b">MarkAttachClass</a>           &quot;
+  <a href="#9.c">FontRevision</a>              # head table
+  <a href="#9.d">CaretOffset</a>               # hhea table
+  <a href="#9.d">Ascender</a>                  # hhea table
+  <a href="#9.d">Descender</a>                 # hhea table
+  <a href="#9.d">LineGap</a>                   # hhea table
+  <a href="#9.f">Panose</a>                    # OS/2 table
+  <a href="#9.f">TypoAscender</a>              &quot;
+  <a href="#9.f">TypoDescender</a>             &quot;
+  <a href="#9.f">TypoLineGap</a>               &quot;
+  <a href="#9.f">winAscent</a>                 &quot;
+  <a href="#9.f">winDescent</a>                &quot;
+  <a href="#9.f">UnicodeRange</a>              &quot;
+  <a href="#9.f">CodePageRange</a>             &quot;
+  <a href="#9.f">XHeight</a>                   &quot;
+  <a href="#9.f">CapHeight</a>                 &quot;
+  <a href="#9.f">Vendor</a>                    &quot;
+  <a href="#8.b">sizemenuname</a>              # size feature
+  <a href="#9.g">VertTypoAscender</a>          # vhea table
+  <a href="#9.g">VertTypoDescender</a>         &quot;
+  <a href="#9.g">VertTypoLineGap</a>           &quot;
+  <a href="#9.h">VertOriginY</a>               # vmtx table
+  <a href="#9.h">VertAdvanceY</a>              # vmtx table</pre>
+<p><i>[* Currently not implemented. ]</i></p>
+<p>The following are keywords only where a tag is expected:</p>
+<pre>
+  DFLT  # can be used only with the script keyword and as the script value with the languagesystem keyword.
+  dflt  # can be used only with the language keyword and as the language value with the languagesystem keyword.</pre>
+<p><a name="2.d"></a><b>2.d. Special characters</b></p>
+<pre>
+  #    pound sign      Denotes start of comment
+  ;    semicolon       Terminates a statement
+  ,    comma           Separator in various lists
+  @    at sign         Identifies glyph class names
+  \    backslash       Identifies CIDs. Distinguishes glyph names from an identical keyword
+  -    hyphen          Denotes glyph ranges in a glyph class
+  =    equal sign       Glyph class assignment operator
+  '    single quote    Marks a glyph or glyph class for contextual substitution or positioning
+  &quot; &quot;  double quotes   Enclose a name table string
+  { }  braces          Enclose a feature, lookup, table, or anonymous block
+  [ ]  square brackets Enclose components of a glyph class
+  &lt; &gt;  angle brackets  Enclose a device, value record, contour point, anchor, or caret
+  ( )  parentheses     Enclose the file name to be included</pre>
+<p><a name="2.e"></a><b>2.e. Numbers and other metrics</b></p>
+<p><a name="2.e.i"></a><b>2.e.i. Number</b></p>
+<p>A &lt;number&gt; is a signed decimal integer (without leading zeros). For example:</p>
+<pre>
+  -150
+  1000</pre>
+<p>It is used in device tables [&sect;<a href="#2.e.iii">2.e.iii</a>] and contour points [&sect;<a href="#2.e.vi">2.e.vi</a>], as well as the values of various table fields [&sect;<a href="#9">9</a>].</p>
+<p><a name="2.e.ii"></a><b>2.e.ii. Metric</b></p>
+<p>A &lt;metric&gt; value is simply a &lt;number&gt; in font design units. It is used in value records [&sect;<a href="#2.e.iv">2.e.iv</a>] for positioning rules, as well as to express the values of various table fields [&sect;<a href="#9">9</a>].</p>
+<p><i>[ Note: Multiple master support has been withdrawn as of OpenType specification 1.3. ]</i></p>
+<p><a name="2.e.iii"></a><b>2.e.iii. Device table</b></p>
+<p><i>[ Currently not implemented. ]</i></p>
+<p>A &lt;device&gt; represents a single device table or a null offset to it. It is used in value records [&sect;<a href="#2.e.iv">2.e.iv</a>], anchors [&sect;<a href="#2.e.vii">2.e.vii</a>], and and the GDEF table LigatureCaret statements [&sect;<a href="#9.b">9.b</a>].</p>
+<ul>
+<li>Device format A:</li>
+</ul>
+<p>This specifies a comma-separated list of &lt;number&gt; pairs. The first &lt;number&gt; in a pair represents a ppem size and the second the number of pixels to adjust at that ppem size:</p>
+<pre>
+&lt; <b>device</b> &lt;number&gt; &lt;number&gt;          # ppem size, number of pixels to adjust
+(, &lt;number&gt; &lt;number&gt;)* &gt; ;          # zero or more such pairs</pre>
+<p>For example:</p>
+<pre>
+&lt;<b>device</b> 11 -1, 12 -1&gt;     # Adjust by -1 at 11 ppem and 12 ppem</pre>
+<ul>
+<li>Device format B, the null device:</li>
+<li><code> &lt; <b>device NULL</b> &gt;</code></li>
+</ul>
+<p>This format is used when an undefined &lt;device&gt; is needed in a list of &lt;device&gt;s.</p>
+<p><a name="2.e.iv"></a><b>2.e.iv. Value record</b></p>
+<p>A &lt;valuerecord&gt; is used in some positioning rules [&sect;<a href="#6">6</a>].</p>
+<p>It must be enclosed by angle brackets, except for format A, in which the angle brackets are optional. Note that the &lt;metric&gt; adjustments indicate values (in design units) to add to (positive values) or subtract from (negative values) the placement and advance values provided in the font (in the 'hmtx' and 'vmtx' tables).</p>
+<ul>
+<li>Value record format A:</li>
+<li><code> &lt;metric&gt; # Angle brackets around value are not allowed.</code></li>
+</ul>
+<p>Here the &lt;metric&gt; represents an x advance adjustment, except when used in the 'vkrn', 'vpal', 'vhal', or 'valt' features, in which case it represents a Y advance adjustment. All other adjustments are implicitly set to 0. This is the simplest feature file &lt;valuerecord&gt; format, and is provided since it represents the most commonly used adjustment (i.e. for kerning). For example:</p>
+<pre>
+-3                 # without &lt;&gt;</pre>
+
+<p>Note that the use of a single value as Y advance can only be triggered when the value record definition is contained within a 'vkrn', 'vpal', 'vhal', or 'valt' feature definition. If it is in a standalone lookup, then the value will be interpreted as an X advance, even if the lookup is referenced from within one of the vertical metric features. </p>
+<ul>
+<li>Value record format B:</li>
+<li><code> &lt; &lt;metric&gt; &lt;metric&gt; &lt;metric&gt; &lt;metric&gt; &gt;</code></li>
+</ul>
+<p>Here, the &lt;metric&gt;s represent adjustments for x placement, Y placement, x advance, and Y advance, in that order. For example:</p>
+<pre>
+  &lt;-80 0 -160 0&gt;       # x placement adjustment: -80; x advance adjustment: -160</pre>
+<ul>
+<li>Value record format C: <i>[ Currently not implemented. ]</i></li>
+<li><code> &lt; &lt;metric&gt; &lt;metric&gt; &lt;metric&gt; &lt;metric&gt; &lt;device&gt; &lt;device&gt; &lt;device&gt; &lt;device&gt; &gt;</code></li>
+</ul>
+<p>Here, the &lt;metric&gt;s represent the same adjustments as in format B. The &lt;device&gt;s represent device tables [&sect;<a href="#2.e.iii">2.e.iii</a>] for x placement, Y placement, x advance, and Y advance, in that order. This format lets the editor express the full functionality of an OpenType value record. For example:</p>
+<pre>
+  &lt;-80 0 -160 0 &lt;<b>device</b> 11 -1, 12 -1&gt;
+               &lt;<b>device NULL</b>&gt;
+
+               &lt;<b>device</b> 11 -2, 12 -2&gt;
+               &lt;<b>device NULL</b>&gt;&gt;</pre>
+<p>This example specifies adjustments for x placement and x advance, as well as device adjustments at 11 and 12 ppem sizes for x placement and x advance.</p>
+<ul>
+<li><p>Value record format D, the null value record: <i>[ Currently not implemented. ]</i></p>
+<pre>
+  &lt;<b>NULL</b>&gt;
+# Value record not defined</pre>
+</li>
+<li><p>Value record format E, the named value record:</p>
+<pre>
+  &lt;name&gt;.</pre>
+<p>For example:</p>
+<pre>
+  &lt; KERN_POS_1 &gt;</pre>
+<p>The name must have been defined with a <b>valueRecordDef</b> statement before being used.</p>
+</li>
+</ul>
+<p><a name="2.e.v"></a><b>2.e.v. Named value record definition.</b></p>
+<p>The <b>valueRecordDef</b> keyword is used to define a named value record. This name can then be used in value records instead of coordinates. It offers the advantage of being able to change the coordinates in the named value record definition only, and having that single edit change the coordinates used in all the rules in which the named value record is used. The format is:</p>
+<pre>
+  <b>valueRecordDef</b> &lt;coordinates&gt; name;</pre>
+<p>where the coordinates can be in value record formats A or B. The anchor name follows the same rules as are used to form glyph names. For example:</p>
+<pre>
+  <b>valueRecordDef</b> -10 FIRST_KERN;
+  <b>valueRecordDef</b> &lt; 0 0 20 0 &gt; SECOND_KERN;</pre>
+<p>These named value coordinates can then be used in value records. For example:</p>
+<pre>
+  <b>pos</b> T V &lt; SECOND_KERN &gt; ;</pre>
+<p>Note than when the value record name is used, it must be enclosed by angle brackets, whether it is a single value or four value record. The valueRecordDef is a top level statement, and must be defined outside of feature blocks. It also must be defined before it is used.</p>
+
+<p><a name="2.e.vi"></a><b>2.e.vi. Contour point</b></p>
+<p>A &lt;contour point&gt; is used in anchors [&sect;<a href="#2.e.vii">2.e.vii</a>] and the GDEF table LigatureCaret statements [&sect;<a href="#9.b">9.b</a>]. It takes the format:</p>
+<pre>
+  <b>contourpoint</b> &lt;number&gt;</pre>
+<p>where &lt;number&gt; specifies a contour point index. For example:</p>
+<pre>
+  <b>contourpoint</b> 2</pre>
+<p class="note"><b>Note:</b> Since CFF OpenType fonts do not specify contour point indexes, a &lt;contour point&gt; may be used only with TrueType OpenType fonts.</p>
+<p><a name="2.e.vii"></a><b>2.e.vii. Anchor</b></p>
+<p>An &lt;anchor&gt; is used in some positioning rules [&sect;<a href="#6">6</a>]. It takes 5 formats:</p>
+<ul>
+<li><p>Anchor format A:</p>
+<pre>
+  &lt; <b>anchor</b> &lt;metric&gt; &lt;metric&gt; &gt;        # x coordinate, Y coordinate</pre>
+<p>For example:</p>
+<pre>
+  &lt;<b>anchor</b> 120 -20&gt;</pre>
+</li>
+<li><p>Anchor format B:</p>
+<pre>
+  &lt;<b>anchor</b> &lt;metric&gt; &lt;metric&gt;         # x coordinate, Y coordinate
+           &lt;contour point&gt; &gt;</pre>
+<p>For example:</p>
+<pre>
+  &lt;<b>anchor</b> 120 -20 <b>contourpoint</b> 5&gt;</pre>
+</li>
+<li><p>Anchor format C:</p>
+<pre>
+&lt;<b>anchor</b> &lt;metric&gt; &lt;metric&gt;          # X coordinate, Y coordinate
+         &lt;device&gt;&lt;device&gt; &gt;        # X coord device, Y coord device</pre>
+<p>For example:</p>
+<pre>
+  &lt;<b>anchor</b> 120 -20 &lt;<b>device</b> 11 1&gt; &lt;<b>device NULL</b>&gt;&gt;</pre>
+</li>
+<li><p>Anchor format D, the null anchor:</p>
+<pre>
+  &lt;<b>anchor NULL</b>&gt; # Anchor not defined</pre>
+</li>
+<li><p>Anchor format E, the named anchor:</p>
+<pre>
+  &lt;<b>anchor</b> &lt;name&gt; &gt;</pre>
+<p>For example:</p>
+<pre>
+  &lt;<b>anchor</b> TOP_ANCHOR_1&gt;</pre>
+</li>
+</ul>
+<p>An anchor name must be defined before it is used - see the following section on the <b>anchorDef</b> keyword.</p>
+<p><a name="2.e.viii"></a><b>2.e.viii. Named anchor definition</b></p>
+<p>The <b>anchorDef</b> keyword is used to define a named anchor. This name can then be used in anchor definitions instead of coordinates. It offers the advantage of being able to change the coordinates in the named anchor definition only, and having that single edit change the coordinates used in all the rules in which the named anchor is used. The format is:</p>
+<pre>
+  <b>anchorDef</b> &lt;coordinates&gt; &lt;name&gt;;</pre>
+<p>where the coordinates can be in Anchor Format A or B. The anchor name follows the same rules as are used to form glyph names. For example:</p>
+<pre>
+  <b>anchorDef</b> 300 0 ANCHOR_1;
+  <b>anchorDef</b> 120 -20 <b>contourpoint</b> 5 ANCHOR_2;</pre>
+<p>These named anchors can then be used in anchor definitions. For example:</p>
+<pre>
+  &lt;<b>anchor</b> 	ANCHOR_2 &gt;</pre>
+<p><a name="2.f"></a><b>2.f. Glyphs</b></p>
+<p>These are represented by one of:</p>
+<p><a name="2.f.i"></a><b>2.f.i. Glyph name</b></p>
+<p>There are two different contexts for glyph naming: final production names and development names.</p>
+<p>For production glyph names, names that are used in shipping font files, the specification is set by the Postscript and Type 1 specifications, which define what is expected by existing PostScript interpreters. These limitations are as follows.</p>
+<p>A glyph name may be up to 63 characters in length, must be entirely comprised of characters from the following set:</p>
+<p>A-Z a-z 0-9 . (period) _ (underscore)</p>
+<p>and must not start with a digit or period. The only exception is the special character &quot;.notdef&quot;.</p>
+<p>&quot;twocents&quot;, &quot;a1&quot;, and &quot;_&quot; are valid glyph names. &quot;2cents&quot; and &quot;.twocents&quot; are not.</p>
+<p> Development glyph names, names used in source data during the development of a font, have a larger supported character set. In addition to the characters allowed for production glyph names, the following characters must also be supported for development glyph names:</p>
+<ul>
+<li>U+002A	*	Asterisk	</li>
+<li>U+002B	+	Plus sign</li>
+<li>U+002D	-	Hyphen-minus</li>
+<li>U+003A	:	Colon</li>
+<li>U+005E	^	Circumflex accent</li>
+<li>U+007C	|	Vertical bar</li>
+<li>U+007E	~	Tilde</li>
+</ul>
+<p>For glyphs where the development glyph name differs from the final production glyph name, an implementation of the feature file syntax must be able to accept either name in source files, but must produce output data which contains either only development glyph names or only final production glyph names.</p>
+<p>A glyph name alias database may be used by the implementation of the feature file grammar to map from development glyph names in the source font data to final production glyph names. If it is used, then it is the responsibility of the implementation to correlate the development glyph names used in the feature file with the final glyph names in the font.</p>
+<p> In order disambiguate whether a text token is a range argument or a glyph name which contains a hyphen, the implementation should first assume that the token is a glyph name. If there is no glyph in the source data with a name that matches the token, then the implementation should interpret the token as a range argument.</p>
+<p>An initial backslash serves to differentiate a glyph name from an identical keyword in the feature file language. (See &sect;<a href="#2.c">2.c</a> for a list of keywords.) For example, a glyph named &quot;table&quot; must be specified in the feature file as:</p>
+<pre>
+   \table</pre>
+
+<p><a name="2.f.ii"></a><b>2.f.ii. CID</b></p>
+<p>CIDs are represented by a non-negative &lt;number&gt; [&sect;<a href="#2.e.i">2.e.i</a>] preceded by a backslash. For example:</p>
+<pre>
+  \101
+  \0</pre>
+<p><a name="2.g"></a><b>2.g. Glyph classes</b></p>
+<p class="note"><b>Note:</b> The feature file glyph classes described in this section are not to be confused with glyph classes of OpenType Layout ClassDefs. The latter are described in the chapter &quot;Common Table Formats&quot; in the OpenType Font File Specification.</p>
+<p>A feature file glyph class, &lt;glyphclass&gt;, represents a single glyph position in a sequence and is denoted by a list of glyphs enclosed in square brackets. For example:</p>
+<pre>
+  [endash emdash figuredash]</pre>
+<p>An example of a sequence which contains a glyph class is:</p>
+<pre>
+  space [endash emdash figuredash] space</pre>
+<p>This would match any of the 3 sequences &quot;space endash space&quot;, &quot;space emdash space&quot;, or &quot;space figuredash space&quot; during OpenType layout.</p>
+<p>A feature file glyph class that contains only one single glyph is known as a singleton glyph class.</p>
+<p>A feature file glyph class is also used to represent the set of alternate glyphs in an alternate substitution lookup type rule.</p>
+<p><a name="2.g.i"></a><b>2.g.i. Ranges</b></p>
+<p>A range of glyphs is denoted by a hyphen:</p>
+<pre>
+  [&lt;firstGlyph&gt; - &lt;lastGlyph&gt;]</pre>
+<p>Spaces around the hyphen are not required since hyphens are not permitted in feature file glyph names. For example:</p>
+<pre>
+  [\0-\31]
+  [A-Z]</pre>
+<p>For CID fonts, the ordering is the CID ordering.</p>
+<p>For non-CID fonts, the ordering is independent of the ordering of glyphs in the font. &lt;firstGlyph&gt; and &lt;lastGlyph&gt; must be the same length and can differ:</p>
+<ol>
+<li><p>By a single letter from A-Z, either uppercase or lowercase. For example:</p>
+<pre>
+[A.swash - Z.swash]
+[a - z]</pre>
+<p>The range is expanded by incrementing the letter that differs, while keeping the rest of the glyph name the same.</p>
+</li>
+<li><p>By up to 3 decimal digits in a contiguous run. For example:</p>
+<pre>
+  [ampersand.01 - ampersand.58]</pre>
+<p>The range is expanded by incrementing the number values, while keeping the rest of the glyph name the same.</p>
+<pre>
+  [ampersand.1 - ampersand.58]         # invalid</pre>
+<p>is not a valid glyph class since the length of the glyph names differ.</p>
+</li>
+</ol>
+<p>Note that</p>
+<pre>
+  [zero - nine]</pre>
+<p>is not a valid glyph range, as the intended range is not in alphabetic order. It must be enumerated explicitly:</p>
+<pre>
+  @digits = [zero one two three four five six seven eight nine];</pre>
+<p><a name="2.g.ii"></a><b>2.g.ii. Named glyph classes</b></p>
+<p>A glyph class can be named by assigning it to a glyph class name, which begins with the &quot;@&quot; character, and then referred to later on by the glyph class name. For example:</p>
+<pre>
+  @dash = [endash emdash figuredash];     # Assignment
+  space @dash space                       # Usage</pre>
+<p>The part of the glyph class name after the &quot;@&quot; is subject to the same name restrictions that apply to a glyph name, except that its maximum length is 63.</p>
+<p>Glyph class assignments can appear anywhere in the feature file. A glyph class name may be used in the feature file only after its definition.</p>
+<p>When a glyph class name occurs within square brackets, its elements are simply added onto the other elements in the glyph class being defined. For example:</p>
+<pre>
+  @Vowels.lc = [a e i o u];
+  @Vowels.uc = [A E I O U];
+  @Vowels = [@Vowels.lc @Vowels.uc y Y];</pre>
+<p>Here the last statement is equivalent to:</p>
+<pre>
+  @Vowels = [a e i o u A E I O U y Y];</pre>
+<p>No square brackets are needed if a glyph class name is assigned to another single glyph class name. For example:</p>
+<pre>
+  @Figures_lining_tabular = @FIGSDEFAULT;</pre>
+<p>Ranges, glyphs, and glyph class names can be combined in a glyph class. For example:</p>
+<pre>
+  [A.oldstyle - Z.oldstyle ampersand.oldstyle  @smallCaps]</pre>
+<p class="note"><b>Implementation Note:</b> When feature file glyph sequences (including glyph classes) are converted into OpenType Layout ClassDefs or Coverages in the font, the Adobe implementation ensures that ClassDefs or Coverages that are identical are shared, even if they are in different features. This happens regardless of whether ranges, glyphs or glyph class names were used to express the feature file glyph classes. (The only exception to this is for lookups that use the Extension lookup types: such lookups will not share their ClassDefs and Coverages with non-extension lookups.)</p>
+<p><a name="2.h"></a><b>2.h. Tags</b></p>
+<p>Tags are four-letter identifiers. These are denoted simply by tag name, without any final spaces, and are distinguished from glyph names by context. For example:</p>
+<pre>
+  DEU</pre>
+<p>Note that the final space in the example is implicit.</p>
+<p>The special language tag 'dflt' denotes the default language system of the corresponding script.</p>
+<p><a name="2.i"></a><b>2.i. Lookup block labels</b></p>
+<p>The same length and name restrictions that apply to a glyph name apply to a lookup block label.</p>
+<p><a name="3"></a><b>3. Including files</b></p>
+<p>Including files is indicated by the directive:</p>
+<pre>
+  <b>include</b>(&lt;filename&gt;);</pre>
+<p>The implementation software is responsible for handling the search paths for the location of the included files.</p>
+<p>In a typical implementation, if the file name were absolute then that path would be used. If the file name were relative, then it would be appended to the directory of the including feature file.</p>
+<pre>
+include<code>(../features.family);</code></pre>
+<p>A maximum include depth of 5 ensures against infinite include loops (files that include each other).</p>
+<p><a name="4"></a><b>4. Specifying features</b></p>
+<p><a name="4.a"></a><b>4.a. feature</b></p>
+<p>Each feature is specified in a feature block:</p>
+<pre>
+  <b>feature</b> &lt;feature tag&gt; {
+     # specifications go here
+  } &lt;feature tag&gt;;</pre>
+<p>For example:</p>
+<pre>
+  <b>feature</b> liga {
+     # ...
+  } liga;</pre>
+<p>The 'aalt' feature is treated specially; see &sect;<a href="#8.a">8.a</a>. For example, the &quot;useExtension&quot; keyword may optionally precede &quot;{&quot; in its feature block syntax, and other features can be referred to with a &quot;feature&quot; statement within its feature block. The 'size' feature is also treated specially; see &sect;<a href="#8.b">8.b</a>.</p>
+<p>A feature file &quot;rule&quot; is a statement that specifies glyph substitution or glyph positioning. A feature block may contain glyph substitution rules [&sect;<a href="#5">5</a>], glyph positioning rules [&sect;<a href="#6">6</a>], or both.</p>
+<p>A lookup is a group of rules of the same type. See &sect;<a href="#4.e">4.e</a>.</p>
+<p><a name="4.b"></a><b>4.b. Language system</b></p>
+<p><a name="4.b"></a>An OpenType language system is any combination of a script tag and a language tag. (In the text of this document, the notation &lt;script tag&gt;/&lt;language tag&gt; is used to refer to a language system; for example, 'script latn;'/'language dflt' denotes the default language of the Latin script.)</p>
+<p><a name="4.b"></a>The lookups in every OpenType feature must be registered under one or more language systems. The lookups of a particular feature may vary across the language systems under which the feature is registered.</p>
+<p><a name="4.b"></a>There are two ways to specify language system in the feature file: with the languagesystem keyword outside of feature definition blocks, and by the script and language keywords within feature definition blocks.</p>
+<p><a name="4.b.i"></a><b>4.b.i. languagesystem</b></p>
+<p>In practice, most or all of the features in a font will be registered under the same set of language systems, and a particular feature's lookups will be identical across the language systems under which the feature is registered.</p>
+<p>The &quot;languagesystem&quot; statement provides a simple directive to use in this case. It is the simplest way to specify language system in the feature file. (For the 'aalt' and 'size' features, it is the only way to specify language system.) One or more such statements may be present in the feature file at global scope (i.e. outside of the feature blocks or any other blocks) and before any of the feature blocks:</p>
+<pre>
+  <b>languagesystem</b> &lt;script tag&gt; &lt;language tag&gt;;</pre>
+<p>When these statements are present, then all the lookups in each feature that does not contain an explicit &quot;script&quot; or &quot;language&quot; statement (see <a href="#4.b.ii">4.b.ii</a> below) will be registered under every language system specified by the &quot;languagesystem&quot; statement(s). If a feature block does contain 'script' or 'language' tags, then all lookups that occur before the first 'script' or 'language' tag will also be applied under all the specified languagesystems.</p>
+<p>If no &quot;languagesystem&quot; statement is present, then the implementation must behave exactly as though the following statement were present at the beginning of the feature file:</p>
+<pre>
+  <b>languagesystem</b> DFLT dflt;</pre>
+<p>If any languagesystem statement is used, then the statement specifying:</p>
+<pre>
+  <b>languagesystem</b> DFLT dflt;</pre>
+<p>must be specified explicitly; if not, this languagesystem will not be included in the font. This script/language pair is special: it is used if a program cannot find a match in the font to the current writing script and language. If it is not in your font, then all the rules may be invisible to the program if your font does not have a match for the current script and language. It is strongly recommended to use the statement 'languagesystem DFLT dflt;'.</p>
+<p>If the statement 'languagesystem DFLT dflt;' is present, it must be the first of the languagesystem statements. Any other language statements using the 'DFLT' script tag must precede all other language statements.</p>
+<p>Please see example 1 in &sect;<a href="#4.g">4.g</a> below.</p>
+<p><a name="4.b.ii"></a><b>4.b.ii. script and language</b></p>
+<p>Occasionally a feature may need to be specified whose lookups vary across the language systems of the feature, or whose language systems vary from the set of language systems of the rest of the features in the file, as specified by the &quot;languagesystem&quot; statements). In these cases, &quot;script&quot; and &quot;language&quot; statements will need to be used within the feature block itself. Such statements affect only that feature.</p>
+<p>Rules that are specified after the start of a feature and before the first &quot;script&quot; and/or &quot;language&quot; statement will be included in all the language systems specified by the &quot;languagesystem&quot; statements. If you do not want any of the rules in the feature to be registered under the language systems specified by the &quot;languagesystem&quot; statements, then a &quot;script&quot; and/or &quot;language&quot; statement for a script must be present before the first rule in the feature.</p>
+<p>Once the first script or language statement occurs within a feature block, subsequent lookups and rules are registered only within the currently specified script and language. To register a rule or lookup under more than one script and language, you must explicitly include it following each script and language specification.</p>
+<p>The one exception to this rule are the default lookups. There are two levels of default lookups. Rules specified between the start of a feature definition and the first 'script' are added to all language-systems, unless a language statement specifies the 'exclude_dflt' keyword. Rules specified between the occurrence of the 'script' statement and the first language statement other than 'dflt' are added to explicitly specified languages for the current script, but not to other scripts, nor to other languages of the same script that are not named in the feature. If your font has several languages for a given script, and you need language specific rules for only some of the languages, you should still explicitly name all of the languages so that they will inherit the script-level default rules.</p>
+<p>The current script and language attributes may be changed as follows:</p>
+<ul>
+<li><p><b>&quot;script&quot; statement:</b></p>
+<pre>
+  <b>script</b>
+&lt;script tag&gt;;</pre>
+<p>For example:</p>
+<pre>
+  <b>script</b> kana;</pre>
+<p>When a &quot;script&quot; statement is seen, the language attribute is implicitly set to 'dflt', and the lookupflag attribute is implicitly set to 0. The script attribute stays the same until explicitly changed by another &quot;script&quot; statement or until the end of the feature.</p>
+</li>
+<li><b>&quot;language&quot; statement:</b><p>The language attribute stays the same until explicitly changed, until the script is changed, or until the end of the feature. To change the language attribute, use the &quot;language&quot; statement:</p>
+<pre>
+  <b>language</b>
+&lt;language tag&gt; [<b>exclude_dflt</b>|<b>include_dflt</b>] [<b>required</b>];</pre>
+<p>To exclude a set of rules from only one or a few languages, you must define the set of rules as a lookup , and explicitly include the lookup in under the languages that should include it, and omit it from the rules included under the languages where it should be excluded.</p>
+<p class="note"><b>Note:</b> the excludeDFLT and includeDFLT keywords still work, but are deprecated and will cause a warning to appear.</p>
+<p>Here is an example statement:</p>
+<pre>
+  <b>language</b> DEU;</pre>
+<p>As a result of this statement, (a) the language attribute is changed to 'DEU ', and (b) the current default lookups are automatically included into the language system specified by the current script and language DEU.</p>
+<p>If (b) is not desired, as may occasionally be the case, then the keyword &quot;exclude_dflt&quot; must follow the language tag. For example:</p>
+<pre>
+  <b>language</b> DEU <b>exclude_dflt</b>;</pre>
+<p>The keyword &quot;include_dflt&quot; may be used to explicitly indicate the default default lookup-inheriting behavior. For example:</p>
+<pre>
+  <b>language</b> DEU <b>include_dflt</b>;
+# Same as:    language DEU;</pre>
+<p>The keyword &quot;required&quot;, when present, specifies the current feature as the required feature for the specified language system.</p>
+<p><i>[ The keyword &quot;required&quot; is currently not implemented. ]</i></p>
+</li>
+</ul>
+<p>Since the 'aalt' and 'size' features are treated specially, &quot;script&quot; and &quot;language&quot; statements are not allowed within these features.</p>
+<p>Special notes:</p>
+<ul>
+<li>'DFLT' is a valid value for the 'script' tag, and 'dflt' is not.</li>
+<li>'dflt' is a valid value for the 'language' tag, and 'DFLT' is not.</li>
+<li>There is no such thing as a 'dflt' language tag in the actual OpenType data structures; the data structures hold these rules in a special record, rather than referencing them from the list of language tags for the current script. The 'dflt' language tag is just a convenience in the feature file syntax for setting the current language to be the default language system.</li>
+</ul>
+<p>Please see &sect;<a href="#4.g">4.g</a> below for detailed examples.</p>
+<p><a name="4.c"></a><b>4.c. parameters</b></p>
+<p>The &quot;parameters&quot; statement specifies the feature parameters for the currently defined language system. It is currently supported only for the 'size', 'ssXX', and 'cvXX' features; see &sect; <a href="#8.b">8.b</a>, <a href="#8.c">8.c</a> and <a href="#8.d">8.d</a>.</p>
+<p><a name="4.d"></a><b>4.d. lookupflag</b></p>
+<p>The chapter &quot;Common Table Formats&quot; in the OpenType Font File Specification describes the LookupFlag field in the Lookup table.</p>
+<p>The lookupflag attribute defaults to 0 at the start of a feature or named lookup block.</p>
+<p>The lookupflag attribute stays the same until explicitly changed, until a lookup reference statement is encountered that changes it, until the script is changed, or until the end of the feature.</p>
+<p>To change the lookupflag attribute explicitly, use the lookupflag statement, which takes two formats:</p>
+<ul>
+<li><p>lookupflag format A:</p>
+<pre>
+  <b>lookupflag</b> &lt;named lookupflag value&gt; ( &lt;named lookupflag value&gt;)*;</pre>
+<p>Here, the individual lookup flag values to be set are expressed in a list of one or more &lt;named lookupflag value&gt;s, in no particular order, separated by spaces. A &lt;named lookupflag value&gt; is one of the following:</p>
+<b>  RightToLeft</b><br>
+<b>  IgnoreBaseGlyphs</b><br>
+<b>  IgnoreLigatures</b><br>
+<b>  IgnoreMarks</b><br>
+<b>  MarkAttachmentType </b>&lt;glyph class name&gt;<br>
+<b>  UseMarkFilteringSet </b>&lt;glyph class name&gt;<br>
+<p>At most one of each of the above 6 kinds of &lt;named lookupflag&gt; values may be present in a lookupflag statement. For example, to skip over base glyphs and ligature glyphs:</p>
+<pre>
+  <b>lookupflag</b> <b>IgnoreBaseGlyphs</b> <b>IgnoreLigatures</b>;</pre>
+<p>Base, ligature, and mark glyphs are specified in the glyph class definition of the GDEF table.</p>
+<p>To skip over all mark glyphs except for those of mark class @TOP_MARKS:</p>
+<pre>
+<b>lookupflag</b> <b>MarkAttachmentType</b> @TOP_MARKS;</pre>
+<p>The class name used with MarkAttachmentType can be either a regular glyph class name or a mark class name. The glyph sets of the referenced classes must not overlap, and the MarkAttachmentType statement can reference at most 15 different classes.</p>
+<p>The flag <b>UseMarkFilteringSet</b> was added in OpenType spec 1.6. This works the same as the MarkAttachmentType, but allows you to use up to 16K different mark classes, and allows the glyph sets of the referenced classes to overlap.</p>
+</li>
+<li><p>lookupflag format B:</p>
+<pre>
+  <b>lookupflag</b> &lt;number&gt;;</pre>
+<p>Here the entire lookup flag value is specified simply as a &lt;number&gt;. The format A example above could equivalently be expressed as:</p>
+<pre>
+  <b>lookupflag</b> 6;</pre>
+<p>Format A is clearly a superior choice for human readability when the lookupflag value is not 0. However, a lookupflag value of 0 can be set only with format B, not with format A:</p>
+<pre>
+  <b>lookupflag</b> 0;</pre>
+</li>
+</ul>
+<p>The base glyphs, ligatures, and mark classes are defined in the GlyphClassDef of the GDEF table block [&sect;<a href="#9.b">9.b</a>].</p>
+<p><a name="4.e"></a><b>4.e. lookup</b></p>
+<p>A lookup is a group of rules of the same type. The font editor can label a run of rules and refer to it explicitly later on, in order to have different parts of the font tables refer to the same lookup. This decreases the size of the font in addition to freeing the editor from maintaining duplicate sets of rules.</p>
+<p>A lookup in the OpenType font will be created from each named lookup block or each run of rules with the same feature, script, language, lookupflag and lookup type attribute.</p>
+<p>To define and label a lookup, use a named lookup block:</p>
+<pre>
+  <b>lookup</b> &lt;label&gt; [<b>useExtension</b>] {
+     # rules to be grouped
+  } &lt;label&gt;;</pre>
+<p>A named lookup block may be defined either inside or outside of a feature block. In either case, it may be referenced in different feature blocks. If it is defined outside a feature block, is is referred to as a 'standalone' lookup.</p>
+<p>The lookup will be created with a GSUB or GPOS Extension lookup type if and only if the optional &quot;useExtension&quot; keyword is used.</p>
+<p>A lookup block may be defined either inside or outside of feature blocks. You may not use the <b>script</b> or <b>language</b> keywords within a standalone lookup block.</p>
+<p>The useExtension keyword has two effects: all the records of all types that are referenced by a lookup qualifier placed in one contiguous block of data, and the offset to the lookup may be 32 bits rather limited to 16 bits.</p>
+<p>When you font cannot be built because of an offset overflow error (meaning that the offset from one record to another record exceeds the 64 Kbyte limit imposed by the maximum size possible for a 16-bit offset field), then add this qualifier to the largest lookup. Keep adding it to more lookups until your font will build.</p>
+<p>Note that since the Extension lookup types were added in OpenType specification v1.3, they will not be recognized by all OpenType layout parsers.</p>
+<p>(See also &sect;<a href="#8.a">8.a</a> for how to specify the entire 'aalt' feature be made with the Extension lookup type.)</p>
+<p>To refer to the lookup later on, use a lookup reference statement:</p>
+<pre>
+  <b>lookup</b> &lt;label&gt;;</pre>
+<p>For example:</p>
+<pre>
+  <b>lookup</b> SHARED{       # lookup definition
+     # ...
+  } SHARED;
+  # ...
+  <b>lookup</b> SHARED;       # lookup reference</pre>
+<p>An example of a lookup that uses the Extension lookup type:</p>
+<pre>
+  <b>lookup</b> EXTENDED_KERNING <b>useExtension</b> {       # lookup definition
+     # ...
+  } EXTENDED_KERNING;
+  # ...
+  <b>lookup</b> EXTENDED_KERNING;    # lookup reference. &quot;useExtension&quot; not needed</pre>
+<p>Since the labeled block literally defines a single lookup in the font, the rules within the lookup block must be of the same lookup type and have the same lookupflag attribute. A lookup block may not contain any other kind of block. The order of lookups within a font is defined by the order of the lookup definitions in the feature file.</p>
+<p>For contextual rules, the rules of the lookup are ordered in the font file in the same order that they are written in the feature file. For non-contextual rules, the implementation sorts the rules to avoid conflict; for example, the ligature substitution rule for f_f_i will be written before the ligature substitution rule for f_i, no matter what their order is in the feature file. .</p>
+<p><a name="4.f"></a><b>4.f. markClass</b></p>
+<p>The markClass keyword is used to identify a mark glyph class definition statement.</p>
+<p>A mark glyph class name is defined differently than a regular glyph class. The mark class definition is built up by a one or more of statements in the form:</p>
+<pre>
+<b>  markClass</b> &lt;glyph|glyphclass&gt; &lt;anchor&gt;  &lt;mark glyph class name&gt;;</pre>
+<p>Each additional mark statement for a mark class adds the referenced glyphs to that mark class.</p>
+<p>The &lt;anchor&gt; [&sect;<a href="#2.e.vii">2.e.vii</a>] indicates the point on the mark glyph(s) by which it is attached to a matching anchor point on a base glyph. If a mark glyph has an anchor point at &lt;anchor 300, 0&gt; and the base glyph has an anchor point at &lt;anchor 400 300&gt;, then the mark glyph will be shifted so that the point x=300, y = 0 in its design space will be superimposed on the point x = 300, y = 400 in the design space of the base glyph.</p>
+<p>For example:</p>
+<pre>
+<b> markClass</b> [acute grave dieresis] &lt;anchor 350 0&gt;  @MARK_TOP_ACCENTS;</pre>
+<p>If all the mark glyphs which belong to a mark class have the same anchor, then the mark class can be defined with a single statement, as above. However, a single mark statement can define only a single anchor point, so when glyphs in a mark class have different anchor points, more than one mark statement must be used to define the mark class. For example:</p>
+<pre>
+<b> markClass</b> [acute grave] &lt;anchor 350 0&gt;  @MARK_TOP_ACCENTS;
+<b> markClass</b> [dieresis umlaut] &lt;anchor 400 0&gt;  @MARK_TOP_ACCENTS;</pre>
+<p>NOTE! All mark class definition statements must precede any use of a mark class in the feature file. Once any position statement has referenced a mark class, no more mark statements are allowed.</p>
+<p>NOTE! The mark classes used within a single lookup must be disjoint: none may include a glyph which is in another mark class that is used within the same lookup.</p>
+<p>NOTE! If a GDEF table is not explicitly defined in the feature file, then an implementation of this syntax will create one. In this case, it will use the set of defined mark classes to define the mark glyphs for the GDEF GlyphClass. In this case, the assignment of a glyph to the GDEF GlyphClass mark class may conflict other assignments to the other GDEF GlyphClass classes. In this case, an implementation should warn the user of the conflict.</p>
+<p>The set of mark classes have an implicit order. Any implementation should order the mark classes in the order of occurrence of the first definition statement for a mark glyph class. In the example:</p>
+<pre>
+<b> markClass</b> [acute grave] &lt;anchor 350 0&gt;  @MARK_TOP_ACCENTS;
+<b> markClass</b> [cedilla hook] &lt;anchor  300 0&gt;  @MARK_BOTTOM_ACCENTS;
+<b> markClass</b> [dieresis umlaut] &lt;anchor 400 0&gt;  @MARK_TOP_ACCENTS;</pre>
+<p>the mark class order will be:</p>
+<pre>
+<b> </b>@MARK_TOP_ACCENTS # mark class index 0
+<b> </b>@MARK_BOTTOM_ACCENTS # mark class index 1</pre>
+<p><a name="4.g"></a><b>4.g. subtable</b></p>
+<p>The feature file implementation must insert subtable breaks among the rules for a particular lookup if needed. For example, if a set of alternate substitution rules specified in the feature file exceeds the subtable size limit, several subtables must be automatically created.</p>
+<p>The &quot;subtable&quot; statement may be used as follows:</p>
+<pre>
+  <b>subtable</b>;</pre>
+<p>to explicitly force a subtable break after the previous rule.</p>
+<p>This is intended for use with only Pair Adjustment Positioning Format 2 (i.e. pair class kerning). See <a href="#6.b.iii"><i>6.b.iii</i></a> for details. This hint to the compiler is required for class kerning, as it is difficult for a compiler to determine where to best place a subtable break in this lookup type, in order to reduce lookup size.</p>
+<p><a name="4.h"></a><b>4.h. Examples</b></p>
+<p><b>Example 1.</b> The following is an example of an entire feature file and demonstrates the two ways to register features under language systems (see &sect;<a href="#4.b">4.b</a> above):</p>
+<pre>
+  <b>languagesystem</b> DFLT dflt;
+  <b>languagesystem</b> latn dflt;
+  <b>languagesystem</b> latn DEU;
+  <b>languagesystem</b> latn TRK;
+  <b>languagesystem</b> cyrl dflt;
+
+  <b>feature</b> smcp {
+     <b>sub</b> [a-z] <b>by</b> [A.sc-Z.sc];
+     # Since all the rules in this feature are of the same type, they will be grouped in a single lookup.
+     # Since no script or language keyword has been specified yet,
+     # the lookup will be registered for this feature under all the language systems.
+  } smcp;
+
+  <b>feature</b> liga {
+          <b>sub</b> f f <b>by</b> f_f;
+          <b>sub</b> f i <b>by</b> f_i;
+          <b>sub</b> f l <b>by</b> f_l;
+     # Since all the rules in this feature are of the same type, they will be grouped in a single lookup.
+     # Since no script or language keyword has been specified yet,
+     # the lookup will be registered for this feature under all the language systems.
+
+     <b>script</b> latn;
+        <b>language</b> dflt;
+          # lookupflag 0;      (implicit)
+          <b>sub</b> c t <b>by</b> c_t;
+          <b>sub</b> c s <b>by</b> c_s;
+          # The rules above will be placed in a lookup that is registered for all the
+          # specified languages for the script latn, but not any other scripts.
+
+       <b>language</b> DEU;
+          # script latn;       (stays the same)
+          # lookupflag 0;      (stays the same)
+          <b>sub</b> c h <b>by</b> c_h;
+          <b>sub</b> c k <b>by</b> c_k;
+          # The rules above will be placed in a lookup that is registered only under the
+          # script latn, language DEU.
+
+       <b>language</b> TRK;
+          # This will inherit both the top level default rules - the rules
+          # defined before the first 'script' statement, and the script-level default rules for 'latn':
+          # all the lookups of this feature defined after the 'script latn' statement, and before the language DEU statement.
+          # If TRK were not named here, it would not inherit the default rules for the script latn.
+  } liga;
+
+  <b>feature</b> kern {
+     <b>pos</b> a y -150;
+     # [more pos statements]
+     # All the rules in this feature will be grouped in a single lookup
+     # that is is registered under all the language-systems.
+  } kern;</pre>
+<p>In the above example feature file, the 'smcp' and 'kern' features will be registered under the 'DFLT'/'dflt', latn'/'dflt', 'latn'/'DEU ', , 'latn'/'TRK' and 'cyrl'/'dflt' language systems since no explicit &quot;script&quot; or &quot;language&quot; statements are present in those features.</p>
+<p>In the 'liga' feature, the f_f, f_i and f_l ligature substitutions will be applied under all all language systems. The c_t and c_s ligature substitutions will be applied under all languages of the script latn, but not under any other scripts. The c_h and c_k ligature substitutions will be applied when the language is German (i.e. they are registered only under 'latn'/'DEU ').</p>
+<p><b>Example 2.</b> The following example illustrates labeled lookup blocks and the use of the exclude_dflt keyword:</p>
+<pre>
+  <b>languagesystem</b> DFLT dflt;
+  <b>languagesystem</b> latn dflt;
+  <b>languagesystem</b> latn DEU;
+  <b>languagesystem</b> cyrl dflt;
+  <b>languagesystem</b> cyrl SRB;
+  <b>languagesystem</b> grek dflt;
+
+  <b>feature</b> liga {
+           # start of default rules that are applied under all language systems.
+          <b>lookup</b> HAS_I {
+           <b>sub</b> f f i <b>by</b> f_f_i;
+           <b>sub</b> f i <b>by</b> f_i;
+          } HAS_I;
+
+          <b>lookup</b> NO_I {
+           <b>sub</b> f f l <b>by</b> f_f_l;
+           <b>sub</b> f f <b>by</b> f_f;
+          } NO_I;
+
+# end of default rules that are applied under all language systems.
+
+     <b>script</b> latn;
+         <b>language</b> dflt;
+# default lookup for latn included under all languages for the latn script
+
+         <b>sub</b> f l <b>by</b> f_l;
+         <b>language</b> DEU;
+# default lookups included under the DEU language..
+         <b>sub</b> s s <b>by</b> germandbls;   # This is also included.
+         <b>language</b> TRK <b>exclude_dflt</b>;   # default lookups are excluded.
+          <b>lookup</b> NO_I;             #Only this lookup is included under the TRK language
+
+     <b>script</b> cyrl;
+        <b>language</b> SRB;
+          <b>sub</b> c t <b>by</b> c_t; # this rule will apply only under script cyrl language SRB.
+  } liga;</pre>
+<p>The 'DFLT'/'dflt', 'cyrl'/'dflt', and 'grek'/'dflt' language systems will all contain the default rules for 'liga' functionality, the rules in the lookups HAS_I and NO_I.</p>
+<p>Under the 'latn' script, all languages but TRK will contain the default lookups, and the f_l ligature rule.</p>
+<p>The germandbls ligature will apply only for the 'latn'/'DEU ' language system.</p>
+<p>The 'latn'/'TRK ' languagesystem will contain only the NO_I lookup.</p>
+<p>The 'cyrl'/'SRB ' languagesystem will contain all the default rules, and the c_t ligature rule.</p>
+<p>Note that if you specify no explicit rules or lookup references after a script and language statement, that the effect is to include all the default rules for all scripts for the feature. Note also that lookup HAS_I must be placed before lookup NO_I since the f_f_i substitution must precede the f_f substitution when both are applied. (See &sect;<a href="#7">7</a>, &quot;Ordering of lookups and rules in the feature file,&quot; below).</p>
+<p>The ordering of ligature rules within a particular lookup does not matter, excepting contextual rules, as the implementation will sort non-contextual rules in order to avoid conflict. For example, in lookup HAS_I, the f_i substitution may be placed before the f_f_i substitution, because the implementation will sort the f_f_i substitution first when writing the lookup to the font. (See &sect;<a href="#5.d">5.d</a>, &quot;Ligature substitution,&quot; below).</p>
+<p><a name="5"></a><b>5. Glyph substitution (GSUB) rules</b></p>
+<p>Glyph substitution rules begin with the keyword &quot;substitute&quot;; this keyword may be abbreviated as &quot;sub&quot;. (The &quot;ignore&quot; keyword may precede the &quot;substitute&quot; keyword in some cases.) The GSUB lookup type is auto-detected from the format of the rest of the rule.</p>
+<p><a name="5.a"></a><b>5.a. [GSUB LookupType 1] Single substitution</b></p>
+<p>A Single Sub rule is specified in one of the following formats:</p>
+<pre>
+  <b>substitute</b> &lt;glyph&gt; <b>by</b> &lt;glyph&gt;;             # format A
+  <b>substitute</b> &lt;glyphclass&gt; <b>by</b> &lt;glyph&gt;;        # format B
+  <b>substitute</b> &lt;glyphclass&gt; <b>by</b> &lt;glyphclass&gt;;   # format C</pre>
+<p>Format B specifies that any glyph in the target glyph class must be replaced by the same replacement glyph.</p>
+<p>Format C specifies that any of the glyphs in the target glyph class must be replaced by its corresponding glyph (in the order of glyphs in the glyph classes) in the replacement glyph class. If the replacement is a singleton glyph class, then the rule will be treated identically to a format B rule. If the replacement class has more than one glyph, then the number of elements in the target and replacement glyph classes must be the same.</p>
+<p>For example:</p>
+<pre>
+  <b>sub</b> a <b>by</b> A.sc;                                           # format A
+  <b>substitute</b> [one.fitted one.oldstyle one.tab.oldstyle] by one; # format B
+  <b>substitute</b> [a - z] <b>by</b> [A.sc - Z.sc];                     # format C
+  <b>substitute</b> @Capitals <b>by</b> @CapSwashes;                     # format C</pre>
+<p>The third line in the above example produces an identical representation in the font as:</p>
+<pre>
+  <b>substitute</b> a <b>by</b> A.sc;
+  <b>substitute</b> b <b>by</b> B.sc;
+  <b>substitute</b> c <b>by</b> C.sc;
+  # ...
+  <b>substitute</b> z <b>by</b> Z.sc;</pre>
+<p><a name="5.b"></a><b>5.b. [GSUB LookupType 2] Multiple substitution</b></p>
+<p>A Multiple Sub rule is specified as:</p>
+<pre>
+  <b>substitute</b> &lt;glyph&gt; <b>by</b> &lt;glyph sequence&gt;;</pre>
+<p>&lt;glyph sequence&gt; contains two or more glyphs. It may not contain glyph classes. (If it did, the rule would be ambiguous as to which replacement sequence were required.) For example:</p>
+<pre>
+  <b>substitute</b> f_f_i <b>by</b> f f i;            # Ligature decomposition</pre>
+<p><a name="5.c"></a><b>5.c. [GSUB LookupType 3] Alternate substitution</b></p>
+<p>An Alternate Sub rule is specified as:</p>
+<pre>
+  <b>substitute</b> &lt;glyph&gt; <b>from</b> &lt;glyphclass&gt;;</pre>
+<p>For example:</p>
+<pre>
+  <b>substitute</b> ampersand <b>from</b> [ampersand.1 ampersand.2 ampersand.3];</pre>
+<p><a name="5.d"></a><b>5.d. [GSUB LookupType 4] Ligature substitution</b></p>
+<p>A Ligature Sub rule is specified as:</p>
+<pre>
+  <b>substitute</b> &lt;glyph sequence&gt; <b>by</b> &lt;glyph&gt;;</pre>
+<p>&lt;glyph sequence&gt; must contain two or more of &lt;glyph|glyphclass&gt;. For example:</p>
+<pre>
+  <b>substitute</b> [one one.oldstyle] [slash fraction] [two two.oldstyle] <b>by</b> onehalf;</pre>
+<p>Since the OpenType specification does not allow ligature substitutions to be specified on target sequences that contain glyph classes, the implementation software will enumerate all specific glyph sequences if glyph classes are detected in &lt;glyph sequence&gt;. Thus, the above example produces an identical representation in the font as if all the sequences were manually enumerated by the font editor:</p>
+<pre>
+  <b>substitute</b> one         slash   two         <b>by</b> onehalf;
+  <b>substitute</b> one.oldstyle slash    two         <b>by</b> onehalf;
+  <b>substitute</b> one         fraction two         <b>by</b> onehalf;
+  <b>substitute</b> one.oldstyle fraction two         <b>by</b> onehalf;
+  <b>substitute</b> one         slash    two.oldstyle <b>by</b> onehalf;
+  <b>substitute</b> one.oldstyle slash    two.oldstyle <b>by</b> onehalf;
+  <b>substitute</b> one         fraction two.oldstyle <b>by</b> onehalf;
+  <b>substitute</b> one.oldstyle fraction two.oldstyle <b>by</b> onehalf;</pre>
+<p>A contiguous set of ligature rules does not need to be ordered in any particular way by the font editor; the implementation software must do the appropriate sorting. So:</p>
+<pre>
+  <b>sub</b> f f <b>by</b> f_f;
+  <b>sub</b> f i <b>by</b> f_i;
+  <b>sub</b> f f i <b>by</b> f_f_i;
+  <b>sub</b> o f f i <b>by</b> o_f_f_i;</pre>
+<p>will produce an identical representation in the font as:</p>
+<pre>
+  <b>sub</b> o f f i <b>by</b> o_f_f_i;
+  <b>sub</b> f f i <b>by</b> f_f_i;
+  <b>sub</b> f f <b>by</b> f_f;
+  <b>sub</b> f i <b>by</b> f_i;</pre>
+<p><a name="5.e"></a><b>5.e. [GSUB LookupType 5] Contextual substitution</b></p>
+<p>This LookupType is a functional subset of GSUB LookupType 6, chaining contextual substitution. Thus, all desired rules of this LookupType can be expressed in terms of chaining contextual substitution rules.</p>
+<p><a name="5.f"></a><b>5.f. [GSUB LookupType 6] Chaining contextual substitution</b></p>
+<p><a name="5.f.i"></a><b>5.f.i. Specifying a Chain Sub rule and marking sub-runs</b></p>
+<p>A Chain Substitution rule target sequence has three parts: backtrack, input, and lookahead glyph sequences. A glyph sequence comprises one or more glyphs or glyph classes.</p>
+<p>The most important is input glyph sequence. This is the sequence of glyphs and glyph classes to which substitution operations are applied. Optionally, a prefix (also known as backtrack) glyph sequence may be specified, as well as a suffix (also known as lookahead) glyph sequence. The entire sequence of glyphs -- prefix plus input plus suffix -- must match in the current context for the rule to be applied. The match sequence is aligned to the current context by aligning the first glyph of the input sequence with the current glyph of the text being processed. If the rule is matched, then the current context moves the current glyph pointer ahead in the original text by the length of the input sequence. Note that in the FDK syntax, the entire context string (backtrack sequence + input sequence + look-ahead sequence) are all written in the text string order. This is worth emphasis, as inside the lookup rule, the glyphs of the backtrack sequence are written in reverse order from the text to be matched. Developers of font editing tools who know this are sometimes confused by the FDK syntax.</p>
+<p>For each glyph or glyph class in the input sequence, the contextual rule may specify one lookup (&sect;<a href="#4.e">4.e</a>) to be applied at that position. Note that the specified lookup may contain many rules; the implementation must ensure that only one rule in a referenced lookup will match at that position in the input sequence. Lookups cannot be specified for the glyphs or glyph classes in the backtrack and lookahead sequences.</p>
+<p>The input sequence is defined by appending the mark (') character to all the glyph names and class names within the input sequence.</p>
+<p>The most general form of the contextual substitution rule is to explicitly reference named lookups in the rule.</p>
+<p><b>Example 1.</b> Define two standalone lookups (&sect;<a href="#4.e">4.e</a>), and then reference them in the input sequence of contextual substitution rules with the keyword &quot;lookup&quot; and the lookup name.</p>
+<pre>
+<b>lookup</b> CNTXT_LIGS {
+     <b>substitute </b>f i by f_i;
+     <b>substitute </b>c t by c_t;
+ } CNTXT_LIGS;
+
+<b>lookup</b> CNTXT_SUB {
+     <b>substitute </b>n by n.end;
+     <b>substitute </b>s by s.end;
+ } CNTXT_SUB;
+
+<b>feature</b> test {
+     <b>substitute </b>[ a e i o u] f' lookup CNTXT_LIGS i' n' lookup CNTXT_SUB;
+     <b>substitute </b>[ a e i o u] c' lookup CNTXT_LIGS t' s' lookup CNTXT_SUB;
+ } test;</pre>
+<p>Note that both the contextual substitution rules use the same lookups. This is because there is more than one rule in each referenced lookup, and different rules within the referenced lookups will match in the different contexts. In the first contextual substitution rule, the lookup <code>CNTXT_LIGS</code> will be applied at the input sequence glyph &quot;f&quot;, and the glyphs &quot;f&quot; and &quot;i&quot; will be replaced by &quot;f_i&quot;. The lookup <code>CNTXT_SUB </code>will be applied at the input sequence glyph &quot;n&quot;, and the glyph &quot;n&quot; will be replaced by &quot;n.end&quot;. This will happen only when the sequence &quot;f i n&quot; is preceded by any one of the glyphs &quot;a e i o u&quot;. Likewise, in the second contextual substitution rule the glyphs &quot;c&quot; and &quot;t&quot; will be replaced by &quot;c_t&quot;, and the glyph &quot;s&quot; will be replaced by &quot;s.end&quot;. This will happen only when the sequence &quot;c t s&quot; is preceded by any one of the glyphs &quot;a e i o u&quot;.</p>
+<p>This form of the contextual substitution rule is the most flexible. You can specify a substitution lookup for more than one input sequence glyph or glyph class, the referenced lookups can be of different types, and the referenced lookups can have different lookup flags that the parent contextual lookup. The drawback is that it is difficult to understand what substitution rule will be applied, and the implementation may not warn if the referenced lookup does not contain a rule that matches the context.</p>
+<p>If there is only a single substitution operation, and it is either single substitution or ligature substitution, then the operation can be specified in-line and its type will be auto-detected from the input and replacement sequence in the same way as in their corresponding standalone (i.e. non-contextual) statements.</p>
+<p><b>Example 2.</b> This calls a Single Sub rule. The rule below means: in sequences &quot;a d&quot; or &quot;e d&quot; or &quot;n d&quot;, substitute &quot;d&quot; by &quot;d.alt&quot;.</p>
+<pre>
+  <b>substitute</b> [a e n] d' <b>by</b> d.alt;</pre>
+<p>This format requires that there be only one glyph of glyph class in the input sequence.</p>
+<p><b>Example 3.</b> This also calls a Single Sub rule. The rule below means: if a capital letter is followed by a small capital, then replace the small capital by its corresponding lowercase letter.</p>
+<pre>
+  <b>substitute</b> [A-Z] [A.sc-Z.sc]' <b>by</b> [a-z];</pre>
+<p>This format requires that there be only one glyph of glyph class in the input sequence.</p>
+<p><b>Example 4.</b> This calls a Ligature Sub lookup. The rule below means: in sequences &quot;e t c&quot; or &quot;e.begin t c&quot;, substitute the first two glyphs by the ampersand.</p>
+<pre>
+  <b>substitute</b> [e e.begin]' t' c <b>by</b> ampersand;</pre>
+<p>This format will assume that entire input sequence is the sequence of ligature components.</p>
+<p><a name="5.f.ii"></a><b>5.f.ii. Specifying exceptions to the Chain Sub rule</b></p>
+<p>Exceptions to a chaining contextual substitution rule are expressed by inserting a statement of the following form anywhere before the chaining contextual rule and in the same lookup as it:</p>
+<pre>
+  <b>ignore substitute</b> &lt;backtrack glyph sequence&gt;*
+            &lt;marked glyph sequence&gt;
+            &lt;lookahead glyph sequence&gt;*;</pre>
+<p>The backtrack and lookahead sequences may be omitted, but there must be at least one marked glyph or glyph class.</p>
+<p>For convenience, several ignore statements may be collapsed into one by separating the matching sequences with a comma. See Example 3. The following three statements:</p>
+<pre>
+  <b>ignore substitute</b> &lt;match sequence1&gt;;</b>
+  <b>ignore substitute</b> &lt;match sequence2&gt;;</b>
+  <b>ignore substitute</b> &lt;match sequence3&gt;;</b>
+</pre>
+<p>can be written as:</p>
+<pre>
+  <b>ignore substitute</b> &lt;match sequence1&gt;, &lt;match sequence2&gt;, &lt;match sequence3&gt;;</b>
+</pre>
+<p>Note that each match sequence is in effect a complete ignore statement, and contains its own independent backtrack, marked glyph, and lookahead sequences.</p>
+
+<p>The &quot;ignore substitute&quot; statement works by creating subtables in the GSUB that tell the OT layout engine simply to match the specified sequences, and not to perform any substitutions on them. As a result of the match, remaining rules (i.e. subtables) in the lookup will be skipped when the rule matches. (See the OT layout algorithm in &sect;<a href="#7.a">7.a</a>.)</p>
+<p><b>Example 1.</b> Ignoring specific sequences: The &quot;ignore substitute&quot; rules below will block any subsequent rules that specifies a substitution for &quot;d&quot; when the context around &quot;d&quot; matches any of the sequences &quot;f a d&quot;, &quot;f e d&quot;, or &quot;a d d&quot;.</p>
+<p>Note that the marked glyphs in the exception sequences indicate where a substitution would have occurred; this is necessary for the OpenType layout engine to correctly handle skipping this sequence.</p>
+<pre>
+  <b>ignore substitute</b> f [a e] d';
+  <b>ignore substitute</b> a d' d;
+  <b>substitute</b> [a e n] d' <b>by</b> d.alt;</pre>
+<p><b>Example 2.</b> Matching a beginning-of-word boundary:</p>
+<pre>
+  <b>ignore substitute</b> @LETTER f' i';
+  <b>substitute</b> f' i' <b>by</b> f_i.begin;</pre>
+<p>The example above shows how a ligature may be substituted at a word boundary. @LETTER must be defined to include all glyphs considered to be part of a word. The substitute statement will get applied only if the sequence doesn't match &quot;@LETTER f i&quot;; i.e. only at the beginning of a word.</p>
+<p><b>Example 3.</b> Matching a whole word boundary:</p>
+<pre>
+  <b>ignore substitute</b> @LETTER a' n' d', a' n' d' @LETTER;
+  <b>substitute</b> a' n' d' by a_n_d;</pre>
+<p>In this example, the a_n_d ligature will apply only if the sequence &quot;a n d&quot; is neither preceded nor succeeded by a @LETTER. Also, note the use of the comma in the &quot;ignore&quot; statement: this is equivalent to writing:</p>
+<pre>
+  <b>ignore substitute</b> @LETTER a' n' d';
+  <b>ignore substitute</b> a' n' d' @LETTER;
+  <b>substitute</b> a' n' d' by a_n_d;</pre>
+<p><b>Example 4.</b> This shows a specification for the contextual swashes feature:</p>
+<pre>
+  <b>feature</b> cswh {
+
+     # --- Glyph classes used in this feature:
+     @BEGINNINGS = [A-N P-Z Th m];
+     @BEGINNINGS_SWASH = [A.swash-N.swash P.swash-Z.swash T_h.swash m.begin];
+     @ENDINGS = [a e z];
+     @ENDINGS_SWASH = [a.end e.end z.end];
+
+     # --- Beginning-of-word swashes:
+     <b>ignore substitute</b> @LETTER @BEGINNINGS';
+     <b>substitute</b> @BEGINNINGS' <b>by</b> @BEGINNINGS_SWASH;
+
+     # --- End-of-word swashes:
+     <b>ignore substitute</b> @ENDINGS' @LETTER;
+     <b>substitute</b> @ENDINGS' <b>by</b> @ENDINGS_SWASH;
+
+  } cswh;</pre>
+<p>If a feature only targets glyphs at the beginning or ending of a word, such as the 'init' and 'fina' features, then the application could be made responsible for detecting the word boundary; the feature itself would be simply defined as the appropriate substitutions without regard for word boundary. Such application responsibilities must be described in the feature tag registry.</p>
+<p><a name="5.g"></a><b>5.g. [GSUB LookupType 7] Extension substitution</b></p>
+<p>The &quot;useExtension&quot; keyword specifies creating lookups of this lookup type. See &sect;<a href="#4.e">4.e</a> and &sect;<a href="#8.a">8.a</a>.</p>
+<p><a name="5.h"></a><b>5.h. [GSUB LookupType 8] Reverse Chaining Single Substitution</b></p>
+<p>A Reverse Chaining Single Substitution shares the same syntax as a Chaining Contextual Substitution rule. The syntactic differences are that it can specify only single substitutions, the marked target sequence can consist of only a single glyph or glyph class, and the rule is specified with the keyword <b>reversesub</b> or <b>rsub</b>. An application's layout engine will also treat this rule differently than any other rule type; the lookup is applied to the text string in the reverse of the logical reading order.</p>
+<p>The rule is specified as follows:</p>
+<pre>
+  <b>reversesub</b> [a e n] d' <b>by</b> d.alt;</pre>
+<p><a name="6"></a><b>6. Glyph positioning (GPOS) rules</b></p>
+<p>Glyph positioning rules begin with the keyword &quot;position&quot;; this keyword may be abbreviated as &quot;pos&quot;. (The &quot;enumerate&quot; or &quot;ignore&quot; keywords may precede the &quot;position&quot; keyword in some cases.) The GPOS lookup type is auto-detected from the format of the rest of the rule.</p>
+<p>Glyph positioning is specified in terms of metrics [&sect;<a href="#2.e.ii">2.e.ii</a>], device tables [&sect;<a href="#2.e.iii">2.e.iii</a>], value records [&sect;<a href="#2.e.iv">2.e.iv</a>], and anchors [&sect;<a href="#2.e.vii">2.e.vii</a>]. In all positioning rules, these are inserted immediately after the glyph(s) they apply to, with the exception of Pair Pos format B.</p>
+<p><a name="6.a"></a><b>6.a. [GPOS LookupType 1] Single adjustment positioning</b></p>
+<p>A Single Pos rule is specified as:</p>
+<pre>
+  <b>position</b> &lt;glyph|glyphclass&gt;
+&lt;valuerecord&gt;;</pre>
+<p>Here, the &lt;glyph|glyphclass&gt; is adjusted by the &lt;valuerecord&gt; [&sect;<a href="#2.e.iv">2.e.iv</a>]. For example, to reduce the left and right side-bearings of a glyph each by 80 design units:</p>
+<pre>
+  <b>position</b> one &lt;-80 0 -160 0&gt;;</pre>
+<p><a name="6.b"></a><b>6.b. [GPOS LookupType 2] Pair adjustment positioning</b></p>
+<p><a name="6.b.i"></a><b>6.b.i. Specific and class pair kerning</b></p>
+<p>Rules for this LookupType are usually used for kerning, and may be in either of 2 formats:</p>
+<ul>
+<li><p>Pair Pos format A: </p>
+<pre>
+  <b>position</b> &lt;glyph|glyphclass&gt; &lt;valuerecord&gt;
+
+           &lt;glyph|glyphclass&gt; &lt;valuerecord&gt;;</pre>
+<p>The first &lt;valuerecord&gt; [&sect;<a href="#2.e.iv">2.e.iv</a>] corresponds to the first &lt;glyph|glyphclass&gt;, and the second &lt;valuerecord&gt; corresponds to the second &lt;glyph|glyphclass&gt;. The following example illustrates an unusual way to specify a kern value of -100:</p>
+<pre>
+  <b>position</b> T -60 a &lt;-40 0 -40 0&gt;;</pre>
+</li>
+<li><p>Pair Pos format B:</p>
+<pre>
+  <b>position</b> &lt;glyph|glyphclass&gt; &lt;glyph|glyphclass&gt;
+           &lt;valuerecord&gt;;     # for first &lt;glyph|glyphclass&gt;</pre>
+</li>
+</ul>
+<p>This format is provided since it closely parallels the way kerning is expressed in AFM files. Thus, it is a shorter way of expressing:</p>
+<pre>
+  <b>position</b> &lt;glyph|glyphclass&gt; &lt;valuerecord format A&gt; &lt;glyph|glyphclass&gt;
+&lt;<b>NULL</b>&gt;;</pre>
+<p>Kerning can most easily be expressed with this format. This will result in adjusting the first glyph's x advance, except when in the 'vrkn' feature, in which case it will adjust the first glyph's Y advance. Some examples:</p>
+<pre>
+  <b>pos</b> T a -100;        # specific pair (no glyph class present)
+  <b>pos</b> [T] a -100;      # class pair (singleton glyph class present)
+  <b>pos</b> T @a -100;       # class pair (glyph class present, even if singleton)
+  <b>pos</b> @T [a o u] -80;  # class pair</pre>
+<p>Note that in both formats A and B, if at least one glyph class is present (even if it is a singleton glyph class), then the rule is interpreted as a class pair; otherwise, the rule is interpreted as a specific pair.</p>
+<p>In the 'kern' feature, the specific glyph pairs should precede the glyph class pairs in the feature file, mirroring the way that they will be stored in the font. Otherwise, depending on the implementation, the specific glyph pairs following any class pair may never be applied. (See &sect;<a href="#7">7</a>, &quot;Ordering of lookups and rules in the feature file,&quot; below.)</p>
+<pre>
+  <b>feature</b> kern {
+     # specific pairs for all scripts
+     # class pairs for all scripts
+  } kern;</pre>
+<p><a name="6.b.ii"></a><b>6.b.ii. Enumerating pairs</b></p>
+<p>If some specific pairs are more conveniently represented as a class pair, but the editor does not want the pairs to be in a class kerning subtable, then the class pair must be preceded by the keyword &quot;enumerate&quot; (which can be abbreviated as &quot;enum&quot;). The implementation software will enumerate such pairs as specific pairs. Thus, these pairs can be thought of as &quot;class exceptions&quot; to class pairs. For example:</p>
+<pre>
+  @Y_LC = [y yacute ydieresis];
+  @SMALL_PUNC = [comma semicolon period];
+
+  <b>enum pos</b> @Y_LC semicolon -80;    # specific pairs
+  <b>pos</b>     f quoteright 30;         # specific pair
+  <b>pos</b>     @Y_LC @SMALL_PUNC -100;  # class pair</pre>
+<p>The enum rule above can be replaced by:</p>
+<pre>
+  <b>pos</b> y semicolon -80;
+  <b>pos</b> yacute semicolon -80;
+  <b>pos</b> ydieresis semicolon -80;</pre>
+<p>without changing the representation in the font. Since this representation is convenient for generating a large number of specific pairs, it may be used even when some of the pairs generated by the 'enum' rules are incorrect. Specific pairs generated by an 'enum' rule may be overridden by specifying preceding single pairs. Because of this case, it is not an error when specific kern pairs conflict because they have the same glyphs.  When specific kern pair rules conflict, the first rule specified is used, and later conflicting rule are skipped. </p>
+<p><a name="6.b.iii"></a><b>6.b.iii. Subtable breaks</b></p>
+<p>The implementation software will insert a subtable break within a run of class pair rules if a single subtable cannot be created due to class overlap. A warning will be emitted. For example:</p>
+<pre>
+  <b>pos</b> [Ygrave] [colon semicolon] -55;   # [line 99]   In first subtable
+  <b>pos</b> [Y Yacute] period -50;            # [line 100]  In first subtable
+  <b>pos</b> [Y Yacute Ygrave] period -60;     # [line 101]  In second subtable</pre>
+<p>will produce a warning that a new subtable has been started at line 101, and that some kern pairs within this subtable may never be accessed. Note that this allows the font to be built, but the result will not match the developer's intention. The kerning feature will not work as expected until the causes for all such errors are removed. The pair (Ygrave, period) will have a value of 0 if the above example comprised the entire lookup, since Ygrave is in the coverage (i.e. union of the first glyphs) of the first subtable. One way to understand this is to imagine a lookup table of kern class pairs as a spreadsheet of all possible pairs of kern left-side classes that are used in the lookup table with all the kern right-side classes that are used in the lookup table. Imagine each left side class is the title of a row in the spreadsheet, and each right side class is the title of a column. A glyph can be put in only one row title, and in only one column title. All glyphs not named in a row title get put together in a special row title. All glyphs not named in a column title get put together in a special column title. When you specify the value of a class pair, you are specifying the value in only one cell of the spreadsheet. When you specify a series of kern pair rules between a particular left side class and a series of right side classes, you are filling in a series of cells in the row for the specific left side class. All cells for which no values are specified are set to 0. When programs look for a kern value between &quot;Ygrave&quot; and something else, they look through the list of left side class definitions to find the first occurrence of 'Ygrave'. By definition, the first spreadsheet row which includes &quot;Ygrave&quot; will define the kern pair value of &quot;Ygrave&quot; with all other right-side classes, e.g spreadsheet columns. Since a pair value with a right-side period has not been explicitly defined at this point, the default value is 0. Since the programs will not look further than this row, the kernclass pair:</p>
+<pre>
+<b>pos</b> [Y Yacute Ygrave] period -60;</pre>
+<p>will never be used.</p>
+<p>Sometimes the class kerning subtable may get too large. The editor can make it smaller by forcing subtable breaks at any point by inserting the statement:</p>
+<pre>
+  <b>subtable</b>;</pre>
+<p>between two class kerning rules. The new subtable created will still be in the same lookup, so the editor must ensure that the coverages of the subtables thus created do not overlap, since the processing rules will not find and report a conflict.</p>
+<p>When seeking to decrease the class table size, it is best to place subtable breaks between blocks of rules where there is no cross linking, such that no left side class in one block is used with any right side class in the other block. However, in most large Western fonts, such groups are so small that breaking them into separate subtables does not yield much decrease in the overall lookup size. In this common case, an adequate strategy is to first divide the entire list of kern class rules in two roughly equal blocks with a subtable break. If this does not make the class kern tables small enough, then continue to subdivide each block of rules in two with a subtable break. Because the class definitions must be repeated for each subtable, a point of diminishing returns usually comes with around 6 subtable breaks.</p>
+<p><a name="6.c"></a><b>6.c. [GPOS LookupType 3] Cursive attachment positioning</b></p>
+<p>A Cursive Pos rule is specified as:</p>
+<pre>
+  <b>position cursive</b> &lt;glyph|glyphclass&gt; &lt;anchor&gt;   # Entry anchor
+                   &lt;anchor&gt;;  # Exit anchor</pre>
+<p>The first &lt;anchor&gt; [&sect;<a href="#2.e.vii">2.e.vii</a>] indicates the entry anchor point for &lt;glyph|glyphclass&gt;; the second, the exit anchor point.</p>
+<p>For example, to define the entry point of glyph meem.medial to be at x=500, y=20, and the exit point to be at x=0, y=-20:</p>
+<pre>
+  <b>position</b> <b>cursive</b> meem.medial &lt;<b>anchor</b> 500 20&gt; &lt;<b>anchor</b> 0 -20&gt;;</pre>
+<p>A glyph may have a defined entry point, exit point, or both. &lt;anchor&gt; format D, the null anchor, must be used to indicate that an &lt;anchor&gt; is not defined.</p>
+<pre>
+  <b>position</b> <b>cursive</b> meem.end &lt;<b>anchor</b> 500 20&gt; &lt;<b>anchor</b> NULL &gt;;</pre>
+<p><a name="6.d"></a><b>6.d. [GPOS LookupType 4] Mark-to-Base attachment positioning</b></p>
+<p>A Mark-to-Base Pos rule is specified as:</p>
+<pre>
+  <b>position base</b> &lt;glyph|glyphclass&gt; # base glyph(s)
+          &lt;anchor&gt;  <b>mark</b> &lt;named mark glyphclass&gt; +     # anchor and mark glyph class; repeated for each attachment point on the base glyphs(s) name
+          ;</pre>
+<p>Each &lt;anchor&gt; [&sect;<a href="#2.e.vii">2.e.vii</a>] indicates the anchor point on the base glyph(s) to which the mark class's anchor point should be attached.</p>
+<p>A single Mark-To-Base statement must specify all the anchor points and their attaching mark classes.</p>
+<p>This rule type does not actually support base glyph classes: the feature file syntax allows this in order to compactly specify Mark-To-Base rules for the set of glyphs which have the same anchor points. A feature file rule which uses a glyph class for the base glyph is expanded in the font to a separate rule for each glyph in the base class, although they will share the same anchor and mark class records.</p>
+<p>The named mark glyph classes and the anchor points of all the mark glyphs in the named mark classes must have been previously defined in the feature file by <b>markClass</b> statements [&sect;<a href="#4.f">4.f</a>].</p>
+<p>NOTE! The mark classes used within a single lookup must be disjoint: none may include a glyph which is in another mark class that is used within the same lookup.</p>
+<p>For example, to specify that the anchor of mark glyphs acute and grave is at x=30, y=600, and that the anchor of mark glyphs dieresis and umlaut is at x=60, y=600, and to position the anchor point of the four mark glyphs at anchor point x=250, y=450 of glyphs a, e, o and u:</p>
+<pre>
+  <b>markClass</b> [acute grave] &lt;<b>anchor</b> 150 -10&gt; @TOP_MARKS;
+  <b>markClass</b> [dieresis umlaut] &lt;<b>anchor</b> 300 -10&gt; @TOP_MARKS;
+  <b>markClass</b> [cedilla] &lt;<b>anchor</b> 300 600&gt; @BOTTOM_MARKS;
+
+  <b>position</b> <b>base</b> [a e o u] &lt;<b>anchor</b> 250 450&gt; <b>mark</b> @TOP_MARKS
+                          &lt;<b>anchor</b> 250 -10&gt; <b>mark</b> @BOTTOM_MARKS;</pre>
+<p><a name="6.e"></a><b>6.e. [GPOS LookupType 5] Mark-to-Ligature attachment positioning</b></p>
+<p>A Mark-to-Ligature Pos rule is specified as:</p>
+<pre>
+  <b>position ligature</b> &lt;ligature glyph|glyphclass&gt;   # ligature glyph or glyph class
+              # anchor and named mark glyph class;
+              # repeated for each anchor point on the first component glyph
+              &lt;anchor&gt; <b>mark</b> &lt;named mark glyph class&gt; +
+              # Start of anchor and mark info for the next ligature component.
+              <b>ligComponent</b>
+
+# anchor and named mark glyph class;
+
+# repeated for each anchor point on the next component glyph
+
+&lt;anchor&gt; <b>mark</b> &lt;named mark glyph class&gt;
+
+
+# The block of ligComponent its anchor-mark classes
+
+# is repeated for each ligature component.
+
+;</pre>
+<p>The statement must specify all the anchor-mark class pairs for all the ligature components. It follows the form of the Mark-To-Base rule, except that a set of anchor-mark class pairs must be specified for each component glyph in the ligature. The set of anchor-mark class pairs for one component is separated for the set of the next component by the 'ligComponent' keyword. If there are no anchor points on a component, it must still specify at least one anchor, which should be the NULL anchor. It is not required that each component have the same number of anchor points.</p>
+<p>The named mark glyph classes and the anchor points of all the mark glyphs in the named mark classes must have been previously defined in the feature file by <b>markClass</b> statements [&sect;<a href="#4.f">4.f</a>].</p>
+<p>The example in the OpenType specification for this LookupType could be expressed as:</p>
+<pre>
+  # 1. Define mark anchors:
+  <b>markClass</b> sukun    &lt;<b>anchor </b>261 488&gt; @TOP_MARKS;
+  <b>markClass</b> kasratan &lt;<b>anchor</b> 346 -98&gt; @BOTTOM_MARKS;
+
+  # 2. Define mark-to-ligature rules:
+  <b>position ligature</b> lam_meem_jeem
+          &lt;<b>anchor</b> 625 1800&gt; <b>mark</b> @TOP_MARKS    # mark above lam
+          <b>ligComponent</b>     # start specifying marks for meem
+          &lt;<b>anchor</b> 376 -368&gt; <b>mark</b> @BOTTOM_MARKS    #mark below meem
+          <b>ligComponent</b>     # start specifying marks for jeem
+          &lt;<b>anchor NULL</b>&gt;    # jeem has no marks
+          ;</pre>
+<p>Note that a NULL anchor needs to be specified for a ligature component only when it has no non-NULL anchors. Otherwise, the implementation will supply a NULL anchor for each mark class that is not used by a ligature component.</p>
+<p>If a glyph class is used, each ligature in the glyph class must have the same number of components and the same anchor positions on each component.</p>
+<p><a name="6.f"></a><b>6.f. [GPOS LookupType 6] Mark-to-Mark attachment positioning</b></p>
+<p>A Mark-to-Mark Pos rule is specified as:</p>
+<pre>
+  <b>position mark</b> &lt;glyph|glyphclass&gt; # base mark glyph(s)
+          &lt;anchor&gt;  <b>mark</b> &lt;named mark glyphclass&gt; +     # anchor and mark glyph class; repeated for each attachment point on the base glyphs(s) name
+          ;</pre>
+<p>This rule is distinguished from a Mark-to-Base Pos rule [&sect;<a href="#6.d">6.d</a>] by the first &quot;mark&quot; keyword. Otherwise, it has the same syntax and restrictions.</p>
+<p>The example in the OpenType specification for this LookupType could be expressed as:</p>
+<pre>
+  # 1. Define name mark class:
+  <b>markClass</b> damma &lt;<b>anchor</b> 189 -103&gt; @MARK_CLASS_1;
+  # 2. Define mark-to-mark rule:
+  <b>position mark</b> hanza &lt;<b>anchor</b> 221 301&gt; <b>mark</b> @MARK_CLASS_1;</pre>
+<p><a name="6.g"></a><b>6.g. [GPOS LookupType 7] Contextual positioning</b></p>
+<p>This LookupType is a functional subset of GPOS LookupType 8, chaining contextual positioning. Thus, all desired rules of this LookupType can be expressed in terms of chaining contextual positioning rules.</p>
+<p><a name="6.h"></a><b>6.h. [GPOS LookupType 8] Chaining contextual positioning</b></p>
+<p>Positioning rules in this lookup type are supported as of FDK 2.0</p>
+<p><a name="6.h.i"></a><b>6.h.i. Specifying a Chain Positioning rule and marking sub-run</b></p>
+<p>A Chain Positioning rule target sequence has three parts: backtrack, input, and lookahead glyph sequences. A glyph sequence comprises one or more glyphs or glyph classes.</p>
+<p>The most important is input glyph sequence. This is the sequence of glyphs and glyph classes to which positioning operations are applied. Optionally, a prefix (also known as backtrack) glyph sequence may be specified, as well as a suffix (also known as lookahead) glyph sequence. The entire sequence of glyphs -- prefix plus input plus suffix -- must match in the current context for the rule to be applied. The match sequence is aligned to the current context by aligning the first glyph of the input sequence with the current glyph of the text being processed. If the rule is matched, then the current context moves the current glyph pointer ahead in the original text by the length of the input sequence. Note that in the FDK syntax, the entire context string (backtrack sequence + input sequence + look-ahead sequence) are all written in the text string order. This is worth emphasis, as inside the lookup rule, the glyphs of the backtrack sequence are written in reverse order from the text to be matched. Developers of font editing tools who know this are sometimes confused by the FDK syntax.</p>
+<p>For each glyph or glyph class in the input sequence, the contextual rule may specify one lookup (&sect;<a href="#4.e">4.e</a>) to be applied at that position. Note that the specified lookup may contain many rules; the implementation must ensure that only one rule in a referenced lookup will match at that position in the input sequence. Lookups cannot be specified for the glyphs or glyph classes in the backtrack and lookahead sequences.</p>
+<p>The input sequence is defined by appending the mark (') character to all the glyph names and class names (and only these names) within the input sequence. Applying the mark (') character to keywords such as anchor and mark or a value record will result in a syntax error.</p>
+<p><a name="6.h.ii"></a>6.h.ii. Specifying Contextual Positioning with explicit lookup references</p>
+<p>The most general form of the contextual substitution rule is to explicitly reference named lookups in the rule.</p>
+<p><b>Example 1.</b> Define two standalone lookups (&sect;<a href="#4.e">4.e</a>), and then reference them in the input sequence of contextual positioning rules with the keyword &quot;lookup&quot; and the lookup name.</p>
+<pre>
+<b>markClass</b> [acute grave] &lt;<b>anchor</b> 150 -10&gt; @ALL_MARKS;
+
+<b>lookup</b> CNTXT_PAIR_POS {
+     <b>position </b>T o -10;
+     <b>position </b>T c -12;
+ } CNTXT_PAIR_POS;
+
+<b>lookup</b> CNTXT_MARK_TO_BASE {
+     <b>position base</b> o &lt;<b>anchor</b> 250 450&gt; <b>mark</b> @ALL_MARKS;
+     <b>position base</b> c &lt;<b>anchor</b> 250 450&gt; <b>mark</b> @ALL_MARKS;
+ } CNTXT_MARK_TO_BASE;
+
+<b>feature</b> test {
+     <b>position </b>T' <b>lookup</b> CNTXT_PAIR_POS [o c]' @ALL_MARKS' <b>lookup</b> CNTXT_MARK_TO_BASE;
+ } test;</pre>
+<p>This rule has only an input sequence, and no backtrack or lookahead sequence. It will match when the current glyph is 'T', followed by either 'o' or 'c', followed by any mark glyph. The lookup CNTXT_PAIR_POS will applied to the 'T', and the lookup CNTXT_MARK_TO_BASE will be applied to the glyphs in the class @ALL_MARKS.</p>
+<p>This form of the contextual positioning rule is the most flexible. You can specify a positioning lookup for more than one input sequence glyph or glyph class, the referenced lookups can be of different types, and the referenced lookups can have different lookup flags that the parent contextual lookup. The drawback is that it is difficult to understand what position rule will be applied, and the implementation may not warn if the referenced lookup does not contain a rule that matches the context.</p>
+<p>When it is acceptable to specify a positioning rule for only one input glyph or glyphclass in the input sequence, and that the referenced lookup have the same lookup flag as the parent contextual lookup, then you can specify a contextual rule with the positioning rule in-line. This is much easier to understand.</p>
+<p><a name="6.h.iii"></a>6.h.iii. Specifying Contextual Positioning with in-line single positioning rules</p>
+<p>Example 1:</p>
+<pre>
+  <b>position</b> [quoteleft quotedblleft ][Y T]' &lt;0 0 20 0 &gt;  [quoteright quotedblright];
+  <b>position</b> [quoteleft quotedblleft ][Y T]' 20  [quoteright quotedblright];</pre>
+<p>Both of these rules have an input sequence of a single glyph position, for which the glyph class [Y T] is specified. The marked glyph class is followed by a value record. The first form shows a full value record which allows you to alter both the (x,y) coordinates of the origin and the (x,y) coordinates of the advance width. The second rule shows the simple form of the value record, which specifies a value for only a change to the x value of the advance width. Note that the value record modifies the glyph which it follows. These both increase the advance width of Y or T by 20, when preceded by either quoteleft or quotedblleft, and followed by quoteright or quotedblright. Note that not all marked glyphs or glyphclasses in the input sequence must be followed by a value record; if this is omitted, then the item's positioning info will not be affected.</p>
+<p>Example 2:</p>
+<pre>
+  <b>position</b> s f' 10 t;
+  <b>position</b> s f'10 t' -5 period;
+</pre>
+<p>The first example specifies a kern pair &quot;ft&quot; when preceded by &quot;s&quot;, and increases the x-advance of f by 10. The second specifies a kern triplet &quot;ft.&quot;, when preceded by &quot;s&quot;. The x-advance of f is increased by 10, and the x-advance of t is decreased by 5. The entire run of marked glyphs will be consumed by a rule; in the first case, after matching this rule, the set of rules in current lookup will next be applied starting at the glyph &quot;t&quot;. In the second case, the rules will next be applied starting at the glyph &quot;period&quot;.</p>
+<p><b>Special notes on contextual kerning</b></p>
+<p>Contextual positioning rules must be in a different lookup than pair positioning rules, since the rules are of different lookup types. Because each lookup is applied independently of the other lookup(s) over the entire text stream, the positioning change specified in a pair kerning rule will be added to the positioning change specified in a contextual kerning rule, whenever the two rules match the same glyph pair in the text stream. This effect can be managed by specifying the contextual kerning rules values so that the sum of the pair positioning rule value and the contextual positioning rule value add to the desired value, as in example 3A.</p>
+<p>Example 3A:</p>
+<pre>
+  <b>position</b> L quoteright -150;
+  <b>position</b> quoteright A -120;
+  <b>position</b> L' 50 quoteright' 70 A;</pre>
+<p>Desired final kern adjustment: L' -100 quoteright' -50 A;</p>
+<p>In this example, the intended kern correction for the triplet &quot;L quoteright A&quot; is an adjustment of -100 to the advance width of the L when followed by quoteright, and of -50 to the advance width of quoteright when followed by A. However, since the pair positioning rules will adjust the pair &quot;L quoteright&quot; by -150 and the pair &quot;quoteright A&quot; by -120, the adjustment values in the contextual rule for the triplet must be set as shown. This approach is feasible, but difficult to understand.</p>
+<p>Another approach is to simply make all the kerning be contextual by marking the first glyph or glyph class of each pair positioning rule. Since all the kern rules will then be in a single lookup, only one rule will match in any context, and there is no need to figure out which rules add up. This solution is shown in example 3B using feature file syntax for contextual positioning. Notice, however, that the triplet rule had to defined before the other two rules. Otherwise, the pair positioning rules would have blocked the triplet's positioning adjustment.</p>
+<p>Example 3B:</p>
+<pre>
+  <b>position</b> L' -100 quoteright' -50 A;
+  <b>position</b> L' -150 quoteright;
+  <b>position</b> quoteright' -120 A;
+  <b>position</b> s f' 10 t period;</pre>
+<p>In order to make pair positioning rules easier to read and write as contextual kern pairs, the feature file syntax will identify a special case of contextual rule which contains only one marked glyph or glyph class, followed by one or more unmarked glyph or glyph class, plus a value record. This will be treated as a contextual pair positioning statement, and will be the only one case where a value record may follow an unmarked glyph. Example 3B can thus be written as example 3C. Both examples are exactly equivalent.</p>
+<p>Example 3C:</p>
+<pre>
+  <b>position</b> L' -100 quoteright' -50 A;
+  <b>position</b> L' quoteright -150; # special cases of contextual positioning
+  <b>position</b> quoteright' A -120; # where
+value record follows unmarked glyph,
+
+# making them exactly equivalent to 3B.
+  <b>position</b> s f' t 10 period;
+</pre>
+<p>Note that the following statement (Example 3D) is NOT a pair kerning statement, and would almost always be an error of intent.</p>
+<p>Example 3D:</p>
+<pre>
+  <b>position</b> L' quoteright' -150;</pre>
+<p>This statement does two things that are not desirable in pair kerning statement. First, it decreases the advance width of quoteright, not L. Second, it will move the current glyph pointer forward by 2 glyphs, skipping over the quoteright so that quoteright will not be examined for matching kern rules.</p>
+<p>The FDK syntax will not allow applying positioning lookups of different types in one contextual rule. For example, if you want to position sukun over lam_meem_jeem when followed by alef, and kern lam_meem_jeem with alef in this context, you need to put the mark and kern rules in different lookups.</p>
+<p>Example 4:</p>
+<pre>
+  <b>mark</b> sukun &lt;anchor 0 0&gt;  @TOP_CLASS;
+
+  <b>lookup</b> MARK_POS {
+    <b>position</b> lam_meem_jeem' &lt;anchor 625 1800&gt;  mark @TOP_CLASS alef;
+  } MARK_POS;
+
+  <b>lookup</b> MARK_KERN {
+    <b>position</b> lam_meem_jeem' 5 @TOP_CLASS
+alef;
+  } MARK_KERN;</pre>
+<p>The rule in lookup MARK_POS will position sukun over lam_meem_jeem when followed by alef. The second rule will add 5 to the advance width of lam_meem_jeem when followed by sukun and then by alef.</p>
+<p><a name="6.h.iv"></a>6.h.iv. Specifying Contextual Positioning with in-line cursive positioning rules</p>
+<p>The contextual form of the cursive positioning rule consists of simply adding contextual glyphs or glyph classes before the 'cursive' keyword, and/or after the anchors. The base glyph must be marked as part of the input sequence; the others may or may not be marked.</p>
+<pre>
+  <b>position</b> @BACKTRACK_GLYPHS_FOR_MEEM <b>cursive</b>
+meem.medial' &lt;<b>anchor</b> 500 20&gt; &lt;<b>anchor</b> 0 -20&gt; @LOOKAHEAD_GLYPHS_FOR_MEEM;</pre>
+<p><a name="6.h.v"></a>6.h.v. Specifying Contextual Positioning with in-line mark attachment positioning rules</p>
+<p>For all three forms of the mark attachment rules - Mark-To-Base, Mark-To-Ligature, and Mark-To-Mark - the contextual form of the positioning rules consist of inserting glyph sequences in one or more of three places in the rule: 1) before the initial 'base | ligature | mark' keyword, 2) after the base glyph or glyph class, and 3) after all the anchor-mark class clauses.</p>
+<p>At least one of the mark classes must be marked as part of the input sequence; the other glyphs or glyph classes in the contextual sequence may or may not be marked. There is special treatment of the mark classes. The implementation creates a glyph class which is the input glyph class to which the positioning lookup is applied. Each mark class that is marked as part of the input sequence is added to this glyph class. If the rule has four mark classes, and three are marked as part of the input sequence. the result is a single glyph class in the input sequence which contains the glyphs from the three marked mark classes. The base glyph or glyph class is also always added in the contextual sequence.</p>
+<p>For example:</p>
+<pre>
+  <b>position</b> [T V F] <b>base</b> [a e o u] &lt;<b>anchor</b> 250 450&gt; <b>mark</b> @TOP_MARKS'
+                                  &lt;<b>anchor</b> 250 -10&gt; <b>mark</b> @BOTTOM_MARKS' @VOWELS;</pre>
+<p>This contextual rule will match when the current context matches the 4 item glyph sequence &quot;[T V F] [a e o u] [ top and bottom marks] @VOWELS&quot;. The input sequence has only one item, a glyph class which consists of all the glyphs from the two mark classes.</p>
+<p><a name="6.h.vi"></a><b>6.h.vi. Specifying exceptions to the Chain Pos rule</b></p>
+<p>Exceptions to a chaining contextual positioning rule are expressed by inserting a statement of the following form anywhere before the chaining contextual rule and in the same lookup:</p>
+<pre>
+  <b>ignore position</b> &lt;marked glyph sequence&gt; (, &lt;marked glyph sequence&gt;)*;</pre>
+<p>This rule works in exactly the same was as specifying exceptions to a chaining contextual substitution rule [&sect;<a href="#5.f.ii">5.f.ii</a>].</p>
+<p><a name="6.i"></a><b>6.i. [GPOS LookupType 9] Extension positioning</b></p>
+<p>The &quot;useExtension&quot; keyword specifies creating lookups of this lookup type. See &sect;<a href="#4.e">4.e</a>.</p>
+<p><a name="7"></a><b>7. Ordering of lookups and rules in the feature file</b></p>
+<p><a name="7.a"></a><b>7.a. An OpenType Layout engine's layout algorithm</b></p>
+<p>The following is a reference summary of the algorithm used by an OpenType layout (OTL) engine to perform substitutions and positionings. The important aspect of this for a feature file editor is that each lookup corresponds to one &quot;pass&quot; over the glyph run (see step 4 below). Thus, each lookup has as input the accumulated result of all previous lookups in the LookupList (whether in the same feature or in other features).</p>
+<pre>
+  1. All glyphs in the client's glyph run must belong to the same language system. (Glyph sequence matching may not occur across language systems.)
+
+  --- Do the following first for the GSUB and then for the GPOS: ---
+
+  2.  Assemble all features (including any required feature) for the glyph run's language system.
+
+  3.  Assemble all lookups in these features, in LookupList order, removing any duplicates. (All features and thus all lookups needn't be applied to every glyph in the run.)
+
+  4.  For each lookup:
+
+  5.  For each glyph in the glyph run:
+
+  6.  If the lookup is applied to that glyph and the lookupflag doesn't indicate that that glyph is to be ignored:
+
+  7.  For each subtable in the lookup:
+
+  8.  If the subtable's target context is matched:
+
+  9.  Do the glyph substitution or positioning,
+
+--- OR: ---
+
+If this is a (chain) contextual lookup do the following [(10)-(11)] in the subtable's Subst/PosLookupRecord order:
+
+ 10. For each (sequenceIndex, lookupListIndex) pair:
+
+ 11. Apply lookup[lookupListIndex] at input sequence[sequenceIndex] [steps (7)-(11)]
+
+ 12. Goto the glyph after the input sequence matched in (8)
+     (i.e. skip any remaining subtables in the lookup).</pre>
+<p>The &quot;target context&quot; in step 8 above comprises the input sequence and any backtrack and lookahead sequences.</p>
+<p>The input sequence must be matched entirely within the lookup's &quot;application range&quot; at that glyph (that contiguous subrun of glyphs including and around the current glyph on which the lookup is applied). There is no such restriction on the backtrack and lookahead sequences.</p>
+<p>&quot;Matching&quot; includes matching any glyphs designated to be skipped in the lookup's LookupFlag.</p>
+<p><a name="7.b"></a><b>7.b. Ordering of lookups and subtables</b></p>
+<p>A lookup in the OpenType font will be created from each named lookup block [&sect;<a href="#4.e">4.e</a>] or each run of rules with the same feature, script, language, lookupflag and lookup type attribute.</p>
+<p>Lookups will be created in the GSUB/GPOS table's LookupList in the same order as the corresponding named lookup blocks or runs of rules in the feature file, except for the lookups that comprise the 'aalt' feature. These will always be created before all other features [&sect;<a href="#8.a">8.a</a>].</p>
+<p>A lookup may contain one or more subtables. Subtable breaks may have been inserted by the implementation software due to format restrictions, or they may have been explicitly requested by the editor [&sect;<a href="#4.f">4.f</a>]. In either case, subtables will be created in the same order as the corresponding subtables in the feature file, if the order is relevant to OT layout. If the order is irrelevant, the implementation may choose to order subtables within a lookup in any manner.</p>
+<p>Note that the lookup sharing mechanism (i.e. a &quot;lookup&quot; reference statement that refers to a named lookup block) is implemented simply by referring to the LookupList index of the lookup as many times as needed in the Feature tables.</p>
+<p><a name="7.c"></a><b>7.c. Ordering of rules within a lookup</b></p>
+<p>In the feature file, the ordering of rules within a lookup is important only for chaining contextual substitution and chaining contextual positioning rules. This is because in all other cases of LookupTypes (including ligature substitutions; see section 5.d), the appropriate ordering is automatically deduced, and the implementation sorts the rules accordingly when writing them to the font file.</p>
+<p><a name="8"></a><b>8. Specially handled features</b></p>
+<p><a name="8.a"></a><b>8.a. The all alternates ('aalt') feature</b></p>
+<p>The aalt feature consists of a feature definition block which contains a series of statements in the form:</p>
+<pre>
+     <b>feature</b> &lt;feature tag&gt;;</pre>
+<p>followed by one or more single and alternates substitution rules.</p>
+<p>The feature file parser should create the 'aalt' feature from the feature file definition as follows:</p>
+<ol type="i">
+<li>Considering only features indicated by:<pre>
+  <b>feature</b> &lt;feature tag&gt;;</pre>
+<p>in the 'aalt' specification feature block (see example below), combine all single and alternate substitutions in those features (including single substitutions that appear within a chaining contextual rule) into groups with the first glyph in the group being the target glyph of the substitution. Subsequent elements of the group will be ordered by the order of the relevant rule in the feature file. Duplicate glyphs will be removed.</p>
+<p>The 'aalt' feature block must appear before the feature block of any &lt;feature tag&gt; it references in the above manner. It will also always be created as the first feature in the font (i.e. its lookups will be at the beginning of the GSUB LookupList).</p>
+</li>
+<li>Add any additional single and alternate substitutions in the 'aalt' specification to the groups that were created algorithmically, by step (i). This facility is provided to fine-tune the semantic groups, for instance, if certain glyphs weren't referenced in any of the features indicated in (i) above. This can also be used to override substitutions specified by including other features: for any target glyph, the alternate glyphs specified by this mechanism precede in order any other alternate glyphs.</li>
+<li>If there are only two glyphs in a group, create a single substitution in the 'aalt' feature, with the first glyph being the target glyph and the second glyph being the replacement glyph. If there are more than two glyphs in a group, create an alternate substitution in the 'aalt' feature, with the first glyph being the target glyph and the remaining glyphs being the alternate set. These alternate glyphs will be sorted in the order that the source features are named in the 'aalt' definition, <i>not</i> the order of the feature definitions in the file. Alternates defined explicitly, as in step (ii) above, will precede all others.</li>
+</ol>
+<p><i>The &quot;useExtension&quot; keyword:</i></p>
+<p>The &quot;useExtension&quot; keyword may optionally precede &quot;{&quot; in the feature block syntax. The 'aalt' lookups will be created with the GSUB Extension lookup type if and only if the &quot;useExtension&quot; keyword is used. Note that since the Extension lookup types were added in OpenType specification v1.3, they will not be recognized by all OpenType layout parsers.</p>
+<p><i>Specifying language system:</i></p>
+<p>This feature will be registered under all language systems specified by &quot;languagesystem&quot; statements; see &sect;<a href="#4.b.i">4.b.i</a> above.</p>
+<p>The following are not allowed in the 'aalt' feature definition: &quot;script&quot;, &quot;language&quot;, &quot;lookupflag&quot;, and &quot;subtable&quot; statements; named lookup blocks and lookup reference statements. The 'aalt' lookups will be created with LookupFlag 0.</p>
+<p><i>Examples:</i></p>
+<pre>
+  <b>languagesystem</b> DFLT dflt;
+  <b>languagesystem</b> latn dflt;
+  <b>languagesystem</b> latn TRK;
+  <b>languagesystem</b> cyrl dflt;
+
+  <b>feature</b> aalt {
+     <b>feature</b> salt;
+     <b>feature</b> smcp;
+     <b>substitute</b> d <b>by</b> d.alt;
+  } aalt;
+
+  <b>feature</b> smcp {
+     <b>sub</b> [a-c] <b>by</b> [A.sc-C.sc];
+     <b>sub</b> f i <b>by</b> f_i;     # not considered for aalt
+  } smcp;
+
+  <b>feature</b> salt {
+     <b>sub</b> a <b>from</b> [a.alt1 a.alt2 a.alt3];
+     <b>sub</b> e [c d e]' f <b>by</b> [c.mid d.mid e.mid];
+     <b>sub</b> b <b>by</b> b.alt;
+  } salt;</pre>
+<p>The 'aalt' lookups from the above example will be registered under the default language systems of the 'DFLT', 'latn' and 'cyrl' scripts, and also under the 'latn'/'TRK ' language systems. The 'aalt' created would be the same as if the font editor had specified:</p>
+<pre>
+  <b>feature</b> aalt {
+     <b>sub</b> a <b>from</b> [a.alt1 a.alt2 a.alt3 A.sc];
+     <b>sub</b> b <b>from</b> [b.alt B.sc];
+     <b>sub</b> c <b>from</b> [c.mid C.sc];
+     <b>sub</b> d <b>from</b> [d.alt d.mid];
+     <b>sub</b> e <b>by</b> e.mid;
+  } aalt;</pre>
+<p>The following example will result in the 'aalt' lookups being created with the GSUB Extension lookup type:</p>
+<pre>
+  <b>feature</b> aalt <b>useExtension</b> {
+     <b>feature</b> salt;
+     <b>feature</b> smcp;
+     <b>substitute</b> d <b>by</b> d.alt;
+     # ... other rules
+  } aalt;</pre>
+<p><a name="8.b"></a><b>8.b. The optical size ('size') feature</b></p>
+<p>This feature is unique in that it contains no substitution or positioning rules (the LookupCount field in its Feature table will always be 0).</p>
+<p>The feature's data is accessed instead through the FeatureParams value of its Feature table.</p>
+<p>Thus, the syntax for this feature is different from all other features. The feature block must contain:</p>
+<ul>
+<li>one &quot;parameters&quot; statement</li>
+<li>and zero or more &quot;sizemenuname&quot; statements.</li>
+</ul>
+<p>No other feature file statements, blocks or keywords are permitted. (Comments are allowed.)</p>
+<p>This feature will be created in the GPOS table and will be registered under all language systems specified by &quot;languagesystem&quot; statements (see &sect;<a href="#4.b.i">4.b.i</a> above).</p>
+<p>For example:</p>
+<pre>
+  <b>feature</b> size {
+     <b>parameters</b> 100 # design size (decipoints)
+                 3  # subfamily identifier
+                80  # range start (exclusive, decipoints)
+               139; # range end (inclusive, decipoints)
+     <b>sizemenuname</b> &quot;Win MinionPro Size Name&quot;;
+     <b>sizemenuname</b> 1 &quot;Mac MinionPro Size Name&quot;;
+     <b>sizemenuname</b> 1 21 0 &quot;Mac MinionPro Size Name&quot;;
+  } size;</pre>
+<p>See the OpenType feature tag registry for a description of the &quot;parameters&quot; statement fields. &quot; decipoints&quot; is a unit of 1/10 of a point.</p>
+<p>These values may also be specified more directly as decimal point values, but a decimal point and following value is then required. For example, &quot;8.0&quot; and &quot;80&quot; will both result in the same value being stored in the font.</p>
+<p>The parameter &quot;sizemenuname&quot; provides the menu name to be used for a group of fonts with the same subfamily identifier.</p>
+<p>If the font is part of such a group, then the &quot;sizemenuname&quot; statement must be provided in order for the members of the group to be grouped together in a sub-menu under the specified menu name.</p>
+<p>In the this case, we strongly recommend providing at least the two entries for Windows and Macintosh platform Roman script name strings. You may also include as any another localized name strings that may be useful.</p>
+<p>If the font is not part of such a group, then the &quot;sizemenuname&quot; statements must be omitted, and all fields but the first (design size) for the parameter statement must be set to 0. This form may be be abbreviated by setting the subfmaily identifer to 0, and omitting the two remaining zeros. For example:</p>
+<pre>
+     <b>parameters</b> 10.0 0; # Indicate intended design size to be 10 pts.
+</pre>
+<p>This can be used to indicate the intended design size for a font, even when it is not part of an optical size group.</p>
+<p>The syntax of the &quot;sizemenuname&quot; statement follows that of the name table name strings, as described in &sect;<a href="#9.e">9.e</a>.</p>
+<p>The names specified by the &quot;sizemenuname&quot; statement are actually stored in the name table, with name ID's starting at the first unused name ID at or after 256.</p>
+
+<p><a name="8.c"></a><b>8.c. Descriptive names for Stylistic Set ('ss01 - ss20') features</b></p>
+<p>As of the OpenType specification 1.6, descriptive names are allowed for stylistic substitution features. These names are specified within a feature block for a Stylistic Set feature. The implementation will store the name strings in the name table, and will create a feature parameter data block which references them.</p>
+<p>A single Stylistic Set feature block may contain more than one descriptive name in order to support different languages. These names are defined within a &quot;featureNames&quot; block that must be inside the stylistic set feature block, and must precede any of the rules in the feature. The syntax for a &quot;featureNames&quot; block is:</p>
+<pre>
+  <b>featureNames</b> {
+     <b>name</b> &lt; platform ID &gt; &lt; script ID &gt; &lt; language ID &gt; &lt; text string &gt; ;
+# This name entry is repeated for every script and language that you want to support.
+  } ;</pre>
+<p>The syntax for the individual name string entries is similar to that of the name table nameID entries (see see &sect;<a href="#9.e">9.e</a>) - the only difference is that the introductory keyword is 'name', and the name ID value is omitted, since the nameID value is auto-generated by the feature compiler.</p>
+<p>Example:</p>
+<pre>
+ <b>feature</b> ss01 {
+    <b>featureNames</b> {
+         <b>name</b> &quot;Feature description for MS Platform, script Unicode, language English&quot;;
+# With no platform ID, script ID, or language ID specified, the implementation assumes (3,1,0x409).
+         <b>name</b> 3 1 0x411 &quot;Feature description for MS Platform, script Unicode, language Japanese&quot;;
+         <b>name</b> 1 &quot;Feature description for Apple Platform, script Roman, language unspecified&quot;;
+# With only the platform ID specified, the implementation assumes script and language = Latin. For Apple this is (1,0,0).
+         <b>name</b> 1 1 12 &quot;Feature description for Apple Platform, script Japanese, language Japanese&quot;;     } ;
+# --- rules for this feature ---
+  } ss01;</pre>
+
+<p><a name="8.d"></a><b>8.d. UI Label names for Character Variant 'cv01 - cv99') features</b></p>
+<p>As of the OpenType specification 1.6, UI label names are allowed for Character Variant features. These names are specified within the feature block for a Character Variant feature. The implementation will store the name strings in the name table, and will create a feature parameter data block which references them.</p>
+<p>A set of NameID entries are specified within a parameter block entry. The parameter block must precede any of the rules in the feature. There are four distinct NameID entry types. The 'ParamUILabelNameID' entry may be omitted or repeated as often as needed. The other NameID types may be omitted, or defined only once. The NameID entries must be specified in the order listed below. A single Character Variant NameID entry may contain more than one name string entry in order to support different languages and platforms.</p>
+
+<P>Following the set of NameID entries, a series of 24 bit Unicode values may be specified. These provide Unicode values for the base glyphs referenced by the feature. The developer may specify none, some, or all of the Unicode values for the base glyphs. The Unicode value may be written with either decimal or hexadecimal notation: the value must be preceded by '0x' if it is a hexadecimal value. The 24 bit field means that the largest Unicode value allowed is ((1<<24) -1), aka, 0xFFFFFF</p>
+
+<p>The intent of the NameID entries is described in the OpenType spec document :
+<a href="https://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#cv01-cv99">OpenType Layout tag registry" section on feature tags, tag name 'cv01' - 'cv99'</a>. Note: The ParamUILabelNameID  entries are used when one base glyph is mapped to more than one variant; the font designer may then specify one ParamUILabelNameID for each variant, in order to uniquely describe that variant. If any ParamUILabelNameID entries are specified, the number of ParamUILabelNameID entries must match the number of variants for each base glyph. If the Character Variant feature specifies more than one base glyph, then the set of NameID entries in the parameter block will be used for each base glyph and its variants.</p>
+
+<p>The syntax for a &quot;cvParameters&quot; block is:</p>
+<pre>
+  <b>cvParameters</b> {
+	  <b>FeatUILabelNameID</b> {
+		 <b>name</b> &lt; platform ID &gt; &lt; script ID &gt; &lt; language ID &gt; &lt; text string &gt; ;
+	  };
+	  <b>FeatUITooltipTextNameID</b> {
+		 <b>name</b> &lt; platform ID &gt; &lt; script ID &gt; &lt; language ID &gt; &lt; text string &gt; ;
+	  };
+	  <b>SampleTextNameID</b> {
+		 <b>name</b> &lt; platform ID &gt; &lt; script ID &gt; &lt; language ID &gt; &lt; text string &gt; ;
+	  };
+	  <b>ParamUILabelNameID</b> {
+		 <b>name</b> &lt; platform ID &gt; &lt; script ID &gt; &lt; language ID &gt; &lt; text string &gt; ;
+	  };
+
+	  <b>Character</b> &lt; Unicode value string &gt; ;
+  };</pre>
+
+<p>The syntax for the individual name string entries within a NameID entry is similar to that of the name table nameID entries (see see &sect;<a href="#9.e">9.e</a>) - the only difference is that the introductory keyword is 'name', and the name ID value is omitted, since the nameID value is auto-generated by the feature compiler.</p>
+<p>Example:</p>
+<pre>
+ <b>feature</b> cv01 {
+
+ <b>cvParameters</b> {
+
+  <b>FeatUILabelNameID</b> {
+		name 3 1 0x0409 "uilabel simple a"; # English US
+		name 1 0 0 "uilabel  simple a"; # Mac English
+  	};
+
+  <b>FeatUITooltipTextNameID</b> {
+		name 3 1 0x0409 "tool tip simple a"; # English US
+		name 1 0 0 "tool tip simple a"; # Mac English
+  	};
+
+  <b>SampleTextNameID</b> {
+		name 3 1 0x0409 "sample text simple a"; # English US
+		name 1 0 0 "sample text simple a"; # Mac English
+  	};
+
+  <b>ParamUILabelNameID</b> {
+		name 3 1 0x0409 "param1 text simple a"; # English US
+		name 1 0 0 "param1 text simple a"; # Mac English
+  	};
+
+  <b>ParamUILabelNameID</b> {
+		name 3 1 0x0409 "param2 text simple a"; # English US
+		name 1 0 0 "param2 text simple a"; # Mac English
+  	};
+
+  <b>Character</b> 10;
+  <b>Character</b> 0x5DDE;
+
+  };
+
+# --- rules for this feature ---
+  } cv01;</pre>
+
+<p><a name="9"></a><b>9. Specifying or overriding table values</b></p>
+<p>In addition to GSUB and GPOS OpenType layout features, the feature file provides for specifying or overriding values in certain other tables. These are specified within the corresponding table block:</p>
+<pre>
+  <b>table</b> &lt;table tag&gt; {
+     # ...
+  } &lt;table tag&gt;;</pre>
+<p>The following table values are currently supported:</p>
+<p><a name="9.a"></a><b>9.a. BASE table</b></p>
+<p>If no BASE table entry is specified in the feature file, no BASE table is created in the OpenType font.</p>
+<pre>
+  <b>table</b> BASE {
+     <b>HorizAxis.BaseTagList</b> &lt;baseline tag&gt;+;
+     <b>HorizAxis.BaseScriptList</b> &lt;script record&gt; (, &lt;script record&gt;)*;
+     <b>HorizAxis.MinMax</b> &lt;minmax&gt;;
+
+     <b>VertAxis.BaseTagList</b> &lt;baseline tag&gt;+;
+     <b>VertAxis.BaseScriptList</b> &lt;script record&gt; (, &lt;script record&gt;)*;
+     <b>VertAxis.MinMax</b> &lt;minmax&gt;;
+  } BASE;</pre>
+<p>A &lt;script record&gt; is of the form:</p>
+<pre>
+  &lt;script tag&gt; &lt;default baseline tag&gt; &lt;base coord&gt;+</pre>
+<p>&lt;base coord&gt; can take several formats: <i>[ Currently only format A is implemented ]</i></p>
+<pre>
+
+&lt;number&gt;
+# format A
+  &lt;number&gt; &lt;glyph&gt;
+&lt;number&gt;
+# format B
+  &lt;number&gt;
+&lt;device&gt;
+# format C</pre>
+<p>The baseline tags for each BaseTagList must be sorted in increasing ASCII order.</p>
+<p>The number of baseline values for a particular script should be the same as the same as the number of baseline tags in the corresponding BaseTagList.</p>
+<p>A &lt;minmax&gt; <i>[ currently not implemented ]</i> is of the form:</p>
+<pre>
+  &lt;script tag&gt; &lt;language tag&gt;   # Defines the language system
+       &lt;base coord&gt;,            # Min value for this language system
+       &lt;base coord&gt;             # Max value for this language system
+       [, &lt;feature tag&gt;         # (Optional) feature tag
+       &lt;base coord&gt;,            # Min value for this feature tag
+       &lt;base coord&gt;]            # Max value for this feature tag
+       ;</pre>
+<p>For example:</p>
+<pre>
+  <b>table</b> BASE {
+     <b>HorizAxis.BaseTagList</b>                  ideo romn;
+     <b>HorizAxis.BaseScriptList</b> latn   romn   -120    0, cyrl   romn   -120    0,
+                              grek   romn   -120    0, hani   ideo   -120    0,
+                              kana   ideo   -120    0, hang   ideo   -120    0;
+  } BASE;</pre>
+<p><a name="9.b"></a><b>9.b. GDEF table</b></p>
+<pre>
+table GDEF {
+     <b>GlyphClassDef</b> &lt;glyphclass&gt;*,    # base glyphs
+                   &lt;glyphclass&gt;*,   # ligature glyphs
+                   &lt;glyphclass&gt;*,    # mark glyphs
+                   &lt;glyphclass&gt;;   # component glyphs
+      <b>Attach</b>       &lt;glyph|glyphclass&gt; &lt;number&gt;+; # &lt;number&gt; is a contour point index
+
+     <b>LigatureCaretbyDev</b> <i>[* Currently not implemented. ]</i>
+     <b>LigatureCaretByPos</b> &lt;glyph|glyphclass&gt; &lt;caret position value&gt;+;
+     <b>LigatureCaretByIndex </b>&lt;glyph|glyphclass&gt; &lt;caret contour point index value&gt;+;
+  } GDEF:</pre>
+<p>The number of &lt;caret value&gt;s specified for a LigatureCaret must be: (number of ligature components) - 1.</p>
+<p>Only one LigatureCaret rule may be specified per glyph, whether it is LigatureCaretByPos or LigatureCaretByIndex.</p>
+<p>Here is an example of a GDEF table block:</p>
+<pre>
+  <b>table</b> GDEF {
+     <b>GlyphClassDef</b> @BASE, @LIGATURES, @MARKS, @COMPONENT;
+     <b>Attach</b> noon.final 5;
+     <b>Attach</b> noon.initial 4;
+     <b>LigatureCaretByPos</b> f_f_l 400 600;
+     <b>LigatureCaretByPos</b> [c_t c_s]  500;
+     <b>LigatureCaretByIndex </b>f_f_i 23 46;
+} GDEF;</pre>
+<p>The four class names in the GlyphClassDef are separated by commas. If you omit a class definition, you must still indicate its position with a comma. By the OpenType spec, any glyph not included in one of the class definition will be assigned glyph class index 0, and will not be included in any of the GlyphClass classes.</p>
+<p>The MarkAttach classes of the GDEF table may not be specified explicitly in feature file syntax. They are instead created by the implementation from use of the &quot;lookupflag MarkAttachmentType &lt;class name&gt;&quot; statements. The class names may be from either regular classes definitions or mark class definitions.</p>
+<p>The MarkGlyphSets classes of the GDEF table may not be specified explicitly in feature file syntax. They are instead created by the implementation from use of the &quot;lookupflag UseMarkFilteringSet &lt;class name&gt;&quot; statements. The class names may be from either regular classes definitions or mark class definitions.</p>
+<p>If any mark class has been defined, or if any of the lookup flags for skipping glyphs of a certain class have been seen, the implementation will check if the GDEF keywords for defining the GlyphClassDefinition has been seen. If not, the implementation will fill them from the substitution and positioning rules, and will create a GDEF table even if there is no GDEF definition in the feature file. The LIGATURE and COMPONENT classes well be filled from the glyphs used in any GSUB Lookup Type 4, Ligature Substitution. The Marks class will be filled from all the glyphs in any of the mark classes used in positioning rules.</p>
+<p><a name="9.c"></a><b>9.c. head table</b></p>
+<p>The head table FontRevision value is used as the overall font version number, and should be incremented whenever any data in the fonts is changed. It is both specified and reported as a decimal number with three significant decimal places. The actual value stored in the font will, however, be a Fixed number (16.16 bit format). Due to the limited precision of this format, the value stored may differ by a small decimal fraction from that specified, but will always round to the same value when rounded to three fractional decimal places.</p>
+<p>This value is also used as the source for the font version string in the name table name string ID 5 &quot;Version&quot;.</p>
+<pre>
+  <b>table</b> head {
+     <b>FontRevision</b> &lt;fixed point number with three fractional decimal places&gt;;
+  } head;</pre>
+<p>Example 1:</p>
+<pre>
+  <b>table</b> head {
+     <b>FontRevision</b> 1.1;
+  } head;</pre>
+<p>This format is supported, but will cause a warning that the specification will be converted to &quot;1.100&quot;. It will be stored in the font as 0x0001199A. A more exact decimal representation would be 1.10000610352, but it will be reported as &quot;1.100&quot;.</p>
+<p>Example 2:</p>
+<pre>
+  <b>table</b> head {
+     <b>FontRevision</b> 1.001;
+  } head;</pre>
+<p>This value be stored in the font as 0x00010042. A more exact decimal representation is 1.001007, but it will be reported as &quot;1.001&quot;.</p>
+<p>Example 3:</p>
+<pre>
+  <b>table</b> head {
+     <b>FontRevision</b> 1.500;
+  } head;</pre>
+<p>This value be stored in the font as 0x00018000, and will be reported as &quot;1.500&quot;. The decimal and Fixed values are equal in this case.</p>
+<p><a name="9.d"></a><b>9.d. hhea table</b></p>
+<pre>
+  <b>table</b> hhea {
+     <b>CaretOffset</b> &lt;metric&gt;;
+     <b>Ascender</b> &lt;metric&gt;;
+     <b>Descender</b> &lt;metric&gt;;
+     <b>LineGap</b> &lt;metric&gt;;
+  } hhea;</pre>
+<p>For example:</p>
+<pre>
+  <b>table</b> hhea {
+     <b>CaretOffset</b> -50;
+     <b>Ascender</b> 800;
+     <b>Descender</b> 200;
+     <b>LineGap</b> 200;
+  } hhea;</pre>
+<p><a name="9.e"></a><b>9.e. name table</b></p>
+<pre>
+  <b>table</b> name {
+     # name records
+  } name;</pre>
+<p>A name record is of the form:</p>
+<pre>
+  <b>nameid</b> &lt;id&gt; [&lt;string attribute&gt;] &lt;string&gt;;</pre>
+<p>An &lt;id&gt; is a number specifying the id of the name string to be added to the name table. Note that ids 2 and 6 (Family, Subfamily, Unique, Full, Version, and FontName) are reserved by the implementation and cannot be overridden; doing so will elicit a warning message and the record will be ignored.</p>
+<p>An optional &lt;string attribute&gt; is one or three space delimited numbers that specify the platform, platform-specific, and language ids to be stored in the name record of the name table. If only one number is specified it represents the platform id. The platform id may be either 1 or 3, corresponding to the Macintosh or Microsoft (hereafter called Windows) platforms, respectively. The other id numbers must be in the range 0-65535 but are not otherwise validated.</p>
+<p>Decimal numbers must begin with a non-0 digit, octal numbers with a 0 digit, and hexadecimal numbers with a 0x prefix to numbers and hexadecimal letters a-f or A-F.</p>
+<p>If some or all of the string attribute id numbers aren't specified their values are defaulted as follows:</p>
+<pre>
+  platform id      3
+(Windows)</pre>
+<p>Windows platform selected:</p>
+<pre>
+  platspec id      1
+(Unicode)
+  language id
+0x0409 (Windows default English)</pre>
+<p>Macintosh platform selected:</p>
+<pre>
+  platspec id      0
+(Roman)
+  language id      0
+(English)</pre>
+<p>Putting this all together gives the following valid nameid formats and the ids that are assigned.</p>
+<pre>
+representation              id  platform id platspec id language id
+--------------------------- --- ----------- ----------- -----------
+nameid I  &lt;string&gt;;         I   3          1           0x0409
+nameid I 3 &lt;string&gt;;        I   3          1           0x0409
+nameid I 3 S L &lt;string&gt;;    I   3          S           L
+nameid I 1 &lt;string&gt;;        I   1          0           0
+nameid I 1 S L &lt;string&gt;;    I   1          S           L</pre>
+<p>A string is composed of 1-byte ASCII characters enclosed by ASCII double quote characters (&quot;). Newlines embedded within the string are removed from the character sequence to be stored.</p>
+<p>Strings are converted to Unicode for the Windows platform by adding a high byte of 0. 2-byte Unicode values for the Windows platform may be specified using a special character sequence of a backslash character (\) followed by exactly four hexadecimal numbers (of either case) which may not all be zero, e.g. \4e2d. The ASCII backslash character must be represented as the sequence \005c or \005C and the ASCII double quote character must be represented as the sequence \0022.</p>
+<p>There is no corresponding conversion to Unicode for the Macintosh platform but character codes in the range 128-255 may be specified using a special character sequence of a backslash character (\) followed by exactly two hexadecimal numbers (of either case) which may not both be zero, e.g. \83 . The ASCII backslash character must be represented as the sequence \5c or \5C and the ASCII double quote character must be represented as the sequence \22.</p>
+<p>Example (add designer's name that includes non-ASCII characters for Mac and Windows platforms):</p>
+<pre>
+  <b>table</b> name {
+     <b>nameid</b> 9 &quot;Joachim M\00fcller-Lanc\00e9&quot;;    # Windows (Unicode)
+     <b>nameid</b> 9 1 &quot;Joachim M\9fller-Lanc\8e&quot;;      # Macintosh (Mac Roman)
+  } name;</pre>
+<p><a name="9.f"></a><b>9.f. OS/2 table</b></p>
+<pre>
+  <b>table</b> OS/2 {
+     <b>FSType</b> &lt;number&gt;;
+     <b>Panose</b> &lt;panose number&gt;;
+     <b>UnicodeRange</b> &lt;Unicode range list&gt;;
+     <b>CodePageRange </b>&lt;code page list&gt;;
+     <b>TypoAscender</b> &lt;metric&gt;;
+     <b>TypoDescender </b>&lt;metric&gt;;
+     <b>TypoLineGap</b> &lt;metric&gt;;
+     <b>winAscent</b> &lt;metric&gt;;
+     <b>winDescent</b> &lt;metric&gt;;
+     <b>XHeight</b> &lt;metric&gt;;
+     <b>CapHeight</b> &lt;metric&gt;;
+     <b>WeightClass</b> &lt;number&gt;;
+     <b>WidthClass</b> &lt;number&gt;;
+     <b>Vendor</b> &lt;string&gt;;
+     <b>LowerOpSize</b> &lt;number&gt;;
+     <b>UpperOpSize</b> &lt;number&gt;;
+  } OS/2;</pre>
+<p>Vendor should 4 character-long. If a shorter vendor id is given, it is automatically padded with spaces. A longer vendor id causes an error.</p>
+
+<p>&lt;panose number&gt; is ten (decimal) numbers separated by white space. For &lt;Unicode range list&gt; is a whitespace-separated list of Unicode bit numbers from the OpenType specification for the ulUnicodeRange1-4 in the OS/2 table. &lt;code page list&gt; is a whitespace-separated list of Windows code page numbers from the OpenType specification for the ulCodePageRange1-2 in the OS/2 table. </p>
+
+<p>LowerOpSize and UpperOpSize set the usLowerOpticalPointSize and usUpperOpticalPointSize fields. If these are set, then the OS/2 version must be set to at least 5 by the implementation. Note that the values for these fields are set in units of TWIPS, or 20 x point size.</p>
+
+<p>Example:</p>
+<pre>
+  <b>table</b> OS/2 {
+     <b>FSType</b> 4;
+     <b>Panose</b> 2 15 0 0 2 2 8 2 9 4;
+     <b>TypoAscender</b> 800;
+     <b>TypoDescender</b> -200; # Note that TypoDescender is negative for descent below the baseline.
+     <b>winAscent</b> 832;
+     <b>winDescent</b> 321; # Note that winDescent is positive for descent below the baseline.
+     <b>UnicodeRange</b> 0   # Basic Latin
+       1   # Latin-1 Supplement
+       9   # Cyrillic
+       55  # CJK Compatibility
+       59  # CJK Unified Ideographs
+       60  # Private Use Area
+       ;
+     <b>CodePageRange</b>  1252    # Latin 1
+     1251    # Cyrillic
+     932     # JIS/Japan
+     ;
+     <b>XHeight</b> 400;
+     <b>CapHeight </b>600;
+     <b>WeightClass </b>800;
+     <b>WidthClass</b> 3;
+     <b>Vendor</b> &quot;ADBE&quot;;
+  } OS/2;</pre>
+<p>Note that for the codepage ranges, the list numbers may be separated by any amount of white space. Note that the terminal semicolon cannot follow a comment character on a line, as all text on a line following the comment character is removed before processing.</p>
+<p><a name="9.g"></a><b>9.g. vhea table</b></p>
+<pre>
+  <b>table</b> vhea {
+     <b>VertTypoAscender</b> &lt;number&gt;;
+     <b>VertTypoDescender</b> &lt;number&gt;;
+     <b>VertTypoLineGap</b> &lt;number&gt;;
+  } vhea;</pre>
+<p>For example:</p>
+<pre>
+  <b>table</b> vhea {
+     <b>VertTypoAscender</b> 500;
+     <b>VertTypoDescender</b> -500;
+     <b>VertTypoLineGap</b> 1000;
+  } vhea;</pre>
+<p><a name="9.h"></a><b>9.h. vmtx table</b></p>
+<p>In OpenType, each glyph may have a unique vertical origin y coordinate and a unique vertical advance width. By default, for each glyph the vertical origin y coordinate is set to the value of the OS/2.TypoAscender field, and the vertical advance width is set to the distance between the values of the of OS/2.TypoAscender and the OS/2.TypoDescender. However, other values may be assigned to a glyph as follows:</p>
+<pre>
+  <b>table</b> vmtx {
+     <b>VertOriginY</b> &lt;glyph&gt; &lt;number1&gt;;
+     <b>VertAdvanceY </b>&lt;glyph&gt; &lt;number2&gt;;
+  } vmtx;</pre>
+<p>This would result in the glyph's vertical origin Y coordinate and the glyph's vertical advance width being set as shown. The value set here for the vertical origin Y coordinate will also set the topSideBearing value in the 'vmtx' table and the vertical origin y value in the 'VORG' table for the named glyph.</p>
+<p>For example:</p>
+<pre>
+  <b>table</b> vmtx {
+     <b>VertOriginY</b> \711  864;
+     <b>VertOriginY</b> \712  867;
+     <b>VertOriginY</b> \713  866;
+  } vmtx;</pre>
+<p>A special case for the vertical advance width is the set of glyphs referenced by the 'vrt2' feature. The default vertical advance for these glyphs is the horizontal advance of their corresponding target (upright) glyphs. These values will also be overridden by VertAdvanceY values.</p>
+<p><a name="10"></a><b>10. Specifying anonymous data blocks</b></p>
+<p>The feature file can contain &quot;anonymous&quot; tagged blocks of data that must be passed back to the client of the implementation software. These blocks of data typically contain information needed to specify custom or unsupported tables. The parser will not attempt to parse the data. Each such block is specified as follows:</p>
+<pre>
+  <b>anonymous</b> &lt;tag&gt; {
+     # ...
+  } &lt;tag&gt;;</pre>
+<p class="note"><b>Note:</b> the keyword &quot;anonymous&quot; can be abbreviated as &quot;anon&quot;. For example:</p>
+<pre>
+  <b>anon</b> sbit {
+     /* sbit table specifications */
+     72  % dpi
+     sizes {
+        10, 12, 14 source {
+           all &quot;Generic/JGeneric&quot;
+        }
+     }
+  } sbit;</pre>
+<p>The closing brace, tag, and semicolon must all be on the same line to indicate the end of the anonymous block to the parser. White space may be used between tokens on this line, and a comment may follow the semicolon. The &quot;include&quot; directive will not be recognized within the block, starting from &quot;anonymous&quot; and ending at the end of the closing line, so the entire block must exist within the same file.</p>
+<p>The data that is passed back to the client starts at the beginning of the line after the opening brace and ends at (and includes) the newline before the closing brace. In the example above, the client is passed back the following data:</p>
+<pre>
+  /* sbit table specifications */
+  72  % dpi
+  sizes {
+     10, 12, 14 source {
+        all &quot;Generic/JGeneric&quot;
+     }
+  }</pre>
+<p>along with the tag 'sbit'.</p>
+<p><a name="11"></a><b>11. Document revisions</b></p>
+<p><b>v1.22 [20 July 2018]:</b></p>
+<ul>
+<li>Removed the restriction that 'DFLT' script is allowed to have only the 'dflt' language. This now matches the changes made in version 1.8.2 of the OpenType spec.</li>
+<li>Removed the restriction that all mark-to-base and mark-to-mark statements in a lookup must reference the same set of mark glyph classes.
+</li>
+</ul>
+<p><b>v1.21.1 [24 Jun 2018]:</b></p>
+<ul>
+<li>Minor updates to TOC.</li>
+<li>Fixed typos.</li>
+<li>Updated link to OpenType specification.</li>
+</ul>
+<p><b>v1.21 [7 Nov 2017]:</b></p>
+<ul>
+<li>Updated Pair Pos Format A: It is now supported. Corrected syntax of example. See <a href="#6.b.i">class pair kerning</a>.</li>
+<li>Updated description of the <b>UseMarkFilteringSet</b> lookup flag. It is now widely supported. See <a href="#4.d">lookupflag</a>.</li>
+<li>Relaxed limitations on name table name ids: only 2 and 6 are now reserved. See <a href="##9.e">name table</a>.</li>
+</ul>
+<p><b>v1.20 [6 Feb 2017]:</b></p>
+<ul>
+<li>Updated glyph name rules in section <a href="#2.f.i">2.f.i glyph name</a> to allow additional characters for development names.</li>
+</ul>
+<p><b>v1.19 [26 April 2016]:</b></p>
+<ul>
+<li>Corrected statement about assigning glyphs to GDEF mark GlyphClass in section <a href="#4.f">4.f markClass</a></li>
+<li>Added statement about single vs enum kern pair priorities when kern pair position rules conflict: see section <a href="#6.b.ii">6.b.ii Enumerating pairs</a>.</li>
+<li>Fixed missing angle brackets in ValueRecordDef example.</li>
+<li>Clarified that langsys rules cannot be used in standalone lookups.</li>
+<li>Clarified 'ignore sub' syntax.</li>
+<li>Clarified keyword scoping rules.</li>
+<li>Clarified that a glyph can have only either one position or index caret  rule, as well as one device caret position rule. in the GDEF table, and fixed example.</li>
+</ul>
+<p><b>v1.18 [16 Mar 2016]:</b></p>
+<ul>
+<li>Clarified use of commas in ignore statement.</li>
+<li>Fixed spelling errors: example at end of section 9.e name table, example 1 in section 5.f.ii ignore sub.</li>
+<li>Increased maximum length of glyph names and named glyph classes from 31 to 63.</li>
+</ul>
+<p><b>v1.17 [ 6 Jan 2016]:</b></p>
+<ul>
+<li>Fixed bug in example for salt feature in section 8.a, and in example for contextual lookup specification in section 6.h.ii.</li>
+</ul>
+<p><b>v1.16 [ 9 Dec 2015]:</b></p>
+<ul>
+<li>For value record format A, specify that the single value represents a Y advance change for vpal, vhal, and valt features, as well as vkern.</li>
+</ul>
+<p><b>v1.15 [ 12 June 2015]:</b></p>
+<ul>
+<li>Added documentation for Character Variant (cv01-cv99) features.</li>
+</ul>
+<p><b>v1.14 [ 16 April 2015]:</b></p>
+<ul>
+<li>Fix typo in GDEF table table spec, reported by Khaled Hosny</li>
+</ul>
+<p><b>v1.13 [ 28 July 2014]:</b></p>
+<ul>
+<li>Clarified that the subtable break keyword is intended for use only with class kerning lookups.</li>
+<li>Corrected lookup flag syntax description: lookupflag values are separated by a space character, not a comma.</li>
+</ul>
+<p><b>v1.12 [ 21 March 2014]:</b></p>
+<ul>
+<li>Clarified that specific glyph pairs should precede class kern pairs, in section 6.b.i</li>
+<li>Removed excessive white space in section 4.d. lookupflag.</li>
+<li> Added two new keywords to set the OS/2 table fields usLowerOpticalPointSize and usUpperOpticalPointSize. These fields were added in version 5 of the OS/2 table.</li>
+</ul>
+<p><b>v1.11 [ 4 Sept 2012]:</b></p>
+<ul>
+<li>Added clarification of backtrack sequence order in chaining contextual lookup rules.</li>
+</ul>
+<p><b>v1.10 [ 31 March 2010]:</b></p>
+<ul>
+<li>Fixed typo in example in section 4.d: lookFlag values are separated by spaces, not commas.</li>
+<li>Fixed typo in example in section 8.c on stylistic names; examples: quotes around name string need to be matching double quotes.</li>
+<li>Fixed typo in example in section 5.f.i on Chain Sub rules; second line was missing the target glyph &quot;s&quot;.</li>
+</ul>
+<p><b>v1.9 [4 May 2009]:</b></p>
+<ul>
+<li>Fixed minor typo in Anchor statement, clarified that both mark class and regular glyph class names can be used with the lookupflag keyword.</li>
+</ul>
+<p><b>v1.8 [16 Dec 2008]:</b></p>
+<ul>
+<li>Revised syntax for mark attachment lookups and the GDEF table</li>
+<li>Revised syntax for the lookupflag statement.</li>
+<li>Added new syntax for contextual rules</li>
+<li>Revised the description of how language systems work.</li>
+<li>Revised syntax to allow standalone lookups.</li>
+<li>Added syntax for named value records and anchors</li>
+<li>Added syntax for descriptive names for stylistic substitution features</li>
+</ul>
+<p><b>v1.7 [25 Oct 2006]:</b></p>
+<ul>
+<li>Fixed incorrect sign for winAscent keyword</li>
+<li>Extended discussion of DFLT script tag and useExtension keyword.</li>
+<li>Fixed minor typos.</li>
+</ul>
+<p><b>v1.6 [28 March 2006]:</b></p>
+<ul>
+<li>Added discussion of contextual chaining positioning, and how it is supported.</li>
+<li>Extended discussion of size feature</li>
+<li>Fixed minor typos.</li>
+</ul>
+<p><b>v1.5 [23 November 2005]:</b></p>
+<ul>
+<li>Expanded discussion of languagesystem, script, and language keywords to describe newly added support for DFLT script, and correctly describe handling of 'dflt' lookups.</li>
+<li>Added OS/2 keywords winAscent, winDescent, and hhea keywords Ascender,Descender, and LineGap</li>
+<li>Added supported size table values as decimal fractions as well as decipoints, e.g &quot;10.0&quot; as well as &quot;100&quot; for a point size of 10.</li>
+<li>Added supported OS/2 keyword &quot;fsType&quot; as well as &quot;FSType&quot;.</li>
+<li>in GPOS positioning statements, allow single value for value record in a all positioning statements; the case of all but pair positioning statements, this stands for a change to the x-advance of the preceding glyph name.</li>
+</ul>
+<p><b>v1.4 [23 January 2003; supported by HOT library v01.00.36]:</b></p>
+<ul>
+<li>Added new vmtx table overrides, in order to permit setting vertical metrics for pre-rotated proportional glyphs that are specifically designed and are not simply rotated forms of proportional glyphs.</li>
+<li><p>Added new OS/2 overrides to set the Unicode and Windows code page range fields:</p>
+<ul>
+<li>UnicodeRange</li>
+<li>CodePageRange</li>
+</ul>
+</li>
+<li>Updated language keywords to be consistent with OpenType spec, i.e using &quot;dflt&quot; instead of &quot;DFLT&quot;. Expanded section explaining use of language and script default keywords. Old keywords still work, but cause a warning to be emitted.</li>
+</ul>
+<p><b>v1.3 [23 May 2002]:</b></p>
+<ul>
+<li>Added support for Vendor tag in OS/2 table</li>
+</ul>
+<p><b>v1.2 [7 March 2001; HOT library v01.00.29]:</b></p>
+<ul>
+<li>Replaced &quot;except&quot; clause by separate &quot;ignore substitute&quot; or &quot;ignore position&quot; statement; e.g. from &quot;except a @LET sub a by a.end;&quot; to &quot;do not sub a @LET; sub a' by a.end;&quot;. (Note that the second rule is now required to be marked to identify it as a Chain Sub and not a Single Sub rule.) &quot;except&quot; clauses will still be handled correctly, but a message will be emitted encouraging users to update the syntax.</li>
+</ul>
+<p>(This change was made since the &quot;except&quot; syntax was misleading in that it implied that the exception sequences were exceptions only to the rule at that same statement, whereas in fact they are exceptions to all subsequent rules until the end of the lookup.)</p>
+<ul>
+<li>Value record, anchor, device, contour point, and caret values: changed to a consistent syntax that removes ambiguities and is more human-readable. (They are now enclosed within angle brackets; the &quot;anchor&quot;, &quot;contourpoint&quot;, and &quot;caret&quot; keywords are introduced; commas now separate device ppem/number pairs from each other.)</li>
+</ul>
+<p class="note"><b>Note:</b> Of the above changes, only value record format B in a Single Pos statement is actually implemented. For example, &quot;pos a 80 0 -160 0;&quot; was changed to &quot;pos a &lt;80 0 -160 0&gt;;&quot;. Previous syntax will still be handled correctly, but a message will be emitted encouraging users to update the syntax.</p>
+<ul>
+<li>Value records and anchors in GPOS rules (except for the AFM-style Pair Pos format) now immediately follow the glyphs they correspond to; no commas are needed. GDEF LigatureCaret statement: removed commas between caret values. (Implementation not affected, since these sections were implemented.)</li>
+<li>Added ability to handle Single Sub rules with a single replacement glyph for 2 or more glyphs in the target glyph class; e.g. &quot;sub [one.fitted one.oldstyle one.tab.oldstyle] by one&quot;.</li>
+<li>Added support for named lookupflag attributes e.g. &quot;lookupflag IgnoreLigatures;&quot;.</li>
+<li>Updated the OT layout algorithm pseudo-code.</li>
+<li>Clarified that a pair positioning rule is treated as a class pair if and only if at least one glyph class is present, even if that class is a singleton glyph class.</li>
+</ul>
+<p><b>v1.1 [1 December 2000; HOT library v01.00.28]:</b></p>
+<ul>
+<li>Added support for &quot;languagesystem&quot; statement. Note that this entailed removing support for script, language, and named lookup blocks/statements in the 'size' feature, and removing support for script and language statements in the 'aalt' feature.</li>
+<li>Added implementation note at end of Syntax: Glyph Classes section.</li>
+<li>Updated OTL engine algorithm and lookup ordering section.</li>
+<li>Specified that the 'vmtx' table overrides are recorded in the 'VORG' table as well.</li>
+</ul>
+<p><b>v1.0 [29 September 2000; HOT library v01.00.24]:</b></p>
+<ul>
+<li>Added useExtension keyword support for lookup blocks and the 'aalt' feature block.</li>
+</ul>
+<p><b>v0.9 [25 April 2000; HOT library v01.00.23]:</b></p>
+<ul>
+<li>Added vmtx table keyword VertOriginY.</li>
+<li>Changed description of 'aalt' feature to describe sorting of alternate glyphs.</li>
+<li>Added description of head.fontRevision setting and reporting.</li>
+<li>Changed syntax for feature parameters.</li>
+</ul>
+<p><b>v0.8 [24 February 2000; HOT library v01.00.23]:</b></p>
+<ul>
+<li>Added syntax for feature parameters.</li>
+<li>Various miscellaneous description changes.</li>
+</ul>
+<p><b>v0.7 [11 October 1999; HOT library v01.00.22]:</b></p>
+<ul>
+<li>Added grammar for completely specifying GSUB, GPOS, BASE and GDEF: full-fledged value records, device tables, anchors, required features, GPOS LookupTypes 3-6 and 8, generalized GSUB LookupType 6, subtable breaks. Indicated all parts not currently supported in [brackets].</li>
+<li>'aalt' creation: specified that 'aalt' will be created after all other features; special script rules.</li>
+<li>Added OS/2.FSType, WeightClass and WidthClass overrides.</li>
+</ul>
+<p><b>v0.6 [22 March 1999; HOT library v119]:</b></p>
+<ul>
+<li>Added subtable keyword.</li>
+</ul>
+<p><b>v0.5 [29 January 1999]:</b></p>
+<ul>
+<li>Added name table overrides.</li>
+</ul>
+<p><b>v0.4 [20 January 1999]:</b></p>
+<ul>
+<li>HTML-formatted the document</li>
+<li>Updated glyph name attributes</li>
+<li>MM metrics can be represented by a single number if constant across masters</li>
+<li>OS/2.XHeight,CapHeight,TypoLineGap overrides</li>
+<li>hhea.CaretOffset override</li>
+<li>vhea.VertTypoAscender,VertTypoDescender,VertTypoLineGap overrides</li>
+</ul>
+<p><b>v0.3 [9 October 1998]:</b></p>
+<ul>
+<li>Revised 'aalt' creation algorithm.</li>
+<li>Revised table field override support: OS/2.Panose, OS/2.TypoAscender, OS/2.TypoDescender, head.FontRevision.</li>
+<li>Added chaining contextual substitutions.</li>
+<li>Added support for anonymous data blocks.</li>
+<li>Changed glyph class expansion rules.</li>
+</ul>
+<p><b>v0.2 [18 March 1998]:</b></p>
+<ul>
+<li>Changed keyword &quot;replace&quot; to &quot;substitute&quot; (or &quot;sub&quot;); introduced keyword &quot;position&quot; (or &quot;pos&quot;).</li>
+<li>Added section on ordering of lookups and rules</li>
+<li>Added lookupflag attribute.</li>
+<li>Expanded Syntax section: lists of keywords, special characters, and glyph name, glyph class name and lookup label name restrictions.</li>
+</ul>
+<p><b>v0.1 [6 February 1998]: First version</b></p>
+    </body>
+</html>

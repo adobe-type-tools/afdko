@@ -1,0 +1,5 @@
+table GDEF {
+    GlyphClassDef , [f_f_i], , ;
+    LigatureCaretByPos f_f_i 315 625;
+    LigatureCaretByPos f_f_i 312 622;
+} GDEF;

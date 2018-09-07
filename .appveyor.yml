@@ -1,52 +1,81 @@
+image: Visual Studio 2017
+
 environment:
-  TWINE_USERNAME: "afdko-travis"
-  TWINE_PASSWORD:
-    secure: myMd6E3niwjGvxEHeChOlg==
+  global:
+    CIBW_SKIP: cp33-* cp34-* cp35-* cp37-* *-win_amd64
+    CIBW_TEST_REQUIRES: pytest-cov==2.5.1 codecov subprocess32
+    CIBW_TEST_COMMAND: cd {project} && pytest --cov -v && coverage combine && codecov && pip uninstall --yes afdko
+    TWINE_USERNAME: afdko-travis
+    # Note: TWINE_PASSWORD is set in AppVeyor settings
 
-  matrix:
-    - PYTHON_HOME: "C:\\Python27-x64"
-    - PYTHON_HOME: "C:\\Python27"
+matrix:
+  fast_finish: true
 
+# Do not build feature branch with open Pull Requests
+skip_branch_with_pr: true
+
+# scripts that run after cloning repository
 install:
-  - set "PATH=%PYTHON_HOME%;%PYTHON_HOME%\\Scripts;%PATH%"
-  # - python --version
-  # - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
-  - python -m pip install -U -r requirements-dev.txt
-  - python -m pip install pytest
-  - python setup.py bdist_wheel
-  - for %%f in (dist\*.whl) do (set "WHEEL=%%f")
-  - python -m pip install -U --force-reinstall %WHEEL%
+  - pip install flake8 cpplint
 
-build: false
+# scripts to run before build
+before_build:
+  - flake8 setup.py
+  - flake8 tests\*.py
+  - flake8 python\afdko\buildcff2vf.py
+  - flake8 python\afdko\buildmasterotfs.py
+  - flake8 python\afdko\checkoutlinesufo.py
+  - flake8 python\afdko\convertfonttocid.py
+  - flake8 python\afdko\fdkutils.py
+  - flake8 python\afdko\makeinstancesufo.py
+  - flake8 python\afdko\makeotf.py
+  - flake8 python\afdko\otfpdf.py
+  - flake8 python\afdko\pdfmetrics.py
+  - flake8 python\afdko\ttfcomponentizer.py
+  - flake8 python\afdko\ttxn.py
+  - flake8 python\afdko\ufotools.py
+  - cpplint --recursive --quiet c\autohint
+  - cpplint --recursive --quiet c\detype1
+  - cpplint --recursive --quiet c\makeotf\makeotf_lib\source
+  - cpplint --recursive --quiet c\makeotf\makeotf_lib\api
+  - cpplint --recursive --quiet c\makeotf\makeotf_lib\resource
+  - cpplint --recursive --quiet c\makeotf\source
+  - cpplint --recursive --quiet c\mergefonts
+  - cpplint --recursive --quiet c\public
+  - cpplint --recursive --quiet c\rotatefont
+  - cpplint --recursive --quiet c\sfntdiff
+  - cpplint --recursive --quiet c\sfntedit
+  - cpplint --recursive --quiet c\spot
+  - cpplint --recursive --quiet c\tx
+  - cpplint --recursive --quiet c\type1
 
-test_script:
-  - python -m pytest -v
-  - python -m pip uninstall --yes afdko
+# to run your custom scripts instead of automatic MSBuild
+build_script:
+  # our setup.py requires 'wheel', which may not be already installed
+  - pip install git+https://github.com/adobe-type-tools/cibuildwheel wheel
+  - cibuildwheel --output-dir wheelhouse
 
 artifacts:
   # archive the generated packages in the ci.appveyor.com build report
-  - path: dist\*.whl
-    name: release_wheel
+  - path: wheelhouse\*.whl
+    name: Wheels
 
-# Deploy wheel on tags to PyPI
 on_success:
+  # deploy wheels to PyPI on tags
   - ps: >-
-      if($env:APPVEYOR_REPO_TAG -eq 'true') {
+      if ($env:APPVEYOR_REPO_TAG -eq "true") {
         Write-Output ("Deploying " + $env:APPVEYOR_REPO_TAG_NAME + " to PyPI...")
-        pip install --upgrade twine
-        twine upload dist\*.whl
-      } else {
-        Write-Output "Not deploying as this is not a tagged commit"
+        python -m pip install twine
+        python -m twine upload wheelhouse/*.whl
       }
 
-# Deploy wheel on tags to GitHub
 deploy:
+  # deploy wheels to GitHub on tags
   provider: GitHub
   auth_token:
     secure: UyKfsObr/shlpP+0U5Zb3EPvmXt0kyKYu940CFNFdNZ8J7Fu54k415R0UNP78t0j
-  artifact: release_wheel
+  artifact: Wheels
   draft: false
-  prerelease: false
+  prerelease: true
   on:
-    branch: $(APPVEYOR_REPO_TAG_NAME)
     appveyor_repo_tag: true

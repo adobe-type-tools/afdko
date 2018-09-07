@@ -1,0 +1,8 @@
+
+# file with commented out FEA code
+
+# include(vert1.fea);
+
+# feature vert {
+#   sub \1125 by \1126;
+# } vert;

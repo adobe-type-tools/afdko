@@ -1,0 +1,18 @@
+languagesystem DFLT dflt;
+
+# Latin:
+
+
+#--------------------------------------
+feature aalt { # Access All Alternates
+    feature test;
+} aalt;
+
+
+
+#--------------------------------------
+feature test {
+    sub A by T;
+} test;
+
+

@@ -1,0 +1,143 @@
+[MasterSet_Kanji-w0.00]
+	f=CJKVar
+	s=w0.00
+
+[MasterSet_Kanji-w239.00]
+	f=CJKVar
+	s=w239.00
+
+[MasterSet_Kanji-w240.00]
+	f=CJKVar
+	s=w240.00
+
+[MasterSet_Kanji-w439.00]
+	f=CJKVar
+	s=w439.00
+
+[MasterSet_Kanji-w440.00]
+	f=CJKVar
+	s=w440.00
+
+[MasterSet_Kanji-w499.00]
+	f=CJKVar
+	s=w499.00
+
+[MasterSet_Kanji-w500.00]
+	f=CJKVar
+	s=w500.00
+
+[MasterSet_Kanji-w599.00]
+	f=CJKVar
+	s=w599.00
+
+[MasterSet_Kanji-w600.00]
+	f=CJKVar
+	s=w600.00
+
+[MasterSet_Kanji-w669.00]
+	f=CJKVar
+	s=w669.00
+
+[MasterSet_Kanji-w670.00]
+	f=CJKVar
+	s=w670.00
+
+[MasterSet_Kanji-w699.00]
+	f=CJKVar
+	s=w699.00
+
+[MasterSet_Kanji-w700.00]
+	f=CJKVar
+	s=w700.00
+
+[MasterSet_Kanji-w799.00]
+	f=CJKVar
+	s=w799.00
+
+[MasterSet_Kanji-w800.00]
+	f=CJKVar
+	s=w800.00
+
+[MasterSet_Kanji-w889.00]
+	f=CJKVar
+	s=w889.00
+
+[MasterSet_Kanji-w890.00]
+	f=CJKVar
+	s=w890.00
+
+[MasterSet_Kanji-w1000.00]
+	f=CJKVar
+	s=w1000.00
+
+[MasterSet_Kanji_75-w0.00]
+	f=CJKVarCond
+	s=w0.00
+
+[MasterSet_Kanji_75-w239.00]
+	f=CJKVarCond
+	s=w239.00
+
+[MasterSet_Kanji_75-w240.00]
+	f=CJKVarCond
+	s=w240.00
+
+[MasterSet_Kanji_75-w439.00]
+	f=CJKVarCond
+	s=w439.00
+
+[MasterSet_Kanji_75-w440.00]
+	f=CJKVarCond
+	s=w440.00
+
+[MasterSet_Kanji_75-w499.00]
+	f=CJKVarCond
+	s=w499.00
+
+[MasterSet_Kanji_75-w500.00]
+	f=CJKVarCond
+	s=w500.00
+
+[MasterSet_Kanji_75-w599.00]
+	f=CJKVarCond
+	s=w599.00
+
+[MasterSet_Kanji_75-w600.00]
+	f=CJKVarCond
+	s=w600.00
+
+[MasterSet_Kanji_75-w669.00]
+	f=CJKVarCond
+	s=w669.00
+
+[MasterSet_Kanji_75-w670.00]
+	f=CJKVarCond
+	s=w670.00
+
+[MasterSet_Kanji_75-w699.00]
+	f=CJKVarCond
+	s=w699.00
+
+[MasterSet_Kanji_75-w700.00]
+	f=CJKVarCond
+	s=w700.00
+
+[MasterSet_Kanji_75-w799.00]
+	f=CJKVarCond
+	s=w799.00
+
+[MasterSet_Kanji_75-w800.00]
+	f=CJKVarCond
+	s=w800.00
+
+[MasterSet_Kanji_75-w889.00]
+	f=CJKVarCond
+	s=w889.00
+
+[MasterSet_Kanji_75-w890.00]
+	f=CJKVarCond
+	s=w890.00
+
+[MasterSet_Kanji_75-w1000.00]
+	f=CJKVarCond
+	s=w1000.00

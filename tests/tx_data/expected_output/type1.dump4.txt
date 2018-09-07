@@ -1,0 +1,6 @@
+## glyph[tag] {name,encoding}
+glyph[0] {.notdef,-}
+glyph[1] {a,0x61}
+glyph[2] {space,0x20}
+glyph[3] {zerowidth,-}
+glyph[4] {negative,-}

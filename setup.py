@@ -1,16 +1,17 @@
+import distutils.command.build_scripts
 import io
 import os
 import platform
 import subprocess
 import sys
-from distutils.util import get_platform
-import distutils.command.build_scripts
-from distutils.dep_util import newer
 from distutils import log
+from distutils.dep_util import newer
 from distutils.util import convert_path
+from distutils.util import get_platform
+
 import setuptools.command.build_py
 import setuptools.command.install
-from setuptools import setup, find_packages
+from setuptools import setup
 
 """
 We need a customized version of the 'bdist_wheel' command, because otherwise
@@ -21,15 +22,13 @@ data files.
 try:
     from wheel.bdist_wheel import bdist_wheel
 
-    # noinspection PyClassicStyleClass,PyAttributeOutsideInit
     class CustomBDistWheel(bdist_wheel):
         def finalize_options(self):
-            # noinspection PyArgumentList
             bdist_wheel.finalize_options(self)
             self.root_is_pure = False
 except ImportError:
-    print("setup requires that the Python package 'wheel' be installed. "
-          "Try the command 'pip install wheel'.")
+    print("afdko: setup.py requires that the Python package 'wheel' be "
+          "installed. Try the command 'pip install wheel'.")
     sys.exit(1)
 
 
@@ -65,31 +64,30 @@ def get_executable_dir():
         bin_dir = "osx"
     else:
         raise KeyError(
-            "Do not recognize target OS: {}".format(platform_system))
+            "afdko: Do not recognize target OS: {}".format(platform_system))
     return bin_dir
 
 
 def compile_package(pkg_dir):
     bin_dir = get_executable_dir()
-    programs_dir = os.path.join(pkg_dir, "Tools", "Programs")
+    programs_dir = 'c'
     cmd = None
     if bin_dir == 'osx':
-        cmd = "sh BuildAll.sh"
+        cmd = "sh buildall.sh"
     elif bin_dir == 'win':
-        cmd = "BuildAll.cmd"
+        cmd = "buildall.cmd"
     elif bin_dir == 'linux':
-        cmd = "sh BuildAllLinux.sh"
+        cmd = "sh buildalllinux.sh"
     cur_dir = os.getcwd()
-    assert cmd, 'Unable to form build command for this platform.'
+    assert cmd, 'afdko: Unable to form build command for this platform.'
     try:
         subprocess.check_call(cmd, cwd=programs_dir, shell=True)
     except subprocess.CalledProcessError:
-        print('Error executing build command.')
+        print('afdko: Error executing build command.')
         sys.exit(1)
     os.chdir(cur_dir)
 
 
-# noinspection PyClassicStyleClass
 class CustomBuild(setuptools.command.build_py.build_py):
     """Custom build command."""
     def run(self):
@@ -107,7 +105,7 @@ class CustomBuildScripts(distutils.command.build_scripts.build_scripts):
         scripts as python scripts. But all our 'scripts' are native C
         executables, thus the python3 tokenize module fails with SyntaxError
         on them. Here we just skip the if branch where distutils attempts
-        to ajust the shebang.
+        to adjust the shebang.
         """
         self.mkpath(self.build_dir)
         outfiles = []
@@ -118,7 +116,7 @@ class CustomBuildScripts(distutils.command.build_scripts.build_scripts):
             outfiles.append(outfile)
 
             if not self.force and not newer(script, outfile):
-                log.debug("not copying %s (up-to-date)", script)
+                log.debug("afdko: not copying %s (up-to-date)", script)
                 continue
 
             try:
@@ -131,7 +129,7 @@ class CustomBuildScripts(distutils.command.build_scripts.build_scripts):
                 first_line = f.readline()
                 if not first_line:
                     f.close()
-                    self.warn("%s is an empty file (skipping)" % script)
+                    self.warn("afdko: %s is an empty file (skipping)" % script)
                     continue
 
             if f:
@@ -143,9 +141,8 @@ class CustomBuildScripts(distutils.command.build_scripts.build_scripts):
 
 
 def _get_scripts():
-    bin_dir = get_executable_dir()
     script_names = [
-        'autohintexe', 'detype1', 'makeotfexe', 'mergeFonts', 'rotateFont',
+        'autohintexe', 'detype1', 'makeotfexe', 'mergefonts', 'rotatefont',
         'sfntdiff', 'sfntedit', 'spot', 'tx', 'type1'
     ]
     if platform.system() == 'Windows':
@@ -153,7 +150,7 @@ def _get_scripts():
     else:
         extension = ''
 
-    scripts = ['afdko/Tools/{}/{}{}'.format(bin_dir, script_name, extension)
+    scripts = ['c/build_all/{}{}'.format(script_name, extension)
                for script_name in script_names]
     return scripts
 
@@ -161,29 +158,26 @@ def _get_scripts():
 def _get_console_scripts():
     script_entries = [
         ('autohint', 'autohint:main'),
-        ('buildcff2vf', 'buildCFF2VF:run'),
-        ('buildmasterotfs', 'buildMasterOTFs:main'),
-        ('comparefamily', 'CompareFamily:main'),
-        ('checkoutlinesufo', 'CheckOutlinesUFO:main'),
-        ('copycffcharstrings', 'copyCFFCharstrings:run'),
-        ('kerncheck', 'kernCheck:run'),
-        ('makeotf', 'MakeOTF:main'),
-        ('makeinstances', 'makeInstances:main'),
-        ('makeinstancesufo', 'makeInstancesUFO:main'),
+        ('buildcff2vf', 'buildcff2vf:run'),
+        ('buildmasterotfs', 'buildmasterotfs:main'),
+        ('comparefamily', 'comparefamily:main'),
+        ('checkoutlinesufo', 'checkoutlinesufo:main'),
+        ('makeotf', 'makeotf:main'),
+        ('makeinstancesufo', 'makeinstancesufo:main'),
         ('otc2otf', 'otc2otf:main'),
         ('otf2otc', 'otf2otc:main'),
-        ('stemhist', 'StemHist:main'),
+        ('stemhist', 'stemhist:main'),
         ('ttfcomponentizer', 'ttfcomponentizer:main'),
         ('ttxn', 'ttxn:main'),
-        ('charplot', 'ProofPDF:charplot'),
-        ('digiplot', 'ProofPDF:digiplot'),
-        ('fontplot', 'ProofPDF:fontplot'),
-        ('fontplot2', 'ProofPDF:fontplot2'),
-        ('fontsetplot', 'ProofPDF:fontsetplot'),
-        ('hintplot', 'ProofPDF:hintplot'),
-        ('waterfallplot', 'ProofPDF:waterfallplot'),
+        ('charplot', 'proofpdf:charplot'),
+        ('digiplot', 'proofpdf:digiplot'),
+        ('fontplot', 'proofpdf:fontplot'),
+        ('fontplot2', 'proofpdf:fontplot2'),
+        ('fontsetplot', 'proofpdf:fontsetplot'),
+        ('hintplot', 'proofpdf:hintplot'),
+        ('waterfallplot', 'proofpdf:waterfallplot'),
     ]
-    scripts_path = 'afdko.Tools.SharedData.FDKScripts'
+    scripts_path = 'afdko'
     scripts = ['{} = {}.{}'.format(name, scripts_path, entry)
                for name, entry in script_entries]
     return scripts
@@ -195,7 +189,6 @@ def _get_requirements():
 
 
 def main():
-    pkg_list = find_packages(exclude=["Tests"])
     classifiers = [
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
@@ -213,7 +206,7 @@ def main():
         more_keywords = ['Operating System :: POSIX :: Linux']
     else:
         raise KeyError(
-            "Do not recognize target OS: {}".format(platform_system))
+            "afdko: Do not recognize target OS: {}".format(platform_system))
     classifiers.extend(more_keywords)
 
     # concatenate README and NEWS into long_description so they are
@@ -238,8 +231,18 @@ def main():
           classifiers=classifiers,
           keywords='font development tools',
           platforms=[platform_name],
-          packages=pkg_list,
+          package_dir={'': 'python'},
+          packages=['afdko'],
           include_package_data=True,
+          package_data={
+              'afdko': [
+                  'resources/*.txt',
+                  'resources/Adobe-CNS1/*',
+                  'resources/Adobe-GB1/*',
+                  'resources/Adobe-Japan1/*',
+                  'resources/Adobe-Korea1/*'
+              ],
+          },
           zip_safe=False,
           python_requires='>=2.7',
           setup_requires=[
@@ -265,5 +268,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# PyPI deployment test 2018-04-09 15:42

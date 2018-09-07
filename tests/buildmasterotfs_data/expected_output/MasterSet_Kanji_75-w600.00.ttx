@@ -1,0 +1,5017 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont sfntVersion="OTTO" ttLibVersion="3.28">
+
+  <GlyphOrder>
+    <!-- The 'id' attribute is only for humans; it is ignored when parsed. -->
+    <GlyphID id="0" name=".notdef"/>
+    <GlyphID id="1" name="uni610F"/>
+    <GlyphID id="2" name="uni5E9A"/>
+    <GlyphID id="3" name="uni6F09"/>
+    <GlyphID id="4" name="uni2FC5"/>
+    <GlyphID id="5" name="uni661F"/>
+    <GlyphID id="6" name="uni9192"/>
+    <GlyphID id="7" name="uni75B2"/>
+    <GlyphID id="8" name="uni821E"/>
+    <GlyphID id="9" name="uni8513"/>
+    <GlyphID id="10" name="uni60FA"/>
+    <GlyphID id="11" name="uni7329"/>
+    <GlyphID id="12" name="uni8165"/>
+    <GlyphID id="13" name="uni83EB"/>
+    <GlyphID id="14" name="uni83F7"/>
+    <GlyphID id="15" name="uni8541"/>
+    <GlyphID id="16" name="uni8591"/>
+    <GlyphID id="17" name="uni85A8"/>
+    <GlyphID id="18" name="uni87C7"/>
+    <GlyphID id="19" name="uni8E59"/>
+    <GlyphID id="20" name="uni994C"/>
+    <GlyphID id="21" name="uni9A40"/>
+    <GlyphID id="22" name="uni85AF"/>
+    <GlyphID id="23" name="uni64B0"/>
+    <GlyphID id="24" name="u2F884"/>
+    <GlyphID id="25" name="uni85B0"/>
+    <GlyphID id="26" name="uniF9DC"/>
+    <GlyphID id="27" name="uni847A_E0101"/>
+    <GlyphID id="28" name="uni9078_E0101"/>
+    <GlyphID id="29" name="uni6801"/>
+    <GlyphID id="30" name="uni76EC"/>
+    <GlyphID id="31" name="uni7772"/>
+    <GlyphID id="32" name="uni8B54"/>
+    <GlyphID id="33" name="uni911C"/>
+    <GlyphID id="34" name="uni9B03"/>
+    <GlyphID id="35" name="uni6479"/>
+    <GlyphID id="36" name="uni7446"/>
+    <GlyphID id="37" name="uni50CE"/>
+    <GlyphID id="38" name="uni645D"/>
+    <GlyphID id="39" name="uni6692"/>
+    <GlyphID id="40" name="uni6A1A"/>
+    <GlyphID id="41" name="uni6F60"/>
+    <GlyphID id="42" name="uni763C"/>
+    <GlyphID id="43" name="uni82E8"/>
+    <GlyphID id="44" name="uni9409"/>
+    <GlyphID id="45" name="uni7243"/>
+    <GlyphID id="46" name="uni8642"/>
+    <GlyphID id="47" name="uni5675"/>
+    <GlyphID id="48" name="uni714B"/>
+    <GlyphID id="49" name="uni7612"/>
+    <GlyphID id="50" name="uni7714"/>
+    <GlyphID id="51" name="uni8550"/>
+    <GlyphID id="52" name="uni8552"/>
+    <GlyphID id="53" name="uni85A5"/>
+    <GlyphID id="54" name="uni8619"/>
+    <GlyphID id="55" name="uni87E4"/>
+  </GlyphOrder>
+
+  <head>
+    <!-- Most of this table will be recalculated by the compiler -->
+    <tableVersion value="1.0"/>
+    <fontRevision value="1.0"/>
+    <checkSumAdjustment value="0xf0405cf3"/>
+    <magicNumber value="0x5f0f3cf5"/>
+    <flags value="00000000 00000011"/>
+    <unitsPerEm value="1000"/>
+    <created value="Thu Jun 28 00:32:45 2018"/>
+    <modified value="Thu Jun 28 00:32:45 2018"/>
+    <xMin value="6"/>
+    <yMin value="-120"/>
+    <xMax value="741"/>
+    <yMax value="880"/>
+    <macStyle value="00000000 00000000"/>
+    <lowestRecPPEM value="3"/>
+    <fontDirectionHint value="2"/>
+    <indexToLocFormat value="0"/>
+    <glyphDataFormat value="0"/>
+  </head>
+
+  <hhea>
+    <tableVersion value="0x00010000"/>
+    <ascent value="880"/>
+    <descent value="-120"/>
+    <lineGap value="0"/>
+    <advanceWidthMax value="750"/>
+    <minLeftSideBearing value="6"/>
+    <minRightSideBearing value="9"/>
+    <xMaxExtent value="741"/>
+    <caretSlopeRise value="1"/>
+    <caretSlopeRun value="0"/>
+    <caretOffset value="0"/>
+    <reserved0 value="0"/>
+    <reserved1 value="0"/>
+    <reserved2 value="0"/>
+    <reserved3 value="0"/>
+    <metricDataFormat value="0"/>
+    <numberOfHMetrics value="1"/>
+  </hhea>
+
+  <maxp>
+    <tableVersion value="0x5000"/>
+    <numGlyphs value="56"/>
+  </maxp>
+
+  <OS_2>
+    <!-- The fields 'usFirstCharIndex' and 'usLastCharIndex'
+         will be recalculated by the compiler -->
+    <version value="3"/>
+    <xAvgCharWidth value="750"/>
+    <usWeightClass value="700"/>
+    <usWidthClass value="3"/>
+    <fsType value="00000000 00001000"/>
+    <ySubscriptXSize value="650"/>
+    <ySubscriptYSize value="600"/>
+    <ySubscriptXOffset value="0"/>
+    <ySubscriptYOffset value="75"/>
+    <ySuperscriptXSize value="650"/>
+    <ySuperscriptYSize value="600"/>
+    <ySuperscriptXOffset value="0"/>
+    <ySuperscriptYOffset value="350"/>
+    <yStrikeoutSize value="50"/>
+    <yStrikeoutPosition value="228"/>
+    <sFamilyClass value="0"/>
+    <panose>
+      <bFamilyType value="0"/>
+      <bSerifStyle value="0"/>
+      <bWeight value="8"/>
+      <bProportion value="6"/>
+      <bContrast value="0"/>
+      <bStrokeVariation value="0"/>
+      <bArmStyle value="0"/>
+      <bLetterForm value="0"/>
+      <bMidline value="0"/>
+      <bXHeight value="0"/>
+    </panose>
+    <ulUnicodeRange1 value="00000000 00000000 00000000 00000000"/>
+    <ulUnicodeRange2 value="00000010 00000000 00000000 00000000"/>
+    <ulUnicodeRange3 value="00000000 00000000 00000000 00000000"/>
+    <ulUnicodeRange4 value="00000000 00000000 00000000 00000000"/>
+    <achVendID value="ADBE"/>
+    <fsSelection value="00000000 00000000"/>
+    <usFirstCharIndex value="12229"/>
+    <usLastCharIndex value="65535"/>
+    <sTypoAscender value="880"/>
+    <sTypoDescender value="-120"/>
+    <sTypoLineGap value="200"/>
+    <usWinAscent value="880"/>
+    <usWinDescent value="120"/>
+    <ulCodePageRange1 value="00000000 00000000 00000000 00000001"/>
+    <ulCodePageRange2 value="00000000 00000000 00000000 00000000"/>
+    <sxHeight value="380"/>
+    <sCapHeight value="760"/>
+    <usDefaultChar value="0"/>
+    <usBreakChar value="32"/>
+    <usMaxContext value="0"/>
+  </OS_2>
+
+  <name>
+    <namerecord nameID="1" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      CJKVarCond
+    </namerecord>
+    <namerecord nameID="2" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Regular
+    </namerecord>
+    <namerecord nameID="3" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      1.000;ADBE;MasterSet_Kanji_75-w600.00
+    </namerecord>
+    <namerecord nameID="4" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      CJKVarCond
+    </namerecord>
+    <namerecord nameID="5" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Version 1.000;hotconv 1.0.108;makeotfexe 2.5.65593
+    </namerecord>
+    <namerecord nameID="6" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      MasterSet_Kanji_75-w600.00
+    </namerecord>
+    <namerecord nameID="17" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      w600.00
+    </namerecord>
+    <namerecord nameID="0" platformID="3" platEncID="1" langID="0x409">
+      © 2018 Adobe. All Rights Reserved.
+    </namerecord>
+    <namerecord nameID="1" platformID="3" platEncID="1" langID="0x409">
+      CJKVarCond
+    </namerecord>
+    <namerecord nameID="2" platformID="3" platEncID="1" langID="0x409">
+      Regular
+    </namerecord>
+    <namerecord nameID="3" platformID="3" platEncID="1" langID="0x409">
+      1.000;ADBE;MasterSet_Kanji_75-w600.00
+    </namerecord>
+    <namerecord nameID="4" platformID="3" platEncID="1" langID="0x409">
+      CJKVarCond
+    </namerecord>
+    <namerecord nameID="5" platformID="3" platEncID="1" langID="0x409">
+      Version 1.000;hotconv 1.0.108;makeotfexe 2.5.65593
+    </namerecord>
+    <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
+      MasterSet_Kanji_75-w600.00
+    </namerecord>
+    <namerecord nameID="8" platformID="3" platEncID="1" langID="0x409">
+      Adobe
+    </namerecord>
+    <namerecord nameID="9" platformID="3" platEncID="1" langID="0x409">
+      Ryoko Nishizuka
+    </namerecord>
+    <namerecord nameID="11" platformID="3" platEncID="1" langID="0x409">
+      http://www.adobe.com
+    </namerecord>
+    <namerecord nameID="17" platformID="3" platEncID="1" langID="0x409">
+      w600.00
+    </namerecord>
+    <namerecord nameID="19" platformID="3" platEncID="1" langID="0x409">
+      蘙
+    </namerecord>
+    <namerecord nameID="25" platformID="3" platEncID="1" langID="0x409">
+      CJKVar
+    </namerecord>
+  </name>
+
+  <cmap>
+    <tableVersion version="0"/>
+    <cmap_format_4 platformID="0" platEncID="3" language="0">
+      <map code="0x2fc5" name="uni2FC5"/><!-- KANGXI RADICAL DEER -->
+      <map code="0x50ce" name="uni50CE"/><!-- CJK UNIFIED IDEOGRAPH-50CE -->
+      <map code="0x5675" name="uni5675"/><!-- CJK UNIFIED IDEOGRAPH-5675 -->
+      <map code="0x5e9a" name="uni5E9A"/><!-- CJK UNIFIED IDEOGRAPH-5E9A -->
+      <map code="0x60fa" name="uni60FA"/><!-- CJK UNIFIED IDEOGRAPH-60FA -->
+      <map code="0x610f" name="uni610F"/><!-- CJK UNIFIED IDEOGRAPH-610F -->
+      <map code="0x645d" name="uni645D"/><!-- CJK UNIFIED IDEOGRAPH-645D -->
+      <map code="0x6479" name="uni6479"/><!-- CJK UNIFIED IDEOGRAPH-6479 -->
+      <map code="0x64b0" name="uni64B0"/><!-- CJK UNIFIED IDEOGRAPH-64B0 -->
+      <map code="0x661f" name="uni661F"/><!-- CJK UNIFIED IDEOGRAPH-661F -->
+      <map code="0x6692" name="uni6692"/><!-- CJK UNIFIED IDEOGRAPH-6692 -->
+      <map code="0x6801" name="uni6801"/><!-- CJK UNIFIED IDEOGRAPH-6801 -->
+      <map code="0x6a1a" name="uni6A1A"/><!-- CJK UNIFIED IDEOGRAPH-6A1A -->
+      <map code="0x6f09" name="uni6F09"/><!-- CJK UNIFIED IDEOGRAPH-6F09 -->
+      <map code="0x6f60" name="uni6F60"/><!-- CJK UNIFIED IDEOGRAPH-6F60 -->
+      <map code="0x714b" name="uni714B"/><!-- CJK UNIFIED IDEOGRAPH-714B -->
+      <map code="0x7243" name="uni7243"/><!-- CJK UNIFIED IDEOGRAPH-7243 -->
+      <map code="0x7329" name="uni7329"/><!-- CJK UNIFIED IDEOGRAPH-7329 -->
+      <map code="0x7446" name="uni7446"/><!-- CJK UNIFIED IDEOGRAPH-7446 -->
+      <map code="0x75b2" name="uni75B2"/><!-- CJK UNIFIED IDEOGRAPH-75B2 -->
+      <map code="0x7612" name="uni7612"/><!-- CJK UNIFIED IDEOGRAPH-7612 -->
+      <map code="0x763c" name="uni763C"/><!-- CJK UNIFIED IDEOGRAPH-763C -->
+      <map code="0x76ec" name="uni76EC"/><!-- CJK UNIFIED IDEOGRAPH-76EC -->
+      <map code="0x7714" name="uni7714"/><!-- CJK UNIFIED IDEOGRAPH-7714 -->
+      <map code="0x7772" name="uni7772"/><!-- CJK UNIFIED IDEOGRAPH-7772 -->
+      <map code="0x8165" name="uni8165"/><!-- CJK UNIFIED IDEOGRAPH-8165 -->
+      <map code="0x821e" name="uni821E"/><!-- CJK UNIFIED IDEOGRAPH-821E -->
+      <map code="0x82e8" name="uni82E8"/><!-- CJK UNIFIED IDEOGRAPH-82E8 -->
+      <map code="0x83eb" name="uni83EB"/><!-- CJK UNIFIED IDEOGRAPH-83EB -->
+      <map code="0x83f7" name="uni83F7"/><!-- CJK UNIFIED IDEOGRAPH-83F7 -->
+      <map code="0x8513" name="uni8513"/><!-- CJK UNIFIED IDEOGRAPH-8513 -->
+      <map code="0x8541" name="uni8541"/><!-- CJK UNIFIED IDEOGRAPH-8541 -->
+      <map code="0x8550" name="uni8550"/><!-- CJK UNIFIED IDEOGRAPH-8550 -->
+      <map code="0x8552" name="uni8552"/><!-- CJK UNIFIED IDEOGRAPH-8552 -->
+      <map code="0x8591" name="uni8591"/><!-- CJK UNIFIED IDEOGRAPH-8591 -->
+      <map code="0x85a5" name="uni85A5"/><!-- CJK UNIFIED IDEOGRAPH-85A5 -->
+      <map code="0x85a8" name="uni85A8"/><!-- CJK UNIFIED IDEOGRAPH-85A8 -->
+      <map code="0x85af" name="uni85AF"/><!-- CJK UNIFIED IDEOGRAPH-85AF -->
+      <map code="0x85b0" name="uni85B0"/><!-- CJK UNIFIED IDEOGRAPH-85B0 -->
+      <map code="0x8619" name="uni8619"/><!-- CJK UNIFIED IDEOGRAPH-8619 -->
+      <map code="0x8642" name="uni8642"/><!-- CJK UNIFIED IDEOGRAPH-8642 -->
+      <map code="0x87c7" name="uni87C7"/><!-- CJK UNIFIED IDEOGRAPH-87C7 -->
+      <map code="0x87e4" name="uni87E4"/><!-- CJK UNIFIED IDEOGRAPH-87E4 -->
+      <map code="0x8b54" name="uni8B54"/><!-- CJK UNIFIED IDEOGRAPH-8B54 -->
+      <map code="0x8e59" name="uni8E59"/><!-- CJK UNIFIED IDEOGRAPH-8E59 -->
+      <map code="0x911c" name="uni911C"/><!-- CJK UNIFIED IDEOGRAPH-911C -->
+      <map code="0x9192" name="uni9192"/><!-- CJK UNIFIED IDEOGRAPH-9192 -->
+      <map code="0x9409" name="uni9409"/><!-- CJK UNIFIED IDEOGRAPH-9409 -->
+      <map code="0x994c" name="uni994C"/><!-- CJK UNIFIED IDEOGRAPH-994C -->
+      <map code="0x9a40" name="uni9A40"/><!-- CJK UNIFIED IDEOGRAPH-9A40 -->
+      <map code="0x9b03" name="uni9B03"/><!-- CJK UNIFIED IDEOGRAPH-9B03 -->
+      <map code="0xf9dc" name="uniF9DC"/><!-- CJK COMPATIBILITY IDEOGRAPH-F9DC -->
+    </cmap_format_4>
+    <cmap_format_12 platformID="0" platEncID="4" format="12" reserved="0" length="652" language="0" nGroups="53">
+      <map code="0x2fc5" name="uni2FC5"/><!-- KANGXI RADICAL DEER -->
+      <map code="0x50ce" name="uni50CE"/><!-- CJK UNIFIED IDEOGRAPH-50CE -->
+      <map code="0x5675" name="uni5675"/><!-- CJK UNIFIED IDEOGRAPH-5675 -->
+      <map code="0x5e9a" name="uni5E9A"/><!-- CJK UNIFIED IDEOGRAPH-5E9A -->
+      <map code="0x60fa" name="uni60FA"/><!-- CJK UNIFIED IDEOGRAPH-60FA -->
+      <map code="0x610f" name="uni610F"/><!-- CJK UNIFIED IDEOGRAPH-610F -->
+      <map code="0x645d" name="uni645D"/><!-- CJK UNIFIED IDEOGRAPH-645D -->
+      <map code="0x6479" name="uni6479"/><!-- CJK UNIFIED IDEOGRAPH-6479 -->
+      <map code="0x64b0" name="uni64B0"/><!-- CJK UNIFIED IDEOGRAPH-64B0 -->
+      <map code="0x661f" name="uni661F"/><!-- CJK UNIFIED IDEOGRAPH-661F -->
+      <map code="0x6692" name="uni6692"/><!-- CJK UNIFIED IDEOGRAPH-6692 -->
+      <map code="0x6801" name="uni6801"/><!-- CJK UNIFIED IDEOGRAPH-6801 -->
+      <map code="0x6a1a" name="uni6A1A"/><!-- CJK UNIFIED IDEOGRAPH-6A1A -->
+      <map code="0x6f09" name="uni6F09"/><!-- CJK UNIFIED IDEOGRAPH-6F09 -->
+      <map code="0x6f60" name="uni6F60"/><!-- CJK UNIFIED IDEOGRAPH-6F60 -->
+      <map code="0x714b" name="uni714B"/><!-- CJK UNIFIED IDEOGRAPH-714B -->
+      <map code="0x7243" name="uni7243"/><!-- CJK UNIFIED IDEOGRAPH-7243 -->
+      <map code="0x7329" name="uni7329"/><!-- CJK UNIFIED IDEOGRAPH-7329 -->
+      <map code="0x7446" name="uni7446"/><!-- CJK UNIFIED IDEOGRAPH-7446 -->
+      <map code="0x75b2" name="uni75B2"/><!-- CJK UNIFIED IDEOGRAPH-75B2 -->
+      <map code="0x7612" name="uni7612"/><!-- CJK UNIFIED IDEOGRAPH-7612 -->
+      <map code="0x763c" name="uni763C"/><!-- CJK UNIFIED IDEOGRAPH-763C -->
+      <map code="0x76ec" name="uni76EC"/><!-- CJK UNIFIED IDEOGRAPH-76EC -->
+      <map code="0x7714" name="uni7714"/><!-- CJK UNIFIED IDEOGRAPH-7714 -->
+      <map code="0x7772" name="uni7772"/><!-- CJK UNIFIED IDEOGRAPH-7772 -->
+      <map code="0x8165" name="uni8165"/><!-- CJK UNIFIED IDEOGRAPH-8165 -->
+      <map code="0x821e" name="uni821E"/><!-- CJK UNIFIED IDEOGRAPH-821E -->
+      <map code="0x82e8" name="uni82E8"/><!-- CJK UNIFIED IDEOGRAPH-82E8 -->
+      <map code="0x83eb" name="uni83EB"/><!-- CJK UNIFIED IDEOGRAPH-83EB -->
+      <map code="0x83f7" name="uni83F7"/><!-- CJK UNIFIED IDEOGRAPH-83F7 -->
+      <map code="0x8513" name="uni8513"/><!-- CJK UNIFIED IDEOGRAPH-8513 -->
+      <map code="0x8541" name="uni8541"/><!-- CJK UNIFIED IDEOGRAPH-8541 -->
+      <map code="0x8550" name="uni8550"/><!-- CJK UNIFIED IDEOGRAPH-8550 -->
+      <map code="0x8552" name="uni8552"/><!-- CJK UNIFIED IDEOGRAPH-8552 -->
+      <map code="0x8591" name="uni8591"/><!-- CJK UNIFIED IDEOGRAPH-8591 -->
+      <map code="0x85a5" name="uni85A5"/><!-- CJK UNIFIED IDEOGRAPH-85A5 -->
+      <map code="0x85a8" name="uni85A8"/><!-- CJK UNIFIED IDEOGRAPH-85A8 -->
+      <map code="0x85af" name="uni85AF"/><!-- CJK UNIFIED IDEOGRAPH-85AF -->
+      <map code="0x85b0" name="uni85B0"/><!-- CJK UNIFIED IDEOGRAPH-85B0 -->
+      <map code="0x8619" name="uni8619"/><!-- CJK UNIFIED IDEOGRAPH-8619 -->
+      <map code="0x8642" name="uni8642"/><!-- CJK UNIFIED IDEOGRAPH-8642 -->
+      <map code="0x87c7" name="uni87C7"/><!-- CJK UNIFIED IDEOGRAPH-87C7 -->
+      <map code="0x87e4" name="uni87E4"/><!-- CJK UNIFIED IDEOGRAPH-87E4 -->
+      <map code="0x8b54" name="uni8B54"/><!-- CJK UNIFIED IDEOGRAPH-8B54 -->
+      <map code="0x8e59" name="uni8E59"/><!-- CJK UNIFIED IDEOGRAPH-8E59 -->
+      <map code="0x911c" name="uni911C"/><!-- CJK UNIFIED IDEOGRAPH-911C -->
+      <map code="0x9192" name="uni9192"/><!-- CJK UNIFIED IDEOGRAPH-9192 -->
+      <map code="0x9409" name="uni9409"/><!-- CJK UNIFIED IDEOGRAPH-9409 -->
+      <map code="0x994c" name="uni994C"/><!-- CJK UNIFIED IDEOGRAPH-994C -->
+      <map code="0x9a40" name="uni9A40"/><!-- CJK UNIFIED IDEOGRAPH-9A40 -->
+      <map code="0x9b03" name="uni9B03"/><!-- CJK UNIFIED IDEOGRAPH-9B03 -->
+      <map code="0xf9dc" name="uniF9DC"/><!-- CJK COMPATIBILITY IDEOGRAPH-F9DC -->
+      <map code="0x2f884" name="u2F884"/><!-- CJK COMPATIBILITY IDEOGRAPH-2F884 -->
+    </cmap_format_12>
+    <cmap_format_6 platformID="1" platEncID="0" language="0">
+    </cmap_format_6>
+    <cmap_format_4 platformID="3" platEncID="1" language="0">
+      <map code="0x2fc5" name="uni2FC5"/><!-- KANGXI RADICAL DEER -->
+      <map code="0x50ce" name="uni50CE"/><!-- CJK UNIFIED IDEOGRAPH-50CE -->
+      <map code="0x5675" name="uni5675"/><!-- CJK UNIFIED IDEOGRAPH-5675 -->
+      <map code="0x5e9a" name="uni5E9A"/><!-- CJK UNIFIED IDEOGRAPH-5E9A -->
+      <map code="0x60fa" name="uni60FA"/><!-- CJK UNIFIED IDEOGRAPH-60FA -->
+      <map code="0x610f" name="uni610F"/><!-- CJK UNIFIED IDEOGRAPH-610F -->
+      <map code="0x645d" name="uni645D"/><!-- CJK UNIFIED IDEOGRAPH-645D -->
+      <map code="0x6479" name="uni6479"/><!-- CJK UNIFIED IDEOGRAPH-6479 -->
+      <map code="0x64b0" name="uni64B0"/><!-- CJK UNIFIED IDEOGRAPH-64B0 -->
+      <map code="0x661f" name="uni661F"/><!-- CJK UNIFIED IDEOGRAPH-661F -->
+      <map code="0x6692" name="uni6692"/><!-- CJK UNIFIED IDEOGRAPH-6692 -->
+      <map code="0x6801" name="uni6801"/><!-- CJK UNIFIED IDEOGRAPH-6801 -->
+      <map code="0x6a1a" name="uni6A1A"/><!-- CJK UNIFIED IDEOGRAPH-6A1A -->
+      <map code="0x6f09" name="uni6F09"/><!-- CJK UNIFIED IDEOGRAPH-6F09 -->
+      <map code="0x6f60" name="uni6F60"/><!-- CJK UNIFIED IDEOGRAPH-6F60 -->
+      <map code="0x714b" name="uni714B"/><!-- CJK UNIFIED IDEOGRAPH-714B -->
+      <map code="0x7243" name="uni7243"/><!-- CJK UNIFIED IDEOGRAPH-7243 -->
+      <map code="0x7329" name="uni7329"/><!-- CJK UNIFIED IDEOGRAPH-7329 -->
+      <map code="0x7446" name="uni7446"/><!-- CJK UNIFIED IDEOGRAPH-7446 -->
+      <map code="0x75b2" name="uni75B2"/><!-- CJK UNIFIED IDEOGRAPH-75B2 -->
+      <map code="0x7612" name="uni7612"/><!-- CJK UNIFIED IDEOGRAPH-7612 -->
+      <map code="0x763c" name="uni763C"/><!-- CJK UNIFIED IDEOGRAPH-763C -->
+      <map code="0x76ec" name="uni76EC"/><!-- CJK UNIFIED IDEOGRAPH-76EC -->
+      <map code="0x7714" name="uni7714"/><!-- CJK UNIFIED IDEOGRAPH-7714 -->
+      <map code="0x7772" name="uni7772"/><!-- CJK UNIFIED IDEOGRAPH-7772 -->
+      <map code="0x8165" name="uni8165"/><!-- CJK UNIFIED IDEOGRAPH-8165 -->
+      <map code="0x821e" name="uni821E"/><!-- CJK UNIFIED IDEOGRAPH-821E -->
+      <map code="0x82e8" name="uni82E8"/><!-- CJK UNIFIED IDEOGRAPH-82E8 -->
+      <map code="0x83eb" name="uni83EB"/><!-- CJK UNIFIED IDEOGRAPH-83EB -->
+      <map code="0x83f7" name="uni83F7"/><!-- CJK UNIFIED IDEOGRAPH-83F7 -->
+      <map code="0x8513" name="uni8513"/><!-- CJK UNIFIED IDEOGRAPH-8513 -->
+      <map code="0x8541" name="uni8541"/><!-- CJK UNIFIED IDEOGRAPH-8541 -->
+      <map code="0x8550" name="uni8550"/><!-- CJK UNIFIED IDEOGRAPH-8550 -->
+      <map code="0x8552" name="uni8552"/><!-- CJK UNIFIED IDEOGRAPH-8552 -->
+      <map code="0x8591" name="uni8591"/><!-- CJK UNIFIED IDEOGRAPH-8591 -->
+      <map code="0x85a5" name="uni85A5"/><!-- CJK UNIFIED IDEOGRAPH-85A5 -->
+      <map code="0x85a8" name="uni85A8"/><!-- CJK UNIFIED IDEOGRAPH-85A8 -->
+      <map code="0x85af" name="uni85AF"/><!-- CJK UNIFIED IDEOGRAPH-85AF -->
+      <map code="0x85b0" name="uni85B0"/><!-- CJK UNIFIED IDEOGRAPH-85B0 -->
+      <map code="0x8619" name="uni8619"/><!-- CJK UNIFIED IDEOGRAPH-8619 -->
+      <map code="0x8642" name="uni8642"/><!-- CJK UNIFIED IDEOGRAPH-8642 -->
+      <map code="0x87c7" name="uni87C7"/><!-- CJK UNIFIED IDEOGRAPH-87C7 -->
+      <map code="0x87e4" name="uni87E4"/><!-- CJK UNIFIED IDEOGRAPH-87E4 -->
+      <map code="0x8b54" name="uni8B54"/><!-- CJK UNIFIED IDEOGRAPH-8B54 -->
+      <map code="0x8e59" name="uni8E59"/><!-- CJK UNIFIED IDEOGRAPH-8E59 -->
+      <map code="0x911c" name="uni911C"/><!-- CJK UNIFIED IDEOGRAPH-911C -->
+      <map code="0x9192" name="uni9192"/><!-- CJK UNIFIED IDEOGRAPH-9192 -->
+      <map code="0x9409" name="uni9409"/><!-- CJK UNIFIED IDEOGRAPH-9409 -->
+      <map code="0x994c" name="uni994C"/><!-- CJK UNIFIED IDEOGRAPH-994C -->
+      <map code="0x9a40" name="uni9A40"/><!-- CJK UNIFIED IDEOGRAPH-9A40 -->
+      <map code="0x9b03" name="uni9B03"/><!-- CJK UNIFIED IDEOGRAPH-9B03 -->
+      <map code="0xf9dc" name="uniF9DC"/><!-- CJK COMPATIBILITY IDEOGRAPH-F9DC -->
+    </cmap_format_4>
+    <cmap_format_12 platformID="3" platEncID="10" format="12" reserved="0" length="652" language="0" nGroups="53">
+      <map code="0x2fc5" name="uni2FC5"/><!-- KANGXI RADICAL DEER -->
+      <map code="0x50ce" name="uni50CE"/><!-- CJK UNIFIED IDEOGRAPH-50CE -->
+      <map code="0x5675" name="uni5675"/><!-- CJK UNIFIED IDEOGRAPH-5675 -->
+      <map code="0x5e9a" name="uni5E9A"/><!-- CJK UNIFIED IDEOGRAPH-5E9A -->
+      <map code="0x60fa" name="uni60FA"/><!-- CJK UNIFIED IDEOGRAPH-60FA -->
+      <map code="0x610f" name="uni610F"/><!-- CJK UNIFIED IDEOGRAPH-610F -->
+      <map code="0x645d" name="uni645D"/><!-- CJK UNIFIED IDEOGRAPH-645D -->
+      <map code="0x6479" name="uni6479"/><!-- CJK UNIFIED IDEOGRAPH-6479 -->
+      <map code="0x64b0" name="uni64B0"/><!-- CJK UNIFIED IDEOGRAPH-64B0 -->
+      <map code="0x661f" name="uni661F"/><!-- CJK UNIFIED IDEOGRAPH-661F -->
+      <map code="0x6692" name="uni6692"/><!-- CJK UNIFIED IDEOGRAPH-6692 -->
+      <map code="0x6801" name="uni6801"/><!-- CJK UNIFIED IDEOGRAPH-6801 -->
+      <map code="0x6a1a" name="uni6A1A"/><!-- CJK UNIFIED IDEOGRAPH-6A1A -->
+      <map code="0x6f09" name="uni6F09"/><!-- CJK UNIFIED IDEOGRAPH-6F09 -->
+      <map code="0x6f60" name="uni6F60"/><!-- CJK UNIFIED IDEOGRAPH-6F60 -->
+      <map code="0x714b" name="uni714B"/><!-- CJK UNIFIED IDEOGRAPH-714B -->
+      <map code="0x7243" name="uni7243"/><!-- CJK UNIFIED IDEOGRAPH-7243 -->
+      <map code="0x7329" name="uni7329"/><!-- CJK UNIFIED IDEOGRAPH-7329 -->
+      <map code="0x7446" name="uni7446"/><!-- CJK UNIFIED IDEOGRAPH-7446 -->
+      <map code="0x75b2" name="uni75B2"/><!-- CJK UNIFIED IDEOGRAPH-75B2 -->
+      <map code="0x7612" name="uni7612"/><!-- CJK UNIFIED IDEOGRAPH-7612 -->
+      <map code="0x763c" name="uni763C"/><!-- CJK UNIFIED IDEOGRAPH-763C -->
+      <map code="0x76ec" name="uni76EC"/><!-- CJK UNIFIED IDEOGRAPH-76EC -->
+      <map code="0x7714" name="uni7714"/><!-- CJK UNIFIED IDEOGRAPH-7714 -->
+      <map code="0x7772" name="uni7772"/><!-- CJK UNIFIED IDEOGRAPH-7772 -->
+      <map code="0x8165" name="uni8165"/><!-- CJK UNIFIED IDEOGRAPH-8165 -->
+      <map code="0x821e" name="uni821E"/><!-- CJK UNIFIED IDEOGRAPH-821E -->
+      <map code="0x82e8" name="uni82E8"/><!-- CJK UNIFIED IDEOGRAPH-82E8 -->
+      <map code="0x83eb" name="uni83EB"/><!-- CJK UNIFIED IDEOGRAPH-83EB -->
+      <map code="0x83f7" name="uni83F7"/><!-- CJK UNIFIED IDEOGRAPH-83F7 -->
+      <map code="0x8513" name="uni8513"/><!-- CJK UNIFIED IDEOGRAPH-8513 -->
+      <map code="0x8541" name="uni8541"/><!-- CJK UNIFIED IDEOGRAPH-8541 -->
+      <map code="0x8550" name="uni8550"/><!-- CJK UNIFIED IDEOGRAPH-8550 -->
+      <map code="0x8552" name="uni8552"/><!-- CJK UNIFIED IDEOGRAPH-8552 -->
+      <map code="0x8591" name="uni8591"/><!-- CJK UNIFIED IDEOGRAPH-8591 -->
+      <map code="0x85a5" name="uni85A5"/><!-- CJK UNIFIED IDEOGRAPH-85A5 -->
+      <map code="0x85a8" name="uni85A8"/><!-- CJK UNIFIED IDEOGRAPH-85A8 -->
+      <map code="0x85af" name="uni85AF"/><!-- CJK UNIFIED IDEOGRAPH-85AF -->
+      <map code="0x85b0" name="uni85B0"/><!-- CJK UNIFIED IDEOGRAPH-85B0 -->
+      <map code="0x8619" name="uni8619"/><!-- CJK UNIFIED IDEOGRAPH-8619 -->
+      <map code="0x8642" name="uni8642"/><!-- CJK UNIFIED IDEOGRAPH-8642 -->
+      <map code="0x87c7" name="uni87C7"/><!-- CJK UNIFIED IDEOGRAPH-87C7 -->
+      <map code="0x87e4" name="uni87E4"/><!-- CJK UNIFIED IDEOGRAPH-87E4 -->
+      <map code="0x8b54" name="uni8B54"/><!-- CJK UNIFIED IDEOGRAPH-8B54 -->
+      <map code="0x8e59" name="uni8E59"/><!-- CJK UNIFIED IDEOGRAPH-8E59 -->
+      <map code="0x911c" name="uni911C"/><!-- CJK UNIFIED IDEOGRAPH-911C -->
+      <map code="0x9192" name="uni9192"/><!-- CJK UNIFIED IDEOGRAPH-9192 -->
+      <map code="0x9409" name="uni9409"/><!-- CJK UNIFIED IDEOGRAPH-9409 -->
+      <map code="0x994c" name="uni994C"/><!-- CJK UNIFIED IDEOGRAPH-994C -->
+      <map code="0x9a40" name="uni9A40"/><!-- CJK UNIFIED IDEOGRAPH-9A40 -->
+      <map code="0x9b03" name="uni9B03"/><!-- CJK UNIFIED IDEOGRAPH-9B03 -->
+      <map code="0xf9dc" name="uniF9DC"/><!-- CJK COMPATIBILITY IDEOGRAPH-F9DC -->
+      <map code="0x2f884" name="u2F884"/><!-- CJK COMPATIBILITY IDEOGRAPH-2F884 -->
+    </cmap_format_12>
+  </cmap>
+
+  <post>
+    <formatType value="3.0"/>
+    <italicAngle value="0.0"/>
+    <underlinePosition value="-75"/>
+    <underlineThickness value="50"/>
+    <isFixedPitch value="0"/>
+    <minMemType42 value="0"/>
+    <maxMemType42 value="0"/>
+    <minMemType1 value="0"/>
+    <maxMemType1 value="0"/>
+  </post>
+
+  <CFF>
+    <major value="1"/>
+    <minor value="0"/>
+    <CFFFont name="MasterSet_Kanji_75-w600.00">
+      <version value="1.000"/>
+      <FamilyName value="MasterSet_Kanji_75"/>
+      <isFixedPitch value="0"/>
+      <ItalicAngle value="0"/>
+      <UnderlinePosition value="-100"/>
+      <UnderlineThickness value="50"/>
+      <PaintType value="0"/>
+      <CharstringType value="2"/>
+      <FontMatrix value="0.001 0 0 0.001 0 0"/>
+      <FontBBox value="6 -120 741 880"/>
+      <StrokeWidth value="0"/>
+      <!-- charset is dumped separately as the 'GlyphOrder' element -->
+      <Encoding name="StandardEncoding"/>
+      <Private>
+        <BlueValues value="0 0"/>
+        <BlueScale value="0.039625"/>
+        <BlueShift value="7"/>
+        <BlueFuzz value="1"/>
+        <ForceBold value="0"/>
+        <LanguageGroup value="0"/>
+        <ExpansionFactor value="0.06"/>
+        <initialRandomSeed value="0"/>
+        <defaultWidthX value="750"/>
+        <nominalWidthX value="0"/>
+      </Private>
+      <CharStrings>
+        <CharString name=".notdef">
+          75 -120 rmoveto
+          600 0 rlineto
+          0 1000 rlineto
+          -600 0 rlineto
+          0 -1000 rlineto
+          300 541 rmoveto
+          -238 409 rlineto
+          477 0 rlineto
+          -239 -409 rlineto
+          24 -41 rmoveto
+          239 409 rlineto
+          0 -818 rlineto
+          -239 409 rlineto
+          -262 -450 rmoveto
+          238 409 rlineto
+          239 -409 rlineto
+          -477 0 rlineto
+          -24 859 rmoveto
+          238 -409 rlineto
+          -238 -409 rlineto
+          0 818 rlineto
+          endchar
+        </CharString>
+        <CharString name="u2F884">
+          425 47 rmoveto
+          84 -42 88 -55 52 -39 rrcurveto
+          67 69 rlineto
+          -57 38 -97 54 -86 41 rrcurveto
+          -51 -66 rlineto
+          -383 147 rmoveto
+          0 -88 rlineto
+          667 0 rlineto
+          0 88 rlineto
+          -667 0 rlineto
+          35 189 rmoveto
+          0 -88 rlineto
+          599 0 rlineto
+          0 88 rlineto
+          -599 0 rlineto
+          133 92 rmoveto
+          0 -318 rlineto
+          75 0 rlineto
+          0 318 rlineto
+          -75 0 rlineto
+          257 1 rmoveto
+          0 -320 rlineto
+          76 0 rlineto
+          0 320 rlineto
+          -76 0 rlineto
+          -394 335 rmoveto
+          0 -243 rlineto
+          0 -88 21 -22 75 0 rrcurveto
+          17 0 81 0 16 0 rrcurveto
+          57 0 20 24 8 87 rrcurveto
+          -19 5 -28 13 -14 13 rrcurveto
+          -3 -55 -6 -10 -21 0 rrcurveto
+          -18 0 -67 0 -14 0 rrcurveto
+          -30 0 -5 5 0 28 rrcurveto
+          0 243 rlineto
+          -70 0 rlineto
+          188 -698 rmoveto
+          -50 -46 -100 -55 -82 -28 rrcurveto
+          17 -20 24 -33 12 -20 rrcurveto
+          82 30 100 56 63 55 rrcurveto
+          -66 61 rlineto
+          -141 698 rmoveto
+          0 -70 rlineto
+          158 0 rlineto
+          0 -68 rlineto
+          -158 0 rlineto
+          0 -70 rlineto
+          227 0 rlineto
+          0 208 rlineto
+          -227 0 rlineto
+          281 0 rmoveto
+          0 -243 rlineto
+          0 -89 22 -23 76 0 rrcurveto
+          17 0 84 0 16 0 rrcurveto
+          58 0 20 25 8 88 rrcurveto
+          -20 5 -27 13 -15 13 rrcurveto
+          -3 -55 -5 -10 -22 0 rrcurveto
+          -19 0 -69 0 -14 0 rrcurveto
+          -31 0 -5 5 0 29 rrcurveto
+          0 242 rlineto
+          -71 0 rlineto
+          36 0 rmoveto
+          0 -70 rlineto
+          166 0 rlineto
+          0 -68 rlineto
+          -166 0 rlineto
+          0 -70 rlineto
+          236 0 rlineto
+          0 208 rlineto
+          -236 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni2FC5">
+          261 686 rmoveto
+          0 -318 rlineto
+          69 0 rlineto
+          0 318 rlineto
+          -69 0 rlineto
+          182 0 rmoveto
+          0 -318 rlineto
+          70 0 rlineto
+          0 318 rlineto
+          -70 0 rlineto
+          -202 -463 rmoveto
+          0 -81 rlineto
+          175 0 rlineto
+          0 81 rlineto
+          -175 0 rlineto
+          -33 111 rmoveto
+          0 -355 rlineto
+          71 0 rlineto
+          0 355 rlineto
+          -71 0 rlineto
+          -70 -330 rmoveto
+          7 -87 rlineto
+          76 11 103 15 98 15 rrcurveto
+          -1 81 rlineto
+          -105 -14 -107 -14 -71 -7 rrcurveto
+          511 273 rmoveto
+          -39 -34 -68 -35 -61 -25 rrcurveto
+          8 -19 10 -30 4 -19 rrcurveto
+          66 23 78 33 56 40 rrcurveto
+          -54 66 rlineto
+          -200 56 rmoveto
+          0 -288 rlineto
+          0 -91 18 -27 74 0 rrcurveto
+          15 0 70 0 15 0 rrcurveto
+          58 0 20 33 7 118 rrcurveto
+          -19 5 -29 15 -15 14 rrcurveto
+          -2 -87 -5 -15 -22 0 rrcurveto
+          -15 0 -57 0 -11 0 rrcurveto
+          -26 0 -5 5 0 31 rrcurveto
+          0 287 rlineto
+          -71 0 rlineto
+          -315 260 rmoveto
+          0 -80 rlineto
+          489 0 rlineto
+          0 -103 rlineto
+          -489 0 rlineto
+          0 -80 rlineto
+          560 0 rlineto
+          0 263 rlineto
+          -560 0 rlineto
+          225 256 rmoveto
+          0 -137 rlineto
+          78 0 rlineto
+          0 137 rlineto
+          -78 0 rlineto
+          -237 -79 rmoveto
+          0 -88 rlineto
+          590 0 rlineto
+          0 88 rlineto
+          -590 0 rlineto
+          -36 0 rmoveto
+          0 -296 rlineto
+          0 -149 -6 -207 -63 -145 rrcurveto
+          17 -10 31 -27 13 -17 rrcurveto
+          68 155 11 239 0 161 rrcurveto
+          0 296 rlineto
+          -71 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni50CE">
+          246 810 rmoveto
+          0 -256 rlineto
+          0 -78 16 -21 59 0 rrcurveto
+          13 0 56 0 12 0 rrcurveto
+          46 0 16 23 7 84 rrcurveto
+          -17 5 -24 11 -13 13 rrcurveto
+          -2 -56 -3 -9 -17 0 rrcurveto
+          -11 0 -45 0 -9 0 rrcurveto
+          -20 0 -4 4 0 25 rrcurveto
+          0 255 rlineto
+          -60 0 rlineto
+          -6 -434 rmoveto
+          0 -84 rlineto
+          467 0 rlineto
+          0 84 rlineto
+          -467 0 rlineto
+          -23 -187 rmoveto
+          0 -85 rlineto
+          508 0 rlineto
+          0 85 rlineto
+          -508 0 rlineto
+          126 288 rmoveto
+          0 -319 rlineto
+          69 0 rlineto
+          0 319 rlineto
+          -69 0 rlineto
+          186 -1 rmoveto
+          0 -319 rlineto
+          70 0 rlineto
+          0 319 rlineto
+          -70 0 rlineto
+          -257 334 rmoveto
+          0 -66 rlineto
+          124 0 rlineto
+          0 -66 rlineto
+          -124 0 rlineto
+          0 -67 rlineto
+          181 0 rlineto
+          0 199 rlineto
+          -181 0 rlineto
+          218 0 rmoveto
+          0 -256 rlineto
+          0 -78 17 -21 60 0 rrcurveto
+          12 0 59 0 14 0 rrcurveto
+          45 0 17 24 6 85 rrcurveto
+          -16 5 -25 11 -12 13 rrcurveto
+          -2 -57 -4 -10 -16 0 rrcurveto
+          -13 0 -48 0 -8 0 rrcurveto
+          -22 0 -3 4 0 26 rrcurveto
+          0 254 rlineto
+          -61 0 rlineto
+          27 0 rmoveto
+          0 -66 rlineto
+          125 0 rlineto
+          0 -66 rlineto
+          -125 0 rlineto
+          0 -67 rlineto
+          183 0 rlineto
+          0 199 rlineto
+          -183 0 rlineto
+          -150 -726 rmoveto
+          -34 -45 -64 -38 -62 -24 rrcurveto
+          16 -16 26 -35 12 -18 rrcurveto
+          63 32 71 54 42 61 rrcurveto
+          -70 29 rlineto
+          150 -41 rmoveto
+          53 -36 64 -56 31 -38 rrcurveto
+          62 52 rlineto
+          -35 39 -66 53 -51 32 rrcurveto
+          -58 -46 rlineto
+          -353 802 rmoveto
+          -35 -152 -57 -150 -64 -98 rrcurveto
+          12 -26 19 -56 6 -24 rrcurveto
+          76 120 69 184 43 176 rrcurveto
+          -69 26 rlineto
+          -61 -263 rmoveto
+          0 -671 rlineto
+          71 0 rlineto
+          0 761 rlineto
+          -2 2 rlineto
+          -69 -92 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni5675">
+          157 26 rmoveto
+          0 -83 rlineto
+          443 0 rlineto
+          0 83 rlineto
+          -443 0 rlineto
+          -41 173 rmoveto
+          0 -288 rlineto
+          72 0 rlineto
+          0 204 rlineto
+          379 0 rlineto
+          0 -200 rlineto
+          75 0 rlineto
+          0 284 rlineto
+          -526 0 rlineto
+          122 572 rmoveto
+          0 -71 rlineto
+          480 0 rlineto
+          0 71 rlineto
+          -480 0 rlineto
+          -202 -123 rmoveto
+          45 -23 54 -38 27 -30 rrcurveto
+          35 66 rlineto
+          -27 30 -55 34 -44 20 rrcurveto
+          -35 -59 rlineto
+          40 135 rmoveto
+          43 -24 52 -42 25 -30 rrcurveto
+          36 65 rlineto
+          -25 30 -53 38 -42 22 rrcurveto
+          -36 -59 rlineto
+          237 51 rmoveto
+          14 -21 12 -31 6 -20 rrcurveto
+          65 18 rlineto
+          -6 21 -15 29 -13 21 rrcurveto
+          -63 -17 rlineto
+          36 -312 rmoveto
+          246 0 rlineto
+          0 -25 rlineto
+          -246 0 rlineto
+          0 25 rlineto
+          0 -78 rmoveto
+          246 0 rlineto
+          0 -27 rlineto
+          -246 0 rlineto
+          0 27 rlineto
+          0 156 rmoveto
+          246 0 rlineto
+          0 -25 rlineto
+          -246 0 rlineto
+          0 25 rlineto
+          -70 61 rmoveto
+          0 -304 rlineto
+          390 0 rlineto
+          0 304 rlineto
+          -390 0 rlineto
+          -83 -124 rmoveto
+          -162 0 rlineto
+          0 -75 rlineto
+          93 0 rlineto
+          0 -108 rlineto
+          69 0 rlineto
+          0 183 rlineto
+          234 198 rmoveto
+          -3 -26 -8 -38 -6 -29 rrcurveto
+          60 -12 rlineto
+          10 25 11 34 11 38 rrcurveto
+          -75 8 rlineto
+          130 116 rmoveto
+          -7 -20 -17 -30 -11 -22 rrcurveto
+          60 -17 rlineto
+          12 20 16 22 16 31 rrcurveto
+          -69 16 rlineto
+          -364 -455 rmoveto
+          -51 0 rlineto
+          -39 -30 -42 -31 -36 -22 rrcurveto
+          27 -83 rlineto
+          41 34 37 32 37 32 rrcurveto
+          40 -61 52 -23 78 -3 rrcurveto
+          91 -5 184 2 94 5 rrcurveto
+          3 24 10 36 6 19 rrcurveto
+          -101 -9 -198 -3 -90 5 rrcurveto
+          -66 3 -50 23 -27 55 rrcurveto
+          endchar
+        </CharString>
+        <CharString name="uni5E9A">
+          169 436 rmoveto
+          0 -84 rlineto
+          555 0 rlineto
+          0 84 rlineto
+          -555 0 rlineto
+          43 154 rmoveto
+          0 -80 rlineto
+          381 0 rlineto
+          0 -239 rlineto
+          -388 0 rlineto
+          0 -80 rlineto
+          460 0 rlineto
+          0 399 rlineto
+          -453 0 rlineto
+          173 84 rmoveto
+          0 -332 rlineto
+          0 -138 -27 -141 -210 -70 rrcurveto
+          15 -20 20 -37 9 -21 rrcurveto
+          229 85 36 167 0 174 rrcurveto
+          0 333 rlineto
+          -72 0 rlineto
+          81 -442 rmoveto
+          -66 -17 rlineto
+          46 -171 84 -96 151 -39 rrcurveto
+          10 28 20 40 16 21 rrcurveto
+          -139 26 -85 75 -37 133 rrcurveto
+          -107 617 rmoveto
+          0 -164 rlineto
+          78 0 rlineto
+          0 164 rlineto
+          -78 0 rlineto
+          -238 -87 rmoveto
+          0 -92 rlineto
+          597 0 rlineto
+          0 92 rlineto
+          -597 0 rlineto
+          -37 0 rmoveto
+          0 -324 rlineto
+          0 -143 -5 -192 -65 -133 rrcurveto
+          17 -11 32 -30 12 -17 rrcurveto
+          71 143 11 227 0 156 rrcurveto
+          0 324 rlineto
+          -73 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni60FA">
+          373 591 rmoveto
+          240 0 rlineto
+          0 -74 rlineto
+          -240 0 rlineto
+          0 74 rlineto
+          0 144 rmoveto
+          240 0 rlineto
+          0 -73 rlineto
+          -240 0 rlineto
+          0 73 rlineto
+          -72 75 rmoveto
+          0 -368 rlineto
+          388 0 rlineto
+          0 368 rlineto
+          -388 0 rlineto
+          31 -464 rmoveto
+          -30 -80 rlineto
+          401 0 rlineto
+          0 80 rlineto
+          -371 0 rlineto
+          124 108 rmoveto
+          0 -473 rlineto
+          74 0 rlineto
+          0 473 rlineto
+          -74 0 rlineto
+          -149 -270 rmoveto
+          0 -79 rlineto
+          377 0 rlineto
+          0 79 rlineto
+          -377 0 rlineto
+          -61 -170 rmoveto
+          0 -83 rlineto
+          480 0 rlineto
+          0 83 rlineto
+          -480 0 rlineto
+          82 422 rmoveto
+          -22 -81 -39 -79 -45 -51 rrcurveto
+          16 -12 30 -25 13 -16 rrcurveto
+          45 58 45 90 24 94 rrcurveto
+          -67 22 rlineto
+          -203 413 rmoveto
+          0 -937 rlineto
+          71 0 rlineto
+          0 937 rlineto
+          -71 0 rlineto
+          -74 -197 rmoveto
+          0 -90 -12 -110 -25 -63 rrcurveto
+          50 -29 rlineto
+          27 72 12 116 0 94 rrcurveto
+          -52 10 rlineto
+          141 3 rmoveto
+          24 -60 22 -78 7 -49 rrcurveto
+          49 31 rlineto
+          -8 48 -24 76 -25 58 rrcurveto
+          -45 -26 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni610F">
+          217 149 rmoveto
+          0 -117 rlineto
+          0 -87 22 -24 87 0 rrcurveto
+          19 0 94 0 19 0 rrcurveto
+          67 0 21 27 9 113 rrcurveto
+          -20 6 -31 14 -15 13 rrcurveto
+          -3 -79 -5 -11 -30 0 rrcurveto
+          -22 0 -78 0 -16 0 rrcurveto
+          -37 0 -7 3 0 26 rrcurveto
+          0 116 rlineto
+          -74 0 rlineto
+          72 11 rmoveto
+          44 -26 54 -42 25 -32 rrcurveto
+          47 64 rlineto
+          -28 30 -55 41 -43 22 rrcurveto
+          -44 -57 rlineto
+          252 -36 rmoveto
+          49 -53 52 -79 24 -54 rrcurveto
+          62 50 rlineto
+          -24 56 -56 75 -49 50 rrcurveto
+          -58 -45 rlineto
+          -416 35 rmoveto
+          -18 -67 -34 -67 -51 -39 rrcurveto
+          60 -54 rlineto
+          54 46 33 75 21 75 rrcurveto
+          -65 31 rlineto
+          -40 631 rmoveto
+          0 -81 rlineto
+          579 0 rlineto
+          0 81 rlineto
+          -579 0 rlineto
+          -36 -168 rmoveto
+          0 -80 rlineto
+          655 0 rlineto
+          0 80 rlineto
+          -655 0 rlineto
+          287 227 rmoveto
+          0 -115 rlineto
+          76 0 rlineto
+          0 115 rlineto
+          -76 0 rlineto
+          -140 -143 rmoveto
+          11 -32 12 -44 4 -27 rrcurveto
+          72 23 rlineto
+          -5 27 -12 41 -14 31 rrcurveto
+          -68 -19 rlineto
+          289 20 rmoveto
+          -7 -30 -14 -41 -12 -29 rrcurveto
+          68 -22 rlineto
+          12 27 16 34 16 40 rrcurveto
+          -79 21 rlineto
+          -281 -411 rmoveto
+          347 0 rlineto
+          0 -42 rlineto
+          -347 0 rlineto
+          0 42 rlineto
+          0 110 rmoveto
+          347 0 rlineto
+          0 -41 rlineto
+          -347 0 rlineto
+          0 41 rlineto
+          -72 74 rmoveto
+          0 -300 rlineto
+          494 0 rlineto
+          0 300 rlineto
+          -494 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni645D">
+          295 757 rmoveto
+          0 -86 rlineto
+          422 0 rlineto
+          0 86 rlineto
+          -422 0 rlineto
+          96 -523 rmoveto
+          0 -78 rlineto
+          120 0 rlineto
+          0 78 rlineto
+          -120 0 rlineto
+          -35 107 rmoveto
+          0 -355 rlineto
+          62 0 rlineto
+          0 355 rlineto
+          -62 0 rlineto
+          95 508 rmoveto
+          0 -141 rlineto
+          76 0 rlineto
+          0 141 rlineto
+          -76 0 rlineto
+          -55 -173 rmoveto
+          0 -302 rlineto
+          60 0 rlineto
+          0 302 rlineto
+          -60 0 rlineto
+          124 0 rmoveto
+          0 -302 rlineto
+          60 0 rlineto
+          0 302 rlineto
+          -60 0 rlineto
+          162 -398 rmoveto
+          -35 -34 -58 -46 -40 -24 rrcurveto
+          31 -57 rlineto
+          41 23 57 38 41 38 rrcurveto
+          -37 62 rlineto
+          -381 307 rmoveto
+          0 -76 rlineto
+          344 0 rlineto
+          0 -108 rlineto
+          -344 0 rlineto
+          0 -76 rlineto
+          408 0 rlineto
+          0 260 rlineto
+          -408 0 rlineto
+          232 -243 rmoveto
+          0 -314 rlineto
+          0 -84 13 -25 57 0 rrcurveto
+          11 0 40 0 12 0 rrcurveto
+          43 0 18 29 6 106 rrcurveto
+          -18 6 -26 14 -13 13 rrcurveto
+          -1 -77 -3 -12 -14 0 rrcurveto
+          -8 0 -30 0 -7 0 rrcurveto
+          -14 0 -3 4 0 27 rrcurveto
+          0 313 rlineto
+          -63 0 rlineto
+          -226 -346 rmoveto
+          12 -82 rlineto
+          58 15 71 18 69 18 rrcurveto
+          -5 78 rlineto
+          -77 -18 -75 -18 -53 -11 rrcurveto
+          -43 761 rmoveto
+          0 -335 rlineto
+          0 -143 -6 -189 -67 -131 rrcurveto
+          16 -10 29 -24 13 -15 rrcurveto
+          70 140 11 217 0 155 rrcurveto
+          0 335 rlineto
+          -66 0 rlineto
+          -249 -420 rmoveto
+          18 -96 rlineto
+          64 26 81 34 77 32 rrcurveto
+          -10 91 rlineto
+          -84 -34 -87 -33 -59 -20 rrcurveto
+          12 315 rmoveto
+          0 -92 rlineto
+          227 0 rlineto
+          0 92 rlineto
+          -227 0 rlineto
+          87 196 rmoveto
+          0 -828 rlineto
+          0 -14 -4 -4 -10 0 rrcurveto
+          -9 -1 -27 0 -30 2 rrcurveto
+          9 -27 9 -41 1 -25 rrcurveto
+          50 0 30 3 21 16 rrcurveto
+          21 16 7 26 0 49 rrcurveto
+          0 828 rlineto
+          -68 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni6479">
+          200 519 rmoveto
+          350 0 rlineto
+          0 -40 rlineto
+          -350 0 rlineto
+          0 40 rlineto
+          0 98 rmoveto
+          350 0 rlineto
+          0 -40 rlineto
+          -350 0 rlineto
+          0 40 rlineto
+          -74 61 rmoveto
+          0 -260 rlineto
+          501 0 rlineto
+          0 260 rlineto
+          -501 0 rlineto
+          -91 -297 rmoveto
+          0 -74 rlineto
+          678 0 rlineto
+          0 74 rlineto
+          -678 0 rlineto
+          225 60 rmoveto
+          -33 -93 -75 -88 -131 -54 rrcurveto
+          14 -15 19 -37 8 -22 rrcurveto
+          143 68 83 100 47 125 rrcurveto
+          -75 16 rlineto
+          274 -91 rmoveto
+          -58 -26 rlineto
+          46 -87 79 -74 85 -34 rrcurveto
+          10 24 20 37 16 18 rrcurveto
+          -80 24 -79 54 -39 64 rrcurveto
+          -495 447 rmoveto
+          0 -75 rlineto
+          674 0 rlineto
+          0 75 rlineto
+          -674 0 rlineto
+          173 53 rmoveto
+          0 -159 rlineto
+          79 0 rlineto
+          0 159 rlineto
+          -79 0 rlineto
+          245 0 rmoveto
+          0 -159 rlineto
+          78 0 rlineto
+          0 159 rlineto
+          -78 0 rlineto
+          -278 -660 rmoveto
+          0 -60 rlineto
+          396 0 rlineto
+          0 60 rlineto
+          -396 0 rlineto
+          -87 -95 rmoveto
+          0 -64 rlineto
+          567 0 rlineto
+          0 64 rlineto
+          -567 0 rlineto
+          249 155 rmoveto
+          0 -252 rlineto
+          0 -12 -3 -3 -11 -1 rrcurveto
+          -10 -1 -36 -1 -36 2 rrcurveto
+          8 -20 10 -30 3 -23 rrcurveto
+          53 0 38 0 25 11 rrcurveto
+          26 12 7 18 0 45 rrcurveto
+          0 255 rlineto
+          -74 0 rlineto
+          112 56 rmoveto
+          -50 -17 -91 -13 -78 -7 rrcurveto
+          6 -14 7 -24 2 -15 rrcurveto
+          83 4 98 13 69 23 rrcurveto
+          -46 50 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni64B0">
+          271 814 rmoveto
+          0 -257 rlineto
+          0 -79 17 -20 58 0 rrcurveto
+          12 0 52 0 12 0 rrcurveto
+          45 0 17 23 6 84 rrcurveto
+          -17 6 -24 11 -13 12 rrcurveto
+          -2 -55 -3 -9 -15 0 rrcurveto
+          -11 0 -42 0 -8 0 rrcurveto
+          -20 0 -3 3 0 24 rrcurveto
+          0 257 rlineto
+          -61 0 rlineto
+          28 0 rmoveto
+          0 -65 rlineto
+          113 0 rlineto
+          0 -72 rlineto
+          -113 0 rlineto
+          0 -64 rlineto
+          170 0 rlineto
+          0 201 rlineto
+          -170 0 rlineto
+          203 0 rmoveto
+          0 -257 rlineto
+          0 -78 17 -21 58 0 rrcurveto
+          12 0 55 0 13 0 rrcurveto
+          44 0 17 23 7 85 rrcurveto
+          -17 5 -24 12 -13 12 rrcurveto
+          -2 -56 -3 -9 -16 0 rrcurveto
+          -11 0 -44 0 -9 0 rrcurveto
+          -20 0 -3 3 0 25 rrcurveto
+          0 256 rlineto
+          -61 0 rlineto
+          28 0 rmoveto
+          0 -64 rlineto
+          116 0 rlineto
+          0 -72 rlineto
+          -116 0 rlineto
+          0 -64 rlineto
+          174 0 rlineto
+          0 200 rlineto
+          -174 0 rlineto
+          -259 -435 rmoveto
+          0 -80 rlineto
+          433 0 rlineto
+          0 80 rlineto
+          -433 0 rlineto
+          -29 -191 rmoveto
+          0 -82 rlineto
+          482 0 rlineto
+          0 82 rlineto
+          -482 0 rlineto
+          119 289 rmoveto
+          0 -328 rlineto
+          66 0 rlineto
+          0 328 rlineto
+          -66 0 rlineto
+          173 -1 rmoveto
+          0 -330 rlineto
+          67 0 rlineto
+          0 330 rlineto
+          -67 0 rlineto
+          -159 -390 rmoveto
+          -32 -45 -60 -40 -58 -26 rrcurveto
+          16 -15 26 -34 12 -18 rrcurveto
+          60 33 67 55 38 62 rrcurveto
+          -69 28 rlineto
+          144 -45 rmoveto
+          53 -36 65 -56 31 -37 rrcurveto
+          62 51 rlineto
+          -35 39 -67 53 -51 33 rrcurveto
+          -58 -47 rlineto
+          -504 293 rmoveto
+          18 -96 rlineto
+          65 27 83 34 79 33 rrcurveto
+          -10 91 rlineto
+          -86 -35 -89 -34 -60 -20 rrcurveto
+          12 318 rmoveto
+          0 -92 rlineto
+          230 0 rlineto
+          0 92 rlineto
+          -230 0 rlineto
+          87 196 rmoveto
+          0 -828 rlineto
+          0 -14 -4 -4 -10 0 rrcurveto
+          -9 -1 -27 0 -30 2 rrcurveto
+          9 -27 9 -41 1 -25 rrcurveto
+          50 0 30 3 21 16 rrcurveto
+          21 16 7 26 0 49 rrcurveto
+          0 828 rlineto
+          -68 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni661F">
+          135 196 rmoveto
+          0 -78 rlineto
+          492 0 rlineto
+          0 78 rlineto
+          -492 0 rlineto
+          18 164 rmoveto
+          0 -83 rlineto
+          507 0 rlineto
+          0 83 rlineto
+          -507 0 rlineto
+          -109 -337 rmoveto
+          0 -86 rlineto
+          664 0 rlineto
+          0 86 rlineto
+          -664 0 rlineto
+          292 434 rmoveto
+          0 -475 rlineto
+          77 0 rlineto
+          0 475 rlineto
+          -77 0 rlineto
+          -143 134 rmoveto
+          361 0 rlineto
+          0 -71 rlineto
+          -361 0 rlineto
+          0 71 rlineto
+          0 142 rmoveto
+          361 0 rlineto
+          0 -69 rlineto
+          -361 0 rlineto
+          0 69 rlineto
+          -73 78 rmoveto
+          0 -368 rlineto
+          511 0 rlineto
+          0 368 rlineto
+          -511 0 rlineto
+          43 -362 rmoveto
+          -29 -86 -52 -86 -55 -54 rrcurveto
+          18 -14 31 -30 14 -18 rrcurveto
+          54 63 57 98 35 99 rrcurveto
+          -73 28 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni6692">
+          85 783 rmoveto
+          0 -90 rlineto
+          118 0 rlineto
+          0 -490 rlineto
+          -118 0 rlineto
+          0 -90 rlineto
+          186 0 rlineto
+          0 670 rlineto
+          -186 0 rlineto
+          4 -287 rmoveto
+          0 -88 rlineto
+          150 0 rlineto
+          0 88 rlineto
+          -150 0 rlineto
+          -39 287 rmoveto
+          0 -747 rlineto
+          68 0 rlineto
+          0 747 rlineto
+          -68 0 rlineto
+          232 -770 rmoveto
+          0 -83 rlineto
+          444 0 rlineto
+          0 83 rlineto
+          -444 0 rlineto
+          54 176 rmoveto
+          0 -78 rlineto
+          349 0 rlineto
+          0 78 rlineto
+          -349 0 rlineto
+          59 403 rmoveto
+          223 0 rlineto
+          0 -71 rlineto
+          -223 0 rlineto
+          0 71 rlineto
+          0 142 rmoveto
+          223 0 rlineto
+          0 -70 rlineto
+          -223 0 rlineto
+          0 70 rlineto
+          -68 76 rmoveto
+          0 -365 rlineto
+          361 0 rlineto
+          0 365 rlineto
+          -361 0 rlineto
+          147 -353 rmoveto
+          0 -477 rlineto
+          71 0 rlineto
+          0 477 rlineto
+          -71 0 rlineto
+          -121 -18 rmoveto
+          -20 -77 -34 -78 -39 -52 rrcurveto
+          15 -12 25 -25 12 -14 rrcurveto
+          40 58 39 90 24 89 rrcurveto
+          -62 21 rlineto
+          16 -88 rmoveto
+          -30 -80 rlineto
+          364 0 rlineto
+          0 80 rlineto
+          -334 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni6801">
+          505 774 rmoveto
+          0 -864 rlineto
+          70 0 rlineto
+          0 775 rlineto
+          98 0 rlineto
+          0 89 rlineto
+          -168 0 rlineto
+          137 0 rmoveto
+          0 -572 rlineto
+          0 -10 -2 -4 -6 0 rrcurveto
+          -8 0 -17 0 -22 1 rrcurveto
+          10 -26 9 -42 3 -27 rrcurveto
+          36 0 26 3 18 16 rrcurveto
+          19 17 5 29 0 41 rrcurveto
+          0 574 rlineto
+          -71 0 rlineto
+          -609 -109 rmoveto
+          0 -97 rlineto
+          237 0 rlineto
+          0 97 rlineto
+          -237 0 rlineto
+          301 29 rmoveto
+          0 -94 rlineto
+          122 0 rlineto
+          0 94 rlineto
+          -122 0 rlineto
+          -210 156 rmoveto
+          0 -939 rlineto
+          73 0 rlineto
+          0 939 rlineto
+          -73 0 rlineto
+          -3 -260 rmoveto
+          -18 -127 -43 -162 -46 -89 rrcurveto
+          12 -26 18 -40 7 -30 rrcurveto
+          53 104 45 194 21 154 rrcurveto
+          -49 22 rlineto
+          73 5 rmoveto
+          -33 -46 rlineto
+          15 -35 35 -92 12 -45 rrcurveto
+          39 87 rlineto
+          -10 20 -46 91 -12 20 rrcurveto
+          124 243 rmoveto
+          -10 -160 -24 -215 -57 -129 rrcurveto
+          15 -18 24 -36 11 -22 rrcurveto
+          70 147 32 232 18 188 rrcurveto
+          -79 13 rlineto
+          114 -144 rmoveto
+          0 -24 rlineto
+          -17 -321 -60 -238 -101 -123 rrcurveto
+          17 -16 26 -40 11 -25 rrcurveto
+          108 137 68 269 22 368 rrcurveto
+          -47 16 rlineto
+          -13 -3 rlineto
+          -14 0 rlineto
+          -133 -301 rmoveto
+          34 -45 39 -63 17 -42 rrcurveto
+          34 100 rlineto
+          -16 39 -41 57 -34 42 rrcurveto
+          -33 -88 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni6A1A">
+          32 641 rmoveto
+          0 -90 rlineto
+          230 0 rlineto
+          0 90 rlineto
+          -230 0 rlineto
+          95 208 rmoveto
+          0 -937 rlineto
+          68 0 rlineto
+          0 937 rlineto
+          -68 0 rlineto
+          0 -270 rmoveto
+          -18 -135 -46 -170 -48 -94 rrcurveto
+          12 -23 16 -38 8 -27 rrcurveto
+          54 107 46 201 23 159 rrcurveto
+          -47 20 rlineto
+          65 -86 rmoveto
+          -33 -50 rlineto
+          19 -41 45 -98 17 -51 rrcurveto
+          39 87 rlineto
+          -12 24 -59 106 -16 23 rrcurveto
+          117 264 rmoveto
+          0 -84 rlineto
+          409 0 rlineto
+          0 84 rlineto
+          -409 0 rlineto
+          86 -530 rmoveto
+          0 -76 rlineto
+          120 0 rlineto
+          0 76 rlineto
+          -120 0 rlineto
+          -28 115 rmoveto
+          0 -356 rlineto
+          62 0 rlineto
+          0 356 rlineto
+          -62 0 rlineto
+          98 507 rmoveto
+          0 -141 rlineto
+          70 0 rlineto
+          0 141 rlineto
+          -70 0 rlineto
+          -62 -165 rmoveto
+          0 -301 rlineto
+          61 0 rlineto
+          0 301 rlineto
+          -61 0 rlineto
+          124 0 rmoveto
+          0 -301 rlineto
+          59 0 rlineto
+          0 301 rlineto
+          -59 0 rlineto
+          155 -409 rmoveto
+          -33 -34 -56 -45 -38 -25 rrcurveto
+          30 -60 rlineto
+          39 24 56 38 38 39 rrcurveto
+          -36 63 rlineto
+          -362 309 rmoveto
+          0 -78 rlineto
+          332 0 rlineto
+          0 -109 rlineto
+          -332 0 rlineto
+          0 -78 rlineto
+          395 0 rlineto
+          0 265 rlineto
+          -395 0 rlineto
+          214 -241 rmoveto
+          0 -318 rlineto
+          0 -82 13 -24 57 0 rrcurveto
+          12 0 40 0 11 0 rrcurveto
+          45 0 17 30 5 112 rrcurveto
+          -17 5 -25 13 -12 14 rrcurveto
+          -2 -85 -3 -14 -14 0 rrcurveto
+          -8 0 -32 0 -7 0 rrcurveto
+          -14 0 -3 4 0 26 rrcurveto
+          0 319 rlineto
+          -63 0 rlineto
+          -215 -340 rmoveto
+          10 -85 rlineto
+          56 13 69 16 67 16 rrcurveto
+          -5 81 rlineto
+          -74 -16 -72 -16 -51 -9 rrcurveto
+          -44 754 rmoveto
+          0 -322 rlineto
+          0 -142 -4 -196 -54 -135 rrcurveto
+          15 -10 29 -27 12 -16 rrcurveto
+          59 146 10 226 0 154 rrcurveto
+          0 322 rlineto
+          -67 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni6F09">
+          261 758 rmoveto
+          0 -87 rlineto
+          456 0 rlineto
+          0 87 rlineto
+          -456 0 rlineto
+          97 -523 rmoveto
+          0 -81 rlineto
+          131 0 rlineto
+          0 81 rlineto
+          -131 0 rlineto
+          -35 112 rmoveto
+          0 -363 rlineto
+          64 0 rlineto
+          0 363 rlineto
+          -64 0 rlineto
+          104 498 rmoveto
+          0 -141 rlineto
+          76 0 rlineto
+          0 141 rlineto
+          -76 0 rlineto
+          -60 -162 rmoveto
+          0 -302 rlineto
+          61 0 rlineto
+          0 302 rlineto
+          -61 0 rlineto
+          136 0 rmoveto
+          0 -302 rlineto
+          61 0 rlineto
+          0 302 rlineto
+          -61 0 rlineto
+          169 -404 rmoveto
+          -35 -32 -61 -44 -40 -23 rrcurveto
+          35 -58 rlineto
+          42 22 58 35 42 37 rrcurveto
+          -41 63 rlineto
+          -408 307 rmoveto
+          0 -82 rlineto
+          372 0 rlineto
+          0 -99 rlineto
+          -372 0 rlineto
+          0 -82 rlineto
+          441 0 rlineto
+          0 263 rlineto
+          -441 0 rlineto
+          248 -238 rmoveto
+          0 -314 rlineto
+          0 -86 15 -25 61 0 rrcurveto
+          12 0 47 0 13 0 rrcurveto
+          49 0 17 33 6 120 rrcurveto
+          -18 6 -27 13 -13 15 rrcurveto
+          -1 -93 -4 -15 -17 0 rrcurveto
+          -9 0 -37 0 -8 0 rrcurveto
+          -18 0 -3 4 0 28 rrcurveto
+          0 314 rlineto
+          -65 0 rlineto
+          -241 -342 rmoveto
+          12 -87 rlineto
+          61 14 77 19 75 18 rrcurveto
+          -4 81 rlineto
+          -82 -18 -82 -17 -57 -10 rrcurveto
+          -47 752 rmoveto
+          0 -324 rlineto
+          0 -145 -6 -195 -63 -135 rrcurveto
+          17 -9 31 -24 14 -16 rrcurveto
+          66 144 10 223 0 157 rrcurveto
+          0 324 rlineto
+          -69 0 rlineto
+          -171 9 rmoveto
+          41 -27 53 -46 24 -33 rrcurveto
+          44 80 rlineto
+          -26 32 -52 41 -43 25 rrcurveto
+          -41 -72 rlineto
+          -31 -270 rmoveto
+          44 -26 53 -42 26 -33 rrcurveto
+          43 81 rlineto
+          -26 32 -56 38 -43 23 rrcurveto
+          -41 -73 rlineto
+          7 -523 rmoveto
+          67 -51 rlineto
+          32 96 35 120 27 107 rrcurveto
+          -60 52 rlineto
+          -30 -116 -41 -129 -30 -79 rrcurveto
+          endchar
+        </CharString>
+        <CharString name="uni6F60">
+          53 767 rmoveto
+          41 -27 53 -45 24 -34 rrcurveto
+          44 79 rlineto
+          -26 34 -52 41 -43 24 rrcurveto
+          -41 -72 rlineto
+          -31 -270 rmoveto
+          43 -26 53 -42 25 -31 rrcurveto
+          43 81 rlineto
+          -26 31 -54 38 -43 21 rrcurveto
+          -41 -72 rlineto
+          11 -523 rmoveto
+          67 -51 rlineto
+          33 96 35 120 27 107 rrcurveto
+          -60 52 rlineto
+          -31 -116 -41 -129 -30 -79 rrcurveto
+          201 839 rmoveto
+          0 -243 rlineto
+          0 -80 17 -21 59 0 rrcurveto
+          12 0 57 0 13 0 rrcurveto
+          44 0 17 24 7 83 rrcurveto
+          -17 5 -25 13 -12 12 rrcurveto
+          -2 -55 -3 -9 -16 0 rrcurveto
+          -13 0 -45 0 -9 0 rrcurveto
+          -20 0 -4 4 0 24 rrcurveto
+          0 243 rlineto
+          -60 0 rlineto
+          -16 -424 rmoveto
+          0 -82 rlineto
+          493 0 rlineto
+          0 82 rlineto
+          -493 0 rlineto
+          -22 -193 rmoveto
+          0 -85 rlineto
+          531 0 rlineto
+          0 85 rlineto
+          -531 0 rlineto
+          133 293 rmoveto
+          0 -326 rlineto
+          70 0 rlineto
+          0 326 rlineto
+          -70 0 rlineto
+          190 0 rmoveto
+          0 -324 rlineto
+          70 0 rlineto
+          0 324 rlineto
+          -70 0 rlineto
+          -251 324 rmoveto
+          0 -65 rlineto
+          114 0 rlineto
+          0 -65 rlineto
+          -114 0 rlineto
+          0 -65 rlineto
+          171 0 rlineto
+          0 195 rlineto
+          -171 0 rlineto
+          210 0 rmoveto
+          0 -242 rlineto
+          0 -81 17 -20 60 0 rrcurveto
+          13 0 62 0 13 0 rrcurveto
+          45 0 18 23 6 84 rrcurveto
+          -16 5 -24 12 -13 13 rrcurveto
+          -2 -56 -3 -9 -18 0 rrcurveto
+          -13 0 -50 0 -10 0 rrcurveto
+          -22 0 -3 4 0 25 rrcurveto
+          0 242 rlineto
+          -60 0 rlineto
+          32 0 rmoveto
+          0 -65 rlineto
+          118 0 rlineto
+          0 -66 rlineto
+          -118 0 rlineto
+          0 -66 rlineto
+          176 0 rlineto
+          0 197 rlineto
+          -176 0 rlineto
+          -151 -714 rmoveto
+          -37 -50 -66 -44 -62 -28 rrcurveto
+          16 -17 26 -34 11 -19 rrcurveto
+          62 37 74 59 44 65 rrcurveto
+          -68 31 rlineto
+          128 -40 rmoveto
+          56 -43 74 -66 34 -40 rrcurveto
+          65 48 rlineto
+          -40 42 -74 60 -55 41 rrcurveto
+          -60 -42 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni714B">
+          259 19 rmoveto
+          0 -84 rlineto
+          469 0 rlineto
+          0 84 rlineto
+          -469 0 rlineto
+          69 173 rmoveto
+          0 -80 rlineto
+          354 0 rlineto
+          0 80 rlineto
+          -354 0 rlineto
+          53 406 rmoveto
+          233 0 rlineto
+          0 -70 rlineto
+          -233 0 rlineto
+          0 70 rlineto
+          0 141 rmoveto
+          233 0 rlineto
+          0 -69 rlineto
+          -233 0 rlineto
+          0 69 rlineto
+          -68 76 rmoveto
+          0 -363 rlineto
+          371 0 rlineto
+          0 363 rlineto
+          -371 0 rlineto
+          148 -345 rmoveto
+          0 -482 rlineto
+          72 0 rlineto
+          0 482 rlineto
+          -72 0 rlineto
+          -122 -19 rmoveto
+          -19 -82 -33 -79 -43 -52 rrcurveto
+          16 -12 27 -27 12 -15 rrcurveto
+          43 59 40 92 23 95 rrcurveto
+          -66 21 rlineto
+          16 -92 rmoveto
+          -30 -80 rlineto
+          374 0 rlineto
+          0 80 rlineto
+          -344 0 rlineto
+          -225 477 rmoveto
+          0 -343 rlineto
+          0 -180 -11 -190 -103 -143 rrcurveto
+          15 -15 23 -33 10 -21 rrcurveto
+          118 162 14 214 0 205 rrcurveto
+          0 344 rlineto
+          -66 0 rlineto
+          -76 -198 rmoveto
+          0 -89 -11 -102 -25 -56 rrcurveto
+          50 -31 rlineto
+          29 67 10 108 0 94 rrcurveto
+          -53 9 rlineto
+          187 52 rmoveto
+          -11 -64 -24 -92 -19 -58 rrcurveto
+          43 -25 rlineto
+          21 53 26 85 24 70 rrcurveto
+          -60 31 rlineto
+          -59 -393 rmoveto
+          -45 -45 rlineto
+          24 -49 52 -118 21 -59 rrcurveto
+          51 70 rlineto
+          -15 32 -69 138 -19 31 rrcurveto
+          endchar
+        </CharString>
+        <CharString name="uni7243">
+          24 347 rmoveto
+          0 -91 rlineto
+          200 0 rlineto
+          0 91 rlineto
+          -200 0 rlineto
+          174 501 rmoveto
+          0 -937 rlineto
+          72 0 rlineto
+          0 937 rlineto
+          -72 0 rlineto
+          -133 -538 rmoveto
+          0 -62 rlineto
+          0 -74 -5 -130 -41 -89 rrcurveto
+          17 -10 29 -22 14 -15 rrcurveto
+          48 102 8 151 0 85 rrcurveto
+          0 64 rlineto
+          -70 0 rlineto
+          220 410 rmoveto
+          0 -84 rlineto
+          443 0 rlineto
+          0 84 rlineto
+          -443 0 rlineto
+          2 -445 rmoveto
+          0 -83 rlineto
+          438 0 rlineto
+          0 83 rlineto
+          -438 0 rlineto
+          182 65 rmoveto
+          0 -430 rlineto
+          72 0 rlineto
+          0 430 rlineto
+          -72 0 rlineto
+          -21 -111 rmoveto
+          -37 -89 -72 -88 -71 -45 rrcurveto
+          15 -17 22 -33 11 -22 rrcurveto
+          74 55 72 104 42 109 rrcurveto
+          -56 26 rlineto
+          115 1 rmoveto
+          -51 -26 rlineto
+          42 -101 72 -109 65 -56 rrcurveto
+          11 23 23 34 15 17 rrcurveto
+          -64 45 -75 90 -38 83 rrcurveto
+          -102 620 rmoveto
+          0 -356 rlineto
+          200 0 rlineto
+          0 337 rlineto
+          -66 1 rlineto
+          0 -266 rlineto
+          -70 0 rlineto
+          0 284 rlineto
+          -64 0 rlineto
+          -123 -20 rmoveto
+          0 -476 rlineto
+          376 0 rlineto
+          0 81 rlineto
+          -311 0 rlineto
+          0 395 rlineto
+          -65 0 rlineto
+          -282 -32 rmoveto
+          0 -326 rlineto
+          186 0 rlineto
+          0 91 rlineto
+          -117 0 rlineto
+          0 235 rlineto
+          -69 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni7329">
+          27 788 rmoveto
+          127 -142 19 -157 0 -187 rrcurveto
+          0 -129 -7 -115 -17 -30 rrcurveto
+          -7 -11 -7 -5 -11 -2 rrcurveto
+          -17 -3 -29 0 -37 3 rrcurveto
+          13 -29 8 -36 1 -33 rrcurveto
+          34 -2 32 1 29 8 rrcurveto
+          19 5 15 13 12 20 rrcurveto
+          34 61 8 138 0 144 rrcurveto
+          0 197 -19 185 -146 162 rrcurveto
+          -54 -56 rlineto
+          150 -307 rmoveto
+          -33 -91 -69 -104 -60 -52 rrcurveto
+          18 -18 21 -34 12 -24 rrcurveto
+          61 65 70 115 36 98 rrcurveto
+          -56 45 rlineto
+          33 362 rmoveto
+          -42 -107 -74 -118 -77 -73 rrcurveto
+          16 -16 25 -31 11 -19 rrcurveto
+          79 81 78 117 51 120 rrcurveto
+          -67 46 rlineto
+          162 -251 rmoveto
+          241 0 rlineto
+          0 -71 rlineto
+          -241 0 rlineto
+          0 71 rlineto
+          0 143 rmoveto
+          241 0 rlineto
+          0 -71 rlineto
+          -241 0 rlineto
+          0 71 rlineto
+          -71 77 rmoveto
+          0 -367 rlineto
+          386 0 rlineto
+          0 367 rlineto
+          -386 0 rlineto
+          26 -377 rmoveto
+          -20 -79 -38 -80 -44 -50 rrcurveto
+          17 -13 28 -25 12 -16 rrcurveto
+          45 58 43 91 25 92 rrcurveto
+          -68 22 rlineto
+          20 -91 rmoveto
+          -31 -82 rlineto
+          388 0 rlineto
+          0 82 rlineto
+          -357 0 rlineto
+          -40 -162 rmoveto
+          0 -78 rlineto
+          378 0 rlineto
+          0 78 rlineto
+          -378 0 rlineto
+          -58 -168 rmoveto
+          0 -84 rlineto
+          476 0 rlineto
+          0 84 rlineto
+          -476 0 rlineto
+          206 408 rmoveto
+          0 -442 rlineto
+          75 0 rlineto
+          0 442 rlineto
+          -75 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni7446">
+          26 791 rmoveto
+          0 -95 rlineto
+          251 0 rlineto
+          0 95 rlineto
+          -251 0 rlineto
+          10 -275 rmoveto
+          0 -94 rlineto
+          230 0 rlineto
+          0 94 rlineto
+          -230 0 rlineto
+          -22 -342 rmoveto
+          18 -97 rlineto
+          71 28 90 37 85 35 rrcurveto
+          -9 93 rlineto
+          -93 -37 -97 -38 -65 -21 rrcurveto
+          100 580 rmoveto
+          0 -587 rlineto
+          73 38 rlineto
+          0 549 rlineto
+          -73 0 rlineto
+          139 -740 rmoveto
+          0 -85 rlineto
+          473 0 rlineto
+          0 85 rlineto
+          -473 0 rlineto
+          67 171 rmoveto
+          0 -81 rlineto
+          368 0 rlineto
+          0 81 rlineto
+          -368 0 rlineto
+          65 406 rmoveto
+          232 0 rlineto
+          0 -69 rlineto
+          -232 0 rlineto
+          0 69 rlineto
+          0 143 rmoveto
+          232 0 rlineto
+          0 -69 rlineto
+          -232 0 rlineto
+          0 69 rlineto
+          -69 77 rmoveto
+          0 -367 rlineto
+          373 0 rlineto
+          0 367 rlineto
+          -373 0 rlineto
+          151 -389 rmoveto
+          0 -446 rlineto
+          75 0 rlineto
+          0 446 rlineto
+          -75 0 rlineto
+          -128 14 rmoveto
+          -18 -78 -34 -77 -41 -50 rrcurveto
+          15 -13 27 -26 11 -15 rrcurveto
+          42 57 40 90 23 91 rrcurveto
+          -65 21 rlineto
+          10 -91 rmoveto
+          -30 -81 rlineto
+          382 0 rlineto
+          0 81 rlineto
+          -352 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni75B2">
+          291 375 rmoveto
+          0 -81 rlineto
+          316 0 rlineto
+          0 81 rlineto
+          -316 0 rlineto
+          0 207 rmoveto
+          0 -84 rlineto
+          348 0 rlineto
+          0 84 rlineto
+          -348 0 rlineto
+          149 101 rmoveto
+          0 -338 rlineto
+          67 0 rlineto
+          0 338 rlineto
+          -67 0 rlineto
+          149 -308 rmoveto
+          0 -14 rlineto
+          -41 -202 -121 -121 -146 -45 rrcurveto
+          12 -20 17 -37 7 -25 rrcurveto
+          164 63 130 131 50 253 rrcurveto
+          -46 21 rlineto
+          -12 -4 rlineto
+          -14 0 rlineto
+          -189 -49 rmoveto
+          -64 -19 rlineto
+          57 -211 105 -130 175 -55 rrcurveto
+          10 26 19 39 16 19 rrcurveto
+          -165 42 -105 113 -48 176 rrcurveto
+          -141 256 rmoveto
+          0 -196 rlineto
+          0 -126 -9 -174 -80 -123 rrcurveto
+          15 -10 29 -27 12 -17 rrcurveto
+          84 133 16 201 0 142 rrcurveto
+          0 197 rlineto
+          -67 0 rlineto
+          373 0 rmoveto
+          0 -12 rlineto
+          -8 -53 -14 -65 -12 -41 rrcurveto
+          62 -14 rlineto
+          15 44 17 69 13 62 rrcurveto
+          -51 13 rlineto
+          -12 -3 rlineto
+          -10 0 rlineto
+          -464 181 rmoveto
+          0 -85 rlineto
+          549 0 rlineto
+          0 85 rlineto
+          -549 0 rlineto
+          -36 0 rmoveto
+          0 -327 rlineto
+          0 -145 -9 -187 -86 -129 rrcurveto
+          14 -13 28 -34 11 -19 rrcurveto
+          94 141 16 226 0 160 rrcurveto
+          0 327 rlineto
+          -68 0 rlineto
+          241 86 rmoveto
+          0 -139 rlineto
+          78 0 rlineto
+          0 139 rlineto
+          -78 0 rlineto
+          -348 -210 rmoveto
+          21 -64 18 -84 5 -53 rrcurveto
+          58 35 rlineto
+          -5 51 -20 82 -23 63 rrcurveto
+          -54 -30 rlineto
+          -9 -359 rmoveto
+          22 -89 rlineto
+          41 32 45 35 43 36 rrcurveto
+          -17 75 rlineto
+          -51 -35 -49 -34 -34 -20 rrcurveto
+          endchar
+        </CharString>
+        <CharString name="uni7612">
+          176 761 rmoveto
+          0 -77 rlineto
+          548 0 rlineto
+          0 77 rlineto
+          -548 0 rlineto
+          197 88 rmoveto
+          0 -128 rlineto
+          74 0 rlineto
+          0 128 rlineto
+          -74 0 rlineto
+          -247 -88 rmoveto
+          0 -324 rlineto
+          0 -142 -8 -187 -81 -128 rrcurveto
+          14 -12 27 -34 11 -19 rrcurveto
+          90 141 14 223 0 158 rrcurveto
+          0 324 rlineto
+          -67 0 rlineto
+          -101 -114 rmoveto
+          21 -65 18 -84 5 -53 rrcurveto
+          58 35 rlineto
+          -5 51 -20 82 -23 63 rrcurveto
+          -54 -29 rlineto
+          -11 -361 rmoveto
+          22 -90 rlineto
+          40 31 42 34 41 34 rrcurveto
+          -17 76 rlineto
+          -49 -34 -46 -32 -33 -19 rrcurveto
+          188 -203 rmoveto
+          0 -69 rlineto
+          514 0 rlineto
+          0 69 rlineto
+          -514 0 rlineto
+          68 431 rmoveto
+          0 -64 rlineto
+          385 0 rlineto
+          0 64 rlineto
+          -385 0 rlineto
+          53 -276 rmoveto
+          275 0 rlineto
+          0 -49 rlineto
+          -275 0 rlineto
+          0 49 rlineto
+          0 107 rmoveto
+          275 0 rlineto
+          0 -48 rlineto
+          -275 0 rlineto
+          0 48 rlineto
+          -67 61 rmoveto
+          0 -278 rlineto
+          411 0 rlineto
+          0 278 rlineto
+          -411 0 rlineto
+          168 178 rmoveto
+          0 -671 rlineto
+          69 0 rlineto
+          0 671 rlineto
+          -69 0 rlineto
+          -198 49 rmoveto
+          0 -145 rlineto
+          62 0 rlineto
+          0 77 rlineto
+          350 0 rlineto
+          0 -77 rlineto
+          65 0 rlineto
+          0 145 rlineto
+          -477 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni763C">
+          164 767 rmoveto
+          0 -80 rlineto
+          557 0 rlineto
+          0 80 rlineto
+          -557 0 rlineto
+          -40 0 rmoveto
+          0 -325 rlineto
+          0 -144 -8 -187 -83 -129 rrcurveto
+          14 -12 28 -34 10 -19 rrcurveto
+          93 141 14 225 0 159 rrcurveto
+          0 325 rlineto
+          -68 0 rlineto
+          249 82 rmoveto
+          0 -137 rlineto
+          78 0 rlineto
+          0 137 rlineto
+          -78 0 rlineto
+          -352 -201 rmoveto
+          21 -65 19 -84 4 -53 rrcurveto
+          59 35 rlineto
+          -6 51 -20 82 -22 63 rrcurveto
+          -55 -29 rlineto
+          -9 -360 rmoveto
+          22 -89 rlineto
+          43 32 44 35 42 36 rrcurveto
+          -17 76 rlineto
+          -51 -36 -48 -33 -35 -21 rrcurveto
+          202 343 rmoveto
+          0 -72 rlineto
+          493 0 rlineto
+          0 72 rlineto
+          -493 0 rlineto
+          -11 -473 rmoveto
+          0 -74 rlineto
+          516 0 rlineto
+          0 74 rlineto
+          -516 0 rlineto
+          128 537 rmoveto
+          0 -210 rlineto
+          65 0 rlineto
+          0 210 rlineto
+          -65 0 rlineto
+          184 0 rmoveto
+          0 -210 rlineto
+          65 0 rlineto
+          0 210 rlineto
+          -65 0 rlineto
+          -200 -366 rmoveto
+          282 0 rlineto
+          0 -52 rlineto
+          -282 0 rlineto
+          0 52 rlineto
+          0 112 rmoveto
+          282 0 rlineto
+          0 -51 rlineto
+          -282 0 rlineto
+          0 51 rlineto
+          -67 64 rmoveto
+          0 -292 rlineto
+          420 0 rlineto
+          0 292 rlineto
+          -420 0 rlineto
+          173 -273 rmoveto
+          -11 -150 -34 -66 -190 -33 rrcurveto
+          12 -18 16 -33 4 -22 rrcurveto
+          210 45 45 90 15 187 rrcurveto
+          -67 0 rlineto
+          80 -115 rmoveto
+          -59 -12 rlineto
+          39 -118 79 -57 132 -20 rrcurveto
+          8 25 16 34 15 19 rrcurveto
+          -120 8 -78 38 -32 83 rrcurveto
+          endchar
+        </CharString>
+        <CharString name="uni76EC">
+          63 401 rmoveto
+          0 -73 rlineto
+          313 0 rlineto
+          0 73 rlineto
+          -313 0 rlineto
+          340 236 rmoveto
+          0 -67 rlineto
+          297 0 rlineto
+          0 67 rlineto
+          -297 0 rlineto
+          45 213 rmoveto
+          -19 -71 -35 -72 -40 -46 rrcurveto
+          16 -11 26 -24 12 -13 rrcurveto
+          39 51 40 82 23 83 rrcurveto
+          -62 21 rlineto
+          -385 -46 rmoveto
+          0 -445 rlineto
+          67 0 rlineto
+          0 372 rlineto
+          243 0 rlineto
+          0 73 rlineto
+          -310 0 rlineto
+          30 -135 rmoveto
+          0 -65 rlineto
+          207 0 rlineto
+          0 -76 rlineto
+          -207 0 rlineto
+          0 -64 rlineto
+          270 0 rlineto
+          0 205 rlineto
+          -270 0 rlineto
+          112 106 rmoveto
+          0 -144 rlineto
+          62 0 rlineto
+          0 144 rlineto
+          -62 0 rlineto
+          317 -91 rmoveto
+          0 -205 rlineto
+          62 0 rlineto
+          0 205 rlineto
+          -62 0 rlineto
+          -317 -180 rmoveto
+          0 -149 rlineto
+          62 0 rlineto
+          0 149 rlineto
+          -62 0 rlineto
+          238 269 rmoveto
+          -26 -78 rlineto
+          294 0 rlineto
+          0 78 rlineto
+          -268 0 rlineto
+          29 -318 rmoveto
+          160 0 rlineto
+          0 -70 rlineto
+          -160 0 rlineto
+          0 70 rlineto
+          -55 63 rmoveto
+          0 -195 rlineto
+          274 0 rlineto
+          0 195 rlineto
+          -274 0 rlineto
+          -387 -483 rmoveto
+          0 -88 rlineto
+          690 0 rlineto
+          0 88 rlineto
+          -690 0 rlineto
+          81 236 rmoveto
+          0 -283 rlineto
+          70 0 rlineto
+          0 202 rlineto
+          81 0 rlineto
+          0 -202 rlineto
+          69 0 rlineto
+          0 202 rlineto
+          80 0 rlineto
+          0 -202 rlineto
+          71 0 rlineto
+          0 202 rlineto
+          80 0 rlineto
+          0 -202 rlineto
+          75 0 rlineto
+          0 283 rlineto
+          -526 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni7714">
+          489 728 rmoveto
+          101 0 rlineto
+          0 -111 rlineto
+          -101 0 rlineto
+          0 111 rlineto
+          -168 0 rmoveto
+          100 0 rlineto
+          0 -111 rlineto
+          -100 0 rlineto
+          0 111 rlineto
+          -164 0 rmoveto
+          96 0 rlineto
+          0 -111 rlineto
+          -96 0 rlineto
+          0 111 rlineto
+          -71 81 rmoveto
+          0 -273 rlineto
+          578 0 rlineto
+          0 273 rlineto
+          -578 0 rlineto
+          324 -364 rmoveto
+          -57 -22 rlineto
+          62 -203 109 -155 153 -72 rrcurveto
+          10 27 23 39 15 21 rrcurveto
+          -148 56 -112 138 -55 171 rrcurveto
+          207 53 rmoveto
+          -43 -67 -74 -87 -54 -52 rrcurveto
+          51 -54 rlineto
+          55 49 72 78 57 71 rrcurveto
+          -64 62 rlineto
+          -539 -57 rmoveto
+          48 -51 60 -73 27 -49 rrcurveto
+          58 60 rlineto
+          -29 48 -62 70 -49 48 rrcurveto
+          -53 -53 rlineto
+          259 113 rmoveto
+          0 -528 rlineto
+          0 -16 -5 -4 -13 0 rrcurveto
+          -13 -1 -45 0 -44 2 rrcurveto
+          9 -27 11 -42 4 -28 rrcurveto
+          63 0 42 1 29 16 rrcurveto
+          28 15 8 28 0 54 rrcurveto
+          0 530 rlineto
+          -74 0 rlineto
+          -305 -453 rmoveto
+          29 -93 rlineto
+          72 42 92 55 85 54 rrcurveto
+          -15 84 rlineto
+          -96 -54 -102 -56 -65 -32 rrcurveto
+          endchar
+        </CharString>
+        <CharString name="uni7772">
+          84 796 rmoveto
+          0 -87 rlineto
+          123 0 rlineto
+          0 -539 rlineto
+          -123 0 rlineto
+          0 -88 rlineto
+          193 0 rlineto
+          0 714 rlineto
+          -193 0 rlineto
+          4 -208 rmoveto
+          0 -84 rlineto
+          159 0 rlineto
+          0 84 rlineto
+          -159 0 rlineto
+          0 -207 rmoveto
+          0 -85 rlineto
+          159 0 rlineto
+          0 85 rlineto
+          -159 0 rlineto
+          -40 415 rmoveto
+          0 -799 rlineto
+          69 0 rlineto
+          0 799 rlineto
+          -69 0 rlineto
+          242 -783 rmoveto
+          0 -83 rlineto
+          434 0 rlineto
+          0 83 rlineto
+          -434 0 rlineto
+          46 172 rmoveto
+          0 -77 rlineto
+          349 0 rlineto
+          0 77 rlineto
+          -349 0 rlineto
+          61 407 rmoveto
+          221 0 rlineto
+          0 -71 rlineto
+          -221 0 rlineto
+          0 71 rlineto
+          0 142 rmoveto
+          221 0 rlineto
+          0 -70 rlineto
+          -221 0 rlineto
+          0 70 rlineto
+          -67 76 rmoveto
+          0 -365 rlineto
+          359 0 rlineto
+          0 365 rlineto
+          -359 0 rlineto
+          144 -348 rmoveto
+          0 -485 rlineto
+          71 0 rlineto
+          0 485 rlineto
+          -71 0 rlineto
+          -120 -26 rmoveto
+          -20 -74 -33 -76 -38 -49 rrcurveto
+          15 -12 25 -26 12 -14 rrcurveto
+          39 56 39 87 24 87 rrcurveto
+          -63 21 rlineto
+          15 -86 rmoveto
+          -30 -80 rlineto
+          364 0 rlineto
+          0 80 rlineto
+          -334 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni8165">
+          98 813 rmoveto
+          0 -93 rlineto
+          154 0 rlineto
+          0 93 rlineto
+          -154 0 rlineto
+          4 -233 rmoveto
+          0 -92 rlineto
+          142 0 rlineto
+          0 92 rlineto
+          -142 0 rlineto
+          196 -567 rmoveto
+          0 -84 rlineto
+          429 0 rlineto
+          0 84 rlineto
+          -429 0 rlineto
+          40 170 rmoveto
+          0 -79 rlineto
+          346 0 rlineto
+          0 79 rlineto
+          -346 0 rlineto
+          -238 159 rmoveto
+          0 -94 rlineto
+          144 0 rlineto
+          0 94 rlineto
+          -144 0 rlineto
+          -33 471 rmoveto
+          0 -367 rlineto
+          0 -148 -2 -203 -48 -141 rrcurveto
+          18 -9 30 -22 13 -15 rrcurveto
+          50 150 7 231 0 158 rrcurveto
+          0 366 rlineto
+          -68 0 rlineto
+          145 0 rmoveto
+          0 -788 rlineto
+          0 -12 -3 -4 -9 -1 rrcurveto
+          -9 -1 -27 0 -28 1 rrcurveto
+          10 -25 8 -45 2 -25 rrcurveto
+          48 -1 29 3 21 17 rrcurveto
+          21 16 7 29 0 47 rrcurveto
+          0 789 rlineto
+          -70 0 rlineto
+          189 -222 rmoveto
+          217 0 rlineto
+          0 -69 rlineto
+          -217 0 rlineto
+          0 69 rlineto
+          0 142 rmoveto
+          217 0 rlineto
+          0 -68 rlineto
+          -217 0 rlineto
+          0 68 rlineto
+          -69 78 rmoveto
+          0 -366 rlineto
+          358 0 rlineto
+          0 366 rlineto
+          -358 0 rlineto
+          141 -390 rmoveto
+          0 -445 rlineto
+          73 0 rlineto
+          0 445 rlineto
+          -73 0 rlineto
+          -119 12 rmoveto
+          -19 -77 -34 -78 -38 -51 rrcurveto
+          15 -12 26 -26 12 -15 rrcurveto
+          39 58 40 90 23 89 rrcurveto
+          -64 22 rlineto
+          15 -88 rmoveto
+          -30 -82 rlineto
+          365 0 rlineto
+          0 82 rlineto
+          -335 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni821E">
+          169 852 rmoveto
+          -24 -61 -44 -72 -61 -54 rrcurveto
+          17 -12 26 -27 13 -20 rrcurveto
+          65 67 46 78 37 82 rrcurveto
+          -75 19 rlineto
+          6 -92 rmoveto
+          -59 -81 rlineto
+          562 0 rlineto
+          0 81 rlineto
+          -503 0 rlineto
+          2 -478 rmoveto
+          -50 -70 rlineto
+          187 0 rlineto
+          0 70 rlineto
+          -137 0 rlineto
+          -137 314 rmoveto
+          0 -83 rlineto
+          671 0 rlineto
+          0 83 rlineto
+          -671 0 rlineto
+          15 -163 rmoveto
+          0 -82 rlineto
+          647 0 rlineto
+          0 82 rlineto
+          -647 0 rlineto
+          95 299 rmoveto
+          0 -338 rlineto
+          71 0 rlineto
+          0 338 rlineto
+          -71 0 rlineto
+          130 0 rmoveto
+          0 -338 rlineto
+          64 0 rlineto
+          0 338 rlineto
+          -64 0 rlineto
+          127 0 rmoveto
+          0 -338 rlineto
+          64 0 rlineto
+          0 338 rlineto
+          -64 0 rlineto
+          126 0 rmoveto
+          0 -338 rlineto
+          72 0 rlineto
+          0 338 rlineto
+          -72 0 rlineto
+          -355 -373 rmoveto
+          -32 -82 -60 -71 -67 -44 rrcurveto
+          14 -15 23 -31 10 -15 rrcurveto
+          69 52 67 85 39 99 rrcurveto
+          -63 22 rlineto
+          114 -77 rmoveto
+          0 -14 rlineto
+          -36 -152 -95 -90 -118 -44 rrcurveto
+          14 -15 21 -37 8 -21 rrcurveto
+          124 53 104 106 46 191 rrcurveto
+          -41 26 rlineto
+          -13 -3 rlineto
+          -14 0 rlineto
+          -189 -124 rmoveto
+          31 -31 39 -43 18 -30 rrcurveto
+          51 49 rlineto
+          -20 28 -38 42 -31 28 rrcurveto
+          -50 -43 rlineto
+          264 127 rmoveto
+          0 -80 rlineto
+          331 0 rlineto
+          0 80 rlineto
+          -331 0 rlineto
+          -37 -179 rmoveto
+          0 -79 rlineto
+          388 0 rlineto
+          0 79 rlineto
+          -388 0 rlineto
+          195 234 rmoveto
+          0 -429 rlineto
+          73 0 rlineto
+          0 429 rlineto
+          -73 0 rlineto
+          -123 -88 rmoveto
+          0 -190 rlineto
+          63 0 rlineto
+          0 190 rlineto
+          -63 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni82E8">
+          43 780 rmoveto
+          0 -91 rlineto
+          667 0 rlineto
+          0 91 rlineto
+          -667 0 rlineto
+          164 69 rmoveto
+          0 -213 rlineto
+          76 0 rlineto
+          0 213 rlineto
+          -76 0 rlineto
+          258 0 rmoveto
+          0 -213 rlineto
+          76 0 rlineto
+          0 213 rlineto
+          -76 0 rlineto
+          -353 -237 rmoveto
+          0 -213 rlineto
+          0 -130 -8 -177 -83 -125 rrcurveto
+          18 -11 33 -31 13 -17 rrcurveto
+          88 133 14 210 0 147 rrcurveto
+          0 214 rlineto
+          -75 0 rlineto
+          42 0 rmoveto
+          0 -84 rlineto
+          435 0 rlineto
+          0 -85 rlineto
+          -435 0 rlineto
+          0 -84 rlineto
+          511 0 rlineto
+          0 253 rlineto
+          -511 0 rlineto
+          96 -282 rmoveto
+          0 -272 rlineto
+          0 -107 30 -30 109 0 rrcurveto
+          23 0 146 0 25 0 rrcurveto
+          92 0 23 36 12 143 rrcurveto
+          -21 6 -32 15 -18 16 rrcurveto
+          -5 -106 -8 -17 -47 0 rrcurveto
+          -35 0 -125 0 -27 0 rrcurveto
+          -58 0 -10 7 0 38 rrcurveto
+          0 271 rlineto
+          -74 0 rlineto
+          344 -10 rmoveto
+          -72 -47 -126 -44 -115 -29 rrcurveto
+          8 -21 11 -35 4 -23 rrcurveto
+          120 27 137 43 95 56 rrcurveto
+          -62 73 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni83EB">
+          38 792 rmoveto
+          0 -86 rlineto
+          676 0 rlineto
+          0 86 rlineto
+          -676 0 rlineto
+          33 -143 rmoveto
+          0 -81 rlineto
+          612 0 rlineto
+          0 81 rlineto
+          -612 0 rlineto
+          13 -371 rmoveto
+          0 -77 rlineto
+          585 0 rlineto
+          0 77 rlineto
+          -585 0 rlineto
+          27 -127 rmoveto
+          0 -75 rlineto
+          532 0 rlineto
+          0 75 rlineto
+          -532 0 rlineto
+          -78 -127 rmoveto
+          0 -81 rlineto
+          685 0 rlineto
+          0 81 rlineto
+          -685 0 rlineto
+          176 826 rmoveto
+          0 -183 rlineto
+          80 0 rlineto
+          0 183 rlineto
+          -80 0 rlineto
+          251 0 rmoveto
+          0 -183 rlineto
+          80 0 rlineto
+          0 183 rlineto
+          -80 0 rlineto
+          -126 -244 rmoveto
+          0 -618 rlineto
+          80 0 rlineto
+          0 618 rlineto
+          -80 0 rlineto
+          -142 -152 rmoveto
+          362 0 rlineto
+          0 -62 rlineto
+          -362 0 rlineto
+          0 62 rlineto
+          -75 68 rmoveto
+          0 -199 rlineto
+          517 0 rlineto
+          0 199 rlineto
+          -517 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni83F7">
+          38 548 rmoveto
+          0 -70 rlineto
+          553 0 rlineto
+          0 70 rlineto
+          -553 0 rlineto
+          543 9 rmoveto
+          0 -88 rlineto
+          137 0 rlineto
+          0 88 rlineto
+          -137 0 rlineto
+          -248 -283 rmoveto
+          0 -363 rlineto
+          79 0 rlineto
+          0 363 rlineto
+          -79 0 rlineto
+          -198 -86 rmoveto
+          0 -249 rlineto
+          78 0 rlineto
+          0 167 rlineto
+          356 0 rlineto
+          0 82 rlineto
+          -434 0 rlineto
+          405 0 rmoveto
+          0 -150 rlineto
+          0 -11 -2 -3 -11 -1 rrcurveto
+          -9 -1 -35 0 -32 2 rrcurveto
+          10 -24 11 -36 3 -27 rrcurveto
+          50 0 35 0 26 14 rrcurveto
+          26 14 7 25 0 45 rrcurveto
+          0 153 rlineto
+          -79 0 rlineto
+          -488 123 rmoveto
+          0 -168 rlineto
+          76 0 rlineto
+          0 95 rlineto
+          491 0 rlineto
+          0 -95 rlineto
+          79 0 rlineto
+          0 168 rlineto
+          -646 0 rlineto
+          61 357 rmoveto
+          0 -74 rlineto
+          443 0 rlineto
+          0 -167 rlineto
+          -448 0 rlineto
+          0 -73 rlineto
+          529 0 rlineto
+          0 314 rlineto
+          -524 0 rlineto
+          -68 134 rmoveto
+          0 -86 rlineto
+          663 0 rlineto
+          0 86 rlineto
+          -663 0 rlineto
+          163 48 rmoveto
+          0 -165 rlineto
+          80 0 rlineto
+          0 165 rlineto
+          -80 0 rlineto
+          251 0 rmoveto
+          0 -165 rlineto
+          81 0 rlineto
+          0 165 rlineto
+          -81 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni847A_E0101">
+          35 47 rmoveto
+          4 -86 rlineto
+          675 38 rlineto
+          -5 84 rlineto
+          -674 -36 rlineto
+          9 748 rmoveto
+          0 -87 rlineto
+          663 0 rlineto
+          0 87 rlineto
+          -663 0 rlineto
+          -1 -379 rmoveto
+          0 -79 rlineto
+          667 0 rlineto
+          0 79 rlineto
+          -667 0 rlineto
+          147 -125 rmoveto
+          0 -65 rlineto
+          362 0 rlineto
+          0 65 rlineto
+          -362 0 rlineto
+          0 -112 rmoveto
+          0 -65 rlineto
+          362 0 rlineto
+          0 65 rlineto
+          -362 0 rlineto
+          18 671 rmoveto
+          0 -179 rlineto
+          80 0 rlineto
+          0 179 rlineto
+          -80 0 rlineto
+          251 0 rmoveto
+          0 -179 rlineto
+          81 0 rlineto
+          0 179 rlineto
+          -81 0 rlineto
+          64 -458 rmoveto
+          0 -479 rlineto
+          79 0 rlineto
+          0 479 rlineto
+          -79 0 rlineto
+          -375 -3 rmoveto
+          0 -362 rlineto
+          79 0 rlineto
+          0 362 rlineto
+          -79 0 rlineto
+          57 198 rmoveto
+          334 0 rlineto
+          0 -60 rlineto
+          -334 0 rlineto
+          0 60 rlineto
+          -77 69 rmoveto
+          0 -198 rlineto
+          492 0 rlineto
+          0 198 rlineto
+          -492 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni8513">
+          67 194 rmoveto
+          0 -73 rlineto
+          517 0 rlineto
+          0 73 rlineto
+          -517 0 rlineto
+          127 328 rmoveto
+          356 0 rlineto
+          0 -39 rlineto
+          -356 0 rlineto
+          0 39 rlineto
+          0 93 rmoveto
+          356 0 rlineto
+          0 -39 rlineto
+          -356 0 rlineto
+          0 39 rlineto
+          -74 57 rmoveto
+          0 -247 rlineto
+          507 0 rlineto
+          0 247 rlineto
+          -507 0 rlineto
+          378 -336 rmoveto
+          103 0 rlineto
+          0 -53 rlineto
+          -103 0 rlineto
+          0 53 rlineto
+          -175 0 rmoveto
+          101 0 rlineto
+          0 -53 rlineto
+          -101 0 rlineto
+          0 53 rlineto
+          -173 0 rmoveto
+          99 0 rlineto
+          0 -53 rlineto
+          -99 0 rlineto
+          0 53 rlineto
+          -76 54 rmoveto
+          0 -161 rlineto
+          606 0 rlineto
+          0 161 rlineto
+          -606 0 rlineto
+          489 -196 rmoveto
+          0 -13 rlineto
+          -86 -132 -220 -45 -225 -9 rrcurveto
+          12 -22 11 -39 4 -25 rrcurveto
+          239 17 232 55 108 178 rrcurveto
+          -46 40 rlineto
+          -12 -5 rlineto
+          -17 0 rlineto
+          -336 -50 rmoveto
+          -59 -38 rlineto
+          113 -126 198 -55 211 -16 rrcurveto
+          8 24 17 38 15 22 rrcurveto
+          -209 9 -200 44 -94 98 rrcurveto
+          -186 659 rmoveto
+          0 -83 rlineto
+          668 0 rlineto
+          0 83 rlineto
+          -668 0 rlineto
+          167 47 rmoveto
+          0 -164 rlineto
+          80 0 rlineto
+          0 164 rlineto
+          -80 0 rlineto
+          251 0 rmoveto
+          0 -164 rlineto
+          81 0 rlineto
+          0 164 rlineto
+          -81 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni8541">
+          38 792 rmoveto
+          0 -82 rlineto
+          676 0 rlineto
+          0 82 rlineto
+          -676 0 rlineto
+          8 -225 rmoveto
+          0 -59 rlineto
+          544 0 rlineto
+          0 59 rlineto
+          -544 0 rlineto
+          528 6 rmoveto
+          0 -71 rlineto
+          133 0 rlineto
+          0 71 rlineto
+          -133 0 rlineto
+          -541 -411 rmoveto
+          0 -78 rlineto
+          685 0 rlineto
+          0 78 rlineto
+          -685 0 rlineto
+          23 212 rmoveto
+          0 -64 rlineto
+          274 0 rlineto
+          0 64 rlineto
+          -274 0 rlineto
+          154 476 rmoveto
+          0 -168 rlineto
+          78 0 rlineto
+          0 168 rlineto
+          -78 0 rlineto
+          -54 -494 rmoveto
+          0 -115 rlineto
+          73 0 rlineto
+          0 115 rlineto
+          -73 0 rlineto
+          303 494 rmoveto
+          0 -168 rlineto
+          80 0 rlineto
+          0 168 rlineto
+          -80 0 rlineto
+          -12 -536 rmoveto
+          154 0 rlineto
+          0 -49 rlineto
+          -154 0 rlineto
+          0 49 rlineto
+          -71 60 rmoveto
+          0 -169 rlineto
+          301 0 rlineto
+          0 169 rlineto
+          -301 0 rlineto
+          -264 294 rmoveto
+          0 -65 rlineto
+          438 0 rlineto
+          0 -132 rlineto
+          -441 0 rlineto
+          0 -65 rlineto
+          517 0 rlineto
+          0 262 rlineto
+          -514 0 rlineto
+          379 -450 rmoveto
+          0 -205 rlineto
+          0 -13 -4 -3 -13 -1 rrcurveto
+          -11 -1 -42 0 -41 3 rrcurveto
+          9 -26 10 -35 5 -27 rrcurveto
+          58 0 41 0 28 13 rrcurveto
+          29 13 7 25 0 49 rrcurveto
+          0 208 rlineto
+          -76 0 rlineto
+          -446 41 rmoveto
+          2 -68 rlineto
+          79 4 109 6 107 7 rrcurveto
+          2 65 rlineto
+          -111 -6 -113 -5 -75 -3 rrcurveto
+          118 -206 rmoveto
+          38 -29 48 -46 21 -33 rrcurveto
+          56 65 rlineto
+          -24 32 -48 43 -38 26 rrcurveto
+          -53 -58 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni8550">
+          334 616 rmoveto
+          0 -705 rlineto
+          78 0 rlineto
+          0 705 rlineto
+          -78 0 rlineto
+          -264 -505 rmoveto
+          0 -76 rlineto
+          610 0 rlineto
+          0 76 rlineto
+          -610 0 rlineto
+          -12 542 rmoveto
+          0 -78 rlineto
+          637 0 rlineto
+          0 78 rlineto
+          -637 0 rlineto
+          -20 133 rmoveto
+          0 -79 rlineto
+          675 0 rlineto
+          0 79 rlineto
+          -675 0 rlineto
+          -2 -548 rmoveto
+          0 -78 rlineto
+          678 0 rlineto
+          0 78 rlineto
+          -678 0 rlineto
+          176 612 rmoveto
+          0 -177 rlineto
+          79 0 rlineto
+          0 177 rlineto
+          -79 0 rlineto
+          244 0 rmoveto
+          0 -177 rlineto
+          79 0 rlineto
+          0 177 rlineto
+          -79 0 rlineto
+          -260 -256 rmoveto
+          -21 -64 -49 -50 -56 -31 rrcurveto
+          13 -14 22 -28 10 -15 rrcurveto
+          59 40 55 65 27 82 rrcurveto
+          -60 15 rlineto
+          -8 -92 rmoveto
+          35 -27 45 -41 22 -28 rrcurveto
+          34 58 rlineto
+          -22 28 -46 38 -35 24 rrcurveto
+          -33 -52 rlineto
+          6 -66 rmoveto
+          -23 -68 -51 -54 -59 -34 rrcurveto
+          13 -12 23 -29 9 -15 rrcurveto
+          62 42 58 68 28 85 rrcurveto
+          -60 17 rlineto
+          -14 -93 rmoveto
+          38 -30 48 -46 22 -32 rrcurveto
+          37 58 rlineto
+          -24 31 -49 44 -37 27 rrcurveto
+          -35 -52 rlineto
+          337 251 rmoveto
+          -18 -60 -40 -48 -49 -32 rrcurveto
+          13 -13 22 -29 10 -15 rrcurveto
+          52 40 48 64 22 78 rrcurveto
+          -60 15 rlineto
+          -6 -92 rmoveto
+          42 -30 54 -47 25 -31 rrcurveto
+          42 57 rlineto
+          -27 31 -55 44 -41 28 rrcurveto
+          -40 -52 rlineto
+          9 -65 rmoveto
+          -19 -67 -41 -54 -51 -35 rrcurveto
+          14 -13 22 -29 9 -15 rrcurveto
+          56 44 47 69 23 85 rrcurveto
+          -60 15 rlineto
+          -5 -93 rmoveto
+          42 -32 53 -51 26 -34 rrcurveto
+          38 59 rlineto
+          -26 34 -55 47 -42 29 rrcurveto
+          -36 -52 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni8552">
+          38 788 rmoveto
+          0 -79 rlineto
+          675 0 rlineto
+          0 79 rlineto
+          -675 0 rlineto
+          175 62 rmoveto
+          0 -168 rlineto
+          79 0 rlineto
+          0 168 rlineto
+          -79 0 rlineto
+          241 0 rmoveto
+          0 -168 rlineto
+          79 0 rlineto
+          0 168 rlineto
+          -79 0 rlineto
+          31 -261 rmoveto
+          100 0 rlineto
+          0 -54 rlineto
+          -100 0 rlineto
+          0 54 rlineto
+          -163 0 rmoveto
+          99 0 rlineto
+          0 -54 rlineto
+          -99 0 rlineto
+          0 54 rlineto
+          -159 0 rmoveto
+          95 0 rlineto
+          0 -54 rlineto
+          -95 0 rlineto
+          0 54 rlineto
+          -72 74 rmoveto
+          0 -200 rlineto
+          569 0 rlineto
+          0 200 rlineto
+          -569 0 rlineto
+          116 -400 rmoveto
+          338 0 rlineto
+          0 -39 rlineto
+          -338 0 rlineto
+          0 39 rlineto
+          0 -98 rmoveto
+          338 0 rlineto
+          0 -41 rlineto
+          -338 0 rlineto
+          0 41 rlineto
+          0 196 rmoveto
+          338 0 rlineto
+          0 -39 rlineto
+          -338 0 rlineto
+          0 39 rlineto
+          -77 62 rmoveto
+          0 -361 rlineto
+          498 0 rlineto
+          0 361 rlineto
+          -498 0 rlineto
+          288 -412 rmoveto
+          85 -33 83 -40 47 -29 rrcurveto
+          101 51 rlineto
+          -58 30 -100 42 -86 31 rrcurveto
+          -72 -52 rlineto
+          -158 51 rmoveto
+          -57 -34 -94 -31 -83 -18 rrcurveto
+          18 -16 27 -36 14 -21 rrcurveto
+          78 24 100 43 66 46 rrcurveto
+          -69 43 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni8591">
+          38 796 rmoveto
+          0 -76 rlineto
+          676 0 rlineto
+          0 76 rlineto
+          -676 0 rlineto
+          12 -447 rmoveto
+          0 -65 rlineto
+          655 0 rlineto
+          0 65 rlineto
+          -655 0 rlineto
+          0 326 rmoveto
+          0 -63 rlineto
+          655 0 rlineto
+          0 63 rlineto
+          -655 0 rlineto
+          -17 -664 rmoveto
+          0 -68 rlineto
+          684 0 rlineto
+          0 68 rlineto
+          -684 0 rlineto
+          177 839 rmoveto
+          0 -159 rlineto
+          78 0 rlineto
+          0 159 rlineto
+          -78 0 rlineto
+          249 0 rmoveto
+          0 -159 rlineto
+          80 0 rlineto
+          0 159 rlineto
+          -80 0 rlineto
+          -123 -284 rmoveto
+          0 -171 rlineto
+          74 0 rlineto
+          0 171 rlineto
+          -74 0 rlineto
+          -140 -107 rmoveto
+          358 0 rlineto
+          0 -34 rlineto
+          -358 0 rlineto
+          0 34 rlineto
+          0 77 rmoveto
+          358 0 rlineto
+          0 -33 rlineto
+          -358 0 rlineto
+          0 33 rlineto
+          -75 47 rmoveto
+          0 -204 rlineto
+          511 0 rlineto
+          0 204 rlineto
+          -511 0 rlineto
+          215 -347 rmoveto
+          0 -180 rlineto
+          74 0 rlineto
+          0 180 rlineto
+          -74 0 rlineto
+          -151 -108 rmoveto
+          379 0 rlineto
+          0 -37 rlineto
+          -379 0 rlineto
+          0 37 rlineto
+          0 80 rmoveto
+          379 0 rlineto
+          0 -35 rlineto
+          -379 0 rlineto
+          0 35 rlineto
+          -75 47 rmoveto
+          0 -211 rlineto
+          532 0 rlineto
+          0 211 rlineto
+          -532 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni85A5">
+          486 594 rmoveto
+          98 0 rlineto
+          0 -54 rlineto
+          -98 0 rlineto
+          0 54 rlineto
+          -161 0 rmoveto
+          96 0 rlineto
+          0 -54 rlineto
+          -96 0 rlineto
+          0 54 rlineto
+          -157 0 rmoveto
+          93 0 rlineto
+          0 -54 rlineto
+          -93 0 rlineto
+          0 54 rlineto
+          -72 72 rmoveto
+          0 -198 rlineto
+          563 0 rlineto
+          0 198 rlineto
+          -563 0 rlineto
+          -57 125 rmoveto
+          0 -83 rlineto
+          674 0 rlineto
+          0 83 rlineto
+          -674 0 rlineto
+          169 59 rmoveto
+          0 -171 rlineto
+          80 0 rlineto
+          0 171 rlineto
+          -80 0 rlineto
+          251 0 rmoveto
+          0 -171 rlineto
+          81 0 rlineto
+          0 171 rlineto
+          -81 0 rlineto
+          -274 -418 rmoveto
+          0 -82 rlineto
+          443 0 rlineto
+          0 82 rlineto
+          -443 0 rlineto
+          -60 -126 rmoveto
+          0 -210 rlineto
+          69 0 rlineto
+          0 210 rlineto
+          -69 0 rlineto
+          39 0 rmoveto
+          0 -66 rlineto
+          266 0 rlineto
+          0 -52 rlineto
+          -266 0 rlineto
+          0 -66 rlineto
+          340 0 rlineto
+          0 184 rlineto
+          -340 0 rlineto
+          108 60 rmoveto
+          0 -365 rlineto
+          75 0 rlineto
+          0 365 rlineto
+          -75 0 rlineto
+          -195 -323 rmoveto
+          7 -88 rlineto
+          105 9 148 13 142 15 rrcurveto
+          1 76 rlineto
+          -149 -10 -155 -10 -99 -5 rrcurveto
+          518 389 rmoveto
+          0 -20 rlineto
+          -7 -282 -9 -100 -13 -24 rrcurveto
+          -6 -11 -6 -3 -10 0 rrcurveto
+          -13 0 -21 0 -25 5 rrcurveto
+          10 -24 7 -37 1 -25 rrcurveto
+          33 -3 30 1 19 3 rrcurveto
+          21 4 15 9 15 26 rrcurveto
+          20 35 9 105 9 299 rrcurveto
+          0 12 0 30 0 0 rrcurveto
+          -79 0 rlineto
+          -382 85 rmoveto
+          -41 -94 -75 -87 -76 -53 rrcurveto
+          18 -17 28 -37 13 -19 rrcurveto
+          76 63 80 102 50 110 rrcurveto
+          -73 32 rlineto
+          170 -422 rmoveto
+          36 -42 44 -61 18 -42 rrcurveto
+          56 50 rlineto
+          -21 43 -44 58 -38 40 rrcurveto
+          -51 -46 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni85A8">
+          38 784 rmoveto
+          0 -87 rlineto
+          675 0 rlineto
+          0 87 rlineto
+          -675 0 rlineto
+          74 -478 rmoveto
+          0 -70 rlineto
+          530 0 rlineto
+          0 70 rlineto
+          -530 0 rlineto
+          98 544 rmoveto
+          0 -184 rlineto
+          80 0 rlineto
+          0 184 rlineto
+          -80 0 rlineto
+          248 0 rmoveto
+          0 -184 rlineto
+          80 0 rlineto
+          0 184 rlineto
+          -80 0 rlineto
+          26 -268 rmoveto
+          91 0 rlineto
+          0 -58 rlineto
+          -91 0 rlineto
+          0 58 rlineto
+          -153 0 rmoveto
+          88 0 rlineto
+          0 -58 rlineto
+          -88 0 rlineto
+          0 58 rlineto
+          -152 0 rmoveto
+          87 0 rlineto
+          0 -58 rlineto
+          -87 0 rlineto
+          0 58 rlineto
+          -72 71 rmoveto
+          0 -199 rlineto
+          544 0 rlineto
+          0 199 rlineto
+          -544 0 rlineto
+          -57 -233 rmoveto
+          0 -158 rlineto
+          72 0 rlineto
+          0 85 rlineto
+          505 0 rlineto
+          0 -85 rlineto
+          76 0 rlineto
+          0 158 rlineto
+          -653 0 rlineto
+          164 -156 rmoveto
+          -32 -53 -59 -51 -84 -37 rrcurveto
+          14 -12 17 -29 8 -19 rrcurveto
+          93 48 63 61 44 76 rrcurveto
+          -64 16 rlineto
+          107 -70 rmoveto
+          0 -12 rlineto
+          -41 -116 -111 -61 -126 -22 rrcurveto
+          11 -18 15 -35 5 -22 rrcurveto
+          141 34 120 75 52 158 rrcurveto
+          -41 21 rlineto
+          -13 -2 rlineto
+          -12 0 rlineto
+          -194 -114 rmoveto
+          28 -19 36 -34 17 -25 rrcurveto
+          48 43 rlineto
+          -19 23 -35 32 -29 18 rrcurveto
+          -46 -38 rlineto
+          69 114 rmoveto
+          -47 -62 rlineto
+          194 0 rlineto
+          0 62 rlineto
+          -147 0 rlineto
+          210 57 rmoveto
+          0 -215 rlineto
+          0 -89 20 -24 83 0 rrcurveto
+          16 0 86 0 18 0 rrcurveto
+          61 0 20 25 8 96 rrcurveto
+          -20 5 -29 14 -15 13 rrcurveto
+          -3 -62 -5 -11 -25 0 rrcurveto
+          -19 0 -71 0 -14 0 rrcurveto
+          -32 0 -6 6 0 28 rrcurveto
+          0 214 rlineto
+          -73 0 rlineto
+          217 -38 rmoveto
+          -44 -26 -77 -25 -69 -16 rrcurveto
+          9 -18 8 -30 4 -18 rrcurveto
+          73 14 88 24 63 33 rrcurveto
+          -55 62 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni85AF">
+          40 321 rmoveto
+          0 -71 rlineto
+          672 0 rlineto
+          0 71 rlineto
+          -672 0 rlineto
+          73 118 rmoveto
+          0 -69 rlineto
+          426 0 rlineto
+          0 69 rlineto
+          -426 0 rlineto
+          98 -346 rmoveto
+          0 -56 rlineto
+          387 0 rlineto
+          0 56 rlineto
+          -387 0 rlineto
+          0 -98 rmoveto
+          0 -64 rlineto
+          387 0 rlineto
+          0 64 rlineto
+          -387 0 rlineto
+          88 502 rmoveto
+          0 -200 rlineto
+          77 0 rlineto
+          0 200 rlineto
+          -77 0 rlineto
+          -116 -299 rmoveto
+          0 -288 rlineto
+          77 0 rlineto
+          0 224 rlineto
+          291 0 rlineto
+          0 -224 rlineto
+          80 0 rlineto
+          0 288 rlineto
+          -448 0 rlineto
+          425 279 rmoveto
+          -127 -158 -235 -101 -228 -47 rrcurveto
+          11 -20 16 -40 7 -20 rrcurveto
+          227 59 242 104 143 179 rrcurveto
+          -56 44 rlineto
+          -145 -250 rmoveto
+          26 -17 31 -27 16 -20 rrcurveto
+          43 47 rlineto
+          -16 21 -32 25 -25 15 rrcurveto
+          -43 -44 rlineto
+          25 376 rmoveto
+          98 0 rlineto
+          0 -56 rlineto
+          -98 0 rlineto
+          0 56 rlineto
+          -161 0 rmoveto
+          96 0 rlineto
+          0 -56 rlineto
+          -96 0 rlineto
+          0 56 rlineto
+          -157 0 rmoveto
+          93 0 rlineto
+          0 -56 rlineto
+          -93 0 rlineto
+          0 56 rlineto
+          -72 67 rmoveto
+          0 -189 rlineto
+          563 0 rlineto
+          0 189 rlineto
+          -563 0 rlineto
+          -57 124 rmoveto
+          0 -83 rlineto
+          669 0 rlineto
+          0 83 rlineto
+          -669 0 rlineto
+          167 55 rmoveto
+          0 -167 rlineto
+          81 0 rlineto
+          0 167 rlineto
+          -81 0 rlineto
+          251 1 rmoveto
+          0 -167 rlineto
+          81 0 rlineto
+          0 167 rlineto
+          -81 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni85B0">
+          180 424 rmoveto
+          387 0 rlineto
+          0 -106 rlineto
+          -387 0 rlineto
+          0 106 rlineto
+          -72 51 rmoveto
+          0 -207 rlineto
+          536 0 rlineto
+          0 207 rlineto
+          -536 0 rlineto
+          -66 320 rmoveto
+          0 -76 rlineto
+          665 0 rlineto
+          0 76 rlineto
+          -665 0 rlineto
+          2 -223 rmoveto
+          0 -65 rlineto
+          662 0 rlineto
+          0 65 rlineto
+          -662 0 rlineto
+          37 -337 rmoveto
+          0 -61 rlineto
+          590 0 rlineto
+          0 61 rlineto
+          -590 0 rlineto
+          -42 -99 rmoveto
+          0 -69 rlineto
+          671 0 rlineto
+          0 69 rlineto
+          -671 0 rlineto
+          173 714 rmoveto
+          0 -165 rlineto
+          78 0 rlineto
+          0 165 rlineto
+          -78 0 rlineto
+          246 0 rmoveto
+          0 -162 rlineto
+          79 0 rlineto
+          0 162 rlineto
+          -79 0 rlineto
+          -125 -223 rmoveto
+          0 -529 rlineto
+          78 0 rlineto
+          0 529 rlineto
+          -78 0 rlineto
+          -200 -554 rmoveto
+          -18 -43 -35 -40 -46 -21 rrcurveto
+          56 -61 rlineto
+          53 29 32 47 21 53 rrcurveto
+          -63 36 rlineto
+          108 -32 rmoveto
+          12 -40 11 -53 4 -33 rrcurveto
+          75 25 rlineto
+          -3 33 -14 51 -13 38 rrcurveto
+          -72 -21 rlineto
+          143 -3 rmoveto
+          21 -37 21 -53 8 -33 rrcurveto
+          70 33 rlineto
+          -9 35 -22 49 -22 36 rrcurveto
+          -67 -30 rlineto
+          149 -4 rmoveto
+          39 -37 48 -54 24 -34 rrcurveto
+          65 44 rlineto
+          -26 36 -51 50 -37 34 rrcurveto
+          -62 -39 rlineto
+          70 656 rmoveto
+          -119 -18 -212 -8 -181 0 rrcurveto
+          5 -16 6 -28 2 -18 rrcurveto
+          183 -1 216 9 151 22 rrcurveto
+          -51 58 rlineto
+          -392 -290 rmoveto
+          14 -26 15 -37 7 -23 rrcurveto
+          53 25 rlineto
+          -6 23 -16 35 -15 24 rrcurveto
+          -52 -21 rlineto
+          266 26 rmoveto
+          -8 -26 -19 -40 -13 -27 rrcurveto
+          48 -20 rlineto
+          14 23 18 33 18 35 rrcurveto
+          -58 22 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni8619">
+          40 796 rmoveto
+          0 -64 rlineto
+          672 0 rlineto
+          0 64 rlineto
+          -672 0 rlineto
+          175 53 rmoveto
+          0 -181 rlineto
+          72 0 rlineto
+          0 181 rlineto
+          -72 0 rlineto
+          252 0 rmoveto
+          0 -181 rlineto
+          74 0 rlineto
+          0 181 rlineto
+          -74 0 rlineto
+          -278 -205 rmoveto
+          -10 -35 -17 -36 -23 -27 rrcurveto
+          12 -8 18 -14 9 -9 rrcurveto
+          22 28 21 46 12 41 rrcurveto
+          -44 14 rlineto
+          217 -128 rmoveto
+          0 -59 rlineto
+          215 0 rlineto
+          0 59 rlineto
+          -215 0 rlineto
+          -220 82 rmoveto
+          0 -46 rlineto
+          173 0 rlineto
+          0 46 rlineto
+          -173 0 rlineto
+          -42 -81 rmoveto
+          0 -47 rlineto
+          226 0 rlineto
+          0 47 rlineto
+          -226 0 rlineto
+          314 164 rmoveto
+          0 -64 rlineto
+          135 0 rlineto
+          0 64 rlineto
+          -135 0 rlineto
+          156 -165 rmoveto
+          0 -9 rlineto
+          -34 -86 -93 -44 -101 -16 rrcurveto
+          11 -15 12 -27 5 -18 rrcurveto
+          115 25 100 55 42 120 rrcurveto
+          -35 17 rlineto
+          -10 -2 rlineto
+          -12 0 rlineto
+          -138 -50 rmoveto
+          -50 -19 rlineto
+          48 -82 93 -49 117 -17 rrcurveto
+          6 20 15 29 13 16 rrcurveto
+          -108 8 -93 33 -41 61 rrcurveto
+          -42 215 rmoveto
+          0 -42 rlineto
+          0 -28 -9 -26 -48 -24 rrcurveto
+          12 -11 21 -31 8 -15 rrcurveto
+          59 34 12 50 0 49 rrcurveto
+          0 44 rlineto
+          -55 0 rlineto
+          129 0 rmoveto
+          0 -56 rlineto
+          0 -44 4 -16 10 -13 rrcurveto
+          8 -12 17 -5 15 0 rrcurveto
+          8 0 15 0 7 0 rrcurveto
+          10 0 13 1 7 4 rrcurveto
+          10 4 7 9 5 10 rrcurveto
+          4 10 2 25 2 24 rrcurveto
+          -15 6 -18 12 -10 12 rrcurveto
+          -1 -20 0 -15 -2 -7 rrcurveto
+          -1 -6 -2 -4 -3 -1 rrcurveto
+          -3 -1 -3 0 -4 0 rrcurveto
+          -5 0 -6 0 -3 0 rrcurveto
+          -4 0 -3 0 -2 2 rrcurveto
+          -2 4 0 6 0 14 rrcurveto
+          0 57 rlineto
+          -57 0 rlineto
+          -327 -104 rmoveto
+          0 -55 rlineto
+          0 -33 -9 -48 -84 -26 rrcurveto
+          10 -11 15 -19 6 -14 rrcurveto
+          93 40 15 62 0 48 rrcurveto
+          0 56 rlineto
+          -46 0 rlineto
+          10 -129 rmoveto
+          30 -22 39 -33 20 -23 rrcurveto
+          28 42 rlineto
+          -21 22 -38 31 -31 21 rrcurveto
+          -27 -38 rlineto
+          132 233 rmoveto
+          -306 0 rlineto
+          0 -356 rlineto
+          311 0 rlineto
+          0 58 rlineto
+          -255 0 rlineto
+          0 240 rlineto
+          250 0 rlineto
+          0 58 rlineto
+          -322 -391 rmoveto
+          0 -71 rlineto
+          250 0 rlineto
+          0 71 rlineto
+          -250 0 rlineto
+          225 0 rmoveto
+          0 -292 rlineto
+          0 -10 -3 -4 -8 0 rrcurveto
+          -9 -1 -26 0 -28 2 rrcurveto
+          6 -21 9 -31 4 -22 rrcurveto
+          43 0 32 0 21 12 rrcurveto
+          22 13 6 20 0 41 rrcurveto
+          0 293 rlineto
+          -69 0 rlineto
+          -100 -56 rmoveto
+          -32 -38 -54 -37 -49 -26 rrcurveto
+          12 -12 21 -29 8 -14 rrcurveto
+          50 32 60 50 38 49 rrcurveto
+          -54 25 rlineto
+          51 -96 rmoveto
+          -44 -61 -77 -55 -72 -35 rrcurveto
+          12 -13 21 -30 8 -14 rrcurveto
+          71 42 84 67 51 74 rrcurveto
+          -54 25 rlineto
+          147 152 rmoveto
+          0 -71 rlineto
+          259 0 rlineto
+          0 71 rlineto
+          -259 0 rlineto
+          230 0 rmoveto
+          0 -292 rlineto
+          0 -10 -3 -4 -10 0 rrcurveto
+          -8 -1 -32 0 -30 2 rrcurveto
+          7 -21 8 -31 4 -22 rrcurveto
+          47 -1 33 1 23 12 rrcurveto
+          23 13 7 20 0 42 rrcurveto
+          0 292 rlineto
+          -69 0 rlineto
+          -108 -55 rmoveto
+          -32 -39 -53 -38 -48 -25 rrcurveto
+          11 -14 22 -28 8 -14 rrcurveto
+          50 32 58 51 37 51 rrcurveto
+          -53 24 rlineto
+          61 -87 rmoveto
+          -45 -63 -78 -58 -72 -36 rrcurveto
+          13 -12 20 -30 9 -16 rrcurveto
+          72 44 84 70 51 76 rrcurveto
+          -54 25 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni8642">
+          39 796 rmoveto
+          0 -70 rlineto
+          674 0 rlineto
+          0 70 rlineto
+          -674 0 rlineto
+          174 53 rmoveto
+          0 -152 rlineto
+          75 0 rlineto
+          0 152 rlineto
+          -75 0 rlineto
+          246 0 rmoveto
+          0 -152 rlineto
+          75 0 rlineto
+          0 152 rlineto
+          -75 0 rlineto
+          -365 -166 rmoveto
+          0 -64 rlineto
+          562 0 rlineto
+          0 64 rlineto
+          -562 0 rlineto
+          57 -188 rmoveto
+          0 -49 rlineto
+          150 0 rlineto
+          0 49 rlineto
+          -150 0 rlineto
+          -9 -81 rmoveto
+          0 -49 rlineto
+          158 0 rlineto
+          0 49 rlineto
+          -158 0 rlineto
+          303 0 rmoveto
+          0 -50 rlineto
+          160 0 rlineto
+          0 50 rlineto
+          -160 0 rlineto
+          -24 -423 rmoveto
+          0 -61 rlineto
+          201 0 rlineto
+          0 61 rlineto
+          -201 0 rlineto
+          -211 133 rmoveto
+          0 -59 rlineto
+          120 0 rlineto
+          0 59 rlineto
+          -120 0 rlineto
+          236 371 rmoveto
+          0 -49 rlineto
+          151 0 rlineto
+          0 49 rlineto
+          -151 0 rlineto
+          -110 165 rmoveto
+          0 -306 rlineto
+          74 0 rlineto
+          0 306 rlineto
+          -74 0 rlineto
+          -290 -75 rmoveto
+          0 -147 rlineto
+          67 0 rlineto
+          0 88 rlineto
+          522 0 rlineto
+          0 -88 rlineto
+          70 0 rlineto
+          0 147 rlineto
+          -659 0 rlineto
+          93 -311 rmoveto
+          125 0 rlineto
+          0 -50 rlineto
+          -125 0 rlineto
+          0 50 rlineto
+          -62 58 rmoveto
+          0 -166 rlineto
+          252 0 rlineto
+          0 166 rlineto
+          -252 0 rlineto
+          319 -226 rmoveto
+          0 -194 rlineto
+          65 0 rlineto
+          0 133 rlineto
+          132 0 rlineto
+          0 -131 rlineto
+          67 0 rlineto
+          0 192 rlineto
+          -264 0 rlineto
+          55 177 rmoveto
+          -47 -21 rlineto
+          59 -97 111 -62 123 -25 rrcurveto
+          7 19 15 29 12 16 rrcurveto
+          -118 17 -110 49 -52 75 rrcurveto
+          8 82 rmoveto
+          -24 -50 -46 -51 -66 -38 rrcurveto
+          12 -10 18 -24 10 -16 rrcurveto
+          72 48 48 59 34 69 rrcurveto
+          -58 13 rlineto
+          147 -40 rmoveto
+          0 -13 rlineto
+          -47 -95 -119 -65 -110 -26 rrcurveto
+          10 -14 14 -26 6 -17 rrcurveto
+          121 35 126 71 59 125 rrcurveto
+          -39 28 rlineto
+          -9 -3 rlineto
+          -12 0 rlineto
+          -565 -329 rmoveto
+          4 -69 rlineto
+          82 9 114 13 111 13 rrcurveto
+          1 65 rlineto
+          -116 -12 -118 -13 -78 -6 rrcurveto
+          420 329 rmoveto
+          -31 -58 rlineto
+          191 0 rlineto
+          0 58 rlineto
+          -160 0 rlineto
+          -283 -135 rmoveto
+          0 -209 rlineto
+          63 4 rlineto
+          0 205 rlineto
+          -63 0 rlineto
+          -97 -51 rmoveto
+          0 -173 rlineto
+          55 8 rlineto
+          0 165 rlineto
+          -55 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni87C7">
+          197 503 rmoveto
+          354 0 rlineto
+          0 -47 rlineto
+          -354 0 rlineto
+          0 47 rlineto
+          0 105 rmoveto
+          354 0 rlineto
+          0 -45 rlineto
+          -354 0 rlineto
+          0 45 rlineto
+          -76 63 rmoveto
+          0 -278 rlineto
+          512 0 rlineto
+          0 278 rlineto
+          -512 0 rlineto
+          -88 -317 rmoveto
+          0 -81 rlineto
+          687 0 rlineto
+          0 81 rlineto
+          -687 0 rlineto
+          227 57 rmoveto
+          -32 -98 -76 -92 -132 -58 rrcurveto
+          15 -16 19 -37 8 -23 rrcurveto
+          145 72 83 107 46 128 rrcurveto
+          -76 17 rlineto
+          267 -88 rmoveto
+          -58 -27 rlineto
+          47 -88 83 -75 88 -35 rrcurveto
+          10 25 20 37 17 18 rrcurveto
+          -83 25 -82 55 -42 65 rrcurveto
+          -488 476 rmoveto
+          0 -85 rlineto
+          674 0 rlineto
+          0 85 rlineto
+          -674 0 rlineto
+          172 51 rmoveto
+          0 -165 rlineto
+          77 0 rlineto
+          0 165 rlineto
+          -77 0 rlineto
+          247 0 rmoveto
+          0 -165 rlineto
+          79 0 rlineto
+          0 165 rlineto
+          -79 0 rlineto
+          -124 -561 rmoveto
+          0 -299 rlineto
+          77 0 rlineto
+          0 299 rlineto
+          -77 0 rlineto
+          -102 -119 rmoveto
+          285 0 rlineto
+          0 -49 rlineto
+          -285 0 rlineto
+          0 49 rlineto
+          -70 55 rmoveto
+          0 -160 rlineto
+          428 0 rlineto
+          0 160 rlineto
+          -428 0 rlineto
+          -71 -214 rmoveto
+          1 -84 rlineto
+          135 2 201 5 189 6 rrcurveto
+          4 73 rlineto
+          -194 -3 -207 0 -129 1 rrcurveto
+          415 34 rmoveto
+          45 -40 57 -65 29 -40 rrcurveto
+          63 41 rlineto
+          -31 38 -56 60 -47 40 rrcurveto
+          -60 -34 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni87E4">
+          132 844 rmoveto
+          0 -235 rlineto
+          57 0 rlineto
+          0 235 rlineto
+          -57 0 rlineto
+          -53 -179 rmoveto
+          0 -80 rlineto
+          145 0 rlineto
+          0 -209 rlineto
+          -145 0 rlineto
+          0 -80 rlineto
+          198 0 rlineto
+          0 369 rlineto
+          -198 0 rlineto
+          -32 0 rmoveto
+          0 -416 rlineto
+          52 0 rlineto
+          0 416 rlineto
+          -52 0 rlineto
+          91 -43 rmoveto
+          0 -295 rlineto
+          -6 0 rlineto
+          0 -261 rlineto
+          57 0 rlineto
+          0 261 rlineto
+          -6 0 rlineto
+          0 295 rlineto
+          -45 0 rlineto
+          -116 -545 rmoveto
+          11 -87 rlineto
+          65 17 83 22 81 22 rrcurveto
+          -5 79 rlineto
+          -87 -21 -88 -20 -60 -12 rrcurveto
+          183 150 rmoveto
+          19 -75 16 -97 3 -64 rrcurveto
+          54 19 rlineto
+          -4 64 -17 96 -21 75 rrcurveto
+          -50 -18 rlineto
+          92 -47 rmoveto
+          0 -83 rlineto
+          431 0 rlineto
+          0 83 rlineto
+          -431 0 rlineto
+          19 190 rmoveto
+          0 -80 rlineto
+          397 0 rlineto
+          0 80 rlineto
+          -397 0 rlineto
+          27 448 rmoveto
+          0 -69 rlineto
+          89 0 rlineto
+          0 -74 rlineto
+          -89 0 rlineto
+          0 -69 rlineto
+          144 0 rlineto
+          0 212 rlineto
+          -144 0 rlineto
+          55 -341 rmoveto
+          0 -330 rlineto
+          68 0 rlineto
+          0 330 rlineto
+          -68 0 rlineto
+          162 0 rmoveto
+          0 -330 rlineto
+          69 0 rlineto
+          0 330 rlineto
+          -69 0 rlineto
+          -248 341 rmoveto
+          0 -260 rlineto
+          0 -76 15 -20 54 0 rrcurveto
+          10 0 47 0 11 0 rrcurveto
+          40 0 16 21 6 75 rrcurveto
+          -16 5 -23 12 -11 12 rrcurveto
+          -2 -48 -3 -7 -14 0 rrcurveto
+          -10 0 -36 0 -8 0 rrcurveto
+          -17 0 -2 3 0 23 rrcurveto
+          0 260 rlineto
+          -57 0 rlineto
+          240 0 rmoveto
+          0 -69 rlineto
+          93 0 rlineto
+          0 -74 rlineto
+          -93 0 rlineto
+          0 -69 rlineto
+          150 0 rlineto
+          0 212 rlineto
+          -150 0 rlineto
+          -30 0 rmoveto
+          0 -260 rlineto
+          0 -77 15 -21 54 0 rrcurveto
+          12 0 49 0 11 0 rrcurveto
+          41 0 16 21 7 77 rrcurveto
+          -16 5 -23 12 -12 12 rrcurveto
+          -2 -48 -4 -7 -13 0 rrcurveto
+          -11 0 -38 0 -8 0 rrcurveto
+          -19 0 -2 3 0 24 rrcurveto
+          0 259 rlineto
+          -57 0 rlineto
+          20 -771 rmoveto
+          49 -39 63 -59 29 -39 rrcurveto
+          50 61 rlineto
+          -33 39 -63 55 -50 37 rrcurveto
+          -45 -55 rlineto
+          -110 52 rmoveto
+          -32 -44 -64 -54 -56 -31 rrcurveto
+          16 -16 20 -27 12 -17 rrcurveto
+          55 32 67 56 41 52 rrcurveto
+          -59 49 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni8B54">
+          303 815 rmoveto
+          0 -252 rlineto
+          0 -78 15 -21 55 0 rrcurveto
+          11 0 47 0 12 0 rrcurveto
+          42 0 16 23 7 83 rrcurveto
+          -17 5 -24 13 -11 12 rrcurveto
+          -3 -55 -3 -9 -14 0 rrcurveto
+          -10 0 -37 0 -8 0 rrcurveto
+          -17 0 -3 4 0 23 rrcurveto
+          0 252 rlineto
+          -58 0 rlineto
+          1 -432 rmoveto
+          0 -83 rlineto
+          414 0 rlineto
+          0 83 rlineto
+          -414 0 rlineto
+          -20 -195 rmoveto
+          0 -84 rlineto
+          445 0 rlineto
+          0 84 rlineto
+          -445 0 rlineto
+          104 295 rmoveto
+          0 -322 rlineto
+          67 0 rlineto
+          0 322 rlineto
+          -67 0 rlineto
+          168 -2 rmoveto
+          0 -320 rlineto
+          68 0 rlineto
+          0 320 rlineto
+          -68 0 rlineto
+          -227 334 rmoveto
+          0 -65 rlineto
+          105 0 rlineto
+          0 -67 rlineto
+          -105 0 rlineto
+          0 -64 rlineto
+          161 0 rlineto
+          0 196 rlineto
+          -161 0 rlineto
+          188 0 rmoveto
+          0 -252 rlineto
+          0 -78 16 -21 56 0 rrcurveto
+          12 0 52 0 11 0 rrcurveto
+          44 0 16 23 7 84 rrcurveto
+          -17 5 -24 12 -12 12 rrcurveto
+          -2 -55 -4 -9 -14 0 rrcurveto
+          -11 0 -41 0 -8 0 rrcurveto
+          -19 0 -2 4 0 24 rrcurveto
+          0 251 rlineto
+          -60 0 rlineto
+          28 0 rmoveto
+          0 -65 rlineto
+          104 0 rlineto
+          0 -68 rlineto
+          -104 0 rlineto
+          0 -65 rlineto
+          160 0 rlineto
+          0 198 rlineto
+          -160 0 rlineto
+          -145 -724 rmoveto
+          -29 -48 -52 -45 -52 -28 rrcurveto
+          16 -15 28 -31 12 -17 rrcurveto
+          53 36 59 58 34 62 rrcurveto
+          -69 28 rlineto
+          143 -35 rmoveto
+          46 -43 58 -63 28 -40 rrcurveto
+          61 48 rlineto
+          -30 42 -60 59 -46 40 rrcurveto
+          -57 -43 rlineto
+          -487 486 rmoveto
+          0 -77 rlineto
+          208 0 rlineto
+          0 77 rlineto
+          -208 0 rlineto
+          4 273 rmoveto
+          0 -77 rlineto
+          201 0 rlineto
+          0 77 rlineto
+          -201 0 rlineto
+          -4 -410 rmoveto
+          0 -77 rlineto
+          208 0 rlineto
+          0 77 rlineto
+          -208 0 rlineto
+          -33 276 rmoveto
+          0 -80 rlineto
+          260 0 rlineto
+          0 80 rlineto
+          -260 0 rlineto
+          67 -414 rmoveto
+          0 -79 rlineto
+          112 0 rlineto
+          0 -141 rlineto
+          -112 0 rlineto
+          0 -79 rlineto
+          175 0 rlineto
+          0 299 rlineto
+          -175 0 rlineto
+          -36 0 rmoveto
+          0 -343 rlineto
+          62 0 rlineto
+          0 343 rlineto
+          -62 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni8E59">
+          189 284 rmoveto
+          378 0 rlineto
+          0 -55 rlineto
+          -378 0 rlineto
+          0 55 rlineto
+          -74 61 rmoveto
+          0 -176 rlineto
+          531 0 rlineto
+          0 176 rlineto
+          -531 0 rlineto
+          222 -130 rmoveto
+          0 -243 rlineto
+          76 -21 rlineto
+          0 264 rlineto
+          -76 0 rlineto
+          40 -91 rmoveto
+          0 -62 rlineto
+          284 0 rlineto
+          0 62 rlineto
+          -284 0 rlineto
+          -259 641 rmoveto
+          0 -70 rlineto
+          595 0 rlineto
+          0 70 rlineto
+          -595 0 rlineto
+          -36 0 rmoveto
+          0 -126 rlineto
+          0 -78 -6 -99 -57 -75 rrcurveto
+          16 -12 29 -32 11 -18 rrcurveto
+          64 85 13 131 0 96 rrcurveto
+          0 128 rlineto
+          -70 0 rlineto
+          170 -58 rmoveto
+          0 -167 rlineto
+          62 0 rlineto
+          0 167 rlineto
+          -62 0 rlineto
+          32 -48 rmoveto
+          0 -47 rlineto
+          134 0 rlineto
+          0 47 rlineto
+          -134 0 rlineto
+          -129 -86 rmoveto
+          0 -54 rlineto
+          290 0 rlineto
+          0 54 rlineto
+          -290 0 rlineto
+          111 -18 rmoveto
+          0 -128 rlineto
+          0 -8 -2 -3 -6 -1 rrcurveto
+          -7 0 -17 0 -22 1 rrcurveto
+          8 -17 10 -25 4 -21 rrcurveto
+          33 0 23 0 18 11 rrcurveto
+          19 10 4 15 0 36 rrcurveto
+          0 130 rlineto
+          -65 0 rlineto
+          -75 -49 rmoveto
+          -13 -37 -23 -36 -26 -28 rrcurveto
+          12 -8 19 -19 10 -11 rrcurveto
+          27 30 27 47 16 46 rrcurveto
+          -49 16 rlineto
+          150 -24 rmoveto
+          20 -29 22 -41 10 -28 rrcurveto
+          44 25 rlineto
+          -10 28 -24 41 -20 27 rrcurveto
+          -42 -23 rlineto
+          70 366 rmoveto
+          14 -277 103 -223 117 0 rrcurveto
+          53 0 25 29 10 123 rrcurveto
+          -18 7 -23 16 -15 18 rrcurveto
+          -3 -76 -6 -28 -19 0 rrcurveto
+          -71 -1 -87 184 -11 228 rrcurveto
+          -69 0 rlineto
+          185 -174 rmoveto
+          -32 -104 -59 -92 -70 -58 rrcurveto
+          16 -14 24 -30 11 -16 rrcurveto
+          69 66 66 106 38 119 rrcurveto
+          -63 23 rlineto
+          -77 128 rmoveto
+          38 -16 47 -27 25 -21 rrcurveto
+          34 56 rlineto
+          -26 21 -48 24 -37 13 rrcurveto
+          -33 -50 rlineto
+          -306 -696 rmoveto
+          -52 -26 rlineto
+          61 -130 96 -23 167 0 rrcurveto
+          161 0 rlineto
+          50 0 rlineto
+          2 23 11 38 9 19 rrcurveto
+          -44 -1 -156 0 -31 0 rrcurveto
+          -135 0 -94 12 -45 88 rrcurveto
+          -50 48 rmoveto
+          -16 -88 -54 -58 -73 -35 rrcurveto
+          17 -14 28 -35 11 -18 rrcurveto
+          77 47 61 75 24 115 rrcurveto
+          -75 11 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni9078_E0101">
+          238 442 rmoveto
+          0 -75 rlineto
+          456 0 rlineto
+          0 75 rlineto
+          -456 0 rlineto
+          -27 -162 rmoveto
+          0 -75 rlineto
+          507 0 rlineto
+          0 75 rlineto
+          -507 0 rlineto
+          127 237 rmoveto
+          0 -264 rlineto
+          67 0 rlineto
+          0 264 rlineto
+          -67 0 rlineto
+          182 0 rmoveto
+          0 -264 rlineto
+          68 0 rlineto
+          0 264 rlineto
+          -68 0 rlineto
+          -289 297 rmoveto
+          0 -215 rlineto
+          0 -76 18 -20 60 0 rrcurveto
+          13 0 60 0 13 0 rrcurveto
+          44 0 17 20 6 69 rrcurveto
+          -17 5 -24 11 -12 12 rrcurveto
+          -2 -41 -4 -7 -16 0 rrcurveto
+          -12 0 -48 0 -9 0 rrcurveto
+          -21 0 -4 3 0 24 rrcurveto
+          0 215 rlineto
+          -62 0 rlineto
+          250 0 rmoveto
+          0 -215 rlineto
+          0 -76 17 -20 61 0 rrcurveto
+          13 0 64 0 13 0 rrcurveto
+          45 0 17 20 6 72 rrcurveto
+          -17 4 -23 11 -13 12 rrcurveto
+          -2 -43 -4 -7 -17 0 rrcurveto
+          -12 0 -51 0 -10 0 rrcurveto
+          -22 0 -3 4 0 24 rrcurveto
+          0 214 rlineto
+          -62 0 rlineto
+          13 -654 rmoveto
+          56 -36 58 -48 32 -36 rrcurveto
+          75 40 rlineto
+          -39 37 -68 50 -60 36 rrcurveto
+          -54 -43 rlineto
+          -123 42 rmoveto
+          -35 -40 -59 -37 -54 -25 rrcurveto
+          15 -14 27 -30 12 -17 rrcurveto
+          54 31 64 50 41 51 rrcurveto
+          -65 31 rlineto
+          -190 183 rmoveto
+          -155 0 rlineto
+          0 -90 rlineto
+          85 0 rlineto
+          0 -216 rlineto
+          70 0 rlineto
+          0 306 rlineto
+          0 -261 rmoveto
+          -62 0 rlineto
+          -33 -40 -36 -40 -31 -31 rrcurveto
+          35 -94 rlineto
+          36 44 31 41 30 41 rrcurveto
+          49 -78 67 -32 97 -5 rrcurveto
+          91 -5 165 2 91 5 rrcurveto
+          3 28 11 44 8 21 rrcurveto
+          -99 -10 -181 -2 -89 5 rrcurveto
+          -85 4 -64 32 -34 70 rrcurveto
+          -124 658 rmoveto
+          41 -35 48 -53 22 -39 rrcurveto
+          53 63 rlineto
+          -24 39 -51 50 -40 32 rrcurveto
+          -49 -57 rlineto
+          -29 -210 rmoveto
+          44 -33 50 -52 24 -37 rrcurveto
+          50 67 rlineto
+          -24 37 -53 48 -44 30 rrcurveto
+          -47 -60 rlineto
+          232 242 rmoveto
+          0 -62 rlineto
+          121 0 rlineto
+          0 -56 rlineto
+          -121 0 rlineto
+          0 -61 rlineto
+          184 0 rlineto
+          0 179 rlineto
+          -184 0 rlineto
+          250 0 rmoveto
+          0 -62 rlineto
+          123 0 rlineto
+          0 -56 rlineto
+          -123 0 rlineto
+          0 -61 rlineto
+          188 0 rlineto
+          0 179 rlineto
+          -188 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni911C">
+          96 768 rmoveto
+          0 -80 rlineto
+          367 0 rlineto
+          0 80 rlineto
+          -367 0 rlineto
+          86 -532 rmoveto
+          0 -76 rlineto
+          100 0 rlineto
+          0 76 rlineto
+          -100 0 rlineto
+          59 607 rmoveto
+          0 -137 rlineto
+          66 0 rlineto
+          0 137 rlineto
+          -66 0 rlineto
+          -57 -152 rmoveto
+          0 -311 rlineto
+          53 0 rlineto
+          0 311 rlineto
+          -53 0 rlineto
+          110 0 rmoveto
+          0 -311 rlineto
+          54 0 rlineto
+          0 311 rlineto
+          -54 0 rlineto
+          -227 77 rmoveto
+          0 -332 rlineto
+          0 -140 -4 -192 -51 -134 rrcurveto
+          15 -8 27 -22 11 -13 rrcurveto
+          54 142 8 217 0 150 rrcurveto
+          0 332 rlineto
+          -60 0 rlineto
+          42 -168 rmoveto
+          0 -80 rlineto
+          295 0 rlineto
+          0 -108 rlineto
+          -295 0 rlineto
+          0 -80 rlineto
+          349 0 rlineto
+          0 268 rlineto
+          -349 0 rlineto
+          41 -249 rmoveto
+          0 -363 rlineto
+          57 5 rlineto
+          0 358 rlineto
+          -57 0 rlineto
+          -48 -352 rmoveto
+          13 -79 rlineto
+          52 16 62 19 61 19 rrcurveto
+          -6 74 rlineto
+          -68 -18 -66 -20 -48 -11 rrcurveto
+          199 354 rmoveto
+          0 -327 rlineto
+          0 -78 12 -22 50 0 rrcurveto
+          10 0 31 0 11 0 rrcurveto
+          39 0 15 28 5 104 rrcurveto
+          -15 6 -24 12 -11 13 rrcurveto
+          -2 -79 -2 -12 -12 0 rrcurveto
+          -7 0 -23 0 -5 0 rrcurveto
+          -12 0 -2 3 0 25 rrcurveto
+          0 327 rlineto
+          -58 0 rlineto
+          126 -72 rmoveto
+          -30 -31 -52 -45 -35 -23 rrcurveto
+          30 -53 rlineto
+          37 21 50 35 39 34 rrcurveto
+          -39 62 rlineto
+          63 511 rmoveto
+          0 -881 rlineto
+          66 0 rlineto
+          0 794 rlineto
+          119 0 rlineto
+          0 87 rlineto
+          -185 0 rlineto
+          166 0 rmoveto
+          0 -31 rlineto
+          -16 -74 -31 -146 -30 -101 rrcurveto
+          57 -87 15 -74 0 -59 rrcurveto
+          0 -36 -4 -28 -12 -12 rrcurveto
+          -8 -7 -9 -3 -11 0 rrcurveto
+          -11 -1 -16 0 -19 2 rrcurveto
+          11 -25 6 -39 1 -25 rrcurveto
+          19 -1 22 0 17 3 rrcurveto
+          17 3 17 7 11 12 rrcurveto
+          25 24 11 49 0 65 rrcurveto
+          0 69 -15 80 -58 93 rrcurveto
+          28 91 31 118 25 96 rrcurveto
+          -49 40 rlineto
+          -11 -3 rlineto
+          -13 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni9192">
+          366 16 rmoveto
+          0 -82 rlineto
+          363 0 rlineto
+          0 82 rlineto
+          -363 0 rlineto
+          31 178 rmoveto
+          0 -78 rlineto
+          299 0 rlineto
+          0 78 rlineto
+          -299 0 rlineto
+          115 270 rmoveto
+          0 -463 rlineto
+          66 0 rlineto
+          0 463 rlineto
+          -66 0 rlineto
+          -55 131 rmoveto
+          172 0 rlineto
+          0 -70 rlineto
+          -172 0 rlineto
+          0 70 rlineto
+          0 138 rmoveto
+          172 0 rlineto
+          0 -68 rlineto
+          -172 0 rlineto
+          0 68 rlineto
+          -65 77 rmoveto
+          0 -361 rlineto
+          304 0 rlineto
+          0 361 rlineto
+          -304 0 rlineto
+          22 -368 rmoveto
+          -15 -71 -28 -70 -37 -48 rrcurveto
+          14 -9 24 -21 11 -12 rrcurveto
+          37 52 32 80 19 83 rrcurveto
+          -57 16 rlineto
+          16 -80 rmoveto
+          -30 -78 rlineto
+          309 0 rlineto
+          0 78 rlineto
+          -279 0 rlineto
+          -387 254 rmoveto
+          0 -699 rlineto
+          57 0 rlineto
+          0 616 rlineto
+          190 0 rlineto
+          0 -602 rlineto
+          60 0 rlineto
+          0 685 rlineto
+          -307 0 rlineto
+          26 -398 rmoveto
+          0 -77 rlineto
+          251 0 rlineto
+          0 77 rlineto
+          -251 0 rlineto
+          0 -157 rmoveto
+          0 -79 rlineto
+          251 0 rlineto
+          0 79 rlineto
+          -251 0 rlineto
+          -36 747 rmoveto
+          0 -84 rlineto
+          322 0 rlineto
+          0 84 rlineto
+          -322 0 rlineto
+          93 -28 rmoveto
+          0 -233 rlineto
+          51 0 rlineto
+          0 233 rlineto
+          -51 0 rlineto
+          86 0 rmoveto
+          0 -233 rlineto
+          51 0 rlineto
+          0 233 rlineto
+          -51 0 rlineto
+          -74 -226 rmoveto
+          0 -96 rlineto
+          0 -48 -5 -57 -37 -47 rrcurveto
+          8 -6 16 -17 7 -11 rrcurveto
+          41 52 9 75 0 58 rrcurveto
+          0 97 rlineto
+          -39 0 rlineto
+          74 0 rmoveto
+          0 -165 rlineto
+          0 -55 9 -12 33 0 rrcurveto
+          7 0 19 0 6 0 rrcurveto
+          23 0 12 11 5 25 rrcurveto
+          -12 4 -16 7 -7 10 rrcurveto
+          -2 -3 -1 0 -9 0 rrcurveto
+          -4 0 -13 0 -3 0 rrcurveto
+          -7 0 -2 1 0 13 rrcurveto
+          0 164 rlineto
+          -38 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni9409">
+          298 189 rmoveto
+          0 -88 rlineto
+          431 0 rlineto
+          0 88 rlineto
+          -431 0 rlineto
+          18 198 rmoveto
+          0 -87 rlineto
+          398 0 rlineto
+          0 87 rlineto
+          -398 0 rlineto
+          33 432 rmoveto
+          0 -74 rlineto
+          85 0 rlineto
+          0 -68 rlineto
+          -85 0 rlineto
+          0 -74 rlineto
+          145 0 rlineto
+          0 216 rlineto
+          -145 0 rlineto
+          47 -345 rmoveto
+          0 -335 rlineto
+          74 0 rlineto
+          0 335 rlineto
+          -74 0 rlineto
+          161 0 rmoveto
+          0 -333 rlineto
+          76 0 rlineto
+          0 333 rlineto
+          -76 0 rlineto
+          -247 345 rmoveto
+          0 -258 rlineto
+          0 -81 15 -21 55 0 rrcurveto
+          11 0 42 0 12 0 rrcurveto
+          41 0 17 21 6 76 rrcurveto
+          -17 6 -24 12 -12 13 rrcurveto
+          -2 -45 -3 -8 -13 0 rrcurveto
+          -9 0 -33 0 -7 0 rrcurveto
+          -16 0 -2 4 0 24 rrcurveto
+          0 257 rlineto
+          -61 0 rlineto
+          247 0 rmoveto
+          0 -74 rlineto
+          88 0 rlineto
+          0 -68 rlineto
+          -88 0 rlineto
+          0 -74 rlineto
+          150 0 rlineto
+          0 216 rlineto
+          -150 0 rlineto
+          -38 0 rmoveto
+          0 -258 rlineto
+          0 -81 15 -22 57 0 rrcurveto
+          12 0 43 0 13 0 rrcurveto
+          41 0 17 21 8 77 rrcurveto
+          -18 5 -25 13 -12 13 rrcurveto
+          -2 -45 -3 -8 -13 0 rrcurveto
+          -10 0 -34 0 -8 0 rrcurveto
+          -17 0 -3 4 0 25 rrcurveto
+          0 256 rlineto
+          -61 0 rlineto
+          21 -775 rmoveto
+          49 -39 62 -58 29 -39 rrcurveto
+          53 67 rlineto
+          -32 39 -63 54 -49 36 rrcurveto
+          -49 -60 rlineto
+          -109 57 rmoveto
+          -32 -44 -64 -53 -55 -30 rrcurveto
+          17 -17 22 -30 13 -18 rrcurveto
+          55 31 67 56 40 51 rrcurveto
+          -63 54 rlineto
+          -405 -71 rmoveto
+          17 -96 rlineto
+          72 18 93 25 88 24 rrcurveto
+          -6 92 rlineto
+          -96 -24 -101 -25 -67 -14 rrcurveto
+          42 567 rmoveto
+          0 -89 rlineto
+          205 0 rlineto
+          0 89 rlineto
+          -205 0 rlineto
+          -32 -169 rmoveto
+          0 -92 rlineto
+          251 0 rlineto
+          0 92 rlineto
+          -251 0 rlineto
+          7 -153 rmoveto
+          11 -58 10 -74 2 -50 rrcurveto
+          53 18 rlineto
+          -3 49 -10 74 -12 56 rrcurveto
+          -51 -15 rlineto
+          196 24 rmoveto
+          -5 -49 -12 -73 -10 -46 rrcurveto
+          49 -18 rlineto
+          11 44 12 66 12 58 rrcurveto
+          -57 18 rlineto
+          -105 262 rmoveto
+          0 -542 rlineto
+          68 14 rlineto
+          0 528 rlineto
+          -68 0 rlineto
+          2 289 rmoveto
+          -23 -80 -44 -98 -63 -74 rrcurveto
+          16 -15 23 -34 10 -21 rrcurveto
+          74 91 45 105 28 77 rrcurveto
+          0 29 rlineto
+          -23 0 rlineto
+          0 20 rlineto
+          -43 0 rlineto
+          10 0 rmoveto
+          0 -75 rlineto
+          12 0 rlineto
+          36 -46 43 -84 19 -49 rrcurveto
+          57 79 rlineto
+          -22 51 -48 73 -40 51 rrcurveto
+          -57 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni994C">
+          309 200 rmoveto
+          0 -81 rlineto
+          413 0 rlineto
+          0 81 rlineto
+          -413 0 rlineto
+          13 191 rmoveto
+          0 -81 rlineto
+          389 0 rlineto
+          0 81 rlineto
+          -389 0 rlineto
+          24 427 rmoveto
+          0 -64 rlineto
+          96 0 rlineto
+          0 -70 rlineto
+          -96 0 rlineto
+          0 -66 rlineto
+          151 0 rlineto
+          0 200 rlineto
+          -151 0 rlineto
+          56 -332 rmoveto
+          0 -308 rlineto
+          65 0 rlineto
+          0 308 rlineto
+          -65 0 rlineto
+          159 0 rmoveto
+          0 -311 rlineto
+          66 0 rlineto
+          0 311 rlineto
+          -66 0 rlineto
+          -242 332 rmoveto
+          0 -253 rlineto
+          0 -74 15 -20 52 0 rrcurveto
+          10 0 46 0 10 0 rrcurveto
+          39 0 16 22 6 82 rrcurveto
+          -15 4 -23 11 -11 12 rrcurveto
+          -1 -55 -3 -7 -15 0 rrcurveto
+          -9 0 -36 0 -7 0 rrcurveto
+          -16 0 -2 3 0 23 rrcurveto
+          0 252 rlineto
+          -56 0 rlineto
+          233 0 rmoveto
+          0 -64 rlineto
+          100 0 rlineto
+          0 -70 rlineto
+          -100 0 rlineto
+          0 -64 rlineto
+          155 0 rlineto
+          0 198 rlineto
+          -155 0 rlineto
+          -26 0 rmoveto
+          0 -250 rlineto
+          0 -75 14 -20 54 0 rrcurveto
+          11 0 49 0 11 0 rrcurveto
+          40 0 16 22 6 81 rrcurveto
+          -15 5 -23 11 -11 12 rrcurveto
+          -2 -54 -3 -8 -14 0 rrcurveto
+          -11 0 -38 0 -8 0 rrcurveto
+          -19 0 -2 4 0 23 rrcurveto
+          0 249 rlineto
+          -55 0 rlineto
+          18 -766 rmoveto
+          50 -40 61 -60 29 -39 rrcurveto
+          50 61 rlineto
+          -32 39 -63 56 -49 37 rrcurveto
+          -46 -54 rlineto
+          -114 55 rmoveto
+          -31 -46 -63 -58 -55 -31 rrcurveto
+          16 -16 21 -27 10 -17 rrcurveto
+          54 34 66 59 40 54 rrcurveto
+          -58 48 rlineto
+          -365 447 rmoveto
+          0 -644 rlineto
+          64 0 rlineto
+          0 644 rlineto
+          -64 0 rlineto
+          38 -118 rmoveto
+          0 -62 rlineto
+          165 0 rlineto
+          0 62 rlineto
+          -165 0 rlineto
+          16 234 rmoveto
+          0 -69 rlineto
+          136 0 rlineto
+          0 69 rlineto
+          -136 0 rlineto
+          -18 -467 rmoveto
+          0 -75 rlineto
+          193 0 rlineto
+          0 75 rlineto
+          -193 0 rlineto
+          1 -129 rmoveto
+          0 -77 rlineto
+          197 0 rlineto
+          0 77 rlineto
+          -197 0 rlineto
+          3 480 rmoveto
+          0 -66 rlineto
+          126 0 rlineto
+          0 -170 rlineto
+          -126 0 rlineto
+          0 -67 rlineto
+          189 0 rlineto
+          0 303 rlineto
+          -189 0 rlineto
+          36 295 rmoveto
+          -25 -75 -44 -93 -61 -71 rrcurveto
+          15 -12 22 -27 11 -20 rrcurveto
+          67 84 45 99 29 70 rrcurveto
+          0 26 rlineto
+          -21 0 rlineto
+          0 19 rlineto
+          -38 0 rlineto
+          16 0 rmoveto
+          0 -64 rlineto
+          12 0 rlineto
+          40 -48 49 -84 23 -50 rrcurveto
+          46 69 rlineto
+          -25 51 -52 73 -44 53 rrcurveto
+          -49 0 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni9A40">
+          43 801 rmoveto
+          0 -69 rlineto
+          664 0 rlineto
+          0 69 rlineto
+          -664 0 rlineto
+          169 48 rmoveto
+          0 -145 rlineto
+          74 0 rlineto
+          0 145 rlineto
+          -74 0 rlineto
+          250 0 rmoveto
+          0 -145 rlineto
+          75 0 rlineto
+          0 145 rlineto
+          -75 0 rlineto
+          -266 -298 rmoveto
+          360 0 rlineto
+          0 -38 rlineto
+          -360 0 rlineto
+          0 38 rlineto
+          0 88 rmoveto
+          360 0 rlineto
+          0 -37 rlineto
+          -360 0 rlineto
+          0 37 rlineto
+          -70 53 rmoveto
+          0 -232 rlineto
+          503 0 rlineto
+          0 232 rlineto
+          -503 0 rlineto
+          -93 -266 rmoveto
+          0 -68 rlineto
+          685 0 rlineto
+          0 68 rlineto
+          -685 0 rlineto
+          172 -183 rmoveto
+          0 -42 rlineto
+          376 0 rlineto
+          0 42 rlineto
+          -376 0 rlineto
+          0 -74 rmoveto
+          0 -41 rlineto
+          385 0 rlineto
+          0 41 rlineto
+          -385 0 rlineto
+          -46 -73 rmoveto
+          0 -55 rlineto
+          464 0 rlineto
+          0 55 rlineto
+          -464 0 rlineto
+          91 389 rmoveto
+          -31 -97 -74 -94 -126 -60 rrcurveto
+          13 -15 20 -33 7 -22 rrcurveto
+          138 73 80 107 43 126 rrcurveto
+          -70 15 rlineto
+          278 -77 rmoveto
+          -57 -26 rlineto
+          48 -92 85 -80 89 -37 rrcurveto
+          9 24 20 34 15 18 rrcurveto
+          -85 27 -82 61 -42 71 rrcurveto
+          -185 -99 rmoveto
+          0 -241 rlineto
+          69 0 rlineto
+          0 241 rlineto
+          -69 0 rlineto
+          256 -213 rmoveto
+          0 -10 rlineto
+          -4 -66 -6 -28 -7 -9 rrcurveto
+          -4 -7 -5 -1 -8 0 rrcurveto
+          -8 0 -16 1 -20 2 rrcurveto
+          8 -17 6 -30 1 -20 rrcurveto
+          25 -1 24 0 12 2 rrcurveto
+          16 1 13 5 11 14 rrcurveto
+          14 18 7 38 6 76 rrcurveto
+          1 11 1 21 0 0 rrcurveto
+          -67 0 rlineto
+          -465 -42 rmoveto
+          -12 -39 -24 -42 -31 -23 rrcurveto
+          52 -43 rlineto
+          36 29 21 44 13 46 rrcurveto
+          -55 28 rlineto
+          93 -30 rmoveto
+          8 -35 6 -46 0 -29 rrcurveto
+          57 12 rlineto
+          0 28 -8 47 -9 34 rrcurveto
+          -54 -11 rlineto
+          102 -2 rmoveto
+          16 -30 16 -42 6 -28 rrcurveto
+          53 24 rlineto
+          -7 28 -16 40 -18 29 rrcurveto
+          -50 -21 rlineto
+          108 1 rmoveto
+          18 -22 20 -32 9 -22 rrcurveto
+          45 31 rlineto
+          -9 22 -22 30 -19 21 rrcurveto
+          -42 -28 rlineto
+          -218 301 rmoveto
+          -33 -50 rlineto
+          345 0 rlineto
+          0 50 rlineto
+          -312 0 rlineto
+          -60 -36 rmoveto
+          0 -218 rlineto
+          71 0 rlineto
+          0 256 rlineto
+          -71 -38 rlineto
+          endchar
+        </CharString>
+        <CharString name="uni9B03">
+          173 274 rmoveto
+          0 -61 rlineto
+          403 0 rlineto
+          0 61 rlineto
+          -403 0 rlineto
+          -119 -104 rmoveto
+          0 -66 rlineto
+          644 0 rlineto
+          0 66 rlineto
+          -644 0 rlineto
+          286 246 rmoveto
+          0 -83 rlineto
+          74 0 rlineto
+          0 83 rlineto
+          -74 0 rlineto
+          125 -357 rmoveto
+          55 -38 69 -58 34 -41 rrcurveto
+          63 50 rlineto
+          -37 42 -70 55 -54 35 rrcurveto
+          -60 -45 rlineto
+          -408 319 rmoveto
+          0 -145 rlineto
+          72 0 rlineto
+          0 84 rlineto
+          489 0 rlineto
+          0 -84 rlineto
+          76 0 rlineto
+          0 145 rlineto
+          -637 0 rlineto
+          278 -245 rmoveto
+          0 -135 rlineto
+          0 -12 -4 -3 -10 0 rrcurveto
+          -10 -1 -40 0 -35 2 rrcurveto
+          10 -19 12 -32 7 -22 rrcurveto
+          50 0 35 0 27 12 rrcurveto
+          24 12 9 17 0 44 rrcurveto
+          0 137 rlineto
+          -75 0 rlineto
+          -140 -30 rmoveto
+          -35 -47 -61 -44 -60 -29 rrcurveto
+          15 -15 27 -32 11 -18 rrcurveto
+          59 35 69 58 42 62 rrcurveto
+          -67 30 rlineto
+          -57 630 rmoveto
+          0 -49 rlineto
+          226 0 rlineto
+          0 49 rlineto
+          -226 0 rlineto
+          0 -81 rmoveto
+          0 -49 rlineto
+          226 0 rlineto
+          0 49 rlineto
+          -226 0 rlineto
+          -102 -82 rmoveto
+          0 -58 rlineto
+          381 0 rlineto
+          0 58 rlineto
+          -381 0 rlineto
+          60 253 rmoveto
+          0 -281 rlineto
+          67 0 rlineto
+          0 223 rlineto
+          224 0 rlineto
+          0 58 rlineto
+          -291 0 rlineto
+          38 -271 rmoveto
+          -8 -28 -14 -42 -11 -28 rrcurveto
+          48 -20 rlineto
+          14 26 17 34 15 37 rrcurveto
+          -61 21 rlineto
+          -78 -86 rmoveto
+          4 -62 rlineto
+          77 5 104 8 103 11 rrcurveto
+          1 54 rlineto
+          -108 -7 -108 -6 -73 -3 rrcurveto
+          218 36 rmoveto
+          26 -28 31 -42 13 -28 rrcurveto
+          48 35 rlineto
+          -14 29 -32 40 -26 27 rrcurveto
+          -46 -33 rlineto
+          345 346 rmoveto
+          -51 -44 -95 -42 -71 -24 rrcurveto
+          15 -16 18 -26 9 -18 rrcurveto
+          75 28 94 47 62 56 rrcurveto
+          -56 39 rlineto
+          19 -126 rmoveto
+          -48 -48 -94 -40 -79 -20 rrcurveto
+          14 -17 16 -27 10 -19 rrcurveto
+          86 27 94 47 58 63 rrcurveto
+          -57 34 rlineto
+          23 -124 rmoveto
+          -47 -62 -99 -40 -100 -19 rrcurveto
+          14 -18 15 -30 9 -22 rrcurveto
+          111 29 102 50 58 81 rrcurveto
+          -63 31 rlineto
+          endchar
+        </CharString>
+        <CharString name="uniF9DC">
+          412 771 rmoveto
+          0 -78 rlineto
+          222 0 rlineto
+          0 78 rlineto
+          -222 0 rlineto
+          -68 -486 rmoveto
+          0 -75 rlineto
+          345 0 rlineto
+          0 75 rlineto
+          -345 0 rlineto
+          27 154 rmoveto
+          0 -74 rlineto
+          264 0 rlineto
+          0 74 rlineto
+          -264 0 rlineto
+          -100 -422 rmoveto
+          0 -84 rlineto
+          451 0 rlineto
+          0 84 rlineto
+          -451 0 rlineto
+          62 136 rmoveto
+          0 -75 rlineto
+          343 0 rlineto
+          0 75 rlineto
+          -343 0 rlineto
+          278 618 rmoveto
+          0 -15 rlineto
+          -56 -141 -150 -102 -145 -41 rrcurveto
+          14 -20 17 -37 7 -24 rrcurveto
+          157 54 157 111 72 185 rrcurveto
+          -48 34 rlineto
+          -12 -4 rlineto
+          -13 0 rlineto
+          -195 -53 rmoveto
+          -61 -30 rlineto
+          69 -144 122 -99 151 -40 rrcurveto
+          8 25 20 38 16 19 rrcurveto
+          -144 31 -123 83 -58 117 rrcurveto
+          16 134 rmoveto
+          -30 -75 -55 -85 -82 -62 rrcurveto
+          16 -14 23 -33 11 -22 rrcurveto
+          91 77 60 95 41 101 rrcurveto
+          -75 18 rlineto
+          -86 -493 rmoveto
+          -16 -64 -29 -65 -35 -43 rrcurveto
+          16 -12 27 -23 13 -14 rrcurveto
+          35 49 34 76 20 75 rrcurveto
+          -65 21 rlineto
+          117 -14 rmoveto
+          0 -371 rlineto
+          75 0 rlineto
+          0 371 rlineto
+          -75 0 rlineto
+          -409 461 rmoveto
+          0 -897 rlineto
+          69 0 rlineto
+          0 802 rlineto
+          109 0 rlineto
+          0 95 rlineto
+          -178 0 rlineto
+          154 0 rmoveto
+          0 -30 rlineto
+          -13 -67 -24 -136 -25 -91 rrcurveto
+          47 -73 11 -65 0 -49 rrcurveto
+          0 -31 -4 -23 -9 -9 rrcurveto
+          -6 -6 -8 -3 -9 -1 rrcurveto
+          -10 0 -12 0 -14 2 rrcurveto
+          11 -26 6 -40 1 -25 rrcurveto
+          16 -1 20 0 13 2 rrcurveto
+          17 3 14 7 11 11 rrcurveto
+          24 21 9 43 0 62 rrcurveto
+          0 61 -10 71 -50 80 rrcurveto
+          23 81 26 109 21 87 rrcurveto
+          -51 40 rlineto
+          -12 -4 rlineto
+          -13 0 rlineto
+          endchar
+        </CharString>
+      </CharStrings>
+    </CFFFont>
+
+    <GlobalSubrs>
+      <!-- The 'index' attribute is only for humans; it is ignored when parsed. -->
+    </GlobalSubrs>
+  </CFF>
+
+  <hmtx>
+    <mtx name=".notdef" width="750" lsb="75"/>
+    <mtx name="u2F884" width="750" lsb="29"/>
+    <mtx name="uni2FC5" width="750" lsb="17"/>
+    <mtx name="uni50CE" width="750" lsb="8"/>
+    <mtx name="uni5675" width="750" lsb="28"/>
+    <mtx name="uni5E9A" width="750" lsb="14"/>
+    <mtx name="uni60FA" width="750" lsb="14"/>
+    <mtx name="uni610F" width="750" lsb="22"/>
+    <mtx name="uni645D" width="750" lsb="15"/>
+    <mtx name="uni6479" width="750" lsb="21"/>
+    <mtx name="uni64B0" width="750" lsb="15"/>
+    <mtx name="uni661F" width="750" lsb="27"/>
+    <mtx name="uni6692" width="750" lsb="50"/>
+    <mtx name="uni6801" width="750" lsb="14"/>
+    <mtx name="uni6A1A" width="750" lsb="15"/>
+    <mtx name="uni6F09" width="750" lsb="22"/>
+    <mtx name="uni6F60" width="750" lsb="22"/>
+    <mtx name="uni714B" width="750" lsb="16"/>
+    <mtx name="uni7243" width="750" lsb="19"/>
+    <mtx name="uni7329" width="750" lsb="15"/>
+    <mtx name="uni7446" width="750" lsb="14"/>
+    <mtx name="uni75B2" width="750" lsb="16"/>
+    <mtx name="uni7612" width="750" lsb="14"/>
+    <mtx name="uni763C" width="750" lsb="12"/>
+    <mtx name="uni76EC" width="750" lsb="30"/>
+    <mtx name="uni7714" width="750" lsb="32"/>
+    <mtx name="uni7772" width="750" lsb="48"/>
+    <mtx name="uni8165" width="750" lsb="17"/>
+    <mtx name="uni821E" width="750" lsb="19"/>
+    <mtx name="uni82E8" width="750" lsb="21"/>
+    <mtx name="uni83EB" width="750" lsb="33"/>
+    <mtx name="uni83F7" width="750" lsb="38"/>
+    <mtx name="uni847A_E0101" width="750" lsb="35"/>
+    <mtx name="uni8513" width="750" lsb="32"/>
+    <mtx name="uni8541" width="750" lsb="33"/>
+    <mtx name="uni8550" width="750" lsb="36"/>
+    <mtx name="uni8552" width="750" lsb="26"/>
+    <mtx name="uni8591" width="750" lsb="33"/>
+    <mtx name="uni85A5" width="750" lsb="21"/>
+    <mtx name="uni85A8" width="750" lsb="38"/>
+    <mtx name="uni85AF" width="750" lsb="18"/>
+    <mtx name="uni85B0" width="750" lsb="34"/>
+    <mtx name="uni8619" width="750" lsb="39"/>
+    <mtx name="uni8642" width="750" lsb="39"/>
+    <mtx name="uni87C7" width="750" lsb="20"/>
+    <mtx name="uni87E4" width="750" lsb="22"/>
+    <mtx name="uni8B54" width="750" lsb="23"/>
+    <mtx name="uni8E59" width="750" lsb="19"/>
+    <mtx name="uni9078_E0101" width="750" lsb="19"/>
+    <mtx name="uni911C" width="750" lsb="12"/>
+    <mtx name="uni9192" width="750" lsb="33"/>
+    <mtx name="uni9409" width="750" lsb="6"/>
+    <mtx name="uni994C" width="750" lsb="11"/>
+    <mtx name="uni9A40" width="750" lsb="19"/>
+    <mtx name="uni9B03" width="750" lsb="36"/>
+    <mtx name="uniF9DC" width="750" lsb="54"/>
+  </hmtx>
+
+  <DSIG>
+    <!-- note that the Digital Signature will be invalid after recompilation! -->
+    <tableHeader flag="0x0" numSigs="0" version="1"/>
+  </DSIG>
+
+</ttFont>

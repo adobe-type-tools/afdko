@@ -1,0 +1,518 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont sfntVersion="OTTO" ttLibVersion="3.28">
+
+  <GlyphOrder>
+    <!-- The 'id' attribute is only for humans; it is ignored when parsed. -->
+    <GlyphID id="0" name=".notdef"/>
+    <GlyphID id="1" name="cid00001"/>
+    <GlyphID id="2" name="cid01125"/>
+    <GlyphID id="3" name="cid01143"/>
+    <GlyphID id="4" name="cid23058"/>
+  </GlyphOrder>
+
+  <head>
+    <!-- Most of this table will be recalculated by the compiler -->
+    <tableVersion value="1.0"/>
+    <fontRevision value="1.0"/>
+    <checkSumAdjustment value="0x306d9d41"/>
+    <magicNumber value="0x5f0f3cf5"/>
+    <flags value="00000000 00000011"/>
+    <unitsPerEm value="1000"/>
+    <created value="Sat Jun 30 16:42:31 2018"/>
+    <modified value="Sat Jun 30 16:42:31 2018"/>
+    <xMin value="37"/>
+    <yMin value="-120"/>
+    <xMax value="971"/>
+    <yMax value="880"/>
+    <macStyle value="00000000 00000000"/>
+    <lowestRecPPEM value="3"/>
+    <fontDirectionHint value="2"/>
+    <indexToLocFormat value="0"/>
+    <glyphDataFormat value="0"/>
+  </head>
+
+  <hhea>
+    <tableVersion value="0x00010000"/>
+    <ascent value="880"/>
+    <descent value="-120"/>
+    <lineGap value="1000"/>
+    <advanceWidthMax value="1000"/>
+    <minLeftSideBearing value="37"/>
+    <minRightSideBearing value="29"/>
+    <xMaxExtent value="971"/>
+    <caretSlopeRise value="1"/>
+    <caretSlopeRun value="0"/>
+    <caretOffset value="0"/>
+    <reserved0 value="0"/>
+    <reserved1 value="0"/>
+    <reserved2 value="0"/>
+    <reserved3 value="0"/>
+    <metricDataFormat value="0"/>
+    <numberOfHMetrics value="5"/>
+  </hhea>
+
+  <maxp>
+    <tableVersion value="0x5000"/>
+    <numGlyphs value="5"/>
+  </maxp>
+
+  <OS_2>
+    <!-- The fields 'usFirstCharIndex' and 'usLastCharIndex'
+         will be recalculated by the compiler -->
+    <version value="3"/>
+    <xAvgCharWidth value="806"/>
+    <usWeightClass value="400"/>
+    <usWidthClass value="5"/>
+    <fsType value="00000000 00000100"/>
+    <ySubscriptXSize value="650"/>
+    <ySubscriptYSize value="600"/>
+    <ySubscriptXOffset value="0"/>
+    <ySubscriptYOffset value="75"/>
+    <ySuperscriptXSize value="650"/>
+    <ySuperscriptYSize value="600"/>
+    <ySuperscriptXOffset value="0"/>
+    <ySuperscriptYOffset value="350"/>
+    <yStrikeoutSize value="50"/>
+    <yStrikeoutPosition value="220"/>
+    <sFamilyClass value="0"/>
+    <panose>
+      <bFamilyType value="0"/>
+      <bSerifStyle value="0"/>
+      <bWeight value="5"/>
+      <bProportion value="0"/>
+      <bContrast value="0"/>
+      <bStrokeVariation value="0"/>
+      <bArmStyle value="0"/>
+      <bLetterForm value="0"/>
+      <bMidline value="0"/>
+      <bXHeight value="0"/>
+    </panose>
+    <ulUnicodeRange1 value="00000000 00000000 00000000 00000000"/>
+    <ulUnicodeRange2 value="00000000 00000000 00000000 00000000"/>
+    <ulUnicodeRange3 value="00000000 00000000 00000000 00000000"/>
+    <ulUnicodeRange4 value="00000000 00000000 00000000 00000000"/>
+    <achVendID value="ADBE"/>
+    <fsSelection value="00000000 01000000"/>
+    <usFirstCharIndex value="0"/>
+    <usLastCharIndex value="39925"/>
+    <sTypoAscender value="880"/>
+    <sTypoDescender value="-120"/>
+    <sTypoLineGap value="1000"/>
+    <usWinAscent value="880"/>
+    <usWinDescent value="120"/>
+    <ulCodePageRange1 value="00000000 00000000 00000000 00000001"/>
+    <ulCodePageRange2 value="00000000 00000000 00000000 00000000"/>
+    <sxHeight value="0"/>
+    <sCapHeight value="0"/>
+    <usDefaultChar value="0"/>
+    <usBreakChar value="32"/>
+    <usMaxContext value="0"/>
+  </OS_2>
+
+  <name>
+    <namerecord nameID="1" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      SourceSans
+    </namerecord>
+    <namerecord nameID="2" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Regular
+    </namerecord>
+    <namerecord nameID="3" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      1.000;ADBE;SourceSans-Test
+    </namerecord>
+    <namerecord nameID="4" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      SourceSans
+    </namerecord>
+    <namerecord nameID="5" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Version 1.000;hotconv 1.0.108;makeotfexe 2.5.65593
+    </namerecord>
+    <namerecord nameID="6" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      SourceSans-Test
+    </namerecord>
+    <namerecord nameID="17" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Test
+    </namerecord>
+    <namerecord nameID="1" platformID="3" platEncID="1" langID="0x409">
+      SourceSans
+    </namerecord>
+    <namerecord nameID="2" platformID="3" platEncID="1" langID="0x409">
+      Regular
+    </namerecord>
+    <namerecord nameID="3" platformID="3" platEncID="1" langID="0x409">
+      1.000;ADBE;SourceSans-Test
+    </namerecord>
+    <namerecord nameID="4" platformID="3" platEncID="1" langID="0x409">
+      SourceSans
+    </namerecord>
+    <namerecord nameID="5" platformID="3" platEncID="1" langID="0x409">
+      Version 1.000;hotconv 1.0.108;makeotfexe 2.5.65593
+    </namerecord>
+    <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
+      SourceSans-Test
+    </namerecord>
+  </name>
+
+  <cmap>
+    <tableVersion version="0"/>
+    <cmap_format_4 platformID="0" platEncID="3" language="0">
+      <map code="0x0" name="cid00001"/><!-- ???? -->
+      <map code="0x1" name="cid00001"/><!-- ???? -->
+      <map code="0x2" name="cid00001"/><!-- ???? -->
+      <map code="0x3" name="cid00001"/><!-- ???? -->
+      <map code="0x4" name="cid00001"/><!-- ???? -->
+      <map code="0x5" name="cid00001"/><!-- ???? -->
+      <map code="0x6" name="cid00001"/><!-- ???? -->
+      <map code="0x7" name="cid00001"/><!-- ???? -->
+      <map code="0x8" name="cid00001"/><!-- ???? -->
+      <map code="0x9" name="cid00001"/><!-- ???? -->
+      <map code="0xa" name="cid00001"/><!-- ???? -->
+      <map code="0xb" name="cid00001"/><!-- ???? -->
+      <map code="0xc" name="cid00001"/><!-- ???? -->
+      <map code="0xd" name="cid00001"/><!-- ???? -->
+      <map code="0xe" name="cid00001"/><!-- ???? -->
+      <map code="0xf" name="cid00001"/><!-- ???? -->
+      <map code="0x10" name="cid00001"/><!-- ???? -->
+      <map code="0x11" name="cid00001"/><!-- ???? -->
+      <map code="0x12" name="cid00001"/><!-- ???? -->
+      <map code="0x13" name="cid00001"/><!-- ???? -->
+      <map code="0x14" name="cid00001"/><!-- ???? -->
+      <map code="0x15" name="cid00001"/><!-- ???? -->
+      <map code="0x16" name="cid00001"/><!-- ???? -->
+      <map code="0x17" name="cid00001"/><!-- ???? -->
+      <map code="0x18" name="cid00001"/><!-- ???? -->
+      <map code="0x19" name="cid00001"/><!-- ???? -->
+      <map code="0x1a" name="cid00001"/><!-- ???? -->
+      <map code="0x1b" name="cid00001"/><!-- ???? -->
+      <map code="0x1c" name="cid00001"/><!-- ???? -->
+      <map code="0x1d" name="cid00001"/><!-- ???? -->
+      <map code="0x1e" name="cid00001"/><!-- ???? -->
+      <map code="0x1f" name="cid00001"/><!-- ???? -->
+      <map code="0x20" name="cid00001"/><!-- SPACE -->
+      <map code="0xa0" name="cid00001"/><!-- NO-BREAK SPACE -->
+      <map code="0x4e9c" name="cid01125"/><!-- CJK UNIFIED IDEOGRAPH-4E9C -->
+      <map code="0x9bf5" name="cid01143"/><!-- CJK UNIFIED IDEOGRAPH-9BF5 -->
+    </cmap_format_4>
+    <cmap_format_14 platformID="0" platEncID="5" format="14" length="33" numVarSelectorRecords="1">
+      <map uvs="0xe0100" uv="0x4e9c" name="None"/>
+      <map uvs="0xe0100" uv="0x9bf5" name="None"/>
+    </cmap_format_14>
+    <cmap_format_2 platformID="1" platEncID="1" language="0">
+      <map code="0x0" name="cid00001"/>
+      <map code="0x1" name="cid00001"/>
+      <map code="0x2" name="cid00001"/>
+      <map code="0x3" name="cid00001"/>
+      <map code="0x4" name="cid00001"/>
+      <map code="0x5" name="cid00001"/>
+      <map code="0x6" name="cid00001"/>
+      <map code="0x7" name="cid00001"/>
+      <map code="0x8" name="cid00001"/>
+      <map code="0x9" name="cid00001"/>
+      <map code="0xa" name="cid00001"/>
+      <map code="0xb" name="cid00001"/>
+      <map code="0xc" name="cid00001"/>
+      <map code="0xd" name="cid00001"/>
+      <map code="0xe" name="cid00001"/>
+      <map code="0xf" name="cid00001"/>
+      <map code="0x10" name="cid00001"/>
+      <map code="0x11" name="cid00001"/>
+      <map code="0x12" name="cid00001"/>
+      <map code="0x13" name="cid00001"/>
+      <map code="0x14" name="cid00001"/>
+      <map code="0x15" name="cid00001"/>
+      <map code="0x16" name="cid00001"/>
+      <map code="0x17" name="cid00001"/>
+      <map code="0x18" name="cid00001"/>
+      <map code="0x19" name="cid00001"/>
+      <map code="0x1a" name="cid00001"/>
+      <map code="0x1b" name="cid00001"/>
+      <map code="0x1c" name="cid00001"/>
+      <map code="0x1d" name="cid00001"/>
+      <map code="0x1e" name="cid00001"/>
+      <map code="0x1f" name="cid00001"/>
+      <map code="0x20" name="cid00001"/>
+      <map code="0x889f" name="cid01125"/>
+      <map code="0x88b1" name="cid01143"/>
+    </cmap_format_2>
+    <cmap_format_4 platformID="3" platEncID="1" language="0">
+      <map code="0x0" name="cid00001"/><!-- ???? -->
+      <map code="0x1" name="cid00001"/><!-- ???? -->
+      <map code="0x2" name="cid00001"/><!-- ???? -->
+      <map code="0x3" name="cid00001"/><!-- ???? -->
+      <map code="0x4" name="cid00001"/><!-- ???? -->
+      <map code="0x5" name="cid00001"/><!-- ???? -->
+      <map code="0x6" name="cid00001"/><!-- ???? -->
+      <map code="0x7" name="cid00001"/><!-- ???? -->
+      <map code="0x8" name="cid00001"/><!-- ???? -->
+      <map code="0x9" name="cid00001"/><!-- ???? -->
+      <map code="0xa" name="cid00001"/><!-- ???? -->
+      <map code="0xb" name="cid00001"/><!-- ???? -->
+      <map code="0xc" name="cid00001"/><!-- ???? -->
+      <map code="0xd" name="cid00001"/><!-- ???? -->
+      <map code="0xe" name="cid00001"/><!-- ???? -->
+      <map code="0xf" name="cid00001"/><!-- ???? -->
+      <map code="0x10" name="cid00001"/><!-- ???? -->
+      <map code="0x11" name="cid00001"/><!-- ???? -->
+      <map code="0x12" name="cid00001"/><!-- ???? -->
+      <map code="0x13" name="cid00001"/><!-- ???? -->
+      <map code="0x14" name="cid00001"/><!-- ???? -->
+      <map code="0x15" name="cid00001"/><!-- ???? -->
+      <map code="0x16" name="cid00001"/><!-- ???? -->
+      <map code="0x17" name="cid00001"/><!-- ???? -->
+      <map code="0x18" name="cid00001"/><!-- ???? -->
+      <map code="0x19" name="cid00001"/><!-- ???? -->
+      <map code="0x1a" name="cid00001"/><!-- ???? -->
+      <map code="0x1b" name="cid00001"/><!-- ???? -->
+      <map code="0x1c" name="cid00001"/><!-- ???? -->
+      <map code="0x1d" name="cid00001"/><!-- ???? -->
+      <map code="0x1e" name="cid00001"/><!-- ???? -->
+      <map code="0x1f" name="cid00001"/><!-- ???? -->
+      <map code="0x20" name="cid00001"/><!-- SPACE -->
+      <map code="0xa0" name="cid00001"/><!-- NO-BREAK SPACE -->
+      <map code="0x4e9c" name="cid01125"/><!-- CJK UNIFIED IDEOGRAPH-4E9C -->
+      <map code="0x9bf5" name="cid01143"/><!-- CJK UNIFIED IDEOGRAPH-9BF5 -->
+    </cmap_format_4>
+  </cmap>
+
+  <post>
+    <formatType value="3.0"/>
+    <italicAngle value="0.0"/>
+    <underlinePosition value="-125"/>
+    <underlineThickness value="50"/>
+    <isFixedPitch value="0"/>
+    <minMemType42 value="0"/>
+    <maxMemType42 value="0"/>
+    <minMemType1 value="0"/>
+    <maxMemType1 value="0"/>
+  </post>
+
+  <CFF>
+    <major value="1"/>
+    <minor value="0"/>
+    <CFFFont name="SourceSans-Test">
+      <ROS Registry="Adobe" Order="Japan1" Supplement="0"/>
+      <Notice value="Copyright 2014-2018 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name 'Source'. Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries."/>
+      <FullName value="Source Han Sans AJ16 Regular"/>
+      <FamilyName value="Source Han Sans AJ16"/>
+      <Weight value="Regular"/>
+      <isFixedPitch value="0"/>
+      <ItalicAngle value="0"/>
+      <UnderlinePosition value="-150"/>
+      <UnderlineThickness value="50"/>
+      <PaintType value="0"/>
+      <CharstringType value="2"/>
+      <FontMatrix value="0.001 0 0 0.001 0 0"/>
+      <FontBBox value="0 -120 977 880"/>
+      <StrokeWidth value="0"/>
+      <CIDFontVersion value="1"/>
+      <CIDFontRevision value="0"/>
+      <CIDFontType value="0"/>
+      <CIDCount value="23059"/>
+      <!-- charset is dumped separately as the 'GlyphOrder' element -->
+      <FDSelect format="0"/>
+      <FDArray>
+        <FontDict index="0">
+          <FontName value="SourceSans-Test-Generic"/>
+          <Private>
+            <BlueValues value="-250 -250 1100 1100"/>
+            <BlueScale value="0.039625"/>
+            <BlueShift value="7"/>
+            <BlueFuzz value="1"/>
+            <StdHW value="40"/>
+            <StdVW value="40"/>
+            <StemSnapH value="40 120"/>
+            <StemSnapV value="40 120"/>
+            <ForceBold value="0"/>
+            <LanguageGroup value="1"/>
+            <ExpansionFactor value="0.06"/>
+            <initialRandomSeed value="0"/>
+            <defaultWidthX value="1000"/>
+            <nominalWidthX value="0"/>
+          </Private>
+        </FontDict>
+        <FontDict index="1">
+          <FontName value="SourceSans-Test-Kanji"/>
+          <Private>
+            <BlueValues value="-250 -250 1100 1100"/>
+            <BlueScale value="0.039625"/>
+            <BlueShift value="7"/>
+            <BlueFuzz value="1"/>
+            <StdHW value="58"/>
+            <StdVW value="63"/>
+            <StemSnapH value="58 65 84"/>
+            <StemSnapV value="63 73 89"/>
+            <ForceBold value="0"/>
+            <LanguageGroup value="1"/>
+            <ExpansionFactor value="0.06"/>
+            <initialRandomSeed value="0"/>
+            <defaultWidthX value="1000"/>
+            <nominalWidthX value="0"/>
+          </Private>
+        </FontDict>
+        <FontDict index="2">
+          <FontName value="SourceSans-Test-Proportional"/>
+          <Private>
+            <BlueValues value="-13 0 543 557 733 747"/>
+            <OtherBlues value="-250 -229"/>
+            <BlueScale value="0.039625"/>
+            <BlueShift value="7"/>
+            <BlueFuzz value="1"/>
+            <StdHW value="69"/>
+            <StdVW value="85"/>
+            <StemSnapH value="69 79 88"/>
+            <StemSnapV value="85 95 111"/>
+            <ForceBold value="0"/>
+            <LanguageGroup value="0"/>
+            <ExpansionFactor value="0.06"/>
+            <initialRandomSeed value="0"/>
+            <defaultWidthX value="0"/>
+            <nominalWidthX value="0"/>
+          </Private>
+        </FontDict>
+      </FDArray>
+      <CharStrings>
+        <CharString name=".notdef" fdSelectIndex="0">
+          100 -120 rmoveto
+          800 1000 -800 hlineto
+          400 -459 rmoveto
+          -318 409 rlineto
+          636 hlineto
+          -286 -450 rmoveto
+          318 409 rlineto
+          -818 vlineto
+          -668 -41 rmoveto
+          318 409 318 -409 rlineto
+          -668 859 rmoveto
+          318 -409 -318 -409 rlineto
+          endchar
+        </CharString>
+        <CharString name="cid00001" fdSelectIndex="2">
+          224 endchar
+        </CharString>
+        <CharString name="cid01125" fdSelectIndex="1">
+          415 211 rmoveto
+          156 -179 -156 hlineto
+          -221 246 rmoveto
+          221 148 -221 vlineto
+          73 427 rmoveto
+          156 -139 -156 hlineto
+          156 -288 rmoveto
+          -156 221 156 hlineto
+          227 hmoveto
+          -221 -156 221 vlineto
+          -467 vmoveto
+          179 156 -33 73 388 -229 139 278 68 -839 -68 261 -139 -218 -391 70 36 148 -179 -290 -68 897 68 vlineto
+          endchar
+        </CharString>
+        <CharString name="cid01143" fdSelectIndex="1">
+          86 -77 rmoveto
+          49 50 17 87 10 83 -54 13 rcurveline
+          -8 -78 -18 -80 -45 -45 rrcurveto
+          156 194 rmoveto
+          11 -59 4 -74 -4 -49 54 7 rcurveline
+          2 49 -5 74 -12 59 rrcurveto
+          36 -6 rmoveto
+          20 -53 17 -70 4 -46 50 11 rcurveline
+          -4 46 -18 70 -21 52 rrcurveto
+          42 -2 rmoveto
+          24 -44 25 -61 9 -39 49 20 rcurveline
+          -10 38 -26 59 -26 44 rrcurveto
+          448 14 rmoveto
+          -69 -106 -146 -67 -178 -32 13 -15 15 -24 8 -17 192 41 152 75 75 125 rrcurveto
+          -153 110 rmoveto
+          -52 -60 -100 -57 -93 -31 14 -12 16 -19 10 -14 99 38 102 62 60 73 rrcurveto
+          -129 122 rmoveto
+          -39 -47 -71 -50 -61 -30 16 -9 17 -16 11 -13 62 34 73 54 45 57 rrcurveto
+          -379 65 rmoveto
+          -81 100 81 hlineto
+          -261 vmoveto
+          -81 103 81 hlineto
+          -212 hmoveto
+          76 -103 -76 hlineto
+          76 261 rmoveto
+          -100 -76 100 vlineto
+          142 164 rmoveto
+          -14 -35 -17 -39 -17 -29 rrcurveto
+          -100 hlineto
+          17 34 16 34 13 35 rrcurveto
+          760 -234 rmoveto
+          63 -281 vlineto
+          11 28 9 30 7 32 -5 1 rcurveline
+          56 3 59 3 59 3 12 -16 10 -16 7 -14 59 32 rcurveline
+          -27 51 -65 66 -58 47 -55 -30 rcurveline
+          24 -20 25 -23 22 -23 -215 -8 rcurveline
+          32 46 34 55 28 49 -76 23 rcurveline
+          -20 -52 -36 -70 -33 -53 -87 -3 rcurveline
+          7 -61 176 8 -7 -31 -10 -29 -11 -28 rlinecurve
+          -155 -63 123 hlineto
+          -37 -63 -49 -51 -60 -38 rrcurveto
+          283 -113 vlineto
+          25 42 25 50 18 45 -43 29 rcurveline
+          -13 -4 rlineto
+          -112 hlineto
+          9 27 8 27 6 26 -68 10 rcurveline
+          -22 -94 -44 -123 -71 -93 16 -8 25 -19 12 -16 10 14 rcurveline
+          -297 332 87 vlineto
+          13 -12 17 -17 7 -10 76 50 61 68 44 87 rrcurveto
+          93 hlineto
+          40 -84 72 -86 69 -45 10 17 22 24 14 11 -59 33 -63 65 -39 65 rrcurveto
+          endchar
+        </CharString>
+        <CharString name="cid23058" fdSelectIndex="2">
+          0 endchar
+        </CharString>
+      </CharStrings>
+    </CFFFont>
+
+    <GlobalSubrs>
+      <!-- The 'index' attribute is only for humans; it is ignored when parsed. -->
+    </GlobalSubrs>
+  </CFF>
+
+  <VORG>
+    <majorVersion value="1"/>
+    <minorVersion value="0"/>
+    <defaultVertOriginY value="880"/>
+    <numVertOriginYMetrics value="0"/>
+  </VORG>
+
+  <hmtx>
+    <mtx name=".notdef" width="1000" lsb="100"/>
+    <mtx name="cid00001" width="224" lsb="0"/>
+    <mtx name="cid01125" width="1000" lsb="52"/>
+    <mtx name="cid01143" width="1000" lsb="37"/>
+    <mtx name="cid23058" width="0" lsb="0"/>
+  </hmtx>
+
+  <vhea>
+    <tableVersion value="0x00011000"/>
+    <ascent value="500"/>
+    <descent value="-500"/>
+    <lineGap value="1000"/>
+    <advanceHeightMax value="1000"/>
+    <minTopSideBearing value="0"/>
+    <minBottomSideBearing value="0"/>
+    <yMaxExtent value="1000"/>
+    <caretSlopeRise value="0"/>
+    <caretSlopeRun value="1"/>
+    <caretOffset value="0"/>
+    <reserved1 value="0"/>
+    <reserved2 value="0"/>
+    <reserved3 value="0"/>
+    <reserved4 value="0"/>
+    <metricDataFormat value="0"/>
+    <numberOfVMetrics value="1"/>
+  </vhea>
+
+  <vmtx>
+    <mtx name=".notdef" height="1000" tsb="0"/>
+    <mtx name="cid00001" height="1000" tsb="880"/>
+    <mtx name="cid01125" height="1000" tsb="107"/>
+    <mtx name="cid01143" height="1000" tsb="43"/>
+    <mtx name="cid23058" height="1000" tsb="880"/>
+  </vmtx>
+
+  <DSIG>
+    <!-- note that the Digital Signature will be invalid after recompilation! -->
+    <tableHeader flag="0x0" numSigs="0" version="1"/>
+  </DSIG>
+
+</ttFont>

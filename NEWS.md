@@ -1,6 +1,93 @@
 Changelog
 =========
 
+2.8.0 (released 2018-09-07)
+---------------------------
+
+- Added support for Python 3
+  ([#593](https://github.com/adobe-type-tools/afdko/pull/593))
+- Added **psautohint** to the list of installed packages
+- \[makeotfexe\] Fixed contents of `GDEF` table when using
+  `LigatureCaretByPos` and `LigatureCaretByIndex` keywords
+  ([#556](https://github.com/adobe-type-tools/afdko/pull/556))
+- \[stemhist\] Fixed exit codes. Removed duplicate results from
+  output and fixed its sorting
+  ([#552](https://github.com/adobe-type-tools/afdko/pull/552))
+- \[tx\] Made subroutinization results deterministic
+  ([#541](https://github.com/adobe-type-tools/afdko/pull/541))
+- \[makeotfexe\] Fixed the creation of secondary lookups with
+  `useMarkFilteringSet` flag
+  ([#538](https://github.com/adobe-type-tools/afdko/pull/538))
+- \[type1\] Implemented `-h` option. Fixed exit codes
+  ([#537](https://github.com/adobe-type-tools/afdko/pull/537))
+- \[detype1\] Fixed exit codes
+  ([#536](https://github.com/adobe-type-tools/afdko/pull/536))
+- \[autohint\] Fixed file conflicts when running concurrent processes
+  ([#534](https://github.com/adobe-type-tools/afdko/pull/534))
+- \[makeotf\] Fixed `-cn` option
+  ([#525](https://github.com/adobe-type-tools/afdko/pull/525))
+- \[spot\] Fixed crash with `-t GPOS=7` option
+  ([#520](https://github.com/adobe-type-tools/afdko/pull/520))
+- \[tx\] Added support for colon `:` in UFO glyph names
+  ([#518](https://github.com/adobe-type-tools/afdko/pull/518))
+- \[makeotf\] Fixed `-ga` and related options
+  ([#514](https://github.com/adobe-type-tools/afdko/pull/514))
+- Changed tools' and scripts' names to all lowercase
+  ([#511](https://github.com/adobe-type-tools/afdko/pull/511))
+- Major reorganization of directory structure and package structure
+  ([#508](https://github.com/adobe-type-tools/afdko/pull/508))
+- \[spot\] Fixed crash with `-t GPOS=6` option
+  ([#500](https://github.com/adobe-type-tools/afdko/pull/500))
+- \[makeotfexe\] Allow mark-to-base statements to reference
+  different sets of mark classes
+  ([#499](https://github.com/adobe-type-tools/afdko/pull/499))
+- \[makeotfexe\] Allow any languages under `DFLT` script
+  ([#498](https://github.com/adobe-type-tools/afdko/pull/498))
+- \[tx\] Exit gracefully when a fatal error occurs
+  ([#495](https://github.com/adobe-type-tools/afdko/pull/495))
+- Removed scripts `BuildMMFont.py`, `checkUFOProcessedLayer.py`
+  and tools `copycffcharstrings`, `kerncheck`, `makeinstances`
+  ([#490](https://github.com/adobe-type-tools/afdko/pull/490),
+  [#558](https://github.com/adobe-type-tools/afdko/pull/558))
+- \[checkoutlinesufo\] Support processing UFO3 fonts
+  ([#482](https://github.com/adobe-type-tools/afdko/pull/482))
+- \[autohint/checkoutlinesufo/makeinstancesufo\] Harmonized dot-progress
+  ([#478](https://github.com/adobe-type-tools/afdko/pull/478))
+- \[tx\] Fixed incorrect warning when converting to CFF a CFF2
+  variable font with non-varying glyphs
+  ([#476](https://github.com/adobe-type-tools/afdko/pull/476))
+- \[tx\] Fixed failure to dump CFF2 variable font containing many
+  hints. Fixed bug in writing CFF2 fonts with FDSelect
+  ([#467](https://github.com/adobe-type-tools/afdko/pull/467))
+- \[makeotfexe\] Zero the advance width of source glyphs with
+  negative advance width
+  ([#460](https://github.com/adobe-type-tools/afdko/pull/460))
+- \[makeotf\] Support file paths containing non-ASCII characters.
+  Fixed warning about feature file not containing a `vert` feature.
+  Removed non-essential **Adobe Cmaps** files. Fixed `-shw`/`-nshw`
+  options. Fixed documentation of `-cs`/`-cl` options. Changed handling
+  of CID fonts: the output OTF is now saved in the same directory
+  as the input font (this matches the handling of non-CID formats;
+  use option `-o .` to get the old behavior). Support building in
+  release mode from Type 1 font without GlyphOrderAndAliasDB file
+  ([#458](https://github.com/adobe-type-tools/afdko/pull/458))
+- \[tx\] Fixed crash processing UFOs containing `<note>` elements
+  ([#455](https://github.com/adobe-type-tools/afdko/pull/455))
+- \[tx\] Fixed calculation of FontBBox values. Fixed crash processing
+  UFOs containing `<anchor>` elements. Added support for UFO's empty
+  arrays expressed as `<array/>` instead of `<array></array>`
+  ([#452](https://github.com/adobe-type-tools/afdko/pull/452))
+- \[makeotf\] Removed support for UFOs without `postscriptFontName`.
+  Enabled output option to be a folder only
+  ([#451](https://github.com/adobe-type-tools/afdko/pull/451))
+- \[buildmasterotfs\] Added support for designspace files without
+  `<instances>` element
+  ([#449](https://github.com/adobe-type-tools/afdko/pull/449))
+- \[tx\] Emit warning instead of error for charstrings longer
+  than 65535 bytes
+  ([#446](https://github.com/adobe-type-tools/afdko/pull/446),
+  [#597](https://github.com/adobe-type-tools/afdko/pull/597))
+
 2.7.2 (released 2018-06-27)
 ---------------------------
 

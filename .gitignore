@@ -3,14 +3,39 @@
 
 # temporary wheel build directories
 afdko.egg-info/
-build/
-dist/
+build/*
+dist/*
 .eggs/
 
 # PyCharm directory
 .idea/
 
 # coverage data
+# DO NOT use '.coverage*' because that matches '.coveragerc'
 .coverage
+.coverage.*
 htmlcov
 .pytest_cache
+
+# ignore the OSX and linux compiled programs
+c/build_all/*
+!c/build_all/this_folder_intentionally_left_empty
+
+# ignore the temp build directories and files
+*.o
+*.a
+*.exe
+*.pyc
+exe/
+
+# Xcode files
+project.xcworkspace/
+xcuserdata/
+**/xcode4/build/
+
+
+# Windows build directories
+*vcxproj.user
+**/visualstudio/Debug/*
+**/visualstudio/Release/*
+*.lib

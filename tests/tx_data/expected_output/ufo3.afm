@@ -1,0 +1,22 @@
+StartFontMetrics 2.0
+Comment Copyright 2018 Adobe Systems Incorporated. All Rights Reserved.
+Comment Creation Date: Fri Aug 24 00:21:16 2018
+FontName SourceSansPro-Regular
+FamilyName Source Sans Pro
+ItalicAngle 0
+IsFixedPitch false
+Comment NOTE: The FontBBox values may be incorrect because tx will
+Comment either copy precomputed values directly from the source
+Comment file (if available) or set them to zero (if not).
+FontBBox 0 0 0 0
+UnderlinePosition -75
+UnderlineThickness 50
+Version 2.20
+Notice Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries.
+StartCharMetrics 4
+C 97 ; WX 504 ; N a ; B 52 -12 433 498 ;
+C 32 ; WX 500 ; N space ; B 0 0 0 0 ;
+C -1 ; WX 0 ; N zerowidth ; B 0 0 0 0 ;
+C -1 ; WX -12 ; N negative ; B 0 0 0 0 ;
+EndCharMetrics
+EndFontMetrics

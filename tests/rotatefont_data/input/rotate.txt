@@ -1,0 +1,4 @@
+A	A.rot	375	-100	50
+B	B	None	0	0
+a	a	-10	-230	-120
+b	b.rot	None	40	90
