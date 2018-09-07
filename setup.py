@@ -216,6 +216,7 @@ def main():
     # Copied from fonttools setup.py
     with io.open("README.md", encoding="utf-8") as readme:
         long_description = readme.read()
+    long_description += '\n'
     with io.open("NEWS.md", encoding="utf-8") as changelog:
         long_description += changelog.read()
 
