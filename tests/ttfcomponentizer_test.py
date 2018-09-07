@@ -6,7 +6,6 @@ from shutil import copy2, copytree
 import subprocess32 as subprocess
 import tempfile
 
-from fontTools.misc.py23 import open
 from fontTools.ttLib import TTFont
 
 from afdko import ttfcomponentizer as ttfcomp
@@ -22,7 +21,7 @@ DESIGN_NAMES_LIST = ['acaron', 'acutecmb', 'caroncmb', 'design_name',
                      'gravecmb', 'tildecmb']
 PRODCT_NAMES_LIST = ['production_name', 'uni01CE', 'uni0300', 'uni0301',
                      'uni0303', 'uni030C']
-EMPTY_LIB = u"""<?xml version="1.0" encoding="UTF-8"?>
+EMPTY_LIB = b"""<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
 "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -65,13 +64,13 @@ def _get_test_ufo_path():
     return _get_test_ttf_path()[:-3] + 'ufo'
 
 
-def _read_txt_file(file_path):
-    with open(file_path, "r", encoding="utf-8") as f:
+def _read_file(file_path):
+    with open(file_path, "rb") as f:
         return f.read()
 
 
 def _write_file(file_path, data):
-    with open(file_path, "w") as f:
+    with open(file_path, "wb") as f:
         f.write(data)
 
 
@@ -229,7 +228,7 @@ def test_get_glyph_names_mapping_names_from_goadb():
     # empty the lib temporarily to force the reading of the GOADB
     ufo_path = _get_test_ufo_path()
     lib_path = os.path.join(ufo_path, 'lib.plist')
-    lib_data = _read_txt_file(lib_path)
+    lib_data = _read_file(lib_path)
     _write_file(lib_path, EMPTY_LIB)
     result = ttfcomp.get_glyph_names_mapping(ufo_path)
     _write_file(lib_path, lib_data)
