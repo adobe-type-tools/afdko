@@ -1,0 +1,4 @@
+
+ 	 feature	 vert{ # this 'vert' feature is intentionally formatted with uncommon whitespace
+  sub \1125 by \1126;
+} vert;

@@ -1,0 +1,7 @@
+InputFontPath	font.pfa
+# comment
+ConvertToCID	true
+unrecognized_keyword	value
+kSetfsSelectionBitsOn	[7]
+kSetfsSelectionBitsOff	[8, 9]
+OutputFontPath	./font.otf

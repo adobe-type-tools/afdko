@@ -1,0 +1,71 @@
+FDK Build Notes
+
+v1.1.0 July 17 2018
+
+1) FDK build directory tree.
+
+The FDK build directory tree is pretty straightforward.
+
+The basic structure is:
+afdko/c/
+	<component>/
+			build/
+				<platform>/<compiler>/<debug|release>
+			exe/
+				<platform>/<debug|release>
+			source/
+
+
+When a tool uses a library, then the project for the main tool contains the projects for all the libraries. The libraries are grouped under the main directory:
+	<component>/
+		<library group name>/
+			build/
+			lib/
+			api/
+			source/
+with sub-directories for build/ and lib/ being the same as for the program build/ and exe/ directories.
+
+Special cases.
+
+tx, mergefonts, and rotatefont share a common set of libraries and resource files. These libraries are grouped under the public directory in:
+afdko/c/public/lib/
+			build/
+			lib/
+			api/
+			resource/
+			source/
+
+
+For the Mac, all programs are built with Xcode 4.5
+For Windows, all programs are built with VC10
+For Linux, programs are built with the Ubuntu 12.04 release.
+
+2) FDK distribution package.
+
+The FDK distribution directory tree is built by:
+
+2.1) building all programs with the script afdko/c/BuildAll.sh (Mac), afdko/c/BuildAll.cmd (Windows), afdko/c/BuildAllLinux.sh (Linux).
+
+2.2) deleting the Programs directory and any unused programs and files (e.g Tools/osx and Tools/Linux under Windows).
+
+
+3) Testing/building systems.
+
+The command-line tools are all implemented as either binary C programs or shell scripts. Each shell script 1) finds the Python included in the FDK and then 2) uses that Python to run a specific Python script with appropriate options.
+
+All the commands will work only if the path FDK/Tools/osx|win|linux is added to the current users PATH environment variable.
+
+If your primary system is Mac OSX, then a useful approach is to use VMWare Fusion (or Virtualbox) to make virtual machines. For Linux:
+- download the Ubuntu Linux 64 bit iso file (x86).
+- make a new VM machine with VMWare Fusion: select the iso file as the source
+- install all updates
+- install the 32 bit libraries: for Ubuntu 13.04 (64-bit) or later, say 'sudo apt-get install lib32z1'; for Ubuntu 12.04 LTS (64-bit) or earlier, say 'sudo apt-get install ia32-libs'.
+- use the Settings->Share option to share the FDK source tree on your Mac OSX file system.
+- choose the VMWare Fusion menu option "VM Machine->Install VMWare Tools"
+This mounts an iso file in the Linux VM. Copy the contents to a local folder in the Ubuntu Linux system. Decompress the tar file, look inside for vmware-install.pl. Run this with sudo, take default answer for all.
+Do not /usr/bin/vmware-user at the end - you don't need additional X Windows support.
+Get the packages needed to build Python:
+sudo apt-get install build-essential
+sudo apt-get install zlib1g-dev # gets you the zlib.h file.
+
+

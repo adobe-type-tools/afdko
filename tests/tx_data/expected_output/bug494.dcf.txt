@@ -1,0 +1,174 @@
+### Header (00000000-00000003)
+major  =1
+minor  =0
+hdrSize=4
+offSize=2
+### Name INDEX (00000004-0000001e)
+--- object[index]={value}
+[0]={SourceSerifPro-Regular}
+### Top DICT INDEX (0000001f-00000041)
+--- object[index]={value}
+[0]={
+  391 version
+  392 Notice
+  393 Copyright
+  394 FamilyName
+  5 -15 663 684 FontBBox
+  254 charset
+  261 CharStrings
+  49 763 Private
+}
+### String INDEX (00000042-000000fb)
+--- object[index]={value}
+[391]={1.0}
+[392]={Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries.}
+[393]={Copyright 2014 Adobe Systems Incorporated. All Rights Reserved.}
+[394]={Source Serif Pro}
+### GlobalSubrINDEX (000000fc-000000fd)
+empty
+### Encoding ........ (Standard)
+### Charset (000000fe-00000104)
+format=1
+--- Range1[index]={first,nLeft}
+[0]={1,0}
+[1]={34,3}
+### CharStrings INDEX (00000105-000002fa)
+--- object[index]={value}
+[0]={
+  -96 0 50 569 50 hstem
+  80 60 360 60 vstem
+  80 hmoveto
+  480 669 -480 hlineto
+  240 -286 rmoveto
+  -148 236 rlineto
+  296 hlineto
+  32 -523 rmoveto
+  -149 239 149 238 rlineto
+  -360 -477 rmoveto
+  477 vlineto
+  150 -238 rlineto
+  -118 -285 rmoveto
+  148 236 148 -236 rlineto
+  endchar
+}
+[1]={
+  endchar
+}
+[2]={
+  -72 0 45.5 -45.5 47 170 47 410 -20 hstemhm
+  5 229 -229 648 hintmask[74]
+  5 hmoveto
+  hintmask[78]
+  229 41 hlineto
+  -97 13 55 163 rlineto
+  232 hlineto
+  55 -164 -98 -12 rlineto
+  -41 272 vlineto
+  hintmask[B4]
+  41 vlineto
+  -75 9 -213 624 rlineto
+  -63 hlineto
+  hintmask[78]
+  -213 -620 -84 -13 rlineto
+  404 223 rmoveto
+  -201 hlineto
+  101 297 rlineto
+  endchar
+}
+[3]={
+  -107 -107 callsubr
+  276 46 253.5 -106 callsubr
+  225 94 -66 100 hintmask[6E]
+  138 310 rmoveto
+  hintmask[AE]
+  -87 0 -87 -2 -84 vhcurveto
+  -92 -11 rlineto
+  hintmask[6D]
+  -41 275 vlineto
+  192 75 92 91 81 -56 65 -133 19 hvcurveto
+  hintmask[6E]
+  111 23 44 64 71 vvcurveto
+  95 -79 68 -139 vhcurveto
+  -290 hlineto
+  hintmask[76]
+  -105 callsubr
+  hintmask[6E]
+  166 264 rmoveto
+  102 52 -33 -91 -91 -52 -39 -121 hvcurveto
+  -52 hlineto
+  79 0 89 2 86 vhcurveto
+  53 -300 rmoveto
+  hintmask[6D]
+  138 60 -47 -93 -88 -62 -48 -128 hvcurveto
+  -61 hlineto
+  -2 85 0 86 105 vvcurveto
+  endchar
+}
+[4]={
+  -105 -15 50 599 50 hstem
+  47 109 vstem
+  391 35 rmoveto
+  -137 -98 104 196 195 108 104 134 32 34 -7 -20 36 hvcurveto
+  20 -116 rlineto
+  62 hlineto
+  -4 145 rlineto
+  39 -67 -71 9 -55 hhcurveto
+  -194 -144 -147 -202 -206 137 -144 202 71 69 14 34 62 hvcurveto
+  4 145 rlineto
+  -62 hlineto
+  -20 -116 rlineto
+  -19 -39 -42 -8 -38 hhcurveto
+  endchar
+}
+[5]={
+  -26 -107 callsubr
+  575.5 -106 callsubr
+  321 109 hintmask[5C]
+  138 322 rmoveto
+  hintmask[9C]
+  -97 0 -88 -2 -85 vhcurveto
+  -92 -11 rlineto
+  hintmask[5C]
+  -41 276 vlineto
+  195 148 118 216 217 -132 118 -192 hvcurveto
+  -295 hlineto
+  hintmask[6C]
+  -105 callsubr
+  95 -37 rmoveto
+  37 vlineto
+  hintmask[5C]
+  89 0 89 2 86 vhcurveto
+  88 hlineto
+  145 86 -101 -188 -182 -86 -105 -154 hvcurveto
+  -79 hlineto
+  hintmask[6C]
+  -2 88 0 89 98 vvcurveto
+  endchar
+}
+### Private DICT (000002fb-0000032b)
+  -15 15 475 13 39 13 9 14 83 13 10 15 45 20 BlueValues
+  -249 10 OtherBlues
+  .0375 BlueScale
+  0 BlueFuzz
+  56 StdHW
+  85 StdVW
+  41 15 StemSnapH
+  85 10 StemSnapV
+  233 defaultWidthX
+  736 nominalWidthX
+  49 Subrs
+### Local Subr INDEX (0000032c-00000357)
+--- object[index]={value}
+[-107]={
+  0 46.5 -46.5 47 return
+}
+[-106]={
+  46.5 -46 46 hstemhm
+  138 95 return
+}
+[-105]={
+  -41 vlineto
+  92 -11 rlineto
+  2 -86 0 -86 -86 vvcurveto
+  return
+}

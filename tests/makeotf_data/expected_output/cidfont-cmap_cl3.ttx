@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont sfntVersion="OTTO" ttLibVersion="3.28">
+
+  <cmap>
+    <tableVersion version="0"/>
+    <cmap_format_4 platformID="0" platEncID="3" language="0">
+      <map code="0x0" name="cid00001"/><!-- ???? -->
+      <map code="0x1" name="cid00001"/><!-- ???? -->
+      <map code="0x2" name="cid00001"/><!-- ???? -->
+      <map code="0x3" name="cid00001"/><!-- ???? -->
+      <map code="0x4" name="cid00001"/><!-- ???? -->
+      <map code="0x5" name="cid00001"/><!-- ???? -->
+      <map code="0x6" name="cid00001"/><!-- ???? -->
+      <map code="0x7" name="cid00001"/><!-- ???? -->
+      <map code="0x8" name="cid00001"/><!-- ???? -->
+      <map code="0x9" name="cid00001"/><!-- ???? -->
+      <map code="0xa" name="cid00001"/><!-- ???? -->
+      <map code="0xb" name="cid00001"/><!-- ???? -->
+      <map code="0xc" name="cid00001"/><!-- ???? -->
+      <map code="0xd" name="cid00001"/><!-- ???? -->
+      <map code="0xe" name="cid00001"/><!-- ???? -->
+      <map code="0xf" name="cid00001"/><!-- ???? -->
+      <map code="0x10" name="cid00001"/><!-- ???? -->
+      <map code="0x11" name="cid00001"/><!-- ???? -->
+      <map code="0x12" name="cid00001"/><!-- ???? -->
+      <map code="0x13" name="cid00001"/><!-- ???? -->
+      <map code="0x14" name="cid00001"/><!-- ???? -->
+      <map code="0x15" name="cid00001"/><!-- ???? -->
+      <map code="0x16" name="cid00001"/><!-- ???? -->
+      <map code="0x17" name="cid00001"/><!-- ???? -->
+      <map code="0x18" name="cid00001"/><!-- ???? -->
+      <map code="0x19" name="cid00001"/><!-- ???? -->
+      <map code="0x1a" name="cid00001"/><!-- ???? -->
+      <map code="0x1b" name="cid00001"/><!-- ???? -->
+      <map code="0x1c" name="cid00001"/><!-- ???? -->
+      <map code="0x1d" name="cid00001"/><!-- ???? -->
+      <map code="0x1e" name="cid00001"/><!-- ???? -->
+      <map code="0x1f" name="cid00001"/><!-- ???? -->
+      <map code="0x20" name="cid00001"/><!-- SPACE -->
+      <map code="0xa0" name="cid00001"/><!-- NO-BREAK SPACE -->
+      <map code="0x4e9c" name="cid01125"/><!-- CJK UNIFIED IDEOGRAPH-4E9C -->
+      <map code="0x9bf5" name="cid01143"/><!-- CJK UNIFIED IDEOGRAPH-9BF5 -->
+    </cmap_format_4>
+    <cmap_format_14 platformID="0" platEncID="5" format="14" length="33" numVarSelectorRecords="1">
+      <map uvs="0xe0100" uv="0x4e9c" name="None"/>
+      <map uvs="0xe0100" uv="0x9bf5" name="None"/>
+    </cmap_format_14>
+    <cmap_format_2 platformID="1" platEncID="1" language="3">
+      <map code="0x0" name="cid00001"/>
+      <map code="0x1" name="cid00001"/>
+      <map code="0x2" name="cid00001"/>
+      <map code="0x3" name="cid00001"/>
+      <map code="0x4" name="cid00001"/>
+      <map code="0x5" name="cid00001"/>
+      <map code="0x6" name="cid00001"/>
+      <map code="0x7" name="cid00001"/>
+      <map code="0x8" name="cid00001"/>
+      <map code="0x9" name="cid00001"/>
+      <map code="0xa" name="cid00001"/>
+      <map code="0xb" name="cid00001"/>
+      <map code="0xc" name="cid00001"/>
+      <map code="0xd" name="cid00001"/>
+      <map code="0xe" name="cid00001"/>
+      <map code="0xf" name="cid00001"/>
+      <map code="0x10" name="cid00001"/>
+      <map code="0x11" name="cid00001"/>
+      <map code="0x12" name="cid00001"/>
+      <map code="0x13" name="cid00001"/>
+      <map code="0x14" name="cid00001"/>
+      <map code="0x15" name="cid00001"/>
+      <map code="0x16" name="cid00001"/>
+      <map code="0x17" name="cid00001"/>
+      <map code="0x18" name="cid00001"/>
+      <map code="0x19" name="cid00001"/>
+      <map code="0x1a" name="cid00001"/>
+      <map code="0x1b" name="cid00001"/>
+      <map code="0x1c" name="cid00001"/>
+      <map code="0x1d" name="cid00001"/>
+      <map code="0x1e" name="cid00001"/>
+      <map code="0x1f" name="cid00001"/>
+      <map code="0x20" name="cid00001"/>
+      <map code="0x889f" name="cid01125"/>
+      <map code="0x88b1" name="cid01143"/>
+    </cmap_format_2>
+    <cmap_format_4 platformID="3" platEncID="1" language="0">
+      <map code="0x0" name="cid00001"/><!-- ???? -->
+      <map code="0x1" name="cid00001"/><!-- ???? -->
+      <map code="0x2" name="cid00001"/><!-- ???? -->
+      <map code="0x3" name="cid00001"/><!-- ???? -->
+      <map code="0x4" name="cid00001"/><!-- ???? -->
+      <map code="0x5" name="cid00001"/><!-- ???? -->
+      <map code="0x6" name="cid00001"/><!-- ???? -->
+      <map code="0x7" name="cid00001"/><!-- ???? -->
+      <map code="0x8" name="cid00001"/><!-- ???? -->
+      <map code="0x9" name="cid00001"/><!-- ???? -->
+      <map code="0xa" name="cid00001"/><!-- ???? -->
+      <map code="0xb" name="cid00001"/><!-- ???? -->
+      <map code="0xc" name="cid00001"/><!-- ???? -->
+      <map code="0xd" name="cid00001"/><!-- ???? -->
+      <map code="0xe" name="cid00001"/><!-- ???? -->
+      <map code="0xf" name="cid00001"/><!-- ???? -->
+      <map code="0x10" name="cid00001"/><!-- ???? -->
+      <map code="0x11" name="cid00001"/><!-- ???? -->
+      <map code="0x12" name="cid00001"/><!-- ???? -->
+      <map code="0x13" name="cid00001"/><!-- ???? -->
+      <map code="0x14" name="cid00001"/><!-- ???? -->
+      <map code="0x15" name="cid00001"/><!-- ???? -->
+      <map code="0x16" name="cid00001"/><!-- ???? -->
+      <map code="0x17" name="cid00001"/><!-- ???? -->
+      <map code="0x18" name="cid00001"/><!-- ???? -->
+      <map code="0x19" name="cid00001"/><!-- ???? -->
+      <map code="0x1a" name="cid00001"/><!-- ???? -->
+      <map code="0x1b" name="cid00001"/><!-- ???? -->
+      <map code="0x1c" name="cid00001"/><!-- ???? -->
+      <map code="0x1d" name="cid00001"/><!-- ???? -->
+      <map code="0x1e" name="cid00001"/><!-- ???? -->
+      <map code="0x1f" name="cid00001"/><!-- ???? -->
+      <map code="0x20" name="cid00001"/><!-- SPACE -->
+      <map code="0xa0" name="cid00001"/><!-- NO-BREAK SPACE -->
+      <map code="0x4e9c" name="cid01125"/><!-- CJK UNIFIED IDEOGRAPH-4E9C -->
+      <map code="0x9bf5" name="cid01143"/><!-- CJK UNIFIED IDEOGRAPH-9BF5 -->
+    </cmap_format_4>
+  </cmap>
+
+</ttFont>

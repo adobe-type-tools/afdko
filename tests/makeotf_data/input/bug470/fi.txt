@@ -1,0 +1,37 @@
+
+begin FDDict OTHER
+	BaselineYCoord 0
+	BaselineOvershoot -12
+	CapHeight 656
+	CapOvershoot 12
+	DominantV [86]
+	DominantH [68]
+	FlexOK false
+end FDDict OTHER
+
+
+begin FDDict LOWERCASE
+	BaselineYCoord 0
+	BaselineOvershoot -12
+	LcHeight 486
+	LcOvershoot 12
+	AscenderHeight 712
+	AscenderOvershoot 12
+	DescenderHeight -205
+	DescenderOvershoot -12
+	DominantV [82]
+	DominantH [68]
+	FlexOK false
+end FDDict LOWERCASE
+
+
+#------------------------------------------------------
+
+begin GlyphSet OTHER
+	^(negative)$
+end GlyphSet OTHER
+
+
+begin GlyphSet LOWERCASE
+	^(a|b)$
+end GlyphSet LOWERCASE

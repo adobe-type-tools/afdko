@@ -1,0 +1,6 @@
+### glyph[tag] {gname,enc,width,{left,bottom,right,top}}
+glyph[0] {.notdef,-,653,{89,0,565,660}}
+glyph[1] {a,0x61,504,{52,-12,433,498}}
+glyph[2] {space,0x20,500,{0,0,0,0}}
+glyph[3] {zerowidth,-,0,{0,0,0,0}}
+glyph[4] {negative,-,-12,{0,0,0,0}}

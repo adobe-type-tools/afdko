@@ -1,0 +1,12 @@
+
+# file with two 'include'
+# one points to file containing commented out FEA code
+# and the other references a non-existing file
+
+include(feat0.fea);
+
+feature xxxx {
+  sub \1125 by \1126;
+} xxxx;
+
+include(missing_file);

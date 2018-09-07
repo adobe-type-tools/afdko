@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="A" format="1">
+  <advance width="664"/>
+  <unicode hex="0041"/>
+  <outline>
+    <contour>
+      <point x="5.205696202531646" y="0.0" type="line"/>
+      <point x="234.38291139240505" y="0.0" type="line"/>
+      <point x="234.38291139240505" y="40.78164556962025" type="line"/>
+      <point x="125.24683544303798" y="55.78164556962025" type="line"/>
+      <point x="105.37025316455696" y="55.78164556962025" type="line"/>
+      <point x="5.205696202531646" y="40.78164556962025" type="line"/>
+    </contour>
+    <contour>
+      <point x="70.75316455696202" y="0.0" type="line"/>
+      <point x="118.45253164556962" y="0.0" type="line"/>
+      <point x="321.7120253164557" y="598.3417721518988" type="line"/>
+      <point x="297.8892405063291" y="595.4620253164557" type="line"/>
+      <point x="497.1613924050633" y="0.0" type="line"/>
+      <point x="594.6044303797469" y="0.0" type="line"/>
+      <point x="364.89240506329116" y="674.0537974683544" type="line"/>
+      <point x="302.4240506329114" y="674.0537974683544" type="line"/>
+    </contour>
+    <contour>
+      <point x="169.91772151898735" y="217.39556962025316" type="line"/>
+      <point x="472.32911392405066" y="217.39556962025316" type="line"/>
+      <point x="455.9588607594937" y="264.09493670886076" type="line"/>
+      <point x="185.95886075949366" y="264.09493670886076" type="line"/>
+    </contour>
+    <contour>
+      <point x="381.3132911392405" y="0.0" type="line"/>
+      <point x="653.493670886076" y="0.0" type="line"/>
+      <point x="653.493670886076" y="40.65822784810126" type="line"/>
+      <point x="529.246835443038" y="55.65822784810126" type="line"/>
+      <point x="506.57278481012656" y="55.65822784810126" type="line"/>
+      <point x="381.3132911392405" y="40.65822784810126" type="line"/>
+    </contour>
+    <contour>
+      <point x="321.78164556962025" y="690.629746835443" type="move" name="aboveUC"/>
+    </contour>
+    <contour>
+      <point x="311.50632911392404" y="-22.0" type="move" name="belowLC"/>
+    </contour>
+    <contour>
+      <point x="560.1645569620254" y="0.0" type="move" name="ogonek"/>
+    </contour>
+  </outline>
+</glyph>

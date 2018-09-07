@@ -1,105 +1,83 @@
-sudo: required
+language: python
+
+env:
+  global:
+    - CIBW_SKIP="cp34-* cp35-* cp37-* *i686"
+    - CIBW_BEFORE_BUILD_LINUX="yum install -y glibc-devel.i386 libgcc_s.so.1"
+    - CIBW_ENVIRONMENT_LINUX="CODECOV_TOKEN=e0067bac-3ded-4432-83c8-667217c76660"
+    - CIBW_TEST_REQUIRES="pytest-cov==2.5.1 codecov subprocess32"
+    - CIBW_TEST_COMMAND="cd {project} && pytest --cov -v && coverage combine && codecov && pip uninstall --yes afdko"
+    - TWINE_USERNAME="afdko-travis"
+    # Note: TWINE_PASSWORD is set in Travis settings
+
 matrix:
+  fast_finish: true
   include:
     - os: linux
-      env: NAME=Linux
-      if: type = pull_request
-      python: 2.7
-      install:
-        - sudo apt-get install g++-multilib
-        - sudo -H pip install --upgrade pip
-        - pip install --user --upgrade setuptools setuptools_scm wheel cython
-      script:
-        - python setup.py bdist_wheel
-        - pip install --user dist/*.whl
-        - pip uninstall --yes afdko
-
-    - os: osx
-      env: NAME=OSX
-      if: type = pull_request
-      language: generic
-      install:
-        - curl -O https://bootstrap.pypa.io/get-pip.py
-        - python get-pip.py --user
-        - python -m pip install --user virtualenv
-        - python -m virtualenv .venv/
-        - source .venv/bin/activate
-        - pip install -U -r requirements-dev.txt
-      before_script:
-        - export PYTHONPATH=$PYTHONPATH:$(pwd)
-      script:
-        - flake8 setup.py
-        - flake8 Tests/*.py
-        - pushd afdko/Tools/SharedData/FDKScripts
-        - flake8 buildCFF2VF.py
-        - flake8 buildMasterOTFs.py
-        - flake8 CheckOutlinesUFO.py
-        - flake8 ConvertFontToCID.py
-        - flake8 FDKUtils.py
-        - flake8 MakeOTF.py
-        - flake8 ttfcomponentizer.py
-        - flake8 ufoTools.py
-        - popd
-        - python setup.py bdist_wheel
-        - deactivate
-        - export PATH=$PATH:'/Users/travis/Library/Python/2.7/bin'
-        - python -m pip install --user -U --force-reinstall dist/*.whl
-        - python -m pip install --user -r requirements-dev.txt
-        - pytest --cov
-        - python -m pip uninstall --yes afdko
-      after_success:
-        - codecov
-
-    - os: linux
       sudo: required
-      services:
-        - docker
+      services: docker
       env:
-        - NAME=Linux-deploy
-        - DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
-        - BUILD_DIST=true
-      if: type = push
-      language: python
-      python: 2.7
-      # skip default 'install' and 'script' steps: all the work is in
-      # before_deploy
-      install: true
-      script: true
+        - NAME=Linux
+        - PIP=pip
 
     - os: osx
-      osx_image: xcode6.4
-      env:
-        - NAME=OSX-deploy
-        - BUILD_DIST=true
-      if: type = push
       language: generic
+      env:
+        - NAME=OSX
+        - PIP=pip2
 
-cache:
-  - pip
-  - directories:
-    - $HOME/.pyenv_cache
+install:
+  - $PIP install flake8 cpplint
 
-# Only build for *pushes* to 'master', 'develop' and 'release',
-# not for pushes to other branches
-# (build for PRs from any branch).
-# The regex below is because Travis treats a tag on the master branch as if it
-# were a different branch. The regex below is meant to match:
-# digit(s).digit(s).digit(s) plus optional additional characters.
-branches:
-  only:
-    - master
-    - /^\d+\.\d+\.\d+.*$/
-    - develop
-    - release
+before_script:
+  - flake8 setup.py
+  - flake8 tests/*.py
+  - pushd python/afdko
+  - flake8 buildcff2vf.py
+  - flake8 buildmasterotfs.py
+  - flake8 checkoutlinesufo.py
+  - flake8 convertfonttocid.py
+  - flake8 fdkutils.py
+  - flake8 makeinstancesufo.py
+  - flake8 makeotf.py
+  - flake8 otfpdf.py
+  - flake8 pdfmetrics.py
+  - flake8 ttfcomponentizer.py
+  - flake8 ttxn.py
+  - flake8 ufotools.py
+  - popd
+  - cpplint --recursive --quiet c/autohint
+  - cpplint --recursive --quiet c/detype1
+  - cpplint --recursive --quiet c/makeotf/makeotf_lib/source
+  - cpplint --recursive --quiet c/makeotf/makeotf_lib/api
+  - cpplint --recursive --quiet c/makeotf/makeotf_lib/resource
+  - cpplint --recursive --quiet c/makeotf/source
+  - cpplint --recursive --quiet c/mergefonts
+  - cpplint --recursive --quiet c/public
+  - cpplint --recursive --quiet c/rotatefont
+  - cpplint --recursive --quiet c/sfntdiff
+  - cpplint --recursive --quiet c/sfntedit
+  - cpplint --recursive --quiet c/spot
+  - cpplint --recursive --quiet c/tx
+  - cpplint --recursive --quiet c/type1
 
-notifications:
-  slack: typekit:TRAVIS_SLACK_TOKEN
-  email:
-    on_success: change
-    on_failure: always
+script:
+  # - $PIP install cibuildwheel
+  - $PIP install git+https://github.com/adobe-type-tools/cibuildwheel
+  - cibuildwheel --output-dir wheelhouse
 
-before_deploy:
-  - ./.travis/before_deploy.sh
+after_success:
+  # create source distribution
+  # and deploy to PyPI on tags
+  - |
+    if [[ $TRAVIS_TAG ]]; then
+      python -m pip install twine
+      python -m twine upload wheelhouse/*.whl
+      if [[ $TRAVIS_OS_NAME == "osx" ]]; then
+        python setup.py sdist
+        python -m twine upload dist/*.tar.gz
+      fi
+    fi
 
 deploy:
   # deploy to Github Releases on tags
@@ -108,16 +86,15 @@ deploy:
       secure: JYAxvC7A46oY0mmhEknUzJ5iTeLwBWyV0ZnNXlx3t6uhKmmPadxSSkTR4uI87DXfYQBlvNnw+VDHaTeaaaXZOUXmcLn7UIjHsBqdhCGKWMKQ2Z0HpSMvYEUVUezHsLteZvdeL1i4c/q7Iaf2SuNuzOlnNvWomxC24yI/cSzRpqP0wumyXh8Qewod7B5/X2mBO8ICxkEETJBFlwHiWyN8p0lF/aaRIOmujHTqQCBy7xN81rGUcsmY5EaU4ojdwybUaa9e1XRNwwWxO3XOVMsSrlAOb8+PLlegi+LY5vi6e2udVHcRtm/2f0RZuKKjfQ6RMPumqkcCerKE5IdZr2NK0P74HXIrqJ4YX8dSIDk8IVEWgZxiYqBpAtXJvq40V90Mh0atR5318WtcUhPzZftVp5JajU+EU1FmyusNdjnHSYosNKVjCEkwqf3fySLk2uxqiDnyIwMUBsvmewwWCMw0NUOFHyG5uOKqRO4n5NWDnrqaUgcenbB/EZtIE/jrGddW7OgHCVS1jcqcTFK0yfz7X98ej6V1OJqEIwLZe2ZDNTGspcIsP83mtahJFF4lLuyfa5/cN7t/1Gc3rC0qNYa3diMK4gV8K3r1c7yjAy5d3siXspx/2Rb7u7jdbI8JLzWGfuByJj9MuN1RRP7nkqMkxpyDzib4QEG169Lb5Rus+Aw=
     skip_cleanup: true
     file_glob: true
-    file: "dist/*"
+    file:
+      - wheelhouse/*.whl
+      - dist/*.tar.gz
+    prerelease: true
     on:
       tags: true
-      repo: adobe-type-tools/afdko
-      condition: "$BUILD_DIST == true"
-  # deploy to PyPI on tags
-  - provider: script
-    script: bash ./.travis/deploy.sh
-    skip_cleanup: true
-    on:
-      tags: true
-      repo: adobe-type-tools/afdko
-      condition: "$BUILD_DIST == true"
+
+notifications:
+  slack: typekit:TRAVIS_SLACK_TOKEN
+  email:
+    on_success: change
+    on_failure: always

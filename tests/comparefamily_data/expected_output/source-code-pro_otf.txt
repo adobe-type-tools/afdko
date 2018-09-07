@@ -1,0 +1,782 @@
+Directory: /Users/msousa/Git/adobe-type-tools/afdko/Tests/comparefamily_data/input/source-code-pro/otf
+Loading Adobe Glyph Dict...
+building lists of preferred families...
+Number of preferred families: 1 ['Source Code Pro']
+Number of font faces: 14
+
+
+Single Face Test 1: Length overrun check for name ID 18. Max 63 characters, must be unique within 31 chars.
+
+Single Face Test 2: Length overrun check for name ID's 1,2, 4, 16, 17. Max 63 characters.
+
+Single Face Test 3: Check that name ID 4 (Full Name) starts with same string as Preferred Family Name, and is the same as the CFF font Full Name.
+Note: font CFF table has no Full Name entry, for Font SourceCodePro-Regular.
+This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used.
+Note: font CFF table has no Full Name entry, for Font SourceCodePro-It.
+This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used.
+Note: font CFF table has no Full Name entry, for Font SourceCodePro-Bold.
+This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used.
+Note: font CFF table has no Full Name entry, for Font SourceCodePro-BoldIt.
+This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used.
+Note: font CFF table has no Full Name entry, for Font SourceCodePro-Black.
+This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used.
+Note: font CFF table has no Full Name entry, for Font SourceCodePro-BlackIt.
+This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used.
+Note: font CFF table has no Full Name entry, for Font SourceCodePro-ExtraLight.
+This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used.
+Note: font CFF table has no Full Name entry, for Font SourceCodePro-ExtraLightIt.
+This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used.
+Note: font CFF table has no Full Name entry, for Font SourceCodePro-Light.
+This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used.
+Note: font CFF table has no Full Name entry, for Font SourceCodePro-LightIt.
+This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used.
+Note: font CFF table has no Full Name entry, for Font SourceCodePro-Medium.
+This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used.
+Note: font CFF table has no Full Name entry, for Font SourceCodePro-MediumIt.
+This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used.
+Note: font CFF table has no Full Name entry, for Font SourceCodePro-Semibold.
+This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used.
+Note: font CFF table has no Full Name entry, for Font SourceCodePro-SemiboldIt.
+This has no functional effect, as the CFF Full Name in an OpenType CFF table is never used.
+
+Single Face Test 4: Version name string matches release font criteria and head table value
+
+Single Face Test 5: Check that CFF PostScript name is same as name table name ID 6.
+
+Single Face Test 6: Check that Copyright, Trademark, Designer note, and foundry values are present, and match default values.
+	Error: Environment variable CF_DEFAULT_URL is not set, so I can't compare it to  Mac Foundry URL name id 11.
+	Error: Environment variable CF_DEFAULT_FOUNDRY_CODE is not set, so I can't compare it to  the OS/2 table foundry code.
+
+Single Face Test 7: Checking for deprecated CFF operators.
+
+Single Face Test 8: Check SubFamily Name (name ID 2) for  Regular Style, Bold Style, Italic Style, and BoldItalic Style
+
+Single Face Test 9: Check that no OS/2.usWeightClass is less than 250
+	Error: OS/2.usWeightClass is 200 for Font SourceCodePro-ExtraLight 
+This may cause the font glyphs to be smear-bolded under Windows 2000.
+	Error: OS/2.usWeightClass is 200 for Font SourceCodePro-ExtraLightIt 
+This may cause the font glyphs to be smear-bolded under Windows 2000.
+
+Single Face Test 10: Check that no Bold Style face has OS/2.usWeightClass of less than 500
+
+Single Face Test 11: Check that BASE table exists, and has reasonable values
+
+Single Face Test 12: Check that Italic style is set when post table italic angle is non-zero, and that italic angle is reasonable.
+
+Single Face Test 13: Warn if post.isFixedPitch is set when font is not monospaced.
+
+Single Face Test 14: Warn if Bold/Italic style bits do not match between the head Table and OS/2 Table
+
+Single Face Test 15: Warn if Font BBox x/y coordinates are improbable, or differ between head table and CFF.
+
+Single Face Test 16: Check values of Ascender and Descender vs em-square.
+	Warning: hhea table ascent field '984' is not the same as OS/2 table sTypoeAscender '750'. SourceCodePro-Regular
+	Warning: hhea table descent field '-273' is not the same as OS/2 table sTypoDescender '-250'. SourceCodePro-Regular
+	Warning: OS/2 table usWinDescent field '-273' is not the same as the font bounding box y min '-400'. SourceCodePro-Regular
+	Warning: OS/2 table usWinAscent field '984' is not the same as the font bounding box y max '1060'. SourceCodePro-Regular
+	Warning: hhea table ascent field '984' is not the same as OS/2 table sTypoeAscender '750'. SourceCodePro-It
+	Warning: hhea table descent field '-273' is not the same as OS/2 table sTypoDescender '-250'. SourceCodePro-It
+	Warning: OS/2 table usWinDescent field '-273' is not the same as the font bounding box y min '-400'. SourceCodePro-It
+	Warning: OS/2 table usWinAscent field '984' is not the same as the font bounding box y max '1060'. SourceCodePro-It
+	Warning. The OS/2 table version 4 fsSelection field bit 7 'USE_TYPO_METRICS' is not turned on. Windows applications will (eventually) use the OS/2 sTypo fields only if this bit is on. SourceCodePro-It.
+	Warning: hhea table ascent field '984' is not the same as OS/2 table sTypoeAscender '750'. SourceCodePro-Bold
+	Warning: hhea table descent field '-273' is not the same as OS/2 table sTypoDescender '-250'. SourceCodePro-Bold
+	Warning: OS/2 table usWinDescent field '-273' is not the same as the font bounding box y min '-400'. SourceCodePro-Bold
+	Warning: OS/2 table usWinAscent field '984' is not the same as the font bounding box y max '1060'. SourceCodePro-Bold
+	Warning: hhea table ascent field '984' is not the same as OS/2 table sTypoeAscender '750'. SourceCodePro-BoldIt
+	Warning: hhea table descent field '-273' is not the same as OS/2 table sTypoDescender '-250'. SourceCodePro-BoldIt
+	Warning: OS/2 table usWinDescent field '-273' is not the same as the font bounding box y min '-400'. SourceCodePro-BoldIt
+	Warning: OS/2 table usWinAscent field '984' is not the same as the font bounding box y max '1060'. SourceCodePro-BoldIt
+	Warning. The OS/2 table version 4 fsSelection field bit 7 'USE_TYPO_METRICS' is not turned on. Windows applications will (eventually) use the OS/2 sTypo fields only if this bit is on. SourceCodePro-BoldIt.
+	Warning: hhea table ascent field '984' is not the same as OS/2 table sTypoeAscender '750'. SourceCodePro-Black
+	Warning: hhea table descent field '-273' is not the same as OS/2 table sTypoDescender '-250'. SourceCodePro-Black
+	Warning: OS/2 table usWinDescent field '-273' is not the same as the font bounding box y min '-400'. SourceCodePro-Black
+	Warning: OS/2 table usWinAscent field '984' is not the same as the font bounding box y max '1060'. SourceCodePro-Black
+	Warning: hhea table ascent field '984' is not the same as OS/2 table sTypoeAscender '750'. SourceCodePro-BlackIt
+	Warning: hhea table descent field '-273' is not the same as OS/2 table sTypoDescender '-250'. SourceCodePro-BlackIt
+	Warning: OS/2 table usWinDescent field '-273' is not the same as the font bounding box y min '-400'. SourceCodePro-BlackIt
+	Warning: OS/2 table usWinAscent field '984' is not the same as the font bounding box y max '1060'. SourceCodePro-BlackIt
+	Warning. The OS/2 table version 4 fsSelection field bit 7 'USE_TYPO_METRICS' is not turned on. Windows applications will (eventually) use the OS/2 sTypo fields only if this bit is on. SourceCodePro-BlackIt.
+	Warning: hhea table ascent field '984' is not the same as OS/2 table sTypoeAscender '750'. SourceCodePro-ExtraLight
+	Warning: hhea table descent field '-273' is not the same as OS/2 table sTypoDescender '-250'. SourceCodePro-ExtraLight
+	Warning: OS/2 table usWinDescent field '-273' is not the same as the font bounding box y min '-400'. SourceCodePro-ExtraLight
+	Warning: OS/2 table usWinAscent field '984' is not the same as the font bounding box y max '1060'. SourceCodePro-ExtraLight
+	Warning: hhea table ascent field '984' is not the same as OS/2 table sTypoeAscender '750'. SourceCodePro-ExtraLightIt
+	Warning: hhea table descent field '-273' is not the same as OS/2 table sTypoDescender '-250'. SourceCodePro-ExtraLightIt
+	Warning: OS/2 table usWinDescent field '-273' is not the same as the font bounding box y min '-400'. SourceCodePro-ExtraLightIt
+	Warning: OS/2 table usWinAscent field '984' is not the same as the font bounding box y max '1060'. SourceCodePro-ExtraLightIt
+	Warning. The OS/2 table version 4 fsSelection field bit 7 'USE_TYPO_METRICS' is not turned on. Windows applications will (eventually) use the OS/2 sTypo fields only if this bit is on. SourceCodePro-ExtraLightIt.
+	Warning: hhea table ascent field '984' is not the same as OS/2 table sTypoeAscender '750'. SourceCodePro-Light
+	Warning: hhea table descent field '-273' is not the same as OS/2 table sTypoDescender '-250'. SourceCodePro-Light
+	Warning: OS/2 table usWinDescent field '-273' is not the same as the font bounding box y min '-400'. SourceCodePro-Light
+	Warning: OS/2 table usWinAscent field '984' is not the same as the font bounding box y max '1060'. SourceCodePro-Light
+	Warning: hhea table ascent field '984' is not the same as OS/2 table sTypoeAscender '750'. SourceCodePro-LightIt
+	Warning: hhea table descent field '-273' is not the same as OS/2 table sTypoDescender '-250'. SourceCodePro-LightIt
+	Warning: OS/2 table usWinDescent field '-273' is not the same as the font bounding box y min '-400'. SourceCodePro-LightIt
+	Warning: OS/2 table usWinAscent field '984' is not the same as the font bounding box y max '1060'. SourceCodePro-LightIt
+	Warning. The OS/2 table version 4 fsSelection field bit 7 'USE_TYPO_METRICS' is not turned on. Windows applications will (eventually) use the OS/2 sTypo fields only if this bit is on. SourceCodePro-LightIt.
+	Warning: hhea table ascent field '984' is not the same as OS/2 table sTypoeAscender '750'. SourceCodePro-Medium
+	Warning: hhea table descent field '-273' is not the same as OS/2 table sTypoDescender '-250'. SourceCodePro-Medium
+	Warning: OS/2 table usWinDescent field '-273' is not the same as the font bounding box y min '-400'. SourceCodePro-Medium
+	Warning: OS/2 table usWinAscent field '984' is not the same as the font bounding box y max '1060'. SourceCodePro-Medium
+	Warning: hhea table ascent field '984' is not the same as OS/2 table sTypoeAscender '750'. SourceCodePro-MediumIt
+	Warning: hhea table descent field '-273' is not the same as OS/2 table sTypoDescender '-250'. SourceCodePro-MediumIt
+	Warning: OS/2 table usWinDescent field '-273' is not the same as the font bounding box y min '-400'. SourceCodePro-MediumIt
+	Warning: OS/2 table usWinAscent field '984' is not the same as the font bounding box y max '1060'. SourceCodePro-MediumIt
+	Warning. The OS/2 table version 4 fsSelection field bit 7 'USE_TYPO_METRICS' is not turned on. Windows applications will (eventually) use the OS/2 sTypo fields only if this bit is on. SourceCodePro-MediumIt.
+	Warning: hhea table ascent field '984' is not the same as OS/2 table sTypoeAscender '750'. SourceCodePro-Semibold
+	Warning: hhea table descent field '-273' is not the same as OS/2 table sTypoDescender '-250'. SourceCodePro-Semibold
+	Warning: OS/2 table usWinDescent field '-273' is not the same as the font bounding box y min '-400'. SourceCodePro-Semibold
+	Warning: OS/2 table usWinAscent field '984' is not the same as the font bounding box y max '1060'. SourceCodePro-Semibold
+	Warning: hhea table ascent field '984' is not the same as OS/2 table sTypoeAscender '750'. SourceCodePro-SemiboldIt
+	Warning: hhea table descent field '-273' is not the same as OS/2 table sTypoDescender '-250'. SourceCodePro-SemiboldIt
+	Warning: OS/2 table usWinDescent field '-273' is not the same as the font bounding box y min '-400'. SourceCodePro-SemiboldIt
+	Warning: OS/2 table usWinAscent field '984' is not the same as the font bounding box y max '1060'. SourceCodePro-SemiboldIt
+	Warning. The OS/2 table version 4 fsSelection field bit 7 'USE_TYPO_METRICS' is not turned on. Windows applications will (eventually) use the OS/2 sTypo fields only if this bit is on. SourceCodePro-SemiboldIt.
+
+Single Face Test 17: Verify that all tabular glyphs have the same width.
+
+Single Face Test 18: Hint Check.  Verify that there is at least one hint for each charstring in each font, and that no charstring is > 32K limit for Mac OSX 10.3.x and earlier.
+Error: hint 32 568 vstem in glyph uni2200 has a bogus stem width, as it is greater than the glyph bbox size 451. SourceCodePro-Regular.
+Error: hint 32 568 vstem in glyph uni2200 has a high value greater than the high value (483) of the glyph bbox. SourceCodePro-Regular.
+Error: hint 42 618 vstem in glyph K has a bogus stem width, as it is greater than the glyph bbox size 488. SourceCodePro-It.
+Error: hint 42 618 vstem in glyph K has a high value greater than the high value (530) of the glyph bbox. SourceCodePro-It.
+Error: hint 42 618 vstem in glyph uni1E34 has a bogus stem width, as it is greater than the glyph bbox size 488. SourceCodePro-It.
+Error: hint 42 618 vstem in glyph uni1E34 has a high value greater than the high value (530) of the glyph bbox. SourceCodePro-It.
+Error: hint 34 492 vstem in glyph uni0279 has a bogus stem width, as it is greater than the glyph bbox size 382. SourceCodePro-It.
+Error: hint 34 492 vstem in glyph uni0279 has a high value greater than the high value (416) of the glyph bbox. SourceCodePro-It.
+Error: hint 97 623 vstem in glyph uni2200 has a bogus stem width, as it is greater than the glyph bbox size 441. SourceCodePro-It.
+Error: hint 97 623 vstem in glyph uni2200 has a high value greater than the high value (538) of the glyph bbox. SourceCodePro-It.
+Error: hint 9 591 vstem in glyph uni2200 has a bogus stem width, as it is greater than the glyph bbox size 432. SourceCodePro-Bold.
+Error: hint 9 591 vstem in glyph uni2200 has a high value greater than the high value (441) of the glyph bbox. SourceCodePro-Bold.
+Error: hint 15 640 vstem in glyph K has a bogus stem width, as it is greater than the glyph bbox size 518. SourceCodePro-BoldIt.
+Error: hint 15 640 vstem in glyph K has a high value greater than the high value (533) of the glyph bbox. SourceCodePro-BoldIt.
+Error: hint 15 640 vstem in glyph uni1E32 has a bogus stem width, as it is greater than the glyph bbox size 518. SourceCodePro-BoldIt.
+Error: hint 15 640 vstem in glyph uni1E32 has a high value greater than the high value (533) of the glyph bbox. SourceCodePro-BoldIt.
+Error: hint 15 640 vstem in glyph uni1E34 has a bogus stem width, as it is greater than the glyph bbox size 518. SourceCodePro-BoldIt.
+Error: hint 15 640 vstem in glyph uni1E34 has a high value greater than the high value (533) of the glyph bbox. SourceCodePro-BoldIt.
+Error: hint -7 600 vstem in glyph uni026F has a bogus stem width, as it is greater than the glyph bbox size 509. SourceCodePro-BoldIt.
+Error: hint -7 600 vstem in glyph uni026F has a high value greater than the high value (502) of the glyph bbox. SourceCodePro-BoldIt.
+Error: hint 18 520 vstem in glyph uni0279 has a bogus stem width, as it is greater than the glyph bbox size 404. SourceCodePro-BoldIt.
+Error: hint 18 520 vstem in glyph uni0279 has a high value greater than the high value (422) of the glyph bbox. SourceCodePro-BoldIt.
+Error: hint 410.5 541 vstem in glyph uni028D has a high value greater than the high value (533) of the glyph bbox. SourceCodePro-BoldIt.
+Error: hint 77 643 vstem in glyph uni2200 has a bogus stem width, as it is greater than the glyph bbox size 415. SourceCodePro-BoldIt.
+Error: hint 77 643 vstem in glyph uni2200 has a high value greater than the high value (492) of the glyph bbox. SourceCodePro-BoldIt.
+Error: hint 0 600 vstem in glyph uni2200 has a bogus stem width, as it is greater than the glyph bbox size 424. SourceCodePro-Black.
+Error: hint 0 600 vstem in glyph uni2200 has a high value greater than the high value (424) of the glyph bbox. SourceCodePro-Black.
+Error: hint 4 648 vstem in glyph K has a bogus stem width, as it is greater than the glyph bbox size 534. SourceCodePro-BlackIt.
+Error: hint 4 648 vstem in glyph K has a high value greater than the high value (538) of the glyph bbox. SourceCodePro-BlackIt.
+Error: hint 4 648 vstem in glyph uni1E32 has a bogus stem width, as it is greater than the glyph bbox size 534. SourceCodePro-BlackIt.
+Error: hint 4 648 vstem in glyph uni1E32 has a high value greater than the high value (538) of the glyph bbox. SourceCodePro-BlackIt.
+Error: hint 4 648 vstem in glyph uni1E34 has a bogus stem width, as it is greater than the glyph bbox size 534. SourceCodePro-BlackIt.
+Error: hint 4 648 vstem in glyph uni1E34 has a high value greater than the high value (538) of the glyph bbox. SourceCodePro-BlackIt.
+Error: hint -14 608 vstem in glyph uni026F has a bogus stem width, as it is greater than the glyph bbox size 524. SourceCodePro-BlackIt.
+Error: hint -14 608 vstem in glyph uni026F has a high value greater than the high value (510) of the glyph bbox. SourceCodePro-BlackIt.
+Error: hint 12 530 vstem in glyph uni0279 has a bogus stem width, as it is greater than the glyph bbox size 420. SourceCodePro-BlackIt.
+Error: hint 12 530 vstem in glyph uni0279 has a high value greater than the high value (432) of the glyph bbox. SourceCodePro-BlackIt.
+Error: hint 421 545.5 vstem in glyph uni028D has a high value greater than the high value (532) of the glyph bbox. SourceCodePro-BlackIt.
+Error: hint 70 650 vstem in glyph uni2200 has a bogus stem width, as it is greater than the glyph bbox size 404. SourceCodePro-BlackIt.
+Error: hint 70 650 vstem in glyph uni2200 has a high value greater than the high value (474) of the glyph bbox. SourceCodePro-BlackIt.
+Error: hint 50 550 vstem in glyph uni2200 has a bogus stem width, as it is greater than the glyph bbox size 468. SourceCodePro-ExtraLight.
+Error: hint 50 550 vstem in glyph uni2200 has a high value greater than the high value (518) of the glyph bbox. SourceCodePro-ExtraLight.
+Error: hint 64 600 vstem in glyph K has a bogus stem width, as it is greater than the glyph bbox size 498. SourceCodePro-ExtraLightIt.
+Error: hint 64 600 vstem in glyph K has a high value greater than the high value (562) of the glyph bbox. SourceCodePro-ExtraLightIt.
+Error: hint 64 600 vstem in glyph uni1E34 has a bogus stem width, as it is greater than the glyph bbox size 498. SourceCodePro-ExtraLightIt.
+Error: hint 64 600 vstem in glyph uni1E34 has a high value greater than the high value (562) of the glyph bbox. SourceCodePro-ExtraLightIt.
+Error: hint 46 470 vstem in glyph uni0279 has a bogus stem width, as it is greater than the glyph bbox size 396. SourceCodePro-ExtraLightIt.
+Error: hint 46 470 vstem in glyph uni0279 has a high value greater than the high value (442) of the glyph bbox. SourceCodePro-ExtraLightIt.
+Error: hint 112 608 vstem in glyph uni2200 has a bogus stem width, as it is greater than the glyph bbox size 464. SourceCodePro-ExtraLightIt.
+Error: hint 112 608 vstem in glyph uni2200 has a high value greater than the high value (576) of the glyph bbox. SourceCodePro-ExtraLightIt.
+Error: hint 45 555 vstem in glyph uni2200 has a bogus stem width, as it is greater than the glyph bbox size 464. SourceCodePro-Light.
+Error: hint 45 555 vstem in glyph uni2200 has a high value greater than the high value (509) of the glyph bbox. SourceCodePro-Light.
+Error: hint 58 605 vstem in glyph K has a bogus stem width, as it is greater than the glyph bbox size 495. SourceCodePro-LightIt.
+Error: hint 58 605 vstem in glyph K has a high value greater than the high value (553) of the glyph bbox. SourceCodePro-LightIt.
+Error: hint 58 605 vstem in glyph uni1E34 has a bogus stem width, as it is greater than the glyph bbox size 495. SourceCodePro-LightIt.
+Error: hint 58 605 vstem in glyph uni1E34 has a high value greater than the high value (553) of the glyph bbox. SourceCodePro-LightIt.
+Error: hint 43 476 vstem in glyph uni0279 has a bogus stem width, as it is greater than the glyph bbox size 392. SourceCodePro-LightIt.
+Error: hint 43 476 vstem in glyph uni0279 has a high value greater than the high value (435) of the glyph bbox. SourceCodePro-LightIt.
+Error: hint 108 612 vstem in glyph uni2200 has a bogus stem width, as it is greater than the glyph bbox size 458. SourceCodePro-LightIt.
+Error: hint 108 612 vstem in glyph uni2200 has a high value greater than the high value (566) of the glyph bbox. SourceCodePro-LightIt.
+Error: hint 26 574 vstem in glyph uni2200 has a bogus stem width, as it is greater than the glyph bbox size 446. SourceCodePro-Medium.
+Error: hint 26 574 vstem in glyph uni2200 has a high value greater than the high value (472) of the glyph bbox. SourceCodePro-Medium.
+Error: hint 35 623 vstem in glyph K has a bogus stem width, as it is greater than the glyph bbox size 488. SourceCodePro-MediumIt.
+Error: hint 35 623 vstem in glyph K has a high value greater than the high value (523) of the glyph bbox. SourceCodePro-MediumIt.
+Error: hint 35 623 vstem in glyph uni1E34 has a bogus stem width, as it is greater than the glyph bbox size 488. SourceCodePro-MediumIt.
+Error: hint 35 623 vstem in glyph uni1E34 has a high value greater than the high value (523) of the glyph bbox. SourceCodePro-MediumIt.
+Error: hint 30 499 vstem in glyph uni0279 has a bogus stem width, as it is greater than the glyph bbox size 377. SourceCodePro-MediumIt.
+Error: hint 30 499 vstem in glyph uni0279 has a high value greater than the high value (407) of the glyph bbox. SourceCodePro-MediumIt.
+Error: hint 92 628 vstem in glyph uni2200 has a bogus stem width, as it is greater than the glyph bbox size 434. SourceCodePro-MediumIt.
+Error: hint 92 628 vstem in glyph uni2200 has a high value greater than the high value (526) of the glyph bbox. SourceCodePro-MediumIt.
+Error: hint 20 580 vstem in glyph uni2200 has a bogus stem width, as it is greater than the glyph bbox size 442. SourceCodePro-Semibold.
+Error: hint 20 580 vstem in glyph uni2200 has a high value greater than the high value (462) of the glyph bbox. SourceCodePro-Semibold.
+Error: hint 28 629 vstem in glyph K has a bogus stem width, as it is greater than the glyph bbox size 498. SourceCodePro-SemiboldIt.
+Error: hint 28 629 vstem in glyph K has a high value greater than the high value (526) of the glyph bbox. SourceCodePro-SemiboldIt.
+Error: hint 28 629 vstem in glyph uni1E34 has a bogus stem width, as it is greater than the glyph bbox size 498. SourceCodePro-SemiboldIt.
+Error: hint 28 629 vstem in glyph uni1E34 has a high value greater than the high value (526) of the glyph bbox. SourceCodePro-SemiboldIt.
+Error: hint 26 506 vstem in glyph uni0279 has a bogus stem width, as it is greater than the glyph bbox size 383. SourceCodePro-SemiboldIt.
+Error: hint 26 506 vstem in glyph uni0279 has a high value greater than the high value (409) of the glyph bbox. SourceCodePro-SemiboldIt.
+Error: hint 433 534.5 vstem in glyph uni028D has a high value greater than the high value (533) of the glyph bbox. SourceCodePro-SemiboldIt.
+Error: hint 87 633 vstem in glyph uni2200 has a bogus stem width, as it is greater than the glyph bbox size 428. SourceCodePro-SemiboldIt.
+Error: hint 87 633 vstem in glyph uni2200 has a high value greater than the high value (515) of the glyph bbox. SourceCodePro-SemiboldIt.
+
+Single Face Test 19: Warn if the Unicode cmap table does not exist, or there are double mapped glyphs in the Unicode cmap table
+
+Single Face Test 20: Warn if there are double spaces in the name table font menu names.
+
+Single Face Test 21: Warn if there trailing or leading spaces in the name table font menu names.
+
+Single Face Test 22: Warn if any ligatures have a width which not larger than the width of the first glyph, or, if first glyph is not in font, if the RSB is negative.
+
+Single Face Test 23: Warn if any accented glyphs have a width different than the base glyph.
+
+Single Face Test 24: Warn if font has 'size' feature, and design size is not in specified range.
+
+Single Face Test 25: Check that fonts do not have UniqueID, UID, or XUID in CFF table.
+
+Single Face Test 26: Glyph name checks.
+	Warning. Glyph name 'Scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-Regular
+	Warning. Glyph name 'scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-Regular
+	Error: glyph emdash has a width of 600 rather than the em-square size. SourceCodePro-Regular
+	Warning. Glyph name 'Scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-It
+	Warning. Glyph name 'scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-It
+	Error: glyph emdash has a width of 600 rather than the em-square size. SourceCodePro-It
+	Warning. Glyph name 'Scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-Bold
+	Warning. Glyph name 'scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-Bold
+	Error: glyph emdash has a width of 600 rather than the em-square size. SourceCodePro-Bold
+	Warning. Glyph name 'Scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-BoldIt
+	Warning. Glyph name 'scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-BoldIt
+	Error: glyph emdash has a width of 600 rather than the em-square size. SourceCodePro-BoldIt
+	Warning. Glyph name 'Scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-Black
+	Warning. Glyph name 'scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-Black
+	Error: glyph emdash has a width of 600 rather than the em-square size. SourceCodePro-Black
+	Warning. Glyph name 'Scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-BlackIt
+	Warning. Glyph name 'scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-BlackIt
+	Error: glyph emdash has a width of 600 rather than the em-square size. SourceCodePro-BlackIt
+	Warning. Glyph name 'Scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-ExtraLight
+	Warning. Glyph name 'scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-ExtraLight
+	Error: glyph emdash has a width of 600 rather than the em-square size. SourceCodePro-ExtraLight
+	Warning. Glyph name 'Scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-ExtraLightIt
+	Warning. Glyph name 'scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-ExtraLightIt
+	Error: glyph emdash has a width of 600 rather than the em-square size. SourceCodePro-ExtraLightIt
+	Warning. Glyph name 'Scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-Light
+	Warning. Glyph name 'scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-Light
+	Error: glyph emdash has a width of 600 rather than the em-square size. SourceCodePro-Light
+	Warning. Glyph name 'Scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-LightIt
+	Warning. Glyph name 'scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-LightIt
+	Error: glyph emdash has a width of 600 rather than the em-square size. SourceCodePro-LightIt
+	Warning. Glyph name 'Scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-Medium
+	Warning. Glyph name 'scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-Medium
+	Error: glyph emdash has a width of 600 rather than the em-square size. SourceCodePro-Medium
+	Warning. Glyph name 'Scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-MediumIt
+	Warning. Glyph name 'scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-MediumIt
+	Error: glyph emdash has a width of 600 rather than the em-square size. SourceCodePro-MediumIt
+	Warning. Glyph name 'Scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-Semibold
+	Warning. Glyph name 'scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-Semibold
+	Error: glyph emdash has a width of 600 rather than the em-square size. SourceCodePro-Semibold
+	Warning. Glyph name 'Scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-SemiboldIt
+	Warning. Glyph name 'scarondot' is neither in the AGD, nor a 'uni' name, and can't be mapped to a Unicode value. SourceCodePro-SemiboldIt
+	Error: glyph emdash has a width of 600 rather than the em-square size. SourceCodePro-SemiboldIt
+
+Single Face Test 27: Check strikeout/subscript/superscript positions.
+
+Single Face Test 28: Check font OS/2 code pages for the a common set of code page bits.
+
+Single Face Test 30: Check that there are no more than 7 pairs of BlueValues and FamilyBlues in a font, and there is an even number of values.
+
+Single Face Test 31: Check that there are no more than 5 pairs of OtherBlues and FamilyOtherBlues in a font, and there is an even number of values.
+
+Single Face Test 32: Check that all fonts have blue value pairs with first integer is less than or equal to the second integer in pairs.
+
+Single Face Test 33: Check that Bottom Zone blue value pairs and Top Zone blue value pairs are at least (2*BlueFuzz+1) unit apart in a font.
+
+Single Face Test 34: Check that the difference between numbers in blue value pairs meet the requirement.
+
+Family Test 1: Verify that each group of fonts with the same nameID 1 has maximum of 4 fonts.
+
+Family Test 2: Check that the Compatible Family group has same name ID's in all languages except for the compatible names 16,17,18, 20, 21 and 22.
+
+Family Test 3: Check that the Compatible Family group has same Preferred Family name (name ID 16)in all languagesID 16 in all other languages.
+
+Family Test 4: Family-wide 'size' feature checks.
+
+Family Test 5: Check that style settings for each face is unique within Compatible Family group, in all languages.
+
+Family Test 6: Check that the Compatible Family group has a base font and at least two faces, and check if weight class is valid.
+
+Family Test 7: Check that all faces in the Preferred Family group have the same Copyright and Trademark string.
+
+Family Test 8: Check the Compatible Family group style vs OS/2.usWeightClass settings. Max 2 usWeightClass allowed.
+
+Family Test 9: Check that all faces in the Compatible Family group have the same OS/2.usWidthClass value.
+
+Family Test 10: Check that if all faces in family have a Panose number and that CFF ISFixedPtch matches the Panose monospace setting.
+
+Family Test 11: Check that Mac and Windows menu names differ for all but base font, and are the same for the base font.
+
+Family Test 12: Check that GSUB/GPOS script and language feature lists are the same in all faces, and that DFLT/dflt and latn/dflt are present.
+	Error: In GPOS/GUSB tables, the sets of lookups used by features in the script-language systems  differ between fonts.
+	This may be intended if the faces have different charsets.
+
+Lang/Sys Table for font(s):  SourceCodePro-Regular SourceCodePro-Bold SourceCodePro-Black SourceCodePro-ExtraLight SourceCodePro-Light SourceCodePro-Medium SourceCodePro-Semibold 
+
+	GPOS Table - script:tag list.
+	DFLT:  dflt
+	cyrl:  SRB    dflt
+	grek:  dflt
+	latn:  NSM    SKS    dflt
+
+	lookup group ID to lookup index list:
+	ID 1:   maps to lookups [29].
+	ID 2:   maps to lookups [15, 16, 17, 18, 19].
+	ID 3:   maps to lookups [0].
+	ID 4:   maps to lookups [1].
+	ID 5:   maps to lookups [2].
+	ID 6:   maps to lookups [3].
+	ID 7:   maps to lookups [4].
+	ID 8:   maps to lookups [5].
+	ID 9:   maps to lookups [6].
+	ID 10:  maps to lookups [8].
+	ID 11:  maps to lookups [7].
+	ID 12:  maps to lookups [9].
+	ID 13:  maps to lookups [10].
+	ID 14:  maps to lookups [11].
+	ID 15:  maps to lookups [12].
+	ID 16:  maps to lookups [21].
+	ID 17:  maps to lookups [20, 22, 23].
+	ID 18:  maps to lookups [20].
+	ID 19:  maps to lookups [28].
+	ID 20:  maps to lookups [24].
+	ID 21:  maps to lookups [0, 1, 2, 3, 4, 5, 6, 9, 10, 11, 12].
+	ID 22:  maps to lookups [27].
+	ID 23:  maps to lookups [10, 11].
+	ID 24:  maps to lookups [0, 4].
+	ID 25:  maps to lookups [1, 5, 8].
+	ID 26:  maps to lookups [3, 6].
+	ID 27:  maps to lookups [24, 25, 26].
+	ID 28:  maps to lookups [7, 8].
+	ID 29:  maps to lookups [13].
+
+	GPOS Table - feature lookup groups by script:tag column headers.
+	(The lookup group ID assigned to each set of lookups is  an arbitrary - see list above for map to actual lookup indices.)
+	DFLT: dflt  cyrl: SRB   dflt  grek: dflt  latn: NSM   SKS   dflt  
+	mark  <same>
+	mkmk  <same>
+	size  <same>
+
+	GSUB Table - script:tag list.
+	DFLT:  dflt
+	cyrl:  SRB    dflt
+	grek:  dflt
+	latn:  NSM    SKS    dflt
+
+	lookup group ID to lookup index list:
+	ID 1:   maps to lookups [29].
+	ID 2:   maps to lookups [15, 16, 17, 18, 19].
+	ID 3:   maps to lookups [0].
+	ID 4:   maps to lookups [1].
+	ID 5:   maps to lookups [2].
+	ID 6:   maps to lookups [3].
+	ID 7:   maps to lookups [4].
+	ID 8:   maps to lookups [5].
+	ID 9:   maps to lookups [6].
+	ID 10:  maps to lookups [8].
+	ID 11:  maps to lookups [7].
+	ID 12:  maps to lookups [9].
+	ID 13:  maps to lookups [10].
+	ID 14:  maps to lookups [11].
+	ID 15:  maps to lookups [12].
+	ID 16:  maps to lookups [21].
+	ID 17:  maps to lookups [20, 22, 23].
+	ID 18:  maps to lookups [20].
+	ID 19:  maps to lookups [28].
+	ID 20:  maps to lookups [24].
+	ID 21:  maps to lookups [0, 1, 2, 3, 4, 5, 6, 9, 10, 11, 12].
+	ID 22:  maps to lookups [27].
+	ID 23:  maps to lookups [10, 11].
+	ID 24:  maps to lookups [0, 4].
+	ID 25:  maps to lookups [1, 5, 8].
+	ID 26:  maps to lookups [3, 6].
+	ID 27:  maps to lookups [24, 25, 26].
+	ID 28:  maps to lookups [7, 8].
+	ID 29:  maps to lookups [13].
+
+	GSUB Table - feature lookup groups by script:tag column headers.
+	(The lookup group ID assigned to each set of lookups is  an arbitrary - see list above for map to actual lookup indices.)
+	DFLT: dflt  cyrl: SRB   dflt  grek: dflt  latn: NSM   SKS   dflt  
+	case  <same>
+	ccmp  <same>
+	cv01  <same>
+	cv02  <same>
+	cv04  <same>
+	cv06  <same>
+	cv07  <same>
+	cv08  <same>
+	cv09  <same>
+	cv10  <same>
+	cv11  <same>
+	cv12  <same>
+	cv14  <same>
+	cv15  <same>
+	cv16  <same>
+	dnom  <same>
+	frac  <same>
+	locl  -           28    11          29          6     6     -     
+	numr  <same>
+	onum  <same>
+	ordn  <same>
+	salt  <same>
+	sinf  <same>
+	ss01  <same>
+	ss02  <same>
+	ss03  <same>
+	ss04  <same>
+	ss05  <same>
+	ss06  <same>
+	subs  <same>
+	sups  <same>
+	zero  <same>
+
+Lang/Sys Table for font(s):  SourceCodePro-It SourceCodePro-BoldIt SourceCodePro-BlackIt SourceCodePro-ExtraLightIt SourceCodePro-LightIt SourceCodePro-MediumIt SourceCodePro-SemiboldIt 
+
+	GPOS Table - script:tag list.
+	DFLT:  dflt
+	cyrl:  SRB    dflt
+	grek:  dflt
+	latn:  NSM    SKS    dflt
+
+	lookup group ID to lookup index list:
+	ID 1:   maps to lookups [23].
+	ID 2:   maps to lookups [9, 10, 11, 12, 13].
+	ID 3:   maps to lookups [0].
+	ID 4:   maps to lookups [1].
+	ID 5:   maps to lookups [2].
+	ID 6:   maps to lookups [3].
+	ID 7:   maps to lookups [4].
+	ID 8:   maps to lookups [5].
+	ID 9:   maps to lookups [6].
+	ID 10:  maps to lookups [7].
+	ID 11:  maps to lookups [15].
+	ID 12:  maps to lookups [14, 16, 17].
+	ID 13:  maps to lookups [14].
+	ID 14:  maps to lookups [22].
+	ID 15:  maps to lookups [18].
+	ID 16:  maps to lookups [0, 1, 2, 4, 5, 6, 7].
+	ID 17:  maps to lookups [21].
+	ID 18:  maps to lookups [5, 6].
+	ID 19:  maps to lookups [18, 19, 20].
+
+	GPOS Table - feature lookup groups by script:tag column headers.
+	(The lookup group ID assigned to each set of lookups is  an arbitrary - see list above for map to actual lookup indices.)
+	DFLT: dflt  cyrl: SRB   dflt  grek: dflt  latn: NSM   SKS   dflt  
+	mark  <same>
+	mkmk  <same>
+	size  <same>
+
+	GSUB Table - script:tag list.
+	DFLT:  dflt
+	cyrl:  SRB    dflt
+	grek:  dflt
+	latn:  NSM    SKS    dflt
+
+	lookup group ID to lookup index list:
+	ID 1:   maps to lookups [23].
+	ID 2:   maps to lookups [9, 10, 11, 12, 13].
+	ID 3:   maps to lookups [0].
+	ID 4:   maps to lookups [1].
+	ID 5:   maps to lookups [2].
+	ID 6:   maps to lookups [3].
+	ID 7:   maps to lookups [4].
+	ID 8:   maps to lookups [5].
+	ID 9:   maps to lookups [6].
+	ID 10:  maps to lookups [7].
+	ID 11:  maps to lookups [15].
+	ID 12:  maps to lookups [14, 16, 17].
+	ID 13:  maps to lookups [14].
+	ID 14:  maps to lookups [22].
+	ID 15:  maps to lookups [18].
+	ID 16:  maps to lookups [0, 1, 2, 4, 5, 6, 7].
+	ID 17:  maps to lookups [21].
+	ID 18:  maps to lookups [5, 6].
+	ID 19:  maps to lookups [18, 19, 20].
+
+	GSUB Table - feature lookup groups by script:tag column headers.
+	(The lookup group ID assigned to each set of lookups is  an arbitrary - see list above for map to actual lookup indices.)
+	DFLT: dflt  cyrl: SRB   dflt  grek: dflt  latn: NSM   SKS   dflt  
+	case  <same>
+	ccmp  <same>
+	cv01  <same>
+	cv02  <same>
+	cv06  <same>
+	cv11  <same>
+	cv12  <same>
+	cv14  <same>
+	cv15  <same>
+	cv16  <same>
+	dnom  <same>
+	frac  <same>
+	locl  -           -     -           -           5     5     -     
+	numr  <same>
+	onum  <same>
+	ordn  <same>
+	salt  <same>
+	sinf  <same>
+	ss01  <same>
+	ss02  <same>
+	ss03  <same>
+	ss05  <same>
+	ss06  <same>
+	subs  <same>
+	sups  <same>
+	zero  <same>
+
+Family Test 13: Check that no two faces in a preferred group have the same weight/width/Italic-style values when the OS/2 table fsSelection bit 8 (WEIGHT_WIDTH_SLOPE_ONLY) is set.
+
+Family Test 14: Check that all faces in a preferred group have the same fsType embedding values.
+	Error: fsType embedding permission '0' for 'SourceCodePro-Regular' should be 8 for Adobe fonts.
+	Error: fsType embedding permission '0' for 'SourceCodePro-It' should be 8 for Adobe fonts, aka OS/2.achVendID == Adobe.
+	Error: fsType embedding permission '0' for 'SourceCodePro-Bold' should be 8 for Adobe fonts, aka OS/2.achVendID == Adobe.
+	Error: fsType embedding permission '0' for 'SourceCodePro-BoldIt' should be 8 for Adobe fonts, aka OS/2.achVendID == Adobe.
+	Error: fsType embedding permission '0' for 'SourceCodePro-Black' should be 8 for Adobe fonts, aka OS/2.achVendID == Adobe.
+	Error: fsType embedding permission '0' for 'SourceCodePro-BlackIt' should be 8 for Adobe fonts, aka OS/2.achVendID == Adobe.
+	Error: fsType embedding permission '0' for 'SourceCodePro-ExtraLight' should be 8 for Adobe fonts, aka OS/2.achVendID == Adobe.
+	Error: fsType embedding permission '0' for 'SourceCodePro-ExtraLightIt' should be 8 for Adobe fonts, aka OS/2.achVendID == Adobe.
+	Error: fsType embedding permission '0' for 'SourceCodePro-Light' should be 8 for Adobe fonts, aka OS/2.achVendID == Adobe.
+	Error: fsType embedding permission '0' for 'SourceCodePro-LightIt' should be 8 for Adobe fonts, aka OS/2.achVendID == Adobe.
+	Error: fsType embedding permission '0' for 'SourceCodePro-Medium' should be 8 for Adobe fonts, aka OS/2.achVendID == Adobe.
+	Error: fsType embedding permission '0' for 'SourceCodePro-MediumIt' should be 8 for Adobe fonts, aka OS/2.achVendID == Adobe.
+	Error: fsType embedding permission '0' for 'SourceCodePro-Semibold' should be 8 for Adobe fonts, aka OS/2.achVendID == Adobe.
+	Error: fsType embedding permission '0' for 'SourceCodePro-SemiboldIt' should be 8 for Adobe fonts, aka OS/2.achVendID == Adobe.
+
+Family Test 15: Check that all faces in a preferred group have the same underline position and width.
+
+Family Test 16: Check that for all faces in a preferred family group, that the width of any glyph is not more than 3 times the width of the same glyph in any other face.
+
+Family Test 17: Check that fonts have OS/2 table version 4.
+	Warning: The font SourceCodePro-Regular should have an OS/2 table version of at least 4 instead of 3.
+	Warning: The font SourceCodePro-Bold should have an OS/2 table version of at least 4 instead of 3.
+	Warning: The font SourceCodePro-Black should have an OS/2 table version of at least 4 instead of 3.
+	Warning: The font SourceCodePro-ExtraLight should have an OS/2 table version of at least 4 instead of 3.
+	Warning: The font SourceCodePro-Light should have an OS/2 table version of at least 4 instead of 3.
+	Warning: The font SourceCodePro-Medium should have an OS/2 table version of at least 4 instead of 3.
+	Warning: The font SourceCodePro-Semibold should have an OS/2 table version of at least 4 instead of 3.
+
+Family Test 18: Check that all faces in a Compatible Family group have the same array size of BlueValues and OtherBlues within a Compatible Family Name Italic or Regular sub-group of the family.
+
+Family Test 19: Check that all faces in the Preferred Family group have the same values of FamilyBlues and FamilyOtherBlues, and are valid.
+
+Family Test 20: Check that all faces in the Compatible Family group have the same BlueScale value.
+
+FamilyTest 21: Check that all faces in the Compatible Family group have the same BlueShift value.
+
+Menu Name Report:
+
+Preferred Menu							  Mac Compatible Menu				 Windows Compatible Menu
+Source Code Pro/Regular                  Source Code Pro                    Source Code Pro/Regular
+Source Code Pro/Italic                   Source Code Pro Italic             Source Code Pro/Italic
+Source Code Pro/Bold                     Source Code Pro Bold               Source Code Pro/Bold
+Source Code Pro/Bold Italic              Source Code Pro Bold Italic        Source Code Pro/Bold Italic
+Source Code Pro/Black                    Source Code Pro Black              Source Code Pro Black/Regular
+Source Code Pro/Black Italic             Source Code Pro Black Italic       Source Code Pro Black/Italic
+Source Code Pro/ExtraLight               Source Code Pro ExtraLight         Source Code Pro ExtraLight/Regular
+Source Code Pro/ExtraLight Italic        Source Code Pro ExtraLight Italic  Source Code Pro ExtraLight/Italic
+Source Code Pro/Light                    Source Code Pro Light              Source Code Pro Light/Regular
+Source Code Pro/Light Italic             Source Code Pro Light Italic       Source Code Pro Light/Italic
+Source Code Pro/Medium                   Source Code Pro Medium             Source Code Pro Medium/Regular
+Source Code Pro/Medium Italic            Source Code Pro Medium Italic      Source Code Pro Medium/Italic
+Source Code Pro/Semibold                 Source Code Pro Semibold           Source Code Pro Semibold/Regular
+Source Code Pro/Semibold Italic          Source Code Pro Semibold Italic    Source Code Pro Semibold/Italic
+
+FONT METRICS REPORT
+Report 1: 
+Preferred Family: Source Code Pro
+Num glyphs from maxp.numGlyphs:
+SourceCodePro-BlackIt:                   1266
+SourceCodePro-BoldIt:                    1266
+SourceCodePro-ExtraLightIt:              1266
+SourceCodePro-It:                        1266
+SourceCodePro-LightIt:                   1266
+SourceCodePro-MediumIt:                  1266
+SourceCodePro-SemiboldIt:                1266
+SourceCodePro-Black:                     1549
+SourceCodePro-Bold:                      1549
+SourceCodePro-ExtraLight:                1549
+SourceCodePro-Light:                     1549
+SourceCodePro-Medium:                    1549
+SourceCodePro-Regular:                   1549
+SourceCodePro-Semibold:                  1549
+
+Preferred Family: Source Code Pro
+OS/2 sTypoAscender/sTypoDescender/sTypoLineGap/sCapHeight/sxHeight
+All fonts have the same value:   750 -250    0  660  480
+
+Preferred Family: Source Code Pro
+Italic Angle from post.italicAngle:
+SourceCodePro-It:                        -11.000
+SourceCodePro-BoldIt:                    -11.000
+SourceCodePro-BlackIt:                   -11.000
+SourceCodePro-ExtraLightIt:              -11.000
+SourceCodePro-LightIt:                   -11.000
+SourceCodePro-MediumIt:                  -11.000
+SourceCodePro-SemiboldIt:                -11.000
+SourceCodePro-Regular:                     0.000
+SourceCodePro-Bold:                        0.000
+SourceCodePro-Black:                       0.000
+SourceCodePro-ExtraLight:                  0.000
+SourceCodePro-Light:                       0.000
+SourceCodePro-Medium:                      0.000
+SourceCodePro-Semibold:                    0.000
+
+Preferred Family: Source Code Pro
+isBold from hhea.mscStyle:
+SourceCodePro-Bold:                      	  Bold
+SourceCodePro-BoldIt:                    	  Bold
+SourceCodePro-Regular:                   Not Bold
+SourceCodePro-It:                        Not Bold
+SourceCodePro-Black:                     Not Bold
+SourceCodePro-BlackIt:                   Not Bold
+SourceCodePro-ExtraLight:                Not Bold
+SourceCodePro-ExtraLightIt:              Not Bold
+SourceCodePro-Light:                     Not Bold
+SourceCodePro-LightIt:                   Not Bold
+SourceCodePro-Medium:                    Not Bold
+SourceCodePro-MediumIt:                  Not Bold
+SourceCodePro-Semibold:                  Not Bold
+SourceCodePro-SemiboldIt:                Not Bold
+
+Preferred Family: Source Code Pro
+isItalic from hhea.mscStyle:
+SourceCodePro-It:                        	Italic
+SourceCodePro-BoldIt:                    	Italic
+SourceCodePro-BlackIt:                   	Italic
+SourceCodePro-ExtraLightIt:              	Italic
+SourceCodePro-LightIt:                   	Italic
+SourceCodePro-MediumIt:                  	Italic
+SourceCodePro-SemiboldIt:                	Italic
+SourceCodePro-Regular:                   Not Italic
+SourceCodePro-Bold:                      Not Italic
+SourceCodePro-Black:                     Not Italic
+SourceCodePro-ExtraLight:                Not Italic
+SourceCodePro-Light:                     Not Italic
+SourceCodePro-Medium:                    Not Italic
+SourceCodePro-Semibold:                  Not Italic
+
+Preferred Family: Source Code Pro
+OTF version from head.fontRevision:
+SourceCodePro-Regular:                   2.010
+SourceCodePro-Bold:                      2.010
+SourceCodePro-Black:                     2.010
+SourceCodePro-ExtraLight:                2.010
+SourceCodePro-Light:                     2.010
+SourceCodePro-Medium:                    2.010
+SourceCodePro-Semibold:                  2.010
+SourceCodePro-It:                        1.030
+SourceCodePro-BoldIt:                    1.030
+SourceCodePro-BlackIt:                   1.030
+SourceCodePro-ExtraLightIt:              1.030
+SourceCodePro-LightIt:                   1.030
+SourceCodePro-MediumIt:                  1.030
+SourceCodePro-SemiboldIt:                1.030
+
+Preferred Family: Source Code Pro
+Embedding permissions setting from OS/2.fsType:
+All fonts have the same value: 0x0000 'Installable embedding' 
+
+Report 2:
+
+Preferred Family: Source Code Pro
+FontBBox from head.XY min/max:		X Min, YMin, XMax, YMax
+SourceCodePro-Regular:                   (-193, -400, 793, 1060)
+SourceCodePro-It:                        (-285, -400, 804, 1060)
+SourceCodePro-Bold:                      (-208, -400, 808, 1060)
+SourceCodePro-BoldIt:                    (-302, -400, 802, 1060)
+SourceCodePro-Black:                     (-214, -400, 814, 1060)
+SourceCodePro-BlackIt:                   (-308, -400, 801, 1060)
+SourceCodePro-ExtraLight:                (-180, -400, 780, 1060)
+SourceCodePro-ExtraLightIt:              (-272, -400, 805, 1060)
+SourceCodePro-Light:                     (-183, -400, 783, 1060)
+SourceCodePro-LightIt:                   (-276, -400, 805, 1060)
+SourceCodePro-Medium:                    (-197, -400, 797, 1060)
+SourceCodePro-MediumIt:                  (-289, -400, 803, 1060)
+SourceCodePro-Semibold:                  (-200, -400, 800, 1060)
+SourceCodePro-SemiboldIt:                (-294, -400, 803, 1060)
+
+Preferred Family: Source Code Pro
+usWeightClass from OS/2.usWeightClass:
+SourceCodePro-Black:                     900 Black (Heavy)
+SourceCodePro-BlackIt:                   900 Black (Heavy)
+SourceCodePro-Bold:                      700 Bold
+SourceCodePro-BoldIt:                    700 Bold
+SourceCodePro-Semibold:                  600 Semi-bold (Demi-bold)
+SourceCodePro-SemiboldIt:                600 Semi-bold (Demi-bold)
+SourceCodePro-Medium:                    500 Medium
+SourceCodePro-MediumIt:                  500 Medium
+SourceCodePro-Regular:                   400 Normal (Regular)
+SourceCodePro-It:                        400 Normal (Regular)
+SourceCodePro-Light:                     300 Light
+SourceCodePro-LightIt:                   300 Light
+SourceCodePro-ExtraLight:                200 Extra-Light (Ultra-light)
+SourceCodePro-ExtraLightIt:              200 Extra-Light (Ultra-light)
+
+Preferred Family: Source Code Pro
+usWidthClass from OS/2.usWidthClass:
+All fonts have the same value: 5 Medium (normal)
+
+Preferred Family: Source Code Pro
+underlinePosition from post.underlinePosition:
+All fonts have the same value: -75
+
+Preferred Family: Source Code Pro
+Vendor ID from OS/2.achVendID:
+All fonts have the same value: ADBO
+
+Report 3:Copyright and Trademark strings for the first face in the group
+
+Preferred Family: Source Code Pro
+First Face: SourceCodePro-Regular
+Copyright:  Copyright 2010, 2012 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name ‘Source’.
+Trademark:  Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries.
+
+Panose Report:
+
+Preferred Family: Source Code Pro
+SourceCodePro-Regular                  2  11   5   9   3   4   3   2   2   4 
+	Family Kind             2 Latin Text
+	Serif Style            11 Normal Sans
+	Weight                  5 Book
+	Proportion              9 Monospaced
+	Contrast                3 Very Low
+	Stroke Variation        4 Gradual/Transitional
+	Arm Style               3 Straight Arms/Wedge
+	Letterform              2 Normal/Contact
+	Midline                 2 Standard/Trimmed
+	X-height                4 Constant/Large
+SourceCodePro-It                       2  11   5   9   3   4   3   9   2   4 
+	Letterform              9 Oblique/Contact
+SourceCodePro-Bold                     2  11   7   9   3   4   3   2   2   4 
+	Weight                  7 Demi
+SourceCodePro-BoldIt                   2  11   7   9   3   4   3   9   2   4 
+	Weight                  7 Demi
+	Letterform              9 Oblique/Contact
+SourceCodePro-Black                    2  11   8   9   3   4   3   2   2   4 
+	Weight                  8 Bold
+SourceCodePro-BlackIt                  2  11   8   9   3   4   3   9   2   4 
+	Weight                  8 Bold
+	Letterform              9 Oblique/Contact
+SourceCodePro-ExtraLight               2  11   3   9   3   4   3   2   2   4 
+	Weight                  3 Light
+SourceCodePro-ExtraLightIt             2  11   3   9   3   4   3   9   2   4 
+	Weight                  3 Light
+	Letterform              9 Oblique/Contact
+SourceCodePro-Light                    2  11   4   9   3   4   3   2   2   4 
+	Weight                  4 Thin
+SourceCodePro-LightIt                  2  11   4   9   3   4   3   9   2   4 
+	Weight                  4 Thin
+	Letterform              9 Oblique/Contact
+SourceCodePro-Medium                   2  11   5   9   3   4   3   2   2   4 
+SourceCodePro-MediumIt                 2  11   5   9   3   4   3   9   2   4 
+	Letterform              9 Oblique/Contact
+SourceCodePro-Semibold                 2  11   6   9   3   4   3   2   2   4 
+	Weight                  6 Medium
+SourceCodePro-SemiboldIt               2  11   6   9   3   4   3   9   2   4 
+	Weight                  6 Medium
+	Letterform              9 Oblique/Contact

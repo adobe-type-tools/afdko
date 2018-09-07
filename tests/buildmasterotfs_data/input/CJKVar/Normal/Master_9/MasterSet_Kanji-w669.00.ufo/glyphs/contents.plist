@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>.notdef</key>
+		<string>_notdef.glif</string>
+		<key>c1177</key>
+		<string>c1177.glif</string>
+		<key>c14872</key>
+		<string>c14872.glif</string>
+		<key>c16976</key>
+		<string>c16976.glif</string>
+		<key>c19523</key>
+		<string>c19523.glif</string>
+		<key>c19753</key>
+		<string>c19753.glif</string>
+		<key>c21305</key>
+		<string>c21305.glif</string>
+		<key>c5640</key>
+		<string>c5640.glif</string>
+		<key>c6260</key>
+		<string>c6260.glif</string>
+		<key>c7253</key>
+		<string>c7253.glif</string>
+	</dict>
+</plist>

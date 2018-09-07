@@ -1,4 +1,4 @@
-[![Travis](https://travis-ci.org/adobe-type-tools/afdko.svg)](https://travis-ci.org/adobe-type-tools/afdko)
+[![Travis](https://travis-ci.org/adobe-type-tools/afdko.svg?branch=develop)](https://travis-ci.org/adobe-type-tools/afdko)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/qurx2si4x54b97mt/branch/develop?svg=true)](https://ci.appveyor.com/project/adobe-type-tools/afdko/branch/develop)
 [![Codacy](https://api.codacy.com/project/badge/Grade/08ceff914833445685924ebb1f040070)](https://www.codacy.com/app/adobe-type-tools/afdko?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=adobe-type-tools/afdko&amp;utm_campaign=Badge_Grade)
 [![Coverage](https://codecov.io/gh/adobe-type-tools/afdko/branch/develop/graph/badge.svg)](https://codecov.io/gh/adobe-type-tools/afdko/branch/develop)
@@ -14,13 +14,12 @@ This repository contains the data files, Python scripts, and sources for
 the command line programs that comprise the AFDKO. The project uses the
 [Apache 2.0 OpenSource license](LICENSE.md).
 
-Please refer to the file
-[AFDKO-Overview.html](https://rawgit.com/adobe-type-tools/afdko/master/afdko/AFDKO-Overview.html)
+Please refer to the file [AFDKO-Overview.md](docs/AFDKO-Overview.md)
 for a more detailed description of what is included in the package.
 
-Please see the 
+Please see the
 [wiki](https://github.com/adobe-type-tools/afdko/wiki)
-for additional information, such as links to reference materials and related 
+for additional information, such as links to reference materials and related
 projects.
 
 Major Changes
@@ -30,18 +29,18 @@ The AFDKO has been restructured so that it can be installed as a Python
 package. It now depends on the user\'s Python interpreter, and no longer
 contains its own Python interpreter. In order to do this, two
 Adobe-owned, non-open source programs were dropped: **IS** and
-**checkOutlines**. If these turn out to be sorely missed, an installer
+**checkoutlines**. If these turn out to be sorely missed, an installer
 for them will be added to the old Adobe AFDKO website. The current
-intent is to migrate the many tests in checkOutlines to the newer
-**checkOutlinesUFO** (which does work with OpenType and Type 1 fonts,
+intent is to migrate the many tests in checkoutlines to the newer
+**checkoutlinesufo** (which does work with OpenType and Type 1 fonts,
 but currently does only overlap detection and removal, and a few basic
 path checks).
 
 Installation
 ------------
 
-The AFDKO requires [Python](http://www.python.org/download) 2.7.x. It
-does not yet support Python 3.x.
+The AFDKO requires [Python](http://www.python.org/download) 2.7.x. or
+3.6.x.
 
 Releases are available on the [Python Package
 Index](https://pypi.python.org/pypi/afdko) (PyPI) and can be installed
@@ -117,7 +116,7 @@ environment variable in the System control panel.
 
 You can download older versions of the tools from the [Adobe AFDKO
 homepage](http://www.adobe.com/devnet/opentype/afdko.html). The tools IS
-and checkOutlines are included in these downloads.
+and checkoutlines are included in these downloads.
 
 Build from Source
 -----------------
@@ -141,5 +140,4 @@ On Linux, install these with:
     apt-get -y install python-pip
     apt-get -y install python-dev
 
-On Windows, you need to download and install Visual C++ 6, and add all
-the service packs.
+On Windows, you need Visual Studio 2017.

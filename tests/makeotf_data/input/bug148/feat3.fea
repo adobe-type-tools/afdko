@@ -1,0 +1,8 @@
+
+# file with two 'include'
+# the first references a non-existing file
+# while the second points to file containing a 'vert' feature;
+# this is to test that the first 'include' will prevent 'vert' from being found.
+
+include(missing_file);
+include(vert.fea);

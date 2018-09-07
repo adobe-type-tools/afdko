@@ -1,0 +1,261 @@
+from __future__ import print_function, division, absolute_import
+
+import os
+import pytest
+from shutil import copy2, copytree
+import subprocess32 as subprocess
+import tempfile
+
+from fontTools.ttLib import TTFont
+
+from afdko import ttfcomponentizer as ttfcomp
+
+from .runner import main as runner
+from .differ import main as differ
+
+TOOL = 'ttfcomponentizer'
+CMD = ['-t', TOOL]
+
+TEST_TTF_FILENAME = 'ttfcomponentizer.ttf'
+DESIGN_NAMES_LIST = ['acaron', 'acutecmb', 'caroncmb', 'design_name',
+                     'gravecmb', 'tildecmb']
+PRODCT_NAMES_LIST = ['production_name', 'uni01CE', 'uni0300', 'uni0301',
+                     'uni0303', 'uni030C']
+EMPTY_LIB = b"""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+"http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict/>
+</plist>
+"""
+
+
+class Object(object):
+    pass
+
+
+data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
+
+
+def _get_expected_path(file_name):
+    return os.path.join(data_dir_path, 'expected_output', file_name)
+
+
+def _get_input_path(file_name):
+    return os.path.join(data_dir_path, 'input', file_name)
+
+
+def _get_temp_file_path(directory=None):
+    return tempfile.mkstemp(dir=directory)[1]
+
+
+def _generate_ttx_dump(font_path, tables=None):
+    font = TTFont(font_path)
+    temp_path = _get_temp_file_path()
+    font.saveXML(temp_path, tables=tables)
+    return temp_path
+
+
+def _get_test_ttf_path():
+    return _get_input_path(TEST_TTF_FILENAME)
+
+
+def _get_test_ufo_path():
+    return _get_test_ttf_path()[:-3] + 'ufo'
+
+
+def _read_file(file_path):
+    with open(file_path, "rb") as f:
+        return f.read()
+
+
+def _write_file(file_path, data):
+    with open(file_path, "wb") as f:
+        f.write(data)
+
+
+# -----
+# Tests
+# -----
+
+def test_run_no_args():
+    with pytest.raises(SystemExit) as exc_info:
+        ttfcomp.main()
+    assert exc_info.value.code == 2
+
+
+def test_run_cli_no_args():
+    with pytest.raises(subprocess.CalledProcessError) as exc_info:
+        runner(CMD + ['-n'])
+    assert exc_info.value.returncode == 2
+
+
+def test_run_invalid_font():
+    assert ttfcomp.main(['not_a_file']) == 1
+
+
+def test_run_ufo_not_found():
+    ttf_path = _get_test_ttf_path()
+    temp_dir = tempfile.mkdtemp()
+    save_path = _get_temp_file_path(directory=temp_dir)
+    copy2(ttf_path, save_path)
+    assert ttfcomp.main([save_path]) == 1
+
+
+def test_run_invalid_ufo():
+    ttf_path = _get_test_ttf_path()
+    temp_dir = tempfile.mkdtemp()
+    save_path = _get_temp_file_path(directory=temp_dir)
+    ufo_path = save_path + '.ufo'
+    copy2(ttf_path, save_path)
+    copy2(ttf_path, ufo_path)
+    assert ttfcomp.main([save_path]) == 1
+
+
+def test_run_with_output_path():
+    ttf_path = _get_test_ttf_path()
+    save_path = _get_temp_file_path()
+    ttfcomp.main(['-o', save_path, ttf_path])
+    gtable = TTFont(save_path)['glyf']
+    composites = [gname for gname in gtable.glyphs if (
+        gtable[gname].isComposite())]
+    assert sorted(composites) == ['aacute', 'uni01CE']
+
+
+def test_run_cli_with_output_path():
+    actual_path = _get_temp_file_path()
+    runner(CMD + ['-n', '-o', 'o', '_{}'.format(actual_path),
+                  '_{}'.format(_get_input_path(TEST_TTF_FILENAME))])
+    actual_ttx = _generate_ttx_dump(actual_path, ['maxp', 'glyf'])
+    expected_ttx = _get_expected_path('ttfcomponentizer.ttx')
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
+def test_run_without_output_path():
+    ttf_path = _get_test_ttf_path()
+    ufo_path = _get_test_ufo_path()
+    temp_dir = tempfile.mkdtemp()
+    tmp_ufo_path = os.path.join(temp_dir, os.path.basename(ufo_path))
+    save_path = _get_temp_file_path(directory=temp_dir)
+    copy2(ttf_path, save_path)
+    copytree(ufo_path, tmp_ufo_path)
+    ttfcomp.main([save_path])
+    gtable = TTFont(save_path)['glyf']
+    assert gtable['agrave'].isComposite() is False
+    assert gtable['aacute'].isComposite() is True
+
+
+def test_options_help():
+    with pytest.raises(SystemExit) as exc_info:
+        ttfcomp.main(['-h'])
+    assert exc_info.value.code == 0
+
+
+def test_options_version():
+    with pytest.raises(SystemExit) as exc_info:
+        ttfcomp.main(['--version'])
+    assert exc_info.value.code == 0
+
+
+def test_options_bogus_option():
+    with pytest.raises(SystemExit) as exc_info:
+        ttfcomp.main(['--bogus'])
+    assert exc_info.value.code == 2
+
+
+def test_options_invalid_font_path():
+    assert ttfcomp.get_options(['not_a_file']).font_path is None
+
+
+def test_options_invalid_font():
+    path = _get_input_path('not_a_font.ttf')
+    assert ttfcomp.get_options([path]).font_path is None
+
+
+def test_options_valid_font():
+    path = _get_test_ttf_path()
+    assert os.path.basename(
+        ttfcomp.get_options([path]).font_path) == TEST_TTF_FILENAME
+
+
+def test_get_ufo_path_found():
+    path = _get_test_ttf_path()
+    assert ttfcomp.get_ufo_path(path) == _get_test_ufo_path()
+
+
+def test_get_ufo_path_not_found():
+    # the UFO font is intentionally used as a test folder
+    path = os.path.join(_get_test_ufo_path(), 'lib.plist')
+    assert ttfcomp.get_ufo_path(path) is None
+
+
+def test_get_goadb_path_found_same_folder():
+    path = _get_test_ttf_path()
+    assert os.path.basename(
+        ttfcomp.get_goadb_path(path)) == ttfcomp.GOADB_FILENAME
+
+
+def test_get_goadb_path_found_3_folders_up():
+    # the UFO's glif file is intentionally used as a test file
+    path = os.path.join(_get_test_ufo_path(), 'glyphs', 'a.glif')
+    assert os.path.basename(
+        ttfcomp.get_goadb_path(path)) == ttfcomp.GOADB_FILENAME
+
+
+def test_get_goadb_path_not_found():
+    path = os.path.dirname(_get_test_ttf_path())
+    assert ttfcomp.get_goadb_path(path) is None
+
+
+def test_get_goadb_names_mapping_goadb_not_found():
+    path = os.path.dirname(_get_test_ttf_path())
+    assert ttfcomp.get_goadb_names_mapping(path) == {}
+
+
+def test_get_glyph_names_mapping_invalid_ufo():
+    path = _get_test_ttf_path()
+    assert ttfcomp.get_glyph_names_mapping(path) == (None, None)
+
+
+def test_get_glyph_names_mapping_names_from_lib():
+    result = ttfcomp.get_glyph_names_mapping(_get_test_ufo_path())
+    assert sorted(result[1].keys()) == DESIGN_NAMES_LIST
+    assert sorted(result[1].values()) == PRODCT_NAMES_LIST
+
+
+def test_get_glyph_names_mapping_names_from_goadb():
+    # the test UFO has a 'public.postscriptNames' in its lib;
+    # empty the lib temporarily to force the reading of the GOADB
+    ufo_path = _get_test_ufo_path()
+    lib_path = os.path.join(ufo_path, 'lib.plist')
+    lib_data = _read_file(lib_path)
+    _write_file(lib_path, EMPTY_LIB)
+    result = ttfcomp.get_glyph_names_mapping(ufo_path)
+    _write_file(lib_path, lib_data)
+    assert sorted(result[1].keys()) == DESIGN_NAMES_LIST
+    assert sorted(result[1].values()) == PRODCT_NAMES_LIST
+
+
+def test_get_composites_data():
+    ufo, ps_names = ttfcomp.get_glyph_names_mapping(_get_test_ufo_path())
+    comps_data = ttfcomp.get_composites_data(ufo, ps_names)
+    comps_name_list = sorted(list(comps_data.keys()))
+    comps_comp_list = [comps_data[gname] for gname in comps_name_list]
+    assert comps_name_list == ['aacute', 'adieresis', 'atilde', 'uni01CE']
+    assert comps_comp_list[0].names == ('a', 'uni0301')
+    assert comps_comp_list[3].names == ('a', 'uni030C')
+    assert comps_comp_list[0].positions == ((0, 0), (263.35, 0))
+    assert comps_comp_list[3].positions == ((0, 0), (263, 0))
+
+
+def test_assemble_components():
+    comps_data = Object()
+    setattr(comps_data, 'names', ('a', 'uni01CE'))
+    setattr(comps_data, 'positions', ((0, 0), (263, 0)))
+    comp_one, comp_two = ttfcomp.assemble_components(comps_data)
+    assert comp_one.glyphName == 'a'
+    assert comp_two.glyphName == 'uni01CE'
+    assert (comp_one.x, comp_one.y) == (0, 0)
+    assert (comp_two.x, comp_two.y) == (263, 0)
+    assert comp_one.flags == 0x204
+    assert comp_two.flags == 0x4

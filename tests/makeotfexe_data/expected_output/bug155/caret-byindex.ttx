@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont sfntVersion="OTTO" ttLibVersion="3.29">
+
+  <GDEF>
+    <Version value="0x00010000"/>
+    <GlyphClassDef Format="2">
+      <ClassDef glyph="f_f_i" class="2"/>
+      <ClassDef glyph="f_i" class="2"/>
+    </GlyphClassDef>
+    <LigCaretList>
+      <Coverage Format="1">
+        <Glyph value="f_i"/>
+        <Glyph value="f_f_i"/>
+      </Coverage>
+      <!-- LigGlyphCount=2 -->
+      <LigGlyph index="0">
+        <!-- CaretCount=1 -->
+        <CaretValue index="0" Format="2">
+          <CaretValuePoint value="55"/>
+        </CaretValue>
+      </LigGlyph>
+      <LigGlyph index="1">
+        <!-- CaretCount=2 -->
+        <CaretValue index="0" Format="2">
+          <CaretValuePoint value="77"/>
+        </CaretValue>
+        <CaretValue index="1" Format="2">
+          <CaretValuePoint value="101"/>
+        </CaretValue>
+      </LigGlyph>
+    </LigCaretList>
+  </GDEF>
+
+</ttFont>
