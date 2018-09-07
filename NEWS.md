@@ -24,7 +24,7 @@ Changelog
   ([#382](https://github.com/adobe-type-tools/afdko/issues/382))
 - \[ProofPDF\] Fixed crash when font has no BlueValues
   ([#394](https://github.com/adobe-type-tools/afdko/issues/394))
-- \[makeinstancesufo\] Disabled ufonormalizer's writeModTimes option;
+- \[makeinstancesufo\] Disabled ufonormalizer's writeModTimes option.
   Fixed Windows command
   ([#413](https://github.com/adobe-type-tools/afdko/pull/413))
 - \[ufoTools\] Fixed line breaks when writting UFOs files on Windows
@@ -67,12 +67,12 @@ Changelog
   ([#271](https://github.com/adobe-type-tools/afdko/pull/271),
   [#312](https://github.com/adobe-type-tools/afdko/pull/312),
   [#344](https://github.com/adobe-type-tools/afdko/pull/344))
-- \[tx\] Fixed -dcf mode failing to dump hinted CFF2 variable font
+- \[tx\] Fixed `-dcf` mode failing to dump hinted CFF2 variable font
   ([#322](https://github.com/adobe-type-tools/afdko/issues/322))
 - \[tx\] Fixed conversion of multi-FD CFF2 font to CID-flavored CFF
   font ([#329](https://github.com/adobe-type-tools/afdko/issues/329))
-- \[tx\] Fixed -cff2 failing to convert CID/CFF1 to multi-FD CFF2
-  ([#345](https://github.com/adobe-type-tools/afdko/issues/345))
+- \[tx\] Fixed `-cff2` failing to convert CID/CFF1 to CFF2
+  ([#351](https://github.com/adobe-type-tools/afdko/pull/351))
 - Wheels for all three environments (macOS, Windows, Linux) are now
   available on [PyPI](https://pypi.org/project/afdko) and
   [GitHub](https://github.com/adobe-type-tools/afdko/releases)
@@ -827,11 +827,11 @@ complete list see:
   changes to the source code tree and build process, to make it easier
   to build the open source AFDKO. Unfortunately, the source code for
   the **IS** and **checkOutlines** programs cannot be open sourced.
-- \[tx/mergeFonts/rotateFonts\] Removed '-bc' option support, as
+- \[tx/mergeFonts/rotateFont\] Removed '-bc' option support, as
   this includes patents that cannot be shared in open source.
 - \[tx\] All tx-related tools now report when a font exceeds the max
   allowed subroutine recursion depth.
-- \[tx/mergeFonts/rotateFonts\] Added common options to all when
+- \[tx/mergeFonts/rotateFont\] Added common options to all when
   possible: all now support UFO and SVG fonts, the '-gx' option to
   exclude fonts, the '-std' option for cff output, and the '-b'
   option for cff output.
