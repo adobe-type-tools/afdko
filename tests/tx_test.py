@@ -219,6 +219,17 @@ def test_long_charstring_warning():
     assert b"(cfr) Warning: CharString of GID 1 is 71057 bytes long" in output
 
 
+def test_long_charstring_write():
+    # read a CFF2 VF with a charstring longer that 65535, write out CFF2 file
+    # NOTE: the font 'CJK-VarTest.otf' cannot be used in this test because
+    # once its long charstring is optimized (floats -> ints) it's no longer
+    # over the 65535 bytes limit; the long charstring in 'CJK-VarTest2.otf' is
+    # already as small as possible, so it will trigger the check in cffwrite.c
+    actual_path = runner(CMD + ['-o', 'cff2', '-f', 'CJK-VarTest2.otf'])
+    expected_path = _get_expected_path('CJK-VarTest2.cff2')
+    assert differ([expected_path, actual_path, '-m', 'bin'])
+
+
 def test_many_hints_string_bug354():
     # The glyph T@gid002 has 33 hstem hints. This tests a bug where
     # tx defined an array of only 6 operands.

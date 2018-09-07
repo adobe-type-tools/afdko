@@ -85,7 +85,8 @@ Changelog
   ([#449](https://github.com/adobe-type-tools/afdko/pull/449))
 - \[tx\] Emit warning instead of error for charstrings longer
   than 65535 bytes
-  ([#446](https://github.com/adobe-type-tools/afdko/pull/446))
+  ([#446](https://github.com/adobe-type-tools/afdko/pull/446),
+  [#597](https://github.com/adobe-type-tools/afdko/pull/597))
 
 2.7.2 (released 2018-06-27)
 ---------------------------

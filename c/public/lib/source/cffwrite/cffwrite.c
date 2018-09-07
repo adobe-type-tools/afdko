@@ -1281,18 +1281,24 @@ static void writeCharStringsINDEX(controlCtx h, cff_Font *font) {
     offset = 1;
     cfwWriteN(g, font->CharStrings.offSize, offset);
     for (i = 0; i < font->glyphs.cnt; i++) {
+        long chrstr_length;
         Glyph *glyph = &font->glyphs.array[i];
         FDInfo *fd = &font->FDArray.array[glyph->iFD];
 
-        if (glyph->cstr.length > 65535) {
-            cfwFatal(g, cfwErrCstrTooLong, NULL);
+        chrstr_length = glyph->cstr.length;
+        if (chrstr_length > 65535) {
+            cfwMessage(g,
+                       "Warning: CharString of GID %d is %d bytes long. "
+                       "CharStrings longer than 65535 bytes might not be "
+                       "supported by some implementations.",
+                       i, chrstr_length);
         }
 
         if ((!(g->flags & CFW_WRITE_CFF2)) && (glyph->hAdv != fd->width.dflt)) {
             /* Add glyph width size */
             offset += numsize(glyph->hAdv - fd->width.nominal);
         }
-        offset += glyph->cstr.length;
+        offset += chrstr_length;
 
         cfwWriteN(g, font->CharStrings.offSize, offset);
     }
