@@ -1,7 +1,7 @@
 Changelog
 =========
 
-2.8.0 (released 2018-09-XX)
+2.8.0 (released 2018-09-07)
 ---------------------------
 
 - Added support for Python 3
