@@ -1,6 +1,12 @@
 Changelog
 =========
 
+2.8.1 (released 2018-09-07)
+---------------------------
+
+- Made the wheels 'universal' py2.py3
+  ([#595](https://github.com/adobe-type-tools/afdko/pull/595))
+
 2.8.0 (released 2018-09-07)
 ---------------------------
 
