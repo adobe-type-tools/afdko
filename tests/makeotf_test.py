@@ -14,7 +14,8 @@ from fontTools.ttLib import TTFont
 
 from afdko.makeotf import (
     checkIfVertInFeature, getOptions, MakeOTFParams, getSourceGOADBData,
-    readOptionFile, writeOptionsFile, kMOTFOptions, kOptionNotSeen)
+    readOptionFile, writeOptionsFile, kMOTFOptions, kOptionNotSeen,
+    makeRelativePath)
 
 from .runner import main as runner
 from .differ import main as differ
@@ -343,6 +344,28 @@ def test_readOptionFile_filenotfound():
     params = MakeOTFParams()
     params.currentDir = os.getcwd()
     assert readOptionFile(proj_path, params, 0) == (True, 0)
+
+
+@pytest.mark.parametrize('cur_dir, target_path, result', [
+    ('/folder/folder2', '/folder/folder2/font.pfa', 'font.pfa'),
+    ('/folder/folder2', '/folder/font.pfa', '../font.pfa'),
+    ('/folder', '/folder/font.pfa', 'font.pfa'),
+    ('/folder', '/font.pfa', '../font.pfa'),
+    ('/folder', None, None),
+])
+def test_makeRelativePath(cur_dir, target_path, result):
+    if result:
+        result = os.path.normpath(result)
+    assert makeRelativePath(cur_dir, target_path) == result
+
+
+@pytest.mark.skipif(sys.platform != 'win32', reason="windows-only")
+@pytest.mark.parametrize('cur_dir, target_path, result', [
+    ('C:\\folder', 'C:\\folder\\font.pfa', 'font.pfa'),
+    ('F:\\folder', 'C:\\folder\\font.pfa', 'C:\\folder\\font.pfa'),
+])
+def test_makeRelativePath_win_only(cur_dir, target_path, result):
+    assert makeRelativePath(cur_dir, target_path) == result
 
 
 @pytest.mark.parametrize('args, input_filename, ttx_filename', [

@@ -25,7 +25,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.5.0 Aug 28 2018
+makeotf.py v2.5.1 Sep 11 2018
 """
 
 __methods__ = """
@@ -2283,18 +2283,23 @@ def makeRelativePath(curDir, targetPath):
     if targetPath is None:
         return
 
-    targetPath = os.path.abspath(targetPath)
-    curDir = os.path.abspath(curDir)
-    targetPath = os.path.relpath(targetPath, curDir)
-    return targetPath
+    abs_targetPath = os.path.abspath(targetPath)
+    abs_curDir = os.path.abspath(curDir)
+    try:
+        return os.path.relpath(abs_targetPath, abs_curDir)
+    except ValueError:
+        # the paths are on different drives/mounts
+        return targetPath
 
 
 def makeRelativePaths(makeOTFParams):
+    """
+    Change file paths to be relative to fontDir,
+    if possible, else to absolute paths.
+    """
     inputFilePath = getattr(makeOTFParams, kFileOptPrefix + kInputFont)
     fontDir = os.path.dirname(os.path.abspath(inputFilePath))
 
-    # Change file paths to be relative to fontDir,
-    # if possible, else to absolute paths.
     inputFilePath = makeRelativePath(fontDir, inputFilePath)
     setattr(makeOTFParams, kFileOptPrefix + kInputFont, inputFilePath)
 
