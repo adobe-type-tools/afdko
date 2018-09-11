@@ -122,7 +122,7 @@ def test_input_formats(arg, input_filename, ttx_filename):
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value=',
-                   '-r', '^\s+Version.*;hotconv.*;makeotfexe'])
+                   '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
 
 
 def test_getSourceGOADBData():
@@ -405,7 +405,7 @@ def test_bug438():
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value=',
-                   '-r', '^\s+Version.*;hotconv.*;makeotfexe'])
+                   '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
 
 
 @pytest.mark.parametrize('args, font, fontinfo', [
@@ -495,7 +495,7 @@ def test_bug497(opts):
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value=',
-                   '-r', '^\s+Version.*;hotconv.*;makeotfexe'])
+                   '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
 
 
 def test_useMarkFilteringSet_flag_bug196():
