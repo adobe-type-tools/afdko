@@ -2083,7 +2083,7 @@ def getSourceGOADBData(inputFilePath):
     # First, get the Unicode mapping from the TTF cmap table.
     command = "spot -t cmap=7 \"%s\" 2>&1" % inputFilePath
     report = fdkutils.runShellCmd(command)
-    spotGlyphList = re.findall("[\n\t]\[(....+)\]=<([^>]+)>", report)
+    spotGlyphList = re.findall(r"[\n\t]\[(....+)\]=<([^>]+)>", report)
 
     # Because this dumps all the Unicode map tables, there are a number
     # of duplicates; weed them out, and strip out gid part of spot name
@@ -2107,7 +2107,7 @@ def getSourceGOADBData(inputFilePath):
     # as tx doesn't check 32 bit UV's, and doesn't report double-encodings.
     command = "tx -mtx \"%s\" 2>&1" % inputFilePath
     report = fdkutils.runShellCmd(command)
-    txGlyphList = re.findall("[\n\r]glyph\[(\d+)\]\s+{([^,]+)", report)
+    txGlyphList = re.findall(r"[\n\r]glyph\[(\d+)\]\s+{([^,]+)", report)
 
     gnameDict = {}
     for gid_str, gname in txGlyphList:
@@ -2180,7 +2180,7 @@ def copyTTFGlyphTables(inputFilePath, tempOutputPath, outputPath):
     tempTablePath = fdkutils.get_temp_file_path()
     command = "tx -mtx \"%s\" 2>&1" % tempOutputPath
     report = fdkutils.runShellCmd(command)
-    glyphList = re.findall("[\n\r]glyph\[\d+\]\s+{([^,]+)", report)
+    glyphList = re.findall(r"[\n\r]glyph\[\d+\]\s+{([^,]+)", report)
 
     if os.path.exists(outputPath):
         os.remove(outputPath)

@@ -60,4 +60,4 @@ def test_cjk_var():
                        '    <checkSumAdjustment value=' + SPLIT_MARKER +
                        '    <created value=' + SPLIT_MARKER +
                        '    <modified value=',
-                       '-r', '^\s+Version.*;hotconv.*;makeotfexe'])
+                       '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
