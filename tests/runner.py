@@ -106,7 +106,7 @@ def _check_tool(tool_name):
         tool_name += '.exe'
     # XXX start hack to bypass this issue
     # https://github.com/adobe-type-tools/afdko/issues/348
-    if tool_name.split('.')[0] in ('sfntdiff', 'sfntedit', 'makeotfexe'):
+    if tool_name.split('.')[0] in ('sfntdiff', 'sfntedit'):
         return tool_name
     # XXX end hack
     try:

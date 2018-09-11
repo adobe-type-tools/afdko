@@ -3,6 +3,7 @@ from __future__ import print_function, division, absolute_import
 import os
 import pytest
 import tempfile
+import subprocess32 as subprocess
 
 from fontTools.ttLib import TTFont
 
@@ -39,6 +40,27 @@ def _generate_ttx_dump(font_path, tables=None):
 # -----
 # Tests
 # -----
+
+def test_exit_no_option():
+    # It's valid to run 'makeotfexe' without using any options,
+    # but if a default-named font file ('font.ps') is NOT found
+    # in the current directory, the tool exits with an error
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        subprocess.check_call([TOOL])
+    assert err.value.returncode == 1
+
+
+@pytest.mark.parametrize('arg', ['-h', '-u'])
+def test_exit_known_option(arg):
+    assert subprocess.check_call([TOOL, arg]) == 0
+
+
+@pytest.mark.parametrize('arg', ['j', 'bogus'])
+def test_exit_unknown_option(arg):
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        runner(CMD + ['-n', '-o', arg])
+    assert err.value.returncode == 1
+
 
 @pytest.mark.parametrize('caret_format', [
     'bypos', 'byindex', 'mixed', 'mixed2', 'double', 'double2'])
