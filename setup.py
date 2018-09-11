@@ -144,7 +144,7 @@ class CustomBuildScripts(distutils.command.build_scripts.build_scripts):
 
 def _get_scripts():
     script_names = [
-        'autohintexe', 'detype1', 'makeotfexe', 'mergefonts', 'rotatefont',
+        'detype1', 'makeotfexe', 'mergefonts', 'rotatefont',
         'sfntdiff', 'sfntedit', 'spot', 'tx', 'type1'
     ]
     if platform.system() == 'Windows':
