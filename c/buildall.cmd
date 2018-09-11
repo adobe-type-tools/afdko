@@ -10,10 +10,6 @@ if %do_target%==0 (
 )
 
 echo " "
-echo "Building autohint..."
-call %~dp0autohint\build\win\visualstudio\BuildAll.cmd %1 || EXIT /B 1
-
-echo " "
 echo "Building detype1..."
 call %~dp0detype1\build\win\visualstudio\BuildAll.cmd %1 || EXIT /B 1
 
