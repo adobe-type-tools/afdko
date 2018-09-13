@@ -3,7 +3,6 @@
 from __future__ import print_function, division, absolute_import
 
 import os
-import platform
 import pytest
 from shutil import copy2, copytree, rmtree
 import subprocess32 as subprocess
@@ -80,20 +79,23 @@ def _generate_ttx_dump(font_path, tables=None):
 # Tests
 # -----
 
+def test_exit_no_option():
+    # It's valid to run 'makeotf' without using any options,
+    # but if a default-named font file is NOT found in the
+    # current directory, the tool exits with an error
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        subprocess.check_call([TOOL])
+    assert err.value.returncode == 1
+
+
 @pytest.mark.parametrize('arg', ['-v', '-h', '-u'])
 def test_exit_known_option(arg):
-    if platform.system() == 'Windows':
-        tool_name = TOOL + '.exe'
-    else:
-        tool_name = TOOL
-    assert subprocess.check_call([tool_name, arg]) == 0
+    assert subprocess.call([TOOL, arg]) == 0
 
 
 @pytest.mark.parametrize('arg', ['j', 'bogus'])
 def test_exit_unknown_option(arg):
-    with pytest.raises(subprocess.CalledProcessError) as err:
-        runner(CMD + ['-n', '-o', arg])
-    assert err.value.returncode == 1
+    assert subprocess.call([TOOL, arg]) == 1
 
 
 @pytest.mark.parametrize('arg, input_filename, ttx_filename', [
