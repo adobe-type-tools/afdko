@@ -481,7 +481,7 @@ def test_cid_keyed_cff_bug470(args, font, fontinfo):
     ['bit7y', 'bit8n', 'bit9n'],
     ['bit7y', 'bit8n', 'bit7n', 'bit8y'],
 ])
-def test_bug497(opts):
+def test_GOADB_options_bug497(opts):
     font_path = _get_input_path(T1PFA_NAME)
     feat_path = _get_input_path('bug497/feat.fea')
     fmndb_path = _get_input_path('bug497/fmndb.txt')
