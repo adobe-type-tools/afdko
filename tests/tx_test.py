@@ -2,6 +2,7 @@ from __future__ import print_function, division, absolute_import
 
 import os
 import pytest
+import subprocess32 as subprocess
 import tempfile
 
 from .runner import main as runner
@@ -44,6 +45,20 @@ PS_SKIP = [
     '560 (Date:' + SPLIT_MARKER +
     '560 (Time:'
 ]
+
+
+# -----------
+# Basic tests
+# -----------
+
+@pytest.mark.parametrize('arg', ['-h', '-v', '-u'])
+def test_exit_known_option(arg):
+    assert subprocess.call([TOOL, arg]) == 0
+
+
+@pytest.mark.parametrize('arg', ['-z', '-foo'])
+def test_exit_unknown_option(arg):
+    assert subprocess.call([TOOL, arg]) == 1
 
 
 # -------------
@@ -251,7 +266,7 @@ def test_non_varying_glyphs_bug356():
     assert differ([expected_path, stderr_path, '-l', '1'])
 
 
-def test_bug473():
+def test_illegal_chars_in_glyph_name_bug473():
     save_path = os.path.join(_get_temp_dir_path(), 'bug473.ufo')
     ufo_path = runner(CMD + ['-o', 'ufo', '-f', 'bug473.ufo', '-s', save_path])
     expected_path = _get_expected_path('bug473.ufo')

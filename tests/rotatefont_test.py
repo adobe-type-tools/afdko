@@ -1,7 +1,6 @@
 from __future__ import print_function, division, absolute_import
 
 import os
-import platform
 import pytest
 import subprocess32 as subprocess
 
@@ -28,20 +27,12 @@ def _get_input_path(file_name):
 
 @pytest.mark.parametrize('arg', ['-h', '-v', '-u'])
 def test_exit_known_option(arg):
-    if platform.system() == 'Windows':
-        tool_name = TOOL + '.exe'
-    else:
-        tool_name = TOOL
-    assert subprocess.call([tool_name, arg]) == 0
+    assert subprocess.call([TOOL, arg]) == 0
 
 
 @pytest.mark.parametrize('arg', ['-z', '-foo'])
 def test_exit_unknown_option(arg):
-    if platform.system() == 'Windows':
-        tool_name = TOOL + '.exe'
-    else:
-        tool_name = TOOL
-    assert subprocess.call([tool_name, arg]) == 1
+    assert subprocess.call([TOOL, arg]) == 1
 
 
 @pytest.mark.parametrize('i, matrix', [
