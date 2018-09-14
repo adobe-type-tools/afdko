@@ -10,6 +10,9 @@ dist/*
 # PyCharm directory
 .idea/
 
+# Visual Studio Code directory
+.vscode/
+
 # coverage data
 # DO NOT use '.coverage*' because that matches '.coveragerc'
 .coverage
