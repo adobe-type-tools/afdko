@@ -26,3 +26,10 @@ def test_check_tool_unhacked(tool_name):
     if platform.system() == 'Windows':
         expected_name += '.exe'
     assert _check_tool(tool_name) == expected_name
+
+
+def test_capture_error_message():
+    output_path = runner(['-t', 'makeotfexe', '-n', '-e'])
+    with open(output_path, 'rb') as f:
+        output = f.read()
+    assert b"[FATAL] Source font file not found: font.ps" in output

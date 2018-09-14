@@ -17,7 +17,7 @@ import subprocess32 as subprocess
 import sys
 import tempfile
 
-__version__ = '0.5.4'
+__version__ = '0.5.5'
 
 logger = logging.getLogger('runner')
 
@@ -36,6 +36,12 @@ def _get_input_dir_path(tool_path):
     input_dir = os.path.join(
         os.path.split(__file__)[0], '{}_data'.format(tool_name), 'input')
     return os.path.abspath(os.path.realpath(input_dir))
+
+
+def _get_temp_file_path():
+    file_descriptor, path = tempfile.mkstemp()
+    os.close(file_descriptor)
+    return path
 
 
 def run_tool(opts):
@@ -72,8 +78,7 @@ def run_tool(opts):
             save_loc = opts.save_path
         else:
             # '--save' option was NOT used. Create a temporary file
-            file_descriptor, save_loc = tempfile.mkstemp()
-            os.close(file_descriptor)
+            save_loc = _get_temp_file_path()
         args.append(save_loc)
 
     stderr = None
@@ -83,7 +88,7 @@ def run_tool(opts):
     logger.debug(
         "About to run the command below\n==>{}<==".format(' '.join(args)))
     try:
-        if opts.no_save_path:
+        if opts.no_save_path and stderr is None:
             return subprocess.check_call(args, timeout=TIMEOUT)
         else:
             output = subprocess.check_output(args, stderr=stderr,
@@ -92,6 +97,10 @@ def run_tool(opts):
                 _write_file(save_loc, output)
             return save_loc
     except (subprocess.CalledProcessError, OSError) as err:
+        if stderr:
+            save_err_loc = _get_temp_file_path()
+            _write_file(save_err_loc, err.output)
+            return save_err_loc
         logger.error(err)
         raise
 
