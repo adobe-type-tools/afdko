@@ -43,7 +43,7 @@ def test_cjk_var():
     temp_dir = os.path.join(tempfile.mkdtemp(), 'CJKVar')
     copytree(input_dir, temp_dir)
     ds_path = os.path.join(temp_dir, 'CJKVar.designspace')
-    runner(CMD + ['-n', '-o', '_{}'.format(ds_path)])
+    runner(CMD + ['-o', '_{}'.format(ds_path)])
 
     otf1_path = os.path.join(
         temp_dir, 'Normal', 'Master_8', 'MasterSet_Kanji-w600.00.otf')

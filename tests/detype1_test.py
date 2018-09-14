@@ -31,6 +31,6 @@ def test_exit_unknown_option(arg):
 
 
 def test_run_on_pfa_data():
-    actual_path = runner(['-t', TOOL, '-f', 'type1.pfa'])
+    actual_path = runner(['-t', TOOL, '-s', '-f', 'type1.pfa'])
     expected_path = _get_expected_path('type1.txt')
     assert differ([expected_path, actual_path])

@@ -12,7 +12,7 @@ def test_bad_tx_cmd():
     # Trigger a fatal error from a command line tool, to make sure
     # it is handled correctly.
     with pytest.raises(subprocess.CalledProcessError):
-        runner(['-t', 'tx', '-n', '-o', 'bad_opt'])
+        runner(['-t', 'tx', '-o', 'bad_opt'])
 
 
 @pytest.mark.parametrize('tool_name', ['not_a_tool'])
@@ -29,7 +29,7 @@ def test_check_tool_unhacked(tool_name):
 
 
 def test_capture_error_message():
-    output_path = runner(['-t', 'makeotfexe', '-n', '-e'])
+    output_path = runner(['-t', 'makeotfexe', '-s', '-e'])
     with open(output_path, 'rb') as f:
         output = f.read()
     assert b"[FATAL] Source font file not found: font.ps" in output

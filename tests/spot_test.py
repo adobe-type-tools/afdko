@@ -85,7 +85,7 @@ def test_options(args, exp_filename):
         skip = []
     if skip:
         skip.insert(0, '-s')
-    actual_path = runner(CMD + ['-r', '-f', 'black.otf', '-o'] + args)
+    actual_path = runner(CMD + ['-s', '-f', 'black.otf', '-o'] + args)
     expected_path = _get_expected_path(exp_filename)
     assert differ([expected_path, actual_path] + skip)
 
@@ -93,7 +93,7 @@ def test_options(args, exp_filename):
 @pytest.mark.parametrize('font_format', ['otf', 'ttf'])
 def test_long_glyph_name_bug373(font_format):
     file_name = 'long_glyph_name.' + font_format
-    actual_path = runner(CMD + ['-r', '-o', 't', '_GSUB=7', '-f', file_name])
+    actual_path = runner(CMD + ['-s', '-o', 't', '_GSUB=7', '-f', file_name])
     expected_path = _get_expected_path('bug373_{}.txt'.format(font_format))
     assert differ([expected_path, actual_path])
 
@@ -107,6 +107,6 @@ def test_buffer_overrun_bug465():
     lookup type, nor this post rule format. This test validates that the
     current spot code correctly reports the test font GPOS table."""
     file_name = "bug465/bug465.otf"
-    actual_path = runner(CMD + ['-r', '-o', 't', '_GPOS=7', '-f', file_name])
+    actual_path = runner(CMD + ['-s', '-o', 't', '_GPOS=7', '-f', file_name])
     expected_path = _get_expected_path('bug465_otf.txt')
     assert differ([expected_path, actual_path])

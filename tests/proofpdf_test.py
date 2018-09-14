@@ -61,7 +61,7 @@ def test_glyphs_2_7(tool_name, font_filename):
     font_path = _get_input_path(font_filename)
     save_path = _get_temp_file_path()
     runner(['-t', tool_name, '-o', 'o', '_{}'.format(save_path), 'g', '_2-7',
-            'dno', '=pageIncludeTitle', '_0', '-f', font_path, '-n', '-a'])
+            'dno', '=pageIncludeTitle', '_0', '-f', font_path, '-a'])
     expected_path = _get_expected_path(pdf_filename)
     assert differ([expected_path, save_path,
                    '-s', '/CreationDate', '-e', 'macroman'])
@@ -91,7 +91,7 @@ def test_hinting_data(tool_name, font_filename):
     font_path = _get_input_path(font_filename)
     save_path = _get_temp_file_path()
     runner(['-t', tool_name, '-o', 'o', '_{}'.format(save_path), 'g', '_2-7',
-            'dno', '=pageIncludeTitle', '_0', '-f', font_path, '-n', '-a'])
+            'dno', '=pageIncludeTitle', '_0', '-f', font_path, '-a'])
     expected_path = _get_expected_path(pdf_filename)
     assert differ([expected_path, save_path,
                    '-s', '/CreationDate', '-e', 'macroman'])
@@ -113,7 +113,7 @@ def test_fontplot2_lf_option(font_filename, glyphs):
     save_path = _get_temp_file_path()
     runner(['-t', tool_name, '-o', 'o', '_{}'.format(save_path), 'dno',
             'g', glyphs, 'lf', '_{}'.format(layout_path),
-            '=pageIncludeTitle', '_0', '-f', font_path, '-n', '-a'])
+            '=pageIncludeTitle', '_0', '-f', font_path, '-a'])
     expected_path = _get_expected_path(pdf_filename)
     assert differ([expected_path, save_path,
                    '-s', '/CreationDate', '-e', 'macroman'])
