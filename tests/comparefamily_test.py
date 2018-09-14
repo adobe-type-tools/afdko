@@ -36,7 +36,7 @@ def _get_temp_file_path():
 def test_report(font_family, font_format):
     input_dir = os.path.join(_get_input_path(font_family), font_format)
     log_path = _get_temp_file_path()
-    runner(CMD + ['-n', '-o', 'd', '_{}'.format(input_dir), 'tolerance', '_3',
+    runner(CMD + ['-o', 'd', '_{}'.format(input_dir), 'tolerance', '_3',
                   'rm', 'rn', 'rp', 'l', '_{}'.format(log_path)])
     expected_path = _get_expected_path('{}_{}.txt'.format(
                                        font_family, font_format))

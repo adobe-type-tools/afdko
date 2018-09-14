@@ -52,7 +52,7 @@ def test_convert_to_cid():
     fontinfo_filename = 'cidfontinfo.txt'
     actual_path = _get_temp_file_path()
     expected_path = _get_expected_path('cidfont.ps')
-    runner(CMD + ['-n', '-o', 'cid', '-f', fontinfo_filename, actual_path,
+    runner(CMD + ['-o', 'cid', '-f', fontinfo_filename, actual_path,
                   alias1_filename, font1_filename,
                   alias2_filename, font2_filename,
                   alias3_filename, font3_filename])

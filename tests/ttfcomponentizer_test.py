@@ -86,7 +86,7 @@ def test_run_no_args():
 
 def test_run_cli_no_args():
     with pytest.raises(subprocess.CalledProcessError) as exc_info:
-        runner(CMD + ['-n'])
+        runner(CMD)
     assert exc_info.value.returncode == 2
 
 
@@ -124,7 +124,7 @@ def test_run_with_output_path():
 
 def test_run_cli_with_output_path():
     actual_path = _get_temp_file_path()
-    runner(CMD + ['-n', '-o', 'o', '_{}'.format(actual_path),
+    runner(CMD + ['-o', 'o', '_{}'.format(actual_path),
                   '_{}'.format(_get_input_path(TEST_TTF_FILENAME))])
     actual_ttx = _generate_ttx_dump(actual_path, ['maxp', 'glyf'])
     expected_ttx = _get_expected_path('ttfcomponentizer.ttx')

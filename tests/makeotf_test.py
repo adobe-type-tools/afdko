@@ -114,9 +114,8 @@ def test_input_formats(arg, input_filename, ttx_filename):
     if 'gf' in arg:
         arg.append('_{}'.format(_get_input_path('GOADB.txt')))
     actual_path = _get_temp_file_path()
-    runner(CMD + ['-n', '-o',
-                  'f', '_{}'.format(_get_input_path(input_filename)),
-                  'o', '_{}'.format(actual_path)] + arg)
+    runner(CMD + ['-o', 'f', '_{}'.format(_get_input_path(input_filename)),
+                        'o', '_{}'.format(actual_path)] + arg)
     actual_ttx = _generate_ttx_dump(actual_path)
     expected_ttx = _get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx,
@@ -150,7 +149,7 @@ def test_path_with_non_ascii_chars_bug222(input_filename):
         copy2(input_path, temp_path)
     expected_path = os.path.join(temp_dir, OTF_NAME)
     assert os.path.exists(expected_path) is False
-    runner(CMD + ['-n', '-o', 'f', '_{}'.format(temp_path)])
+    runner(CMD + ['-o', 'f', '_{}'.format(temp_path)])
     assert os.path.isfile(expected_path)
 
 
@@ -161,7 +160,7 @@ def test_ufo_with_trailing_slash_bug280(input_filename):
     temp_dir = tempfile.mkdtemp()
     tmp_ufo_path = os.path.join(temp_dir, input_filename)
     copytree(ufo_path, tmp_ufo_path)
-    runner(CMD + ['-n', '-o', 'f', '_{}{}'.format(tmp_ufo_path, os.sep)])
+    runner(CMD + ['-o', 'f', '_{}{}'.format(tmp_ufo_path, os.sep)])
     expected_path = os.path.join(temp_dir, OTF_NAME)
     assert os.path.isfile(expected_path)
 
@@ -174,8 +173,8 @@ def test_output_is_folder_only_bug281(input_filename):
     temp_dir = tempfile.mkdtemp()
     expected_path = os.path.join(temp_dir, OTF_NAME)
     assert os.path.exists(expected_path) is False
-    runner(CMD + ['-n', '-o', 'f', '_{}'.format(input_path),
-                              'o', '_{}'.format(temp_dir)])
+    runner(CMD + ['-o', 'f', '_{}'.format(input_path),
+                        'o', '_{}'.format(temp_dir)])
     assert os.path.isfile(expected_path)
 
 
@@ -188,7 +187,7 @@ def test_output_is_folder_only_bug281(input_filename):
 def test_no_postscript_name_bug282(input_filename):
     # makeotf will fail for both UFO and Type 1 inputs
     with pytest.raises(subprocess.CalledProcessError) as err:
-        runner(CMD + ['-n', '-o', 'f', '_{}'.format(input_filename)])
+        runner(CMD + ['-o', 'f', '_{}'.format(input_filename)])
     assert err.value.returncode == 1
 
 
@@ -386,9 +385,8 @@ def test_makeRelativePath_win_only(cur_dir, target_path, result):
 ])
 def test_build_options_cs_cl_bug459(args, input_filename, ttx_filename):
     actual_path = _get_temp_file_path()
-    runner(CMD + ['-n', '-o',
-                  'f', '_{}'.format(_get_input_path(input_filename)),
-                  'o', '_{}'.format(actual_path)] + args)
+    runner(CMD + ['-o', 'f', '_{}'.format(_get_input_path(input_filename)),
+                        'o', '_{}'.format(actual_path)] + args)
     actual_ttx = _generate_ttx_dump(actual_path, ['cmap'])
     expected_ttx = _get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
@@ -417,9 +415,8 @@ def test_cid_keyed_cff_bug470(args, font, fontinfo):
         ttx_file = 'bug470/{}.ttx'.format(font)
     font_file = 'bug470/{}.pfa'.format(font)
     actual_path = _get_temp_file_path()
-    runner(CMD + ['-n', '-o',
-                  'f', '_{}'.format(_get_input_path(font_file)),
-                  'o', '_{}'.format(actual_path)] + args)
+    runner(CMD + ['-o', 'f', '_{}'.format(_get_input_path(font_file)),
+                        'o', '_{}'.format(actual_path)] + args)
     actual_ttx = _generate_ttx_dump(actual_path, ['CFF '])
     expected_ttx = _get_expected_path(ttx_file)
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
@@ -467,11 +464,10 @@ def test_GOADB_options_bug497(opts):
             bit_bol = 'osbOn' if opt[4] == 'y' else 'osbOff'
             args.extend([bit_bol, '_{}'.format(bit_num)])
 
-    runner(CMD + ['-n', '-o',
-                  'f', '_{}'.format(font_path),
-                  'o', '_{}'.format(actual_path),
-                  'ff', '_{}'.format(feat_path),
-                  'mf', '_{}'.format(fmndb_path)] + args)
+    runner(CMD + ['-o', 'f', '_{}'.format(font_path),
+                        'o', '_{}'.format(actual_path),
+                        'ff', '_{}'.format(feat_path),
+                        'mf', '_{}'.format(fmndb_path)] + args)
     actual_ttx = _generate_ttx_dump(actual_path)
     expected_ttx = _get_expected_path('bug497/{}'.format(ttx_filename))
     assert differ([expected_ttx, actual_ttx,

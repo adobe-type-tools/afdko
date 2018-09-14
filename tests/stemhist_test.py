@@ -53,7 +53,7 @@ def test_stems_and_zones(arg, font_filename):
         suffixes = ['.hstm.txt', '.vstm.txt']
 
     report_path = _get_temp_file_path()
-    runner(CMD + ['-n', '-f', font_filename, '-o',
+    runner(CMD + ['-f', font_filename, '-o',
                   'o', '_{}'.format(report_path)] + arg)
     for suffix in suffixes:
         actual_path = '{}{}'.format(report_path, suffix)

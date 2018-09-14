@@ -101,7 +101,7 @@ def test_basic_hinting(font_filename, opt):
             diff_mode = ['-m', 'bin']
             break
 
-    runner(CMD + ['-n', '-f', _get_input_path(font_filename),
+    runner(CMD + ['-f', _get_input_path(font_filename),
                   '-o', 'o', '_{}'.format(actual_path)] + arg)
 
     skip = []

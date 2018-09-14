@@ -32,6 +32,6 @@ def test_diff(args, txt_filename):
     if args:
         args.insert(0, '-o')
     actual_path = runner(
-        ['-t', TOOL, '-r', '-f', 'regular.otf', 'bold.otf'] + args)
+        ['-t', TOOL, '-s', '-f', 'regular.otf', 'bold.otf'] + args)
     expected_path = _get_expected_path(txt_filename)
     assert differ([expected_path, actual_path, '-l', '1-4'])

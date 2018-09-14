@@ -68,10 +68,9 @@ def test_GDEF_LigatureCaret_bug155(caret_format):
     feat_filename = 'bug155/caret-{}.fea'.format(caret_format)
     ttx_filename = 'bug155/caret-{}.ttx'.format(caret_format)
     actual_path = _get_temp_file_path()
-    runner(CMD + ['-n', '-o',
-                  'f', '_{}'.format(_get_input_path(input_filename)),
-                  'ff', '_{}'.format(_get_input_path(feat_filename)),
-                  'o', '_{}'.format(actual_path)])
+    runner(CMD + ['-o', 'f', '_{}'.format(_get_input_path(input_filename)),
+                        'ff', '_{}'.format(_get_input_path(feat_filename)),
+                        'o', '_{}'.format(actual_path)])
     actual_ttx = _generate_ttx_dump(actual_path, ['GDEF'])
     expected_ttx = _get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx, '-l', '2'])
@@ -82,10 +81,9 @@ def test_useMarkFilteringSet_flag_bug196():
     feat_filename = "bug196/feat.fea"
     actual_path = _get_temp_file_path()
     ttx_filename = "bug196.ttx"
-    runner(CMD + ['-n', '-o',
-                  'f', '_{}'.format(_get_input_path(input_filename)),
-                  'ff', '_{}'.format(_get_input_path(feat_filename)),
-                  'o', '_{}'.format(actual_path)])
+    runner(CMD + ['-o', 'f', '_{}'.format(_get_input_path(input_filename)),
+                        'ff', '_{}'.format(_get_input_path(feat_filename)),
+                        'o', '_{}'.format(actual_path)])
     actual_ttx = _generate_ttx_dump(actual_path, ['GSUB'])
     expected_ttx = _get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
@@ -96,10 +94,9 @@ def test_mark_refer_diff_classes_bug416():
     feat_filename = "bug416/feat.fea"
     actual_path = _get_temp_file_path()
     ttx_filename = "bug416.ttx"
-    runner(CMD + ['-n', '-o',
-                  'f', '_{}'.format(_get_input_path(input_filename)),
-                  'ff', '_{}'.format(_get_input_path(feat_filename)),
-                  'o', '_{}'.format(actual_path)])
+    runner(CMD + ['-o', 'f', '_{}'.format(_get_input_path(input_filename)),
+                        'ff', '_{}'.format(_get_input_path(feat_filename)),
+                        'o', '_{}'.format(actual_path)])
     actual_ttx = _generate_ttx_dump(actual_path, ['GPOS'])
     expected_ttx = _get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
@@ -114,10 +111,9 @@ def test_DFLT_script_with_any_lang_bug438():
     feat_filename = 'bug438/feat.fea'
     ttx_filename = 'bug438.ttx'
     actual_path = _get_temp_file_path()
-    runner(CMD + ['-n', '-o',
-                  'f', '_{}'.format(_get_input_path(input_filename)),
-                  'ff', '_{}'.format(_get_input_path(feat_filename)),
-                  'o', '_{}'.format(actual_path)])
+    runner(CMD + ['-o', 'f', '_{}'.format(_get_input_path(input_filename)),
+                        'ff', '_{}'.format(_get_input_path(feat_filename)),
+                        'o', '_{}'.format(actual_path)])
     actual_ttx = _generate_ttx_dump(actual_path)
     expected_ttx = _get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx,
