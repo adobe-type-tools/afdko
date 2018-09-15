@@ -12,12 +12,11 @@ from __future__ import print_function, division, absolute_import
 import argparse
 import logging
 import os
-import platform
 import subprocess32 as subprocess
 import sys
 import tempfile
 
-__version__ = '0.6.0'
+__version__ = '0.6.1'
 
 logger = logging.getLogger('runner')
 
@@ -30,9 +29,7 @@ def _write_file(file_path, data):
         f.write(data)
 
 
-def _get_input_dir_path(tool_path):
-    # Windows tool name contains '.exe'
-    tool_name = os.path.splitext(os.path.basename(tool_path))[0]
+def _get_input_dir_path(tool_name):
     input_dir = os.path.join(
         os.path.split(__file__)[0], '{}_data'.format(tool_name), 'input')
     return os.path.abspath(os.path.realpath(input_dir))
@@ -96,8 +93,6 @@ def _check_tool(tool_name):
     Returns the tool's name if the check is successful,
     or a tuple with the tool's name and the error if it's not.
     """
-    if platform.system() == 'Windows':
-        tool_name += '.exe'
     # XXX start hack to bypass this issue
     # https://github.com/adobe-type-tools/afdko/issues/348
     if tool_name.split('.')[0] in ('sfntdiff', 'sfntedit'):
