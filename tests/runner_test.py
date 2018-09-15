@@ -1,6 +1,5 @@
 from __future__ import print_function, division, absolute_import
 
-import platform
 import pytest
 import subprocess32 as subprocess
 
@@ -22,10 +21,7 @@ def test_check_tool_error(tool_name):
 
 @pytest.mark.parametrize('tool_name', ['detype1', 'type1'])
 def test_check_tool_unhacked(tool_name):
-    expected_name = tool_name
-    if platform.system() == 'Windows':
-        expected_name += '.exe'
-    assert _check_tool(tool_name) == expected_name
+    assert _check_tool(tool_name) == tool_name
 
 
 def test_capture_error_message():
