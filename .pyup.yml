@@ -2,3 +2,10 @@
 
 branch: develop
 schedule: every week
+
+requirements:
+  - requirements.txt
+    pin: False
+  - requirements-dev.txt
+    update: False
+    pin: False
