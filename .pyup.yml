@@ -4,8 +4,8 @@ branch: develop
 schedule: every week
 
 requirements:
-  - requirements.txt
+  - requirements.txt:
     pin: False
-  - requirements-dev.txt
+  - requirements-dev.txt:
     update: False
     pin: False
