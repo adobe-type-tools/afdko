@@ -1,6 +1,8 @@
 from __future__ import print_function, division, absolute_import
 
 import os
+import pytest
+import subprocess32 as subprocess
 import tempfile
 
 from fontTools.ttLib import TTFont
@@ -47,11 +49,25 @@ def _font_has_table(font_path, table_tag):
 # Tests
 # -----
 
-# This test is commented because sfntedit does not exit with 0
-# def test_no_options():
-#     actual_path = runner(CMD + ['-r', '-f', LIGHT])
-#     expected_path = _get_expected_path('list_sfnt.txt')
-#     assert differ([expected_path, actual_path, '-l', '1'])
+def test_exit_no_option():
+    # When ran by itself, 'sfntedit' prints the usage
+    assert subprocess.call([TOOL]) == 1
+
+
+@pytest.mark.parametrize('arg', ['-h', '-u'])
+def test_exit_known_option(arg):
+    assert subprocess.call([TOOL, arg]) == 0
+
+
+@pytest.mark.parametrize('arg', ['-j', '--bogus'])
+def test_exit_unknown_option(arg):
+    assert subprocess.call([TOOL, arg]) == 1
+
+
+def test_no_options():
+    actual_path = runner(CMD + ['-s', '-f', LIGHT])
+    expected_path = _get_expected_path('list_sfnt.txt')
+    assert differ([expected_path, actual_path, '-l', '1'])
 
 
 def test_extract_table():
