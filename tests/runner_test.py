@@ -19,7 +19,8 @@ def test_check_tool_error(tool_name):
     assert isinstance(_check_tool(tool_name), tuple)
 
 
-@pytest.mark.parametrize('tool_name', ['detype1', 'type1'])
+@pytest.mark.parametrize('tool_name', [
+    'detype1', 'type1', 'sfntedit', 'sfntdiff', 'makeotfexe'])
 def test_check_tool_unhacked(tool_name):
     assert _check_tool(tool_name) == tool_name
 

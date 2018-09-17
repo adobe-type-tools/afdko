@@ -93,11 +93,6 @@ def _check_tool(tool_name):
     Returns the tool's name if the check is successful,
     or a tuple with the tool's name and the error if it's not.
     """
-    # XXX start hack to bypass this issue
-    # https://github.com/adobe-type-tools/afdko/issues/348
-    if tool_name.split('.')[0] in ('sfntdiff', 'sfntedit'):
-        return tool_name
-    # XXX end hack
     try:
         subprocess.check_output([tool_name, '-h'], timeout=TIMEOUT)
         return tool_name
