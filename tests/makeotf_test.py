@@ -93,7 +93,7 @@ def test_exit_known_option(arg):
     assert subprocess.call([TOOL, arg]) == 0
 
 
-@pytest.mark.parametrize('arg', ['j', 'bogus'])
+@pytest.mark.parametrize('arg', ['-j', '--bogus'])
 def test_exit_unknown_option(arg):
     assert subprocess.call([TOOL, arg]) == 1
 
