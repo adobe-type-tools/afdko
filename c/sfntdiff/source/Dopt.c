@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include "Dopt.h"
 
@@ -99,6 +100,16 @@ void opt_Error(int error, opt_Option *opt, char *arg) {
     global.error += global.handler(error, opt, arg, global.client);
 }
 
+bool is_known_option(char *arg) {
+    const char *known_options[] = {"-u", "-h", "-T", "-d", "-x", "-i", "-X"};
+    int num_opts = sizeof(known_options) / sizeof(known_options[0]);
+    int i;
+    for (i = 0; i < num_opts; i++)
+        if (strcmp(arg, known_options[i]) == 0)
+            return true;
+    return false;
+}
+
 /* Process argument list */
 int opt_Scan(int argc, char *argv[],
              int nOpts, opt_Option *opts, opt_Handler handler, void *client) {
@@ -138,6 +149,10 @@ int opt_Scan(int argc, char *argv[],
     argi = 1;
     while (argi < argc) {
         char *arg = argv[argi];
+        if (arg[0] == '-' && !is_known_option(arg)) {
+            opt_Error(opt_Unknown, NULL, arg);
+            exit(1);
+        }
         opt_Option *opt = lookup(arg, matchWhole);
         if (opt != NULL)
             /* Whole argument matched option */
