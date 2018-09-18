@@ -1,3 +1,5 @@
+# coding: utf-8
+
 #	comparefamily.py
 #	This is not code to copy . The original developer did not know Python well,
 #	and had odd ideas about design. However, it works.
@@ -8,7 +10,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-comparefamily 2.1.0 Aug 28 2018
+comparefamily 2.1.1 Sep 18 2018
 
 comparefamily [u] -h] [-d <directory path>] [-tolerance <n>] -rm] [-rn] [-rp] [-nohints] [-l] [-rf] [-st n1,..] [-ft n1,..]
 where 'n1' stands for the number of a test, such as "-st 26" to run Single Test 26.
@@ -119,19 +121,32 @@ kKnownBaseTags = ["hang", # The hanging baseline. This is the horizontal line fr
 			]
 
 
-# Updated to OpenType specification version 1.6
-kKnownScriptTags = [ "arab", # Arabic
+# Updated to OpenType specification version 1.8.3
+# https://docs.microsoft.com/en-us/typography/opentype/spec/scripttags
+kKnownScriptTags = [
+	"adlm", # Adlam
+	"ahom", # Ahom
+	"hluw", # Anatolian Hieroglyphs
+	"arab", # Arabic
 	"armn", # Armenian
+	"avst", # Avestan
 	"bali", # Balinese
+	"bamu", # Bamum
+	"bass", # Bassa Vah
+	"batk", # Batak
 	"beng", # Bengali
 	"bng2", # Bengali v.2
+	"bhks", # Bhaiksuki
 	"bopo", # Bopomofo
+	"brah", # Brahmi
 	"brai", # Braille
 	"bugi", # Buginese
 	"buhd", # Buhid
 	"byzm", # Byzantine Music
 	"cans", # Canadian Syllabics
 	"cari", # Carian
+	"aghb", # Caucasian Albanian
+	"cakm", # Chakma
 	"cham", # Cham
 	"cher", # Cherokee
 	"hani", # CJK Ideographic
@@ -142,56 +157,109 @@ kKnownScriptTags = [ "arab", # Arabic
 	"dsrt", # Deseret
 	"deva", # Devanagari
 	"dev2", # Devanagari v.2
+	"dogr", # Dogra
+	"dupl", # Duployan
+	"egyp", # Egyptian Hieroglyphs
+	"elba", # Elbasan
 	"ethi", # Ethiopic
 	"geor", # Georgian
 	"glag", # Glagolitic
 	"goth", # Gothic
+	"gran", # Grantha
 	"grek", # Greek
 	"gujr", # Gujarati
 	"gjr2", # Gujarati v.2
+	"gong", # Gunjala Gondi
 	"guru", # Gurmukhi
 	"gur2", # Gurmukhi v.2
 	"hang", # Hangul
 	"jamo", # Hangul Jamo
+	"rohg", # Hanifi Rohingya
 	"hano", # Hanunoo
+	"hatr", # Hatran
 	"hebr", # Hebrew
 	"kana", # Hiragana
+	"armi", # Imperial Aramaic
+	"phli", # Inscriptional Pahlavi
+	"prti", # Inscriptional Parthian
 	"java", # Javanese
+	"kthi", # Kaithi
 	"knda", # Kannada
 	"knd2", # Kannada v.2
 	"kana", # Katakana
 	"kali", # Kayah Li
 	"khar", # Kharosthi
 	"khmr", # Khmer
+	"khoj", # Khojki
+	"sind", # Khudawadi
 	"lao ", # Lao
 	"latn", # Latin
 	"lepc", # Lepcha
 	"limb", # Limbu
+	"lina", # Linear A
 	"linb", # Linear B
+	"lisu", # Lisu (Fraser)
 	"lyci", # Lycian
 	"lydi", # Lydian
+	"mahj", # Mahajani
+	"maka", # Makasar
 	"mlym", # Malayalam
 	"mlm2", # Malayalam v.2
+	"mand", # Mandaic, Mandaean
+	"mani", # Manichaean
+	"marc", # Marchen
+	"gonm", # Masaram Gondi
 	"math", # Mathematical Alphanumeric Symbols
+	"medf", # Medefaidrin (Oberi Okaime, Oberi Ɔkaimɛ)
+	"mtei", # Meitei Mayek (Meithei, Meetei)
+	"mend", # Mende Kikakui
+	"merc", # Meroitic Cursive
+	"mero", # Meroitic Hieroglyphs
+	"plrd", # Miao
+	"modi", # Modi
 	"mong", # Mongolian
+	"mroo", # Mro
+	"mult", # Multani
 	"musc", # Musical Symbols
 	"mymr", # Myanmar
+	"mym2", # Myanmar v.2
+	"nbat", # Nabataean
+	"newa", # Newa
 	"talu", # New Tai Lue
 	"nko ", # N'Ko
+	"nshu", # Nüshu
+	"orya", # Odia (formerly Oriya)
+	"ory2", # Odia v.2 (formerly Oriya v.2)
 	"ogam", # Ogham
 	"olck", # Ol Chiki
 	"ital", # Old Italic
+	"hung", # Old Hungarian
+	"narb", # Old North Arabian
+	"perm", # Old Permic
 	"xpeo", # Old Persian Cuneiform
-	"orya", # Oriya
-	"ory2", # Oriya v.2
+	"sogo", # Old Sogdian
+	"sarb", # Old South Arabian
+	"orkh", # Old Turkic, Orkhon Runic
+	"osge", # Osage
 	"osma", # Osmanya
+	"hmng", # Pahawh Hmong
+	"palm", # Palmyrene
+	"pauc", # Pau Cin Hau
 	"phag", # Phags-pa
 	"phnx", # Phoenician
+	"phlp", # Psalter Pahlavi
 	"rjng", # Rejang
 	"runr", # Runic
+	"samr", # Samaritan
 	"saur", # Saurashtra
+	"shrd", # Sharada
 	"shaw", # Shavian
+	"sidd", # Siddham
+	"sgnw", # Sign Writing
 	"sinh", # Sinhala
+	"sogd", # Sogdian
+	"sora", # Sora Sompeng
+	"soyo", # Soyombo
 	"xsux", # Sumero-Akkadian Cuneiform
 	"sund", # Sundanese
 	"sylo", # Syloti Nagri
@@ -199,98 +267,153 @@ kKnownScriptTags = [ "arab", # Arabic
 	"tglg", # Tagalog
 	"tagb", # Tagbanwa
 	"tale", # Tai Le
+	"lana", # Tai Tham (Lanna)
+	"tavt", # Tai Viet
+	"takr", # Takri
 	"taml", # Tamil
 	"tml2", # Tamil v.2
+	"tang", # Tangut
 	"telu", # Telugu
 	"tel2", # Telugu v.2
 	"thaa", # Thaana
 	"thai", # Thai
 	"tibt", # Tibetan
 	"tfng", # Tifinagh
+	"tirh", # Tirhuta
 	"ugar", # Ugaritic Cuneiform
 	"vai ", # Vai
+	"wara", # Warang Citi
 	"yi  ", # Yi
-	]
+	"zanb", # Zanabazar Square (Zanabazarin Dörböljin Useg, Xewtee Dörböljin Bicig, Horizontal Square Script)
+]
 
-# Updated to OpenType specification version 1.6
+# Updated to OpenType specification version 1.8.3
+# https://docs.microsoft.com/en-us/typography/opentype/spec/languagetags
 # NOTE: The "dflt" language tag is not included in OT spec
-kKnownLanguageTags = [ "dflt", # Default
+kKnownLanguageTags = [
+	"dflt", # Default
 	"ABA ", # Abaza
 	"ABK ", # Abkhazian
+	"ACH ", # Acholi
+	"ACR ", # Achi
 	"ADY ", # Adyghe
 	"AFK ", # Afrikaans
 	"AFR ", # Afar
 	"AGW ", # Agaw
+	"AIO ", # Aiton
+	"AKA ", # Akan
 	"ALS ", # Alsatian
 	"ALT ", # Altai
 	"AMH ", # Amharic
-	"APPH", # Phonetic transcription-Americanist conventions
+	"ANG ", # Anglo-Saxon
+	"APPH", # Phonetic transcription—Americanist conventions
 	"ARA ", # Arabic
+	"ARG ", # Aragonese
 	"ARI ", # Aari
-	"ARK ", # Arakanese
+	"ARK ", # Rakhine
 	"ASM ", # Assamese
+	"AST ", # Asturian
 	"ATH ", # Athapaskan
 	"AVR ", # Avar
 	"AWA ", # Awadhi
 	"AYM ", # Aymara
-	"AZE ", # Azeri
+	"AZB ", # Torki
+	"AZE ", # Azerbaijani
 	"BAD ", # Badaga
+	"BAD0", # Banda
 	"BAG ", # Baghelkhandi
 	"BAL ", # Balkar
-	"BAU ", # Baule
+	"BAN ", # Balinese
+	"BAR ", # Bavarian
+	"BAU ", # Baulé
+	"BBC ", # Batak Toba
 	"BBR ", # Berber
 	"BCH ", # Bench
 	"BCR ", # Bible Cree
+	"BDY ", # Bandjalang
 	"BEL ", # Belarussian
 	"BEM ", # Bemba
 	"BEN ", # Bengali
+	"BGC ", # Haryanvi
+	"BGQ ", # Bagri
 	"BGR ", # Bulgarian
 	"BHI ", # Bhili
 	"BHO ", # Bhojpuri
 	"BIK ", # Bikol
 	"BIL ", # Bilen
+	"BIS ", # Bislama
+	"BJJ ", # Kanauji
 	"BKF ", # Blackfoot
-	"BLI ", # Balochi
+	"BLI ", # Baluchi
+	"BLK ", # Pa'o Karen
 	"BLN ", # Balante
 	"BLT ", # Balti
-	"BMB ", # Bambara
+	"BMB ", # Bambara (Bamanankan)
 	"BML ", # Bamileke
 	"BOS ", # Bosnian
+	"BPY ", # Bishnupriya Manipuri
 	"BRE ", # Breton
 	"BRH ", # Brahui
 	"BRI ", # Braj Bhasha
 	"BRM ", # Burmese
+	"BRX ", # Bodo
 	"BSH ", # Bashkir
+	"BSK ", # Burushaski
 	"BTI ", # Beti
+	"BTS ", # Batak Simalungun
+	"BUG ", # Bugis
+	"BYV ", # Medumba
+	"CAK ", # Kaqchikel
 	"CAT ", # Catalan
+	"CBK ", # Zamboanga Chavacano
+	"CCHN", # Chinantec
 	"CEB ", # Cebuano
 	"CHE ", # Chechen
 	"CHG ", # Chaha Gurage
 	"CHH ", # Chattisgarhi
-	"CHI ", # Chichewa
+	"CHI ", # Chichewa (Chewa, Nyanja)
 	"CHK ", # Chukchi
+	"CHK0", # Chuukese
+	"CHO ", # Choctaw
 	"CHP ", # Chipewyan
 	"CHR ", # Cherokee
+	"CHA ", # Chamorro
 	"CHU ", # Chuvash
+	"CHY ", # Cheyenne
+	"CGG ", # Chiga
+	"CJA ", # Western Cham
+	"CJM ", # Eastern Cham
 	"CMR ", # Comorian
 	"COP ", # Coptic
+	"COR ", # Cornish
 	"COS ", # Corsican
+	"CPP ", # Creoles
 	"CRE ", # Cree
 	"CRR ", # Carrier
 	"CRT ", # Crimean Tatar
+	"CSB ", # Kashubian
 	"CSL ", # Church Slavonic
 	"CSY ", # Czech
+	"CTG ", # Chittagonian
+	"CUK ", # San Blas Kuna
 	"DAN ", # Danish
 	"DAR ", # Dargwa
+	"DAX ", # Dayi
 	"DCR ", # Woods Cree
 	"DEU ", # German
+	"DGO ", # Dogri
 	"DGR ", # Dogri
-#	"DHV ", # Dhivehi (deprecated)
-	"DIV ", # Dhivehi
-	"DJR ", # Djerma
+	"DHG ", # Dhangu
+	# "DHV ", # Divehi (Dhivehi, Maldivian) (deprecated)
+	"DIQ ", # Dimli
+	"DIV ", # Divehi (Dhivehi, Maldivian)
+	"DJR ", # Zarma
+	"DJR0", # Djambarrpuyngu
 	"DNG ", # Dangme
+	"DNJ ", # Dan
 	"DNK ", # Dinka
 	"DRI ", # Dari
+	"DUJ ", # Dhuwal
 	"DUN ", # Dungan
 	"DZN ", # Dzongkha
 	"EBI ", # Ebira
@@ -298,105 +421,150 @@ kKnownLanguageTags = [ "dflt", # Default
 	"EDO ", # Edo
 	"EFI ", # Efik
 	"ELL ", # Greek
+	"EMK ", # Eastern Maninkakan
 	"ENG ", # English
 	"ERZ ", # Erzya
 	"ESP ", # Spanish
+	"ESU ", # Central Yupik
 	"ETI ", # Estonian
 	"EUQ ", # Basque
 	"EVK ", # Evenki
 	"EVN ", # Even
 	"EWE ", # Ewe
 	"FAN ", # French Antillean
-	"FAR ", # Farsi
+	"FAN0", # Fang
+	"FAR ", # Persian
+	"FAT ", # Fanti
 	"FIN ", # Finnish
 	"FJI ", # Fijian
-	"FLE ", # Flemish
+	"FLE ", # Dutch (Flemish)
+	"FMP ", # Fe'fe'
 	"FNE ", # Forest Nenets
 	"FON ", # Fon
 	"FOS ", # Faroese
 	"FRA ", # French
+	"FRC ", # Cajun French
 	"FRI ", # Frisian
 	"FRL ", # Friulian
+	"FRP ", # Arpitan
 	"FTA ", # Futa
-	"FUL ", # Fulani
+	"FUL ", # Fulah
+	"FUV ", # Nigerian Fulfulde
 	"GAD ", # Ga
-	"GAE ", # Gaelic
+	"GAE ", # Scottish Gaelic (Gaelic)
 	"GAG ", # Gagauz
 	"GAL ", # Galician
 	"GAR ", # Garshuni
 	"GAW ", # Garhwali
-	"GEZ ", # Ge'ez
+	"GEZ ", # Geez
+	"GIH ", # Githabul
 	"GIL ", # Gilyak
+	"GIL0", # Kiribati (Gilbertese)
+	"GKP ", # Kpelle (Guinea)
+	"GLK ", # Gilaki
 	"GMZ ", # Gumuz
+	"GNN ", # Gumatj
+	"GOG ", # Gogo
 	"GON ", # Gondi
 	"GRN ", # Greenlandic
 	"GRO ", # Garo
 	"GUA ", # Guarani
+	"GUC ", # Wayuu
+	"GUF ", # Gupapuyngu
 	"GUJ ", # Gujarati
-	"HAI ", # Haitian
-	"HAL ", # Halam
+	"GUZ ", # Gusii
+	"HAI ", # Haitian (Haitian Creole)
+	"HAL ", # Halam (Falam Chin)
 	"HAR ", # Harauti
 	"HAU ", # Hausa
-	"HAW ", # Hawaiin
+	"HAW ", # Hawaiian
+	"HAY ", # Haya
+	"HAZ ", # Hazaragi
 	"HBN ", # Hammer-Banna
+	"HER ", # Herero
 	"HIL ", # Hiligaynon
 	"HIN ", # Hindi
 	"HMA ", # High Mari
+	"HMN ", # Hmong
+	"HMO ", # Hiri Motu
 	"HND ", # Hindko
 	"HO  ", # Ho
 	"HRI ", # Harari
 	"HRV ", # Croatian
 	"HUN ", # Hungarian
 	"HYE ", # Armenian
+	"HYE0", # Armenian East
+	"IBA ", # Iban
+	"IBB ", # Ibibio
 	"IBO ", # Igbo
-	"IJO ", # Ijo
+	"IJO ", # Ijo languages
+	"IDO ", # Ido
+	"ILE ", # Interlingue
 	"ILO ", # Ilokano
+	"INA ", # Interlingua
 	"IND ", # Indonesian
 	"ING ", # Ingush
 	"INU ", # Inuktitut
-	"IPPH", # Phonetic transcription-IPA conventions
+	"IPK ", # Inupiat
+	"IPPH", # Phonetic transcription—IPA conventions
 	"IRI ", # Irish
 	"IRT ", # Irish Traditional
 	"ISL ", # Icelandic
 	"ISM ", # Inari Sami
 	"ITA ", # Italian
 	"IWR ", # Hebrew
-	"JAV ", # Javanese
-	"JII ", # Yiddish
+	"JAM ", # Jamaican Creole
 	"JAN ", # Japanese
-	"JUD ", # Judezmo
+	"JAV ", # Javanese
+	"JBO ", # Lojban
+	"JCT ", # Krymchak
+	"JII ", # Yiddish
+	"JUD ", # Ladino
 	"JUL ", # Jula
 	"KAB ", # Kabardian
+	"KAB0", # Kabyle
 	"KAC ", # Kachchi
 	"KAL ", # Kalenjin
 	"KAN ", # Kannada
 	"KAR ", # Karachay
 	"KAT ", # Georgian
 	"KAZ ", # Kazakh
+	"KDE ", # Makonde
+	"KEA ", # Kabuverdianu (Crioulo)
 	"KEB ", # Kebena
+	"KEK ", # Kekchi
 	"KGE ", # Khutsuri Georgian
 	"KHA ", # Khakass
 	"KHK ", # Khanty-Kazim
 	"KHM ", # Khmer
 	"KHS ", # Khanty-Shurishkar
+	"KHT ", # Khamti Shan
 	"KHV ", # Khanty-Vakhi
 	"KHW ", # Khowar
-	"KIK ", # Kikuyu
-	"KIR ", # Kirghiz
+	"KIK ", # Kikuyu (Gikuyu)
+	"KIR ", # Kirghiz (Kyrgyz)
 	"KIS ", # Kisii
+	"KIU ", # Kirmanjki
+	"KJD ", # Southern Kiwai
+	"KJP ", # Eastern Pwo Karen
+	"KJZ ", # Bumthangkha
 	"KKN ", # Kokni
 	"KLM ", # Kalmyk
 	"KMB ", # Kamba
 	"KMN ", # Kumaoni
 	"KMO ", # Komo
 	"KMS ", # Komso
+	"KMZ ", # Khorasani Turkic
 	"KNR ", # Kanuri
 	"KOD ", # Kodagu
 	"KOH ", # Korean Old Hangul
 	"KOK ", # Konkani
 	"KON ", # Kikongo
+	"KOM ", # Komi
+	"KON0", # Kongo
 	"KOP ", # Komi-Permyak
 	"KOR ", # Korean
+	"KOS ", # Kosraean
 	"KOZ ", # Komi-Zyrian
 	"KPL ", # Kpelle
 	"KRI ", # Krio
@@ -406,8 +574,11 @@ kKnownLanguageTags = [ "dflt", # Default
 	"KRN ", # Karen
 	"KRT ", # Koorete
 	"KSH ", # Kashmiri
+	"KSH0", # Ripuarian
 	"KSI ", # Khasi
 	"KSM ", # Kildin Sami
+	"KSW ", # S’gaw Karen
+	"KUA ", # Kuanyama
 	"KUI ", # Kui
 	"KUL ", # Kulvi
 	"KUM ", # Kumyk
@@ -415,6 +586,7 @@ kKnownLanguageTags = [ "dflt", # Default
 	"KUU ", # Kurukh
 	"KUY ", # Kuy
 	"KYK ", # Koryak
+	"KYU ", # Western Kayah
 	"LAD ", # Ladin
 	"LAH ", # Lahuli
 	"LAK ", # Lak
@@ -425,33 +597,54 @@ kKnownLanguageTags = [ "dflt", # Default
 	"LCR ", # L-Cree
 	"LDK ", # Ladakhi
 	"LEZ ", # Lezgi
+	"LIJ ", # Ligurian
+	"LIM ", # Limburgish
 	"LIN ", # Lingala
+	"LIS ", # Lisu
+	"LJP ", # Lampung
+	"LKI ", # Laki
 	"LMA ", # Low Mari
 	"LMB ", # Limbu
+	"LMO ", # Lombard
 	"LMW ", # Lomwe
+	"LOM ", # Loma
+	"LRC ", # Luri
 	"LSB ", # Lower Sorbian
 	"LSM ", # Lule Sami
 	"LTH ", # Lithuanian
 	"LTZ ", # Luxembourgish
-	"LUB ", # Luba
-	"LUG ", # Luganda
-	"LUH ", # Luhya
+	"LUA ", # Luba-Lulua
+	"LUB ", # Luba-Katanga
+	"LUG ", # Ganda
+	"LUH ", # Luyia
 	"LUO ", # Luo
 	"LVI ", # Latvian
+	"MAD ", # Madura
+	"MAG ", # Magahi
+	"MAH ", # Marshallese
 	"MAJ ", # Majang
-	"MAK ", # Makua
-	"MAL ", # Malayalam Traditional
+	"MAK ", # Makhuwa
+	"MAL ", # Malayalam
+	"MAM ", # Mam
 	"MAN ", # Mansi
 	"MAP ", # Mapudungun
 	"MAR ", # Marathi
 	"MAW ", # Marwari
 	"MBN ", # Mbundu
+	"MBO ", # Mbo
 	"MCH ", # Manchu
 	"MCR ", # Moose Cree
 	"MDE ", # Mende
+	"MDR ", # Mandar
 	"MEN ", # Me'en
+	"MER ", # Meru
+	"MFA ", # Pattani Malay
+	"MFE ", # Morisyen
+	"MIN ", # Minangkabau
 	"MIZ ", # Mizo
 	"MKD ", # Macedonian
+	"MKR ", # Makasar
+	"MKW ", # Kituba
 	"MLE ", # Male
 	"MLG ", # Malagasy
 	"MLN ", # Malinke
@@ -461,153 +654,248 @@ kKnownLanguageTags = [ "dflt", # Default
 	"MNG ", # Mongolian
 	"MNI ", # Manipuri
 	"MNK ", # Maninka
-	"MNX ", # Manx Gaelic
+	"MNX ", # Manx
 	"MOH ", # Mohawk
 	"MOK ", # Moksha
 	"MOL ", # Moldavian
 	"MON ", # Mon
 	"MOR ", # Moroccan
+	"MOS ", # Mossi
 	"MRI ", # Maori
 	"MTH ", # Maithili
 	"MTS ", # Maltese
 	"MUN ", # Mundari
+	"MUS ", # Muscogee
+	"MWL ", # Mirandese
+	"MWW ", # Hmong Daw
+	"MYN ", # Mayan
+	"MZN ", # Mazanderani
 	"NAG ", # Naga-Assamese
+	"NAH ", # Nahuatl
 	"NAN ", # Nanai
+	"NAP ", # Neapolitan
 	"NAS ", # Naskapi
+	"NAU ", # Nauruan
+	"NAV ", # Navajo
 	"NCR ", # N-Cree
 	"NDB ", # Ndebele
+	"NDC ", # Ndau
 	"NDG ", # Ndonga
+	"NDS ", # Low Saxon
 	"NEP ", # Nepali
 	"NEW ", # Newari
+	"NGA ", # Ngbaka
 	"NGR ", # Nagari
 	"NHC ", # Norway House Cree
 	"NIS ", # Nisi
 	"NIU ", # Niuean
-	"NKL ", # Nkole
+	"NKL ", # Nyankole
 	"NKO ", # N'Ko
 	"NLD ", # Dutch
+	"NOE ", # Nimadi
 	"NOG ", # Nogai
 	"NOR ", # Norwegian
+	"NOV ", # Novial
 	"NSM ", # Northern Sami
+	"NSO ", # Sotho, Northern
 	"NTA ", # Northern Tai
 	"NTO ", # Esperanto
-	"NYN ", # Nynorsk
+	"NYM ", # Nyamwezi
+	"NYN ", # Norwegian Nynorsk (Nynorsk, Norwegian)
+	"NZA ", # Mbembe Tigon
 	"OCI ", # Occitan
 	"OCR ", # Oji-Cree
 	"OJB ", # Ojibway
-	"ORI ", # Oriya
+	"ORI ", # Odia (formerly Oriya)
 	"ORO ", # Oromo
 	"OSS ", # Ossetian
 	"PAA ", # Palestinian Aramaic
+	"PAG ", # Pangasinan
 	"PAL ", # Pali
+	"PAM ", # Pampangan
 	"PAN ", # Punjabi
 	"PAP ", # Palpa
+	"PAP0", # Papiamentu
 	"PAS ", # Pashto
+	"PAU ", # Palauan
+	"PCC ", # Bouyei
+	"PCD ", # Picard
+	"PDC ", # Pennsylvania German
 	"PGR ", # Polytonic Greek
+	"PHK ", # Phake
+	"PIH ", # Norfolk
 	"PIL ", # Filipino
 	"PLG ", # Palaung
 	"PLK ", # Polish
-	"PRO ", # Provencal
+	"PMS ", # Piemontese
+	"PNB ", # Western Panjabi
+	"POH ", # Pocomchi
+	"PON ", # Pohnpeian
+	"PRO ", # Provençal / Old Provençal
 	"PTG ", # Portuguese
+	"PWO ", # Western Pwo Karen
 	"QIN ", # Chin
+	"QUC ", # K’iche’
+	"QUH ", # Quechua (Bolivia)
+	"QUZ ", # Quechua
+	"QVI ", # Quechua (Ecuador)
+	"QWH ", # Quechua (Peru)
 	"RAJ ", # Rajasthani
-	"RCR ", # R-Cree
+	"RAR ", # Rarotongan
 	"RBU ", # Russian Buriat
+	"RCR ", # R-Cree
+	"REJ ", # Rejang
 	"RIA ", # Riang
-	"RMS ", # Rhaeto-Romanic
+	"RIF ", # Tarifit
+	"RIT ", # Ritarungo
+	"RKW ", # Arakwal
+	"RMS ", # Romansh
+	"RMY ", # Vlax Romani
 	"ROM ", # Romanian
 	"ROY ", # Romany
 	"RSY ", # Rusyn
-	"RUA ", # Ruanda
+	"RTM ", # Rotuman
+	"RUA ", # Kinyarwanda
+	"RUN ", # Rundi
+	"RUP ", # Aromanian
 	"RUS ", # Russian
 	"SAD ", # Sadri
 	"SAN ", # Sanskrit
+	"SAS ", # Sasak
 	"SAT ", # Santali
 	"SAY ", # Sayisi
+	"SCN ", # Sicilian
+	"SCO ", # Scots
 	"SEK ", # Sekota
 	"SEL ", # Selkup
+	"SGA ", # Old Irish
 	"SGO ", # Sango
+	"SGS ", # Samogitian
+	"SHI ", # Tachelhit
 	"SHN ", # Shan
 	"SIB ", # Sibe
 	"SID ", # Sidamo
 	"SIG ", # Silte Gurage
 	"SKS ", # Skolt Sami
 	"SKY ", # Slovak
+	"SCS ", # North Slavey
 	"SLA ", # Slavey
 	"SLV ", # Slovenian
 	"SML ", # Somali
 	"SMO ", # Samoan
 	"SNA ", # Sena
+	"SNA0", # Shona
 	"SND ", # Sindhi
-	"SNH ", # Sinhalese
+	"SNH ", # Sinhala (Sinhalese)
 	"SNK ", # Soninke
 	"SOG ", # Sodo Gurage
-	"SOT ", # Sotho
+	"SOP ", # Songe
+	"SOT ", # Sotho, Southern
 	"SQI ", # Albanian
 	"SRB ", # Serbian
+	"SRD ", # Sardinian
 	"SRK ", # Saraiki
 	"SRR ", # Serer
 	"SSL ", # South Slavey
 	"SSM ", # Southern Sami
+	"STQ ", # Saterland Frisian
+	"SUK ", # Sukuma
+	"SUN ", # Sundanese
 	"SUR ", # Suri
 	"SVA ", # Svan
 	"SVE ", # Swedish
 	"SWA ", # Swadaya Aramaic
 	"SWK ", # Swahili
-	"SWZ ", # Swazi
+	"SWZ ", # Swati
 	"SXT ", # Sutu
+	"SXU ", # Upper Saxon
+	"SYL ", # Sylheti
 	"SYR ", # Syriac
+	"SYRE", # Syriac, Estrangela
+	"SYRJ", # Syriac, Western
+	"SYRN", # Syriac, Eastern
+	"SZL ", # Silesian
 	"TAB ", # Tabasaran
 	"TAJ ", # Tajiki
 	"TAM ", # Tamil
 	"TAT ", # Tatar
 	"TCR ", # TH-Cree
+	"TDD ", # Dehong Dai
 	"TEL ", # Telugu
+	"TET ", # Tetum
+	"TGL ", # Tagalog
 	"TGN ", # Tongan
 	"TGR ", # Tigre
 	"TGY ", # Tigrinya
 	"THA ", # Thai
 	"THT ", # Tahitian
 	"TIB ", # Tibetan
+	"TIV ", # Tiv
 	"TKM ", # Turkmen
+	"TMH ", # Tamashek
 	"TMN ", # Temne
 	"TNA ", # Tswana
 	"TNE ", # Tundra Nenets
 	"TNG ", # Tonga
 	"TOD ", # Todo
+	"TOD0", # Toma
+	"TPI ", # Tok Pisin
 	"TRK ", # Turkish
 	"TSG ", # Tsonga
+	"TSJ ", # Tshangla
 	"TUA ", # Turoyo Aramaic
-	"TUL ", # Tulu
+	"TUM ", # Tulu
+	"TUL ", # Tumbuka
 	"TUV ", # Tuvin
+	"TVL ", # Tuvalu
 	"TWI ", # Twi
+	"TYZ ", # Tày
+	"TZM ", # Tamazight
+	"TZO ", # Tzotzil
 	"UDM ", # Udmurt
 	"UKR ", # Ukrainian
+	"UMB ", # Umbundu
 	"URD ", # Urdu
 	"USB ", # Upper Sorbian
 	"UYG ", # Uyghur
 	"UZB ", # Uzbek
+	"VEC ", # Venetian
 	"VEN ", # Venda
 	"VIT ", # Vietnamese
+	"VOL ", # Volapük
+	"VRO ", # Võro
 	"WA  ", # Wa
 	"WAG ", # Wagdi
+	"WAR ", # Waray-Waray
 	"WCR ", # West-Cree
 	"WEL ", # Welsh
+	"WLN ", # Walloon
 	"WLF ", # Wolof
-	"XBD ", # Tai Lue
+	"WTM ", # Mewati
+	"XBD ", # Lü
+	"XKF ", # Khengkha
 	"XHS ", # Xhosa
-	"YAK ", # Yakut
+	"XJB ", # Minjangbal
+	"XOG ", # Soga
+	"XPE ", # Kpelle (Liberia)
+	"YAK ", # Sakha
+	"YAO ", # Yao
+	"YAP ", # Yapese
 	"YBA ", # Yoruba
 	"YCR ", # Y-Cree
 	"YIC ", # Yi Classic
 	"YIM ", # Yi Modern
-	"ZHH ", # Chinese Hong Kong
+	"ZEA ", # Zealandic
+	"ZGH ", # Standard Moroccan Tamazight
+	"ZHA ", # Zhuang
+	"ZHH ", # Chinese, Hong Kong SAR
 	"ZHP ", # Chinese Phonetic
 	"ZHS ", # Chinese Simplified
 	"ZHT ", # Chinese Traditional
 	"ZND ", # Zande
 	"ZUL ", # Zulu
-	]
+	"ZZA ", # Zazaki
+]
 
 
 gAGDDict = {}
