@@ -41,7 +41,7 @@ def teardown_module(module):
     (['_5', 'a', 'c', 'n'], 'black.ufo', 0),  # round only
 ])
 def test_options(args, ufo_filename, num):
-    runner(['-t', TOOL, '-n', '-o', 'd',
+    runner(['-t', TOOL, '-o', 'd',
             '_{}'.format(_get_input_path('font.designspace')), 'i'] + args)
     if num:
         expct_filename = '{}{}.ufo'.format(ufo_filename[:-4], num)

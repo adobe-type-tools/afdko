@@ -23,7 +23,7 @@ except ImportError:
 from afdko.ufotools import validateLayers
 
 __usage__ = """
-   makeinstancesufo v1.5.0 Aug 28 2018
+   makeinstancesufo v1.5.1 Sep 14 2018
    makeinstancesufo -h
    makeinstancesufo -u
    makeinstancesufo [-d <design space file name>] [-a] [-c] [-n] [-dec]
@@ -214,12 +214,8 @@ def updateInstance(options, fontInstancePath):
         opList = ["-e", fontInstancePath]
         if options.allowDecimalCoords:
             opList.insert(0, "-d")
-        if os.name == "nt":
-            opList.insert(0, 'checkoutlinesufo.exe')
-            proc = Popen(opList, stdout=PIPE)
-        else:
-            opList.insert(0, 'checkoutlinesufo')
-            proc = Popen(opList, stdout=PIPE)
+        opList.insert(0, 'checkoutlinesufo')
+        proc = Popen(opList, stdout=PIPE)
         while 1:
             output = tounicode(proc.stdout.readline())
             if output:
@@ -246,12 +242,8 @@ def updateInstance(options, fontInstancePath):
         opList = ['-q', '-nb', fontInstancePath]
         if options.allowDecimalCoords:
             opList.insert(0, "-dec")
-        if os.name == "nt":
-            opList.insert(0, 'autohint.exe')
-            proc = Popen(opList, stdout=PIPE)
-        else:
-            opList.insert(0, 'autohint')
-            proc = Popen(opList, stdout=PIPE)
+        opList.insert(0, 'autohint')
+        proc = Popen(opList, stdout=PIPE)
         while 1:
             output = tounicode(proc.stdout.readline())
             if output:

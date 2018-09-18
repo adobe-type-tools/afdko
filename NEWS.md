@@ -1,6 +1,24 @@
 Changelog
 =========
 
+2.8.2 (released 2018-09-18)
+---------------------------
+
+- Switched to `autohintexe` from `psautohint` (v1.8.1) package
+  ([#596](https://github.com/adobe-type-tools/afdko/pull/596),
+  [#606](https://github.com/adobe-type-tools/afdko/pull/606))
+- Added 64-bit (`win_amd64`) wheel for Windows
+  ([#609](https://github.com/adobe-type-tools/afdko/pull/609))
+- \[snftdiff/snftedit\] Fixed exit codes
+  ([#613](https://github.com/adobe-type-tools/afdko/pull/613))
+- \[makeotfexe\] Fixed exit codes
+  ([#607](https://github.com/adobe-type-tools/afdko/pull/607))
+- \[makeotfexe\] Fixed bug in setting Unicode values
+  ([#609](https://github.com/adobe-type-tools/afdko/pull/609))
+- \[makeotf\] Fixed calculation of relative paths when the input
+  paths are not on the same drive
+  ([#605](https://github.com/adobe-type-tools/afdko/pull/605))
+
 2.8.1 (released 2018-09-07)
 ---------------------------
 

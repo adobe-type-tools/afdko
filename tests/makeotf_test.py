@@ -3,7 +3,6 @@
 from __future__ import print_function, division, absolute_import
 
 import os
-import platform
 import pytest
 from shutil import copy2, copytree, rmtree
 import subprocess32 as subprocess
@@ -14,7 +13,8 @@ from fontTools.ttLib import TTFont
 
 from afdko.makeotf import (
     checkIfVertInFeature, getOptions, MakeOTFParams, getSourceGOADBData,
-    readOptionFile, writeOptionsFile, kMOTFOptions, kOptionNotSeen)
+    readOptionFile, writeOptionsFile, kMOTFOptions, kOptionNotSeen,
+    makeRelativePath)
 
 from .runner import main as runner
 from .differ import main as differ
@@ -79,20 +79,23 @@ def _generate_ttx_dump(font_path, tables=None):
 # Tests
 # -----
 
+def test_exit_no_option():
+    # It's valid to run 'makeotf' without using any options,
+    # but if a default-named font file is NOT found in the
+    # current directory, the tool exits with an error
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        subprocess.check_call([TOOL])
+    assert err.value.returncode == 1
+
+
 @pytest.mark.parametrize('arg', ['-v', '-h', '-u'])
 def test_exit_known_option(arg):
-    if platform.system() == 'Windows':
-        tool_name = TOOL + '.exe'
-    else:
-        tool_name = TOOL
-    assert subprocess.check_call([tool_name, arg]) == 0
+    assert subprocess.call([TOOL, arg]) == 0
 
 
-@pytest.mark.parametrize('arg', ['j', 'bogus'])
+@pytest.mark.parametrize('arg', ['-j', '--bogus'])
 def test_exit_unknown_option(arg):
-    with pytest.raises(subprocess.CalledProcessError) as err:
-        runner(CMD + ['-n', '-o', arg])
-    assert err.value.returncode == 1
+    assert subprocess.call([TOOL, arg]) == 1
 
 
 @pytest.mark.parametrize('arg, input_filename, ttx_filename', [
@@ -111,9 +114,8 @@ def test_input_formats(arg, input_filename, ttx_filename):
     if 'gf' in arg:
         arg.append('_{}'.format(_get_input_path('GOADB.txt')))
     actual_path = _get_temp_file_path()
-    runner(CMD + ['-n', '-o',
-                  'f', '_{}'.format(_get_input_path(input_filename)),
-                  'o', '_{}'.format(actual_path)] + arg)
+    runner(CMD + ['-o', 'f', '_{}'.format(_get_input_path(input_filename)),
+                        'o', '_{}'.format(actual_path)] + arg)
     actual_ttx = _generate_ttx_dump(actual_path)
     expected_ttx = _get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx,
@@ -122,7 +124,7 @@ def test_input_formats(arg, input_filename, ttx_filename):
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value=',
-                   '-r', '^\s+Version.*;hotconv.*;makeotfexe'])
+                   '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
 
 
 def test_getSourceGOADBData():
@@ -147,7 +149,7 @@ def test_path_with_non_ascii_chars_bug222(input_filename):
         copy2(input_path, temp_path)
     expected_path = os.path.join(temp_dir, OTF_NAME)
     assert os.path.exists(expected_path) is False
-    runner(CMD + ['-n', '-o', 'f', '_{}'.format(temp_path)])
+    runner(CMD + ['-o', 'f', '_{}'.format(temp_path)])
     assert os.path.isfile(expected_path)
 
 
@@ -158,7 +160,7 @@ def test_ufo_with_trailing_slash_bug280(input_filename):
     temp_dir = tempfile.mkdtemp()
     tmp_ufo_path = os.path.join(temp_dir, input_filename)
     copytree(ufo_path, tmp_ufo_path)
-    runner(CMD + ['-n', '-o', 'f', '_{}{}'.format(tmp_ufo_path, os.sep)])
+    runner(CMD + ['-o', 'f', '_{}{}'.format(tmp_ufo_path, os.sep)])
     expected_path = os.path.join(temp_dir, OTF_NAME)
     assert os.path.isfile(expected_path)
 
@@ -171,8 +173,8 @@ def test_output_is_folder_only_bug281(input_filename):
     temp_dir = tempfile.mkdtemp()
     expected_path = os.path.join(temp_dir, OTF_NAME)
     assert os.path.exists(expected_path) is False
-    runner(CMD + ['-n', '-o', 'f', '_{}'.format(input_path),
-                              'o', '_{}'.format(temp_dir)])
+    runner(CMD + ['-o', 'f', '_{}'.format(input_path),
+                        'o', '_{}'.format(temp_dir)])
     assert os.path.isfile(expected_path)
 
 
@@ -185,7 +187,7 @@ def test_output_is_folder_only_bug281(input_filename):
 def test_no_postscript_name_bug282(input_filename):
     # makeotf will fail for both UFO and Type 1 inputs
     with pytest.raises(subprocess.CalledProcessError) as err:
-        runner(CMD + ['-n', '-o', 'f', '_{}'.format(input_filename)])
+        runner(CMD + ['-o', 'f', '_{}'.format(input_filename)])
     assert err.value.returncode == 1
 
 
@@ -345,6 +347,28 @@ def test_readOptionFile_filenotfound():
     assert readOptionFile(proj_path, params, 0) == (True, 0)
 
 
+@pytest.mark.parametrize('cur_dir, target_path, result', [
+    ('/folder/folder2', '/folder/folder2/font.pfa', 'font.pfa'),
+    ('/folder/folder2', '/folder/font.pfa', '../font.pfa'),
+    ('/folder', '/folder/font.pfa', 'font.pfa'),
+    ('/folder', '/font.pfa', '../font.pfa'),
+    ('/folder', None, None),
+])
+def test_makeRelativePath(cur_dir, target_path, result):
+    if result:
+        result = os.path.normpath(result)
+    assert makeRelativePath(cur_dir, target_path) == result
+
+
+@pytest.mark.skipif(sys.platform != 'win32', reason="windows-only")
+@pytest.mark.parametrize('cur_dir, target_path, result', [
+    ('C:\\folder', 'C:\\folder\\font.pfa', 'font.pfa'),
+    ('F:\\folder', 'C:\\folder\\font.pfa', 'C:\\folder\\font.pfa'),
+])
+def test_makeRelativePath_win_only(cur_dir, target_path, result):
+    assert makeRelativePath(cur_dir, target_path) == result
+
+
 @pytest.mark.parametrize('args, input_filename, ttx_filename', [
     (['r'], T1PFA_NAME, 't1pfa-cmap.ttx'),
     (['r', 'cs', '_1'], T1PFA_NAME, 't1pfa-cmap_cs1.ttx'),
@@ -361,51 +385,11 @@ def test_readOptionFile_filenotfound():
 ])
 def test_build_options_cs_cl_bug459(args, input_filename, ttx_filename):
     actual_path = _get_temp_file_path()
-    runner(CMD + ['-n', '-o',
-                  'f', '_{}'.format(_get_input_path(input_filename)),
-                  'o', '_{}'.format(actual_path)] + args)
+    runner(CMD + ['-o', 'f', '_{}'.format(_get_input_path(input_filename)),
+                        'o', '_{}'.format(actual_path)] + args)
     actual_ttx = _generate_ttx_dump(actual_path, ['cmap'])
     expected_ttx = _get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
-
-
-def test_bug416():
-    input_filename = "bug416/bug416.pfa"
-    input_featurename = "bug416/bug416.fea"
-    actual_path = _get_temp_file_path()
-    ttx_filename = "bug416.ttx"
-    runner(CMD + ['-n', '-o',
-                  'f', '_{}'.format(_get_input_path(input_filename)),
-                  'ff', '_{}'.format(_get_input_path(input_featurename)),
-                  'o', '_{}'.format(actual_path)])
-    actual_ttx = _generate_ttx_dump(actual_path, ['GPOS'])
-    expected_ttx = _get_expected_path(ttx_filename)
-    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
-
-
-def test_bug438():
-    """ The feature file bug438/feat.fea contains languagesystem
-    statements for a language other than 'dflt' with the 'DFLT' script
-    tag. With the fix, makeotf will build an otf which is identical to
-    't1pfa-dev.ttx'. Without the fix, it will fail to build an OTF."""
-    input_filename = T1PFA_NAME
-    feat_filename = 'bug438/feat.fea'
-    ttx_filename = 't1pfa-dev.ttx'
-    actual_path = _get_temp_file_path()
-    runner(CMD + ['-n', '-o',
-                  'f', '_{}'.format(_get_input_path(input_filename)),
-                  'ff', '_{}'.format(_get_input_path(feat_filename)),
-                  'o', '_{}'.format(actual_path)])
-    actual_ttx = _generate_ttx_dump(actual_path)
-    expected_ttx = _get_expected_path(ttx_filename)
-    assert differ([expected_ttx, actual_ttx,
-                   '-s',
-                   '<ttFont sfntVersion' + SPLIT_MARKER +
-                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
-                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
-                   '    <created value=' + SPLIT_MARKER +
-                   '    <modified value=',
-                   '-r', '^\s+Version.*;hotconv.*;makeotfexe'])
 
 
 @pytest.mark.parametrize('args, font, fontinfo', [
@@ -431,9 +415,8 @@ def test_cid_keyed_cff_bug470(args, font, fontinfo):
         ttx_file = 'bug470/{}.ttx'.format(font)
     font_file = 'bug470/{}.pfa'.format(font)
     actual_path = _get_temp_file_path()
-    runner(CMD + ['-n', '-o',
-                  'f', '_{}'.format(_get_input_path(font_file)),
-                  'o', '_{}'.format(actual_path)] + args)
+    runner(CMD + ['-o', 'f', '_{}'.format(_get_input_path(font_file)),
+                        'o', '_{}'.format(actual_path)] + args)
     actual_ttx = _generate_ttx_dump(actual_path, ['CFF '])
     expected_ttx = _get_expected_path(ttx_file)
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
@@ -458,7 +441,7 @@ def test_cid_keyed_cff_bug470(args, font, fontinfo):
     ['bit7y', 'bit8n', 'bit9n'],
     ['bit7y', 'bit8n', 'bit7n', 'bit8y'],
 ])
-def test_bug497(opts):
+def test_GOADB_options_bug497(opts):
     font_path = _get_input_path(T1PFA_NAME)
     feat_path = _get_input_path('bug497/feat.fea')
     fmndb_path = _get_input_path('bug497/fmndb.txt')
@@ -481,11 +464,10 @@ def test_bug497(opts):
             bit_bol = 'osbOn' if opt[4] == 'y' else 'osbOff'
             args.extend([bit_bol, '_{}'.format(bit_num)])
 
-    runner(CMD + ['-n', '-o',
-                  'f', '_{}'.format(font_path),
-                  'o', '_{}'.format(actual_path),
-                  'ff', '_{}'.format(feat_path),
-                  'mf', '_{}'.format(fmndb_path)] + args)
+    runner(CMD + ['-o', 'f', '_{}'.format(font_path),
+                        'o', '_{}'.format(actual_path),
+                        'ff', '_{}'.format(feat_path),
+                        'mf', '_{}'.format(fmndb_path)] + args)
     actual_ttx = _generate_ttx_dump(actual_path)
     expected_ttx = _get_expected_path('bug497/{}'.format(ttx_filename))
     assert differ([expected_ttx, actual_ttx,
@@ -495,18 +477,4 @@ def test_bug497(opts):
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value=',
-                   '-r', '^\s+Version.*;hotconv.*;makeotfexe'])
-
-
-def test_useMarkFilteringSet_flag_bug196():
-    input_filename = "bug196/bug196.pfa"
-    input_featurename = "bug196/bug196.fea"
-    actual_path = _get_temp_file_path()
-    ttx_filename = "bug196.ttx"
-    runner(CMD + ['-n', '-o',
-                  'f', '_{}'.format(_get_input_path(input_filename)),
-                  'ff', '_{}'.format(_get_input_path(input_featurename)),
-                  'o', '_{}'.format(actual_path)])
-    actual_ttx = _generate_ttx_dump(actual_path, ['GSUB'])
-    expected_ttx = _get_expected_path(ttx_filename)
-    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+                   '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])

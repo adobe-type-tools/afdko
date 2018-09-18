@@ -56,7 +56,7 @@ def cacheImageFile(filename):
 
 
 def preProcessImages(spec):
-    """accepts either a filespec ('C:\mydir\*.jpg') or a list
+    """accepts either a filespec ('/mydir/*.jpg') or a list
     of image filenames, crunches them all to save time.  Run this
     to save huge amounts of time when repeatedly building image
     documents."""
@@ -99,8 +99,8 @@ def _escape(s):
     need slashes before them too. Use Python's repr function
     and chop off the quotes first"""
     s = repr(s)[1:-1]
-    s = s.replace('(', '\(')
-    s = s.replace(')', '\)')
+    s = s.replace('(', r'\(')
+    s = s.replace(')', r'\)')
     return s
 
 

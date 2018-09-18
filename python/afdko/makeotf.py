@@ -25,7 +25,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.5.0 Aug 28 2018
+makeotf.py v2.5.1 Sep 11 2018
 """
 
 __methods__ = """
@@ -2083,7 +2083,7 @@ def getSourceGOADBData(inputFilePath):
     # First, get the Unicode mapping from the TTF cmap table.
     command = "spot -t cmap=7 \"%s\" 2>&1" % inputFilePath
     report = fdkutils.runShellCmd(command)
-    spotGlyphList = re.findall("[\n\t]\[(....+)\]=<([^>]+)>", report)
+    spotGlyphList = re.findall(r"[\n\t]\[(....+)\]=<([^>]+)>", report)
 
     # Because this dumps all the Unicode map tables, there are a number
     # of duplicates; weed them out, and strip out gid part of spot name
@@ -2107,7 +2107,7 @@ def getSourceGOADBData(inputFilePath):
     # as tx doesn't check 32 bit UV's, and doesn't report double-encodings.
     command = "tx -mtx \"%s\" 2>&1" % inputFilePath
     report = fdkutils.runShellCmd(command)
-    txGlyphList = re.findall("[\n\r]glyph\[(\d+)\]\s+{([^,]+)", report)
+    txGlyphList = re.findall(r"[\n\r]glyph\[(\d+)\]\s+{([^,]+)", report)
 
     gnameDict = {}
     for gid_str, gname in txGlyphList:
@@ -2180,7 +2180,7 @@ def copyTTFGlyphTables(inputFilePath, tempOutputPath, outputPath):
     tempTablePath = fdkutils.get_temp_file_path()
     command = "tx -mtx \"%s\" 2>&1" % tempOutputPath
     report = fdkutils.runShellCmd(command)
-    glyphList = re.findall("[\n\r]glyph\[\d+\]\s+{([^,]+)", report)
+    glyphList = re.findall(r"[\n\r]glyph\[\d+\]\s+{([^,]+)", report)
 
     if os.path.exists(outputPath):
         os.remove(outputPath)
@@ -2283,18 +2283,23 @@ def makeRelativePath(curDir, targetPath):
     if targetPath is None:
         return
 
-    targetPath = os.path.abspath(targetPath)
-    curDir = os.path.abspath(curDir)
-    targetPath = os.path.relpath(targetPath, curDir)
-    return targetPath
+    abs_targetPath = os.path.abspath(targetPath)
+    abs_curDir = os.path.abspath(curDir)
+    try:
+        return os.path.relpath(abs_targetPath, abs_curDir)
+    except ValueError:
+        # the paths are on different drives/mounts
+        return targetPath
 
 
 def makeRelativePaths(makeOTFParams):
+    """
+    Change file paths to be relative to fontDir,
+    if possible, else to absolute paths.
+    """
     inputFilePath = getattr(makeOTFParams, kFileOptPrefix + kInputFont)
     fontDir = os.path.dirname(os.path.abspath(inputFilePath))
 
-    # Change file paths to be relative to fontDir,
-    # if possible, else to absolute paths.
     inputFilePath = makeRelativePath(fontDir, inputFilePath)
     setattr(makeOTFParams, kFileOptPrefix + kInputFont, inputFilePath)
 

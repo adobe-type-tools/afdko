@@ -1,6 +1,8 @@
 from __future__ import print_function, division, absolute_import
 
 import os
+import pytest
+import subprocess32 as subprocess
 import tempfile
 
 from fontTools.ttLib import TTFont
@@ -47,17 +49,30 @@ def _font_has_table(font_path, table_tag):
 # Tests
 # -----
 
-# This test is commented because sfntedit does not exit with 0
-# def test_no_options():
-#     actual_path = runner(CMD + ['-r', '-f', LIGHT])
-#     expected_path = _get_expected_path('list_sfnt.txt')
-#     assert differ([expected_path, actual_path, '-l', '1'])
+def test_exit_no_option():
+    # When ran by itself, 'sfntedit' prints the usage
+    assert subprocess.call([TOOL]) == 1
+
+
+@pytest.mark.parametrize('arg', ['-h', '-u'])
+def test_exit_known_option(arg):
+    assert subprocess.call([TOOL, arg]) == 0
+
+
+@pytest.mark.parametrize('arg', ['-j', '--bogus'])
+def test_exit_unknown_option(arg):
+    assert subprocess.call([TOOL, arg]) == 1
+
+
+def test_no_options():
+    actual_path = runner(CMD + ['-s', '-f', LIGHT])
+    expected_path = _get_expected_path('list_sfnt.txt')
+    assert differ([expected_path, actual_path, '-l', '1'])
 
 
 def test_extract_table():
-    save_path = _get_temp_file_path()
-    actual_path = runner(CMD + ['-o', 'x', '_GDEF={}'.format(save_path),
-                                '-f', LIGHT, '-s', save_path])
+    actual_path = _get_temp_file_path()
+    runner(CMD + ['-o', 'x', '_GDEF={}'.format(actual_path), '-f', LIGHT])
     expected_path = _get_expected_path('GDEF_light.tb')
     assert differ([expected_path, actual_path, '-m', 'bin'])
 
@@ -71,22 +86,25 @@ def test_extract_table():
 
 
 def test_add_table():
-    input_path = _get_input_path('GDEF_italic.tb')
-    assert _font_has_table(_get_input_path(ITALIC), 'GDEF') is False
-    actual_path = runner(CMD + ['-o', 'a', '_GDEF={}'.format(input_path),
-                                '-f', ITALIC])
+    table_path = _get_input_path('GDEF_italic.tb')
+    font_path = _get_input_path(ITALIC)
+    actual_path = _get_temp_file_path()
+    assert _font_has_table(font_path, 'GDEF') is False
+    runner(CMD + ['-a', '-o', 'a', '_GDEF={}'.format(table_path),
+                  '-f', font_path, actual_path])
     expected_path = _get_expected_path('italic_w_GDEF.otf')
     assert differ([expected_path, actual_path, '-m', 'bin']) is False
     assert _font_has_table(actual_path, 'GDEF')
     actual_ttx = _generate_ttx_dump(actual_path)
     expected_ttx = _generate_ttx_dump(expected_path)
-    assert differ([expected_ttx, actual_ttx,
-                   '-s', '    <checkSumAdjustment'])
+    assert differ([expected_ttx, actual_ttx, '-s', '    <checkSumAdjustment'])
 
 
 def test_linux_ci_failure_bug570():
-    input_path = _get_input_path('1_fdict.cff')
-    actual_path = runner(CMD + ['-o', 'a', '_CFF={}'.format(input_path),
-                                '-f', 'core.otf'])
+    table_path = _get_input_path('1_fdict.cff')
+    font_path = _get_input_path('core.otf')
+    actual_path = _get_temp_file_path()
+    runner(CMD + ['-a', '-o', 'a', '_CFF={}'.format(table_path),
+                  '-f', font_path, actual_path])
     expected_path = _get_expected_path('1_fdict.otf')
     assert differ([expected_path, actual_path, '-m', 'bin'])

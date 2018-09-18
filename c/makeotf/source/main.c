@@ -30,8 +30,8 @@
 
 jmp_buf mark;
 
-#define MAKEOTF_VERSION "2.5.65593"
-/*Warning: this string is now part of heuristic used by CoolType to identify the
+#define MAKEOTF_VERSION "2.5.65594"
+/* Warning: this string is now part of heuristic used by CoolType to identify the
    first round of CoolType fonts which had the backtrack sequence of a chaining
    contextual substitution ordered incorrectly.  Fonts with the old ordering MUST match
    the regex:
@@ -264,13 +264,13 @@ static void printUsage(void) {
 /* Show usage information */
 static void showUsage(void) {
     printUsage();
-    exit(1);
+    exit(0);
 }
 
 /* Show usage and help information */
 static void showHelp(void) {
     printUsage();
-    exit(1);
+    exit(0);
 }
 
 extern char *sep();

@@ -54,7 +54,6 @@ static void printUsage(void) {
 /* Show usage information */
 static void showUsage(void) {
     printUsage();
-    quit(0);
 }
 
 /* Show usage and help information */
@@ -85,7 +84,6 @@ static void showHelp(void) {
         "        e.g., -i cmap,name\n"
         "        will inspect/compare ONLY the 'cmap' and 'name' tables\n");
     printf("    -i and -x switches are exclusive of each other.\n");
-    quit(1);
 }
 
 /* Main program */
@@ -115,9 +113,12 @@ IntN main(IntN argc, Byte8 *argv[]) {
 
     argi = opt_Scan(argc, argv, opt_NOPTS(opt), opt, NULL, NULL);
 
+    if (opt_Present("-u") || opt_Present("-h")) return 0;
+
     if (opt_Present("-x") && opt_Present("-i")) {
         printf("ERROR: '-x' switch and '-i' switch are exclusive of each other.\n");
         showUsage();
+        return 1;
     }
 
     if (level > 4) level = 4;
@@ -125,6 +126,7 @@ IntN main(IntN argc, Byte8 *argv[]) {
     if ((argc - argi) < 2) {
         printf("ERROR: not enough files/directories specified.\n");
         showUsage();
+        return 1;
     }
 
     filename1 = argv[argi];
@@ -303,8 +305,7 @@ IntN main(IntN argc, Byte8 *argv[]) {
     } else {
         printf("ERROR: Incorrect/insufficient files/directories specified.\n");
         showUsage();
+        return 1;
     }
-
-    /*printf( "\nDone.\n");*/
     return 0;
 }

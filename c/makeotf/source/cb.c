@@ -1762,15 +1762,11 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
     }
 
     if (!fileExists(pfbpath)) {
-        char buf[1024];
-        sprintf(buf, "Specified source font file not found: %s \n", pfbpath);
-        message(h, hotERROR, buf);
+        cbFatal(h, "Source font file not found: %s \n", pfbpath);
         return;
     }
     if ((featurefile != NULL) && (!fileExists(featurefile))) {
-        char buf[1024];
-        sprintf(buf, "Specified feature file not found: %s \n", featurefile);
-        message(h, hotERROR, buf);
+        cbFatal(h, "Feature file not found: %s \n", featurefile);
         return;
     }
 

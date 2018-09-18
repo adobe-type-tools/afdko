@@ -4,20 +4,20 @@
   <GlyphOrder>
     <!-- The 'id' attribute is only for humans; it is ignored when parsed. -->
     <GlyphID id="0" name=".notdef"/>
-    <GlyphID id="1" name="evitagen"/>
-    <GlyphID id="2" name="a"/>
+    <GlyphID id="1" name="a"/>
+    <GlyphID id="2" name="negative"/>
   </GlyphOrder>
 
   <head>
     <!-- Most of this table will be recalculated by the compiler -->
     <tableVersion value="1.0"/>
-    <fontRevision value="1.01099"/>
-    <checkSumAdjustment value="0x26287b3e"/>
+    <fontRevision value="1.0"/>
+    <checkSumAdjustment value="0xfaa19d9d"/>
     <magicNumber value="0x5f0f3cf5"/>
     <flags value="00000000 00000011"/>
     <unitsPerEm value="1000"/>
-    <created value="Wed Jul 25 18:42:18 2018"/>
-    <modified value="Wed Jul 25 18:42:18 2018"/>
+    <created value="Sat Jun 30 16:31:20 2018"/>
+    <modified value="Sat Jun 30 16:31:20 2018"/>
     <xMin value="52"/>
     <yMin value="-12"/>
     <xMax value="565"/>
@@ -92,7 +92,7 @@
     <achVendID value="ADBE"/>
     <fsSelection value="00000000 01000000"/>
     <usFirstCharIndex value="97"/>
-    <usLastCharIndex value="8203"/>
+    <usLastCharIndex value="97"/>
     <sTypoAscender value="660"/>
     <sTypoDescender value="-340"/>
     <sTypoLineGap value="200"/>
@@ -109,46 +109,43 @@
 
   <name>
     <namerecord nameID="1" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      Bug 497
+      SourceSans
     </namerecord>
     <namerecord nameID="2" platformID="1" platEncID="0" langID="0x0" unicode="True">
       Regular
     </namerecord>
     <namerecord nameID="3" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      1.011;ADBE;SourceSans-Test
+      1.000;ADBE;SourceSans-Test
     </namerecord>
     <namerecord nameID="4" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      Bug 497
+      SourceSans
     </namerecord>
     <namerecord nameID="5" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      Version 1.011;hotconv 1.0.108;makeotfexe 2.5.65593
+      Version 1.000;hotconv 1.0.108;makeotfexe 2.5.65593 DEVELOPMENT
     </namerecord>
     <namerecord nameID="6" platformID="1" platEncID="0" langID="0x0" unicode="True">
       SourceSans-Test
     </namerecord>
     <namerecord nameID="17" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      Condensed
+      Test
     </namerecord>
     <namerecord nameID="1" platformID="3" platEncID="1" langID="0x409">
-      Bug 497
+      SourceSans
     </namerecord>
     <namerecord nameID="2" platformID="3" platEncID="1" langID="0x409">
       Regular
     </namerecord>
     <namerecord nameID="3" platformID="3" platEncID="1" langID="0x409">
-      1.011;ADBE;SourceSans-Test
+      1.000;ADBE;SourceSans-Test
     </namerecord>
     <namerecord nameID="4" platformID="3" platEncID="1" langID="0x409">
-      Bug 497
+      SourceSans
     </namerecord>
     <namerecord nameID="5" platformID="3" platEncID="1" langID="0x409">
-      Version 1.011;hotconv 1.0.108;makeotfexe 2.5.65593
+      Version 1.000;hotconv 1.0.108;makeotfexe 2.5.65593 DEVELOPMENT
     </namerecord>
     <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
       SourceSans-Test
-    </namerecord>
-    <namerecord nameID="17" platformID="3" platEncID="1" langID="0x409">
-      Condensed
     </namerecord>
   </name>
 
@@ -156,14 +153,12 @@
     <tableVersion version="0"/>
     <cmap_format_4 platformID="0" platEncID="3" language="0">
       <map code="0x61" name="a"/><!-- LATIN SMALL LETTER A -->
-      <map code="0x200b" name="evitagen"/><!-- ZERO WIDTH SPACE -->
     </cmap_format_4>
     <cmap_format_6 platformID="1" platEncID="0" language="0">
       <map code="0x61" name="a"/>
     </cmap_format_6>
     <cmap_format_4 platformID="3" platEncID="1" language="0">
       <map code="0x61" name="a"/><!-- LATIN SMALL LETTER A -->
-      <map code="0x200b" name="evitagen"/><!-- ZERO WIDTH SPACE -->
     </cmap_format_4>
   </cmap>
 
@@ -254,7 +249,7 @@
           -42 -47 -38 -23 -47 hhcurveto
           endchar
         </CharString>
-        <CharString name="evitagen">
+        <CharString name="negative">
           0 endchar
         </CharString>
       </CharStrings>
@@ -268,12 +263,7 @@
   <hmtx>
     <mtx name=".notdef" width="653" lsb="89"/>
     <mtx name="a" width="504" lsb="52"/>
-    <mtx name="evitagen" width="0" lsb="0"/>
+    <mtx name="negative" width="0" lsb="0"/>
   </hmtx>
-
-  <DSIG>
-    <!-- note that the Digital Signature will be invalid after recompilation! -->
-    <tableHeader flag="0x0" numSigs="0" version="1"/>
-  </DSIG>
 
 </ttFont>

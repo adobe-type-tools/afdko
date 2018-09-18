@@ -10,6 +10,9 @@ dist/*
 # PyCharm directory
 .idea/
 
+# Visual Studio Code directory
+.vscode/
+
 # coverage data
 # DO NOT use '.coverage*' because that matches '.coveragerc'
 .coverage
@@ -17,15 +20,13 @@ dist/*
 htmlcov
 .pytest_cache
 
-# ignore the OSX and linux compiled programs
+# ignore the compiled programs
 c/build_all/*
 !c/build_all/this_folder_intentionally_left_empty
 
 # ignore the temp build directories and files
 *.o
 *.a
-*.exe
-*.pyc
 exe/
 
 # Xcode files
@@ -38,4 +39,4 @@ xcuserdata/
 *vcxproj.user
 **/visualstudio/Debug/*
 **/visualstudio/Release/*
-*.lib
+**/visualstudio/x64/*

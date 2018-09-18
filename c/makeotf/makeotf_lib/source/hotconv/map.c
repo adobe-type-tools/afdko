@@ -1701,6 +1701,8 @@ static void setOS_2Fields(hotCtx g) {
         }
     }
     OS_2SetCharIndexRange(g, minBMP, maxBMP);
+
+
     /* Xcode compiler kept complaining about signed/unsigned mistmach - can't figure out why. */
     /* OS_2SetCharIndexRange(g, (unsigned short)( (uvCnt == (unsigned)0) ? UV_UNDEF : h->minBmpUV),
                             (unsigned short)( ((uvCnt == (unsigned)0) || (h->nSuppUV > (unsigned)0)) ? UV_UNDEF : h->maxBmpUV)); */
@@ -1708,47 +1710,49 @@ static void setOS_2Fields(hotCtx g) {
 
     unicodeRange[0] = unicodeRange[1] = unicodeRange[2] = unicodeRange[3] = 0;
 
-    /* Loop thru sorted UV array (saves bsearches for primary UVs). Addl */
-    /* UVs have already been recorded by calls to addToBlock, which does */
-    /* use bsearch                                                       */
-    p = uvarray;
-    for (i = 0; i < ARRAY_LEN(unicodeBlock); i++) {
-        UnicodeBlock *block = &unicodeBlock[i];
-        unsigned long numRequired;
+    if (uvCnt != 0) {
+        /* Loop thru sorted UV array (saves bsearches for primary UVs). Addl */
+        /* UVs have already been recorded by calls to addToBlock, which does */
+        /* use bsearch                                                       */
+        p = uvarray;
+        for (i = 0; i < ARRAY_LEN(unicodeBlock); i++) {
+            UnicodeBlock *block = &unicodeBlock[i];
+            unsigned long numRequired;
 
-        for (; p <= &uvarray[uvCnt - 1] && (*p)->uv < block->first; p++) {
-        }
-        if (p <= &uvarray[uvCnt - 1] && (*p)->uv <= block->last) {
-            /* p now points at the first UV candidate for this block */
-            for (q = p; (q + 1) <= &uvarray[uvCnt - 1] &&
-                        (*(q + 1))->uv <= block->last;
-                 q++) {
+            for (; p <= &uvarray[uvCnt - 1] && (*p)->uv < block->first; p++) {
             }
-            block->numFound += q - p + 1;
-            p = q + 1;
-        }
-        numRequired = 1 + block->numEssential / 3;
+            if (p <= &uvarray[uvCnt - 1] && (*p)->uv <= block->last) {
+                /* p now points at the first UV candidate for this block */
+                for (q = p; (q + 1) <= &uvarray[uvCnt - 1] &&
+                            (*(q + 1))->uv <= block->last;
+                     q++) {
+                }
+                block->numFound += q - p + 1;
+                p = q + 1;
+            }
+            numRequired = 1 + block->numEssential / 3;
 
-        /* This is a hack. The numEssential field is set for each block in  */
-        /* uniblock. This is currently the number of entries in the range   */
-        /* from min UV to max UV of the block. This is already not right,   */
-        /* as in most blocks, not all UV's in the range are valid. However, */
-        /* most of these ranges include a lot of archaic and  unusual       */
-        /* glyphs not really needed for useful support of the script. I am  */
-        /* going to just say that if at least third of the entry range is   */
-        /* included in the font, the designer was making a reasonable       */
-        /* effort to support this block                                     */
+            /* This is a hack. The numEssential field is set for each block in  */
+            /* uniblock. This is currently the number of entries in the range   */
+            /* from min UV to max UV of the block. This is already not right,   */
+            /* as in most blocks, not all UV's in the range are valid. However, */
+            /* most of these ranges include a lot of archaic and  unusual       */
+            /* glyphs not really needed for useful support of the script. I am  */
+            /* going to just say that if at least third of the entry range is   */
+            /* included in the font, the designer was making a reasonable       */
+            /* effort to support this block                                     */
 
-        if (block->numFound >= numRequired) {
-            block->isSupported = 1;
-            SET_BIT_ARR(unicodeRange, block->bitNum);
+            if (block->numFound >= numRequired) {
+                block->isSupported = 1;
+                SET_BIT_ARR(unicodeRange, block->bitNum);
+            }
+            /*
+            else if (block->numFound > 0)
+            {
+                printf(" %4d %4d, name %s.\n", block->numFound,  block->numEssential,  block->name);
+            }
+            */
         }
-        /*
-        else if (block->numFound > 0)
-        {
-            printf(" %4d %4d, name %s.\n", block->numFound,  block->numEssential,  block->name);
-        }
-        */
     }
     if (h->nSuppUV > 0) {
         SET_BIT_ARR(unicodeRange, SUPP_UV_BITNUM);

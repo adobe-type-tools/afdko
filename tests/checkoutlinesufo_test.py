@@ -70,7 +70,7 @@ def test_remove_tiny_sub_paths_small_contour():
 def test_remove_overlap(args, ufo_filename, expct_label):
     actual_path = os.path.join(tempfile.mkdtemp(), ufo_filename)
     copytree(_get_input_path(ufo_filename), actual_path)
-    runner(CMD + ['-n', '-f', actual_path, '-o'] + args)
+    runner(CMD + ['-f', actual_path, '-o'] + args)
     expct_filename = '{}-{}'.format(ufo_filename[:-4], expct_label)
     expected_path = _get_expected_path(expct_filename)
     assert differ([expected_path, actual_path])

@@ -4,7 +4,7 @@
   <GlyphOrder>
     <!-- The 'id' attribute is only for humans; it is ignored when parsed. -->
     <GlyphID id="0" name=".notdef"/>
-    <GlyphID id="1" name="negative"/>
+    <GlyphID id="1" name="evitagen"/>
     <GlyphID id="2" name="a"/>
   </GlyphOrder>
 
@@ -156,14 +156,14 @@
     <tableVersion version="0"/>
     <cmap_format_4 platformID="0" platEncID="3" language="0">
       <map code="0x61" name="a"/><!-- LATIN SMALL LETTER A -->
-      <map code="0x200b" name="negative"/><!-- ZERO WIDTH SPACE -->
+      <map code="0x200b" name="evitagen"/><!-- ZERO WIDTH SPACE -->
     </cmap_format_4>
     <cmap_format_6 platformID="1" platEncID="0" language="0">
       <map code="0x61" name="a"/>
     </cmap_format_6>
     <cmap_format_4 platformID="3" platEncID="1" language="0">
       <map code="0x61" name="a"/><!-- LATIN SMALL LETTER A -->
-      <map code="0x200b" name="negative"/><!-- ZERO WIDTH SPACE -->
+      <map code="0x200b" name="evitagen"/><!-- ZERO WIDTH SPACE -->
     </cmap_format_4>
   </cmap>
 
@@ -254,7 +254,7 @@
           -42 -47 -38 -23 -47 hhcurveto
           endchar
         </CharString>
-        <CharString name="negative">
+        <CharString name="evitagen">
           0 endchar
         </CharString>
       </CharStrings>
@@ -268,7 +268,7 @@
   <hmtx>
     <mtx name=".notdef" width="653" lsb="89"/>
     <mtx name="a" width="504" lsb="52"/>
-    <mtx name="negative" width="0" lsb="0"/>
+    <mtx name="evitagen" width="0" lsb="0"/>
   </hmtx>
 
 </ttFont>
