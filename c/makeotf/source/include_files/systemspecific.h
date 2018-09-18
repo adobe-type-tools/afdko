@@ -5,6 +5,4 @@
 
 char *curdir();
 char *sep();
-char sepch();
-
 #endif
