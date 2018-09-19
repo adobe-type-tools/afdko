@@ -1971,15 +1971,15 @@ def doSingleTest15():
 			print("	Warning: BBox Y-Max '%s' is out of usual range for Font %s." % (font.fontBBox[3], font.PostScriptName1))
 
 		if 'CFF ' in font.ttFont:
-			hheaBox =  font.fontBBox
+			headBox =  font.fontBBox
 			cffBox = font.topDict.FontBBox
 			diff = 0
 			for i in [0,1,2,3]:
-				if abs(hheaBox[i] - cffBox[i]) > 1:
+				if abs(headBox[i] - cffBox[i]) > 1:
 					diff = 1
 					break
 			if diff:
-				print("The font bounding box in the hhea table '%s' differs from that in the CFF table '%s'. %s." % (hheaBox, cffBox, font.PostScriptName1))
+				print("The head table xMin, yMin, xMax, yMax values '%s' differ from the CFF table FontBBox values '%s'. %s." % (headBox, cffBox, font.PostScriptName1))
 
 def doSingleTest16():
 	global fontlist
