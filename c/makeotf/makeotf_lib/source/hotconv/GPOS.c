@@ -3764,8 +3764,9 @@ static LOffset getAnchoOffset(hotCtx g, AnchorMarkInfo *anchor, void *fmt) {
 
     if (i == localFmt->anchorList.cnt) {
         /* did not find the anchor in the list. Add it */
-        AnchorListRec *prevAnchorRec = &localFmt->anchorList.array[i - 1];
+        AnchorListRec *prevAnchorRec;
         anchorRec = dnaNEXT(localFmt->anchorList);
+        prevAnchorRec = &localFmt->anchorList.array[i - 1];
         anchorRec->anchor = *anchor;
         anchorRec->offset = prevAnchorRec->offset;
         if (prevAnchorRec->anchor.format == 2) {
@@ -4258,7 +4259,7 @@ static void fillMarkToLigature(hotCtx g, GPOSCtx h) {
 
     if (h->offset.subtable > 0xFFFF) {
         hotMsg(g, hotFATAL,
-               "MarkToBase lookup subtable in GPOS "
+               "MarkToLigature lookup subtable in GPOS "
                "feature '%c%c%c%c' causes offset overflow.",
                TAG_ARG(h->new.feature));
     }

@@ -143,8 +143,8 @@ def test_version_warning_bug610():
         b"[FATAL] <SourceSans-Test> MarkToBase lookup subtable in GPOS "
         b"feature 'mrk1' causes offset overflow."),
     ('test_mark_to_ligature_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> ligature coverage offset overflow "
-        b"(0x1007a) in MarkToLigature positioning"),
+        b"[FATAL] <SourceSans-Test> MarkToLigature lookup subtable in GPOS "
+        b"feature 'lig1' causes offset overflow"),
     ('test_singlesub1_subtable_overflow',
         b"[FATAL] <SourceSans-Test> GSUB feature 'tss2' causes overflow "
         b"of offset to a subtable"),
