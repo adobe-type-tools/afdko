@@ -155,6 +155,8 @@ markClass [ glyph192 ] <anchor 192 192> @MARK_CLASS_192;
 markClass [ glyph193 ] <anchor 193 193> @MARK_CLASS_193;
 markClass [ glyph194 ] <anchor 194 194> @MARK_CLASS_194;
 markClass [ glyph196 ] <anchor 196 196> @MARK_CLASS_196;
+markClass [ glyph197 ] <anchor 197 197> @MARK_CLASS_197;
+markClass [ glyph198 ] <anchor 198 198> @MARK_CLASS_198;
 
 	pos ligature glyph0 <anchor 0 0> mark @MARK_CLASS_1;
 	pos ligature glyph1 <anchor 1 2> mark @MARK_CLASS_1;
@@ -353,3 +355,5 @@ markClass [ glyph196 ] <anchor 196 196> @MARK_CLASS_196;
 	pos ligature glyph194 <anchor 194 388> mark @MARK_CLASS_194;
 	pos ligature glyph195 <anchor 195 390> mark @MARK_CLASS_194;
 	pos ligature glyph196 <anchor 196 392> mark @MARK_CLASS_196;
+	pos ligature glyph197 <anchor 197 394> mark @MARK_CLASS_197;
+	pos ligature glyph198 <anchor 198 396> mark @MARK_CLASS_198;
