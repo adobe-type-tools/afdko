@@ -124,3 +124,20 @@ def test_DFLT_script_with_any_lang_bug438():
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value=',
                    '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
+
+
+def test_version_warning_bug610():
+    input_filename = 'bug610/font.pfa'
+    feat_filename = 'bug610/v0005.fea'
+    otf_path = _get_temp_file_path()
+
+    stderr_path = runner(
+        CMD + ['-s', '-e', '-o',
+               'f', '_{}'.format(_get_input_path(input_filename)),
+               'ff', '_{}'.format(_get_input_path(feat_filename)),
+               'o', '_{}'.format(otf_path)])
+
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert (b"[WARNING] <SourceSans-Test> Major version number not in "
+            b"range 1 .. 255") not in output
