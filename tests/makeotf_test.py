@@ -498,3 +498,22 @@ def test_fetch_font_version_bug610(feat_name, has_warn):
     assert b"Revision 0.005" in output
     assert (b"[Warning] Major version number not in "
             b"range 1 .. 255" in output) is has_warn
+
+
+def test_update_cff_bbox_bug617():
+    input_filename = "bug617/font.pfa"
+    goadb_filename = "bug617/goadb.txt"
+    actual_path = _get_temp_file_path()
+    ttx_filename = "bug617.ttx"
+    runner(CMD + ['-o', 'f', '_{}'.format(_get_input_path(input_filename)),
+                        'gf', '_{}'.format(_get_input_path(goadb_filename)),
+                        'o', '_{}'.format(actual_path), 'r', 'gs'])
+    actual_ttx = _generate_ttx_dump(actual_path, ['head', 'CFF '])
+    expected_ttx = _get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx,
+                   '-s',
+                   '<ttFont sfntVersion' + SPLIT_MARKER +
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <created value=' + SPLIT_MARKER +
+                   '    <modified value='])
