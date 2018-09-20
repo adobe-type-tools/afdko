@@ -3,5 +3,5 @@ table head {
 } head;
 
 table OS/2 {
-	Vendor "UKNW";
+	Vendor "ADBE";
 } OS/2;

@@ -2630,6 +2630,13 @@ def runMakeOTF(makeOTFParams):
                 font_version = Decimal(
                     font['head'].fontRevision).quantize(Decimal('1.000'))
 
+                vendor = None
+                if 'OS/2' in font:
+                    vendor = font['OS/2'].achVendID
+                if int(font_version) == 0 and vendor == 'ADBE':
+                    print("makeotf [Warning] Major version number not in "
+                          "range 1 .. 255")
+
                 print("Built release mode font '%s' Revision %s" % (
                     outputPath, font_version))
 

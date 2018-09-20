@@ -480,10 +480,9 @@ def test_GOADB_options_bug497(opts):
                    '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
 
 
-@pytest.mark.parametrize('feat_name, msg', [
-    ('v0005', b"Revision 0.005"),
-])
-def test_fetch_font_version_bug610(feat_name, msg):
+@pytest.mark.parametrize('feat_name, has_warn', [('v0005', False),
+                                                 ('ADBE', True)])
+def test_fetch_font_version_bug610(feat_name, has_warn):
     input_filename = 't1pfa.pfa'
     feat_filename = 'bug610/{}.fea'.format(feat_name)
     otf_path = _get_temp_file_path()
@@ -496,4 +495,6 @@ def test_fetch_font_version_bug610(feat_name, msg):
 
     with open(stdout_path, 'rb') as f:
         output = f.read()
-    assert msg in output
+    assert b"Revision 0.005" in output
+    assert (b"[Warning] Major version number not in "
+            b"range 1 .. 255" in output) is has_warn
