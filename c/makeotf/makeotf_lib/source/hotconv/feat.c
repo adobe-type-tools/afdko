@@ -3936,10 +3936,6 @@ static void setFontRev(char *rev) {
 
     long major = strtol(rev, &fraction, 10);
 
-    if (major < 1 || major > 255) {
-        featMsg(hotWARNING, "Major version number not in range 1 .. 255");
-    }
-
     if ((fraction != 0) && (strlen(fraction) > 0)) {
         short strLen = strlen(fraction);
         minor = strtod(fraction, NULL);
