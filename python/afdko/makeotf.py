@@ -1,12 +1,13 @@
 # Copyright 2014 Adobe. All rights reserved.
 
 from __future__ import print_function, absolute_import
+from decimal import Decimal
 import functools
 import os
 import re
 import sys
 
-from fontTools.ttLib import TTFont
+from fontTools.ttLib import TTFont, TTLibError
 from fontTools.misc.py23 import open, tounicode, tobytes
 
 from afdko import convertfonttocid, fdkutils, ufotools
@@ -25,7 +26,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.5.1 Sep 11 2018
+makeotf.py v2.5.2 Sep 20 2018
 """
 
 __methods__ = """
@@ -2621,18 +2622,22 @@ def runMakeOTF(makeOTFParams):
 
     if getattr(makeOTFParams, kFileOptPrefix + kRelease):
         try:
-            command = "spot -t head \"%s\" 2>&1" % outputPath
-            report = fdkutils.runShellCmd(command)
-            match = re.search(r"fontRevision\s+=(\S+)", report)
-            if not match:
-                print("makeotf [Error] Could not find fontRevision in spot "
-                      "dump of head table of file %s." % outputPath)
-                raise MakeOTFTXError
-            print("Built release mode font '%s' Revision %s" % (
-                outputPath, match.group(1)))
-        except ValueError:
-            print("makeotf [Error] Could not extract version number from "
-                  "file at '%s'." % outputPath)
+            with TTFont(outputPath) as font:
+                if 'head' not in font:
+                    print("makeotf [Error] Could not extract version number "
+                          "from file at '%s'." % outputPath)
+                    raise MakeOTFTXError
+                font_version = Decimal(
+                    font['head'].fontRevision).quantize(Decimal('1.000'))
+
+                print("Built release mode font '%s' Revision %s" % (
+                    outputPath, font_version))
+
+        except (IOError, TTLibError):
+            # makeotfexe failed to generate a font
+            # or the font that was generated is invalid
+            raise MakeOTFTXError
+
     else:
         print("Built development mode font '%s'." % outputPath)
 
