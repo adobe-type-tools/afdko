@@ -478,3 +478,22 @@ def test_GOADB_options_bug497(opts):
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value=',
                    '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
+
+
+@pytest.mark.parametrize('feat_name, msg', [
+    ('v0005', b"Revision 0.005"),
+])
+def test_fetch_font_version_bug610(feat_name, msg):
+    input_filename = 't1pfa.pfa'
+    feat_filename = 'bug610/{}.fea'.format(feat_name)
+    otf_path = _get_temp_file_path()
+
+    stdout_path = runner(
+        CMD + ['-s', '-o', 'r',
+               'f', '_{}'.format(_get_input_path(input_filename)),
+               'ff', '_{}'.format(_get_input_path(feat_filename)),
+               'o', '_{}'.format(otf_path)])
+
+    with open(stdout_path, 'rb') as f:
+        output = f.read()
+    assert msg in output
