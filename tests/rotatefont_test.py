@@ -1,31 +1,14 @@
 from __future__ import print_function, division, absolute_import
 
-import os
 import pytest
 import subprocess32 as subprocess
-import tempfile
 
-from .runner import main as runner
-from .differ import main as differ
+from runner import main as runner
+from differ import main as differ
+from test_utils import get_input_path, get_expected_path, get_temp_file_path
 
 TOOL = 'rotatefont'
 CMD = ['-t', TOOL]
-
-data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
-
-
-def _get_expected_path(file_name):
-    return os.path.join(data_dir_path, 'expected_output', file_name)
-
-
-def _get_input_path(file_name):
-    return os.path.join(data_dir_path, 'input', file_name)
-
-
-def _get_temp_file_path():
-    file_descriptor, path = tempfile.mkstemp()
-    os.close(file_descriptor)
-    return path
 
 
 # -----
@@ -60,8 +43,8 @@ def test_exit_unknown_option(arg):
 def test_matrix(font_filename, i, matrix):
     matrix_values = ['_{}'.format(val) for val in matrix.split()]
 
-    font_path = _get_input_path(font_filename)
-    actual_path = _get_temp_file_path()
+    font_path = get_input_path(font_filename)
+    actual_path = get_temp_file_path()
     runner(CMD + ['-a', '-f', font_path, actual_path,
                   '-o', 't1', 'matrix'] + matrix_values)
     ext = 'pfa'
@@ -69,7 +52,7 @@ def test_matrix(font_filename, i, matrix):
     if 'cid' in font_filename:
         ext = 'ps'
         diff_mode = ['-m', 'bin']
-    expected_path = _get_expected_path('matrix{}.{}'.format(i, ext))
+    expected_path = get_expected_path('matrix{}.{}'.format(i, ext))
     assert differ([expected_path, actual_path] + diff_mode)
 
 
@@ -89,11 +72,11 @@ def test_rt_fd_options(font_filename, i, rt_args):
 
     rt_values = ['_{}'.format(val) for val in rt_args.split()]
 
-    font_path = _get_input_path(font_filename)
-    actual_path = _get_temp_file_path()
+    font_path = get_input_path(font_filename)
+    actual_path = get_temp_file_path()
     runner(CMD + ['-a', '-f', font_path, actual_path,
                   '-o', 't1', 'rt'] + rt_values + fd_args)
-    expected_path = _get_expected_path('rotatrans{}.{}'.format(i, ext))
+    expected_path = get_expected_path('rotatrans{}.{}'.format(i, ext))
     assert differ([expected_path, actual_path] + diff_mode)
 
 
@@ -107,12 +90,12 @@ def test_rtf_option(font_filename):
         diff_mode = ['-m', 'bin']
         rtf_filename = 'cidrotate.txt'
 
-    rtf_path = _get_input_path(rtf_filename)
+    rtf_path = get_input_path(rtf_filename)
 
-    font_path = _get_input_path(font_filename)
-    actual_path = _get_temp_file_path()
+    font_path = get_input_path(font_filename)
+    actual_path = get_temp_file_path()
     runner(CMD + ['-a', '-f', font_path, actual_path,
                   '-o', 't1', 'rt', '_45', '_0', '_0',
                   'rtf', '_{}'.format(rtf_path)])
-    expected_path = _get_expected_path('rotafile.{}'.format(ext))
+    expected_path = get_expected_path('rotafile.{}'.format(ext))
     assert differ([expected_path, actual_path] + diff_mode)

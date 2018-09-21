@@ -1,21 +1,14 @@
 from __future__ import print_function, division, absolute_import
 
-import os
 import pytest
 import subprocess32 as subprocess
 
-from .runner import main as runner
-from .differ import main as differ
-from .differ import SPLIT_MARKER
+from runner import main as runner
+from differ import main as differ, SPLIT_MARKER
+from test_utils import get_expected_path
 
 TOOL = 'spot'
 CMD = ['-t', TOOL]
-
-data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
-
-
-def _get_expected_path(file_name):
-    return os.path.join(data_dir_path, 'expected_output', file_name)
 
 
 # -----
@@ -86,7 +79,7 @@ def test_options(args, exp_filename):
     if skip:
         skip.insert(0, '-s')
     actual_path = runner(CMD + ['-s', '-f', 'black.otf', '-o'] + args)
-    expected_path = _get_expected_path(exp_filename)
+    expected_path = get_expected_path(exp_filename)
     assert differ([expected_path, actual_path] + skip)
 
 
@@ -94,7 +87,7 @@ def test_options(args, exp_filename):
 def test_long_glyph_name_bug373(font_format):
     file_name = 'long_glyph_name.' + font_format
     actual_path = runner(CMD + ['-s', '-o', 't', '_GSUB=7', '-f', file_name])
-    expected_path = _get_expected_path('bug373_{}.txt'.format(font_format))
+    expected_path = get_expected_path('bug373_{}.txt'.format(font_format))
     assert differ([expected_path, actual_path])
 
 
@@ -108,5 +101,5 @@ def test_buffer_overrun_bug465():
     current spot code correctly reports the test font GPOS table."""
     file_name = "bug465/bug465.otf"
     actual_path = runner(CMD + ['-s', '-o', 't', '_GPOS=7', '-f', file_name])
-    expected_path = _get_expected_path('bug465_otf.txt')
+    expected_path = get_expected_path('bug465_otf.txt')
     assert differ([expected_path, actual_path])

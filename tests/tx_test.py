@@ -5,28 +5,12 @@ import pytest
 import subprocess32 as subprocess
 import tempfile
 
-from .runner import main as runner
-from .differ import main as differ
-from .differ import SPLIT_MARKER
+from runner import main as runner
+from differ import main as differ, SPLIT_MARKER
+from test_utils import get_input_path, get_expected_path, get_temp_file_path
 
 TOOL = 'tx'
 CMD = ['-t', TOOL]
-
-data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
-
-
-def _get_expected_path(file_name):
-    return os.path.join(data_dir_path, 'expected_output', file_name)
-
-
-def _get_input_path(file_name):
-    return os.path.join(data_dir_path, 'input', file_name)
-
-
-def _get_temp_file_path():
-    file_descriptor, path = tempfile.mkstemp()
-    os.close(file_descriptor)
-    return path
 
 
 def _get_temp_dir_path():
@@ -105,7 +89,7 @@ def test_convert(from_format, to_format):
     if 'ufo' in to_format:
         save_path = os.path.join(_get_temp_dir_path(), 'font.ufo')
     else:
-        save_path = _get_temp_file_path()
+        save_path = get_temp_file_path()
 
     # diff mode
     if to_format == 'cff':
@@ -133,9 +117,9 @@ def test_convert(from_format, to_format):
     else:
         format_arg = to_format
 
-    runner(CMD + ['-a', '-f', _get_input_path(from_filename), save_path,
+    runner(CMD + ['-a', '-f', get_input_path(from_filename), save_path,
                   '-o', format_arg])
-    expected_path = _get_expected_path(exp_filename)
+    expected_path = get_expected_path(exp_filename)
     assert differ([expected_path, save_path] + skip + diff_mode)
 
 
@@ -166,7 +150,7 @@ def test_dump(args, exp_filename):
         skip = ['-s', '## Filename']
 
     actual_path = runner(CMD + ['-s', '-f', 'type1.pfa'] + args)
-    expected_path = _get_expected_path(exp_filename)
+    expected_path = get_expected_path(exp_filename)
     assert differ([expected_path, actual_path] + skip)
 
 
@@ -180,17 +164,17 @@ def test_dump(args, exp_filename):
 ])
 def test_cff2_extract(args, exp_filename):
     # read CFF2 VF, write CFF2 table
-    font_path = _get_input_path('SourceCodeVariable-Roman.otf')
-    cff2_path = _get_temp_file_path()
+    font_path = get_input_path('SourceCodeVariable-Roman.otf')
+    cff2_path = get_temp_file_path()
     runner(CMD + ['-a', '-f', font_path, cff2_path, '-o', 'cff2'] + args)
-    expected_path = _get_expected_path(exp_filename)
+    expected_path = get_expected_path(exp_filename)
     assert differ([expected_path, cff2_path, '-m', 'bin'])
 
 
 def test_varread_pr355():
     # read CFF2 VF, write Type1 snapshot
     actual_path = runner(CMD + ['-s', '-o', 't1', '-f', 'cff2_vf.otf'])
-    expected_path = _get_expected_path('cff2_vf.pfa')
+    expected_path = get_expected_path('cff2_vf.pfa')
     assert differ([expected_path, actual_path])
 
 
@@ -198,10 +182,10 @@ def test_cff2_no_vf_bug353():
     # read CFF2 WITHOUT VF info, write a CFF2 out. 'regular_CFF2.otf'
     # is derived by taking the regular.otf file from the sfntdiff
     # 'input_data' directory, and converting the CFF table to CFF2.
-    font_path = _get_input_path('regular_CFF2.otf')
-    cff2_path = _get_temp_file_path()
+    font_path = get_input_path('regular_CFF2.otf')
+    cff2_path = get_temp_file_path()
     runner(CMD + ['-a', '-o', 'cff2', '-f', font_path, cff2_path])
-    expected_path = _get_expected_path('regular_CFF2.cff2')
+    expected_path = get_expected_path('regular_CFF2.cff2')
     assert differ([expected_path, cff2_path, '-m', 'bin'])
 
 
@@ -213,22 +197,22 @@ def test_trademark_string_pr425():
     # the copyright symbol used in the trademark field of a UFO is
     # converted to 'Copyright' and stored in Notice field of a Type1
     actual_path = runner(CMD + ['-s', '-o', 't1', '-f', 'trademark.ufo'])
-    expected_path = _get_expected_path('trademark.pfa')
+    expected_path = get_expected_path('trademark.pfa')
     assert differ([expected_path, actual_path])
 
 
 def test_remove_hints_bug180():
-    font_path = _get_input_path('cid.otf')
-    cid_path = _get_temp_file_path()
+    font_path = get_input_path('cid.otf')
+    cid_path = get_temp_file_path()
     runner(CMD + ['-a', '-o', 't1', 'n', '-f', font_path, cid_path])
-    expected_path = _get_expected_path('cid_nohints.ps')
+    expected_path = get_expected_path('cid_nohints.ps')
     assert differ([expected_path, cid_path, '-m', 'bin'])
 
 
 def test_long_charstring_read_bug444():
     # read a CFF2 VF with a charstring longer that 65535, check output
     actual_path = runner(CMD + ['-s', '-o', '0', '-f', 'CJK-VarTest.otf'])
-    expected_path = _get_expected_path('CJK-VarTest_read.txt')
+    expected_path = get_expected_path('CJK-VarTest_read.txt')
     assert differ([expected_path, actual_path, '-s', '## Filename'])
 
 
@@ -238,7 +222,7 @@ def test_long_charstring_warning():
     # Windows the lines start with 'tx.exe:' instead of just 'tx:'
     actual_path = runner(
         CMD + ['-s', '-e', '-o', '5', '-f', 'CJK-VarTest.otf'])
-    # expected_path = _get_expected_path('CJK-VarTest_warn.txt')
+    # expected_path = get_expected_path('CJK-VarTest_warn.txt')
     with open(actual_path, 'rb') as f:
         output = f.read()
     assert b"(cfr) Warning: CharString of GID 1 is 71057 bytes long" in output
@@ -250,10 +234,10 @@ def test_long_charstring_write():
     # once its long charstring is optimized (floats -> ints) it's no longer
     # over the 65535 bytes limit; the long charstring in 'CJK-VarTest2.otf' is
     # already as small as possible, so it will trigger the check in cffwrite.c
-    font_path = _get_input_path('CJK-VarTest2.otf')
-    cff2_path = _get_temp_file_path()
+    font_path = get_input_path('CJK-VarTest2.otf')
+    cff2_path = get_temp_file_path()
     runner(CMD + ['-a', '-o', 'cff2', '-f', font_path, cff2_path])
-    expected_path = _get_expected_path('CJK-VarTest2.cff2')
+    expected_path = get_expected_path('CJK-VarTest2.cff2')
     assert differ([expected_path, cff2_path, '-m', 'bin'])
 
 
@@ -261,12 +245,12 @@ def test_many_hints_string_bug354():
     # The glyph T@gid002 has 33 hstem hints. This tests a bug where
     # tx defined an array of only 6 operands.
     # This is encountered only when wrinting to a VF CFF2.
-    font_path = _get_input_path('cff2_vf.otf')
-    cff2_path = _get_temp_file_path()
-    dcf_path = _get_temp_file_path()
+    font_path = get_input_path('cff2_vf.otf')
+    cff2_path = get_temp_file_path()
+    dcf_path = get_temp_file_path()
     runner(CMD + ['-a', '-o', 'cff2', '-f', font_path, cff2_path])
     runner(CMD + ['-a', '-o', 'dcf', '-f', cff2_path, dcf_path])
-    expected_path = _get_expected_path('cff2_vf.dcf.txt')
+    expected_path = get_expected_path('cff2_vf.dcf.txt')
     assert differ([expected_path, dcf_path])
 
 
@@ -276,19 +260,19 @@ def test_non_varying_glyphs_bug356():
     support code assumed that this was an error, and issued a false warning.
     File 'bug356.otf' is a handcrafted modification of 'cff2_vf.otf'. The
     latter cannot be used as-is to validate the fix."""
-    actual_path = _get_temp_file_path()
-    font_path = _get_input_path('bug356.otf')
+    actual_path = get_temp_file_path()
+    font_path = get_input_path('bug356.otf')
     stderr_path = runner(CMD + ['-s', '-e', '-a', '-o', 'cff',
                                 '-f', font_path, actual_path])
-    expected_path = _get_expected_path('bug356.txt')
+    expected_path = get_expected_path('bug356.txt')
     assert differ([expected_path, stderr_path, '-l', '1'])
 
 
 def test_illegal_chars_in_glyph_name_bug473():
-    font_path = _get_input_path('bug473.ufo')
+    font_path = get_input_path('bug473.ufo')
     save_path = os.path.join(_get_temp_dir_path(), 'bug473.ufo')
     runner(CMD + ['-a', '-o', 'ufo', '-f', font_path, save_path])
-    expected_path = _get_expected_path('bug473.ufo')
+    expected_path = get_expected_path('bug473.ufo')
     assert differ([expected_path, save_path])
 
 
@@ -299,11 +283,11 @@ def test_subroutine_sorting_bug494():
     The bug is that two subroutines in the Windows CFF output are swapped in
     index order from the Mac version. This was because of an unstable
     'qsort' done on the subroutines in the final stage of selection."""
-    font_path = _get_input_path('bug494.pfa')
-    cff_path = _get_temp_file_path()
-    dcf_path = _get_temp_file_path()
+    font_path = get_input_path('bug494.pfa')
+    cff_path = get_temp_file_path()
+    dcf_path = get_temp_file_path()
     runner(CMD + ['-a', '-o', 'cff', '*S', 'std', '*b',
                   '-f', font_path, cff_path])
     runner(CMD + ['-a', '-o', 'dcf', '-f', cff_path, dcf_path])
-    expected_path = _get_expected_path('bug494.dcf.txt')
+    expected_path = get_expected_path('bug494.dcf.txt')
     assert differ([expected_path, dcf_path])

@@ -1,22 +1,15 @@
 from __future__ import print_function, division, absolute_import
 
-import os
-
 from fontTools.ttLib import TTFont
 
 from afdko.fontpdf import (doTitle, FontPDFParams)
 from afdko.otfpdf import txPDFFont
 from afdko.pdfgen import Canvas
 
+from test_utils import get_input_path
 
 TOOL = 'fontpdf'
 OTF_FONT = 'OTF.otf'
-
-data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
-
-
-def _get_input_path(file_name):
-    return os.path.join(data_dir_path, 'input', file_name)
 
 
 # -----
@@ -24,7 +17,7 @@ def _get_input_path(file_name):
 # -----
 
 def test_doTitle_pageIncludeTitle_1():
-    with TTFont(_get_input_path(OTF_FONT)) as otfont:
+    with TTFont(get_input_path(OTF_FONT)) as otfont:
         params = FontPDFParams()
         assert params.pageIncludeTitle == 1
         pdfFont = txPDFFont(otfont, params)
@@ -36,7 +29,7 @@ def test_doTitle_pageIncludeTitle_1():
 
 
 def test_doTitle_pageIncludeTitle_0():
-    with TTFont(_get_input_path(OTF_FONT)) as otfont:
+    with TTFont(get_input_path(OTF_FONT)) as otfont:
         params = FontPDFParams()
         params.pageIncludeTitle = 0
         pdfFont = txPDFFont(otfont, params)
