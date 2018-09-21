@@ -9,16 +9,15 @@ import subprocess32 as subprocess
 import sys
 import tempfile
 
-from fontTools.ttLib import TTFont
-
 from afdko.makeotf import (
     checkIfVertInFeature, getOptions, MakeOTFParams, getSourceGOADBData,
     readOptionFile, writeOptionsFile, kMOTFOptions, kOptionNotSeen,
     makeRelativePath)
 
-from .runner import main as runner
-from .differ import main as differ
-from .differ import SPLIT_MARKER
+from runner import main as runner
+from differ import main as differ, SPLIT_MARKER
+from test_utils import (get_input_path, get_expected_path, get_temp_file_path,
+                        generate_ttx_dump)
 
 TOOL = 'makeotf'
 CMD = ['-t', TOOL]
@@ -30,8 +29,8 @@ CID_NAME = 'cidfont.ps'
 TTF_NAME = 'font.ttf'
 OTF_NAME = 'SourceSans-Test.otf'
 
-data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
-temp_dir_path = os.path.join(data_dir_path, 'temp_output')
+DATA_DIR = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
+TEMP_DIR = os.path.join(DATA_DIR, 'temp_output')
 
 
 xfail_py36_win = pytest.mark.xfail(
@@ -43,36 +42,14 @@ def setup_module():
     """
     Create the temporary output directory
     """
-    os.mkdir(temp_dir_path)
+    os.mkdir(TEMP_DIR)
 
 
 def teardown_module():
     """
     teardown the temporary output directory
     """
-    rmtree(temp_dir_path)
-
-
-def _get_expected_path(file_name):
-    return os.path.join(data_dir_path, 'expected_output', file_name)
-
-
-def _get_input_path(file_name):
-    return os.path.join(data_dir_path, 'input', file_name)
-
-
-def _get_temp_file_path():
-    # make sure temp data on same file system as other data for rename to work
-    file_descriptor, path = tempfile.mkstemp(dir=temp_dir_path)
-    os.close(file_descriptor)
-    return path
-
-
-def _generate_ttx_dump(font_path, tables=None):
-    with TTFont(font_path) as font:
-        temp_path = _get_temp_file_path()
-        font.saveXML(temp_path, tables=tables)
-        return temp_path
+    rmtree(TEMP_DIR)
 
 
 # -----
@@ -112,12 +89,12 @@ def test_exit_unknown_option(arg):
 ])
 def test_input_formats(arg, input_filename, ttx_filename):
     if 'gf' in arg:
-        arg.append('_{}'.format(_get_input_path('GOADB.txt')))
-    actual_path = _get_temp_file_path()
-    runner(CMD + ['-o', 'f', '_{}'.format(_get_input_path(input_filename)),
+        arg.append('_{}'.format(get_input_path('GOADB.txt')))
+    actual_path = get_temp_file_path()
+    runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
                         'o', '_{}'.format(actual_path)] + arg)
-    actual_ttx = _generate_ttx_dump(actual_path)
-    expected_ttx = _get_expected_path(ttx_filename)
+    actual_ttx = generate_ttx_dump(actual_path)
+    expected_ttx = get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx,
                    '-s',
                    '<ttFont sfntVersion' + SPLIT_MARKER +
@@ -128,7 +105,7 @@ def test_input_formats(arg, input_filename, ttx_filename):
 
 
 def test_getSourceGOADBData():
-    ttf_path = _get_input_path('font.ttf')
+    ttf_path = get_input_path('font.ttf')
     assert getSourceGOADBData(ttf_path) == [['.notdef', '.notdef', ''],
                                             ['a', 'a', 'uni0041'],
                                             ['g2', 'g2', '']]
@@ -141,7 +118,7 @@ def test_path_with_non_ascii_chars_bug222(input_filename):
     temp_dir = os.path.join(tempfile.mkdtemp(), 'á意ê  ï薨õ 巽ù')
     os.makedirs(temp_dir)
     assert os.path.isdir(temp_dir)
-    input_path = _get_input_path(input_filename)
+    input_path = get_input_path(input_filename)
     temp_path = os.path.join(temp_dir, input_filename)
     if os.path.isdir(input_path):
         copytree(input_path, temp_path)
@@ -156,7 +133,7 @@ def test_path_with_non_ascii_chars_bug222(input_filename):
 @pytest.mark.parametrize('input_filename', [UFO2_NAME, UFO3_NAME])
 def test_ufo_with_trailing_slash_bug280(input_filename):
     # makeotf will now save the OTF alongside the UFO instead of inside of it
-    ufo_path = _get_input_path(input_filename)
+    ufo_path = get_input_path(input_filename)
     temp_dir = tempfile.mkdtemp()
     tmp_ufo_path = os.path.join(temp_dir, input_filename)
     copytree(ufo_path, tmp_ufo_path)
@@ -169,7 +146,7 @@ def test_ufo_with_trailing_slash_bug280(input_filename):
     T1PFA_NAME, UFO2_NAME, UFO3_NAME, CID_NAME])
 def test_output_is_folder_only_bug281(input_filename):
     # makeotf will output a default-named font to the folder
-    input_path = _get_input_path(input_filename)
+    input_path = get_input_path(input_filename)
     temp_dir = tempfile.mkdtemp()
     expected_path = os.path.join(temp_dir, OTF_NAME)
     assert os.path.exists(expected_path) is False
@@ -203,7 +180,7 @@ def test_no_postscript_name_bug282(input_filename):
 def test_find_vert_feature_bug148(fea_filename, result):
     fea_path = None
     if fea_filename:
-        input_dir = _get_input_path('bug148')
+        input_dir = get_input_path('bug148')
         fea_path = os.path.join(input_dir, fea_filename)
     assert checkIfVertInFeature(fea_path) == result
 
@@ -246,8 +223,8 @@ def test_options_cs_cl_bug459(args, result):
 
 
 def test_writeOptionsFile():
-    actual_path = _get_temp_file_path()
-    expected_path = _get_expected_path('proj_write.txt')
+    actual_path = get_temp_file_path()
+    expected_path = get_expected_path('proj_write.txt')
     params = MakeOTFParams()
     params.currentDir = os.path.dirname(actual_path)
     params.opt_InputFontPath = 'font.pfa'
@@ -268,7 +245,7 @@ def test_writeOptionsFile():
 def test_readOptionFile():
     INPUT_FONT_NAME = 'font.pfa'
     OUTPUT_FONT_NAME = 'font.otf'
-    proj_path = _get_input_path('proj.txt')
+    proj_path = get_input_path('proj.txt')
     abs_font_dir_path = os.path.dirname(proj_path)
     params = MakeOTFParams()
     assert params.fontDirPath == '.'
@@ -295,7 +272,7 @@ def test_readOptionFile():
 
 
 def test_readOptionFile_abspath():
-    proj_path = _get_input_path('proj2.txt')
+    proj_path = get_input_path('proj2.txt')
     params = MakeOTFParams()
 
     root = os.path.abspath(os.sep)
@@ -314,7 +291,7 @@ def test_readOptionFile_abspath():
 def test_readOptionFile_relpath(cur_dir_str):
     INPUT_FONT_NAME = 'font.pfa'
     OUTPUT_FONT_NAME = 'font.otf'
-    proj_path = _get_input_path('proj2.txt')
+    proj_path = get_input_path('proj2.txt')
     abs_font_dir_path = os.path.dirname(proj_path)
     params = MakeOTFParams()
 
@@ -341,7 +318,7 @@ def test_readOptionFile_relpath(cur_dir_str):
 
 
 def test_readOptionFile_filenotfound():
-    proj_path = _get_input_path('notafile')
+    proj_path = get_input_path('notafile')
     params = MakeOTFParams()
     params.currentDir = os.getcwd()
     assert readOptionFile(proj_path, params, 0) == (True, 0)
@@ -384,11 +361,11 @@ def test_makeRelativePath_win_only(cur_dir, target_path, result):
     (['r', 'cl', '_3'], CID_NAME, 'cidfont-cmap_cl3.ttx'),
 ])
 def test_build_options_cs_cl_bug459(args, input_filename, ttx_filename):
-    actual_path = _get_temp_file_path()
-    runner(CMD + ['-o', 'f', '_{}'.format(_get_input_path(input_filename)),
+    actual_path = get_temp_file_path()
+    runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
                         'o', '_{}'.format(actual_path)] + args)
-    actual_ttx = _generate_ttx_dump(actual_path, ['cmap'])
-    expected_ttx = _get_expected_path(ttx_filename)
+    actual_ttx = generate_ttx_dump(actual_path, ['cmap'])
+    expected_ttx = get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
 
 
@@ -409,16 +386,19 @@ def test_build_options_cs_cl_bug459(args, input_filename, ttx_filename):
 def test_cid_keyed_cff_bug470(args, font, fontinfo):
     if 'fi' in args:
         fontinfo_file = 'bug470/{}.txt'.format(fontinfo)
-        args.append('_{}'.format(_get_input_path(fontinfo_file)))
+        args.append('_{}'.format(get_input_path(fontinfo_file)))
         ttx_file = 'bug470/{}-{}.ttx'.format(font, 'fi')
     else:
         ttx_file = 'bug470/{}.ttx'.format(font)
     font_file = 'bug470/{}.pfa'.format(font)
-    actual_path = _get_temp_file_path()
-    runner(CMD + ['-o', 'f', '_{}'.format(_get_input_path(font_file)),
+    # 'dir=TEMP_DIR' is used for guaranteeing that the temp data is on same
+    # file system as other data; if it's not, a file rename step made by
+    # sfntedit will NOT work.
+    actual_path = get_temp_file_path(directory=TEMP_DIR)
+    runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(font_file)),
                         'o', '_{}'.format(actual_path)] + args)
-    actual_ttx = _generate_ttx_dump(actual_path, ['CFF '])
-    expected_ttx = _get_expected_path(ttx_file)
+    actual_ttx = generate_ttx_dump(actual_path, ['CFF '])
+    expected_ttx = get_expected_path(ttx_file)
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
 
 
@@ -442,11 +422,11 @@ def test_cid_keyed_cff_bug470(args, font, fontinfo):
     ['bit7y', 'bit8n', 'bit7n', 'bit8y'],
 ])
 def test_GOADB_options_bug497(opts):
-    font_path = _get_input_path(T1PFA_NAME)
-    feat_path = _get_input_path('bug497/feat.fea')
-    fmndb_path = _get_input_path('bug497/fmndb.txt')
-    goadb_path = _get_input_path('bug497/goadb.txt')
-    actual_path = _get_temp_file_path()
+    font_path = get_input_path(T1PFA_NAME)
+    feat_path = get_input_path('bug497/feat.fea')
+    fmndb_path = get_input_path('bug497/fmndb.txt')
+    goadb_path = get_input_path('bug497/goadb.txt')
+    actual_path = get_temp_file_path()
     ttx_filename = '-'.join(['opts'] + opts) + '.ttx'
 
     args = []
@@ -468,8 +448,8 @@ def test_GOADB_options_bug497(opts):
                         'o', '_{}'.format(actual_path),
                         'ff', '_{}'.format(feat_path),
                         'mf', '_{}'.format(fmndb_path)] + args)
-    actual_ttx = _generate_ttx_dump(actual_path)
-    expected_ttx = _get_expected_path('bug497/{}'.format(ttx_filename))
+    actual_ttx = generate_ttx_dump(actual_path)
+    expected_ttx = get_expected_path('bug497/{}'.format(ttx_filename))
     assert differ([expected_ttx, actual_ttx,
                    '-s',
                    '<ttFont sfntVersion' + SPLIT_MARKER +
@@ -485,12 +465,12 @@ def test_GOADB_options_bug497(opts):
 def test_fetch_font_version_bug610(feat_name, has_warn):
     input_filename = 't1pfa.pfa'
     feat_filename = 'bug610/{}.fea'.format(feat_name)
-    otf_path = _get_temp_file_path()
+    otf_path = get_temp_file_path()
 
     stdout_path = runner(
         CMD + ['-s', '-o', 'r',
-               'f', '_{}'.format(_get_input_path(input_filename)),
-               'ff', '_{}'.format(_get_input_path(feat_filename)),
+               'f', '_{}'.format(get_input_path(input_filename)),
+               'ff', '_{}'.format(get_input_path(feat_filename)),
                'o', '_{}'.format(otf_path)])
 
     with open(stdout_path, 'rb') as f:
@@ -503,13 +483,13 @@ def test_fetch_font_version_bug610(feat_name, has_warn):
 def test_update_cff_bbox_bug617():
     input_filename = "bug617/font.pfa"
     goadb_filename = "bug617/goadb.txt"
-    actual_path = _get_temp_file_path()
+    actual_path = get_temp_file_path()
     ttx_filename = "bug617.ttx"
-    runner(CMD + ['-o', 'f', '_{}'.format(_get_input_path(input_filename)),
-                        'gf', '_{}'.format(_get_input_path(goadb_filename)),
+    runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
+                        'gf', '_{}'.format(get_input_path(goadb_filename)),
                         'o', '_{}'.format(actual_path), 'r', 'gs'])
-    actual_ttx = _generate_ttx_dump(actual_path, ['head', 'CFF '])
-    expected_ttx = _get_expected_path(ttx_filename)
+    actual_ttx = generate_ttx_dump(actual_path, ['head', 'CFF '])
+    expected_ttx = get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx,
                    '-s',
                    '<ttFont sfntVersion' + SPLIT_MARKER +

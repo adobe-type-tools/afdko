@@ -10,8 +10,10 @@ from fontTools.ttLib import TTFont
 
 from afdko import ttfcomponentizer as ttfcomp
 
-from .runner import main as runner
-from .differ import main as differ
+from runner import main as runner
+from differ import main as differ
+from test_utils import (get_input_path, get_expected_path, get_temp_file_path,
+                        generate_ttx_dump)
 
 TOOL = 'ttfcomponentizer'
 CMD = ['-t', TOOL]
@@ -34,30 +36,8 @@ class Object(object):
     pass
 
 
-data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
-
-
-def _get_expected_path(file_name):
-    return os.path.join(data_dir_path, 'expected_output', file_name)
-
-
-def _get_input_path(file_name):
-    return os.path.join(data_dir_path, 'input', file_name)
-
-
-def _get_temp_file_path(directory=None):
-    return tempfile.mkstemp(dir=directory)[1]
-
-
-def _generate_ttx_dump(font_path, tables=None):
-    font = TTFont(font_path)
-    temp_path = _get_temp_file_path()
-    font.saveXML(temp_path, tables=tables)
-    return temp_path
-
-
 def _get_test_ttf_path():
-    return _get_input_path(TEST_TTF_FILENAME)
+    return get_input_path(TEST_TTF_FILENAME)
 
 
 def _get_test_ufo_path():
@@ -97,7 +77,7 @@ def test_run_invalid_font():
 def test_run_ufo_not_found():
     ttf_path = _get_test_ttf_path()
     temp_dir = tempfile.mkdtemp()
-    save_path = _get_temp_file_path(directory=temp_dir)
+    save_path = get_temp_file_path(directory=temp_dir)
     copy2(ttf_path, save_path)
     assert ttfcomp.main([save_path]) == 1
 
@@ -105,7 +85,7 @@ def test_run_ufo_not_found():
 def test_run_invalid_ufo():
     ttf_path = _get_test_ttf_path()
     temp_dir = tempfile.mkdtemp()
-    save_path = _get_temp_file_path(directory=temp_dir)
+    save_path = get_temp_file_path(directory=temp_dir)
     ufo_path = save_path + '.ufo'
     copy2(ttf_path, save_path)
     copy2(ttf_path, ufo_path)
@@ -114,7 +94,7 @@ def test_run_invalid_ufo():
 
 def test_run_with_output_path():
     ttf_path = _get_test_ttf_path()
-    save_path = _get_temp_file_path()
+    save_path = get_temp_file_path()
     ttfcomp.main(['-o', save_path, ttf_path])
     gtable = TTFont(save_path)['glyf']
     composites = [gname for gname in gtable.glyphs if (
@@ -123,11 +103,11 @@ def test_run_with_output_path():
 
 
 def test_run_cli_with_output_path():
-    actual_path = _get_temp_file_path()
+    actual_path = get_temp_file_path()
     runner(CMD + ['-o', 'o', '_{}'.format(actual_path),
-                  '_{}'.format(_get_input_path(TEST_TTF_FILENAME))])
-    actual_ttx = _generate_ttx_dump(actual_path, ['maxp', 'glyf'])
-    expected_ttx = _get_expected_path('ttfcomponentizer.ttx')
+                  '_{}'.format(get_input_path(TEST_TTF_FILENAME))])
+    actual_ttx = generate_ttx_dump(actual_path, ['maxp', 'glyf'])
+    expected_ttx = get_expected_path('ttfcomponentizer.ttx')
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
 
 
@@ -136,7 +116,7 @@ def test_run_without_output_path():
     ufo_path = _get_test_ufo_path()
     temp_dir = tempfile.mkdtemp()
     tmp_ufo_path = os.path.join(temp_dir, os.path.basename(ufo_path))
-    save_path = _get_temp_file_path(directory=temp_dir)
+    save_path = get_temp_file_path(directory=temp_dir)
     copy2(ttf_path, save_path)
     copytree(ufo_path, tmp_ufo_path)
     ttfcomp.main([save_path])
@@ -168,7 +148,7 @@ def test_options_invalid_font_path():
 
 
 def test_options_invalid_font():
-    path = _get_input_path('not_a_font.ttf')
+    path = get_input_path('not_a_font.ttf')
     assert ttfcomp.get_options([path]).font_path is None
 
 

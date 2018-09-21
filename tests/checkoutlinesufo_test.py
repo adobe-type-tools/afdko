@@ -10,24 +10,15 @@ from defcon import Glyph
 
 from afdko.checkoutlinesufo import remove_tiny_sub_paths
 
-from .runner import main as runner
-from .differ import main as differ
+from runner import main as runner
+from differ import main as differ
+from test_utils import get_input_path, get_expected_path
 
 TOOL = 'checkoutlinesufo'
 CMD = ['-t', TOOL]
 
 UFO2_NAME = 'ufo2.ufo'
 UFO3_NAME = 'ufo3.ufo'
-
-data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
-
-
-def _get_expected_path(file_name):
-    return os.path.join(data_dir_path, 'expected_output', file_name)
-
-
-def _get_input_path(file_name):
-    return os.path.join(data_dir_path, 'input', file_name)
 
 
 # -----
@@ -69,8 +60,8 @@ def test_remove_tiny_sub_paths_small_contour():
 ])
 def test_remove_overlap(args, ufo_filename, expct_label):
     actual_path = os.path.join(tempfile.mkdtemp(), ufo_filename)
-    copytree(_get_input_path(ufo_filename), actual_path)
+    copytree(get_input_path(ufo_filename), actual_path)
     runner(CMD + ['-f', actual_path, '-o'] + args)
     expct_filename = '{}-{}'.format(ufo_filename[:-4], expct_label)
-    expected_path = _get_expected_path(expct_filename)
+    expected_path = get_expected_path(expct_filename)
     assert differ([expected_path, actual_path])
