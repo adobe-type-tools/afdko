@@ -301,3 +301,32 @@ def test_subroutine_sorting_bug494():
     runner(CMD + ['-a', '-o', 'dcf', '-f', cff_path, dcf_path])
     expected_path = get_expected_path('bug494.dcf.txt')
     assert differ([expected_path, dcf_path])
+
+
+@pytest.mark.parametrize('args, exp_filename', [([], 'roundtrip'),
+                                                (['g', '_0-1'], 'subset')])
+@pytest.mark.parametrize('to_format', ['t1'])  # TODO: 'cff' & 'afm'
+def test_recalculate_font_bbox_bug618(to_format, args, exp_filename):
+    font_path = get_input_path('bug618.pfa')
+    save_path = get_temp_file_path()
+
+    runner(CMD + ['-f', font_path, save_path, '-o', to_format] + args)
+
+    file_ext = to_format
+    if to_format == 't1':
+        file_ext = 'pfa'
+    elif to_format == 'afm':
+        file_ext = 'txt'
+
+    expected_path = get_expected_path(
+        'bug618/{}.{}'.format(exp_filename, file_ext))
+
+    diff_mode = []
+    if to_format == 'cff':
+        diff_mode = ['-m', 'bin']
+
+    skip = []
+    if to_format == 'afm':
+        skip = ['-s', 'Comment Creation Date:']
+
+    assert differ([expected_path, save_path] + diff_mode + skip)
