@@ -29,6 +29,7 @@ before_build:
   - flake8 python\afdko\fdkutils.py
   - flake8 python\afdko\makeinstancesufo.py
   - flake8 python\afdko\makeotf.py
+  - flake8 python\afdko\otf2ttf.py
   - flake8 python\afdko\otfpdf.py
   - flake8 python\afdko\pdfmetrics.py
   - flake8 python\afdko\ttfcomponentizer.py

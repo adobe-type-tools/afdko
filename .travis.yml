@@ -39,6 +39,7 @@ before_script:
   - flake8 fdkutils.py
   - flake8 makeinstancesufo.py
   - flake8 makeotf.py
+  - flake8 otf2ttf.py
   - flake8 otfpdf.py
   - flake8 pdfmetrics.py
   - flake8 ttfcomponentizer.py

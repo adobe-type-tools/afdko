@@ -168,6 +168,7 @@ def _get_console_scripts():
         ('makeinstancesufo', 'makeinstancesufo:main'),
         ('otc2otf', 'otc2otf:main'),
         ('otf2otc', 'otf2otc:main'),
+        ('otf2ttf', 'otf2ttf:main'),
         ('stemhist', 'stemhist:main'),
         ('ttfcomponentizer', 'ttfcomponentizer:main'),
         ('ttxn', 'ttxn:main'),

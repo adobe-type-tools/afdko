@@ -1,4 +1,5 @@
 booleanOperations~=0.8.0
+cu2qu~=1.5.0
 defcon~=0.5.3
 fontMath~=0.4.7
 fontPens~=0.1.0
