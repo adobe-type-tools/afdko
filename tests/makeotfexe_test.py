@@ -119,53 +119,66 @@ def test_version_warning_bug610():
 
 @pytest.mark.parametrize('feat_name, error_msg', [
     ('test_named_lookup',
-        b"[FATAL] <SourceSans-Test> GPOS feature 'last' causes overflow of "
-        b"offset to a subtable"),
+        b"[FATAL] <SourceSans-Test> In feature 'last' positioning rules "
+        b"cause an offset overflow (0x10020) to a lookup subtable"),
     ('test_singlepos_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> GPOS feature 'sps1' causes overflow of "
-        b"offset to a subtable"),
+        b"[FATAL] <SourceSans-Test> In feature 'sps1' lookup 'lkup40' "
+        b"positioning rules cause an offset overflow (0x10188) to a "
+        b"lookup subtable"),
     ('test_class_pair_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> GPOS feature 'last' causes overflow of "
-        b"offset to a subtable"),
+        b"[FATAL] <SourceSans-Test> In feature 'last' positioning rules "
+        b"cause an offset overflow (0x10020) to a lookup subtable"),
     ('test_class_pair_class_def_overflow',
-        b"[FATAL] <SourceSans-Test> ClassDef offset overflow (0x1001a) in "
-        b"pair positioning"),
+        b"[FATAL] <SourceSans-Test> In feature 'krn1' lookup 'l1' pair "
+        b"positioning rules cause an offset overflow (0x1001a) to a "
+        b"class 2 definition table"),
     ('test_contextual_overflow',
-        b"[FATAL] <SourceSans-Test> Chain contextual lookup subtable in "
-        b"GPOS feature 'krn0' causes offset overflow."),
+        b"[FATAL] <SourceSans-Test> In feature 'krn0' lookup 'lkup40' "
+        b"chain contextual positioning rules cause an offset overflow "
+        b"(0x10002) to a lookup subtable"),
     ('test_cursive_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> Cursive Attach lookup subtable in "
-        b"GPOS feature 'curs' causes offset overflow."),
+        b"[FATAL] <SourceSans-Test> In feature 'curs' lookup 'lk20' "
+        b"cursive positioning rules cause an offset overflow "
+        b"(0x1006e) to a cursive attach table"),
     ('test_mark_to_base_coverage_overflow',
-        b"[FATAL] <SourceSans-Test> base coverage offset overflow "
-        b"(0x1002c) in MarkToBase positioning"),
+        b"[FATAL] <SourceSans-Test> In feature 'mrk1' mark to base "
+        b"positioning rules cause an offset overflow (0x1002c) to a "
+        b"base coverage table"),
     ('test_mark_to_base_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> MarkToBase lookup subtable in GPOS "
-        b"feature 'mrk1' causes offset overflow."),
+        b"[FATAL] <SourceSans-Test> In feature 'mrk1' mark to base "
+        b"positioning rules cause an offset overflow (0x10230) to a "
+        b"lookup subtable"),
     ('test_mark_to_ligature_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> MarkToLigature lookup subtable in GPOS "
-        b"feature 'lig1' causes offset overflow"),
+        b"[FATAL] <SourceSans-Test> In feature 'lig1' lookup 'lk0' mark "
+        b"to ligature positioning rules cause an offset overflow (0x1053e) "
+        b"to a lookup subtable"),
     ('test_singlesub1_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> GSUB feature 'tss2' causes overflow "
-        b"of offset to a subtable"),
+        b"[FATAL] <SourceSans-Test> In feature 'tss2' lookup 'lkup258' "
+        b"substitution rules cause an offset overflow (0x10002) to a "
+        b"lookup subtable"),
     ('test_singlesub2_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> GSUB feature 'tss1' causes overflow "
-        b"of offset to a subtable"),
+        b"[FATAL] <SourceSans-Test> In feature 'tss1' lookup 'lkup237' "
+        b"substitution rules cause an offset overflow (0x10098) to a "
+        b"lookup subtable"),
     ('test_multiplesub_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> GSUB feature 'mts1' causes overflow "
-        b"of offset to a subtable"),
+        b"[FATAL] <SourceSans-Test> In feature 'mts1' lookup 'lkup238' "
+        b"substitution rules cause an offset overflow (0x10056) to a "
+        b"lookup subtable"),
     ('test_alternatesub_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> GSUB feature 'ats1' causes overflow "
-        b"of offset to a subtable"),
+        b"[FATAL] <SourceSans-Test> In feature 'ats1' lookup 'lkup238' "
+        b"substitution rules cause an offset overflow (0x1009c) to a "
+        b"lookup subtable"),
     ('test_ligaturesub_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> GSUB feature 'lts1' causes overflow "
-        b"of offset to a subtable"),
+        b"[FATAL] <SourceSans-Test> In feature 'lts1' lookup 'lkup238' "
+        b"substitution rules cause an offset overflow (0x10016) to a "
+        b"lookup subtable"),
     ('test_chaincontextualsub_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> GSUB feature '\xff\xff\xff\xff' causes "
-        b"overflow of offset to a subtable"),
+        b"[FATAL] <SourceSans-Test> In feature 'cts1' substitution rules "
+        b"cause an offset overflow (0x100ac) to a lookup subtable"),
     ('test_reversechaincontextualsub_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> Reverse Chain contextual lookup "
-        b"subtable in GSUB feature 'rts1' causes offset overflow"),
+        b"[FATAL] <SourceSans-Test> In feature 'rts1' lookup 'lkup238' "
+        b"reverse chain contextual substitution rules cause an offset "
+        b"overflow (0x100a0) to a lookup subtable"),
 ])
 def test_oveflow_report_bug313(feat_name, error_msg):
     input_filename = 'bug313/font.pfa'
