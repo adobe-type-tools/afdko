@@ -68,7 +68,7 @@ def otf_to_ttf(ttFont, post_format=POST_FORMAT, **kwargs):
 
 def main(args=None):
     parser = argparse.ArgumentParser()
-    parser.add_argument("input", metavar="INPUT")
+    parser.add_argument("input", nargs='+', metavar="INPUT")
     parser.add_argument("-o", "--output")
     parser.add_argument("-e", "--max-error", type=float, default=MAX_ERR)
     parser.add_argument("--post-format", type=float, default=POST_FORMAT)
@@ -76,15 +76,16 @@ def main(args=None):
         "--keep-direction", dest='reverse_direction', action='store_false')
     options = parser.parse_args(args)
 
-    output = options.output or makeOutputFileName(options.input,
-                                                  outputDir=None,
-                                                  extension='.ttf')
-    font = TTFont(options.input)
-    otf_to_ttf(font,
-               post_format=options.post_format,
-               max_err=options.max_error,
-               reverse_direction=options.reverse_direction)
-    font.save(output)
+    for path in options.input:
+        output = options.output or makeOutputFileName(path,
+                                                      outputDir=None,
+                                                      extension='.ttf')
+        font = TTFont(path)
+        otf_to_ttf(font,
+                   post_format=options.post_format,
+                   max_err=options.max_error,
+                   reverse_direction=options.reverse_direction)
+        font.save(output)
 
 
 if __name__ == "__main__":
