@@ -21,9 +21,6 @@
 #define XML_HEADER "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 #define PLIST_DTD_HEADER "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">"
 
-#ifdef _WIN32
-#define round round_int
-#endif
 /* ---------------------------- Library Context ---------------------------- */
 
 typedef struct /* Glyph data */
@@ -106,12 +103,6 @@ static void fatal(ufwCtx h, int err_code) {
     h->err.code = err_code;
     RAISE(&h->err.env, err_code, NULL);
 }
-
-#if _WIN32
-static int round_int(double r) {
-    return (int)((r > 0.0) ? (r + 0.5) : (r - 0.5));
-}
-#endif
 
 /* --------------------------- Destination Stream -------------------------- */
 
