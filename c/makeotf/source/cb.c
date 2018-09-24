@@ -648,37 +648,11 @@ static void uvsClose(void *ctx) {
 
 /* --------------------------- Temporary file I/O -------------------------- */
 
-/* On Windows, the stdio.h 'tmpfile' function tries to make temp files in the root
-directory, thus requiring administrative privileges. So we first need to use '_tempnam'
-to generate a unique filename inside the user's TMP environment variable (or the
-current working directory if TMP is not defined). Then we open the temporary file
-and return its pointer */
-static FILE *_tmpfile() {
-    FILE *fp;
-#ifdef _WIN32
-    char *tempname;
-    tempname = _tempnam(NULL, "tx_tmpfile");
-    if (tempname != NULL) {
-        int fd, flags, mode;
-        flags = _O_BINARY | _O_CREAT | _O_EXCL | _O_RDWR | _O_TEMPORARY;
-        mode = _S_IREAD | _S_IWRITE;
-        fd = _open(tempname, flags, mode);
-        if (fd != -1)
-            fp = _fdopen(fd, "w+b");
-        free(tempname);
-    }
-#else
-    /* Use the default tmpfile on non-Windows platforms */
-    fp = tmpfile();
-#endif
-    return fp;
-}
-
 /* [hot callback] Open temporary file */
 static void tmpOpen(void *ctx) {
     cbCtx h = ctx;
     h->tmp.file.name = "tmpfile";
-    if ((h->tmp.file.fp = _tmpfile()) == NULL) {
+    if ((h->tmp.file.fp = tmpfile()) == NULL) {
         fileError(&h->tmp.file);
     }
 }
