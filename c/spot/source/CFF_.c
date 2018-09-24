@@ -120,17 +120,6 @@ static char *syntheticGlyphs[] = {"Delta", "Euro", "Omega", "approxequal", "asci
 
 static Byte8 *workstr = NULL;
 
-#if _WIN32
-#define round round_double
-static double round_double(double r) {
-    /* I return double as this is mostly used to round values for float or
-       double printf format specifiers, and since I hope to remove this code
-       soon when we move to VS 2017, it is less work to do an extra cast here
-       than change all the printf format statements. */
-    return (double)((int)((r > 0.0) ? (r + 0.5) : (r - 0.5)));
-}
-#endif
-
 static void CFFfatal(void *ctx) {
     fatal(SPOT_MSG_CFFPARSING);
 }
