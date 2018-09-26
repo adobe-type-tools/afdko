@@ -1,0 +1,9 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+lookup test2 {
+sub glyph1 by glyph1 glyph2;
+sub glyph1 by glyph1 glyph2;
+} test2;

@@ -1,0 +1,18 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+	markClass glyph1 <anchor 150 700> @TOP_MARKS;
+
+feature tst1 {
+	
+ position ligature glyph6 
+          <anchor 625 1800> mark @TOP_MARKS
+          <anchor 625 1800> mark @TOP_MARKS
+           ;
+ position ligature glyph6 
+          <anchor 625 1800> mark @TOP_MARKS
+           ;
+
+} tst1;
