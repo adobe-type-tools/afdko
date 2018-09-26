@@ -1,0 +1,10 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+feature size {
+     parameters 100 # design size (decipoints)
+                 0  # subfamily identifier
+               0; # range end (inclusive, decipoints)
+  } size;

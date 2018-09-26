@@ -1,0 +1,16 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+	markClass glyph1 <anchor 150 700> @TOP_MARKS;
+	markClass glyph2 <anchor 150 700> @TOP_MARKS;
+	markClass glyph3 <anchor 150 -10> @BOTTOM_MARKS;
+	markClass glyph4 <anchor 150 -11> @BOTTOM_MARKS;
+
+feature tst1 {
+	
+	position base glyph5 <anchor 250 450> mark @TOP_MARKS;
+	position base glyph5 <anchor 250 -10> mark @BOTTOM_MARKS;
+
+} tst1;

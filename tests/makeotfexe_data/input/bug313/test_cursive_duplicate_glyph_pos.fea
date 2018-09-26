@@ -1,0 +1,11 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+feature tst1 {
+	
+ position cursive glyph1 <anchor 500 20> <anchor 0 -20>;
+ position cursive glyph1 <anchor 500 20> <anchor 0 -20>;
+
+} tst1;

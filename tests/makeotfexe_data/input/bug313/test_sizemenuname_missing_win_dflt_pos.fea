@@ -1,0 +1,12 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+feature size {
+ parameters 100 # design size (decipoints)
+			 3  # subfamily identifier
+			80  # range start (exclusive, decipoints)
+		   139; # range end (inclusive, decipoints)
+ sizemenuname 1 "Win MinionPro Size Name";
+} size;

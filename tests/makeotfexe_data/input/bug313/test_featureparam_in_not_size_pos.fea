@@ -1,0 +1,8 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+lookup test2 {
+	parameters 5.0 0; # design size, subfamily
+} test2;
