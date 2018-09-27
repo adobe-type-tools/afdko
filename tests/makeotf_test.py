@@ -519,12 +519,8 @@ def test_feature_includes_ufo_bug164():
     input_filename = "bug164/d1/d2/font.ufo"
     otf_path = get_temp_file_path()
 
-    stderr_path = runner(
-        CMD + ['-s', '-e', '-o',
-               'f', '_{}'.format(get_input_path(input_filename)),
-               'o', '_{}'.format(otf_path)])
+    runner(CMD + ['-o',
+                  'f', '_{}'.format(get_input_path(input_filename)),
+                  'o', '_{}'.format(otf_path)])
 
-    with open(stderr_path, 'rb') as f:
-        output = f.read()
-    assert(b"[FATAL] <SourceSans-Test> include file <../../rel_to_main1.fea> "
-           b"not found [font.ufo/features.fea 1]") in output
+    assert font_has_table(otf_path, 'head')

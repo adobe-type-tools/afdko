@@ -1,6 +1,6 @@
-/* 
+/*
  Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
- This software is licensed as OpenSource, under the Apache License, Version 2.0. 
+ This software is licensed as OpenSource, under the Apache License, Version 2.0.
  This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 /***********************************************************************/
@@ -452,16 +452,30 @@ static char *findFeatInclFile(cbCtx h, char *filename) {
     /* Check if relative path */
     if ((filename[0] != '/') && (filename[0] != '\\') && (filename[1] != ':')) {
         int i;
-        /* Look first relative to to the current include directory. If
-         not found, check relative to the main feature file.
-         */
-        for (i = 1; i >= 0; i--) {
-            if ((h->feat.includeDir[i] != 0) &&
-                (h->feat.includeDir[i][0] != '\0')) {
-                sprintf(path, "%s%s%s", h->feat.includeDir[i], sep(), filename);
+        /* h->feat.includeDir[0] contains the parent directory of the main feature file.             */
+        /* h->feat.includeDir[1] contains the parent directory of the including parent feature file. */
+        if ((h->feat.includeDir[0] != 0) &&
+            (h->feat.includeDir[0][0] != '\0')) {
+            /* Relative to UFO parent dir, if that is what it is */
+            sprintf(path, "%s%s%s", h->feat.includeDir[0], sep(), "fontinfo.plist");
+            if (fileExists(path)) {
+                sprintf(path, "%s%s..%s%s", h->feat.includeDir[0], sep(), sep(), filename);
                 if (fileExists(path)) {
                     goto found;
                 }
+            }
+            /* Relative to the main feature file */
+            sprintf(path, "%s%s%s", h->feat.includeDir[0], sep(), filename);
+            if (fileExists(path)) {
+                goto found;
+            }
+        }
+        /* Relative to parent include file */
+        if ((h->feat.includeDir[1] != 0) &&
+            (h->feat.includeDir[1][0] != '\0')) {
+            sprintf(path, "%s%s%s", h->feat.includeDir[1], sep(), filename);
+            if (fileExists(path)) {
+                goto found;
             }
         }
         return NULL; /* Can't find include file (error) */
