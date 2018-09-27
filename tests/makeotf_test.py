@@ -17,7 +17,7 @@ from afdko.makeotf import (
 from runner import main as runner
 from differ import main as differ, SPLIT_MARKER
 from test_utils import (get_input_path, get_expected_path, get_temp_file_path,
-                        generate_ttx_dump)
+                        generate_ttx_dump, font_has_table)
 
 TOOL = 'makeotf'
 CMD = ['-t', TOOL]
@@ -497,3 +497,34 @@ def test_update_cff_bbox_bug617():
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value='])
+
+
+@pytest.mark.parametrize('feat_filename', [
+    'bug164/d1/d2/rel_to_main.fea',
+    'bug164/d1/d2/rel_to_parent.fea',
+])
+def test_feature_includes_type1_bug164(feat_filename):
+    input_filename = "bug164/d1/d2/font.pfa"
+    otf_path = get_temp_file_path()
+
+    runner(CMD + ['-o',
+                  'f', '_{}'.format(get_input_path(input_filename)),
+                  'ff', '_{}'.format(get_input_path(feat_filename)),
+                  'o', '_{}'.format(otf_path)])
+
+    assert font_has_table(otf_path, 'head')
+
+
+def test_feature_includes_ufo_bug164():
+    input_filename = "bug164/d1/d2/font.ufo"
+    otf_path = get_temp_file_path()
+
+    stderr_path = runner(
+        CMD + ['-s', '-e', '-o',
+               'f', '_{}'.format(get_input_path(input_filename)),
+               'o', '_{}'.format(otf_path)])
+
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert(b"[FATAL] <SourceSans-Test> include file <../../rel_to_main1.fea> "
+           b"not found [font.ufo/features.fea 1]") in output
