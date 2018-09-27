@@ -1,0 +1,5 @@
+languagesystem DLFT dflt;
+
+feature tst1 {
+	sub a by a;
+} tst1;
