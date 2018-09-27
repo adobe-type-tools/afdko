@@ -3,7 +3,7 @@
 from __future__ import print_function, division, absolute_import
 
 __usage__ = """
-buildcff2vf.py  1.14 Aug 28 2018
+buildcff2vf.py  1.14.1 Sep 26 2018
 Build a variable font from a designspace file and the UFO master source fonts.
 
 python buildcff2vf.py -h
@@ -45,6 +45,7 @@ https://github.com/fonttools/fonttools
 
 import collections
 import io
+import logging
 import os
 import sys
 
@@ -69,6 +70,9 @@ xmlToString = ET.tostring
 kMaxStack = 48
 kTempCFFSuffix = ".temp.cff"
 kTempCFF2File = "test.cff2"
+
+# setup basic logging to enable fontTools errors to peek thru
+logging.basicConfig()
 
 
 class ACFontError(KeyError):
