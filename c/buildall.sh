@@ -1,7 +1,7 @@
 #! /bin/sh
 
 # How to find and add all the xcode files for a new program:
-# find .   \( -path "*/xcode4/*" \)	 -and \( \(	 -name BuildAll.sh \) -or \( -name project.pbxproj \) -or \( -name contents.xcworkspacedata	 \) \)	-exec p4 add {} \;curDir=`pwd`
+# find .   \( -path "*/xcode/*" \)	 -and \( \(	 -name build.sh \) -or \( -name project.pbxproj \) -or \( -name contents.xcworkspacedata	 \) \)	-exec p4 add {} \;curDir=`pwd`
 
 set -e
 set -x
@@ -10,7 +10,7 @@ curDir=$(pwd)
 
 if [ -z "$1" ] || [ "$1" = "release" ] || [ "$1" = "debug" ] || [ "$1" = "clean" ]
 then
-	buildAllList=$(ls -1 ./*/build/osx/xcode4/BuildAll.sh)
+	buildAllList=$(ls -1 ./*/build/osx/xcode/build.sh)
 	for shFile in $buildAllList
 	do
 		echo "***Running $shFile"

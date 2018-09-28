@@ -32,7 +32,7 @@ exe/
 # Xcode files
 project.xcworkspace/
 xcuserdata/
-**/xcode4/build/
+**/xcode/build/
 
 
 # Windows build directories
