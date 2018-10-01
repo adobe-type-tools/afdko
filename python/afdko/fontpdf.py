@@ -24,13 +24,12 @@ right, with the positive Y axis pointing down.
 
 from __future__ import print_function, absolute_import
 
+from math import ceil
 import os
 import re
 import time
 
-from afdko import fdkutils
-from afdko import pdfgen
-from afdko import pdfmetrics
+from afdko import fdkutils, pdfgen, pdfmetrics
 from afdko.pdfutils import LINEEND
 
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
@@ -1952,9 +1951,9 @@ def makeWaterfallPDF(params, pdfFont, doProgressBar):
 	if glyphList:
 		glyphLists.append(glyphList)
 
-	numWaterfallsOnPage = pageHeight/float(waterfallHeight)
+	numWaterfallsOnPage = int(pageHeight / waterfallHeight)
 	numWaterFalls = len(glyphLists)
-	numPages = int(round(0.5 + float(numWaterFalls)/numWaterfallsOnPage))
+	numPages = int(ceil(float(numWaterFalls) / numWaterfallsOnPage))
 	if numPages == 0:
 		numPages = 1
 	doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages)
@@ -1966,7 +1965,7 @@ def makeWaterfallPDF(params, pdfFont, doProgressBar):
 		progressBarInstance.EndProgress()
 	rt_canvas.showPage()
 	rt_canvas.save()
-	return
+
 
 def makeFontSetPDF(pdfFontList, params, doProgressBar=True):
 	"""
