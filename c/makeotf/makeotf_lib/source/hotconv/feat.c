@@ -65,7 +65,7 @@ enum {
     tableTag
 };
 
-#define MAX_INCL 5
+#define MAX_INCL 50
 #define INCL_CNT (h->stack.cnt)
 #define INCL (h->stack.array[INCL_CNT - 1])
 

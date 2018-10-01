@@ -531,7 +531,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 <li>relative to the top-level include file</li>
 <li>relative to the parent include file</li>
 </ol>
-<p>A maximum include depth of 5 ensures against infinite include loops (files that include each other).</p>
+<p>A maximum include depth of 50 ensures against infinite include loops (files that include each other).</p>
 <p><a name="4"></a><b>4. Specifying features</b></p>
 <p><a name="4.a"></a><b>4.a. feature</b></p>
 <p>Each feature is specified in a feature block:</p>
@@ -1772,12 +1772,12 @@ nameid I 1 S L &lt;string&gt;;    I   1          S           L</pre>
 <p><b>v1.23 [1 Oct 2018]:</b></p>
 <ul>
 <li>Clarified the resolution of include file paths, as described in <a href="https://github.com/adobe-type-tools/afdko/issues/164">GitHub issue #164</a>.</li>
+<li>Raised the maximum include depth from 5 to 50.</li>
 </ul>
 <p><b>v1.22 [20 July 2018]:</b></p>
 <ul>
 <li>Removed the restriction that 'DFLT' script is allowed to have only the 'dflt' language. This now matches the changes made in version 1.8.2 of the OpenType spec.</li>
-<li>Removed the restriction that all mark-to-base and mark-to-mark statements in a lookup must reference the same set of mark glyph classes.
-</li>
+<li>Removed the restriction that all mark-to-base and mark-to-mark statements in a lookup must reference the same set of mark glyph classes.</li>
 </ul>
 <p><b>v1.21.1 [24 Jun 2018]:</b></p>
 <ul>
