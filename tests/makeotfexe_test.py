@@ -289,3 +289,20 @@ def test_overflow_report_bug313(feat_name, error_msg):
     with open(stderr_path, 'rb') as f:
         output = f.read()
     assert error_msg in output
+
+
+def test_feature_recursion_bug628():
+    input_filename = 'bug628/font.pfa'
+    feat_filename = 'bug628/feat.fea'
+    otf_path = get_temp_file_path()
+
+    stderr_path = runner(
+        CMD + ['-s', '-e', '-o', 'shw',
+               'f', '_{}'.format(get_input_path(input_filename)),
+               'ff', '_{}'.format(get_input_path(feat_filename)),
+               'o', '_{}'.format(otf_path)])
+
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert(b"[FATAL] <SourceSans-Test> Can't include [feat.fea]; maximum "
+           b"include levels <50> reached") in output
