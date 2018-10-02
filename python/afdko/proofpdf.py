@@ -848,23 +848,18 @@ def proofMakePDF(pathList, params, txPath):
 			if tempPathCFF:
 				os.remove(tempPathCFF)
 
-
 		logMsg( "Wrote proof file %s. End time: %s." % (pdfFilePath, time.asctime()))
 		if pdfFilePath and params.openPDFWhenDone:
 			if curSystem == "Windows":
-				curdir = os.getcwdu()
-				basedir, pdfName = os.path.split(pdfFilePath)
-				os.chdir(basedir)
-				command = "start %s" % (pdfName)
-				print(command)
+				command = 'start "" "%s"' % pdfFilePath
 				fdkutils.runShellCmdLogging(command)
-				os.chdir(curdir)
-			elif os.name == "Linux":
-				command = "xdg-open \"" + pdfFilePath  + "\"" + " &"
+			elif curSystem == "Linux":
+				command = 'xdg-open "%s" &' % pdfFilePath
 				fdkutils.runShellCmdLogging(command)
 			else:
-				command = "open \"" + pdfFilePath  + "\"" + " &"
+				command = 'open "%s" &' % pdfFilePath
 				fdkutils.runShellCmdLogging(command)
+
 	else:
 		tmpList = []
 		for path in pathList:
@@ -908,19 +903,13 @@ def proofMakePDF(pathList, params, txPath):
 				logMsg("Wrote proof file %s. End time: %s." % (pdfFilePath, time.asctime()))
 			if pdfFilePath and params.openPDFWhenDone:
 				if curSystem == "Windows":
-					curdir = os.getcwdu()
-					basedir, pdfName = os.path.split(pdfFilePath)
-					os.chdir(basedir)
-					command = "start %s" % (pdfName)
-					print(command)
+					command = 'start "" "%s"' % pdfFilePath
 					fdkutils.runShellCmdLogging(command)
-					os.chdir(curdir)
 				elif curSystem == "Linux":
-					command = "xdg-open \"" + pdfFilePath  + "\"" + " &"
-					print(command)
+					command = 'xdg-open "%s" &' % pdfFilePath
 					fdkutils.runShellCmdLogging(command)
 				else:
-					command = "open \"" + pdfFilePath  + "\"" + " &"
+					command = 'open "%s" &' % pdfFilePath
 					fdkutils.runShellCmdLogging(command)
 
 
