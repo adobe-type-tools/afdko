@@ -34,6 +34,11 @@ PDF_SKIP = [
     '(Time:',
 ]
 
+PDF_SKIP_REGEX = [
+    '^.+30.00 Td',
+    '^.+0.00 Td',
+]
+
 PS_SKIP = [
     '0 740 moveto (Filename:' + SPLIT_MARKER +
     '560 (Date:' + SPLIT_MARKER +
@@ -98,16 +103,21 @@ def test_convert(from_format, to_format):
         diff_mode = []
 
     # skip items
+    regex_skip = []
+    skip = []
     if to_format == 'afm':
         skip = ['Comment Creation Date:']
     elif to_format == 'pdf':
         skip = PDF_SKIP[:]
+        regex_skip = PDF_SKIP_REGEX[:]
     elif to_format == 'ps':
         skip = PS_SKIP[:]
-    else:
-        skip = []
     if skip:
         skip.insert(0, '-s')
+    if regex_skip:
+        for regex in regex_skip:
+            skip.append('-r')
+            skip.append(regex)
 
     # format arg fix
     if to_format in ('ufo2', 'ufo3'):
