@@ -1,2 +1,8 @@
 [build-system]
-requires = ["setuptools", "wheel", "setuptools_scm"]
+# Temporarily pin wheel version to 0.31.1 as 0.32 breaks scikit-build
+# https://github.com/scikit-build/scikit-build/issues/360
+requires = [
+	"setuptools",
+	"wheel == 0.31.1",
+	"setuptools_scm"
+]
