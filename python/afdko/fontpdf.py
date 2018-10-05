@@ -1854,11 +1854,12 @@ def doWaterfall(params, glyphList, fontInfo, wi, cur_y, cur_x, pdfFont, yTop, nu
 	fontInfo.setEncoding(fontInfo, glyphList)
 	rt_canvas.addFont(embeddedFontPSName, fontInfo.encoding, fontInfo, getFontDescriptorItems, getEncodingInfo)
 	leading = None
-	codeRange = range(fontInfo.firstChar, fontInfo.lastChar)
-	text = map(lambda charCode: chr(charCode), codeRange)
-	text = "".join(text)
-	text= text.replace("\\", "\\\\")
-	#print text, codeRange, glyphList
+	text = ''
+	for char_int in range(fontInfo.firstChar, fontInfo.lastChar):
+		if char_int == 92:  # backslash
+			text += '\\\\'
+		else:
+			text += chr(char_int)
 	for gSize in params.waterfallRange:
 		cur_y -= gSize*1.2
 		if ((cur_y) < params.pageBottomMargin):
