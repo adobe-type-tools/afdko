@@ -100,3 +100,19 @@ def test_fontplot2_lf_option(font_filename, glyphs):
     expected_path = get_expected_path(pdf_filename)
     assert differ([expected_path, save_path,
                    '-s', '/CreationDate', '-e', 'macroman'])
+
+
+@pytest.mark.parametrize('filename', ['SourceSansPro-Black',
+                                      'SourceSansPro-BlackIt'])
+def test_waterfallplot(filename):
+    font_filename = '{}.otf'.format(filename)
+    pdf_filename = '{}.pdf'.format(filename)
+    font_path = get_input_path(font_filename)
+    save_path = get_temp_file_path()
+    expected_path = get_expected_path(pdf_filename)
+    runner(['-t', 'waterfallplot',
+            '-o', 'o', '_{}'.format(save_path), 'dno', '-f', font_path, '-a'])
+    assert differ([expected_path, save_path,
+                   '-s', '/CreationDate',
+                   '-r', r'^BT 1 0 0 1 \d{3}\.\d+ 742\.0000 Tm',  # timestamp
+                   '-e', 'macroman'])
