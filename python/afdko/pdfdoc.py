@@ -173,17 +173,15 @@ class PDFDocument:
         the file.  Keep track of the file position at each point for
         use in the index at the end"""
         f = fileobj
-        i = 1
         self.xref = []
         f.write(tobytes("%PDF-1.2" + LINEEND, encoding='utf-8'))  # for CID support
         f.write(tobytes(b"%\xed\xec\xb6\xbe\r\n", encoding='utf-8'))
-        for obj in self.objects:
+        for i, obj in enumerate(self.objects, 1):
             pos = f.tell()
             self.xref.append(pos)
             f.write(tobytes(str(i) + ' 0 obj' + LINEEND, encoding='utf-8'))
             obj.save(f)
             f.write(tobytes('endobj' + LINEEND, encoding='utf-8'))
-            i = i + 1
         self.writeXref(f)
         self.writeTrailer(f)
         f.write(tobytes('%%EOF', encoding='utf-8'))  # no lineend needed on this one!
@@ -573,7 +571,7 @@ class PDFStream(PDFObject):
         else:
             file.write(tobytes('<< /Length %d >>' % length + LINEEND, encoding='utf-8'))
         file.write(tobytes('stream' + LINEEND, encoding='utf-8'))
-        file.write(tobytes(data_to_write + LINEEND, encoding='utf-8'))
+        file.write(tobytes(data_to_write + LINEEND, encoding='latin-1'))
         file.write(tobytes('endstream' + LINEEND, encoding='utf-8'))
 
 class PDFImage(PDFObject):
