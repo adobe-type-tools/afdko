@@ -1300,24 +1300,12 @@ def doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages = None):
 		rt_canvas.drawString(params.pageLeftMargin, cur_y, title)
 		rt_canvas.drawRightString(rightMarginPos, cur_y, time.asctime())
 	cur_y -= pageTitleSize*1.2
-	path = repr(params.rt_filePath) # Can be non-ASCII
 	if numPages == None:
 		numPages = numGlyphs // params.glyphsPerPage
 		if (numGlyphs % params.glyphsPerPage) > 0:
 			numPages +=1
 	pageString = '   %d of %s' % (rt_canvas.getPageNumber(), numPages)
-	pathWidth = pdfmetrics.stringwidth(path, pageTitleFont)  * 0.001 * pageTitleSize
-	pageStringWidth = pdfmetrics.stringwidth(pageString, pageTitleFont) * 0.001 * pageTitleSize
-	adjustedWidth = 0
-	while (params.pageLeftMargin + pathWidth + pageStringWidth)  > rightMarginPos:
-		adjustedWidth = 1
-		path = path[1:]
-		pathWidth = pdfmetrics.stringwidth( "..." + path, pageTitleFont)  * 0.001 * pageTitleSize
-
-	if adjustedWidth:
-		path = "..." + path[3:]
 	if pageIncludeTitle:
-		rt_canvas.drawString(params.pageLeftMargin, cur_y, path)
 		rt_canvas.drawRightString(rightMarginPos, cur_y, pageString)
 	cur_y -= pageTitleSize/2
 	if pageIncludeTitle:
