@@ -5,6 +5,7 @@ schedule: every week
 
 requirements:
   - requirements.txt:
+      update: True
       pin: False
   - requirements-dev.txt:
       update: False
