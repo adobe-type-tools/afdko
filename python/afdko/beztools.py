@@ -2,7 +2,7 @@ from __future__ import print_function
 import sys
 
 """
-beztools.py v 1.14 Aug 28 2018
+beztools.py v 1.15 Oct 10 2018
 
 Utilities for converting between T2 charstrings and the bez data format.
 Used by autohint and checkoutlines.
@@ -1055,7 +1055,7 @@ def convertBezToT2(bezString):
 	vhints.sort()
 	numHHints = len(hhints)
 	numVHints =  len(vhints)
-	hintLimit = (kStackLimit-2)/2
+	hintLimit = (kStackLimit - 2) // 2
 	if numHHints >=hintLimit:
 		hhints = hhints[:hintLimit]
 		numHHints = hintLimit
@@ -1274,7 +1274,7 @@ class CFFFontData:
 					blueValues = inactiveAlignmentValues
 					numBlueValues = len(blueValues)
 				else:
-					raise	ACFontError("Error: font must have at least four values in it's BlueValues array for AC to work!")
+					raise	ACFontError("Error: font must have at least four values in its BlueValues array for AC to work!")
 		else:
 			if allow_no_blues:
 				blueValues = inactiveAlignmentValues

@@ -24,7 +24,7 @@ def _copy_fontinfo_file():
         copy2(fontinfo_source, fontinfo_copy)
 
 
-def teardown_module():
+def teardown_function():
     """
     Deletes the temporary 'fontinfo' file
     """
@@ -92,3 +92,12 @@ def test_basic_hinting(font_filename, opt):
 
     expected_path = get_expected_path(expected_filename)
     assert differ([expected_path, actual_path] + diff_mode + skip)
+
+
+def test_beztools_hhint_over_limit_bug629():
+    test_filename = 'bug629.pfa'
+    actual_path = get_temp_file_path()
+    expected_path = get_expected_path(test_filename)
+    runner(CMD + ['-o', 'nb', 'o', '_{}'.format(actual_path),
+                  '-f', test_filename])
+    assert differ([expected_path, actual_path])
