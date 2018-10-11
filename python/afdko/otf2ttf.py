@@ -3,6 +3,7 @@ from __future__ import print_function, division, absolute_import
 
 import argparse
 import logging
+import os
 import sys
 
 from cu2qu.pens import Cu2QuPen
@@ -92,10 +93,18 @@ def main(args=None):
     parser.add_argument("--face-index", type=int, default=0)
     options = parser.parse_args(args)
 
+    if options.output and len(options.input) > 1:
+        if not os.path.isdir(options.output):
+            parser.error("-o/--output option must be a directory when "
+                         "processing multiple fonts")
+
     for path in options.input:
-        output = options.output or makeOutputFileName(path,
-                                                      outputDir=None,
-                                                      extension='.ttf')
+        if options.output and not os.path.isdir(options.output):
+            output = options.output
+        else:
+            output = makeOutputFileName(path, outputDir=options.output,
+                                        extension='.ttf')
+
         font = TTFont(path, fontNumber=options.face_index)
         otf_to_ttf(font,
                    post_format=options.post_format,
