@@ -54,4 +54,4 @@ def test_warnings_bug635():
         warnings = f.read().replace(b'mergefonts.exe:', b'mergefonts:')
     with open(warnings_path, 'wb') as f:
         f.write(warnings)
-    assert differ([expected_path, warnings_path, '-l', '1,5-7,25-26'])
+    assert differ([expected_path, warnings_path, '-l', '1,5-7,11-12'])
