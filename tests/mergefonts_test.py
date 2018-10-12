@@ -5,7 +5,7 @@ import subprocess32 as subprocess
 
 from runner import main as runner
 from differ import main as differ
-from test_utils import get_expected_path, get_temp_file_path
+from test_utils import get_expected_path, get_temp_file_path, get_input_path
 
 TOOL = 'mergefonts'
 CMD = ['-t', TOOL]
@@ -40,3 +40,18 @@ def test_convert_to_cid():
                   alias2_filename, font2_filename,
                   alias3_filename, font3_filename])
     assert differ([expected_path, actual_path, '-m', 'bin'])
+
+
+def test_warnings_bug635():
+    font1_path = get_input_path('bug635/cidfont.ps')
+    font2_path = get_input_path('bug635/rotated.ps')
+    actual_path = get_temp_file_path()
+    expected_path = get_expected_path('bug635.txt')
+    warnings_path = runner(
+        CMD + ['-s', '-e', '-a', '-f', actual_path, font1_path, font2_path])
+    # On Windows the messages start with 'mergefonts.exe:'
+    with open(warnings_path, 'rb') as f:
+        warnings = f.read().replace(b'mergefonts.exe:', b'mergefonts:')
+    with open(warnings_path, 'wb') as f:
+        f.write(warnings)
+    assert differ([expected_path, warnings_path, '-l', '1,5-7,11-12'])

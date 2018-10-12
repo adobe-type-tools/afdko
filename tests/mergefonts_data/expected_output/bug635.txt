@@ -1,0 +1,14 @@
+mergefonts: --- cidfont.ps
+mergefonts: (cfw) unused hints <cid-13340>
+mergefonts: (cfw) unused hints <cid-16961>
+mergefonts: (cfw) unused hints <cid-16963>
+Adding font dict 0 from cidfont.ps.
+Adding font dict 1 from cidfont.ps.
+mergefonts: --- rotated.ps
+mergefonts: (cfw) glyph skipped - same name, different charstring as glyph in font <cid-0>
+mergefonts: (cfw) all hintsubs removed (fixupmap enabled) <cid-48957>
+mergefonts: (cfw) all hintsubs removed (fixupmap enabled) <cid-48968>
+Adding font dict 2 from rotated.ps.
+Adding font dict 3 from rotated.ps.
+mergefonts: (cfw) There are 7 additional reports of 'duplicate hintsubs (discarded)'.
+
