@@ -134,6 +134,7 @@ struct cstrCtx_ {
     unsigned long unique;             /* Unique subroutinizer separator value */
     unsigned short warning[warn_cnt]; /* Warning accumulator */
     cfwCtx g;                         /* Package context */
+    long glyphwarning;                /* Warning per glyph */
 };
 
 static void flushBlends(cstrCtx h);
@@ -214,6 +215,7 @@ void cfwCstrFree(cfwCtx g) {
 static void addWarn(cstrCtx h, int type) {
     h->warning[type]++;
     h->flags |= SEEN_WARN;
+    h->glyphwarning |= 1 << type;
 }
 
 /* Begin new glyph definition. */
@@ -263,6 +265,7 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
     CLEAR_MASK(h->hintmask);
     CLEAR_MASK(h->cntrmask);
     h->glyph.info = info;
+    h->glyphwarning = 0;
 
     return ABF_CONT_RET;
 }
@@ -2378,7 +2381,7 @@ static void printWarn(cstrCtx h) {
     }
 
     for (i = 0; i < warn_cnt; i++) {
-        if (h->warning[i] > 0 &&
+        if ((h->glyphwarning & (1 << i)) &&
             ((g->flags & CFW_WARN_DUP_HINTSUBS) || i != warn_hint1)) {
             char *msg = warnMsg(i);
 
