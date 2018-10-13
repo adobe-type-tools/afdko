@@ -6,7 +6,7 @@ environment:
     CIBW_ENVIRONMENT: PYTHONWARNINGS=ignore
     CIBW_TEST_REQUIRES: pytest-cov==2.5.1 codecov subprocess32
     CIBW_TEST_COMMAND: cd {project} && pytest --cov -v && coverage combine && codecov && pip uninstall --yes afdko
-    TWINE_USERNAME: afdko-travis
+    TWINE_USERNAME: adobe-type-tools-ci
     # Note: TWINE_PASSWORD is set in AppVeyor settings
 
 matrix:
