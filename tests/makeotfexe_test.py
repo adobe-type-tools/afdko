@@ -306,3 +306,23 @@ def test_feature_recursion_bug628():
         output = f.read()
     assert(b"[FATAL] <SourceSans-Test> Can't include [feat.fea]; maximum "
            b"include levels <50> reached") in output
+
+
+@pytest.mark.parametrize('arg', [[], ['gs']])
+def test_recalculate_bbox_bug617(arg):
+    input_filename = "bug617/font.pfa"
+    goadb_filename = "bug617/goadb.txt"
+    ttx_filename = "bug617/{}gs_opt.ttx".format('no_' if not arg else '')
+    actual_path = get_temp_file_path()
+    runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
+                        'gf', '_{}'.format(get_input_path(goadb_filename)),
+                        'o', '_{}'.format(actual_path), 'r'] + arg)
+    actual_ttx = generate_ttx_dump(actual_path, ['head', 'CFF '])
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx,
+                   '-s',
+                   '<ttFont sfntVersion' + SPLIT_MARKER +
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <created value=' + SPLIT_MARKER +
+                   '    <modified value='])
