@@ -2185,7 +2185,12 @@ static void saveBlend(parseCtx h, DICT *dict, int iKey) {
 static void storeArray(parseCtx h, DICT *dict, int op, int cnt, double *array) {
     int i;
     for (i = 0; i < cnt; i++) {
-        dictSaveNumber(dict, array[i]);
+        if (op == cff_FontBBox) {
+            /* use 3 byte ints so we can easily patch them later, if needed */
+            dictSaveNumberAsShortInt(dict, array[i]);
+        } else {
+            dictSaveNumber(dict, array[i]);
+        }
     }
     DICTSAVEOP(*dict, op);
 }
