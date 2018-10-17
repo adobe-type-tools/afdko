@@ -16,6 +16,13 @@ void dictSaveInt(DICT *dict, long i) {
     memcpy(dnaEXTEND(*dict, length), t, length);
 }
 
+void dictSaveNumberAsShortInt(DICT *dict, double d) {
+    char t[5];
+    long i = (long)d;
+    int length = csEncIntegerAsShortInt(i, t);
+    memcpy(dnaEXTEND(*dict, length), t, length);
+}
+
 /* Save real or integer number in dict */
 void dictSaveNumber(DICT *dict, double d) {
     char buf[50];

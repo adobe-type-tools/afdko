@@ -13,6 +13,7 @@
 #include "GPOS.h"
 #include "OS_2.h"
 #include "MMFX.h"
+#include "dictops.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -1045,12 +1046,106 @@ char *refillDSIG(void *ctx, long *count, unsigned long tag) {
 
 /* ------------------------------------------------------------------------- */
 
+int bbox_changed(BBox *x, BBox *y) {
+    return (   (x->left   != y->left)
+            || (x->right  != y->right)
+            || (x->top    != y->top)
+            || (x->bottom != y->bottom));
+}
+
+void patch_cff_fontbbox(hotCtx g) {
+    long count;
+    char *data;
+    long offset, top_dict_start, top_dict_end;
+    uint8_t b0;
+
+    data = g->cb.cffSeek(g->cb.ctx, 0, &count);
+
+    offset = 8 + data[8]; /* get past end of name string to top dict index */
+    top_dict_end = 3 + offset + data[offset + 4]; /* calc end index of top dict */
+    offset += 5; /* get past top dict index to start of top dict itself */
+
+    /* parse the top dict to find the FontBBox key */
+    top_dict_start = offset;
+    while (offset <= top_dict_end)
+    {
+        b0 = data[offset];
+        if (b0 == cff_FontBBox) {
+            break;
+        } else if (b0 == cff_BCD) {
+            while (((b0 & 0x0F) != 0x0F)
+                  && ((b0 & 0xF0) != 0xF0)
+                  && offset < top_dict_end) {
+                offset++;
+                b0 = data[offset];
+            }
+            continue;
+        } else if (b0 == cff_longint) {
+            offset += 5;
+            continue;
+        } else if (b0 == cff_shortint) {
+            offset += 3;
+            continue;
+        } else if ((247 <= b0) && (b0 <= 254)) {
+            offset += 2;
+            continue;
+        } else if ((32 <= b0) && (b0 <= 246)) {
+            offset += 1;
+            continue;
+        } else if (b0 == cff_escape) {
+            offset += 2;
+            continue;
+        } else {
+            offset += 1;
+            continue;
+        }
+    }
+
+    /* make sure we found the key and that we have room for the values */
+    if ((b0 != cff_FontBBox) || (offset < top_dict_start + 12))
+    {
+        hotMsg(g, hotWARNING, "unable to patch FontBBox in CFF table");
+        return;
+    }
+
+    /* back up to start of FontBBox data */
+    offset -= 12;
+
+    /* make sure we see four short (3-byte) ints and a FontBBox key */
+    if (   (data[offset] != cff_shortint)
+        || (data[offset + 3] != cff_shortint)
+        || (data[offset + 6] != cff_shortint)
+        || (data[offset + 9] != cff_shortint)
+        || (data[offset + 12] != cff_FontBBox)) {
+        hotMsg(g, hotWARNING, "unable to patch FontBBox in CFF table");
+        return;
+    }
+
+    data[offset + 1] = (g->font.bbox.left & 0xFF00) >> 8;
+    data[offset + 2] = (g->font.bbox.left & 0xFF);
+
+    data[offset + 4] = (g->font.bbox.bottom & 0xFF00) >> 8;
+    data[offset + 5] = (g->font.bbox.bottom & 0xFF);
+
+    data[offset + 7] = (g->font.bbox.right & 0xFF00) >> 8;
+    data[offset + 8] = (g->font.bbox.right & 0xFF);
+
+    data[offset + 10] = (g->font.bbox.top & 0xFF00) >> 8;
+    data[offset + 11] = (g->font.bbox.top & 0xFF);
+}
+
 /* Convert to OTF */
 void hotConvert(hotCtx g) {
+    BBox old_bbox;
+
     if (IS_MM(g)) {
         sortInstances(g);
     }
+    old_bbox = g->font.bbox;
     setBounds(g);
+    if (bbox_changed(&old_bbox, &g->font.bbox)) {
+        patch_cff_fontbbox(g);
+    }
     mapFill(g);
     featFill(g);
 
