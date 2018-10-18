@@ -749,7 +749,7 @@ static int partitionRanges(cmapCtx h, Mapping *mapping) {
     }
     mapping[i - span].span = span;
     if (span > 1)
-        setOrdered(mapping, 1, span, i - span);
+        setOrdered(mapping, 1, span, i);
     else
         mapping[i - span].ordered = 0;
 
