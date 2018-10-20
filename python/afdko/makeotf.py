@@ -2639,13 +2639,6 @@ def runMakeOTF(makeOTFParams):
                     print("makeotf [Warning] Major version number not in "
                           "range 1 .. 255")
 
-                # XXX start workaround for makeotfexe issue
-                # https://github.com/adobe-type-tools/afdko/issues/617
-                if getattr(makeOTFParams,
-                           kFileOptPrefix + kDoSubset) == 'true':
-                    update_cff_font_bbox(font, outputPath)
-                # end workaround
-
                 print("Built release mode font '%s' Revision %s" % (
                     outputPath, font_version))
 
@@ -2658,17 +2651,6 @@ def runMakeOTF(makeOTFParams):
         print("Built development mode font '%s'." % outputPath)
 
     os.chdir(curdir)
-
-
-def update_cff_font_bbox(font, path):
-    cff = font['CFF '].cff
-    top_dict = cff[cff.fontNames[0]].rawDict
-    cff_bbox = top_dict.get('FontBBox', None)
-    head = font['head']
-    head_bbox = [head.xMin, head.yMin, head.xMax, head.yMax]
-    if cff_bbox != head_bbox:
-        top_dict['FontBBox'] = head_bbox
-        font.save(path)
 
 
 def CheckEnvironment():
