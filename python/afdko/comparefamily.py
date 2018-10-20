@@ -3787,13 +3787,13 @@ def doFamilyTest11():
 			for nameIDKey in font.nameIDDict.keys():
 				Platform, Encoding, Language, ID = nameIDKey
 
-				if (Platform == 1) and (Encoding == 0)  and (ID == 18):
+				if (Platform == 1) and (Encoding == 0)  and (ID == 18) and Language == 0:
 					macMenuName = tounicode(font.nameIDDict[nameIDKey])
 
-				if (Platform == 1) and (Encoding == 0) and (ID == 4) and not macMenuName:
+				if (Platform == 1) and (Encoding == 0) and (ID == 4) and Language == 0 and not macMenuName:
 					macMenuName = tounicode(font.nameIDDict[nameIDKey])
 
-				if Platform == 3 and Encoding == 1 and ID == 1:
+				if Platform == 3 and Encoding == 1 and ID == 1 and Language == 1033:
 					winMenuName = tounicode(font.nameIDDict[nameIDKey].decode('utf_16_be'))
 			if font.isBold or font.isItalic:
 				if not font.isCID:
