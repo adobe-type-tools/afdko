@@ -3,7 +3,6 @@ language: python
 env:
   global:
     - CIBW_SKIP="cp34-* cp35-* cp37-* *i686"
-    - CIBW_ENVIRONMENT="PYTHONWARNINGS=ignore"
     - CIBW_TEST_REQUIRES_MACOS="pytest-cov==2.5.1 codecov subprocess32"
     - CIBW_TEST_REQUIRES_LINUX="pytest subprocess32"
     - CIBW_TEST_COMMAND_MACOS="cd {project} && pytest --cov -v && coverage combine && codecov && pip uninstall --yes afdko"
