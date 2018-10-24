@@ -102,8 +102,8 @@ typedef struct /* Outlet */
     float angle;                /* angle */
     float score;                /* segment score */
     long flags;                 /* Status flags */
-#define OUTLET_DELETE (1 << 0)  /* Outlet deleted */
-#define OUTLET_OUT (1 << 1)     /* Outlet outgoing */
+#define OUTLET_DELETE  (1 << 0) /* Outlet deleted */
+#define OUTLET_OUT     (1 << 1) /* Outlet outgoing */
 #define OUTLET_VISITED (1 << 2) /* Outlet visited */
 } Outlet;
 
@@ -151,12 +151,12 @@ typedef struct /* Segment */
     Extrema xExtrema; /* Curve extrema */
     Extrema yExtrema;
     long flags;                /* Status flags */
-#define SEG_DELETE (1 << 0)    /* Segment deleted */
-#define SEG_LINE (1 << 1)      /* Line segment (else curve segment) */
-#define SEG_ISECT (1 << 2)     /* Segment intersected */
+#define SEG_DELETE    (1 << 0) /* Segment deleted */
+#define SEG_LINE      (1 << 1) /* Line segment (else curve segment) */
+#define SEG_ISECT     (1 << 2) /* Segment intersected */
 #define SEG_WIND_TEST (1 << 3) /* Segment winding tested */
-#define SEG_REVERSE (1 << 4)   /* Segment to be reversed */
-#define SEG_VISITED (1 << 5)   /* Segment has been visited during path reconstruction */
+#define SEG_REVERSE   (1 << 4) /* Segment to be reversed */
+#define SEG_VISITED   (1 << 5) /* Segment has been visited during path reconstruction */
     long iPrev;                /* Previous segment index */
     long iNext;                /* Next segment index */
     long iPath;                /* Parent path */
