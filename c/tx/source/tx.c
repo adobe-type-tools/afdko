@@ -143,7 +143,7 @@ typedef struct /* Data stream */
 {
     short type;
     short flags;
-#define STM_TMP_ERR (1 << 0)    /* Temporary stream error occured */
+#define STM_TMP_ERR    (1 << 0) /* Temporary stream error occured */
 #define STM_DONT_CLOSE (1 << 1) /* Don't close stream */
     char *filename;
     FILE *fp;
@@ -231,22 +231,22 @@ enum {
 struct txCtx_ {
     char *progname;                   /* This program's name (for diagnostics) */
     long flags;                       /* Control flags */
-#define SEEN_MODE (1 << 0)            /* Flags mode option seen */
-#define DONE_FILE (1 << 1)            /* Processed font file */
-#define DUMP_RES (1 << 2)             /* Print mac resource map */
-#define DUMP_ASD (1 << 3)             /* Print AppleSingle/Double data */
-#define AUTO_FILE_FROM_FILE (1 << 4)  /* Gen. dst filename from src filename */
-#define AUTO_FILE_FROM_FONT (1 << 5)  /* Gen. dst filename from src FontName */
-#define SUBSET_OPT (1 << 6)           /* Subsetting option specified */
-#define EVERY_FONT (1 << 7)           /* Read every font from multi-font file */
-#define SHOW_NAMES (1 << 8)           /* Show filename and FontName being processed */
-#define PRESERVE_GID (1 << 9)         /* Preserve gids when subsetting */
-#define NO_UDV_CLAMPING (1 << 10)     /* Don't clamp UVD's */
+#define SEEN_MODE           (1 <<  0) /* Flags mode option seen */
+#define DONE_FILE           (1 <<  1) /* Processed font file */
+#define DUMP_RES            (1 <<  2) /* Print mac resource map */
+#define DUMP_ASD            (1 <<  3) /* Print AppleSingle/Double data */
+#define AUTO_FILE_FROM_FILE (1 <<  4) /* Gen. dst filename from src filename */
+#define AUTO_FILE_FROM_FONT (1 <<  5) /* Gen. dst filename from src FontName */
+#define SUBSET_OPT          (1 <<  6) /* Subsetting option specified */
+#define EVERY_FONT          (1 <<  7) /* Read every font from multi-font file */
+#define SHOW_NAMES          (1 <<  8) /* Show filename and FontName being processed */
+#define PRESERVE_GID        (1 <<  9) /* Preserve gids when subsetting */
+#define NO_UDV_CLAMPING     (1 << 10) /* Don't clamp UVD's */
 #define SUBSET__EXCLUDE_OPT (1 << 11) /* use glyph list to exclude glyphs, instead of including them */
-#define SUBSET_SKIP_NOTDEF (1 << 12)  /* While this is set, don't force the notdef into the current subset. */
-#define SUBSET_HAS_NOTDEF (1 << 13)   /* Indcates that notdef has been added, no need to force it in.*/
+#define SUBSET_SKIP_NOTDEF  (1 << 12) /* While this is set, don't force the notdef into the current subset. */
+#define SUBSET_HAS_NOTDEF   (1 << 13) /* Indcates that notdef has been added, no need to force it in.*/
 #define PATH_REMOVE_OVERLAP (1 << 14) /* Do not remove path overlaps */
-#define PATH_SUPRESS_HINTS (1 << 15)  /* Do not remove path overlaps */
+#define PATH_SUPRESS_HINTS  (1 << 15) /* Do not remove path overlaps */
     int mode;                         /* Current mode */
     char *modename;                   /* Name of current mode */
     abfTopDict *top;                  /* Top dictionary */
@@ -422,10 +422,10 @@ struct txCtx_ {
     struct /* t1write library */
     {
         long options;             /* Control options */
-#define T1W_NO_UID (1 << 0)       /* Remove UniqueID keys */
-#define T1W_DECID (1 << 1)        /* -decid option */
-#define T1W_USEFD (1 << 2)        /* -usefd option */
-#define T1W_REFORMAT (1 << 3)     /* -pfb or -LWFN options */
+#define T1W_NO_UID       (1 << 0) /* Remove UniqueID keys */
+#define T1W_DECID        (1 << 1) /* -decid option */
+#define T1W_USEFD        (1 << 2) /* -usefd option */
+#define T1W_REFORMAT     (1 << 3) /* -pfb or -LWFN options */
 #define T1W_WAS_EMBEDDED (1 << 4) /* +E option */
         t1wCtx ctx;
         Stream tmp;
@@ -455,26 +455,26 @@ struct txCtx_ {
     struct /* Dump cff mode */
     {
         long flags; /* Control flags */
-#define DCF_Header (1 << 0)
-#define DCF_NameINDEX (1 << 1)
-#define DCF_TopDICTINDEX (1 << 3)
-#define DCF_StringINDEX (1 << 4)
-#define DCF_GlobalSubrINDEX (1 << 5)
-#define DCF_Encoding (1 << 6)
-#define DCF_Charset (1 << 7)
-#define DCF_FDSelect (1 << 8)
-#define DCF_FDArrayINDEX (1 << 9)
+#define DCF_Header           (1 <<  0)
+#define DCF_NameINDEX        (1 <<  1)
+#define DCF_TopDICTINDEX     (1 <<  3)
+#define DCF_StringINDEX      (1 <<  4)
+#define DCF_GlobalSubrINDEX  (1 <<  5)
+#define DCF_Encoding         (1 <<  6)
+#define DCF_Charset          (1 <<  7)
+#define DCF_FDSelect         (1 <<  8)
+#define DCF_FDArrayINDEX     (1 <<  9)
 #define DCF_CharStringsINDEX (1 << 10)
-#define DCF_PrivateDICT (1 << 11)
-#define DCF_LocalSubrINDEX (1 << 12)
-#define DCF_AllTables N_BIT_MASK(13)
-#define DCF_BreakFlowed (1 << 13)   /* Break flowed objects */
-#define DCF_TableSelected (1 << 14) /* -T option used */
-#define DCF_Flatten (1 << 15)       /* Flatten charstrings */
-#define DCF_SaveStemCnt (1 << 16)   /* Save h/vstems counts */
-#define DCF_IS_CUBE (1 << 17)       /* Font has Cube data - use different stack and op limits. */
-#define DCF_IS_CFF2 (1 << 18)       /* Font has CFF table is CFF 2 */
-#define DCF_END_HINTS (1 << 19)     /* have seen moveto */
+#define DCF_PrivateDICT      (1 << 11)
+#define DCF_LocalSubrINDEX   (1 << 12)
+#define DCF_AllTables   N_BIT_MASK(13)
+#define DCF_BreakFlowed      (1 << 13) /* Break flowed objects */
+#define DCF_TableSelected    (1 << 14) /* -T option used */
+#define DCF_Flatten          (1 << 15) /* Flatten charstrings */
+#define DCF_SaveStemCnt      (1 << 16) /* Save h/vstems counts */
+#define DCF_IS_CUBE          (1 << 17) /* Font has Cube data - use different stack and op limits. */
+#define DCF_IS_CFF2          (1 << 18) /* Font has CFF table is CFF 2 */
+#define DCF_END_HINTS        (1 << 19) /* have seen moveto */
 
         int level;                    /* Dump level */
         char *sep;                    /* Flowed text separator */
