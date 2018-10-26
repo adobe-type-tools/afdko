@@ -11,6 +11,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <math.h>
+#include <stdint.h>
 #include "ctutil.h"
 
 /* Exchange 2 values of size "s" pointed to by "a" and "b". */
@@ -152,17 +153,17 @@ void ctuANSITime2LongDateTime(struct tm *ansi, ctuLongDateTime ldt) {
 /* Convert Apple LongDateTime format to ANSI standard date/time format.
    Algorithm adapted from standard Julian Day calculation. */
 void ctuLongDateTime2ANSITime(struct tm *ansi, ctuLongDateTime ldt) {
-    unsigned long elapsed = ((unsigned long)ldt[4] << 24 |
-                             (unsigned long)ldt[5] << 16 |
-                             ldt[6] << 8 |
-                             ldt[7]);
-    long A = elapsed / (24 * 60 * 60L);
-    long B = A + 1524;
-    long C = (long)((B - 122.1) / 365.25);
-    long D = (long)(C * 365.25);
-    long E = (long)((B - D) / 30.6001);
-    long F = (long)(E * 30.6001);
-    long secs = elapsed - A * (24 * 60 * 60L);
+    uint32_t elapsed = (ldt[4] << 24 |
+                        ldt[5] << 16 |
+                        ldt[6] <<  8 |
+                        ldt[7]);
+    int A = elapsed / (24 * 60 * 60L);
+    int B = A + 1524;
+    int C = ((B - 122.1) / 365.25);
+    int D = (C * 365.25);
+    int E = ((B - D) / 30.6001);
+    int F = (E * 30.6001);
+    int secs = elapsed - A * (24 * 60 * 60L);
     if (E > 13) {
         ansi->tm_year = C + 1;
         ansi->tm_mon = E - 14;
@@ -282,10 +283,10 @@ void ctuGetVersion(ctlVersionCallbacks *cb) {
     cb->called |= 1 << CTU_LIB_ID;
 }
 
-char *CTL_SPLIT_VERSION(char *version_buf, unsigned int version) {
-    sprintf(version_buf, "%d.%d.%d", (int)((version) >> 16 & 0xff),
-            (int)((version) >> 8 & 0xff),
-            (int)((version)&0xff));
+char *CTL_SPLIT_VERSION(char *version_buf, int version) {
+    sprintf(version_buf, "%d.%d.%d", ((version) >> 16 & 0xff),
+            ((version) >> 8 & 0xff),
+            ((version)&0xff));
     return version_buf;
 }
 

@@ -32,7 +32,7 @@
 /* CTL_MAKE_VERSION combines the "major", "branch", and "minor" parameters into
    a single value of type long. */
 
-char *CTL_SPLIT_VERSION(char *version_buf, unsigned int version);
+char *CTL_SPLIT_VERSION(char *version_buf, int version);
 
 /* CTL_SPLIT_VERSION splits the "version" parameter into its comma-separated
    major, branch, and minor component values that may be passed to printf,
@@ -465,7 +465,7 @@ typedef struct ctlVersionCallbacks_ ctlVersionCallbacks;
 struct ctlVersionCallbacks_ {
     void *ctx;
     unsigned long called;
-    void (*getversion)(ctlVersionCallbacks *cb, long version, char *libname);
+    void (*getversion)(ctlVersionCallbacks *cb, int version, char *libname);
 };
 
 enum {
