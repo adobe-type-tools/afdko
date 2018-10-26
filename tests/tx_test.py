@@ -330,3 +330,11 @@ def test_recalculate_font_bbox_bug618(to_format, args, exp_filename):
         skip = ['-s', 'Comment Creation Date:']
 
     assert differ([expected_path, save_path] + diff_mode + skip)
+
+
+def test_glyph_bboxes_bug655():
+    font_path = get_input_path('bug655.ufo')
+    expected_path = get_expected_path('bug655.txt')
+    result_path = get_temp_file_path()
+    runner(CMD + ['-o', 'mtx', '2', '-f', font_path, result_path])
+    assert differ([expected_path, result_path])
