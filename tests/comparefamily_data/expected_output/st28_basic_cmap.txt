@@ -1,0 +1,10 @@
+Directory: /Users/msousa/Git/adobe-type-tools/afdko/tests/comparefamily_data/input/basic_cmap
+Loading Adobe Glyph Dict...
+building lists of preferred families...
+Number of preferred families: 1 ['Source Sans Pro']
+Number of font faces: 1
+
+
+Single Face Test 28: Check font OS/2 code pages for the a common set of code page bits.
+	Error: font has OS/2.ulCodePageRange1 bit 0 set, but the test heuristics say it should not be set. SourceSansPro-Regular.
+	Error: font has OS/2.ulUnicodeRange1 bit 0 set for Unicode block Basic Latin, but the test heuristics say it should not be set. SourceSansPro-Regular.

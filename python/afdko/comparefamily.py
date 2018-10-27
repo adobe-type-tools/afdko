@@ -10,7 +10,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-comparefamily 2.1.1 Sep 18 2018
+comparefamily 2.1.2 Oct 26 2018
 
 comparefamily [u] -h] [-d <directory path>] [-tolerance <n>] -rm] [-rn] [-rp] [-nohints] [-l] [-rf] [-st n1,..] [-ft n1,..]
 where 'n1' stands for the number of a test, such as "-st 26" to run Single Test 26.
@@ -970,7 +970,7 @@ def readGlyphInfo(cmpfFont):
 	if not metrics:
 		print("Error: Quitting. Could not run 'tx' against the font %s to get font metrics." % cmpfFont.path)
 		print("\t tx log output <" + report + ">.")
-		sys.exit(0)
+		sys.exit(1)
 	cmpfFont.metricsDict = {}
 	for entry in metrics:
 		valList = [eval(val) for val in entry[1:]]
@@ -3026,11 +3026,6 @@ def doSingleTest28():
 			pass
 
 		# Check unicodeTable. Say block is supported if it has at least 1/3 of the necessary glyphs.
-		# Get Unicode cmap subtable
-		if not haveUVCmap:
-			print("\tError: font has no Unicode camp table! Skipping check of OS/2 ulUnicodeRanges. %s." % ())
-			continue
-
 		unitTableDict = {}
 		# build dict of which blocks are/are nto supported.
 		for unicodeBlock in unicodeTable:
