@@ -267,6 +267,8 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
     h->glyph.info = info;
     h->glyphwarning = 0;
 
+    g->glyph_metrics.cb.beg(&g->glyph_metrics.cb, info);
+
     return ABF_CONT_RET;
 }
 
@@ -275,6 +277,8 @@ static void glyphWidth(abfGlyphCallbacks *cb, float hAdv) {
     cfwCtx g = (cfwCtx)cb->direct_ctx;
     cstrCtx h = g->ctx.cstr;
     h->glyph.hAdv = roundf(hAdv);
+
+    g->glyph_metrics.cb.width(&g->glyph_metrics.cb, hAdv);
 }
 
 /* Save number in charstring. */
@@ -449,6 +453,8 @@ static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0) {
     dy0 = y0 - h->y;
     h->x = h->start_x = x0;
     h->y = h->start_y = y0;
+
+    g->glyph_metrics.cb.move(&g->glyph_metrics.cb, x0, y0);
 
     /* Choose format */
     if ((dx0 == 0.0) && doOptimize) {
@@ -659,6 +665,8 @@ static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1) {
         insertMove(cb);
     }
 
+    g->glyph_metrics.cb.line(&g->glyph_metrics.cb, x1, y1);
+
     /* Choose format */
     if ((dx1 == 0.0) && doOptimize) {
         /* - dy1 vlineto */
@@ -865,6 +873,8 @@ static void glyphCurve(abfGlyphCallbacks *cb,
     if (!(h->flags & SEEN_MOVETO)) {
         insertMove(cb);
     }
+
+    g->glyph_metrics.cb.curve(&g->glyph_metrics.cb, x1, y1, x2, y2, x3, y3);
 
     /* Choose format */
     if ((dx1 == 0.0) && doOptimize) {
@@ -2419,6 +2429,27 @@ void printFinalWarn(cfwCtx g) {
     }
 }
 
+static void updateFontBoundingBox(cfwCtx g) {
+    /* ignore empty glyphs */
+    if (   (g->glyph_metrics.ctx.int_mtx.left == 0)
+        && (g->glyph_metrics.ctx.int_mtx.right == 0)
+        && (g->glyph_metrics.ctx.int_mtx.top == 0)
+        && (g->glyph_metrics.ctx.int_mtx.bottom == 0))
+        return;
+
+    if (g->glyph_metrics.ctx.int_mtx.left < g->font_bbox.left)
+        g->font_bbox.left = g->glyph_metrics.ctx.int_mtx.left;
+
+    if (g->glyph_metrics.ctx.int_mtx.right > g->font_bbox.right)
+        g->font_bbox.right = g->glyph_metrics.ctx.int_mtx.right;
+
+    if (g->glyph_metrics.ctx.int_mtx.top > g->font_bbox.top)
+        g->font_bbox.top = g->glyph_metrics.ctx.int_mtx.top;
+
+    if (g->glyph_metrics.ctx.int_mtx.bottom < g->font_bbox.bottom)
+        g->font_bbox.bottom = g->glyph_metrics.ctx.int_mtx.bottom;
+}
+
 /* End glyph definition. */
 static void glyphEnd(abfGlyphCallbacks *cb) {
     cfwCtx g = (cfwCtx)cb->direct_ctx;
@@ -2552,6 +2583,10 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
     if (h->flags & SEEN_WARN) {
         printWarn(h);
     }
+
+    g->glyph_metrics.cb.end(&g->glyph_metrics.cb);
+
+    updateFontBoundingBox(g);
 }
 
 static void glyphCubeBlend(abfGlyphCallbacks *cb, unsigned int nBlends, unsigned int numVals, float *blendVals) {

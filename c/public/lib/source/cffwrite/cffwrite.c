@@ -1472,6 +1472,15 @@ int cfwBegFont(cfwCtx g, cfwMapCallback *map, unsigned long maxNumSubrs) {
     h->flags &= ~(SEEN_NAME_KEYED_GLYPH | SEEN_CID_KEYED_GLYPH);
     h->mergedDicts = 0;
 
+    /* Set up metrics facility */
+    g->glyph_metrics.cb = abfGlyphMetricsCallbacks;
+    g->glyph_metrics.cb.direct_ctx = &g->glyph_metrics.ctx;
+    g->glyph_metrics.ctx.flags = 0;
+    g->font_bbox.left = INT16_MAX;
+    g->font_bbox.bottom = INT16_MAX;
+    g->font_bbox.right = INT16_MIN;
+    g->font_bbox.top = INT16_MIN;
+
     return cfwSuccess;
 }
 
@@ -1829,6 +1838,18 @@ static void analyzeWidths(controlCtx h) {
     }
 }
 
+static void zeroOutEmptyFontBBox(cfwCtx g) {
+    if (   (g->font_bbox.left   == INT16_MAX)
+        && (g->font_bbox.bottom == INT16_MAX)
+        && (g->font_bbox.right  == INT16_MIN)
+        && (g->font_bbox.top    == INT16_MIN)) {
+        g->font_bbox.left   = 0;
+        g->font_bbox.right  = 0;
+        g->font_bbox.top    = 0;
+        g->font_bbox.bottom = 0;
+    }
+}
+
 /* End font. */
 int cfwEndFont(cfwCtx g, abfTopDict *top) {
     controlCtx h = g->ctx.control;
@@ -1878,6 +1899,15 @@ int cfwEndFont(cfwCtx g, abfTopDict *top) {
             h->_new->flags |= FONT_SYN;
         }
     }
+
+    /* if we only had empty glyphs, set bbox to zeros */
+    zeroOutEmptyFontBBox(g);
+
+    /* update top dict's font bounding box with aggregate values */
+    top->FontBBox[0] = (float)g->font_bbox.left;
+    top->FontBBox[1] = (float)g->font_bbox.bottom;
+    top->FontBBox[2] = (float)g->font_bbox.right;
+    top->FontBBox[3] = (float)g->font_bbox.top;
 
     /* Copy dict data from client */
     cfwDictCopyTop(g, &h->_new->top, top);
