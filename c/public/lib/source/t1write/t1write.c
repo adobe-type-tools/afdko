@@ -2666,8 +2666,6 @@ static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1) {
     float dx1;
     float dy1;
 
-    h->glyph_metrics.cb.line(&h->glyph_metrics.cb, x1, y1);
-
     x1 = (float)RND_ON_WRITE(x1);  // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
     y1 = (float)RND_ON_WRITE(y1);
     dx1 = x1 - h->path.x;
@@ -2687,6 +2685,8 @@ static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1) {
 
     if (accomodate(h, 2, 1))
         return;
+
+    h->glyph_metrics.cb.line(&h->glyph_metrics.cb, x1, y1);
 
     /* Choose format */
     if (dx1 == 0.0) {
