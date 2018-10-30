@@ -305,7 +305,7 @@ def test_subroutine_sorting_bug494():
 
 @pytest.mark.parametrize('args, exp_filename', [([], 'roundtrip'),
                                                 (['g', '_0-1'], 'subset')])
-@pytest.mark.parametrize('to_format', ['t1', 'cff'])  # TODO: 'afm'
+@pytest.mark.parametrize('to_format', ['t1', 'cff', 'afm'])
 def test_recalculate_font_bbox_bug618(to_format, args, exp_filename):
     font_path = get_input_path('bug618.pfa')
     save_path = get_temp_file_path()
