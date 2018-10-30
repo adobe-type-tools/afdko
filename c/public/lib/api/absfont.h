@@ -911,16 +911,24 @@ extern const abfGlyphCallbacks abfGlyphDrawCallbacks;
 typedef struct abfAFMCtx_ *abfAFMCtx;
 struct abfAFMCtx_ {
     FILE *fp; /* Output stream */
+    FILE *tmp_fp; /* tempory output stream */
     int err_code;
-    struct /* Metric data */
+    struct /* glyph metrics */
     {
         struct abfMetricsCtx_ ctx;
         abfGlyphCallbacks cb;
-    } metrics;
+    } glyph_metrics;
+    struct /* aggregate font bounding box metrics */
+    {
+        int16_t left;
+        int16_t bottom;
+        int16_t right;
+        int16_t top;
+    } font_bbox;
 };
 
-void abfAFMBegFont(abfAFMCtx h, abfTopDict *top);
-void abfAFMEndFont(abfAFMCtx h);
+void abfAFMBegFont(abfAFMCtx h);
+void abfAFMEndFont(abfAFMCtx h, abfTopDict *top);
 
 extern const abfGlyphCallbacks abfGlyphAFMCallbacks;
 
