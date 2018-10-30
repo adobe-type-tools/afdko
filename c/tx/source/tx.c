@@ -1376,19 +1376,24 @@ static void afm_BegSet(txCtx h) {
 /* Begin new font. */
 static void afm_BegFont(txCtx h, abfTopDict *top) {
     dstFileOpen(h, top);
+    h->abf.afm.tmp_fp = tmpfile();
+    if (h->abf.afm.tmp_fp == NULL) {
+        fatal(h, "Error opening temp file for AFM.");
+    }
     h->abf.afm.fp = h->dst.stm.fp;
     top->sup.filename =
         (strcmp(h->src.stm.filename, "-") == 0) ? "stdin" : h->src.stm.filename;
-    abfAFMBegFont(&h->abf.afm, top);
+    abfAFMBegFont(&h->abf.afm);
 }
 
 /* End new font. */
 static void afm_EndFont(txCtx h) {
-    abfAFMEndFont(&h->abf.afm);
+    abfAFMEndFont(&h->abf.afm, h->top);
 }
 
 /* End font set. */
 static void afm_EndSet(txCtx h) {
+    fclose(h->abf.afm.tmp_fp);
     dstFileClose(h);
 }
 
