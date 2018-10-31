@@ -28,6 +28,7 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
+from afdko.checkoutlinesufo import run as checkoutlinesUFO
 from afdko.ufotools import validateLayers
 
 
@@ -106,28 +107,13 @@ def updateInstance(options, fontInstancePath):
     if options.doOverlapRemoval:
         logger.info("Doing overlap removal with checkoutlinesufo on %s ..." %
                     fontInstancePath)
-        logList = []
-        opList = ["-e", fontInstancePath]
+        co_args = ['-e', '-q', fontInstancePath]
         if options.no_round:
-            opList.insert(0, "-d")
-        opList.insert(0, 'checkoutlinesufo')
-        proc = Popen(opList, stdout=PIPE)
-        while 1:
-            output = tounicode(proc.stdout.readline())
-            if output:
-                logList.append(output)
-            if proc.poll() is not None:
-                output = proc.stdout.readline()
-                if output:
-                    if options.verbose == 1:
-                        print(output, end='')
-                    logList.append(output)
-                break
-        log = "".join(logList)
-        if not ("Done with font" in log):
-            logger.error(log)
-            logger.error("Error in checkoutlinesufo %s" % fontInstancePath)
-            raise(SnapShotError)
+            co_args.insert(0, '-d')
+        try:
+            checkoutlinesUFO(co_args)
+        except Exception:
+            raise
 
     if options.doAutoHint:
         logger.info("Running autohint on %s ..." % fontInstancePath)
