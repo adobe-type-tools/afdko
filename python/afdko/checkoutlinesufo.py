@@ -6,7 +6,7 @@ Tool that performs outline quality checks and can remove path overlaps.
 
 from __future__ import print_function, absolute_import
 
-__version__ = '2.2.0'
+__version__ = '2.2.1'
 
 import argparse
 from functools import cmp_to_key
@@ -119,7 +119,6 @@ class FontFile(object):
             self.ufo_font_hash_data.close()
 
     def save(self):
-        print("Saving font...")
         if self.save_to_default_layer:
             self.defcon_font.save()
         else:
@@ -1122,17 +1121,15 @@ def run(args=None):
     if not font_changed:
         # Even if the program didn't change any glyphs,
         # we should still save updates to the src glyph hash file.
-        print()
         font_file.close()
     else:
-        print()
         font_file.save()
 
     if processed_glyph_count != seen_glyph_count:
         print("Skipped %s of %s glyphs." %
               (seen_glyph_count - processed_glyph_count, seen_glyph_count))
-    print("Done with font")
-    return
+    if not options.quiet_mode:
+        print("Done with font")
 
 
 def main():
