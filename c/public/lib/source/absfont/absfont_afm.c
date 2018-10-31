@@ -32,6 +32,7 @@ void abfAFMBegFont(abfAFMCtx h) {
 
 void abfAFMEndFont(abfAFMCtx h, abfTopDict *top) {
     time_t now = time(NULL);
+    int c;
 
     /* update top dict's font bounding box with aggregate values */
     top->FontBBox[0] = (float)h->font_bbox.left;
@@ -98,12 +99,8 @@ void abfAFMEndFont(abfAFMCtx h, abfTopDict *top) {
 
     /* copy glyph metrics from temp file to output file */
     rewind(h->tmp_fp);
-    while (!feof(h->tmp_fp)) {
-        int c;
-        c = fgetc(h->tmp_fp);
-        if (c != EOF) {
-            fputc(c, h->fp);
-        }
+    while ((c = fgetc(h->tmp_fp)) != EOF) {
+        fputc(c, h->fp);
     }
 
     fprintf(h->fp, "EndCharMetrics\n");
@@ -201,7 +198,7 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
     abfAFMCtx h = (abfAFMCtx)cb->direct_ctx;
     abfMetricsCtx g = &h->glyph_metrics.ctx;
     abfGlyphInfo *info = cb->info;
-    unsigned long code = (info->encoding.code == ABF_GLYPH_UNENC) ? (unsigned long)-1 : (unsigned long)info->encoding.code;
+    long code = (info->encoding.code == ABF_GLYPH_UNENC) ? -1 : info->encoding.code;
     h->glyph_metrics.cb.end(&h->glyph_metrics.cb);
 
     updateFontBoundingBox(h);
