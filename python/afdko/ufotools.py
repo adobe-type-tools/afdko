@@ -17,7 +17,7 @@ from fontTools.misc.py23 import open, tobytes, tounicode
 from afdko import convertfonttocid, fdkutils
 
 __doc__ = """
-ufotools.py v1.31.0 Aug 28 2018
+ufotools.py v1.32.0 Nov 1 2018
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -328,8 +328,8 @@ def debugMsg(*args):
 # UFO names
 kDefaultGlyphsLayerName = "public.default"
 kDefaultGlyphsLayer = "glyphs"
-kProcessedGlyphsLayerName = "AFDKO ProcessedGlyphs"
-kProcessedGlyphsLayer = "glyphs.com.adobe.type.processedGlyphs"
+kProcessedGlyphsLayerName = "com.adobe.type.processedglyphs"
+kProcessedGlyphsLayer = "glyphs." + kProcessedGlyphsLayerName
 kFontInfoName = "fontinfo.plist"
 kContentsName = "contents.plist"
 kLibName = "lib.plist"
