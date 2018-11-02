@@ -26,13 +26,13 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "txops.h"
 #include "dictops.h"
 #include "abfdesc.h"
-#include "supportframepixeltypes.h"
 #include "sha1.h"
 
 #undef global /* Remove conflicting definition from buildch */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #if PLAT_MAC
 #include <console.h>
@@ -236,10 +236,10 @@ typedef struct
     CIDInfo cidinfo;                   /* info used to convert a non-CID font to a cID fontl. */
     unsigned short fileIndex;
     unsigned short curGAEIndex; /* current index of the GAE entry  Must be set in */
-    boolean seenNotdef;
+    bool seenNotdef;
     int mode;                /* the file type of the first font. Thsi is what sets the outptu font file type. */
-    boolean hintsOnly;       /* copy hints only */
-    boolean compareNameOnly; /* compare hint dict to source font dict by name only. Not yet used - at the moment, mergeFonts compares teh fontName only. */
+    bool hintsOnly;       /* copy hints only */
+    bool compareNameOnly; /* compare hint dict to source font dict by name only. Not yet used - at the moment, mergeFonts compares teh fontName only. */
     struct
     {
         long cnt; /* ABF_EMPTY_ARRAY */
@@ -2693,7 +2693,7 @@ static void mtx_Help(txCtx h) {
 
 /* --------------------------------- t1 mode ------------------------------- */
 
-static boolean applyCIDFontInfo(txCtx h, boolean fontisCID) {
+static bool applyCIDFontInfo(txCtx h, bool fontisCID) {
     if (h->mergeInfo.cidinfo.CIDFontName[0] != 0) /* if the users has specified a cidfontinfo file, override the first font's cid info. */
     {
         fontisCID = 1;
@@ -2739,7 +2739,7 @@ static boolean applyCIDFontInfo(txCtx h, boolean fontisCID) {
     return fontisCID;
 }
 
-static GAFileInfo *checkIFParentCIDCompatible(txCtx h, abfTopDict *local_top, boolean parentIsCID, boolean localFontIsCID) {
+static GAFileInfo *checkIFParentCIDCompatible(txCtx h, abfTopDict *local_top, bool parentIsCID, bool localFontIsCID) {
     GAFileInfo *gaf = NULL;
     unsigned short fileIndex = h->mergeInfo.fileIndex;
 
@@ -5103,8 +5103,8 @@ static void t1rReadFont(txCtx h, long origin) {
 }
 
 /* Merge font with t1read library. */
-static void t1rMergeFont(txCtx h, long origin, boolean isFirstFont, sourceCtx *srcCtx) {
-    boolean parentIsCID = 0;
+static void t1rMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcCtx) {
+    bool parentIsCID = 0;
     GAFileInfo *gaf = NULL;
 
     if (isFirstFont) {
@@ -5169,7 +5169,7 @@ static void t1rMergeFont(txCtx h, long origin, boolean isFirstFont, sourceCtx *s
         unsigned int fileIndex = h->mergeInfo.fileIndex;
         t1rCtx local_t1r_ctx;
         abfTopDict *local_top = NULL;
-        boolean localFontIsCID = 0;
+        bool localFontIsCID = 0;
         parentIsCID = h->top->sup.flags & ABF_CID_FONT;
 
         local_t1r_ctx = t1rNew(&h->cb.mem, &h->cb.stm, T1R_CHECK_ARGS);
@@ -5266,15 +5266,15 @@ static void svrReadFont(txCtx h, long origin) {
 }
 
 /* Merge font with svread library. */
-static void svrMergeFont(txCtx h, long origin, boolean isFirstFont, sourceCtx *srcCtx) {
+static void svrMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcCtx) {
     GAFileInfo *gaf = NULL;
     if (isFirstFont)
         fatal(h, "An SVG font cannot be the first font in a merge list - it doesn't have a complete top dict.");
     else {
         svrCtx local_svr_ctx;
         abfTopDict *local_top = NULL;
-        boolean parentIsCID = h->top->sup.flags & ABF_CID_FONT;
-        boolean localFontIsCID = 0;
+        bool parentIsCID = h->top->sup.flags & ABF_CID_FONT;
+        bool localFontIsCID = 0;
 
         local_svr_ctx = svrNew(&h->cb.mem, &h->cb.stm, SVR_CHECK_ARGS);
 
@@ -5356,9 +5356,9 @@ static void ufoReadFont(txCtx h, long origin) {
 }
 
 /* Merge font with uforead library. */
-static void ufoMergeFont(txCtx h, long origin, boolean isFirstFont, sourceCtx *srcCtx) {
+static void ufoMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcCtx) {
     GAFileInfo *gaf = NULL;
-    boolean parentIsCID = 0;
+    bool parentIsCID = 0;
 
     if (isFirstFont) {
         h->mergeInfo.mode = mode_ufow;
@@ -5416,8 +5416,8 @@ static void ufoMergeFont(txCtx h, long origin, boolean isFirstFont, sourceCtx *s
     } else {
         ufoCtx local_ufr_ctx;
         abfTopDict *local_top = NULL;
-        boolean parentIsCID = h->top->sup.flags & ABF_CID_FONT;
-        boolean localFontIsCID;
+        bool parentIsCID = h->top->sup.flags & ABF_CID_FONT;
+        bool localFontIsCID;
 
         local_ufr_ctx = ufoNew(&h->cb.mem, &h->cb.stm, UFO_CHECK_ARGS);
 
@@ -5693,8 +5693,8 @@ static void cfrReadFont(txCtx h, long origin, int ttcIndex) {
 }
 
 /* Merge font with cffread library. */
-static void cfrMergeFont(txCtx h, long origin, boolean isFirstFont, sourceCtx *srcCtx) {
-    boolean parentIsCID = 0;
+static void cfrMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcCtx) {
+    bool parentIsCID = 0;
     GAFileInfo *gaf = NULL;
 
     if (isFirstFont) {
@@ -5753,7 +5753,7 @@ static void cfrMergeFont(txCtx h, long origin, boolean isFirstFont, sourceCtx *s
     } else {
         cfrCtx local_cfr_ctx;
         abfTopDict *local_top = NULL;
-        boolean localFontIsCID = 0;
+        bool localFontIsCID = 0;
 
         parentIsCID = h->top->sup.flags & ABF_CID_FONT;
         local_cfr_ctx = cfrNew(&h->cb.mem, &h->cb.stm, CFR_CHECK_ARGS);
@@ -7114,7 +7114,7 @@ static int mergeGlyphBegin(abfGlyphCallbacks *cb, abfGlyphInfo *srcInfo) {
 }
 
 /* Merge file. */
-static void mergeFile(txCtx h, char *srcname, boolean isFirstFont, sourceCtx *srcCtx) {
+static void mergeFile(txCtx h, char *srcname, bool isFirstFont, sourceCtx *srcCtx) {
     long i;
     char *p;
     struct stat fileStat;
@@ -7204,9 +7204,9 @@ static int CTL_CDECL cmpGAEBySrcCID(const void *first, const void *second) {
 }
 #endif
 
-static boolean readGlyphAliasFile(txCtx h, int fileIndex, char *filePath) {
+static bool readGlyphAliasFile(txCtx h, int fileIndex, char *filePath) {
     FILE *ga_fp;
-    boolean isGA = 0;
+    bool isGA = 0;
     char lineBuffer[MAX_DICT_ENTRY_LEN];
     char progName[MAX_DICT_ENTRY_LEN];
     int len;
@@ -7348,7 +7348,7 @@ static int doMergeFileSet(txCtx h, int argc, char *argv[], int i) {
 
     /* a glyph alias file applies to the following font file. */
     while (i < argc) {
-        boolean isGA;
+        bool isGA;
         char *filePath = argv[i++];
         int j;
 
