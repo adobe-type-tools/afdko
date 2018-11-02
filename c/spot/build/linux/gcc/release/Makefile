@@ -61,7 +61,6 @@ PRG_SRCS = $(SRC_DIR)/BASE.c \
 	$(SRC_DIR)/main.c \
 	$(SRC_DIR)/map.c \
 	$(SRC_DIR)/maxp.c \
-	$(SRC_DIR)/memcheck.c \
 	$(SRC_DIR)/name.c \
 	$(SRC_DIR)/opt.c \
 	$(SRC_DIR)/pathbuild.c \
@@ -132,7 +131,6 @@ PRG_INCLUDES = $(SRC_DIR)/BASE.h \
 	$(SRC_DIR)/loca.h \
 	$(SRC_DIR)/map.h \
 	$(SRC_DIR)/maxp.h \
-	$(SRC_DIR)/memcheck.h \
 	$(SRC_DIR)/name.h \
 	$(SRC_DIR)/nicename.h \
 	$(SRC_DIR)/numtypes.h \
@@ -202,7 +200,6 @@ PRG_OBJS = $(OBJECT_DIR)/BASE.o \
 	$(OBJECT_DIR)/main.o \
 	$(OBJECT_DIR)/map.o \
 	$(OBJECT_DIR)/maxp.o \
-	$(OBJECT_DIR)/memcheck.o \
 	$(OBJECT_DIR)/name.o \
 	$(OBJECT_DIR)/opt.o \
 	$(OBJECT_DIR)/pathbuild.o \
@@ -359,9 +356,6 @@ $(OBJECT_DIR)/map.o: $(SRC_DIR)/map.c $(PRG_INCLUDES)
 
 $(OBJECT_DIR)/maxp.o: $(SRC_DIR)/maxp.c $(PRG_INCLUDES)
 	$(CC)  $(CFLAGS) -c $(SRC_DIR)/maxp.c -o $(OBJECT_DIR)/maxp.o
-
-$(OBJECT_DIR)/memcheck.o: $(SRC_DIR)/memcheck.c $(PRG_INCLUDES)
-	$(CC)  $(CFLAGS) -c $(SRC_DIR)/memcheck.c -o $(OBJECT_DIR)/memcheck.o
 
 $(OBJECT_DIR)/name.o: $(SRC_DIR)/name.c $(PRG_INCLUDES)
 	$(CC)  $(CFLAGS) -c $(SRC_DIR)/name.c -o $(OBJECT_DIR)/name.o
