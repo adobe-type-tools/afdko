@@ -10,7 +10,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-comparefamily 2.1.2 Oct 26 2018
+comparefamily 2.1.3 Nov 1 2018
 
 comparefamily [u] -h] [-d <directory path>] [-tolerance <n>] -rm] [-rn] [-rp] [-nohints] [-l] [-rf] [-st n1,..] [-ft n1,..]
 where 'n1' stands for the number of a test, such as "-st 26" to run Single Test 26.
@@ -900,7 +900,7 @@ kKnownLanguageTags = [
 
 gAGDDict = {}
 
-class compare_family_font:
+class CompareFamilyFont:
 		def __init__(self, ttFont, path):
 			self.ttFont = ttFont
 			self.path = path
@@ -1023,36 +1023,20 @@ def readCFFTable(cmpfFont):
 	cmpfFont.topDict = first_font_topDict
 	try:
 		cmpfFont.FDArray = first_font_topDict.FDArray
-		cmpfFont.isCID = 1
+		cmpfFont.isCID = True
 	except:
-		cmpfFont.isCID = 0
+		cmpfFont.isCID = False
 		cmpfFont.FDArray = [first_font_topDict]
 
 
 # sorting routines for reports
 
-# default sorting based on Windows compatible name and style name.
 def sort_font(fontlist):
-	newlist = [fontlist[0]]
-	for font in fontlist[1:]:
-		if font.compatibleFamilyName3 > newlist[-1].compatibleFamilyName3:
-			newlist.append(font)
-		else:
-			for i in range(len(newlist)):
-				if	font.compatibleFamilyName3 < newlist[i].compatibleFamilyName3:
-					newlist.insert(i,font)
-					break
-				elif font.compatibleFamilyName3 == newlist[i].compatibleFamilyName3:
-					if font.macStyle < newlist[i].macStyle:
-						newlist.insert(i,font)
-						break
-					elif i == len(newlist)-1:
-						newlist.append(font)
-						break
-				elif i == len(newlist)-1:
-					newlist.append(font)
-					break
-	return newlist
+	"""
+	Returns a new list that is first sorted by the font's compatibleFamilyName3
+	(Windows compatible name), and secondly by the font's macStyle (style name).
+	"""
+	return sorted(fontlist, key=lambda font: (font.compatibleFamilyName3, font.macStyle))
 
 def sort_by_numGlyphs_and_PostScriptName1(fontlist):
 	"""
@@ -1186,13 +1170,13 @@ def readNameTable(cmpfFont):
 		try:
 			cmpfFont.copyrightStr1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 0)].decode('mac_roman'))
 		except KeyError:
-			print("	Error: Missing Mac Copyright String from name table! Should be in record", (1, 0, 0, 0), cmpfFont.PostScriptName1)
+			print("	Warning: Missing Mac Copyright String from name table! Should be in record", (1, 0, 0, 0), cmpfFont.PostScriptName1)
 			cmpfFont.copyrightStr1 = ""
 
 		try:
 			cmpfFont.trademarkStr1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 7)].decode('mac_roman'))
 		except KeyError:
-			print("	Error: Missing Mac Trademark String from name table! Should be in record", (1, 0, 0, 7), cmpfFont.PostScriptName1)
+			print("	Warning: Missing Mac Trademark String from name table! Should be in record", (1, 0, 0, 7), cmpfFont.PostScriptName1)
 			cmpfFont.trademarkStr1 = ""
 
 
@@ -1251,14 +1235,14 @@ def readNameTable(cmpfFont):
 	try:
 		cmpfFont.copyrightStr3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 0)].decode('utf_16_be'))
 	except KeyError:
-		print("	Error: Missing Windows Copyright String/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 0), cmpfFont.PostScriptName3)
+		print("	Warning: Missing Windows Copyright String/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 0), cmpfFont.PostScriptName3)
 		cmpfFont.copyrightStr3 = ""
 
 
 	try:
 		cmpfFont.trademarkStr3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 7)].decode('utf_16_be'))
 	except KeyError:
-		print("	Error: Missing Windows Trademark String/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 7), cmpfFont.PostScriptName3)
+		print("	Warning: Missing Windows Trademark String/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 7), cmpfFont.PostScriptName3)
 		cmpfFont.trademarkStr3 = ""
 
 	if not cmpfFont.hasMacNames:
@@ -1413,8 +1397,7 @@ def readhheaTable(cmpfFont):
 
 
 def handle_datafork_file(path):
-	tt = ttLib.TTFont(path)
-	return tt
+	return ttLib.TTFont(path)
 
 
 
@@ -1470,10 +1453,10 @@ def guessfiletype(path):
 
 
 # Fill in font info by reading the required tables
-def get_fontinfo(pathname, type):
-	if type == "resource":
+def get_fontinfo(pathname, font_type):
+	if font_type == "resource":
 		ttFont = handle_resource_file(pathname)
-	elif type == "datafork":
+	elif font_type == "datafork":
 		ttFont = handle_datafork_file(pathname)
 	else:
 		ttFont = None
@@ -1485,39 +1468,35 @@ def build_fontlist_from_dir(directory):
 	global fontlist
 	try:
 		# get all files in the directory
-		dirlist = os.listdir(directory)
+		dirlist = sorted(os.listdir(directory))
 	except OSError:
 		print("No files found in the directory", directory)
 		return []
 
-	fontlist = []
-	for i in range(len(dirlist)):
-		filename = dirlist[i]
+	for filename in dirlist:
 		path = os.path.join(directory, filename )
 		if os.path.isfile(path):
-			type = guessfiletype(path)
-			if type == "unknown":
+			font_type = guessfiletype(path)
+			if font_type == "unknown":
 				continue
 		else:
 			continue
 
-		ttFont = get_fontinfo(path, type)
-		if ttFont != None:
-			cmpfFont = compare_family_font(ttFont, path)
-			if 'CFF ' in cmpfFont.ttFont.keys():
-				cmpfFont.isTTF = 0
+		ttFont = get_fontinfo(path, font_type)
+		if ttFont is not None:
+			cmpfFont = CompareFamilyFont(ttFont, path)
+			if 'CFF ' in cmpfFont.ttFont:
+				cmpfFont.isTTF = False
+				readCFFTable(cmpfFont)
 			else:
-				cmpfFont.isTTF = 1
+				cmpfFont.isTTF = True
+				cmpfFont.isCID = False
+				cmpfFont.topDict = None
 			readNameTable(cmpfFont)
 			readheadTable(cmpfFont)
 			readhheaTable(cmpfFont)
 			readOS2Table(cmpfFont)
 			readpostTable(cmpfFont)
-			if 'CFF ' in cmpfFont.ttFont.keys():
-				readCFFTable(cmpfFont)
-			else:
-				cmpfFont.isCID = 0
-				cmpfFont.topDict = None
 			readGlyphInfo(cmpfFont)
 			fontlist.append(cmpfFont)
 
@@ -2421,37 +2400,38 @@ oldLigatureNames = {
 		"zy" : "z",
 		}
 
-accentNames = {
-			"acute" : 1,
-			"acutecomb" : 1,
-			"bar" : 1,
-			"breve" : 1,
-			"caron" : 1,
-			"cedilla" : 1,
-			"comb" : 1,
-			"circumflex" : 1,
-			"croat" : 1,
-			"dieresis" : 1,
-			"dot" : 1,
-			"dotaccent" : 1,
-			"grave" : 1,
-			"gravecomb" : 1,
-			"hook" : 1,
-			"hookabove" : 1,
-			"hookabovecomb" : 1,
-			"hungarumlaut" : 1,
-			"macron" : 1,
-			"ogonek" : 1,
-			"ring" : 1,
-			"ringacute" : 1,
-			"slash" : 1,
-			"slashacute" : 1,
-			"tilde" : 1,
-			"tildecomb" : 1,
-			"uni0302" : 1,
-			"uni0313" : 1,
-			"umlaut" : 1,
-			}
+NAMES_OF_ACCENTS = set([
+			"accent",
+			"acute",
+			"acutecomb",
+			"bar",
+			"breve",
+			"caron",
+			"cedilla",
+			"comb",
+			"circumflex",
+			"croat",
+			"dieresis",
+			"dot",
+			"dotaccent",
+			"grave",
+			"gravecomb",
+			"hook",
+			"hookabove",
+			"hookabovecomb",
+			"hungarumlaut",
+			"macron",
+			"ogonek",
+			"ring",
+			"ringacute",
+			"slash",
+			"slashacute",
+			"tilde",
+			"tildecomb",
+			"uni0302",
+			"uni0313",
+			"umlaut",
+			])
 
 uniLigPattern = re.compile(r"^uni([0-8A-Fa-f][0-8A-Fa-f][0-8A-Fa-f][0-8A-Fa-f])([0-8A-Fa-f][0-8A-Fa-f][0-8A-Fa-f][0-8A-Fa-f])")
 
@@ -2586,7 +2566,6 @@ def doSingleTest22():
 				if diff > gDesignSpaceTolerance:
 					print("	Warning: right side bearing %s of ligature %s is not equal to the rsb %s of the last component %s for font %s." % (rsbLig, ligName, rsbRightComp, rightComp, font.PostScriptName1))
 
-accentedNames = accentNames.keys()
 def  getAcentEntries(font):
 	# Simply delete all the sub-strings in the accentedNames list from the glyph name. If the result differs from the original, store it.
 	# We don't know yet if the baseName glyph exists.
@@ -2594,7 +2573,7 @@ def  getAcentEntries(font):
 	nameList = font.ttFont.getGlyphOrder()
 	for name in nameList:
 		baseName = name
-		for subName in accentedNames:
+		for subName in sorted(NAMES_OF_ACCENTS):
 			if baseName == subName:
 				break
 			baseName = re.sub(subName, "", baseName)
@@ -3454,11 +3433,11 @@ def doFamilyTest4():
 		if "size" in report:
 			match = re.search(r"Design Size:\s*(\d+).+?Subfamily Identifier:\s*(\d+).+name table [^:]+:\s*(\d+).+Range Start:\s*(\d+).+?Range End:\s*(\d+)", report, re.DOTALL)
 			if match:
-				font.sizeDesignSize = designSize = eval(match.group(1))
-				font.sizeSubfFamilyID = subfFamilyID = eval(match.group(2))
-				font.sizeNameID = sizeNameID = eval(match.group(3))
-				font.sizeRangeStart = rangeStart = eval(match.group(4))
-				font.sizeRangeEnd = rangeEnd = eval(match.group(5))
+				font.sizeDesignSize = eval(match.group(1))
+				font.sizeSubfFamilyID = eval(match.group(2))
+				font.sizeNameID = eval(match.group(3))
+				font.sizeRangeStart = eval(match.group(4))
+				font.sizeRangeEnd = eval(match.group(5))
 				font.sizeMenuName = ""
 				for keyTuple in font.nameIDDict.keys():
 					if keyTuple[3] == font.sizeNameID:
@@ -3471,8 +3450,7 @@ def doFamilyTest4():
 		fontgroup = preferredFamilyList1[name]
 		sizeGroupbyID = {}
 		sizeGroupbyMenu = {}
-		for i in range(len(fontgroup)):
-			font = fontgroup[i]
+		for font in fontgroup:
 			if font.sizeNameID:
 				seenSize = 1
 			gList = sizeGroupbyMenu.get(font.sizeMenuName, [])
@@ -3900,7 +3878,7 @@ def doFamilyTest12():
 		print("	Error: In GPOS/GUSB tables, the sets of lookups used by features in the script-language systems  differ between fonts.")
 		print("\tThis may be intended if the faces have different charsets.")
 
-	for value  in langSysDict.values():
+	for value in sorted(langSysDict.values()):
 		print()
 		print("Lang/Sys Table for font(s): ", end=' ')
 		for entry in  value:
@@ -4085,7 +4063,7 @@ def doFamilyTest16():
 			fontList = charsetDict.get(charset, [])
 			fontList.append(font)
 			charsetDict[charset] = fontList
-		charsetList = charsetDict.keys()
+		charsetList = sorted(charsetDict.keys())
 
 		# Can't usefully compare between fonts when there is only 1. Add these to the end of the longest charset.
 		singletonFonts = [] # list of fonts which had a unique charset.
@@ -4114,7 +4092,7 @@ def doFamilyTest16():
 					try:
 						widthList.append([htmx_table.metrics[gname][0], font.PostScriptName1])
 					except KeyError:
-						print("\tError: Glyph '%s' is in font, but is nt in the width list. This can happen when the number of glyphs in the maxp table is less than the actual number of glyphs." % (gname))
+						print("\tError: Glyph '%s' is in font, but is not in the width list. This can happen when the number of glyphs in the maxp table is less than the actual number of glyphs." % (gname))
 						pass
 				if not widthList:
 					continue
@@ -5068,7 +5046,7 @@ def main():
 			print("No directory available for processing.")
 			sys.exit(0)
 
-	if fontlist == []:
+	if not fontlist:
 			print("No font available for processing.")
 			sys.exit(0)
 
