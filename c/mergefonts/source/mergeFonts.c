@@ -5358,9 +5358,10 @@ static void ufoReadFont(txCtx h, long origin) {
 /* Merge font with uforead library. */
 static void ufoMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcCtx) {
     GAFileInfo *gaf = NULL;
-    bool parentIsCID = 0;
 
     if (isFirstFont) {
+        bool parentIsCID = 0;
+
         h->mergeInfo.mode = mode_ufow;
         if (h->ufr.ctx == NULL) {
             /* Initialize library */
