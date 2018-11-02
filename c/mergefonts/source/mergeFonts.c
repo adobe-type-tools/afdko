@@ -514,7 +514,7 @@ struct txCtx_ {
         Stream dbg;
         long flags; /* Library flags */
         int lenIV;
-        int fd;               /* -decid target fd */
+        long fd;              /* -decid target fd */
         dnaDCL(char, gnames); /* -decid glyph names */
     } t1w;
     struct /* svgwrite library */
@@ -617,14 +617,10 @@ struct txCtx_ {
 #define POP() (h->stack.array[--h->stack.cnt])
 #define PUSH(v) (h->stack.array[h->stack.cnt++] = (float)(v))
 
-/* SID to standard string map */
-static char *sid2std[] =
-    {
-#include "stdstr1.h"
-};
+/* SID to standard string length */
+#define SID2STD_LEN 391 /* number of entries in stdstr1.h */
 
 static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr);
-static void condAddNotdef(txCtx h);
 static void callbackSubset(txCtx h);
 static void txFree(txCtx h);
 
@@ -1324,7 +1320,7 @@ static void dump_BegFont(txCtx h, abfTopDict *top) {
     h->abf.dump.fp = h->dst.stm.fp;
     if (h->fd.fdIndices.cnt > 0) {
         h->abf.dump.excludeSubset = (h->flags & SUBSET__EXCLUDE_OPT);
-        h->abf.dump.fdCnt = h->fd.fdIndices.cnt;
+        h->abf.dump.fdCnt = (int)h->fd.fdIndices.cnt;
         h->abf.dump.fdArray = h->fd.fdIndices.array;
     }
     top->sup.filename =
@@ -1890,52 +1886,10 @@ static void getGlyphList(txCtx h) {
     h->cb.glyph.beg = h->cb.saveGlyphBeg;
 }
 
-/* Compare glyphs by their name. */
-static int CTL_CDECL cmpByName(const void *first, const void *second) {
-    return strcmp((*(abfGlyphInfo **)first)->gname.ptr,
-                  (*(abfGlyphInfo **)second)->gname.ptr);
-}
-
-/* Sort glyph list by glyph name. */
-static void sortGlyphsByName(txCtx h) {
-    qsort(h->src.glyphs.array, h->src.glyphs.cnt,
-          sizeof(h->src.glyphs.array[0]), cmpByName);
-}
-
-/* Compare glyphs by their fd. */
-static int CTL_CDECL cmpByFD(const void *first, const void *second) {
-    const abfGlyphInfo *a = *(abfGlyphInfo **)first;
-    const abfGlyphInfo *b = *(abfGlyphInfo **)second;
-    if (a->iFD < b->iFD)
-        return -1;
-    else if (a->iFD > b->iFD)
-        return 1;
-    else if (a->cid < b->cid)
-        return -1;
-    else if (a->cid > b->cid)
-        return 1;
-    else
-        return 0;
-}
-
-/* Sort glyph list by FD index. */
-static void sortGlyphsByFD(txCtx h) {
-    qsort(h->src.glyphs.array, h->src.glyphs.cnt,
-          sizeof(h->src.glyphs.array[0]), cmpByFD);
-}
-
-/* Make glyph subset from glyph list. */
-static void makeSubsetGlyphList(txCtx h) {
-    long i;
-    dnaSET_CNT(h->subset.glyphs, h->src.glyphs.cnt);
-    for (i = 0; i < h->src.glyphs.cnt; i++)
-        h->subset.glyphs.array[i] = h->src.glyphs.array[i]->tag;
-}
-
 /* Construct arg buffer from subset list to simulated -g option. */
 static void makeSubsetArgList(txCtx h) {
     long i;
-    long rangecnt = 0;
+    int rangecnt = 0;
     unsigned short first = h->subset.glyphs.array[0];
     unsigned short last = first;
     h->subset.args.cnt = 0;
@@ -2935,10 +2889,10 @@ static void copyPFBSegment(txCtx h, int type, long length,
     /* Write segment header */
     putc(128, dst);
     putc(type, dst);
-    putc(length, dst);
-    putc(length >> 8, dst);
-    putc(length >> 16, dst);
-    putc(length >> 24, dst);
+    putc(length         & 0xFF, dst);
+    putc((length >>  8) & 0xFF, dst);
+    putc((length >> 16) & 0xFF, dst);
+    putc((length >> 24) & 0xFF, dst);
 
     /* Copy segment data */
     copyFile(h, length, src, srcfile, dst, dstfile);
@@ -2978,10 +2932,10 @@ static void write2(FILE *fp, unsigned short value) {
 
 /* Write 4-byte big-endian number. */
 static void write4(FILE *fp, unsigned long value) {
-    putc(value >> 24, fp);
-    putc(value >> 16, fp);
-    putc(value >> 8, fp);
-    putc(value, fp);
+    putc((value >> 24) & 0xFF, fp);
+    putc((value >> 16) & 0xFF, fp);
+    putc((value >>  8) & 0xFF, fp);
+    putc(value         & 0xFF, fp);
 }
 
 /* Write padding bytes */
@@ -3008,7 +2962,7 @@ static void writeSection(txCtx h, int type, long length,
                          FILE *src, char *srcfile,
                          FILE *dst, char *dstfile) {
     /* Write full-length resouces */
-    int cnt = length / 2046;
+    long cnt = length / 2046;
     while (cnt--)
         copyPOSTRes(h, type, 2046, src, srcfile, dst, dstfile);
 
@@ -3023,16 +2977,16 @@ static void writeRef(FILE *fp, int *id, long *offset, long length) {
     write2(fp, (unsigned short)((*id)++));
     write2(fp, (unsigned short)-1);
     putc(0, fp);
-    putc(*offset >> 16, fp);
-    putc(*offset >> 8, fp);
-    putc(*offset, fp);
+    putc((*offset >> 16) & 0xFF, fp);
+    putc((*offset >>  8) & 0xFF, fp);
+    putc(*offset         & 0xFF, fp);
     write4(fp, 0);
     *offset += length + (4 + 1 + 1);
 }
 
 /* Write references. */
 static void writeRefs(FILE *fp, int *id, long *offset, long length) {
-    int cnt = length / 2046;
+    long cnt = length / 2046;
     while (cnt--)
         writeRef(fp, id, offset, 2046);
 
@@ -3055,10 +3009,10 @@ static void writeLWFN(txCtx h, FILE *font, char *fontfile,
     long length1 = begTrailer - begBinary;  /* Binary section */
     long length2 = endTrailer - begTrailer; /* Text trailer */
     long length3 = 0;                       /* End-of-font program */
-    int rescnt = ((length0 + 2045) / 2046 +
-                  (length1 + 2045) / 2046 +
-                  (length2 + 2045) / 2046 +
-                  1);
+    long rescnt = ((length0 + 2045) / 2046 +
+                   (length1 + 2045) / 2046 +
+                   (length2 + 2045) / 2046 +
+                   1);
     long datalen = rescnt * (4 + 1 + 1) + endTrailer;
     long maplen = MAP_HEADER_LEN + TYPE_LIST_LEN + rescnt * REFERENCE_LEN;
     char *tmpfil = "(t1w) reformat tmpfile";
@@ -3937,7 +3891,7 @@ static void dcf_DumpTopDICTINDEX(txCtx h, const ctlRegion *region) {
 
 /* Dump String INDEX element. */
 static void dumpStringElement(txCtx h, long index, const ctlRegion *region) {
-    flowElemBeg(h, (h->dcf.level == 5) ? ARRAY_LEN(sid2std) + index : index, 0);
+    flowElemBeg(h, (h->dcf.level == 5) ? SID2STD_LEN + index : index, 0);
     dumpString(h, region);
     flowElemEnd(h);
 }
@@ -4149,7 +4103,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
                     h->dcf.stemcnt += h->stack.cnt / 2;
                 flowStack(h);
                 {
-                    int masklen = (h->dcf.stemcnt + 7) / 8;
+                    long masklen = (h->dcf.stemcnt + 7) / 8;
                     flowOp(h, "%s[", opname[byte]);
                     left -= masklen;
                     while (masklen--)
@@ -4564,7 +4518,7 @@ static int dcf_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
 
 /* Initialize charstring dump. */
 static void initCstrs(txCtx h, abfTopDict *top) {
-    long i;
+    int i;
     int subrDump = h->dcf.flags & (DCF_GlobalSubrINDEX | DCF_LocalSubrINDEX);
 
     if (h->dcf.level < 1 ||
@@ -4603,7 +4557,7 @@ static void initCstrs(txCtx h, abfTopDict *top) {
 
 /* Begin new font. */
 static void dcf_BegFont(txCtx h, abfTopDict *top) {
-    long i;
+    int i;
     const cfrSingleRegions *single;
 
     if (h->src.type != src_OTF && h->src.type != src_CFF)
@@ -4645,7 +4599,7 @@ static void dcf_BegFont(txCtx h, abfTopDict *top) {
         const cfrRepeatRegions *repeat = cfrGetRepeatRegions(h->cfr.ctx, i);
         if (top->FDArray.cnt > 1 &&
             (h->dcf.flags & (DCF_PrivateDICT | DCF_LocalSubrINDEX)))
-            fprintf(h->dst.stm.fp, "--- FD[%ld]\n", i);
+            fprintf(h->dst.stm.fp, "--- FD[%d]\n", i);
         dcf_DumpPrivateDICT(h, &repeat->PrivateDICT);
         h->dcf.fd = &h->dcf.local.array[i];
         dcf_DumpLocalSubrINDEX(h, &repeat->LocalSubrINDEX);
@@ -5079,7 +5033,7 @@ static void callbackSubset(txCtx h) {
 static void callbackMergeGASubset(txCtx h, GAFileInfo *gaf) {
     int seltype;
     int i;
-    int numGAEEntries = gaf->gaEntrySet.cnt;
+    long numGAEEntries = gaf->gaEntrySet.cnt;
 
     if ((gaf->gaType == gafSrcCID) || (gaf->gaType == gafBothCID))
         seltype = sel_by_cid;
@@ -6006,12 +5960,12 @@ static void addTTC(txCtx h, long origin) {
     /* sfrGetNextTTCOffset() returns 0 when it is asked to get the next offset
        after the last real font, so it serves effectively as a test for
        iterating through all the fonts in the TTC. */
-    long i;
+    int i;
     long offset;
 
     if (h->arg.i != NULL) {
         int j;
-        i = strtol(h->arg.i, NULL, 0);
+        i = (int)strtol(h->arg.i, NULL, 0);
         if (i < 0)
             fatal(h, "bad TTC index (-i)");
 
@@ -6034,7 +5988,7 @@ static void addTTC(txCtx h, long origin) {
             "\n"
             "--- TableDirectory[index]=offset\n");
         for (i = 0; (offset = sfrGetNextTTCOffset(h->ctx.sfr)); i++)
-            printf("[%ld]=%08lx\n", i, offset);
+            printf("[%d]=%08lx\n", i, offset);
 
         printf(
             "\n"
@@ -6380,7 +6334,6 @@ static void doASDFormats(txCtx h, ctlTag magic) {
 /* Scan source file for fonts and build font list. */
 static void buildFontList(txCtx h) {
     ctlTag sig;
-    int fillErr = 0;
     h->fonts.cnt = 0;
 
     /* Initialize segment */
@@ -6584,7 +6537,7 @@ static void addArgs(txCtx h, char *filename) {
 }
 
 /* Get version callback function. */
-static void getversion(ctlVersionCallbacks *cb, long version, char *libname) {
+static void getversion(ctlVersionCallbacks *cb, int version, char *libname) {
     char version_buf[MAX_VERSION_SIZE + 1];
     printf("    %-10s%s\n", libname, CTL_SPLIT_VERSION(version_buf, version));
 }
@@ -6860,7 +6813,7 @@ finish:
 
 static void stringStrip(char *str) {
     int start = 0;
-    int end = strlen(str) - 1;
+    int end = (int)strlen(str) - 1;
     if (end == 0)
         return;
 
@@ -7051,21 +7004,6 @@ static void readCIDFontInfo(txCtx h, char *filePath) {
     return;
 }
 
-static int CTL_CDECL matchGAEByName(const void *key, const void *value) {
-    return strcmp(key, ((GAEntry *)value)->srcName);
-}
-
-static int CTL_CDECL matchGAEByCID(const void *key, const void *value) {
-    long firstCID = *(long *)key;
-    long secondCID = ((GAEntry *)value)->srcCID;
-
-    if (firstCID == secondCID)
-        return 0;
-    if (firstCID < secondCID)
-        return -1;
-    return 1;
-}
-
 /* Merge the source font dict into the destination font, and then
 call glyphBegin */
 static int mergeGlyphBegin(abfGlyphCallbacks *cb, abfGlyphInfo *srcInfo) {
@@ -7249,6 +7187,7 @@ static void mergeFile(txCtx h, char *srcname, boolean isFirstFont, sourceCtx *sr
     h->flags |= DONE_FILE;
 }
 
+#if 0  /* see corresponding if'd out calls in readGlyphAliasFile below */
 static int CTL_CDECL cmpGAEBySrcName(const void *first, const void *second) {
     return strcmp(((GAEntry *)first)->srcName,
                   ((GAEntry *)second)->srcName);
@@ -7263,6 +7202,7 @@ static int CTL_CDECL cmpGAEBySrcCID(const void *first, const void *second) {
         return -1;
     return 1;
 }
+#endif
 
 static boolean readGlyphAliasFile(txCtx h, int fileIndex, char *filePath) {
     FILE *ga_fp;
@@ -8540,7 +8480,7 @@ int CTL_CDECL main(int argc, char *argv[]) {
         /* Add args from script file */
         addArgs(h, argv[argc - 1]);
 
-        parseArgs(h, h->script.args.cnt, h->script.args.array);
+        parseArgs(h, (int)h->script.args.cnt, h->script.args.array);
     } else
         parseArgs(h, argc, argv);
 
