@@ -1,6 +1,43 @@
 Changelog
 =========
 
+2.8.3 (released 2018-11-02)
+---------------------------
+
+- New `otf2ttf` tool that converts OpenType-CFF fonts to TrueType.
+  ([#625](https://github.com/adobe-type-tools/afdko/pull/625))
+- [tx] Font and glyph bounding box values are updated now
+  ([#618](https://github.com/adobe-type-tools/afdko/issues/618),
+  [#655](https://github.com/adobe-type-tools/afdko/issues/655))
+- [makeotfexe] CFF table `FontBBox` values are updated now
+  ([#617](https://github.com/adobe-type-tools/afdko/issues/617))
+- [makeotfexe] Removed warning about the font's major version number
+  ([#622](https://github.com/adobe-type-tools/afdko/pull/622))
+- [makeotfexe] Fixed garbage in subtable overflow messages
+  ([#313](https://github.com/adobe-type-tools/afdko/issues/313))
+- [makeotfexe] Clarified path resolution of `include` statements
+  ([#164](https://github.com/adobe-type-tools/afdko/issues/164))
+- [makeotfexe] Raised limit of feature file include recursion to 50
+  ([#628](https://github.com/adobe-type-tools/afdko/issues/628))
+- [mergefonts] Fixed warning messages
+  ([#635](https://github.com/adobe-type-tools/afdko/issues/635))
+- [autohint] Fixed failure when path contained spaces
+  ([#654](https://github.com/adobe-type-tools/afdko/pull/654))
+- [proofpdf/waterfallplot] Various PDF-related fixes
+  ([#638](https://github.com/adobe-type-tools/afdko/pull/638))
+- [beztools] Fixed hintLimit calculation on py3
+  ([#629](https://github.com/adobe-type-tools/afdko/issues/629))
+- [comparefamily] Updated script and language lists to OpenType spec v1.8.3
+  ([#592](https://github.com/adobe-type-tools/afdko/issues/592))
+- [comparefamily] Fixed various crashes
+  ([#663](https://github.com/adobe-type-tools/afdko/pull/663),
+  746ddeb4dc995e9975f9a8851d23ed226811fdaa)
+- [makeinstancesufo] Improved the tool's options
+  ([#662](https://github.com/adobe-type-tools/afdko/pull/662))
+- [ufotools] Changed name of UFO processed layer from
+  `AFDKO ProcessedGlyphs` to `com.adobe.type.processedglyphs`
+  ([#662](https://github.com/adobe-type-tools/afdko/pull/662))
+
 2.8.2 (released 2018-09-18)
 ---------------------------
 
@@ -152,6 +189,9 @@ Changelog
 2.7.0 (released 2018-05-09)
 ---------------------------
 
+- New `ttfcomponentizer` tool that componentizes TrueType fonts using
+  the component data of a related UFO font.
+  ([#293](https://github.com/adobe-type-tools/afdko/pull/293))
 - \[CheckOutlinesUFO\] Replaced Robofab's pens with FontPens'
   ([#230](https://github.com/adobe-type-tools/afdko/issues/230))
 - Removed `extractSVGTableSVGDocs.py` and
@@ -172,8 +212,6 @@ Changelog
   ([#279](https://github.com/adobe-type-tools/afdko/pull/279))
 - \[ttxn\] Update for latest FontTools version
   ([#288](https://github.com/adobe-type-tools/afdko/pull/288))
-- New `ttfcomponentizer` tool that componentizes TrueType fonts using
-  the component data of a related UFO font.
 - Added 64-bit support for Mac OSX and Linux
   ([#271](https://github.com/adobe-type-tools/afdko/pull/271),
   [#312](https://github.com/adobe-type-tools/afdko/pull/312),
