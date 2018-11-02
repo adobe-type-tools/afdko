@@ -189,7 +189,6 @@
     <ClCompile Include="..\..\..\source\main.c" />
     <ClCompile Include="..\..\..\source\map.c" />
     <ClCompile Include="..\..\..\source\maxp.c" />
-    <ClCompile Include="..\..\..\source\memcheck.c" />
     <ClCompile Include="..\..\..\source\META.c" />
     <ClCompile Include="..\..\..\source\MMFX.c" />
     <ClCompile Include="..\..\..\source\MMVR.c" />
