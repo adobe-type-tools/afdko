@@ -7,6 +7,7 @@ import subprocess32 as subprocess
 import tempfile
 
 from fontTools.ttLib import TTFont
+from fontTools.ufoLib.errors import UFOLibError
 
 from afdko import ttfcomponentizer as ttfcomp
 
@@ -89,7 +90,9 @@ def test_run_invalid_ufo():
     ufo_path = save_path + '.ufo'
     copy2(ttf_path, save_path)
     copy2(ttf_path, ufo_path)
-    assert ttfcomp.main([save_path]) == 1
+    with pytest.raises(UFOLibError):
+        # message: 'The specified UFO does not have a known structure'
+        ttfcomp.main([save_path])
 
 
 def test_run_with_output_path():
@@ -194,7 +197,9 @@ def test_get_goadb_names_mapping_goadb_not_found():
 
 def test_get_glyph_names_mapping_invalid_ufo():
     path = _get_test_ttf_path()
-    assert ttfcomp.get_glyph_names_mapping(path) == (None, None)
+    with pytest.raises(UFOLibError):
+        # message: 'The specified UFO does not have a known structure'
+        ttfcomp.get_glyph_names_mapping(path)
 
 
 def test_get_glyph_names_mapping_names_from_lib():
@@ -219,7 +224,7 @@ def test_get_glyph_names_mapping_names_from_goadb():
 def test_get_composites_data():
     ufo, ps_names = ttfcomp.get_glyph_names_mapping(_get_test_ufo_path())
     comps_data = ttfcomp.get_composites_data(ufo, ps_names)
-    comps_name_list = sorted(list(comps_data.keys()))
+    comps_name_list = sorted(comps_data.keys())
     comps_comp_list = [comps_data[gname] for gname in comps_name_list]
     assert comps_name_list == ['aacute', 'adieresis', 'atilde', 'uni01CE']
     assert comps_comp_list[0].names == ('a', 'uni0301')
