@@ -1,0 +1,326 @@
+Directory: /Users/msousa/Git/adobe-type-tools/afdko/tests/comparefamily_data/input/font-family
+Loading Adobe Glyph Dict...
+building lists of preferred families...
+Number of preferred families: 1 ['Font']
+Number of font faces: 2
+
+
+Single Face Test 1: Length overrun check for name ID 18. Max 63 characters, must be unique within 31 chars.
+
+Single Face Test 2: Length overrun check for name ID's 1,2, 4, 16, 17. Max 63 characters.
+
+Single Face Test 3: Check that name ID 4 (Full Name) starts with same string as Preferred Family Name, and is the same as the CFF font Full Name.
+
+Single Face Test 4: Version name string matches release font criteria and head table value
+
+Single Face Test 5: Check that CFF PostScript name is same as name table name ID 6.
+
+Single Face Test 6: Check that Copyright, Trademark, Designer note, and foundry values are present, and match default values.
+	Error: Environment variable CF_DEFAULT_URL is not set, so I can't compare it to  Mac Foundry URL name id 11.
+	Error: Environment variable CF_DEFAULT_FOUNDRY_CODE is not set, so I can't compare it to  the OS/2 table foundry code.
+
+Single Face Test 7: Checking for deprecated CFF operators.
+
+Single Face Test 8: Check SubFamily Name (name ID 2) for  Regular Style, Bold Style, Italic Style, and BoldItalic Style
+
+Single Face Test 9: Check that no OS/2.usWeightClass is less than 250
+
+Single Face Test 10: Check that no Bold Style face has OS/2.usWeightClass of less than 500
+
+Single Face Test 11: Check that BASE table exists, and has reasonable values
+	Error: font Font-Quadratic does not have a BASE table. This is necessary for users who are editing in a different script than the font is designed for.
+
+Single Face Test 12: Check that Italic style is set when post table italic angle is non-zero, and that italic angle is reasonable.
+
+Single Face Test 13: Warn if post.isFixedPitch is set when font is not monospaced.
+
+Single Face Test 14: Warn if Bold/Italic style bits do not match between the head Table and OS/2 Table
+
+Single Face Test 15: Warn if Font BBox x/y coordinates are improbable, or differ between head table and CFF.
+
+Single Face Test 16: Check values of Ascender and Descender vs em-square.
+	Warning: OS/2 table usWinDescent field '-294' is not the same as the font bounding box y min '0'. Font-Quadratic
+	Warning: OS/2 table usWinAscent field '1014' is not the same as the font bounding box y max '858'. Font-Quadratic
+	Warning: OS/2 table usWinDescent field '-294' is not the same as the font bounding box y min '0'. Font-Rectangular
+	Warning: OS/2 table usWinAscent field '1014' is not the same as the font bounding box y max '858'. Font-Rectangular
+
+Single Face Test 17: Verify that all tabular glyphs have the same width.
+
+Single Face Test 18: Hint Check.  Verify that there is at least one hint for each charstring in each font, and that no charstring is > 32K limit for Mac OSX 10.3.x and earlier.
+
+Single Face Test 19: Warn if the Unicode cmap table does not exist, or there are double mapped glyphs in the Unicode cmap table
+
+Single Face Test 20: Warn if there are double spaces in the name table font menu names.
+
+Single Face Test 21: Warn if there trailing or leading spaces in the name table font menu names.
+
+Single Face Test 22: Warn if any ligatures have a width which not larger than the width of the first glyph, or, if first glyph is not in font, if the RSB is negative.
+
+Single Face Test 23: Warn if any accented glyphs have a width different than the base glyph.
+	Warning: Width of glyph Cacute.ss02: 600 differs from that of the base glyph C.ss02: 544 for font Font-Quadratic.
+	Warning: Width of glyph Ccaron.ss02: 600 differs from that of the base glyph C.ss02: 544 for font Font-Quadratic.
+	Warning: Width of glyph Ccedilla.ss02: 600 differs from that of the base glyph C.ss02: 544 for font Font-Quadratic.
+	Warning: Width of glyph Ccircumflex.ss02: 600 differs from that of the base glyph C.ss02: 544 for font Font-Quadratic.
+	Warning: Width of glyph Cdotaccent.ss02: 600 differs from that of the base glyph C.ss02: 544 for font Font-Quadratic.
+	Warning: Width of glyph Wacute.ss02: 1060 differs from that of the base glyph W.ss02: 1064 for font Font-Quadratic.
+	Warning: Width of glyph Cacute.ss02: 600 differs from that of the base glyph C.ss02: 544 for font Font-Rectangular.
+	Warning: Width of glyph Ccaron.ss02: 600 differs from that of the base glyph C.ss02: 544 for font Font-Rectangular.
+	Warning: Width of glyph Ccedilla.ss02: 600 differs from that of the base glyph C.ss02: 544 for font Font-Rectangular.
+	Warning: Width of glyph Ccircumflex.ss02: 600 differs from that of the base glyph C.ss02: 544 for font Font-Rectangular.
+	Warning: Width of glyph Cdotaccent.ss02: 600 differs from that of the base glyph C.ss02: 544 for font Font-Rectangular.
+
+Single Face Test 24: Warn if font has 'size' feature, and design size is not in specified range.
+
+Single Face Test 25: Check that fonts do not have UniqueID, UID, or XUID in CFF table.
+
+Single Face Test 26: Glyph name checks.
+
+Single Face Test 27: Check strikeout/subscript/superscript positions.
+
+Single Face Test 28: Check font OS/2 code pages for the a common set of code page bits.
+
+Single Face Test 30: Check that there are no more than 7 pairs of BlueValues and FamilyBlues in a font, and there is an even number of values.
+
+Single Face Test 31: Check that there are no more than 5 pairs of OtherBlues and FamilyOtherBlues in a font, and there is an even number of values.
+
+Single Face Test 32: Check that all fonts have blue value pairs with first integer is less than or equal to the second integer in pairs.
+
+Single Face Test 33: Check that Bottom Zone blue value pairs and Top Zone blue value pairs are at least (2*BlueFuzz+1) unit apart in a font.
+
+Single Face Test 34: Check that the difference between numbers in blue value pairs meet the requirement.
+
+Family Test 1: Verify that each group of fonts with the same nameID 1 has maximum of 4 fonts.
+
+Family Test 2: Check that the Compatible Family group has same name ID's in all languages except for the compatible names 16,17,18, 20, 21 and 22.
+
+Family Test 3: Check that the Compatible Family group has same Preferred Family name (name ID 16)in all languagesID 16 in all other languages.
+
+Family Test 4: Family-wide 'size' feature checks.
+
+Family Test 5: Check that style settings for each face is unique within Compatible Family group, in all languages.
+
+Family Test 6: Check that the Compatible Family group has a base font and at least two faces, and check if weight class is valid.
+
+Family Test 7: Check that all faces in the Preferred Family group have the same Copyright and Trademark string.
+
+Family Test 8: Check the Compatible Family group style vs OS/2.usWeightClass settings. Max 2 usWeightClass allowed.
+
+Family Test 9: Check that all faces in the Compatible Family group have the same OS/2.usWidthClass value.
+
+Family Test 10: Check that if all faces in family have a Panose number and that CFF ISFixedPtch matches the Panose monospace setting.
+	Warning:  Font-Quadratic  has only the first 4 Panose values set; these are may be default values derived by makeotf.
+	Warning:  Font-Rectangular  has only the first 4 Panose values set; these are may be default values derived by makeotf.
+
+Family Test 11: Check that Mac and Windows menu names differ for all but base font, and are the same for the base font.
+
+Family Test 12: Check that GSUB/GPOS script and language feature lists are the same in all faces, and that DFLT/dflt and latn/dflt are present.
+	Error: In GPOS/GUSB tables, the sets of lookups used by features in the script-language systems  differ between fonts.
+	This may be intended if the faces have different charsets.
+
+Lang/Sys Table for font(s):  Font-Quadratic 
+
+	GPOS Table - script:tag list.
+	DFLT:  dflt
+	latn:  AZE    CRT    KAZ    TAT    TRK    dflt
+
+	lookup group ID to lookup index list:
+	ID 1:   maps to lookups [0, 1].
+	ID 2:   maps to lookups [7].
+	ID 3:   maps to lookups [8].
+	ID 4:   maps to lookups [9].
+	ID 5:   maps to lookups [10].
+	ID 6:   maps to lookups [11].
+	ID 7:   maps to lookups [12].
+	ID 8:   maps to lookups [13].
+	ID 9:   maps to lookups [6].
+	ID 10:  maps to lookups [2].
+	ID 11:  maps to lookups [4].
+	ID 12:  maps to lookups [3].
+	ID 13:  maps to lookups [5].
+
+	GPOS Table - feature lookup groups by script:tag column headers.
+	(The lookup group ID assigned to each set of lookups is  an arbitrary - see list above for map to actual lookup indices.)
+	DFLT: dflt  latn: AZE   CRT   KAZ   TAT   TRK   dflt  
+	kern  <same>
+
+	GSUB Table - script:tag list.
+	DFLT:  dflt
+	latn:  AZE    CRT    KAZ    TAT    TRK    dflt
+
+	lookup group ID to lookup index list:
+	ID 1:   maps to lookups [0, 1].
+	ID 2:   maps to lookups [7].
+	ID 3:   maps to lookups [8].
+	ID 4:   maps to lookups [9].
+	ID 5:   maps to lookups [10].
+	ID 6:   maps to lookups [11].
+	ID 7:   maps to lookups [12].
+	ID 8:   maps to lookups [13].
+	ID 9:   maps to lookups [6].
+	ID 10:  maps to lookups [2].
+	ID 11:  maps to lookups [4].
+	ID 12:  maps to lookups [3].
+	ID 13:  maps to lookups [5].
+
+	GSUB Table - feature lookup groups by script:tag column headers.
+	(The lookup group ID assigned to each set of lookups is  an arbitrary - see list above for map to actual lookup indices.)
+	DFLT: dflt  latn: AZE   CRT   KAZ   TAT   TRK   dflt  
+	aalt  <same>
+	locl  -           9     10    11    12    13    -     
+	salt  <same>
+	ss01  <same>
+	ss02  <same>
+	ss03  <same>
+	ss04  <same>
+	ss05  <same>
+	ss06  <same>
+
+Lang/Sys Table for font(s):  Font-Rectangular 
+
+	GPOS Table - script:tag list.
+	DFLT:  dflt
+	latn:  AZE    CRT    KAZ    TAT    TRK    dflt
+
+	lookup group ID to lookup index list:
+	ID 1:   maps to lookups [0, 1].
+	ID 2:   maps to lookups [7].
+	ID 3:   maps to lookups [8].
+	ID 4:   maps to lookups [9].
+	ID 5:   maps to lookups [10].
+	ID 6:   maps to lookups [11].
+	ID 7:   maps to lookups [12].
+	ID 8:   maps to lookups [6].
+	ID 9:   maps to lookups [2].
+	ID 10:  maps to lookups [4].
+	ID 11:  maps to lookups [3].
+	ID 12:  maps to lookups [5].
+
+	GPOS Table - feature lookup groups by script:tag column headers.
+	(The lookup group ID assigned to each set of lookups is  an arbitrary - see list above for map to actual lookup indices.)
+	DFLT: dflt  latn: AZE   CRT   KAZ   TAT   TRK   dflt  
+	kern  <same>
+
+	GSUB Table - script:tag list.
+	DFLT:  dflt
+	latn:  AZE    CRT    KAZ    TAT    TRK    dflt
+
+	lookup group ID to lookup index list:
+	ID 1:   maps to lookups [0, 1].
+	ID 2:   maps to lookups [7].
+	ID 3:   maps to lookups [8].
+	ID 4:   maps to lookups [9].
+	ID 5:   maps to lookups [10].
+	ID 6:   maps to lookups [11].
+	ID 7:   maps to lookups [12].
+	ID 8:   maps to lookups [6].
+	ID 9:   maps to lookups [2].
+	ID 10:  maps to lookups [4].
+	ID 11:  maps to lookups [3].
+	ID 12:  maps to lookups [5].
+
+	GSUB Table - feature lookup groups by script:tag column headers.
+	(The lookup group ID assigned to each set of lookups is  an arbitrary - see list above for map to actual lookup indices.)
+	DFLT: dflt  latn: AZE   CRT   KAZ   TAT   TRK   dflt  
+	aalt  <same>
+	locl  -           8     9     10    11    12    -     
+	salt  <same>
+	ss01  <same>
+	ss02  <same>
+	ss03  <same>
+	ss04  <same>
+	ss05  <same>
+
+Family Test 13: Check that no two faces in a preferred group have the same weight/width/Italic-style values when the OS/2 table fsSelection bit 8 (WEIGHT_WIDTH_SLOPE_ONLY) is set.
+
+Family Test 14: Check that all faces in a preferred group have the same fsType embedding values.
+
+Family Test 15: Check that all faces in a preferred group have the same underline position and width.
+
+Family Test 16: Check that for all faces in a preferred family group, that the width of any glyph is not more than 3 times the width of the same glyph in any other face.
+
+Family Test 17: Check that fonts have OS/2 table version 4.
+	Warning: The font Font-Quadratic should have an OS/2 table version of at least 4 instead of 3.
+	Warning: The font Font-Rectangular should have an OS/2 table version of at least 4 instead of 3.
+
+Family Test 18: Check that all faces in a Compatible Family group have the same array size of BlueValues and OtherBlues within a Compatible Family Name Italic or Regular sub-group of the family.
+
+Family Test 19: Check that all faces in the Preferred Family group have the same values of FamilyBlues and FamilyOtherBlues, and are valid.
+	Warning. The fonts in the family group Font do not have  FamilyBlue values. This font feature helps with alignment of different styles of the same family on a text line.
+
+Family Test 20: Check that all faces in the Compatible Family group have the same BlueScale value.
+
+FamilyTest 21: Check that all faces in the Compatible Family group have the same BlueShift value.
+
+Menu Name Report:
+
+Preferred Menu							  Mac Compatible Menu				 Windows Compatible Menu
+Font/Quadratic                           Font Quadratic                     Font Quadratic/Regular
+Font/Rectangular                         Font Rectangular                   Font Rectangular/Regular
+
+FONT METRICS REPORT
+Report 1: 
+Preferred Family: Font
+Num glyphs from maxp.numGlyphs:
+Font-Rectangular:                        284
+Font-Quadratic:                          324
+
+Preferred Family: Font
+Font									TypoAscent/TypoDescent/LineGap/CapHeight/sxHeight
+Font-Quadratic:                           750    -250     200     728     416
+Font-Rectangular:                         750    -250     200     728     624
+
+Preferred Family: Font
+Italic Angle from post.italicAngle:
+All fonts have the same value:   0.000
+
+Preferred Family: Font
+isBold from hhea.mscStyle:
+All fonts have the same value: Not Bold
+
+Preferred Family: Font
+isItalic from hhea.mscStyle:
+All fonts have the same value: Not Italic
+
+Preferred Family: Font
+OTF version from head.fontRevision:
+All fonts have the same value: 1.012
+
+Preferred Family: Font
+Embedding permissions setting from OS/2.fsType:
+All fonts have the same value: 0x0008 'editable embedding' 
+
+Report 2:
+
+Preferred Family: Font
+FontBBox from head.XY min/max:		X Min, YMin, XMax, YMax
+Font-Quadratic:                          (116, 0, 735, 858)
+Font-Rectangular:                        (116, 0, 735, 858)
+
+Preferred Family: Font
+usWeightClass from OS/2.usWeightClass:
+All fonts have the same value: 400 Normal (Regular)
+
+Preferred Family: Font
+usWidthClass from OS/2.usWidthClass:
+All fonts have the same value: 5 Medium (normal)
+
+Preferred Family: Font
+underlinePosition from post.underlinePosition:
+All fonts have the same value: -75
+
+Preferred Family: Font
+Vendor ID from OS/2.achVendID:
+All fonts have the same value: ADBE
+
+Report 3:Copyright and Trademark strings for the first face in the group
+
+Preferred Family: Font
+First Face: Font-Quadratic
+Copyright:  Copyright 2018 Adobe. All Rights Reserved.
+Trademark:  
+
+Panose Report:
+
+Preferred Family: Font
+Font-Quadratic                         0   0   5   0   0   0   0   0   0   0 
+    0 Any

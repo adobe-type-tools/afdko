@@ -281,6 +281,99 @@ Family Test 12: Check that GSUB/GPOS script and language feature lists are the s
 	Error: In GPOS/GUSB tables, the sets of lookups used by features in the script-language systems  differ between fonts.
 	This may be intended if the faces have different charsets.
 
+Lang/Sys Table for font(s):  SourceCodePro-It SourceCodePro-BoldIt SourceCodePro-BlackIt SourceCodePro-ExtraLightIt SourceCodePro-LightIt SourceCodePro-MediumIt SourceCodePro-SemiboldIt 
+
+	GPOS Table - script:tag list.
+	DFLT:  dflt
+	cyrl:  SRB    dflt
+	grek:  dflt
+	latn:  NSM    SKS    dflt
+
+	lookup group ID to lookup index list:
+	ID 1:   maps to lookups [23].
+	ID 2:   maps to lookups [9, 10, 11, 12, 13].
+	ID 3:   maps to lookups [0].
+	ID 4:   maps to lookups [1].
+	ID 5:   maps to lookups [2].
+	ID 6:   maps to lookups [3].
+	ID 7:   maps to lookups [4].
+	ID 8:   maps to lookups [5].
+	ID 9:   maps to lookups [6].
+	ID 10:  maps to lookups [7].
+	ID 11:  maps to lookups [15].
+	ID 12:  maps to lookups [14, 16, 17].
+	ID 13:  maps to lookups [14].
+	ID 14:  maps to lookups [22].
+	ID 15:  maps to lookups [18].
+	ID 16:  maps to lookups [0, 1, 2, 4, 5, 6, 7].
+	ID 17:  maps to lookups [21].
+	ID 18:  maps to lookups [5, 6].
+	ID 19:  maps to lookups [18, 19, 20].
+
+	GPOS Table - feature lookup groups by script:tag column headers.
+	(The lookup group ID assigned to each set of lookups is  an arbitrary - see list above for map to actual lookup indices.)
+	DFLT: dflt  cyrl: SRB   dflt  grek: dflt  latn: NSM   SKS   dflt  
+	mark  <same>
+	mkmk  <same>
+	size  <same>
+
+	GSUB Table - script:tag list.
+	DFLT:  dflt
+	cyrl:  SRB    dflt
+	grek:  dflt
+	latn:  NSM    SKS    dflt
+
+	lookup group ID to lookup index list:
+	ID 1:   maps to lookups [23].
+	ID 2:   maps to lookups [9, 10, 11, 12, 13].
+	ID 3:   maps to lookups [0].
+	ID 4:   maps to lookups [1].
+	ID 5:   maps to lookups [2].
+	ID 6:   maps to lookups [3].
+	ID 7:   maps to lookups [4].
+	ID 8:   maps to lookups [5].
+	ID 9:   maps to lookups [6].
+	ID 10:  maps to lookups [7].
+	ID 11:  maps to lookups [15].
+	ID 12:  maps to lookups [14, 16, 17].
+	ID 13:  maps to lookups [14].
+	ID 14:  maps to lookups [22].
+	ID 15:  maps to lookups [18].
+	ID 16:  maps to lookups [0, 1, 2, 4, 5, 6, 7].
+	ID 17:  maps to lookups [21].
+	ID 18:  maps to lookups [5, 6].
+	ID 19:  maps to lookups [18, 19, 20].
+
+	GSUB Table - feature lookup groups by script:tag column headers.
+	(The lookup group ID assigned to each set of lookups is  an arbitrary - see list above for map to actual lookup indices.)
+	DFLT: dflt  cyrl: SRB   dflt  grek: dflt  latn: NSM   SKS   dflt  
+	case  <same>
+	ccmp  <same>
+	cv01  <same>
+	cv02  <same>
+	cv06  <same>
+	cv11  <same>
+	cv12  <same>
+	cv14  <same>
+	cv15  <same>
+	cv16  <same>
+	dnom  <same>
+	frac  <same>
+	locl  -           -     -           -           5     5     -     
+	numr  <same>
+	onum  <same>
+	ordn  <same>
+	salt  <same>
+	sinf  <same>
+	ss01  <same>
+	ss02  <same>
+	ss03  <same>
+	ss05  <same>
+	ss06  <same>
+	subs  <same>
+	sups  <same>
+	zero  <same>
+
 Lang/Sys Table for font(s):  SourceCodePro-Regular SourceCodePro-Bold SourceCodePro-Black SourceCodePro-ExtraLight SourceCodePro-Light SourceCodePro-Medium SourceCodePro-Semibold 
 
 	GPOS Table - script:tag list.
@@ -394,99 +487,6 @@ Lang/Sys Table for font(s):  SourceCodePro-Regular SourceCodePro-Bold SourceCode
 	ss02  <same>
 	ss03  <same>
 	ss04  <same>
-	ss05  <same>
-	ss06  <same>
-	subs  <same>
-	sups  <same>
-	zero  <same>
-
-Lang/Sys Table for font(s):  SourceCodePro-It SourceCodePro-BoldIt SourceCodePro-BlackIt SourceCodePro-ExtraLightIt SourceCodePro-LightIt SourceCodePro-MediumIt SourceCodePro-SemiboldIt 
-
-	GPOS Table - script:tag list.
-	DFLT:  dflt
-	cyrl:  SRB    dflt
-	grek:  dflt
-	latn:  NSM    SKS    dflt
-
-	lookup group ID to lookup index list:
-	ID 1:   maps to lookups [23].
-	ID 2:   maps to lookups [9, 10, 11, 12, 13].
-	ID 3:   maps to lookups [0].
-	ID 4:   maps to lookups [1].
-	ID 5:   maps to lookups [2].
-	ID 6:   maps to lookups [3].
-	ID 7:   maps to lookups [4].
-	ID 8:   maps to lookups [5].
-	ID 9:   maps to lookups [6].
-	ID 10:  maps to lookups [7].
-	ID 11:  maps to lookups [15].
-	ID 12:  maps to lookups [14, 16, 17].
-	ID 13:  maps to lookups [14].
-	ID 14:  maps to lookups [22].
-	ID 15:  maps to lookups [18].
-	ID 16:  maps to lookups [0, 1, 2, 4, 5, 6, 7].
-	ID 17:  maps to lookups [21].
-	ID 18:  maps to lookups [5, 6].
-	ID 19:  maps to lookups [18, 19, 20].
-
-	GPOS Table - feature lookup groups by script:tag column headers.
-	(The lookup group ID assigned to each set of lookups is  an arbitrary - see list above for map to actual lookup indices.)
-	DFLT: dflt  cyrl: SRB   dflt  grek: dflt  latn: NSM   SKS   dflt  
-	mark  <same>
-	mkmk  <same>
-	size  <same>
-
-	GSUB Table - script:tag list.
-	DFLT:  dflt
-	cyrl:  SRB    dflt
-	grek:  dflt
-	latn:  NSM    SKS    dflt
-
-	lookup group ID to lookup index list:
-	ID 1:   maps to lookups [23].
-	ID 2:   maps to lookups [9, 10, 11, 12, 13].
-	ID 3:   maps to lookups [0].
-	ID 4:   maps to lookups [1].
-	ID 5:   maps to lookups [2].
-	ID 6:   maps to lookups [3].
-	ID 7:   maps to lookups [4].
-	ID 8:   maps to lookups [5].
-	ID 9:   maps to lookups [6].
-	ID 10:  maps to lookups [7].
-	ID 11:  maps to lookups [15].
-	ID 12:  maps to lookups [14, 16, 17].
-	ID 13:  maps to lookups [14].
-	ID 14:  maps to lookups [22].
-	ID 15:  maps to lookups [18].
-	ID 16:  maps to lookups [0, 1, 2, 4, 5, 6, 7].
-	ID 17:  maps to lookups [21].
-	ID 18:  maps to lookups [5, 6].
-	ID 19:  maps to lookups [18, 19, 20].
-
-	GSUB Table - feature lookup groups by script:tag column headers.
-	(The lookup group ID assigned to each set of lookups is  an arbitrary - see list above for map to actual lookup indices.)
-	DFLT: dflt  cyrl: SRB   dflt  grek: dflt  latn: NSM   SKS   dflt  
-	case  <same>
-	ccmp  <same>
-	cv01  <same>
-	cv02  <same>
-	cv06  <same>
-	cv11  <same>
-	cv12  <same>
-	cv14  <same>
-	cv15  <same>
-	cv16  <same>
-	dnom  <same>
-	frac  <same>
-	locl  -           -     -           -           5     5     -     
-	numr  <same>
-	onum  <same>
-	ordn  <same>
-	salt  <same>
-	sinf  <same>
-	ss01  <same>
-	ss02  <same>
-	ss03  <same>
 	ss05  <same>
 	ss06  <same>
 	subs  <same>
