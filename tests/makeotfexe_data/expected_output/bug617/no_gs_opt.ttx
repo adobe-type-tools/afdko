@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont sfntVersion="OTTO" ttLibVersion="3.30">
+
+  <head>
+    <!-- Most of this table will be recalculated by the compiler -->
+    <tableVersion value="1.0"/>
+    <fontRevision value="1.0"/>
+    <checkSumAdjustment value="0x1e2b67ae"/>
+    <magicNumber value="0x5f0f3cf5"/>
+    <flags value="00000000 00000011"/>
+    <unitsPerEm value="1000"/>
+    <created value="Wed Oct 17 16:37:33 2018"/>
+    <modified value="Wed Oct 17 16:37:33 2018"/>
+    <xMin value="25"/>
+    <yMin value="-13"/>
+    <xMax value="560"/>
+    <yMax value="739"/>
+    <macStyle value="00000000 00000000"/>
+    <lowestRecPPEM value="3"/>
+    <fontDirectionHint value="2"/>
+    <indexToLocFormat value="0"/>
+    <glyphDataFormat value="0"/>
+  </head>
+
+  <CFF>
+    <major value="1"/>
+    <minor value="0"/>
+    <CFFFont name="SourceSerifPro-Regular">
+      <version value="1.0"/>
+      <Notice value="Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries."/>
+      <Copyright value="Copyright 2014 Adobe Systems Incorporated. All Rights Reserved."/>
+      <FamilyName value="Source Serif Pro"/>
+      <isFixedPitch value="0"/>
+      <ItalicAngle value="0"/>
+      <UnderlinePosition value="-100"/>
+      <UnderlineThickness value="50"/>
+      <PaintType value="0"/>
+      <CharstringType value="2"/>
+      <FontMatrix value="0.001 0 0 0.001 0 0"/>
+      <FontBBox value="25 -13 560 739"/>
+      <StrokeWidth value="0"/>
+      <!-- charset is dumped separately as the 'GlyphOrder' element -->
+      <Encoding name="StandardEncoding"/>
+      <Private>
+        <BlueValues value="-15 0 475 488 527 540 549 563 646 659 669 684 729 749"/>
+        <OtherBlues value="-249 -239"/>
+        <FamilyBlues value="-15 0 475 488 527 540 549 563 646 659 669 684 729 749"/>
+        <FamilyOtherBlues value="-249 -239"/>
+        <BlueScale value="0.0375"/>
+        <BlueShift value="7"/>
+        <BlueFuzz value="0"/>
+        <StdHW value="56"/>
+        <StdVW value="85"/>
+        <StemSnapH value="41 56"/>
+        <StemSnapV value="85 95"/>
+        <ForceBold value="0"/>
+        <LanguageGroup value="0"/>
+        <ExpansionFactor value="0.06"/>
+        <initialRandomSeed value="0"/>
+        <defaultWidthX value="0"/>
+        <nominalWidthX value="0"/>
+      </Private>
+      <CharStrings>
+        <CharString name=".notdef">
+          640 80 hmoveto
+          480 669 -480 hlineto
+          240 -286 rmoveto
+          -148 236 rlineto
+          296 hlineto
+          32 -523 rmoveto
+          -149 239 149 238 rlineto
+          -360 -477 rmoveto
+          477 vlineto
+          150 -238 rlineto
+          -118 -285 rmoveto
+          148 236 148 -236 rlineto
+          endchar
+        </CharString>
+        <CharString name="a">
+          509 214 53 rmoveto
+          -46 -34 21 53 30 11 38 87 34 hvcurveto
+          21 8 36 12 35 10 rrcurveto
+          -154 vlineto
+          -40 -57 -19 -12 -34 hhcurveto
+          202 -63 rmoveto
+          35 28 13 39 24 hvcurveto
+          -20 22 rlineto
+          -13 -11 -11 -9 -17 hhcurveto
+          -22 -14 16 43 hvcurveto
+          213 vlineto
+          126 -50 48 -105 -102 -74 -48 -76 -19 vhcurveto
+          -26 3 16 -15 28 hhcurveto
+          27 16 17 31 9 hvcurveto
+          19 65 rlineto
+          5 21 18 1 15 hhcurveto
+          66 28 -24 -97 hvcurveto
+          -25 vlineto
+          -40 -9 -42 -13 -31 -11 rrcurveto
+          -135 -49 -31 -45 -57 vvcurveto
+          -83 61 -42 73 59 33 26 54 55 vhcurveto
+          -47 8 34 -30 48 hhcurveto
+          endchar
+        </CharString>
+        <CharString name="b">
+          577 30 hmoveto
+          150 -10 8 67 rlineto
+          -54 43 48 -16 47 hhcurveto
+          117 89 101 154 155 -84 91 -106 -55 -51 -24 -53 -48 hvcurveto
+          178 vlineto
+          4 142 -14 8 -153 -45 rlineto
+          -35 vlineto
+          82 -10 rlineto
+          -439 vlineto
+          -44 -1 -66 -1 -50 vhcurveto
+          -75 -14 rlineto
+          280 8 rmoveto
+          -37 -41 16 39 -41 hvcurveto
+          274 vlineto
+          45 54 39 13 31 hhcurveto
+          75 52 -69 -128 -129 -61 -61 -71 hvcurveto
+          endchar
+        </CharString>
+      </CharStrings>
+    </CFFFont>
+
+    <GlobalSubrs>
+      <!-- The 'index' attribute is only for humans; it is ignored when parsed. -->
+    </GlobalSubrs>
+  </CFF>
+
+</ttFont>

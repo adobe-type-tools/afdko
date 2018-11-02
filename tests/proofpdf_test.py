@@ -1,29 +1,12 @@
 from __future__ import print_function, division, absolute_import
 
-import os
 import pytest
-import tempfile
 
-from .runner import main as runner
-from .differ import main as differ
+from runner import main as runner
+from differ import main as differ
+from test_utils import get_input_path, get_expected_path, get_temp_file_path
 
 TOOL = 'proofpdf'
-
-data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
-
-
-def _get_expected_path(file_name):
-    return os.path.join(data_dir_path, 'expected_output', file_name)
-
-
-def _get_input_path(file_name):
-    return os.path.join(data_dir_path, 'input', file_name)
-
-
-def _get_temp_file_path():
-    file_descriptor, path = tempfile.mkstemp()
-    os.close(file_descriptor)
-    return path
 
 
 def _get_filename_label(file_name):
@@ -58,11 +41,11 @@ def test_glyphs_2_7(tool_name, font_filename):
     else:
         font_format = 'otf'
     pdf_filename = '{}_{}_glyphs_2-7.pdf'.format(tool_name, font_format)
-    font_path = _get_input_path(font_filename)
-    save_path = _get_temp_file_path()
+    font_path = get_input_path(font_filename)
+    save_path = get_temp_file_path()
     runner(['-t', tool_name, '-o', 'o', '_{}'.format(save_path), 'g', '_2-7',
             'dno', '=pageIncludeTitle', '_0', '-f', font_path, '-a'])
-    expected_path = _get_expected_path(pdf_filename)
+    expected_path = get_expected_path(pdf_filename)
     assert differ([expected_path, save_path,
                    '-s', '/CreationDate', '-e', 'macroman'])
 
@@ -88,11 +71,11 @@ def test_hinting_data(tool_name, font_filename):
     else:
         font_format = 'otf'
     pdf_filename = '{}_{}{}.pdf'.format(tool_name, font_format, label)
-    font_path = _get_input_path(font_filename)
-    save_path = _get_temp_file_path()
+    font_path = get_input_path(font_filename)
+    save_path = get_temp_file_path()
     runner(['-t', tool_name, '-o', 'o', '_{}'.format(save_path), 'g', '_2-7',
             'dno', '=pageIncludeTitle', '_0', '-f', font_path, '-a'])
-    expected_path = _get_expected_path(pdf_filename)
+    expected_path = get_expected_path(pdf_filename)
     assert differ([expected_path, save_path,
                    '-s', '/CreationDate', '-e', 'macroman'])
 
@@ -107,13 +90,29 @@ def test_fontplot2_lf_option(font_filename, glyphs):
         font_format = 'cid'
     else:
         font_format = 'otf'
-    layout_path = _get_input_path('CID_layout')
-    font_path = _get_input_path(font_filename)
+    layout_path = get_input_path('CID_layout')
+    font_path = get_input_path(font_filename)
     pdf_filename = '{}_{}_lf_option.pdf'.format(tool_name, font_format)
-    save_path = _get_temp_file_path()
+    save_path = get_temp_file_path()
     runner(['-t', tool_name, '-o', 'o', '_{}'.format(save_path), 'dno',
             'g', glyphs, 'lf', '_{}'.format(layout_path),
             '=pageIncludeTitle', '_0', '-f', font_path, '-a'])
-    expected_path = _get_expected_path(pdf_filename)
+    expected_path = get_expected_path(pdf_filename)
     assert differ([expected_path, save_path,
                    '-s', '/CreationDate', '-e', 'macroman'])
+
+
+@pytest.mark.parametrize('filename', ['SourceSansPro-Black',
+                                      'SourceSansPro-BlackIt'])
+def test_waterfallplot(filename):
+    font_filename = '{}.otf'.format(filename)
+    pdf_filename = '{}.pdf'.format(filename)
+    font_path = get_input_path(font_filename)
+    save_path = get_temp_file_path()
+    expected_path = get_expected_path(pdf_filename)
+    runner(['-t', 'waterfallplot',
+            '-o', 'o', '_{}'.format(save_path), 'dno', '-f', font_path, '-a'])
+    assert differ([expected_path, save_path,
+                   '-s', '/CreationDate',
+                   '-r', r'^BT 1 0 0 1 \d{3}\.\d+ 742\.0000 Tm',  # timestamp
+                   '-e', 'macroman'])

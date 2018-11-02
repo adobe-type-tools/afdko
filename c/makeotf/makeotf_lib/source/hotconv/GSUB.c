@@ -17,14 +17,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define CHECK4OVERFLOW(n, s)                                                           \
-    do {                                                                               \
-        if ((n) > 0xFFFF) {                                                            \
-            hotMsg(g, hotFATAL, "Coverage offset overflow (0x%lx) in %s substitution", \
-                   (n), (s));                                                          \
-        }                                                                              \
-    } while (0)
-
 /* --------------------------- Context Definition -------------------------- */
 
 typedef struct {
@@ -38,6 +30,7 @@ typedef struct { /* Subtable record */
     Tag script;
     Tag language;
     Tag feature;
+    char id_text[ID_TEXT_SIZE];
     unsigned short lkpType;
     unsigned short lkpFlag;
     unsigned short markSetIndex;
@@ -63,6 +56,7 @@ typedef struct { /* New subtable data */
     Tag script;
     Tag language;
     Tag feature;
+    Tag parentFeatTag; /* The parent feature for anonymous lookups made by a chaining contextual feature */
     short useExtension; /* Use extension lookupType? */
     unsigned short lkpType;
     unsigned short lkpFlag;
@@ -174,6 +168,16 @@ static void freeExtension(hotCtx g, GSUBCtx h, Subtable *sub);
 
 /* --------------------------- Standard Functions -------------------------- */
 
+static void check_overflow(hotCtx g, char* offsetType, long offset, char* subType)
+{
+    if (offset > 0xFFFF) {
+        hotMsg(g, hotFATAL,
+               "In %s %s rules cause an offset overflow (0x%lx) to a %s",
+               g->error_id_text, subType, offset, offsetType);
+    }
+}
+
+
 /* Element initializer */
 
 static void subtableInit(void *ctx, long count, SubtableInfo *si) {
@@ -206,6 +210,7 @@ void GSUBNew(hotCtx g) {
     /* Link contexts */
     h->g = g;
     g->ctx.GSUB = h;
+    g->error_id_text[0] = '\0';
 }
 
 int GSUBFill(hotCtx g) {
@@ -283,6 +288,7 @@ void GSUBWrite(hotCtx g) {
     /* Write main subtable section */
     for (i = 0; i < h->subtables.cnt; i++) {
         Subtable *sub = &h->subtables.array[i];
+        strcpy(g->error_id_text, sub->id_text);
 
         if (IS_REF_LAB(sub->label)) {
             continue;
@@ -327,8 +333,10 @@ void GSUBWrite(hotCtx g) {
                 writeGSUBCVParam(h, sub);
                 break;
 
+            /* Not supported
             case GSUBContext:
                 break;
+            */
 #endif /* HOT_FEAT_SUPPORT */
         }
     }
@@ -372,8 +380,10 @@ void GSUBWrite(hotCtx g) {
                 writeReverseChain(g, h, sub);
                 break;
 
+            /* Not supported
             case GSUBContext:
                 break;
+            */
 #endif /* HOT_FEAT_SUPPORT */
         }
     }
@@ -430,8 +440,10 @@ void GSUBReuse(hotCtx g) {
                 freeGSUBCVParam(g, sub);
                 break;
 
+            /* Not supported
             case GSUBContext:
                 break;
+            */
 #endif /* HOT_FEAT_SUPPORT */
         }
     }
@@ -498,6 +510,7 @@ static void startNewSubtable(hotCtx g) {
     sub->script = h->new.script;
     sub->language = h->new.language;
     sub->feature = h->new.feature;
+    strcpy(sub->id_text, g->error_id_text); /* save feature and lookup names for writing phase */
     sub->lkpType = h->new.lkpType;
     sub->lkpFlag = h->new.lkpFlag;
     sub->markSetIndex = h->new.markSetIndex;
@@ -668,18 +681,9 @@ void GSUBLookupEnd(hotCtx g, Tag feature) {
     if (g->hadError) {
         return;
     }
-    if (feature != h->new.feature) {
-        /* This happens when a feature definition is empty. */
-        hotMsg(g, hotFATAL, "Empty lookup in feature '%c%c%c%c'", TAG_ARG(feature));
-    }
 
-    if (h->new.rules.cnt == 0) {
-        int hasParam = ((h->new.lkpType == GSUBFeatureNameParam) ||
-                        (h->new.lkpType == GSUBCVParam));
-        if (!hasParam) {
-            hotMsg(g, hotFATAL, "Empty GSUB lookup in feature '%c%c%c%c'", TAG_ARG(h->new.feature));
-        }
-    }
+    /* No need to check for an empty feature or lookup:                  */
+    /* this cannot happen with the current implementation of the parser. */
 
     if (h->otl == NULL) {
         /* Allocate table if not done so already */
@@ -720,22 +724,13 @@ void GSUBLookupEnd(hotCtx g, Tag feature) {
             fillGSUBCVParam(g, h, h->new.sub);
             break;
 
-        case GSUBContext:
-            hotMsg(g, hotFATAL, "unsupported GSUB lkpType <%d>", h->new.lkpType);
-
 #endif /* HOT_FEAT_SUPPORT */
         default:
-            hotMsg(g, hotFATAL, "unknown GSUB lkpType <%d>", h->new.lkpType);
+            /* Can't get here, but it is a useful check for future development. */
+            hotMsg(g, hotFATAL, "unknown GSUB lkpType <%d> in %s.", h->new.lkpType, g->error_id_text);
     }
 
-    if (h->offset.subtable > 0xFFFF) {
-        hotMsg(g, hotFATAL,
-               "GSUB feature '%c%c%c%c' causes overflow of offset"
-               " to a subtable (0x%lx)",
-               TAG_ARG(h->new.feature),
-               h->offset.subtable);
-    }
-
+    check_overflow(g, "lookup subtable", h->offset.subtable, "substitution");
     /* Recycle Glyph nodes, since formatted tbl has been constructed */
     for (i = 0; i < h->new.rules.cnt; i++) {
         SubstRule *rule = &h->new.rules.array[i];
@@ -744,7 +739,7 @@ void GSUBLookupEnd(hotCtx g, Tag feature) {
     }
     h->new.rules.cnt = 0;
     /* This prevents the rules from being re-used un-intentionally in the */
-    /* case where an emtpy GPOS feature is called for, and because it is  */
+    /* case where an empty GSUB feature is called for; because it is      */
     /* empty, the table type doesn't get correctly assigned, and the code */
     /* comes through here.                                                */
 }
@@ -768,19 +763,23 @@ void GSUBSetFeatureNameID(hotCtx g, Tag feat, unsigned short nameID) {
 static void fillGSUBFeatureNameParam(hotCtx g, GSUBCtx h, Subtable *sub) {
     FeatureNameParameterFormat *feat_param = (FeatureNameParameterFormat *)sub->tbl;
     unsigned short nameid = feat_param->nameID;
-    unsigned short cvNumber = ((sub->feature >> 8 & 0xFF) - (int)'0') * 10;
-    cvNumber += (sub->feature & 0xFF) - (int)'0';
+    unsigned short ssNumber = ((sub->feature >> 8 & 0xFF) - (int)'0') * 10;
+    ssNumber += (sub->feature & 0xFF) - (int)'0';
     if (((sub->feature >> 24 & 0xFF) == (int)'s') &&
         ((sub->feature >> 16 & 0xFF) == (int)'s') &&
-        (cvNumber >= 0) && (cvNumber <= 99)) {
+        (ssNumber <= 99)) {
         if (nameid != 0) {
             unsigned short nameIDPresent = nameVerifyDefaultNames(g, nameid);
-            if (nameIDPresent && nameIDPresent & MISSING_WIN_DEFAULT_NAME) {
-                hotMsg(g, hotFATAL, "Missing Windows default name for for feature name  nameid %i", nameid);
+            if (nameIDPresent && (nameIDPresent & MISSING_WIN_DEFAULT_NAME)) {
+                hotMsg(g, hotFATAL,
+                       "Missing Windows default name for 'featureNames' nameid %i in %s.",
+                       nameid, g->error_id_text);
             }
         }
     } else {
-        hotMsg(g, hotFATAL, "A 'featureNames' block is allowed only Stylistic Set (ssXX) features. It is being used in feature '%c%c%c%c'.", TAG_ARG(sub->feature));
+        hotMsg(g, hotFATAL,
+               "A 'featureNames' block is only allowed in Stylistic Set (ssXX) features; it is being used in %s.",
+               g->error_id_text);
     }
 }
 
@@ -821,7 +820,7 @@ static void fillGSUBCVParam(hotCtx g, GSUBCtx h, Subtable *sub) {
     cvNumber += (sub->feature & 0xFF) - (int)'0';
     if (((sub->feature >> 24 & 0xFF) == (int)'c') &&
         ((sub->feature >> 16 & 0xFF) == (int)'v') &&
-        (cvNumber >= 0) && (cvNumber <= 99)) {
+        (cvNumber <= 99)) {
         nameIDs[0] = feat_param->FeatUILabelNameID;
         nameIDs[1] = feat_param->FeatUITooltipTextNameID;
         nameIDs[2] = feat_param->SampleTextNameID;
@@ -832,12 +831,16 @@ static void fillGSUBCVParam(hotCtx g, GSUBCtx h, Subtable *sub) {
             if (nameid != 0) {
                 unsigned short nameIDPresent = nameVerifyDefaultNames(g, nameid);
                 if (nameIDPresent && nameIDPresent & MISSING_WIN_DEFAULT_NAME) {
-                    hotMsg(g, hotFATAL, "Missing Windows default name for for feature name  nameid %i", nameid);
+                    hotMsg(g, hotFATAL,
+                           "Missing Windows default name for 'cvParameters' nameid %i in %s.",
+                           nameid, g->error_id_text);
                 }
             }
         }
     } else {
-        hotMsg(g, hotFATAL, "A 'cvParameters' block is allowed only Character Variant (cvXX) features. It is being used in feature '%c%c%c%c'.", TAG_ARG(sub->feature));
+        hotMsg(g, hotFATAL,
+               "A 'cvParameters' block is only allowed in Character Variant (cvXX) features; it is being used in %s.",
+               g->error_id_text);
     }
 }
 
@@ -956,8 +959,8 @@ static void checkAndSortSingle(hotCtx g, GSUBCtx h) {
                 featGlyphDump(g, curr->repl->gid, '\0', 0);
                 hotMsg(g, hotNOTE,
                        "Removing duplicate single substitution "
-                       "in '%c%c%c%c' feature: %s",
-                       TAG_ARG(h->new.feature),
+                       "in %s: %s",
+                       g->error_id_text,
                        g->note.array);
 
                 /* Set prev duplicates to NULL */
@@ -970,8 +973,8 @@ static void checkAndSortSingle(hotCtx g, GSUBCtx h) {
                 featGlyphDump(g, curr->targ->gid, '\0', 0);
                 hotMsg(g, hotFATAL,
                        "Duplicate target glyph for single "
-                       "substitution in '%c%c%c%c' feature: %s",
-                       TAG_ARG(h->new.feature), g->note.array);
+                       "substitution in %s: %s",
+                       g->error_id_text, g->note.array);
             }
         }
     }
@@ -1102,7 +1105,7 @@ static void writeSingle1(hotCtx g, GSUBCtx h, Subtable *sub) {
     if (!sub->extension.use) {
         fmt->Coverage += h->offset.subtable - sub->offset; /* Adjust offset */
     }
-    CHECK4OVERFLOW(fmt->Coverage, "single");
+    check_overflow(g, "coverage table", fmt->Coverage, "single substitution");
 
     OUT2(fmt->SubstFormat);
     OUT2((Offset)(fmt->Coverage));
@@ -1122,7 +1125,7 @@ static void writeSingle2(hotCtx g, GSUBCtx h, Subtable *sub) {
     if (!sub->extension.use) {
         fmt->Coverage += h->offset.subtable - sub->offset; /* Adjust offset */
     }
-    CHECK4OVERFLOW(fmt->Coverage, "single");
+    check_overflow(g, "coverage table", fmt->Coverage, "single substitution");
 
     OUT2(fmt->SubstFormat);
     OUT2((Offset)(fmt->Coverage));
@@ -1342,9 +1345,9 @@ static void fillMultiple(hotCtx g, GSUBCtx h) {
         if (j != 0 && rule->targ->gid == (rule - 1)->targ->gid) {
             featGlyphDump(g, rule->targ->gid, '\0', 0);
             hotMsg(g, hotFATAL,
-                   "Duplicate target glyph for alternate substitution in "
-                   "'%c%c%c%c' feature: %s",
-                   TAG_ARG(h->new.feature),
+                   "Duplicate target glyph for multiple substitution in "
+                   "%s: %s",
+                   g->error_id_text,
                    g->note.array);
         }
 
@@ -1381,7 +1384,7 @@ static void writeMultiple(hotCtx g, GSUBCtx h, Subtable *sub) {
     if (!sub->extension.use) {
         fmt->Coverage += h->offset.subtable - sub->offset; /* Adjust offset */
     }
-    CHECK4OVERFLOW(fmt->Coverage, "multiple");
+    check_overflow(g, "coverage table", fmt->Coverage, "multiple substitution");
 
     OUT2(fmt->SubstFormat);
     OUT2((Offset)(fmt->Coverage));
@@ -1551,8 +1554,8 @@ static void fillAlternate(hotCtx g, GSUBCtx h) {
             featGlyphDump(g, rule->targ->gid, '\0', 0);
             hotMsg(g, hotFATAL,
                    "Duplicate target glyph for alternate substitution in "
-                   "'%c%c%c%c' feature: %s",
-                   TAG_ARG(h->new.feature),
+                   "%s: %s",
+                   g->error_id_text,
                    g->note.array);
         }
 
@@ -1589,8 +1592,7 @@ static void writeAlternate(hotCtx g, GSUBCtx h, Subtable *sub) {
     if (!sub->extension.use) {
         fmt->Coverage += h->offset.subtable - sub->offset; /* Adjust offset */
     }
-    CHECK4OVERFLOW(fmt->Coverage, "alternate");
-
+    check_overflow(g, "coverage table", fmt->Coverage, "alternate substitution");
     OUT2(fmt->SubstFormat);
     OUT2((Offset)(fmt->Coverage));
     OUT2(fmt->AlternateSetCount);
@@ -1704,8 +1706,8 @@ static void checkAndSortLigature(hotCtx g, GSUBCtx h) {
                 featGlyphDump(g, curr->repl->gid, '\0', 0);
                 hotMsg(g, hotNOTE,
                        "Removing duplicate ligature substitution"
-                       " in '%c%c%c%c' feature: %s",
-                       TAG_ARG(h->new.feature),
+                       " in %s: %s",
+                       g->error_id_text,
                        g->note.array);
 
                 /* Set prev duplicates to NULL */
@@ -1719,8 +1721,8 @@ static void checkAndSortLigature(hotCtx g, GSUBCtx h) {
                 hotMsg(g, hotFATAL,
                        "Duplicate target sequence but different "
                        "replacement glyphs in ligature substitutions in "
-                       "'%c%c%c%c' feature: %s",
-                       TAG_ARG(h->new.feature),
+                       "%s: %s",
+                       g->error_id_text,
                        g->note.array);
             }
         }
@@ -1855,13 +1857,7 @@ static void fillLigature(hotCtx g, GSUBCtx h) {
         }
     }
 
-    if (offset > 0xFFFF) {
-        hotMsg(g, hotFATAL,
-               "Ligature lookup subtable in GSUB feature "
-               "'%c%c%c%c' causes offset overflow.",
-               TAG_ARG(h->new.feature), i);
-    }
-
+    check_overflow(g, "lookup subtable", offset, "ligature substitution");
     fmt->Coverage = otlCoverageEnd(g, otl); /* Adjusted later */
     if (sub->extension.use) {
         fmt->Coverage += offset; /* Final value */
@@ -1881,8 +1877,7 @@ static void writeLigature(hotCtx g, GSUBCtx h, Subtable *sub) {
     if (!sub->extension.use) {
         fmt->Coverage += h->offset.subtable - sub->offset; /* Adjust offset */
     }
-    CHECK4OVERFLOW(fmt->Coverage, "ligature");
-
+    check_overflow(g, "coverage table", fmt->Coverage, "ligature substitution");
     OUT2(fmt->SubstFormat);
     OUT2((Offset)(fmt->Coverage));
     OUT2(fmt->LigSetCount);
@@ -2228,7 +2223,9 @@ static Label addAnonRule(hotCtx g, GSUBCtx h, GNode *pMarked, unsigned nMarked,
         int i = h->anonSubtable.cnt;
 
         si = dnaINDEX(h->anonSubtable, i - 1);
-        if ((si->lkpType == lkpType) && (si->lkpFlag == lkpFlag) && (si->markSetIndex == markSetIndex) && addToAnonSubtbl(g, h, si, targCp, replCp)) {
+        if ((si->lkpType == lkpType) && (si->lkpFlag == lkpFlag) && (si->markSetIndex == markSetIndex) &&
+            (si->parentFeatTag == h->new.feature) &&
+            addToAnonSubtbl(g, h, si, targCp, replCp)) {
             return si->label;
         }
     }
@@ -2240,6 +2237,7 @@ static Label addAnonRule(hotCtx g, GSUBCtx h, GNode *pMarked, unsigned nMarked,
     si->lkpFlag = lkpFlag;
     si->markSetIndex = markSetIndex;
     si->label = featGetNextAnonLabel(g);
+    si->parentFeatTag = h->new.feature;
 
     si->rules.cnt = 0;
     addRule(g, h, si, targCp, replCp);
@@ -2255,7 +2253,7 @@ static void createAnonLookups(hotCtx g, GSUBCtx h) {
     for (i = 0; i < h->anonSubtable.cnt; i++) {
         long j;
         SubtableInfo *si = &h->anonSubtable.array[i];
-
+        sprintf(g->error_id_text, "feature '%c%c%c%c'", TAG_ARG(si->parentFeatTag));
         GSUBFeatureBegin(g, si->script, si->language, si->feature);
         GSUBLookupBegin(g, si->lkpType, si->lkpFlag, si->label, 0, si->markSetIndex);
 
@@ -2477,12 +2475,7 @@ static void fillChain(hotCtx g, GSUBCtx h) {
 
         fillChain3(g, h, otl, sub, i);
 
-        if (h->offset.subtable > 0xFFFF) {
-            hotMsg(g, hotFATAL,
-                   "Chain contextual lookup subtable in GSUB "
-                   "feature '%c%c%c%c' causes offset overflow.",
-                   TAG_ARG(h->new.feature), i);
-        }
+        check_overflow(g, "lookup subtable", h->offset.subtable, "chain contextual substitution");
     }
 }
 
@@ -2532,7 +2525,7 @@ static void writeChain3(hotCtx g, GSUBCtx h, Subtable *sub) {
             if (!isExt) {
                 fmt->Backtrack[i] += adjustment;
             }
-            CHECK4OVERFLOW(fmt->Backtrack[i], "chain contextual");
+            check_overflow(g, "backtrack coverage table", fmt->Backtrack[i], "chain contextual substitution");
             OUT2((unsigned short)fmt->Backtrack[i]);
         }
     } else {
@@ -2541,7 +2534,7 @@ static void writeChain3(hotCtx g, GSUBCtx h, Subtable *sub) {
             if (!isExt) {
                 fmt->Backtrack[i] += adjustment;
             }
-            CHECK4OVERFLOW(fmt->Backtrack[i], "chain contextual");
+            check_overflow(g, "backtrack coverage table", fmt->Backtrack[i], "chain contextual substitution");
             OUT2((unsigned short)fmt->Backtrack[i]);
         }
     }
@@ -2551,7 +2544,7 @@ static void writeChain3(hotCtx g, GSUBCtx h, Subtable *sub) {
         if (!sub->extension.use) {
             fmt->Input[i] += adjustment;
         }
-        CHECK4OVERFLOW(fmt->Input[i], "chain contextual");
+        check_overflow(g, "input coverage table", fmt->Input[i], "chain contextual substitution");
         OUT2((unsigned short)fmt->Input[i]);
     }
 
@@ -2560,7 +2553,7 @@ static void writeChain3(hotCtx g, GSUBCtx h, Subtable *sub) {
         if (!isExt) {
             fmt->Lookahead[i] += adjustment;
         }
-        CHECK4OVERFLOW(fmt->Lookahead[i], "chain contextual");
+        check_overflow(g, "lookahead coverage table", fmt->Lookahead[i], "chain contextual substitution");
         OUT2((unsigned short)fmt->Lookahead[i]);
     }
 
@@ -2744,7 +2737,7 @@ static void fillReverseChain1(hotCtx g, GSUBCtx h, otlTbl otl, Subtable *sub,
     /* is then sorted in GID order, otlCoverageEnd won't change the order  */
     /* again.                                                              */
     if (rule->repl != NULL) {
-        /* Mo need for this whole block, if subCount === 0. */
+        /* No need for this whole block, if subCount === 0. */
         for (p = pInput, r = rule->repl; p != NULL; p = p->nextCl, r = r->nextCl) {
             /* I require in feat.c that pInput and repl lists have the same length */
             p->nextSeq = r;
@@ -2819,12 +2812,7 @@ static void fillReverseChain(hotCtx g, GSUBCtx h) {
 
         fillReverseChain1(g, h, otl, sub, i);
 
-        if (h->offset.subtable > 0xFFFF) {
-            hotMsg(g, hotFATAL,
-                   "Reverse Chain contextual lookup subtable in GSUB "
-                   "feature '%c%c%c%c' causes offset overflow.",
-                   TAG_ARG(h->new.feature), i);
-        }
+        check_overflow(g, "lookup subtable", h->offset.subtable, "reverse chain contextual substitution");
     }
 }
 
@@ -2853,7 +2841,7 @@ static void writeReverseChain(hotCtx g, GSUBCtx h, Subtable *sub) {
             if (!isExt) {
                 fmt->Backtrack[i] += adjustment;
             }
-            CHECK4OVERFLOW(fmt->Backtrack[i], "chain contextual");
+            check_overflow(g, "backtrack coverage table", fmt->Backtrack[i], "reverse chain contextual substitution");
             OUT2((unsigned short)fmt->Backtrack[i]);
         }
     } else {
@@ -2862,7 +2850,7 @@ static void writeReverseChain(hotCtx g, GSUBCtx h, Subtable *sub) {
             if (!isExt) {
                 fmt->Backtrack[i] += adjustment;
             }
-            CHECK4OVERFLOW(fmt->Backtrack[i], "chain contextual");
+            check_overflow(g, "backtrack coverage table", fmt->Backtrack[i], "reverse chain contextual substitution");
             OUT2((unsigned short)fmt->Backtrack[i]);
         }
     }
@@ -2872,7 +2860,7 @@ static void writeReverseChain(hotCtx g, GSUBCtx h, Subtable *sub) {
         if (!isExt) {
             fmt->Lookahead[i] += adjustment;
         }
-        CHECK4OVERFLOW(fmt->Lookahead[i], "chain contextual");
+        check_overflow(g, "lookahead coverage table", fmt->Lookahead[i], "reverse chain contextual substitution");
         OUT2((unsigned short)fmt->Lookahead[i]);
     }
 

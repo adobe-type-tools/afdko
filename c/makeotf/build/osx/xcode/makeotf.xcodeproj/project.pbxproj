@@ -1,0 +1,709 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		BDA3D11A14E57C4C00BCED0F /* BuildAll */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = BDA3D12C14E57C6D00BCED0F /* Build configuration list for PBXAggregateTarget "BuildAll" */;
+			buildPhases = (
+			);
+			dependencies = (
+				BDA3D11E14E57C5200BCED0F /* PBXTargetDependency */,
+				BDA3D12014E57C5500BCED0F /* PBXTargetDependency */,
+				BDA3D12214E57C5800BCED0F /* PBXTargetDependency */,
+				BDA3D12414E57C5B00BCED0F /* PBXTargetDependency */,
+				BDA3D12614E57C5E00BCED0F /* PBXTargetDependency */,
+				BDA3D12814E57C6100BCED0F /* PBXTargetDependency */,
+				BDA3D12A14E57C6600BCED0F /* PBXTargetDependency */,
+			);
+			name = BuildAll;
+			productName = BuildAll;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		BD55CB4D0DAD5D0E00CA71B7 /* libcffread.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BD55CB220DAD5CCB00CA71B7 /* libcffread.a */; };
+		BD55CB4E0DAD5D1300CA71B7 /* libhotconv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BD55CB370DAD5CD800CA71B7 /* libhotconv.a */; };
+		BD55CB4F0DAD5D1600CA71B7 /* libpstoken.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BD55CB400DAD5CE700CA71B7 /* libpstoken.a */; };
+		BD55CB500DAD5D1B00CA71B7 /* libtypecomp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BD55CB490DAD5CF500CA71B7 /* libtypecomp.a */; };
+		BD55CBB80DAD6C4C00CA71B7 /* libdynarr.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BD55CBB70DAD6C4600CA71B7 /* libdynarr.a */; };
+		BD55CBB90DAD6C5100CA71B7 /* libctutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BD55CBAE0DAD6C3400CA71B7 /* libctutil.a */; };
+		BD6159100D2D751300C1E0CA /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = BD61590B0D2D751300C1E0CA /* main.c */; };
+		BD6159110D2D751300C1E0CA /* fcdb.c in Sources */ = {isa = PBXBuildFile; fileRef = BD61590C0D2D751300C1E0CA /* fcdb.c */; };
+		BD6159120D2D751300C1E0CA /* cbpriv.c in Sources */ = {isa = PBXBuildFile; fileRef = BD61590D0D2D751300C1E0CA /* cbpriv.c */; };
+		BD6159130D2D751300C1E0CA /* file.c in Sources */ = {isa = PBXBuildFile; fileRef = BD61590E0D2D751300C1E0CA /* file.c */; };
+		BD6159140D2D751300C1E0CA /* cb.c in Sources */ = {isa = PBXBuildFile; fileRef = BD61590F0D2D751300C1E0CA /* cb.c */; };
+		BD6159200D2D752D00C1E0CA /* file.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = BD6159150D2D752D00C1E0CA /* file.h */; };
+		BD6159210D2D752D00C1E0CA /* lctype.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = BD6159160D2D752D00C1E0CA /* lctype.h */; };
+		BD6159220D2D752D00C1E0CA /* fcdb.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = BD6159170D2D752D00C1E0CA /* fcdb.h */; };
+		BD6159230D2D752D00C1E0CA /* cb.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = BD6159180D2D752D00C1E0CA /* cb.h */; };
+		BD6159240D2D752D00C1E0CA /* cbpriv.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = BD6159190D2D752D00C1E0CA /* cbpriv.h */; };
+		BD6159250D2D752D00C1E0CA /* systemspecific.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = BD61591A0D2D752D00C1E0CA /* systemspecific.h */; };
+		BD6159260D2D752D00C1E0CA /* lstdio.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = BD61591B0D2D752D00C1E0CA /* lstdio.h */; };
+		BD6159270D2D752D00C1E0CA /* lstring.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = BD61591C0D2D752D00C1E0CA /* lstring.h */; };
+		BD6159280D2D752D00C1E0CA /* lerrno.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = BD61591D0D2D752D00C1E0CA /* lerrno.h */; };
+		BD6159290D2D752D00C1E0CA /* lstdlib.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = BD61591E0D2D752D00C1E0CA /* lstdlib.h */; };
+		BD61592A0D2D752D00C1E0CA /* package.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = BD61591F0D2D752D00C1E0CA /* package.h */; };
+		BD61592C0D2D754000C1E0CA /* mac.c in Sources */ = {isa = PBXBuildFile; fileRef = BD61592B0D2D754000C1E0CA /* mac.c */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BD55CB210DAD5CCB00CA71B7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD55CB1A0DAD5CCB00CA71B7 /* cffread.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = cffread;
+		};
+		BD55CB360DAD5CD800CA71B7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD55CB230DAD5CD800CA71B7 /* hotconv.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = hotconv;
+		};
+		BD55CB3F0DAD5CE700CA71B7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD55CB380DAD5CE700CA71B7 /* pstoken.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = pstoken;
+		};
+		BD55CB480DAD5CF500CA71B7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD55CB410DAD5CF500CA71B7 /* typecomp.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = typecomp;
+		};
+		BD55CBAD0DAD6C3400CA71B7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD55CBA60DAD6C3400CA71B7 /* ctutil.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = ctutil;
+		};
+		BD55CBB60DAD6C4600CA71B7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD55CBAF0DAD6C4600CA71B7 /* dynarr.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = dynarr;
+		};
+		BDA3D11D14E57C5200BCED0F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD55CB380DAD5CE700CA71B7 /* pstoken.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = pstoken;
+		};
+		BDA3D11F14E57C5500BCED0F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD55CB410DAD5CF500CA71B7 /* typecomp.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = typecomp;
+		};
+		BDA3D12114E57C5800BCED0F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD55CB1A0DAD5CCB00CA71B7 /* cffread.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = cffread;
+		};
+		BDA3D12314E57C5B00BCED0F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD55CBAF0DAD6C4600CA71B7 /* dynarr.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = dynarr;
+		};
+		BDA3D12514E57C5E00BCED0F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD55CB230DAD5CD800CA71B7 /* hotconv.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = hotconv;
+		};
+		BDA3D12714E57C6100BCED0F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD55CBA60DAD6C3400CA71B7 /* ctutil.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = ctutil;
+		};
+		BDA3D12914E57C6600BCED0F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DD76FA90486AB0100D96B5E;
+			remoteInfo = makeotf;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		8DD76FAF0486AB0100D96B5E /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 8;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+				BD6159200D2D752D00C1E0CA /* file.h in CopyFiles */,
+				BD6159210D2D752D00C1E0CA /* lctype.h in CopyFiles */,
+				BD6159220D2D752D00C1E0CA /* fcdb.h in CopyFiles */,
+				BD6159230D2D752D00C1E0CA /* cb.h in CopyFiles */,
+				BD6159240D2D752D00C1E0CA /* cbpriv.h in CopyFiles */,
+				BD6159250D2D752D00C1E0CA /* systemspecific.h in CopyFiles */,
+				BD6159260D2D752D00C1E0CA /* lstdio.h in CopyFiles */,
+				BD6159270D2D752D00C1E0CA /* lstring.h in CopyFiles */,
+				BD6159280D2D752D00C1E0CA /* lerrno.h in CopyFiles */,
+				BD6159290D2D752D00C1E0CA /* lstdlib.h in CopyFiles */,
+				BD61592A0D2D752D00C1E0CA /* package.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		8DD76FB20486AB0100D96B5E /* makeotfexe */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = makeotfexe; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD55CB1A0DAD5CCB00CA71B7 /* cffread.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = cffread.xcodeproj; path = ../../../makeotf_lib/build/cffread/osx/xcode/cffread.xcodeproj; sourceTree = SOURCE_ROOT; };
+		BD55CB230DAD5CD800CA71B7 /* hotconv.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = hotconv.xcodeproj; path = ../../../makeotf_lib/build/hotconv/osx/xcode/hotconv.xcodeproj; sourceTree = SOURCE_ROOT; };
+		BD55CB380DAD5CE700CA71B7 /* pstoken.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = pstoken.xcodeproj; path = ../../../makeotf_lib/build/pstoken/osx/xcode/pstoken.xcodeproj; sourceTree = SOURCE_ROOT; };
+		BD55CB410DAD5CF500CA71B7 /* typecomp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = typecomp.xcodeproj; path = ../../../makeotf_lib/build/typecomp/osx/xcode/typecomp.xcodeproj; sourceTree = SOURCE_ROOT; };
+		BD55CBA60DAD6C3400CA71B7 /* ctutil.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ctutil.xcodeproj; path = ../../../../public/lib/build/ctutil/osx/xcode/ctutil.xcodeproj; sourceTree = SOURCE_ROOT; };
+		BD55CBAF0DAD6C4600CA71B7 /* dynarr.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = dynarr.xcodeproj; path = ../../../../public/lib/build/dynarr/osx/xcode/dynarr.xcodeproj; sourceTree = SOURCE_ROOT; };
+		BD61590B0D2D751300C1E0CA /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = main.c; path = ../../../source/main.c; sourceTree = SOURCE_ROOT; };
+		BD61590C0D2D751300C1E0CA /* fcdb.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = fcdb.c; path = ../../../source/fcdb.c; sourceTree = SOURCE_ROOT; };
+		BD61590D0D2D751300C1E0CA /* cbpriv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = cbpriv.c; path = ../../../source/cbpriv.c; sourceTree = SOURCE_ROOT; };
+		BD61590E0D2D751300C1E0CA /* file.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = file.c; path = ../../../source/file.c; sourceTree = SOURCE_ROOT; };
+		BD61590F0D2D751300C1E0CA /* cb.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = cb.c; path = ../../../source/cb.c; sourceTree = SOURCE_ROOT; };
+		BD6159150D2D752D00C1E0CA /* file.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = file.h; path = ../../../source/include_files/file.h; sourceTree = SOURCE_ROOT; };
+		BD6159160D2D752D00C1E0CA /* lctype.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lctype.h; path = ../../../source/include_files/lctype.h; sourceTree = SOURCE_ROOT; };
+		BD6159170D2D752D00C1E0CA /* fcdb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = fcdb.h; path = ../../../source/include_files/fcdb.h; sourceTree = SOURCE_ROOT; };
+		BD6159180D2D752D00C1E0CA /* cb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cb.h; path = ../../../source/include_files/cb.h; sourceTree = SOURCE_ROOT; };
+		BD6159190D2D752D00C1E0CA /* cbpriv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cbpriv.h; path = ../../../source/include_files/cbpriv.h; sourceTree = SOURCE_ROOT; };
+		BD61591A0D2D752D00C1E0CA /* systemspecific.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = systemspecific.h; path = ../../../source/include_files/systemspecific.h; sourceTree = SOURCE_ROOT; };
+		BD61591B0D2D752D00C1E0CA /* lstdio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lstdio.h; path = ../../../source/include_files/lstdio.h; sourceTree = SOURCE_ROOT; };
+		BD61591C0D2D752D00C1E0CA /* lstring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lstring.h; path = ../../../source/include_files/lstring.h; sourceTree = SOURCE_ROOT; };
+		BD61591D0D2D752D00C1E0CA /* lerrno.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lerrno.h; path = ../../../source/include_files/lerrno.h; sourceTree = SOURCE_ROOT; };
+		BD61591E0D2D752D00C1E0CA /* lstdlib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lstdlib.h; path = ../../../source/include_files/lstdlib.h; sourceTree = SOURCE_ROOT; };
+		BD61591F0D2D752D00C1E0CA /* package.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = package.h; path = ../../../source/include_files/package.h; sourceTree = SOURCE_ROOT; };
+		BD61592B0D2D754000C1E0CA /* mac.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mac.c; path = ../../../source/mac/mac.c; sourceTree = SOURCE_ROOT; };
+		BD61592D0D2D755300C1E0CA /* debug_makeotf.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = debug_makeotf.xcconfig; path = ../../../config/xcconfig/debug_makeotf.xcconfig; sourceTree = SOURCE_ROOT; };
+		BD61592E0D2D755300C1E0CA /* release_makeotf.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = release_makeotf.xcconfig; path = ../../../config/xcconfig/release_makeotf.xcconfig; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8DD76FAD0486AB0100D96B5E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BD55CB4D0DAD5D0E00CA71B7 /* libcffread.a in Frameworks */,
+				BD55CB4E0DAD5D1300CA71B7 /* libhotconv.a in Frameworks */,
+				BD55CB4F0DAD5D1600CA71B7 /* libpstoken.a in Frameworks */,
+				BD55CB500DAD5D1B00CA71B7 /* libtypecomp.a in Frameworks */,
+				BD55CBB90DAD6C5100CA71B7 /* libctutil.a in Frameworks */,
+				BD55CBB80DAD6C4C00CA71B7 /* libdynarr.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08FB7794FE84155DC02AAC07 /* makeotf */ = {
+			isa = PBXGroup;
+			children = (
+				BD6159430D2DC12300C1E0CA /* lib */,
+				BD6159090D2D74DD00C1E0CA /* xconfig */,
+				BD61590A0D2D74E600C1E0CA /* Headers */,
+				08FB7795FE84155DC02AAC07 /* Source */,
+				C6A0FF2B0290797F04C91782 /* Documentation */,
+				1AB674ADFE9D54B511CA2CBB /* Products */,
+			);
+			name = makeotf;
+			sourceTree = "<group>";
+		};
+		08FB7795FE84155DC02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				BD61590B0D2D751300C1E0CA /* main.c */,
+				BD61590C0D2D751300C1E0CA /* fcdb.c */,
+				BD61590D0D2D751300C1E0CA /* cbpriv.c */,
+				BD61590E0D2D751300C1E0CA /* file.c */,
+				BD61590F0D2D751300C1E0CA /* cb.c */,
+				BD61592B0D2D754000C1E0CA /* mac.c */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		1AB674ADFE9D54B511CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8DD76FB20486AB0100D96B5E /* makeotfexe */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BD55CB1B0DAD5CCB00CA71B7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BD55CB220DAD5CCB00CA71B7 /* libcffread.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BD55CB240DAD5CD800CA71B7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BD55CB370DAD5CD800CA71B7 /* libhotconv.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BD55CB390DAD5CE700CA71B7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BD55CB400DAD5CE700CA71B7 /* libpstoken.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BD55CB420DAD5CF500CA71B7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BD55CB490DAD5CF500CA71B7 /* libtypecomp.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BD55CBA70DAD6C3400CA71B7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BD55CBAE0DAD6C3400CA71B7 /* libctutil.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BD55CBB00DAD6C4600CA71B7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BD55CBB70DAD6C4600CA71B7 /* libdynarr.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BD6159090D2D74DD00C1E0CA /* xconfig */ = {
+			isa = PBXGroup;
+			children = (
+				BD61592D0D2D755300C1E0CA /* debug_makeotf.xcconfig */,
+				BD61592E0D2D755300C1E0CA /* release_makeotf.xcconfig */,
+			);
+			name = xconfig;
+			sourceTree = "<group>";
+		};
+		BD61590A0D2D74E600C1E0CA /* Headers */ = {
+			isa = PBXGroup;
+			children = (
+				BD6159150D2D752D00C1E0CA /* file.h */,
+				BD6159160D2D752D00C1E0CA /* lctype.h */,
+				BD6159170D2D752D00C1E0CA /* fcdb.h */,
+				BD6159180D2D752D00C1E0CA /* cb.h */,
+				BD6159190D2D752D00C1E0CA /* cbpriv.h */,
+				BD61591A0D2D752D00C1E0CA /* systemspecific.h */,
+				BD61591B0D2D752D00C1E0CA /* lstdio.h */,
+				BD61591C0D2D752D00C1E0CA /* lstring.h */,
+				BD61591D0D2D752D00C1E0CA /* lerrno.h */,
+				BD61591E0D2D752D00C1E0CA /* lstdlib.h */,
+				BD61591F0D2D752D00C1E0CA /* package.h */,
+			);
+			name = Headers;
+			sourceTree = "<group>";
+		};
+		BD6159430D2DC12300C1E0CA /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				BD55CB1A0DAD5CCB00CA71B7 /* cffread.xcodeproj */,
+				BD55CB230DAD5CD800CA71B7 /* hotconv.xcodeproj */,
+				BD55CB380DAD5CE700CA71B7 /* pstoken.xcodeproj */,
+				BD55CB410DAD5CF500CA71B7 /* typecomp.xcodeproj */,
+				BD55CBA60DAD6C3400CA71B7 /* ctutil.xcodeproj */,
+				BD55CBAF0DAD6C4600CA71B7 /* dynarr.xcodeproj */,
+			);
+			name = lib;
+			sourceTree = "<group>";
+		};
+		C6A0FF2B0290797F04C91782 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Documentation;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8DD76FA90486AB0100D96B5E /* makeotf */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DEB928508733DD80010E9CD /* Build configuration list for PBXNativeTarget "makeotf" */;
+			buildPhases = (
+				8DD76FAB0486AB0100D96B5E /* Sources */,
+				8DD76FAD0486AB0100D96B5E /* Frameworks */,
+				8DD76FAF0486AB0100D96B5E /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = makeotf;
+			productInstallPath = "$(HOME)/bin";
+			productName = makeotf;
+			productReference = 8DD76FB20486AB0100D96B5E /* makeotfexe */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1000;
+			};
+			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "makeotf" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
+			mainGroup = 08FB7794FE84155DC02AAC07 /* makeotf */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = BD55CB1B0DAD5CCB00CA71B7 /* Products */;
+					ProjectRef = BD55CB1A0DAD5CCB00CA71B7 /* cffread.xcodeproj */;
+				},
+				{
+					ProductGroup = BD55CBA70DAD6C3400CA71B7 /* Products */;
+					ProjectRef = BD55CBA60DAD6C3400CA71B7 /* ctutil.xcodeproj */;
+				},
+				{
+					ProductGroup = BD55CBB00DAD6C4600CA71B7 /* Products */;
+					ProjectRef = BD55CBAF0DAD6C4600CA71B7 /* dynarr.xcodeproj */;
+				},
+				{
+					ProductGroup = BD55CB240DAD5CD800CA71B7 /* Products */;
+					ProjectRef = BD55CB230DAD5CD800CA71B7 /* hotconv.xcodeproj */;
+				},
+				{
+					ProductGroup = BD55CB390DAD5CE700CA71B7 /* Products */;
+					ProjectRef = BD55CB380DAD5CE700CA71B7 /* pstoken.xcodeproj */;
+				},
+				{
+					ProductGroup = BD55CB420DAD5CF500CA71B7 /* Products */;
+					ProjectRef = BD55CB410DAD5CF500CA71B7 /* typecomp.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				8DD76FA90486AB0100D96B5E /* makeotf */,
+				BDA3D11A14E57C4C00BCED0F /* BuildAll */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		BD55CB220DAD5CCB00CA71B7 /* libcffread.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libcffread.a;
+			remoteRef = BD55CB210DAD5CCB00CA71B7 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		BD55CB370DAD5CD800CA71B7 /* libhotconv.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libhotconv.a;
+			remoteRef = BD55CB360DAD5CD800CA71B7 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		BD55CB400DAD5CE700CA71B7 /* libpstoken.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libpstoken.a;
+			remoteRef = BD55CB3F0DAD5CE700CA71B7 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		BD55CB490DAD5CF500CA71B7 /* libtypecomp.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libtypecomp.a;
+			remoteRef = BD55CB480DAD5CF500CA71B7 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		BD55CBAE0DAD6C3400CA71B7 /* libctutil.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libctutil.a;
+			remoteRef = BD55CBAD0DAD6C3400CA71B7 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		BD55CBB70DAD6C4600CA71B7 /* libdynarr.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libdynarr.a;
+			remoteRef = BD55CBB60DAD6C4600CA71B7 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8DD76FAB0486AB0100D96B5E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BD6159100D2D751300C1E0CA /* main.c in Sources */,
+				BD6159110D2D751300C1E0CA /* fcdb.c in Sources */,
+				BD6159120D2D751300C1E0CA /* cbpriv.c in Sources */,
+				BD6159130D2D751300C1E0CA /* file.c in Sources */,
+				BD6159140D2D751300C1E0CA /* cb.c in Sources */,
+				BD61592C0D2D754000C1E0CA /* mac.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BDA3D11E14E57C5200BCED0F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = pstoken;
+			targetProxy = BDA3D11D14E57C5200BCED0F /* PBXContainerItemProxy */;
+		};
+		BDA3D12014E57C5500BCED0F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = typecomp;
+			targetProxy = BDA3D11F14E57C5500BCED0F /* PBXContainerItemProxy */;
+		};
+		BDA3D12214E57C5800BCED0F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = cffread;
+			targetProxy = BDA3D12114E57C5800BCED0F /* PBXContainerItemProxy */;
+		};
+		BDA3D12414E57C5B00BCED0F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = dynarr;
+			targetProxy = BDA3D12314E57C5B00BCED0F /* PBXContainerItemProxy */;
+		};
+		BDA3D12614E57C5E00BCED0F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = hotconv;
+			targetProxy = BDA3D12514E57C5E00BCED0F /* PBXContainerItemProxy */;
+		};
+		BDA3D12814E57C6100BCED0F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = ctutil;
+			targetProxy = BDA3D12714E57C6100BCED0F /* PBXContainerItemProxy */;
+		};
+		BDA3D12A14E57C6600BCED0F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8DD76FA90486AB0100D96B5E /* makeotf */;
+			targetProxy = BDA3D12914E57C6600BCED0F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1DEB928608733DD80010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BD61592D0D2D755300C1E0CA /* debug_makeotf.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					BRV_64BIT_TYPES,
+					"HOT_FEAT_SUPPORT=1",
+					"CFF_T13_SUPPORT=0",
+					"TC_HINT_CHECK=1",
+					"TC_EURO_SUPPORT=1",
+					"TC_SUBR_SUPPORT=1",
+					"CFF_DEBUG=1",
+					"HOT_DEBUG=1",
+					"TC_DEBUG=1",
+				);
+			};
+			name = Debug;
+		};
+		1DEB928708733DD80010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BD61592E0D2D755300C1E0CA /* release_makeotf.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					BRV_64BIT_TYPES,
+					"HOT_FEAT_SUPPORT=1",
+					"CFF_T13_SUPPORT=0",
+					"TC_HINT_CHECK=1",
+					"TC_EURO_SUPPORT=1",
+					"TC_SUBR_SUPPORT=1",
+				);
+			};
+			name = Release;
+		};
+		1DEB928A08733DD80010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BD61592D0D2D755300C1E0CA /* debug_makeotf.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					BRV_64BIT_TYPES,
+					"HOT_FEAT_SUPPORT=1",
+					"CFF_T13_SUPPORT=0",
+					"TC_HINT_CHECK=1",
+					"TC_EURO_SUPPORT=1",
+					"TC_SUBR_SUPPORT=1",
+					"CFF_DEBUG=1",
+					"HOT_DEBUG=1",
+					"TC_DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SDKROOT)/usr/include",
+					"../../../makeotf_lib/api/**",
+					"../../../makeotf_lib/resource/**",
+					"../../../../public/lib/api/**",
+					"../../../../public/lib/resource/**",
+				);
+				"HEADER_SEARCH_PATHS[arch=*]" = (
+					"$(SDKROOT)/usr/include",
+					"../../../makeotf_lib/api/**",
+					"../../../makeotf_lib/resource/**",
+					"../../../../public/lib/api/**",
+					"../../../../public/lib/resource/**",
+				);
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = makeotfexe;
+			};
+			name = Debug;
+		};
+		1DEB928B08733DD80010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BD61592E0D2D755300C1E0CA /* release_makeotf.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					BRV_64BIT_TYPES,
+					"HOT_FEAT_SUPPORT=1",
+					"CFF_T13_SUPPORT=0",
+					"TC_HINT_CHECK=1",
+					"TC_EURO_SUPPORT=1",
+					"TC_SUBR_SUPPORT=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PRODUCT_NAME = makeotfexe;
+			};
+			name = Release;
+		};
+		BDA3D11B14E57C4C00BCED0F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BD61592D0D2D755300C1E0CA /* debug_makeotf.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
+			};
+			name = Debug;
+		};
+		BDA3D11C14E57C4C00BCED0F /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BD61592E0D2D755300C1E0CA /* release_makeotf.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB928508733DD80010E9CD /* Build configuration list for PBXNativeTarget "makeotf" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB928608733DD80010E9CD /* Debug */,
+				1DEB928708733DD80010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "makeotf" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB928A08733DD80010E9CD /* Debug */,
+				1DEB928B08733DD80010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BDA3D12C14E57C6D00BCED0F /* Build configuration list for PBXAggregateTarget "BuildAll" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BDA3D11B14E57C4C00BCED0F /* Debug */,
+				BDA3D11C14E57C4C00BCED0F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

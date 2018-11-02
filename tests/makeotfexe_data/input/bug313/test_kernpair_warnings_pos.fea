@@ -1,0 +1,19 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+@test_class_left = [ glyph1 glyph2 ];
+@test_class_right = [ @test_class_left ];
+
+@test_class_left2 = [ glyph1 glyph3 ];
+@test_class_right2 = [ @test_class_left2 ];
+
+feature tst1 {
+     pos glyph3 glyph3 1;
+     pos glyph3 glyph3 1;
+     pos glyph3 glyph3 2;
+     pos @test_class_left @test_class_right 1;
+     pos @test_class_left2 @test_class_right 2;
+     pos glyph3 glyph3 1;
+  } tst1;

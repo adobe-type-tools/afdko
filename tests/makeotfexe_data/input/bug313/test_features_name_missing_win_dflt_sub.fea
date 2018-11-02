@@ -1,0 +1,10 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+feature ss01 {
+	featureNames {
+		name 1 0 0 "Greek: vertical stress";
+	};
+} ss01;

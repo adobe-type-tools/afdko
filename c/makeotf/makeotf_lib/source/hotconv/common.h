@@ -387,6 +387,9 @@ typedef struct sfntCtx_ *sfntCtx;
 typedef struct vheaCtx_ *vheaCtx;
 typedef struct vmtxCtx_ *vmtxCtx;
 
+#define ID_TEXT_SIZE 1024 /* Size of text buffer used to hold identifying info about the current feature for error messages. */
+
+
 struct hotCtx_ {
     long version;    /* Hot lib version number */
     struct tm time;  /* Local time */
@@ -423,8 +426,8 @@ struct hotCtx_ {
     dnaCtx dnaCtx;
     dnaDCL(char, data); /* CFF data object buffer */
     dnaDCL(char, tmp);  /* Temporary conversion buffer */
-    dnaDCL(char, note); /* Buffer for messages */
-
+    dnaDCL(char, note); /* Buffer for accumulated messages */
+    char error_id_text[ID_TEXT_SIZE]; /* buffer for text identifying class and feature of error */
     short hadError;        /* Flags if error occurred */
     uint32_t convertFlags; /* flags for building final OTF. */
 };

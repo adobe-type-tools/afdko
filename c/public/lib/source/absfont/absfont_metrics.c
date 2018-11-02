@@ -49,11 +49,11 @@ static void glyphWidth(abfGlyphCallbacks *cb, float hAdv) {
 static void boundPoint(abfMetricsCtx h, float x, float y) {
     if (h->real_mtx.left > x)
         h->real_mtx.left = x;
-    else if (h->real_mtx.right < x)
+    if (h->real_mtx.right < x)
         h->real_mtx.right = x;
     if (h->real_mtx.bottom > y)
         h->real_mtx.bottom = y;
-    else if (h->real_mtx.top < y)
+    if (h->real_mtx.top < y)
         h->real_mtx.top = y;
 }
 

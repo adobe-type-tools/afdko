@@ -1013,9 +1013,7 @@ class PDFTextObject:
             self._y = self._y - self._leading
         else:
             self._y = self._y + self._leading
-        textList = ["(", text, ") Tj T*"]
-        text = "".join(textList)
-        self._code.append(text)
+        self._code.append('(%s) Tj T*' % text)
 
     def textLines(self, stuff, trim=1):
         """prints multi-line or newlined strings, moving down.  One

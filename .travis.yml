@@ -3,10 +3,11 @@ language: python
 env:
   global:
     - CIBW_SKIP="cp34-* cp35-* cp37-* *i686"
-    - CIBW_ENVIRONMENT_LINUX="CODECOV_TOKEN=e0067bac-3ded-4432-83c8-667217c76660"
-    - CIBW_TEST_REQUIRES="pytest-cov==2.5.1 codecov subprocess32"
-    - CIBW_TEST_COMMAND="cd {project} && pytest --cov -v && coverage combine && codecov && pip uninstall --yes afdko"
-    - TWINE_USERNAME="afdko-travis"
+    - CIBW_TEST_REQUIRES_MACOS="pytest-cov==2.5.1 codecov subprocess32"
+    - CIBW_TEST_REQUIRES_LINUX="pytest subprocess32"
+    - CIBW_TEST_COMMAND_MACOS="cd {project} && pytest --cov -v && coverage combine && codecov && pip uninstall --yes afdko"
+    - CIBW_TEST_COMMAND_LINUX="cd {project} && pytest -v && pip uninstall --yes afdko"
+    - TWINE_USERNAME="adobe-type-tools-ci"
     # Note: TWINE_PASSWORD is set in Travis settings
 
 matrix:
@@ -39,6 +40,7 @@ before_script:
   - flake8 fdkutils.py
   - flake8 makeinstancesufo.py
   - flake8 makeotf.py
+  - flake8 otf2ttf.py
   - flake8 otfpdf.py
   - flake8 pdfmetrics.py
   - flake8 ttfcomponentizer.py

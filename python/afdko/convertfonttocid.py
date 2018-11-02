@@ -938,7 +938,7 @@ def makeCIDFontInfo(fontPath, cidfontinfoPath):
                                  "font '%s'" % fontPath)
 
     for entry in TX_FIELDS:
-        match = re.search(entry[0] + "\s+(.+?)[\r\n]", report)
+        match = re.search(entry[0] + r"\s+(.+?)[\r\n]", report)
         if match:
             entry[2] = match.group(1)
 

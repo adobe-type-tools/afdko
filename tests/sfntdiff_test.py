@@ -1,19 +1,13 @@
 from __future__ import print_function, division, absolute_import
 
-import os
 import subprocess32 as subprocess
 import pytest
 
-from .runner import main as runner
-from .differ import main as differ
+from runner import main as runner
+from differ import main as differ
+from test_utils import get_expected_path
 
 TOOL = 'sfntdiff'
-
-data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
-
-
-def _get_expected_path(file_name):
-    return os.path.join(data_dir_path, 'expected_output', file_name)
 
 
 # -----
@@ -49,5 +43,5 @@ def test_diff(args, txt_filename):
         args.insert(0, '-o')
     actual_path = runner(
         ['-t', TOOL, '-s', '-f', 'regular.otf', 'bold.otf'] + args)
-    expected_path = _get_expected_path(txt_filename)
+    expected_path = get_expected_path(txt_filename)
     assert differ([expected_path, actual_path, '-l', '1-4'])

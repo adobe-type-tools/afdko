@@ -1,0 +1,7 @@
+table head {
+	FontRevision 0.005;
+} head;
+
+table OS/2 {
+	Vendor "UKNW";
+} OS/2;

@@ -1,6 +1,6 @@
-/* 
+/*
  Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
- This software is licensed as OpenSource, under the Apache License, Version 2.0. 
+ This software is licensed as OpenSource, under the Apache License, Version 2.0.
  This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 /***********************************************************************/
@@ -48,10 +48,6 @@ extern jmp_buf mark;
 #define WINDOWS_DECORATIVE (5 << 4)
 #define MAX_CHAR_NAME_LEN 63       /* Max charname len (inc '\0') */
 #define MAX_FINAL_CHAR_NAME_LEN 63 /* Max charname len (inc '\0') */
-#ifdef WIN32
-char sepch(); /* from WIN.C */
-
-#endif
 
 #ifdef _MSC_VER /* defined by Microsoft Compiler */
 #include <io.h>
@@ -197,6 +193,22 @@ void message(void *ctx, int type, char *text) {
 }
 
 /* --------------------------- Memory Management --------------------------- */
+
+/* find last path directory separator */
+static char* findDirName(char *path)
+{
+    size_t i = strlen(path);
+    char* end = NULL;
+    while (i > 0)
+    {
+        end = strchr("/\\:", path[--i]);
+        if (end != NULL)
+            break;
+    }
+    if (end != NULL)
+        end = &path[i];
+    return end;
+}
 
 /* Make a copy of a string */
 static void copyStr(cbCtx h, char **dst, char *src) {
@@ -438,18 +450,32 @@ static char *findFeatInclFile(cbCtx h, char *filename) {
         return NULL;
     }
     /* Check if relative path */
-    if (filename[0] != '/') {
+    if ((filename[0] != '/') && (filename[0] != '\\') && (filename[1] != ':')) {
         int i;
-        /* Look first relative to to the current include directory. If
-         not found, check relative to the main feature file.
-         */
-        for (i = 1; i >= 0; i--) {
-            if ((h->feat.includeDir[i] != 0) &&
-                (h->feat.includeDir[i][0] != '\0')) {
-                sprintf(path, "%s%s%s", h->feat.includeDir[i], sep(), filename);
+        /* h->feat.includeDir[0] contains the parent directory of the main feature file.             */
+        /* h->feat.includeDir[1] contains the parent directory of the including parent feature file. */
+        if ((h->feat.includeDir[0] != 0) &&
+            (h->feat.includeDir[0][0] != '\0')) {
+            /* Relative to UFO parent dir, if that is what it is */
+            sprintf(path, "%s%s%s", h->feat.includeDir[0], sep(), "fontinfo.plist");
+            if (fileExists(path)) {
+                sprintf(path, "%s%s..%s%s", h->feat.includeDir[0], sep(), sep(), filename);
                 if (fileExists(path)) {
                     goto found;
                 }
+            }
+            /* Relative to the main feature file */
+            sprintf(path, "%s%s%s", h->feat.includeDir[0], sep(), filename);
+            if (fileExists(path)) {
+                goto found;
+            }
+        }
+        /* Relative to parent include file */
+        if ((h->feat.includeDir[1] != 0) &&
+            (h->feat.includeDir[1][0] != '\0')) {
+            sprintf(path, "%s%s%s", h->feat.includeDir[1], sep(), filename);
+            if (fileExists(path)) {
+                goto found;
             }
         }
         return NULL; /* Can't find include file (error) */
@@ -463,7 +489,7 @@ static char *findFeatInclFile(cbCtx h, char *filename) {
 found : { /* set the current include directory */
     char *p;
 
-    p = strrchr(path, sepch());
+    p = findDirName(path);
     if (p == NULL) {
         /* if there are no directory separators, it is in the main feature file parent dir */
         if (h->feat.includeDir[1] != 0)
@@ -513,7 +539,7 @@ static char *featOpen(void *ctx, char *name, long offset) {
         /* RE-opening file: name is full path. */
         copyStr(h, &fullpath, name);
         /* Determine dir that feature file's in */
-        p = strrchr(fullpath, sepch()); /* xxx won't work for '\' delimiters */
+        p = findDirName(fullpath);
         if (p == NULL) {
             cbMemFree(ctx, h->feat.includeDir[1]);
             h->feat.includeDir[1] = 0;
@@ -648,37 +674,11 @@ static void uvsClose(void *ctx) {
 
 /* --------------------------- Temporary file I/O -------------------------- */
 
-/* On Windows, the stdio.h 'tmpfile' function tries to make temp files in the root
-directory, thus requiring administrative privileges. So we first need to use '_tempnam'
-to generate a unique filename inside the user's TMP environment variable (or the
-current working directory if TMP is not defined). Then we open the temporary file
-and return its pointer */
-static FILE *_tmpfile() {
-    FILE *fp;
-#ifdef _WIN32
-    char *tempname;
-    tempname = _tempnam(NULL, "tx_tmpfile");
-    if (tempname != NULL) {
-        int fd, flags, mode;
-        flags = _O_BINARY | _O_CREAT | _O_EXCL | _O_RDWR | _O_TEMPORARY;
-        mode = _S_IREAD | _S_IWRITE;
-        fd = _open(tempname, flags, mode);
-        if (fd != -1)
-            fp = _fdopen(fd, "w+b");
-        free(tempname);
-    }
-#else
-    /* Use the default tmpfile on non-Windows platforms */
-    fp = tmpfile();
-#endif
-    return fp;
-}
-
 /* [hot callback] Open temporary file */
 static void tmpOpen(void *ctx) {
     cbCtx h = ctx;
     h->tmp.file.name = "tmpfile";
-    if ((h->tmp.file.fp = _tmpfile()) == NULL) {
+    if ((h->tmp.file.fp = tmpfile()) == NULL) {
         fileError(&h->tmp.file);
     }
 }
@@ -1791,7 +1791,7 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
     h->feat.mainFile = featurefile;
     if (featurefile != NULL) {
         char *p;
-        p = strrchr(featurefile, sepch()); /* xxx won't work for '\' delimiters */
+        p = findDirName(featurefile);
         if (p == NULL) {
             h->feat.includeDir[0] = curdir();
         } else {

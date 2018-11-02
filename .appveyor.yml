@@ -5,7 +5,7 @@ environment:
     CIBW_SKIP: cp33-* cp34-* cp35-* cp37-* cp27-win_amd64 cp36-win32
     CIBW_TEST_REQUIRES: pytest-cov==2.5.1 codecov subprocess32
     CIBW_TEST_COMMAND: cd {project} && pytest --cov -v && coverage combine && codecov && pip uninstall --yes afdko
-    TWINE_USERNAME: afdko-travis
+    TWINE_USERNAME: adobe-type-tools-ci
     # Note: TWINE_PASSWORD is set in AppVeyor settings
 
 matrix:
@@ -29,6 +29,7 @@ before_build:
   - flake8 python\afdko\fdkutils.py
   - flake8 python\afdko\makeinstancesufo.py
   - flake8 python\afdko\makeotf.py
+  - flake8 python\afdko\otf2ttf.py
   - flake8 python\afdko\otfpdf.py
   - flake8 python\afdko\pdfmetrics.py
   - flake8 python\afdko\ttfcomponentizer.py

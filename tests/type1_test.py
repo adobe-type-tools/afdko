@@ -1,19 +1,13 @@
 from __future__ import print_function, division, absolute_import
 
-import os
 import pytest
 import subprocess32 as subprocess
 
-from .runner import main as runner
-from .differ import main as differ
+from runner import main as runner
+from differ import main as differ
+from test_utils import get_expected_path
 
 TOOL = 'type1'
-
-data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
-
-
-def _get_expected_path(file_name):
-    return os.path.join(data_dir_path, 'expected_output', file_name)
 
 
 # -----
@@ -32,5 +26,5 @@ def test_exit_unknown_option(arg):
 
 def test_run_on_txt_data():
     actual_path = runner(['-t', TOOL, '-s', '-f', 'type1.txt'])
-    expected_path = _get_expected_path('type1.pfa')
+    expected_path = get_expected_path('type1.pfa')
     assert differ([expected_path, actual_path])

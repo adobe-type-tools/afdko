@@ -1,0 +1,10 @@
+### glyph[tag] {gname,enc,width,{left,bottom,right,top}}
+glyph[0] {a,-,500,{76,-124,503,303}}
+glyph[1] {b,-,500,{-235,-235,235,235}}
+glyph[2] {c,-,500,{56,-10,391,303}}
+glyph[3] {d,-,500,{86,80,418,412}}
+glyph[4] {e,-,500,{86,80,418,412}}
+### aggregate
+bbox  {-235,-235,503,412}
+tag   {1,1,0,3}
+gname {b,b,a,d}

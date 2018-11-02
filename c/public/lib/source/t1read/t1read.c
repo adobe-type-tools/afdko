@@ -96,15 +96,15 @@ typedef struct /* Length delimited string for search match */
 /* Module context */
 struct t1rCtx_ {
     long flags;                    /* Control flags */
-#define MM_FONT (1UL << 31)        /* MM font */
-#define CID_FONT (1UL << 30)       /* CID-keyed font */
-#define SYN_FONT (1UL << 29)       /* Synthetic font */
-#define SEEN_END (1UL << 28)       /* Seen CharStrings dict end operator */
-#define STD_ENC (1UL << 27)        /* Standard encoded font */
+#define MM_FONT        (1UL << 31) /* MM font */
+#define CID_FONT       (1UL << 30) /* CID-keyed font */
+#define SYN_FONT       (1UL << 29) /* Synthetic font */
+#define SEEN_END       (1UL << 28) /* Seen CharStrings dict end operator */
+#define STD_ENC        (1UL << 27) /* Standard encoded font */
 #define FREE_ENCODINGS (1UL << 26) /* Return encoding nodes to free list */
-#define PRINT_STREAM (1UL << 25)   /* CoolType print steam font */
-#define CRLF_NEWLINES (1UL << 24)  /* Font uses CR/LF newlines */
-#define SEEN_NOTDEF (1UL << 23)    /* Seen .notdef glyph */
+#define PRINT_STREAM   (1UL << 25) /* CoolType print steam font */
+#define CRLF_NEWLINES  (1UL << 24) /* Font uses CR/LF newlines */
+#define SEEN_NOTDEF    (1UL << 23) /* Seen .notdef glyph */
     abfTopDict top;                /* Top dict */
     FDInfo *fd;                    /* Active FDArray element */
     dnaDCL(FDInfo, FDArray);       /* FDArray */

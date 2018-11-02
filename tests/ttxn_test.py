@@ -1,11 +1,11 @@
 from __future__ import print_function, division, absolute_import
 
-import os
 import pytest
 import tempfile
 
-from .runner import main as runner
-from .differ import main as differ
+from runner import main as runner
+from differ import main as differ
+from test_utils import get_expected_path
 
 TOOL = 'ttxn'
 
@@ -15,12 +15,6 @@ OTF2_FONT = 'SourceSansPro-ExtraLightIt.otf'
 OTF3_FONT = 'SourceSansPro-Light.otf'
 TTF2_FONT = 'NotoNaskhArabic-Regular.ttf'
 TTF3_FONT = 'NotoNastaliqUrdu-Regular.ttf'
-
-data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
-
-
-def _get_expected_path(file_name):
-    return os.path.join(data_dir_path, 'expected_output', file_name)
 
 
 # -----
@@ -46,5 +40,5 @@ def test_dump(args, font_filename, exp_filename):
     save_path = tempfile.mkstemp()[1]
     runner(['-t', TOOL, '-f', font_filename, '-o',
             'o{}'.format(save_path)] + args)
-    expected_path = _get_expected_path(exp_filename)
+    expected_path = get_expected_path(exp_filename)
     assert differ([expected_path, save_path, '-s', '<ttFont sfntVersion'])

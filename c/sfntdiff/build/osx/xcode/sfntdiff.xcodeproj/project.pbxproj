@@ -1,0 +1,306 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		BDB5C70E0DAEBCAD003A4375 /* Dda.c in Sources */ = {isa = PBXBuildFile; fileRef = BDB5C6EC0DAEBCAD003A4375 /* Dda.c */; };
+		BDB5C70F0DAEBCAD003A4375 /* Ddesc.c in Sources */ = {isa = PBXBuildFile; fileRef = BDB5C6EE0DAEBCAD003A4375 /* Ddesc.c */; };
+		BDB5C7100DAEBCAD003A4375 /* Dfile.c in Sources */ = {isa = PBXBuildFile; fileRef = BDB5C6F00DAEBCAD003A4375 /* Dfile.c */; };
+		BDB5C7110DAEBCAD003A4375 /* Dglobal.c in Sources */ = {isa = PBXBuildFile; fileRef = BDB5C6F20DAEBCAD003A4375 /* Dglobal.c */; };
+		BDB5C7120DAEBCAD003A4375 /* Dhead.c in Sources */ = {isa = PBXBuildFile; fileRef = BDB5C6F40DAEBCAD003A4375 /* Dhead.c */; };
+		BDB5C7130DAEBCAD003A4375 /* Dmain.c in Sources */ = {isa = PBXBuildFile; fileRef = BDB5C6F60DAEBCAD003A4375 /* Dmain.c */; };
+		BDB5C7140DAEBCAD003A4375 /* Dname.c in Sources */ = {isa = PBXBuildFile; fileRef = BDB5C6F70DAEBCAD003A4375 /* Dname.c */; };
+		BDB5C7150DAEBCAD003A4375 /* Dopt.c in Sources */ = {isa = PBXBuildFile; fileRef = BDB5C6F90DAEBCAD003A4375 /* Dopt.c */; };
+		BDB5C7160DAEBCAD003A4375 /* Dpriv.c in Sources */ = {isa = PBXBuildFile; fileRef = BDB5C6FB0DAEBCAD003A4375 /* Dpriv.c */; };
+		BDB5C7170DAEBCAD003A4375 /* Dsfnt.c in Sources */ = {isa = PBXBuildFile; fileRef = BDB5C6FC0DAEBCAD003A4375 /* Dsfnt.c */; };
+		BDB5C7180DAEBCAD003A4375 /* Dsys.c in Sources */ = {isa = PBXBuildFile; fileRef = BDB5C6FE0DAEBCAD003A4375 /* Dsys.c */; };
+		BDB5C7190DAEBCAD003A4375 /* Dtto.c in Sources */ = {isa = PBXBuildFile; fileRef = BDB5C7000DAEBCAD003A4375 /* Dtto.c */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		BDB5C6E70DAEBC8E003A4375 /* common.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = common.xcconfig; path = ../../../../public/config/xcconfig/common.xcconfig; sourceTree = SOURCE_ROOT; };
+		BDB5C6E80DAEBC8E003A4375 /* debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../../../../public/config/xcconfig/debug.xcconfig; sourceTree = SOURCE_ROOT; };
+		BDB5C6E90DAEBC8E003A4375 /* release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = release.xcconfig; path = ../../../../public/config/xcconfig/release.xcconfig; sourceTree = SOURCE_ROOT; };
+		BDB5C6EC0DAEBCAD003A4375 /* Dda.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Dda.c; path = ../../../source/Dda.c; sourceTree = SOURCE_ROOT; };
+		BDB5C6ED0DAEBCAD003A4375 /* Dda.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Dda.h; path = ../../../source/Dda.h; sourceTree = SOURCE_ROOT; };
+		BDB5C6EE0DAEBCAD003A4375 /* Ddesc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Ddesc.c; path = ../../../source/Ddesc.c; sourceTree = SOURCE_ROOT; };
+		BDB5C6EF0DAEBCAD003A4375 /* Ddesc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Ddesc.h; path = ../../../source/Ddesc.h; sourceTree = SOURCE_ROOT; };
+		BDB5C6F00DAEBCAD003A4375 /* Dfile.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Dfile.c; path = ../../../source/Dfile.c; sourceTree = SOURCE_ROOT; };
+		BDB5C6F10DAEBCAD003A4375 /* Dfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Dfile.h; path = ../../../source/Dfile.h; sourceTree = SOURCE_ROOT; };
+		BDB5C6F20DAEBCAD003A4375 /* Dglobal.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Dglobal.c; path = ../../../source/Dglobal.c; sourceTree = SOURCE_ROOT; };
+		BDB5C6F30DAEBCAD003A4375 /* Dglobal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Dglobal.h; path = ../../../source/Dglobal.h; sourceTree = SOURCE_ROOT; };
+		BDB5C6F40DAEBCAD003A4375 /* Dhead.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Dhead.c; path = ../../../source/Dhead.c; sourceTree = SOURCE_ROOT; };
+		BDB5C6F50DAEBCAD003A4375 /* Dhead.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Dhead.h; path = ../../../source/Dhead.h; sourceTree = SOURCE_ROOT; };
+		BDB5C6F60DAEBCAD003A4375 /* Dmain.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Dmain.c; path = ../../../source/Dmain.c; sourceTree = SOURCE_ROOT; };
+		BDB5C6F70DAEBCAD003A4375 /* Dname.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Dname.c; path = ../../../source/Dname.c; sourceTree = SOURCE_ROOT; };
+		BDB5C6F80DAEBCAD003A4375 /* Dname.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Dname.h; path = ../../../source/Dname.h; sourceTree = SOURCE_ROOT; };
+		BDB5C6F90DAEBCAD003A4375 /* Dopt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Dopt.c; path = ../../../source/Dopt.c; sourceTree = SOURCE_ROOT; };
+		BDB5C6FA0DAEBCAD003A4375 /* Dopt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Dopt.h; path = ../../../source/Dopt.h; sourceTree = SOURCE_ROOT; };
+		BDB5C6FB0DAEBCAD003A4375 /* Dpriv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Dpriv.c; path = ../../../source/Dpriv.c; sourceTree = SOURCE_ROOT; };
+		BDB5C6FC0DAEBCAD003A4375 /* Dsfnt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Dsfnt.c; path = ../../../source/Dsfnt.c; sourceTree = SOURCE_ROOT; };
+		BDB5C6FD0DAEBCAD003A4375 /* Dsfnt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Dsfnt.h; path = ../../../source/Dsfnt.h; sourceTree = SOURCE_ROOT; };
+		BDB5C6FE0DAEBCAD003A4375 /* Dsys.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Dsys.c; path = ../../../source/Dsys.c; sourceTree = SOURCE_ROOT; };
+		BDB5C6FF0DAEBCAD003A4375 /* Dsys.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Dsys.h; path = ../../../source/Dsys.h; sourceTree = SOURCE_ROOT; };
+		BDB5C7000DAEBCAD003A4375 /* Dtto.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Dtto.c; path = ../../../source/Dtto.c; sourceTree = SOURCE_ROOT; };
+		BDB5C7010DAEBCAD003A4375 /* Dtto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Dtto.h; path = ../../../source/Dtto.h; sourceTree = SOURCE_ROOT; };
+		BDB5C7060DAEBCAD003A4375 /* numtypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = numtypes.h; path = ../../../source/numtypes.h; sourceTree = SOURCE_ROOT; };
+		BDB5C7090DAEBCAD003A4375 /* sfntdiff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sfntdiff.h; path = ../../../source/sfntdiff.h; sourceTree = SOURCE_ROOT; };
+		BDB5C71B0DAEBD06003A4375 /* sfntdiff */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = sfntdiff; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8DD76FAD0486AB0100D96B5E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08FB7794FE84155DC02AAC07 /* sfntdiff */ = {
+			isa = PBXGroup;
+			children = (
+				BDB5C6E00DAEBC73003A4375 /* xcconfig */,
+				08FB7795FE84155DC02AAC07 /* Source */,
+				1AB674ADFE9D54B511CA2CBB /* Products */,
+			);
+			name = sfntdiff;
+			sourceTree = "<group>";
+		};
+		08FB7795FE84155DC02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				BDB5C6EC0DAEBCAD003A4375 /* Dda.c */,
+				BDB5C6ED0DAEBCAD003A4375 /* Dda.h */,
+				BDB5C6EE0DAEBCAD003A4375 /* Ddesc.c */,
+				BDB5C6EF0DAEBCAD003A4375 /* Ddesc.h */,
+				BDB5C6F00DAEBCAD003A4375 /* Dfile.c */,
+				BDB5C6F10DAEBCAD003A4375 /* Dfile.h */,
+				BDB5C6F20DAEBCAD003A4375 /* Dglobal.c */,
+				BDB5C6F30DAEBCAD003A4375 /* Dglobal.h */,
+				BDB5C6F40DAEBCAD003A4375 /* Dhead.c */,
+				BDB5C6F50DAEBCAD003A4375 /* Dhead.h */,
+				BDB5C6F60DAEBCAD003A4375 /* Dmain.c */,
+				BDB5C6F70DAEBCAD003A4375 /* Dname.c */,
+				BDB5C6F80DAEBCAD003A4375 /* Dname.h */,
+				BDB5C6F90DAEBCAD003A4375 /* Dopt.c */,
+				BDB5C6FA0DAEBCAD003A4375 /* Dopt.h */,
+				BDB5C6FB0DAEBCAD003A4375 /* Dpriv.c */,
+				BDB5C6FC0DAEBCAD003A4375 /* Dsfnt.c */,
+				BDB5C6FD0DAEBCAD003A4375 /* Dsfnt.h */,
+				BDB5C6FE0DAEBCAD003A4375 /* Dsys.c */,
+				BDB5C6FF0DAEBCAD003A4375 /* Dsys.h */,
+				BDB5C7000DAEBCAD003A4375 /* Dtto.c */,
+				BDB5C7010DAEBCAD003A4375 /* Dtto.h */,
+				BDB5C7060DAEBCAD003A4375 /* numtypes.h */,
+				BDB5C7090DAEBCAD003A4375 /* sfntdiff.h */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		1AB674ADFE9D54B511CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BDB5C71B0DAEBD06003A4375 /* sfntdiff */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BDB5C6E00DAEBC73003A4375 /* xcconfig */ = {
+			isa = PBXGroup;
+			children = (
+				BDB5C6E70DAEBC8E003A4375 /* common.xcconfig */,
+				BDB5C6E80DAEBC8E003A4375 /* debug.xcconfig */,
+				BDB5C6E90DAEBC8E003A4375 /* release.xcconfig */,
+			);
+			name = xcconfig;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8DD76FA90486AB0100D96B5E /* sfntdiff */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DEB928508733DD80010E9CD /* Build configuration list for PBXNativeTarget "sfntdiff" */;
+			buildPhases = (
+				8DD76FAB0486AB0100D96B5E /* Sources */,
+				8DD76FAD0486AB0100D96B5E /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = sfntdiff;
+			productInstallPath = "$(HOME)/bin";
+			productName = sfntdiff;
+			productReference = BDB5C71B0DAEBD06003A4375 /* sfntdiff */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1000;
+			};
+			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "sfntdiff" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
+			mainGroup = 08FB7794FE84155DC02AAC07 /* sfntdiff */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8DD76FA90486AB0100D96B5E /* sfntdiff */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8DD76FAB0486AB0100D96B5E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BDB5C70E0DAEBCAD003A4375 /* Dda.c in Sources */,
+				BDB5C70F0DAEBCAD003A4375 /* Ddesc.c in Sources */,
+				BDB5C7100DAEBCAD003A4375 /* Dfile.c in Sources */,
+				BDB5C7110DAEBCAD003A4375 /* Dglobal.c in Sources */,
+				BDB5C7120DAEBCAD003A4375 /* Dhead.c in Sources */,
+				BDB5C7130DAEBCAD003A4375 /* Dmain.c in Sources */,
+				BDB5C7140DAEBCAD003A4375 /* Dname.c in Sources */,
+				BDB5C7150DAEBCAD003A4375 /* Dopt.c in Sources */,
+				BDB5C7160DAEBCAD003A4375 /* Dpriv.c in Sources */,
+				BDB5C7170DAEBCAD003A4375 /* Dsfnt.c in Sources */,
+				BDB5C7180DAEBCAD003A4375 /* Dsys.c in Sources */,
+				BDB5C7190DAEBCAD003A4375 /* Dtto.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1DEB928608733DD80010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BDB5C6E80DAEBC8E003A4375 /* debug.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				PRODUCT_NAME = sfntdiff;
+			};
+			name = Debug;
+		};
+		1DEB928708733DD80010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BDB5C6E90DAEBC8E003A4375 /* release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				PRODUCT_NAME = sfntdiff;
+			};
+			name = Release;
+		};
+		1DEB928A08733DD80010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BDB5C6E80DAEBC8E003A4375 /* debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PRODUCT_NAME = sfntdiff;
+			};
+			name = Debug;
+		};
+		1DEB928B08733DD80010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BDB5C6E90DAEBC8E003A4375 /* release.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PRODUCT_NAME = sfntdiff;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB928508733DD80010E9CD /* Build configuration list for PBXNativeTarget "sfntdiff" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB928608733DD80010E9CD /* Debug */,
+				1DEB928708733DD80010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "sfntdiff" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB928A08733DD80010E9CD /* Debug */,
+				1DEB928B08733DD80010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

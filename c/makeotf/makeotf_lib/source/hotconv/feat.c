@@ -65,7 +65,7 @@ enum {
     tableTag
 };
 
-#define MAX_INCL 5
+#define MAX_INCL 50
 #define INCL_CNT (h->stack.cnt)
 #define INCL (h->stack.array[INCL_CNT - 1])
 
@@ -2199,6 +2199,7 @@ static void closeFeaScrLan(State *st) {
                 hotMsg(g, hotFATAL, "[internal] unrecognized tbl");
             }
         }
+        g->error_id_text[0] = '\0';
 
         /* Close feature */
         if (st->tbl == GSUB_) {
@@ -2400,7 +2401,7 @@ static int checkTag(Tag tag, int type, int atStart) {
             /* Allow interleaving features */
             if (tagAssign(tag, featureTag, 1) == 0) {
                 if (tag != (Tag)TAG_STAND_ALONE) {
-                    /* This is normal for stand-alone lookup blocks- we use the same feature tag for each. */
+                    /* This is normal for standalone lookup blocks- we use the same feature tag for each. */
                     featMsg(hotWARNING, "feature already defined: %s", zzlextext);
                 }
             }
@@ -2415,7 +2416,7 @@ static int checkTag(Tag tag, int type, int atStart) {
             if (h->langSys.cnt == 0) {
                 addLangSys(DFLT_, dflt_, 0);
                 featMsg(hotWARNING,
-                        "[internal] Feature block seen before any language system statement.  You should place languagesystem statements before any feature definition", zzlextext);
+                        "[internal] Feature block seen before any language system statement. You should place languagesystem statements before any feature definition", zzlextext);
             }
             tagAssign(h->langSys.array[0].script, scriptTag, 0);
 
@@ -2430,13 +2431,13 @@ static int checkTag(Tag tag, int type, int atStart) {
         } else if (type == scriptTag || type == languageTag) {
             if (h->curr.feature == aalt_ || h->curr.feature == size_) {
                 featMsg(hotERROR,
-                        "\"script\" and \"language\" statements"
-                        " not allowed anymore in 'aalt' or 'size' feature; " USE_LANGSYS_MSG);
+                        "\"script\" and \"language\" statements "
+                        "are not allowed in 'aalt' or 'size' features; " USE_LANGSYS_MSG);
                 return -1;
             } else if ((tag != (Tag)TAG_STAND_ALONE) && (h->curr.feature == (Tag)TAG_STAND_ALONE)) {
                 featMsg(hotERROR,
-                        "\"script\" and \"language\" statements"
-                        "not allowed in within stand-alone lookup blocks; ");
+                        "\"script\" and \"language\" statements "
+                        "are not allowed within standalone lookup blocks; ");
             }
             /*
             if (h->fFlags & FF_LANGSYS_MODE) {
@@ -2918,6 +2919,20 @@ void featWrapUpFeatFile(void) {
 
 /* Current fea, scr, lan, lkpFlag already set. Need to set label. */
 
+static void setIDText(hotCtx g, featCtx h)
+{
+    if (h->curr.feature == TAG_STAND_ALONE)
+        sprintf(g->error_id_text, "standalone");
+    else
+        sprintf(g->error_id_text, "feature '%c%c%c%c'", TAG_ARG(h->curr.feature));
+    if (IS_NAMED_LAB(h->curr.label))
+    {
+        char* p = g->error_id_text + strlen(g->error_id_text);
+        NamedLkp *curr = lab2NamedLkp(h->currNamedLkp);
+        sprintf(p, " lookup '%s'", curr->name);
+    }
+}
+
 static void prepRule(Tag newTbl, int newlkpType, GNode *targ, GNode *repl) {
     int accumDFLTLkps = 1;
 
@@ -3066,6 +3081,7 @@ static void prepRule(Tag newTbl, int newlkpType, GNode *targ, GNode *repl) {
             lkp->label = h->curr.label;
             lkp->useExtension = useExtension;
         }
+        setIDText(g, h);
 
         /* --- COPY CURRENT TO PREVIOUS STATE: */
         h->prev = h->curr;
@@ -3730,9 +3746,7 @@ static void addFeatureParam(hotCtx g, short *params, unsigned short numParams) {
 
         default:
             featMsg(hotERROR,
-                    "Feature parameter not supported for feature"
-                    " '%c%c%c%c'",
-                    TAG_ARG(h->curr.feature));
+                    "A feature parameter is supported only for the 'size' feature.");
     }
 }
 
@@ -3936,10 +3950,6 @@ static void setFontRev(char *rev) {
 
     long major = strtol(rev, &fraction, 10);
 
-    if (major < 1 || major > 255) {
-        featMsg(hotWARNING, "Major version number not in range 1 .. 255");
-    }
-
     if ((fraction != 0) && (strlen(fraction) > 0)) {
         short strLen = strlen(fraction);
         minor = strtod(fraction, NULL);
@@ -4119,7 +4129,7 @@ static Label featGetLabelIndex(char *name) {
 
 static void checkLkpName(char *name, int linenum, int atStart, int isStandAlone) {
     if (isStandAlone) {
-        /* This is a stand-alone lookup, used outside of a feature block. */
+        /* This is a standalone lookup, used outside of a feature block. */
         /* Add it to the dummy feature 'A\0\0A'                           */
         if (atStart) {
             checkTag((Tag)TAG_STAND_ALONE, featureTag, atStart);

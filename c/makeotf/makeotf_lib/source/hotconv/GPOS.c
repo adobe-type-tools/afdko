@@ -17,13 +17,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define CHECK4OVERFLOW(n, t, s)                                                  \
-    do {                                                                         \
-        if ((n) > 0xFFFF)                                                        \
-            hotMsg(g, hotFATAL, "%s offset overflow (0x%0lx) in %s positioning", \
-                   (t), (n), (s));                                               \
-    } while (0)
-
 /* --------------------------- Context Definition -------------------------- */
 
 typedef struct {
@@ -37,6 +30,7 @@ typedef struct { /* Subtable record */
     Tag script;
     Tag language;
     Tag feature;
+    char id_text[ID_TEXT_SIZE];
     unsigned short lkpType;
     unsigned short lkpFlag;
     unsigned short markSetIndex;
@@ -134,6 +128,7 @@ typedef struct { /* New subtable data */
     Tag script;
     Tag language;
     Tag feature;
+    Tag parentFeatTag; /* The parent feature for anonymous lookups made by a chaining contextual feature */
     short useExtension; /* Use extension lookupType? */
     unsigned short lkpType;
     unsigned short parentLkpType;
@@ -296,6 +291,15 @@ static void kernRecDump(hotCtx g, GID glyph1, GID glyph2, short metricsCnt, shor
 
 /* --------------------------- Standard Functions -------------------------- */
 
+static void check_overflow(hotCtx g, char* offsetType, long offset, char* posType)
+{
+    if (offset > 0xFFFF) {
+        hotMsg(g, hotFATAL,
+               "In %s %s rules cause an offset overflow (0x%lx) to a %s",
+               g->error_id_text, posType, offset, offsetType);
+    }
+}
+
 /* Element initializer */
 
 static void anonSubtableInit(void *ctx, long count, SubtableInfo *si) {
@@ -417,6 +421,7 @@ void GPOSWrite(hotCtx g) {
     /* Write main subtable section */
     for (i = 0; i < h->subtables.cnt; i++) {
         Subtable *sub = &h->subtables.array[i];
+        strcpy(g->error_id_text, sub->id_text);
 
         if (IS_REF_LAB(sub->label)) {
             continue;
@@ -665,6 +670,7 @@ static void startNewSubtable(hotCtx g) {
     sub->script = h->new.script;
     sub->language = h->new.language;
     sub->feature = h->new.feature;
+    strcpy(sub->id_text, g->error_id_text); /* save feature and lookup names for writing phase */
     sub->lkpType = h->new.lkpType;
     sub->lkpFlag = h->new.lkpFlag;
     sub->markSetIndex = h->new.markSetIndex;
@@ -758,10 +764,8 @@ void GPOSLookupEnd(hotCtx g, Tag feature) {
         return;
     }
 
-    if (feature != h->new.feature) {
-        /* This happens when a feature definition is empty. */
-        hotMsg(g, hotFATAL, "Empty lookup in feature '%c%c%c%c'", TAG_ARG(feature));
-    }
+    /* This function used to check for an empty feature or lookup,           */
+    /* but this cannot happen with the current implementation of the parser. */
 
     if (h->otl == NULL) {
         /* Allocate table if not done so already */
@@ -770,16 +774,12 @@ void GPOSLookupEnd(hotCtx g, Tag feature) {
 
     switch (h->new.lkpType) {
         case GPOSSingle:
-            if (h->new.single.cnt == 0) {
-                hotMsg(g, hotFATAL, "Empty GPOS Single lookup");
-            }
+            /* No need to test that at least one GPOSSingle rule exists. Can't get here if that is the case */
             fillSinglePos(g, h);
             break;
 
         case GPOSPair:
-            if (h->new.pairs.cnt == 0) {
-                hotMsg(g, hotFATAL, "Empty GPOS Pair lookup");
-            }
+            /* No need to test that at least one GPOSPair rule exists. Can't get here if that is the case */
             fillPairPos(g, h);
             if (h->new.pairFmt == 2) {
                 recyclePairs(h);
@@ -788,68 +788,43 @@ void GPOSLookupEnd(hotCtx g, Tag feature) {
             break;
 
         case GPOSFeatureParam:
-            switch (h->new.feature) {
-                case size_:
-                    fillSizeFeature(g, h, h->new.sub);
-                    break;
-
-                default:
-                    hotMsg(g, hotFATAL,
-                           "feature '%c%c%c%c'with FeatureParameter is not supported.",
-                           TAG_ARG(h->new.feature));
-            }
+            /* No need to test that current feature is 'size', as that is already enforced in feat.c */
+            fillSizeFeature(g, h, h->new.sub);
             break;
 
         case GPOSChain:
-            if (h->new.rules.cnt == 0) {
-                hotMsg(g, hotFATAL, "Empty GPOS Contextual Positioning lookup");
-            }
+            /* No need to test that at least one GPOSChain rule exists. Can't get here if that is the case */
             fillChain(g, h);
             break;
 
         case GPOSCursive:
-            if (h->new.baseList.cnt == 0) {
-                hotMsg(g, hotFATAL, "Empty GPOS Cursive lookup");
-            }
+            /* No need to test that least one GPOSCursive rule exists. Can't get here if that is the case */
             fillCursive(g, h);
             break;
 
         case GPOSMarkToBase:
-            if (h->new.baseList.cnt == 0) {
-                hotMsg(g, hotFATAL, "Empty GPOS MarkToBase lookup");
-            }
+            /* No need to test that least one GPOSMarkToBase rule exists. Can't get here if that is the case */
             fillMarkToBase(g, h);
             break;
 
         case GPOSMarkToLigature:
-            if (h->new.baseList.cnt == 0) {
-                hotMsg(g, hotFATAL, "Empty GPOS MarkToLigature lookup");
-            }
+            /* No need to test that at least one GPOSMarkToLigature rule exists. Can't get here if that is the case */
             fillMarkToLigature(g, h);
             break;
 
         case GPOSMarkToMark:
-            if (h->new.baseList.cnt == 0) {
-                hotMsg(g, hotFATAL, "Empty GPOS MarkToMark lookup");
-            }
+            /* No need to test that at least one GPOSMarkToMark rule exists. Can't get here if that is the case */
             fillMarkToBase(g, h);
             break;
 
-        case GPOSContext:
-            hotMsg(g, hotFATAL, "unsupported GPOS lkpType <%d>\n", h->new.lkpType);
-            break;
+            /* No need to test for case GPOSContext type. Not supported */
 
         default:
-            hotMsg(g, hotFATAL, "unknown GPOS lkpType <%d>\n", h->new.lkpType);
+            /* Can't get here, but it is a useful check for future development. */
+            hotMsg(g, hotFATAL, "unknown GPOS lkpType <%d> in %s.", h->new.lkpType, g->error_id_text);
     }
 
-    if (h->offset.subtable > 0xFFFF) {
-        hotMsg(g, hotFATAL,
-               "GPOS feature '%c%c%c%c' causes overflow of offset"
-               " to a subtable (0x%lx)",
-               TAG_ARG(h->new.feature),
-               h->offset.subtable);
-    }
+    check_overflow(g, "lookup subtable", h->offset.subtable, "positioning");
 
     if (h->startNewPairPosSubtbl != 0) {
         h->startNewPairPosSubtbl = 0;
@@ -1026,9 +1001,9 @@ void GPOSAddSize(hotCtx g, short *params, unsigned short numParams) {
     int outParamSize = (uint16 * 5) + param_offset; /* output record size in bytes */
 
     if ((params[kSizeSubFamilyID] != 0) && (numParams != 4)) {
-        hotMsg(g, hotFATAL, "size feature must have 4 parameters if sub family ID code is non-zero!");
+        hotMsg(g, hotFATAL, "'size' feature must have 4 parameters if sub family ID code is non-zero! In %s.", g->error_id_text);
     } else if ((params[kSizeSubFamilyID] == 0) && (numParams != 4) && (numParams != 2)) {
-        hotMsg(g, hotFATAL, "size feature must have 4 or 2 parameters if sub family code is zero!");
+        hotMsg(g, hotFATAL, "'size' feature must have 4 or 2 parameters if sub family code is zero! In %s.", g->error_id_text);
     }
 
     startNewSubtable(g);
@@ -1182,8 +1157,8 @@ static void checkAndSortSinglePos(hotCtx g, GPOSCtx h) {
                 featGlyphDump(g, curr->gid, '\0', 0);
                 hotMsg(g, hotNOTE,
                        "Removing duplicate single positioning "
-                       "in '%c%c%c%c' feature: %s",
-                       TAG_ARG(h->new.feature),
+                       "in %s: %s",
+                       g->error_id_text,
                        g->note.array);
 
                 /* Set prev duplicate to NULL */
@@ -1193,8 +1168,8 @@ static void checkAndSortSinglePos(hotCtx g, GPOSCtx h) {
                 featGlyphDump(g, curr->gid, '\0', 0);
                 hotMsg(g, hotFATAL,
                        "Duplicate single positioning glyph with "
-                       "different values in '%c%c%c%c' feature: %s",
-                       TAG_ARG(h->new.feature), g->note.array);
+                       "different values in %s: %s",
+                       g->error_id_text, g->note.array);
             }
         }
     }
@@ -1268,7 +1243,7 @@ static void fillSizeFeature(hotCtx g, GPOSCtx h, Subtable *sub) {
         if (nameid != 0) {
             unsigned short nameIDPresent = nameVerifyDefaultNames(g, nameid);
             if (nameIDPresent && nameIDPresent & MISSING_WIN_DEFAULT_NAME) {
-                hotMsg(g, hotFATAL, "Missing Windows default name for for feature name  nameid %i", nameid);
+                hotMsg(g, hotFATAL, "Missing Windows default name for 'sizemenuname' nameid %i in 'size' feature.", nameid);
             }
         }
     } else {
@@ -1467,7 +1442,7 @@ static void writeSinglePos1(hotCtx g, GPOSCtx h, Subtable *sub) {
     if (!sub->extension.use) {
         fmt->Coverage += h->offset.subtable - sub->offset; /* Adjust offset */
     }
-    CHECK4OVERFLOW(fmt->Coverage, "Coverage", "single");
+    check_overflow(g, "coverage table", fmt->Coverage, "single positioning");
 
     OUT2(fmt->PosFormat);
     OUT2((Offset)fmt->Coverage);
@@ -1488,7 +1463,7 @@ static void writeSinglePos2(hotCtx g, GPOSCtx h, Subtable *sub) {
     if (!sub->extension.use) {
         fmt->Coverage += h->offset.subtable - sub->offset; /* Adjust offset */
     }
-    CHECK4OVERFLOW(fmt->Coverage, "Coverage", "single");
+    check_overflow(g, "coverage table", fmt->Coverage, "single positioning");
 
     OUT2(fmt->PosFormat);
     OUT2((Offset)fmt->Coverage);
@@ -1689,12 +1664,11 @@ static void insertInClassDef(GPOSCtx h, int classDefInx, GNode *gc, int inx,
     /* Add gids to glyph accumulator */
     for (; gc != NULL; gc = gc->nextCl) {
         size_t gInx;
-        if (!ctuLookup(&gc->gid, cdef->cov.array, cdef->cov.cnt,
-                       sizeof(GID), matchGID, &gInx, h)) {
-            *INSERT(cdef->cov, gInx) = gc->gid;
-        } else {
-            hotMsg(h->g, hotWARNING, "Duplicate glyph found in glyph class");
-        }
+        ctuLookup(&gc->gid, cdef->cov.array, cdef->cov.cnt,
+                  sizeof(GID), matchGID, &gInx, h);
+        *INSERT(cdef->cov, gInx) = gc->gid;
+        /* No need to check for duplicate glyph class in list;                             */
+        /* this is already handled in feat.c::addPos() by the call to featGlyphClassCopy() */
     }
 }
 
@@ -1847,14 +1821,14 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second, char
                     featGlyphDump(g, first->gid, ' ', 0);
                     featGlyphDump(g, second->gid, '\0', 0);
                     if (filename != NULL) {
-                        sprintf(msg, " [%s %d]", filename, lineNum);
+                        sprintf(msg, " [%s line %d]", filename, lineNum);
                     } else {
                         msg[0] = '\0';
                     }
                     hotMsg(g, hotWARNING,
-                           "Specific kern pair occurring after "
-                           "class kern pair: %s%s",
-                           g->note.array, msg);
+                           "Single kern pair occurring after "
+                           "class kern pair in %s: %s%s",
+                           g->error_id_text, g->note.array, msg);
                 }
             }
         }
@@ -1938,14 +1912,15 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second, char
             featGlyphClassDump(g, first, ' ', 0);
             featGlyphClassDump(g, second, '\0', 0);
             if (filename != NULL) {
-                sprintf(msg, " [%s %d]", filename, lineNum);
+                sprintf(msg, " [%s line %d]", filename, lineNum);
             } else {
                 msg[0] = '\0';
             }
 
             hotMsg(g, hotWARNING,
-                   "Start of new pair positioning subtable; "
+                   "Start of new pair positioning subtable forced by overlapping glyph classes in %s; "
                    "some pairs may never be accessed: %s%s",
+                   g->error_id_text,
                    g->note.array,
                    msg);
 
@@ -2276,7 +2251,9 @@ static GNode *getGNodes(hotCtx g, unsigned class, int classDefInx) {
             return ci->gc;
         }
     }
+    /* can't get here: the class defintions have already been conditioned in feat.c::addPos().
     hotMsg(g, hotFATAL, "class <%u> not valid in classDef", class);
+    */
     return NULL; /* Suppress compiler warning */
 }
 
@@ -2363,9 +2340,8 @@ static void checkAndSortPairPos(hotCtx g, GPOSCtx h, SubtableInfo *si) {
 #if REPORT_DUPE_KERN
                 printKernPair(g, curr1, curr2, curr->metricsRec1[0], prev->metricsRec1[0], fmt1);
                 hotMsg(g, hotNOTE,
-                       "Removing duplicate pair positioning in "
-                       "'%c%c%c%c' feature: %s",
-                       TAG_ARG(si->feature),
+                       "Removing duplicate pair positioning in %s: %s",
+                       g->error_id_text,
                        g->note.array);
 #endif /* REPORT_DUPE_KERN */
             } else {
@@ -2375,9 +2351,9 @@ static void checkAndSortPairPos(hotCtx g, GPOSCtx h, SubtableInfo *si) {
                 printKernPair(g, curr1, curr2, currVal, prevVal, fmt1);
                 hotMsg(g, hotWARNING,
                        "Pair positioning has conflicting statements in "
-                       "'%c%c%c%c' feature; choosing the first "
+                       "%s; choosing the first "
                        "value: %s",
-                       TAG_ARG(si->feature), g->note.array);
+                       g->error_id_text, g->note.array);
                 /* ... for MMs, at default instance */
 #endif /* REPORT_DUPE_KERN */
             }
@@ -2517,9 +2493,11 @@ static Offset classDefMake(hotCtx g, GPOSCtx h, otlTbl t, int cdefInx,
     GNode *p;
     ClassDef *cdef = &h->classDef[cdefInx];
 
+    /* Can't get here - parser reports an error for an empty class defintion.
     if (cdef->classInfo.cnt == 0 || cdef->cov.cnt == 0) {
         hotMsg(g, hotFATAL, "empty classdef");
     }
+    */
 
     /* --- Create coverage, if needed --- */
     if (coverage != NULL) {
@@ -2864,6 +2842,7 @@ static SubtableInfo *addAnonPosRule(hotCtx g, GPOSCtx h, SubtableInfo *cur_si, u
                 (si->useExtension == cur_si->useExtension) &&
                 (si->lkpFlag == cur_si->lkpFlag) &&
                 (si->markSetIndex == cur_si->markSetIndex) &&
+                (si->parentFeatTag == h->new.feature) &&
                 (lkpType == si->lkpType)) {
                 return si;
             }
@@ -2876,6 +2855,7 @@ static SubtableInfo *addAnonPosRule(hotCtx g, GPOSCtx h, SubtableInfo *cur_si, u
                     (si->useExtension == cur_si->useExtension) &&
                     (si->lkpFlag == cur_si->lkpFlag) &&
                     (si->markSetIndex == cur_si->markSetIndex) &&
+                    (si->parentFeatTag == h->new.feature) &&
                     (lkpType == si->lkpType)) {
                     if (checkAddRule(si, targ) != 0) {
                         return si;
@@ -2896,6 +2876,7 @@ static SubtableInfo *addAnonPosRule(hotCtx g, GPOSCtx h, SubtableInfo *cur_si, u
     si->script = cur_si->script;
     si->language = cur_si->language;
     si->feature = cur_si->feature;
+    si->parentFeatTag = h->new.feature;
     si->useExtension = cur_si->useExtension; /* Use extension lookupType? */
     si->lkpFlag = cur_si->lkpFlag;
     si->markSetIndex = cur_si->markSetIndex;
@@ -2923,6 +2904,7 @@ static void createAnonLookups(hotCtx g, GPOSCtx h) {
                                                              /* and will not be considered for adding to the FeatureList table */
         *newsi = *si;
 
+        sprintf(g->error_id_text, "feature '%c%c%c%c'", TAG_ARG(si->parentFeatTag));
         GPOSLookupEnd(g, si->feature); /* This is where the fill unctions get called */
         GPOSFeatureEnd(g);
     }
@@ -3100,12 +3082,7 @@ static void fillChain(hotCtx g, GPOSCtx h) {
 
         fillChain3(g, h, otl, sub, i);
 
-        if (h->offset.subtable > 0xFFFF) {
-            hotMsg(g, hotFATAL,
-                   "Chain contextual lookup subtable in GPOS "
-                   "feature '%c%c%c%c' causes offset overflow.",
-                   TAG_ARG(h->new.feature), i);
-        }
+        check_overflow(g, "lookup subtable", h->offset.subtable, "chain contextual positioning");
     }
 }
 
@@ -3137,7 +3114,7 @@ static void writeChain3(hotCtx g, GPOSCtx h, Subtable *sub) {
             if (!isExt) {
                 fmt->Backtrack[i] += adjustment;
             }
-            CHECK4OVERFLOW(fmt->Backtrack[i], "backtrack", "chain contextual");
+            check_overflow(g, "backtrack coverage table", fmt->Backtrack[i], "chain contextual positioning");
             OUT2((unsigned short)fmt->Backtrack[i]);
         }
     } else {
@@ -3146,7 +3123,7 @@ static void writeChain3(hotCtx g, GPOSCtx h, Subtable *sub) {
             if (!isExt) {
                 fmt->Backtrack[i] += adjustment;
             }
-            CHECK4OVERFLOW(fmt->Backtrack[i], "backtrack", "chain contextual");
+            check_overflow(g, "backtrack coverage table", fmt->Backtrack[i], "chain contextual positioning");
             OUT2((unsigned short)fmt->Backtrack[i]);
         }
     }
@@ -3156,7 +3133,7 @@ static void writeChain3(hotCtx g, GPOSCtx h, Subtable *sub) {
         if (!sub->extension.use) {
             fmt->Input[i] += adjustment;
         }
-        CHECK4OVERFLOW(fmt->Input[i], "input", "chain contextual");
+        check_overflow(g, "input coverage table", fmt->Input[i], "chain contextual positioning");
         OUT2((unsigned short)fmt->Input[i]);
     }
 
@@ -3165,7 +3142,7 @@ static void writeChain3(hotCtx g, GPOSCtx h, Subtable *sub) {
         if (!isExt) {
             fmt->Lookahead[i] += adjustment;
         }
-        CHECK4OVERFLOW(fmt->Lookahead[i], "look-ahead", "chain contextual");
+        check_overflow(g, "lookahead coverage table", fmt->Lookahead[i], "chain contextual positioning");
         OUT2((unsigned short)fmt->Lookahead[i]);
     }
 
@@ -3202,7 +3179,7 @@ static void writePairPos1(hotCtx g, GPOSCtx h, Subtable *sub) {
     if (!sub->extension.use) {
         fmt->Coverage += h->offset.subtable - sub->offset; /* Adjust offset */
     }
-    CHECK4OVERFLOW(fmt->Coverage, "Coverage", "pair");
+    check_overflow(g, "coverage table", fmt->Coverage, "pair positioning");
 
     /* Write header */
     OUT2(fmt->PosFormat);
@@ -3249,9 +3226,9 @@ static void writePairPos2(hotCtx g, GPOSCtx h, Subtable *sub) {
         fmt->ClassDef1 += classAdjust;
         fmt->ClassDef2 += classAdjust;
     }
-    CHECK4OVERFLOW(fmt->Coverage, "Coverage", "pair");
-    CHECK4OVERFLOW(fmt->ClassDef1, "ClassDef", "pair");
-    CHECK4OVERFLOW(fmt->ClassDef2, "ClassDef", "pair");
+    check_overflow(g, "coverage table", fmt->Coverage, "pair positioning");
+    check_overflow(g, "class 1 definition table", fmt->ClassDef1, "pair positioning");
+    check_overflow(g, "class 2 definition table", fmt->ClassDef2, "pair positioning");
 
     /* Write header */
     OUT2(fmt->PosFormat);
@@ -3598,15 +3575,14 @@ static void checkBaseAnchorConflict(hotCtx g, BaseGlyphRec *baseGlyphArray, long
         if (cur->gid == prev->gid) {
             /* For mark to base and mark to mark, only a single entry is allowed in  the baseGlyphArray for a given GID. */
             char msg[1024];
-            featGlyphDump(g, cur->gid, ':', 0);
-            featGlyphDump(g, prev->gid, '\0', 0);
+            featGlyphDump(g, cur->gid, '\0', 0);
             if (fileName != NULL) {
-                sprintf(msg, " [%s current %ld previous %ld]", fileName, cur->lineNum, prev->lineNum);
+                sprintf(msg, " [%s current line %ld previous line %ld]", fileName, cur->lineNum, prev->lineNum);
             } else {
                 msg[0] = '\0';
             }
-            hotMsg(g, hotERROR, "MarkToBase or MarkToMark error 0: A previous statement has already defined the anchors and marks on this the same glyph '%s'. Skipping rule. %s",
-                   g->note.array, msg);
+            hotMsg(g, hotERROR, "MarkToBase or MarkToMark error in %s. Another statement has already defined the anchors and marks on glyph '%s'. %s",
+                    g->error_id_text, g->note.array, msg);
         } else {
             /* For mark to ligature, each successive base glyph entry     */
             /* defines the next component. We just need to make sure that */
@@ -3637,14 +3613,15 @@ static void checkBaseLigatureConflict(hotCtx g, BaseGlyphRec *baseGlyphArray, lo
             cpi2 = cur->anchorMarkInfo.array[0].componentIndex;
             if (cpi1 == cpi2) {
                 char msg[1024];
-                featGlyphDump(g, cur->gid, ':', 0);
+                featGlyphDump(g, cur->gid, '\0', 0);
                 if (fileName != NULL) {
-                    sprintf(msg, " [%s current %ld previous %ld]", fileName, cur->lineNum, prev->lineNum);
+                    sprintf(msg, " [%s current line %ld previous line %ld]", fileName, cur->lineNum, prev->lineNum);
                 } else {
                     msg[0] = '\0';
                 }
-                hotMsg(g, hotERROR, "MarkToLigature error 0: A previous statement has already defined mark to component attachments for this same ligature glyph '%s'. Skipping rule. %s",
-                       g->note.array, msg);
+                hotMsg(g, hotERROR,
+                       "MarkToLigature error in %s. Two different statements referencing the ligature glyph '%s' have assigned the same mark class to the same ligature component. %s",
+                    g->error_id_text, g->note.array, msg);
             }
         } else {
             prev = cur;
@@ -3682,12 +3659,12 @@ static int addMarkClass(hotCtx g, SubtableInfo *si, GNode *markNode, char *fileN
                     GNode *prevMarkNode = si->markClassList.array[i].gnode;
                     featGlyphDump(g, newGID, '\0', 0);
                     if (fileName != NULL) {
-                        sprintf(msg, " [%s %d]", fileName, lineNum);
+                        sprintf(msg, " [%s line %d]", fileName, lineNum);
                     } else {
                         msg[0] = '\0';
                     }
-                    hotMsg(g, hotERROR, "Glyph '%s' occurs in two different mark classes. Previous mark class: %s. Current mark class %s. %s%s",
-                           g->note.array, prevMarkNode->markClassName, markNode->markClassName, msg);
+                    hotMsg(g, hotERROR, "In %s, glyph '%s' occurs in two different mark classes. Previous mark class: %s. Current mark class: %s. %s",
+                           g->error_id_text, g->note.array, prevMarkNode->markClassName, markNode->markClassName, msg);
                     ci = -1;
                 }
                 curNode = curNode->nextCl;
@@ -3707,12 +3684,12 @@ static int addMarkClass(hotCtx g, SubtableInfo *si, GNode *markNode, char *fileN
                     char msg[1024];
                     featGlyphDump(g, testNode->gid, '\0', 0);
                     if (fileName != NULL) {
-                        sprintf(msg, " [%s %d]", fileName, lineNum);
+                        sprintf(msg, " [%s line %d]", fileName, lineNum);
                     } else {
                         msg[0] = '\0';
                     }
-                    hotMsg(g, hotERROR, "The same glyph '%s' is repeated in the current class definition.  mark class %s. %s",
-                           g->note.array, markNode->markClassName, msg);
+                    hotMsg(g, hotERROR, "In %s, glyph '%s' is repeated in the current class definition. Mark class: %s. %s",
+                           g->error_id_text, g->note.array, markNode->markClassName, msg);
                     ci = -1;
                 }
                 testNode = testNode->nextCl;
@@ -3764,8 +3741,9 @@ static LOffset getAnchoOffset(hotCtx g, AnchorMarkInfo *anchor, void *fmt) {
 
     if (i == localFmt->anchorList.cnt) {
         /* did not find the anchor in the list. Add it */
-        AnchorListRec *prevAnchorRec = &localFmt->anchorList.array[i - 1];
+        AnchorListRec *prevAnchorRec;
         anchorRec = dnaNEXT(localFmt->anchorList);
+        prevAnchorRec = &localFmt->anchorList.array[i - 1];
         anchorRec->anchor = *anchor;
         anchorRec->offset = prevAnchorRec->offset;
         if (prevAnchorRec->anchor.format == 2) {
@@ -3904,15 +3882,8 @@ static void fillMarkToBase(hotCtx g, GPOSCtx h) {
             int j;
             BaseGlyphRec *baseRec = &(h->new.baseList.array[i]);
             if ((i > 0) && (prevGID == baseRec->gid)) {
-                char msg[1024];
-                featGlyphDump(g, prevGID, '\0', 0);
-                if (h->new.fileName != NULL) {
-                    sprintf(msg, " [%s %ld]", h->new.fileName, baseRec->lineNum);
-                } else {
-                    msg[0] = '\0';
-                }
-                hotMsg(g, hotERROR, "MarkToBase or MarkToMark error 1: A previous statement has already defined the anchors and marks for the current base glyph '%s'. Skipping rule. %s",
-                       g->note.array, msg);
+                continue;
+                /* No need for logic to report base glyph conflict; this is already reported in checkBaseAnchorConflict() */
             } else {
                 /* Add new glyph entry*/
                 long blockSize;
@@ -3935,12 +3906,12 @@ static void fillMarkToBase(hotCtx g, GPOSCtx h) {
                     char msg[1024];
                     featGlyphDump(g, prevGID, '\0', 0);
                     if (h->new.fileName != NULL) {
-                        sprintf(msg, " [%s %ld]", h->new.fileName, baseRec->lineNum);
+                        sprintf(msg, " [%s line %ld]", h->new.fileName, baseRec->lineNum);
                     } else {
                         msg[0] = '\0';
                     }
-                    hotMsg(g, hotERROR, "MarkToBase or MarkToMark error 2: A previous statement has already assigned the current mark class to another anchor point on the same glyph '%s'. Skipping rule. %s",
-                           g->note.array, msg);
+                    hotMsg(g, hotERROR, "MarkToBase or MarkToMark error in %s. Another statement has already assigned the current mark class to another anchor point on glyph '%s'. %s",
+                           g->error_id_text, g->note.array, msg);
                 } else {
                     nextRec->BaseAnchorArray[baseRec->anchorMarkInfo.array[j].markClassIndex] = getAnchoOffset(g, &baseRec->anchorMarkInfo.array[j], fmt); /* offset from start of anchor list */
                 }
@@ -3961,12 +3932,12 @@ static void fillMarkToBase(hotCtx g, GPOSCtx h) {
                     baseAnchorArray[j] = 0;
                     featGlyphDump(g, baseRec->gid, '\0', 0);
                     if (h->new.fileName != NULL) {
-                        sprintf(msg, " [%s %ld]", h->new.fileName, baseRec->lineNum);
+                        sprintf(msg, " [%s line %ld]", h->new.fileName, baseRec->lineNum);
                     } else {
                         msg[0] = '\0';
                     }
-                    hotMsg(g, hotWARNING, "MarkToBase or MarkToMark: The glyph '%s' does not have an anchor point for a mark class that was used in a previous statement in the same lookup table. Setting the anchor point offset to 0.",
-                           g->note.array, msg);
+                    hotMsg(g, hotWARNING, "MarkToBase or MarkToMark error in %s. Glyph '%s' does not have an anchor point for a mark class that was used in a previous statement in the same lookup table. Setting the anchor point offset to 0.",
+                        g->error_id_text, g->note.array, msg);
                 }
             }
         }
@@ -3996,12 +3967,7 @@ static void fillMarkToBase(hotCtx g, GPOSCtx h) {
         h->offset.subtable += size;
     }
 
-    if (h->offset.subtable > 0xFFFF) {
-        hotMsg(g, hotFATAL,
-               "MarkToBase lookup subtable in GPOS "
-               "feature '%c%c%c%c' causes offset overflow.",
-               TAG_ARG(h->new.feature));
-    }
+    check_overflow(g, "lookup subtable", h->offset.subtable, "mark to base positioning");
 
     sub->tbl = fmt;
 }
@@ -4023,9 +3989,9 @@ static void writeMarkToBase(hotCtx g, GPOSCtx h, Subtable *sub) {
     fmt->BaseCoverage += adjustment; /* Adjust offset */
 
     OUT2(fmt->PosFormat);
-    CHECK4OVERFLOW(fmt->MarkCoverage, "mark coverage", "MarkToBase");
+    check_overflow(g, "mark coverage table", fmt->MarkCoverage, "mark to base positioning");
     OUT2((Offset)fmt->MarkCoverage);
-    CHECK4OVERFLOW(fmt->BaseCoverage, "base coverage", "MarkToBase");
+    check_overflow(g, "base coverage table", fmt->BaseCoverage, "mark to base positioning");
     OUT2((Offset)fmt->BaseCoverage);
     OUT2(fmt->ClassCount);
     OUT2(fmt->MarkArray);
@@ -4214,12 +4180,12 @@ static void fillMarkToLigature(hotCtx g, GPOSCtx h) {
                     char msg[1024];
                     featGlyphDump(g, curGID, '\0', 0);
                     if (h->new.fileName != NULL) {
-                        sprintf(msg, " [%s %ld]", h->new.fileName, baseRec->lineNum);
+                        sprintf(msg, " [%s line %ld]", h->new.fileName, baseRec->lineNum);
                     } else {
                         msg[0] = '\0';
                     }
-                    hotMsg(g, hotERROR, "MarkToLigature statement for glyph '%s' contains a duplicate or conflicting mark class assignment. Skipping rule. %s",
-                           g->note.array, msg);
+                    hotMsg(g, hotERROR, "MarkToLigature statement error in %s. Glyph '%s' contains a duplicate mark class assignment for one of the ligature components. %s",
+                        g->error_id_text, g->note.array, msg);
                 } else {
                     if (baseRec->anchorMarkInfo.array[j].format != 0) {
                         /* Skip anchor if the format is 0 aka NULL anchor */
@@ -4256,12 +4222,7 @@ static void fillMarkToLigature(hotCtx g, GPOSCtx h) {
         h->offset.subtable += size;
     }
 
-    if (h->offset.subtable > 0xFFFF) {
-        hotMsg(g, hotFATAL,
-               "MarkToBase lookup subtable in GPOS "
-               "feature '%c%c%c%c' causes offset overflow.",
-               TAG_ARG(h->new.feature));
-    }
+    check_overflow(g, "lookup subtable", h->offset.subtable, "mark to ligature positioning");
 
     sub->tbl = fmt;
 }
@@ -4285,9 +4246,9 @@ static void writeMarkToLigature(hotCtx g, GPOSCtx h, Subtable *sub) {
     fmt->LigatureCoverage += adjustment; /* Adjust offset */
 
     OUT2(fmt->PosFormat);
-    CHECK4OVERFLOW(fmt->MarkCoverage, "mark coverage", "MarkToLigature");
+    check_overflow(g, "mark coverage table", h->offset.subtable, "mark to ligature positioning");
     OUT2((Offset)fmt->MarkCoverage);
-    CHECK4OVERFLOW(fmt->LigatureCoverage, "ligature coverage", "MarkToLigature");
+    check_overflow(g, "ligature coverage table", h->offset.subtable, "mark to ligature positioning");
     OUT2((Offset)fmt->LigatureCoverage);
     OUT2(fmt->ClassCount);
     OUT2(fmt->MarkArray);
@@ -4418,12 +4379,12 @@ static void fillCursive(hotCtx g, GPOSCtx h) {
                 char msg[1024];
                 featGlyphDump(g, prevRec->gid, '\0', 0);
                 if (h->new.fileName != NULL) {
-                    sprintf(msg, " [%s current %ld previous %ld]", h->new.fileName, baseRec->lineNum, prevRec->lineNum);
+                    sprintf(msg, " [%s current line %ld line previous line %ld]", h->new.fileName, baseRec->lineNum, prevRec->lineNum);
                 } else {
                     msg[0] = '\0';
                 }
-                hotMsg(g, hotERROR, "Cursive statement error: A previous statment has already referenced the same glyph '%s'. Skipping rule. %s",
-                       g->note.array, msg);
+                hotMsg(g, hotERROR, "Cursive statement error in %s. A previous statement has already referenced glyph '%s'. %s",
+                       g->error_id_text, g->note.array, msg);
             } else {
                 EntryExitRecord *fmtRec = &fmt->EntryExitRecord[numRecs];
                 AnchorMarkInfo *anchorInfo;
@@ -4470,12 +4431,7 @@ static void fillCursive(hotCtx g, GPOSCtx h) {
         h->offset.subtable += size;
     }
 
-    if (h->offset.subtable > 0xFFFF) {
-        hotMsg(g, hotFATAL,
-               "Cursive Attach lookup subtable in GPOS "
-               "feature '%c%c%c%c' causes offset overflow.",
-               TAG_ARG(h->new.feature));
-    }
+    check_overflow(g, "cursive attach table", h->offset.subtable, "cursive positioning");
 
     sub->tbl = fmt;
 }
@@ -4500,7 +4456,7 @@ static void writeCursive(hotCtx g, GPOSCtx h, Subtable *sub) {
     OUT2(fmt->PosFormat);
     OUT2((Offset)fmt->Coverage);
     OUT2((Offset)fmt->EntryExitCount);
-    CHECK4OVERFLOW(fmt->Coverage, "cursive coverage", "CursivePos");
+    check_overflow(g, "cursive coverage table", h->offset.subtable, "cursive positioning");
     for (i = 0; i < recCnt; i++) {
         fmtRec = &fmt->EntryExitRecord[i];
 

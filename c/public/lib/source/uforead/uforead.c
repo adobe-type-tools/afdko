@@ -64,9 +64,6 @@ typedef struct
 typedef unsigned short STI; /* String index */
 #define STI_UNDEF 0xffff    /* Undefined string index */
 #define ARRAY_LEN(a) (sizeof(a) / sizeof(a[0]))
-#ifdef _WIN32
-#define round round_int
-#endif
 
 enum {
 #define DCL_KEY(key, index) index,
@@ -696,12 +693,6 @@ static token* getElementValue(ufoCtx h, int state) {
 
     return tk;
 }
-
-#if _WIN32
-static int round_int(double r) {
-    return (int)((r > 0.0) ? (r + 0.5) : (r - 0.5));
-}
-#endif
 
 /* Construct matrix from args. */
 static void setTransformMtx(Transform* transform,

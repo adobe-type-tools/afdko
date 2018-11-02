@@ -1,0 +1,10 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+feature lig1 {
+	lookup lk0 {
+		include (mark_to_ligature.fea);
+	} lk0;
+} lig1;

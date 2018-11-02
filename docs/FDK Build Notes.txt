@@ -44,7 +44,7 @@ For Linux, programs are built with the Ubuntu 12.04 release.
 
 The FDK distribution directory tree is built by:
 
-2.1) building all programs with the script afdko/c/BuildAll.sh (Mac), afdko/c/BuildAll.cmd (Windows), afdko/c/BuildAllLinux.sh (Linux).
+2.1) building all programs with the script afdko/c/buildall.sh (Mac), afdko/c/buildall.cmd (Windows), afdko/c/buildalllinux.sh (Linux).
 
 2.2) deleting the Programs directory and any unused programs and files (e.g Tools/osx and Tools/Linux under Windows).
 

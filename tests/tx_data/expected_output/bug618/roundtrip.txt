@@ -1,0 +1,17 @@
+StartFontMetrics 2.0
+Comment Copyright 2018 Adobe Systems Incorporated. All Rights Reserved.
+Comment Creation Date: Fri Oct 26 21:19:23 2018
+FontName SourceSerifPro-Regular
+FamilyName Source Serif Pro
+ItalicAngle 0
+IsFixedPitch false
+FontBBox 25 -13 560 739
+UnderlinePosition -100
+UnderlineThickness 50
+Version 1.0
+Notice Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries.
+StartCharMetrics 2
+C 97 ; WX 509 ; N a ; B 45 -13 503 488 ;
+C 98 ; WX 577 ; N b ; B 25 -13 532 739 ;
+EndCharMetrics
+EndFontMetrics

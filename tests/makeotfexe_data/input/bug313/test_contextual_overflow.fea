@@ -1,0 +1,132 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+include (kern_classes.fea);
+
+feature krn0 {
+	lookup lkup0 {
+		include(contextual_class_kern.fea);
+	} lkup0;
+	lookup lkup1 {
+		include(contextual_class_kern.fea);
+	} lkup1;
+	lookup lkup2 {
+		include(contextual_class_kern.fea);
+	} lkup2;
+	lookup lkup3 {
+		include(contextual_class_kern.fea);
+	} lkup3;
+	lookup lkup4 {
+		include(contextual_class_kern.fea);
+	} lkup4;
+	lookup lkup5 {
+		include(contextual_class_kern.fea);
+	} lkup5;
+	lookup lkup6 {
+		include(contextual_class_kern.fea);
+	} lkup6;
+	lookup lkup7 {
+		include(contextual_class_kern.fea);
+	} lkup7;
+	lookup lkup8 {
+		include(contextual_class_kern.fea);
+	} lkup8;
+	lookup lkup9 {
+		include(contextual_class_kern.fea);
+	} lkup9;
+	lookup lkup10 {
+		include(contextual_class_kern.fea);
+	} lkup10;
+	lookup lkup11 {
+		include(contextual_class_kern.fea);
+	} lkup11;
+	lookup lkup12 {
+		include(contextual_class_kern.fea);
+	} lkup12;
+	lookup lkup13 {
+		include(contextual_class_kern.fea);
+	} lkup13;
+	lookup lkup14 {
+		include(contextual_class_kern.fea);
+	} lkup14;
+	lookup lkup15 {
+		include(contextual_class_kern.fea);
+	} lkup15;
+	lookup lkup16 {
+		include(contextual_class_kern.fea);
+	} lkup16;
+	lookup lkup17 {
+		include(contextual_class_kern.fea);
+	} lkup17;
+	lookup lkup18 {
+		include(contextual_class_kern.fea);
+	} lkup18;
+	lookup lkup19 {
+		include(contextual_class_kern.fea);
+	} lkup19;
+	lookup lkup20 {
+		include(contextual_class_kern.fea);
+	} lkup20;
+	lookup lkup21 {
+		include(contextual_class_kern.fea);
+	} lkup21;
+	lookup lkup22 {
+		include(contextual_class_kern.fea);
+	} lkup22;
+	lookup lkup23 {
+		include(contextual_class_kern.fea);
+	} lkup23;
+	lookup lkup24 {
+		include(contextual_class_kern.fea);
+	} lkup24;
+	lookup lkup25 {
+		include(contextual_class_kern.fea);
+	} lkup25;
+	lookup lkup26 {
+		include(contextual_class_kern.fea);
+	} lkup26;
+	lookup lkup27 {
+		include(contextual_class_kern.fea);
+	} lkup27;
+	lookup lkup28 {
+		include(contextual_class_kern.fea);
+	} lkup28;
+	lookup lkup29 {
+		include(contextual_class_kern.fea);
+	} lkup29;
+	lookup lkup30 {
+		include(contextual_class_kern.fea);
+	} lkup30;
+	lookup lkup31 {
+		include(contextual_class_kern.fea);
+	} lkup31;
+	lookup lkup32 {
+		include(contextual_class_kern.fea);
+	} lkup32;
+	lookup lkup33 {
+		include(contextual_class_kern.fea);
+	} lkup33;
+	lookup lkup34 {
+		include(contextual_class_kern.fea);
+	} lkup34;
+	lookup lkup35 {
+		include(contextual_class_kern.fea);
+	} lkup35;
+	lookup lkup36 {
+		include(contextual_class_kern.fea);
+	} lkup36;
+	lookup lkup37 {
+		include(contextual_class_kern.fea);
+	} lkup37;
+	lookup lkup38 {
+		include(contextual_class_kern.fea);
+	} lkup38;
+	lookup lkup39 {
+		include(contextual_class_kern.fea);
+	} lkup39;
+	lookup lkup40 {
+		include(contextual_class_kern.fea);
+	} lkup40;
+} krn0;

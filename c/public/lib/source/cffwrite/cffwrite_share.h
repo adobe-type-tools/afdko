@@ -152,6 +152,18 @@ struct cfwCtx_ {
         short code;
     } err;
     unsigned long maxNumSubrs;
+    struct /* glyph metrics */
+    {
+        struct abfMetricsCtx_ ctx;
+        abfGlyphCallbacks cb;
+    } glyph_metrics;
+    struct /* aggregate font bounding box metrics */
+    {
+        int16_t left;
+        int16_t bottom;
+        int16_t right;
+        int16_t top;
+    } font_bbox;
 };
 
 #endif /* CFFWRITE_SHARE_H */

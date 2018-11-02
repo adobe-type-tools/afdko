@@ -91,6 +91,18 @@ struct t1wCtx_ {
         char *end;     /* Buffer end */
         char *next;    /* Next byte available (buf <= next < end) */
     } tmp;
+    struct /* glyph metrics */
+    {
+        struct abfMetricsCtx_ ctx;
+        abfGlyphCallbacks cb;
+    } glyph_metrics;
+    struct /* aggregate font bounding box metrics */
+    {
+        int16_t left;
+        int16_t bottom;
+        int16_t right;
+        int16_t top;
+    } font_bbox;
     struct /* Destination stream */
     {
         char buf[BUFSIZ];
@@ -2141,6 +2153,15 @@ int t1wBegFont(t1wCtx h, long flags, int lenIV, long maxglyphs) {
     h->size.subrs = 0;
     h->size.glyphs = 0;
 
+    /* Set up metrics facility */
+    h->glyph_metrics.cb = abfGlyphMetricsCallbacks;
+    h->glyph_metrics.cb.direct_ctx = &h->glyph_metrics.ctx;
+    h->glyph_metrics.ctx.flags = 0;
+    h->font_bbox.left = INT16_MAX;
+    h->font_bbox.bottom = INT16_MAX;
+    h->font_bbox.right = INT16_MIN;
+    h->font_bbox.top = INT16_MIN;
+
     /* Reset tmp stream */
     if (h->cb.stm.seek(&h->cb.stm, h->stm.tmp, 0))
         return t1wErrTmpStream;
@@ -2159,6 +2180,18 @@ int t1wBegFont(t1wCtx h, long flags, int lenIV, long maxglyphs) {
     END_HANDLER
 
     return t1wSuccess;
+}
+
+static void zeroOutEmptyFontBBox(t1wCtx h) {
+    if (   (h->font_bbox.left   == INT16_MAX)
+        && (h->font_bbox.bottom == INT16_MAX)
+        && (h->font_bbox.right  == INT16_MIN)
+        && (h->font_bbox.top    == INT16_MIN)) {
+        h->font_bbox.left   = 0;
+        h->font_bbox.right  = 0;
+        h->font_bbox.top    = 0;
+        h->font_bbox.bottom = 0;
+    }
 }
 
 /* Finish reading font. */
@@ -2188,6 +2221,15 @@ int t1wEndFont(t1wCtx h, abfTopDict *top) {
     if (h->cb.stm.seek(&h->cb.stm, h->stm.tmp, 0))
         fatal(h, t1wErrTmpStream);
     readTmp(h, 0);
+
+    /* if we only had empty glyphs, set bbox to zeros */
+    zeroOutEmptyFontBBox(h);
+
+    /* update top dict's font bounding box with aggregate values */
+    top->FontBBox[0] = (float)h->font_bbox.left;
+    top->FontBBox[1] = (float)h->font_bbox.bottom;
+    top->FontBBox[2] = (float)h->font_bbox.right;
+    top->FontBBox[3] = (float)h->font_bbox.top;
 
     /* Write out font */
     h->top = top;
@@ -2317,6 +2359,8 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
 
     h->path.state = 1;
 
+    h->glyph_metrics.cb.beg(&h->glyph_metrics.cb, info);
+
     return (h->arg.flags & T1W_WIDTHS_ONLY) ? ABF_WIDTH_RET : ABF_CONT_RET;
 }
 
@@ -2433,6 +2477,8 @@ static void glyphWidth(abfGlyphCallbacks *cb, float hAdv) {
 
     if (accomodate(h, 2, 1))
         return;
+
+    h->glyph_metrics.cb.width(&h->glyph_metrics.cb, hAdv);
 
     saveInt(h, 0);
     saveFlt(h, roundf(hAdv));
@@ -2596,6 +2642,8 @@ static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0) {
     if (accomodate(h, 2, 1))
         return;
 
+    h->glyph_metrics.cb.move(&h->glyph_metrics.cb, x0, y0);
+
     /* Choose format */
     if (dx0 == 0.0) {
         saveFlt(h, dy0);
@@ -2617,6 +2665,7 @@ static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1) {
     t1wCtx h = cb->direct_ctx;
     float dx1;
     float dy1;
+
     x1 = (float)RND_ON_WRITE(x1);  // need to round to 2 decimal places, else get cumulative error when reading the relative coords.
     y1 = (float)RND_ON_WRITE(y1);
     dx1 = x1 - h->path.x;
@@ -2636,6 +2685,8 @@ static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1) {
 
     if (accomodate(h, 2, 1))
         return;
+
+    h->glyph_metrics.cb.line(&h->glyph_metrics.cb, x1, y1);
 
     /* Choose format */
     if (dx1 == 0.0) {
@@ -2694,6 +2745,8 @@ static void glyphCurve(abfGlyphCallbacks *cb,
 
     if (accomodate(h, 6, 1))
         return;
+
+    h->glyph_metrics.cb.curve(&h->glyph_metrics.cb, x1, y1, x2, y2, x3, y3);
 
     /* Choose format */
     if (dx1 == 0.0 && dy3 == 0.0) {
@@ -2956,6 +3009,28 @@ static void glyphSeac(abfGlyphCallbacks *cb,
     h->path.state = 4;
 }
 
+static void updateFontBoundingBox(t1wCtx h) {
+    /* ignore empty glyphs */
+    if (   (h->glyph_metrics.ctx.int_mtx.left == 0)
+        && (h->glyph_metrics.ctx.int_mtx.right == 0)
+        && (h->glyph_metrics.ctx.int_mtx.top == 0)
+        && (h->glyph_metrics.ctx.int_mtx.bottom == 0))
+        return;
+
+    if (h->glyph_metrics.ctx.int_mtx.left < h->font_bbox.left)
+        h->font_bbox.left = h->glyph_metrics.ctx.int_mtx.left;
+
+    if (h->glyph_metrics.ctx.int_mtx.right > h->font_bbox.right)
+        h->font_bbox.right = h->glyph_metrics.ctx.int_mtx.right;
+
+    if (h->glyph_metrics.ctx.int_mtx.top > h->font_bbox.top)
+        h->font_bbox.top = h->glyph_metrics.ctx.int_mtx.top;
+
+    if (h->glyph_metrics.ctx.int_mtx.bottom < h->font_bbox.bottom)
+        h->font_bbox.bottom = h->glyph_metrics.ctx.int_mtx.bottom;
+}
+
+
 /* End glyph definition. */
 static void glyphEnd(abfGlyphCallbacks *cb) {
     t1wCtx h = cb->direct_ctx;
@@ -3003,7 +3078,12 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
     h->size.glyphs += glyph->cstr.length;
 
     h->path.state = 0;
+
+    h->glyph_metrics.cb.end(&h->glyph_metrics.cb);
+
+    updateFontBoundingBox(h);
 }
+
 static void glyphCubeBlend(abfGlyphCallbacks *cb, unsigned int nBlends, unsigned int numVals, float *blendVals) {
     t1wCtx h = cb->direct_ctx;
     unsigned int i = 0;

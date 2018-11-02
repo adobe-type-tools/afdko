@@ -287,6 +287,15 @@ void csSetConvProcs(tcCtx g, csConvProcs *procs) {
     h->procs = *procs;
 }
 
+/* Encode integer as 3 bytes */
+int csEncIntegerAsShortInt(int32_t i, char *t) {
+    /* +ve/-ve 3-byte number (shared with dict ops) */
+    t[0] = (unsigned char)t2_shortint;
+    t[1] = (unsigned char)(i >> 8);
+    t[2] = (unsigned char)i;
+    return 3;
+}
+
 /* Encode integer and return length */
 int csEncInteger(int32_t i, char *t) {
     if (-107 <= i && i <= 107) {

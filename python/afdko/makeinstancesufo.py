@@ -2,8 +2,16 @@
 
 # Copyright 2015 Adobe. All rights reserved.
 
+"""
+Generates UFO font instances from a set of master UFO fonts.
+It uses the mutatorMath library. The paths to the masters and
+instances fonts are specified in the .designspace file.
+"""
+
 from __future__ import print_function, absolute_import, division
 
+import argparse
+import logging
 import os
 import shutil
 import sys
@@ -20,131 +28,20 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
+from afdko.checkoutlinesufo import run as checkoutlinesUFO
 from afdko.ufotools import validateLayers
 
-__usage__ = """
-   makeinstancesufo v1.5.1 Sep 14 2018
-   makeinstancesufo -h
-   makeinstancesufo -u
-   makeinstancesufo [-d <design space file name>] [-a] [-c] [-n] [-dec]
-                    [-i 0,1,..n]
 
-   -d <design space file path>
-      Specifies alternate path to design space file.
-      Default name is 'font.designspace'.
+__version__ = '2.0.0'
 
-   -a ... do NOT autohint the instances. Default is to do so.
-   -c ... do NOT remove the instances' outline overlaps. Default is to do so.
-   -n ... do NOT normalize the instances. Default is to do so.
-   -dec . do NOT round coordinates to integer. Default is to do so.
+logger = logging.getLogger(__name__)
 
-   -i <list of instance indices>
-      Specify the instances to generate. 'i' is a 0-based index of the
-      instance records in the design space file.
-      Example: '-i 1,4,22' -> generates only the 2nd, 5th, and 23rd instances
-"""
-
-__help__ = __usage__ + """
-    makeinstancesufo generates UFO font instances from a set of master design
-    UFO fonts. It uses the mutatorMath library. The paths to the masters and
-    instances fonts are specified in the .designspace file.
-
-"""
 
 DFLT_DESIGNSPACE_FILENAME = "font.designspace"
 
 
-class OptError(ValueError):
+class SnapShotError(Exception):
     pass
-
-
-class ParseError(ValueError):
-    pass
-
-
-class SnapShotError(ValueError):
-    pass
-
-
-class Options(object):
-    def __init__(self, args):
-        self.dsPath = DFLT_DESIGNSPACE_FILENAME
-        self.doAutoHint = True
-        self.doOverlapRemoval = True
-        self.doNormalize = True
-        self.logFile = None
-        self.allowDecimalCoords = False
-        self.indexList = []
-        lenArgs = len(args)
-
-        i = 0
-        hadError = 0
-        while i < lenArgs:
-            arg = args[i]
-            i += 1
-
-            if arg == "-h":
-                logMsg.log(__help__)
-                sys.exit(0)
-            elif arg == "-u":
-                logMsg.log(__usage__)
-                sys.exit(0)
-            elif arg == "-d":
-                self.dsPath = args[i]
-                i += 1
-            elif arg == "-log":
-                logMsg.sendTo(args[i])
-                i += 1
-            elif arg == "-a":
-                self.doAutoHint = False
-            elif arg == "-c":
-                self.doOverlapRemoval = False
-            elif arg == "-n":
-                self.doNormalize = False
-            elif arg in ["-dec", "-decimal"]:
-                self.allowDecimalCoords = True
-            elif arg == "-i":
-                ilist = args[i]
-                i += 1
-                self.indexList = eval(ilist)
-                if isinstance(self.indexList, int):
-                    self.indexList = (self.indexList,)
-            else:
-                logMsg.log("Error: unrecognized argument:", arg)
-                hadError = 1
-
-        if hadError:
-            raise(OptError)
-
-        if not os.path.exists(self.dsPath):
-            logMsg.log("Note: could not find design space file path:",
-                       self.dsPath)
-            hadError = 1
-
-        if hadError:
-            raise(OptError)
-
-
-class LogMsg(object):
-    def __init__(self, logFilePath=None):
-        self.logFilePath = logFilePath
-        self.logFile = None
-        if self.logFilePath:
-            self.logFile = open(logFilePath, "w")
-
-    def log(self, *args):
-        txt = " ".join(args)
-        print(txt)
-        if self.logFilePath:
-            self.logFile.write(txt + os.linesep)
-            self.logFile.flush()
-
-    def sendTo(self, logFilePath):
-        self.logFilePath = logFilePath
-        self.logFile = open(logFilePath, "w")
-
-
-logMsg = LogMsg()
 
 
 def readDesignSpaceFile(options):
@@ -158,7 +55,7 @@ def readDesignSpaceFile(options):
     """
 
     instanceEntryList = []
-    print("Reading design space file: %s ..." % options.dsPath)
+    logger.info("Reading design space file '%s' ..." % options.dsPath)
 
     with open(options.dsPath, "r", encoding='utf-8') as f:
         data = f.read()
@@ -169,14 +66,14 @@ def readDesignSpaceFile(options):
 
     # Remove any instances that are not in the specified list of instance
     # indices, from the option -i.
-    if (len(options.indexList) > 0):
+    if options.indexList:
         newInstanceXMLList = instances.findall("instance")
         numInstances = len(newInstanceXMLList)
         instanceIndex = numInstances
         while instanceIndex > 0:
             instanceIndex -= 1
             instanceXML = newInstanceXMLList[instanceIndex]
-            if not (instanceIndex in options.indexList):
+            if instanceIndex not in options.indexList:
                 instances.remove(instanceXML)
 
     # We want to build all remaining instances.
@@ -184,15 +81,15 @@ def readDesignSpaceFile(options):
         familyName = instanceXML.attrib["familyname"]
         styleName = instanceXML.attrib["stylename"]
         curPath = instanceXML.attrib["filename"]
-        print("Adding %s %s to build list." % (familyName, styleName))
+        logger.info("Adding %s %s to build list." % (familyName, styleName))
         instanceEntryList.append(curPath)
         if os.path.exists(curPath):
             glyphDir = os.path.join(curPath, "glyphs")
             if os.path.exists(glyphDir):
                 shutil.rmtree(glyphDir, ignore_errors=True)
     if not instanceEntryList:
-        print("Failed to find any instances in the ds file '%s' that have the "
-              "postscriptfilename attribute" % options.dsPath)
+        logger.error("Failed to find any instances in the ds file '%s' that "
+                     "have the postscriptfilename attribute" % options.dsPath)
         return None, None
 
     dsPath = "{}.temp".format(options.dsPath)
@@ -208,66 +105,44 @@ def updateInstance(options, fontInstancePath):
     Run checkoutlinesufo and autohint, unless explicitly suppressed.
     """
     if options.doOverlapRemoval:
-        logMsg.log("Doing overlap removal with checkoutlinesufo %s ..." %
-                   fontInstancePath)
-        logList = []
-        opList = ["-e", fontInstancePath]
-        if options.allowDecimalCoords:
-            opList.insert(0, "-d")
-        opList.insert(0, 'checkoutlinesufo')
-        proc = Popen(opList, stdout=PIPE)
-        while 1:
-            output = tounicode(proc.stdout.readline())
-            if output:
-                print('.', end='')
-                logList.append(output)
-            if proc.poll() is not None:
-                output = proc.stdout.readline()
-                if output:
-                    print(output, end='')
-                    logList.append(output)
-                break
-        log = "".join(logList)
-        if not ("Done with font" in log):
-            print()
-            logMsg.log(log)
-            logMsg.log("Error in checkoutlinesufo %s" % (fontInstancePath))
-            raise(SnapShotError)
-        else:
-            print()
+        logger.info("Doing overlap removal with checkoutlinesufo on %s ..." %
+                    fontInstancePath)
+        co_args = ['-e', '-q', fontInstancePath]
+        if options.no_round:
+            co_args.insert(0, '-d')
+        try:
+            checkoutlinesUFO(co_args)
+        except Exception:
+            raise
 
     if options.doAutoHint:
-        logMsg.log("Autohinting %s ..." % (fontInstancePath))
+        logger.info("Running autohint on %s ..." % fontInstancePath)
         logList = []
         opList = ['-q', '-nb', fontInstancePath]
-        if options.allowDecimalCoords:
+        if options.no_round:
             opList.insert(0, "-dec")
         opList.insert(0, 'autohint')
         proc = Popen(opList, stdout=PIPE)
         while 1:
             output = tounicode(proc.stdout.readline())
             if output:
-                print(output, end='')
                 logList.append(output)
             if proc.poll() is not None:
                 output = proc.stdout.readline()
                 if output:
-                    print(output, end='')
+                    if options.verbose == 1:
+                        print(output, end='')
                     logList.append(output)
                 break
         log = "".join(logList)
         if not ("Done with font" in log):
-            print()
-            logMsg.log(log)
-            logMsg.log("Error in autohinting %s" % (fontInstancePath))
+            logger.error(log)
+            logger.error("Error in autohinting %s" % fontInstancePath)
             raise(SnapShotError)
-        else:
-            print()
-    return
 
 
 def clearCustomLibs(dFont):
-    for key in dFont.lib.keys():
+    for key in list(dFont.lib.keys()):
         if key not in ['public.glyphOrder', 'public.postscriptNames']:
             del(dFont.lib[key])
 
@@ -355,13 +230,12 @@ def roundSelectedValues(dFont):
 def postProcessInstance(fontPath, options):
     dFont = Font(fontPath)
     clearCustomLibs(dFont)
-    if options.allowDecimalCoords:
+    if options.no_round:
         roundSelectedValues(dFont)
     dFont.save()
 
 
-def run(args):
-    options = Options(args)
+def run(options):
 
     # Set the current dir to the design space dir, so that relative paths in
     # the design space file will work.
@@ -375,27 +249,27 @@ def run(args):
 
     version = 2
     if len(newInstancesList) == 1:
-        logMsg.log("Building 1 instance...")
+        logger.info("Building 1 instance...")
     else:
-        logMsg.log("Building %s instances..." % (len(newInstancesList)))
+        logger.info("Building %s instances..." % len(newInstancesList))
     mutatorMathBuild(documentPath=dsPath, outputUFOFormatVersion=version,
-                     roundGeometry=(not options.allowDecimalCoords))
+                     roundGeometry=(not options.no_round))
     if (dsPath != options.dsPath) and os.path.exists(dsPath):
         os.remove(dsPath)
 
-    logMsg.log("Built %s instances." % (len(newInstancesList)))
+    logger.info("Built %s instances." % len(newInstancesList))
     # Remove glyph.lib and font.lib (except for "public.glyphOrder")
     for instancePath in newInstancesList:
         postProcessInstance(instancePath, options)
 
     if options.doNormalize:
-        logMsg.log("Applying UFO normalization...")
+        logger.info("Applying UFO normalization...")
         for instancePath in newInstancesList:
             normalizeUFO(instancePath, outputPath=None, onlyModified=True,
                          writeModTimes=False)
 
     if options.doAutoHint or options.doOverlapRemoval:
-        logMsg.log("Applying post-processing...")
+        logger.info("Applying post-processing...")
         # Apply autohint and checkoutlines, if requested.
         for instancePath in newInstancesList:
             # make new instance font.
@@ -416,13 +290,117 @@ def run(args):
                              writeModTimes=False)
 
 
-def main():
+def _validate_path(path_str):
+    valid_path = os.path.abspath(os.path.realpath(path_str))
+    if not os.path.exists(valid_path):
+        raise argparse.ArgumentTypeError(
+            "'{}' is not a valid path.".format(path_str))
+    return valid_path
+
+
+def _split_comma_sequence(comma_str):
+    index_lst = [item.strip() for item in comma_str.split(',')]
+    int_set = set()
+    for item in index_lst:
+        try:
+            index = int(item)
+        except ValueError:
+            raise argparse.ArgumentTypeError(
+                "Invalid integer value: '{}'".format(item))
+        if index < 0:
+            raise argparse.ArgumentTypeError(
+                "Index values must be greater than zero: '{}'".format(index))
+        int_set.add(index)
+    return sorted(int_set)
+
+
+def get_options(args):
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawTextHelpFormatter,
+        description=__doc__
+    )
+    parser.add_argument(
+        '--version',
+        action='version',
+        version=__version__
+    )
+    parser.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        default=0,
+        help='verbose mode\n'
+             'Use -vv for debug mode'
+    )
+    parser.add_argument(
+        '-d',
+        '--designspace',
+        metavar='PATH',
+        dest='dsPath',
+        type=_validate_path,
+        default=DFLT_DESIGNSPACE_FILENAME,
+        help='path to design space file\n'
+             "Default file name is '%(default)s'"
+    )
+    parser.add_argument(
+        '-a',
+        '--no-autohint',
+        dest='doAutoHint',
+        action='store_false',
+        help='do NOT autohint the instances'
+    )
+    parser.add_argument(
+        '-c',
+        '--no-remove-overlap',
+        dest='doOverlapRemoval',
+        action='store_false',
+        help="do NOT remove the instances' outline overlaps"
+    )
+    parser.add_argument(
+        '-n',
+        '--no-normalize',
+        dest='doNormalize',
+        action='store_false',
+        help='do NOT normalize the instances'
+    )
+    parser.add_argument(
+        '-r',
+        '--no-round',
+        action='store_true',
+        help='do NOT round coordinates to integer'
+    )
+    parser.add_argument(
+        '-i',
+        metavar='INDEX(ES)',
+        dest='indexList',
+        type=_split_comma_sequence,
+        default=[],
+        help='index of instance(s) to generate\n'
+             'Zero-based comma-separated sequence of integers\n'
+             'Example: -i 1,4 (generates 2nd & 5th instances)'
+    )
+    options = parser.parse_args(args)
+
+    if not options.verbose:
+        level = "WARNING"
+    elif options.verbose == 1:
+        level = "INFO"
+    else:
+        level = "DEBUG"
+    logging.basicConfig(level=level)
+
+    return options
+
+
+def main(args=None):
+    opts = get_options(args)
+
     try:
-        run(sys.argv[1:])
-    except (OptError, ParseError, SnapShotError):
-        logMsg.log("Quitting after error.")
-        pass
+        run(opts)
+    except SnapShotError:
+        logger.error("Quitting after error.")
+        return 1
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    sys.exit(main())

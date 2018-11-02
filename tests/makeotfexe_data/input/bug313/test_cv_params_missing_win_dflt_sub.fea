@@ -1,0 +1,14 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+feature cv01 {
+	cvParameters {
+
+  FeatUILabelNameID {
+		name 1 0 0 "uilabel  simple a"; # Mac English
+  	};
+  };
+  
+} cv01;

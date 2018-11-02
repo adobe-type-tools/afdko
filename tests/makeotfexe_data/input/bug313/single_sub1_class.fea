@@ -1,0 +1,6 @@
+@sub1_class0 = [ glyph1 glyph2 glyph3 glyph5 glyph6 glyph8 glyph9 glyph11 glyph12 glyph14 glyph15 glyph17 glyph18 glyph20 glyph21 glyph23 glyph24 glyph26 glyph27 glyph29 glyph30 glyph32 glyph33 glyph35 glyph36 glyph38 glyph39 glyph41 glyph42 glyph44 glyph45 glyph47 glyph48 glyph50 glyph51 glyph53 glyph54 glyph56 glyph57 glyph59 glyph60 glyph62 glyph63 glyph65 glyph66 glyph68 glyph69 glyph71 glyph72 glyph74 glyph75 glyph77 glyph78 glyph80 glyph81 glyph83 glyph84 glyph86 glyph87 glyph89 glyph90 glyph92 glyph93 glyph95 glyph96 glyph98 glyph99 glyph101 glyph102 glyph104 glyph105 glyph107 glyph108 glyph110 glyph111 glyph113 glyph114 glyph116 glyph117 glyph119 glyph120 glyph122 glyph123 glyph125 glyph126 glyph128 glyph129 glyph131 glyph132 glyph134 glyph135 glyph137 glyph138 glyph140 glyph141 glyph143 glyph144 glyph146 glyph147 glyph149 glyph150 glyph152 glyph153 glyph155 glyph156 glyph158 glyph159 glyph161 glyph162 glyph164 glyph165 glyph167 glyph168 glyph170 glyph171 glyph173 glyph174 glyph176 glyph177 glyph179 glyph180 glyph182 glyph183 glyph185 glyph186 glyph188 glyph189 glyph191 glyph192 glyph194 glyph195 glyph197 glyph198 ];
+
+@left_sub1_class = [ glyph0 @sub1_class0 glyph199];
+
+
+@right_sub1_class = [  @left_sub1_class ];

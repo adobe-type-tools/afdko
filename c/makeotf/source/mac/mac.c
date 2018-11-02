@@ -8,6 +8,3 @@ char *sep() {
     return "/";
 }
 
-char sepch() {
-    return '/';
-}

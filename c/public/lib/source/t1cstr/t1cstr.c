@@ -2204,7 +2204,7 @@ static int t1DecodeSubr(t1cCtx h, long offset) {
 
 /* Parse Type 1 charstring. */
 int t1cParse(long offset, t1cAuxData *aux, abfGlyphCallbacks *glyph) {
-    struct t1cCtx h;
+    struct t1cCtx h = {0};
     int retVal;
 
     /* Initialize */

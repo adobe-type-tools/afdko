@@ -24,13 +24,12 @@ right, with the positive Y axis pointing down.
 
 from __future__ import print_function, absolute_import
 
+from math import ceil
 import os
 import re
 import time
 
-from afdko import fdkutils
-from afdko import pdfgen
-from afdko import pdfmetrics
+from afdko import fdkutils, pdfgen, pdfmetrics
 from afdko.pdfutils import LINEEND
 
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
@@ -1301,24 +1300,12 @@ def doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages = None):
 		rt_canvas.drawString(params.pageLeftMargin, cur_y, title)
 		rt_canvas.drawRightString(rightMarginPos, cur_y, time.asctime())
 	cur_y -= pageTitleSize*1.2
-	path = repr(params.rt_filePath) # Can be non-ASCII
 	if numPages == None:
 		numPages = numGlyphs // params.glyphsPerPage
 		if (numGlyphs % params.glyphsPerPage) > 0:
 			numPages +=1
 	pageString = '   %d of %s' % (rt_canvas.getPageNumber(), numPages)
-	pathWidth = pdfmetrics.stringwidth(path, pageTitleFont)  * 0.001 * pageTitleSize
-	pageStringWidth = pdfmetrics.stringwidth(pageString, pageTitleFont) * 0.001 * pageTitleSize
-	adjustedWidth = 0
-	while (params.pageLeftMargin + pathWidth + pageStringWidth)  > rightMarginPos:
-		adjustedWidth = 1
-		path = path[1:]
-		pathWidth = pdfmetrics.stringwidth( "..." + path, pageTitleFont)  * 0.001 * pageTitleSize
-
-	if adjustedWidth:
-		path = "..." + path[3:]
 	if pageIncludeTitle:
-		rt_canvas.drawString(params.pageLeftMargin, cur_y, path)
 		rt_canvas.drawRightString(rightMarginPos, cur_y, pageString)
 	cur_y -= pageTitleSize/2
 	if pageIncludeTitle:
@@ -1855,11 +1842,12 @@ def doWaterfall(params, glyphList, fontInfo, wi, cur_y, cur_x, pdfFont, yTop, nu
 	fontInfo.setEncoding(fontInfo, glyphList)
 	rt_canvas.addFont(embeddedFontPSName, fontInfo.encoding, fontInfo, getFontDescriptorItems, getEncodingInfo)
 	leading = None
-	codeRange = range(fontInfo.firstChar, fontInfo.lastChar)
-	text = map(lambda charCode: chr(charCode), codeRange)
-	text = "".join(text)
-	text= text.replace("\\", "\\\\")
-	#print text, codeRange, glyphList
+	text = ''
+	for char_int in range(fontInfo.firstChar, fontInfo.lastChar):
+		if char_int == 92:  # backslash
+			text += '\\\\'
+		else:
+			text += chr(char_int)
 	for gSize in params.waterfallRange:
 		cur_y -= gSize*1.2
 		if ((cur_y) < params.pageBottomMargin):
@@ -1952,9 +1940,9 @@ def makeWaterfallPDF(params, pdfFont, doProgressBar):
 	if glyphList:
 		glyphLists.append(glyphList)
 
-	numWaterfallsOnPage = pageHeight/float(waterfallHeight)
+	numWaterfallsOnPage = int(pageHeight / waterfallHeight)
 	numWaterFalls = len(glyphLists)
-	numPages = int(round(0.5 + float(numWaterFalls)/numWaterfallsOnPage))
+	numPages = int(ceil(float(numWaterFalls) / numWaterfallsOnPage))
 	if numPages == 0:
 		numPages = 1
 	doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages)
@@ -1966,7 +1954,7 @@ def makeWaterfallPDF(params, pdfFont, doProgressBar):
 		progressBarInstance.EndProgress()
 	rt_canvas.showPage()
 	rt_canvas.save()
-	return
+
 
 def makeFontSetPDF(pdfFontList, params, doProgressBar=True):
 	"""

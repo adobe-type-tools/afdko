@@ -1,0 +1,8 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+feature mrk1 {
+	include (mark_to_base.fea);
+} mrk1;

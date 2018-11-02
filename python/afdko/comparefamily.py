@@ -1,3 +1,5 @@
+# coding: utf-8
+
 #	comparefamily.py
 #	This is not code to copy . The original developer did not know Python well,
 #	and had odd ideas about design. However, it works.
@@ -8,7 +10,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-comparefamily 2.1.0 Aug 28 2018
+comparefamily 2.1.3 Nov 1 2018
 
 comparefamily [u] -h] [-d <directory path>] [-tolerance <n>] -rm] [-rn] [-rp] [-nohints] [-l] [-rf] [-st n1,..] [-ft n1,..]
 where 'n1' stands for the number of a test, such as "-st 26" to run Single Test 26.
@@ -119,19 +121,32 @@ kKnownBaseTags = ["hang", # The hanging baseline. This is the horizontal line fr
 			]
 
 
-# Updated to OpenType specification version 1.6
-kKnownScriptTags = [ "arab", # Arabic
+# Updated to OpenType specification version 1.8.3
+# https://docs.microsoft.com/en-us/typography/opentype/spec/scripttags
+kKnownScriptTags = [
+	"adlm", # Adlam
+	"ahom", # Ahom
+	"hluw", # Anatolian Hieroglyphs
+	"arab", # Arabic
 	"armn", # Armenian
+	"avst", # Avestan
 	"bali", # Balinese
+	"bamu", # Bamum
+	"bass", # Bassa Vah
+	"batk", # Batak
 	"beng", # Bengali
 	"bng2", # Bengali v.2
+	"bhks", # Bhaiksuki
 	"bopo", # Bopomofo
+	"brah", # Brahmi
 	"brai", # Braille
 	"bugi", # Buginese
 	"buhd", # Buhid
 	"byzm", # Byzantine Music
 	"cans", # Canadian Syllabics
 	"cari", # Carian
+	"aghb", # Caucasian Albanian
+	"cakm", # Chakma
 	"cham", # Cham
 	"cher", # Cherokee
 	"hani", # CJK Ideographic
@@ -142,56 +157,109 @@ kKnownScriptTags = [ "arab", # Arabic
 	"dsrt", # Deseret
 	"deva", # Devanagari
 	"dev2", # Devanagari v.2
+	"dogr", # Dogra
+	"dupl", # Duployan
+	"egyp", # Egyptian Hieroglyphs
+	"elba", # Elbasan
 	"ethi", # Ethiopic
 	"geor", # Georgian
 	"glag", # Glagolitic
 	"goth", # Gothic
+	"gran", # Grantha
 	"grek", # Greek
 	"gujr", # Gujarati
 	"gjr2", # Gujarati v.2
+	"gong", # Gunjala Gondi
 	"guru", # Gurmukhi
 	"gur2", # Gurmukhi v.2
 	"hang", # Hangul
 	"jamo", # Hangul Jamo
+	"rohg", # Hanifi Rohingya
 	"hano", # Hanunoo
+	"hatr", # Hatran
 	"hebr", # Hebrew
 	"kana", # Hiragana
+	"armi", # Imperial Aramaic
+	"phli", # Inscriptional Pahlavi
+	"prti", # Inscriptional Parthian
 	"java", # Javanese
+	"kthi", # Kaithi
 	"knda", # Kannada
 	"knd2", # Kannada v.2
 	"kana", # Katakana
 	"kali", # Kayah Li
 	"khar", # Kharosthi
 	"khmr", # Khmer
+	"khoj", # Khojki
+	"sind", # Khudawadi
 	"lao ", # Lao
 	"latn", # Latin
 	"lepc", # Lepcha
 	"limb", # Limbu
+	"lina", # Linear A
 	"linb", # Linear B
+	"lisu", # Lisu (Fraser)
 	"lyci", # Lycian
 	"lydi", # Lydian
+	"mahj", # Mahajani
+	"maka", # Makasar
 	"mlym", # Malayalam
 	"mlm2", # Malayalam v.2
+	"mand", # Mandaic, Mandaean
+	"mani", # Manichaean
+	"marc", # Marchen
+	"gonm", # Masaram Gondi
 	"math", # Mathematical Alphanumeric Symbols
+	"medf", # Medefaidrin (Oberi Okaime, Oberi Ɔkaimɛ)
+	"mtei", # Meitei Mayek (Meithei, Meetei)
+	"mend", # Mende Kikakui
+	"merc", # Meroitic Cursive
+	"mero", # Meroitic Hieroglyphs
+	"plrd", # Miao
+	"modi", # Modi
 	"mong", # Mongolian
+	"mroo", # Mro
+	"mult", # Multani
 	"musc", # Musical Symbols
 	"mymr", # Myanmar
+	"mym2", # Myanmar v.2
+	"nbat", # Nabataean
+	"newa", # Newa
 	"talu", # New Tai Lue
 	"nko ", # N'Ko
+	"nshu", # Nüshu
+	"orya", # Odia (formerly Oriya)
+	"ory2", # Odia v.2 (formerly Oriya v.2)
 	"ogam", # Ogham
 	"olck", # Ol Chiki
 	"ital", # Old Italic
+	"hung", # Old Hungarian
+	"narb", # Old North Arabian
+	"perm", # Old Permic
 	"xpeo", # Old Persian Cuneiform
-	"orya", # Oriya
-	"ory2", # Oriya v.2
+	"sogo", # Old Sogdian
+	"sarb", # Old South Arabian
+	"orkh", # Old Turkic, Orkhon Runic
+	"osge", # Osage
 	"osma", # Osmanya
+	"hmng", # Pahawh Hmong
+	"palm", # Palmyrene
+	"pauc", # Pau Cin Hau
 	"phag", # Phags-pa
 	"phnx", # Phoenician
+	"phlp", # Psalter Pahlavi
 	"rjng", # Rejang
 	"runr", # Runic
+	"samr", # Samaritan
 	"saur", # Saurashtra
+	"shrd", # Sharada
 	"shaw", # Shavian
+	"sidd", # Siddham
+	"sgnw", # Sign Writing
 	"sinh", # Sinhala
+	"sogd", # Sogdian
+	"sora", # Sora Sompeng
+	"soyo", # Soyombo
 	"xsux", # Sumero-Akkadian Cuneiform
 	"sund", # Sundanese
 	"sylo", # Syloti Nagri
@@ -199,98 +267,153 @@ kKnownScriptTags = [ "arab", # Arabic
 	"tglg", # Tagalog
 	"tagb", # Tagbanwa
 	"tale", # Tai Le
+	"lana", # Tai Tham (Lanna)
+	"tavt", # Tai Viet
+	"takr", # Takri
 	"taml", # Tamil
 	"tml2", # Tamil v.2
+	"tang", # Tangut
 	"telu", # Telugu
 	"tel2", # Telugu v.2
 	"thaa", # Thaana
 	"thai", # Thai
 	"tibt", # Tibetan
 	"tfng", # Tifinagh
+	"tirh", # Tirhuta
 	"ugar", # Ugaritic Cuneiform
 	"vai ", # Vai
+	"wara", # Warang Citi
 	"yi  ", # Yi
-	]
+	"zanb", # Zanabazar Square (Zanabazarin Dörböljin Useg, Xewtee Dörböljin Bicig, Horizontal Square Script)
+]
 
-# Updated to OpenType specification version 1.6
+# Updated to OpenType specification version 1.8.3
+# https://docs.microsoft.com/en-us/typography/opentype/spec/languagetags
 # NOTE: The "dflt" language tag is not included in OT spec
-kKnownLanguageTags = [ "dflt", # Default
+kKnownLanguageTags = [
+	"dflt", # Default
 	"ABA ", # Abaza
 	"ABK ", # Abkhazian
+	"ACH ", # Acholi
+	"ACR ", # Achi
 	"ADY ", # Adyghe
 	"AFK ", # Afrikaans
 	"AFR ", # Afar
 	"AGW ", # Agaw
+	"AIO ", # Aiton
+	"AKA ", # Akan
 	"ALS ", # Alsatian
 	"ALT ", # Altai
 	"AMH ", # Amharic
-	"APPH", # Phonetic transcription-Americanist conventions
+	"ANG ", # Anglo-Saxon
+	"APPH", # Phonetic transcription—Americanist conventions
 	"ARA ", # Arabic
+	"ARG ", # Aragonese
 	"ARI ", # Aari
-	"ARK ", # Arakanese
+	"ARK ", # Rakhine
 	"ASM ", # Assamese
+	"AST ", # Asturian
 	"ATH ", # Athapaskan
 	"AVR ", # Avar
 	"AWA ", # Awadhi
 	"AYM ", # Aymara
-	"AZE ", # Azeri
+	"AZB ", # Torki
+	"AZE ", # Azerbaijani
 	"BAD ", # Badaga
+	"BAD0", # Banda
 	"BAG ", # Baghelkhandi
 	"BAL ", # Balkar
-	"BAU ", # Baule
+	"BAN ", # Balinese
+	"BAR ", # Bavarian
+	"BAU ", # Baulé
+	"BBC ", # Batak Toba
 	"BBR ", # Berber
 	"BCH ", # Bench
 	"BCR ", # Bible Cree
+	"BDY ", # Bandjalang
 	"BEL ", # Belarussian
 	"BEM ", # Bemba
 	"BEN ", # Bengali
+	"BGC ", # Haryanvi
+	"BGQ ", # Bagri
 	"BGR ", # Bulgarian
 	"BHI ", # Bhili
 	"BHO ", # Bhojpuri
 	"BIK ", # Bikol
 	"BIL ", # Bilen
+	"BIS ", # Bislama
+	"BJJ ", # Kanauji
 	"BKF ", # Blackfoot
-	"BLI ", # Balochi
+	"BLI ", # Baluchi
+	"BLK ", # Pa'o Karen
 	"BLN ", # Balante
 	"BLT ", # Balti
-	"BMB ", # Bambara
+	"BMB ", # Bambara (Bamanankan)
 	"BML ", # Bamileke
 	"BOS ", # Bosnian
+	"BPY ", # Bishnupriya Manipuri
 	"BRE ", # Breton
 	"BRH ", # Brahui
 	"BRI ", # Braj Bhasha
 	"BRM ", # Burmese
+	"BRX ", # Bodo
 	"BSH ", # Bashkir
+	"BSK ", # Burushaski
 	"BTI ", # Beti
+	"BTS ", # Batak Simalungun
+	"BUG ", # Bugis
+	"BYV ", # Medumba
+	"CAK ", # Kaqchikel
 	"CAT ", # Catalan
+	"CBK ", # Zamboanga Chavacano
+	"CCHN", # Chinantec
 	"CEB ", # Cebuano
 	"CHE ", # Chechen
 	"CHG ", # Chaha Gurage
 	"CHH ", # Chattisgarhi
-	"CHI ", # Chichewa
+	"CHI ", # Chichewa (Chewa, Nyanja)
 	"CHK ", # Chukchi
+	"CHK0", # Chuukese
+	"CHO ", # Choctaw
 	"CHP ", # Chipewyan
 	"CHR ", # Cherokee
+	"CHA ", # Chamorro
 	"CHU ", # Chuvash
+	"CHY ", # Cheyenne
+	"CGG ", # Chiga
+	"CJA ", # Western Cham
+	"CJM ", # Eastern Cham
 	"CMR ", # Comorian
 	"COP ", # Coptic
+	"COR ", # Cornish
 	"COS ", # Corsican
+	"CPP ", # Creoles
 	"CRE ", # Cree
 	"CRR ", # Carrier
 	"CRT ", # Crimean Tatar
+	"CSB ", # Kashubian
 	"CSL ", # Church Slavonic
 	"CSY ", # Czech
+	"CTG ", # Chittagonian
+	"CUK ", # San Blas Kuna
 	"DAN ", # Danish
 	"DAR ", # Dargwa
+	"DAX ", # Dayi
 	"DCR ", # Woods Cree
 	"DEU ", # German
+	"DGO ", # Dogri
 	"DGR ", # Dogri
-#	"DHV ", # Dhivehi (deprecated)
-	"DIV ", # Dhivehi
-	"DJR ", # Djerma
+	"DHG ", # Dhangu
+	# "DHV ", # Divehi (Dhivehi, Maldivian) (deprecated)
+	"DIQ ", # Dimli
+	"DIV ", # Divehi (Dhivehi, Maldivian)
+	"DJR ", # Zarma
+	"DJR0", # Djambarrpuyngu
 	"DNG ", # Dangme
+	"DNJ ", # Dan
 	"DNK ", # Dinka
 	"DRI ", # Dari
+	"DUJ ", # Dhuwal
 	"DUN ", # Dungan
 	"DZN ", # Dzongkha
 	"EBI ", # Ebira
@@ -298,105 +421,150 @@ kKnownLanguageTags = [ "dflt", # Default
 	"EDO ", # Edo
 	"EFI ", # Efik
 	"ELL ", # Greek
+	"EMK ", # Eastern Maninkakan
 	"ENG ", # English
 	"ERZ ", # Erzya
 	"ESP ", # Spanish
+	"ESU ", # Central Yupik
 	"ETI ", # Estonian
 	"EUQ ", # Basque
 	"EVK ", # Evenki
 	"EVN ", # Even
 	"EWE ", # Ewe
 	"FAN ", # French Antillean
-	"FAR ", # Farsi
+	"FAN0", # Fang
+	"FAR ", # Persian
+	"FAT ", # Fanti
 	"FIN ", # Finnish
 	"FJI ", # Fijian
-	"FLE ", # Flemish
+	"FLE ", # Dutch (Flemish)
+	"FMP ", # Fe'fe'
 	"FNE ", # Forest Nenets
 	"FON ", # Fon
 	"FOS ", # Faroese
 	"FRA ", # French
+	"FRC ", # Cajun French
 	"FRI ", # Frisian
 	"FRL ", # Friulian
+	"FRP ", # Arpitan
 	"FTA ", # Futa
-	"FUL ", # Fulani
+	"FUL ", # Fulah
+	"FUV ", # Nigerian Fulfulde
 	"GAD ", # Ga
-	"GAE ", # Gaelic
+	"GAE ", # Scottish Gaelic (Gaelic)
 	"GAG ", # Gagauz
 	"GAL ", # Galician
 	"GAR ", # Garshuni
 	"GAW ", # Garhwali
-	"GEZ ", # Ge'ez
+	"GEZ ", # Geez
+	"GIH ", # Githabul
 	"GIL ", # Gilyak
+	"GIL0", # Kiribati (Gilbertese)
+	"GKP ", # Kpelle (Guinea)
+	"GLK ", # Gilaki
 	"GMZ ", # Gumuz
+	"GNN ", # Gumatj
+	"GOG ", # Gogo
 	"GON ", # Gondi
 	"GRN ", # Greenlandic
 	"GRO ", # Garo
 	"GUA ", # Guarani
+	"GUC ", # Wayuu
+	"GUF ", # Gupapuyngu
 	"GUJ ", # Gujarati
-	"HAI ", # Haitian
-	"HAL ", # Halam
+	"GUZ ", # Gusii
+	"HAI ", # Haitian (Haitian Creole)
+	"HAL ", # Halam (Falam Chin)
 	"HAR ", # Harauti
 	"HAU ", # Hausa
-	"HAW ", # Hawaiin
+	"HAW ", # Hawaiian
+	"HAY ", # Haya
+	"HAZ ", # Hazaragi
 	"HBN ", # Hammer-Banna
+	"HER ", # Herero
 	"HIL ", # Hiligaynon
 	"HIN ", # Hindi
 	"HMA ", # High Mari
+	"HMN ", # Hmong
+	"HMO ", # Hiri Motu
 	"HND ", # Hindko
 	"HO  ", # Ho
 	"HRI ", # Harari
 	"HRV ", # Croatian
 	"HUN ", # Hungarian
 	"HYE ", # Armenian
+	"HYE0", # Armenian East
+	"IBA ", # Iban
+	"IBB ", # Ibibio
 	"IBO ", # Igbo
-	"IJO ", # Ijo
+	"IJO ", # Ijo languages
+	"IDO ", # Ido
+	"ILE ", # Interlingue
 	"ILO ", # Ilokano
+	"INA ", # Interlingua
 	"IND ", # Indonesian
 	"ING ", # Ingush
 	"INU ", # Inuktitut
-	"IPPH", # Phonetic transcription-IPA conventions
+	"IPK ", # Inupiat
+	"IPPH", # Phonetic transcription—IPA conventions
 	"IRI ", # Irish
 	"IRT ", # Irish Traditional
 	"ISL ", # Icelandic
 	"ISM ", # Inari Sami
 	"ITA ", # Italian
 	"IWR ", # Hebrew
-	"JAV ", # Javanese
-	"JII ", # Yiddish
+	"JAM ", # Jamaican Creole
 	"JAN ", # Japanese
-	"JUD ", # Judezmo
+	"JAV ", # Javanese
+	"JBO ", # Lojban
+	"JCT ", # Krymchak
+	"JII ", # Yiddish
+	"JUD ", # Ladino
 	"JUL ", # Jula
 	"KAB ", # Kabardian
+	"KAB0", # Kabyle
 	"KAC ", # Kachchi
 	"KAL ", # Kalenjin
 	"KAN ", # Kannada
 	"KAR ", # Karachay
 	"KAT ", # Georgian
 	"KAZ ", # Kazakh
+	"KDE ", # Makonde
+	"KEA ", # Kabuverdianu (Crioulo)
 	"KEB ", # Kebena
+	"KEK ", # Kekchi
 	"KGE ", # Khutsuri Georgian
 	"KHA ", # Khakass
 	"KHK ", # Khanty-Kazim
 	"KHM ", # Khmer
 	"KHS ", # Khanty-Shurishkar
+	"KHT ", # Khamti Shan
 	"KHV ", # Khanty-Vakhi
 	"KHW ", # Khowar
-	"KIK ", # Kikuyu
-	"KIR ", # Kirghiz
+	"KIK ", # Kikuyu (Gikuyu)
+	"KIR ", # Kirghiz (Kyrgyz)
 	"KIS ", # Kisii
+	"KIU ", # Kirmanjki
+	"KJD ", # Southern Kiwai
+	"KJP ", # Eastern Pwo Karen
+	"KJZ ", # Bumthangkha
 	"KKN ", # Kokni
 	"KLM ", # Kalmyk
 	"KMB ", # Kamba
 	"KMN ", # Kumaoni
 	"KMO ", # Komo
 	"KMS ", # Komso
+	"KMZ ", # Khorasani Turkic
 	"KNR ", # Kanuri
 	"KOD ", # Kodagu
 	"KOH ", # Korean Old Hangul
 	"KOK ", # Konkani
 	"KON ", # Kikongo
+	"KOM ", # Komi
+	"KON0", # Kongo
 	"KOP ", # Komi-Permyak
 	"KOR ", # Korean
+	"KOS ", # Kosraean
 	"KOZ ", # Komi-Zyrian
 	"KPL ", # Kpelle
 	"KRI ", # Krio
@@ -406,8 +574,11 @@ kKnownLanguageTags = [ "dflt", # Default
 	"KRN ", # Karen
 	"KRT ", # Koorete
 	"KSH ", # Kashmiri
+	"KSH0", # Ripuarian
 	"KSI ", # Khasi
 	"KSM ", # Kildin Sami
+	"KSW ", # S’gaw Karen
+	"KUA ", # Kuanyama
 	"KUI ", # Kui
 	"KUL ", # Kulvi
 	"KUM ", # Kumyk
@@ -415,6 +586,7 @@ kKnownLanguageTags = [ "dflt", # Default
 	"KUU ", # Kurukh
 	"KUY ", # Kuy
 	"KYK ", # Koryak
+	"KYU ", # Western Kayah
 	"LAD ", # Ladin
 	"LAH ", # Lahuli
 	"LAK ", # Lak
@@ -425,33 +597,54 @@ kKnownLanguageTags = [ "dflt", # Default
 	"LCR ", # L-Cree
 	"LDK ", # Ladakhi
 	"LEZ ", # Lezgi
+	"LIJ ", # Ligurian
+	"LIM ", # Limburgish
 	"LIN ", # Lingala
+	"LIS ", # Lisu
+	"LJP ", # Lampung
+	"LKI ", # Laki
 	"LMA ", # Low Mari
 	"LMB ", # Limbu
+	"LMO ", # Lombard
 	"LMW ", # Lomwe
+	"LOM ", # Loma
+	"LRC ", # Luri
 	"LSB ", # Lower Sorbian
 	"LSM ", # Lule Sami
 	"LTH ", # Lithuanian
 	"LTZ ", # Luxembourgish
-	"LUB ", # Luba
-	"LUG ", # Luganda
-	"LUH ", # Luhya
+	"LUA ", # Luba-Lulua
+	"LUB ", # Luba-Katanga
+	"LUG ", # Ganda
+	"LUH ", # Luyia
 	"LUO ", # Luo
 	"LVI ", # Latvian
+	"MAD ", # Madura
+	"MAG ", # Magahi
+	"MAH ", # Marshallese
 	"MAJ ", # Majang
-	"MAK ", # Makua
-	"MAL ", # Malayalam Traditional
+	"MAK ", # Makhuwa
+	"MAL ", # Malayalam
+	"MAM ", # Mam
 	"MAN ", # Mansi
 	"MAP ", # Mapudungun
 	"MAR ", # Marathi
 	"MAW ", # Marwari
 	"MBN ", # Mbundu
+	"MBO ", # Mbo
 	"MCH ", # Manchu
 	"MCR ", # Moose Cree
 	"MDE ", # Mende
+	"MDR ", # Mandar
 	"MEN ", # Me'en
+	"MER ", # Meru
+	"MFA ", # Pattani Malay
+	"MFE ", # Morisyen
+	"MIN ", # Minangkabau
 	"MIZ ", # Mizo
 	"MKD ", # Macedonian
+	"MKR ", # Makasar
+	"MKW ", # Kituba
 	"MLE ", # Male
 	"MLG ", # Malagasy
 	"MLN ", # Malinke
@@ -461,158 +654,253 @@ kKnownLanguageTags = [ "dflt", # Default
 	"MNG ", # Mongolian
 	"MNI ", # Manipuri
 	"MNK ", # Maninka
-	"MNX ", # Manx Gaelic
+	"MNX ", # Manx
 	"MOH ", # Mohawk
 	"MOK ", # Moksha
 	"MOL ", # Moldavian
 	"MON ", # Mon
 	"MOR ", # Moroccan
+	"MOS ", # Mossi
 	"MRI ", # Maori
 	"MTH ", # Maithili
 	"MTS ", # Maltese
 	"MUN ", # Mundari
+	"MUS ", # Muscogee
+	"MWL ", # Mirandese
+	"MWW ", # Hmong Daw
+	"MYN ", # Mayan
+	"MZN ", # Mazanderani
 	"NAG ", # Naga-Assamese
+	"NAH ", # Nahuatl
 	"NAN ", # Nanai
+	"NAP ", # Neapolitan
 	"NAS ", # Naskapi
+	"NAU ", # Nauruan
+	"NAV ", # Navajo
 	"NCR ", # N-Cree
 	"NDB ", # Ndebele
+	"NDC ", # Ndau
 	"NDG ", # Ndonga
+	"NDS ", # Low Saxon
 	"NEP ", # Nepali
 	"NEW ", # Newari
+	"NGA ", # Ngbaka
 	"NGR ", # Nagari
 	"NHC ", # Norway House Cree
 	"NIS ", # Nisi
 	"NIU ", # Niuean
-	"NKL ", # Nkole
+	"NKL ", # Nyankole
 	"NKO ", # N'Ko
 	"NLD ", # Dutch
+	"NOE ", # Nimadi
 	"NOG ", # Nogai
 	"NOR ", # Norwegian
+	"NOV ", # Novial
 	"NSM ", # Northern Sami
+	"NSO ", # Sotho, Northern
 	"NTA ", # Northern Tai
 	"NTO ", # Esperanto
-	"NYN ", # Nynorsk
+	"NYM ", # Nyamwezi
+	"NYN ", # Norwegian Nynorsk (Nynorsk, Norwegian)
+	"NZA ", # Mbembe Tigon
 	"OCI ", # Occitan
 	"OCR ", # Oji-Cree
 	"OJB ", # Ojibway
-	"ORI ", # Oriya
+	"ORI ", # Odia (formerly Oriya)
 	"ORO ", # Oromo
 	"OSS ", # Ossetian
 	"PAA ", # Palestinian Aramaic
+	"PAG ", # Pangasinan
 	"PAL ", # Pali
+	"PAM ", # Pampangan
 	"PAN ", # Punjabi
 	"PAP ", # Palpa
+	"PAP0", # Papiamentu
 	"PAS ", # Pashto
+	"PAU ", # Palauan
+	"PCC ", # Bouyei
+	"PCD ", # Picard
+	"PDC ", # Pennsylvania German
 	"PGR ", # Polytonic Greek
+	"PHK ", # Phake
+	"PIH ", # Norfolk
 	"PIL ", # Filipino
 	"PLG ", # Palaung
 	"PLK ", # Polish
-	"PRO ", # Provencal
+	"PMS ", # Piemontese
+	"PNB ", # Western Panjabi
+	"POH ", # Pocomchi
+	"PON ", # Pohnpeian
+	"PRO ", # Provençal / Old Provençal
 	"PTG ", # Portuguese
+	"PWO ", # Western Pwo Karen
 	"QIN ", # Chin
+	"QUC ", # K’iche’
+	"QUH ", # Quechua (Bolivia)
+	"QUZ ", # Quechua
+	"QVI ", # Quechua (Ecuador)
+	"QWH ", # Quechua (Peru)
 	"RAJ ", # Rajasthani
-	"RCR ", # R-Cree
+	"RAR ", # Rarotongan
 	"RBU ", # Russian Buriat
+	"RCR ", # R-Cree
+	"REJ ", # Rejang
 	"RIA ", # Riang
-	"RMS ", # Rhaeto-Romanic
+	"RIF ", # Tarifit
+	"RIT ", # Ritarungo
+	"RKW ", # Arakwal
+	"RMS ", # Romansh
+	"RMY ", # Vlax Romani
 	"ROM ", # Romanian
 	"ROY ", # Romany
 	"RSY ", # Rusyn
-	"RUA ", # Ruanda
+	"RTM ", # Rotuman
+	"RUA ", # Kinyarwanda
+	"RUN ", # Rundi
+	"RUP ", # Aromanian
 	"RUS ", # Russian
 	"SAD ", # Sadri
 	"SAN ", # Sanskrit
+	"SAS ", # Sasak
 	"SAT ", # Santali
 	"SAY ", # Sayisi
+	"SCN ", # Sicilian
+	"SCO ", # Scots
 	"SEK ", # Sekota
 	"SEL ", # Selkup
+	"SGA ", # Old Irish
 	"SGO ", # Sango
+	"SGS ", # Samogitian
+	"SHI ", # Tachelhit
 	"SHN ", # Shan
 	"SIB ", # Sibe
 	"SID ", # Sidamo
 	"SIG ", # Silte Gurage
 	"SKS ", # Skolt Sami
 	"SKY ", # Slovak
+	"SCS ", # North Slavey
 	"SLA ", # Slavey
 	"SLV ", # Slovenian
 	"SML ", # Somali
 	"SMO ", # Samoan
 	"SNA ", # Sena
+	"SNA0", # Shona
 	"SND ", # Sindhi
-	"SNH ", # Sinhalese
+	"SNH ", # Sinhala (Sinhalese)
 	"SNK ", # Soninke
 	"SOG ", # Sodo Gurage
-	"SOT ", # Sotho
+	"SOP ", # Songe
+	"SOT ", # Sotho, Southern
 	"SQI ", # Albanian
 	"SRB ", # Serbian
+	"SRD ", # Sardinian
 	"SRK ", # Saraiki
 	"SRR ", # Serer
 	"SSL ", # South Slavey
 	"SSM ", # Southern Sami
+	"STQ ", # Saterland Frisian
+	"SUK ", # Sukuma
+	"SUN ", # Sundanese
 	"SUR ", # Suri
 	"SVA ", # Svan
 	"SVE ", # Swedish
 	"SWA ", # Swadaya Aramaic
 	"SWK ", # Swahili
-	"SWZ ", # Swazi
+	"SWZ ", # Swati
 	"SXT ", # Sutu
+	"SXU ", # Upper Saxon
+	"SYL ", # Sylheti
 	"SYR ", # Syriac
+	"SYRE", # Syriac, Estrangela
+	"SYRJ", # Syriac, Western
+	"SYRN", # Syriac, Eastern
+	"SZL ", # Silesian
 	"TAB ", # Tabasaran
 	"TAJ ", # Tajiki
 	"TAM ", # Tamil
 	"TAT ", # Tatar
 	"TCR ", # TH-Cree
+	"TDD ", # Dehong Dai
 	"TEL ", # Telugu
+	"TET ", # Tetum
+	"TGL ", # Tagalog
 	"TGN ", # Tongan
 	"TGR ", # Tigre
 	"TGY ", # Tigrinya
 	"THA ", # Thai
 	"THT ", # Tahitian
 	"TIB ", # Tibetan
+	"TIV ", # Tiv
 	"TKM ", # Turkmen
+	"TMH ", # Tamashek
 	"TMN ", # Temne
 	"TNA ", # Tswana
 	"TNE ", # Tundra Nenets
 	"TNG ", # Tonga
 	"TOD ", # Todo
+	"TOD0", # Toma
+	"TPI ", # Tok Pisin
 	"TRK ", # Turkish
 	"TSG ", # Tsonga
+	"TSJ ", # Tshangla
 	"TUA ", # Turoyo Aramaic
-	"TUL ", # Tulu
+	"TUM ", # Tulu
+	"TUL ", # Tumbuka
 	"TUV ", # Tuvin
+	"TVL ", # Tuvalu
 	"TWI ", # Twi
+	"TYZ ", # Tày
+	"TZM ", # Tamazight
+	"TZO ", # Tzotzil
 	"UDM ", # Udmurt
 	"UKR ", # Ukrainian
+	"UMB ", # Umbundu
 	"URD ", # Urdu
 	"USB ", # Upper Sorbian
 	"UYG ", # Uyghur
 	"UZB ", # Uzbek
+	"VEC ", # Venetian
 	"VEN ", # Venda
 	"VIT ", # Vietnamese
+	"VOL ", # Volapük
+	"VRO ", # Võro
 	"WA  ", # Wa
 	"WAG ", # Wagdi
+	"WAR ", # Waray-Waray
 	"WCR ", # West-Cree
 	"WEL ", # Welsh
+	"WLN ", # Walloon
 	"WLF ", # Wolof
-	"XBD ", # Tai Lue
+	"WTM ", # Mewati
+	"XBD ", # Lü
+	"XKF ", # Khengkha
 	"XHS ", # Xhosa
-	"YAK ", # Yakut
+	"XJB ", # Minjangbal
+	"XOG ", # Soga
+	"XPE ", # Kpelle (Liberia)
+	"YAK ", # Sakha
+	"YAO ", # Yao
+	"YAP ", # Yapese
 	"YBA ", # Yoruba
 	"YCR ", # Y-Cree
 	"YIC ", # Yi Classic
 	"YIM ", # Yi Modern
-	"ZHH ", # Chinese Hong Kong
+	"ZEA ", # Zealandic
+	"ZGH ", # Standard Moroccan Tamazight
+	"ZHA ", # Zhuang
+	"ZHH ", # Chinese, Hong Kong SAR
 	"ZHP ", # Chinese Phonetic
 	"ZHS ", # Chinese Simplified
 	"ZHT ", # Chinese Traditional
 	"ZND ", # Zande
 	"ZUL ", # Zulu
-	]
+	"ZZA ", # Zazaki
+]
 
 
 gAGDDict = {}
 
-class compare_family_font:
+class CompareFamilyFont:
 		def __init__(self, ttFont, path):
 			self.ttFont = ttFont
 			self.path = path
@@ -682,7 +970,7 @@ def readGlyphInfo(cmpfFont):
 	if not metrics:
 		print("Error: Quitting. Could not run 'tx' against the font %s to get font metrics." % cmpfFont.path)
 		print("\t tx log output <" + report + ">.")
-		sys.exit(0)
+		sys.exit(1)
 	cmpfFont.metricsDict = {}
 	for entry in metrics:
 		valList = [eval(val) for val in entry[1:]]
@@ -735,36 +1023,20 @@ def readCFFTable(cmpfFont):
 	cmpfFont.topDict = first_font_topDict
 	try:
 		cmpfFont.FDArray = first_font_topDict.FDArray
-		cmpfFont.isCID = 1
+		cmpfFont.isCID = True
 	except:
-		cmpfFont.isCID = 0
+		cmpfFont.isCID = False
 		cmpfFont.FDArray = [first_font_topDict]
 
 
 # sorting routines for reports
 
-# default sorting based on Windows compatible name and style name.
 def sort_font(fontlist):
-	newlist = [fontlist[0]]
-	for font in fontlist[1:]:
-		if font.compatibleFamilyName3 > newlist[-1].compatibleFamilyName3:
-			newlist.append(font)
-		else:
-			for i in range(len(newlist)):
-				if	font.compatibleFamilyName3 < newlist[i].compatibleFamilyName3:
-					newlist.insert(i,font)
-					break
-				elif font.compatibleFamilyName3 == newlist[i].compatibleFamilyName3:
-					if font.macStyle < newlist[i].macStyle:
-						newlist.insert(i,font)
-						break
-					elif i == len(newlist)-1:
-						newlist.append(font)
-						break
-				elif i == len(newlist)-1:
-					newlist.append(font)
-					break
-	return newlist
+	"""
+	Returns a new list that is first sorted by the font's compatibleFamilyName3
+	(Windows compatible name), and secondly by the font's macStyle (style name).
+	"""
+	return sorted(fontlist, key=lambda font: (font.compatibleFamilyName3, font.macStyle))
 
 def sort_by_numGlyphs_and_PostScriptName1(fontlist):
 	"""
@@ -898,13 +1170,13 @@ def readNameTable(cmpfFont):
 		try:
 			cmpfFont.copyrightStr1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 0)].decode('mac_roman'))
 		except KeyError:
-			print("	Error: Missing Mac Copyright String from name table! Should be in record", (1, 0, 0, 0), cmpfFont.PostScriptName1)
+			print("	Warning: Missing Mac Copyright String from name table! Should be in record", (1, 0, 0, 0), cmpfFont.PostScriptName1)
 			cmpfFont.copyrightStr1 = ""
 
 		try:
 			cmpfFont.trademarkStr1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 7)].decode('mac_roman'))
 		except KeyError:
-			print("	Error: Missing Mac Trademark String from name table! Should be in record", (1, 0, 0, 7), cmpfFont.PostScriptName1)
+			print("	Warning: Missing Mac Trademark String from name table! Should be in record", (1, 0, 0, 7), cmpfFont.PostScriptName1)
 			cmpfFont.trademarkStr1 = ""
 
 
@@ -963,14 +1235,14 @@ def readNameTable(cmpfFont):
 	try:
 		cmpfFont.copyrightStr3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 0)].decode('utf_16_be'))
 	except KeyError:
-		print("	Error: Missing Windows Copyright String/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 0), cmpfFont.PostScriptName3)
+		print("	Warning: Missing Windows Copyright String/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 0), cmpfFont.PostScriptName3)
 		cmpfFont.copyrightStr3 = ""
 
 
 	try:
 		cmpfFont.trademarkStr3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 7)].decode('utf_16_be'))
 	except KeyError:
-		print("	Error: Missing Windows Trademark String/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 7), cmpfFont.PostScriptName3)
+		print("	Warning: Missing Windows Trademark String/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 7), cmpfFont.PostScriptName3)
 		cmpfFont.trademarkStr3 = ""
 
 	if not cmpfFont.hasMacNames:
@@ -1125,8 +1397,7 @@ def readhheaTable(cmpfFont):
 
 
 def handle_datafork_file(path):
-	tt = ttLib.TTFont(path)
-	return tt
+	return ttLib.TTFont(path)
 
 
 
@@ -1182,10 +1453,10 @@ def guessfiletype(path):
 
 
 # Fill in font info by reading the required tables
-def get_fontinfo(pathname, type):
-	if type == "resource":
+def get_fontinfo(pathname, font_type):
+	if font_type == "resource":
 		ttFont = handle_resource_file(pathname)
-	elif type == "datafork":
+	elif font_type == "datafork":
 		ttFont = handle_datafork_file(pathname)
 	else:
 		ttFont = None
@@ -1197,39 +1468,35 @@ def build_fontlist_from_dir(directory):
 	global fontlist
 	try:
 		# get all files in the directory
-		dirlist = os.listdir(directory)
+		dirlist = sorted(os.listdir(directory))
 	except OSError:
 		print("No files found in the directory", directory)
 		return []
 
-	fontlist = []
-	for i in range(len(dirlist)):
-		filename = dirlist[i]
+	for filename in dirlist:
 		path = os.path.join(directory, filename )
 		if os.path.isfile(path):
-			type = guessfiletype(path)
-			if type == "unknown":
+			font_type = guessfiletype(path)
+			if font_type == "unknown":
 				continue
 		else:
 			continue
 
-		ttFont = get_fontinfo(path, type)
-		if ttFont != None:
-			cmpfFont = compare_family_font(ttFont, path)
-			if 'CFF ' in cmpfFont.ttFont.keys():
-				cmpfFont.isTTF = 0
+		ttFont = get_fontinfo(path, font_type)
+		if ttFont is not None:
+			cmpfFont = CompareFamilyFont(ttFont, path)
+			if 'CFF ' in cmpfFont.ttFont:
+				cmpfFont.isTTF = False
+				readCFFTable(cmpfFont)
 			else:
-				cmpfFont.isTTF = 1
+				cmpfFont.isTTF = True
+				cmpfFont.isCID = False
+				cmpfFont.topDict = None
 			readNameTable(cmpfFont)
 			readheadTable(cmpfFont)
 			readhheaTable(cmpfFont)
 			readOS2Table(cmpfFont)
 			readpostTable(cmpfFont)
-			if 'CFF ' in cmpfFont.ttFont.keys():
-				readCFFTable(cmpfFont)
-			else:
-				cmpfFont.isCID = 0
-				cmpfFont.topDict = None
 			readGlyphInfo(cmpfFont)
 			fontlist.append(cmpfFont)
 
@@ -1683,15 +1950,15 @@ def doSingleTest15():
 			print("	Warning: BBox Y-Max '%s' is out of usual range for Font %s." % (font.fontBBox[3], font.PostScriptName1))
 
 		if 'CFF ' in font.ttFont:
-			hheaBox =  font.fontBBox
+			headBox =  font.fontBBox
 			cffBox = font.topDict.FontBBox
 			diff = 0
 			for i in [0,1,2,3]:
-				if abs(hheaBox[i] - cffBox[i]) > 1:
+				if abs(headBox[i] - cffBox[i]) > 1:
 					diff = 1
 					break
 			if diff:
-				print("The font bounding box in the hhea table '%s' differs from that in the CFF table '%s'. %s." % (hheaBox, cffBox, font.PostScriptName1))
+				print("The head table xMin, yMin, xMax, yMax values '%s' differ from the CFF table FontBBox values '%s'. %s." % (headBox, cffBox, font.PostScriptName1))
 
 def doSingleTest16():
 	global fontlist
@@ -2133,37 +2400,38 @@ oldLigatureNames = {
 		"zy" : "z",
 		}
 
-accentNames = {
-			"acute" : 1,
-			"acutecomb" : 1,
-			"bar" : 1,
-			"breve" : 1,
-			"caron" : 1,
-			"cedilla" : 1,
-			"comb" : 1,
-			"circumflex" : 1,
-			"croat" : 1,
-			"dieresis" : 1,
-			"dot" : 1,
-			"dotaccent" : 1,
-			"grave" : 1,
-			"gravecomb" : 1,
-			"hook" : 1,
-			"hookabove" : 1,
-			"hookabovecomb" : 1,
-			"hungarumlaut" : 1,
-			"macron" : 1,
-			"ogonek" : 1,
-			"ring" : 1,
-			"ringacute" : 1,
-			"slash" : 1,
-			"slashacute" : 1,
-			"tilde" : 1,
-			"tildecomb" : 1,
-			"uni0302" : 1,
-			"uni0313" : 1,
-			"umlaut" : 1,
-			}
+NAMES_OF_ACCENTS = set([
+			"accent",
+			"acute",
+			"acutecomb",
+			"bar",
+			"breve",
+			"caron",
+			"cedilla",
+			"comb",
+			"circumflex",
+			"croat",
+			"dieresis",
+			"dot",
+			"dotaccent",
+			"grave",
+			"gravecomb",
+			"hook",
+			"hookabove",
+			"hookabovecomb",
+			"hungarumlaut",
+			"macron",
+			"ogonek",
+			"ring",
+			"ringacute",
+			"slash",
+			"slashacute",
+			"tilde",
+			"tildecomb",
+			"uni0302",
+			"uni0313",
+			"umlaut",
+			])
 
 uniLigPattern = re.compile(r"^uni([0-8A-Fa-f][0-8A-Fa-f][0-8A-Fa-f][0-8A-Fa-f])([0-8A-Fa-f][0-8A-Fa-f][0-8A-Fa-f][0-8A-Fa-f])")
 
@@ -2298,7 +2566,6 @@ def doSingleTest22():
 				if diff > gDesignSpaceTolerance:
 					print("	Warning: right side bearing %s of ligature %s is not equal to the rsb %s of the last component %s for font %s." % (rsbLig, ligName, rsbRightComp, rightComp, font.PostScriptName1))
 
-accentedNames = accentNames.keys()
 def  getAcentEntries(font):
 	# Simply delete all the sub-strings in the accentedNames list from the glyph name. If the result differs from the original, store it.
 	# We don't know yet if the baseName glyph exists.
@@ -2306,7 +2573,7 @@ def  getAcentEntries(font):
 	nameList = font.ttFont.getGlyphOrder()
 	for name in nameList:
 		baseName = name
-		for subName in accentedNames:
+		for subName in sorted(NAMES_OF_ACCENTS):
 			if baseName == subName:
 				break
 			baseName = re.sub(subName, "", baseName)
@@ -2738,11 +3005,6 @@ def doSingleTest28():
 			pass
 
 		# Check unicodeTable. Say block is supported if it has at least 1/3 of the necessary glyphs.
-		# Get Unicode cmap subtable
-		if not haveUVCmap:
-			print("\tError: font has no Unicode camp table! Skipping check of OS/2 ulUnicodeRanges. %s." % ())
-			continue
-
 		unitTableDict = {}
 		# build dict of which blocks are/are nto supported.
 		for unicodeBlock in unicodeTable:
@@ -3171,11 +3433,11 @@ def doFamilyTest4():
 		if "size" in report:
 			match = re.search(r"Design Size:\s*(\d+).+?Subfamily Identifier:\s*(\d+).+name table [^:]+:\s*(\d+).+Range Start:\s*(\d+).+?Range End:\s*(\d+)", report, re.DOTALL)
 			if match:
-				font.sizeDesignSize = designSize = eval(match.group(1))
-				font.sizeSubfFamilyID = subfFamilyID = eval(match.group(2))
-				font.sizeNameID = sizeNameID = eval(match.group(3))
-				font.sizeRangeStart = rangeStart = eval(match.group(4))
-				font.sizeRangeEnd = rangeEnd = eval(match.group(5))
+				font.sizeDesignSize = eval(match.group(1))
+				font.sizeSubfFamilyID = eval(match.group(2))
+				font.sizeNameID = eval(match.group(3))
+				font.sizeRangeStart = eval(match.group(4))
+				font.sizeRangeEnd = eval(match.group(5))
 				font.sizeMenuName = ""
 				for keyTuple in font.nameIDDict.keys():
 					if keyTuple[3] == font.sizeNameID:
@@ -3188,8 +3450,7 @@ def doFamilyTest4():
 		fontgroup = preferredFamilyList1[name]
 		sizeGroupbyID = {}
 		sizeGroupbyMenu = {}
-		for i in range(len(fontgroup)):
-			font = fontgroup[i]
+		for font in fontgroup:
 			if font.sizeNameID:
 				seenSize = 1
 			gList = sizeGroupbyMenu.get(font.sizeMenuName, [])
@@ -3499,13 +3760,13 @@ def doFamilyTest11():
 			for nameIDKey in font.nameIDDict.keys():
 				Platform, Encoding, Language, ID = nameIDKey
 
-				if (Platform == 1) and (Encoding == 0)  and (ID == 18):
+				if (Platform == 1) and (Encoding == 0)  and (ID == 18) and Language == 0:
 					macMenuName = tounicode(font.nameIDDict[nameIDKey])
 
-				if (Platform == 1) and (Encoding == 0) and (ID == 4) and not macMenuName:
+				if (Platform == 1) and (Encoding == 0) and (ID == 4) and Language == 0 and not macMenuName:
 					macMenuName = tounicode(font.nameIDDict[nameIDKey])
 
-				if Platform == 3 and Encoding == 1 and ID == 1:
+				if Platform == 3 and Encoding == 1 and ID == 1 and Language == 1033:
 					winMenuName = tounicode(font.nameIDDict[nameIDKey].decode('utf_16_be'))
 			if font.isBold or font.isItalic:
 				if not font.isCID:
@@ -3617,7 +3878,7 @@ def doFamilyTest12():
 		print("	Error: In GPOS/GUSB tables, the sets of lookups used by features in the script-language systems  differ between fonts.")
 		print("\tThis may be intended if the faces have different charsets.")
 
-	for value  in langSysDict.values():
+	for value in sorted(langSysDict.values()):
 		print()
 		print("Lang/Sys Table for font(s): ", end=' ')
 		for entry in  value:
@@ -3802,7 +4063,7 @@ def doFamilyTest16():
 			fontList = charsetDict.get(charset, [])
 			fontList.append(font)
 			charsetDict[charset] = fontList
-		charsetList = charsetDict.keys()
+		charsetList = sorted(charsetDict.keys())
 
 		# Can't usefully compare between fonts when there is only 1. Add these to the end of the longest charset.
 		singletonFonts = [] # list of fonts which had a unique charset.
@@ -3831,7 +4092,7 @@ def doFamilyTest16():
 					try:
 						widthList.append([htmx_table.metrics[gname][0], font.PostScriptName1])
 					except KeyError:
-						print("\tError: Glyph '%s' is in font, but is nt in the width list. This can happen when the number of glyphs in the maxp table is less than the actual number of glyphs." % (gname))
+						print("\tError: Glyph '%s' is in font, but is not in the width list. This can happen when the number of glyphs in the maxp table is less than the actual number of glyphs." % (gname))
 						pass
 				if not widthList:
 					continue
@@ -4785,7 +5046,7 @@ def main():
 			print("No directory available for processing.")
 			sys.exit(0)
 
-	if fontlist == []:
+	if not fontlist:
 			print("No font available for processing.")
 			sys.exit(0)
 

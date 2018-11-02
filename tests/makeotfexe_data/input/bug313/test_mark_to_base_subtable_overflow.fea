@@ -1,0 +1,89 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+feature mrk1 {
+	include (mark_to_base.fea);
+	pos base [glyph101]
+		<anchor 101 101> mark @MARK_CLASS_1
+		<anchor 101 102> mark @MARK_CLASS_2
+		<anchor 101 103> mark @MARK_CLASS_3
+		<anchor 101 104> mark @MARK_CLASS_4
+		<anchor 101 106> mark @MARK_CLASS_6
+		<anchor 101 107> mark @MARK_CLASS_7
+		<anchor 101 108> mark @MARK_CLASS_8
+		<anchor 101 109> mark @MARK_CLASS_9
+		<anchor 101 111> mark @MARK_CLASS_11
+		<anchor 101 112> mark @MARK_CLASS_12
+		<anchor 101 113> mark @MARK_CLASS_13
+		<anchor 101 114> mark @MARK_CLASS_14
+		<anchor 101 116> mark @MARK_CLASS_16
+		<anchor 101 117> mark @MARK_CLASS_17
+		<anchor 101 118> mark @MARK_CLASS_18
+		<anchor 101 119> mark @MARK_CLASS_19
+		<anchor 101 121> mark @MARK_CLASS_21
+		<anchor 101 122> mark @MARK_CLASS_22
+		<anchor 101 123> mark @MARK_CLASS_23
+		<anchor 101 124> mark @MARK_CLASS_24
+		<anchor 101 126> mark @MARK_CLASS_26
+		<anchor 101 127> mark @MARK_CLASS_27
+		<anchor 101 128> mark @MARK_CLASS_28
+		<anchor 101 129> mark @MARK_CLASS_29
+		<anchor 101 131> mark @MARK_CLASS_31
+		<anchor 101 132> mark @MARK_CLASS_32
+		<anchor 101 133> mark @MARK_CLASS_33
+		<anchor 101 134> mark @MARK_CLASS_34
+		<anchor 101 136> mark @MARK_CLASS_36
+		<anchor 101 137> mark @MARK_CLASS_37
+		<anchor 101 138> mark @MARK_CLASS_38
+		<anchor 101 139> mark @MARK_CLASS_39
+		<anchor 101 141> mark @MARK_CLASS_41
+		<anchor 101 142> mark @MARK_CLASS_42
+		<anchor 101 143> mark @MARK_CLASS_43
+		<anchor 101 144> mark @MARK_CLASS_44
+		<anchor 101 146> mark @MARK_CLASS_46
+		<anchor 101 147> mark @MARK_CLASS_47
+		<anchor 101 148> mark @MARK_CLASS_48
+		<anchor 101 149> mark @MARK_CLASS_49
+		<anchor 101 151> mark @MARK_CLASS_51
+		<anchor 101 152> mark @MARK_CLASS_52
+		<anchor 101 153> mark @MARK_CLASS_53
+		<anchor 101 154> mark @MARK_CLASS_54
+		<anchor 101 156> mark @MARK_CLASS_56
+		<anchor 101 157> mark @MARK_CLASS_57
+		<anchor 101 158> mark @MARK_CLASS_58
+		<anchor 101 159> mark @MARK_CLASS_59
+		<anchor 101 161> mark @MARK_CLASS_61
+		<anchor 101 162> mark @MARK_CLASS_62
+		<anchor 101 163> mark @MARK_CLASS_63
+		<anchor 101 164> mark @MARK_CLASS_64
+		<anchor 101 166> mark @MARK_CLASS_66
+		<anchor 101 167> mark @MARK_CLASS_67
+		<anchor 101 168> mark @MARK_CLASS_68
+		<anchor 101 169> mark @MARK_CLASS_69
+		<anchor 101 171> mark @MARK_CLASS_71
+		<anchor 101 172> mark @MARK_CLASS_72
+		<anchor 101 173> mark @MARK_CLASS_73
+		<anchor 101 174> mark @MARK_CLASS_74
+		<anchor 101 176> mark @MARK_CLASS_76
+		<anchor 101 177> mark @MARK_CLASS_77
+		<anchor 101 178> mark @MARK_CLASS_78
+		<anchor 101 179> mark @MARK_CLASS_79
+		<anchor 101 181> mark @MARK_CLASS_81
+		<anchor 101 182> mark @MARK_CLASS_82
+		<anchor 101 183> mark @MARK_CLASS_83
+		<anchor 101 184> mark @MARK_CLASS_84
+		<anchor 101 186> mark @MARK_CLASS_86
+		<anchor 101 187> mark @MARK_CLASS_87
+		<anchor 101 188> mark @MARK_CLASS_88
+		<anchor 101 189> mark @MARK_CLASS_89
+		<anchor 101 191> mark @MARK_CLASS_91
+		<anchor 101 192> mark @MARK_CLASS_92
+		<anchor 101 193> mark @MARK_CLASS_93
+		<anchor 101 194> mark @MARK_CLASS_94
+		<anchor 101 196> mark @MARK_CLASS_96
+		<anchor 101 197> mark @MARK_CLASS_97
+		<anchor 101 198> mark @MARK_CLASS_98
+		<anchor 101 199> mark @MARK_CLASS_99;
+} mrk1;
