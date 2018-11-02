@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BD8A43950D885A240078BEDA /* bitarray.c in Sources */ = {isa = PBXBuildFile; fileRef = BD8A43910D885A240078BEDA /* bitarray.c */; };
 		BD8A43960D885A240078BEDA /* canthappen.c in Sources */ = {isa = PBXBuildFile; fileRef = BD8A43920D885A240078BEDA /* canthappen.c */; };
 		BD8A43970D885A240078BEDA /* except.c in Sources */ = {isa = PBXBuildFile; fileRef = BD8A43930D885A240078BEDA /* except.c */; };
 		BD8A43980D885A240078BEDA /* fixed.c in Sources */ = {isa = PBXBuildFile; fileRef = BD8A43940D885A240078BEDA /* fixed.c */; };
@@ -17,11 +16,9 @@
 		BD8A43A20D885A770078BEDA /* supportenvironment.h in Headers */ = {isa = PBXBuildFile; fileRef = BD8A43A10D885A770078BEDA /* supportenvironment.h */; };
 		BD8A43A40D885A7D0078BEDA /* supportcanthappen.h in Headers */ = {isa = PBXBuildFile; fileRef = BD8A43A30D885A7D0078BEDA /* supportcanthappen.h */; };
 		BD8A43A60D885A870078BEDA /* supportexcept.h in Headers */ = {isa = PBXBuildFile; fileRef = BD8A43A50D885A870078BEDA /* supportexcept.h */; };
-		BD8A43AA0D885AA10078BEDA /* supportframepixel.h in Headers */ = {isa = PBXBuildFile; fileRef = BD8A43A90D885AA10078BEDA /* supportframepixel.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		BD8A43910D885A240078BEDA /* bitarray.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = bitarray.c; path = ../../../../source/support/bitarray.c; sourceTree = SOURCE_ROOT; };
 		BD8A43920D885A240078BEDA /* canthappen.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = canthappen.c; path = ../../../../source/support/canthappen.c; sourceTree = SOURCE_ROOT; };
 		BD8A43930D885A240078BEDA /* except.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = except.c; path = ../../../../source/support/except.c; sourceTree = SOURCE_ROOT; };
 		BD8A43940D885A240078BEDA /* fixed.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = fixed.c; path = ../../../../source/support/fixed.c; sourceTree = SOURCE_ROOT; };
@@ -31,7 +28,6 @@
 		BD8A43A10D885A770078BEDA /* supportenvironment.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = supportenvironment.h; path = ../../../../api/supportenvironment.h; sourceTree = SOURCE_ROOT; };
 		BD8A43A30D885A7D0078BEDA /* supportcanthappen.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = supportcanthappen.h; path = ../../../../api/supportcanthappen.h; sourceTree = SOURCE_ROOT; };
 		BD8A43A50D885A870078BEDA /* supportexcept.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = supportexcept.h; path = ../../../../api/supportexcept.h; sourceTree = SOURCE_ROOT; };
-		BD8A43A90D885AA10078BEDA /* supportframepixel.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = supportframepixel.h; path = ../../../../api/supportframepixel.h; sourceTree = SOURCE_ROOT; };
 		BD8A5AB90D6F8FA900301916 /* release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; name = release.xcconfig; path = ../../../../config/xcconfig/release.xcconfig; sourceTree = SOURCE_ROOT; };
 		BD8A5ABA0D6F8FA900301916 /* debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../../../../config/xcconfig/debug.xcconfig; sourceTree = SOURCE_ROOT; };
 		D2AAC046055464E500DB518D /* libsupport.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libsupport.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -63,7 +59,6 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				BD8A43910D885A240078BEDA /* bitarray.c */,
 				BD8A43920D885A240078BEDA /* canthappen.c */,
 				BD8A43930D885A240078BEDA /* except.c */,
 				BD8A43940D885A240078BEDA /* fixed.c */,
@@ -97,7 +92,6 @@
 				BD8A43A10D885A770078BEDA /* supportenvironment.h */,
 				BD8A43A30D885A7D0078BEDA /* supportcanthappen.h */,
 				BD8A43A50D885A870078BEDA /* supportexcept.h */,
-				BD8A43A90D885AA10078BEDA /* supportframepixel.h */,
 			);
 			name = Header;
 			sourceTree = "<group>";
@@ -122,7 +116,6 @@
 				BD8A43A20D885A770078BEDA /* supportenvironment.h in Headers */,
 				BD8A43A40D885A7D0078BEDA /* supportcanthappen.h in Headers */,
 				BD8A43A60D885A870078BEDA /* supportexcept.h in Headers */,
-				BD8A43AA0D885AA10078BEDA /* supportframepixel.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -175,7 +168,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BD8A43950D885A240078BEDA /* bitarray.c in Sources */,
 				BD8A43960D885A240078BEDA /* canthappen.c in Sources */,
 				BD8A43970D885A240078BEDA /* except.c in Sources */,
 				BD8A43980D885A240078BEDA /* fixed.c in Sources */,

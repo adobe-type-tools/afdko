@@ -27,7 +27,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "txops.h"
 #include "dictops.h"
 #include "abfdesc.h"
-#include "supportframepixeltypes.h"
 #include "sha1.h"
 
 #undef global /* Remove conflicting definition from buildch */

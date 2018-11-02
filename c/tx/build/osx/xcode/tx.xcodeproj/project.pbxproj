@@ -573,11 +573,8 @@
 		BD4990AD0D7DE99B005EF88C /* ctlshare.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = ctlshare.h; path = ../../../../public/lib/api/ctlshare.h; sourceTree = SOURCE_ROOT; };
 		BD4990AF0D7DE9BA005EF88C /* t1read.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = t1read.h; path = ../../../../public/lib/api/t1read.h; sourceTree = SOURCE_ROOT; };
 		BD4990B10D7DE9C1005EF88C /* t1write.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = t1write.h; path = ../../../../public/lib/api/t1write.h; sourceTree = SOURCE_ROOT; };
-		BD4990B30D7DE9DA005EF88C /* buildch.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = buildch.h; path = ../../../../public/lib/api/buildch.h; sourceTree = SOURCE_ROOT; };
-		BD4990B50D7DE9EA005EF88C /* atmqred.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = atmqred.h; path = ../../../../public/lib/api/atmqred.h; sourceTree = SOURCE_ROOT; };
 		BD4990B80D7DEA3C005EF88C /* sha1.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = sha1.h; path = ../../../../public/lib/api/sha1.h; sourceTree = SOURCE_ROOT; };
 		BD4990BA0D7DEA5C005EF88C /* sfntwrite.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = sfntwrite.h; path = ../../../../public/lib/api/sfntwrite.h; sourceTree = SOURCE_ROOT; };
-		BD4990BE0D7DEA9A005EF88C /* supportframepixeltypes.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = supportframepixeltypes.h; path = ../../../../public/lib/api/supportframepixeltypes.h; sourceTree = SOURCE_ROOT; };
 		BD4990C00D7DEAD3005EF88C /* txops.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = txops.h; path = ../../../../public/lib/resource/txops.h; sourceTree = SOURCE_ROOT; };
 		BD4990C20D7DEADC005EF88C /* dictops.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = dictops.h; path = ../../../../public/lib/resource/dictops.h; sourceTree = SOURCE_ROOT; };
 		BD4990C50D7DEB85005EF88C /* sfntread.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = sfntread.h; path = ../../../../public/lib/api/sfntread.h; sourceTree = SOURCE_ROOT; };
@@ -732,8 +729,6 @@
 				BD4990DF0D7DED23005EF88C /* abfdesc.h */,
 				BD4990940D7DE82C005EF88C /* absfont.h */,
 				BD4990D90D7DECE5005EF88C /* agl2uv.h */,
-				BD4990B50D7DE9EA005EF88C /* atmqred.h */,
-				BD4990B30D7DE9DA005EF88C /* buildch.h */,
 				BD49909A0D7DE8F5005EF88C /* cfembed.h */,
 				BD4990960D7DE869005EF88C /* cffread.h */,
 				BD4990980D7DE8E7005EF88C /* cffwrite.h */,
@@ -747,7 +742,6 @@
 				BD4990BA0D7DEA5C005EF88C /* sfntwrite.h */,
 				BD4990DB0D7DECFD005EF88C /* stdenc2.h */,
 				BD4990DD0D7DED10005EF88C /* stdstr1.h */,
-				BD4990BE0D7DEA9A005EF88C /* supportframepixeltypes.h */,
 				BD4990A60D7DE966005EF88C /* svgwrite.h */,
 				BD4990AF0D7DE9BA005EF88C /* t1read.h */,
 				BD4990B10D7DE9C1005EF88C /* t1write.h */,

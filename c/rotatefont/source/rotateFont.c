@@ -26,13 +26,13 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "txops.h"
 #include "dictops.h"
 #include "abfdesc.h"
-#include "supportframepixeltypes.h"
 #include "sha1.h"
 
 #undef global /* Remove conflicting definition from buildch */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #if PLAT_MAC
 #include <console.h>
@@ -6690,7 +6690,7 @@ static void setupRotationCallbacks(txCtx h) {
         rotateLoadGlyphList(h, h->rotateInfo.rtFile);
 }
 
-static int setRotationMatrix(txCtx h, int argc, char **argv, int i, boolean isMatrix) {
+static int setRotationMatrix(txCtx h, int argc, char **argv, int i, bool isMatrix) {
     float *farray = h->rotateInfo.origMatrix;
     char *arg = argv[i];
     int j;
