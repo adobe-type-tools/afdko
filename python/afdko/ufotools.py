@@ -1,7 +1,8 @@
 # Copyright 2017 Adobe. All rights reserved.
 
-from __future__ import print_function, absolute_import
+from __future__ import print_function, absolute_import, unicode_literals
 
+import ast
 import hashlib
 import os
 import plistlib
@@ -12,12 +13,12 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
-from fontTools.misc.py23 import open, tobytes, tounicode
+from fontTools.misc.py23 import open, tobytes, tounicode, tostr
 
 from afdko import convertfonttocid, fdkutils
 
 __doc__ = """
-ufotools.py v1.32.0 Nov 1 2018
+ufotools.py v1.32.1 Nov 2 2018
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -329,14 +330,14 @@ def debugMsg(*args):
 kDefaultGlyphsLayerName = "public.default"
 kDefaultGlyphsLayer = "glyphs"
 kProcessedGlyphsLayerName = "com.adobe.type.processedglyphs"
-kProcessedGlyphsLayer = "glyphs." + kProcessedGlyphsLayerName
+kProcessedGlyphsLayer = "glyphs.%s" % kProcessedGlyphsLayerName
 kFontInfoName = "fontinfo.plist"
 kContentsName = "contents.plist"
 kLibName = "lib.plist"
 kPublicGlyphOrderKey = "public.glyphOrder"
 
 kAdobeDomainPrefix = "com.adobe.type"
-kAdobHashMapName = "%s.processedHashMap" % (kAdobeDomainPrefix)
+kAdobHashMapName = "%s.processedHashMap" % kAdobeDomainPrefix
 kAdobHashMapVersionName = "hashMapVersion"
 kAdobHashMapVersion = (1, 0)  # If major version differs, do not use.
 kAutohintName = "autohint"
@@ -379,7 +380,7 @@ class BezParseError(Exception):
 
 class UFOFontData(object):
     def __init__(self, parentPath, useHashMap, programName):
-        self.parentPath = parentPath
+        self.parentPath = tounicode(parentPath, encoding='utf-8')
         self.glyphMap = {}
         self.processedLayerGlyphMap = {}
         self.newGlyphMap = {}
@@ -395,11 +396,12 @@ class UFOFontData(object):
         # hash matches hash of current glyph data.
         self.hashMap = {}
         self.fontDict = None
-        self.programName = programName
+        self.programName = tostr(programName)
         self.curSrcDir = None
         self.hashMapChanged = 0
-        self.glyphDefaultDir = os.path.join(parentPath, "glyphs")
-        self.glyphLayerDir = os.path.join(parentPath, kProcessedGlyphsLayer)
+        self.glyphDefaultDir = os.path.join(self.parentPath, "glyphs")
+        self.glyphLayerDir = os.path.join(self.parentPath,
+                                          kProcessedGlyphsLayer)
         self.glyphWriteDir = self.glyphLayerDir
         self.historyList = []
         self.requiredHistory = []  # See documentation above.
@@ -509,7 +511,7 @@ class UFOFontData(object):
         if os.path.exists(hashPath):
             with open(hashPath, "r", encoding='utf-8') as fp:
                 data = fp.read()
-            newMap = eval(data)
+            newMap = ast.literal_eval(data)
         else:
             newMap = {kAdobHashMapVersionName: kAdobHashMapVersion}
 
@@ -614,7 +616,7 @@ class UFOFontData(object):
         # and we have just created a new glyph in the processed layer,
         # then reset the history.
         if (not self.useProcessedLayer) and changed:
-            self.hashMap[glyphName] = [srcHash, [self.programName]]
+            self.hashMap[glyphName] = [tostr(srcHash), [self.programName]]
             return
         # If the program is not in the history list, add it.
         elif self.programName not in historyList:
@@ -654,7 +656,8 @@ class UFOFontData(object):
                 # case for Checkoutlines
                 if not self.useProcessedLayer:
                     self.hashMapChanged = 1
-                    self.hashMap[glyphName] = [newSrcHash, [self.programName]]
+                    self.hashMap[glyphName] = [tostr(newSrcHash),
+                                               [self.programName]]
                     glyphPath = self.getGlyphProcessedPath(glyphName)
                     if glyphPath and os.path.exists(glyphPath):
                         os.remove(glyphPath)
@@ -682,7 +685,7 @@ class UFOFontData(object):
             # If the source hash has changed, we need to
             # delete the processed layer glyph.
             self.hashMapChanged = 1
-            self.hashMap[glyphName] = [newSrcHash, [self.programName]]
+            self.hashMap[glyphName] = [tostr(newSrcHash), [self.programName]]
             glyphPath = self.getGlyphProcessedPath(glyphName)
             if glyphPath and os.path.exists(glyphPath):
                 os.remove(glyphPath)
@@ -2483,7 +2486,8 @@ def validateLayers(ufoFontPath, doWarning=True):
 
 
 def makeUFOFMNDB(srcFontPath):
-    fontInfoPath = os.path.join(srcFontPath, kFontInfoName)  # default
+    fontInfoPath = os.path.join(tounicode(srcFontPath, encoding='utf-8'),
+                                kFontInfoName)  # default
     fiMap, fiList = parsePList(fontInfoPath)
     psName = "NoFamilyName-Regular"
     familyName = "NoFamilyName"

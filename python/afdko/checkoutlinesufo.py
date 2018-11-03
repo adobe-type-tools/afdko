@@ -6,7 +6,7 @@ Tool that performs outline quality checks and can remove path overlaps.
 
 from __future__ import print_function, absolute_import
 
-__version__ = '2.2.1'
+__version__ = '2.2.2'
 
 import argparse
 from functools import cmp_to_key
@@ -20,8 +20,8 @@ import textwrap
 
 import booleanOperations.booleanGlyph
 import defcon
-import ufoLib
 from fontPens.digestPointPen import DigestPointPen
+from fontTools import ufoLib
 
 from afdko import ufotools
 from afdko.ufotools import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
