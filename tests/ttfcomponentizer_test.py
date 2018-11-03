@@ -7,7 +7,6 @@ import subprocess32 as subprocess
 import tempfile
 
 from fontTools.ttLib import TTFont
-from fontTools.ufoLib.errors import UFOLibError
 
 from afdko import ttfcomponentizer as ttfcomp
 
@@ -90,9 +89,7 @@ def test_run_invalid_ufo():
     ufo_path = save_path + '.ufo'
     copy2(ttf_path, save_path)
     copy2(ttf_path, ufo_path)
-    with pytest.raises(UFOLibError):
-        # message: 'The specified UFO does not have a known structure'
-        ttfcomp.main([save_path])
+    assert ttfcomp.main([save_path]) == 1
 
 
 def test_run_with_output_path():
@@ -197,9 +194,7 @@ def test_get_goadb_names_mapping_goadb_not_found():
 
 def test_get_glyph_names_mapping_invalid_ufo():
     path = _get_test_ttf_path()
-    with pytest.raises(UFOLibError):
-        # message: 'The specified UFO does not have a known structure'
-        ttfcomp.get_glyph_names_mapping(path)
+    assert ttfcomp.get_glyph_names_mapping(path) == (None, None)
 
 
 def test_get_glyph_names_mapping_names_from_lib():

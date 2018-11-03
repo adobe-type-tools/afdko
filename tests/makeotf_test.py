@@ -33,8 +33,8 @@ DATA_DIR = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
 TEMP_DIR = os.path.join(DATA_DIR, 'temp_output')
 
 
-xfail_py36_win = pytest.mark.xfail(
-    sys.version_info >= (3, 0) and sys.platform == 'win32',
+xfail_win = pytest.mark.xfail(
+    sys.platform == 'win32',
     reason="Console's encoding is not UTF-8 ?")
 
 
@@ -111,7 +111,7 @@ def test_getSourceGOADBData():
                                             ['g2', 'g2', '']]
 
 
-@xfail_py36_win
+@xfail_win
 @pytest.mark.parametrize('input_filename', [
     T1PFA_NAME, UFO2_NAME, UFO3_NAME, CID_NAME])
 def test_path_with_non_ascii_chars_bug222(input_filename):
