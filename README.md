@@ -125,9 +125,10 @@ In order to build afdko from source get the files from the [afdko github
 repository](https://github.com/adobe-type-tools/afdko), cd to the
 top-level directory of the afdko, and use the `setup.py` script:
 
-    python setup.py install
+    python setup.py bdist_wheel
+    pip install dist/*.whl
 
-And to be able to run this install command, you must first have
+And to be able to run these commands, you must first have
 installed the development tools for your platform.
 
 On the Mac, install these with:
