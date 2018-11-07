@@ -2428,7 +2428,7 @@ def cleanupContentsList(glyphDirPath, doWarning=True):
 
     # now update and write the processed processedGlyphDirPath
     # contents.plist file.
-    itemList = contentsDict.items()
+    itemList = list(contentsDict.items())
     for glyphName, fileName in itemList:
         if fileName not in fileDict:
             del contentsDict[glyphName]
