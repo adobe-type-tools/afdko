@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -256,6 +256,9 @@
     <ProjectReference Include="..\..\..\..\public\lib\build\ttread\win\visualstudio\ttread.vcxproj">
       <Project>{0e9d40d8-c144-4760-adc1-22d0e23a72eb}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\public\lib\build\tx_shared\win\visualstudio\tx_shared.vcxproj">
+      <Project>{34a7c3b7-fc39-49b3-a554-c532f2dc4a54}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\public\lib\build\uforead\win\visualstudio\uforead.vcxproj">
       <Project>{2E122640-3CD7-4064-9AA3-9C685EE1A4DA}</Project>

@@ -280,6 +280,9 @@
     <ProjectReference Include="..\..\..\..\public\lib\build\varread\win\visualstudio\varread.vcxproj">
       <Project>{0f6c5c6e-5b6d-463d-81df-cceb1271c759}</Project>
     </ProjectReference>
+    <ProjectReference Include= "..\..\..\..\public\lib\build\tx_shared\win\visualstudio\tx_shared.vcxproj">
+    <Project>{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
