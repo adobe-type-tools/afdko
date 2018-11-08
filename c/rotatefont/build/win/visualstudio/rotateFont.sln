@@ -1,10 +1,11 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27703.2047
+VisualStudioVersion = 15.0.26228.48
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rotateFont", "rotateFont.vcxproj", "{66C1C775-5375-41AC-BEC0-93173237700D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{0F6C5C6E-5B6D-463D-81DF-CCEB1271C759} = {0F6C5C6E-5B6D-463D-81DF-CCEB1271C759}
+		{34A7C3B7-FC39-49B3-A554-C532F2DC4A54} = {34A7C3B7-FC39-49B3-A554-C532F2DC4A54}
 		{DA4450E3-E694-4F89-AEB3-D1A5498BD6F5} = {DA4450E3-E694-4F89-AEB3-D1A5498BD6F5}
 	EndProjectSection
 EndProject
@@ -53,6 +54,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nameread", "..\..\..\..\public\lib\build\nameread\win\visualstudio\nameread.vcxproj", "{DA4450E3-E694-4F89-AEB3-D1A5498BD6F5}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "varread", "..\..\..\..\public\lib\build\varread\win\visualstudio\varread.vcxproj", "{0F6C5C6E-5B6D-463D-81DF-CCEB1271C759}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tx_shared", "..\..\..\..\public\lib\build\tx_shared\win\visualstudio\tx_shared.vcxproj", "{34A7C3B7-FC39-49B3-A554-C532F2DC4A54}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -254,6 +257,14 @@ Global
 		{0F6C5C6E-5B6D-463D-81DF-CCEB1271C759}.Release|x64.Build.0 = Release|x64
 		{0F6C5C6E-5B6D-463D-81DF-CCEB1271C759}.Release|x86.ActiveCfg = Release|Win32
 		{0F6C5C6E-5B6D-463D-81DF-CCEB1271C759}.Release|x86.Build.0 = Release|Win32
+		{34A7C3B7-FC39-49B3-A554-C532F2DC4A54}.Debug|x64.ActiveCfg = Debug|x64
+		{34A7C3B7-FC39-49B3-A554-C532F2DC4A54}.Debug|x64.Build.0 = Debug|x64
+		{34A7C3B7-FC39-49B3-A554-C532F2DC4A54}.Debug|x86.ActiveCfg = Debug|Win32
+		{34A7C3B7-FC39-49B3-A554-C532F2DC4A54}.Debug|x86.Build.0 = Debug|Win32
+		{34A7C3B7-FC39-49B3-A554-C532F2DC4A54}.Release|x64.ActiveCfg = Release|x64
+		{34A7C3B7-FC39-49B3-A554-C532F2DC4A54}.Release|x64.Build.0 = Release|x64
+		{34A7C3B7-FC39-49B3-A554-C532F2DC4A54}.Release|x86.ActiveCfg = Release|Win32
+		{34A7C3B7-FC39-49B3-A554-C532F2DC4A54}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
