@@ -13,6 +13,7 @@
 			buildPhases = (
 			);
 			dependencies = (
+				DEF9BB4D21937A1B0051E856 /* PBXTargetDependency */,
 				BD5E122F17A7396F007BA047 /* PBXTargetDependency */,
 				BD5E121B17A7390C007BA047 /* PBXTargetDependency */,
 				BD5E122917A7390C007BA047 /* PBXTargetDependency */,
@@ -65,6 +66,7 @@
 		BD613CDF10F7988700F98996 /* libsvread.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BD613CC710F7986500F98996 /* libsvread.a */; };
 		BDA7084D173321C0009B6A63 /* libuforead.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BD1FAAAF1731D2E200472BF0 /* libuforead.a */; };
 		BDAF347117D6A9DE004B2EA0 /* libufowrite.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BDAF345717D6A9AF004B2EA0 /* libufowrite.a */; };
+		DE7A844C21926BB3006244BC /* libtx_shared.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DEBF3F04219259C10022A4C6 /* libtx_shared.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -537,6 +539,27 @@
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = svread;
 		};
+		DEBF3F03219259C10022A4C6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DEBF3EFF219259C10022A4C6 /* tx_shared.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = DE8577CD2192544500D4F584;
+			remoteInfo = tx_shared;
+		};
+		DEF9BB4921937A070051E856 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DEBF3EFF219259C10022A4C6 /* tx_shared.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = DE8577CC2192544500D4F584;
+			remoteInfo = tx_shared;
+		};
+		DEF9BB4C21937A1B0051E856 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DEBF3EFF219259C10022A4C6 /* tx_shared.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = DE8577CC2192544500D4F584;
+			remoteInfo = tx_shared;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -603,6 +626,7 @@
 		BD613CC210F7986500F98996 /* svread.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = svread.xcodeproj; path = ../../../../public/lib/build/svread/osx/xcode/svread.xcodeproj; sourceTree = SOURCE_ROOT; };
 		BDAF345217D6A9AF004B2EA0 /* ufowrite.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ufowrite.xcodeproj; path = ../../../../public/lib/build/ufowrite/osx/xcode/ufowrite.xcodeproj; sourceTree = "<group>"; };
 		BDC28A801808539300053E7D /* ufo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ufo.h; path = ../../../source/ufo.h; sourceTree = "<group>"; };
+		DEBF3EFF219259C10022A4C6 /* tx_shared.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = tx_shared.xcodeproj; path = ../../../../public/lib/build/tx_shared/osx/xcode/tx_shared.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -610,6 +634,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DE7A844C21926BB3006244BC /* libtx_shared.a in Frameworks */,
 				8EE84C601DEDFADD00157252 /* libnameread.a in Frameworks */,
 				8E8759E71DCD415400C7A081 /* libvarread.a in Frameworks */,
 				BDAF347117D6A9DE004B2EA0 /* libufowrite.a in Frameworks */,
@@ -648,6 +673,7 @@
 				BD4990480D7DE60A005EF88C /* Headers */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
+				DE7A844A21926BB3006244BC /* Frameworks */,
 			);
 			name = tx;
 			sourceTree = "<group>";
@@ -774,6 +800,7 @@
 				BD5E11CE17A73839007BA047 /* t1write.xcodeproj */,
 				BD5E11D417A73840007BA047 /* t2cstr.xcodeproj */,
 				BD5E11E017A7384E007BA047 /* ttread.xcodeproj */,
+				DEBF3EFF219259C10022A4C6 /* tx_shared.xcodeproj */,
 				BD1FAAA71731D2E100472BF0 /* uforead.xcodeproj */,
 				BDAF345217D6A9AF004B2EA0 /* ufowrite.xcodeproj */,
 				8E8759DD1DCBF66500C7A081 /* varread.xcodeproj */,
@@ -941,6 +968,21 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		DE7A844A21926BB3006244BC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DEBF3F00219259C10022A4C6 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DEBF3F04219259C10022A4C6 /* libtx_shared.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -954,6 +996,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				DEF9BB4A21937A070051E856 /* PBXTargetDependency */,
 				8EE84C621DEDFAEB00157252 /* PBXTargetDependency */,
 				8E8759E91DCD416100C7A081 /* PBXTargetDependency */,
 				BDAF347017D6A9D4004B2EA0 /* PBXTargetDependency */,
@@ -1084,6 +1127,10 @@
 				{
 					ProductGroup = BD5E11E117A7384E007BA047 /* Products */;
 					ProjectRef = BD5E11E017A7384E007BA047 /* ttread.xcodeproj */;
+				},
+				{
+					ProductGroup = DEBF3F00219259C10022A4C6 /* Products */;
+					ProjectRef = DEBF3EFF219259C10022A4C6 /* tx_shared.xcodeproj */;
 				},
 				{
 					ProductGroup = BD1FAAA81731D2E100472BF0 /* Products */;
@@ -1266,6 +1313,13 @@
 			fileType = archive.ar;
 			path = libufowrite.a;
 			remoteRef = BDAF345617D6A9AF004B2EA0 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		DEBF3F04219259C10022A4C6 /* libtx_shared.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libtx_shared.a;
+			remoteRef = DEBF3F03219259C10022A4C6 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -1501,6 +1555,16 @@
 			isa = PBXTargetDependency;
 			name = svread;
 			targetProxy = BDD086E114E49DE600F0FC0D /* PBXContainerItemProxy */;
+		};
+		DEF9BB4A21937A070051E856 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = tx_shared;
+			targetProxy = DEF9BB4921937A070051E856 /* PBXContainerItemProxy */;
+		};
+		DEF9BB4D21937A1B0051E856 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = tx_shared;
+			targetProxy = DEF9BB4C21937A1B0051E856 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
