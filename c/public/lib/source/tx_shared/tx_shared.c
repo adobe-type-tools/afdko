@@ -4156,6 +4156,7 @@ static void dcf_BegFont(txCtx h, abfTopDict *top) {
         h->maxOpStack = CFF2_MAX_OP_STACK;
         initCstrs(h, top);
         dcf_DumpTopDICT2(h, &single->TopDICTINDEX);
+        dcf_DumpGlobalSubrINDEX(h, &single->GlobalSubrINDEX);
     }
     dcf_DumpFDSelect(h, &single->FDSelect);
     dcf_DumpVarStore(h, &single->VarStore);
