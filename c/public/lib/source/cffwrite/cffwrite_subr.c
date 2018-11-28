@@ -175,9 +175,9 @@ struct Subr_ {
     Subr *next;              /* Next member of social group */
     Subr *output;            /* Link to next subr for match trie output */
     unsigned char *cstr;     /* Charstring */
-    unsigned short length;   /* Subr length (original bytes spanned) */
+    unsigned length;         /* Subr length (original bytes spanned) */
     unsigned short count;    /* Occurance count */
-    short deltalen;          /* Delta length */
+    int deltalen;            /* Delta length */
     short subrnum;           /* Biased subr number */
     short numsize;           /* Size of subr number (1, 2, or 3 bytes) */
     short maskcnt;           /* hint/cntrmask count */
@@ -199,13 +199,13 @@ struct Link_ /* Social group link */
 {
     Subr *subr;            /* Superior/inferior subr */
     Link *next;            /* Next record */
-    unsigned short offset; /* Offset within superior/inferior */
+    unsigned offset;       /* Offset within superior/inferior */
 };
 
 typedef struct /* Subr call within charstring */
 {
     Subr *subr;            /* Inferior subr */
-    unsigned short offset; /* Offset within charstring */
+    unsigned offset;       /* Offset within charstring */
 } Call;
 
 typedef dnaDCL(Call, CallList);
@@ -275,8 +275,8 @@ struct subrCtx_ {
 #define TEST_SUBR_PREFIX_MAP(ctx, str) ((ctx)->subrPrefixMap[SUBR_PREFIX_MAP_INDEX(str[0], str[1])] & SUBR_PREFIX_MAP_BIT(str[1]))
 #define SET_SUBR_PREFIX_MAP(ctx, str) ((ctx)->subrPrefixMap[SUBR_PREFIX_MAP_INDEX(str[0], str[1])] |= SUBR_PREFIX_MAP_BIT(str[1]))
     unsigned char subrPrefixMap[SUBR_PREFIX_MAP_SIZE]; /* bit table where a bit is set when its corresponding subr 2-byte prefix selected */
-    dnaDCL(unsigned short, subrLenMap);                /* boolean table where a value is set when any subr with the corresponding length is selected */
-    dnaDCL(unsigned short, prefixLen);                 /* Prefix byte length for each byte in a charstring */
+    dnaDCL(unsigned, subrLenMap);                      /* boolean table where a value is set when any subr with the corresponding length is selected */
+    dnaDCL(unsigned, prefixLen);                       /* Prefix byte length for each byte in a charstring */
     unsigned maxSubrLen;                               /* Maximum subr length */
     unsigned minSubrLen;                               /* Minimum subr lenth */
 
@@ -456,7 +456,7 @@ static Link *newLink(subrCtx h, Subr *subr, unsigned offset, Link *next) {
     Link *link = (Link *)newObject(h, &h->linkBlks, sizeof(Link), LINKS_PER_BLK);
     link->subr = subr;
     link->next = next;
-    link->offset = (unsigned short)offset;
+    link->offset = (unsigned)offset;
     return link;
 }
 
@@ -1285,7 +1285,7 @@ static void saveSubr(subrCtx h, unsigned char *edgeEnd, Node *node,
     subr->next = NULL;
     subr->output = NULL;
     subr->cstr = edgeEnd - subrLen;
-    subr->length = (unsigned short)subrLen;
+    subr->length = (unsigned)subrLen;
     subr->count = (unsigned short)count;
     subr->deltalen = 0;
     subr->numsize = 1;
@@ -1543,7 +1543,7 @@ static void listUpSubrMatches(subrCtx h, unsigned char *pstart, long length, int
                     c = dnaNEXT(*callList);
                     c->subr = subr;
                     c->subr->order = callList->cnt;
-                    c->offset = (unsigned short)offset;
+                    c->offset = (unsigned)offset;
                 }
             }
         }
