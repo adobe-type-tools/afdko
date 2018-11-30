@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph format="1" name="Aacute">
-  <advance width="664" />
+  <advance width="663.6993670886" />
   <unicode hex="00C1" />
   <outline>
     <contour>
@@ -50,7 +50,7 @@
       <key>com.adobe.type.autohint.v2</key>
       <dict>
         <key>id</key>
-        <string>598fa5698308cf0bf4633b8df8d19e6225dc530bbb5112f87ce4a1b3fdb0a79aaaf3c8941c9a82a5842575d22f3b14ee0e4233b88c408caf44691e561debde8f</string>
+        <string>92c95fba1b2b2fb2a2fdfc8b56723d97aa88f73c39b0e3e9b5e20f853a0f0c98543edcec7327cd0f035cae02d44f88cd8df8293fb3a855a87ed1528b5ad46048</string>
         <key>hintSetList</key>
         <array>
           <dict>

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph format="1" name="Atilde">
-  <advance width="664" />
+  <advance width="663.6993670886" />
   <unicode hex="00C3" />
   <outline>
     <contour>
@@ -60,7 +60,7 @@
       <key>com.adobe.type.autohint.v2</key>
       <dict>
         <key>id</key>
-        <string>3dc41d5c62d20d2d6a613ad55150cfa12f3c9915303039848c8b57226d6976378a1778614a1632fa414a3f89b7238a4c568dcc178b96f2785a1282ee164503f6</string>
+        <string>65e99ccdb6120d7b5c88f93a9d6d19b344e010f8e2dabcdf77f5ace5532a49bedfafe83cdd2d41c86551255fbb2de1c2e366769455daac6fc3c3862c07a9a415</string>
         <key>hintSetList</key>
         <array>
           <dict>

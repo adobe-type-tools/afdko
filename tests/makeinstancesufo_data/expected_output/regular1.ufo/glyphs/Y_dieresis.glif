@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="Ydieresis" format="1">
-  <advance width="633"/>
+  <advance width="632.506329113924"/>
   <unicode hex="0178"/>
   <outline>
     <component base="Y"/>

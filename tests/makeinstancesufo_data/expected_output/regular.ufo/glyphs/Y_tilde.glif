@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <glyph name="Ytilde" format="1">
 	<unicode hex="1EF8"/>
-	<advance width="633"/>
+	<advance width="632.5063291139"/>
 	<outline>
 		<component base="Y"/>
 		<component base="tildecmb.cap" xOffset="346.164556962"/>
