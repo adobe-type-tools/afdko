@@ -23,6 +23,8 @@
       <integer>-50</integer>
       <key>adieresis</key>
       <integer>-50</integer>
+      <key>atilde</key>
+      <integer>-80</integer>
     </dict>
     <key>@MMK_L_LAT_a</key>
     <dict>

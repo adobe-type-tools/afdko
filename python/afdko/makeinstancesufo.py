@@ -17,10 +17,11 @@ import shutil
 import sys
 from subprocess import PIPE, Popen
 
+from fontTools.designspaceLib import DesignSpaceDocumentError
 from fontTools.misc.py23 import open, tounicode, tobytes
 
 from defcon import Font
-from mutatorMath.ufo import build as mutatorMathBuild
+from ufoProcessor import build as ufoProcessorBuild
 from ufonormalizer import normalizeUFO
 
 try:
@@ -32,7 +33,7 @@ from afdko.checkoutlinesufo import run as checkoutlinesUFO
 from afdko.ufotools import validateLayers
 
 
-__version__ = '2.0.0'
+__version__ = '2.1.0'
 
 logger = logging.getLogger(__name__)
 
@@ -230,7 +231,7 @@ def roundSelectedValues(dFont):
 def postProcessInstance(fontPath, options):
     dFont = Font(fontPath)
     clearCustomLibs(dFont)
-    if options.no_round:
+    if not options.no_round:
         roundSelectedValues(dFont)
     dFont.save()
 
@@ -252,8 +253,8 @@ def run(options):
         logger.info("Building 1 instance...")
     else:
         logger.info("Building %s instances..." % len(newInstancesList))
-    mutatorMathBuild(documentPath=dsPath, outputUFOFormatVersion=version,
-                     roundGeometry=(not options.no_round))
+    ufoProcessorBuild(documentPath=dsPath, outputUFOFormatVersion=version,
+                      roundGeometry=(not options.no_round), logger=logger)
     if (dsPath != options.dsPath) and os.path.exists(dsPath):
         os.remove(dsPath)
 
@@ -397,8 +398,8 @@ def main(args=None):
 
     try:
         run(opts)
-    except SnapShotError:
-        logger.error("Quitting after error.")
+    except (SnapShotError, DesignSpaceDocumentError) as err:
+        logger.error(err)
         return 1
 
 

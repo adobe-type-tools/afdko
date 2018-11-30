@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph format="1" name="Adieresis">
-  <advance width="664" />
+  <advance width="663.6993670886076" />
   <unicode hex="00C4" />
   <outline>
     <contour>
@@ -60,7 +60,7 @@
       <key>com.adobe.type.autohint.v2</key>
       <dict>
         <key>id</key>
-        <string>b2dfdbe9d17bcb4ebd988b3074becb070eb139e333337b559f776b50e8f60d4b4ed5f65110b97940b11b36493426c087167decbd4f98af223be8b772446d6bb0</string>
+        <string>33f50953b8f2f44214364b14837e4505dd5a8fa29ad97e4384ec273f52d2dcc5d68a9f47bdca506145af940f315b8a5ef9981d27526868c9e8d5f632fe082734</string>
         <key>hintSetList</key>
         <array>
           <dict>

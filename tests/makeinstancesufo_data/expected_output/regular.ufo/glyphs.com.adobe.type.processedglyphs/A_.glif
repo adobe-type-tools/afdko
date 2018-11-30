@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph format="1" name="A">
-  <advance width="664" />
+  <advance width="663.6993670886" />
   <unicode hex="0041" />
   <outline>
     <contour>
@@ -32,7 +32,7 @@
       <key>com.adobe.type.autohint.v2</key>
       <dict>
         <key>id</key>
-        <string>7780e04248642674813a2d2c471fbb3f9b21a4c2aea4421fb53e99d0dca3f6865ff730ac7f612c1ce78a83f7acd311df8412fe2e2711a6527d8fcec57eee0ff9</string>
+        <string>e9a195a987fd041efd7d6e9d3049974a1b80346fe8510faace053b96e279779880507d37a9a742c8be0f8e91ad5029419785d2af1fdc10c9009dba7363fa8523</string>
         <key>hintSetList</key>
         <array>
           <dict>
