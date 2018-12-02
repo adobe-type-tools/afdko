@@ -369,23 +369,26 @@ static void saveopDirect(cstrCtx h, int op) {
     h->pendop = tx_noop; /* Clear pending op */
 }
 
-static int checkBlendOverflowWithArg(cstrCtx h, int argcnt)
+static int checkOverflowWithArg(cstrCtx h, int argcnt)
 {
-    return ((h->numBlends + 1) * h->glyph.info->blendInfo.numRegions + h->stack.cnt + h->blended_cnt
-           + (argcnt * (h->glyph.info->blendInfo.numRegions + 1))
-           + ((h->g->flags & CFW_SUBRIZE) ? 1 : 0) + 1 > CFF2_MAX_OP_STACK);
+    if (h->numBlends > 0)
+        return ((h->numBlends + 1) * h->glyph.info->blendInfo.numRegions + h->stack.cnt + h->blended_cnt
+               + (argcnt * (h->glyph.info->blendInfo.numRegions + 1))
+               + ((h->g->flags & CFW_SUBRIZE) ? 1 : 0) + 1 > h->maxstack);
+    else
+        return (h->stack.cnt + argcnt + ((h->g->flags & CFW_SUBRIZE) ? 1 : 0) > h->maxstack);
 }
 
-static int checkBlendOverflow(cstrCtx h)
+static int checkOverflow(cstrCtx h)
 {
-    return checkBlendOverflowWithArg(h, 0);
+    return checkOverflowWithArg(h, 0);
 }
 
 /* Check stack headroom and flush pending op if next op causes overflow.
    When subroutinizer is enabled, reserve one extra space for a subr number.
    Return 1 on error else 0. */
 static void flushop(cstrCtx h, int argcnt) {
-    if (checkBlendOverflowWithArg(h, argcnt)) {
+    if (checkOverflowWithArg(h, argcnt)) {
         saveop(h, h->pendop);
     }
 }
@@ -550,7 +553,7 @@ static void pushBlend(cstrCtx h, abfBlendArg *arg1) {
         if (h->numBlends > 0)
             flushBlends(h);
     } else {
-        if (checkBlendOverflow(h)) {
+        if (checkOverflow(h)) {
             flushBlends(h);
         }
         pushBlendDeltas(h, arg1);
@@ -566,7 +569,7 @@ static void pushStemBlends(cstrCtx h, abfBlendArg *arg1) {
         if (h->numBlends > 0)
             flushStemBlends(h);
     } else {
-        if (checkBlendOverflow(h)) {
+        if (checkOverflow(h)) {
             flushStemBlends(h);
         }
         pushBlendDeltas(h, arg1);
