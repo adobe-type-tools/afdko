@@ -1,7 +1,10 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph name="a" format="1">
+<glyph name="a" format="2">
   <advance width="509.3164556962025"/>
   <unicode hex="0061"/>
+  <anchor x="244.8227848101266" y="506.5759493670886" name="aboveLC"/>
+  <anchor x="243.61708860759492" y="-22.0" name="belowLC"/>
+  <anchor x="446.74050632911394" y="0.0" name="ogonek"/>
   <outline>
     <contour>
       <point x="45.13607594936709" y="112.04113924050633" type="curve" smooth="yes"/>
@@ -69,15 +72,6 @@
       <point x="323.6012658227848" y="91.42405063291139" type="line"/>
       <point x="324.09493670886076" y="29.50632911392405"/>
       <point x="360.17721518987344" y="-10.246835443037975"/>
-    </contour>
-    <contour>
-      <point x="244.8227848101266" y="506.5759493670886" type="move" name="aboveLC"/>
-    </contour>
-    <contour>
-      <point x="243.61708860759492" y="-22.0" type="move" name="belowLC"/>
-    </contour>
-    <contour>
-      <point x="446.74050632911394" y="0.0" type="move" name="ogonek"/>
     </contour>
   </outline>
 </glyph>

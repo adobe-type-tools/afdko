@@ -1,66 +1,64 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="1" name="Adieresis">
-  <advance width="663.6993670886076" />
-  <unicode hex="00C4" />
+<glyph name="Adieresis" format="2">
+  <advance width="663.6993670886076"/>
+  <unicode hex="00C4"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="line" x="208.17" y="264.1" />
-      <point type="line" x="309.23" y="561.59" />
-      <point type="line" x="408.78" y="264.1" />
+      <point x="208.17" y="264.1" type="line" name="hintSet0000"/>
+      <point x="309.23" y="561.59" type="line"/>
+      <point x="408.78" y="264.1" type="line"/>
     </contour>
     <contour>
-      <point name="hintSet0003" type="line" x="5.21" y="0" />
-      <point type="line" x="234.38" y="0" />
-      <point type="line" x="234.38" y="40.78" />
-      <point type="line" x="136.86" y="54.19" />
-      <point type="line" x="192.3" y="217.4" />
-      <point type="line" x="424.41" y="217.4" />
-      <point type="line" x="479.62" y="52.43" />
-      <point type="line" x="381.31" y="40.66" />
-      <point type="line" x="381.31" y="0" />
-      <point type="line" x="653.49" y="0" />
-      <point name="hintSet0013" type="line" x="653.49" y="40.66" />
-      <point type="line" x="577.63" y="49.82" />
-      <point type="line" x="364.89" y="674.05" />
-      <point type="line" x="302.42" y="674.05" />
-      <point name="hintSet0017" type="line" x="89.09" y="53.34" />
-      <point type="line" x="5.21" y="40.78" />
+      <point x="5.21" y="0" type="line" name="hintSet0003"/>
+      <point x="234.38" y="0" type="line"/>
+      <point x="234.38" y="40.78" type="line"/>
+      <point x="136.86" y="54.19" type="line"/>
+      <point x="192.3" y="217.4" type="line"/>
+      <point x="424.41" y="217.4" type="line"/>
+      <point x="479.62" y="52.43" type="line"/>
+      <point x="381.31" y="40.66" type="line"/>
+      <point x="381.31" y="0" type="line"/>
+      <point x="653.49" y="0" type="line"/>
+      <point x="653.49" y="40.66" type="line" name="hintSet0013"/>
+      <point x="577.63" y="49.82" type="line"/>
+      <point x="364.89" y="674.05" type="line"/>
+      <point x="302.42" y="674.05" type="line"/>
+      <point x="89.09" y="53.34" type="line" name="hintSet0017"/>
+      <point x="5.21" y="40.78" type="line"/>
     </contour>
     <contour>
-      <point name="hintSet0019" type="curve" x="219.92" y="744.11" />
-      <point x="251.41" y="744.11" />
-      <point x="276.91" y="767.27" />
-      <point type="curve" x="276.91" y="798.97" />
-      <point x="276.91" y="830.67" />
-      <point x="251.41" y="853.84" />
-      <point type="curve" x="219.92" y="853.84" />
-      <point x="188.51" y="853.84" />
-      <point x="161.97" y="830.67" />
-      <point type="curve" x="161.97" y="798.97" />
-      <point x="161.97" y="767.27" />
-      <point x="188.51" y="744.11" />
+      <point x="219.92" y="744.11" type="curve" name="hintSet0019"/>
+      <point x="251.41" y="744.11"/>
+      <point x="276.91" y="767.27"/>
+      <point x="276.91" y="798.97" type="curve"/>
+      <point x="276.91" y="830.67"/>
+      <point x="251.41" y="853.84"/>
+      <point x="219.92" y="853.84" type="curve"/>
+      <point x="188.51" y="853.84"/>
+      <point x="161.97" y="830.67"/>
+      <point x="161.97" y="798.97" type="curve"/>
+      <point x="161.97" y="767.27"/>
+      <point x="188.51" y="744.11"/>
     </contour>
     <contour>
-      <point type="curve" x="442.52" y="744.11" />
-      <point x="474.02" y="744.11" />
-      <point x="500.47" y="767.27" />
-      <point type="curve" x="500.47" y="798.97" />
-      <point x="500.47" y="830.67" />
-      <point x="474.02" y="853.84" />
-      <point type="curve" x="442.52" y="853.84" />
-      <point x="411.11" y="853.84" />
-      <point x="385.54" y="830.67" />
-      <point type="curve" x="385.54" y="798.97" />
-      <point x="385.54" y="767.27" />
-      <point x="411.11" y="744.11" />
+      <point x="442.52" y="744.11" type="curve"/>
+      <point x="474.02" y="744.11"/>
+      <point x="500.47" y="767.27"/>
+      <point x="500.47" y="798.97" type="curve"/>
+      <point x="500.47" y="830.67"/>
+      <point x="474.02" y="853.84"/>
+      <point x="442.52" y="853.84" type="curve"/>
+      <point x="411.11" y="853.84"/>
+      <point x="385.54" y="830.67"/>
+      <point x="385.54" y="798.97" type="curve"/>
+      <point x="385.54" y="767.27"/>
+      <point x="411.11" y="744.11"/>
     </contour>
   </outline>
   <lib>
     <dict>
       <key>com.adobe.type.autohint.v2</key>
       <dict>
-        <key>id</key>
-        <string>33f50953b8f2f44214364b14837e4505dd5a8fa29ad97e4384ec273f52d2dcc5d68a9f47bdca506145af940f315b8a5ef9981d27526868c9e8d5f632fe082734</string>
         <key>hintSetList</key>
         <array>
           <dict>
@@ -129,6 +127,8 @@
             </array>
           </dict>
         </array>
+        <key>id</key>
+        <string>d91fa779f87de4a744fd39078410e1e5d0a0523b47c1898999dbe63830c1cfd1e9dd13249683d99271b1d6e41792eb382a09aa44ed66d63ed287b1af1808426b</string>
       </dict>
     </dict>
   </lib>

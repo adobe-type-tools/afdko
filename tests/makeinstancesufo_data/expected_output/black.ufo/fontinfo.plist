@@ -12,6 +12,8 @@
     <integer>-222</integer>
     <key>familyName</key>
     <string>Source Serif Pro</string>
+    <key>guidelines</key>
+    <array/>
     <key>italicAngle</key>
     <integer>0</integer>
     <key>openTypeHheaAscender</key>

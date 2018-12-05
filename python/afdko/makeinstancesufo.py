@@ -15,14 +15,13 @@ import logging
 import os
 import shutil
 import sys
-from subprocess import PIPE, Popen
 
-from fontTools.designspaceLib import DesignSpaceDocumentError
-from fontTools.misc.py23 import open, tounicode, tobytes
+from fontTools.misc.py23 import open, tobytes
 
 from defcon import Font
-from ufoProcessor import build as ufoProcessorBuild
+from psautohint.__main__ import main as psautohint
 from ufonormalizer import normalizeUFO
+from ufoProcessor import build as ufoProcessorBuild
 
 try:
     import xml.etree.cElementTree as ET
@@ -33,16 +32,12 @@ from afdko.checkoutlinesufo import run as checkoutlinesUFO
 from afdko.ufotools import validateLayers
 
 
-__version__ = '2.1.0'
+__version__ = '2.2.0'
 
 logger = logging.getLogger(__name__)
 
 
 DFLT_DESIGNSPACE_FILENAME = "font.designspace"
-
-
-class SnapShotError(Exception):
-    pass
 
 
 def readDesignSpaceFile(options):
@@ -103,7 +98,7 @@ def readDesignSpaceFile(options):
 
 def updateInstance(options, fontInstancePath):
     """
-    Run checkoutlinesufo and autohint, unless explicitly suppressed.
+    Run checkoutlinesufo and psautohint, unless explicitly suppressed.
     """
     if options.doOverlapRemoval:
         logger.info("Doing overlap removal with checkoutlinesufo on %s ..." %
@@ -117,29 +112,14 @@ def updateInstance(options, fontInstancePath):
             raise
 
     if options.doAutoHint:
-        logger.info("Running autohint on %s ..." % fontInstancePath)
-        logList = []
-        opList = ['-q', '-nb', fontInstancePath]
+        logger.info("Running psautohint on %s ..." % fontInstancePath)
+        ah_args = ['--no-zones-stems', fontInstancePath]
         if options.no_round:
-            opList.insert(0, "-dec")
-        opList.insert(0, 'autohint')
-        proc = Popen(opList, stdout=PIPE)
-        while 1:
-            output = tounicode(proc.stdout.readline())
-            if output:
-                logList.append(output)
-            if proc.poll() is not None:
-                output = proc.stdout.readline()
-                if output:
-                    if options.verbose == 1:
-                        print(output, end='')
-                    logList.append(output)
-                break
-        log = "".join(logList)
-        if not ("Done with font" in log):
-            logger.error(log)
-            logger.error("Error in autohinting %s" % fontInstancePath)
-            raise(SnapShotError)
+            ah_args.insert(0, '-d')
+        try:
+            psautohint(ah_args)
+        except Exception:
+            raise
 
 
 def clearCustomLibs(dFont):
@@ -248,7 +228,7 @@ def run(options):
     if not dsPath:
         return
 
-    version = 2
+    version = 3
     if len(newInstancesList) == 1:
         logger.info("Building 1 instance...")
     else:
@@ -398,9 +378,8 @@ def main(args=None):
 
     try:
         run(opts)
-    except (SnapShotError, DesignSpaceDocumentError) as err:
-        logger.error(err)
-        return 1
+    except Exception:
+        raise
 
 
 if __name__ == "__main__":

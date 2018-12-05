@@ -1,6 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph name="tildecmb" format="1">
+<glyph name="tildecmb" format="2">
   <unicode hex="0303"/>
+  <anchor x="0" y="516" name="_aboveLC"/>
   <outline>
     <contour>
       <point x="-177" y="588" type="curve"/>
@@ -29,9 +30,6 @@
       <point x="-65" y="727" type="curve" smooth="yes"/>
       <point x="-123" y="727"/>
       <point x="-166" y="677"/>
-    </contour>
-    <contour>
-      <point x="0" y="516" type="move" name="_aboveLC"/>
     </contour>
   </outline>
 </glyph>
