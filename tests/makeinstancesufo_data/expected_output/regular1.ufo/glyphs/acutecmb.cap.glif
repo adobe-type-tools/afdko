@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph name="acutecmb.cap" format="1">
+<glyph name="acutecmb.cap" format="2">
+  <anchor x="0.0" y="690.629746835443" name="_aboveUC"/>
   <outline>
     <contour>
       <point x="-67.35759493670886" y="745.3006329113924" type="curve"/>
@@ -18,9 +19,6 @@
       <point x="26.629746835443036" y="839.0411392405064" type="curve" smooth="yes"/>
       <point x="-4.617088607594937" y="808.8354430379746"/>
       <point x="-36.028481012658226" y="777.5474683544304"/>
-    </contour>
-    <contour>
-      <point x="0.0" y="690.629746835443" type="move" name="_aboveUC"/>
     </contour>
   </outline>
 </glyph>

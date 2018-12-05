@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph name="dieresiscmb.cap" format="1">
+<glyph name="dieresiscmb.cap" format="2">
+  <anchor x="0.0" y="690.629746835443" name="_aboveUC"/>
   <outline>
     <contour>
       <point x="-111.78164556962025" y="744.1075949367089" type="curve" smooth="yes"/>
@@ -28,9 +29,6 @@
       <point x="53.835443037974684" y="798.9715189873418" type="curve" smooth="yes"/>
       <point x="53.835443037974684" y="767.2721518987341"/>
       <point x="79.4113924050633" y="744.1075949367089"/>
-    </contour>
-    <contour>
-      <point x="0.0" y="690.629746835443" type="move" name="_aboveUC"/>
     </contour>
   </outline>
 </glyph>

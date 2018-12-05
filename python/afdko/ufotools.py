@@ -13,12 +13,12 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
-from fontTools.misc.py23 import open, tobytes, tounicode, tostr
+from fontTools.misc.py23 import open, tobytes, tounicode, tostr, round
 
 from afdko import convertfonttocid, fdkutils
 
 __doc__ = """
-ufotools.py v1.32.1 Nov 2 2018
+ufotools.py v1.32.2 Dec 5 2018
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -701,7 +701,7 @@ class UFOFontData(object):
         try:
             widthXML = glifXML.find("advance")
             if widthXML is not None:
-                width = int(eval(widthXML.get("width")))
+                width = round(ast.literal_eval(widthXML.get("width")), 9)
             else:
                 width = 1000
         except UFOParseError as e:
@@ -1029,7 +1029,7 @@ class UFOFontData(object):
         glyphData must be the official <outline> XML from a GLIF.
         We skip contours with only one point.
         """
-        dataList = ["w%s" % (str(width))]
+        dataList = ["w%s" % width]
         if level > 10:
             raise UFOParseError(
                 "In parsing component, exceeded 10 levels of reference. "
@@ -1101,11 +1101,11 @@ class UFOFontData(object):
                     for transformTag in ["xScale", "xyScale", "yxScale",
                                          "yScale", "xOffset", "yOffset"]:
                         try:
-                            value = childContour.attrib[transformTag]
-                            rval = eval(value)
-                            if int(rval) == rval:
-                                value = str(int(rval))
-                            dataList.append(value)
+                            value = round(ast.literal_eval(
+                                childContour.attrib[transformTag]), 9)
+                            if int(value) == value:
+                                value = int(value)
+                            dataList.append(str(value))
                         except KeyError:
                             pass
                     componentXML = etRoot.parse(componentPath)
@@ -1117,10 +1117,10 @@ class UFOFontData(object):
                     dataList.extend(componentDataList)
         data = "".join(dataList)
         if len(data) < 128:
-            hash = data
+            hash_ = data
         else:
-            hash = hashlib.sha512(data.encode("ascii")).hexdigest()
-        return hash, dataList
+            hash_ = hashlib.sha512(data.encode("ascii")).hexdigest()
+        return hash_, dataList
 
     def getComponentOutline(self, componentItem):
         try:

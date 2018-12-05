@@ -2,50 +2,50 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
   <dict>
-    <key>@MMK_L_LAT_A</key>
+    <key>public.kern1.LAT_A</key>
     <dict>
-      <key>@MMK_R_LAT_A</key>
+      <key>public.kern2.LAT_A</key>
       <real>9.58860759493671</real>
-      <key>@MMK_R_LAT_Y</key>
+      <key>public.kern2.LAT_Y</key>
       <integer>-90</integer>
-      <key>@MMK_R_LAT_a</key>
+      <key>public.kern2.LAT_a</key>
       <real>-5.205696202531645</real>
-      <key>@MMK_R_LAT_y</key>
+      <key>public.kern2.LAT_y</key>
       <real>-50.41139240506329</real>
     </dict>
-    <key>@MMK_L_LAT_Y</key>
+    <key>public.kern1.LAT_Y</key>
     <dict>
-      <key>@MMK_R_LAT_A</key>
-      <real>-90.4113924050633</real>
-      <key>@MMK_R_LAT_Y</key>
-      <real>0.4113924050632911</real>
-      <key>@MMK_R_LAT_a</key>
-      <integer>-80</integer>
-      <key>@MMK_R_LAT_y</key>
-      <real>-69.17721518987342</real>
       <key>adieresis</key>
       <real>-78.76582278481013</real>
       <key>atilde</key>
       <real>-60.822784810126585</real>
+      <key>public.kern2.LAT_A</key>
+      <real>-90.4113924050633</real>
+      <key>public.kern2.LAT_Y</key>
+      <real>0.4113924050632911</real>
+      <key>public.kern2.LAT_a</key>
+      <integer>-80</integer>
+      <key>public.kern2.LAT_y</key>
+      <real>-69.17721518987342</real>
     </dict>
-    <key>@MMK_L_LAT_a</key>
+    <key>public.kern1.LAT_a</key>
     <dict>
-      <key>@MMK_R_LAT_A</key>
+      <key>public.kern2.LAT_A</key>
       <real>9.58860759493671</real>
-      <key>@MMK_R_LAT_Y</key>
+      <key>public.kern2.LAT_Y</key>
       <real>-79.5886075949367</real>
-      <key>@MMK_R_LAT_y</key>
+      <key>public.kern2.LAT_y</key>
       <real>-10.41139240506329</real>
     </dict>
-    <key>@MMK_L_LAT_v</key>
+    <key>public.kern1.LAT_v</key>
     <dict>
-      <key>@MMK_R_LAT_A</key>
+      <key>public.kern2.LAT_A</key>
       <real>-71.23417721518987</real>
-      <key>@MMK_R_LAT_Y</key>
+      <key>public.kern2.LAT_Y</key>
       <real>-50.41139240506329</real>
-      <key>@MMK_R_LAT_a</key>
+      <key>public.kern2.LAT_a</key>
       <real>-15.617088607594937</real>
-      <key>@MMK_R_LAT_y</key>
+      <key>public.kern2.LAT_y</key>
       <real>9.177215189873419</real>
     </dict>
   </dict>

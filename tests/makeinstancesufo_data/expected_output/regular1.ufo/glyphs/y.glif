@@ -1,7 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph name="y" format="1">
+<glyph name="y" format="2">
   <advance width="512.3164556962025"/>
   <unicode hex="0079"/>
+  <anchor x="271.23417721518985" y="506.5759493670886" name="aboveLC"/>
+  <anchor x="124.23417721518987" y="-254.38291139240508" name="belowLC"/>
   <outline>
     <contour>
       <point x="441.20569620253167" y="424.0411392405063" type="line"/>
@@ -48,12 +50,6 @@
       <point x="0.04113924050632911" y="-182.7246835443038" type="curve"/>
       <point x="0.24683544303797467" y="-221.93037974683546"/>
       <point x="42.49367088607595" y="-249.2594936708861"/>
-    </contour>
-    <contour>
-      <point x="271.23417721518985" y="506.5759493670886" type="move" name="aboveLC"/>
-    </contour>
-    <contour>
-      <point x="124.23417721518987" y="-254.38291139240508" type="move" name="belowLC"/>
     </contour>
   </outline>
 </glyph>

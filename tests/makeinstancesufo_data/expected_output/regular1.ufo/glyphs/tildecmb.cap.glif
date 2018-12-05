@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph name="tildecmb.cap" format="1">
+<glyph name="tildecmb.cap" format="2">
+  <anchor x="0.0" y="690.629746835443" name="_aboveUC"/>
   <outline>
     <contour>
       <point x="-180.08227848101265" y="734.1360759493671" type="curve"/>
@@ -28,9 +29,6 @@
       <point x="-75.46518987341773" y="862.753164556962" type="curve" smooth="yes"/>
       <point x="-136.38291139240508" y="862.753164556962"/>
       <point x="-168.123417721519" y="811.7943037974684"/>
-    </contour>
-    <contour>
-      <point x="0.0" y="690.629746835443" type="move" name="_aboveUC"/>
     </contour>
   </outline>
 </glyph>

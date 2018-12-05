@@ -12,6 +12,9 @@
 		<real>-239.2594936709</real>
 		<key>familyName</key>
 		<string>Source Serif Pro</string>
+		<key>guidelines</key>
+		<array>
+		</array>
 		<key>italicAngle</key>
 		<integer>0</integer>
 		<key>openTypeHheaAscender</key>

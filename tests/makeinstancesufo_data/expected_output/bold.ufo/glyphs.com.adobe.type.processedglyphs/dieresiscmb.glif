@@ -1,42 +1,42 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="1" name="dieresiscmb">
-  <unicode hex="0308" />
+<glyph name="dieresiscmb" format="2">
+  <unicode hex="0308"/>
+  <anchor x="0" y="516" name="_aboveLC"/>
+  <anchor x="0" y="716" name="aboveLC"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="curve" x="120" y="575" />
-      <point x="161" y="575" />
-      <point x="197" y="602" />
-      <point type="curve" x="197" y="648" />
-      <point x="197" y="693" />
-      <point x="161" y="721" />
-      <point type="curve" x="120" y="721" />
-      <point x="80" y="721" />
-      <point x="43" y="693" />
-      <point type="curve" x="43" y="648" />
-      <point x="43" y="602" />
-      <point x="80" y="575" />
+      <point x="120" y="575" type="curve" name="hintSet0000"/>
+      <point x="161" y="575"/>
+      <point x="197" y="602"/>
+      <point x="197" y="648" type="curve"/>
+      <point x="197" y="693"/>
+      <point x="161" y="721"/>
+      <point x="120" y="721" type="curve"/>
+      <point x="80" y="721"/>
+      <point x="43" y="693"/>
+      <point x="43" y="648" type="curve"/>
+      <point x="43" y="602"/>
+      <point x="80" y="575"/>
     </contour>
     <contour>
-      <point type="curve" x="-120" y="575" />
-      <point x="-78" y="575" />
-      <point x="-43" y="602" />
-      <point type="curve" x="-43" y="648" />
-      <point x="-43" y="693" />
-      <point x="-78" y="721" />
-      <point type="curve" x="-120" y="721" />
-      <point x="-160" y="721" />
-      <point x="-197" y="693" />
-      <point type="curve" x="-197" y="648" />
-      <point x="-197" y="602" />
-      <point x="-160" y="575" />
+      <point x="-120" y="575" type="curve"/>
+      <point x="-78" y="575"/>
+      <point x="-43" y="602"/>
+      <point x="-43" y="648" type="curve"/>
+      <point x="-43" y="693"/>
+      <point x="-78" y="721"/>
+      <point x="-120" y="721" type="curve"/>
+      <point x="-160" y="721"/>
+      <point x="-197" y="693"/>
+      <point x="-197" y="648" type="curve"/>
+      <point x="-197" y="602"/>
+      <point x="-160" y="575"/>
     </contour>
   </outline>
   <lib>
     <dict>
       <key>com.adobe.type.autohint.v2</key>
       <dict>
-        <key>id</key>
-        <string>c2ed37bf180e269e8b49caa6857e4bcf2805f3ef8f28d9e1b075b25f1fe22a8d255c52b7b6f868a191449490260a7d8fddcef085413e7a980f79c3c530bfa8df</string>
         <key>hintSetList</key>
         <array>
           <dict>
@@ -50,6 +50,8 @@
             </array>
           </dict>
         </array>
+        <key>id</key>
+        <string>c2ed37bf180e269e8b49caa6857e4bcf2805f3ef8f28d9e1b075b25f1fe22a8d255c52b7b6f868a191449490260a7d8fddcef085413e7a980f79c3c530bfa8df</string>
       </dict>
     </dict>
   </lib>
