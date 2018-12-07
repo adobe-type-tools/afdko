@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="i.a" format="1">
+	<advance width="600"/>
+	<outline>
+		<component base="dotlessi.a"/>
+		<component base="dotaccentcmb" xOffset="28"/>
+		<contour>
+			<point name="aboveUC" x="328" y="738" type="move"/>
+		</contour>
+		<contour>
+			<point name="ogonekLC" x="336" y="0" type="move"/>
+		</contour>
+		<contour>
+			<point name="baseLC" x="334" y="0" type="move"/>
+		</contour>
+		<contour>
+			<point name="belowLC" x="328" y="-20" type="move"/>
+		</contour>
+	</outline>
+</glyph>
