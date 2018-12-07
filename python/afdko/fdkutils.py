@@ -1,7 +1,7 @@
 # Copyright 2016 Adobe. All rights reserved.
 
 """
-fdkutils.py v1.2.7 Aug 28 2018
+fdkutils.py v1.2.8 Dec 7 2018
 A module of functions that are needed by several of the AFDKO scripts.
 """
 
@@ -22,6 +22,19 @@ def get_temp_file_path():
 
 def get_resources_dir():
     return os.path.join(os.path.dirname(__file__), 'resources')
+
+
+def run_shell_command(args):
+    """
+    Runs a shell command.
+    Returns True if the command was successful, and False otherwise.
+    """
+    try:
+        subprocess.check_call(args)
+        return True
+    except (subprocess.CalledProcessError, OSError) as err:
+        print(err)
+        return False
 
 
 def runShellCmd(cmd):

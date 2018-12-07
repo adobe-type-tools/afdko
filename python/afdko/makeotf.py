@@ -26,7 +26,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.5.2 Sep 20 2018
+makeotf.py v2.6.0 Dec 7 2018
 """
 
 __methods__ = """
@@ -2200,28 +2200,26 @@ def copyTTFGlyphTables(inputFilePath, tempOutputPath, outputPath):
     for tableTag in ["GDEF", "GSUB", "GPOS", "cmap", "name", "OS/2", "BASE"]:
         if tableTag not in tableDump:
             continue
-        command = "sfntedit -x \"%s\"=\"%s\" \"%s\" 2>&1" % (
-            tableTag, tempTablePath, tempOutputPath)
-        log = fdkutils.runShellCmd(command)
-        if not ("Done." in log):
-            print(log)
+        args1 = ['sfntedit', '-x', '%s=%s' % (tableTag, tempTablePath),
+                 tempOutputPath]
+        success1 = fdkutils.run_shell_command(args1)
+        if not success1:
             print("Error removing table '%s' from OTF font reference." %
                   tableTag)
             return
 
-        command = "sfntedit -a \"%s\"=\"%s\" \"%s\" 2>&1" % (
-            tableTag, tempTablePath, outputPath)
-        log = fdkutils.runShellCmd(command)
-        if not ("Done." in log):
-            print(log)
+        args2 = ['sfntedit', '-a', '%s=%s' % (tableTag, tempTablePath),
+                 outputPath]
+        success2 = fdkutils.run_shell_command(args2)
+        if not success2:
             print("Error adding makeotf-made table '%s' to TrueType font." %
                   tableTag)
             return
 
-        print("\tcopied \"%s\"." % tableTag)
+        print("    copied \"%s\"" % tableTag)
 
-    command = "sfntedit -f \"%s\" 2>&1" % outputPath
-    fdkutils.runShellCmd(command)
+    # fix checksums
+    fdkutils.run_shell_command(['sfntedit', '-f', outputPath])
 
     print("Succeeded in merging makeotf tables with TrueType source font to "
           "final TrueType output font at '%s'." % outputPath)

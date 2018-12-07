@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="overlinecmb" format="1">
+	<unicode hex="0305"/>
+	<advance width="600"/>
+	<outline>
+		<component base="macroncmb"/>
+		<contour>
+			<point name="_aboveLC" x="300" y="507" type="move"/>
+		</contour>
+		<contour>
+			<point name="aboveLC" x="300" y="574" type="move"/>
+		</contour>
+	</outline>
+</glyph>

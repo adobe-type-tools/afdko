@@ -524,3 +524,19 @@ def test_feature_includes_ufo_bug164():
                   'o', '_{}'.format(otf_path)])
 
     assert font_has_table(otf_path, 'head')
+
+
+def test_ttf_input_font_bug680():
+    input_filename = 'bug680/font.ttf'
+    feat_filename = 'bug680/features.fea'
+    ttf_path = get_temp_file_path()
+
+    runner(CMD + ['-o', 'r',
+                  'f', '_{}'.format(get_input_path(input_filename)),
+                  'ff', '_{}'.format(get_input_path(feat_filename)),
+                  'o', '_{}'.format(ttf_path)])
+
+    for table_tag in ('head', 'hhea', 'maxp', 'OS/2', 'hmtx', 'cmap', 'fpgm',
+                      'prep', 'cvt ', 'loca', 'glyf', 'name', 'post', 'gasp',
+                      'BASE', 'GDEF', 'GPOS', 'GSUB'):
+        assert font_has_table(ttf_path, table_tag)
