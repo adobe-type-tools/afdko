@@ -11,7 +11,7 @@ import os
 import subprocess
 import tempfile
 
-from fontTools.misc.py23 import tounicode
+from fontTools.misc.py23 import tounicode, tostr
 
 
 def get_temp_file_path():
@@ -54,13 +54,13 @@ def runShellCmdLogging(cmd):
         proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT)
         while 1:
-            output = proc.stdout.readline()
+            output = proc.stdout.readline().rstrip()
             if output:
-                print(output, end=' ')
+                print(tostr(output))
             if proc.poll() is not None:
-                output = proc.stdout.readline()
+                output = proc.stdout.readline().rstrip()
                 if output:
-                    print(output, end=' ')
+                    print(tostr(output))
                 break
     except (subprocess.CalledProcessError, OSError) as err:
         msg = "Error executing command '%s'\n%s" % (cmd, err)
