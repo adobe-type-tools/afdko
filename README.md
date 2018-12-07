@@ -22,7 +22,7 @@ Please see the
 for additional information, such as links to reference materials and related
 projects.
 
-Major Changes
+Major changes
 -------------
 
 The AFDKO has been restructured so that it can be installed as a Python
@@ -118,17 +118,10 @@ You can download older versions of the tools from the [Adobe AFDKO
 homepage](http://www.adobe.com/devnet/opentype/afdko.html). The tools IS
 and checkoutlines are included in these downloads.
 
-Build from Source
+Build from source
 -----------------
 
-In order to build afdko from source get the files from the [afdko github
-repository](https://github.com/adobe-type-tools/afdko), cd to the
-top-level directory of the afdko, and use the `setup.py` script:
-
-    python setup.py install
-
-And to be able to run this install command, you must first have
-installed the development tools for your platform.
+First you must have installed the development tools for your platform.
 
 On the Mac, install these with:
 
@@ -141,3 +134,22 @@ On Linux, install these with:
     apt-get -y install python-dev
 
 On Windows, you need Visual Studio 2017.
+
+To build **afdko** from source, clone the [afdko GitHub
+repository](https://github.com/adobe-type-tools/afdko), ensure the `wheel`
+module is installed (`pip install wheel`), then `cd` to the top-level
+directory of the afdko, and run:
+
+    pip install .
+
+**Note**
+
+It's not possible to install the afdko in editable/develop mode using
+`pip install -e .`; this is because the toolkit includes binary C executables
+which setup.py tries to install in the bin/ (or Scripts/) folder, however
+this process was only meant to be used with text-based scripts (either
+written in Python or a shell scripting language). To work around this problem
+(which really only impacts the few core afdko developers who need to get live
+feedback as they modify the source files) you can use alternative methods like
+exporting a PYTHONPATH, using a .pth file or similar hacks.
+For further details read [this comment](https://github.com/adobe-type-tools/afdko/pull/677#issuecomment-436747212).
