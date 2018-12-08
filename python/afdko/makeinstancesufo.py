@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Copyright 2015 Adobe. All rights reserved.
 
 """
