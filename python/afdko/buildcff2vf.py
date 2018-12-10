@@ -314,7 +314,7 @@ class CFF2GlyphData(object):
                 except IndexError:
                     print("Path mismatch: different number of points. "
                           "Glyph name: %s. " % self.glyphName,
-                          "font index: %s. " % i - 1,
+                          "font index: %s. " % (i - 1),
                           "master font path: %s. " %
                           self.masterFontList[0].srcPath,
                           "Delta font path: %s." %
