@@ -758,174 +758,215 @@ static Byte8 *dumpTitle(Card32 tag, IntX flavor) {
     if (tag == 0) {
         return ("GSUB table features ");
     } else if (tag == (STR2TAG("aalt")))
-        return ("aalt (Access all alternates)");
+        return ("aalt (Access All Alternates)");
+    else if (tag == (STR2TAG("abvf")))
+        return ("abvf (Above-base Forms)");
+    else if (tag == (STR2TAG("abvs")))
+        return ("abvs (Above-base Substitutions)");
     else if (tag == (STR2TAG("afrc")))
-        return ("afrc (Alternative fractions)");
-    else if (tag == (STR2TAG("c2sc")))
-        return ("c2sc (Small Caps substitution (Majuscules))");
-    else if (tag == (STR2TAG("calt")))
-        return ("calt (Connection alternates)");
-    else if (tag == (STR2TAG("case")))
-        return ("case (Case-sensitive substitution)");
-    else if (tag == (STR2TAG("clig")))
-        return ("clig (Contextual ligature substitution)");
-    else if (tag == (STR2TAG("crcy")))
-        return ("crcy (Currency substitution)");
-    else if (tag == (STR2TAG("cswh")))
-        return ("cswh (Contextual swash substitution)");
-    else if (tag == (STR2TAG("DCMP")))
-        return ("DCMP (Ligature decomposition)");
-    else if (tag == (STR2TAG("dlig")))
-        return ("dlig (Discretionary ligature substitution)");
-    else if (tag == (STR2TAG("dnom")))
-        return ("dnom (Denominators)");
-    else if (tag == (STR2TAG("dpng")))
-        return ("dpng (Dipthong substitution)");
-    else if (tag == (STR2TAG("expt")))
-        return ("expt (Expert-forms substitution)");
-    else if (tag == (STR2TAG("fina")))
-        return ("fina (Terminal alternates)");
-    else if (tag == (STR2TAG("frac"))) {
-        if (flavor == 4)
-            return ("frac (Pre-built Fraction substitution)");
-        else if (flavor == 5)
-            return ("frac (Arbitrary Fraction substitution)");
-        else
-            return ("frac (Fraction substitution)");
-    } else if (tag == (STR2TAG("fwid")))
-        return ("fwid (Full-width substitution)");
-    else if (tag == (STR2TAG("hist")))
-        return ("hist (Historical alternates)");
-    else if (tag == (STR2TAG("hkna")))
-        return ("hkna (Horizontal Kana Alternates)");
-    else if (tag == (STR2TAG("hlig")))
-        return ("hlig (Historical ligatures)");
-    else if (tag == (STR2TAG("hngl")))
-        return ("hngl (Hanja to Hangul substitution)");
-    else if (tag == (STR2TAG("hwid")))
-        return ("hwid (Half-width substitution)");
-    else if (tag == (STR2TAG("init")))
-        return ("init (Initial alternates)");
-    else if (tag == (STR2TAG("ital")))
-        return ("ital (Italics alternates)");
-    else if (tag == (STR2TAG("jajp")))
-        return ("jajp (Japanese forms)");
-    else if (tag == (STR2TAG("jp78")))
-        return ("jp78 (JIS78-forms substitution)");
-    else if (tag == (STR2TAG("jp83")))
-        return ("jp83 (JIS83-forms substitution)");
-    else if (tag == (STR2TAG("jp90")))
-        return ("jp90 (JIS90-forms substitution)");
-    else if (tag == (STR2TAG("kokr")))
-        return ("kokr (Korean forms)");
-    else if (tag == (STR2TAG("liga")))
-        return ("liga (Ligature substitution)");
-    else if (tag == (STR2TAG("lnum")))
-        return ("lnum (Lining figures)");
-    else if (tag == (STR2TAG("medi")))
-        return ("medi (Medial alternates)");
-    else if (tag == (STR2TAG("mgrk")))
-        return ("mgrk (Mathematical Greek)");
-    else if (tag == (STR2TAG("mset")))
-        return ("mset (Mark positioning substitution)");
-    else if (tag == (STR2TAG("nalt")))
-        return ("nalt (Alternate annotation forms)");
-    else if (tag == (STR2TAG("nlck")))
-        return ("nlck (National Language Committee kanji)");
-    else if (tag == (STR2TAG("numr")))
-        return ("numr (Numerators)");
-    else if (tag == (STR2TAG("nutf")))
-        return ("nutf ('Nut' fractions)");
-    else if (tag == (STR2TAG("onum")))
-        return ("onum (Oldstyle figures)");
-    else if (tag == (STR2TAG("ordn")))
-        return ("ordn (Ordinals substitution)");
-    else if (tag == (STR2TAG("ornm")))
-        return ("ornm (Ornaments)");
-    else if (tag == (STR2TAG("pnum")))
-        return ("pnum (Proportional figures)");
-    else if (tag == (STR2TAG("pwid")))
-        return ("pwid (Proportional-width substitution)");
-    else if (tag == (STR2TAG("qwid")))
-        return ("qwid (Quarter-width substitution)");
-    else if (tag == (STR2TAG("rand")))
-        return ("rand (Random-selection alternates)");
-    else if (tag == (STR2TAG("ruby")))
-        return ("ruby (Ruby Notation Forms)");
-    else if (tag == (STR2TAG("salt")))
-        return ("salt (Stylistic alternates)");
-    else if (tag == (STR2TAG("SALT")))
-        return ("SALT (Stylistic alternates)");
-    else if (tag == (STR2TAG("sinf")))
-        return ("sinf (Scientific subscript/inferiors)");
-    else if (tag == (STR2TAG("smcp")))
-        return ("smcp (Small Caps substitution (Minuscules))");
-    else if (tag == (STR2TAG("smpl")))
-        return ("smpl (Simplified-forms substitution)");
-    else if (tag == (STR2TAG("subs")))
-        return ("subs (Subscript substitution)");
-    else if (tag == (STR2TAG("sups")))
-        return ("sups (Superscript substitution)");
-    else if (tag == (STR2TAG("swsh")))
-        return ("swsh (Swash alternates)");
-    else if (tag == (STR2TAG("titl")))
-        return ("titl (Titling alternates)");
-    else if (tag == (STR2TAG("tnam")))
-        return ("tnam (Traditional name forms)");
-    else if (tag == (STR2TAG("tnum")))
-        return ("tnum (Tabular figures)");
-    else if (tag == (STR2TAG("trad")))
-        return ("trad (Traditional-forms substitution)");
-    else if (tag == (STR2TAG("twid")))
-        return ("twid (Third-width substitution)");
-    else if (tag == (STR2TAG("vert")))
-        return ("vert (Vertical-forms substitution)");
-    else if (tag == (STR2TAG("vivn")))
-        return ("vivn (Vietnamese Forms)");
-    else if (tag == (STR2TAG("vrt2")))
-        return ("vrt2 (Rotated vertical-forms substitution)");
-    else if (tag == (STR2TAG("zero")))
-        return ("zero (Slashed-Zero substitution)");
-    else if (tag == (STR2TAG("zhcn")))
-        return ("zhcn (Simplified Chinese Forms)");
-    else if (tag == (STR2TAG("zhtw")))
-        return ("zhtw (Traditional Chinese Forms)");
+        return ("afrc (Alternative Fractions)");
     else if (tag == (STR2TAG("akhn")))
         return ("akhn (Akhands)");
     else if (tag == (STR2TAG("blwf")))
         return ("blwf (Below-base Forms)");
-    else if (tag == (STR2TAG("half")))
-        return ("half ( Half Forms)");
-    else if (tag == (STR2TAG("vatu")))
-        return ("vatu (Vattu Variants)");
-    else if (tag == (STR2TAG("vkna")))
-        return ("vkna (Vertical Kana Alternates)");
-    else if (tag == (STR2TAG("pstf")))
-        return ("pstf (Post-base Forms)");
-    else if (tag == (STR2TAG("nukt")))
-        return ("nukt (Nukta Forms)");
-    else if (tag == (STR2TAG("abvs")))
-        return ("abvs (Above-base Substitutions)");
     else if (tag == (STR2TAG("blws")))
         return ("blws (Below-base Substitutions)");
+    else if (tag == (STR2TAG("calt")))
+        return ("calt (Contextual Alternates)");
+    else if (tag == (STR2TAG("case")))
+        return ("case (Case-Sensitive Forms)");
+    else if (tag == (STR2TAG("ccmp")))
+        return ("ccmp (Glyph Composition/Decomposition)");
+    else if (tag == (STR2TAG("cfar")))
+        return ("cfar (Conjuct Form After Ro)");
+    else if (tag == (STR2TAG("cjct")))
+        return ("cjct (Conjuct Forms)");
+    else if (tag == (STR2TAG("clig")))
+        return ("clig (Contextual Ligatures)");
+    else if (tag == (STR2TAG("cswh")))
+        return ("cswh (Contextual Swash)");
+    else if (tag == (STR2TAG("c2pc")))
+        return ("c2pc (Petite Capitals from Capitals)");
+    else if (tag == (STR2TAG("c2sc")))
+        return ("c2sc (Small Capitals from Capitals)");
+    else if (tag == (STR2TAG("dlig")))
+        return ("dlig (Discretionary Ligatures)");
+    else if (tag == (STR2TAG("dnom")))
+        return ("dnom (Denominators)");
+    else if (tag == (STR2TAG("dtls")))
+        return ("dtls (Dotless Forms)");
+    else if (tag == (STR2TAG("expt")))
+        return ("expt (Expert Forms)");
     else if (tag == (STR2TAG("falt")))
         return ("falt (Final Glyph on Line Alternates)");
+    else if (tag == (STR2TAG("fin2")))
+        return ("fin2 (Terminal Forms #2)");
+    else if (tag == (STR2TAG("fin3")))
+        return ("fin3 (Terminal Forms #3)");
+    else if (tag == (STR2TAG("fina")))
+        return ("fina (Terminal Forms)");
+    else if (tag == (STR2TAG("flac")))
+        return ("flac (Flattened accent forms)");
+    else if (tag == (STR2TAG("frac")))
+        return ("frac (Fractions)");
+    else if (tag == (STR2TAG("fwid")))
+        return ("fwid (Full Widths)");
+    else if (tag == (STR2TAG("half")))
+        return ("half (Half Forms)");
     else if (tag == (STR2TAG("haln")))
         return ("haln (Halant Forms)");
+    else if (tag == (STR2TAG("hist")))
+        return ("hist (Historical Forms)");
+    else if (tag == (STR2TAG("hkna")))
+        return ("hkna (Horizontal Kana Alternates)");
+    else if (tag == (STR2TAG("hlig")))
+        return ("hlig (Historical Ligatures)");
+    else if (tag == (STR2TAG("hngl")))
+        return ("hngl (Hangul)");
+    else if (tag == (STR2TAG("hojo")))
+        return ("hojo (Hojo Kanji Forms)");
+    else if (tag == (STR2TAG("hwid")))
+        return ("hwid (Half Widths)");
+    else if (tag == (STR2TAG("init")))
+        return ("init (Initial Forms)");
     else if (tag == (STR2TAG("isol")))
         return ("isol (Isolated Forms)");
+    else if (tag == (STR2TAG("ital")))
+        return ("ital (Italics)");
     else if (tag == (STR2TAG("jalt")))
         return ("jalt (Justification Alternates)");
+    else if (tag == (STR2TAG("jp78")))
+        return ("jp78 (JIS78 Forms)");
+    else if (tag == (STR2TAG("jp83")))
+        return ("jp83 (JIS83 Forms)");
+    else if (tag == (STR2TAG("jp90")))
+        return ("jp90 (JIS90 Forms)");
+    else if (tag == (STR2TAG("jp04")))
+        return ("jp04 (JIS2004 Forms)");
+    else if (tag == (STR2TAG("liga")))
+        return ("liga (Standard Ligatures)");
+    else if (tag == (STR2TAG("ljmo")))
+        return ("ljmo (Leading Jamo Forms)");
+    else if (tag == (STR2TAG("lnum")))
+        return ("lnum (Lining Figures)");
     else if (tag == (STR2TAG("locl")))
         return ("locl (Localized Forms)");
+    else if (tag == (STR2TAG("ltra")))
+        return ("ltra (Left-to-Right Alternates)");
+    else if (tag == (STR2TAG("ltrm")))
+        return ("ltrm (Left-to-Right Mirrored Forms)");
+    else if (tag == (STR2TAG("med2")))
+        return ("med2 (Medial Forms #2)");
+    else if (tag == (STR2TAG("medi")))
+        return ("medi (Medial Forms)");
+    else if (tag == (STR2TAG("mgrk")))
+        return ("mgrk (Mathematical Greek)");
+    else if (tag == (STR2TAG("mset")))
+        return ("mset (Mark Positioning via Substitution)");
+    else if (tag == (STR2TAG("nalt")))
+        return ("nalt (Alternate Annotation Forms)");
+    else if (tag == (STR2TAG("nlck")))
+        return ("nlck (NLC Kanji Forms)");
+    else if (tag == (STR2TAG("nukt")))
+        return ("nukt (Nukta Forms)");
+    else if (tag == (STR2TAG("numr")))
+        return ("numr (Numerators)");
+    else if (tag == (STR2TAG("onum")))
+        return ("onum (Oldstyle Figures)");
+    else if (tag == (STR2TAG("ordn")))
+        return ("ordn (Ordinals)");
+    else if (tag == (STR2TAG("ornm")))
+        return ("ornm (Ornaments)");
+    else if (tag == (STR2TAG("pcap")))
+        return ("pcap (Petite Capitals)");
+    else if (tag == (STR2TAG("pkna")))
+        return ("pkna (Proportional Kana)");
+    else if (tag == (STR2TAG("pnum")))
+        return ("pnum (Proportional Figures)");
+    else if (tag == (STR2TAG("pref")))
+        return ("pref (Pre-base Forms)");
     else if (tag == (STR2TAG("pres")))
         return ("pres (Pre-base Substitutions)");
+    else if (tag == (STR2TAG("pstf")))
+        return ("pstf (Post-base Forms)");
     else if (tag == (STR2TAG("psts")))
         return ("psts (Post-base Substitutions)");
+    else if (tag == (STR2TAG("pwid")))
+        return ("pwid (Proportional Widths)");
+    else if (tag == (STR2TAG("qwid")))
+        return ("qwid (Quarter Widths)");
+    else if (tag == (STR2TAG("rand")))
+        return ("rand (Randomize)");
+    else if (tag == (STR2TAG("rclt")))
+        return ("rclt (Required Contextual Alternates)");
+    else if (tag == (STR2TAG("rkrf")))
+        return ("rkrf (Rakar Forms)");
+    else if (tag == (STR2TAG("rlig")))
+        return ("rlig (Required Ligatures)");
     else if (tag == (STR2TAG("rphf")))
         return ("rphf (Reph Forms)");
+    else if (tag == (STR2TAG("rtla")))
+        return ("rtla (Right-to-Left Alternates)");
+    else if (tag == (STR2TAG("rtlm")))
+        return ("rtlm (Right-to-Left Mirrored Forms)");
+    else if (tag == (STR2TAG("ruby")))
+        return ("ruby (Ruby Notation Forms)");
+    else if (tag == (STR2TAG("rvrn")))
+        return ("rvrn (Required Variation Alternates)");
+    else if (tag == (STR2TAG("salt")))
+        return ("salt (Stylistic Alternates)");
+    else if (tag == (STR2TAG("sinf")))
+        return ("sinf (Scientific Inferiors)");
+    else if (tag == (STR2TAG("smcp")))
+        return ("smcp (Small Capitals)");
+    else if (tag == (STR2TAG("smpl")))
+        return ("smpl (Simplified Forms)");
+    else if (tag == (STR2TAG("ssty")))
+        return ("ssty (Math script style alternates)");
+    else if (tag == (STR2TAG("stch")))
+        return ("stch (Stretching Glyph Decomposition)");
+    else if (tag == (STR2TAG("subs")))
+        return ("subs (Subscript)");
+    else if (tag == (STR2TAG("sups")))
+        return ("sups (Superscript)");
+    else if (tag == (STR2TAG("swsh")))
+        return ("swsh (Swash)");
+    else if (tag == (STR2TAG("titl")))
+        return ("titl (Titling)");
+    else if (tag == (STR2TAG("tjmo")))
+        return ("tjmo (Trailing Jamo Forms)");
+    else if (tag == (STR2TAG("tnam")))
+        return ("tnam (Traditional Name Forms)");
+    else if (tag == (STR2TAG("tnum")))
+        return ("tnum (Tabular Figures)");
+    else if (tag == (STR2TAG("trad")))
+        return ("trad (Traditional Forms)");
+    else if (tag == (STR2TAG("twid")))
+        return ("twid (Third Widths)");
+    else if (tag == (STR2TAG("unic")))
+        return ("unic (Unicase)");
+    else if (tag == (STR2TAG("vatu")))
+        return ("vatu (Vattu Variants)");
+    else if (tag == (STR2TAG("vert")))
+        return ("vert (Vertical Writing)");
+    else if (tag == (STR2TAG("vjmo")))
+        return ("vjmo (Vowel Jamo Forms)");
+    else if (tag == (STR2TAG("vkna")))
+        return ("vkna (Vertical Kana Alternates)");
+    else if (tag == (STR2TAG("vrt2")))
+        return ("vrt2 (Vertical Alternates and Rotation)");
+    else if (tag == (STR2TAG("vrtr")))
+        return ("vrtr (Vertical Alternates for Rotation)");
+    else if (tag == (STR2TAG("zero")))
+        return ("zero (Slashed-Zero substitution)");
 
-    else {
+    else if ((tag >= (STR2TAG("cv01"))) && (tag <= (STR2TAG("cv99")))) {
+        sprintf(othertag, "%c%c%c%c (Character Variant)", TAG_ARG(tag));
+        return othertag;
+    } else if ((tag >= (STR2TAG("ss01"))) && (tag <= (STR2TAG("ss20")))) {
+        sprintf(othertag, "%c%c%c%c (Stylistic Set)", TAG_ARG(tag));
+        return othertag;
+    } else {
         sprintf(othertag, "'%c%c%c%c' (Unknown/Unregistered tag)", TAG_ARG(tag));
         return (othertag);
     }
@@ -940,107 +981,6 @@ static IntX isVerticalFeature(Card32 tag, IntX flavor) {
         return 1;
     return 0;
 }
-
-#if 0
-static IntX isAlternatesFormat(Card32 tag, IntX flavor) {
-    if (tag == 0)
-        return 0;
-    else if (tag == (STR2TAG("CALT")))
-        return 1;
-    else if (tag == (STR2TAG("fina")))
-        return 1;
-    else if (tag == (STR2TAG("HIST")))
-        return 1;
-    else if (tag == (STR2TAG("init")))
-        return 1;
-    else if (tag == (STR2TAG("medi")))
-        return 1;
-    else if (tag == (STR2TAG("NALT")))
-        return 1;
-    else if (tag == (STR2TAG("ORNM")))
-        return 1;
-    else if (tag == (STR2TAG("RAND")))
-        return 1;
-    else if (tag == (STR2TAG("SALT")))
-        return 1;
-    else if (tag == (STR2TAG("swsh")))
-        return 1;
-    else if (tag == (STR2TAG("TITL")))
-        return 1;
-    return 0;
-}
-
-static IntX isOneToOneFormat(Card32 tag, IntX flavor) {
-    if (tag == 0)
-        return 0;
-    else if (tag == (STR2TAG("C2SC")))
-        return 1;
-    else if (tag == (STR2TAG("EXPT")))
-        return 1;
-    else if (tag == (STR2TAG("FWID")))
-        return 1;
-    else if (tag == (STR2TAG("HWID")))
-        return 1;
-    else if (tag == (STR2TAG("JP78")))
-        return 1;
-    else if (tag == (STR2TAG("JP83")))
-        return 1;
-    else if (tag == (STR2TAG("LNUM")))
-        return 1;
-    else if (tag == (STR2TAG("onum")))
-        return 1;
-    else if (tag == (STR2TAG("ORDN")))
-        return 1;
-    else if (tag == (STR2TAG("pnum")))
-        return 1;
-    else if (tag == (STR2TAG("PWID")))
-        return 1;
-    else if (tag == (STR2TAG("smcp")))
-        return 1;
-    else if (tag == (STR2TAG("SMPL")))
-        return 1;
-    else if (tag == (STR2TAG("sups")))
-        return 1;
-    else if (tag == (STR2TAG("subs")))
-        return 1;
-    else if (tag == (STR2TAG("TNUM")))
-        return 1;
-    else if (tag == (STR2TAG("TRAD")))
-        return 1;
-    else if (tag == (STR2TAG("vert")))
-        return 1;
-    else if (tag == (STR2TAG("ZERO")))
-        return 1;
-    return 0;
-}
-
-static IntX isOnetoManyFormat(Card32 tag, IntX flavor) {
-    if (tag == 0)
-        return 0;
-    else if (tag == (STR2TAG("DCMP")))
-        return 1;
-    return 0;
-}
-
-static IntX isManyToOneFormat(Card32 tag, IntX flavor) {
-    if (tag == 0)
-        return 0;
-    else if (tag == (STR2TAG("dlig")))
-        return 1;
-    else if (tag == (STR2TAG("DPNG")))
-        return 1;
-    else if (tag == (STR2TAG("frac"))) {
-        if (flavor == 4)
-            return 1;
-        else if (flavor == 5)
-            return 1;
-        else
-            return 1;
-    } else if (tag == (STR2TAG("liga")))
-        return 1;
-    return 0;
-}
-#endif
 
 static void dumpMessage(char *str, Tag feature) {
     if (isVerticalFeature(feature, 0)) {
