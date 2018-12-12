@@ -18,7 +18,7 @@ from fontTools.misc.py23 import open, tobytes, tounicode, tostr, round
 from afdko import convertfonttocid, fdkutils
 
 __doc__ = """
-ufotools.py v1.32.2 Dec 5 2018
+ufotools.py v1.32.3 Dec 12 2018
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -601,6 +601,9 @@ class UFOFontData(object):
         return glyphPath
 
     def updateHashEntry(self, glyphName, changed):
+        """
+        THIS METHOD DOES NOT UPDATE THE GLYPH HASHES!!
+        """
         # srcHarsh has already been set: we are fixing the history list.
         if not self.useHashMap:
             return
@@ -1168,7 +1171,6 @@ class UFOFontData(object):
         if self.hashMapChanged:
             self.writeHashMap()
             self.hashMapChanged = 0
-        return
 
     def clearHashMap(self):
         self.hashMap = {kAdobHashMapVersionName: kAdobHashMapVersion}
@@ -2253,6 +2255,22 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
 
     addWhiteSpace(glifXML, 0)
     return glifXML
+
+
+def regenerate_glyph_hashes(ufo_font_data):
+    """
+    The handling of the glyph hashes is super convoluted.
+    This method fixes https://github.com/adobe-type-tools/afdko/issues/349
+    """
+    for gname, gfilename in ufo_font_data.getGlyphMap().items():
+        gwidth, _, outline_xml = ufo_font_data.getGlyphXML(
+            ufo_font_data.glyphDefaultDir, gfilename)
+        hash_entry = ufo_font_data.hashMap.get(gname, None)
+        if not hash_entry:
+            continue
+        ghash, _ = ufo_font_data.buildGlyphHashValue(
+            gwidth, outline_xml, gname, True)
+        hash_entry[0] = tostr(ghash)
 
 
 def checkHashMaps(fontPath, doSync):
