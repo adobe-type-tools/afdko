@@ -83,6 +83,15 @@ def test_options(args, exp_filename):
     assert differ([expected_path, actual_path] + skip)
 
 
+@pytest.mark.parametrize('table', ['GSUB', 'GPOS'])
+def test_feature_tags_bug691(table):
+    exp_filename = 'SourceCodePro-Regular_{}.ps'.format(table)
+    actual_path = runner(CMD + ['-s', '-f', 'SourceCodePro-Regular.otf',
+                                '-o', 't', '_{}=8'.format(table)])
+    expected_path = get_expected_path(exp_filename)
+    assert differ([expected_path, actual_path])
+
+
 @pytest.mark.parametrize('font_format', ['otf', 'ttf'])
 def test_long_glyph_name_bug373(font_format):
     file_name = 'long_glyph_name.' + font_format
