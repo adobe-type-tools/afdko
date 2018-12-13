@@ -2887,7 +2887,7 @@ static void proofChainContext3(ChainContextSubstFormat3 *fmt) {
 
     if (fmt->InputGlyphCount == 1) {
         GlyphId inputgid[1];
-        GlyphId outputgid[1];
+        GlyphId outputgid[2];
         IntX inputcount, outputcount;
         Card32 nitems;
         IntX j, o;
