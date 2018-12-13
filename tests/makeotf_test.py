@@ -130,6 +130,23 @@ def test_path_with_non_ascii_chars_bug222(input_filename):
     assert os.path.isfile(expected_path)
 
 
+def test_font_with_hash_bug239():
+    input_path = get_input_path('bug239/font.ufo')
+    output_path = get_temp_file_path()
+    runner(CMD + ['-o', 'f', '_{}'.format(input_path),
+                        'o', '_{}'.format(output_path)])
+    assert font_has_table(output_path, 'CFF ')
+
+
+def test_font_with_outdated_hash_bug239():
+    input_path = get_input_path('bug239/font_outdated_hash.ufo')
+    output_path = get_temp_file_path()
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        runner(CMD + ['-o', 'f', '_{}'.format(input_path),
+                            'o', '_{}'.format(output_path)])
+    assert err.value.returncode == 1
+
+
 @pytest.mark.parametrize('input_filename', [UFO2_NAME, UFO3_NAME])
 def test_ufo_with_trailing_slash_bug280(input_filename):
     # makeotf will now save the OTF alongside the UFO instead of inside of it
