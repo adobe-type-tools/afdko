@@ -346,7 +346,6 @@ def test_cs_opt_bug684():
     of the standard size (513) after re-converted to CFF2 unless -no_opt option is specified."""
     font_path = get_input_path('SHSVF_9b3b.otf')
     result_path = get_temp_file_path()
-    dcf_path = get_temp_file_path()
     runner(CMD + ['-a', '-o', 'cff2', '-f', font_path, result_path])
     expected_path = get_expected_path('SHSVF_9b3b_opt.cff2')
     assert differ([expected_path, result_path, '-m', 'bin'])
