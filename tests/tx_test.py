@@ -343,8 +343,9 @@ def test_glyph_bboxes_bug655():
 def test_cs_opt_bug684():
     """ The input CFF2 variable font contains a long single charstring
     making the maximum use of the operand stack.
-    tx was generating a bad CFF2 charstring that would overflow the operand stack
-    of the standard size (513) after re-converted to CFF2 unless -no_opt option is specified."""
+    tx was generating a bad CFF2 charstring that would overflow
+    the operand stack of the standard size (513) after re-converted
+    to CFF2 unless -no_opt option is specified."""
     font_path = get_input_path('SHSVF_9b3b.otf')
     result_path = get_temp_file_path()
     runner(CMD + ['-a', '-o', 'cff2', '-f', font_path, result_path])
