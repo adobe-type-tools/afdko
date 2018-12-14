@@ -103,10 +103,10 @@
     <ulUnicodeRange2 value="00000000 00000000 00000000 00000000"/>
     <ulUnicodeRange3 value="00000000 00000000 00000000 00000000"/>
     <ulUnicodeRange4 value="00000000 00000000 00000000 00000000"/>
-    <achVendID value="ADBE"/>
+    <achVendID value="UKWN"/>
     <fsSelection value="00000000 01000000"/>
     <usFirstCharIndex value="65"/>
-    <usLastCharIndex value="97"/>
+    <usLastCharIndex value="65"/>
     <sTypoAscender value="660"/>
     <sTypoDescender value="-340"/>
     <sTypoLineGap value="200"/>
@@ -131,15 +131,12 @@
     <tableVersion version="0"/>
     <cmap_format_4 platformID="0" platEncID="3" language="0">
       <map code="0x41" name="a"/><!-- LATIN CAPITAL LETTER A -->
-      <map code="0x61" name="a"/><!-- LATIN SMALL LETTER A -->
     </cmap_format_4>
     <cmap_format_6 platformID="1" platEncID="0" language="0">
       <map code="0x41" name="a"/>
-      <map code="0x61" name="a"/>
     </cmap_format_6>
     <cmap_format_4 platformID="3" platEncID="1" language="0">
       <map code="0x41" name="a"/><!-- LATIN CAPITAL LETTER A -->
-      <map code="0x61" name="a"/><!-- LATIN SMALL LETTER A -->
     </cmap_format_4>
   </cmap>
 
@@ -239,16 +236,16 @@
 
   <name>
     <namerecord nameID="1" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      Source Sans
+      SourceSans
     </namerecord>
     <namerecord nameID="2" platformID="1" platEncID="0" langID="0x0" unicode="True">
       Regular
     </namerecord>
     <namerecord nameID="3" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      1.000;ADBE;SourceSans-Test
+      1.000;UKWN;SourceSans-Test
     </namerecord>
     <namerecord nameID="4" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      Source Sans
+      SourceSans
     </namerecord>
     <namerecord nameID="5" platformID="1" platEncID="0" langID="0x0" unicode="True">
       Version 1.000;hotconv 1.0.109;makeotfexe 2.5.65593 DEVELOPMENT
@@ -256,17 +253,20 @@
     <namerecord nameID="6" platformID="1" platEncID="0" langID="0x0" unicode="True">
       SourceSans-Test
     </namerecord>
+    <namerecord nameID="17" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Test
+    </namerecord>
     <namerecord nameID="1" platformID="3" platEncID="1" langID="0x409">
-      Source Sans
+      SourceSans
     </namerecord>
     <namerecord nameID="2" platformID="3" platEncID="1" langID="0x409">
       Regular
     </namerecord>
     <namerecord nameID="3" platformID="3" platEncID="1" langID="0x409">
-      1.000;ADBE;SourceSans-Test
+      1.000;UKWN;SourceSans-Test
     </namerecord>
     <namerecord nameID="4" platformID="3" platEncID="1" langID="0x409">
-      Source Sans
+      SourceSans
     </namerecord>
     <namerecord nameID="5" platformID="3" platEncID="1" langID="0x409">
       Version 1.000;hotconv 1.0.109;makeotfexe 2.5.65593 DEVELOPMENT

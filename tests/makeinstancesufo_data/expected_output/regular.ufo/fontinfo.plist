@@ -3,21 +3,24 @@
 <plist version="1.0">
 	<dict>
 		<key>ascender</key>
-		<integer>729</integer>
+		<real>729.2183544304</real>
 		<key>capHeight</key>
-		<integer>669</integer>
+		<real>669.2594936709</real>
 		<key>copyright</key>
 		<string>Copyright 2014 - 2017 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name 'Source'.</string>
 		<key>descender</key>
-		<integer>-239</integer>
+		<real>-239.2594936709</real>
 		<key>familyName</key>
 		<string>Source Serif Pro</string>
+		<key>guidelines</key>
+		<array>
+		</array>
 		<key>italicAngle</key>
 		<integer>0</integer>
 		<key>openTypeHheaAscender</key>
-		<integer>993</integer>
+		<integer>1036</integer>
 		<key>openTypeHheaDescender</key>
-		<integer>-321</integer>
+		<integer>-335</integer>
 		<key>openTypeHheaLineGap</key>
 		<integer>0</integer>
 		<key>openTypeNameDesigner</key>
@@ -55,9 +58,9 @@
 			<integer>4</integer>
 		</array>
 		<key>openTypeOS2TypoAscender</key>
-		<integer>700</integer>
+		<integer>730</integer>
 		<key>openTypeOS2TypoDescender</key>
-		<integer>-259</integer>
+		<integer>-270</integer>
 		<key>openTypeOS2TypoLineGap</key>
 		<integer>0</integer>
 		<key>openTypeOS2UnicodeRanges</key>
@@ -75,29 +78,29 @@
 		<key>openTypeOS2VendorID</key>
 		<string>ADBO</string>
 		<key>openTypeOS2WinAscent</key>
-		<integer>993</integer>
+		<integer>1036</integer>
 		<key>openTypeOS2WinDescent</key>
-		<integer>321</integer>
+		<integer>335</integer>
 		<key>postscriptBlueFuzz</key>
 		<integer>0</integer>
 		<key>postscriptBlueScale</key>
 		<real>0.0375</real>
 		<key>postscriptBlueValues</key>
 		<array>
-			<real>-15.21</real>
+			<real>-15.2056962025</real>
 			<integer>0</integer>
-			<real>474.53</real>
-			<real>487.66</real>
-			<real>526.51</real>
-			<real>539.63</real>
-			<real>549.42</real>
-			<real>562.55</real>
-			<real>646.05</real>
-			<real>659.18</real>
-			<real>669.26</real>
-			<real>684.47</real>
-			<real>729.22</real>
-			<real>749.22</real>
+			<real>474.5348101266</real>
+			<real>487.6582278481</real>
+			<real>526.5063291139</real>
+			<real>539.6297468354</real>
+			<real>549.4240506329</real>
+			<real>562.5474683544</real>
+			<real>646.0537974684</real>
+			<real>659.1772151899</real>
+			<real>669.2594936709</real>
+			<real>684.4651898734</real>
+			<real>729.2183544304</real>
+			<real>749.2183544304</real>
 		</array>
 		<key>postscriptFamilyBlues</key>
 		<array>
@@ -125,18 +128,18 @@
 		<string>SourceSerifPro-Regular</string>
 		<key>postscriptOtherBlues</key>
 		<array>
-			<real>-249.26</real>
-			<real>-239.26</real>
+			<real>-249.2594936709</real>
+			<real>-239.2594936709</real>
 		</array>
 		<key>postscriptStemSnapH</key>
 		<array>
-			<real>55.78</real>
-			<real>40.82</real>
+			<real>55.7816455696</real>
+			<real>40.8227848101</real>
 		</array>
 		<key>postscriptStemSnapV</key>
 		<array>
-			<real>84.53</real>
-			<real>94.53</real>
+			<real>84.5253164557</real>
+			<real>94.5253164557</real>
 		</array>
 		<key>postscriptUnderlinePosition</key>
 		<integer>-75</integer>
@@ -153,6 +156,6 @@
 		<key>versionMinor</key>
 		<integer>0</integer>
 		<key>xHeight</key>
-		<integer>475</integer>
+		<real>474.5348101266</real>
 	</dict>
 </plist>

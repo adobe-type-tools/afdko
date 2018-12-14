@@ -219,7 +219,7 @@ def test_get_glyph_names_mapping_names_from_goadb():
 def test_get_composites_data():
     ufo, ps_names = ttfcomp.get_glyph_names_mapping(_get_test_ufo_path())
     comps_data = ttfcomp.get_composites_data(ufo, ps_names)
-    comps_name_list = sorted(list(comps_data.keys()))
+    comps_name_list = sorted(comps_data.keys())
     comps_comp_list = [comps_data[gname] for gname in comps_name_list]
     assert comps_name_list == ['aacute', 'adieresis', 'atilde', 'uni01CE']
     assert comps_comp_list[0].names == ('a', 'uni0301')
