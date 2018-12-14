@@ -151,7 +151,7 @@ struct Node_ {
 #define NODE_COUNTED (1 << 15) /* Paths have been counted for this node */
 #define NODE_TESTED  (1 << 14) /* Candidacy tested for this node */
 #define NODE_FAIL    (1 << 13) /* Node failed candidacy test */
-#define NODE_TAIL    (1 << 12) /* Tail subr (terminates with endchar) */
+#define NODE_TAIL    (1 << 12) /* Tail subr (CFF2 or terminates with endchar in CFF1) */
 #define NODE_SUBR    (1 << 11) /* Node has subr info (index in misc) */
 };
 
@@ -1236,6 +1236,9 @@ static void saveSubr(subrCtx h, unsigned char *edgeEnd, Node *node,
     unsigned count = node->paths;
 
     node->flags |= NODE_FAIL; /* Assume test will fail and mark node */
+    if (h->g->flags & CFW_WRITE_CFF2) {
+        tail = 1;   /* CFF2 subr has no return. Treat it the same as CFF1 tail subr */
+    }
 
     /* Test for candidacy */
     switch (subrLen - maskcnt) {
@@ -1366,7 +1369,7 @@ static int subrSaved(subrCtx h, Subr *subr) {
 }
 
 /* Calculate byte savings by one instance of call to this subr */
-static int subrSavedByOneCall(subrCtx h, Subr *subr) {
+static int subrSavedByOneCall(Subr *subr) {
     int length = subr->length - subr->maskcnt;
     return (length - CALL_OP_SIZE - subr->numsize);
 }
@@ -1550,14 +1553,16 @@ static void listUpSubrMatches(subrCtx h, unsigned char *pstart, long length, int
     }
 }
 
-/* Compare subr calls by length (longest first) then by offset (smallest first) */
-static int CTL_CDECL cmpSubrLengths(const void *first, const void *second) {
+/* Compare subr calls by single-call saving (largest first) then by offset (smallest first) */
+static int CTL_CDECL cmpSubrSavings(const void *first, const void *second) {
     Call *a = (Call *)first;
     Call *b = (Call *)second;
-    if (a->subr->length != b->subr->length)
-        return (int)b->subr->length - (int)a->subr->length;
+    int asave = subrSavedByOneCall(a->subr);
+    int bsave = subrSavedByOneCall(b->subr);
+    if (asave != bsave)
+        return bsave - asave;
     else if (a->offset != b->offset)
-        return (int)b->offset - (int)a->offset;
+        return (int)a->offset - (int)b->offset;
     else
         return (int)b->subr->order - (int)a->subr->order;
 }
@@ -1589,7 +1594,7 @@ static void buildCallList(subrCtx h, int buildPhase, unsigned length, unsigned c
     /* List up all matching subrs */
     dnaINIT(h->g->ctx.dnaSafe, callList, 100, 100);
     listUpSubrMatches(h, pstart, length, buildPhase, selfMatch, id, subrDepth, &callList);
-    qsort(callList.array, callList.cnt, sizeof(Call), cmpSubrLengths);
+    qsort(callList.array, callList.cnt, sizeof(Call), cmpSubrSavings);
 
     /* Try to fill lists with longest subrs first */
     h->calls.cnt = 0;
