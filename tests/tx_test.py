@@ -338,3 +338,15 @@ def test_glyph_bboxes_bug655():
     result_path = get_temp_file_path()
     runner(CMD + ['-o', 'mtx', '2', '-f', font_path, result_path])
     assert differ([expected_path, result_path])
+
+def test_cs_opt_bug684():
+    """ The input CFF2 variable font contains a long single charstring
+    making the maximum use of the operand stack.
+    tx was generating a bad CFF2 charstring that would overflow the operand stack
+    of the standard size (513) after re-converted to CFF2 unless -no_opt option is specified."""
+    font_path = get_input_path('SHSVF_9b3b.otf')
+    result_path = get_temp_file_path()
+    dcf_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', 'cff2', '-f', font_path, result_path])
+    expected_path = get_expected_path('SHSVF_9b3b_opt.cff2')
+    assert differ([expected_path, result_path, '-m', 'bin'])
