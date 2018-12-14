@@ -339,6 +339,7 @@ def test_glyph_bboxes_bug655():
     runner(CMD + ['-o', 'mtx', '2', '-f', font_path, result_path])
     assert differ([expected_path, result_path])
 
+
 def test_cs_opt_bug684():
     """ The input CFF2 variable font contains a long single charstring
     making the maximum use of the operand stack.
