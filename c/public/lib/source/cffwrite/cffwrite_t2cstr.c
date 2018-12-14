@@ -106,7 +106,7 @@ struct cstrCtx_ {
     } deltaStack;
     int numBlends;
     unsigned short maxstack;
-    int blended_cnt;    /* Number of blended values already flushed out */
+    int flushed_cnt;    /* Number of values flushed out and stored on the client's stack */
     float x;            /* Current x-coordinate */
     float y;            /* Current y-coordinate */
     float start_x;      /*  x-coordinate of current path initial moveto */
@@ -253,7 +253,7 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
         h->maxstack = CFF2_MAX_OP_STACK;
     else
         h->maxstack = T2_MAX_OP_STACK;
-    h->blended_cnt = 0;
+    h->flushed_cnt = 0;
     h->stack.cnt = 0;
     h->deltaStack.cnt = 0;
     h->numBlends = 0;
@@ -327,7 +327,7 @@ static void saveop(cstrCtx h, int op) {
         }
         h->stack.cnt = 0;
     }
-    h->blended_cnt = 0;
+    h->flushed_cnt = 0;
 
     /* Save op */
     switch (op) {
@@ -364,31 +364,34 @@ static void saveopDirect(cstrCtx h, int op) {
         h->stack.cnt = 0;
     }
 
+    h->flushed_cnt = 0;
     cstr_saveop(h, op);
 
     h->pendop = tx_noop; /* Clear pending op */
 }
 
-static int checkOverflowWithArg(cstrCtx h, int argcnt)
+/* Returns 1 if argcnt maybe blended args may overflow the operand stack */
+static int checkOverflowByArg(cstrCtx h, int argcnt)
 {
-    if (h->numBlends > 0)
-        return ((h->numBlends + 1) * h->glyph.info->blendInfo.numRegions + h->stack.cnt + h->blended_cnt
-               + (argcnt * (h->glyph.info->blendInfo.numRegions + 1))
-               + ((h->g->flags & CFW_SUBRIZE) ? 1 : 0) + 1 > h->maxstack);
-    else
-        return (h->stack.cnt + argcnt + ((h->g->flags & CFW_SUBRIZE) ? 1 : 0) > h->maxstack);
+    int blend_arg_cnt = h->glyph.info->blendInfo.numRegions;
+    if (blend_arg_cnt > 0)
+        blend_arg_cnt++; /* number of args */
+    return (h->stack.cnt + h->flushed_cnt + argcnt + blend_arg_cnt
+           + ((h->g->flags & CFW_SUBRIZE) ? 1 : 0)) > h->maxstack;
 }
 
+/* Returns 1 if a new set of default and delta values pushed to the delta stack will overflow the operand stack */
 static int checkOverflow(cstrCtx h)
 {
-    return checkOverflowWithArg(h, 0);
+    return (h->stack.cnt + h->flushed_cnt + h->deltaStack.cnt + 1 + h->glyph.info->blendInfo.numRegions + 1
+           + ((h->g->flags & CFW_SUBRIZE) ? 1 : 0)) > h->maxstack;
 }
 
 /* Check stack headroom and flush pending op if next op causes overflow.
    When subroutinizer is enabled, reserve one extra space for a subr number.
    Return 1 on error else 0. */
 static void flushop(cstrCtx h, int argcnt) {
-    if (checkOverflowWithArg(h, argcnt)) {
+    if (checkOverflowByArg(h, argcnt)) {
         saveop(h, h->pendop);
     }
 }
@@ -502,18 +505,21 @@ static void pushBlendDeltas(cstrCtx h, abfBlendArg *blendArg) {
 
 static void flushBlends(cstrCtx h) {
     int i;
-    if ((h->deltaStack.cnt + 1 + h->stack.cnt + h->blended_cnt
+    if ((h->deltaStack.cnt + 1 + h->stack.cnt + h->flushed_cnt
        + ((h->g->flags & CFW_SUBRIZE) ? 1 : 0)) > CFF2_MAX_OP_STACK) {
         cfwCtx g = h->g;
         cfwFatal(g, cfwErrStackOverflow, "Blend overflow");
     }
 
+    /* Note that even after numbers are flushed out of our stack, non-blended values and blended values
+     * will still occupy space on the client's stack so need to be taken into account during overflow check
+     * until a stack-clearing operator is issued.
+     */
+    h->flushed_cnt += h->stack.cnt + h->numBlends;
+
     for (i = 0; i < h->deltaStack.cnt; i++)
         PUSH(h->deltaStack.array[i]);
     PUSH(h->numBlends);
-    /* Blended values are cleared from our stack, but left on the client's stack
-     * until a stack-clearing operator is issued */
-    h->blended_cnt += h->numBlends;
     h->deltaStack.cnt = 0;
     h->numBlends = 0;
 
