@@ -38,6 +38,11 @@ xfail_win = pytest.mark.xfail(
     reason="Console's encoding is not UTF-8 ?")
 
 
+xfail_py3_win = pytest.mark.xfail(
+    sys.version_info >= (3, 0) and sys.platform == 'win32',
+    reason="?")
+
+
 def setup_module():
     """
     Create the temporary output directory
@@ -147,6 +152,7 @@ def test_font_with_outdated_hash_bug239():
     assert err.value.returncode == 1
 
 
+@xfail_py3_win
 @pytest.mark.parametrize('input_filename', [UFO2_NAME, UFO3_NAME])
 def test_ufo_with_trailing_slash_bug280(input_filename):
     # makeotf will now save the OTF alongside the UFO instead of inside of it
