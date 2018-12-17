@@ -186,7 +186,7 @@ struct Subr_ {
     Subr *output;            /* Link to next subr for match trie output */
     unsigned char *cstr;     /* Charstring */
     uint32_t length;         /* Subr length (original bytes spanned) */
-    unsigned short count;    /* Occurance count */
+    uint32_t count;          /* Occurance count */
     int32_t deltalen;        /* Delta length */
     short subrnum;           /* Biased subr number */
     short numsize;           /* Size of subr number (1, 2, or 3 bytes) */
@@ -1326,7 +1326,7 @@ static void saveSubr(subrCtx h, unsigned char *edgeEnd, Node *node,
     subr->output = NULL;
     subr->cstr = edgeEnd - subrLen;
     subr->length = (uint32_t)subrLen;
-    subr->count = (unsigned short)count;
+    subr->count = (uint32_t)count;
     subr->deltalen = 0;
     subr->numsize = 1;
     subr->maskcnt = (short)maskcnt;
@@ -2103,7 +2103,7 @@ static void updateSups(subrCtx h, Subr *subr, int deltalen, unsigned id) {
 
 /* Select subr */
 static void selectSubr(subrCtx h, Subr *subr) {
-    int count = subr->count;
+    uint32_t count = subr->count;
     int length = subr->length - subr->maskcnt + subr->deltalen;
     int saved = count * (length - CALL_OP_SIZE - subr->numsize) -
                 (h->offSize + length + ((subr->node->flags & NODE_TAIL) == 0));
@@ -2886,37 +2886,34 @@ static int subrBias(long count)
         return 32768;
 }
 
-/* Remove futile (zero or one use) subrs and renumber the rest */
-static void removeFutileSubrs(subrCtx h, SubrList *list)
-{
-    long count = 0;
-    long i;
-    long bias;
+/* Compare subrs by count (frequent ones first) */
+static int CTL_CDECL cmpSubrCount(const void *first, const void *second) {
+    Subr **a = (Subr **)first;
+    Subr **b = (Subr **)second;
+    uint32_t count_a = (*a)->count;
+    uint32_t count_b = (*b)->count;
+    if (count_a != count_b)
+        return count_b - count_a;
+    else
+        return (int)(a - b); /* preserve original order */
+}
 
+/* Remove futile (zero or one use) subrs and renumber the rest */
+static void removeFutileSubrs(subrCtx h, SubrList *list, unsigned id)
+{
+    long i;
+
+    dnaSET_CNT(h->tmp, 0);
     for (i = 0; i < list->cnt; i++) {
         Subr *subr = list->array[i];
         if (subr->count > 1) {
-            if (i != count) {
-                list->array[count] = list->array[i];
-            }
-            count++;
+            *dnaNEXT(h->tmp) = subr;
         }
     }
-    dnaSET_CNT(*list, count);
-    bias = subrBias(count);
 
-    for (i = 0; i < list->cnt; i++) {
-        short subrnum = (short)(i - bias);
-        Subr *subr = list->array[i];
-        subr->subrnum = subrnum;
-        /* numsize unused beyond this point, just for completeness */
-        if ((-107 <= subrnum) && (subrnum <= 107))
-            subr->numsize = 1;
-        else if ((-1131 <= subrnum) && (subrnum <= 1131))
-            subr->numsize = 2;
-        else
-            subr->numsize = 3;
-    }
+    /* Reorder remaining subrs based on their acutal use counts */
+    qsort(h->tmp.array, h->tmp.cnt, sizeof(h->tmp.array[0]), cmpSubrCount);
+    reorderSubrs(h, id);
 }
 
 static void inlineOrRemoveFutileSubrs(subrCtx h)
@@ -2935,12 +2932,11 @@ static void inlineOrRemoveFutileSubrs(subrCtx h)
     }
 
     /* Remove all zero-use and one-use subrs.
-     * Remaining subrs are renumbered accordingly.
-     * Subr bias may change as the result.
+     * Remaining subrs are renumbered using the actual use count.
      */
-    removeFutileSubrs(h, &h->globalSubrs);
+    removeFutileSubrs(h, &h->globalSubrs, NODE_GLOBAL);
     for (i = 0; i < h->localSubrs.cnt; i++) {
-        removeFutileSubrs(h, &h->localSubrs.array[i]);
+        removeFutileSubrs(h, &h->localSubrs.array[i], (unsigned)i);
     }
 }
 
