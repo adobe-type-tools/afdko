@@ -251,7 +251,6 @@ struct subrCtx_ {
 
     dnaDCL(Subr, subrs);     /* Subr list (all) */
     dnaDCL(Subr *, tmp);     /* Temporary subr list */
-    //dnaDCL(Subr *, reorder); /* Reordered subrs */
     SubrList globalSubrs;    /* List of global subrs */
     dnaDCL(SubrList, localSubrs);   /* List of local subr lists */
     dnaDCL(CallLists, charsCallLists);   /* List of subr calls in charstrings */
@@ -2854,8 +2853,7 @@ static void inlineFutileSubr(subrCtx h, CallList *callList)
             if (diff > 0) {
                 dnaSET_CNT(*callList, callList->cnt + diff);
                 memmove(&callList->array[i + 1 + diff], &callList->array[i + 1], sizeof(Call) * rest);
-            }
-            else if (diff < 0) {
+            } else if (diff < 0) {
                 memmove(&callList->array[i], &callList->array[i + 1], sizeof(Call) * rest);
                 dnaSET_CNT(*callList, callList->cnt + diff);
             }
