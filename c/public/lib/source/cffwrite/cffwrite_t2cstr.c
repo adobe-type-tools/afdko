@@ -370,7 +370,7 @@ static void saveopDirect(cstrCtx h, int op) {
     h->pendop = tx_noop; /* Clear pending op */
 }
 
-/* Returns 1 if argcnt maybe blended args may overflow the operand stack */
+/* Returns 1 if argcnt plus blended args may overflow the operand stack */
 static int checkOverflowByArg(cstrCtx h, int argcnt)
 {
     int blend_arg_cnt = h->glyph.info->blendInfo.numRegions;
