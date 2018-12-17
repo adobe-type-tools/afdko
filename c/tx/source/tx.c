@@ -8,7 +8,7 @@
 
 #include "tx_shared.h"
 
-#define TX_VERSION CTL_MAKE_VERSION(1, 2, 0)
+#define TX_VERSION CTL_MAKE_VERSION(1, 2, 1)
 
 #include "varread.h"
 
@@ -758,7 +758,7 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
             case opt_no_futile:
                 switch (h->mode) {
                     case mode_cff:
-                        h->cfw.flags |= CFW_NO_FUTILE_SUBRS;
+                        fprintf(stderr, "%s: option -no_futile deprecated (ignored)\n", h->progname);
                         break;
                     default:
                         goto wrongmode;

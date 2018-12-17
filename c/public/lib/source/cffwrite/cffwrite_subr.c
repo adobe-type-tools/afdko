@@ -123,7 +123,6 @@ static unsigned char *gTestString = (unsigned char *)"Humpty Dumpty sat on a wal
 #endif
 
 #define MAX_NUM_SUBRS 32765L /* Maximum number of subroutines in one INDEX structure. 64K is valid by the spec, but but teh Google font validation tool OTS rejects fonts with subrs in a subrindex which is  over 32K -3.*/
-#define MAX_PREFLIGHT 10     /* Typically large enough */
 
 /* --- Memory management --- */
 #define MEM_NEW(g, s) cfwMemNew(g, s)
@@ -151,7 +150,7 @@ struct Node_ {
 #define NODE_COUNTED (1 << 15) /* Paths have been counted for this node */
 #define NODE_TESTED  (1 << 14) /* Candidacy tested for this node */
 #define NODE_FAIL    (1 << 13) /* Node failed candidacy test */
-#define NODE_TAIL    (1 << 12) /* Tail subr (CFF2 or terminates with endchar in CFF1) */
+#define NODE_TAIL    (1 << 12) /* Tail subr (terminates with endchar in CFF1 or CFF2) */
 #define NODE_SUBR    (1 << 11) /* Node has subr info (index in misc) */
 };
 
@@ -164,6 +163,17 @@ struct NodeLink_ {
 
 #define EDGE_TABLE_SMALLEST_SPARSE_SIZE 128 /* Double the hash table size even before it becomes full beyond this size */
 #define EDGE_TABLE_SIZE_USE_SIMPLE_HASH 16  /* Use a better hash function for edges if the table size is larger than this */
+
+/* ------------------------------- Call list ------------------------------- */
+
+typedef struct /* Subr call within charstring */
+{
+    struct Subr_ *subr;    /* Inferior subr */
+    uint32_t offset;       /* Offset within charstring */
+} Call;
+
+typedef dnaDCL(Call, CallList);         /* List of subr calls for a subr/charstring */
+typedef dnaDCL(CallList, CallLists);    /* List of call lists for charstrings */
 
 /* ------------------------------- Subr data ------------------------------- */
 typedef struct Subr_ Subr;
@@ -183,11 +193,11 @@ struct Subr_ {
     short maskcnt;           /* hint/cntrmask count */
     short misc;              /* subrSaved value/call depth (transient) */
     short flags;             /* Status flags */
-    size_t order;            /* index value used for stable sort. */
 #define SUBR_SELECT (1 << 0) /* Flags subr selected */
 #define SUBR_REJECT (1 << 1) /* Flags subr rejected */
 #define SUBR_MEMBER (1 << 2) /* Flags subr added to social group */
-#define SUBR_FUTILE (1 << 3) /* Flags subr futile (use count 1 or 0) */
+    size_t order;            /* index value used for stable sort. */
+    CallList callList;       /* subrs called by this subr */
 #if DB_CALLS
     short calls; /* xxx remove */
 #endif
@@ -202,13 +212,7 @@ struct Link_ /* Social group link */
     uint32_t offset;       /* Offset within superior/inferior */
 };
 
-typedef struct /* Subr call within charstring */
-{
-    Subr *subr;            /* Inferior subr */
-    unsigned offset;       /* Offset within charstring */
-} Call;
-
-typedef dnaDCL(Call, CallList);
+typedef dnaDCL(Subr *, SubrList);   /* List of subrs */
 
 typedef struct MemBlk_ MemBlk;
 struct MemBlk_ /* Generalized memory block for object allocation */
@@ -247,8 +251,11 @@ struct subrCtx_ {
 
     dnaDCL(Subr, subrs);     /* Subr list (all) */
     dnaDCL(Subr *, tmp);     /* Temporary subr list */
-    dnaDCL(Subr *, reorder); /* Reordered subrs */
-    dnaDCL(Call, calls);     /* Temporary subr call accumulator */
+    //dnaDCL(Subr *, reorder); /* Reordered subrs */
+    SubrList globalSubrs;    /* List of global subrs */
+    dnaDCL(SubrList, localSubrs);   /* List of local subr lists */
+    dnaDCL(CallLists, charsCallLists);   /* List of subr calls in charstrings */
+    CallList calls;          /* Temporary subr call accumulator */
     dnaDCL(Subr *, members); /* Temporary social group member accumulator */
     dnaDCL(Subr *, leaders); /* Social group leaders */
     dnaDCL(char, cstrs);     /* Charstring data accumulator */
@@ -482,6 +489,26 @@ static NodeLink *newNodeLink(subrCtx h, Node *node, NodeLink *next) {
     return link;
 }
 
+/* --------------------------- Call Lists -------------------------- */
+
+static void initCallLists(subrCtx h, CallLists *lists, long cnt)
+{
+    long    i;
+    dnaSET_CNT(*lists, cnt);
+    for (i = 0; i < cnt; i++) {
+        dnaINIT(h->g->ctx.dnaSafe, lists->array[i], 0, 1);
+    }
+}
+
+static void freeCallLists(subrCtx h, CallLists *lists)
+{
+    long    i;
+    for (i = 0; i < lists->cnt; i++) {
+        dnaFREE(lists->array[i]);
+    }
+    dnaFREE(*lists);
+}
+
 /* --------------------------- Context Management -------------------------- */
 
 /* Initialize module */
@@ -503,7 +530,9 @@ void cfwSubrNew(cfwCtx g) {
     /* xxx tune these parameters */
     dnaINIT(g->ctx.dnaSafe, h->subrs, 500, 1000);
     dnaINIT(g->ctx.dnaSafe, h->tmp, 500, 1000);
-    dnaINIT(g->ctx.dnaSafe, h->reorder, 500, 1000);
+    dnaINIT(g->ctx.dnaSafe, h->globalSubrs, 500, 1000);
+    dnaINIT(g->ctx.dnaSafe, h->localSubrs, 1, 1);
+    dnaINIT(g->ctx.dnaSafe, h->charsCallLists, 1, 1);
     dnaINIT(g->ctx.dnaSafe, h->calls, 10, 10);
     dnaINIT(g->ctx.dnaSafe, h->members, 40, 40);
     dnaINIT(g->ctx.dnaSafe, h->leaders, 100, 200);
@@ -567,6 +596,7 @@ void cfwSubrReuse(cfwCtx g) {
 /* Free resources */
 void cfwSubrFree(cfwCtx g) {
     subrCtx h = g->ctx.subr;
+    long    i;
 
     if (h == NULL)
         return;
@@ -579,9 +609,14 @@ void cfwSubrFree(cfwCtx g) {
     freeObjects(g, &h->trieNodeBlks);
     freeObjects(g, &h->nodeLinkBlks);
 
+    for (i = 0; i < h->subrs.cnt; i++)
+        dnaFREE(h->subrs.array[i].callList);
     dnaFREE(h->subrs);
     dnaFREE(h->tmp);
-    dnaFREE(h->reorder);
+    dnaFREE(h->globalSubrs);
+    for (i = 0; i < h->localSubrs.cnt; i++)
+        dnaFREE(h->localSubrs.array[i]);
+    dnaFREE(h->localSubrs);
     dnaFREE(h->calls);
     dnaFREE(h->members);
     dnaFREE(h->leaders);
@@ -592,6 +627,9 @@ void cfwSubrFree(cfwCtx g) {
     dnaFREE(h->subrLenMap);
     dnaFREE(h->cube_gsubrs.subOffsets);
     dnaFREE(h->cube_gsubrs.cstrs);
+    for (i = 0; i < h->charsCallLists.cnt; i++)
+        freeCallLists(h, &h->charsCallLists.array[i]);
+    dnaFREE(h->charsCallLists);
 
     MEM_FREE(g, h);
 }
@@ -1236,9 +1274,8 @@ static void saveSubr(subrCtx h, unsigned char *edgeEnd, Node *node,
     unsigned count = node->paths;
 
     node->flags |= NODE_FAIL; /* Assume test will fail and mark node */
-    if (h->g->flags & CFW_WRITE_CFF2) {
-        tail = 1;   /* CFF2 subr has no return. Treat it the same as CFF1 tail subr */
-    }
+    if (h->g->flags & CFW_WRITE_CFF2)
+        tail = 1;
 
     /* Test for candidacy */
     switch (subrLen - maskcnt) {
@@ -1294,6 +1331,7 @@ static void saveSubr(subrCtx h, unsigned char *edgeEnd, Node *node,
     subr->numsize = 1;
     subr->maskcnt = (short)maskcnt;
     subr->flags = 0;
+    dnaINIT(h->g->ctx.dnaSafe, subr->callList, 0, 1);
 #if DB_CALLS
     subr->calls = 0;
 #endif
@@ -1301,7 +1339,8 @@ static void saveSubr(subrCtx h, unsigned char *edgeEnd, Node *node,
     /* Update subr node */
     node->misc = h->subrs.cnt - 1;
     node->flags |= NODE_SUBR;
-    if (tail) {
+    /* Treat CFF2 subrs the same as CFF1 tail subrs, i.e., no return op required at end */
+    if (tail || (h->g->flags & CFW_WRITE_CFF2)) {
         node->flags |= NODE_TAIL;
     }
 }
@@ -1586,30 +1625,31 @@ static int CTL_CDECL cmpSubrSavings(const void *first, const void *second) {
  */
 
 static void buildCallList(subrCtx h, int buildPhase, unsigned length, unsigned char *pstart,
-                          int selfMatch, unsigned id, short subrDepth) {
+                          int selfMatch, unsigned id, short subrDepth,
+                          CallList *callList) {
     // unsigned char *pend = pstart + length;
     unsigned i, j;
-    CallList callList;
+    CallList candList;
 
     /* List up all matching subrs */
-    dnaINIT(h->g->ctx.dnaSafe, callList, 100, 100);
-    listUpSubrMatches(h, pstart, length, buildPhase, selfMatch, id, subrDepth, &callList);
-    qsort(callList.array, callList.cnt, sizeof(Call), cmpSubrSavings);
+    dnaINIT(h->g->ctx.dnaSafe, candList, 100, 100);
+    listUpSubrMatches(h, pstart, length, buildPhase, selfMatch, id, subrDepth, &candList);
+    qsort(candList.array, candList.cnt, sizeof(Call), cmpSubrLengths);
 
     /* Try to fill lists with longest subrs first */
-    h->calls.cnt = 0;
-    for (i = 0; i < (unsigned)callList.cnt; i++) {
-        Call *c = &callList.array[i];
+    dnaSET_CNT(*callList, 0);
+    for (i = 0; i < (unsigned)candList.cnt; i++) {
+        Call *c = &candList.array[i];
         Subr *subr = c->subr;
         unsigned subrEndOffset = c->offset + subr->length;
 
         /* Try to fill a gap in calls array */
         unsigned cnt;
         int overlap = 0;
-        cnt = h->calls.cnt;
+        cnt = callList->cnt;
 
         for (j = 0; j < cnt; j++) {
-            Call *call = &h->calls.array[j];
+            Call *call = &callList->array[j];
             if (subrEndOffset <= call->offset) {
                 /* found gap before at j'th call */
                 break;
@@ -1628,16 +1668,16 @@ static void buildCallList(subrCtx h, int buildPhase, unsigned length, unsigned c
 
         /* insert the subr into this gap */
         if (!overlap) {
-            dnaSET_CNT(h->calls, cnt + 1);
-            memmove(&h->calls.array[j + 1], &h->calls.array[j], sizeof(Call) * (cnt - j));
-            h->calls.array[j] = *c;
+            dnaSET_CNT(*callList, cnt + 1);
+            memmove(&callList->array[j + 1], &callList->array[j], sizeof(Call) * (cnt - j));
+            callList->array[j] = *c;
         }
     }
 
-    dnaFREE(callList);
+    dnaFREE(candList);
 
-    for (i = 0; i < (unsigned)h->calls.cnt; i++) {
-        Call *call = &h->calls.array[i];
+    for (i = 0; i < (unsigned)callList->cnt; i++) {
+        Call *call = &callList->array[i];
         call->subr->count++;
 #if DB_ASSOC
         dbsubr(h, call->subr - h->subrs.array, 'i', call->offset);
@@ -1645,10 +1685,10 @@ static void buildCallList(subrCtx h, int buildPhase, unsigned length, unsigned c
     }
 
 #if DB_INFS
-    if (buildPhase && h->calls.cnt != 0) {
+    if (buildPhase && callList->cnt != 0) {
         int j;
-        for (j = 0; j < h->calls.cnt; j++) {
-            Call *call = &h->calls.array[j];
+        for (j = 0; j < callList->cnt; j++) {
+            Call *call = &callList->array[j];
             if (call->subr != NULL) {
                 dbsubr(h, call->subr - h->subrs.array, 'y', call->offset);
             }
@@ -1669,7 +1709,9 @@ static void resetSubrCount(subrCtx h, unsigned id) {
     }
 }
 
-static void setSubrActCount(subrCtx h) {
+/* Renamed from setSubrActCount, since set call count are
+ * more like estimate at this point */
+static void setSubrTentativeCount(subrCtx h) {
     long i, j;
     Subr *subr;
     Link *infs;
@@ -1686,7 +1728,7 @@ static void setSubrActCount(subrCtx h) {
         dbsubr(h, i, '-', 0);
 #endif
         subr = &h->subrs.array[i];
-        buildCallList(h, 0, subr->length, subr->cstr, 0, 0, -1);
+        buildCallList(h, 0, subr->length, subr->cstr, 0, 0, -1, &h->calls);
 
         infs = NULL;
         for (j = h->calls.cnt - 1; j >= 0; j--) {
@@ -1800,7 +1842,7 @@ static void assocSubrs(subrCtx h) {
             printf("\n");
 #endif
 
-            buildCallList(h, 0, nextoff - offset, (unsigned char *)&FONT_CHARS_DATA[offset], 1, 0, -1);
+            buildCallList(h, 0, nextoff - offset, (unsigned char *)&FONT_CHARS_DATA[offset], 1, 0, -1, &h->calls);
 
             offset = nextoff;
         }
@@ -2071,7 +2113,7 @@ static void selectSubr(subrCtx h, Subr *subr) {
            subr - h->subrs.array, count, length, saved);
 #endif
 
-    if (saved > 0 && !(subr->flags & SUBR_FUTILE)) {
+    if (saved > 0) {
         /* Select subr */
         unsigned id = subr->node->id;
         int deltalen = subr->numsize + CALL_OP_SIZE - subr->length -
@@ -2306,14 +2348,15 @@ reselect:
 /* Subroutinize charstring */
 static unsigned char *subrizeCstr(subrCtx h,
                                   unsigned char *pdst, unsigned char *psrc,
-                                  unsigned length) {
+                                  unsigned length,
+                                  CallList *callList) {
     int i;
     long offset;
 
     /* Insert calls in charstring */
     offset = 0;
-    for (i = 0; i < h->calls.cnt; i++) {
-        Call *call = &h->calls.array[i];
+    for (i = 0; i < callList->cnt; i++) {
+        Call *call = &callList->array[i];
         Subr *subr = call->subr;
 
         if (subr != NULL) {
@@ -2338,8 +2381,39 @@ static unsigned char *subrizeCstr(subrCtx h,
     return t2cstrcpy(pdst, psrc, length - offset);
 }
 
-/* Subroutinize charstrings */
-static void subrizeChars(subrCtx h, subr_CSData *chars, unsigned id, int preflight) {
+/* Build subroutine call lists of charstrings */
+static void buildCharsCallLists(subrCtx h, subr_CSData *chars, unsigned id) {
+    long i;
+    long offset;
+    CallLists *callLists;
+
+    callLists = dnaMAX(h->charsCallLists, id);
+    dnaINIT(h->g->ctx.dnaSafe, *callLists, 500, 500);
+    initCallLists(h, callLists, chars->nStrings);
+
+    offset = 0;
+    h->cstrs.cnt = 0;
+    for (i = 0; i < chars->nStrings; i++) {
+        unsigned char *psrc = (unsigned char *)&chars->data[offset];
+        long nextoff = chars->offset[i];
+        unsigned length = nextoff - offset - 4 /* t2_separator */;
+        long iStart = h->cstrs.cnt;
+
+#if DB_CHARS
+        printf("[%3ld]    =  ", i);
+        dbcstr(h, length, psrc);
+        printf("\n");
+#endif
+
+        /* Build subr call list */
+        buildCallList(h, 1, length, psrc, 1, id, -1, &callLists->array[i]);
+
+        offset = nextoff;
+    }
+}
+
+/* Subroutinize charstrings from call lists */
+static void subrizeChars(subrCtx h, subr_CSData *chars, unsigned iFont) {
     long i;
     long offset;
 
@@ -2359,46 +2433,33 @@ static void subrizeChars(subrCtx h, subr_CSData *chars, unsigned id, int preflig
         /* Initially allocate space for entire charstring */
         pdst = (unsigned char *)dnaEXTEND(h->cstrs, (long)length);
 
-#if DB_CHARS
-        printf("[%3ld]    =  ", i);
-        dbcstr(h, length, psrc);
-        printf("\n");
-#endif
+        /* Subroutinize charstring from call lists */
+        pdst = subrizeCstr(h, pdst, psrc, length, &h->charsCallLists.array[iFont].array[i]);
 
-        /* Build subr call list */
-        buildCallList(h, 1, length, psrc, 1, id, -1);
-
-        if (!preflight) {
-            /* Subroutinize charstring */
-            pdst = subrizeCstr(h, pdst, psrc, length);
-
-            /* Adjust initial length estimate and save offset */
-            h->cstrs.cnt = (long)(iStart + pdst - (unsigned char *)&h->cstrs.array[iStart]);
-            chars->offset[i] = h->cstrs.cnt;
-        }
+        /* Adjust initial length estimate and save offset */
+        h->cstrs.cnt = (long)(iStart + pdst - (unsigned char *)&h->cstrs.array[iStart]);
+        chars->offset[i] = h->cstrs.cnt;
         offset = nextoff;
     }
 
-    if (!preflight) {
-        /* Copy charstring data without loosing original data pointer */
-        chars->refcopy = chars->data;
-        chars->data = (char *)MEM_NEW(h->g, h->cstrs.cnt);
-        memcpy(chars->data, h->cstrs.array, h->cstrs.cnt);
+    /* Copy charstring data without loosing original data pointer */
+    chars->refcopy = chars->data;
+    chars->data = (char *)MEM_NEW(h->g, h->cstrs.cnt);
+    memcpy(chars->data, h->cstrs.array, h->cstrs.cnt);
 
 #if DB_CALLS
-        printf("--- actual subr calls\n");
-        for (i = 0; i < h->reorder.cnt; i++) {
-            Subr *subr = h->reorder.array[i];
-            printf("[%3d]=%2d (%2d)", subr - h->subrs.array,
-                   subr->calls, subr->count);
-            if (subr->calls != subr->count) {
-                printf("*\n");
-            } else {
-                printf("\n");
-            }
+    printf("--- actual subr calls\n");
+    for (i = 0; i < subrList->cnt; i++) {
+        Subr *subr = subrList->array[i];
+        printf("[%3d]=%2d (%2d)", subr - h->subrs.array,
+               subr->calls, subr->count);
+        if (subr->calls != subr->count) {
+            printf("*\n");
+        } else {
+            printf("\n");
         }
-#endif
     }
+#endif
 }
 
 /* Create biased reordering for either global or local subrs for a singleton
@@ -2409,6 +2470,7 @@ static void reorderCombined(subrCtx h, int local) {
     long count; /* Element in reorder array */
     long i;     /* Reorder array index */
     long j;     /* Temporary array index */
+    SubrList *subrList = local? &h->localSubrs.array[0]: &h->globalSubrs;
 
     if (local) {
         /* Reorder local (odd) indexes */
@@ -2421,50 +2483,50 @@ static void reorderCombined(subrCtx h, int local) {
     }
 
     /* Set the reorder array size */
-    dnaSET_CNT(h->reorder, count);
+    dnaSET_CNT(*subrList, count);
 
     i = count - 1;
     if (count < 1240) {
         /* Bias-107 reordering */
         for (; i >= 0; i--) {
-            h->reorder.array[i + 0] = h->tmp.array[j -= 2];
+            subrList->array[i + 0] = h->tmp.array[j -= 2];
         }
         bias = 107;
     } else if (count < 33900) {
         /* Bias-1131 reordering */
         for (; i >= 1239; i--) {
-            h->reorder.array[i + 0] = h->tmp.array[j -= 2];
+            subrList->array[i + 0] = h->tmp.array[j -= 2];
         }
         for (; i >= 215; i--) {
-            h->reorder.array[i - 215] = h->tmp.array[j -= 2];
+            subrList->array[i - 215] = h->tmp.array[j -= 2];
         }
         for (; i >= 0; i--) {
-            h->reorder.array[i + 1024] = h->tmp.array[j -= 2];
+            subrList->array[i + 1024] = h->tmp.array[j -= 2];
         }
         bias = 1131;
     } else {
         /* Bias-32768 reordering */
         for (; i >= 33900; i--) {
-            h->reorder.array[i + 0] = h->tmp.array[j -= 2];
+            subrList->array[i + 0] = h->tmp.array[j -= 2];
         }
         for (; i >= 2263; i--) {
-            h->reorder.array[i - 2263] = h->tmp.array[j -= 2];
+            subrList->array[i - 2263] = h->tmp.array[j -= 2];
         }
         for (; i >= 1239; i--) {
-            h->reorder.array[i + 31637] = h->tmp.array[j -= 2];
+            subrList->array[i + 31637] = h->tmp.array[j -= 2];
         }
         for (; i >= 215; i--) {
-            h->reorder.array[i + 31422] = h->tmp.array[j -= 2];
+            subrList->array[i + 31422] = h->tmp.array[j -= 2];
         }
         for (; i >= 0; i--) {
-            h->reorder.array[i + 32661] = h->tmp.array[j -= 2];
+            subrList->array[i + 32661] = h->tmp.array[j -= 2];
         }
         bias = 32768;
     }
 
     /* Add biased subr numbers and mark global subrs */
     for (i = 0; i < count; i++) {
-        Subr *subr = h->reorder.array[i];
+        Subr *subr = subrList->array[i];
         subr->subrnum = (short)(i - bias);
         if (!local) {
             subr->node->id = NODE_GLOBAL;
@@ -2473,118 +2535,150 @@ static void reorderCombined(subrCtx h, int local) {
 }
 
 /* Create biased reordering for a non-singleton font */
-static void reorderSubrs(subrCtx h) {
+static void reorderSubrs(subrCtx h, unsigned id) {
     long i;
     long bias;
+    SubrList *subrList = (id == NODE_GLOBAL)? &h->globalSubrs: &h->localSubrs.array[id];
 
     /* Assign reording index */
-    dnaSET_CNT(h->reorder, h->tmp.cnt);
+    dnaSET_CNT(*subrList, h->tmp.cnt);
     i = h->tmp.cnt - 1;
     if (h->tmp.cnt < 1240) {
         /* Bias-107 reordering */
         for (; i >= 0; i--) {
-            h->reorder.array[i + 0] = h->tmp.array[i];
+            subrList->array[i + 0] = h->tmp.array[i];
         }
         bias = 107;
     } else if (h->tmp.cnt < 33900) {
         /* Bias-1131 reordering */
         for (; i >= 1239; i--) {
-            h->reorder.array[i + 0] = h->tmp.array[i];
+            subrList->array[i + 0] = h->tmp.array[i];
         }
         for (; i >= 215; i--) {
-            h->reorder.array[i - 215] = h->tmp.array[i];
+            subrList->array[i - 215] = h->tmp.array[i];
         }
         for (; i >= 0; i--) {
-            h->reorder.array[i + 1024] = h->tmp.array[i];
+            subrList->array[i + 1024] = h->tmp.array[i];
         }
         bias = 1131;
     } else {
         /* Bias-32768 reordering */
         for (; i >= 33900; i--) {
-            h->reorder.array[i + 0] = h->tmp.array[i];
+            subrList->array[i + 0] = h->tmp.array[i];
         }
         for (; i >= 2263; i--) {
-            h->reorder.array[i - 2263] = h->tmp.array[i];
+            subrList->array[i - 2263] = h->tmp.array[i];
         }
         for (; i >= 1239; i--) {
-            h->reorder.array[i + 31637] = h->tmp.array[i];
+            subrList->array[i + 31637] = h->tmp.array[i];
         }
         for (; i >= 215; i--) {
-            h->reorder.array[i + 31422] = h->tmp.array[i];
+            subrList->array[i + 31422] = h->tmp.array[i];
         }
         for (; i >= 0; i--) {
-            h->reorder.array[i + 32661] = h->tmp.array[i];
+            subrList->array[i + 32661] = h->tmp.array[i];
         }
         bias = 32768;
     }
 
     /* Add biased subr numbers */
-    for (i = 0; i < h->reorder.cnt; i++) {
-        h->reorder.array[i]->subrnum = (short)(i - bias);
+    for (i = 0; i < subrList->cnt; i++) {
+        subrList->array[i]->subrnum = (short)(i - bias);
     }
 }
 
 /* Add reorder subrs from reorder array */
-static void addSubrs(subrCtx h, subr_CSData *subrs, unsigned id, int preflight) {
+static void buildSubrsCallLists(subrCtx h, unsigned id) {
+    long i;
+    SubrList *subrList = (id == NODE_GLOBAL)? &h->globalSubrs: &h->localSubrs.array[id];
+
+    if (subrList->cnt == 0) {
+        return; /* No subrs */
+    }
+
+    for (i = 0; i < subrList->cnt; i++) {
+        Subr *subr = subrList->array[i];
+
+        /* Build subr call list */
+        buildCallList(h, 1, subr->length, subr->cstr, 0, id, subr->misc, &subr->callList);
+    }
+}
+
+/* Replace subroutines with calls in subroutines */
+static void subrizeSubrs(subrCtx h, subr_CSData *subrs, unsigned id) {
+    SubrList *subrList = (id == NODE_GLOBAL)? &h->globalSubrs: &h->localSubrs.array[id];
     long i;
 
 #if DB_SUBRS
     printf("--- subrized subrs (subrs marked with -)\n");
 #endif
 
-    if (h->reorder.cnt == 0) {
+    if (subrList->cnt == 0) {
         return; /* No subrs */
     }
 
-    if (!preflight) {
-        /* Allocate subr offset array */
-        subrs->nStrings = (unsigned short)h->reorder.cnt;
-        subrs->offset = (Offset *)MEM_NEW(h->g, h->reorder.cnt * sizeof(Offset));
+    /* Allocate subr offset array */
+    subrs->nStrings = (unsigned short)subrList->cnt;
+    subrs->offset = (Offset *)MEM_NEW(h->g, subrList->cnt * sizeof(Offset));
 
-        h->cstrs.cnt = 0;
-    }
-    for (i = 0; i < h->reorder.cnt; i++) {
+    h->cstrs.cnt = 0;
+
+    for (i = 0; i < subrList->cnt; i++) {
         unsigned char *pdst = NULL;
-        Subr *subr = h->reorder.array[i];
+        Subr *subr = subrList->array[i];
         long iStart = h->cstrs.cnt;
 
-        if (!preflight) {
-            /* Initially allocate space for entire charstring + last op  */
-            pdst = (unsigned char *)dnaEXTEND(h->cstrs, subr->length + 1);
+        /* Initially allocate space for entire charstring + last op  */
+        pdst = (unsigned char *)dnaEXTEND(h->cstrs, subr->length + 1);
 
 #if DB_SUBRS
-            dbsubr(h, subr - h->subrs.array, '-', 0);
+        dbsubr(h, subr - h->subrs.array, '-', 0);
 #endif
+
+        /* Subroutinize charstring */
+        pdst = subrizeCstr(h, pdst, subr->cstr, subr->length, &subr->callList);
+
+        /* Terminate subr */
+        if ((!(subr->node->flags & NODE_TAIL)) && (!(h->g->flags & CFW_WRITE_CFF2))) {
+            *pdst++ = (unsigned char)tx_return;
         }
 
-        /* Build subr call list */
-        buildCallList(h, 1, subr->length, subr->cstr, 0, id, subr->misc);
-
-        if (!preflight) {
-            /* Subroutinize charstring */
-            pdst = subrizeCstr(h, pdst, subr->cstr, subr->length);
-
-            /* Terminate subr */
-            if ((!(subr->node->flags & NODE_TAIL)) && (!(h->g->flags & CFW_WRITE_CFF2))) {
-                *pdst++ = (unsigned char)tx_return;
-            }
-
-            /* Adjust initial length estimate and save offset */
-            h->cstrs.cnt = (long)(iStart + pdst - (unsigned char *)&h->cstrs.array[iStart]);
-            subrs->offset[i] = h->cstrs.cnt;
-        }
+        /* Adjust initial length estimate and save offset */
+        h->cstrs.cnt = (long)(iStart + pdst - (unsigned char *)&h->cstrs.array[iStart]);
+        subrs->offset[i] = h->cstrs.cnt;
     }
 
-    if (!preflight) {
-        /* Allocate and copy charstring data */
-        subrs->data = (char *)MEM_NEW(h->g, h->cstrs.cnt);
-        memcpy(subrs->data, h->cstrs.array, h->cstrs.cnt);
+    /* Allocate and copy charstring data */
+    subrs->data = (char *)MEM_NEW(h->g, h->cstrs.cnt);
+    memcpy(subrs->data, h->cstrs.array, h->cstrs.cnt);
+}
+
+/* Build call lists for FD charstrings */
+static void buildFDCharsCallLists(subrCtx h, subr_Font *font,
+                           unsigned iFont, unsigned iFD) {
+    long iSrc;
+    subr_CSData *src = &font->chars;
+    CallLists *callLists = &h->charsCallLists.array[iFont];
+
+#if DB_CHARS
+    printf("--- subrized FD[%u] chars (chars marked with =)\n", iFD);
+#endif
+
+    for (iSrc = 0; iSrc < src->nStrings; iSrc++) {
+        if (font->fdIndex[iSrc] == iFD) {
+            long offset = (iSrc == 0) ? 0 : src->offset[iSrc - 1];
+            unsigned char *psrc = (unsigned char *)&src->data[offset];
+            unsigned length = src->offset[iSrc] - offset - 4 /* t2_separator */;
+
+            /* Build subr call list */
+            buildCallList(h, 1, length, psrc, 1, iFont + iFD, -1, &callLists->array[iSrc]);
+        }
     }
 }
 
 /* Subroutinize FD charstrings */
 static void subrizeFDChars(subrCtx h, subr_CSData *dst, subr_Font *font,
-                           unsigned iFont, unsigned iFD, int preflight) {
+                           unsigned iFont, unsigned iFD) {
     long iSrc;
     unsigned iDst;
     subr_CSData *src = &font->chars;
@@ -2601,69 +2695,58 @@ static void subrizeFDChars(subrCtx h, subr_CSData *dst, subr_Font *font,
         }
     }
 
-    if (!preflight) {
-        /* Allocate offset array */
-        dst->offset = (Offset *)MEM_NEW(h->g, sizeof(Offset) * dst->nStrings);
+    /* Allocate offset array */
+    dst->offset = (Offset *)MEM_NEW(h->g, sizeof(Offset) * dst->nStrings);
 
-        h->cstrs.cnt = 0;
-        iDst = 0;
-    }
+    h->cstrs.cnt = 0;
+    iDst = 0;
     for (iSrc = 0; iSrc < src->nStrings; iSrc++) {
         if (font->fdIndex[iSrc] == iFD) {
             unsigned char *pdst;
             long offset = (iSrc == 0) ? 0 : src->offset[iSrc - 1];
             unsigned char *psrc = (unsigned char *)&src->data[offset];
-            unsigned length = src->offset[iSrc] - offset - 4 /* t2_separator */;
+            long length = src->offset[iSrc] - offset - 4 /* t2_separator */;
             long iStart = h->cstrs.cnt;
 
-            if (!preflight) {
-                /* Initially allocate space for entire charstring */
-                pdst = (unsigned char *)dnaEXTEND(h->cstrs, (long)length);
+            /* Initially allocate space for entire charstring */
+            pdst = (unsigned char *)dnaEXTEND(h->cstrs, (long)length);
 
 #if DB_CHARS
-                printf("[%3ld]    =  ", iSrc);
-                dbcstr(h, length, psrc);
-                printf("\n");
+            printf("[%3ld]    =  ", iSrc);
+            dbcstr(h, length, psrc);
+            printf("\n");
 #endif
-            }
 
-            /* Build subr call list */
-            buildCallList(h, 1, length, psrc, 1, iFont + iFD, -1);
+            /* Subroutinize charstring */
+            pdst = subrizeCstr(h, pdst, psrc, length, &h->charsCallLists.array[iFont].array[iSrc]);
 
-            if (!preflight) {
-                /* Subroutinize charstring */
-                pdst = subrizeCstr(h, pdst, psrc, length);
-
-                /* Adjust initial length estimate and save offset */
-                h->cstrs.cnt = (long)(iStart + pdst -
-                                      (unsigned char *)&h->cstrs.array[iStart]);
-                dst->offset[iDst++] = h->cstrs.cnt;
-            }
+            /* Adjust initial length estimate and save offset */
+            h->cstrs.cnt = (long)(iStart + pdst -
+                                  (unsigned char *)&h->cstrs.array[iStart]);
+            dst->offset[iDst++] = h->cstrs.cnt;
         }
     }
 
-    if (!preflight) {
-        /* Copy charstring data */
-        dst->data = (char *)MEM_NEW(h->g, h->cstrs.cnt);
-        memcpy(dst->data, h->cstrs.array, h->cstrs.cnt);
+    /* Copy charstring data */
+    dst->data = (char *)MEM_NEW(h->g, h->cstrs.cnt);
+    memcpy(dst->data, h->cstrs.array, h->cstrs.cnt);
 
 #if DB_CALLS
-        {
-            int i;
-            printf("--- actual subr calls\n");
-            for (i = 0; i < h->reorder.cnt; i++) {
-                Subr *subr = h->reorder.array[i];
-                printf("[%3d]=%2d (%2d)", subr - h->subrs.array,
-                       subr->calls, subr->count);
-                if (subr->calls != subr->count) {
-                    printf("*\n");
-                } else {
-                    printf("\n");
-                }
+    {
+        int i;
+        printf("--- actual subr calls\n");
+        for (i = 0; i < subrList->cnt; i++) {
+            Subr *subr = subrList->array[i];
+            printf("[%3d]=%2d (%2d)", subr - h->subrs.array,
+                   subr->calls, subr->count);
+            if (subr->calls != subr->count) {
+                printf("*\n");
+            } else {
+                printf("\n");
             }
         }
-#endif
     }
+#endif
 }
 
 /* Reassemble cstrs for CID-keyed font */
@@ -2698,35 +2781,17 @@ static void joinFDChars(subrCtx h, subr_Font *font) {
     }
 
     /* Free temporary chars index for each FD */
-    for (i = 0; i < font->fdCount; i++) {
+     for (i = 0; i < font->fdCount; i++) {
         subr_CSData *chars = &font->fdInfo[i].chars;
         MEM_FREE(g, chars->offset);
         MEM_FREE(g, chars->data);
     }
 }
 
-/* Returns 1 if any subrs have use count one or less */
-static int checkFutileSubrs(subrCtx h) {
-    long i;
-    long futileCount = 0;
-
-    /* Mark all zero-use subrs as futile */
-    for (i = 0; i < h->subrs.cnt; i++) {
-        Subr *subr = &h->subrs.array[i];
-        if (((subr->flags & (SUBR_MARKED | SUBR_FUTILE)) == SUBR_SELECT) && subr->count <= 1) {
-            subr->flags &= ~SUBR_SELECT;
-            subr->flags |= (SUBR_REJECT | SUBR_FUTILE);
-            futileCount++;
-        }
-    }
-
-    return futileCount > 0;
-}
-
 /* -------------------------- Subroutinize FontSet ------------------------- */
 
 /* Build subrs with specific id */
-static void buildSubrs(subrCtx h, subr_CSData *subrs, unsigned id, int preflight) {
+static void buildSubrs(subrCtx h, unsigned id) {
     long i;
 
     /* Build temporary array of subrs with matching id */
@@ -2758,16 +2823,131 @@ static void buildSubrs(subrCtx h, subr_CSData *subrs, unsigned id, int preflight
 
     selectFinalSubrSet(h, id);
     resetSubrCount(h, id);
-    reorderSubrs(h);
-    addSubrs(h, subrs, id, preflight);
+    reorderSubrs(h, id);
+}
+
+static void initLocalSubrs(subrCtx h, long cnt)
+{
+    long i;
+    dnaSET_CNT(h->localSubrs, cnt);
+    for (i = 0; i < cnt; i++) {
+        dnaINIT(h->g->ctx.dnaSafe, h->localSubrs.array[i], 500, 500);
+    }
+}
+
+/* Inline one-use futile subr */
+static void inlineFutileSubr(subrCtx h, CallList *callList)
+{
+    long i;
+    for (i = callList->cnt - 1; i >= 0; i--) {
+        Call *call = &callList->array[i];
+        if (call->subr->count == 1) {
+            Subr *futile = call->subr;
+            int32_t offset = call->offset;
+            long diff, rest, j;
+            inlineFutileSubr(h, &call->subr->callList); /* recursively inline futile subrs */
+            /* copy subr calls made by the futile subr to this subr
+             * while ordering & adjusting offsets
+             */
+            diff = futile->callList.cnt - 1;
+            rest = callList->cnt - i - 1;
+            if (diff > 0) {
+                dnaSET_CNT(*callList, callList->cnt + diff);
+                memmove(&callList->array[i + 1 + diff], &callList->array[i + 1], sizeof(Call) * rest);
+            }
+            else if (diff < 0) {
+                memmove(&callList->array[i], &callList->array[i + 1], sizeof(Call) * rest);
+                dnaSET_CNT(*callList, callList->cnt + diff);
+            }
+            for (j = 0; j < futile->callList.cnt; j++) {
+                callList->array[i + j] = futile->callList.array[j];
+                callList->array[i + j].offset += offset;
+            }
+        }
+    }
+}
+
+/* Inline one-use futile subrs in all subrs in a list */
+static void inlineFutileSubrs(subrCtx h, SubrList *list)
+{
+    long i;
+    for (i = 0; i < list->cnt; i++) {
+        inlineFutileSubr(h, &list->array[i]->callList);
+    }
+}
+
+static int subrBias(long count)
+{
+    if (count < 1240)
+        return 107;
+    else if (count < 33900)
+        return 1131;
+    else
+        return 32768;
+}
+
+/* Remove futile (zero or one use) subrs and renumber the rest */
+static void removeFutileSubrs(subrCtx h, SubrList *list)
+{
+    long count = 0;
+    long i;
+    long bias;
+
+    for (i = 0; i < list->cnt; i++) {
+        Subr *subr = list->array[i];
+        if (subr->count > 1) {
+            if (i != count) {
+                list->array[count] = list->array[i];
+            }
+            count++;
+        }
+    }
+    dnaSET_CNT(*list, count);
+    bias = subrBias(count);
+
+    for (i = 0; i < list->cnt; i++) {
+        short subrnum = (short)(i - bias);
+        Subr *subr = list->array[i];
+        subr->subrnum = subrnum;
+        /* numsize unused beyond this point, just for completeness */
+        if ((-107 <= subrnum) && (subrnum <= 107))
+            subr->numsize = 1;
+        else if ((-1131 <= subrnum) && (subrnum <= 1131))
+            subr->numsize = 2;
+        else
+            subr->numsize = 3;
+    }
+}
+
+static void inlineOrRemoveFutileSubrs(subrCtx h)
+{
+    long i, j;
+
+    /* Inline all one-use subrs at their call points. */
+    inlineFutileSubrs(h, &h->globalSubrs);
+    for (i = 0; i < h->localSubrs.cnt; i++) {
+        inlineFutileSubrs(h, &h->localSubrs.array[i]);
+    }
+    for (i = 0; i < h->charsCallLists.cnt; i++) {
+        for (j = 0; j < h->charsCallLists.array[i].cnt; j++) {
+            inlineFutileSubr(h, &h->charsCallLists.array[i].array[j]);
+        }
+    }
+
+    /* Remove all zero-use and one-use subrs.
+     * Remaining subrs are renumbered accordingly.
+     * Subr bias may change as the result.
+     */
+    removeFutileSubrs(h, &h->globalSubrs);
+    for (i = 0; i < h->localSubrs.cnt; i++) {
+        removeFutileSubrs(h, &h->localSubrs.array[i]);
+    }
 }
 
 /* Subroutinize all fonts in FontSet */
 void cfwSubrSubrize(cfwCtx g, int nFonts, subr_Font *fonts) {
     subrCtx h = g->ctx.subr;
     unsigned iFont;
-    long preflight;
-    int futile = 1;
     long i;
 
     h->nFonts = (short)nFonts;
@@ -2797,100 +2977,125 @@ void cfwSubrSubrize(cfwCtx g, int nFonts, subr_Font *fonts) {
 
     selectCandSubrs(h); /* Select candidate subrs */
     buildSubrMatchTrie(h);
-    setSubrActCount(h); /* Set subr actual call counts */
+    setSubrTentativeCount(h); /* Set subr tentative call counts */
 #if DB_TEST_STRING
     return;
 #endif
     assocSubrs(h);   /* Associate subrs with a font */
     sortInfSubrs(h); /* Sort inferior subrs by saving */
 
-    if (h->g->flags & CFW_NO_FUTILE_SUBRS)
-        preflight = MAX_PREFLIGHT; /* Preflight until all subrs become actually used at least twice */
-    else
-        preflight = 0;
-    while (preflight >= 0) {
-        if (h->singleton) {
-            /* Single non-CID font */
+    if (h->singleton) {
+        /* Single non-CID font */
 
-            /* Build temporary array from full subr list */
-            dnaSET_CNT(h->tmp, h->subrs.cnt);
-            for (i = 0; i < h->subrs.cnt; i++) {
-                h->tmp.array[i] = &h->subrs.array[i];
-            }
+        /* Build temporary array from full subr list */
+        dnaSET_CNT(h->tmp, h->subrs.cnt);
+        for (i = 0; i < h->subrs.cnt; i++) {
+            h->tmp.array[i] = &h->subrs.array[i];
+        }
+
+        h->subrStackOvl = 0;
+        selectFinalSubrSet(h, 0);
+        resetSubrCount(h, 0);
+
+        if (h->subrStackOvl) {
+            cfwMessage(h->g, "subr stack depth exceeded (reduced)");
+        }
+
+        initLocalSubrs(h, 1);
+        if (h->tmp.cnt >= 215) {
+            /* Temporarily make local subrs from odd indexes for renumbering */
+            reorderCombined(h, 1);
+            /* Make global subrs from even indexes */
+            reorderCombined(h, 0);
+            buildSubrsCallLists(h, NODE_GLOBAL);
+
+            /* Make local subrs from odd indexes */
+            reorderCombined(h, 1);
+            buildSubrsCallLists(h, 0);
+        } else {
+            reorderSubrs(h, 0);
+            buildSubrsCallLists(h, 0);
+        }
+        buildCharsCallLists(h, &h->fonts[0].chars, 0);
+
+        inlineOrRemoveFutileSubrs(h);
+
+        subrizeSubrs(h, &h->gsubrs, NODE_GLOBAL);
+        subrizeSubrs(h, &h->fonts[0].subrs, 0);
+        subrizeChars(h, &h->fonts[0].chars, 0);
+    } else {
+        /* Multiple fonts or single CID font */
+
+        long n = 0;
+        for (i = 0; i < h->nFonts; i++) {
+            n += h->fonts[i].fdCount;
+        }
+        initLocalSubrs(h, n);
+
+        /* Build global subrs */
+        buildSubrs(h, NODE_GLOBAL);
+        buildSubrsCallLists(h, NODE_GLOBAL);
+
+        /* Build call lists of local subrs for each font */
+        iFont = 0;
+        for (i = 0; i < h->nFonts; i++) {
+            subr_Font *font = &h->fonts[i];
+            CallLists *callLists = dnaMAX(h->charsCallLists, iFont);
+            dnaINIT(h->g->ctx.dnaSafe, *callLists, 500, 500);
+            initCallLists(h, callLists, font->chars.nStrings);
 
             h->subrStackOvl = 0;
-            selectFinalSubrSet(h, 0);
-            resetSubrCount(h, 0);
+            if (font->flags & SUBR_FONT_CID) {
+                /* Subrotinize CID-keyed font */
+                int16_t iFD;
+                for (iFD = 0; iFD < h->fonts[i].fdCount; iFD++) {
+                    buildSubrs(h, iFont + iFD);
+                    buildSubrsCallLists(h, iFont + iFD);
+                    buildFDCharsCallLists(h, font, iFont, iFD);
+                }
+                iFont += h->fonts[i].fdCount;
+            } else {
+                if (font->chars.nStrings != 0) {
+                    /* Subroutinize non-synthetic font */
+                    buildSubrs(h, iFont);
+                    buildSubrsCallLists(h, iFont);
+                    buildCharsCallLists(h, &h->fonts[iFont].chars, iFont);
+                }
+                iFont++;
+            }
 
             if (h->subrStackOvl) {
                 cfwMessage(h->g, "subr stack depth exceeded (reduced)");
             }
-
-            if (h->tmp.cnt >= 215) {
-                /* Temporarily make local subrs from odd indexes for renumbering */
-                reorderCombined(h, 1);
-                /* Make global subrs from even indexes */
-                reorderCombined(h, 0);
-                addSubrs(h, &h->gsubrs, NODE_GLOBAL, preflight);
-
-                /* Make local subrs from odd indexes */
-                reorderCombined(h, 1);
-                addSubrs(h, &h->fonts[0].subrs, 0, preflight);
-            } else {
-                reorderSubrs(h);
-                addSubrs(h, &h->fonts[0].subrs, 0, preflight);
-            }
-            subrizeChars(h, &h->fonts[0].chars, 0, preflight);
-        } else {
-            /* Multiple fonts or single CID font */
-
-            /* Build global subrs */
-            buildSubrs(h, &h->gsubrs, NODE_GLOBAL, preflight);
-
-            /* Find and add local subrs to each font */
-            iFont = 0;
-            for (i = 0; i < h->nFonts; i++) {
-                subr_Font *font = &h->fonts[i];
-
-                h->subrStackOvl = 0;
-                if (font->flags & SUBR_FONT_CID) {
-                    /* Subrotinize CID-keyed font */
-                    int j;
-                    for (j = 0; j < h->fonts[i].fdCount; j++) {
-                        /* Subroutinize component DICT */
-                        subr_FDInfo *info = &font->fdInfo[j];
-
-                        buildSubrs(h, &info->subrs, iFont + j, preflight);
-                        subrizeFDChars(h, &info->chars, font, iFont, j, preflight);
-                    }
-                    if (!preflight)
-                        joinFDChars(h, font);
-                    iFont += h->fonts[i].fdCount;
-                } else {
-                    if (font->chars.nStrings != 0) {
-                        /* Subroutinize non-synthetic font */
-                        buildSubrs(h, &font->subrs, iFont, preflight);
-                        subrizeChars(h, &font->chars, iFont, preflight);
-                    }
-                    iFont++;
-                }
-
-                if (h->subrStackOvl) {
-                    cfwMessage(h->g, "subr stack depth exceeded (reduced)");
-                }
-            }
         }
 
-        /* Remove any subrs used once or less, if no subrs removed twice consecutively, preflight is over */
-        if (preflight > 0) {
-            int newfutile = checkFutileSubrs(h);
-            if (!futile && !newfutile)
-                preflight = 0;
-            else
-                preflight--;
-            futile = newfutile;
-        } else
-            preflight--;
+        inlineOrRemoveFutileSubrs(h);
+
+        subrizeSubrs(h, &h->gsubrs, NODE_GLOBAL);
+        /* Add local subrs to each font */
+        iFont = 0;
+        for (i = 0; i < h->nFonts; i++) {
+            subr_Font *font = &h->fonts[i];
+
+            if (font->flags & SUBR_FONT_CID) {
+                int16_t iFD;
+                for (iFD = 0; iFD < font->fdCount; iFD++) {
+                    /* Subroutinize component DICT */
+                    subr_FDInfo *info = &font->fdInfo[iFD];
+                    subrizeSubrs(h, &info->subrs, iFont + iFD);
+                    subrizeFDChars(h, &info->chars, font, iFont, iFD);
+                }
+                joinFDChars(h, font);
+                iFont += font->fdCount;
+            } else {
+                if (font->chars.nStrings != 0) {
+                    /* Subroutinize non-synthetic font */
+                    subrizeSubrs(h, &h->fonts[iFont].subrs, iFont);
+                    subrizeChars(h, &font->chars, iFont);
+                }
+                iFont++;
+            }
+        }
     }
 
     /* Free original unsubroutinized charstring data */
