@@ -1634,7 +1634,7 @@ static void buildCallList(subrCtx h, int buildPhase, unsigned length, unsigned c
     /* List up all matching subrs */
     dnaINIT(h->g->ctx.dnaSafe, candList, 100, 100);
     listUpSubrMatches(h, pstart, length, buildPhase, selfMatch, id, subrDepth, &candList);
-    qsort(candList.array, candList.cnt, sizeof(Call), cmpSubrLengths);
+    qsort(candList.array, candList.cnt, sizeof(Call), cmpSubrSavings);
 
     /* Try to fill lists with longest subrs first */
     dnaSET_CNT(*callList, 0);
