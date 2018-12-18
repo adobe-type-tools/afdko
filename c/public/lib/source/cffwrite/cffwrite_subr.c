@@ -2890,10 +2890,16 @@ static int CTL_CDECL cmpSubrCount(const void *first, const void *second) {
     Subr **b = (Subr **)second;
     uint32_t count_a = (*a)->count;
     uint32_t count_b = (*b)->count;
-    if (count_a != count_b)
+    if (count_a != count_b) {
         return count_b - count_a;
-    else
-        return (int)(a - b); /* preserve original order */
+    } else if ((*a)->order > (*b)->order) {
+        /* Preserve original order */
+        return 1;
+    } else if ((*a)->order < (*b)->order) {
+        return -1;
+    } else {
+        return 0;
+    }
 }
 
 /* Remove futile (zero or one use) subrs and renumber the rest */
