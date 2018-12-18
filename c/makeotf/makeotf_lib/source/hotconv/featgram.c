@@ -178,13 +178,12 @@ char *gcname;
                                                 if (gid != 0 && endgid != 0) {
                                                     gcAddRange(gid, endgid, firstPart, secondPart);
                                                 } else {
-                                                    zzFAIL(1, zzerr2, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
-                                                    goto fail;
+                                                    hotMsg(g, hotFATAL, "aborting because of errors");
                                                 }
 
                                             } else {
-                                                zzFAIL(1, zzerr2, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
-                                                goto fail;
+                                                featMapGName2GID(g, firstPart, FALSE);
+                                                hotMsg(g, hotFATAL, "aborting because of errors");
                                             }
                                             zzEXIT(zztasp4);
                                         } else {
