@@ -2903,6 +2903,7 @@ static void removeFutileSubrs(subrCtx h, SubrList *list, unsigned id)
     for (i = 0; i < list->cnt; i++) {
         Subr *subr = list->array[i];
         if (subr->count > 1) {
+            subr->order = h->tmp.cnt;
             *dnaNEXT(h->tmp) = subr;
         }
     }
