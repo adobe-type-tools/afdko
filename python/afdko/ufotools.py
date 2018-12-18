@@ -18,7 +18,7 @@ from fontTools.misc.py23 import open, tobytes, tounicode, tostr, round
 from afdko import convertfonttocid, fdkutils
 
 __doc__ = """
-ufotools.py v1.32.2 Dec 5 2018
+ufotools.py v1.32.4 Dec 13 2018
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -601,6 +601,9 @@ class UFOFontData(object):
         return glyphPath
 
     def updateHashEntry(self, glyphName, changed):
+        """
+        THIS METHOD DOES NOT UPDATE THE GLYPH HASHES!!
+        """
         # srcHarsh has already been set: we are fixing the history list.
         if not self.useHashMap:
             return
@@ -1168,7 +1171,6 @@ class UFOFontData(object):
         if self.hashMapChanged:
             self.writeHashMap()
             self.hashMapChanged = 0
-        return
 
     def clearHashMap(self):
         self.hashMap = {kAdobHashMapVersionName: kAdobHashMapVersion}
@@ -2255,73 +2257,71 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
     return glifXML
 
 
+def regenerate_glyph_hashes(ufo_font_data):
+    """
+    The handling of the glyph hashes is super convoluted.
+    This method fixes https://github.com/adobe-type-tools/afdko/issues/349
+    """
+    for gname, gfilename in ufo_font_data.getGlyphMap().items():
+        gwidth, _, outline_xml = ufo_font_data.getGlyphXML(
+            ufo_font_data.glyphDefaultDir, gfilename)
+        hash_entry = ufo_font_data.hashMap.get(gname, None)
+        if not hash_entry:
+            continue
+        ghash, _ = ufo_font_data.buildGlyphHashValue(
+            gwidth, outline_xml, gname, True)
+        hash_entry[0] = tostr(ghash)
+
+
 def checkHashMaps(fontPath, doSync):
     """
-    This function checks that all the glyphs in the processed glyph
-    layer have a src glyph hash which matches the hash of the
-    corresponding default layer glyph. If not, it returns an error.
+    Checks if the hashes of the glyphs in the default layer match the hash
+    values stored in the UFO's 'data/com.adobe.type.processedHashMap' file.
+
+    Returns a tuple of a boolean and a list. The boolean is True if all glyph
+    hashes matched. The list contains strings that report the glyph names
+    whose hash did not match.
 
     If doSync is True, it will delete any glyph in the processed glyph
     layer directory which does not have a matching glyph in the default
-    layer, or whose src glyph hash does not match. It will then update
+    layer, or whose source glyph hash does not match. It will then update
     the contents.plist file for the processed glyph layer, and delete
     the program specific hash maps.
     """
     msgList = []
     allMatch = True
 
-    useHashMap = True
-    programName = "CheckOutlines"
-    ufoFontData = UFOFontData(fontPath, useHashMap, programName)
-    gm = ufoFontData.getGlyphMap()
-    gNameList = gm.keys()
+    ufoFontData = UFOFontData(fontPath, True, '')
     ufoFontData.readHashMap()
+
     # Don't need to check the glyph hashes if there aren't any.
-    if len(ufoFontData.hashMap) > 0:
-        for glyphName in gNameList:
-            glyphFileName = gm[glyphName]
-            glyphPath = os.path.join(
-                ufoFontData.glyphDefaultDir, glyphFileName)
-            etRoot = ET.ElementTree()
-            glifXML = etRoot.parse(glyphPath)
-            outlineXML = glifXML.find("outline")
-            failedMatch = 0
-            if outlineXML is not None:
-                hashMap = ufoFontData.hashMap
-                try:
-                    widthXML = glifXML.find("advance")
-                    if widthXML is not None:
-                        width = int(eval(widthXML.get("width")))
-                    else:
-                        width = 1000
-                    oldHash, historyList = hashMap[glyphName]
-                    useDefaultGlyphDir = True
-                    newHash, dataList = ufoFontData.buildGlyphHashValue(
-                        width, outlineXML, glyphName, useDefaultGlyphDir)
-                    # print("\toldHash", oldHash)
-                    if oldHash != newHash:
-                        failedMatch = 1
-                except KeyError:
-                    pass
-            else:
-                continue
+    if not ufoFontData.hashMap:
+        return allMatch, msgList
 
-            if failedMatch:
-                allMatch = False
-                if len(msgList) < 10:
-                    msgList.append(
-                        "src glyph %s is newer than processed layer. "
-                        "programName: %s" % (glyphName, programName))
-                    # print("glyph differs", glyphName)
-                    # print("\told hash map:", oldHash)
-                    # print("\tnew hash map:", newHash)
+    for glyphName, glyphFileName in ufoFontData.getGlyphMap().items():
+        hash_entry = ufoFontData.hashMap.get(glyphName, None)
+        if not hash_entry:
+            continue
+        else:
+            oldHash = hash_entry[0]
 
-                elif len(msgList) == 10:
-                    msgList.append(
-                        "More glyphs differ between source and processed "
-                        "layer.")
-                else:
-                    continue
+        width, _, outlineXML = ufoFontData.getGlyphXML(
+            ufoFontData.glyphDefaultDir, glyphFileName)
+        if not outlineXML:
+            continue
+
+        newHash, _ = ufoFontData.buildGlyphHashValue(
+            width, outlineXML, glyphName, True)
+
+        if oldHash != newHash:
+            allMatch = False
+            if len(msgList) < 10:
+                msgList.append("Glyph %s seems to have been modified since "
+                               "last time checkoutlinesufo processed this "
+                               "font." % glyphName)
+            elif len(msgList) == 10:
+                msgList.append("(additional messages omitted)")
+
     if doSync:
         fileList = os.listdir(ufoFontData.glyphWriteDir)
         fileList = filter(lambda fileName: fileName.endswith(".glif"),
@@ -2344,6 +2344,7 @@ def checkHashMaps(fontPath, doSync):
                 print("Removed outdated file: %s" % glyphPath)
             except OSError:
                 print("Cannot delete outdated file: %s" % glyphPath)
+
     return allMatch, msgList
 
 

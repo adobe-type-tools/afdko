@@ -6,11 +6,10 @@ Tool that performs outline quality checks and can remove path overlaps.
 
 from __future__ import print_function, absolute_import
 
-__version__ = '2.2.2'
+__version__ = '2.3.0'
 
 import argparse
 from functools import cmp_to_key
-import hashlib
 import os
 import re
 import shutil
@@ -51,7 +50,6 @@ class FontFile(object):
         self.defcon_font = None
         self.use_hash_map = False
         self.ufo_font_hash_data = None
-        self.ufo_format = 2
         self.save_to_default_layer = False
 
     def open(self, use_hash_map):
@@ -157,6 +155,7 @@ class FontFile(object):
             layer.save(glyph_set)
 
         if self.font_type == UFO_FONT_TYPE:
+            ufotools.regenerate_glyph_hashes(self.ufo_font_hash_data)
             # Write the hash data, if it has changed.
             self.ufo_font_hash_data.close()
         elif self.font_type == TYPE1_FONT_TYPE:
@@ -199,23 +198,6 @@ class FontFile(object):
             width, outline_xml, skip = \
                 self.ufo_font_hash_data.getOrSkipGlyphXML(glyph_name, do_all)
         return skip
-
-    @staticmethod
-    def build_glyph_hash(width, glyph_digest):
-        data_list = [str(width)]
-        for x, y in glyph_digest:
-            data_list.append("%s%s" % (x, y))
-        data_list.sort()
-        data = "".join(data_list)
-        if len(data) < 128:
-            glyph_hash = data
-        else:
-            glyph_hash = hashlib.sha512(data).hexdigest()
-        return glyph_hash
-
-    def update_hash_entry(self, glyph_name, changed):
-        if self.ufo_font_hash_data is not None:  # isn't a UFO font.
-            self.ufo_font_hash_data.updateHashEntry(glyph_name, changed)
 
     def clear_hash_map(self):
         if self.ufo_font_hash_data is not None:
@@ -1082,7 +1064,6 @@ def run(args=None):
         if changed and options.allow_changes:
             font_changed = True
             original_contours = list(defcon_glyph)
-            font_file.update_hash_entry(glyph_name, changed)
             if options.write_to_default_layer:
                 fixed_glyph = defcon_glyph
                 fixed_glyph.clearContours()
