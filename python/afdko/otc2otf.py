@@ -138,7 +138,7 @@ def parseArgs(args):
 		data = fp.read(4)
 	
 	if data != b'ttcf':
-		raise OTCErrr("File is not an OpenType Collection file: '%s'." % (fontPath))
+		raise OTCError("File is not an OpenType Collection file: '%s'." % (fontPath))
 
 	return fontPath, doReportOnly
 
@@ -218,7 +218,7 @@ def readFontFile(fontOffset, data, tableDict, doReportOnly):
 	return fontEntry
 
 
-def writeOTFFont(fontEntry):
+def writeOTFFont(fontEntry, directory):
 
 	dataList = []
 	numTables = len(fontEntry.tableList)
@@ -243,8 +243,9 @@ def writeOTFFont(fontEntry):
 		dataList.append(tableData)
 	
 	fontData = b"".join(dataList)
-	
-	with open(fontEntry.fileName, "wb") as fp:
+	font_file_path = os.path.join(directory, fontEntry.fileName)
+
+	with open(font_file_path, "wb") as fp:
 		fp.write(fontData)
 	return
 
@@ -270,10 +271,11 @@ def run(args):
 		fontList.append(fontEntry)
 		offsetdata = offsetdata[offsetSize:]
 		i += 1
-		
-	if not doReportOnly:		
+
+	if not doReportOnly:
+		directory = os.path.dirname(os.path.realpath(fontPath))
 		for fontEntry in fontList:
-			writeOTFFont(fontEntry)
+			writeOTFFont(fontEntry, directory)
 			print("Output font:", fontEntry.fileName)
 	print("Done")
 
