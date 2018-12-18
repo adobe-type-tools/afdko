@@ -1406,12 +1406,6 @@ static int subrSaved(subrCtx h, Subr *subr) {
            (h->offSize + length + ((subr->node->flags & NODE_TAIL) == 0));
 }
 
-/* Calculate byte savings by one instance of call to this subr */
-static int subrSavedByOneCall(Subr *subr) {
-    int length = subr->length - subr->maskcnt;
-    return (length - CALL_OP_SIZE - subr->numsize);
-}
-
 /* ----------------------- Subr match trie ----------------------- */
 
 /* Set up suffix links */
@@ -1591,14 +1585,12 @@ static void listUpSubrMatches(subrCtx h, unsigned char *pstart, long length, int
     }
 }
 
-/* Compare subr calls by single-call saving (largest first) then by offset (smallest first) */
-static int CTL_CDECL cmpSubrSavings(const void *first, const void *second) {
+/* Compare subr calls by length (longest first) then by offset (smallest first) */
+static int CTL_CDECL cmpSubrLengths(const void *first, const void *second) {
     Call *a = (Call *)first;
     Call *b = (Call *)second;
-    int asave = subrSavedByOneCall(a->subr);
-    int bsave = subrSavedByOneCall(b->subr);
-    if (asave != bsave)
-        return bsave - asave;
+    if (a->subr->length != b->subr->length)
+        return (int)b->subr->length - (int)a->subr->length;
     else if (a->offset != b->offset)
         return (int)a->offset - (int)b->offset;
     else
@@ -1633,7 +1625,7 @@ static void buildCallList(subrCtx h, int buildPhase, unsigned length, unsigned c
     /* List up all matching subrs */
     dnaINIT(h->g->ctx.dnaSafe, candList, 100, 100);
     listUpSubrMatches(h, pstart, length, buildPhase, selfMatch, id, subrDepth, &candList);
-    qsort(candList.array, candList.cnt, sizeof(Call), cmpSubrSavings);
+    qsort(candList.array, candList.cnt, sizeof(Call), cmpSubrLengths);
 
     /* Try to fill lists with longest subrs first */
     dnaSET_CNT(*callList, 0);
