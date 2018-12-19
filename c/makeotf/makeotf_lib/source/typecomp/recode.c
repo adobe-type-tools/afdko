@@ -893,10 +893,10 @@ static void addWidth(recodeCtx h, Fixed width) {
         width = 0;
         switch (h->idType) {
             case SIDType:
-                parseWarning(h->g, "glyph '%s' has a negative advance width. Setting width to 0.\n", sindexGetString(h->g, (SID)h->id));
+                parseWarning(h->g, "glyph '%s' has a negative advance width. Setting width to 0.", sindexGetString(h->g, (SID)h->id));
                 break;
             case CIDType:
-                parseWarning(h->g, "glyph 'cid#%hu' has a negative advance width. Setting width to 0.\n", h->id);
+                parseWarning(h->g, "glyph 'cid#%hu' has a negative advance width. Setting width to 0.", h->id);
                 break;
             default:;
         }
@@ -4912,7 +4912,7 @@ void recodeAddNewGlyph(tcCtx g, unsigned id, unsigned fill_in_font_id, unsigned 
                 diff = (diff > 0) ? diff : -diff;
 
                 if (diff == 1) {
-                    parseWarning(g, "Zero width vs  calculated Euro width round-off difference: %f, %d", FIX2DBL(zeroWidth), iwidth);
+                    parseWarning(g, "Zero width vs. calculated Euro width round-off difference: %f, %d", FIX2DBL(zeroWidth), iwidth);
                 }
                 if (diff > 1) {
                     parseWarning(g, "Problem: Zero width of target font is not same as calculated Euro width: %f, %d", FIX2DBL(zeroWidth), iwidth);

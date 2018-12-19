@@ -100,6 +100,24 @@ def test_DFLT_script_with_any_lang_bug438():
                    '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
 
 
+def test_glyph_not_in_font_bug492():
+    input_filename = 'bug492/font.pfa'
+    feat_filename = 'bug492/features.fea'
+    otf_path = get_temp_file_path()
+
+    stderr_path = runner(
+        CMD + ['-s', '-e', '-o',
+               'f', '_{}'.format(get_input_path(input_filename)),
+               'ff', '_{}'.format(get_input_path(feat_filename)),
+               'o', '_{}'.format(otf_path)])
+
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert (b'[ERROR] <SourceSans-Test> Glyph "glyph_not_found" not in font. '
+            b'[') in output
+    assert (b'syntax error at "a" [') not in output
+
+
 def test_version_warning_bug610():
     input_filename = 'bug610/font.pfa'
     feat_filename = 'bug610/v0005.fea'
