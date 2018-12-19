@@ -1273,6 +1273,7 @@ static void saveSubr(subrCtx h, unsigned char *edgeEnd, Node *node,
     unsigned count = node->paths;
 
     node->flags |= NODE_FAIL; /* Assume test will fail and mark node */
+    /* Treat CFF2 subrs the same as CFF1 tail subrs, i.e., no return op required at end */
     if (h->g->flags & CFW_WRITE_CFF2)
         tail = 1;
 
@@ -1338,8 +1339,7 @@ static void saveSubr(subrCtx h, unsigned char *edgeEnd, Node *node,
     /* Update subr node */
     node->misc = h->subrs.cnt - 1;
     node->flags |= NODE_SUBR;
-    /* Treat CFF2 subrs the same as CFF1 tail subrs, i.e., no return op required at end */
-    if (tail || (h->g->flags & CFW_WRITE_CFF2)) {
+    if (tail) {
         node->flags |= NODE_TAIL;
     }
 }
