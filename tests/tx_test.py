@@ -106,7 +106,7 @@ def test_convert(from_format, to_format):
     regex_skip = []
     skip = []
     if to_format == 'afm':
-        skip = ['Comment Creation Date:']
+        skip = ['Comment Creation Date:' + SPLIT_MARKER + 'Comment Copyright']
     elif to_format == 'pdf':
         skip = PDF_SKIP[:]
         regex_skip = PDF_SKIP_REGEX[:]
@@ -327,7 +327,8 @@ def test_recalculate_font_bbox_bug618(to_format, args, exp_filename):
 
     skip = []
     if to_format == 'afm':
-        skip = ['-s', 'Comment Creation Date:']
+        skip = ['-s', 'Comment Creation Date:' + SPLIT_MARKER +
+                'Comment Copyright']
 
     assert differ([expected_path, save_path] + diff_mode + skip)
 
