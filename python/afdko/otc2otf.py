@@ -1,4 +1,4 @@
-# otc2otf.py v1.3 October 13 2017
+# otc2otf.py v1.4 Jan 8 2019
 from __future__ import print_function
 
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
@@ -25,6 +25,9 @@ or directly with the command:
 import sys
 import os
 import struct
+
+from fontTools.misc.py23 import tostr
+
 
 class OTCError(TypeError):
 	pass
@@ -179,7 +182,7 @@ def getPSName(data):
 
 	if psName == None:
 		psName = "PSNameUndefined"
-	return psName
+	return tostr(psName)
 
 def readFontFile(fontOffset, data, tableDict, doReportOnly):
 	sfntType, numTables, searchRange, entrySelector, rangeShift = struct.unpack(sfntDirectoryFormat, data[fontOffset:fontOffset + sfntDirectorySize])
@@ -200,10 +203,10 @@ def readFontFile(fontOffset, data, tableDict, doReportOnly):
 		entryData =  entryData[sfntDirectoryEntrySize:]
 		i += 1
 	if seenGlyf:
-			fontEntry.fileName = fontEntry.psName + ".ttf"
+		fontEntry.fileName = "%s.ttf" % fontEntry.psName
 	else:
-			fontEntry.fileName = fontEntry.psName + ".otf"
-		
+		fontEntry.fileName = "%s.otf" % fontEntry.psName
+
 	if doReportOnly:
 		print("%s" % (fontEntry.fileName))
 	for tableEntry in fontEntry.tableList:
@@ -243,7 +246,10 @@ def writeOTFFont(fontEntry, directory):
 		dataList.append(tableData)
 	
 	fontData = b"".join(dataList)
-	font_file_path = os.path.join(directory, fontEntry.fileName)
+	try:
+		font_file_path = os.path.join(directory.decode(sys.getfilesystemencoding()), fontEntry.fileName)
+	except AttributeError:
+		font_file_path = os.path.join(directory, fontEntry.fileName)
 
 	with open(font_file_path, "wb") as fp:
 		fp.write(fontData)
