@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont sfntVersion="\x00\x01\x00\x00" ttLibVersion="3.28">
+<ttFont sfntVersion="\x00\x01\x00\x00" ttLibVersion="3.33">
 
   <maxp>
     <!-- Most of this table will be recalculated by the compiler -->
     <tableVersion value="0x10000"/>
-    <numGlyphs value="11"/>
+    <numGlyphs value="12"/>
     <maxPoints value="61"/>
     <maxContours value="5"/>
-    <maxCompositePoints value="45"/>
-    <maxCompositeContours value="3"/>
+    <maxCompositePoints value="74"/>
+    <maxCompositeContours value="4"/>
     <maxZones value="1"/>
     <maxTwilightPoints value="0"/>
     <maxStorage value="0"/>
@@ -104,6 +104,11 @@
         <pt x="182" y="54" on="0"/>
       </contour>
       <instructions/>
+    </TTGlyph>
+
+    <TTGlyph name="aa" xMin="52" yMin="-12" xMax="873" yMax="498">
+      <component glyphName="a" x="0" y="0" flags="0x4"/>
+      <component glyphName="a" x="440" y="0" flags="0x4"/>
     </TTGlyph>
 
     <TTGlyph name="aacute" xMin="52" yMin="-12" xMax="433" yMax="781">

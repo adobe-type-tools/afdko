@@ -18,7 +18,7 @@ from fontTools.ufoLib.errors import UFOLibError
 from defcon import Font
 
 
-__version__ = '0.1.1'
+__version__ = '0.2.0'
 
 
 PUBLIC_PSNAMES = "public.postscriptNames"
@@ -176,10 +176,22 @@ class ComponentsData(object):
     def __init__(self):
         self.names = ()
         self.positions = ()
+        self.same_advwidth = False
 
     def add_component(self, name, pos):
         self.names += (name,)
         self.positions += (pos,)
+
+
+def check_1st_comp_advwidth(glyph):
+    """
+    Returns True if the advance width of the composite glyph is the same as
+    the advance width of its first component, and False otherwise.
+    This information is essential for setting the flag of the composite's
+    first component later on.
+    """
+    font = glyph.getParent()
+    return glyph.width == font[glyph.components[0].baseGlyph].width
 
 
 def get_composites_data(ufo, ps_names):
@@ -201,12 +213,14 @@ def get_composites_data(ufo, ps_names):
         if glyph.components and not len(glyph):
             components = ComponentsData()
             all_comps_are_basic = True
-            for comp in glyph.components:
+            for i, comp in enumerate(glyph.components):
                 if comp.transformation[:4] != (1, 0, 0, 1):
                     all_comps_are_basic = False
                     break
                 comp_name = ps_names.get(comp.baseGlyph, comp.baseGlyph)
                 components.add_component(comp_name, comp.transformation[4:])
+                if i == 0:
+                    components.same_advwidth = check_1st_comp_advwidth(glyph)
             if all_comps_are_basic:
                 glyf_name = ps_names.get(glyph.name, glyph.name)
                 composites_data[glyf_name] = components
@@ -222,7 +236,9 @@ def assemble_components(comps_data):
         component = getTableModule('glyf').GlyphComponent()
         component.glyphName = cname
         component.x, component.y = comps_data.positions[i]
-        component.flags = 0x204 if i == 0 else 0x4
+        component.flags = 0x4
+        if i == 0 and comps_data.same_advwidth:
+            component.flags = 0x204
         components.append(component)
     return components
 
