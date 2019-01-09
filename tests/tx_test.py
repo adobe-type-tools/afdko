@@ -73,7 +73,7 @@ def test_exit_unknown_option(arg):
     'afm',
     'pdf',
     'ps',
-    'cff',
+    # 'cff',
 ])
 @pytest.mark.parametrize('from_format', [
     'ufo2',
