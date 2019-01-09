@@ -16,7 +16,7 @@
     <maxInstructionDefs value="0"/>
     <maxStackElements value="0"/>
     <maxSizeOfInstructions value="0"/>
-    <maxComponentElements value="0"/>
+    <maxComponentElements value="2"/>
     <maxComponentDepth value="1"/>
   </maxp>
 
