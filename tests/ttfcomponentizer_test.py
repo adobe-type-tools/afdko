@@ -216,9 +216,18 @@ def test_get_glyph_names_mapping_names_from_goadb():
     assert sorted(result[1].values()) == PRODCT_NAMES_LIST
 
 
-def test_get_composites_data():
+def test_componentize():
+    ttf_path = _get_test_ttf_path()
+    save_path = get_temp_file_path()
+    opts = Object()
+    setattr(opts, 'font_path', ttf_path)
+    setattr(opts, 'output_path', save_path)
     ufo, ps_names = ttfcomp.get_glyph_names_mapping(_get_test_ufo_path())
-    comps_data = ttfcomp.get_composites_data(ufo, ps_names)
+    ttcomp_obj = ttfcomp.TTComponentizer(ufo, ps_names, opts)
+    ttcomp_obj.componentize()
+
+    # 'get_composites_data' method
+    comps_data = ttcomp_obj.composites_data
     comps_name_list = sorted(comps_data.keys())
     comps_comp_list = [comps_data[gname] for gname in comps_name_list]
     assert comps_name_list == ['aa', 'aacute', 'adieresis', 'atilde',
@@ -228,13 +237,12 @@ def test_get_composites_data():
     assert comps_comp_list[1].positions == ((0, 0), (263.35, 0))
     assert comps_comp_list[4].positions == ((0, 0), (263, 0))
 
-
-def test_assemble_components():
-    comps_data = Object()
-    setattr(comps_data, 'names', ('a', 'uni01CE'))
-    setattr(comps_data, 'positions', ((0, 0), (263, 0)))
-    setattr(comps_data, 'same_advwidth', True)
-    comp_one, comp_two = ttfcomp.assemble_components(comps_data)
+    # 'assemble_components' method
+    comps_data = ttfcomp.ComponentsData()
+    comps_data.names = ('a', 'uni01CE')
+    comps_data.positions = ((0, 0), (263, 0))
+    comps_data.same_advwidth = True
+    comp_one, comp_two = ttcomp_obj.assemble_components(comps_data)
     assert comp_one.glyphName == 'a'
     assert comp_two.glyphName == 'uni01CE'
     assert (comp_one.x, comp_one.y) == (0, 0)

@@ -3,7 +3,7 @@
 """
 Takes in a TrueType font and looks for a UFO font stored in the same folder.
 Uses the UFO's components data to componentize matching TrueType glyphs.
-The script only supports components that are not scaled, rotated or flipped.
+The script only supports components that are not scaled, rotated nor flipped.
 """
 
 from __future__ import print_function
@@ -18,28 +18,132 @@ from fontTools.ufoLib.errors import UFOLibError
 from defcon import Font
 
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 
 PUBLIC_PSNAMES = "public.postscriptNames"
 GOADB_FILENAME = "GlyphOrderAndAliasDB"
 
 
-def get_font_format(font_file_path):
-    with open(font_file_path, "rb") as f:
-        head = f.read(4).decode()
-        if head in ("\0\1\0\0", "true"):
-            return "TTF"
-        return None
+class ComponentsData(object):
+    def __init__(self):
+        self.names = ()
+        self.positions = ()
+        self.same_advwidth = False
+
+    def add_component(self, name, pos):
+        self.names += (name,)
+        self.positions += (pos,)
 
 
-def validate_font_path(path):
-    path = os.path.realpath(path)
-    if not (os.path.isfile(path) and get_font_format(path) == 'TTF'):
-        print("ERROR: {} is not a valid TrueType font file path.".format(path),
-              file=sys.stderr)
-        return None
-    return path
+class TTComponentizer(object):
+    def __init__(self, ufo, ps_names, options):
+        self.ufo = ufo
+        self.ps_names = ps_names
+        self.opts = options
+        self.composites_data = {}
+        self.comp_count = 0
+
+    def componentize(self):
+        # Get the composites' info from processing the UFO
+        self.get_composites_data()
+
+        self.componentize_ttf()
+
+        plural = "s were" if self.comp_count != 1 else " was"
+        print("Done! {} glyph{} componentized.".format(
+            self.comp_count, plural), file=sys.stdout)
+
+    def get_composites_data(self):
+        """
+        Iterate thru each glyph of a UFO and collect the names and positions
+        of all components that make up a composite glyph. The process will
+        only collect data for composites that are strictly made with components
+        (i.e. no mixed contours-components composites), and whose components
+        only have x and y transformations (thus composites with scaled,
+        rotated, or flipped componentes will NOT be considered).
+
+        Fills the 'composites_data' dictionary whose keys are composite names
+        and whose values are ComponentsData objects.
+
+        NOTE: All glyph names in the returned dictionary are production names.
+        """
+        for glyph in self.ufo:
+            if glyph.components and not len(glyph):
+                ttcomps = ComponentsData()
+                all_comps_are_basic = True
+                for i, comp in enumerate(glyph.components):
+                    if comp.transformation[:4] != (1, 0, 0, 1):
+                        all_comps_are_basic = False
+                        break
+                    comp_name = self.ps_names.get(comp.baseGlyph,
+                                                  comp.baseGlyph)
+                    ttcomps.add_component(comp_name, comp.transformation[4:])
+                    if i == 0:
+                        ttcomps.same_advwidth = self.check_1st_comp_advwidth(
+                            glyph)
+                if all_comps_are_basic:
+                    glyf_name = self.ps_names.get(glyph.name, glyph.name)
+                    self.composites_data[glyf_name] = ttcomps
+
+    def check_1st_comp_advwidth(self, glyph):
+        """
+        Returns True if the advance width of the composite glyph is the same
+        as the advance width of its first component, and False otherwise.
+        This information is essential for setting the flag of the composite's
+        first component later on.
+        """
+        return glyph.width == self.ufo[glyph.components[0].baseGlyph].width
+
+    def componentize_ttf(self):
+        """
+        Loads a TrueType font and iterates thru a dictionary of composites
+        data. Remakes some glyphs in the glyf table from being made of
+        countours to being made of components.
+
+        Saves the modified font in a new location if an output path was
+        provided, otherwise overwrites the original one.
+
+        Updates a count of the glyphs that got componentized.
+        """
+        font = TTFont(self.opts.font_path)
+        glyf_table = font['glyf']
+
+        for gname in self.composites_data:
+            if gname not in glyf_table:
+                continue
+            if not all([cname in glyf_table for cname in self.composites_data[
+                    gname].names]):
+                continue
+
+            components = self.assemble_components(self.composites_data[gname])
+
+            glyph = glyf_table[gname]
+            glyph.__dict__.clear()
+            setattr(glyph, "components", components)
+            glyph.numberOfContours = -1
+            self.comp_count += 1
+
+        if self.opts.output_path:
+            font.save(os.path.realpath(self.opts.output_path))
+        else:
+            font.save(self.opts.font_path)
+
+    @staticmethod
+    def assemble_components(comps_data):
+        """
+        Assemble and return a list of GlyphComponent objects.
+        """
+        components = []
+        for i, cname in enumerate(comps_data.names):
+            component = getTableModule('glyf').GlyphComponent()
+            component.glyphName = cname
+            component.x, component.y = comps_data.positions[i]
+            component.flags = 0x4
+            if i == 0 and comps_data.same_advwidth:
+                component.flags = 0x204
+            components.append(component)
+        return components
 
 
 def get_ufo_path(ttf_path):
@@ -80,7 +184,7 @@ def read_txt_file_lines(file_path):
 
 def process_goadb(goadb_path):
     """
-    Read a GOAD file and return a dictionary mapping glyph design names to
+    Read a GOADB file and return a dictionary mapping glyph design names to
     glyph production names. The returned mapping may be empty as it will only
     contain entries for glyph names that change from design to production.
     The sctructure of each line of a GOADB file is:
@@ -172,113 +276,21 @@ def get_glyph_names_mapping(ufo_path):
     return ufo, get_goadb_names_mapping(ufo_path)
 
 
-class ComponentsData(object):
-    def __init__(self):
-        self.names = ()
-        self.positions = ()
-        self.same_advwidth = False
-
-    def add_component(self, name, pos):
-        self.names += (name,)
-        self.positions += (pos,)
+def get_font_format(font_file_path):
+    with open(font_file_path, "rb") as f:
+        head = f.read(4).decode()
+        if head in ("\0\1\0\0", "true"):
+            return "TTF"
+        return None
 
 
-def check_1st_comp_advwidth(glyph):
-    """
-    Returns True if the advance width of the composite glyph is the same as
-    the advance width of its first component, and False otherwise.
-    This information is essential for setting the flag of the composite's
-    first component later on.
-    """
-    font = glyph.getParent()
-    return glyph.width == font[glyph.components[0].baseGlyph].width
-
-
-def get_composites_data(ufo, ps_names):
-    """
-    Iterate thru each glyph of a UFO and collect the names and positions of
-    all components that make up a composite glyph. The process will only
-    collect data for composites that are strictly made with components (i.e.
-    no mixed contours-components composites), and whose components only have
-    x and y transformations (thus composites with scaled, rotated, or flipped
-    componentes will NOT be considered).
-
-    Returns a dictionary whose keys are composite names and whose values are
-    ComponentsData objects.
-
-    NOTE: All glyph names in the returned dictionary are production names.
-    """
-    composites_data = {}
-    for glyph in ufo:
-        if glyph.components and not len(glyph):
-            components = ComponentsData()
-            all_comps_are_basic = True
-            for i, comp in enumerate(glyph.components):
-                if comp.transformation[:4] != (1, 0, 0, 1):
-                    all_comps_are_basic = False
-                    break
-                comp_name = ps_names.get(comp.baseGlyph, comp.baseGlyph)
-                components.add_component(comp_name, comp.transformation[4:])
-                if i == 0:
-                    components.same_advwidth = check_1st_comp_advwidth(glyph)
-            if all_comps_are_basic:
-                glyf_name = ps_names.get(glyph.name, glyph.name)
-                composites_data[glyf_name] = components
-    return composites_data
-
-
-def assemble_components(comps_data):
-    """
-    Assemble and return a list of GlyphComponent objects.
-    """
-    components = []
-    for i, cname in enumerate(comps_data.names):
-        component = getTableModule('glyf').GlyphComponent()
-        component.glyphName = cname
-        component.x, component.y = comps_data.positions[i]
-        component.flags = 0x4
-        if i == 0 and comps_data.same_advwidth:
-            component.flags = 0x204
-        components.append(component)
-    return components
-
-
-def componentize_ttf(font_path, composites_data, output_path):
-    """
-    Load a TrueType font and iterate thru a dictionary of composites data.
-    Remakes some glyphs in the glyf table from being made of countours to
-    being made of components.
-
-    Saves the modified font in a new location if an output path was provided,
-    otherwise overwrites the original one.
-
-    Returns a count of the glyphs that got componentized.
-    """
-    font = TTFont(font_path)
-    glyf_table = font['glyf']
-    comp_count = 0
-
-    for gname in composites_data:
-        if gname not in glyf_table:
-            continue
-        if not all(
-           [cname in glyf_table for cname in composites_data[gname].names]):
-            continue
-
-        components = assemble_components(composites_data[gname])
-
-        glyph = glyf_table[gname]
-        glyph.__dict__.clear()
-        setattr(glyph, "components", components)
-        glyph.numberOfContours = -1
-        comp_count += 1
-
-    if output_path:
-        font.save(os.path.realpath(output_path))
-    else:
-        font.save(font_path)
-
-    return comp_count
+def validate_font_path(path):
+    path = os.path.realpath(path)
+    if not (os.path.isfile(path) and get_font_format(path) == 'TTF'):
+        print("ERROR: {} is not a valid TrueType font file path.".format(path),
+              file=sys.stderr)
+        return None
+    return path
 
 
 def get_options(args):
@@ -320,20 +332,13 @@ def main(args=None):
               file=sys.stderr)
         return 1
 
-    # Get the design->production glyph names mapping, and the UFO
+    # Get the design->production glyph names mapping, and the UFO object
     ufo, ps_names = get_glyph_names_mapping(ufo_path)
     if not ufo:
         return 1
 
-    # Get the composites' info from processing the UFO
-    composites_data = get_composites_data(ufo, ps_names)
-
-    comp_count = componentize_ttf(opts.font_path, composites_data,
-                                  opts.output_path)
-
-    plural = "s were" if comp_count != 1 else " was"
-    print("Done! {} glyph{} componentized.".format(comp_count, plural),
-          file=sys.stdout)
+    ttcomp = TTComponentizer(ufo, ps_names, opts)
+    ttcomp.componentize()
 
 
 if __name__ == "__main__":
