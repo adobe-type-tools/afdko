@@ -985,7 +985,8 @@ def run(args=None):
 
     if os.path.exists(varFontPath):
         os.remove(varFontPath)
-    varFont, varModel, masterPaths = varLib.build(designSpacePath, otfFinder)
+    varFont, varModel, masterPaths = varLib.build(designSpacePath,
+                                                  otfFinder, exclude=("CFF2",))
 
     blendError = buildCFF2Font(varFontPath, varFont, varModel, masterPaths,
                                post_format_3)

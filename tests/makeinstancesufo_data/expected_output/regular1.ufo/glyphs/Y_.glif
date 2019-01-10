@@ -1,7 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<glyph name="Y" format="1">
-  <advance width="633"/>
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="Y" format="2">
+  <advance width="632.506329113924"/>
   <unicode hex="0059"/>
+  <anchor x="335.90506329113924" y="690.629746835443" name="aboveUC"/>
+  <anchor x="315.753164556962" y="-22.0" name="belowLC"/>
   <outline>
     <contour>
       <point x="307.05379746835445" y="55.78164556962025" type="line"/>
@@ -16,15 +18,15 @@
       <point x="167.18037974683546" y="613.4778481012659" type="line"/>
       <point x="297.0158227848101" y="628.4778481012659" type="line"/>
       <point x="297.0158227848101" y="669.2594936708861" type="line"/>
-      <point x="14.588607594936708" y="669.2594936708861" type="line"/>
-      <point x="14.588607594936708" y="628.4778481012659" type="line"/>
+      <point x="14.58860759493671" y="669.2594936708861" type="line"/>
+      <point x="14.58860759493671" y="628.4778481012659" type="line"/>
     </contour>
     <contour>
       <point x="523.5348101265823" y="613.4778481012659" type="line"/>
       <point x="622.9177215189874" y="628.4778481012659" type="line"/>
       <point x="622.9177215189874" y="669.2594936708861" type="line"/>
-      <point x="394.2341772151899" y="669.2594936708861" type="line"/>
-      <point x="394.2341772151899" y="628.4778481012659" type="line"/>
+      <point x="394.23417721518985" y="669.2594936708861" type="line"/>
+      <point x="394.23417721518985" y="628.4778481012659" type="line"/>
       <point x="504.2879746835443" y="613.4778481012659" type="line"/>
     </contour>
     <contour>
@@ -46,12 +48,6 @@
       <point x="177.9620253164557" y="669.2594936708861" type="line"/>
       <point x="68.94303797468355" y="669.2594936708861" type="line"/>
       <point x="287.77848101265823" y="224.4240506329114" type="line"/>
-    </contour>
-    <contour>
-      <point x="335.90506329113924" y="690.629746835443" type="move" name="aboveUC"/>
-    </contour>
-    <contour>
-      <point x="315.753164556962" y="-22.0" type="move" name="belowLC"/>
     </contour>
   </outline>
 </glyph>

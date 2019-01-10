@@ -1,42 +1,42 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="1" name="dieresiscmb">
-  <unicode hex="0308" />
+<glyph name="dieresiscmb" format="2">
+  <unicode hex="0308"/>
+  <anchor x="0.0" y="506.5759493670886" name="_aboveLC"/>
+  <anchor x="0.0" y="682.0569620253165" name="aboveLC"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="curve" x="104.91" y="595.77" />
-      <point x="137.44" y="595.77" />
-      <point x="163.98" y="619.93" />
-      <point type="curve" x="163.98" y="652.71" />
-      <point x="163.98" y="685.45" />
-      <point x="137.44" y="709.66" />
-      <point type="curve" x="104.91" y="709.66" />
-      <point x="72.45" y="709.66" />
-      <point x="44.88" y="685.45" />
-      <point type="curve" x="44.88" y="652.71" />
-      <point x="44.88" y="619.93" />
-      <point x="72.45" y="595.77" />
+      <point x="104.91" y="595.77" type="curve" name="hintSet0000"/>
+      <point x="137.44" y="595.77"/>
+      <point x="163.97" y="619.93"/>
+      <point x="163.97" y="652.71" type="curve"/>
+      <point x="163.97" y="685.45"/>
+      <point x="137.44" y="709.66"/>
+      <point x="104.91" y="709.66" type="curve"/>
+      <point x="72.45" y="709.66"/>
+      <point x="44.88" y="685.45"/>
+      <point x="44.88" y="652.71" type="curve"/>
+      <point x="44.88" y="619.93"/>
+      <point x="72.45" y="595.77"/>
     </contour>
     <contour>
-      <point type="curve" x="-104.91" y="595.77" />
-      <point x="-72.37" y="595.77" />
-      <point x="-44.88" y="619.93" />
-      <point type="curve" x="-44.88" y="652.71" />
-      <point x="-44.88" y="685.45" />
-      <point x="-72.37" y="709.66" />
-      <point type="curve" x="-104.91" y="709.66" />
-      <point x="-137.36" y="709.66" />
-      <point x="-163.98" y="685.45" />
-      <point type="curve" x="-163.98" y="652.71" />
-      <point x="-163.98" y="619.93" />
-      <point x="-137.36" y="595.77" />
+      <point x="-104.91" y="595.77" type="curve"/>
+      <point x="-72.37" y="595.77"/>
+      <point x="-44.88" y="619.93"/>
+      <point x="-44.88" y="652.71" type="curve"/>
+      <point x="-44.88" y="685.45"/>
+      <point x="-72.37" y="709.66"/>
+      <point x="-104.91" y="709.66" type="curve"/>
+      <point x="-137.36" y="709.66"/>
+      <point x="-163.97" y="685.45"/>
+      <point x="-163.97" y="652.71" type="curve"/>
+      <point x="-163.97" y="619.93"/>
+      <point x="-137.36" y="595.77"/>
     </contour>
   </outline>
   <lib>
     <dict>
       <key>com.adobe.type.autohint.v2</key>
       <dict>
-        <key>id</key>
-        <string>f7a858fc5ce5ef870150b54780912c27fb8a0e4a72b5bb23182d317a49aadb82b7d299031bdce8ef6861eaf067db13397dc1431adcb646e51060d3763c9fb089</string>
         <key>hintSetList</key>
         <array>
           <dict>
@@ -45,11 +45,13 @@
             <key>stems</key>
             <array>
               <string>hstem 595.77 113.89</string>
-              <string>vstem -163.98 119.1</string>
-              <string>vstem 44.88 119.1</string>
+              <string>vstem -163.97 119.09</string>
+              <string>vstem 44.88 119.09</string>
             </array>
           </dict>
         </array>
+        <key>id</key>
+        <string>a0d5e568c0633907005e2a1bc725b1bbd2fdb564f3081d62158fe98003018084c03f934c8b98ab291c1868d318ce8c3e38d92674a1f1b9f72f6a2b48cee830fc</string>
       </dict>
     </dict>
   </lib>

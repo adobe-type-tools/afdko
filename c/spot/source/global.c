@@ -23,9 +23,6 @@
 #include "head.h"
 #include "name.h"
 #include "map.h"
-#if MEMCHECK
-#include "memcheck.h"
-#endif
 Global global; /* Global data */
 static IntX nameLookupType = 0;
 extern jmp_buf mark;
@@ -127,9 +124,6 @@ void *memNew(size_t size) {
         memError();
     else
         memset((char *)ptr, 0, size);
-#if MEMCHECK
-    memAllocated(ptr);
-#endif
     return ptr;
 }
 
@@ -138,21 +132,12 @@ void *memResize(void *old, size_t size) {
     void *new = realloc(old, size);
     if (new == NULL)
         memError();
-    if (old != new) {
-#if MEMCHECK
-        memDeallocated(old);
-        memAllocated(new);
-#endif
-    }
     return new;
 }
 
 /* Free memory */
 void memFree(void *ptr) {
     if (ptr != NULL) {
-#if MEMCHECK
-        memDeallocated(ptr);
-#endif
         free(ptr);
     }
 }

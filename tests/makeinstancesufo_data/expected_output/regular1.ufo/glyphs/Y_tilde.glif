@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<glyph name="Ytilde" format="1">
-  <advance width="633"/>
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="Ytilde" format="2">
+  <advance width="632.506329113924"/>
   <unicode hex="1EF8"/>
   <outline>
     <component base="Y"/>

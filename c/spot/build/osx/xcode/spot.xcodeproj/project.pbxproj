@@ -42,7 +42,6 @@
 		BD5262E20CF2B52F0052C7B8 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = BD5262560CF2B52F0052C7B8 /* main.c */; };
 		BD5262E30CF2B52F0052C7B8 /* map.c in Sources */ = {isa = PBXBuildFile; fileRef = BD5262570CF2B52F0052C7B8 /* map.c */; };
 		BD5262E50CF2B52F0052C7B8 /* maxp.c in Sources */ = {isa = PBXBuildFile; fileRef = BD5262590CF2B52F0052C7B8 /* maxp.c */; };
-		BD5262E70CF2B52F0052C7B8 /* memcheck.c in Sources */ = {isa = PBXBuildFile; fileRef = BD52625B0CF2B52F0052C7B8 /* memcheck.c */; };
 		BD5262E90CF2B52F0052C7B8 /* META.c in Sources */ = {isa = PBXBuildFile; fileRef = BD52625D0CF2B52F0052C7B8 /* META.c */; };
 		BD5262EB0CF2B52F0052C7B8 /* MMFX.c in Sources */ = {isa = PBXBuildFile; fileRef = BD52625F0CF2B52F0052C7B8 /* MMFX.c */; };
 		BD5262ED0CF2B52F0052C7B8 /* MMSD.c in Sources */ = {isa = PBXBuildFile; fileRef = BD5262610CF2B52F0052C7B8 /* MMSD.c */; };
@@ -149,8 +148,6 @@
 		BD5262580CF2B52F0052C7B8 /* map.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = map.h; path = ../../../source/map.h; sourceTree = SOURCE_ROOT; };
 		BD5262590CF2B52F0052C7B8 /* maxp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = maxp.c; path = ../../../source/maxp.c; sourceTree = SOURCE_ROOT; };
 		BD52625A0CF2B52F0052C7B8 /* maxp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = maxp.h; path = ../../../source/maxp.h; sourceTree = SOURCE_ROOT; };
-		BD52625B0CF2B52F0052C7B8 /* memcheck.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = memcheck.c; path = ../../../source/memcheck.c; sourceTree = SOURCE_ROOT; };
-		BD52625C0CF2B52F0052C7B8 /* memcheck.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = memcheck.h; path = ../../../source/memcheck.h; sourceTree = SOURCE_ROOT; };
 		BD52625D0CF2B52F0052C7B8 /* META.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = META.c; path = ../../../source/META.c; sourceTree = SOURCE_ROOT; };
 		BD52625E0CF2B52F0052C7B8 /* META.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = META.h; path = ../../../source/META.h; sourceTree = SOURCE_ROOT; };
 		BD52625F0CF2B52F0052C7B8 /* MMFX.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MMFX.c; path = ../../../source/MMFX.c; sourceTree = SOURCE_ROOT; };
@@ -314,8 +311,6 @@
 				BD5262580CF2B52F0052C7B8 /* map.h */,
 				BD5262590CF2B52F0052C7B8 /* maxp.c */,
 				BD52625A0CF2B52F0052C7B8 /* maxp.h */,
-				BD52625B0CF2B52F0052C7B8 /* memcheck.c */,
-				BD52625C0CF2B52F0052C7B8 /* memcheck.h */,
 				BD52625D0CF2B52F0052C7B8 /* META.c */,
 				BD52625E0CF2B52F0052C7B8 /* META.h */,
 				BD52625F0CF2B52F0052C7B8 /* MMFX.c */,
@@ -480,7 +475,6 @@
 				BD5262E20CF2B52F0052C7B8 /* main.c in Sources */,
 				BD5262E30CF2B52F0052C7B8 /* map.c in Sources */,
 				BD5262E50CF2B52F0052C7B8 /* maxp.c in Sources */,
-				BD5262E70CF2B52F0052C7B8 /* memcheck.c in Sources */,
 				BD5262E90CF2B52F0052C7B8 /* META.c in Sources */,
 				BD5262EB0CF2B52F0052C7B8 /* MMFX.c in Sources */,
 				BD5262ED0CF2B52F0052C7B8 /* MMSD.c in Sources */,

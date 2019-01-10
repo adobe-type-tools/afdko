@@ -14,9 +14,6 @@
 #include "proof.h"
 #include "da.h"
 #include "sys.h"
-#if MEMCHECK
-#include "memcheck.h"
-#endif
 #include "cmap.h"
 #include <ctype.h>
 #include "setjmp.h"
@@ -879,9 +876,6 @@ PyObject *main_python(PyObject *self, PyObject *args) {
         fileClose();
         freemap();
         argFree(argfree, argv);
-#if MEMCHECK
-        memReport();
-#endif
         fclose(PyOutFile);
         PyOutFile = NULL;
         return Py_None;
@@ -1003,9 +997,6 @@ execscript : {
     fileClose();
     freemap();
     argFree(argfree, argv);
-#if MEMCHECK
-    memReport();
-#endif
     fclose(PyOutFile);
     PyOutFile = NULL;
     return Py_None;

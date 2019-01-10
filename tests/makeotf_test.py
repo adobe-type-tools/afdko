@@ -33,9 +33,14 @@ DATA_DIR = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
 TEMP_DIR = os.path.join(DATA_DIR, 'temp_output')
 
 
-xfail_py36_win = pytest.mark.xfail(
-    sys.version_info >= (3, 0) and sys.platform == 'win32',
+xfail_win = pytest.mark.xfail(
+    sys.platform == 'win32',
     reason="Console's encoding is not UTF-8 ?")
+
+
+xfail_py3_win = pytest.mark.xfail(
+    sys.version_info >= (3, 0) and sys.platform == 'win32',
+    reason="?")
 
 
 def setup_module():
@@ -111,7 +116,7 @@ def test_getSourceGOADBData():
                                             ['g2', 'g2', '']]
 
 
-@xfail_py36_win
+@xfail_win
 @pytest.mark.parametrize('input_filename', [
     T1PFA_NAME, UFO2_NAME, UFO3_NAME, CID_NAME])
 def test_path_with_non_ascii_chars_bug222(input_filename):
@@ -130,6 +135,24 @@ def test_path_with_non_ascii_chars_bug222(input_filename):
     assert os.path.isfile(expected_path)
 
 
+def test_font_with_hash_bug239():
+    input_path = get_input_path('bug239/font.ufo')
+    output_path = get_temp_file_path()
+    runner(CMD + ['-o', 'f', '_{}'.format(input_path),
+                        'o', '_{}'.format(output_path)])
+    assert font_has_table(output_path, 'CFF ')
+
+
+def test_font_with_outdated_hash_bug239():
+    input_path = get_input_path('bug239/font_outdated_hash.ufo')
+    output_path = get_temp_file_path()
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        runner(CMD + ['-o', 'f', '_{}'.format(input_path),
+                            'o', '_{}'.format(output_path)])
+    assert err.value.returncode == 1
+
+
+@xfail_py3_win
 @pytest.mark.parametrize('input_filename', [UFO2_NAME, UFO3_NAME])
 def test_ufo_with_trailing_slash_bug280(input_filename):
     # makeotf will now save the OTF alongside the UFO instead of inside of it
@@ -524,3 +547,19 @@ def test_feature_includes_ufo_bug164():
                   'o', '_{}'.format(otf_path)])
 
     assert font_has_table(otf_path, 'head')
+
+
+def test_ttf_input_font_bug680():
+    input_filename = 'bug680/font.ttf'
+    feat_filename = 'bug680/features.fea'
+    ttf_path = get_temp_file_path()
+
+    runner(CMD + ['-o', 'r',
+                  'f', '_{}'.format(get_input_path(input_filename)),
+                  'ff', '_{}'.format(get_input_path(feat_filename)),
+                  'o', '_{}'.format(ttf_path)])
+
+    for table_tag in ('head', 'hhea', 'maxp', 'OS/2', 'hmtx', 'cmap', 'fpgm',
+                      'prep', 'cvt ', 'loca', 'glyf', 'name', 'post', 'gasp',
+                      'BASE', 'GDEF', 'GPOS', 'GSUB'):
+        assert font_has_table(ttf_path, table_tag)

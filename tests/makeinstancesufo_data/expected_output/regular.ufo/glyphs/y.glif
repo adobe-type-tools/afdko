@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<glyph name="y" format="1">
+<glyph name="y" format="2">
 	<unicode hex="0079"/>
-	<advance width="512"/>
+	<advance width="512.3164556962"/>
 	<outline>
 		<contour>
 			<point x="441.2056962025" y="424.0411392405" type="line"/>
@@ -49,11 +49,7 @@
 			<point x="0.246835443" y="-221.9303797468"/>
 			<point x="42.4936708861" y="-249.2594936709"/>
 		</contour>
-		<contour>
-			<point name="aboveLC" x="271.2341772152" y="506.5759493671" type="move"/>
-		</contour>
-		<contour>
-			<point name="belowLC" x="124.2341772152" y="-254.3829113924" type="move"/>
-		</contour>
 	</outline>
+	<anchor name="aboveLC" x="271.2341772152" y="506.5759493671"/>
+	<anchor name="belowLC" x="124.2341772152" y="-254.3829113924"/>
 </glyph>

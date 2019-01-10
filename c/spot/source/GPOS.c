@@ -1010,20 +1010,57 @@ static Byte8 *dumpTitle(Card32 tag, IntX flavor) {
 
     if (tag == 0) {
         return ("GPOS table features ");
-    } else if (tag == (STR2TAG("altv")))
-        return ("altv (Alternate vertical metrics)");
+    } else if (tag == (STR2TAG("abvm")))
+        return ("abvm (Above-base Mark Positioning)");
+    else if (tag == (STR2TAG("blwm")))
+        return ("blwm (Below-base Mark Positioning)");
     else if (tag == (STR2TAG("case")))
-        return ("case (Case-sensitive positioning)");
+        return ("case (Case-Sensitive Forms)");
     else if (tag == (STR2TAG("cpct")))
-        return ("cpct (Centered punctuation)");
+        return ("cpct (Centered CJK Punctuation)");
     else if (tag == (STR2TAG("cpsp")))
-        return ("cpsp (Capitals spacing)");
+        return ("cpsp (Capital Spacing)");
+    else if (tag == (STR2TAG("curs")))
+        return ("curs (Cursive Positioning)");
+    else if (tag == (STR2TAG("dist")))
+        return ("dist (Distances)");
+    else if (tag == (STR2TAG("fwid")))
+        return ("fwid (Full Widths)");
     else if (tag == (STR2TAG("halt")))
-        return ("halt (Alternate Half-width metrics)");
+        return ("halt (Alternate Half Widths)");
     else if (tag == (STR2TAG("hwid")))
-        return ("hwid (Half-width metrics)");
+        return ("hwid (Half Widths)");
     else if (tag == (STR2TAG("lfbd")))
-        return ("lfbd (Left-bounds positioning)");
+        return ("lfbd (Left Bounds)");
+    else if (tag == (STR2TAG("mark")))
+        return ("mark (Mark Positioning)");
+    else if (tag == (STR2TAG("mkmk")))
+        return ("mkmk (Mark to Mark Positioning)");
+    else if (tag == (STR2TAG("opbd")))
+        return ("opbd (Optical Bounds)");
+    else if (tag == (STR2TAG("palt")))
+        return ("palt (Proportional Alternate Widths)");
+    else if (tag == (STR2TAG("pwid")))
+        return ("pwid (Proportional Widths)");
+    else if (tag == (STR2TAG("qwid")))
+        return ("qwid (Quarter Widths)");
+    else if (tag == (STR2TAG("rtbd")))
+        return ("rtbd (Right Bounds)");
+    else if (tag == (STR2TAG("subs")))
+        return ("subs (Subscript)");
+    else if (tag == (STR2TAG("sups")))
+        return ("sups (Superscript)");
+    else if (tag == (STR2TAG("size")))
+        return ("size (Optical Size)");
+    else if (tag == (STR2TAG("twid")))
+        return ("twid (Third Widths)");
+    else if (tag == (STR2TAG("valt")))
+        return ("valt (Alternate Vertical Metrics)");
+    else if (tag == (STR2TAG("vhal")))
+        return ("vhal (Alternate Vertical Half Metrics)");
+    else if (tag == (STR2TAG("vpal")))
+        return ("vpal (Proportional Alternate Vertical Metrics)");
+
     else if (tag == (STR2TAG("kern"))) {
         if (flavor == 1) {
             if (proofIsAltKanjiKern())
@@ -1041,38 +1078,8 @@ static Byte8 *dumpTitle(Card32 tag, IntX flavor) {
             else
                 return ("kern");
         }
-    } else if (tag == (STR2TAG("mark")))
-        return ("mark (Mark positioning)");
-    else if (tag == (STR2TAG("opbd")))
-        return ("opbd (Optical bounds positioning)");
-    else if (tag == (STR2TAG("palt")))
-        return ("palt (Alternate Proportional-width metrics)");
-    else if (tag == (STR2TAG("pwid")))
-        return ("pwid (Proportional-width metrics)");
-    else if (tag == (STR2TAG("qwid")))
-        return ("qwid (Quarter-width metrics)");
-    else if (tag == (STR2TAG("rtbd")))
-        return ("rtbd (Right-bounds positioning)");
-    else if (tag == (STR2TAG("subs")))
-        return ("subs (Subscript positioning)");
-    else if (tag == (STR2TAG("twid")))
-        return ("twid (Third-width metrics)");
-    else if (tag == (STR2TAG("valt")))
-        return ("valt (Alternate vertical metrics)");
-    else if (tag == (STR2TAG("vhal")))
-        return ("vhal (Vertical alternate Half-width metrics)");
-    else if (tag == (STR2TAG("mkmk")))
-        return ("mkmk (Mark to Mark Positioning)");
-    else if (tag == (STR2TAG("dist")))
-        return ("dist (Distances )");
-    else if (tag == (STR2TAG("abvm")))
-        return ("abvm (Above-base Mark Positioning)");
-    else if (tag == (STR2TAG("blwm")))
-        return ("blwm ( Below-base Mark Positioning)");
-    else if (tag == (STR2TAG("curs")))
-        return ("curs (Cursive Positioning)");
 
-    else if (tag == (STR2TAG("vkrn"))) {
+    } else if (tag == (STR2TAG("vkrn"))) {
         if (flavor == 2) {
             if (proofIsAltKanjiKern())
                 return ("vkrn (Vertical class kerning) + AltMetrics");
@@ -1085,10 +1092,7 @@ static Byte8 *dumpTitle(Card32 tag, IntX flavor) {
                 return ("vkrn (Vertical pair kerning)");
         }
 
-    } else if (tag == (STR2TAG("vpal")))
-        return ("vpal (Vertical alt. Proportional-width metrics)");
-
-    else {
+    } else {
         sprintf(othertag, "'%c%c%c%c' (Unknown/Unregistered tag)", TAG_ARG(tag));
         return (othertag);
     }

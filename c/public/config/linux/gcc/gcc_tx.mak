@@ -1,6 +1,6 @@
 #########################################################################
 #                                                                       #
-# Copyright 2014 Adobe Systems Incorporated.                       #
+# Copyright 2014-2018 Adobe Systems Incorporated.                       #
 # All rights reserved.                                                  #
 #                                                                       #
 #########################################################################
@@ -26,6 +26,7 @@ PRG_LIBS = \
 	$(CT_LIB_DIR)/t1write.a \
 	$(CT_LIB_DIR)/t2cstr.a \
 	$(CT_LIB_DIR)/ttread.a \
+	$(CT_LIB_DIR)/tx_shared.a \
 	$(CT_LIB_DIR)/uforead.a \
 	$(CT_LIB_DIR)/ufowrite.a \
 	$(CT_LIB_DIR)/pstoken.a \
@@ -92,6 +93,9 @@ $(CT_LIB_DIR)/t2cstr.a:
 
 $(CT_LIB_DIR)/ttread.a:
 	cd $(LIB_BUILD_DIR)/ttread/$(PLATFORM)/$(COMPILER)/$(CONFIG); $(MAKE) clean; $(MAKE);
+
+$(CT_LIB_DIR)/tx_shared.a:
+	cd $(LIB_BUILD_DIR)/tx_shared/$(PLATFORM)/$(COMPILER)/$(CONFIG); $(MAKE) clean; $(MAKE);
 
 $(CT_LIB_DIR)/uforead.a:
 	cd $(LIB_BUILD_DIR)/uforead/$(PLATFORM)/$(COMPILER)/$(CONFIG); $(MAKE) clean; $(MAKE);

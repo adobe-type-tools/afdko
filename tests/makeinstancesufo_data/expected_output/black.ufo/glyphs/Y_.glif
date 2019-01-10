@@ -1,7 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<glyph name="Y" format="1">
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="Y" format="2">
   <advance width="621"/>
   <unicode hex="0059"/>
+  <anchor x="357" y="682" name="aboveUC"/>
+  <anchor x="310" y="-22" name="belowLC"/>
   <outline>
     <contour>
       <point x="285" y="74" type="line"/>
@@ -46,12 +48,6 @@
       <point x="247" y="652" type="line"/>
       <point x="21" y="652" type="line"/>
       <point x="236" y="211" type="line"/>
-    </contour>
-    <contour>
-      <point x="357" y="682" type="move" name="aboveUC"/>
-    </contour>
-    <contour>
-      <point x="310" y="-22" type="move" name="belowLC"/>
     </contour>
   </outline>
 </glyph>

@@ -1818,17 +1818,17 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
     if (h->fcdb.files.cnt == 0) {
         {
             fcdbGetRec(h->fcdb.ctx, FontName);
-            cbWarning(h, "Font Menu Name database is not specified or not found .[%s]", FontName);
+            cbWarning(h, "FontMenuNameDB file was not specified or not found. [%s]", FontName);
         }
     } else if (fcdbGetRec(h->fcdb.ctx, FontName)) {
         {
-            cbWarning(h, "not in Font Menu Name database [%s]", FontName);
+            cbWarning(h, "not in FontMenuNameDB [%s]", FontName);
         }
     }
 
     // Make sure that GOADB file has been read in, if required
     if ((flags & HOT_RENAME) && (h->alias.recs.cnt < 1) && (type != hotCID)) {
-        cbWarning(h, "Glyph renaming is requested, but the Glyph Alias And Order DB file was not specified.");
+        cbWarning(h, "Glyph renaming was requested, but the GlyphOrderAndAliasDB file was not specified.");
     }
 
     h->mac.cmapScript = macScript; /* Used in hotAddmiscData, in ProcessFontInfo */

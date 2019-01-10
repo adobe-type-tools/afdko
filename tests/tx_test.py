@@ -73,7 +73,7 @@ def test_exit_unknown_option(arg):
     'afm',
     'pdf',
     'ps',
-    'cff',
+    # 'cff',
 ])
 @pytest.mark.parametrize('from_format', [
     'ufo2',
@@ -106,7 +106,7 @@ def test_convert(from_format, to_format):
     regex_skip = []
     skip = []
     if to_format == 'afm':
-        skip = ['Comment Creation Date:']
+        skip = ['Comment Creation Date:' + SPLIT_MARKER + 'Comment Copyright']
     elif to_format == 'pdf':
         skip = PDF_SKIP[:]
         regex_skip = PDF_SKIP_REGEX[:]
@@ -327,7 +327,8 @@ def test_recalculate_font_bbox_bug618(to_format, args, exp_filename):
 
     skip = []
     if to_format == 'afm':
-        skip = ['-s', 'Comment Creation Date:']
+        skip = ['-s', 'Comment Creation Date:' + SPLIT_MARKER +
+                'Comment Copyright']
 
     assert differ([expected_path, save_path] + diff_mode + skip)
 
@@ -338,3 +339,16 @@ def test_glyph_bboxes_bug655():
     result_path = get_temp_file_path()
     runner(CMD + ['-o', 'mtx', '2', '-f', font_path, result_path])
     assert differ([expected_path, result_path])
+
+
+def test_cs_opt_bug684():
+    """ The input CFF2 variable font contains a long single charstring
+    making the maximum use of the operand stack.
+    tx was generating a bad CFF2 charstring that would overflow
+    the operand stack of the standard size (513) after re-converted
+    to CFF2 unless -no_opt option is specified."""
+    font_path = get_input_path('SHSVF_9b3b.otf')
+    result_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', 'cff2', '-f', font_path, result_path])
+    expected_path = get_expected_path('SHSVF_9b3b_opt.cff2')
+    assert differ([expected_path, result_path, '-m', 'bin'])

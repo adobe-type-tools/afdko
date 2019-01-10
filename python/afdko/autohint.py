@@ -1,4 +1,3 @@
-#!/bin/env python
 from __future__ import print_function
 
 __copyright__ = """Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.

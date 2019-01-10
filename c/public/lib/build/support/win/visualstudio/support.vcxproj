@@ -132,7 +132,6 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\source\support\bitarray.c" />
     <ClCompile Include="..\..\..\..\source\support\canthappen.c" />
     <ClCompile Include="..\..\..\..\source\support\except.c" />
     <ClCompile Include="..\..\..\..\source\support\fixed.c" />

@@ -100,4 +100,5 @@ def test_beztools_hhint_over_limit_bug629():
     expected_path = get_expected_path(test_filename)
     runner(CMD + ['-o', 'nb', 'o', '_{}'.format(actual_path),
                   '-f', test_filename])
-    assert differ([expected_path, actual_path])
+    assert differ([expected_path, actual_path,
+                   '-s', r'%%Copyright: Copyright'])
