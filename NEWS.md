@@ -1,6 +1,39 @@
 Changelog
 =========
 
+2.8.4 (released 2019-01-09)
+---------------------------
+
+- [ufotools] Python 3 fix
+  ([#676](https://github.com/adobe-type-tools/afdko/pull/676))
+- [tx] Fixed `-dcf` option failing to print CFF2 global subrs
+  ([#681](https://github.com/adobe-type-tools/afdko/pull/681))
+- [tx] Fixed subroutinizer 64K limit
+  ([#687](https://github.com/adobe-type-tools/afdko/pull/687))
+- [makeinstancesufo] Switched from using mutatorMath to
+  ufoProcessor
+  ([#669](https://github.com/adobe-type-tools/afdko/pull/669))
+- [makeinstancesufo] Switched from using autohint to psautohint
+  ([#689](https://github.com/adobe-type-tools/afdko/pull/689))
+- [makeotf] Fixed calls to `sfntedit`
+  ([#690](https://github.com/adobe-type-tools/afdko/pull/690))
+- [checkoutlinesufo] Fixed failure to remove overlaps
+  ([#239](https://github.com/adobe-type-tools/afdko/issues/239))
+- [checkoutlinesufo] Fixed glyph hashes when using `-w` option
+  ([#692](https://github.com/adobe-type-tools/afdko/pull/692))
+- [spot] Updated OpenType feature tags to v1.8.3
+  ([#693](https://github.com/adobe-type-tools/afdko/pull/693))
+- [makeotfexe] Fixed "glyph not in font" error
+  ([#698](https://github.com/adobe-type-tools/afdko/pull/698))
+- [tx] Fixed CFF2 blend/path optimization
+  ([#697](https://github.com/adobe-type-tools/afdko/pull/697))
+- [otc2otf] Fixed file path bugs
+  ([#708](https://github.com/adobe-type-tools/afdko/issues/708))
+- [ttfcomponentizer] Fixed setting first component flag
+  ([#709](https://github.com/adobe-type-tools/afdko/issues/709))
+- [ttfcomponentizer] Update `maxp` maxComponentElements value
+  ([#710](https://github.com/adobe-type-tools/afdko/issues/710))
+
 2.8.3 (released 2018-11-02)
 ---------------------------
 
