@@ -27,7 +27,7 @@ kTempDSExt = ".temp.designspace"
 kFeaturesFile = "features.fea"
 
 __usage__ = """
-buildmasterotfs.py  1.8.1 Sep 25 2018
+buildmasterotfs.py  1.8.2 Jan 29 2019
 Build master source OpenType/CFF fonts from a Superpolator design space file
 and the UFO master source fonts.
 
@@ -229,7 +229,8 @@ def main(args=None):
         else:
             otfName = os.path.splitext(ufoName)[0]
         otfName = otfName + ".otf"
-        os.chdir(masterDir)
+        if masterDir:
+            os.chdir(masterDir)
         cmd = "makeotf -nshw -f \"%s\" -o \"%s\" -r -nS %s 2>&1" % (
             ufoName, otfName, mkot_options)
         log = runShellCmd(cmd)
