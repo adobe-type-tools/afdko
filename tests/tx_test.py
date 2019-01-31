@@ -181,6 +181,16 @@ def test_cff2_extract(args, exp_filename):
     assert differ([expected_path, cff2_path, '-m', 'bin'])
 
 
+def test_cff2_sub_dump():
+    # Dump a subroutinized CFF2 font. This is a J font with 64K glyphs,
+    # and almost every subr and charstring is a single subr call.
+    # A good test for problems with charstrings with no endchar operator.
+    actual_path = runner(CMD + ['-s', '-o', 'dump', '6', 'g', '_64513',
+                                '-f', 'CFF2-serif-sub.cff2'])
+    expected_path = get_expected_path("CFF2-serif-sub.cff2.txt")
+    assert differ([expected_path, actual_path])
+
+
 def test_varread_pr355():
     # read CFF2 VF, write Type1 snapshot
     actual_path = runner(CMD + ['-s', '-o', 't1', '-f', 'cff2_vf.otf'])
