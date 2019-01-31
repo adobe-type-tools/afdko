@@ -41,9 +41,9 @@
       <map code="0x4e9c" name="cid01125"/><!-- CJK UNIFIED IDEOGRAPH-4E9C -->
       <map code="0x9bf5" name="cid01143"/><!-- CJK UNIFIED IDEOGRAPH-9BF5 -->
     </cmap_format_4>
-    <cmap_format_14 platformID="0" platEncID="5" format="14" length="33" numVarSelectorRecords="1">
-      <map uvs="0xe0100" uv="0x4e9c" name="None"/>
-      <map uvs="0xe0100" uv="0x9bf5" name="None"/>
+    <cmap_format_14 platformID="0" platEncID="5">
+      <map uv="0x4e9c" uvs="0xe0100"/>
+      <map uv="0x9bf5" uvs="0xe0100"/>
     </cmap_format_14>
     <cmap_format_2 platformID="1" platEncID="1" language="0">
       <map code="0x0" name="cid00001"/>

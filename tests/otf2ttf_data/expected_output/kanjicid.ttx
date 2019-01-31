@@ -461,108 +461,108 @@
       <map code="0x9bf5" name="cid01143"/><!-- CJK UNIFIED IDEOGRAPH-9BF5 -->
       <map code="0x9c2f" name="cid07636"/><!-- CJK UNIFIED IDEOGRAPH-9C2F -->
     </cmap_format_4>
-    <cmap_format_14 platformID="0" platEncID="5" format="14" length="455" numVarSelectorRecords="2">
-      <map uvs="0xe0100" uv="0x4e00" name="None"/>
-      <map uvs="0xe0100" uv="0x4e95" name="None"/>
-      <map uvs="0xe0100" uv="0x4e9c" name="None"/>
-      <map uvs="0xe0100" uv="0x4ea5" name="None"/>
-      <map uvs="0xe0100" uv="0x4ee5" name="None"/>
-      <map uvs="0xe0100" uv="0x4f0a" name="None"/>
-      <map uvs="0xe0100" uv="0x4f4d" name="None"/>
-      <map uvs="0xe0100" uv="0x4f9d" name="None"/>
-      <map uvs="0xe0100" uv="0x5049" name="None"/>
-      <map uvs="0xe0100" uv="0x5141" name="None"/>
-      <map uvs="0xe0100" uv="0x533b" name="None"/>
-      <map uvs="0xe0100" uv="0x5370" name="None"/>
-      <map uvs="0xe0100" uv="0x54bd" name="None"/>
-      <map uvs="0xe0100" uv="0x54c0" name="None"/>
-      <map uvs="0xe0100" uv="0x54e1" name="None"/>
-      <map uvs="0xe0100" uv="0x5516" name="None"/>
-      <map uvs="0xe0100" uv="0x56e0" name="None"/>
-      <map uvs="0xe0100" uv="0x56f2" name="None"/>
-      <map uvs="0xe0100" uv="0x5727" name="None"/>
-      <map uvs="0xe0100" uv="0x57df" name="None"/>
-      <map uvs="0xe0100" uv="0x58f1" name="None"/>
-      <map uvs="0xe0100" uv="0x5937" name="None"/>
-      <map uvs="0xe0100" uv="0x59d0" name="None"/>
-      <map uvs="0xe0100" uv="0x59d4" name="None"/>
-      <map uvs="0xe0100" uv="0x59f6" name="None"/>
-      <map uvs="0xe0100" uv="0x59fb" name="None"/>
-      <map uvs="0xe0100" uv="0x5a01" name="None"/>
-      <map uvs="0xe0100" uv="0x5a03" name="None"/>
-      <map uvs="0xe0100" uv="0x5b89" name="None"/>
-      <map uvs="0xe0100" uv="0x5b9b" name="None"/>
-      <map uvs="0xe0100" uv="0x5c09" name="None"/>
-      <map uvs="0xe0100" uv="0x5eb5" name="None"/>
-      <map uvs="0xe0100" uv="0x5f15" name="None"/>
-      <map uvs="0xe0100" uv="0x60aa" name="None"/>
-      <map uvs="0xe0100" uv="0x60df" name="None"/>
-      <map uvs="0xe0100" uv="0x610f" name="None"/>
-      <map uvs="0xe0100" uv="0x611b" name="None"/>
-      <map uvs="0xe0100" uv="0x6170" name="None"/>
-      <map uvs="0xe0100" uv="0x6216" name="None"/>
-      <map uvs="0xe0100" uv="0x6271" name="None"/>
-      <map uvs="0xe0100" uv="0x6309" name="None"/>
-      <map uvs="0xe0100" uv="0x6328" name="None"/>
-      <map uvs="0xe0100" uv="0x63e1" name="None"/>
-      <map uvs="0xe0100" uv="0x65a1" name="None"/>
-      <map uvs="0xe0100" uv="0x65ed" name="None"/>
-      <map uvs="0xe0100" uv="0x6613" name="None"/>
-      <map uvs="0xe0100" uv="0x6697" name="None"/>
-      <map uvs="0xe0100" uv="0x674f" name="None"/>
-      <map uvs="0xe0100" uv="0x6848" name="None"/>
-      <map uvs="0xe0100" uv="0x6893" name="None"/>
-      <map uvs="0xe0100" uv="0x6905" name="None"/>
-      <map uvs="0xe0100" uv="0x6e25" name="None"/>
-      <map uvs="0xe0100" uv="0x70ba" name="None"/>
-      <map uvs="0xe0100" uv="0x754f" name="None"/>
-      <map uvs="0xe0100" uv="0x7570" name="None"/>
-      <map uvs="0xe0100" uv="0x78ef" name="None"/>
-      <map uvs="0xe0100" uv="0x79fb" name="None"/>
-      <map uvs="0xe0100" uv="0x7a32" name="None"/>
-      <map uvs="0xe0100" uv="0x7a50" name="None"/>
-      <map uvs="0xe0100" uv="0x7c9f" name="None"/>
-      <map uvs="0xe0100" uv="0x7d62" name="None"/>
-      <map uvs="0xe0100" uv="0x7dad" name="None"/>
-      <map uvs="0xe0100" uv="0x7dbe" name="None"/>
-      <map uvs="0xe0100" uv="0x7def" name="None"/>
-      <map uvs="0xe0100" uv="0x80b2" name="None"/>
-      <map uvs="0xe0100" uv="0x80c3" name="None"/>
-      <map uvs="0xe0100" uv="0x80e4" name="None"/>
-      <map uvs="0xe0100" uv="0x828b" name="None"/>
-      <map uvs="0xe0100" uv="0x831c" name="None"/>
-      <map uvs="0xe0100" uv="0x840e" name="None"/>
-      <map uvs="0xe0100" uv="0x8466" name="None"/>
-      <map uvs="0xe0100" uv="0x8475" name="None"/>
-      <map uvs="0xe0100" uv="0x852d" name="None"/>
-      <map uvs="0xe0100" uv="0x867b" name="None"/>
-      <map uvs="0xe0100" uv="0x8863" name="None"/>
-      <map uvs="0xe0100" uv="0x88b7" name="None"/>
-      <map uvs="0xe0100" uv="0x8b02" name="None"/>
-      <map uvs="0xe0100" uv="0x9038" name="None"/>
-      <map uvs="0xe0100" uv="0x9055" name="None"/>
-      <map uvs="0xe0100" uv="0x907a" name="None"/>
-      <map uvs="0xe0100" uv="0x90c1" name="None"/>
-      <map uvs="0xe0100" uv="0x95c7" name="None"/>
-      <map uvs="0xe0100" uv="0x963f" name="None"/>
-      <map uvs="0xe0100" uv="0x978d" name="None"/>
-      <map uvs="0xe0100" uv="0x98f2" name="None"/>
-      <map uvs="0xe0100" uv="0x9b8e" name="None"/>
-      <map uvs="0xe0100" uv="0x9bf5" name="None"/>
-      <map uvs="0xe0100" uv="0x6deb" name="cid01216"/>
-      <map uvs="0xe0100" uv="0x6ea2" name="cid01202"/>
-      <map uvs="0xe0100" uv="0x82a6" name="cid01142"/>
-      <map uvs="0xe0100" uv="0x8328" name="cid01205"/>
-      <map uvs="0xe0100" uv="0x9022" name="cid01133"/>
-      <map uvs="0xe0100" uv="0x98f4" name="cid01151"/>
-      <map uvs="0xe0100" uv="0x9c2f" name="cid01207"/>
-      <map uvs="0xe0101" uv="0x6deb" name="None"/>
-      <map uvs="0xe0101" uv="0x6ea2" name="None"/>
-      <map uvs="0xe0101" uv="0x82a6" name="None"/>
-      <map uvs="0xe0101" uv="0x8328" name="None"/>
-      <map uvs="0xe0101" uv="0x9022" name="None"/>
-      <map uvs="0xe0101" uv="0x98f4" name="None"/>
-      <map uvs="0xe0101" uv="0x9c2f" name="None"/>
+    <cmap_format_14 platformID="0" platEncID="5">
+      <map uv="0x4e00" uvs="0xe0100"/>
+      <map uv="0x4e95" uvs="0xe0100"/>
+      <map uv="0x4e9c" uvs="0xe0100"/>
+      <map uv="0x4ea5" uvs="0xe0100"/>
+      <map uv="0x4ee5" uvs="0xe0100"/>
+      <map uv="0x4f0a" uvs="0xe0100"/>
+      <map uv="0x4f4d" uvs="0xe0100"/>
+      <map uv="0x4f9d" uvs="0xe0100"/>
+      <map uv="0x5049" uvs="0xe0100"/>
+      <map uv="0x5141" uvs="0xe0100"/>
+      <map uv="0x533b" uvs="0xe0100"/>
+      <map uv="0x5370" uvs="0xe0100"/>
+      <map uv="0x54bd" uvs="0xe0100"/>
+      <map uv="0x54c0" uvs="0xe0100"/>
+      <map uv="0x54e1" uvs="0xe0100"/>
+      <map uv="0x5516" uvs="0xe0100"/>
+      <map uv="0x56e0" uvs="0xe0100"/>
+      <map uv="0x56f2" uvs="0xe0100"/>
+      <map uv="0x5727" uvs="0xe0100"/>
+      <map uv="0x57df" uvs="0xe0100"/>
+      <map uv="0x58f1" uvs="0xe0100"/>
+      <map uv="0x5937" uvs="0xe0100"/>
+      <map uv="0x59d0" uvs="0xe0100"/>
+      <map uv="0x59d4" uvs="0xe0100"/>
+      <map uv="0x59f6" uvs="0xe0100"/>
+      <map uv="0x59fb" uvs="0xe0100"/>
+      <map uv="0x5a01" uvs="0xe0100"/>
+      <map uv="0x5a03" uvs="0xe0100"/>
+      <map uv="0x5b89" uvs="0xe0100"/>
+      <map uv="0x5b9b" uvs="0xe0100"/>
+      <map uv="0x5c09" uvs="0xe0100"/>
+      <map uv="0x5eb5" uvs="0xe0100"/>
+      <map uv="0x5f15" uvs="0xe0100"/>
+      <map uv="0x60aa" uvs="0xe0100"/>
+      <map uv="0x60df" uvs="0xe0100"/>
+      <map uv="0x610f" uvs="0xe0100"/>
+      <map uv="0x611b" uvs="0xe0100"/>
+      <map uv="0x6170" uvs="0xe0100"/>
+      <map uv="0x6216" uvs="0xe0100"/>
+      <map uv="0x6271" uvs="0xe0100"/>
+      <map uv="0x6309" uvs="0xe0100"/>
+      <map uv="0x6328" uvs="0xe0100"/>
+      <map uv="0x63e1" uvs="0xe0100"/>
+      <map uv="0x65a1" uvs="0xe0100"/>
+      <map uv="0x65ed" uvs="0xe0100"/>
+      <map uv="0x6613" uvs="0xe0100"/>
+      <map uv="0x6697" uvs="0xe0100"/>
+      <map uv="0x674f" uvs="0xe0100"/>
+      <map uv="0x6848" uvs="0xe0100"/>
+      <map uv="0x6893" uvs="0xe0100"/>
+      <map uv="0x6905" uvs="0xe0100"/>
+      <map uv="0x6e25" uvs="0xe0100"/>
+      <map uv="0x70ba" uvs="0xe0100"/>
+      <map uv="0x754f" uvs="0xe0100"/>
+      <map uv="0x7570" uvs="0xe0100"/>
+      <map uv="0x78ef" uvs="0xe0100"/>
+      <map uv="0x79fb" uvs="0xe0100"/>
+      <map uv="0x7a32" uvs="0xe0100"/>
+      <map uv="0x7a50" uvs="0xe0100"/>
+      <map uv="0x7c9f" uvs="0xe0100"/>
+      <map uv="0x7d62" uvs="0xe0100"/>
+      <map uv="0x7dad" uvs="0xe0100"/>
+      <map uv="0x7dbe" uvs="0xe0100"/>
+      <map uv="0x7def" uvs="0xe0100"/>
+      <map uv="0x80b2" uvs="0xe0100"/>
+      <map uv="0x80c3" uvs="0xe0100"/>
+      <map uv="0x80e4" uvs="0xe0100"/>
+      <map uv="0x828b" uvs="0xe0100"/>
+      <map uv="0x831c" uvs="0xe0100"/>
+      <map uv="0x840e" uvs="0xe0100"/>
+      <map uv="0x8466" uvs="0xe0100"/>
+      <map uv="0x8475" uvs="0xe0100"/>
+      <map uv="0x852d" uvs="0xe0100"/>
+      <map uv="0x867b" uvs="0xe0100"/>
+      <map uv="0x8863" uvs="0xe0100"/>
+      <map uv="0x88b7" uvs="0xe0100"/>
+      <map uv="0x8b02" uvs="0xe0100"/>
+      <map uv="0x9038" uvs="0xe0100"/>
+      <map uv="0x9055" uvs="0xe0100"/>
+      <map uv="0x907a" uvs="0xe0100"/>
+      <map uv="0x90c1" uvs="0xe0100"/>
+      <map uv="0x95c7" uvs="0xe0100"/>
+      <map uv="0x963f" uvs="0xe0100"/>
+      <map uv="0x978d" uvs="0xe0100"/>
+      <map uv="0x98f2" uvs="0xe0100"/>
+      <map uv="0x9b8e" uvs="0xe0100"/>
+      <map uv="0x9bf5" uvs="0xe0100"/>
+      <map uv="0x6deb" uvs="0xe0100" name="cid01216"/>
+      <map uv="0x6ea2" uvs="0xe0100" name="cid01202"/>
+      <map uv="0x82a6" uvs="0xe0100" name="cid01142"/>
+      <map uv="0x8328" uvs="0xe0100" name="cid01205"/>
+      <map uv="0x9022" uvs="0xe0100" name="cid01133"/>
+      <map uv="0x98f4" uvs="0xe0100" name="cid01151"/>
+      <map uv="0x9c2f" uvs="0xe0100" name="cid01207"/>
+      <map uv="0x6deb" uvs="0xe0101"/>
+      <map uv="0x6ea2" uvs="0xe0101"/>
+      <map uv="0x82a6" uvs="0xe0101"/>
+      <map uv="0x8328" uvs="0xe0101"/>
+      <map uv="0x9022" uvs="0xe0101"/>
+      <map uv="0x98f4" uvs="0xe0101"/>
+      <map uv="0x9c2f" uvs="0xe0101"/>
     </cmap_format_14>
     <cmap_format_2 platformID="1" platEncID="1" language="0">
       <map code="0x0" name="cid00001"/>
