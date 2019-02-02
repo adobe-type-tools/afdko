@@ -187,7 +187,7 @@ def test_cff2_sub_dump():
     # A good test for problems with charstrings with no endchar operator.
     actual_path = runner(CMD + ['-s', '-o', 'dump', '6', 'g', '_64513',
                                 '-f', 'CFF2-serif-sub.cff2'])
-    expected_path = get_expected_path("CFF2-serif-sub.cff2.txt")
+    expected_path = get_expected_path('CFF2-serif-sub.cff2.txt')
     assert differ([expected_path, actual_path])
 
 
@@ -344,11 +344,9 @@ def test_recalculate_font_bbox_bug618(to_format, args, exp_filename):
 
 
 def test_glyph_bboxes_bug655():
-    font_path = get_input_path('bug655.ufo')
+    actual_path = runner(CMD + ['-s', '-o', 'mtx', '2', '-f', 'bug655.ufo'])
     expected_path = get_expected_path('bug655.txt')
-    result_path = get_temp_file_path()
-    runner(CMD + ['-o', 'mtx', '2', '-f', font_path, result_path])
-    assert differ([expected_path, result_path])
+    assert differ([expected_path, actual_path])
 
 
 def test_cs_opt_bug684():
