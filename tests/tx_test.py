@@ -185,7 +185,7 @@ def test_cff2_sub_dump():
     # Dump a subroutinized CFF2 font. This is a J font with 64K glyphs,
     # and almost every subr and charstring is a single subr call.
     # A good test for problems with charstrings with no endchar operator.
-    actual_path = runner(CMD + ['-s', '-o', 'dump', '6', 'g', '_64513',
+    actual_path = runner(CMD + ['-s', '-o', 'dump', '6', 'g', '_21847',
                                 '-f', 'CFF2-serif-sub.cff2'])
     expected_path = get_expected_path('CFF2-serif-sub.cff2.txt')
     assert differ([expected_path, actual_path])
