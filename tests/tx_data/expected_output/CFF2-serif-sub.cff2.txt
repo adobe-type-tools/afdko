@@ -1,0 +1,72 @@
+## glyph[tag] {cid,iFD,path}
+glyph[21847] {21847,3,
+  0 width
+  252 31 move
+  100 23 line
+  100 0 line
+  420 0 line
+  420 23 line
+  268 31 line
+  252 31 line
+  242 341 move
+  242 227 242 112 240 0 curve
+  280 0 line
+  278 112 278 227 278 341 curve
+  278 404 line
+  278 518 278 633 280 745 curve
+  240 745 line
+  242 633 242 518 242 404 curve
+  242 341 line
+  468 719 move
+  451 745 line
+  472 564 line
+  500 564 line
+  490 745 line
+  30 745 line
+  20 564 line
+  48 564 line
+  69 745 line
+  52 719 line
+  468 719 line
+  498 722 move
+  553 714 line
+  570 714 line
+  648 722 line
+  648 745 line
+  498 745 line
+  498 722 line
+  628 -6 move
+  652 -6 line
+  751 493 line
+  736 493 line
+  767 326 797 159 828 -6 curve
+  852 -6 line
+  945 745 line
+  917 745 line
+  835 39 line
+  852 26 line
+  822 195 792 366 762 535 curve
+  738 535 line
+  641 38 line
+  654 28 line
+  626 267 599 508 571 745 curve
+  536 745 line
+  628 -6 line
+  838 722 move
+  919 714 line
+  935 714 line
+  986 722 line
+  986 745 line
+  838 745 line
+  838 722 line
+  0 -120 move
+  1000 -120 line
+  1000 880 line
+  0 880 line
+  0 -120 line
+  20 -100 move
+  20 860 line
+  980 860 line
+  980 -100 line
+  20 -100 line
+  endchar}
