@@ -2213,7 +2213,17 @@ static Label addAnonRule(hotCtx g, GSUBCtx h, GNode *pMarked, unsigned nMarked,
     GNode *targCp;
     GNode *replCp;
     SubtableInfo *si;
-    int lkpType = (nMarked == 1) ? GSUBSingle : GSUBLigature;
+    int lkpType;
+
+    if (nMarked == 1) {
+        if (repl->nextSeq != NULL) {
+            lkpType = GSUBMultiple;
+        } else {
+            lkpType = GSUBSingle;
+        }
+    } else {
+        lkpType = GSUBLigature;
+    }
 
     /* Make copies in targCp, replCp */
     featPatternCopy(g, &targCp, pMarked, nMarked);

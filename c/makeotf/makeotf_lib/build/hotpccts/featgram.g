@@ -340,7 +340,7 @@ glyphClass[int named, char *gcname]>[GNode *gnode]
 			<<GID gid, endgid;
 			  char p[MAX_TOKEN], q[MAX_TOKEN];>>
 			glyph[p, TRUE]>[gid]
-			<<if (gid == 0) {
+			<<if (gid == GID_UNDEF) {
 				char *secondPart = p;
 				char *firstPart = p;
 				/* it might be a range.*/
