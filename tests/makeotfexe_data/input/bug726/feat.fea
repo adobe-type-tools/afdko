@@ -1,0 +1,3 @@
+table GDEF {
+  GlyphClassDef [.notdef], , , ;
+} GDEF;
