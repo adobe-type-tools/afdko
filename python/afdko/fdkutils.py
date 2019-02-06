@@ -1,13 +1,14 @@
 # Copyright 2016 Adobe. All rights reserved.
 
 """
-fdkutils.py v1.2.8 Dec 7 2018
+fdkutils.py v1.2.9 Feb 5 2019
 A module of functions that are needed by several of the AFDKO scripts.
 """
 
 from __future__ import print_function, absolute_import
 
 import os
+import sys
 import subprocess
 import tempfile
 
@@ -42,7 +43,10 @@ def runShellCmd(cmd):
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
         stdoutdata, _ = p.communicate()
-        return tounicode(stdoutdata, encoding='utf-8')
+        try:
+            return tounicode(stdoutdata, encoding='utf-8')
+        except UnicodeDecodeError:
+            return tounicode(stdoutdata, encoding=sys.getfilesystemencoding())
     except (subprocess.CalledProcessError, OSError) as err:
         msg = "Error executing command '%s'\n%s" % (cmd, err)
         print(msg)
