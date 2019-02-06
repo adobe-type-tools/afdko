@@ -1784,16 +1784,18 @@ static GID featMapGName2GID(hotCtx g, char *gname, int allowNotdef) {
 
     gid = mapName2GID(g, gname, &realname);
 
-    if (gid != GID_UNDEF) {
+    /* Return the glyph if found in the font. When allowNotdef is set, we
+     * always return and callers should check for GID_UNDEF as we can't return
+     * GID_NOTDEF in this case. */
+    if (gid != GID_UNDEF || allowNotdef == 1) {
         return gid;
     }
-    if (allowNotdef == 0) {
-        if (realname != NULL && strcmp(gname, realname) != 0) {
-            featMsg(hotERROR, "Glyph \"%s\" (alias \"%s\") not in font",
-                    realname, gname);
-        } else {
-            featMsg(hotERROR, "Glyph \"%s\" not in font.", gname);
-        }
+
+    if (realname != NULL && strcmp(gname, realname) != 0) {
+        featMsg(hotERROR, "Glyph \"%s\" (alias \"%s\") not in font",
+                realname, gname);
+    } else {
+        featMsg(hotERROR, "Glyph \"%s\" not in font.", gname);
     }
     return GID_NOTDEF;
 }
