@@ -230,7 +230,7 @@ static unsigned char *refill(t2cCtx h, unsigned char **end) {
     /* Read buffer */
     /* 64-bit warning fixed by cast here HO */
     h->src.length = (long)h->aux->stm->read(h->aux->stm, h->aux->src, &h->src.buf);
-    if (h->src.length == 0) {
+    if (h->src.length == 0 && !(h->flags & IS_CFF2)) {
         errMsg = strerror(errno);
         message(h, "%s", errMsg);
         return NULL; /* Stream error */

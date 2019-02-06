@@ -4,13 +4,14 @@
 
 /*
  * Standard Apple Glyph Ordering (258 entries) aggregate initializer.
+ * https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6post.html
  *
  * Elements values are glyph names. Index by glyph index (GID) get glyph name.
  */
 
     /* 000 */   ".notdef",
-    /* 001 */   "uni0000",
-    /* 002 */   "uni000D",
+    /* 001 */   ".null",
+    /* 002 */   "nonmarkingreturn",
     /* 003 */   "space",
     /* 004 */   "exclam",
     /* 005 */   "quotedbl",
@@ -180,7 +181,7 @@
     /* 169 */   "guillemotleft",
     /* 170 */   "guillemotright",
     /* 171 */   "ellipsis",
-    /* 172 */   "uni00A0",
+    /* 172 */   "nonbreakingspace",
     /* 173 */   "Agrave",
     /* 174 */   "Atilde",
     /* 175 */   "Otilde",
