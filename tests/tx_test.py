@@ -360,3 +360,9 @@ def test_cs_opt_bug684():
     runner(CMD + ['-a', '-o', 'cff2', '-f', font_path, result_path])
     expected_path = get_expected_path('SHSVF_9b3b_opt.cff2')
     assert differ([expected_path, result_path, '-m', 'bin'])
+
+
+def test_standard_apple_glyph_names():
+    actual_path = runner(CMD + ['-s', '-o', 'dump', '4', '-f', 'post-v2.ttf'])
+    expected_path = get_expected_path('post-v2.txt')
+    assert differ([expected_path, actual_path])
