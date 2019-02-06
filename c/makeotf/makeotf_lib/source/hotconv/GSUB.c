@@ -2248,6 +2248,7 @@ static Label addAnonRule(hotCtx g, GSUBCtx h, GNode *pMarked, unsigned nMarked,
     si->markSetIndex = markSetIndex;
     si->label = featGetNextAnonLabel(g);
     si->parentFeatTag = h->new.feature;
+    si->useExtension = h->new.useExtension;
 
     si->rules.cnt = 0;
     addRule(g, h, si, targCp, replCp);
@@ -2265,7 +2266,7 @@ static void createAnonLookups(hotCtx g, GSUBCtx h) {
         SubtableInfo *si = &h->anonSubtable.array[i];
         sprintf(g->error_id_text, "feature '%c%c%c%c'", TAG_ARG(si->parentFeatTag));
         GSUBFeatureBegin(g, si->script, si->language, si->feature);
-        GSUBLookupBegin(g, si->lkpType, si->lkpFlag, si->label, 0, si->markSetIndex);
+        GSUBLookupBegin(g, si->lkpType, si->lkpFlag, si->label, si->useExtension, si->markSetIndex);
 
         for (j = 0; j < si->rules.cnt; j++) {
             SubstRule *rule = &si->rules.array[j];
