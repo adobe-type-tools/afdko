@@ -357,3 +357,16 @@ def test_contextual_multiple_substitutions_bug725():
     actual_ttx = generate_ttx_dump(actual_path, ['GSUB'])
     expected_ttx = get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
+def test_notdef_in_glyph_class_bug726():
+    input_filename = "bug726/font.pfa"
+    feat_filename = "bug726/feat.fea"
+    actual_path = get_temp_file_path()
+    ttx_filename = "bug726.ttx"
+    runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
+                        'ff', '_{}'.format(get_input_path(feat_filename)),
+                        'o', '_{}'.format(actual_path)])
+    actual_ttx = generate_ttx_dump(actual_path, ['GDEF'])
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
