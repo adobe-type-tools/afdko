@@ -1575,7 +1575,7 @@ static Offset fillFeatureList(hotCtx g, otlTbl t) {
     /* This works becuase prepFeature has sorted the subtables so that anon subtabes are last, preceded by Stand-Alone subtables */
     int spanLimit = t->subtable.cnt - (t->nAnonSubtables + t->nStandAloneSubtables);
 
-    nFeatures = t->subtable.array[spanLimit - 1].index.feature + 1;
+    nFeatures = spanLimit ? t->subtable.array[spanLimit - 1].index.feature + 1 : 0;
     /* Allocate features */
     t->tbl.FeatureList_.FeatureCount = nFeatures;
     t->tbl.FeatureList_.FeatureRecord =
