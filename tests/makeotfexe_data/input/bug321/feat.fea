@@ -1,0 +1,15 @@
+languagesystem DFLT dflt; # Default
+languagesystem latn dflt; # Latin default
+
+table head {
+	FontRevision 1.001;
+} head;
+
+feature test {
+	lookup TEST1 useExtension {
+		sub a' by b;
+	} TEST1;
+	lookup TEST2 useExtension {
+		pos a' 100;
+	} TEST2;
+} test;

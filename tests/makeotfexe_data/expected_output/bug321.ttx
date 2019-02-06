@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont sfntVersion="OTTO" ttLibVersion="3.37">
+
+  <GSUB>
+    <Version value="0x00010000"/>
+    <ScriptList>
+      <!-- ScriptCount=2 -->
+      <ScriptRecord index="0">
+        <ScriptTag value="DFLT"/>
+        <Script>
+          <DefaultLangSys>
+            <ReqFeatureIndex value="65535"/>
+            <!-- FeatureCount=1 -->
+            <FeatureIndex index="0" value="0"/>
+          </DefaultLangSys>
+          <!-- LangSysCount=0 -->
+        </Script>
+      </ScriptRecord>
+      <ScriptRecord index="1">
+        <ScriptTag value="latn"/>
+        <Script>
+          <DefaultLangSys>
+            <ReqFeatureIndex value="65535"/>
+            <!-- FeatureCount=1 -->
+            <FeatureIndex index="0" value="1"/>
+          </DefaultLangSys>
+          <!-- LangSysCount=0 -->
+        </Script>
+      </ScriptRecord>
+    </ScriptList>
+    <FeatureList>
+      <!-- FeatureCount=2 -->
+      <FeatureRecord index="0">
+        <FeatureTag value="test"/>
+        <Feature>
+          <!-- LookupCount=1 -->
+          <LookupListIndex index="0" value="0"/>
+        </Feature>
+      </FeatureRecord>
+      <FeatureRecord index="1">
+        <FeatureTag value="test"/>
+        <Feature>
+          <!-- LookupCount=1 -->
+          <LookupListIndex index="0" value="0"/>
+        </Feature>
+      </FeatureRecord>
+    </FeatureList>
+    <LookupList>
+      <!-- LookupCount=2 -->
+      <Lookup index="0">
+        <LookupType value="7"/>
+        <LookupFlag value="0"/>
+        <!-- SubTableCount=1 -->
+        <ExtensionSubst index="0" Format="1">
+          <ExtensionLookupType value="6"/>
+          <ChainContextSubst Format="3">
+            <!-- BacktrackGlyphCount=0 -->
+            <!-- InputGlyphCount=1 -->
+            <InputCoverage index="0" Format="1">
+              <Glyph value="a"/>
+            </InputCoverage>
+            <!-- LookAheadGlyphCount=0 -->
+            <!-- SubstCount=1 -->
+            <SubstLookupRecord index="0">
+              <SequenceIndex value="0"/>
+              <LookupListIndex value="1"/>
+            </SubstLookupRecord>
+          </ChainContextSubst>
+        </ExtensionSubst>
+      </Lookup>
+      <Lookup index="1">
+        <LookupType value="7"/>
+        <LookupFlag value="0"/>
+        <!-- SubTableCount=1 -->
+        <ExtensionSubst index="0" Format="1">
+          <ExtensionLookupType value="1"/>
+          <SingleSubst Format="1">
+            <Substitution in="a" out="b"/>
+          </SingleSubst>
+        </ExtensionSubst>
+      </Lookup>
+    </LookupList>
+  </GSUB>
+
+  <GPOS>
+    <Version value="0x00010000"/>
+    <ScriptList>
+      <!-- ScriptCount=2 -->
+      <ScriptRecord index="0">
+        <ScriptTag value="DFLT"/>
+        <Script>
+          <DefaultLangSys>
+            <ReqFeatureIndex value="65535"/>
+            <!-- FeatureCount=1 -->
+            <FeatureIndex index="0" value="0"/>
+          </DefaultLangSys>
+          <!-- LangSysCount=0 -->
+        </Script>
+      </ScriptRecord>
+      <ScriptRecord index="1">
+        <ScriptTag value="latn"/>
+        <Script>
+          <DefaultLangSys>
+            <ReqFeatureIndex value="65535"/>
+            <!-- FeatureCount=1 -->
+            <FeatureIndex index="0" value="1"/>
+          </DefaultLangSys>
+          <!-- LangSysCount=0 -->
+        </Script>
+      </ScriptRecord>
+    </ScriptList>
+    <FeatureList>
+      <!-- FeatureCount=2 -->
+      <FeatureRecord index="0">
+        <FeatureTag value="test"/>
+        <Feature>
+          <!-- LookupCount=1 -->
+          <LookupListIndex index="0" value="0"/>
+        </Feature>
+      </FeatureRecord>
+      <FeatureRecord index="1">
+        <FeatureTag value="test"/>
+        <Feature>
+          <!-- LookupCount=1 -->
+          <LookupListIndex index="0" value="0"/>
+        </Feature>
+      </FeatureRecord>
+    </FeatureList>
+    <LookupList>
+      <!-- LookupCount=2 -->
+      <Lookup index="0">
+        <LookupType value="9"/>
+        <LookupFlag value="0"/>
+        <!-- SubTableCount=1 -->
+        <ExtensionPos index="0" Format="1">
+          <ExtensionLookupType value="8"/>
+          <ChainContextPos Format="3">
+            <!-- BacktrackGlyphCount=0 -->
+            <!-- InputGlyphCount=1 -->
+            <InputCoverage index="0" Format="1">
+              <Glyph value="a"/>
+            </InputCoverage>
+            <!-- LookAheadGlyphCount=0 -->
+            <!-- PosCount=1 -->
+            <PosLookupRecord index="0">
+              <SequenceIndex value="0"/>
+              <LookupListIndex value="1"/>
+            </PosLookupRecord>
+          </ChainContextPos>
+        </ExtensionPos>
+      </Lookup>
+      <Lookup index="1">
+        <LookupType value="9"/>
+        <LookupFlag value="0"/>
+        <!-- SubTableCount=1 -->
+        <ExtensionPos index="0" Format="1">
+          <ExtensionLookupType value="1"/>
+          <SinglePos Format="1">
+            <Coverage Format="1">
+              <Glyph value="a"/>
+            </Coverage>
+            <ValueFormat value="4"/>
+            <Value XAdvance="100"/>
+          </SinglePos>
+        </ExtensionPos>
+      </Lookup>
+    </LookupList>
+  </GPOS>
+
+</ttFont>
