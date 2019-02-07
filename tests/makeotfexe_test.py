@@ -63,6 +63,21 @@ def test_useMarkFilteringSet_flag_bug196():
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
 
 
+def test_useException_bug321():
+    input_filename = "bug321/font.pfa"
+    feat_filename = "bug321/feat.fea"
+    actual_path = get_temp_file_path()
+    ttx_filename = "bug321.ttx"
+    runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
+                        'ff', '_{}'.format(get_input_path(feat_filename)),
+                        'o', '_{}'.format(actual_path)])
+    actual_ttx = generate_ttx_dump(actual_path, ['GSUB', 'GPOS'])
+    expected_ttx = get_expected_path(ttx_filename)
+    import os
+    os.system("cp " + actual_ttx + " " + expected_ttx)
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
 def test_mark_refer_diff_classes_bug416():
     input_filename = "bug416/font.pfa"
     feat_filename = "bug416/feat.fea"
