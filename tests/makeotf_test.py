@@ -563,3 +563,11 @@ def test_ttf_input_font_bug680():
                       'prep', 'cvt ', 'loca', 'glyf', 'name', 'post', 'gasp',
                       'BASE', 'GDEF', 'GPOS', 'GSUB'):
         assert font_has_table(ttf_path, table_tag)
+
+
+def test_skip_ufo3_global_guides_bug700():
+    input_filename = "bug700/font.ufo"
+    actual_path = get_temp_file_path()
+    runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
+                        'o', '_{}'.format(actual_path)])
+    assert font_has_table(actual_path, 'CFF ')
