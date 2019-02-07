@@ -1784,16 +1784,18 @@ static GID featMapGName2GID(hotCtx g, char *gname, int allowNotdef) {
 
     gid = mapName2GID(g, gname, &realname);
 
-    if (gid != GID_UNDEF) {
+    /* Return the glyph if found in the font. When allowNotdef is set, we
+     * always return and callers should check for GID_UNDEF as we can't return
+     * GID_NOTDEF in this case. */
+    if (gid != GID_UNDEF || allowNotdef == 1) {
         return gid;
     }
-    if (allowNotdef == 0) {
-        if (realname != NULL && strcmp(gname, realname) != 0) {
-            featMsg(hotERROR, "Glyph \"%s\" (alias \"%s\") not in font",
-                    realname, gname);
-        } else {
-            featMsg(hotERROR, "Glyph \"%s\" not in font.", gname);
-        }
+
+    if (realname != NULL && strcmp(gname, realname) != 0) {
+        featMsg(hotERROR, "Glyph \"%s\" (alias \"%s\") not in font",
+                realname, gname);
+    } else {
+        featMsg(hotERROR, "Glyph \"%s\" not in font.", gname);
     }
     return GID_NOTDEF;
 }
@@ -3273,7 +3275,7 @@ static int validateGSUBMultiple(hotCtx g, GNode *targ, GNode *repl,
         valid = 0;
     }
 
-    if (!(IS_GLYPH(targ) && isUnmarkedGlyphSeq(repl))) {
+    if (!((isSubrule || IS_GLYPH(targ)) && isUnmarkedGlyphSeq(repl))) {
         featMsg(hotERROR, "Invalid multiple substitution rule");
         valid = 0;
     }
@@ -3507,21 +3509,25 @@ static int validateGSUBChain(hotCtx g, GNode *targ, GNode *repl) {
     /* m now points to beginning of marked run */
 
     if (repl) {
-        if (repl->nextSeq != NULL) {
-            featMsg(hotERROR, "Unsupported contextual GSUB replacement sequence");
-            return 0;
-        }
-
         if (nMarked == 1) {
             if (IS_GLYPH(m) && IS_CLASS(repl)) {
                 featMsg(hotERROR, "Contextual alternate rule not yet supported");
                 return 0;
             }
 
-            if (!validateGSUBSingle(g, m, repl, 1)) {
+            if (repl->nextSeq != NULL) {
+                if (!validateGSUBMultiple(g, m, repl, 1)) {
+                    return 0;
+                }
+            } else if (!validateGSUBSingle(g, m, repl, 1)) {
                 return 0;
             }
         } else if (nMarked > 1) {
+            if (repl->nextSeq != NULL) {
+                featMsg(hotERROR, "Unsupported contextual GSUB replacement sequence");
+                return 0;
+            }
+
             /* Ligature run may contain classes, but only with a single repl */
             if (!validateGSUBLigature(g, m, repl, 1)) {
                 return 0;
