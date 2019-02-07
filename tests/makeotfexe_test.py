@@ -344,3 +344,20 @@ def test_recalculate_bbox_bug617(arg):
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value='])
+
+
+def test_overflow_bug731():
+    input_filename = 'bug731/font.pfa'
+    feat_filename = 'bug731/feat.fea'
+    otf_path = get_temp_file_path()
+
+    stderr_path = runner(
+        CMD + ['-s', '-e', '-o', 'shw',
+               'f', '_{}'.format(get_input_path(input_filename)),
+               'ff', '_{}'.format(get_input_path(feat_filename)),
+               'o', '_{}'.format(otf_path)])
+
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert(b"[FATAL] <SourceSans-Test> subtable offset too large (1003c) in "
+           b"lookup 0 type 3") in output
