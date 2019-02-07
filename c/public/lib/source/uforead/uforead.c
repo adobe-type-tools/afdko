@@ -933,7 +933,7 @@ static void setFontDictKey(ufoCtx h, char* keyValue) {
             char* newString = memNew(h, strlen(cpy) + strlen(keyValue) + 2);
             /* set the 0xC2 to NULL to terminate the left side of the string */
             *copySymbol = '\0';
-            /* use copySymbol + 2 to skip the NULL and the 0xA9 
+            /* use copySymbol + 2 to skip the NULL and the 0xA9
                to get the right side of the string */
             sprintf(newString, "%s%s%s", keyValue, "Copyright", copySymbol + 2);
             top->Notice.ptr = newString;
@@ -1167,7 +1167,7 @@ static int parseGlyphOrder(ufoCtx h) {
         } else if (tokenEqualStrN(tk, "<key", 4) && (state == 1)) /* if we are at the top level of the lib dict, check the key values */
         {
             if ((tk->val[tk->length - 2] == '/') && (tk->val[tk->length - 1] == '>')) {
-                message(h, "Warning: Encountered empty <key></key>. Text: '%s'.", getBufferContextPtr(h));
+                message(h, "Warning: Encountered empty <key/>. Text: '%s'.", getBufferContextPtr(h));
             } else {
                 // get key name
                 tk = getElementValue(h, state);
@@ -1632,9 +1632,9 @@ static int parseFontInfo(ufoCtx h) {
                 state = 1;
         } else if (tokenEqualStr(tk, "</dict>")) {
             break;
-        } else if (state > 4)
+        } else if (state > 4) {
             continue;
-        else if (tokenEqualStr(tk, "<key>")) {
+        } else if (tokenEqualStr(tk, "<key>")) {
             if (state != 1) {
                 fatal(h, ufoErrParse, "Encountered '<key>' while not in top level of first <dict>, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
             }
@@ -1786,7 +1786,7 @@ static int parseAnchor(ufoCtx h, GLIF_Rec* glifRec, int state) {
             }
         } else if (tokenEqualStr(tk, "/>")) {
             memFree(h, anchor);
-            /* ToDo: instead of freeing it, append the anchor record to a 
+            /* ToDo: instead of freeing it, append the anchor record to a
                      dynamic array in, or associated with, the glyph record */
             break;
         } else {
