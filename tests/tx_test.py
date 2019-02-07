@@ -366,3 +366,9 @@ def test_standard_apple_glyph_names():
     actual_path = runner(CMD + ['-s', '-o', 'dump', '4', '-f', 'post-v2.ttf'])
     expected_path = get_expected_path('post-v2.txt')
     assert differ([expected_path, actual_path])
+
+
+def test_ufo_self_closing_dict_element_bug701():
+    actual_path = runner(CMD + ['-s', '-o', 'dump', '0', '-f', 'bug701.ufo'])
+    expected_path = get_expected_path('bug701.txt')
+    assert differ([expected_path, actual_path, '-s', '## Filename'])

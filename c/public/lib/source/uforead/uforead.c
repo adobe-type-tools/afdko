@@ -1158,6 +1158,9 @@ static int parseGlyphOrder(ufoCtx h) {
         } else if (state == IN_COMMENT) {
             continue;
         } else if (tokenEqualStrN(tk, "<dict", 5)) {
+            // <dict/> case
+            if ((tk->val[tk->length - 2] == '/') && (tk->val[tk->length - 1] == '>'))
+                continue;
             state++;
         } else if (tokenEqualStr(tk, "</dict>")) {
             state--;

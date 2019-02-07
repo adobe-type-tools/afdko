@@ -1,0 +1,10 @@
+## Filename font.ufo
+## Top Dict
+version             "1.000"
+FullName            "PSnameSerifTextBold"
+FamilyName          "PSname Serif Text"
+sup.srcFontType     UFO (name-keyed)
+sup.nGlyphs         1
+## FontDict[0]
+FontName            "PSnameSerifText-Bold"
+## Private

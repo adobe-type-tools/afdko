@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>ascender</key>
+    <integer>729</integer>
+    <key>capHeight</key>
+    <real>675.0</real>
+    <key>familyName</key>
+    <string>PSname Serif Text</string>
+    <key>styleName</key>
+    <string>Bold</string>
+    <key>postscriptFontName</key>
+    <string>PSnameSerifText-Bold</string>
+    <key>postscriptFullName</key>
+    <string>PSnameSerifTextBold</string>
+  </dict>
+</plist>
