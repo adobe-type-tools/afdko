@@ -73,8 +73,6 @@ def test_useException_bug321():
                         'o', '_{}'.format(actual_path)])
     actual_ttx = generate_ttx_dump(actual_path, ['GSUB', 'GPOS'])
     expected_ttx = get_expected_path(ttx_filename)
-    import os
-    os.system("cp " + actual_ttx + " " + expected_ttx)
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
 
 
