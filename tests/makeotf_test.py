@@ -571,3 +571,17 @@ def test_skip_ufo3_global_guides_bug700():
     runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
                         'o', '_{}'.format(actual_path)])
     assert font_has_table(actual_path, 'CFF ')
+
+
+def test_unhandled_ufo_glif_token_bug705():
+    input_filename = 'bug705/font.ufo'
+    otf_path = get_temp_file_path()
+
+    stderr_path = runner(
+        CMD + ['-s', '-e', '-o',
+               'f', '_{}'.format(get_input_path(input_filename)),
+               'o', '_{}'.format(otf_path)])
+
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert b"unhandled token: <foo" in output
