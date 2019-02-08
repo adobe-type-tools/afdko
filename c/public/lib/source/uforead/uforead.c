@@ -1729,7 +1729,6 @@ static int parseUFO(ufoCtx h) {
 
 static int parseAnchor(ufoCtx h, GLIF_Rec* glifRec, int state) {
     token* tk;
-    int type = 0;
     char* end;
     int prevState = outlineStart;
     int result = ufoSuccess;
