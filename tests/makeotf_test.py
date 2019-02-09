@@ -43,6 +43,11 @@ xfail_py3_win = pytest.mark.xfail(
     reason="?")
 
 
+xfail_py27_mac = pytest.mark.xfail(
+    sys.version_info < (3, 0) and sys.platform != 'win32',
+    reason="?")
+
+
 def setup_module():
     """
     Create the temporary output directory
@@ -117,6 +122,7 @@ def test_getSourceGOADBData():
 
 
 @xfail_win
+@xfail_py27_mac
 @pytest.mark.parametrize('input_filename', [
     T1PFA_NAME, UFO2_NAME, UFO3_NAME, CID_NAME])
 def test_path_with_non_ascii_chars_bug222(input_filename):
