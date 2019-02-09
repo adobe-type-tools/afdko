@@ -181,6 +181,16 @@ def test_cff2_extract(args, exp_filename):
     assert differ([expected_path, cff2_path, '-m', 'bin'])
 
 
+def test_cff2_sub_dump():
+    # Dump a subroutinized CFF2 font. This is a J font with 64K glyphs,
+    # and almost every subr and charstring is a single subr call.
+    # A good test for problems with charstrings with no endchar operator.
+    actual_path = runner(CMD + ['-s', '-o', 'dump', '6', 'g', '_21847',
+                                '-f', 'CFF2-serif-sub.cff2'])
+    expected_path = get_expected_path('CFF2-serif-sub.cff2.txt')
+    assert differ([expected_path, actual_path])
+
+
 def test_varread_pr355():
     # read CFF2 VF, write Type1 snapshot
     actual_path = runner(CMD + ['-s', '-o', 't1', '-f', 'cff2_vf.otf'])
@@ -334,11 +344,9 @@ def test_recalculate_font_bbox_bug618(to_format, args, exp_filename):
 
 
 def test_glyph_bboxes_bug655():
-    font_path = get_input_path('bug655.ufo')
+    actual_path = runner(CMD + ['-s', '-o', 'mtx', '2', '-f', 'bug655.ufo'])
     expected_path = get_expected_path('bug655.txt')
-    result_path = get_temp_file_path()
-    runner(CMD + ['-o', 'mtx', '2', '-f', font_path, result_path])
-    assert differ([expected_path, result_path])
+    assert differ([expected_path, actual_path])
 
 
 def test_cs_opt_bug684():
@@ -352,3 +360,21 @@ def test_cs_opt_bug684():
     runner(CMD + ['-a', '-o', 'cff2', '-f', font_path, result_path])
     expected_path = get_expected_path('SHSVF_9b3b_opt.cff2')
     assert differ([expected_path, result_path, '-m', 'bin'])
+
+
+def test_standard_apple_glyph_names():
+    actual_path = runner(CMD + ['-s', '-o', 'dump', '4', '-f', 'post-v2.ttf'])
+    expected_path = get_expected_path('post-v2.txt')
+    assert differ([expected_path, actual_path])
+
+
+def test_ufo_self_closing_dict_element_bug701():
+    actual_path = runner(CMD + ['-s', '-o', 'dump', '0', '-f', 'bug701.ufo'])
+    expected_path = get_expected_path('bug701.txt')
+    assert differ([expected_path, actual_path, '-s', '## Filename'])
+
+
+def test_ufo3_guideline_bug705():
+    actual_path = runner(CMD + ['-s', '-o', 't1', '-f', 'bug705.ufo'])
+    expected_path = get_expected_path('bug705.pfa')
+    assert differ([expected_path, actual_path])

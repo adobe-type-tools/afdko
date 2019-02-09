@@ -1,6 +1,39 @@
 Changelog
 =========
 
+2.8.5 (released 2019-02-09)
+---------------------------
+
+- [tx] Improved subroutinization. Removal of futile subroutines
+  is now the default. `-no_futile` option has been deprecated
+  ([#704](https://github.com/adobe-type-tools/afdko/pull/704))
+- [buildmasterotfs] Fixed failure when master UFOs and designspace
+  file are in the same directory
+- [buildcff2vf] Fixed type error bug
+- [fdkutils] Fixed UnicodeDecodeError on py27 Windows
+  ([#719](https://github.com/adobe-type-tools/afdko/issues/719))
+- [tx] Fixed failure processing already-subroutinized CFF2 font
+  ([#721](https://github.com/adobe-type-tools/afdko/issues/721))
+- [tx] Fixed wrong entries in Standard Apple Glyph Ordering
+  ([#727](https://github.com/adobe-type-tools/afdko/pull/727))
+- [makeotfexe] Added support for shorthand syntax for contextual
+  multiple substitutions `sub a b' c by d e;`
+  ([#725](https://github.com/adobe-type-tools/afdko/issues/725))
+- [makeotfexe] Fixed infinite loop
+  ([#728](https://github.com/adobe-type-tools/afdko/pull/728))
+- [makeotfexe] Allow glyph at GID 0 in glyph classes
+  ([#726](https://github.com/adobe-type-tools/afdko/issues/726))
+- [ufotools] Skip `<dict>` elements inside `<array>`
+  ([#700](https://github.com/adobe-type-tools/afdko/issues/700))
+- [tx] Support self-closing `<dict/>` in UFO's lib.plist
+  ([#701](https://github.com/adobe-type-tools/afdko/issues/701))
+- [makeotfexe] Fixed detection of offset overflow error
+  ([#731](https://github.com/adobe-type-tools/afdko/issues/731))
+- [makeotfexe] Fixed application of `useExtension` to anonymous lookups
+  ([#321](https://github.com/adobe-type-tools/afdko/issues/321))
+- [tx] Support UFO3 guidelines
+  ([#705](https://github.com/adobe-type-tools/afdko/issues/705))
+
 2.8.4 (released 2019-01-09)
 ---------------------------
 

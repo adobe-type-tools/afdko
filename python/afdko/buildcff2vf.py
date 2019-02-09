@@ -3,7 +3,7 @@
 from __future__ import print_function, division, absolute_import
 
 __usage__ = """
-buildcff2vf.py  1.14.1 Sep 26 2018
+buildcff2vf.py  1.14.2 Feb 1 2019
 Build a variable font from a designspace file and the UFO master source fonts.
 
 python buildcff2vf.py -h
@@ -314,7 +314,7 @@ class CFF2GlyphData(object):
                 except IndexError:
                     print("Path mismatch: different number of points. "
                           "Glyph name: %s. " % self.glyphName,
-                          "font index: %s. " % i - 1,
+                          "font index: %s. " % (i - 1),
                           "master font path: %s. " %
                           self.masterFontList[0].srcPath,
                           "Delta font path: %s." %

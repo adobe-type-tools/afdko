@@ -97,6 +97,16 @@ typedef struct
 
 typedef struct
 {
+    float x;
+    float y;
+    float angle;
+    char* name;
+    char* color;
+    char* identifier;
+} guidelineRec;
+
+typedef struct
+{
     char* glyphName;
     char* glifFileName;
     char* glifFilePath;
@@ -143,7 +153,8 @@ enum {
     otherInElement,
     otherInTag,
     otherInAnchor,
-    otherInNote
+    otherInNote,
+    otherInGuideline
 } outlineState;
 
 typedef struct {
@@ -933,7 +944,7 @@ static void setFontDictKey(ufoCtx h, char* keyValue) {
             char* newString = memNew(h, strlen(cpy) + strlen(keyValue) + 2);
             /* set the 0xC2 to NULL to terminate the left side of the string */
             *copySymbol = '\0';
-            /* use copySymbol + 2 to skip the NULL and the 0xA9 
+            /* use copySymbol + 2 to skip the NULL and the 0xA9
                to get the right side of the string */
             sprintf(newString, "%s%s%s", keyValue, "Copyright", copySymbol + 2);
             top->Notice.ptr = newString;
@@ -1158,13 +1169,16 @@ static int parseGlyphOrder(ufoCtx h) {
         } else if (state == IN_COMMENT) {
             continue;
         } else if (tokenEqualStrN(tk, "<dict", 5)) {
+            // <dict/> case
+            if ((tk->val[tk->length - 2] == '/') && (tk->val[tk->length - 1] == '>'))
+                continue;
             state++;
         } else if (tokenEqualStr(tk, "</dict>")) {
             state--;
         } else if (tokenEqualStrN(tk, "<key", 4) && (state == 1)) /* if we are at the top level of the lib dict, check the key values */
         {
             if ((tk->val[tk->length - 2] == '/') && (tk->val[tk->length - 1] == '>')) {
-                message(h, "Warning: Encountered empty <key></key>. Text: '%s'.", getBufferContextPtr(h));
+                message(h, "Warning: Encountered empty <key/>. Text: '%s'.", getBufferContextPtr(h));
             } else {
                 // get key name
                 tk = getElementValue(h, state);
@@ -1629,9 +1643,9 @@ static int parseFontInfo(ufoCtx h) {
                 state = 1;
         } else if (tokenEqualStr(tk, "</dict>")) {
             break;
-        } else if (state > 4)
+        } else if (state > 4) {
             continue;
-        else if (tokenEqualStr(tk, "<key>")) {
+        } else if (tokenEqualStr(tk, "<key>")) {
             if (state != 1) {
                 fatal(h, ufoErrParse, "Encountered '<key>' while not in top level of first <dict>, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
             }
@@ -1724,9 +1738,80 @@ static int parseUFO(ufoCtx h) {
     return retVal;
 }
 
+static int parseGuideline(ufoCtx h, GLIF_Rec* glifRec, int state) {
+    token* tk;
+    char* end;
+    int prevState = outlineStart;
+    int result = ufoSuccess;
+    guidelineRec* guideline;
+
+    guideline = memNew(h, sizeof(guidelineRec));
+    memset(guideline, 0, sizeof(guidelineRec));
+
+    while (1) {
+        tk = getToken(h, state);
+        if (tk == NULL) {
+            fatal(h, ufoErrParse, "Encountered end of buffer before end of glyph.%s. Context: %s\n", glifRec->glifFilePath, getBufferContextPtr(h));
+        } else if (tokenEqualStr(tk, "<!--")) {
+            prevState = state;
+            state = outlineInComment;
+        } else if (tokenEqualStr(tk, "-->")) {
+            if (state != outlineInComment) {
+                fatal(h, ufoErrParse, "Encountered end comment token while not in comment. Glyph %s. Context: %s\n", glifRec->glifFilePath, getBufferContextPtr(h));
+            }
+            state = prevState;
+        } else if (state == outlineInComment) {
+            continue;
+        } else if (tokenEqualStr(tk, "x=")) {
+            tk = getAttribute(h, state);
+            end = tk->val + tk->length;
+            guideline->x = (float)strtod(tk->val, &end);
+        } else if (tokenEqualStr(tk, "y=")) {
+            tk = getAttribute(h, state);
+            end = tk->val + tk->length;
+            guideline->y = (float)strtod(tk->val, &end);
+        } else if (tokenEqualStr(tk, "angle=")) {
+            tk = getAttribute(h, state);
+            end = tk->val + tk->length;
+            guideline->angle = (float)strtod(tk->val, &end);
+        } else if (tokenEqualStr(tk, "name=")) {
+            tk = getAttribute(h, state);
+            if (tk->length > 0) {
+                guideline->name = memNew(h, tk->length + 1);
+                end = tk->val + tk->length;
+                strncpy(guideline->name, tk->val, tk->length);
+                guideline->name[tk->length] = 0;
+            }
+        } else if (tokenEqualStr(tk, "color=")) {
+            tk = getAttribute(h, state);
+            if (tk->length > 0) {
+                guideline->color = memNew(h, tk->length + 1);
+                end = tk->val + tk->length;
+                strncpy(guideline->color, tk->val, tk->length);
+                guideline->color[tk->length] = 0;
+            }
+        } else if (tokenEqualStr(tk, "identifier=")) {
+            tk = getAttribute(h, state);
+            if (tk->length > 0) {
+                guideline->identifier = memNew(h, tk->length + 1);
+                end = tk->val + tk->length;
+                strncpy(guideline->identifier, tk->val, tk->length);
+                guideline->identifier[tk->length] = 0;
+            }
+        } else if (tokenEqualStr(tk, "/>")) {
+            memFree(h, guideline);
+            /* ToDo: instead of freeing it, append the guideline record to a
+                     dynamic array in, or associated with, the glyph record */
+            break;
+        } else {
+            continue;
+        }
+    }
+    return result;
+}
+
 static int parseAnchor(ufoCtx h, GLIF_Rec* glifRec, int state) {
     token* tk;
-    int type = 0;
     char* end;
     int prevState = outlineStart;
     int result = ufoSuccess;
@@ -1783,7 +1868,7 @@ static int parseAnchor(ufoCtx h, GLIF_Rec* glifRec, int state) {
             }
         } else if (tokenEqualStr(tk, "/>")) {
             memFree(h, anchor);
-            /* ToDo: instead of freeing it, append the anchor record to a 
+            /* ToDo: instead of freeing it, append the anchor record to a
                      dynamic array in, or associated with, the glyph record */
             break;
         } else {
@@ -2988,7 +3073,7 @@ static void skipData(ufoCtx h, GLIF_Rec* glifRec) {
 
 static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks* glyph_cb, Transform* transform) {
     /* The first point in a GLIF outlne serves two purposes: it is the start point, but also the end-point.
-     We need to to convert it to the initial move-to, but we also need to
+     We need to convert it to the initial move-to, but we also need to
      re-issue it as the original point type at the end of the path.
      */
 
@@ -3197,9 +3282,18 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks* glyph_cb, Tr
                 state = prevState;
                 if (ufoSuccess != result)
                     break;
+            } else if (tokenEqualStr(tk, "<guideline")) {
+                if (state != outlineStart) {
+                    fatal(h, ufoErrParse, "Encountered <guideline token unexpectedly. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+                }
+                state = otherInGuideline;
+                result = parseGuideline(h, glifRec, state);
+                state = outlineStart;
+                if (ufoSuccess != result)
+                    break;
             } else {
                 if ((state != outlineInLib) && (state != outlineInLibDict)) {
-                    fatal(h, ufoErrParse, "parseGlyphOutline: unhandled token: %s. Glyph: %s. Context: %s.\n", tk->val, glifRec->glyphName, getBufferContextPtr(h));
+                    fatal(h, ufoErrParse, "parseGLIF: unhandled token: %s. Glyph: %s. Context: %s.\n", tk->val, glifRec->glyphName, getBufferContextPtr(h));
                 }
             }
         }

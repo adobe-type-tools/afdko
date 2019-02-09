@@ -18,7 +18,7 @@ from fontTools.misc.py23 import open, tobytes, tounicode, tostr, round
 from afdko import convertfonttocid, fdkutils
 
 __doc__ = """
-ufotools.py v1.32.4 Dec 13 2018
+ufotools.py v1.32.5 Feb 6 2019
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -1254,6 +1254,8 @@ def parsePList(filePath, dictKey=None):
                         val = float(eval(val))
                     elif listChild.tag == "string":
                         pass
+                    elif listChild.tag == "dict":
+                        continue  # ignore global guidelines (UFO3)
                     else:
                         raise UFOParseError(
                             "In plist file, encountered unhandled key type "

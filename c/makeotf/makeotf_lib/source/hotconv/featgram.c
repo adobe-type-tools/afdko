@@ -163,7 +163,7 @@ char *gcname;
                                     if ((setwd1[LA(1)] & 0x2)) {
                                         gid = glyph(p, TRUE);
 
-                                        if (gid == 0) {
+                                        if (gid == GID_UNDEF) {
                                             char *secondPart = p;
                                             char *firstPart = p;
                                             /* it might be a range.*/

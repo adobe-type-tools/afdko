@@ -62,7 +62,7 @@ from __future__ import print_function, absolute_import
 
 
 __help__ = """
-ttxn v1.21.0 Aug 30 2018
+ttxn v1.21.1 Jan 30 2019
 
 Based on the ttx tool, with the same options, except that it is limited to
 dumping, and cannot compile. Makes a normalized dump of the font, or of
@@ -1107,8 +1107,8 @@ def ruleLigatureSub(subtable, otlConv, context=None):
                     else:
                         note = ""
                 except ValueError:
-                        note = (" # Note! first glyph %s is not in input "
-                                "sequence." % firstGlyph)
+                    note = (" # Note! first glyph %s is not in input "
+                            "sequence." % firstGlyph)
             else:
                 note = ""
 

@@ -8,7 +8,7 @@
 
 #include "ctlshare.h"
 
-#define CFW_VERSION CTL_MAKE_VERSION(1, 0, 53)
+#define CFW_VERSION CTL_MAKE_VERSION(1, 0, 54)
 
 #include "absfont.h"
 
@@ -87,8 +87,7 @@ enum {
        sources that will be used for OpenType/CFF fonts */
     CFW_CUBE_RND =               1 << 11,
     CFW_NO_OPTIMIZATION =        1 << 12,
-    CFW_WRITE_CFF2 =             1 << 13,
-    CFW_NO_FUTILE_SUBRS =        1 << 14 /* Remove futile subroutines during subroutinization */
+    CFW_WRITE_CFF2 =             1 << 13
 };
 
 /* If the CFW_PRESERVE_GLYPH_ORDER bit is not set, glyphs are accumulated and

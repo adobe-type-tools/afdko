@@ -63,6 +63,19 @@ def test_useMarkFilteringSet_flag_bug196():
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
 
 
+def test_useException_bug321():
+    input_filename = "bug321/font.pfa"
+    feat_filename = "bug321/feat.fea"
+    actual_path = get_temp_file_path()
+    ttx_filename = "bug321.ttx"
+    runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
+                        'ff', '_{}'.format(get_input_path(feat_filename)),
+                        'o', '_{}'.format(actual_path)])
+    actual_ttx = generate_ttx_dump(actual_path, ['GSUB', 'GPOS'])
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
 def test_mark_refer_diff_classes_bug416():
     input_filename = "bug416/font.pfa"
     feat_filename = "bug416/feat.fea"
@@ -344,3 +357,46 @@ def test_recalculate_bbox_bug617(arg):
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value='])
+
+
+def test_contextual_multiple_substitutions_bug725():
+    input_filename = "bug725/font.pfa"
+    feat_filename = "bug725/feat.fea"
+    actual_path = get_temp_file_path()
+    ttx_filename = "bug725.ttx"
+    runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
+                        'ff', '_{}'.format(get_input_path(feat_filename)),
+                        'o', '_{}'.format(actual_path)])
+    actual_ttx = generate_ttx_dump(actual_path, ['GSUB'])
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
+def test_notdef_in_glyph_class_bug726():
+    input_filename = "bug726/font.pfa"
+    feat_filename = "bug726/feat.fea"
+    actual_path = get_temp_file_path()
+    ttx_filename = "bug726.ttx"
+    runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
+                        'ff', '_{}'.format(get_input_path(feat_filename)),
+                        'o', '_{}'.format(actual_path)])
+    actual_ttx = generate_ttx_dump(actual_path, ['GDEF'])
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
+def test_overflow_bug731():
+    input_filename = 'bug731/font.pfa'
+    feat_filename = 'bug731/feat.fea'
+    otf_path = get_temp_file_path()
+
+    stderr_path = runner(
+        CMD + ['-s', '-e', '-o', 'shw',
+               'f', '_{}'.format(get_input_path(input_filename)),
+               'ff', '_{}'.format(get_input_path(feat_filename)),
+               'o', '_{}'.format(otf_path)])
+
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert(b"[FATAL] <SourceSans-Test> subtable offset too large (1003c) in "
+           b"lookup 0 type 3") in output

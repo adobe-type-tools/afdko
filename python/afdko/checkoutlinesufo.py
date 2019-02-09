@@ -6,7 +6,7 @@ Tool that performs outline quality checks and can remove path overlaps.
 
 from __future__ import print_function, absolute_import
 
-__version__ = '2.3.0'
+__version__ = '2.3.1'
 
 import argparse
 from functools import cmp_to_key
@@ -254,7 +254,7 @@ class InlineHelpFormatter(argparse.RawDescriptionHelpFormatter):
         arg_rows = arg.splitlines()
         for line_index, text_line in enumerate(arg_rows):
             search = re.search(r'\s*[0-9\-]{0,}\.?\s*', text_line)
-            if text_line.strip() is "":
+            if text_line.strip() == "":
                 arg_rows[line_index] = " "
             elif search:
                 indent_space = search.end()

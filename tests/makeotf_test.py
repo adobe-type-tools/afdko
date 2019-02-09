@@ -43,6 +43,11 @@ xfail_py3_win = pytest.mark.xfail(
     reason="?")
 
 
+xfail_py27_mac = pytest.mark.xfail(
+    sys.version_info < (3, 0) and sys.platform != 'win32',
+    reason="?")
+
+
 def setup_module():
     """
     Create the temporary output directory
@@ -117,6 +122,7 @@ def test_getSourceGOADBData():
 
 
 @xfail_win
+@xfail_py27_mac
 @pytest.mark.parametrize('input_filename', [
     T1PFA_NAME, UFO2_NAME, UFO3_NAME, CID_NAME])
 def test_path_with_non_ascii_chars_bug222(input_filename):
@@ -563,3 +569,25 @@ def test_ttf_input_font_bug680():
                       'prep', 'cvt ', 'loca', 'glyf', 'name', 'post', 'gasp',
                       'BASE', 'GDEF', 'GPOS', 'GSUB'):
         assert font_has_table(ttf_path, table_tag)
+
+
+def test_skip_ufo3_global_guides_bug700():
+    input_filename = "bug700/font.ufo"
+    actual_path = get_temp_file_path()
+    runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
+                        'o', '_{}'.format(actual_path)])
+    assert font_has_table(actual_path, 'CFF ')
+
+
+def test_unhandled_ufo_glif_token_bug705():
+    input_filename = 'bug705/font.ufo'
+    otf_path = get_temp_file_path()
+
+    stderr_path = runner(
+        CMD + ['-s', '-e', '-o',
+               'f', '_{}'.format(get_input_path(input_filename)),
+               'o', '_{}'.format(otf_path)])
+
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert b"unhandled token: <foo" in output

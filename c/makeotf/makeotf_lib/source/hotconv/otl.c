@@ -1167,7 +1167,6 @@ static void calcLookupListIndexes(hotCtx g, otlTbl t) {
             LabelInfo *lab = dnaNEXT(t->label);
             lab->used = 0; /* new label; hasn't been referenced by anything yet. */
 
-            /* sub-tables with feature Params currently don't have any look-ups. */
             if (sub->isFeatParam) {
                 sub->index.lookup = -1;
             } else {
@@ -1575,7 +1574,7 @@ static Offset fillFeatureList(hotCtx g, otlTbl t) {
     /* This works becuase prepFeature has sorted the subtables so that anon subtabes are last, preceded by Stand-Alone subtables */
     int spanLimit = t->subtable.cnt - (t->nAnonSubtables + t->nStandAloneSubtables);
 
-    nFeatures = t->subtable.array[spanLimit - 1].index.feature + 1;
+    nFeatures = spanLimit ? t->subtable.array[spanLimit - 1].index.feature + 1 : 0;
     /* Allocate features */
     t->tbl.FeatureList_.FeatureCount = nFeatures;
     t->tbl.FeatureList_.FeatureRecord =
@@ -1794,8 +1793,12 @@ void otlTableFill(hotCtx g, otlTbl t) {
     if (t->nFeatParams > 0) {
         /* The feature table FeatureParam offsets are currently from the start of the subtable block.*/
         /* featureParamBaseOffset is the (size of the feature list + feature record array) + size of the lookup list. */
-        short featureParamBaseOffset = (t->tbl.LookupList - t->tbl.FeatureList) + t->lookupSize;
-        fixFeatureParmOffsets(g, t, featureParamBaseOffset);
+        long featureParamBaseOffset = (t->tbl.LookupList - t->tbl.FeatureList) + t->lookupSize;
+        if (featureParamBaseOffset > 0xFFFF) {
+            hotMsg(g, hotFATAL, "feature parameter offset too large (%0lx)",
+                   featureParamBaseOffset);
+        }
+        fixFeatureParmOffsets(g, t, (short)featureParamBaseOffset);
     }
 }
 
@@ -1903,7 +1906,12 @@ void otlTableWrite(hotCtx g, otlTbl t) {
         OUT2(lookup->LookupFlag);
         OUT2(lookup->SubTableCount);
         for (j = 0; j < lookup->SubTableCount; j++) {
-            OUT2((short)(lookup->SubTable[j] + t->lookupSize));
+            long subTableOffset = lookup->SubTable[j] + t->lookupSize;
+            if (subTableOffset > 0xFFFF) {
+                hotMsg(g, hotFATAL, "subtable offset too large (%0lx) in lookup %i type %i",
+                       subTableOffset, i, lookup->LookupType);
+            }
+            OUT2((short)subTableOffset);
         }
         if (lookup->LookupFlag & otlUseMarkFilteringSet) {
             OUT2(lookup->UseMarkSetIndex);
