@@ -372,3 +372,9 @@ def test_ufo_self_closing_dict_element_bug701():
     actual_path = runner(CMD + ['-s', '-o', 'dump', '0', '-f', 'bug701.ufo'])
     expected_path = get_expected_path('bug701.txt')
     assert differ([expected_path, actual_path, '-s', '## Filename'])
+
+
+def test_ufo3_guideline_bug705():
+    actual_path = runner(CMD + ['-s', '-o', 't1', '-f', 'bug705.ufo'])
+    expected_path = get_expected_path('bug705.pfa')
+    assert differ([expected_path, actual_path])
