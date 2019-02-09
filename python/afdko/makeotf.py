@@ -26,7 +26,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.7.0 Feb 8 2019
+makeotf.py v2.7.1 Feb 9 2019
 """
 
 __methods__ = """
@@ -2570,6 +2570,11 @@ def runMakeOTF(makeOTFParams):
     if not os.path.exists(tempOutPath) or (os.path.getsize(tempOutPath) < 500):
         print("makeotf [Error] Failed to build output font file '%s'." %
               tempOutPath)
+        if os.path.exists(tempOutPath):
+            try:
+                os.remove(tempOutPath)
+            except OSError:
+                pass
         raise MakeOTFRunError
 
     if makeOTFParams.srcIsTTF:
@@ -2578,6 +2583,11 @@ def runMakeOTF(makeOTFParams):
     if not os.path.exists(outputPath) or (os.path.getsize(outputPath) < 500):
         print("makeotf [Error] Failed to build output font file '%s'." %
               outputPath)
+        if os.path.exists(outputPath):
+            try:
+                os.remove(outputPath)
+            except OSError:
+                pass
         raise MakeOTFRunError
 
     # The following check is here because of the internal Adobe
