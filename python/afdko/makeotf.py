@@ -8,6 +8,7 @@ import re
 import sys
 
 from fontTools.ttLib import TTFont, TTLibError
+from fontTools.ttLib.tables.DefaultTable import DefaultTable
 from fontTools.misc.py23 import open, tounicode, tobytes
 
 from afdko import convertfonttocid, fdkutils, ufotools
@@ -2167,11 +2168,6 @@ def copyTTFGlyphTables(inputFilePath, tempOutputPath, outputPath):
     # tempOutputPath exists and is an OTF/CFF font.
     # outputPath does not yet exist, or is the same as inputFilePath.
 
-    success, tableDump = fdkutils.get_shell_command_output([
-        'spot', tempOutputPath])
-    if not success:
-        raise MakeOTFShellError
-
     # Get the final glyph name list.
     success, output = fdkutils.get_shell_command_output([
         'tx', '-mtx', tempOutputPath])
@@ -2190,33 +2186,10 @@ def copyTTFGlyphTables(inputFilePath, tempOutputPath, outputPath):
     print("Fixing output font 'hhea' table...")
     fixHhea(tempOutputPath, outputPath)
 
-    tempTablePath = fdkutils.get_temp_file_path()
-
     print("Copying makeotf-generated tables from temp OTF file to output "
           "font...")
-    for tableTag in ["GDEF", "GSUB", "GPOS", "cmap", "name", "OS/2", "BASE"]:
-        if tableTag not in tableDump:
-            continue
-
-        if not fdkutils.run_shell_command([
-                'sfntedit', '-x', '%s=%s' % (tableTag, tempTablePath),
-                tempOutputPath]):
-            print("Error removing table '%s' from OTF font reference." %
-                  tableTag)
-            raise MakeOTFShellError
-
-        if not fdkutils.run_shell_command([
-                'sfntedit', '-a', '%s=%s' % (tableTag, tempTablePath),
-                outputPath]):
-            print("Error adding makeotf-made table '%s' to TrueType font." %
-                  tableTag)
-            raise MakeOTFShellError
-
-        print("    copied \"%s\"" % tableTag)
-
-    # fix checksums
-    if not fdkutils.run_shell_command(['sfntedit', '-f', outputPath]):
-        raise MakeOTFShellError
+    tags = ["GDEF", "GSUB", "GPOS", "cmap", "name", "OS/2", "BASE"]
+    copy_tables(tempOutputPath, outputPath, tags)
 
     print("Succeeded in merging makeotf tables with TrueType source font to "
           "final TrueType output font at '%s'." % outputPath)
@@ -2275,6 +2248,23 @@ def fixHead(tempOTFFilePath, outputPath):
 def fixHhea(tempOTFFilePath, outputPath):
     hhea_items = ("ascent", "descent", "lineGap")
     update_table_items('hhea', hhea_items, outputPath, tempOTFFilePath)
+
+
+def copy_tables(font1_path, font2_path, tags):
+    font1 = TTFont(font1_path)
+    font2 = TTFont(font2_path)
+
+    for tag in tags:
+        if tag not in font1:
+            continue
+        table = DefaultTable(tag)
+        table.data = font1.getTableData(tag)
+        font2[tag] = table
+        print('    copied "%s"' % tag)
+
+    font2.save(font2_path)
+    font1.close()
+    font2.close()
 
 
 def makeRelativePath(curDir, targetPath):
