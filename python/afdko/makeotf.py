@@ -2176,26 +2176,32 @@ def copyTTFGlyphTables(inputFilePath, tempOutputPath, outputPath):
 
     glyphList = re.findall(r"[\n\r]glyph\[\d+\]\s+{([^,]+)", output)
 
-    if os.path.exists(outputPath):
-        os.remove(outputPath)
+    font = TTFont(inputFilePath)
+    temp_font = TTFont(tempOutputPath)
 
     print("Fixing output font 'post' table...")
-    fixPost(glyphList, inputFilePath, outputPath)
+    fixPost(glyphList, font)
+
     print("Fixing output font 'head' table...")
-    fixHead(tempOutputPath, outputPath)
+    fixHead(temp_font, font)
+
     print("Fixing output font 'hhea' table...")
-    fixHhea(tempOutputPath, outputPath)
+    fixHhea(temp_font, font)
 
     print("Copying makeotf-generated tables from temp OTF file to output "
           "font...")
     tags = ["GDEF", "GSUB", "GPOS", "cmap", "name", "OS/2", "BASE"]
-    copy_tables(tempOutputPath, outputPath, tags)
+    copy_tables(temp_font, font, tags)
 
     print("Succeeded in merging makeotf tables with TrueType source font to "
           "final TrueType output font at '%s'." % outputPath)
 
+    font.save(outputPath)
+    font.close()
+    temp_font.close()
 
-def fixPost(glyphList, inputFilePath, outputPath):
+
+def fixPost(glyphList, font):
     """
     Replace 'post' table
     """
@@ -2206,65 +2212,49 @@ def fixPost(glyphList, inputFilePath, outputPath):
         if gname not in kStdNames:
             extraNamesList.append(gname)
 
-    font = TTFont(inputFilePath)
     post_table = font['post']
     post_table.formatType = 2
     post_table.glyphOrder = glyphOrderList
     post_table.extraNames = extraNamesList
-    font.save(outputPath)
 
 
-def update_table_items(table_tag, items_list, font1_path, font2_path):
+def update_table_items(table_tag, items_list, font1, font2):
     """
     font1 will get new values from font2
     """
-    font1 = TTFont(font1_path)
-    font2 = TTFont(font2_path)
-
     font1_table = font1[table_tag]
     font2_table = font2[table_tag]
 
     for item_name in items_list:
         setattr(font1_table, item_name, getattr(font2_table, item_name))
 
-    font1.save(font1_path)
-    font1.close()
-    font2.close()
 
-
-def fixHead(tempOTFFilePath, outputPath):
+def fixHead(temp_font, font):
     """
-    tempOTFFilePath is an OTF/CFF font.
-    outputPath is a TTF font.
+    temp_font is an OTF/CFF font.
+    font is a TTF font.
     Need to update the head values. Can't just copy the entire table
     from the OTF temp font, as as some of the head table values control
     interpretation of the glyf data.
     """
     head_items = ("fontRevision", "created", "modified", "macStyle",
                   "xMin", "xMax", "yMin", "yMax")
-    update_table_items('head', head_items, outputPath, tempOTFFilePath)
+    update_table_items('head', head_items, font, temp_font)
 
 
-def fixHhea(tempOTFFilePath, outputPath):
+def fixHhea(temp_font, font):
     hhea_items = ("ascent", "descent", "lineGap")
-    update_table_items('hhea', hhea_items, outputPath, tempOTFFilePath)
+    update_table_items('hhea', hhea_items, font, temp_font)
 
 
-def copy_tables(font1_path, font2_path, tags):
-    font1 = TTFont(font1_path)
-    font2 = TTFont(font2_path)
-
+def copy_tables(temp_font, font, tags):
     for tag in tags:
-        if tag not in font1:
+        if tag not in temp_font:
             continue
         table = DefaultTable(tag)
-        table.data = font1.getTableData(tag)
-        font2[tag] = table
+        table.data = temp_font.getTableData(tag)
+        font[tag] = table
         print('    copied "%s"' % tag)
-
-    font2.save(font2_path)
-    font1.close()
-    font2.close()
 
 
 def makeRelativePath(curDir, targetPath):
