@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="dieresisbelowcmb" format="1">
+	<outline>
+		<contour>
+			<point x="-127" y="-127" type="line"/>
+			<point x="-127" y="-219" type="line"/>
+			<point x="-64" y="-219" type="line"/>
+			<point x="-64" y="-127" type="line"/>
+		</contour>
+		<contour>
+			<point x="63" y="-127" type="line"/>
+			<point x="63" y="-219" type="line"/>
+			<point x="126" y="-219" type="line"/>
+			<point x="126" y="-127" type="line"/>
+		</contour>
+	</outline>
+</glyph>
