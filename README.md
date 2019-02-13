@@ -25,11 +25,12 @@ projects.
 Installation
 ------------
 
-:warning: **WARNING** After June 30th 2019 the afdko will officially only
-support Python 3.6 or later. See #741 for details.
+:warning: **WARNING** :warning: After June 30th 2019 the AFDKO will officially
+only support Python 3.6 or later. See [#741](https://github.com/adobe-type-tools/afdko/issues/741)
+for details.
 
 The AFDKO requires [Python](http://www.python.org/download) 2.7, 3.6
-os later.
+or later.
 
 Releases are available on the [Python Package
 Index](https://pypi.python.org/pypi/afdko) (PyPI) and can be installed
