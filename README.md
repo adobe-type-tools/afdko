@@ -22,25 +22,14 @@ Please see the
 for additional information, such as links to reference materials and related
 projects.
 
-Major changes
--------------
-
-The AFDKO has been restructured so that it can be installed as a Python
-package. It now depends on the user\'s Python interpreter, and no longer
-contains its own Python interpreter. In order to do this, two
-Adobe-owned, non-open source programs were dropped: **IS** and
-**checkoutlines**. If these turn out to be sorely missed, an installer
-for them will be added to the old Adobe AFDKO website. The current
-intent is to migrate the many tests in checkoutlines to the newer
-**checkoutlinesufo** (which does work with OpenType and Type 1 fonts,
-but currently does only overlap detection and removal, and a few basic
-path checks).
-
 Installation
 ------------
 
-The AFDKO requires [Python](http://www.python.org/download) 2.7.x. or
-3.6.x.
+:warning: **WARNING** After June 30th 2019 the afdko will officially only
+support Python 3.6 or later. See #741 for details.
+
+The AFDKO requires [Python](http://www.python.org/download) 2.7, 3.6
+os later.
 
 Releases are available on the [Python Package
 Index](https://pypi.python.org/pypi/afdko) (PyPI) and can be installed
@@ -153,3 +142,18 @@ written in Python or a shell scripting language). To work around this problem
 feedback as they modify the source files) you can use alternative methods like
 exporting a PYTHONPATH, using a .pth file or similar hacks.
 For further details read [this comment](https://github.com/adobe-type-tools/afdko/pull/677#issuecomment-436747212).
+
+Major changes
+-------------
+
+The AFDKO has been restructured so that it can be installed as a Python
+package. It now depends on the user\'s Python interpreter, and no longer
+contains its own Python interpreter. In order to do this, two
+Adobe-owned, non-open source programs were dropped: **IS** and
+**checkoutlines**. If these turn out to be sorely missed, an installer
+for them will be added to the old Adobe AFDKO website. The current
+intent is to migrate the many tests in checkoutlines to the newer
+**checkoutlinesufo** (which does work with OpenType and Type 1 fonts,
+but currently does only overlap detection and removal, and a few basic
+path checks).
+
