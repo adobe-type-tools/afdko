@@ -378,3 +378,15 @@ def test_ufo3_guideline_bug705():
     actual_path = runner(CMD + ['-s', '-o', 't1', '-f', 'bug705.ufo'])
     expected_path = get_expected_path('bug705.pfa')
     assert differ([expected_path, actual_path])
+
+
+@pytest.mark.parametrize('filename', [
+    'a',  # AE glyph in both default and processed layers
+    'b',  # AE glyph in default layer only
+    'c',  # AE glyph in processed layer only
+])
+def test_ufo_read_processed_contents_plist_bug740(filename):
+    actual_path = runner(CMD + ['-s', '-o', 'dump', '6', 'g', '_AE',
+                                '-f', 'bug740/{}.ufo'.format(filename)])
+    expected_path = get_expected_path('bug740/{}.txt'.format(filename))
+    assert differ([expected_path, actual_path])

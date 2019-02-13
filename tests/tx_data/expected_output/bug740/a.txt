@@ -1,0 +1,41 @@
+## glyph[tag] {name,encoding,path}
+glyph[0] {AE,U+00C6,
+  1014 width
+  299 320 move
+  493 605 line
+  493 320 line
+  925 684 move
+  876 675 line
+  402 675 line
+  402 642 line
+  455 630 line
+  57 49 line
+  -14 33 line
+  -14 0 line
+  188 0 line
+  188 33 line
+  116 50 line
+  266 271 line
+  493 271 line
+  493 49 line
+  422 33 line
+  422 0 line
+  903 0 line
+  953 -9 line
+  980 229 line
+  941 229 line
+  861 42 line
+  653 42 line
+  653 323 line
+  811 323 line
+  837 249 line
+  875 249 line
+  875 443 line
+  837 443 line
+  811 369 line
+  653 369 line
+  653 633 line
+  829 633 line
+  923 446 line
+  962 446 line
+  endchar}
