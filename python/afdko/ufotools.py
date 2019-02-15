@@ -14,11 +14,14 @@ except ImportError:
     import xml.etree.ElementTree as ET
 
 from fontTools.misc.py23 import open, tobytes, tounicode, tostr, round
+from fontTools.ufoLib import UFOReader
+
+from psautohint.ufoFont import UFOFontData as psautohintUFOFontData
 
 from afdko import convertfonttocid, fdkutils
 
 __doc__ = """
-ufotools.py v1.32.5 Feb 6 2019
+ufotools.py v1.33.0 Feb 14 2019
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -418,6 +421,9 @@ class UFOFontData(object):
         # If true, do NOT round x,y values when processing
         self.allowDecimalCoords = False
 
+        self.glyphset = UFOReader(self.parentPath,
+                                  validate=False).getGlyphSet(None)
+
     def getUnitsPerEm(self):
         unitsPerEm = "1000"
         if self.fontInfo is None:
@@ -713,7 +719,7 @@ class UFOFontData(object):
             return None, None, None
         return width, glifXML, outlineXML
 
-    def getOrSkipGlyphXML(self, glyphName, doAll=0):
+    def getOrSkipGlyph(self, glyphName, doAll=0):
         # Get default glyph layer data, so we can check if the glyph
         # has been edited since this program was last run.
         # If the program name is in the history list, and the srcHash
@@ -722,13 +728,12 @@ class UFOFontData(object):
             self.loadGlyphMap()
         glyphFileName = self.glyphMap.get(glyphName)
         if not glyphFileName:
-            skip = 1
-            return None, None, skip
+            return None, True  # skip
+
         width, glifXML, outlineXML = self.getGlyphXML(self.glyphDefaultDir,
                                                       glyphFileName)
         if glifXML is None:
-            skip = 1
-            return None, None, skip
+            return None, True  # skip
 
         # Hash is always from the default glyph layer.
         useDefaultGlyphDir = True
@@ -745,13 +750,12 @@ class UFOFontData(object):
                 pass
             glyphPath = os.path.join(self.glyphLayerDir, glyphFileName)
             if os.path.exists(glyphPath):
-                width, glifXML, outlineXML = self.getGlyphXML(
+                width, glifXML, _ = self.getGlyphXML(
                     self.glyphLayerDir, glyphFileName)
                 if glifXML is None:
-                    skip = 1
-                    return None, None, skip
+                    return None, True  # skip
 
-        return width, outlineXML, skip
+        return width, skip
 
     def getGlyphList(self):
         if len(self.glyphMap) == 0:
@@ -1287,318 +1291,17 @@ def parsePList(filePath, dictKey=None):
     return plistDict, plistKeys
 
 
-class UFOTransform:
-    kTransformTagList = ["xScale", "xyScale", "yxScale", "yScale",
-                         "xOffset", "yOffset"]
-
-    def __init__(self, componentXML):
-        self.transformFactors = []
-        self.isDefault = True
-        self.isOffsetOnly = True
-        hasScale = False
-        hasOffset = False
-        for tag in self.kTransformTagList:
-            val = componentXML.attrib.get(tag, None)
-            if tag in ["xScale", "yScale"]:
-                if val is None:
-                    val = 1.0
-                else:
-                    val = float(val)
-                    if val != 1.0:
-                        hasScale = True
-            else:
-                if val is None:
-                    val = 0
-                else:
-                    val = float(val)
-                    if val != 0:
-                        self.isDefault = False
-                        if tag in ["xyScale", "yxScale"]:
-                            hasScale = True
-                        elif tag in ["xOffset", "yOffset"]:
-                            hasOffset = True
-                        else:
-                            raise UFOParseError(
-                                "Unknown tag '%s' in component '%s'." %
-                                (tag, xmlToString(componentXML)))
-
-            self.transformFactors.append(val)
-        if hasScale or hasOffset:
-            self.isDefault = False
-        if hasScale:
-            self.isOffsetOnly = False
-
-    def concat(self, transform):
-        if transform is None:
-            return
-        if transform.isDefault:
-            return
-        tfCur = self.transformFactors
-        tfPrev = transform.transformFactors
-        if transform.isOffsetOnly:
-            tfCur[4] += tfPrev[4]
-            tfCur[5] += tfPrev[5]
-            self.isDefault = False
-        else:
-            tfNew = [0.0] * 6
-            tfNew[0] = tfCur[0] * tfPrev[0] + tfCur[1] * tfPrev[2]
-            tfNew[1] = tfCur[0] * tfPrev[1] + tfCur[1] * tfPrev[3]
-            tfNew[2] = tfCur[2] * tfPrev[0] + tfCur[3] * tfPrev[2]
-            tfNew[3] = tfCur[2] * tfPrev[1] + tfCur[3] * tfPrev[3]
-            tfNew[4] = tfCur[4] * tfPrev[0] + tfCur[5] * tfPrev[2] + tfPrev[4]
-            tfNew[5] = tfCur[4] * tfPrev[1] + tfCur[5] * tfPrev[3] + tfPrev[5]
-            self.transformFactors = tfNew
-            self.isOffsetOnly = self.isOffsetOnly and transform.isOffsetOnly
-            self.isDefault = False
-
-    def apply(self, x, y):
-        tfCur = self.transformFactors
-        if self.isOffsetOnly:
-            x += tfCur[4]
-            y += tfCur[5]
-        else:
-            x, y = (x * tfCur[0] + y * tfCur[2] + tfCur[4],
-                    x * tfCur[1] + y * tfCur[3] + tfCur[5])
-        return x, y
-
-
-def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY,
-                                   transform=None, level=0):
-    """convert XML outline element containing contours and components to
-    a bez string. Since xml.etree.CElementTree is compiled code, this
-    will run faster than tokenizing and parsing in regular Python.
-
-    glyphMap is a dict mapping glyph names to component file names. If it
-    has a length of 1, it needs to be filled from the contents.plist file.
-    It must have a key/value [UFO_FONTPATH] = path to parent UFO font.
-
-    transformList is None, or a list of floats in the order:
-    ["xScale", "xyScale", "yxScale", "yScale", "xOffset", "yOffset"]
-
-    Build a list of outlines and components.
-    For each item:
-        if is outline:
-            get list of points
-            for each point:
-                if transform matrix:
-                    apply transform to coordinate
-                if off line
-                    push coord on stack
-                if online:
-                    add operator
-            if is component:
-                if any scale, skew, or offset factors:
-                    set transform
-                    call convertGlyphOutlineToBezString with transform
-                    add to bez string
-    I don't bother adding in any hinting info, as this is used only for making
-    temp bez files as input to checkoutlines or autohint, which invalidate
-    hinting data by changing the outlines data, or at best ignore hinting data.
-
-    bez ops output: ["rrmt", "dt", "rct", "cp" , "ed"]
-    """
-
-    if level > 10:
-        raise UFOParseError(
-            "In parsing component, exceeded 10 levels of reference. '%s'. " %
-            outlineXML)
-
-    allowDecimals = ufoFontData.allowDecimalCoords
-
-    bezStringList = []
-    if outlineXML is None:
-        bezstring = ""
-    else:
-        for outlineItem in outlineXML:
-
-            if outlineItem.tag == "component":
-                newTransform = UFOTransform(outlineItem)
-                if newTransform.isDefault:
-                    if transform is not None:
-                        newTransform.concat(transform)
-                    else:
-                        newTransform = None
-                else:
-                    if transform is not None:
-                        newTransform.concat(transform)
-                componentOutline = ufoFontData.getComponentOutline(outlineItem)
-                if componentOutline:
-                    outlineBezString, curX, curY = \
-                        convertGlyphOutlineToBezString(
-                            componentOutline, ufoFontData, curX, curY,
-                            newTransform, level + 1)
-                    bezStringList.append(outlineBezString)
-                continue
-
-            if outlineItem.tag != "contour":
-                continue
-
-            # May be an empty contour.
-            if len(outlineItem) == 0:
-                continue
-
-            # We have a regular contour. Iterate over points.
-            argStack = []
-            # Deal with setting up move-to.
-            lastItem = outlineItem[0]
-            try:
-                type = lastItem.attrib["type"]
-            except KeyError:
-                type = "offcurve"
-            if type in ["curve", "line", "qccurve"]:
-                outlineItem = outlineItem[1:]
-                if type != "line":
-                    # I don't do this for line, as AC behaves
-                    # differently when a final line-to is explicit.
-                    outlineItem.append(lastItem)
-                x = float(lastItem.attrib["x"])
-                y = float(lastItem.attrib["y"])
-                if transform is not None:
-                    x, y = transform.apply(x, y)
-
-                if (not allowDecimals):
-                    x = int(round(x))
-                    y = int(round(y))
-                curX = x
-                curY = y
-
-                if (allowDecimals):
-                    op = "%.3f %.3f mt" % (x, y)
-                else:
-                    op = "%s %s mt" % (x, y)
-                bezStringList.append(op)
-            elif type == "move":
-                # first op is a move-to.
-                if len(outlineItem) == 1:
-                    # this is a move, and is the only op in this outline.
-                    # Don't pass it thru. This is most likely leftover
-                    # from a GLIF format 1 anchor.
-                    argStack = []
-                    continue
-            elif type == "offcurve":
-                # We should only see an off curve point as the first point
-                # when the first op is a curve and the last op is a line.
-                # In this case, insert a move-to to the line's coords, then
-                # omit the line.
-                # Breaking news! In rare cases, a first off-curve point can
-                # occur when the first AND last op is a curve.
-                curLastItem = outlineItem[-1]
-                # In this case, insert a move-to to the last op's end pos.
-                try:
-                    lastType = curLastItem.attrib["type"]
-                    x = float(curLastItem.attrib["x"])
-                    y = float(curLastItem.attrib["y"])
-                    if transform is not None:
-                        x, y = transform.apply(x, y)
-
-                    if (not allowDecimals):
-                        x = int(round(x))
-                        y = int(round(y))
-                    curX = x
-                    curY = y
-
-                    if lastType == "line":
-                        if (allowDecimals):
-                            op = "%.3f %.3f mt" % (x, y)
-                        else:
-                            op = "%s %s mt" % (x, y)
-                        bezStringList.append(op)
-                        outlineItem = outlineItem[:-1]
-
-                    elif lastType == "curve":
-                        if (allowDecimals):
-                            op = "%.3f %.3f mt" % (x, y)
-                        else:
-                            op = "%s %s mt" % (x, y)
-                        bezStringList.append(op)
-
-                except KeyError:
-                    raise UFOParseError(
-                        "Unhandled case for first and last points in outline "
-                        "'%s'." % xmlToString(outlineItem))
-            else:
-                raise UFOParseError(
-                    "Unhandled case for first point in outline '%s'." %
-                    xmlToString(outlineItem))
-
-            for contourItem in outlineItem:
-                if contourItem.tag != "point":
-                    continue
-                x = float(contourItem.attrib["x"])
-                y = float(contourItem.attrib["y"])
-                if transform is not None:
-                    x, y = transform.apply(x, y)
-
-                if not allowDecimals:
-                    x = int(round(x))
-                    y = int(round(y))
-                curX = x
-                curY = y
-
-                try:
-                    type = contourItem.attrib["type"]
-                except KeyError:
-                    type = "offcurve"
-
-                if type == "offcurve":
-                    argStack.append(x)
-                    argStack.append(y)
-                elif type == "move":
-                    if (allowDecimals):
-                        op = "%.3f %.3f mt" % (x, y)
-                    else:
-                        op = "%s %s mt" % (x, y)
-                    bezStringList.append(op)
-                    argStack = []
-                elif type == "line":
-                    if (allowDecimals):
-                        op = "%.3f %.3f dt" % (x, y)
-                    else:
-                        op = "%s %s dt" % (x, y)
-                    bezStringList.append(op)
-                    argStack = []
-                elif type == "curve":
-                    if len(argStack) != 4:
-                        raise UFOParseError(
-                            "Argument stack error seen for curve point '%s'." %
-                            xmlToString(contourItem))
-                    if (allowDecimals):
-                        op = "%.3f %.3f %.3f %.3f %.3f %.3f ct" % (
-                            argStack[0], argStack[1], argStack[2], argStack[3],
-                            x, y)
-                    else:
-                        op = "%s %s %s %s %s %s ct" % (
-                            argStack[0], argStack[1], argStack[2], argStack[3],
-                            x, y)
-                    argStack = []
-                    bezStringList.append(op)
-                elif type == "qccurve":
-                    raise UFOParseError(
-                        "Point type not supported '%s'." %
-                        xmlToString(contourItem))
-                else:
-                    raise UFOParseError(
-                        "Unknown Point type not supported '%s'." %
-                        xmlToString(contourItem))
-
-            # we get here only if there was at least a move.
-            bezStringList.append("cp" + os.linesep)
-        bezstring = os.linesep.join(bezStringList)
-    return bezstring, curX, curY
-
-
 def convertGLIFToBez(ufoFontData, glyphName, doAll=0):
-    width, outlineXML, skip = ufoFontData.getOrSkipGlyphXML(glyphName, doAll)
+    width, skip = ufoFontData.getOrSkipGlyph(glyphName, doAll)
     if skip:
         return None, width
 
-    if outlineXML is None:
-        return None, width
+    glyph = ufoFontData.glyphset[glyphName]
+    round_coords = not ufoFontData.allowDecimalCoords
+    bez = psautohintUFOFontData.get_glyph_bez(glyph, round_coords)
+    bezString = "\n".join(bez)
+    bezString = "\n".join(["% " + glyphName, "sc", bezString, "ed", ""])
 
-    curX = curY = 0
-    bezString, curX, curY = convertGlyphOutlineToBezString(
-        outlineXML, ufoFontData, curX, curY)
-    bezString = (r"%%%s%ssc " % (glyphName, os.linesep)) + bezString + " ed"
     return bezString, width
 
 
