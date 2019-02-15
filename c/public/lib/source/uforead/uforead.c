@@ -39,6 +39,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <float.h>
+#include <stdbool.h>
 
 enum {
     ufoUnknown,
@@ -110,6 +111,7 @@ typedef struct
     char* glyphName;
     char* glifFileName;
     char* glifFilePath;
+    char* altLayerGlifFileName;
     long int glyphOrder;  // used to sort the glifRecs by glyph order from lib.plist.
 } GLIF_Rec;
 
@@ -208,6 +210,7 @@ struct ufoCtx_ {
     char* mark;                /* Buffer position marker */
     char* altLayerDir;
     char* defaultLayerDir;
+    bool hasAltLayer;
     struct
     {
         int cnt;
@@ -1130,7 +1133,49 @@ static void addGLIFRec(ufoCtx h, int state) {
     }
     newGLIFRec->glifFileName = memNew(h, 1 + strlen(fileName));
     sprintf(newGLIFRec->glifFileName, "%s", fileName);
+    newGLIFRec->altLayerGlifFileName = NULL;
 }
+
+static int findGLIFRecByName(ufoCtx h, char *glyphName)
+{
+    int i = 0;
+    while (i < h->data.glifRecs.cnt) {
+        GLIF_Rec* glifRec;
+        glifRec = &h->data.glifRecs.array[i];
+        if (!strcmp(glifRec->glyphName, glyphName)) {
+            return i;
+        }
+        i++;
+    }
+    return -1;
+}
+
+static void updateGLIFRec(ufoCtx h, int state) {
+    int index;
+    char *glyphName;
+
+    glyphName = h->parseKeyName;
+
+    index = findGLIFRecByName(h, glyphName);
+    if (index == -1) {
+        message(h, "Warning: glyph '%s' is in the processed layer but not in the default layer.", glyphName);
+        getKeyValue(h, "</string>", state); /* consume the file name */
+    } else {
+        char* fileName;
+        GLIF_Rec* glifRec;
+
+        glifRec = &h->data.glifRecs.array[index];
+
+        fileName = getKeyValue(h, "</string>", state);
+        if (fileName == NULL) {
+            fatal(h, ufoErrParse, "Encounted glyph reference in alternate layer's contents.plist with an empty file path. Text: '%s'.", getBufferContextPtr(h));
+        }
+
+        glifRec->altLayerGlifFileName = memNew(h, 1 + strlen(fileName));
+        sprintf(glifRec->altLayerGlifFileName, "%s", fileName);
+    }
+}
+
 
 #define START_PUBLIC_ORDER 1256
 #define IN_PUBLIC_ORDER 1257
@@ -1254,17 +1299,32 @@ static int parseGlyphOrder(ufoCtx h) {
     return ufoSuccess;
 }
 
-static int parseGlyphList(ufoCtx h) {
+static int parseGlyphList(ufoCtx h, bool altLayer) {
     int state = 0; /* 0 == start, 1= seen start of glyph, 2 = seen glyph name, 3 = in path, 4 in comment.  */
     int prevState = 0;
-    token* tk;
     h->src.next = h->mark = NULL;
+    char *clientFilePath;
+    char *plistFileName = "/contents.plist";
 
-    h->cb.stm.clientFileName = "glyphs/contents.plist";
+    if (altLayer) {
+        clientFilePath = memNew(h, 2 + strlen(h->altLayerDir) + strlen(plistFileName));
+        strcpy(clientFilePath, h->altLayerDir);
+    } else {
+        clientFilePath = memNew(h, 2 + strlen(h->defaultLayerDir) + strlen(plistFileName));
+        strcpy(clientFilePath, h->defaultLayerDir);
+    }
+    strcat(clientFilePath, "/contents.plist");
+    h->cb.stm.clientFileName = clientFilePath;
+
     h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
     if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0)) {
-        fprintf(stderr, "Failed to read glyphs/contents.plist\n");
-        return ufoErrSrcStream;
+        if (altLayer) {
+            h->hasAltLayer = false;
+            return ufoSuccess;
+        } else {
+            fprintf(stderr, "Failed to read %s\n", h->cb.stm.clientFileName);
+            return ufoErrSrcStream;
+        }
     }
 
     dnaSET_CNT(h->valueArray, 0);
@@ -1311,32 +1371,36 @@ static int parseGlyphList(ufoCtx h) {
             }
             state = 2;
         } else if ((tokenEqualStr(tk, "<string>")) && (state == 2)) {
-            addGLIFRec(h, state);
+            if (altLayer) {
+                updateGLIFRec(h, state);
+            } else {
+                addGLIFRec(h, state);
+            }
             state = 1;
         } else if (state != 0) {
             message(h, "Warning: discarding token '%s", tk->val);
-        } else {
-            if (h->data.glifRecs.cnt > 0)  // If we have seen the glifs, then we are done with any additional parsing
-                break;
         }
     } /* end while more tokens */
 
-    if (h->data.glifOrder.cnt > 0) {
-        ctuQSort(h->data.glifRecs.array, h->data.glifRecs.cnt,
-                 sizeof(h->data.glifRecs.array[0]), cmpGlifRecs, h);
-    }
-    if (h->data.glifRecs.cnt > 0) {
-        int i = 0;
-        while (i < h->data.glifRecs.cnt) {
-            GLIF_Rec* glifRec;
-            glifRec = &h->data.glifRecs.array[i++];
-            addString(h, strlen(glifRec->glyphName), glifRec->glyphName);
+    if (!altLayer) {
+        if (h->data.glifOrder.cnt > 0) {
+            ctuQSort(h->data.glifRecs.array, h->data.glifRecs.cnt,
+                     sizeof(h->data.glifRecs.array[0]), cmpGlifRecs, h);
+        }
+        if (h->data.glifRecs.cnt > 0) {
+            int i = 0;
+            while (i < h->data.glifRecs.cnt) {
+                GLIF_Rec* glifRec;
+                glifRec = &h->data.glifRecs.array[i++];
+                addString(h, strlen(glifRec->glyphName), glifRec->glyphName);
+            }
         }
     }
 
     h->cb.stm.close(&h->cb.stm, h->stm.src);
     h->stm.src = NULL;
 
+    memFree(h, clientFilePath);
     return ufoSuccess;
 }
 
@@ -1402,15 +1466,24 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
 
     h->flags &= ~((unsigned long)SEEN_END);
 
-    /* First, try the alt layer directory */
-    glifRec->glifFilePath = memNew(h, 2 + strlen(h->altLayerDir) + strlen(glifRec->glifFileName));
-    sprintf(glifRec->glifFilePath, "%s/%s", h->altLayerDir, glifRec->glifFileName);
+    h->stm.src = NULL;
+    glifRec->glifFilePath = NULL;
 
-    h->cb.stm.clientFileName = glifRec->glifFilePath;
-    h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
+    if ((h->hasAltLayer) && (glifRec->altLayerGlifFileName != NULL))
+    {
+        /* First, try the alt layer directory */
+        glifRec->glifFilePath = memNew(h, 2 + strlen(h->altLayerDir) + strlen(glifRec->altLayerGlifFileName));
+        sprintf(glifRec->glifFilePath, "%s/%s", h->altLayerDir, glifRec->altLayerGlifFileName);
+
+        h->cb.stm.clientFileName = glifRec->glifFilePath;
+        h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
+    }
+
     if (h->stm.src == NULL) {
         /* Didn't work. Try the glyph layer directory */
-        memFree(h, glifRec->glifFilePath);
+        if (glifRec->glifFilePath) {
+            memFree(h, glifRec->glifFilePath);
+        }
         glifRec->glifFilePath = memNew(h, 2 + strlen(h->defaultLayerDir) + strlen(glifRec->glifFileName));
         sprintf(glifRec->glifFilePath, "%s/%s", h->defaultLayerDir, glifRec->glifFileName);
 
@@ -1725,11 +1798,15 @@ static int parseUFO(ufoCtx h) {
      Open the UFO fontinfo.plist, and extract the PS infop
      Open the glyphs/contents.plist file, and extract any glyphs that are not in the glyphs.ac/contents.plist file
      */
+    h->hasAltLayer = true; /* assume we have one until we find we don't */
+
     int retVal = parseFontInfo(h);
     if (retVal == ufoSuccess)
         retVal = parseGlyphOrder(h); /* return value was being ignored prior to 15 June 2018, not sure why -- CJC */
     if (retVal == ufoSuccess)
-        retVal = parseGlyphList(h);
+        retVal = parseGlyphList(h, false); /* parse default layer */
+    if (retVal == ufoSuccess)
+        retVal = parseGlyphList(h, true); /* parse alternate layer */
     if (retVal == ufoSuccess)
         retVal = preParseGLIFS(h);
     return retVal;
