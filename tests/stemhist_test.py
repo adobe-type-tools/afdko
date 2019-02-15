@@ -61,3 +61,18 @@ def test_cross_environment_results_bug210():
 
     assert differ([expect_top_path, actual_top_path, '-l', '1'])
     assert differ([expect_bot_path, actual_bot_path, '-l', '1'])
+
+
+def test_start_point_not_oncurve_bug715():
+    filename = 'bug715'
+    report_path = get_temp_file_path()
+    actual_hstm_path = '{}.hstm.txt'.format(report_path)
+    actual_vstm_path = '{}.vstm.txt'.format(report_path)
+    expect_hstm_path = get_expected_path('{}.hstm.txt'.format(filename))
+    expect_vstm_path = get_expected_path('{}.vstm.txt'.format(filename))
+
+    runner(CMD + ['-f', '{}.ufo'.format(filename),
+                  '-o', 'all', 'o', '_{}'.format(report_path)])
+
+    assert differ([expect_hstm_path, actual_hstm_path, '-l', '1'])
+    assert differ([expect_vstm_path, actual_vstm_path, '-l', '1'])

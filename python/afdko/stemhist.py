@@ -117,9 +117,7 @@ from afdko.autohint import (
 	parseGlyphListArg, getGlyphID, getGlyphNames, filterGlyphList, openFile,
 	ACOptionParseError, ACFontError, logMsg, ACreport, expandNames,
 	AUTOHINTEXE)
-from afdko.beztools import *
-import afdko.fdkutils as fdkutils
-import afdko.ufotools as ufotools
+from afdko import fdkutils, ufotools
 import traceback
 from collections import defaultdict
 

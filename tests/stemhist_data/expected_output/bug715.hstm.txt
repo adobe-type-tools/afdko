@@ -1,0 +1,3 @@
+Horizontal Stem List for tests/stemhist_data/input/bug715.ufo on Thu Feb 14 22:50:57 2019
+Count	Width	Glyph List
+1	236	['C']
