@@ -572,7 +572,7 @@ def test_ttf_input_font_bug680():
 
 
 def test_skip_ufo3_global_guides_bug700():
-    input_filename = "bug700/font.ufo"
+    input_filename = "bug700.ufo"
     actual_path = get_temp_file_path()
     runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
                         'o', '_{}'.format(actual_path)])
@@ -591,7 +591,7 @@ def test_outline_from_processed_layer_bug703():
 
 
 def test_unhandled_ufo_glif_token_bug705():
-    input_filename = 'bug705/font.ufo'
+    input_filename = 'bug705.ufo'
     otf_path = get_temp_file_path()
 
     stderr_path = runner(
