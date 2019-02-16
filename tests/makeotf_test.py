@@ -579,6 +579,17 @@ def test_skip_ufo3_global_guides_bug700():
     assert font_has_table(actual_path, 'CFF ')
 
 
+def test_outline_from_processed_layer_bug703():
+    input_filename = 'bug703.ufo'
+    ttx_filename = 'bug703.ttx'
+    actual_path = get_temp_file_path()
+    runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
+                        'o', '_{}'.format(actual_path)])
+    actual_ttx = generate_ttx_dump(actual_path, ['CFF '])
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
 def test_unhandled_ufo_glif_token_bug705():
     input_filename = 'bug705/font.ufo'
     otf_path = get_temp_file_path()
