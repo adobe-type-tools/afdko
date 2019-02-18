@@ -133,3 +133,16 @@ def test_seac_in_charstring_bug125(tool_name):
     expected_path = get_expected_path(pdf_filename)
     assert differ([expected_path, save_path,
                    '-s', '/CreationDate', '-e', 'macroman'])
+
+
+@pytest.mark.parametrize('font_format', ['otf', 'ttf'])
+def test_round_glyph_bounds_values_bug128(font_format):
+    bug_numb = 'bug128'
+    pdf_filename = '{}_{}.pdf'.format(bug_numb, font_format)
+    font_path = get_input_path('{}/font.{}'.format(bug_numb, font_format))
+    save_path = get_temp_file_path()
+    runner(['-t', 'charplot', '-o', 'o', '_{}'.format(save_path), 'g', '_o',
+            'dno', '=pageIncludeTitle', '_0', '-f', font_path, '-a'])
+    expected_path = get_expected_path(pdf_filename)
+    assert differ([expected_path, save_path,
+                   '-s', '/CreationDate', '-e', 'macroman'])

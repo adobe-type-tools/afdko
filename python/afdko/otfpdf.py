@@ -9,7 +9,7 @@ from __future__ import print_function, absolute_import
 
 from fontTools.pens.boundsPen import BoundsPen, BasePen
 from fontTools.misc.psCharStrings import T2OutlineExtractor
-from fontTools.misc.py23 import byteord
+from fontTools.misc.py23 import byteord, round
 
 from afdko.fontpdf import FontPDFGlyph, FontPDFFont, FontPDFPoint
 
@@ -362,9 +362,11 @@ class txPDFGlyph(FontPDFGlyph):
         pen = BoundsPen(glyph_set)
         charstring.draw(pen)
         self.xAdvance = charstring.width
-        self.BBox = pen.bounds
-        if not self.BBox:
+        glyph_bounds = pen.bounds
+        if not glyph_bounds:
             self.BBox = [0, 0, 0, 0]
+        else:
+            self.BBox = [round(item) for item in glyph_bounds]
 
         self.yOrigin = self.parentFont.emSquare + self.parentFont.getBaseLine()
         if txFont.vorg:

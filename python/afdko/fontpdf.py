@@ -1188,7 +1188,6 @@ class FontPDFGlyph:
 		rt_canvas.restoreState()
 
 	def drawMeta_BBox(self, params):
-		emSquare = float(self.parentFont.getEmSquare())
 		rt_canvas = params.rt_canvas
 		bbox = self.BBox
 		rt_canvas.drawString(self.cur_x, self.cur_y, "min = %s, %s  max = %s, %s" % (bbox[0], bbox[1], bbox[2], bbox[3]))

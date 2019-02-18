@@ -1,5 +1,5 @@
 """
-otfpdf v1.4 Aug 28 2018
+otfpdf v1.4.1 Feb 17 2019
 provides support for the proofpdf script,  for working with OpenType/TTF
 fonts. Provides an implementation of the fontpdf font object. Cannot be
 run alone.
@@ -8,6 +8,7 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 from fontTools.pens.boundsPen import BoundsPen, BasePen
+from fontTools.misc.py23 import round
 from afdko.fontpdf import FontPDFGlyph, FontPDFFont, FontPDFPoint
 
 class FontPDFPen(BasePen):
@@ -193,9 +194,11 @@ class  txPDFGlyph(FontPDFGlyph):
 		pen = BoundsPen(None)
 		clientGlyph.draw(pen)
 		self.xAdvance = clientGlyph.width
-		self.BBox = pen.bounds
-		if not self.BBox :
-			self.BBox  = [0,0,0,0]
+		glyph_bounds = pen.bounds
+		if not glyph_bounds:
+			self.BBox = [0, 0, 0, 0]
+		else:
+			self.BBox = [round(item) for item in glyph_bounds]
 
 		self.yOrigin = self.parentFont.emSquare + self.parentFont.getBaseLine()
 		if txFont.vorg:
