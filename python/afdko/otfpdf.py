@@ -1,6 +1,6 @@
-# Copyright 2014 Adobe . All rights reserved.
+# Copyright 2014 Adobe. All rights reserved.
 """
-otfpdf v1.6.0 Aug 28 2018
+otfpdf v1.6.1 Feb 17 2019
 provides support for the proofpdf script, for working with OpenType/CFF
 fonts. Provides an implementation of the fontpdf font object. Cannot be
 run alone.
@@ -311,6 +311,12 @@ class txPDFGlyph(FontPDFGlyph):
 
     def clientInitData(self):
         txFont = self.parentFont.clientFont
+
+        try:
+            glyph_set = txFont.getGlyphSet()
+        except KeyError:
+            glyph_set = None
+
         if not hasattr(txFont, 'vmetrics'):
             try:
                 txFont.vmetrics = txFont['vmtx'].metrics
@@ -326,7 +332,7 @@ class txPDFGlyph(FontPDFGlyph):
         charstring = fTopDict.CharStrings[self.name]
 
         # Get the list of points
-        pen = FontPDFPen(None)
+        pen = FontPDFPen(glyph_set)
         drawCharString(charstring, pen)
         self.hintTable = charstring.hintTable
 
@@ -353,7 +359,7 @@ class txPDFGlyph(FontPDFGlyph):
             "Path lengths don't match %s %s" % (len(self.pathList),
                                                 self.numPaths))
         # get the bbox and width.
-        pen = BoundsPen(None)
+        pen = BoundsPen(glyph_set)
         charstring.draw(pen)
         self.xAdvance = charstring.width
         self.BBox = pen.bounds
