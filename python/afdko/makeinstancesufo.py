@@ -30,7 +30,7 @@ from afdko.checkoutlinesufo import run as checkoutlinesUFO
 from afdko.ufotools import validateLayers
 
 
-__version__ = '2.2.0'
+__version__ = '2.2.1'
 
 logger = logging.getLogger(__name__)
 
@@ -226,13 +226,14 @@ def run(options):
     if not dsPath:
         return
 
-    version = 3
     if len(newInstancesList) == 1:
         logger.info("Building 1 instance...")
     else:
         logger.info("Building %s instances..." % len(newInstancesList))
-    ufoProcessorBuild(documentPath=dsPath, outputUFOFormatVersion=version,
-                      roundGeometry=(not options.no_round), logger=logger)
+    ufoProcessorBuild(documentPath=dsPath,
+                      outputUFOFormatVersion=options.ufo_version,
+                      roundGeometry=(not options.no_round),
+                      logger=logger)
     if (dsPath != options.dsPath) and os.path.exists(dsPath):
         os.remove(dsPath)
 
@@ -357,6 +358,15 @@ def get_options(args):
         help='index of instance(s) to generate\n'
              'Zero-based comma-separated sequence of integers\n'
              'Example: -i 1,4 (generates 2nd & 5th instances)'
+    )
+    parser.add_argument(
+        '--ufo-version',
+        metavar='NUMBER',
+        choices=(2, 3),
+        default=3,
+        type=int,
+        help='specify the format version number of the generated UFOs\n'
+             'Default: %(default)s'
     )
     options = parser.parse_args(args)
 
