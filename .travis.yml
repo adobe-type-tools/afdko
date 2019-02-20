@@ -3,9 +3,9 @@ language: python
 env:
   global:
     - CIBW_SKIP="cp34-* cp35-* cp37-* *i686"
-    - CIBW_TEST_REQUIRES_MACOS="pytest-cov==2.5.1 codecov subprocess32"
+    - CIBW_TEST_REQUIRES_MACOS="pytest-cov codecov subprocess32"
     - CIBW_TEST_REQUIRES_LINUX="pytest subprocess32"
-    - CIBW_TEST_COMMAND_MACOS="cd {project} && pytest --cov -v && coverage combine && codecov && pip uninstall --yes afdko"
+    - CIBW_TEST_COMMAND_MACOS="cd {project} && pytest --cov -v && codecov && pip uninstall --yes afdko"
     - CIBW_TEST_COMMAND_LINUX="cd {project} && pytest -v && pip uninstall --yes afdko"
     - TWINE_USERNAME="adobe-type-tools-ci"
     # Note: TWINE_PASSWORD is set in Travis settings
