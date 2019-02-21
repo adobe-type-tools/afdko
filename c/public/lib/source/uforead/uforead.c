@@ -1637,13 +1637,11 @@ static void fixUnsetDictValues(ufoCtx h) {
     abfPrivateDict* pd = &fd0->Private;
 
     if (fd0->FontName.ptr == NULL) {
-        fd0->FontName.ptr = "PSNameNotSpecified";
-        message(h, "Warning: No PS name specified in source UFO font. Using 'PSNameNotSpecified'.");
+        message(h, "Warning: No PS name specified in source UFO font.");
     }
 
     if (top->version.ptr == NULL) {
-        top->version.ptr = "1.000";
-        message(h, "Warning: No version specified in source UFO font. Using '1.000'.");
+        message(h, "Warning: No version specified in source UFO font.");
     }
 
     if (pd->StemSnapH.cnt > ABF_EMPTY_ARRAY) {
