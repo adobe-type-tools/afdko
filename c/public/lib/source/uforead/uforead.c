@@ -660,7 +660,7 @@ static token* getAttribute(ufoCtx h, int state) {
 
 /* return value between begin/end element, skipping white space before and after. */
 static token* getElementValue(ufoCtx h, int state) {
-    char ch;
+    char ch = 0;
     token* tk = NULL;
     h->mark = NULL;
 
