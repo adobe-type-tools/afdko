@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>familyName</key>
+	<string>Source Han Sans AJ16</string>
+	<key>versionMajor</key>
+	<integer>1</integer>
+	<key>versionMinor</key>
+	<integer>0</integer>
+	<key>trademark</key>
+	<string>Copyright 2014-2018 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name 'Source'. Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries.</string>
+	<key>unitsPerEm</key>
+	<integer>1000</integer>
+	<key>postscriptFullName</key>
+	<string>Source Han Sans AJ16 Regular</string>
+	<key>postscriptWeightName</key>
+	<string>Regular</string>
+	<key>postscriptUnderlinePosition</key>
+	<integer>-150</integer>
+	<key>postscriptBlueValues</key>
+	<array>
+		<integer>-250</integer>
+		<integer>-250</integer>
+		<integer>1100</integer>
+		<integer>1100</integer>
+	</array>
+	<key>postscriptStemSnapH</key>
+	<array>
+		<integer>58</integer>
+		<integer>65</integer>
+		<integer>84</integer>
+	</array>
+	<key>postscriptStemSnapV</key>
+	<array>
+		<integer>63</integer>
+		<integer>73</integer>
+		<integer>89</integer>
+	</array>
+	<key>postscriptBlueScale</key>
+	<real>0.039625</real>
+	<key>postscriptBlueShift</key>
+	<integer>7</integer>
+	<key>postscriptBlueFuzz</key>
+	<integer>1</integer>
+</dict>
+</plist>
