@@ -240,20 +240,6 @@ static void writeLine(ufwCtx h, char *s) {
     writeStr(h, "\n");
 }
 
-/* Write formatted data to dst stream. This function must only be called when
- the maximum size of the resulting formatted string is known in advance. It
- must never be called with a string that has been passed into this library
- since it might cause a buffer overrun. Those strings may be handled safely
- by calling writeStr() directly. */
-static void CTL_CDECL writeFmt(ufwCtx h, char *fmt, ...) {
-    char buf[200];
-    va_list ap;
-    va_start(ap, fmt);
-    vsprintf(buf, fmt, ap);
-    writeStr(h, buf);
-    va_end(ap);
-}
-
 /* --------------------------- Context Management -------------------------- */
 
 /* Validate client and create context. */
