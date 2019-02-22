@@ -463,7 +463,6 @@
     <major value="1"/>
     <minor value="0"/>
     <CFFFont name="MasterSet_Kanji-w600.00">
-      <version value="1.000"/>
       <FamilyName value="MasterSet_Kanji"/>
       <isFixedPitch value="0"/>
       <ItalicAngle value="0"/>
