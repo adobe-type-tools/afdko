@@ -452,8 +452,7 @@ kOverrideMenuNames = "OverrideMenuNames"
 kLicenseCode = "LicenseCode"
 # Will look for all.
 kDefaultFontPathList = ["font.ufo", "font.pfa", "font.ps", "font.txt"]
-kDefaultFeaturesPath = "features"
-kDefaultUFOFeaturesPath = "features.fea"
+kDefaultFeaturesList = ["features.fea", "features"]
 kDefaultOptionsFile = "current.fpr"
 kDefaultFMNDBPath = "FontMenuNameDB"
 GOADB_NAME = "GlyphOrderAndAliasDB"
@@ -1805,14 +1804,19 @@ def setMissingParams(makeOTFParams):
     # features path.
     fea_path = getattr(makeOTFParams, kFileOptPrefix + kFeature)
     if not fea_path:
-        # look in font's home dir.
-        path1 = os.path.join(makeOTFParams.fontDirPath, kDefaultFeaturesPath)
-        if os.path.exists(path1):
-            fea_path = path1
-        elif makeOTFParams.srcIsUFO:
-            path1 = os.path.join(srcFontPath, kDefaultUFOFeaturesPath)
+        # First look for FEA file inside UFO
+        if makeOTFParams.srcIsUFO:
+            path1 = os.path.join(srcFontPath, 'features.fea')
             if os.path.exists(path1):
                 fea_path = path1
+        # Then look for FEA file in the font's home directory,
+        # regardless if the input font is UFO or not
+        if not fea_path:
+            for fea_file_name in kDefaultFeaturesList:
+                path1 = os.path.join(makeOTFParams.fontDirPath, fea_file_name)
+                if os.path.exists(path1):
+                    fea_path = path1
+                    break
         if not fea_path:
             print("makeotf [Warning] Could not find default features file. "
                   "Font will be built without any layout features.")
