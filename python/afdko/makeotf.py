@@ -1904,33 +1904,10 @@ def setMissingParams(makeOTFParams):
         output_dir = path
         path = None
     if not path:
-        # need to figure out PS name in order to derive default output path.
-        success, output = fdkutils.get_shell_command_output([
-            'tx', '-dump', '-0', inputFontPath])
-        if not success:
-            raise MakeOTFShellError
-
-        match = re.search(r"(?:CID)?FontName\s+\"(\S+)\"", output)
-        if not match:
-            print("makeotf [Error] Could not find FontName (a.k.a. "
-                  "PostScript name) in FontDict of file "
-                  "'{}'".format(inputFilePath))
-            raise MakeOTFShellError
-
-        psName = match.group(1)
-
-        if psName == 'PSNameNotSpecified':
-            # 'tx' fills-in the PostScript font name if the UFO doesn't have it
-            # https://github.com/adobe-type-tools/afdko/issues/437
-            # This condition makes the UFO pipeline behave the same as Type 1
-            print("makeotf [Error] Could not find 'postscriptFontName' "
-                  "in file '{}'".format(inputFilePath))
-            raise MakeOTFShellError
-
         if makeOTFParams.srcIsTTF or inputFontPath.lower().endswith(".ttf"):
-            font_filename = "{}.ttf".format(psName)
+            font_filename = "{}.ttf".format(makeOTFParams.psName)
         else:
-            font_filename = "{}.otf".format(psName)
+            font_filename = "{}.otf".format(makeOTFParams.psName)
 
         if output_dir:
             font_path = os.path.join(output_dir, font_filename)
@@ -2025,31 +2002,51 @@ def convertFontIfNeeded(makeOTFParams):
             if not fdkutils.run_shell_command([
                     'type1', filePath, tempTxtPath]):
                 raise MakeOTFShellError
+            filePath = tempTxtPath
 
-            # rewrite PS encrypted with 'tx' (necessary??)
+        if needsSEACRemoval:
+            tempSeacPath = fdkutils.get_temp_file_path()
+
+            # convert to CFF using 'tx'
             if not fdkutils.run_shell_command([
-                    'tx', '-t1', tempTxtPath, fontPath]):
+                    'tx', '-cff', '-Z', '+b', filePath, tempSeacPath]):
                 raise MakeOTFShellError
+            filePath = tempSeacPath
 
-        else:
-            if needsSEACRemoval:
-                seacPath = fdkutils.get_temp_file_path()
+        psName = get_font_psname(filePath, makeOTFParams.srcIsUFO)
 
-                if not fdkutils.run_shell_command([
-                        'tx', '-cff', '-Z', '+b', filePath,
-                        seacPath]):
-                    raise MakeOTFShellError
-
-                if not fdkutils.run_shell_command([
-                        'tx', '-t1', seacPath, fontPath]):
-                    raise MakeOTFShellError
-
-            else:
-                if not fdkutils.run_shell_command([
-                        'tx', '-t1', filePath, fontPath]):
-                    raise MakeOTFShellError
+        # Now convert to Type 1
+        # (it's the only font format that makeotfexe can consume)
+        if not fdkutils.run_shell_command(['tx', '-t1', filePath, fontPath]):
+            raise MakeOTFShellError
 
         makeOTFParams.tempFontPath = fontPath
+
+    else:  # convertion is not needed
+        psName = get_font_psname(filePath)
+
+    makeOTFParams.psName = psName
+
+
+def get_font_psname(font_path, is_ufo=False):
+    # Figure out PS name in order to derive default output path.
+    success, output = fdkutils.get_shell_command_output([
+        'tx', '-dump', '-0', font_path])
+    if not success:
+        raise MakeOTFShellError
+
+    match = re.search(r"(?:CID)?FontName\s+\"(\S+)\"", output)
+    if not match:
+        if is_ufo:
+            print("makeotf [Error] Could not find 'postscriptFontName' "
+                  "in file '{}'".format(font_path))
+        else:
+            print("makeotf [Error] Could not find FontName (a.k.a. "
+                  "PostScript name) in FontDict of file "
+                  "'{}'".format(font_path))
+        raise MakeOTFShellError
+
+    return match.group(1)
 
 
 def updateFontRevision(featuresPath, fontRevision):
