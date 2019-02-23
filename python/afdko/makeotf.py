@@ -1562,7 +1562,7 @@ def checkInputFile(makeOTFParams):
     inputFilePath = getattr(makeOTFParams, kFileOptPrefix + kInputFont)
     # path to font file was not specified.
     if not inputFilePath:
-        return None
+        return
 
     file_path = inputFilePath
     newFontDirPath = os.path.dirname(file_path)
@@ -1605,7 +1605,6 @@ def checkInputFile(makeOTFParams):
                 print("makeotf [Warning] Did not recognize the ordering '%s'. "
                       "The Mac cmap script id will be set to Roman (0)." % Ord)
             setattr(makeOTFParams, kFileOptPrefix + kMacScript, script)
-    return fontPath
 
 
 def lookUpDirTree(fileName):
@@ -1745,18 +1744,17 @@ def checkIfVertInFeature(featurePath):
     # report that vert CMAP is needed to synthesize
     # the vert feature, if the feature file exists
     # and does not contain a definition of the vert feature.
-    foundVert = 0
+    foundVert = False
 
     if not (featurePath and os.path.exists(featurePath)):
-        print("No feature path at", featurePath)
-        return 0
+        return foundVert
 
     with open(featurePath, "r", encoding='utf-8') as fp:
         data = fp.read()
 
     match = re.search(RE_FEATURE, data)
     if match:
-        return 1
+        return True
 
     includeList = re.findall(RE_INCLUDE, data)
     for _file in includeList:
@@ -1767,9 +1765,9 @@ def checkIfVertInFeature(featurePath):
             # Second, look for include files relative to working directory.
             apath = os.path.abspath(_file)
             if not os.path.exists(apath):
-                print("Could not find the include file '%s', referenced in "
-                      "'%s'." % (_file, featurePath))
-                return 0
+                print("makeotf [Error] Could not find the include file '%s', "
+                      "referenced in '%s'." % (_file, featurePath))
+                return False
         foundVert = checkIfVertInFeature(apath)
         if foundVert:
             break
@@ -1780,25 +1778,23 @@ def checkIfVertInFeature(featurePath):
 def setMissingParams(makeOTFParams):
     error = False
     # The path to the original src font file
-    inputFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kInputFont))
+    inputFilePath = getattr(makeOTFParams, kFileOptPrefix + kInputFont)
     srcFontPath = inputFilePath
 
     # check for input font file.
     # path to font file was not specified.
     if not inputFilePath:
         for fileName in kDefaultFontPathList:
-            inputFilePath = fileName
-            if os.path.exists(inputFilePath):
-                srcFontPath = inputFilePath
+            if os.path.exists(fileName):
+                srcFontPath = inputFilePath = fileName
                 break
-        exec("makeOTFParams.%s%s = inputFilePath" % (kFileOptPrefix,
-                                                     kInputFont))
         if not os.path.exists(inputFilePath):
             print("makeotf [Error] Could not find any of the default input "
                   "font file '%s'." % kDefaultFontPathList)
             # stop here already, otherwise getROS() will generate an IOError.
             raise MakeOTFOptionsError
 
+        setattr(makeOTFParams, kFileOptPrefix + kInputFont, inputFilePath)
         checkInputFile(makeOTFParams)
 
     if makeOTFParams.tempFontPath:
@@ -1807,23 +1803,22 @@ def setMissingParams(makeOTFParams):
         inputFontPath = inputFilePath
 
     # features path.
-    path = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kFeature))
-    if not path:
+    fea_path = getattr(makeOTFParams, kFileOptPrefix + kFeature)
+    if not fea_path:
         # look in font's home dir.
         path1 = os.path.join(makeOTFParams.fontDirPath, kDefaultFeaturesPath)
         if os.path.exists(path1):
-            path = path1
+            fea_path = path1
         elif makeOTFParams.srcIsUFO:
             path1 = os.path.join(srcFontPath, kDefaultUFOFeaturesPath)
             if os.path.exists(path1):
-                path = path1
-        if not path:
-            print("makeotf [Warning] Could not find default features file at "
-                  "'%s'. Font will be built without any layout features." %
-                  path)
-            exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kFeature))
+                fea_path = path1
+        if not fea_path:
+            print("makeotf [Warning] Could not find default features file. "
+                  "Font will be built without any layout features.")
+            setattr(makeOTFParams, kFileOptPrefix + kFeature, None)
         else:
-            exec("makeOTFParams.%s%s = path" % (kFileOptPrefix, kFeature))
+            setattr(makeOTFParams, kFileOptPrefix + kFeature, fea_path)
 
     # FontMenuNameDB path.
     fmndb_path = getattr(makeOTFParams, kFileOptPrefix + kFMB)
@@ -1933,8 +1928,6 @@ def convertFontIfNeeded(makeOTFParams):
     needsConversion = False
     needsSEACRemoval = False
     isTextPS = False
-    # Empty, but not None. Means we have already checked.
-    makeOTFParams.tempFontPath = ""
 
     input_font_format = fdkutils.get_font_format(filePath)
 
@@ -1944,13 +1937,13 @@ def convertFontIfNeeded(makeOTFParams):
 
     if input_font_format == 'UFO':
         needsConversion = True
-        doSync = False
-        allMatch, msgList = ufotools.checkHashMaps(filePath, doSync)
+        makeOTFParams.srcIsUFO = 1
+
+        allMatch, msgList = ufotools.checkHashMaps(filePath, False)
         if not allMatch:
             for msg in msgList:
                 print(msg)
             raise MakeOTFShellError
-        makeOTFParams.srcIsUFO = 1
 
     elif input_font_format == 'OTF':
         needsConversion = True
