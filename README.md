@@ -40,13 +40,16 @@ with [pip](https://pip.pypa.io).
 
 **Option 1 (Recommended)**
 
-- Install [virtualenv](https://virtualenv.pypa.io):
-
-        pip install --user virtualenv
-
 - Create a virtual environment:
 
-        python -m virtualenv afdko_env
+    - Python 3.6+
+
+            python3 -m venv afdko_env
+
+    - Python 2.7
+
+            pip install --user virtualenv
+            python -m virtualenv afdko_env
 
 - Activate the virtual environment:
 
@@ -62,7 +65,7 @@ with [pip](https://pip.pypa.io).
 
         pip install afdko
 
-Installing the afdko inside a virtual environment prevents conflicts
+Installing the **afdko** inside a virtual environment prevents conflicts
 between its dependencies and other modules installed globally.
 
 **Option 2**
@@ -125,7 +128,7 @@ On Linux, install these with:
 
 On Windows, you need Visual Studio 2017.
 
-To build **afdko** from source, clone the [afdko GitHub
+To build the **afdko** from source, clone the [afdko GitHub
 repository](https://github.com/adobe-type-tools/afdko), ensure the `wheel`
 module is installed (`pip install wheel`), then `cd` to the top-level
 directory of the afdko, and run:
@@ -135,7 +138,7 @@ directory of the afdko, and run:
 **Note**
 
 It's not possible to install the afdko in editable/develop mode using
-`pip install -e .`; this is because the toolkit includes binary C executables
+`pip install -e .` ; this is because the toolkit includes binary C executables
 which setup.py tries to install in the bin/ (or Scripts/) folder, however
 this process was only meant to be used with text-based scripts (either
 written in Python or a shell scripting language). To work around this problem
