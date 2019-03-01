@@ -65,8 +65,9 @@ def get_executable_dir():
     elif platform_system == "Darwin":
         bin_dir = "osx"
     else:
-        raise KeyError(
-            "afdko: Do not recognize target OS: {}".format(platform_system))
+        # fallback to Linux
+        print('afdko: Unknown OS: {}'.format(platform_system))
+        bin_dir = "linux"
     return bin_dir
 
 
@@ -198,19 +199,10 @@ def main():
         'Topic :: Software Development :: Build Tools',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 2.7',
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: Microsoft :: Windows',
+        'Operating System :: POSIX :: Linux',
     ]
-
-    platform_system = platform.system()
-    if platform_system == "Darwin":
-        more_keywords = ['Operating System :: MacOS :: MacOS X']
-    elif platform_system == "Windows":
-        more_keywords = ['Operating System :: Microsoft :: Windows']
-    elif platform_system == "Linux":
-        more_keywords = ['Operating System :: POSIX :: Linux']
-    else:
-        raise KeyError(
-            "afdko: Do not recognize target OS: {}".format(platform_system))
-    classifiers.extend(more_keywords)
 
     # concatenate README and NEWS into long_description so they are
     # displayed on the afdko project page on PyPI
