@@ -22,25 +22,15 @@ Please see the
 for additional information, such as links to reference materials and related
 projects.
 
-Major changes
--------------
-
-The AFDKO has been restructured so that it can be installed as a Python
-package. It now depends on the user\'s Python interpreter, and no longer
-contains its own Python interpreter. In order to do this, two
-Adobe-owned, non-open source programs were dropped: **IS** and
-**checkoutlines**. If these turn out to be sorely missed, an installer
-for them will be added to the old Adobe AFDKO website. The current
-intent is to migrate the many tests in checkoutlines to the newer
-**checkoutlinesufo** (which does work with OpenType and Type 1 fonts,
-but currently does only overlap detection and removal, and a few basic
-path checks).
-
 Installation
 ------------
 
-The AFDKO requires [Python](http://www.python.org/download) 2.7.x. or
-3.6.x.
+:warning: **WARNING** :warning: After June 30th 2019 the AFDKO will officially
+only support Python 3.6 or later. See [#741](https://github.com/adobe-type-tools/afdko/issues/741)
+for details.
+
+The AFDKO requires [Python](http://www.python.org/download) 2.7, 3.6
+or later.
 
 Releases are available on the [Python Package
 Index](https://pypi.python.org/pypi/afdko) (PyPI) and can be installed
@@ -50,13 +40,16 @@ with [pip](https://pip.pypa.io).
 
 **Option 1 (Recommended)**
 
-- Install [virtualenv](https://virtualenv.pypa.io):
-
-        pip install --user virtualenv
-
 - Create a virtual environment:
 
-        python -m virtualenv afdko_env
+    - Python 3.6+
+
+            python3 -m venv afdko_env
+
+    - Python 2.7
+
+            pip install --user virtualenv
+            python -m virtualenv afdko_env
 
 - Activate the virtual environment:
 
@@ -72,7 +65,7 @@ with [pip](https://pip.pypa.io).
 
         pip install afdko
 
-Installing the afdko inside a virtual environment prevents conflicts
+Installing the **afdko** inside a virtual environment prevents conflicts
 between its dependencies and other modules installed globally.
 
 **Option 2**
@@ -135,7 +128,7 @@ On Linux, install these with:
 
 On Windows, you need Visual Studio 2017.
 
-To build **afdko** from source, clone the [afdko GitHub
+To build the **afdko** from source, clone the [afdko GitHub
 repository](https://github.com/adobe-type-tools/afdko), ensure the `wheel`
 module is installed (`pip install wheel`), then `cd` to the top-level
 directory of the afdko, and run:
@@ -145,7 +138,7 @@ directory of the afdko, and run:
 **Note**
 
 It's not possible to install the afdko in editable/develop mode using
-`pip install -e .`; this is because the toolkit includes binary C executables
+`pip install -e .` ; this is because the toolkit includes binary C executables
 which setup.py tries to install in the bin/ (or Scripts/) folder, however
 this process was only meant to be used with text-based scripts (either
 written in Python or a shell scripting language). To work around this problem
@@ -153,3 +146,18 @@ written in Python or a shell scripting language). To work around this problem
 feedback as they modify the source files) you can use alternative methods like
 exporting a PYTHONPATH, using a .pth file or similar hacks.
 For further details read [this comment](https://github.com/adobe-type-tools/afdko/pull/677#issuecomment-436747212).
+
+Major changes
+-------------
+
+The AFDKO has been restructured so that it can be installed as a Python
+package. It now depends on the user\'s Python interpreter, and no longer
+contains its own Python interpreter. In order to do this, two
+Adobe-owned, non-open source programs were dropped: **IS** and
+**checkoutlines**. If these turn out to be sorely missed, an installer
+for them will be added to the old Adobe AFDKO website. The current
+intent is to migrate the many tests in checkoutlines to the newer
+**checkoutlinesufo** (which does work with OpenType and Type 1 fonts,
+but currently does only overlap detection and removal, and a few basic
+path checks).
+

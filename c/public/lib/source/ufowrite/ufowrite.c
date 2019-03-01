@@ -144,17 +144,14 @@ static void flushBuf(ufwCtx h) {
 static void writeBuf(ufwCtx h, size_t writeCnt, const char *ptr) {
     char *buf;
     size_t *cnt;
-    int err;
     size_t left;
     if (h->state == 0) {
         buf = h->tmp.buf;
         cnt = &h->tmp.cnt;
-        err = ufwErrTmpStream;
     } else /* h->state == 1 */
     {
         buf = h->dst.buf;
         cnt = &h->dst.cnt;
-        err = ufwErrDstStream;
     }
 
     left = BUFSIZ - *cnt; /* Bytes left in buffer */
@@ -184,8 +181,6 @@ static void ufw_ltoa(char *buf, long val) {
     static char ascii_digit[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
     char *position = buf;
     char *start = buf;
-    int digit;
-    char tmp;
 
     int isneg = val < 0;
     if (isneg)
@@ -193,6 +188,7 @@ static void ufw_ltoa(char *buf, long val) {
 
     /* extract char's */
     do {
+        int digit;
         digit = val % 10;
         val /= 10;
         *position = ascii_digit[digit];
@@ -211,6 +207,7 @@ static void ufw_ltoa(char *buf, long val) {
 
     /* reverse string */
     while (start < position) {
+        char tmp;
         tmp = *position;
         *position = *start;
         *start = tmp;
@@ -237,65 +234,10 @@ static void writeStr(ufwCtx h, const char *s) {
     writeBuf(h, strlen(s), s);
 }
 
-/* Write null-terminated string to dst steam and escape XML reserved characters. */
-static void writeXMLStr(ufwCtx h, const char *s) {
-    /* 64-bit warning fixed by cast here */
-    long len = (long)strlen(s);
-    int i;
-    char buf[9];
-    unsigned char code;
-
-    for (i = 0; i < len; i++) {
-        code = s[i];
-        if (code & 0x80) {
-            writeStr(h, "&#x");
-            sprintf(buf, "%X", code);
-            writeStr(h, buf);
-            writeStr(h, ";");
-        } else {
-            switch (code) {
-                case '<':
-                    writeStr(h, "&lt;");
-                    break;
-                case '>':
-                    writeStr(h, "&gt;");
-                    break;
-                case '&':
-                    writeStr(h, "&amp;");
-                    break;
-                case '"':
-                    writeStr(h, "&quot;");
-                    break;
-                default:
-                    if (code < 0x20 && !(code == 0x9 || code == 0xa || code == 0xd))
-                        continue; /* xml 1.0 limits control points to x9,xa,xd */
-
-                    buf[0] = code;
-                    buf[1] = '\0';
-                    writeStr(h, buf);
-            }
-        }
-    }
-}
-
 /* Write null-terminated string followed by newline. */
 static void writeLine(ufwCtx h, char *s) {
     writeStr(h, s);
     writeStr(h, "\n");
-}
-
-/* Write formatted data to dst stream. This function must only be called when
- the maximum size of the resulting formatted string is known in advance. It
- must never be called with a string that has been passed into this library
- since it might cause a buffer overrun. Those strings may be handled safely
- by calling writeStr() directly. */
-static void CTL_CDECL writeFmt(ufwCtx h, char *fmt, ...) {
-    char buf[200];
-    va_list ap;
-    va_start(ap, fmt);
-    vsprintf(buf, fmt, ap);
-    writeStr(h, buf);
-    va_end(ap);
 }
 
 /* --------------------------- Context Management -------------------------- */
@@ -396,7 +338,6 @@ int ufwBegFont(ufwCtx h, long flags, char *glyphLayerDir) {
 }
 
 static void writeContents(ufwCtx h) {
-    Glyph *glyphRec;
     char buffer[FILENAME_MAX];
     int i;
     /* Set error handler */
@@ -417,6 +358,7 @@ static void writeContents(ufwCtx h) {
     writeLine(h, "<plist version=\"1.0\">");
     writeLine(h, "<dict>");
     for (i = 0; i < h->glyphs.cnt; i++) {
+        Glyph *glyphRec;
         glyphRec = &h->glyphs.array[i];
         sprintf(buffer, "\t<key>%s</key>", glyphRec->glyphName);
         writeLine(h, buffer);
@@ -442,7 +384,6 @@ static void writeContents(ufwCtx h) {
 }
 
 static void writeGlyphOrder(ufwCtx h) {
-    Glyph *glyphRec;
     char buffer[FILENAME_MAX];
     int i;
 
@@ -466,6 +407,7 @@ static void writeGlyphOrder(ufwCtx h) {
     writeLine(h, "\t<key>public.glyphOrder</key>");
     writeLine(h, "\t<array>");
     for (i = 0; i < h->glyphs.cnt; i++) {
+        Glyph *glyphRec;
         glyphRec = &h->glyphs.array[i];
         sprintf(buffer, "\t\t<string>%s</string>", glyphRec->glyphName);
         writeLine(h, buffer);
@@ -610,15 +552,18 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
 
     /* This is what I care about the most. Add the rest in the order of the
      UFO 3 spec. */
-    writeLine(h, "\t<key>postscriptFontName</key>");
     if (top->sup.flags & ABF_CID_FONT) {
-        sprintf(buffer, "\t<string>%s</string>", top->cid.CIDFontName.ptr);
-        writeLine(h, buffer);
-        setStyleName(buffer2, top->cid.CIDFontName.ptr);
-        writeLine(h, "\t<key>styleName</key>");
-        sprintf(buffer, "\t<string>%s</string>", buffer2);
-        writeLine(h, buffer);
-    } else {
+        if (top->cid.CIDFontName.ptr != NULL) {
+            writeLine(h, "\t<key>postscriptFontName</key>");
+            sprintf(buffer, "\t<string>%s</string>", top->cid.CIDFontName.ptr);
+            writeLine(h, buffer);
+            setStyleName(buffer2, top->cid.CIDFontName.ptr);
+            writeLine(h, "\t<key>styleName</key>");
+            sprintf(buffer, "\t<string>%s</string>", buffer2);
+            writeLine(h, buffer);
+        }
+    } else if (fontDict0->FontName.ptr != NULL) {
+        writeLine(h, "\t<key>postscriptFontName</key>");
         sprintf(buffer, "\t<string>%s</string>", fontDict0->FontName.ptr);
         writeLine(h, buffer);
         setStyleName(buffer2, fontDict0->FontName.ptr);
@@ -830,7 +775,7 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
         p = strchr(valueBuffer, '.');
         if (p != NULL) {
             /* Have decimal point. Remove trailing zeroes.*/
-            int l = strlen(p);
+            size_t l = strlen(p);
             p += l - 1;
             while (*p == '0') {
                 *p = '\0';
@@ -884,10 +829,6 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
 
 /* Finish reading font. */
 int ufwEndFont(ufwCtx h, abfTopDict *top) {
-    size_t cntTmp = 0;
-    size_t cntRead = 0;
-    size_t cntWrite = 0;
-    char *pBuf = NULL;
     int errCode = ufwSuccess;
 
     /* Check for errors when accumulating glyphs */
@@ -990,7 +931,6 @@ static void mapGlyphToGLIFName(char *glyphName, char *glifName) {
 /* Begin new glyph definition. */
 static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
     ufwCtx h = cb->direct_ctx;
-    char buf[9];
     char glyphName[MAX_UFO_GLYPH_NAME];
     char glifName[MAX_UFO_GLYPH_NAME];
     char glifRelPath[FILENAME_MAX];
@@ -1045,6 +985,7 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
     // write encoding, if present.
 
     if (info->flags & ABF_GLYPH_UNICODE) {
+        char buf[9];
         writeStr(h, "\t<unicode hex=\"");
         sprintf(buf, "%06lX", info->encoding.code);
         writeStr(h, buf);
@@ -1245,8 +1186,6 @@ static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0) {
 static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1) {
     OpRec *opRec;
     ufwCtx h = cb->direct_ctx;
-    float dx1 = x1 - h->path.x;
-    float dy1 = y1 - h->path.y;
     h->path.x = x1;
     h->path.y = y1;
 

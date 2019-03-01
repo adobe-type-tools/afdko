@@ -29,6 +29,8 @@ import os
 import re
 import time
 
+from fontTools.pens.basePen import BasePen
+
 from afdko import fdkutils, pdfgen, pdfmetrics
 from afdko.pdfutils import LINEEND
 
@@ -569,6 +571,55 @@ def getTickPos(pt0, pt1, pt2, tickSize, pathisCW):
 		# tickPos is 90 degrees clockwise to  to the vector "sum"
 		tickPos = ((pt1[0] +  (sum[1] * tickSize)), pt1[1] - (sum[0]*tickSize))
 	return tickPos
+
+
+class FontPDFPen(BasePen):
+    def __init__(self, glyphSet=None):
+        BasePen.__init__(self, glyphSet)
+        self.pathList = []
+        # These all get set when the outline is drawn
+        self.numMT = self.numLT = self.numCT = self.numPaths = self.total = 0
+        self.curPt = [0, 0]
+        self.noPath = 1
+
+    def _moveTo(self, pt):
+        if self.noPath:
+            self.pathList.append([])
+        self.noPath = 0
+        self.numMT += 1
+        pdfPoint = FontPDFPoint(FontPDFPoint.MT, pt, index=self.total)
+        self.total += 1
+        self.curPt = pt
+        curPath = self.pathList[-1]
+        curPath.append(pdfPoint)
+
+    def _lineTo(self, pt):
+        if self.noPath:
+            self.pathList.append([])
+        self.noPath = 0
+        self.numLT += 1
+        pdfPoint = FontPDFPoint(FontPDFPoint.LT, pt, index=self.total)
+        self.total += 1
+        self.pathList[-1].append(pdfPoint)
+        self.curPt = pt
+
+    def _curveToOne(self, pt1, pt2, pt3):
+        if self.noPath:
+            self.pathList.append([])
+        self.numCT += 1
+        pdfPoint = FontPDFPoint(
+            FontPDFPoint.CT, pt3, pt1, pt2, index=self.total)
+        self.total += 1
+        self.pathList[-1].append(pdfPoint)
+        self.curPt = pt3
+
+    def _closePath(self):
+        self.numPaths += 1
+        self.noPath = 1
+
+    def _endPath(self):
+        self.numPaths += 1
+
 
 class FontPDFGlyph:
 	def __init__(self, parentFont, glyphName):
@@ -1188,7 +1239,6 @@ class FontPDFGlyph:
 		rt_canvas.restoreState()
 
 	def drawMeta_BBox(self, params):
-		emSquare = float(self.parentFont.getEmSquare())
 		rt_canvas = params.rt_canvas
 		bbox = self.BBox
 		rt_canvas.drawString(self.cur_x, self.cur_y, "min = %s, %s  max = %s, %s" % (bbox[0], bbox[1], bbox[2], bbox[3]))

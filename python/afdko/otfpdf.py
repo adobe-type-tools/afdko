@@ -1,65 +1,17 @@
-# Copyright 2014 Adobe . All rights reserved.
+# Copyright 2014 Adobe. All rights reserved.
 """
-otfpdf v1.6.0 Aug 28 2018
+otfpdf v1.6.1 Feb 17 2019
 provides support for the proofpdf script, for working with OpenType/CFF
 fonts. Provides an implementation of the fontpdf font object. Cannot be
 run alone.
 """
 from __future__ import print_function, absolute_import
 
-from fontTools.pens.boundsPen import BoundsPen, BasePen
+from fontTools.pens.boundsPen import BoundsPen
 from fontTools.misc.psCharStrings import T2OutlineExtractor
-from fontTools.misc.py23 import byteord
+from fontTools.misc.py23 import byteord, round
 
-from afdko.fontpdf import FontPDFGlyph, FontPDFFont, FontPDFPoint
-
-
-class FontPDFPen(BasePen):
-    def __init__(self, glyphSet=None):
-        BasePen.__init__(self, glyphSet)
-        self.pathList = []
-        # These all get set when the outline is drawn
-        self.numMT = self.numLT = self.numCT = self.numPaths = self.total = 0
-        self.curPt = [0, 0]
-        self.noPath = 1
-
-    def _moveTo(self, pt):
-        if self.noPath:
-            self.pathList.append([])
-        self.noPath = 0
-        self.numMT += 1
-        pdfPoint = FontPDFPoint(FontPDFPoint.MT, pt, index=self.total)
-        self.total += 1
-        self.curPt = pt
-        curPath = self.pathList[-1]
-        curPath.append(pdfPoint)
-
-    def _lineTo(self, pt):
-        if self.noPath:
-            self.pathList.append([])
-        self.noPath = 0
-        self.numLT += 1
-        pdfPoint = FontPDFPoint(FontPDFPoint.LT, pt, index=self.total)
-        self.total += 1
-        self.pathList[-1].append(pdfPoint)
-        self.curPt = pt
-
-    def _curveToOne(self, pt1, pt2, pt3):
-        if self.noPath:
-            self.pathList.append([])
-        self.numCT += 1
-        pdfPoint = FontPDFPoint(
-            FontPDFPoint.CT, pt3, pt1, pt2, index=self.total)
-        self.total += 1
-        self.pathList[-1].append(pdfPoint)
-        self.curPt = pt3
-
-    def _closePath(self):
-        self.numPaths += 1
-        self.noPath = 1
-
-    def _endPath(self):
-        self.numPaths += 1
+from afdko.fontpdf import FontPDFGlyph, FontPDFFont, FontPDFPen
 
 
 class txPDFFont(FontPDFFont):
@@ -311,6 +263,12 @@ class txPDFGlyph(FontPDFGlyph):
 
     def clientInitData(self):
         txFont = self.parentFont.clientFont
+
+        try:
+            glyph_set = txFont.getGlyphSet()
+        except KeyError:
+            glyph_set = None
+
         if not hasattr(txFont, 'vmetrics'):
             try:
                 txFont.vmetrics = txFont['vmtx'].metrics
@@ -326,7 +284,7 @@ class txPDFGlyph(FontPDFGlyph):
         charstring = fTopDict.CharStrings[self.name]
 
         # Get the list of points
-        pen = FontPDFPen(None)
+        pen = FontPDFPen(glyph_set)
         drawCharString(charstring, pen)
         self.hintTable = charstring.hintTable
 
@@ -353,12 +311,14 @@ class txPDFGlyph(FontPDFGlyph):
             "Path lengths don't match %s %s" % (len(self.pathList),
                                                 self.numPaths))
         # get the bbox and width.
-        pen = BoundsPen(None)
+        pen = BoundsPen(glyph_set)
         charstring.draw(pen)
         self.xAdvance = charstring.width
-        self.BBox = pen.bounds
-        if not self.BBox:
+        glyph_bounds = pen.bounds
+        if not glyph_bounds:
             self.BBox = [0, 0, 0, 0]
+        else:
+            self.BBox = [round(item) for item in glyph_bounds]
 
         self.yOrigin = self.parentFont.emSquare + self.parentFont.getBaseLine()
         if txFont.vorg:

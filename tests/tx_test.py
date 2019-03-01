@@ -288,6 +288,55 @@ def test_non_varying_glyphs_bug356():
     assert differ([expected_path, stderr_path, '-l', '1'])
 
 
+@pytest.mark.parametrize('font_format', ['type1', 'cidfont', 'ufo2', 'ufo3'])
+def test_no_psname_dump_bug437(font_format):
+    if 'cid' in font_format:
+        file_ext = 'ps'
+    elif 'ufo' in font_format:
+        file_ext = 'ufo'
+    else:
+        file_ext = 'pfa'
+
+    filename = '{}-noPSname.{}'.format(font_format, file_ext)
+    expected_path = get_expected_path('bug437/dump-{}.txt'.format(font_format))
+
+    actual_path = runner(CMD + ['-s', '-o', 'dump', '0', '-f', filename])
+    assert differ([expected_path, actual_path, '-l', '1'])
+
+
+@pytest.mark.parametrize('font_format', ['type1', 'cidfont', 'ufo2', 'ufo3'])
+def test_no_psname_convert_to_ufo_bug437(font_format):
+    if 'cid' in font_format:
+        file_ext = 'ps'
+    elif 'ufo' in font_format:
+        file_ext = 'ufo'
+    else:
+        file_ext = 'pfa'
+
+    font_path = get_input_path('{}-noPSname.{}'.format(font_format, file_ext))
+    expected_path = get_expected_path('bug437/{}.ufo'.format(font_format))
+    save_path = os.path.join(
+        _get_temp_dir_path(), '{}.ufo'.format(font_format))
+
+    runner(CMD + ['-a', '-o', 'ufo', '-f', font_path, save_path])
+    assert differ([expected_path, save_path])
+
+
+@pytest.mark.parametrize('font_format', ['type1', 'cidfont', 'ufo2', 'ufo3'])
+def test_no_psname_convert_to_type1_bug437(font_format):
+    if 'cid' in font_format:
+        file_ext = 'ps'
+    elif 'ufo' in font_format:
+        file_ext = 'ufo'
+    else:
+        file_ext = 'pfa'
+
+    filename = '{}-noPSname.{}'.format(font_format, file_ext)
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        runner(CMD + ['-o', 't1', '-f', filename])
+    assert err.value.returncode in (5, 6)
+
+
 def test_illegal_chars_in_glyph_name_bug473():
     font_path = get_input_path('bug473.ufo')
     save_path = os.path.join(_get_temp_dir_path(), 'bug473.ufo')
@@ -377,4 +426,16 @@ def test_ufo_self_closing_dict_element_bug701():
 def test_ufo3_guideline_bug705():
     actual_path = runner(CMD + ['-s', '-o', 't1', '-f', 'bug705.ufo'])
     expected_path = get_expected_path('bug705.pfa')
+    assert differ([expected_path, actual_path])
+
+
+@pytest.mark.parametrize('filename', [
+    'a',  # AE glyph in both default and processed layers
+    'b',  # AE glyph in default layer only
+    'c',  # AE glyph in processed layer only
+])
+def test_ufo_read_processed_contents_plist_bug740(filename):
+    actual_path = runner(CMD + ['-s', '-o', 'dump', '6', 'g', '_AE',
+                                '-f', 'bug740/{}.ufo'.format(filename)])
+    expected_path = get_expected_path('bug740/{}.txt'.format(filename))
     assert differ([expected_path, actual_path])

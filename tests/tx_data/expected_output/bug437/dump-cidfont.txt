@@ -1,0 +1,41 @@
+## Filename tx_data/input/cidfont-noPSname.ps
+## Top Dict
+Notice              "Copyright 2014-2018 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name 'Source'. Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries."
+FullName            "Source Han Sans AJ16 Regular"
+FamilyName          "Source Han Sans AJ16"
+Weight              "Regular"
+UnderlinePosition   -150
+FontBBox            {0,-120,977,880}
+FSType              0
+cid.Registry        "Adobe"
+cid.Ordering        "Japan1"
+cid.Supplement      0
+cid.CIDFontVersion  1.000
+cid.CIDCount        1144
+sup.flags           0x00000001 (ABF_CID_FONT)
+sup.srcFontType     Type 1 (cid-keyed)
+sup.nGlyphs         4
+## FontDict[0]
+## Private
+BlueValues          {-250,-250,1100,1100}
+StdHW               40
+StdVW               40
+StemSnapH           {40,120}
+StemSnapV           {40,120}
+LanguageGroup       1
+## FontDict[1]
+## Private
+BlueValues          {-250,-250,1100,1100}
+StdHW               58
+StdVW               63
+StemSnapH           {58,65,84}
+StemSnapV           {63,73,89}
+LanguageGroup       1
+## FontDict[2]
+## Private
+BlueValues          {-13,0,543,557,733,747}
+OtherBlues          {-250,-229}
+StdHW               69
+StdVW               85
+StemSnapH           {69,79,88}
+StemSnapV           {85,95,111}

@@ -195,8 +195,8 @@ class FontFile(object):
     def check_skip_glyph(self, glyph_name, do_all):
         skip = False
         if self.ufo_font_hash_data and self.use_hash_map:
-            width, outline_xml, skip = \
-                self.ufo_font_hash_data.getOrSkipGlyphXML(glyph_name, do_all)
+            _, skip = \
+                self.ufo_font_hash_data.getOrSkipGlyph(glyph_name, do_all)
         return skip
 
     def clear_hash_map(self):

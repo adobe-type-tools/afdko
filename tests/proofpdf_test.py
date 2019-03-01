@@ -6,8 +6,6 @@ from runner import main as runner
 from differ import main as differ
 from test_utils import get_input_path, get_expected_path, get_temp_file_path
 
-TOOL = 'proofpdf'
-
 
 def _get_filename_label(file_name):
     sep_index = file_name.find('_')
@@ -116,3 +114,35 @@ def test_waterfallplot(filename):
                    '-s', '/CreationDate',
                    '-r', r'^BT 1 0 0 1 \d{3}\.\d+ 742\.0000 Tm',  # timestamp
                    '-e', 'macroman'])
+
+
+@pytest.mark.parametrize('tool_name', [
+    'charplot',
+    'digiplot',
+    'fontplot',
+    'fontplot2',
+    'hintplot',
+    'waterfallplot',
+])
+def test_seac_in_charstring_bug125(tool_name):
+    pdf_filename = 'bug125_{}.pdf'.format(tool_name)
+    font_path = get_input_path('seac.otf')
+    save_path = get_temp_file_path()
+    runner(['-t', tool_name, '-o', 'o', '_{}'.format(save_path), 'dno',
+            '=pageIncludeTitle', '_0', '-f', font_path, '-a'])
+    expected_path = get_expected_path(pdf_filename)
+    assert differ([expected_path, save_path,
+                   '-s', '/CreationDate', '-e', 'macroman'])
+
+
+@pytest.mark.parametrize('font_format', ['otf', 'ttf'])
+def test_round_glyph_bounds_values_bug128(font_format):
+    bug_numb = 'bug128'
+    pdf_filename = '{}_{}.pdf'.format(bug_numb, font_format)
+    font_path = get_input_path('{}/font.{}'.format(bug_numb, font_format))
+    save_path = get_temp_file_path()
+    runner(['-t', 'charplot', '-o', 'o', '_{}'.format(save_path), 'g', '_o',
+            'dno', '=pageIncludeTitle', '_0', '-f', font_path, '-a'])
+    expected_path = get_expected_path(pdf_filename)
+    assert differ([expected_path, save_path,
+                   '-s', '/CreationDate', '-e', 'macroman'])

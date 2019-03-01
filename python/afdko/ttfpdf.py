@@ -1,5 +1,5 @@
 """
-otfpdf v1.4 Aug 28 2018
+otfpdf v1.4.1 Feb 17 2019
 provides support for the proofpdf script,  for working with OpenType/TTF
 fonts. Provides an implementation of the fontpdf font object. Cannot be
 run alone.
@@ -7,58 +7,10 @@ run alone.
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
-from fontTools.pens.boundsPen import BoundsPen, BasePen
-from afdko.fontpdf import FontPDFGlyph, FontPDFFont, FontPDFPoint
+from fontTools.pens.boundsPen import BoundsPen
+from fontTools.misc.py23 import round
+from afdko.fontpdf import FontPDFGlyph, FontPDFFont, FontPDFPen
 
-class FontPDFPen(BasePen):
-	def __init__(self, glyphSet = None):
-		BasePen.__init__(self, glyphSet)
-		self.pathList = []
-		self.numMT = self.numLT =  self.numCT = self.numPaths = self.total = 0 # These all get set when thge outline is drawn.
-		self.curPt = [0,0]
-		self.noPath = 1
-
-	def _moveTo(self, pt):
-		if self.noPath:
-			self.pathList.append([])
-		self.noPath  = 0
-		self.numMT +=1
-		pdfPoint = FontPDFPoint(FontPDFPoint.MT,  pt, index = self.total )
-		self.total += 1
-		self.curPt = pt
-		curPath = self.pathList[-1]
-		curPath.append(pdfPoint)
-
-	def _lineTo(self, pt):
-		if self.noPath:
-			self.pathList.append([])
-		self.noPath  = 0
-		self.numLT += 1
-		pdfPoint = FontPDFPoint(FontPDFPoint.LT,  pt, index = self.total)
-		self.total += 1
-		self.pathList[-1].append(pdfPoint)
-		self.curPt = pt
-
-	def _curveToOne(self, pt1, pt2, pt3):
-		if self.noPath:
-			self.pathList.append([])
-		self.numCT += 1
-		pdfPoint = FontPDFPoint(FontPDFPoint.CT,  pt3, pt1, pt2, index = self.total )
-		self.total += 1
-		self.pathList[-1].append(pdfPoint)
-		self.curPt = pt3
-
-	def _closePath(self):
-		self.numPaths += 1
-		self.noPath = 1
-		curPath = self.pathList[-1]
-
-		#if self.curPt != curPath[0].pt0:
-		#	curPath.append( FontPDFPoint(FontPDFPoint.LT,  curPath[0].pt0, index = self.total))
-		#	self.total += 1
-
-	def _endPath(self):
-		self.numPaths += 1
 
 class  txPDFFont(FontPDFFont):
 
@@ -193,9 +145,11 @@ class  txPDFGlyph(FontPDFGlyph):
 		pen = BoundsPen(None)
 		clientGlyph.draw(pen)
 		self.xAdvance = clientGlyph.width
-		self.BBox = pen.bounds
-		if not self.BBox :
-			self.BBox  = [0,0,0,0]
+		glyph_bounds = pen.bounds
+		if not glyph_bounds:
+			self.BBox = [0, 0, 0, 0]
+		else:
+			self.BBox = [round(item) for item in glyph_bounds]
 
 		self.yOrigin = self.parentFont.emSquare + self.parentFont.getBaseLine()
 		if txFont.vorg:

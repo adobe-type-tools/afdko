@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont sfntVersion="OTTO" ttLibVersion="3.37">
+
+  <CFF>
+    <major value="1"/>
+    <minor value="0"/>
+    <CFFFont name="SerifText-Bold">
+      <version value="1.0"/>
+      <FamilyName value="Serif Text"/>
+      <isFixedPitch value="0"/>
+      <ItalicAngle value="0"/>
+      <UnderlinePosition value="-100"/>
+      <UnderlineThickness value="50"/>
+      <PaintType value="0"/>
+      <CharstringType value="2"/>
+      <FontMatrix value="0.001 0 0 0.001 0 0"/>
+      <FontBBox value="0 0 500 700"/>
+      <StrokeWidth value="0"/>
+      <!-- charset is dumped separately as the 'GlyphOrder' element -->
+      <Encoding name="StandardEncoding"/>
+      <Private>
+        <BlueValues value="0 0"/>
+        <BlueScale value="0.039625"/>
+        <BlueShift value="7"/>
+        <BlueFuzz value="1"/>
+        <ForceBold value="0"/>
+        <LanguageGroup value="0"/>
+        <ExpansionFactor value="0.06"/>
+        <initialRandomSeed value="0"/>
+        <defaultWidthX value="0"/>
+        <nominalWidthX value="0"/>
+      </Private>
+      <CharStrings>
+        <CharString name=".notdef">
+          500 0 50 600 50 hstem
+          0 50 400 50 vstem
+          0 vmoveto
+          500 700 -500 hlineto
+          250 -305 rmoveto
+          -170 255 rlineto
+          340 hlineto
+          -140 -300 rmoveto
+          170 255 rlineto
+          -510 vlineto
+          -370 -45 rmoveto
+          170 255 170 -255 rlineto
+          -370 555 rmoveto
+          170 -255 -170 -255 rlineto
+          endchar
+        </CharString>
+        <CharString name="AE">
+          1014 299 320 rmoveto
+          194 285 rlineto
+          -285 vlineto
+          432 364 rmoveto
+          -49 -9 rlineto
+          -474 -33 hlineto
+          53 -12 -398 -581 -71 -16 rlineto
+          -33 202 33 vlineto
+          -72 17 150 221 rlineto
+          227 -222 hlineto
+          -71 -16 rlineto
+          -33 481 vlineto
+          50 -9 27 238 rlineto
+          -39 hlineto
+          -80 -187 rlineto
+          -208 281 158 hlineto
+          26 -74 rlineto
+          38 194 -38 hlineto
+          -26 -74 rlineto
+          -158 264 176 hlineto
+          94 -187 rlineto
+          39 hlineto
+          endchar
+        </CharString>
+      </CharStrings>
+    </CFFFont>
+
+    <GlobalSubrs>
+      <!-- The 'index' attribute is only for humans; it is ignored when parsed. -->
+    </GlobalSubrs>
+  </CFF>
+
+</ttFont>

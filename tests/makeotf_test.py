@@ -572,15 +572,26 @@ def test_ttf_input_font_bug680():
 
 
 def test_skip_ufo3_global_guides_bug700():
-    input_filename = "bug700/font.ufo"
+    input_filename = "bug700.ufo"
     actual_path = get_temp_file_path()
     runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
                         'o', '_{}'.format(actual_path)])
     assert font_has_table(actual_path, 'CFF ')
 
 
+def test_outline_from_processed_layer_bug703():
+    input_filename = 'bug703.ufo'
+    ttx_filename = 'bug703.ttx'
+    actual_path = get_temp_file_path()
+    runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
+                        'o', '_{}'.format(actual_path)])
+    actual_ttx = generate_ttx_dump(actual_path, ['CFF '])
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
 def test_unhandled_ufo_glif_token_bug705():
-    input_filename = 'bug705/font.ufo'
+    input_filename = 'bug705.ufo'
     otf_path = get_temp_file_path()
 
     stderr_path = runner(
@@ -591,3 +602,16 @@ def test_unhandled_ufo_glif_token_bug705():
     with open(stderr_path, 'rb') as f:
         output = f.read()
     assert b"unhandled token: <foo" in output
+
+
+def test_delete_zero_kb_font_on_fail_bug736():
+    input_filename = 'bug736/font.pfa'
+    feat_filename = 'bug736/feat.fea'
+    out_filename = 'bug736/SourceSans-Test.otf'
+
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        runner(CMD + ['-o',
+                      'f', '_{}'.format(get_input_path(input_filename)),
+                      'ff', '_{}'.format(get_input_path(feat_filename))])
+    assert err.value.returncode == 1
+    assert os.path.exists(get_input_path(out_filename)) is False

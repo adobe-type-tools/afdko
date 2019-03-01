@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="AE" format="1">
+  <advance width="1014"/>
+  <unicode hex="00C6"/>
+  <outline>
+    <contour>
+      <point x="272" y="320" type="line"/>
+      <point x="252" y="271" type="line"/>
+      <point x="554" y="271" type="line"/>
+      <point x="554" y="320" type="line"/>
+    </contour>
+    <contour>
+      <point x="-14" y="33" type="line"/>
+      <point x="-14" y="0" type="line"/>
+      <point x="188" y="0" type="line"/>
+      <point x="188" y="33" type="line"/>
+      <point x="111" y="51" type="line"/>
+      <point x="68" y="51" type="line"/>
+    </contour>
+    <contour>
+      <point x="497" y="644" type="line"/>
+      <point x="464" y="644" type="line"/>
+      <point x="41" y="25" type="line"/>
+      <point x="99" y="25" type="line"/>
+      <point x="497" y="611" type="line"/>
+    </contour>
+    <contour>
+      <point x="837" y="249" type="line"/>
+      <point x="875" y="249" type="line"/>
+      <point x="875" y="443" type="line"/>
+      <point x="837" y="443" type="line"/>
+      <point x="811" y="369" type="line"/>
+      <point x="811" y="323" type="line"/>
+    </contour>
+    <contour>
+      <point x="402" y="642" type="line"/>
+      <point x="483" y="624" type="line"/>
+      <point x="612" y="633" type="line"/>
+      <point x="911" y="633" type="line"/>
+      <point x="906" y="675" type="line"/>
+      <point x="402" y="675" type="line"/>
+    </contour>
+    <contour>
+      <point x="925" y="684" type="line"/>
+      <point x="876" y="675" type="line"/>
+      <point x="821" y="649" type="line"/>
+      <point x="923" y="446" type="line"/>
+      <point x="962" y="446" type="line"/>
+    </contour>
+    <contour>
+      <point x="493" y="675" type="line"/>
+      <point x="493" y="0" type="line"/>
+      <point x="653" y="0" type="line"/>
+      <point x="653" y="675" type="line"/>
+    </contour>
+    <contour>
+      <point x="422" y="33" type="line"/>
+      <point x="422" y="0" type="line"/>
+      <point x="924" y="0" type="line"/>
+      <point x="928" y="42" type="line"/>
+      <point x="612" y="42" type="line"/>
+      <point x="503" y="51" type="line"/>
+    </contour>
+    <contour>
+      <point x="953" y="-9" type="line"/>
+      <point x="980" y="229" type="line"/>
+      <point x="941" y="229" type="line"/>
+      <point x="849" y="14" type="line"/>
+      <point x="903" y="0" type="line"/>
+    </contour>
+    <contour>
+      <point x="599" y="318" type="line"/>
+      <point x="633" y="323" type="line"/>
+      <point x="811" y="323" type="line"/>
+      <point x="811" y="369" type="line"/>
+      <point x="599" y="369" type="line"/>
+    </contour>
+    <contour>
+      <point x="553" y="700" type="move" name="top"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.typemytype.robofont.guides</key>
+      <array>
+      </array>
+      <key>com.typemytype.robofont.layerData</key>
+      <dict>
+        <key>background</key>
+        <dict>
+          <key>anchors</key>
+          <array>
+          </array>
+          <key>components</key>
+          <array>
+            <dict>
+              <key>baseGlyph</key>
+              <string>E</string>
+              <key>transformation</key>
+              <array>
+                <integer>1</integer>
+                <integer>0</integer>
+                <integer>0</integer>
+                <integer>1</integer>
+                <integer>393</integer>
+                <integer>0</integer>
+              </array>
+            </dict>
+          </array>
+          <key>contours</key>
+          <array>
+          </array>
+          <key>lib</key>
+          <dict>
+          </dict>
+          <key>name</key>
+          <string>AE</string>
+          <key>unicodes</key>
+          <array>
+          </array>
+          <key>width</key>
+          <integer>1014</integer>
+        </dict>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

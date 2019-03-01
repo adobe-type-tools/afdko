@@ -17,7 +17,7 @@ The tools fall into several different functional groups.
 
 ## 2.1 Making/editing fonts
 
-### autohint
+### autohint/psautohint
 
 This program is the Adobe auto-hinter. It can be applied to both OpenType/CFF and Type 1 fonts. Works with Type 1 and OpenType/CFF fonts only. It uses Just von Rossum's fontTools Python package for accessing and changing the font data.
 
@@ -33,6 +33,18 @@ This script will generate UFO fonts from a set of Superpolator master designs.
 
 This program will merge glyphs from one font into another, optionally copying a subset from the source fonts, and changing the names of the glyphs. It can also be used to subset and change the glyph names in a font. By using the same font more than once as a source with different mapping files, glyphs can be duplicated under other names. It can also convert a named-keyed font to a CID-keyed font.
 
+### otc2otf
+
+Extracts all OpenType fonts (.otf or .ttf) from an OpenType Collection font file (.ttc or .otc).
+
+### otf2otc
+
+Generates an OpenType Collection font file (.ttc) from two or more OpenType fonts (.otf or .ttf).
+
+### otf2ttf
+
+Converts OpenType-CFF fonts to TrueType.
+
 ### rotatefont
 
 This tool will rotate and translate glyphs in a font, including the hints. However, hints will be discarded if the rotation is not a multiple of 90 degrees.
@@ -41,9 +53,13 @@ This tool will rotate and translate glyphs in a font, including the hints. Howev
 
 This allows you to cut and past the entire binary block of a font table from one font to another. You do this by first using it on a source font with the "-x" option to copy a table from the source font to a separate file, and then using it with the "-a" option to add that table to a target font. It can also be used to simply delete a table, and to fix the font table checksums.
 
-### stemhist
+### stemhist/psstemhist
 
 This program provides reports which help in selecting the global hint data and alignment zones for Type 1 hinting. You should look at the reports from this tool in order to select the most common stem widths, and then use a program such as FontLab or Robofont to set the values in the font. This should be done before hinting the font. Works with Type 1 and OpenType/CFF fonts only.
+
+### ttfcomponentizer
+
+Componentizes glyphs of a TrueType font with information from an external UFO font. The script only supports components that are not scaled, rotated nor flipped.
 
 ### ttx
 
