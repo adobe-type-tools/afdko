@@ -1,6 +1,33 @@
 Changelog
 =========
 
+2.8.6 (released 2019-03-01)
+---------------------------
+
+- Updated FEA syntax spec to allow `subtable` statements in lookups
+  other than PairPos Format 2.
+- [makeotf] Added `features.fea` to list of default FEA file names,
+  and gave preference to it
+- [tx] Don't fake font name or version if they're not in the source UFO
+  ([#437](https://github.com/adobe-type-tools/afdko/issues/437))
+- [makeinstancesufo] Added `--ufo-version` option
+- [otfpdf/ttfpdf] Round glyph bounds values
+  ([#128](https://github.com/adobe-type-tools/afdko/issues/128))
+- [otfpdf] Provide a glyphset to the pens
+  ([#125](https://github.com/adobe-type-tools/afdko/issues/125))
+- [tx] Get UFO's layer file names from the layer's contents.plist
+  ([#740](https://github.com/adobe-type-tools/afdko/issues/740),
+  [#703](https://github.com/adobe-type-tools/afdko/issues/703))
+- [ufotools] Replace `convertGlyphOutlineToBezString()` by
+  `get_glyph_bez()` from **psautohint**
+  ([#715](https://github.com/adobe-type-tools/afdko/issues/715))
+- [makeotf] Update and re-format documentation
+  ([#702](https://github.com/adobe-type-tools/afdko/issues/702))
+- [makeotf] Use FontTools to copy font tables
+  ([#739](https://github.com/adobe-type-tools/afdko/pull/739))
+- [makeotf] Delete zero-size font on failure
+  ([#736](https://github.com/adobe-type-tools/afdko/issues/736))
+
 2.8.5 (released 2019-02-09)
 ---------------------------
 
