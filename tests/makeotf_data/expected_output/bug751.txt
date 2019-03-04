@@ -1,0 +1,5 @@
+tx: --- tests/makeotf_data/input/bug751.ufo
+tx: (ufr) Warning: Encountered empty <string> for fontinfo key copyright. Skipping
+tx: (ufr) Warning: Encountered empty <string> for fontinfo key trademark. Skipping
+makeotf [Warning] Could not find default features file. Font will be built without any layout features.
+Built development mode font 'Exercise1-Regular.otf'.
