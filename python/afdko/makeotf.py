@@ -27,7 +27,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.7.1 Feb 9 2019
+makeotf.py v2.7.2 Mar 3 2019
 """
 
 __methods__ = """
@@ -2028,7 +2028,7 @@ def convertFontIfNeeded(makeOTFParams):
 def get_font_psname(font_path, is_ufo=False):
     # Figure out PS name in order to derive default output path.
     success, output = fdkutils.get_shell_command_output([
-        'tx', '-dump', '-0', font_path])
+        'tx', '-dump', '-0', font_path], std_error=True)
     if not success:
         raise MakeOTFShellError
 
