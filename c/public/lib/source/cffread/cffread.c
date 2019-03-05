@@ -890,7 +890,7 @@ static void saveDeltaArray(cfrCtx h, size_t max, long *cnt, float *array, long *
             numBlends = stackEntry->numBlends;
 
             if (numBlends == 0) {
-                blendEntry->value = lastValue + (stackEntry->is_int) ? (float)stackEntry->u.int_val : stackEntry->u.real_val;
+                blendEntry->value = lastValue + (stackEntry->is_int ? (float)stackEntry->u.int_val : stackEntry->u.real_val);
                 lastValue = blendEntry->value;
                 blendEntry->numBlends = 0;
                 blendEntry->blendValues = NULL;
