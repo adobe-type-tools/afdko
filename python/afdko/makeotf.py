@@ -88,8 +88,8 @@ __usage__ = __version__ + """
 -ni                 Turn off the -i option, if it has previously
                     been turned on.
 
--ff <feature file>  Specify path to feature file. Default is 'features' or
-                    'features.fea'.
+-ff <feature file>  Specify path to feature file. Default is 'features.fea';
+                    'features' is also accepted.
 
 -fs                 Make stub GSUB table if there are no glyph substitution
                     rules in the features file.
