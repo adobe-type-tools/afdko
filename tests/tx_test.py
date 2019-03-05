@@ -398,16 +398,17 @@ def test_glyph_bboxes_bug655():
     assert differ([expected_path, actual_path])
 
 
-def test_cs_opt_bug684():
+@pytest.mark.parametrize('filename', ['SHSVF_9b3b', 'bug684'])
+def test_cs_opt_bug684(filename):
     """ The input CFF2 variable font contains a long single charstring
     making the maximum use of the operand stack.
     tx was generating a bad CFF2 charstring that would overflow
     the operand stack of the standard size (513) after re-converted
     to CFF2 unless -no_opt option is specified."""
-    font_path = get_input_path('SHSVF_9b3b.otf')
+    font_path = get_input_path('{}.otf'.format(filename))
     result_path = get_temp_file_path()
+    expected_path = get_expected_path('{}.cff2'.format(filename))
     runner(CMD + ['-a', '-o', 'cff2', '-f', font_path, result_path])
-    expected_path = get_expected_path('SHSVF_9b3b_opt.cff2')
     assert differ([expected_path, result_path, '-m', 'bin'])
 
 
