@@ -53,33 +53,19 @@ class InstallPlatlib(setuptools.command.install.install):
         self.install_lib = self.install_platlib
 
 
-def get_executable_dir():
-    """
-    Build source path on the afdko for the command-line tools.
-    """
+def compile_package(pkg_dir):
+    programs_dir = 'c'
+    cmd = None
     platform_system = platform.system()
     if platform_system == "Windows":
-        bin_dir = "win"
+        cmd = "buildall.cmd"
     elif platform_system == "Linux":
-        bin_dir = "linux"
+        cmd = "sh buildalllinux.sh"
     elif platform_system == "Darwin":
-        bin_dir = "osx"
+        cmd = "sh buildall.sh"
     else:
         # fallback to Linux
         print('afdko: Unknown OS: {}'.format(platform_system))
-        bin_dir = "linux"
-    return bin_dir
-
-
-def compile_package(pkg_dir):
-    bin_dir = get_executable_dir()
-    programs_dir = 'c'
-    cmd = None
-    if bin_dir == 'osx':
-        cmd = "sh buildall.sh"
-    elif bin_dir == 'win':
-        cmd = "buildall.cmd"
-    elif bin_dir == 'linux':
         cmd = "sh buildalllinux.sh"
     cur_dir = os.getcwd()
     assert cmd, 'afdko: Unable to form build command for this platform.'
