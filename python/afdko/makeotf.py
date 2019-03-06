@@ -27,7 +27,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.7.2 Mar 3 2019
+makeotf.py v2.7.3 Mar 5 2019
 """
 
 __methods__ = """
@@ -1788,9 +1788,9 @@ def setMissingParams(makeOTFParams):
             if os.path.exists(fileName):
                 srcFontPath = inputFilePath = fileName
                 break
-        if not os.path.exists(inputFilePath):
+        if not inputFilePath:
             print("makeotf [Error] Could not find any of the default input "
-                  "font file '%s'." % kDefaultFontPathList)
+                  "font files %s." % kDefaultFontPathList)
             # stop here already, otherwise getROS() will generate an IOError.
             raise MakeOTFOptionsError
 
