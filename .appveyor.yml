@@ -35,7 +35,6 @@ before_build:
   - flake8 python\afdko\ttfcomponentizer.py
   - flake8 python\afdko\ttxn.py
   - flake8 python\afdko\ufotools.py
-  - cpplint --recursive --quiet c\autohint
   - cpplint --recursive --quiet c\detype1
   - cpplint --recursive --quiet c\makeotf\makeotf_lib\source
   - cpplint --recursive --quiet c\makeotf\makeotf_lib\api
@@ -80,3 +79,9 @@ deploy:
   prerelease: true
   on:
     appveyor_repo_tag: true
+
+notifications:
+  - provider: Email
+    on_build_success: false
+    on_build_failure: true
+    on_build_status_changed: false

@@ -47,7 +47,6 @@ before_script:
   - flake8 ttxn.py
   - flake8 ufotools.py
   - popd
-  - cpplint --recursive --quiet c/autohint
   - cpplint --recursive --quiet c/detype1
   - cpplint --recursive --quiet c/makeotf/makeotf_lib/source
   - cpplint --recursive --quiet c/makeotf/makeotf_lib/api
@@ -95,7 +94,5 @@ deploy:
       tags: true
 
 notifications:
-  slack: typekit:TRAVIS_SLACK_TOKEN
   email:
-    on_success: change
     on_failure: always
