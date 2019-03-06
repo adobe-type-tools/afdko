@@ -82,6 +82,8 @@ deploy:
 
 notifications:
   - provider: Email
+    to:
+      - afdko@adobe.com
     on_build_success: false
     on_build_failure: true
     on_build_status_changed: false
