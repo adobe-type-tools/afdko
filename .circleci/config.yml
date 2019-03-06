@@ -1,0 +1,41 @@
+version: 2.1
+
+commands:
+  setup_venv:
+    description: Setup the virtual environment
+    steps:
+      - run: bash .circleci/setup_venv.sh
+
+  check_source_code:
+    description: Run flake8 and cpplint
+    steps:
+      - run: bash .circleci/check_source_code.sh
+
+  build_and_test:
+    description: Build wheel and run tests via cibuildwheel
+    steps:
+      - run:
+          command: |
+            source venv/bin/activate
+            cibuildwheel --output-dir wheelhouse
+
+jobs:
+  linux-python3:
+    docker:
+      - image: circleci/python:3.6
+    environment:
+      CIBW_SKIP: cp27-* cp34-* cp35-* cp37-* *i686
+      CIBW_TEST_REQUIRES_LINUX: pytest subprocess32
+      CIBW_TEST_COMMAND_LINUX: cd {project} && pytest -v && pip uninstall --yes afdko
+    steps:
+      - checkout
+      - setup_remote_docker
+      - setup_venv
+      - check_source_code
+      - build_and_test
+
+workflows:
+  version: 2.1
+  all-tests:
+    jobs:
+      - linux-python3
