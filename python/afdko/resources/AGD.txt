@@ -23613,16 +23613,16 @@ pstroke
 	uni: 1D7D
 	fin: uni1D7D
 	maj: Pstroke
-macronacutecmb
+macronacutetonecmb
 	uni: 1DC4
 	fin: uni1DC4
-gravemacroncmb
+gravemacrontonecmb
 	uni: 1DC5
 	fin: uni1DC5
-macrongravecmb
+macrongravetonecmb
 	uni: 1DC6
 	fin: uni1DC6
-acutemacroncmb
+acutemacrontonecmb
 	uni: 1DC7
 	fin: uni1DC7
 nbhyphen
@@ -25076,458 +25076,458 @@ dvStopVirama
 	fin: uni097D094D
 dvStopNuktaVirama
 	fin: uni097D093C094D
-beCandrabindu
+bnCandrabindu
 	uni: 0981
 	fin: uni0981
 	ali: candrabindubengali
 	set: AGL1
-beAnusvara
+bnAnusvara
 	uni: 0982
 	fin: uni0982
 	ali: anusvarabengali
 	set: AGL1
-beVisarga
+bnVisarga
 	uni: 0983
 	fin: uni0983
 	ali: visargabengali
 	set: AGL1
-beA
+bnA
 	uni: 0985
 	fin: uni0985
 	ali: abengali
 	set: AGL1
-beAa
+bnAa
 	uni: 0986
 	fin: uni0986
 	ali: aabengali
 	set: AGL1
-beI
+bnI
 	uni: 0987
 	fin: uni0987
 	ali: ibengali
 	set: AGL1
-beIi
+bnIi
 	uni: 0988
 	fin: uni0988
 	ali: iibengali
 	set: AGL1
-beU
+bnU
 	uni: 0989
 	fin: uni0989
 	ali: ubengali
 	set: AGL1
-beUu
+bnUu
 	uni: 098A
 	fin: uni098A
 	ali: uubengali
 	set: AGL1
-beRvocal
+bnRvocal
 	uni: 098B
 	fin: uni098B
 	ali: rvocalicbengali
 	set: AGL1
-beLvocal
+bnLvocal
 	uni: 098C
 	fin: uni098C
 	ali: lvocalicbengali
 	set: AGL1
-beE
+bnE
 	uni: 098F
 	fin: uni098F
 	ali: ebengali
 	set: AGL1
-beAi
+bnAi
 	uni: 0990
 	fin: uni0990
 	ali: aibengali
 	set: AGL1
-beO
+bnO
 	uni: 0993
 	fin: uni0993
 	ali: obengali
 	set: AGL1
-beAu
+bnAu
 	uni: 0994
 	fin: uni0994
 	ali: aubengali
 	set: AGL1
-beKa
+bnKa
 	uni: 0995
 	fin: uni0995
 	ali: kabengali
 	set: AGL1
-beKha
+bnKha
 	uni: 0996
 	fin: uni0996
 	ali: khabengali
 	set: AGL1
-beGa
+bnGa
 	uni: 0997
 	fin: uni0997
 	ali: gabengali
 	set: AGL1
-beGha
+bnGha
 	uni: 0998
 	fin: uni0998
 	ali: ghabengali
 	set: AGL1
-beNga
+bnNga
 	uni: 0999
 	fin: uni0999
 	ali: ngabengali
 	set: AGL1
-beCa
+bnCa
 	uni: 099A
 	fin: uni099A
 	ali: cabengali
 	set: AGL1
-beCha
+bnCha
 	uni: 099B
 	fin: uni099B
 	ali: chabengali
 	set: AGL1
-beJa
+bnJa
 	uni: 099C
 	fin: uni099C
 	ali: jabengali
 	set: AGL1
-beJha
+bnJha
 	uni: 099D
 	fin: uni099D
 	ali: jhabengali
 	set: AGL1
-beNya
+bnNya
 	uni: 099E
 	fin: uni099E
 	ali: nyabengali
 	set: AGL1
-beTta
+bnTta
 	uni: 099F
 	fin: uni099F
 	ali: ttabengali
 	set: AGL1
-beTtha
+bnTtha
 	uni: 09A0
 	fin: uni09A0
 	ali: tthabengali
 	set: AGL1
-beDda
+bnDda
 	uni: 09A1
 	fin: uni09A1
 	ali: ddabengali
 	set: AGL1
-beDdha
+bnDdha
 	uni: 09A2
 	fin: uni09A2
 	ali: ddhabengali
 	set: AGL1
-beNna
+bnNna
 	uni: 09A3
 	fin: uni09A3
 	ali: nnabengali
 	set: AGL1
-beTa
+bnTa
 	uni: 09A4
 	fin: uni09A4
 	ali: tabengali
 	set: AGL1
-beTha
+bnTha
 	uni: 09A5
 	fin: uni09A5
 	ali: thabengali
 	set: AGL1
-beDa
+bnDa
 	uni: 09A6
 	fin: uni09A6
 	ali: dabengali
 	set: AGL1
-beDha
+bnDha
 	uni: 09A7
 	fin: uni09A7
 	ali: dhabengali
 	set: AGL1
-beNa
+bnNa
 	uni: 09A8
 	fin: uni09A8
 	ali: nabengali
 	set: AGL1
-bePa
+bnPa
 	uni: 09AA
 	fin: uni09AA
 	ali: pabengali
 	set: AGL1
-bePha
+bnPha
 	uni: 09AB
 	fin: uni09AB
 	ali: phabengali
 	set: AGL1
-beBa
+bnBa
 	uni: 09AC
 	fin: uni09AC
 	ali: babengali
 	set: AGL1
-beBha
+bnBha
 	uni: 09AD
 	fin: uni09AD
 	ali: bhabengali
 	set: AGL1
-beMa
+bnMa
 	uni: 09AE
 	fin: uni09AE
 	ali: mabengali
 	set: AGL1
-beYa
+bnYa
 	uni: 09AF
 	fin: uni09AF
 	ali: yabengali
 	set: AGL1
-beRa
+bnRa
 	uni: 09B0
 	fin: uni09B0
 	ali: rabengali
 	set: AGL1
-beLa
+bnLa
 	uni: 09B2
 	fin: uni09B2
 	ali: labengali
 	set: AGL1
-beSha
+bnSha
 	uni: 09B6
 	fin: uni09B6
 	ali: shabengali
 	set: AGL1
-beSsa
+bnSsa
 	uni: 09B7
 	fin: uni09B7
 	ali: ssabengali
 	set: AGL1
-beSa
+bnSa
 	uni: 09B8
 	fin: uni09B8
 	ali: sabengali
 	set: AGL1
-beHa
+bnHa
 	uni: 09B9
 	fin: uni09B9
 	ali: habengali
 	set: AGL1
-beNukta
+bnNukta
 	uni: 09BC
 	fin: uni09BC
 	ali: nuktabengali
 	set: AGL1
-beAvagraha
+bnAvagraha
 	uni: 09BD
 	fin: uni09BD
-beAasign
+bnAasign
 	uni: 09BE
 	fin: uni09BE
 	ali: aavowelsignbengali
 	set: AGL1
-beIsign
+bnIsign
 	uni: 09BF
 	fin: uni09BF
 	ali: ivowelsignbengali
 	set: AGL1
-beIisign
+bnIisign
 	uni: 09C0
 	fin: uni09C0
 	ali: iivowelsignbengali
 	set: AGL1
-beUsign
+bnUsign
 	uni: 09C1
 	fin: uni09C1
 	ali: uvowelsignbengali
 	set: AGL1
-beUusign
+bnUusign
 	uni: 09C2
 	fin: uni09C2
 	ali: uuvowelsignbengali
 	set: AGL1
-beRvocalsign
+bnRvocalsign
 	uni: 09C3
 	fin: uni09C3
 	ali: rvocalicvowelsignbengali
 	set: AGL1
-beRrvocalsign
+bnRrvocalsign
 	uni: 09C4
 	fin: uni09C4
 	ali: rrvocalicvowelsignbengali
 	set: AGL1
-beEsign
+bnEsign
 	uni: 09C7
 	fin: uni09C7
 	ali: evowelsignbengali
 	set: AGL1
-beAisign
+bnAisign
 	uni: 09C8
 	fin: uni09C8
 	ali: aivowelsignbengali
 	set: AGL1
-beOsign
+bnOsign
 	uni: 09CB
 	fin: uni09CB
 	ali: ovowelsignbengali
 	set: AGL1
-beAusign
+bnAusign
 	uni: 09CC
 	fin: uni09CC
 	ali: auvowelsignbengali
 	set: AGL1
-beVirama
+bnVirama
 	uni: 09CD
 	fin: uni09CD
 	ali: viramabengali
 	set: AGL1
-beKhandaTa
+bnTaKhanda
 	uni: 09CE
 	fin: uni09CE
-beAulength
+bnAulength
 	uni: 09D7
 	fin: uni09D7
 	ali: aulengthmarkbengali
 	set: AGL1
-beRra
+bnRra
 	uni: 09DC
 	fin: uni09DC
 	ali: rrabengali
 	set: AGL1
-beRha
+bnRha
 	uni: 09DD
 	fin: uni09DD
 	ali: rhabengali
 	set: AGL1
-beYya
+bnYya
 	uni: 09DF
 	fin: uni09DF
 	ali: yyabengali
 	set: AGL1
-beRrvocal
+bnRrvocal
 	uni: 09E0
 	fin: uni09E0
 	ali: rrvocalicbengali
 	set: AGL1
-beLlvocal
+bnLlvocal
 	uni: 09E1
 	fin: uni09E1
 	ali: llvocalicbengali
 	set: AGL1
-beLvocalsign
+bnLvocalsign
 	uni: 09E2
 	fin: uni09E2
 	ali: lvocalicvowelsignbengali
 	set: AGL1
-beLlvocalsign
+bnLlvocalsign
 	uni: 09E3
 	fin: uni09E3
 	ali: llvocalicvowelsignbengali
 	set: AGL1
-beZero
+bnZero
 	uni: 09E6
 	fin: uni09E6
 	ali: zerobengali
 	set: AGL1
-beOne
+bnOne
 	uni: 09E7
 	fin: uni09E7
 	ali: onebengali
 	set: AGL1
-beTwo
+bnTwo
 	uni: 09E8
 	fin: uni09E8
 	ali: twobengali
 	set: AGL1
-beThree
+bnThree
 	uni: 09E9
 	fin: uni09E9
 	ali: threebengali
 	set: AGL1
-beFour
+bnFour
 	uni: 09EA
 	fin: uni09EA
 	ali: fourbengali
 	set: AGL1
-beFive
+bnFive
 	uni: 09EB
 	fin: uni09EB
 	ali: fivebengali
 	set: AGL1
-beSix
+bnSix
 	uni: 09EC
 	fin: uni09EC
 	ali: sixbengali
 	set: AGL1
-beSeven
+bnSeven
 	uni: 09ED
 	fin: uni09ED
 	ali: sevenbengali
 	set: AGL1
-beEight
+bnEight
 	uni: 09EE
 	fin: uni09EE
 	ali: eightbengali
 	set: AGL1
-beNine
+bnNine
 	uni: 09EF
 	fin: uni09EF
 	ali: ninebengali
 	set: AGL1
-beRa.ASM
+bnRa.ASM
 	uni: 09F0
 	fin: uni09F0
 	ali: ramiddlediagonalbengali
 	set: AGL1
-beVa
+bnVa
 	uni: 09F1
 	fin: uni09F1
 	ali: ralowerdiagonalbengali
 	set: AGL1
-beRupeeMark
+bnRupeeMark
 	uni: 09F2
 	fin: uni09F2
 	ali: rupeemarkbengali
 	set: AGL1
-beRupee
+bnRupee
 	uni: 09F3
 	fin: uni09F3
 	ali: rupeesignbengali
 	set: AGL1
-beOneCurNum
+bnOneCurNum
 	uni: 09F4
 	fin: uni09F4
 	ali: onenumeratorbengali
 	set: AGL1
-beTwoCurNum
+bnTwoCurNum
 	uni: 09F5
 	fin: uni09F5
 	ali: twonumeratorbengali
 	set: AGL1
-beThreeCurNum
+bnThreeCurNum
 	uni: 09F6
 	fin: uni09F6
 	ali: threenumeratorbengali
 	set: AGL1
-beFourCurNum
+bnFourCurNum
 	uni: 09F7
 	fin: uni09F7
 	ali: fournumeratorbengali
 	set: AGL1
-beOneLessCurNum
+bnOneLessCurNum
 	uni: 09F8
 	fin: uni09F8
 	ali: denominatorminusonenumeratorbengali
 	set: AGL1
-beSixteenCurDenom
+bnSixteenCurDenom
 	uni: 09F9
 	fin: uni09F9
 	ali: sixteencurrencydenominatorbengali
 	set: AGL1
-beIsshar
+bnIsshar
 	uni: 09FA
 	fin: uni09FA
 	ali: issharbengali
 	set: AGL1
-beGanda
+bnGanda
 	uni: 09FB
 	fin: uni09FB
 guAdakBindi
@@ -27130,12 +27130,21 @@ teThreeFracEven
 teTuumu
 	uni: 0C7F
 	fin: uni0C7F
+knCandrabindu
+	uni: 0C80
+	fin: uni0C80
+knCandrabinducmb
+	uni: 0C81
+	fin: uni0C81
 knAnusvara
 	uni: 0C82
 	fin: uni0C82
 knVisarga
 	uni: 0C83
 	fin: uni0C83
+knSiddham
+	uni: 0C84
+	fin: uni0C84
 knA
 	uni: 0C85
 	fin: uni0C85
@@ -30406,6 +30415,10 @@ Hhook
 	uni: A7AA
 	fin: uniA7AA
 	min: hhook
+Ismallcap
+	uni: A7AE
+	fin: uniA7AE
+	min: Ismall
 colonmod
 	uni: A789
 	fin: uniA789
