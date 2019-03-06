@@ -1,5 +1,6 @@
 [![Travis](https://travis-ci.org/adobe-type-tools/afdko.svg?branch=develop)](https://travis-ci.org/adobe-type-tools/afdko)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/qurx2si4x54b97mt/branch/develop?svg=true)](https://ci.appveyor.com/project/adobe-type-tools/afdko/branch/develop)
+[![CircleCI](https://circleci.com/gh/adobe-type-tools/afdko/tree/develop.svg?style=svg)](https://circleci.com/gh/adobe-type-tools/afdko/tree/develop)
 [![Codacy](https://api.codacy.com/project/badge/Grade/08ceff914833445685924ebb1f040070)](https://www.codacy.com/app/adobe-type-tools/afdko?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=adobe-type-tools/afdko&amp;utm_campaign=Badge_Grade)
 [![Coverage](https://codecov.io/gh/adobe-type-tools/afdko/branch/develop/graph/badge.svg)](https://codecov.io/gh/adobe-type-tools/afdko/branch/develop)
 [![PyPI](https://img.shields.io/pypi/v/afdko.svg)](https://pypi.org/project/afdko)
