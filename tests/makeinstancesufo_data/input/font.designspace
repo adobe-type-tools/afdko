@@ -45,6 +45,13 @@
             <kerning />
             <info />
         </instance>
+        <instance familyname="Source Serif Pro" filename="../temp_output/regular1.ufo" postscriptfontname="SourceSerifPro-Regular" stylename="Regular">
+            <location>
+                <dimension name="weight" xvalue="394" />
+            </location>
+            <kerning />
+            <info />
+        </instance>
         <instance familyname="Source Serif Pro" filename="../temp_output/semibold.ufo" postscriptfontname="SourceSerifPro-Semibold" stylename="Semibold">
             <location>
                 <dimension name="weight" xvalue="600" />
@@ -62,6 +69,25 @@
         <instance familyname="Source Serif Pro" filename="../temp_output/black.ufo" postscriptfontname="SourceSerifPro-Black" stylename="Black">
             <location>
                 <dimension name="weight" xvalue="1000" />
+            </location>
+            <kerning />
+            <info />
+        </instance>
+        <instance familyname="Source Serif Pro" filename="../temp_output/anisotropic.ufo" postscriptfontname="SourceSerifPro-Anisotropic" stylename="Anisotropic">
+            <location>
+                <dimension name="weight" xvalue="1000" yvalue="200" />
+            </location>
+            <kerning />
+            <info />
+        </instance>
+        <instance familyname="Source Serif Pro" filename="../temp_output/ufo2.ufo" postscriptfontname="SourceSerifPro-Regular" stylename="Regular">
+            <location>
+                <dimension name="weight" xvalue="394" />
+            </location>
+        </instance>
+        <instance familyname="Source Serif Pro" filename="same_dir.ufo" postscriptfontname="SourceSerifPro-SameDir" stylename="Same Dir">
+            <location>
+                <dimension name="weight" xvalue="55.5" />
             </location>
             <kerning />
             <info />
