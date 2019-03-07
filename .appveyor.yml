@@ -14,41 +14,6 @@ matrix:
 # Do not build feature branch with open Pull Requests
 skip_branch_with_pr: true
 
-# scripts that run after cloning repository
-install:
-  - pip install flake8 cpplint
-
-# scripts to run before build
-before_build:
-  - flake8 setup.py
-  - flake8 tests\*.py
-  - flake8 python\afdko\buildcff2vf.py
-  - flake8 python\afdko\buildmasterotfs.py
-  - flake8 python\afdko\checkoutlinesufo.py
-  - flake8 python\afdko\convertfonttocid.py
-  - flake8 python\afdko\fdkutils.py
-  - flake8 python\afdko\makeinstancesufo.py
-  - flake8 python\afdko\makeotf.py
-  - flake8 python\afdko\otf2ttf.py
-  - flake8 python\afdko\otfpdf.py
-  - flake8 python\afdko\pdfmetrics.py
-  - flake8 python\afdko\ttfcomponentizer.py
-  - flake8 python\afdko\ttxn.py
-  - flake8 python\afdko\ufotools.py
-  - cpplint --recursive --quiet c\detype1
-  - cpplint --recursive --quiet c\makeotf\makeotf_lib\source
-  - cpplint --recursive --quiet c\makeotf\makeotf_lib\api
-  - cpplint --recursive --quiet c\makeotf\makeotf_lib\resource
-  - cpplint --recursive --quiet c\makeotf\source
-  - cpplint --recursive --quiet c\mergefonts
-  - cpplint --recursive --quiet c\public
-  - cpplint --recursive --quiet c\rotatefont
-  - cpplint --recursive --quiet c\sfntdiff
-  - cpplint --recursive --quiet c\sfntedit
-  - cpplint --recursive --quiet c\spot
-  - cpplint --recursive --quiet c\tx
-  - cpplint --recursive --quiet c\type1
-
 # to run your custom scripts instead of automatic MSBuild
 build_script:
   # our setup.py requires 'wheel', which may not be already installed
