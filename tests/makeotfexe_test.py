@@ -400,3 +400,19 @@ def test_overflow_bug731():
         output = f.read()
     assert(b"[FATAL] <SourceSans-Test> subtable offset too large (1003c) in "
            b"lookup 0 type 3") in output
+
+
+def test_parameter_offset_overflow_bug746():
+    input_filename = 'bug746/font.pfa'
+    feat_filename = 'bug746/feat.fea'
+    otf_path = get_temp_file_path()
+
+    stderr_path = runner(
+        CMD + ['-s', '-e', '-o', 'shw',
+               'f', '_{}'.format(get_input_path(input_filename)),
+               'ff', '_{}'.format(get_input_path(feat_filename)),
+               'o', '_{}'.format(otf_path)])
+
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert(b"[FATAL] <bug746> feature parameter offset too large") in output
