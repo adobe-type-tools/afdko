@@ -1,6 +1,32 @@
 Changelog
 =========
 
+2.8.7 (released 2019-03-08)
+---------------------------
+
+- Fixed installation on Cygwin OS
+  ([#748](https://github.com/adobe-type-tools/afdko/issues/748))
+- [tx] Fixed blend overflow error
+  ([#684](https://github.com/adobe-type-tools/afdko/issues/684))
+- [tx] Fixed error in delta array calculation
+  ([#758](https://github.com/adobe-type-tools/afdko/issues/758))
+- [makeotfexe] Fixed detection of offset overflow to a feature parameter
+  ([#746](https://github.com/adobe-type-tools/afdko/issues/746))
+- [makeotf] Fixed duplicate warning messages coming from tx
+  ([#751](https://github.com/adobe-type-tools/afdko/issues/751))
+- [makeotf] Fixed error message when tool is ran without arguments
+  and default named files cannot be found
+  ([#755](https://github.com/adobe-type-tools/afdko/issues/755))
+- Updated AGD.txt
+  ([#750](https://github.com/adobe-type-tools/afdko/issues/750))
+- [makeinstancesufo] Fixed failure when `filename` attribute in
+  designspace's `<instance>` element has no leading folder path.
+  Fixed copying non-kerning groups.
+  ([#753](https://github.com/adobe-type-tools/afdko/issues/753))
+- [makeinstancesufo] Fixed anisotropic interpolation
+  ([#756](https://github.com/adobe-type-tools/afdko/issues/756))
+
+
 2.8.6 (released 2019-03-01)
 ---------------------------
 
