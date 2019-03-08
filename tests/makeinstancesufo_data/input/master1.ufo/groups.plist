@@ -2,6 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 	<dict>
+	    <key>Not a kerning group</key>
+	    <array>
+	      <string>a</string>
+	      <string>b</string>
+	      <string>c</string>
+	      <string>d</string>
+	      <string>e</string>
+	    </array>
 		<key>@MMK_L_LAT_A</key>
 		<array>
 			<string>A</string>

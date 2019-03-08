@@ -12,6 +12,7 @@
 "-cef            write CEF (Compact Embedded Font) font  (-cef -h for help)\n"
 "-afm            write AFM representation of font data   (-afm -h for help)\n"
 "-svg            write SVG font                          (-svg -h for help)\n",
+"-ufo            write UFO file                          (-ufo -h for help)\n",
 "-path           test path handling code                 (-path -h for help)\n"
 "\n"
 "[shared options]\n"

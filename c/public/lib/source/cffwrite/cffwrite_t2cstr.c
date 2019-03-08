@@ -375,8 +375,11 @@ static int checkOverflowByArg(cstrCtx h, int argcnt)
 {
     int blend_arg_cnt = h->glyph.info->blendInfo.numRegions;
     if (blend_arg_cnt > 0)
+    {
+        blend_arg_cnt *= argcnt;
         blend_arg_cnt++; /* number of args */
-    return (h->stack.cnt + h->flushed_cnt + argcnt + blend_arg_cnt
+    }
+    return (h->stack.cnt + h->flushed_cnt + argcnt + h->deltaStack.cnt + blend_arg_cnt
            + ((h->g->flags & CFW_SUBRIZE) ? 1 : 0)) > h->maxstack;
 }
 

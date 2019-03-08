@@ -27,7 +27,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.7.1 Feb 9 2019
+makeotf.py v2.7.3 Mar 5 2019
 """
 
 __methods__ = """
@@ -88,7 +88,8 @@ __usage__ = __version__ + """
 -ni                 Turn off the -i option, if it has previously
                     been turned on.
 
--ff <feature file>  Specify path to feature file. Default is 'features'.
+-ff <feature file>  Specify path to feature file. Default is 'features.fea';
+                    'features' is also accepted.
 
 -fs                 Make stub GSUB table if there are no glyph substitution
                     rules in the features file.
@@ -1787,9 +1788,9 @@ def setMissingParams(makeOTFParams):
             if os.path.exists(fileName):
                 srcFontPath = inputFilePath = fileName
                 break
-        if not os.path.exists(inputFilePath):
+        if not inputFilePath:
             print("makeotf [Error] Could not find any of the default input "
-                  "font file '%s'." % kDefaultFontPathList)
+                  "font files %s." % kDefaultFontPathList)
             # stop here already, otherwise getROS() will generate an IOError.
             raise MakeOTFOptionsError
 
@@ -2028,7 +2029,7 @@ def convertFontIfNeeded(makeOTFParams):
 def get_font_psname(font_path, is_ufo=False):
     # Figure out PS name in order to derive default output path.
     success, output = fdkutils.get_shell_command_output([
-        'tx', '-dump', '-0', font_path])
+        'tx', '-dump', '-0', font_path], std_error=True)
     if not success:
         raise MakeOTFShellError
 

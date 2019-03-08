@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="tildecmb.cap" format="2">
+	<outline>
+		<contour>
+			<point name="hintSet0000" x="-171" y="738" type="curve"/>
+			<point x="-143" y="727" type="line"/>
+			<point x="-130" y="768"/>
+			<point x="-108" y="791"/>
+			<point x="-75" y="791" type="curve"/>
+			<point x="-47" y="791"/>
+			<point x="-29" y="776"/>
+			<point x="-9" y="758" type="curve"/>
+			<point name="hintSet0004" x="10" y="740"/>
+			<point x="36" y="723"/>
+			<point x="70" y="723" type="curve"/>
+			<point x="122" y="723"/>
+			<point x="162" y="766"/>
+			<point x="171" y="835" type="curve"/>
+			<point x="143" y="846" type="line"/>
+			<point x="130" y="804"/>
+			<point x="108" y="781"/>
+			<point x="75" y="781" type="curve"/>
+			<point x="48" y="781"/>
+			<point x="29" y="796"/>
+			<point x="9" y="814" type="curve"/>
+			<point name="hintSet0009" x="-10" y="832"/>
+			<point x="-35" y="850"/>
+			<point x="-69" y="850" type="curve"/>
+			<point x="-122" y="850"/>
+			<point x="-161" y="807"/>
+		</contour>
+	</outline>
+	<anchor name="_aboveUC" x="0" y="682"/>
+	<lib>
+		<dict>
+			<key>com.adobe.type.autohint.v2</key>
+			<dict>
+				<key>hintSetList</key>
+				<array>
+					<dict>
+						<key>pointTag</key>
+						<string>hintSet0000</string>
+						<key>stems</key>
+						<array>
+							<string>hstem 738 -20</string>
+							<string>hstem 791 59</string>
+							<string>vstem -171 342</string>
+						</array>
+					</dict>
+					<dict>
+						<key>pointTag</key>
+						<string>hintSet0004</string>
+						<key>stems</key>
+						<array>
+							<string>hstem 723 58</string>
+							<string>hstem 791 59</string>
+							<string>vstem -171 342</string>
+						</array>
+					</dict>
+					<dict>
+						<key>pointTag</key>
+						<string>hintSet0009</string>
+						<key>stems</key>
+						<array>
+							<string>hstem 738 -20</string>
+							<string>hstem 791 59</string>
+							<string>vstem -171 342</string>
+						</array>
+					</dict>
+				</array>
+				<key>id</key>
+				<string>aa8ea0229e3ad9150fa4808b985049d6b6d310220ebcda1567677accc3c5a2f259fa3f208fc81db6c3c5ba89b76edabe66fbf2107684b01756b040c40579b88c</string>
+			</dict>
+		</dict>
+	</lib>
+</glyph>

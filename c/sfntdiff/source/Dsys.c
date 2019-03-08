@@ -219,9 +219,6 @@ IntX sysReadInputDir(Byte8 *dirName, Byte8 ***fileNameList) {
     memFree(path);
 
 #else
-#ifdef __linux__
-#define d_namlen d_reclen
-#endif
     int i;
     DIR *thedir;
     struct dirent *entp;
@@ -242,7 +239,7 @@ IntX sysReadInputDir(Byte8 *dirName, Byte8 ***fileNameList) {
     i = 0;
     for (entp = readdir(thedir); entp != NULL; entp = readdir(thedir)) {
         if (entp->d_name[0] == '.') continue;
-        (*fileNameList)[i] = (Byte8 *)memNew((entp->d_namlen + 1) * sizeof(Byte8));
+        (*fileNameList)[i] = (Byte8 *)memNew((strlen(entp->d_name) + 1) * sizeof(Byte8));
         strcpy((*fileNameList)[i], entp->d_name);
         i++;
     }

@@ -170,7 +170,7 @@ typedef struct {
 
 /* --- FeatureList --- */
 typedef struct {
-    Offset FeatureParams; /* Reserved=NULL */
+    LOffset FeatureParams; /* Reserved=NULL */
     unsigned short LookupCount;
     unsigned short *LookupListIndex; /* [LookupCount] */
 } Feature;
@@ -1682,6 +1682,10 @@ static void fixFeatureParmOffsets(hotCtx g, otlTbl t, short shortfeatureParamBas
             /* feature->FeatureParams is now: (offset from start of subtable block that follows the LookupList) */
             /* shortfeatureParamBaseOffset is (size of featureList) + (size of LookupList).                     */
             feature->FeatureParams = feature->FeatureParams + shortfeatureParamBaseOffset - rec->Feature;
+            if (feature->FeatureParams > 0xFFFF) {
+                hotMsg(g, hotFATAL, "feature parameter offset too large (%0lx)",
+                       feature->FeatureParams);
+            }
         }
     }
 }
@@ -1794,10 +1798,6 @@ void otlTableFill(hotCtx g, otlTbl t) {
         /* The feature table FeatureParam offsets are currently from the start of the subtable block.*/
         /* featureParamBaseOffset is the (size of the feature list + feature record array) + size of the lookup list. */
         long featureParamBaseOffset = (t->tbl.LookupList - t->tbl.FeatureList) + t->lookupSize;
-        if (featureParamBaseOffset > 0xFFFF) {
-            hotMsg(g, hotFATAL, "feature parameter offset too large (%0lx)",
-                   featureParamBaseOffset);
-        }
         fixFeatureParmOffsets(g, t, (short)featureParamBaseOffset);
     }
 }

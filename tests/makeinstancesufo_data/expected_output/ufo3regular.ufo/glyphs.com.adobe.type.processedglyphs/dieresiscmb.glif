@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="dieresiscmb" format="2">
+	<unicode hex="0308"/>
+	<outline>
+		<contour>
+			<point name="hintSet0000" x="107" y="614" type="curve"/>
+			<point x="133" y="614"/>
+			<point x="157" y="631"/>
+			<point x="157" y="663" type="curve"/>
+			<point x="157" y="694"/>
+			<point x="133" y="712"/>
+			<point x="107" y="712" type="curve"/>
+			<point x="81" y="712"/>
+			<point x="56" y="694"/>
+			<point x="56" y="663" type="curve"/>
+			<point x="56" y="631"/>
+			<point x="81" y="614"/>
+		</contour>
+		<contour>
+			<point x="-107" y="614" type="curve"/>
+			<point x="-80" y="614"/>
+			<point x="-56" y="631"/>
+			<point x="-56" y="663" type="curve"/>
+			<point x="-56" y="694"/>
+			<point x="-80" y="712"/>
+			<point x="-107" y="712" type="curve"/>
+			<point x="-133" y="712"/>
+			<point x="-157" y="694"/>
+			<point x="-157" y="663" type="curve"/>
+			<point x="-157" y="631"/>
+			<point x="-133" y="614"/>
+		</contour>
+	</outline>
+	<anchor name="_aboveLC" x="0" y="511"/>
+	<anchor name="aboveLC" x="0" y="700"/>
+	<lib>
+		<dict>
+			<key>com.adobe.type.autohint.v2</key>
+			<dict>
+				<key>hintSetList</key>
+				<array>
+					<dict>
+						<key>pointTag</key>
+						<string>hintSet0000</string>
+						<key>stems</key>
+						<array>
+							<string>hstem 614 98</string>
+							<string>vstem -157 101</string>
+							<string>vstem 56 101</string>
+						</array>
+					</dict>
+				</array>
+				<key>id</key>
+				<string>999a3cf16f2f63c385d92d2f442c44e90ffe005b7dc3f8c2f65bdde95dcbb16e1334f112c1904d58e06d7bbb4488e3fc2b56a74b638368bb920b4ddd59508d91</string>
+			</dict>
+		</dict>
+	</lib>
+</glyph>

@@ -53,32 +53,19 @@ class InstallPlatlib(setuptools.command.install.install):
         self.install_lib = self.install_platlib
 
 
-def get_executable_dir():
-    """
-    Build source path on the afdko for the command-line tools.
-    """
-    platform_system = platform.system()
-    if platform_system == "Windows":
-        bin_dir = "win"
-    elif platform_system == "Linux":
-        bin_dir = "linux"
-    elif platform_system == "Darwin":
-        bin_dir = "osx"
-    else:
-        raise KeyError(
-            "afdko: Do not recognize target OS: {}".format(platform_system))
-    return bin_dir
-
-
 def compile_package(pkg_dir):
-    bin_dir = get_executable_dir()
     programs_dir = 'c'
     cmd = None
-    if bin_dir == 'osx':
-        cmd = "sh buildall.sh"
-    elif bin_dir == 'win':
+    platform_system = platform.system()
+    if platform_system == "Windows":
         cmd = "buildall.cmd"
-    elif bin_dir == 'linux':
+    elif platform_system == "Linux":
+        cmd = "sh buildalllinux.sh"
+    elif platform_system == "Darwin":
+        cmd = "sh buildall.sh"
+    else:
+        # fallback to Linux
+        print('afdko: Unknown OS: {}'.format(platform_system))
         cmd = "sh buildalllinux.sh"
     cur_dir = os.getcwd()
     assert cmd, 'afdko: Unable to form build command for this platform.'
@@ -198,19 +185,10 @@ def main():
         'Topic :: Software Development :: Build Tools',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 2.7',
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: Microsoft :: Windows',
+        'Operating System :: POSIX :: Linux',
     ]
-
-    platform_system = platform.system()
-    if platform_system == "Darwin":
-        more_keywords = ['Operating System :: MacOS :: MacOS X']
-    elif platform_system == "Windows":
-        more_keywords = ['Operating System :: Microsoft :: Windows']
-    elif platform_system == "Linux":
-        more_keywords = ['Operating System :: POSIX :: Linux']
-    else:
-        raise KeyError(
-            "afdko: Do not recognize target OS: {}".format(platform_system))
-    classifiers.extend(more_keywords)
 
     # concatenate README and NEWS into long_description so they are
     # displayed on the afdko project page on PyPI

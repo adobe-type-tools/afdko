@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='utf-8'?>
+<designspace format="3">
+    <axes>
+        <axis default="0.0" maximum="1000.0" minimum="0.0" name="weight" tag="wght" />
+    </axes>
+    <sources>
+        <source filename="ufo3master0.ufo" name="master_0">
+            <lib copy="1" />
+            <groups copy="1" />
+            <info copy="1" />
+            <location>
+                <dimension name="weight" xvalue="0" />
+            </location>
+        </source>
+        <source filename="ufo3master1.ufo" name="master_1">
+            <location>
+                <dimension name="weight" xvalue="1000" />
+            </location>
+        </source>
+    </sources>
+    <instances>
+        <instance familyname="Source Serif Pro" filename="../temp_output/ufo3regular.ufo" postscriptfontname="SourceSerifPro-Regular" stylename="Regular">
+            <location>
+                <dimension name="weight" xvalue="394" />
+            </location>
+            <kerning />
+            <info />
+        </instance>
+        <instance familyname="Source Serif Pro" filename="../temp_output/ufo3medium.ufo" postscriptfontname="SourceSerifPro-Medium" stylename="Medium">
+            <location>
+                <dimension name="weight" xvalue="505" />
+            </location>
+            <kerning />
+            <info />
+        </instance>
+        <instance familyname="Source Serif Pro" filename="../temp_output/ufo3semibold.ufo" postscriptfontname="SourceSerifPro-Semibold" stylename="Semibold">
+            <location>
+                <dimension name="weight" xvalue="600" />
+            </location>
+            <kerning />
+            <info />
+        </instance>
+    </instances>
+</designspace>

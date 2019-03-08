@@ -615,3 +615,17 @@ def test_delete_zero_kb_font_on_fail_bug736():
                       'ff', '_{}'.format(get_input_path(feat_filename))])
     assert err.value.returncode == 1
     assert os.path.exists(get_input_path(out_filename)) is False
+
+
+def test_duplicate_warning_messages_bug751():
+    input_filename = 'bug751.ufo'
+    expected_path = get_expected_path('bug751.txt')
+    otf_path = get_temp_file_path()
+
+    stderr_path = runner(
+        CMD + ['-s', '-e', '-o',
+               'f', '_{}'.format(get_input_path(input_filename)),
+               'o', '_{}'.format(otf_path)])
+
+    assert differ([expected_path, stderr_path, '-l', '1',
+                   '-s', 'Built development mode font'])
