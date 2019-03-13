@@ -78,3 +78,25 @@ def test_linux_ci_failure_bug570():
                   '-f', font_path, actual_path])
     expected_path = get_expected_path('1_fdict.otf')
     assert differ([expected_path, actual_path, '-m', 'bin'])
+
+
+def test_missing_table_delete_bug160():
+    actual_path = get_temp_file_path()
+    stderr_path = runner(CMD + ['-s', '-e', '-o', 'd', '_xyz,GSUB',
+                                '-f', LIGHT, actual_path])
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert b'[WARNING]: table missing (xyz )' in output
+    assert font_has_table(get_input_path(LIGHT), 'GSUB')
+    assert not font_has_table(actual_path, 'GSUB')
+
+
+def test_missing_table_extract_bug160():
+    actual_path = get_temp_file_path()
+    stderr_path = runner(CMD + ['-s', '-e', '-f', LIGHT, actual_path, '-o',
+                                'x', '_xyz,head={}'.format(actual_path)])
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert b'[WARNING]: table missing (xyz )' in output
+    expected_path = get_expected_path('head_light.tb')
+    assert differ([expected_path, actual_path, '-m', 'bin'])

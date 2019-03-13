@@ -624,8 +624,9 @@ static void sfntReadHdr(void) {
     for (i = 0; i < sfnt.numTables; i++) {
         Table *tbl = &sfnt.directory[i];
 
-        if (tbl->flags & (OPT_EXTRACT | OPT_DELETE) && !(tbl->flags & TBL_SRC))
-            fatal(SFED_MSG_TABLEMISSING, TAG_ARG(tbl->tag));
+        if (tbl->flags & (OPT_EXTRACT | OPT_DELETE) && !(tbl->flags & TBL_SRC)) {
+            warning(SFED_MSG_TABLEMISSING, TAG_ARG(tbl->tag));
+        }
     }
 }
 
@@ -808,6 +809,9 @@ static void extractTables(void) {
         if (!(tbl->flags & OPT_EXTRACT))
             continue;
 
+        if (!(tbl->flags & TBL_SRC))
+            continue;
+
         filename = makexFilename(tbl);
 
         fileOpenWrite(filename, &file);
@@ -886,7 +890,7 @@ static int cmpTags(const void *first, const void *second) {
 
 /* Copy tables from source file to destination file applying (-d, -a, and -f)
    options */
-static void sfntCopy(void) {
+static boolean sfntCopy(void) {
     int i;
     int nLongs;
     Tag *tags;
@@ -900,6 +904,7 @@ static void sfntCopy(void) {
     char outputfilename[FILENAME_MAX];
     char *dstfilename = dstfile.name;
     FILE *f;
+    boolean changed = (options & OPT_FIX) ? 1: 0; /* write file only if we change it */
 
     strcpy(outputfilename, dstfile.name);
     f = freopen(outputfilename, "r+b", dstfile.fp);
@@ -942,12 +947,16 @@ static void sfntCopy(void) {
 
         offset = fileTell(&dstfile);
 
-        if (tbl->flags & OPT_ADD)
+        if (tbl->flags & OPT_ADD) {
             checksum = addTable(tbl, &length);
-        else {
-            if (tbl->flags & OPT_DELETE)
+            changed = 1;
+        } else {
+            if (!(tbl->flags & TBL_SRC)) {
+                continue; /* Skip table that is not in source font */
+            } else if (tbl->flags & OPT_DELETE) {
+                changed = 1;
                 continue; /* Skip deleted table */
-            else {
+            } else {
                 length = tbl->length;
                 checksum =
                     tableCopy(&srcfile, &dstfile, tbl->offset, length);
@@ -975,6 +984,9 @@ static void sfntCopy(void) {
 
         totalsum += checksum;
     }
+
+    if (!changed)
+        return changed;
 
     /* Initialize sfnt header */
     calcSearchParams(numDstTables, &sfnt.searchRange,
@@ -1021,13 +1033,14 @@ static void sfntCopy(void) {
         fileWriteObject(&dstfile, 4, 0xb1b0afba - totalsum);
     }
     dstfile.name = dstfilename;
+    return changed;
 }
 
 int main(int argc, char *argv[]) {
     int argi;
     volatile int i;
     cmdlinetype *cmdl;
-
+    boolean changed = 0;
     /* Set signal handler */
     if (signal(SIGINT, SIG_IGN) != SIG_IGN)
         signal(SIGINT, cleanup);
@@ -1130,15 +1143,17 @@ int main(int argc, char *argv[]) {
             if (options & OPT_EXTRACT)
                 extractTables();
             if (options & (OPT_DELETE | OPT_ADD | OPT_FIX))
-                sfntCopy();
+                changed = sfntCopy();
         }
 
         /* Close files */
         fileClose(&srcfile);
         if (dstfile.fp != NULL) {
             fileClose(&dstfile);
-
-            if (strcmp(dstfile.name + strlen(dstfile.name) - strlen(tmpname), tmpname) == 0) { /* Rename tmp file to source file */
+            if (!changed) {
+                if (remove(dstfile.name) == -1)
+                    fatal(SFED_MSG_REMOVEERR, strerror(errno), dstfile.name);
+            } else if (strcmp(dstfile.name + strlen(dstfile.name) - strlen(tmpname), tmpname) == 0) { /* Rename tmp file to source file */
                 if (rename(srcfile.name, BACKUPNAME) == -1)
                     fatal(SFED_MSG_BADRENAME, strerror(errno), srcfile.name);
                 if (rename(dstfile.name, srcfile.name) == -1)
@@ -1219,7 +1234,7 @@ int main(int argc, char *argv[]) {
                 if (options & OPT_EXTRACT)
                     extractTables();
                 if (options & (OPT_DELETE | OPT_ADD | OPT_FIX))
-                    sfntCopy();
+                    changed = sfntCopy();
             }
 
             /* Close files */
@@ -1228,8 +1243,10 @@ int main(int argc, char *argv[]) {
                 char *fullbackupname;
                 fullbackupname = MakeFullPath(BACKUPNAME);
                 fileClose(&dstfile);
-
-                if (strcmp(dstfile.name + strlen(dstfile.name) - strlen(tmpname), tmpname) == 0) { /* Rename tmp file to source file */
+                if (!changed) {
+                    if (remove(dstfile.name) == -1)
+                        fatal(SFED_MSG_REMOVEERR, strerror(errno), dstfile.name);
+                } else if (strcmp(dstfile.name + strlen(dstfile.name) - strlen(tmpname), tmpname) == 0) { /* Rename tmp file to source file */
                     if (rename(srcfile.name, fullbackupname) == -1)
                         fatal(SFED_MSG_BADRENAME, strerror(errno), srcfile.name);
                     if (rename(dstfile.name, srcfile.name) == -1)
