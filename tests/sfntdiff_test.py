@@ -8,6 +8,7 @@ from differ import main as differ
 from test_utils import get_expected_path
 
 TOOL = 'sfntdiff'
+CMD = ['-t', TOOL]
 
 
 # -----
@@ -41,7 +42,23 @@ def test_exit_unknown_option(arg):
 def test_diff(args, txt_filename):
     if args:
         args.insert(0, '-o')
-    actual_path = runner(
-        ['-t', TOOL, '-s', '-f', 'regular.otf', 'bold.otf'] + args)
+    actual_path = runner(CMD + ['-s', '-f', 'regular.otf', 'bold.otf'] + args)
     expected_path = get_expected_path(txt_filename)
     assert differ([expected_path, actual_path, '-l', '1-4'])
+
+
+def test_diff_otf_vs_ttf_bug626():
+    actual_path = runner(CMD + ['-s', '-f', 'SourceSerifPro-It.otf',
+                                            'SourceSerifPro-It.ttf'])
+    expected_path = get_expected_path('bug626.txt')
+    assert differ([expected_path, actual_path, '-l', '1-4'])
+
+
+def test_not_font_files():
+    stderr_path = runner(CMD + ['-s', '-e', '-f', 'not_a_font_1.otf',
+                                                  'not_a_font_2.otf'])
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert b'[WARNING]: unsupported/bad file' in output
+    assert b'not_a_font_1.otf] (ignored)' in output
+    assert b'not_a_font_2.otf] (ignored)' in output

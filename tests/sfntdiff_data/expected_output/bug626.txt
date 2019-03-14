@@ -1,0 +1,8 @@
+Thu Mar 14 02:59:39 2019
+sfntdiff (2.21217) (-d 0)  files:
+< SourceSerifPro-It.otf
+> SourceSerifPro-It.ttf
+'sfnt' differs.
+'head' differs.
+'maxp' differs.
+'post' differs.
