@@ -10,8 +10,9 @@
 #include "Dsys.h"
 #include <ctype.h>
 #include <string.h>
+#include <stdbool.h>
 
-Byte8 *version = "2.21217"; /* Program version */
+Byte8 *version = "3.0.0"; /* Program version */
 
 static char *sourcepath = "";
 #include "setjmp.h"
@@ -100,7 +101,7 @@ IntN main(IntN argc, Byte8 *argv[]) {
 
     volatile IntX i = 0;
     IntN argi;
-    Card32 value, value2;
+    bool supported, supported2;
     Byte8 *filename1;
     Byte8 *filename2;
     IntN name1isDir, name2isDir;
@@ -151,34 +152,16 @@ IntN main(IntN argc, Byte8 *argv[]) {
         }
 
         /* See if we can recognize the file type */
-        value = fileSniff(1);
-        value2 = fileSniff(2);
-        if (value != value2) {
+        supported = isSupportedFontFormat(fileSniff(1), filename1);
+        supported2 = isSupportedFontFormat(fileSniff(2), filename2);
+
+        if (!supported || !supported2) {
             fileClose(1);
             fileClose(2);
-            fatal("file1 [%s] is not the same type as file2 [%s]\n", filename1, filename2);
+            quit(1);
         }
 
-        switch (value) {
-            case bits_:
-            case typ1_:
-            case true_:
-            case OTTO_:
-            case VERSION(1, 0):
-                sfntRead(0, -1, 0, -1); /* Read plain sfnt file */
-                break;
-            case ttcf_:
-                warning("unsupported file [%s] (ignored)\n", filename1);
-                fileClose(1);
-                fileClose(2);
-                quit(1);
-                break;
-            default:
-                warning("unsupported/bad file [%s] (ignored)\n", filename1);
-                fileClose(1);
-                fileClose(2);
-                quit(1);
-        }
+        sfntRead(0, -1, 0, -1); /* Read plain sfnt file */
         sfntDump();
         sfntFree();
         fileClose(1);
@@ -211,35 +194,16 @@ IntN main(IntN argc, Byte8 *argv[]) {
             }
 
             /* See if we can recognize the file type */
-            value = fileSniff(1);
-            value2 = fileSniff(2);
-            if (value != value2) {
+            supported = isSupportedFontFormat(fileSniff(1), fil1);
+            supported2 = isSupportedFontFormat(fileSniff(2), fil2);
+
+            if (!supported || !supported2) {
                 fileClose(1);
                 fileClose(2);
-                fatal("file1 [%s] is not the same type as file2 [%s]\n", fil1, fil2);
+                continue;
             }
 
-            switch (value) {
-                case bits_:
-                case typ1_:
-                case true_:
-                case OTTO_:
-                case VERSION(1, 0):
-                    sfntRead(0, -1, 0, -1); /* Read plain sfnt file */
-                    break;
-                case 256:
-                case ttcf_:
-                    warning("unsupported file [%s] (ignored)\n", fil1);
-                    fileClose(1);
-                    fileClose(2);
-                    quit(1);
-                    break;
-                default:
-                    warning("unsupported/bad file [%s] (ignored)\n", fil1);
-                    fileClose(1);
-                    fileClose(2);
-                    continue;
-            }
+            sfntRead(0, -1, 0, -1); /* Read plain sfnt file */
             sfntDump();
             sfntFree();
             fileClose(1);
@@ -269,35 +233,16 @@ IntN main(IntN argc, Byte8 *argv[]) {
         }
 
         /* See if we can recognize the file type */
-        value = fileSniff(1);
-        value2 = fileSniff(2);
-        if (value != value2) {
+        supported = isSupportedFontFormat(fileSniff(1), filename1);
+        supported2 = isSupportedFontFormat(fileSniff(2), fil2);
+
+        if (!supported || !supported2) {
             fileClose(1);
             fileClose(2);
-            fatal("file1 [%s] is not the same type as file2 [%s]\n", filename1, fil2);
+            quit(1);
         }
 
-        switch (value) {
-            case bits_:
-            case typ1_:
-            case true_:
-            case OTTO_:
-            case VERSION(1, 0):
-                sfntRead(0, -1, 0, -1); /* Read plain sfnt file */
-                break;
-            case 256:
-            case ttcf_:
-                warning("unsupported file [%s] (ignored)\n", filename1);
-                fileClose(1);
-                fileClose(2);
-                quit(1);
-                break;
-            default:
-                warning("unsupported/bad file [%s] (ignored)\n", filename1);
-                fileClose(1);
-                fileClose(2);
-                quit(1);
-        }
+        sfntRead(0, -1, 0, -1); /* Read plain sfnt file */
         sfntDump();
         sfntFree();
         fileClose(1);

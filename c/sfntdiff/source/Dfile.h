@@ -6,6 +6,7 @@
  * File input support.
  */
 
+#include <stdbool.h>
 #ifndef FILE_H
 #define FILE_H
 
@@ -20,6 +21,7 @@ extern void fileReadBytes(Card8 which, Int32 count, Card8 *buf);
 extern void fileReadObject(Card8 which, IntX size, ...);
 extern Byte8 *fileName(Card8 which);
 extern Card32 fileSniff(Card8 which);
+extern bool isSupportedFontFormat(Card32 value, Byte8 *fname);
 
 /* Convienience macros */
 #define TELL(which)           fileTell((which))
