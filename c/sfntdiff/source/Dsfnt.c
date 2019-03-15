@@ -209,22 +209,6 @@ static struct
     da_DCL(Dump, list);
 } dump;
 
-/* Compare Card32s */
-static IntN cmpCard32s(const void *first, const void *second) {
-    Card32 a = *(Card32 *)first;
-    Card32 b = *(Card32 *)second;
-    if (a < b)
-        return -1;
-    else if (a > b)
-        return 1;
-    else
-        return 0;
-}
-
-static void printTag(Card32 tag) {
-    printf("%c%c%c%c", TAG_ARG(tag));
-}
-
 /* Read TT Collection header */
 void sfntTTCRead(Card8 which, LongN start) {
 #if TTC_SUPPORTED
@@ -280,44 +264,6 @@ void sfntTTCRead(Card8 which, LongN start) {
 
         memFree(ttcf2.TableDirectory);
         ttc2.loaded = 0;
-    }
-#endif
-}
-
-/* Dump TT Collection header */
-static void ttcfDump(Card8 which, LongN start) {
-#if TTC_SUPPORTED
-    IntX i;
-    if (which == 1) {
-        if (!ttc1.loaded)
-            return; /* Not a TT Collection */
-
-        DL(1, ("### [ttcf] (%08lx)\n", start));
-
-        DL(2, ("TTCTag        =%c%c%c%c (%08x)\n",
-               TAG_ARG(ttcf1.TTCTag), ttcf1.TTCTag));
-        DLV(2, "Version       =", ttcf1.Version);
-        DLU(2, "DirectoryCount=", ttcf1.DirectoryCount);
-
-        DL(2, ("--- TableDirectory[index]=offset\n"));
-        for (i = 0; i < ttcf1.DirectoryCount; i++)
-            DL(2, ("[%d]=%08lx ", i, ttcf1.TableDirectory[i]));
-        DL(2, ("\n"));
-    } else {
-        if (!ttc2.loaded)
-            return; /* Not a TT Collection */
-
-        DL(1, ("### [ttcf] (%08lx)\n", start));
-
-        DL(2, ("TTCTag        =%c%c%c%c (%08lx)\n",
-               TAG_ARG(ttcf2.TTCTag), ttcf2.TTCTag));
-        DLV(2, "Version       =", ttcf2.Version);
-        DLU(2, "DirectoryCount=", ttcf2.DirectoryCount);
-
-        DL(2, ("--- TableDirectory[index]=offset\n"));
-        for (i = 0; i < ttcf2.DirectoryCount; i++)
-            DL(2, ("[%d]=%08lx ", i, ttcf2.TableDirectory[i]));
-        DL(2, ("\n"));
     }
 #endif
 }
