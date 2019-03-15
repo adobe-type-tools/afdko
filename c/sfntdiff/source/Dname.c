@@ -22,7 +22,7 @@ void nameReset() {
 void nameRead(Card8 which, LongN start, Card32 length) {
     IntX i;
     IntX nameSize;
-    nameTbl *name;
+    nameTbl *name = NULL;
 
     if (which == 1) {
         if (loaded1)
@@ -73,7 +73,7 @@ static NameRecord *findNameRecord(Card8 inwhich,
                                   Card16 scriptId,
                                   Card16 languageId,
                                   Card16 nameId, IntX *where) {
-    nameTbl *name;
+    nameTbl *name = NULL;
     IntX i;
 
     if (inwhich == 1)
@@ -346,7 +346,7 @@ void nameDiff(LongN offset1, LongN offset2) {
 }
 
 void nameFree(Card8 which) {
-    nameTbl *name;
+    nameTbl *name = NULL;
 
     if (which == 1) {
         if (!loaded1) {
@@ -392,7 +392,7 @@ void nameFree(Card8 which) {
 Byte8 *nameFontName(Card8 which) {
     IntX i;
     Byte8 *fullname = NULL;
-    nameTbl *name;
+    nameTbl *name = NULL;
 
     CHECKREADASSIGN
 
@@ -418,7 +418,7 @@ out:
 Byte8 *namePostScriptName(Card8 which) {
     IntX i;
     Byte8 *psname = NULL;
-    nameTbl *name;
+    nameTbl *name = NULL;
 
     CHECKREADASSIGN
 

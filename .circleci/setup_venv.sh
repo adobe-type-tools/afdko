@@ -6,7 +6,7 @@ python -m venv venv
 source venv/bin/activate
 # install and update dependencies
 pip install -U -q pip setuptools wheel flake8 cpplint
-pip install git+https://github.com/adobe-type-tools/cibuildwheel
+pip install cibuildwheel
 # print versions
 python --version
 pip --version

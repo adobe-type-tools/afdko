@@ -18,13 +18,15 @@ commands:
           command: |
             source venv/bin/activate
             cibuildwheel --output-dir wheelhouse
+      # - store_artifacts:
+      #     path: wheelhouse/
 
 jobs:
   linux-python3:
     docker:
       - image: circleci/python:3.6
     environment:
-      CIBW_SKIP: cp27-* cp34-* cp35-* cp37-* *i686
+      CIBW_BUILD: cp37-manylinux1_x86_64
       CIBW_TEST_REQUIRES_LINUX: pytest subprocess32
       CIBW_TEST_COMMAND_LINUX: cd {project} && pytest -v && pip uninstall --yes afdko
     steps:

@@ -19,7 +19,7 @@ static IntX loaded2 = 0;
 static char *dateFormat = "%a %b %d %H:%M:%S %Y";
 
 void headRead(Card8 which, LongN start, Card32 length) {
-    headTbl *head;
+    headTbl *head = NULL;
 
     if (which == 1) {
         if (loaded1)
@@ -151,7 +151,7 @@ Byte8 tday[32];
 
 Byte8 *headGetCreatedDate(Card8 which, Card32 client) {
     struct tm tmp;
-    headTbl *head;
+    headTbl *head = NULL;
 
     tday[0] = '\0';
 
@@ -167,7 +167,7 @@ out:
 
 Byte8 *headGetModifiedDate(Card8 which, Card32 client) {
     struct tm tmp;
-    headTbl *head;
+    headTbl *head = NULL;
 
     tday[0] = '\0';
 
@@ -295,7 +295,7 @@ void headFree(Card8 which) {
 
 /* Return head.indexToLocFormat */
 IntX headGetLocFormat(Card8 which, Card16 *locFormat, Card32 client) {
-    headTbl *head;
+    headTbl *head = NULL;
 
     CHECKREADASSIGN
 
@@ -308,7 +308,7 @@ out:
 
 /* Return head.uintsPerEm */
 IntX headGetUnitsPerEm(Card8 which, Card16 *unitsPerEm, Card32 client) {
-    headTbl *head;
+    headTbl *head = NULL;
     CHECKREADASSIGN
     *unitsPerEm = head->unitsPerEm;
     return 0;
@@ -318,7 +318,7 @@ out:
 
 /* Return head.flags & head_SET_LSB */
 IntX headGetSetLsb(Card8 which, Card16 *setLsb, Card32 client) {
-    headTbl *head;
+    headTbl *head = NULL;
     CHECKREADASSIGN
     *setLsb = (head->flags & head_SET_LSB) != 0;
     return 0;
@@ -329,7 +329,7 @@ out:
 /* Return head.xMin, head.yMin, head.xMax, head.yMax */
 IntX headGetBBox(Card8 which, Int16 *xMin, Int16 *yMin, Int16 *xMax, Int16 *yMax,
                  Card32 client) {
-    headTbl *head;
+    headTbl *head = NULL;
 
     CHECKREADASSIGN
 

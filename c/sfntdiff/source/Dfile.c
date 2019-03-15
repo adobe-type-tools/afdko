@@ -5,16 +5,17 @@
 /*
  * Machine independant file operations. The ANSI standard buffered i/o library
  * can't be used here because the Macintosh version doesn't support resource
- * reading. 
+ * reading.
  *
  * This code assumes that 32 bits is large enough to hold a file offset. This
  * seems a safe assumtion since other code would break long before
- * fonts/resource files reached this size. 
+ * fonts/resource files reached this size.
  */
 
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "Dglobal.h"
 #include "Dfile.h"
@@ -249,4 +250,24 @@ Card32 fileSniff(Card8 which) {
 
     fileSeekAbsNotBuffered(which, 0);
     return value;
+}
+
+bool isSupportedFontFormat(Card32 value, Byte8 *fname) {
+    switch (value) {
+        case bits_:
+        case typ1_:
+        case true_:
+        case OTTO_:
+        case VERSION(1, 0):
+            return true;
+            break;
+        case 256:
+        case ttcf_:
+            warning("unsupported file [%s] (ignored)\n", fname);
+            return false;
+            break;
+        default:
+            warning("unsupported/bad file [%s] (ignored)\n", fname);
+            return false;
+    }
 }

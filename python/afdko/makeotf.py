@@ -27,7 +27,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.7.3 Mar 5 2019
+makeotf.py v2.7.4 Mar 14 2019
 """
 
 __methods__ = """
@@ -88,8 +88,8 @@ __usage__ = __version__ + """
 -ni                 Turn off the -i option, if it has previously
                     been turned on.
 
--ff <feature file>  Specify path to feature file. Default is 'features.fea';
-                    'features' is also accepted.
+-ff <feature file>  Specify path to feature file. Default is 'features';
+                    'features.fea' is also accepted.
 
 -fs                 Make stub GSUB table if there are no glyph substitution
                     rules in the features file.
@@ -453,7 +453,7 @@ kOverrideMenuNames = "OverrideMenuNames"
 kLicenseCode = "LicenseCode"
 # Will look for all.
 kDefaultFontPathList = ["font.ufo", "font.pfa", "font.ps", "font.txt"]
-kDefaultFeaturesList = ["features.fea", "features"]
+kDefaultFeaturesList = ["features", "features.fea"]
 kDefaultOptionsFile = "current.fpr"
 kDefaultFMNDBPath = "FontMenuNameDB"
 GOADB_NAME = "GlyphOrderAndAliasDB"
@@ -1805,24 +1805,24 @@ def setMissingParams(makeOTFParams):
     # features path.
     fea_path = getattr(makeOTFParams, kFileOptPrefix + kFeature)
     if not fea_path:
-        # First look for FEA file inside UFO
-        if makeOTFParams.srcIsUFO:
+        # First look for FEA file in the font's home directory
+        for fea_file_name in kDefaultFeaturesList:
+            path1 = os.path.join(makeOTFParams.fontDirPath, fea_file_name)
+            if os.path.exists(path1):
+                fea_path = path1
+                break
+        # If FEA file hasn't been found yet, look for it inside UFO
+        if not fea_path and makeOTFParams.srcIsUFO:
             path1 = os.path.join(srcFontPath, 'features.fea')
             if os.path.exists(path1):
                 fea_path = path1
-        # Then look for FEA file in the font's home directory,
-        # regardless if the input font is UFO or not
-        if not fea_path:
-            for fea_file_name in kDefaultFeaturesList:
-                path1 = os.path.join(makeOTFParams.fontDirPath, fea_file_name)
-                if os.path.exists(path1):
-                    fea_path = path1
-                    break
+
         if not fea_path:
             print("makeotf [Warning] Could not find default features file. "
                   "Font will be built without any layout features.")
             setattr(makeOTFParams, kFileOptPrefix + kFeature, None)
         else:
+            print("makeotf [Note] Using features file at '%s'." % fea_path)
             setattr(makeOTFParams, kFileOptPrefix + kFeature, fea_path)
 
     # FontMenuNameDB path.
