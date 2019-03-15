@@ -11,7 +11,7 @@
 
 #include "Dglobal.h"
 
-extern void nameReset();
+extern void nameReset(void);
 
 extern void nameRead(Card8 which, LongN offset, Card32 length);
 extern void nameDiff(LongN offset1, LongN offset2);
