@@ -24,7 +24,7 @@ extern opt_Scanner sfntTTCScan;
 extern void sfntUsage(void);
 extern void sfntTableSpecificUsage(void);
 
-extern void sfntReset();
+extern void sfntReset(void);
 
 void hexDump(Card8 which, Card32 tag, LongN start, Card32 length);
 void hexDiff(Card32 tag, LongN start1, Card32 length1, LongN start2, Card32 length2);
