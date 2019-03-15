@@ -1,6 +1,18 @@
 Changelog
 =========
 
+2.8.8 (released 2019-03-15)
+---------------------------
+
+- [makeotf] Reverted the preference for `features.fea` file made
+  in **afdko** version 2.8.6
+  ([#765](https://github.com/adobe-type-tools/afdko/issues/765))
+- [sfntedit] Skip missing tables and issue a warning instead of
+  exiting with fatal error
+  ([#160](https://github.com/adobe-type-tools/afdko/issues/160))
+- [sfntdiff] Enabled diff'ing different font formats
+  ([#626](https://github.com/adobe-type-tools/afdko/issues/626))
+
 2.8.7 (released 2019-03-08)
 ---------------------------
 
