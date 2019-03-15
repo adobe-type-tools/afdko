@@ -99,13 +99,11 @@ IntN main(IntN argc, Byte8 *argv[]) {
             {"-d", opt_Int, &level, "0", 0, 4},
         };
 
-    volatile IntX i = 0;
     IntN argi;
     bool supported, supported2;
     Byte8 *filename1;
     Byte8 *filename2;
     IntN name1isDir, name2isDir;
-    Byte8 foundXswitch = 0;
     Byte8 **SimpleNameList;
     IntN NumSimpleNames = 0;
 
