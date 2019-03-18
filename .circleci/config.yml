@@ -1,25 +1,4 @@
-version: 2.1
-
-commands:
-  setup_venv:
-    description: Setup the virtual environment
-    steps:
-      - run: bash .circleci/setup_venv.sh
-
-  check_source_code:
-    description: Run flake8 and cpplint
-    steps:
-      - run: bash .circleci/check_source_code.sh
-
-  build_and_test:
-    description: Build wheel and run tests via cibuildwheel
-    steps:
-      - run:
-          command: |
-            source venv/bin/activate
-            cibuildwheel --output-dir wheelhouse
-      # - store_artifacts:
-      #     path: wheelhouse/
+version: 2
 
 jobs:
   linux-python3:
@@ -27,17 +6,54 @@ jobs:
       - image: circleci/python:3.6
     environment:
       CIBW_BUILD: cp37-manylinux1_x86_64
-      CIBW_TEST_REQUIRES_LINUX: pytest subprocess32
-      CIBW_TEST_COMMAND_LINUX: cd {project} && pytest -v && pip uninstall --yes afdko
+      CIBW_TEST_REQUIRES: pytest subprocess32
+      CIBW_TEST_COMMAND: cd {project} && pytest -v && pip uninstall --yes afdko
+      PYTHON: python
+      PIP: pip
     steps:
       - checkout
       - setup_remote_docker
-      - setup_venv
-      - check_source_code
-      - build_and_test
+      - run: bash .circleci/setup_linux_pyenv.sh
+      - run:  # do static code analysis on commits (but not on tags)
+          command: |
+            if [[ -z $CIRCLE_TAG ]]; then
+              bash .circleci/check_source_code.sh
+            fi
+      - run:
+          command: |
+            source venv/bin/activate
+            cibuildwheel --output-dir wheelhouse
+      # - store_artifacts:
+      #     path: wheelhouse/
+
+  osx-python3:
+    macos:
+      xcode: "10.0.0"
+    environment:
+      CIBW_BUILD: cp37-macosx_10_6_intel
+      CIBW_TEST_REQUIRES: pytest subprocess32
+      CIBW_TEST_COMMAND: cd {project} && pytest -v && pip uninstall --yes afdko
+      PYTHON: python3
+      PIP: pip3
+    steps:
+      - checkout
+      - run: bash .circleci/setup_mac_pyenv.sh
+      - run:
+          command: |
+            source venv/bin/activate
+            cibuildwheel --output-dir wheelhouse
+      # - store_artifacts:
+      #     path: wheelhouse/
 
 workflows:
-  version: 2.1
+  version: 2
   all-tests:
     jobs:
-      - linux-python3
+      - linux-python3:
+          filters:  # run job for all branches and all tags
+            tags:
+              only: /.*/
+      - osx-python3:
+          filters:
+            tags:
+              only: /.*/
