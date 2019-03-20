@@ -137,9 +137,9 @@ This is an example of a complete feature file:
         position s f' <0 0 10 0> t;
     } kern;
 
-This file specifies the formation of the "f_i" and "f_l" ligatures, and the kern
-values of the glyph pairs "A" "Y" and "a" "y". It also specifies a contextual
-positioning adjustment for "f" when preceded by "s" and followed by "t". It also
+This file specifies the formation of the “f_i” and “f_l” ligatures, and the kern
+values of the glyph pairs “A” “Y” and “a” “y”. It also specifies a contextual
+positioning adjustment for “f” when preceded by “s” and followed by “t”. It also
 specifies that all features will be applied under all languages in the latn
 script, and for all scripts not named in the feature file.
 
@@ -153,7 +153,7 @@ feature file grammar in the makeotf program, unless otherwise indicated.
 <a name="2.a"></a>
 ### 2.a. Comments
 
-The "#" character indicates the start of a comment; the comment extends until
+The `#` character indicates the start of a comment; the comment extends until
 the end of the line. Text on a line after the comment is discarded before
 processing.
 
@@ -167,51 +167,55 @@ line endings are all supported.
 <a name="2.c"></a>
 ### 2.c. Keywords
 
-This is a complete list of keywords in the feature file language. They are shown
-in boldface in examples. Note that all keywords have a global scope. Although
-many keywords may be used only in specific contexts, the same keyword is never
-used in different ways in different contexts.
+This is a complete list of keywords in the feature file language. Note that all
+keywords have a global scope. Although many keywords may be used only in
+specific contexts, the same keyword is never used in different ways in different
+contexts.
 
-  [anchor](#2.e.vii)  
-  [anchorDef](#2.e.viii)  
-  [anonymous](#10) (or anon)  
-  [by](#5)  
-  [contour](#2.e.vi)  
-  [cursive](#6.c)  
- *[device](#2.e.iii)  
-  [enumerate](#6.b.ii) (or enum)  
-  [excludeDFLT (deprecated)](#4.b.ii)  
-  [exclude_dflt](#4.b.ii)  
-  [feature](#4.a) block; [feature](#8.a) statement  
-  [from](#5.c)  
-  [ignore](#5.f.ii) substitute; [ignore](#6.h) position  
-  [IgnoreBaseGlyphs](#4.d)  
-  [IgnoreLigatures](#4.d)  
-  [IgnoreMarks](#4.d)  
-  [MarkAttachmentType](#4.d)  
-  [UseMarkFilteringSet](#4.d)  
-  [include](#3)  
-  [includeDFLT (deprecated)](#4.b.ii)  
-  [include_dflt](#4.b.ii)  
-  [language](#4.b.ii)  
-  [languagesystem](#4.b.i)  
-  [lookup](#4.e) block and statement  
-  [lookupflag](#4.d)  
-  [mark](#6.d)  
-  [markClass](#4.f)  
-  [nameid](#9.e)  
-  [NULL](#2.e.iii) device; [NULL](#2.e.iv) value record; [NULL](#2.e.vii) anchor  
-  [parameters](#4.c)  
-  [position](#6) (or pos)  
- *[required](#4.b.ii)  
-  [RightToLeft](#4.d)  
-  [reversesub](#5) (or rsub)  
-  [script](#4.b.ii)  
-  [substitute](#5) (or sub)  
-  [subtable](#4.f)  
-  [table](#9)  
-  [useExtension](#4.e)  
-  [valueRecordDef](#2.e.v)  
+[`anchor`](#2.e.vii)  
+[`anchorDef`](#2.e.viii)  
+[`anonymous`](#10) (or anon)  
+[`by`](#5)  
+[`contour`](#2.e.vi)  
+[`cursive`](#6.c)  
+[`device`](#2.e.iii)  _[ Not implemented ]_  
+[`enumerate`](#6.b.ii) (or enum)  
+[`excludeDFLT`](#4.b.ii)  
+[`exclude_dflt`](#4.b.ii)  
+[`feature`](#4.a) block  
+[`feature`](#8.a) statement  
+[`from`](#5.c)  
+[`ignore`](#5.f.ii) substitute  
+[`ignore`](#6.h) position  
+[`IgnoreBaseGlyphs`](#4.d)  
+[`IgnoreLigatures`](#4.d)  
+[`IgnoreMarks`](#4.d)  
+[`MarkAttachmentType`](#4.d)  
+[`UseMarkFilteringSet`](#4.d)  
+[`include`](#3)  
+[`includeDFLT`](#4.b.ii) (deprecated)  
+[`include_dflt`](#4.b.ii)  
+[`language`](#4.b.ii)  
+[`languagesystem`](#4.b.i)  
+[`lookup`](#4.e) block and statement  
+[`lookupflag`](#4.d)  
+[`mark`](#6.d)  
+[`markClass`](#4.f)  
+[`nameid`](#9.e)  
+[`NULL`](#2.e.iii) device  
+[`NULL`](#2.e.iv) value record  
+[`NULL`](#2.e.vii) anchor  
+[`parameters`](#4.c)  
+[`position`](#6) (or pos)  
+[`required`](#4.b.ii)  _[ Not implemented ]_  
+[`RightToLeft`](#4.d)  
+[`reversesub`](#5) (or rsub)  
+[`script`](#4.b.ii)  
+[`substitute`](#5) (or sub)  
+[`subtable`](#4.f)  
+[`table`](#9)  
+[`useExtension`](#4.e)  
+[`valueRecordDef`](#2.e.v)  
 
 
 The following are keywords only in their corresponding table/feature blocks:
@@ -269,7 +273,7 @@ The following are keywords only where a tag is expected:
     -    hyphen           Denotes glyph ranges in a glyph class
     =    equal sign       Glyph class assignment operator
     '    single quote     Marks a glyph or glyph class for contextual substitution or positioning
-    " "  double quotes    Enclose a name table string
+    "  "  double quotes    Enclose a name table string
     { }  braces           Enclose a feature, lookup, table, or anonymous block
     [ ]  square brackets  Enclose components of a glyph class
     < >  angle brackets   Enclose a device, value record, contour point, anchor, or caret
