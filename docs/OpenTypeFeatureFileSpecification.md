@@ -2,7 +2,7 @@
 
 **Copyright**
 
-Copyright 2015-2018 Adobe. All Rights Reserved. This software is licensed as OpenSource, under the Apache License, Version 2.0\. This license is available at: http://opensource.org/licenses/Apache-2.0.
+Copyright 2015-2018 Adobe. All Rights Reserved. This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0.
 
 **Version**
 
@@ -114,24 +114,26 @@ Portions of the syntax unimplemented by Adobe are subject to change.
 
 An OpenType feature file is a text file that contains the typographic layout feature specifications for an OpenType font in an easy-to-read format. It may also contain override values for certain fields in the font tables. It is read in during the creation or editing of an OpenType font. This document specifies the feature file grammar.
 
-This is an example of a complete feature file (keywords are shown boldface):
+This is an example of a complete feature file:
 
-<pre>         # Script and language coverage
-         **languagesystem** DFLT dflt;
-         **languagesystem** latn dflt;
+```
+# Script and language coverage
+languagesystem DFLT dflt;
+languagesystem latn dflt;
 
-         # Ligature formation
-         **feature** liga {
-              **substitute** f i **by** f_i;
-              **substitute** f l **by** f_l;
-         } liga;
+# Ligature formation
+feature liga {
+    substitute f i by f_i;
+    substitute f l by f_l;
+} liga;
 
-         # Kerning
-         **feature** kern {
-              **position** A Y -100;
-              **position** a y -80;
-              **position** s f' <0 0 10 0> t;
-         } kern;</pre>
+# Kerning
+feature kern {
+    position A Y -100;
+    position a y -80;
+    position s f' <0 0 10 0> t;
+} kern;
+```
 
 This file specifies the formation of the "f_i" and "f_l" ligatures, and the kern values of the glyph pairs "A" "Y" and "a" "y". It also specifies a contextual positioning adjustment for "f" when preceded by "s" and followed by "t". It also specifies that all features will be applied under all languages in the latn script, and for all scripts not named in the feature file.
 
@@ -151,108 +153,113 @@ White space is not significant except for delimiting tokens. You can have multip
 
 This is a complete list of keywords in the feature file language. They are shown in **boldface** in examples. Note that all keywords have a global scope. Although many keywords may be used only in specific contexts, the same keyword is never used in different ways in different contexts.
 
-<pre>  [anchor](#2.e.vii)
-  [anchorDef](#2.e.viii)
-  [anonymous](#10) (or anon)
-  [by](#5)
-  [contour](#2.e.vi)
-  [cursive](#6.c)
- *[device](#2.e.iii)
-  [enumerate](#6.b.ii) (or enum)
-  [excludeDFLT (deprecated)](#4.b.ii)
-  [exclude_dflt](#4.b.ii)
-  [feature](#4.a) block; [feature](#8.a) statement
-  [from](#5.c)
-  [ignore](#5.f.ii) substitute; [ignore](#6.h) position
-  [IgnoreBaseGlyphs](#4.d)
-  [IgnoreLigatures](#4.d)
-  [IgnoreMarks](#4.d)
-  [MarkAttachmentType](#4.d)
-  [UseMarkFilteringSet](#4.d)
-  [include](#3)
-  [includeDFLT (deprecated)](#4.b.ii)
-  [include_dflt](#4.b.ii)
-  [language](#4.b.ii)
-  [languagesystem](#4.b.i)
-  [lookup](#4.e) block and statement
-  [lookupflag](#4.d)
-  [mark](#6.d)
-  [markClass](#4.f)
-  [nameid](#9.e)
-  [NULL](#2.e.iii) device; [NULL](#2.e.iv) value record; [NULL](#2.e.vii) anchor
-  [parameters](#4.c)
-  [position](#6) (or pos)
- *[required](#4.b.ii)
-  [RightToLeft](#4.d)
-  [reversesub](#5) (or rsub)
-  [script](#4.b.ii)
-  [substitute](#5) (or sub)
-  [subtable](#4.f)
-  [table](#9)
-  [useExtension](#4.e)
-  [valueRecordDef](#2.e.v)
-</pre>
+  [anchor](#2.e.vii)  
+  [anchorDef](#2.e.viii)  
+  [anonymous](#10) (or anon)  
+  [by](#5)  
+  [contour](#2.e.vi)  
+  [cursive](#6.c)  
+ *[device](#2.e.iii)  
+  [enumerate](#6.b.ii) (or enum)  
+  [excludeDFLT (deprecated)](#4.b.ii)  
+  [exclude_dflt](#4.b.ii)  
+  [feature](#4.a) block; [feature](#8.a) statement  
+  [from](#5.c)  
+  [ignore](#5.f.ii) substitute; [ignore](#6.h) position  
+  [IgnoreBaseGlyphs](#4.d)  
+  [IgnoreLigatures](#4.d)  
+  [IgnoreMarks](#4.d)  
+  [MarkAttachmentType](#4.d)  
+  [UseMarkFilteringSet](#4.d)  
+  [include](#3)  
+  [includeDFLT (deprecated)](#4.b.ii)  
+  [include_dflt](#4.b.ii)  
+  [language](#4.b.ii)  
+  [languagesystem](#4.b.i)  
+  [lookup](#4.e) block and statement  
+  [lookupflag](#4.d)  
+  [mark](#6.d)  
+  [markClass](#4.f)  
+  [nameid](#9.e)  
+  [NULL](#2.e.iii) device; [NULL](#2.e.iv) value record; [NULL](#2.e.vii) anchor  
+  [parameters](#4.c)  
+  [position](#6) (or pos)  
+ *[required](#4.b.ii)  
+  [RightToLeft](#4.d)  
+  [reversesub](#5) (or rsub)  
+  [script](#4.b.ii)  
+  [substitute](#5) (or sub)  
+  [subtable](#4.f)  
+  [table](#9)  
+  [useExtension](#4.e)  
+  [valueRecordDef](#2.e.v)  
 
-The following are keywords only in their corresponding table/feature blocks, and are shown in **boldface** in examples:
 
-<pre> [HorizAxis.BaseTagList](#9.a)     # BASE table
-  [HorizAxis.BaseScriptList](#9.a)  "
- *[HorizAxis.MinMax](#9.a)          "
-  [VertAxis.BaseTagList](#9.a)      "
-  [VertAxis.BaseScriptList](#9.a)   "
- *[VertAxis.MinMax](#9.a)           "
-  [GlyphClassDef](#9.b)             # GDEF table
-  [Attach](#9.b)                    "
- *[LigatureCaretByDev](#9.b)        "
-  [LigatureCaretByIndex](#9.b)      "
-  [LigatureCaretByPos](#9.b)        "
-  [MarkAttachClass](#9.b)           "
-  [FontRevision](#9.c)              # head table
-  [CaretOffset](#9.d)               # hhea table
-  [Ascender](#9.d)                  # hhea table
-  [Descender](#9.d)                 # hhea table
-  [LineGap](#9.d)                   # hhea table
-  [Panose](#9.f)                    # OS/2 table
-  [TypoAscender](#9.f)              "
-  [TypoDescender](#9.f)             "
-  [TypoLineGap](#9.f)               "
-  [winAscent](#9.f)                 "
-  [winDescent](#9.f)                "
-  [UnicodeRange](#9.f)              "
-  [CodePageRange](#9.f)             "
-  [XHeight](#9.f)                   "
-  [CapHeight](#9.f)                 "
-  [Vendor](#9.f)                    "
-  [sizemenuname](#8.b)              # size feature
-  [VertTypoAscender](#9.g)          # vhea table
-  [VertTypoDescender](#9.g)         "
-  [VertTypoLineGap](#9.g)           "
-  [VertOriginY](#9.h)               # vmtx table
-  [VertAdvanceY](#9.h)              # vmtx table</pre>
+The following are keywords only in their corresponding table/feature blocks:
 
-_[* Currently not implemented. ]_
+|  |  |
+| -- | -- |
+| [HorizAxis.BaseTagList](#9.a) | BASE table |  
+| [HorizAxis.BaseScriptList](#9.a) | BASE table | 
+|*[HorizAxis.MinMax](#9.a) | BASE table |
+| [VertAxis.BaseTagList](#9.a) | BASE table |
+| [VertAxis.BaseScriptList](#9.a) | BASE table |
+|*[VertAxis.MinMax](#9.a) | BASE table |
+| [GlyphClassDef](#9.b) | GDEF table |
+| [Attach](#9.b) | GDEF table |
+|*[LigatureCaretByDev](#9.b) | GDEF table |
+| [LigatureCaretByIndex](#9.b) | GDEF table |
+| [LigatureCaretByPos](#9.b) | GDEF table |
+| [MarkAttachClass](#9.b) | GDEF table |
+| [FontRevision](#9.c) | head table |
+| [CaretOffset](#9.d) | hhea table |
+| [Ascender](#9.d) | hhea table |
+| [Descender](#9.d) | hhea table |
+| [LineGap](#9.d) | hhea table |
+| [Panose](#9.f) | OS/2 table |
+| [TypoAscender](#9.f) | OS/2 table |
+| [TypoDescender](#9.f) | OS/2 table |
+| [TypoLineGap](#9.f) | OS/2 table |
+| [winAscent](#9.f) | OS/2 table |
+| [winDescent](#9.f) | OS/2 table |
+| [UnicodeRange](#9.f) | OS/2 table |
+| [CodePageRange](#9.f) | OS/2 table |
+| [XHeight](#9.f) | OS/2 table |
+| [CapHeight](#9.f) | OS/2 table |
+| [Vendor](#9.f) | OS/2 table |
+| [sizemenuname](#8.b) | size feature |
+| [VertTypoAscender](#9.g) | vhea table |
+| [VertTypoDescender](#9.g) | vhea table |
+| [VertTypoLineGap](#9.g) | vhea table |
+| [VertOriginY](#9.h) | vmtx table |
+| [VertAdvanceY](#9.h) | vmtx table |
+
+_* Currently not implemented._
 
 The following are keywords only where a tag is expected:
 
-<pre>  DFLT  # can be used only with the script keyword and as the script value with the languagesystem keyword.
-  dflt  # can be used only with the language keyword and as the language value with the languagesystem keyword.</pre>
+```
+DFLT  # can be used only with the script keyword and as the script value with the languagesystem keyword.
+dflt  # can be used only with the language keyword and as the language value with the languagesystem keyword.
+```
 
 <a name="2.d"></a>**2.d. Special characters**
 
-<pre>  #    pound sign      Denotes start of comment
-  ;    semicolon       Terminates a statement
-  ,    comma           Separator in various lists
-  @    at sign         Identifies glyph class names
-  \    backslash       Identifies CIDs. Distinguishes glyph names from an identical keyword
-  -    hyphen          Denotes glyph ranges in a glyph class
-  =    equal sign       Glyph class assignment operator
-  '    single quote    Marks a glyph or glyph class for contextual substitution or positioning
-  " "  double quotes   Enclose a name table string
-  { }  braces          Enclose a feature, lookup, table, or anonymous block
-  [ ]  square brackets Enclose components of a glyph class
-  < >  angle brackets  Enclose a device, value record, contour point, anchor, or caret
-  ( )  parentheses     Enclose the file name to be included</pre>
-
+```
+#    pound sign      Denotes start of comment
+;    semicolon       Terminates a statement
+,    comma           Separator in various lists
+@    at sign         Identifies glyph class names
+\    backslash       Identifies CIDs. Distinguishes glyph names from an identical keyword
+-    hyphen          Denotes glyph ranges in a glyph class
+=    equal sign      Glyph class assignment operator
+'    single quote    Marks a glyph or glyph class for contextual substitution or positioning
+" "  double quotes   Enclose a name table string
+{ }  braces          Enclose a feature, lookup, table, or anonymous block
+[ ]  square brackets Enclose components of a glyph class
+< >  angle brackets  Enclose a device, value record, contour point, anchor, or caret
+( )  parentheses     Enclose the file name to be included
+```
 <a name="2.e"></a>**2.e. Numbers and other metrics**
 
 <a name="2.e.i"></a>**2.e.i. Number**
@@ -634,17 +641,17 @@ In practice, most or all of the features in a font will be registered under the 
 
 The "languagesystem" statement provides a simple directive to use in this case. It is the simplest way to specify language system in the feature file. (For the 'aalt' and 'size' features, it is the only way to specify language system.) One or more such statements may be present in the feature file at global scope (i.e. outside of the feature blocks or any other blocks) and before any of the feature blocks:
 
-<pre>  **languagesystem** <script tag> <language tag>;</pre>
+<pre>  languagesystem <script tag> <language tag>;</pre>
 
 When these statements are present, then all the lookups in each feature that does not contain an explicit "script" or "language" statement (see [4.b.ii](#4.b.ii) below) will be registered under every language system specified by the "languagesystem" statement(s). If a feature block does contain 'script' or 'language' tags, then all lookups that occur before the first 'script' or 'language' tag will also be applied under all the specified languagesystems.
 
 If no "languagesystem" statement is present, then the implementation must behave exactly as though the following statement were present at the beginning of the feature file:
 
-<pre>  **languagesystem** DFLT dflt;</pre>
+<pre>  languagesystem DFLT dflt;</pre>
 
 If any languagesystem statement is used, then the statement specifying:
 
-<pre>  **languagesystem** DFLT dflt;</pre>
+<pre>  languagesystem DFLT dflt;</pre>
 
 must be specified explicitly; if not, this languagesystem will not be included in the font. This script/language pair is special: it is used if a program cannot find a match in the font to the current writing script and language. If it is not in your font, then all the rules may be invisible to the program if your font does not have a match for the current script and language. It is strongly recommended to use the statement 'languagesystem DFLT dflt;'.
 
@@ -874,11 +881,11 @@ This statement must be respected in Pair Adjustment Positioning Format 2 (i.e. p
 
 **Example 1.** The following is an example of an entire feature file and demonstrates the two ways to register features under language systems (see §[4.b](#4.b) above):
 
-<pre>  **languagesystem** DFLT dflt;
-  **languagesystem** latn dflt;
-  **languagesystem** latn DEU;
-  **languagesystem** latn TRK;
-  **languagesystem** cyrl dflt;
+<pre>  languagesystem DFLT dflt;
+  languagesystem latn dflt;
+  languagesystem latn DEU;
+  languagesystem latn TRK;
+  languagesystem cyrl dflt;
 
   **feature** smcp {
      **sub** [a-z] **by** [A.sc-Z.sc];
@@ -931,12 +938,12 @@ In the 'liga' feature, the f_f, f_i and f_l ligature substitutions will be appli
 
 **Example 2.** The following example illustrates labeled lookup blocks and the use of the exclude_dflt keyword:
 
-<pre>  **languagesystem** DFLT dflt;
-  **languagesystem** latn dflt;
-  **languagesystem** latn DEU;
-  **languagesystem** cyrl dflt;
-  **languagesystem** cyrl SRB;
-  **languagesystem** grek dflt;
+<pre>  languagesystem DFLT dflt;
+  languagesystem latn dflt;
+  languagesystem latn DEU;
+  languagesystem cyrl dflt;
+  languagesystem cyrl SRB;
+  languagesystem grek dflt;
 
   **feature** liga {
            # start of default rules that are applied under all language systems.
@@ -1668,10 +1675,10 @@ The following are not allowed in the 'aalt' feature definition: "script", "langu
 
 _Examples:_
 
-<pre>  **languagesystem** DFLT dflt;
-  **languagesystem** latn dflt;
-  **languagesystem** latn TRK;
-  **languagesystem** cyrl dflt;
+<pre>  languagesystem DFLT dflt;
+  languagesystem latn dflt;
+  languagesystem latn TRK;
+  languagesystem cyrl dflt;
 
   **feature** aalt {
      **feature** salt;
