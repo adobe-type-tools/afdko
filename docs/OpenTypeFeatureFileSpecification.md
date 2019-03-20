@@ -199,44 +199,42 @@ This is a complete list of keywords in the feature file language. They are shown
 
 The following are keywords only in their corresponding table/feature blocks:
 
-|  |  |
-| -- | -- |
-| [HorizAxis.BaseTagList](#9.a) | BASE table |  
-| [HorizAxis.BaseScriptList](#9.a) | BASE table | 
-|*[HorizAxis.MinMax](#9.a) | BASE table |
-| [VertAxis.BaseTagList](#9.a) | BASE table |
-| [VertAxis.BaseScriptList](#9.a) | BASE table |
-|*[VertAxis.MinMax](#9.a) | BASE table |
-| [GlyphClassDef](#9.b) | GDEF table |
-| [Attach](#9.b) | GDEF table |
-|*[LigatureCaretByDev](#9.b) | GDEF table |
-| [LigatureCaretByIndex](#9.b) | GDEF table |
-| [LigatureCaretByPos](#9.b) | GDEF table |
-| [MarkAttachClass](#9.b) | GDEF table |
-| [FontRevision](#9.c) | head table |
-| [CaretOffset](#9.d) | hhea table |
-| [Ascender](#9.d) | hhea table |
-| [Descender](#9.d) | hhea table |
-| [LineGap](#9.d) | hhea table |
-| [Panose](#9.f) | OS/2 table |
-| [TypoAscender](#9.f) | OS/2 table |
-| [TypoDescender](#9.f) | OS/2 table |
-| [TypoLineGap](#9.f) | OS/2 table |
-| [winAscent](#9.f) | OS/2 table |
-| [winDescent](#9.f) | OS/2 table |
-| [UnicodeRange](#9.f) | OS/2 table |
-| [CodePageRange](#9.f) | OS/2 table |
-| [XHeight](#9.f) | OS/2 table |
-| [CapHeight](#9.f) | OS/2 table |
-| [Vendor](#9.f) | OS/2 table |
-| [sizemenuname](#8.b) | size feature |
-| [VertTypoAscender](#9.g) | vhea table |
-| [VertTypoDescender](#9.g) | vhea table |
-| [VertTypoLineGap](#9.g) | vhea table |
-| [VertOriginY](#9.h) | vmtx table |
-| [VertAdvanceY](#9.h) | vmtx table |
-
-_* Currently not implemented._
+| keyword | table | implemented |
+| -- | -- | -- |
+| [`HorizAxis.BaseTagList`](#9.a) | BASE table | ✅ |
+| [`HorizAxis.BaseScriptList`](#9.a) | BASE table | ✅ |
+| [`HorizAxis.MinMax`](#9.a) | BASE table | ❌ | 
+| [`VertAxis.BaseTagList`](#9.a) | BASE table | ✅ |
+| [`VertAxis.BaseScriptList`](#9.a) | BASE table | ✅ |
+| [`VertAxis.MinMax`](#9.a) | BASE table | ❌ |
+| [`GlyphClassDef`](#9.b) | GDEF table | ✅ |
+| [`Attach`](#9.b) | GDEF table | ✅ |
+| [`LigatureCaretByDev`](#9.b) | GDEF table | ❌ |
+| [`LigatureCaretByIndex`](#9.b) | GDEF table | ✅ |
+| [`LigatureCaretByPos`](#9.b) | GDEF table | ✅ |
+| [`MarkAttachClass`](#9.b) | GDEF table | ✅ |
+| [`FontRevision`](#9.c) | head table | ✅ |
+| [`CaretOffset`](#9.d) | hhea table | ✅ |
+| [`Ascender`](#9.d) | hhea table | ✅ |
+| [`Descender`](#9.d) | hhea table | ✅ |
+| [`LineGap`](#9.d) | hhea table | ✅ |
+| [`Panose`](#9.f) | OS/2 table | ✅ |
+| [`TypoAscender`](#9.f) | OS/2 table | ✅ |
+| [`TypoDescender`](#9.f) | OS/2 table | ✅ |
+| [`TypoLineGap`](#9.f) | OS/2 table | ✅ |
+| [`winAscent`](#9.f) | OS/2 table | ✅ |
+| [`winDescent`](#9.f) | OS/2 table | ✅ |
+| [`UnicodeRange`](#9.f) | OS/2 table | ✅ |
+| [`CodePageRange`](#9.f) | OS/2 table | ✅ |
+| [`XHeight`](#9.f) | OS/2 table | ✅ |
+| [`CapHeight`](#9.f) | OS/2 table | ✅ |
+| [`Vendor`](#9.f) | OS/2 table | ✅ |
+| [`sizemenuname`](#8.b) | size feature | ✅ |
+| [`VertTypoAscender`](#9.g) | vhea table | ✅ |
+| [`VertTypoDescender`](#9.g) | vhea table | ✅ |
+| [`VertTypoLineGap`](#9.g) | vhea table | ✅ |
+| [`VertOriginY`](#9.h) | vmtx table | ✅ |
+| [`VertAdvanceY`](#9.h) | vmtx table | ✅ |
 
 The following are keywords only where a tag is expected:
 
@@ -249,19 +247,19 @@ dflt  # can be used only with the language keyword and as the language value wit
 ### 2.d. Special characters
 
 ```
-#    pound sign      Denotes start of comment
-;    semicolon       Terminates a statement
-,    comma           Separator in various lists
-@    at sign         Identifies glyph class names
-\    backslash       Identifies CIDs. Distinguishes glyph names from an identical keyword
--    hyphen          Denotes glyph ranges in a glyph class
-=    equal sign      Glyph class assignment operator
-'    single quote    Marks a glyph or glyph class for contextual substitution or positioning
-" "  double quotes   Enclose a name table string
-{ }  braces          Enclose a feature, lookup, table, or anonymous block
-[ ]  square brackets Enclose components of a glyph class
-< >  angle brackets  Enclose a device, value record, contour point, anchor, or caret
-( )  parentheses     Enclose the file name to be included
+#    pound sign       Denotes start of comment
+;    semicolon        Terminates a statement
+,    comma            Separator in various lists
+@    at sign          Identifies glyph class names
+\    backslash        Identifies CIDs. Distinguishes glyph names from an identical keyword
+-    hyphen           Denotes glyph ranges in a glyph class
+=    equal sign       Glyph class assignment operator
+'    single quote     Marks a glyph or glyph class for contextual substitution or positioning
+" "  double quotes    Enclose a name table string
+{ }  braces           Enclose a feature, lookup, table, or anonymous block
+[ ]  square brackets  Enclose components of a glyph class
+< >  angle brackets   Enclose a device, value record, contour point, anchor, or caret
+( )  parentheses      Enclose the file name to be included
 ```
 
 
@@ -2262,24 +2260,24 @@ A `<script record>` is of the form:
 <script tag> <default baseline tag> <base coord>+
 ```
 
-```
-<base coord>
-``` can take several formats: _[ Currently only format A is implemented ]_
+`<base coord>` can take several formats: _[ Currently only format A is implemented ]_
 
 ```
 <number>
 # format A
+
 <number> <glyph>
 <number>
 # format B
+
 <number>
 <device>
 # format C
 ```
 
-The baseline tags for each BaseTagList must be sorted in increasing ASCII order.
+The baseline tags for each `BaseTagList` must be sorted in increasing ASCII order.
 
-The number of baseline values for a particular script should be the same as the same as the number of baseline tags in the corresponding BaseTagList.
+The number of baseline values for a particular script should be the same as the same as the number of baseline tags in the corresponding `BaseTagList`.
 
 A `<minmax>` _[ currently not implemented ]_ is of the form:
 
@@ -2287,7 +2285,8 @@ A `<minmax>` _[ currently not implemented ]_ is of the form:
 <script tag> <language tag>  # Defines the language system
     <base coord>,            # Min value for this language system
     <base coord>             # Max value for this language system
-    [, <feature tag>         # (Optional) feature tag
+    [, 
+    <feature tag>            # (Optional) feature tag
     <base coord>,            # Min value for this feature tag
     <base coord>]            # Max value for this feature tag
     ;
@@ -2299,8 +2298,8 @@ For example:
 table BASE {
     HorizAxis.BaseTagList     ideo romn;
     HorizAxis.BaseScriptList  latn   romn   -120    0, cyrl   romn   -120    0,
-                                  grek   romn   -120    0, hani   ideo   -120    0,
-                                  kana   ideo   -120    0, hang   ideo   -120    0;
+                              grek   romn   -120    0, hani   ideo   -120    0,
+                              kana   ideo   -120    0, hang   ideo   -120    0;
 } BASE;
 ```
 
@@ -2309,13 +2308,13 @@ table BASE {
 
 ```
 table GDEF {
-    GlyphClassDef <glyphclass>*,   # base glyphs
-                  <glyphclass>*,   # ligature glyphs
-                  <glyphclass>*,   # mark glyphs
-                  <glyphclass>;    # component glyphs
+    GlyphClassDef <glyphclass>*,  # base glyphs
+                  <glyphclass>*,  # ligature glyphs
+                  <glyphclass>*,  # mark glyphs
+                  <glyphclass>;   # component glyphs
     Attach        <glyph|glyphclass> <number>+; # <number> is a contour point index
 
-    LigatureCaretbyDev _[* Currently not implemented. ]_
+    LigatureCaretbyDev # Currently not implemented
     LigatureCaretByPos <glyph|glyphclass> <caret position value>+;
     LigatureCaretByIndex <glyph|glyphclass> <caret contour point index value>+;
 } GDEF:
@@ -2323,7 +2322,7 @@ table GDEF {
 
 The number of `<caret value>`s specified for a LigatureCaret must be: (number of ligature components) - 1.
 
-Only one LigatureCaret rule may be specified per glyph, whether it is LigatureCaretByPos or LigatureCaretByIndex.
+Only one `LigatureCaret` rule may be specified per glyph, whether it is `LigatureCaretByPos` or `LigatureCaretByIndex`.
 
 Here is an example of a GDEF table block:
 
@@ -2338,7 +2337,7 @@ table GDEF {
 } GDEF;
 ```
 
-The four class names in the GlyphClassDef are separated by commas. If you omit a class definition, you must still indicate its position with a comma. By the OpenType spec, any glyph not included in one of the class definition will be assigned glyph class index 0, and will not be included in any of the GlyphClass classes.
+The four class names in the `GlyphClassDef` are separated by commas. If you omit a class definition, you must still indicate its position with a comma. By the OpenType spec, any glyph not included in one of the class definition will be assigned glyph class index 0, and will not be included in any of the `GlyphClass` classes.
 
 The MarkAttach classes of the GDEF table may not be specified explicitly in feature file syntax. They are instead created by the implementation from use of the `lookupflag MarkAttachmentType <class name>` statements. The class names may be from either regular classes definitions or mark class definitions.
 
@@ -2349,7 +2348,7 @@ If any mark class has been defined, or if any of the lookup flags for skipping g
 <a name="9.c"></a>
 ### 9.c. head table
 
-The head table FontRevision value is used as the overall font version number, and should be incremented whenever any data in the fonts is changed. It is both specified and reported as a decimal number with three significant decimal places. The actual value stored in the font will, however, be a Fixed number (16.16 bit format). Due to the limited precision of this format, the value stored may differ by a small decimal fraction from that specified, but will always round to the same value when rounded to three fractional decimal places.
+The head table `FontRevision` value is used as the overall font version number, and should be incremented whenever any data in the fonts is changed. It is both specified and reported as a decimal number with three significant decimal places. The actual value stored in the font will, however, be a Fixed number (16.16 bit format). Due to the limited precision of this format, the value stored may differ by a small decimal fraction from that specified, but will always round to the same value when rounded to three fractional decimal places.
 
 This value is also used as the source for the font version string in the name table name string ID 5 “Version”.
 
@@ -2436,26 +2435,21 @@ Decimal numbers must begin with a non-0 digit, octal numbers with a 0 digit, and
 If some or all of the string attribute id numbers aren't specified their values are defaulted as follows:
 
 ```
-  platform id      3
-(Windows)
+platform id      3 (Windows)
 ```
 
 Windows platform selected:
 
 ```
-  platspec id      1
-(Unicode)
-  language id
-0x0409 (Windows default English)
+platspec id      1 (Unicode)
+language id 0x0409 (Windows default English)
 ```
 
 Macintosh platform selected:
 
 ```
-  platspec id      0
-(Roman)
-  language id      0
-(English)
+platspec id      0 (Roman)
+language id      0 (English)
 ```
 
 Putting this all together gives the following valid nameid formats and the ids that are assigned.
@@ -2513,7 +2507,7 @@ Vendor should 4 character-long. If a shorter vendor id is given, it is automatic
 
 `<panose number>` is ten (decimal) numbers separated by white space. For `<Unicode range list>` is a whitespace-separated list of Unicode bit numbers from the OpenType specification for the ulUnicodeRange1-4 in the OS/2 table. `<code page list>` is a whitespace-separated list of Windows code page numbers from the OpenType specification for the ulCodePageRange1-2 in the OS/2 table.
 
-LowerOpSize and UpperOpSize set the usLowerOpticalPointSize and usUpperOpticalPointSize fields. If these are set, then the OS/2 version must be set to at least 5 by the implementation. Note that the values for these fields are set in units of TWIPS, or 20 x point size.
+`LowerOpSize` and `UpperOpSize` set the usLowerOpticalPointSize and usUpperOpticalPointSize fields. If these are set, then the OS/2 version must be set to at least 5 by the implementation. Note that the values for these fields are set in units of TWIPS, or 20 x point size.
 
 ###### Example:
 
@@ -2593,7 +2587,7 @@ table vmtx {
 } vmtx;
 ```
 
-A special case for the vertical advance width is the set of glyphs referenced by the `vrt2` feature. The default vertical advance for these glyphs is the horizontal advance of their corresponding target (upright) glyphs. These values will also be overridden by VertAdvanceY values.
+A special case for the vertical advance width is the set of glyphs referenced by the `vrt2` feature. The default vertical advance for these glyphs is the horizontal advance of their corresponding target (upright) glyphs. These values will also be overridden by `VertAdvanceY` values.
 
 <a name="10"></a>
 ## 10. Specifying anonymous data blocks
