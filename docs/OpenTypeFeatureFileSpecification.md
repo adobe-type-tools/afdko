@@ -1930,38 +1930,38 @@ The `useExtension` keyword specifies creating lookups of this lookup type. See �
 
 The following is a reference summary of the algorithm used by an OpenType layout (OTL) engine to perform substitutions and positionings. The important aspect of this for a feature file editor is that each lookup corresponds to one “pass” over the glyph run (see step 4 below). Thus, each lookup has as input the accumulated result of all previous lookups in the LookupList (whether in the same feature or in other features).
 
-```
-  1. All glyphs in the client’s glyph run must belong to the same language system. (Glyph sequence matching may not occur across language systems.)
+1. All glyphs in the client’s glyph run must belong to the same language system. (Glyph sequence matching may not occur across language systems.)
 
-  --- Do the following first for the GSUB and then for the GPOS: ---
+----
+Do the following first for the GSUB and then for the GPOS:
 
-  2.  Assemble all features (including any required feature) for the glyph run’s language system.
+2.  Assemble all features (including any required feature) for the glyph run’s language system.
 
-  3.  Assemble all lookups in these features, in LookupList order, removing any duplicates. (All features and thus all lookups needn't be applied to every glyph in the run.)
+3.  Assemble all lookups in these features, in LookupList order, removing any duplicates. (All features and thus all lookups needn't be applied to every glyph in the run.)
 
-  4.  For each lookup:
+4.  For each lookup:
 
-  5.  For each glyph in the glyph run:
+5.  For each glyph in the glyph run:
 
-  6.  If the lookup is applied to that glyph and the lookupflag doesn't indicate that that glyph is to be ignored:
+6.  If the lookup is applied to that glyph and the lookupflag doesn't indicate that that glyph is to be ignored:
 
-  7.  For each subtable in the lookup:
+7.  For each subtable in the lookup:
 
-  8.  If the subtable’s target context is matched:
+8.  If the subtable’s target context is matched:
 
-  9.  Do the glyph substitution or positioning,
+9.  Do the glyph substitution or positioning,
 
---- OR: ---
+----
+OR:
 
 If this is a (chain) contextual lookup do the following [(10)-(11)] in the subtable’s Subst/PosLookupRecord order:
 
- 10. For each (sequenceIndex, lookupListIndex) pair:
+10. For each (sequenceIndex, lookupListIndex) pair:
 
- 11. Apply lookup[lookupListIndex] at input sequence[sequenceIndex] [steps (7)-(11)]
+11. Apply lookup[lookupListIndex] at input sequence[sequenceIndex] [steps (7)-(11)]
 
- 12. Goto the glyph after the input sequence matched in (8)
-     (i.e. skip any remaining subtables in the lookup).
-```
+12. Goto the glyph after the input sequence matched in (8)
+   (i.e. skip any remaining subtables in the lookup).
 
 The “target context” in step 8 above comprises the input sequence and any backtrack and lookahead sequences.
 
