@@ -1983,7 +1983,7 @@ In the feature file, the ordering of rules within a lookup is important only for
 ## 8. Specially handled features
 
 <a name="8.a"></a>
-### 8.a. The all alternates (`aalt`) feature
+### 8.a. The all alternates feature (`aalt`) 
 
 The aalt feature consists of a feature definition block which contains a series of statements in the form:
 
@@ -2003,14 +2003,15 @@ The feature file parser should create the `aalt` feature from the feature file d
 
     The `aalt` feature block must appear before the feature block of any `<feature tag>` it references in the above manner. It will also always be created as the first feature in the font (i.e. its lookups will be at the beginning of the GSUB LookupList).
 
-2.  Add any additional single and alternate substitutions in the `aalt` specification to the groups that were created algorithmically, by step (i). This facility is provided to fine-tune the semantic groups, for instance, if certain glyphs weren't referenced in any of the features indicated in (i) above. This can also be used to override substitutions specified by including other features: for any target glyph, the alternate glyphs specified by this mechanism precede in order any other alternate glyphs.
-3.  If there are only two glyphs in a group, create a single substitution in the `aalt` feature, with the first glyph being the target glyph and the second glyph being the replacement glyph. If there are more than two glyphs in a group, create an alternate substitution in the `aalt` feature, with the first glyph being the target glyph and the remaining glyphs being the alternate set. These alternate glyphs will be sorted in the order that the source features are named in the `aalt` definition, _not_ the order of the feature definitions in the file. Alternates defined explicitly, as in step (ii) above, will precede all others.
+2.  Add any additional single and alternate substitutions in the `aalt` specification to the groups that were created algorithmically, by step 1. This facility is provided to fine-tune the semantic groups, for instance, if certain glyphs weren't referenced in any of the features indicated in step 1 above. This can also be used to override substitutions specified by including other features: for any target glyph, the alternate glyphs specified by this mechanism precede in order any other alternate glyphs.
 
-_The `useExtension` keyword:_
+3.  If there are only two glyphs in a group, create a single substitution in the `aalt` feature, with the first glyph being the target glyph and the second glyph being the replacement glyph. If there are more than two glyphs in a group, create an alternate substitution in the `aalt` feature, with the first glyph being the target glyph and the remaining glyphs being the alternate set. These alternate glyphs will be sorted in the order that the source features are named in the `aalt` definition, _not_ the order of the feature definitions in the file. Alternates defined explicitly, as in step 2 above, will precede all others.
+
+###### The `useExtension` keyword:
 
 The `useExtension` keyword may optionally precede `{` in the feature block syntax. The `aalt` lookups will be created with the GSUB Extension lookup type if and only if the `useExtension` keyword is used. Note that since the Extension lookup types were added in OpenType specification v1.3, they will not be recognized by all OpenType layout parsers.
 
-_Specifying language system:_
+###### Specifying language system:
 
 This feature will be registered under all language systems specified by `languagesystem` statements; see §[4.b.i](#4.b.i) above.
 
@@ -2066,7 +2067,7 @@ The following example will result in the `aalt` lookups being created with the G
 ```
 
 <a name="8.b"></a>
-### 8.b. The optical size (`size`) feature
+### 8.b. The optical size feature (`size`) 
 
 This feature is unique in that it contains no substitution or positioning rules (the LookupCount field in its Feature table will always be 0).
 
@@ -2074,8 +2075,8 @@ The feature’s data is accessed instead through the FeatureParams value of its 
 
 Thus, the syntax for this feature is different from all other features. The feature block must contain:
 
-*   one `parameters` statement
-*   and zero or more `sizemenuname` statements.
+* one `parameters` statement
+* and zero or more `sizemenuname` statements.
 
 No other feature file statements, blocks or keywords are permitted. (Comments are allowed.)
 
@@ -2108,8 +2109,7 @@ In the this case, we strongly recommend providing at least the two entries for W
 If the font is not part of such a group, then the `sizemenuname` statements must be omitted, and all fields but the first (design size) for the parameter statement must be set to 0. This form may be be abbreviated by setting the subfmaily identifer to 0, and omitting the two remaining zeros. For example:
 
 ```
-parameters 10.0 0; # Indicate intended design size to be 10 pts.
-
+parameters 10.0 0;  # Indicate intended design size to be 10 pts.
 ```
 
 This can be used to indicate the intended design size for a font, even when it is not part of an optical size group.
@@ -2119,7 +2119,7 @@ The syntax of the `sizemenuname` statement follows that of the name table name s
 The names specified by the `sizemenuname` statement are actually stored in the name table, with name ID’s starting at the first unused name ID at or after 256.
 
 <a name="8.c"></a>
-### 8.c. Descriptive names for Stylistic Set (`ss01` - `ss20`) features
+### 8.c. Descriptive names for Stylistic Set features (`ss01` - `ss20`) 
 
 As of the OpenType specification 1.6, descriptive names are allowed for stylistic substitution features. These names are specified within a feature block for a Stylistic Set feature. The implementation will store the name strings in the name table, and will create a feature parameter data block which references them.
 
@@ -2127,8 +2127,8 @@ A single Stylistic Set feature block may contain more than one descriptive name 
 
 ```
 featureNames {
-	name < platform ID > < script ID > < language ID > < text string > ;
-# This name entry is repeated for every script and language that you want to support.
+    name <platform ID> <script ID> <language ID> <text string> ;
+    # This name entry is repeated for every script and language to be supported.
 } ;
 ```
 
@@ -2137,16 +2137,19 @@ The syntax for the individual name string entries is similar to that of the name
 ###### Example:
 
 ```
- feature ss01 {
+feature ss01 {
     featureNames {
-         name "Feature description for MS Platform, script Unicode, language English";
-# With no platform ID, script ID, or language ID specified, the implementation assumes (3,1,0x409).
-         name 3 1 0x411 "Feature description for MS Platform, script Unicode, language Japanese";
-         name 1 "Feature description for Apple Platform, script Roman, language unspecified";
-# With only the platform ID specified, the implementation assumes script and language = Latin. For Apple this is (1,0,0).
-         name 1 1 12 "Feature description for Apple Platform, script Japanese, language Japanese";     } ;
-# --- rules for this feature ---
-  } ss01;
+        name "Feature description for MS Platform, script Unicode, language English";
+        # With no platform ID, script ID, or language ID specified, the implementation assumes (3,1,0x409).
+        
+        name 3 1 0x411 "Feature description for MS Platform, script Unicode, language Japanese";
+        name 1 "Feature description for Apple Platform, script Roman, language unspecified";
+        # With only the platform ID specified, the implementation assumes script and language = Latin. For Apple this is (1,0,0).
+        
+        name 1 1 12 "Feature description for Apple Platform, script Japanese, language Japanese"; 
+    };
+        # --- rules for this feature ---
+} ss01;
 ```
 
 <a name="8.d"></a>
@@ -2158,26 +2161,26 @@ A set of NameID entries are specified within a parameter block entry. The parame
 
 Following the set of NameID entries, a series of 24 bit Unicode values may be specified. These provide Unicode values for the base glyphs referenced by the feature. The developer may specify none, some, or all of the Unicode values for the base glyphs. The Unicode value may be written with either decimal or hexadecimal notation: the value must be preceded by '0x' if it is a hexadecimal value. The 24 bit field means that the largest Unicode value allowed is ((1<<24) -1), aka, 0xFFFFFF
 
-The intent of the NameID entries is described in the OpenType spec document : [OpenType Layout tag registry -- section on feature tags, tag name `cv01` - `cv99`](https://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#cv01-cv99). Note: The ParamUILabelNameID entries are used when one base glyph is mapped to more than one variant; the font designer may then specify one ParamUILabelNameID for each variant, in order to uniquely describe that variant. If any ParamUILabelNameID entries are specified, the number of ParamUILabelNameID entries must match the number of variants for each base glyph. If the Character Variant feature specifies more than one base glyph, then the set of NameID entries in the parameter block will be used for each base glyph and its variants.
+The intent of the NameID entries is described in the OpenType spec document : [OpenType Layout tag registry -- section on feature tags, tag name `cv01` - `cv99`](https://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#cv01-cv99). Note: The `ParamUILabelNameID` entries are used when one base glyph is mapped to more than one variant; the font designer may then specify one `ParamUILabelNameID` for each variant, in order to uniquely describe that variant. If any `ParamUILabelNameID` entries are specified, the number of `ParamUILabelNameID` entries must match the number of variants for each base glyph. If the Character Variant feature specifies more than one base glyph, then the set of NameID entries in the parameter block will be used for each base glyph and its variants.
 
 The syntax for a `cvParameters` block is:
 
 ```
 cvParameters {
     FeatUILabelNameID {
-        name < platform ID > < script ID > < language ID > < text string > ;
+        name <platform ID> <script ID> <language ID> <text string> ;
     };
     FeatUITooltipTextNameID {
-        name < platform ID > < script ID > < language ID > < text string > ;
+        name <platform ID> <script ID> <language ID> <text string> ;
     };
     SampleTextNameID {
-        name < platform ID > < script ID > < language ID > < text string > ;
+        name <platform ID> <script ID> <language ID> <text string> ;
     };
     ParamUILabelNameID {
-        name < platform ID > < script ID > < language ID > < text string > ;
+        name <platform ID> <script ID> <language ID> <text string> ;
     };
 
-    Character < Unicode value string > ;
+    Character <Unicode value string> ;
 };
 ```
 
@@ -2191,28 +2194,28 @@ feature cv01 {
     cvParameters {
 
         FeatUILabelNameID {
-            name 3 1 0x0409 "uilabel simple a"; # English US
-            name 1 0 0 "uilabel  simple a"; # Mac English
+            name 3 1 0x0409 "uilabel simple a";  # English US
+            name 1 0 0 "uilabel  simple a";  # Mac English
         };
 
         FeatUITooltipTextNameID {
-            name 3 1 0x0409 "tool tip simple a"; # English US
-            name 1 0 0 "tool tip simple a"; # Mac English
+            name 3 1 0x0409 "tool tip simple a";  # English US
+            name 1 0 0 "tool tip simple a";  # Mac English
         };
 
         SampleTextNameID {
-            name 3 1 0x0409 "sample text simple a"; # English US
-            name 1 0 0 "sample text simple a"; # Mac English
+            name 3 1 0x0409 "sample text simple a";  # English US
+            name 1 0 0 "sample text simple a";  # Mac English
         };
 
         ParamUILabelNameID {
-            name 3 1 0x0409 "param1 text simple a"; # English US
-            name 1 0 0 "param1 text simple a"; # Mac English
+            name 3 1 0x0409 "param1 text simple a";  # English US
+            name 1 0 0 "param1 text simple a";  # Mac English
         };
 
         ParamUILabelNameID {
-            name 3 1 0x0409 "param2 text simple a"; # English US
-            name 1 0 0 "param2 text simple a"; # Mac English
+            name 3 1 0x0409 "param2 text simple a";  # English US
+            name 1 0 0 "param2 text simple a";  # Mac English
         };
 
         Character 10;
@@ -2220,7 +2223,7 @@ feature cv01 {
 
     };
 
-# --- rules for this feature ---
+    # --- rules for this feature ---
 } cv01;
 ```
 
