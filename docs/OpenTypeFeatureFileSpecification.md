@@ -1,17 +1,13 @@
 OpenType™ Feature File Specification
 ---
 
-Copyright
+Copyright 2015-2019 Adobe. All Rights Reserved. This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0.
 
-Copyright 2015-2018 Adobe. All Rights Reserved. This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0.
+Document version 1.24 Last updated 20 March 2019
 
-Version
+**Caution: Portions of the syntax unimplemented by Adobe are subject to change.** 
 
-[Document version 1.23 Last updated 1 Oct 2018]
-
-**Caution:**
-
-Portions of the syntax unimplemented by Adobe are subject to change.
+## Contents
 
 1.  [Introduction](#1)
 2.  [Syntax](#2)
@@ -1121,7 +1117,7 @@ feature kern {
 } kern;
 ```
 
-In the above example feature file, the `smcp` and `kern` features will be registered under the `DFLT`/`dflt`, `latn`/`dflt`, `latn`/`DEU `, , `latn`/`TRK` and `cyrl`/`dflt` language systems since no explicit `script` or `language` statements are present in those features.
+In the above example feature file, the `smcp` and `kern` features will be registered under the `DFLT`/`dflt`, `latn`/`dflt`, `latn`/`DEU `, `latn`/`TRK` and `cyrl`/`dflt` language systems since no explicit `script` or `language` statements are present in those features.
 
 In the `liga` feature, the f_f, f_i and f_l ligature substitutions will be applied under all all language systems. The c_t and c_s ligature substitutions will be applied under all languages of the script latn, but not under any other scripts. The c_h and c_k ligature substitutions will be applied when the language is German (i.e. they are registered only under `latn`/`DEU `).
 
@@ -2642,6 +2638,10 @@ along with the tag `sbit`.
 
 <a name="11"></a>
 ## 11. Document revisions
+
+**v1.24 [20 Mar 2019]:**
+
+*   Converted formatting to Markdown.
 
 **v1.23 [1 Oct 2018]:**
 
