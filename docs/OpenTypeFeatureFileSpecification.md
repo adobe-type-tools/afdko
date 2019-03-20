@@ -1187,9 +1187,9 @@ Glyph substitution rules begin with the keyword `substitute`; this keyword may b
 A Single Sub rule is specified in one of the following formats:
 
 ```
-substitute <glyph> by <glyph>;             # format A
-substitute <glyphclass> by <glyph>;        # format B
-substitute <glyphclass> by <glyphclass>;   # format C
+substitute <glyph> by <glyph>;            # format A
+substitute <glyphclass> by <glyph>;       # format B
+substitute <glyphclass> by <glyphclass>;  # format C
 ```
 
 Format B specifies that any glyph in the target glyph class must be replaced by the same replacement glyph.
@@ -1199,10 +1199,10 @@ Format C specifies that any of the glyphs in the target glyph class must be repl
 For example:
 
 ```
-sub a by A.sc;                                           # format A
-substitute [one.fitted one.oldstyle one.tab.oldstyle] by one; # format B
-substitute [a - z] by [A.sc - Z.sc];                     # format C
-substitute @Capitals by @CapSwashes;                     # format C
+sub a by A.sc;                                                 # format A
+substitute [one.fitted one.oldstyle one.tab.oldstyle] by one;  # format B
+substitute [a - z] by [A.sc - Z.sc];                           # format C
+substitute @Capitals by @CapSwashes;                           # format C
 ```
 
 The third line in the above example produces an identical representation in the font as:
@@ -1224,7 +1224,7 @@ A Multiple Sub rule is specified as:
 substitute <glyph> by <glyph sequence>;
 ```
 
-<glyph sequence> contains two or more glyphs. It may not contain glyph classes. (If it did, the rule would be ambiguous as to which replacement sequence were required.) For example:
+`<glyph sequence>` contains two or more glyphs. It may not contain glyph classes. (If it did, the rule would be ambiguous as to which replacement sequence were required.) For example:
 
 ```
 substitute f_f_i by f f i;            # Ligature decomposition
@@ -1254,23 +1254,23 @@ A Ligature Sub rule is specified as:
 substitute <glyph sequence> by <glyph>;
 ```
 
-<glyph sequence> must contain two or more of <glyph|glyphclass>. For example:
+`<glyph sequence>` must contain two or more of `<glyph|glyphclass>`. For example:
 
 ```
 substitute [one one.oldstyle] [slash fraction] [two two.oldstyle] by onehalf;
 ```
 
-Since the OpenType specification does not allow ligature substitutions to be specified on target sequences that contain glyph classes, the implementation software will enumerate all specific glyph sequences if glyph classes are detected in <glyph sequence>. Thus, the above example produces an identical representation in the font as if all the sequences were manually enumerated by the font editor:
+Since the OpenType specification does not allow ligature substitutions to be specified on target sequences that contain glyph classes, the implementation software will enumerate all specific glyph sequences if glyph classes are detected in `<glyph sequence>`. Thus, the above example produces an identical representation in the font as if all the sequences were manually enumerated by the font editor:
 
 ```
-substitute one          slash    two          by onehalf;
-substitute one.oldstyle slash    two          by onehalf;
-substitute one          fraction two          by onehalf;
-substitute one.oldstyle fraction two          by onehalf;
-substitute one          slash    two.oldstyle by onehalf;
-substitute one.oldstyle slash    two.oldstyle by onehalf;
-substitute one          fraction two.oldstyle by onehalf;
-substitute one.oldstyle fraction two.oldstyle by onehalf;
+substitute  one           slash     two           by  onehalf;
+substitute  one.oldstyle  slash     two           by  onehalf;
+substitute  one           fraction  two           by  onehalf;
+substitute  one.oldstyle  fraction  two           by  onehalf;
+substitute  one           slash     two.oldstyle  by  onehalf;
+substitute  one.oldstyle  slash     two.oldstyle  by  onehalf;
+substitute  one           fraction  two.oldstyle  by  onehalf;
+substitute  one.oldstyle  fraction  two.oldstyle  by  onehalf;
 ```
 
 A contiguous set of ligature rules does not need to be ordered in any particular way by the font editor; the implementation software must do the appropriate sorting. So:
@@ -1304,11 +1304,11 @@ This LookupType is a functional subset of GSUB LookupType 6, chaining contextual
 
 A Chain Substitution rule target sequence has three parts: backtrack, input, and lookahead glyph sequences. A glyph sequence comprises one or more glyphs or glyph classes.
 
-The most important is input glyph sequence. This is the sequence of glyphs and glyph classes to which substitution operations are applied. Optionally, a prefix (also known as backtrack) glyph sequence may be specified, as well as a suffix (also known as lookahead) glyph sequence. The entire sequence of glyphs -- prefix plus input plus suffix -- must match in the current context for the rule to be applied. The match sequence is aligned to the current context by aligning the first glyph of the input sequence with the current glyph of the text being processed. If the rule is matched, then the current context moves the current glyph pointer ahead in the original text by the length of the input sequence. Note that in the FDK syntax, the entire context string (backtrack sequence + input sequence + look-ahead sequence) are all written in the text string order. This is worth emphasis, as inside the lookup rule, the glyphs of the backtrack sequence are written in reverse order from the text to be matched. Developers of font editing tools who know this are sometimes confused by the FDK syntax.
+The most important is input glyph sequence. This is the sequence of glyphs and glyph classes to which substitution operations are applied. Optionally, a prefix (also known as backtrack) glyph sequence may be specified, as well as a suffix (also known as lookahead) glyph sequence. The entire sequence of glyphs — prefix plus input plus suffix — must match in the current context for the rule to be applied. The match sequence is aligned to the current context by aligning the first glyph of the input sequence with the current glyph of the text being processed. If the rule is matched, then the current context moves the current glyph pointer ahead in the original text by the length of the input sequence. Note that in the FDK syntax, the entire context string (backtrack sequence + input sequence + look-ahead sequence) are all written in the text string order. This is worth emphasis, as inside the lookup rule, the glyphs of the backtrack sequence are written in reverse order from the text to be matched. Developers of font editing tools who know this are sometimes confused by the FDK syntax.
 
 For each glyph or glyph class in the input sequence, the contextual rule may specify one lookup (§[4.e](#4.e)) to be applied at that position. Note that the specified lookup may contain many rules; the implementation must ensure that only one rule in a referenced lookup will match at that position in the input sequence. Lookups cannot be specified for the glyphs or glyph classes in the backtrack and lookahead sequences.
 
-The input sequence is defined by appending the mark (') character to all the glyph names and class names within the input sequence.
+The input sequence is defined by appending the mark (`'`) character to all the glyph names and class names within the input sequence.
 
 The most general form of the contextual substitution rule is to explicitly reference named lookups in the rule.
 
@@ -2161,7 +2161,7 @@ A set of NameID entries are specified within a parameter block entry. The parame
 
 Following the set of NameID entries, a series of 24 bit Unicode values may be specified. These provide Unicode values for the base glyphs referenced by the feature. The developer may specify none, some, or all of the Unicode values for the base glyphs. The Unicode value may be written with either decimal or hexadecimal notation: the value must be preceded by '0x' if it is a hexadecimal value. The 24 bit field means that the largest Unicode value allowed is ((1<<24) -1), aka, 0xFFFFFF
 
-The intent of the NameID entries is described in the OpenType spec document : [OpenType Layout tag registry -- section on feature tags, tag name `cv01` - `cv99`](https://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#cv01-cv99). Note: The `ParamUILabelNameID` entries are used when one base glyph is mapped to more than one variant; the font designer may then specify one `ParamUILabelNameID` for each variant, in order to uniquely describe that variant. If any `ParamUILabelNameID` entries are specified, the number of `ParamUILabelNameID` entries must match the number of variants for each base glyph. If the Character Variant feature specifies more than one base glyph, then the set of NameID entries in the parameter block will be used for each base glyph and its variants.
+The intent of the NameID entries is described in the OpenType spec document : [OpenType Layout tag registry — section on feature tags, tag name `cv01` - `cv99`](https://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#cv01-cv99). Note: The `ParamUILabelNameID` entries are used when one base glyph is mapped to more than one variant; the font designer may then specify one `ParamUILabelNameID` for each variant, in order to uniquely describe that variant. If any `ParamUILabelNameID` entries are specified, the number of `ParamUILabelNameID` entries must match the number of variants for each base glyph. If the Character Variant feature specifies more than one base glyph, then the set of NameID entries in the parameter block will be used for each base glyph and its variants.
 
 The syntax for a `cvParameters` block is:
 
