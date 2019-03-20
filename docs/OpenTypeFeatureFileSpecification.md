@@ -5,7 +5,8 @@ Copyright 2015-2019 Adobe. All Rights Reserved. This software is licensed as
 OpenSource, under the Apache License, Version 2.0. This license is available at:
 http://opensource.org/licenses/Apache-2.0.
 
-Document version 1.24 Last updated 20 March 2019
+Document version 1.24  
+Last updated 20 March 2019
 
 **Caution: Portions of the syntax unimplemented by Adobe are subject to change.** 
 
@@ -145,7 +146,7 @@ positioning adjustment for “f” when preceded by “s” and followed by “t
 specifies that all features will be applied under all languages in the latn
 script, and for all scripts not named in the feature file.
 
-**Note:** all “Implementation Notes” and “Currently not implemented” comments
+**Note:** All “Implementation Notes” and “Currently not implemented” comments
 in the rest of the specification below refer to the Adobe implementation of the
 feature file grammar in the makeotf program, unless otherwise indicated.
 
@@ -176,12 +177,12 @@ contexts.
 
 [`anchor`](#2.e.vii)  
 [`anchorDef`](#2.e.viii)  
-[`anonymous`](#10) (or anon)  
+[`anonymous`](#10) (or `anon`)  
 [`by`](#5)  
 [`contour`](#2.e.vi)  
 [`cursive`](#6.c)  
 [`device`](#2.e.iii)  _[ Not implemented ]_  
-[`enumerate`](#6.b.ii) (or enum)  
+[`enumerate`](#6.b.ii) (or `enum`)  
 [`excludeDFLT`](#4.b.ii)  
 [`exclude_dflt`](#4.b.ii)  
 [`feature`](#4.a) block  
@@ -208,12 +209,12 @@ contexts.
 [`NULL`](#2.e.iv) value record  
 [`NULL`](#2.e.vii) anchor  
 [`parameters`](#4.c)  
-[`position`](#6) (or pos)  
+[`position`](#6) (or `pos`)  
 [`required`](#4.b.ii)  _[ Not implemented ]_  
 [`RightToLeft`](#4.d)  
-[`reversesub`](#5) (or rsub)  
+[`reversesub`](#5) (or `rsub`)  
 [`script`](#4.b.ii)  
-[`substitute`](#5) (or sub)  
+[`substitute`](#5) (or `sub`)  
 [`subtable`](#4.f)  
 [`table`](#9)  
 [`useExtension`](#4.e)  
@@ -308,9 +309,7 @@ the values of various table fields [§[9](#9)].
 _[ Note: Multiple master support has been withdrawn as of OpenType specification 1.3. ]_
 
 <a name="2.e.iii"></a>
-#### 2.e.iii. Device table
-
-_[ Currently not implemented. ]_
+#### 2.e.iii. Device table _[ Currently not implemented. ]_
 
 A `<device>` represents a single device table or a null offset to it. It is used
 in value records [§[2.e.iv](#2.e.iv)], anchors [§[2.e.vii](#2.e.vii)], and and
@@ -355,7 +354,7 @@ tables).
 ##### Value record format A:
 
 ```fea
-<metric> # Angle brackets around value are not allowed.
+<metric>  # Angle brackets around value are not allowed.
 ```
 
 Here the `<metric>` represents an x advance adjustment, except when used in the
@@ -590,7 +589,11 @@ follows.
 A glyph name may be up to 63 characters in length, must be entirely comprised of
 characters from the following set:
 
-A-Z a-z 0-9 . (period) _ (underscore)
+    ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    abcdefghijklmnopqrstuvwxyz
+    0123456789 
+    .  # period
+    _  # underscore
 
 and must not start with a digit or period. The only exception is the special
 character “.notdef”.
@@ -3444,7 +3447,7 @@ anonymous <tag> {
 } <tag>;
 ```
 
-**Note:** the keyword `anonymous` can be abbreviated as `anon`. For example:
+**Note:** The keyword `anonymous` can be abbreviated as `anon`. For example:
 
 ```fea
 anon sbit {
