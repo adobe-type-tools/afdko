@@ -325,13 +325,13 @@ It must be enclosed by angle brackets, except for format A, in which the angle b
 <metric> # Angle brackets around value are not allowed.
 ```
 
-Here the `<metric>` represents an x advance adjustment, except when used in the `vkrn`, `vpal`, `vhal`, or `valt` features, in which case it represents a Y advance adjustment. All other adjustments are implicitly set to 0. This is the simplest feature file `<valuerecord>` format, and is provided since it represents the most commonly used adjustment (i.e. for kerning). For example:
+Here the `<metric>` represents an x advance adjustment, except when used in the `vkrn`, `vpal`, `vhal`, or `valt` features, in which case it represents a y advance adjustment. All other adjustments are implicitly set to 0. This is the simplest feature file `<valuerecord>` format, and is provided since it represents the most commonly used adjustment (i.e. for kerning). For example:
 
 ```
 -3  # without <>
 ```
 
-Note that the use of a single value as Y advance can only be triggered when the value record definition is contained within a `vkrn`, `vpal`, `vhal`, or `valt` feature definition. If it is in a standalone lookup, then the value will be interpreted as an X advance, even if the lookup is referenced from within one of the vertical metric features.
+Note that the use of a single value as y advance can only be triggered when the value record definition is contained within a `vkrn`, `vpal`, `vhal`, or `valt` feature definition. If it is in a standalone lookup, then the value will be interpreted as an x advance, even if the lookup is referenced from within one of the vertical metric features.
 
 ##### Value record format B:
 ```
@@ -349,7 +349,7 @@ Here, the `<metric>`s represent adjustments for x placement, y placement, x adva
 < <metric> <metric> <metric> <metric> <device> <device> <device> <device> >
 ```
 
-Here, the `<metric>`s represent the same adjustments as in format B. The `<device>`s represent device tables [§[2.e.iii](#2.e.iii)] for x placement, Y placement, x advance, and Y advance, in that order. This format lets the editor express the full functionality of an OpenType value record. For example:
+Here, the `<metric>`s represent the same adjustments as in format B. The `<device>`s represent device tables [§[2.e.iii](#2.e.iii)] for x placement, Y placement, x advance, and y advance, in that order. This format lets the editor express the full functionality of an OpenType value record. For example:
 
 ```
 <-80 0 -160 0 <device 11 -1, 12 -1>
@@ -1490,7 +1490,7 @@ A Single Pos rule is specified as:
 position <glyph|glyphclass> <valuerecord>;
 ```
 
-Here, the <glyph|glyphclass> is adjusted by the `<valuerecord>`[§[2.e.iv](#2.e.iv)]. For example, to reduce the left and right side-bearings of a glyph each by 80 design units:
+Here, the `<glyph|glyphclass>` is adjusted by the `<valuerecord>`[§[2.e.iv](#2.e.iv)]. For example, to reduce the left and right side-bearings of a glyph each by 80 design units:
 
 ```
 position one <-80 0 -160 0>;
@@ -1508,7 +1508,7 @@ Rules for this LookupType are usually used for kerning, and may be in either of 
 
 ```
 position <glyph|glyphclass> <valuerecord>
-          <glyph|glyphclass> <valuerecord>;
+         <glyph|glyphclass> <valuerecord>;
 ```
 
 The first `<valuerecord>`[§[2.e.iv](#2.e.iv)] corresponds to the first `<glyph|glyphclass>`, and the second `<valuerecord>` corresponds to the second `<glyph|glyphclass>`. The following example illustrates an unusual way to specify a kern value of -100:
@@ -1521,17 +1521,16 @@ position T -60 a <-40 0 -40 0>;
 
 ```
 position <glyph|glyphclass> <glyph|glyphclass>
-        <valuerecord>;     # for first <glyph|glyphclass>
+         <valuerecord>;     # for first <glyph|glyphclass>
 ```
 
 This format is provided since it closely parallels the way kerning is expressed in AFM files. Thus, it is a shorter way of expressing:
 
 ```
-position <glyph|glyphclass> <valuerecord format A> <glyph|glyphclass>
-<NULL>;
+position <glyph|glyphclass> <valuerecord format A> <glyph|glyphclass> <NULL>;
 ```
 
-Kerning can most easily be expressed with this format. This will result in adjusting the first glyph’s x advance, except when in the `vrkn` feature, in which case it will adjust the first glyph’s Y advance. Some examples:
+Kerning can most easily be expressed with this format. This will result in adjusting the first glyph’s x advance, except when in the `vrkn` feature, in which case it will adjust the first glyph’s y advance. Some examples:
 
 ```
 pos T a -100;        # specific pair (no glyph class present)
@@ -1565,7 +1564,7 @@ pos     f quoteright 30;         # specific pair
 pos     @Y_LC @SMALL_PUNC -100;  # class pair
 ```
 
-The enum rule above can be replaced by:
+The `enum` rule above can be replaced by:
 
 ```
 pos y semicolon -80;
@@ -1637,7 +1636,7 @@ A Mark-to-Base Pos rule is specified as:
 
 ```
 position base <glyph|glyphclass> # base glyph(s)
-      <anchor>  mark <named mark glyphclass> +     # anchor and mark glyph class; repeated for each attachment point on the base glyphs(s) name
+      <anchor>  mark <named mark glyphclass> +  # anchor and mark glyph class; repeated for each attachment point on the base glyphs(s) name
       ;
 ```
 
@@ -1669,20 +1668,20 @@ A Mark-to-Ligature Pos rule is specified as:
 
 ```
 position ligature <ligature glyph|glyphclass>   # ligature glyph or glyph class
-          # anchor and named mark glyph class;
-          # repeated for each anchor point on the first component glyph
-          <anchor> mark <named mark glyph class> +
-          # Start of anchor and mark info for the next ligature component.
-          ligComponent
+    # anchor and named mark glyph class;
+    # repeated for each anchor point on the first component glyph:
+    <anchor> mark <named mark glyph class> +
 
-# anchor and named mark glyph class;
-# repeated for each anchor point on the next component glyph
+    # Start of anchor and mark info for the next ligature componentL
+    ligComponent
 
-<anchor> mark <named mark glyph class>
+    # anchor and named mark glyph class,
+    # repeated for each anchor point on the next component glyph:
+    <anchor> mark <named mark glyph class>
 
-# The block of ligComponent its anchor-mark classes
-# is repeated for each ligature component.
-;
+    # The block of ligComponent its anchor-mark classes
+    # is repeated for each ligature component.
+    ;
 ```
 
 The statement must specify all the anchor-mark class pairs for all the ligature components. It follows the form of the Mark-To-Base rule, except that a set of anchor-mark class pairs must be specified for each component glyph in the ligature. The set of anchor-mark class pairs for one component is separated for the set of the next component by the `ligComponent` keyword. If there are no anchor points on a component, it must still specify at least one anchor, which should be the NULL anchor. It is not required that each component have the same number of anchor points.
@@ -1698,11 +1697,11 @@ markClass kasratan <anchor 346 -98> @BOTTOM_MARKS;
 
 # 2. Define mark-to-ligature rules:
 position ligature lam_meem_jeem
-    <anchor 625 1800> mark @TOP_MARKS    # mark above lam
-    ligComponent     # start specifying marks for meem
-    <anchor 376 -368> mark @BOTTOM_MARKS    #mark below meem
-    ligComponent     # start specifying marks for jeem
-    <anchor NULL>    # jeem has no marks
+    <anchor 625 1800> mark @TOP_MARKS  # mark above lam
+    ligComponent  # start specifying marks for meem
+    <anchor 376 -368> mark @BOTTOM_MARKS  # mark below meem
+    ligComponent  # start specifying marks for jeem
+    <anchor NULL>  # jeem has no marks
 ;
 ```
 
@@ -1716,8 +1715,9 @@ If a glyph class is used, each ligature in the glyph class must have the same nu
 A Mark-to-Mark Pos rule is specified as:
 
 ```
-position mark <glyph|glyphclass> # base mark glyph(s)
-    <anchor>  mark <named mark glyphclass> +     # anchor and mark glyph class; repeated for each attachment point on the base glyphs(s) name
+position mark <glyph|glyphclass>  # base mark glyph(s)
+    # anchor and mark glyph class; repeated for each attachment point on the base glyphs(s) name:
+    <anchor>  mark <named mark glyphclass> +  
     ;
 ```
 
@@ -1747,18 +1747,18 @@ Positioning rules in this lookup type are supported as of FDK 2.0
 
 A Chain Positioning rule target sequence has three parts: backtrack, input, and lookahead glyph sequences. A glyph sequence comprises one or more glyphs or glyph classes.
 
-The most important is input glyph sequence. This is the sequence of glyphs and glyph classes to which positioning operations are applied. Optionally, a prefix (also known as backtrack) glyph sequence may be specified, as well as a suffix (also known as lookahead) glyph sequence. The entire sequence of glyphs -- prefix plus input plus suffix -- must match in the current context for the rule to be applied. The match sequence is aligned to the current context by aligning the first glyph of the input sequence with the current glyph of the text being processed. If the rule is matched, then the current context moves the current glyph pointer ahead in the original text by the length of the input sequence. Note that in the FDK syntax, the entire context string (backtrack sequence + input sequence + look-ahead sequence) are all written in the text string order. This is worth emphasis, as inside the lookup rule, the glyphs of the backtrack sequence are written in reverse order from the text to be matched. Developers of font editing tools who know this are sometimes confused by the FDK syntax.
+The most important is input glyph sequence. This is the sequence of glyphs and glyph classes to which positioning operations are applied. Optionally, a prefix (also known as backtrack) glyph sequence may be specified, as well as a suffix (also known as lookahead) glyph sequence. The entire sequence of glyphs — prefix plus input plus suffix — must match in the current context for the rule to be applied. The match sequence is aligned to the current context by aligning the first glyph of the input sequence with the current glyph of the text being processed. If the rule is matched, then the current context moves the current glyph pointer ahead in the original text by the length of the input sequence. Note that in the FDK syntax, the entire context string (backtrack sequence + input sequence + look-ahead sequence) are all written in the text string order. This is worth emphasis, as inside the lookup rule, the glyphs of the backtrack sequence are written in reverse order from the text to be matched. Developers of font editing tools who know this are sometimes confused by the FDK syntax.
 
 For each glyph or glyph class in the input sequence, the contextual rule may specify one lookup (§[4.e](#4.e)) to be applied at that position. Note that the specified lookup may contain many rules; the implementation must ensure that only one rule in a referenced lookup will match at that position in the input sequence. Lookups cannot be specified for the glyphs or glyph classes in the backtrack and lookahead sequences.
 
-The input sequence is defined by appending the mark (') character to all the glyph names and class names (and only these names) within the input sequence. Applying the mark (') character to keywords such as anchor and mark or a value record will result in a syntax error.
+The input sequence is defined by appending the mark (`'`) character to all the glyph names and class names (and only these names) within the input sequence. Applying the mark (`'`) character to keywords such as anchor and mark or a value record will result in a syntax error.
 
 <a name="6.h.ii"></a>
 #### 6.h.ii. Specifying Contextual Positioning with explicit lookup references
 
 The most general form of the contextual substitution rule is to explicitly reference named lookups in the rule.
 
-###### Example 1.
+###### Example:
 Define two standalone lookups (§[4.e](#4.e)), and then reference them in the input sequence of contextual positioning rules with the keyword `lookup` and the lookup name.
 
 ```
@@ -1791,8 +1791,8 @@ When it is acceptable to specify a positioning rule for only one input glyph or 
 ###### Example 1:
 
 ```
-position [quoteleft quotedblleft ][Y T]' <0 0 20 0 >  [quoteright quotedblright];
-position [quoteleft quotedblleft ][Y T]' 20  [quoteright quotedblright];
+position [quoteleft quotedblleft ][Y T]' <0 0 20 0 > [quoteright quotedblright];
+position [quoteleft quotedblleft ][Y T]' 20 [quoteright quotedblright];
 ```
 
 Both of these rules have an input sequence of a single glyph position, for which the glyph class [Y T] is specified. The marked glyph class is followed by a value record. The first form shows a full value record which allows you to alter both the (x,y) coordinates of the origin and the (x,y) coordinates of the advance width. The second rule shows the simple form of the value record, which specifies a value for only a change to the x value of the advance width. Note that the value record modifies the glyph which it follows. These both increase the advance width of Y or T by 20, when preceded by either quoteleft or quotedblleft, and followed by quoteright or quotedblright. Note that not all marked glyphs or glyphclasses in the input sequence must be followed by a value record; if this is omitted, then the item’s positioning info will not be affected.
@@ -1818,7 +1818,7 @@ position quoteright A -120;
 position L' 50 quoteright' 70 A;
 ```
 
-Desired final kern adjustment: L' -100 quoteright' -50 A;
+Desired final kern adjustment: `L' -100 quoteright' -50 A;`
 
 In this example, the intended kern correction for the triplet “L quoteright A” is an adjustment of -100 to the advance width of the L when followed by quoteright, and of -50 to the advance width of quoteright when followed by A. However, since the pair positioning rules will adjust the pair “L quoteright” by -150 and the pair “quoteright A” by -120, the adjustment values in the contextual rule for the triplet must be set as shown. This approach is feasible, but difficult to understand.
 
@@ -1839,9 +1839,9 @@ In order to make pair positioning rules easier to read and write as contextual k
 
 ```
 position L' -100 quoteright' -50 A;
-position L' quoteright -150; # special cases of contextual positioning
-position quoteright' A -120; # where value record follows unmarked glyph,
-                             # making them exactly equivalent to 3B.
+position L' quoteright -150;  # special cases of contextual positioning
+position quoteright' A -120;  # where value record follows unmarked glyph,
+                              # making them exactly equivalent to 3B.
 position s f' t 10 period;
 ```
 
@@ -2688,7 +2688,7 @@ along with the tag `sbit`.
 
 **v1.16 [9 Dec 2015]:**
 
-*   For value record format A, specify that the single value represents a Y advance change for vpal, vhal, and valt features, as well as vkern.
+*   For value record format A, specify that the single value represents a y advance change for vpal, vhal, and valt features, as well as vkern.
 
 **v1.15 [12 June 2015]:**
 
