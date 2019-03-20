@@ -2529,38 +2529,38 @@ along with the tag `sbit`.
 *   Fixed spelling errors: example at end of section 9.e name table, example 1 in section 5.f.ii ignore sub.
 *   Increased maximum length of glyph names and named glyph classes from 31 to 63.
 
-**v1.17 [ 6 Jan 2016]:**
+**v1.17 [6 Jan 2016]:**
 
 *   Fixed bug in example for salt feature in section 8.a, and in example for contextual lookup specification in section 6.h.ii.
 
-**v1.16 [ 9 Dec 2015]:**
+**v1.16 [9 Dec 2015]:**
 
 *   For value record format A, specify that the single value represents a Y advance change for vpal, vhal, and valt features, as well as vkern.
 
-**v1.15 [ 12 June 2015]:**
+**v1.15 [12 June 2015]:**
 
 *   Added documentation for Character Variant (cv01-cv99) features.
 
-**v1.14 [ 16 April 2015]:**
+**v1.14 [16 April 2015]:**
 
 *   Fix typo in GDEF table table spec, reported by Khaled Hosny
 
-**v1.13 [ 28 July 2014]:**
+**v1.13 [28 July 2014]:**
 
 *   Clarified that the subtable break keyword is intended for use only with class kerning lookups.
 *   Corrected lookup flag syntax description: lookupflag values are separated by a space character, not a comma.
 
-**v1.12 [ 21 March 2014]:**
+**v1.12 [21 March 2014]:**
 
 *   Clarified that specific glyph pairs should precede class kern pairs, in section 6.b.i
 *   Removed excessive white space in section 4.d. lookupflag.
 *   Added two new keywords to set the OS/2 table fields usLowerOpticalPointSize and usUpperOpticalPointSize. These fields were added in version 5 of the OS/2 table.
 
-**v1.11 [ 4 Sept 2012]:**
+**v1.11 [4 Sept 2012]:**
 
 *   Added clarification of backtrack sequence order in chaining contextual lookup rules.
 
-**v1.10 [ 31 March 2010]:**
+**v1.10 [31 March 2010]:**
 
 *   Fixed typo in example in section 4.d: lookFlag values are separated by spaces, not commas.
 *   Fixed typo in example in section 8.c on stylistic names; examples: quotes around name string need to be matching double quotes.
