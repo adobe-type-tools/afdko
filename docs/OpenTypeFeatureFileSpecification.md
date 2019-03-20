@@ -650,8 +650,8 @@ a backslash. For example:
 
 **Note:** The feature file glyph classes described in this section are not to be
 confused with glyph classes of OpenType Layout ClassDefs. The latter are
-described in the chapter “Common Table Formats” in the OpenType Font File
-Specification.
+described in the chapter [“Common Table Formats”](https://docs.microsoft.com/en-us/typography/opentype/spec/chapter2)
+in the OpenType Font File Specification.
 
 A feature file glyph class, `<glyphclass>`, represents a single glyph position
 in a sequence and is denoted by a list of glyphs enclosed in square brackets.
@@ -894,7 +894,7 @@ by the script and language keywords within feature definition blocks.
 #### 4.b.i. languagesystem
 
 In practice, most or all of the features in a font will be registered under the
-same set of language systems, and a particular feature's lookups will be
+same set of language systems, and a particular feature’s lookups will be
 identical across the language systems under which the feature is registered.
 
 The `languagesystem` statement provides a simple directive to use in this case.
@@ -924,14 +924,14 @@ feature file:
 languagesystem DFLT dflt;
 ```
 
-If any languagesystem statement is used, then the statement specifying:
+If any `languagesystem` statement is used, then the statement specifying:
 
 ```fea
 languagesystem DFLT dflt;
 ```
 
-must be specified explicitly; if not, this languagesystem will not be included
-in the font. This script/language pair is special: it is used if a program
+must be specified explicitly; if not, this `languagesystem` will not be included
+in the font. This `script`/`language` pair is special: it is used if a program
 cannot find a match in the font to the current writing script and language.
 If it is not in your font, then all the rules may be invisible to the program
 if your font does not have a match for the current script and language.
@@ -980,7 +980,7 @@ script-level default rules.
 
 The current script and language attributes may be changed as follows:
 
-##### `script` statement:
+##### script statement:
 
 ```fea
 script <script tag>;
@@ -993,11 +993,11 @@ script kana;
 ```
 
 When a `script` statement is seen, the language attribute is implicitly set to
-`dflt`, and the lookupflag attribute is implicitly set to 0. The script
+`dflt`, and the `lookupflag` attribute is implicitly set to 0. The script
 attribute stays the same until explicitly changed by another `script` statement
 or until the end of the feature.
 
-##### `language` statement:
+##### language statement:
 The language attribute stays the same until explicitly changed, until the script
 is changed, or until the end of the feature. To change the language attribute,
 use the `language` statement:
@@ -1069,23 +1069,24 @@ and `cvXX` features; see § [8.b](#8.b), [8.c](#8.c) and [8.d](#8.d).
 <a name="4.d"></a>
 ### 4.d. lookupflag
 
-The chapter “Common Table Formats” in the OpenType Font File Specification
-describes the LookupFlag field in the Lookup table.
+The chapter [“Common Table Formats”](https://docs.microsoft.com/en-us/typography/opentype/spec/chapter2)    
+in the OpenType Font File Specification describes the LookupFlag field in the
+Lookup table.
 
-The lookupflag attribute defaults to 0 at the start of a feature or named
+The `lookupflag` attribute defaults to 0 at the start of a feature or named
 lookup block.
 
-The lookupflag attribute stays the same until explicitly changed, until a lookup
-reference statement is encountered that changes it, until the script is changed,
-or until the end of the feature.
+The `lookupflag` attribute stays the same until explicitly changed, until a
+lookup reference statement is encountered that changes it, until the script is
+changed, or until the end of the feature.
 
-To change the lookupflag attribute explicitly, use the lookupflag statement,
+To change the `lookupflag` attribute explicitly, use the `lookupflag` statement,
 which takes two formats:
 
 ##### lookupflag format A:
 
 ```fea
-lookupflag <named lookupflag value> ( <named lookupflag value>)*;
+lookupflag <named lookupflag value> (<named lookupflag value>)*;
 ```
 
 Here, the individual lookup flag values to be set are expressed in a list of one
@@ -1118,13 +1119,13 @@ To skip over all mark glyphs except for those of mark class @TOP_MARKS:
 lookupflag MarkAttachmentType @TOP_MARKS;
 ```
 
-The class name used with MarkAttachmentType can be either a regular glyph class
-name or a mark class name. The glyph sets of the referenced classes must not
-overlap, and the MarkAttachmentType statement can reference at most 15 different
-classes.
+The class name used with `MarkAttachmentType` can be either a regular glyph
+class name or a mark class name. The glyph sets of the referenced classes must
+not overlap, and the MarkAttachmentType statement can reference at most 15
+different classes.
 
-The flag UseMarkFilteringSet was added in OpenType spec 1.6. This works the same
-as the MarkAttachmentType, but allows you to use up to 16K different mark
+The flag `UseMarkFilteringSet` was added in OpenType spec 1.6. This works the
+same as the `MarkAttachmentType`, but allows you to use up to 16K different mark
 classes, and allows the glyph sets of the referenced classes to overlap.
 
 ##### lookupflag format B:
@@ -1140,15 +1141,15 @@ The format A example above could equivalently be expressed as:
 lookupflag 6;
 ```
 
-Format A is clearly a superior choice for human readability when the lookupflag
-value is not 0. However, a lookupflag value of 0 can be set only with format B,
-not with format A:
+Format A is clearly a superior choice for human readability when the
+`lookupflag` value is not 0. However, a `lookupflag` value of 0 can be set only
+with format B, not with format A:
 
 ```fea
 lookupflag 0;
 ```
 
-The base glyphs, ligatures, and mark classes are defined in the GlyphClassDef
+The base glyphs, ligatures, and mark classes are defined in the `GlyphClassDef`
 of the GDEF table block [§[9.b](#9.b)].
 
 <a name="4.e"></a>
@@ -1173,7 +1174,7 @@ lookup <label> [useExtension] {
 
 A named lookup block may be defined either inside or outside of a feature block.
 In either case, it may be referenced in different feature blocks. If it is
-defined outside a feature block, is is referred to as a 'standalone' lookup.
+defined outside a feature block, is is referred to as a ‘standalone’ lookup.
 
 The lookup will be created with a GSUB or GPOS Extension lookup type if and only
 if the optional `useExtension` keyword is used.
@@ -1181,9 +1182,9 @@ if the optional `useExtension` keyword is used.
 A lookup block may be defined either inside or outside of feature blocks. You
 may not use the script or language keywords within a standalone lookup block.
 
-The useExtension keyword has two effects: all the records of all types that are
-referenced by a lookup qualifier placed in one contiguous block of data, and the
-offset to the lookup may be 32 bits rather limited to 16 bits.
+The `useExtension` keyword has two effects: all the records of all types that
+are referenced by a lookup qualifier placed in one contiguous block of data, and
+the offset to the lookup may be 32 bits rather limited to 16 bits.
 
 When you font cannot be built because of an offset overflow error (meaning that
 the offset from one record to another record exceeds the 64 Kbyte limit imposed
@@ -1227,7 +1228,7 @@ lookup EXTENDED_KERNING;    # lookup reference. useExtension not needed
 
 Since the labeled block literally defines a single lookup in the font, the rules
 within the lookup block must be of the same lookup type and have the same
-lookupflag attribute. A lookup block may not contain any other kind of block.
+`lookupflag` attribute. A lookup block may not contain any other kind of block.
 The order of lookups within a font is defined by the order of the lookup
 definitions in the feature file.
 
@@ -1240,7 +1241,7 @@ substitution rule for f_i, no matter what their order is in the feature file.
 <a name="4.f"></a>
 ### 4.f. markClass
 
-The markClass keyword is used to identify a mark glyph class definition
+The `markClass` keyword is used to identify a mark glyph class definition
 statement.
 
 A mark glyph class name is defined differently than a regular glyph class. The
@@ -1257,7 +1258,7 @@ The `<anchor>` [§[2.e.vii](#2.e.vii)] indicates the point on the mark glyph(s)
 by which it is attached to a matching anchor point on a base glyph.
 If a mark glyph has an anchor point at `<anchor 300, 0>` and the base glyph
 has an anchor point at `<anchor 400 300>`, then the mark glyph will be shifted
-so that the point x=300, y = 0 in its design space will be superimposed on
+so that the point x = 300, y = 0 in its design space will be superimposed on
 the point x = 300, y = 400 in the design space of the base glyph.
 
 For example:
@@ -1277,18 +1278,18 @@ markClass [acute grave] <anchor 350 0>  @MARK_TOP_ACCENTS;
 markClass [dieresis umlaut] <anchor 400 0>  @MARK_TOP_ACCENTS;
 ```
 
-NOTE! All mark class definition statements must precede any use of a mark class
-in the feature file. Once any position statement has referenced a mark class,
-no more mark statements are allowed.
+**NOTE!** All mark class definition statements must precede any use of a mark 
+class in the feature file. Once any position statement has referenced a mark
+class, no more mark statements are allowed.
 
-NOTE! The mark classes used within a single lookup must be disjoint: none may
-include a glyph which is in another mark class that is used within the same
+**NOTE!** The mark classes used within a single lookup must be disjoint: none
+may include a glyph which is in another mark class that is used within the same
 lookup.
 
-NOTE! If a GDEF table is not explicitly defined in the feature file, then an
+**NOTE!** If a GDEF table is not explicitly defined in the feature file, then an
 implementation of this syntax will create one. In this case, it will use the set
-of defined mark classes to define the mark glyphs for the GDEF GlyphClass.
-In this case, the assignment of a glyph to the GDEF GlyphClass mark class may
+of defined mark classes to define the mark glyphs for the GDEF GlyphClass. In
+this case, the assignment of a glyph to the GDEF GlyphClass mark class may
 conflict other assignments to the other GDEF GlyphClass classes. In this case,
 an implementation should warn the user of the conflict.
 
@@ -1404,7 +1405,8 @@ scripts. The c_h and c_k ligature substitutions will be applied when the
 language is German (i.e. they are registered only under `latn`/`DEU `).
 
 ###### Example 2.
-The following example illustrates labeled lookup blocks and the use of the exclude_dflt keyword:
+The following example illustrates labeled lookup blocks and the use of the
+`exclude_dflt` keyword:
 
 ```fea
 languagesystem DFLT dflt;
@@ -1446,19 +1448,20 @@ feature liga {
 } liga;
 ```
 
-The `DFLT`/`dflt`, `cyrl`/`dflt`, and `grek`/`dflt` language systems will all
-contain the default rules for `liga` functionality, the rules in the lookups
-HAS_I and NO_I.
+*   The `DFLT`/`dflt`, `cyrl`/`dflt`, and `grek`/`dflt` language systems will 
+    all contain the default rules for `liga` functionality, the rules in the 
+    lookups HAS_I and NO_I.
 
-Under the `latn` script, all languages but TRK will contain the default lookups,
-and the f_l ligature rule.
+*   Under the `latn` script, all languages but TRK will contain the default
+    lookups, and the f_l ligature rule.
 
-The germandbls ligature will apply only for the `latn`/`DEU ` language system.
+*   The germandbls ligature will apply only for the `latn`/`DEU ` language
+    system.
 
-The `latn`/`TRK ` languagesystem will contain only the NO_I lookup.
+*   The `latn`/`TRK ` languagesystem will contain only the NO_I lookup.
 
-The `cyrl`/`SRB ` languagesystem will contain all the default rules, and the c_t
-ligature rule.
+*   The `cyrl`/`SRB ` languagesystem will contain all the default rules, and the
+    c_t ligature rule.
 
 Note that if you specify no explicit rules or lookup references after a script
 and language statement, that the effect is to include all the default rules for
@@ -2642,8 +2645,8 @@ implementation sorts the rules accordingly when writing them to the font file.
 <a name="8.a"></a>
 ### 8.a. The all alternates feature (`aalt`) 
 
-The aalt feature consists of a feature definition block which contains a series
-of statements in the form:
+The `aalt` feature consists of a feature definition block which contains a
+series of statements in the form:
 
 ```fea
 feature <feature tag>;
@@ -3510,7 +3513,7 @@ along with the tag `sbit`.
 
 *   Updated Pair Pos Format A: It is now supported. Corrected syntax of example. 
     See [class pair kerning](#6.b.i).
-*   Updated description of the UseMarkFilteringSet lookup flag.
+*   Updated description of the `UseMarkFilteringSet` lookup flag.
     It is now widely supported. See [lookupflag](#4.d).
 *   Relaxed limitations on name table name ids: only 2 and 6 are now reserved.
     See [name table](##9.e).
@@ -3679,7 +3682,7 @@ a message will be emitted encouraging users to update the syntax.
 *   Added ability to handle Single Sub rules with a single replacement glyph for
     2 or more glyphs in the target glyph class; e.g. `sub [one.fitted
     one.oldstyle one.tab.oldstyle] by one`.
-*   Added support for named lookupflag attributes e.g.
+*   Added support for named `lookupflag` attributes e.g.
     `lookupflag IgnoreLigatures;`.
 *   Updated the OT layout algorithm pseudo-code.
 *   Clarified that a pair positioning rule is treated as a class pair if and
@@ -3756,7 +3759,7 @@ a message will be emitted encouraging users to update the syntax.
 *   Changed keyword `replace` to `substitute` (or `sub`); introduced keyword
     `position` (or `pos`).
 *   Added section on ordering of lookups and rules
-*   Added lookupflag attribute.
+*   Added `lookupflag` attribute.
 *   Expanded Syntax section: lists of keywords, special characters, and glyph
     name, glyph class name and lookup label name restrictions.
 
