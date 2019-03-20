@@ -307,11 +307,15 @@ This specifies a comma-separated list of `<number>` pairs. The first `<number>` 
 
 For example:
 
-`<device 11 -1, 12 -1>  # Adjust by -1 at 11 ppem and 12 ppem`
+```
+<device 11 -1, 12 -1>  # Adjust by -1 at 11 ppem and 12 ppem
+```
 
 ##### Device format B, the null device:
 
-`< device NULL >`
+```
+< device NULL >
+```
 
 This format is used when an undefined `<device>` is needed in a list of `<device>`s.
 
@@ -323,23 +327,33 @@ A `<valuerecord>` is used in some positioning rules [§[6](#6)].
 It must be enclosed by angle brackets, except for format A, in which the angle brackets are optional. Note that the `<metric>` adjustments indicate values (in design units) to add to (positive values) or subtract from (negative values) the placement and advance values provided in the font (in the `hmtx` and `vmtx` tables).
 
 ##### Value record format A:
-`<metric> # Angle brackets around value are not allowed.`
+```
+<metric> # Angle brackets around value are not allowed.
+```
 
 Here the `<metric>` represents an x advance adjustment, except when used in the `vkrn`, `vpal`, `vhal`, or `valt` features, in which case it represents a Y advance adjustment. All other adjustments are implicitly set to 0. This is the simplest feature file `<valuerecord>` format, and is provided since it represents the most commonly used adjustment (i.e. for kerning). For example:
 
-`-3  # without <>`
+```
+-3  # without <>
+```
 
 Note that the use of a single value as Y advance can only be triggered when the value record definition is contained within a `vkrn`, `vpal`, `vhal`, or `valt` feature definition. If it is in a standalone lookup, then the value will be interpreted as an X advance, even if the lookup is referenced from within one of the vertical metric features.
 
 ##### Value record format B:
-`< <metric> <metric> <metric> <metric> >`
+```
+< <metric> <metric> <metric> <metric> >
+```
 
 Here, the `<metric>`s represent adjustments for x placement, y placement, x advance, and y advance, in that order. For example:
 
-`<-80 0 -160 0>       # x placement adjustment: -80; x advance adjustment: -160`
+```
+<-80 0 -160 0>       # x placement adjustment: -80; x advance adjustment: -160
+```
 
 ##### Value record format C: _[ Currently not implemented. ]_
-`< <metric> <metric> <metric> <metric> <device> <device> <device> <device> >`
+```
+< <metric> <metric> <metric> <metric> <device> <device> <device> <device> >
+```
 
 Here, the `<metric>`s represent the same adjustments as in format B. The `<device>`s represent device tables [§[2.e.iii](#2.e.iii)] for x placement, Y placement, x advance, and Y advance, in that order. This format lets the editor express the full functionality of an OpenType value record. For example:
 
@@ -354,13 +368,19 @@ Here, the `<metric>`s represent the same adjustments as in format B. The `<devic
 This example specifies adjustments for x placement and x advance, as well as device adjustments at 11 and 12 ppem sizes for x placement and x advance.
 
 ##### Value record format D, the null value record: _[ Currently not implemented. ]_
-`<NULL> # Value record not defined`
+```
+<NULL> # Value record not defined
+```
 
 ##### Value record format E, the named value record:
-`<name>`
+```
+<name>
+```
 
 For example:
-`< KERN_POS_1 >`
+```
+< KERN_POS_1 >
+```
 
 The name must have been defined with a `valueRecordDef` statement before being used.
 
@@ -369,7 +389,9 @@ The name must have been defined with a `valueRecordDef` statement before being u
 
 The `valueRecordDef` keyword is used to define a named value record. This name can then be used in value records instead of coordinates. It offers the advantage of being able to change the coordinates in the named value record definition only, and having that single edit change the coordinates used in all the rules in which the named value record is used. The format is:
 
-`valueRecordDef <coordinates> name;`
+```
+valueRecordDef <coordinates> name;
+```
 
 where the coordinates can be in value record formats A or B. The anchor name follows the same rules as are used to form glyph names. For example:
 
@@ -380,7 +402,9 @@ valueRecordDef < 0 0 20 0 > SECOND_KERN;
 
 These named value coordinates can then be used in value records. For example:
 
-`pos T V < SECOND_KERN > ;`
+```
+pos T V < SECOND_KERN > ;
+```
 
 Note than when the value record name is used, it must be enclosed by angle brackets, whether it is a single value or four value record. The valueRecordDef is a top level statement, and must be defined outside of feature blocks. It also must be defined before it is used.
 
@@ -389,11 +413,15 @@ Note than when the value record name is used, it must be enclosed by angle brack
 
 A `<contour point>` is used in anchors [§[2.e.vii](#2.e.vii)] and the GDEF table LigatureCaret statements [§[9.b](#9.b)]. It takes the format:
 
-`contourpoint <number>`
+```
+contourpoint <number>
+```
 
 where `<number>` specifies a contour point index. For example:
 
-`contourpoint 2`
+```
+contourpoint 2
+```
 
 **Note:** Since CFF OpenType fonts do not specify contour point indexes, a `<contour point>` may be used only with TrueType OpenType fonts.
 
@@ -404,11 +432,15 @@ An `<anchor>` is used in some positioning rules [§[6](#6)]. It takes 5 formats:
 
 ##### Anchor format A:
 
-`< anchor <metric> <metric> >  # x coordinate, Y coordinate`
+```
+< anchor <metric> <metric> >  # x coordinate, Y coordinate
+```
 
 For example:
 
-`<anchor 120 -20>`
+```
+<anchor 120 -20>
+```
 
 ##### Anchor format B:
 
@@ -419,7 +451,9 @@ For example:
 
 For example:
 
-`<anchor 120 -20 contourpoint 5>`
+```
+<anchor 120 -20 contourpoint 5>
+```
 
 ##### Anchor format C:
 
@@ -430,19 +464,27 @@ For example:
 
 For example:
 
-`<anchor 120 -20 <device 11 1> <device NULL>>`
+```
+<anchor 120 -20 <device 11 1> <device NULL>>
+```
 
 ##### Anchor format D, the null anchor:
 
-`<anchor NULL> # Anchor not defined`
+```
+<anchor NULL> # Anchor not defined
+```
 
 ##### Anchor format E, the named anchor:
 
-`<anchor <name> >`
+```
+<anchor <name> >
+```
 
 For example:
 
-`<anchor TOP_ANCHOR_1>`
+```
+<anchor TOP_ANCHOR_1>
+```
 
 An anchor name must be defined before it is used - see the following section on the anchorDef keyword.
 
@@ -451,7 +493,9 @@ An anchor name must be defined before it is used - see the following section on 
 
 The anchorDef keyword is used to define a named anchor. This name can then be used in anchor definitions instead of coordinates. It offers the advantage of being able to change the coordinates in the named anchor definition only, and having that single edit change the coordinates used in all the rules in which the named anchor is used. The format is:
 
-`anchorDef <coordinates> <name>;`
+```
+anchorDef <coordinates> <name>;
+```
 
 where the coordinates can be in Anchor Format A or B. The anchor name follows the same rules as are used to form glyph names. For example:
 
@@ -462,7 +506,9 @@ anchorDef 120 -20 contourpoint 5 ANCHOR_2;
 
 These named anchors can then be used in anchor definitions. For example:
 
-`<anchor 	ANCHOR_2 >`
+```
+<anchor 	ANCHOR_2 >
+```
 
 <a name="2.f"></a>
 ### 2.f. Glyphs
@@ -504,7 +550,9 @@ In order disambiguate whether a text token is a range argument or a glyph name w
 
 An initial backslash serves to differentiate a glyph name from an identical keyword in the feature file language. (See §[2.c](#2.c) for a list of keywords.) For example, a glyph named “table” must be specified in the feature file as:
 
-`\table`
+```
+\table
+```
 
 <a name="2.f.ii"></a>
 #### 2.f.ii. CID
@@ -523,11 +571,15 @@ CIDs are represented by a non-negative `<number>` [§[2.e.i](#2.e.i)] preceded b
 
 A feature file glyph class, <glyphclass>, represents a single glyph position in a sequence and is denoted by a list of glyphs enclosed in square brackets. For example:
 
-`[endash emdash figuredash]`
+```
+[endash emdash figuredash]
+```
 
 An example of a sequence which contains a glyph class is:
 
-`space [endash emdash figuredash] space`
+```
+space [endash emdash figuredash] space
+```
 
 This would match any of the 3 sequences “space endash space”, “space emdash space”, or “space figuredash space” during OpenType layout.
 
@@ -540,7 +592,9 @@ A feature file glyph class is also used to represent the set of alternate glyphs
 
 A range of glyphs is denoted by a hyphen:
 
-`[<firstGlyph> - <lastGlyph>]`
+```
+[<firstGlyph> - <lastGlyph>]
+```
 
 Spaces around the hyphen are not required since hyphens are not permitted in feature file glyph names. For example:
 
@@ -564,21 +618,29 @@ For non-CID fonts, the ordering is independent of the ordering of glyphs in the 
 
 2.  By up to 3 decimal digits in a contiguous run. For example:
 
-    `[ampersand.01 - ampersand.58]`
+```
+[ampersand.01 - ampersand.58]
+```
 
-    The range is expanded by incrementing the number values, while keeping the rest of the glyph name the same.
+The range is expanded by incrementing the number values, while keeping the rest of the glyph name the same.
 
-    `[ampersand.1 - ampersand.58]         # invalid`
+```
+[ampersand.1 - ampersand.58]         # invalid
+```
 
-    is not a valid glyph class since the length of the glyph names differ.
+is not a valid glyph class since the length of the glyph names differ.
 
 Note that
 
-`[zero - nine]`
+```
+[zero - nine]
+```
 
 is not a valid glyph range, as the intended range is not in alphabetic order. It must be enumerated explicitly:
 
-`@digits = [zero one two three four five six seven eight nine];`
+```
+@digits = [zero one two three four five six seven eight nine];
+```
 
 <a name="2.g.ii"></a>
 #### 2.g.ii. Named glyph classes
@@ -586,8 +648,8 @@ is not a valid glyph range, as the intended range is not in alphabetic order. It
 A glyph class can be named by assigning it to a glyph class name, which begins with the “@” character, and then referred to later on by the glyph class name. For example:
 
 ```
-  @dash = [endash emdash figuredash];     # Assignment
-  space @dash space                       # Usage
+@dash = [endash emdash figuredash];     # Assignment
+space @dash space                       # Usage
 ```
 
 The part of the glyph class name after the “@” is subject to the same name restrictions that apply to a glyph name, except that its maximum length is 63.
@@ -597,22 +659,28 @@ Glyph class assignments can appear anywhere in the feature file. A glyph class n
 When a glyph class name occurs within square brackets, its elements are simply added onto the other elements in the glyph class being defined. For example:
 
 ```
-  @Vowels.lc = [a e i o u];
-  @Vowels.uc = [A E I O U];
-  @Vowels = [@Vowels.lc @Vowels.uc y Y];
+@Vowels.lc = [a e i o u];
+@Vowels.uc = [A E I O U];
+@Vowels = [@Vowels.lc @Vowels.uc y Y];
 ```
 
 Here the last statement is equivalent to:
 
-`@Vowels = [a e i o u A E I O U y Y];`
+```
+@Vowels = [a e i o u A E I O U y Y];
+```
 
 No square brackets are needed if a glyph class name is assigned to another single glyph class name. For example:
 
-`@Figures_lining_tabular = @FIGSDEFAULT;`
+```
+@Figures_lining_tabular = @FIGSDEFAULT;
+```
 
 Ranges, glyphs, and glyph class names can be combined in a glyph class. For example:
 
-`[A.oldstyle - Z.oldstyle ampersand.oldstyle  @smallCaps]`
+```
+[A.oldstyle - Z.oldstyle ampersand.oldstyle  @smallCaps]
+```
 
 **Implementation Note:** When feature file glyph sequences (including glyph classes) are converted into OpenType Layout ClassDefs or Coverages in the font, the Adobe implementation ensures that ClassDefs or Coverages that are identical are shared, even if they are in different features. This happens regardless of whether ranges, glyphs or glyph class names were used to express the feature file glyph classes. (The only exception to this is for lookups that use the Extension lookup types: such lookups will not share their ClassDefs and Coverages with non-extension lookups.)
 
@@ -621,7 +689,9 @@ Ranges, glyphs, and glyph class names can be combined in a glyph class. For exam
 
 Tags are four-letter identifiers. These are denoted simply by tag name, without any final spaces, and are distinguished from glyph names by context. For example:
 
-`DEU `
+```
+DEU 
+```
 
 Note that the final space in the example is implicit.
 
@@ -637,11 +707,15 @@ The same length and name restrictions that apply to a glyph name apply to a look
 
 Including files is indicated by the directive:
 
-`include(<filename>);`
+```
+include(<filename>);
+```
 
 For example:
 
-`include(../features.family);`
+```
+include(../features.family);
+```
 
 The implementation software is responsible for handling the search paths for the location of the included files.
 
@@ -684,7 +758,7 @@ A lookup is a group of rules of the same type. See §[4.e](#4.e).
 <a name="4.b"></a>
 ### 4.b. Language system
 
-<a name="4.b"></a>An OpenType language system is any combination of a script tag and a language tag. (In the text of this document, the notation `<script tag>`/`<language tag>` is used to refer to a language system; for example, `script latn;`/`language dflt` denotes the default language of the Latin script.)
+<a name="4.b"></a>An OpenType language system is any combination of a script tag and a language tag. (In the text of this document, the notation `<script tag>`/`<language tag>` is used to refer to a language system; for example, `script latn`/`language dflt` denotes the default language of the Latin script.)
 
 <a name="4.b"></a>The lookups in every OpenType feature must be registered under one or more language systems. The lookups of a particular feature may vary across the language systems under which the feature is registered.
 
@@ -697,17 +771,23 @@ In practice, most or all of the features in a font will be registered under the 
 
 The `languagesystem` statement provides a simple directive to use in this case. It is the simplest way to specify language system in the feature file. (For the `aalt` and `size` features, it is the only way to specify language system.) One or more such statements may be present in the feature file at global scope (i.e. outside of the feature blocks or any other blocks) and before any of the feature blocks:
 
-`languagesystem <script tag> <language tag>;`
+```
+languagesystem <script tag> <language tag>;
+```
 
 When these statements are present, then all the lookups in each feature that does not contain an explicit `script` or `language` statement (see [4.b.ii](#4.b.ii) below) will be registered under every language system specified by the `languagesystem` statement(s). If a feature block does contain `script` or `language` tags, then all lookups that occur before the first `script` or `language` tag will also be applied under all the specified languagesystems.
 
 If no `languagesystem` statement is present, then the implementation must behave exactly as though the following statement were present at the beginning of the feature file:
 
-`languagesystem DFLT dflt;`
+```
+languagesystem DFLT dflt;
+```
 
 If any languagesystem statement is used, then the statement specifying:
 
-`languagesystem DFLT dflt;`
+```
+languagesystem DFLT dflt;
+```
 
 must be specified explicitly; if not, this languagesystem will not be included in the font. This script/language pair is special: it is used if a program cannot find a match in the font to the current writing script and language. If it is not in your font, then all the rules may be invisible to the program if your font does not have a match for the current script and language. It is strongly recommended to use the statement `languagesystem DFLT dflt;`.
 
@@ -729,17 +809,23 @@ The one exception to this rule are the default lookups. There are two levels of 
 The current script and language attributes may be changed as follows:
 
 ##### `script` statement:
-`script <script tag>;`
+```
+script <script tag>;
+```
 
 For example:
-`script kana;`
+```
+script kana;
+```
 
 When a `script` statement is seen, the language attribute is implicitly set to `dflt`, and the lookupflag attribute is implicitly set to 0. The script attribute stays the same until explicitly changed by another `script` statement or until the end of the feature.
 
 ##### `language` statement:
 The language attribute stays the same until explicitly changed, until the script is changed, or until the end of the feature. To change the language attribute, use the `language` statement:
 
-`language <language tag> [exclude_dflt|include_dflt] [required];`
+```
+language <language tag> [exclude_dflt|include_dflt] [required];
+```
 
 To exclude a set of rules from only one or a few languages, you must define the set of rules as a lookup, and explicitly include the lookup in under the languages that should include it, and omit it from the rules included under the languages where it should be excluded.
 
@@ -747,13 +833,17 @@ To exclude a set of rules from only one or a few languages, you must define the 
 
 Here is an example statement:
 
-`language DEU;`
+```
+language DEU;
+```
 
 As a result of this statement, (a) the language attribute is changed to `DEU `, and (b) the current default lookups are automatically included into the language system specified by the current script and language DEU.
 
 If (b) is not desired, as may occasionally be the case, then the keyword `exclude_dflt` must follow the language tag. For example:
 
-`language DEU exclude_dflt;`
+```
+language DEU exclude_dflt;
+```
 
 The keyword `include_dflt` may be used to explicitly indicate the default default lookup-inheriting behavior. For example:
 
@@ -794,7 +884,9 @@ To change the lookupflag attribute explicitly, use the lookupflag statement, whi
 
 ##### lookupflag format A:
 
-`lookupflag <named lookupflag value> ( <named lookupflag value>)*;`
+```
+lookupflag <named lookupflag value> ( <named lookupflag value>)*;
+```
 
 Here, the individual lookup flag values to be set are expressed in a list of one or more `<named lookupflag value>`s, in no particular order, separated by spaces. A `<named lookupflag value>` is one of the following:
 
@@ -809,13 +901,17 @@ UseMarkFilteringSet <glyph class name>
 
 At most one of each of the above 6 kinds of `<named lookupflag>` values may be present in a lookupflag statement. For example, to skip over base glyphs and ligature glyphs:
 
-`lookupflag IgnoreBaseGlyphs IgnoreLigatures;`
+```
+lookupflag IgnoreBaseGlyphs IgnoreLigatures;
+```
 
 Base, ligature, and mark glyphs are specified in the glyph class definition of the GDEF table.
 
 To skip over all mark glyphs except for those of mark class @TOP_MARKS:
 
-`lookupflag MarkAttachmentType @TOP_MARKS;`
+```
+lookupflag MarkAttachmentType @TOP_MARKS;
+```
 
 The class name used with MarkAttachmentType can be either a regular glyph class name or a mark class name. The glyph sets of the referenced classes must not overlap, and the MarkAttachmentType statement can reference at most 15 different classes.
 
@@ -823,15 +919,21 @@ The flag UseMarkFilteringSet was added in OpenType spec 1.6. This works the same
 
 ##### lookupflag format B:
 
-`lookupflag <number>;`
+```
+lookupflag <number>;
+```
 
 Here the entire lookup flag value is specified simply as a `<number>`. The format A example above could equivalently be expressed as:
 
-`lookupflag 6;`
+```
+lookupflag 6;
+```
 
 Format A is clearly a superior choice for human readability when the lookupflag value is not 0. However, a lookupflag value of 0 can be set only with format B, not with format A:
 
-`lookupflag 0;`
+```
+lookupflag 0;
+```
 
 The base glyphs, ligatures, and mark classes are defined in the GlyphClassDef of the GDEF table block [§[9.b](#9.b)].
 
@@ -866,7 +968,9 @@ Note that since the Extension lookup types were added in OpenType specification 
 
 To refer to the lookup later on, use a lookup reference statement:
 
-`lookup <label>;`
+```
+lookup <label>;
+```
 
 For example:
 
@@ -901,7 +1005,9 @@ The markClass keyword is used to identify a mark glyph class definition statemen
 
 A mark glyph class name is defined differently than a regular glyph class. The mark class definition is built up by a one or more of statements in the form:
 
-`markClass <glyph|glyphclass> <anchor>  <mark glyph class name>;`
+```
+markClass <glyph|glyphclass> <anchor>  <mark glyph class name>;
+```
 
 Each additional mark statement for a mark class adds the referenced glyphs to that mark class.
 
@@ -909,7 +1015,9 @@ The `<anchor>` [§[2.e.vii](#2.e.vii)] indicates the point on the mark glyph(s) 
 
 For example:
 
-`markClass [acute grave dieresis] <anchor 350 0>  @MARK_TOP_ACCENTS;`
+```
+markClass [acute grave dieresis] <anchor 350 0>  @MARK_TOP_ACCENTS;
+```
 
 If all the mark glyphs which belong to a mark class have the same anchor, then the mark class can be defined with a single statement, as above. However, a single mark statement can define only a single anchor point, so when glyphs in a mark class have different anchor points, more than one mark statement must be used to define the mark class. For example:
 
@@ -946,7 +1054,9 @@ The feature file implementation must insert subtable breaks among the rules for 
 
 The `subtable` statement may be used as follows:
 
-`subtable;`
+```
+subtable;
+```
 
 to explicitly force a subtable break after the previous rule.
 
@@ -1116,33 +1226,45 @@ substitute z by Z.sc;
 
 A Multiple Sub rule is specified as:
 
-`substitute <glyph> by <glyph sequence>;`
+```
+substitute <glyph> by <glyph sequence>;
+```
 
 <glyph sequence> contains two or more glyphs. It may not contain glyph classes. (If it did, the rule would be ambiguous as to which replacement sequence were required.) For example:
 
-`substitute f_f_i by f f i;            # Ligature decomposition`
+```
+substitute f_f_i by f f i;            # Ligature decomposition
+```
 
 <a name="5.c"></a>
 ### 5.c. [GSUB LookupType 3] Alternate substitution
 
 An Alternate Sub rule is specified as:
 
-`substitute <glyph> from <glyphclass>;`
+```
+substitute <glyph> from <glyphclass>;
+```
 
 For example:
 
-`substitute ampersand from [ampersand.1 ampersand.2 ampersand.3];`
+```
+substitute ampersand from [ampersand.1 ampersand.2 ampersand.3];
+```
 
 <a name="5.d"></a>
 ### 5.d. [GSUB LookupType 4] Ligature substitution
 
 A Ligature Sub rule is specified as:
 
-`substitute <glyph sequence> by <glyph>;`
+```
+substitute <glyph sequence> by <glyph>;
+```
 
 <glyph sequence> must contain two or more of <glyph|glyphclass>. For example:
 
-`substitute [one one.oldstyle] [slash fraction] [two two.oldstyle] by onehalf;`
+```
+substitute [one one.oldstyle] [slash fraction] [two two.oldstyle] by onehalf;
+```
 
 Since the OpenType specification does not allow ligature substitutions to be specified on target sequences that contain glyph classes, the implementation software will enumerate all specific glyph sequences if glyph classes are detected in <glyph sequence>. Thus, the above example produces an identical representation in the font as if all the sequences were manually enumerated by the font editor:
 
@@ -1225,21 +1347,27 @@ If there is only a single substitution operation, and it is either single substi
 ###### Example 2.
 This calls a Single Sub rule. The rule below means: in sequences “a d” or “e d” or “n d”, substitute “d” by “d.alt”.
 
-`substitute [a e n] d' by d.alt;`
+```
+substitute [a e n] d' by d.alt;
+```
 
 This format requires that there be only one glyph of glyph class in the input sequence.
 
 ###### Example 3.
 This also calls a Single Sub rule. The rule below means: if a capital letter is followed by a small capital, then replace the small capital by its corresponding lowercase letter.
 
-`substitute [A-Z] [A.sc-Z.sc]' by [a-z];`
+```
+substitute [A-Z] [A.sc-Z.sc]' by [a-z];
+```
 
 This format requires that there be only one glyph of glyph class in the input sequence.
 
 ###### Example 4.
 This calls a Ligature Sub lookup. The rule below means: in sequences “e t c” or “e.begin t c”, substitute the first two glyphs by the ampersand.
 
-`substitute [e e.begin]' t' c by ampersand;`
+```
+substitute [e e.begin]' t' c by ampersand;
+```
 
 This format will assume that entire input sequence is the sequence of ligature components.
 
@@ -1348,7 +1476,9 @@ A Reverse Chaining Single Substitution shares the same syntax as a Chaining Cont
 
 The rule is specified as follows:
 
-`reversesub [a e n] d' by d.alt;`
+```
+reversesub [a e n] d' by d.alt;
+```
 
 <a name="6"></a>
 ## 6. Glyph positioning (GPOS) rules
@@ -1362,11 +1492,15 @@ Glyph positioning is specified in terms of metrics [§[2.e.ii](#2.e.ii)], device
 
 A Single Pos rule is specified as:
 
-`position <glyph|glyphclass> <valuerecord>;`
+```
+position <glyph|glyphclass> <valuerecord>;
+```
 
 Here, the <glyph|glyphclass> is adjusted by the `<valuerecord>`[§[2.e.iv](#2.e.iv)]. For example, to reduce the left and right side-bearings of a glyph each by 80 design units:
 
-`position one <-80 0 -160 0>;`
+```
+position one <-80 0 -160 0>;
+```
 
 <a name="6.b"></a>
 ### 6.b. [GPOS LookupType 2] Pair adjustment positioning
@@ -1385,7 +1519,9 @@ position <glyph|glyphclass> <valuerecord>
 
 The first `<valuerecord>`[§[2.e.iv](#2.e.iv)] corresponds to the first `<glyph|glyphclass>`, and the second `<valuerecord>` corresponds to the second `<glyph|glyphclass>`. The following example illustrates an unusual way to specify a kern value of -100:
 
-`position T -60 a <-40 0 -40 0>;`
+```
+position T -60 a <-40 0 -40 0>;
+```
 
 ##### Pair Pos format B:
 
@@ -1458,13 +1594,17 @@ pos [Y Yacute Ygrave] period -60;     # [line 101]  In second subtable
 
 will produce a warning that a new subtable has been started at line 101, and that some kern pairs within this subtable may never be accessed. Note that this allows the font to be built, but the result will not match the developer’s intention. The kerning feature will not work as expected until the causes for all such errors are removed. The pair (Ygrave, period) will have a value of 0 if the above example comprised the entire lookup, since Ygrave is in the coverage (i.e. union of the first glyphs) of the first subtable. One way to understand this is to imagine a lookup table of kern class pairs as a spreadsheet of all possible pairs of kern left-side classes that are used in the lookup table with all the kern right-side classes that are used in the lookup table. Imagine each left side class is the title of a row in the spreadsheet, and each right side class is the title of a column. A glyph can be put in only one row title, and in only one column title. All glyphs not named in a row title get put together in a special row title. All glyphs not named in a column title get put together in a special column title. When you specify the value of a class pair, you are specifying the value in only one cell of the spreadsheet. When you specify a series of kern pair rules between a particular left side class and a series of right side classes, you are filling in a series of cells in the row for the specific left side class. All cells for which no values are specified are set to 0. When programs look for a kern value between “Ygrave” and something else, they look through the list of left side class definitions to find the first occurrence of 'Ygrave'. By definition, the first spreadsheet row which includes “Ygrave” will define the kern pair value of “Ygrave” with all other right-side classes, e.g spreadsheet columns. Since a pair value with a right-side period has not been explicitly defined at this point, the default value is 0. Since the programs will not look further than this row, the kernclass pair:
 
-`pos [Y Yacute Ygrave] period -60;`
+```
+pos [Y Yacute Ygrave] period -60;
+```
 
 will never be used.
 
 Sometimes the class kerning subtable may get too large. The editor can make it smaller by forcing subtable breaks at any point by inserting the statement:
 
-`subtable;`
+```
+subtable;
+```
 
 between two class kerning rules. The new subtable created will still be in the same lookup, so the editor must ensure that the coverages of the subtables thus created do not overlap, since the processing rules will not find and report a conflict.
 
@@ -1486,11 +1626,15 @@ The first `<anchor>` [§[2.e.vii](#2.e.vii)] indicates the entry anchor point fo
 
 For example, to define the entry point of glyph meem.medial to be at x=500, y=20, and the exit point to be at x=0, y=-20:
 
-`position cursive meem.medial <anchor 500 20> <anchor 0 -20>;`
+```
+position cursive meem.medial <anchor 500 20> <anchor 0 -20>;
+```
 
 A glyph may have a defined entry point, exit point, or both. `<anchor>` format D, the null anchor, must be used to indicate that an `<anchor>` is not defined.
 
-`position cursive meem.end <anchor 500 20> <anchor NULL >;`
+```
+position cursive meem.end <anchor 500 20> <anchor NULL >;
+```
 
 <a name="6.d"></a>
 ### 6.d. [GPOS LookupType 4] Mark-to-Base attachment positioning
@@ -1711,7 +1855,9 @@ Note that the following statement (Example 3D) is NOT a pair kerning statement, 
 
 ###### Example 3D:
 
-`position L' quoteright' -150;`
+```
+position L' quoteright' -150;
+```
 
 This statement does two things that are not desirable in pair kerning statement. First, it decreases the advance width of quoteright, not L. Second, it will move the current glyph pointer forward by 2 glyphs, skipping over the quoteright so that quoteright will not be examined for matching kern rules.
 
@@ -1765,7 +1911,9 @@ This contextual rule will match when the current context matches the 4 item glyp
 
 Exceptions to a chaining contextual positioning rule are expressed by inserting a statement of the following form anywhere before the chaining contextual rule and in the same lookup:
 
-`ignore position <marked glyph sequence> (, <marked glyph sequence>)*;`
+```
+ignore position <marked glyph sequence> (, <marked glyph sequence>)*;
+```
 
 This rule works in exactly the same was as specifying exceptions to a chaining contextual substitution rule [§[5.f.ii](#5.f.ii)].
 
@@ -1845,7 +1993,9 @@ In the feature file, the ordering of rules within a lookup is important only for
 
 The aalt feature consists of a feature definition block which contains a series of statements in the form:
 
-`feature <feature tag>;`
+```
+feature <feature tag>;
+```
 
 followed by one or more single and alternates substitution rules.
 
@@ -2112,9 +2262,13 @@ table BASE {
 
 A `<script record>` is of the form:
 
-`<script tag> <default baseline tag> <base coord>+`
+```
+<script tag> <default baseline tag> <base coord>+
+```
 
-`<base coord>` can take several formats: _[ Currently only format A is implemented ]_
+```
+<base coord>
+``` can take several formats: _[ Currently only format A is implemented ]_
 
 ```
 <number>
@@ -2273,7 +2427,9 @@ table name {
 
 A name record is of the form:
 
-`nameid <id> [<string attribute>] <string>;`
+```
+nameid <id> [<string attribute>] <string>;
+```
 
 An `<id>` is a number specifying the id of the name string to be added to the name table. Note that ids 2 and 6 (Family, Subfamily, Unique, Full, Version, and FontName) are reserved by the implementation and cannot be overridden; doing so will elicit a warning message and the record will be ignored.
 
@@ -2359,7 +2515,7 @@ table OS/2 {
 
 Vendor should 4 character-long. If a shorter vendor id is given, it is automatically padded with spaces. A longer vendor id causes an error.
 
-`<panose number>` is ten (decimal) numbers separated by white space. For <Unicode range list> is a whitespace-separated list of Unicode bit numbers from the OpenType specification for the ulUnicodeRange1-4 in the OS/2 table. `<code page list>` is a whitespace-separated list of Windows code page numbers from the OpenType specification for the ulCodePageRange1-2 in the OS/2 table.
+`<panose number>` is ten (decimal) numbers separated by white space. For `<Unicode range list>` is a whitespace-separated list of Unicode bit numbers from the OpenType specification for the ulUnicodeRange1-4 in the OS/2 table. `<code page list>` is a whitespace-separated list of Windows code page numbers from the OpenType specification for the ulCodePageRange1-2 in the OS/2 table.
 
 LowerOpSize and UpperOpSize set the usLowerOpticalPointSize and usUpperOpticalPointSize fields. If these are set, then the OS/2 version must be set to at least 5 by the implementation. Note that the values for these fields are set in units of TWIPS, or 20 x point size.
 
