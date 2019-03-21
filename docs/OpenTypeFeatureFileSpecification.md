@@ -5,10 +5,10 @@ Copyright 2015-2019 Adobe. All Rights Reserved. This software is licensed as
 OpenSource, under the Apache License, Version 2.0. This license is available at:
 http://opensource.org/licenses/Apache-2.0.
 
-Document version 1.24  
+Document version 1.24
 Last updated 21 March 2019
 
-**Caution: Portions of the syntax unimplemented by Adobe are subject to change.** 
+**Caution: Portions of the syntax unimplemented by Adobe are subject to change.**
 
 ## Contents
 
@@ -27,7 +27,7 @@ Last updated 21 March 2019
         4.  [Value record](#2.e.iv)
         5.  [Contour point](#2.e.vi)
         6.  [Anchor](#2.e.vii)
-    
+
     6.  [Glyphs](#2.f)
 
         1.  [Glyph name](#2.f.i)
@@ -243,7 +243,7 @@ The following are keywords only in their corresponding table/feature blocks:
 | -- | -- | -- |
 | [`HorizAxis.BaseTagList`](#9.a) | BASE table | ✅ |
 | [`HorizAxis.BaseScriptList`](#9.a) | BASE table | ✅ |
-| [`HorizAxis.MinMax`](#9.a) | BASE table | ❌ | 
+| [`HorizAxis.MinMax`](#9.a) | BASE table | ❌ |
 | [`VertAxis.BaseTagList`](#9.a) | BASE table | ✅ |
 | [`VertAxis.BaseScriptList`](#9.a) | BASE table | ✅ |
 | [`VertAxis.MinMax`](#9.a) | BASE table | ❌ |
@@ -607,7 +607,7 @@ characters from the following set:
 
     ABCDEFGHIJKLMNOPQRSTUVWXYZ
     abcdefghijklmnopqrstuvwxyz
-    0123456789 
+    0123456789
     .  # period
     _  # underscore
 
@@ -817,7 +817,7 @@ any final spaces, and are distinguished from glyph names by context. For
 example:
 
 ```fea
-DEU 
+DEU
 ```
 
 Note that the final space in the example is implicit.
@@ -882,13 +882,13 @@ feature liga {
 } liga;
 ```
 
-The `aalt` feature is treated specially; see §[8.a](#8.a). For example, the 
-`useExtension` keyword may optionally precede `{` in its feature block syntax, 
-and other features can be referred to with a `feature` statement within its 
+The `aalt` feature is treated specially; see §[8.a](#8.a). For example, the
+`useExtension` keyword may optionally precede `{` in its feature block syntax,
+and other features can be referred to with a `feature` statement within its
 feature block. The `size` feature is also treated specially; see §[8.b](#8.b).
 
-A feature file “rule” is a statement that specifies glyph substitution or 
-glyph positioning. A feature block may contain glyph substitution rules 
+A feature file “rule” is a statement that specifies glyph substitution or
+glyph positioning. A feature block may contain glyph substitution rules
 [§[5](#5)], glyph positioning rules [§[6](#6)], or both.
 
 A lookup is a group of rules of the same type. See §[4.e](#4.e).
@@ -1112,12 +1112,12 @@ or more `<named lookupflag value>`s, in no particular order, separated by
 spaces. A `<named lookupflag value>` is one of the following:
 
 ```fea
-RightToLeft  
-IgnoreBaseGlyphs  
-IgnoreLigatures  
-IgnoreMarks  
-MarkAttachmentType <glyph class name>  
-UseMarkFilteringSet <glyph class name>  
+RightToLeft
+IgnoreBaseGlyphs
+IgnoreLigatures
+IgnoreMarks
+MarkAttachmentType <glyph class name>
+UseMarkFilteringSet <glyph class name>
 ```
 
 At most one of each of the above 6 kinds of `<named lookupflag>` values may be
@@ -1295,7 +1295,7 @@ markClass [acute grave] <anchor 350 0>  @MARK_TOP_ACCENTS;
 markClass [dieresis umlaut] <anchor 400 0>  @MARK_TOP_ACCENTS;
 ```
 
-**NOTE!** All mark class definition statements must precede any use of a mark 
+**NOTE!** All mark class definition statements must precede any use of a mark
 class in the feature file. Once any position statement has referenced a mark
 class, no more mark statements are allowed.
 
@@ -1375,7 +1375,7 @@ feature liga {
     sub f f by f_f;
     sub f i by f_i;
     sub f l by f_l;
-    # Since all the rules in this feature are of the same type, they will be 
+    # Since all the rules in this feature are of the same type, they will be
     # grouped in a single lookup.
     # Since no script or language keyword has been specified yet,
     # the lookup will be registered for this feature under all the language systems.
@@ -1393,15 +1393,15 @@ feature liga {
         # lookupflag 0;      (stays the same)
             sub c h by c_h;
             sub c k by c_k;
-        # The rules above will be placed in a lookup that is registered only 
+        # The rules above will be placed in a lookup that is registered only
         # under the script 'latn', 'language DEU'.
 
         language TRK;
-        # This will inherit both the top level default rules - the rules defined 
-        # before the first 'script' statement, and the script-level default 
-        # rules for 'latn: all the lookups of this feature defined after the 
+        # This will inherit both the top level default rules - the rules defined
+        # before the first 'script' statement, and the script-level default
+        # rules for 'latn: all the lookups of this feature defined after the
         # 'script latn' statement, and before the 'language DEU' statement.
-        # If 'TRK' were not named here, it would not inherit the default rules 
+        # If 'TRK' were not named here, it would not inherit the default rules
         # for the script 'latn'.
 } liga;
 
@@ -1458,7 +1458,7 @@ feature liga {
         language DEU;
         # default lookups included under the DEU language.
         sub s s by germandbls;   # This is also included.
-        
+
         language TRK exclude_dflt;   # default lookups are excluded.
             lookup NO_I;             # Only this lookup is included under the TRK language
 
@@ -1468,8 +1468,8 @@ feature liga {
 } liga;
 ```
 
-*   The `DFLT`/`dflt`, `cyrl`/`dflt`, and `grek`/`dflt` language systems will 
-    all contain the default rules for `liga` functionality, the rules in the 
+*   The `DFLT`/`dflt`, `cyrl`/`dflt`, and `grek`/`dflt` language systems will
+    all contain the default rules for `liga` functionality, the rules in the
     lookups HAS_I and NO_I.
 
 *   Under the `latn` script, all languages but TRK will contain the default
@@ -1493,7 +1493,7 @@ The ordering of ligature rules within a particular lookup does not matter,
 excepting contextual rules, as the implementation will sort non-contextual rules
 in order to avoid conflict. For example, in lookup HAS_I, the f_i substitution
 may be placed before the f_f_i substitution, because the implementation will
-sort the f_f_i substitution first when writing the lookup to the font. 
+sort the f_f_i substitution first when writing the lookup to the font.
 (See [5.d: Ligature substitution](#5.d)).
 
 <a name="5"></a>
@@ -1796,7 +1796,7 @@ contains its own independent backtrack, marked glyph, and lookahead sequences.
 The `ignore substitute` statement works by creating subtables in the GSUB that
 tell the OT layout engine simply to match the specified sequences, and not to
 perform any substitutions on them. As a result of the match, remaining rules
-(i.e. subtables) in the lookup will be skipped when the rule matches. 
+(i.e. subtables) in the lookup will be skipped when the rule matches.
 (See [OT layout algorithm](#7.a).)
 
 ###### Example 1.
@@ -2158,7 +2158,7 @@ The named mark glyph classes and the anchor points of all the mark glyphs in the
 named mark classes must have been previously defined in the feature file by
 markClass statements [§[4.f](#4.f)].
 
-**NOTE!** The mark classes used within a single lookup must be disjoint: none 
+**NOTE!** The mark classes used within a single lookup must be disjoint: none
 may include a glyph which is in another mark class that is used within the same
 lookup.
 
@@ -2241,7 +2241,7 @@ A Mark-to-Mark Pos rule is specified as:
 ```fea
 position mark <glyph|glyphclass>  # base mark glyph(s)
     # anchor and mark glyph class; repeated for each attachment point on the base glyphs(s) name:
-    <anchor>  mark <named mark glyphclass> +  
+    <anchor>  mark <named mark glyphclass> +
     ;
 ```
 
@@ -2659,7 +2659,7 @@ implementation sorts the rules accordingly when writing them to the font file.
 ## 8. Specially handled features
 
 <a name="8.a"></a>
-### 8.a. The all alternates feature (`aalt`) 
+### 8.a. The all alternates feature (`aalt`)
 
 The `aalt` feature consists of a feature definition block which contains a
 series of statements in the form:
@@ -2779,7 +2779,7 @@ feature aalt useExtension {
 ```
 
 <a name="8.b"></a>
-### 8.b. The optical size feature (`size`) 
+### 8.b. The optical size feature (`size`)
 
 This feature is unique in that it contains no substitution or positioning rules
 (the LookupCount field in its Feature table will always be 0).
@@ -2851,7 +2851,7 @@ The names specified by the `sizemenuname` statement are actually stored in the
 name table, with name IDs starting at the first unused name ID at or after 256.
 
 <a name="8.c"></a>
-### 8.c. Descriptive names for Stylistic Set features (`ss01` - `ss20`) 
+### 8.c. Descriptive names for Stylistic Set features (`ss01` - `ss20`)
 
 As of the OpenType specification 1.6, descriptive names are allowed for
 stylistic substitution features. These names are specified within a feature
@@ -2884,19 +2884,19 @@ feature ss01 {
     featureNames {
         name "Feature description for MS Platform, script Unicode, language English";
         # With no platform ID, script ID, or language ID specified, the implementation assumes (3,1,0x409).
-        
+
         name 3 1 0x411 "Feature description for MS Platform, script Unicode, language Japanese";
         name 1 "Feature description for Apple Platform, script Roman, language unspecified";
         # With only the platform ID specified, the implementation assumes script and language = Latin. For Apple this is (1,0,0).
-        
-        name 1 1 12 "Feature description for Apple Platform, script Japanese, language Japanese"; 
+
+        name 1 1 12 "Feature description for Apple Platform, script Japanese, language Japanese";
     };
         # --- rules for this feature ---
 } ss01;
 ```
 
 <a name="8.d"></a>
-### 8.d. UI Label names for Character Variant features (`cv01` - `cv99`) 
+### 8.d. UI Label names for Character Variant features (`cv01` - `cv99`)
 
 As of the OpenType specification 1.6, UI label names are allowed for Character
 Variant features. These names are specified within the feature block for a
@@ -3066,7 +3066,7 @@ A `<minmax>` _[ currently not implemented ]_ is of the form:
 <script tag> <language tag>  # Defines the language system
     <base coord>,            # Min value for this language system
     <base coord>             # Max value for this language system
-    [, 
+    [,
     <feature tag>            # (Optional) feature tag
     <base coord>,            # Min value for this feature tag
     <base coord>]            # Max value for this feature tag
@@ -3528,7 +3528,7 @@ along with the tag `sbit`.
 
 **v1.21 [7 Nov 2017]:**
 
-*   Updated Pair Pos Format A: It is now supported. Corrected syntax of example. 
+*   Updated Pair Pos Format A: It is now supported. Corrected syntax of example.
     See [class pair kerning](#6.b.i).
 *   Updated description of the `UseMarkFilteringSet` lookup flag.
     It is now widely supported. See [lookupflag](#4.d).
@@ -3644,7 +3644,7 @@ along with the tag `sbit`.
 *   Added supported size table values as decimal fractions as well as decipoints,
     e.g “10.0” as well as “100” for a point size of 10.
 *   Added supported OS/2 keyword `fsType` as well as `FSType`.
-*   in GPOS positioning statements, allow single value for value record in 
+*   in GPOS positioning statements, allow single value for value record in
     all positioning statements; the case of all but pair positioning statements,
     this stands for a change to the x-advance of the preceding glyph name.
 
