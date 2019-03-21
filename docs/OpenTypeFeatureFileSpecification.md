@@ -294,7 +294,7 @@ dflt  # can be used only with the language keyword and as the language value wit
     -    hyphen           Denotes glyph ranges in a glyph class
     =    equal sign       Glyph class assignment operator
     '    single quote     Marks a glyph or glyph class for contextual substitution or positioning
-    "  " double quotes    Enclose a name table string
+    " "  double quotes    Enclose a name table string
     { }  braces           Enclose a feature, lookup, table, or anonymous block
     [ ]  square brackets  Enclose components of a glyph class
     < >  angle brackets   Enclose a device, value record, contour point, anchor, or caret
