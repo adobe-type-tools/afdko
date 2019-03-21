@@ -3031,11 +3031,11 @@ created in the OpenType font.
 table BASE {
     HorizAxis.BaseTagList <baseline tag>+;
     HorizAxis.BaseScriptList <script record> (, <script record>)*;
-    HorizAxis.MinMax <minmax>;
+    HorizAxis.MinMax <minmax record>;
 
     VertAxis.BaseTagList <baseline tag>+;
     VertAxis.BaseScriptList <script record> (, <script record>)*;
-    VertAxis.MinMax <minmax>;
+    VertAxis.MinMax <minmax record>;
 } BASE;
 ```
 
@@ -3048,16 +3048,14 @@ A `<script record>` is of the form:
 `<base coord>` can take several formats: _[ Currently only format A is implemented ]_
 
 ```fea
+# Format A
 <number>
-# format A
 
-<number> <glyph>
-<number>
-# format B
+# Format B
+<number> <glyph> <number>
 
-<number>
-<device>
-# format C
+# Format C
+<number> <device>
 ```
 
 The baseline tags for each `BaseTagList` must be sorted in increasing ASCII
@@ -3066,7 +3064,7 @@ order.
 The number of baseline values for a particular script should be the same as the
 same as the number of baseline tags in the corresponding `BaseTagList`.
 
-A `<minmax>` _[ currently not implemented ]_ is of the form:
+A `<minmax record>` _[ currently not implemented ]_ is of the form:
 
 ```fea
 <script tag> <language tag>  # Defines the language system
@@ -3079,7 +3077,7 @@ A `<minmax>` _[ currently not implemented ]_ is of the form:
     ;
 ```
 
-For example:
+An example of a simple BASE table is:
 
 ```fea
 table BASE {
