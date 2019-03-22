@@ -15,7 +15,8 @@ This repository contains the data files, Python scripts, and sources for
 the command line programs that comprise the AFDKO. The project uses the
 [Apache 2.0 OpenSource license](LICENSE.md).
 
-Please refer to the file [AFDKO-Overview.md](docs/AFDKO-Overview.md)
+Please refer to the
+[AFDKO Overview](https://adobe-type-tools.github.io/afdko/AFDKO-Overview.html)
 for a more detailed description of what is included in the package.
 
 Please see the
@@ -92,26 +93,6 @@ To remove the afdko package use the command:
 
     pip uninstall afdko
 
-### Comments
-
-If you have both the FDK from the Adobe AFDKO web page installed, and
-the new afdko package installed, the commands in the new afdko will take
-precedence over commands in the older Adobe FDK, as the Python package
-directory is added at the beginning of the PATH directory list, and the
-old installer added the Adobe FDK directory to the end of the list.
-
-Note that the PyPI installer will add the new adko package paths to the
-start of your system PATH environment variable, and this is not undone
-by the uninstaller. If you want to completely clean up, you will need to
-change the PATH environment variable to remove the new afdko executable
-directories. On the Mac, this means editing the line in your login file
-that sets the PATH variable. On Windows, this means editing the PATH
-environment variable in the System control panel.
-
-You can download older versions of the tools from the [Adobe AFDKO
-homepage](http://www.adobe.com/devnet/opentype/afdko.html). The tools IS
-and checkoutlines are included in these downloads.
-
 Build from source
 -----------------
 
@@ -148,17 +129,24 @@ feedback as they modify the source files) you can use alternative methods like
 exporting a PYTHONPATH, using a .pth file or similar hacks.
 For further details read [this comment](https://github.com/adobe-type-tools/afdko/pull/677#issuecomment-436747212).
 
-Major changes
--------------
+Major changes from version 2.5.x
+--------------------------------
 
-The AFDKO has been restructured so that it can be installed as a Python
-package. It now depends on the user\'s Python interpreter, and no longer
-contains its own Python interpreter. In order to do this, two
-Adobe-owned, non-open source programs were dropped: **IS** and
-**checkoutlines**. If these turn out to be sorely missed, an installer
-for them will be added to the old Adobe AFDKO website. The current
-intent is to migrate the many tests in checkoutlines to the newer
-**checkoutlinesufo** (which does work with OpenType and Type 1 fonts,
-but currently does only overlap detection and removal, and a few basic
-path checks).
+* The AFDKO has been restructured so that it can be installed as a Python
+package. It now depends on the user's Python interpreter, and no longer
+contains its own Python interpreter.
 
+* Two programs, **IS** and **checkoutlines** were dropped because their source
+code could not be open-sourced. These tools are available in [release version
+2.5.65322 and older](https://github.com/adobe-type-tools/afdko/releases?after=2.6.22).
+
+**Note**
+
+If you install the old AFDKO as well as the new PyPI afdko package, the tools from
+the newer version will take precedence over the older. This happens because pip
+adds the afdko's package path at the beginning of the system's PATH environment
+variable, whereas the old installer adds it at the end; this modification to PATH
+is not undone by the uninstaller. If you want to completely remove the path to the
+newer version, you will have to edit the PATH. On the Mac, this means editing the
+line in your login file that sets the PATH variable. On Windows, this means editing
+the PATH environment variable in the system's Control Panel.

@@ -1,5 +1,5 @@
 ##### • [Adobe Font Development Kit for OpenType (AFDKO) Overview](./AFDKO-Overview.md)
-##### • [OpenType Feature File Specification](./OpenTypeFeatureFileSpecification.html)
+##### • [OpenType Feature File Specification](./OpenTypeFeatureFileSpecification.md)
 ---
 ##### • [MakeOTF v2.5 User Guide](./MakeOTFUserGuide.pdf)
 ##### • [Command Line How-To](./CommandLineHowTo.pdf)
