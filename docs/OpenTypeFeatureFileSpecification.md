@@ -1,3 +1,8 @@
+---
+title: OpenType Feature File Specification
+layout: default
+---
+
 OpenType™ Feature File Specification
 ---
 
