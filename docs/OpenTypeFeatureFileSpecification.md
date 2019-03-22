@@ -12,119 +12,90 @@ Last updated 21 March 2019
 
 ## Contents
 
-1.  [Introduction](#1)
-2.  [Syntax](#2)
-
-    1.  [Comments](#2.a)
-    2.  [White space](#2.b)
-    3.  [Keywords](#2.c)
-    4.  [Special characters](#2.d)
-    5.  [Numbers and other metrics](#2.e)
-
-        1.  [Number](#2.e.i)
-        2.  [Metric](#2.e.ii)
-        3.  [Device table](#2.e.iii)
-        4.  [Value record](#2.e.iv)
-        5.  [Contour point](#2.e.vi)
-        6.  [Anchor](#2.e.vii)
-
-    6.  [Glyphs](#2.f)
-
-        1.  [Glyph name](#2.f.i)
-        2.  [CID](#2.f.ii)
-
-    7.  [Glyph classes](#2.g)
-
-        1.  [Ranges](#2.g.i)
-        2.  [Named glyph classes](#2.g.ii)
-
-    8.  [Tags](#2.h)
-    9.  [Lookup block labels](#2.i)
-
-3.  [Including files](#3)
-
-4.  [Specifying features](#4)
-
-    1.  [feature](#4.a)
-    2.  [Language system](#4.b)
-
-        1.  [languagesystem](#4.b.i)
-        2.  [script and language](#4.b.ii)
-
-    3.  [parameters](#4.c)
-    4.  [lookupflag](#4.d)
-    5.  [lookup](#4.e)
-    6.  [markClass](#4.f)
-    7.  [subtable](#4.g)
-    8.  [Examples](#4.h)
-
-5.  [Glyph substitution (GSUB) rules](#5)
-
-    1.  [[GSUB LookupType 1] Single substitution](#5.a)
-    2.  [[GSUB LookupType 2] Multiple substitution](#5.b)
-    3.  [[GSUB LookupType 3] Alternate substitution](#5.c)
-    4.  [[GSUB LookupType 4] Ligature substitution](#5.d)
-    5.  [[GSUB LookupType 5] Contextual substitution](#5.e)
-    6.  [[GSUB LookupType 6] Chaining contextual substitution](#5.f)
-
-        1.  [Specifying a Chain Sub rule and marking sub-runs](#5.f.i)
-        2.  [Specifying exceptions to the Chain Sub rule](#5.f.ii)
-
-    7.  [[GSUB LookupType 7] Extension substitution](#5.g)
-    8.  [[GSUB LookupType 8] Reverse Chaining Single Substitution](#5.h)
-
-6.  [Glyph positioning (GPOS) rules](#6)
-
-    1.  [[GPOS LookupType 1] Single adjustment positioning](#6.a)
-    2.  [[GPOS LookupType 2] Pair adjustment positioning](#6.b)
-
-        1.  [Specific and class pair kerning](#6.b.i)
-        2.  [Enumerating pairs](#6.b.ii)
-        3.  [Subtable breaks](#6.b.iii)
-
-    3.  [[GPOS LookupType 3] Cursive attachment positioning](#6.c)
-    4.  [[GPOS LookupType 4] Mark-to-Base attachment positioning](#6.d)
-    5.  [[GPOS LookupType 5] Mark-to-Ligature attachment positioning](#6.e)
-    6.  [[GPOS LookupType 6] Mark-to-Mark attachment positioning](#6.f)
-    7.  [[GPOS LookupType 7] Contextual positioning](#6.g)
-    8.  [[GPOS LookupType 8] Chaining contextual positioning](#6.h)
-
-        1.  [Specifying a Chain Pos rule and marking sub-runs](#6.h.i)
-        2.  [Specifying Contextual Positioning with explicit lookup references](#6.h.ii)
-        3.  [Specifying Contextual Positioning with with in-line single positioning rules](#6.h.iii)
-        4.  [Specifying Contextual Positioning with with in-line cursive positioning rules](#6.h.iv)
-        5.  [Specifying Contextual Positioning with with in-line in-line mark attachment positioning rules](#6.h.v)
-        6.  [Specifying exceptions to the Chain Pos rule](#6.h.vi)
-
-    9.  [[GPOS LookupType 9] Extension positioning](#6.i)
-
-7.  [Ordering of lookups and rules in the feature file](#7)
-
-    1.  [An OpenType Layout engine’s layout algorithm](#7.a)
-    2.  [Ordering of lookups and subtables](#7.b)
-    3.  [Ordering of rules within a lookup](#7.c)
-
-8.  [Specially handled features](#8)
-
-    1.  [The all alternates feature (`aalt`)](#8.a)
-    2.  [The optical size feature (`size`)](#8.b)
-    3.  [Descriptive names for Stylistic Set features (`ss01` - `ss20`)](#8.c)
-    4.  [UI names Character Variation features (`cv01` - `cv99`)](#8.d)
-
-9.  [Specifying or overriding table values](#9)
-
-    1.  [BASE table](#9.a)
-    2.  [GDEF table](#9.b)
-    3.  [head table](#9.c)
-    4.  [hhea table](#9.d)
-    5.  [name table](#9.e)
-    6.  [OS/2 table](#9.f)
-    7.  [vhea table](#9.g)
-    8.  [vmtx table](#9.h)
-
-10.  [Specifying anonymous data blocks](#10)
-
-11.  [Document revisions](#11)
+- [1. Introduction](#1)
+- [2. Syntax](#2)
+  - [a. Comments](#2.a)
+  - [b. White space](#2.b)
+  - [c. Keywords](#2.c)
+  - [d. Special characters](#2.d)
+  - [e. Numbers and other metrics](#2.e)
+    - [i.   Number](#2.e.i)
+    - [ii.  Metric](#2.e.ii)
+    - [iii. Device table](#2.e.iii)
+    - [iv.  Value record](#2.e.iv)
+    - [v.   Named value record](#2.e.v)
+    - [vi.  Contour point](#2.e.vi)
+    - [vii. Anchor](#2.e.vii)
+  - [f. Glyphs](#2.f)
+    - [i.  Glyph name](#2.f.i)
+    - [ii. CID](#2.f.ii)
+  - [g. Glyph classes](#2.g)
+    - [i.  Ranges](#2.g.i)
+    - [ii. Named glyph classes](#2.g.ii)
+  - [h. Tags](#2.h)
+  - [i. Lookup block labels](#2.i)
+- [3. Including files](#3)
+- [4. Specifying features](#4)
+  - [a. feature](#4.a)
+  - [b. Language system](#4.b)
+    - [i.  languagesystem](#4.b.i)
+    - [ii. script and language](#4.b.ii)
+  - [c. parameters](#4.c)
+  - [d. lookupflag](#4.d)
+  - [e. lookup](#4.e)
+  - [f. markClass](#4.f)
+  - [g. subtable](#4.g)
+  - [h. Examples](#4.h)
+- [5. Glyph substitution (GSUB) rules](#5)
+  - [a. [GSUB LookupType 1] Single substitution](#5.a)
+  - [b. [GSUB LookupType 2] Multiple substitution](#5.b)
+  - [c. [GSUB LookupType 3] Alternate substitution](#5.c)
+  - [d. [GSUB LookupType 4] Ligature substitution](#5.d)
+  - [e. [GSUB LookupType 5] Contextual substitution](#5.e)
+  - [f. [GSUB LookupType 6] Chaining contextual substitution](#5.f)
+    - [i.  Specifying a Chain Sub rule and marking sub-runs](#5.f.i)
+    - [ii. Specifying exceptions to the Chain Sub rule](#5.f.ii)
+  - [g. [GSUB LookupType 7] Extension substitution](#5.g)
+  - [h. [GSUB LookupType 8] Reverse Chaining Single Substitution](#5.h)
+- [6. Glyph positioning (GPOS) rules](#6)
+  - [a. [GPOS LookupType 1] Single adjustment positioning](#6.a)
+  - [b. [GPOS LookupType 2] Pair adjustment positioning](#6.b)
+    - [i.   Specific and class pair kerning](#6.b.i)
+    - [ii.  Enumerating pairs](#6.b.ii)
+    - [iii. Subtable breaks](#6.b.iii)
+  - [c. [GPOS LookupType 3] Cursive attachment positioning](#6.c)
+  - [d. [GPOS LookupType 4] Mark-to-Base attachment positioning](#6.d)
+  - [e. [GPOS LookupType 5] Mark-to-Ligature attachment positioning](#6.e)
+  - [f. [GPOS LookupType 6] Mark-to-Mark attachment positioning](#6.f)
+  - [g. [GPOS LookupType 7] Contextual positioning](#6.g)
+  - [h. [GPOS LookupType 8] Chaining contextual positioning](#6.h)
+    - [i.   Specifying a Chain Pos rule and marking sub-runs](#6.h.i)
+    - [ii.  Specifying Contextual Positioning with explicit lookup references](#6.h.ii)
+    - [iii. Specifying Contextual Positioning with with in-line single positioning rules](#6.h.iii)
+    - [iv.  Specifying Contextual Positioning with with in-line cursive positioning rules](#6.h.iv)
+    - [v.   Specifying Contextual Positioning with with in-line in-line mark attachment positioning rules](#6.h.v)
+    - [vi.  Specifying exceptions to the Chain Pos rule](#6.h.vi)
+  - [i. [GPOS LookupType 9] Extension positioning](#6.i)
+- [7. Ordering of lookups and rules in the feature file](#7)
+  - [a. An OpenType Layout engine’s layout algorithm](#7.a)
+  - [b. Ordering of lookups and subtables](#7.b)
+  - [c. Ordering of rules within a lookup](#7.c)
+- [8. Specially handled features](#8)
+  - [a. The all alternates feature (`aalt`)](#8.a)
+  - [b. The optical size feature (`size`)](#8.b)
+  - [c. Descriptive names for Stylistic Set features (`ss01` - `ss20`)](#8.c)
+  - [d. UI names Character Variation features (`cv01` - `cv99`)](#8.d)
+- [9. Specifying or overriding table values](#9)
+  - [a. BASE table](#9.a)
+  - [b. GDEF table](#9.b)
+  - [c. head table](#9.c)
+  - [d. hhea table](#9.d)
+  - [e. name table](#9.e)
+  - [f. OS/2 table](#9.f)
+  - [g. vhea table](#9.g)
+  - [h. vmtx table](#9.h)
+- [10. Specifying anonymous data blocks](#10)
+- [11. Document revisions](#11)
 
 <a name="1"></a>
 ## 1. Introduction
@@ -445,7 +416,7 @@ For example:
 The name must have been defined with a `valueRecordDef` statement before being used.
 
 <a name="2.e.v"></a>
-#### 2.e.v. Named value record definition.
+#### 2.e.v. Named value record
 
 The `valueRecordDef` keyword is used to define a named value record. This name
 can then be used in value records instead of coordinates. It offers the
