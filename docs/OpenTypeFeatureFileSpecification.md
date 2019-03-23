@@ -3078,7 +3078,7 @@ table GDEF {
     LigatureCaretByDev # Currently not implemented
     LigatureCaretByPos <glyph|glyphclass> <caret position value>+;
     LigatureCaretByIndex <glyph|glyphclass> <caret contour point index value>+;
-} GDEF:
+} GDEF;
 ```
 
 The number of `<caret value>`s specified for a LigatureCaret must be: (number of
