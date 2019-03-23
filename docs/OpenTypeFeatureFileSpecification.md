@@ -872,16 +872,16 @@ A lookup is a group of rules of the same type. See §[4.e](#4.e).
 <a name="4.b"></a>
 ### 4.b. Language system
 
-<a name="4.b"></a>An OpenType language system is any combination of a script tag
+An OpenType language system is any combination of a script tag
 and a language tag. (In the text of this document, the notation  `<script
 tag>`/`<language tag>` is used to refer to a language system; for example,
 `script latn`/`language dflt` denotes the default language of the Latin script.)
 
-<a name="4.b"></a>The lookups in every OpenType feature must be registered under
+The lookups in every OpenType feature must be registered under
 one or more language systems. The lookups of a particular feature may vary across
 the language systems under which the feature is registered.
 
-<a name="4.b"></a>There are two ways to specify language system in the feature
+There are two ways to specify language system in the feature
 file: with the languagesystem keyword outside of feature definition blocks, and
 by the script and language keywords within feature definition blocks.
 
