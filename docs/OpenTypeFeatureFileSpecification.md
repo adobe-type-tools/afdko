@@ -167,50 +167,51 @@ keywords have a global scope. Although many keywords may be used only in
 specific contexts, the same keyword is never used in different ways in different
 contexts.
 
-[`anchor`](#2.e.vii)  
-[`anchorDef`](#2.e.viii)  
-[`anonymous`](#10) (or `anon`)  
-[`by`](#5)  
-[`contourpoint`](#2.e.vi)  
-[`cursive`](#6.c)  
-[`device`](#2.e.iii)  _[ Not implemented ]_  
-[`enumerate`](#6.b.ii) (or `enum`)  
-[`excludeDFLT`](#4.b.ii)  
-[`exclude_dflt`](#4.b.ii)  
-[`feature`](#4.a) block  
-[`feature`](#8.a) statement  
-[`from`](#5.c)  
-[`ignore`](#5.f.ii) substitute  
-[`ignore`](#6.h) position  
-[`IgnoreBaseGlyphs`](#4.d)  
-[`IgnoreLigatures`](#4.d)  
-[`IgnoreMarks`](#4.d)  
-[`MarkAttachmentType`](#4.d)  
-[`UseMarkFilteringSet`](#4.d)  
-[`include`](#3)  
-[`includeDFLT`](#4.b.ii) (deprecated)  
-[`include_dflt`](#4.b.ii)  
-[`language`](#4.b.ii)  
-[`languagesystem`](#4.b.i)  
-[`lookup`](#4.e) block and statement  
-[`lookupflag`](#4.d)  
-[`mark`](#6.d)  
-[`markClass`](#4.f)  
-[`nameid`](#9.e)  
-[`NULL`](#2.e.iii) device  
-[`NULL`](#2.e.iv) value record  
-[`NULL`](#2.e.vii) anchor  
-[`parameters`](#4.c)  
-[`position`](#6) (or `pos`)  
-[`required`](#4.b.ii)  _[ Not implemented ]_  
-[`RightToLeft`](#4.d)  
-[`reversesub`](#5) (or `rsub`)  
-[`script`](#4.b.ii)  
-[`substitute`](#5) (or `sub`)  
-[`subtable`](#4.f)  
-[`table`](#9)  
-[`useExtension`](#4.e)  
-[`valueRecordDef`](#2.e.v)  
+[`anchor`](#2.e.vii)<br>
+[`anchorDef`](#2.e.viii)<br>
+[`anon`](#10)<br>
+[`anonymous`](#10)<br>
+[`by`](#5.a)<br>
+[`contourpoint`](#2.e.vi)<br>
+[`cursive`](#6.c)<br>
+[`device`](#2.e.iii)  _[ Not implemented ]_<br>
+[`enum`](#6.b.ii)<br>
+[`enumerate`](#6.b.ii)<br>
+[`exclude_dflt`](#4.b.ii)<br>
+`feature` (used as a [block](#4.a) and as a [statement](#8.a))<br>
+[`from`](#5.c)<br>
+`ignore` (used with [substitute](#5.f.ii) and [position](#6.h.vi))<br>
+[`IgnoreBaseGlyphs`](#4.d)<br>
+[`IgnoreLigatures`](#4.d)<br>
+[`IgnoreMarks`](#4.d)<br>
+[`include`](#3)<br>
+[`include_dflt`](#4.b.ii)<br>
+[`language`](#4.b.ii)<br>
+[`languagesystem`](#4.b.i)<br>
+[`lookup`](#4.e)<br>
+[`lookupflag`](#4.d)<br>
+[`mark`](#6.d)<br>
+[`MarkAttachmentType`](#4.d)<br>
+[`markClass`](#4.f)<br>
+[`nameid`](#9.e)<br>
+`NULL` (used in [device](#2.e.iii), [value record](#2.e.iv), [anchor](#2.e.vii))<br>
+[`parameters`](#4.c)<br>
+[`pos`](#6)<br>
+[`position`](#6)<br>
+[`required`](#4.b.ii)  _[ Not implemented ]_<br>
+[`reversesub`](#5.h)<br>
+[`RightToLeft`](#4.d)<br>
+[`rsub`](#5.h)<br>
+[`script`](#4.b.ii)<br>
+[`sub`](#5)<br>
+[`substitute`](#5)<br>
+[`subtable`](#4.g)<br>
+[`table`](#9)<br>
+[`useExtension`](#4.e)<br>
+[`UseMarkFilteringSet`](#4.d)<br>
+[`valueRecordDef`](#2.e.v)<br>
+`excludeDFLT` (deprecated)<br>
+`includeDFLT` (deprecated)<br>
 
 
 The following are keywords only in their corresponding table/feature blocks:
@@ -1052,7 +1053,7 @@ than referencing them from the list of language tags for the current script. The
 `dflt` language tag is just a convenience in the feature file syntax for setting
 the current language to be the default language system.
 
-Please see §[4.g](#4.g) below for detailed examples.
+Please see §[4.h](#4.h) below for detailed examples.
 
 <a name="4.c"></a>
 ### 4.c. parameters
@@ -2115,7 +2116,7 @@ A Mark-to-Base Pos rule is specified as:
 position base <glyph|glyphclass> # base glyph(s)
     # Anchor and mark glyph class, repeated for each
     # attachment point on the base glyphs(s) name
-    <anchor>  mark <named mark glyphclass> +
+    <anchor> mark <named mark glyphclass> +
     ;
 ```
 
