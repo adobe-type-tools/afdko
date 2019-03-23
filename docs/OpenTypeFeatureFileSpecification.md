@@ -218,40 +218,40 @@ The following are keywords only in their corresponding table/feature blocks:
 
 | keyword | table | implemented |
 | -- | -- | -- |
-| [`HorizAxis.BaseTagList`](#9.a) | BASE table | ✅ |
 | [`HorizAxis.BaseScriptList`](#9.a) | BASE table | ✅ |
+| [`HorizAxis.BaseTagList`](#9.a) | BASE table | ✅ |
 | [`HorizAxis.MinMax`](#9.a) | BASE table | ❌ |
-| [`VertAxis.BaseTagList`](#9.a) | BASE table | ✅ |
 | [`VertAxis.BaseScriptList`](#9.a) | BASE table | ✅ |
+| [`VertAxis.BaseTagList`](#9.a) | BASE table | ✅ |
 | [`VertAxis.MinMax`](#9.a) | BASE table | ❌ |
-| [`GlyphClassDef`](#9.b) | GDEF table | ✅ |
 | [`Attach`](#9.b) | GDEF table | ✅ |
+| [`GlyphClassDef`](#9.b) | GDEF table | ✅ |
 | [`LigatureCaretByDev`](#9.b) | GDEF table | ❌ |
 | [`LigatureCaretByIndex`](#9.b) | GDEF table | ✅ |
 | [`LigatureCaretByPos`](#9.b) | GDEF table | ✅ |
 | [`MarkAttachClass`](#9.b) | GDEF table | ✅ |
 | [`FontRevision`](#9.c) | head table | ✅ |
-| [`CaretOffset`](#9.d) | hhea table | ✅ |
 | [`Ascender`](#9.d) | hhea table | ✅ |
+| [`CaretOffset`](#9.d) | hhea table | ✅ |
 | [`Descender`](#9.d) | hhea table | ✅ |
 | [`LineGap`](#9.d) | hhea table | ✅ |
+| [`CapHeight`](#9.f) | OS/2 table | ✅ |
+| [`CodePageRange`](#9.f) | OS/2 table | ✅ |
 | [`Panose`](#9.f) | OS/2 table | ✅ |
 | [`TypoAscender`](#9.f) | OS/2 table | ✅ |
 | [`TypoDescender`](#9.f) | OS/2 table | ✅ |
 | [`TypoLineGap`](#9.f) | OS/2 table | ✅ |
+| [`UnicodeRange`](#9.f) | OS/2 table | ✅ |
+| [`Vendor`](#9.f) | OS/2 table | ✅ |
 | [`winAscent`](#9.f) | OS/2 table | ✅ |
 | [`winDescent`](#9.f) | OS/2 table | ✅ |
-| [`UnicodeRange`](#9.f) | OS/2 table | ✅ |
-| [`CodePageRange`](#9.f) | OS/2 table | ✅ |
 | [`XHeight`](#9.f) | OS/2 table | ✅ |
-| [`CapHeight`](#9.f) | OS/2 table | ✅ |
-| [`Vendor`](#9.f) | OS/2 table | ✅ |
 | [`sizemenuname`](#8.b) | size feature | ✅ |
 | [`VertTypoAscender`](#9.g) | vhea table | ✅ |
 | [`VertTypoDescender`](#9.g) | vhea table | ✅ |
 | [`VertTypoLineGap`](#9.g) | vhea table | ✅ |
-| [`VertOriginY`](#9.h) | vmtx table | ✅ |
 | [`VertAdvanceY`](#9.h) | vmtx table | ✅ |
+| [`VertOriginY`](#9.h) | vmtx table | ✅ |
 
 The following are keywords only where a tag is expected:
 
