@@ -171,7 +171,7 @@ contexts.
 [`anchorDef`](#2.e.viii)  
 [`anonymous`](#10) (or `anon`)  
 [`by`](#5)  
-[`contour`](#2.e.vi)  
+[`contourpoint`](#2.e.vi)  
 [`cursive`](#6.c)  
 [`device`](#2.e.iii)  _[ Not implemented ]_  
 [`enumerate`](#6.b.ii) (or `enum`)  
