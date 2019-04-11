@@ -429,6 +429,11 @@ def test_ufo3_guideline_bug705():
     expected_path = get_expected_path('bug705.pfa')
     assert differ([expected_path, actual_path])
 
+def test_ufo_vertical_advance_bug786():
+    actual_path = runner(CMD + ['-s', '-o', 't1', '-f', 'bug786.ufo'])
+    expected_path = get_expected_path('bug786.pfa')
+    assert differ([expected_path, actual_path])
+
 
 @pytest.mark.parametrize('filename', [
     'a',  # AE glyph in both default and processed layers
