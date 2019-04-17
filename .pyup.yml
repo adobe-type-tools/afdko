@@ -1,12 +1,12 @@
 # see https://pyup.io/docs/configuration/ for all available options
 
 branch: develop
-schedule: every week
+schedule: every day
 
 requirements:
   - requirements.txt:
       update: True
-      pin: False
+      pin: True
   - requirements-dev.txt:
       update: False
       pin: False
