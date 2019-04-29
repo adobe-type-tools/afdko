@@ -1580,6 +1580,10 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
                     glyphWidth = atol(tempVal);
                     setWidth(h, tag, glyphWidth);
                 }
+                if (tokenEqualStr(tk, "height=")) {
+                    getAttribute(h, state);
+                    /* just discard it, as we don't currently use it */
+                }
             }
         } else if (tokenEqualStr(tk, "<outline>")) {
             if (state != 1) {

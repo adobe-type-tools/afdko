@@ -167,90 +167,91 @@ keywords have a global scope. Although many keywords may be used only in
 specific contexts, the same keyword is never used in different ways in different
 contexts.
 
-[`anchor`](#2.e.vii)  
-[`anchorDef`](#2.e.viii)  
-[`anonymous`](#10) (or `anon`)  
-[`by`](#5)  
-[`contour`](#2.e.vi)  
-[`cursive`](#6.c)  
-[`device`](#2.e.iii)  _[ Not implemented ]_  
-[`enumerate`](#6.b.ii) (or `enum`)  
-[`excludeDFLT`](#4.b.ii)  
-[`exclude_dflt`](#4.b.ii)  
-[`feature`](#4.a) block  
-[`feature`](#8.a) statement  
-[`from`](#5.c)  
-[`ignore`](#5.f.ii) substitute  
-[`ignore`](#6.h) position  
-[`IgnoreBaseGlyphs`](#4.d)  
-[`IgnoreLigatures`](#4.d)  
-[`IgnoreMarks`](#4.d)  
-[`MarkAttachmentType`](#4.d)  
-[`UseMarkFilteringSet`](#4.d)  
-[`include`](#3)  
-[`includeDFLT`](#4.b.ii) (deprecated)  
-[`include_dflt`](#4.b.ii)  
-[`language`](#4.b.ii)  
-[`languagesystem`](#4.b.i)  
-[`lookup`](#4.e) block and statement  
-[`lookupflag`](#4.d)  
-[`mark`](#6.d)  
-[`markClass`](#4.f)  
-[`nameid`](#9.e)  
-[`NULL`](#2.e.iii) device  
-[`NULL`](#2.e.iv) value record  
-[`NULL`](#2.e.vii) anchor  
-[`parameters`](#4.c)  
-[`position`](#6) (or `pos`)  
-[`required`](#4.b.ii)  _[ Not implemented ]_  
-[`RightToLeft`](#4.d)  
-[`reversesub`](#5) (or `rsub`)  
-[`script`](#4.b.ii)  
-[`substitute`](#5) (or `sub`)  
-[`subtable`](#4.f)  
-[`table`](#9)  
-[`useExtension`](#4.e)  
-[`valueRecordDef`](#2.e.v)  
+[`anchor`](#2.e.vii)<br>
+[`anchorDef`](#2.e.viii)<br>
+[`anon`](#10)<br>
+[`anonymous`](#10)<br>
+[`by`](#5.a)<br>
+[`contourpoint`](#2.e.vi)<br>
+[`cursive`](#6.c)<br>
+[`device`](#2.e.iii)  _[ Not implemented ]_<br>
+[`enum`](#6.b.ii)<br>
+[`enumerate`](#6.b.ii)<br>
+[`exclude_dflt`](#4.b.ii)<br>
+`feature` (used as a [block](#4.a) and as a [statement](#8.a))<br>
+[`from`](#5.c)<br>
+`ignore` (used with [substitute](#5.f.ii) and [position](#6.h.vi))<br>
+[`IgnoreBaseGlyphs`](#4.d)<br>
+[`IgnoreLigatures`](#4.d)<br>
+[`IgnoreMarks`](#4.d)<br>
+[`include`](#3)<br>
+[`include_dflt`](#4.b.ii)<br>
+[`language`](#4.b.ii)<br>
+[`languagesystem`](#4.b.i)<br>
+[`lookup`](#4.e)<br>
+[`lookupflag`](#4.d)<br>
+[`mark`](#6.d)<br>
+[`MarkAttachmentType`](#4.d)<br>
+[`markClass`](#4.f)<br>
+[`nameid`](#9.e)<br>
+`NULL` (used in [device](#2.e.iii), [value record](#2.e.iv), [anchor](#2.e.vii))<br>
+[`parameters`](#4.c)<br>
+[`pos`](#6)<br>
+[`position`](#6)<br>
+[`required`](#4.b.ii)  _[ Not implemented ]_<br>
+[`reversesub`](#5.h)<br>
+[`RightToLeft`](#4.d)<br>
+[`rsub`](#5.h)<br>
+[`script`](#4.b.ii)<br>
+[`sub`](#5)<br>
+[`substitute`](#5)<br>
+[`subtable`](#4.g)<br>
+[`table`](#9)<br>
+[`useExtension`](#4.e)<br>
+[`UseMarkFilteringSet`](#4.d)<br>
+[`valueRecordDef`](#2.e.v)<br>
+`excludeDFLT` (deprecated)<br>
+`includeDFLT` (deprecated)<br>
 
 
 The following are keywords only in their corresponding table/feature blocks:
 
 | keyword | table | implemented |
 | -- | -- | -- |
-| [`HorizAxis.BaseTagList`](#9.a) | BASE table | ✅ |
 | [`HorizAxis.BaseScriptList`](#9.a) | BASE table | ✅ |
+| [`HorizAxis.BaseTagList`](#9.a) | BASE table | ✅ |
 | [`HorizAxis.MinMax`](#9.a) | BASE table | ❌ |
-| [`VertAxis.BaseTagList`](#9.a) | BASE table | ✅ |
 | [`VertAxis.BaseScriptList`](#9.a) | BASE table | ✅ |
+| [`VertAxis.BaseTagList`](#9.a) | BASE table | ✅ |
 | [`VertAxis.MinMax`](#9.a) | BASE table | ❌ |
-| [`GlyphClassDef`](#9.b) | GDEF table | ✅ |
 | [`Attach`](#9.b) | GDEF table | ✅ |
+| [`GlyphClassDef`](#9.b) | GDEF table | ✅ |
 | [`LigatureCaretByDev`](#9.b) | GDEF table | ❌ |
 | [`LigatureCaretByIndex`](#9.b) | GDEF table | ✅ |
 | [`LigatureCaretByPos`](#9.b) | GDEF table | ✅ |
 | [`MarkAttachClass`](#9.b) | GDEF table | ✅ |
 | [`FontRevision`](#9.c) | head table | ✅ |
-| [`CaretOffset`](#9.d) | hhea table | ✅ |
 | [`Ascender`](#9.d) | hhea table | ✅ |
+| [`CaretOffset`](#9.d) | hhea table | ✅ |
 | [`Descender`](#9.d) | hhea table | ✅ |
 | [`LineGap`](#9.d) | hhea table | ✅ |
+| [`CapHeight`](#9.f) | OS/2 table | ✅ |
+| [`CodePageRange`](#9.f) | OS/2 table | ✅ |
 | [`Panose`](#9.f) | OS/2 table | ✅ |
 | [`TypoAscender`](#9.f) | OS/2 table | ✅ |
 | [`TypoDescender`](#9.f) | OS/2 table | ✅ |
 | [`TypoLineGap`](#9.f) | OS/2 table | ✅ |
+| [`UnicodeRange`](#9.f) | OS/2 table | ✅ |
+| [`Vendor`](#9.f) | OS/2 table | ✅ |
 | [`winAscent`](#9.f) | OS/2 table | ✅ |
 | [`winDescent`](#9.f) | OS/2 table | ✅ |
-| [`UnicodeRange`](#9.f) | OS/2 table | ✅ |
-| [`CodePageRange`](#9.f) | OS/2 table | ✅ |
 | [`XHeight`](#9.f) | OS/2 table | ✅ |
-| [`CapHeight`](#9.f) | OS/2 table | ✅ |
-| [`Vendor`](#9.f) | OS/2 table | ✅ |
 | [`sizemenuname`](#8.b) | size feature | ✅ |
 | [`VertTypoAscender`](#9.g) | vhea table | ✅ |
 | [`VertTypoDescender`](#9.g) | vhea table | ✅ |
 | [`VertTypoLineGap`](#9.g) | vhea table | ✅ |
-| [`VertOriginY`](#9.h) | vmtx table | ✅ |
 | [`VertAdvanceY`](#9.h) | vmtx table | ✅ |
+| [`VertOriginY`](#9.h) | vmtx table | ✅ |
 
 The following are keywords only where a tag is expected:
 
@@ -314,8 +315,8 @@ in a pair represents a ppem size and the second the number of pixels to adjust
 at that ppem size:
 
 ```fea
-<device <number> <number>,  # ppem size, number of pixels to adjust
-(<number> <number>)> ;      # zero or more such pairs
+<device <number> <number>,   # ppem size, number of pixels to adjust
+       (<number> <number>)>; # zero or more such pairs
 ```
 
 For example:
@@ -872,16 +873,16 @@ A lookup is a group of rules of the same type. See §[4.e](#4.e).
 <a name="4.b"></a>
 ### 4.b. Language system
 
-<a name="4.b"></a>An OpenType language system is any combination of a script tag
+An OpenType language system is any combination of a script tag
 and a language tag. (In the text of this document, the notation  `<script
 tag>`/`<language tag>` is used to refer to a language system; for example,
 `script latn`/`language dflt` denotes the default language of the Latin script.)
 
-<a name="4.b"></a>The lookups in every OpenType feature must be registered under
+The lookups in every OpenType feature must be registered under
 one or more language systems. The lookups of a particular feature may vary across
 the language systems under which the feature is registered.
 
-<a name="4.b"></a>There are two ways to specify language system in the feature
+There are two ways to specify language system in the feature
 file: with the languagesystem keyword outside of feature definition blocks, and
 by the script and language keywords within feature definition blocks.
 
@@ -1052,7 +1053,7 @@ than referencing them from the list of language tags for the current script. The
 `dflt` language tag is just a convenience in the feature file syntax for setting
 the current language to be the default language system.
 
-Please see §[4.g](#4.g) below for detailed examples.
+Please see §[4.h](#4.h) below for detailed examples.
 
 <a name="4.c"></a>
 ### 4.c. parameters
@@ -1241,7 +1242,7 @@ A mark glyph class name is defined differently than a regular glyph class. The
 mark class definition is built up by a one or more of statements in the form:
 
 ```fea
-markClass <glyph|glyphclass> <anchor>  <mark glyph class name>;
+markClass <glyph|glyphclass> <anchor> <mark glyph class name>;
 ```
 
 Each additional mark statement for a mark class adds the referenced glyphs to
@@ -1257,7 +1258,7 @@ the point x = 300, y = 400 in the design space of the base glyph.
 For example:
 
 ```fea
-markClass [acute grave dieresis] <anchor 350 0>  @MARK_TOP_ACCENTS;
+markClass [acute grave dieresis] <anchor 350 0> @MARK_TOP_ACCENTS;
 ```
 
 If all the mark glyphs which belong to a mark class have the same anchor, then
@@ -1267,19 +1268,19 @@ when glyphs in a mark class have different anchor points, more than one mark
 statement must be used to define the mark class. For example:
 
 ```fea
-markClass [acute grave] <anchor 350 0>  @MARK_TOP_ACCENTS;
-markClass [dieresis umlaut] <anchor 400 0>  @MARK_TOP_ACCENTS;
+markClass [acute grave] <anchor 350 0> @MARK_TOP_ACCENTS;
+markClass [dieresis umlaut] <anchor 400 0> @MARK_TOP_ACCENTS;
 ```
 
-**NOTE!** All mark class definition statements must precede any use of a mark
+**Note:** All mark class definition statements must precede any use of a mark
 class in the feature file. Once any position statement has referenced a mark
 class, no more mark statements are allowed.
 
-**NOTE!** The mark classes used within a single lookup must be disjoint: none
+**Note:** The mark classes used within a single lookup must be disjoint: none
 may include a glyph which is in another mark class that is used within the same
 lookup.
 
-**NOTE!** If a GDEF table is not explicitly defined in the feature file, then an
+**Note:** If a GDEF table is not explicitly defined in the feature file, then an
 implementation of this syntax will create one. In this case, it will use the set
 of defined mark classes to define the mark glyphs for the GDEF GlyphClass. In
 this case, the assignment of a glyph to the GDEF GlyphClass mark class may
@@ -1291,9 +1292,9 @@ the mark classes in the order of occurrence of the first definition statement
 for a mark glyph class. In the example:
 
 ```fea
-markClass [acute grave] <anchor 350 0>  @MARK_TOP_ACCENTS;
-markClass [cedilla hook] <anchor  300 0>  @MARK_BOTTOM_ACCENTS;
-markClass [dieresis umlaut] <anchor 400 0>  @MARK_TOP_ACCENTS;
+markClass [acute grave] <anchor 350 0> @MARK_TOP_ACCENTS;
+markClass [cedilla hook] <anchor 300 0> @MARK_BOTTOM_ACCENTS;
+markClass [dieresis umlaut] <anchor 400 0> @MARK_TOP_ACCENTS;
 ```
 
 the mark class order will be:
@@ -2024,8 +2025,8 @@ will produce a warning that a new subtable has been started at line 101, and
 that some kern pairs within this subtable may never be accessed. Note that this
 allows the font to be built, but the result will not match the developer’s
 intention. The kerning feature will not work as expected until the causes for
-all such errors are removed. The pair (Ygrave, period) will have a value of 0 if
-the above example comprised the entire lookup, since Ygrave is in the coverage
+all such errors are removed. The pair “Ygrave period” will have a value of 0 if
+the above example comprised the entire lookup, since “Ygrave” is in the coverage
 (i.e. union of the first glyphs) of the first subtable. One way to understand
 this is to imagine a lookup table of kern class pairs as a spreadsheet of all
 possible pairs of kern left-side classes that are used in the lookup table with
@@ -2041,11 +2042,11 @@ right side classes, you are filling in a series of cells in the row for the
 specific left side class. All cells for which no values are specified are set to
 0. When programs look for a kern value between “Ygrave” and something else, they
 look through the list of left side class definitions to find the first
-occurrence of 'Ygrave'. By definition, the first spreadsheet row which includes
+occurrence of “Ygrave”. By definition, the first spreadsheet row which includes
 “Ygrave” will define the kern pair value of “Ygrave” with all other right-side
 classes, e.g spreadsheet columns. Since a pair value with a right-side period
 has not been explicitly defined at this point, the default value is 0. Since the
-programs will not look further than this row, the kernclass pair:
+programs will not look further than this row, the kern class pair:
 
 ```fea
 pos [Y Yacute Ygrave] period -60;
@@ -2114,18 +2115,18 @@ A Mark-to-Base Pos rule is specified as:
 ```fea
 position base <glyph|glyphclass> # base glyph(s)
     # Anchor and mark glyph class, repeated for each
-    # attachment point on the base glyphs(s) name
-    <anchor>  mark <named mark glyphclass> +
+    # attachment point on the base glyph(s)
+    <anchor> mark <named mark glyphclass> +
     ;
 ```
 
 Each `<anchor>` [§[2.e.vii](#2.e.vii)] indicates the anchor point on the base
-glyph(s) to which the mark class’s anchor point should be attached.
+glyph(s) to which the mark class’ anchor point should be attached.
 
 A single Mark-To-Base statement must specify all the anchor points and their
 attaching mark classes.
 
-This rule type does not actually support base glyph classes: the feature file
+This rule type does not actually support base glyph classes; the feature file
 syntax allows this in order to compactly specify Mark-To-Base rules for the set
 of glyphs which have the same anchor points. A feature file rule which uses a
 glyph class for the base glyph is expanded in the font to a separate rule for
@@ -2136,7 +2137,7 @@ The named mark glyph classes and the anchor points of all the mark glyphs in the
 named mark classes must have been previously defined in the feature file by
 markClass statements [§[4.f](#4.f)].
 
-**NOTE!** The mark classes used within a single lookup must be disjoint: none
+**Note:** The mark classes used within a single lookup must be disjoint: none
 may include a glyph which is in another mark class that is used within the same
 lookup.
 
@@ -2170,7 +2171,7 @@ position ligature <ligature glyph|glyphclass>   # ligature glyph or glyph class
 
     # Anchor and named mark glyph class, repeated for
     # each anchor point on the next component glyph:
-    <anchor> mark <named mark glyph class>
+    <anchor> mark <named mark glyph class> +
 
     # Additional blocks of ligComponent plus anchor and named mark glyph class
     ;
@@ -2219,9 +2220,10 @@ number of components and the same anchor positions on each component.
 A Mark-to-Mark Pos rule is specified as:
 
 ```fea
-position mark <glyph|glyphclass>  # base mark glyph(s)
-    # anchor and mark glyph class; repeated for each attachment point on the base glyphs(s) name:
-    <anchor>  mark <named mark glyphclass> +
+position mark <glyph|glyphclass> # mark glyph(s)
+    # Anchor and mark glyph class, repeated for each
+    # attachment point on the mark glyph(s)
+    <anchor> mark <named mark glyphclass> +
     ;
 ```
 
@@ -2326,7 +2328,7 @@ applied, and the implementation may not warn if the referenced lookup does not
 contain a rule that matches the context.
 
 When it is acceptable to specify a positioning rule for only one input glyph or
-glyphclass in the input sequence, and that the referenced lookup have the same
+glyph class in the input sequence, and that the referenced lookup have the same
 lookup flag as the parent contextual lookup, then you can specify a contextual
 rule with the positioning rule in-line. This is much easier to understand.
 
@@ -2456,10 +2458,10 @@ context, you need to put the mark and kern rules in different lookups.
 ###### Example 4:
 
 ```fea
-mark sukun <anchor 0 0>  @TOP_CLASS;
+mark sukun <anchor 0 0> @TOP_CLASS;
 
 lookup MARK_POS {
-    position lam_meem_jeem' <anchor 625 1800>  mark @TOP_CLASS alef;
+    position lam_meem_jeem' <anchor 625 1800> mark @TOP_CLASS alef;
 } MARK_POS;
 
 lookup MARK_KERN {
@@ -2815,7 +2817,7 @@ as any another localized name strings that may be useful.
 If the font is not part of such a group, then the `sizemenuname` statements must
 be omitted, and all fields but the first (design size) for the parameter
 statement must be set to 0. This form may be abbreviated by setting the
-subfmaily identifer to 0, and omitting the two remaining zeros. For example:
+subfamily identifier to 0, and omitting the two remaining zeros. For example:
 
 ```fea
 parameters 10.0 0;  # Indicate intended design size to be 10 pts.
@@ -2847,9 +2849,9 @@ block is:
 
 ```fea
 featureNames {
-    name <platform ID> <script ID> <language ID> <text string> ;
+    name <platform ID> <script ID> <language ID> <text string>;
     # This name entry is repeated for every script and language to be supported.
-} ;
+};
 ```
 
 The syntax for the individual name string entries is similar to that of the name
@@ -2902,11 +2904,12 @@ hexadecimal notation: the value must be preceded by '0x' if it is a hexadecimal
 value. The 24 bit field means that the largest Unicode value allowed is ((1<<24)
 -1), aka, 0xFFFFFF
 
-The intent of the NameID entries is described in the OpenType spec document :
+The intent of the NameID entries is described in the OpenType spec document:
 [OpenType Layout tag registry — section on feature tags, tag name `cv01` -
 `cv99`](https://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#cv01-cv99).
-Note: The `ParamUILabelNameID` entries are used when one base glyph is mapped to
-more than one variant; the font designer may then specify one
+
+**Note:** The `ParamUILabelNameID` entries are used when one base glyph is mapped
+to more than one variant; the font designer may then specify one
 `ParamUILabelNameID` for each variant, in order to uniquely describe that
 variant. If any `ParamUILabelNameID` entries are specified, the number of
 `ParamUILabelNameID` entries must match the number of variants for each base
@@ -2919,19 +2922,19 @@ The syntax for a `cvParameters` block is:
 ```fea
 cvParameters {
     FeatUILabelNameID {
-        name <platform ID> <script ID> <language ID> <text string> ;
+        name <platform ID> <script ID> <language ID> <text string>;
     };
     FeatUITooltipTextNameID {
-        name <platform ID> <script ID> <language ID> <text string> ;
+        name <platform ID> <script ID> <language ID> <text string>;
     };
     SampleTextNameID {
-        name <platform ID> <script ID> <language ID> <text string> ;
+        name <platform ID> <script ID> <language ID> <text string>;
     };
     ParamUILabelNameID {
-        name <platform ID> <script ID> <language ID> <text string> ;
+        name <platform ID> <script ID> <language ID> <text string>;
     };
 
-    Character <Unicode value string> ;
+    Character <Unicode value string>;
 };
 ```
 
@@ -2950,7 +2953,7 @@ feature cv01 {
 
         FeatUILabelNameID {
             name 3 1 0x0409 "uilabel simple a";  # English US
-            name 1 0 0 "uilabel  simple a";  # Mac English
+            name 1 0 0 "uilabel simple a";  # Mac English
         };
 
         FeatUITooltipTextNameID {
@@ -2985,9 +2988,9 @@ feature cv01 {
 <a name="9"></a>
 ## 9. Specifying or overriding table values
 
-In addition to GSUB and GPOS OpenType layout features, the feature file provides
-for specifying or overriding values in certain other tables. These are specified
-within the corresponding table block:
+In addition to GSUB and GPOS OpenType layout features, the feature file syntax
+enables specifying or overriding values in certain other tables. These are
+specified within the corresponding table block:
 
 ```fea
 table <table tag> {
@@ -3037,8 +3040,8 @@ A `<script record>` is of the form:
 The baseline tags for each `BaseTagList` must be sorted in increasing ASCII
 order.
 
-The number of baseline values for a particular script should be the same as the
-same as the number of baseline tags in the corresponding `BaseTagList`.
+The number of baseline values for a particular script should be the same as
+the number of baseline tags in the corresponding `BaseTagList`.
 
 A `<minmax record>` _[ currently not implemented ]_ is of the form:
 
@@ -3078,7 +3081,7 @@ table GDEF {
     LigatureCaretByDev # Currently not implemented
     LigatureCaretByPos <glyph|glyphclass> <caret position value>+;
     LigatureCaretByIndex <glyph|glyphclass> <caret contour point index value>+;
-} GDEF:
+} GDEF;
 ```
 
 The number of `<caret value>`s specified for a LigatureCaret must be: (number of
@@ -3095,34 +3098,34 @@ table GDEF {
     Attach noon.final 5;
     Attach noon.initial 4;
     LigatureCaretByPos f_f_l 400 600;
-    LigatureCaretByPos [c_t c_s]  500;
+    LigatureCaretByPos [c_t c_s] 500;
     LigatureCaretByIndex f_f_i 23 46;
 } GDEF;
 ```
 
-The four class names in the `GlyphClassDef` are separated by commas. If you omit
-a class definition, you must still indicate its position with a comma. By the
-OpenType spec, any glyph not included in one of the class definition will be
-assigned glyph class index 0, and will not be included in any of the
-`GlyphClass` classes.
+The four class names following `GlyphClassDef` must be separated by commas. Any
+classes can be omitted, but all the commas are required. According to the OpenType
+specification, any glyph not included in one of the class definitions will be
+assigned glyph class index 0, and will not be included in any of the `GlyphClassDef`
+classes.
 
-The MarkAttach classes of the GDEF table may not be specified explicitly in
+The **MarkAttach** classes of the GDEF table may not be specified explicitly in
 feature file syntax. They are instead created by the implementation from use of
 the `lookupflag MarkAttachmentType <class name>` statements. The class names may
 be from either regular classes definitions or mark class definitions.
 
-The MarkGlyphSets classes of the GDEF table may not be specified explicitly in
+The **MarkGlyphSets** classes of the GDEF table may not be specified explicitly in
 feature file syntax. They are instead created by the implementation from use of
 the `lookupflag UseMarkFilteringSet <class name>` statements. The class names
 may be from either regular classes definitions or mark class definitions.
 
 If any mark class has been defined, or if any of the lookup flags for skipping
 glyphs of a certain class have been seen, the implementation will check if the
-GDEF keywords for defining the GlyphClassDefinition has been seen. If not, the
+GDEF keywords for defining the `GlyphClassDef` has been seen. If not, the
 implementation will fill them from the substitution and positioning rules, and
 will create a GDEF table even if there is no GDEF definition in the feature
-file. The LIGATURE and COMPONENT classes well be filled from the glyphs used in
-any GSUB Lookup Type 4, Ligature Substitution. The Marks class will be filled
+file. The LIGATURE and COMPONENT classes will be filled from the glyphs used in
+any GSUB Lookup Type 4, Ligature Substitution. The MARKS class will be filled
 from all the glyphs in any of the mark classes used in positioning rules.
 
 <a name="9.c"></a>
@@ -3218,7 +3221,7 @@ A name record is of the form:
 nameid <id> [<string attribute>] <string>;
 ```
 
-An `<id>` is a number specifying the id of the name string to be added to the
+An `<id>` is a number specifying the ID of the name string to be added to the
 name table. Note that IDs 2 and 6 (Family, Subfamily, Unique, Full, Version, and
 FontName) are reserved by the implementation and cannot be overridden; doing so
 will elicit a warning message and the record will be ignored.
@@ -3226,9 +3229,9 @@ will elicit a warning message and the record will be ignored.
 An optional `<string attribute>` is one or three space delimited numbers that
 specify the platform, platform-specific, and language IDs to be stored in the
 name record of the name table. If only one number is specified it represents the
-platform id. The platform id may be either 1 or 3, corresponding to the
+platform ID. The platform ID may be either 1 or 3, corresponding to the
 Macintosh or Microsoft (hereafter called Windows) platforms, respectively. The
-other id numbers must be in the range 0-65535 but are not otherwise validated.
+other ID numbers must be in the range 0-65535 but are not otherwise validated.
 
 Consult the OpenType specification to obtain
 [Windows platform IDs](https://docs.microsoft.com/en-us/typography/opentype/spec/name#windows-encoding-ids),
@@ -3240,7 +3243,7 @@ Decimal numbers must begin with a non-0 digit, octal numbers with a 0 digit, and
 hexadecimal numbers with a 0x prefix to numbers and hexadecimal letters a-f or
 A-F.
 
-If some or all of the string attribute id numbers aren't specified their values
+If some or all of the string attribute ID numbers aren't specified their values
 are defaulted as follows:
 
 ```fea
@@ -3266,27 +3269,27 @@ that are assigned.
 
     representation              id  platform id platspec id language id
     --------------------------- --- ----------- ----------- -----------
-    nameid 1  <string>;         1   3           1           0x0409
+    nameid 1 <string>;          1   3           1           0x0409
     nameid 1 3 <string>;        1   3           1           0x0409
     nameid 1 3 S L <string>;    1   3           S           L
     nameid 1 1 <string>;        1   1           0           0
     nameid 1 1 S L <string>;    1   1           S           L
 
 A string is composed of 1-byte ASCII characters enclosed by ASCII double quote
-characters ("). Newlines embedded within the string are removed from the
+characters (`"`). Newlines embedded within the string are removed from the
 character sequence to be stored.
 
 Strings are converted to Unicode for the Windows platform by adding a high byte
 of 0. 2-byte Unicode values for the Windows platform may be specified using a
-special character sequence of a backslash character (\\) followed by exactly
+special character sequence of a backslash character (`\`) followed by exactly
 four hexadecimal numbers (of either case) which may not all be zero, e.g. \4e2d.
 The ASCII backslash character must be represented as the sequence \005c or \005C
 and the ASCII double quote character must be represented as the sequence \0022.
 
 There is no corresponding conversion to Unicode for the Macintosh platform but
 character codes in the range 128-255 may be specified using a special character
-sequence of a backslash character (\\) followed by exactly two hexadecimal
-numbers (of either case) which may not both be zero, e.g. \83 . The ASCII
+sequence of a backslash character (`\`) followed by exactly two hexadecimal
+numbers (of either case) which may not both be zero, e.g. \83. The ASCII
 backslash character must be represented as the sequence \5c or \5C and the ASCII
 double quote character must be represented as the sequence \22.
 
@@ -3323,19 +3326,21 @@ table OS/2 {
 } OS/2;
 ```
 
-Vendor should 4 character-long. If a shorter vendor id is given, it is
-automatically padded with spaces. A longer vendor id causes an error.
+`Vendor` should be 4 characters long. If a shorter vendor ID is given, it is
+automatically padded with spaces. A longer vendor ID causes an error.
 
 `<panose number>` is ten (decimal) numbers separated by spaces.
-`<Unicode range list>` is a space-separated list of Unicode bit numbers from the
-OpenType specification for the [ulUnicodeRange1-4 in the OS/2 table](https://docs.microsoft.com/en-us/typography/opentype/spec/os2#ur).
-`<code page list>` is a space-separated list of Windows code page numbers from the
-OpenType specification for the [ulCodePageRange1-2 in the OS/2 table](https://docs.microsoft.com/en-us/typography/opentype/spec/os2#cpr).
 
-`LowerOpSize` and `UpperOpSize` set the usLowerOpticalPointSize and
-usUpperOpticalPointSize fields. If these are set, then the OS/2 version must be
+`<Unicode range list>` is a space-separated list of Unicode bit numbers from the
+OpenType specification for the [**ulUnicodeRange1-4** in the OS/2 table](https://docs.microsoft.com/en-us/typography/opentype/spec/os2#ur).
+
+`<code page list>` is a space-separated list of Windows code page numbers from the
+OpenType specification for the [**ulCodePageRange1-2** in the OS/2 table](https://docs.microsoft.com/en-us/typography/opentype/spec/os2#cpr).
+
+`LowerOpSize` and `UpperOpSize` set the **usLowerOpticalPointSize** and
+**usUpperOpticalPointSize** fields. If these are set, then the OS/2 version must be
 set to at least 5 by the implementation. Note that the values for these fields
-are set in units of TWIPS, or 20 x point size.
+are set in units of TWIPS, or 20 × point size.
 
 ###### Example:
 
@@ -3399,9 +3404,9 @@ table vhea {
 
 In OpenType, each glyph may have a unique vertical origin y coordinate and a
 unique vertical advance width. By default, for each glyph the vertical origin y
-coordinate is set to the value of the OS/2.TypoAscender field, and the vertical
+coordinate is set to the value of the **OS/2.TypoAscender** field, and the vertical
 advance width is set to the distance between the values of the of
-OS/2.TypoAscender and the OS/2.TypoDescender. However, other values may be
+**OS/2.TypoAscender** and the **OS/2.TypoDescender**. However, other values may be
 assigned to a glyph as follows:
 
 ```fea
@@ -3413,16 +3418,16 @@ table vmtx {
 
 This would result in the glyph’s vertical origin y coordinate and the glyph’s
 vertical advance width being set as shown. The value set here for the vertical
-origin y coordinate will also set the topSideBearing value in the `vmtx` table
+origin y coordinate will also set the **topSideBearing** value in the `vmtx` table
 and the vertical origin y value in the `VORG` table for the named glyph.
 
 For example:
 
 ```fea
 table vmtx {
-    VertOriginY \711  864;
-    VertOriginY \712  867;
-    VertOriginY \713  866;
+    VertOriginY \711 864;
+    VertOriginY \712 867;
+    VertOriginY \713 866;
 } vmtx;
 ```
 
@@ -3529,11 +3534,11 @@ along with the tag `sbit`.
 **v1.19 [26 April 2016]:**
 
 *   Corrected statement about assigning glyphs to GDEF mark GlyphClass in section
-    [4.f markClass](#4.f)
+    [4.f markClass](#4.f).
 *   Added statement about single vs enum kern pair priorities when kern pair
     position rules conflict: see section [6.b.ii Enumerating pairs](#6.b.ii).
 *   Fixed missing angle brackets in ValueRecordDef example.
-*   Clarified that langsys rules cannot be used in standalone lookups.
+*   Clarified that languagesystem rules cannot be used in standalone lookups.
 *   Clarified `ignore sub` syntax.
 *   Clarified keyword scoping rules.
 *   Clarified that a glyph can have only either one position or index caret rule,
@@ -3562,7 +3567,7 @@ along with the tag `sbit`.
 
 **v1.14 [16 April 2015]:**
 
-*   Fix typo in GDEF table table spec, reported by Khaled Hosny
+*   Fix typo in GDEF table spec, reported by Khaled Hosny.
 
 **v1.13 [28 July 2014]:**
 
@@ -3573,7 +3578,7 @@ along with the tag `sbit`.
 
 **v1.12 [21 March 2014]:**
 
-*   Clarified that specific glyph pairs should precede class kern pairs, in section 6.b.i
+*   Clarified that specific glyph pairs should precede class kern pairs, in section 6.b.i.
 *   Removed excessive white space in section 4.d. lookupflag.
 *   Added two new keywords to set the OS/2 table fields usLowerOpticalPointSize
     and usUpperOpticalPointSize. These fields were added in version 5 of the
@@ -3600,33 +3605,33 @@ along with the tag `sbit`.
 
 **v1.8 [16 Dec 2008]:**
 
-*   Revised syntax for mark attachment lookups and the GDEF table
+*   Revised syntax for mark attachment lookups and the GDEF table.
 *   Revised syntax for the lookupflag statement.
-*   Added new syntax for contextual rules
+*   Added new syntax for contextual rules.
 *   Revised the description of how language systems work.
 *   Revised syntax to allow standalone lookups.
-*   Added syntax for named value records and anchors
-*   Added syntax for descriptive names for stylistic substitution features
+*   Added syntax for named value records and anchors.
+*   Added syntax for descriptive names for stylistic substitution features.
 
 **v1.7 [25 Oct 2006]:**
 
-*   Fixed incorrect sign for winAscent keyword
-*   Extended discussion of DFLT script tag and useExtension keyword.
+*   Fixed incorrect sign for winAscent keyword.
+*   Extended documentation of DFLT script tag and useExtension keyword.
 *   Fixed minor typos.
 
 **v1.6 [28 March 2006]:**
 
-*   Added discussion of contextual chaining positioning, and how it is supported.
-*   Extended discussion of size feature
+*   Added documentation of contextual chaining positioning, and how it is supported.
+*   Extended documentation of size feature.
 *   Fixed minor typos.
 
 **v1.5 [23 November 2005]:**
 
-*   Expanded discussion of languagesystem, script, and language keywords to
+*   Expanded documentation of languagesystem, script, and language keywords to
     describe newly added support for DFLT script, and correctly describe
     handling of `dflt` lookups.
 *   Added OS/2 keywords winAscent, winDescent, and hhea keywords Ascender,
-    Descender, and LineGap
+    Descender, and LineGap.
 *   Added supported size table values as decimal fractions as well as decipoints,
     e.g “10.0” as well as “100” for a point size of 10.
 *   Added supported OS/2 keyword `fsType` as well as `FSType`.
@@ -3651,7 +3656,7 @@ along with the tag `sbit`.
 
 **v1.3 [23 May 2002]:**
 
-*   Added support for Vendor tag in OS/2 table
+*   Added support for Vendor tag in OS/2 table.
 
 **v1.2 [7 March 2001; HOT library v01.00.29]:**
 
@@ -3741,12 +3746,12 @@ a message will be emitted encouraging users to update the syntax.
 
 **v0.4 [20 January 1999]:**
 
-*   HTML-formatted the document
-*   Updated glyph name attributes
-*   MM metrics can be represented by a single number if constant across masters
-*   OS/2.XHeight,CapHeight,TypoLineGap overrides
-*   hhea.CaretOffset override
-*   vhea.VertTypoAscender,VertTypoDescender,VertTypoLineGap overrides
+*   HTML-formatted the document.
+*   Updated glyph name attributes.
+*   MM metrics can be represented by a single number if constant across masters.
+*   OS/2.XHeight, CapHeight, TypoLineGap overrides.
+*   hhea.CaretOffset override.
+*   vhea.VertTypoAscender, VertTypoDescender, VertTypoLineGap overrides.
 
 **v0.3 [9 October 1998]:**
 

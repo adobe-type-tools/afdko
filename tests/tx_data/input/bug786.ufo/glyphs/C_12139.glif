@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="C12139" format="1">
+  <advance height="1000" width="1000"/>
+  <outline>
+    <contour>
+      <point x="874" y="-110" type="line"/>
+      <point x="985" y="-35" type="line"/>
+      <point x="844" y="200" type="line"/>
+      <point x="156" y="200" type="line"/>
+      <point x="15" y="-35" type="line"/>
+      <point x="126" y="-110" type="line"/>
+      <point x="235" y="62" type="line"/>
+      <point x="765" y="62" type="line"/>
+    </contour>
+    <contour>
+      <point x="44" y="-29" type="line"/>
+      <point x="170" y="178" type="line"/>
+      <point x="830" y="178" type="line"/>
+      <point x="956" y="-29" type="line"/>
+      <point x="880" y="-79" type="line"/>
+      <point x="778" y="84" type="line"/>
+      <point x="222" y="84" type="line"/>
+      <point x="120" y="-79" type="line"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.schriftgestaltung.Glyphs.lastChange</key>
+      <string>2019-04-08 04:32:03 +0000</string>
+      <key>public.markColor</key>
+      <string>0.04,0.57,0.04,1</string>
+    </dict>
+  </lib>
+</glyph>

@@ -1,6 +1,15 @@
 Changelog
 =========
 
+2.8.9 (released 2019-04-29)
+---------------------------
+
+- OpenType Feature File specification was converted to markdown
+  and is now hosted at https://adobe-type-tools.github.io/afdko/OpenTypeFeatureFileSpecification.html
+  ([#777](https://github.com/adobe-type-tools/afdko/pull/777))
+- [tx] Ignore height advance value in UFO glyph files
+  ([#786](https://github.com/adobe-type-tools/afdko/issues/786))
+
 2.8.8 (released 2019-03-15)
 ---------------------------
 

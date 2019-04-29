@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ascender</key>
+	<integer>880</integer>
+	<key>capHeight</key>
+	<integer>700</integer>
+	<key>descender</key>
+	<integer>-120</integer>
+	<key>familyName</key>
+	<string>InsideAJ16JPSymbol</string>
+	<key>openTypeHeadCreated</key>
+	<string>2014/02/06 08:54:23</string>
+	<key>openTypeNamePreferredFamilyName</key>
+	<string>InsideAJ16JPSymbol</string>
+	<key>openTypeNamePreferredSubfamilyName</key>
+	<string>EL</string>
+	<key>openTypeOS2Type</key>
+	<array>
+		<integer>2</integer>
+	</array>
+	<key>openTypeOS2WeightClass</key>
+	<integer>200</integer>
+	<key>openTypeOS2WidthClass</key>
+	<integer>5</integer>
+	<key>postscriptBlueValues</key>
+	<array>
+		<integer>-250</integer>
+		<integer>-250</integer>
+		<integer>1100</integer>
+		<integer>1100</integer>
+	</array>
+	<key>postscriptFamilyBlues</key>
+	<array>
+		<integer>0</integer>
+		<integer>20</integer>
+	</array>
+	<key>postscriptFamilyOtherBlues</key>
+	<array>
+	</array>
+	<key>postscriptFontName</key>
+	<string>InsideAJ16JPSymbol-EL</string>
+	<key>postscriptOtherBlues</key>
+	<array>
+	</array>
+	<key>postscriptStemSnapH</key>
+	<array>
+		<integer>1</integer>
+	</array>
+	<key>postscriptStemSnapV</key>
+	<array>
+		<integer>1</integer>
+	</array>
+	<key>styleMapFamilyName</key>
+	<string>InsideAJ16JPSymbol EL</string>
+	<key>styleMapStyleName</key>
+	<string>regular</string>
+	<key>styleName</key>
+	<string>EL</string>
+	<key>unitsPerEm</key>
+	<integer>1000</integer>
+	<key>versionMajor</key>
+	<integer>1</integer>
+	<key>versionMinor</key>
+	<integer>0</integer>
+	<key>xHeight</key>
+	<integer>500</integer>
+</dict>
+</plist>
