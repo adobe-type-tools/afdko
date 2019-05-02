@@ -33,8 +33,19 @@ kMaxStack = 48
 kTempCFFSuffix = ".temp.cff"
 kTempCFF2File = "test.cff2"
 
-# setup basic logging to enable fontTools errors to peek thru
-logging.basicConfig()
+
+# set up for printing progress notes
+def progress(self, message, *args, **kws):
+    # Note: message must contain the format specifiers for any strings in args.
+    level = self.getEffectiveLevel()
+    self._log(level, message, args, **kws)
+
+
+PROGRESS_LEVEL = logging.INFO+5
+PROGESS_NAME = "progress"
+logging.addLevelName(PROGRESS_LEVEL, PROGESS_NAME)
+logger = logging.getLogger(__name__)
+logging.Logger.progress = progress
 
 
 class ACFontError(KeyError):
@@ -976,6 +987,15 @@ def get_options(args):
         var_font_path = os.path.splitext(options.design_space_path)[0] + '.otf'
         options.var_font_path = var_font_path
 
+    if not options.verbose:
+        level = PROGRESS_LEVEL
+        logging.basicConfig(level=level, format="%(message)s")
+    else:
+        if options.verbose:
+            level = logging.INFO
+        logging.basicConfig(level=level)
+    logger.setLevel(level)
+
     return options
 
 
@@ -988,8 +1008,8 @@ def run(args=None):
     options = get_options(args)
 
     if parse_version(fontToolsVersion) < parse_version("3.19"):
-        print("Quitting. The Python fonttools module must be at least 3.19.0 "
-              "in order for buildcff2vf to work.")
+        logger.error("Quitting. The Python fonttools module "
+                     "must be at least version 3.41.0")
         return
 
     designSpacePath = options.design_space_path
@@ -997,13 +1017,14 @@ def run(args=None):
     post_format_3 = not options.keep_glyph_names
     if os.path.exists(varFontPath):
         os.remove(varFontPath)
+    logger.progress("Building VF font...")
     varFont, varModel, masterPaths = varLib.build(designSpacePath,
                                                   otfFinder, exclude=("CFF2",))
 
     blendError = buildCFF2Font(varFontPath, varFont, varModel, masterPaths,
                                post_format_3)
     if not blendError:
-        print("Built variable font '%s'" % (varFontPath))
+        logger.progress("Built variable font '%s'" % (options.var_font_path))
 
 
 if __name__ == '__main__':
