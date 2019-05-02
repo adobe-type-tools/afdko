@@ -21,7 +21,7 @@ def test_cjk_vf():
     temp_dir = os.path.join(tempfile.mkdtemp(), 'CJKVar')
     copytree(input_dir, temp_dir)
     ds_path = os.path.join(temp_dir, 'CJKVar.designspace')
-    runner(CMD + ['-o', 'p', '_{}'.format(ds_path)])
+    runner(CMD + ['-o', 'd', '_{}'.format(ds_path)])
     actual_path = os.path.join(temp_dir, 'CJKVar.otf')
     actual_ttx = generate_ttx_dump(actual_path,
                                    ['CFF2', 'HVAR', 'avar', 'fvar'])

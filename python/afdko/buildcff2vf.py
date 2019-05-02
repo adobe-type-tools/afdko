@@ -2,47 +2,7 @@
 
 from __future__ import print_function, division, absolute_import
 
-__usage__ = """
-buildcff2vf.py  1.14.2 Feb 1 2019
-Build a variable font from a designspace file and the UFO master source fonts.
-
-python buildcff2vf.py -h
-python buildcff2vf.py -u
-python buildcff2vf.py <path to designspace file> (<optional path to output
-                                                               variable font>)
-"""
-
-__help__ = __usage__ + """
-Options:
--p   Use 'post' table format 3.
-
-The script makes a number of assumptions.
-1) all the master source fonts are blend compatible in all their data.
-2) The source OTF files are in the same directory as the master source
-   fonts, and have the same file name but with an extension of '.otf'
-   rather than '.ufo'.
-3) The master source OTF fonts were built with the companion script
-   'buildmasterotfs.py'. This does a first pass of compatibilization
-   by using 'tx' with the '-no_opt' option to undo T2 charstring
-   optimization applied by makeotf.
-
-The variable font inherits all the OpenType Tables except CFF2 and GPOS
-from the default master source font. The default font is flagged in the
-designspace file by having the element "<info copy="1" />" in the <source>
-element.
-
-The width values and the GPOS positioning data are drawn from all the
-master source fonts, so each must be built with with a full set of GPOS
-features.
-
-The companion script buildmasterotfs.py will build the master source OTFs
-from the designspace file.
-
-Any python interpreter may be used to run the script, as long as it has
-installed the latest version of the fonttools module from
-https://github.com/fonttools/fonttools
-"""
-
+import argparse
 import collections
 import io
 import logging
@@ -62,6 +22,8 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 from pkg_resources import parse_version
+
+__version__ = '1.15.0'
 
 XML = ET.XML
 XMLElement = ET.Element
@@ -955,34 +917,84 @@ def otfFinder(s):
     return s.replace('.ufo', '.otf')
 
 
+def _validate_path(path_str):
+    # used for paths passed to get_options.
+    valid_path = os.path.abspath(os.path.realpath(path_str))
+    if not os.path.exists(valid_path):
+        raise argparse.ArgumentTypeError(
+            "'{}' is not a valid path.".format(path_str))
+    return valid_path
+
+
+def get_options(args):
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawTextHelpFormatter,
+        description=__doc__
+    )
+    parser.add_argument(
+        '--version',
+        action='version',
+        version=__version__
+    )
+    parser.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        default=0,
+        help='verbose mode\n'
+             'Use -vv for debug mode'
+    )
+    parser.add_argument(
+        '-d',
+        '--designspace',
+        metavar='PATH',
+        dest='design_space_path',
+        type=_validate_path,
+        help='path to design space file\n',
+        required=True
+    )
+    parser.add_argument(
+        '-o',
+        '--out',
+        metavar='PATH',
+        dest='var_font_path',
+        help='path to output variable font file. Default is base name\n'
+        'of the design space file.\n',
+        default=None,
+    )
+    parser.add_argument(
+        '-k',
+        '--keep_glyph_names',
+        dest='keep_glyph_names',
+        action='store_true',
+        help='Preserve glyph names in output var font, with a post table\n'
+        'format 2.\n',
+        default=False,
+    )
+    options = parser.parse_args(args)
+    if not options.var_font_path:
+        var_font_path = os.path.splitext(options.design_space_path)[0] + '.otf'
+        options.var_font_path = var_font_path
+
+    return options
+
+
 def run(args=None):
     post_format_3 = False
-    if not args:
+
+    if args is None:
         args = sys.argv[1:]
-    if '-u' in args:
-        print(__usage__)
-        return
-    if '-h' in args:
-        print(__help__)
-        return
-    if '-p' in args:
-        post_format_3 = True
-        args.remove('-p')
+
+    options = get_options(args)
 
     if parse_version(fontToolsVersion) < parse_version("3.19"):
         print("Quitting. The Python fonttools module must be at least 3.19.0 "
               "in order for buildcff2vf to work.")
         return
 
-    if len(args) == 2:
-        designSpacePath, varFontPath = args
-    elif len(args) == 1:
-        designSpacePath = args[0]
-        varFontPath = os.path.splitext(designSpacePath)[0] + '.otf'
-    else:
-        print(__usage__)
-        return
-
+    designSpacePath = options.design_space_path
+    varFontPath = options.var_font_path
+    post_format_3 = not options.keep_glyph_names
     if os.path.exists(varFontPath):
         os.remove(varFontPath)
     varFont, varModel, masterPaths = varLib.build(designSpacePath,
