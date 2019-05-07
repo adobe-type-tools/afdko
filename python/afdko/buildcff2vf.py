@@ -3,10 +3,12 @@
 from __future__ import print_function, division, absolute_import
 
 import argparse
+from ast import literal_eval
 from copy import deepcopy
 import logging
 import os
 from pkg_resources import parse_version
+import re
 import sys
 
 from fontTools import varLib, version as fontToolsVersion
@@ -14,6 +16,7 @@ from fontTools.cffLib.specializer import commandsToProgram
 from fontTools.designspaceLib import DesignSpaceDocument
 from fontTools.misc.fixedTools import otRound
 from fontTools.misc.psCharStrings import T2OutlineExtractor, T2CharString
+from fontTools.ttLib import TTFont
 from fontTools.varLib.cff import CFF2CharStringMergePen
 
 __version__ = '1.15.0'
@@ -96,6 +99,15 @@ def get_options(args):
         'curves.\n',
         default=False,
     )
+    parser.add_argument(
+        '-i',
+        '--include_glyphs_path',
+        metavar='PATH',
+        dest='include_glyphs_path',
+        type=_validate_path,
+        help='Path to file containing a python dict specifying which\n'
+        'glyph names should be included from which source fonts.\n'
+    )
     options = parser.parse_args(args)
     if not options.var_font_path:
         var_font_path = os.path.splitext(options.design_space_path)[0] + '.otf'
@@ -111,6 +123,58 @@ def get_options(args):
     logger.setLevel(level)
 
     return options
+
+
+def getSubset(subset_Path):
+    if not os.path.exists(subset_Path):
+        raise ValueError("could not find subset file path", subset_Path)
+    fp = open(subset_Path, "rt")
+    text_lines = fp.readlines()
+    locationDict = {}
+    cur_key_list = None
+    for li, line in enumerate(text_lines):
+        idx = line.find('#')
+        if idx >= 0:
+            line = line[:idx]
+        line = line.strip()
+        if not line:
+            continue
+        if line[0] == "(":
+            cur_key_list = []
+            location_list = literal_eval(line)
+            for location_entry in location_list:
+                cur_key_list.append(location_entry)
+                if location_entry not in locationDict:
+                    locationDict[location_entry] = []
+        else:
+            m = re.match(r"(\S+)", line)
+            if m:
+                if cur_key_list is None:
+                    logger.error(
+                        "Error parsing subset file. "
+                        "Seeing a glyph name record before "
+                        "seeing a location record.")
+                    logger.error("Line number: {}.".format(li))
+                    logger.error("Line text: {}.".format(line))
+                for key in cur_key_list:
+                    locationDict[key].append(m.group(1))
+    return locationDict
+
+
+def subset_masters(designspace, subsetDict):
+    from fontTools import subset
+    subset_options = subset.Options(notdef_outline=True)
+    for ds_source in designspace.sources:
+        key = tuple(ds_source.location.items())
+        included = set(subsetDict[key])
+        ttf_font = ds_source.font
+        subsetter = subset.Subsetter(options=subset_options)
+        subsetter.populate(glyphs=included)
+        subsetter.subset(ttf_font)
+        subset_path = os.path.splitext(ds_source.path)[0] + ".subset.otf"
+        logger.progress("Saving subset font %s", subset_path)
+        ttf_font.save(subset_path)
+        ds_source.font = TTFont(subset_path)
 
 
 class MergeTypeError(Exception):
@@ -400,6 +464,12 @@ def run(args=None):
     for i, master_font in enumerate(master_fonts):
         designspace.sources[i].font = master_font
 
+    # Subset source fonts
+    if options.include_glyphs_path:
+        logger.progress("Subsetting source fonts...")
+        subsetDict = getSubset(options.include_glyphs_path)
+        subset_masters(designspace, subsetDict)
+
     if options.check_compatibility:
         logger.progress("Checking outline compatibility in source fonts...")
         font_list = [src.font for src in designspace.sources]
@@ -411,9 +481,9 @@ def run(args=None):
         do_compatibility(vf, font_list)
 
     logger.progress("Building VF font...")
-    # Note that we now pass in the design space object, not a path
-    # to the design space file, in order to pass in the 
-    # modified sources fonts without having to recompile and save them.
+    # Note that we now pass in the design space object, rather than a path to
+    # the design space file, in order to pass in the modified source fonts
+    # fonts without having to recompile and save them.
     varFont, _, _ = varLib.build(designspace, otfFinder)
 
     if options.keep_glyph_names:
