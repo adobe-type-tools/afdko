@@ -16,6 +16,19 @@ CMD = ['-t', TOOL]
 # Tests
 # -----
 
+def test_rvrn_vf():
+    input_dir = get_input_path('GSUBVar')
+    temp_dir = os.path.join(tempfile.mkdtemp(), 'GSUBVar')
+    copytree(input_dir, temp_dir)
+    ds_path = os.path.join(temp_dir, 'GSUBVar.designspace')
+    runner(CMD + ['-o', 'd', '_{}'.format(ds_path)])
+    actual_path = os.path.join(temp_dir, 'GSUBVar.otf')
+    actual_ttx = generate_ttx_dump(actual_path,
+                                   ['CFF2', 'GSUB', 'avar', 'fvar'])
+    expected_ttx = get_expected_path('GSUBVar.ttx')
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
 def test_cjk_vf():
     input_dir = get_input_path('CJKVar')
     temp_dir = os.path.join(tempfile.mkdtemp(), 'CJKVar')
