@@ -27,3 +27,22 @@ def test_cjk_vf():
                                    ['CFF2', 'HVAR', 'avar', 'fvar'])
     expected_ttx = get_expected_path('CJKVar.ttx')
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
+def test_parse_cjk_vf():
+    # subset fonts to lists in 'SHSansJPVFTest.subset.txt'
+    # Check compatibility. Issue is in cid00089.
+    # keep PostScript names
+    input_dir = get_input_path('CJKSparseVar')
+    temp_dir = os.path.join(tempfile.mkdtemp(), 'CJKSparseVar')
+    copytree(input_dir, temp_dir)
+    ds_path = os.path.join(temp_dir, 'SHSansJPVFTest.designspace')
+    subset_path = os.path.join(temp_dir, 'SHSansJPVFTest.subset.txt')
+    runner(CMD + [
+                '-o', 'd', '_{}'.format(ds_path),
+                'i', '_{}'.format(subset_path), 'c', 'k'])
+    actual_path = os.path.join(temp_dir, 'SHSansJPVFTest.otf')
+    actual_ttx = generate_ttx_dump(actual_path,
+                                   ['CFF2', 'HVAR', 'avar', 'fvar'])
+    expected_ttx = get_expected_path('SHSansJPVFTest.ttx')
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
