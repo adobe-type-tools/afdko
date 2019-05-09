@@ -110,7 +110,7 @@
 		DE8577C52192544500D4F584 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1010;
+				LastUpgradeCheck = 1020;
 				ORGANIZATIONNAME = Adobe;
 				TargetAttributes = {
 					DE8577CC2192544500D4F584 = {
@@ -124,6 +124,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = DE8577C42192544500D4F584;
 			productRefGroup = DE8577CE2192544500D4F584 /* Products */;
@@ -264,7 +265,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = DEB51F1521936C12003011C0 /* debug.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_CXX_LIBRARY = "compiler-default";
@@ -296,7 +296,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = DEB51F1621936C1F003011C0 /* release.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_CXX_LIBRARY = "compiler-default";
