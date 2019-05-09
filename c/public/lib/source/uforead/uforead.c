@@ -3607,7 +3607,6 @@ int ufoBegFont(ufoCtx h, long flags, abfTopDict** top, char* altLayerDir) {
 int ufoEndFont(ufoCtx h) {
     if (h->stm.src)
         h->cb.stm.close(&h->cb.stm, h->stm.src);
-    memFree(h, h->top.FullName.ptr);
     return ufoSuccess;
 }
 
