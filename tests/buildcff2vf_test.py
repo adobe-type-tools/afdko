@@ -51,9 +51,8 @@ def test_parse_cjk_vf():
     copytree(input_dir, temp_dir)
     ds_path = os.path.join(temp_dir, 'SHSansJPVFTest.designspace')
     subset_path = os.path.join(temp_dir, 'SHSansJPVFTest.subset.txt')
-    runner(CMD + [
-                '-o', 'd', '_{}'.format(ds_path),
-                'i', '_{}'.format(subset_path), 'c', 'k'])
+    runner(CMD + ['-o', 'd', '_{}'.format(ds_path),
+                  'i', '_{}'.format(subset_path), 'c', 'k'])
     actual_path = os.path.join(temp_dir, 'SHSansJPVFTest.otf')
     actual_ttx = generate_ttx_dump(actual_path,
                                    ['CFF2', 'HVAR', 'avar', 'fvar'])

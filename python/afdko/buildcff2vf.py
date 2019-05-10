@@ -1,5 +1,9 @@
 # Copyright 2017 Adobe. All rights reserved.
 
+"""
+Builds a CFF2 variable font from a designspace file and its UFO masters.
+"""
+
 from __future__ import print_function, division, absolute_import
 
 import argparse
@@ -7,11 +11,10 @@ from ast import literal_eval
 from copy import deepcopy
 import logging
 import os
-from pkg_resources import parse_version
 import re
 import sys
 
-from fontTools import varLib, version as fontToolsVersion
+from fontTools import varLib
 from fontTools.cffLib.specializer import commandsToProgram
 from fontTools.designspaceLib import DesignSpaceDocument
 from fontTools.misc.fixedTools import otRound
@@ -19,7 +22,7 @@ from fontTools.misc.psCharStrings import T2OutlineExtractor, T2CharString
 from fontTools.ttLib import TTFont
 from fontTools.varLib.cff import CFF2CharStringMergePen
 
-__version__ = '1.15.0'
+__version__ = '2.0.0'
 
 
 # set up for printing progress notes
@@ -29,107 +32,16 @@ def progress(self, message, *args, **kws):
     self._log(level, message, args, **kws)
 
 
-PROGRESS_LEVEL = logging.INFO+5
+PROGRESS_LEVEL = logging.INFO + 5
 PROGESS_NAME = "progress"
 logging.addLevelName(PROGRESS_LEVEL, PROGESS_NAME)
 logger = logging.getLogger(__name__)
 logging.Logger.progress = progress
 
 
-def _validate_path(path_str):
-    # used for paths passed to get_options.
-    valid_path = os.path.abspath(os.path.realpath(path_str))
-    if not os.path.exists(valid_path):
-        raise argparse.ArgumentTypeError(
-            "'{}' is not a valid path.".format(path_str))
-    return valid_path
-
-
-def get_options(args):
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawTextHelpFormatter,
-        description=__doc__
-    )
-    parser.add_argument(
-        '--version',
-        action='version',
-        version=__version__
-    )
-    parser.add_argument(
-        '-v',
-        '--verbose',
-        action='count',
-        default=0,
-        help='verbose mode\n'
-             'Use -vv for debug mode'
-    )
-    parser.add_argument(
-        '-d',
-        '--designspace',
-        metavar='PATH',
-        dest='design_space_path',
-        type=_validate_path,
-        help='path to design space file\n',
-        required=True
-    )
-    parser.add_argument(
-        '-o',
-        '--out',
-        metavar='PATH',
-        dest='var_font_path',
-        help='path to output variable font file. Default is base name\n'
-        'of the design space file.\n',
-        default=None,
-    )
-    parser.add_argument(
-        '-k',
-        '--keep_glyph_names',
-        dest='keep_glyph_names',
-        action='store_true',
-        help='Preserve glyph names in output var font, with a post table\n'
-        'format 2.\n',
-        default=False,
-    )
-    parser.add_argument(
-        '-c',
-        '--compat',
-        dest='check_compatibility',
-        action='store_true',
-        help='Check outline compatibility in source fonts, and fix flat\n'
-        'curves.\n',
-        default=False,
-    )
-    parser.add_argument(
-        '-i',
-        '--include_glyphs_path',
-        metavar='PATH',
-        dest='include_glyphs_path',
-        type=_validate_path,
-        help='Path to file containing a python dict specifying which\n'
-        'glyph names should be included from which source fonts.\n'
-    )
-    options = parser.parse_args(args)
-    if not options.var_font_path:
-        var_font_path = os.path.splitext(options.design_space_path)[0] + '.otf'
-        options.var_font_path = var_font_path
-
-    if not options.verbose:
-        level = PROGRESS_LEVEL
-        logging.basicConfig(level=level, format="%(message)s")
-    else:
-        if options.verbose:
-            level = logging.INFO
-        logging.basicConfig(level=level)
-    logger.setLevel(level)
-
-    return options
-
-
 def getSubset(subset_Path):
-    if not os.path.exists(subset_Path):
-        raise ValueError("could not find subset file path", subset_Path)
-    fp = open(subset_Path, "rt")
-    text_lines = fp.readlines()
+    with open(subset_Path, "rt") as fp:
+        text_lines = fp.readlines()
     locationDict = {}
     cur_key_list = None
     for li, line in enumerate(text_lines):
@@ -171,7 +83,8 @@ def subset_masters(designspace, subsetDict):
         subsetter = subset.Subsetter(options=subset_options)
         subsetter.populate(glyphs=included)
         subsetter.subset(ttf_font)
-        subset_path = os.path.splitext(ds_source.path)[0] + ".subset.otf"
+        subset_path = '{}.subset.otf'.format(
+            os.path.splitext(ds_source.path)[0])
         logger.progress("Saving subset font %s", subset_path)
         ttf_font.save(subset_path)
         ds_source.font = TTFont(subset_path)
@@ -185,8 +98,8 @@ class CompatibilityPen(CFF2CharStringMergePen):
     def __init__(self, default_commands,
                  glyphName, num_masters, master_idx, roundTolerance=0.5):
         super(CompatibilityPen, self).__init__(
-                      default_commands, glyphName, num_masters, master_idx,
-                      roundTolerance=0.5)
+            default_commands, glyphName, num_masters, master_idx,
+            roundTolerance=0.5)
         self.fixed = False
 
     def add_point(self, point_type, pt_coords):
@@ -210,7 +123,7 @@ class CompatibilityPen(CFF2CharStringMergePen):
                     pt_coords = new_pt_coords
                 else:
                     success = self.check_and_fix_closepath(
-                            cmd, point_type, pt_coords)
+                        cmd, point_type, pt_coords)
                     if success:
                         # We may have incremented self.pt_index
                         cmd = self._commands[self.pt_index]
@@ -226,18 +139,18 @@ class CompatibilityPen(CFF2CharStringMergePen):
 
     def make_flat_curve(self, prev_coords, cur_coords):
         # Convert line coords to curve coords.
-        dx = self.roundNumber((cur_coords[0] - prev_coords[0])/3.0)
-        dy = self.roundNumber((cur_coords[1] - prev_coords[1])/3.0)
+        dx = self.roundNumber((cur_coords[0] - prev_coords[0]) / 3.0)
+        dy = self.roundNumber((cur_coords[1] - prev_coords[1]) / 3.0)
         new_coords = [prev_coords[0] + dx,
                       prev_coords[1] + dy,
-                      prev_coords[0] + 2*dx,
-                      prev_coords[1] + 2*dy
+                      prev_coords[0] + 2 * dx,
+                      prev_coords[1] + 2 * dy
                       ] + cur_coords
         return new_coords
 
     def make_curve_coords(self, coords, is_default):
         # Convert line coords to curve coords.
-        prev_cmd = self._commands[self.pt_index-1]
+        prev_cmd = self._commands[self.pt_index - 1]
         if is_default:
             new_coords = []
             for i, cur_coords in enumerate(coords):
@@ -252,6 +165,7 @@ class CompatibilityPen(CFF2CharStringMergePen):
         return new_coords
 
     def check_and_fix_flat_curve(self, cmd, point_type, pt_coords):
+        success = False
         if (point_type == 'rlineto') and (cmd[0] == 'rrcurveto'):
             is_default = False  # the line is in the master font we are adding
             pt_coords = self.make_curve_coords(pt_coords, is_default)
@@ -262,8 +176,6 @@ class CompatibilityPen(CFF2CharStringMergePen):
             cmd[1] = expanded_coords
             cmd[0] = point_type
             success = True
-        else:
-            success = False
         return success, pt_coords
 
     def check_and_fix_closepath(self, cmd, point_type, pt_coords):
@@ -295,7 +207,7 @@ class CompatibilityPen(CFF2CharStringMergePen):
 
             # The previous op must not close the path for this region font.
             prev_moveto_coords = self._commands[self.prev_move_idx][1][-1]
-            prv_coords = self._commands[self.pt_index-1][1][-1]
+            prv_coords = self._commands[self.pt_index - 1][1][-1]
             if prev_moveto_coords == prv_coords[-2:]:
                 return False
 
@@ -318,7 +230,7 @@ class CompatibilityPen(CFF2CharStringMergePen):
         if cmd[0] == 'rmoveto':
             # The previous op must not close the path for the default font.
             prev_moveto_coords = self._commands[self.prev_move_idx][1][0]
-            prv_coords = self._commands[self.pt_index-1][1][0]
+            prv_coords = self._commands[self.pt_index - 1][1][0]
             if prev_moveto_coords == prv_coords[-2:]:
                 return False
 
@@ -397,10 +309,9 @@ def do_compatibility(vf, master_fonts):
     default_charStrings = default_font['CFF '].cff.topDictIndex[0].CharStrings
     glyphOrder = default_font.getGlyphOrder()
     charStrings = [
-                font['CFF '].cff.topDictIndex[0].CharStrings for
-                font in master_fonts]
-    for gname in glyphOrder:
+        font['CFF '].cff.topDictIndex[0].CharStrings for font in master_fonts]
 
+    for gname in glyphOrder:
         all_cs = [_get_cs(glyphOrder, cs, gname) for cs in charStrings]
         if len([gs for gs in all_cs if gs is not None]) < 2:
             continue
@@ -426,7 +337,6 @@ def do_compatibility(vf, master_fonts):
             for i, cs in enumerate(cs_list):
                 mi = all_cs.index(cs)
                 charStrings[mi][gname] = fixed_cs_list[i]
-    return
 
 
 def otfFinder(s):
@@ -442,17 +352,95 @@ def add_glyph_names(tt_font, glyph_order):
     postTable.compile(tt_font)
 
 
-def run(args=None):
+def _validate_path(path_str):
+    # used for paths passed to get_options.
+    valid_path = os.path.abspath(os.path.realpath(path_str))
+    if not os.path.exists(valid_path):
+        raise argparse.ArgumentTypeError(
+            "'{}' is not a valid path.".format(path_str))
+    return valid_path
 
-    if args is None:
-        args = sys.argv[1:]
 
+def get_options(args):
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawTextHelpFormatter,
+        description=__doc__
+    )
+    parser.add_argument(
+        '--version',
+        action='version',
+        version=__version__
+    )
+    parser.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        default=0,
+        help='verbose mode\n'
+             'Use -vv for debug mode'
+    )
+    parser.add_argument(
+        '-d',
+        '--designspace',
+        metavar='PATH',
+        dest='design_space_path',
+        type=_validate_path,
+        help='path to design space file',
+        required=True
+    )
+    parser.add_argument(
+        '-o',
+        '--output',
+        dest='var_font_path',
+        metavar='PATH',
+        help='path to output variable font file. Default is base name\n'
+        'of the design space file.',
+    )
+    parser.add_argument(
+        '-k',
+        '--keep-glyph-names',
+        action='store_true',
+        help='Preserve glyph names in output var font, with a post table\n'
+        'format 2.',
+    )
+    parser.add_argument(
+        '-c',
+        '--check-compat',
+        dest='check_compatibility',
+        action='store_true',
+        help='Check outline compatibility in source fonts, and fix flat\n'
+        'curves.',
+    )
+    parser.add_argument(
+        '-i',
+        '--include-glyphs',
+        dest='include_glyphs_path',
+        metavar='PATH',
+        type=_validate_path,
+        help='Path to file containing a python dict specifying which\n'
+        'glyph names should be included from which source fonts.\n'
+    )
+    options = parser.parse_args(args)
+
+    if not options.var_font_path:
+        var_font_path = '{}.otf'.format(os.path.splitext(
+            options.design_space_path)[0])
+        options.var_font_path = var_font_path
+
+    if not options.verbose:
+        level = PROGRESS_LEVEL
+        logging.basicConfig(level=level, format="%(message)s")
+    else:
+        if options.verbose:
+            level = logging.INFO
+        logging.basicConfig(level=level)
+    logger.setLevel(level)
+
+    return options
+
+
+def main(args=None):
     options = get_options(args)
-
-    if parse_version(fontToolsVersion) < parse_version("3.19"):
-        logger.error("Quitting. The Python fonttools module "
-                     "must be at least version 3.41.0")
-        return
 
     if os.path.exists(options.var_font_path):
         os.remove(options.var_font_path)
@@ -495,4 +483,4 @@ def run(args=None):
 
 
 if __name__ == '__main__':
-    run()
+    sys.exit(main())
