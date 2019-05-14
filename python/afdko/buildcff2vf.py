@@ -343,12 +343,9 @@ def otfFinder(s):
     return s.replace('.ufo', '.otf')
 
 
-def add_glyph_names(tt_font, glyph_order):
+def suppress_glyph_names(tt_font):
     postTable = tt_font['post']
-    postTable.glyphOrder = tt_font.glyphOrder = glyph_order
-    postTable.formatType = 2.0
-    postTable.extraNames = []
-    postTable.mapping = {}
+    postTable.formatType = 3.0
     postTable.compile(tt_font)
 
 
@@ -473,9 +470,9 @@ def main(args=None):
     # fonts without having to recompile and save them.
     varFont, _, _ = varLib.build(designspace, otfFinder)
 
-    if options.keep_glyph_names:
+    if not options.keep_glyph_names:
         default_font = designspace.sources[ds_data.base_idx].font
-        add_glyph_names(varFont, default_font.glyphOrder)
+        suppress_glyph_names(varFont)
 
     varFont.save(options.var_font_path)
     logger.progress("Built variable font '%s'" % (options.var_font_path))
