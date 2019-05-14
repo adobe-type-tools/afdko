@@ -223,7 +223,7 @@ class CompatibilityPen(CFF2CharStringMergePen):
             # with the next default font moveto.
             if cmd[0] == 'rrcurveto':
                 new_coords = self.make_curve_coords(prev_moveto_coords, False)
-            cmd[1].append(new_coords)
+                cmd[1].append(new_coords)
             self.pt_index += 1
             return True
 
@@ -431,8 +431,7 @@ def get_options(args):
         level = PROGRESS_LEVEL
         logging.basicConfig(level=level, format="%(message)s")
     else:
-        if options.verbose:
-            level = logging.INFO
+        level = logging.INFO
         logging.basicConfig(level=level)
     logger.setLevel(level)
 
