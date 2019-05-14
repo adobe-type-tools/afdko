@@ -743,7 +743,7 @@ space @dash space                       # Usage
 ```
 
 The part of the glyph class name after the “@” is subject to the same name
-restrictions that apply to a glyph name, except that its maximum length is 63.
+restrictions that apply to a glyph name.
 
 Glyph class assignments can appear anywhere in the feature file. A glyph class
 name may be used in the feature file only after its definition.
