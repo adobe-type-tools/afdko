@@ -1,998 +1,482 @@
 # Copyright 2017 Adobe. All rights reserved.
 
+"""
+Builds a CFF2 variable font from a designspace file and its UFO masters.
+"""
+
 from __future__ import print_function, division, absolute_import
 
-__usage__ = """
-buildcff2vf.py  1.14.2 Feb 1 2019
-Build a variable font from a designspace file and the UFO master source fonts.
-
-python buildcff2vf.py -h
-python buildcff2vf.py -u
-python buildcff2vf.py <path to designspace file> (<optional path to output
-                                                               variable font>)
-"""
-
-__help__ = __usage__ + """
-Options:
--p   Use 'post' table format 3.
-
-The script makes a number of assumptions.
-1) all the master source fonts are blend compatible in all their data.
-2) The source OTF files are in the same directory as the master source
-   fonts, and have the same file name but with an extension of '.otf'
-   rather than '.ufo'.
-3) The master source OTF fonts were built with the companion script
-   'buildmasterotfs.py'. This does a first pass of compatibilization
-   by using 'tx' with the '-no_opt' option to undo T2 charstring
-   optimization applied by makeotf.
-
-The variable font inherits all the OpenType Tables except CFF2 and GPOS
-from the default master source font. The default font is flagged in the
-designspace file by having the element "<info copy="1" />" in the <source>
-element.
-
-The width values and the GPOS positioning data are drawn from all the
-master source fonts, so each must be built with with a full set of GPOS
-features.
-
-The companion script buildmasterotfs.py will build the master source OTFs
-from the designspace file.
-
-Any python interpreter may be used to run the script, as long as it has
-installed the latest version of the fonttools module from
-https://github.com/fonttools/fonttools
-"""
-
-import collections
-import io
+import argparse
+from ast import literal_eval
+from copy import deepcopy
 import logging
 import os
+import re
 import sys
 
-from fontTools import varLib, version as fontToolsVersion
-from fontTools.misc.py23 import tobytes
-from fontTools.ttLib import TTFont, newTable
-from fontTools.cffLib import (VarStoreData, buildOpcodeDict,
-                              privateDictOperators)
+from fontTools import varLib
+from fontTools.cffLib.specializer import commandsToProgram
+from fontTools.designspaceLib import DesignSpaceDocument
+from fontTools.misc.fixedTools import otRound
 from fontTools.misc.psCharStrings import T2OutlineExtractor, T2CharString
-from fontTools.pens.t2CharStringPen import T2CharStringPen
-from fontTools.ttLib.tables import otTables
-try:
-    import xml.etree.cElementTree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET
-from pkg_resources import parse_version
+from fontTools.ttLib import TTFont
+from fontTools.varLib.cff import CFF2CharStringMergePen
 
-XML = ET.XML
-XMLElement = ET.Element
-xmlToString = ET.tostring
-
-kMaxStack = 48
-kTempCFFSuffix = ".temp.cff"
-kTempCFF2File = "test.cff2"
-
-# setup basic logging to enable fontTools errors to peek thru
-logging.basicConfig()
+__version__ = '2.0.0'
 
 
-class ACFontError(KeyError):
+# set up for printing progress notes
+def progress(self, message, *args, **kws):
+    # Note: message must contain the format specifiers for any strings in args.
+    level = self.getEffectiveLevel()
+    self._log(level, message, args, **kws)
+
+
+PROGRESS_LEVEL = logging.INFO + 5
+PROGESS_NAME = "progress"
+logging.addLevelName(PROGRESS_LEVEL, PROGESS_NAME)
+logger = logging.getLogger(__name__)
+logging.Logger.progress = progress
+
+
+def getSubset(subset_Path):
+    with open(subset_Path, "rt") as fp:
+        text_lines = fp.readlines()
+    locationDict = {}
+    cur_key_list = None
+    for li, line in enumerate(text_lines):
+        idx = line.find('#')
+        if idx >= 0:
+            line = line[:idx]
+        line = line.strip()
+        if not line:
+            continue
+        if line[0] == "(":
+            cur_key_list = []
+            location_list = literal_eval(line)
+            for location_entry in location_list:
+                cur_key_list.append(location_entry)
+                if location_entry not in locationDict:
+                    locationDict[location_entry] = []
+        else:
+            m = re.match(r"(\S+)", line)
+            if m:
+                if cur_key_list is None:
+                    logger.error(
+                        "Error parsing subset file. "
+                        "Seeing a glyph name record before "
+                        "seeing a location record.")
+                    logger.error("Line number: {}.".format(li))
+                    logger.error("Line text: {}.".format(line))
+                for key in cur_key_list:
+                    locationDict[key].append(m.group(1))
+    return locationDict
+
+
+def subset_masters(designspace, subsetDict):
+    from fontTools import subset
+    subset_options = subset.Options(notdef_outline=True)
+    for ds_source in designspace.sources:
+        key = tuple(ds_source.location.items())
+        included = set(subsetDict[key])
+        ttf_font = ds_source.font
+        subsetter = subset.Subsetter(options=subset_options)
+        subsetter.populate(glyphs=included)
+        subsetter.subset(ttf_font)
+        subset_path = '{}.subset.otf'.format(
+            os.path.splitext(ds_source.path)[0])
+        logger.progress("Saving subset font %s", subset_path)
+        ttf_font.save(subset_path)
+        ds_source.font = TTFont(subset_path)
+
+
+class MergeTypeError(Exception):
     pass
 
 
-class AxisMapError(KeyError):
-    pass
+class CompatibilityPen(CFF2CharStringMergePen):
+    def __init__(self, default_commands,
+                 glyphName, num_masters, master_idx, roundTolerance=0.5):
+        super(CompatibilityPen, self).__init__(
+            default_commands, glyphName, num_masters, master_idx,
+            roundTolerance=0.5)
+        self.fixed = False
 
-
-def openOpenTypeFile(path):
-    try:
-        ttFont = TTFont(path)
-    except IOError:
-        import traceback
-        print("\t%s" % (
-            traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1]))
-        print("Attempted to read font %s as CFF." % path)
-        raise ACFontError("Error parsing font file <%s>." % path)
-
-    fontData = CFF2FontData(ttFont, path)
-    return fontData
-
-
-class CFF2FontData(object):
-    def __init__(self, ttFont, srcPath):
-        self.ttFont = ttFont
-        self.srcPath = srcPath
-        try:
-            self.cffTable = ttFont["CFF "]
-            topDict = self.cffTable.cff.topDictIndex[0]
-        except KeyError:
-            raise ACFontError(
-                "Error: font is not a CFF font <%s>." % srcPath)
-
-        # for identifier in glyph-list:
-        # Get charstring.
-        self.topDict = topDict
-        self.isCID = hasattr(topDict, "FDArray")
-        self.charStrings = topDict.CharStrings
-        self.charStringIndex = self.charStrings.charStringsIndex
-        self.allowDecimalCoords = False
-
-
-class OpListExtractor(T2OutlineExtractor):
-    def __init__(self, pen, subrs, globalSubrs, nominalWidthX, defaultWidthX):
-        super(OpListExtractor, self).__init__(pen, subrs, globalSubrs,
-                                              nominalWidthX, defaultWidthX)
-        self.seenHints = None
-        self.hintmaskLen = 0
-        self.hints = []
-
-    def countHints(self):
-        args = self.popallWidth()
-        self.hintCount = self.hintCount + len(args) // 2
-        return args
-
-    def op_hstem(self, index):
-        self.seenHints = 'h'
-        args = self.countHints()
-        self.pen.hstem(args)
-
-    def op_vstem(self, index):
-        self.seenHints = 'v'
-        args = self.countHints()
-        self.pen.vstem(args)
-
-    def op_hstemhm(self, index):
-        self.seenHints = 'h'
-        args = self.countHints()
-        self.pen.hstemhm(args)
-
-    def op_vstemhm(self, index):
-        self.seenHints = 'v'
-        args = self.countHints()
-        self.pen.vstemhm(args)
-
-    def op_hintmask(self, index):
-        if not self.sawMoveTo:
-            # are processing the first hintmask.
-            if not self.seenHints:
-                args = self.countHints()
-                if args:
-                    self.pen.op_hstemhm(args)
-            elif self.seenHints == 'h':
-                args = self.countHints()
-                if args:
-                    # There may be hstem hints but no vstem hints.
-                    self.pen.vstemhm(args)
-        if not self.hintmaskLen:
-            self.countHints()
-            self.hintmaskLen = (self.hintCount + 7) // 8
-        hintMaskBytes, index = self.callingStack[-1].getBytes(
-            index, self.hintmaskLen)
-        self.pen.hintmask(hintMaskBytes)
-        return hintMaskBytes, index
-
-    def op_cntrmask(self, index):
-        if not self.sawMoveTo:
-            # are processing the first hintmask.
-            if not self.seenHints:
-                args = self.countHints()
-                if args:
-                    self.pen.op_hstemhm(args)
-            elif self.seenHints == 'h':
-                args = self.countHints()
-                if args:
-                    # There may be hstem hints but no vstem hints.
-                    self.pen.vstemhm(args)
-        if not self.hintmaskLen:
-            self.countHints()
-            self.hintmaskLen = (self.hintCount + 7) // 8
-        hintMaskBytes, index = self.callingStack[-1].getBytes(
-            index, self.hintmaskLen)
-        self.pen.cntrmask(hintMaskBytes)
-        return hintMaskBytes, index
-
-
-class OpListPen(T2CharStringPen):
-    # We use this to de-optimize the T2Charstrings
-    # to just rmoveto, rlineto, and rrcurveto.
-    def __init__(self, supportHints):
-        super(OpListPen, self).__init__(0, {})
-        self.opList = []
-        self.absMovetoPt = [0, 0]
-        self.supportHints = supportHints
-
-    def _moveTo(self, pt):
-        self.opList.append(["rmoveto", self._p(pt)])
-        self.absMovetoPt = list(self._p0)
-
-    def _lineTo(self, pt):
-        self.opList.append(["rlineto", self._p(pt)])
-
-    def _curveToOne(self, pt1, pt2, pt3):
-        _p = self._p
-        self.opList.append(["rrcurveto", _p(pt1) + _p(pt2) + _p(pt3)])
-
-    def _closePath(self):
-        # Add closing lineto if start and end path are not the same.
-        # We need this to compatibilize different master designs where
-        # the the last path op in one design is a rlineto and is omitted,
-        # while the last path op in another is an rrcurveto.
-        if (self._p0[0] != self.absMovetoPt[0]) or (
-           self._p0[1] != self.absMovetoPt[1]):
-            self.opList.append(["rlineto", [self._p0[0] - self.absMovetoPt[0],
-                               self._p0[1] - self.absMovetoPt[1]]])
-
-    def vstem(self, args):
-        if self.supportHints:
-            self.opList.append(["vstem", args])
-
-    def hstem(self, args):
-        if self.supportHints:
-            self.opList.append(["hstem", args])
-
-    def vstemhm(self, args):
-        if self.supportHints:
-            self.opList.append(["vstemhm", args])
-
-    def hstemhm(self, args):
-        if self.supportHints:
-            self.opList.append(["hstemhm", args])
-
-    def hintmask(self, hintMaskBytes):
-        if self.supportHints:
-            self.opList.append(["hintmask", [hintMaskBytes]])
-
-    def cntrmask(self, hintMaskBytes):
-        if self.supportHints:
-            self.opList.append(["cntrmask", [hintMaskBytes]])
-
-    def getCharString(self, private=None, globalSubrs=None):
-        return self.opList
-
-
-class CFF2GlyphData(object):
-    hintOpList = ('hintmask', 'cntrmask', 'hstem', 'vstem', 'hstemhm',
-                  'vstemhm')
-
-    def __init__(self, glyphName, gid, masterFontList):
-        self.glyphName = glyphName
-        self.gid = gid
-        self.masterFontList = masterFontList
-        self.charstringList = []
-        self.mmCharString = None
-
-    def addCharString(self, t2CharString):
-        self.charstringList.append(t2CharString)
-
-    def buildOpList(self, t2Index, supportHints):
-        t2String = self.charstringList[t2Index]
-        t2Pen = OpListPen(supportHints)
-        subrs = getattr(t2String.private, "Subrs", [])
-        extractor = OpListExtractor(t2Pen, subrs, t2String.globalSubrs,
-                                    t2String.private.nominalWidthX,
-                                    t2String.private.defaultWidthX)
-        extractor.execute(t2String)
-        opList = t2Pen.getCharString(t2String.private, t2String.globalSubrs)
-        if t2Index == 0:
-            # For the master font path, promote all coordinates to a list.
-            for _, ptList in opList:
-                for i, item in enumerate(ptList):
-                    ptList[i] = [item]
-        return opList
-
-    def buildMMData(self):
-        # Build MM charstring, and list of  points.
-        # First, build a list of path entries for the default master.
-        # Each entry is [opName,  [ [arg0], [arg1],..[argn] ].
-        # Note that each arg is a list: this is so we can add the corresponding
-        # arg from each successive master font design, and end up with
-        # [opName,  [ [arg.0.0,...,arg.0.k-1],
-        # [arg.1.0,...,arg.1.k-1],..,[arg.n-1.0,...,arg.n-1.k-1] ]
-        # where n is the number of arguments for the opName,
-        # and k is the number of master designs.
-        supportHints = True
-        self.opList = opList = self.buildOpList(0, supportHints)
-        numOps = len(opList)
-        # For each other master in turn,
-        #  add the args for each opName to pointList
-        # deal with incompatible path lists because:
-        # converting from UFO to Type1 can convert flat curves to lines.
-        blendError = False
-        i = 1
-        while i < len(self.charstringList):
-            opList2 = self.buildOpList(i, supportHints)
-            i += 1
-            opIndex = op2Index = 0
-            while opIndex < numOps:
-                masterOp, masterPointList = opList[opIndex]
-                if (not supportHints) and masterOp in self.hintOpList:
-                    opIndex += 1
-                    continue
-
-                # Do minor work to compatibilize charstrings.
-                try:
-                    token, pointList = opList2[op2Index]
-                except IndexError:
-                    print("Path mismatch: different number of points. "
-                          "Glyph name: %s. " % self.glyphName,
-                          "font index: %s. " % (i - 1),
-                          "master font path: %s. " %
-                          self.masterFontList[0].srcPath,
-                          "Delta font path: %s." %
-                          self.masterFontList[i - 1].srcPath)
-                    blendError = True
-                    break
-
-                if (not supportHints) and token in self.hintOpList:
-                    op2Index += 1
-                    continue
-
-                if token == 'rlineto' and masterOp == 'rrcurveto':
-                    self.updateLineToCurve(pointList)
-                elif masterOp == 'rlineto' and token == 'rrcurveto':
-                    self.updateLineToCurve(masterPointList)
-                    opList[opIndex] = ['rrcurveto', masterPointList]
-                elif token != masterOp:
-                    if supportHints and (masterOp in self.hintOpList or (
-                       token in self.hintOpList)):
-                        # restart with hint support off.
-                        supportHints = False
-                        self.opList = opList = self.buildOpList(
-                            0, supportHints)
-                        numOps = len(opList)
-                        i = 1
-                        break
-                    print("Path mismatch in glyph %s, master index %s. %s." % (
-                          self.glyphName, i - 1,
-                          self.masterFontList[i - 1].srcPath))
-                    blendError = True
-                    break
-
-                try:
-                    self.mergePointList(masterPointList, pointList,
-                                        masterOp in ('hintmask', 'cntrmask'))
-                except IndexError:
-                    if supportHints and masterOp in self.hintOpList or (
-                       token in self.hintOpList):
-                        # restart with hint support off.
-                        supportHints = False
-                        self.opList = opList = self.buildOpList(
-                            0, supportHints)
-                        numOps = len(opList)
-                        i = 1
-                        break
-                    else:
-                        print("Path mismatch 2", self.glyphName, i,
-                              self.masterFontList[i - 1].srcPath)
-                        blendError = True
-                        break
-                opIndex += 1
-                op2Index += 1
-        # Now pointList is the list of number lists' first master value,
-        # folowed by the other master values.
-        if not supportHints:
-            print("\t skipped incompatible hint data for", self.glyphName)
-        return blendError
-
-    def mergePointList(self, masterPointList, pointList, isHintMask):
-        i = 0
-        while i < len(masterPointList):
-            if isHintMask:
-                # can't blend hint masks. Just use the first one.
-                masterPointList[i].append(masterPointList[i][0])
-            else:
-                masterPointList[i].append(pointList[i])
-            i += 1
-
-    def updateLineToCurve(self, pointList):
-        # pointList has a lineto that needs to be a flat curve.
-        # Convert to curve by pre-pending [0,0], and appending [0,0]
-        if isinstance(pointList[0], list):
-            numMasters = len(pointList[0])
-            pointList.insert(0, [0] * numMasters)
-            pointList.insert(0, [0] * numMasters)
-            pointList.append([0] * numMasters)
-            pointList.append([0] * numMasters)
+    def add_point(self, point_type, pt_coords):
+        if self.m_index == 0:
+            self._commands.append([point_type, [pt_coords]])
         else:
-            pointList.insert(0, 0)
-            pointList.insert(0, 0)
-            pointList.append(0)
-            pointList.append(0)
-
-
-class AxisValueRecord(object):
-    def __init__(self, nameID, axisValue, flagValue, valueIndex, axisIndex):
-        self.nameID = nameID
-        self.axisValue = axisValue
-        self.flagValue = flagValue
-        self.valueIndex = valueIndex
-        self.axisIndex = axisIndex
-
-
-def getInsertGID(origGID, fontGlyphNameList, mergedGlyphNameList):
-    if origGID == 0:
-        return origGID
-    newGID = 0
-    # try stepping down in GID.
-    gid = origGID - 1
-    while gid >= 0:
-        prevName = fontGlyphNameList[gid]
-        newGID = mergedGlyphNameList.index(prevName)
-        if newGID >= 0:
-            newGID += 1
-            return newGID
-        gid -= 1
-
-    # try stepping up in GID.
-    numGlyphs = len(fontGlyphNameList)
-    gid = origGID + 1
-    while gid < numGlyphs:
-        prevName = fontGlyphNameList[gid]
-        newGID = mergedGlyphNameList.index(prevName)
-        if newGID >= 0:
-            newGID -= 1
-            return newGID
-        gid += 1
-
-    return None
-
-
-def buildMasterList(inputPaths):
-    blendError = False
-    cff2FontList = []
-    # Collect all the charstrings.
-    cff2GlyphList = collections.OrderedDict()
-    print("Opening default font", inputPaths[0])
-    baseFont = openOpenTypeFile(inputPaths[0])
-    cff2FontList.append(baseFont)
-
-    # Get the master source data for all the glyphs.
-    fontGlyphList = baseFont.ttFont.getGlyphOrder()
-    for glyphName in fontGlyphList:
-        gid = baseFont.charStrings.charStrings[glyphName]
-        cff2GlyphData = CFF2GlyphData(glyphName, gid, cff2FontList)
-        cff2GlyphList[glyphName] = cff2GlyphData
-
-        t2CharString = baseFont.charStringIndex[gid]
-        cff2GlyphData.addCharString(t2CharString)
-
-    for fontPath in inputPaths[1:]:
-        print("Opening", fontPath)
-        masterFont = openOpenTypeFile(fontPath)
-        cff2FontList.append(masterFont)
-        for glyphName in fontGlyphList:
-            cff2GlyphData = cff2GlyphList[glyphName]
-            gid = masterFont.charStrings.charStrings[glyphName]
-            if gid != cff2GlyphData.gid:
-                raise ACFontError("GID in master font did not match GID in "
-                                  "base font: %s." % glyphName)
-            t2CharString = masterFont.charStringIndex[gid]
-            cff2GlyphData.addCharString(t2CharString)
-
-    # Now build MM versions.
-    print("Reading glyph data...")
-    blendError = False
-    for glyphName in fontGlyphList:
-        cff2GlyphData = cff2GlyphList[glyphName]
-        blendError = cff2GlyphData.buildMMData()
-        if blendError:
-            break
-    if blendError:
-        print("Failed to blend master designs.")
-        return None, None, None, None, blendError
-
-    # Now get the MM data for the Private Dict.
-    # Not all fonts will have the same keys.
-    # The first time a key is encountered, we fill out the
-    # value list for that key for all fonts, using the values from
-    # the first font which has the key. When other fonts with the
-    # key are encountered, the real values will overwrite the default values.
-    privateDictList = []
-    numMasters = len(cff2FontList)
-    curFont = cff2FontList[0]
-    isCID = curFont.isCID
-    if isCID:
-        numFDArray = len(cff2FontList[0].topDict.FDArray)
-    else:
-        numFDArray = 1
-    for fdIndex in range(numFDArray):
-        blendedPD = {}
-        privateDictList.append(blendedPD)
-        for master_index in range(numMasters):
-            curFont = cff2FontList[master_index]
-            if isCID:
-                pd = curFont.topDict.FDArray[fdIndex].Private
-            else:
-                pd = curFont.topDict.Private
-            for key, value in pd.rawDict.items():
-                try:
-                    valList = blendedPD[key]
-                    if isinstance(valList[0], list):
-                        lenValueList = len(value)
-                        if lenValueList != len(valList):
-                            print("Error: the number of items in the",
-                                  "value list for key", key,
-                                  "in the Private dict of FDDict index",
-                                  fdIndex, "in master font", master_index,
-                                  "is different than for previous masters.")
-                            print("Failed to blend master designs.")
-                            blendError = True
-                            return None, None, None, None, blendError
-                        for j in range(lenValueList):
-                            val = value[j]
-                            valList[j][master_index] = val
-                    else:
-                        blendedPD[key][master_index] = value
-                except KeyError:
-                    if isinstance(value, list):
-                        lenValueList = len(value)
-                        valList = [None] * lenValueList
-                        for j in range(lenValueList):
-                            vList = [value[j]] * numMasters
-                            valList[j] = vList
-                        blendedPD[key] = valList
-                    else:
-                        blendedPD[key] = [value] * numMasters
-
-    return baseFont, privateDictList, cff2GlyphList, fontGlyphList, blendError
-
-
-def pointsDiffer(pointList):
-    val = False
-    p0 = pointList[0]
-    for p in pointList[1:]:
-        if p != p0:
-            val = True
-            break
-    return val
-
-
-def appendBlendOp(op, pointList, varModel):
-    blendStack = []
-    numBlends = len(pointList)
-    # pointList is arranged as:
-    # [
-    #   [m0, m1..mn] # values for each master for arg 0
-    #   [m0, m1..mn] # values for each master for arg 1
-    #   ...
-    #   [m0, m1..mn] # values for each master for arg numBlends
-    # ]
-    # The CFF2 blend operator expects first the series of args 0-numBlends
-    # from the first master
-    blendList = []
-    if op in ('hintmask', 'cntrmask'):
-        blendStack.append(op)
-        blendStack.append(pointList[0][0])
-        return blendStack
-    for argEntry in pointList:
-        masterArg = argEntry[0]
-        if pointsDiffer(argEntry):
-            blendStack.append(masterArg)
-            blendList.append(argEntry)
-        else:
-            if blendList:
-                for masterValues in blendList:
-                    deltas = varModel.getDeltas(masterValues)
-                    # First item in 'deltas' is the default master value;
-                    # for CFF2 data, that has already been written.
-                    blendStack.extend(deltas[1:])
-                numBlends = len(blendList)
-                blendStack.append(numBlends)
-                blendStack.append('blend')
-                blendList = []
-            blendStack.append(masterArg)
-    if blendList:
-        for masterValues in blendList:
-            deltas = varModel.getDeltas(masterValues)
-            # First item in 'deltas' is the default master value;
-            # for CFF2 data, that has already been written.
-            blendStack.extend(deltas[1:])
-        numBlends = len(blendList)
-        blendStack.append(numBlends)
-        blendStack.append('blend')
-        blendList = []
-    blendStack.append(op)
-    return blendStack
-
-
-def buildMMCFFTables(baseFont, privateDictList, cff2GlyphList, varModel):
-
-    # Build the blended PrivateDicts.
-    opCodeDict = buildOpcodeDict(privateDictOperators)
-    blendedPD = privateDictList[0]
-    if baseFont.isCID:
-        numFDArray = len(baseFont.topDict.FDArray)
-    else:
-        numFDArray = 1
-    for fdIndex in range(numFDArray):
-        if baseFont.isCID:
-            pd = baseFont.topDict.FDArray[fdIndex]
-            blendedPD = privateDictList[fdIndex]
-        else:
-            pd = baseFont.topDict.Private
-            blendedPD = privateDictList[0]
-
-        for key in blendedPD.keys():
-            argType = opCodeDict[key][1]
-            valList = blendedPD[key]
-            if argType == 'delta':
-                # If all masters are the same for each entry in the list, then
-                # save a non-blend version; else save the blend version
-                needsBlend = False
-                for blendList in valList:
-                    if pointsDiffer(blendList):
-                        needsBlend = True
-                        break
-                dataList = []
-                if needsBlend:
-                    prevBlendList = [0] * len(valList[0])
-                    for blendList in valList:
-                        # convert blend list from absolute values to relative
-                        # values from the previous blend list.
-                        relBlendList = [(val - prevBlendList[i]) for i, val in
-                                        enumerate(blendList)]
-                        prevBlendList = blendList
-                        deltas = varModel.getDeltas(relBlendList)
-                        # For PrivateDict BlueValues, the default font
-                        # values are absolute, not relative.
-                        deltas[0] = blendList[0]
-                        dataList.append(deltas)
+            cmd = self._commands[self.pt_index]
+            if cmd[0] != point_type:
+                # Fix some issues that show up in some
+                # CFF workflows, even when fonts are
+                # topologically merge compatible.
+                success, new_pt_coords = self.check_and_fix_flat_curve(
+                    cmd, point_type, pt_coords)
+                if success:
+                    logger.progress("Converted between line and curve in "
+                                    "source font index '%s' glyph '%s', "
+                                    "point index '%s'at '%s'. "
+                                    "Please check correction." % (
+                                        self.m_index, self.glyphName,
+                                        self.pt_index, pt_coords))
+                    pt_coords = new_pt_coords
                 else:
-                    for blendList in valList:
-                        dataList.append(blendList[0])
+                    success = self.check_and_fix_closepath(
+                        cmd, point_type, pt_coords)
+                    if success:
+                        # We may have incremented self.pt_index
+                        cmd = self._commands[self.pt_index]
+                        if cmd[0] != point_type:
+                            success = False
+                if not success:
+                    raise MergeTypeError(
+                        point_type, self.pt_index, self.m_index, cmd[0],
+                        self.glyphName)
+                self.fixed = True
+            cmd[1].append(pt_coords)
+        self.pt_index += 1
+
+    def make_flat_curve(self, prev_coords, cur_coords):
+        # Convert line coords to curve coords.
+        dx = self.roundNumber((cur_coords[0] - prev_coords[0]) / 3.0)
+        dy = self.roundNumber((cur_coords[1] - prev_coords[1]) / 3.0)
+        new_coords = [prev_coords[0] + dx,
+                      prev_coords[1] + dy,
+                      prev_coords[0] + 2 * dx,
+                      prev_coords[1] + 2 * dy
+                      ] + cur_coords
+        return new_coords
+
+    def make_curve_coords(self, coords, is_default):
+        # Convert line coords to curve coords.
+        prev_cmd = self._commands[self.pt_index - 1]
+        if is_default:
+            new_coords = []
+            for i, cur_coords in enumerate(coords):
+                prev_coords = prev_cmd[1][i]
+                master_coords = self.make_flat_curve(prev_coords[:2],
+                                                     cur_coords)
+                new_coords.append(master_coords)
+        else:
+            cur_coords = coords
+            prev_coords = prev_cmd[1][-1]
+            new_coords = self.make_flat_curve(prev_coords[:2], cur_coords)
+        return new_coords
+
+    def check_and_fix_flat_curve(self, cmd, point_type, pt_coords):
+        success = False
+        if (point_type == 'rlineto') and (cmd[0] == 'rrcurveto'):
+            is_default = False  # the line is in the master font we are adding
+            pt_coords = self.make_curve_coords(pt_coords, is_default)
+            success = True
+        elif (point_type == 'rrcurveto') and (cmd[0] == 'rlineto'):
+            is_default = True  # the line is in the default font commands
+            expanded_coords = self.make_curve_coords(cmd[1], is_default)
+            cmd[1] = expanded_coords
+            cmd[0] = point_type
+            success = True
+        return success, pt_coords
+
+    def check_and_fix_closepath(self, cmd, point_type, pt_coords):
+        """ Some workflows drop a lineto which closes a path.
+        Also, if the last segment is a curve in one master,
+        and a flat curve in another, the flat curve can get
+        converted to a closing lineto, and then dropped.
+        Test if:
+        1) one master op is a moveto,
+        2) the previous op for this master does not close the path
+        3) in the other master the current op is not a moveto
+        4) the current op in the otehr master closes the current path
+
+        If the default font is missing the closing lineto, insert it,
+        then proceed with merging the current op and pt_coords.
+
+        If the current region is missing the closing lineto
+        and therefore the current op is a moveto,
+        then add closing coordinates to self._commands,
+        and increment self.pt_index.
+
+        Note that if this may insert a point in the default font list,
+        so after using it, 'cmd' needs to be reset.
+
+        return True if we can fix this issue.
+        """
+        if point_type == 'rmoveto':
+            # If this is the case, we know that cmd[0] != 'rmoveto'
+
+            # The previous op must not close the path for this region font.
+            prev_moveto_coords = self._commands[self.prev_move_idx][1][-1]
+            prv_coords = self._commands[self.pt_index - 1][1][-1]
+            if prev_moveto_coords == prv_coords[-2:]:
+                return False
+
+            # The current op must close the path for the default font.
+            prev_moveto_coords2 = self._commands[self.prev_move_idx][1][0]
+            prv_coords = self._commands[self.pt_index][1][0]
+            if prev_moveto_coords2 != prv_coords[-2:]:
+                return False
+
+            # Add the closing line coords for this region
+            # so self._commands, then increment self.pt_index
+            # so that the current region op will get merged
+            # with the next default font moveto.
+            if cmd[0] == 'rrcurveto':
+                new_coords = self.make_curve_coords(prev_moveto_coords, False)
+                cmd[1].append(new_coords)
+            self.pt_index += 1
+            return True
+
+        if cmd[0] == 'rmoveto':
+            # The previous op must not close the path for the default font.
+            prev_moveto_coords = self._commands[self.prev_move_idx][1][0]
+            prv_coords = self._commands[self.pt_index - 1][1][0]
+            if prev_moveto_coords == prv_coords[-2:]:
+                return False
+
+            # The current op must close the path for this region font.
+            prev_moveto_coords2 = self._commands[self.prev_move_idx][1][-1]
+            if prev_moveto_coords2 != pt_coords[-2:]:
+                return False
+
+            # Insert the close path segment in the default font.
+            # We omit the last coords from the previous moveto
+            # is it will be supplied by the current region point.
+            # after this function returns.
+            new_cmd = [point_type, None]
+            prev_move_coords = self._commands[self.prev_move_idx][1][:-1]
+            # Note that we omit the last region's coord from prev_move_coords,
+            # as that is from the current region, and we will add the
+            # current pts' coords from the current region in its place.
+            if point_type == 'rlineto':
+                new_cmd[1] = prev_move_coords
             else:
-                if pointsDiffer(valList):
-                    dataList = varModel.getDeltas(valList)
-                else:
-                    dataList = valList[0]
+                # We omit the last set of coords from the
+                # previous moveto, as it will be supplied by the coords
+                # for the current region pt.
+                new_cmd[1] = self.make_curve_coords(prev_move_coords, True)
+            self._commands.insert(self.pt_index, new_cmd)
+            return True
+        return False
 
-            pd.rawDict[key] = dataList
+    def getCharStrings(self, num_masters, private=None, globalSubrs=None):
+        """ A command look s like:
+        [op_name, [
+            [source 0 arglist for op],
+            [source 1 arglist for op],
+            ...
+            [source n arglist for op],
+        I am not optimising this there, as that will be done when
+        the CFF2 Charstring is creating in fontTools.varLib.build().
 
-    # Now update all the charstrings.
-    fontGlyphList = baseFont.ttFont.getGlyphOrder()
-    for glyphName in fontGlyphList:
-        gid = baseFont.charStrings.charStrings[glyphName]
-        t2CharString = baseFont.charStringIndex[gid]
-        cff2GlyphData = cff2GlyphList[glyphName]
-        t2CharString.decompile()
-        newProgram = []
-        for op, pointList in cff2GlyphData.opList:
-            blendStack = appendBlendOp(op, pointList, varModel)
-            newProgram.extend(blendStack)
-        t2CharString = T2CharString(private=t2CharString.private,
-                                    globalSubrs=t2CharString.globalSubrs)
-        baseFont.charStringIndex[gid] = t2CharString
-        t2CharString.program = newProgram
-        t2CharString.private.defaultWidthX = 0
-        t2CharString.private.nominalWidthX = 0
-        t2CharString.compile(isCFF2=True)
-
-
-def addCFFVarStore(baseFont, varModel, varFont):
-    supports = varModel.supports[1:]
-    fvarTable = varFont['fvar']
-    axisKeys = [axis.axisTag for axis in fvarTable.axes]
-    varTupleList = varLib.builder.buildVarRegionList(supports, axisKeys)
-    varTupleIndexes = list(range(len(supports)))
-    varDeltasCFFV = varLib.builder.buildVarData(varTupleIndexes, None, False)
-    varStoreCFFV = varLib.builder.buildVarStore(varTupleList, [varDeltasCFFV])
-
-    cffTable = baseFont.cffTable
-    topDict = cffTable.cff.topDictIndex[0]
-    topDict.VarStore = VarStoreData(otVarStore=varStoreCFFV)
-
-
-def addNamesToPost(ttFont, fontGlyphList):
-    postTable = ttFont['post']
-    postTable.glyphOrder = ttFont.glyphOrder = fontGlyphList
-    postTable.formatType = 2.0
-    postTable.extraNames = []
-    postTable.mapping = {}
-    postTable.compile(ttFont)
+        If I did, I woudl have to rearragne the arguments to:
+        [
+        [arg 0 for source 0 ... arg 0 for source n]
+        [arg 1 for source 0 ... arg 1 for source n]
+        ...
+        [arg M for source 0 ... arg M for source n]
+        ]
+        before calling specialize.
+        """
+        t2List = []
+        merged_commands = self._commands
+        for i in range(num_masters):
+            commands = []
+            for op in merged_commands:
+                source_op = [op[0], op[1][i]]
+                commands.append(source_op)
+            program = commandsToProgram(commands)
+            if self._width is not None:
+                assert not self._CFF2, (
+                    "CFF2 does not allow encoding glyph width in CharString.")
+                program.insert(0, otRound(self._width))
+            if not self._CFF2:
+                program.append('endchar')
+            charString = T2CharString(
+                program=program, private=private, globalSubrs=globalSubrs)
+            t2List.append(charString)
+        return t2List
 
 
-def convertCFFtoCFF2(baseFont, masterFont, post_format_3=False):
-    # base font contains the CFF2 blend data, but with the table tag 'CFF '
-    # all the CFF fields. Remove all the fields that were removed in the
-    # CFF2 spec.
-
-    cffTable = baseFont.ttFont['CFF ']
-    del masterFont['CFF ']
-    cffTable.cff.convertCFFToCFF2(masterFont)
-    newCFF2 = newTable("CFF2")
-    newCFF2.cff = cffTable.cff
-    newCFF2.compile(masterFont)
-    masterFont['CFF2'] = newCFF2
-    if post_format_3:
-        masterFont['post'].formatType = 3.0
-
-
-def reorderMasters(mapping, masterPaths):
-    numMasters = len(masterPaths)
-    new_order = [0] * numMasters
-    for i in range(numMasters):
-        new_order[mapping[i]] = masterPaths[i]
-    return new_order
-
-
-def fixVerticalMetrics(masterFont, masterPaths):
-    # Fix the head table bbox, and OS/2 winAscender/Descender.
-    # Record the largest BBOX extents, and use these values.
-    print("Updating vertical metrics to most extreme in source fonts.")
-    print("\tname old new")
-
-    xMax, yMax, xMin, yMin = ([] for i in range(4))
-    ascender, descender = ([] for i in range(2))
-    gap = 0
-
-    for fPath in masterPaths:
-        srcFont = TTFont(fPath)
-
-        headTable = srcFont['head']
-        xMax.append(headTable.xMax)
-        yMax.append(headTable.yMax)
-        xMin.append(headTable.xMin)
-        yMin.append(headTable.yMin)
-
-        os2Table = srcFont['OS/2']
-        ascender.append(os2Table.sTypoAscender)
-        descender.append(os2Table.sTypoDescender)
-
-    xMax = max(xMax)
-    yMax = max(yMax)
-    xMin = min(xMin)
-    yMin = min(yMin)
-    ascender = max(ascender)
-    descender = min(descender)
-
-    headTable = masterFont['head']
-    print("\theadTable.xMax", headTable.xMax, xMax)
-    print("\theadTable.yMax", headTable.yMax, yMax)
-    print("\theadTable.xMin", headTable.xMin, xMin)
-    print("\theadTable.yMin", headTable.yMin, yMin)
-    headTable.xMax = xMax
-    headTable.yMax = yMax
-    headTable.xMin = xMin
-    headTable.yMin = yMin
-
-    # IMPORTANT: The vertical metrics are deliberately set in a
-    # way that ensures cross-platform compatibility in browsers.
-    # This approach to setting vertical metrics is different from
-    # what Adobe Type has used for many years in their fonts.
-
-    hheaTable = masterFont['hhea']
-    print("\thheaTable.ascent", hheaTable.ascent, yMax)
-    print("\thheaTable.descent", hheaTable.descent, yMin)
-    print("\thheaTable.lineGap", hheaTable.lineGap, gap)
-    hheaTable.ascent = yMax
-    hheaTable.descent = yMin
-    hheaTable.lineGap = gap
-
-    OS2Table = masterFont['OS/2']
-    print("\tOS2Table.usWinAscent", OS2Table.usWinAscent, yMax)
-    print("\tOS2Table.usWinDescent", OS2Table.usWinDescent, abs(yMin))
-    OS2Table.usWinAscent = yMax
-    OS2Table.usWinDescent = abs(yMin)
-    print("\tOS2Table.sTypoAscender", OS2Table.sTypoAscender, ascender)
-    print("\tOS2Table.sTypoDescender", OS2Table.sTypoDescender, descender)
-    print("\tOS2Table.sTypoLineGap", OS2Table.sTypoLineGap, gap)
-    OS2Table.sTypoAscender = ascender
-    OS2Table.sTypoDescender = descender
-    OS2Table.sTypoLineGap = gap
-
-
-def getNewAxisValue(seenCoordinate, fvarInstance, axisTag):
-    # Return None if:
-    #   have already seen this axis coordinate
-    #   any of the other axis coordinates are non-zero
-    axisValue = fvarInstance.coordinates[axisTag]
-    if axisValue in seenCoordinate:
+def _get_cs(glyphOrder, charstrings, glyphName):
+    if glyphName not in charstrings:
         return None
-    for tag, value in fvarInstance.coordinates.items():
-        if tag == axisTag:
+    return charstrings[glyphName]
+
+
+def do_compatibility(vf, master_fonts):
+    default_font = vf
+    default_charStrings = default_font['CFF '].cff.topDictIndex[0].CharStrings
+    glyphOrder = default_font.getGlyphOrder()
+    charStrings = [
+        font['CFF '].cff.topDictIndex[0].CharStrings for font in master_fonts]
+
+    for gname in glyphOrder:
+        all_cs = [_get_cs(glyphOrder, cs, gname) for cs in charStrings]
+        if len([gs for gs in all_cs if gs is not None]) < 2:
             continue
-        if value != 0:
-            return
-    seenCoordinate[axisValue] = axisTag
-    return axisValue, fvarInstance.subfamilyNameID
+        # remove the None's from the list.
+        cs_list = [cs for cs in all_cs if cs]
+        num_masters = len(cs_list)
+        default_charstring = default_charStrings[gname]
+        compat_pen = CompatibilityPen([], gname, num_masters, 0)
+        default_charstring.outlineExtractor = T2OutlineExtractor
+        default_charstring.draw(compat_pen)
 
-
-def addAxisValueData(xmlData, prevEntry, axisEntry, nextEntry, linkDelta):
-    if linkDelta is not None:
-        _format = 3
-    elif (prevEntry is None) and (nextEntry is None):
-        _format = 1
-    else:
-        _format = 2
-
-    xmlData.append("\t\t<AxisValue index=\"%s\" Format=\"%s\">" % (
-        axisEntry.valueIndex, _format))
-    xmlData.append("\t\t\t<AxisIndex value=\"%s\" />" % (axisEntry.axisIndex))
-    xmlData.append("\t\t\t<Flags value=\"%s\" />" % (axisEntry.flagValue))
-    xmlData.append("\t\t\t<ValueNameID value=\"%s\" />" % (axisEntry.nameID))
-    if _format == 1:
-        xmlData.append("\t\t\t<Value value=\"%s\" />" % (axisEntry.axisValue))
-    elif _format == 2:
-        if prevEntry is None:
-            minValue = axisEntry.axisValue
-        else:
-            minValue = (axisEntry.axisValue + prevEntry.axisValue) / 2.0
-        if nextEntry is None:
-            maxValue = axisEntry.axisValue
-        else:
-            maxValue = (axisEntry.axisValue + nextEntry.axisValue) / 2.0
-        xmlData.append("\t\t\t<NominalValue value=\"%s\" />" % (
-            axisEntry.axisValue))
-        xmlData.append("\t\t\t<RangeMinValue value=\"%s\" />" % (minValue))
-        xmlData.append("\t\t\t<RangeMaxValue value=\"%s\" />" % (maxValue))
-    elif _format == 3:
-        xmlData.append("\t\t\t<Value value=\"%s\" />" % (axisEntry.axisValue))
-        xmlData.append("\t\t\t<LinkedValue value=\"%s\" />" % (linkDelta))
-    xmlData.append("\t\t</AxisValue>")
-
-
-def makeSTAT(fvar):
-    newSTAT = newTable("STAT")
-    newSTAT.table = otTables.STAT()
-    xmlData = ["<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
-               "<ttFont sfntVersion=\"OTTO\" ttLibVersion=\"3.11\">",
-               "<STAT>",
-               "\t<Version value=\"0x00010001\"/>",
-               "\t<DesignAxisRecordSize value=\"8\"/>",
-               "\t<DesignAxisRecord>"]
-    for i, a in enumerate(fvar.axes):
-        xmlData.append("\t\t<Axis index=\"%s\">" % (i))
-        xmlData.append("\t\t\t<AxisTag value=\"%s\"/>" % (a.axisTag))
-        xmlData.append("\t\t\t<AxisNameID value=\"%s\"/>" % (a.axisNameID))
-        xmlData.append("\t\t\t<AxisOrdering value=\"%s\"/>" % (i))
-        xmlData.append("\t\t</Axis>")
-
-    xmlData.append("\t</DesignAxisRecord>")
-    xmlData.append("\t<AxisValueArray>")
-    # For each axis in turn, cycle through the named instances and
-    # make a AxisValue entry for the instance of each new named instance when
-    # the other axes are at 0.
-    numAxes = len(fvar.axes)
-    numInstances = len(fvar.instances)
-    fallBackNameID = None
-    for axisIndex in range(numAxes):
-        axisTag = fvar.axes[axisIndex].axisTag
-        seenCoordinate = {}
-        axisList = []
-        valueIndex = 0
-        for j in range(numInstances):
-            flagValue = 0
-            instance = fvar.instances[j]
-            entry = getNewAxisValue(seenCoordinate, instance, axisTag)
-            if entry is None:
-                continue
-            axisValue, nameID = entry
-#           if (axisValue == 0) and (axisTag == 'wght'):
-#               # the style name from any other axis will probably
-#               # already be elided from the style name.
-#               fallBackNameID = nameID
-#               flagValue = 2
-            axisEntry = AxisValueRecord(nameID, axisValue, flagValue,
-                                        valueIndex, axisIndex)
-            axisList.append(axisEntry)
-            valueIndex += 1
-
-        numEntries = len(axisList)
-        linkDelta = None
-        if numEntries == 0:
-            continue
-        if numEntries == 1:
-            addAxisValueData(xmlData, None, axisList[0], None, linkDelta)
-            continue
-        if numEntries == 2:
-            addAxisValueData(xmlData, None, axisList[0], axisList[1],
-                             linkDelta)
-            addAxisValueData(xmlData, axisList[0], axisList[1], None,
-                             linkDelta)
-            continue
-
-        prevEntry = nextEntry = None
-        for j in range(numEntries - 1):
-            axisEntry = axisList[j]
-            nextEntry = axisList[j + 1]
-            addAxisValueData(xmlData, prevEntry, axisEntry, nextEntry,
-                             linkDelta)
-            prevEntry = axisEntry
-        addAxisValueData(xmlData, axisEntry, nextEntry, None, linkDelta)
-
-    xmlData.append("\t</AxisValueArray>")
-
-    if fallBackNameID is None:
-        fallBackNameID = 2
-    xmlData.append("\t<ElidedFallbackNameID value=\"%s\" />" % (
-        fallBackNameID))
-    xmlData.append("</STAT>")
-    xmlData.append("</ttFont>")
-    xmlData.append("")
-    xmlData = os.linesep.join(xmlData)
-    return xmlData
-
-
-def addSTATTable(varFont, varFontPath):
-    print("Adding STAT table")
-    kSTAT_OverrideName = "override.STAT.ttx"
-    statPath = os.path.dirname(varFontPath)
-    statPath = os.path.join(statPath, kSTAT_OverrideName)
-    if not os.path.exists(statPath):
-        print("Note: Generating simple STAT table from 'fvar' table in "
-              "'%s'." % (statPath))
-        fvar = varFont["fvar"]
-        xmlSTATData = tobytes(makeSTAT(fvar))
-        statFile = io.BytesIO(xmlSTATData)
-        varFont.importXML(statFile)
-        varFont.saveXML(statPath, tables=["STAT"])
-    else:
-        varFont.importXML(statPath)
-
-
-def buildCFF2Font(varFontPath, varFont, varModel, masterPaths,
-                  post_format_3=False):
-    """Build CFF2 font from the master designs. default font is first."""
-    numMasters = len(masterPaths)
-    inputPaths = reorderMasters(varModel.mapping, masterPaths)
-    varModel.mapping = varModel.reverseMapping = range(numMasters)
-    # Since we have re-ordered the master master data to be the same
-    # as the varModel.location order, the mappings are flat.
-    (baseFont, privateDictList, cff2GlyphList, fontGlyphList, blendError) = \
-        buildMasterList(inputPaths)
-    if blendError:
-        return blendError
-    buildMMCFFTables(baseFont, privateDictList, cff2GlyphList, varModel)
-    addCFFVarStore(baseFont, varModel, varFont)
-    addNamesToPost(varFont, fontGlyphList)
-    convertCFFtoCFF2(baseFont, varFont, post_format_3)
-    # fixVerticalMetrics(varFont, masterPaths)
-    addSTATTable(varFont, varFontPath)
-    varFont.save(varFontPath)
-    return blendError
+        # Add the coordinates from all the other regions to the
+        # blend lists in the CFF2 charstring.
+        region_cs = cs_list[1:]
+        for region_idx, region_charstring in enumerate(region_cs, start=1):
+            compat_pen.restart(region_idx)
+            region_charstring.draw(compat_pen)
+        if compat_pen.fixed:
+            fixed_cs_list = compat_pen.getCharStrings(
+                num_masters, private=default_charstring.private,
+                globalSubrs=default_charstring.globalSubrs)
+            cs_list = list(cs_list)
+            for i, cs in enumerate(cs_list):
+                mi = all_cs.index(cs)
+                charStrings[mi][gname] = fixed_cs_list[i]
 
 
 def otfFinder(s):
     return s.replace('.ufo', '.otf')
 
 
-def run(args=None):
-    post_format_3 = False
-    if not args:
-        args = sys.argv[1:]
-    if '-u' in args:
-        print(__usage__)
-        return
-    if '-h' in args:
-        print(__help__)
-        return
-    if '-p' in args:
-        post_format_3 = True
-        args.remove('-p')
+def suppress_glyph_names(tt_font):
+    postTable = tt_font['post']
+    postTable.formatType = 3.0
+    postTable.compile(tt_font)
 
-    if parse_version(fontToolsVersion) < parse_version("3.19"):
-        print("Quitting. The Python fonttools module must be at least 3.19.0 "
-              "in order for buildcff2vf to work.")
-        return
 
-    if len(args) == 2:
-        designSpacePath, varFontPath = args
-    elif len(args) == 1:
-        designSpacePath = args[0]
-        varFontPath = os.path.splitext(designSpacePath)[0] + '.otf'
+def _validate_path(path_str):
+    # used for paths passed to get_options.
+    valid_path = os.path.abspath(os.path.realpath(path_str))
+    if not os.path.exists(valid_path):
+        raise argparse.ArgumentTypeError(
+            "'{}' is not a valid path.".format(path_str))
+    return valid_path
+
+
+def get_options(args):
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawTextHelpFormatter,
+        description=__doc__
+    )
+    parser.add_argument(
+        '--version',
+        action='version',
+        version=__version__
+    )
+    parser.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        default=0,
+        help='verbose mode\n'
+             'Use -vv for debug mode'
+    )
+    parser.add_argument(
+        '-d',
+        '--designspace',
+        metavar='PATH',
+        dest='design_space_path',
+        type=_validate_path,
+        help='path to design space file',
+        required=True
+    )
+    parser.add_argument(
+        '-o',
+        '--output',
+        dest='var_font_path',
+        metavar='PATH',
+        help='path to output variable font file. Default is base name\n'
+        'of the design space file.',
+    )
+    parser.add_argument(
+        '-k',
+        '--keep-glyph-names',
+        action='store_true',
+        help='Preserve glyph names in output var font, with a post table\n'
+        'format 2.',
+    )
+    parser.add_argument(
+        '-c',
+        '--check-compat',
+        dest='check_compatibility',
+        action='store_true',
+        help='Check outline compatibility in source fonts, and fix flat\n'
+        'curves.',
+    )
+    parser.add_argument(
+        '-i',
+        '--include-glyphs',
+        dest='include_glyphs_path',
+        metavar='PATH',
+        type=_validate_path,
+        help='Path to file containing a python dict specifying which\n'
+        'glyph names should be included from which source fonts.\n'
+    )
+    options = parser.parse_args(args)
+
+    if not options.var_font_path:
+        var_font_path = '{}.otf'.format(os.path.splitext(
+            options.design_space_path)[0])
+        options.var_font_path = var_font_path
+
+    if not options.verbose:
+        level = PROGRESS_LEVEL
+        logging.basicConfig(level=level, format="%(message)s")
     else:
-        print(__usage__)
-        return
+        level = logging.INFO
+        logging.basicConfig(level=level)
+    logger.setLevel(level)
 
-    if os.path.exists(varFontPath):
-        os.remove(varFontPath)
-    varFont, varModel, masterPaths = varLib.build(designSpacePath,
-                                                  otfFinder, exclude=("CFF2",))
+    return options
 
-    blendError = buildCFF2Font(varFontPath, varFont, varModel, masterPaths,
-                               post_format_3)
-    if not blendError:
-        print("Built variable font '%s'" % (varFontPath))
+
+def main(args=None):
+    options = get_options(args)
+
+    if os.path.exists(options.var_font_path):
+        os.remove(options.var_font_path)
+
+    designspace = DesignSpaceDocument.fromfile(options.design_space_path)
+    ds_data = varLib.load_designspace(designspace)
+    master_fonts = varLib.load_masters(designspace, otfFinder)
+    logger.progress("Reading source fonts...")
+    for i, master_font in enumerate(master_fonts):
+        designspace.sources[i].font = master_font
+
+    # Subset source fonts
+    if options.include_glyphs_path:
+        logger.progress("Subsetting source fonts...")
+        subsetDict = getSubset(options.include_glyphs_path)
+        subset_masters(designspace, subsetDict)
+
+    if options.check_compatibility:
+        logger.progress("Checking outline compatibility in source fonts...")
+        font_list = [src.font for src in designspace.sources]
+        default_font = designspace.sources[ds_data.base_idx].font
+        vf = deepcopy(default_font)
+        # We copy vf from default_font, because we use VF to hold
+        # merged arguments from each source font charstring - this alters
+        # the font, which we don't want to do to the default font.
+        do_compatibility(vf, font_list)
+
+    logger.progress("Building VF font...")
+    # Note that we now pass in the design space object, rather than a path to
+    # the design space file, in order to pass in the modified source fonts
+    # fonts without having to recompile and save them.
+    varFont, _, _ = varLib.build(designspace, otfFinder)
+
+    if not options.keep_glyph_names:
+        default_font = designspace.sources[ds_data.base_idx].font
+        suppress_glyph_names(varFont)
+
+    varFont.save(options.var_font_path)
+    logger.progress("Built variable font '%s'" % (options.var_font_path))
 
 
 if __name__ == '__main__':
-    run()
+    sys.exit(main())
