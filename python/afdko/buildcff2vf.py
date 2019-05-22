@@ -402,8 +402,8 @@ def get_options(args):
         '-k',
         '--keep-glyph-names',
         action='store_true',
-        help='Preserve glyph names in output var font, with a post table\n'
-        'format 2.',
+        help='Preserve glyph names in output variable font\n'
+        "(using 'post' table format 2).",
     )
     parser.add_argument(
         '--omit-mac-names',
@@ -425,7 +425,7 @@ def get_options(args):
         metavar='PATH',
         type=_validate_path,
         help='Path to file containing a python dict specifying which\n'
-        'glyph names should be included from which source fonts.\n'
+        'glyph names should be included from which source fonts.'
     )
     options = parser.parse_args(args)
 
@@ -481,7 +481,6 @@ def main(args=None):
     varFont, _, _ = varLib.build(designspace, otfFinder)
 
     if not options.keep_glyph_names:
-        default_font = designspace.sources[ds_data.base_idx].font
         suppress_glyph_names(varFont)
 
     if options.omit_mac_names:
