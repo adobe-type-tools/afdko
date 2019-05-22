@@ -349,6 +349,11 @@ def suppress_glyph_names(tt_font):
     postTable.compile(tt_font)
 
 
+def remove_mac_names(tt_font):
+    name_tb = tt_font['name']
+    name_tb.names = [nr for nr in name_tb.names if nr.platformID != 1]
+
+
 def _validate_path(path_str):
     # used for paths passed to get_options.
     valid_path = os.path.abspath(os.path.realpath(path_str))
@@ -399,6 +404,11 @@ def get_options(args):
         action='store_true',
         help='Preserve glyph names in output var font, with a post table\n'
         'format 2.',
+    )
+    parser.add_argument(
+        '--omit-mac-names',
+        action='store_true',
+        help="Omit Macintosh strings from 'name' table.",
     )
     parser.add_argument(
         '-c',
@@ -473,6 +483,9 @@ def main(args=None):
     if not options.keep_glyph_names:
         default_font = designspace.sources[ds_data.base_idx].font
         suppress_glyph_names(varFont)
+
+    if options.omit_mac_names:
+        remove_mac_names(varFont)
 
     varFont.save(options.var_font_path)
     logger.progress("Built variable font '%s'" % (options.var_font_path))
