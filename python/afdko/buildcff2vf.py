@@ -24,6 +24,8 @@ from fontTools.varLib.cff import CFF2CharStringMergePen
 
 __version__ = '2.0.0'
 
+STAT_FILENAME = 'override.STAT.ttx'
+
 
 # set up for printing progress notes
 def progress(self, message, *args, **kws):
@@ -485,6 +487,12 @@ def main(args=None):
 
     if options.omit_mac_names:
         remove_mac_names(varFont)
+
+    stat_file_path = os.path.join(
+        os.path.dirname(options.var_font_path), STAT_FILENAME)
+    if os.path.exists(stat_file_path):
+        logger.progress("Importing STAT table override...")
+        varFont.importXML(stat_file_path)
 
     varFont.save(options.var_font_path)
     logger.progress("Built variable font '%s'" % (options.var_font_path))
