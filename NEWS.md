@@ -1,6 +1,17 @@
 Changelog
 =========
 
+2.8.10 (released 2019-05-28)
+---------------------------
+
+- **buildcff2vf** tool was rewritten to support sparse masters,
+  glyph subsets, and to rely more on `fontTools.varLib`. Existing
+  options were renamed and new ones were added
+  ([#792](https://github.com/adobe-type-tools/afdko/pull/792),
+  [#800](https://github.com/adobe-type-tools/afdko/pull/800))
+- [mergefonts] Ignore height advance value in UFO glyph files
+  ([#795](https://github.com/adobe-type-tools/afdko/pull/795))
+
 2.8.9 (released 2019-04-29)
 ---------------------------
 
