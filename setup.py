@@ -147,7 +147,7 @@ def _get_scripts():
 def _get_console_scripts():
     script_entries = [
         ('autohint', 'autohint:main'),
-        ('buildcff2vf', 'buildcff2vf:run'),
+        ('buildcff2vf', 'buildcff2vf:main'),
         ('buildmasterotfs', 'buildmasterotfs:main'),
         ('comparefamily', 'comparefamily:main'),
         ('checkoutlinesufo', 'checkoutlinesufo:main'),

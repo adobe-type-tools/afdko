@@ -99,6 +99,10 @@ long dnaGrow(void *object, size_t elemsize, long index) {
     if (new_ptr == NULL) {
         return -1; /* Allocation failed */
     }
+
+    /* explictly zero out the new memory before initialization */
+    memset((char *)new_ptr + (da->size * elemsize), 0, (new_size - da->size) * elemsize);
+
     if (da->func != NULL) {
         /* Initialize newly allocated elements */
         /* 64-bit warning fixed by cast here */

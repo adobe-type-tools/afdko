@@ -1106,10 +1106,10 @@ static int matchGLIFOrderRec(const void* key, const void* value, void* ctx) {
 
 static long getGlyphOrderIndex(ufoCtx h, char* glyphName) {
     long orderIndex = ABF_UNSET_INT;
-    int recIndex = 0;
+    size_t recIndex = 0;
 
     if (ctuLookup(glyphName, h->data.glifOrder.array, h->data.glifOrder.cnt,
-                  sizeof(h->data.glifOrder.array[0]), matchGLIFOrderRec, (size_t*)&recIndex, h)) {
+                  sizeof(h->data.glifOrder.array[0]), matchGLIFOrderRec, &recIndex, h)) {
         orderIndex = h->data.glifOrder.array[recIndex].order;
     } else {
         message(h, "Warning: glyph order does not contain glyph name '%s'.", glyphName);
@@ -3607,7 +3607,6 @@ int ufoBegFont(ufoCtx h, long flags, abfTopDict** top, char* altLayerDir) {
 int ufoEndFont(ufoCtx h) {
     if (h->stm.src)
         h->cb.stm.close(&h->cb.stm, h->stm.src);
-    memFree(h, h->top.FullName.ptr);
     return ufoSuccess;
 }
 

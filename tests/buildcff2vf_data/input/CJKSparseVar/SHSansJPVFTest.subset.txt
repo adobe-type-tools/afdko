@@ -1,0 +1,9 @@
+((("weight",0.0),),(("weight",1000.0),),)
+	.notdef
+	cid00001 #uni 00020
+	cid00002 #uni 00021
+	cid00089
+	cid06449 #uni 085A8
+	cid22370 #uni 08552
+((("weight",0.0),),(("weight",799),),(("weight",800),),(("weight",1000.0),),)
+	cid13393
