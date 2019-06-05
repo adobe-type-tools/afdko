@@ -338,8 +338,8 @@ This format is used when an undefined `<device>` is needed in a list of `<device
 
 A `<valuerecord>` is used in some positioning rules [§[6](#6)].
 
-It must be enclosed by angle brackets, except for format A, in which the angle
-brackets are optional. Note that the `<metric>` adjustments indicate values (in
+Except for format A, a `<valuerecord>` must be enclosed by angle brackets. 
+Note that the `<metric>` adjustments indicate values (in
 design units) to add to (positive values) or subtract from (negative values) the
 placement and advance values provided in the font (in the `hmtx` and `vmtx`
 tables).
