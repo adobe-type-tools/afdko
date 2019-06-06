@@ -7,6 +7,7 @@ import hashlib
 import os
 import plistlib
 import re
+from collections import OrderedDict
 
 try:
     import xml.etree.cElementTree as ET
@@ -15,13 +16,15 @@ except ImportError:
 
 from fontTools.misc.py23 import open, tobytes, tounicode, tostr, round
 from fontTools.ufoLib import UFOReader
+from fontTools.ufoLib.glifLib import Glyph
 
-from psautohint.ufoFont import UFOFontData as psautohintUFOFontData
+from psautohint.ufoFont import (norm_float, HashPointPen,
+                                UFOFontData as psahUFOFontData)
 
 from afdko import convertfonttocid, fdkutils
 
 __doc__ = """
-ufotools.py v1.33.0 Feb 14 2019
+ufotools.py v1.34.0 Jun 6 2019
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -334,6 +337,9 @@ kDefaultGlyphsLayerName = "public.default"
 kDefaultGlyphsLayer = "glyphs"
 kProcessedGlyphsLayerName = "com.adobe.type.processedglyphs"
 kProcessedGlyphsLayer = "glyphs.%s" % kProcessedGlyphsLayerName
+DEFAULT_LAYER_ENTRY = [kDefaultGlyphsLayerName, kDefaultGlyphsLayer]
+PROCESSED_LAYER_ENTRY = [kProcessedGlyphsLayerName, kProcessedGlyphsLayer]
+
 kFontInfoName = "fontinfo.plist"
 kContentsName = "contents.plist"
 kLibName = "lib.plist"
@@ -372,6 +378,15 @@ kPointName = "name"
 kStackLimit = 46
 kStemLimit = 96
 
+COMP_TRANSFORM = OrderedDict([
+    ('xScale', '1'),
+    ('xyScale', '0'),
+    ('yxScale', '0'),
+    ('yScale', '1'),
+    ('xOffset', '0'),
+    ('yOffset', '0')
+])
+
 
 class UFOParseError(Exception):
     pass
@@ -401,7 +416,7 @@ class UFOFontData(object):
         self.fontDict = None
         self.programName = tostr(programName)
         self.curSrcDir = None
-        self.hashMapChanged = 0
+        self.hashMapChanged = False
         self.glyphDefaultDir = os.path.join(self.parentPath, "glyphs")
         self.glyphLayerDir = os.path.join(self.parentPath,
                                           kProcessedGlyphsLayer)
@@ -421,16 +436,15 @@ class UFOFontData(object):
         # If true, do NOT round x,y values when processing
         self.allowDecimalCoords = False
 
-        self.glyphset = UFOReader(self.parentPath,
+        self.glyphSet = UFOReader(self.parentPath,
                                   validate=False).getGlyphSet(None)
 
     def getUnitsPerEm(self):
-        unitsPerEm = "1000"
+        unitsPerEm = 1000
         if self.fontInfo is None:
             self.loadFontInfo()
         if self.fontInfo:
             unitsPerEm = int(self.fontInfo["unitsPerEm"])
-        unitsPerEm = int(unitsPerEm)
         return unitsPerEm
 
     def getPSName(self):
@@ -470,42 +484,41 @@ class UFOFontData(object):
         self.newGlyphMap[glyphName] = glifXML
 
     def saveChanges(self):
-        if self.hashMapChanged:
-            self.writeHashMap()
-        self.hashMapChanged = 0
-
         if not os.path.exists(self.glyphWriteDir):
             os.makedirs(self.glyphWriteDir)
 
-        for glyphName, glifXML in self.newGlyphMap.items():
-            glyphPath = self.getWriteGlyphPath(glyphName)
-            # print("Saving file", glyphPath)
-            with open(glyphPath, "wb") as fp:
-                et = ET.ElementTree(glifXML)
-                et.write(fp, encoding="UTF-8", xml_declaration=True)
-
-        # Update the layer contents.plist file
         layerContentsFilePath = os.path.join(
             self.parentPath, "layercontents.plist")
         self.updateLayerContents(layerContentsFilePath)
+
         glyphContentsFilePath = os.path.join(
             self.glyphWriteDir, "contents.plist")
         self.updateLayerGlyphContents(glyphContentsFilePath, self.newGlyphMap)
+
+        for glyphName, glifXML in self.newGlyphMap.items():
+            glyphPath = self.getWriteGlyphPath(glyphName)
+            with open(glyphPath, "wb") as fp:
+                et = ET.ElementTree(glifXML)
+                et.write(fp, encoding="UTF-8", xml_declaration=True)
+            # Recalculate glyph hashes
+            if self.writeToDefaultLayer:
+                glyph = Glyph(glyphName, self.glyphSet)
+                glyph.width = _get_glyph_width(glyph)
+                self.recalcHashEntry(glyphName, glyph)
+
+        if self.hashMapChanged:
+            self.writeHashMap()
 
     def getWriteGlyphPath(self, glyphName):
         if len(self.glyphMap) == 0:
             self.loadGlyphMap()
 
         glyphFileName = self.glyphMap[glyphName]
-        if not self.writeToDefaultLayer:
-            if self.processedLayerGlyphMap:
-                try:
-                    glyphFileName = self.processedLayerGlyphMap[glyphName]
-                except KeyError:
-                    pass
+        if not self.writeToDefaultLayer and (
+                glyphName in self.processedLayerGlyphMap):
+            glyphFileName = self.processedLayerGlyphMap[glyphName]
 
-        glifFilePath = os.path.join(self.glyphWriteDir, glyphFileName)
-        return glifFilePath
+        return os.path.join(self.glyphWriteDir, glyphFileName)
 
     def getGlyphMap(self):
         if len(self.glyphMap) == 0:
@@ -608,28 +621,35 @@ class UFOFontData(object):
 
     def updateHashEntry(self, glyphName, changed):
         """
-        THIS METHOD DOES NOT UPDATE THE GLYPH HASHES!!
+        Updates the dict to be saved as 'com.adobe.type.processedHashMap'.
+        It does NOT recalculate the hash.
         """
         # srcHarsh has already been set: we are fixing the history list.
         if not self.useHashMap:
             return
         # Get hash entry for glyph
-        try:
-            hashEntry = self.hashMap[glyphName]
-            srcHash, historyList = hashEntry
-        except KeyError:
-            hashEntry = None
+        srcHash, historyList = self.hashMap[glyphName]
 
-        self.hashMapChanged = 1
+        self.hashMapChanged = True
         # If the program always reads data from the default layer,
         # and we have just created a new glyph in the processed layer,
         # then reset the history.
         if (not self.useProcessedLayer) and changed:
             self.hashMap[glyphName] = [tostr(srcHash), [self.programName]]
-            return
         # If the program is not in the history list, add it.
         elif self.programName not in historyList:
             historyList.append(self.programName)
+
+    def recalcHashEntry(self, glyphName, glyph):
+        hashBefore, historyList = self.hashMap[glyphName]
+
+        hash_pen = HashPointPen(glyph)
+        glyph.drawPoints(hash_pen)
+        hashAfter = hash_pen.getHash()
+
+        if hashAfter != hashBefore:
+            self.hashMap[glyphName] = [tostr(hashAfter), historyList]
+            self.hashMapChanged = True
 
     def checkSkipGlyph(self, glyphName, newSrcHash, doAll):
         skip = False
@@ -664,7 +684,7 @@ class UFOFontData(object):
             if not skip:
                 # case for Checkoutlines
                 if not self.useProcessedLayer:
-                    self.hashMapChanged = 1
+                    self.hashMapChanged = True
                     self.hashMap[glyphName] = [tostr(newSrcHash),
                                                [self.programName]]
                     glyphPath = self.getGlyphProcessedPath(glyphName)
@@ -693,7 +713,7 @@ class UFOFontData(object):
 
             # If the source hash has changed, we need to
             # delete the processed layer glyph.
-            self.hashMapChanged = 1
+            self.hashMapChanged = True
             self.hashMap[glyphName] = [tostr(newSrcHash), [self.programName]]
             glyphPath = self.getGlyphProcessedPath(glyphName)
             if glyphPath and os.path.exists(glyphPath):
@@ -710,9 +730,9 @@ class UFOFontData(object):
         try:
             widthXML = glifXML.find("advance")
             if widthXML is not None:
-                width = round(ast.literal_eval(widthXML.get("width")), 9)
+                width = round(ast.literal_eval(widthXML.get("width", '0')), 9)
             else:
-                width = 1000
+                width = 0
         except UFOParseError as e:
             print("Error. skipping glyph '%s' because of parse error: %s" %
                   (glyphFileName, e.message))
@@ -737,7 +757,7 @@ class UFOFontData(object):
 
         # Hash is always from the default glyph layer.
         useDefaultGlyphDir = True
-        newHash, dataList = self.buildGlyphHashValue(
+        newHash, _ = self.buildGlyphHashValue(
             width, outlineXML, glyphName, useDefaultGlyphDir)
         skip = self.checkSkipGlyph(glyphName, newHash, doAll)
 
@@ -814,33 +834,22 @@ class UFOFontData(object):
         self.fontInfo, tempList = parsePList(fontInfoPath)
 
     def updateLayerContents(self, contentsFilePath):
-        print("Calling updateLayerContents")
-        if os.path.exists(contentsFilePath):
-            contentsList = plistlib.readPlist(contentsFilePath)
-            # If the layer name already exists,
-            # don't add a new one, or change the path
-            seenPublicDefault = 0
-            seenProcessedGlyph = 0
-            for layerName, layerPath in contentsList:
-                if (layerPath == kProcessedGlyphsLayer):
-                    seenProcessedGlyph = 1
-                if (layerPath == kDefaultGlyphsLayer):
-                    seenPublicDefault = 1
-            update = 0
-            if not seenPublicDefault:
-                update = 1
-                contentsList = [[kDefaultGlyphsLayerName,
-                                kDefaultGlyphsLayer]] + contentsList
-            if not seenProcessedGlyph:
-                update = 1
-                contentsList.append([kProcessedGlyphsLayerName,
-                                    kProcessedGlyphsLayer])
-            if update:
-                plistlib.writePlist(contentsList, contentsFilePath)
+        # UFO v2
+        if not os.path.exists(contentsFilePath):
+            contentsList = [DEFAULT_LAYER_ENTRY]
+            if not self.writeToDefaultLayer:
+                contentsList.append(PROCESSED_LAYER_ENTRY)
+        # UFO v3
         else:
-            contentsList = [[kDefaultGlyphsLayerName, kDefaultGlyphsLayer]]
-            contentsList.append([kProcessedGlyphsLayerName,
-                                kProcessedGlyphsLayer])
+            contentsList = plistlib.readPlist(contentsFilePath)
+
+            if self.writeToDefaultLayer and (
+                    PROCESSED_LAYER_ENTRY in contentsList):
+                contentsList.remove(PROCESSED_LAYER_ENTRY)
+            elif PROCESSED_LAYER_ENTRY not in contentsList and (
+                    not self.writeToDefaultLayer):
+                contentsList.append(PROCESSED_LAYER_ENTRY)
+
         plistlib.writePlist(contentsList, contentsFilePath)
 
     def updateLayerGlyphContents(self, contentsFilePath, newGlyphData):
@@ -1030,44 +1039,47 @@ class UFOFontData(object):
                 "'%s'. " % (glyphName, self.parentPath))
         return gid
 
+    @staticmethod
+    def _rd_val(str_val):
+        """Round and normalize a (string) GLIF value"""
+        return repr(norm_float(round(ast.literal_eval(str_val), 9)))
+
     def buildGlyphHashValue(self, width, outlineXML, glyphName,
                             useDefaultGlyphDir, level=0):
         """
         glyphData must be the official <outline> XML from a GLIF.
         We skip contours with only one point.
         """
-        dataList = ["w%s" % width]
+        dataList = ["w%s" % norm_float(round(width, 9))]
         if level > 10:
             raise UFOParseError(
                 "In parsing component, exceeded 10 levels of reference. "
                 "'%s'. " % (glyphName))
         # <outline> tag is optional per spec., e.g. space glyph
         # does not necessarily have it.
-        if outlineXML:
+        if outlineXML is not None:
             for childContour in outlineXML:
                 if childContour.tag == "contour":
                     if len(childContour) < 2:
                         continue
-                    else:
-                        for child in childContour:
-                            if child.tag == "point":
-                                try:
-                                    pointType = child.attrib["type"][0]
-                                except KeyError:
-                                    pointType = ""
-                                dataList.append(
-                                    "%s%s%s" % (pointType, child.attrib["x"],
-                                                child.attrib["y"]))
-                                # print(dataList[-3:])
+                    for child in childContour:
+                        if child.tag == "point":
+                            ptType = child.get("type")
+                            pointType = '' if ptType is None else ptType[0]
+                            x = self._rd_val(child.get("x"))
+                            y = self._rd_val(child.get("y"))
+                            dataList.append("%s%s%s" % (pointType, x, y))
+
                 elif childContour.tag == "component":
                     # append the component hash.
-                    try:
-                        compGlyphName = childContour.attrib["base"]
-                        dataList.append("%s%s" % ("base:", compGlyphName))
-                    except KeyError:
+                    compGlyphName = childContour.get("base")
+
+                    if compGlyphName is None:
                         raise UFOParseError(
                             "'%s' is missing the 'base' attribute in a "
-                            "component. glyph '%s'." % (glyphName))
+                            "component." % glyphName)
+
+                    dataList.append("%s%s" % ("base:", compGlyphName))
 
                     if useDefaultGlyphDir:
                         try:
@@ -1104,17 +1116,11 @@ class UFOFontData(object):
 
                     etRoot = ET.ElementTree()
 
-                    # Collect transformm fields, if any.
-                    for transformTag in ["xScale", "xyScale", "yxScale",
-                                         "yScale", "xOffset", "yOffset"]:
-                        try:
-                            value = round(ast.literal_eval(
-                                childContour.attrib[transformTag]), 9)
-                            if int(value) == value:
-                                value = int(value)
-                            dataList.append(str(value))
-                        except KeyError:
-                            pass
+                    # Collect transform values
+                    for trans_key, flbk_val in COMP_TRANSFORM.items():
+                        value = childContour.get(trans_key, flbk_val)
+                        dataList.append(self._rd_val(value))
+
                     componentXML = etRoot.parse(componentPath)
                     componentOutlineXML = componentXML.find("outline")
                     componentHash, componentDataList = \
@@ -1123,16 +1129,14 @@ class UFOFontData(object):
                             useDefaultGlyphDir, level + 1)
                     dataList.extend(componentDataList)
         data = "".join(dataList)
-        if len(data) < 128:
-            hash_ = data
-        else:
-            hash_ = hashlib.sha512(data.encode("ascii")).hexdigest()
-        return hash_, dataList
+        if len(data) >= 128:
+            data = hashlib.sha512(data.encode("ascii")).hexdigest()
+        return data, dataList
 
     def getComponentOutline(self, componentItem):
-        try:
-            compGlyphName = componentItem.attrib["base"]
-        except KeyError:
+        compGlyphName = componentItem.get("base")
+
+        if compGlyphName is None:
             raise UFOParseError(
                 "'%s' attribute missing from component '%s'." %
                 ("base", xmlToString(componentItem)))
@@ -1174,7 +1178,7 @@ class UFOFontData(object):
     def close(self):
         if self.hashMapChanged:
             self.writeHashMap()
-            self.hashMapChanged = 0
+            self.hashMapChanged = False
 
     def clearHashMap(self):
         self.hashMap = {kAdobHashMapVersionName: kAdobHashMapVersion}
@@ -1296,9 +1300,9 @@ def convertGLIFToBez(ufoFontData, glyphName, doAll=0):
     if skip:
         return None, width
 
-    glyph = ufoFontData.glyphset[glyphName]
+    glyph = ufoFontData.glyphSet[glyphName]
     round_coords = not ufoFontData.allowDecimalCoords
-    bez = psautohintUFOFontData.get_glyph_bez(glyph, round_coords)
+    bez = psahUFOFontData.get_glyph_bez(glyph, round_coords)
     bezString = "\n".join(bez)
     bezString = "\n".join(["% " + glyphName, "sc", bezString, "ed", ""])
 
@@ -1916,11 +1920,11 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
     if hintInfoDict is not None:
         widthXML = glifXML.find("advance")
         if widthXML is not None:
-            width = int(eval(widthXML.get("width")))
+            width = int(ast.literal_eval(widthXML.get("width", '0')))
         else:
-            width = 1000
+            width = 0
         useDefaultGlyphDir = False
-        newGlyphHash, dataList = ufoFontData.buildGlyphHashValue(
+        newGlyphHash, _ = ufoFontData.buildGlyphHashValue(
             width, newOutlineElement, glyphName, useDefaultGlyphDir)
         # We add this hash to the T1 data, as it is the hash which matches
         # the output outline data. This is not necessarily the same as the
@@ -1960,6 +1964,12 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
 
     addWhiteSpace(glifXML, 0)
     return glifXML
+
+
+def _get_glyph_width(glyph):
+    hash_pen = HashPointPen(glyph)
+    glyph.drawPoints(hash_pen)
+    return getattr(glyph, 'width', 0)
 
 
 def regenerate_glyph_hashes(ufo_font_data):
