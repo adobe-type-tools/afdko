@@ -1,0 +1,6 @@
+{
+'a': ['w500l00l1400l140140l0140', ['autohint']],
+'after': ['w500base:a10012000w500l00l1400l140140l0140', ['autohint']],
+'before': ['w500base:a10010200w500l00l1400l140140l0140', ['autohint']],
+'hashMapVersion': (1, 0),
+}

@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph format="2" name="T">
+  <advance width="536" />
+  <unicode hex="0054" />
+  <anchor name="aboveUC" x="213.60000000000002" y="542.4" />
+  <anchor name="baseLC" x="214.4" y="0" />
+  <anchor name="belowLC" x="214.4" y="-17.6" />
+  <outline>
+    <contour>
+      <point name="hintSet0000" type="line" x="181" y="0" />
+      <point type="line" x="248" y="0" />
+      <point type="line" x="248" y="469" />
+      <point type="line" x="406" y="469" />
+      <point type="line" x="406" y="525" />
+      <point type="line" x="22" y="525" />
+      <point type="line" x="22" y="469" />
+      <point type="line" x="181" y="469" />
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>id</key>
+        <string>w536l1810l2480l248469l406469l406525l22525l22469l181469</string>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 21 -21</string>
+              <string>hstem 469 56</string>
+              <string>vstem 181 67</string>
+            </array>
+          </dict>
+        </array>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

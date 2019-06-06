@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph format="2" name="A">
+  <advance width="544" />
+  <unicode hex="0041" />
+  <anchor name="aboveUC" x="270.04" y="671.0" />
+  <anchor name="ogonekUC" x="462.12" y="6.560000000000002" />
+  <anchor name="belowLC" x="270.04" y="-14.999999999999996" />
+  <outline>
+    <contour>
+      <point name="hintSet0000" type="line" x="8" y="7" />
+      <point type="line" x="92" y="7" />
+      <point type="line" x="204" y="366" />
+      <point x="228" y="438" />
+      <point x="248" y="508" />
+      <point type="curve" x="268" y="583" />
+      <point type="line" x="272" y="583" />
+      <point x="293" y="508" />
+      <point x="313" y="438" />
+      <point type="curve" x="337" y="366" />
+      <point type="line" x="448" y="7" />
+      <point type="line" x="536" y="7" />
+      <point type="line" x="318" y="649" />
+      <point type="line" x="226" y="649" />
+    </contour>
+    <contour>
+      <point type="line" x="122" y="203" />
+      <point type="line" x="419" y="203" />
+      <point type="line" x="419" y="268" />
+      <point type="line" x="122" y="268" />
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>id</key>
+        <string>w544l87l927l204366228438248508c268583l272583293508313438c337366l4487l5367l318649l226649l122203l419203l419268l122268</string>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 203 65</string>
+              <string>hstem 583 66</string>
+              <string>vstem 8 528</string>
+            </array>
+          </dict>
+        </array>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

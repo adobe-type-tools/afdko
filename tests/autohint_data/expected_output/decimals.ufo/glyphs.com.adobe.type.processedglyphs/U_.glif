@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph format="2" name="U">
+  <advance width="645" />
+  <unicode hex="0055" />
+  <anchor name="aboveUC" x="257.6" y="542.4" />
+  <anchor name="hornLC" x="420.0" y="532.8000000000001" />
+  <anchor name="ogonekUC" x="257.6" y="0" />
+  <anchor name="belowLC" x="257.6" y="-17.6" />
+  <outline>
+    <contour>
+      <point name="hintSet0000" type="curve" x="258" y="-10" />
+      <point x="366" y="-10" />
+      <point x="446" y="48" />
+      <point type="curve" x="446" y="217" />
+      <point type="line" x="446" y="525" />
+      <point type="line" x="382" y="525" />
+      <point type="line" x="382" y="215" />
+      <point x="382" y="89" />
+      <point x="328" y="49" />
+      <point type="curve" x="258" y="49" />
+      <point x="190" y="49" />
+      <point x="136" y="89" />
+      <point type="curve" x="136" y="215" />
+      <point type="line" x="136" y="525" />
+      <point type="line" x="70" y="525" />
+      <point type="line" x="70" y="217" />
+      <point x="70" y="48" />
+      <point x="151" y="-10" />
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>id</key>
+        <string>w645c258-10366-1044648c446217l446525l382525l3822153828932849c258491904913689c136215l136525l70525l702177048151-10</string>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem -10 59</string>
+              <string>hstem 525 -20</string>
+              <string>vstem 70 66</string>
+              <string>vstem 382 64</string>
+            </array>
+          </dict>
+        </array>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

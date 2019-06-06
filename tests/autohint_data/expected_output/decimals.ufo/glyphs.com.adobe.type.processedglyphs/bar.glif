@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph format="2" name="bar">
+  <advance width="241" />
+  <unicode hex="007C" />
+  <outline>
+    <contour>
+      <point name="hintSet0000" type="line" x="74" y="-200" />
+      <point type="line" x="120" y="-200" />
+      <point type="line" x="120" y="600" />
+      <point type="line" x="74" y="600" />
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>id</key>
+        <string>w241l74-200l120-200l120600l74600</string>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem -200 800</string>
+              <string>vstem 74 46</string>
+            </array>
+          </dict>
+        </array>
+      </dict>
+    </dict>
+  </lib>
+</glyph>
