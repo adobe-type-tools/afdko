@@ -33,6 +33,7 @@ exe/
 project.xcworkspace/
 xcuserdata/
 **/xcode/build/
+*.xcscheme
 
 
 # Windows build directories
