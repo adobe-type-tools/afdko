@@ -3,14 +3,7 @@
 from __future__ import print_function, division, absolute_import
 
 import os
-import shutil
 import sys
-import tempfile
-
-from fontTools.misc.py23 import tounicode
-
-import defcon
-from mutatorMath.ufo.document import DesignSpaceDocumentReader
 
 from afdko.fdkutils import runShellCmd
 
@@ -22,12 +15,8 @@ except ImportError:
 XMLElement = ET.Element
 xmlToString = ET.tostring
 
-kTempUFOExt = ".temp.ufo"
-kTempDSExt = ".temp.designspace"
-kFeaturesFile = "features.fea"
-
 __usage__ = """
-buildmasterotfs.py  1.8.2 Jan 29 2019
+buildmasterotfs.py  1.9.0 Jun 7 2019
 Build master source OpenType/CFF fonts from a Superpolator design space file
 and the UFO master source fonts.
 
@@ -81,99 +70,6 @@ def compatibilizePaths(otfPath):
     os.remove(tempPathCFF)
 
 
-def _determine_which_masters_to_generate(ds_path):
-    """'ds_path' is the path to a designspace file.
-       Returns a list of integers representing the indexes
-       of the temp masters to generate.
-    """
-    master_list = ET.parse(ds_path).getroot().find('sources').findall('source')
-
-    # Make a set of the glyphsets of all the masters while collecting each
-    # glyphset. Glyph order is ignored.
-    all_gsets = set()
-    each_gset = []
-    for master in master_list:
-        master_path = master.attrib['filename']
-        ufo_path = os.path.join(os.path.dirname(ds_path), master_path)
-        gset = set(defcon.Font(ufo_path).keys())
-        all_gsets.update(gset)
-        each_gset.append(gset)
-
-    master_indexes = []
-    for i, gset in enumerate(each_gset):
-        if gset != all_gsets:
-            master_indexes.append(i)
-
-    return master_indexes
-
-
-def buildTempDesignSpace(dsPath):
-    """'dsPath' is the path to the original designspace file.
-       Returns a modified designspace file (for generating temp UFO masters)
-       and a list of paths to the UFO masters (that will be used for generating
-       each master OTF).
-    """
-    ds = ET.parse(dsPath).getroot()
-    masterList = ds.find('sources').findall('source')
-
-    # Delete any existing instances
-    instances = ds.find('instances')
-    if instances:
-        ds.remove(instances)
-    ds.append(XMLElement('instances'))
-    instances = ds.find('instances')
-
-    # Don't be wasteful, generate only the necessary temp masters
-    temp_masters_to_generate = _determine_which_masters_to_generate(dsPath)
-
-    # Populate the <instances> element with the information needed
-    # for generating the temp master(s)
-    master_paths = []
-    for i, master in enumerate(masterList):
-        masterPath = master.attrib['filename']
-        if i not in temp_masters_to_generate:
-            master_paths.append(masterPath)
-            continue
-        instance = XMLElement('instance')
-        instance.append(master.find('location'))
-        instance.append(XMLElement('kerning'))
-        instance.append(XMLElement('info'))
-        tempMasterPath = os.path.splitext(masterPath)[0] + kTempUFOExt
-        master_paths.append(tempMasterPath)
-        instance.attrib['filename'] = tempMasterPath
-        ufo_path = os.path.join(os.path.dirname(dsPath), masterPath)
-        ufo_info = defcon.Font(ufo_path).info
-        instance.attrib['familyname'] = ufo_info.familyName
-        instance.attrib['stylename'] = ufo_info.styleName
-        instance.attrib['postscriptfontname'] = ufo_info.postscriptFontName
-        instances.append(instance)
-    tempDSPath = os.path.splitext(dsPath)[0] + kTempDSExt
-    with open(tempDSPath, "w") as fp:
-        fp.write(tounicode(xmlToString(ds)))
-    return tempDSPath, master_paths
-
-
-def testGlyphSetsCompatible(dsPath):
-    # check if the masters all have the same set of glyphs
-    glyphSetsDiffer = False
-    dsDirPath = os.path.dirname(dsPath)
-    rootET = ET.parse(dsPath)
-    master_paths = []
-    ds = rootET.getroot()
-    sourceET = ds.find('sources')
-    masterList = sourceET.findall('source')
-    for et in masterList:
-        master_paths.append(et.attrib['filename'])
-    master_path = os.path.join(dsDirPath, master_paths[0])
-    baseGO = defcon.Font(master_path).keys()
-    for master_path in master_paths[1:]:
-        master_path = os.path.join(dsDirPath, master_path)
-        if baseGO != defcon.Font(master_path).keys():
-            glyphSetsDiffer = True
-            break
-    return glyphSetsDiffer, master_paths
-
-
 def parse_makeotf_options(mkot_opts):
     """Converts a comma-separated string into a space-separated string"""
     return ' '.join(mkot_opts.split(','))
@@ -199,17 +95,11 @@ def main(args=None):
         mkot_options = parse_makeotf_options(args.pop(index))
 
     (dsPath,) = args
-    glyphSetsDiffer, master_paths = testGlyphSetsCompatible(dsPath)
-
-    if glyphSetsDiffer:
-        allowDecimalCoords = False
-        logFile = tempfile.NamedTemporaryFile(delete=True).name
-        tempDSPath, master_paths = buildTempDesignSpace(dsPath)
-        print("Generating temp UFO master(s)...")
-        ds_doc_reader = DesignSpaceDocumentReader(
-            tempDSPath, ufoVersion=2, roundGeometry=(not allowDecimalCoords),
-            verbose=False, logPath=logFile)
-        ds_doc_reader.process(makeGlyphs=True, makeKerning=True, makeInfo=True)
+    rootET = ET.parse(dsPath)
+    ds = rootET.getroot()
+    sourceET = ds.find('sources')
+    masterList = sourceET.findall('source')
+    master_paths = [et.attrib['filename'] for et in masterList]
 
     print("Building local otf's for master font paths...")
     curDir = os.getcwd()
@@ -218,17 +108,8 @@ def main(args=None):
         master_path = os.path.join(dsDir, master_path)
         masterDir = os.path.dirname(master_path)
         ufoName = os.path.basename(master_path)
-        if ufoName.endswith(kTempUFOExt):
-            otfName = ufoName[:-len(kTempUFOExt)]
-            # copy the features.fea file from the original UFO master
-            fea_file_path_from = os.path.join(
-                master_path[:-len(kTempUFOExt)] + '.ufo', kFeaturesFile)
-            fea_file_path_to = os.path.join(master_path, kFeaturesFile)
-            if os.path.exists(fea_file_path_from):
-                shutil.copyfile(fea_file_path_from, fea_file_path_to)
-        else:
-            otfName = os.path.splitext(ufoName)[0]
-        otfName = otfName + ".otf"
+        otfName = os.path.splitext(ufoName)[0]
+        otfName = "{}.otf".format(otfName)
         if masterDir:
             os.chdir(masterDir)
         cmd = "makeotf -nshw -f \"%s\" -o \"%s\" -r -nS %s 2>&1" % (
@@ -243,12 +124,7 @@ def main(args=None):
         else:
             print("Built OTF font for", master_path)
             compatibilizePaths(otfName)
-            if ufoName.endswith(kTempUFOExt):
-                shutil.rmtree(ufoName)
         os.chdir(curDir)
-
-    if glyphSetsDiffer and os.path.exists(tempDSPath):
-        os.remove(tempDSPath)
 
 
 if __name__ == "__main__":
