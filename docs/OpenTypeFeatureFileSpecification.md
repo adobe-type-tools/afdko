@@ -2433,7 +2433,7 @@ position L' -100 quoteright' -50 A;
 position L' quoteright -150;  # special cases of contextual positioning
 position quoteright' A -120;  # where value record follows unmarked glyph,
                               # making them exactly equivalent to 3B.
-position s f' t 10 period;
+position s f' 10 t period;
 ```
 
 Note that the following statement (Example 3D) is NOT a pair kerning statement,
