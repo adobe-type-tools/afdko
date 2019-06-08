@@ -1,11 +1,32 @@
 # Copyright 2017 Adobe. All rights reserved.
+"""
+Builds master source OpenType/CFF fonts from a designspace file
+and UFO master source fonts.
+"""
+
+# The script makes the following assumptions:
+# 1. The AFDKO is installed; the script calls 'tx', 'sfntedit' and 'makeotf').
+# 2. Each master source font is in a separate directory from the other master
+#    fonts, and each of these directories provides the default metadata files
+#    expected by the 'makeotf' command:
+#    - features/features.fea
+#    - font.ufo
+#    - FontMenuNameDB within the directory or no more than 4 parent
+#      directories up.
+#    - GlyphAliasAndOrderDB within the directory or no more than 4 parent
+#      directories up.
+# The script will build a master source OpenType/CFF font for each master
+# source UFO font, using the same file name, but with the extension '.otf'.
 
 from __future__ import print_function, division, absolute_import
 
+import argparse
+import logging
 import os
 import sys
 
-from afdko.fdkutils import runShellCmd
+from afdko.fdkutils import run_shell_command, get_temp_file_path
+from afdko.makeotf import main as makeotf
 
 try:
     import xml.etree.cElementTree as ET
@@ -15,95 +36,123 @@ except ImportError:
 XMLElement = ET.Element
 xmlToString = ET.tostring
 
-__usage__ = """
-buildmasterotfs.py  1.9.0 Jun 7 2019
-Build master source OpenType/CFF fonts from a Superpolator design space file
-and the UFO master source fonts.
+__version__ = '1.9.0'
 
-python buildmasterotfs.py -h
-python buildmasterotfs.py -u
-python buildmasterotfs.py  <path to design space file>
-"""
-
-__help__ = __usage__ + """
-Options:
---mkot   Allows passing a comma-separated set of options to makeotf
-
-The script makes a number of assumptions.
-1) all the master source fonts are blend compatible in all their data.
-2) Each master source font is in a separate directory from the other master
-source fonts, and each of these directories provides the default meta data
-files expected by the 'makeotf' command:
-- features/features.fea
-- font.ufo
-- FontMenuNameDB within the directory or no more than 4 parent directories up.
-- GlyphAliasAndOrderDB within the directory or no more than 4 parent
-  directories up.
-3) The Adobe AFDKO is installed: the script calls 'tx' and 'makeotf'.
-4) <source> element for the default font in the design space file has
-the child element <info copy="1">; this is used to identify which master is
-the default font.
-
-The script will build a master source OpenType/CFF font for each master source
-UFO font, using the same file name, but with the extension '.otf'.
-
-UFO masters with partial glyphsets are supported.
-"""
+logger = logging.getLogger(__name__)
 
 
-def compatibilizePaths(otfPath):
-    tempPathCFF = otfPath + ".temp.cff"
-    command = "tx -cff +b -std -no_opt \"%s\" \"%s\" 2>&1" % (otfPath,
-                                                              tempPathCFF)
-    report = runShellCmd(command)
-    if "fatal" in str(report):
-        print(report)
-        sys.exit(1)
-
-    command = "sfntedit -a \"CFF \"=\"%s\" \"%s\" 2>&1" % (tempPathCFF,
-                                                           otfPath)
-    report = runShellCmd(command)
-    if "FATAL" in str(report):
-        print(report)
-        sys.exit(1)
-
-    os.remove(tempPathCFF)
+class ShellCommandError(Exception):
+    pass
 
 
-def parse_makeotf_options(mkot_opts):
-    """Converts a comma-separated string into a space-separated string"""
-    return ' '.join(mkot_opts.split(','))
+def generalizeCFF(otfPath):
+    tempFilePath = get_temp_file_path()
+
+    if not run_shell_command(['tx', '-cff', '+b', '-std', '-no_opt',
+                              otfPath, tempFilePath]):
+        raise ShellCommandError
+
+    if not run_shell_command(['sfntedit', '-a',
+                              'CFF ={}'.format(tempFilePath), otfPath]):
+        raise ShellCommandError
+
+
+def _validate_path(path_str):
+    valid_path = os.path.abspath(os.path.realpath(path_str))
+    if not os.path.exists(valid_path):
+        raise argparse.ArgumentTypeError(
+            "'{}' is not a valid path.".format(path_str))
+    return valid_path
+
+
+def _split_makeotf_options(comma_str):
+    """Converts a comma-separated string into a list.
+       Adds back leading hyphen."""
+    if not comma_str.startswith('-'):
+        comma_str = '-' + comma_str
+    return comma_str.split(',')
+
+
+MKOT_OPT = '--mkot'
+
+
+def _preparse_args(args):
+    """Removes the leading hyphen from the '--mkot' option argument"""
+    if args is None:
+        args = sys.argv[1:]
+    if MKOT_OPT not in args:
+        return args
+    opt_i = args.index(MKOT_OPT)
+    try:
+        arg_i = opt_i + 1
+        mkot_arg = args[arg_i]
+        if mkot_arg.startswith('-'):
+            args[arg_i] = mkot_arg[1:]
+    except IndexError:
+        pass
+    return args
+
+
+def get_options(args):
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawTextHelpFormatter,
+        description=__doc__
+    )
+    parser.add_argument(
+        '--version',
+        action='version',
+        version=__version__
+    )
+    parser.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        default=0,
+        help='verbose mode\n'
+             'Use -vv for debug mode'
+    )
+    parser.add_argument(
+        '-d',
+        '--designspace',
+        metavar='PATH',
+        dest='dsPath',
+        type=_validate_path,
+        help='path to design space file',
+        required=True
+    )
+    parser.add_argument(
+        MKOT_OPT,
+        metavar='OPTIONS',
+        help="comma-separated set of 'makeotf' options",
+        type=_split_makeotf_options,
+        default=[]
+    )
+    options = parser.parse_args(args)
+
+    if not options.verbose:
+        level = "WARNING"
+    elif options.verbose == 1:
+        level = "INFO"
+    else:
+        level = "DEBUG"
+    logging.basicConfig(level=level)
+
+    return options
 
 
 def main(args=None):
-    if args is None:
-        args = sys.argv[1:]
-    if not args:
-        args = ["-u"]
+    args = _preparse_args(args)
+    opts = get_options(args)
 
-    mkot_options = ''
-
-    if '-u' in args:
-        print(__usage__)
-        return
-    if '-h' in args:
-        print(__help__)
-        return
-    if '--mkot' in args:
-        index = args.index('--mkot')
-        args.pop(index)
-        mkot_options = parse_makeotf_options(args.pop(index))
-
-    (dsPath,) = args
-    rootET = ET.parse(dsPath)
+    rootET = ET.parse(opts.dsPath)
     ds = rootET.getroot()
     sourceET = ds.find('sources')
     masterList = sourceET.findall('source')
     master_paths = [et.attrib['filename'] for et in masterList]
 
-    print("Building local otf's for master font paths...")
+    logger.info("Building local OTFs for master font paths...")
     curDir = os.getcwd()
-    dsDir = os.path.dirname(dsPath)
+    dsDir = os.path.dirname(opts.dsPath)
     for master_path in master_paths:
         master_path = os.path.join(dsDir, master_path)
         masterDir = os.path.dirname(master_path)
@@ -112,20 +161,12 @@ def main(args=None):
         otfName = "{}.otf".format(otfName)
         if masterDir:
             os.chdir(masterDir)
-        cmd = "makeotf -nshw -f \"%s\" -o \"%s\" -r -nS %s 2>&1" % (
-            ufoName, otfName, mkot_options)
-        log = runShellCmd(cmd)
-        if ("FATAL" in log) or ("Failed to build" in log):
-            print(log)
-
-        if "Built" not in str(log):
-            print("Error building OTF font for", master_path, log)
-            print("makeotf cmd was '%s' in %s." % (cmd, masterDir))
-        else:
-            print("Built OTF font for", master_path)
-            compatibilizePaths(otfName)
+        makeotf(['-nshw', '-f', ufoName, '-o', otfName,
+                 '-r', '-nS'] + opts.mkot)
+        logger.info("Built OTF font for {}".format(master_path))
+        generalizeCFF(otfName)
         os.chdir(curDir)
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
