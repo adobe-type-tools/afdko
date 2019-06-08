@@ -129,27 +129,6 @@
   </OS_2>
 
   <name>
-    <namerecord nameID="1" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      CJKVarCond
-    </namerecord>
-    <namerecord nameID="2" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      Regular
-    </namerecord>
-    <namerecord nameID="3" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      1.000;ADBE;MasterSet_Kanji_75-w600.00
-    </namerecord>
-    <namerecord nameID="4" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      CJKVarCond
-    </namerecord>
-    <namerecord nameID="5" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      Version 1.000;hotconv 1.0.109;makeotfexe 2.5.65596
-    </namerecord>
-    <namerecord nameID="6" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      MasterSet_Kanji_75-w600.00
-    </namerecord>
-    <namerecord nameID="17" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      w600.00
-    </namerecord>
     <namerecord nameID="0" platformID="3" platEncID="1" langID="0x409">
       © 2018 Adobe. All Rights Reserved.
     </namerecord>
@@ -2211,10 +2190,5 @@
     <mtx name="uni9192" width="750" lsb="33"/>
     <mtx name="uni994C" width="750" lsb="11"/>
   </hmtx>
-
-  <DSIG>
-    <!-- note that the Digital Signature will be invalid after recompilation! -->
-    <tableHeader flag="0x0" numSigs="0" version="1"/>
-  </DSIG>
 
 </ttFont>
