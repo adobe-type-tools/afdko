@@ -67,3 +67,22 @@ def test_ufo3_masters(args, ufo_filename):
     expected_path = _get_output_path(ufo_filename, 'expected_output')
     actual_path = _get_output_path(ufo_filename, 'temp_output')
     assert differ([expected_path, actual_path])
+
+
+@pytest.mark.parametrize('filename, exp_content', [
+    ('features_copy', b'# Master 1'),
+    ('features_nocopy', None),
+])
+def test_features_copy(filename, exp_content):
+    runner(['-t', TOOL, '-o', 'a', 'c', 'n', 'd',
+            '_{}'.format(get_input_path('{}.designspace'.format(filename)))])
+    for i in (1, 2):  # two instances
+        ufo_filename = '{}{}.ufo'.format(filename, i)
+        ufo_path = _get_output_path(ufo_filename, 'expected_output')
+        fea_path = os.path.join(ufo_path, 'features.fea')
+        if not os.path.exists(fea_path):
+            act_content = None
+        else:
+            with open(fea_path, 'rb') as f:
+                act_content = f.read().rstrip()
+        assert exp_content == act_content
