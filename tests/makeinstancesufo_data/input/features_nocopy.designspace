@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8'?>
+<designspace format="3">
+    <axes>
+        <axis default="0.0" maximum="1000.0" minimum="0.0" name="weight" tag="wght"/>
+    </axes>
+    <sources>
+        <source filename="features_m0.ufo" name="master_0">
+            <location>
+                <dimension name="weight" xvalue="0"/>
+            </location>
+        </source>
+        <source filename="features_m1.ufo" name="master_1">
+            <features copy="0"/>
+            <location>
+                <dimension name="weight" xvalue="1000"/>
+            </location>
+        </source>
+    </sources>
+    <instances>
+        <instance familyname="Features" filename="../expected_output/features_nocopy1.ufo" postscriptfontname="Features-Regular" stylename="Regular">
+            <location>
+                <dimension name="weight" xvalue="394"/>
+            </location>
+        </instance>
+        <instance familyname="Features" filename="../expected_output/features_nocopy2.ufo" postscriptfontname="Features-Bold" stylename="Bold">
+            <location>
+                <dimension name="weight" xvalue="725"/>
+            </location>
+        </instance>
+    </instances>
+</designspace>
