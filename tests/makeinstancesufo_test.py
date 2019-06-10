@@ -4,6 +4,8 @@ import os
 import pytest
 from shutil import rmtree
 
+from fontTools.misc.py23 import tobytes
+
 from runner import main as runner
 from differ import main as differ
 from test_utils import get_input_path
@@ -71,11 +73,12 @@ def test_ufo3_masters(args, ufo_filename):
 
 @pytest.mark.parametrize('filename, exp_content', [
     ('features_copy', b'# Master 1'),
-    ('features_nocopy', None),
+    ('features_nocopy', b'# Instance'),
 ])
 def test_features_copy(filename, exp_content):
     runner(['-t', TOOL, '-o', 'a', 'c', 'n', 'd',
             '_{}'.format(get_input_path('{}.designspace'.format(filename)))])
+    exp_content_orig = exp_content
     for i in (1, 2):  # two instances
         ufo_filename = '{}{}.ufo'.format(filename, i)
         ufo_path = _get_output_path(ufo_filename, 'expected_output')
@@ -85,4 +88,6 @@ def test_features_copy(filename, exp_content):
         else:
             with open(fea_path, 'rb') as f:
                 act_content = f.read().rstrip()
+        if 'nocopy' in filename:
+            exp_content = exp_content_orig + tobytes(str(i), encoding='utf-8')
         assert exp_content == act_content
