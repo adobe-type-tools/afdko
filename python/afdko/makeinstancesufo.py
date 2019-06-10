@@ -14,6 +14,7 @@ import os
 import shutil
 import sys
 
+from fontTools.designspaceLib import DesignSpaceDocument
 from fontTools.misc.py23 import open, tobytes
 
 from defcon import Font
@@ -30,15 +31,17 @@ from afdko.checkoutlinesufo import run as checkoutlinesUFO
 from afdko.ufotools import validateLayers
 
 
-__version__ = '2.2.1'
+__version__ = '2.3.0'
 
 logger = logging.getLogger(__name__)
 
 
 DFLT_DESIGNSPACE_FILENAME = "font.designspace"
+FEATURES_FILENAME = "features.fea"
 
 
 def readDesignSpaceFile(options):
+    # TODO: Replace with DesignSpaceDocument and use a proper tempfile
     """ Read design space file.
     build a new instancesList with all the instances from the ds file
 
@@ -214,7 +217,38 @@ def postProcessInstance(fontPath, options):
     dFont.save()
 
 
+def collect_features_content(instances, inst_idx_lst):
+    """
+    Returns a dictionary whose keys are 'features.fea' file paths, and the
+    values are the contents of the corresponding file.
+    """
+    fea_dict = {}
+    for i, inst_dscrpt in enumerate(instances):
+        if inst_idx_lst and i not in inst_idx_lst:
+            continue
+        ufo_pth = inst_dscrpt.path
+        if ufo_pth is None:
+            continue
+        ufo_pth = os.path.abspath(os.path.realpath(ufo_pth))
+        fea_pth = os.path.join(ufo_pth, FEATURES_FILENAME)
+        if os.path.isfile(fea_pth):
+            with open(fea_pth, 'rb') as fp:
+                fea_cntnts = fp.read()
+            fea_dict[fea_pth] = fea_cntnts
+    return fea_dict
+
+
 def run(options):
+    ds_doc = DesignSpaceDocument.fromfile(options.dsPath)
+
+    copy_features = any(src.copyFeatures for src in ds_doc.sources)
+    features_store = {}
+    if not copy_features:
+        # '<features copy="1"/>' is NOT set in any of masters.
+        # Collect the contents of 'features.fea' of any existing
+        # instances so that they can be restored later.
+        features_store = collect_features_content(ds_doc.instances,
+                                                  options.indexList)
 
     # Set the current dir to the design space dir, so that relative paths in
     # the design space file will work.
@@ -258,7 +292,7 @@ def run(options):
     # checkoutlinesufo does ufotools.validateLayers()
     if not options.doOverlapRemoval:
         for instancePath in newInstancesList:
-            # make sure that that there are no old glyphs left in the
+            # make sure that there are no old glyphs left in the
             # processed glyphs folder
             validateLayers(instancePath)
 
@@ -268,6 +302,11 @@ def run(options):
             if options.doNormalize:
                 normalizeUFO(instancePath, outputPath=None, onlyModified=False,
                              writeModTimes=False)
+
+    # Restore the contents of the instances' 'features.fea' files
+    for fea_pth, fea_cntnts in features_store.items():
+        with open(fea_pth, 'wb') as fp:
+            fp.write(fea_cntnts)
 
 
 def _validate_path(path_str):
