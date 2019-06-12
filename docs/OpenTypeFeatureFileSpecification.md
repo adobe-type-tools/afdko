@@ -10,8 +10,8 @@ Copyright 2015-2019 Adobe. All Rights Reserved. This software is licensed as
 OpenSource, under the Apache License, Version 2.0. This license is available at:
 http://opensource.org/licenses/Apache-2.0.
 
-Document version 1.24
-Last updated 21 March 2019
+Document version 1.24.1
+Last updated 12 June 2019
 
 **Caution: Portions of the syntax unimplemented by Adobe are subject to change.**
 
@@ -338,7 +338,7 @@ This format is used when an undefined `<device>` is needed in a list of `<device
 
 A `<valuerecord>` is used in some positioning rules [§[6](#6)].
 
-Except for format A, a `<valuerecord>` must be enclosed by angle brackets. 
+Except for format A, a `<valuerecord>` must be enclosed by angle brackets.
 Note that the `<metric>` adjustments indicate values (in
 design units) to add to (positive values) or subtract from (negative values) the
 placement and advance values provided in the font (in the `hmtx` and `vmtx`
@@ -2432,8 +2432,7 @@ example 3C. Both examples are exactly equivalent.
 position L' -100 quoteright' -50 A;
 position L' quoteright -150;  # special cases of contextual positioning
 position quoteright' A -120;  # where value record follows unmarked glyph,
-                              # making them exactly equivalent to 3B.
-position s f' t 10 period;
+position s f' t 10 period;    # making them exactly equivalent to 3B.
 ```
 
 Note that the following statement (Example 3D) is NOT a pair kerning statement,
