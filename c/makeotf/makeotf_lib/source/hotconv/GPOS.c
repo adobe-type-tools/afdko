@@ -3929,7 +3929,7 @@ static void fillMarkToBase(hotCtx g, GPOSCtx h) {
             for (j = 0; j < fmt->ClassCount; j++) {
                 if (baseAnchorArray[j] == 0xFFFFFFFFL) {
                     char msg[1024];
-                    baseAnchorArray[j] = 0;
+                    baseAnchorArray[j] = 0xFFFFFFFFL;
                     featGlyphDump(g, baseRec->gid, '\0', 0);
                     if (h->new.fileName != NULL) {
                         sprintf(msg, " [%s line %ld]", h->new.fileName, baseRec->lineNum);
@@ -4014,8 +4014,7 @@ static void writeMarkToBase(hotCtx g, GPOSCtx h, Subtable *sub) {
     for (i = 0; i < fmt->BaseArray_.BaseCount; i++) {
         BaseRecord *baseRec = &fmt->BaseArray_.BaseRecord[i];
         for (j = 0; j < markClassCnt; j++) {
-            LOffset *baseAnchorArray = baseRec->BaseAnchorArray;
-            if (baseRec->BaseAnchorArray[j] == 0)
+            if (baseRec->BaseAnchorArray[j] == 0xFFFFFFFFL)
                 OUT2((Offset)0);
             else
                 OUT2((Offset)(baseRec->BaseAnchorArray[j] + anchorListOffset));
