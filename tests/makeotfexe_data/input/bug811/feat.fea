@@ -1,0 +1,18 @@
+
+table head {
+	FontRevision 1.011;
+} head;
+
+languagesystem DFLT dflt;
+
+# Copied loosely from SourceCodePro-Regular
+@mGC_above_300_500 = [.notdef];
+@mGC_above_300_680 = [a];
+
+markClass @mGC_above_300_500 <anchor 300 500> @MC_above;
+markClass @mGC_above_300_680 <anchor 300 680> @MC_above;
+
+feature GPS4 {
+	pos base .notdef <anchor 300 680> mark @MC_above;
+	pos base a <anchor 300 500> mark @MC_above;
+} GPS4;
