@@ -1177,14 +1177,14 @@ void dumpUnicodeRanges(IntX level) {
             "IPA Extensions",                                /*   4 */
             "Spacing Modifier Letters",                      /*   5 */
             "Combining Diacritical Marks",                   /*   6 */
-            "Basic Greek",                                   /*   7 */
-            "Greek Symbols and Coptic",                      /*   8 */
+            "Greek and Coptic",                              /*   7 */
+            "Coptic",                                        /*   8 */
             "Cyrillic",                                      /*   9 */
             "Armenian",                                      /*  10 */
-            "Basic Hebrew",                                  /*  11 */
-            "Hebrew Extended (A and B blocks combined)",     /*  12 */
-            "Basic Arabic",                                  /*  13 */
-            "Arabic Extended",                               /*  14 */
+            "Hebrew",                                        /*  11 */
+            "Vai",                                           /*  12 */
+            "Arabic",                                        /*  13 */
+            "NKo",                                           /*  14 */
             "Devanagari",                                    /*  15 */
             "Bengali",                                       /*  16 */
             "Gurmukhi",                                      /*  17 */
@@ -1196,10 +1196,10 @@ void dumpUnicodeRanges(IntX level) {
             "Malayalam",                                     /*  23 */
             "Thai",                                          /*  24 */
             "Lao",                                           /*  25 */
-            "Basic Georgian",                                /*  26 */
-            "Georgian Extended",                             /*  27 */
+            "Georgian",                                      /*  26 */
+            "Balinese",                                      /*  27 */
             "Hangul Jamo",                                   /*  28 */
-            "Latin Extend Additional",                       /*  29 */
+            "Latin Extended Additional",                     /*  29 */
             "Greek Extended",                                /*  30 */
             "General Punctuation",                           /*  31 */
             "Superscripts and Subscripts",                   /*  32 */
@@ -1209,7 +1209,7 @@ void dumpUnicodeRanges(IntX level) {
             "Number Forms",                                  /*  36 */
             "Arrows",                                        /*  37 */
             "Mathematical Operators",                        /*  38 */
-            "Miscellaneous technical",                       /*  39 */
+            "Miscellaneous Technical",                       /*  39 */
             "Control Pictures",                              /*  40 */
             "Optical Character Recognition",                 /*  41 */
             "Enclosed Alphanumerics",                        /*  42 */
@@ -1223,19 +1223,19 @@ void dumpUnicodeRanges(IntX level) {
             "Katakana",                                      /*  50 */
             "Bopomofo",                                      /*  51 */
             "Hangul Compatibility Jamo",                     /*  52 */
-            "CJK Miscellaneous",                             /*  53 */
+            "Phags-pa",                                      /*  53 */
             "Enclosed CJK Letters and Months",               /*  54 */
             "CJK Compatibility",                             /*  55 */
-            "Hangul",                                        /*  56 */
-            "Surrogates",                                    /*  57 */
-            "Reserved 58",                                   /*  58 */
+            "Hangul Syllables",                              /*  56 */
+            "Non-Plane 0",                                   /*  57 */
+            "Phoenician",                                    /*  58 */
             "CJK Unified Ideographs",                        /*  59 */
-            "Private Use Area",                              /*  60 */
-            "CJK Compatibility Ideographs",                  /*  61 */
+            "Private Use Area (plane 0)",                    /*  60 */
+            "CJK Strokes",                                   /*  61 */
             "Alphabetic Presentation Forms",                 /*  62 */
             "Arabic Presentation Forms-A",                   /*  63 */
             "Combining Half Marks",                          /*  64 */
-            "CJK Compatibility Forms",                       /*  65 */
+            "Vertical Forms",                                /*  65 */
             "Small Form Variants",                           /*  66 */
             "Arabic Presentation Forms-B",                   /*  67 */
             "Halfwidth and Fullwidth Forms",                 /*  68 */
@@ -1247,52 +1247,52 @@ void dumpUnicodeRanges(IntX level) {
             "Myanmar",                                       /*  74 */
             "Ethiopic",                                      /*  75 */
             "Cherokee",                                      /*  76 */
-            "Unified Canadian Syllabics",                    /*  77 */
+            "Unified Canadian Aboriginal Syllabics",         /*  77 */
             "Ogham",                                         /*  78 */
             "Runic",                                         /*  79 */
             "Khmer",                                         /*  80 */
             "Mongolian",                                     /*  81 */
-            "Braille",                                       /*  82 */
-            "Yi",                                            /*  83 */
-            "Reserved 84",                                   /*  84 */
+            "Braille Patterns",                              /*  82 */
+            "Yi Syllables",                                  /*  83 */
+            "Tagalog",                                       /*  84 */
             "Old Italic",                                    /*  85 */
             "Gothic",                                        /*  86 */
             "Deseret",                                       /*  87 */
-            "Byzantine Musical Symbols and Musical Symbols", /*  88 */
+            "Byzantine Musical Symbols",                     /*  88 */
             "Mathematical Alphanumeric Symbols",             /*  89 */
-            "Supplementary Private Use Area-A",              /*  90 */
-            "Supplementary Private Use Area-B",              /*  91 */
-            "Reserved 92",                                   /*  92 */
-            "Reserved 93",                                   /*  93 */
-            "Reserved 94",                                   /*  94 */
-            "Reserved 95",                                   /*  95 */
-            "Reserved 96",                                   /*  96 */
-            "Reserved 97",                                   /*  97 */
-            "Reserved 98",                                   /*  98 */
-            "Reserved 99",                                   /*  99 */
-            "Reserved 100",                                  /* 100 */
-            "Reserved 101",                                  /* 101 */
-            "Reserved 102",                                  /* 102 */
-            "Reserved 103",                                  /* 103 */
-            "Reserved 104",                                  /* 104 */
-            "Reserved 105",                                  /* 105 */
-            "Reserved 106",                                  /* 106 */
-            "Reserved 107",                                  /* 107 */
-            "Reserved 108",                                  /* 108 */
-            "Reserved 109",                                  /* 109 */
-            "Reserved 110"                                   /* 110 */
-            "Reserved 111",                                  /* 111 */
-            "Reserved 112",                                  /* 112 */
-            "Reserved 113",                                  /* 113 */
-            "Reserved 114",                                  /* 114 */
-            "Reserved 115",                                  /* 115 */
-            "Reserved 116",                                  /* 116 */
-            "Reserved 117",                                  /* 117 */
-            "Reserved 118",                                  /* 118 */
-            "Reserved 119",                                  /* 119 */
-            "Reserved 120"                                   /* 120 */
-            "Reserved 121",                                  /* 121 */
-            "Reserved 122",                                  /* 122 */
+            "Private Use (plane 15)",                        /*  90 */
+            "Variation Selectors",                           /*  91 */
+            "Tags",                                          /*  92 */
+            "Limbu",                                         /*  93 */
+            "Tai Le",                                        /*  94 */
+            "New Tai Lue",                                   /*  95 */
+            "Buginese",                                      /*  96 */
+            "Glagolitic",                                    /*  97 */
+            "Tifinagh",                                      /*  98 */
+            "Yijing Hexagram Symbols",                       /*  99 */
+            "Syloti Nagri",                                  /* 100 */
+            "Linear B Syllabary",                            /* 101 */
+            "Ancient Greek Numbers",                         /* 102 */
+            "Ugaritic",                                      /* 103 */
+            "Old Persian",                                   /* 104 */
+            "Shavian",                                       /* 105 */
+            "Osmanya",                                       /* 106 */
+            "Cypriot Syllabary",                             /* 107 */
+            "Kharoshthi",                                    /* 108 */
+            "Tai Xuan Jing Symbols",                         /* 109 */
+            "Cuneiform",                                     /* 110 */
+            "Counting Rod Numerals",                         /* 111 */
+            "Sundanese",                                     /* 112 */
+            "Lepcha",                                        /* 113 */
+            "Ol Chiki",                                      /* 114 */
+            "Saurashtra",                                    /* 115 */
+            "Kayah Li",                                      /* 116 */
+            "Rejang",                                        /* 117 */
+            "Cham",                                          /* 118 */
+            "Ancient Symbols",                               /* 119 */
+            "Phaistos Disc",                                 /* 120 */
+            "Carian",                                        /* 121 */
+            "Domino Tiles",                                  /* 122 */
             "Reserved 123",                                  /* 123 */
             "Reserved 124",                                  /* 124 */
             "Reserved 125",                                  /* 125 */
