@@ -109,6 +109,13 @@ def test_buffer_overrun_bug465():
     lookup type, nor this post rule format. This test validates that the
     current spot code correctly reports the test font GPOS table."""
     file_name = "bug465/bug465.otf"
-    actual_path = runner(CMD + ['-s', '-o', 't', '_GPOS=7', '-f', file_name])
     expected_path = get_expected_path('bug465_otf.txt')
+    actual_path = runner(CMD + ['-s', expected_path, '-o', 't', '_GPOS=7', '-f', file_name])
+    assert differ([expected_path, actual_path])
+
+
+def test_full_unicode_ranges_bug813():
+    font_name = 'AdobeBlack2VF.otf'
+    actual_path = runner(CMD + ['-s', '-o', 't', '_OS/2', '-f', font_name])
+    expected_path = get_expected_path('AdobeBlack2VF_OS2.txt')
     assert differ([expected_path, actual_path])
