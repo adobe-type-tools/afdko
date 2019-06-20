@@ -13,17 +13,26 @@ from test_utils import get_input_path
 TOOL = 'makeinstancesufo'
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), TOOL + '_data')
+TEMP_DIR = os.path.join(DATA_DIR, "temp_output")
 
 
 def _get_output_path(file_name, dir_name):
     return os.path.join(DATA_DIR, dir_name, file_name)
 
 
+def setup_module():
+    """
+    Create the temporary output directory
+    """
+    rmtree(TEMP_DIR, ignore_errors=True)
+    os.mkdir(TEMP_DIR)
+
+
 def teardown_module():
     """
     teardown the temporary UFOs or the directory that holds them
     """
-    rmtree(os.path.join(DATA_DIR, 'temp_output'), True)
+    rmtree(os.path.join(TEMP_DIR), True)
     rmtree(os.path.join(DATA_DIR, 'input', 'same_dir.ufo'), True)
 
 
