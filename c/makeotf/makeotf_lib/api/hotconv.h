@@ -12,10 +12,10 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 extern "C" {
 #endif
 
-#define HOT_VERSION 0x01006E /* Library version (1.0.110) */
+#define HOT_VERSION 0x01006F /* Library version (1.0.111) */
 /* Major, minor, build = (HOT_VERSION >> 16) & 0xff, (HOT_VERSION >> 8) & 0xff, HOT_VERSION & 0xff) */
 /* Warning: this string is now part of heuristic used by CoolType to identify the
-first round of CoolType fonts which had the backtrack sequence of a chaining 
+first round of CoolType fonts which had the backtrack sequence of a chaining
 contextual substitution ordered incorrectly.  Fonts with the old ordering MUST match
 the regex:
     "(Version|OTF) 1.+;Core 1\.0\..+;makeotflib1\."
@@ -699,7 +699,7 @@ void hotAddUVSMap(hotCtx g, char *uvsFileName);
 
 /* hotAddUVSMap() parses hte input file uvsFileName to build a cmap format 14 subtable.
 The uvsFileName is the file path to a specifiaction for a set of Unicode variation Selectors.
-Tis is a simple text file with one record per line. The record fields are:  
+Tis is a simple text file with one record per line. The record fields are:
  - base Unicode value, specified as decimnal, or as hex with a preceeding "0x"
  - Unicode Variation Selectior value, s pecified as decimnal, or as hex with a preceeding "0x"
  - ROS name, whci is ignored
@@ -818,8 +818,8 @@ unsigned short hotMapCID2GID(hotCtx g, unsigned short cid);
 void hotConvert(hotCtx g);
 
 /* hotConvert() is used to initiate the final conversion to OTF after all the
-   miscellaneous data has been provided via the other library functions. 
-   
+   miscellaneous data has been provided via the other library functions.
+
    convertFlags is used to control the processing of the data. */
 
 /* convertFlags values */
