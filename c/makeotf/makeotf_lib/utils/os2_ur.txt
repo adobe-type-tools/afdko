@@ -1,0 +1,170 @@
+0	Basic Latin	0000-007F	
+1	Latin-1 Supplement	0080-00FF	
+2	Latin Extended-A	0100-017F	
+3	Latin Extended-B	0180-024F	
+4	IPA Extensions	0250-02AF	
+Phonetic Extensions	1D00-1D7F	Added in OpenType 1.5 for OS/2 version 4.
+Phonetic Extensions Supplement	1D80-1DBF	Added in OpenType 1.5 for OS/2 version 4.
+5	Spacing Modifier Letters	02B0-02FF	
+Modifier Tone Letters	A700-A71F	Added in OpenType 1.5 for OS/2 version 4.
+6	Combining Diacritical Marks	0300-036F	
+Combining Diacritical Marks Supplement	1DC0-1DFF	Added in OpenType 1.5 for OS/2 version 4.
+7	Greek and Coptic	0370-03FF	
+8	Coptic	2C80-2CFF	Added in OpenType 1.5 for OS/2 version 4. See below for other version differences.
+9	Cyrillic	0400-04FF	
+Cyrillic Supplement	0500-052F	Added in OpenType 1.4 for OS/2 version 3.
+Cyrillic Extended-A	2DE0-2DFF	Added in OpenType 1.5 for OS/2 version 4.
+Cyrillic Extended-B	A640-A69F	Added in OpenType 1.5 for OS/2 version 4.
+10	Armenian	0530-058F	
+11	Hebrew	0590-05FF	
+12	Vai	A500-A63F	Added in OpenType 1.5 for OS/2 version 4. See below for other version differences.
+13	Arabic	0600-06FF	
+Arabic Supplement	0750-077F	Added in OpenType 1.5 for OS/2 version 4.
+14	NKo	07C0-07FF	Added in OpenType 1.5 for OS/2 version 4. See below for other version differences.
+15	Devanagari	0900-097F	
+16	Bengali	0980-09FF	
+17	Gurmukhi	0A00-0A7F	
+18	Gujarati	0A80-0AFF	
+19	Oriya	0B00-0B7F	
+20	Tamil	0B80-0BFF	
+21	Telugu	0C00-0C7F	
+22	Kannada	0C80-0CFF	
+23	Malayalam	0D00-0D7F	
+24	Thai	0E00-0E7F	
+25	Lao	0E80-0EFF	
+26	Georgian	10A0-10FF	
+Georgian Supplement	2D00-2D2F	Added in OpenType 1.5 for OS/2 version 4.
+27	Balinese	1B00-1B7F	Added in OpenType 1.5 for OS/2 version 4. See below for other version differences.
+28	Hangul Jamo	1100-11FF	
+29	Latin Extended Additional	1E00-1EFF	
+Latin Extended-C	2C60-2C7F	Added in OpenType 1.5 for OS/2 version 4.
+Latin Extended-D	A720-A7FF	Added in OpenType 1.5 for OS/2 version 4.
+30	Greek Extended	1F00-1FFF	
+31	General Punctuation	2000-206F	
+Supplemental Punctuation	2E00-2E7F	Added in OpenType 1.5 for OS/2 version 4.
+32	Superscripts And Subscripts	2070-209F	
+33	Currency Symbols	20A0-20CF	
+34	Combining Diacritical Marks For Symbols	20D0-20FF	
+35	Letterlike Symbols	2100-214F	
+36	Number Forms	2150-218F	
+37	Arrows	2190-21FF	
+Supplemental Arrows-A	27F0-27FF	Added in OpenType 1.4 for OS/2 version 3.
+Supplemental Arrows-B	2900-297F	Added in OpenType 1.4 for OS/2 version 3.
+Miscellaneous Symbols and Arrows	2B00-2BFF	Added in OpenType 1.5 for OS/2 version 4.
+38	Mathematical Operators	2200-22FF	
+Supplemental Mathematical Operators	2A00-2AFF	Added in OpenType 1.4 for OS/2 version 3.
+Miscellaneous Mathematical Symbols-A	27C0-27EF	Added in OpenType 1.4 for OS/2 version 3.
+Miscellaneous Mathematical Symbols-B	2980-29FF	Added in OpenType 1.4 for OS/2 version 3.
+39	Miscellaneous Technical	2300-23FF	
+40	Control Pictures	2400-243F	
+41	Optical Character Recognition	2440-245F	
+42	Enclosed Alphanumerics	2460-24FF	
+43	Box Drawing	2500-257F	
+44	Block Elements	2580-259F	
+45	Geometric Shapes	25A0-25FF	
+46	Miscellaneous Symbols	2600-26FF	
+47	Dingbats	2700-27BF	
+48	CJK Symbols And Punctuation	3000-303F	
+49	Hiragana	3040-309F	
+50	Katakana	30A0-30FF	
+Katakana Phonetic Extensions	31F0-31FF	Added in OpenType 1.4 for OS/2 version 3.
+51	Bopomofo	3100-312F	
+Bopomofo Extended	31A0-31BF	Added in OpenType 1.3, extending OS/2 version 2.
+52	Hangul Compatibility Jamo	3130-318F	
+53	Phags-pa	A840-A87F	Added in OpenType 1.5 for OS/2 version 4. See below for other version differences.
+54	Enclosed CJK Letters And Months	3200-32FF	
+55	CJK Compatibility	3300-33FF	
+56	Hangul Syllables	AC00-D7AF	
+57	Non-Plane 0	10000-10FFFF	Implies at least one character beyond the Basic Multilingual Plane. First assigned in OpenType 1.3 for OS/2 version 2.
+58	Phoenician	10900-1091F	First assigned in OpenType 1.5 for OS/2 version 4.
+59	CJK Unified Ideographs	4E00-9FFF	
+CJK Radicals Supplement	2E80-2EFF	Added in OpenType 1.3 for OS/2 version 2.
+Kangxi Radicals	2F00-2FDF	Added in OpenType 1.3 for OS/2 version 2.
+Ideographic Description Characters	2FF0-2FFF	Added in OpenType 1.3 for OS/2 version 2.
+CJK Unified Ideographs Extension A	3400-4DBF	Added in OpenType 1.3 for OS/2 version 2.
+CJK Unified Ideographs Extension B	20000-2A6DF	Added in OpenType 1.4 for OS/2 version 3.
+Kanbun	3190-319F	Added in OpenType 1.4 for OS/2 version 3.
+60	Private Use Area (plane 0)	E000-F8FF	
+61	CJK Strokes	31C0-31EF	Range added in OpenType 1.5 for OS/2 version 4.
+CJK Compatibility Ideographs	F900-FAFF	
+CJK Compatibility Ideographs Supplement	2F800-2FA1F	Added in OpenType 1.4 for OS/2 version 3.
+62	Alphabetic Presentation Forms	FB00-FB4F	
+63	Arabic Presentation Forms-A	FB50-FDFF	
+64	Combining Half Marks	FE20-FE2F	
+65	Vertical Forms	FE10-FE1F	Range added in OpenType 1.5 for OS/2 version 4.
+CJK Compatibility Forms	FE30-FE4F	
+66	Small Form Variants	FE50-FE6F	
+67	Arabic Presentation Forms-B	FE70-FEFF	
+68	Halfwidth And Fullwidth Forms	FF00-FFEF	
+69	Specials	FFF0-FFFF	
+70	Tibetan	0F00-0FFF	First assigned in OpenType 1.3, extending OS/2 version 2.
+71	Syriac	0700-074F	First assigned in OpenType 1.3, extending OS/2 version 2.
+72	Thaana	0780-07BF	First assigned in OpenType 1.3, extending OS/2 version 2.
+73	Sinhala	0D80-0DFF	First assigned in OpenType 1.3, extending OS/2 version 2.
+74	Myanmar	1000-109F	First assigned in OpenType 1.3, extending OS/2 version 2.
+75	Ethiopic	1200-137F	First assigned in OpenType 1.3, extending OS/2 version 2.
+Ethiopic Supplement	1380-139F	Added in OpenType 1.5 for OS/2 version 4.
+Ethiopic Extended	2D80-2DDF	Added in OpenType 1.5 for OS/2 version 4.
+76	Cherokee	13A0-13FF	First assigned in OpenType 1.3, extending OS/2 version 2.
+77	Unified Canadian Aboriginal Syllabics	1400-167F	First assigned in OpenType 1.3, extending OS/2 version 2.
+78	Ogham	1680-169F	First assigned in OpenType 1.3, extending OS/2 version 2.
+79	Runic	16A0-16FF	First assigned in OpenType 1.3, extending OS/2 version 2.
+80	Khmer	1780-17FF	First assigned in OpenType 1.3, extending OS/2 version 2.
+Khmer Symbols	19E0-19FF	Added in OpenType 1.5 for OS/2 version 4.
+81	Mongolian	1800-18AF	First assigned in OpenType 1.3, extending OS/2 version 2.
+82	Braille Patterns	2800-28FF	First assigned in OpenType 1.3, extending OS/2 version 2.
+83	Yi Syllables	A000-A48F	First assigned in OpenType 1.3, extending OS/2 version 2.
+Yi Radicals	A490-A4CF	Added in OpenType 1.3, extending OS/2 version 2.
+84	Tagalog	1700-171F	First assigned in OpenType 1.4 for OS/2 version 3.
+Hanunoo	1720-173F	Added in OpenType 1.4 for OS/2 version 3.
+Buhid	1740-175F	Added in OpenType 1.4 for OS/2 version 3.
+Tagbanwa	1760-177F	Added in OpenType 1.4 for OS/2 version 3.
+85	Old Italic	10300-1032F	First assigned in OpenType 1.4 for OS/2 version 3.
+86	Gothic	10330-1034F	First assigned in OpenType 1.4 for OS/2 version 3.
+87	Deseret	10400-1044F	First assigned in OpenType 1.4 for OS/2 version 3.
+88	Byzantine Musical Symbols	1D000-1D0FF	First assigned in OpenType 1.4 for OS/2 version 3.
+Musical Symbols	1D100-1D1FF	Added in OpenType 1.4 for OS/2 version 3.
+Ancient Greek Musical Notation	1D200-1D24F	Added in OpenType 1.5 for OS/2 version 4.
+89	Mathematical Alphanumeric Symbols	1D400-1D7FF	First assigned in OpenType 1.4 for OS/2 version 3.
+90	Private Use (plane 15)	F0000-FFFFD	First assigned in OpenType 1.4 for OS/2 version 3.
+Private Use (plane 16)	100000-10FFFD	Added in OpenType 1.4 for OS/2 version 3.
+91	Variation Selectors	FE00-FE0F	First assigned in OpenType 1.4 for OS/2 version 3.
+Variation Selectors Supplement	E0100-E01EF	Added in OpenType 1.4 for OS/2 version 3.
+92	Tags	E0000-E007F	First assigned in OpenType 1.4 for OS/2 version 3.
+93	Limbu	1900-194F	First assigned in OpenType 1.5 for OS/2 version 4.
+94	Tai Le	1950-197F	First assigned in OpenType 1.5 for OS/2 version 4.
+95	New Tai Lue	1980-19DF	First assigned in OpenType 1.5 for OS/2 version 4.
+96	Buginese	1A00-1A1F	First assigned in OpenType 1.5 for OS/2 version 4.
+97	Glagolitic	2C00-2C5F	First assigned in OpenType 1.5 for OS/2 version 4.
+98	Tifinagh	2D30-2D7F	First assigned in OpenType 1.5 for OS/2 version 4.
+99	Yijing Hexagram Symbols	4DC0-4DFF	First assigned in OpenType 1.5 for OS/2 version 4.
+100	Syloti Nagri	A800-A82F	First assigned in OpenType 1.5 for OS/2 version 4.
+101	Linear B Syllabary	10000-1007F	First assigned in OpenType 1.5 for OS/2 version 4.
+Linear B Ideograms	10080-100FF	Added in OpenType 1.5 for OS/2 version 4.
+Aegean Numbers	10100-1013F	Added in OpenType 1.5 for OS/2 version 4.
+102	Ancient Greek Numbers	10140-1018F	First assigned in OpenType 1.5 for OS/2 version 4.
+103	Ugaritic	10380-1039F	First assigned in OpenType 1.5 for OS/2 version 4.
+104	Old Persian	103A0-103DF	First assigned in OpenType 1.5 for OS/2 version 4.
+105	Shavian	10450-1047F	First assigned in OpenType 1.5 for OS/2 version 4.
+106	Osmanya	10480-104AF	First assigned in OpenType 1.5 for OS/2 version 4.
+107	Cypriot Syllabary	10800-1083F	First assigned in OpenType 1.5 for OS/2 version 4.
+108	Kharoshthi	10A00-10A5F	First assigned in OpenType 1.5 for OS/2 version 4.
+109	Tai Xuan Jing Symbols	1D300-1D35F	First assigned in OpenType 1.5 for OS/2 version 4.
+110	Cuneiform	12000-123FF	First assigned in OpenType 1.5 for OS/2 version 4.
+Cuneiform Numbers and Punctuation	12400-1247F	Added in OpenType 1.5 for OS/2 version 4.
+111	Counting Rod Numerals	1D360-1D37F	First assigned in OpenType 1.5 for OS/2 version 4.
+112	Sundanese	1B80-1BBF	First assigned in OpenType 1.5 for OS/2 version 4.
+113	Lepcha	1C00-1C4F	First assigned in OpenType 1.5 for OS/2 version 4.
+114	Ol Chiki	1C50-1C7F	First assigned in OpenType 1.5 for OS/2 version 4.
+115	Saurashtra	A880-A8DF	First assigned in OpenType 1.5 for OS/2 version 4.
+116	Kayah Li	A900-A92F	First assigned in OpenType 1.5 for OS/2 version 4.
+117	Rejang	A930-A95F	First assigned in OpenType 1.5 for OS/2 version 4.
+118	Cham	AA00-AA5F	First assigned in OpenType 1.5 for OS/2 version 4.
+119	Ancient Symbols	10190-101CF	First assigned in OpenType 1.5 for OS/2 version 4.
+120	Phaistos Disc	101D0-101FF	First assigned in OpenType 1.5 for OS/2 version 4.
+121	Carian	102A0-102DF	First assigned in OpenType 1.5 for OS/2 version 4.
+Lycian	10280-1029F	Added in OpenType 1.5 for OS/2 version 4.
+Lydian	10920-1093F	Added in OpenType 1.5 for OS/2 version 4.
+122	Domino Tiles	1F030-1F09F	First assigned in OpenType 1.5 for OS/2 version 4.
+Mahjong Tiles	1F000-1F02F	First assigned in OpenType 1.5 for OS/2 version 4.
+123-127	Reserved for process-internal usage
