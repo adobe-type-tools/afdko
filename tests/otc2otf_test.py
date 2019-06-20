@@ -25,6 +25,7 @@ def setup_module():
     """
     Create the temporary output directory
     """
+    rmtree(TEMP_DIR, ignore_errors=True)
     os.mkdir(TEMP_DIR)
 
 
