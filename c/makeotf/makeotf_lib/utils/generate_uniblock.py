@@ -93,7 +93,7 @@ def _main():
                 row.insert(0, prev_os2_num)
             if row[0] == '123-127':  # reserved stuff at end
                 continue
-            (os2_num, name, start_end, comment) = row
+            (os2_num, name, start_end, _) = row
             os2_num = int(os2_num)
             (start, end) = (int(x, 16) for x in start_end.split('-'))
             if os2_num == 57:  # 'Non-Plane 0'
