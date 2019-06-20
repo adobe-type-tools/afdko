@@ -14,24 +14,23 @@ import os
 import shutil
 import sys
 
-from fontTools.designspaceLib import DesignSpaceDocument
-from fontTools.misc.py23 import open, tobytes
+from fontTools.designspaceLib import (
+    DesignSpaceDocument,
+    DesignSpaceDocumentError,
+)
+from fontTools.misc.py23 import open
 
 from defcon import Font
 from psautohint.__main__ import main as psautohint
 from ufonormalizer import normalizeUFO
 from ufoProcessor import build as ufoProcessorBuild
 
-try:
-    import xml.etree.cElementTree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET
-
 from afdko.checkoutlinesufo import run as checkoutlinesUFO
+from afdko.fdkutils import get_temp_file_path
 from afdko.ufotools import validateLayers
 
 
-__version__ = '2.3.0'
+__version__ = '2.3.1'
 
 logger = logging.getLogger(__name__)
 
@@ -40,61 +39,43 @@ DFLT_DESIGNSPACE_FILENAME = "font.designspace"
 FEATURES_FILENAME = "features.fea"
 
 
-def readDesignSpaceFile(options):
-    # TODO: Replace with DesignSpaceDocument and use a proper tempfile
-    """ Read design space file.
-    build a new instancesList with all the instances from the ds file
-
-    - Promote all the source and instance filename attributes from relative
-      to absolute paths
-    - Write a temporary ds file
-    - Return a path to the temporary ds file, and the current instances list.
+def filterDesignspaceInstances(dsDoc, options):
+    """
+    - Filter unwanted instances out of dsDoc as specified by -i option
+      (options.indexList), which has already been validated.
+    - Promote dsDoc.instance.paths to absolute, referring to original
+      dsDoc's location.
+    - Remove any existing instance
+    - Write the modified doc to a proper temp file
+    - Return the path to the temp DS file.
     """
 
-    instanceEntryList = []
-    logger.info("Reading design space file '%s' ..." % options.dsPath)
+    origDSPath = options.dsPath
+    filteredInstances = []
 
-    with open(options.dsPath, "r", encoding='utf-8') as f:
-        data = f.read()
+    for idx in sorted(options.indexList):
+        instance = dsDoc.instances[idx]
+        instance.path = os.path.abspath(
+            os.path.realpath(
+                os.path.join(
+                    origDSPath,
+                    instance.path,
+                )
+            )
+        )
 
-    ds = ET.XML(data)
-
-    instances = ds.find("instances")
-
-    # Remove any instances that are not in the specified list of instance
-    # indices, from the option -i.
-    if options.indexList:
-        newInstanceXMLList = instances.findall("instance")
-        numInstances = len(newInstanceXMLList)
-        instanceIndex = numInstances
-        while instanceIndex > 0:
-            instanceIndex -= 1
-            instanceXML = newInstanceXMLList[instanceIndex]
-            if instanceIndex not in options.indexList:
-                instances.remove(instanceXML)
-
-    # We want to build all remaining instances.
-    for instanceXML in instances:
-        familyName = instanceXML.attrib["familyname"]
-        styleName = instanceXML.attrib["stylename"]
-        curPath = instanceXML.attrib["filename"]
-        logger.info("Adding %s %s to build list." % (familyName, styleName))
-        instanceEntryList.append(curPath)
-        if os.path.exists(curPath):
-            glyphDir = os.path.join(curPath, "glyphs")
+        if os.path.exists(instance.path):
+            glyphDir = os.path.join(instance.path, "glyphs")
             if os.path.exists(glyphDir):
                 shutil.rmtree(glyphDir, ignore_errors=True)
-    if not instanceEntryList:
-        logger.error("Failed to find any instances in the ds file '%s' that "
-                     "have the postscriptfilename attribute" % options.dsPath)
-        return None, None
 
-    dsPath = "{}.temp".format(options.dsPath)
-    data = ET.tostring(ds)
-    with open(dsPath, "wb") as f:
-        f.write(tobytes(data, encoding='utf-8'))
+        filteredInstances.append(instance)
 
-    return dsPath, instanceEntryList
+    dsDoc.instances = filteredInstances
+    tmpPath = get_temp_file_path()
+    dsDoc.write(tmpPath)
+
+    return tmpPath
 
 
 def updateInstance(options, fontInstancePath):
@@ -217,6 +198,39 @@ def postProcessInstance(fontPath, options):
     dFont.save()
 
 
+def validateDesignspaceDoc(dsDoc, dsoptions, **kwArgs):
+    """
+    Validate the dsDoc DesignSpaceDocument object, using supplied dsoptions
+    and kwArgs. Raises Exceptions if certain criteria are not met. These
+    are above and beyond the basic validations in fontTools.designspaceLib
+    and are specific to makeinstancesufo.
+    """
+    if dsDoc.sources:
+        for src in dsDoc.sources:
+            if not os.path.exists(src.path):
+                raise DesignSpaceDocumentError(
+                    "Source file {} does not exist".format(
+                        src.path,
+                    ))
+    else:
+        raise DesignSpaceDocumentError(
+            "Designspace file contains no sources."
+        )
+
+    if dsDoc.instances:
+        if dsoptions.indexList:
+            # bounds check on indexList
+            maxinstidx = max(dsoptions.indexList)
+            if maxinstidx >= len(dsDoc.instances):
+                raise IndexError("Instance index {} out-of-range".format(
+                    maxinstidx,
+                ))
+    else:
+        raise DesignSpaceDocumentError(
+            "Designspace file contains no instances."
+        )
+
+
 def collect_features_content(instances, inst_idx_lst):
     """
     Returns a dictionary whose keys are 'features.fea' file paths, and the
@@ -239,7 +253,12 @@ def collect_features_content(instances, inst_idx_lst):
 
 
 def run(options):
+
     ds_doc = DesignSpaceDocument.fromfile(options.dsPath)
+
+    # can still have a successful read but useless DSD (no sources, no
+    # instances, sources non-existent, other conditions
+    validateDesignspaceDoc(ds_doc, options)
 
     copy_features = any(src.copyFeatures for src in ds_doc.sources)
     features_store = {}
@@ -256,14 +275,18 @@ def run(options):
     os.chdir(dsDir)
     options.dsPath = dsFile
 
-    dsPath, newInstancesList = readDesignSpaceFile(options)
-    if not dsPath:
-        return
+    if options.indexList:
+        dsPath = filterDesignspaceInstances(ds_doc, options)
+    else:
+        dsPath = dsFile
 
-    if len(newInstancesList) == 1:
+    newInstancesList = [inst.path for inst in ds_doc.instances]
+    newInstancesCount = len(newInstancesList)
+
+    if newInstancesCount == 1:
         logger.info("Building 1 instance...")
     else:
-        logger.info("Building %s instances..." % len(newInstancesList))
+        logger.info("Building %s instances..." % newInstancesCount)
     ufoProcessorBuild(documentPath=dsPath,
                       outputUFOFormatVersion=options.ufo_version,
                       roundGeometry=(not options.no_round),
@@ -271,7 +294,7 @@ def run(options):
     if (dsPath != options.dsPath) and os.path.exists(dsPath):
         os.remove(dsPath)
 
-    logger.info("Built %s instances." % len(newInstancesList))
+    logger.info("Built %s instances." % newInstancesCount)
     # Remove glyph.lib and font.lib (except for "public.glyphOrder")
     for instancePath in newInstancesList:
         postProcessInstance(instancePath, options)
@@ -425,8 +448,9 @@ def main(args=None):
 
     try:
         run(opts)
-    except Exception:
-        raise
+    except Exception as exc:
+        logger.error(exc)
+        return 1
 
 
 if __name__ == "__main__":

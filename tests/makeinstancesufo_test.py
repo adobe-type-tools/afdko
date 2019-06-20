@@ -3,6 +3,7 @@ from __future__ import print_function, division, absolute_import
 import os
 import pytest
 from shutil import rmtree
+import subprocess32 as subprocess
 
 from fontTools.misc.py23 import tobytes
 
@@ -100,3 +101,17 @@ def test_features_copy(filename, exp_content):
         if 'nocopy' in filename:
             exp_content = exp_content_orig + tobytes(str(i), encoding='utf-8')
         assert exp_content == act_content
+
+
+def test_bad_source():
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        runner(['-t', TOOL, '-o', 'd',
+                '_{}'.format(get_input_path('badsource.designspace'))])
+        assert err.value.returncode == 1
+
+
+def test_no_instances():
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        runner(['-t', TOOL, '-o', 'd',
+                '_{}'.format(get_input_path('noinstances.designspace'))])
+        assert err.value.returncode == 1
