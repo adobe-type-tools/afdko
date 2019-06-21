@@ -102,3 +102,41 @@ def test_beztools_hhint_over_limit_bug629():
                   '-f', test_filename])
     assert differ([expected_path, actual_path,
                    '-s', r'%%Copyright: Copyright'])
+
+
+@pytest.mark.parametrize('font_filename, opt', [
+    ('decimals.ufo', ''),
+    ('decimals.ufo', 'decimal'),
+    ('hashmap_advance.ufo', ''),
+    ('hashmap_unnormalized_floats.ufo', ''),
+    ('hashmap_transform.ufo', ''),
+    ('hashmap_dflt_layer.ufo', 'wd'),
+])
+def test_ufo_hashmap(font_filename, opt):
+    arg = []
+    expected_filename = font_filename
+    if opt:
+        arg = [opt]
+        head, tail = os.path.splitext(font_filename)
+        expected_filename = '{}-{}{}'.format(head, opt, tail)
+
+    actual_path = tempfile.mkdtemp()
+    runner(CMD + ['-f', get_input_path(font_filename),
+                  '-o', 'o', '_{}'.format(actual_path)] + arg)
+    expected_path = get_expected_path(expected_filename)
+    assert differ([expected_path, actual_path])
+
+
+def test_ufo_hashmap_rehint():
+    """
+    The font is first hinted with no options, and then it's rehinted with -wd
+    option. This test serves to test that the processed layer added in the
+    first run gets removed in the second.
+    """
+    font_filename = 'hashmap_dflt_layer.ufo'
+    actual_path = tempfile.mkdtemp()
+    runner(CMD + ['-f', get_input_path(font_filename),
+                  '-o', 'o', '_{}'.format(actual_path)])
+    runner(CMD + ['-f', actual_path, '-o', 'wd', 'all'])
+    expected_path = get_expected_path(font_filename)
+    assert differ([expected_path, actual_path])

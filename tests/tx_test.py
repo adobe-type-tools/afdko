@@ -445,3 +445,14 @@ def test_ufo_read_processed_contents_plist_bug740(filename):
                                 '-f', 'bug740/{}.ufo'.format(filename)])
     expected_path = get_expected_path('bug740/{}.txt'.format(filename))
     assert differ([expected_path, actual_path])
+
+
+def test_dcf_with_infinite_recursion_bug775():
+    font_path = get_input_path('subr_test_font_infinite_recursion.otf')
+    dcf_path = get_temp_file_path()
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        runner(CMD + ['-a', '-o', 'dcf', '-f', font_path, dcf_path])
+    assert(err.value.returncode == 1)  # exit code of 1, not segfault of -11
+    expected_path = get_expected_path(
+        'subr_test_font_infinite_recursion.dcf.txt')
+    assert differ([expected_path, dcf_path])

@@ -1,5 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-   This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
 /*
@@ -120,13 +121,13 @@ static unsigned short schinese[] = {
 typedef struct {
     UV first;              /* First of range */
     UV last;               /* Last of range */
-    unsigned numEssential; /* for this block to be considered supported */
-                           /* [This field not used] */
+    unsigned numDefined;   /* num chars defined by Unicode for this block    */
+                           /* if numDefined is 1, it means set the block bit */
+                           /* if there are *any* characters in this block    */
     unsigned numFound;     /* Number of entries found for this block */
-
-    unsigned bitNum;      /* in OS_2 */
-    unsigned isSupported; /* Is this block supported? */
-    char *name;           /* Descriptive name (debugging purposes only) */
+    unsigned bitNum;       /* in OS_2 */
+    unsigned isSupported;  /* Is this block supported? */
+    char *name;            /* Descriptive name (debugging purposes only) */
 } UnicodeBlock;
 
 static UnicodeBlock unicodeBlock[] = {
@@ -1730,17 +1731,14 @@ static void setOS_2Fields(hotCtx g) {
                 block->numFound += q - p + 1;
                 p = q + 1;
             }
-            numRequired = 1 + block->numEssential / 3;
+            numRequired = 1 + block->numDefined / 3;
 
-            /* This is a hack. The numEssential field is set for each block in  */
-            /* uniblock. This is currently the number of entries in the range   */
-            /* from min UV to max UV of the block. This is already not right,   */
-            /* as in most blocks, not all UV's in the range are valid. However, */
-            /* most of these ranges include a lot of archaic and  unusual       */
-            /* glyphs not really needed for useful support of the script. I am  */
-            /* going to just say that if at least third of the entry range is   */
-            /* included in the font, the designer was making a reasonable       */
-            /* effort to support this block                                     */
+            /* The numDefined field is set for each block in uniblock.h.  */ 
+            /* If at least one third of the characters for the block are  */
+            /* included in the font, the designer was making a reasonable */
+            /* effort to support this block. Note that if numDefined==1,  */
+            /* it means we want to set the corresponding bit if we see    */
+            /* *any* characters in this block, e.g. for PUA & CJK blocks. */
 
             if (block->numFound >= numRequired) {
                 block->isSupported = 1;
@@ -1749,7 +1747,7 @@ static void setOS_2Fields(hotCtx g) {
             /*
             else if (block->numFound > 0)
             {
-                printf(" %4d %4d, name %s.\n", block->numFound,  block->numEssential,  block->name);
+                printf(" %4d %4d, name %s.\n", block->numFound,  block->numDefined,  block->name);
             }
             */
         }

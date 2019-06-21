@@ -3475,9 +3475,13 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
                 flowCommand(h, opname[byte]);
                 break;
             case tx_callsubr:
-                if (h->dcf.flags & DCF_Flatten)
+                if (h->dcf.flags & DCF_Flatten) {
+                    h->dcf.subrDepth++;
+                    if (h->dcf.subrDepth > TX_MAX_SUBR_DEPTH) {
+                        fatal(h, "subr depth: %d\n", h->dcf.subrDepth);
+                    }
                     callsubr(h, h->dcf.fd, region, left);
-                else
+                } else
                     flowCommand(h, opname[byte]);
                 break;
             case tx_return:
@@ -3485,9 +3489,13 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
                     flowCommand(h, opname[byte]);
                 break;
             case t2_callgsubr:
-                if (h->dcf.flags & DCF_Flatten)
+                if (h->dcf.flags & DCF_Flatten) {
+                    h->dcf.subrDepth++;
+                    if (h->dcf.subrDepth > TX_MAX_SUBR_DEPTH) {
+                        fatal(h, "subr depth: %d\n", h->dcf.subrDepth);
+                    }
                     callsubr(h, &h->dcf.global, region, left);
-                else
+                } else
                     flowCommand(h, opname[byte]);
                 break;
             case tx_hstem:
@@ -4134,6 +4142,8 @@ static void dcf_BegFont(txCtx h, abfTopDict *top) {
 
     h->src.offset = -BUFSIZ;
     dstFileOpen(h, top);
+
+    h->dcf.subrDepth = 0;
 
     single = cfrGetSingleRegions(h->cfr.ctx);
     major = dcf_DumpHeader(h, &single->Header);

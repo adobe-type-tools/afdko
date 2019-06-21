@@ -1,6 +1,31 @@
 Changelog
 =========
 
+2.9.0 (released 2019-06-21)
+---------------------------
+
+- **This is the last version that supports Python 2.7**
+- [autohint/checkoutlinesufo/ufotools] Fixed and enhanced the
+  glyph hash calculation. The results now match **psautohint**
+  version 1.9.3c1
+  ([#806](https://github.com/adobe-type-tools/afdko/pull/806))
+- [makeinstancesufo] The `features.fea` file the instance fonts
+  may include are now preserved (only if none of the masters
+  have `<features copy="1"/>` set in the designspace file)
+- [buildmasterotfs] Removed sparse masters workaround
+- [tx] Fixed infinite recursion in call to global subroutines
+  ([#775](https://github.com/adobe-type-tools/afdko/issues/775))
+- [spot/makeotfexe] Updated OS/2 Unicode Ranges to match current
+  OpenType specification
+  ([#813](https://github.com/adobe-type-tools/afdko/issues/813),
+  [#819](https://github.com/adobe-type-tools/afdko/pull/819))
+- [makeotfexe] Fixed MarkToBase bug (NOTE: a font is affected by
+  this bug only when a base anchor record's coordinates match the
+  coordinates of the first mark anchor record)
+  ([#815](https://github.com/adobe-type-tools/afdko/pull/815))
+- [makeinstancesufo] Improved validation of UFO sources
+  ([#778](https://github.com/adobe-type-tools/afdko/issues/778))
+
 2.8.10 (released 2019-05-28)
 ---------------------------
 

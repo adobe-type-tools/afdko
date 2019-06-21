@@ -476,6 +476,7 @@ struct txCtx_ {
         long vsIndex;    /* needed to derive numRegions */
         long numRegions; /* needed to decode blend args */
         SubrInfo *fd;    /* Current local info */
+        int subrDepth;   /* Subroutine call depth */
     } dcf;
     struct /* Operand stack */
     {

@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph format="2" name="A">
+  <advance width="544" />
+  <unicode hex="0041" />
+  <anchor name="aboveUC" x="270.04" y="671.0" />
+  <anchor name="ogonekUC" x="462.12" y="6.560000000000002" />
+  <anchor name="belowLC" x="270.04" y="-14.999999999999996" />
+  <outline>
+    <contour>
+      <point name="hintSet0000" type="line" x="8.38" y="6.56" />
+      <point type="line" x="91.68" y="6.56" />
+      <point type="line" x="204.38" y="366.22" />
+      <point x="227.9" y="437.76" />
+      <point x="248.48" y="508.32" />
+      <point type="curve" x="268.08" y="582.8" />
+      <point type="line" x="272" y="582.8" />
+      <point x="292.58" y="508.32" />
+      <point x="313.16" y="437.76" />
+      <point type="curve" x="336.68" y="366.22" />
+      <point type="line" x="448.4" y="6.56" />
+      <point type="line" x="535.62" y="6.56" />
+      <point type="line" x="318.06" y="649.44" />
+      <point type="line" x="225.94" y="649.44" />
+    </contour>
+    <contour>
+      <point type="line" x="122.06" y="202.56" />
+      <point type="line" x="419" y="202.56" />
+      <point type="line" x="419" y="268.22" />
+      <point type="line" x="122.06" y="268.22" />
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>id</key>
+        <string>c66e6bea0defeebc3e60d8ea81456582d10467b7aedb4c0af9379fa8ec248f5b83b4fd29e9be056f2696f922538f25a9b15a04d9ec235a0606b263862c345a84</string>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 202.56 65.66</string>
+              <string>hstem 582.8 66.64</string>
+              <string>vstem 8 528</string>
+            </array>
+          </dict>
+        </array>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

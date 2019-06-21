@@ -416,3 +416,16 @@ def test_parameter_offset_overflow_bug746():
     with open(stderr_path, 'rb') as f:
         output = f.read()
     assert(b"[FATAL] <bug746> feature parameter offset too large") in output
+
+
+def test_base_anchor_bug811():
+    input_filename = 'bug811/font.pfa'
+    feat_filename = 'bug811/feat.fea'
+    ttx_filename = 'bug811.ttx'
+    actual_path = get_temp_file_path()
+    runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
+                        'ff', '_{}'.format(get_input_path(feat_filename)),
+                        'o', '_{}'.format(actual_path)])
+    actual_ttx = generate_ttx_dump(actual_path, ['GPOS'])
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
