@@ -7,6 +7,7 @@ environment:
     CIBW_TEST_COMMAND: cd {project} && pytest -v && pip uninstall --yes afdko
     TWINE_USERNAME: adobe-type-tools-ci
     # Note: TWINE_PASSWORD is set in AppVeyor settings
+    PYTHON_HOME: C:\Python36-x64
 
 matrix:
   fast_finish: true
@@ -14,11 +15,17 @@ matrix:
 # Do not build feature branch with open Pull Requests
 skip_branch_with_pr: true
 
+install:
+  - SET PATH=%PYTHON_HOME%;%PYTHON_HOME%\Scripts;%PATH%
+  - python --version
+  - python -c "import struct; print(struct.calcsize('P') * 8)"
+  - python -m pip install --disable-pip-version-check --upgrade pip
+  - python -m pip --version
+
 # to run your custom scripts instead of automatic MSBuild
 build_script:
-  - python -m pip install --upgrade pip
   # our setup.py requires 'wheel', which may not be already installed
-  - pip install git+https://github.com/miguelsousa/cibuildwheel wheel
+  - python -m pip install git+https://github.com/miguelsousa/cibuildwheel wheel
   - cibuildwheel --output-dir wheelhouse
 
 artifacts:
