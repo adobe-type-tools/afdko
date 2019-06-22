@@ -2,10 +2,8 @@ from __future__ import print_function, division, absolute_import
 
 import os
 import pytest
-from shutil import rmtree
+from shutil import rmtree, copytree
 import subprocess32 as subprocess
-
-from fontTools.misc.py23 import tobytes
 
 from runner import main as runner
 from differ import main as differ
@@ -81,26 +79,29 @@ def test_ufo3_masters(args, ufo_filename):
     assert differ([expected_path, actual_path])
 
 
-@pytest.mark.parametrize('filename, exp_content', [
-    ('features_copy', b'# Master 1'),
-    ('features_nocopy', b'# Instance'),
-])
-def test_features_copy(filename, exp_content):
-    runner(['-t', TOOL, '-o', 'a', 'c', 'n', 'd',
-            '_{}'.format(get_input_path('{}.designspace'.format(filename)))])
-    exp_content_orig = exp_content
+@pytest.mark.parametrize('filename', ['features_copy', 'features_nocopy'])
+def test_features_copy(filename):
+    # NOTE: This test was originally implemented without copying the expected
+    # UFOs to a temp location, but the Windows64 build always modified the glif
+    # files' line endings after the test was ran and this caused wheel problems
+    # https://ci.appveyor.com/project/adobe-type-tools/afdko/builds/25459479
+    # ---
+    # First copy the expected UFOs into the temp folder. The UFOs need to
+    # exist before makeinstancesufo is called because this test is about
+    # checking that any existing features.fea files are preserved.
+    paths = []
     for i in (1, 2):  # two instances
         ufo_filename = '{}{}.ufo'.format(filename, i)
-        ufo_path = _get_output_path(ufo_filename, 'expected_output')
-        fea_path = os.path.join(ufo_path, 'features.fea')
-        if not os.path.exists(fea_path):
-            act_content = None
-        else:
-            with open(fea_path, 'rb') as f:
-                act_content = f.read().rstrip()
-        if 'nocopy' in filename:
-            exp_content = exp_content_orig + tobytes(str(i), encoding='utf-8')
-        assert exp_content == act_content
+        from_path = _get_output_path(ufo_filename, 'expected_output')
+        to_path = os.path.join(TEMP_DIR, ufo_filename)
+        copytree(from_path, to_path)
+        paths.append((to_path, from_path))
+    # run makeinstancesufo
+    runner(['-t', TOOL, '-o', 'a', 'c', 'n', 'd',
+            '_{}'.format(get_input_path('{}.designspace'.format(filename)))])
+    # assert the expected results
+    for expected_path, actual_path in paths:
+        assert differ([expected_path, actual_path])
 
 
 def test_bad_source():

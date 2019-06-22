@@ -17,12 +17,12 @@
         </source>
     </sources>
     <instances>
-        <instance familyname="Features" filename="../expected_output/features_nocopy1.ufo" postscriptfontname="Features-Regular" stylename="Regular">
+        <instance familyname="Features" filename="../temp_output/features_nocopy1.ufo" postscriptfontname="Features-Regular" stylename="Regular">
             <location>
                 <dimension name="weight" xvalue="394"/>
             </location>
         </instance>
-        <instance familyname="Features" filename="../expected_output/features_nocopy2.ufo" postscriptfontname="Features-Bold" stylename="Bold">
+        <instance familyname="Features" filename="../temp_output/features_nocopy2.ufo" postscriptfontname="Features-Bold" stylename="Bold">
             <location>
                 <dimension name="weight" xvalue="725"/>
             </location>
