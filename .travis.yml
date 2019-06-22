@@ -28,7 +28,7 @@ matrix:
 
 script:
   # - $PIP install cibuildwheel
-  - $PIP install git+https://github.com/adobe-type-tools/cibuildwheel
+  - $PIP install git+https://github.com/miguelsousa/cibuildwheel
   - cibuildwheel --output-dir wheelhouse
 
 after_success:

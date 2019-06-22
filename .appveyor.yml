@@ -17,7 +17,7 @@ skip_branch_with_pr: true
 # to run your custom scripts instead of automatic MSBuild
 build_script:
   # our setup.py requires 'wheel', which may not be already installed
-  - pip install git+https://github.com/adobe-type-tools/cibuildwheel wheel
+  - pip install git+https://github.com/miguelsousa/cibuildwheel wheel
   - cibuildwheel --output-dir wheelhouse
 
 artifacts:
