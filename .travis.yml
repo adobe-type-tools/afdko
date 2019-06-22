@@ -38,7 +38,7 @@ after_success:
     if [[ $TRAVIS_TAG ]]; then
       python -m pip install twine
       python -m twine upload wheelhouse/*.whl
-      if [[ $TRAVIS_OS_NAME == "linux" ]]; then
+      if [[ $TRAVIS_OS_NAME == "osx" ]]; then
         python setup.py sdist
         python -m twine upload dist/*.tar.gz
       fi
