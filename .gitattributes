@@ -2,3 +2,4 @@
 *.pfa text eol=lf
 *.pfb binary
 *.plist text eol=lf
+*.glif text eol=lf

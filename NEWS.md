@@ -1,7 +1,7 @@
 Changelog
 =========
 
-2.9.0 (released 2019-06-21)
+2.9.1 (released 2019-06-22)
 ---------------------------
 
 - **This is the last version that supports Python 2.7**
