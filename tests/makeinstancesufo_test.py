@@ -80,7 +80,7 @@ def test_ufo3_masters(args, ufo_filename):
 
 
 @pytest.mark.parametrize('filename', ['features_copy', 'features_nocopy'])
-def t_est_features_copy(filename):
+def test_features_copy(filename):
     # NOTE: This test was originally implemented without copying the expected
     # UFOs to a temp location, but the Windows64 build always modified the glif
     # files' line endings after the test was ran and this caused wheel problems
