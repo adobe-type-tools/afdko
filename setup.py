@@ -17,8 +17,8 @@ try:
     from wheel.bdist_wheel import bdist_wheel
 
     class CustomBDistWheel(bdist_wheel):
-        """Mark the wheel as "universal" (both python 2 and 3), yet
-        platform-specific, since it contains native C executables.
+        """Mark the wheel as python 3, yet platform-specific,
+        since it contains native C executables.
         """
 
         def finalize_options(self):
@@ -26,7 +26,7 @@ try:
             self.root_is_pure = False
 
         def get_tag(self):
-            return ('py2.py3', 'none',) + bdist_wheel.get_tag(self)[2:]
+            return ('py3', 'none',) + bdist_wheel.get_tag(self)[2:]
 
 except ImportError:
     print("afdko: setup.py requires that the Python package 'wheel' be "
@@ -184,7 +184,7 @@ def main():
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Build Tools',
         'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.6',
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: Microsoft :: Windows',
         'Operating System :: POSIX :: Linux',
@@ -226,7 +226,7 @@ def main():
               ],
           },
           zip_safe=False,
-          python_requires='>=2.7',
+          python_requires='>=3.6',
           setup_requires=[
               'wheel',
               'setuptools_scm',
