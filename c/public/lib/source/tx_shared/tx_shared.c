@@ -2677,11 +2677,14 @@ static int svg_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
 
     /* Determine (or fabricate) Unicode value for glyph. */
     info->flags |= ABF_GLYPH_UNICODE;
-    if (h->top->sup.flags & ABF_CID_FONT) {
-        info->encoding.code = h->svw.unrec;
-        h->svw.unrec++;
-    } else
-        info->encoding.code = mapName2UV(h, info->gname.ptr, &h->svw.unrec);
+     if (h->top->sup.flags & ABF_CID_FONT) {
+         if (info->encoding.code == ABF_GLYPH_UNENC) {
+             info->encoding.code = h->svw.unrec;
+             h->svw.unrec++;
+         }
+     } else {
+         info->encoding.code = mapName2UV(h, info->gname.ptr, &h->svw.unrec);
+     }
 
     return svwGlyphCallbacks.beg(cb, info);
 }

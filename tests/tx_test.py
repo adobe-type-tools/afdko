@@ -456,3 +456,11 @@ def test_dcf_with_infinite_recursion_bug775():
     expected_path = get_expected_path(
         'subr_test_font_infinite_recursion.dcf.txt')
     assert differ([expected_path, dcf_path])
+
+
+def test_svg_with_cid_font_bug822():
+    font_path = get_input_path('cid.otf')
+    cid_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', 'svg', '-f', font_path, cid_path])
+    expected_path = get_expected_path('cid.svg')
+    assert differ([expected_path, cid_path])
