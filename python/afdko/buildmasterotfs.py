@@ -25,18 +25,15 @@ import logging
 import os
 import sys
 
+from fontTools.designspaceLib import (
+    DesignSpaceDocument,
+    DesignSpaceDocumentError,
+)
+
 from afdko.fdkutils import run_shell_command, get_temp_file_path
 from afdko.makeotf import main as makeotf
 
-try:
-    import xml.etree.cElementTree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET
-
-XMLElement = ET.Element
-xmlToString = ET.tostring
-
-__version__ = '1.9.0'
+__version__ = '1.9.1'
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +90,36 @@ def _preparse_args(args):
     return args
 
 
+def build_masters(opts):
+    """
+    Build master OTFs using supplied options.
+    """
+    logger.info("Reading designspace file...")
+    ds = DesignSpaceDocument.fromfile(opts.dsPath)
+    validateDesignspaceDoc(ds)
+    master_paths = [s.path for s in ds.sources]
+
+    logger.info("Building local OTFs for master font paths...")
+    curDir = os.getcwd()
+    dsDir = os.path.dirname(opts.dsPath)
+
+    for master_path in master_paths:
+        master_path = os.path.join(dsDir, master_path)
+        masterDir = os.path.dirname(master_path)
+        ufoName = os.path.basename(master_path)
+        otfName = os.path.splitext(ufoName)[0]
+        otfName = "{}.otf".format(otfName)
+
+        if masterDir:
+            os.chdir(masterDir)
+
+        makeotf(['-nshw', '-f', ufoName, '-o', otfName,
+                 '-r', '-nS'] + opts.mkot)
+        logger.info("Built OTF font for {}".format(master_path))
+        generalizeCFF(otfName)
+        os.chdir(curDir)
+
+
 def get_options(args):
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
@@ -140,32 +167,31 @@ def get_options(args):
     return options
 
 
+def validateDesignspaceDoc(dsDoc, **kwArgs):
+    """
+    Validate the dsDoc DesignSpaceDocument object. Raises Exceptions if
+    certain criteria are not met. These are above and beyond the basic
+    validations in fontTools.designspaceLib and are specific to
+    buildmasterotfs.
+    """
+    if dsDoc.sources:
+        for src in dsDoc.sources:
+            if not os.path.exists(src.path):
+                raise DesignSpaceDocumentError(
+                    "Source file {} does not exist".format(src.path))
+    else:
+        raise DesignSpaceDocumentError("Designspace file contains no sources.")
+
+
 def main(args=None):
     args = _preparse_args(args)
     opts = get_options(args)
 
-    rootET = ET.parse(opts.dsPath)
-    ds = rootET.getroot()
-    sourceET = ds.find('sources')
-    masterList = sourceET.findall('source')
-    master_paths = [et.attrib['filename'] for et in masterList]
-
-    logger.info("Building local OTFs for master font paths...")
-    curDir = os.getcwd()
-    dsDir = os.path.dirname(opts.dsPath)
-    for master_path in master_paths:
-        master_path = os.path.join(dsDir, master_path)
-        masterDir = os.path.dirname(master_path)
-        ufoName = os.path.basename(master_path)
-        otfName = os.path.splitext(ufoName)[0]
-        otfName = "{}.otf".format(otfName)
-        if masterDir:
-            os.chdir(masterDir)
-        makeotf(['-nshw', '-f', ufoName, '-o', otfName,
-                 '-r', '-nS'] + opts.mkot)
-        logger.info("Built OTF font for {}".format(master_path))
-        generalizeCFF(otfName)
-        os.chdir(curDir)
+    try:
+        build_masters(opts)
+    except Exception as exc:
+        logger.error(exc)
+        return 1
 
 
 if __name__ == "__main__":

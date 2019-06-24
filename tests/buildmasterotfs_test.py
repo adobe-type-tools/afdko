@@ -2,7 +2,10 @@ from __future__ import print_function, division, absolute_import
 
 import os
 from shutil import copytree
+import subprocess32 as subprocess
 import tempfile
+
+import pytest
 
 from runner import main as runner
 from differ import main as differ, SPLIT_MARKER
@@ -43,3 +46,16 @@ def test_cjk_var():
                        '    <created value=' + SPLIT_MARKER +
                        '    <modified value=',
                        '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
+
+
+def test_bad_designspace():
+    """
+    Purposely fail on bad designspace file.
+    """
+    input_dir = get_input_path('bad_dsfile')
+    ds_path = os.path.join(input_dir, 'TestVF.designspace')
+
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        runner(CMD + ['-o', 'd', '_{}'.format(ds_path), 'vv'])
+
+    assert err.value.returncode == 1
