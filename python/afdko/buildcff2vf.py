@@ -261,17 +261,18 @@ class CompatibilityPen(CFF2CharStringMergePen):
             return True
         return False
 
-    def getCharStrings(self, num_masters, private=None, globalSubrs=None):
-        """ A command look s like:
+    def getCharStrings(self, num_masters, private=None, globalSubrs=None,
+                       default_idx=0):
+        """ A command looks like:
         [op_name, [
             [source 0 arglist for op],
             [source 1 arglist for op],
             ...
             [source n arglist for op],
-        I am not optimising this there, as that will be done when
-        the CFF2 Charstring is creating in fontTools.varLib.build().
+        I am not optimizing this there, as that will be done when
+        the CFF2 Charstring is created in fontTools.varLib.build().
 
-        If I did, I woudl have to rearragne the arguments to:
+        If I did, I would have to rearrange the arguments to:
         [
         [arg 0 for source 0 ... arg 0 for source n]
         [arg 1 for source 0 ... arg 1 for source n]
@@ -297,6 +298,10 @@ class CompatibilityPen(CFF2CharStringMergePen):
             charString = T2CharString(
                 program=program, private=private, globalSubrs=globalSubrs)
             t2List.append(charString)
+        # if default_idx is not 0, we need to move it to the right index.
+        if default_idx:
+            default_font_cs = t2List.pop(0)
+            t2List.insert(default_idx, default_font_cs)
         return t2List
 
 
@@ -306,7 +311,7 @@ def _get_cs(glyphOrder, charstrings, glyphName):
     return charstrings[glyphName]
 
 
-def do_compatibility(vf, master_fonts):
+def do_compatibility(vf, master_fonts, default_idx):
     default_font = vf
     default_charStrings = default_font['CFF '].cff.topDictIndex[0].CharStrings
     glyphOrder = default_font.getGlyphOrder()
@@ -327,14 +332,16 @@ def do_compatibility(vf, master_fonts):
 
         # Add the coordinates from all the other regions to the
         # blend lists in the CFF2 charstring.
-        region_cs = cs_list[1:]
+        region_cs = cs_list[:]
+        del region_cs[default_idx]
         for region_idx, region_charstring in enumerate(region_cs, start=1):
             compat_pen.restart(region_idx)
             region_charstring.draw(compat_pen)
         if compat_pen.fixed:
             fixed_cs_list = compat_pen.getCharStrings(
                 num_masters, private=default_charstring.private,
-                globalSubrs=default_charstring.globalSubrs)
+                globalSubrs=default_charstring.globalSubrs,
+                default_idx=default_idx)
             cs_list = list(cs_list)
             for i, cs in enumerate(cs_list):
                 mi = all_cs.index(cs)
@@ -474,7 +481,7 @@ def main(args=None):
         # We copy vf from default_font, because we use VF to hold
         # merged arguments from each source font charstring - this alters
         # the font, which we don't want to do to the default font.
-        do_compatibility(vf, font_list)
+        do_compatibility(vf, font_list, ds_data.base_idx)
 
     logger.progress("Building VF font...")
     # Note that we now pass in the design space object, rather than a path to

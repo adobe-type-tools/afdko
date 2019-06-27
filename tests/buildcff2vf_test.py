@@ -42,7 +42,7 @@ def test_cjk_vf():
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
 
 
-def test_parse_cjk_vf():
+def test_sparse_cjk_vf():
     # subset fonts to lists in 'SHSansJPVFTest.subset.txt'
     # Check compatibility. Issue is in cid00089.
     # keep PostScript names
@@ -57,4 +57,16 @@ def test_parse_cjk_vf():
     actual_ttx = generate_ttx_dump(actual_path,
                                    ['CFF2', 'HVAR', 'avar', 'fvar'])
     expected_ttx = get_expected_path('SHSansJPVFTest.ttx')
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
+def test_compatibility_vf():
+    input_dir = get_input_path('bug816')
+    temp_dir = os.path.join(tempfile.mkdtemp(), 'bug816var')
+    copytree(input_dir, temp_dir)
+    ds_path = os.path.join(temp_dir, 'bug816.designspace')
+    runner(CMD + ['-o', 'c', 'd', '_{}'.format(ds_path)])
+    actual_path = os.path.join(temp_dir, 'bug816.otf')
+    actual_ttx = generate_ttx_dump(actual_path, ['CFF2'])
+    expected_ttx = get_expected_path('bug816.ttx')
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
