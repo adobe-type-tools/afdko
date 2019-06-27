@@ -77,7 +77,7 @@ def getSubset(subset_Path):
 
 def subset_masters(designspace, subsetDict):
     from fontTools import subset
-    subset_options = subset.Options(notdef_outline=True)
+    subset_options = subset.Options(notdef_outline=True, layout_features='*')
     for ds_source in designspace.sources:
         key = tuple(ds_source.location.items())
         included = set(subsetDict[key])

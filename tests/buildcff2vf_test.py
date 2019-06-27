@@ -70,3 +70,17 @@ def test_compatibility_vf():
     actual_ttx = generate_ttx_dump(actual_path, ['CFF2'])
     expected_ttx = get_expected_path('bug816.ttx')
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
+def test_subset_vf():
+    input_dir = get_input_path('bug817')
+    temp_dir = os.path.join(tempfile.mkdtemp(), 'bug817var')
+    copytree(input_dir, temp_dir)
+    ds_path = os.path.join(temp_dir, 'bug817.designspace')
+    subset_path = os.path.join(temp_dir, 'bug817.subset')
+    runner(CMD + ['-o', 'd', '_{}'.format(
+        ds_path), 'i', '_{}'.format(subset_path)])
+    actual_path = os.path.join(temp_dir, 'bug817.otf')
+    actual_ttx = generate_ttx_dump(actual_path, ['GSUB'])
+    expected_ttx = get_expected_path('bug817.ttx')
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
