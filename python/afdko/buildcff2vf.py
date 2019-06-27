@@ -139,31 +139,25 @@ class CompatibilityPen(CFF2CharStringMergePen):
             cmd[1].append(pt_coords)
         self.pt_index += 1
 
-    def make_flat_curve(self, prev_coords, cur_coords):
+    def make_flat_curve(self, cur_coords):
         # Convert line coords to curve coords.
-        dx = self.roundNumber((cur_coords[0] - prev_coords[0]) / 3.0)
-        dy = self.roundNumber((cur_coords[1] - prev_coords[1]) / 3.0)
-        new_coords = [prev_coords[0] + dx,
-                      prev_coords[1] + dy,
-                      prev_coords[0] + 2 * dx,
-                      prev_coords[1] + 2 * dy
-                      ] + cur_coords
+        dx = self.roundNumber(cur_coords[0] / 3.0)
+        dy = self.roundNumber(cur_coords[1] / 3.0)
+        new_coords = [dx, dy, dx, dy,
+                      cur_coords[0] - 2 * dx,
+                      cur_coords[1] - 2 * dy]
         return new_coords
 
     def make_curve_coords(self, coords, is_default):
         # Convert line coords to curve coords.
-        prev_cmd = self._commands[self.pt_index - 1]
         if is_default:
             new_coords = []
-            for i, cur_coords in enumerate(coords):
-                prev_coords = prev_cmd[1][i]
-                master_coords = self.make_flat_curve(prev_coords[:2],
-                                                     cur_coords)
+            for cur_coords in coords:
+                master_coords = self.make_flat_curve(cur_coords)
                 new_coords.append(master_coords)
         else:
             cur_coords = coords
-            prev_coords = prev_cmd[1][-1]
-            new_coords = self.make_flat_curve(prev_coords[:2], cur_coords)
+            new_coords = self.make_flat_curve(cur_coords)
         return new_coords
 
     def check_and_fix_flat_curve(self, cmd, point_type, pt_coords):
@@ -305,7 +299,7 @@ class CompatibilityPen(CFF2CharStringMergePen):
         return t2List
 
 
-def _get_cs(glyphOrder, charstrings, glyphName):
+def _get_cs(charstrings, glyphName):
     if glyphName not in charstrings:
         return None
     return charstrings[glyphName]
@@ -319,7 +313,7 @@ def do_compatibility(vf, master_fonts, default_idx):
         font['CFF '].cff.topDictIndex[0].CharStrings for font in master_fonts]
 
     for gname in glyphOrder:
-        all_cs = [_get_cs(glyphOrder, cs, gname) for cs in charStrings]
+        all_cs = [_get_cs(cs, gname) for cs in charStrings]
         if len([gs for gs in all_cs if gs is not None]) < 2:
             continue
         # remove the None's from the list.
