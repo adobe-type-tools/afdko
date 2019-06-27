@@ -30,7 +30,7 @@ matrix:
 script:
   - $PIP install --upgrade pip
   # - $PIP install cibuildwheel
-  - $PIP install git+https://github.com/miguelsousa/cibuildwheel
+  - $PIP install git+https://github.com/adobe-type-tools/cibuildwheel
   - cibuildwheel --output-dir wheelhouse
 
 after_success:
