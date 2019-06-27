@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<designspace format="3">
+    <axes>
+        <axis default="368" maximum="1000.0" minimum="0.0" name="weight" tag="wght">
+        </axis>
+    </axes>
+    <sources>
+        <source filename="source_fonts/SourceCode_ExtraLight.ufo" name="master_0">
+            <location>
+                <dimension name="weight" xvalue="0" />
+            </location>
+        </source>
+        <source filename="source_fonts/SourceCode_Regular.ufo" name="master_1">
+            <location>
+                <dimension name="weight" xvalue="368" />
+            </location>
+        </source>
+        <source filename="source_fonts/SourceCode_Black.ufo" name="master_2">
+            <location>
+                <dimension name="weight" xvalue="1000" />
+            </location>
+        </source>
+    </sources>
+    <instances>
+        <instance familyname="Bug 816 TestVF" postscriptfontname="SourceCodeRoman-ExtraLight" stylename="ExtraLight">
+            <location>
+                <dimension name="weight" xvalue="0" />
+            </location>
+        </instance>
+        <instance familyname="Bug 816 TestVF" postscriptfontname="SourceCodeRoman-Regular" stylename="Regular">
+            <location>
+                <dimension name="weight" xvalue="368" />
+            </location>
+        </instance>
+        <instance familyname="Bug 816 TestVF" postscriptfontname="SourceCodeRoman-Black" stylename="Black">
+            <location>
+                <dimension name="weight" xvalue="1000" />
+            </location>
+        </instance>
+    </instances>
+</designspace>
