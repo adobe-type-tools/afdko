@@ -5,7 +5,6 @@ from __future__ import print_function, absolute_import, unicode_literals
 import ast
 import hashlib
 import os
-import plistlib
 import re
 from collections import OrderedDict
 
@@ -14,7 +13,8 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
-from fontTools.misc.py23 import open, tobytes, tounicode, tostr, round
+from fontTools.misc import plistlib
+from fontTools.misc.py23 import open, tounicode, tostr, round
 from fontTools.ufoLib import UFOReader
 from fontTools.ufoLib.glifLib import Glyph
 
@@ -23,8 +23,10 @@ from psautohint.ufoFont import (norm_float, HashPointPen,
 
 from afdko import convertfonttocid, fdkutils
 
+__version__ = '1.34.1'
+
 __doc__ = """
-ufotools.py v1.34.0 Jun 6 2019
+ufotools.py v1.34.1 Jul 8 2019
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -841,7 +843,8 @@ class UFOFontData(object):
                 contentsList.append(PROCESSED_LAYER_ENTRY)
         # UFO v3
         else:
-            contentsList = plistlib.readPlist(contentsFilePath)
+            with open(contentsFilePath, 'r', encoding='utf-8') as fp:
+                contentsList = plistlib.load(fp)
 
             if self.writeToDefaultLayer and (
                     PROCESSED_LAYER_ENTRY in contentsList):
@@ -850,11 +853,13 @@ class UFOFontData(object):
                     not self.writeToDefaultLayer):
                 contentsList.append(PROCESSED_LAYER_ENTRY)
 
-        plistlib.writePlist(contentsList, contentsFilePath)
+        with open(contentsFilePath, 'wb') as fp:
+            plistlib.dump(contentsList, fp)
 
     def updateLayerGlyphContents(self, contentsFilePath, newGlyphData):
         if os.path.exists(contentsFilePath):
-            contentsDict = plistlib.readPlist(contentsFilePath)
+            with open(contentsFilePath, 'r', encoding='utf-8') as fp:
+                contentsDict = plistlib.load(fp)
         else:
             contentsDict = {}
         for glyphName in newGlyphData.keys():
@@ -867,7 +872,9 @@ class UFOFontData(object):
                     contentsDict[glyphName] = self.glyphMap[glyphName]
             else:
                 contentsDict[glyphName] = self.glyphMap[glyphName]
-        plistlib.writePlist(contentsDict, contentsFilePath)
+
+        with open(contentsFilePath, 'wb') as fp:
+            plistlib.dump(contentsDict, fp)
 
     def getFontInfo(self, fontPSName, inputPath, allow_no_blues, noFlex,
                     vCounterGlyphs, hCounterGlyphs, fdIndex=0):
@@ -1211,87 +1218,27 @@ def parseGlyphOrder(filePath):
 
 def parsePList(filePath, dictKey=None):
     # If dictKey is defined, parse and return only the data for that key.
-    # This helps avoid needing to parse all plist types. We need to support
-    # only data for known keys amd lists.
+    #
+    # Updates July 2019:
+    #  - use fontTools.misc.plistlib instead of ET to parse
+    #  - use built-in OrderedDict as the dict_type to preserve ordering
+    #  - use simpler filtering for non-None dictKey
+
     plistDict = {}
     plistKeys = []
 
-    # We uses this rather than the plistlib in order to get a list that
-    # allows preserving key order.
-    with open(filePath, "r", encoding='utf-8') as fp:
-        data = fp.read()
-    contents = XML(tobytes(data, encoding='utf-8'))
-    contents_dict = contents.find("dict")
-    if contents_dict is None:
-        raise UFOParseError("In '%s', failed to find dict. '%s'." % (
-            filePath, contents_dict))
-    lastTag = "string"
-    for child in contents_dict:
-        if child.tag == "key":
-            if lastTag == "key":
-                raise UFOParseError(
-                    "In contents.plist, key name '%s' followed another key "
-                    "name '%s'." % (xmlToString(child), lastTag))
-            skipKeyData = False
-            lastName = child.text
-            lastTag = "key"
-            if dictKey is not None:
-                if lastName != dictKey:
-                    skipKeyData = True
-        elif child.tag != "key":
-            if lastTag != "key":
-                raise UFOParseError(
-                    "In contents.plist, key value '%s' followed a non-key "
-                    "tag '%s'." % (xmlToString(child), lastTag))
-            lastTag = child.tag
+    with open(filePath, 'r', encoding='utf-8') as fp:
+        plistDict = plistlib.load(fp, dict_type=OrderedDict)
 
-            if skipKeyData:
-                continue
-
-            if lastName in plistDict:
-                raise UFOParseError(
-                    "Encountered duplicate key name '%s' in '%s'." %
-                    (lastName, filePath))
-            if child.tag == "array":
-                list = []
-                for listChild in child:
-                    val = listChild.text
-                    if listChild.tag == "integer":
-                        val = int(eval(val))
-                    elif listChild.tag == "real":
-                        val = float(eval(val))
-                    elif listChild.tag == "string":
-                        pass
-                    elif listChild.tag == "dict":
-                        continue  # ignore global guidelines (UFO3)
-                    else:
-                        raise UFOParseError(
-                            "In plist file, encountered unhandled key type "
-                            "'%s' in '%s' for parent key %s. %s." %
-                            (listChild.tag, child.tag, lastName, filePath))
-                    list.append(val)
-                plistDict[lastName] = list
-            elif child.tag == "integer":
-                plistDict[lastName] = int(eval(child.text))
-            elif child.tag == "real":
-                plistDict[lastName] = float(eval(child.text))
-            elif child.tag == "false":
-                plistDict[lastName] = 0
-            elif child.tag == "true":
-                plistDict[lastName] = 1
-            elif child.tag == "string":
-                plistDict[lastName] = child.text
-            else:
-                raise UFOParseError(
-                    "In plist file, encountered unhandled key type '%s' "
-                    "for key %s. %s." % (child.tag, lastName, filePath))
-            plistKeys.append(lastName)
+    if dictKey is not None:
+        if dictKey in plistDict:
+            plistDict = {dictKey: plistDict[dictKey]}
         else:
-            raise UFOParseError(
-                "In plist file, encountered unexpected element '%s'. %s." %
-                (xmlToString(child), filePath))
-    if len(plistDict) == 0:
-        plistDict = None
+            plistDict = None
+
+    if plistDict is not None:
+        plistKeys = list(plistDict.keys())
+
     return plistDict, plistKeys
 
 
@@ -2070,7 +2017,10 @@ def cleanUpGLIFFiles(defaultContentsFilePath, glyphDirPath, doWarning=True):
     changed = 0
     contentsFilePath = os.path.join(glyphDirPath, kContentsName)
     # maps glyph names to files.
-    contentsDict = plistlib.readPlist(contentsFilePath)
+
+    with open(contentsFilePath, 'r', encoding='utf-8') as fp:
+        contentsDict = plistlib.load(fp)
+
     # First, delete glyph files that are not in the contents.plist file in
     # the glyphDirPath. In some UFOfont files, we end up with case errors,
     # so we need to check for a lower-case version of the file name.
@@ -2112,7 +2062,10 @@ def cleanUpGLIFFiles(defaultContentsFilePath, glyphDirPath, doWarning=True):
     # and the default layer may be written by anything, the actual glyph file
     # names may be different for the same UFO glyph. We need to compare by UFO
     # glyph name, not file name.
-    defaultContentsDict = plistlib.readPlist(defaultContentsFilePath)
+
+    with open(defaultContentsFilePath, 'r', encoding='utf-8') as fp:
+        defaultContentsDict = plistlib.load(fp)
+
     fileList = os.listdir(glyphDirPath)
     for fileName in fileList:
         if not fileName.endswith(".glif"):
@@ -2138,7 +2091,10 @@ def cleanUpGLIFFiles(defaultContentsFilePath, glyphDirPath, doWarning=True):
 def cleanupContentsList(glyphDirPath, doWarning=True):
     contentsFilePath = os.path.join(glyphDirPath, kContentsName)
     # maps glyph names to files.
-    contentsDict = plistlib.readPlist(contentsFilePath)
+
+    with open(contentsFilePath, 'r', encoding='utf-8') as fp:
+        contentsDict = plistlib.load(fp)
+
     fileDict = {}
     fileList = os.listdir(glyphDirPath)
     for fileName in fileList:
@@ -2157,7 +2113,8 @@ def cleanupContentsList(glyphDirPath, doWarning=True):
                       "%s, %s, %s" % (glyphName, fileName, glyphDirPath))
 
     if changed:
-        plistlib.writePlist(contentsDict, contentsFilePath)
+        with open(contentsFilePath, 'wb') as fp:
+            plistlib.dump(contentsDict, fp)
 
 
 def validateLayers(ufoFontPath, doWarning=True):
