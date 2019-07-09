@@ -1224,31 +1224,6 @@ static void preserveGlyphEnd(abfGlyphCallbacks *cb) {
     h->cb.save.end(&h->cb.save);
 }
 
-static void preserveCubeBlend(abfGlyphCallbacks *cb, unsigned int nBlends, unsigned int numVals, float *blendVals) {
-    txCtx h = cb->direct_ctx;
-    if (h->cb.selected) {
-        h->cb.save.cubeBlend(&h->cb.save, nBlends, numVals, blendVals);
-    }
-}
-static void preserveCubeSetwv(abfGlyphCallbacks *cb, unsigned int numDV) {
-    txCtx h = cb->direct_ctx;
-    if (h->cb.selected) {
-        h->cb.save.cubeSetwv(&h->cb.save, numDV);
-    }
-}
-static void preserveCubeCompose(abfGlyphCallbacks *cb, int cubeLEIndex, float x0, float y0, int numDV, float *ndv) {
-    txCtx h = cb->direct_ctx;
-    if (h->cb.selected) {
-        h->cb.save.cubeCompose(&h->cb.save, cubeLEIndex, x0, y0, numDV, ndv);
-    }
-}
-static void preserveCubeTransform(abfGlyphCallbacks *cb, float rotate, float scaleX, float scaleY, float skew, float skewY) {
-    txCtx h = cb->direct_ctx;
-    if (h->cb.selected) {
-        h->cb.save.cubeTransform(&h->cb.save, rotate, scaleX, scaleY, skew, skewY);
-    }
-}
-
 /* preserve mode callbacks template. */
 static abfGlyphCallbacks preserveGlyphCallbacks =
     {
@@ -1265,10 +1240,6 @@ static abfGlyphCallbacks preserveGlyphCallbacks =
         preserveGlyphGenop,
         preserveGlyphSeac,
         preserveGlyphEnd,
-        preserveCubeBlend,
-        preserveCubeSetwv,
-        preserveCubeCompose,
-        preserveCubeTransform,
         NULL,
         NULL,
         NULL,
@@ -2004,11 +1975,6 @@ static abfGlyphCallbacks mtxGlyphCallbacks =
         mtxGlyphGenop,
         mtxGlyphSeac,
         mtxGlyphEnd,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         NULL,
         NULL,
@@ -2833,17 +2799,14 @@ static void ufo_SetMode(txCtx h) {
     h->cb.glyph = ufwGlyphCallbacks;
     h->cb.glyph.direct_ctx = h->ufow.ctx;
 
-    /* Set source library flags. It is harmless to declare a font to be cune, and we have to flatten them if going to UFO */
-    h->t1r.flags = T1R_UPDATE_OPS | T1R_FLATTEN_CUBE | T1R_IS_CUBE;
-    h->cfr.flags = CFR_UPDATE_OPS | CFR_FLATTEN_CUBE | T1R_IS_CUBE;
+    /* Set source library flags. */
+    h->t1r.flags = T1R_UPDATE_OPS;
+    h->cfr.flags = CFR_UPDATE_OPS;
 
     h->mode = mode_ufow;
 }
 
 /* -------------------------------- dcf mode ------------------------------- */
-
-#define tx_reserved2 2
-#define t2_reserved17 17
 
 /* Return size of region. */
 static long sizeRegion(const ctlRegion *region) {
@@ -3341,7 +3304,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
         {
             /*  0 */ "reserved0",
             /*  1 */ "hstem",
-            /*  2 */ "compose",
+            /*  2 */ "reserved2",
             /*  3 */ "vstem",
             /*  4 */ "vmoveto",
             /*  5 */ "rlineto",
@@ -3356,7 +3319,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
             /* 14 */ "endchar",
             /* 15 */ "vsindex",
             /* 16 */ "blend",
-            /* 17 */ "callgrel",
+            /* 17 */ "reserved17",
             /* 18 */ "hstemhm",
             /* 19 */ "hintmask",
             /* 20 */ "cntrmask",
@@ -3413,18 +3376,6 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
             /* 36 */ "hflex1",
             /* 37 */ "flex1",
             /* 38 */ "cntron",
-            /* 39 */ "blend1",
-            /* 40 */ "blend2",
-            /* 41 */ "blend3",
-            /* 42 */ "blend4",
-            /* 43 */ "blend6",
-            /* 44 */ "setwv1",
-            /* 45 */ "setwv2",
-            /* 46 */ "setwv3",
-            /* 47 */ "setwv4",
-            /* 48 */ "setwv5",
-            /* 49 */ "setwvN",
-            /* 50 */ "transform",
         };
     long left = sizeRegion(region);
 
@@ -3436,12 +3387,14 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
         left--;
         switch (byte) {
             case tx_reserved0:
+            case tx_reserved2:
             case tx_rlineto:
             case tx_hlineto:
             case tx_vlineto:
             case tx_rrcurveto:
             case t2_reserved9:
             case t2_reserved13:
+            case tx_reserved17:
             case tx_endchar:
             case t2_rcurveline:
             case t2_rlinecurve:
@@ -3471,12 +3424,6 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
                 flowCommand(h, opname[byte]);
                 break;
             }
-            case tx_compose:
-                flowCommand(h, opname[byte]);
-                break;
-            case tx_callgrel:
-                flowCommand(h, opname[byte]);
-                break;
             case tx_callsubr:
                 if (h->dcf.flags & DCF_Flatten) {
                     h->dcf.subrDepth++;
@@ -4151,10 +4098,7 @@ static void dcf_BegFont(txCtx h, abfTopDict *top) {
     single = cfrGetSingleRegions(h->cfr.ctx);
     major = dcf_DumpHeader(h, &single->Header);
     if (major == 1) {
-        if (h->dcf.flags & DCF_IS_CUBE)
-            h->maxOpStack = TX_MAX_OP_STACK_CUBE;
-        else
-            h->maxOpStack = T2_MAX_OP_STACK;
+        h->maxOpStack = T2_MAX_OP_STACK;
         initCstrs(h, top);
         dcf_DumpNameINDEX(h, &single->NameINDEX);
         dcf_DumpTopDICTINDEX(h, &single->TopDICTINDEX);

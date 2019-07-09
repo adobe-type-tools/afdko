@@ -385,7 +385,6 @@ typedef struct /* Glyph information */
 #define ABF_GLYPH_SEEN       (1 << 1) /* Path data already returned to client */
 #define ABF_GLYPH_UNICODE    (1 << 2) /* Encoding is Unicode */
 #define ABF_GLYPH_LANG_1     (1 << 3) /* Render with LanguageGroup 1 rules */
-#define ABF_GLYPH_CUBE_GSUBR (1 << 4) /* This a GSUBR charstring. */
     unsigned short tag;               /* Unique tag */
     abfString gname;                  /* Name-keyed: glyph name */
     abfEncoding encoding;             /* Name-keyed: encoding list */
@@ -475,14 +474,6 @@ struct abfGlyphCallbacks_ {
     void (*seac)(abfGlyphCallbacks *cb,
                  float adx, float ady, int bchar, int achar);
     void (*end)(abfGlyphCallbacks *cb);
-    void (*cubeBlend)(abfGlyphCallbacks *cb, unsigned int nBlends, unsigned int numVals, float *blendVals);
-    void (*cubeSetwv)(abfGlyphCallbacks *cb, unsigned int numDV);
-    void (*cubeCompose)(abfGlyphCallbacks *cb, int cubeLEIndex, float x0, float y0, int numDV, float *ndv);
-    /* Note: ndv is the raw value from the CFF, a value in the range
-             -100 to +100, which corresponds to the normalized design vector
-             range 0.0-1.0.  x0 and y0 are the absolute x and y of the LE
-             origin in the glyph design space. */
-    void (*cubeTransform)(abfGlyphCallbacks *cb, float rotate, float scaleX, float scaleY, float skewX, float skewY);
     void (*moveVF)(abfGlyphCallbacks *cb, abfBlendArg *x0, abfBlendArg *y0);
     void (*lineVF)(abfGlyphCallbacks *cb, abfBlendArg *x1, abfBlendArg *y1);
     void (*curveVF)(abfGlyphCallbacks *cb,

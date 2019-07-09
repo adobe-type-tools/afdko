@@ -63,10 +63,7 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
 #define CFR_USE_MATRIX              (1 << 1)
 #define CFR_NO_ENCODING             (1 << 2)
 #define CFR_SHALLOW_READ            (1 << 3)
-#define CFR_IS_CUBE                 (1 << 4)
-#define CFR_FLATTEN_CUBE            (1 << 5)
 #define CFR_SEEN_GLYPH              (1 << 6) /* have seen a glyph */
-#define CFR_CUBE_RND                (1 << 7)
 #define CFR_FLATTEN_VF              (1 << 8)
 #define CFR_SHORT_VF_NAME           (1 << 9)
 #define CFR_UNUSE_VF_NAMED_INSTANCE (1 << 10)
@@ -109,13 +106,6 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
    string INDEX, gsubrs INDEX, and top dict. Glyph access functions like
    cfrIterateGlyphs, cfrGetGlyphByTag, cfrGetGlyphByName, cfrGetGlyphByCID may
    not be called with a font parsed with this flag set.
-
-   CFR_IS_CUBE - the data contains cube font operators. Stack depth
-   and operator defs are different. Cube subr's are found at the end of gsubr's
-   for CID fonts, subrs for non-CID fonts.
-
-   CFR_FLATTEN_CUBE - the data contains cube font operators. Stack depth
-   and operator defs are different. The Cube compose ops must be flattened.
 
    CFR_FLATTEN_VF - flatten CFF2 variable font data for a given user design
    vector.

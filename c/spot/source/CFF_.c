@@ -279,7 +279,7 @@ void CFF_Read(LongN start, Card32 length) {
     CFF_.cb.cffRefill = CFFcffRefill;
     CFF_.cb.ctx = (void *)(&CFFproofctx);
 
-    CFF_.cff = cffNew(&CFF_.cb, 0, CFFREAD_SMALL_FONT); /* On dumping, doesn't hurt to have the max stack limits larger than usual */
+    CFF_.cff = cffNew(&CFF_.cb, 0, 0);
     CFF_.fi = cffGetFontInfo(CFF_.cff);
 
     CFF_.proofcb.newpath = NULL;

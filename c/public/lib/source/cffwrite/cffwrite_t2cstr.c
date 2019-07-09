@@ -1952,88 +1952,31 @@ static void glyphGenop(abfGlyphCallbacks *cb, int cnt, float *args, int op) {
     cfwCtx g = (cfwCtx)cb->direct_ctx;
     cstrCtx h = g->ctx.cstr;
 
-    if (h->glyph.info->flags & ABF_GLYPH_CUBE_GSUBR) {
-        switch (op) {
-            case tx_return:
-                if (cnt) {
-                    /* use use tx_return to signal the end of a subr when there
-                       are numbers on the stack */
-                    float *p = &h->stack.array[h->stack.cnt];
-                    memmove(p, args, cnt * sizeof(float));
-                    h->stack.cnt += cnt;
-                }
-                break;
+    if (h->pendop != tx_noop) {
+        saveop(h, h->pendop);
+    }
 
-            case tx_SETWV1:
-            case tx_SETWV2:
-            case tx_SETWV3:
-            case tx_SETWV4:
-            case tx_SETWV5:
-                if (cnt) {
-                    float *p = &h->stack.array[h->stack.cnt];
-                    memmove(p, args, cnt * sizeof(float));
-                    h->stack.cnt += cnt;
-                }
-                cfwSeenLEIndex(g, -1);
-                saveopDirect(h, op);
-                break;
+    switch (op) {
+        case t2_cntron:
+            h->pendop = t2_cntron;
+            break;
 
-            case tx_SETWVN:
-                if (cnt) {
-                    float *p = &h->stack.array[h->stack.cnt];
-                    memmove(p, args, cnt * sizeof(float));
-                    h->stack.cnt += cnt;
-                }
-                cfwSeenLEIndex(g, -1);
-                saveopDirect(h, op);
-                break;
+        case t2_cntroff:
+            /* Create all clear cntrmask */
+            newCntr(h);
+            break;
 
-            case tx_callgrel: {
-                float *p = &h->stack.array[h->stack.cnt];
-                memmove(p, args, cnt * sizeof(float));
-                h->stack.cnt += cnt;
-                cfwSeenLEIndex(g, (long)args[cnt - 1]);
-                saveopDirect(h, op);
-                break;
+        default:
+            if (cnt) {
+                memmove(h->stack.array, args, cnt * sizeof(float));
+                h->stack.cnt = cnt;
             }
-
-            default: {
-                if (cnt) {
-                    float *p = &h->stack.array[h->stack.cnt];
-                    memmove(p, args, cnt * sizeof(float));
-                    h->stack.cnt += cnt;
-                }
-                saveopDirect(h, op);
-                break;
+            if (op == tx_dotsection) {
+                h->pendop = tx_dotsection;
+            } else {
+                saveop(h, op);
             }
-        }
-    } else {
-        if (h->pendop != tx_noop) {
-            saveop(h, h->pendop);
-        }
-
-        switch (op) {
-            case t2_cntron:
-                h->pendop = t2_cntron;
-                break;
-
-            case t2_cntroff:
-                /* Create all clear cntrmask */
-                newCntr(h);
-                break;
-
-            default:
-                if (cnt) {
-                    memmove(h->stack.array, args, cnt * sizeof(float));
-                    h->stack.cnt = cnt;
-                }
-                if (op == tx_dotsection) {
-                    h->pendop = tx_dotsection;
-                } else {
-                    saveop(h, op);
-                }
-                break;
-        }
+            break;
     }
 }
 
@@ -2528,7 +2471,7 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
         }
     }
 
-    if (g->flags & (CFW_IS_CUBE | CFW_WRITE_CFF2)) {
+    if (g->flags & CFW_WRITE_CFF2) {
         clearop(h);
     } else {
         saveop(h, tx_endchar);
@@ -2541,10 +2484,6 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
     /* Save stems, counters, and initial hintmask at head of charstring */
     saveStems(h, map);
 
-    if (h->glyph.info->flags & ABF_GLYPH_CUBE_GSUBR) {
-        cfwAddCubeGSUBR(g, h->cstr.array, h->cstr.cnt);
-        return;
-    }
     /* Write rest of charstring */
     iCstr = 0;
     for (i = 0; i < h->hints.cnt; i++) {
@@ -2620,143 +2559,6 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
     updateFontBoundingBox(g);
 }
 
-static void glyphCubeBlend(abfGlyphCallbacks *cb, unsigned int nBlends, unsigned int numVals, float *blendVals) {
-    cfwCtx g = (cfwCtx)cb->direct_ctx;
-    cstrCtx h = g->ctx.cstr;
-    unsigned int i = 0;
-
-    if (h->pendop != tx_noop) {
-        saveop(h, h->pendop);
-    }
-
-    while (i < numVals) {
-        PUSH(blendVals[i]);
-    }
-    switch (nBlends) {
-        case 1:
-            saveop(h, tx_BLEND1);
-            break;
-
-        case 2:
-            saveop(h, tx_BLEND2);
-            break;
-
-        case 3:
-            saveop(h, tx_BLEND3);
-            break;
-
-        case 4:
-            saveop(h, tx_BLEND4);
-            break;
-
-        case 6:
-            saveop(h, tx_BLEND6);
-            break;
-    }
-    h->pendop = tx_noop;
-}
-
-static void glyphCubeSetWV(abfGlyphCallbacks *cb, unsigned int numDV) {
-    cfwCtx g = (cfwCtx)cb->direct_ctx;
-    cstrCtx h = g->ctx.cstr;
-
-    if (h->pendop != tx_noop) {
-        saveop(h, h->pendop);
-    }
-
-    switch (numDV) {
-        case 1:
-            saveop(h, tx_SETWV1);
-            break;
-
-        case 2:
-            saveop(h, tx_SETWV2);
-            break;
-
-        case 3:
-            saveop(h, tx_SETWV3);
-            break;
-
-        case 4:
-            saveop(h, tx_SETWV4);
-            break;
-
-        case 5:
-            saveop(h, tx_SETWV5);
-            break;
-
-        default:
-            saveop(h, tx_SETWVN);
-    }
-    h->pendop = tx_noop;
-}
-
-static void glyphCubeCompose(abfGlyphCallbacks *cb, int cubeLEIndex, float x0, float y0, int numDV, float *ndv) {
-    cfwCtx g = (cfwCtx)cb->direct_ctx;
-    cstrCtx h = g->ctx.cstr;
-    int i = 0;
-    float dx0;
-    float dy0;
-
-    if (!(h->flags & SEEN_MOVETO)) {
-        glyphMove(cb, 0, 0);  // same as insertMoce(), but without the warning.
-    }
-    switch (h->pendop) {
-        case tx_compose:
-            flushop(h, 3 + numDV); /* make sure we don't exceed the stack depth */
-            break;
-
-        case tx_noop:
-            break;
-
-        default:
-            saveop(h, h->pendop);
-            break;
-    }
-
-    PUSH(cubeLEIndex); /* library element value */
-    /* Compute delta and update current point */
-    dx0 = x0 - h->x;
-    dy0 = y0 - h->y;
-    h->x = x0;
-    h->y = y0;
-    if (g->flags & CFW_CUBE_RND) {
-        PUSH(dx0 / 4);
-        PUSH(dy0 / 4);
-    } else {
-        PUSH(dx0);
-        PUSH(dy0);
-    }
-
-    while (i < numDV) {
-        PUSH(ndv[i++]);
-    }
-    h->pendop = tx_compose;
-}
-
-static void cubeTransform(abfGlyphCallbacks *cb, float rotate, float scaleX, float scaleY, float skewX, float skewY) {
-    cfwCtx g = (cfwCtx)cb->direct_ctx;
-    cstrCtx h = g->ctx.cstr;
-
-    switch (h->pendop) {
-        case tx_noop:
-            break;
-
-        default:
-            saveop(h, h->pendop);
-            break;
-    }
-
-    /* Rotation is expressed in degrees. Rotation is *100, and the scale/skew
-       are *1000 to avoid the use of the div operator in the charstring.  */
-    PUSH(rotate * 100);
-    PUSH(scaleX * 1000);
-    PUSH(scaleY * 1000);
-    PUSH(skewX * 1000);
-    PUSH(skewY * 1000);
-    h->pendop = tx_transform;  // This is not a typo. The idea is to allow chaining a transform op and a compose op.
-}
-
 /* Public callback set */
 const abfGlyphCallbacks cfwGlyphCallbacks = {
     NULL,
@@ -2772,10 +2574,6 @@ const abfGlyphCallbacks cfwGlyphCallbacks = {
     glyphGenop,
     glyphSeac,
     glyphEnd,
-    glyphCubeBlend,
-    glyphCubeSetWV,
-    glyphCubeCompose,
-    cubeTransform,
     glyphMoveVF,
     glyphLineVF,
     glyphCurveVF,
@@ -2863,7 +2661,7 @@ static void dbt2cstr(long length, unsigned char *cstr) {
     static char *opname[32] = {
         /*  0 */ "reserved0",
         /*  1 */ "hstem",
-        /*  2 */ "compose",
+        /*  2 */ "reserved2",
         /*  3 */ "vstem",
         /*  4 */ "vmoveto",
         /*  5 */ "rlineto",
@@ -2878,7 +2676,7 @@ static void dbt2cstr(long length, unsigned char *cstr) {
         /* 14 */ "endchar",
         /* 15 */ "vsindex",
         /* 16 */ "blend",
-        /* 17 */ "callgrel",
+        /* 17 */ "reserved17",
         /* 18 */ "hstemhm",
         /* 19 */ "hintmask",
         /* 20 */ "cntrmask",
@@ -2934,19 +2732,6 @@ static void dbt2cstr(long length, unsigned char *cstr) {
         /* 36 */ "hflex1",
         /* 37 */ "flex1",
         /* 38 */ "cntron",
-
-        /* 39 */ "blend1",
-        /* 40 */ "blend2",
-        /* 41 */ "blend3",
-        /* 42 */ "blend4",
-        /* 43 */ "blend6",
-        /* 44 */ "setwv1",
-        /* 45 */ "setwv2",
-        /* 46 */ "setwv3",
-        /* 47 */ "setwv4",
-        /* 48 */ "setwv5",
-        /* 49 */ "setwvn",
-        /* 50 */ "transform",
     };
     int single = 0; /* Suppress optimizer warning */
     int stems = 0;
@@ -2962,7 +2747,7 @@ static void dbt2cstr(long length, unsigned char *cstr) {
                 break;
 
             case tx_reserved0:
-            case tx_compose:
+            case tx_reserved2:
             case tx_vmoveto:
             case tx_rlineto:
             case tx_hlineto:
@@ -2974,7 +2759,7 @@ static void dbt2cstr(long length, unsigned char *cstr) {
             case t2_reserved13:
             case t2_vsindex:
             case t2_blend:
-            case tx_callgrel:
+            case tx_reserved17:
             case tx_rmoveto:
             case tx_hmoveto:
             case t2_rcurveline:
@@ -3020,7 +2805,7 @@ static void dbt2cstr(long length, unsigned char *cstr) {
                 /* Process escaped operator */
                 int escop = cstr[i + 1];
                 if (escop > (int)ARRAY_LEN(escopname) - 1) {
-                    printf("? ");
+                    printf("reservedESC%d ", escop);
                 } else {
                     printf("%s ", escopname[escop]);
                 }

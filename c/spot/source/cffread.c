@@ -116,7 +116,6 @@ struct cffCtx_ /* Context */
 #define UDV_SET     (1 << 10) /* UDV explicitly set */
 #define WV_SET      (1 << 11) /* WV explicitly set */
 #define JUST_WIDTH  (1 << 12) /* Stop parse after width found */
-#define SMALL_FONT  (1 << 13) /* Process end char with Cube Small Font logic. */
     struct /* CFF data */
     {
         char *next;     /* Next byte available */
@@ -278,10 +277,7 @@ cffCtx cffNew(cffStdCallbacks *cb, Offset offset, unsigned long cffreadFlags) {
     h->dict.fd = NULL;
 
     /* Initialize for Type 2 charstrings */
-    if (cffreadFlags & CFFREAD_SMALL_FONT)
-        h->stack.max = T2_MAX_OP_STACK_CUBE;
-    else
-        h->stack.max = T2_MAX_OP_STACK;
+    h->stack.max = T2_MAX_OP_STACK;
     h->stack.array = MEM_NEW(h, h->stack.max * sizeof(StkElement));
     h->stack.type = MEM_NEW(h, h->stack.max);
     h->cstrRead = t2Read;
@@ -504,10 +500,6 @@ static char fillbuf(cffCtx h) {
 /* Seek to data byte */
 static void seekbyte(cffCtx h, Offset offset) {
     h->data.next = h->cb.cffSeek(h->cb.ctx, offset, &h->data.left);
-    /* Small Font extensions do not require return or endchar and treat the end
-       of a charstring/subroutine/globalsubroutine as an endchar or return */
-    if ((!(h->flags & SMALL_FONT)) && (h->data.left == 0))
-        fatal(h, "premature end of data");
     h->data.nextoff = offset + h->data.left;
 }
 
@@ -1050,14 +1042,12 @@ static void t2Read(cffCtx h, Offset offset, int init, int cslen) {
                 h->path.flags |= SEEN_END;
                 PATH_FUNC_CALL(endchar, (h->cb.ctx));
                 return;
-            case tx_compose:
-                h->stack.cnt = 0;
-                break;
             case tx_reserved0:
+            case tx_reserved2:
             case t2_reserved9:
             case t2_reserved13:
             case t2_reserved15:
-            case t2_reserved17:
+            case tx_reserved17:
                 fatal(h, "reserved charstring op");
             case tx_rlineto:
                 for (j = 0; j < h->stack.cnt; j += 2)
@@ -1278,11 +1268,11 @@ static void t2Read(cffCtx h, Offset offset, int init, int cslen) {
                     case t2_reservedESC7:
                     case t2_reservedESC16:
                     case t2_reservedESC17:
+                    case tx_reservedESC19:
                     case tx_reservedESC25:
                     case tx_reservedESC31:
                     case tx_reservedESC32:
                     case t2_reservedESC33:
-                    case t2_reservedESC19:
                     case t2_cntron:
                         fatal(h, "reserved charstring op");
                     case tx_and:

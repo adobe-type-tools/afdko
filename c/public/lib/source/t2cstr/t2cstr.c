@@ -54,16 +54,9 @@ struct _t2cCtx {
 #define PEND_WIDTH        (1<<0)  /* Flags width pending */
 #define PEND_MASK         (1<<1)  /* Flags hintmask pending */
 #define SEEN_ENDCHAR      (1<<2)  /* Flags endchar operator seen */
-#define START_COMPOSE     (1<<3)  /* currently flattening a Cube library element: need to add the compose (dx, dy) to the LE moveto */
-#define FLATTEN_CUBE      (1<<4)  /* when process a compose operator, flatten it rather than report it. */
-#define NEW_HINTS         (1<<5)  /* Needed for cube gsubrs that report simple simple and vstems, Type1 style. */
-#define IS_CUBE           (1<<6)  /* Current font is a cube font. Allow no endchar/return ops, increase stack sizes. */
-#define CUBE_RND          (1<<7)  /* start (x,y) for a Cube element is rounded to a multiple of 4: used when building real Cube host fonts. Required to be rasterized by PFR. */
 #define SEEN_BLEND        (1<<8)  /* Seen blend operator: need to round position after each op. */
 #define USE_MATRIX        (1<<9)  /* Apply transform*/
 #define USE_GLOBAL_MATRIX (1<<10) /* Transform is applied to entire charstring */
-#define START_PATH_MATRIX (1<<11) /* Transform has just been defined, and shoould be applied to the foloowing path (from next move-to tup o the following move-to). */
-#define FLATTEN_COMPOSE   (1<<12) /* Flag that we are flattening a compose operation. Used to rest the USE_MATRIX flag when done. */
 #define FLATTEN_BLEND     (1<<13) /* Flag that we are flattening a CFF2 charstring. */
 #define SEEN_CFF2_BLEND   (1<<14) /* Seen CFF2 blend operator. */
 #define IS_CFF2           (1<<15) /* CFF2 charstring */
@@ -81,20 +74,7 @@ struct _t2cCtx {
     float x;                  /* Path x-coord */
     float y;                  /* Path y-coord */
     int subrDepth;
-    int cubeStackDepth;
     float transformMatrix[6];
-    struct /* Stem hints */
-    {
-        float start_x;  /* Path x-coord at start of Cube library element processing */
-        float start_y;  /* Path y-coord at start of Cube library element processing */
-        float offset_x; /* cube offset, to add to first moveto in cube library element (LE) */
-        float offset_y; /* cube offset, to add to first moveto in cube library element (LE)  */
-        int nMasters;
-        int leIndex;
-        int composeOpCnt;
-        float composeOpArray[TX_MAX_OP_STACK_CUBE];
-        double WV[kMaxCubeMasters]; /* Was originally just 4, to support substitution MM fonts. Note: the PFR rasterizer can support only up to 5 axes */
-    } cube[CUBE_LE_STACKDEPTH];
     struct /* Stem hints */
     {
         long cnt;
@@ -259,7 +239,6 @@ static int srcSeek(t2cCtx h, long offset) {
 }
 
 /* Check next byte available and refill buffer if not. */
-/* only CUBE fonts have no endchar/return operators in teh charstring or gsubrs. */
 
 #define CHKBYTE(h)                                                  \
     do                                                              \
@@ -267,12 +246,7 @@ static int srcSeek(t2cCtx h, long offset) {
             if (h->src.offset >= h->src.endOffset) {                \
                 if (h->aux->flags & T2C_IS_CFF2)                    \
                     goto do_endchar;                                \
-                if (!(h->aux->flags & T2C_IS_CUBE))                 \
-                    return t2cErrSrcStream;                         \
-                if ((h->subrDepth > 0) || (h->cubeStackDepth >= 0)) \
-                    return t2cSuccess;                              \
-                else                                                \
-                    goto do_endchar;                                \
+                return t2cErrSrcStream;                             \
             }                                                       \
             next = refill(h, &end);                                 \
             if (next == NULL)                                       \
@@ -286,9 +260,7 @@ static int srcSeek(t2cCtx h, long offset) {
             if (h->src.offset >= h->src.endOffset) { \
                 if (h->aux->flags & T2C_IS_CFF2)     \
                     goto do_subr_return;             \
-                if (!(h->aux->flags & T2C_IS_CUBE))  \
-                    return t2cErrSrcStream;          \
-                goto do_subr_return;                 \
+                return t2cErrSrcStream;              \
             }                                        \
             next = refill(h, &end);                  \
             if (next == NULL)                        \
@@ -440,45 +412,6 @@ static void callbackStems(t2cCtx h, int cntr) {
         h->flags &= ~PEND_MASK;
 }
 
-/* Callback stems in mask. */
-static void callbackCubeStem(t2cCtx h, int stemFlags) {
-    int flags;
-    float lastEdge = 0;
-    float edge0;
-    float edge1;
-    int i;
-    if (h->glyph->stem == NULL)
-        return;
-
-    flags = (h->flags & NEW_HINTS) ? ABF_NEW_HINTS : 0;
-    h->flags &= ~NEW_HINTS;
-
-    flags |= stemFlags;
-    for (i = h->stack.cnt & 1; i < h->stack.cnt - 1; i += 2) {
-        edge0 = INDEX(i);
-        edge1 = INDEX(i + 1); /* is actually width */
-        edge0 += lastEdge;
-        edge1 += edge0;
-        lastEdge = edge1;
-        if (h->flags & USE_MATRIX) {
-            if (stemFlags & ABF_VERT_STEM) {
-                edge0 = SX(edge0);
-                edge1 = SX(edge1);
-            } else {
-                edge0 = SY(edge0);
-                edge1 = SY(edge1);
-            }
-        } else if (h->flags & SEEN_BLEND) {
-            edge0 = RND(edge0);
-            edge1 = RND(edge1);
-        }
-
-        h->glyph->stem(h->glyph, flags, edge0, edge1);
-        if (flags & ABF_NEW_HINTS)
-            flags &= ~ABF_NEW_HINTS;
-    }
-}
-
 /* Determine how to handle first cntrmask and save it. */
 static void savePendCntr(t2cCtx h, int cntr) {
     if (cntr || h->LanguageGroup == 1 || !validStem3(h))
@@ -531,62 +464,27 @@ static void callbackMove(t2cCtx h, float dx, float dy) {
     int flags;
     float x, y;
 
-    if (h->flags & START_COMPOSE) {
-        /* We can tell that this is the first move-to of a flattened compare operator
-           with the START_COMPOSE flag.
-           dx and dy are the initial moveto values in the LE, usually 0 or a small value.
-           h->x and h->y are the current absolute position of the last point in the last path.
-           h->le_start.x,y are the LE absolute start position.
-         */
-        x = dx + h->cube[h->cubeStackDepth].offset_x;
-        y = dy + h->cube[h->cubeStackDepth].offset_y;
-        h->cube[h->cubeStackDepth].offset_x = 0;
-        h->cube[h->cubeStackDepth].offset_y = 0;
-        if (h->flags & START_PATH_MATRIX) {
-            /* Set the tx and ty such that the start point remains the same. */
-            float x2 = TX(x, y);
-            float y2 = TY(x, y);
-            // Path specific matrix scales and rotates around start point. Set tx and ty accordingly.
-            h->transformMatrix[4] = x - x2;  // tx
-            h->transformMatrix[5] = y - y2;  // ty
-
-            /* set USE_MATRIX. The transform op already set the new matrix values in h->transfromMatrix */
-            h->flags |= USE_MATRIX;
-            h->flags &= ~START_PATH_MATRIX;
-            /* we will clear USE_MATRIX if START_PATH_MATRIX is set at the end of flattening the compose operator. */
-        }
-        h->flags &= ~START_COMPOSE;
-    } else {
-        x = h->x + dx;
-        y = h->y + dy;
-        if (!(h->flags & FLATTEN_COMPOSE)) {
-            /* We are starting a regular path, not flattening a compose operator.*/
-            if (h->flags & START_PATH_MATRIX) {
-                /* set USE_MATRIX. The transform op already set the new matrix values in h->transfromMatrix */
-                h->flags |= USE_MATRIX;
-                h->flags &= ~START_PATH_MATRIX;
-            } else if (h->flags & USE_MATRIX) {
-                /* if START_PATH_MATRIX is not set, then this either global, or left over from a previous path.  */
-                if (h->flags & USE_GLOBAL_MATRIX) {
-                    int i;
-                    /* restore the global matrix values */
-                    for (i = 0; i < 6; i++) {
-                        h->transformMatrix[i] = h->aux->matrix[i];
-                    }
-                } else {
-                    /* If USE_GLOBAL_MATRIX is not set, then the   USE_MATRIX is left over from the previous path. Clear it. */
-                    h->flags &= ~USE_MATRIX;
-                    h->transformMatrix[0] = h->transformMatrix[3] = 1.0;
-                    h->transformMatrix[1] = h->transformMatrix[2] = h->transformMatrix[4] = h->transformMatrix[5] = 1.0;
-                }
+    x = h->x + dx;
+    y = h->y + dy;
+    if (h->flags & USE_MATRIX) {
+        /* if START_PATH_MATRIX is not set, then this either global, or left over from a previous path.  */
+        if (h->flags & USE_GLOBAL_MATRIX) {
+            int i;
+            /* restore the global matrix values */
+            for (i = 0; i < 6; i++) {
+                h->transformMatrix[i] = h->aux->matrix[i];
             }
+        } else {
+            /* If USE_GLOBAL_MATRIX is not set, then the   USE_MATRIX is left over from the previous path. Clear it. */
+            h->flags &= ~USE_MATRIX;
+            h->transformMatrix[0] = h->transformMatrix[3] = 1.0;
+            h->transformMatrix[1] = h->transformMatrix[2] = h->transformMatrix[4] = h->transformMatrix[5] = 1.0;
         }
     }
 
     if (h->mask.state == 1)
         savePendCntr(h, 0);
 
-    h->flags |= NEW_HINTS;
     if (h->seac.phase == seacAccentPreMove) {
         /* Accent component moveto; if no mask force hintsubs */
         flags = ABF_NEW_HINTS;
@@ -628,15 +526,6 @@ static void callbackMove(t2cCtx h, float dx, float dy) {
 
 /* Callback path line. */
 static void callbackLine(t2cCtx h, float dx, float dy) {
-    h->flags |= NEW_HINTS;
-
-    if (h->flags & START_COMPOSE) {
-        callbackMove(h, h->cube[h->cubeStackDepth].offset_x, h->cube[h->cubeStackDepth].offset_y);
-        h->cube[h->cubeStackDepth].offset_x = 0;
-        h->cube[h->cubeStackDepth].offset_y = 0;
-        h->flags &= ~START_COMPOSE;
-    }
-
     h->x += dx;
     h->y += dy;
     h->x = roundf(h->x * 100) / 100;
@@ -662,15 +551,6 @@ static void callbackCurve(t2cCtx h,
                           float dx2, float dy2,
                           float dx3, float dy3) {
     float x1, y1, x2, y2, x3, y3;
-
-    h->flags |= NEW_HINTS;
-
-    if (h->flags & START_COMPOSE) {
-        callbackMove(h, h->cube[h->cubeStackDepth].offset_x, h->cube[h->cubeStackDepth].offset_y);
-        h->cube[h->cubeStackDepth].offset_x = 0;
-        h->cube[h->cubeStackDepth].offset_y = 0;
-        h->flags &= ~START_COMPOSE;
-    }
 
     x1 = h->x + dx1;
     y1 = h->y + dy1;
@@ -717,13 +597,6 @@ static void callbackFlex(t2cCtx h,
                          float dx5, float dy5,
                          float dx6, float dy6,
                          float depth) {
-    if (h->flags & START_COMPOSE) {
-        callbackMove(h, h->cube[h->cubeStackDepth].offset_x, h->cube[h->cubeStackDepth].offset_y);
-        h->cube[h->cubeStackDepth].offset_x = 0;
-        h->cube[h->cubeStackDepth].offset_y = 0;
-        h->flags &= ~START_COMPOSE;
-    }
-
     if (h->glyph->flex == NULL) {
         /* Callback as 2 curves */
         callbackCurve(h,
@@ -896,44 +769,6 @@ static void callback_seac(t2cCtx h, float adx, float ady, int bchar, int achar) 
     h->glyph->seac(h->glyph, adx, ady, bchar, achar);
 }
 
-/* Callback setwv operator. */
-static void callback_blend_cube(t2cCtx h, unsigned int nBlends, unsigned int numVals, float *blendVals) {
-    if (h->glyph->cubeBlend == NULL)
-        return;
-
-    h->glyph->cubeBlend(h->glyph, nBlends, numVals, blendVals);
-    return;
-}
-
-/* Callback blend operator. */
-static void callback_setwv_cube(t2cCtx h, unsigned int numDV) {
-    if (h->glyph->cubeSetwv == NULL)
-        return;
-
-    h->glyph->cubeSetwv(h->glyph, numDV);
-    return;
-}
-
-/* Callback compose operator. */
-static void callback_compose(t2cCtx h, int cubeLEIndex, float dx, float dy, int numDV, float *ndv) {
-    h->x += dx;
-    h->y += dy;
-    h->x = roundf(h->x * 100) / 100;
-    h->y = roundf(h->y * 100) / 100;
-    if (h->glyph->cubeCompose == NULL)
-        return;
-
-    h->glyph->cubeCompose(h->glyph, cubeLEIndex, h->x, h->y, numDV, ndv);
-}
-
-/* Callback transform operator. */
-static void callback_transform(t2cCtx h, float rotate, float scaleX, float scaleY, float skewX, float skewY) {
-    if (h->glyph->cubeTransform == NULL)
-        return;
-
-    h->glyph->cubeTransform(h->glyph, rotate, scaleX, scaleY, skewX, skewY);
-}
-
 /* ---------------------------- Charstring Parse --------------------------- */
 
 /* Parse seac component glyph. */
@@ -980,107 +815,6 @@ static void reverse(t2cCtx h, int i, int j) {
         h->stack.array[i++] = h->stack.array[j];
         h->stack.array[j--] = tmp;
     }
-}
-
-static int do_set_weight_vector_cube(t2cCtx h, int nAxes) {
-    float dx, dy;
-    int i = 0;
-    int j = 0;
-    int nMasters = 1 << nAxes;
-    float NDV[kMaxCubeAxes];
-    int popCnt = nAxes + 3;
-    int composeCnt = h->cube[h->cubeStackDepth].composeOpCnt;
-    float *composeOps = h->cube[h->cubeStackDepth].composeOpArray;
-
-    h->flags |= NEW_HINTS;
-
-    if (h->flags & CUBE_RND) {
-        dx = (float)4 * (long)composeOps[1];
-        dy = (float)4 * (long)composeOps[2];
-    } else {
-        dx = (float)composeOps[1];
-        dy = (float)composeOps[2];
-    }
-
-    /* Several complications for processing the Cube library element (x,y) offset.
-
-    1) It acts as an rmoveto. However, since the LE may have an rmoveto, we
-       need to save the dx, and dy value and either add it to the LE's rmoveto,
-       or add it as an explicit rmoveto before the LE's first marking operator.
-
-    2) The LE path ops have no effect on the current point. This means that
-       after the LE is processed, we need to restore the current point to the
-       what it was after the compose (dx,dy0 is added. All this matters only
-       when we are flattening compose operators, as otherwise, the values are
-       just passed through. */
-
-    h->cube[h->cubeStackDepth].start_x = h->x + dx;
-    h->cube[h->cubeStackDepth].start_y = h->y + dy;
-    h->cube[h->cubeStackDepth].offset_x = dx;
-    h->cube[h->cubeStackDepth].offset_y = dy;
-
-    if (composeCnt < (nAxes + 3))
-        return t2cErrStackUnderflow;
-    h->cube[h->cubeStackDepth].nMasters = nMasters;
-
-    if (!(h->flags & FLATTEN_CUBE)) {
-        callback_compose(h, h->cube[h->cubeStackDepth].leIndex, dx, dy, nAxes, &composeOps[3]);
-        /* Pop all the current COMPOSE args off the stack. */
-        for (i = popCnt; i < composeCnt; i++)
-            composeOps[i - popCnt] = composeOps[i];
-        h->cube[h->cubeStackDepth].composeOpCnt -= popCnt;
-        return t2cSuccess;
-    }
-
-    while (i < nAxes) {
-        NDV[i] = (float)((100 + (long)composeOps[3 + i]) / 200.0);
-        i++;
-    }
-
-    /* Compute Weight Vector */
-    for (i = 0; i < nMasters; i++) {
-        h->cube[h->cubeStackDepth].WV[i] = 1;
-        for (j = 0; j < nAxes; j++)
-            h->cube[h->cubeStackDepth].WV[i] *= (i & 1 << j) ? NDV[j] : 1 - NDV[j];
-    }
-    /* Pop all the current COMPOSE args off the stack. */
-    for (i = popCnt; i < composeCnt; i++)
-        composeOps[i - popCnt] = composeOps[i];
-    h->cube[h->cubeStackDepth].composeOpCnt -= popCnt;
-
-    return t2cSuccess;
-}
-
-/* Execute "blend" op. Return 0 on success else error code. */
-static int do_blend_cube(t2cCtx h, int nBlends) {
-    int i;
-    int nElements = nBlends * h->cube[h->cubeStackDepth].nMasters;
-    int iBase = h->stack.cnt - nElements;
-    int k = iBase + nBlends;
-
-    if (h->cube[h->cubeStackDepth].nMasters <= 1)
-        return t2cErrInvalidWV;
-    CHKUFLOW(h, nElements);
-
-    if (h->flags & FLATTEN_CUBE) {
-        for (i = 0; i < nBlends; i++) {
-            int j;
-            double x = INDEX(iBase + i);
-            for (j = 1; j < h->cube[h->cubeStackDepth].nMasters; j++)
-                x += INDEX(k++) * h->cube[h->cubeStackDepth].WV[j];
-            INDEX(iBase + i) = (float)x;
-        }
-    } else {
-        float blendVals[kMaxCubeMasters * kMaxBlendOps];
-        for (i = 0; i < nElements; i++) {
-            blendVals[i] = INDEX(iBase + i);
-        }
-        callback_blend_cube(h, nBlends, nElements, blendVals);
-    }
-
-    h->stack.cnt = iBase + nBlends;
-
-    return 0;
 }
 
 /* Support undocumented blend operator. Retained for multiple master font
@@ -1286,182 +1020,14 @@ static int t2Decode(t2cCtx h, long offset) {
             case tx_reserved0:
             case t2_reserved9:
             case t2_reserved13:
+            case tx_reserved17:
                 return t2cErrInvalidOp;
             case t2_vsindex:
                 CHKUFLOW(h, 1);
                 h->glyph->info->blendInfo.vsindex = (unsigned short)POP();
                 setNumMasters(h);
                 break;
-            case tx_callgrel: {
-                long saveoff = (long)(h->src.offset - (end - next));
-                long saveEndOff = h->src.endOffset;
-                long num = unbiasLE((long)POP(), h->aux->gsubrs.cnt);
-                if (num == -1)
-                    return t2cErrCallgsubr;
-                if ((num + 1) < h->aux->gsubrs.cnt)
-                    h->src.endOffset = h->aux->gsubrs.offset[num + 1];
-                else
-                    h->src.endOffset = h->aux->gsubrsEnd;
-
-                result = t2Decode(h, h->aux->gsubrs.offset[num]);
-                h->src.endOffset = saveEndOff;
-                if (result || h->flags & SEEN_ENDCHAR)
-                    return result;
-                else if (srcSeek(h, saveoff))
-                    return t2cErrSrcStream;
-                next = refill(h, &end);
-                if (next == NULL)
-                    return t2cErrSrcStream;
-            }
-                continue;
-
-            case tx_compose:
-
-                CHKUFLOW(h, 4);
-                /* If there is a transform left over from a previous path op, clear it. */
-                if (h->flags & USE_MATRIX) {
-                    h->flags &= ~USE_MATRIX;
-                }
-
-                if ((h->flags & PEND_MASK) && (callbacDfltkWidth(h))) /* we ony need to do callbackWidth is this is the initial hint */
-                    return t2cSuccess;
-
-                clearHintStack(h);
-
-                /* If hstm/vstem have been called but no mask operators, we
-                   need to report them now, as any new hint ops we meet in
-                   the library elements will have to be treated as hint
-                   substitution blocks, so these will othewise get thrown
-                   away. */
-
-                /* The op stack at this point looks like:
-
-                       library element num
-                       dx
-                       dy
-                       design vector val 1-n, where n is a max of 5
-                       .. repeated.
-
-                 However, we don't know how many masters there are. I just call
-                 the LE routine, which will pop the stack items which it needs.
-                 When it returns, if there are any items on the stack, we
-                 assume that the items are for the next LE, and we call it. I
-                 still need to do this even if I am not flattening the Cube LE,
-                 as I can can't call the compose glyph call back until I know
-                 how many design vectors there are, which I don't know until I
-                 see the setwv<n> operator. As a result, I call the compose
-                 glyph callback from within the setwv routine. */
-
-                /* Compose operators must follow all regular charstring
-                   operators, but do not inherit any hints from the parent
-                   charstring. This means that any hints seen in the library
-                   elements must be new hint blocks. */
-
-                h->flags &= ~PEND_MASK; /* any hints seen in the library element need to be treated as a hint-sub.*/
-
-                if (h->stack.cnt < 4)
-                    return t2cErrStackUnderflow;
-
-                h->cubeStackDepth++;
-                /* copy compose ops to h->cubeOpArray */
-                h->cube[h->cubeStackDepth].composeOpCnt = h->stack.cnt;
-                while (h->stack.cnt-- > 0)
-                    h->cube[h->cubeStackDepth].composeOpArray[h->stack.cnt] = h->stack.array[h->stack.cnt];
-                h->stack.cnt = 0;
-                while (h->cube[h->cubeStackDepth].composeOpCnt >= 4) {
-                    long saveoff = (long)(h->src.offset - (end - next));
-                    long saveEndOff = h->src.endOffset;
-                    float *composeOpArray = h->cube[h->cubeStackDepth].composeOpArray;
-                    long int leIndex = (long)composeOpArray[0];
-                    long num = unbiasLE(leIndex, h->aux->gsubrs.cnt);
-                    h->cube[h->cubeStackDepth].leIndex = leIndex;
-                    if ((num == -1) || (h->aux->gsubrs.cnt == 0)) {
-                        /* Maybe this is a font with the Cube compose ops, but
-                           without the subrs. We get this when converting a svg
-                           font to a cff font. In this case, Assume that each
-                           compose op calls just one LE. */
-                        if ((!(h->flags & FLATTEN_CUBE)) && (h->aux->subrs.cnt <= 5)) {
-                            int nAxes = h->cube[h->cubeStackDepth].composeOpCnt - 3;
-
-                            float dx;
-                            float dy;
-                            if (h->flags & CUBE_RND) {
-                                dx = (float)4 * (long)composeOpArray[1];
-                                dy = (float)4 * (long)composeOpArray[2];
-                            } else {
-                                dx = (float)composeOpArray[1];
-                                dy = (float)composeOpArray[2];
-                            }
-                            callback_compose(h, leIndex, dx, dy, nAxes, &composeOpArray[3]);
-                            result = 0;
-                            h->stack.cnt = 0;
-                            h->cube[h->cubeStackDepth].composeOpCnt = 0;
-                        } else
-                            return t2cErrCallgsubr;
-                    } else { /* we have the LE subr we need */
-                        if ((num + 1) < h->aux->gsubrs.cnt)
-                            h->src.endOffset = h->aux->gsubrs.offset[num + 1];
-                        else
-                            h->src.endOffset = h->aux->gsubrsEnd;
-
-                        if (h->flags & FLATTEN_CUBE) {
-                            h->flags |= START_COMPOSE;
-                            h->flags |= FLATTEN_COMPOSE;
-                        }
-                        h->flags |= SEEN_BLEND;  // Apply rounding when updating the final position after a drawing op
-                        result = t2Decode(h, h->aux->gsubrs.offset[num]);
-                        if (result)
-                            return result;
-                        h->flags &= ~SEEN_BLEND;
-                        h->src.endOffset = saveEndOff;
-                        if (h->flags & FLATTEN_CUBE) {
-                            h->flags &= ~START_COMPOSE;
-                            h->flags &= ~FLATTEN_COMPOSE;
-                        }
-                        h->x = h->cube[h->cubeStackDepth].start_x; /* these get set in do_set_weight_vector_cube */
-                        h->y = h->cube[h->cubeStackDepth].start_y;
-                    }
-
-                    /* Clear the path-specific transform matrix, if any. */
-                    if (h->flags & USE_MATRIX) {
-                        /* if START_PATH_MATRIX is not set, then this either global, or left over from a previous path.  */
-                        if (h->flags & USE_GLOBAL_MATRIX) {
-                            /* restore the global matrix values */
-                            for (i = 0; i < 6; i++) {
-                                h->transformMatrix[i] = h->aux->matrix[i];
-                            }
-                        } else {
-                            /* If USE_GLOBAL_MATRIX is not set, then the   USE_MATRIX is left over from the previous path. Clear it. */
-                            h->flags &= ~USE_MATRIX;
-                            h->transformMatrix[0] = h->transformMatrix[3] = 1.0;
-                            h->transformMatrix[1] = h->transformMatrix[2] = h->transformMatrix[4] = h->transformMatrix[5] = 1.0;
-                        }
-                    }
-
-                    if (result) /* ignore endChar flag, if there is one in the LE. */
-                    {
-                        h->cubeStackDepth--;
-                        return result;
-                    } else if (srcSeek(h, saveoff)) {
-                        h->cubeStackDepth--;
-                        return t2cErrSrcStream;
-                    }
-                    next = refill(h, &end);
-                    if (next == NULL) {
-                        h->cubeStackDepth--;
-                        return t2cErrSrcStream;
-                    }
-                }
-                h->cubeStackDepth--;
-
-                if (h->flags & SEEN_ENDCHAR)
-                    return t2cSuccess;
-                break;
             case tx_hstem:
-                if ((h->flags & IS_CUBE) && (h->cubeStackDepth >= 0)) {
-                    callbackCubeStem(h, 0); /* calls stem call back immediately, instead of waiting for endchar. mask ops not supported.*/
-                    break;
-                }
             /* if not in a library element, falls through to t2_hstemhm */
             case t2_hstemhm:
                 if (callbackWidth(h, 1))
@@ -1470,10 +1036,6 @@ static int t2Decode(t2cCtx h, long offset) {
                     return t2cErrStemOverflow;
                 break;
             case tx_vstem:
-                if ((h->flags & IS_CUBE) && (h->cubeStackDepth >= 0)) {
-                    callbackCubeStem(h, ABF_VERT_STEM); /* calls stem call back immediately, instead of waiting for endchar. mask ops not supported.r*/
-                    break;
-                }
             /* if not in a library element, falls through to t2_vstemhm */
             case t2_vstemhm:
                 if (callbackWidth(h, 1))
@@ -1853,120 +1415,6 @@ static int t2Decode(t2cCtx h, long offset) {
                         case tx_reservedESC32:
                         case t2_reservedESC33:
                             break;
-                        case tx_BLEND1:
-                            result = do_blend_cube(h, 1);
-                            if (result)
-                                return result;
-                            continue; /* not break, since we don;t want ot clear the stack */
-                        case tx_BLEND2:
-                            result = do_blend_cube(h, 2);
-                            if (result)
-                                return result;
-                            continue; /* not break, since we don;t want ot clear the stack */
-                        case tx_BLEND3:
-                            result = do_blend_cube(h, 3);
-                            if (result)
-                                return result;
-                            continue; /* not break, since we don;t want ot clear the stack */
-                        case tx_BLEND4:
-                            result = do_blend_cube(h, 4);
-                            if (result)
-                                return result;
-                            continue; /* not break, since we don;t want ot clear the stack */
-                        case tx_BLEND6:
-                            result = do_blend_cube(h, 6);
-                            if (result)
-                                return result;
-                            continue; /* not break, since we don;t want ot clear the stack */
-                        case tx_SETWV1: {
-                            int numAxes = 1;
-                            result = do_set_weight_vector_cube(h, numAxes);
-                            if (result || !(h->flags & FLATTEN_CUBE))
-                                return result;
-                        } break;
-                        case tx_SETWV2: {
-                            int numAxes = 2;
-                            result = do_set_weight_vector_cube(h, numAxes);
-                            if (result || !(h->flags & FLATTEN_CUBE))
-                                return result;
-                        } break;
-                        case tx_SETWV3: {
-                            int numAxes = 3;
-                            result = do_set_weight_vector_cube(h, numAxes);
-                            if (result || !(h->flags & FLATTEN_CUBE))
-                                return result;
-                        } break;
-                        case tx_SETWV4: {
-                            int numAxes = 4;
-                            result = do_set_weight_vector_cube(h, numAxes);
-                            if (result || !(h->flags & FLATTEN_CUBE))
-                                return result;
-                        } break;
-                        case tx_SETWV5: {
-                            int numAxes = 5;
-                            result = do_set_weight_vector_cube(h, numAxes);
-                            if (result || !(h->flags & FLATTEN_CUBE))
-                                return result;
-                        } break;
-
-                        case tx_SETWVN: {
-                            int numAxes = (int)POP();
-                            result = do_set_weight_vector_cube(h, numAxes);
-                            if (result || !(h->flags & FLATTEN_CUBE))
-                                return result;
-                        } break;
-
-                        case tx_transform:
-                            /* This set a transform matrix to be applied to all
-                               path data until it is cleared by seeing another
-                               t1_transform, or a move-to or tx_compose which
-                               follows another a move-to or tx_compose. */
-                            {
-                                float rotate;
-                                float radians;
-                                float scaleX;
-                                float scaleY;
-                                float skewX;
-                                float skewY;
-                                float sinVal;
-                                float cosVal;
-
-                                CHKUFLOW(h, 5);
-                                // rotate is ezpressed in degrees. All are expressed in val*100 or *1000, to avoid using "div" operator in charstring.
-                                rotate = (float)(INDEX(0) / 100.0);
-                                radians = (float)(M_PI * rotate / 180.0);
-                                scaleX = (float)(INDEX(1) / 1000.0);
-                                scaleY = (float)(INDEX(2) / 1000.0);
-                                skewX = (float)(INDEX(3) / 1000.0);
-                                skewY = (float)(INDEX(4) / 1000.0);
-
-                                if (scaleX == 0)
-                                    scaleX = 1.0;
-                                if (scaleY == 0)
-                                    scaleY = 1.0;
-
-                                if (h->flags & FLATTEN_CUBE) {
-                                    h->flags |= START_PATH_MATRIX;  // flag that we have added a path specific transform.*/
-
-                                    sinVal = (float)sin(radians);
-                                    cosVal = (float)cos(radians);
-
-                                    h->transformMatrix[0] = scaleX * cosVal - skewX * sinVal;
-                                    h->transformMatrix[1] = scaleX * sinVal + skewX * cosVal;
-                                    h->transformMatrix[2] = skewY * cosVal - scaleY * sinVal;
-                                    h->transformMatrix[3] = skewY * sinVal + scaleY * cosVal;
-
-                                    h->transformMatrix[4] = 0;
-                                    h->transformMatrix[5] = 0;
-                                    // The offsets (matrix[4] and matrix[5]) will be set at the first move-to, so that the rotation is around the
-                                    // first start point.
-                                } else {
-                                    callback_transform(h, rotate, scaleX, scaleY, skewX, skewY);
-                                }
-
-                                break;
-                            }
-
                         default:
                             return t2cErrInvalidOp;
                     } /* End: switch (escop) */
@@ -1975,9 +1423,6 @@ static int t2Decode(t2cCtx h, long offset) {
 
             case tx_endchar:
             do_endchar:
-                if (h->cubeStackDepth > -1) /* Ignore if we are in a CUBE library element.      */
-                                            /* Early test CFF fonts erroneously had enchar ops. */
-                    return t2cSuccess;
                 if (callbackWidth(h, 1))
                     return t2cSuccess;
                 if ((h->subrDepth > 0) && (h->flags & IS_CFF2))
@@ -2317,208 +1762,6 @@ static int t2Decode(t2cCtx h, long offset) {
 #endif
 }
 
-/* Decode Type 2 charstring. Return 0 to continue else error code.
-Note: I do not try and convert the T2 only ops to ops common to T2 and T1 becuase the 
-Cube library elements can only have the common ops.
-*/
-static int t2DecodeSubr(t2cCtx h, long offset) {
-    /* This would better named "passThroughSubr", as it makes no attempt to
-       convert between t2 and T2 and abs font ops. This is just fine for the
-       purpose of Cube fonts, as the regular global subroutines from
-       subroutinization get thrown away, and only the Cube library elements and
-       the gsubs called by tme are kept. These can have oly the ops that are
-       common to T2 and T1 - no hint mask operators, no vvcurveto, etc. */
-    unsigned char *end;
-    unsigned char *next;
-
-    /* Fetch charstring */
-    if (srcSeek(h, offset))
-        return t2cErrSrcStream;
-    next = refill(h, &end);
-    if (next == NULL)
-        return t2cErrSrcStream;
-
-    for (;;) {
-        int byte0;
-        CHKSUBRBYTE(h);
-        byte0 = *next++;
-        switch (byte0) {
-            case tx_reserved0:
-            case t2_reserved9:
-            case t2_reserved13:
-                return t2cErrInvalidOp;
-            case t2_vsindex:
-            case t2_hintmask:
-            case t2_cntrmask: /* can't process these in the context of subrs - no way to know how long the mask byte is. Skip it. */
-                return 0;
-            case t2_blend:
-            case tx_callgrel:
-            case tx_compose:
-            case tx_hstem:
-            case t2_hstemhm:
-            case tx_vstem:
-            case t2_vstemhm:
-            case tx_rmoveto:
-            case tx_hmoveto:
-            case tx_vmoveto:
-            case tx_rlineto:
-            case tx_hlineto:
-            case tx_vlineto:
-            case tx_rrcurveto:
-            case tx_callsubr:
-                callbackOp(h, byte0);
-                break;
-            case tx_return:
-            do_subr_return:
-                if (h->stack.cnt > 0)
-                    callbackOp(h, tx_return); /* allow numbers at end of subroutine */
-                return 0;
-            case tx_escape:
-                /* Process escaped operator */
-                {
-                    int escop;
-                    CHKSUBRBYTE(h);
-                    escop = tx_ESC(*next++);
-                    switch (escop) {
-                        case tx_dotsection:
-                        case tx_and:
-                        case tx_or:
-                        case tx_not:
-                        case tx_abs:
-                        case tx_add:
-                        case tx_sub:
-                        case tx_div:
-                        case tx_neg:
-                        case tx_eq:
-                        case tx_drop:
-                        case tx_put:
-                        case tx_get:
-                        case tx_ifelse:
-                        case tx_random:
-                        case tx_mul:
-                        case tx_sqrt:
-                        case tx_dup:
-                        case tx_exch:
-                        case tx_index:
-                        case tx_roll:
-                        case t2_hflex:
-                        case t2_flex:
-                        case t2_hflex1:
-                        case t2_flex1:
-                        case t2_cntron:
-                        case t2_reservedESC1:
-                        case t2_reservedESC2:
-                        case t2_reservedESC6:
-                        case t2_reservedESC7:
-                        case t2_reservedESC8:
-                        case t2_reservedESC13:
-                        case t2_reservedESC16:
-                        case t2_reservedESC17:
-                        case tx_reservedESC19:
-                        case tx_reservedESC25:
-                        case tx_reservedESC31:
-                        case tx_reservedESC32:
-                        case t2_reservedESC33:
-                        case tx_BLEND1:
-                        case tx_BLEND2:
-                        case tx_BLEND3:
-                        case tx_BLEND4:
-                        case tx_BLEND6:
-                            callbackOp(h, escop);
-                            break;
-                        case tx_SETWV1:
-                        case tx_SETWV2:
-                        case tx_SETWV3:
-                        case tx_SETWV4:
-                        case tx_SETWV5:
-                        case tx_SETWVN:
-                            callbackOp(h, escop);
-                            break;
-                        default:
-                            return t2cErrInvalidOp;
-                    } /* End: switch (escop) */
-                }     /* End: case tx_escape: */
-                break;
-            case tx_endchar:
-                return 0;
-            case t2_rcurveline:
-            case t2_rlinecurve:
-            case t2_vvcurveto:
-            case t2_hhcurveto:
-            case t2_callgsubr:
-            case tx_vhcurveto:
-            case tx_hvcurveto:
-                callbackOp(h, byte0);
-                break;
-            case t2_shortint:
-                /* 3 byte number */
-                CHKOFLOW(h, 1);
-                {
-                    short value;
-                    CHKSUBRBYTE(h);
-                    value = *next++;
-                    CHKSUBRBYTE(h);
-                    value = value << 8 | *next++;
-#if SHRT_MAX > 32767
-                    /* short greater that 2 bytes; handle negative range */
-                    if (value > 32767)
-                        value -= 65536;
-#endif
-                    PUSH(value);
-                }
-                continue;
-            default:
-                /* 1 byte number */
-                CHKOFLOW(h, 1);
-                PUSH(byte0 - 139);
-                continue;
-            case 247:
-            case 248:
-            case 249:
-            case 250:
-                /* Positive 2 byte number */
-                CHKOFLOW(h, 1);
-                CHKSUBRBYTE(h);
-                PUSH(108 + 256 * (byte0 - 247) + *next);
-                next++;
-                continue;
-            case 251:
-            case 252:
-            case 253:
-            case 254:
-                /* Negative 2 byte number */
-                CHKOFLOW(h, 1);
-                CHKSUBRBYTE(h);
-                PUSH(-108 - 256 * (byte0 - 251) - *next);
-                next++;
-                continue;
-            case 255:
-                /* 5 byte number */
-                CHKOFLOW(h, 1);
-                {
-                    long value;
-                    CHKSUBRBYTE(h);
-                    value = *next++;
-                    CHKSUBRBYTE(h);
-                    value = value << 8 | *next++;
-                    CHKSUBRBYTE(h);
-                    value = value << 8 | *next++;
-                    CHKSUBRBYTE(h);
-                    value = value << 8 | *next++;
-#if LONG_MAX > 2147483647
-                    /* long greater that 4 bytes; handle negative range */
-                    if (value > 2417483647)
-                        value -= 4294967296;
-#endif
-                    PUSH(value / 65536.0);
-                }
-                continue;
-        } /* End: switch (byte0) */
-        clearBlendStack(h);
-        h->stack.cnt = 0; /* Clear stack */
-    }                     /* End: while (cstr < end) */
-}
-
 /* Parse Type 2 charstring. */
 int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, cff2GlyphCallbacks *cff2, abfGlyphCallbacks *glyph, ctlMemoryCallbacks *mem) {
     struct _t2cCtx h;
@@ -2531,7 +1774,6 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
     h.stack.numRegions = 0;
     h.x = 0;
     h.y = 0;
-    h.cubeStackDepth = -1;
     h.subrDepth = 0;
     h.stems.cnt = 0;
     h.mask.state = 0;
@@ -2552,7 +1794,7 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
     if (aux->flags & T2C_IS_CFF2)
         h.maxOpStack = glyph->info->blendInfo.maxstack;
     else
-        h.maxOpStack = (aux->flags & T2C_IS_CUBE) ? TX_MAX_OP_STACK_CUBE : T2_MAX_OP_STACK;
+        h.maxOpStack = T2_MAX_OP_STACK;
 
     if (aux->flags & T2C_USE_MATRIX) {
         int i;
@@ -2569,26 +1811,17 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
             }
         }
     }
-    if (aux->flags & T2C_FLATTEN_CUBE)
-        h.flags |= FLATTEN_CUBE;
     if (aux->flags & T2C_FLATTEN_BLEND) {
         h.flags |= FLATTEN_BLEND;
         h.flags |= SEEN_BLEND;
     }
-    if (aux->flags & T2C_IS_CUBE)
-        h.flags |= IS_CUBE;
-    if (aux->flags & T2C_CUBE_RND)
-        h.flags |= CUBE_RND;
     if (aux->flags & T2C_IS_CFF2)
         h.flags |= IS_CFF2;
     h.src.endOffset = endOffset;
 
     DURING_EX(h.err.env)
 
-    if (aux->flags & T2C_CUBE_GSUBR)
-        retVal = t2DecodeSubr(&h, offset);
-    else
-        retVal = t2Decode(&h, offset);
+    retVal = t2Decode(&h, offset);
 
     HANDLER
     retVal = Exception.Code;

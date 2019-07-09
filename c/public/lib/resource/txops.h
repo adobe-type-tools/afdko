@@ -23,24 +23,24 @@
 /* ----------------------- One Byte Operators (0-31) ----------------------- */
 
 /* Type 2 */
-#define tx_reserved0         0  /* Reserved (used internally by coretype) */
+#define tx_reserved0         0  /* used internally by coretype */
 #define tx_hstem             1
-#define tx_compose           2
+#define tx_reserved2         2  /* was Cube compose */
 #define tx_vstem             3
 #define tx_vmoveto           4
 #define tx_rlineto           5
 #define tx_hlineto           6
 #define tx_vlineto           7
 #define tx_rrcurveto         8
-#define t2_reserved9         9  /* Reserved (Subroutinizer cstr separator) */
+#define t2_reserved9         9  /* Subroutinizer cstr separator */
 #define tx_callsubr         10
 #define tx_return           11
 #define tx_escape           12
-#define t2_reserved13       13  /* Reserved */
+#define t2_reserved13       13
 #define tx_endchar          14
 #define t2_vsindex          15
 #define t2_blend            16
-#define tx_callgrel         17
+#define tx_reserved17       17  /* was Cube callgrel */
 #define t2_hstemhm          18
 #define t2_hintmask         19
 #define t2_cntrmask         20
@@ -60,11 +60,10 @@
 #define t1_closepath        9
 #define t1_hsbw             13
 #define t1_moveto           15  /* Not in Black Book, used in a few fonts */
-
 #define t1_reserved16       16
-/* #define t1_reserved17    17 */ /* Was t1_curveto, for CUBE ia tx_callgrel */
+#define t1_reserved17       17  /* was t1 curveto or Cube callgrel */
 #define t1_reserved18       18
-#define t1_reserved19       19
+#define t1_reserved19       19  /* was Cube setwv */
 #define t1_reserved20       20
 #define t1_reserved23       23
 #define t1_reserved24       24
@@ -83,58 +82,61 @@
 
 /* Type 2 */
 #define tx_dotsection       tx_ESC(0)   /* Deprecated */
-#define t2_reservedESC1     tx_ESC(1)   /* Reserved */
-#define t2_reservedESC2     tx_ESC(2)   /* Reserved */
+#define t2_reservedESC1     tx_ESC(1)
+#define t2_reservedESC2     tx_ESC(2)
 #define tx_and              tx_ESC(3)
 #define tx_or               tx_ESC(4)
 #define tx_not              tx_ESC(5)
-#define t2_reservedESC6     tx_ESC(6)   /* Reserved */
-#define t2_reservedESC7     tx_ESC(7)   /* Reserved */
-#define t2_reservedESC8     tx_ESC(8)   /* Reserved */
+#define t2_reservedESC6     tx_ESC(6)
+#define t2_reservedESC7     tx_ESC(7)
+#define t2_reservedESC8     tx_ESC(8)
 #define tx_abs              tx_ESC(9)
 #define tx_add              tx_ESC(10)
 #define tx_sub              tx_ESC(11)
 #define tx_div              tx_ESC(12)
-#define t2_reservedESC13    tx_ESC(13)  /* Reserved */
+#define t2_reservedESC13    tx_ESC(13)
 #define tx_neg              tx_ESC(14)
 #define tx_eq               tx_ESC(15)
-#define t2_reservedESC16    tx_ESC(16)  /* Reserved */
-#define t2_reservedESC17    tx_ESC(17)  /* Reserved */
+#define t2_reservedESC16    tx_ESC(16)
+#define t2_reservedESC17    tx_ESC(17)
 #define tx_drop             tx_ESC(18)
-#define tx_reservedESC19    tx_ESC(19)  /* Reserved */
+#define tx_reservedESC19    tx_ESC(19)
 #define tx_put              tx_ESC(20)
 #define tx_get              tx_ESC(21)
 #define tx_ifelse           tx_ESC(22)
 #define tx_random           tx_ESC(23)
 #define tx_mul              tx_ESC(24)
-#define tx_reservedESC25    tx_ESC(25)  /* Reserved */
+#define tx_reservedESC25    tx_ESC(25)
 #define tx_sqrt             tx_ESC(26)
 #define tx_dup              tx_ESC(27)
 #define tx_exch             tx_ESC(28)
 #define tx_index            tx_ESC(29)
 #define tx_roll             tx_ESC(30)
-#define tx_reservedESC31    tx_ESC(31)  /* Reserved */
-#define tx_reservedESC32    tx_ESC(32)  /* Reserved */
-#define t2_reservedESC33    tx_ESC(33)  /* Reserved (used internally by */
-                                        /* coretype for cntroff)        */
+#define tx_reservedESC31    tx_ESC(31)  /* was Cube rotate */
+#define tx_reservedESC32    tx_ESC(32)  /* was Cube attach */
+#define t2_reservedESC33    tx_ESC(33)  /* used internally by   */
+                                        /* coretype for cntroff */
 #define t2_hflex            tx_ESC(34)
 #define t2_flex             tx_ESC(35)
 #define t2_hflex1           tx_ESC(36)
 #define t2_flex1            tx_ESC(37)
-#define t2_cntron           tx_ESC(38)  /* Undocumented */
+#define t2_cntron           tx_ESC(38)  /* Deprecated/undocumented */
 /*                                 39-255 Reserved */
-#define tx_BLEND1           tx_ESC(39)
-#define tx_BLEND2           tx_ESC(40)
-#define tx_BLEND3           tx_ESC(41)
-#define tx_BLEND4           tx_ESC(42)
-#define tx_BLEND6           tx_ESC(43)
-#define tx_SETWV1           tx_ESC(44)
-#define tx_SETWV2           tx_ESC(45)
-#define tx_SETWV3           tx_ESC(46)
-#define tx_SETWV4           tx_ESC(47)
-#define tx_SETWV5           tx_ESC(48)
-#define tx_SETWVN           tx_ESC(49) /* Used only in closed environments, such as font development. For library element blending. */
-#define tx_transform        tx_ESC(50) /* Used only in closed environments, such as font development. For scaling paths. */
+
+/* The following were for use with Cube fonts: */
+/*         blend1              ESC 39 */
+/*         blend2              ESC 40 */
+/*         blend3              ESC 41 */
+/*         blend4              ESC 42 */
+/*         blend6              ESC 43 */
+/*         setwv1              ESC 44 */
+/*         setwv2              ESC 45 */
+/*         setwv3              ESC 46 */
+/*         setwv4              ESC 47 */
+/*         setwv5              ESC 48 */
+/*         setwvN              ESC 49 */
+/*         transform           ESC 50 */
+
 
 /* Type 1 (where different from above) */
 #define t1_vstem3           tx_ESC(1)
@@ -188,13 +190,6 @@
 #define TXOPSIZE(op) (((op)&0xff00)?2:1)
 
 /* Interpreter limits/definitions */
-#define TX_MAX_OP_STACK_CUBE     576  /* Max operand stack depth */
-#define TX_MAX_CALL_STACK_CUBE   15  /* Max callsubr stack depth */
-#define CUBE_LE_STACKDEPTH 6
-#define kMaxCubeAxes 9
-#define kMaxCubeMasters (1 << kMaxCubeAxes)
-#define kMaxBlendOps 6
-
 #define TX_MAX_SUBR_DEPTH      10 /* Max recursion level allowed */
 #define T2_MAX_OP_STACK        48 /* Max operand stack depth */
 #define CFF2_DEFAULT_OP_STACK 193 /* Max operand stack depth */

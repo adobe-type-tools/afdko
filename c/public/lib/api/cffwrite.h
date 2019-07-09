@@ -77,15 +77,10 @@ enum {
     CFW_CHECK_IF_GLYPHS_DIFFER = 1 << 7, /* When adding a charstring, check if */
                                          /* it is already present and same or different. */
     CFW_ENABLE_CMP_TEST =        1 << 8, /* Enable testing by disabling optimizations */
-    CFW_IS_CUBE =                1 << 9,
-    /* When bit 9 is set, the data contains cube font operators. Stack depth
-       and operator defs are different. Cube subr's are added at the end of
-       gsubr's for CID fonts, subrs for non-CID fonts. */
     CFW_FORCE_STD_ENCODING =     1 << 10,
     /* When bit 10 is set, TopDict encoding vector is set to StandardEncoding,
        no matter what is in the font. This is useful for working with font
        sources that will be used for OpenType/CFF fonts */
-    CFW_CUBE_RND =               1 << 11,
     CFW_NO_OPTIMIZATION =        1 << 12,
     CFW_WRITE_CFF2 =             1 << 13
 };

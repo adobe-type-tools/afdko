@@ -2823,61 +2823,6 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
     return cfrSuccess;
 }
 
-/* Read GSubr as if it were a glyph. */
-static void readGSubr(cfrCtx h, abfGlyphCallbacks *glyph_cb, Offset gsubrStartOffset, Offset gsubrEndOffset, abfGlyphInfo *glyph_info, t2cAuxData *glyph_aux) {
-    int result;
-
-    /* Copy template info from .notdef glyph. gname or cid is not used when writing GSUBr's,
-     o we don't need to change this. */
-    abfGlyphInfo info = *glyph_info;
-    t2cAuxData aux = *glyph_aux;
-
-    info.sup.begin = gsubrStartOffset;
-    info.sup.end = gsubrEndOffset;
-    info.flags |= ABF_GLYPH_CUBE_GSUBR;
-    aux.flags |= T2C_CUBE_GSUBR;
-    info.flags &= ~ABF_GLYPH_SEEN;
-    info.blendInfo.vsindex = aux.default_vsIndex;
-
-    /* Begin glyph and mark it as seen */
-    result = glyph_cb->beg(glyph_cb, &info);
-
-    /* Check result */
-    switch (result) {
-        case ABF_CONT_RET:
-            aux.flags &= ~T2C_WIDTH_ONLY;
-            break;
-        case ABF_WIDTH_RET:
-            aux.flags |= T2C_WIDTH_ONLY;
-            break;
-        case ABF_SKIP_RET:
-            return;
-        case ABF_QUIT_RET:
-            fatal(h, cfrErrCstrQuit);
-        case ABF_FAIL_RET:
-            fatal(h, cfrErrCstrFail);
-    }
-
-    if (h->flags & CFR_IS_CUBE)
-        aux.flags |= T2C_IS_CUBE;
-
-    if (h->flags & CFR_CUBE_RND)
-        aux.flags |= T2C_CUBE_RND;
-
-    /* Parse charstring */
-    result = t2cParse(info.sup.begin, info.sup.end, &aux, 0, NULL, glyph_cb, &h->cb.mem);
-    if (result) {
-        if (info.flags & ABF_GLYPH_CID)
-            message(h, "(t2c) %s <cid-%hu>", t2cErrStr(result), info.cid);
-        else
-            message(h, "(t2c) %s <%s>", t2cErrStr(result), info.gname.ptr);
-        fatal(h, cfrErrCstrParse);
-    }
-
-    /* End glyph */
-    glyph_cb->end(glyph_cb);
-}
-
 /* Read charstring. */
 static void readGlyph(cfrCtx h,
                       unsigned short gid, abfGlyphCallbacks *glyph_cb) {
@@ -2908,12 +2853,6 @@ static void readGlyph(cfrCtx h,
             fatal(h, cfrErrCstrFail);
     }
 
-    if (h->flags & CFR_IS_CUBE)
-        aux->flags |= T2C_IS_CUBE;
-    if (h->flags & CFR_FLATTEN_CUBE)
-        aux->flags |= T2C_FLATTEN_CUBE;
-    if (h->flags & CFR_CUBE_RND)
-        aux->flags |= T2C_CUBE_RND;
     if (h->flags & CFR_IS_CFF2) {
         aux->flags |= T2C_IS_CFF2;
         cff2_cb = &h->cb.cff2;
@@ -2935,22 +2874,6 @@ static void readGlyph(cfrCtx h,
 
     /* End glyph */
     glyph_cb->end(glyph_cb);
-
-    /* if it is a CUBE font, play the GSUBR's through to the client */
-    if ((flags & CFR_IS_CUBE) && (glyph_cb->cubeSetwv != NULL) && !(flags & CFR_FLATTEN_CUBE) && !(flags & CFR_SEEN_GLYPH) && (h->gsubrs.cnt > 10)) {
-        int i;
-        Offset gsubrStartOffset = 0;
-        Offset gsubrEndOffset;
-        h->flags |= CFR_SEEN_GLYPH;
-        for (i = 0; i < h->gsubrs.cnt; i++) {
-            gsubrStartOffset = aux->gsubrs.offset[i];
-            if ((i + 1) < aux->gsubrs.cnt)
-                gsubrEndOffset = aux->gsubrs.offset[i + 1];
-            else
-                gsubrEndOffset = aux->gsubrsEnd;
-            readGSubr(h, glyph_cb, gsubrStartOffset, gsubrEndOffset, info, aux);
-        }
-    }
 }
 
 /* Iterate through all glyphs in font. */

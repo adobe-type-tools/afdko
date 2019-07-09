@@ -618,48 +618,6 @@ static void EnsureState(svrCtx h, int flags) {
 }
 /* hints */
 
-static void doOp_trans(svrCtx h, abfGlyphCallbacks *glyph_cb) {
-    /* There can be either 3 or 5 values on the stack. */
-
-    /* Rotation is expressed in degrees */
-    float rotate = (float)INDEX(0);
-    float scaleX = (float)INDEX(1);
-    float scaleY = (float)INDEX(2);
-    float skewX;
-    float skewY;
-
-    switch (h->stack.cnt) {
-        case 3:
-            skewX = 0;
-            skewY = 0;
-            break;
-        case 5:
-            skewX = (float)INDEX(3);
-            skewY = (float)INDEX(4);
-            break;
-        default:
-            fatal(h, svrErrParse, "Rotation matrix needs 3 or 5 ops.");
-    }
-    h->stack.cnt = 0;
-    glyph_cb->cubeTransform(glyph_cb, rotate, scaleX, scaleY, skewX, skewY);
-}
-
-static void doOp_cmp(svrCtx h, abfGlyphCallbacks *glyph_cb) {
-    int le;
-    float x0, y0;
-    int numDV = h->stack.cnt - 3;
-
-    le = (int)INDEX(0);
-    x0 = INDEX(1);
-    y0 = INDEX(2);
-
-    glyph_cb->cubeCompose(glyph_cb, le, x0, y0, numDV, &h->stack.array[3]);
-
-    h->stack.cx = x0;
-    h->stack.cy = y0;
-    h->stack.cnt = 0;
-}
-
 static void doOp_rmt(svrCtx h, abfGlyphCallbacks *glyph_cb) {
     float dy, dx;
     CHKUFLOW(2);
@@ -820,16 +778,6 @@ static void doOperator(svrCtx h, token *opToken, abfGlyphCallbacks *glyph_cb) {
 
     op_cmd = p - op_keys;
     switch (op_cmd) {
-        /* ------------ FontMatrix ------------*/
-        case k_trans: {
-            EnsureState(h, PARSE_PATH);
-            doOp_trans(h, glyph_cb);
-        } break;
-        /* ------------ Compose ------------*/
-        case k_cmp: {
-            EnsureState(h, PARSE_PATH);
-            doOp_cmp(h, glyph_cb);
-        } break;
         /* ------------ Move ------------*/
         case k_rmt: {
             EnsureState(h, PARSE_PATH);
