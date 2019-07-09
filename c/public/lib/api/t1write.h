@@ -197,12 +197,6 @@ enum {
        incrementally downloading name-keyed fonts and when specifying an
        encoding vector. */
 
-    T1W_IS_CUBE = 1 << 14,
-
-    /* When bit 14 is set, the data contains cube font operators. Stack depth
-       and operator defs are different. Cube subr's are added at the end of
-       gsubr's for CID fonts, subrs for non-CID fonts. */
-
     T1W_FORCE_STD_ENCODING = 1 << 15,
 
     /* When bit 15 is set, TopDict encoding vector is set to StandardEncoding,

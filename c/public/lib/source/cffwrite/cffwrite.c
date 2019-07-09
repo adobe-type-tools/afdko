@@ -2121,10 +2121,6 @@ int cfwEndSet(cfwCtx g) {
         cfwCallSubrizer(g);
     }
 
-    if (g->flags & CFW_IS_CUBE) {
-        cfwMergeCubeGSUBR(g);
-    }
-
     fillSet(h); /* all subrs and charstrings must be inplace by the time this is called. */
     writeSet(h);
 

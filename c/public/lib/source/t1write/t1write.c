@@ -128,7 +128,7 @@ struct t1wCtx_ {
     struct               /* Type 1 operand stack */
     {
         int cnt;
-        float array[TX_MAX_OP_STACK_CUBE];
+        float array[T1_MAX_OP_STACK];
     } stack;
     struct /* Total charstring data sizes */
     {
@@ -153,13 +153,6 @@ struct t1wCtx_ {
         t1wSINGCallback sing;
     } cb;
     dnaCtx dna; /* dynarr context */
-    struct
-    {
-        long lowLESubrIndex;        /* the lowest seen LE reference by GSUBR index The entire GSUBR array is played through, and we copy only those from the low LE num on.*/
-        long highLEIndex;           /* the lowest seen LE reference by the biased LE iindex. The entire GSUBR array is played through, and we copy only those from the low LE num on.*/
-        dnaDCL(Offset, subOffsets); /* Charstring data accumulator */
-        dnaDCL(char, cstrs);        /* Charstring data accumulator */
-    } cube_gsubrs;
     struct /* Error handling */
     {
         _Exc_Buf env;
@@ -621,52 +614,6 @@ static void saveStdSubrs(t1wCtx h) {
     saveStdSubr(h, sizeof(subr4), subr4);
 }
 
-/* Save standard subrs to tmp stream. */
-static void saveCubeSubrs(t1wCtx h) {
-    int i;
-    long leIndex = -1; /* index of the first Library Element in the source font gsubrs */
-    long numSourceGSubrs = h->cube_gsubrs.subOffsets.cnt;
-    long leLen;
-    long leOffset;
-
-    if (h->cube_gsubrs.lowLESubrIndex < 0)
-        return; /* aren't any to merge. */
-
-    leIndex = numSourceGSubrs - (108 + h->cube_gsubrs.highLEIndex);
-    if (leIndex > h->cube_gsubrs.lowLESubrIndex)
-        leIndex = h->cube_gsubrs.lowLESubrIndex;
-    h->cube_gsubrs.lowLESubrIndex = leIndex; /* We need the final value in writeSubrs */
-
-    if (leIndex == 0)
-        leOffset = 0;
-    else
-        leOffset = h->cube_gsubrs.subOffsets.array[leIndex - 1];
-    leLen = h->cube_gsubrs.cstrs.cnt - leOffset;
-
-    {
-        /* h->cube_gsubrs.subOffsets.array[leIndex] contains the offset to
-           the byte after the *end* of subr leIndex. If leIndex is 0, then
-           the start offset is 0 else it is the offset for the previous le
-           Index. */
-        long startOffset = leOffset;
-        long endOffset = h->cube_gsubrs.subOffsets.array[leIndex];
-        unsigned char *data = (unsigned char *)&h->cube_gsubrs.cstrs.array[startOffset];
-        size_t length = endOffset - startOffset;
-
-        (void)saveSubr(h, length, data);
-
-        i = leIndex + 1;
-        while (i < numSourceGSubrs) {
-            startOffset = endOffset;
-            endOffset = h->cube_gsubrs.subOffsets.array[i];
-            data = (unsigned char *)&h->cube_gsubrs.cstrs.array[startOffset];
-            length = endOffset - startOffset;
-            (void)saveSubr(h, length, data);
-            i++;
-        }
-    }
-}
-
 /* Write subr at specified index. */
 static void writeSubr(t1wCtx h, int index) {
     writeFmt(h, "dup %d", index);
@@ -677,20 +624,12 @@ static void writeSubr(t1wCtx h, int index) {
 static void writeSubrs(t1wCtx h) {
     if (h->subrs.cnt == 0)
         return;
-    if (h->cube_gsubrs.subOffsets.cnt > 0) {
-        int i;
-        writeFmt(h, "/Subrs %d array ", h->subrs.cnt);
-        for (i = 0; i < h->subrs.cnt; i++) {
-            writeSubr(h, i);
-        }
-    } else {
-        writeLine(h, "/Subrs 5 array");
-        writeSubr(h, 0);
-        writeSubr(h, 1);
-        writeSubr(h, 2);
-        writeSubr(h, 3);
-        writeSubr(h, 4);
-    }
+    writeLine(h, "/Subrs 5 array");
+    writeSubr(h, 0);
+    writeSubr(h, 1);
+    writeSubr(h, 2);
+    writeSubr(h, 3);
+    writeSubr(h, 4);
     writeLine(h, "def");
 }
 
@@ -1199,10 +1138,7 @@ static void writePrivateDict(t1wCtx h, abfPrivateDict *private, long SDBytes) {
     if (cid) {
         writeIntDef(h, "SubrMapOffset", 0);
         writeIntDef(h, "SDBytes", SDBytes);
-        if (h->cube_gsubrs.subOffsets.cnt > 0)
-            writeIntDef(h, "SubrCount", h->subrs.cnt);
-        else
-            writeIntDef(h, "SubrCount", 5);
+        writeIntDef(h, "SubrCount", 5);
         writeLine(h, "end def");
     } else {
         writeSubrs(h);
@@ -1552,12 +1488,7 @@ static long prepStartData(t1wCtx h, long *SDBytes,
     /* Compute subrs size */
     subrSize = MapSize(0, SDBytes, h->subrs.cnt, h->subrs.cnt, h->size.subrs);
 
-    /* If writing Std Subrs, they precede the glyph charstrings.
-       If writing cube subrs, they follow the glyph charstrings. */
-    if (h->cube_gsubrs.subOffsets.cnt > 0) /* if have cube LE subrs */
-        *CIDMapOffset = 0;                 /* glyphs are at start, subrs follow. */
-    else
-        *CIDMapOffset = subrSize; /* glyphs follow subrs - need to skip over subrs to get to glyphs. */
+    *CIDMapOffset = subrSize; /* glyphs follow subrs - need to skip over subrs to get to glyphs. */
 
     if (!(h->arg.flags & T1W_TYPE_HOST)) {
         *GDBytes = 1;
@@ -2031,11 +1962,6 @@ t1wCtx t1wNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     dnaINIT(h->dna, h->stems, 20, 80);
     dnaINIT(h->dna, h->subrs, 5, 100);
 
-    h->cube_gsubrs.highLEIndex = -1000;
-    h->cube_gsubrs.lowLESubrIndex = 1000;
-    dnaINIT(h->dna, h->cube_gsubrs.subOffsets, 214, 10);
-    dnaINIT(h->dna, h->cube_gsubrs.cstrs, 1028, 1028);
-
     /* Open tmp stream */
     h->stm.tmp = h->cb.stm.open(&h->cb.stm, T1W_TMP_STREAM_ID, 0);
     if (h->stm.tmp == NULL)
@@ -2070,8 +1996,6 @@ void t1wFree(t1wCtx h) {
     dnaFREE(h->cntrs);
     dnaFREE(h->stems);
     dnaFREE(h->subrs);
-    dnaFREE(h->cube_gsubrs.subOffsets);
-    dnaFREE(h->cube_gsubrs.cstrs);
     dnaFree(h->dna);
 
     /* Free library context */
@@ -2197,8 +2121,6 @@ static void zeroOutEmptyFontBBox(t1wCtx h) {
 /* Finish reading font. */
 int t1wEndFont(t1wCtx h, abfTopDict *top) {
     int destFileOpened = 0;
-    if (h->cube_gsubrs.subOffsets.cnt > 0)
-        saveCubeSubrs(h);
 
     /* Check for errors when accumulating glyphs */
     if (h->err.code != 0)
@@ -2295,33 +2217,6 @@ char *t1wErrStr(int err_code) {
 #include "t1werr.h"
         };
     return (err_code < 0 || err_code >= (int)ARRAY_LEN(errstrs)) ? "unknown error" : errstrs[err_code];
-}
-
-/* ------------ global subroutines support --------------------------------------------------*/
-/* Check new LE sur to se if it is the lowest one seen */
-static void seenLEIndex(t1wCtx h, long leIndex) {
-    if (leIndex < 0) {
-        /* We are being called when processing a SETWV op in an LE.
-           The subr index is the current number of gsubrs. */
-        if (h->cube_gsubrs.lowLESubrIndex > h->cube_gsubrs.subOffsets.cnt)
-            h->cube_gsubrs.lowLESubrIndex = h->cube_gsubrs.subOffsets.cnt;
-    } else {
-        /* We are being called when processing a callgrel op in an LE. The subr
-           index is the biased such that index decrements from the first, but
-           the last index is -107. We can't resolve that to real subr number
-           until we know the number of subrs. */
-        if (h->cube_gsubrs.highLEIndex < leIndex)
-            h->cube_gsubrs.highLEIndex = leIndex;
-    }
-}
-
-static void addCubeGSUBR(t1wCtx h, char *cstr, long length) {
-    unsigned char *start;
-    Offset *subOffset;
-    subOffset = dnaNEXT(h->cube_gsubrs.subOffsets);
-    start = (unsigned char *)dnaEXTEND(h->cube_gsubrs.cstrs, (long)length);
-    *subOffset = h->cube_gsubrs.cstrs.cnt;
-    memcpy(start, cstr, length);
 }
 
 /* ------------------------------ Glyph Path  ------------------------------ */
@@ -2624,7 +2519,7 @@ static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0) {
 
     if (h->err.code != 0)
         return; /* Pending error */
-    else if (!(cb->info->flags & ABF_GLYPH_CUBE_GSUBR) && (h->path.state < 2)) {
+    else if (h->path.state < 2) {
         /* Call sequence error */
         h->err.code = t1wErrBadCall;
         return;
@@ -2633,7 +2528,7 @@ static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0) {
     if (accomodate(h, 0, 1))
         return;
 
-    if (!(cb->info->flags & ABF_GLYPH_CUBE_GSUBR) && !(h->flags & IN_FLEX) && h->path.state > 2)
+    if (!(h->flags & IN_FLEX) && h->path.state > 2)
         saveOp(h, t1_closepath);
 
     if (h->flags & HINT_PENDING)
@@ -2675,7 +2570,7 @@ static void glyphLine(abfGlyphCallbacks *cb, float x1, float y1) {
 
     if (h->err.code != 0)
         return; /* Pending error */
-    else if (!(cb->info->flags & ABF_GLYPH_CUBE_GSUBR) && (h->path.state != 3)) {
+    else if (h->path.state != 3) {
         /* Call sequence error */
         h->err.code = t1wErrBadCall;
         return;
@@ -2734,7 +2629,7 @@ static void glyphCurve(abfGlyphCallbacks *cb,
 
     if (h->err.code != 0)
         return; /* Pending error */
-    else if (!(cb->info->flags & ABF_GLYPH_CUBE_GSUBR) && (h->path.state != 3)) {
+    else if (h->path.state != 3) {
         /* Call sequence error */
         h->err.code = t1wErrBadCall;
         return;
@@ -2781,7 +2676,7 @@ static void glyphStem(abfGlyphCallbacks *cb,
 
     if (h->err.code != 0)
         return;
-    else if (!(cb->info->flags & ABF_GLYPH_CUBE_GSUBR) && (h->path.state < 2)) {
+    else if (h->path.state < 2) {
         /* Call sequence error */
         h->err.code = t1wErrBadCall;
         return;
@@ -2844,7 +2739,7 @@ static void glyphFlex(abfGlyphCallbacks *cb, float depth,
 
     if (h->err.code != 0)
         return; /* Pending error */
-    else if (!(cb->info->flags & ABF_GLYPH_CUBE_GSUBR) && (h->path.state != 3)) {
+    else if (h->path.state != 3) {
         /* Call sequence error */
         h->err.code = t1wErrBadCall;
         return;
@@ -2904,82 +2799,37 @@ static void glyphFlex(abfGlyphCallbacks *cb, float depth,
 /* Add generic operator. */
 static void glyphGenop(abfGlyphCallbacks *cb, int cnt, float *args, int op) {
     t1wCtx h = cb->direct_ctx;
+    if (h->err.code != 0)
+        return; /* Pending error */
+    else if (h->path.state < 2) {
+        /* Call sequence error */
+        h->err.code = t1wErrBadCall;
+        return;
+    }
 
-    if (cb->info->flags & ABF_GLYPH_CUBE_GSUBR) {
-        if (accomodate(h, cnt, 1))
-            return;
+    if (h->flags & HINT_PENDING)
+        saveStems(h);
 
-        switch (op) {
-            case tx_return:
-                if (cnt) {
-                    while (cnt--)
-                        saveFlt(h, *args++);
-                }
-                break;
-            case tx_SETWV1:
-            case tx_SETWV2:
-            case tx_SETWV3:
-            case tx_SETWV4:
-            case tx_SETWV5:
-                while (cnt--)
-                    saveFlt(h, *args++);
-                seenLEIndex(h, -1);
-                saveOp(h, op);
-                break;
-            case tx_SETWVN:
-                while (cnt-- > 1)
-                    saveFlt(h, *args++);
-                saveInt(h, (int)*args++);
-                seenLEIndex(h, -1);
-                saveOp(h, op);
-                break;
-            case tx_callgrel: {
-                seenLEIndex(h, (long)args[cnt - 1]);
-                while (cnt--)
-                    saveFlt(h, *args++);
-                saveOp(h, op);
-                break;
-            }
-            default: {
-                while (cnt--)
-                    saveFlt(h, *args++);
-                saveOp(h, op);
-                break;
-            }
-        }
-    } else {
-        if (h->err.code != 0)
-            return; /* Pending error */
-        else if (!(cb->info->flags & ABF_GLYPH_CUBE_GSUBR) && (h->path.state < 2)) {
-            /* Call sequence error */
-            h->err.code = t1wErrBadCall;
-            return;
-        }
-
-        if (h->flags & HINT_PENDING)
-            saveStems(h);
-
-        switch (op) {
-            case t2_cntron:
-                /* 0 6 callother */
-                h->stack.cnt = 0;
-                saveOtherSubr(h, t1_otherGlobalColor);
-                break;
-            case t2_cntroff:
-                /* 0 0 2 13 callother */
-                h->stack.cnt = 0;
-                pushOtherArg(h, 0);
-                pushOtherArg(h, 0);
-                saveOtherSubr(h, t1_otherCntr2);
-                break;
-            default:
-                if (accomodate(h, cnt, 1))
-                    return;
-                while (cnt--)
-                    saveFlt(h, *args++);
-                saveOp(h, op);
-                break;
-        }
+    switch (op) {
+        case t2_cntron:
+            /* 0 6 callother */
+            h->stack.cnt = 0;
+            saveOtherSubr(h, t1_otherGlobalColor);
+            break;
+        case t2_cntroff:
+            /* 0 0 2 13 callother */
+            h->stack.cnt = 0;
+            pushOtherArg(h, 0);
+            pushOtherArg(h, 0);
+            saveOtherSubr(h, t1_otherCntr2);
+            break;
+        default:
+            if (accomodate(h, cnt, 1))
+                return;
+            while (cnt--)
+                saveFlt(h, *args++);
+            saveOp(h, op);
+            break;
     }
 }
 
@@ -2990,7 +2840,7 @@ static void glyphSeac(abfGlyphCallbacks *cb,
 
     if (h->err.code != 0)
         return; /* Pending error */
-    else if (!(cb->info->flags & ABF_GLYPH_CUBE_GSUBR) && (h->path.state != 2)) {
+    else if (h->path.state != 2) {
         /* Call sequence error */
         h->err.code = t1wErrBadCall;
         return;
@@ -3039,23 +2889,16 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
 
     if (h->err.code != 0)
         return;
-    else if (!(cb->info->flags & ABF_GLYPH_CUBE_GSUBR) && (h->path.state < 2)) {
+    else if (h->path.state < 2) {
         /* Call sequence error */
         h->err.code = t1wErrBadCall;
-        return;
-    }
-
-    if (cb->info->flags & ABF_GLYPH_CUBE_GSUBR) {
-        saveOp(h, tx_return);
-        addCubeGSUBR(h, h->cstr.array, h->cstr.cnt);
-        h->path.state = 0;
         return;
     }
 
     /* Save closepath endchar */
     if (accomodate(h, 0, 2))
         return;
-    if (!(cb->info->flags & ABF_GLYPH_CUBE_GSUBR) && (h->path.state > 2))
+    if (h->path.state > 2)
         saveOp(h, t1_closepath);
     saveOp(h, tx_endchar);
 
@@ -3084,96 +2927,6 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
     updateFontBoundingBox(h);
 }
 
-static void glyphCubeBlend(abfGlyphCallbacks *cb, unsigned int nBlends, unsigned int numVals, float *blendVals) {
-    t1wCtx h = cb->direct_ctx;
-    unsigned int i = 0;
-
-    while (i < numVals) {
-        saveFlt(h, blendVals[i]);
-    }
-    switch (nBlends) {
-        case 1:
-            saveOp(h, tx_BLEND1);
-            break;
-        case 2:
-            saveOp(h, tx_BLEND2);
-            break;
-        case 3:
-            saveOp(h, tx_BLEND3);
-            break;
-        case 4:
-            saveOp(h, tx_BLEND4);
-            break;
-        case 6:
-            saveOp(h, tx_BLEND6);
-            break;
-    }
-}
-
-static void glyphCubeSetWV(abfGlyphCallbacks *cb, unsigned int numDV) {
-    t1wCtx h = cb->direct_ctx;
-
-    switch (numDV) {
-        case 1:
-            saveOp(h, tx_SETWV1);
-            break;
-        case 2:
-            saveOp(h, tx_SETWV2);
-            break;
-        case 3:
-            saveOp(h, tx_SETWV3);
-            break;
-        case 4:
-            saveOp(h, tx_SETWV4);
-            break;
-        case 5:
-            saveOp(h, tx_SETWV5);
-            break;
-        default:
-            saveOp(h, tx_SETWVN);
-    }
-}
-
-static void glyphCubeCompose(abfGlyphCallbacks *cb, int cubeLEIndex, float x0, float y0, int numDV, float *ndv) {
-    t1wCtx h = cb->direct_ctx;
-    int i = 0;
-    float dx0;
-    float dy0;
-
-    if (accomodate(h, 3 + numDV, 1))
-        return;
-
-    saveInt(h, (long)cubeLEIndex); /* library element value */
-    /* Compute delta and update current point */
-    dx0 = x0 - h->path.x;
-    dy0 = y0 - h->path.y;
-    h->path.x = x0;
-    h->path.y = y0;
-    saveInt(h, (long)dx0);
-    saveInt(h, (long)dy0);
-
-    while (i < numDV) {
-        saveInt(h, (long)ndv[i++]);
-    }
-    saveOp(h, tx_compose);
-}
-
-static void cubeTransform(abfGlyphCallbacks *cb, float rotate, float scaleX, float scaleY, float skewX, float skewY) {
-    t1wCtx h = cb->direct_ctx;
-    /* Rotation is expressed in degrees. Rotation is *100, 
-     and the scale/skew are *1000 to avoid the use of the div
-     oerator in the charstring.  */
-    if (accomodate(h, 5, 1))
-        return;
-
-    saveInt(h, RND2I(rotate * 100));
-    saveInt(h, RND2I(scaleX * 1000));
-    saveInt(h, RND2I(scaleY * 1000));
-    saveInt(h, RND2I(skewX * 1000));
-    saveInt(h, RND2I(skewY * 1000));
-    saveOp(h, tx_transform);
-}
-
 /* Public callback set */
 const abfGlyphCallbacks t1wGlyphCallbacks =
     {
@@ -3190,10 +2943,6 @@ const abfGlyphCallbacks t1wGlyphCallbacks =
         glyphGenop,
         glyphSeac,
         glyphEnd,
-        glyphCubeBlend,
-        glyphCubeSetWV,
-        glyphCubeCompose,
-        cubeTransform,
 };
 
 /* ----------------------------- Debug Support ----------------------------- */
@@ -3206,7 +2955,7 @@ static void dbt1cstr(long length, unsigned char *cstr) {
         {
             /*  0 */ "reserved0",
             /*  1 */ "hstem",
-            /*  2 */ "compose",
+            /*  2 */ "reserved2",
             /*  3 */ "vstem",
             /*  4 */ "vmoveto",
             /*  5 */ "rlineto",
@@ -3221,7 +2970,7 @@ static void dbt1cstr(long length, unsigned char *cstr) {
             /* 14 */ "endchar",
             /* 15 */ "vsindex",
             /* 16 */ "blend",
-            /* 17 */ "callgrel",
+            /* 17 */ "reserved17",
             /* 18 */ "reserved18",
             /* 19 */ "reserved19",
             /* 20 */ "reserved20",
@@ -3273,18 +3022,6 @@ static void dbt1cstr(long length, unsigned char *cstr) {
             /* 31 */ "reservedESC31",
             /* 32 */ "reservedESC32",
             /* 33 */ "setcurrentpoint",
-            /* 39 */ "blend1",
-            /* 40 */ "blend2",
-            /* 41 */ "blend3",
-            /* 42 */ "blend4",
-            /* 43 */ "blend6",
-            /* 44 */ "setwv1",
-            /* 45 */ "setwv2",
-            /* 46 */ "setwv3",
-            /* 47 */ "setwv4",
-            /* 48 */ "setwv5",
-            /* 49 */ "setwvn",
-            /* 50 */ "transform",
         };
     long i = 0;
 
@@ -3293,7 +3030,7 @@ static void dbt1cstr(long length, unsigned char *cstr) {
         switch (op) {
             case tx_reserved0:
             case tx_hstem:
-            case tx_compose:
+            case tx_reserved2:
             case tx_vstem:
             case tx_vmoveto:
             case tx_rlineto:
@@ -3307,7 +3044,7 @@ static void dbt1cstr(long length, unsigned char *cstr) {
             case tx_endchar:
             case t1_moveto:
             case t1_reserved16:
-            case tx_callgrel:
+            case tx_reserved17:
             case t1_reserved18:
             case t1_reserved19:
             case t1_reserved20:
@@ -3329,7 +3066,7 @@ static void dbt1cstr(long length, unsigned char *cstr) {
                 /* Process escaped operator */
                 int escop = cstr[i + 1];
                 if (escop > ARRAY_LEN(escopname) - 1)
-                    printf("? ");
+                    printf("reservedESC%d ", escop);
                 else
                     printf("%s ", escopname[escop]);
                 i += 2;

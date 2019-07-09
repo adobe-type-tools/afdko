@@ -3129,8 +3129,6 @@ static void readSubr(t1rCtx h, abfGlyphCallbacks *glyph_cb, Offset subrStartOffs
     offset = chr.sup.begin = subrStartOffset;
     chr.sup.end = subrEndOffset;
     chr.flags &= ~ABF_GLYPH_SEEN;
-    chr.flags |= ABF_GLYPH_CUBE_GSUBR;
-    aux.flags |= T1C_CUBE_GSUBR;
 
     result = glyph_cb->beg(glyph_cb, &chr);
 
@@ -3149,9 +3147,6 @@ static void readSubr(t1rCtx h, abfGlyphCallbacks *glyph_cb, Offset subrStartOffs
         case ABF_FAIL_RET:
             fatal(h, t1rErrCstrFail, NULL);
     }
-
-    if (h->flags & T1R_IS_CUBE)
-        aux.flags |= T1C_IS_CUBE;
 
     /* Parse charstring */
     result = t1cParse(offset, &aux, glyph_cb);
@@ -3231,11 +3226,6 @@ static void readGlyph(t1rCtx h,
             fatal(h, t1rErrCstrFail, NULL);
     }
 
-    if (flags & T1R_IS_CUBE)
-        aux->flags |= T1C_IS_CUBE;
-    if (flags & T1R_FLATTEN_CUBE)
-        aux->flags |= T1C_FLATTEN_CUBE;
-
     /* Parse charstring */
     result = t1cParse(offset, aux, glyph_cb);
     if (result) {
@@ -3248,22 +3238,6 @@ static void readGlyph(t1rCtx h,
 
     /* End glyph */
     glyph_cb->end(glyph_cb);
-
-    /* if it is a CUBE font, and we have the call backs to do so, play the SUBR's through to the client */
-    if ((flags & T1R_IS_CUBE) && !(glyph_cb->cubeSetwv == NULL) && !(flags & T1R_FLATTEN_CUBE) && !(flags & T1R_SEEN_GLYPH) && (aux->subrs.cnt > 10)) {
-        int i;
-        Offset subrStartOffset = 0;
-        Offset subrEndOffset;
-        h->flags |= T1R_SEEN_GLYPH;
-        for (i = 0; i < aux->subrs.cnt; i++) {
-            subrStartOffset = aux->subrs.offset[i];
-            if ((i + 1) < aux->subrs.cnt)
-                subrEndOffset = aux->subrs.offset[i + 1];
-            else
-                subrEndOffset = aux->subrsEnd;
-            readSubr(h, glyph_cb, subrStartOffset, subrEndOffset, chr, aux);
-        }
-    }
 }
 
 /* Iterate through all glyphs in font. */

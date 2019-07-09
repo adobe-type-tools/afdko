@@ -597,7 +597,7 @@ static void glyphGenop(abfGlyphCallbacks *cb,
         {
             "reserved0",
             "hstem",
-            "compose",
+            "reserved2",
             "vstem",
             "vmoveto",
             "rlineto",
@@ -612,7 +612,7 @@ static void glyphGenop(abfGlyphCallbacks *cb,
             "endchar",
             "vsindex",
             "blend",
-            "callgrel",
+            "reserved17",
             "hstemhm",
             "hintmask",
             "cntrmask",
@@ -721,37 +721,6 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
     }
 }
 
-static void glyphCompose(abfGlyphCallbacks *cb, int cubeLEIndex, float x0, float y0, int numDV, float *ndv) {
-    int i = 0;
-
-    char buf[250];
-    const size_t bufLen = sizeof(buf);
-    char *p = buf;
-    size_t remainingBufLength = bufLen;
-    size_t usedPrintLength;
-
-    SPRINTF_S(p, remainingBufLength, " %d %f %f", cubeLEIndex, x0, y0);
-    usedPrintLength = strnlen(p, remainingBufLength);
-    p += strlen(p);
-    remainingBufLength -= usedPrintLength;
-    while (i < numDV) {
-        SPRINTF_S(p, remainingBufLength, " %g", ndv[i++]);
-        usedPrintLength = strnlen(p, remainingBufLength);
-        p += strlen(p);
-        remainingBufLength -= usedPrintLength;
-    }
-    dumpInstr(cb, "%s compose", buf);
-}
-
-static void glyphTransform(abfGlyphCallbacks *cb, float rotate, float scaleX, float scaleY, float skewX, float skewY) {
-    char buf[250];
-    const size_t bufLen = sizeof(buf);
-    char *p = buf;
-
-    SPRINTF_S(p, bufLen, " %f %f %f %f %f", rotate, scaleX, scaleY, skewX, skewY);
-    dumpInstr(cb, "%s transform", buf);
-}
-
 /* Dump glyph callbacks */
 const abfGlyphCallbacks abfGlyphDumpCallbacks =
     {
@@ -768,8 +737,4 @@ const abfGlyphCallbacks abfGlyphDumpCallbacks =
         glyphGenop,
         glyphSeac,
         glyphEnd,
-        NULL,
-        NULL,
-        glyphCompose,
-        glyphTransform,
 };

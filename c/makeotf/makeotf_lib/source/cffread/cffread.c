@@ -1104,11 +1104,11 @@ static void t2Read(cffCtx h, Offset offset, int init) {
                 return;
 
             case tx_reserved0:
-            case t2_reserved2:
+            case tx_reserved2:
             case t2_reserved9:
             case t2_reserved13:
             case t2_reserved15:
-            case t2_reserved17:
+            case tx_reserved17:
                 fatal(h, "reserved charstring op");
 
             case tx_rlineto:
@@ -1364,11 +1364,11 @@ static void t2Read(cffCtx h, Offset offset, int init) {
                     case t2_reservedESC7:
                     case t2_reservedESC16:
                     case t2_reservedESC17:
+                    case tx_reservedESC19:
                     case tx_reservedESC25:
                     case tx_reservedESC31:
                     case tx_reservedESC32:
                     case t2_reservedESC33:
-                    case t2_reservedESC19:
                     case t2_cntron:
                         fatal(h, "reserved charstring op");
 

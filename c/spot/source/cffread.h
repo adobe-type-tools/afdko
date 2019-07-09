@@ -63,8 +63,6 @@ cffCtx cffNew(cffStdCallbacks *cb, long offset, unsigned long cffreadFlags);
    cffStdCallbacks data structure whose fields are described below. Optional
    fields should be passed with a NULL value if not required. */
 
-#define CFFREAD_SMALL_FONT 1 /* parse using Small Font rules */
-
 /* Message types (for use with message callback) */
 enum {
     cffWARNING = 1,

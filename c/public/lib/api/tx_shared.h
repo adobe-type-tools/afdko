@@ -462,7 +462,6 @@ struct txCtx_ {
 #define DCF_TableSelected    (1 << 14) /* -T option used */
 #define DCF_Flatten          (1 << 15) /* Flatten charstrings */
 #define DCF_SaveStemCnt      (1 << 16) /* Save h/vstems counts */
-#define DCF_IS_CUBE          (1 << 17) /* Font has Cube data - use different stack and op limits. */
 #define DCF_IS_CFF2          (1 << 18) /* Font has CFF table is CFF 2 */
 #define DCF_END_HINTS        (1 << 19) /* have seen moveto */
 

@@ -788,68 +788,6 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
     h->path.state = 0;
 }
 
-static void glyphCompose(abfGlyphCallbacks *cb, int cubeLEIndex, float x0, float y0, int numDV, float *ndv) {
-    svwCtx h = cb->direct_ctx;
-    int i = 0;
-
-    if (h->path.state < 3)
-        /* First moveto/compose for this glyph implies start of path data. */
-        writeStr(h, " d=\"");
-    else if (h->path.state == 3) {
-        /* Close path. */
-        if (h->arg.flags & SVW_ABSOLUTE)
-            writeStr(h, " Z");
-        else
-            writeStr(h, " z");
-        writeStr(h, " ");
-    }
-
-    writeStr(h, "B ");
-    writeInt(h, cubeLEIndex);
-    writeStr(h, ",");
-    writeReal(h, x0);
-    writeStr(h, ",");
-    writeReal(h, y0);
-    while (i < numDV) {
-        writeStr(h, ",");
-        writeInt(h, (long)ndv[i++]);
-    }
-    h->path.state = 3; /* make sure we write the final "Z". */
-}
-
-static void glyphTransform(abfGlyphCallbacks *cb, float rotate, float scaleX, float scaleY, float skewX, float skewY) {
-    svwCtx h = cb->direct_ctx;
-
-    if (h->path.state < 3)
-        /* First moveto/compose for this glyph implies start of path data. */
-        writeStr(h, " d=\"");
-    else if (h->path.state == 3) {
-        /* Close path. */
-        if (h->arg.flags & SVW_ABSOLUTE)
-            writeStr(h, " Z");
-        else
-            writeStr(h, " z");
-        writeStr(h, " ");
-    }
-
-    /* Rotate is expressed in degrees in absfont.  */
-    writeStr(h, "R ");
-    writeReal(h, rotate);
-    writeStr(h, ",");
-    writeReal(h, scaleX);
-    writeStr(h, ",");
-    writeReal(h, scaleY);
-    if ((skewX != 1.0) || (skewY != 1.0)) {
-        writeStr(h, ",");
-        writeReal(h, skewX);
-        writeStr(h, ",");
-        writeReal(h, skewY);
-    }
-    writeStr(h, " ");
-
-    h->path.state = 4; /* we do NOT want the following compose op to write "Z" to close the preceding path. */
-}
-
 /* Public callback set */
 const abfGlyphCallbacks svwGlyphCallbacks =
     {
@@ -866,8 +804,4 @@ const abfGlyphCallbacks svwGlyphCallbacks =
         glyphGenop,
         glyphSeac,
         glyphEnd,
-        NULL,
-        NULL,
-        glyphCompose,
-        glyphTransform,
 };
