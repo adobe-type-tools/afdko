@@ -1,19 +1,19 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="2" name="less">
-  <advance width="497" />
-  <unicode hex="003C" />
+<glyph name="less" format="2">
+  <advance width="497"/>
+  <unicode hex="003C"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="line" x="370.4" y="104.8" />
-      <point type="line" x="370.4" y="161.6" />
-      <point type="line" x="201.6" y="224" />
-      <point type="line" x="94.4" y="264" />
-      <point type="line" x="94.4" y="267.2" />
-      <point type="line" x="201.6" y="307.2" />
-      <point type="line" x="370.4" y="369.6" />
-      <point type="line" x="370.4" y="426.4" />
-      <point type="line" x="27.2" y="292" />
-      <point type="line" x="27.2" y="239.2" />
+      <point type="line" x="370.4" y="104.8" name="hintSet0000"/>
+      <point type="line" x="370.4" y="161.6"/>
+      <point type="line" x="201.6" y="224"/>
+      <point type="line" x="94.4" y="264"/>
+      <point type="line" x="94.4" y="267.2"/>
+      <point type="line" x="201.6" y="307.2"/>
+      <point type="line" x="370.4" y="369.6"/>
+      <point type="line" x="370.4" y="426.4"/>
+      <point type="line" x="27.2" y="292"/>
+      <point type="line" x="27.2" y="239.2"/>
     </contour>
   </outline>
   <lib>

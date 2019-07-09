@@ -1,30 +1,30 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="2" name="i">
-  <advance width="246" />
-  <unicode hex="0069" />
-  <anchor name="ogonekLC" x="121.60000000000001" y="0" />
-  <anchor name="aboveLC" x="98.4" y="555.2" />
-  <anchor name="belowLC" x="98.4" y="-17.6" />
+<glyph name="i" format="2">
+  <advance width="246"/>
+  <unicode hex="0069"/>
+  <anchor x="121.60000000000001" y="0" name="ogonekLC"/>
+  <anchor x="98.4" y="555.2" name="aboveLC"/>
+  <anchor x="98.4" y="-17.6" name="belowLC"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="line" x="66" y="0" />
-      <point type="line" x="131" y="0" />
-      <point type="line" x="131" y="389" />
-      <point type="line" x="66" y="389" />
+      <point type="line" x="66" y="0" name="hintSet0000"/>
+      <point type="line" x="131" y="0"/>
+      <point type="line" x="131" y="389"/>
+      <point type="line" x="66" y="389"/>
     </contour>
     <contour>
-      <point name="hintSet0004" type="curve" x="99" y="469" />
-      <point x="125" y="469" />
-      <point x="145" y="486" />
-      <point type="curve" x="145" y="511" />
-      <point x="145" y="537" />
-      <point x="125" y="554" />
-      <point type="curve" x="99" y="554" />
-      <point x="74" y="554" />
-      <point x="54" y="537" />
-      <point type="curve" x="54" y="511" />
-      <point x="54" y="486" />
-      <point x="74" y="469" />
+      <point type="curve" x="99" y="469" name="hintSet0004"/>
+      <point x="125" y="469"/>
+      <point x="145" y="486"/>
+      <point type="curve" x="145" y="511"/>
+      <point x="145" y="537"/>
+      <point x="125" y="554"/>
+      <point type="curve" x="99" y="554"/>
+      <point x="74" y="554"/>
+      <point x="54" y="537"/>
+      <point type="curve" x="54" y="511"/>
+      <point x="54" y="486"/>
+      <point x="74" y="469"/>
     </contour>
   </outline>
   <lib>

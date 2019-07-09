@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="2" name="before">
-  <advance width="500" />
+<glyph name="before" format="2">
+  <advance width="500"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="line" x="0" y="200" />
-      <point type="line" x="140" y="200" />
-      <point type="line" x="140" y="340" />
-      <point type="line" x="0" y="340" />
+      <point type="line" x="0" y="200" name="hintSet0000"/>
+      <point type="line" x="140" y="200"/>
+      <point type="line" x="140" y="340"/>
+      <point type="line" x="0" y="340"/>
     </contour>
   </outline>
   <lib>

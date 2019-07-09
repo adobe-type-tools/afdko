@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="2" name="some_width-no_height">
-  <advance width="500" />
+<glyph name="some_width-no_height" format="2">
+  <advance width="500"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="line" x="0" y="0" />
-      <point type="line" x="140" y="0" />
-      <point type="line" x="140" y="140" />
-      <point type="line" x="0" y="140" />
+      <point type="line" x="0" y="0" name="hintSet0000"/>
+      <point type="line" x="140" y="0"/>
+      <point type="line" x="140" y="140"/>
+      <point type="line" x="0" y="140"/>
     </contour>
   </outline>
   <lib>

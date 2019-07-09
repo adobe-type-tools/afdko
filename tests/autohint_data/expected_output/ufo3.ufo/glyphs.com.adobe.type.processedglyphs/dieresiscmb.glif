@@ -1,36 +1,36 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="2" name="dieresiscmb">
-  <unicode hex="0308" />
-  <anchor name="_aboveLC" x="0" y="507" />
-  <anchor name="aboveLC" x="0" y="682" />
+<glyph name="dieresiscmb" format="2">
+  <unicode hex="0308"/>
+  <anchor x="0" y="507" name="_aboveLC"/>
+  <anchor x="0" y="682" name="aboveLC"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="curve" x="105" y="596" />
-      <point x="137" y="596" />
-      <point x="164" y="620" />
-      <point type="curve" x="164" y="653" />
-      <point x="164" y="685" />
-      <point x="137" y="710" />
-      <point type="curve" x="105" y="710" />
-      <point x="72" y="710" />
-      <point x="45" y="685" />
-      <point type="curve" x="45" y="653" />
-      <point x="45" y="620" />
-      <point x="72" y="596" />
+      <point type="curve" x="105" y="596" name="hintSet0000"/>
+      <point x="137" y="596"/>
+      <point x="164" y="620"/>
+      <point type="curve" x="164" y="653"/>
+      <point x="164" y="685"/>
+      <point x="137" y="710"/>
+      <point type="curve" x="105" y="710"/>
+      <point x="72" y="710"/>
+      <point x="45" y="685"/>
+      <point type="curve" x="45" y="653"/>
+      <point x="45" y="620"/>
+      <point x="72" y="596"/>
     </contour>
     <contour>
-      <point type="curve" x="-105" y="596" />
-      <point x="-72" y="596" />
-      <point x="-45" y="620" />
-      <point type="curve" x="-45" y="653" />
-      <point x="-45" y="685" />
-      <point x="-72" y="710" />
-      <point type="curve" x="-105" y="710" />
-      <point x="-137" y="710" />
-      <point x="-164" y="685" />
-      <point type="curve" x="-164" y="653" />
-      <point x="-164" y="620" />
-      <point x="-137" y="596" />
+      <point type="curve" x="-105" y="596"/>
+      <point x="-72" y="596"/>
+      <point x="-45" y="620"/>
+      <point type="curve" x="-45" y="653"/>
+      <point x="-45" y="685"/>
+      <point x="-72" y="710"/>
+      <point type="curve" x="-105" y="710"/>
+      <point x="-137" y="710"/>
+      <point x="-164" y="685"/>
+      <point type="curve" x="-164" y="653"/>
+      <point x="-164" y="620"/>
+      <point x="-137" y="596"/>
     </contour>
   </outline>
   <lib>

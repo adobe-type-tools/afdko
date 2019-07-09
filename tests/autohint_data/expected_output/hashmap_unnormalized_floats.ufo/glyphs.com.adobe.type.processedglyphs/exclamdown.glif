@@ -1,18 +1,18 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="2" name="exclamdown">
-  <advance width="196.0" />
+<glyph name="exclamdown" format="2">
+  <advance width="196.0"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="line" x="130" y="82" />
-      <point type="line" x="127" y="361" />
-      <point type="line" x="89" y="361" />
-      <point type="line" x="86" y="82" />
+      <point type="line" x="130" y="82" name="hintSet0000"/>
+      <point type="line" x="127" y="361"/>
+      <point type="line" x="89" y="361"/>
+      <point type="line" x="86" y="82"/>
     </contour>
     <contour>
-      <point type="line" x="108" y="487" />
-      <point type="line" x="75" y="455" />
-      <point type="line" x="108" y="423" />
-      <point type="line" x="141" y="455" />
+      <point type="line" x="108" y="487"/>
+      <point type="line" x="75" y="455"/>
+      <point type="line" x="108" y="423"/>
+      <point type="line" x="141" y="455"/>
     </contour>
   </outline>
   <lib>
