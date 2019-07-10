@@ -96,6 +96,10 @@ static int CTL_CDECL matchNonStdStr(const void *key, const void *value,
                                     [h->custom.array[*(unsigned short *)value].iString]);
 }
 
+int cfwSindexInvalidString(char *string) {
+    return (string == NULL || *string == '\0');
+}
+
 /* Add string. If standard string return its SID, otherwise if in table return
    existing record index, else add to table and return new record index. If
    string is empty return SRI_UNDEF. */
@@ -104,7 +108,7 @@ SRI cfwSindexAddString(cfwCtx g, char *string) {
     size_t index;
     StdRec *std;
 
-    if (string == NULL || *string == '\0') {
+    if (cfwSindexInvalidString(string)) {
         return SRI_UNDEF; /* Reject invalid strings */
     }
     std = (StdRec *)bsearch(string, std2sid, STD_STR_CNT,
@@ -151,6 +155,9 @@ char *cfwSindexGetString(cfwCtx g, SRI index) {
     if (index < STD_STR_CNT) {
         return sid2std[index];
     } else {
+        static char null_str[1] = {'\0'};
+        if (index - STD_STR_CNT >= h->custom.cnt)
+            return null_str;
         return &h->strings.array[h->custom.array[index - STD_STR_CNT].iString];
     }
 }
@@ -160,6 +167,8 @@ SID cfwSindexAssignSID(cfwCtx g, SRI index) {
     sindexCtx h = g->ctx.sindex;
     if (index < STD_STR_CNT) {
         return index;
+    } else if (index - STD_STR_CNT >= h->custom.cnt) {
+        return SID_UNDEF;
     } else {
         CustomRec *custom = &h->custom.array[index - STD_STR_CNT];
         if (custom->sid == SID_UNDEF) {
