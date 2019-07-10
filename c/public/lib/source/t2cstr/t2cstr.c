@@ -839,12 +839,14 @@ static int handleBlend(t2cCtx h) {
     int numBlends;
     int numRegions = h->stack.numRegions;
     int numDeltaBlends;
+    int numTotalBlends;
     int firstItemIndex;
 
     CHKUFLOW(h, 1);
     numBlends = (int)INDEX(h->stack.cnt - 1);
     numDeltaBlends = numBlends * numRegions;
-    if (numBlends < 0 || numDeltaBlends < 0)
+    numTotalBlends = numBlends + numDeltaBlends;
+    if (numBlends < 0 || numDeltaBlends < 0 || numTotalBlends < 0 /*check signed int overflow*/)
         return t2cErrStackUnderflow;
 
     // pop off the numBlends value
@@ -853,8 +855,8 @@ static int handleBlend(t2cCtx h) {
 
     if (numBlends < 0)
         return t2cErrStackUnderflow;
-    CHKUFLOW(h, numBlends + numDeltaBlends);
-    firstItemIndex = (h->stack.blendCnt - (numBlends + numDeltaBlends));
+    CHKUFLOW(h, numTotalBlends);
+    firstItemIndex = (h->stack.blendCnt - numTotalBlends);
     if (firstItemIndex < 0)
         return t2cErrStackUnderflow;
 
@@ -1046,6 +1048,7 @@ static int t2Decode(t2cCtx h, long offset) {
             case tx_rmoveto:
                 if (callbackWidth(h, 1))
                     return t2cSuccess;
+                CHKUFLOW(h, 2);
                 {
                     float y = POP();
                     float x = POP();
@@ -1059,6 +1062,7 @@ static int t2Decode(t2cCtx h, long offset) {
                     return t2cSuccess;
                 if ((h->flags & IS_CFF2) && (h->glyph->moveVF != NULL))
                     popBlendArgs2(h, &INDEX_BLEND(0), NULL);
+                CHKUFLOW(h, 1);
                 callbackMove(h, POP(), 0);
                 break;
             case tx_vmoveto:
@@ -1066,6 +1070,7 @@ static int t2Decode(t2cCtx h, long offset) {
                     return t2cSuccess;
                 if ((h->flags & IS_CFF2) && (h->glyph->moveVF != NULL))
                     popBlendArgs2(h, NULL, &INDEX_BLEND(0));
+                CHKUFLOW(h, 1);
                 callbackMove(h, 0, POP());
                 break;
             case tx_rlineto:
@@ -1153,6 +1158,8 @@ static int t2Decode(t2cCtx h, long offset) {
                                 callbackOp(h, tx_dotsection);
                             break;
                         case tx_and:
+                            if (h->flags & IS_CFF2)
+                                return t2cErrInvalidOp;
                             CHKUFLOW(h, 2);
                             {
                                 int b = POP() != 0.0f;
@@ -1161,6 +1168,8 @@ static int t2Decode(t2cCtx h, long offset) {
                             }
                             continue;
                         case tx_or:
+                            if (h->flags & IS_CFF2)
+                                return t2cErrInvalidOp;
                             CHKUFLOW(h, 2);
                             {
                                 int b = POP() != 0.0f;
@@ -1169,6 +1178,8 @@ static int t2Decode(t2cCtx h, long offset) {
                             }
                             continue;
                         case tx_not:
+                            if (h->flags & IS_CFF2)
+                                return t2cErrInvalidOp;
                             CHKUFLOW(h, 1);
                             {
                                 int a = POP() == 0.0f;
@@ -1176,6 +1187,8 @@ static int t2Decode(t2cCtx h, long offset) {
                             }
                             continue;
                         case tx_abs:
+                            if (h->flags & IS_CFF2)
+                                return t2cErrInvalidOp;
                             CHKUFLOW(h, 1);
                             {
                                 float a = POP();
@@ -1183,6 +1196,8 @@ static int t2Decode(t2cCtx h, long offset) {
                             }
                             continue;
                         case tx_add:
+                            if (h->flags & IS_CFF2)
+                                return t2cErrInvalidOp;
                             CHKUFLOW(h, 2);
                             {
                                 float b = POP();
@@ -1191,6 +1206,8 @@ static int t2Decode(t2cCtx h, long offset) {
                             }
                             continue;
                         case tx_sub:
+                            if (h->flags & IS_CFF2)
+                                return t2cErrInvalidOp;
                             CHKUFLOW(h, 2);
                             {
                                 float b = POP();
@@ -1199,6 +1216,8 @@ static int t2Decode(t2cCtx h, long offset) {
                             }
                             continue;
                         case tx_div:
+                            if (h->flags & IS_CFF2)
+                                return t2cErrInvalidOp;
                             CHKUFLOW(h, 2);
                             {
                                 float b = POP();
@@ -1207,6 +1226,8 @@ static int t2Decode(t2cCtx h, long offset) {
                             }
                             continue;
                         case tx_neg:
+                            if (h->flags & IS_CFF2)
+                                return t2cErrInvalidOp;
                             CHKUFLOW(h, 1);
                             {
                                 float a = POP();
@@ -1214,6 +1235,8 @@ static int t2Decode(t2cCtx h, long offset) {
                             }
                             continue;
                         case tx_eq:
+                            if (h->flags & IS_CFF2)
+                                return t2cErrInvalidOp;
                             CHKUFLOW(h, 2);
                             {
                                 float b = POP();
@@ -1222,6 +1245,8 @@ static int t2Decode(t2cCtx h, long offset) {
                             }
                             continue;
                         case tx_drop:
+                            if (h->flags & IS_CFF2)
+                                return t2cErrInvalidOp;
                             CHKUFLOW(h, 1);
                             h->stack.cnt--;
                             continue;
@@ -1235,6 +1260,8 @@ static int t2Decode(t2cCtx h, long offset) {
                             }
                             continue;
                         case tx_get:
+                            if (h->flags & IS_CFF2)
+                                return t2cErrInvalidOp;
                             CHKUFLOW(h, 1);
                             {
                                 i = (int)POP();
@@ -1244,6 +1271,8 @@ static int t2Decode(t2cCtx h, long offset) {
                             }
                             continue;
                         case tx_ifelse:
+                            if (h->flags & IS_CFF2)
+                                return t2cErrInvalidOp;
                             CHKUFLOW(h, 4);
                             {
                                 float v2 = POP();
@@ -1254,6 +1283,8 @@ static int t2Decode(t2cCtx h, long offset) {
                             }
                             continue;
                         case tx_random:
+                            if (h->flags & IS_CFF2)
+                                return t2cErrInvalidOp;
                             CHKOFLOW(h, 1);
                             PUSH(((float)rand() + 1) / ((float)RAND_MAX + 1));
                             continue;
@@ -1266,6 +1297,8 @@ static int t2Decode(t2cCtx h, long offset) {
                             }
                             continue;
                         case tx_sqrt:
+                            if (h->flags & IS_CFF2)
+                                return t2cErrInvalidOp;
                             CHKUFLOW(h, 1);
                             {
                                 float a = POP();
@@ -1275,6 +1308,8 @@ static int t2Decode(t2cCtx h, long offset) {
                             }
                             continue;
                         case tx_dup:
+                            if (h->flags & IS_CFF2)
+                                return t2cErrInvalidOp;
                             CHKUFLOW(h, 1);
                             CHKOFLOW(h, 1);
                             {
@@ -1284,6 +1319,8 @@ static int t2Decode(t2cCtx h, long offset) {
                             }
                             continue;
                         case tx_exch:
+                            if (h->flags & IS_CFF2)
+                                return t2cErrInvalidOp;
                             CHKUFLOW(h, 2);
                             {
                                 float b = POP();
@@ -1293,6 +1330,8 @@ static int t2Decode(t2cCtx h, long offset) {
                             }
                             continue;
                         case tx_index:
+                            if (h->flags & IS_CFF2)
+                                return t2cErrInvalidOp;
                             CHKUFLOW(h, 1);
                             {
                                 i = (int)POP();
@@ -1307,6 +1346,8 @@ static int t2Decode(t2cCtx h, long offset) {
                             }
                             continue;
                         case tx_roll:
+                            if (h->flags & IS_CFF2)
+                                return t2cErrInvalidOp;
                             CHKUFLOW(h, 2);
                             {
                                 int j = (int)POP();
@@ -1314,7 +1355,7 @@ static int t2Decode(t2cCtx h, long offset) {
                                 int iTop = h->stack.cnt - 1;
                                 int iBottom = h->stack.cnt - n;
 
-                                if (n < 0 || iBottom < 0)
+                                if (n <= 0 || iBottom < 0)
                                     return t2cErrRollBounds;
 
                                 /* Constrain j to [0,n) */
@@ -1398,6 +1439,8 @@ static int t2Decode(t2cCtx h, long offset) {
                             }
                             break;
                         case t2_cntron:
+                            if (h->flags & IS_CFF2)
+                                return t2cErrInvalidOp;
                             h->LanguageGroup = 1; /* Turn on global coloring */
                             callbackOp(h, t2_cntron);
                             continue;
@@ -1789,6 +1832,7 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
     h.LanguageGroup = (glyph->info->flags & ABF_GLYPH_LANG_1) != 0;
     h.gid = gid;
     h.cff2 = cff2;
+    memset(&h.BCA, 0, sizeof(h.BCA));
     aux->bchar = 0;
     aux->achar = 0;
     if (aux->flags & T2C_IS_CFF2)
