@@ -506,6 +506,9 @@ static unsigned short read2(cfrCtx h) {
 static uint32_t readN(cfrCtx h, int N) {
     uint32_t value = 0;
     switch (N) {
+        default:
+            fatal(h, cfrErrINDEXHeader);
+            break;
         case 4:
             value = read1(h);
         case 3:
@@ -519,7 +522,7 @@ static uint32_t readN(cfrCtx h, int N) {
 }
 
 /* Open source stream. */
-static void srcOpen(cfrCtx h, long origin, int ttcIndex) {
+static void srcOpen(cfrCtx h, long flags, long origin, int ttcIndex) {
     int i;
     int result;
     ctlTag sfnt_tag;
@@ -559,8 +562,9 @@ readhdr:
             case sfrSuccess:
                 if (sfnt_tag == sfr_OTTO_tag) {
                     /* OTF; use CFF table offset */
-                    sfrTable *table =
-                        sfrGetTableByTag(h->ctx.sfr, CTL_TAG('C', 'F', 'F', ' '));
+                    sfrTable *table = NULL;
+                    if (!(flags & CFR_CFF2_ONLY))
+                        table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('C', 'F', 'F', ' '));
                     if (table == NULL) {
                         table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('C', 'F', 'F', '2'));
                     }
@@ -778,15 +782,16 @@ static void handleBlend(cfrCtx h) {
     stack_elem *firstItem;
     int i = 0;
     int numDeltaBlends = numBlends * h->stack.numRegions;
+    int numTotalBlends = numBlends + numDeltaBlends;
     int firstItemIndex;
     h->flags |= CFR_SEEN_BLEND;
 
     h->stack.cnt--;
 
-    if (numBlends < 0 || numDeltaBlends < 0)
+    if (numBlends < 0 || numDeltaBlends < 0 || numTotalBlends < 0 /*check signed int overflow*/)
         fatal(h, cfrErrStackUnderflow);
-    CHKUFLOW(numBlends + numDeltaBlends);
-    firstItemIndex = (h->stack.cnt - (numBlends + numDeltaBlends));
+    CHKUFLOW(numTotalBlends);
+    firstItemIndex = (h->stack.cnt - numTotalBlends);
     firstItem = &(h->stack.array[firstItemIndex]);
 
     if (h->flags & CFR_FLATTEN_VF) {
@@ -1542,6 +1547,8 @@ static void readSubrINDEX(cfrCtx h, ctlRegion *region, SubrOffsets *offsets) {
     }
 
     offSize = read1(h); /* Get offset size */
+    if (offSize < 1 || offSize > 4)
+        fatal(h, cfrErrINDEXHeader);
 
     /* Compute data offset */
     dataoff = region->begin + cntSize + 1 + (cnt + 1) * offSize - 1;
@@ -1573,8 +1580,10 @@ static void readINDEX(cfrCtx h, ctlRegion *region, INDEX *index) {
         index->count = read2(h);
     }
 
+    index->offset = region->begin + cntSize + 1; /* Get offset array base */
     if (index->count == 0) {
         /* Empty INDEX */
+        index->offSize = 0;
         region->end = region->begin + cntSize;
         return;
     }
@@ -1583,8 +1592,6 @@ static void readINDEX(cfrCtx h, ctlRegion *region, INDEX *index) {
     index->offSize = read1(h);
     if (index->offSize < 1 || index->offSize > 4)
         fatal(h, cfrErrINDEXHeader);
-
-    index->offset = region->begin + cntSize + 1; /* Get offset array base */
 
     /* Read and validate first offset */
     if (readN(h, index->offSize) != 1)
@@ -1596,6 +1603,8 @@ static void readINDEX(cfrCtx h, ctlRegion *region, INDEX *index) {
     /* Read last offset and compute INDEX length */
     srcSeek(h, index->offset + index->count * index->offSize);
     region->end = index->data + readN(h, index->offSize);
+    if (region->end < region->begin)
+        fatal(h, cfrErrINDEXOffset);
 }
 
 static void readTopDataAsIndex(cfrCtx h, ctlRegion *region, INDEX *index) {
@@ -1696,7 +1705,7 @@ static void readFDArray(cfrCtx h) {
     if (h->region.FDArrayINDEX.begin == -1)
         fatal(h, cfrErrNoFDArray);
     readINDEX(h, &h->region.FDArrayINDEX, &h->index.FDArray);
-    if (h->index.FDArray.count > 256)
+    if (h->index.FDArray.count < 1 || h->index.FDArray.count > 256)
         fatal(h, cfrErrBadFDArray);
 
     /* Read FDArray */
@@ -1778,7 +1787,7 @@ static void readStrings(cfrCtx h) {
 
 /* Read CharStrings INDEX. */
 static void readCharStringsINDEX(cfrCtx h, short flags) {
-    unsigned long i;
+    long i;
     INDEX index;
     Offset offset;
 
@@ -1789,9 +1798,11 @@ static void readCharStringsINDEX(cfrCtx h, short flags) {
 
     /* Allocate and initialize glyphs array */
     dnaSET_CNT(h->glyphs, index.count);
+    if (index.count == 0)
+        return;
     srcSeek(h, index.offset);
     offset = index.data + readN(h, index.offSize);
-    for (i = 0; i < index.count; i++) {
+    for (i = 0; i < h->glyphs.cnt; i++) {
         long length;
         abfGlyphInfo *info = &h->glyphs.array[i];
 
@@ -1821,9 +1832,9 @@ static char *post2GetName(cfrCtx h, SID gid) {
     if (gid >= h->post.fmt2.glyphNameIndex.cnt)
         return NULL; /* Out of bounds; .notdef */
     else if (h->post.format != 0x00020000)
-        return h->post.fmt2.strings.array[gid];
+        return (gid < h->post.fmt2.strings.cnt) ? h->post.fmt2.strings.array[gid] : NULL;
     else {
-        long nid = h->post.fmt2.glyphNameIndex.array[gid];
+        long nid = (gid < h->post.fmt2.glyphNameIndex.cnt) ? h->post.fmt2.glyphNameIndex.array[gid] : 0;
         if (nid == 0)
             return stdstrs[nid]; /* .notdef */
         else if (nid < 258)
@@ -1837,7 +1848,10 @@ static char *post2GetName(cfrCtx h, SID gid) {
 
 /* Add SID/CID to charset */
 static void addID(cfrCtx h, long gid, unsigned short id) {
-    abfGlyphInfo *info = &h->glyphs.array[gid];
+    abfGlyphInfo *info;
+    if (gid >= h->glyphs.cnt)
+        fatal(h, cfrErrNoGlyph);
+    info = &h->glyphs.array[gid];
     if (h->flags & CID_FONT)
         /* Save CID */
         info->cid = id;
@@ -1903,6 +1917,8 @@ static void buildGIDNames(cfrCtx h) {
     long numGlyphs = h->glyphs.cnt;
     unsigned short i;
 
+    if (numGlyphs <= 0)
+        fatal(h, cfrErrNoGlyph);
     dnaSET_CNT(h->post.fmt2.glyphNameIndex, numGlyphs);
     for (i = 0; i < numGlyphs; i++) {
         h->post.fmt2.glyphNameIndex.array[i] = i;
@@ -2029,6 +2045,7 @@ parseError:
      to a value that will allow us to use the header values but will prevent
      us from using any glyph name data which is likely missing or invalid */
     h->post.format = 0x00000001;
+    buildGIDNames(h);
 }
 
 /* Read MVAR table for font wide variable metrics. */
@@ -2183,8 +2200,11 @@ static void readCharset(cfrCtx h) {
                     while (gid < h->glyphs.cnt) {
                         unsigned short id = read2(h);
                         long nLeft = readN(h, size);
-                        while (nLeft-- >= 0)
+                        while (nLeft-- >= 0) {
+                            if (gid >= h->glyphs.cnt)
+                                fatal(h, cfrErrCharsetFmt);
                             addID(h, gid++, id++);
+                        }
                     }
                     break;
                 default:
@@ -2290,16 +2310,22 @@ static void readEncoding(cfrCtx h) {
             switch (fmt & 0x7f) {
                 case 0:
                     cnt = read1(h);
-                    while (gid <= cnt)
+                    while (gid <= cnt) {
+                        if (gid >= h->glyphs.cnt)
+                            fatal(h, cfrErrEncodingFmt);
                         encAdd(h, &h->glyphs.array[gid++], read1(h));
+                    }
                     break;
                 case 1:
                     cnt = read1(h);
                     while (cnt--) {
                         short code = read1(h);
                         int nLeft = read1(h);
-                        while (nLeft-- >= 0)
+                        while (nLeft-- >= 0) {
+                            if (gid >= h->glyphs.cnt)
+                                fatal(h, cfrErrEncodingFmt);
                             encAdd(h, &h->glyphs.array[gid++], code++);
+                        }
                     }
                     break;
                 default:
@@ -2346,8 +2372,12 @@ static void readFDSelect(cfrCtx h) {
     srcSeek(h, h->region.FDSelect.begin);
     switch (read1(h)) {
         case 0:
-            for (gid = 0; gid < h->glyphs.cnt; gid++)
-                h->glyphs.array[gid].iFD = read1(h);
+            for (gid = 0; gid < h->glyphs.cnt; gid++) {
+                int fd = (int)read1(h);
+                if (fd >= h->FDArray.cnt)
+                    fatal(h, cfrErrFDSelectFmt);
+                h->glyphs.array[gid].iFD = (unsigned char)fd;
+            }
             break;
         case 3: {
             int nRanges = read2(h);
@@ -2357,8 +2387,11 @@ static void readFDSelect(cfrCtx h) {
                 int fd = read1(h);
                 long next = read2(h);
 
-                while (gid < next)
+                while (gid < next) {
+                    if (gid >= h->glyphs.cnt || fd >= h->FDArray.cnt)
+                        fatal(h, cfrErrFDSelectFmt);
                     h->glyphs.array[gid++].iFD = (unsigned char)fd;
+                }
             }
         } break;
         default:
@@ -2613,13 +2646,16 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
     ctlRegion region;
     short gi_flags; /* abfGlyphInfo flags */
 
+    if (flags & CFR_FLATTEN_VF)
+        flags |= CFR_CFF2_ONLY;
+
     /* Set error handler */
     DURING_EX(h->err.env)
 
     /* Initialize top DICT */
     abfInitTopDict(&h->top);
 
-    srcOpen(h, origin, ttcIndex);
+    srcOpen(h, flags, origin, ttcIndex);
 
     /* Initialize */
     h->flags = flags & 0xffff;

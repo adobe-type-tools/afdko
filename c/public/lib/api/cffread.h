@@ -67,6 +67,7 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
 #define CFR_FLATTEN_VF              (1 << 8)
 #define CFR_SHORT_VF_NAME           (1 << 9)
 #define CFR_UNUSE_VF_NAMED_INSTANCE (1 << 10)
+#define CFR_CFF2_ONLY   (1<<11)
 
 /* cfrBegFont() is called to initiate a new font parse. The source data stream
    (CFR_SRC_STREAM_ID) is opened, positioned at the offset specified by the
@@ -118,6 +119,9 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
    instance PS name is generated from the design vector as documented in Tech
    Notes 5902 regarding named instances in the fvar table. If the flag is
    unset, a PS name of a named instance is used if there is a match.
+
+   CFR_CFF2_ONLY - don't read the CFF table even if it is available in the font along with CFF2.
+   This flag is assumed when CFR_FLATTEN_VF is set.
 
    The "UDV" parameter specifies the User Design Vector to be used in
    flattening (snapshotting) a CFF2 variable font. If NULL, the font is
