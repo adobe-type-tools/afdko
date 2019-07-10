@@ -155,9 +155,10 @@ char *cfwSindexGetString(cfwCtx g, SRI index) {
     if (index < STD_STR_CNT) {
         return sid2std[index];
     } else {
-        static char null_str[1] = {'\0'};
-        if (index - STD_STR_CNT >= h->custom.cnt)
+        if (index - STD_STR_CNT >= h->custom.cnt) {
+            static char null_str[1] = {'\0'};
             return null_str;
+        }
         return &h->strings.array[h->custom.array[index - STD_STR_CNT].iString];
     }
 }
