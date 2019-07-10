@@ -176,14 +176,20 @@ static void readSfntDirectory(sfrCtx h, long origin) {
 /* Read TrueType Collection TableDirectory. */
 static void readTTCDirectory(sfrCtx h, long origin) {
     long i;
+    size_t size;
 
     /* Skip version since we are only interested in version 1.0 fields*/
     (void)read4(h);
 
     /* Read directory */
     h->TTC.DirectoryCount = read4(h);
-    h->TTC.TableDirectory = (long *)memResize(h, h->TTC.TableDirectory,
-                                              h->TTC.DirectoryCount * sizeof(long *));
+    size = (size_t)h->TTC.DirectoryCount * sizeof(long);
+    if (h->TTC.DirectoryCount <= 0 || size / sizeof(long) != h->TTC.DirectoryCount) /* overflow check */
+    {
+        h->TTC.DirectoryCount = 0;
+        return;
+    }
+    h->TTC.TableDirectory = (long *)memResize(h, h->TTC.TableDirectory, size);
     h->flags |= TTC_STM; /* readSfntDirectory( reads in to h->TTC.TableDirectory[i].directory if TTC_STM is set.*/
 
     for (i = 0; i < h->TTC.DirectoryCount; i++) {
