@@ -1,23 +1,23 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="2" name="quotedbl">
-  <advance width="426" />
-  <unicode hex="0022" />
+<glyph name="quotedbl" format="2">
+  <advance width="426"/>
+  <unicode hex="0022"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="line" x="63.36" y="275.84" />
-      <point type="line" x="95.36" y="275.84" />
-      <point type="line" x="105.6" y="382.72" />
-      <point type="line" x="107.52" y="441.6" />
-      <point type="line" x="51.2" y="441.6" />
-      <point type="line" x="53.12" y="382.72" />
+      <point type="line" x="63.36" y="275.84" name="hintSet0000"/>
+      <point type="line" x="95.36" y="275.84"/>
+      <point type="line" x="105.6" y="382.72"/>
+      <point type="line" x="107.52" y="441.6"/>
+      <point type="line" x="51.2" y="441.6"/>
+      <point type="line" x="53.12" y="382.72"/>
     </contour>
     <contour>
-      <point type="line" x="204.96" y="275.84" />
-      <point type="line" x="236.96" y="275.84" />
-      <point type="line" x="247.2" y="382.72" />
-      <point type="line" x="249.12" y="441.6" />
-      <point type="line" x="192.8" y="441.6" />
-      <point type="line" x="194.72" y="382.72" />
+      <point type="line" x="204.96" y="275.84"/>
+      <point type="line" x="236.96" y="275.84"/>
+      <point type="line" x="247.2" y="382.72"/>
+      <point type="line" x="249.12" y="441.6"/>
+      <point type="line" x="192.8" y="441.6"/>
+      <point type="line" x="194.72" y="382.72"/>
     </contour>
   </outline>
   <lib>

@@ -1,21 +1,21 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="2" name="period">
-  <advance width="249" />
-  <unicode hex="002E" />
+<glyph name="period" format="2">
+  <advance width="249"/>
+  <unicode hex="002E"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="curve" x="100" y="-10" />
-      <point x="126" y="-10" />
-      <point x="147" y="11" />
-      <point type="curve" x="147" y="40" />
-      <point name="hintSet0002" x="147" y="70" />
-      <point x="126" y="91" />
-      <point type="curve" x="100" y="91" />
-      <point x="74" y="91" />
-      <point x="52" y="70" />
-      <point type="curve" x="52" y="40" />
-      <point name="hintSet0004" x="52" y="11" />
-      <point x="74" y="-10" />
+      <point type="curve" x="100" y="-10" name="hintSet0000"/>
+      <point x="126" y="-10"/>
+      <point x="147" y="11"/>
+      <point type="curve" x="147" y="40"/>
+      <point x="147" y="70" name="hintSet0002"/>
+      <point x="126" y="91"/>
+      <point type="curve" x="100" y="91"/>
+      <point x="74" y="91"/>
+      <point x="52" y="70"/>
+      <point type="curve" x="52" y="40"/>
+      <point x="52" y="11" name="hintSet0004"/>
+      <point x="74" y="-10"/>
     </contour>
   </outline>
   <lib>

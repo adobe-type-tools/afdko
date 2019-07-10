@@ -8,11 +8,7 @@ import os
 import re
 from collections import OrderedDict
 
-try:
-    import xml.etree.cElementTree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET
-
+from fontTools.misc import etree as ET
 from fontTools.misc import plistlib
 from fontTools.misc.py23 import open, tounicode, tostr, round
 from fontTools.ufoLib import UFOReader
@@ -23,10 +19,10 @@ from psautohint.ufoFont import (norm_float, HashPointPen,
 
 from afdko import convertfonttocid, fdkutils
 
-__version__ = '1.34.1'
+__version__ = '1.34.2'
 
 __doc__ = """
-ufotools.py v1.34.1 Jul 8 2019
+ufotools.py v1.34.2 Jul 9 2019
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -1825,7 +1821,7 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
     # I need to replace the contours with data from the bez string.
     glyphPath = ufoFontData.getGlyphSrcPath(glyphName)
 
-    with open(glyphPath, "r", encoding='utf-8') as fp:
+    with open(glyphPath, "rb") as fp:
         data = fp.read()
 
     glifXML = XML(data)

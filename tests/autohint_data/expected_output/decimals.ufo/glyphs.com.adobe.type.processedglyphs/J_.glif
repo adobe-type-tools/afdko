@@ -1,27 +1,27 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="2" name="J">
-  <advance width="480" />
-  <unicode hex="004A" />
-  <anchor name="aboveUC" x="278.40000000000003" y="542.4" />
-  <anchor name="belowLC" x="202.4" y="-17.6" />
+<glyph name="J" format="2">
+  <advance width="480"/>
+  <unicode hex="004A"/>
+  <anchor x="278.40000000000003" y="542.4" name="aboveUC"/>
+  <anchor x="202.4" y="-17.6" name="belowLC"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="curve" x="170" y="-10" />
-      <point x="272" y="-10" />
-      <point x="314" y="64" />
-      <point type="curve" x="314" y="154" />
-      <point type="line" x="314" y="525" />
-      <point type="line" x="247" y="525" />
-      <point type="line" x="247" y="161" />
-      <point x="247" y="81" />
-      <point x="219" y="49" />
-      <point type="curve" x="163" y="49" />
-      <point x="126" y="49" />
-      <point x="96" y="66" />
-      <point type="curve" x="73" y="108" />
-      <point type="line" x="25" y="74" />
-      <point x="55" y="19" />
-      <point x="103" y="-10" />
+      <point type="curve" x="170" y="-10" name="hintSet0000"/>
+      <point x="272" y="-10"/>
+      <point x="314" y="64"/>
+      <point type="curve" x="314" y="154"/>
+      <point type="line" x="314" y="525"/>
+      <point type="line" x="247" y="525"/>
+      <point type="line" x="247" y="161"/>
+      <point x="247" y="81"/>
+      <point x="219" y="49"/>
+      <point type="curve" x="163" y="49"/>
+      <point x="126" y="49"/>
+      <point x="96" y="66"/>
+      <point type="curve" x="73" y="108"/>
+      <point type="line" x="25" y="74"/>
+      <point x="55" y="19"/>
+      <point x="103" y="-10"/>
     </contour>
   </outline>
   <lib>

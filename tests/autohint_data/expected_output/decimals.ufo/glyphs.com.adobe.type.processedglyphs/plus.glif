@@ -1,21 +1,21 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="2" name="plus">
-  <advance width="497" />
-  <unicode hex="002B" />
+<glyph name="plus" format="2">
+  <advance width="497"/>
+  <unicode hex="002B"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="line" x="173" y="83" />
-      <point type="line" x="225" y="83" />
-      <point type="line" x="225" y="239" />
-      <point type="line" x="370" y="239" />
-      <point type="line" x="370" y="289" />
-      <point type="line" x="225" y="289" />
-      <point type="line" x="225" y="445" />
-      <point type="line" x="173" y="445" />
-      <point type="line" x="173" y="289" />
-      <point type="line" x="27" y="289" />
-      <point type="line" x="27" y="239" />
-      <point type="line" x="173" y="239" />
+      <point type="line" x="173" y="83" name="hintSet0000"/>
+      <point type="line" x="225" y="83"/>
+      <point type="line" x="225" y="239"/>
+      <point type="line" x="370" y="239"/>
+      <point type="line" x="370" y="289"/>
+      <point type="line" x="225" y="289"/>
+      <point type="line" x="225" y="445"/>
+      <point type="line" x="173" y="445"/>
+      <point type="line" x="173" y="289"/>
+      <point type="line" x="27" y="289"/>
+      <point type="line" x="27" y="239"/>
+      <point type="line" x="173" y="239"/>
     </contour>
   </outline>
   <lib>

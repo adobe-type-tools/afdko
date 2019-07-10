@@ -1,24 +1,24 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="2" name="K">
-  <advance width="579" />
-  <unicode hex="004B" />
-  <anchor name="aboveUC" x="248.8" y="542.4" />
-  <anchor name="belowLC" x="262.40000000000003" y="-17.6" />
+<glyph name="K" format="2">
+  <advance width="579"/>
+  <unicode hex="004B"/>
+  <anchor x="248.8" y="542.4" name="aboveUC"/>
+  <anchor x="262.40000000000003" y="-17.6" name="belowLC"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="line" x="72" y="0" />
-      <point type="line" x="138" y="0" />
-      <point type="line" x="138" y="166" />
-      <point type="line" x="229" y="273" />
-      <point type="line" x="386" y="0" />
-      <point type="line" x="460" y="0" />
-      <point type="line" x="270" y="325" />
-      <point type="line" x="434" y="525" />
-      <point type="line" x="359" y="525" />
-      <point type="line" x="141" y="262" />
-      <point type="line" x="138" y="262" />
-      <point type="line" x="138" y="525" />
-      <point type="line" x="72" y="525" />
+      <point type="line" x="72" y="0" name="hintSet0000"/>
+      <point type="line" x="138" y="0"/>
+      <point type="line" x="138" y="166"/>
+      <point type="line" x="229" y="273"/>
+      <point type="line" x="386" y="0"/>
+      <point type="line" x="460" y="0"/>
+      <point type="line" x="270" y="325"/>
+      <point type="line" x="434" y="525"/>
+      <point type="line" x="359" y="525"/>
+      <point type="line" x="141" y="262"/>
+      <point type="line" x="138" y="262"/>
+      <point type="line" x="138" y="525"/>
+      <point type="line" x="72" y="525"/>
     </contour>
   </outline>
   <lib>
