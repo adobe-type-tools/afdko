@@ -268,6 +268,7 @@ static void var_freeavar(ctlSharedStmCallbacks *sscb, var_avar avar) {
 static var_avar var_loadavar(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
     var_avar avar = NULL;
     int success = 0;
+    unsigned short axisCount = 0;
     unsigned short i;
 
     sfrTable *table = sfrGetTableByTag(sfr, AVAR_TABLE_TAG);
@@ -290,18 +291,23 @@ static var_avar var_loadavar(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
 
     avar = (var_avar)sscb->memNew(sscb, sizeof(*avar));
     memset(avar, 0, sizeof(*avar));
+    dnaINIT(sscb->dna, avar->segmentMaps, 0, 1);
 
     i = sscb->read2(sscb); /* skip reserved short */
-    avar->axisCount = sscb->read2(sscb);
+    axisCount = sscb->read2(sscb);
 
-    if (table->length < AVAR_TABLE_HEADER_SIZE + (unsigned long)AVAR_SEGMENT_MAP_SIZE * avar->axisCount) {
+    if (table->length < AVAR_TABLE_HEADER_SIZE + (unsigned long)AVAR_SEGMENT_MAP_SIZE * axisCount) {
         sscb->message(sscb, "invalid avar table size or axis/instance count/size");
         goto cleanup;
     }
 
-    dnaINIT(sscb->dna, avar->segmentMaps, 0, 1);
-    if (dnaSetCnt(&avar->segmentMaps, DNA_ELEM_SIZE_(avar->segmentMaps), avar->axisCount) < 0)
+    if (dnaSetCnt(&avar->segmentMaps, DNA_ELEM_SIZE_(avar->segmentMaps), axisCount) < 0)
         goto cleanup;
+    avar->axisCount = axisCount;
+    for (i = 0; i < avar->axisCount; i++) {
+        segmentMap *seg = &avar->segmentMaps.array[i];
+        dnaINIT(sscb->dna, seg->valueMaps, 0, 1);
+    }
 
     for (i = 0; i < avar->axisCount; i++) {
         segmentMap *seg = &avar->segmentMaps.array[i];
@@ -313,7 +319,6 @@ static var_avar var_loadavar(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
             goto cleanup;
         }
 
-        dnaINIT(sscb->dna, seg->valueMaps, 0, 1);
         if (dnaSetCnt(&seg->valueMaps, DNA_ELEM_SIZE_(seg->valueMaps), seg->positionMapCount) < 0)
             goto cleanup;
         for (j = 0; j < seg->positionMapCount; j++) {
