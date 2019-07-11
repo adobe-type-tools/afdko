@@ -209,6 +209,25 @@ def test_cff2_no_vf_bug353():
     assert differ([expected_path, cff2_path, '-m', 'bin'])
 
 
+def test_cff2_with_spare_masters_pr835():
+    # SetNumMasters was incorrectly passing the number of region indices to
+    # var_getIVSRegionIndices for the regionListCount. With PR #835 it now
+    # passes the total region count for regionListCount.
+    #
+    # Example of the bug -- this command:
+    #   tx -cff2 +S +b -std SHSansJPVFTest.otf SHSansJPVFTest.cff2
+    # Would produce the following warning & error:
+    #   inconsistent region indices detected in item variation store subtable 1
+    #   memory error
+    font_path = get_input_path('SHSansJPVFTest.otf')
+    output_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o',
+                  'cff2', '*S', '*b', 'std',
+                  '-f', font_path, output_path])
+    expected_path = get_expected_path('SHSansJPVFTest.cff2')
+    assert differ([expected_path, output_path, '-m', 'bin'])
+
+
 # -----------
 # Other tests
 # -----------
@@ -428,6 +447,7 @@ def test_ufo3_guideline_bug705():
     actual_path = runner(CMD + ['-s', '-o', 't1', '-f', 'bug705.ufo'])
     expected_path = get_expected_path('bug705.pfa')
     assert differ([expected_path, actual_path])
+
 
 def test_ufo_vertical_advance_bug786():
     actual_path = runner(CMD + ['-s', '-o', 't1', '-f', 'bug786.ufo'])
