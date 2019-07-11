@@ -2317,10 +2317,12 @@ def makeRelativePath(curDir, targetPath):
         return targetPath
 
 
-def makeRelativePaths(makeOTFParams):
+def adjustPaths(makeOTFParams):
     """
     Change file paths to be relative to fontDir,
     if possible, else to absolute paths.
+    (With the exception of fmndbFilePath and tempFontPath which are
+    always absolute paths.)
     """
     inputFilePath = getattr(makeOTFParams, kFileOptPrefix + kInputFont)
     fontDir = os.path.dirname(os.path.abspath(inputFilePath))
@@ -2338,9 +2340,9 @@ def makeRelativePaths(makeOTFParams):
     if featuresFilePath:
         setattr(makeOTFParams, kFileOptPrefix + kFeature, featuresFilePath)
 
-    fmndbFilePath = makeRelativePath(
-        fontDir, getattr(makeOTFParams, kFileOptPrefix + kFMB))
+    fmndbFilePath = getattr(makeOTFParams, kFileOptPrefix + kFMB)
     if fmndbFilePath:
+        fmndbFilePath = os.path.abspath(fmndbFilePath)
         setattr(makeOTFParams, kFileOptPrefix + kFMB, fmndbFilePath)
 
     goadbFilePath = makeRelativePath(
@@ -2364,8 +2366,7 @@ def makeRelativePaths(makeOTFParams):
         setattr(makeOTFParams, kFileOptPrefix + kUVSPath, uvsFilePath)
 
     if makeOTFParams.tempFontPath:
-        makeOTFParams.tempFontPath = makeRelativePath(
-            fontDir, makeOTFParams.tempFontPath)
+        makeOTFParams.tempFontPath = os.path.abspath(makeOTFParams.tempFontPath)
 
     return fontDir
 
@@ -2386,7 +2387,7 @@ def runMakeOTF(makeOTFParams):
 
     # Change file paths to be relative to fontDir,
     # if possible, else to absolute paths.
-    fontDir = makeRelativePaths(makeOTFParams)
+    fontDir = adjustPaths(makeOTFParams)
     inputFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kInputFont))
 
     # This MUST follow makeRelativePaths.
