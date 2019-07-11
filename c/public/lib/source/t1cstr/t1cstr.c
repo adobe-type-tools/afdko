@@ -555,6 +555,8 @@ static int do_store(t1cCtx h) {
     int j;
     int reg;
     float *array;
+    int temp_length;
+    int temp_size;
 
     CHKUFLOW(4);
 
@@ -564,9 +566,11 @@ static int do_store(t1cCtx h) {
     reg = (int)POP();
     array = selRegItem(h, reg, &size);
 
-    if (array == NULL ||
-        i < 0 || i + count + 1 >= TX_BCA_LENGTH ||
-        j < 0 || j + count + 1 >= size)
+    temp_length = i + count + 1;
+    temp_size = j + count + 1;
+    if (array == NULL || count < 0 ||
+        i < 0 || temp_length < 0 || temp_length >= TX_BCA_LENGTH ||
+        j < 0 || temp_size < 0 || temp_size >= size)
         return t1cErrStoreBounds;
 
     memcpy(&array[j], &h->BCA[i], sizeof(float) * count);
@@ -619,7 +623,8 @@ static int do_load(t1cCtx h) {
     reg = (int)POP();
     array = selRegItem(h, reg, &size);
 
-    if (i < 0 || i + count - 1 >= TX_BCA_LENGTH || count > size)
+    if (array == NULL || count < 0 ||
+        i < 0 || i + count - 1 >= TX_BCA_LENGTH || count > size)
         return t1cErrLoadBounds;
 
     memcpy(&h->BCA[i], array, sizeof(float) * count);

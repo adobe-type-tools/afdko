@@ -5079,11 +5079,24 @@ static void readsfnt(txCtx h, long origin) {
                 case sfr_v1_0_tag:
                 case sfr_true_tag:
                     /* TrueType */
-                    addFont(h, src_TrueType, 0, origin);
+                    table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('g', 'l', 'y', 'f'));
+                    if (table == NULL)
+                        fatal(h, "(sfr) %s", sfrErrStr(sfrErrBadSfnt));
+                    else
+                        addFont(h, src_TrueType, 0, origin);
                     break;
                 case sfr_OTTO_tag:
                     /* OTF */
-                    addFont(h, src_OTF, 0, origin);
+                    table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('C', 'F', 'F', ' '));
+                    if (table == NULL) {
+                        table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('C', 'F', 'F', '2'));
+                        if (table == NULL) {
+                            fatal(h, "(sfr) %s", sfrErrStr(sfrErrBadSfnt));
+                        }
+                    }
+                    if (table != NULL) {
+                        addFont(h, src_OTF, 0, origin);
+                    }
                     break;
                 case sfr_typ1_tag:
                     /* GX or sfnt-wrapped CID font */

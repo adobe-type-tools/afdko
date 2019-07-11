@@ -87,11 +87,13 @@ long dnaGrow(void *object, size_t elemsize, long index) {
         else
             new_ptr = NULL;
     } else {
+        size_t new_mem_size;
         /* Incremental allocation */
         new_size = da->size +
                    ((index - da->size) + da->incr) / da->incr * da->incr;
-        if (new_size * elemsize >= new_size) /* check math overflow */
-            new_ptr = h->mem.manage(&h->mem, da->array, new_size * elemsize);
+        new_mem_size = new_size * elemsize;
+        if (new_mem_size / elemsize == new_size) /* check math overflow */
+            new_ptr = h->mem.manage(&h->mem, da->array, new_mem_size);
         else
             new_ptr = NULL;
     }

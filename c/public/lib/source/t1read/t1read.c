@@ -201,7 +201,7 @@ static void vmessage(t1rCtx h, char *fmt, va_list ap) {
     if (h->stm.dbg == NULL)
         return; /* Debug stream not available */
 
-    vsprintf(text, fmt, ap);
+    vsnprintf(text, 500, fmt, ap);
     (void)h->cb.stm.write(&h->cb.stm, h->stm.dbg, strlen(text), text);
 }
 
@@ -338,7 +338,10 @@ static STI addString(t1rCtx h, size_t length, const char *value) {
 
 /* Get string from STI. */
 static char *getString(t1rCtx h, STI sti) {
-    return &h->strings.buf.array[h->strings.index.array[sti]];
+    if (sti == STI_UNDEF)
+        return NULL;
+    else
+        return &h->strings.buf.array[h->strings.index.array[sti]];
 }
 
 /* ---------------------------- Chars Management --------------------------- */
@@ -491,6 +494,9 @@ t1rCtx t1rNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     h = mem_cb->manage(mem_cb, NULL, sizeof(struct t1rCtx_));
     if (h == NULL)
         return NULL;
+
+    /* explictly zero out entire structure */
+    memset(h, 0, sizeof(struct t1rCtx_));
 
     /* Safety initialization */
     h->FDArray.size = 0;
@@ -1468,6 +1474,8 @@ static void mmInit(t1rCtx h) {
     int nMasters;
     int nAxes;
     char *FontName = getString(h, (STI)h->fd->fdict->FontName.impl);
+    if (FontName == NULL)
+        fatal(h, t1rErrFontName, NULL);
     int isJenson = bsearch(FontName, jenson, ARRAY_LEN(jenson),
                            sizeof(jenson[0]), matchFontName) != NULL;
     int isKepler = bsearch(FontName, kepler, ARRAY_LEN(kepler),
@@ -2041,7 +2049,7 @@ static void parseOrigFontType(t1rCtx h, abfTopDict *top) {
 /* Initialize FDArray. */
 static void initFDArray(t1rCtx h, long cnt) {
     int i;
-    if (cnt < 0 || cnt > 256)
+    if (cnt < 1 || cnt > 256)
         badKeyValue(h, kFDArray);
     dnaSET_CNT(h->FDArray, cnt);
     dnaSET_CNT(h->fdicts, cnt);
@@ -2630,6 +2638,9 @@ static void srcSeek(t1rCtx h, long offset) {
         /* Offset within current buffer; reposition next byte */
         h->src.next = h->src.buf + delta;
     else {
+        if (h->stm.src == NULL)
+            fatal(h, t1rErrSrcStream, NULL);
+
         /* Offset outside current buffer; seek to offset and fill buffer */
         if (h->cb.stm.seek(&h->cb.stm, h->stm.src, offset))
             fatal(h, t1rErrSrcStream, NULL);
@@ -2747,6 +2758,8 @@ static void readCIDMap(t1rCtx h,
         offset = nextoff;
     }
     h->chars.index.cnt = tag;
+    if (h->chars.index.cnt == 0)
+        fatal(h, t1rErrCIDMap, NULL);
 
     if (h->chars.index.array[h->chars.index.cnt - 1].cid + 1 !=
         h->top.cid.CIDCount)
