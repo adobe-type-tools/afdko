@@ -1,6 +1,5 @@
 # Copyright 2014 Adobe. All rights reserved.
 
-from __future__ import print_function, absolute_import
 from decimal import Decimal
 import functools
 import os
@@ -27,7 +26,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.7.4 Mar 14 2019
+makeotf.py v2.7.5 Jul 12 2019
 """
 
 __methods__ = """

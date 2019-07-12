@@ -6,8 +6,6 @@ It uses the mutatorMath library. The paths to the masters and
 instances fonts are specified in the .designspace file.
 """
 
-from __future__ import print_function, absolute_import, division
-
 import argparse
 import logging
 import os
@@ -30,7 +28,7 @@ from afdko.fdkutils import get_temp_file_path
 from afdko.ufotools import validateLayers
 
 
-__version__ = '2.3.1'
+__version__ = '2.3.2'
 
 logger = logging.getLogger(__name__)
 

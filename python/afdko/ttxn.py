@@ -58,8 +58,6 @@ Get feat tag list. For each tag:
 
 
 """
-from __future__ import print_function, absolute_import
-
 
 __help__ = """
 ttxn v1.21.1 Jan 30 2019

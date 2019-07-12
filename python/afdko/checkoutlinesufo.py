@@ -4,9 +4,7 @@
 Tool that performs outline quality checks and can remove path overlaps.
 """
 
-from __future__ import print_function, absolute_import
-
-__version__ = '2.3.1'
+__version__ = '2.3.2'
 
 import argparse
 from functools import cmp_to_key

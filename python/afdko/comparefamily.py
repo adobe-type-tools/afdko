@@ -4,13 +4,11 @@
 #	This is not code to copy . The original developer did not know Python well,
 #	and had odd ideas about design. However, it works.
 
-from __future__ import print_function, absolute_import
-
 __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
 __usage__ = """
-comparefamily 2.1.3 Nov 1 2018
+comparefamily 2.1.4 Jul 12 2019
 
 comparefamily [u] -h] [-d <directory path>] [-tolerance <n>] -rm] [-rn] [-rp] [-nohints] [-l] [-rf] [-st n1,..] [-ft n1,..]
 where 'n1' stands for the number of a test, such as "-st 26" to run Single Test 26.
@@ -24,6 +22,8 @@ feel free to edit or disable them in the source script file at:
 
 See 'comparefamily -h' for details.
 """
+
+__version__ = "2.1.4"
 
 __help__ = """
 

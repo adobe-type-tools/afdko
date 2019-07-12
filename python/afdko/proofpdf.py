@@ -8,8 +8,6 @@ options to arguments for the fontpdf module; the latter produces a proof
 file using the provided options annd font instance.
 """
 
-from __future__ import print_function
-
 import copy
 import os
 import platform

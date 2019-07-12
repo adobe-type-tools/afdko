@@ -1,7 +1,5 @@
 # Copyright 2017 Adobe. All rights reserved.
 
-from __future__ import print_function, absolute_import, unicode_literals
-
 import ast
 import hashlib
 import os
@@ -19,10 +17,10 @@ from psautohint.ufoFont import (norm_float, HashPointPen,
 
 from afdko import convertfonttocid, fdkutils
 
-__version__ = '1.34.2'
+__version__ = '1.34.3'
 
 __doc__ = """
-ufotools.py v1.34.2 Jul 9 2019
+ufotools.py v1.34.3 Jul 12 2019
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO

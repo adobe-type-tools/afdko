@@ -1,7 +1,6 @@
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
 # 1
-from __future__ import print_function, absolute_import
 
 import glob
 import os

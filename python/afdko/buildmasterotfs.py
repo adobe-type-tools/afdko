@@ -18,8 +18,6 @@ and UFO master source fonts.
 # The script will build a master source OpenType/CFF font for each master
 # source UFO font, using the same file name, but with the extension '.otf'.
 
-from __future__ import print_function, division, absolute_import
-
 import argparse
 import logging
 import os
@@ -33,7 +31,7 @@ from fontTools.designspaceLib import (
 from afdko.fdkutils import run_shell_command, get_temp_file_path
 from afdko.makeotf import main as makeotf
 
-__version__ = '1.9.1'
+__version__ = '1.9.2'
 
 logger = logging.getLogger(__name__)
 

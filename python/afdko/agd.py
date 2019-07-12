@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
@@ -18,7 +16,7 @@ python/afdko, the set of commands is:
 	gAGDDict = agd.dictionary(agdTextPath)
 """
 
-import re, sys, os, time
+import re
 
 
 #---------------------------------------

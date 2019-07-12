@@ -1,7 +1,7 @@
 # Copyright 2014 Adobe. All rights reserved.
 
 """
-convertfonttocid.py. v 1.13.0 Aug 28 2018
+convertfonttocid.py. v 1.13.1 Jul 12 2019
 
 Convert a Type 1 font to CID, given multiple hint dict defs in the
 "fontinfo" file. See autohint help, with the "-hfd" option, or the makeotf
@@ -53,8 +53,6 @@ PROCEDURE:
 
 """
 
-from __future__ import print_function, absolute_import
-
 import os
 import re
 import sys
@@ -62,6 +60,8 @@ import sys
 from fontTools.misc.py23 import open, tounicode, tobytes
 
 from afdko import fdkutils
+
+__version__ = "1.13.1"
 
 # Tokens seen in font info file that are not part
 # of a FDDict or GlyphSet definition.

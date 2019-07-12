@@ -52,7 +52,6 @@ Modified 7/25/2006 read rooberts. Added supported for embedding fonts.
 ##
 ##
 ##
-from __future__ import print_function, absolute_import
 
 import os
 try:
