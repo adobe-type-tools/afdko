@@ -4,8 +4,5 @@
 # (override default ignore list)
 select = E,F,W
 
-# except this one:
-ignore = W504
-
 # explicitly set line length limitation
 max-line-length = 79
