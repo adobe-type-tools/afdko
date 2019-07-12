@@ -3,7 +3,7 @@ image: Visual Studio 2017
 environment:
   global:
     CIBW_BUILD: cp36-win_amd64
-    CIBW_TEST_REQUIRES: pytest subprocess32
+    CIBW_TEST_REQUIRES: pytest
     CIBW_TEST_COMMAND: cd {project} && pytest && pip uninstall --yes afdko
     TWINE_USERNAME: adobe-type-tools-ci
     # Note: TWINE_PASSWORD is set in AppVeyor settings
