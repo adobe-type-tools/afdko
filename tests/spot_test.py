@@ -108,7 +108,8 @@ def test_buffer_overrun_bug465():
     current spot code correctly reports the test font GPOS table."""
     file_name = "bug465/bug465.otf"
     expected_path = get_expected_path('bug465_otf.txt')
-    actual_path = runner(CMD + ['-s', expected_path, '-o', 't', '_GPOS=7', '-f', file_name])
+    actual_path = runner(
+        CMD + ['-s', expected_path, '-o', 't', '_GPOS=7', '-f', file_name])
     assert differ([expected_path, actual_path])
 
 
