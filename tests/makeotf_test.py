@@ -3,7 +3,7 @@
 import os
 import pytest
 from shutil import copy2, copytree, rmtree
-import subprocess32 as subprocess
+import subprocess
 import sys
 import tempfile
 

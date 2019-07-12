@@ -1,5 +1,5 @@
 import pytest
-import subprocess32 as subprocess
+import subprocess
 
 from runner import main as runner, _check_tool
 

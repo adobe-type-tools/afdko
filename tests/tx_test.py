@@ -1,6 +1,6 @@
 import os
 import pytest
-import subprocess32 as subprocess
+import subprocess
 import tempfile
 
 from runner import main as runner
