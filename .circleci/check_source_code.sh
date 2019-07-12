@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # activate virtual environment
 source venv/bin/activate
 # check source files
