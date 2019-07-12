@@ -2365,7 +2365,8 @@ def adjustPaths(makeOTFParams):
         setattr(makeOTFParams, kFileOptPrefix + kUVSPath, uvsFilePath)
 
     if makeOTFParams.tempFontPath:
-        makeOTFParams.tempFontPath = os.path.abspath(makeOTFParams.tempFontPath)
+        makeOTFParams.tempFontPath = os.path.abspath(
+            makeOTFParams.tempFontPath)
 
     return fontDir
 
