@@ -1,5 +1,5 @@
 """
-fontpdf v1.27 Aug 28 2018. This module is not run stand-alone; it requires
+fontpdf v1.28 Jul 12 2019. This module is not run stand-alone; it requires
 another module, such as proofpdf, in order to collect the options, and call
 the MakePDF function.
 
@@ -22,8 +22,6 @@ however, that the coordinate system for the page puts (0,0) at the top
 right, with the positive Y axis pointing down.
 """
 
-from __future__ import print_function, absolute_import
-
 from math import ceil
 import os
 import re
@@ -33,6 +31,8 @@ from fontTools.pens.basePen import BasePen
 
 from afdko import fdkutils, pdfgen, pdfmetrics
 from afdko.pdfutils import LINEEND
+
+__version__ = "1.28"
 
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """

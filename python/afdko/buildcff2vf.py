@@ -4,8 +4,6 @@
 Builds a CFF2 variable font from a designspace file and its UFO masters.
 """
 
-from __future__ import print_function, division, absolute_import
-
 import argparse
 from ast import literal_eval
 from copy import deepcopy
@@ -22,7 +20,7 @@ from fontTools.misc.psCharStrings import T2OutlineExtractor, T2CharString
 from fontTools.ttLib import TTFont
 from fontTools.varLib.cff import CFF2CharStringMergePen
 
-__version__ = '2.0.0'
+__version__ = '2.0.1'
 
 STAT_FILENAME = 'override.STAT.ttx'
 

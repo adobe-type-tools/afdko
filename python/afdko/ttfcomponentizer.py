@@ -6,8 +6,6 @@ Uses the UFO's components data to componentize matching TrueType glyphs.
 The script only supports components that are not scaled, rotated nor flipped.
 """
 
-from __future__ import print_function
-
 import argparse
 import os
 import sys

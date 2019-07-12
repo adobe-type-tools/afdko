@@ -1,11 +1,9 @@
 # Copyright 2016 Adobe. All rights reserved.
 
 """
-fdkutils.py v1.3.0 Feb 8 2019
+fdkutils.py v1.3.1 Jul 12 2019
 A module of functions that are needed by several of the AFDKO scripts.
 """
-
-from __future__ import print_function, absolute_import
 
 import os
 import sys
@@ -13,6 +11,8 @@ import subprocess
 import tempfile
 
 from fontTools.misc.py23 import tounicode, tostr
+
+__version__ = "1.3.1"
 
 
 def get_temp_file_path():

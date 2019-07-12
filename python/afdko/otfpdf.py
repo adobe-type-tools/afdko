@@ -1,17 +1,17 @@
 # Copyright 2014 Adobe. All rights reserved.
 """
-otfpdf v1.6.1 Feb 17 2019
+otfpdf v1.6.2 Jul 12 2019
 provides support for the proofpdf script, for working with OpenType/CFF
 fonts. Provides an implementation of the fontpdf font object. Cannot be
 run alone.
 """
-from __future__ import print_function, absolute_import
-
 from fontTools.pens.boundsPen import BoundsPen
 from fontTools.misc.psCharStrings import T2OutlineExtractor
 from fontTools.misc.py23 import byteord, round
 
 from afdko.fontpdf import FontPDFGlyph, FontPDFFont, FontPDFPen
+
+__version__ = "1.6.2"
 
 
 class txPDFFont(FontPDFFont):
