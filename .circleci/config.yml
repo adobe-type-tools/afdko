@@ -7,7 +7,7 @@ jobs:
     environment:
       CIBW_BUILD: cp37-manylinux1_x86_64
       CIBW_TEST_REQUIRES: pytest subprocess32
-      CIBW_TEST_COMMAND: cd {project} && pytest -v && pip uninstall --yes afdko
+      CIBW_TEST_COMMAND: cd {project} && pytest && pip uninstall --yes afdko
       PYTHON: python
       PIP: pip
     steps:
@@ -32,7 +32,7 @@ jobs:
     environment:
       CIBW_BUILD: cp37-macosx_10_6_intel
       CIBW_TEST_REQUIRES: pytest subprocess32
-      CIBW_TEST_COMMAND: cd {project} && pytest -v && pip uninstall --yes afdko
+      CIBW_TEST_COMMAND: cd {project} && pytest && pip uninstall --yes afdko
       PYTHON: python3
       PIP: pip3
     steps:
