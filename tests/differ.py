@@ -5,8 +5,6 @@ Helper script for diff'ing files.
 Used as part of the integration tests.
 """
 
-from __future__ import print_function, division, absolute_import
-
 import argparse
 import difflib
 import filecmp
@@ -17,7 +15,7 @@ import sys
 
 from fontTools.misc.py23 import open
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 
 logger = logging.getLogger('differ')
 

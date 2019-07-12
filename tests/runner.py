@@ -5,8 +5,6 @@ Helper script for running a command line tool.
 Used as part of the integration tests.
 """
 
-from __future__ import print_function, division, absolute_import
-
 import argparse
 import logging
 import os
@@ -14,7 +12,7 @@ import subprocess32 as subprocess
 import sys
 import tempfile
 
-__version__ = '0.6.1'
+__version__ = '0.6.2'
 
 logger = logging.getLogger('runner')
 
