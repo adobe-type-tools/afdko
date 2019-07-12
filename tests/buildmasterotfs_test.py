@@ -1,6 +1,6 @@
 import os
 from shutil import copytree
-import subprocess32 as subprocess
+import subprocess
 import tempfile
 
 import pytest

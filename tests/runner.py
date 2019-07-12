@@ -8,7 +8,7 @@ Used as part of the integration tests.
 import argparse
 import logging
 import os
-import subprocess32 as subprocess
+import subprocess
 import sys
 import tempfile
 

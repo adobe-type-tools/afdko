@@ -1,7 +1,7 @@
 import os
 import pytest
 from shutil import copy2, copytree
-import subprocess32 as subprocess
+import subprocess
 import tempfile
 
 from fontTools.ttLib import TTFont

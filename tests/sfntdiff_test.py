@@ -1,4 +1,4 @@
-import subprocess32 as subprocess
+import subprocess
 import pytest
 
 from runner import main as runner

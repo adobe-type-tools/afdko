@@ -1,7 +1,7 @@
 import os
 import pytest
 from shutil import rmtree, copytree
-import subprocess32 as subprocess
+import subprocess
 
 from runner import main as runner
 from differ import main as differ
