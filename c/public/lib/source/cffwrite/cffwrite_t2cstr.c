@@ -92,6 +92,7 @@ struct cstrCtx_ {
 #define SEEN_HINT   (1 << 1) /* Seen hint subs */
 #define SEEN_CNTR   (1 << 2) /* Seen counter */
 #define SEEN_WARN   (1 << 3) /* Seen cstr warning */
+#define SEEN_BLEND  (1 << 4) /* Seen blend */
     int pendop;              /* Pending op */
     int seqop;               /* Pending sequence op */
     struct                   /* Operand stack */
@@ -512,6 +513,14 @@ static void flushBlends(cstrCtx h) {
        + ((h->g->flags & CFW_SUBRIZE) ? 1 : 0)) > CFF2_MAX_OP_STACK) {
         cfwCtx g = h->g;
         cfwFatal(g, cfwErrStackOverflow, "Blend overflow");
+    }
+
+    if (!(h->flags & SEEN_BLEND)) {
+        h->flags |= SEEN_BLEND;
+        if (h->glyph.info->blendInfo.vsindex) {
+            cstr_savenum(h, h->glyph.info->blendInfo.vsindex);
+            cstr_saveop(h, t2_vsindex);
+        }
     }
 
     /* Note that even after numbers are flushed out of our stack, non-blended values and blended values
