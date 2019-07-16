@@ -8,7 +8,7 @@ __copyright__ = """Copyright 2015 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-comparefamily 2.1.4 Jul 12 2019
+comparefamily 2.1.5 Jul 15 2019
 
 comparefamily [u] -h] [-d <directory path>] [-tolerance <n>] -rm] [-rn] [-rp] [-nohints] [-l] [-rf] [-st n1,..] [-ft n1,..]
 where 'n1' stands for the number of a test, such as "-st 26" to run Single Test 26.
@@ -23,7 +23,7 @@ feel free to edit or disable them in the source script file at:
 See 'comparefamily -h' for details.
 """
 
-__version__ = "2.1.4"
+__version__ = "2.1.5"
 
 __help__ = """
 
@@ -95,7 +95,6 @@ import copy
 import math
 
 from fontTools import ttLib
-from fontTools.misc.py23 import tounicode, byteord
 
 from afdko import fdkutils
 
@@ -1127,120 +1126,120 @@ def readNameTable(cmpfFont):
 	if cmpfFont.hasMacNames:
 		# Fill in font info with Mac Names from Mac Platform, Roman Encoding, English Language
 		try:
-			cmpfFont.PostScriptName1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 6)].decode('mac_roman'))
+			cmpfFont.PostScriptName1 = cmpfFont.nameIDDict[(1, 0, 0, 6)].decode('mac_roman')
 		except KeyError:
 			print("	Error: Missing Mac Postcriptname from name table! Should be in record", (1, 0, 0, 6))
 			cmpfFont.PostScriptName1 = ""
 
 		try:
-			cmpfFont.compatibleFamilyName1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 1)].decode('mac_roman'))
+			cmpfFont.compatibleFamilyName1 = cmpfFont.nameIDDict[(1, 0, 0, 1)].decode('mac_roman')
 		except KeyError:
 			print("	Error: Missing Mac Compatible Family Name from name table! Should be in record", (1, 0, 0, 1) , cmpfFont.PostScriptName1)
 			cmpfFont.compatibleFamilyName1 = ""
 
 		try:
-			cmpfFont.compatibleSubFamilyName1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 2)].decode('mac_roman'))
+			cmpfFont.compatibleSubFamilyName1 = cmpfFont.nameIDDict[(1, 0, 0, 2)].decode('mac_roman')
 		except KeyError:
 			print("	Error: Missing Mac Compatible SubFamily Name from name table! Should be in record", (1, 0, 0, 2), cmpfFont.PostScriptName1)
 			cmpfFont.compatibleSubFamilyName1 = ""
 
 		if (1, 0, 0, 16) in cmpfFont.nameIDDict:
-			cmpfFont.preferredFamilyName1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 16)].decode('mac_roman'))
+			cmpfFont.preferredFamilyName1 = cmpfFont.nameIDDict[(1, 0, 0, 16)].decode('mac_roman')
 		else:
 			cmpfFont.preferredFamilyName1 = cmpfFont.compatibleFamilyName1
 
 		if (1, 0, 0, 17) in cmpfFont.nameIDDict:
-			cmpfFont.preferredSubFamilyName1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 17)].decode('mac_roman'))
+			cmpfFont.preferredSubFamilyName1 = cmpfFont.nameIDDict[(1, 0, 0, 17)].decode('mac_roman')
 		else:
 			cmpfFont.preferredSubFamilyName1 = cmpfFont.compatibleSubFamilyName1
 
 
 		try:
-			cmpfFont.FullFontName1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 4)].decode('mac_roman'))
+			cmpfFont.FullFontName1 = cmpfFont.nameIDDict[(1, 0, 0, 4)].decode('mac_roman')
 		except KeyError:
 			print("	Error: Missing Mac Full Font Name from name table! Should be in record", (1, 0, 0, 4), cmpfFont.PostScriptName1)
 			cmpfFont.FullFontName1 = ""
 
 		try:
-			cmpfFont.VersionStr1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 5)].decode('mac_roman'))
+			cmpfFont.VersionStr1 = cmpfFont.nameIDDict[(1, 0, 0, 5)].decode('mac_roman')
 		except KeyError:
 			print("	Warning: Missing Mac Version String from name table! Should be in record", (1, 0, 0, 5), cmpfFont.PostScriptName1)
 			cmpfFont.VersionStr1 = ""
 
 		try:
-			cmpfFont.copyrightStr1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 0)].decode('mac_roman'))
+			cmpfFont.copyrightStr1 = cmpfFont.nameIDDict[(1, 0, 0, 0)].decode('mac_roman')
 		except KeyError:
 			print("	Warning: Missing Mac Copyright String from name table! Should be in record", (1, 0, 0, 0), cmpfFont.PostScriptName1)
 			cmpfFont.copyrightStr1 = ""
 
 		try:
-			cmpfFont.trademarkStr1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 7)].decode('mac_roman'))
+			cmpfFont.trademarkStr1 = cmpfFont.nameIDDict[(1, 0, 0, 7)].decode('mac_roman')
 		except KeyError:
 			print("	Warning: Missing Mac Trademark String from name table! Should be in record", (1, 0, 0, 7), cmpfFont.PostScriptName1)
 			cmpfFont.trademarkStr1 = ""
 
 
 		try:
-			tounicode(cmpfFont.nameIDDict[(1, 0, 0, 14)].decode('mac_roman'))
+			cmpfFont.nameIDDict[(1, 0, 0, 14)].decode('mac_roman')
 		except KeyError:
 			print("	Warning: Missing Mac platform License Notice URL  from name table! Should be in record", (1, 0, 0, 14))
 
 		if (1, 0, 0, 18) in cmpfFont.nameIDDict:
-			cmpfFont.MacCompatibleFullName1 = tounicode(cmpfFont.nameIDDict[(1, 0, 0, 18)].decode('mac_roman'))
+			cmpfFont.MacCompatibleFullName1 = cmpfFont.nameIDDict[(1, 0, 0, 18)].decode('mac_roman')
 		else:
 			cmpfFont.MacCompatibleFullName1 = cmpfFont.FullFontName1
 
 # Fill in font info with Win Names from Win Platform, Unicode Encoding, English Language
 	try:
-		cmpfFont.PostScriptName3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 6)].decode('utf_16_be'))
+		cmpfFont.PostScriptName3 = cmpfFont.nameIDDict[(3, 1, 1033, 6)].decode('utf_16_be')
 	except KeyError:
 		print("	Error: Missing Windows PostScript Name/Unicode encoding from name table! Should be in record", (3, 1, 1033, 6), cmpfFont.PostScriptName3)
 		cmpfFont.PostScriptName3 = ""
 
 	try:
-		cmpfFont.compatibleFamilyName3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 1)].decode('utf_16_be'))
+		cmpfFont.compatibleFamilyName3 = cmpfFont.nameIDDict[(3, 1, 1033, 1)].decode('utf_16_be')
 	except KeyError:
 		print("	Error: Missing Windows Compatible Family Name/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 1), cmpfFont.PostScriptName3)
 		cmpfFont.compatibleFamilyName3 = ""
 
 	if (3, 1, 1033, 16) in cmpfFont.nameIDDict:
-		cmpfFont.preferredFamilyName3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 16)].decode('utf_16_be'))
+		cmpfFont.preferredFamilyName3 = cmpfFont.nameIDDict[(3, 1, 1033, 16)].decode('utf_16_be')
 	else:
 		cmpfFont.preferredFamilyName3 = cmpfFont.compatibleFamilyName3
 
 
 	try:
-		cmpfFont.compatibleSubFamilyName3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 2)].decode('utf_16_be'))
+		cmpfFont.compatibleSubFamilyName3 = cmpfFont.nameIDDict[(3, 1, 1033, 2)].decode('utf_16_be')
 	except KeyError:
 		print("	Error: Missing Windows Compatible SubFamily Name/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 2), cmpfFont.PostScriptName3)
 		cmpfFont.compatibleSubFamilyName3 = ""
 
 	if (3, 1, 1033, 17) in cmpfFont.nameIDDict:
-		cmpfFont.preferredSubFamilyName3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 17)].decode('utf_16_be'))
+		cmpfFont.preferredSubFamilyName3 = cmpfFont.nameIDDict[(3, 1, 1033, 17)].decode('utf_16_be')
 	else:
 		cmpfFont.preferredSubFamilyName3 = cmpfFont.compatibleSubFamilyName3
 
 	try:
-		cmpfFont.FullFontName3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 4)].decode('utf_16_be'))
+		cmpfFont.FullFontName3 = cmpfFont.nameIDDict[(3, 1, 1033, 4)].decode('utf_16_be')
 	except KeyError:
 		print("	Error: Missing Windows Full Family Name/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 4), cmpfFont.PostScriptName3)
 		cmpfFont.FullFontName3 = ""
 
 	try:
-		cmpfFont.VersionStr3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 5)].decode('utf_16_be'))
+		cmpfFont.VersionStr3 = cmpfFont.nameIDDict[(3, 1, 1033, 5)].decode('utf_16_be')
 	except KeyError:
 		print("	Error: Missing Windows Version String/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 5), cmpfFont.PostScriptName3)
 		cmpfFont.VersionStr3 = ""
 
 	try:
-		cmpfFont.copyrightStr3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 0)].decode('utf_16_be'))
+		cmpfFont.copyrightStr3 = cmpfFont.nameIDDict[(3, 1, 1033, 0)].decode('utf_16_be')
 	except KeyError:
 		print("	Warning: Missing Windows Copyright String/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 0), cmpfFont.PostScriptName3)
 		cmpfFont.copyrightStr3 = ""
 
 
 	try:
-		cmpfFont.trademarkStr3 = tounicode(cmpfFont.nameIDDict[(3, 1, 1033, 7)].decode('utf_16_be'))
+		cmpfFont.trademarkStr3 = cmpfFont.nameIDDict[(3, 1, 1033, 7)].decode('utf_16_be')
 	except KeyError:
 		print("	Warning: Missing Windows Trademark String/Unicode encoding String from name table! Should be in record", (3, 1, 1033, 7), cmpfFont.PostScriptName3)
 		cmpfFont.trademarkStr3 = ""
@@ -3739,7 +3738,7 @@ def doFamilyTest11():
 			# might be the same!
 			isEqual = 1
 			for i in range(lenMac):
-				if byteord(macMenuName[i]) > 127:
+				if ord(macMenuName[i]) > 127:
 					continue # ignore upper ascii
 				if (winMenuName[i] == macMenuName[i]):
 					continue
@@ -3761,13 +3760,13 @@ def doFamilyTest11():
 				Platform, Encoding, Language, ID = nameIDKey
 
 				if (Platform == 1) and (Encoding == 0)  and (ID == 18) and Language == 0:
-					macMenuName = tounicode(font.nameIDDict[nameIDKey])
+					macMenuName = font.nameIDDict[nameIDKey].decode('macroman')
 
 				if (Platform == 1) and (Encoding == 0) and (ID == 4) and Language == 0 and not macMenuName:
-					macMenuName = tounicode(font.nameIDDict[nameIDKey])
+					macMenuName = font.nameIDDict[nameIDKey].decode('macroman')
 
 				if Platform == 3 and Encoding == 1 and ID == 1 and Language == 1033:
-					winMenuName = tounicode(font.nameIDDict[nameIDKey].decode('utf_16_be'))
+					winMenuName = font.nameIDDict[nameIDKey].decode('utf_16_be')
 			if font.isBold or font.isItalic:
 				if not font.isCID:
 					if CompareWinToMacMenuName(winMenuName, macMenuName):

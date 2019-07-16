@@ -1,17 +1,16 @@
 # Copyright 2014 Adobe. All rights reserved.
 """
-otfpdf v1.6.2 Jul 12 2019
+otfpdf v1.6.3 Jul 15 2019
 provides support for the proofpdf script, for working with OpenType/CFF
 fonts. Provides an implementation of the fontpdf font object. Cannot be
 run alone.
 """
 from fontTools.pens.boundsPen import BoundsPen
 from fontTools.misc.psCharStrings import T2OutlineExtractor
-from fontTools.misc.py23 import byteord, round
 
 from afdko.fontpdf import FontPDFGlyph, FontPDFFont, FontPDFPen
 
-__version__ = "1.6.2"
+__version__ = "1.6.3"
 
 
 class txPDFFont(FontPDFFont):
@@ -150,7 +149,7 @@ def hintOn(i, hintMaskBytes):
     # used to add the active hints to the bez string,
     # when a T2 hintmask operator is encountered.
     byteIndex = i // 8
-    byteValue = byteord(hintMaskBytes[byteIndex])
+    byteValue = hintMaskBytes[byteIndex]
     offset = 7 - (i % 8)
     return ((2 ** offset) & byteValue) > 0
 

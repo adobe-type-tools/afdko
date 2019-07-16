@@ -8,7 +8,6 @@ from collections import OrderedDict
 
 from fontTools.misc import etree as ET
 from fontTools.misc import plistlib
-from fontTools.misc.py23 import open, tounicode, tostr, round
 from fontTools.ufoLib import UFOReader
 from fontTools.ufoLib.glifLib import Glyph
 
@@ -17,10 +16,10 @@ from psautohint.ufoFont import (norm_float, HashPointPen,
 
 from afdko import convertfonttocid, fdkutils
 
-__version__ = '1.34.3'
+__version__ = '1.34.4'
 
 __doc__ = """
-ufotools.py v1.34.3 Jul 12 2019
+ufotools.py v1.34.4 Jul 15 2019
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -394,7 +393,7 @@ class BezParseError(Exception):
 
 class UFOFontData(object):
     def __init__(self, parentPath, useHashMap, programName):
-        self.parentPath = tounicode(parentPath, encoding='utf-8')
+        self.parentPath = parentPath
         self.glyphMap = {}
         self.processedLayerGlyphMap = {}
         self.newGlyphMap = {}
@@ -410,7 +409,7 @@ class UFOFontData(object):
         # hash matches hash of current glyph data.
         self.hashMap = {}
         self.fontDict = None
-        self.programName = tostr(programName)
+        self.programName = programName
         self.curSrcDir = None
         self.hashMapChanged = False
         self.glyphDefaultDir = os.path.join(self.parentPath, "glyphs")
@@ -561,7 +560,7 @@ class UFOFontData(object):
         data.append("")
         data = '\n'.join(data)
         with open(hashPath, "w") as fp:
-            fp.write(tounicode(data))
+            fp.write(data)
 
     def getCurGlyphPath(self, glyphName):
         if self.curSrcDir is None:
@@ -631,7 +630,7 @@ class UFOFontData(object):
         # and we have just created a new glyph in the processed layer,
         # then reset the history.
         if (not self.useProcessedLayer) and changed:
-            self.hashMap[glyphName] = [tostr(srcHash), [self.programName]]
+            self.hashMap[glyphName] = [srcHash, [self.programName]]
         # If the program is not in the history list, add it.
         elif self.programName not in historyList:
             historyList.append(self.programName)
@@ -644,7 +643,7 @@ class UFOFontData(object):
         hashAfter = hash_pen.getHash()
 
         if hashAfter != hashBefore:
-            self.hashMap[glyphName] = [tostr(hashAfter), historyList]
+            self.hashMap[glyphName] = [hashAfter, historyList]
             self.hashMapChanged = True
 
     def checkSkipGlyph(self, glyphName, newSrcHash, doAll):
@@ -681,8 +680,7 @@ class UFOFontData(object):
                 # case for Checkoutlines
                 if not self.useProcessedLayer:
                     self.hashMapChanged = True
-                    self.hashMap[glyphName] = [tostr(newSrcHash),
-                                               [self.programName]]
+                    self.hashMap[glyphName] = [newSrcHash, [self.programName]]
                     glyphPath = self.getGlyphProcessedPath(glyphName)
                     if glyphPath and os.path.exists(glyphPath):
                         os.remove(glyphPath)
@@ -710,7 +708,7 @@ class UFOFontData(object):
             # If the source hash has changed, we need to
             # delete the processed layer glyph.
             self.hashMapChanged = True
-            self.hashMap[glyphName] = [tostr(newSrcHash), [self.programName]]
+            self.hashMap[glyphName] = [newSrcHash, [self.programName]]
             glyphPath = self.getGlyphProcessedPath(glyphName)
             if glyphPath and os.path.exists(glyphPath):
                 os.remove(glyphPath)
@@ -1926,7 +1924,7 @@ def regenerate_glyph_hashes(ufo_font_data):
             continue
         ghash, _ = ufo_font_data.buildGlyphHashValue(
             gwidth, outline_xml, gname, True)
-        hash_entry[0] = tostr(ghash)
+        hash_entry[0] = ghash
 
 
 def checkHashMaps(fontPath, doSync):
@@ -2153,8 +2151,7 @@ def validateLayers(ufoFontPath, doWarning=True):
 
 
 def makeUFOFMNDB(srcFontPath):
-    fontInfoPath = os.path.join(tounicode(srcFontPath, encoding='utf-8'),
-                                kFontInfoName)  # default
+    fontInfoPath = os.path.join(srcFontPath, kFontInfoName)  # default
     fiMap, fiList = parsePList(fontInfoPath)
     psName = "NoFamilyName-Regular"
     familyName = "NoFamilyName"
@@ -2192,5 +2189,5 @@ def makeUFOFMNDB(srcFontPath):
     parts.append("")
     data = '\n'.join(parts)
     with open(fmndbPath, "w") as fp:
-        fp.write(tounicode(data))
+        fp.write(data)
     return fmndbPath

@@ -2,8 +2,6 @@ import os
 import pytest
 from shutil import copy2, rmtree
 
-from fontTools.misc.py23 import tobytes
-
 from runner import main as runner
 from differ import main as differ
 from test_utils import get_input_path, get_expected_path, generate_ttx_dump
@@ -58,7 +56,7 @@ def test_convert(ttc_filename, otf_filenames, diff_index):
 
     with open(stdout_path, 'rb') as f:
         output = f.read()
-    assert tobytes(fonts_msg) in output
+    assert fonts_msg.encode('ascii') in output
 
     # diff only one of the OTFs
     otf_filename = otf_filenames[diff_index]

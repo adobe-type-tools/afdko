@@ -57,8 +57,6 @@ import os
 import re
 import sys
 
-from fontTools.misc.py23 import open, tounicode, tobytes
-
 from afdko import fdkutils
 
 __version__ = "1.13.1"
@@ -960,7 +958,7 @@ def makeCIDFontInfo(fontPath, cidfontinfoPath):
                     continue
                 if value[0] == "\"":
                     value = "(" + value[1:-1] + ")"
-                string = tounicode("%s\t%s\n" % (key, value))
+                string = "%s\t%s\n" % (key, value)
                 fp.write(string)
     except (IOError, OSError):
         raise FontInfoParseError(
@@ -999,8 +997,8 @@ def makeGAFile(gaPath, fontPath, glyphList, fontDictList, fdGlyphDict,
     lineList.append("")
     gaText = "mergefonts %s%s%s" % (dictName, langGroup, '\n'.join(lineList))
 
-    with open(gaPath, "wb") as gf:
-        gf.write(tobytes(gaText))
+    with open(gaPath, "w") as gf:
+        gf.write(gaText)
 
 
 def merge_fonts(inputFontPath, outputPath, fontList, glyphList, fontDictList,
