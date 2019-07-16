@@ -1,0 +1,333 @@
+### Header (00000c60-00000c64)
+major  =2
+minor  =0
+hdrSize=5
+offSize=0
+### Top DICT Data (00000c65-00000c70)
+  [0]={
+  101 CharStrings
+  27 VarStore
+  93 FDIndex
+  2075 FDArray
+}
+### GlobalSubrINDEX (00000c71-00000c7a)
+--- object[index]={value}
+[-107]={
+  2 blend
+  rmoveto
+}
+### FDSelect (00000cbd-00000cc4)
+format =0
+--- glyph[gid]=fd
+[0]=0
+[1]=2
+[2]=2
+[3]=2
+[4]=1
+[5]=1
+[6]=1
+### VarStore (00000c7b-00000cbc)
+length =64
+format = 1
+regionListOffset = 00000010
+subtableCount = 2
+--- subtableOffsets[index]={offset}
+[0]={0000002c}
+[1]={00000034}
+--- RegionList
+axisCount = 1
+regionCount = 4
+--- RegionCoords[region,axis]={start,peak,end}
+[0,0]={0,1,1}
+[1,0]={0,0.799011,1}
+[2,0]={0.799011,0.799988,1}
+[3,0]={0.799988,1,1}
+--- VarStoreSubtable[0]
+itemCount        = 0
+shortDeltaCount  = 0
+regionIndexCount = 1
+--- RegionIndex[region]={index}
+[0]={0}
+--- DeltaValue[item,region]={delta}
+--- VarStoreSubtable[1]
+itemCount        = 0
+shortDeltaCount  = 0
+regionIndexCount = 3
+--- RegionIndex[region]={index}
+[0]={1}
+[1]={2}
+[2]={3}
+--- DeltaValue[item,region]={delta}
+
+### FDArray INDEX (0000147b-00001492)
+--- object[index]={value}
+[0]={
+  15 2099 Private
+}
+[1]={
+  17 2114 Private
+}
+[2]={
+  5 2131 Private
+}
+### CharStrings INDEX (00000cc5-0000147a)
+--- object[index]={value}
+[0]={
+  100 -120 rmoveto
+  800 1000 -800 hlineto
+  400 -459 rmoveto
+  -318 409 rlineto
+  636 hlineto
+  -286 -450 rmoveto
+  318 409 rlineto
+  -818 vlineto
+  -668 -41 rmoveto
+  318 409 318 -409 rlineto
+  -668 859 rmoveto
+  318 -409 -318 -409 rlineto
+}
+[1]={
+
+}
+[2]={
+  134 755 107 18 -107 callgsubr
+  -48 -137 -107 callsubr
+  8 -565 16 50 2 blend
+  rlineto
+  32 106 -107 callsubr
+  -17 -202 -52 -67 -107 callgsubr
+  24 14 18 22 25 -14 18 -22 -23 -14 -21 -24 -18 13 -20 22 38 25 26 38 37 -28 25 -37 -34 -30 -22 -38 -40 27 -26 39 16 blend
+  hvcurveto
+}
+[3]={
+  393 536 -39 27 -107 callgsubr
+  -97 -139 -22 -32 -22 -27 -21 -34 59 48 10 3 11 -5 10 6 8 blend
+  rlinecurve
+  -2 -1 -107 callsubr
+  -21 34 -19 27 -23 33 -97 138 9 -5 7 2 11 -4 54 -45 8 blend
+  rcurveline
+  -43 -151 -107 callsubr
+  186 -262 -198 -274 -28 -17 38 -10 4 blend
+  rlineto
+  44 142 -107 callsubr
+  99 143 27 38 20 27 23 37 -59 -44 -16 -11 -8 2 -13 -8 8 blend
+  rlinecurve
+  2 1 -107 callsubr
+  23 -35 22 -32 25 -35 101 -143 -13 7 -10 3 -13 8 -56 43 8 blend
+  rcurveline
+  43 153 -107 callsubr
+  -196 274 188 262 35 17 -29 10 4 blend
+  rlineto
+}
+[4]={
+  53 761 -3 35 -106 callsubr
+  896 30 -86 5 86 -107 callsubr
+  -802 -461 2 -26 -106 callsubr
+  703 30 -60 4 60 -107 callsubr
+  -532 539 -65 7 -107 callgsubr
+  -171 30 171 -36 114 36 -107 callsubr
+  299 -112 1 blend
+  hmoveto
+  -171 30 171 -36 115 36 -107 callsubr
+  -46 -219 -39 -72 -107 callgsubr
+  204 -121 -204 -123 93 123 -105 callsubr
+  -230 121 38 -93 -107 callgsubr
+  200 -121 -200 -122 93 122 -105 callsubr
+  -222 121 30 -93 -107 callgsubr
+  192 -121 -192 -114 93 114 -105 callsubr
+  -30 151 -98 -33 -107 callgsubr
+  -181 716 181 -27 12 27 -107 callsubr
+  -788 -240 -19 11 -107 callgsubr
+  -130 30 100 786 -100 30 130 -42 99 -23 -168 23 106 42 7 blend
+  vlineto
+  -610 -123 -63 -50 -107 callgsubr
+  -50 -62 -93 -73 -118 -54 8 -4 10 -9 6 -7 121 58 92 75 59 70 11 15 21 32 10 25 14 -12 21 -30 8 -18 3 -14 -11 -21 -2 8 18 blend
+  rrcurveto
+  124 -78 -100 36 -107 callgsubr
+  -7 -6 1 blend
+  vlineto
+  -65 -139 -176 -81 -162 -31 6 -6 8 -12 3 -8 168 37 178 84 72 154 -19 11 17 34 41 29 -8 13 14 -18 16 -33 6 -21 29 -5 -26 -14 -5 7 -53 15 20 blend
+  rcurveline
+  -6 -2 -15 -1 2 blend
+  rlineto
+  -333 -72 85 -61 -107 callgsubr
+  65 -25 75 -46 38 -35 26 19 -40 9 -42 17 -21 15 56 35 8 blend
+  rcurveline
+  -39 34 -76 45 -64 25 21 -16 44 -20 36 -10 6 blend
+  rrcurveto
+  72 55 -62 31 -106 callsubr
+  -30 -47 -47 2 blend
+  rlineto
+  269 30 -16 47 2 blend
+  hlineto
+  74 74 15 -24 -107 callgsubr
+  -276 90 1 blend
+  vlineto
+  -52 21 -9 77 -54 9 -24 49 4 blend
+  vhcurveto
+  16 182 9 -101 2 blend
+  0 18 9 1 blend
+  hhcurveto
+  62 12 21 88 4 28 22 7 11 10 5 blend
+  hvcurveto
+  -9 2 -12 5 -8 6 -26 5 -39 13 -18 11 6 blend
+  rrcurveto
+  -81 28 1 blend
+  -4 -6 -11 -41 -37 -154 -1 1 12 17 89 5 blend
+  0 -26 10 1 blend
+  hhcurveto
+  -56 -9 6 25 19 3 -2 5 4 blend
+  hvcurveto
+  276 -91 1 blend
+  vlineto
+  278 -62 -128 36 -107 callgsubr
+  -66 -32 -126 -33 -107 -23 5 -7 5 -10 2 -7 110 22 126 32 81 36 11 8 34 12 23 10 8 -16 10 -30 4 -17 -17 -11 -14 -12 4 -4 18 blend
+  rrcurveto
+}
+[5]={
+  1 vsindex
+  529 746 23 0 29 30 4 43 -106 callsubr
+  320 30 -58 0 -73 -29 0 -36 58 0 73 -107 callsubr
+  -397 -495 15 0 18 12 -4 10 -106 callsubr
+  442 30 -56 0 -71 21 0 27 56 0 71 -107 callsubr
+  -420 149 -6 0 -8 6 -4 2 -106 callsubr
+  374 30 -54 0 -68 -25 0 -31 54 0 68 -107 callsubr
+  -514 -420 34 0 42 -3 4 1 -106 callsubr
+  626 30 -66 0 -82 -29 0 -36 66 0 82 -107 callsubr
+  -531 144 15 0 19 -9 0 -11 -106 callsubr
+  460 30 -55 0 -69 -4 0 -5 55 0 69 -107 callsubr
+  -53 622 -42 0 -53 -6 4 -2 -107 callgsubr
+  -7 -9 0 -12 1 blend
+  vlineto
+  -86 -171 -222 -118 -188 -45 7 -7 8 -11 3 -8 192 51 224 119 94 187 -19 12 14 0 18 37 0 46 27 0 34 19 0 24 -7 0 -9 5 0 7 15 0 18 -16 0 -20 17 0 22 -32 0 -40 9 0 11 -19 0 -24 21 0 26 3 0 3 -17 0 -21 -9 0 -11 2 0 2 -3 0 -4 -55 0 -68 27 0 34 20 blend
+  rcurveline
+  -6 -2 -12 0 -15 -3 0 -3 2 blend
+  rlineto
+  -323 -32 55 0 69 -25 0 -32 -107 callgsubr
+  -25 -11 83 -154 177 -116 201 -44 -68 0 -86 -23 0 -28 11 0 14 12 0 15 -18 0 -22 21 0 26 -1 0 -1 -104 callsubr
+  8 blend
+  rlinecurve
+  4 8 9 12 7 6 -200 39 -177 113 -79 147 11 0 13 21 0 26 21 0 27 32 0 40 17 0 21 16 0 20 9 0 11 -10 0 -12 17 0 21 -36 0 -45 1 0 2 -37 0 -47 12 blend
+  rrcurveto
+  59 127 -46 0 -58 9 -4 6 -107 callgsubr
+  -40 -82 -80 -104 -112 -75 8 -4 10 -9 6 -7 115 80 2 0 2 8 0 10 7 0 9 23 0 29 2 0 3 16 0 20 16 0 20 -12 0 -15 26 0 32 -30 0 -37 10 0 13 -18 0 -23 8 0 10 -4 0 -5 14 blend
+  80 106 47 90 -13 0 -16 11 0 13 14 0 17 3 blend
+  rrcurveto
+  -129 -493 -106 -5 -137 21 6 34 -107 callgsubr
+  -27 -73 -43 -71 -51 -50 8 -5 13 -9 5 -5 49 52 47 77 29 77 6 0 8 11 0 14 7 0 8 8 0 10 5 0 7 8 0 10 16 0 20 -8 0 -10 28 0 35 -17 -1 -22 15 0 18 -11 0 -14 -3 0 -4 -4 0 -5 -2 0 -2 -1 0 -1 -3 0 -4 -3 1 -3 18 blend
+  rrcurveto
+  124 -1 -66 4 -77 10 15 31 -107 callgsubr
+  -374 30 374 -104 callsubr
+  84 0 105 -4 0 -5 3 blend
+  vlineto
+  -586 460 -72 0 -90 2 -21 -24 -107 callgsubr
+  -875 30 845 209 30 -27 0 -33 77 0 96 -53 0 -66 -79 0 -99 80 0 99 5 blend
+  vlineto
+  -8 -29 0 -36 1 blend
+  hmoveto
+  -7 -29 0 -36 1 blend
+  vlineto
+  -28 -75 -43 -102 -46 -95 14 0 17 10 0 13 11 0 14 -41 0 -51 17 0 22 -104 callsubr
+  6 blend
+  rrcurveto
+  89 -91 24 -74 -63 -32 0 -40 23 0 28 -11 0 -14 10 0 13 17 0 21 5 blend
+  vvcurveto
+  -33 -6 -35 -19 -13 3 0 4 1 0 1 15 0 18 7 0 9 -104 callsubr
+  5 blend
+  vhcurveto
+  -10 -6 -12 3 0 3 0 0 1 1 0 2 3 blend
+  -3 -14 -1 -20 -2 -26 1 -29 -104 callsubr
+  1 0 1 7 0 9 2 0 2 13 0 16 -1 0 -1 11 0 14 7 blend
+  2 7 -9 4 -13 11 0 13 -21 0 -26 5 0 6 -33 0 -41 4 blend
+  1 -8 22 -2 27 0 22 -21 0 -27 1 0 2 1 0 1 -3 0 -4 0 0 1 -4 0 -5 6 blend
+  2 19 2 17 5 12 9 3 0 4 2 0 2 3 0 3 2 0 2 4 0 5 3 0 4 6 blend
+  rrcurveto
+  25 17 10 7 0 9 5 0 7 -104 callsubr
+  3 blend
+  43 44 22 0 27 1 blend
+  vvcurveto
+  67 -22 76 -86 89 -8 0 -10 9 0 12 -6 0 -8 24 0 30 -11 0 -13 5 blend
+  vhcurveto
+  39 84 42 98 33 81 -20 14 -10 0 -13 -4 0 -5 -8 0 -10 14 0 17 -6 0 -8 7 0 9 -60 0 -75 32 0 40 8 blend
+  rcurveline
+  -6 -2 -12 0 -14 -2 0 -3 2 blend
+  rlineto
+}
+[6]={
+  53 761 -3 40 -106 callsubr
+  896 30 -73 5 73 -107 callsubr
+  -631 78 -52 -24 -107 callgsubr
+  -162 30 162 -41 111 41 -107 callsubr
+  296 -118 1 blend
+  hmoveto
+  -162 30 162 -41 112 41 -107 callsubr
+  -47 -217 -26 -64 -107 callgsubr
+  209 -109 -209 -113 81 113 -105 callsubr
+  -235 109 27 -81 -107 callgsubr
+  205 -109 -205 -111 81 111 -105 callsubr
+  -227 109 21 -81 -107 callgsubr
+  197 -109 -197 -105 81 105 -105 callsubr
+  -30 139 -98 -17 -107 callgsubr
+  -169 731 169 -46 42 46 -107 callsubr
+  -650 -375 70 -36 -107 callgsubr
+  571 -76 -103 callsubr
+  -30 -43 1 blend
+  vmoveto
+  571 -77 -103 callsubr
+  287 -74 1 blend
+  vmoveto
+  571 -74 -571 -179 52 179 -105 callsubr
+  -30 104 -111 -5 -107 callgsubr
+  -347 631 347 -20 50 20 -107 callsubr
+  -216 -389 -96 -35 -107 callgsubr
+  127 -34 121 -39 72 -31 31 22 -19 2 -15 -2 -15 3 153 44 8 blend
+  rcurveline
+  -78 32 -126 39 -121 1 -3 -9 5 10 5 blend
+  31 rrcurveto
+  -258 -1 -75 -1 -107 callgsubr
+  -81 -39 -128 -36 -107 -23 8 -6 12 -12 5 -6 103 25 130 41 86 43 10 7 4 8 -5 8 22 -16 36 -36 19 -21 3 -1 6 2 1 5 18 blend
+  rrcurveto
+}
+--- FD[0]
+### Private DICT (00001493-000014a1)
+  -250 0 1350 0 BlueValues
+  0 BlueFuzz
+  1 StdHW
+  1 StdVW
+--- FD[1]
+### Private DICT (000014a2-000014b2)
+  -250 0 1350 0 BlueValues
+  0 BlueFuzz
+  1 StdHW
+  1 StdVW
+  22 Subrs
+### Local Subr INDEX (000014b8-000014d7)
+--- object[index]={value}
+[-107]={
+  3 blend
+  vlineto
+}
+[-106]={
+  -107 callgsubr
+  -30
+}
+[-105]={
+  3 blend
+  hlineto
+}
+[-104]={
+  4 0 5
+}
+[-103]={
+  -571 -179 54 179 -105 callsubr
+}
+--- FD[2]
+### Private DICT (000014b3-000014b7)
+  0 0 BlueValues
+  37 Subrs
+### Local Subr INDEX (000014d8-000014e1)
+--- object[index]={value}
+[-107]={
+  1 blend
+  hlineto
+}
