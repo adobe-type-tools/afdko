@@ -3431,6 +3431,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
                         fatal(h, "subr depth: %d\n", h->dcf.subrDepth);
                     }
                     callsubr(h, h->dcf.fd, region, left);
+                    h->dcf.subrDepth--;
                 } else
                     flowCommand(h, opname[byte]);
                 break;
@@ -3445,6 +3446,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
                         fatal(h, "subr depth: %d\n", h->dcf.subrDepth);
                     }
                     callsubr(h, &h->dcf.global, region, left);
+                    h->dcf.subrDepth--;
                 } else
                     flowCommand(h, opname[byte]);
                 break;

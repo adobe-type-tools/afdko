@@ -476,6 +476,18 @@ def test_dcf_with_infinite_recursion_bug775():
     assert differ([expected_path, dcf_path])
 
 
+def test_dcf_call_depth_with_many_calls_bug846():
+    # This font was getting an invalid subroutine count because tx wasn't
+    # decrementing the subroutine call depth after the subroutine calls,
+    # so it was effectively just counting the total number of calls,
+    # not the call depth.
+    font_path = get_input_path('SHSansJPVFTest_SUBR.otf')
+    dcf_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', 'dcf', '-f', font_path, dcf_path])
+    expected_path = get_expected_path('SHSansJPVFTest_SUBR.dcf.txt')
+    assert differ([expected_path, dcf_path])
+
+
 def test_svg_with_cid_font_bug822():
     font_path = get_input_path('cid.otf')
     cid_path = get_temp_file_path()
