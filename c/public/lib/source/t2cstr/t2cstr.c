@@ -1807,38 +1807,46 @@ static int t2Decode(t2cCtx h, long offset) {
 
 /* Parse Type 2 charstring. */
 int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, cff2GlyphCallbacks *cff2, abfGlyphCallbacks *glyph, ctlMemoryCallbacks *mem) {
-    struct _t2cCtx h;
+    struct _t2cCtx *h;
     int retVal;
+
+    h = malloc(sizeof(struct _t2cCtx));
+    if (h == NULL) {
+        retVal = t2cErrMemory;
+        return retVal;
+    }
+    memset(h, 0, sizeof(struct _t2cCtx));
+
     /* Initialize */
-    h.flags = PEND_WIDTH | PEND_MASK;
-    h.stack.cnt = 0;
-    h.stack.blendCnt = 0;
-    memset(h.stack.blendArray, 0, sizeof(h.stack.blendArray));
-    h.stack.numRegions = 0;
-    h.x = 0;
-    h.y = 0;
-    h.subrDepth = 0;
-    h.stems.cnt = 0;
-    h.mask.state = 0;
-    h.mask.length = 0;
-    h.seac.phase = seacNone;
-    h.aux = aux;
-    h.aux->WV[0] = 0.25f; /* use center of design space by default */
-    h.aux->WV[1] = 0.25f;
-    h.aux->WV[2] = 0.25f;
-    h.aux->WV[3] = 0.25f;
-    h.glyph = glyph;
-    h.mem = mem;
-    h.LanguageGroup = (glyph->info->flags & ABF_GLYPH_LANG_1) != 0;
-    h.gid = gid;
-    h.cff2 = cff2;
-    memset(&h.BCA, 0, sizeof(h.BCA));
+    h->flags = PEND_WIDTH | PEND_MASK;
+    h->stack.cnt = 0;
+    h->stack.blendCnt = 0;
+    memset(h->stack.blendArray, 0, sizeof(h->stack.blendArray));
+    h->stack.numRegions = 0;
+    h->x = 0;
+    h->y = 0;
+    h->subrDepth = 0;
+    h->stems.cnt = 0;
+    h->mask.state = 0;
+    h->mask.length = 0;
+    h->seac.phase = seacNone;
+    h->aux = aux;
+    h->aux->WV[0] = 0.25f; /* use center of design space by default */
+    h->aux->WV[1] = 0.25f;
+    h->aux->WV[2] = 0.25f;
+    h->aux->WV[3] = 0.25f;
+    h->glyph = glyph;
+    h->mem = mem;
+    h->LanguageGroup = (glyph->info->flags & ABF_GLYPH_LANG_1) != 0;
+    h->gid = gid;
+    h->cff2 = cff2;
+    memset(&h->BCA, 0, sizeof(h->BCA));
     aux->bchar = 0;
     aux->achar = 0;
     if (aux->flags & T2C_IS_CFF2)
-        h.maxOpStack = glyph->info->blendInfo.maxstack;
+        h->maxOpStack = glyph->info->blendInfo.maxstack;
     else
-        h.maxOpStack = T2_MAX_OP_STACK;
+        h->maxOpStack = T2_MAX_OP_STACK;
 
     if (aux->flags & T2C_USE_MATRIX) {
         int i;
@@ -1848,32 +1856,30 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
             (aux->matrix[2] != 0) ||
             (aux->matrix[4] != 0) ||
             (aux->matrix[5] != 0)) {
-            h.flags |= USE_MATRIX;
-            h.flags |= USE_GLOBAL_MATRIX;
+            h->flags |= USE_MATRIX;
+            h->flags |= USE_GLOBAL_MATRIX;
             for (i = 0; i < 6; i++) {
-                h.transformMatrix[i] = aux->matrix[i];
+                h->transformMatrix[i] = aux->matrix[i];
             }
         }
     }
     if (aux->flags & T2C_FLATTEN_BLEND) {
-        h.flags |= FLATTEN_BLEND;
-        h.flags |= SEEN_BLEND;
+        h->flags |= FLATTEN_BLEND;
+        h->flags |= SEEN_BLEND;
     }
     if (aux->flags & T2C_IS_CFF2)
-        h.flags |= IS_CFF2;
-    h.src.endOffset = endOffset;
+        h->flags |= IS_CFF2;
+    h->src.endOffset = endOffset;
 
-    DURING_EX(h.err.env)
+    DURING_EX(h->err.env)
 
-    retVal = t2Decode(&h, offset);
+    retVal = t2Decode(h, offset);
 
     HANDLER
     retVal = Exception.Code;
     END_HANDLER
 
-    // Clear path=specifc transform if last over from last path of the charstring,
-    if (h.flags & USE_MATRIX)
-        h.flags &= ~USE_MATRIX;
+    free(h);
 
     return retVal;
 }
