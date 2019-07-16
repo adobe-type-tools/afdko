@@ -16,10 +16,8 @@ import sys
 import tempfile
 import time
 import traceback
-import subprocess
 
 from fontTools.ttLib import TTFont, getTableModule, TTLibError
-from fontTools.misc.py23 import open
 
 from afdko.fontpdf import (FontPDFParams, makePDF, makeFontSetPDF, kDrawTag,
                            kDrawPointTag, kShowMetaTag, params_doc)

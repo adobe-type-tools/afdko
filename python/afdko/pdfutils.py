@@ -9,8 +9,6 @@ try:
 except ImportError:
     from io import StringIO
 
-from fontTools.misc.py23 import byteord
-
 LINEEND = '\015\012'
 
 ##########################################################
@@ -118,7 +116,7 @@ def _AsciiHexEncode(input):
     "Helper function used by images"
     output = StringIO()
     for char in input:
-        output.write('%02x' % byteord(char))
+        output.write('%02x' % ord(char))
     output.write('>')
     output.seek(0)
     return output.read()
@@ -135,10 +133,10 @@ def _AsciiBase85Encode(input):
 
     for i in range(whole_word_count):
         offset = i*4
-        b1 = byteord(body[offset])
-        b2 = byteord(body[offset+1])
-        b3 = byteord(body[offset+2])
-        b4 = byteord(body[offset+3])
+        b1 = body[offset]
+        b2 = body[offset+1]
+        b3 = body[offset+2]
+        b4 = body[offset+3]
 
         num = 16777216 * b1 + 65536 * b2 + 256 * b3 + b4
 
@@ -166,10 +164,10 @@ def _AsciiBase85Encode(input):
     if remainder_size > 0:
         while len(lastbit) < 4:
             lastbit = lastbit + b'\000'
-        b1 = byteord(lastbit[0])
-        b2 = byteord(lastbit[1])
-        b3 = byteord(lastbit[2])
-        b4 = byteord(lastbit[3])
+        b1 = lastbit[0]
+        b2 = lastbit[1]
+        b3 = lastbit[2]
+        b4 = lastbit[3]
 
         num = 16777216 * b1 + 65536 * b2 + 256 * b3 + b4
 
@@ -212,11 +210,11 @@ def _AsciiBase85Decode(input):
 
     for i in range(whole_word_count):
         offset = i*5
-        c1 = byteord(body[offset]) - 33
-        c2 = byteord(body[offset+1]) - 33
-        c3 = byteord(body[offset+2]) - 33
-        c4 = byteord(body[offset+3]) - 33
-        c5 = byteord(body[offset+4]) - 33
+        c1 = ord(body[offset]) - 33
+        c2 = ord(body[offset+1]) - 33
+        c3 = ord(body[offset+2]) - 33
+        c4 = ord(body[offset+3]) - 33
+        c5 = ord(body[offset+4]) - 33
 
         num = ((85**4) * c1) + ((85**3) * c2) + ((85**2) * c3) + (85*c4) + c5
 
@@ -234,11 +232,11 @@ def _AsciiBase85Decode(input):
     if remainder_size > 0:
         while len(lastbit) < 5:
             lastbit = lastbit + '!'
-        c1 = byteord(lastbit[0]) - 33
-        c2 = byteord(lastbit[1]) - 33
-        c3 = byteord(lastbit[2]) - 33
-        c4 = byteord(lastbit[3]) - 33
-        c5 = byteord(lastbit[4]) - 33
+        c1 = ord(lastbit[0]) - 33
+        c2 = ord(lastbit[1]) - 33
+        c3 = ord(lastbit[2]) - 33
+        c4 = ord(lastbit[3]) - 33
+        c5 = ord(lastbit[4]) - 33
         num = ((85**4) * c1) + ((85**3) * c2) + ((85**2) * c3) + (85*c4) + c5
         temp, b4 = divmod(num,256)
         temp, b3 = divmod(temp,256)

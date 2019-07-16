@@ -16,7 +16,6 @@ from fontTools.designspaceLib import (
     DesignSpaceDocument,
     DesignSpaceDocumentError,
 )
-from fontTools.misc.py23 import open
 
 from defcon import Font
 from psautohint.__main__ import main as psautohint
@@ -28,7 +27,7 @@ from afdko.fdkutils import get_temp_file_path
 from afdko.ufotools import validateLayers
 
 
-__version__ = '2.3.2'
+__version__ = '2.3.3'
 
 logger = logging.getLogger(__name__)
 
@@ -244,7 +243,7 @@ def collect_features_content(instances, inst_idx_lst):
         ufo_pth = os.path.abspath(os.path.realpath(ufo_pth))
         fea_pth = os.path.join(ufo_pth, FEATURES_FILENAME)
         if os.path.isfile(fea_pth):
-            with open(fea_pth, 'rb') as fp:
+            with open(fea_pth, 'r') as fp:
                 fea_cntnts = fp.read()
             fea_dict[fea_pth] = fea_cntnts
     return fea_dict
@@ -326,7 +325,7 @@ def run(options):
 
     # Restore the contents of the instances' 'features.fea' files
     for fea_pth, fea_cntnts in features_store.items():
-        with open(fea_pth, 'wb') as fp:
+        with open(fea_pth, 'w') as fp:
             fp.write(fea_cntnts)
 
 

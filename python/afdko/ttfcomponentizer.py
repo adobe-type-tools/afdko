@@ -10,13 +10,12 @@ import argparse
 import os
 import sys
 
-from fontTools.misc.py23 import open
 from fontTools.ttLib import TTFont, getTableModule
 from fontTools.ufoLib.errors import UFOLibError
 from defcon import Font
 
 
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 
 PUBLIC_PSNAMES = "public.postscriptNames"

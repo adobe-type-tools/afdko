@@ -8,7 +8,6 @@ import sys
 
 from fontTools.ttLib import TTFont, TTLibError
 from fontTools.ttLib.tables.DefaultTable import DefaultTable
-from fontTools.misc.py23 import open, tounicode, tobytes
 
 from afdko import convertfonttocid, fdkutils, ufotools
 
@@ -26,7 +25,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.7.5 Jul 12 2019
+makeotf.py v2.7.6 Jul 15 2019
 """
 
 __methods__ = """
@@ -679,8 +678,8 @@ def writeOptionsFile(makeOTFParams, filePath):
         if makeOTFParams.verbose:
             print("makeotf [Note] Writing options file %s" % filePath)
         try:
-            with open(filePath, "wb") as fp:
-                fp.write(tobytes(data, encoding='utf-8'))
+            with open(filePath, "w", encoding='utf-8') as fp:
+                fp.write(data)
         except (IOError, OSError):
             print("makeotf [Warning] Could not write the options file %s. "
                   "Please check the file protection settings for the file "
@@ -1639,7 +1638,7 @@ def getROS(fontPath):
     """
     Reg = Ord = Sup = None
     with open(fontPath, "r", encoding='macroman') as fp:
-        data = tounicode(fp.read(5000))
+        data = fp.read(5000)
     match = re.search(r"/Registry\s+\((\S+)\)", data)
     if not match:
         return Reg, Ord, Sup
@@ -1960,11 +1959,11 @@ def convertFontIfNeeded(makeOTFParams):
     else:
         try:
             with open(filePath, "rb") as fp:
-                data = tounicode(fp.read(1024))
-            if ("%" not in data[:4]) and ('/FontName' not in data):
+                data = fp.read(1024)
+            if (b"%" not in data[:4]) and (b'/FontName' not in data):
                 needsConversion = True
             else:
-                if "/Private" in data:
+                if b"/Private" in data:
                     isTextPS = True
                     needsConversion = True
         except (IOError, OSError):
@@ -2084,8 +2083,8 @@ def updateFontRevision(featuresPath, fontRevision):
     newData = re.sub(match.group(0), "FontRevision %s.%s;" % (major, minor),
                      data)
     try:
-        with open(featuresPath, "wb") as fp:
-            fp.write(tobytes(newData, encoding='utf-8'))
+        with open(featuresPath, "w", encoding='utf-8') as fp:
+            fp.write(newData)
     except (IOError, OSError):
         print("makeotf [Error] When trying to update the head table "
               "fontRevision field, failed to write the new data to '%s'." %

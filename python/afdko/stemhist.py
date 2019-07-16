@@ -104,20 +104,18 @@ A range of glyphs may be specified by providing two names separated only
 """
 
 
-
-import sys
+from collections import defaultdict
 import os
-import re
+import sys
 import time
+import traceback
+
 from fontTools.ttLib import TTFont, getTableModule
-from fontTools.misc.py23 import open, tounicode
 from afdko.autohint import (
 	parseGlyphListArg, getGlyphID, getGlyphNames, filterGlyphList, openFile,
 	ACOptionParseError, ACFontError, logMsg, ACreport, expandNames,
 	AUTOHINTEXE)
 from afdko import fdkutils, ufotools
-import traceback
-from collections import defaultdict
 
 
 rawData = []
@@ -438,10 +436,10 @@ def PrintReports(path, h_stem_list, v_stem_list, top_zone_list, bot_zone_list):
 		header = headers[i]
 		try:
 			with open(fName, "w") as fp:
-				fp.write(tounicode(title))
-				fp.write(tounicode(header))
+				fp.write(title)
+				fp.write(header)
 				for item in formatReport(rep_list, sortFunc):
-					fp.write(tounicode(item))
+					fp.write(item)
 				print("Wrote %s" % fName)
 		except (IOError, OSError):
 			print("Error creating file %s!" % fName)
@@ -488,7 +486,7 @@ def collectStemsFont(path, options):
 	if fdGlyphDict == None:
 		fdDict = fontDictList[0]
 		with open(tempFI, "w") as fp:
-			fp.write(tounicode(fdDict.getFontInfo()))
+			fp.write(fdDict.getFontInfo())
 	else:
 		if not options.verbose:
 			logMsg("Note: Using alternate FDDict global values from fontinfo file for some glyphs. Remove option '-q' to see which dict is used for which glyphs.")
@@ -536,7 +534,7 @@ def collectStemsFont(path, options):
 				lastFDIndex = fdIndex
 				fdDict = fontData.getFontInfo(psName, path, options.allow_no_blues, options.noFlex, options.vCounterGlyphs, options.hCounterGlyphs, fdIndex)
 				with open(tempFI, "w") as fp:
-					fp.write(tounicode(fdDict.getFontInfo()))
+					fp.write(fdDict.getFontInfo())
 		else:
 			if (fdGlyphDict != None):
 				try:
@@ -548,14 +546,14 @@ def collectStemsFont(path, options):
 					lastFDIndex = fdIndex
 					fdDict = fontDictList[fdIndex]
 					with open(tempFI, "w") as fp:
-						fp.write(tounicode(fdDict.getFontInfo()))
+						fp.write(fdDict.getFontInfo())
 
 		glyphReports.startGlyphName(name)
 
 
 		# 	Call auto-hint library on bez string.
 		with open(tempBez, "w") as bp:
-			bp.write(tounicode(bezString))
+			bp.write(bezString)
 
 		if options.doAlign:
 			doAlign = "-ra"
@@ -635,7 +633,7 @@ def main():
 			return 1
 		if options.debug:
 			with open("rawdata.txt", "w") as fp:
-				fp.write(tounicode('\n'.join(rawData)))
+				fp.write('\n'.join(rawData))
 
 
 if __name__=='__main__':

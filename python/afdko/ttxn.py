@@ -60,7 +60,7 @@ Get feat tag list. For each tag:
 """
 
 __help__ = """
-ttxn v1.21.1 Jan 30 2019
+ttxn v1.21.2 Jul 15 2019
 
 Based on the ttx tool, with the same options, except that it is limited to
 dumping, and cannot compile. Makes a normalized dump of the font, or of
@@ -79,7 +79,6 @@ from fontTools import ttx
 from fontTools.ttLib import TTFont, tagToXML, TTLibError
 from fontTools.ttLib.tables.DefaultTable import DefaultTable
 from fontTools.misc.loggingTools import Timer
-from fontTools.misc.py23 import open, basestring
 import copy
 import subprocess
 import re
@@ -91,6 +90,7 @@ import logging
 
 from afdko.fdkutils import get_temp_file_path
 
+__version__ = "1.21.2"
 
 log = logging.getLogger('fontTools.ttx')
 
@@ -253,7 +253,7 @@ def checkGlyphInSequence(glyphName, contextSequence, i):
         if isinstance(input_seq, list):
             if glyphName in input_seq:
                 retVal = 1
-        elif isinstance(input_seq, basestring):
+        elif isinstance(input_seq, str):
             if glyphName == input_seq:
                 retVal = 1
     except IndexError:

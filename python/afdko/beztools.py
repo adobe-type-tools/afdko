@@ -14,7 +14,6 @@ import time
 import os
 from afdko import fdkutils, convertfonttocid
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
-from fontTools.misc.py23 import byteord, bytechr
 from fontTools.pens.basePen import BasePen
 debug = 0
 def debugMsg(*args):
@@ -29,11 +28,14 @@ class ACFontError(Exception):
 class SEACError(Exception):
 	pass
 
-def hintOn( i, hintMaskBytes):
-	# used to add the active hints to the bez string, when a  T2 hintmask operator is encountered.
+
+def hintOn(i, hintMaskBytes):
+	# used to add the active hints to the bez string, when a T2 hintmask
+	# operator is encountered.
 	byteIndex = i // 8
-	byteValue = byteord(hintMaskBytes[byteIndex])
-	offset = 7 -  (i %8)
+	byteValue = hintMaskBytes[byteIndex]
+	offset = 7 - (i % 8)
+
 	return ((2**offset) & byteValue) > 0
 
 
@@ -234,7 +236,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
 		if not  self.removeHints:
 			curhhints, curvhints = self.getCurHints( self.hintMaskString)
 			strout = ""
-			mask = [strout + hex(byteord(ch)) for ch in self.hintMaskString]
+			mask = [strout + hex(ch) for ch in self.hintMaskString]
 			debugMsg(bezCommand, mask, curhhints, curvhints, args)
 
 			self.bezProgram.append("beginsubr snc\n")
@@ -301,7 +303,7 @@ class HintMask:
 				continue	# we get here if some hints have been dropped because of the stack limit
 			newbyteIndex = (i//8)
 			if newbyteIndex != byteIndex:
-				mask += bytechr(maskVal)
+				mask += bytes((maskVal,))
 				byteIndex +=1
 				while byteIndex < newbyteIndex:
 					mask += b"\0"
@@ -317,7 +319,7 @@ class HintMask:
 				continue	# we get here if some hints have been dropped because of the stack limit
 			newbyteIndex = (i//8)
 			if newbyteIndex != byteIndex:
-				mask += bytechr(maskVal)
+				mask += bytes((maskVal,))
 				byteIndex +=1
 				while byteIndex < newbyteIndex:
 					mask += b"\0"
@@ -326,7 +328,7 @@ class HintMask:
 			maskVal += 2**(7 - (i %8))
 
 		if maskVal:
-			mask += bytechr(maskVal)
+			mask += bytes((maskVal,))
 
 		if len(mask) < byteLength:
 			mask += b"\0"*(byteLength - len(mask))
@@ -767,9 +769,9 @@ def  bezDecrypt(bezDataBuffer):
 			if not ch.islower():
 				ch = ch.lower()
 			if ch.isdigit():
-				ch = byteord(ch) - byteord('0')
+				ch = ord(ch) - ord('0')
 			else:
-				ch = byteord(ch) - byteord('a') + 10
+				ch = ord(ch) - ord('a') + 10
 			cipher = (cipher << 4) & 0xFFFF
 			cipher = cipher | ch
 			i += 1
@@ -780,7 +782,7 @@ def  bezDecrypt(bezDataBuffer):
 			r = r & 0xFFFF
 		byteCnt +=1
 		if (byteCnt > LEN_IV):
-			newBuffer += bytechr(plain)
+			newBuffer += bytes((plain,))
 		if i >= lenBuffer:
 			break
 

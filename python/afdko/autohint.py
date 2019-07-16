@@ -441,7 +441,6 @@ import os
 import re
 import time
 import tempfile
-from fontTools.misc.py23 import open, tounicode
 from fontTools.ttLib import TTFont, getTableModule
 import plistlib
 import warnings
@@ -834,17 +833,20 @@ def  openFontPlistFile(psName, dirPath):
 		filePath = pPath1
 	else:
 		try:
-			fontPlist = plistlib.Plist.fromFile(filePath)
+			with open(filePath, 'rb') as f:
+				fontPlist = plistlib.load(f)
 			isNewPlistFile = 0
 		except (IOError, OSError):
 			raise ACFontError("\tError: font plist file exists, but coud not be read <%s>." % filePath)
 		except:
 			raise ACFontError("\tError: font plist file exists, but coud not be parsed <%s>." % filePath)
 
-	if  fontPlist == None:
-		fontPlist =  plistlib.Plist()
-	if not fontPlist.has_key(kACIDKey):
+	if  fontPlist is None:
+		fontPlist = dict()
+
+	if kACIDKey not in fontPlist:
 		fontPlist[kACIDKey] = {}
+
 	return fontPlist, filePath, isNewPlistFile
 
 
@@ -1106,7 +1108,7 @@ def hintFile(options):
 	if fdGlyphDict == None:
 		fdDict = fontDictList[0]
 		with open(tempFI, "w") as fp:
-			fp.write(tounicode(fdDict.getFontInfo()))
+			fp.write(fdDict.getFontInfo())
 	else:
 		if not options.verbose:
 			logMsg("Note: Using alternate FDDict global values from fontinfo file for some glyphs. Remove option '-q' to see which dict is used for which glyphs.")
@@ -1170,7 +1172,7 @@ def hintFile(options):
 				lastFDIndex = fdIndex
 				fdDict = fontData.getFontInfo(psName, path, options.allow_no_blues, options.noFlex, options.vCounterGlyphs, options.hCounterGlyphs, fdIndex)
 				with open(tempFI, "w") as fp:
-					fp.write(tounicode(fdDict.getFontInfo()))
+					fp.write(fdDict.getFontInfo())
 		else:
 			if (fdGlyphDict != None):
 				try:
@@ -1182,7 +1184,7 @@ def hintFile(options):
 					lastFDIndex = fdIndex
 					fdDict = fontDictList[fdIndex]
 					with open(tempFI, "w") as fp:
-						fp.write(tounicode(fdDict.getFontInfo()))
+						fp.write(fdDict.getFontInfo())
 
 
 		# 	Build autohint point list identifier
@@ -1223,7 +1225,7 @@ def hintFile(options):
 
 		# 	Call auto-hint library on bez string.
 		with open(tempBez, "wt") as bp:
-			bp.write(tounicode(bezString))
+			bp.write(bezString)
 
 		#print "oldBezString", oldBezString
 		#print ""
@@ -1303,11 +1305,15 @@ def hintFile(options):
 					logMsg("No new hints. All glyphs were already hinted.")
 			else:
 				logMsg("No glyphs were hinted.")
+
 	if options.usePlistFile and (anyGlyphChanged or pListChanged):
 		#  save font plist file.
-		fontPlist.write(fontPlistFilePath)
+		with open(fontPlistFilePath, 'wb') as f:
+			plistlib.writePlist(fontPlist, f)
+
 	if processedGlyphCount != seenGlyphCount:
 		logMsg("Skipped %s of %s glyphs." % (seenGlyphCount - processedGlyphCount, seenGlyphCount))
+
 	logMsg("Done with font %s. End time: %s." % (path, time.asctime()))
 
 def main():

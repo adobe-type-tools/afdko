@@ -1,6 +1,6 @@
-# otc2otf.py v1.4.1 Jul 12 2019
+# otc2otf.py v1.4.2 Jul 15 2019
 
-__version__ = "1.4.1"
+__version__ = "1.4.2"
 
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
@@ -27,11 +27,9 @@ import sys
 import os
 import struct
 
-from fontTools.misc.py23 import tostr
-
 
 class OTCError(TypeError):
-	pass
+    pass
 
 class FontEntry:
 
@@ -183,7 +181,7 @@ def getPSName(data):
 
 	if psName == None:
 		psName = "PSNameUndefined"
-	return tostr(psName)
+	return psName
 
 def readFontFile(fontOffset, data, tableDict, doReportOnly):
 	sfntType, numTables, searchRange, entrySelector, rangeShift = struct.unpack(sfntDirectoryFormat, data[fontOffset:fontOffset + sfntDirectorySize])
