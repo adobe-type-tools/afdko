@@ -711,7 +711,7 @@ static void setOrdered(Mapping *mapping, int codeBreak, int span, int index) {
 /* Partition mappings optimally for format 4. Assumes mapping in code order */
 static int partitionRanges(cmapCtx h, Mapping *mapping) {
     int span;
-    int ordered;
+    int ordered = 0;
     int lastOrdered;
     int total;
     int i;
@@ -989,8 +989,6 @@ static Format12 *makeFormat12(cmapCtx h, unsigned long *length) {
 static Format14 *makeFormat14(cmapCtx h) {
     long i;
     Format14 *fmt = MEM_NEW(h->g, sizeof(Format14));
-
-    i = 0;
 
     fmt->format = 14;
     fmt->length = (uint16 + 2 * uint32);                   /* size of header*/
