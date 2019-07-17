@@ -39,7 +39,7 @@ def test_exit_unknown_option(arg):
 ])
 @pytest.mark.parametrize('font_filename', ['font.pfa', 'cidfont.ps'])
 def test_matrix(font_filename, i, matrix):
-    matrix_values = ['_{}'.format(val) for val in matrix.split()]
+    matrix_values = [f'_{val}' for val in matrix.split()]
 
     font_path = get_input_path(font_filename)
     actual_path = get_temp_file_path()
@@ -50,7 +50,7 @@ def test_matrix(font_filename, i, matrix):
     if 'cid' in font_filename:
         ext = 'ps'
         diff_mode = ['-m', 'bin']
-    expected_path = get_expected_path('matrix{}.{}'.format(i, ext))
+    expected_path = get_expected_path(f'matrix{i}.{ext}')
     assert differ([expected_path, actual_path] + diff_mode)
 
 
@@ -64,17 +64,17 @@ def test_rt_fd_options(font_filename, i, rt_args):
     ext = 'pfa'
     diff_mode = []
     if 'cid' in font_filename:
-        fd_args = ['fd', '_{}'.format(i)]
+        fd_args = ['fd', f'_{i}']
         ext = 'ps'
         diff_mode = ['-m', 'bin']
 
-    rt_values = ['_{}'.format(val) for val in rt_args.split()]
+    rt_values = [f'_{val}' for val in rt_args.split()]
 
     font_path = get_input_path(font_filename)
     actual_path = get_temp_file_path()
     runner(CMD + ['-a', '-f', font_path, actual_path,
                   '-o', 't1', 'rt'] + rt_values + fd_args)
-    expected_path = get_expected_path('rotatrans{}.{}'.format(i, ext))
+    expected_path = get_expected_path(f'rotatrans{i}.{ext}')
     assert differ([expected_path, actual_path] + diff_mode)
 
 
@@ -94,6 +94,6 @@ def test_rtf_option(font_filename):
     actual_path = get_temp_file_path()
     runner(CMD + ['-a', '-f', font_path, actual_path,
                   '-o', 't1', 'rt', '_45', '_0', '_0',
-                  'rtf', '_{}'.format(rtf_path)])
-    expected_path = get_expected_path('rotafile.{}'.format(ext))
+                  'rtf', f'_{rtf_path}'])
+    expected_path = get_expected_path(f'rotafile.{ext}')
     assert differ([expected_path, actual_path] + diff_mode)

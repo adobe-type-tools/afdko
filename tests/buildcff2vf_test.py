@@ -19,7 +19,7 @@ def test_rvrn_vf():
     temp_dir = os.path.join(tempfile.mkdtemp(), 'GSUBVar')
     copytree(input_dir, temp_dir)
     ds_path = os.path.join(temp_dir, 'GSUBVar.designspace')
-    runner(CMD + ['-o', 'd', '_{}'.format(ds_path)])
+    runner(CMD + ['-o', 'd', f'_{ds_path}'])
     actual_path = os.path.join(temp_dir, 'GSUBVar.otf')
     actual_ttx = generate_ttx_dump(actual_path,
                                    ['CFF2', 'GSUB', 'avar', 'fvar'])
@@ -32,7 +32,7 @@ def test_cjk_vf():
     temp_dir = os.path.join(tempfile.mkdtemp(), 'CJKVar')
     copytree(input_dir, temp_dir)
     ds_path = os.path.join(temp_dir, 'CJKVar.designspace')
-    runner(CMD + ['-o', 'd', '_{}'.format(ds_path)])
+    runner(CMD + ['-o', 'd', f'_{ds_path}'])
     actual_path = os.path.join(temp_dir, 'CJKVar.otf')
     actual_ttx = generate_ttx_dump(actual_path,
                                    ['CFF2', 'HVAR', 'avar', 'fvar'])
@@ -49,8 +49,7 @@ def test_sparse_cjk_vf():
     copytree(input_dir, temp_dir)
     ds_path = os.path.join(temp_dir, 'SHSansJPVFTest.designspace')
     subset_path = os.path.join(temp_dir, 'SHSansJPVFTest.subset.txt')
-    runner(CMD + ['-o', 'd', '_{}'.format(ds_path),
-                  'i', '_{}'.format(subset_path), 'c', 'k'])
+    runner(CMD + ['-o', 'd', f'_{ds_path}', 'i', f'_{subset_path}', 'c', 'k'])
     actual_path = os.path.join(temp_dir, 'SHSansJPVFTest.otf')
     actual_ttx = generate_ttx_dump(actual_path,
                                    ['CFF2', 'HVAR', 'avar', 'fvar'])
@@ -63,7 +62,7 @@ def test_compatibility_vf():
     temp_dir = os.path.join(tempfile.mkdtemp(), 'bug816var')
     copytree(input_dir, temp_dir)
     ds_path = os.path.join(temp_dir, 'bug816.designspace')
-    runner(CMD + ['-o', 'c', 'd', '_{}'.format(ds_path)])
+    runner(CMD + ['-o', 'c', 'd', f'_{ds_path}'])
     actual_path = os.path.join(temp_dir, 'bug816.otf')
     actual_ttx = generate_ttx_dump(actual_path, ['CFF2'])
     expected_ttx = get_expected_path('bug816.ttx')
@@ -76,8 +75,7 @@ def test_subset_vf():
     copytree(input_dir, temp_dir)
     ds_path = os.path.join(temp_dir, 'bug817.designspace')
     subset_path = os.path.join(temp_dir, 'bug817.subset')
-    runner(CMD + ['-o', 'd', '_{}'.format(
-        ds_path), 'i', '_{}'.format(subset_path)])
+    runner(CMD + ['-o', 'd', f'_{ds_path}', 'i', f'_{subset_path}'])
     actual_path = os.path.join(temp_dir, 'bug817.otf')
     actual_ttx = generate_ttx_dump(actual_path, ['GSUB'])
     expected_ttx = get_expected_path('bug817.ttx')

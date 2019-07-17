@@ -50,7 +50,7 @@ def test_convert(ttc_filename, otf_filenames, diff_index):
     copy2(input_ttc_path, temp_ttc_path)
 
     fonts_msg = os.linesep.join(
-        ['Output font: {}'.format(fname) for fname in otf_filenames])
+        [f'Output font: {fname}' for fname in otf_filenames])
 
     stdout_path = runner(CMD + ['-s', '-a', '-f', temp_ttc_path])
 

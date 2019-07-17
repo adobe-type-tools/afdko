@@ -314,8 +314,8 @@ def test_no_psname_dump_bug437(font_format):
     else:
         file_ext = 'pfa'
 
-    filename = '{}-noPSname.{}'.format(font_format, file_ext)
-    expected_path = get_expected_path('bug437/dump-{}.txt'.format(font_format))
+    filename = f'{font_format}-noPSname.{file_ext}'
+    expected_path = get_expected_path(f'bug437/dump-{font_format}.txt')
 
     actual_path = runner(CMD + ['-s', '-o', 'dump', '0', '-f', filename])
     assert differ([expected_path, actual_path, '-l', '1'])
@@ -330,10 +330,10 @@ def test_no_psname_convert_to_ufo_bug437(font_format):
     else:
         file_ext = 'pfa'
 
-    font_path = get_input_path('{}-noPSname.{}'.format(font_format, file_ext))
-    expected_path = get_expected_path('bug437/{}.ufo'.format(font_format))
+    font_path = get_input_path(f'{font_format}-noPSname.{file_ext}')
+    expected_path = get_expected_path(f'bug437/{font_format}.ufo')
     save_path = os.path.join(
-        _get_temp_dir_path(), '{}.ufo'.format(font_format))
+        _get_temp_dir_path(), f'{font_format}.ufo')
 
     runner(CMD + ['-a', '-o', 'ufo', '-f', font_path, save_path])
     assert differ([expected_path, save_path])
@@ -348,7 +348,7 @@ def test_no_psname_convert_to_type1_bug437(font_format):
     else:
         file_ext = 'pfa'
 
-    filename = '{}-noPSname.{}'.format(font_format, file_ext)
+    filename = f'{font_format}-noPSname.{file_ext}'
     with pytest.raises(subprocess.CalledProcessError) as err:
         runner(CMD + ['-o', 't1', '-f', filename])
     assert err.value.returncode in (5, 6)
@@ -395,7 +395,7 @@ def test_recalculate_font_bbox_bug618(to_format, args, exp_filename):
         file_ext = 'txt'
 
     expected_path = get_expected_path(
-        'bug618/{}.{}'.format(exp_filename, file_ext))
+        f'bug618/{exp_filename}.{file_ext}')
 
     diff_mode = []
     if to_format == 'cff':
@@ -422,9 +422,9 @@ def test_cs_opt_bug684(filename):
     tx was generating a bad CFF2 charstring that would overflow
     the operand stack of the standard size (513) after re-converted
     to CFF2 unless -no_opt option is specified."""
-    font_path = get_input_path('{}.otf'.format(filename))
+    font_path = get_input_path(f'{filename}.otf')
     result_path = get_temp_file_path()
-    expected_path = get_expected_path('{}.cff2'.format(filename))
+    expected_path = get_expected_path(f'{filename}.cff2')
     runner(CMD + ['-a', '-o', 'cff2', '-f', font_path, result_path])
     assert differ([expected_path, result_path, '-m', 'bin'])
 
@@ -460,8 +460,8 @@ def test_ufo_vertical_advance_bug786():
 ])
 def test_ufo_read_processed_contents_plist_bug740(filename):
     actual_path = runner(CMD + ['-s', '-o', 'dump', '6', 'g', '_AE',
-                                '-f', 'bug740/{}.ufo'.format(filename)])
-    expected_path = get_expected_path('bug740/{}.txt'.format(filename))
+                                '-f', f'bug740/{filename}.ufo'])
+    expected_path = get_expected_path(f'bug740/{filename}.txt')
     assert differ([expected_path, actual_path])
 
 

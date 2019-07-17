@@ -63,7 +63,7 @@ def test_basic_hinting(font_filename, opt):
         else:
             arg = [opt]
         head, tail = os.path.splitext(font_filename)
-        expected_filename = '{}-{}{}'.format(head, opt, tail)
+        expected_filename = f'{head}-{opt}{tail}'
 
     if 'ufo' in font_filename:
         actual_path = tempfile.mkdtemp()
@@ -77,7 +77,7 @@ def test_basic_hinting(font_filename, opt):
             break
 
     runner(CMD + ['-f', get_input_path(font_filename),
-                  '-o', 'o', '_{}'.format(actual_path)] + arg)
+                  '-o', 'o', f'_{actual_path}'] + arg)
 
     skip = []
     if 'otf' in font_filename:
@@ -96,7 +96,7 @@ def test_beztools_hhint_over_limit_bug629():
     test_filename = 'bug629.pfa'
     actual_path = get_temp_file_path()
     expected_path = get_expected_path(test_filename)
-    runner(CMD + ['-o', 'nb', 'o', '_{}'.format(actual_path),
+    runner(CMD + ['-o', 'nb', 'o', f'_{actual_path}',
                   '-f', test_filename])
     assert differ([expected_path, actual_path,
                    '-s', r'%%Copyright: Copyright'])
@@ -116,11 +116,11 @@ def test_ufo_hashmap(font_filename, opt):
     if opt:
         arg = [opt]
         head, tail = os.path.splitext(font_filename)
-        expected_filename = '{}-{}{}'.format(head, opt, tail)
+        expected_filename = f'{head}-{opt}{tail}'
 
     actual_path = tempfile.mkdtemp()
     runner(CMD + ['-f', get_input_path(font_filename),
-                  '-o', 'o', '_{}'.format(actual_path)] + arg)
+                  '-o', 'o', f'_{actual_path}'] + arg)
     expected_path = get_expected_path(expected_filename)
     assert differ([expected_path, actual_path])
 
@@ -134,7 +134,7 @@ def test_ufo_hashmap_rehint():
     font_filename = 'hashmap_dflt_layer.ufo'
     actual_path = tempfile.mkdtemp()
     runner(CMD + ['-f', get_input_path(font_filename),
-                  '-o', 'o', '_{}'.format(actual_path)])
+                  '-o', 'o', f'_{actual_path}'])
     runner(CMD + ['-f', actual_path, '-o', 'wd', 'all'])
     expected_path = get_expected_path(font_filename)
     assert differ([expected_path, actual_path])

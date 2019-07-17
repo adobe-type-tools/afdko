@@ -37,6 +37,6 @@ TTF3_FONT = 'NotoNastaliqUrdu-Regular.ttf'
 def test_dump(args, font_filename, exp_filename):
     save_path = tempfile.mkstemp()[1]
     runner(['-t', TOOL, '-f', font_filename, '-o',
-            'o{}'.format(save_path)] + args)
+            f'o{save_path}'] + args)
     expected_path = get_expected_path(exp_filename)
     assert differ([expected_path, save_path, '-s', '<ttFont sfntVersion'])

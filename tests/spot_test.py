@@ -83,9 +83,9 @@ def test_options(args, exp_filename):
 
 @pytest.mark.parametrize('table', ['GSUB', 'GPOS'])
 def test_feature_tags_bug691(table):
-    exp_filename = 'SourceCodePro-Regular_{}.ps'.format(table)
+    exp_filename = f'SourceCodePro-Regular_{table}.ps'
     actual_path = runner(CMD + ['-s', '-f', 'SourceCodePro-Regular.otf',
-                                '-o', 't', '_{}=8'.format(table)])
+                                '-o', 't', f'_{table}=8'])
     expected_path = get_expected_path(exp_filename)
     assert differ([expected_path, actual_path])
 
@@ -94,7 +94,7 @@ def test_feature_tags_bug691(table):
 def test_long_glyph_name_bug373(font_format):
     file_name = 'long_glyph_name.' + font_format
     actual_path = runner(CMD + ['-s', '-o', 't', '_GSUB=7', '-f', file_name])
-    expected_path = get_expected_path('bug373_{}.txt'.format(font_format))
+    expected_path = get_expected_path(f'bug373_{font_format}.txt')
     assert differ([expected_path, actual_path])
 
 
