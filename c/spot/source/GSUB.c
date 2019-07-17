@@ -3976,7 +3976,7 @@ static void evalSingle(void *fmt,
     SingleSubstFormat1 *fmt1;
     SingleSubstFormat2 *fmt2;
     ttoEnumRec CovList;
-    Card32 nitems;
+    Card32 nitems = 0;
     IntX i, at;
     GlyphId inputglyphId;
     IntX formattype = ((SingleSubstFormat1 *)fmt)->SubstFormat;
