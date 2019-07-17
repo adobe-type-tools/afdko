@@ -1666,6 +1666,8 @@ static void writeHostCIDKeyedFont(t1wCtx h) {
     int host = (h->arg.flags & T1W_TYPE_HOST) != 0;
     abfTopDict *top = h->top;
 
+    memset(FDMap, 0, sizeof(FDMap));
+
     if (host)
         h->CIDCount++; /* Convert max CID to CIDCount */
     else
