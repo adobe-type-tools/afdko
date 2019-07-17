@@ -1666,7 +1666,7 @@ def makePDF(pdfFont, params, doProgressBar=True):
 	if params.rt_pdfFileName:
 		pdfPath = params.rt_pdfFileName
 	else:
-		pdfPath = "{}.pdf".format(os.path.splitext(fontPath)[0])
+		pdfPath = f"{os.path.splitext(fontPath)[0]}.pdf"
 	params.rt_canvas = rt_canvas = pdfgen.Canvas(pdfPath, pagesize=params.pageSize, bottomup = 1)
 
 	if params.waterfallRange:
@@ -2031,7 +2031,7 @@ def makeFontSetPDF(pdfFontList, params, doProgressBar=True):
 		# We put the PDF wherever the first font is.
 		firstPDFFont = pdfFontList[0][1]
 		fontPath = params.rt_filePath
-		pdfPath = "{}.fontset.pdf".format(os.path.splitext(fontPath)[0])
+		pdfPath = f"{os.path.splitext(fontPath)[0]}.fontset.pdf"
 	params.rt_canvas = rt_canvas = pdfgen.Canvas(pdfPath, pagesize=params.pageSize, bottomup = 1)
 
 	# figure out how much space to leave at start of line for PS names and fond index fields.

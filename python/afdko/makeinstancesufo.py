@@ -206,9 +206,7 @@ def validateDesignspaceDoc(dsDoc, dsoptions, **kwArgs):
         for src in dsDoc.sources:
             if not os.path.exists(src.path):
                 raise DesignSpaceDocumentError(
-                    "Source file {} does not exist".format(
-                        src.path,
-                    ))
+                    f"Source file {src.path} does not exist")
     else:
         raise DesignSpaceDocumentError(
             "Designspace file contains no sources."
@@ -219,9 +217,7 @@ def validateDesignspaceDoc(dsDoc, dsoptions, **kwArgs):
             # bounds check on indexList
             maxinstidx = max(dsoptions.indexList)
             if maxinstidx >= len(dsDoc.instances):
-                raise IndexError("Instance index {} out-of-range".format(
-                    maxinstidx,
-                ))
+                raise IndexError(f"Instance index {maxinstidx} out-of-range")
     else:
         raise DesignSpaceDocumentError(
             "Designspace file contains no instances."
@@ -333,7 +329,7 @@ def _validate_path(path_str):
     valid_path = os.path.abspath(os.path.realpath(path_str))
     if not os.path.exists(valid_path):
         raise argparse.ArgumentTypeError(
-            "'{}' is not a valid path.".format(path_str))
+            f"'{path_str}' is not a valid path.")
     return valid_path
 
 
@@ -345,10 +341,10 @@ def _split_comma_sequence(comma_str):
             index = int(item)
         except ValueError:
             raise argparse.ArgumentTypeError(
-                "Invalid integer value: '{}'".format(item))
+                f"Invalid integer value: '{item}'")
         if index < 0:
             raise argparse.ArgumentTypeError(
-                "Index values must be greater than zero: '{}'".format(index))
+                f"Index values must be greater than zero: '{index}'")
         int_set.add(index)
     return sorted(int_set)
 

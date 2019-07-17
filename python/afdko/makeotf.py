@@ -573,9 +573,11 @@ class MakeOTFParams(object):
         # exec("self.%s%s = [7,8]" % (kFileOptPrefix, kSetfsSelectionBitsOn))
 
     def __repr__(self):
-        text = '{}:\n'.format(self.__class__.__name__)
+        text = f'{self.__class__.__name__}:\n'
+
         for key, val in sorted(vars(self).items()):
-            text += '  {}: {}\n'.format(key, val)
+            text += f'  {key}: {val}\n'
+
         return text
 
 
@@ -1728,8 +1730,8 @@ def setCIDCMAPPaths(makeOTFParams, Reg, Ord, Sup):
               "the Mac CMAP encoding file with the '-cm' option.")
 
     if not uvsFilePath:
-        print("makeotf [Warning] Could not find a Unicode Variation Sequence "
-              "file in the expected '{}' subdirectory.".format(cmapPath))
+        print(f"makeotf [Warning] Could not find a Unicode Variation Sequence "
+              f"file in the expected '{cmapPath}' subdirectory.")
 
     return error
 
@@ -1903,9 +1905,9 @@ def setMissingParams(makeOTFParams):
         path = None
     if not path:
         if makeOTFParams.srcIsTTF or inputFontPath.lower().endswith(".ttf"):
-            font_filename = "{}.ttf".format(makeOTFParams.psName)
+            font_filename = f"{makeOTFParams.psName}.ttf"
         else:
-            font_filename = "{}.otf".format(makeOTFParams.psName)
+            font_filename = f"{makeOTFParams.psName}.otf"
 
         if output_dir:
             font_path = os.path.join(output_dir, font_filename)
@@ -2034,12 +2036,12 @@ def get_font_psname(font_path, is_ufo=False):
     match = re.search(r"(?:CID)?FontName\s+\"(\S+)\"", output)
     if not match:
         if is_ufo:
-            print("makeotf [Error] Could not find 'postscriptFontName' "
-                  "in file '{}'".format(font_path))
+            print(f"makeotf [Error] Could not find 'postscriptFontName' "
+                  f"in file '{font_path}'")
         else:
-            print("makeotf [Error] Could not find FontName (a.k.a. "
-                  "PostScript name) in FontDict of file "
-                  "'{}'".format(font_path))
+            print(f"makeotf [Error] Could not find FontName (a.k.a. "
+                  f"PostScript name) in FontDict of file "
+                  f"'{font_path}'")
         raise MakeOTFShellError
 
     return match.group(1)

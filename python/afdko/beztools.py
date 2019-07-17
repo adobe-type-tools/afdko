@@ -1178,7 +1178,7 @@ class CFFFontData:
 		overwriteOriginal = 0
 		if inputPath == outFilePath:
 			overwriteOriginal = 1
-		tempPath = "{}.temp.ac".format(inputPath)
+		tempPath = f'{inputPath}.temp.ac'
 
 		if fontType == 0: # OTF
 			if overwriteOriginal:
