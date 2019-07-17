@@ -65,7 +65,7 @@ def compile_package(pkg_dir):
         cmd = "sh buildall.sh"
     else:
         # fallback to Linux
-        print('afdko: Unknown OS: {}'.format(platform_system))
+        print(f'afdko: Unknown OS: {platform_system}')
         cmd = "sh buildalllinux.sh"
     cur_dir = os.getcwd()
     assert cmd, 'afdko: Unable to form build command for this platform.'
@@ -139,7 +139,7 @@ def _get_scripts():
     else:
         extension = ''
 
-    scripts = ['c/build_all/{}{}'.format(script_name, extension)
+    scripts = [f'c/build_all/{script_name}{extension}'
                for script_name in script_names]
     return scripts
 
@@ -168,7 +168,7 @@ def _get_console_scripts():
         ('waterfallplot', 'proofpdf:waterfallplot'),
     ]
     scripts_path = 'afdko'
-    scripts = ['{} = {}.{}'.format(name, scripts_path, entry)
+    scripts = [f'{name} = {scripts_path}.{entry}'
                for name, entry in script_entries]
     return scripts
 
