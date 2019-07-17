@@ -38,7 +38,7 @@ MSG_2 = (
 def test_convert(otf_filenames, ttc_filename, tables_msg):
     actual_path = get_temp_file_path()
     expected_path = get_expected_path(ttc_filename)
-    stdout_path = runner(CMD + ['-s', '-o', 'o', '_{}'.format(actual_path),
+    stdout_path = runner(CMD + ['-s', '-o', 'o', f'_{actual_path}',
                                 '-f'] + otf_filenames)
     with open(stdout_path, 'rb') as f:
         output = f.read()

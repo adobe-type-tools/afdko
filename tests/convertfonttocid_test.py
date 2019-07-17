@@ -41,7 +41,8 @@ def test_mergeFontToCFF_bug570(font_filename, subroutinize):
     # sfntedit will NOT work.
     actual_path = get_temp_file_path(directory=TEMP_DIR)
     subr_str = 'subr' if subroutinize else 'no_subr'
-    ttx_filename = '{}-{}.ttx'.format(font_filename.split('.')[0], subr_str)
+    font_base = os.path.splitext(font_filename)[0]
+    ttx_filename = f'{font_base}-{subr_str}.ttx'
     source_path = get_input_path(font_filename)
     output_path = get_input_path('core.otf')
     copy2(output_path, actual_path)

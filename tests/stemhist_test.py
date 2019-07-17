@@ -35,27 +35,27 @@ def test_stems_and_zones(arg, font_filename):
 
     report_path = get_temp_file_path()
     runner(CMD + ['-f', font_filename, '-o',
-                  'o', '_{}'.format(report_path)] + arg)
+                  'o', f'_{report_path}'] + arg)
     for suffix in suffixes:
-        actual_path = '{}{}'.format(report_path, suffix)
+        actual_path = f'{report_path}{suffix}'
         exp_suffix = suffix
         if 'all' in arg:
             exp_suffix = '.all' + suffix
-        expected_path = get_expected_path('{}{}'.format(prefix, exp_suffix))
+        expected_path = get_expected_path(f'{prefix}{exp_suffix}')
         assert differ([expected_path, actual_path, '-l', '1'])
 
 
 def test_cross_environment_results_bug210():
     filename = 'bug210'
     report_path = get_temp_file_path()
-    actual_top_path = '{}.top.txt'.format(report_path)
-    actual_bot_path = '{}.bot.txt'.format(report_path)
-    expect_top_path = get_expected_path('{}.top.txt'.format(filename))
-    expect_bot_path = get_expected_path('{}.bot.txt'.format(filename))
+    actual_top_path = f'{report_path}.top.txt'
+    actual_bot_path = f'{report_path}.bot.txt'
+    expect_top_path = get_expected_path(f'{filename}.top.txt')
+    expect_bot_path = get_expected_path(f'{filename}.bot.txt')
 
-    runner(CMD + ['-f', '{}.ufo'.format(filename),
+    runner(CMD + ['-f', f'{filename}.ufo',
                   '-o', 'a', 'g', '_a-z,A-Z,zero-nine',
-                  'o', '_{}'.format(report_path)])
+                  'o', f'_{report_path}'])
 
     assert differ([expect_top_path, actual_top_path, '-l', '1'])
     assert differ([expect_bot_path, actual_bot_path, '-l', '1'])
@@ -64,13 +64,13 @@ def test_cross_environment_results_bug210():
 def test_start_point_not_oncurve_bug715():
     filename = 'bug715'
     report_path = get_temp_file_path()
-    actual_hstm_path = '{}.hstm.txt'.format(report_path)
-    actual_vstm_path = '{}.vstm.txt'.format(report_path)
-    expect_hstm_path = get_expected_path('{}.hstm.txt'.format(filename))
-    expect_vstm_path = get_expected_path('{}.vstm.txt'.format(filename))
+    actual_hstm_path = f'{report_path}.hstm.txt'
+    actual_vstm_path = f'{report_path}.vstm.txt'
+    expect_hstm_path = get_expected_path(f'{filename}.hstm.txt')
+    expect_vstm_path = get_expected_path(f'{filename}.vstm.txt')
 
-    runner(CMD + ['-f', '{}.ufo'.format(filename),
-                  '-o', 'all', 'o', '_{}'.format(report_path)])
+    runner(CMD + ['-f', f'{filename}.ufo',
+                  '-o', 'all', 'o', f'_{report_path}'])
 
     assert differ([expect_hstm_path, actual_hstm_path, '-l', '1'])
     assert differ([expect_vstm_path, actual_vstm_path, '-l', '1'])

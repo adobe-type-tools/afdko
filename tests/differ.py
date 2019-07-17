@@ -84,27 +84,27 @@ class Differ(object):
                 for i, line in enumerate(f.readlines(), 1):
                     # Skip lines that change, such as timestamps
                     if self._line_to_skip(line):
-                        logger.debug("Matched begin of line. Skipped: {}"
-                                     "".format(line.rstrip()))
+                        logger.debug(f"Matched begin of line. "
+                                     f"Skipped: {line.rstrip()}")
                         # Blank the line instead of actually skipping (via
                         # 'continue'); this way the difflib results show the
                         # correct line numbers
                         line = ''
                     # Skip specific lines, referenced by number
                     elif i in self.skip_lines:
-                        logger.debug("Matched line #{}. Skipped: {}"
-                                     "".format(i, line.rstrip()))
+                        logger.debug(f"Matched line #{i}. "
+                                     f"Skipped: {line.rstrip()}")
                         line = ''
                     # Skip lines that match regex
                     elif self.skip_regex and self.skip_regex.match(line):
-                        logger.debug("Matched regex begin of line. Skipped: {}"
-                                     "".format(line.rstrip()))
+                        logger.debug(f"Matched regex begin of line. "
+                                     f"Skipped: {line.rstrip()}")
                         line = ''
                     # Use os-native line separator to enable running difflib
                     lines.append(line.rstrip() + os.linesep)
         except UnicodeDecodeError:
-            logger.error("Couldn't read text file using '{}' encoding.\n"
-                         "      File path: {}".format(self.encoding, path))
+            logger.error(f"Couldn't read text file using '{self.encoding}' "
+                         f"encoding.\n      File path: {path}")
             sys.exit(1)
         return lines
 
@@ -129,15 +129,15 @@ class Differ(object):
             return False
         for rel_file_path in all_rel_file_paths:
             path1 = self.path1 + rel_file_path
-            assert os.path.exists(path1), "Not a valid path1: {}".format(path1)
+            assert os.path.exists(path1), f"Not a valid path1: {path1}"
             path2 = self.path2 + rel_file_path
-            assert os.path.exists(path2), "Not a valid path2: {}".format(path2)
+            assert os.path.exists(path2), f"Not a valid path2: {path2}"
             if self.mode == BIN_MODE:
                 diff_result = filecmp.cmp(path1, path2)
             else:
                 diff_result = self._diff_txt_files(path1, path2)
             if not diff_result:
-                logger.debug("Non-matching file: {}".format(rel_file_path))
+                logger.debug(f"Non-matching file: {rel_file_path}")
                 return False
         return True
 
@@ -149,16 +149,18 @@ class Differ(object):
         diffs_str = ''
         set_1st = set(all_paths1)
         set_2nd = set(all_paths2)
-        diff1 = sorted(list(set_1st - set_2nd))
-        diff2 = sorted(list(set_2nd - set_1st))
+        diff1 = sorted(set_1st - set_2nd)
+        diff2 = sorted(set_2nd - set_1st)
         if diff1:
             dir1 = os.path.basename(self.path1)
-            diffs_str += ("\n  In 1st folder ({}) but not in 2nd:\n    {}"
-                          "".format(dir1, '\n    '.join(diff1)))
+            dj1 = '\n    '.join(diff1)
+            diffs_str += (f"\n  In 1st folder ({dir1}) but not in 2nd:"
+                          f"\n    {dj1}")
         if diff2:
             dir2 = os.path.basename(self.path2)
-            diffs_str += ("\n  In 2nd folder ({}) but not in 1st:\n    {}"
-                          "".format(dir2, '\n    '.join(diff2)))
+            dj2 = '\n    '.join(diff2)
+            diffs_str += (f"\n  In 2nd folder ({dir2}) but not in 1st:"
+                          f"\n    {dj2}")
         return diffs_str
 
     def _compare_dir_contents(self):
@@ -170,8 +172,8 @@ class Differ(object):
         all_paths1 = self._get_all_file_paths_in_dir_tree(self.path1)
         all_paths2 = self._get_all_file_paths_in_dir_tree(self.path2)
         if all_paths1 != all_paths2:
-            logger.info("Folders' contents don't match.{}".format(
-                self._report_dir_diffs(all_paths1, all_paths2)))
+            dd = self._report_dir_diffs(all_paths1, all_paths2)
+            logger.info(f"Folders' contents don't match.{dd}")
             return None
         return all_paths1
 
@@ -190,7 +192,7 @@ class Differ(object):
         all_paths = sorted(
             [path.replace(start_path, '') for path in all_paths])
 
-        logger.debug("All paths: {}".format(all_paths))
+        logger.debug(f"All paths: {all_paths}")
 
         return all_paths
 
@@ -225,7 +227,7 @@ def _validate_path(path_str):
     valid_path = os.path.abspath(os.path.realpath(path_str))
     if not os.path.exists(valid_path):
         raise argparse.ArgumentTypeError(
-            "{} is not a valid path.".format(path_str))
+            f"{path_str} is not a valid path.")
     return valid_path
 
 
@@ -247,7 +249,7 @@ def _convert_to_int(num_str):
     try:
         return int(num_str)
     except ValueError:
-        raise argparse.ArgumentTypeError("Not a number: {}".format(num_str))
+        raise argparse.ArgumentTypeError(f"Not a number: {num_str}")
 
 
 def _expand_num_range_or_delta(num_str_lst):
@@ -259,12 +261,12 @@ def _expand_num_range_or_delta(num_str_lst):
     elif plus_minus == '-':
         if not (rng_dlt_num >= start_num):
             raise argparse.ArgumentTypeError(
-                "The start of range value is larger than the end of range "
-                "value: {}-{}".format(start_num, rng_dlt_num))
+                f"The start of range value is larger than the end of range "
+                f"value: {start_num}-{rng_dlt_num}")
         return list(range(start_num, rng_dlt_num + 1))
     else:
         raise argparse.ArgumentTypeError(
-            "Unrecognized number separator: {}".format(plus_minus))
+            f"Unrecognized number separator: {plus_minus}")
 
 
 def _convert_seq_to_ints(num_seq):
@@ -290,7 +292,7 @@ def _compile_regex(str_seq):
         return re.compile(str_seq)
     except re.error as err:
         raise argparse.ArgumentTypeError(
-            'The expression is invalid: {}'.format(err))
+            f'The expression is invalid: {err}')
 
 
 def get_options(args):
@@ -324,8 +326,8 @@ def get_options(args):
         dest='skip_strings',
         type=_split_string_sequence,
         default=(),
-        help='string for matching the beginning of a line to skip\n'
-             'For multiple strings, separate them with {}'.format(SPLIT_MARKER)
+        help=f'string for matching the beginning of a line to skip\n'
+             f'For multiple strings, separate them with {SPLIT_MARKER}'
     )
     parser.add_argument(
         '-l',
@@ -378,14 +380,15 @@ def get_options(args):
     logging.basicConfig(level=level)
 
     if not _paths_are_same_kind(options.path1, options.path2):
-        parser.error("The paths are not of the same kind. Path1's kind is {}. "
-                     "Path2's kind is {}.".format(
-                         _get_path_kind(options.path1),
-                         _get_path_kind(options.path2)))
+        kp1 = _get_path_kind(options.path1)
+        kp2 = _get_path_kind(options.path2)
+        parser.error(f"The paths are not of the same kind. "
+                     f"Path1's kind is {kp1}. "
+                     f"Path2's kind is {kp2}.")
 
-    logger.debug("Line numbers: {}".format(options.skip_lines))
-    logger.debug("Regular expression: {}".format(
-        getattr(options.skip_regex, 'pattern', None)))
+    logger.debug(f"Line numbers: {options.skip_lines}")
+    regexpat = getattr(options.skip_regex, 'pattern', None)
+    logger.debug(f"Regular expression: {regexpat}")
 
     return options
 

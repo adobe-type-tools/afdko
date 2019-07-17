@@ -93,10 +93,10 @@ def test_exit_unknown_option(arg):
 ])
 def test_input_formats(arg, input_filename, ttx_filename):
     if 'gf' in arg:
-        arg.append('_{}'.format(get_input_path('GOADB.txt')))
+        arg.append(f'_{get_input_path("GOADB.txt")}')
     actual_path = get_temp_file_path()
-    runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
-                        'o', '_{}'.format(actual_path)] + arg)
+    runner(CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
+                        'o', f'_{actual_path}'] + arg)
     actual_ttx = generate_ttx_dump(actual_path)
     expected_ttx = get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx,
@@ -130,15 +130,15 @@ def test_path_with_non_ascii_chars_bug222(input_filename):
         copy2(input_path, temp_path)
     expected_path = os.path.join(temp_dir, OTF_NAME)
     assert os.path.exists(expected_path) is False
-    runner(CMD + ['-o', 'f', '_{}'.format(temp_path)])
+    runner(CMD + ['-o', 'f', f'_{temp_path}'])
     assert os.path.isfile(expected_path)
 
 
 def test_font_with_hash_bug239():
     input_path = get_input_path('bug239/font.ufo')
     output_path = get_temp_file_path()
-    runner(CMD + ['-o', 'f', '_{}'.format(input_path),
-                        'o', '_{}'.format(output_path)])
+    runner(CMD + ['-o', 'f', f'_{input_path}',
+                        'o', f'_{output_path}'])
     assert font_has_table(output_path, 'CFF ')
 
 
@@ -146,8 +146,8 @@ def test_font_with_outdated_hash_bug239():
     input_path = get_input_path('bug239/font_outdated_hash.ufo')
     output_path = get_temp_file_path()
     with pytest.raises(subprocess.CalledProcessError) as err:
-        runner(CMD + ['-o', 'f', '_{}'.format(input_path),
-                            'o', '_{}'.format(output_path)])
+        runner(CMD + ['-o', 'f', f'_{input_path}',
+                            'o', f'_{output_path}'])
     assert err.value.returncode == 1
 
 
@@ -159,7 +159,7 @@ def test_ufo_with_trailing_slash_bug280(input_filename):
     temp_dir = tempfile.mkdtemp()
     tmp_ufo_path = os.path.join(temp_dir, input_filename)
     copytree(ufo_path, tmp_ufo_path)
-    runner(CMD + ['-o', 'f', '_{}{}'.format(tmp_ufo_path, os.sep)])
+    runner(CMD + ['-o', 'f', f'_{tmp_ufo_path}{os.sep}'])
     expected_path = os.path.join(temp_dir, OTF_NAME)
     assert os.path.isfile(expected_path)
 
@@ -172,8 +172,8 @@ def test_output_is_folder_only_bug281(input_filename):
     temp_dir = tempfile.mkdtemp()
     expected_path = os.path.join(temp_dir, OTF_NAME)
     assert os.path.exists(expected_path) is False
-    runner(CMD + ['-o', 'f', '_{}'.format(input_path),
-                        'o', '_{}'.format(temp_dir)])
+    runner(CMD + ['-o', 'f', f'_{input_path}',
+                        'o', f'_{temp_dir}'])
     assert os.path.isfile(expected_path)
 
 
@@ -186,7 +186,7 @@ def test_output_is_folder_only_bug281(input_filename):
 def test_no_postscript_name_bug282(input_filename):
     # makeotf will fail for both UFO and Type 1 inputs
     with pytest.raises(subprocess.CalledProcessError) as err:
-        runner(CMD + ['-o', 'f', '_{}'.format(input_filename)])
+        runner(CMD + ['-o', 'f', f'_{input_filename}'])
     assert err.value.returncode == 1
 
 
@@ -384,8 +384,8 @@ def test_makeRelativePath_win_only(cur_dir, target_path, result):
 ])
 def test_build_options_cs_cl_bug459(args, input_filename, ttx_filename):
     actual_path = get_temp_file_path()
-    runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
-                        'o', '_{}'.format(actual_path)] + args)
+    runner(CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
+                        'o', f'_{actual_path}'] + args)
     actual_ttx = generate_ttx_dump(actual_path, ['cmap'])
     expected_ttx = get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
@@ -407,18 +407,18 @@ def test_build_options_cs_cl_bug459(args, input_filename, ttx_filename):
 ])
 def test_cid_keyed_cff_bug470(args, font, fontinfo):
     if 'fi' in args:
-        fontinfo_file = 'bug470/{}.txt'.format(fontinfo)
-        args.append('_{}'.format(get_input_path(fontinfo_file)))
-        ttx_file = 'bug470/{}-{}.ttx'.format(font, 'fi')
+        fontinfo_file = f'bug470/{fontinfo}.txt'
+        args.append(f'_{get_input_path(fontinfo_file)}')
+        ttx_file = f'bug470/{font}-fi.ttx'
     else:
-        ttx_file = 'bug470/{}.ttx'.format(font)
-    font_file = 'bug470/{}.pfa'.format(font)
+        ttx_file = f'bug470/{font}.ttx'
+    font_file = f'bug470/{font}.pfa'
     # 'dir=TEMP_DIR' is used for guaranteeing that the temp data is on same
     # file system as other data; if it's not, a file rename step made by
     # sfntedit will NOT work.
     actual_path = get_temp_file_path(directory=TEMP_DIR)
-    runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(font_file)),
-                        'o', '_{}'.format(actual_path)] + args)
+    runner(CMD + ['-o', 'f', f'_{get_input_path(font_file)}',
+                        'o', f'_{actual_path}'] + args)
     actual_ttx = generate_ttx_dump(actual_path, ['CFF '])
     expected_ttx = get_expected_path(ttx_file)
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
@@ -460,18 +460,18 @@ def test_GOADB_options_bug497(opts):
         elif opt == 'nga':
             args.append(opt)
         elif opt == 'gf':
-            args.extend([opt, '_{}'.format(goadb_path)])
+            args.extend([opt, f'_{goadb_path}'])
         elif 'bit' in opt:
             bit_num = int(opt[3])
             bit_bol = 'osbOn' if opt[4] == 'y' else 'osbOff'
-            args.extend([bit_bol, '_{}'.format(bit_num)])
+            args.extend([bit_bol, f'_{bit_num}'])
 
-    runner(CMD + ['-o', 'f', '_{}'.format(font_path),
-                        'o', '_{}'.format(actual_path),
-                        'ff', '_{}'.format(feat_path),
-                        'mf', '_{}'.format(fmndb_path)] + args)
+    runner(CMD + ['-o', 'f', f'_{font_path}',
+                        'o', f'_{actual_path}',
+                        'ff', f'_{feat_path}',
+                        'mf', f'_{fmndb_path}'] + args)
     actual_ttx = generate_ttx_dump(actual_path)
-    expected_ttx = get_expected_path('bug497/{}'.format(ttx_filename))
+    expected_ttx = get_expected_path(f'bug497/{ttx_filename}')
     assert differ([expected_ttx, actual_ttx,
                    '-s',
                    '<ttFont sfntVersion' + SPLIT_MARKER +
@@ -486,14 +486,14 @@ def test_GOADB_options_bug497(opts):
                                                  ('ADBE', True)])
 def test_fetch_font_version_bug610(feat_name, has_warn):
     input_filename = 't1pfa.pfa'
-    feat_filename = 'bug610/{}.fea'.format(feat_name)
+    feat_filename = f'bug610/{feat_name}.fea'
     otf_path = get_temp_file_path()
 
     stdout_path = runner(
         CMD + ['-s', '-o', 'r',
-               'f', '_{}'.format(get_input_path(input_filename)),
-               'ff', '_{}'.format(get_input_path(feat_filename)),
-               'o', '_{}'.format(otf_path)])
+               'f', f'_{get_input_path(input_filename)}',
+               'ff', f'_{get_input_path(feat_filename)}',
+               'o', f'_{otf_path}'])
 
     with open(stdout_path, 'rb') as f:
         output = f.read()
@@ -507,9 +507,9 @@ def test_update_cff_bbox_bug617():
     goadb_filename = "bug617/goadb.txt"
     actual_path = get_temp_file_path()
     ttx_filename = "bug617.ttx"
-    runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
-                        'gf', '_{}'.format(get_input_path(goadb_filename)),
-                        'o', '_{}'.format(actual_path), 'r', 'gs'])
+    runner(CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
+                        'gf', f'_{get_input_path(goadb_filename)}',
+                        'o', f'_{actual_path}', 'r', 'gs'])
     actual_ttx = generate_ttx_dump(actual_path, ['head', 'CFF '])
     expected_ttx = get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx,
@@ -530,9 +530,9 @@ def test_feature_includes_type1_bug164(feat_filename):
     otf_path = get_temp_file_path()
 
     runner(CMD + ['-o',
-                  'f', '_{}'.format(get_input_path(input_filename)),
-                  'ff', '_{}'.format(get_input_path(feat_filename)),
-                  'o', '_{}'.format(otf_path)])
+                  'f', f'_{get_input_path(input_filename)}',
+                  'ff', f'_{get_input_path(feat_filename)}',
+                  'o', f'_{otf_path}'])
 
     assert font_has_table(otf_path, 'head')
 
@@ -542,8 +542,8 @@ def test_feature_includes_ufo_bug164():
     otf_path = get_temp_file_path()
 
     runner(CMD + ['-o',
-                  'f', '_{}'.format(get_input_path(input_filename)),
-                  'o', '_{}'.format(otf_path)])
+                  'f', f'_{get_input_path(input_filename)}',
+                  'o', f'_{otf_path}'])
 
     assert font_has_table(otf_path, 'head')
 
@@ -554,9 +554,9 @@ def test_ttf_input_font_bug680():
     ttf_path = get_temp_file_path()
 
     runner(CMD + ['-o', 'r',
-                  'f', '_{}'.format(get_input_path(input_filename)),
-                  'ff', '_{}'.format(get_input_path(feat_filename)),
-                  'o', '_{}'.format(ttf_path)])
+                  'f', f'_{get_input_path(input_filename)}',
+                  'ff', f'_{get_input_path(feat_filename)}',
+                  'o', f'_{ttf_path}'])
 
     for table_tag in ('head', 'hhea', 'maxp', 'OS/2', 'hmtx', 'cmap', 'fpgm',
                       'prep', 'cvt ', 'loca', 'glyf', 'name', 'post', 'gasp',
@@ -567,8 +567,8 @@ def test_ttf_input_font_bug680():
 def test_skip_ufo3_global_guides_bug700():
     input_filename = "bug700.ufo"
     actual_path = get_temp_file_path()
-    runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
-                        'o', '_{}'.format(actual_path)])
+    runner(CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
+                        'o', f'_{actual_path}'])
     assert font_has_table(actual_path, 'CFF ')
 
 
@@ -576,8 +576,8 @@ def test_outline_from_processed_layer_bug703():
     input_filename = 'bug703.ufo'
     ttx_filename = 'bug703.ttx'
     actual_path = get_temp_file_path()
-    runner(CMD + ['-o', 'f', '_{}'.format(get_input_path(input_filename)),
-                        'o', '_{}'.format(actual_path)])
+    runner(CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
+                        'o', f'_{actual_path}'])
     actual_ttx = generate_ttx_dump(actual_path, ['CFF '])
     expected_ttx = get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
@@ -589,8 +589,8 @@ def test_unhandled_ufo_glif_token_bug705():
 
     stderr_path = runner(
         CMD + ['-s', '-e', '-o',
-               'f', '_{}'.format(get_input_path(input_filename)),
-               'o', '_{}'.format(otf_path)])
+               'f', f'_{get_input_path(input_filename)}',
+               'o', f'_{otf_path}'])
 
     with open(stderr_path, 'rb') as f:
         output = f.read()
@@ -604,8 +604,8 @@ def test_delete_zero_kb_font_on_fail_bug736():
 
     with pytest.raises(subprocess.CalledProcessError) as err:
         runner(CMD + ['-o',
-                      'f', '_{}'.format(get_input_path(input_filename)),
-                      'ff', '_{}'.format(get_input_path(feat_filename))])
+                      'f', f'_{get_input_path(input_filename)}',
+                      'ff', f'_{get_input_path(feat_filename)}'])
     assert err.value.returncode == 1
     assert os.path.exists(get_input_path(out_filename)) is False
 
@@ -617,8 +617,8 @@ def test_duplicate_warning_messages_bug751():
 
     stderr_path = runner(
         CMD + ['-s', '-e', '-o',
-               'f', '_{}'.format(get_input_path(input_filename)),
-               'o', '_{}'.format(otf_path)])
+               'f', f'_{get_input_path(input_filename)}',
+               'o', f'_{otf_path}'])
 
     assert differ([expected_path, stderr_path, '-l', '1',
                    '-s', 'Built development mode font'])
