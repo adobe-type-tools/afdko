@@ -66,8 +66,8 @@ def getSubset(subset_Path):
                         "Error parsing subset file. "
                         "Seeing a glyph name record before "
                         "seeing a location record.")
-                    logger.error("Line number: {}.".format(li))
-                    logger.error("Line text: {}.".format(line))
+                    logger.error(f'Line number: {li}.')
+                    logger.error(f'Line text: {line}.')
                 for key in cur_key_list:
                     locationDict[key].append(m.group(1))
     return locationDict
@@ -83,9 +83,8 @@ def subset_masters(designspace, subsetDict):
         subsetter = subset.Subsetter(options=subset_options)
         subsetter.populate(glyphs=included)
         subsetter.subset(ttf_font)
-        subset_path = '{}.subset.otf'.format(
-            os.path.splitext(ds_source.path)[0])
-        logger.progress("Saving subset font %s", subset_path)
+        subset_path = f'{os.path.splitext(ds_source.path)[0]}.subset.otf'
+        logger.progress(f'Saving subset font {subset_path}')
         ttf_font.save(subset_path)
         ds_source.font = TTFont(subset_path)
 
@@ -360,7 +359,7 @@ def _validate_path(path_str):
     valid_path = os.path.abspath(os.path.realpath(path_str))
     if not os.path.exists(valid_path):
         raise argparse.ArgumentTypeError(
-            "'{}' is not a valid path.".format(path_str))
+            f"'{path_str}' is not a valid path.")
     return valid_path
 
 
@@ -431,8 +430,7 @@ def get_options(args):
     options = parser.parse_args(args)
 
     if not options.var_font_path:
-        var_font_path = '{}.otf'.format(os.path.splitext(
-            options.design_space_path)[0])
+        var_font_path = f'{os.path.splitext(options.design_space_path)[0]}.otf'
         options.var_font_path = var_font_path
 
     if not options.verbose:

@@ -1104,7 +1104,7 @@ def main():
 
         convertFontToCID(inputPath, outputPath, fontinfoPath)
 
-        save_path = '{}{}'.format(os.path.splitext(inputPath)[0], '-CID.ps')
+        save_path = f'{os.path.splitext(inputPath)[0]}-CID.ps'
 
         if os.path.isfile(outputPath):
             os.rename(outputPath, save_path)

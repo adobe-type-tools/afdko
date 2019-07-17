@@ -48,7 +48,7 @@ def generalizeCFF(otfPath):
         raise ShellCommandError
 
     if not run_shell_command(['sfntedit', '-a',
-                              'CFF ={}'.format(tempFilePath), otfPath]):
+                              f'CFF ={tempFilePath}', otfPath]):
         raise ShellCommandError
 
 
@@ -56,7 +56,7 @@ def _validate_path(path_str):
     valid_path = os.path.abspath(os.path.realpath(path_str))
     if not os.path.exists(valid_path):
         raise argparse.ArgumentTypeError(
-            "'{}' is not a valid path.".format(path_str))
+            f"'{path_str}' is not a valid path.")
     return valid_path
 
 
@@ -106,14 +106,14 @@ def build_masters(opts):
         masterDir = os.path.dirname(master_path)
         ufoName = os.path.basename(master_path)
         otfName = os.path.splitext(ufoName)[0]
-        otfName = "{}.otf".format(otfName)
+        otfName = f"{otfName}.otf"
 
         if masterDir:
             os.chdir(masterDir)
 
         makeotf(['-nshw', '-f', ufoName, '-o', otfName,
                  '-r', '-nS'] + opts.mkot)
-        logger.info("Built OTF font for {}".format(master_path))
+        logger.info(f"Built OTF font for {master_path}")
         generalizeCFF(otfName)
         os.chdir(curDir)
 
@@ -176,7 +176,7 @@ def validateDesignspaceDoc(dsDoc, **kwArgs):
         for src in dsDoc.sources:
             if not os.path.exists(src.path):
                 raise DesignSpaceDocumentError(
-                    "Source file {} does not exist".format(src.path))
+                    f"Source file {src.path} does not exist")
     else:
         raise DesignSpaceDocumentError("Designspace file contains no sources.")
 

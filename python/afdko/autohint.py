@@ -1050,7 +1050,7 @@ def hintFile(options):
 
 	# temp file names for input and output bez files, and for the fontinfo file.
 	tempBez = fdkutils.get_temp_file_path()
-	tempBezNew = '{}{}'.format(tempBez, NEWBEZ_SUFFIX)
+	tempBezNew = f'{tempBez}{NEWBEZ_SUFFIX}'
 	tempFI = fdkutils.get_temp_file_path()
 
 	psName = fontData.getPSName()
@@ -1309,7 +1309,7 @@ def hintFile(options):
 	if options.usePlistFile and (anyGlyphChanged or pListChanged):
 		#  save font plist file.
 		with open(fontPlistFilePath, 'wb') as f:
-			plistlib.writePlist(fontPlist, f)
+			plistlib.dump(fontPlist, f)
 
 	if processedGlyphCount != seenGlyphCount:
 		logMsg("Skipped %s of %s glyphs." % (seenGlyphCount - processedGlyphCount, seenGlyphCount))

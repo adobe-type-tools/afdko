@@ -431,7 +431,7 @@ def PrintReports(path, h_stem_list, v_stem_list, top_zone_list, bot_zone_list):
 		rep_list, sortFunc = item
 		if not rep_list:
 			continue
-		fName = '{}{}'.format(path, suffixes[i])
+		fName = f'{path}{suffixes[i]}'
 		title = titles[i]
 		header = headers[i]
 		try:
@@ -471,7 +471,7 @@ def collectStemsFont(path, options):
 		raise ACFontError("Error: selected glyph list is empty for font <%s>." % fontFileName)
 
 	tempBez = fdkutils.get_temp_file_path()
-	tempReport = '{}{}'.format(tempBez, ".rpt")
+	tempReport = f'{tempBez}.rpt'
 	tempFI = fdkutils.get_temp_file_path()
 
 	#    open font plist file, if any. If not, create empty font plist.
