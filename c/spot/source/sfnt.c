@@ -794,8 +794,8 @@ static void doTables(IntX read) {
         IntX level = dump.list.array[i].level;
         error = 0;
         if (level != 0) {
-            Card32 start;
-            Card32 length;
+            Card32 start = 0;
+            Card32 length = 0;
             Function *func = findFunc(tag);
             Entry *entry = findEntry(tag);
 
