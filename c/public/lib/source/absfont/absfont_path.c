@@ -1870,6 +1870,8 @@ static int solveSegAtY(Segment *seg, float y, float icepts[3], int wind[3]) {
     int i;
     int j;
 
+    memset(q, 0, sizeof(q));
+
     if (seg->flags & SEG_LINE) {
         icepts[0] = seg->p0.x +
                     (y - seg->p0.y) * (seg->p3.x - seg->p0.x) / (seg->p3.y - seg->p0.y);
@@ -1941,6 +1943,8 @@ static int solveSegAtX(Segment *seg, float x, float icepts[3], int wind[3]) {
     int cnt;
     int i;
     int j;
+
+    memset(q, 0, sizeof(q));
 
     if (seg->flags & SEG_LINE) {
         icepts[0] = seg->p0.y +
@@ -2107,6 +2111,8 @@ static void chooseTargetPoint(abfCtx h, Segment *seg, Point *mid, int testvert) 
         int cnt;
         float icepts[3];
         int wind[3]; /* unused */
+
+        memset(icepts, 0, sizeof(icepts));
 
         if (testvert) {
             mid->x = v;
