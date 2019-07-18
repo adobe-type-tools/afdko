@@ -27,11 +27,7 @@ projects.
 Installation
 ------------
 
-:warning: **WARNING** :warning: After June 30th 2019 the AFDKO will officially
-only support Python 3.6 or later. See [#741](https://github.com/adobe-type-tools/afdko/issues/741)
-for details.
-
-The AFDKO requires [Python](http://www.python.org/download) 2.7, 3.6
+The AFDKO requires [Python](http://www.python.org/download) 3.6
 or later.
 
 Releases are available on the [Python Package
@@ -44,14 +40,7 @@ with [pip](https://pip.pypa.io).
 
 - Create a virtual environment:
 
-    - Python 3.6+
-
-            python3 -m venv afdko_env
-
-    - Python 2.7
-
-            pip install --user virtualenv
-            python -m virtualenv afdko_env
+        python3 -m venv afdko_env
 
 - Activate the virtual environment:
 
@@ -102,9 +91,9 @@ On the Mac, install these with:
 
     xcode-select --install
 
-On Linux, install these with:
+On Linux (Ubuntu 17.10 LTS or later), install these with:
 
-    apt-get -y install python2.7
+    apt-get -y install python3.6
     apt-get -y install python-pip
     apt-get -y install python-dev
 
