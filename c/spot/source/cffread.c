@@ -600,7 +600,7 @@ int cffGetString(cffCtx h, cffSID sid,
 /* Get NDV/CDV charstring offset */
 static Offset getProcOffset(cffCtx h, cffSID sid, unsigned *length) {
     char *ptr;
-    long offset;
+    long offset = 0;
     if (cffGetString(h, sid, length, &ptr, &offset))
         fatal(h, "bad NDV/CDV proc");
     return offset;
@@ -848,7 +848,7 @@ static int addMove(cffCtx h, Fixed x, Fixed y) {
 
         /* Set bound to first point */
         if (h->dict.FontMatrix != NULL) {
-            h->path.left = h->path.right = transX(h, x, y),
+            h->path.left = h->path.right = transX(h, x, y);
             h->path.bottom = h->path.top = transY(h, x, y);
         } else {
             h->path.left = h->path.right = x;
@@ -1294,7 +1294,7 @@ static void t2Read(cffCtx h, Offset offset, int init, int cslen) {
                         int i = popInt(h);
                         int j = popInt(h);
                         int iReg = popInt(h);
-                        int regSize;
+                        int regSize = 0;
                         Fixed *reg = selRegItem(h, iReg, &regSize);
                         if (i < 0 || i + count - 1 >= h->BCA.size ||
                             j < 0 || j + count - 1 >= regSize)
@@ -1323,7 +1323,7 @@ static void t2Read(cffCtx h, Offset offset, int init, int cslen) {
                         pushFix(h, DBL2FIX(x / y));
                         break;
                     case tx_load: {
-                        int regSize;
+                        int regSize = 0;
                         int count = popInt(h);
                         int i = popInt(h);
                         int iReg = popInt(h);
@@ -1397,7 +1397,7 @@ static void t2Read(cffCtx h, Offset offset, int init, int cslen) {
                         int iTop = h->stack.cnt - 1;
                         int iBottom = h->stack.cnt - n;
 
-                        if (n < 0 || iBottom < 0)
+                        if (n <= 0 || iBottom < 0)
                             fatal(h, "limit check (roll)");
 
                         /* Constrain j to [0,n) */

@@ -398,7 +398,7 @@ static void dump3(Format3 *fmt, Card32 length, IntX level) {
 /* Interpret format 0 table */
 static void run0(Format0 *fmt, Card32 length, IntX level) {
     IntX i;
-    IntX nPairs = (length - FORMAT0_HDR_SIZE) / PAIR_SIZE(nMasters);
+    IntX nPairs;
 
     if (nMasters > 1)
         return;
