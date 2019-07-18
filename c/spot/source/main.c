@@ -1133,7 +1133,7 @@ IntN main(IntN argc, Byte8 *argv[]) {
 
 #if AUTOSCRIPT
         if (!global.doingScripting && opt_Present("-X")) {
-            if (scriptfilename && scriptfilename[0] != '\0') {
+            if (scriptfilename[0] != '\0') {
                 global.doingScripting = 1;
                 makeArgs(scriptfilename);
                 goto execscript;

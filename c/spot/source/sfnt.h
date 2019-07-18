@@ -27,7 +27,7 @@ extern IntX sfntIsInFeatProofList(Card32 feat_tag); /* 0=>not in list,      */
                                                     /* >0 is in list:       */
                                                     /*   return dump level, */
                                                     /* -1=>empty list       */
-extern void sfntAllProcessedProofList();
+extern void sfntAllProcessedProofList(void);
 extern void resetReferencedList(void);
 extern void addToReferencedList(Card32 n);
 extern Card32 numReferencedList(void);

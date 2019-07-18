@@ -112,7 +112,7 @@ void opt_Error(int error, opt_Option *opt, char *arg) {
     opt_globals.error += opt_globals.handler(error, opt, arg, opt_globals.client);
 }
 
-int opt_hasError() {
+int opt_hasError(void) {
     return opt_globals.error;
 }
 

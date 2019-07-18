@@ -2456,7 +2456,6 @@ static void decompileChainContext3(ChainContextSubstFormat3 *fmt) {
     unsigned short numSubRecs = fmt->SubstCount;
     SubstLookupRecord *slr = NULL;
     IntX needLookupRefs = (numSubRecs > 1);
-    IntX haveAnyInLineRepl = 0; /* have any sub rules that will print the replacement string, and hence new-line */
     IntX decompileable = 0;
     Lookup *lookup;
 
@@ -2494,7 +2493,6 @@ static void decompileChainContext3(ChainContextSubstFormat3 *fmt) {
     /* Determine what input nodes need a direct lookup reference */
     {
         unsigned short *inputRuleList = NULL;
-        int seqIndex;
         inputRuleList = memNew(sizeof(*inputRuleList) * (fmt->InputGlyphCount));
 
         for (i = 0; i < fmt->InputGlyphCount; i++) {
@@ -2502,23 +2500,6 @@ static void decompileChainContext3(ChainContextSubstFormat3 *fmt) {
         }
         for (i = 0; i < numSubRecs; i++) {
             slr = &fmt->SubstLookupRecord[i];
-            seqIndex = slr->SequenceIndex;
-            lookup = &(GSUB._LookupList._Lookup[slr->LookupListIndex]);
-            if (needLookupRefs)
-                decompileable = 0;
-            else if ((lookup->LookupType == SingleSubsType) || (lookup->LookupType == LigatureSubsType))
-                decompileable = 1;
-            else
-                decompileable = 0;
-
-            if (0)  // 8/31/2012: msousa request that in-line replacement be printed as a second commented-out line.
-            {
-                if (!decompileable) {
-                    addToReferencedList(slr->LookupListIndex);
-                    inputRuleList[i] = slr->LookupListIndex;
-                } else
-                    haveAnyInLineRepl = 1;
-            }
             addToReferencedList(slr->LookupListIndex);
             inputRuleList[i] = slr->LookupListIndex;
         }
@@ -2565,7 +2546,6 @@ static void decompileChainContext3(ChainContextSubstFormat3 *fmt) {
         return;
     }
 
-    // if (haveAnyInLineRepl == 0) 8/31/2012: msousa request that in-line replacement be printed as a second commented-out line.
     fprintf(OUTPUTBUFF, ";\n");
 
     /* Need to free these because the calls to ttoEnumerateCoverage re-initialize them*/
@@ -2619,6 +2599,8 @@ static void decompileChainContext3(ChainContextSubstFormat3 *fmt) {
                     Card32 nitems;
                     IntX i, o;
                     Card16 lookupindex, seqindex;
+
+                    memset(inputgid, 0, sizeof(inputgid));
 
                     seqindex = slr->SequenceIndex;
                     lookupindex = slr->LookupListIndex;
@@ -3980,6 +3962,8 @@ static void evalSingle(void *fmt,
     IntX i, at;
     GlyphId inputglyphId;
     IntX formattype = ((SingleSubstFormat1 *)fmt)->SubstFormat;
+
+    memset((void*)&CovList, 0, sizeof(CovList));
 
     if (numinputglyphs > 1) {
         warning(SPOT_MSG_GSUBEVALCNT);

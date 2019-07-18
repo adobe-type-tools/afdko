@@ -464,7 +464,7 @@ extern int opt_Scan(int argc, char *argv[], int nOpts, opt_Option *opt,
                     opt_Handler handler, void *client);
 extern void opt_Error(int error, opt_Option *opt, char *arg);
 extern int opt_Present(char *name);
-extern int opt_hasError(); /* return if an option scan error has occured. */
+extern int opt_hasError(void); /* return if an option scan error has occured. */
 
 /* Standard value scanners */
 extern opt_Scanner opt_Char;   /* (char) */
