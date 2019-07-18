@@ -2523,6 +2523,7 @@ static void decompileChainContext3(ChainContextSubstFormat3 *fmt) {
                 fprintf(OUTPUTBUFF, " lookup lkp_%d", inputRuleList[i]);
             }
         }
+        memFree(inputRuleList);
     }
 
     for (i = 0; i < fmt->LookaheadGlyphCount; i++) {

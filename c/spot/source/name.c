@@ -259,7 +259,7 @@ Byte8 *nameFontName(void) {
             if ((record->languageId == 0) ||
                 (record->languageId == 0x409)) /* English */
             {
-                if (!fullname) memFree(fullname);
+                if (fullname) memFree(fullname);
                 fullname = memNew(sizeof(Byte8) * (record->length + 1));
                 fullname[0] = '\0';
                 makeString(record, fullname);

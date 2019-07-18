@@ -488,6 +488,7 @@ void proofMessage(ProofContextPtr ctx, Byte8 *str) {
                 proofPSOUT(ctx, psstr);
                 tLen = nLen - nPos;
             }
+            memFree(temp);
         }
     }
     proofNewline(ctx);
