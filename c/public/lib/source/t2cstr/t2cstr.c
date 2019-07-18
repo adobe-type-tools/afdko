@@ -992,7 +992,7 @@ static void setNumMasters(t2cCtx h) {
     unsigned short vsindex = h->glyph->info->blendInfo.vsindex;
     h->stack.numRegions = var_getIVDRegionCountForIndex(h->aux->varStore, vsindex);
     h->glyph->info->blendInfo.numRegions = h->stack.numRegions;
-    if (!var_getIVSRegionIndices(h->aux->varStore, vsindex, h->regionIndices, h->aux->varStore->regionList.regionCount)) {
+    if (h->aux->varStore && !var_getIVSRegionIndices(h->aux->varStore, vsindex, h->regionIndices, h->aux->varStore->regionList.regionCount)) {
         message(h, "inconsistent region indices detected in item variation store subtable %d", vsindex);
         h->stack.numRegions = 0;
     }
