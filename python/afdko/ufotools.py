@@ -1961,7 +1961,7 @@ def checkHashMaps(fontPath, doSync):
 
         width, _, outlineXML = ufoFontData.getGlyphXML(
             ufoFontData.glyphDefaultDir, glyphFileName)
-        if not outlineXML:
+        if outlineXML is None:
             continue
 
         newHash, _ = ufoFontData.buildGlyphHashValue(
