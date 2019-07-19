@@ -191,6 +191,8 @@ def test_cff2_sub_dump():
 
 def test_varread_pr355():
     # read CFF2 VF, write Type1 snapshot
+    # Note that cff2_vf is built from the sources at:
+    #    afdko/tests/buildmasterotfs_data/input/cff2_vf.
     actual_path = runner(CMD + ['-s', '-o', 't1', '-f', 'cff2_vf.otf'])
     expected_path = get_expected_path('cff2_vf.pfa')
     assert differ([expected_path, actual_path])
