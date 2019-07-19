@@ -680,7 +680,7 @@ static void checkChecksums(void) {
     Card16 searchRange;
     Card16 entrySelector;
     Card16 rangeShift;
-    Card32 checkSumAdjustment;
+    Card32 checkSumAdjustment = 0;
     Card32 totalsum = 0;
 
     /* Validate sfnt search fields */
@@ -750,7 +750,6 @@ static char *tail(char *path) {
     p = strrchr(path, '/');
     if (p == NULL)
         p = strrchr(path, '\\');
-    p = strrchr(path, '\\');
     return (p == NULL) ? path : p + 1;
 }
 
@@ -921,7 +920,7 @@ static boolean sfntCopy(void) {
     /* Assign table order */
     tags = (sfnt.version == TAG('O', 'T', 'T', 'O')) ? otfOrder : ttfOrder;
     for (i = 0; i < sfnt.numTables; i++) {
-        Tag *tagp = tags;
+        Tag *tagp;
         Table *tbl = &sfnt.directory[i];
 
         for (tagp = tags; *tagp != 0; tagp++)
@@ -1092,7 +1091,7 @@ int main(int argc, char *argv[]) {
             showUsage();
 
         if (!doingScripting && foundXswitch) {
-            if (scriptfilename && scriptfilename[0] != '\0') {
+            if (scriptfilename[0] != '\0') {
                 doingScripting = 1;
                 makeArgs(scriptfilename);
                 goto execscript;
@@ -1175,7 +1174,7 @@ int main(int argc, char *argv[]) {
             char *scurr = scriptfilename;
             char *dcurr;
 
-            sourcepath = (char *)malloc(strlen(scriptfilename));
+            sourcepath = (char *)malloc(strlen(scriptfilename) + 1);
             dcurr = sourcepath;
             while (scurr != end) {
                 *dcurr++ = *scurr++;
