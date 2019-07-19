@@ -249,7 +249,7 @@ static void showHelp(void) {
             "then be rerun with an argument to the -i option specifying a\n"
             "comma-separated sfnt id list of the sfnt resources to be dumped\n"
             "or the argument 'all' which dumps all sfnt resources.\n"
-            "    All the multiple sfnts within a TrueType Collection (TTC)\n"
+            "    All the multiple sfnts within an OpenType Collection (TTC)\n"
             "will be dumped by default but may be selectively dumped via TTC\n"
             "directory offsets specified with the -o option, e.g.\n"
             "-o0x14,0x170. Use the -tttcf option to view all the TTC\n"
