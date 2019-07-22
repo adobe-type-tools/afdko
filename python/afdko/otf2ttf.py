@@ -47,6 +47,8 @@ def otf_to_ttf(ttFont, post_format=POST_FORMAT, **kwargs):
     glyf.glyphOrder = glyphOrder
     glyf.glyphs = glyphs_to_quadratic(ttFont.getGlyphSet(), **kwargs)
     del ttFont["CFF "]
+    if "VORG" in ttFont:
+        del ttFont["VORG"]
     glyf.compile(ttFont)
 
     ttFont["maxp"] = maxp = newTable("maxp")
