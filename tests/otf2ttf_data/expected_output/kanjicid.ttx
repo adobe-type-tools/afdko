@@ -11638,13 +11638,6 @@
     </VertAxis>
   </BASE>
 
-  <VORG>
-    <majorVersion value="1"/>
-    <minorVersion value="0"/>
-    <defaultVertOriginY value="880"/>
-    <numVertOriginYMetrics value="0"/>
-  </VORG>
-
   <vhea>
     <tableVersion value="0x00011000"/>
     <ascent value="500"/>
