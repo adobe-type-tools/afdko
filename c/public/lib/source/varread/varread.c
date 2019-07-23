@@ -709,8 +709,23 @@ var_itemVariationStore var_loadItemVariationStore(ctlSharedStmCallbacks *sscb, u
         goto cleanup;
     }
     sscb->seek(sscb, tableOffset + ivsOffset + regionListOffset);
+
     ivs->regionList.axisCount = sscb->read2(sscb);
+
+    if (ivs->regionList.axisCount > CFF2_MAX_AXES) {
+        sscb->message(sscb, "invalid axis count in item variation region list");
+        goto cleanup;
+    }
+
     ivs->regionList.regionCount = sscb->read2(sscb);
+
+    /* cff2.scalars and cff2.regionIndices have size CFF2_MAX_MASTERS,
+       so regionList.regionCount should not exceed CFF2_MAX_MASTERS */
+    if (ivs->regionList.regionCount > CFF2_MAX_MASTERS) {
+        sscb->message(sscb, "invalid region count in item variation region list");
+        goto cleanup;
+    }
+
     if (dnaSetCnt(&ivs->regionList.regions, DNA_ELEM_SIZE_(ivs->regionList.regions), ivs->regionList.axisCount * ivs->regionList.regionCount) < 0)
         goto cleanup;
 
