@@ -745,7 +745,11 @@ static void doOp_ed(svrCtx h, abfGlyphCallbacks *glyph_cb) {
 }
 
 static int tkncmp(token *tk, char *str) {
-    return strncmp(tk->val, str, tk->length);
+    size_t len = strlen(str);
+    int retVal = 1;
+    if ((tk != NULL) && (len == tk->length))
+        retVal = strncmp(tk->val, str, tk->length);
+    return retVal;
 }
 
 static int tokenEqualStr(token *tk, char *str) {
