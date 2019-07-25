@@ -348,9 +348,16 @@ static void eeappend(int c) {
     eebuf[eecount++] = c;
 }
 
+#define CSBUF_SIZE 65536
 static void writeeexec(void) {
     char *s, *end;
     int lenIV;
+    Card8 *csbuf;
+
+    csbuf = malloc(CSBUF_SIZE);
+    if (csbuf == NULL)
+        panic("out of memory");
+    memset(csbuf, 0, CSBUF_SIZE);
 
     s = eebuf;
     end = &s[eecount];
@@ -366,7 +373,6 @@ static void writeeexec(void) {
             int i, len;
             unsigned short key = key_charstring;
             char *t, RD[20], prefix[40];
-            Card8 csbuf[65536];
 
             s += 2;
             while (isspace(*s))
@@ -384,7 +390,7 @@ static void writeeexec(void) {
             s = charstring(csbuf, s, &len);
             if (s >= end)
                 panic("charstring extended past end of encrypted region");
-            if (len > (int)sizeof(csbuf))
+            if (len > CSBUF_SIZE)
                 panic("charstring too long");
 
             if (lenIV >= 0) {
@@ -420,7 +426,6 @@ static void snarfeexec(FILE *fp) {
         } else if (*++cp == '\0') {
             for (s = closefile + 1; *s != '\0'; s++)
                 eeappend(*s);
-            cp = closefile;
             return;
         }
     panic("EOF in ciphertext region");
