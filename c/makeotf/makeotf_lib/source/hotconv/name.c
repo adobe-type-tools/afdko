@@ -281,13 +281,17 @@ static void addStdNames(nameCtx h, int win, int mac) {
         /* Add Unique name */
         /* xxx is this really needed or just a waste of space? */
         if (g->font.licenseID != NULL) {
-            sprintf(buf, "%.3f;%s;%s;%s",
+            snprintf(buf,
+                    sizeof(buf),
+                    "%.3f;%s;%s;%s",
                     dFontVersion,
                     g->font.vendId,
                     g->font.FontName.array,
                     g->font.licenseID);
         } else {
-            sprintf(buf, "%.3f;%s;%s",
+            snprintf(buf,
+                    sizeof(buf),
+                    "%.3f;%s;%s",
                     dFontVersion,
                     g->font.vendId,
                     g->font.FontName.array);

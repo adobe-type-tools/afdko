@@ -1853,8 +1853,7 @@ void CDECL hotMsg(hotCtx g, int level, char *fmt, ...) {
 #define MAX_NOTE_LEN 1024
             char message[MAX_NOTE_LEN + 1024];
             char *p;
-
-            if (g->font.FontName.cnt != 0) {
+            if ((g->font.FontName.cnt != 0) && (lenName < MAX_NOTE_LEN)) {
                 sprintf(message, "<%s> ", g->font.FontName.array);
                 p = &message[lenName];
             } else {

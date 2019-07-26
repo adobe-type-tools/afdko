@@ -18,6 +18,10 @@
 #include "file.h"
 #include "ctutil.h"
 
+#ifndef MIN
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#endif
+
 /* Keyword ids */
 enum {
     kFamily,         /* "f", "family" */
@@ -666,10 +670,12 @@ static void buildDefaultRec(fcdbCtx h, char *FontName) {
 
     if ((sepIndex > -1) && (FontName[sepIndex] == '-')) { /* On Windows, strcspn returns the string length when the char is not found! */
         subFamily = &FontName[sepIndex + 1];
+        sepIndex = MIN(sepIndex, sizeof(familyName) - 1);
         strncpy(familyName, FontName, sepIndex);
         familyName[sepIndex] = 0;
     } else {
-        strcpy(familyName, FontName);
+        strncpy(familyName, FontName, sizeof(familyName));
+        familyName[sizeof(familyName) - 1] = 0;
     }
 
     nameId = HOT_NAME_FAMILY; /* family */
