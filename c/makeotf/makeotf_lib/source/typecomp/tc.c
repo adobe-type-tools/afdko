@@ -224,7 +224,11 @@ static void calcSizes(tcprivCtx h) {
 
 /* Fill initial sizes in font */
 static void fillInitialSizes(tcprivCtx h, Font *font) {
-    font->size.FontName = strlen(font->FontName);
+    if (font->FontName != NULL) {
+        font->size.FontName = strlen(font->FontName);
+    } else{
+        font->size.FontName = 0;
+    }
     font->size.dict = font->dict.cnt;
     font->size.CharStrings =
         (font->flags & FONT_CHAMELEON) ? 0 : csSizeChars(h->g, font);

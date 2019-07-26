@@ -2867,6 +2867,9 @@ static void recodePath(recodeCtx h) {
 
     /* Create optimized Type 2 charstring from operators and segments */
     iSeg = 0;
+    if (h->path.ops.cnt == 0) {
+        badChar(h);
+    }
     nextop = h->path.ops.array;
     for (;;) {
         int newop;
