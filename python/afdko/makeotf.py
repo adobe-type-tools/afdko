@@ -581,6 +581,20 @@ class MakeOTFParams(object):
         return text
 
 
+def _check_remove_bad_output(outpath):
+    """
+    Checks for non-existing or "bad" (< 500 bytes) output file and attempts
+    to delete.
+    """
+    if not os.path.exists(outpath) or (os.path.getsize(outpath) < 500):
+        print("makeotf [Error] Failed to build output font file '%s'." %
+              outpath)
+        if os.path.exists(outpath):
+            os.remove(outpath)
+
+        raise MakeOTFRunError
+
+
 def readOptionFile(filePath, makeOTFParams, optionIndex):
     """ Paths in this file are stored relative to it's directory.
     However, we want to set the paths relative to the current directory.
@@ -632,7 +646,7 @@ def readOptionFile(filePath, makeOTFParams, optionIndex):
 
             if key == kSetfsSelectionBitsOn:
                 makeOTFParams.seenOS2v4Bits = [1, 1, 1]
-                value = eval(value)
+                value = str(value)
             setattr(makeOTFParams, attrName, value)
         else:
             print("makeotf [Error] When reading options file, did not "
@@ -898,7 +912,7 @@ def setOptionsFromFontInfo(makeOTFParams):
     m = re.search(r"FSType\s+(\S+)", data)
     if m:
         try:
-            val = eval(m.group(1))
+            val = str(m.group(1))
             makeOTFParams.FSType = val
         except (NameError, SyntaxError):
             print("makeotf [Error] Failed to parse value '%s' for FSType in "
@@ -1273,10 +1287,10 @@ def getOptions(makeOTFParams, args):
                              kFileOptPrefix + kSetfsSelectionBitsOn)
             if bitsOn is None:
                 setattr(makeOTFParams, kFileOptPrefix + kSetfsSelectionBitsOn,
-                        [val])
+                        [str(val)])
             else:
                 setattr(makeOTFParams, kFileOptPrefix + kSetfsSelectionBitsOn,
-                        bitsOn + [val])
+                        bitsOn + [str(val)])
 
         elif arg == kMOTFOptions[kSetfsSelectionBitsOff][1]:
             kMOTFOptions[kSetfsSelectionBitsOff][0] = i + optionIndex
@@ -1294,10 +1308,10 @@ def getOptions(makeOTFParams, args):
                               kFileOptPrefix + kSetfsSelectionBitsOff)
             if bitsOff is None:
                 setattr(makeOTFParams, kFileOptPrefix + kSetfsSelectionBitsOff,
-                        [val])
+                        [str(val)])
             else:
                 setattr(makeOTFParams, kFileOptPrefix + kSetfsSelectionBitsOff,
-                        bitsOff + [val])
+                        bitsOff + [str(val)])
 
         elif arg == kMOTFOptions[kSetOS2Version][1]:
             kMOTFOptions[kSetOS2Version][0] = i + optionIndex
@@ -1309,7 +1323,7 @@ def getOptions(makeOTFParams, args):
                       "an integer greater than 0." % arg)
                 error = 1
                 val = 0
-            setattr(makeOTFParams, kFileOptPrefix + kSetOS2Version, val)
+            setattr(makeOTFParams, kFileOptPrefix + kSetOS2Version, str(val))
 
         elif arg == kMOTFOptions[kAddSymbol][1]:
             # If the next argument is a valid integer, use it as
@@ -1320,7 +1334,7 @@ def getOptions(makeOTFParams, args):
                 i += 1
             except (IndexError, ValueError):
                 val = 'true'
-            setattr(makeOTFParams, kFileOptPrefix + kAddSymbol, val)
+            setattr(makeOTFParams, kFileOptPrefix + kAddSymbol, str(val))
 
         elif arg == kMOTFOptions[kAddSymbol][2]:
             kMOTFOptions[kAddSymbol][0] = i + optionIndex
@@ -1343,7 +1357,7 @@ def getOptions(makeOTFParams, args):
             try:
                 val = int(args[i])
                 i += 1
-                setattr(makeOTFParams, kFileOptPrefix + kMacScript, val)
+                setattr(makeOTFParams, kFileOptPrefix + kMacScript, str(val))
             except (IndexError, ValueError):
                 error = 1
                 print("makeotf [Error] The '%s' option must be followed by a "
@@ -1355,7 +1369,7 @@ def getOptions(makeOTFParams, args):
             try:
                 val = int(args[i])
                 i += 1
-                setattr(makeOTFParams, kFileOptPrefix + kMacLang, val)
+                setattr(makeOTFParams, kFileOptPrefix + kMacLang, str(val))
             except (IndexError, ValueError):
                 error = 1
                 print("makeotf [Error] The '%s' option must be followed by a "
@@ -2108,7 +2122,7 @@ def checkFSTypeValue(FSType, outputPath):
     fsType = fsTypeTxt.lstrip("0")
     if (len(fsType) == 0) and (len(fsTypeTxt) > 0):
         fsType = "0"
-    fsType = eval(fsType)
+    fsType = str(fsType)
     if fsType != FSType:
         print("makeotf [Error] FSType value '%s' from (cid)fontinfo file does "
               "not match value '%s' of OS/2 fsType in file at '%s'." %
@@ -2492,7 +2506,7 @@ def runMakeOTF(makeOTFParams):
 
     hasOS2V4Bit = False
     if bitsOn:
-        if sorted(bitsOn)[0] > 6:
+        if int(sorted(bitsOn)[0]) > 6:
             hasOS2V4Bit = True
 
     os2Version = getattr(makeOTFParams, kFileOptPrefix + kSetOS2Version)
@@ -2500,7 +2514,7 @@ def runMakeOTF(makeOTFParams):
         # If the OS/2 table version has not been explicitly specified,
         # and the kSetfsSelectionBits is being set to greater than 6,
         # then bump the OS/2 table version to 4.
-        setattr(makeOTFParams, kFileOptPrefix + kSetOS2Version, 4)
+        setattr(makeOTFParams, kFileOptPrefix + kSetOS2Version, '4')
 
     if hasOS2V4Bit:
         osv4Err = False
@@ -2548,11 +2562,12 @@ def runMakeOTF(makeOTFParams):
 
     params = [
         'makeotfexe',
-        "\"%s\" \"%s\"" % (eval("kMOTFOptions[\"%s\"]" % (
-            kInputFont))[1], inputFontPath),  # add temp font as the input font
-        "\"%s\" \"%s\"" % (eval("kMOTFOptions[\"%s\"]" % (
-            kOutputFont))[1], tempOutPath)  # add temp font as the input font
+        f'{kMOTFOptions[kInputFont][1]}',
+        inputFontPath,
+        f'{kMOTFOptions[kOutputFont][1]}',
+        tempOutPath,
     ]
+
     # Add the rest of the parameters
     optionKeys.sort(key=byEntryOrder)
     for optionKey in optionKeys:
@@ -2573,7 +2588,8 @@ def runMakeOTF(makeOTFParams):
             # True/False option where the option may have
             # an integer value following, e.g -adds.
             else:
-                params.append('%s "%s"' % (optionEntry[1], val))
+                params.append(optionEntry[1])
+                params.append(val)
         # an option without a following value
         elif val == 'true':
             params.append(optionEntry[1])
@@ -2583,41 +2599,29 @@ def runMakeOTF(makeOTFParams):
                   "is not T/F" % optionEntry[1])
         elif isinstance(val, list):
             for item in val:
-                params.append('%s "%s"' % (optionEntry[1], item))
+                params.append(optionEntry[1])
+                params.append(item)
         else:
-            params.append('%s "%s"' % (optionEntry[1], val))
+            params.append(optionEntry[1])
+            params.append(val)
 
-    commandString = " ".join(params)
     if makeOTFParams.verbose:
         print("makeotf [Note] Running %s with commands:" %
               os.path.basename('makeotfexe'))
-        print("   cd \"%s\"" % fontDir)
-        print("   %s" % commandString)
+        print(f'   cd "{fontDir}"')
+        print(f"   {params}")
 
-    fdkutils.runShellCmdLogging(commandString)
+    success, output = fdkutils.get_shell_command_output(params, std_error=True)
 
-    if not os.path.exists(tempOutPath) or (os.path.getsize(tempOutPath) < 500):
-        print("makeotf [Error] Failed to build output font file '%s'." %
-              tempOutPath)
-        if os.path.exists(tempOutPath):
-            try:
-                os.remove(tempOutPath)
-            except OSError:
-                pass
-        raise MakeOTFRunError
+    _check_remove_bad_output(tempOutPath)
+
+    if not success:
+        raise MakeOTFShellError
 
     if makeOTFParams.srcIsTTF:
         copyTTFGlyphTables(inputFilePath, tempOutPath, outputPath)
 
-    if not os.path.exists(outputPath) or (os.path.getsize(outputPath) < 500):
-        print("makeotf [Error] Failed to build output font file '%s'." %
-              outputPath)
-        if os.path.exists(outputPath):
-            try:
-                os.remove(outputPath)
-            except OSError:
-                pass
-        raise MakeOTFRunError
+    _check_remove_bad_output(outputPath)
 
     # The following check is here because of the internal Adobe
     # production process for CID fonts, where a Type1 CID font

@@ -233,9 +233,9 @@ def test_options_shw_nshw_bug457(args, result):
     # options 'MacCmapScriptID' and 'MacCmapLanguageID'
     # CJK MacCmapScriptIDs: Japan/1, CN/2, Korea/3, GB/25
     ([], (None, None)),
-    (['-cs', '1'], (1, None)),
-    (['-cl', '2'], (None, 2)),
-    (['-cs', '4', '-cl', '5'], (4, 5)),
+    (['-cs', '1'], ('1', None)),
+    (['-cl', '2'], (None, '2')),
+    (['-cs', '4', '-cl', '5'], ('4', '5')),
 ])
 def test_options_cs_cl_bug459(args, result):
     params = MakeOTFParams()
@@ -279,7 +279,7 @@ def test_readOptionFile():
     assert params.opt_OutputFontPath == OUTPUT_FONT_NAME
     assert params.opt_ConvertToCID == 'true'
     assert params.opt_kSetfsSelectionBitsOff == '[8, 9]'
-    assert params.opt_kSetfsSelectionBitsOn == [7]
+    assert params.opt_kSetfsSelectionBitsOn == '[7]'
     assert params.seenOS2v4Bits == [1, 1, 1]
     assert params.opt_UseOldNameID4 is None
 
