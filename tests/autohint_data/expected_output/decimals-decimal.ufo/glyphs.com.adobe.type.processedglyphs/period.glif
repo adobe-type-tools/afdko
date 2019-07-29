@@ -4,16 +4,16 @@
   <unicode hex="002E"/>
   <outline>
     <contour>
-      <point type="curve" x="100" y="-9.6" name="hintSet0000"/>
+      <point x="100" y="-9.6" type="curve" name="hintSet0000"/>
       <point x="125.6" y="-9.6"/>
       <point x="147.2" y="11.2"/>
-      <point type="curve" x="147.2" y="40"/>
+      <point x="147.2" y="40" type="curve"/>
       <point x="147.2" y="70.4" name="hintSet0002"/>
       <point x="125.6" y="91.2"/>
-      <point type="curve" x="100" y="91.2"/>
+      <point x="100" y="91.2" type="curve"/>
       <point x="73.6" y="91.2"/>
       <point x="52" y="70.4"/>
-      <point type="curve" x="52" y="40"/>
+      <point x="52" y="40" type="curve"/>
       <point x="52" y="11.2" name="hintSet0004"/>
       <point x="73.6" y="-9.6"/>
     </contour>

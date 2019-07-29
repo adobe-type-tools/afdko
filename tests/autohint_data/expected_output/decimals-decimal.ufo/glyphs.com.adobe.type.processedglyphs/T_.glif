@@ -7,14 +7,14 @@
   <anchor x="214.4" y="-17.6" name="belowLC"/>
   <outline>
     <contour>
-      <point type="line" x="180.8" y="0" name="hintSet0000"/>
-      <point type="line" x="248" y="0"/>
-      <point type="line" x="248" y="468.8"/>
-      <point type="line" x="406.4" y="468.8"/>
-      <point type="line" x="406.4" y="524.8"/>
-      <point type="line" x="22.4" y="524.8"/>
-      <point type="line" x="22.4" y="468.8"/>
-      <point type="line" x="180.8" y="468.8"/>
+      <point x="180.8" y="0" type="line" name="hintSet0000"/>
+      <point x="248" y="0" type="line"/>
+      <point x="248" y="468.8" type="line"/>
+      <point x="406.4" y="468.8" type="line"/>
+      <point x="406.4" y="524.8" type="line"/>
+      <point x="22.4" y="524.8" type="line"/>
+      <point x="22.4" y="468.8" type="line"/>
+      <point x="180.8" y="468.8" type="line"/>
     </contour>
   </outline>
   <lib>
