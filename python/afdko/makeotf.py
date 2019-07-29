@@ -1234,17 +1234,13 @@ def getOptions(makeOTFParams, args):
                 fontRevisionString = "5"
 
             # It is not another option. Must be a valid number
-            formatOK = 0
-            try:
-                fontRevision = eval(fontRevisionString)
-                if isinstance(fontRevision, int):
-                    formatOK = 1
-                elif isinstance(fontRevision, float):
-                    _, minor = fontRevisionString.split(".")
-                    if len(minor) == 3:
-                        formatOK = 1
-            except ValueError:
-                pass
+            formatOK = False
+            frs_parts = fontRevisionString.split(".")
+            formatOK = frs_parts[0].isnumeric()
+
+            if formatOK and len(frs_parts) == 2:
+                frac_part = frs_parts[1]
+                formatOK = len(frac_part) == 3 and frac_part.isnumeric()
 
             if not formatOK:
                 print("makeotf [Error] The '%s' option must be followed by an "
