@@ -160,7 +160,7 @@ static void fillFontDescElementValues(abfFontDict *font,
     values = saveValues(values, Private->FamilyOtherBlues.array,
                         elem->FamilyOtherBlues);
     values = saveValues(values, Private->StemSnapH.array, elem->StemSnapH);
-    values = saveValues(values, Private->StemSnapV.array, elem->StemSnapV);
+    saveValues(values, Private->StemSnapV.array, elem->StemSnapV);
 }
 
 /* Create abstract font descriptor. */
