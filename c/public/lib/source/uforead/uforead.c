@@ -3479,7 +3479,7 @@ static STI addString(ufoCtx h, size_t length, const char* value) {
         /* A null name (/) is legal in PostScript but could lead to unexpected
          behaviour elsewhere in the coretype libraries so it is substituted
          for a name that is very likely to be unique in the font */
-        const char subs_name[] = "_null_name_substitute_";
+        static const char subs_name[] = "_null_name_substitute_";
         value = subs_name;
         length = sizeof(subs_name) - 1;
         message(h, "null charstring name");
