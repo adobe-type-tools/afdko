@@ -419,7 +419,7 @@ void abfCheckAllDicts(abfErrCallbacks *cb, abfTopDict *top) {
     if (top->FDArray.cnt == 1)
         checkFontDict(cb, top, &top->FDArray.array[0], -1);
     else {
-        long i;
+        int i;
         for (i = 0; i < top->FDArray.cnt; i++)
             checkFontDict(cb, top, &top->FDArray.array[i], i);
     }

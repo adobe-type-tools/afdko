@@ -1389,8 +1389,7 @@ static int checkSelfIsectCurve(Point *p0, Point *p1, Point *p2, Point *p3) {
 /* Find the intersection of a self-intersecting curve. */
 static void selfIsectCurve(abfCtx h, Segment *seg) {
     float lo = 0, hi = 1;
-    float t;
-    Bezier a = {0}, b = {0}, c = {0};
+    Bezier a = {0}, b, c = {0};
     int foundSplit = 0;
 
     /* First find a point to split the curve in two
@@ -1400,6 +1399,7 @@ static void selfIsectCurve(abfCtx h, Segment *seg) {
     b = c; /* initialize bounds */
     while (lo < hi) {
         int isecta, isectb;
+        float t;
 
         t = (lo + hi) / 2;
         a = c;
@@ -1504,7 +1504,6 @@ static void splitSegment(abfCtx h, Intersect *last, Intersect *isect) {
         } else if (last->iSplit != -1) {
             t = (t - last->t) / (1 - last->t);
             iSeg = last->iSplit;
-            seg = &h->segs.array[iSeg];
         }
     } else if (t == 0 || t == 1)
         return;
@@ -2054,8 +2053,6 @@ static long searchValueList(ValueList *list, float val) {
 static void chooseTargetPoint(abfCtx h, Segment *seg, Point *mid, int testvert) {
     float v;
     float min, max;
-    float gapVal;
-    long i, gapIndex = 0;
     ValueList *list;
 
     if (testvert) {
@@ -2071,6 +2068,9 @@ static void chooseTargetPoint(abfCtx h, Segment *seg, Point *mid, int testvert) 
     if (min == max)
         v = min;
     else {
+        float gapVal;
+        long i, gapIndex = 0;
+
         if (min > max) {
             float temp = min;
             min = max;
@@ -2489,9 +2489,9 @@ static void sortOutlets(abfCtx h) {
 
 /* Reset all path and segment flags */
 static void resetSegFlags(abfCtx h, long iBeg, long pathFlags, long segFlags) {
-    long i;
     long iPath = iBeg;
     do {
+        long i;
         Path *path = &h->paths.array[iPath];
         path->flags &= ~pathFlags;
         iPath = path->iNext;
@@ -2857,10 +2857,6 @@ static int fixWorstOutlet(abfCtx h) {
 static void fixBadJunctions(abfCtx h, long iBeg) {
     int sweep;
     int good = 0;
-    int maxSweep = h->segs.cnt - h->paths.array[iBeg].iSeg;
-
-    if (maxSweep > MAX_SWEEP_FIX_JUNC)
-        maxSweep = MAX_SWEEP_FIX_JUNC;
 
     for (sweep = 0; !good && sweep < h->segs.cnt; sweep++)
         good = fixWorstOutlet(h);
@@ -2892,9 +2888,9 @@ static void reverseSeg(Segment *seg) {
 static void windTestPaths(abfCtx h, long iBeg) {
     /* Check all segments for winding order. */
     long iPath = iBeg;
-    long i;
 
     do {
+        long i;
         Path *path = &h->paths.array[iPath];
         iPath = path->iNext;
         i = path->iSeg;
@@ -2930,13 +2926,13 @@ static int CTL_CDECL cmpVals(const void *first, const void *second) {
 
 static void sortValueList(ValueList *list) {
     float lastVal = -MAXFLOAT;
-    float val;
     long i, j;
 
     qsort(list->array, list->cnt, sizeof(list->array[0]), cmpVals);
 
     /* remove duplicates */
     for (i = j = 0; i < list->cnt; i++) {
+        float val;
         val = list->array[i];
         if (val != lastVal) {
             list->array[j++] = val;
@@ -2952,9 +2948,9 @@ static void sortValueList(ValueList *list) {
 static void collectExtrema(abfCtx h) {
     long iBeg = h->glyphs.array[h->iGlyph].iPath;
     long iPath = iBeg;
-    long iSeg;
 
     do {
+        long iSeg;
         Path *path = &h->paths.array[iPath];
         iPath = path->iNext;
         iSeg = path->iSeg;
@@ -2980,8 +2976,6 @@ static void collectExtrema(abfCtx h) {
    Collect them in a junction list */
 static void deleteBadSegs(abfCtx h, long iBeg) {
     long i, j;
-    Intersect *firstisect, *lastisect;
-    long beg, end;
     Segment *seg;
     long iJunc;
 
@@ -2995,6 +2989,8 @@ static void deleteBadSegs(abfCtx h, long iBeg) {
 
     /* Collect non-deleted segments intersecting at the same point in a junction list */
     {
+        Intersect *firstisect, *lastisect;
+        long beg, end;
         Junction *junc = NULL;
         firstisect = lastisect = NULL;
         for (i = 0; i < h->isects.cnt; i++) {
@@ -3021,8 +3017,6 @@ static void deleteBadSegs(abfCtx h, long iBeg) {
 
             /* Check the end of a series of intersections sharing the same id */
             if (i + 1 >= h->isects.cnt || isect->id != isect[1].id) {
-                lastisect = isect;
-
                 /* There must be N*2 segments on N paths surrounding an intersection */
                 /* Start a new series of intersections at the same point */
                 if (junc) {
@@ -3041,6 +3035,7 @@ static void deleteBadSegs(abfCtx h, long iBeg) {
        Follow the original segment link possibly backwards if a segment is marked SEG_REVERSE
        At a junction, choose one of untaken segments in the opposite direction */
     for (j = 0; j < h->juncs.cnt; j++) {
+        long beg;
         Junction *junc = &h->juncs.array[j];
 
         for (i = 0; i < junc->outlets.cnt; i++) {
@@ -3080,7 +3075,6 @@ static void deleteBadSegs(abfCtx h, long iBeg) {
                     float angle = segmentAngle(seg, 1);
                     long iOutSeg = -1;
                     long iAnySeg = -1;
-                    Segment *outSeg;
 
                     /* If there are multiple outgoing segments to choose from at the junction,
                        choose the closest one to the left so that newly built paths are
@@ -3101,8 +3095,6 @@ static void deleteBadSegs(abfCtx h, long iBeg) {
                         iOutSeg = iAnySeg;
                     if (iOutSeg < 0)
                         fatal(h, abfErrCantHandle); /* shouldn't happen */
-
-                    outSeg = &h->segs.array[iOutSeg];
 
                     /* link the segments */
                     seg->iNext = iOutSeg;
@@ -3199,9 +3191,9 @@ static void deleteNonMarkingPaths(abfCtx h, long iBeg, long iGlyph) {
     long iFirstPath = -1;
     long iPrevPath = -1;
     long i;
-    Path *path;
 
     for (i = iBeg; i <= iEnd; i++) {
+        Path *path;
         path = &h->paths.array[i];
 #if ABF_DEBUG
         if (path->flags & PATH_ISECT)
