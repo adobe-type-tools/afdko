@@ -62,7 +62,7 @@ void fileOpenWrite(char *filename, File *fyl) {
         } else {
             /* make certain that "filename" is unique */
             int try = 0;
-            strcpy(Wfnam, filename);
+            STRLCPY(Wfnam, filename, sizeof(Wfnam));
             while (fileExists(Wfnam)) {
                 sprintf(Wfnam, "%s%d", filename, try ++);
             }
@@ -113,7 +113,7 @@ long fileLength(File *fyl) {
 }
 
 /* Read N bytes from file */
-int fileReadN(File *file, size_t count, void *ptr) {
+size_t fileReadN(File *file, size_t count, void *ptr) {
     size_t n = fread(ptr, 1, count, file->fp);
 
     if (n == 0 && ferror(file->fp))
@@ -159,7 +159,7 @@ void fileReadObject(File *fyl, IntX size, void *obj) {
 }
 
 /* Write N bytes to file */
-int fileWriteN(File *file, size_t count, void *ptr) {
+size_t fileWriteN(File *file, size_t count, void *ptr) {
     size_t n = fwrite(ptr, 1, count, file->fp);
     if (n != count)
         fileError(file);

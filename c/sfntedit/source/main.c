@@ -397,8 +397,8 @@ static Table *insertTable(Tag tag) {
 static void parseTagList(char *arg, int option, int flag) {
     char *p = arg;
     for (p = strtok(arg, ","); p != NULL; p = strtok(NULL, ",")) {
-        int i;
-        int taglen;
+        size_t i;
+        size_t taglen;
         Tag tag;
         char *filename;
         Table *tbl;
@@ -479,7 +479,7 @@ static int parseArgs(int argc, char *argv[]) {
                     case 'X': /* script file to execute */
                         foundXswitch = 1;
                         if ((argsleft > 0) && argv[i + 1][0] != '-') {
-                            strcpy(scriptfilename, argv[++i]);
+                            STRLCPY(scriptfilename, argv[++i], sizeof(scriptfilename));
                             if (doingScripting) /* disallow nesting */
                             {
                                 foundXswitch = 0;
@@ -905,7 +905,7 @@ static boolean sfntCopy(void) {
     FILE *f;
     boolean changed = (options & OPT_FIX) ? 1: 0; /* write file only if we change it */
 
-    strcpy(outputfilename, dstfile.name);
+    STRLCPY(outputfilename, dstfile.name, sizeof(outputfilename));
     f = freopen(outputfilename, "r+b", dstfile.fp);
     if (f == NULL) {
         fatal(SFED_MSG_sysFERRORSTR, strerror(errno), dstfile.name);
@@ -1052,7 +1052,7 @@ int main(int argc, char *argv[]) {
     for (i = 0; i < argc; i++) {
         if (strcmp(argv[i], "-X") == 0) {
             if ((argv[i + 1] != NULL) && (argv[i + 1][0] != '\0')) {
-                strcpy(scriptfilename, argv[i + 1]);
+                STRLCPY(scriptfilename, argv[i + 1], sizeof(scriptfilename));
                 foundXswitch = 1;
             }
             break;
@@ -1118,7 +1118,7 @@ int main(int argc, char *argv[]) {
                 char *scurr = srcfile.name;
                 char *dcurr;
 
-                sourcepath = (char *)malloc(strlen(srcfile.name));
+                sourcepath = (char *)malloc(strlen(srcfile.name) + 1);
                 dcurr = sourcepath;
                 while (scurr != end) {
                     *dcurr++ = *scurr++;
