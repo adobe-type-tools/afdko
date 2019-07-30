@@ -363,7 +363,7 @@ static void writeeexec(void) {
     end = &s[eecount];
     lenIV = getlenIV(s, end);
 
-    while (s < end)
+    while (s < end) {
         if (s[0] != '#' || s[1] != '#') {
             if (s[0] == 0x0D) /* exclude CR so Win & Mac have same output */
                 s++;
@@ -409,6 +409,8 @@ static void writeeexec(void) {
                     eeputchar(csbuf[i]);
             }
         }
+    }
+    free(csbuf);
 }
 
 static void snarfeexec(FILE *fp) {
