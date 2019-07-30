@@ -40,14 +40,20 @@ int sysFileExists(char *filename) {
 long sysFileLen(FILE *f) {
     long at, cur;
     if (f == NULL)
-        return (-1);
+        return -1;
     cur = ftell(f);
+    if (cur == -1)
+        return -1;
     at = fseek(f, 0, SEEK_END);
     if (at == -1)
-        return (-1);
+        return -1;
     at = ftell(f);
-    fseek(f, cur, SEEK_SET);
-    return (at);
+    if (at == -1)
+        return -1;
+    if (fseek(f, cur, SEEK_SET) == -1)
+        return -1;
+    else
+        return at;
 }
 
 FILE *sysOpenRead(char *filename) {
@@ -83,14 +89,15 @@ FILE *sysOpenSearchpath(char *filename) {
         file[0] = '\0';
         sprintf(file, *p, filename);
         f = fopen(file, "rb");
-        if (f == NULL) continue;
-        fd = fileno(f);
-        if (fd < 0) continue;
-        if ((f == NULL) ||
-            (fstat(fd, &st) == (-1)) || ((st.st_mode & S_IFMT) == S_IFDIR))
+        if (f == NULL)
             continue;
-        else
+        fd = fileno(f);
+        if ((fd < 0) || (fstat(fd, &st) == (-1)) || ((st.st_mode & S_IFMT) == S_IFDIR)) {
+            fclose(f);
+            continue;
+        } else {
             return f;
+        }
     }
 
     return (NULL);
