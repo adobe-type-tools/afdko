@@ -45,7 +45,7 @@ struct t1cCtx {
 #define USE_GLOBAL_MATRIX (1<<13) /* Transform is applied to entire charstring */
     struct /* Operand stack */
     {
-        long cnt;
+        int cnt;
         float array[T1_MAX_OP_STACK];
     } stack;
     float x; /* Path x-coord */
@@ -66,7 +66,7 @@ struct t1cCtx {
     } lsb;
     struct /* Counter control args */
     {
-        long cnt;
+        int cnt;
         float array[T2_MAX_STEMS * 2 + 2];
     } cntr;
     struct /* seac conversion data */
@@ -850,14 +850,6 @@ static int addCntrCntl(t1cCtx h, int last, int argcnt) {
     return 0;
 }
 
-/* Unbias Library element gsub value. 
- -107 is is the last gsubrm -106, the second to last, and so on.
- Return -1 on error else subroutine number. */
-static long unbiasLE(long arg, long nSubrs) {
-    long subrIndex = nSubrs - (107 + arg + 1);
-    return (subrIndex < 0 || subrIndex >= nSubrs) ? -1 : subrIndex;
-}
-
 /* Execute "blend" op. Return 0 on success else error code. */
 static int do_blend(t1cCtx h, int nBlends) {
     int i;
@@ -1482,7 +1474,6 @@ int t1cParse(long offset, t1cAuxData *aux, abfGlyphCallbacks *glyph) {
     aux->achar = 0;
 
     if (aux->flags & T1C_USE_MATRIX) {
-        int i;
         if ((fabs(1 - aux->matrix[0]) > 0.0001) ||
             (fabs(1 - aux->matrix[3]) > 0.0001) ||
             (aux->matrix[1] != 0) ||
@@ -1491,6 +1482,7 @@ int t1cParse(long offset, t1cAuxData *aux, abfGlyphCallbacks *glyph) {
             (aux->matrix[5] != 0))
 
         {
+            int i;
             h.flags |= USE_MATRIX;
             h.flags |= USE_GLOBAL_MATRIX;
             for (i = 0; i < 6; i++) {
