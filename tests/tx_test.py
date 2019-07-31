@@ -5,7 +5,8 @@ import tempfile
 
 from runner import main as runner
 from differ import main as differ, SPLIT_MARKER
-from test_utils import get_input_path, get_expected_path, get_temp_file_path
+from test_utils import (get_input_path, get_expected_path, get_temp_file_path,
+                        generate_ps_dump)
 
 TOOL = 'tx'
 CMD = ['-t', TOOL]
@@ -41,6 +42,14 @@ PS_SKIP = [
     '0 740 moveto (Filename:' + SPLIT_MARKER +
     '560 (Date:' + SPLIT_MARKER +
     '560 (Time:'
+]
+
+PS_SKIP2 = [
+    '%ADOt1write:'
+]
+
+PFA_SKIP = [
+    '%ADOt1write:'
 ]
 
 
@@ -110,6 +119,8 @@ def test_convert(from_format, to_format):
         regex_skip = PDF_SKIP_REGEX[:]
     elif to_format == 'ps':
         skip = PS_SKIP[:]
+    elif to_format == 'type1':
+        skip = PFA_SKIP[:]
     if skip:
         skip.insert(0, '-s')
     if regex_skip:
@@ -195,7 +206,8 @@ def test_varread_pr355():
     #    afdko/tests/buildmasterotfs_data/input/cff2_vf.
     actual_path = runner(CMD + ['-s', '-o', 't1', '-f', 'cff2_vf.otf'])
     expected_path = get_expected_path('cff2_vf.pfa')
-    assert differ([expected_path, actual_path])
+    skip = ['-s'] + PFA_SKIP[:]
+    assert differ([expected_path, actual_path] + skip)
 
 
 def test_cff2_no_vf_bug353():
@@ -237,7 +249,8 @@ def test_trademark_string_pr425():
     # converted to 'Copyright' and stored in Notice field of a Type1
     actual_path = runner(CMD + ['-s', '-o', 't1', '-f', 'trademark.ufo'])
     expected_path = get_expected_path('trademark.pfa')
-    assert differ([expected_path, actual_path])
+    skip = ['-s'] + PFA_SKIP[:]
+    assert differ([expected_path, actual_path] + skip)
 
 
 def test_remove_hints_bug180():
@@ -245,7 +258,10 @@ def test_remove_hints_bug180():
     cid_path = get_temp_file_path()
     runner(CMD + ['-a', '-o', 't1', 'n', '-f', font_path, cid_path])
     expected_path = get_expected_path('cid_nohints.ps')
-    assert differ([expected_path, cid_path, '-m', 'bin'])
+    expected_path = generate_ps_dump(expected_path)
+    actual_path = generate_ps_dump(cid_path)
+    skip = ['-s'] + PS_SKIP2
+    assert differ([expected_path, actual_path] + skip)
 
 
 def test_long_charstring_read_bug444():
@@ -407,6 +423,8 @@ def test_recalculate_font_bbox_bug618(to_format, args, exp_filename):
     if to_format == 'afm':
         skip = ['-s', 'Comment Creation Date:' + SPLIT_MARKER +
                 'Comment Copyright']
+    elif to_format == 't1':
+        skip = ['-s'] + PFA_SKIP[:]
 
     assert differ([expected_path, save_path] + diff_mode + skip)
 
@@ -446,13 +464,15 @@ def test_ufo_self_closing_dict_element_bug701():
 def test_ufo3_guideline_bug705():
     actual_path = runner(CMD + ['-s', '-o', 't1', '-f', 'bug705.ufo'])
     expected_path = get_expected_path('bug705.pfa')
-    assert differ([expected_path, actual_path])
+    skip = ['-s'] + PFA_SKIP[:]
+    assert differ([expected_path, actual_path] + skip)
 
 
 def test_ufo_vertical_advance_bug786():
     actual_path = runner(CMD + ['-s', '-o', 't1', '-f', 'bug786.ufo'])
     expected_path = get_expected_path('bug786.pfa')
-    assert differ([expected_path, actual_path])
+    skip = ['-s'] + PFA_SKIP[:]
+    assert differ([expected_path, actual_path] + skip)
 
 
 @pytest.mark.parametrize('filename', [

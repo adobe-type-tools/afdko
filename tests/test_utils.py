@@ -32,6 +32,42 @@ def generate_ttx_dump(font_path, tables=None):
         return temp_path
 
 
+def generate_ps_dump(font_path):
+    with open(font_path, 'rb') as ps_file:
+        data = ps_file.read()
+    line = ''
+    i = 0
+    in_binary_section = False
+    bytes_read = 0
+    byte_count = 0
+    temp_path = get_temp_file_path()
+    with open(temp_path, 'w') as temp_file:
+        while i < len(data):
+            x = data[i]
+            if not in_binary_section:
+                if x != 0x0A:
+                    line += '%c' % x
+                else:
+                    if line.startswith('%%BeginData'):
+                        in_binary_section = True
+                        byte_count = int(line.split()[1])
+                    line += '\n'
+                    temp_file.write(line)
+                    line = ''
+            else:
+                bytes_read += 1
+                if bytes_read == byte_count:
+                    in_binary_section = False
+                    if bytes_read % 32 != 1:
+                        temp_file.write('\n')
+                else:
+                    temp_file.write('%02X' % x)
+                    if bytes_read % 32 == 0:
+                        temp_file.write('\n')
+            i += 1
+    return temp_path
+
+
 def font_has_table(font_path, table_tag):
     with TTFont(font_path) as font:
         return table_tag in font

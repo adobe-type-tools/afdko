@@ -4,9 +4,9 @@ from shutil import copy2
 import tempfile
 
 from runner import main as runner
-from differ import main as differ
+from differ import main as differ, SPLIT_MARKER
 from test_utils import (get_input_path, get_expected_path, get_temp_file_path,
-                        generate_ttx_dump)
+                        generate_ttx_dump, generate_ps_dump)
 
 TOOL = 'autohint'
 CMD = ['-t', TOOL]
@@ -56,14 +56,17 @@ def teardown_function():
 ])
 def test_basic_hinting(font_filename, opt):
     arg = []
-    expected_filename = font_filename
+    head, tail = os.path.splitext(font_filename)
+    if tail == '.pfb':
+        tail = '.pfa'  # the input is PFB, but the output will be PFA
     if opt:
         if opt == 'fi':
             _copy_fontinfo_file()
         else:
             arg = [opt]
-        head, tail = os.path.splitext(font_filename)
         expected_filename = f'{head}-{opt}{tail}'
+    else:
+        expected_filename = f'{head}{tail}'
 
     if 'ufo' in font_filename:
         actual_path = tempfile.mkdtemp()
@@ -71,24 +74,30 @@ def test_basic_hinting(font_filename, opt):
         actual_path = get_temp_file_path()
 
     diff_mode = []
-    for font_format in ('.pfb', '.cff', '.ps'):
-        if font_filename.endswith(font_format):
-            diff_mode = ['-m', 'bin']
-            break
+    if tail == '.cff':
+        diff_mode = ['-m', 'bin']
 
     runner(CMD + ['-f', get_input_path(font_filename),
                   '-o', 'o', f'_{actual_path}'] + arg)
 
     skip = []
-    if 'otf' in font_filename:
+    if tail == '.otf':
         fi = ''
         if opt == 'fi':
             fi = '-' + opt
         expected_filename = os.path.splitext(font_filename)[0] + fi + '.ttx'
         actual_path = generate_ttx_dump(actual_path, ['CFF '])
         skip = ['-l', '2']  # <ttFont sfntVersion=
+    elif tail in {'.pfa', '.pfb'}:
+        skip = ['-s', r'%ADOt1write:']
+    elif tail == '.ps':
+        actual_path = generate_ps_dump(actual_path)
+        skip = ['-s', r'%ADOt1write:']
 
     expected_path = get_expected_path(expected_filename)
+    if tail == '.ps':
+        expected_path = generate_ps_dump(expected_path)
+
     assert differ([expected_path, actual_path] + diff_mode + skip)
 
 
@@ -99,7 +108,8 @@ def test_beztools_hhint_over_limit_bug629():
     runner(CMD + ['-o', 'nb', 'o', f'_{actual_path}',
                   '-f', test_filename])
     assert differ([expected_path, actual_path,
-                   '-s', r'%%Copyright: Copyright'])
+                   '-s',
+                   r'%ADOt1write' + SPLIT_MARKER + r'%%Copyright: Copyright'])
 
 
 @pytest.mark.parametrize('font_filename, opt', [
