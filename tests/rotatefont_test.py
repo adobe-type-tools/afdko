@@ -3,7 +3,8 @@ import subprocess
 
 from runner import main as runner
 from differ import main as differ
-from test_utils import get_input_path, get_expected_path, get_temp_file_path
+from test_utils import (get_input_path, get_expected_path, get_temp_file_path,
+                        generate_ps_dump)
 
 TOOL = 'rotatefont'
 CMD = ['-t', TOOL]
@@ -46,12 +47,15 @@ def test_matrix(font_filename, i, matrix):
     runner(CMD + ['-a', '-f', font_path, actual_path,
                   '-o', 't1', 'matrix'] + matrix_values)
     ext = 'pfa'
-    diff_mode = []
+    skip = ['-s', '%ADOt1write:']
     if 'cid' in font_filename:
         ext = 'ps'
-        diff_mode = ['-m', 'bin']
     expected_path = get_expected_path(f'matrix{i}.{ext}')
-    assert differ([expected_path, actual_path] + diff_mode)
+    if ext == 'ps':
+        actual_path = generate_ps_dump(actual_path)
+        expected_path = generate_ps_dump(expected_path)
+
+    assert differ([expected_path, actual_path] + skip)
 
 
 @pytest.mark.parametrize('i, rt_args', [
@@ -62,11 +66,10 @@ def test_matrix(font_filename, i, matrix):
 def test_rt_fd_options(font_filename, i, rt_args):
     fd_args = []
     ext = 'pfa'
-    diff_mode = []
+    skip = ['-s', '%ADOt1write:']
     if 'cid' in font_filename:
         fd_args = ['fd', f'_{i}']
         ext = 'ps'
-        diff_mode = ['-m', 'bin']
 
     rt_values = [f'_{val}' for val in rt_args.split()]
 
@@ -75,17 +78,19 @@ def test_rt_fd_options(font_filename, i, rt_args):
     runner(CMD + ['-a', '-f', font_path, actual_path,
                   '-o', 't1', 'rt'] + rt_values + fd_args)
     expected_path = get_expected_path(f'rotatrans{i}.{ext}')
-    assert differ([expected_path, actual_path] + diff_mode)
+    if ext == 'ps':
+        actual_path = generate_ps_dump(actual_path)
+        expected_path = generate_ps_dump(expected_path)
+    assert differ([expected_path, actual_path] + skip)
 
 
 @pytest.mark.parametrize('font_filename', ['font.pfa', 'cidfont.ps'])
 def test_rtf_option(font_filename):
     ext = 'pfa'
-    diff_mode = []
     rtf_filename = 'rotate.txt'
+    skip = ['-s', '%ADOt1write:']
     if 'cid' in font_filename:
         ext = 'ps'
-        diff_mode = ['-m', 'bin']
         rtf_filename = 'cidrotate.txt'
 
     rtf_path = get_input_path(rtf_filename)
@@ -96,4 +101,7 @@ def test_rtf_option(font_filename):
                   '-o', 't1', 'rt', '_45', '_0', '_0',
                   'rtf', f'_{rtf_path}'])
     expected_path = get_expected_path(f'rotafile.{ext}')
-    assert differ([expected_path, actual_path] + diff_mode)
+    if ext == 'ps':
+        actual_path = generate_ps_dump(actual_path)
+        expected_path = generate_ps_dump(expected_path)
+    assert differ([expected_path, actual_path] + skip)

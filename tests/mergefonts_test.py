@@ -3,7 +3,8 @@ import subprocess
 
 from runner import main as runner
 from differ import main as differ
-from test_utils import get_expected_path, get_temp_file_path, get_input_path
+from test_utils import (get_expected_path, get_temp_file_path, get_input_path,
+                        generate_ps_dump)
 
 TOOL = 'mergefonts'
 CMD = ['-t', TOOL]
@@ -32,12 +33,17 @@ def test_convert_to_cid():
     alias3_filename = 'alias3.txt'
     fontinfo_filename = 'cidfontinfo.txt'
     actual_path = get_temp_file_path()
+
     expected_path = get_expected_path('cidfont.ps')
     runner(CMD + ['-o', 'cid', '-f', fontinfo_filename, actual_path,
                   alias1_filename, font1_filename,
                   alias2_filename, font2_filename,
                   alias3_filename, font3_filename])
-    assert differ([expected_path, actual_path, '-m', 'bin'])
+
+    actual_path = generate_ps_dump(actual_path)
+    expected_path = generate_ps_dump(expected_path)
+
+    assert differ([expected_path, actual_path, '-s', r'%ADOt1write:'])
 
 
 def test_warnings_bug635():
