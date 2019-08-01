@@ -71,3 +71,8 @@ def generate_ps_dump(font_path):
 def font_has_table(font_path, table_tag):
     with TTFont(font_path) as font:
         return table_tag in font
+
+
+def get_font_revision(font_path):
+    with TTFont(font_path) as font:
+        return font['head'].fontRevision
