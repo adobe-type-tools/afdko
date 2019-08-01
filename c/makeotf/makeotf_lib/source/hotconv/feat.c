@@ -3968,6 +3968,9 @@ static void setFontRev(char *rev) {
         featMsg(hotWARNING, "head FontRevision entry <%d> should have 3 fractional decimal places; it now has none.", major);
     }
 
+    /* limit of 32767 as anything higher sets the sign bit to negative */
+    major = MIN(major, 32767);
+
     /* Convert to Fixed */
     g->font.version.otf = (Fixed)((major + minor) * 65536.0);
 }
