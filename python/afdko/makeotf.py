@@ -25,7 +25,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.7.6 Jul 15 2019
+makeotf.py v2.7.7 Aug 1 2019
 """
 
 __methods__ = """
@@ -2640,7 +2640,7 @@ def runMakeOTF(makeOTFParams):
         print(f'   cd "{fontDir}"')
         print(f"   {params}")
 
-    success, output = fdkutils.get_shell_command_output(params, std_error=True)
+    success = fdkutils.run_shell_command(params, suppress_output=True)
 
     _check_remove_bad_output(tempOutPath)
 
