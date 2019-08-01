@@ -2049,7 +2049,28 @@ def get_font_psname(font_path, is_ufo=False):
 
 
 def updateFontRevision(featuresPath, fontRevision):
+    """
+    Set or increment FontRevision value in fea file.
+
+    supplied 'fontRevision' kind specifies behavior:
+    - float/decimal means "set to" supplied value, e.g.:
+      .fea FontRevision = '2.102', fontRevision == '1.100', result = '1.100'
+
+    - integer value means "increment minor by this value (thousandths)":
+      .fea FontRevision = '1.230', fontRevision == '5', result = '1.235'
+      .fea FontRevision = '1.1', fontRevision == '1', result = '1.101'
+      .fea FontRevision = '1.02', fontRevision == '31', result = '1.051'
+
+    Constraint: resulting FontRevision must be in range 0.000 - 32767.999.
+    This means:
+       - for float case, 0.000 < float(fontRevision) <= 32767.999
+       - for int case, fractional part + increment <= .999
+       - if supplied values would overflow, a message is printed and
+         the feature file is not updated.
+    """
+
     try:
+        # get FontRevision from feature file
         with open(featuresPath, "r", encoding='utf-8') as fp:
             data = fp.read()
     except (IOError, OSError):
@@ -2057,34 +2078,50 @@ def updateFontRevision(featuresPath, fontRevision):
               "fontRevision field, failed to open '%s'." % featuresPath)
         return
 
-    match = re.search(r"FontRevision\s+(\d+)\.(\d+);", data)
-    if not match:
+    fea_match = re.search(r"FontRevision\s+(\d+)\.(\d+);", data)
+
+    if not fea_match:
         print("makeotf [Error] When trying to update the head table "
               "fontRevision field, failed to find the fontRevision keyword in "
-              "'%s'." % featuresPath)
+              f"'{featuresPath}'")
         return
-    fontRevision = eval(fontRevision)
-    if isinstance(fontRevision, float):
-        # Font Revision is a decimal value; replace the current font revision
-        major = int(fontRevision)
-        minor = int(0.5 + (fontRevision - major) * 1000)
-        minor = str(minor).zfill(3)
+
+    # this is supplied from -rev option
+    usr_match = re.search(r'([0-9]{1,5})(\.[0-9]{1,3})?', fontRevision)
+
+    if not usr_match:
+        print("makeotf [Error] When trying to update the head table "
+              "fontRevision field, supplied update value was not valid "
+              "(must be integer in range 1-999 or decimal in range "
+              "0.000 - 32767.999")
+        return
+
+    if usr_match.group(2) is not None:
+        # "decimal" case; replace .fea value with normalized version
+        major = int(usr_match.group(1))
+        minor = int(usr_match.group(2)[1:].ljust(3, '0'))
+        if major > 32767 or minor > 999:
+            print("makeotf [Error] When trying to update the head table "
+                  f"fontRevision field, supplied value {major}.{minor} "
+                  "is out of range (0.000 - 32767.999)")
+            return
     else:
-        # fontRevision is an integer; increment the minor version.
-        major = match.group(1)
-        while major[0] == "0":
-            major = major[1:]
-        major = eval(major)
+        # integer case, increment (if it doesn't cause overflow)
+        major = int(fea_match.group(1))
+        minor_str = fea_match.group(2).ljust(3, '0')
+        minor = int(minor_str)
+        increment = int(usr_match.group(1))
+        minor += increment
+        if minor > 999:
+            print("makeotf [Error] When trying to update the head table "
+                  f"fontRevision field, supplied value {increment} would "
+                  f"cause {major}.{minor_str} to overflow.")
+            return
 
-        minor = match.group(2)
-        while minor[0] == "0":
-            minor = minor[1:]
-        minor = eval(minor)
-        minor += fontRevision
-        minor = str(minor).zfill(3)
-
-    newData = re.sub(match.group(0), "FontRevision %s.%s;" % (major, minor),
+    newData = re.sub(fea_match.group(0),
+                     f"FontRevision {major}.{minor:03};",
                      data)
+
     try:
         with open(featuresPath, "w", encoding='utf-8') as fp:
             fp.write(newData)
@@ -2390,7 +2427,7 @@ def runMakeOTF(makeOTFParams):
     # Change file paths to be relative to fontDir,
     # if possible, else to absolute paths.
     fontDir = adjustPaths(makeOTFParams)
-    inputFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kInputFont))
+    inputFilePath = getattr(makeOTFParams, kFileOptPrefix + kInputFont, None)
 
     # This MUST follow makeRelativePaths.
     os.chdir(fontDir)
@@ -2461,8 +2498,10 @@ def runMakeOTF(makeOTFParams):
 
         # if the source is TTF, then the name table must
         # be built without the -useOldNameID4 option.
-        useOldNameID4 = eval("makeOTFParams.%s%s" % (kFileOptPrefix,
-                                                     kUseOldNameID4))
+        useOldNameID4 = getattr(makeOTFParams,
+                                kFileOptPrefix + kUseOldNameID4,
+                                False)
+
         if useOldNameID4:
             print("Because font is TTF, forcing use of new name table id 4 "
                   "format")
@@ -2524,8 +2563,8 @@ def runMakeOTF(makeOTFParams):
             return
 
     # renumber the fontRevision
-    fontRevision = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kRenumber))
-    featuresPath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kFeature))
+    fontRevision = getattr(makeOTFParams, kFileOptPrefix + kRenumber, None)
+    featuresPath = getattr(makeOTFParams, kFileOptPrefix + kFeature, None)
     if fontRevision is not None:
         # If this is not defined, then there is no 'features' file. Make one.
         if not featuresPath:
@@ -2562,7 +2601,9 @@ def runMakeOTF(makeOTFParams):
         # Skip the options that should not be passed to makeotfexe.
         if optionKey in kSkipOptions:
             continue
-        val = eval("makeOTFParams.%s%s" % (kFileOptPrefix, optionKey))
+
+        val = getattr(makeOTFParams, kFileOptPrefix + optionKey, None)
+
         if val is None:
             continue
 
