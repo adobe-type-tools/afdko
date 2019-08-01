@@ -8,7 +8,7 @@
 
 #include "ctlshare.h"
 
-#define CFW_VERSION CTL_MAKE_VERSION(1, 0, 54)
+#define CFW_VERSION CTL_MAKE_VERSION(1, 0, 55)
 
 #include "absfont.h"
 

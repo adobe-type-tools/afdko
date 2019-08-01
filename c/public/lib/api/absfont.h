@@ -9,7 +9,7 @@
 #include "dynarr.h"
 #include "txops.h"
 
-#define ABF_VERSION CTL_MAKE_VERSION(1, 0, 53)
+#define ABF_VERSION CTL_MAKE_VERSION(1, 0, 54)
 
 #include <stdint.h>
 #include <stdio.h>

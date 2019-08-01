@@ -7,7 +7,7 @@
 
 #include "ctlshare.h"
 
-#define DNA_VERSION CTL_MAKE_VERSION(2, 0, 3)
+#define DNA_VERSION CTL_MAKE_VERSION(2, 0, 4)
 
 #ifdef __cplusplus
 extern "C" {
