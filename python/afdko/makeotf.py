@@ -2061,9 +2061,9 @@ def updateFontRevision(featuresPath, fontRevision):
       .fea FontRevision = '1.1', fontRevision == '1', result = '1.101'
       .fea FontRevision = '1.02', fontRevision == '31', result = '1.051'
 
-    Constraint: resulting FontRevision must be in range 0.000 - 32767.999.
+    Constraint: resulting FontRevision must be in range 0.000 - 32767.000.
     This means:
-       - for float case, 0.000 < float(fontRevision) <= 32767.999
+       - for float case, 0.000 < float(fontRevision) <= 32767.000
        - for int case, fractional part + increment <= .999
        - if supplied values would overflow, a message is printed and
          the feature file is not updated.
@@ -2086,25 +2086,25 @@ def updateFontRevision(featuresPath, fontRevision):
               f"'{featuresPath}'")
         return
 
-    # this is supplied from -rev option
+    # fontRevision comes from -rev option
     usr_match = re.search(r'([0-9]{1,5})(\.[0-9]{1,3})?', fontRevision)
 
     if not usr_match:
         print("makeotf [Error] When trying to update the head table "
               "fontRevision field, supplied update value was not valid "
               "(must be integer in range 1-999 or decimal in range "
-              "0.000 - 32767.999")
+              "0.000 - 32767.000")
         return
 
     if usr_match.group(2) is not None:
         # "decimal" case; replace .fea value with normalized version
+        if float(fontRevision) > 32767.000:
+            print("makeotf [Error] When trying to update the head table "
+                  f"fontRevision field, supplied value {fontRevision} "
+                  "is out of range (0.000 - 32767.000)")
+            return
         major = int(usr_match.group(1))
         minor = int(usr_match.group(2)[1:].ljust(3, '0'))
-        if major > 32767 or minor > 999:
-            print("makeotf [Error] When trying to update the head table "
-                  f"fontRevision field, supplied value {major}.{minor} "
-                  "is out of range (0.000 - 32767.999)")
-            return
     else:
         # integer case, increment (if it doesn't cause overflow)
         major = int(fea_match.group(1))
