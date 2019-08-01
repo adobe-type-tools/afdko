@@ -14,8 +14,8 @@ from afdko.makeotf import (
 
 from runner import main as runner
 from differ import main as differ, SPLIT_MARKER
-from test_utils import (get_input_path, get_expected_path, get_temp_file_path,
-                        generate_ttx_dump, font_has_table)
+from test_utils import (get_input_path, get_expected_path, get_font_revision,
+                        get_temp_file_path, generate_ttx_dump, font_has_table)
 
 TOOL = 'makeotf'
 CMD = ['-t', TOOL]
@@ -622,3 +622,23 @@ def test_duplicate_warning_messages_bug751():
 
     assert differ([expected_path, stderr_path, '-l', '1',
                    '-s', 'Built development mode font'])
+
+
+@pytest.mark.parametrize('feat_filename, rev_value, expected', [
+    ('fontrev/fr_1_000.fea', '1', '1.001'),
+    ('fontrev/fr_1_000.fea', '2.345', '2.345'),
+    ('fontrev/fr_1_000.fea', '40000.000', '1.000')])
+def test_update_font_revision(feat_filename, rev_value, expected):
+    input_filename = "fontrev/font.ufo"
+    otf_path = get_temp_file_path()
+    tmp_fea_path = get_temp_file_path()
+    copy2(get_input_path(feat_filename), tmp_fea_path)
+
+    runner(CMD + ['-o',
+                  'f', f'_{get_input_path(input_filename)}',
+                  'ff', f'_{tmp_fea_path}',
+                  'o', f'_{otf_path}',
+                  'rev', f'_{rev_value}',
+                  ])
+    frstr = f'{get_font_revision(otf_path):.3f}'
+    assert frstr == expected
