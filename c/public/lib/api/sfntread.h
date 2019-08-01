@@ -7,7 +7,7 @@
 
 #include "ctlshare.h"
 
-#define SFR_VERSION CTL_MAKE_VERSION(1, 0, 5)
+#define SFR_VERSION CTL_MAKE_VERSION(1, 0, 6)
 
 #ifdef __cplusplus
 extern "C" {
