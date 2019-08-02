@@ -20,12 +20,14 @@ matrix:
       env:
         - NAME=Linux
         - PIP=pip
+        - PYTHON=python
 
     - os: osx
       language: generic
       env:
         - NAME=OSX
         - PIP=pip3
+        - PYTHON=python3
 
 script:
   - $PIP install --upgrade pip
@@ -38,11 +40,11 @@ after_success:
   # and deploy to PyPI on tags
   - |
     if [[ $TRAVIS_TAG ]]; then
-      python -m pip install twine
-      python -m twine upload wheelhouse/*.whl
+      $PYTHON -m pip install twine
+      $PYTHON -m twine upload wheelhouse/*.whl
       if [[ $TRAVIS_OS_NAME == "osx" ]]; then
-        python setup.py sdist
-        python -m twine upload dist/*.tar.gz
+        $PYTHON setup.py sdist
+        $PYTHON -m twine upload dist/*.tar.gz
       fi
     fi
 
