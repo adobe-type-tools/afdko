@@ -2640,7 +2640,7 @@ def runMakeOTF(makeOTFParams):
         print(f'   cd "{fontDir}"')
         print(f"   {params}")
 
-    success = fdkutils.run_shell_command(params, suppress_output=True)
+    success = fdkutils.run_shell_command(params)
 
     _check_remove_bad_output(tempOutPath)
 
