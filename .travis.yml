@@ -25,7 +25,7 @@ matrix:
       language: generic
       env:
         - NAME=OSX
-        - PIP=pip2
+        - PIP=pip3
 
 script:
   - $PIP install --upgrade pip
