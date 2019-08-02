@@ -8,7 +8,7 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 from fontTools.pens.boundsPen import BoundsPen
-from afdko.fontpdf import FontPDFGlyph, FontPDFFont, FontPDFPen
+from afdko.pdflib.fontpdf import FontPDFGlyph, FontPDFFont, FontPDFPen
 
 __version__ = "1.4.2"
 

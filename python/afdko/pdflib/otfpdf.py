@@ -8,7 +8,7 @@ run alone.
 from fontTools.pens.boundsPen import BoundsPen
 from fontTools.misc.psCharStrings import T2OutlineExtractor
 
-from afdko.fontpdf import FontPDFGlyph, FontPDFFont, FontPDFPen
+from afdko.pdflib.fontpdf import FontPDFGlyph, FontPDFFont, FontPDFPen
 
 __version__ = "1.6.3"
 

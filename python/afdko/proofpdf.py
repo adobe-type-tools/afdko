@@ -19,9 +19,12 @@ import traceback
 
 from fontTools.ttLib import TTFont, getTableModule, TTLibError
 
-from afdko.fontpdf import (FontPDFParams, makePDF, makeFontSetPDF, kDrawTag,
-                           kDrawPointTag, kShowMetaTag, params_doc)
-from afdko import ttfpdf, otfpdf, fdkutils
+from afdko import fdkutils
+from afdko.pdflib import ttfpdf, otfpdf
+from afdko.pdflib.fontpdf import (
+	FontPDFParams, makePDF, makeFontSetPDF, kDrawTag, kDrawPointTag,
+	kShowMetaTag, params_doc,
+	)
 
 curSystem = platform.system()
 
