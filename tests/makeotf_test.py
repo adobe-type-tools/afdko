@@ -14,8 +14,8 @@ from afdko.makeotf import (
 
 from runner import main as runner
 from differ import main as differ, SPLIT_MARKER
-from test_utils import (get_input_path, get_expected_path, get_temp_file_path,
-                        generate_ttx_dump, font_has_table)
+from test_utils import (get_input_path, get_expected_path, get_font_revision,
+                        get_temp_file_path, generate_ttx_dump, font_has_table)
 
 TOOL = 'makeotf'
 CMD = ['-t', TOOL]
@@ -106,6 +106,31 @@ def test_input_formats(arg, input_filename, ttx_filename):
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value=',
                    '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
+
+
+@pytest.mark.parametrize('args, ttx_fname', [
+    ([], 'font_dev'),
+    (['r'], 'font_rel'),
+])
+def test_build_font_and_check_messages(args, ttx_fname):
+    actual_path = get_temp_file_path()
+    expected_msg_path = get_expected_path(f'{ttx_fname}_output.txt')
+    ttx_filename = f'{ttx_fname}.ttx'
+    stderr_path = runner(CMD + [
+        '-s', '-e', '-o', 'f', f'_{get_input_path("font.pfa")}',
+                          'o', f'_{actual_path}'] + args)
+    actual_ttx = generate_ttx_dump(actual_path)
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx,
+                   '-s',
+                   '<ttFont sfntVersion' + SPLIT_MARKER +
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <created value=' + SPLIT_MARKER +
+                   '    <modified value=',
+                   '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
+    assert differ([expected_msg_path, stderr_path,
+                   '-r', r'^Built (development|release) mode font'])
 
 
 def test_getSourceGOADBData():
@@ -233,9 +258,9 @@ def test_options_shw_nshw_bug457(args, result):
     # options 'MacCmapScriptID' and 'MacCmapLanguageID'
     # CJK MacCmapScriptIDs: Japan/1, CN/2, Korea/3, GB/25
     ([], (None, None)),
-    (['-cs', '1'], (1, None)),
-    (['-cl', '2'], (None, 2)),
-    (['-cs', '4', '-cl', '5'], (4, 5)),
+    (['-cs', '1'], ('1', None)),
+    (['-cl', '2'], (None, '2')),
+    (['-cs', '4', '-cl', '5'], ('4', '5')),
 ])
 def test_options_cs_cl_bug459(args, result):
     params = MakeOTFParams()
@@ -279,7 +304,7 @@ def test_readOptionFile():
     assert params.opt_OutputFontPath == OUTPUT_FONT_NAME
     assert params.opt_ConvertToCID == 'true'
     assert params.opt_kSetfsSelectionBitsOff == '[8, 9]'
-    assert params.opt_kSetfsSelectionBitsOn == [7]
+    assert params.opt_kSetfsSelectionBitsOn == '[7]'
     assert params.seenOS2v4Bits == [1, 1, 1]
     assert params.opt_UseOldNameID4 is None
 
@@ -622,3 +647,23 @@ def test_duplicate_warning_messages_bug751():
 
     assert differ([expected_path, stderr_path, '-l', '1',
                    '-s', 'Built development mode font'])
+
+
+@pytest.mark.parametrize('feat_filename, rev_value, expected', [
+    ('fontrev/fr_1_000.fea', '1', '1.001'),
+    ('fontrev/fr_1_000.fea', '2.345', '2.345'),
+    ('fontrev/fr_1_000.fea', '40000.000', '1.000')])
+def test_update_font_revision(feat_filename, rev_value, expected):
+    input_filename = "fontrev/font.ufo"
+    otf_path = get_temp_file_path()
+    tmp_fea_path = get_temp_file_path()
+    copy2(get_input_path(feat_filename), tmp_fea_path)
+
+    runner(CMD + ['-o',
+                  'f', f'_{get_input_path(input_filename)}',
+                  'ff', f'_{tmp_fea_path}',
+                  'o', f'_{otf_path}',
+                  'rev', f'_{rev_value}',
+                  ])
+    frstr = f'{get_font_revision(otf_path):.3f}'
+    assert frstr == expected

@@ -1,7 +1,7 @@
 # Copyright 2016 Adobe. All rights reserved.
 
 """
-fdkutils.py v1.3.2 Jul 15 2019
+fdkutils.py v1.3.3 Aug 1 2019
 A module of functions that are needed by several of the AFDKO scripts.
 """
 
@@ -58,13 +58,15 @@ def get_font_format(font_file_path):
     return None
 
 
-def run_shell_command(args):
+def run_shell_command(args, suppress_output=False):
     """
     Runs a shell command.
     Returns True if the command was successful, and False otherwise.
     """
+    sup = subprocess.DEVNULL if suppress_output else None
+
     try:
-        subprocess.check_call(args)
+        subprocess.check_call(args, stderr=sup, stdout=sup)
         return True
     except (subprocess.CalledProcessError, OSError) as err:
         print(err)

@@ -25,7 +25,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.7.6 Jul 15 2019
+makeotf.py v2.7.7 Aug 1 2019
 """
 
 __methods__ = """
@@ -570,7 +570,7 @@ class MakeOTFParams(object):
             setattr(self, kFileOptPrefix + item[0], None)
         # USE_TYPO_METRICS Remove comment from next
         # line to turn on bits 7 and 8 by default.
-        # exec("self.%s%s = [7,8]" % (kFileOptPrefix, kSetfsSelectionBitsOn))
+        # setattr(self, kFileOptPrefix + kSetfsSelectionBitsOn, [7,8])
 
     def __repr__(self):
         text = f'{self.__class__.__name__}:\n'
@@ -579,6 +579,20 @@ class MakeOTFParams(object):
             text += f'  {key}: {val}\n'
 
         return text
+
+
+def _check_remove_bad_output(outpath):
+    """
+    Checks for non-existing or "bad" (< 500 bytes) output file and attempts
+    to delete.
+    """
+    if not os.path.exists(outpath) or (os.path.getsize(outpath) < 500):
+        print("makeotf [Error] Failed to build output font file '%s'." %
+              outpath)
+        if os.path.exists(outpath):
+            os.remove(outpath)
+
+        raise MakeOTFRunError
 
 
 def readOptionFile(filePath, makeOTFParams, optionIndex):
@@ -632,7 +646,7 @@ def readOptionFile(filePath, makeOTFParams, optionIndex):
 
             if key == kSetfsSelectionBitsOn:
                 makeOTFParams.seenOS2v4Bits = [1, 1, 1]
-                value = eval(value)
+                value = str(value)
             setattr(makeOTFParams, attrName, value)
         else:
             print("makeotf [Error] When reading options file, did not "
@@ -728,71 +742,67 @@ def setOptionsFromFontInfo(makeOTFParams):
 
     if kMOTFOptions[kBold][0] == kOptionNotSeen:
         if re.search(r"IsBoldStyle\s+([Tt]rue|1)", data):
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kBold))
+            setattr(makeOTFParams, kFileOptPrefix + kBold, 'true')
             print("makeotf [Note] adding the style Bold from fontinfo "
                   "keyword.")
 
     if kMOTFOptions[kBold][0] == kOptionNotSeen:
         if re.search(r"IsWindowsBold\s+([Tt]rue|1)", data):
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kBold))
+            setattr(makeOTFParams, kFileOptPrefix + kBold, 'true')
             print("makeotf [Note] adding the style Bold from fontinfo "
                   "keyword.")
 
     if kMOTFOptions[kItalic][0] == kOptionNotSeen:
         if re.search(r"IsItalicStyle\s+([Tt]rue|1)", data):
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kItalic))
+            setattr(makeOTFParams, kFileOptPrefix + kItalic, 'true')
             print("makeotf [Note] adding the style Italic from fontinfo "
                   "keyword.")
 
     if kMOTFOptions[kConvertToCID][0] == kOptionNotSeen:
         if re.search(r"ConvertToCID\s+([Tt]rue|1)", data):
-            exec("makeOTFParams.%s%s = 'true'" % (
-                kFileOptPrefix, kConvertToCID))
+            setattr(makeOTFParams, kFileOptPrefix + kConvertToCID, 'true')
             print("makeotf [Note] setting output to be CID-keyed from "
                   "fontinfo keyword.")
 
     if kMOTFOptions[kUseOldNameID4][0] == kOptionNotSeen:
         if re.search(r"UseOldNameID4\s+([Tt]rue|1)", data):
-            exec("makeOTFParams.%s%s = 'true'" % (
-                kFileOptPrefix, kUseOldNameID4))
+            setattr(makeOTFParams, kFileOptPrefix + kUseOldNameID4, 'true')
             print("makeotf [Note] using old name ID 4 logic.")
 
     if kMOTFOptions[kOmitMacNames][0] == kOptionNotSeen:
         if re.search(r"OmitMacNames+([Tt]rue|1)", data):
-            exec("makeOTFParams.%s%s = 'true'" % (
-                kFileOptPrefix, kOmitMacNames))
+            setattr(makeOTFParams, kFileOptPrefix + kOmitMacNames, 'true')
             print("makeotf [Note] omitting Mac platform names from the "
                   "name table.")
 
     if kMOTFOptions[kOverrideMenuNames][0] == kOptionNotSeen:
         if re.search(r"OverrideMenuNames+([Tt]rue|1)", data):
-            exec("makeOTFParams.%s%s = 'true'" % (
-                kFileOptPrefix, kOverrideMenuNames))
+            setattr(makeOTFParams, kFileOptPrefix + kOverrideMenuNames, 'true')
             print("makeotf [Note] allowing overrides of font menu names in "
                   "name table.")
 
     if kMOTFOptions[kSuppressKernOptimization][0] == kOptionNotSeen:
         if re.search(r"SuppressKernOptimization+([Tt]rue|1)", data):
-            exec("makeOTFParams.%s%s = 'true'" % (
-                kFileOptPrefix, kSuppressKernOptimization))
+            setattr(makeOTFParams,
+                    kFileOptPrefix + kSuppressKernOptimization,
+                    'true')
             print("makeotf [Note] Suppressing Kern Optimization.")
 
     if kMOTFOptions[kAddStubDSIG][0] == kOptionNotSeen:
         if re.search(r"AddStubDSIG+([Tt]rue|1)", data):
-            exec("makeOTFParams.%s%s = 'true'" % (
-                kFileOptPrefix, kAddStubDSIG))
+            setattr(makeOTFParams, kFileOptPrefix + kAddStubDSIG, 'true')
 
     if kMOTFOptions[kVerboseWarnings][0] == kOptionNotSeen:
         if re.search(r"kVerboseWarnings+([Tt]rue|1)", data):
-            exec("makeOTFParams.%s%s = 'true'" % (
-                kFileOptPrefix, kVerboseWarnings))
+            setattr(makeOTFParams, kFileOptPrefix + kVerboseWarnings, 'true')
             makeOTFParams.verbose = True
 
     if kMOTFOptions[kLicenseCode][0] == kOptionNotSeen:
         m = re.search(r"LicenseCode\s+([^\r\n]+)", data)
         if m:
-            exec("makeOTFParams.%s%s = \"%s\"" % (
-                kFileOptPrefix, kLicenseCode, m.group(1)))
+            setattr(makeOTFParams,
+                    kFileOptPrefix + kLicenseCode,
+                    str(m.group(1)))
 
     if kMOTFOptions[kSuppressHintWarnings][0] == kOptionNotSeen:
         if re.search(r"SuppressHintWarnings\s+([Tt]rue|1)", data):
@@ -801,12 +811,13 @@ def setOptionsFromFontInfo(makeOTFParams):
 
     if kMOTFOptions[kSuppressWidthOptimization][0] == kOptionNotSeen:
         if re.search(r"SuppressWidthOptimization\s+([Tt]rue|1)", data):
-            exec("makeOTFParams.%s%s = 'true'" % (
-                kFileOptPrefix, kSuppressWidthOptimization))
+            setattr(makeOTFParams,
+                    kFileOptPrefix + kSuppressWidthOptimization,
+                    'true')
 
     if kMOTFOptions[kStubCmap4][0] == kOptionNotSeen:
         if re.search(r"stubCmap4\s+([Tt]rue|1)", data):
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kStubCmap4))
+            setattr(makeOTFParams, kFileOptPrefix + kStubCmap4, 'true')
 
     if kMOTFOptions[kMacScript][0] == kOptionNotSeen:
         m = re.search(r"Language\s+\(([^)]+)\)", data)
@@ -898,7 +909,7 @@ def setOptionsFromFontInfo(makeOTFParams):
     m = re.search(r"FSType\s+(\S+)", data)
     if m:
         try:
-            val = eval(m.group(1))
+            val = str(m.group(1))
             makeOTFParams.FSType = val
         except (NameError, SyntaxError):
             print("makeotf [Error] Failed to parse value '%s' for FSType in "
@@ -1055,23 +1066,23 @@ def getOptions(makeOTFParams, args):
 
         elif arg == kMOTFOptions[kBold][1]:
             kMOTFOptions[kBold][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kBold))
+            setattr(makeOTFParams, kFileOptPrefix + kBold, 'true')
 
         # makeotfexe does not have a not-bold option;
         # we need to just suppress the bold option.
         elif arg == kMOTFOptions[kBold][2]:
             kMOTFOptions[kBold][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kBold))
+            setattr(makeOTFParams, kFileOptPrefix + kBold, None)
 
         elif arg == kMOTFOptions[kItalic][1]:
             kMOTFOptions[kItalic][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kItalic))
+            setattr(makeOTFParams, kFileOptPrefix + kItalic, 'true')
 
         # makeotfexe does not have a not-italic option;
         # we need to just suppress the italic option.
         elif arg == kMOTFOptions[kItalic][2]:
             kMOTFOptions[kItalic][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kItalic))
+            setattr(makeOTFParams, kFileOptPrefix + kItalic, None)
 
         elif arg == kMOTFOptions[kFeature][1]:
             kMOTFOptions[kFeature][0] = i + optionIndex
@@ -1090,19 +1101,19 @@ def getOptions(makeOTFParams, args):
                 print("makeotf [Error] Could not find the features file at "
                       "'%s'." % file_path)
                 continue
-            exec("makeOTFParams.%s%s = file_path" % (kFileOptPrefix, kFeature))
+            setattr(makeOTFParams, kFileOptPrefix + kFeature, file_path)
 
         # makeotfexe does not have a no-stub-GSUB option;
         # we need to just suppress the stub-GSUB option.
         elif arg == kMOTFOptions[kGSUBStub][1]:
             kMOTFOptions[kGSUBStub][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kGSUBStub))
+            setattr(makeOTFParams, kFileOptPrefix + kGSUBStub, 'true')
 
         # makeotfexe does not have a no-stub-GSUB option;
         # we need to just suppress the stub-GSUB option.
         elif arg == kMOTFOptions[kGSUBStub][2]:
             kMOTFOptions[kGSUBStub][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kGSUBStub))
+            setattr(makeOTFParams, kFileOptPrefix + kGSUBStub, None)
 
         elif arg == kMOTFOptions[kFMB][1]:
             kMOTFOptions[kFMB][0] = i + optionIndex
@@ -1117,14 +1128,14 @@ def getOptions(makeOTFParams, args):
                 continue
             i += 1
             if file_path == "None":
-                exec("makeOTFParams.%s%s = file_path" % (kFileOptPrefix, kFMB))
+                setattr(makeOTFParams, kFileOptPrefix + kFMB, file_path)
             else:
                 if not os.path.exists(file_path):
                     error = 1
                     print("makeotf [Error] Could not find the FontMenuNameDB "
                           "file at '%s'." % file_path)
                     continue
-                exec("makeOTFParams.%s%s = file_path" % (kFileOptPrefix, kFMB))
+                setattr(makeOTFParams, kFileOptPrefix + kFMB, file_path)
 
         # -gf
         elif arg == kMOTFOptions[kGOADB][1]:
@@ -1153,7 +1164,7 @@ def getOptions(makeOTFParams, args):
             # If the -r option is specified, we don't want
             # the -q and -S options showing up unless the
             # user specified them later.
-            exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kDoSubr))
+            setattr(makeOTFParams, kFileOptPrefix + kDoSubr, None)
             setattr(makeOTFParams, kFileOptPrefix + kDoAlias, None)
 
         # -nr
@@ -1165,7 +1176,7 @@ def getOptions(makeOTFParams, args):
             # If the -r option is specified being off,
             # we also turn off the -q and -S options.
             kMOTFOptions[kDoSubr][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kDoSubr))
+            setattr(makeOTFParams, kFileOptPrefix + kDoSubr, None)
             kMOTFOptions[kDoAlias][0] = i + optionIndex
             setattr(makeOTFParams, kFileOptPrefix + kDoAlias, None)
             kMOTFOptions[kGOADB][0] = i + optionIndex
@@ -1173,11 +1184,11 @@ def getOptions(makeOTFParams, args):
 
         elif arg == kMOTFOptions[kDoSubr][1]:
             kMOTFOptions[kDoSubr][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kDoSubr))
+            setattr(makeOTFParams, kFileOptPrefix + kDoSubr, 'true')
 
         elif arg == kMOTFOptions[kDoSubr][2]:
             kMOTFOptions[kDoSubr][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'false'" % (kFileOptPrefix, kDoSubr))
+            setattr(makeOTFParams, kFileOptPrefix + kDoSubr, 'false')
 
         elif arg == kMOTFOptions[kMaxSubrs][1]:
             try:
@@ -1223,17 +1234,13 @@ def getOptions(makeOTFParams, args):
                 fontRevisionString = "5"
 
             # It is not another option. Must be a valid number
-            formatOK = 0
-            try:
-                fontRevision = eval(fontRevisionString)
-                if isinstance(fontRevision, int):
-                    formatOK = 1
-                elif isinstance(fontRevision, float):
-                    _, minor = fontRevisionString.split(".")
-                    if len(minor) == 3:
-                        formatOK = 1
-            except ValueError:
-                pass
+            formatOK = False
+            frs_parts = fontRevisionString.split(".")
+            formatOK = frs_parts[0].isnumeric()
+
+            if formatOK and len(frs_parts) == 2:
+                frac_part = frs_parts[1]
+                formatOK = len(frac_part) == 3 and frac_part.isnumeric()
 
             if not formatOK:
                 print("makeotf [Error] The '%s' option must be followed by an "
@@ -1243,18 +1250,19 @@ def getOptions(makeOTFParams, args):
                 continue
 
             kMOTFOptions[kRenumber][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = fontRevisionString" % (kFileOptPrefix,
-                                                              kRenumber))
+            setattr(makeOTFParams,
+                    kFileOptPrefix + kRenumber,
+                    fontRevisionString)
 
         elif arg == kMOTFOptions[kNotdef][1]:
             kMOTFOptions[kNotdef][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kNotdef))
+            setattr(makeOTFParams, kFileOptPrefix + kNotdef, 'true')
 
         # makeotfexe does not have a "don't make notdef"
         # option; we need to just suppress it.
         elif arg == kMOTFOptions[kNotdef][2]:
             kMOTFOptions[kNotdef][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = None" % (kFileOptPrefix, kNotdef))
+            setattr(makeOTFParams, kFileOptPrefix + kNotdef, None)
 
         elif arg == kMOTFOptions[kSetfsSelectionBitsOn][1]:
             kMOTFOptions[kSetfsSelectionBitsOn][0] = i + optionIndex
@@ -1273,10 +1281,10 @@ def getOptions(makeOTFParams, args):
                              kFileOptPrefix + kSetfsSelectionBitsOn)
             if bitsOn is None:
                 setattr(makeOTFParams, kFileOptPrefix + kSetfsSelectionBitsOn,
-                        [val])
+                        [str(val)])
             else:
                 setattr(makeOTFParams, kFileOptPrefix + kSetfsSelectionBitsOn,
-                        bitsOn + [val])
+                        bitsOn + [str(val)])
 
         elif arg == kMOTFOptions[kSetfsSelectionBitsOff][1]:
             kMOTFOptions[kSetfsSelectionBitsOff][0] = i + optionIndex
@@ -1294,10 +1302,10 @@ def getOptions(makeOTFParams, args):
                               kFileOptPrefix + kSetfsSelectionBitsOff)
             if bitsOff is None:
                 setattr(makeOTFParams, kFileOptPrefix + kSetfsSelectionBitsOff,
-                        [val])
+                        [str(val)])
             else:
                 setattr(makeOTFParams, kFileOptPrefix + kSetfsSelectionBitsOff,
-                        bitsOff + [val])
+                        bitsOff + [str(val)])
 
         elif arg == kMOTFOptions[kSetOS2Version][1]:
             kMOTFOptions[kSetOS2Version][0] = i + optionIndex
@@ -1309,7 +1317,7 @@ def getOptions(makeOTFParams, args):
                       "an integer greater than 0." % arg)
                 error = 1
                 val = 0
-            setattr(makeOTFParams, kFileOptPrefix + kSetOS2Version, val)
+            setattr(makeOTFParams, kFileOptPrefix + kSetOS2Version, str(val))
 
         elif arg == kMOTFOptions[kAddSymbol][1]:
             # If the next argument is a valid integer, use it as
@@ -1320,7 +1328,7 @@ def getOptions(makeOTFParams, args):
                 i += 1
             except (IndexError, ValueError):
                 val = 'true'
-            setattr(makeOTFParams, kFileOptPrefix + kAddSymbol, val)
+            setattr(makeOTFParams, kFileOptPrefix + kAddSymbol, str(val))
 
         elif arg == kMOTFOptions[kAddSymbol][2]:
             kMOTFOptions[kAddSymbol][0] = i + optionIndex
@@ -1343,7 +1351,7 @@ def getOptions(makeOTFParams, args):
             try:
                 val = int(args[i])
                 i += 1
-                setattr(makeOTFParams, kFileOptPrefix + kMacScript, val)
+                setattr(makeOTFParams, kFileOptPrefix + kMacScript, str(val))
             except (IndexError, ValueError):
                 error = 1
                 print("makeotf [Error] The '%s' option must be followed by a "
@@ -1355,7 +1363,7 @@ def getOptions(makeOTFParams, args):
             try:
                 val = int(args[i])
                 i += 1
-                setattr(makeOTFParams, kFileOptPrefix + kMacLang, val)
+                setattr(makeOTFParams, kFileOptPrefix + kMacLang, str(val))
             except (IndexError, ValueError):
                 error = 1
                 print("makeotf [Error] The '%s' option must be followed by a "
@@ -1378,8 +1386,7 @@ def getOptions(makeOTFParams, args):
                 print("makeotf [Error] Could not find the CID CMAP Mac "
                       "encoding file at '%s'." % file_path)
                 continue
-            exec("makeOTFParams.%s%s = file_path" % (kFileOptPrefix,
-                                                     kMacCMAPPath))
+            setattr(makeOTFParams, kFileOptPrefix + kMacCMAPPath, file_path)
 
         elif arg == kMOTFOptions[kHUniCMAPPath][1]:
             kMOTFOptions[kHUniCMAPPath][0] = i + optionIndex
@@ -1399,8 +1406,7 @@ def getOptions(makeOTFParams, args):
                 print("makeotf [Error] Could not find the CID CMAP horizontal "
                       "Unicode encoding file at '%s'." % file_path)
                 continue
-            exec("makeOTFParams.%s%s = file_path" % (kFileOptPrefix,
-                                                     kHUniCMAPPath))
+            setattr(makeOTFParams, kFileOptPrefix + kHUniCMAPPath, file_path)
 
         elif arg == kMOTFOptions[kUVSPath][1]:
             kMOTFOptions[kUVSPath][0] = i + optionIndex
@@ -1420,62 +1426,59 @@ def getOptions(makeOTFParams, args):
                 print("makeotf [Error] Could not find the Unicode Variation "
                       "Sequence specification file at '%s'." % file_path)
                 continue
-            exec("makeOTFParams.%s%s = file_path" % (kFileOptPrefix, kUVSPath))
+            setattr(makeOTFParams, kFileOptPrefix + kUVSPath, file_path)
 
         elif arg == kMOTFOptions[kWriteWrongBacktrack][1]:
             kMOTFOptions[kWriteWrongBacktrack][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix,
-                                                  kWriteWrongBacktrack))
+            setattr(makeOTFParams,
+                    kFileOptPrefix + kWriteWrongBacktrack,
+                    'true')
 
         elif arg == kMOTFOptions[kDoubleMapGlyphs][1]:
             kMOTFOptions[kDoubleMapGlyphs][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix,
-                                                  kDoubleMapGlyphs))
+            setattr(makeOTFParams, kFileOptPrefix + kDoubleMapGlyphs, 'true')
 
         elif arg == kMOTFOptions[kDefaultCharAsSpace][1]:
             kMOTFOptions[kDefaultCharAsSpace][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix,
-                                                  kDefaultCharAsSpace))
+            setattr(makeOTFParams,
+                    kFileOptPrefix + kDefaultCharAsSpace,
+                    'true')
 
         elif arg == kMOTFOptions[kUseOldNameID4][1]:
             kMOTFOptions[kUseOldNameID4][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix,
-                                                  kUseOldNameID4))
+            setattr(makeOTFParams, kFileOptPrefix + kUseOldNameID4, 'true')
 
         elif arg == kMOTFOptions[kUseOldNameID4][2]:
             kMOTFOptions[kUseOldNameID4][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = None" % (kFileOptPrefix,
-                                                kUseOldNameID4))
+            setattr(makeOTFParams, kFileOptPrefix + kUseOldNameID4, None)
 
         elif arg == kMOTFOptions[kOmitMacNames][1]:
             kMOTFOptions[kOmitMacNames][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix,
-                                                  kOmitMacNames))
+            setattr(makeOTFParams, kFileOptPrefix + kOmitMacNames, 'true')
 
         elif arg == kMOTFOptions[kOmitMacNames][2]:
             kMOTFOptions[kOmitMacNames][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'None'" % (kFileOptPrefix,
-                                                  kOmitMacNames))
+            setattr(makeOTFParams, kFileOptPrefix + kOmitMacNames, None)
 
         elif arg == kMOTFOptions[kOverrideMenuNames][1]:
             kMOTFOptions[kOverrideMenuNames][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix,
-                                                  kOverrideMenuNames))
+            setattr(makeOTFParams, kFileOptPrefix + kOverrideMenuNames, 'true')
 
         elif arg == kMOTFOptions[kOverrideMenuNames][2]:
             kMOTFOptions[kOverrideMenuNames][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'None'" % (kFileOptPrefix,
-                                                  kOverrideMenuNames))
+            setattr(makeOTFParams, kFileOptPrefix + kOverrideMenuNames, None)
 
         elif arg == kMOTFOptions[kSuppressKernOptimization][1]:
             kMOTFOptions[kSuppressKernOptimization][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix,
-                                                  kSuppressKernOptimization))
+            setattr(makeOTFParams,
+                    kFileOptPrefix + kSuppressKernOptimization,
+                    'true')
 
         elif arg == kMOTFOptions[kSuppressKernOptimization][2]:
             kMOTFOptions[kSuppressKernOptimization][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'None'" % (kFileOptPrefix,
-                                                  kSuppressKernOptimization))
+            setattr(makeOTFParams,
+                    kFileOptPrefix + kSuppressKernOptimization,
+                    None)
 
         elif arg == kMOTFOptions[kLicenseCode][1]:
             kMOTFOptions[kLicenseCode][0] = i + optionIndex
@@ -1483,21 +1486,19 @@ def getOptions(makeOTFParams, args):
                 licenseCode = args[i]
             except IndexError:
                 licenseCode = None
-            exec("makeOTFParams.%s%s = licenseCode" % (kFileOptPrefix,
-                                                       licenseCode))
+            setattr(makeOTFParams, kFileOptPrefix + licenseCode, licenseCode)
             i += 1
 
         elif arg == kMOTFOptions[kConvertToCID][1]:
             kMOTFOptions[kConvertToCID][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix,
-                                                  kConvertToCID))
+            setattr(makeOTFParams, kFileOptPrefix + kConvertToCID, 'true')
 
         # makeotfexe does not have a not-release option;
         # we need to suppress the release option.
         elif arg == kMOTFOptions[kConvertToCID][2]:
             kMOTFOptions[kConvertToCID][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'false'" % (kFileOptPrefix,
-                                                   kConvertToCID))
+            setattr(makeOTFParams, kFileOptPrefix + kConvertToCID, 'false')
+
         # -shw
         elif arg == kMOTFOptions[kSuppressHintWarnings][1]:
             kMOTFOptions[kSuppressHintWarnings][0] = i + optionIndex
@@ -1511,42 +1512,42 @@ def getOptions(makeOTFParams, args):
 
         elif arg == kMOTFOptions[kSuppressWidthOptimization][1]:
             kMOTFOptions[kSuppressWidthOptimization][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix,
-                                                  kSuppressWidthOptimization))
+            setattr(makeOTFParams,
+                    kFileOptPrefix + kSuppressWidthOptimization,
+                    'true')
+
         elif arg == kMOTFOptions[kSuppressWidthOptimization][2]:
             kMOTFOptions[kSuppressWidthOptimization][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'None'" % (kFileOptPrefix,
-                                                  kSuppressWidthOptimization))
+            setattr(makeOTFParams,
+                    kFileOptPrefix + kSuppressWidthOptimization,
+                    None)
 
         elif arg == kMOTFOptions[kStubCmap4][1]:
             kMOTFOptions[kStubCmap4][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix, kStubCmap4))
+            setattr(makeOTFParams, kFileOptPrefix + kStubCmap4, 'true')
 
         elif arg == kMOTFOptions[kAddStubDSIG][1]:
             kMOTFOptions[kAddStubDSIG][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix,
-                                                  kAddStubDSIG))
+            setattr(makeOTFParams, kFileOptPrefix + kAddStubDSIG, 'true')
 
         elif arg == kMOTFOptions[kAddStubDSIG][2]:
             kMOTFOptions[kAddStubDSIG][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'false'" % (kFileOptPrefix,
-                                                   kAddStubDSIG))
+            setattr(makeOTFParams, kFileOptPrefix + kAddStubDSIG, 'false')
 
         elif arg == kMOTFOptions[kShowFinalNames][1]:
             kMOTFOptions[kShowFinalNames][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix,
-                                                  kShowFinalNames))
+            setattr(makeOTFParams, kFileOptPrefix + kShowFinalNames, 'true')
 
         elif arg == kMOTFOptions[kVerboseWarnings][1]:
             kMOTFOptions[kVerboseWarnings][0] = i + optionIndex
-            exec("makeOTFParams.%s%s = 'true'" % (kFileOptPrefix,
-                                                  kVerboseWarnings))
+            setattr(makeOTFParams, kFileOptPrefix + kVerboseWarnings, 'true')
             makeOTFParams.verbose = True
+
         elif arg == kMOTFOptions[kVerboseWarnings][2]:
             kMOTFOptions[kVerboseWarnings][0] = None
-            exec("makeOTFParams.%s%s = None" % (kFileOptPrefix,
-                                                kVerboseWarnings))
+            setattr(makeOTFParams, kFileOptPrefix + kVerboseWarnings, None)
             makeOTFParams.verbose = False
+
         else:
             error = 1
             print("makeotf [Error] Did not recognize option '%s'." % arg)
@@ -2048,7 +2049,28 @@ def get_font_psname(font_path, is_ufo=False):
 
 
 def updateFontRevision(featuresPath, fontRevision):
+    """
+    Set or increment FontRevision value in fea file.
+
+    supplied 'fontRevision' kind specifies behavior:
+    - float/decimal means "set to" supplied value, e.g.:
+      .fea FontRevision = '2.102', fontRevision == '1.100', result = '1.100'
+
+    - integer value means "increment minor by this value (thousandths)":
+      .fea FontRevision = '1.230', fontRevision == '5', result = '1.235'
+      .fea FontRevision = '1.1', fontRevision == '1', result = '1.101'
+      .fea FontRevision = '1.02', fontRevision == '31', result = '1.051'
+
+    Constraint: resulting FontRevision must be in range 0.000 - 32767.000.
+    This means:
+       - for float case, 0.000 < float(fontRevision) <= 32767.000
+       - for int case, fractional part + increment <= .999
+       - if supplied values would overflow, a message is printed and
+         the feature file is not updated.
+    """
+
     try:
+        # get FontRevision from feature file
         with open(featuresPath, "r", encoding='utf-8') as fp:
             data = fp.read()
     except (IOError, OSError):
@@ -2056,34 +2078,50 @@ def updateFontRevision(featuresPath, fontRevision):
               "fontRevision field, failed to open '%s'." % featuresPath)
         return
 
-    match = re.search(r"FontRevision\s+(\d+)\.(\d+);", data)
-    if not match:
+    fea_match = re.search(r"FontRevision\s+(\d+)\.(\d+);", data)
+
+    if not fea_match:
         print("makeotf [Error] When trying to update the head table "
               "fontRevision field, failed to find the fontRevision keyword in "
-              "'%s'." % featuresPath)
+              f"'{featuresPath}'")
         return
-    fontRevision = eval(fontRevision)
-    if isinstance(fontRevision, float):
-        # Font Revision is a decimal value; replace the current font revision
-        major = int(fontRevision)
-        minor = int(0.5 + (fontRevision - major) * 1000)
-        minor = str(minor).zfill(3)
+
+    # fontRevision comes from -rev option
+    usr_match = re.search(r'([0-9]{1,5})(\.[0-9]{1,3})?', fontRevision)
+
+    if not usr_match:
+        print("makeotf [Error] When trying to update the head table "
+              "fontRevision field, supplied update value was not valid "
+              "(must be integer in range 1-999 or decimal in range "
+              "0.000 - 32767.000")
+        return
+
+    if usr_match.group(2) is not None:
+        # "decimal" case; replace .fea value with normalized version
+        if float(fontRevision) > 32767.000:
+            print("makeotf [Error] When trying to update the head table "
+                  f"fontRevision field, supplied value {fontRevision} "
+                  "is out of range (0.000 - 32767.000)")
+            return
+        major = int(usr_match.group(1))
+        minor = int(usr_match.group(2)[1:].ljust(3, '0'))
     else:
-        # fontRevision is an integer; increment the minor version.
-        major = match.group(1)
-        while major[0] == "0":
-            major = major[1:]
-        major = eval(major)
+        # integer case, increment (if it doesn't cause overflow)
+        major = int(fea_match.group(1))
+        minor_str = fea_match.group(2).ljust(3, '0')
+        minor = int(minor_str)
+        increment = int(usr_match.group(1))
+        minor += increment
+        if minor > 999:
+            print("makeotf [Error] When trying to update the head table "
+                  f"fontRevision field, supplied value {increment} would "
+                  f"cause {major}.{minor_str} to overflow.")
+            return
 
-        minor = match.group(2)
-        while minor[0] == "0":
-            minor = minor[1:]
-        minor = eval(minor)
-        minor += fontRevision
-        minor = str(minor).zfill(3)
-
-    newData = re.sub(match.group(0), "FontRevision %s.%s;" % (major, minor),
+    newData = re.sub(fea_match.group(0),
+                     f"FontRevision {major}.{minor:03};",
                      data)
+
     try:
         with open(featuresPath, "w", encoding='utf-8') as fp:
             fp.write(newData)
@@ -2108,7 +2146,7 @@ def checkFSTypeValue(FSType, outputPath):
     fsType = fsTypeTxt.lstrip("0")
     if (len(fsType) == 0) and (len(fsTypeTxt) > 0):
         fsType = "0"
-    fsType = eval(fsType)
+    fsType = str(fsType)
     if fsType != FSType:
         print("makeotf [Error] FSType value '%s' from (cid)fontinfo file does "
               "not match value '%s' of OS/2 fsType in file at '%s'." %
@@ -2389,7 +2427,7 @@ def runMakeOTF(makeOTFParams):
     # Change file paths to be relative to fontDir,
     # if possible, else to absolute paths.
     fontDir = adjustPaths(makeOTFParams)
-    inputFilePath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kInputFont))
+    inputFilePath = getattr(makeOTFParams, kFileOptPrefix + kInputFont, None)
 
     # This MUST follow makeRelativePaths.
     os.chdir(fontDir)
@@ -2460,13 +2498,15 @@ def runMakeOTF(makeOTFParams):
 
         # if the source is TTF, then the name table must
         # be built without the -useOldNameID4 option.
-        useOldNameID4 = eval("makeOTFParams.%s%s" % (kFileOptPrefix,
-                                                     kUseOldNameID4))
+        useOldNameID4 = getattr(makeOTFParams,
+                                kFileOptPrefix + kUseOldNameID4,
+                                False)
+
         if useOldNameID4:
             print("Because font is TTF, forcing use of new name table id 4 "
                   "format")
-            exec("makeOTFParams.%s%s = None" % (kFileOptPrefix,
-                                                kUseOldNameID4))
+            setattr(makeOTFParams, kFileOptPrefix + kUseOldNameID4, None)
+
         # We also need to suppress the warnings about
         # no hints: all glyphs will be un-hinted.
         setattr(makeOTFParams, kFileOptPrefix + kSuppressHintWarnings, 'true')
@@ -2492,7 +2532,7 @@ def runMakeOTF(makeOTFParams):
 
     hasOS2V4Bit = False
     if bitsOn:
-        if sorted(bitsOn)[0] > 6:
+        if int(sorted(bitsOn)[0]) > 6:
             hasOS2V4Bit = True
 
     os2Version = getattr(makeOTFParams, kFileOptPrefix + kSetOS2Version)
@@ -2500,7 +2540,7 @@ def runMakeOTF(makeOTFParams):
         # If the OS/2 table version has not been explicitly specified,
         # and the kSetfsSelectionBits is being set to greater than 6,
         # then bump the OS/2 table version to 4.
-        setattr(makeOTFParams, kFileOptPrefix + kSetOS2Version, 4)
+        setattr(makeOTFParams, kFileOptPrefix + kSetOS2Version, '4')
 
     if hasOS2V4Bit:
         osv4Err = False
@@ -2523,8 +2563,8 @@ def runMakeOTF(makeOTFParams):
             return
 
     # renumber the fontRevision
-    fontRevision = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kRenumber))
-    featuresPath = eval("makeOTFParams.%s%s" % (kFileOptPrefix, kFeature))
+    fontRevision = getattr(makeOTFParams, kFileOptPrefix + kRenumber, None)
+    featuresPath = getattr(makeOTFParams, kFileOptPrefix + kFeature, None)
     if fontRevision is not None:
         # If this is not defined, then there is no 'features' file. Make one.
         if not featuresPath:
@@ -2532,10 +2572,11 @@ def runMakeOTF(makeOTFParams):
                   "table FontRevision value.")
             featuresDir = os.path.dirname(inputFontPath)
             featuresPath = os.path.join(featuresDir, "features")
-            exec("makeOTFParams.%s%s = featuresPath" % (kFileOptPrefix,
-                                                        kFeature))
+            setattr(makeOTFParams, kFileOptPrefix + kFeature, featuresPath)
+
             with open(featuresPath, "w") as fp:
                 fp.write("\ntable head {\nFontRevision 1.000;\n} head;\n")
+
         updateFontRevision(featuresPath, fontRevision)
 
     # if converting to CID, save the setting, but
@@ -2548,18 +2589,21 @@ def runMakeOTF(makeOTFParams):
 
     params = [
         'makeotfexe',
-        "\"%s\" \"%s\"" % (eval("kMOTFOptions[\"%s\"]" % (
-            kInputFont))[1], inputFontPath),  # add temp font as the input font
-        "\"%s\" \"%s\"" % (eval("kMOTFOptions[\"%s\"]" % (
-            kOutputFont))[1], tempOutPath)  # add temp font as the input font
+        f'{kMOTFOptions[kInputFont][1]}',
+        inputFontPath,
+        f'{kMOTFOptions[kOutputFont][1]}',
+        tempOutPath,
     ]
+
     # Add the rest of the parameters
     optionKeys.sort(key=byEntryOrder)
     for optionKey in optionKeys:
         # Skip the options that should not be passed to makeotfexe.
         if optionKey in kSkipOptions:
             continue
-        val = eval("makeOTFParams.%s%s" % (kFileOptPrefix, optionKey))
+
+        val = getattr(makeOTFParams, kFileOptPrefix + optionKey, None)
+
         if val is None:
             continue
 
@@ -2573,7 +2617,8 @@ def runMakeOTF(makeOTFParams):
             # True/False option where the option may have
             # an integer value following, e.g -adds.
             else:
-                params.append('%s "%s"' % (optionEntry[1], val))
+                params.append(optionEntry[1])
+                params.append(val)
         # an option without a following value
         elif val == 'true':
             params.append(optionEntry[1])
@@ -2583,41 +2628,29 @@ def runMakeOTF(makeOTFParams):
                   "is not T/F" % optionEntry[1])
         elif isinstance(val, list):
             for item in val:
-                params.append('%s "%s"' % (optionEntry[1], item))
+                params.append(optionEntry[1])
+                params.append(item)
         else:
-            params.append('%s "%s"' % (optionEntry[1], val))
+            params.append(optionEntry[1])
+            params.append(val)
 
-    commandString = " ".join(params)
     if makeOTFParams.verbose:
         print("makeotf [Note] Running %s with commands:" %
               os.path.basename('makeotfexe'))
-        print("   cd \"%s\"" % fontDir)
-        print("   %s" % commandString)
+        print(f'   cd "{fontDir}"')
+        print(f"   {params}")
 
-    fdkutils.runShellCmdLogging(commandString)
+    success = fdkutils.run_shell_command(params)
 
-    if not os.path.exists(tempOutPath) or (os.path.getsize(tempOutPath) < 500):
-        print("makeotf [Error] Failed to build output font file '%s'." %
-              tempOutPath)
-        if os.path.exists(tempOutPath):
-            try:
-                os.remove(tempOutPath)
-            except OSError:
-                pass
-        raise MakeOTFRunError
+    _check_remove_bad_output(tempOutPath)
+
+    if not success:
+        raise MakeOTFShellError
 
     if makeOTFParams.srcIsTTF:
         copyTTFGlyphTables(inputFilePath, tempOutPath, outputPath)
 
-    if not os.path.exists(outputPath) or (os.path.getsize(outputPath) < 500):
-        print("makeotf [Error] Failed to build output font file '%s'." %
-              outputPath)
-        if os.path.exists(outputPath):
-            try:
-                os.remove(outputPath)
-            except OSError:
-                pass
-        raise MakeOTFRunError
+    _check_remove_bad_output(outputPath)
 
     # The following check is here because of the internal Adobe
     # production process for CID fonts, where a Type1 CID font

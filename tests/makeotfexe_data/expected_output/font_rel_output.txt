@@ -1,0 +1,5 @@
+makeotfexe [WARNING] unhinted <.notdef>
+makeotfexe [WARNING] unhinted <a>
+makeotfexe [WARNING] unhinted <b>
+makeotfexe [WARNING] FontMenuNameDB file was not specified or not found. [SourceSerifPro-Regular]
+makeotfexe [WARNING] Glyph renaming was requested, but the GlyphOrderAndAliasDB file was not specified.
