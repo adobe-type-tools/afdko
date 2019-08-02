@@ -108,6 +108,31 @@ def test_input_formats(arg, input_filename, ttx_filename):
                    '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
 
 
+@pytest.mark.parametrize('args, ttx_fname', [
+    ([], 'font_dev'),
+    (['r'], 'font_rel'),
+])
+def test_build_font_and_check_messages(args, ttx_fname):
+    actual_path = get_temp_file_path()
+    expected_msg_path = get_expected_path(f'{ttx_fname}_output.txt')
+    ttx_filename = f'{ttx_fname}.ttx'
+    stderr_path = runner(CMD + [
+        '-s', '-e', '-o', 'f', f'_{get_input_path("font.pfa")}',
+                          'o', f'_{actual_path}'] + args)
+    actual_ttx = generate_ttx_dump(actual_path)
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx,
+                   '-s',
+                   '<ttFont sfntVersion' + SPLIT_MARKER +
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <created value=' + SPLIT_MARKER +
+                   '    <modified value=',
+                   '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
+    assert differ([expected_msg_path, stderr_path,
+                   '-r', r'^Built (development|release) mode font'])
+
+
 def test_getSourceGOADBData():
     ttf_path = get_input_path('font.ttf')
     assert getSourceGOADBData(ttf_path) == [['.notdef', '.notdef', ''],
