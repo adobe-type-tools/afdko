@@ -29,8 +29,9 @@ import time
 
 from fontTools.pens.basePen import BasePen
 
-from afdko import fdkutils, pdfgen, pdfmetrics
-from afdko.pdfutils import LINEEND
+from afdko import fdkutils
+from afdko.pdflib import pdfgen, pdfmetrics
+from afdko.pdflib.pdfutils import LINEEND
 
 __version__ = "1.28"
 

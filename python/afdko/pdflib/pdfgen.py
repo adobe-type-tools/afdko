@@ -60,7 +60,7 @@ except ImportError:
     from io import StringIO
 from math import sin, cos, tan, pi
 
-from afdko import pdfdoc, pdfgeom, pdfmetrics, pdfutils
+from afdko.pdflib import pdfdoc, pdfgeom, pdfmetrics, pdfutils
 
 # Robert Kern
 # Constants for closing paths.
