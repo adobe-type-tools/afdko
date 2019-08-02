@@ -465,6 +465,7 @@ def test_max_revision_bug876():
     expected_ttx = get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx,
                    '-s',
+                   '<ttFont sfntVersion' + SPLIT_MARKER +
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value='])
