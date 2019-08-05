@@ -21,6 +21,15 @@
 #include "common.h"
 #include "font.h"
 
+/* In order to avoid matching repeats across charstring boundaries it is
+   necessary to add a unique separator between charstrings. This is achieved by
+   inserting the t2_separator operator after each endchar. The 1-byte operator
+   value is followed by a 24-bit number that is guaranteed to be different for
+   each charstring thereby removing any possibility of a match spanning an
+   endchar operator. These operators are inserted by the recode module and
+   removed by the subroutinizer */
+#define t2_separator t2_reserved9
+
 #if TC_SUBR_SUPPORT
 void subrNew(tcCtx g);
 void subrFree(tcCtx g);
