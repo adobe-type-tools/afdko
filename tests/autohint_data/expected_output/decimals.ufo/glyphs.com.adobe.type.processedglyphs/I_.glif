@@ -7,10 +7,10 @@
   <anchor x="104.80000000000001" y="-17.6" name="belowLC"/>
   <outline>
     <contour>
-      <point x="72" y="0" type="line" name="hintSet0000"/>
-      <point x="138" y="0" type="line"/>
-      <point x="138" y="525" type="line"/>
-      <point x="72" y="525" type="line"/>
+      <point type="line" x="72" y="0" name="hintSet0000"/>
+      <point type="line" x="138" y="0"/>
+      <point type="line" x="138" y="525"/>
+      <point type="line" x="72" y="525"/>
     </contour>
   </outline>
   <lib>

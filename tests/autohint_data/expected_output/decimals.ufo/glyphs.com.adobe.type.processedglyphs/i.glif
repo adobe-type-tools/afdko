@@ -7,22 +7,22 @@
   <anchor x="98.4" y="-17.6" name="belowLC"/>
   <outline>
     <contour>
-      <point x="66" y="0" type="line" name="hintSet0000"/>
-      <point x="131" y="0" type="line"/>
-      <point x="131" y="389" type="line"/>
-      <point x="66" y="389" type="line"/>
+      <point type="line" x="66" y="0" name="hintSet0000"/>
+      <point type="line" x="131" y="0"/>
+      <point type="line" x="131" y="389"/>
+      <point type="line" x="66" y="389"/>
     </contour>
     <contour>
-      <point x="99" y="469" type="curve" name="hintSet0004"/>
+      <point type="curve" x="99" y="469" name="hintSet0004"/>
       <point x="125" y="469"/>
       <point x="145" y="486"/>
-      <point x="145" y="511" type="curve"/>
+      <point type="curve" x="145" y="511"/>
       <point x="145" y="537"/>
       <point x="125" y="554"/>
-      <point x="99" y="554" type="curve"/>
+      <point type="curve" x="99" y="554"/>
       <point x="74" y="554"/>
       <point x="54" y="537"/>
-      <point x="54" y="511" type="curve"/>
+      <point type="curve" x="54" y="511"/>
       <point x="54" y="486"/>
       <point x="74" y="469"/>
     </contour>

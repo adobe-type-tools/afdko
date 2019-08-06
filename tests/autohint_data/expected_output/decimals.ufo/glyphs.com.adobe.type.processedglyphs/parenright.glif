@@ -4,20 +4,20 @@
   <unicode hex="0029"/>
   <outline>
     <contour>
-      <point x="71" y="-141" type="line" name="hintSet0000"/>
+      <point type="line" x="71" y="-141" name="hintSet0000"/>
       <point x="138" y="-34"/>
       <point x="177" y="82"/>
-      <point x="177" y="222" type="curve"/>
+      <point type="curve" x="177" y="222"/>
       <point x="177" y="363"/>
       <point x="138" y="478"/>
-      <point x="71" y="586" type="curve"/>
-      <point x="30" y="566" type="line"/>
+      <point type="curve" x="71" y="586"/>
+      <point type="line" x="30" y="566"/>
       <point x="92" y="465"/>
       <point x="122" y="344"/>
-      <point x="122" y="222" type="curve"/>
+      <point type="curve" x="122" y="222"/>
       <point x="122" y="101"/>
       <point x="92" y="-20"/>
-      <point x="30" y="-122" type="curve"/>
+      <point type="curve" x="30" y="-122"/>
     </contour>
   </outline>
   <lib>

@@ -6,19 +6,19 @@
   <anchor x="216.8" y="-17.6" name="belowLC"/>
   <outline>
     <contour>
-      <point x="66" y="0" type="line" name="hintSet0000"/>
-      <point x="130" y="0" type="line"/>
-      <point x="130" y="102" type="line"/>
-      <point x="203" y="187" type="line"/>
-      <point x="317" y="0" type="line"/>
-      <point x="389" y="0" type="line"/>
-      <point x="241" y="233" type="line"/>
-      <point x="371" y="389" type="line"/>
-      <point x="298" y="389" type="line"/>
-      <point x="133" y="184" type="line"/>
-      <point x="130" y="184" type="line"/>
-      <point x="130" y="570" type="line"/>
-      <point x="66" y="570" type="line"/>
+      <point type="line" x="66" y="0" name="hintSet0000"/>
+      <point type="line" x="130" y="0"/>
+      <point type="line" x="130" y="102"/>
+      <point type="line" x="203" y="187"/>
+      <point type="line" x="317" y="0"/>
+      <point type="line" x="389" y="0"/>
+      <point type="line" x="241" y="233"/>
+      <point type="line" x="371" y="389"/>
+      <point type="line" x="298" y="389"/>
+      <point type="line" x="133" y="184"/>
+      <point type="line" x="130" y="184"/>
+      <point type="line" x="130" y="570"/>
+      <point type="line" x="66" y="570"/>
     </contour>
   </outline>
   <lib>
