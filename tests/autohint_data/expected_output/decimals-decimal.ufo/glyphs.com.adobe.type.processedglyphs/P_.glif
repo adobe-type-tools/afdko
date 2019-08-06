@@ -6,28 +6,28 @@
   <anchor x="109.60000000000001" y="-17.6" name="belowLC"/>
   <outline>
     <contour>
-      <point x="72" y="0" type="line" name="hintSet0000"/>
-      <point x="138.4" y="0" type="line"/>
-      <point x="138.4" y="208" type="line"/>
-      <point x="224.8" y="208" type="line"/>
+      <point type="line" x="72" y="0" name="hintSet0000"/>
+      <point type="line" x="138.4" y="0"/>
+      <point type="line" x="138.4" y="208"/>
+      <point type="line" x="224.8" y="208"/>
       <point x="340" y="208"/>
       <point x="418.4" y="260"/>
-      <point x="418.4" y="370.4" type="curve"/>
+      <point type="curve" x="418.4" y="370.4"/>
       <point x="418.4" y="485.6"/>
       <point x="339.2" y="524.8"/>
-      <point x="221.6" y="524.8" type="curve"/>
-      <point x="72" y="524.8" type="line"/>
+      <point type="curve" x="221.6" y="524.8"/>
+      <point type="line" x="72" y="524.8"/>
     </contour>
     <contour>
-      <point x="138.4" y="262.4" type="line"/>
-      <point x="138.4" y="471.2" type="line"/>
-      <point x="213.6" y="471.2" type="line"/>
+      <point type="line" x="138.4" y="262.4"/>
+      <point type="line" x="138.4" y="471.2"/>
+      <point type="line" x="213.6" y="471.2"/>
       <point x="305.6" y="471.2"/>
       <point x="352" y="446.4"/>
-      <point x="352" y="370.4" type="curve"/>
+      <point type="curve" x="352" y="370.4"/>
       <point x="352" y="296"/>
       <point x="308" y="262.4"/>
-      <point x="216.8" y="262.4" type="curve"/>
+      <point type="curve" x="216.8" y="262.4"/>
     </contour>
   </outline>
   <lib>

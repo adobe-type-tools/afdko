@@ -4,24 +4,24 @@
   <unicode hex="0021"/>
   <outline>
     <contour>
-      <point x="92.8" y="158.4" type="line" name="hintSet0000"/>
-      <point x="138.4" y="158.4" type="line"/>
-      <point x="147.2" y="460.8" type="line"/>
-      <point x="148.8" y="536" type="line"/>
-      <point x="82.4" y="536" type="line"/>
-      <point x="84" y="460.8" type="line"/>
+      <point type="line" x="92.8" y="158.4" name="hintSet0000"/>
+      <point type="line" x="138.4" y="158.4"/>
+      <point type="line" x="147.2" y="460.8"/>
+      <point type="line" x="148.8" y="536"/>
+      <point type="line" x="82.4" y="536"/>
+      <point type="line" x="84" y="460.8"/>
     </contour>
     <contour>
-      <point x="116" y="-9.6" type="curve" name="hintSet0006"/>
+      <point type="curve" x="116" y="-9.6" name="hintSet0006"/>
       <point x="141.6" y="-9.6"/>
       <point x="163.2" y="11.2"/>
-      <point x="163.2" y="40" type="curve"/>
+      <point type="curve" x="163.2" y="40"/>
       <point x="163.2" y="70.4" name="hintSet0008"/>
       <point x="141.6" y="91.2"/>
-      <point x="116" y="91.2" type="curve"/>
+      <point type="curve" x="116" y="91.2"/>
       <point x="89.6" y="91.2"/>
       <point x="68" y="70.4"/>
-      <point x="68" y="40" type="curve"/>
+      <point type="curve" x="68" y="40"/>
       <point x="68" y="11.2" name="hintSet0010"/>
       <point x="89.6" y="-9.6"/>
     </contour>

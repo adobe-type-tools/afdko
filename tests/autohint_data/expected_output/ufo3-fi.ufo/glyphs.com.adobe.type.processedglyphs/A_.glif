@@ -7,27 +7,27 @@
   <anchor x="312" y="-22" name="belowLC"/>
   <outline>
     <contour>
-      <point x="5" y="0" type="line" name="hintSet0000"/>
-      <point x="234" y="0" type="line" name="hintSet0001"/>
-      <point x="234" y="41" type="line"/>
-      <point x="137" y="54" type="line"/>
-      <point x="192" y="217" type="line"/>
-      <point x="424" y="217" type="line"/>
-      <point x="480" y="52" type="line"/>
-      <point x="381" y="41" type="line"/>
-      <point x="381" y="0" type="line"/>
-      <point x="653" y="0" type="line"/>
-      <point x="653" y="41" type="line" name="hintSet0010"/>
-      <point x="578" y="50" type="line"/>
-      <point x="365" y="674" type="line"/>
-      <point x="302" y="674" type="line"/>
-      <point x="89" y="53" type="line" name="hintSet0014"/>
-      <point x="5" y="41" type="line"/>
+      <point type="line" x="5" y="0" name="hintSet0000"/>
+      <point type="line" x="234" y="0" name="hintSet0001"/>
+      <point type="line" x="234" y="41"/>
+      <point type="line" x="137" y="54"/>
+      <point type="line" x="192" y="217"/>
+      <point type="line" x="424" y="217"/>
+      <point type="line" x="480" y="52"/>
+      <point type="line" x="381" y="41"/>
+      <point type="line" x="381" y="0"/>
+      <point type="line" x="653" y="0"/>
+      <point type="line" x="653" y="41" name="hintSet0010"/>
+      <point type="line" x="578" y="50"/>
+      <point type="line" x="365" y="674"/>
+      <point type="line" x="302" y="674"/>
+      <point type="line" x="89" y="53" name="hintSet0014"/>
+      <point type="line" x="5" y="41"/>
     </contour>
     <contour>
-      <point x="208" y="264" type="line"/>
-      <point x="309" y="562" type="line"/>
-      <point x="409" y="264" type="line"/>
+      <point type="line" x="208" y="264"/>
+      <point type="line" x="309" y="562"/>
+      <point type="line" x="409" y="264"/>
     </contour>
   </outline>
   <lib>

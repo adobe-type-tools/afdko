@@ -4,19 +4,19 @@
   <unicode hex="0031"/>
   <outline>
     <contour>
-      <point x="63.2" y="0" type="line" name="hintSet0000"/>
-      <point x="351.2" y="0" type="line" name="hintSet0001"/>
-      <point x="351.2" y="54.4" type="line"/>
-      <point x="245.6" y="54.4" type="line" name="hintSet0003"/>
-      <point x="245.6" y="510.4" type="line"/>
-      <point x="195.2" y="510.4" type="line"/>
+      <point type="line" x="63.2" y="0" name="hintSet0000"/>
+      <point type="line" x="351.2" y="0" name="hintSet0001"/>
+      <point type="line" x="351.2" y="54.4"/>
+      <point type="line" x="245.6" y="54.4" name="hintSet0003"/>
+      <point type="line" x="245.6" y="510.4"/>
+      <point type="line" x="195.2" y="510.4"/>
       <point x="167.2" y="493.6"/>
       <point x="133.6" y="480.8"/>
-      <point x="87.2" y="472.8" type="curve"/>
-      <point x="87.2" y="430.4" type="line"/>
-      <point x="180" y="430.4" type="line"/>
-      <point x="180" y="54.4" type="line"/>
-      <point x="63.2" y="54.4" type="line" name="hintSet0010"/>
+      <point type="curve" x="87.2" y="472.8"/>
+      <point type="line" x="87.2" y="430.4"/>
+      <point type="line" x="180" y="430.4"/>
+      <point type="line" x="180" y="54.4"/>
+      <point type="line" x="63.2" y="54.4" name="hintSet0010"/>
     </contour>
   </outline>
   <lib>

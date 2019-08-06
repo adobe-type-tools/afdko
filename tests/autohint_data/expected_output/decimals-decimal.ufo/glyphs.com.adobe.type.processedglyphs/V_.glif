@@ -6,20 +6,20 @@
   <anchor x="206.4" y="-17.6" name="belowLC"/>
   <outline>
     <contour>
-      <point x="168" y="0" type="line" name="hintSet0000"/>
-      <point x="245.6" y="0" type="line"/>
-      <point x="412" y="524.8" type="line"/>
-      <point x="344" y="524.8" type="line"/>
-      <point x="260" y="241.6" type="line"/>
+      <point type="line" x="168" y="0" name="hintSet0000"/>
+      <point type="line" x="245.6" y="0"/>
+      <point type="line" x="412" y="524.8"/>
+      <point type="line" x="344" y="524.8"/>
+      <point type="line" x="260" y="241.6"/>
       <point x="241.6" y="179.2"/>
       <point x="228.8" y="129.6"/>
-      <point x="209.6" y="68" type="curve"/>
-      <point x="206.4" y="68" type="line"/>
+      <point type="curve" x="209.6" y="68"/>
+      <point type="line" x="206.4" y="68"/>
       <point x="186.4" y="129.6"/>
       <point x="174.4" y="179.2"/>
-      <point x="155.2" y="241.6" type="curve"/>
-      <point x="71.2" y="524.8" type="line"/>
-      <point x="0" y="524.8" type="line"/>
+      <point type="curve" x="155.2" y="241.6"/>
+      <point type="line" x="71.2" y="524.8"/>
+      <point type="line" x="0" y="524.8"/>
     </contour>
   </outline>
   <lib>

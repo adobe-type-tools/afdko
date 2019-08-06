@@ -8,30 +8,30 @@
   <anchor x="216.8" y="-17.6" name="belowLC"/>
   <outline>
     <contour>
-      <point x="217" y="-10" type="curve" name="hintSet0000"/>
+      <point type="curve" x="217" y="-10" name="hintSet0000"/>
       <point x="312" y="-10"/>
       <point x="397" y="65"/>
-      <point x="397" y="194" type="curve"/>
+      <point type="curve" x="397" y="194"/>
       <point x="397" y="324"/>
       <point x="312" y="398"/>
-      <point x="217" y="398" type="curve"/>
+      <point type="curve" x="217" y="398"/>
       <point x="122" y="398"/>
       <point x="37" y="324"/>
-      <point x="37" y="194" type="curve"/>
+      <point type="curve" x="37" y="194"/>
       <point x="37" y="65"/>
       <point x="122" y="-10"/>
     </contour>
     <contour>
-      <point x="217" y="45" type="curve"/>
+      <point type="curve" x="217" y="45"/>
       <point x="150" y="45"/>
       <point x="105" y="105"/>
-      <point x="105" y="194" type="curve"/>
+      <point type="curve" x="105" y="194"/>
       <point x="105" y="283"/>
       <point x="150" y="344"/>
-      <point x="217" y="344" type="curve"/>
+      <point type="curve" x="217" y="344"/>
       <point x="284" y="344"/>
       <point x="329" y="283"/>
-      <point x="329" y="194" type="curve"/>
+      <point type="curve" x="329" y="194"/>
       <point x="329" y="105"/>
       <point x="284" y="45"/>
     </contour>

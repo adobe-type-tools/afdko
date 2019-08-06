@@ -7,18 +7,18 @@
   <anchor x="238.4" y="-17.6" name="belowLC"/>
   <outline>
     <contour>
-      <point x="72" y="0" type="line" name="hintSet0000"/>
-      <point x="382" y="0" type="line"/>
-      <point x="382" y="57" type="line"/>
-      <point x="138" y="57" type="line"/>
-      <point x="138" y="247" type="line"/>
-      <point x="338" y="247" type="line"/>
-      <point x="338" y="304" type="line"/>
-      <point x="138" y="304" type="line"/>
-      <point x="138" y="469" type="line"/>
-      <point x="374" y="469" type="line"/>
-      <point x="374" y="525" type="line"/>
-      <point x="72" y="525" type="line"/>
+      <point type="line" x="72" y="0" name="hintSet0000"/>
+      <point type="line" x="382" y="0"/>
+      <point type="line" x="382" y="57"/>
+      <point type="line" x="138" y="57"/>
+      <point type="line" x="138" y="247"/>
+      <point type="line" x="338" y="247"/>
+      <point type="line" x="338" y="304"/>
+      <point type="line" x="138" y="304"/>
+      <point type="line" x="138" y="469"/>
+      <point type="line" x="374" y="469"/>
+      <point type="line" x="374" y="525"/>
+      <point type="line" x="72" y="525"/>
     </contour>
   </outline>
   <lib>

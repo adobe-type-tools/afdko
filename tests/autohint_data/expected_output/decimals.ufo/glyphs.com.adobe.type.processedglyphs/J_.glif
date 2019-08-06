@@ -6,20 +6,20 @@
   <anchor x="202.4" y="-17.6" name="belowLC"/>
   <outline>
     <contour>
-      <point x="170" y="-10" type="curve" name="hintSet0000"/>
+      <point type="curve" x="170" y="-10" name="hintSet0000"/>
       <point x="272" y="-10"/>
       <point x="314" y="64"/>
-      <point x="314" y="154" type="curve"/>
-      <point x="314" y="525" type="line"/>
-      <point x="247" y="525" type="line"/>
-      <point x="247" y="161" type="line"/>
+      <point type="curve" x="314" y="154"/>
+      <point type="line" x="314" y="525"/>
+      <point type="line" x="247" y="525"/>
+      <point type="line" x="247" y="161"/>
       <point x="247" y="81"/>
       <point x="219" y="49"/>
-      <point x="163" y="49" type="curve"/>
+      <point type="curve" x="163" y="49"/>
       <point x="126" y="49"/>
       <point x="96" y="66"/>
-      <point x="73" y="108" type="curve"/>
-      <point x="25" y="74" type="line"/>
+      <point type="curve" x="73" y="108"/>
+      <point type="line" x="25" y="74"/>
       <point x="55" y="19"/>
       <point x="103" y="-10"/>
     </contour>
