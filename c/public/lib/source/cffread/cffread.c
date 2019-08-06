@@ -494,12 +494,12 @@ static void srcRead(cfrCtx h, size_t count, char *ptr) {
 
 /* Read 1-byte unsigned number. */
 #define read1(h) \
-    ((unsigned char)((h->src.next == h->src.end) ? nextbuf(h) : *h->src.next++))
+    ((uint8_t)((h->src.next == h->src.end) ? nextbuf(h) : *h->src.next++))
 
 /* Read 2-byte number. */
-static unsigned short read2(cfrCtx h) {
-    unsigned short value = (unsigned short)read1(h) << 8;
-    return value | (unsigned short)read1(h);
+static uint16_t read2(cfrCtx h) {
+    uint16_t value = (uint16_t)read1(h) << 8;
+    return value | (uint16_t)read1(h);
 }
 
 /* Read 1-, 2-, 3-, or 4-byte number. */
@@ -1885,24 +1885,20 @@ static short sread2(cfrCtx h) {
 }
 
 /* Read 4-byte unsigned number. */
-static unsigned long read4(cfrCtx h) {
-    unsigned long value = (unsigned long)read1(h) << 24;
-    value |= (unsigned long)read1(h) << 16;
-    value |= (unsigned long)read1(h) << 8;
-    return value | (unsigned long)read1(h);
+static uint32_t read4(cfrCtx h) {
+    uint32_t value = (uint32_t)read1(h) << 24;
+    value |= (uint32_t)read1(h) << 16;
+    value |= (uint32_t)read1(h) << 8;
+    return value | (uint32_t)read1(h);
 }
 
 /* Read 4-byte signed number. */
-static long sread4(cfrCtx h) {
-    unsigned long value = (unsigned long)read1(h) << 24;
-    value |= (unsigned long)read1(h) << 16;
-    value |= (unsigned long)read1(h) << 8;
-    value |= (unsigned long)read1(h);
-#if LONG_MAX == 2147483647
-    return (long)value;
-#else
-    return (long)((value > 2417483647) ? value - 4294967296 : value);
-#endif
+static int32_t sread4(cfrCtx h) {
+    uint32_t value = (uint32_t)read1(h) << 24;
+    value |= (uint32_t)read1(h) << 16;
+    value |= (uint32_t)read1(h) << 8;
+    value |= (uint32_t)read1(h);
+    return (int32_t)value;
 }
 
 static int invalidStreamOffset(cfrCtx h, unsigned long offset) {
@@ -2364,33 +2360,48 @@ static void readEncoding(cfrCtx h) {
 
 /* Read FDSelect */
 static void readFDSelect(cfrCtx h) {
-    long gid;
+    uint32_t gid;
 
     if (h->region.FDSelect.begin == -1)
         fatal(h, cfrErrNoFDSelect);
 
     srcSeek(h, h->region.FDSelect.begin);
     switch (read1(h)) {
-        case 0:
+        case 0: {
             for (gid = 0; gid < h->glyphs.cnt; gid++) {
-                int fd = (int)read1(h);
+                uint8_t fd = read1(h);
                 if (fd >= h->FDArray.cnt)
                     fatal(h, cfrErrFDSelectFmt);
-                h->glyphs.array[gid].iFD = (unsigned char)fd;
+                h->glyphs.array[gid].iFD = fd;
             }
-            break;
+        } break;
         case 3: {
-            int nRanges = read2(h);
+            uint16_t nRanges = read2(h);
 
             gid = read2(h);
             while (nRanges--) {
-                int fd = read1(h);
-                long next = read2(h);
+                uint8_t fd = read1(h);
+                uint16_t next = read2(h);
 
                 while (gid < next) {
                     if (gid >= h->glyphs.cnt || fd >= h->FDArray.cnt)
                         fatal(h, cfrErrFDSelectFmt);
-                    h->glyphs.array[gid++].iFD = (unsigned char)fd;
+                    h->glyphs.array[gid++].iFD = fd;
+                }
+            }
+        } break;
+        case 4: {
+            uint32_t nRanges = read4(h);
+
+            gid = read4(h);
+            while (nRanges--) {
+                uint16_t fd = read2(h);
+                uint32_t next = read4(h);
+
+                while (gid < next) {
+                    if (gid >= h->glyphs.cnt || fd >= h->FDArray.cnt)
+                        fatal(h, cfrErrFDSelectFmt);
+                    h->glyphs.array[gid++].iFD = fd;
                 }
             }
         } break;

@@ -389,7 +389,7 @@ typedef struct /* Glyph information */
     abfString gname;                  /* Name-keyed: glyph name */
     abfEncoding encoding;             /* Name-keyed: encoding list */
     unsigned short cid;               /* CID-keyed: CID */
-    unsigned char iFD;                /* CID-keyed: FD index */
+    uint16_t iFD;                     /* CID-keyed: FD index */
     ctlRegion sup;                    /* Supplementary data */
     struct {
         unsigned short vsindex;
