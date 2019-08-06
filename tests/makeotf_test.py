@@ -667,3 +667,17 @@ def test_update_font_revision(feat_filename, rev_value, expected):
                   ])
     frstr = f'{get_font_revision(otf_path):.3f}'
     assert frstr == expected
+
+
+def test_cli_numerics():
+    input_filename = "clinum/font.otf"
+    fontinfo_filename = "clinum/fontinfo"
+    expected_msg_path = get_expected_path("clinum_output.txt")
+    out_font_path = get_temp_file_path()
+    stderr_path = runner(CMD + [
+        '-s', '-e', '-o',
+        'f', f'_{get_input_path(input_filename)}',
+        'o', f'_{out_font_path}',
+        'fi', f'_{get_input_path(fontinfo_filename)}'])
+    assert differ([expected_msg_path, stderr_path,
+                   '-r', r'^Built (development|release) mode font'])

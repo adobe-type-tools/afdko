@@ -1,0 +1,7 @@
+makeotf [Warning] Could not find default features file. Font will be built without any layout features.
+makeotf [Warning] Could not find FontMenuNameDB file. Font will be built with menu names derived from PostScript name.
+makeotf [Note] setting the USE_TYPO_METRICS OS/2 fsSelection bit 7 from fontinfo keyword.
+makeotf [Note] setting the WEIGHT_WIDTH_SLOPE_ONLY OS/2 fsSelection bit 8 from fontinfo keyword.
+makeotf [Note] setting the OBLIQUE OS/2 fsSelection bit 9 from fontinfo keyword.
+makeotfexe [WARNING] FontMenuNameDB file was not specified or not found. [SourceCodePro-Black]
+Built development mode font 'out.otf'.
