@@ -637,36 +637,32 @@ static void readN(txCtx h, size_t count, char *ptr) {
 }
 
 #define read1(h) \
-    (unsigned char)((h->src.next == h->src.end) ? nextbuf(h) : *h->src.next++)
+    (uint8_t)((h->src.next == h->src.end) ? nextbuf(h) : *h->src.next++)
 
 /* Read 2-byte number. */
-static unsigned short read2(txCtx h) {
-    unsigned short value = read1(h) << 8;
+static uint16_t read2(txCtx h) {
+    uint16_t value = read1(h) << 8;
     return value | read1(h);
 }
 
 /* Read 2-byte signed number. */
-static short sread2(txCtx h) {
-    unsigned short value = read1(h) << 8;
+static int16_t sread2(txCtx h) {
+    uint16_t value = read1(h) << 8;
     value |= read1(h);
-#if SHRT_MAX == 32767
-    return (short)value;
-#else
-    return (short)((value > 32767) ? value - 65536 : value);
-#endif
+    return (int16_t)value;
 }
 
 /* Read 4-byte number. */
-static unsigned long read4(txCtx h) {
-    unsigned long value = (unsigned long)read1(h) << 24;
-    value |= (unsigned long)read1(h) << 16;
+static uint32_t read4(txCtx h) {
+    uint32_t value = (uint32_t)read1(h) << 24;
+    value |= (uint32_t)read1(h) << 16;
     value |= read1(h) << 8;
     return value | read1(h);
 }
 
 /* Read 1-, 2-, 3-, or 4-byte number. */
-static unsigned long readn(txCtx h, int n) {
-    unsigned long value = 0;
+static uint32_t readn(txCtx h, int n) {
+    uint32_t value = 0;
     switch (n) {
         case 4:
             value = read1(h);
@@ -3841,7 +3837,7 @@ static void dcf_DumpFDSelect(txCtx h, const ctlRegion *region) {
     if (h->dcf.level < 1)
         return;
     else {
-        unsigned char fmt;
+        uint8_t fmt;
 
         bufSeek(h, region->begin);
         fmt = read1(h);
@@ -3849,24 +3845,37 @@ static void dcf_DumpFDSelect(txCtx h, const ctlRegion *region) {
 
         switch (fmt) {
             case 0: {
-                long gid;
+                uint32_t gid;
                 flowTitle(h, "glyph[gid]=fd");
                 for (gid = 0; gid < h->top->sup.nGlyphs; gid++)
                     flowBreak(h, "[%ld]=%u", gid, read1(h));
                 flowEnd(h);
             } break;
             case 3: {
-                long i;
-                long nRanges = read2(h);
-                fprintf(fp, "nRanges=%ld\n", nRanges);
+                uint16_t i;
+                uint16_t nRanges = read2(h);
+                fprintf(fp, "nRanges=%hu\n", nRanges);
                 flowTitle(h, "Range3[index]={first,fd}");
                 for (i = 0; i < nRanges; i++) {
-                    unsigned short first = read2(h);
-                    unsigned char fd = read1(h);
-                    flowBreak(h, "[%ld]={%hu,%u}", i, first, fd);
+                    uint16_t first = read2(h);
+                    uint8_t fd = read1(h);
+                    flowBreak(h, "[%hu]={%hu,%u}", i, first, fd);
                 }
                 flowEnd(h);
                 fprintf(fp, "sentinel=%hu\n", read2(h));
+            } break;
+            case 4: {
+                uint32_t i;
+                uint32_t nRanges = read4(h);
+                fprintf(fp, "nRanges=%u\n", nRanges);
+                flowTitle(h, "Range3[index]={first,fd}");
+                for (i = 0; i < nRanges; i++) {
+                    uint32_t first = read4(h);
+                    uint16_t fd = read2(h);
+                    flowBreak(h, "[%u]={%u,%u}", i, first, fd);
+                }
+                flowEnd(h);
+                fprintf(fp, "sentinel=%u\n", read4(h));
             } break;
             default:
                 fatal(h, "invalid FDSelect format");

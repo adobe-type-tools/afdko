@@ -526,3 +526,13 @@ def test_svg_missing_fontname_bug883(filename):
     with pytest.raises(subprocess.CalledProcessError) as err:
         runner(CMD + ['-a', '-o', 'svg', '-f', font_path, svg_path])
     assert(err.value.returncode == 6)  # exit code of 6, not segfault of -11
+
+
+@pytest.mark.parametrize('option', ['dump', 'dcf'])
+def test_fdselect_format_4(option):
+    font_name = 'fdselect4.otf'
+    font_path = get_input_path(font_name)
+    dump_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', option, '-f', font_path, dump_path])
+    expected_path = get_expected_path(font_name + '.' + option)
+    assert differ([expected_path, dump_path, '-s', '## Filename'])
