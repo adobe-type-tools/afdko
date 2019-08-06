@@ -444,10 +444,19 @@ int svwEndFont(svwCtx h, abfTopDict *top) {
     }
 
     writeStr(h, "<font-face font-family=\"");
-    if (h->top->sup.flags & ABF_CID_FONT)
-        writeXMLStr(h, h->top->cid.CIDFontName.ptr);
-    else
-        writeXMLStr(h, h->top->FDArray.array[0].FontName.ptr);
+    if (h->top->sup.flags & ABF_CID_FONT) {
+        if (h->top->cid.CIDFontName.ptr == NULL) {
+            fatal(h, svwErrFontName);
+        } else {
+            writeXMLStr(h, h->top->cid.CIDFontName.ptr);
+        }
+    } else {
+        if (h->top->FDArray.array[0].FontName.ptr == NULL) {
+            fatal(h, svwErrFontName);
+        } else {
+            writeXMLStr(h, h->top->FDArray.array[0].FontName.ptr);
+        }
+    }
     writeStr(h, "\"");
 
     writeStr(h, " units-per-em=\"");
