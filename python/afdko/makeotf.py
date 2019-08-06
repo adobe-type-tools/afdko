@@ -25,7 +25,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.7.7 Aug 1 2019
+makeotf.py v2.7.8 Aug 6 2019
 """
 
 __methods__ = """
@@ -824,13 +824,13 @@ def setOptionsFromFontInfo(makeOTFParams):
         if m:
             lang = m.group(1).strip()
             if lang == "Japanese":
-                script = 1
+                script = '1'
             elif lang == "Chinese":
-                script = 2
+                script = '2'
             elif lang == "TraditionalChinese":
-                script = 25
+                script = '25'
             elif lang == "Korean":
-                script = 3
+                script = '3'
             else:
                 script = None
             if script is not None:
@@ -842,7 +842,7 @@ def setOptionsFromFontInfo(makeOTFParams):
         if m:
             makeOTFParams.seenOS2v4Bits[0] = 1
             if m.group(1) in ["True", "true", "1"]:
-                val = 7
+                val = '7'
                 bitsOn = getattr(makeOTFParams,
                                  kFileOptPrefix + kSetfsSelectionBitsOn)
                 if bitsOn is None:
@@ -867,7 +867,7 @@ def setOptionsFromFontInfo(makeOTFParams):
         if m:
             makeOTFParams.seenOS2v4Bits[1] = 1
             if m.group(1) in ["True", "true", "1"]:
-                val = 8
+                val = '8'
                 bitsOn = getattr(makeOTFParams,
                                  kFileOptPrefix + kSetfsSelectionBitsOn)
                 if bitsOn is None:
@@ -887,7 +887,7 @@ def setOptionsFromFontInfo(makeOTFParams):
         if m:
             makeOTFParams.seenOS2v4Bits[2] = 1
             if m.group(1) in ["True", "true", "1"]:
-                val = 9
+                val = '9'
                 bitsOn = getattr(makeOTFParams,
                                  kFileOptPrefix + kSetfsSelectionBitsOn)
                 if bitsOn is None:
@@ -2640,7 +2640,7 @@ def runMakeOTF(makeOTFParams):
         print(f'   cd "{fontDir}"')
         print(f"   {params}")
 
-    success = fdkutils.run_shell_command(params)
+    success = fdkutils.run_shell_command_logging(params)
 
     _check_remove_bad_output(tempOutPath)
 
