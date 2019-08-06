@@ -516,3 +516,13 @@ def test_svg_with_cid_font_bug822():
     runner(CMD + ['-a', '-o', 'svg', '-f', font_path, cid_path])
     expected_path = get_expected_path('cid.svg')
     assert differ([expected_path, cid_path])
+
+
+@pytest.mark.parametrize('filename',
+                         ['type1-noPSname.pfa', 'cidfont-noPSname.ps'])
+def test_svg_missing_fontname_bug883(filename):
+    font_path = get_input_path(filename)
+    svg_path = get_temp_file_path()
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        runner(CMD + ['-a', '-o', 'svg', '-f', font_path, svg_path])
+    assert(err.value.returncode == 6)  # exit code of 6, not segfault of -11
