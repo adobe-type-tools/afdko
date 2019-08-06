@@ -8,8 +8,9 @@ A module of functions that are needed by several of the AFDKO scripts.
 import os
 import subprocess
 import tempfile
+import time
 
-__version__ = "1.3.2"
+__version__ = "1.3.3"
 
 
 def get_temp_file_path():
@@ -70,6 +71,27 @@ def run_shell_command(args, suppress_output=False):
         return True
     except (subprocess.CalledProcessError, OSError) as err:
         print(err)
+        return False
+
+
+def run_shell_command_logging(args):
+    try:
+        proc = subprocess.Popen(args,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT)
+        while True:
+            out = proc.stdout.readline().rstrip()
+            if out:
+                print(out.decode())
+            if proc.poll() is not None:
+                out = proc.stdout.readline().rstrip()
+                if out:
+                    print(out.decode())
+                break
+        return True
+    except (subprocess.CalledProcessError, OSError) as err:
+        msg = " ".join(args)
+        print(f"Error executing command '{msg}'\n{err}")
         return False
 
 
