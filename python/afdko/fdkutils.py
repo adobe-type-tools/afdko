@@ -8,7 +8,6 @@ A module of functions that are needed by several of the AFDKO scripts.
 import os
 import subprocess
 import tempfile
-import time
 
 __version__ = "1.3.3"
 
