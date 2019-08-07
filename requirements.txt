@@ -5,6 +5,6 @@ defcon[lxml,pens]==0.6.0
 fontMath==0.5.0
 fontTools[ufo,unicode,lxml,woff]==3.44.0
 mutatorMath==2.1.2
-psautohint==1.9.3c1
+psautohint==1.9.4
 ufonormalizer==0.3.6
 ufoProcessor==1.0.6
