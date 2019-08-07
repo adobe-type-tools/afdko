@@ -13,7 +13,7 @@ import os
 import re
 import sys
 
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 
 logger = logging.getLogger('differ')
 
@@ -43,16 +43,13 @@ class Differ(object):
         Diffs the contents of two paths using the parameters provided.
         Returns True if the contents match, and False if they don't.
         """
-        if self.mode == TXT_MODE:
-            if os.path.isfile(self.path1):
+        if os.path.isdir(self.path1):
+            return self._diff_dirs()
+        else:  # paths are files
+            if self.mode == TXT_MODE:
                 return self._diff_txt_files(self.path1, self.path2)
-            elif os.path.isdir(self.path1):
-                return self._diff_dirs()
-        elif self.mode == BIN_MODE:
-            if os.path.isfile(self.path1):
+            elif self.mode == BIN_MODE:
                 return filecmp.cmp(self.path1, self.path2)
-            elif os.path.isdir(self.path1):
-                return self._diff_dirs()
 
     def _diff_txt_files(self, path1, path2):
         """
@@ -200,15 +197,17 @@ class Differ(object):
 def _get_path_kind(pth):
     """
     Returns a string describing the kind of path.
-    String values are file, folder, invalid, and unknown.
+    Possible values are 'file', 'folder', and 'invalid'.
     """
-    if not os.path.exists(pth):
+    try:
+        if os.path.isfile(pth):
+            return 'file'
+        elif os.path.isdir(pth):
+            return 'folder'
+        elif not os.path.exists(pth):
+            return 'invalid'
+    except TypeError:
         return 'invalid'
-    elif os.path.isfile(pth):
-        return 'file'
-    elif os.path.isdir(pth):
-        return 'folder'
-    return 'unknown'
 
 
 def _paths_are_same_kind(path1, path2):
@@ -242,7 +241,11 @@ def _split_num_range_or_delta(num_str):
         return num_range
     elif len(num_delta) == 3:
         return num_delta
-    return num_str
+    elif num_str.isnumeric():
+        return num_str
+    else:
+        raise argparse.ArgumentTypeError(
+            f"Invalid number range or delta: {num_str}")
 
 
 def _convert_to_int(num_str):
@@ -255,18 +258,15 @@ def _convert_to_int(num_str):
 def _expand_num_range_or_delta(num_str_lst):
     start_num = _convert_to_int(num_str_lst[0])
     rng_dlt_num = _convert_to_int(num_str_lst[1])
-    plus_minus = num_str_lst[2]
-    if plus_minus == '+':
+    sign = num_str_lst[2]
+    if sign == '+':
         return list(range(start_num, start_num + rng_dlt_num + 1))
-    elif plus_minus == '-':
+    else:  # sign == '-'
         if not (rng_dlt_num >= start_num):
             raise argparse.ArgumentTypeError(
                 f"The start of range value is larger than the end of range "
                 f"value: {start_num}-{rng_dlt_num}")
         return list(range(start_num, rng_dlt_num + 1))
-    else:
-        raise argparse.ArgumentTypeError(
-            f"Unrecognized number separator: {plus_minus}")
 
 
 def _convert_seq_to_ints(num_seq):
@@ -276,7 +276,7 @@ def _convert_seq_to_ints(num_seq):
             seq.extend(_expand_num_range_or_delta(item))
         else:
             seq.append(_convert_to_int(item))
-    return seq
+    return sorted(set(seq))
 
 
 def _split_linenumber_sequence(str_seq):
@@ -285,7 +285,7 @@ def _split_linenumber_sequence(str_seq):
 
 
 def _compile_regex(str_seq):
-    if str_seq[0] != '^':
+    if not str_seq.startswith('^'):
         raise argparse.ArgumentTypeError(
             "The expression must start with the caret '^' character")
     try:
