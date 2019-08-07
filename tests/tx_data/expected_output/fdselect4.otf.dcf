@@ -14,7 +14,7 @@ empty
 ### FDSelect (000006fa-0000071a)
 format =4
 nRanges=4
---- Range3[index]={first,fd}
+--- Range4[index]={first,fd}
 [0]={0,0}
 [1]={1,2}
 [2]={2,1}
