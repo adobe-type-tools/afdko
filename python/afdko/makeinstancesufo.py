@@ -6,8 +6,6 @@ It uses the mutatorMath library. The paths to the masters and
 instances fonts are specified in the .designspace file.
 """
 
-from __future__ import print_function, absolute_import, division
-
 import argparse
 import logging
 import os
@@ -18,7 +16,6 @@ from fontTools.designspaceLib import (
     DesignSpaceDocument,
     DesignSpaceDocumentError,
 )
-from fontTools.misc.py23 import open
 
 from defcon import Font
 from psautohint.__main__ import main as psautohint
@@ -30,7 +27,7 @@ from afdko.fdkutils import get_temp_file_path
 from afdko.ufotools import validateLayers
 
 
-__version__ = '2.3.1'
+__version__ = '2.3.3'
 
 logger = logging.getLogger(__name__)
 
@@ -209,9 +206,7 @@ def validateDesignspaceDoc(dsDoc, dsoptions, **kwArgs):
         for src in dsDoc.sources:
             if not os.path.exists(src.path):
                 raise DesignSpaceDocumentError(
-                    "Source file {} does not exist".format(
-                        src.path,
-                    ))
+                    f"Source file {src.path} does not exist")
     else:
         raise DesignSpaceDocumentError(
             "Designspace file contains no sources."
@@ -222,9 +217,7 @@ def validateDesignspaceDoc(dsDoc, dsoptions, **kwArgs):
             # bounds check on indexList
             maxinstidx = max(dsoptions.indexList)
             if maxinstidx >= len(dsDoc.instances):
-                raise IndexError("Instance index {} out-of-range".format(
-                    maxinstidx,
-                ))
+                raise IndexError(f"Instance index {maxinstidx} out-of-range")
     else:
         raise DesignSpaceDocumentError(
             "Designspace file contains no instances."
@@ -246,7 +239,7 @@ def collect_features_content(instances, inst_idx_lst):
         ufo_pth = os.path.abspath(os.path.realpath(ufo_pth))
         fea_pth = os.path.join(ufo_pth, FEATURES_FILENAME)
         if os.path.isfile(fea_pth):
-            with open(fea_pth, 'rb') as fp:
+            with open(fea_pth, 'r') as fp:
                 fea_cntnts = fp.read()
             fea_dict[fea_pth] = fea_cntnts
     return fea_dict
@@ -328,7 +321,7 @@ def run(options):
 
     # Restore the contents of the instances' 'features.fea' files
     for fea_pth, fea_cntnts in features_store.items():
-        with open(fea_pth, 'wb') as fp:
+        with open(fea_pth, 'w') as fp:
             fp.write(fea_cntnts)
 
 
@@ -336,7 +329,7 @@ def _validate_path(path_str):
     valid_path = os.path.abspath(os.path.realpath(path_str))
     if not os.path.exists(valid_path):
         raise argparse.ArgumentTypeError(
-            "'{}' is not a valid path.".format(path_str))
+            f"'{path_str}' is not a valid path.")
     return valid_path
 
 
@@ -348,10 +341,10 @@ def _split_comma_sequence(comma_str):
             index = int(item)
         except ValueError:
             raise argparse.ArgumentTypeError(
-                "Invalid integer value: '{}'".format(item))
+                f"Invalid integer value: '{item}'")
         if index < 0:
             raise argparse.ArgumentTypeError(
-                "Index values must be greater than zero: '{}'".format(index))
+                f"Index values must be greater than zero: '{index}'")
         int_set.add(index)
     return sorted(int_set)
 

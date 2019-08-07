@@ -1576,9 +1576,6 @@ static int t1parse(recodeCtx h, unsigned length, unsigned char *cstr,
                 addStems(h, 0, 0);
                 break;
 
-            case t1_compose:
-                parseFatal(g, "unsupported operator [compose]");
-
             case tx_vstem:
                 addStems(h, 1, 0);
                 break;
@@ -1684,10 +1681,6 @@ static int t1parse(recodeCtx h, unsigned length, unsigned char *cstr,
                 addMove(h, 0, 1);
                 break;
 
-            case t1_curveto:
-                parseFatal(g, "unsupported operator [curveto]");
-                break;
-
             case tx_rmoveto:
                 CHKUFLOW(2);
                 if (!h->pend.flex) {
@@ -1752,7 +1745,9 @@ static int t1parse(recodeCtx h, unsigned length, unsigned char *cstr,
                 break;
 
             case tx_reserved0:
+            case tx_reserved2:
             case t1_reserved16:
+            case t1_reserved17:
             case t1_reserved18:
             case t1_reserved19:
             case t1_reserved20:
@@ -2037,10 +2032,6 @@ static int t1parse(recodeCtx h, unsigned length, unsigned char *cstr,
                         addOp(h, tx_drop);
                         break;
 
-                    case t1_setwv:
-                        parseFatal(g, "unsupported operator [setwv]");
-                        break;
-
                     case tx_put:
                         addOp(h, tx_put);
                         break;
@@ -2105,8 +2096,6 @@ static int t1parse(recodeCtx h, unsigned length, unsigned char *cstr,
                         }
                         break;
 
-                    case tx_reservedESC31:
-                    case tx_reservedESC32:
                     default:
                         badChar(h);
                 }
@@ -2878,6 +2867,9 @@ static void recodePath(recodeCtx h) {
 
     /* Create optimized Type 2 charstring from operators and segments */
     iSeg = 0;
+    if (h->path.ops.cnt == 0) {
+        badChar(h);
+    }
     nextop = h->path.ops.array;
     for (;;) {
         int newop;

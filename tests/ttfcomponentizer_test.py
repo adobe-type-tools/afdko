@@ -1,9 +1,7 @@
-from __future__ import print_function, division, absolute_import
-
 import os
 import pytest
 from shutil import copy2, copytree
-import subprocess32 as subprocess
+import subprocess
 import tempfile
 
 from fontTools.ttLib import TTFont
@@ -104,8 +102,8 @@ def test_run_with_output_path():
 
 def test_run_cli_with_output_path():
     actual_path = get_temp_file_path()
-    runner(CMD + ['-o', 'o', '_{}'.format(actual_path),
-                  '_{}'.format(get_input_path(TEST_TTF_FILENAME))])
+    runner(CMD + ['-o', 'o', f'_{actual_path}',
+                  f'_{get_input_path(TEST_TTF_FILENAME)}'])
     actual_ttx = generate_ttx_dump(actual_path, ['maxp', 'glyf'])
     expected_ttx = get_expected_path('ttfcomponentizer.ttx')
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])

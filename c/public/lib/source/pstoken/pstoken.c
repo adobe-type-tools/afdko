@@ -17,6 +17,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#define MAX_RECURSION_DEPTH 1000
+
 #define ARRAY_LEN(a) (sizeof(a) / sizeof(a[0]))
 
 /* Selected PostScript lexical classes */
@@ -49,12 +51,12 @@ static char class[256] = {
     /* Rest are zero */
 };
 
-#define IS_WHITE(c) (class[(int)(c)] & W_)
-#define IS_NEWLINE(c) (class[(int)(c)] & N_)
-#define IS_DELIMETER(c) (class[(int)(c)] & (S_ | W_))
-#define IS_NUMBER(c) (class[(int)(c)] & (D_ | G_ | P_))
-#define IS_SIGN(c) (class[(int)(c)] & G_)
-#define IS_EXPONENT(c) (class[(int)(c)] & E_)
+#define IS_WHITE(c) (class[(uint8_t)(c)] & W_)
+#define IS_NEWLINE(c) (class[(uint8_t)(c)] & N_)
+#define IS_DELIMETER(c) (class[(uint8_t)(c)] & (S_ | W_))
+#define IS_NUMBER(c) (class[(uint8_t)(c)] & (D_ | G_ | P_))
+#define IS_SIGN(c) (class[(uint8_t)(c)] & G_)
+#define IS_EXPONENT(c) (class[(uint8_t)(c)] & E_)
 
 /* Index by ascii char and return digit value (to radix 36) or error (99) */
 static unsigned char digit[256] = {
@@ -76,9 +78,9 @@ static unsigned char digit[256] = {
     99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, /* f0-ff */
 };
 
-#define IS_DIGIT(c)    (digit[(int)(c)] < 10)
-#define IS_HEX(c)      (digit[(int)(c)] < 16)
-#define IS_RADIX(c, b) (digit[(int)(c)] < (b))
+#define IS_DIGIT(c)    (digit[(uint8_t)(c)] < 10)
+#define IS_HEX(c)      (digit[(uint8_t)(c)] < 16)
+#define IS_RADIX(c, b) (digit[(uint8_t)(c)] < (b))
 
 /* Parse context */
 struct pstCtx_ {
@@ -191,7 +193,7 @@ static int ascii_decrypt(pstCtx h, size_t length, char *buf) {
     /* Decrypt and copy buffer */
     dst = h->plain.array;
     do {
-        int nib = digit[(int)(*src++)];
+        int nib = digit[(uint8_t)(*src++)];
         if (nib > 15)
             continue;
         else if (hi_nib == -1)
@@ -283,6 +285,12 @@ static int eexec_refill(pstCtx h) {
     /* Decrypt cipher buffer to plain buffer */
     if ((h->cipher.binary ? binary_decrypt(h, h->cipher.length, h->cipher.buf) : ascii_decrypt(h, h->cipher.length, h->cipher.buf)))
         return -1;
+
+    if (h->plain.cnt == 0) {
+        h->errcode = pstErrSrcStream;
+        return -1;
+    }
+
     h->mark = h->plain.array;
 
     /* Set source to plain text buffer */
@@ -292,7 +300,9 @@ static int eexec_refill(pstCtx h) {
 }
 
 /* Read one source character. Return -1 on error else next char. */
-#define read1(h) ((h->src.left-- == 0) ? h->src.refill(h) : (*h->src.next++) & 0xff)
+static int read1(pstCtx h) {
+    return ((h->src.left-- == 0) ? h->src.refill(h) : (*h->src.next++) & 0xff);
+}
 
 /* Unread lookahead character. */
 static void unread1(pstCtx h) {
@@ -392,12 +402,16 @@ int pstSetPlain(pstCtx h) {
     else {
         /* Find corresponding position in cipher buffer */
         /* 64-bit warning fixed by cast here */
-        long cnt = (long)((h->src.next - h->plain.array) * 2);
+        long digit_count = (long)((h->src.next - h->plain.array) * 2);
+        size_t remaining_bytes = h->cipher.length;
         char *src = h->cipher.buf;
-        while (cnt > 0)
-            if (digit[(int)(*src++)] <= 15)
-                cnt--;
+        while ((digit_count > 0) && (remaining_bytes > 0)) {
+            remaining_bytes--;
+            if (digit[(uint8_t)(*src++)] <= 15)
+                digit_count--;
+        }
         h->src.next = src;
+        h->mark = h->src.next;
         h->src.left = h->cipher.length - (src - h->cipher.buf);
     }
 
@@ -533,11 +547,16 @@ static int skipArray(pstCtx h) {
     return 0;
 }
 
-static int skipAngle(pstCtx h);
+static int skipAngle(pstCtx h, int call_depth);
 
 /* Skip dictionary. Return 1 on error else 0. */
-static int skipDictionary(pstCtx h) {
-    for (;;)
+static int skipDictionary(pstCtx h, int call_depth) {
+    if (call_depth > MAX_RECURSION_DEPTH) {
+        h->errcode = pstErrMaxRecursion;
+        return -1;
+    }
+
+    for (;;) {
         switch (read1(h)) {
             case '>':
                 switch (read1(h)) {
@@ -557,19 +576,29 @@ static int skipDictionary(pstCtx h) {
                     return 1;
                 break;
             case '<':
-                if (skipAngle(h))
+                if (skipAngle(h, call_depth + 1))
                     return 1;
                 break;
+            case -1:
+                return 1;
         }
+    }
 }
 
 /* Skip angle-delimited object. Already seen '<'. Return -1 on error else 
    token type. */
-static int skipAngle(pstCtx h) {
-    int c = read1(h);
+static int skipAngle(pstCtx h, int call_depth) {
+    int c;
+
+    if (call_depth > MAX_RECURSION_DEPTH) {
+        h->errcode = pstErrMaxRecursion;
+        return -1;
+    }
+
+    c = read1(h);
     switch (c) {
         case '<':
-            return skipDictionary(h) ? -1 : pstDictionary;
+            return skipDictionary(h, call_depth + 1) ? -1 : pstDictionary;
         case '~':
             /* Skip ASCII 85 string */
             for (;;) {
@@ -585,6 +614,8 @@ static int skipAngle(pstCtx h) {
                 } else if ((c < '!' || c > 'u') && !IS_WHITE(c) && c != 'z') {
                     h->errcode = pstErrBadASCII85;
                     return -1;
+                } else if (c == -1) {
+                    return -1;
                 }
             }
         default: {
@@ -595,6 +626,8 @@ static int skipAngle(pstCtx h) {
                     return -1;
                 }
                 c = read1(h);
+                if (c == -1)
+                    return -1;
             } while (c != '>');
             return pstHexString;
         }
@@ -850,7 +883,7 @@ int pstGetToken(pstCtx h, pstToken *token) {
             type = pstArray;
             break;
         case '<':
-            type = skipAngle(h);
+            type = skipAngle(h, 0);
             if (type == -1)
                 return h->errcode;
             break;
@@ -936,7 +969,7 @@ int32_t pstConvInteger(pstCtx h, pstToken *token) {
             base = value;
             value = 0;
         } else {
-            value = value * base + digit[(int)(*p)];
+            value = value * base + digit[(uint8_t)(*p)];
         }
     } while (++p < end);
 

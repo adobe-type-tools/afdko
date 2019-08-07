@@ -4,8 +4,6 @@
 Builds a CFF2 variable font from a designspace file and its UFO masters.
 """
 
-from __future__ import print_function, division, absolute_import
-
 import argparse
 from ast import literal_eval
 from copy import deepcopy
@@ -22,7 +20,7 @@ from fontTools.misc.psCharStrings import T2OutlineExtractor, T2CharString
 from fontTools.ttLib import TTFont
 from fontTools.varLib.cff import CFF2CharStringMergePen
 
-__version__ = '2.0.0'
+__version__ = '2.0.1'
 
 STAT_FILENAME = 'override.STAT.ttx'
 
@@ -68,8 +66,8 @@ def getSubset(subset_Path):
                         "Error parsing subset file. "
                         "Seeing a glyph name record before "
                         "seeing a location record.")
-                    logger.error("Line number: {}.".format(li))
-                    logger.error("Line text: {}.".format(line))
+                    logger.error(f'Line number: {li}.')
+                    logger.error(f'Line text: {line}.')
                 for key in cur_key_list:
                     locationDict[key].append(m.group(1))
     return locationDict
@@ -77,7 +75,7 @@ def getSubset(subset_Path):
 
 def subset_masters(designspace, subsetDict):
     from fontTools import subset
-    subset_options = subset.Options(notdef_outline=True)
+    subset_options = subset.Options(notdef_outline=True, layout_features='*')
     for ds_source in designspace.sources:
         key = tuple(ds_source.location.items())
         included = set(subsetDict[key])
@@ -85,9 +83,8 @@ def subset_masters(designspace, subsetDict):
         subsetter = subset.Subsetter(options=subset_options)
         subsetter.populate(glyphs=included)
         subsetter.subset(ttf_font)
-        subset_path = '{}.subset.otf'.format(
-            os.path.splitext(ds_source.path)[0])
-        logger.progress("Saving subset font %s", subset_path)
+        subset_path = f'{os.path.splitext(ds_source.path)[0]}.subset.otf'
+        logger.progress(f'Saving subset font {subset_path}')
         ttf_font.save(subset_path)
         ds_source.font = TTFont(subset_path)
 
@@ -139,31 +136,25 @@ class CompatibilityPen(CFF2CharStringMergePen):
             cmd[1].append(pt_coords)
         self.pt_index += 1
 
-    def make_flat_curve(self, prev_coords, cur_coords):
+    def make_flat_curve(self, cur_coords):
         # Convert line coords to curve coords.
-        dx = self.roundNumber((cur_coords[0] - prev_coords[0]) / 3.0)
-        dy = self.roundNumber((cur_coords[1] - prev_coords[1]) / 3.0)
-        new_coords = [prev_coords[0] + dx,
-                      prev_coords[1] + dy,
-                      prev_coords[0] + 2 * dx,
-                      prev_coords[1] + 2 * dy
-                      ] + cur_coords
+        dx = self.roundNumber(cur_coords[0] / 3.0)
+        dy = self.roundNumber(cur_coords[1] / 3.0)
+        new_coords = [dx, dy, dx, dy,
+                      cur_coords[0] - 2 * dx,
+                      cur_coords[1] - 2 * dy]
         return new_coords
 
     def make_curve_coords(self, coords, is_default):
         # Convert line coords to curve coords.
-        prev_cmd = self._commands[self.pt_index - 1]
         if is_default:
             new_coords = []
-            for i, cur_coords in enumerate(coords):
-                prev_coords = prev_cmd[1][i]
-                master_coords = self.make_flat_curve(prev_coords[:2],
-                                                     cur_coords)
+            for cur_coords in coords:
+                master_coords = self.make_flat_curve(cur_coords)
                 new_coords.append(master_coords)
         else:
             cur_coords = coords
-            prev_coords = prev_cmd[1][-1]
-            new_coords = self.make_flat_curve(prev_coords[:2], cur_coords)
+            new_coords = self.make_flat_curve(cur_coords)
         return new_coords
 
     def check_and_fix_flat_curve(self, cmd, point_type, pt_coords):
@@ -261,17 +252,18 @@ class CompatibilityPen(CFF2CharStringMergePen):
             return True
         return False
 
-    def getCharStrings(self, num_masters, private=None, globalSubrs=None):
-        """ A command look s like:
+    def getCharStrings(self, num_masters, private=None, globalSubrs=None,
+                       default_idx=0):
+        """ A command looks like:
         [op_name, [
             [source 0 arglist for op],
             [source 1 arglist for op],
             ...
             [source n arglist for op],
-        I am not optimising this there, as that will be done when
-        the CFF2 Charstring is creating in fontTools.varLib.build().
+        I am not optimizing this there, as that will be done when
+        the CFF2 Charstring is created in fontTools.varLib.build().
 
-        If I did, I woudl have to rearragne the arguments to:
+        If I did, I would have to rearrange the arguments to:
         [
         [arg 0 for source 0 ... arg 0 for source n]
         [arg 1 for source 0 ... arg 1 for source n]
@@ -297,16 +289,20 @@ class CompatibilityPen(CFF2CharStringMergePen):
             charString = T2CharString(
                 program=program, private=private, globalSubrs=globalSubrs)
             t2List.append(charString)
+        # if default_idx is not 0, we need to move it to the right index.
+        if default_idx:
+            default_font_cs = t2List.pop(0)
+            t2List.insert(default_idx, default_font_cs)
         return t2List
 
 
-def _get_cs(glyphOrder, charstrings, glyphName):
+def _get_cs(charstrings, glyphName):
     if glyphName not in charstrings:
         return None
     return charstrings[glyphName]
 
 
-def do_compatibility(vf, master_fonts):
+def do_compatibility(vf, master_fonts, default_idx):
     default_font = vf
     default_charStrings = default_font['CFF '].cff.topDictIndex[0].CharStrings
     glyphOrder = default_font.getGlyphOrder()
@@ -314,7 +310,7 @@ def do_compatibility(vf, master_fonts):
         font['CFF '].cff.topDictIndex[0].CharStrings for font in master_fonts]
 
     for gname in glyphOrder:
-        all_cs = [_get_cs(glyphOrder, cs, gname) for cs in charStrings]
+        all_cs = [_get_cs(cs, gname) for cs in charStrings]
         if len([gs for gs in all_cs if gs is not None]) < 2:
             continue
         # remove the None's from the list.
@@ -327,14 +323,16 @@ def do_compatibility(vf, master_fonts):
 
         # Add the coordinates from all the other regions to the
         # blend lists in the CFF2 charstring.
-        region_cs = cs_list[1:]
+        region_cs = cs_list[:]
+        del region_cs[default_idx]
         for region_idx, region_charstring in enumerate(region_cs, start=1):
             compat_pen.restart(region_idx)
             region_charstring.draw(compat_pen)
         if compat_pen.fixed:
             fixed_cs_list = compat_pen.getCharStrings(
                 num_masters, private=default_charstring.private,
-                globalSubrs=default_charstring.globalSubrs)
+                globalSubrs=default_charstring.globalSubrs,
+                default_idx=default_idx)
             cs_list = list(cs_list)
             for i, cs in enumerate(cs_list):
                 mi = all_cs.index(cs)
@@ -361,7 +359,7 @@ def _validate_path(path_str):
     valid_path = os.path.abspath(os.path.realpath(path_str))
     if not os.path.exists(valid_path):
         raise argparse.ArgumentTypeError(
-            "'{}' is not a valid path.".format(path_str))
+            f"'{path_str}' is not a valid path.")
     return valid_path
 
 
@@ -432,8 +430,7 @@ def get_options(args):
     options = parser.parse_args(args)
 
     if not options.var_font_path:
-        var_font_path = '{}.otf'.format(os.path.splitext(
-            options.design_space_path)[0])
+        var_font_path = f'{os.path.splitext(options.design_space_path)[0]}.otf'
         options.var_font_path = var_font_path
 
     if not options.verbose:
@@ -474,7 +471,7 @@ def main(args=None):
         # We copy vf from default_font, because we use VF to hold
         # merged arguments from each source font charstring - this alters
         # the font, which we don't want to do to the default font.
-        do_compatibility(vf, font_list)
+        do_compatibility(vf, font_list, ds_data.base_idx)
 
     logger.progress("Building VF font...")
     # Note that we now pass in the design space object, rather than a path to

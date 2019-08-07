@@ -1,7 +1,7 @@
 # Copyright 2014 Adobe. All rights reserved.
 
 """
-convertfonttocid.py. v 1.13.0 Aug 28 2018
+convertfonttocid.py. v 1.13.1 Jul 12 2019
 
 Convert a Type 1 font to CID, given multiple hint dict defs in the
 "fontinfo" file. See autohint help, with the "-hfd" option, or the makeotf
@@ -53,15 +53,13 @@ PROCEDURE:
 
 """
 
-from __future__ import print_function, absolute_import
-
 import os
 import re
 import sys
 
-from fontTools.misc.py23 import open, tounicode, tobytes
-
 from afdko import fdkutils
+
+__version__ = "1.13.1"
 
 # Tokens seen in font info file that are not part
 # of a FDDict or GlyphSet definition.
@@ -960,7 +958,7 @@ def makeCIDFontInfo(fontPath, cidfontinfoPath):
                     continue
                 if value[0] == "\"":
                     value = "(" + value[1:-1] + ")"
-                string = tounicode("%s\t%s\n" % (key, value))
+                string = "%s\t%s\n" % (key, value)
                 fp.write(string)
     except (IOError, OSError):
         raise FontInfoParseError(
@@ -999,8 +997,8 @@ def makeGAFile(gaPath, fontPath, glyphList, fontDictList, fdGlyphDict,
     lineList.append("")
     gaText = "mergefonts %s%s%s" % (dictName, langGroup, '\n'.join(lineList))
 
-    with open(gaPath, "wb") as gf:
-        gf.write(tobytes(gaText))
+    with open(gaPath, "w") as gf:
+        gf.write(gaText)
 
 
 def merge_fonts(inputFontPath, outputPath, fontList, glyphList, fontDictList,
@@ -1106,7 +1104,7 @@ def main():
 
         convertFontToCID(inputPath, outputPath, fontinfoPath)
 
-        save_path = '{}{}'.format(os.path.splitext(inputPath)[0], '-CID.ps')
+        save_path = f'{os.path.splitext(inputPath)[0]}-CID.ps'
 
         if os.path.isfile(outputPath):
             os.rename(outputPath, save_path)

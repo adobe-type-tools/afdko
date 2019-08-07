@@ -637,8 +637,8 @@ static void drawMetrics(abfDrawCtx h, abfGlyphInfo *info) {
             char *p = buf;
             size_t remainingBufferLength = bufLen;
             char *sep = "";
-            size_t printStringLength;
             do {
+                size_t printStringLength;
                 if (info->flags & ABF_GLYPH_UNICODE) {
                     if (enc->code < 0x10000)
                         SPRINTF_S(p, remainingBufferLength, "%sU+%04lX", sep, enc->code);
@@ -662,14 +662,13 @@ static void drawMetrics(abfDrawCtx h, abfGlyphInfo *info) {
         SPRINTF_S(buf, bufLen, "\\\\%hu", info->cid);
     else
         SPRINTF_S(buf, bufLen, "%s", info->gname.ptr);
-    y = drawString(h, y, "glyph", buf);
+    drawString(h, y, "glyph", buf);
 }
 
 /* Draw glyph end. */
 static void glyphEnd(abfGlyphCallbacks *cb) {
     abfDrawCtx h = (abfDrawCtx)cb->direct_ctx;
     char gname[50];
-    const size_t gnameLen = sizeof(gname);
     abfGlyphInfo *info = cb->info;
 
     if (!h->showglyph)
@@ -685,15 +684,14 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
 
     /* Set glyph name */
     if (info->flags & ABF_GLYPH_CID)
-        SPRINTF_S(gname, gnameLen, "\\\\%hu", info->cid);
+        SPRINTF_S(gname, sizeof(gname), "\\\\%hu", info->cid);
     else
-        SPRINTF_S(gname, gnameLen, "%s", info->gname.ptr);
+        SPRINTF_S(gname, sizeof(gname), "%s", info->gname.ptr);
 
     if (h->level == 0) {
         char tag[20];
         const size_t tagLen = sizeof(tag);
         char hAdv[20];
-        const size_t hAdvLen = sizeof(hAdv);
 
         if (info->flags & ABF_GLYPH_CID)
             SPRINTF_S(tag, tagLen, "%hu,%u", info->tag, info->iFD);
@@ -727,7 +725,7 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
                 }
             }
         }
-        SPRINTF_S(hAdv, hAdvLen, "%g", h->glyph.hAdv);
+        SPRINTF_S(hAdv, sizeof(hAdv), "%g", h->glyph.hAdv);
         drawTile(h, (float)h->tile.h, (float)h->tile.v, tag, hAdv, gname);
 
         if (!(h->flags & ABF_SHOW_BY_ENC)) {

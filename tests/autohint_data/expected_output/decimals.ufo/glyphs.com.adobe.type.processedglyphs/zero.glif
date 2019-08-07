@@ -1,35 +1,35 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="2" name="zero">
-  <advance width="497" />
-  <unicode hex="0030" />
+<glyph name="zero" format="2">
+  <advance width="497"/>
+  <unicode hex="0030"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="curve" x="199" y="-10" />
-      <point x="301" y="-10" />
-      <point x="362" y="86" />
-      <point type="curve" x="362" y="257" />
-      <point x="362" y="428" />
-      <point x="301" y="520" />
-      <point type="curve" x="199" y="520" />
-      <point x="97" y="520" />
-      <point x="35" y="428" />
-      <point type="curve" x="35" y="257" />
-      <point x="35" y="86" />
-      <point x="97" y="-10" />
+      <point type="curve" x="199" y="-10" name="hintSet0000"/>
+      <point x="301" y="-10"/>
+      <point x="362" y="86"/>
+      <point type="curve" x="362" y="257"/>
+      <point x="362" y="428"/>
+      <point x="301" y="520"/>
+      <point type="curve" x="199" y="520"/>
+      <point x="97" y="520"/>
+      <point x="35" y="428"/>
+      <point type="curve" x="35" y="257"/>
+      <point x="35" y="86"/>
+      <point x="97" y="-10"/>
     </contour>
     <contour>
-      <point type="curve" x="199" y="43" />
-      <point x="139" y="43" />
-      <point x="99" y="107" />
-      <point type="curve" x="99" y="257" />
-      <point x="99" y="406" />
-      <point x="139" y="467" />
-      <point type="curve" x="199" y="467" />
-      <point x="258" y="467" />
-      <point x="298" y="406" />
-      <point type="curve" x="298" y="257" />
-      <point x="298" y="107" />
-      <point x="258" y="43" />
+      <point type="curve" x="199" y="43"/>
+      <point x="139" y="43"/>
+      <point x="99" y="107"/>
+      <point type="curve" x="99" y="257"/>
+      <point x="99" y="406"/>
+      <point x="139" y="467"/>
+      <point type="curve" x="199" y="467"/>
+      <point x="258" y="467"/>
+      <point x="298" y="406"/>
+      <point type="curve" x="298" y="257"/>
+      <point x="298" y="107"/>
+      <point x="258" y="43"/>
     </contour>
   </outline>
   <lib>

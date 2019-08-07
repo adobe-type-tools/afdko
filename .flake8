@@ -1,0 +1,11 @@
+[flake8]
+
+# explicitly select all Errors, Failures, and Warnings
+# (override default ignore list)
+select = E,F,W
+
+# ignore W504 line break before binary operator
+ignore = W504
+
+# explicitly set line length limitation
+max-line-length = 79

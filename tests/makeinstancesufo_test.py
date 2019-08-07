@@ -1,9 +1,7 @@
-from __future__ import print_function, division, absolute_import
-
 import os
 import pytest
 from shutil import rmtree, copytree
-import subprocess32 as subprocess
+import subprocess
 
 from runner import main as runner
 from differ import main as differ
@@ -52,7 +50,7 @@ def teardown_module():
 ])
 def test_options(args, ufo_filename):
     runner(['-t', TOOL, '-o', 'd',
-            '_{}'.format(get_input_path('font.designspace')), 'i'] + args)
+            f'_{get_input_path("font.designspace")}', 'i'] + args)
     expected_path = _get_output_path(ufo_filename, 'expected_output')
     actual_path = _get_output_path(ufo_filename, 'temp_output')
     assert differ([expected_path, actual_path])
@@ -62,7 +60,7 @@ def test_filename_without_dir():
     instance_path = get_input_path('same_dir.ufo')
     assert not os.path.exists(instance_path)
     runner(['-t', TOOL, '-o', 'd',
-            '_{}'.format(get_input_path('font.designspace')), 'i', '_9'])
+            f'_{get_input_path("font.designspace")}', 'i', '_9'])
     assert os.path.exists(instance_path)
 
 
@@ -73,7 +71,7 @@ def test_filename_without_dir():
 ])
 def test_ufo3_masters(args, ufo_filename):
     runner(['-t', TOOL, '-o', 'd',
-            '_{}'.format(get_input_path('ufo3.designspace')), 'i'] + args)
+            f'_{get_input_path("ufo3.designspace")}', 'i'] + args)
     expected_path = _get_output_path(ufo_filename, 'expected_output')
     actual_path = _get_output_path(ufo_filename, 'temp_output')
     assert differ([expected_path, actual_path])
@@ -91,14 +89,14 @@ def test_features_copy(filename):
     # checking that any existing features.fea files are preserved.
     paths = []
     for i in (1, 2):  # two instances
-        ufo_filename = '{}{}.ufo'.format(filename, i)
+        ufo_filename = f'{filename}{i}.ufo'
         from_path = _get_output_path(ufo_filename, 'expected_output')
         to_path = os.path.join(TEMP_DIR, ufo_filename)
         copytree(from_path, to_path)
         paths.append((to_path, from_path))
     # run makeinstancesufo
     runner(['-t', TOOL, '-o', 'a', 'c', 'n', 'd',
-            '_{}'.format(get_input_path('{}.designspace'.format(filename)))])
+            f'_{get_input_path(f"{filename}.designspace")}'])
     # assert the expected results
     for expected_path, actual_path in paths:
         assert differ([expected_path, actual_path])
@@ -107,12 +105,12 @@ def test_features_copy(filename):
 def test_bad_source():
     with pytest.raises(subprocess.CalledProcessError) as err:
         runner(['-t', TOOL, '-o', 'd',
-                '_{}'.format(get_input_path('badsource.designspace'))])
+                f'_{get_input_path("badsource.designspace")}'])
         assert err.value.returncode == 1
 
 
 def test_no_instances():
     with pytest.raises(subprocess.CalledProcessError) as err:
         runner(['-t', TOOL, '-o', 'd',
-                '_{}'.format(get_input_path('noinstances.designspace'))])
+                f'_{get_input_path("noinstances.designspace")}'])
         assert err.value.returncode == 1

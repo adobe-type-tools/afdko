@@ -397,8 +397,8 @@ static Table *insertTable(Tag tag) {
 static void parseTagList(char *arg, int option, int flag) {
     char *p = arg;
     for (p = strtok(arg, ","); p != NULL; p = strtok(NULL, ",")) {
-        int i;
-        int taglen;
+        size_t i;
+        size_t taglen;
         Tag tag;
         char *filename;
         Table *tbl;
@@ -479,7 +479,7 @@ static int parseArgs(int argc, char *argv[]) {
                     case 'X': /* script file to execute */
                         foundXswitch = 1;
                         if ((argsleft > 0) && argv[i + 1][0] != '-') {
-                            strcpy(scriptfilename, argv[++i]);
+                            STRLCPY(scriptfilename, argv[++i], sizeof(scriptfilename));
                             if (doingScripting) /* disallow nesting */
                             {
                                 foundXswitch = 0;
@@ -680,7 +680,7 @@ static void checkChecksums(void) {
     Card16 searchRange;
     Card16 entrySelector;
     Card16 rangeShift;
-    Card32 checkSumAdjustment;
+    Card32 checkSumAdjustment = 0;
     Card32 totalsum = 0;
 
     /* Validate sfnt search fields */
@@ -750,7 +750,6 @@ static char *tail(char *path) {
     p = strrchr(path, '/');
     if (p == NULL)
         p = strrchr(path, '\\');
-    p = strrchr(path, '\\');
     return (p == NULL) ? path : p + 1;
 }
 
@@ -906,7 +905,7 @@ static boolean sfntCopy(void) {
     FILE *f;
     boolean changed = (options & OPT_FIX) ? 1: 0; /* write file only if we change it */
 
-    strcpy(outputfilename, dstfile.name);
+    STRLCPY(outputfilename, dstfile.name, sizeof(outputfilename));
     f = freopen(outputfilename, "r+b", dstfile.fp);
     if (f == NULL) {
         fatal(SFED_MSG_sysFERRORSTR, strerror(errno), dstfile.name);
@@ -921,7 +920,7 @@ static boolean sfntCopy(void) {
     /* Assign table order */
     tags = (sfnt.version == TAG('O', 'T', 'T', 'O')) ? otfOrder : ttfOrder;
     for (i = 0; i < sfnt.numTables; i++) {
-        Tag *tagp = tags;
+        Tag *tagp;
         Table *tbl = &sfnt.directory[i];
 
         for (tagp = tags; *tagp != 0; tagp++)
@@ -1053,7 +1052,7 @@ int main(int argc, char *argv[]) {
     for (i = 0; i < argc; i++) {
         if (strcmp(argv[i], "-X") == 0) {
             if ((argv[i + 1] != NULL) && (argv[i + 1][0] != '\0')) {
-                strcpy(scriptfilename, argv[i + 1]);
+                STRLCPY(scriptfilename, argv[i + 1], sizeof(scriptfilename));
                 foundXswitch = 1;
             }
             break;
@@ -1092,7 +1091,7 @@ int main(int argc, char *argv[]) {
             showUsage();
 
         if (!doingScripting && foundXswitch) {
-            if (scriptfilename && scriptfilename[0] != '\0') {
+            if (scriptfilename[0] != '\0') {
                 doingScripting = 1;
                 makeArgs(scriptfilename);
                 goto execscript;
@@ -1119,7 +1118,7 @@ int main(int argc, char *argv[]) {
                 char *scurr = srcfile.name;
                 char *dcurr;
 
-                sourcepath = (char *)malloc(strlen(srcfile.name));
+                sourcepath = (char *)malloc(strlen(srcfile.name) + 1);
                 dcurr = sourcepath;
                 while (scurr != end) {
                     *dcurr++ = *scurr++;
@@ -1175,7 +1174,7 @@ int main(int argc, char *argv[]) {
             char *scurr = scriptfilename;
             char *dcurr;
 
-            sourcepath = (char *)malloc(strlen(scriptfilename));
+            sourcepath = (char *)malloc(strlen(scriptfilename) + 1);
             dcurr = sourcepath;
             while (scurr != end) {
                 *dcurr++ = *scurr++;

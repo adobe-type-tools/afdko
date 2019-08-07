@@ -1,6 +1,55 @@
 Changelog
 =========
 
+3.0.0 (released 2019-08-07)
+---------------------------
+
+- **This version supports Python 3.6+ ONLY**
+- NOTE: as a result of switching to new components for writing XML,
+  some formatting of UFO-related XML output is slightly different
+  from previous versions of AFDKO (ordering of attributes,
+  self-closing element tags, indents).
+- [python] Drop support for Python 2.7
+  ([#741](https://github.com/adobe-type-tools/afdko/issues/741))
+- [tx] Only use PUA Unicodes for unencoded glyphs in svg output
+  ([#822](https://github.com/adobe-type-tools/afdko/issues/822))
+- [buildcff2vf] Use correct default master for compatibilization
+  ([#816](https://github.com/adobe-type-tools/afdko/issues/816))
+- [buildcff2vf] Keep all OT features when subsetting
+  ([#817](https://github.com/adobe-type-tools/afdko/issues/817))
+- [buildcff2vf] Fix bug in compatibilization
+  ([#825](https://github.com/adobe-type-tools/afdko/pull/825))
+- [various Python] Use fontTools.misc.plistlib
+  ([#711](https://github.com/adobe-type-tools/afdko/issues/711))
+- [various Python] Use fontTools.misc.etree
+  ([#712](https://github.com/adobe-type-tools/afdko/issues/712))
+- [various C/C++] Improve robustness in several tools
+  ([#833](https://github.com/adobe-type-tools/afdko/pull/833))
+- [makeotf] Use absolute paths for temp files
+  ([#828](https://github.com/adobe-type-tools/afdko/issues/828))
+- [tx] Write a vsindex before the first blend (if needed)
+  ([#845](https://github.com/adobe-type-tools/afdko/pull/845))
+- [tx] Decrement subroutine depth after subroutine call
+  ([#846](https://github.com/adobe-type-tools/afdko/issues/846))
+- [otf2ttf] Remove VORG table from TTF output
+  ([#863](https://github.com/adobe-type-tools/afdko/pull/863))
+- [makeotf] Prevent code execution
+  ([#780](https://github.com/adobe-type-tools/afdko/issues/780),
+  [#877](https://github.com/adobe-type-tools/afdko/pull/877))
+- [makeotfexe] Port tx subroutinizer
+  ([#331](https://github.com/adobe-type-tools/afdko/issues/331))
+- [tx] Add support for FDSelect format 4
+  ([#799](https://github.com/adobe-type-tools/afdko/issues/799))
+- [tx] Fix handling of IVS region indices
+  ([#835](https://github.com/adobe-type-tools/afdko/pull/835))
+- [makeotfexe, makeotf] Limit maximum value for FontRevision
+  ([#876](https://github.com/adobe-type-tools/afdko/issues/876),
+  [#877](https://github.com/adobe-type-tools/afdko/pull/877))
+- [pdflib] Consolidate PDF-related files under afdko/pdflib
+  ([#880](https://github.com/adobe-type-tools/afdko/pull/880))
+- [tx] Fix bug in generating SVG from font without FontName
+  ([#883](https://github.com/adobe-type-tools/afdko/issues/883))
+
 2.9.1 (released 2019-06-22)
 ---------------------------
 

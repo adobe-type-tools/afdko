@@ -2,12 +2,12 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef UFOEAD_H
-#define UFOEAD_H
+#ifndef UFOREAD_H
+#define UFOREAD_H
 
 #include "ctlshare.h"
 
-#define UFO_VERSION CTL_MAKE_VERSION(1, 1, 0)
+#define UFO_VERSION CTL_MAKE_VERSION(1, 1, 1)
 
 #include "absfont.h"
 
@@ -150,4 +150,4 @@ void ufoGetVersion(ctlVersionCallbacks *cb);
 }
 #endif
 
-#endif /* UFOEAD_H */
+#endif /* UFOREAD_H */

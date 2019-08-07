@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont sfntVersion="OTTO" ttLibVersion="3.43">
+
+  <CFF2>
+    <major value="2"/>
+    <minor value="0"/>
+    <CFFFont name="CFF2Font">
+      <FontMatrix value="0.001 0 0 0.001 0 0"/>
+      <FDArray>
+        <FontDict index="0">
+          <Private>
+            <BlueValues>
+                <blend value="-12 0 0"/>
+                <blend value="0 0 0"/>
+                <blend value="486 -8 14"/>
+                <blend value="498 0 0"/>
+                <blend value="574 4 -8"/>
+                <blend value="586 0 0"/>
+                <blend value="638 6 -10"/>
+                <blend value="650 0 0"/>
+                <blend value="656 2 -2"/>
+                <blend value="668 0 0"/>
+                <blend value="712 6 -10"/>
+                <blend value="724 0 0"/>
+            </BlueValues>
+            <OtherBlues>
+                <blend value="-217 -17 29"/>
+                <blend value="-205 0 0"/>
+            </OtherBlues>
+            <BlueScale value="0.0625"/>
+            <BlueShift value="7"/>
+            <BlueFuzz value="0"/>
+            <StdHW>
+                <blend value="67 -39 67"/>
+            </StdHW>
+            <StdVW>
+                <blend value="85 -51 87"/>
+            </StdVW>
+          </Private>
+        </FontDict>
+      </FDArray>
+      <CharStrings>
+        <CharString name=".notdef">
+          62 22 -38 1 blend
+          hmoveto
+          476 -44 76 1 blend
+          660 -476 44 -76 1 blend
+          -660 hlineto
+          109 59 -61 103 -27 45 2 blend
+          rmoveto
+          73 131 54 102 29 -47 45 -75 10 -18 4 -6 4 blend
+          4 0 52 -102 73 -131 10 -16 -4 6 27 -47 -45 75 4 blend
+          rlineto
+          -256 -76 128 1 blend
+          hlineto
+          -44 52 34 -56 -10 16 2 blend
+          rmoveto
+          461 75 -125 1 blend
+          vlineto
+          127 -232 -127 -229 27 -45 -38 64 -27 45 -37 61 4 blend
+          rlineto
+          171 277 5 -9 15 -25 2 blend
+          rmoveto
+          -50 93 -66 119 234 -6 10 -1 3 -28 48 49 -83 68 -114 5 blend
+          0 -65 -119 -49 -93 -29 47 -49 83 -5 9 1 -3 4 blend
+          rlineto
+          -4 hlineto
+          48 -48 -22 36 22 -36 2 blend
+          rmoveto
+          126 232 26 -44 38 -64 2 blend
+          0 -461 -126 229 -75 125 -26 44 37 -61 3 blend
+          rlineto
+        </CharString>
+        <CharString name="A">
+          31 19 -31 1 blend
+          hmoveto
+          86 -54 90 1 blend
+          hlineto
+          115 366 23 73 21 72 21 76 25 -42 30 -50 2 -9 3 -11 4 -4 4 6 5 -7 0 -10 8 blend
+          rlinecurve
+          4 hlineto
+          20 -76 22 -72 23 -73 4 -6 -6 10 2 -3 4 -6 5 -9 -7 11 6 blend
+          rrcurveto
+          113 -366 90 25 -40 -30 50 -56 92 3 blend
+          0 -221 656 -96 -15 25 4 -6 68 -112 3 blend
+          0 -221 -656 -15 25 -4 6 2 blend
+          rlineto
+          117 199 -15 24 37 -61 2 blend
+          rmoveto
+          301 68 -301 -68 -8 15 -40 65 8 -15 40 -65 4 blend
+          hlineto
+        </CharString>
+      </CharStrings>
+      <VarStore Format="1">
+        <Format value="1"/>
+        <VarRegionList>
+          <!-- RegionAxisCount=1 -->
+          <!-- RegionCount=2 -->
+          <Region index="0">
+            <VarRegionAxis index="0">
+              <StartCoord value="-1.0"/>
+              <PeakCoord value="-1.0"/>
+              <EndCoord value="0.0"/>
+            </VarRegionAxis>
+          </Region>
+          <Region index="1">
+            <VarRegionAxis index="0">
+              <StartCoord value="0.0"/>
+              <PeakCoord value="1.0"/>
+              <EndCoord value="1.0"/>
+            </VarRegionAxis>
+          </Region>
+        </VarRegionList>
+        <!-- VarDataCount=1 -->
+        <VarData index="0">
+          <!-- ItemCount=0 -->
+          <NumShorts value="0"/>
+          <!-- VarRegionCount=2 -->
+          <VarRegionIndex index="0" value="0"/>
+          <VarRegionIndex index="1" value="1"/>
+        </VarData>
+      </VarStore>
+    </CFFFont>
+
+    <GlobalSubrs>
+      <!-- The 'index' attribute is only for humans; it is ignored when parsed. -->
+    </GlobalSubrs>
+  </CFF2>
+
+</ttFont>

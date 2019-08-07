@@ -238,6 +238,8 @@ static res_Map *res_MapRead(long origin) {
         new->res[i].offset += SIZEOF(Data, length);
     }
 
+    memFree(refList);
+
     return new;
 }
 
@@ -282,6 +284,7 @@ void resRead(long origin) {
                 sfntFree((i == (map->cnt - 1)));
             }
         }
+        res_MapFree(map);
         return;
     }
 

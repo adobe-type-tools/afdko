@@ -1,5 +1,3 @@
-from __future__ import print_function, division, absolute_import
-
 import pytest
 
 from runner import main as runner
@@ -17,12 +15,12 @@ CMD = ['-t', TOOL]
 
 @pytest.mark.parametrize('filename', ['sans', 'serif', 'latincid', 'kanjicid'])
 def test_convert(filename):
-    input_path = get_input_path('{}.otf'.format(filename))
+    input_path = get_input_path(f'{filename}.otf')
     actual_path = get_temp_file_path()
-    runner(CMD + ['-o', 'o', '_{}'.format(actual_path),
+    runner(CMD + ['-o', 'o', f'_{actual_path}',
                   '-f', input_path])
     actual_ttx = generate_ttx_dump(actual_path)
-    expected_ttx = get_expected_path('{}.ttx'.format(filename))
+    expected_ttx = get_expected_path(f'{filename}.ttx')
     assert differ([expected_ttx, actual_ttx,
                    '-s',
                    '<ttFont sfntVersion' + SPLIT_MARKER +

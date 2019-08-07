@@ -39,8 +39,6 @@
 "-m <arg>        simulate memory allocation failure\n"
 "-N              print filename and FontName to stderr before processing\n"
 "-pg             preserve GIDs when subsetting\n"
-"-cube           copies Cube elements through to output font. Can be used only with -t1 and -cff modes\n"
-"-cubef          flattens Cube source to a normal Type 1 font. Can be used with all output formats\n"
 "-n              remove hints\n"
 "\n"
 "[files]\n"

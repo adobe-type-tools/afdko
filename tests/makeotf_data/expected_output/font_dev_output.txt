@@ -1,0 +1,4 @@
+makeotf [Warning] Could not find default features file. Font will be built without any layout features.
+makeotf [Warning] Could not find FontMenuNameDB file. Font will be built with menu names derived from PostScript name.
+makeotfexe [WARNING] FontMenuNameDB file was not specified or not found. [SourceSerifPro-Regular]
+Built development mode font 'font.otf'.

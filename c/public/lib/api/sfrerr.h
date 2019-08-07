@@ -8,4 +8,4 @@
 CTL_DCL_ERR(sfrSuccess, "no error")
 CTL_DCL_ERR(sfrErrNoMemory, "out of memory")
 CTL_DCL_ERR(sfrErrSrcStream, "can't read source stream")
-CTL_DCL_ERR(sfrErrBadSfnt, "unrecognized sfnt version")
+CTL_DCL_ERR(sfrErrBadSfnt, "bad sfnt version")

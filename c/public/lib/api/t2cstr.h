@@ -11,7 +11,7 @@
 
 #include "ctlshare.h"
 
-#define T2C_VERSION CTL_MAKE_VERSION(1, 0, 21)
+#define T2C_VERSION CTL_MAKE_VERSION(1, 0, 22)
 
 #include "absfont.h"
 
@@ -25,13 +25,6 @@ typedef struct
 #define T2C_WIDTH_ONLY    (1 << 0)
 #define T2C_USE_MATRIX    (1 << 1)
 #define T2C_UPDATE_OPS    (1 << 2)
-#define T2C_IS_CUBE       (1 << 3)
-#define T2C_FLATTEN_CUBE  (1 << 4)
-#define T2C_CUBE_GSUBR    (1 << 5) /* current charstring is a subr. */
-#define T2C_CUBE_RND      (1 << 6) /* start (x,y) for a Cube element is      */
-                                   /* rounded to a multiple of 4: used when  */
-                                   /* building real Cube host fonts.         */
-                                   /* Required to be rasterized by PFR.      */
 #define T2C_IS_CFF2       (1 << 7)
 #define T2C_FLATTEN_BLEND (1 << 8)
 
@@ -100,13 +93,6 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
    T2C_UPDATE_OPS - charstrings using the deprecated seac operator are
    converted to a regular path by combining the component glyphs specified in
    the charstring and the deprecated dotsection operator is removed
-
-   T2C_IS_CUBE - the data contains cube font operators. Stack depth
-   and operator defs are different. Cube subr's are found at the end of gsubr's
-   for CID fonts, subrs for non-CID fonts.
-
-   T2C_FLATTEN_CUBE - the data contains cube font operators. Stack depth
-   and operator defs are different. The Cube compose ops must be flattened.
 
    The "getStdEncGlyphOffset" field holds the address of a function that will
    return the stream offset of a standard encoded glyph. It is only called when

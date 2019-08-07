@@ -870,8 +870,6 @@ int main(int argc, char *argv[]) {
     /* Process args. Call convFont at end. */
     parseArgs(argc, argv, 0);
 
-    fprintf(stderr, "\n"); /* Terminate progress line */
-
     /* Clean up */
     cbMemFree(cbctx, script.buf);
     dnaFREE(script.args);

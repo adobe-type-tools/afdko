@@ -1,6 +1,6 @@
 FDK Build Notes
 
-v1.1.0 July 17 2018
+v1.2.0 July 18 2019
 
 1) FDK build directory tree.
 
@@ -36,9 +36,9 @@ afdko/c/public/lib/
 			source/
 
 
-For the Mac, all programs are built with Xcode 4.5
-For Windows, all programs are built with VC10
-For Linux, programs are built with the Ubuntu 12.04 release.
+For MacOS, all programs are built with Xcode 9.4
+For Windows, all programs are built with MSVC 14.0
+For Linux, programs are built with gcc on Ubuntu 14.04 LTS
 
 2) FDK distribution package.
 
@@ -59,12 +59,12 @@ If your primary system is Mac OSX, then a useful approach is to use VMWare Fusio
 - download the Ubuntu Linux 64 bit iso file (x86).
 - make a new VM machine with VMWare Fusion: select the iso file as the source
 - install all updates
-- install the 32 bit libraries: for Ubuntu 13.04 (64-bit) or later, say 'sudo apt-get install lib32z1'; for Ubuntu 12.04 LTS (64-bit) or earlier, say 'sudo apt-get install ia32-libs'.
 - use the Settings->Share option to share the FDK source tree on your Mac OSX file system.
 - choose the VMWare Fusion menu option "VM Machine->Install VMWare Tools"
 This mounts an iso file in the Linux VM. Copy the contents to a local folder in the Ubuntu Linux system. Decompress the tar file, look inside for vmware-install.pl. Run this with sudo, take default answer for all.
 Do not /usr/bin/vmware-user at the end - you don't need additional X Windows support.
-Get the packages needed to build Python:
+Get the packages needed to build:
+sudo apt-get install python3.6  (NOTE: for Ubuntu 16.04 or older you may need to add a PPA such as https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa in order to get Python 3.6)
 sudo apt-get install build-essential
 sudo apt-get install zlib1g-dev # gets you the zlib.h file.
 

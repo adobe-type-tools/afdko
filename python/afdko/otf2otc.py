@@ -1,7 +1,5 @@
 # otf2otc.py v1.5 October 12 2017
 
-from fontTools.misc.py23 import tostr
-
 __copyright__ = """Copyright 2014,2017 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
@@ -310,9 +308,9 @@ def run(args):
 	unSharedTables = []
 	for tableEntryList in tableList:
 		if len(tableEntryList) > 1:
-			unSharedTables.append(tostr(tableEntryList[0].tag.decode('ascii')))
+			unSharedTables.append(tableEntryList[0].tag.decode('ascii'))
 		else:
-			sharedTables.append(tostr(tableEntryList[0].tag.decode('ascii')))
+			sharedTables.append(tableEntryList[0].tag.decode('ascii'))
 	if len(sharedTables) == 0:
 		print("No tables are shared")
 	else:

@@ -6,13 +6,15 @@
 /* Temporary debug control */
 #define DB_FONT 0   /* Font input charstrings */
 #define DB_INFS 0   /* Inferior subr selection */
-#define DB_OVLPS 0  /* Overlap handling */
+#define DB_ASSOC 0  /* Associate with subrs */
 #define DB_RELNS 0  /* Subr relationship building */
 #define DB_SELECT 0 /* Subr selection */
 #define DB_GROUPS 0 /* Selected groups */
 #define DB_CHARS 0  /* Chars with selected subrs */
 #define DB_SUBRS 0  /* Subrs with selected subrs */
 #define DB_CALLS 0  /* Call counts */
+
+#define EDGE_HASH_STAT 0 /* Collect edge hash table statistics */
 
 /*
    T2 subroutinizer.
@@ -37,11 +39,17 @@
 
    The most challenging part of the process of subroutinization is finding and
    counting the repeated charstrings. This is achieved by first building a suffix
-   DAWG using the concatenation of all the charstrings from all the fonts as
-   input. Subseqeuntly the completed suffix DAWG is traversed in order to count
+   CDAWG using the concatenation of all the charstrings from all the fonts as
+   input. Subsequently the completed suffix CDAWG is traversed in order to count
 
-   The suffix DAWG is built using an online algorithm described in "Text
-   Algorithms, Maxime Crochemore and Wojciech Ryter, OUP" p.113.
+   The suffix CDAWG is built as a compact DAWG (CDAWG) using an algorithm described in paper
+   "On-Line Construction of Compact Directed Acyclic Word Graphs" (200), S. Inenaga, et. al.
+   <http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.25.474> which is an extension
+   to the compact suffix tree construction algorithm "On-line construction of suffix trees"
+   (1995) by Esko Ukkonen <http://www.cs.helsinki.fi/u/ukkonen/SuffixT1withFigs.pdf>
+
+   The original code used a DAWG algorithm described in "Text Algorithms, Maxime Crochemore
+   and Wojciech Ryter, OUP" p.113. CDAWG is expected to use less memory than DAWG.
 
    ...
    regular.saved = count * (length - call - num) - (off + length + ret);
@@ -56,18 +64,18 @@
    offset   2
    return   1
                                     length
-        3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20
-    +------------------------------------------------------------------------
-   2|  -4  -3  -2  -1   0   1   2   3   4   5   6   7   8   9  10  11  12  13
-   3|  -3  -1   1   3   5   7   9  11  13  15  17  19  21  23  25  27  29  31
- c 4|  -2   1   4   7  10  13  16  19  22  25  28  31  34  37  40  43  46  49
- o 5|  -1   3   7  11  15  19  23  27  31  35  39  43  47  51  55  59  63  67
- u 6|   0   5  10  15  20  25  30  35  40  45  50  55  60  65  70  75  80  85
- n 7|   1   7  13  19  25  31  37  43  49  55  61  67  73  79  85  91  97 103
- t 8|   2   9  16  23  30  37  44  51  58  65  72  79  86  93 100 107 114 121
-   9|   3  11  19  27  35  43  51  59  67  75  83  91  99 107 115 123 131 139
-  10|   4  13  22  31  40  49  58  67  76  85  94 103 112 121 130 139 148 157
-   +------------------------------------------------------------------------
+          3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20
+      +------------------------------------------------------------------------
+     2|  -4  -3  -2  -1   0   1   2   3   4   5   6   7   8   9  10  11  12  13
+     3|  -3  -1   1   3   5   7   9  11  13  15  17  19  21  23  25  27  29  31
+   c 4|  -2   1   4   7  10  13  16  19  22  25  28  31  34  37  40  43  46  49
+   o 5|  -1   3   7  11  15  19  23  27  31  35  39  43  47  51  55  59  63  67
+   u 6|   0   5  10  15  20  25  30  35  40  45  50  55  60  65  70  75  80  85
+   n 7|   1   7  13  19  25  31  37  43  49  55  61  67  73  79  85  91  97 103
+   t 8|   2   9  16  23  30  37  44  51  58  65  72  79  86  93 100 107 114 121
+     9|   3  11  19  27  35  43  51  59  67  75  83  91  99 107 115 123 131 139
+    10|   4  13  22  31  40  49  58  67  76  85  94 103 112 121 130 139 148 157
+      +------------------------------------------------------------------------
 
    Following table calculated with the following parameters:
 
@@ -76,23 +84,24 @@
    offset   2
    return   1
                                     length
-        3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20
-    +------------------------------------------------------------------------
-   2|  -6  -5  -4  -3  -2  -1   0   1   2   3   4   5   6   7   8   9  10  11
-   3|  -6  -4  -2   0   2   4   6   8  10  12  14  16  18  20  22  24  26  28
- c 4|  -6  -3   0   3   6   9  12  15  18  21  24  27  30  33  36  39  42  45
- o 5|  -6  -2   2   6  10  14  18  22  26  30  34  38  42  46  50  54  58  62
- u 6|  -6  -1   4   9  14  19  24  29  34  39  44  49  54  59  64  69  74  79
- n 7|  -6   0   6  12  18  24  30  36  42  48  54  60  66  72  78  84  90  96
- t 8|  -6   1   8  15  22  29  36  43  50  57  64  71  78  85  92  99 106 113
-   9|  -6   2  10  18  26  34  42  50  58  66  74  82  90  98 106 114 122 130
-  10|  -6   3  12  21  30  39  48  57  66  75  84  93 102 111 120 129 138 147
-   +------------------------------------------------------------------------
+          3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20
+      +------------------------------------------------------------------------
+     2|  -6  -5  -4  -3  -2  -1   0   1   2   3   4   5   6   7   8   9  10  11
+     3|  -6  -4  -2   0   2   4   6   8  10  12  14  16  18  20  22  24  26  28
+   c 4|  -6  -3   0   3   6   9  12  15  18  21  24  27  30  33  36  39  42  45
+   o 5|  -6  -2   2   6  10  14  18  22  26  30  34  38  42  46  50  54  58  62
+   u 6|  -6  -1   4   9  14  19  24  29  34  39  44  49  54  59  64  69  74  79
+   n 7|  -6   0   6  12  18  24  30  36  42  48  54  60  66  72  78  84  90  96
+   t 8|  -6   1   8  15  22  29  36  43  50  57  64  71  78  85  92  99 106 113
+     9|  -6   2  10  18  26  34  42  50  58  66  74  82  90  98 106 114 122 130
+    10|  -6   3  12  21  30  39  48  57  66  75  84  93 102 111 120 129 138 147
+      +------------------------------------------------------------------------
 
  */
 
 #include "subr.h"
 #include "parse.h"
+#include "txops.h"
 
 #include <limits.h>
 #include <stdio.h>
@@ -101,52 +110,90 @@
 
 #include "dynarr.h"
 
-#if TC_SUBR_SUPPORT
-/* ------------------------------- DAWG data ------------------------------- */
+#define DB_TEST_STRING 0
+#if DB_TEST_STRING
+static unsigned char *gTestString = (unsigned char *)"Humpty Dumpty sat on a wall.Humpty Dumpty had a great fall.";
+#define FONT_CHARS_DATA gTestString
+#define OPLEN(h, cstr) 1
+#define SEPARATOR ','
+#else
+#define FONT_CHARS_DATA font->chars.data
+#define OPLEN(h, cstr) ((h)->opLenCache[*(cstr)] == 0 ? (cstr)[1] : (h)->opLenCache[*(cstr)])
+#define SEPARATOR t2_separator
+#endif
+
+#define MAX_NUM_SUBRS 32765L /* Maximum number of subroutines in one INDEX structure. 64K is valid by the spec, but but teh Google font validation tool OTS rejects fonts with subrs in a subrindex which is  over 32K -3.*/
+
+/* ------------------------------- CDAWG data ------------------------------- */
 typedef struct Edge_ Edge;
 typedef struct Node_ Node;
 struct Edge_ {
-    unsigned char *label;
-    Node *son;  /* Son node */
-    Edge *next; /* Next edge in list */
+    unsigned char *label; /* Pointer to the edge label, or the beginning of the edge string */
+    Node *son;            /* Son node. red/black color is encoded as the LSB in this pointer */
+    unsigned length;      /* Length of the edge string */
 };
 struct Node_ {
-    Node *suffix;              /* Suffix link */
-    Edge edge;                 /* First linking edge */
-    int32_t misc;              /* Initially longest path from root, then subr index */
-    unsigned short paths;      /* Paths through node */
-    unsigned short id;         /* Font id */
-#define NODE_GLOBAL USHRT_MAX  /* Identifies global subr */
+    Node *suffix;             /* Suffix link */
+    Edge *edgeTable;          /* Pointer to the edge table */
+    long misc;                /* Initially longest path from root, then subr index */
+    unsigned edgeCount;       /* Number of edges from this node */
+    unsigned edgeTableSize;   /* Number of entries allocated in the edge table */
+    unsigned short paths;     /* Paths through node; depth for subr trie */
+    unsigned short id;        /* Font id */
+#define NODE_GLOBAL USHRT_MAX /* Identifies global subr */
+#define NODE_ANY (NODE_GLOBAL - 1)
     short flags;               /* Status flags */
 #define NODE_COUNTED (1 << 15) /* Paths have been counted for this node */
-#define NODE_TESTED (1 << 14)  /* Candidacy tested for this node */
-#define NODE_FAIL (1 << 13)    /* Node failed candidacy test */
-#define NODE_TAIL (1 << 12)    /* Tail subr (terminates with endchar) */
-#define NODE_SUBR (1 << 11)    /* Node has subr info (index in misc) */
+#define NODE_TESTED  (1 << 14) /* Candidacy tested for this node */
+#define NODE_FAIL    (1 << 13) /* Node failed candidacy test */
+#define NODE_TAIL    (1 << 12) /* Tail subr (terminates with endchar in CFF1 or CFF2) */
+#define NODE_SUBR    (1 << 11) /* Node has subr info (index in misc) */
 };
+
+typedef struct NodeLink_ NodeLink;
+struct NodeLink_ {
+    Node *node;
+    NodeLink *next;
+};
+/* ------------------------------- hash table parameters ------------------------------- */
+
+#define EDGE_TABLE_SMALLEST_SPARSE_SIZE 128 /* Double the hash table size even before it becomes full beyond this size */
+#define EDGE_TABLE_SIZE_USE_SIMPLE_HASH 16  /* Use a better hash function for edges if the table size is larger than this */
+
+/* ------------------------------- Call list ------------------------------- */
+
+typedef struct /* Subr call within charstring */
+{
+    struct Subr_ *subr;    /* Inferior subr */
+    uint32_t offset;       /* Offset within charstring */
+} Call;
+
+typedef dnaDCL(Call, CallList);         /* List of subr calls for a subr/charstring */
+typedef dnaDCL(CallList, CallLists);    /* List of call lists for charstrings */
 
 /* ------------------------------- Subr data ------------------------------- */
 typedef struct Subr_ Subr;
 typedef struct Link_ Link;
 struct Subr_ {
-    Node *node;               /* Associated node */
-    Link *sups;               /* Superior subrs */
-    Link *infs;               /* Inferior subrs */
-    Subr *next;               /* Next member of social group */
-    unsigned char *cstr;      /* Charstring */
-    unsigned short length;    /* Subr length (original bytes spanned) */
-    unsigned short count;     /* Occurance count */
-    short deltacnt;           /* Delta count */
-    short deltalen;           /* Delta length */
-    short subrnum;            /* Biased subr number */
-    short numsize;            /* Size of subr number (1, 2, or 3 bytes) */
-    short maskcnt;            /* hint/cntrmask count */
-    short flags;              /* Status flags */
-#define SUBR_SELECT (1 << 0)  /* Flags subr selected */
-#define SUBR_REJECT (1 << 1)  /* Flags subr rejected */
-#define SUBR_MEMBER (1 << 2)  /* Flags subr added to social group */
-#define SUBR_REDUCE (1 << 3)  /* Subr has had count reduced (transient) */
-#define SUBR_OVERLAP (1 << 4) /* Marks overlapped and reduced subr */
+    Node *node;              /* Associated node */
+    Link *sups;              /* Superior subrs */
+    Link *infs;              /* Inferior subrs */
+    Subr *next;              /* Next member of social group */
+    Subr *output;            /* Link to next subr for match trie output */
+    unsigned char *cstr;     /* Charstring */
+    uint32_t length;         /* Subr length (original bytes spanned) */
+    uint32_t count;          /* Occurance count */
+    int32_t deltalen;        /* Delta length */
+    short subrnum;           /* Biased subr number */
+    short numsize;           /* Size of subr number (1, 2, or 3 bytes) */
+    short maskcnt;           /* hint/cntrmask count */
+    short misc;              /* subrSaved value/call depth (transient) */
+    short flags;             /* Status flags */
+#define SUBR_SELECT (1 << 0) /* Flags subr selected */
+#define SUBR_REJECT (1 << 1) /* Flags subr rejected */
+#define SUBR_MEMBER (1 << 2) /* Flags subr added to social group */
+    size_t order;            /* index value used for stable sort. */
+    CallList callList;       /* subrs called by this subr */
 #if DB_CALLS
     short calls; /* xxx remove */
 #endif
@@ -154,19 +201,18 @@ struct Subr_ {
 
 #define SUBR_MARKED (SUBR_SELECT | SUBR_REJECT) /* Flags if subr marked */
 
-struct Link_ {             /* Social group link */
+struct Link_ /* Social group link */
+{
     Subr *subr;            /* Superior/inferior subr */
     Link *next;            /* Next record */
-    unsigned short offset; /* Offset within superior/inferior */
+    uint32_t offset;       /* Offset within superior/inferior */
 };
 
-typedef struct {           /* Subr call within charstring */
-    Subr *subr;            /* Inferior subr */
-    unsigned short offset; /* Offset within charstring */
-} Call;
+typedef dnaDCL(Subr *, SubrList);   /* List of subrs */
 
 typedef struct MemBlk_ MemBlk;
-struct MemBlk_ {     /* Generalized memory block for object allocation */
+struct MemBlk_ /* Generalized memory block for object allocation */
+{
     MemBlk *nextBlk; /* Next memory block in chain */
     char *array;     /* Object array */
     short iNext;     /* Next free element index */
@@ -178,22 +224,33 @@ typedef struct {
 } MemInfo;
 
 #define NODES_PER_BLK 5000
-#define EDGES_PER_BLK 5000
 #define LINKS_PER_BLK 1000
+#define NODE_LINKS_PER_BLK 500
+#define TRIE_NODES_PER_BLK 1000
 
 /* Subroutinization context */
 struct subrCtx_ {
-    MemInfo nodeBlks; /* Node blocks */
-    MemInfo edgeBlks; /* Edge blocks */
-    MemInfo linkBlks; /* Relation blocks */
+    MemInfo nodeBlks;     /* Node blocks */
+    MemInfo linkBlks;     /* Relation blocks */
+    MemInfo trieNodeBlks; /* Trie node blocks */
+    MemInfo nodeLinkBlks; /* Node link blocks */
 
-    Node *root; /* DAWG root */
-    Node *sink; /* DAWG sink */
+    Node *root;            /* CDAWG root */
+    Node *base;            /* CDAWG base */
+    dnaDCL(Node *, sinks); /* CDAWG sinks (one for each font id) */
+
+    Edge baseEdge; /* dummy edge from base to root */
+
+    Node *trieRoot;      /* Subr match trie root */
+    Node *trieParent;    /* parent node used during trie walk */
+    NodeLink *trieQueue; /* node link queue */
 
     dnaDCL(Subr, subrs);     /* Subr list (all) */
     dnaDCL(Subr *, tmp);     /* Temporary subr list */
-    dnaDCL(Subr *, reorder); /* Reordered subrs */
-    dnaDCL(Call, calls);     /* Temporary subr call accumulator */
+    SubrList globalSubrs;    /* List of global subrs */
+    dnaDCL(SubrList, localSubrs);   /* List of local subr lists */
+    dnaDCL(CallLists, charsCallLists);   /* List of subr calls in charstrings */
+    CallList calls;          /* Temporary subr call accumulator */
     dnaDCL(Subr *, members); /* Temporary social group member accumulator */
     dnaDCL(Subr *, leaders); /* Social group leaders */
     dnaDCL(char, cstrs);     /* Charstring data accumulator */
@@ -201,12 +258,25 @@ struct subrCtx_ {
     short singleton;    /* Single font in font set */
     short offSize;      /* Subr INDEX offset size */
     short subrStackOvl; /* Subr stack overflow */
-    SubrParseData *spd; /* Subr parsing data */
 
     CSData gsubrs; /* Global subrs */
+    short nFonts;     /* Font count */
+    Font *fonts; /* Font list */
 
-    short nFonts; /* Font count */
-    Font *fonts;  /* Font list */
+    unsigned char opLenCache[256]; /* Cached values of t2oplen. If 0, the second byte in the charstring indicates the length */
+    dnaDCL(Subr *, subrHash);      /* Subr hash table */
+#define SUBR_PREFIX_MAP_SIZE ((1 << (2 * 8)) / 8)
+#define SUBR_PREFIX_MAP_INDEX(b1, b2) ((((unsigned)(b1)) << 5) | ((b2) >> 3))
+#define SUBR_PREFIX_MAP_BIT(b2) (1 << ((b2)&7))
+#define TEST_SUBR_PREFIX_MAP(ctx, str) ((ctx)->subrPrefixMap[SUBR_PREFIX_MAP_INDEX(str[0], str[1])] & SUBR_PREFIX_MAP_BIT(str[1]))
+#define SET_SUBR_PREFIX_MAP(ctx, str) ((ctx)->subrPrefixMap[SUBR_PREFIX_MAP_INDEX(str[0], str[1])] |= SUBR_PREFIX_MAP_BIT(str[1]))
+    unsigned char subrPrefixMap[SUBR_PREFIX_MAP_SIZE]; /* bit table where a bit is set when its corresponding subr 2-byte prefix selected */
+    dnaDCL(uint32_t, subrLenMap);                      /* boolean table where a value is set when any subr with the corresponding length is selected */
+    dnaDCL(uint32_t, prefixLen);                       /* Prefix byte length for each byte in a charstring */
+    unsigned maxSubrLen;                               /* Maximum subr length */
+    unsigned minSubrLen;                               /* Minimum subr lenth */
+
+    unsigned long maxNumSubrs; /* Maximum number of subroutines (0 means default MAX_NUM_SUBRS) */
 
     tcCtx g; /* Package context */
 };
@@ -225,10 +295,94 @@ static void dbop(int length, unsigned char *cstr);
 static void dbsubr(subrCtx h, unsigned iSubr, int c, unsigned offset);
 static void dbnode(subrCtx h, Node *node);
 static void dbcstr(subrCtx h, unsigned length, unsigned char *cstr);
-static void dbcstrs(subrCtx h, unsigned char *cstr, unsigned char *end, int index);
+static void dbcstrs(subrCtx h,
+                    unsigned char *cstr, unsigned char *end, int index);
 static void dbgroups(subrCtx h);
 
 #endif /* TC_DEBUG */
+
+/* --------------------------- Type 2 charstring functions --------------------------- */
+
+/* Return operator length from opcode */
+static int t2oplen(unsigned char *cstr) {
+    switch (cstr[0]) {
+        default:
+            return 1;
+
+        case tx_escape:
+        case 247:
+        case 248:
+        case 249:
+        case 250:
+        case 251:
+        case 252:
+        case 253:
+        case 254:
+            return 2;
+
+        case t2_shortint:
+            return 3;
+
+        case t2_separator:
+            return 4;
+
+        case 255:
+            return 5;
+
+        case t2_hintmask:
+        case t2_cntrmask:
+            return cstr[1];
+    }
+}
+
+/* Copy and edit cstr by removing length bytes from mask operators. Return
+   advanced destination buffer pointer */
+static unsigned char *t2cstrcpy(unsigned char *pdst, unsigned char *psrc,
+                                unsigned length) {
+    int left;
+    unsigned char *pend = psrc + length;
+
+    while (psrc < pend) {
+        switch (*psrc) {
+            case t2_hintmask:
+            case t2_cntrmask: /* Mask ops; remove length byte */
+                *pdst++ = *psrc++;
+                left = *psrc++ - 2;
+                while (left--) {
+                    *pdst++ = *psrc++;
+                }
+                length--;
+                break;
+
+            case 255: /* 5-byte number */
+                *pdst++ = *psrc++;
+                *pdst++ = *psrc++;
+                /* Fall through */
+
+            case t2_shortint: /* 3-byte number */
+                *pdst++ = *psrc++;
+                /* Fall through */
+
+            case tx_escape: /* 2-byte number/esc operator */
+            case 247:
+            case 248:
+            case 249:
+            case 250:
+            case 251:
+            case 252:
+            case 253:
+            case 254:
+                *pdst++ = *psrc++;
+                /* Fall through */
+
+            default: /* 1-byte number/operator */
+                *pdst++ = *psrc++;
+                break;
+        }
+    }
+
+    return pdst;
+}
 
 /* --------------------------- Object Management --------------------------- */
 
@@ -237,19 +391,19 @@ static void *newObject(subrCtx h, MemInfo *info, long size, long count) {
     MemBlk *pblk = info->head;
     if (pblk == NULL || pblk->iNext == count) {
         /* Re/allocate new block */
-        MemBlk *new;
+        MemBlk *_new;
         if (info->free != NULL) {
             /* Remove block from free list */
-            new = info->free;
-            info->free = new->nextBlk;
+            _new = info->free;
+            info->free = _new->nextBlk;
         } else {
             /* Allocate new block from heap */
-            new = MEM_NEW(h->g, sizeof(MemBlk));
-            new->array = MEM_NEW(h->g, size * count);
+            _new = (MemBlk *)MEM_NEW(h->g, sizeof(MemBlk));
+            _new->array = (char *)MEM_NEW(h->g, size * count);
         }
-        new->nextBlk = pblk;
-        new->iNext = 0;
-        info->head = pblk = new;
+        _new->nextBlk = pblk;
+        _new->iNext = 0;
+        info->head = pblk = _new;
     }
     /* Return next object */
     return &pblk->array[pblk->iNext++ * size];
@@ -280,56 +434,102 @@ static void freeObjects(tcCtx g, MemInfo *info) {
     info->free = NULL;
 }
 
-/* Create and initialize new DAWG node */
+/* Create and initialize new CDAWG node */
 static Node *newNode(subrCtx h, long length, unsigned id) {
-    Node *node = newObject(h, &h->nodeBlks, sizeof(Node), NODES_PER_BLK);
-    node->edge.son = NULL; /* Used to signal uninitialized first edge */
-    node->edge.next = NULL;
+    Node *node = (Node *)newObject(h, &h->nodeBlks, sizeof(Node), NODES_PER_BLK);
+    node->edgeTable = NULL;
+    node->edgeCount = 0;
+    node->edgeTableSize = 0;
     node->misc = length;
     node->paths = 0;
-    node->id = id;
+    node->id = (unsigned short)id;
     node->flags = 0;
     return node;
 }
 
-/* Create and initialize new DAWG edge */
-static Edge *newEdge(subrCtx h, unsigned char *label, Node *son, Edge *next) {
-    Edge *edge = newObject(h, &h->edgeBlks, sizeof(Edge), EDGES_PER_BLK);
-    edge->label = label;
-    edge->son = son;
-    edge->next = next;
-    return edge;
-}
-
 /* Create and initialize new subr link */
 static Link *newLink(subrCtx h, Subr *subr, unsigned offset, Link *next) {
-    Link *link = newObject(h, &h->linkBlks, sizeof(Link), LINKS_PER_BLK);
+    Link *link = (Link *)newObject(h, &h->linkBlks, sizeof(Link), LINKS_PER_BLK);
     link->subr = subr;
     link->next = next;
-    link->offset = offset;
+    link->offset = (uint32_t)offset;
     return link;
+}
+
+/* Create and initialize new trie node */
+static Node *newTrieNode(subrCtx h, long depth) {
+    Node *node = (Node *)newObject(h, &h->trieNodeBlks, sizeof(Node), TRIE_NODES_PER_BLK);
+    node->edgeTable = NULL;
+    node->edgeCount = 0;
+    node->edgeTableSize = 0;
+    node->suffix = NULL;                 /* suffix link */
+    node->misc = -1;                     /* subr index */
+    node->paths = (unsigned short)depth; /* debug only */
+    node->id = 0;
+    node->flags = 0;
+    return node;
+}
+
+/* Create and initialize new node link */
+static NodeLink *newNodeLink(subrCtx h, Node *node, NodeLink *next) {
+    NodeLink *link = (NodeLink *)newObject(h, &h->nodeLinkBlks, sizeof(NodeLink), NODE_LINKS_PER_BLK);
+    link->node = node;
+    link->next = next;
+    return link;
+}
+
+/* --------------------------- Call Lists -------------------------- */
+
+static void initCallLists(subrCtx h, CallLists *lists, long cnt)
+{
+    long    i;
+    dnaSET_CNT(*lists, cnt);
+    for (i = 0; i < cnt; i++) {
+        dnaINIT(h->g->ctx.dnaCtx, lists->array[i], 0, 1);
+    }
+}
+
+static void freeCallLists(subrCtx h, CallLists *lists)
+{
+    long    i;
+    for (i = 0; i < lists->cnt; i++) {
+        dnaFREE(lists->array[i]);
+    }
+    dnaFREE(*lists);
 }
 
 /* --------------------------- Context Management -------------------------- */
 
 /* Initialize module */
 void subrNew(tcCtx g) {
-    subrCtx h = MEM_NEW(g, sizeof(struct subrCtx_));
+    subrCtx h = (subrCtx)MEM_NEW(g, sizeof(struct subrCtx_));
 
     h->nodeBlks.head = h->nodeBlks.free = NULL;
-    h->edgeBlks.head = h->edgeBlks.free = NULL;
     h->linkBlks.head = h->linkBlks.free = NULL;
+    h->trieNodeBlks.head = h->trieNodeBlks.free = NULL;
+    h->nodeLinkBlks.head = h->nodeLinkBlks.free = NULL;
 
     h->root = NULL;
+    h->base = NULL;
+
+    h->trieRoot = NULL;
+    h->trieQueue = NULL;
+    h->maxNumSubrs = 0;
 
     /* xxx tune these parameters */
     dnaINIT(g->ctx.dnaCtx, h->subrs, 500, 1000);
     dnaINIT(g->ctx.dnaCtx, h->tmp, 500, 1000);
-    dnaINIT(g->ctx.dnaCtx, h->reorder, 500, 1000);
+    dnaINIT(g->ctx.dnaCtx, h->globalSubrs, 500, 1000);
+    dnaINIT(g->ctx.dnaCtx, h->localSubrs, 1, 1);
+    dnaINIT(g->ctx.dnaCtx, h->charsCallLists, 1, 1);
     dnaINIT(g->ctx.dnaCtx, h->calls, 10, 10);
     dnaINIT(g->ctx.dnaCtx, h->members, 40, 40);
     dnaINIT(g->ctx.dnaCtx, h->leaders, 100, 200);
     dnaINIT(g->ctx.dnaCtx, h->cstrs, 5000, 2000);
+    dnaINIT(g->ctx.dnaCtx, h->sinks, 1, 1);
+    dnaINIT(g->ctx.dnaCtx, h->subrHash, 0, 1);
+    dnaINIT(g->ctx.dnaCtx, h->prefixLen, 10, 10);
+    dnaINIT(g->ctx.dnaCtx, h->subrLenMap, 0, 1);
 
     h->offSize = 2;
 
@@ -343,13 +543,21 @@ void subrNew(tcCtx g) {
     g->ctx.subr = h;
 }
 
+static void freeEdges(subrCtx h, MemInfo *info);
+
 /* Prepare module for reuse */
 void subrReuse(tcCtx g) {
     subrCtx h = g->ctx.subr;
 
+    freeEdges(h, &h->nodeBlks);
+    freeEdges(h, &h->trieNodeBlks);
+    dnaSET_CNT(h->sinks, 0);
+    dnaSET_CNT(h->subrHash, 0);
+
     reuseObjects(g, &h->nodeBlks);
-    reuseObjects(g, &h->edgeBlks);
     reuseObjects(g, &h->linkBlks);
+    reuseObjects(g, &h->trieNodeBlks);
+    reuseObjects(g, &h->nodeLinkBlks);
 
     csFreeData(g, &h->gsubrs);
 
@@ -360,24 +568,77 @@ void subrReuse(tcCtx g) {
 /* Free resources */
 void subrFree(tcCtx g) {
     subrCtx h = g->ctx.subr;
+    long    i;
+
+    if (h == NULL)
+        return;
+
+    freeEdges(h, &h->nodeBlks);
+    freeEdges(h, &h->trieNodeBlks);
 
     freeObjects(g, &h->nodeBlks);
-    freeObjects(g, &h->edgeBlks);
     freeObjects(g, &h->linkBlks);
+    freeObjects(g, &h->trieNodeBlks);
+    freeObjects(g, &h->nodeLinkBlks);
 
+    for (i = 0; i < h->subrs.cnt; i++)
+        dnaFREE(h->subrs.array[i].callList);
     dnaFREE(h->subrs);
     dnaFREE(h->tmp);
-    dnaFREE(h->reorder);
+    dnaFREE(h->globalSubrs);
+    for (i = 0; i < h->localSubrs.cnt; i++)
+        dnaFREE(h->localSubrs.array[i]);
+    dnaFREE(h->localSubrs);
     dnaFREE(h->calls);
     dnaFREE(h->members);
     dnaFREE(h->leaders);
     dnaFREE(h->cstrs);
+    dnaFREE(h->sinks);
+    dnaFREE(h->subrHash);
+    dnaFREE(h->prefixLen);
+    dnaFREE(h->subrLenMap);
+    for (i = 0; i < h->charsCallLists.cnt; i++)
+        freeCallLists(h, &h->charsCallLists.array[i]);
+    dnaFREE(h->charsCallLists);
 
     MEM_FREE(g, h);
 }
 
-/* --------------------------- DAWG Construction --------------------------- */
+/* --------------------------- Edge Table -------------------------- */
 
+/* Allocate the initial edge table for a given node */
+static void newEdgeTable(tcCtx g, Node *node, unsigned size) {
+    unsigned long byteSize = sizeof(Edge) * size;
+    node->edgeTableSize = size;
+    node->edgeCount = 0;
+    node->edgeTable = (Edge *)MEM_NEW(g, byteSize);
+    memset(node->edgeTable, 0, sizeof(Edge) * size);
+}
+
+/* Initialize new CDAWG edge */
+static void initEdge(Edge *edge, unsigned char *label, unsigned edgeLength, Node *son) {
+    edge->label = label;
+    edge->length = edgeLength;
+    edge->son = son;
+}
+
+/* free edge tables allocated for all nodes */
+static void freeEdges(subrCtx h, MemInfo *info) {
+    MemBlk *pblk = info->head;
+    while (pblk) {
+        short i;
+        Node *node;
+        for (i = 0, node = (Node *)&pblk->array[0]; i < pblk->iNext; i++, node++) {
+            if (node->edgeTable) {
+                MEM_FREE(h->g, node->edgeTable);
+                node->edgeTable = NULL;
+            }
+        }
+        pblk = pblk->nextBlk;
+    }
+}
+
+/* --------------------------- CDAWG Construction --------------------------- */
 /* Compare two edge labels */
 static int labelcmp(subrCtx h,
                     int length1, unsigned char *label1, unsigned char *label2) {
@@ -385,9 +646,10 @@ static int labelcmp(subrCtx h,
     if (cmp != 0) {
         return cmp; /* First byte differs */
     } else {
-        int length2 = h->spd->oplen(label2++);
+        int length2 = OPLEN(h, label2);
         int length = (length1 < length2) ? length1 : length2;
 
+        label2++;
         while (--length) {
             cmp = *label1++ - *label2++;
             if (cmp != 0) {
@@ -400,74 +662,395 @@ static int labelcmp(subrCtx h,
     }
 }
 
+/* Calculate a hash value for a given edge; this simple formula appears good enough */
+static unsigned hashLabel(unsigned char *label, unsigned length) {
+    unsigned long hash = *label;
+
+    hash += (hash << 5);
+    while (--length > 0) {
+        unsigned long temp = *++label;
+        hash += temp;
+        hash <<= 5;
+        hash += temp;
+    }
+    return hash;
+}
+
+#if EDGE_HASH_STAT
+static unsigned long gTotalEdgeTableSize;
+static unsigned long gTotalEdgeCount;
+static unsigned long long gTotalEdgeLookupCount;
+static unsigned long gTotalEdgeMissCount;
+#endif
+
+/* Look up the edge table as a hash table for a given edge label
+   returns a ponter to an edge entry which may be empty if not found */
+static Edge *lookupEdgeTable(subrCtx h, Node *node, unsigned length, unsigned char *label) {
+    unsigned tableSize = node->edgeTableSize;
+    unsigned tableSizeMinus1 = tableSize - 1;
+    unsigned hashValue = (tableSize <= EDGE_TABLE_SIZE_USE_SIMPLE_HASH) ? (*label + length) : hashLabel(label, length);
+    unsigned hashIncrement = 0;
+    unsigned count = 0;
+#if EDGE_HASH_STAT
+    gTotalEdgeLookupCount++;
+    gTotalEdgeTableSize += tableSize;
+    gTotalEdgeCount += node->edgeCount;
+#endif
+
+    while (count < tableSize) {
+        Edge *edge = &node->edgeTable[hashValue & tableSizeMinus1]; /* (hashValue % node->edgeTableSize) */
+        if (edge->label == NULL) {
+            return edge;
+        }
+
+        if (labelcmp(h, length, label, edge->label) == 0) {
+            return edge;
+        }
+
+        /* Collided with a wrong entry. Update the hash value using the
+           quadratic probing algorithm and try again. */
+        hashValue += ++hashIncrement;
+        count++;
+#if EDGE_HASH_STAT
+        gTotalEdgeMissCount++;
+#endif
+    }
+
+    /* couldn't find an entry (and the table was full) */
+    return NULL;
+}
+
+static void doubleEdgeTable(subrCtx h, Node *node);
+
+/* Enter a new edge into the edge table represented as a hash table */
+static void addEdgeToHashTable(subrCtx h, Node *node, Node *son,
+                               unsigned length, unsigned char *label, unsigned edgeLength) {
+    int doubleIt = 0;
+    Edge *edge;
+
+    if (node->edgeTable == NULL) {
+        /* The initial edge table starts out with only one entry */
+        newEdgeTable(h->g, node, 1);
+        edge = &node->edgeTable[0];
+    } else {
+        /* Double the hash table if the large table is almost full or no empty slot available */
+        if (node->edgeCount >= node->edgeTableSize) {
+            doubleIt = 1;
+        } else if (node->edgeTableSize >= EDGE_TABLE_SMALLEST_SPARSE_SIZE) {
+            if (node->edgeCount >= (node->edgeTableSize - (node->edgeTableSize >> 3))) {
+                /* When the hash table is >= 87.5% full, double its size */
+                doubleIt = 1;
+            }
+        }
+
+        if (doubleIt) {
+            doubleEdgeTable(h, node);
+        }
+
+        edge = lookupEdgeTable(h, node, length, label);
+    }
+#if TC_DEBUG
+    if (!edge || edge->label) {
+        printf("addEdgeToHashTable: failed to find an empty slot\n");
+    }
+#endif
+    initEdge(edge, label, edgeLength, son);
+    node->edgeCount++;
+}
+
+/* Double the size of the edge table for a given node */
+static void doubleEdgeTable(subrCtx h, Node *node) {
+    Edge *oldTable = node->edgeTable;
+    unsigned oldTableSize = node->edgeTableSize;
+    unsigned newTableSize = node->edgeTableSize * 2;
+    unsigned newTableByteSize = sizeof(Edge) * newTableSize;
+    Edge *newTable = (Edge *)MEM_NEW(h->g, newTableByteSize);
+    Edge *edge;
+    unsigned i;
+
+    /* Replace the old hash table with a new blank hash table */
+    memset(newTable, 0, newTableByteSize);
+    node->edgeTable = newTable;
+    node->edgeTableSize = newTableSize;
+    node->edgeCount = 0;
+
+    /* Copy all edges from the old hash table to the new hash table */
+    for (i = 0, edge = oldTable; i < oldTableSize; i++, edge++) {
+        if (edge->label != NULL) {
+            addEdgeToHashTable(h, node, edge->son, OPLEN(h, edge->label), edge->label, edge->length);
+        }
+    }
+
+    MEM_FREE(h->g, oldTable);
+}
+
 /* Add edge to between father and son nodes */
 static void addEdge(subrCtx h, Node *father, Node *son,
-                    unsigned length, unsigned char *label) {
-    Edge *edge = &father->edge;
-    if (edge->son == NULL) {
-        /* Add first edge to node */
-        edge->label = label;
-        edge->son = son;
-        edge->next = NULL;
-    } else {
-        /* Find insertion position in edge list */
-        Edge *prev = NULL;
-        do {
-            if (labelcmp(h, length, label, edge->label) < 0) {
-                if (prev == NULL) {
-                    /* Insert at head of list */
-                    Edge *newedge =
-                        newEdge(h, edge->label, edge->son, edge->next);
-                    edge->label = label;
-                    edge->son = son;
-                    edge->next = newedge;
-                    return;
-                } else {
-                    break; /* Insert in middle of list */
-                }
-            }
-
-            prev = edge;
-            edge = edge->next;
-        } while (edge != NULL);
-
-        /* Insert in middle (from break) or end of list (from while) */
-        prev->next = newEdge(h, label, son, edge);
-    }
+                    unsigned length, unsigned char *label, unsigned edgeLength) {
+    addEdgeToHashTable(h, father, son, length, label, edgeLength);
 }
+
+/* handle the special case where the base node has a virtual edge for every token to the root node */
+#define FIND_EDGE(h, node, length, label) ((node)->misc == -1 ? &(h)->baseEdge : findEdge(h, node, length, label))
 
 /* Find linking edge from node with label */
 static Edge *findEdge(subrCtx h,
                       Node *node, unsigned length, unsigned char *label) {
-    Edge *edge = &node->edge;
-    do {
-        int cmp = labelcmp(h, length, label, edge->label);
-        if (cmp < 0) {
-            return NULL;
-        } else if (cmp == 0) {
-            return edge; /* Matched edge */
-        }
-        edge = edge->next;
-    } while (edge != NULL);
-    return NULL;
+    Edge *edge = lookupEdgeTable(h, node, length, label);
+    if (edge == NULL || edge->label) {
+        return edge;
+    } else {
+        return NULL;
+    }
 }
 
-/* Append font's charstring data to DAWG. This construction algorithm closely
-   follows the one presented in "Text Algorithms, Maxime Crochemore and
-   Wojciech Ryter, OUP" p.113 although this one also adds code the identify
-   nodes in the DAWG with a particular font or as global nodes if they
-   terminate charstrings that appear in multiple fonts */
-static void addFont(subrCtx h, Font *font, unsigned iFont) {
-    unsigned char *a;
+/* Copy the edge table from the source node to the destination node */
+static void copyEdgeTable(subrCtx h, Node *destNode, Node *srcNode) {
+    newEdgeTable(h->g, destNode, srcNode->edgeTableSize);
+    destNode->edgeCount = srcNode->edgeCount;
+    memcpy(destNode->edgeTable, srcNode->edgeTable, sizeof(Edge) * srcNode->edgeTableSize);
+}
+
+typedef void (*walkEdgeTableProc)(subrCtx h, Edge *edge, long param1, long param2);
+
+static void walkEdgeTable(subrCtx h, Node *node, walkEdgeTableProc proc, long param1, long param2) {
+    unsigned size = node->edgeTableSize;
+    Edge *edge = node->edgeTable;
+    unsigned i;
+
+    if (!edge) {
+        return;
+    }
+
+    for (i = 0; i < size; i++, edge++) {
+        if (edge->label) {
+            proc(h, edge, param1, param2);
+        }
+    }
+}
+
+/* Determine whether the state with the canonical reference pair (s,(k,p)) is the end point */
+static int CheckEndPoint(subrCtx h, Node *s, unsigned char *k, unsigned char *p,
+                         unsigned length, unsigned id) {
+    /* c == *p */
+    if (s->misc == -1) {
+        /* base node is always an end point */
+        return 1;
+    }
+
+    if (k < p) {
+        /* implicit node */
+        /* let s (k',p')-> s' be the text[k]-edge from s;
+           return (c == text[k' + p - k]) */
+        Edge *edge = FIND_EDGE(h, s, OPLEN(h, k), k);
+        return labelcmp(h, length, p, edge->label + (p - k)) == 0;
+    } else {
+        /* explicit node */
+        /* is there 'c'-edge from s? */
+        return (FIND_EDGE(h, s, length, p) != NULL);
+    }
+}
+
+/* Return either an explicit/implicit node corresponding to the canonical reference pair (s,(k,p)) */
+static Node *Extension(subrCtx h, Node *s, unsigned char *k, unsigned char *p) {
+    if (k >= p) {
+        /* explicit node */
+        return s;
+    } else {
+        /* implicit node */
+        /* let s (k',p')-> s' be the text[k]-edge from s */
+        return FIND_EDGE(h, s, OPLEN(h, k), k)->son;
+    }
+}
+
+/* Redirect the edge (s,(k,p)) to r */
+static void Redirect(subrCtx h, Node *s, unsigned char *k, unsigned char *p, Node *r) {
+    /* let s (k',p')-> s' be the text[k]-edge from s */
+    Edge *edge = FIND_EDGE(h, s, OPLEN(h, k), k);
+
+    /* replace this edge by edge s (k',k'+p-k)-> r;
+       note that the edge has the same label so it can be replaced in place
+       within the edge tree */
+    edge->son = r;
+    edge->length = (unsigned int)(p - k);
+}
+
+#define CANONIZE(h, s, k, p, s_ret, k_ret)                          \
+    {                                                               \
+        if ((k) < (p)) {                                            \
+            Canonize(h, s, k, p, s_ret, k_ret); /* implicit node */ \
+        } else {                                                    \
+            *(s_ret) = (s);                                         \
+            *(k_ret) = (k);                                         \
+        } /* explicit node */                                       \
+    }
+
+/* Canonize (normalize) a reference pair (s,(k,p)) of an implicit node and return it as (s',k') */
+static void Canonize(subrCtx h, Node *s, unsigned char *k, unsigned char *p, Node **s_ret, unsigned char **k_ret) {
+    Edge *edge;
+    int length = OPLEN(h, k);
+
+    if (s->misc == -1) {
+        /* base node has a one-length edge to root for every token */
+        s = h->root;
+        k += length;
+        if (k >= p) {
+            /* explicit node */
+            *s_ret = s;
+            *k_ret = k;
+            return;
+        }
+        length = OPLEN(h, k);
+    }
+    /* (s,(k,p)) is an implicit node */
+    /* find the text[k]-edge s (k',p') -> s' from s */
+    edge = FIND_EDGE(h, s, length, k);
+    while (edge->length <= (unsigned)(p - k)) {
+        k += edge->length;
+        s = edge->son;
+        if (k < p) {
+            /* find the text[k]-edge s (k',p')-> s' from s */
+            edge = FIND_EDGE(h, s, OPLEN(h, k), k);
+        }
+    }
+    *s_ret = s;
+    *k_ret = k;
+}
+
+/* Split an edge at the canonical reference point (s,(k,p)) and returns the split point as an explicit node */
+static Node *SplitEdge(subrCtx h, Node *s, unsigned char *k, unsigned char *p, int id) {
+    Node *r;
+    unsigned char *newLabel;
+    /* let s (k',p') -> s' be the text[k]-edge from s */
+    Edge *edge = FIND_EDGE(h, s, OPLEN(h, k), k);
+    /* replace this edge by edges s (k',k'+p-k) -> r and r (k'+p-k+1,p') -> s',
+       where r is a new node */
+    r = newNode(h, s->misc + (long)(p - k), (edge->son->id != id) ? NODE_GLOBAL : id);
+    newLabel = edge->label + (p - k);
+    addEdge(h, r, edge->son, OPLEN(h, newLabel), newLabel, (unsigned int)((edge->label + edge->length) - newLabel));
+    edge->length = (unsigned int)(p - k);
+    edge->son = r;
+
+    return r;
+}
+
+/* If a node at the canonical reference point (s,(k,p)) is a non-solid, explicit node,
+   then duplicate the node and return a new active point */
+static void SeparateNode(subrCtx h, Node *s, unsigned char *k, unsigned char *p,
+                         Node **s_ret, unsigned char **k_ret, int id) {
+    Node *ss;
+    Node *rr;
+    unsigned char *kk;
+    unsigned char *pminus1;
+    Node *cs;
+    unsigned char *ck;
+    CANONIZE(h, s, k, p, &ss, &kk);
+    if (kk < p) {
+        /* implicit node */
+        *s_ret = ss;
+        *k_ret = kk;
+        return;
+    }
+    /* (s',(k',p)) is an explicit node */
+    if (s->misc == -1 /*base node*/) {
+        *s_ret = ss;
+        *k_ret = kk;
+        return;
+    }
+    if (ss->misc == s->misc + (p - k)) {
+        /* solid edge */
+        Node *suffix;
+        for (suffix = ss; suffix != NULL; suffix = suffix->suffix) {
+            if (suffix->id != id) {
+                suffix->id = NODE_GLOBAL;
+            }
+        }
+        *s_ret = ss;
+        *k_ret = kk;
+        return;
+    }
+
+    /* non-solid case */
+    /* create a new node r' as a duplication of s' */
+    rr = newNode(h, s->misc + (long)(p - k), (ss->id != id) ? NODE_GLOBAL : id);
+    /* Copy the edge table */
+    copyEdgeTable(h, rr, ss);
+    /* set up suffix link */
+    rr->suffix = ss->suffix;
+    ss->suffix = rr;
+
+    do {
+        /* replace the text[k]-edge from s to s' by edge s (k,p)-> r' */
+        Node *son;
+        Edge *edge = FIND_EDGE(h, s, OPLEN(h, k), k);
+        ss = edge->son;
+        edge->son = rr;
+        edge->label = k;
+        edge->length = (unsigned int)(p - k);
+
+        /* calculate a canonical reference for Suf(s) with edge (k,p-1);
+           (s, k) := Canonize(Suf(s),(k,p-1))
+           that is, we need to back up from (k,p) by one token. Since we can't
+           parse a charstring backwards, we parse from k forward to find p-1.
+           this code may need optimization since it is O(n^2) */
+        pminus1 = k;
+        for (;;) {
+            int length = OPLEN(h, pminus1);
+            if (pminus1 + length >= p) {
+                break;
+            }
+            pminus1 += length;
+        }
+        CANONIZE(h, s->suffix, k, pminus1, &s, &k);
+        if (k < p) {
+            /* implicit node */
+            son = FIND_EDGE(h, s, OPLEN(h, k), k)->son;
+        } else {
+            son = s;
+        }
+        if (son->id != id) {
+            son->id = NODE_GLOBAL;
+        }
+
+        /* do {..} until (s',k') != Canonize(s,(k,p)) */
+        CANONIZE(h, s, k, p, &cs, &ck);
+    } while ((ss == cs) && (kk == ck));
+
+    /* return (r',p) */
+    *s_ret = rr;
+    *k_ret = p;
+}
+
+/* Append font's charstring data to CDAWG. This construction algorithm closely
+   follows the one presented in "On-Line Construction of Compact Directed Acyclic
+   Word Graphs" although this one also adds code the identify
+   nodes in the CDAWG with a particular font or as global nodes if they
+   terminate charstrings that appear in multiple fonts.
+   A notational difference is that an edge is represented as (k,p) where
+   p points at the next token after the end of the string as opposed to
+   p pointing at the last token in the string.
+ */
+static void addFont(subrCtx h, Font *font, unsigned iFont, int multiFonts) {
+    unsigned char *p;
     unsigned char *pend;
     unsigned char *pfd;
     unsigned id;
+    Node *s;          /* active point */
+    unsigned char *k; /* beginning of the current reference point */
+    Node *e;          /* extention node */
+    Node *r, *oldr;
 
     if (font->chars.nStrings == 0) {
         return; /* Synthetic font */
     }
-    a = (unsigned char *)font->chars.data;
-    pend = a + font->chars.offset[font->chars.nStrings - 1];
+#if DB_TEST_STRING
+    p = gTestString;
+    pend = p + strlen((char *)p);
+    multiFonts = 1;
+#else
+    p = (unsigned char *)font->chars.data;
+    pend = p + font->chars.offset[font->chars.nStrings - 1];
+#endif
 
     if (font->flags & FONT_CID) {
         pfd = font->fdIndex;
@@ -477,143 +1060,159 @@ static void addFont(subrCtx h, Font *font, unsigned iFont) {
         id = iFont;
     }
 
-    if (h->root == NULL) {
-        h->sink = h->root = newNode(h, 0, id);
-        h->root->suffix = NULL;
+    if (h->base == NULL) {
+        h->base = newNode(h, -1, id);
+        h->base->misc = -1; /* length from source */
+        h->base->suffix = NULL;
     }
 
+    if (h->root == NULL) {
+        h->root = newNode(h, 0, id);
+        h->root->suffix = h->base;
+    }
+
+    /* set up base edge */
+    h->baseEdge.son = h->root;
+
+    s = h->root;
+    k = p;
+
 #if DB_FONT
-    dbcstrs(h, a, end, iFont);
+    dbcstrs(h, p, pend, iFont);
 #endif
 
     /* Extend path (token by token) */
-    while (a < pend) {
-        Edge *edge = NULL; /* Suppress optimizer warning */
-        Node *w;
-        int length = h->spd->oplen(a);
-        Node *newsink = newNode(h, h->sink->misc + length, id);
+    while (p < pend) {
+        int length = OPLEN(h, p);
 
-        /* Add solid a-edge (sink, newsink) */
-        addEdge(h, h->sink, newsink, length, a);
+        r = NULL;
+        oldr = NULL;
+        e = NULL;
 
-        for (w = h->sink->suffix; w != NULL; w = w->suffix) {
-            edge = findEdge(h, w, length, a);
-            if (edge != NULL) {
-                break;
-            }
-
-            /* Make non-solid a-edge (w, newsink) */
-            addEdge(h, w, newsink, length, a);
-        }
-
-        if (w == NULL) {
-            newsink->suffix = h->root;
-        } else {
-            Node *n;
-            Node *v = edge->son;
-
-            for (n = v->suffix; n != NULL; n = n->suffix) {
-                if (n->id != id) {
-                    n->id = NODE_GLOBAL;
-                }
-            }
-
-            if (w->misc + length == v->misc) {
-                /* Edge (w, v) solid */
-                newsink->suffix = v;
-                if (v->id != id) {
-                    v->id = NODE_GLOBAL;
+        /* Update at (s,(k,p)) which is the canonical reference pair for the active point. */
+        while (!CheckEndPoint(h, s, k, p, length, id)) {
+            Node *sink;
+            if (k < p) {
+                /* implicit */
+                Node *newe = Extension(h, s, k, p);
+                if (newe == e) {
+                    Redirect(h, s, k, p, r);
+                    CANONIZE(h, s->suffix, k, p, &s, &k);
+                    continue;
+                } else {
+                    e = newe;
+                    r = SplitEdge(h, s, k, p, id);
                 }
             } else {
-                /* Split node v */
-                Node *newnode;
-                Edge *newedge;
+                /* explicit */
+                r = s;
+            }
 
-                /* Create new node */
-                newnode = newNode(h, w->misc + length,
-                                  (v->id != id) ? NODE_GLOBAL : id);
-
-                /* Change (w, v) into solid edge (w, newnode) */
-                edge->son = newnode;
-
-                /* Copy first edge as shortcut */
-                edge = &v->edge;
-                newedge = &newnode->edge;
-                newedge->label = edge->label;
-                newedge->son = edge->son;
-
-                /* Copy remaining edges as shortcuts */
-                for (edge = edge->next; edge != NULL; edge = edge->next) {
-                    newedge = newedge->next =
-                        newEdge(h, edge->label, edge->son, NULL);
+            /* create p new edge r (p,infinity) -> sink */
+            /* we furnish one sink for each font */
+            if (id >= (unsigned)h->sinks.cnt) {
+                long cnt = h->sinks.cnt;
+                dnaSET_CNT(h->sinks, id + 1);
+                while (cnt < h->sinks.cnt) {
+                    h->sinks.array[cnt++] = NULL;
                 }
+            }
+            sink = h->sinks.array[id];
+            if (!sink) {
+                sink = h->sinks.array[id] = newNode(h, 0, id);
+                sink->flags |= NODE_COUNTED;
+                sink->paths = 1;
+            }
 
-                /* Update suffix links */
-                newsink->suffix = newnode;
-                newnode->suffix = v->suffix;
-                v->suffix = newnode;
+            addEdge(h, r, sink, length, p, (unsigned int)(pend - p));
 
-                for (w = w->suffix; w != NULL; w = w->suffix) {
-                    edge = findEdge(h, w, length, a);
-                    if (edge == NULL || edge->son != v ||
-                        w->misc + length == v->misc) {
-                        break;
+            if (oldr != NULL) {
+                oldr->suffix = r;
+            }
+            oldr = r;
+            CANONIZE(h, s->suffix, k, p, &s, &k);
+        }
+
+        if (oldr != NULL) {
+            oldr->suffix = s;
+        }
+
+        /* Even though we reached an end point, we need to follow the suffix
+           link in order to mark shared nodes as NODE_GLOBAL in the case of
+           multi-fonts. */
+        if (multiFonts) {
+            Node *ss = s;
+            unsigned char *kk = k;
+            unsigned char *pp = p + length;
+            while (ss->misc != -1) {
+                CANONIZE(h, ss->suffix, kk, pp, &ss, &kk);
+                if (kk >= pp) {
+                    /* explicit */
+                    if (ss->id != id) {
+                        ss->id = NODE_GLOBAL;
                     }
-
-                    /* Redirect non-solid edge to newnode */
-                    edge->son = newnode;
                 }
             }
         }
 
+        SeparateNode(h, s, k, p + length, &s, &k, id);
+
+#if DB_TEST_STRING
+        if (p[0] == SEPARATOR) {
+            id++;
+        }
+#else
         if (font->flags & FONT_CID &&
-            a[0] == h->spd->separator &&
-            a + length < pend) {
+            p[0] == SEPARATOR &&
+            p + length < pend) {
             /* Change id for CID font on charstring boundary */
             id = iFont + *pfd++;
         }
+#endif
 
-        h->sink = newsink;
-        a += length;
+        p += length;
     }
 }
 
 /* ----------------------- Candidate Subr Selection ------------------------ */
 
+static long countPathsForNode(subrCtx h, Node *node);
+
 /* Count paths running through each node */
 static unsigned countPaths(subrCtx h, Edge *edge) {
-    Node *node = edge->son;
+    Node *node;
 
-    if (!(node->flags & NODE_COUNTED) && node != h->sink) {
+    if (edge == NULL) {
+        return 0;
+    }
+    node = edge->son;
+
+    if (!(node->flags & NODE_COUNTED)) {
         /* Count descendent paths */
-        Node *next;
-        Node *start = node;
         long count = node->paths;
 
-        /* Optimize recursion; skip over simple nodes in the path */
-        for (next = node;
-             next != NULL && next->edge.next == NULL && next->paths == 0;
-             next = node->edge.son) {
-            node = next;
-        }
-
         /* Recursively descend complex node */
-        edge = &node->edge;
-        do {
-            count += countPaths(h, edge);
-        } while ((edge = edge->next) != NULL);
+        count += countPathsForNode(h, node);
 
         /* Update node */
         node->paths = (unsigned short)((count > USHRT_MAX) ? USHRT_MAX : count);
         node->flags |= NODE_COUNTED;
-
-        /* Update skipped nodes */
-        for (; start != node; start = start->edge.son) {
-            start->paths = node->paths;
-            start->flags |= NODE_COUNTED;
-        }
     }
     return node->paths;
+}
+
+static long countPathsForNode(subrCtx h, Node *node) {
+    long count = 0;
+    unsigned i, tableSize;
+    Edge *edge = node->edgeTable;
+
+    tableSize = node->edgeTableSize;
+    for (i = 0; i < tableSize; i++, edge++) {
+        if (edge->label) {
+            count += countPaths(h, edge);
+        }
+    }
+    return count;
 }
 
 /* Test candidate subr and save if it meets candidate requirements.
@@ -639,15 +1238,15 @@ static unsigned countPaths(subrCtx h, Edge *edge) {
       8       2     1       2     2
      9-       2    >0       2    >0
  */
-static void saveSubr(subrCtx h, unsigned char *label, Node *node,
-                     int maskcnt, int tail) {
+static void saveSubr(subrCtx h, unsigned char *edgeEnd, Node *node,
+                     int maskcnt, int tail, long subrLen) {
     Subr *subr;
     unsigned count = node->paths;
 
     node->flags |= NODE_FAIL; /* Assume test will fail and mark node */
 
     /* Test for candidacy */
-    switch (node->misc - maskcnt) {
+    switch (subrLen - maskcnt) {
         case 1:
         case 2:
             return;
@@ -692,14 +1291,15 @@ static void saveSubr(subrCtx h, unsigned char *label, Node *node,
     subr->sups = NULL;
     subr->infs = NULL;
     subr->next = NULL;
-    subr->cstr = label + h->spd->oplen(label) - node->misc;
-    subr->length = (unsigned short)node->misc;
-    subr->count = count;
-    subr->deltacnt = 0;
+    subr->output = NULL;
+    subr->cstr = edgeEnd - subrLen;
+    subr->length = (uint32_t)subrLen;
+    subr->count = (uint32_t)count;
     subr->deltalen = 0;
     subr->numsize = 1;
-    subr->maskcnt = maskcnt;
+    subr->maskcnt = (short)maskcnt;
     subr->flags = 0;
+    dnaINIT(h->g->ctx.dnaCtx, subr->callList, 0, 1);
 #if DB_CALLS
     subr->calls = 0;
 #endif
@@ -712,13 +1312,23 @@ static void saveSubr(subrCtx h, unsigned char *label, Node *node,
     }
 }
 
-/* Find candidate subrs in DAWG */
+static void findCandSubrs(subrCtx h, Edge *edge, int maskcnt);
+
+static void findCandSubrsProc(subrCtx h, Edge *edge, long maskcnt, long misc) {
+    if ((long)(misc + edge->length) == edge->son->misc) {
+        /* Descend solid edge */
+        findCandSubrs(h, edge, maskcnt);
+    }
+}
+
+/* Find candidate subrs in CDAWG */
 static void findCandSubrs(subrCtx h, Edge *edge, int maskcnt) {
-    int32_t misc;
+    long misc;
     Node *node;
-    unsigned char *label;
+    unsigned char *edgeEnd;
 
     for (;;) {
+        unsigned char *pstr;
         node = edge->son;
 
         if (node->flags & NODE_TESTED || node->paths == 1) {
@@ -726,248 +1336,358 @@ static void findCandSubrs(subrCtx h, Edge *edge, int maskcnt) {
         }
         node->flags |= NODE_TESTED;
 
-        if (edge->label[0] == h->spd->endchar) {
-            if (node->paths > 1) {
-                saveSubr(h, edge->label, node, maskcnt, 1);
+        /* scan the edge string for masks and endchar */
+        pstr = edge->label;
+        edgeEnd = pstr + edge->length;
+        while (pstr < edgeEnd) {
+            int oplen = OPLEN(h, pstr);
+            if (*pstr == tx_endchar) {
+                if (node->paths > 1) {
+                    pstr += oplen;
+                    saveSubr(h, pstr, node, maskcnt, 1, (long)(node->misc - ((edge->label + edge->length) - pstr)));
+                }
+                return;
+            } else if (*pstr == t2_hintmask ||
+                       *pstr == t2_cntrmask) {
+                maskcnt++;
             }
-            return;
-        } else if (edge->label[0] == h->spd->hintmask ||
-                   edge->label[0] == h->spd->cntrmask) {
-            maskcnt++;
+            pstr += oplen;
         }
 
         misc = node->misc;
-        label = edge->label;
-        edge = &node->edge;
-        if (edge->next != NULL) {
+        if (node->edgeCount > 1) {
             goto complex;
-        } else if (node->paths > edge->son->paths) {
-            saveSubr(h, label, node, maskcnt, 0);
+        } else if (node->paths > node->edgeTable[0].son->paths) {
+            saveSubr(h, edgeEnd, node, maskcnt, 0, misc);
         }
     }
 
 complex:
-    saveSubr(h, label, node, maskcnt, 0);
-    do {
-        if (misc + h->spd->oplen(edge->label) == edge->son->misc) {
-            /* Descend solid edge */
-            findCandSubrs(h, edge, maskcnt);
-        }
-    } while ((edge = edge->next) != NULL);
-}
-
-/* Find insertion postion (ordered by offset) in call list */
-static Call *findInsertPosn(subrCtx h, unsigned offset) {
-    if (h->calls.cnt == 0) {
-        return dnaNEXT(h->calls); /* Empty list; first element */
-    } else {
-        int i = h->calls.cnt - 1;
-        Call *call = &h->calls.array[i];
-
-        if (offset > call->offset) {
-            return dnaNEXT(h->calls); /* Not in list; add to end */
-        }
-        for (;;) {
-            if (offset == call->offset) {
-                /* Found call with matching offset; return it */
-                return call;
-            } else if (--i < 0 ||
-                       (call = &h->calls.array[i], offset > call->offset)) {
-                /* Insert at [i+1] */
-                call = &dnaGROW(h->calls, h->calls.cnt)[i + 1];
-                COPY(call + 1, call, h->calls.cnt++ - (i + 1));
-                return call;
-            }
-        }
-    }
-}
-
-/* Find inferior subrs in charstring and build call list in offset order */
-static void findInfSubrs(subrCtx h, unsigned length, unsigned char *pstart,
-                         int selfMatch) {
-    Node *node = h->root;
-    unsigned char *pstr = pstart;
-    unsigned char *pend = pstart + length;
-
-    h->calls.cnt = 0;
-    do {
-        Node *suffix;
-        Call *call;
-        Subr *subr;
-        unsigned offset;
-        unsigned oplength = h->spd->oplen(pstr);
-        node = findEdge(h, node, oplength, pstr)->son;
-        pstr += oplength;
-
-#if 0
-        {
-            int depth = (node->flags & NODE_SUBR) ? h->subrs.array[node->misc].length : node->misc;
-            if (depth != pstr - pstart) {
-                printf("@@@ depth mismatch %d %d\n", depth, pstr - pstart);
-            }
-        }
-#endif
-
-        if (node->flags & NODE_SUBR && (selfMatch || pstr != pend)) {
-            /* In-path subr; reset accumulator */
-            h->calls.cnt = 0;
-            subr = &h->subrs.array[node->misc];
-            offset = 0;
-            goto save;
-        }
-
-        for (suffix = node->suffix; suffix != NULL; suffix = suffix->suffix) {
-            if (suffix->flags & NODE_SUBR) {
-                /* Suffix subr; compute offset */
-                subr = &h->subrs.array[suffix->misc];
-                offset = pstr - pstart - subr->length;
-                goto save;
-            } else if (!(suffix->flags & NODE_FAIL)) {
-                break; /* Can't be another subr on suffix chain */
-            }
-        }
-        continue;
-
-        /* Save/update record */
-    save:
-        call = findInsertPosn(h, offset);
-        call->subr = subr;
-        call->offset = offset;
-    } while (pstr < pend);
-
-#if DB_INFS
-    {
-        int i;
-        for (i = 0; i < h->calls.cnt; i++) {
-            Call *call = &h->calls.array[i];
-            dbsubr(h, call->subr - h->subrs.array, 'i', call->offset);
-        }
-    }
-#endif
-}
-
-/* Reduce overlapped subr and reduce inferiors that also overlap */
-static void reduceSubr(subrCtx h, Subr *subr, unsigned offset, unsigned count) {
-    Link *inf;
-
-    /* Update subr */
-    if (subr->count < count) {
-#if DB_OVLPS
-        printf("--- negative count\n");
-#endif
-        subr->count = 0;
-    } else {
-        subr->count -= count;
-    }
-    subr->flags |= SUBR_OVERLAP;
-
-#if DB_OVLPS
-    printf("reduce subr (offset=%u,count=%u)\n", offset, count);
-    dbsubr(h, subr - h->subrs.array, 'r', 0);
-#endif
-
-#if 0
-    /* Check for inferior that ends on offset */
-    for (inf = subr->infs; inf != NULL; inf = inf->next) {
-        if (inf->offset + inf->subr->length == offset) {
-            return; /* Inferior subrs reduced on this offset elsewhere */
-        } else if (inf->offset > offset) {
-            break;
-        }
-    }
-#endif
-
-    /* Reduce inferiors */
-    for (inf = subr->infs; inf != NULL; inf = inf->next) {
-        if (inf->offset >= offset) {
-            break;
-        } else if (inf->offset + inf->subr->length > (unsigned short)offset) {
-            reduceSubr(h, inf->subr, offset - inf->offset, count);
-        }
-    }
+    saveSubr(h, edgeEnd, node, maskcnt, 0, misc);
+    walkEdgeTable(h, node, findCandSubrsProc, maskcnt, misc);
 }
 
 /* Calculate byte savings for this subr. See candSubr() for details */
-static long subrSaved(subrCtx h, Subr *subr) {
-    unsigned length = subr->length - subr->maskcnt;
+static int subrSaved(subrCtx h, Subr *subr) {
+    int length = subr->length - subr->maskcnt;
     return subr->count * (length - CALL_OP_SIZE - subr->numsize) -
            (h->offSize + length + ((subr->node->flags & NODE_TAIL) == 0));
 }
 
-/* Handle inferior subr overlap */
-static void handleOverlap(subrCtx h, Call *first, Call *second, int supcount) {
-    Subr *initial = first->subr; /* Initial (first) overlapping subr */
-    Subr *final = second->subr;  /* Final (second) overlapping subr */
+/* ----------------------- Subr match trie ----------------------- */
 
-#if DB_OVLPS
-    printf("--- overlap (supcount=%d)\n", supcount);
-    dbsubr(h, first->subr - h->subrs.array, 'o', first->offset);
-    dbsubr(h, second->subr - h->subrs.array, 'o', second->offset);
-#endif
+/* Set up suffix links */
+static void setTrieSuffixProc(subrCtx h, Edge *edge, long param1, long param2) {
+    Node *node = edge->son;
+    Node *state;
+    Edge *suffixEdge = NULL;
 
-    if (subrSaved(h, initial) < subrSaved(h, final)) {
-        if (!(initial->flags & SUBR_REDUCE)) {
-            /* Reduce initial and its inferiors in the overlap region */
-            reduceSubr(h, initial, second->offset - first->offset, supcount);
-            initial->flags |= SUBR_REDUCE;
+    /* Append this node to the queue for later processing of its children */
+    h->trieQueue->next = newNodeLink(h, node, NULL);
+    h->trieQueue = h->trieQueue->next;
+    if (h->trieParent == h->trieRoot)
+        return;
+
+    state = h->trieParent->suffix;
+
+    for (;;) {
+        if (!state)
+            state = h->trieRoot;
+        suffixEdge = findEdge(h, state, edge->length, edge->label);
+        if (suffixEdge) {
+            node->suffix = suffixEdge->son;
+            break;
         }
-    } else {
-        if (!(final->flags & SUBR_REDUCE)) {
-            /* Reduce final and its inferiors in the overlap region */
-            reduceSubr(h, final, initial->length - (second->offset - first->offset), supcount);
-            final->flags |= SUBR_REDUCE;
-        }
+        if (state == h->trieRoot)
+            return;
+
+        state = state->suffix;
+    }
+
+    /* Chain the output subr of this node to the ouput subr of the suffix node */
+    if (node->misc >= 0) {
+        Subr *subr = &h->subrs.array[node->misc];
+
+        if (node->suffix->misc >= 0)
+            subr->output = &h->subrs.array[node->suffix->misc];
+    } else
+        node->misc = node->suffix->misc;
+}
+
+/* Update each suffix link with the pointer to the next node */
+static void setTrieNextProc(subrCtx h, Edge *edge, long param1, long param2) {
+    Node *node = edge->son;
+    Node *suffix;
+    Edge *suffixEdge = NULL;
+
+    /* Append this node to the queue for later processing of its children */
+    h->trieQueue->next = newNodeLink(h, node, NULL);
+    h->trieQueue = h->trieQueue->next;
+    if (h->trieParent == h->trieRoot)
+        return;
+
+    suffix = h->trieParent->suffix;
+    if (!suffix)
+        suffix = h->trieRoot;
+    suffixEdge = findEdge(h, suffix, edge->length, edge->label);
+    if (!suffixEdge) {
+        if (suffix == h->trieRoot)
+            return;
+
+        suffixEdge = findEdge(h, suffix, edge->length, edge->label);
+        if (suffixEdge)
+            node->suffix = suffixEdge->son;
+        else
+            node->suffix = NULL;
     }
 }
 
-/* Check for and handle inferior subr overlap */
-static void checkOverlap(subrCtx h, int supcount) {
-    int i;
-    int overlap = 0;
+/* Build a subr match trie using Aho-Corasick algorithm */
+static void buildSubrMatchTrie(subrCtx h) {
+    long i;
+    NodeLink *link;
+    Node *node;
 
-    for (i = 0; i < h->calls.cnt - 1; i++) {
-        int j;
-        Call *first = &h->calls.array[i];
-        unsigned nextfree = first->offset + first->subr->length;
+    h->trieRoot = newTrieNode(h, 0);
 
-        for (j = i + 1; j < h->calls.cnt; j++) {
-            Call *second = &h->calls.array[j];
-            if (nextfree > second->offset) {
-                /* Found overlap; edit subrs in conflict */
-                handleOverlap(h, first, second, supcount);
-                overlap = 1;
+    /* Add all subrs to the trie */
+    for (i = 0; i < h->subrs.cnt; i++) {
+        Subr *subr = &h->subrs.array[i];
+        unsigned char *pstr, *pend;
+        long oplen;
+        long depth;
+
+        node = h->trieRoot;
+        pstr = subr->cstr;
+        pend = pstr + subr->length;
+        for (depth = 1; pstr < pend; pstr += oplen, depth++) {
+            Edge *edge;
+
+            oplen = OPLEN(h, pstr);
+            edge = findEdge(h, node, oplen, pstr);
+            if (edge) {
+                node = edge->son;
             } else {
+                Node *son = newTrieNode(h, depth);
+                addEdge(h, node, son, oplen, pstr, oplen);
+                node = son;
+            }
+        }
+        node->misc = (long)(subr - h->subrs.array); /* store output subr index in the trie node */
+    }
+
+    /* Set up suffix links */
+    reuseObjects(h->g, &h->nodeLinkBlks);
+    link = h->trieQueue = newNodeLink(h, h->trieRoot, NULL);
+    for (; link; link = link->next) {
+        h->trieParent = link->node;
+        walkEdgeTable(h, link->node, setTrieSuffixProc, 0, 0);
+    }
+
+    /* Update each suffix link with the pointer to the next node */
+    reuseObjects(h->g, &h->nodeLinkBlks);
+    link = h->trieQueue = newNodeLink(h, h->trieRoot, NULL);
+    for (; link; link = link->next) {
+        h->trieParent = link->node;
+        walkEdgeTable(h, link->node, setTrieNextProc, 0, 0);
+    }
+}
+
+/* List up all subrs matching the given string against the subr match trie */
+static void listUpSubrMatches(subrCtx h, unsigned char *pstart, long length, int buildPhase, int selfMatch,
+                              unsigned id, short subrDepth, CallList *callList) {
+    Node *node = h->trieRoot;
+    unsigned char *pstr, *pend = pstart + length;
+    int oplen;
+    Edge *edge;
+
+    for (pstr = pstart; pstr < pend; pstr += oplen) {
+        oplen = OPLEN(h, pstr);
+
+        for (;;) {
+            edge = findEdge(h, node, oplen, pstr);
+            if (edge) {
+                node = edge->son;
                 break;
+            } else {
+                node = node->suffix;
+                if (!node)
+                    break;
+            }
+        }
+
+        if (!node) {
+            node = h->trieRoot;
+            continue;
+        }
+        if (node->misc >= 0) {
+            Subr *subr = &h->subrs.array[node->misc];
+
+            for (; subr; subr = subr->output) {
+                long offset;
+
+                if (buildPhase) {
+                    if ((subr->flags & SUBR_MARKED) != SUBR_SELECT)
+                        continue;
+                    if (subr->node->id != NODE_GLOBAL && subr->node->id != id)
+                        continue;
+                }
+
+                offset = (long)(pstr - pstart + oplen - subr->length);
+                if ((offset >= 0) && (offset + subr->length <= length)) {
+                    Call *c;
+
+                    if (!selfMatch && offset == 0 && offset + subr->length == length)
+                        continue;
+                    /* respect the max subr stack depth observed by checkSubrStackOvl */
+                    if ((subrDepth >= 0) && (subrDepth <= subr->misc))
+                        continue;
+
+                    c = dnaNEXT(*callList);
+                    c->subr = subr;
+                    c->subr->order = callList->cnt;
+                    c->offset = (uint32_t)offset;
+                }
             }
         }
     }
+}
 
-    if (overlap) {
-        /* Remove reduced attribute from overlapped subrs */
-        for (i = 0; i < h->calls.cnt; i++) {
-            h->calls.array[i].subr->flags &= ~SUBR_REDUCE;
+/* Compare subr calls by length (longest first) then by offset (smallest first) */
+static int CTL_CDECL cmpSubrLengths(const void *first, const void *second) {
+    Call *a = (Call *)first;
+    Call *b = (Call *)second;
+    if (a->subr->length != b->subr->length)
+        return (int)b->subr->length - (int)a->subr->length;
+    else if (a->offset != b->offset)
+        return (int)a->offset - (int)b->offset;
+    else
+        return (int)b->subr->order - (int)a->subr->order;
+}
+
+/* Scan charstring and build call list of subrs */
+/* The same function is called with buildPhase = 0 for setting subr count duing
+   overlap handling phase and called with buildPhase = 1 for building call list.
+
+   The code looks for subrs with the longest length first, then try to cover
+   a given charstring. During the following iterations shorter subrs are tried
+   to fill gaps (if we apply the same logic to each gap recursively, we can get
+   the most optimal result). Lists are created and are tried to fill their gaps in
+   the order of the subr size. All subrs including those inferior to others are tried.
+   If a subr can't fit in any gap in lists, then a new list is created for it.
+   At the end, the most space saving list of subrs is selected as the call list.
+   The call list may not contain the longest inferior subr for the given charstring
+   as the result.
+
+   TODO: If this approach works well the overlap handling phase should be rewritten
+   using the same logic in order to resolve the logic disparity between the two phases.
+ */
+
+static void buildCallList(subrCtx h, int buildPhase, unsigned length, unsigned char *pstart,
+                          int selfMatch, unsigned id, short subrDepth,
+                          CallList *callList) {
+    // unsigned char *pend = pstart + length;
+    unsigned i, j;
+    CallList candList;
+
+    /* List up all matching subrs */
+    dnaINIT(h->g->ctx.dnaCtx, candList, 100, 100);
+    listUpSubrMatches(h, pstart, length, buildPhase, selfMatch, id, subrDepth, &candList);
+    qsort(candList.array, candList.cnt, sizeof(Call), cmpSubrLengths);
+
+    /* Try to fill lists with longest subrs first */
+    dnaSET_CNT(*callList, 0);
+    for (i = 0; i < (unsigned)candList.cnt; i++) {
+        Call *c = &candList.array[i];
+        Subr *subr = c->subr;
+        unsigned subrEndOffset = c->offset + subr->length;
+
+        /* Try to fill a gap in calls array */
+        unsigned cnt;
+        int overlap = 0;
+        cnt = callList->cnt;
+
+        for (j = 0; j < cnt; j++) {
+            Call *call = &callList->array[j];
+            if (subrEndOffset <= call->offset) {
+                /* found gap before at j'th call */
+                break;
+            }
+            if (subrEndOffset > call->offset && c->offset < (unsigned)call->offset + call->subr->length) {
+                /* overlap */
+                overlap = 1;
+                break;
+            }
+            if (c->offset < call->offset + (unsigned)call->subr->length && subrEndOffset > call->offset) {
+                /* overlap */
+                overlap = 1;
+                break;
+            }
         }
+
+        /* insert the subr into this gap */
+        if (!overlap) {
+            dnaSET_CNT(*callList, cnt + 1);
+            memmove(&callList->array[j + 1], &callList->array[j], sizeof(Call) * (cnt - j));
+            callList->array[j] = *c;
+        }
+    }
+
+    dnaFREE(candList);
+
+    for (i = 0; i < (unsigned)callList->cnt; i++) {
+        Call *call = &callList->array[i];
+        call->subr->count++;
+#if DB_ASSOC
+        dbsubr(h, call->subr - h->subrs.array, 'i', call->offset);
+#endif
+    }
+
+#if DB_INFS
+    if (buildPhase && callList->cnt != 0) {
+        int j;
+        for (j = 0; j < callList->cnt; j++) {
+            Call *call = &callList->array[j];
+            if (call->subr != NULL) {
+                dbsubr(h, call->subr - h->subrs.array, 'y', call->offset);
+            }
+        }
+    }
+#endif
+}
+
+/* Reset subr count */
+static void resetSubrCount(subrCtx h, unsigned id) {
+    long i;
+    Subr *subr;
+
+    for (i = 0; i < h->subrs.cnt; i++) {
+        subr = &h->subrs.array[i];
+        if (subr->node->id == id || id == NODE_ANY)
+            subr->count = 0;
     }
 }
 
-/* Scan subrs and find inferiors to each subr */
-static void addSubrRelns(subrCtx h) {
-    long i;
+/* Renamed from setSubrActCount, since set call count are
+ * more like estimate at this point */
+static void setSubrTentativeCount(subrCtx h) {
+    long i, j;
+    Subr *subr;
+    Link *infs;
 
-#if DB_RELNS
-    printf("--- subrs (subrs marked with -)\n");
+#if DB_ASSOC
+    printf("--- assoc subrs with subrs\n");
 #endif
 
-    for (i = 0; i < h->subrs.cnt; i++) {
-        int j;
-        Link *infs;
-        Subr *subr = &h->subrs.array[i];
+    resetSubrCount(h, NODE_ANY);
 
-#if DB_RELNS
+    /* Make call list for each subr and set actual call count in each */
+    for (i = 0; i < h->subrs.cnt; i++) {
+#if DB_ASSOC || DB_RELNS
         dbsubr(h, i, '-', 0);
 #endif
-
-        findInfSubrs(h, subr->length, subr->cstr, 0);
+        subr = &h->subrs.array[i];
+        buildCallList(h, 0, subr->length, subr->cstr, 0, 0, -1, &h->calls);
 
         infs = NULL;
         for (j = h->calls.cnt - 1; j >= 0; j--) {
@@ -982,57 +1702,41 @@ static void addSubrRelns(subrCtx h) {
         }
         subr->infs = infs;
     }
+}
 
-#if DB_OVLPS
-    printf("--- subr overlaps\n");
-#endif
+static void sortInfSubrs(subrCtx h) {
+    long i;
+    Subr *subr;
 
-    /* Check all subrs for overlap */
+    /* Cache the subrSaved value for use during sort below */
     for (i = 0; i < h->subrs.cnt; i++) {
-        int j;
-        Link *inf;
-        Subr *subr = &h->subrs.array[i];
-
-        /* Build inferior subr call array */
-        j = 0;
-        for (inf = subr->infs; inf != NULL; inf = inf->next) {
-            Call *call = &h->calls.array[j++];
-            call->subr = inf->subr;
-            call->offset = inf->offset;
-        }
-        if (j > 1) {
-            h->calls.cnt = j;
-            checkOverlap(h, subr->count);
-        }
+        subr = &h->subrs.array[i];
+        subr->misc = (short)subrSaved(h, subr);
     }
 
     /* Reorder inferiors by savings (largest first) */
     for (i = 0; i < h->subrs.cnt; i++) {
-        Subr *subr = &h->subrs.array[i];
         Link *head; /* Head if inferior list */
+        subr = &h->subrs.array[i];
 
         /* Sort list in-place */
         for (head = subr->infs; head != NULL; head = head->next) {
-            Link *try
-                = head->next;
-            if (try == NULL) {
+            Link *try_ = head->next;
+            if (try_ == NULL) {
                 break; /* End of list */
             } else {
                 Link *best = NULL;
-                int max = subrSaved(h, head->subr);
+                int max = head->subr->misc;
 
                 /* Find best inferior subr in remainder of list */
                 do {
-                    int saved = subrSaved(h, try->subr);
+                    int saved = try_->subr->misc;
                     if (saved > max) {
-                        best = try
-                            ;
+                        best = try_;
                         max = saved;
                     }
-                    try
-                        = try
-                            ->next;
-                } while (try != NULL);
+                    try_ = try_->next;
+                } while (try_ != NULL);
 
                 if (best != NULL) {
                     /* Swap "head" and "best" nodes */
@@ -1051,110 +1755,24 @@ static void addSubrRelns(subrCtx h) {
     }
 }
 
-#if 0
-/* Experimental dawg traversal that may be much more efficient than tracing
-   charstrings through the dawg when finished. */
-static void xfindSubrRelns(subrCtx h, Edge *edge, long initdepth) {
-    Node *node;
-    long depth;
-    Node *son = edge->son;
-    long sondepth = (son->flags & NODE_SUBR) ? h->subrs.array[son->misc].length : son->misc;
-
-    while (son != h->sink) {
-#if 0
-        printf("%ld:%ld-%d ", initdepth, node->misc, oplen(edge->label));
-        dbcstr(h, node->misc - initdepth,
-               edge->label + oplen(edge->label) - (node->misc - initdepth));
-        printf("\n");
-#endif
-        node = son;
-        depth = sondepth;
-
-        if (node->flags & NODE_SUBR) {
-            dbsubr(h, node->misc, 'n', 0);
-        } else {
-            Node *suf;
-
-            for (suf = node->suffix; suf != NULL; suf = suf->suffix) {
-                if (suf->flags & NODE_SUBR) {
-                    /* Suffix subr */
-                    /*dbsubr(h, suf->misc, 'x', 0);*/
-                    break;
-                } else if (!(suf->flags & NODE_FAIL)) {
-                    break; /* Can't be another subr on suffix chain */
-                }
-            }
-        }
-
-#if 1
-        if (edge->label[0] == tx_endchar) {
-            printf("%ld: ", initdepth);
-            dbcstr(h, node->misc - initdepth,
-                   edge->label + 1 - (node->misc - initdepth));
-            printf("\n");
-            initdepth = node->misc + 4;
-            return;
-        }
-#endif
-        edge = &node->edge;
-
-        if (edge->next != NULL) {
-            do {
-                if (depth + h->spd->oplen(edge->label) ==
-                    ((edge->son->flags & NODE_SUBR) ? h->subrs.array[edge->son->misc].length : edge->son->misc)) {
-                    /* Descend solid edge */
-                    xfindSubrRelns(h, edge, initdepth);
-                }
-            } while ((edge = edge->next) != NULL);
-            return;
-        } else {
-            son = edge->son;
-            sondepth = (son->flags & NODE_SUBR) ? h->subrs.array[son->misc].length : son->misc;
-
-            if (depth + h->spd->oplen(edge->label) != sondepth) {
-                return;
-            }
-        }
-    }
-}
-
-#endif
-
 /* Select candidate subrs */
 static void selectCandSubrs(subrCtx h) {
-    Node *sink;
-    Edge *edge;
-
-    /* Count all path termination nodes by traversing suffix list from sink */
-    for (sink = h->sink; sink->suffix != NULL; sink = sink->suffix) {
-        sink->paths++;
-    }
-
     /* Count paths */
-    for (edge = &h->root->edge; edge != NULL; edge = edge->next) {
-        (void)countPaths(h, edge);
-    }
+    (void)countPathsForNode(h, h->root);
 
     /* Find candidate subrs */
     h->subrs.cnt = 0;
-    for (edge = &h->root->edge; edge != NULL; edge = edge->next) {
-        if (h->spd->oplen(edge->label) == edge->son->misc) {
-            findCandSubrs(h, edge, 0);
-        }
-    }
+    walkEdgeTable(h, h->root, findCandSubrsProc, 0, 0);
 
 #if 0
     printf("--- xfindSubrRelns\n");
     h->tmp.cnt = 0;
     for (edge = &h->root->edge; edge != NULL; edge = edge->next) {
-        if (oplen(edge->label) == edge->son->misc) {
+        if (OPLEN(h, edge->label) == edge->son->misc) {
             xfindSubrRelns(h, edge, 0);
         }
     }
 #endif
-
-    /* Add subr reletionships */
-    addSubrRelns(h);
 }
 
 /* ----------------------- Associate Subrs With Font ----------------------- */
@@ -1163,8 +1781,8 @@ static void selectCandSubrs(subrCtx h) {
 static void assocSubrs(subrCtx h) {
     int i;
 
-#if DB_OVLPS
-    printf("--- char overlaps\n");
+#if DB_ASSOC
+    printf("--- assoc chars with subrs\n");
 #endif
 
     for (i = 0; i < h->nFonts; i++) {
@@ -1176,16 +1794,14 @@ static void assocSubrs(subrCtx h) {
         for (j = 0; j < font->chars.nStrings; j++) {
             long nextoff = font->chars.offset[j];
 
-#if DB_INFS
+#if DB_ASSOC
             printf("[%3d:%4ld]  ", i, j);
             dbcstr(h, nextoff - offset,
-                   (unsigned char *)&font->chars.data[offset]);
+                   (unsigned char *)&FONT_CHARS_DATA[offset]);
             printf("\n");
 #endif
 
-            findInfSubrs(h, nextoff - offset,
-                         (unsigned char *)&font->chars.data[offset], 1);
-            checkOverlap(h, 1);
+            buildCallList(h, 0, nextoff - offset, (unsigned char *)&FONT_CHARS_DATA[offset], 1, 0, -1, &h->calls);
 
             offset = nextoff;
         }
@@ -1200,7 +1816,7 @@ static void prints(Subr *subr) {
     if (subr->flags & SUBR_MEMBER) {
         c -= 'a' - 'A';
     }
-    printf("%ld%c", subrSaved(ctx, subr), c);
+    printf("%d%c", subrSaved(ctx, subr), c);
     if (subr->flags & SUBR_SELECT) {
         printf("s ");
     } else if (subr->flags & SUBR_REJECT) {
@@ -1257,13 +1873,17 @@ static void addMember(subrCtx h, Subr *subr) {
             /* Add member and mark subr to avoid reselection */
             *dnaNEXT(h->members) = subr;
             subr->flags |= SUBR_MEMBER;
+            subr->order = h->members.cnt;
 
             for (link = subr->sups; link != NULL; link = link->next) {
                 /* Add superior member to temporary list*/
                 list[listlength++] = link->subr;
                 if (listlength >= LISTSIZE) {
+#if TC_DEBUG
                     fprintf(stderr, "Typecomp Error: List Overflow\n");
+#endif
                     free(list);
+                    dnaFREE(subrStack);
                     return;
                 }
             }
@@ -1271,8 +1891,11 @@ static void addMember(subrCtx h, Subr *subr) {
                 /* Add inferior member to temporary list*/
                 list[listlength++] = link->subr;
                 if (listlength >= LISTSIZE) {
+#if TC_DEBUG
                     fprintf(stderr, "Typecomp Error: List Overflow\n");
+#endif
                     free(list);
+                    dnaFREE(subrStack);
                     return;
                 }
             }
@@ -1291,7 +1914,7 @@ static void addMember(subrCtx h, Subr *subr) {
 
 /* Compare social group member subrs for a global subr set. Global subrs are
    sorted before local subrs, largest saving first. */
-static int CDECL cmpGlobalSetSubrs(const void *first, const void *second) {
+static int CTL_CDECL cmpGlobalSetSubrs(const void *first, const void *second) {
     Subr *a = *(Subr **)first;
     Subr *b = *(Subr **)second;
     if (a->node->id == NODE_GLOBAL) {
@@ -1300,6 +1923,11 @@ static int CDECL cmpGlobalSetSubrs(const void *first, const void *second) {
             int asaved = subrSaved(ctx, a);
             int bsaved = subrSaved(ctx, b);
             if (asaved > bsaved) {
+                return -1;
+            } else if (a->order > b->order) {
+                /* Preserve original order */
+                return 1;
+            } else if (a->order < b->order) {
                 return -1;
             } else if (asaved < bsaved) {
                 return 1;
@@ -1313,6 +1941,11 @@ static int CDECL cmpGlobalSetSubrs(const void *first, const void *second) {
     } else if (b->node->id == NODE_GLOBAL) {
         /* local global */
         return 1;
+    } else if (a->order > b->order) {
+        /* Preserve original order */
+        return 1;
+    } else if (a->order < b->order) {
+        return -1;
     } else {
         /* local local */
         return 0;
@@ -1323,19 +1956,25 @@ static int CDECL cmpGlobalSetSubrs(const void *first, const void *second) {
    subrs are sorted before local subrs which are sorted before rejected global
    subrs. Selected global and unselected local subrs are further sorted by
    largest savings first. */
-static int CDECL cmpLocalSetSubrs(const void *first, const void *second) {
+static int CTL_CDECL cmpLocalSetSubrs(const void *first, const void *second) {
     Subr *a = *(Subr **)first;
     Subr *b = *(Subr **)second;
     switch ((a->flags & SUBR_MARKED) << 2 | (b->flags & SUBR_MARKED)) {
-                  /* a-subr         b-subr          */
-        case 0:   /* local          local           */
-        case 5: { /* global.select  global.select   */
+            /* a-subr         b-subr        */
+        case 0: /* local          local         */
+        case 5: /* global.select  global.select */
+        {
             int asaved = subrSaved(ctx, a);
             int bsaved = subrSaved(ctx, b);
             if (asaved > bsaved) {
                 return -1;
             } else if (asaved < bsaved) {
                 return 1;
+            } else if (a->order > b->order) {
+                /* Preserve original order */
+                return 1;
+            } else if (a->order < b->order) {
+                return -1;
             } else {
                 return 0;
             }
@@ -1351,11 +1990,14 @@ static int CDECL cmpLocalSetSubrs(const void *first, const void *second) {
         case 6: /* global.select  global.reject */
             return -1;
 
-        case 10: /* global.reject  global.reject */
+        case 10: /* global.reject global.reject */
             return 0;
 
         default:
+#if TC_DEBUG
             printf("cmpLocalSetSubrs() can't happen!\n");
+#endif
+            break;
     }
     return 0; /* Suppress compiler warning */
 }
@@ -1363,7 +2005,7 @@ static int CDECL cmpLocalSetSubrs(const void *first, const void *second) {
 /* Find social groups for global or local subr set. */
 static void findGroups(subrCtx h, unsigned id) {
     long i;
-    int(CDECL * cmpSubrs)(const void *first, const void *second) =
+    int(CTL_CDECL * cmpSubrs)(const void *first, const void *second) =
         (id == NODE_GLOBAL) ? cmpGlobalSetSubrs : cmpLocalSetSubrs;
 
     h->leaders.cnt = 0;
@@ -1400,45 +2042,27 @@ static void findGroups(subrCtx h, unsigned id) {
     }
 }
 
-/* Update inferior counts */
-static void updateInfs(subrCtx h, Subr *subr, int deltacnt, unsigned id) {
-    Link *link;
-
-    for (link = subr->infs; link != NULL; link = link->next) {
-        Subr *inf = link->subr;
-        if (!(inf->flags & (SUBR_MARKED | SUBR_OVERLAP)) && inf->node->id == id) {
-#if DB_SELECT
-            printf("updateInfs([%d]->[%d],%d) deltacnt=%d\n",
-                   subr - h->subrs.array, inf - h->subrs.array,
-                   deltacnt, inf->deltacnt + deltacnt);
-#endif
-            updateInfs(h, inf, deltacnt, id);
-            inf->deltacnt += deltacnt;
-        }
-    }
-}
-
 /* Update superior lengths */
 static void updateSups(subrCtx h, Subr *subr, int deltalen, unsigned id) {
     Link *link;
 
     for (link = subr->sups; link != NULL; link = link->next) {
         Subr *sup = link->subr;
-        if (!(sup->flags & (SUBR_MARKED | SUBR_OVERLAP)) && sup->node->id == id) {
+        if (!(sup->flags & SUBR_MARKED) && sup->node->id == id) {
 #if DB_SELECT
             printf("updateSups([%d]->[%d],%d) deltalen=%d\n",
                    subr - h->subrs.array, sup - h->subrs.array,
                    deltalen, sup->deltalen + deltalen);
 #endif
             updateSups(h, sup, deltalen, id);
-            sup->deltalen += deltalen;
+            sup->deltalen += (short)deltalen;
         }
     }
 }
 
 /* Select subr */
 static void selectSubr(subrCtx h, Subr *subr) {
-    int count = subr->count + subr->deltacnt;
+    uint32_t count = subr->count;
     int length = subr->length - subr->maskcnt + subr->deltalen;
     int saved = count * (length - CALL_OP_SIZE - subr->numsize) -
                 (h->offSize + length + ((subr->node->flags & NODE_TAIL) == 0));
@@ -1451,20 +2075,20 @@ static void selectSubr(subrCtx h, Subr *subr) {
     if (saved > 0) {
         /* Select subr */
         unsigned id = subr->node->id;
-        int deltacnt = 1 - subr->count - subr->deltacnt;
         int deltalen = subr->numsize + CALL_OP_SIZE - subr->length -
                        subr->deltalen;
 
+        subr->flags &= ~SUBR_REJECT;
         subr->flags |= SUBR_SELECT;
 
 #if DB_SELECT
-        printf("select=%d, deltacnt=%d, deltalen=%d\n",
-               saved, deltacnt, deltalen);
+        printf("select=%d, deltalen=%d\n",
+               saved, deltalen);
 #endif
-        updateInfs(h, subr, deltacnt, id);
         updateSups(h, subr, deltalen, id);
     } else {
         /* Reject subr */
+        subr->flags &= ~SUBR_SELECT;
         subr->flags |= SUBR_REJECT;
 #if DB_SELECT
         printf("reject\n");
@@ -1488,7 +2112,6 @@ static void selectLocalSubrs(subrCtx h, Subr *subr, unsigned id) {
     for (; subr != NULL; subr = subr->next) {
         if (subr->node->id == NODE_GLOBAL) {
             if (subr->flags & SUBR_SELECT) {
-                updateInfs(h, subr, 1 - subr->count, id);
                 updateSups(h, subr, subr->numsize + CALL_OP_SIZE - subr->length, id);
             } else {
                 return; /* Quit on first rejected global subr */
@@ -1500,7 +2123,7 @@ static void selectLocalSubrs(subrCtx h, Subr *subr, unsigned id) {
 }
 
 /* Compare subr calls by selection/saved/length/frequency */
-static int CDECL cmpSubrFitness(const void *first, const void *second) {
+static int CTL_CDECL cmpSubrFitness(const void *first, const void *second) {
     Subr *a = *(Subr **)first;
     Subr *b = *(Subr **)second;
     int aselect = (a->flags & SUBR_SELECT) != 0;
@@ -1523,6 +2146,11 @@ static int CDECL cmpSubrFitness(const void *first, const void *second) {
             return -1;
         } else if (a->count < b->count) {
             return 1;
+        } else if (a->order > b->order) {
+            /* Preserve original order */
+            return 1;
+        } else if (a->order < b->order) {
+            return -1;
         } else {
             return 0;
         }
@@ -1534,24 +2162,32 @@ static int CDECL cmpSubrFitness(const void *first, const void *second) {
 }
 
 /* Check for subr stack depth overflow */
-static void checkSubrStackOvl(subrCtx h, Subr *subr, int depth) {
+static void checkSubrStackOvl(subrCtx h, Subr *subr, int depth, unsigned id) {
     Link *sup;
 
-    if (subr->flags & SUBR_SELECT) {
+    if ((subr->flags & SUBR_MARKED) == SUBR_SELECT) {
+        /* No need to check this subr if it is local and has been checked with this or deeper stack */
+        if (depth <= subr->misc && (subr->node->id != NODE_GLOBAL || id == NODE_GLOBAL)) {
+            return;
+        }
+
+        if (depth > subr->misc)
+            subr->misc = (short)depth;
         depth++; /* Bump depth for selected subrs only */
 
-        if (depth >= h->spd->maxCallStack) {
+        if (depth >= TX_MAX_CALL_STACK) {
             /* Stack depth exceeded; reject subr */
             subr->flags &= ~SUBR_SELECT;
             subr->flags |= SUBR_REJECT;
             depth--;
             h->subrStackOvl = 1;
+            subr->misc = (short)depth;
         }
     }
 
     /* Recursively ascend superior subrs */
     for (sup = subr->sups; sup != NULL; sup = sup->next) {
-        checkSubrStackOvl(h, sup->subr, depth);
+        checkSubrStackOvl(h, sup->subr, depth, id);
     }
 }
 
@@ -1563,6 +2199,12 @@ static void selectFinalSubrSet(subrCtx h, unsigned id) {
     long nSelected = 0;                    /* Suppress optimizer warning */
     int multiplier = h->singleton ? 2 : 1; /* Range multiplier */
     int pass = 0;
+    long limit = h->maxNumSubrs;
+
+    if (limit == 0) {
+        limit = MAX_NUM_SUBRS;
+    }
+    limit = limit * multiplier;
 
     findGroups(h, id); /* Find social groups (related subrs) */
 
@@ -1577,7 +2219,7 @@ reselect:
             /* Select/reject hermit subr */
             subr->flags |= (subrSaved(h, subr) > 0) ? SUBR_SELECT : SUBR_REJECT;
 #if DB_SELECT
-            printf("%s=%ld\n", (subr->flags & SUBR_SELECT) ? "select" : "reject",
+            printf("%s=%d\n", (subr->flags & SUBR_SELECT) ? "select" : "reject",
                    subrSaved(h, subr));
 #endif
         } else {
@@ -1589,13 +2231,19 @@ reselect:
     dbgroups(h);
 #endif
 
-    /* Remove membership so globals may be selected in other local sets and */
-    /* check for and handle subr call stack overflow                        */
+    /* Reset misc field for storing subr call depth by checkSubrStackOvl */
+    for (i = 0; i < h->tmp.cnt; i++) {
+        h->tmp.array[i]->misc = -1;
+        h->tmp.array[i]->order = i;
+    }
+
+    /* Remove membership so globals may be selected in other local sets and
+       check for and handle subr call stack overflow */
     for (i = 0; i < h->leaders.cnt; i++) {
         Subr *subr;
         for (subr = h->leaders.array[i]; subr != NULL; subr = subr->next) {
             if (subr->infs == NULL) {
-                checkSubrStackOvl(h, subr, 0);
+                checkSubrStackOvl(h, subr, 0, id);
             }
             subr->flags &= ~SUBR_MEMBER;
         }
@@ -1606,46 +2254,36 @@ reselect:
 
     /* Find last selected subr */
     for (i = h->tmp.cnt - 1; i >= 0; i--) {
-        if (h->tmp.array[i]->flags & SUBR_SELECT) {
+        if ((h->tmp.array[i]->flags & SUBR_MARKED) == SUBR_SELECT) {
             nSelected = i + 1;
             break;
         }
     }
 
-    if (++pass == 2) {
-#if 1
-        /* Discard extra subrs if exceeds capacity */
-        int32_t limit = h->g->maxNumSubrs;
-        if (limit == 0) {
-            limit = 65536L;
+    if (nSelected >= limit) {
+        for (i = limit; i < nSelected; i++) {
+            h->tmp.array[i]->flags &= ~SUBR_SELECT;
+            h->tmp.array[i]->flags |= SUBR_REJECT;
         }
-        limit = limit * multiplier;
+        h->tmp.cnt = nSelected = limit;
+    } else {
+        h->tmp.cnt = nSelected;
+    }
 
-        if (nSelected >= limit) {
-            for (i = limit; i < nSelected; i++) {
-                h->tmp.array[i]->flags &= ~SUBR_SELECT;
-                h->tmp.array[i]->flags |= SUBR_REJECT;
-            }
-            h->tmp.cnt = limit;
-        } else {
-            h->tmp.cnt = nSelected;
-        }
-#else /* original code before I added h->g->maxNumSubrs */
-        h->tmp.cnt =
-            (nSelected > 65536L * multiplier) ? 65536L * multiplier : nSelected;
-#endif
+    if (++pass == 2) {
         return;
     } else if (nSelected < 215 * multiplier) {
-        /* All subrs fit into first 1-byte range. Since we don't have to */
-        /* increase the index number size, for any subroutines, their    */
-        /* calculated savings won't change on a second pass.             */
+        /* All subrs fit into first 1-byte range. Since we don't have to
+           increase the index number size, for any subroutines, their
+           calculated savings won't change on a second pass. */
         h->tmp.cnt = nSelected;
         return;
     }
 
     /* Removed subr marking before reselection */
-    /* We are going to have to increase the index number size for some subroutines. */
-    /* This means that their savings will get smaller, and we may need to reject them. */
+    /* We are going to have to increase the index number size for some
+       subroutines. This means that their savings will get smaller, and we may
+       need to reject them. */
     for (i = 0; i < h->tmp.cnt; i++) {
         h->tmp.array[i]->flags &= ~SUBR_MARKED;
     }
@@ -1666,126 +2304,27 @@ reselect:
 
 /* --------------------------- Add Subrs to INDEX -------------------------- */
 
-/* Rescan charstring and build call list of selected subrs */
-static void buildCallList(subrCtx h, unsigned length, unsigned char *pstart,
-                          int selfMatch, unsigned id) {
-    Node *node = h->root;
-    unsigned char *pstr = pstart;
-    unsigned char *pend = pstart + length;
-
-    h->calls.cnt = 0;
-    do {
-        Node *suffix;
-        Call *call;
-        Subr *subr;
-        unsigned offset;
-        unsigned oplength = h->spd->oplen(pstr);
-        node = findEdge(h, node, oplength, pstr)->son;
-        pstr += oplength;
-
-        if (node->flags & NODE_SUBR && (selfMatch || pstr != pend)) {
-            subr = &h->subrs.array[node->misc];
-            if (subr->flags & SUBR_SELECT) {
-                /* In-path subr; reset accumulator */
-                offset = 0;
-                h->calls.cnt = 0;
-                goto save;
-            }
-        }
-
-        for (suffix = node->suffix; suffix != NULL; suffix = suffix->suffix) {
-            if (suffix->flags & NODE_SUBR) {
-                subr = &h->subrs.array[suffix->misc];
-                if (subr->flags & SUBR_SELECT) {
-                    /* Suffix subr; compute offset */
-                    offset = pstr - pstart - subr->length;
-                    goto save;
-                }
-            }
-        }
-#if 0 /* xxx figure this out */
-        else if (!(suffix->flags & NODE_FAIL)) {
-            break; /* Can't be another subr on suffix chain */
-        }
-#endif
-        continue;
-
-        /* Save/update record */
-    save:
-        call = findInsertPosn(h, offset);
-        call->subr = subr;
-        call->offset = offset;
-    } while (pstr < pend);
-
-    /* Check for overlaps */
-    if (h->calls.cnt > 1) {
-        /* Handle overlaps */
-        int i;
-
-        for (i = 0; i < h->calls.cnt - 1; i++) {
-            int j;
-            unsigned freeoff;
-            Call *first = &h->calls.array[i];
-
-            if (first->subr == NULL) {
-                continue;
-            }
-
-            freeoff = first->offset + first->subr->length;
-
-            for (j = i + 1; j < h->calls.cnt; j++) {
-                Call *second = &h->calls.array[j];
-
-                if (second->subr == NULL) {
-                    continue;
-                } else if (freeoff > second->offset) {
-                    /* Found overlap; disable shortest subr */
-                    if (first->subr->length > second->subr->length) {
-                        second->subr = NULL;
-                    } else {
-                        first->subr = NULL;
-                        break;
-                    }
-                } else {
-                    break;
-                }
-            }
-        }
-    }
-
-#if DB_INFS
-    if (h->calls.cnt != 0) {
-        int j;
-        for (j = 0; j < h->calls.cnt; j++) {
-            Call *call = &h->calls.array[j];
-            if (call->subr != NULL) {
-                dbsubr(h, call->subr - h->subrs.array, 'y', call->offset);
-            }
-        }
-    }
-#endif
-}
-
 /* Subroutinize charstring */
 static unsigned char *subrizeCstr(subrCtx h,
                                   unsigned char *pdst, unsigned char *psrc,
-                                  unsigned length) {
+                                  unsigned length,
+                                  CallList *callList) {
     int i;
     long offset;
 
     /* Insert calls in charstring */
     offset = 0;
-    for (i = 0; i < h->calls.cnt; i++) {
-        Call *call = &h->calls.array[i];
+    for (i = 0; i < callList->cnt; i++) {
+        Call *call = &callList->array[i];
         Subr *subr = call->subr;
 
         if (subr != NULL) {
             /* Copy bytes preceeding subr */
-            pdst = h->spd->cstrcpy(pdst, psrc, call->offset - offset);
+            pdst = t2cstrcpy(pdst, psrc, call->offset - offset);
 
             /* Add subr call */
-            pdst += h->spd->encInteger(subr->subrnum, (char *)pdst);
-            *pdst++ = (subr->node->id == NODE_GLOBAL) ? h->spd->callgsubr : h->spd->callsubr;
+            pdst += csEncInteger(subr->subrnum, (char*)pdst);
+            *pdst++ = (subr->node->id == NODE_GLOBAL) ? t2_callgsubr : tx_callsubr;
 
 #if DB_CALLS
             subr->calls++;
@@ -1798,11 +2337,41 @@ static unsigned char *subrizeCstr(subrCtx h,
     }
 
     /* Copy remainder of charstring and return destination buffer pointer */
-    return h->spd->cstrcpy(pdst, psrc, length - offset);
+    return t2cstrcpy(pdst, psrc, length - offset);
 }
 
-/* Subroutinize charstrings */
-static void subrizeChars(subrCtx h, CSData *chars, unsigned id) {
+/* Build subroutine call lists of charstrings */
+static void buildCharsCallLists(subrCtx h, CSData *chars, unsigned id) {
+    long i;
+    long offset;
+    CallLists *callLists;
+
+    callLists = dnaMAX(h->charsCallLists, id);
+    dnaINIT(h->g->ctx.dnaCtx, *callLists, 500, 500);
+    initCallLists(h, callLists, chars->nStrings);
+
+    offset = 0;
+    h->cstrs.cnt = 0;
+    for (i = 0; i < chars->nStrings; i++) {
+        unsigned char *psrc = (unsigned char *)&chars->data[offset];
+        long nextoff = chars->offset[i];
+        unsigned length = nextoff - offset - 4 /* t2_separator */;
+
+#if DB_CHARS
+        printf("[%3ld]    =  ", i);
+        dbcstr(h, length, psrc);
+        printf("\n");
+#endif
+
+        /* Build subr call list */
+        buildCallList(h, 1, length, psrc, 1, id, -1, &callLists->array[i]);
+
+        offset = nextoff;
+    }
+}
+
+/* Subroutinize charstrings from call lists */
+static void subrizeChars(subrCtx h, CSData *chars, unsigned iFont) {
     long i;
     long offset;
 
@@ -1820,35 +2389,26 @@ static void subrizeChars(subrCtx h, CSData *chars, unsigned id) {
         long iStart = h->cstrs.cnt;
 
         /* Initially allocate space for entire charstring */
-        pdst = (unsigned char *)dnaEXTEND(h->cstrs, (int32_t)length);
+        pdst = (unsigned char *)dnaEXTEND(h->cstrs, (long)length);
 
-#if DB_CHARS
-        printf("[%3ld]    =  ", i);
-        dbcstr(h, length, psrc);
-        printf("\n");
-#endif
-
-        /* Build subr call list */
-        buildCallList(h, length, psrc, 1, id);
-
-        /* Subroutinize charstring */
-        pdst = subrizeCstr(h, pdst, psrc, length);
+        /* Subroutinize charstring from call lists */
+        pdst = subrizeCstr(h, pdst, psrc, length, &h->charsCallLists.array[iFont].array[i]);
 
         /* Adjust initial length estimate and save offset */
-        h->cstrs.cnt = iStart + pdst - (unsigned char *)&h->cstrs.array[iStart];
+        h->cstrs.cnt = (long)(iStart + pdst - (unsigned char *)&h->cstrs.array[iStart]);
         chars->offset[i] = h->cstrs.cnt;
         offset = nextoff;
     }
 
     /* Copy charstring data without loosing original data pointer */
     chars->refcopy = chars->data;
-    chars->data = MEM_NEW(h->g, h->cstrs.cnt);
+    chars->data = (char *)MEM_NEW(h->g, h->cstrs.cnt);
     memcpy(chars->data, h->cstrs.array, h->cstrs.cnt);
 
 #if DB_CALLS
     printf("--- actual subr calls\n");
-    for (i = 0; i < h->reorder.cnt; i++) {
-        Subr *subr = h->reorder.array[i];
+    for (i = 0; i < subrList->cnt; i++) {
+        Subr *subr = subrList->array[i];
         printf("[%3d]=%2d (%2d)", subr - h->subrs.array,
                subr->calls, subr->count);
         if (subr->calls != subr->count) {
@@ -1864,10 +2424,11 @@ static void subrizeChars(subrCtx h, CSData *chars, unsigned id) {
    font using combined subr INDEXes. The global subrs are selected from even
    temporary array indexes and local subrs are chosen from odd indexes */
 static void reorderCombined(subrCtx h, int local) {
-    int32_t bias;
+    long bias;
     long count; /* Element in reorder array */
     long i;     /* Reorder array index */
     long j;     /* Temporary array index */
+    SubrList *subrList = local? &h->localSubrs.array[0]: &h->globalSubrs;
 
     if (local) {
         /* Reorder local (odd) indexes */
@@ -1880,134 +2441,149 @@ static void reorderCombined(subrCtx h, int local) {
     }
 
     /* Set the reorder array size */
-    dnaSET_CNT(h->reorder, count);
+    dnaSET_CNT(*subrList, count);
 
     i = count - 1;
     if (count < 1240) {
         /* Bias-107 reordering */
         for (; i >= 0; i--) {
-            h->reorder.array[i + 0] = h->tmp.array[j -= 2];
+            subrList->array[i + 0] = h->tmp.array[j -= 2];
         }
         bias = 107;
     } else if (count < 33900) {
         /* Bias-1131 reordering */
         for (; i >= 1239; i--) {
-            h->reorder.array[i + 0] = h->tmp.array[j -= 2];
+            subrList->array[i + 0] = h->tmp.array[j -= 2];
         }
         for (; i >= 215; i--) {
-            h->reorder.array[i - 215] = h->tmp.array[j -= 2];
+            subrList->array[i - 215] = h->tmp.array[j -= 2];
         }
         for (; i >= 0; i--) {
-            h->reorder.array[i + 1024] = h->tmp.array[j -= 2];
+            subrList->array[i + 1024] = h->tmp.array[j -= 2];
         }
         bias = 1131;
     } else {
         /* Bias-32768 reordering */
         for (; i >= 33900; i--) {
-            h->reorder.array[i + 0] = h->tmp.array[j -= 2];
+            subrList->array[i + 0] = h->tmp.array[j -= 2];
         }
         for (; i >= 2263; i--) {
-            h->reorder.array[i - 2263] = h->tmp.array[j -= 2];
+            subrList->array[i - 2263] = h->tmp.array[j -= 2];
         }
         for (; i >= 1239; i--) {
-            h->reorder.array[i + 31637] = h->tmp.array[j -= 2];
+            subrList->array[i + 31637] = h->tmp.array[j -= 2];
         }
         for (; i >= 215; i--) {
-            h->reorder.array[i + 31422] = h->tmp.array[j -= 2];
+            subrList->array[i + 31422] = h->tmp.array[j -= 2];
         }
         for (; i >= 0; i--) {
-            h->reorder.array[i + 32661] = h->tmp.array[j -= 2];
+            subrList->array[i + 32661] = h->tmp.array[j -= 2];
         }
         bias = 32768;
     }
 
-    if (!local) {
-        /* Add biased subr numbers and mark global subrs */
-        for (i = 0; i < count; i++) {
-            Subr *subr = h->reorder.array[i];
-            subr->subrnum = (short)(i - bias);
+    /* Add biased subr numbers and mark global subrs */
+    for (i = 0; i < count; i++) {
+        Subr *subr = subrList->array[i];
+        subr->subrnum = (short)(i - bias);
+        if (!local) {
             subr->node->id = NODE_GLOBAL;
-        }
-
-        /* Copy global subr numbers to local subrs so that when the global subr */
-        /* INDEX is constructed the local subr references will be valid         */
-        for (i = 0; i < h->tmp.cnt - 1; i += 2) {
-            h->tmp.array[i + 1]->subrnum = h->tmp.array[i]->subrnum;
         }
     }
 }
 
 /* Create biased reordering for a non-singleton font */
-static void reorderSubrs(subrCtx h) {
+static void reorderSubrs(subrCtx h, unsigned id) {
     long i;
-    int32_t bias;
+    long bias;
+    SubrList *subrList = (id == NODE_GLOBAL)? &h->globalSubrs: &h->localSubrs.array[id];
 
     /* Assign reording index */
-    dnaSET_CNT(h->reorder, h->tmp.cnt);
+    dnaSET_CNT(*subrList, h->tmp.cnt);
     i = h->tmp.cnt - 1;
     if (h->tmp.cnt < 1240) {
         /* Bias-107 reordering */
         for (; i >= 0; i--) {
-            h->reorder.array[i + 0] = h->tmp.array[i];
+            subrList->array[i + 0] = h->tmp.array[i];
         }
         bias = 107;
     } else if (h->tmp.cnt < 33900) {
         /* Bias-1131 reordering */
         for (; i >= 1239; i--) {
-            h->reorder.array[i + 0] = h->tmp.array[i];
+            subrList->array[i + 0] = h->tmp.array[i];
         }
         for (; i >= 215; i--) {
-            h->reorder.array[i - 215] = h->tmp.array[i];
+            subrList->array[i - 215] = h->tmp.array[i];
         }
         for (; i >= 0; i--) {
-            h->reorder.array[i + 1024] = h->tmp.array[i];
+            subrList->array[i + 1024] = h->tmp.array[i];
         }
         bias = 1131;
     } else {
         /* Bias-32768 reordering */
         for (; i >= 33900; i--) {
-            h->reorder.array[i + 0] = h->tmp.array[i];
+            subrList->array[i + 0] = h->tmp.array[i];
         }
         for (; i >= 2263; i--) {
-            h->reorder.array[i - 2263] = h->tmp.array[i];
+            subrList->array[i - 2263] = h->tmp.array[i];
         }
         for (; i >= 1239; i--) {
-            h->reorder.array[i + 31637] = h->tmp.array[i];
+            subrList->array[i + 31637] = h->tmp.array[i];
         }
         for (; i >= 215; i--) {
-            h->reorder.array[i + 31422] = h->tmp.array[i];
+            subrList->array[i + 31422] = h->tmp.array[i];
         }
         for (; i >= 0; i--) {
-            h->reorder.array[i + 32661] = h->tmp.array[i];
+            subrList->array[i + 32661] = h->tmp.array[i];
         }
         bias = 32768;
     }
 
     /* Add biased subr numbers */
-    for (i = 0; i < h->reorder.cnt; i++) {
-        h->reorder.array[i]->subrnum = (short)(i - bias);
+    for (i = 0; i < subrList->cnt; i++) {
+        subrList->array[i]->subrnum = (short)(i - bias);
     }
 }
 
 /* Add reorder subrs from reorder array */
-static void addSubrs(subrCtx h, CSData *subrs, unsigned id) {
+static void buildSubrsCallLists(subrCtx h, unsigned id) {
+    long i;
+    SubrList *subrList = (id == NODE_GLOBAL)? &h->globalSubrs: &h->localSubrs.array[id];
+
+    if (subrList->cnt == 0) {
+        return; /* No subrs */
+    }
+
+    for (i = 0; i < subrList->cnt; i++) {
+        Subr *subr = subrList->array[i];
+
+        /* Build subr call list */
+        buildCallList(h, 1, subr->length, subr->cstr, 0, id, subr->misc, &subr->callList);
+    }
+}
+
+/* Replace subroutines with calls in subroutines */
+static void subrizeSubrs(subrCtx h, CSData *subrs, unsigned id) {
+    SubrList *subrList = (id == NODE_GLOBAL)? &h->globalSubrs: &h->localSubrs.array[id];
     long i;
 
 #if DB_SUBRS
     printf("--- subrized subrs (subrs marked with -)\n");
 #endif
 
-    if (h->reorder.cnt == 0) {
+    if (subrList->cnt == 0) {
         return; /* No subrs */
     }
+
     /* Allocate subr offset array */
-    subrs->nStrings = (unsigned short)h->reorder.cnt;
-    subrs->offset = MEM_NEW(h->g, h->reorder.cnt * sizeof(Offset));
+    subrs->nStrings = (unsigned short)subrList->cnt;
+    subrs->offset = (Offset *)MEM_NEW(h->g, subrList->cnt * sizeof(Offset));
 
     h->cstrs.cnt = 0;
-    for (i = 0; i < h->reorder.cnt; i++) {
-        unsigned char *pdst;
-        Subr *subr = h->reorder.array[i];
+
+    for (i = 0; i < subrList->cnt; i++) {
+        unsigned char *pdst = NULL;
+        Subr *subr = subrList->array[i];
         long iStart = h->cstrs.cnt;
 
         /* Initially allocate space for entire charstring + last op  */
@@ -2017,25 +2593,45 @@ static void addSubrs(subrCtx h, CSData *subrs, unsigned id) {
         dbsubr(h, subr - h->subrs.array, '-', 0);
 #endif
 
-        /* Build subr call list */
-        buildCallList(h, subr->length, subr->cstr, 0, id);
-
         /* Subroutinize charstring */
-        pdst = subrizeCstr(h, pdst, subr->cstr, subr->length);
+        pdst = subrizeCstr(h, pdst, subr->cstr, subr->length, &subr->callList);
 
         /* Terminate subr */
         if (!(subr->node->flags & NODE_TAIL)) {
-            *pdst++ = (unsigned char)h->spd->return_;
+            *pdst++ = (unsigned char)tx_return;
         }
 
         /* Adjust initial length estimate and save offset */
-        h->cstrs.cnt = iStart + pdst - (unsigned char *)&h->cstrs.array[iStart];
+        h->cstrs.cnt = (long)(iStart + pdst - (unsigned char *)&h->cstrs.array[iStart]);
         subrs->offset[i] = h->cstrs.cnt;
     }
 
     /* Allocate and copy charstring data */
-    subrs->data = MEM_NEW(h->g, h->cstrs.cnt);
+    subrs->data = (char *)MEM_NEW(h->g, h->cstrs.cnt);
     memcpy(subrs->data, h->cstrs.array, h->cstrs.cnt);
+}
+
+/* Build call lists for FD charstrings */
+static void buildFDCharsCallLists(subrCtx h, Font *font,
+                           unsigned iFont, unsigned iFD) {
+    long iSrc;
+    CSData *src = &font->chars;
+    CallLists *callLists = &h->charsCallLists.array[iFont];
+
+#if DB_CHARS
+    printf("--- subrized FD[%u] chars (chars marked with =)\n", iFD);
+#endif
+
+    for (iSrc = 0; iSrc < src->nStrings; iSrc++) {
+        if (font->fdIndex[iSrc] == iFD) {
+            long offset = (iSrc == 0) ? 0 : src->offset[iSrc - 1];
+            unsigned char *psrc = (unsigned char *)&src->data[offset];
+            unsigned length = src->offset[iSrc] - offset - 4 /* t2_separator */;
+
+            /* Build subr call list */
+            buildCallList(h, 1, length, psrc, 1, iFont + iFD, -1, &callLists->array[iSrc]);
+        }
+    }
 }
 
 /* Subroutinize FD charstrings */
@@ -2058,7 +2654,7 @@ static void subrizeFDChars(subrCtx h, CSData *dst, Font *font,
     }
 
     /* Allocate offset array */
-    dst->offset = MEM_NEW(h->g, sizeof(Offset) * dst->nStrings);
+    dst->offset = (Offset *)MEM_NEW(h->g, sizeof(Offset) * dst->nStrings);
 
     h->cstrs.cnt = 0;
     iDst = 0;
@@ -2067,7 +2663,7 @@ static void subrizeFDChars(subrCtx h, CSData *dst, Font *font,
             unsigned char *pdst;
             long offset = (iSrc == 0) ? 0 : src->offset[iSrc - 1];
             unsigned char *psrc = (unsigned char *)&src->data[offset];
-            unsigned length = src->offset[iSrc] - offset - 4 /* t2_separator */;
+            long length = src->offset[iSrc] - offset - 4 /* t2_separator */;
             long iStart = h->cstrs.cnt;
 
             /* Initially allocate space for entire charstring */
@@ -2079,33 +2675,33 @@ static void subrizeFDChars(subrCtx h, CSData *dst, Font *font,
             printf("\n");
 #endif
 
-            /* Build subr call list */
-            buildCallList(h, length, psrc, 1, iFont + iFD);
-
             /* Subroutinize charstring */
-            pdst = subrizeCstr(h, pdst, psrc, length);
+            pdst = subrizeCstr(h, pdst, psrc, length, &h->charsCallLists.array[iFont].array[iSrc]);
 
             /* Adjust initial length estimate and save offset */
-            h->cstrs.cnt = iStart + pdst -
-                           (unsigned char *)&h->cstrs.array[iStart];
+            h->cstrs.cnt = (long)(iStart + pdst -
+                                  (unsigned char *)&h->cstrs.array[iStart]);
             dst->offset[iDst++] = h->cstrs.cnt;
         }
     }
 
     /* Copy charstring data */
-    dst->data = MEM_NEW(h->g, h->cstrs.cnt);
+    dst->data = (char *)MEM_NEW(h->g, h->cstrs.cnt);
     memcpy(dst->data, h->cstrs.array, h->cstrs.cnt);
 
 #if DB_CALLS
-    printf("--- actual subr calls\n");
-    for (i = 0; i < h->reorder.cnt; i++) {
-        Subr *subr = h->reorder.array[i];
-        printf("[%3d]=%2d (%2d)", subr - h->subrs.array,
-               subr->calls, subr->count);
-        if (subr->calls != subr->count) {
-            printf("*\n");
-        } else {
-            printf("\n");
+    {
+        int i;
+        printf("--- actual subr calls\n");
+        for (i = 0; i < subrList->cnt; i++) {
+            Subr *subr = subrList->array[i];
+            printf("[%3d]=%2d (%2d)", subr - h->subrs.array,
+                   subr->calls, subr->count);
+            if (subr->calls != subr->count) {
+                printf("*\n");
+            } else {
+                printf("\n");
+            }
         }
     }
 #endif
@@ -2127,8 +2723,8 @@ static void joinFDChars(subrCtx h, Font *font) {
     }
 
     /* Allocate new charstring data without loosing original data pointer */
-    font->chars.refcopy = font->chars.data;
-    font->chars.data = MEM_NEW(g, size);
+    font->chars.refcopy = FONT_CHARS_DATA;
+    font->chars.data = (char *)MEM_NEW(g, size);
 
     dstoff = 0;
     for (i = 0; i < font->chars.nStrings; i++) {
@@ -2143,7 +2739,7 @@ static void joinFDChars(subrCtx h, Font *font) {
     }
 
     /* Free temporary chars index for each FD */
-    for (i = 0; i < font->fdCount; i++) {
+     for (i = 0; i < font->fdCount; i++) {
         CSData *chars = &font->fdInfo[i].chars;
         MEM_FREE(g, chars->offset);
         MEM_FREE(g, chars->data);
@@ -2153,7 +2749,7 @@ static void joinFDChars(subrCtx h, Font *font) {
 /* -------------------------- Subroutinize FontSet ------------------------- */
 
 /* Build subrs with specific id */
-static void buildSubrs(subrCtx h, CSData *subrs, unsigned id) {
+static void buildSubrs(subrCtx h, unsigned id) {
     long i;
 
     /* Build temporary array of subrs with matching id */
@@ -2184,8 +2780,118 @@ static void buildSubrs(subrCtx h, CSData *subrs, unsigned id) {
 #endif
 
     selectFinalSubrSet(h, id);
-    reorderSubrs(h);
-    addSubrs(h, subrs, id);
+    resetSubrCount(h, id);
+    reorderSubrs(h, id);
+}
+
+static void initLocalSubrs(subrCtx h, long cnt)
+{
+    long i;
+    dnaSET_CNT(h->localSubrs, cnt);
+    for (i = 0; i < cnt; i++) {
+        dnaINIT(h->g->ctx.dnaCtx, h->localSubrs.array[i], 500, 500);
+    }
+}
+
+/* Inline one-use futile subr */
+static void inlineFutileSubr(subrCtx h, CallList *callList)
+{
+    long i;
+    for (i = callList->cnt - 1; i >= 0; i--) {
+        Call *call = &callList->array[i];
+        if (call->subr->count == 1) {
+            Subr *futile = call->subr;
+            int32_t offset = call->offset;
+            long diff, rest, j;
+            inlineFutileSubr(h, &call->subr->callList); /* recursively inline futile subrs */
+            /* copy subr calls made by the futile subr to this subr
+             * while ordering & adjusting offsets
+             */
+            diff = futile->callList.cnt - 1;
+            rest = callList->cnt - i - 1;
+            if (diff > 0) {
+                dnaSET_CNT(*callList, callList->cnt + diff);
+                memmove(&callList->array[i + 1 + diff], &callList->array[i + 1], sizeof(Call) * rest);
+            } else if (diff < 0) {
+                memmove(&callList->array[i], &callList->array[i + 1], sizeof(Call) * rest);
+                dnaSET_CNT(*callList, callList->cnt + diff);
+            }
+            for (j = 0; j < futile->callList.cnt; j++) {
+                callList->array[i + j] = futile->callList.array[j];
+                callList->array[i + j].offset += offset;
+            }
+        }
+    }
+}
+
+/* Inline one-use futile subrs in all subrs in a list */
+static void inlineFutileSubrs(subrCtx h, SubrList *list)
+{
+    long i;
+    for (i = 0; i < list->cnt; i++) {
+        inlineFutileSubr(h, &list->array[i]->callList);
+    }
+}
+
+/* Compare subrs by count (frequent ones first) */
+static int CTL_CDECL cmpSubrCount(const void *first, const void *second) {
+    Subr **a = (Subr **)first;
+    Subr **b = (Subr **)second;
+    uint32_t count_a = (*a)->count;
+    uint32_t count_b = (*b)->count;
+    if (count_a != count_b) {
+        return count_b - count_a;
+    } else if ((*a)->order > (*b)->order) {
+        /* Preserve original order */
+        return 1;
+    } else if ((*a)->order < (*b)->order) {
+        return -1;
+    } else {
+        return 0;
+    }
+}
+
+/* Remove futile (zero or one use) subrs and renumber the rest */
+static void removeFutileSubrs(subrCtx h, SubrList *list, unsigned id)
+{
+    long i;
+
+    dnaSET_CNT(h->tmp, 0);
+    for (i = 0; i < list->cnt; i++) {
+        Subr *subr = list->array[i];
+        if (subr->count > 1) {
+            subr->order = h->tmp.cnt;
+            *dnaNEXT(h->tmp) = subr;
+        }
+    }
+
+    /* Reorder remaining subrs based on their acutal use counts */
+    qsort(h->tmp.array, h->tmp.cnt, sizeof(h->tmp.array[0]), cmpSubrCount);
+    reorderSubrs(h, id);
+}
+
+static void inlineOrRemoveFutileSubrs(subrCtx h)
+{
+    long i, j;
+
+    /* Inline all one-use subrs at their call points. */
+    inlineFutileSubrs(h, &h->globalSubrs);
+    for (i = 0; i < h->localSubrs.cnt; i++) {
+        inlineFutileSubrs(h, &h->localSubrs.array[i]);
+    }
+    for (i = 0; i < h->charsCallLists.cnt; i++) {
+        for (j = 0; j < h->charsCallLists.array[i].cnt; j++) {
+            inlineFutileSubr(h, &h->charsCallLists.array[i].array[j]);
+        }
+    }
+
+    /* Remove all zero-use and one-use subrs.
+     * Remaining subrs are renumbered using the actual use count.
+     */
+    removeFutileSubrs(h, &h->globalSubrs, NODE_GLOBAL);
+    for (i = 0; i < h->localSubrs.cnt; i++) {
+        removeFutileSubrs(h, &h->localSubrs.array[i], (unsigned)i);
+    }
 }
 
 /* Subroutinize all fonts in FontSet */
@@ -2194,22 +2900,39 @@ void subrSubrize(tcCtx g, int nFonts, Font *fonts) {
     unsigned iFont;
     long i;
 
-    h->spd = g->spd;
-    h->nFonts = nFonts;
+    h->nFonts = (short)nFonts;
     h->fonts = fonts;
+    h->maxNumSubrs = g->maxNumSubrs;
+
+    /* Initialize opLenCache */
+    {
+        unsigned char dummycstr[2] = {
+            0, 0};
+        int i;
+        for (i = 0; i < 256; i++) {
+            dummycstr[0] = (unsigned char)i;
+            h->opLenCache[i] = (unsigned char)t2oplen(dummycstr);
+        }
+    }
 
     /* Determine type of FontSet */
     h->singleton = h->nFonts == 1 && !(h->fonts[0].flags & FONT_CID);
 
-    /* Add fonts' charstring data to DAWG */
+    /* Add fonts' charstring data to CDAWG */
     iFont = 0;
     for (i = 0; i < h->nFonts; i++) {
-        addFont(h, &h->fonts[i], iFont);
+        addFont(h, &h->fonts[i], iFont, (h->nFonts > 1) || (h->fonts[i].flags & FONT_CID));
         iFont += (h->fonts[i].flags & FONT_CID) ? h->fonts[i].fdCount : 1;
     }
 
     selectCandSubrs(h); /* Select candidate subrs */
-    assocSubrs(h);      /* Associate subrs with a font */
+    buildSubrMatchTrie(h);
+    setSubrTentativeCount(h); /* Set subr tentative call counts */
+#if DB_TEST_STRING
+    return;
+#endif
+    assocSubrs(h);   /* Associate subrs with a font */
+    sortInfSubrs(h); /* Sort inferior subrs by saving */
 
     if (h->singleton) {
         /* Single non-CID font */
@@ -2222,47 +2945,94 @@ void subrSubrize(tcCtx g, int nFonts, Font *fonts) {
 
         h->subrStackOvl = 0;
         selectFinalSubrSet(h, 0);
+        resetSubrCount(h, 0);
+
+        initLocalSubrs(h, 1);
         if (h->tmp.cnt >= 215) {
+            /* Temporarily make local subrs from odd indexes for renumbering */
+            reorderCombined(h, 1);
             /* Make global subrs from even indexes */
             reorderCombined(h, 0);
-            addSubrs(h, &h->gsubrs, NODE_GLOBAL);
+            buildSubrsCallLists(h, NODE_GLOBAL);
 
             /* Make local subrs from odd indexes */
             reorderCombined(h, 1);
-            addSubrs(h, &h->fonts[0].subrs, 0);
+            buildSubrsCallLists(h, 0);
         } else {
-            reorderSubrs(h);
-            addSubrs(h, &h->fonts[0].subrs, 0);
+            reorderSubrs(h, 0);
+            buildSubrsCallLists(h, 0);
         }
+        buildCharsCallLists(h, &h->fonts[0].chars, 0);
+
+        inlineOrRemoveFutileSubrs(h);
+
+        subrizeSubrs(h, &h->gsubrs, NODE_GLOBAL);
+        subrizeSubrs(h, &h->fonts[0].subrs, 0);
         subrizeChars(h, &h->fonts[0].chars, 0);
     } else {
         /* Multiple fonts or single CID font */
 
-        /* Build global subrs */
-        buildSubrs(h, &h->gsubrs, NODE_GLOBAL);
+        long n = 0;
+        for (i = 0; i < h->nFonts; i++) {
+            n += h->fonts[i].fdCount;
+        }
+        initLocalSubrs(h, n);
 
-        /* Find and add local subrs to each font */
+        /* Build global subrs */
+        buildSubrs(h, NODE_GLOBAL);
+        buildSubrsCallLists(h, NODE_GLOBAL);
+
+        /* Build call lists of local subrs for each font */
         iFont = 0;
         for (i = 0; i < h->nFonts; i++) {
             Font *font = &h->fonts[i];
+            CallLists *callLists = dnaMAX(h->charsCallLists, iFont);
+            dnaINIT(h->g->ctx.dnaCtx, *callLists, 500, 500);
+            initCallLists(h, callLists, font->chars.nStrings);
 
             h->subrStackOvl = 0;
             if (font->flags & FONT_CID) {
                 /* Subrotinize CID-keyed font */
-                int j;
-                for (j = 0; j < h->fonts[i].fdCount; j++) {
-                    /* Subroutinize component DICT */
-                    FDInfo *info = &font->fdInfo[j];
-
-                    buildSubrs(h, &info->subrs, iFont + j);
-                    subrizeFDChars(h, &info->chars, font, iFont, j);
+                int16_t iFD;
+                for (iFD = 0; iFD < h->fonts[i].fdCount; iFD++) {
+                    buildSubrs(h, iFont + iFD);
+                    buildSubrsCallLists(h, iFont + iFD);
+                    buildFDCharsCallLists(h, font, iFont, iFD);
                 }
-                joinFDChars(h, font);
                 iFont += h->fonts[i].fdCount;
             } else {
                 if (font->chars.nStrings != 0) {
                     /* Subroutinize non-synthetic font */
-                    buildSubrs(h, &font->subrs, iFont);
+                    buildSubrs(h, iFont);
+                    buildSubrsCallLists(h, iFont);
+                    buildCharsCallLists(h, &h->fonts[iFont].chars, iFont);
+                }
+                iFont++;
+            }
+        }
+
+        inlineOrRemoveFutileSubrs(h);
+
+        subrizeSubrs(h, &h->gsubrs, NODE_GLOBAL);
+        /* Add local subrs to each font */
+        iFont = 0;
+        for (i = 0; i < h->nFonts; i++) {
+            Font *font = &h->fonts[i];
+
+            if (font->flags & FONT_CID) {
+                int16_t iFD;
+                for (iFD = 0; iFD < font->fdCount; iFD++) {
+                    /* Subroutinize component DICT */
+                    FDInfo *info = &font->fdInfo[iFD];
+                    subrizeSubrs(h, &info->subrs, iFont + iFD);
+                    subrizeFDChars(h, &info->chars, font, iFont, iFD);
+                }
+                joinFDChars(h, font);
+                iFont += font->fdCount;
+            } else {
+                if (font->chars.nStrings != 0) {
+                    /* Subroutinize non-synthetic font */
+                    subrizeSubrs(h, &h->fonts[iFont].subrs, iFont);
                     subrizeChars(h, &font->chars, iFont);
                 }
                 iFont++;
@@ -2274,26 +3044,53 @@ void subrSubrize(tcCtx g, int nFonts, Font *fonts) {
     for (i = 0; i < h->nFonts; i++) {
         MEM_FREE(g, h->fonts[i].chars.refcopy);
     }
+
+#if EDGE_HASH_STAT
+    if (gTotalEdgeLookupCount) {
+        printf("hash table statistics -- total lookup: %lld, average table size (dynamic): %.2lf, average fill rate (dynamic): %d%%, average miss per call: %.2lf\n",
+               gTotalEdgeLookupCount, (double)gTotalEdgeTableSize / gTotalEdgeLookupCount,
+               (int)(((double)gTotalEdgeCount / gTotalEdgeTableSize) * 100.0), (double)gTotalEdgeMissCount / gTotalEdgeLookupCount);
+
+        {
+            MemInfo *info = &h->nodeBlks;
+            MemBlk *pblk = info->head;
+            long long totalTableSize = 0;
+            long long totalEdgeCount = 0;
+            long long nodeCount = 0;
+            while (pblk) {
+                short i;
+                Node *node;
+                for (i = 0, node = (Node *)&pblk->array[0]; i < pblk->iNext; i++, node++) {
+                    if (node->edgeTable) {
+                        totalTableSize += node->edgeTableSize;
+                        totalEdgeCount += node->edgeCount;
+                        nodeCount++;
+                    }
+                }
+                pblk = pblk->nextBlk;
+            }
+            printf("average table size (static): %2lf, average fill rate (static): %d%%\n",
+                   (double)totalTableSize / nodeCount, (int)((double)totalEdgeCount / totalTableSize * 100.0));
+        }
+    }
+#endif
 }
 
 /* Compute size of font's subrs */
 long subrSizeLocal(CSData *subrs) {
-    return (subrs->nStrings == 0) ? 0 : INDEX_SIZE(subrs->nStrings, subrs->offset[subrs->nStrings - 1]);
+    long size = 0;
+    size = (!subrs || subrs->nStrings == 0) ? 0 : INDEX_SIZE(subrs->nStrings, subrs->offset[subrs->nStrings - 1]);
+    return size;
 }
-
-#endif /* TC_SUBR_SUPPORT */
 
 /* Compute size of global subrs */
 long subrSizeGlobal(tcCtx g) {
-#if TC_SUBR_SUPPORT
     subrCtx h = g->ctx.subr;
-    return (h->gsubrs.nStrings == 0) ? INDEX_SIZE(0, 0) : INDEX_SIZE(h->gsubrs.nStrings, h->gsubrs.offset[h->gsubrs.nStrings - 1]);
-#else  /* TC_SUBR_SUPPORT */
-    return INDEX_SIZE(0, 0);
-#endif /* TC_SUBR_SUPPORT */
+    long size = 0;
+    size = (!h || h->gsubrs.nStrings == 0) ? INDEX_SIZE(0, 0) : INDEX_SIZE(h->gsubrs.nStrings, h->gsubrs.offset[h->gsubrs.nStrings - 1]);
+    return size;
 }
 
-#if TC_SUBR_SUPPORT
 /* Write subrs */
 static void subrWrite(tcCtx g, CSData *subrs) {
     long dataSize;
@@ -2314,22 +3111,17 @@ static void subrWrite(tcCtx g, CSData *subrs) {
 
 /* Write local subrs */
 void subrWriteLocal(tcCtx g, CSData *subrs) {
-    if (subrs->nStrings != 0) {
+    if (subrs && subrs->nStrings != 0) {
         subrWrite(g, subrs);
     }
 }
 
-#endif /* TC_SUBR_SUPPORT */
-
 /* Write global subrs */
 void subrWriteGlobal(tcCtx g) {
-#if TC_SUBR_SUPPORT
     subrCtx h = g->ctx.subr;
     if (h != NULL) {
         subrWrite(g, &h->gsubrs);
-    } else
-#endif /* TC_SUBR_SUPPORT */
-    {
+    } else {
         /* Write empty global subr INDEX */
         INDEXHdr header;
         header.count = 0;
@@ -2337,11 +3129,9 @@ void subrWriteGlobal(tcCtx g) {
     }
 }
 
-#if TC_SUBR_SUPPORT
 #if TC_DEBUG
 /* --------------------------------- DEBUG --------------------------------- */
 #include <ctype.h>
-#include "sindex.h"
 
 static long dbnodeid(subrCtx h, Node *node) {
     MemBlk *nb;
@@ -2361,7 +3151,7 @@ static long dbnodeid(subrCtx h, Node *node) {
         }
     }
 
-    tcFatal(h->g, "can't find node!");
+    printf("can't find node!");
     return 0;
 }
 
@@ -2376,7 +3166,7 @@ static void dbop(int length, unsigned char *cstr) {
 
 static char *dbinfo(subrCtx h, Subr *subr, int mark) {
     static char buf[16];
-    sprintf(buf, "%hu.%d%c%ld", subr->count, subr->length - subr->maskcnt,
+    sprintf(buf, "%u.%u%c%d", subr->count, subr->length - subr->maskcnt,
             mark, subrSaved(h, subr));
     return buf;
 }
@@ -2397,11 +3187,25 @@ static void dbsubr(subrCtx h, unsigned iSubr, int c, unsigned offset) {
     printf(" [%u]\n", iSubr);
 }
 
+static void dbnodeProc(subrCtx h, Edge *edge, long misc, long param2) {
+    if (!edge || !edge->label) {
+        return;
+    }
+    printf("  %6ld (%08lx) %8s ",
+           dbnodeid(h, edge->son), (unsigned long)edge->son,
+           (misc + OPLEN(h, edge->label) !=
+            edge->son->misc)
+               ? "shortcut"
+               : "-");
+    dbop(OPLEN(h, edge->label), edge->label);
+    printf(" (%08lx)\n", (unsigned long)edge);
+}
+
 static void dbnode(subrCtx h, Node *node) {
     printf("--- node[%ld]\n", dbnodeid(h, node));
     printf("suffix=%ld (%08lx)\n",
            dbnodeid(h, node->suffix), (unsigned long)node->suffix);
-    printf("misc  =%d\n", node->misc);
+    printf("misc  =%ld\n", node->misc);
     printf("paths =%hu\n", node->paths);
     printf("id    =%hu\n", node->id);
     printf("flags =%04hx (", (unsigned short)node->flags);
@@ -2416,44 +3220,45 @@ static void dbnode(subrCtx h, Node *node) {
         }
         if (node->flags & NODE_SUBR) {
             printf("%sSUBR", sep);
-            sep = ",";
         }
     }
     printf(")\n");
 
     printf("edges:\n");
-    if (node->edge.son == NULL) {
+    if (node->edgeTable == NULL) {
         printf("   none\n");
     } else {
-        Edge *edge;
-        for (edge = &node->edge; edge != NULL; edge = edge->next) {
-            printf("  %6ld (%08lx) %8s ",
-                   dbnodeid(h, edge->son), (unsigned long)edge->son,
-                   (node->misc + h->spd->oplen(edge->label) !=
-                    edge->son->misc)
-                       ? "shortcut"
-                       : "-");
-            dbop(h->spd->oplen(edge->label), edge->label);
-            printf(" (%08lx)\n", (unsigned long)edge);
-        }
+        walkEdgeTable(h, node, dbnodeProc, node->misc, 0);
     }
 }
 
 static void dbcstr(subrCtx h, unsigned length, unsigned char *cstr) {
     unsigned char *end = cstr + length;
-
+#if DB_TEST_STRING
+    unsigned char *start = cstr;
+#endif
     while (cstr < end) {
         unsigned i;
 
-        length = h->spd->oplen(cstr);
-        for (i = 0; i < length; i++) {
+        length = OPLEN(h, cstr);
+        for (i = 0; i < length; i++)
+#if DB_TEST_STRING
+        {
+            printf("%c%c", cstr == start ? '"' : ' ', cstr[i]);
+        }
+#else
+        {
             printf("%c%c",
                    "0123456789abcdef"[cstr[i] >> 4],
                    "0123456789abcdef"[cstr[i] & 0xf]);
         }
+#endif
 
         cstr += length;
     }
+#if DB_TEST_STRING
+    printf("\"");
+#endif
 }
 
 static void dbcstrs(subrCtx h, unsigned char *cstr, unsigned char *end,
@@ -2464,17 +3269,17 @@ static void dbcstrs(subrCtx h, unsigned char *cstr, unsigned char *end,
     printf("--- glyphs (total=%ld)\n", (long)(end - cstr));
 
     while (cstr < end) {
-        int length = h->spd->oplen(cstr);
+        int length = OPLEN(h, cstr);
 
         if (startchar) {
-            printf("%2d:%3d (%s) ", index, gid, sindexGetString(h->g, gid));
+            printf("%2d:%3d ", index, gid);
             startchar = 0;
             gid++;
         }
 
         dbop(length, cstr);
 
-        if (cstr[0] == h->spd->separator) {
+        if (cstr[0] == SEPARATOR) {
             startchar = 1;
             printf("\n");
         }
@@ -2524,9 +3329,8 @@ static void dbgroups(subrCtx h) {
 
 /* This function just serves to suppress annoying "defined but not used"
    compiler messages when debugging */
-static void CDECL dbuse(int arg, ...) {
+static void CTL_CDECL dbuse(int arg, ...) {
     dbuse(0, dbnode, dbcstrs, dbsubr, dbgroups);
 }
 
 #endif /* TC_DEBUG */
-#endif /* TC_SUBR_SUPPORT */

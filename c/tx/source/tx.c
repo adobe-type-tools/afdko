@@ -8,7 +8,7 @@
 
 #include "tx_shared.h"
 
-#define TX_VERSION CTL_MAKE_VERSION(1, 2, 1)
+#define TX_VERSION CTL_MAKE_VERSION(1, 2, 2)
 
 #include "varread.h"
 
@@ -1028,50 +1028,6 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                 break;
             case opt_cmp:
                 goto bc_gone;
-                break;
-            case opt_cube2:
-                h->cfr.flags |= CFR_CUBE_RND;
-                h->cfw.flags |= CFW_CUBE_RND;
-            case opt_cube:
-                h->t1r.flags |= T1R_IS_CUBE;
-                h->cfr.flags |= CFR_IS_CUBE;
-                h->t1w.flags |= T1W_IS_CUBE;
-                h->cfw.flags |= CFW_IS_CUBE;
-                switch (h->mode) {
-                    case mode_t1:
-                        h->t1w.flags |= T1W_IS_CUBE;
-                        break;
-                    case mode_cff:
-                        h->cfw.flags |= CFW_IS_CUBE;
-                        break;
-                    case mode_bc:
-                        goto bc_gone;
-                        break;
-                    case mode_dcf:
-                        h->dcf.flags |= DCF_IS_CUBE;
-                        break;
-                    case mode_pdf:
-                        h->dcf.flags |= DCF_IS_CUBE;
-                        h->t1r.flags |= T1R_FLATTEN_CUBE;
-                        h->cfr.flags |= CFR_FLATTEN_CUBE;
-                        break;
-                }
-                break;
-            case opt_flatten_cube2:
-                h->cfr.flags |= CFR_CUBE_RND;
-                h->cfw.flags |= CFW_CUBE_RND;
-            case opt_flatten_cube:
-                h->t1r.flags |= T1R_IS_CUBE;
-                h->cfr.flags |= CFR_IS_CUBE;
-                h->t1r.flags |= T1R_FLATTEN_CUBE;
-                h->cfr.flags |= CFR_FLATTEN_CUBE;
-                switch (h->mode) {
-                    case mode_dcf:
-                        goto wrongmode;
-                        break;
-                    default:
-                        break;
-                }
                 break;
             case opt_c:
                 switch (h->mode) {

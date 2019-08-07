@@ -11,7 +11,7 @@ void dump_csDump(Int32 length, Card8 *strng, Int32 nMasters) {
         {
             /*  0 */ "reserved0",
             /*  1 */ "hstem",
-            /*  2 */ "compose",
+            /*  2 */ "reserved2",
             /*  3 */ "vstem",
             /*  4 */ "vmoveto",
             /*  5 */ "rlineto",
@@ -26,7 +26,7 @@ void dump_csDump(Int32 length, Card8 *strng, Int32 nMasters) {
             /* 14 */ "endchar",
             /* 15 */ "moveto",
             /* 16 */ "blend",
-            /* 17 */ "curveto",
+            /* 17 */ "reserved17",
             /* 18 */ "hstemhm",
             /* 19 */ "hintmask",
             /* 20 */ "cntrmask",
@@ -63,7 +63,7 @@ void dump_csDump(Int32 length, Card8 *strng, Int32 nMasters) {
             /* 16 */ "callother",
             /* 17 */ "pop",
             /* 18 */ "drop",
-            /* 19 */ "setvw",
+            /* 19 */ "reservedESC19",
             /* 20 */ "put",
             /* 21 */ "get",
             /* 22 */ "ifelse",
@@ -99,7 +99,7 @@ void dump_csDump(Int32 length, Card8 *strng, Int32 nMasters) {
                 break;
 
             case tx_reserved0:
-            case tx_compose:
+            case tx_reserved2:
             case tx_vmoveto:
             case tx_rlineto:
             case tx_hlineto:
@@ -109,7 +109,7 @@ void dump_csDump(Int32 length, Card8 *strng, Int32 nMasters) {
             case tx_callsubr:
             case t1_hsbw:
             case t1_moveto:
-            case t1_curveto:
+            case t1_reserved17:
             case tx_rmoveto:
             case tx_hmoveto:
             case t2_rcurveline:

@@ -44,13 +44,13 @@ static char class[256] = {
     /* -- Rest are zero -- */
 };
 
-#define ISWHITE(c) (class[(int)(c)] & W_)
-#define ISNEWLINE(c) (class[(int)(c)] & N_)
-#define ISSPECIAL(c) (class[(int)(c)] & S_)
-#define ISDELIMETER(c) (class[(int)(c)] & (S_ | W_))
-#define ISNUMBER(c) (class[(int)(c)] & (D_ | G_ | P_))
-#define ISSIGN(c) (class[(int)(c)] & G_)
-#define ISEXPONENT(c) (class[(int)(c)] & E_)
+#define ISWHITE(c) (class[(uint8_t)(c)] & W_)
+#define ISNEWLINE(c) (class[(uint8_t)(c)] & N_)
+#define ISSPECIAL(c) (class[(uint8_t)(c)] & S_)
+#define ISDELIMETER(c) (class[(uint8_t)(c)] & (S_ | W_))
+#define ISNUMBER(c) (class[(uint8_t)(c)] & (D_ | G_ | P_))
+#define ISSIGN(c) (class[(uint8_t)(c)] & G_)
+#define ISEXPONENT(c) (class[(uint8_t)(c)] & E_)
 
 /* Index by ascii character and return digit value or error (255) */
 static unsigned char digit[256] = {
@@ -72,9 +72,9 @@ static unsigned char digit[256] = {
     255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, /* f0-ff */
 };
 
-#define ISDIGIT(c) (digit[(int)(c)] < 10)
-#define ISHEX(c) (digit[(int)(c)] < 16)
-#define ISRADIX(c, b) (digit[(int)(c)] < (b))
+#define ISDIGIT(c) (digit[(uint8_t)(c)] < 10)
+#define ISHEX(c) (digit[(uint8_t)(c)] < 16)
+#define ISRADIX(c, b) (digit[(uint8_t)(c)] < (b))
 
 /* Parse context */
 struct psCtx_ {
@@ -117,11 +117,11 @@ static int hexdecrypt(psCtx h, int check) {
     int plain;
 
     /* Form cipher byte from 2 hexadecimal characters */
-    while ((nibble = digit[(int)GETRAW(1)]) > 15) {
+    while ((nibble = digit[(uint8_t)GETRAW(1)]) > 15) {
     }
     cipher = nibble << 4;
 
-    while ((nibble = digit[(int)GETRAW(1)]) > 15) {
+    while ((nibble = digit[(uint8_t)GETRAW(1)]) > 15) {
     }
     cipher |= nibble;
 
@@ -659,7 +659,7 @@ int32_t psConvInteger(psCtx h, psToken *token) {
             base = value;
             value = 0;
         } else {
-            value = value * base + digit[(int)(*p)];
+            value = value * base + digit[(uint8_t)(*p)];
         }
     } while (++p < end);
 

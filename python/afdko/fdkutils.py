@@ -1,18 +1,15 @@
 # Copyright 2016 Adobe. All rights reserved.
 
 """
-fdkutils.py v1.3.0 Feb 8 2019
+fdkutils.py v1.3.3 Aug 1 2019
 A module of functions that are needed by several of the AFDKO scripts.
 """
 
-from __future__ import print_function, absolute_import
-
 import os
-import sys
 import subprocess
 import tempfile
 
-from fontTools.misc.py23 import tounicode, tostr
+__version__ = "1.3.3"
 
 
 def get_temp_file_path():
@@ -61,16 +58,39 @@ def get_font_format(font_file_path):
     return None
 
 
-def run_shell_command(args):
+def run_shell_command(args, suppress_output=False):
     """
     Runs a shell command.
     Returns True if the command was successful, and False otherwise.
     """
+    sup = subprocess.DEVNULL if suppress_output else None
+
     try:
-        subprocess.check_call(args)
+        subprocess.check_call(args, stderr=sup, stdout=sup)
         return True
     except (subprocess.CalledProcessError, OSError) as err:
         print(err)
+        return False
+
+
+def run_shell_command_logging(args):
+    try:
+        proc = subprocess.Popen(args,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT)
+        while True:
+            out = proc.stdout.readline().rstrip()
+            if out:
+                print(out.decode())
+            if proc.poll() is not None:
+                out = proc.stdout.readline().rstrip()
+                if out:
+                    print(out.decode())
+                break
+        return True
+    except (subprocess.CalledProcessError, OSError) as err:
+        msg = " ".join(args)
+        print(f"Error executing command '{msg}'\n{err}")
         return False
 
 
@@ -84,17 +104,18 @@ def get_shell_command_output(args, std_error=False):
     Unicode-encoded string, or None.
     """
     stderr = subprocess.STDOUT if std_error else None
+
     try:
         bytes_output = subprocess.check_output(args, stderr=stderr)
-        try:
-            str_output = tounicode(bytes_output, encoding='utf-8')
-        except UnicodeDecodeError:
-            str_output = tounicode(bytes_output,
-                                   encoding=sys.getfilesystemencoding())
-        return True, str_output
+        str_output = bytes_output.decode('utf-8', 'backslashreplace')
+        success = True
+
     except (subprocess.CalledProcessError, OSError) as err:
         print(err)
-        return False, None
+        success = False
+        str_output = None
+
+    return success, str_output
 
 
 def runShellCmd(cmd):
@@ -102,14 +123,14 @@ def runShellCmd(cmd):
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
         stdoutdata, _ = p.communicate()
-        try:
-            return tounicode(stdoutdata, encoding='utf-8')
-        except UnicodeDecodeError:
-            return tounicode(stdoutdata, encoding=sys.getfilesystemencoding())
+        str_output = stdoutdata.decode('utf-8', 'backslashreplace')
+
     except (subprocess.CalledProcessError, OSError) as err:
-        msg = "Error executing command '%s'\n%s" % (cmd, err)
+        msg = f"Error executing command '{cmd}'\n{err}"
         print(msg)
-        return ""
+        str_output = ""
+
+    return str_output
 
 
 def runShellCmdLogging(cmd):
@@ -119,14 +140,17 @@ def runShellCmdLogging(cmd):
         while 1:
             output = proc.stdout.readline().rstrip()
             if output:
-                print(tostr(output))
+                print(output.decode('utf-8', 'backslashreplace'))
+
             if proc.poll() is not None:
                 output = proc.stdout.readline().rstrip()
                 if output:
-                    print(tostr(output))
+                    print(output.decode('utf-8', 'backslashreplace'))
                 break
+
     except (subprocess.CalledProcessError, OSError) as err:
-        msg = "Error executing command '%s'\n%s" % (cmd, err)
+        msg = f"Error executing command '{cmd}'\n{err}"
         print(msg)
         return 1
+
     return 0

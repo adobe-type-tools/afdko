@@ -1,7 +1,5 @@
-from __future__ import print_function, division, absolute_import
-
 import pytest
-import subprocess32 as subprocess
+import subprocess
 
 from runner import main as runner
 from differ import main as differ
@@ -42,7 +40,7 @@ def test_no_options():
 
 def test_extract_table():
     actual_path = get_temp_file_path()
-    runner(CMD + ['-o', 'x', '_GDEF={}'.format(actual_path), '-f', LIGHT])
+    runner(CMD + ['-o', 'x', f'_GDEF={actual_path}', '-f', LIGHT])
     expected_path = get_expected_path('GDEF_light.tb')
     assert differ([expected_path, actual_path, '-m', 'bin'])
 
@@ -60,7 +58,7 @@ def test_add_table():
     font_path = get_input_path(ITALIC)
     actual_path = get_temp_file_path()
     assert font_has_table(font_path, 'GDEF') is False
-    runner(CMD + ['-a', '-o', 'a', '_GDEF={}'.format(table_path),
+    runner(CMD + ['-a', '-o', 'a', f'_GDEF={table_path}',
                   '-f', font_path, actual_path])
     expected_path = get_expected_path('italic_w_GDEF.otf')
     assert differ([expected_path, actual_path, '-m', 'bin']) is False
@@ -74,7 +72,7 @@ def test_linux_ci_failure_bug570():
     table_path = get_input_path('1_fdict.cff')
     font_path = get_input_path('core.otf')
     actual_path = get_temp_file_path()
-    runner(CMD + ['-a', '-o', 'a', '_CFF={}'.format(table_path),
+    runner(CMD + ['-a', '-o', 'a', f'_CFF={table_path}',
                   '-f', font_path, actual_path])
     expected_path = get_expected_path('1_fdict.otf')
     assert differ([expected_path, actual_path, '-m', 'bin'])
@@ -94,7 +92,7 @@ def test_missing_table_delete_bug160():
 def test_missing_table_extract_bug160():
     actual_path = get_temp_file_path()
     stderr_path = runner(CMD + ['-s', '-e', '-f', LIGHT, actual_path, '-o',
-                                'x', '_xyz,head={}'.format(actual_path)])
+                                'x', f'_xyz,head={actual_path}'])
     with open(stderr_path, 'rb') as f:
         output = f.read()
     assert b'[WARNING]: table missing (xyz )' in output

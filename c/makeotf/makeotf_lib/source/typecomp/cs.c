@@ -354,7 +354,7 @@ unsigned csDump(long length, unsigned char *cstr, int nMasters, int t1) {
     static char *opname[32] = {
         /*  0 */ "reserved0",
         /*  1 */ "hstem",
-        /*  2 */ "compose",
+        /*  2 */ "reserved2",
         /*  3 */ "vstem",
         /*  4 */ "vmoveto",
         /*  5 */ "rlineto",
@@ -369,7 +369,7 @@ unsigned csDump(long length, unsigned char *cstr, int nMasters, int t1) {
         /* 14 */ "endchar",
         /* 15 */ "moveto",
         /* 16 */ "blend",
-        /* 17 */ "curveto",
+        /* 17 */ "reserved17",
         /* 18 */ "hstemhm",
         /* 19 */ "hintmask",
         /* 20 */ "cntrmask",
@@ -405,7 +405,7 @@ unsigned csDump(long length, unsigned char *cstr, int nMasters, int t1) {
         /* 16 */ "callother",
         /* 17 */ "pop",
         /* 18 */ "drop",
-        /* 19 */ "setvw",
+        /* 19 */ "reservedESC19",
         /* 20 */ "put",
         /* 21 */ "get",
         /* 22 */ "ifelse",
@@ -443,7 +443,7 @@ unsigned csDump(long length, unsigned char *cstr, int nMasters, int t1) {
                 break;
 
             case tx_reserved0:
-            case t1_compose:
+            case tx_reserved2:
             case tx_vmoveto:
             case tx_rlineto:
             case tx_hlineto:
@@ -454,7 +454,7 @@ unsigned csDump(long length, unsigned char *cstr, int nMasters, int t1) {
             case tx_return:
             case t1_hsbw:
             case t1_moveto:
-            case t1_curveto:
+            case tx_reserved17:
             case tx_rmoveto:
             case tx_hmoveto:
             case t2_rcurveline:
@@ -500,7 +500,7 @@ unsigned csDump(long length, unsigned char *cstr, int nMasters, int t1) {
                 /* Process escaped operator */
                 unsigned int escop = cstr[i + 1];
                 if (escop > TABLE_LEN(escopname) - 1) {
-                    printf("? ");
+                    printf("reservedESC%u ", escop);
                 } else {
                     printf("%s ", escopname[escop]);
                 }

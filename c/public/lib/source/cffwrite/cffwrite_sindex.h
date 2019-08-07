@@ -16,6 +16,7 @@ void cfwSindexNew(cfwCtx g);
 void cfwSindexReuse(cfwCtx g);
 void cfwSindexFree(cfwCtx g);
 
+int cfwSindexInvalidString(char *string);
 SRI cfwSindexAddString(cfwCtx g, char *string);
 char *cfwSindexGetString(cfwCtx g, SRI index);
 SID cfwSindexAssignSID(cfwCtx g, SRI index);

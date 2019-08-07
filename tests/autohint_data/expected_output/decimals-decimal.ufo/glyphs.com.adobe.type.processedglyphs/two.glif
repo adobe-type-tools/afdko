@@ -1,35 +1,35 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="2" name="two">
-  <advance width="497" />
-  <unicode hex="0032" />
+<glyph name="two" format="2">
+  <advance width="497"/>
+  <unicode hex="0032"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="line" x="32" y="0" />
-      <point type="line" x="361.6" y="0" />
-      <point type="line" x="361.6" y="56.8" />
-      <point type="line" x="213.6" y="56.8" />
-      <point x="187.2" y="56.8" />
-      <point x="156" y="54.4" />
-      <point type="curve" x="128" y="52" />
-      <point x="248.8" y="178.4" />
-      <point x="336" y="273.6" />
-      <point type="curve" x="336" y="369.6" />
-      <point x="336" y="460" />
-      <point x="277.6" y="520" />
-      <point type="curve" x="183.2" y="520" />
-      <point x="116.8" y="520" />
-      <point x="71.2" y="488.8" />
-      <point type="curve" x="28.8" y="442.4" />
-      <point type="line" x="66.4" y="404.8" />
-      <point x="96" y="439.2" />
-      <point x="132.8" y="466.4" />
-      <point type="curve" x="175.2" y="466.4" />
-      <point x="240" y="466.4" />
-      <point x="272" y="424.8" />
-      <point type="curve" x="272" y="366.4" />
-      <point x="272" y="284" />
-      <point x="185.6" y="192" />
-      <point type="curve" x="32" y="39.2" />
+      <point type="line" x="32" y="0" name="hintSet0000"/>
+      <point type="line" x="361.6" y="0"/>
+      <point type="line" x="361.6" y="56.8"/>
+      <point type="line" x="213.6" y="56.8"/>
+      <point x="187.2" y="56.8"/>
+      <point x="156" y="54.4"/>
+      <point type="curve" x="128" y="52"/>
+      <point x="248.8" y="178.4"/>
+      <point x="336" y="273.6"/>
+      <point type="curve" x="336" y="369.6"/>
+      <point x="336" y="460"/>
+      <point x="277.6" y="520"/>
+      <point type="curve" x="183.2" y="520"/>
+      <point x="116.8" y="520"/>
+      <point x="71.2" y="488.8"/>
+      <point type="curve" x="28.8" y="442.4"/>
+      <point type="line" x="66.4" y="404.8"/>
+      <point x="96" y="439.2"/>
+      <point x="132.8" y="466.4"/>
+      <point type="curve" x="175.2" y="466.4"/>
+      <point x="240" y="466.4"/>
+      <point x="272" y="424.8"/>
+      <point type="curve" x="272" y="366.4"/>
+      <point x="272" y="284"/>
+      <point x="185.6" y="192"/>
+      <point type="curve" x="32" y="39.2"/>
     </contour>
   </outline>
   <lib>

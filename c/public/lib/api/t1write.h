@@ -7,7 +7,7 @@
 
 #include "ctlshare.h"
 
-#define T1W_VERSION CTL_MAKE_VERSION(1, 0, 34)
+#define T1W_VERSION CTL_MAKE_VERSION(1, 0, 35)
 
 #include "absfont.h"
 
@@ -196,12 +196,6 @@ enum {
     /* When bit 13 is set findfont is not used to lookup the base font when
        incrementally downloading name-keyed fonts and when specifying an
        encoding vector. */
-
-    T1W_IS_CUBE = 1 << 14,
-
-    /* When bit 14 is set, the data contains cube font operators. Stack depth
-       and operator defs are different. Cube subr's are added at the end of
-       gsubr's for CID fonts, subrs for non-CID fonts. */
 
     T1W_FORCE_STD_ENCODING = 1 << 15,
 

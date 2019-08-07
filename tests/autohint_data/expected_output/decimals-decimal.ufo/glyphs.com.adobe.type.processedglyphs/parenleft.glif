@@ -1,23 +1,23 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="2" name="parenleft">
-  <advance width="303" />
-  <unicode hex="0028" />
+<glyph name="parenleft" format="2">
+  <advance width="303"/>
+  <unicode hex="0028"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="curve" x="171.2" y="-140.8" />
-      <point type="line" x="212" y="-121.6" />
-      <point x="150.4" y="-20" />
-      <point x="120" y="100.8" />
-      <point type="curve" x="120" y="222.4" />
-      <point x="120" y="344" />
-      <point x="150.4" y="464.8" />
-      <point type="curve" x="212" y="566.4" />
-      <point type="line" x="171.2" y="585.6" />
-      <point x="104.8" y="478.4" />
-      <point x="65.6" y="363.2" />
-      <point type="curve" x="65.6" y="222.4" />
-      <point x="65.6" y="81.6" />
-      <point x="104.8" y="-33.6" />
+      <point type="curve" x="171.2" y="-140.8" name="hintSet0000"/>
+      <point type="line" x="212" y="-121.6"/>
+      <point x="150.4" y="-20"/>
+      <point x="120" y="100.8"/>
+      <point type="curve" x="120" y="222.4"/>
+      <point x="120" y="344"/>
+      <point x="150.4" y="464.8"/>
+      <point type="curve" x="212" y="566.4"/>
+      <point type="line" x="171.2" y="585.6"/>
+      <point x="104.8" y="478.4"/>
+      <point x="65.6" y="363.2"/>
+      <point type="curve" x="65.6" y="222.4"/>
+      <point x="65.6" y="81.6"/>
+      <point x="104.8" y="-33.6"/>
     </contour>
   </outline>
   <lib>

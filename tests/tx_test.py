@@ -1,13 +1,12 @@
-from __future__ import print_function, division, absolute_import
-
 import os
 import pytest
-import subprocess32 as subprocess
+import subprocess
 import tempfile
 
 from runner import main as runner
 from differ import main as differ, SPLIT_MARKER
-from test_utils import get_input_path, get_expected_path, get_temp_file_path
+from test_utils import (get_input_path, get_expected_path, get_temp_file_path,
+                        generate_ps_dump)
 
 TOOL = 'tx'
 CMD = ['-t', TOOL]
@@ -43,6 +42,14 @@ PS_SKIP = [
     '0 740 moveto (Filename:' + SPLIT_MARKER +
     '560 (Date:' + SPLIT_MARKER +
     '560 (Time:'
+]
+
+PS_SKIP2 = [
+    '%ADOt1write:'
+]
+
+PFA_SKIP = [
+    '%ADOt1write:'
 ]
 
 
@@ -112,6 +119,8 @@ def test_convert(from_format, to_format):
         regex_skip = PDF_SKIP_REGEX[:]
     elif to_format == 'ps':
         skip = PS_SKIP[:]
+    elif to_format == 'type1':
+        skip = PFA_SKIP[:]
     if skip:
         skip.insert(0, '-s')
     if regex_skip:
@@ -193,9 +202,12 @@ def test_cff2_sub_dump():
 
 def test_varread_pr355():
     # read CFF2 VF, write Type1 snapshot
+    # Note that cff2_vf is built from the sources at:
+    #    afdko/tests/buildmasterotfs_data/input/cff2_vf.
     actual_path = runner(CMD + ['-s', '-o', 't1', '-f', 'cff2_vf.otf'])
     expected_path = get_expected_path('cff2_vf.pfa')
-    assert differ([expected_path, actual_path])
+    skip = ['-s'] + PFA_SKIP[:]
+    assert differ([expected_path, actual_path] + skip)
 
 
 def test_cff2_no_vf_bug353():
@@ -209,6 +221,25 @@ def test_cff2_no_vf_bug353():
     assert differ([expected_path, cff2_path, '-m', 'bin'])
 
 
+def test_cff2_with_spare_masters_pr835():
+    # SetNumMasters was incorrectly passing the number of region indices to
+    # var_getIVSRegionIndices for the regionListCount. With PR #835 it now
+    # passes the total region count for regionListCount.
+    #
+    # Example of the bug -- this command:
+    #   tx -cff2 +S +b -std SHSansJPVFTest.otf SHSansJPVFTest.cff2
+    # Would produce the following warning & error:
+    #   inconsistent region indices detected in item variation store subtable 1
+    #   memory error
+    font_path = get_input_path('SHSansJPVFTest.otf')
+    output_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o',
+                  'cff2', '*S', '*b', 'std',
+                  '-f', font_path, output_path])
+    expected_path = get_expected_path('SHSansJPVFTest.cff2')
+    assert differ([expected_path, output_path, '-m', 'bin'])
+
+
 # -----------
 # Other tests
 # -----------
@@ -218,7 +249,8 @@ def test_trademark_string_pr425():
     # converted to 'Copyright' and stored in Notice field of a Type1
     actual_path = runner(CMD + ['-s', '-o', 't1', '-f', 'trademark.ufo'])
     expected_path = get_expected_path('trademark.pfa')
-    assert differ([expected_path, actual_path])
+    skip = ['-s'] + PFA_SKIP[:]
+    assert differ([expected_path, actual_path] + skip)
 
 
 def test_remove_hints_bug180():
@@ -226,7 +258,10 @@ def test_remove_hints_bug180():
     cid_path = get_temp_file_path()
     runner(CMD + ['-a', '-o', 't1', 'n', '-f', font_path, cid_path])
     expected_path = get_expected_path('cid_nohints.ps')
-    assert differ([expected_path, cid_path, '-m', 'bin'])
+    expected_path = generate_ps_dump(expected_path)
+    actual_path = generate_ps_dump(cid_path)
+    skip = ['-s'] + PS_SKIP2
+    assert differ([expected_path, actual_path] + skip)
 
 
 def test_long_charstring_read_bug444():
@@ -297,8 +332,8 @@ def test_no_psname_dump_bug437(font_format):
     else:
         file_ext = 'pfa'
 
-    filename = '{}-noPSname.{}'.format(font_format, file_ext)
-    expected_path = get_expected_path('bug437/dump-{}.txt'.format(font_format))
+    filename = f'{font_format}-noPSname.{file_ext}'
+    expected_path = get_expected_path(f'bug437/dump-{font_format}.txt')
 
     actual_path = runner(CMD + ['-s', '-o', 'dump', '0', '-f', filename])
     assert differ([expected_path, actual_path, '-l', '1'])
@@ -313,10 +348,10 @@ def test_no_psname_convert_to_ufo_bug437(font_format):
     else:
         file_ext = 'pfa'
 
-    font_path = get_input_path('{}-noPSname.{}'.format(font_format, file_ext))
-    expected_path = get_expected_path('bug437/{}.ufo'.format(font_format))
+    font_path = get_input_path(f'{font_format}-noPSname.{file_ext}')
+    expected_path = get_expected_path(f'bug437/{font_format}.ufo')
     save_path = os.path.join(
-        _get_temp_dir_path(), '{}.ufo'.format(font_format))
+        _get_temp_dir_path(), f'{font_format}.ufo')
 
     runner(CMD + ['-a', '-o', 'ufo', '-f', font_path, save_path])
     assert differ([expected_path, save_path])
@@ -331,7 +366,7 @@ def test_no_psname_convert_to_type1_bug437(font_format):
     else:
         file_ext = 'pfa'
 
-    filename = '{}-noPSname.{}'.format(font_format, file_ext)
+    filename = f'{font_format}-noPSname.{file_ext}'
     with pytest.raises(subprocess.CalledProcessError) as err:
         runner(CMD + ['-o', 't1', '-f', filename])
     assert err.value.returncode in (5, 6)
@@ -378,7 +413,7 @@ def test_recalculate_font_bbox_bug618(to_format, args, exp_filename):
         file_ext = 'txt'
 
     expected_path = get_expected_path(
-        'bug618/{}.{}'.format(exp_filename, file_ext))
+        f'bug618/{exp_filename}.{file_ext}')
 
     diff_mode = []
     if to_format == 'cff':
@@ -388,6 +423,8 @@ def test_recalculate_font_bbox_bug618(to_format, args, exp_filename):
     if to_format == 'afm':
         skip = ['-s', 'Comment Creation Date:' + SPLIT_MARKER +
                 'Comment Copyright']
+    elif to_format == 't1':
+        skip = ['-s'] + PFA_SKIP[:]
 
     assert differ([expected_path, save_path] + diff_mode + skip)
 
@@ -405,9 +442,9 @@ def test_cs_opt_bug684(filename):
     tx was generating a bad CFF2 charstring that would overflow
     the operand stack of the standard size (513) after re-converted
     to CFF2 unless -no_opt option is specified."""
-    font_path = get_input_path('{}.otf'.format(filename))
+    font_path = get_input_path(f'{filename}.otf')
     result_path = get_temp_file_path()
-    expected_path = get_expected_path('{}.cff2'.format(filename))
+    expected_path = get_expected_path(f'{filename}.cff2')
     runner(CMD + ['-a', '-o', 'cff2', '-f', font_path, result_path])
     assert differ([expected_path, result_path, '-m', 'bin'])
 
@@ -427,12 +464,15 @@ def test_ufo_self_closing_dict_element_bug701():
 def test_ufo3_guideline_bug705():
     actual_path = runner(CMD + ['-s', '-o', 't1', '-f', 'bug705.ufo'])
     expected_path = get_expected_path('bug705.pfa')
-    assert differ([expected_path, actual_path])
+    skip = ['-s'] + PFA_SKIP[:]
+    assert differ([expected_path, actual_path] + skip)
+
 
 def test_ufo_vertical_advance_bug786():
     actual_path = runner(CMD + ['-s', '-o', 't1', '-f', 'bug786.ufo'])
     expected_path = get_expected_path('bug786.pfa')
-    assert differ([expected_path, actual_path])
+    skip = ['-s'] + PFA_SKIP[:]
+    assert differ([expected_path, actual_path] + skip)
 
 
 @pytest.mark.parametrize('filename', [
@@ -442,8 +482,8 @@ def test_ufo_vertical_advance_bug786():
 ])
 def test_ufo_read_processed_contents_plist_bug740(filename):
     actual_path = runner(CMD + ['-s', '-o', 'dump', '6', 'g', '_AE',
-                                '-f', 'bug740/{}.ufo'.format(filename)])
-    expected_path = get_expected_path('bug740/{}.txt'.format(filename))
+                                '-f', f'bug740/{filename}.ufo'])
+    expected_path = get_expected_path(f'bug740/{filename}.txt')
     assert differ([expected_path, actual_path])
 
 
@@ -456,3 +496,43 @@ def test_dcf_with_infinite_recursion_bug775():
     expected_path = get_expected_path(
         'subr_test_font_infinite_recursion.dcf.txt')
     assert differ([expected_path, dcf_path])
+
+
+def test_dcf_call_depth_with_many_calls_bug846():
+    # This font was getting an invalid subroutine count because tx wasn't
+    # decrementing the subroutine call depth after the subroutine calls,
+    # so it was effectively just counting the total number of calls,
+    # not the call depth.
+    font_path = get_input_path('SHSansJPVFTest_SUBR.otf')
+    dcf_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', 'dcf', '-f', font_path, dcf_path])
+    expected_path = get_expected_path('SHSansJPVFTest_SUBR.dcf.txt')
+    assert differ([expected_path, dcf_path])
+
+
+def test_svg_with_cid_font_bug822():
+    font_path = get_input_path('cid.otf')
+    cid_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', 'svg', '-f', font_path, cid_path])
+    expected_path = get_expected_path('cid.svg')
+    assert differ([expected_path, cid_path])
+
+
+@pytest.mark.parametrize('filename',
+                         ['type1-noPSname.pfa', 'cidfont-noPSname.ps'])
+def test_svg_missing_fontname_bug883(filename):
+    font_path = get_input_path(filename)
+    svg_path = get_temp_file_path()
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        runner(CMD + ['-a', '-o', 'svg', '-f', font_path, svg_path])
+    assert(err.value.returncode == 6)  # exit code of 6, not segfault of -11
+
+
+@pytest.mark.parametrize('option', ['dump', 'dcf'])
+def test_fdselect_format_4(option):
+    font_name = 'fdselect4.otf'
+    font_path = get_input_path(font_name)
+    dump_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', option, '-f', font_path, dump_path])
+    expected_path = get_expected_path(font_name + '.' + option)
+    assert differ([expected_path, dump_path, '-s', '## Filename'])

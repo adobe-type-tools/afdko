@@ -1283,7 +1283,12 @@ static void writeCharStringsINDEX(controlCtx h, cff_Font *font) {
     for (i = 0; i < font->glyphs.cnt; i++) {
         long chrstr_length;
         Glyph *glyph = &font->glyphs.array[i];
-        FDInfo *fd = &font->FDArray.array[glyph->iFD];
+        FDInfo *fd;
+
+        if (glyph->iFD >= font->FDArray.cnt)
+            cfwFatal(g, cfwErrBadFDArray, NULL);
+
+        fd = &font->FDArray.array[glyph->iFD];
 
         chrstr_length = glyph->cstr.length;
         if (chrstr_length > 65535) {
@@ -1873,8 +1878,8 @@ int cfwEndFont(cfwCtx g, abfTopDict *top) {
     h->_new->flags = 0;
     if (top->sup.flags & ABF_CID_FONT) {
         /* Validate CID data */
-        if (top->cid.Registry.ptr == ABF_UNSET_PTR ||
-            top->cid.Ordering.ptr == ABF_UNSET_PTR ||
+        if (cfwSindexInvalidString(top->cid.Registry.ptr) ||
+            cfwSindexInvalidString(top->cid.Ordering.ptr) ||
             top->cid.Supplement == ABF_UNSET_INT) {
             return cfwErrBadDict;
         }
@@ -2119,10 +2124,6 @@ int cfwEndSet(cfwCtx g) {
     /* Subroutinize charstrings */
     if (g->flags & CFW_SUBRIZE) {
         cfwCallSubrizer(g);
-    }
-
-    if (g->flags & CFW_IS_CUBE) {
-        cfwMergeCubeGSUBR(g);
     }
 
     fillSet(h); /* all subrs and charstrings must be inplace by the time this is called. */

@@ -170,7 +170,7 @@ static char *charstring(Card8 *csbuf, const char *s, int *lenp) {
         *const cmd[] = {
             "reserved_0",
             "hstem",
-            "compose",
+            "reserved_2",
             "vstem",
             "vmoveto",
             "rlineto",
@@ -183,9 +183,9 @@ static char *charstring(Card8 *csbuf, const char *s, int *lenp) {
             NULL,
             "hsbw",
             "endchar",
-            "reserved_1",
+            "reserved_15",
             "blend",
-            "callgrel",
+            "reserved_17",
             "hstemhm",
             "hintmask",
             "cntrmask",
@@ -221,7 +221,7 @@ static char *charstring(Card8 *csbuf, const char *s, int *lenp) {
             "callother",
             "pop",
             "drop",
-            "setwv",
+            "reservedESC_19",
             "put",
             "get",
             "ifelse",
@@ -233,26 +233,26 @@ static char *charstring(Card8 *csbuf, const char *s, int *lenp) {
             "exch",
             "index",
             "roll",
-            "rotate",
-            "attach",
+            "reservedESC_31",
+            "reservedESC_32",
             "setcurrentpoint",
             "hflex",
             "flex",
             "hflex1",
             "flex1",
             "cntron",
-            "blend1",
-            "blend2",
-            "blend3",
-            "blend4",
-            "blend6",
-            "setwv1",
-            "setwv2",
-            "setwv3",
-            "setwv4",
-            "setwv5",
-            "setwvN",
-            "transform"
+            "reservedESC_39",
+            "reservedESC_40",
+            "reservedESC_41",
+            "reservedESC_42",
+            "reservedESC_43",
+            "reservedESC_44",
+            "reservedESC_45",
+            "reservedESC_46",
+            "reservedESC_47",
+            "reservedESC_48",
+            "reservedESC_49",
+            "reservedESC_50"
         };
 
 nexttoken:
@@ -348,15 +348,22 @@ static void eeappend(int c) {
     eebuf[eecount++] = c;
 }
 
+#define CSBUF_SIZE 65536
 static void writeeexec(void) {
     char *s, *end;
     int lenIV;
+    Card8 *csbuf;
+
+    csbuf = malloc(CSBUF_SIZE);
+    if (csbuf == NULL)
+        panic("out of memory");
+    memset(csbuf, 0, CSBUF_SIZE);
 
     s = eebuf;
     end = &s[eecount];
     lenIV = getlenIV(s, end);
 
-    while (s < end)
+    while (s < end) {
         if (s[0] != '#' || s[1] != '#') {
             if (s[0] == 0x0D) /* exclude CR so Win & Mac have same output */
                 s++;
@@ -366,7 +373,6 @@ static void writeeexec(void) {
             int i, len;
             unsigned short key = key_charstring;
             char *t, RD[20], prefix[40];
-            Card8 csbuf[65536];
 
             s += 2;
             while (isspace(*s))
@@ -384,7 +390,7 @@ static void writeeexec(void) {
             s = charstring(csbuf, s, &len);
             if (s >= end)
                 panic("charstring extended past end of encrypted region");
-            if (len > (int)sizeof(csbuf))
+            if (len > CSBUF_SIZE)
                 panic("charstring too long");
 
             if (lenIV >= 0) {
@@ -403,6 +409,8 @@ static void writeeexec(void) {
                     eeputchar(csbuf[i]);
             }
         }
+    }
+    free(csbuf);
 }
 
 static void snarfeexec(FILE *fp) {
@@ -420,7 +428,6 @@ static void snarfeexec(FILE *fp) {
         } else if (*++cp == '\0') {
             for (s = closefile + 1; *s != '\0'; s++)
                 eeappend(*s);
-            cp = closefile;
             return;
         }
     panic("EOF in ciphertext region");

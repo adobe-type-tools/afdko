@@ -1733,7 +1733,7 @@ static void setOS_2Fields(hotCtx g) {
             }
             numRequired = 1 + block->numDefined / 3;
 
-            /* The numDefined field is set for each block in uniblock.h.  */ 
+            /* The numDefined field is set for each block in uniblock.h.  */
             /* If at least one third of the characters for the block are  */
             /* included in the font, the designer was making a reasonable */
             /* effort to support this block. Note that if numDefined==1,  */

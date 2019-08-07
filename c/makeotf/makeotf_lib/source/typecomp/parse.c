@@ -763,6 +763,7 @@ static void saveEncoding(parseCtx h, Encoding *encoding) {
 
         /* Construct a binary-searchable code mapping (in SID order) */
         nMaps = 0;
+        memset(maps, 0, sizeof(maps));
         h->reorder.supplement.cnt = 0;
         for (i = 0; i < 256; i++) {
             SID sid;

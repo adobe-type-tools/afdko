@@ -58,7 +58,6 @@
 static void dirDump(IntX level, LongN start);
 static void dirFree(void);
 static void addDumpTable(Card32 tag);
-static void sfntTTCList(void);
 
 /* sfnt table functions */
 typedef struct
@@ -598,7 +597,7 @@ IntX sfntIsInFeatProofList(Card32 feat_tag) {
     return 0; /* not in list */
 }
 
-void sfntAllProcessedProofList() {
+void sfntAllProcessedProofList(void) {
     IntX i;
     if (proof.list.cnt == 0) return;
     for (i = 0; i < proof.list.cnt; i++) {
@@ -667,18 +666,6 @@ static Function *findFunc(Card32 tag) {
                                sizeof(Function), cmpFuncTags);
 }
 
-/* Compare with directory entry tag */
-static IntN cmpEntryTags(const void *key, const void *value) {
-    Card32 a = *(Card32 *)key;
-    Card32 b = ((Entry *)value)->tag;
-    if (a < b)
-        return -1;
-    else if (a > b)
-        return 1;
-    else
-        return 0;
-}
-
 /* Find entry in the sfnt directory */
 static Entry *findEntry(Card32 tag) {
     int i;
@@ -696,8 +683,6 @@ static Entry *findEntry(Card32 tag) {
         currEntry++;
     }
     return NULL;
-
-    /* return (Entry *)bsearch(&tag, sfnt.directory, sfnt.numTables, sizeof(Entry), cmpEntryTags); */
 }
 
 /* Hexadecimal table dump */
@@ -794,8 +779,8 @@ static void doTables(IntX read) {
         IntX level = dump.list.array[i].level;
         error = 0;
         if (level != 0) {
-            Card32 start;
-            Card32 length;
+            Card32 start = 0;
+            Card32 length = 0;
             Function *func = findFunc(tag);
             Entry *entry = findEntry(tag);
 
@@ -986,17 +971,6 @@ int sfntTTCScan(int argc, char *argv[], int argi, opt_Option *opt) {
         qsort(ttc.sel.array, ttc.sel.cnt, sizeof(Card32), cmpCard32s);
     }
     return argi;
-}
-
-static void sfntTTCList(void) {
-    int i;
-    fprintf(OUTPUTBUFF, "(offsets: ");
-    for (i = 0; i < ttc.sel.cnt; i++)
-        if (i == 0)
-            fprintf(OUTPUTBUFF, "%d", (Card32)da_INDEX(ttc.sel, i));
-        else
-            fprintf(OUTPUTBUFF, ", %d", (Card32)da_INDEX(ttc.sel, i));
-    fprintf(OUTPUTBUFF, ")");
 }
 
 /* Print table usage infomation */

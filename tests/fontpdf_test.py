@@ -1,14 +1,11 @@
-from __future__ import print_function, division, absolute_import
-
 from fontTools.ttLib import TTFont
 
-from afdko.fontpdf import (doTitle, FontPDFParams)
-from afdko.otfpdf import txPDFFont
-from afdko.pdfgen import Canvas
+from afdko.pdflib.fontpdf import (doTitle, FontPDFParams)
+from afdko.pdflib.otfpdf import txPDFFont
+from afdko.pdflib.pdfgen import Canvas
 
 from test_utils import get_input_path
 
-TOOL = 'fontpdf'
 OTF_FONT = 'OTF.otf'
 
 

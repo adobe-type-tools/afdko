@@ -201,7 +201,7 @@ static void vmessage(t1rCtx h, char *fmt, va_list ap) {
     if (h->stm.dbg == NULL)
         return; /* Debug stream not available */
 
-    vsprintf(text, fmt, ap);
+    vsnprintf(text, 500, fmt, ap);
     (void)h->cb.stm.write(&h->cb.stm, h->stm.dbg, strlen(text), text);
 }
 
@@ -338,7 +338,10 @@ static STI addString(t1rCtx h, size_t length, const char *value) {
 
 /* Get string from STI. */
 static char *getString(t1rCtx h, STI sti) {
-    return &h->strings.buf.array[h->strings.index.array[sti]];
+    if (sti == STI_UNDEF)
+        return NULL;
+    else
+        return &h->strings.buf.array[h->strings.index.array[sti]];
 }
 
 /* ---------------------------- Chars Management --------------------------- */
@@ -491,6 +494,9 @@ t1rCtx t1rNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     h = mem_cb->manage(mem_cb, NULL, sizeof(struct t1rCtx_));
     if (h == NULL)
         return NULL;
+
+    /* explictly zero out entire structure */
+    memset(h, 0, sizeof(struct t1rCtx_));
 
     /* Safety initialization */
     h->FDArray.size = 0;
@@ -1468,6 +1474,8 @@ static void mmInit(t1rCtx h) {
     int nMasters;
     int nAxes;
     char *FontName = getString(h, (STI)h->fd->fdict->FontName.impl);
+    if (FontName == NULL)
+        fatal(h, t1rErrFontName, NULL);
     int isJenson = bsearch(FontName, jenson, ARRAY_LEN(jenson),
                            sizeof(jenson[0]), matchFontName) != NULL;
     int isKepler = bsearch(FontName, kepler, ARRAY_LEN(kepler),
@@ -2041,7 +2049,7 @@ static void parseOrigFontType(t1rCtx h, abfTopDict *top) {
 /* Initialize FDArray. */
 static void initFDArray(t1rCtx h, long cnt) {
     int i;
-    if (cnt < 0 || cnt > 256)
+    if (cnt < 1 || cnt > 256)
         badKeyValue(h, kFDArray);
     dnaSET_CNT(h->FDArray, cnt);
     dnaSET_CNT(h->fdicts, cnt);
@@ -2630,6 +2638,9 @@ static void srcSeek(t1rCtx h, long offset) {
         /* Offset within current buffer; reposition next byte */
         h->src.next = h->src.buf + delta;
     else {
+        if (h->stm.src == NULL)
+            fatal(h, t1rErrSrcStream, NULL);
+
         /* Offset outside current buffer; seek to offset and fill buffer */
         if (h->cb.stm.seek(&h->cb.stm, h->stm.src, offset))
             fatal(h, t1rErrSrcStream, NULL);
@@ -2747,6 +2758,8 @@ static void readCIDMap(t1rCtx h,
         offset = nextoff;
     }
     h->chars.index.cnt = tag;
+    if (h->chars.index.cnt == 0)
+        fatal(h, t1rErrCIDMap, NULL);
 
     if (h->chars.index.array[h->chars.index.cnt - 1].cid + 1 !=
         h->top.cid.CIDCount)
@@ -3129,8 +3142,6 @@ static void readSubr(t1rCtx h, abfGlyphCallbacks *glyph_cb, Offset subrStartOffs
     offset = chr.sup.begin = subrStartOffset;
     chr.sup.end = subrEndOffset;
     chr.flags &= ~ABF_GLYPH_SEEN;
-    chr.flags |= ABF_GLYPH_CUBE_GSUBR;
-    aux.flags |= T1C_CUBE_GSUBR;
 
     result = glyph_cb->beg(glyph_cb, &chr);
 
@@ -3149,9 +3160,6 @@ static void readSubr(t1rCtx h, abfGlyphCallbacks *glyph_cb, Offset subrStartOffs
         case ABF_FAIL_RET:
             fatal(h, t1rErrCstrFail, NULL);
     }
-
-    if (h->flags & T1R_IS_CUBE)
-        aux.flags |= T1C_IS_CUBE;
 
     /* Parse charstring */
     result = t1cParse(offset, &aux, glyph_cb);
@@ -3231,11 +3239,6 @@ static void readGlyph(t1rCtx h,
             fatal(h, t1rErrCstrFail, NULL);
     }
 
-    if (flags & T1R_IS_CUBE)
-        aux->flags |= T1C_IS_CUBE;
-    if (flags & T1R_FLATTEN_CUBE)
-        aux->flags |= T1C_FLATTEN_CUBE;
-
     /* Parse charstring */
     result = t1cParse(offset, aux, glyph_cb);
     if (result) {
@@ -3248,22 +3251,6 @@ static void readGlyph(t1rCtx h,
 
     /* End glyph */
     glyph_cb->end(glyph_cb);
-
-    /* if it is a CUBE font, and we have the call backs to do so, play the SUBR's through to the client */
-    if ((flags & T1R_IS_CUBE) && !(glyph_cb->cubeSetwv == NULL) && !(flags & T1R_FLATTEN_CUBE) && !(flags & T1R_SEEN_GLYPH) && (aux->subrs.cnt > 10)) {
-        int i;
-        Offset subrStartOffset = 0;
-        Offset subrEndOffset;
-        h->flags |= T1R_SEEN_GLYPH;
-        for (i = 0; i < aux->subrs.cnt; i++) {
-            subrStartOffset = aux->subrs.offset[i];
-            if ((i + 1) < aux->subrs.cnt)
-                subrEndOffset = aux->subrs.offset[i + 1];
-            else
-                subrEndOffset = aux->subrsEnd;
-            readSubr(h, glyph_cb, subrStartOffset, subrEndOffset, chr, aux);
-        }
-    }
 }
 
 /* Iterate through all glyphs in font. */

@@ -1,7 +1,5 @@
-from __future__ import print_function, division, absolute_import
-
 import pytest
-import subprocess32 as subprocess
+import subprocess
 
 from runner import main as runner
 from differ import main as differ

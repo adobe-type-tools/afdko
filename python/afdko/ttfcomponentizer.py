@@ -6,19 +6,16 @@ Uses the UFO's components data to componentize matching TrueType glyphs.
 The script only supports components that are not scaled, rotated nor flipped.
 """
 
-from __future__ import print_function
-
 import argparse
 import os
 import sys
 
-from fontTools.misc.py23 import open
 from fontTools.ttLib import TTFont, getTableModule
 from fontTools.ufoLib.errors import UFOLibError
 from defcon import Font
 
 
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 
 PUBLIC_PSNAMES = "public.postscriptNames"
@@ -51,8 +48,8 @@ class TTComponentizer(object):
         self.componentize_ttf()
 
         plural = "s were" if self.comp_count != 1 else " was"
-        print("Done! {} glyph{} componentized.".format(
-            self.comp_count, plural), file=sys.stdout)
+        print(f"Done! {self.comp_count} glyph{plural} componentized.",
+              file=sys.stdout)
 
     def get_composites_data(self):
         """
@@ -207,20 +204,22 @@ def process_goadb(goadb_path):
         line_cols = line.split()
 
         if len(line_cols) < 2:
-            print("WARNING: Skipped invalid line #{}: {}".format(i + 1, line),
+            print(f"WARNING: Skipped invalid line #{i + 1}: {line}",
                   file=sys.stderr)
             continue
 
         prod_name, dsgn_name = line_cols[:2]
 
         if dsgn_name in dsgn_names_seen:
-            print("WARNING: Skipped duplicate design glyph name '{}' at "
-                  "line #{}".format(dsgn_name, i + 1), file=sys.stderr)
+            print(f"WARNING: Skipped duplicate design glyph name '{dsgn_name}'"
+                  f" at line #{i + 1}",
+                  file=sys.stderr)
             continue
 
         if prod_name in prod_names_seen:
-            print("WARNING: Skipped duplicate production glyph name '{}' at "
-                  "line #{}".format(prod_name, i + 1), file=sys.stderr)
+            print(f"WARNING: Skipped duplicate production glyph name "
+                  f"'{prod_name}' at line #{i + 1}",
+                  file=sys.stderr)
             continue
 
         dsgn_names_seen.add(dsgn_name)
@@ -266,7 +265,7 @@ def get_glyph_names_mapping(ufo_path):
     try:
         ufo = Font(ufo_path)
     except UFOLibError:
-        print("ERROR: Not a valid UFO font at {}".format(ufo_path),
+        print(f"ERROR: Not a valid UFO font at {ufo_path}",
               file=sys.stderr)
         return None, None
 
@@ -287,7 +286,7 @@ def get_font_format(font_file_path):
 def validate_font_path(path):
     path = os.path.realpath(path)
     if not (os.path.isfile(path) and get_font_format(path) == 'TTF'):
-        print("ERROR: {} is not a valid TrueType font file path.".format(path),
+        print(f"ERROR: {path} is not a valid TrueType font file path.",
               file=sys.stderr)
         return None
     return path
@@ -328,7 +327,7 @@ def main(args=None):
     # Find UFO file in the same directory
     ufo_path = get_ufo_path(opts.font_path)
     if not ufo_path:
-        print("ERROR: No UFO font was found for {}".format(opts.input_path),
+        print(f"ERROR: No UFO font was found for {opts.input_path}",
               file=sys.stderr)
         return 1
 

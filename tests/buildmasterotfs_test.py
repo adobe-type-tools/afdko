@@ -1,8 +1,9 @@
-from __future__ import print_function, division, absolute_import
-
 import os
 from shutil import copytree
+import subprocess
 import tempfile
+
+import pytest
 
 from runner import main as runner
 from differ import main as differ, SPLIT_MARKER
@@ -24,8 +25,8 @@ def test_cjk_var():
     temp_dir = os.path.join(tempfile.mkdtemp(), 'CJKVar')
     copytree(input_dir, temp_dir)
     ds_path = os.path.join(temp_dir, 'CJKVar.designspace')
-    runner(CMD + ['-o', 'd', '_{}'.format(ds_path),
-                  '=mkot', 'omitDSIG,-omitMacNames', 'vv'])
+    runner(CMD + ['-o', 'd', f'_{ds_path}', '=mkot',
+                  'omitDSIG,-omitMacNames', 'vv'])
 
     otf1_path = os.path.join(
         temp_dir, 'Normal', 'Master_8', 'MasterSet_Kanji-w600.00.otf')
@@ -43,3 +44,16 @@ def test_cjk_var():
                        '    <created value=' + SPLIT_MARKER +
                        '    <modified value=',
                        '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
+
+
+def test_bad_designspace():
+    """
+    Purposely fail on bad designspace file.
+    """
+    input_dir = get_input_path('bad_dsfile')
+    ds_path = os.path.join(input_dir, 'TestVF.designspace')
+
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        runner(CMD + ['-o', 'd', f'_{ds_path}', 'vv'])
+
+    assert err.value.returncode == 1

@@ -5,16 +5,14 @@ Helper script for running a command line tool.
 Used as part of the integration tests.
 """
 
-from __future__ import print_function, division, absolute_import
-
 import argparse
 import logging
 import os
-import subprocess32 as subprocess
+import subprocess
 import sys
 import tempfile
 
-__version__ = '0.6.1'
+__version__ = '0.6.2'
 
 logger = logging.getLogger('runner')
 
@@ -29,7 +27,7 @@ def _write_file(file_path, data):
 
 def _get_input_dir_path(tool_name):
     input_dir = os.path.join(
-        os.path.split(__file__)[0], '{}_data'.format(tool_name), 'input')
+        os.path.split(__file__)[0], f'{tool_name}_data', 'input')
     return os.path.abspath(os.path.realpath(input_dir))
 
 
@@ -42,13 +40,13 @@ def run_tool(opts):
     args = [opts.tool]
     for opt in opts.options:
         if opt.startswith('='):
-            args.append('--{}'.format(opt[1:]))
+            args.append(f'--{opt[1:]}')
         elif opt.startswith('*'):
-            args.append('+{}'.format(opt[1:]))
+            args.append(f'+{opt[1:]}')
         elif opt.startswith('_'):
-            args.append('{}'.format(opt[1:]))
+            args.append(f'{opt[1:]}')
         else:
-            args.append('-{}'.format(opt))
+            args.append(f'-{opt}')
 
     if opts.files:
         if opts.abs_paths:
@@ -68,7 +66,7 @@ def run_tool(opts):
         stderr = subprocess.STDOUT
 
     logger.debug(
-        "About to run the command below\n==>{}<==".format(' '.join(args)))
+        f"About to run the command below\n==>{' '.join(args)}<==")
     try:
         if opts.save_path:
             output = subprocess.check_output(args, stderr=stderr,
@@ -110,7 +108,7 @@ def _check_save_path(path_str):
             os.remove(check_path)
     except (IOError, OSError):
         raise argparse.ArgumentTypeError(
-            "{} is not a valid path to write to.".format(check_path))
+            f"{check_path} is not a valid path to write to.")
     return check_path
 
 
@@ -208,7 +206,7 @@ def get_options(args):
         options.save_path = temp_path
 
     if isinstance(options.tool, tuple):
-        parser.error("'{}' is an unknown command.".format(options.tool[0]))
+        parser.error(f"'{options.tool[0]}' is an unknown command.")
 
     return options
 

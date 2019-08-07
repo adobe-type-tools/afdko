@@ -1,34 +1,34 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="2" name="u">
-  <advance width="544" />
-  <unicode hex="0075" />
-  <anchor name="hornLC" x="328.8" y="396.8" />
-  <anchor name="aboveLC" x="217.60000000000002" y="407.20000000000005" />
-  <anchor name="ogonekLC" x="342.40000000000003" y="0" />
-  <anchor name="belowLC" x="232.0" y="-17.6" />
+<glyph name="u" format="2">
+  <advance width="544"/>
+  <unicode hex="0075"/>
+  <anchor x="328.8" y="396.8" name="hornLC"/>
+  <anchor x="217.60000000000002" y="407.20000000000005" name="aboveLC"/>
+  <anchor x="342.40000000000003" y="0" name="ogonekLC"/>
+  <anchor x="232.0" y="-17.6" name="belowLC"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="curve" x="179.2" y="-9.6" />
-      <point name="hintSet0001" x="232.8" y="-9.6" />
-      <point x="271.2" y="18.4" />
-      <point type="curve" x="307.2" y="60.8" />
-      <point type="line" x="309.6" y="60.8" />
-      <point name="hintSet0003" type="line" x="315.2" y="0" />
-      <point name="hintSet0004" type="line" x="369.6" y="0" />
-      <point type="line" x="369.6" y="388.8" />
-      <point type="line" x="304" y="388.8" />
-      <point name="hintSet0007" type="line" x="304" y="112.8" />
-      <point x="267.2" y="67.2" />
-      <point x="239.2" y="47.2" />
-      <point type="curve" x="199.2" y="47.2" />
-      <point x="148" y="47.2" />
-      <point x="126.4" y="78.4" />
-      <point type="curve" x="126.4" y="151.2" />
-      <point type="line" x="126.4" y="388.8" />
-      <point type="line" x="60" y="388.8" />
-      <point type="line" x="60" y="142.4" />
-      <point x="60" y="43.2" />
-      <point x="96.8" y="-9.6" />
+      <point type="curve" x="179.2" y="-9.6" name="hintSet0000"/>
+      <point x="232.8" y="-9.6" name="hintSet0001"/>
+      <point x="271.2" y="18.4"/>
+      <point type="curve" x="307.2" y="60.8"/>
+      <point type="line" x="309.6" y="60.8"/>
+      <point type="line" x="315.2" y="0" name="hintSet0003"/>
+      <point type="line" x="369.6" y="0" name="hintSet0004"/>
+      <point type="line" x="369.6" y="388.8"/>
+      <point type="line" x="304" y="388.8"/>
+      <point type="line" x="304" y="112.8" name="hintSet0007"/>
+      <point x="267.2" y="67.2"/>
+      <point x="239.2" y="47.2"/>
+      <point type="curve" x="199.2" y="47.2"/>
+      <point x="148" y="47.2"/>
+      <point x="126.4" y="78.4"/>
+      <point type="curve" x="126.4" y="151.2"/>
+      <point type="line" x="126.4" y="388.8"/>
+      <point type="line" x="60" y="388.8"/>
+      <point type="line" x="60" y="142.4"/>
+      <point x="60" y="43.2"/>
+      <point x="96.8" y="-9.6"/>
     </contour>
   </outline>
   <lib>

@@ -12,7 +12,6 @@
 
 static int compareOpEntries(abfOpEntry *opEntry1, abfOpEntry *opEntry2) {
     /* return 1 if NOT equal */
-    int i = 0;
     int retVal = 1;
 
     if (opEntry1->numBlends != opEntry2->numBlends)
@@ -24,6 +23,7 @@ static int compareOpEntries(abfOpEntry *opEntry1, abfOpEntry *opEntry2) {
         else
             return 1;
     } else {
+        int i = 0;
         retVal = 0;
         while (i < opEntry1->numBlends) {
             if (opEntry1->blendValues[i] != opEntry2->blendValues[i]) {
@@ -125,7 +125,6 @@ static int comparePrivateDicts(abfPrivateDict *private1,
 /* Compare two top dicts to see if they are similar enough to merge.
    Assume client has assured that they are valid before call. */
 int abfCompareTopDicts(abfTopDict *top1, abfTopDict *top2) {
-    int i;
     int firstIsCID = (top1->sup.flags & ABF_CID_FONT) != 0;
     int secondIsCID = (top2->sup.flags & ABF_CID_FONT) != 0;
 
@@ -149,6 +148,8 @@ int abfCompareTopDicts(abfTopDict *top1, abfTopDict *top2) {
         return 1;
 
     if (firstIsCID) {
+        int i;
+
         if (top1->cid.Registry.ptr && top2->cid.Registry.ptr &&
             strcmp(top1->cid.Registry.ptr, top2->cid.Registry.ptr) != 0)
             return 1;

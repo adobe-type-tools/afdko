@@ -1,25 +1,25 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="2" name="v">
-  <advance width="467" />
-  <unicode hex="0076" />
-  <anchor name="aboveLC" x="188.0" y="407.20000000000005" />
-  <anchor name="belowLC" x="188.0" y="-17.6" />
+<glyph name="v" format="2">
+  <advance width="467"/>
+  <unicode hex="0076"/>
+  <anchor x="188.0" y="407.20000000000005" name="aboveLC"/>
+  <anchor x="188.0" y="-17.6" name="belowLC"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="line" x="149.6" y="0" />
-      <point type="line" x="226.4" y="0" />
-      <point type="line" x="364" y="388.8" />
-      <point type="line" x="299.2" y="388.8" />
-      <point type="line" x="225.6" y="168" />
-      <point x="214.4" y="129.6" />
-      <point x="201.6" y="90.4" />
-      <point type="curve" x="190.4" y="53.6" />
-      <point type="line" x="187.2" y="53.6" />
-      <point x="175.2" y="90.4" />
-      <point x="162.4" y="129.6" />
-      <point type="curve" x="151.2" y="168" />
-      <point type="line" x="77.6" y="388.8" />
-      <point type="line" x="9.6" y="388.8" />
+      <point type="line" x="149.6" y="0" name="hintSet0000"/>
+      <point type="line" x="226.4" y="0"/>
+      <point type="line" x="364" y="388.8"/>
+      <point type="line" x="299.2" y="388.8"/>
+      <point type="line" x="225.6" y="168"/>
+      <point x="214.4" y="129.6"/>
+      <point x="201.6" y="90.4"/>
+      <point type="curve" x="190.4" y="53.6"/>
+      <point type="line" x="187.2" y="53.6"/>
+      <point x="175.2" y="90.4"/>
+      <point x="162.4" y="129.6"/>
+      <point type="curve" x="151.2" y="168"/>
+      <point type="line" x="77.6" y="388.8"/>
+      <point type="line" x="9.6" y="388.8"/>
     </contour>
   </outline>
   <lib>

@@ -1,19 +1,19 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="2" name="asciicircum">
-  <advance width="497" />
-  <unicode hex="005E" />
+<glyph name="asciicircum" format="2">
+  <advance width="497"/>
+  <unicode hex="005E"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="line" x="48" y="227.2" />
-      <point type="line" x="105.6" y="227.2" />
-      <point type="line" x="157.6" y="368" />
-      <point type="line" x="197.6" y="474.4" />
-      <point type="line" x="200.8" y="474.4" />
-      <point type="line" x="240" y="368" />
-      <point type="line" x="292" y="227.2" />
-      <point type="line" x="349.6" y="227.2" />
-      <point type="line" x="228" y="536" />
-      <point type="line" x="169.6" y="536" />
+      <point type="line" x="48" y="227.2" name="hintSet0000"/>
+      <point type="line" x="105.6" y="227.2"/>
+      <point type="line" x="157.6" y="368"/>
+      <point type="line" x="197.6" y="474.4"/>
+      <point type="line" x="200.8" y="474.4"/>
+      <point type="line" x="240" y="368"/>
+      <point type="line" x="292" y="227.2"/>
+      <point type="line" x="349.6" y="227.2"/>
+      <point type="line" x="228" y="536"/>
+      <point type="line" x="169.6" y="536"/>
     </contour>
   </outline>
   <lib>

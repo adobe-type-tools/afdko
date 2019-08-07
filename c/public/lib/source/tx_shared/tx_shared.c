@@ -637,36 +637,32 @@ static void readN(txCtx h, size_t count, char *ptr) {
 }
 
 #define read1(h) \
-    (unsigned char)((h->src.next == h->src.end) ? nextbuf(h) : *h->src.next++)
+    (uint8_t)((h->src.next == h->src.end) ? nextbuf(h) : *h->src.next++)
 
 /* Read 2-byte number. */
-static unsigned short read2(txCtx h) {
-    unsigned short value = read1(h) << 8;
+static uint16_t read2(txCtx h) {
+    uint16_t value = read1(h) << 8;
     return value | read1(h);
 }
 
 /* Read 2-byte signed number. */
-static short sread2(txCtx h) {
-    unsigned short value = read1(h) << 8;
+static int16_t sread2(txCtx h) {
+    uint16_t value = read1(h) << 8;
     value |= read1(h);
-#if SHRT_MAX == 32767
-    return (short)value;
-#else
-    return (short)((value > 32767) ? value - 65536 : value);
-#endif
+    return (int16_t)value;
 }
 
 /* Read 4-byte number. */
-static unsigned long read4(txCtx h) {
-    unsigned long value = (unsigned long)read1(h) << 24;
-    value |= (unsigned long)read1(h) << 16;
+static uint32_t read4(txCtx h) {
+    uint32_t value = (uint32_t)read1(h) << 24;
+    value |= (uint32_t)read1(h) << 16;
     value |= read1(h) << 8;
     return value | read1(h);
 }
 
 /* Read 1-, 2-, 3-, or 4-byte number. */
-static unsigned long readn(txCtx h, int n) {
-    unsigned long value = 0;
+static uint32_t readn(txCtx h, int n) {
+    uint32_t value = 0;
     switch (n) {
         case 4:
             value = read1(h);
@@ -1224,31 +1220,6 @@ static void preserveGlyphEnd(abfGlyphCallbacks *cb) {
     h->cb.save.end(&h->cb.save);
 }
 
-static void preserveCubeBlend(abfGlyphCallbacks *cb, unsigned int nBlends, unsigned int numVals, float *blendVals) {
-    txCtx h = cb->direct_ctx;
-    if (h->cb.selected) {
-        h->cb.save.cubeBlend(&h->cb.save, nBlends, numVals, blendVals);
-    }
-}
-static void preserveCubeSetwv(abfGlyphCallbacks *cb, unsigned int numDV) {
-    txCtx h = cb->direct_ctx;
-    if (h->cb.selected) {
-        h->cb.save.cubeSetwv(&h->cb.save, numDV);
-    }
-}
-static void preserveCubeCompose(abfGlyphCallbacks *cb, int cubeLEIndex, float x0, float y0, int numDV, float *ndv) {
-    txCtx h = cb->direct_ctx;
-    if (h->cb.selected) {
-        h->cb.save.cubeCompose(&h->cb.save, cubeLEIndex, x0, y0, numDV, ndv);
-    }
-}
-static void preserveCubeTransform(abfGlyphCallbacks *cb, float rotate, float scaleX, float scaleY, float skew, float skewY) {
-    txCtx h = cb->direct_ctx;
-    if (h->cb.selected) {
-        h->cb.save.cubeTransform(&h->cb.save, rotate, scaleX, scaleY, skew, skewY);
-    }
-}
-
 /* preserve mode callbacks template. */
 static abfGlyphCallbacks preserveGlyphCallbacks =
     {
@@ -1265,10 +1236,6 @@ static abfGlyphCallbacks preserveGlyphCallbacks =
         preserveGlyphGenop,
         preserveGlyphSeac,
         preserveGlyphEnd,
-        preserveCubeBlend,
-        preserveCubeSetwv,
-        preserveCubeCompose,
-        preserveCubeTransform,
         NULL,
         NULL,
         NULL,
@@ -2007,11 +1974,6 @@ static abfGlyphCallbacks mtxGlyphCallbacks =
         NULL,
         NULL,
         NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
 };
 
 /* Begin font set. */
@@ -2677,11 +2639,14 @@ static int svg_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
 
     /* Determine (or fabricate) Unicode value for glyph. */
     info->flags |= ABF_GLYPH_UNICODE;
-    if (h->top->sup.flags & ABF_CID_FONT) {
-        info->encoding.code = h->svw.unrec;
-        h->svw.unrec++;
-    } else
-        info->encoding.code = mapName2UV(h, info->gname.ptr, &h->svw.unrec);
+     if (h->top->sup.flags & ABF_CID_FONT) {
+         if (info->encoding.code == ABF_GLYPH_UNENC) {
+             info->encoding.code = h->svw.unrec;
+             h->svw.unrec++;
+         }
+     } else {
+         info->encoding.code = mapName2UV(h, info->gname.ptr, &h->svw.unrec);
+     }
 
     return svwGlyphCallbacks.beg(cb, info);
 }
@@ -2830,17 +2795,14 @@ static void ufo_SetMode(txCtx h) {
     h->cb.glyph = ufwGlyphCallbacks;
     h->cb.glyph.direct_ctx = h->ufow.ctx;
 
-    /* Set source library flags. It is harmless to declare a font to be cune, and we have to flatten them if going to UFO */
-    h->t1r.flags = T1R_UPDATE_OPS | T1R_FLATTEN_CUBE | T1R_IS_CUBE;
-    h->cfr.flags = CFR_UPDATE_OPS | CFR_FLATTEN_CUBE | T1R_IS_CUBE;
+    /* Set source library flags. */
+    h->t1r.flags = T1R_UPDATE_OPS;
+    h->cfr.flags = CFR_UPDATE_OPS;
 
     h->mode = mode_ufow;
 }
 
 /* -------------------------------- dcf mode ------------------------------- */
-
-#define tx_reserved2 2
-#define t2_reserved17 17
 
 /* Return size of region. */
 static long sizeRegion(const ctlRegion *region) {
@@ -3338,7 +3300,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
         {
             /*  0 */ "reserved0",
             /*  1 */ "hstem",
-            /*  2 */ "compose",
+            /*  2 */ "reserved2",
             /*  3 */ "vstem",
             /*  4 */ "vmoveto",
             /*  5 */ "rlineto",
@@ -3353,7 +3315,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
             /* 14 */ "endchar",
             /* 15 */ "vsindex",
             /* 16 */ "blend",
-            /* 17 */ "callgrel",
+            /* 17 */ "reserved17",
             /* 18 */ "hstemhm",
             /* 19 */ "hintmask",
             /* 20 */ "cntrmask",
@@ -3410,18 +3372,6 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
             /* 36 */ "hflex1",
             /* 37 */ "flex1",
             /* 38 */ "cntron",
-            /* 39 */ "blend1",
-            /* 40 */ "blend2",
-            /* 41 */ "blend3",
-            /* 42 */ "blend4",
-            /* 43 */ "blend6",
-            /* 44 */ "setwv1",
-            /* 45 */ "setwv2",
-            /* 46 */ "setwv3",
-            /* 47 */ "setwv4",
-            /* 48 */ "setwv5",
-            /* 49 */ "setwvN",
-            /* 50 */ "transform",
         };
     long left = sizeRegion(region);
 
@@ -3433,12 +3383,14 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
         left--;
         switch (byte) {
             case tx_reserved0:
+            case tx_reserved2:
             case tx_rlineto:
             case tx_hlineto:
             case tx_vlineto:
             case tx_rrcurveto:
             case t2_reserved9:
             case t2_reserved13:
+            case tx_reserved17:
             case tx_endchar:
             case t2_rcurveline:
             case t2_rlinecurve:
@@ -3468,12 +3420,6 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
                 flowCommand(h, opname[byte]);
                 break;
             }
-            case tx_compose:
-                flowCommand(h, opname[byte]);
-                break;
-            case tx_callgrel:
-                flowCommand(h, opname[byte]);
-                break;
             case tx_callsubr:
                 if (h->dcf.flags & DCF_Flatten) {
                     h->dcf.subrDepth++;
@@ -3481,6 +3427,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
                         fatal(h, "subr depth: %d\n", h->dcf.subrDepth);
                     }
                     callsubr(h, h->dcf.fd, region, left);
+                    h->dcf.subrDepth--;
                 } else
                     flowCommand(h, opname[byte]);
                 break;
@@ -3495,6 +3442,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
                         fatal(h, "subr depth: %d\n", h->dcf.subrDepth);
                     }
                     callsubr(h, &h->dcf.global, region, left);
+                    h->dcf.subrDepth--;
                 } else
                     flowCommand(h, opname[byte]);
                 break;
@@ -3889,7 +3837,7 @@ static void dcf_DumpFDSelect(txCtx h, const ctlRegion *region) {
     if (h->dcf.level < 1)
         return;
     else {
-        unsigned char fmt;
+        uint8_t fmt;
 
         bufSeek(h, region->begin);
         fmt = read1(h);
@@ -3897,24 +3845,37 @@ static void dcf_DumpFDSelect(txCtx h, const ctlRegion *region) {
 
         switch (fmt) {
             case 0: {
-                long gid;
+                uint32_t gid;
                 flowTitle(h, "glyph[gid]=fd");
                 for (gid = 0; gid < h->top->sup.nGlyphs; gid++)
                     flowBreak(h, "[%ld]=%u", gid, read1(h));
                 flowEnd(h);
             } break;
             case 3: {
-                long i;
-                long nRanges = read2(h);
-                fprintf(fp, "nRanges=%ld\n", nRanges);
+                uint16_t i;
+                uint16_t nRanges = read2(h);
+                fprintf(fp, "nRanges=%hu\n", nRanges);
                 flowTitle(h, "Range3[index]={first,fd}");
                 for (i = 0; i < nRanges; i++) {
-                    unsigned short first = read2(h);
-                    unsigned char fd = read1(h);
-                    flowBreak(h, "[%ld]={%hu,%u}", i, first, fd);
+                    uint16_t first = read2(h);
+                    uint8_t fd = read1(h);
+                    flowBreak(h, "[%hu]={%hu,%u}", i, first, fd);
                 }
                 flowEnd(h);
                 fprintf(fp, "sentinel=%hu\n", read2(h));
+            } break;
+            case 4: {
+                uint32_t i;
+                uint32_t nRanges = read4(h);
+                fprintf(fp, "nRanges=%u\n", nRanges);
+                flowTitle(h, "Range4[index]={first,fd}");
+                for (i = 0; i < nRanges; i++) {
+                    uint32_t first = read4(h);
+                    uint16_t fd = read2(h);
+                    flowBreak(h, "[%u]={%u,%u}", i, first, fd);
+                }
+                flowEnd(h);
+                fprintf(fp, "sentinel=%u\n", read4(h));
             } break;
             default:
                 fatal(h, "invalid FDSelect format");
@@ -4148,10 +4109,7 @@ static void dcf_BegFont(txCtx h, abfTopDict *top) {
     single = cfrGetSingleRegions(h->cfr.ctx);
     major = dcf_DumpHeader(h, &single->Header);
     if (major == 1) {
-        if (h->dcf.flags & DCF_IS_CUBE)
-            h->maxOpStack = TX_MAX_OP_STACK_CUBE;
-        else
-            h->maxOpStack = T2_MAX_OP_STACK;
+        h->maxOpStack = T2_MAX_OP_STACK;
         initCstrs(h, top);
         dcf_DumpNameINDEX(h, &single->NameINDEX);
         dcf_DumpTopDICTINDEX(h, &single->TopDICTINDEX);
@@ -5132,11 +5090,24 @@ static void readsfnt(txCtx h, long origin) {
                 case sfr_v1_0_tag:
                 case sfr_true_tag:
                     /* TrueType */
-                    addFont(h, src_TrueType, 0, origin);
+                    table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('g', 'l', 'y', 'f'));
+                    if (table == NULL)
+                        fatal(h, "(sfr) %s", sfrErrStr(sfrErrBadSfnt));
+                    else
+                        addFont(h, src_TrueType, 0, origin);
                     break;
                 case sfr_OTTO_tag:
                     /* OTF */
-                    addFont(h, src_OTF, 0, origin);
+                    table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('C', 'F', 'F', ' '));
+                    if (table == NULL) {
+                        table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('C', 'F', 'F', '2'));
+                        if (table == NULL) {
+                            fatal(h, "(sfr) %s", sfrErrStr(sfrErrBadSfnt));
+                        }
+                    }
+                    if (table != NULL) {
+                        addFont(h, src_OTF, 0, origin);
+                    }
                     break;
                 case sfr_typ1_tag:
                     /* GX or sfnt-wrapped CID font */

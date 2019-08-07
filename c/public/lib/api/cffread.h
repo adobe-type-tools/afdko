@@ -7,7 +7,7 @@
 
 #include "ctlshare.h"
 
-#define CFR_VERSION CTL_MAKE_VERSION(2, 1, 0)
+#define CFR_VERSION CTL_MAKE_VERSION(2, 1, 1)
 
 #include "absfont.h"
 
@@ -63,13 +63,11 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
 #define CFR_USE_MATRIX              (1 << 1)
 #define CFR_NO_ENCODING             (1 << 2)
 #define CFR_SHALLOW_READ            (1 << 3)
-#define CFR_IS_CUBE                 (1 << 4)
-#define CFR_FLATTEN_CUBE            (1 << 5)
 #define CFR_SEEN_GLYPH              (1 << 6) /* have seen a glyph */
-#define CFR_CUBE_RND                (1 << 7)
 #define CFR_FLATTEN_VF              (1 << 8)
 #define CFR_SHORT_VF_NAME           (1 << 9)
 #define CFR_UNUSE_VF_NAMED_INSTANCE (1 << 10)
+#define CFR_CFF2_ONLY   (1<<11)
 
 /* cfrBegFont() is called to initiate a new font parse. The source data stream
    (CFR_SRC_STREAM_ID) is opened, positioned at the offset specified by the
@@ -110,13 +108,6 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
    cfrIterateGlyphs, cfrGetGlyphByTag, cfrGetGlyphByName, cfrGetGlyphByCID may
    not be called with a font parsed with this flag set.
 
-   CFR_IS_CUBE - the data contains cube font operators. Stack depth
-   and operator defs are different. Cube subr's are found at the end of gsubr's
-   for CID fonts, subrs for non-CID fonts.
-
-   CFR_FLATTEN_CUBE - the data contains cube font operators. Stack depth
-   and operator defs are different. The Cube compose ops must be flattened.
-
    CFR_FLATTEN_VF - flatten CFF2 variable font data for a given user design
    vector.
 
@@ -128,6 +119,9 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
    instance PS name is generated from the design vector as documented in Tech
    Notes 5902 regarding named instances in the fvar table. If the flag is
    unset, a PS name of a named instance is used if there is a match.
+
+   CFR_CFF2_ONLY - don't read the CFF table even if it is available in the font along with CFF2.
+   This flag is assumed when CFR_FLATTEN_VF is set.
 
    The "UDV" parameter specifies the User Design Vector to be used in
    flattening (snapshotting) a CFF2 variable font. If NULL, the font is

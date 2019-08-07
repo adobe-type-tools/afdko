@@ -31,6 +31,10 @@ static short exenc[] = {
 #define NULL 0
 #endif
 
+/* limit flatten() iterations and recursions */
+#define MAX_FLATTEN_RECURSION_DEPTH 1000
+#define MAX_FLATTEN_ITERATION_COUNT 1000
+
 #define ARRAY_LEN(t) (sizeof(t) / sizeof((t)[0]))
 #define ABS(v) ((v) < 0 ? -(v) : (v))
 
@@ -757,8 +761,13 @@ static void checkPoint(cffCtx h, Fixed x, Fixed y) {
  */
 static void flatten(cffCtx h,
                     Fixed x0, Fixed y0, Fixed x1, Fixed y1,
-                    Fixed x2, Fixed y2, Fixed x3, Fixed y3) {
-    for (;;) {
+                    Fixed x2, Fixed y2, Fixed x3, Fixed y3,
+                    int call_depth) {
+    int i;
+    if (call_depth > MAX_FLATTEN_RECURSION_DEPTH) {
+        fatal(h, "maximum flatten recursion depth exceeded\n");
+    }
+    for (i=0; i < MAX_FLATTEN_ITERATION_COUNT; i++) {
         Fixed left;
         Fixed bottom;
         Fixed right;
@@ -793,7 +802,8 @@ static void flatten(cffCtx h,
             Fixed cy = (sy + 2 * ty + uy) / 4;
 
             /* Compute first curve and flatten */
-            flatten(h, x0, y0, ux, uy, (tx + ux) / 2, (ty + uy) / 2, cx, cy);
+            flatten(h, x0, y0, ux, uy, (tx + ux) / 2, (ty + uy) / 2, cx, cy,
+                call_depth + 1);
 
             /* Compute second curve (x3, y3 unchanged) */
             x0 = cx;
@@ -808,6 +818,7 @@ static void flatten(cffCtx h,
             return;
         }
     }
+    fatal(h, "maximum flatten iteration count exceeded\n");
 }
 
 /* Transform x-coord by by FontMatrix */
@@ -891,7 +902,7 @@ static void addCurve(cffCtx h, int flex, Fixed dx1, Fixed dy1,
         y3 < h->path.bottom || y3 > h->path.top) {
         /* Bounding trapezium extends outside bounding box; flatten curve */
         checkPoint(h, x0, y0);
-        flatten(h, x0, y0, x1, y1, x2, y2, x3, y3);
+        flatten(h, x0, y0, x1, y1, x2, y2, x3, y3, 0);
     }
 }
 
@@ -1104,11 +1115,11 @@ static void t2Read(cffCtx h, Offset offset, int init) {
                 return;
 
             case tx_reserved0:
-            case t2_reserved2:
+            case tx_reserved2:
             case t2_reserved9:
             case t2_reserved13:
             case t2_reserved15:
-            case t2_reserved17:
+            case tx_reserved17:
                 fatal(h, "reserved charstring op");
 
             case tx_rlineto:
@@ -1364,11 +1375,11 @@ static void t2Read(cffCtx h, Offset offset, int init) {
                     case t2_reservedESC7:
                     case t2_reservedESC16:
                     case t2_reservedESC17:
+                    case tx_reservedESC19:
                     case tx_reservedESC25:
                     case tx_reservedESC31:
                     case tx_reservedESC32:
                     case t2_reservedESC33:
-                    case t2_reservedESC19:
                     case t2_cntron:
                         fatal(h, "reserved charstring op");
 

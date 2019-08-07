@@ -268,6 +268,7 @@ static void var_freeavar(ctlSharedStmCallbacks *sscb, var_avar avar) {
 static var_avar var_loadavar(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
     var_avar avar = NULL;
     int success = 0;
+    unsigned short axisCount = 0;
     unsigned short i;
 
     sfrTable *table = sfrGetTableByTag(sfr, AVAR_TABLE_TAG);
@@ -290,18 +291,23 @@ static var_avar var_loadavar(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
 
     avar = (var_avar)sscb->memNew(sscb, sizeof(*avar));
     memset(avar, 0, sizeof(*avar));
+    dnaINIT(sscb->dna, avar->segmentMaps, 0, 1);
 
     i = sscb->read2(sscb); /* skip reserved short */
-    avar->axisCount = sscb->read2(sscb);
+    axisCount = sscb->read2(sscb);
 
-    if (table->length < AVAR_TABLE_HEADER_SIZE + (unsigned long)AVAR_SEGMENT_MAP_SIZE * avar->axisCount) {
+    if (table->length < AVAR_TABLE_HEADER_SIZE + (unsigned long)AVAR_SEGMENT_MAP_SIZE * axisCount) {
         sscb->message(sscb, "invalid avar table size or axis/instance count/size");
         goto cleanup;
     }
 
-    dnaINIT(sscb->dna, avar->segmentMaps, 0, 1);
-    if (dnaSetCnt(&avar->segmentMaps, DNA_ELEM_SIZE_(avar->segmentMaps), avar->axisCount) < 0)
+    if (dnaSetCnt(&avar->segmentMaps, DNA_ELEM_SIZE_(avar->segmentMaps), axisCount) < 0)
         goto cleanup;
+    avar->axisCount = axisCount;
+    for (i = 0; i < avar->axisCount; i++) {
+        segmentMap *seg = &avar->segmentMaps.array[i];
+        dnaINIT(sscb->dna, seg->valueMaps, 0, 1);
+    }
 
     for (i = 0; i < avar->axisCount; i++) {
         segmentMap *seg = &avar->segmentMaps.array[i];
@@ -313,7 +319,6 @@ static var_avar var_loadavar(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
             goto cleanup;
         }
 
-        dnaINIT(sscb->dna, seg->valueMaps, 0, 1);
         if (dnaSetCnt(&seg->valueMaps, DNA_ELEM_SIZE_(seg->valueMaps), seg->positionMapCount) < 0)
             goto cleanup;
         for (j = 0; j < seg->positionMapCount; j++) {
@@ -704,8 +709,23 @@ var_itemVariationStore var_loadItemVariationStore(ctlSharedStmCallbacks *sscb, u
         goto cleanup;
     }
     sscb->seek(sscb, tableOffset + ivsOffset + regionListOffset);
+
     ivs->regionList.axisCount = sscb->read2(sscb);
+
+    if (ivs->regionList.axisCount > CFF2_MAX_AXES) {
+        sscb->message(sscb, "invalid axis count in item variation region list");
+        goto cleanup;
+    }
+
     ivs->regionList.regionCount = sscb->read2(sscb);
+
+    /* cff2.scalars and cff2.regionIndices have size CFF2_MAX_MASTERS,
+       so regionList.regionCount should not exceed CFF2_MAX_MASTERS */
+    if (ivs->regionList.regionCount > CFF2_MAX_MASTERS) {
+        sscb->message(sscb, "invalid region count in item variation region list");
+        goto cleanup;
+    }
+
     if (dnaSetCnt(&ivs->regionList.regions, DNA_ELEM_SIZE_(ivs->regionList.regions), ivs->regionList.axisCount * ivs->regionList.regionCount) < 0)
         goto cleanup;
 

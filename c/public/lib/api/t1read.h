@@ -7,7 +7,7 @@
 
 #include "ctlshare.h"
 
-#define T1R_VERSION CTL_MAKE_VERSION(1, 0, 42)
+#define T1R_VERSION CTL_MAKE_VERSION(1, 0, 43)
 
 #include "absfont.h"
 
@@ -67,8 +67,6 @@ int t1rBegFont(t1rCtx h,
 #define T1R_DUMP_TOKENS     (1 << 2)
 #define T1R_KEEP_CID_CSTRS  (1 << 3)
 #define T1R_NO_UDV_CLAMPING (1 << 4)
-#define T1R_IS_CUBE         (1 << 5)
-#define T1R_FLATTEN_CUBE    (1 << 6)
 #define T1R_SEEN_GLYPH      (1 << 7) /* have seen a glyph */
 
 /* t1rBegFont() is called to initiate a new font parse. The source data stream
@@ -107,13 +105,6 @@ int t1rBegFont(t1rCtx h,
    snapshotting a multiple master font. If NULL, the font is snapshot at the
    default instance. The parameter may be set to NULL for non-multiple master
    fonts.
-
-   T1R_IS_CUBE - the data contains cube font operators. Stack depth
-   and operator defs are different. Cube subr's are found at the end of gsubr's
-   for CID fonts, subrs for non-CID fonts.
-
-   T1R_FLATTEN_CUBE - the data contains cube font operators. Stack depth
-   and operator defs are different. The Cube compose ops must be flattened.
 */
 
 int t1rIterateGlyphs(t1rCtx h, abfGlyphCallbacks *glyph_cb);

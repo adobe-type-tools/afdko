@@ -18,25 +18,20 @@ and UFO master source fonts.
 # The script will build a master source OpenType/CFF font for each master
 # source UFO font, using the same file name, but with the extension '.otf'.
 
-from __future__ import print_function, division, absolute_import
-
 import argparse
 import logging
 import os
 import sys
 
+from fontTools.designspaceLib import (
+    DesignSpaceDocument,
+    DesignSpaceDocumentError,
+)
+
 from afdko.fdkutils import run_shell_command, get_temp_file_path
 from afdko.makeotf import main as makeotf
 
-try:
-    import xml.etree.cElementTree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET
-
-XMLElement = ET.Element
-xmlToString = ET.tostring
-
-__version__ = '1.9.0'
+__version__ = '1.9.2'
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +48,7 @@ def generalizeCFF(otfPath):
         raise ShellCommandError
 
     if not run_shell_command(['sfntedit', '-a',
-                              'CFF ={}'.format(tempFilePath), otfPath]):
+                              f'CFF ={tempFilePath}', otfPath]):
         raise ShellCommandError
 
 
@@ -61,7 +56,7 @@ def _validate_path(path_str):
     valid_path = os.path.abspath(os.path.realpath(path_str))
     if not os.path.exists(valid_path):
         raise argparse.ArgumentTypeError(
-            "'{}' is not a valid path.".format(path_str))
+            f"'{path_str}' is not a valid path.")
     return valid_path
 
 
@@ -91,6 +86,36 @@ def _preparse_args(args):
     except IndexError:
         pass
     return args
+
+
+def build_masters(opts):
+    """
+    Build master OTFs using supplied options.
+    """
+    logger.info("Reading designspace file...")
+    ds = DesignSpaceDocument.fromfile(opts.dsPath)
+    validateDesignspaceDoc(ds)
+    master_paths = [s.path for s in ds.sources]
+
+    logger.info("Building local OTFs for master font paths...")
+    curDir = os.getcwd()
+    dsDir = os.path.dirname(opts.dsPath)
+
+    for master_path in master_paths:
+        master_path = os.path.join(dsDir, master_path)
+        masterDir = os.path.dirname(master_path)
+        ufoName = os.path.basename(master_path)
+        otfName = os.path.splitext(ufoName)[0]
+        otfName = f"{otfName}.otf"
+
+        if masterDir:
+            os.chdir(masterDir)
+
+        makeotf(['-nshw', '-f', ufoName, '-o', otfName,
+                 '-r', '-nS'] + opts.mkot)
+        logger.info(f"Built OTF font for {master_path}")
+        generalizeCFF(otfName)
+        os.chdir(curDir)
 
 
 def get_options(args):
@@ -140,32 +165,31 @@ def get_options(args):
     return options
 
 
+def validateDesignspaceDoc(dsDoc, **kwArgs):
+    """
+    Validate the dsDoc DesignSpaceDocument object. Raises Exceptions if
+    certain criteria are not met. These are above and beyond the basic
+    validations in fontTools.designspaceLib and are specific to
+    buildmasterotfs.
+    """
+    if dsDoc.sources:
+        for src in dsDoc.sources:
+            if not os.path.exists(src.path):
+                raise DesignSpaceDocumentError(
+                    f"Source file {src.path} does not exist")
+    else:
+        raise DesignSpaceDocumentError("Designspace file contains no sources.")
+
+
 def main(args=None):
     args = _preparse_args(args)
     opts = get_options(args)
 
-    rootET = ET.parse(opts.dsPath)
-    ds = rootET.getroot()
-    sourceET = ds.find('sources')
-    masterList = sourceET.findall('source')
-    master_paths = [et.attrib['filename'] for et in masterList]
-
-    logger.info("Building local OTFs for master font paths...")
-    curDir = os.getcwd()
-    dsDir = os.path.dirname(opts.dsPath)
-    for master_path in master_paths:
-        master_path = os.path.join(dsDir, master_path)
-        masterDir = os.path.dirname(master_path)
-        ufoName = os.path.basename(master_path)
-        otfName = os.path.splitext(ufoName)[0]
-        otfName = "{}.otf".format(otfName)
-        if masterDir:
-            os.chdir(masterDir)
-        makeotf(['-nshw', '-f', ufoName, '-o', otfName,
-                 '-r', '-nS'] + opts.mkot)
-        logger.info("Built OTF font for {}".format(master_path))
-        generalizeCFF(otfName)
-        os.chdir(curDir)
+    try:
+        build_masters(opts)
+    except Exception as exc:
+        logger.error(exc)
+        return 1
 
 
 if __name__ == "__main__":

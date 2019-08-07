@@ -6,7 +6,7 @@ $PYTHON -m venv venv
 source venv/bin/activate
 # install and update dependencies
 $PIP install -U -q pip setuptools wheel
-$PIP install git+https://github.com/miguelsousa/cibuildwheel
+$PIP install git+https://github.com/adobe-type-tools/cibuildwheel
 # print versions
 $PYTHON --version
 $PIP --version

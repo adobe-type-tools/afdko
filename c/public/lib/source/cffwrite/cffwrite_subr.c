@@ -264,12 +264,6 @@ struct subrCtx_ {
     short subrStackOvl; /* Subr stack overflow */
 
     subr_CSData gsubrs; /* Global subrs */
-    struct {
-        long lowLESubrIndex;        /* the lowest seen LE reference by GSUBR index The entire GSUBR array is played through, and we copy only those from the low LE num on.*/
-        long highLEIndex;           /* the lowest seen LE reference by the biased LE iindex. The entire GSUBR array is played through, and we copy only those from the low LE num on.*/
-        dnaDCL(Offset, subOffsets); /* Charstring data accumulator */
-        dnaDCL(char, cstrs);        /* Charstring data accumulator */
-    } cube_gsubrs;
     short nFonts;     /* Font count */
     subr_Font *fonts; /* Font list */
 
@@ -543,11 +537,6 @@ void cfwSubrNew(cfwCtx g) {
 
     h->offSize = 2;
 
-    h->cube_gsubrs.highLEIndex = -1000;
-    h->cube_gsubrs.lowLESubrIndex = 1000;
-    dnaINIT(g->ctx.dnaSafe, h->cube_gsubrs.subOffsets, 214, 10);
-    dnaINIT(g->ctx.dnaSafe, h->cube_gsubrs.cstrs, 1028, 1028);
-
     h->gsubrs.nStrings = 0;
     h->gsubrs.offset = NULL;
 
@@ -585,9 +574,6 @@ void cfwSubrReuse(cfwCtx g) {
 
     csFreeData(g, &h->gsubrs);
 
-    dnaSET_CNT(h->cube_gsubrs.subOffsets, 0);
-    dnaSET_CNT(h->cube_gsubrs.cstrs, 0);
-
     h->root = NULL;
     h->offSize = 2;
 }
@@ -624,8 +610,6 @@ void cfwSubrFree(cfwCtx g) {
     dnaFREE(h->subrHash);
     dnaFREE(h->prefixLen);
     dnaFREE(h->subrLenMap);
-    dnaFREE(h->cube_gsubrs.subOffsets);
-    dnaFREE(h->cube_gsubrs.cstrs);
     for (i = 0; i < h->charsCallLists.cnt; i++)
         freeCallLists(h, &h->charsCallLists.array[i]);
     dnaFREE(h->charsCallLists);
@@ -3125,99 +3109,6 @@ void cfwSubrSubrize(cfwCtx g, int nFonts, subr_Font *fonts) {
         }
     }
 #endif
-}
-
-/* Check new LE subr to see if it is the lowest one seen */
-void cfwSeenLEIndex(cfwCtx g, long leIndex) {
-    subrCtx h = g->ctx.subr;
-    if (leIndex < 0) {
-        /* We are being called when processing a SETWV op in an LE.
-           The subr index is the current number of gsubrs. */
-        if (h->cube_gsubrs.lowLESubrIndex > h->cube_gsubrs.subOffsets.cnt) {
-            h->cube_gsubrs.lowLESubrIndex = h->cube_gsubrs.subOffsets.cnt; /* this should happen just once, with the first setvw seen. */
-        }
-    } else {
-        /* We are being called when processing a callgrel op in an LE. The subr
-           index is the biased such that index decrements from the first, but
-           the last index is -107. We can't resolve that to real subr number
-           until we know the number of subrs. */
-        if (h->cube_gsubrs.highLEIndex < leIndex) {
-            h->cube_gsubrs.highLEIndex = leIndex; /* this should happen just once, with the first callgrel seen. */
-        }
-    }
-}
-
-/* add new cube GSUBR */
-void cfwAddCubeGSUBR(cfwCtx g, char *cstr, long length) {
-    subrCtx h = g->ctx.subr;
-    unsigned char *start;
-    Offset *subOffset;
-    subOffset = dnaNEXT(h->cube_gsubrs.subOffsets);
-    start = (unsigned char *)dnaEXTEND(h->cube_gsubrs.cstrs, (long)length);
-    *subOffset = h->cube_gsubrs.cstrs.cnt;
-    memcpy(start, cstr, length);
-}
-
-/* Append the library element GSUBR's to the global ones produced by subroutinization. */
-void cfwMergeCubeGSUBR(cfwCtx g) {
-    subrCtx h = g->ctx.subr;
-    int i, j;
-    long leIndex = -1; /* index of the first Library Element in the source font gsubrs */
-    long leLen;
-    long leOffset;
-    long gsLen;
-    Offset *newOffsets;
-    char *newData;
-    subr_CSData *subrs = &h->gsubrs;
-    long numSourceGSubrs = h->cube_gsubrs.subOffsets.cnt;
-
-    if (h->cube_gsubrs.lowLESubrIndex > numSourceGSubrs) {
-        return; /* aren't any to merge. */
-    }
-    leIndex = numSourceGSubrs - (108 + h->cube_gsubrs.highLEIndex);
-    if (leIndex > h->cube_gsubrs.lowLESubrIndex) {
-        leIndex = h->cube_gsubrs.lowLESubrIndex;
-    }
-    if (subrs->nStrings > 0) {
-        gsLen = subrs->offset[subrs->nStrings - 1];
-    } else {
-        gsLen = 0;
-    }
-
-    if (leIndex == 0) {
-        leOffset = 0;
-    } else {
-        leOffset = h->cube_gsubrs.subOffsets.array[leIndex - 1];
-    }
-    leLen = h->cube_gsubrs.cstrs.cnt - leOffset;
-
-    /* Allocate and copy charstring data */
-    newData = (char *)MEM_NEW(h->g, gsLen + leLen);
-    if (gsLen) {
-        memcpy(newData, subrs->data, gsLen);
-        MEM_FREE(h->g, subrs->data);
-    }
-
-    memcpy(&newData[gsLen], &h->cube_gsubrs.cstrs.array[leOffset], leLen);
-    subrs->data = newData;
-
-    /* Allocate and copy offsets*/
-    newOffsets = (Offset *)MEM_NEW(h->g, (h->cube_gsubrs.subOffsets.cnt + subrs->nStrings) * sizeof(Offset));
-    if (gsLen) {
-        memcpy(newOffsets, subrs->offset, (subrs->nStrings * sizeof(Offset)));
-        MEM_FREE(h->g, subrs->offset);
-    }
-
-    /*update offsets*/
-    i = leIndex;
-    j = subrs->nStrings;
-    while (i < h->cube_gsubrs.subOffsets.cnt) {
-        long offset = h->cube_gsubrs.subOffsets.array[i++];
-        newOffsets[j++] = gsLen + (offset - leOffset);
-    }
-
-    subrs->offset = newOffsets;
-    subrs->nStrings += (unsigned short)(h->cube_gsubrs.subOffsets.cnt - leIndex);
 }
 
 /* Compute size of font's subrs */

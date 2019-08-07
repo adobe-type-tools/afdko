@@ -1,12 +1,13 @@
 language: python
+python: 3.6
 
 env:
   global:
-    - CIBW_SKIP="cp34-* cp35-* cp37-* *i686"
-    - CIBW_TEST_REQUIRES_MACOS="pytest-cov codecov subprocess32"
-    - CIBW_TEST_REQUIRES_LINUX="pytest subprocess32"
-    - CIBW_TEST_COMMAND_MACOS="cd {project} && pytest --cov -v && codecov && pip uninstall --yes afdko"
-    - CIBW_TEST_COMMAND_LINUX="cd {project} && pytest -v && pip uninstall --yes afdko"
+    - CIBW_BUILD="cp36-macosx_10_6_intel cp36-manylinux1_x86_64"
+    - CIBW_TEST_REQUIRES_MACOS="pytest-cov codecov"
+    - CIBW_TEST_REQUIRES_LINUX="pytest"
+    - CIBW_TEST_COMMAND_MACOS="cd {project} && pytest --cov && codecov && pip uninstall --yes afdko"
+    - CIBW_TEST_COMMAND_LINUX="cd {project} && pytest && pip uninstall --yes afdko"
     - TWINE_USERNAME="adobe-type-tools-ci"
     # Note: TWINE_PASSWORD is set in Travis settings
 
@@ -19,14 +20,17 @@ matrix:
       env:
         - NAME=Linux
         - PIP=pip
+        - PYTHON=python
 
     - os: osx
       language: generic
       env:
         - NAME=OSX
-        - PIP=pip2
+        - PIP=pip3
+        - PYTHON=python3
 
 script:
+  - $PIP install --upgrade pip
   # - $PIP install cibuildwheel
   - $PIP install git+https://github.com/adobe-type-tools/cibuildwheel
   - cibuildwheel --output-dir wheelhouse
@@ -36,11 +40,11 @@ after_success:
   # and deploy to PyPI on tags
   - |
     if [[ $TRAVIS_TAG ]]; then
-      python -m pip install twine
-      python -m twine upload wheelhouse/*.whl
+      $PYTHON -m pip install twine
+      $PYTHON -m twine upload wheelhouse/*.whl
       if [[ $TRAVIS_OS_NAME == "osx" ]]; then
-        python setup.py sdist
-        python -m twine upload dist/*.tar.gz
+        $PYTHON setup.py sdist
+        $PYTHON -m twine upload dist/*.tar.gz
       fi
     fi
 

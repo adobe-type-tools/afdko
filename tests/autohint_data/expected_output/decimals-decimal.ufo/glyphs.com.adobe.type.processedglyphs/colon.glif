@@ -1,35 +1,35 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="2" name="colon">
-  <advance width="249" />
-  <unicode hex="003A" />
+<glyph name="colon" format="2">
+  <advance width="249"/>
+  <unicode hex="003A"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="curve" x="80" y="281.12" />
-      <point x="100.48" y="281.12" />
-      <point x="117.76" y="297.76" />
-      <point type="curve" x="117.76" y="320.8" />
-      <point x="117.76" y="345.12" />
-      <point x="100.48" y="361.76" />
-      <point type="curve" x="80" y="361.76" />
-      <point x="58.88" y="361.76" />
-      <point x="41.6" y="345.12" />
-      <point type="curve" x="41.6" y="320.8" />
-      <point x="41.6" y="297.76" />
-      <point x="58.88" y="281.12" />
+      <point type="curve" x="80" y="281.12" name="hintSet0000"/>
+      <point x="100.48" y="281.12"/>
+      <point x="117.76" y="297.76"/>
+      <point type="curve" x="117.76" y="320.8"/>
+      <point x="117.76" y="345.12"/>
+      <point x="100.48" y="361.76"/>
+      <point type="curve" x="80" y="361.76"/>
+      <point x="58.88" y="361.76"/>
+      <point x="41.6" y="345.12"/>
+      <point type="curve" x="41.6" y="320.8"/>
+      <point x="41.6" y="297.76"/>
+      <point x="58.88" y="281.12"/>
     </contour>
     <contour>
-      <point type="curve" x="80" y="-7.68" />
-      <point x="100.48" y="-7.68" />
-      <point x="117.76" y="8.96" />
-      <point type="curve" x="117.76" y="32" />
-      <point name="hintSet0007" x="117.76" y="56.32" />
-      <point x="100.48" y="72.96" />
-      <point type="curve" x="80" y="72.96" />
-      <point x="58.88" y="72.96" />
-      <point x="41.6" y="56.32" />
-      <point type="curve" x="41.6" y="32" />
-      <point name="hintSet0009" x="41.6" y="8.96" />
-      <point x="58.88" y="-7.68" />
+      <point type="curve" x="80" y="-7.68"/>
+      <point x="100.48" y="-7.68"/>
+      <point x="117.76" y="8.96"/>
+      <point type="curve" x="117.76" y="32"/>
+      <point x="117.76" y="56.32" name="hintSet0007"/>
+      <point x="100.48" y="72.96"/>
+      <point type="curve" x="80" y="72.96"/>
+      <point x="58.88" y="72.96"/>
+      <point x="41.6" y="56.32"/>
+      <point type="curve" x="41.6" y="32"/>
+      <point x="41.6" y="8.96" name="hintSet0009"/>
+      <point x="58.88" y="-7.68"/>
     </contour>
   </outline>
   <lib>

@@ -11,7 +11,7 @@
 
 #include "ctlshare.h"
 
-#define T1C_VERSION CTL_MAKE_VERSION(1, 0, 19)
+#define T1C_VERSION CTL_MAKE_VERSION(1, 0, 20)
 
 #include "absfont.h"
 
@@ -54,9 +54,6 @@ typedef struct
 #define T1C_WIDTH_ONLY   (1 << 0)
 #define T1C_USE_MATRIX   (1 << 1) /* Matrix applied to entire charstring; used by 'rotateFont'.*/
 #define T1C_UPDATE_OPS   (1 << 2)
-#define T1C_IS_CUBE      (1 << 3)
-#define T1C_FLATTEN_CUBE (1 << 4)
-#define T1C_CUBE_GSUBR   (1 << 5) /* current charstring is a subr. */
     void *src;
     ctlStreamCallbacks *stm;
     ctlSubrs subrs;

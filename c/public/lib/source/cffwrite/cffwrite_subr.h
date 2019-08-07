@@ -73,9 +73,6 @@ void cfwSubrSubrize(cfwCtx g, int nFonts, subr_Font *fonts);
 long cfwSubrSizeLocal(cfwCtx g, subr_CSData *subrs);
 void cfwSubrWriteLocal(cfwCtx g, subr_CSData *subrs);
 
-void cfwAddCubeGSUBR(cfwCtx g, char *cstr, long length);
-void cfwMergeCubeGSUBR(cfwCtx g);
-void cfwSeenLEIndex(cfwCtx g, long leIndex);
 long cfwSubrSizeGlobal(cfwCtx g);
 void cfwSubrWriteGlobal(cfwCtx g);
 

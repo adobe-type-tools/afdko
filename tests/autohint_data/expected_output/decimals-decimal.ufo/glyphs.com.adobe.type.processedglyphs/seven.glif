@@ -1,20 +1,20 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph format="2" name="seven">
-  <advance width="497" />
-  <unicode hex="0037" />
+<glyph name="seven" format="2">
+  <advance width="497"/>
+  <unicode hex="0037"/>
   <outline>
     <contour>
-      <point name="hintSet0000" type="curve" x="141.6" y="0" />
-      <point type="line" x="209.6" y="0" />
-      <point x="218.4" y="199.2" />
-      <point x="243.2" y="315.2" />
-      <point type="curve" x="364" y="469.6" />
-      <point type="line" x="364" y="510.4" />
-      <point type="line" x="35.2" y="510.4" />
-      <point type="line" x="35.2" y="453.6" />
-      <point type="line" x="289.6" y="453.6" />
-      <point x="188.8" y="313.6" />
-      <point x="150.4" y="192" />
+      <point type="curve" x="141.6" y="0" name="hintSet0000"/>
+      <point type="line" x="209.6" y="0"/>
+      <point x="218.4" y="199.2"/>
+      <point x="243.2" y="315.2"/>
+      <point type="curve" x="364" y="469.6"/>
+      <point type="line" x="364" y="510.4"/>
+      <point type="line" x="35.2" y="510.4"/>
+      <point type="line" x="35.2" y="453.6"/>
+      <point type="line" x="289.6" y="453.6"/>
+      <point x="188.8" y="313.6"/>
+      <point x="150.4" y="192"/>
     </contour>
   </outline>
   <lib>

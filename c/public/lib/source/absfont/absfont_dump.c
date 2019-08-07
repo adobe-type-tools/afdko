@@ -456,17 +456,16 @@ static void glyphWidth(abfGlyphCallbacks *cb, float hAdv) {
 /*In Xcode, FLT_EPSILON is 1.192..x10-7, but the diff between value-roundf(value) can be 3.05x10-5, when the input value is an integer. */
 static void writeReal(char *buf, const size_t bufLen, float value) {
     char tmp[50];
-    const size_t tmpLen = sizeof(tmp);
-    int l;
 
     /* if no decimal component, perform a faster to string conversion */
     if ((fabs(value - roundf(value)) < TX_EPSILON) && (value > LONG_MIN) && (value < LONG_MAX))
-        SPRINTF_S(tmp, tmpLen, " %ld", (long int)roundf(value));
+        SPRINTF_S(tmp, sizeof(tmp), " %ld", (long int)roundf(value));
     else {
+        int l;
         float value2 = (float)RND_ON_WRITE(value);  // to avoid getting -0 from 0.0004.
         if ((value2 == 0) && (value < 0))
             value2 = 0;
-        SPRINTF_S(tmp, tmpLen, " %.2f", value2);
+        SPRINTF_S(tmp, sizeof(tmp), " %.2f", value2);
         l = (int)strlen(tmp) - 1;
         if ((tmp[l] == '0') && (tmp[l - 1] == '0')) {
             tmp[l - 2] = 0;
@@ -597,7 +596,7 @@ static void glyphGenop(abfGlyphCallbacks *cb,
         {
             "reserved0",
             "hstem",
-            "compose",
+            "reserved2",
             "vstem",
             "vmoveto",
             "rlineto",
@@ -612,7 +611,7 @@ static void glyphGenop(abfGlyphCallbacks *cb,
             "endchar",
             "vsindex",
             "blend",
-            "callgrel",
+            "reserved17",
             "hstemhm",
             "hintmask",
             "cntrmask",
@@ -721,37 +720,6 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
     }
 }
 
-static void glyphCompose(abfGlyphCallbacks *cb, int cubeLEIndex, float x0, float y0, int numDV, float *ndv) {
-    int i = 0;
-
-    char buf[250];
-    const size_t bufLen = sizeof(buf);
-    char *p = buf;
-    size_t remainingBufLength = bufLen;
-    size_t usedPrintLength;
-
-    SPRINTF_S(p, remainingBufLength, " %d %f %f", cubeLEIndex, x0, y0);
-    usedPrintLength = strnlen(p, remainingBufLength);
-    p += strlen(p);
-    remainingBufLength -= usedPrintLength;
-    while (i < numDV) {
-        SPRINTF_S(p, remainingBufLength, " %g", ndv[i++]);
-        usedPrintLength = strnlen(p, remainingBufLength);
-        p += strlen(p);
-        remainingBufLength -= usedPrintLength;
-    }
-    dumpInstr(cb, "%s compose", buf);
-}
-
-static void glyphTransform(abfGlyphCallbacks *cb, float rotate, float scaleX, float scaleY, float skewX, float skewY) {
-    char buf[250];
-    const size_t bufLen = sizeof(buf);
-    char *p = buf;
-
-    SPRINTF_S(p, bufLen, " %f %f %f %f %f", rotate, scaleX, scaleY, skewX, skewY);
-    dumpInstr(cb, "%s transform", buf);
-}
-
 /* Dump glyph callbacks */
 const abfGlyphCallbacks abfGlyphDumpCallbacks =
     {
@@ -768,8 +736,4 @@ const abfGlyphCallbacks abfGlyphDumpCallbacks =
         glyphGenop,
         glyphSeac,
         glyphEnd,
-        NULL,
-        NULL,
-        glyphCompose,
-        glyphTransform,
 };

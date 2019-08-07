@@ -8,8 +8,6 @@ options to arguments for the fontpdf module; the latter produces a proof
 file using the provided options annd font instance.
 """
 
-from __future__ import print_function
-
 import copy
 import os
 import platform
@@ -18,14 +16,15 @@ import sys
 import tempfile
 import time
 import traceback
-import subprocess
 
 from fontTools.ttLib import TTFont, getTableModule, TTLibError
-from fontTools.misc.py23 import open
 
-from afdko.fontpdf import (FontPDFParams, makePDF, makeFontSetPDF, kDrawTag,
-                           kDrawPointTag, kShowMetaTag, params_doc)
-from afdko import ttfpdf, otfpdf, fdkutils
+from afdko import fdkutils
+from afdko.pdflib import ttfpdf, otfpdf
+from afdko.pdflib.fontpdf import (
+	FontPDFParams, makePDF, makeFontSetPDF, kDrawTag, kDrawPointTag,
+	kShowMetaTag, params_doc,
+	)
 
 curSystem = platform.system()
 

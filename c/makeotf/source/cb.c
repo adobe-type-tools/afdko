@@ -451,7 +451,6 @@ static char *findFeatInclFile(cbCtx h, char *filename) {
     }
     /* Check if relative path */
     if ((filename[0] != '/') && (filename[0] != '\\') && (filename[1] != ':')) {
-        int i;
         /* h->feat.includeDir[0] contains the parent directory of the main feature file.             */
         /* h->feat.includeDir[1] contains the parent directory of the including parent feature file. */
         if ((h->feat.includeDir[0] != 0) &&
@@ -1655,6 +1654,7 @@ static void ProcessFontInfo(hotCtx g, char *version, char *FontName, int psinfo,
     hotWinData win;
     hotCommonData common;
 
+    memset((void *)&win, 0, sizeof(hotWinData));
     win.Family = WINDOWS_ROMAN; /* This is not currently used by the hot lib; */
                                 /* it currently always sets OS2.sFamily to "undefined". */
     win.CharSet = WIN_NONSYMBOLCHARSET;
