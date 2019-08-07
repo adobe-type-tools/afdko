@@ -3868,7 +3868,7 @@ static void dcf_DumpFDSelect(txCtx h, const ctlRegion *region) {
                 uint32_t i;
                 uint32_t nRanges = read4(h);
                 fprintf(fp, "nRanges=%u\n", nRanges);
-                flowTitle(h, "Range3[index]={first,fd}");
+                flowTitle(h, "Range4[index]={first,fd}");
                 for (i = 0; i < nRanges; i++) {
                     uint32_t first = read4(h);
                     uint16_t fd = read2(h);
