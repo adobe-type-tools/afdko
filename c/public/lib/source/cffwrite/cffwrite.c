@@ -1493,18 +1493,13 @@ int cfwBegFont(cfwCtx g, cfwMapCallback *map, unsigned long maxNumSubrs) {
 static void orderCIDKeyedGlyphs(controlCtx h) {
     cfwCtx g = h->g;
     long i;
-    uint16_t *fdmap;
-    size_t fdmap_size;
     long nGlyphs = h->_new->glyphs.cnt;
     Glyph *glyphs = h->_new->glyphs.array;
+    dnaDCL(uint16_t, fdmap);
 
-    fdmap_size = h->_new->FDArray.cnt * sizeof(uint16_t);
-    fdmap = malloc(fdmap_size);
-    if (fdmap == NULL) {
-        cfwFatal(h->g, cfwErrNoMemory, NULL);
-    }
-    memset(fdmap, 0, fdmap_size);
-
+    dnaINIT(g->ctx.dnaSafe, fdmap, 1, 1);
+    dnaSET_CNT(fdmap, h->_new->FDArray.cnt);
+    memset(fdmap.array, 0, sizeof(uint16_t) * h->_new->FDArray.cnt);
 
     if (glyphs[0].info == NULL) {
         cfwFatal(h->g, cfwErrNoCID0, NULL);
@@ -1527,34 +1522,34 @@ static void orderCIDKeyedGlyphs(controlCtx h) {
 
     /* Mark used FDs */
     for (i = 0; i < nGlyphs; i++) {
-        fdmap[glyphs[i].iFD] = 1;
+        fdmap.array[glyphs[i].iFD] = 1;
     }
 
     /* Remove unused FDs from FDArray */
     {
         long j = 0;
         for (i = 0; i < h->_new->FDArray.cnt; i++) {
-            if (fdmap[i]) {
+            if (fdmap.array[i]) {
                 if (i != j) {
                     /* Swap elements preserving dynamic arrays for later freeing */
                     FDInfo tmp = h->_new->FDArray.array[j];
                     h->_new->FDArray.array[j] = h->_new->FDArray.array[i];
                     h->_new->FDArray.array[i] = tmp;
                 }
-                fdmap[i] = j++;
+                fdmap.array[i] = (uint16_t)j++;
             }
         }
 
         if (i != j) {
             /* Unused FDs; remap glyphs to new FDArray */
             for (i = 0; i < nGlyphs; i++) {
-                glyphs[i].iFD = fdmap[glyphs[i].iFD];
+                glyphs[i].iFD = fdmap.array[glyphs[i].iFD];
             }
             h->_new->FDArray.cnt = j;
         }
     }
 
-    free(fdmap);
+    dnaFREE(fdmap);
 
     cfwCharsetBeg(g, 1);
     cfwFdselectBeg(g);
