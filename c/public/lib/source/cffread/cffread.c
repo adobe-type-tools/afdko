@@ -1705,7 +1705,7 @@ static void readFDArray(cfrCtx h) {
     if (h->region.FDArrayINDEX.begin == -1)
         fatal(h, cfrErrNoFDArray);
     readINDEX(h, &h->region.FDArrayINDEX, &h->index.FDArray);
-    if (h->index.FDArray.count < 1 || h->index.FDArray.count > 256)
+    if (h->index.FDArray.count < 1 || h->index.FDArray.count > 65536)
         fatal(h, cfrErrBadFDArray);
 
     /* Read FDArray */

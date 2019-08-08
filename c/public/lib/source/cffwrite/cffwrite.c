@@ -79,7 +79,7 @@ typedef struct Glyph_ /* Glyph data */
         long length;
         long offset;
     } cstr;
-    unsigned char iFD; /* Modifiable and persistent copy of info->iFD */
+    uint16_t iFD; /* Modifiable and persistent copy of info->iFD */
 } Glyph;
 
 typedef struct /* Glyph data */
@@ -1493,9 +1493,18 @@ int cfwBegFont(cfwCtx g, cfwMapCallback *map, unsigned long maxNumSubrs) {
 static void orderCIDKeyedGlyphs(controlCtx h) {
     cfwCtx g = h->g;
     long i;
-    unsigned char fdmap[256];
+    uint16_t *fdmap;
+    size_t fdmap_size;
     long nGlyphs = h->_new->glyphs.cnt;
     Glyph *glyphs = h->_new->glyphs.array;
+
+    fdmap_size = h->_new->FDArray.cnt * sizeof(uint16_t);
+    fdmap = malloc(fdmap_size);
+    if (fdmap == NULL) {
+        cfwFatal(h->g, cfwErrNoMemory, NULL);
+    }
+    memset(fdmap, 0, fdmap_size);
+
 
     if (glyphs[0].info == NULL) {
         cfwFatal(h->g, cfwErrNoCID0, NULL);
@@ -1517,7 +1526,6 @@ static void orderCIDKeyedGlyphs(controlCtx h) {
     }
 
     /* Mark used FDs */
-    memset(fdmap, 0, 256);
     for (i = 0; i < nGlyphs; i++) {
         fdmap[glyphs[i].iFD] = 1;
     }
@@ -1533,7 +1541,7 @@ static void orderCIDKeyedGlyphs(controlCtx h) {
                     h->_new->FDArray.array[j] = h->_new->FDArray.array[i];
                     h->_new->FDArray.array[i] = tmp;
                 }
-                fdmap[i] = (unsigned char)j++;
+                fdmap[i] = j++;
             }
         }
 
@@ -1545,6 +1553,8 @@ static void orderCIDKeyedGlyphs(controlCtx h) {
             h->_new->FDArray.cnt = j;
         }
     }
+
+    free(fdmap);
 
     cfwCharsetBeg(g, 1);
     cfwFdselectBeg(g);
@@ -1887,7 +1897,7 @@ int cfwEndFont(cfwCtx g, abfTopDict *top) {
         if (h->flags & SEEN_NAME_KEYED_GLYPH) {
             return cfwErrGlyphType;
         }
-        if (top->FDArray.cnt < 1 || top->FDArray.cnt > 256) {
+        if (top->FDArray.cnt < 1 || top->FDArray.cnt > 65536) {
             return cfwErrBadFDArray;
         }
 
