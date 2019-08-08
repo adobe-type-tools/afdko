@@ -529,10 +529,19 @@ def test_svg_missing_fontname_bug883(filename):
 
 
 @pytest.mark.parametrize('option', ['dump', 'dcf'])
-def test_fdselect_format_4(option):
+def test_read_fdselect_format_4(option):
     font_name = 'fdselect4.otf'
-    font_path = get_input_path(font_name)
-    dump_path = get_temp_file_path()
-    runner(CMD + ['-a', '-o', option, '-f', font_path, dump_path])
+    input_path = get_input_path(font_name)
+    output_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', option, '-f', input_path, output_path])
     expected_path = get_expected_path(font_name + '.' + option)
-    assert differ([expected_path, dump_path, '-s', '## Filename'])
+    assert differ([expected_path, output_path, '-s', '## Filename'])
+
+
+def test_write_fdselect_format_4():
+    font_name = 'FDArrayTest257FontDicts.otf'
+    input_path = get_input_path(font_name)
+    output_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', 'cff2', '-f', input_path, output_path])
+    expected_path = get_expected_path('FDArrayTest257FontDicts.cff2')
+    assert differ([expected_path, output_path, '-m', 'bin'])
