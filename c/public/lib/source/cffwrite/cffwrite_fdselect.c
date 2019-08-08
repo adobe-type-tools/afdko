@@ -8,38 +8,39 @@
 #include <string.h>
 
 /* Declarations used for determining sizes and for format documentation */
-typedef struct {
-    uint8_t format;
-    uint8_t *fds; /* [nGlyphs] */
-} Format0;
+
+// typedef struct {
+//     uint8_t format;
+//     uint8_t *fds; /* [nGlyphs] */
+// } Format0;
 #define FORMAT0_SIZE(nGlyphs) (1 + (nGlyphs)*1)
 
-typedef struct {
-    uint16_t first;
-    uint8_t fd;
-} Range3;
+// typedef struct {
+//     uint16_t first;
+//     uint8_t fd;
+// } Range3;
 #define RANGE3_SIZE (2 + 1)
 
-typedef struct {
-    uint8_t format;
-    uint16_t nRanges;
-    Range3 *range;
-    uint16_t sentinel;
-} Format3;
+// typedef struct {
+//     uint8_t format;
+//     uint16_t nRanges;
+//     Range3 *range;
+//     uint16_t sentinel;
+// } Format3;
 #define FORMAT3_SIZE(nRanges) (1 + 2 + (nRanges)*RANGE3_SIZE + 2)
 
-typedef struct {
-    uint32_t first;
-    uint16_t fd;
-} Range4;
+// typedef struct {
+//     uint32_t first;
+//     uint16_t fd;
+// } Range4;
 #define RANGE4_SIZE (4 + 2)
 
-typedef struct {
-    uint8_t format;
-    uint32_t nRanges;
-    Range4 *range;
-    uint32_t sentinel;
-} Format4;
+// typedef struct {
+//     uint8_t format;
+//     uint32_t nRanges;
+//     Range4 *range;
+//     uint32_t sentinel;
+// } Format4;
 #define FORMAT4_SIZE(nRanges) (1 + 4 + (nRanges)*RANGE4_SIZE + 4)
 
 typedef struct {
@@ -144,8 +145,6 @@ long cfwFdselectFill(cfwCtx g) {
     offset = 0;
     for (i = 0; i < h->selectors.cnt; i++) {
         unsigned j;
-        long size0;
-        long size3;
         Selector *selector = &h->selectors.array[i];
 
         /* Count ranges */
@@ -162,6 +161,8 @@ long cfwFdselectFill(cfwCtx g) {
             selector->format = 4;
             offset += FORMAT4_SIZE(selector->nRanges);
         } else {
+            long size0;
+            long size3;
             size0 = FORMAT0_SIZE(selector->fds.cnt);
             size3 = FORMAT3_SIZE(selector->nRanges);
             if (size0 <= size3) {

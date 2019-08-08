@@ -27,11 +27,11 @@
 #include <ctype.h>
 
 /* Predefined encodings */
-static const unsigned char stdenc[] =
+static const uint8_t stdenc[] =
     {
 #include "stdenc0.h"
 };
-static const unsigned char exenc[] =
+static const uint8_t exenc[] =
     {
 #include "exenc0.h"
 };
@@ -53,7 +53,7 @@ static char *applestd[258] =
 
 #define ARRAY_LEN(t) (sizeof(t) / sizeof((t)[0]))
 
-typedef unsigned char OffSize; /* Offset size indicator */
+typedef uint8_t OffSize; /* Offset size indicator */
 typedef long Offset;           /* 1, 2, 3, or 4-byte offset */
 typedef unsigned short SID;    /* String identifier */
 #define SID_SIZE 2             /* SID byte size */
@@ -124,9 +124,9 @@ struct cfrCtx_ /* Context */
     cfrSingleRegions region;
     struct /* CFF header */
     {
-        unsigned char major;
-        unsigned char minor;
-        unsigned char hdrSize;
+        uint8_t major;
+        uint8_t minor;
+        uint8_t hdrSize;
         OffSize offSize;
     } header;
     struct /* INDEXes */
@@ -870,8 +870,7 @@ static void saveDeltaArray(cfrCtx h, size_t max, long *cnt, float *array, long *
      values from a blend operation will be copied into a single blendArray entry.
      */
 
-    int i, j, k, bi;
-    int numBlends;
+    int i;
 
     if (h->stack.cnt == 0 || h->stack.cnt > (long)max)
         fatal(h, cfrErrDICTArray);
@@ -885,10 +884,13 @@ static void saveDeltaArray(cfrCtx h, size_t max, long *cnt, float *array, long *
     if (!hasBlend(h)) {
         *blendCnt = 0; /* show that there are no blended values - the regular array should be used. */
     } else {
+        int j, k, bi;
         float lastValue = 0;
 
         i = j = k = bi = 0;
         while (i < h->stack.cnt) {
+            int numBlends;
+
             abfOpEntry *blendEntry = &blendArray[bi];
 
             stack_elem *stackEntry = &(INDEX(i));
@@ -939,7 +941,6 @@ static void saveDeltaArray(cfrCtx h, size_t max, long *cnt, float *array, long *
 
 static void saveBlend(cfrCtx h, float *realValue, abfOpEntry *blendEntry) {
     /* Save a value that may be blended. Stack depth is 1 for a non-blended value, or numBlends for a blended value. */
-    int i;
     int numBlends;
 
     stack_elem *stackEntry = &(INDEX(0));
@@ -952,6 +953,7 @@ static void saveBlend(cfrCtx h, float *realValue, abfOpEntry *blendEntry) {
         blendEntry->numBlends = 0; /* shows there is no blend value, and the regular value shoud be used instead. */
         blendEntry->blendValues = NULL;
     } else {
+        int i;
         float defaultValue;
         signed int numRegions = h->stack.numRegions;
         unsigned short numBlendValues = (unsigned short)(numBlends + numRegions);
@@ -1424,7 +1426,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
             case cff_maxstack:
                 CHKUFLOW(1);
                 /* deprecated April 2017.
-                   top->maxstack = (unsigned short)INDEX_INT(0); */
+                   top->maxstack = (uint16_t)INDEX_INT(0); */
                 break;
             case cff_Subrs:
                 CHKUFLOW(1);
@@ -1443,13 +1445,8 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
                 /* 3 byte number */
                 CHKOFLOW(1);
                 {
-                    short value = read1(h);
+                    uint16_t value = read1(h);
                     value = value << 8 | read1(h);
-#if SHRT_MAX > 32767
-                    /* short greater that 2 bytes; handle negative range */
-                    if (value > 32767)
-                        value -= 65536;
-#endif
                     PUSH_INT(value);
                 }
                 continue;
@@ -1874,14 +1871,10 @@ static void addID(cfrCtx h, long gid, unsigned short id) {
 }
 
 /* Read 2-byte signed number. */
-static short sread2(cfrCtx h) {
-    unsigned short value = (unsigned short)read1(h) << 8;
-    value |= (unsigned short)read1(h);
-#if SHRT_MAX == 32767
-    return (short)value;
-#else
-    return (short)((value > 32767) ? value - 65536 : value);
-#endif
+static int16_t sread2(cfrCtx h) {
+    uint16_t value = (uint16_t)read1(h) << 8;
+    value |= (uint16_t)read1(h);
+    return (int16_t)value;
 }
 
 /* Read 4-byte unsigned number. */
@@ -2020,7 +2013,7 @@ static void postRead(cfrCtx h) {
     end = p + length;
     i = 0;
     for (i = 0; i < h->post.fmt2.strings.cnt; i++) {
-        length = *(unsigned char *)p;
+        length = *(uint8_t *)p;
         *p++ = '\0';
         h->post.fmt2.strings.array[i] = p;
         p += length;
@@ -2071,13 +2064,14 @@ static void predefCharset(cfrCtx h, int cnt, const SID *charset) {
 }
 
 static void readCharSetFromPost(cfrCtx h) {
-    Offset offset;
-    unsigned long i;
     long gid;
     char *p;
     long lenStrings = ARRAY_LEN(stdstrs);
 
     if (!(h->flags & CFR_IS_CFF2)) {
+        Offset offset;
+        unsigned long i;
+
         /* init string.offsets and h->string.ptrs */
         h->index.string.count = (short)h->glyphs.cnt;
         dnaSET_CNT(h->string.offsets, h->index.string.count + 1);
@@ -2271,7 +2265,7 @@ static void encListFree(cfrCtx h, abfEncoding *node) {
 }
 
 /* Initialize from predefined encoding */
-static void predefEncoding(cfrCtx h, int cnt, const unsigned char *encoding) {
+static void predefEncoding(cfrCtx h, int cnt, const uint8_t *encoding) {
     long gid;
     for (gid = 0; gid < h->glyphs.cnt; gid++) {
         abfGlyphInfo *info = &h->glyphs.array[gid];
@@ -3131,8 +3125,8 @@ int cfrGetWidths(cfrCtx h, int iFD,
 }
 
 /* Return table mapping standard encoding and glyph index. */
-const unsigned char *cfrGetStdEnc2GIDMap(cfrCtx h) {
-    return (unsigned char *)h->stdEnc2GID;
+const uint8_t *cfrGetStdEnc2GIDMap(cfrCtx h) {
+    return (uint8_t *)h->stdEnc2GID;
 }
 
 /* Finish reading font. */
@@ -3175,15 +3169,15 @@ static void sharedSrcRead(ctlSharedStmCallbacks *h, size_t count, char *ptr) {
     srcRead((cfrCtx)h->direct_ctx, count, ptr);
 }
 
-static unsigned char sharedSrcRead1(ctlSharedStmCallbacks *h) {
+static uint8_t sharedSrcRead1(ctlSharedStmCallbacks *h) {
     return read1(((cfrCtx)h->direct_ctx));
 }
 
-static unsigned short sharedSrcRead2(ctlSharedStmCallbacks *h) {
+static uint16_t sharedSrcRead2(ctlSharedStmCallbacks *h) {
     return read2(((cfrCtx)h->direct_ctx));
 }
 
-static unsigned long sharedSrcRead4(ctlSharedStmCallbacks *h) {
+static uint32_t sharedSrcRead4(ctlSharedStmCallbacks *h) {
     return read4(((cfrCtx)h->direct_ctx));
 }
 
