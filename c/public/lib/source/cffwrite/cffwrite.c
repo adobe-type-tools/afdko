@@ -370,7 +370,6 @@ long cfwSeenGlyph(cfwCtx g, abfGlyphInfo *info, int *result, long startNew, long
     controlCtx h = g->ctx.control;
     long seenIndex = 0;
     int nameFound;
-    int noMatch = 0;
 
     *result = 0;
 
@@ -383,6 +382,7 @@ long cfwSeenGlyph(cfwCtx g, abfGlyphInfo *info, int *result, long startNew, long
     }
 
     if (nameFound) {
+        int noMatch = 0;
         long lenNewStr = endNew - startNew;
         long glyphIndex = h->_new->seenGlyphs.array[seenIndex].glyphsIndex;
         long lenOldStr = h->_new->glyphs.array[glyphIndex].cstr.length;
@@ -509,9 +509,9 @@ int cfwCompareFDArrays(cfwCtx g, abfTopDict *srcTop) {
     controlCtx h = g->ctx.control;
     int srcCount = srcTop->FDArray.cnt;
     int destCount = h->_new->FDArray.cnt;
-    int j = 0;
 
     if (destCount > 0) {
+        int j = 0;
         while (j < srcCount) {
             long seenIndex = 0;
             int dictFound;
@@ -1310,13 +1310,13 @@ static void writeCharStringsINDEX(controlCtx h, cff_Font *font) {
 
     /* Write charstring data */
     for (i = 0; i < font->glyphs.cnt; i++) {
-        long length;
         Glyph *glyph = &font->glyphs.array[i];
         FDInfo *fd = &font->FDArray.array[glyph->iFD];
 
         if ((!(g->flags & CFW_WRITE_CFF2)) && (glyph->hAdv != fd->width.dflt)) {
             /* Write width */
-            unsigned char t[5];
+            long length;
+            uint8_t t[5];
             long n;
             float r = glyph->hAdv - fd->width.nominal;
             if (r < -32768 || r >= 32768)
@@ -1658,7 +1658,7 @@ static void orderNameKeyedGlyphs(controlCtx h) {
     } else {
         for (id = 0;; id++) {
             int cnt;
-            const unsigned char *array = cfwEncodingGetPredef(id, &cnt);
+            const uint8_t *array = cfwEncodingGetPredef(id, &cnt);
             if (array == NULL) {
                 break;
             }
@@ -1699,9 +1699,9 @@ static void orderNameKeyedGlyphs(controlCtx h) {
             abfEncoding *enc = &info->encoding;
             if (enc->code != ABF_GLYPH_UNENC) {
                 /* Add glyph to encoding */
-                cfwEncodingAddCode(g, (unsigned char)enc->code);
+                cfwEncodingAddCode(g, (uint8_t)enc->code);
                 while ((enc = enc->next) != NULL) {
-                    cfwEncodingAddSupCode(g, (unsigned char)enc->code,
+                    cfwEncodingAddSupCode(g, (uint8_t)enc->code,
                                           (SID)gname->impl);
                 }
             }
@@ -1730,10 +1730,8 @@ static int assignWidths(controlCtx h, FDInfo *fd) {
         fd->width.dflt = rec->width;
         return 0;
     } else {
-        float nominal;
         int i;
         int minsize;
-        int dictsize;
         int nonoptsize;
         int iNominal = 0; /* Suppress optimizer warning */
         int iDefault = 0; /* Suppress optimizer warning */
@@ -1775,7 +1773,10 @@ static int assignWidths(controlCtx h, FDInfo *fd) {
         }
 
         {
+            float nominal;
             float dflt;
+            int dictsize;
+
             dflt = fd->width.freqs.array[iDefault].width;
             nominal = fd->width.freqs.array[iNominal].width + 107;
 
@@ -1832,8 +1833,9 @@ static void analyzeWidths(controlCtx h) {
             fd->width.freqs.array[index].count++;
         } else {
             /* Not found; add new record */
-            WidthFreq *_new =
-                &dnaGROW(fd->width.freqs, fd->width.freqs.cnt)[index];
+            WidthFreq *_new;
+
+            dnaGROW(fd->width.freqs, fd->width.freqs.cnt)[index];
 
             /* Make hole for new record */
             _new = &fd->width.freqs.array[index];
@@ -2340,7 +2342,7 @@ void cfwMemFree(cfwCtx g, void *ptr) {
 /* ------------------------------ Data Output ------------------------------ */
 
 /* Write 1-byte number. */
-void cfwWrite1(cfwCtx g, unsigned char value) {
+void cfwWrite1(cfwCtx g, uint8_t value) {
     if (g->cb.stm.write(&g->cb.stm, g->stm.dst, 1, (char *)&value) != 1) {
         cfwFatal(g, cfwErrDstStream, NULL);
     }
@@ -2348,9 +2350,9 @@ void cfwWrite1(cfwCtx g, unsigned char value) {
 
 /* Write 2-byte number. */
 void cfwWrite2(cfwCtx g, unsigned short value) {
-    unsigned char buf[2];
-    buf[0] = (unsigned char)(value >> 8);
-    buf[1] = (unsigned char)value;
+    uint8_t buf[2];
+    buf[0] = (uint8_t)(value >> 8);
+    buf[1] = (uint8_t)value;
     if (g->cb.stm.write(&g->cb.stm, g->stm.dst, 2, (char *)buf) != 2) {
         cfwFatal(g, cfwErrDstStream, NULL);
     }
@@ -2359,19 +2361,19 @@ void cfwWrite2(cfwCtx g, unsigned short value) {
 /* Write N-byte number. */
 void cfwWriteN(cfwCtx g, int N, unsigned long value) {
     char buf[4];
-    unsigned char *p = (unsigned char *)buf;
+    uint8_t *p = (uint8_t *)buf;
     switch (N) {
         case 4:
-            *p++ = (unsigned char)(value >> 24);
+            *p++ = (uint8_t)(value >> 24);
 
         case 3:
-            *p++ = (unsigned char)(value >> 16);
+            *p++ = (uint8_t)(value >> 16);
 
         case 2:
-            *p++ = (unsigned char)(value >> 8);
+            *p++ = (uint8_t)(value >> 8);
 
         case 1:
-            *p = (unsigned char)value;
+            *p = (uint8_t)value;
     }
     if (g->cb.stm.write(&g->cb.stm, g->stm.dst, N, buf) != (size_t)N) {
         cfwFatal(g, cfwErrDstStream, NULL);
@@ -2386,48 +2388,48 @@ void cfwWrite(cfwCtx g, size_t count, char *buf) {
 }
 
 /* Encode integer in array and return length. */
-int cfwEncInt(long i, unsigned char *t) {
+int cfwEncInt(long i, uint8_t *t) {
     if (-107 <= i && i <= 107) {
         /* Single byte number */
-        t[0] = (unsigned char)(i + 139);
+        t[0] = (uint8_t)(i + 139);
         return 1;
     } else if (108 <= i && i <= 1131) {
         /* Positive 2-byte number */
         i -= 108;
-        t[0] = (unsigned char)((i >> 8) + 247);
-        t[1] = (unsigned char)i;
+        t[0] = (uint8_t)((i >> 8) + 247);
+        t[1] = (uint8_t)i;
         return 2;
     } else if (-1131 <= i && i <= -108) {
         /* Negative 2-byte number */
         i += 108;
-        t[0] = (unsigned char)((-i >> 8) + 251);
-        t[1] = (unsigned char)-i;
+        t[0] = (uint8_t)((-i >> 8) + 251);
+        t[1] = (uint8_t)-i;
         return 2;
     } else if (-32768 <= i && i <= 32767) {
         /* Positive/negative 3-byte number (shared with dict ops) */
-        t[0] = (unsigned char)t2_shortint;
-        t[1] = (unsigned char)(i >> 8);
-        t[2] = (unsigned char)i;
+        t[0] = (uint8_t)t2_shortint;
+        t[1] = (uint8_t)(i >> 8);
+        t[2] = (uint8_t)i;
         return 3;
     } else {
         /* Positive/negative 5-byte number (dict ops only) */
-        t[0] = (unsigned char)cff_longint;
-        t[1] = (unsigned char)(i >> 24);
-        t[2] = (unsigned char)(i >> 16);
-        t[3] = (unsigned char)(i >> 8);
-        t[4] = (unsigned char)i;
+        t[0] = (uint8_t)cff_longint;
+        t[1] = (uint8_t)(i >> 24);
+        t[2] = (uint8_t)(i >> 16);
+        t[3] = (uint8_t)(i >> 8);
+        t[4] = (uint8_t)i;
         return 5;
     }
 }
 
 /* Encode real number as 5-byte fixed point in array and return length. */
-int cfwEncReal(float r, unsigned char *t) {
+int cfwEncReal(float r, uint8_t *t) {
     long i = (long)(r * 65536.0 + ((r < 0) ? -0.5 : 0.5));
-    t[0] = (unsigned char)255;
-    t[1] = (unsigned char)(i >> 24);
-    t[2] = (unsigned char)(i >> 16);
-    t[3] = (unsigned char)(i >> 8);
-    t[4] = (unsigned char)i;
+    t[0] = (uint8_t)255;
+    t[1] = (uint8_t)(i >> 24);
+    t[2] = (uint8_t)(i >> 16);
+    t[3] = (uint8_t)(i >> 8);
+    t[4] = (uint8_t)i;
     return 5;
 }
 
