@@ -1,4 +1,4 @@
-lxml==4.3.5
+lxml==4.3.5 # pyup: ignore
 booleanOperations==0.8.2
 cu2qu[cli]==1.6.5
 defcon[lxml,pens]==0.6.0
