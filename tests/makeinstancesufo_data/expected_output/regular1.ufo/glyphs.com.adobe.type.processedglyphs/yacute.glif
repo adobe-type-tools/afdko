@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="yacute" format="2">
-  <advance width="512.3164556962025"/>
+  <advance width="512"/>
   <unicode hex="00FD"/>
   <outline>
     <contour>
@@ -133,7 +133,7 @@
           </dict>
         </array>
         <key>id</key>
-        <string>e382a176d33cfafe1f605b1bf200c9615004fd6be0e3b596aa320a09818bc6aab76d8a9671e493c351bbb648801dd2ddfd2cac89b616b6d39c0d124e08a9e209</string>
+        <string>897ee0f4ac094776107aab40bf79dcba90fa378759721509c3d0662660fe18bd9da81c1d2c36f137157ac2bbdfede46c10b62f71d734ed521b7bcc8f6aefac52</string>
       </dict>
     </dict>
   </lib>

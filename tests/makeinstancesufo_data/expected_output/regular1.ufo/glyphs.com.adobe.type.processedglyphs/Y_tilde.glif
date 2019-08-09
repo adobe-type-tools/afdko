@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="Ytilde" format="2">
-  <advance width="632.506329113924"/>
+  <advance width="633"/>
   <unicode hex="1EF8"/>
   <outline>
     <contour>
@@ -179,7 +179,7 @@
           </dict>
         </array>
         <key>id</key>
-        <string>b53cd84015e2fb3045da68b0f33eb56a2022af50124ef0b1cd4a86abcf245db94a9e5cc9eafb220f81c3c818e5ba7d773258eba902edc58c06ec39c32cc8c64e</string>
+        <string>145cbaa8e18a7eaa9e30eca3e670aedec7c8eb7970709ae699013cb0d4fffc88c7ad5de190225169c58fb225be3961c78cb1fbdec53c194dfd7928e1bfe28b95</string>
       </dict>
     </dict>
   </lib>

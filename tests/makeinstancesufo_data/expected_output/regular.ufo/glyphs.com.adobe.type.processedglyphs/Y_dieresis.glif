@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <glyph name="Ydieresis" format="2">
 	<unicode hex="0178"/>
-	<advance width="632.5063291139"/>
+	<advance width="633"/>
 	<outline>
 		<contour>
 			<point name="hintSet0000" x="394.23" y="628.48" type="line"/>
@@ -143,7 +143,7 @@
 					</dict>
 				</array>
 				<key>id</key>
-				<string>5bb90d1f11c1781070fbaa2c65d48e09e094df9f7f303e53dea9a6fc801e7dd403f2d44e437189cf85abfa31154fd604472ee20883e3790e1ccf4c1b96eff5d4</string>
+				<string>b73a908f2aeb9039a6854b4bcf2e41571fb6c4e0644bee80e1a4c0df58def4078426833e93c278f5585873270d2d92cea92497d243de2d3114043e5aa00e0150</string>
 			</dict>
 		</dict>
 	</lib>

@@ -27,7 +27,7 @@ from afdko.fdkutils import get_temp_file_path
 from afdko.ufotools import validateLayers
 
 
-__version__ = '2.3.3'
+__version__ = '2.4.0'
 
 logger = logging.getLogger(__name__)
 
@@ -133,17 +133,13 @@ def roundSelectedFontInfo(fontInfo):
 
         if isinstance(prop_val, float):
 
-            if prop_name == "postscriptBlueScale":
-                # round to 6 places
-                round_val = round(prop_val * 1000000) / 1000000.0
+            if prop_name == 'postscriptBlueScale':
+                round_val = round(prop_val, 6)
 
             elif prop_name in ('postscriptBlueFuzz', 'postscriptBlueShift',
                                'postscriptSlantAngle'):
-                # round to 2 places
-                round_val = round(prop_val * 100) / 100.0
-
+                round_val = round(prop_val, 2)
             else:
-                # simple round, and convert to integer
                 round_val = int(round(prop_val))
 
             if (round_val == prop_val) and (prop_val % 1 == 0):
@@ -159,39 +155,45 @@ def roundSelectedFontInfo(fontInfo):
 
             for i, val in enumerate(prop_val):
                 if isinstance(val, float):
-                    # round to 2 places
-                    prop_val[i] = round(val * 100) / 100.0
+                    prop_val[i] = round(val, 2)
 
 
-def roundSelectedValues(dFont):
-    """
-    Glyph widths, kern values, and selected FontInfo values must be rounded,
-    as these are stored in the final OTF as ints.
-    """
-    roundSelectedFontInfo(dFont.info)
+def roundPostscriptBlueScale(fontInfo):
+    psbs_str = 'postscriptBlueScale'
+    psbs_val = getattr(fontInfo, psbs_str, None)
+    if psbs_val:
+        setattr(fontInfo, psbs_str, round(psbs_val, 6))
 
-    # round widths
+
+def roundGlyphWidths(dFont):
     for dGlyph in dFont:
-        rval = dGlyph.width
-        ival = int(round(rval))
-        if ival != rval:
-            dGlyph.width = ival
+        dGlyph.width = int(round(dGlyph.width))
 
-    # round kern values, if any
+
+def roundKerningValues(dFont):
     if dFont.kerning:
         keys = dFont.kerning.keys()
         for key in keys:
-            rval = dFont.kerning[key]
-            ival = int(round(rval))
-            if ival != rval:
-                dFont.kerning[key] = ival
+            dFont.kerning[key] = int(round(dFont.kerning[key]))
 
 
 def postProcessInstance(fontPath, options):
     dFont = Font(fontPath)
     clearCustomLibs(dFont)
-    if not options.no_round:
-        roundSelectedValues(dFont)
+
+    if options.no_round:
+        # '-r/--no-round' option was used but certain values (glyph widths,
+        # kerning values, font info values) still need to be rounded because
+        # of how they are stored in the final OTF
+        roundSelectedFontInfo(dFont.info)
+        roundGlyphWidths(dFont)
+        roundKerningValues(dFont)
+    else:
+        # ufoProcessor does not round kerning values nor postscriptBlueScale
+        # when 'roundGeometry' = False
+        roundPostscriptBlueScale(dFont.info)
+        roundKerningValues(dFont)
+
     dFont.save()
 
 

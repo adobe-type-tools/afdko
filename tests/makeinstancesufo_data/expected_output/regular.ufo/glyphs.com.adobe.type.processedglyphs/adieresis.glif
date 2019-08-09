@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <glyph name="adieresis" format="2">
 	<unicode hex="00E4"/>
-	<advance width="509.3164556962"/>
+	<advance width="509"/>
 	<outline>
 		<contour>
 			<point name="hintSet0000" x="144.96" y="595.77" type="curve"/>
@@ -187,7 +187,7 @@
 					</dict>
 				</array>
 				<key>id</key>
-				<string>6653e9c41cbb7a9b52fb421ac3d0e4e5c00677eafbfc30a32bb57b8c69b51ad099c021189962702b9cf4090c0494166588774dac29d2c49adb238b49ea8193c6</string>
+				<string>8b46e158a799fe762633ff3debd5ff80b3a135fdf0c942421316848cb46cca413d0483723e03d7e4c60774680db97e2e2794719574092d45e7f7b3a108e1f86c</string>
 			</dict>
 		</dict>
 	</lib>

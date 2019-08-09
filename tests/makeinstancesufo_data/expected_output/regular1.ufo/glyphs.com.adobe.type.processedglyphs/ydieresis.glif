@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="ydieresis" format="2">
-  <advance width="512.3164556962025"/>
+  <advance width="512"/>
   <unicode hex="00FF"/>
   <outline>
     <contour>
@@ -162,7 +162,7 @@
           </dict>
         </array>
         <key>id</key>
-        <string>76a32ba3e1461ffed77974e97afd32c4856f4ca47f7fd2c518d202682cec9c20e125a83bc0cea94b60019322d59945e436400b4c2c2cffc53f44f229485646cb</string>
+        <string>a3a5a7b549beb7ee405863365f3da14b412e3d5c6a69e1074733498e82826ca2f629ae9cd25cefb7df136e02bb43c0a9716aac7a4375f4a07dc28c40300dcb93</string>
       </dict>
     </dict>
   </lib>
