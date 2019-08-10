@@ -62,9 +62,7 @@ def filterDesignspaceInstances(dsDoc, options):
         )
 
         if os.path.exists(instance.path):
-            glyphDir = os.path.join(instance.path, "glyphs")
-            if os.path.exists(glyphDir):
-                shutil.rmtree(glyphDir, ignore_errors=True)
+            shutil.rmtree(instance.path, ignore_errors=True)
 
         filteredInstances.append(instance)
 
