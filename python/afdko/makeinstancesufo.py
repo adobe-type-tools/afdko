@@ -225,6 +225,17 @@ def validateDesignspaceDoc(dsDoc, dsoptions, **kwArgs):
             "Designspace file contains no instances."
         )
 
+    for i, inst in enumerate(dsDoc.instances):
+        if dsoptions.indexList and i not in dsoptions.indexList:
+            continue
+        for attr_name in ('familyName', 'postScriptFontName', 'styleName'):
+            if getattr(inst, attr_name, None) is None:
+                logger.warning(
+                    f"Instance at index {i} has no '{attr_name}' attribute.")
+        if inst.path is None:
+            raise DesignSpaceDocumentError(
+                f"Instance at index {i} has no 'filename' attribute.")
+
 
 def collect_features_content(instances, inst_idx_lst):
     """
@@ -236,8 +247,6 @@ def collect_features_content(instances, inst_idx_lst):
         if inst_idx_lst and i not in inst_idx_lst:
             continue
         ufo_pth = inst_dscrpt.path
-        if ufo_pth is None:
-            continue
         ufo_pth = os.path.abspath(os.path.realpath(ufo_pth))
         fea_pth = os.path.join(ufo_pth, FEATURES_FILENAME)
         if os.path.isfile(fea_pth):
