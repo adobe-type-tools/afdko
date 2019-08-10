@@ -73,7 +73,7 @@ def filterDesignspaceInstances(dsDoc, options):
     return tmpPath
 
 
-def updateInstance(options, fontInstancePath):
+def updateInstance(fontInstancePath, options):
     """
     Run checkoutlinesufo and psautohint, unless explicitly suppressed.
     """
@@ -312,7 +312,7 @@ def run(options):
         # Apply autohint and checkoutlines, if requested.
         for instancePath in newInstancesList:
             # make new instance font.
-            updateInstance(options, instancePath)
+            updateInstance(instancePath, options)
 
     # checkoutlinesufo does ufotools.validateLayers()
     if not options.doOverlapRemoval:
