@@ -26,6 +26,14 @@
             <kerning />
             <info />
         </instance>
+        <!-- INSTANCE INTENTIONALLY REPEATED -->
+        <instance familyname="Source Serif Pro" filename="../temp_output/ufo3regular.ufo" postscriptfontname="SourceSerifPro-Regular" stylename="Regular">
+            <location>
+                <dimension name="weight" xvalue="394" />
+            </location>
+            <kerning />
+            <info />
+        </instance>
         <instance familyname="Source Serif Pro" filename="../temp_output/ufo3medium.ufo" postscriptfontname="SourceSerifPro-Medium" stylename="Medium">
             <location>
                 <dimension name="weight" xvalue="505" />

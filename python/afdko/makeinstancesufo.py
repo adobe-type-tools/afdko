@@ -85,7 +85,7 @@ def updateInstance(fontInstancePath, options):
             co_args.insert(0, '-d')
         try:
             checkoutlinesUFO(co_args)
-        except Exception:
+        except (Exception, SystemExit):
             raise
 
     if options.doAutoHint:
@@ -95,7 +95,7 @@ def updateInstance(fontInstancePath, options):
             ah_args.insert(0, '-d')
         try:
             psautohint(ah_args)
-        except Exception:
+        except (Exception, SystemExit):
             raise
 
 
