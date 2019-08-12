@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <glyph name="Yacute" format="2">
 	<unicode hex="00DD"/>
-	<advance width="632.5063291139"/>
+	<advance width="633"/>
 	<outline>
 		<contour>
 			<point name="hintSet0000" x="394.23" y="628.48" type="line"/>
@@ -126,7 +126,7 @@
 					</dict>
 				</array>
 				<key>id</key>
-				<string>51a1c8e3c6c38527a76d75eab3c0d1cf8376b1b70a7bf7ba9ce6bda65ab60b6f6820ea21a10d93c5918e574cd59e9b9893fb0cc4573714a596a726974c3032b9</string>
+				<string>de8c1981a39009741f2454f6052e146ba21fc6c3ecef77a7fc1005597388fa0bf59a4ec84aae3e60c3a484fbf9add16d09433b3926e21e09e4337929236f586e</string>
 			</dict>
 		</dict>
 	</lib>

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="Y" format="2">
-  <advance width="632.506329113924"/>
+  <advance width="633"/>
   <unicode hex="0059"/>
   <anchor x="335.90506329113924" y="690.629746835443" name="aboveUC"/>
   <anchor x="315.753164556962" y="-22.0" name="belowLC"/>

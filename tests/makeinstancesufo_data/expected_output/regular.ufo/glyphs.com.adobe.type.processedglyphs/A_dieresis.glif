@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <glyph name="Adieresis" format="2">
 	<unicode hex="00C4"/>
-	<advance width="663.6993670886"/>
+	<advance width="664"/>
 	<outline>
 		<contour>
 			<point name="hintSet0000" x="208.17" y="264.1" type="line"/>
@@ -128,7 +128,7 @@
 					</dict>
 				</array>
 				<key>id</key>
-				<string>d91fa779f87de4a744fd39078410e1e5d0a0523b47c1898999dbe63830c1cfd1e9dd13249683d99271b1d6e41792eb382a09aa44ed66d63ed287b1af1808426b</string>
+				<string>b2dfdbe9d17bcb4ebd988b3074becb070eb139e333337b559f776b50e8f60d4b4ed5f65110b97940b11b36493426c087167decbd4f98af223be8b772446d6bb0</string>
 			</dict>
 		</dict>
 	</lib>

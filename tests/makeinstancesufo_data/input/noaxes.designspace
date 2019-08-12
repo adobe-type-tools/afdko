@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<designspace format="3">
+    <sources>
+        <source filename="master0.ufo">
+            <location>
+                <dimension name="weight" xvalue="0" />
+            </location>
+        </source>
+    </sources>
+    <instances>
+        <instance familyname="Family Name" filename="foobar.ufo" postscriptfontname="PS Name" stylename="Style Name">
+            <location>
+                <dimension name="weight" xvalue="0" />
+            </location>
+        </instance>
+    </instances>
+</designspace>

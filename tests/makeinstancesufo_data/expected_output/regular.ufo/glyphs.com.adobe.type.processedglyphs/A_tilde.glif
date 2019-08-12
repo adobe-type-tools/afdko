@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <glyph name="Atilde" format="2">
 	<unicode hex="00C3"/>
-	<advance width="663.6993670886"/>
+	<advance width="664"/>
 	<outline>
 		<contour>
 			<point name="hintSet0000" x="208.17" y="264.1" type="line"/>
@@ -154,7 +154,7 @@
 					</dict>
 				</array>
 				<key>id</key>
-				<string>1c7753620759d71e9468e6df5367c761ad8250517e29e8d30c6e2f93c6054f3025ebb7fa33bf75022d5de84cf7830e99b196201fdac28f1f7a874678aae1ecaa</string>
+				<string>3dc41d5c62d20d2d6a613ad55150cfa12f3c9915303039848c8b57226d6976378a1778614a1632fa414a3f89b7238a4c568dcc178b96f2785a1282ee164503f6</string>
 			</dict>
 		</dict>
 	</lib>

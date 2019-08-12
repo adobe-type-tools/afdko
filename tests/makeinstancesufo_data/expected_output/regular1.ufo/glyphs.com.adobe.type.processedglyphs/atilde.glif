@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="atilde" format="2">
-  <advance width="509.3164556962025"/>
+  <advance width="509"/>
   <unicode hex="00E3"/>
   <outline>
     <contour>
@@ -173,7 +173,7 @@
           </dict>
         </array>
         <key>id</key>
-        <string>a1a03cf6f24bef978f33bc771f2713cebdb1ca2bfeab58498ccf677321961305fd1106e9f6946edee7563cc1a61e9bd5124c6d4656a69e9e0e0e2c99bce834a1</string>
+        <string>5fd8777229a4c54f717549a275f8eae562e298f503cceba0f8a318df8d570b370544f8bb0a5c2e8802f5f0219264f64827c99f6704affa5ae457a67d9e83c48c</string>
       </dict>
     </dict>
   </lib>

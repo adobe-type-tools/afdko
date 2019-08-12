@@ -5,48 +5,48 @@
 		<key>public.kern1.LAT_A</key>
 		<dict>
 			<key>public.kern2.LAT_A</key>
-			<real>9.5886075949</real>
+			<integer>10</integer>
 			<key>public.kern2.LAT_Y</key>
 			<integer>-90</integer>
 			<key>public.kern2.LAT_a</key>
-			<real>-5.2056962025</real>
+			<integer>-5</integer>
 			<key>public.kern2.LAT_y</key>
-			<real>-50.4113924051</real>
+			<integer>-50</integer>
 		</dict>
 		<key>public.kern1.LAT_Y</key>
 		<dict>
 			<key>adieresis</key>
-			<real>-78.7658227848</real>
+			<integer>-79</integer>
 			<key>atilde</key>
-			<real>-60.8227848101</real>
+			<integer>-61</integer>
 			<key>public.kern2.LAT_A</key>
-			<real>-90.4113924051</real>
+			<integer>-90</integer>
 			<key>public.kern2.LAT_Y</key>
-			<real>0.4113924051</real>
+			<integer>0</integer>
 			<key>public.kern2.LAT_a</key>
 			<integer>-80</integer>
 			<key>public.kern2.LAT_y</key>
-			<real>-69.1772151899</real>
+			<integer>-69</integer>
 		</dict>
 		<key>public.kern1.LAT_a</key>
 		<dict>
 			<key>public.kern2.LAT_A</key>
-			<real>9.5886075949</real>
+			<integer>10</integer>
 			<key>public.kern2.LAT_Y</key>
-			<real>-79.5886075949</real>
+			<integer>-80</integer>
 			<key>public.kern2.LAT_y</key>
-			<real>-10.4113924051</real>
+			<integer>-10</integer>
 		</dict>
 		<key>public.kern1.LAT_v</key>
 		<dict>
 			<key>public.kern2.LAT_A</key>
-			<real>-71.2341772152</real>
+			<integer>-71</integer>
 			<key>public.kern2.LAT_Y</key>
-			<real>-50.4113924051</real>
+			<integer>-50</integer>
 			<key>public.kern2.LAT_a</key>
-			<real>-15.6170886076</real>
+			<integer>-16</integer>
 			<key>public.kern2.LAT_y</key>
-			<real>9.1772151899</real>
+			<integer>9</integer>
 		</dict>
 	</dict>
 </plist>

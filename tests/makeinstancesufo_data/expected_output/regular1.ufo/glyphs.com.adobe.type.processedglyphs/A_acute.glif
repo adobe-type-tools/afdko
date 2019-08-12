@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="Aacute" format="2">
-  <advance width="663.6993670886076"/>
+  <advance width="664"/>
   <unicode hex="00C1"/>
   <outline>
     <contour>
@@ -101,7 +101,7 @@
           </dict>
         </array>
         <key>id</key>
-        <string>ff5a3c9976be06b32b0f8c0e3c44a4b38feedc9e963693a4e355f191f16e7948c47613787113ba3981af0dbbdd50488735125fad5b9afc49f273d37eb1206703</string>
+        <string>598fa5698308cf0bf4633b8df8d19e6225dc530bbb5112f87ce4a1b3fdb0a79aaaf3c8941c9a82a5842575d22f3b14ee0e4233b88c408caf44691e561debde8f</string>
       </dict>
     </dict>
   </lib>

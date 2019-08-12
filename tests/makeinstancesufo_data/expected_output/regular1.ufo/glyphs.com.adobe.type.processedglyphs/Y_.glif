@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="Y" format="2">
-  <advance width="632.506329113924"/>
+  <advance width="633"/>
   <unicode hex="0059"/>
   <outline>
     <contour>
@@ -102,7 +102,7 @@
           </dict>
         </array>
         <key>id</key>
-        <string>016b3ad6d0a94677de06af2d7b59e62b71deeed9f53cf14d8ed94bc0914f70ece62d52a72d8316cc3a4bfc1e5f1b7c1d6d85035d5c1776aa927dbc7b9ccd4ae0</string>
+        <string>c2acd946962abdd4405b511377a312a3136ace20e1f5b7d9a33b6a43a87ebc5f04ab54c42ce0c3253988540fc3eda2a415af2f3cd6f933792b3e2a395a2725ad</string>
       </dict>
     </dict>
   </lib>
