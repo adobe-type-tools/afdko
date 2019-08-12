@@ -1,5 +1,3 @@
-# coding: utf-8
-
 import os
 import pytest
 from shutil import copy2, copytree, rmtree

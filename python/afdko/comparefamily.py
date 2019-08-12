@@ -1,5 +1,3 @@
-# coding: utf-8
-
 #	comparefamily.py
 #	This is not code to copy . The original developer did not know Python well,
 #	and had odd ideas about design. However, it works.
