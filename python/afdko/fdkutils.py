@@ -1,20 +1,26 @@
 # Copyright 2016 Adobe. All rights reserved.
 
 """
-fdkutils.py v1.3.3 Aug 1 2019
-A module of functions that are needed by several of the AFDKO scripts.
+A collection of functions used by multiple AFDKO scripts.
 """
 
 import os
 import subprocess
 import tempfile
 
-__version__ = "1.3.3"
+__version__ = "1.3.4"
 
 
-def get_temp_file_path():
-    file_descriptor, path = tempfile.mkstemp()
+def get_temp_file_path(directory=None):
+    file_descriptor, path = tempfile.mkstemp(dir=directory)
     os.close(file_descriptor)
+    return path
+
+
+def get_temp_dir_path(path_comp=None):
+    path = tempfile.mkdtemp()
+    if path_comp:
+        path = os.path.join(path, path_comp)
     return path
 
 

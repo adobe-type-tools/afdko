@@ -1,12 +1,19 @@
 import os
 import pytest
 from shutil import copy2
-import tempfile
 
+from afdko.fdkutils import (
+    get_temp_file_path,
+    get_temp_dir_path,
+)
+from test_utils import (
+    get_input_path,
+    get_expected_path,
+    generate_ttx_dump,
+    generate_ps_dump,
+)
 from runner import main as runner
 from differ import main as differ, SPLIT_MARKER
-from test_utils import (get_input_path, get_expected_path, get_temp_file_path,
-                        generate_ttx_dump, generate_ps_dump)
 
 TOOL = 'autohint'
 CMD = ['-t', TOOL]
@@ -69,7 +76,7 @@ def test_basic_hinting(font_filename, opt):
         expected_filename = f'{head}{tail}'
 
     if 'ufo' in font_filename:
-        actual_path = tempfile.mkdtemp()
+        actual_path = get_temp_dir_path()
     else:
         actual_path = get_temp_file_path()
 
@@ -128,7 +135,7 @@ def test_ufo_hashmap(font_filename, opt):
         head, tail = os.path.splitext(font_filename)
         expected_filename = f'{head}-{opt}{tail}'
 
-    actual_path = tempfile.mkdtemp()
+    actual_path = get_temp_dir_path()
     runner(CMD + ['-f', get_input_path(font_filename),
                   '-o', 'o', f'_{actual_path}'] + arg)
     expected_path = get_expected_path(expected_filename)
@@ -142,7 +149,7 @@ def test_ufo_hashmap_rehint():
     first run gets removed in the second.
     """
     font_filename = 'hashmap_dflt_layer.ufo'
-    actual_path = tempfile.mkdtemp()
+    actual_path = get_temp_dir_path()
     runner(CMD + ['-f', get_input_path(font_filename),
                   '-o', 'o', f'_{actual_path}'])
     runner(CMD + ['-f', actual_path, '-o', 'wd', 'all'])

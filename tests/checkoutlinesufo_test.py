@@ -1,16 +1,18 @@
-import os
 import pytest
 from shutil import copytree
-import tempfile
 
 from booleanOperations.booleanGlyph import BooleanGlyph
 from defcon import Glyph
 
 from afdko.checkoutlinesufo import remove_tiny_sub_paths
 
+from afdko.fdkutils import get_temp_dir_path
+from test_utils import (
+    get_input_path,
+    get_expected_path,
+)
 from runner import main as runner
 from differ import main as differ
-from test_utils import get_input_path, get_expected_path
 
 TOOL = 'checkoutlinesufo'
 CMD = ['-t', TOOL]
@@ -57,7 +59,7 @@ def test_remove_tiny_sub_paths_small_contour():
     (['e', 'q'], 'proc-layer.ufo'),
 ])
 def test_remove_overlap(args, ufo_filename, expct_label):
-    actual_path = os.path.join(tempfile.mkdtemp(), ufo_filename)
+    actual_path = get_temp_dir_path(ufo_filename)
     copytree(get_input_path(ufo_filename), actual_path)
     runner(CMD + ['-f', actual_path, '-o'] + args)
     expct_filename = f'{ufo_filename[:-4]}-{expct_label}'

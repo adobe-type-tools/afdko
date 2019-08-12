@@ -1,19 +1,20 @@
-import os
 import pytest
 import subprocess
-import tempfile
 
+from afdko.fdkutils import (
+    get_temp_file_path,
+    get_temp_dir_path,
+)
+from test_utils import (
+    get_input_path,
+    get_expected_path,
+    generate_ps_dump,
+)
 from runner import main as runner
 from differ import main as differ, SPLIT_MARKER
-from test_utils import (get_input_path, get_expected_path, get_temp_file_path,
-                        generate_ps_dump)
 
 TOOL = 'tx'
 CMD = ['-t', TOOL]
-
-
-def _get_temp_dir_path():
-    return tempfile.mkdtemp()
 
 
 def _get_extension(in_format):
@@ -99,7 +100,7 @@ def test_convert(from_format, to_format):
 
     # runner args
     if 'ufo' in to_format:
-        save_path = os.path.join(_get_temp_dir_path(), 'font.ufo')
+        save_path = get_temp_dir_path('font.ufo')
     else:
         save_path = get_temp_file_path()
 
@@ -350,8 +351,7 @@ def test_no_psname_convert_to_ufo_bug437(font_format):
 
     font_path = get_input_path(f'{font_format}-noPSname.{file_ext}')
     expected_path = get_expected_path(f'bug437/{font_format}.ufo')
-    save_path = os.path.join(
-        _get_temp_dir_path(), f'{font_format}.ufo')
+    save_path = get_temp_dir_path(f'{font_format}.ufo')
 
     runner(CMD + ['-a', '-o', 'ufo', '-f', font_path, save_path])
     assert differ([expected_path, save_path])
@@ -374,7 +374,7 @@ def test_no_psname_convert_to_type1_bug437(font_format):
 
 def test_illegal_chars_in_glyph_name_bug473():
     font_path = get_input_path('bug473.ufo')
-    save_path = os.path.join(_get_temp_dir_path(), 'bug473.ufo')
+    save_path = get_temp_dir_path('bug473.ufo')
     runner(CMD + ['-a', '-o', 'ufo', '-f', font_path, save_path])
     expected_path = get_expected_path('bug473.ufo')
     assert differ([expected_path, save_path])
