@@ -7,6 +7,7 @@ from afdko.fdkutils import (
 )
 from test_utils import (
     get_input_path,
+    get_bad_input_path,
     get_expected_path,
     generate_ps_dump,
 )
@@ -488,7 +489,7 @@ def test_ufo_read_processed_contents_plist_bug740(filename):
 
 
 def test_dcf_with_infinite_recursion_bug775():
-    font_path = get_input_path('subr_test_font_infinite_recursion.otf')
+    font_path = get_bad_input_path('subr_test_font_infinite_recursion.otf')
     dcf_path = get_temp_file_path()
     with pytest.raises(subprocess.CalledProcessError) as err:
         runner(CMD + ['-a', '-o', 'dcf', '-f', font_path, dcf_path])
@@ -545,3 +546,14 @@ def test_write_fdselect_format_4():
     runner(CMD + ['-a', '-o', 'cff2', '-f', input_path, output_path])
     expected_path = get_expected_path('FDArrayTest257FontDicts.cff2')
     assert differ([expected_path, output_path, '-m', 'bin'])
+
+
+@pytest.mark.parametrize('option', ['cff', 'dcf'])
+def test_read_short_charstring_bug895(option):
+    font_name = 'bug895.otf'
+    input_path = get_bad_input_path(font_name)
+    output_path = runner(CMD + ['-s', '-e', '-a', '-o', option,
+                                '-f', input_path])
+    expected_path = get_expected_path(font_name + '.' + option)
+    skip = ['-s', 'tx: ---']  # skip line with filename
+    assert differ([expected_path, output_path] + skip)

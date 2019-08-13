@@ -526,6 +526,17 @@ struct txCtx_ {
             fatal(h, "Type 2 stack overflow");  \
     } while (0)
 
+/* Check that current charstring has enough bytes left. */
+#define CHECK_CHARSTRING_BYTES_LEFT(n)    \
+    if (n > left)                         \
+        fatal(h, "charstring too short"); \
+
+/* Check that current dict has enough bytes left. */
+#define CHECK_DICT_BYTES_LEFT(n)    \
+    if (n > left)                   \
+        fatal(h, "dict too short"); \
+
+
 /* Stack access without check. */
 #define INDEX(i) (h->stack.array[i])
 #define POP() (h->stack.array[--h->stack.cnt])
