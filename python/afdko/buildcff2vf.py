@@ -20,7 +20,9 @@ from fontTools.misc.psCharStrings import T2OutlineExtractor, T2CharString
 from fontTools.ttLib import TTFont
 from fontTools.varLib.cff import CFF2CharStringMergePen
 
-__version__ = '2.0.1'
+from afdko.fdkutils import validate_path
+
+__version__ = '2.0.2'
 
 STAT_FILENAME = 'override.STAT.ttx'
 
@@ -354,15 +356,6 @@ def remove_mac_names(tt_font):
     name_tb.names = [nr for nr in name_tb.names if nr.platformID != 1]
 
 
-def _validate_path(path_str):
-    # used for paths passed to get_options.
-    valid_path = os.path.abspath(os.path.realpath(path_str))
-    if not os.path.exists(valid_path):
-        raise argparse.ArgumentTypeError(
-            f"'{path_str}' is not a valid path.")
-    return valid_path
-
-
 def get_options(args):
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
@@ -386,7 +379,7 @@ def get_options(args):
         '--designspace',
         metavar='PATH',
         dest='design_space_path',
-        type=_validate_path,
+        type=validate_path,
         help='path to design space file',
         required=True
     )
@@ -423,7 +416,7 @@ def get_options(args):
         '--include-glyphs',
         dest='include_glyphs_path',
         metavar='PATH',
-        type=_validate_path,
+        type=validate_path,
         help='Path to file containing a python dict specifying which\n'
         'glyph names should be included from which source fonts.'
     )

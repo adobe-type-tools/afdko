@@ -7,7 +7,6 @@ from afdko.makeinstancesufo import (
     main as mkinstufo,
     get_options,
     _split_comma_sequence,
-    _validate_path,
     updateInstance,
 )
 from runner import main as runner
@@ -70,11 +69,6 @@ def test_log_level(v_arg):
     arg = [] if not v_val else [f'-{v_arg}']
     opts = get_options(['-d', dspath] + arg)
     assert opts.verbose == v_val
-
-
-def test_validate_path():
-    with pytest.raises(argparse.ArgumentTypeError):
-        _validate_path(get_input_path('not_a_file_or_folder'))
 
 
 @pytest.mark.parametrize('str_seq, lst_seq', [

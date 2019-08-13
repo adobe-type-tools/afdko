@@ -4,7 +4,7 @@
 Tool that performs outline quality checks and can remove path overlaps.
 """
 
-__version__ = '2.4.0'
+__version__ = '2.4.1'
 
 import argparse
 from functools import cmp_to_key
@@ -29,6 +29,7 @@ from afdko.fdkutils import (
     get_temp_dir_path,
     get_font_format,
     run_shell_command,
+    validate_path,
 )
 
 
@@ -242,14 +243,6 @@ class InlineHelpFormatter(argparse.RawDescriptionHelpFormatter):
         return [item for sublist in arg_rows for item in sublist] + ['']
 
 
-def _validate_path(path_str):
-    valid_path = os.path.abspath(os.path.realpath(path_str))
-    if not os.path.exists(valid_path):
-        raise argparse.ArgumentTypeError(
-            f"{path_str} is not a valid path.")
-    return valid_path
-
-
 def get_options(args):
     parser = argparse.ArgumentParser(
         formatter_class=InlineHelpFormatter,
@@ -316,7 +309,7 @@ def get_options(args):
         '-f',
         '--glyph-file',
         metavar='FILE_PATH',
-        type=_validate_path,
+        type=validate_path,
         help='specify a file containing a list of glyphs to check\n'
              'Check only specific glyphs listed in a file. The '
              'file must contain a comma-delimited list of glyph '
@@ -369,7 +362,7 @@ def get_options(args):
     parser.add_argument(
         'font_path',
         metavar='FONT_PATH',
-        type=_validate_path,
+        type=validate_path,
         help='Path to UFO, OTF, CFF, or Type 1 font'
     )
 

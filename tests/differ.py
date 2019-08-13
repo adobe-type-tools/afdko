@@ -13,7 +13,9 @@ import os
 import re
 import sys
 
-__version__ = '0.3.3'
+from afdko.fdkutils import validate_path
+
+__version__ = '0.3.4'
 
 logger = logging.getLogger('differ')
 
@@ -222,14 +224,6 @@ def _paths_are_same_kind(path1, path2):
     return False
 
 
-def _validate_path(path_str):
-    valid_path = os.path.abspath(os.path.realpath(path_str))
-    if not os.path.exists(valid_path):
-        raise argparse.ArgumentTypeError(
-            f"{path_str} is not a valid path.")
-    return valid_path
-
-
 def _split_string_sequence(str_seq):
     return tuple(str_seq.split(SPLIT_MARKER))
 
@@ -360,13 +354,13 @@ def get_options(args):
     parser.add_argument(
         'path1',
         metavar='PATH1',
-        type=_validate_path,
+        type=validate_path,
         help='1st path for comparison'
     )
     parser.add_argument(
         'path2',
         metavar='PATH2',
-        type=_validate_path,
+        type=validate_path,
         help='2nd path for comparison'
     )
     options = parser.parse_args(args)
