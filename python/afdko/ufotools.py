@@ -16,10 +16,10 @@ from psautohint.ufoFont import (norm_float, HashPointPen,
 
 from afdko import convertfonttocid, fdkutils
 
-__version__ = '1.34.4'
+__version__ = '1.34.5'
 
 __doc__ = """
-ufotools.py v1.34.4 Jul 15 2019
+ufotools.py v1.34.5 Aug 13 2019
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -450,7 +450,8 @@ class UFOFontData(object):
             psName = self.fontInfo.get("postscriptFontName", psName)
         return psName
 
-    def isCID(self):
+    @staticmethod
+    def isCID():
         return 0
 
     def checkForHints(self, glyphName):
@@ -716,7 +717,8 @@ class UFOFontData(object):
 
         return skip
 
-    def getGlyphXML(self, glyphDir, glyphFileName):
+    @staticmethod
+    def getGlyphXML(glyphDir, glyphFileName):
         glyphPath = os.path.join(glyphDir, glyphFileName)  # default
         etRoot = ET.ElementTree()
         glifXML = etRoot.parse(glyphPath)
@@ -825,7 +827,7 @@ class UFOFontData(object):
         fontInfoPath = os.path.join(self.parentPath, "fontinfo.plist")
         if not os.path.exists(fontInfoPath):
             return
-        self.fontInfo, tempList = parsePList(fontInfoPath)
+        self.fontInfo, _ = parsePList(fontInfoPath)
 
     def updateLayerContents(self, contentsFilePath):
         # UFO v2
@@ -916,7 +918,7 @@ class UFOFontData(object):
         for i in range(numBlueValues):
             key = convertfonttocid.kBlueValueKeys[i]
             value = blueValues[i]
-            exec("fdDict.%s = %s" % (key, value))
+            setattr(fdDict, key, value)
 
         otherBlues = self.fontInfo.get("postscriptOtherBlues", [])
         numBlueValues = len(otherBlues)
@@ -933,7 +935,7 @@ class UFOFontData(object):
             for i in range(numBlueValues):
                 key = convertfonttocid.kOtherBlueValueKeys[i]
                 value = otherBlues[i]
-                exec("fdDict.%s = %s" % (key, value))
+                setattr(fdDict, key, value)
 
         vstems = self.fontInfo.get("postscriptStemSnapV", [])
         if len(vstems) == 0:
@@ -1122,10 +1124,9 @@ class UFOFontData(object):
 
                     componentXML = etRoot.parse(componentPath)
                     componentOutlineXML = componentXML.find("outline")
-                    componentHash, componentDataList = \
-                        self.buildGlyphHashValue(
-                            width, componentOutlineXML, glyphName,
-                            useDefaultGlyphDir, level + 1)
+                    _, componentDataList = self.buildGlyphHashValue(
+                        width, componentOutlineXML, glyphName,
+                        useDefaultGlyphDir, level + 1)
                     dataList.extend(componentDataList)
         data = "".join(dataList)
         if len(data) >= 128:
@@ -1198,7 +1199,7 @@ class UFOFontData(object):
 def parseGlyphOrder(filePath):
     orderMap = None
     if os.path.exists(filePath):
-        publicOrderDict, temp = parsePList(filePath, kPublicGlyphOrderKey)
+        publicOrderDict, _ = parsePList(filePath, kPublicGlyphOrderKey)
         if publicOrderDict is not None:
             orderMap = {}
             glyphList = publicOrderDict[kPublicGlyphOrderKey]
@@ -1351,7 +1352,7 @@ def fixStartPoint(outlineItem, opList):
     # then leave the first two point args on the stack at the end of the point
     # list, and move the last curveto to the first op, replacing the move-to.
 
-    firstOp, firstX, firstY = opList[0]
+    _, firstX, firstY = opList[0]
     lastOp, lastX, lastY = opList[-1]
     firstPointElement = outlineItem[0]
     if (firstX == lastX) and (firstY == lastY):
@@ -1781,7 +1782,7 @@ def addHintList(hints, hintsStem3, newHintSetArray, isH):
     if len(hintsStem3) > 0:
         hintsStem3.sort()
         numHints = len(hintsStem3)
-        hintLimit = (kStackLimit - 2) / 2
+        hintLimit = int((kStackLimit - 2) / 2)
         if numHints >= hintLimit:
             hintsStem3 = hintsStem3[:hintLimit]
             numHints = hintLimit
@@ -1790,7 +1791,7 @@ def addHintList(hints, hintsStem3, newHintSetArray, isH):
     else:
         hints.sort()
         numHints = len(hints)
-        hintLimit = (kStackLimit - 2) / 2
+        hintLimit = int((kStackLimit - 2) / 2)
         if numHints >= hintLimit:
             hints = hints[:hintLimit]
             numHints = hintLimit
@@ -2152,7 +2153,7 @@ def validateLayers(ufoFontPath, doWarning=True):
 
 def makeUFOFMNDB(srcFontPath):
     fontInfoPath = os.path.join(srcFontPath, kFontInfoName)  # default
-    fiMap, fiList = parsePList(fontInfoPath)
+    fiMap, _ = parsePList(fontInfoPath)
     psName = "NoFamilyName-Regular"
     familyName = "NoFamilyName"
     styleName = "Regular"
