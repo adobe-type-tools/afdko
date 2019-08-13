@@ -4,11 +4,20 @@
 A collection of functions used by multiple AFDKO scripts.
 """
 
+import argparse
 import os
 import subprocess
 import tempfile
 
-__version__ = "1.3.4"
+__version__ = '1.3.5'
+
+
+def validate_path(path_str):
+    valid_path = os.path.abspath(os.path.realpath(path_str))
+    if not os.path.exists(valid_path):
+        raise argparse.ArgumentTypeError(
+            f"'{path_str}' is not a valid path.")
+    return valid_path
 
 
 def get_temp_file_path(directory=None):

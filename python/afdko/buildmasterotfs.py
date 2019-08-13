@@ -27,11 +27,14 @@ from fontTools.designspaceLib import (
     DesignSpaceDocument,
     DesignSpaceDocumentError,
 )
-
-from afdko.fdkutils import run_shell_command, get_temp_file_path
+from afdko.fdkutils import (
+    run_shell_command,
+    get_temp_file_path,
+    validate_path,
+)
 from afdko.makeotf import main as makeotf
 
-__version__ = '1.9.2'
+__version__ = '1.9.3'
 
 logger = logging.getLogger(__name__)
 
@@ -50,14 +53,6 @@ def generalizeCFF(otfPath):
     if not run_shell_command(['sfntedit', '-a',
                               f'CFF ={tempFilePath}', otfPath]):
         raise ShellCommandError
-
-
-def _validate_path(path_str):
-    valid_path = os.path.abspath(os.path.realpath(path_str))
-    if not os.path.exists(valid_path):
-        raise argparse.ArgumentTypeError(
-            f"'{path_str}' is not a valid path.")
-    return valid_path
 
 
 def _split_makeotf_options(comma_str):
@@ -141,7 +136,7 @@ def get_options(args):
         '--designspace',
         metavar='PATH',
         dest='dsPath',
-        type=_validate_path,
+        type=validate_path,
         help='path to design space file',
         required=True
     )

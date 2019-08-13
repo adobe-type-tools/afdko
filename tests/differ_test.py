@@ -7,7 +7,6 @@ from differ import (
     _compile_regex,
     _convert_to_int,
     _split_linenumber_sequence,
-    _validate_path,
     _get_path_kind,
 )
 from test_utils import get_input_path
@@ -52,11 +51,6 @@ def test_paths_not_same_kind():
     with pytest.raises(SystemExit) as exc_info:
         differ([fp1, fp2])
     assert exc_info.value.code == 2
-
-
-def test_validate_path():
-    with pytest.raises(argparse.ArgumentTypeError):
-        _validate_path(get_input_path('not_a_file_or_folder'))
 
 
 @pytest.mark.parametrize('pth, result', [

@@ -23,11 +23,14 @@ from ufonormalizer import normalizeUFO
 from ufoProcessor import build as ufoProcessorBuild
 
 from afdko.checkoutlinesufo import run as checkoutlinesUFO
-from afdko.fdkutils import get_temp_file_path
+from afdko.fdkutils import (
+    get_temp_file_path,
+    validate_path,
+)
 from afdko.ufotools import validateLayers
 
 
-__version__ = '2.4.0'
+__version__ = '2.4.1'
 
 logger = logging.getLogger(__name__)
 
@@ -334,14 +337,6 @@ def run(options):
             fp.write(fea_cntnts)
 
 
-def _validate_path(path_str):
-    valid_path = os.path.abspath(os.path.realpath(path_str))
-    if not os.path.exists(valid_path):
-        raise argparse.ArgumentTypeError(
-            f"'{path_str}' is not a valid path.")
-    return valid_path
-
-
 def _split_comma_sequence(comma_str):
     index_lst = [item.strip() for item in comma_str.split(',')]
     int_set = set()
@@ -381,7 +376,7 @@ def get_options(args):
         '--designspace',
         metavar='PATH',
         dest='dsPath',
-        type=_validate_path,
+        type=validate_path,
         default=DFLT_DESIGNSPACE_FILENAME,
         help='path to design space file\n'
              "Default file name is '%(default)s'"
