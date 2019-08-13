@@ -158,12 +158,11 @@ static void copyBlendArgs(t2cCtx h, abfBlendArg *blendArg, abfOpEntry *opEntry);
 /* Write message to debug stream from va_list. */
 static void vmessage(t2cCtx h, char *fmt, va_list ap) {
     char text[500];
-    const size_t textLen = sizeof(text);
 
     if (h->aux->dbg == NULL)
         return; /* Debug stream not available */
 
-    VSPRINTF_S(text, textLen, fmt, ap);
+    VSPRINTF_S(text, sizeof(text), fmt, ap);
     (void)h->aux->stm->write(h->aux->stm, h->aux->dbg, strlen(text), text);
 }
 
@@ -188,11 +187,10 @@ static void *memNew(t2cCtx h, size_t size) {
     void *ptr = h->mem->manage(h->mem, NULL, size);
     if (ptr == NULL) {
         fatal(h, t2cErrMemory);
+    } else {
+        /* Safety initialization */
+        memset(ptr, 0, size);
     }
-
-    /* Safety initialization */
-    memset(ptr, 0, size);
-
     return ptr;
 }
 
@@ -206,11 +204,11 @@ static void memFree(t2cCtx h, void *ptr) {
 /* Refill input buffer. Return NULL on stream error else pointer to buffer. */
 static unsigned char *refill(t2cCtx h, unsigned char **end) {
     long int offset;
-    char *errMsg;
     /* Read buffer */
     /* 64-bit warning fixed by cast here HO */
     h->src.length = (long)h->aux->stm->read(h->aux->stm, h->aux->src, &h->src.buf);
     if (h->src.length == 0 && !(h->flags & IS_CFF2)) {
+        char *errMsg;
         errMsg = strerror(errno);
         message(h, "%s", errMsg);
         return NULL; /* Stream error */
@@ -238,9 +236,12 @@ static int srcSeek(t2cCtx h, long offset) {
     return 0;
 }
 
-/* Check next byte available and refill buffer if not. */
+/* Check for the first of possibly multiple bytes for an operator or operand.
+   If we're curently empty, but more bytes are available, refill from buffer.
+   If this is a CFF2 font and we're completely out of bytes,
+   treat this condition as equivalent to an endchar in CFF. */
 
-#define CHKBYTE(h)                                                  \
+#define CHECK_FIRST_BYTE(h)                                         \
     do                                                              \
         if (next == end) {                                          \
             if (h->src.offset >= h->src.endOffset) {                \
@@ -254,18 +255,20 @@ static int srcSeek(t2cCtx h, long offset) {
         }                                                           \
     while (0)
 
-#define CHKSUBRBYTE(h)                               \
-    do                                               \
-        if (next == end) {                           \
-            if (h->src.offset >= h->src.endOffset) { \
-                if (h->aux->flags & T2C_IS_CFF2)     \
-                    goto do_subr_return;             \
-                return t2cErrSrcStream;              \
-            }                                        \
-            next = refill(h, &end);                  \
-            if (next == NULL)                        \
-                return t2cErrSrcStream;              \
-        }                                            \
+/* Check for a byte that follows the first byte of an operator or operand.
+   If we're curently empty, but more bytes are available, refill from buffer.
+   If we're completely out of bytes, throw an error.                         */
+
+#define CHECK_SUBSEQUENT_BYTE(h)                                    \
+    do                                                              \
+        if (next == end) {                                          \
+            if (h->src.offset >= h->src.endOffset) {                \
+                return t2cErrSrcStream;                             \
+            }                                                       \
+            next = refill(h, &end);                                 \
+            if (next == NULL)                                       \
+                return t2cErrSrcStream;                             \
+        }                                                           \
     while (0)
 
 /* ------------------------------- Callbacks ------------------------------- */
@@ -284,26 +287,6 @@ static int callbackWidth(t2cCtx h, int odd_args) {
             else if (h->flags & SEEN_BLEND)
                 width = RND(width);
         }
-
-        h->glyph->width(h->glyph, width);
-        h->flags &= ~PEND_WIDTH;
-        if (h->aux->flags & T2C_WIDTH_ONLY) {
-            /* Only width required; pretend we've seen endchar operator */
-            h->flags |= SEEN_ENDCHAR;
-            return 1;
-        }
-    }
-    return 0;
-}
-
-/* Compute and callback width. Return non-0 to end parse else 0. */
-static int callbacDfltkWidth(t2cCtx h) {
-    if (h->flags & PEND_WIDTH) {
-        float width = h->aux->defaultWidthX;
-        if (h->flags & USE_MATRIX)
-            width = SX(width);
-        else if (h->flags & SEEN_BLEND)
-            width = RND(width);
 
         h->glyph->width(h->glyph, width);
         h->flags &= ~PEND_WIDTH;
@@ -437,26 +420,6 @@ static void savePendCntr(t2cCtx h, int cntr) {
     }
 
     h->mask.state = 2; /* Don't do this again */
-}
-
-static void clearHintStack(t2cCtx h) {
-    int flags = 0;
-
-    if (h->mask.state == 1)
-        savePendCntr(h, 0);
-
-    if (h->glyph->stem != NULL && (h->flags & PEND_MASK)) {
-        /* No mask before first move; callback initial hints */
-        int i;
-        for (i = 0; i < h->stems.cnt; i++) {
-            /* Callback stem */
-            Stem *stem = &h->stems.array[i];
-            flags |= stem->flags;
-            callBackStem(h, stem, 0, flags);
-            flags = 0;
-        }
-        h->flags &= ~PEND_MASK;
-    }
 }
 
 /* Callback path move. */
@@ -796,18 +759,6 @@ static long unbias(long arg, long nSubrs) {
     return (arg < 0 || arg >= nSubrs) ? -1 : arg;
 }
 
-/* Unbias Library element gsub value. 
- -107 is is the last gsubrm -106, the second to last, and so on.
- Return -1 on error else subroutine number. */
-static long unbiasLE(long arg, long nSubrs) {
-    long subrIndex = nSubrs - (107 + arg + 1);
-    return (subrIndex < 0 || subrIndex >= nSubrs) ? -1 : subrIndex;
-}
-
-static long setWV(t2cCtx h, int i) {
-    return 1;
-}
-
 /* Reverse stack elements between index i and j (i < j). */
 static void reverse(t2cCtx h, int i, int j) {
     while (i < j) {
@@ -909,8 +860,8 @@ static int handleBlend(t2cCtx h) {
 }
 
 static void clearBlendStack(t2cCtx h) {
-    int j;
     if (h->flags & SEEN_CFF2_BLEND) {
+        int j;
         for (j = 0; j < h->stack.blendCnt; j++) {
             abfOpEntry *blend = &h->stack.blendArray[j];
             if (blend->blendValues != NULL) {
@@ -1015,8 +966,7 @@ static int t2Decode(t2cCtx h, long offset) {
         int result;
         int byte0;
 
-        CHKBYTE(h);
-        // CHKBYTE2(h, &next, &end);
+        CHECK_FIRST_BYTE(h);
         byte0 = *next++;
         switch (byte0) {
             case tx_reserved0:
@@ -1149,7 +1099,7 @@ static int t2Decode(t2cCtx h, long offset) {
                 /* Process escaped operator */
                 {
                     int escop;
-                    CHKBYTE(h);
+                    CHECK_SUBSEQUENT_BYTE(h);
                     escop = tx_ESC(*next++);
                     switch (escop) {
                         case tx_dotsection:
@@ -1604,7 +1554,6 @@ static int t2Decode(t2cCtx h, long offset) {
                 if ((h->stack.cnt) & 1) {
                     /* Add initial curve */
                     CHKUFLOW(h, 5);
-                    i = 0;
                     if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
                         popBlendArgs6(h,
                                       &INDEX_BLEND(1), &INDEX_BLEND(0),
@@ -1728,9 +1677,9 @@ static int t2Decode(t2cCtx h, long offset) {
                 CHKOFLOW(h, 1);
                 {
                     short value;
-                    CHKBYTE(h);
+                    CHECK_SUBSEQUENT_BYTE(h);
                     value = *next++;
-                    CHKBYTE(h);
+                    CHECK_SUBSEQUENT_BYTE(h);
                     value = value << 8 | *next++;
 #if SHRT_MAX > 32767
                     /* short greater that 2 bytes; handle negative range */
@@ -1751,7 +1700,7 @@ static int t2Decode(t2cCtx h, long offset) {
             case 250:
                 /* Positive 2 byte number */
                 CHKOFLOW(h, 1);
-                CHKBYTE(h);
+                CHECK_SUBSEQUENT_BYTE(h);
                 PUSH(108 + 256 * (byte0 - 247) + *next);
                 next++;
                 continue;
@@ -1761,28 +1710,23 @@ static int t2Decode(t2cCtx h, long offset) {
             case 254:
                 /* Negative 2 byte number */
                 CHKOFLOW(h, 1);
-                CHKBYTE(h);
+                CHECK_SUBSEQUENT_BYTE(h);
                 PUSH(-108 - 256 * (byte0 - 251) - *next);
                 next++;
                 continue;
             case 255:
-                /* 5 byte number */
+                /* 5 byte number (16.16 fixed) */
                 CHKOFLOW(h, 1);
                 {
-                    long value;
-                    CHKBYTE(h);
+                    int32_t value;
+                    CHECK_SUBSEQUENT_BYTE(h);
                     value = *next++;
-                    CHKBYTE(h);
+                    CHECK_SUBSEQUENT_BYTE(h);
                     value = value << 8 | *next++;
-                    CHKBYTE(h);
+                    CHECK_SUBSEQUENT_BYTE(h);
                     value = value << 8 | *next++;
-                    CHKBYTE(h);
+                    CHECK_SUBSEQUENT_BYTE(h);
                     value = value << 8 | *next++;
-#if LONG_MAX > 2147483647
-                    /* long greater that 4 bytes; handle negative range */
-                    if (value > 2417483647)
-                        value -= 4294967296;
-#endif
                     PUSH(value / 65536.0);
                 }
                 continue;
@@ -1849,13 +1793,13 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
         h->maxOpStack = T2_MAX_OP_STACK;
 
     if (aux->flags & T2C_USE_MATRIX) {
-        int i;
         if ((fabs(1 - aux->matrix[0]) > 0.0001) ||
             (fabs(1 - aux->matrix[3]) > 0.0001) ||
             (aux->matrix[1] != 0) ||
             (aux->matrix[2] != 0) ||
             (aux->matrix[4] != 0) ||
             (aux->matrix[5] != 0)) {
+            int i;
             h->flags |= USE_MATRIX;
             h->flags |= USE_GLOBAL_MATRIX;
             for (i = 0; i < 6; i++) {

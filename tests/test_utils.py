@@ -19,6 +19,10 @@ def get_input_path(file_name):
     return os.path.join(get_data_dir(), 'input', file_name)
 
 
+def get_bad_input_path(file_name):
+    return os.path.join(get_data_dir(), 'input', 'bad', file_name)
+
+
 def generate_ttx_dump(font_path, tables=None):
     with TTFont(font_path) as font:
         temp_path = get_temp_file_path()

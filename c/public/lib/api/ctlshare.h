@@ -13,6 +13,7 @@
 #else
 #include <stddef.h> /* For size_t and NULL */
 #endif
+#include <stdint.h>
 
 /* CoreType Library Shared Definitions
    ===================================
@@ -336,13 +337,13 @@ struct ctlSharedStmCallbacks_ {
     void (*read)(ctlSharedStmCallbacks *h, size_t count, char *ptr);
 
     /* Read 1-byte unsigned number. */
-    unsigned char (*read1)(ctlSharedStmCallbacks *h);
+    uint8_t (*read1)(ctlSharedStmCallbacks *h);
 
     /* Read 2-byte number. */
-    unsigned short (*read2)(ctlSharedStmCallbacks *h);
+    uint16_t (*read2)(ctlSharedStmCallbacks *h);
 
     /* Read 4-byte unsigned number. */
-    unsigned long (*read4)(ctlSharedStmCallbacks *h);
+    uint32_t (*read4)(ctlSharedStmCallbacks *h);
 
     /* Error message. */
     void (*message)(ctlSharedStmCallbacks *h, char *msg, ...);
