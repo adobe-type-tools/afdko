@@ -549,8 +549,9 @@ def test_write_fdselect_format_4():
 
 
 @pytest.mark.parametrize('option', ['cff', 'dcf'])
-def test_read_short_charstring_bug895(option):
-    font_name = 'bug895.otf'
+@pytest.mark.parametrize('font_name',
+                         ['bug895_charstring.otf', 'bug895_private_dict.otf'])
+def test_read_short_charstring_bug895(option, font_name):
     input_path = get_bad_input_path(font_name)
     output_path = runner(CMD + ['-s', '-e', '-a', '-o', option,
                                 '-f', input_path])
