@@ -1,37 +1,36 @@
-### Header (000006e8-000006ec)
+### Header (00000000-00000004)
 major  =2
 minor  =0
 hdrSize=5
 offSize=0
-### Top DICT Data (000006ed-000006f5)
+### Top DICT Data (00000005-0000000d)
   [0]={
+  24 CharStrings
   18 FDIndex
-  616 FDArray
-  51 CharStrings
+  589 FDArray
 }
-### GlobalSubrINDEX (000006f6-000006f9)
+### GlobalSubrINDEX (0000000e-00000011)
 empty
-### FDSelect (000006fa-0000071a)
-format =4
-nRanges=4
---- Range4[index]={first,fd}
-[0]={0,0}
-[1]={1,2}
-[2]={2,1}
-[3]={4,2}
-sentinel=5
-### FDArray INDEX (00000950-00000964)
+### FDSelect (00000012-00000017)
+format =0
+--- glyph[gid]=fd
+[0]=0
+[1]=2
+[2]=1
+[3]=1
+[4]=2
+### FDArray INDEX (0000024d-00000261)
 --- object[index]={value}
 [0]={
-  22 637 Private
+  20 610 Private
 }
 [1]={
-  24 659 Private
+  22 630 Private
 }
 [2]={
-  27 683 Private
+  27 652 Private
 }
-### CharStrings INDEX (0000071b-0000094f)
+### CharStrings INDEX (00000018-0000024c)
 --- object[index]={value}
 [0]={
   100 -120 rmoveto
@@ -121,21 +120,21 @@ sentinel=5
 
 }
 --- FD[0]
-### Private DICT (00000965-0000097a)
+### Private DICT (00000262-00000275)
   -250 0 1350 0 BlueValues
   40 StdHW
   40 StdVW
   40 80 StemSnapH
   40 80 StemSnapV
 --- FD[1]
-### Private DICT (0000097b-00000992)
+### Private DICT (00000276-0000028b)
   -250 0 1350 0 BlueValues
   58 StdHW
   63 StdVW
   58 7 19 StemSnapH
   63 10 16 StemSnapV
 --- FD[2]
-### Private DICT (00000993-000009ad)
+### Private DICT (0000028c-000002a6)
   -13 13 543 14 176 14 BlueValues
   -250 21 OtherBlues
   69 StdHW
