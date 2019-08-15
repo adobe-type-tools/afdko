@@ -13,8 +13,6 @@ import os
 import re
 import sys
 
-from afdko.fdkutils import validate_path
-
 __version__ = '0.3.4'
 
 logger = logging.getLogger('differ')
@@ -48,10 +46,10 @@ class Differ(object):
         if os.path.isdir(self.path1):
             return self._diff_dirs()
         else:  # paths are files
-            if self.mode == TXT_MODE:
-                return self._diff_txt_files(self.path1, self.path2)
-            elif self.mode == BIN_MODE:
+            if self.mode == BIN_MODE:
                 return filecmp.cmp(self.path1, self.path2)
+            else:  # TXT_MODE
+                return self._diff_txt_files(self.path1, self.path2)
 
     def _diff_txt_files(self, path1, path2):
         """
@@ -133,7 +131,7 @@ class Differ(object):
             assert os.path.exists(path2), f"Not a valid path2: {path2}"
             if self.mode == BIN_MODE:
                 diff_result = filecmp.cmp(path1, path2)
-            else:
+            else:  # TXT_MODE
                 diff_result = self._diff_txt_files(path1, path2)
             if not diff_result:
                 logger.debug(f"Non-matching file: {rel_file_path}")
@@ -206,7 +204,7 @@ def _get_path_kind(pth):
             return 'file'
         elif os.path.isdir(pth):
             return 'folder'
-        elif not os.path.exists(pth):
+        else:
             return 'invalid'
     except TypeError:
         return 'invalid'
@@ -222,6 +220,14 @@ def _paths_are_same_kind(path1, path2):
     elif all([os.path.isdir(path) for path in (path1, path2)]):
         return True
     return False
+
+
+def _validate_path(path_str):
+    valid_path = os.path.abspath(os.path.realpath(path_str))
+    if not os.path.exists(valid_path):
+        raise argparse.ArgumentTypeError(
+            f"'{path_str}' is not a valid path.")
+    return valid_path
 
 
 def _split_string_sequence(str_seq):
@@ -354,13 +360,13 @@ def get_options(args):
     parser.add_argument(
         'path1',
         metavar='PATH1',
-        type=validate_path,
+        type=_validate_path,
         help='1st path for comparison'
     )
     parser.add_argument(
         'path2',
         metavar='PATH2',
-        type=validate_path,
+        type=_validate_path,
         help='2nd path for comparison'
     )
     options = parser.parse_args(args)
