@@ -558,3 +558,15 @@ def test_read_short_charstring_bug895(option, font_name):
     expected_path = get_expected_path(font_name + '.' + option)
     skip = ['-s', 'tx: ---']  # skip line with filename
     assert differ([expected_path, output_path] + skip)
+
+
+@pytest.mark.parametrize('option', ['cff2', 'cff'])
+def test_drop_defaultwidthx_when_writing_cff2_bug897(option):
+    font_name = 'bug897.otf'
+    input_path = get_bad_input_path(font_name)
+    output_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', option, '-f', input_path, output_path])
+    dcf_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', 'dcf', '-f', output_path, dcf_path])
+    expected_path = get_expected_path('bug897.' + option + '.dcf')
+    assert differ([expected_path, dcf_path])
