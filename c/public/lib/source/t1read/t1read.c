@@ -338,7 +338,7 @@ static STI addString(t1rCtx h, size_t length, const char *value) {
 
 /* Get string from STI. */
 static char *getString(t1rCtx h, STI sti) {
-    if (sti == STI_UNDEF)
+    if ((sti == STI_UNDEF) || (sti >= h->strings.index.cnt))
         return NULL;
     else
         return &h->strings.buf.array[h->strings.index.array[sti]];
@@ -669,8 +669,6 @@ static void readEncoding(t1rCtx h) {
 
         token = getToken(h);
     }
-
-    fatal(h, t1rErrEncoding, NULL);
 }
 
 /* Compute hex string length taking newlines into account. */
@@ -927,8 +925,11 @@ static void readSubrs(t1rCtx h) {
 
     /* Parse subrs count */
     token = getToken(h);
-    if (token->type != pstInteger ||
-        (cnt = pstConvInteger(h->pst, token), cnt < 0 || cnt > 65535))
+    if (token->type != pstInteger)
+        fatal(h, t1rErrSubrsCount, NULL);
+
+    cnt = pstConvInteger(h->pst, token);
+    if (cnt < 0 || cnt > 65535)
         fatal(h, t1rErrSubrsCount, NULL);
 
     /* Allocate and initialize elements */
@@ -961,9 +962,11 @@ static void readSubrs(t1rCtx h) {
 
         /* Parse subr number */
         token = getToken(h);
-        if (token->type != pstInteger ||
-            (num = pstConvInteger(h->pst, token),
-             num < 0 || num >= h->fd->subrs.offset.cnt))
+        if (token->type != pstInteger)
+            break;
+
+        num = pstConvInteger(h->pst, token);
+        if (num < 0 || num >= h->fd->subrs.offset.cnt)
             break;
 
         /* Read cstr bytes */
@@ -1891,6 +1894,8 @@ static long parseBool(t1rCtx h, int kKey) {
 static int parseFontMatrix(t1rCtx h, abfTopDict *top, abfFontDict *font) {
     float array[6];
 
+    memset(array, 0, 6 * sizeof(float));
+
     /* Parse matrix */
     (void)parseNumArray(h, kFontMatrix, 6, 6, array, 0, 0);
 
@@ -2386,8 +2391,8 @@ static void doLiteral(t1rCtx h, pstToken *literal) {
 
 /* Process operator. */
 static void doOperator(t1rCtx h, pstToken *operator) {
-    pstToken *token;
     if (pstMatch(h->pst, operator, "currentfile")) {
+        pstToken *token;
         int result = 0;
         token = getToken(h);
         if (pstMatch(h->pst, token, "eexec"))
@@ -2601,8 +2606,10 @@ parse_bin_fmt:
 
         /* Parse cstr length */
         token = getToken(h);
-        if (token->type != pstInteger ||
-            (len = pstConvInteger(h->pst, token), len < 1 || len > 65535))
+        if (token->type != pstInteger)
+            goto bad_char;
+        len = pstConvInteger(h->pst, token);
+        if (len < 1 || len > 65535)
             goto bad_char;
 
         /* Parse RD operator */
@@ -2732,10 +2739,10 @@ static void readCIDMap(t1rCtx h,
     fd = (h->key.FDBytes == 0) ? 0 : read1(h);
     offset = readN(h, h->key.GDBytes);
     for (cid = 0; cid < h->chars.index.cnt; cid++) {
-        long length;
         unsigned char nextfd = (h->key.FDBytes == 0) ? 0 : read1(h);
         long nextoff = readN(h, h->key.GDBytes);
         if (offset != nextoff) {
+            long length;
             Char *chr = &h->chars.index.array[tag];
 
             /* Initialize char */
@@ -3027,9 +3034,11 @@ static void prepClientData(t1rCtx h) {
         /* Standard encoding */
         for (i = 0; i < h->chars.index.cnt; i++) {
             Char *chr = &h->chars.index.array[i];
-            int code = getStdEnc(h, (STI)chr->gname.impl);
-            if (code != -1)
-                encAdd(h, chr, code);
+            if ((STI)chr->gname.impl != STI_UNDEF) {
+                int code = getStdEnc(h, (STI)chr->gname.impl);
+                if (code != -1)
+                    encAdd(h, chr, code);
+            }
         }
     } else {
         /* Custom encoding */
@@ -3131,48 +3140,6 @@ int t1rEndFont(t1rCtx h) {
     }
     encListReuse(h);
     return t1rSuccess;
-}
-
-/* Read charstring. */
-static void readSubr(t1rCtx h, abfGlyphCallbacks *glyph_cb, Offset subrStartOffset, Offset subrEndOffset, abfGlyphInfo *glyph_info, t1cAuxData *glyph_aux) {
-    int result;
-    long offset;
-    Char chr = *glyph_info;
-    t1cAuxData aux = *glyph_aux;
-    offset = chr.sup.begin = subrStartOffset;
-    chr.sup.end = subrEndOffset;
-    chr.flags &= ~ABF_GLYPH_SEEN;
-
-    result = glyph_cb->beg(glyph_cb, &chr);
-
-    /* Check result */
-    switch (result) {
-        case ABF_CONT_RET:
-            aux.flags &= ~T1C_WIDTH_ONLY;
-            break;
-        case ABF_WIDTH_RET:
-            aux.flags |= T1C_WIDTH_ONLY;
-            break;
-        case ABF_SKIP_RET:
-            return;
-        case ABF_QUIT_RET:
-            fatal(h, t1rErrCstrQuit, NULL);
-        case ABF_FAIL_RET:
-            fatal(h, t1rErrCstrFail, NULL);
-    }
-
-    /* Parse charstring */
-    result = t1cParse(offset, &aux, glyph_cb);
-    if (result) {
-        if (chr.flags & ABF_GLYPH_CID)
-            message(h, "(t1c) %s <cid-%hu>", t1cErrStr(result), chr.cid);
-        else
-            message(h, "(t1c) %s <%s>", t1cErrStr(result), chr.gname.ptr);
-        fatal(h, t1rErrCstrParse, NULL);
-    }
-
-    /* End glyph */
-    glyph_cb->end(glyph_cb);
 }
 
 /* Read charstring. */
