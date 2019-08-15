@@ -620,9 +620,11 @@ readhdr:
     while (0)
 
 /* Check that dict has enough bytes left. */
-#define CHECK_DICT_BYTES_LEFT(n)        \
-    if ((srcTell(h) + n) > region->end) \
-        fatal(h, cfrErrSrcStream);      \
+#define CHECK_DICT_BYTES_LEFT(n)            \
+    do                                      \
+        if ((srcTell(h) + n) > region->end) \
+            fatal(h, cfrErrSrcStream);      \
+    while (0)
 
 /* Stack access without check. */
 #define INDEX(i) (h->stack.array[i])

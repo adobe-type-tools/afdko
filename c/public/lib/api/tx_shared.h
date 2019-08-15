@@ -527,15 +527,18 @@ struct txCtx_ {
     } while (0)
 
 /* Check that current charstring has enough bytes left. */
-#define CHECK_CHARSTRING_BYTES_LEFT(n)    \
-    if (n > left)                         \
-        fatal(h, "charstring too short"); \
+#define CHECK_CHARSTRING_BYTES_LEFT(n)        \
+    do {                                      \
+        if (n > left)                         \
+            fatal(h, "charstring too short"); \
+    } while (0)
 
 /* Check that current dict has enough bytes left. */
 #define CHECK_DICT_BYTES_LEFT(n)    \
-    if (n > left)                   \
-        fatal(h, "dict too short"); \
-
+    do {                            \
+        if (n > left)                   \
+            fatal(h, "dict too short"); \
+    } while (0)
 
 /* Stack access without check. */
 #define INDEX(i) (h->stack.array[i])
