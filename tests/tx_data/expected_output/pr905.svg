@@ -1,0 +1,8 @@
+<font horiz-adv-x="1000">
+<!--  2014 - 2017 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name Source. Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries. -->
+<font-face font-family="TestVF-Roman" units-per-em="1000" underline-position="-100" underline-thickness="50"/>
+<glyph unicode="&#xE000;" horiz-adv-x="640" d="M80,0l60,0l420,670l-60,0l-420,-670 z M560,0l-420,670l-60,0l420,-670l60,0 z M140,50l0,570l360,0l0,-570l-360,0 z M80,0l480,0l0,670l-480,0l0,-670z"/>
+<glyph unicode="&#xE001;" horiz-adv-x="663" d="M5,0l230,0l0,40l-110,15l-20,0l-100,-15l0,-40 z M71,0l47,0l204,599l-23,0l201,-599l93,0l-230,675l-60,0l-232,-675 z M170,219l302,0l-16,46l-270,0l-16,-46 z M383,0l270,0l0,40l-124,15l-20,0l-126,-15l0,-40z"/>
+<glyph unicode="&#xE002;" horiz-adv-x="602" d="M291,55l-140,-15l0,-40l300,0l0,40l-140,15l-20,0 z M256,310C256,205 256,101 253,0l96,0C346,103 346,207 346,310l0,50C346,465 346,569 349,670l-96,0C256,567 256,463 256,360l0,-50 z M539,620l-45,50l32,-178l56,0l-8,178l-546,0l-8,-178l56,0l32,178l-45,-50l476,0z"/>
+<glyph unicode="&#xE003;" horiz-adv-x="742" d="M329,40l49,0l190,434l-43,0l-168,-385l30,0l-171,385l-79,0l192,-434 z M547,0l80,0C625,45 624,146 624,210l0,54C624,328 625,429 627,474l-75,0l-5,-264l0,-210 z M45,0l186,0l0,35l-80,20l-20,0l-86,-20l0,-35 z M471,0l226,0l0,35l-100,20l-20,0l-106,-20l0,-35 z M115,0l47,0l0,210l-10,264l-37,0l0,-474 z M45,439l86,-20l20,0l0,55l-106,0l0,-35 z M577,419l20,0l100,20l0,35l-120,0l0,-55z"/>
+</font>

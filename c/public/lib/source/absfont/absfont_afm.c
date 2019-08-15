@@ -209,11 +209,19 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
                 code, g->int_mtx.hAdv, info->cid,
                 g->int_mtx.left, g->int_mtx.bottom,
                 g->int_mtx.right, g->int_mtx.top);
-    else if (strcmp(info->gname.ptr, ".notdef") != 0)
-        fprintf(h->tmp_fp, "C %ld ; WX %ld ; N %s ; B %ld %ld %ld %ld ;\n",
-                code, g->int_mtx.hAdv, info->gname.ptr,
+    else if (info->gname.ptr != NULL) {
+        if (strcmp(info->gname.ptr, ".notdef") != 0) {
+            fprintf(h->tmp_fp, "C %ld ; WX %ld ; N %s ; B %ld %ld %ld %ld ;\n",
+                    code, g->int_mtx.hAdv, info->gname.ptr,
+                    g->int_mtx.left, g->int_mtx.bottom,
+                    g->int_mtx.right, g->int_mtx.top);
+        }
+    } else {
+        fprintf(h->tmp_fp, "C %ld ; WX %ld ; B %ld %ld %ld %ld ;\n",
+                code, g->int_mtx.hAdv,
                 g->int_mtx.left, g->int_mtx.bottom,
                 g->int_mtx.right, g->int_mtx.top);
+    }
 }
 
 /* AFM callbacks template. */

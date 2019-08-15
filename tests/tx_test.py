@@ -570,3 +570,28 @@ def test_drop_defaultwidthx_when_writing_cff2_bug897(option):
     runner(CMD + ['-a', '-o', 'dcf', '-f', output_path, dcf_path])
     expected_path = get_expected_path('bug897.' + option + '.dcf')
     assert differ([expected_path, dcf_path])
+
+
+@pytest.mark.parametrize('option', ['afm', 'svg'])
+def test_missing_glyph_names_pr905(option):
+    font_name = 'pr905.otf'
+    input_path = get_bad_input_path(font_name)
+    output_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', option, '-f', input_path, output_path])
+    expected_path = get_expected_path('pr905' + '.' + option)
+    if option == 'afm':
+        skip = ['-s',
+                'Comment Creation Date:' + SPLIT_MARKER + 'Comment Copyright']
+    else:
+        skip = []
+    assert differ([expected_path, output_path] + skip)
+
+
+def test_missing_glyph_names_pr905_cef():
+    font_name = 'pr905.otf'
+    option = 'cef'
+    input_path = get_bad_input_path(font_name)
+    output_path = get_temp_file_path()
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        runner(CMD + ['-a', '-o', option, '-f', input_path, output_path])
+    assert(err.value.returncode > 0)  # error code, not segfault of -11
