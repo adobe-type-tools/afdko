@@ -1448,8 +1448,14 @@ static int CTL_CDECL cef_matchByCID(const void *key, const void *value,
 static int CTL_CDECL cef_cmpByName(const void *first, const void *second,
                                    void *ctx) {
     txCtx h = ctx;
-    return strcmp(h->src.glyphs.array[*(unsigned short *)first]->gname.ptr,
-                  h->src.glyphs.array[*(unsigned short *)second]->gname.ptr);
+    if ((h->src.glyphs.array[*(unsigned short *)first]->gname.ptr == NULL) ||
+        (h->src.glyphs.array[*(unsigned short *)second]->gname.ptr == NULL)) {
+        fatal(h, "missing glyph name");
+        return -1; /* should not reach this line, but it makes Xcode happy */
+    } else {
+        return strcmp(h->src.glyphs.array[*(unsigned short *)first]->gname.ptr,
+                      h->src.glyphs.array[*(unsigned short *)second]->gname.ptr);
+    }
 }
 
 /* Match glyph by its name. */
@@ -1661,7 +1667,11 @@ static void cef_EndFont(txCtx h) {
         for (i = 0; i < h->cef.subset.cnt; i++) {
             cefSubsetGlyph *dst = &h->cef.subset.array[i];
             abfGlyphInfo *src = h->src.glyphs.array[dst->id];
-            dst->uv = mapName2UV(h, src->gname.ptr, &unrec);
+            if (src->gname.ptr != NULL) {
+                dst->uv = mapName2UV(h, src->gname.ptr, &unrec);
+            } else {
+                dst->uv = unrec++;
+            }
         }
 
         /* Decide whether to use name list */

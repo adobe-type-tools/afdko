@@ -1,0 +1,20 @@
+StartFontMetrics 2.0
+Comment Copyright 2019 Adobe Systems Incorporated. All Rights Reserved.
+Comment Creation Date: Thu Aug 15 07:59:24 2019
+FontName TestVF-Roman
+FullName Test VF
+FamilyName Test VF
+ItalicAngle 0
+IsFixedPitch false
+FontBBox 5 0 697 675
+UnderlinePosition -100
+UnderlineThickness 50
+Version 1.0
+Notice  2014 - 2017 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name Source. Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries.
+StartCharMetrics 3
+C -1 ; WX 640 ; B 80 0 560 670 ;
+C 65 ; WX 663 ; B 5 0 653 675 ;
+C 84 ; WX 602 ; B 20 0 582 670 ;
+C 1084 ; WX 742 ; B 45 0 697 474 ;
+EndCharMetrics
+EndFontMetrics
