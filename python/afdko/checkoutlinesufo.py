@@ -4,7 +4,7 @@
 Tool that performs outline quality checks and can remove path overlaps.
 """
 
-__version__ = '2.4.1'
+__version__ = '2.4.2'
 
 import argparse
 from functools import cmp_to_key
@@ -149,8 +149,11 @@ class FontFile(object):
             self.ufo_font_hash_data.close()
 
         elif self.font_type == TYPE1_FONT_TYPE:
-            if not run_shell_command([
-                    'tx', '-t1', self.temp_ufo_path, self.font_path]):
+            args = ['tx', '-t1']
+            if self.font_format == 'PFB':
+                args.append('-pfb')
+            if not run_shell_command(
+                    args + [self.temp_ufo_path, self.font_path]):
                 raise FocusFontError('Failed to convert UFO font to Type 1.')
 
         else:

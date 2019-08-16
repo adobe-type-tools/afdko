@@ -70,6 +70,7 @@ def test_remove_overlap_ufo(args, ufo_filename, expct_label):
 
 @pytest.mark.parametrize('filename, diffmode', [
     ('font.pfa', []),
+    ('font.pfb', ['-m', 'bin']),
     ('font.cff', ['-m', 'bin']),
 ])
 def test_remove_overlap_type1_cff(filename, diffmode):
