@@ -1524,7 +1524,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                 opName = 'curve'
                 newPoint = XMLElement(
                     "point", {
-                        "type": opName, "x": f"{showX}", "y": f"{showY}"})
+                        "x": f"{showX}", "y": f"{showY}", "type": opName})
                 outlineItem.append(newPoint)
                 opList.append([opName, curX, curY])
                 opIndex += 1
@@ -1568,7 +1568,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                 opName = 'curve'
                 newPoint = XMLElement(
                     "point", {
-                        "type": opName, "x": f"{showX}", "y": f"{showY}"})
+                        "x": f"{showX}", "y": f"{showY}", "type": opName})
                 outlineItem.append(newPoint)
                 opList.append([opName, curX, curY])
                 opIndex += 1
@@ -1620,7 +1620,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                 showX, showY = convertCoords(curX, curY)
                 newPoint = XMLElement(
                     "point", {
-                        "type": opName, "x": f"{showX}", "y": f"{showY}"})
+                        "x": f"{showX}", "y": f"{showY}", "type": opName})
 
                 if opName == "move":
                     if outlineItem is not None:
@@ -1663,7 +1663,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                     showX, showY = convertCoords(curX, curY)
                     newPoint = XMLElement(
                         "point", {
-                            "type": opName, "x": f"{showX}", "y": f"{showY}"})
+                            "x": f"{showX}", "y": f"{showY}", "type": opName})
                     outlineItem.append(newPoint)
                 else:
                     if token in ["rct", "rcv"]:
@@ -1684,8 +1684,9 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                         showX, showY = convertCoords(curX, curY)
                         newPoint = XMLElement(
                             "point", {
-                                "type": opName,
-                                "x": f"{showX}", "y": f"{showY}"})
+                                "x": f"{showX}",
+                                "y": f"{showY}",
+                                "type": opName})
                         outlineItem.append(newPoint)
                     elif token == "vhct":
                         curY += argList[0]
@@ -1703,8 +1704,9 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                         showX, showY = convertCoords(curX, curY)
                         newPoint = XMLElement(
                             "point", {
-                                "type": opName,
-                                "x": f"{showX}", "y": f"{showY}"})
+                                "x": f"{showX}",
+                                "y": f"{showY}",
+                                "type": opName})
                         outlineItem.append(newPoint)
                     elif token == "hvct":
                         curX += argList[0]
@@ -1722,8 +1724,9 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                         showX, showY = convertCoords(curX, curY)
                         newPoint = XMLElement(
                             "point", {
-                                "type": opName,
-                                "x": f"{showX}", "y": f"{showY}"})
+                                "x": f"{showX}",
+                                "y": f"{showY}",
+                                "type": opName})
                         outlineItem.append(newPoint)
                 if newHintMaskName is not None:
                     # attach the pointName to the first point of the curve.

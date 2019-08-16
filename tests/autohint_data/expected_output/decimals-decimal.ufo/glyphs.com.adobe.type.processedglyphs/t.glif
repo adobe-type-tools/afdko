@@ -7,28 +7,28 @@
   <anchor x="169.60000000000002" y="-17.6" name="belowLC"/>
   <outline>
     <contour>
-      <point type="curve" x="188" y="-9.6" name="hintSet0000"/>
+      <point x="188" y="-9.6" type="curve" name="hintSet0000"/>
       <point x="212" y="-9.6"/>
       <point x="238.4" y="-2.4"/>
-      <point type="curve" x="260" y="4.8"/>
-      <point type="line" x="247.2" y="54.4"/>
+      <point x="260" y="4.8" type="curve"/>
+      <point x="247.2" y="54.4" type="line"/>
       <point x="234.4" y="49.6"/>
       <point x="216.8" y="44"/>
-      <point type="curve" x="203.2" y="44"/>
+      <point x="203.2" y="44" type="curve"/>
       <point x="158.4" y="44"/>
       <point x="143.2" y="71.2"/>
-      <point type="curve" x="143.2" y="119.2"/>
-      <point type="line" x="143.2" y="335.2"/>
-      <point type="line" x="248" y="335.2"/>
-      <point type="line" x="248" y="388.8" name="hintSet0007"/>
-      <point type="line" x="143.2" y="388.8"/>
-      <point type="line" x="143.2" y="497.6" name="hintSet0009"/>
-      <point type="line" x="88" y="497.6" name="hintSet0010"/>
-      <point type="line" x="80" y="388.8" name="hintSet0011"/>
-      <point type="line" x="19.2" y="384.8" name="hintSet0012"/>
-      <point type="line" x="19.2" y="335.2" name="hintSet0013"/>
-      <point type="line" x="76.8" y="335.2"/>
-      <point type="line" x="76.8" y="120"/>
+      <point x="143.2" y="119.2" type="curve"/>
+      <point x="143.2" y="335.2" type="line"/>
+      <point x="248" y="335.2" type="line"/>
+      <point x="248" y="388.8" type="line" name="hintSet0007"/>
+      <point x="143.2" y="388.8" type="line"/>
+      <point x="143.2" y="497.6" type="line" name="hintSet0009"/>
+      <point x="88" y="497.6" type="line" name="hintSet0010"/>
+      <point x="80" y="388.8" type="line" name="hintSet0011"/>
+      <point x="19.2" y="384.8" type="line" name="hintSet0012"/>
+      <point x="19.2" y="335.2" type="line" name="hintSet0013"/>
+      <point x="76.8" y="335.2" type="line"/>
+      <point x="76.8" y="120" type="line"/>
       <point x="76.8" y="43.2"/>
       <point x="104.8" y="-9.6"/>
     </contour>
