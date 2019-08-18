@@ -19,7 +19,7 @@ extern "C" {
    This library parses tables common tables used by variable OpenType fonts.
 */
 
-#define VARREAD_VERSION CTL_MAKE_VERSION(1, 0, 6)
+#define VARREAD_VERSION CTL_MAKE_VERSION(1, 0, 7)
 #define F2DOT14_TO_FIXED(v) (((Fixed)(v)) << 2)
 #define FIXED_TO_F2DOT14(v) ((var_F2dot14)(((Fixed)(v) + 0x00000002) >> 2))
 
@@ -248,9 +248,9 @@ void var_freehmtx(ctlSharedStmCallbacks *sscb, var_hmtx hmtx);
     hmtx - a pointer to the horizontal metrics table data to be freed.
 */
 
-int var_lookuphmtx(ctlSharedStmCallbacks *sscb, var_hmtx hmtx, unsigned short axisCount, float *scalars, unsigned short gid, var_glyphMetrics *metrics);
+int var_lookuphmtx(ctlSharedStmCallbacks *sscb, var_hmtx hmtx, unsigned short axisCount, Fixed *instCoords, unsigned short gid, var_glyphMetrics *metrics);
 
-/*  var_lookuphmtx() lookup horizontal metrics for a glyph optionally blended using font instance scalars.
+/*  var_lookuphmtx() lookup horizontal metrics for a glyph optionally blended using font instance coordinates.
     returns 0 if successful, otherwise non-zero.
 
     sscb - a pointer to shared stream callback functions.
@@ -259,7 +259,7 @@ int var_lookuphmtx(ctlSharedStmCallbacks *sscb, var_hmtx hmtx, unsigned short ax
 
     axisCount - the number of axes.
 
-    scalars - a pointer to font instance scalars. May be NULL if no blending required.
+    instCoords - a pointer to normalized instance coordinates. May be NULL if no blending required.
 
     gid - the glyph ID to be looked up.
 
@@ -289,9 +289,9 @@ void var_freevmtx(ctlSharedStmCallbacks *sscb, var_vmtx vmtx);
     vmtx - a pointer to the horizontal metrics table data to be freed.
 */
 
-int var_lookupvmtx(ctlSharedStmCallbacks *sscb, var_vmtx vmtx, unsigned short axisCount, float *scalars, unsigned short gid, var_glyphMetrics *metrics);
+int var_lookupvmtx(ctlSharedStmCallbacks *sscb, var_vmtx vmtx, unsigned short axisCount, Fixed *instCoords, unsigned short gid, var_glyphMetrics *metrics);
 
-/*  var_lookupvmtx() lookup vertical metrics for a glyph optionally blended using font instance scalars.
+/*  var_lookupvmtx() lookup vertical metrics for a glyph optionally blended using font instance coordinates.
     returns 0 if successful, otherwise non-zero.
 
     sscb - a pointer to shared stream callback functions.
@@ -300,7 +300,7 @@ int var_lookupvmtx(ctlSharedStmCallbacks *sscb, var_vmtx vmtx, unsigned short ax
 
     axisCount - the number of axes.
 
-    scalars - a pointer to font instance scalars. May be NULL if no blending required.
+    instCoords - a pointer to normalized instance coordinates. May be NULL if no blending required.
 
     gid - the glyph ID to be looked up.
 
@@ -362,9 +362,9 @@ var_MVAR var_loadMVAR(sfrCtx sfr, ctlSharedStmCallbacks *sscb);
     sscb - a pointer to shared stream callback functions.
 */
 
-int var_lookupMVAR(ctlSharedStmCallbacks *sscb, var_MVAR mvar, unsigned short axisCount, float *scalars, ctlTag tag, float *value);
+int var_lookupMVAR(ctlSharedStmCallbacks *sscb, var_MVAR mvar, unsigned short axisCount, Fixed *instCoords, ctlTag tag, float *value);
 
-/*  var_lookupMVAR() lookup font-wide metric values for a tag blended using font instance scalars.
+/*  var_lookupMVAR() lookup font-wide metric values for a tag blended using font instance coordinates.
     returns 0 if successful, otherwise non-zero.
 
     sscb - a pointer to shared stream callback functions.
@@ -373,7 +373,7 @@ int var_lookupMVAR(ctlSharedStmCallbacks *sscb, var_MVAR mvar, unsigned short ax
 
     axisCount - the number of axes.
 
-    scalars - a pointer to font instance scalars. May be NULL if no blending required.
+    instCoords - a pointer to normalized instance coordinates. May be NULL if no blending required.
 
     tag - the tag of the metric value to be looked up.
 

@@ -2043,11 +2043,11 @@ static void MVARread(cfrCtx h) {
     abfTopDict *top = &h->top;
     float thickness, position;
 
-    if (!var_lookupMVAR(&h->cb.shstm, h->cff2.mvar, h->cff2.axisCount, h->cff2.scalars, MVAR_unds_tag, &thickness)) {
+    if (!var_lookupMVAR(&h->cb.shstm, h->cff2.mvar, h->cff2.axisCount, h->cff2.ndv, MVAR_unds_tag, &thickness)) {
         top->UnderlineThickness += thickness;
         top->UnderlinePosition -= thickness / 2;
     }
-    if (!var_lookupMVAR(&h->cb.shstm, h->cff2.mvar, h->cff2.axisCount, h->cff2.scalars, MVAR_undo_tag, &position)) {
+    if (!var_lookupMVAR(&h->cb.shstm, h->cff2.mvar, h->cff2.axisCount, h->cff2.ndv, MVAR_undo_tag, &position)) {
         top->UnderlinePosition += position;
     }
 }
@@ -2412,7 +2412,7 @@ static float cff2GetWidth(cff2GlyphCallbacks *cb, unsigned short gid) {
     cfrCtx h = (cfrCtx)cb->direct_ctx;
     var_glyphMetrics metrics;
 
-    if (!var_lookuphmtx(&h->cb.shstm, h->cff2.hmtx, h->cff2.axisCount, h->cff2.scalars, gid, &metrics)) {
+    if (!var_lookuphmtx(&h->cb.shstm, h->cff2.hmtx, h->cff2.axisCount, h->cff2.ndv, gid, &metrics)) {
         return metrics.width;
     }
 
