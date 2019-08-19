@@ -4,18 +4,18 @@
   <unicode hex="002B"/>
   <outline>
     <contour>
-      <point type="line" x="172.8" y="83.2" name="hintSet0000"/>
-      <point type="line" x="224.8" y="83.2"/>
-      <point type="line" x="224.8" y="239.2"/>
-      <point type="line" x="370.4" y="239.2"/>
-      <point type="line" x="370.4" y="288.8"/>
-      <point type="line" x="224.8" y="288.8"/>
-      <point type="line" x="224.8" y="444.8"/>
-      <point type="line" x="172.8" y="444.8"/>
-      <point type="line" x="172.8" y="288.8"/>
-      <point type="line" x="27.2" y="288.8"/>
-      <point type="line" x="27.2" y="239.2"/>
-      <point type="line" x="172.8" y="239.2"/>
+      <point x="172.8" y="83.2" type="line" name="hintSet0000"/>
+      <point x="224.8" y="83.2" type="line"/>
+      <point x="224.8" y="239.2" type="line"/>
+      <point x="370.4" y="239.2" type="line"/>
+      <point x="370.4" y="288.8" type="line"/>
+      <point x="224.8" y="288.8" type="line"/>
+      <point x="224.8" y="444.8" type="line"/>
+      <point x="172.8" y="444.8" type="line"/>
+      <point x="172.8" y="288.8" type="line"/>
+      <point x="27.2" y="288.8" type="line"/>
+      <point x="27.2" y="239.2" type="line"/>
+      <point x="172.8" y="239.2" type="line"/>
     </contour>
   </outline>
   <lib>

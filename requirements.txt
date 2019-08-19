@@ -1,4 +1,7 @@
-lxml==4.3.5 # pyup: ignore
+# 'lxml' is not a primary requirement of afdko but it's listed here because
+# we want to have control over the version and guarantee that the XML output
+# of our tools is stable
+lxml==4.4.1
 booleanOperations==0.8.2
 cu2qu[cli]==1.6.5
 defcon[lxml,pens]==0.6.0
