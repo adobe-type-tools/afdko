@@ -7,7 +7,7 @@
 
 # Configuration
 CONFIG = release
-ROOT_DIR = ../../../..
+ROOT_DIR = $(realpath ../../../..)
 OBJECT_DIR = .
 PRG_TARGET = $(EXE_DIR)/spot
 # Build targets
@@ -216,7 +216,7 @@ PRG_OBJS = $(OBJECT_DIR)/BASE.o \
 	$(OBJECT_DIR)/vmtx.o
 	
 # Standard definitions
-include ../../../../../public/config/linux/gcc/gcc.mak
+include $(realpath ../../../../../public/config/linux/gcc/gcc.mak)
 
 # program rule is in gcc.mak
 

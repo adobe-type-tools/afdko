@@ -10,7 +10,7 @@ CONFIG = release
 CFLAGS = $(STD_OPTS)
 
 # Library
-ROOT_DIR = ../../../../..
+ROOT_DIR = $(realpath ../../../../..)
 SRC_DIR = $(ROOT_DIR)/source/cffread
 
 # Library
@@ -23,7 +23,7 @@ LIB_TARGET = $(LIB_DIR)/cffread.a
 TARGETS = $(LIB_TARGET)
 
 # Standard definitions
-include ../../../../../config/linux/gcc/gcc_tx.mak
+include $(realpath ../../../../../config/linux/gcc/gcc_tx.mak)
 
 # Object rules
 # Object rules

@@ -9,7 +9,7 @@
 CONFIG = release
 
 # Library
-ROOT_DIR = ../../../../..
+ROOT_DIR = $(realpath ../../../../..)
 SRC_DIR = $(ROOT_DIR)/source/hotconv
 OBJECT_DIR = .
 LIB_TARGET = $(LIB_DIR)/hotconv.a
@@ -17,8 +17,8 @@ LIB_TARGET = $(LIB_DIR)/hotconv.a
 CFLAGS = $(STD_OPTS) -I$(ROOT_DIR)/api \
 					 -I$(ROOT_DIR)/resource \
 					 -I$(ROOT_DIR)/build/hotpccts/pccts/h \
-					 -I$(ROOT_DIR)/../../public/lib/api \
-					 -I$(ROOT_DIR)/../../public/lib/resource \
+					 -I$(realpath $(ROOT_DIR)/../../public/lib/api) \
+					 -I$(realpath $(ROOT_DIR)/../../public/lib/resource) \
 					 -DHOT_FEAT_SUPPORT=1
 					 
 LIB_SRCS = \
