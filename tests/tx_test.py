@@ -595,3 +595,14 @@ def test_missing_glyph_names_pr905_cef():
     with pytest.raises(subprocess.CalledProcessError) as err:
         runner(CMD + ['-a', '-o', option, '-f', input_path, output_path])
     assert(err.value.returncode > 0)  # error code, not segfault of -11
+
+def test_var_bug_913():
+    # AdobeVFPrototype_mod.otf is a modified copy of AdobeVFPrototype.otf 1.003
+    # so that the region indexes in HVAR are listed in a different order from those in CFF2.
+    # Also MVAR table has been modified to contain (dummy) deltas for underline offset and
+    # underline thickness just to exercize MVAR lookup code.
+    font_path = get_input_path('AdobeVFPrototype_mod.otf')
+    save_path = get_temp_dir_path('bug913.txt')
+    runner(CMD + ['-3', '-g', 'A,W,y', '-U', '900,0', font_path, save_path])
+    expected_path = get_expected_path('bug913.txt')
+    assert differ([expected_path, save_path])

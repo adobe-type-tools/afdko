@@ -1,0 +1,134 @@
+## Filename AdobeVFPrototype_mod.otf
+## Top Dict
+version             "1.0"
+Notice              "Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/). Adobe is either a registered trademark or a trademark of Adobe Systems Incorporated in the United States and/or other countries."
+Copyright           "Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/)."
+FullName            "Adobe Variable Font Prototype"
+FamilyName          "Adobe Variable Font Prototype"
+UnderlinePosition   -73.5
+UnderlineThickness  63
+FontBBox            {-178,-250,1135,908}
+FSType              0
+sup.srcFontType     CFF (name-keyed)
+sup.nGlyphs         313
+## FontDict[0]
+FontName            "AdobeVFPrototype-Black"
+## Private
+BlueValues          {-20,0,487,503,515,531,536,552,624,640,652,672,711,731}
+OtherBlues          {-232,-222}
+FamilyBlues         {-20,0,473,491,525,540,549,562,644,659,669,689,729,749}
+FamilyOtherBlues    {-249,-239}
+BlueScale           0.0375
+BlueFuzz            0
+StdHW               74
+StdVW               190
+StemSnapH           {60,74}
+StemSnapV           {190,200}
+## glyph[tag] {name,encoding,path}
+glyph[34] {A,U+0041,
+  680 width
+  10 0 move
+  220 0 line
+  220 59 line
+  131 74 line
+  114 74 line
+  10 59 line
+  10 0 line
+  65 0 move
+  129 0 line
+  315 583 line
+  272 513 line
+  431 0 line
+  632 0 line
+  409 652 line
+  289 652 line
+  65 0 line
+  168 180 move
+  480 180 line
+  455 243 line
+  185 243 line
+  168 180 line
+  342 0 move
+  665 0 line
+  665 56 line
+  535 71 line
+  450 71 line
+  342 56 line
+  342 0 line
+  endchar}
+glyph[56] {W,U+0057,
+  989 width
+  902 578 move
+  989 593 line
+  989 652 line
+  784 652 line
+  784 593 line
+  873 578 line
+  902 578 line
+  591 578 move
+  715 593 line
+  715 652 line
+  404 652 line
+  404 593 line
+  524 578 line
+  591 578 line
+  189 578 move
+  331 593 line
+  331 652 line
+  5 652 line
+  5 593 line
+  150 578 line
+  189 578 line
+  300 0 move
+  374 147 line
+  248 652 line
+  38 652 line
+  236 0 line
+  356 0 line
+  515 531 line
+  468 486 line
+  613 0 line
+  733 0 line
+  935 652 line
+  866 652 line
+  679 0 line
+  750 147 line
+  614 652 line
+  485 652 line
+  300 0 line
+  endchar}
+glyph[90] {y,U+0079,
+  543 width
+  446 425 move
+  538 440 line
+  538 487 line
+  352 487 line
+  352 440 line
+  427 425 line
+  446 425 line
+  220 424 move
+  298 441 line
+  298 487 line
+  -5 487 line
+  -5 440 line
+  83 424 line
+  220 424 line
+  343 137 move
+  218 487 line
+  15 487 line
+  256 -67 line
+  343 137 line
+  109 -232 move
+  206 -232 247 -167 289 -59 curve
+  500 487 line
+  430 487 line
+  308 137 line
+  247 -39 line
+  224 -105 183 -154 143 -181 curve
+  175 -196 line
+  212 -181 line
+  181 -130 line
+  154 -86 117 -80 90 -80 curve
+  47 -80 10 -103 1 -153 curve
+  6 -197 54 -232 109 -232 curve
+  endchar}

@@ -259,7 +259,7 @@ int var_lookuphmtx(ctlSharedStmCallbacks *sscb, var_hmtx hmtx, unsigned short ax
 
     axisCount - the number of axes.
 
-    instCoords - a pointer to normalized instance coordinates. May be NULL if no blending required.
+    instCoords - a pointer to normalized font instance coordinates. May be NULL if no blending required.
 
     gid - the glyph ID to be looked up.
 
@@ -300,7 +300,7 @@ int var_lookupvmtx(ctlSharedStmCallbacks *sscb, var_vmtx vmtx, unsigned short ax
 
     axisCount - the number of axes.
 
-    instCoords - a pointer to normalized instance coordinates. May be NULL if no blending required.
+    instCoords - a pointer to normalized font instance coordinates. May be NULL if no blending required.
 
     gid - the glyph ID to be looked up.
 
@@ -373,7 +373,7 @@ int var_lookupMVAR(ctlSharedStmCallbacks *sscb, var_MVAR mvar, unsigned short ax
 
     axisCount - the number of axes.
 
-    instCoords - a pointer to normalized instance coordinates. May be NULL if no blending required.
+    instCoords - a pointer to normalized font instance coordinates. May be NULL if no blending required.
 
     tag - the tag of the metric value to be looked up.
 
