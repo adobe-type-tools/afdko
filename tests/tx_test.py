@@ -603,6 +603,6 @@ def test_var_bug_913():
     # underline thickness just to exercize MVAR lookup code.
     font_path = get_input_path('AdobeVFPrototype_mod.otf')
     save_path = get_temp_dir_path('bug913.txt')
-    runner(CMD + ['-3', '-g', 'A,W,y', '-U', '900,0', font_path, save_path])
+    runner(CMD + ['3', 'g', '_A,W,y', 'U', '_900,0', font_path, save_path])
     expected_path = get_expected_path('bug913.txt')
     assert differ([expected_path, save_path])
