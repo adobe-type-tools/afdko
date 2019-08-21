@@ -1622,7 +1622,11 @@ static void assignMacRomanNames(ttrCtx h) {
     /* Convert to Unicode equivalent */
     for (i = 0; i < h->encodings.cnt; i++) {
         Encoding *enc = &h->encodings.array[i];
-        enc->code = macrmn[enc->code];
+        if (enc->code < 256) {
+            enc->code = macrmn[enc->code];
+        } else {
+            enc->code = UV_UNDEF;
+        }
     }
     assignAGLNames(h);
 }
@@ -1982,7 +1986,7 @@ static short glyfReadHdr(ttrCtx h, GID gid) {
     return nContours;
 }
 
-#define GLYF_MAX_COMPONENT_DEPTH 1000 /* this is an arbitrary upper limit, to prevent call stack overflow */
+#define GLYF_MAX_COMPONENT_DEPTH 500 /* this is an arbitrary upper limit, to prevent call stack overflow */
 
 /* Read compound glyph. Header already read. */
 static void glyfReadCompound(ttrCtx h, GID gid, GID *mtx_gid, int depth) {
