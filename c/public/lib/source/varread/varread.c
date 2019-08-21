@@ -1176,7 +1176,7 @@ void var_freehmtx(ctlSharedStmCallbacks *sscb, var_hmtx hmtx) {
     }
 }
 
-int var_lookuphmtx(ctlSharedStmCallbacks *sscb, var_hmtx hmtx, unsigned short axisCount, float *scalars, unsigned short gid, var_glyphMetrics *metrics) {
+int var_lookuphmtx(ctlSharedStmCallbacks *sscb, var_hmtx hmtx, unsigned short axisCount, Fixed *instCoords, unsigned short gid, var_glyphMetrics *metrics) {
     if (!hmtx) {
         sscb->message(sscb, "invalid HVAR table data");
         return 1;
@@ -1190,9 +1190,11 @@ int var_lookuphmtx(ctlSharedStmCallbacks *sscb, var_hmtx hmtx, unsigned short ax
     *metrics = hmtx->defaultMetrics.array[gid];
 
     /* modify the default metrics if the font has variable font tables */
-    if (hmtx->ivs && scalars && (axisCount > 0)) {
+    if (hmtx->ivs && instCoords && (axisCount > 0)) {
         long regionListCount = hmtx->ivs->regionList.regionCount;
+        float scalars[CFF2_MAX_MASTERS];
 
+        var_calcRegionScalars(sscb, hmtx->ivs, &axisCount, instCoords, scalars);
         metrics->width += var_applyDeltasForGid(sscb, hmtx->ivs, &hmtx->widthMap, gid, scalars, regionListCount);
         if (hmtx->lsbMap.offset > 0) /* if side bearing variation data are provided, index map must exist */
             metrics->sideBearing += var_applyDeltasForGid(sscb, hmtx->ivs, &hmtx->lsbMap, gid, scalars, regionListCount);
@@ -1399,7 +1401,7 @@ void var_freevmtx(ctlSharedStmCallbacks *sscb, var_vmtx vmtx) {
     }
 }
 
-int var_lookupvmtx(ctlSharedStmCallbacks *sscb, var_vmtx vmtx, unsigned short axisCount, float *scalars, unsigned short gid, var_glyphMetrics *metrics) {
+int var_lookupvmtx(ctlSharedStmCallbacks *sscb, var_vmtx vmtx, unsigned short axisCount, Fixed *instCoords, unsigned short gid, var_glyphMetrics *metrics) {
     if (!vmtx) {
         sscb->message(sscb, "invalid VVAR table data");
         return 1;
@@ -1413,9 +1415,11 @@ int var_lookupvmtx(ctlSharedStmCallbacks *sscb, var_vmtx vmtx, unsigned short ax
     *metrics = vmtx->defaultMetrics.array[gid];
 
     /* modify the default metrics if the font has variable font tables */
-    if (vmtx->ivs && scalars && (axisCount > 0)) {
+    if (vmtx->ivs && instCoords && (axisCount > 0)) {
         long regionListCount = vmtx->ivs->regionList.regionCount;
+        float scalars[CFF2_MAX_MASTERS];
 
+        var_calcRegionScalars(sscb, vmtx->ivs, &axisCount, instCoords, scalars);
         metrics->width += var_applyDeltasForGid(sscb, vmtx->ivs, &vmtx->widthMap, gid, scalars, regionListCount);
         if (vmtx->tsbMap.offset > 0) /* if side bearing variation data are provided, index map must exist */
             metrics->sideBearing += var_applyDeltasForGid(sscb, vmtx->ivs, &vmtx->tsbMap, gid, scalars, regionListCount);
@@ -1500,18 +1504,19 @@ cleanup:
     return NULL;
 }
 
-int var_lookupMVAR(ctlSharedStmCallbacks *sscb, var_MVAR mvar, unsigned short axisCount, float *scalars, ctlTag tag, float *value) {
+int var_lookupMVAR(ctlSharedStmCallbacks *sscb, var_MVAR mvar, unsigned short axisCount, Fixed *instCoords, ctlTag tag, float *value) {
     long top, bot, index;
     mvarValueRecord *rec = NULL;
     int found = 0;
+    float scalars[CFF2_MAX_MASTERS];
 
     if (!mvar || !mvar->ivs) {
         sscb->message(sscb, "invalid MVAR table data");
         return 1;
     }
 
-    if (scalars == 0 || axisCount == 0) {
-        sscb->message(sscb, "zero scalars/axis count specified for MVAR");
+    if (instCoords == 0 || axisCount == 0) {
+        sscb->message(sscb, "zero instCoords/axis count specified for MVAR");
         return 1;
     }
 
@@ -1534,6 +1539,8 @@ int var_lookupMVAR(ctlSharedStmCallbacks *sscb, var_MVAR mvar, unsigned short ax
         /* Specified tag was not found. */
         return 1;
     }
+
+    var_calcRegionScalars(sscb, mvar->ivs, &axisCount, instCoords, scalars);
 
     /* Blend the metric value using the IVS table */
     *value = var_applyDeltasForIndexPair(sscb, mvar->ivs, &rec->pair, scalars, mvar->ivs->regionList.regionCount);
