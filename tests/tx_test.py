@@ -181,6 +181,14 @@ def test_dump_option(args, font_filename):
     assert differ([expected_path, actual_path] + skip)
 
 
+@pytest.mark.parametrize('fext', ['pfa', 'ufo'])
+def test_dump_flex_op(fext):
+    fname = 'flex'
+    actual_path = runner(CMD + ['-s', '-o', '6', '-f', f'{fname}.{fext}'])
+    expected_path = get_expected_path(f'{fname}.txt')
+    assert differ([expected_path, actual_path])
+
+
 # ----------
 # CFF2 tests
 # ----------
