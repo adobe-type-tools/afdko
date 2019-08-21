@@ -563,7 +563,7 @@ static void glyphFlex(abfGlyphCallbacks *cb, float depth,
                       float x4, float y4,
                       float x5, float y5,
                       float x6, float y6) {
-    char buf[128];
+    char buf[256];
     const size_t bufLen = sizeof(buf);
     buf[0] = 0;
 
@@ -573,8 +573,6 @@ static void glyphFlex(abfGlyphCallbacks *cb, float depth,
     writeReal(buf, bufLen, y2);
     writeReal(buf, bufLen, x3);
     writeReal(buf, bufLen, y3);
-    dumpInstr(cb, "%s", buf);
-    buf[0] = 0;
     writeReal(buf, bufLen, x4);
     writeReal(buf, bufLen, y4);
     writeReal(buf, bufLen, x5);
@@ -584,9 +582,6 @@ static void glyphFlex(abfGlyphCallbacks *cb, float depth,
     writeReal(buf, bufLen, depth);
     STRCAT_S(buf, bufLen, " flex");
     dumpInstr(cb, "%s", buf);
-
-    // dumpInstr(cb, " %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f flex",
-    //     x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, x6, y6, depth);
 }
 
 /* Dump glyph general operator. */
