@@ -148,29 +148,35 @@ def test_convert(from_format, to_format):
 # Dump tests
 # ----------
 
-@pytest.mark.parametrize('args, exp_filename', [
-    ([], 'type1.dump1.txt'),
-    (['0'], 'type1.dump0.txt'),
-    (['dump', '0'], 'type1.dump0.txt'),
-    (['1'], 'type1.dump1.txt'),
-    (['2'], 'type1.dump2.txt'),
-    (['3'], 'type1.dump3.txt'),
-    (['4'], 'type1.dump4.txt'),
-    (['5'], 'type1.dump5.txt'),
-    (['6'], 'type1.dump6.txt'),
-    (['6', 'd'], 'type1.dump6d.txt'),
-    (['6', 'n'], 'type1.dump6n.txt'),
+@pytest.mark.parametrize('args', [
+    [],
+    ['0'],
+    ['dump', '0'],
+    ['1'],
+    ['2'],
+    ['3'],
+    ['4'],
+    ['5'],
+    ['6'],
+    ['6', 'd'],
+    ['6', 'n'],
 ])
-def test_dump(args, exp_filename):
-    if args:
-        args.insert(0, '-o')
-
+@pytest.mark.parametrize('font_filename', ['type1.pfa', 'svg.svg'])
+def test_dump_option(args, font_filename):
     if any([arg in args for arg in ('4', '5', '6')]):
         skip = []
     else:
         skip = ['-s', '## Filename']
 
-    actual_path = runner(CMD + ['-s', '-f', 'type1.pfa'] + args)
+    head = font_filename.split('.')[0]
+    midl = ''.join(args) if args else 'dump1'
+    if 'dump' not in midl:
+        midl = f'dump{midl}'
+    exp_filename = f'{head}.{midl}.txt'
+
+    opts = ['-o'] + args if args else []
+
+    actual_path = runner(CMD + ['-s', '-f', font_filename] + opts)
     expected_path = get_expected_path(exp_filename)
     assert differ([expected_path, actual_path] + skip)
 
