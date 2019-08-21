@@ -7,7 +7,7 @@
 
 # Configuration
 CONFIG = release
-ROOT_DIR = ../../../..
+ROOT_DIR = $(realpath ../../../..)
 OBJECT_DIR = .
 LIB_DIR = $(ROOT_DIR)/makeotf_lib/lib/$(PLATFORM)/$(CONFIG)
 CT_LIB_DIR = $(ROOT_DIR)/../public/lib/lib/$(PLATFORM)/$(CONFIG)
@@ -16,9 +16,8 @@ CFLAGS = $(STD_OPTS)  \
 				-I$(ROOT_DIR)/source/include_files \
 				-I$(ROOT_DIR)/makeotf_lib/api \
 				-I$(ROOT_DIR)/makeotf_lib/resource \
-				-I$(ROOT_DIR)/.../public/lib/api 
+				-I$(realpath $(ROOT_DIR)/.../public/lib/api) \
 				-DMAKEOTFLIB_EXPORTS=1
-
 
 # Program
 PRG_SRCS = \
@@ -51,7 +50,7 @@ PRG_TARGET = $(EXE_DIR)/makeotfexe
 TARGETS = $(PRG_TARGET)
 
 # Standard definitions
-include ../../../../../public/config/linux/gcc/gcc.mak
+include $(realpath ../../../../../public/config/linux/gcc/gcc.mak)
 
 # program rule is in gcc.mak
 

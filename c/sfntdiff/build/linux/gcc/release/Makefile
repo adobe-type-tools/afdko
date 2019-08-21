@@ -4,10 +4,10 @@
 
 # Configuration
 CONFIG = release
-ROOT_DIR = ../../../..
+ROOT_DIR = $(realpath ../../../..)
 OBJECT_DIR = .
 
-CFLAGS = $(STD_OPTS) -I$(ROOT_DIR)/../spot/sfnt_includes
+CFLAGS = $(STD_OPTS) -I$(realpath $(ROOT_DIR)/../spot/sfnt_includes)
 
 # Program
 PRG_SRCS = $(SRC_DIR)/Dmain.c \
@@ -58,7 +58,7 @@ PRG_TARGET = $(EXE_DIR)/sfntdiff
 TARGETS = $(PRG_TARGET)
 
 # Standard definitions
-include ../../../../../public/config/linux/gcc/gcc.mak
+include $(realpath ../../../../../public/config/linux/gcc/gcc.mak)
 
 # Object rules
 $(OBJECT_DIR)/Dda.o: $(SRC_DIR)/Dda.c $(PRG_INCLUDES)

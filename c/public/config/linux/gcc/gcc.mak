@@ -14,14 +14,14 @@ COMPILER = gcc
 SYS_LIBS = -lm
 
 # Directories (relative to build directory)
-CT_LIB_DIR = $(ROOT_DIR)/../public/lib/lib/$(PLATFORM)/$(CONFIG)
+CT_LIB_DIR = $(realpath $(ROOT_DIR)/../public/lib/lib/$(PLATFORM)/$(CONFIG))
 EXE_DIR = $(ROOT_DIR)/exe/$(PLATFORM)/$(CONFIG)
 SRC_DIR = $(ROOT_DIR)/source
 
 
 STD_OPTS = $(XFLAGS)  \
-	-I$(ROOT_DIR)/../public/lib/api \
-	-I$(ROOT_DIR)/../public/lib/resource \
+	-I$(realpath $(ROOT_DIR)/../public/lib/api) \
+	-I$(realpath $(ROOT_DIR)/../public/lib/resource) \
 	 $(SYS_INCLUDES)
 ifneq ($(strip $(OSX)),) # In order to test under Mac OSX, define OSX in the user environment.
 	STD_OPTS += -DOSX=1

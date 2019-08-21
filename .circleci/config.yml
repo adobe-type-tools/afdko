@@ -3,45 +3,54 @@ version: 2
 jobs:
   linux-python3:
     docker:
-      - image: circleci/python:3.6
+      - image: circleci/python:3.7
     environment:
-      CIBW_BUILD: cp37-manylinux1_x86_64
-      CIBW_TEST_REQUIRES: pytest
-      CIBW_TEST_COMMAND: cd {project} && pytest && pip uninstall --yes afdko
+      XFLAGS: --coverage
       PYTHON: python
       PIP: pip
     steps:
       - checkout
       - setup_remote_docker
-      - run: bash .circleci/setup_linux_pyenv.sh
-      - run:  # do static code analysis on commits (but not on tags)
+      - run:
+          name: "Setup Python virtual environment"
+          command: bash .circleci/setup_linux_pyenv.sh
+      - run:
+          name: "Run static code analysis (if it's not a tagged commit)"
           command: |
             if [[ -z $CIRCLE_TAG ]]; then
               bash .circleci/check_source_code.sh
             fi
       - run:
+          name: "Build wheel, run tests, report coverage, and uninstall"
           command: |
             source venv/bin/activate
-            cibuildwheel --output-dir wheelhouse
+            $PYTHON setup.py bdist_wheel
+            $PIP install dist/*.whl
+            $PYTHON -m pytest --cov
+            codecov
+            $PIP uninstall --yes afdko
       # - store_artifacts:
       #     path: wheelhouse/
 
   osx-python3:
     macos:
-      xcode: "10.0.0"
+      xcode: "10.3.0"
     environment:
-      CIBW_BUILD: cp37-macosx_10_6_intel
-      CIBW_TEST_REQUIRES: pytest
-      CIBW_TEST_COMMAND: cd {project} && pytest && pip uninstall --yes afdko
       PYTHON: python3
       PIP: pip3
     steps:
       - checkout
-      - run: bash .circleci/setup_mac_pyenv.sh
       - run:
+          name: "Setup Python virtual environment"
+          command: bash .circleci/setup_mac_pyenv.sh
+      - run:
+          name: "Build wheel, run tests, and uninstall"
           command: |
             source venv/bin/activate
-            cibuildwheel --output-dir wheelhouse
+            $PIP wheel . --no-deps -w dist
+            $PIP install dist/*.whl
+            $PYTHON -m pytest
+            $PIP uninstall --yes afdko
       # - store_artifacts:
       #     path: wheelhouse/
 

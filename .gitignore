@@ -19,6 +19,8 @@ dist/*
 .coverage.*
 htmlcov
 .pytest_cache
+*.gcno
+*.gcda
 
 # ignore the compiled programs
 c/build_all/*

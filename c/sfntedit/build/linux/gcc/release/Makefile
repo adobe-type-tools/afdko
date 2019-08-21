@@ -4,7 +4,7 @@
 
 # Configuration
 CONFIG = release
-ROOT_DIR = ../../../..
+ROOT_DIR = $(realpath ../../../..)
 OBJECT_DIR = .
 
 CFLAGS = $(STD_OPTS) -I$(ROOT_DIR)/../spot/sfnt_includes
@@ -40,7 +40,7 @@ PRG_TARGET = $(EXE_DIR)/sfntedit
 TARGETS = $(PRG_TARGET)
 
 # Standard definitions
-include ../../../../../public/config/linux/gcc/gcc.mak
+include $(realpath ../../../../../public/config/linux/gcc/gcc.mak)
 
 # Object rules
 $(OBJECT_DIR)/Eda.o: $(SRC_DIR)/Eda.c $(PRG_INCLUDES)

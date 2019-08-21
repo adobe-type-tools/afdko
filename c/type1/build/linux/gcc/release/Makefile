@@ -7,7 +7,7 @@
 
 # Configuration
 CONFIG = release
-ROOT_DIR = ../../../..
+ROOT_DIR = $(realpath ../../../..)
 
 CFLAGS = $(STD_OPTS) -g
 
@@ -20,7 +20,7 @@ PRG_TARGET = $(EXE_DIR)/type1
 TARGETS = $(PRG_TARGET)
 
 # Standard definitions
-include ../../../../../public/config/linux/gcc/gcc.mak
+include $(realpath ../../../../../public/config/linux/gcc/gcc.mak)
 
 # Object rules
 type1.o: 
