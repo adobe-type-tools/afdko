@@ -25,13 +25,13 @@ install:
 
 # to run your custom scripts instead of automatic MSBuild
 build_script:
-  - python setup.py bdist_wheel
+  - python setup.py bdist_wheel || EXIT /B 1
   - for %%f in (dist\*.whl) do (set "WHEEL=%%f")
-  - python -m pip install %WHEEL%
+  - python -m pip install %WHEEL% || EXIT /B 1
 
 test_script:
-  - python -m pytest
-  - python -m pip uninstall --yes afdko
+  - python -m pytest || EXIT /B 1
+  - python -m pip uninstall --yes afdko || EXIT /B 1
 
 artifacts:
   # archive the generated packages in the ci.appveyor.com build report
