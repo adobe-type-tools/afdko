@@ -2192,8 +2192,10 @@ static void readCharset(cfrCtx h) {
                         unsigned short id = read2(h);
                         long nLeft = readN(h, size);
                         while (nLeft-- >= 0) {
-                            if (gid >= h->glyphs.cnt)
-                                fatal(h, cfrErrCharsetFmt);
+                            if (gid >= h->glyphs.cnt) {
+                                message(h, "extra mappings in Charset ignored");
+                                break;
+                            }
                             addID(h, gid++, id++);
                         }
                     }
