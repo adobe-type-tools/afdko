@@ -1,0 +1,24 @@
+## glyph[tag] {name,encoding,path}
+glyph[0] {.notdef,-,
+  500 width
+  endchar}
+glyph[1] {exclam,-,
+  450 width
+  0 55 hstem
+  305 356 hstem
+  180 270 vstem
+  100 0 move
+  139 3 178 5 225 5 272 5 311 3 350 0 50 flex
+  350 55 line
+  275 55 line
+  272 94 270 133 270 180 curve
+  270 227 272 266 275 305 curve
+  350 305 line
+  350 356 line
+  311 353 272 351 225 351 178 351 139 353 100 356 50 flex
+  100 305 line
+  175 305 line
+  178 266 180 227 180 180 curve
+  180 133 178 94 175 55 curve
+  100 55 line
+  endchar}

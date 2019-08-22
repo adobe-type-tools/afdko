@@ -167,7 +167,7 @@ static void vmessage(svrCtx h, char *fmt, va_list ap) {
     if (h->stm.dbg == NULL)
         return; /* Debug stream not available */
 
-    vsprintf(text, fmt, ap);
+    vsnprintf(text, BUFSIZ, fmt, ap);
     (void)h->cb.stm.write(&h->cb.stm, h->stm.dbg, strlen(text), text);
 }
 
@@ -322,26 +322,6 @@ static void fillbuf(svrCtx h, long offset) {
     h->src.end = h->src.buf + h->src.length;
 }
 
-static int c(svrCtx h) {
-    if (h->flags & SEEN_END)
-        return 0;
-
-    /* buffer read must be able to contain a full token */
-    if (h->mark && h->mark != h->src.buf) {
-        size_t new_offset = h->src.offset + (h->mark - h->src.buf);
-        h->cb.stm.seek(&h->cb.stm, h->stm.src, new_offset);
-        fillbuf(h, new_offset);
-
-        /* make sure we are still pointing at the beginning of token */
-        h->mark = h->src.buf;
-    }
-    if (h->src.next == h->src.end) {
-        fillbuf(h, h->src.offset + h->src.length);
-    }
-
-    return ((h->flags & SEEN_END) == 0);
-}
-
 static int nextbuf(svrCtx h) {
     if (h->flags & SEEN_END)
         return 0;
@@ -389,7 +369,7 @@ static token *setToken(svrCtx h) {
 
 /* return actual tokens, ignores comments as well */
 static token *getToken(svrCtx h) {
-    char ch;
+    char ch = 0;
     h->mark = NULL;
 
     while (bufferReady(h)) {
@@ -481,10 +461,10 @@ static token *getAttribute(svrCtx h) {
 }
 
 static long getPathLength(svrCtx h) {
-    char ch;
     int startOffset = h->src.offset + (h->src.next - h->src.buf);
     int endOffset;
     while (bufferReady(h)) {
+        char ch;
         ch = *h->src.next;
         if (ch == 0) {
             break;
@@ -503,7 +483,7 @@ static long getPathLength(svrCtx h) {
         } else if (ch == '/' || ch == '"')
             break;
         else
-            ch = *h->src.next++;
+            h->src.next++;
     }
     endOffset = h->src.offset + (h->src.next - h->src.buf);
     return endOffset - startOffset;
@@ -817,19 +797,6 @@ static void doOperator(svrCtx h, token *opToken, abfGlyphCallbacks *glyph_cb) {
 }
 
 /* --------------------- Glyph Processing ----------------------- */
-static void createNotdef(svrCtx h) {
-    unsigned short tag = (unsigned short)h->chars.index.cnt;
-    abfGlyphInfo *chr = dnaNEXT(h->chars.index);
-    chr->flags = 0;
-    chr->tag = tag;
-    chr->gname.ptr = ".notdef";
-    chr->iFD = 0;
-    chr->encoding.code = ABF_GLYPH_UNENC;
-    chr->encoding.next = 0;
-    chr->sup.begin = 0;
-    chr->sup.end = 0;
-}
-
 static void updateGlyphNames(svrCtx h) {
     int i = 0;
     while (i < h->chars.index.cnt) {
@@ -846,8 +813,7 @@ static int parseSVG(svrCtx h) {
     long char_begin;
     long char_end;
     long defaultWidth = 1000;
-    long glyphWidth;
-    char *gname;
+    long glyphWidth = 0;
     unsigned long unicode = ABF_GLYPH_UNENC;
     char tempVal[kMaxName];
     char tempName[kMaxName];
@@ -860,8 +826,6 @@ static int parseSVG(svrCtx h) {
         return svrErrSrcStream;
 
     fillbuf(h, 0);
-
-    // createNotdef(h);
 
     h->metrics.defaultWidth = defaultWidth;
 
@@ -909,7 +873,6 @@ static int parseSVG(svrCtx h) {
 
             state = 2;
             gnameIndex = addString(h, 7, ".notdef");
-            gname = getString(h, gnameIndex);
             addWidth(h, gnameIndex, defaultWidth); /* will set this to a real value later, if the value is supplied. */
             char_begin = 0;
             char_end = 0;
@@ -934,7 +897,7 @@ static int parseSVG(svrCtx h) {
                     unicode = '>';
                     sprintf(tempName, "greater");
                 } else {
-                    int len = tk->length;
+                    size_t len = tk->length;
                     if (len > kMaxName)
                         len = kMaxName - 1;
                     strncpy(tempVal, tk->val, len);
@@ -974,14 +937,12 @@ static int parseSVG(svrCtx h) {
             tk = getToken(h);
             state = 2;
             gnameIndex = addString(h, tk->length, tk->val);
-            gname = getString(h, gnameIndex);
             addWidth(h, gnameIndex, glyphWidth); /* will set this to a real value later, if the value is supplied. */
         } else if (tokenEqualStr(tk, "d=")) {
             if (state == 1) /*No glyph name was supplied. We need to add it.*/
             {
                 state = 2;
                 gnameIndex = addString(h, strlen(tempName), tempName);
-                gname = getString(h, gnameIndex);
                 addWidth(h, gnameIndex, glyphWidth);
             }
             if (state != 2) {
@@ -992,10 +953,9 @@ static int parseSVG(svrCtx h) {
             char_end = char_begin + getPathLength(h);
             state = 3;
         } else if (isUnknownAttribute(tk)) {
-            tk = getToken(h);
+            getToken(h);
             /* discard its value.*/
         } else if (tokenEqualStr(tk, "/>")) {
-            unsigned short tag;
             abfGlyphInfo *chr;
             if (state == 0)
                 continue;
@@ -1009,7 +969,6 @@ static int parseSVG(svrCtx h) {
                     /* It is a non-marking glyph, and we haven't seen a name. Need to save the name. */
                     state = 2;
                     gnameIndex = addString(h, strlen(tempName), tempName);
-                    gname = getString(h, gnameIndex);
                     addWidth(h, gnameIndex, glyphWidth);
                 }
             }
@@ -1018,9 +977,9 @@ static int parseSVG(svrCtx h) {
                 message(h, "duplicate charstring <%s> (discarded)",
                         getString(h, gnameIndex));
             } else {
+                unsigned short tag;
                 tag = (unsigned short)h->chars.index.cnt;
 
-                state = 0;
                 chr->flags = 0;
                 chr->tag = tag;
                 /* note that we do not store gname here; as it is not stable: it is a pointer into the h->string->buf array,
@@ -1130,8 +1089,6 @@ static int readGlyph(svrCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb) 
                 copyToken(tk, &op_tk);
             } break;
             case svrUnknown: {
-                end = tk->val + tk->length;
-                val = strtol(tk->val, &end, 10);
                 fatal(h, svrErrParse, "Encountered unknown operator '%s' in path attribute of glyph '%s'.", gi->gname.ptr);
                 break;
             }
@@ -1158,12 +1115,6 @@ static int readGlyph(svrCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb) 
 static void newStrings(svrCtx h) {
     dnaINIT(h->dna, h->strings.index, 50, 200);
     dnaINIT(h->dna, h->strings.buf, 32000, 6000);
-}
-
-/* Reinitilize strings for new font. */
-static void initStrings(svrCtx h) {
-    h->strings.index.cnt = 0;
-    h->strings.buf.cnt = 0;
 }
 
 /* Free strings. */
@@ -1259,17 +1210,6 @@ static int addChar(svrCtx h, STI sti, Char **chr) {
     return found;
 }
 
-/* Find char by name. NULL if not found else char record. */
-static Char *findChar(svrCtx h, STI sti) {
-    size_t index;
-    if (ctuLookup(getString(h, sti),
-                  h->chars.byName.array, h->chars.byName.cnt,
-                  sizeof(h->chars.byName.array[0]), matchChar, &index, h))
-        return &h->chars.index.array[h->chars.byName.array[index]];
-    else
-        return NULL;
-}
-
 /* ---------------------- Public API -----------------------*/
 
 /* Parse files */
@@ -1322,12 +1262,12 @@ int svrEndFont(svrCtx h) {
 
 int svrIterateGlyphs(svrCtx h, abfGlyphCallbacks *glyph_cb) {
     unsigned short i;
-    int res;
 
     /* Set error handler */
     DURING_EX(h->err.env)
 
     for (i = 0; i < h->chars.index.cnt; i++) {
+        int res;
         res = readGlyph(h, i, glyph_cb);
         if (res != svrSuccess)
             return res;

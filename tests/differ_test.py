@@ -23,13 +23,14 @@ def test_log_level(v_arg):
 
 
 @pytest.mark.parametrize('fname, result', [
-    ('folder1_copy', True),
-    ('folder1_mod', False),
-    ('folder2', False),
+    ('folder_copy', True),
+    ('folder_mod_file', False),
+    ('folder_less_file', False),
+    ('folder_more_file', False),
 ])
 @pytest.mark.parametrize('difmod', [[], ['-m', 'bin']])
 def test_compare_dir_contents(fname, result, difmod):
-    fp1, fp2 = get_input_path('folder1'), get_input_path(fname)
+    fp1, fp2 = get_input_path('folder'), get_input_path(fname)
     assert differ([fp1, fp2] + difmod) is result
 
 
@@ -48,7 +49,7 @@ def test_file_encoding():
 
 
 def test_paths_not_same_kind():
-    fp1, fp2 = get_input_path('file1'), get_input_path('folder1')
+    fp1, fp2 = get_input_path('file1'), get_input_path('folder')
     with pytest.raises(SystemExit) as exc_info:
         differ([fp1, fp2])
     assert exc_info.value.code == 2

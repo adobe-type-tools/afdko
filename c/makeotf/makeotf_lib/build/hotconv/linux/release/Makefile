@@ -44,7 +44,7 @@ LIB_TARGET = $(LIB_DIR)/hotconv.a
 TARGETS = $(LIB_TARGET)
 
 # Standard definitions
-include ../../../standard/linux.mak
+include $(realpath ../../../standard/linux.mak)
 
 # Auto-generated dependencies
 include depend.mak

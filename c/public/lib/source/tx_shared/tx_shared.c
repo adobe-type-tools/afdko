@@ -1448,8 +1448,14 @@ static int CTL_CDECL cef_matchByCID(const void *key, const void *value,
 static int CTL_CDECL cef_cmpByName(const void *first, const void *second,
                                    void *ctx) {
     txCtx h = ctx;
-    return strcmp(h->src.glyphs.array[*(unsigned short *)first]->gname.ptr,
-                  h->src.glyphs.array[*(unsigned short *)second]->gname.ptr);
+    if ((h->src.glyphs.array[*(unsigned short *)first]->gname.ptr == NULL) ||
+        (h->src.glyphs.array[*(unsigned short *)second]->gname.ptr == NULL)) {
+        fatal(h, "missing glyph name");
+        return -1; /* should not reach this line, but it makes Xcode happy */
+    } else {
+        return strcmp(h->src.glyphs.array[*(unsigned short *)first]->gname.ptr,
+                      h->src.glyphs.array[*(unsigned short *)second]->gname.ptr);
+    }
 }
 
 /* Match glyph by its name. */
@@ -1661,7 +1667,11 @@ static void cef_EndFont(txCtx h) {
         for (i = 0; i < h->cef.subset.cnt; i++) {
             cefSubsetGlyph *dst = &h->cef.subset.array[i];
             abfGlyphInfo *src = h->src.glyphs.array[dst->id];
-            dst->uv = mapName2UV(h, src->gname.ptr, &unrec);
+            if (src->gname.ptr != NULL) {
+                dst->uv = mapName2UV(h, src->gname.ptr, &unrec);
+            } else {
+                dst->uv = unrec++;
+            }
         }
 
         /* Decide whether to use name list */
@@ -1880,7 +1890,7 @@ static void mtxGlyphEnd(abfGlyphCallbacks *cb) {
     fprintf(h->dst.stm.fp, "glyph[%hu] {", info->tag);
     if (info->flags & ABF_GLYPH_CID)
         /* Dump CID-keyed glyph */
-        fprintf(h->dst.stm.fp, "%hu,%hhu", info->cid, info->iFD);
+        fprintf(h->dst.stm.fp, "%hu,%hu", info->cid, info->iFD);
     else {
         /* Dump name-keyed glyph */
         abfEncoding *enc = &info->encoding;
@@ -2639,13 +2649,18 @@ static int svg_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
 
     /* Determine (or fabricate) Unicode value for glyph. */
     info->flags |= ABF_GLYPH_UNICODE;
-     if (h->top->sup.flags & ABF_CID_FONT) {
-         if (info->encoding.code == ABF_GLYPH_UNENC) {
+    if (h->top->sup.flags & ABF_CID_FONT) {
+        if (info->encoding.code == ABF_GLYPH_UNENC) {
+            info->encoding.code = h->svw.unrec;
+            h->svw.unrec++;
+        }
+    } else {
+         if (info->gname.ptr != NULL) {
+             info->encoding.code = mapName2UV(h, info->gname.ptr, &h->svw.unrec);
+         } else {
              info->encoding.code = h->svw.unrec;
              h->svw.unrec++;
          }
-     } else {
-         info->encoding.code = mapName2UV(h, info->gname.ptr, &h->svw.unrec);
      }
 
     return svwGlyphCallbacks.beg(cb, info);
@@ -3093,7 +3108,7 @@ static void dumpDICT(txCtx h, const ctlRegion *region) {
     h->dcf.sep = (h->dcf.flags & DCF_BreakFlowed) ? "  " : "";
     bufSeek(h, region->begin);
     while (left > 0) {
-        unsigned char byte = read1(h);
+        uint8_t byte = read1(h);
         left--;
         switch (byte) {
             case cff_version:
@@ -3128,7 +3143,9 @@ static void dumpDICT(txCtx h, const ctlRegion *region) {
                 break;
             case cff_escape: {
                 /* Process escaped operator */
-                unsigned char escop = read1(h);
+                uint8_t escop;
+                CHECK_DICT_BYTES_LEFT(1);
+                escop = read1(h);
                 left--;
                 if (escop > ARRAY_LEN(escopname) - 1)
                     flowOp(h, "reservedESC%d", escop);
@@ -3138,28 +3155,22 @@ static void dumpDICT(txCtx h, const ctlRegion *region) {
             }
             case cff_shortint: {
                 /* 3-byte number */
-                short value = read1(h);
+                uint16_t value;
+                CHECK_DICT_BYTES_LEFT(2);
+                value = read1(h);
                 value = value << 8 | read1(h);
                 left -= 2;
-#if SHRT_MAX > 32767
-                /* short greater that 2 bytes; handle negative range */
-                if (value > 32767)
-                    value -= 65536;
-#endif
                 flowArg(h, "%hd", value);
             } break;
             case cff_longint: {
                 /* 5-byte number */
-                long value = read1(h);
+                int32_t value;
+                CHECK_DICT_BYTES_LEFT(4);
+                value = read1(h);
                 value = value << 8 | read1(h);
                 value = value << 8 | read1(h);
                 value = value << 8 | read1(h);
                 left -= 4;
-#if LONG_MAX > 2147483647
-                /* long greater that 4 bytes; handle negative range */
-                if (value > 2417483647)
-                    value -= 4294967296;
-#endif
                 flowArg(h, "%ld", value);
             } break;
             case cff_BCD: {
@@ -3172,6 +3183,7 @@ static void dumpDICT(txCtx h, const ctlRegion *region) {
                     if (count++ & 1)
                         nibble = byte & 0xf;
                     else {
+                        CHECK_DICT_BYTES_LEFT(1);
                         byte = read1(h);
                         left--;
                         nibble = byte >> 4;
@@ -3189,6 +3201,7 @@ static void dumpDICT(txCtx h, const ctlRegion *region) {
             case 249:
             case 250:
                 /* Positive 2-byte number */
+                CHECK_DICT_BYTES_LEFT(1);
                 flowArg(h, "%d", 108 + 256 * (byte - 247) + read1(h));
                 left--;
                 break;
@@ -3197,6 +3210,7 @@ static void dumpDICT(txCtx h, const ctlRegion *region) {
             case 253:
             case 254:
                 /* Negative 2-byte number */
+                CHECK_DICT_BYTES_LEFT(1);
                 flowArg(h, "%d", -108 - 256 * (byte - 251) - read1(h));
                 left--;
                 break;
@@ -3379,7 +3393,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
         h->dcf.sep = (h->dcf.flags & DCF_BreakFlowed) ? "  " : "";
     bufSeek(h, region->begin);
     while (left > 0) {
-        unsigned char byte = read1(h);
+        uint8_t byte = read1(h);
         left--;
         switch (byte) {
             case tx_reserved0:
@@ -3464,6 +3478,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
                     /* stemcnt is currently number of coordinates; number stems is the number of pairs of coordinates. */
                     long masklen = ((h->dcf.stemcnt / 2) + 7) / 8;
                     flowOp(h, "%s[", opname[byte]);
+                    CHECK_CHARSTRING_BYTES_LEFT(masklen);
                     left -= masklen;
                     while (masklen--)
                         flowAdd(h, "%02X", read1(h));
@@ -3472,7 +3487,9 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
                 }
             case tx_escape: {
                 /* Process escaped operator */
-                unsigned char escop = read1(h);
+                uint8_t escop;
+                CHECK_CHARSTRING_BYTES_LEFT(1);
+                escop = read1(h);
                 left--;
                 if (escop > ARRAY_LEN(escopname) - 1) {
                     flowStack(h);
@@ -3484,15 +3501,11 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
             case t2_shortint:
                 /* 3-byte number */
                 CHKOFLOW(1);
+                CHECK_CHARSTRING_BYTES_LEFT(2);
                 {
-                    short value = read1(h);
+                    int16_t value = read1(h);
                     value = value << 8 | read1(h);
                     left -= 2;
-#if SHRT_MAX > 32767
-                    /* short greater that 2 bytes; handle negative range */
-                    if (value > 32767)
-                        value -= 65536;
-#endif
                     PUSH(value);
                 }
                 continue;
@@ -3502,6 +3515,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
             case 250:
                 /* Positive 2-byte number */
                 CHKOFLOW(1);
+                CHECK_CHARSTRING_BYTES_LEFT(1);
                 PUSH(108 + 256 * (byte - 247) + read1(h));
                 left--;
                 continue;
@@ -3511,23 +3525,20 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
             case 254:
                 /* Negative 2-byte number */
                 CHKOFLOW(1);
+                CHECK_CHARSTRING_BYTES_LEFT(1);
                 PUSH(-108 - 256 * (byte - 251) - read1(h));
                 left--;
                 continue;
             case 255:
                 /* 5-byte number (16.16 fixed) */
                 CHKOFLOW(1);
+                CHECK_CHARSTRING_BYTES_LEFT(4);
                 {
-                    long value = read1(h);
+                    int32_t value = read1(h);
                     value = value << 8 | read1(h);
                     value = value << 8 | read1(h);
                     value = value << 8 | read1(h);
                     left -= 4;
-#if LONG_MAX > 2147483647
-                    /* long greater that 4 bytes; handle negative range */
-                    if (value > 2417483647)
-                        value -= 4294967296;
-#endif
                     PUSH(value / 65536.0);
                 }
                 continue;
@@ -3538,6 +3549,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
                 continue;
         }
     }
+
     if (!inSubr && (h->dcf.flags & DCF_BreakFlowed) &&
         !(h->dcf.flags & DCF_SaveStemCnt)) {
         /* Handle left over args (if any) */
@@ -4804,12 +4816,13 @@ void prepOTF(txCtx h) {
 
     /* Get cmap table */
     table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('c', 'm', 'a', 'p'));
-    if (table == NULL)
+    if (table == NULL) {
         fatal(h, "OTF: can't find cmap");
-
-    /* Force seek */
-    h->src.offset = LONG_MAX;
-    bufSeek(h, table->offset);
+    } else {
+        /* Force seek */
+        h->src.offset = LONG_MAX;
+        bufSeek(h, table->offset);
+    }
 
     /* Read and check version */
     version = read2(h);

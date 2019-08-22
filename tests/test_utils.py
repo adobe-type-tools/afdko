@@ -1,8 +1,8 @@
 import inspect
 import os
-import tempfile
 
 from fontTools.ttLib import TTFont
+from afdko.fdkutils import get_temp_file_path
 
 
 def get_data_dir():
@@ -19,10 +19,8 @@ def get_input_path(file_name):
     return os.path.join(get_data_dir(), 'input', file_name)
 
 
-def get_temp_file_path(directory=None):
-    file_descriptor, path = tempfile.mkstemp(dir=directory)
-    os.close(file_descriptor)
-    return path
+def get_bad_input_path(file_name):
+    return os.path.join(get_data_dir(), 'input', 'bad', file_name)
 
 
 def generate_ttx_dump(font_path, tables=None):

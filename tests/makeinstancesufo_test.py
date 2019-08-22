@@ -1,8 +1,14 @@
+import argparse
 import os
 import pytest
 from shutil import rmtree, copytree
-import subprocess
 
+from afdko.makeinstancesufo import (
+    main as mkinstufo,
+    get_options,
+    _split_comma_sequence,
+    updateInstance,
+)
 from runner import main as runner
 from differ import main as differ
 from test_utils import get_input_path
@@ -56,6 +62,55 @@ def test_options(args, ufo_filename):
     assert differ([expected_path, actual_path])
 
 
+@pytest.mark.parametrize('v_arg', ['', 'v', 'vv', 'vvv'])
+def test_log_level(v_arg):
+    dspath = get_input_path('font.designspace')
+    v_val = len(v_arg)
+    arg = [] if not v_val else [f'-{v_arg}']
+    opts = get_options(['-d', dspath] + arg)
+    assert opts.verbose == v_val
+
+
+@pytest.mark.parametrize('str_seq, lst_seq', [
+    ('10', [10]),
+    ('11,13,19', [11, 13, 19]),
+    ('16,0,13', [0, 13, 16]),
+])
+def test_split_comma_sequence(str_seq, lst_seq):
+    assert _split_comma_sequence(str_seq) == lst_seq
+
+
+@pytest.mark.parametrize('str_seq', ['0,a', '1,-2', '10-10', '5+4', '3*5'])
+def test_split_comma_sequence_error(str_seq):
+    with pytest.raises(argparse.ArgumentTypeError):
+        _split_comma_sequence(str_seq)
+
+
+@pytest.mark.parametrize('filename', [
+    'noaxes', 'nosources', 'nosourcepath', 'badsourcepath',
+    'noinstances', 'noinstancepath', ('badinstanceindex', 2)
+])
+def test_validate_designspace_doc_raise(filename):
+    args = []
+    if isinstance(filename, tuple):
+        filename, idx = filename
+        args = ['-i', f'{idx}']
+    dspath = get_input_path(f'{filename}.designspace')
+    assert mkinstufo(['-d', dspath] + args) == 1
+
+
+@pytest.mark.parametrize('args', [
+    [],  # checkoutlinesufo call
+    ['-c'],  # psautohint call
+])
+def test_update_instance_raise(args):
+    dspath = get_input_path('font.designspace')
+    ufopath = get_input_path('invalid.ufo')
+    opts = get_options(['-d', dspath] + args)
+    with pytest.raises(SystemExit):
+        updateInstance(ufopath, opts)
+
+
 def test_filename_without_dir():
     instance_path = get_input_path('same_dir.ufo')
     assert not os.path.exists(instance_path)
@@ -66,8 +121,9 @@ def test_filename_without_dir():
 
 @pytest.mark.parametrize('args, ufo_filename', [
     (['_0'], 'ufo3regular.ufo'),  # hint/remove overlap/normalize/round
-    (['_1', 'a', 'c', 'n'], 'ufo3medium.ufo'),  # round only
-    (['_2', 'a', '=ufo-version', '_2'], 'ufo3semibold.ufo'),  # no hint UFO v2
+    (['_1'], 'ufo3regular.ufo'),  # for testing instance removal
+    (['_2', 'a', 'c', 'n'], 'ufo3medium.ufo'),  # round only
+    (['_3', 'a', '=ufo-version', '_2'], 'ufo3semibold.ufo'),  # no hint UFO v2
 ])
 def test_ufo3_masters(args, ufo_filename):
     runner(['-t', TOOL, '-o', 'd',
@@ -100,17 +156,3 @@ def test_features_copy(filename):
     # assert the expected results
     for expected_path, actual_path in paths:
         assert differ([expected_path, actual_path])
-
-
-def test_bad_source():
-    with pytest.raises(subprocess.CalledProcessError) as err:
-        runner(['-t', TOOL, '-o', 'd',
-                f'_{get_input_path("badsource.designspace")}'])
-        assert err.value.returncode == 1
-
-
-def test_no_instances():
-    with pytest.raises(subprocess.CalledProcessError) as err:
-        runner(['-t', TOOL, '-o', 'd',
-                f'_{get_input_path("noinstances.designspace")}'])
-        assert err.value.returncode == 1

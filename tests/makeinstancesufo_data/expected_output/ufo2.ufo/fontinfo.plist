@@ -13,7 +13,7 @@
 		<key>familyName</key>
 		<string>Source Serif Pro</string>
 		<key>italicAngle</key>
-		<integer>0</integer>
+		<integer>2</integer>
 		<key>openTypeHheaAscender</key>
 		<integer>1036</integer>
 		<key>openTypeHheaDescender</key>
@@ -81,7 +81,7 @@
 		<key>postscriptBlueFuzz</key>
 		<integer>0</integer>
 		<key>postscriptBlueScale</key>
-		<real>0.0375</real>
+		<real>0.038734</real>
 		<key>postscriptBlueValues</key>
 		<array>
 			<integer>-15</integer>
@@ -139,9 +139,9 @@
 			<integer>95</integer>
 		</array>
 		<key>postscriptUnderlinePosition</key>
-		<integer>-75</integer>
+		<integer>-76</integer>
 		<key>postscriptUnderlineThickness</key>
-		<integer>50</integer>
+		<integer>51</integer>
 		<key>styleName</key>
 		<string>Regular</string>
 		<key>trademark</key>

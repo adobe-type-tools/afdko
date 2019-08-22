@@ -1,21 +1,33 @@
-# coding: utf-8
-
 import os
 import pytest
 from shutil import copy2, copytree, rmtree
 import subprocess
 import sys
-import tempfile
 
 from afdko.makeotf import (
-    checkIfVertInFeature, getOptions, MakeOTFParams, getSourceGOADBData,
-    readOptionFile, writeOptionsFile, kMOTFOptions, kOptionNotSeen,
-    makeRelativePath)
-
+    checkIfVertInFeature,
+    getOptions,
+    MakeOTFParams,
+    getSourceGOADBData,
+    readOptionFile,
+    writeOptionsFile,
+    kMOTFOptions,
+    kOptionNotSeen,
+    makeRelativePath,
+)
+from afdko.fdkutils import (
+    get_temp_file_path,
+    get_temp_dir_path,
+)
+from test_utils import (
+    get_input_path,
+    get_expected_path,
+    get_font_revision,
+    generate_ttx_dump,
+    font_has_table,
+)
 from runner import main as runner
 from differ import main as differ, SPLIT_MARKER
-from test_utils import (get_input_path, get_expected_path, get_font_revision,
-                        get_temp_file_path, generate_ttx_dump, font_has_table)
 
 TOOL = 'makeotf'
 CMD = ['-t', TOOL]
@@ -144,7 +156,7 @@ def test_getSourceGOADBData():
 @pytest.mark.parametrize('input_filename', [
     T1PFA_NAME, UFO2_NAME, UFO3_NAME, CID_NAME])
 def test_path_with_non_ascii_chars_bug222(input_filename):
-    temp_dir = os.path.join(tempfile.mkdtemp(), 'á意ê  ï薨õ 巽ù')
+    temp_dir = get_temp_dir_path('á意ê  ï薨õ 巽ù')
     os.makedirs(temp_dir)
     assert os.path.isdir(temp_dir)
     input_path = get_input_path(input_filename)
@@ -181,7 +193,7 @@ def test_font_with_outdated_hash_bug239():
 def test_ufo_with_trailing_slash_bug280(input_filename):
     # makeotf will now save the OTF alongside the UFO instead of inside of it
     ufo_path = get_input_path(input_filename)
-    temp_dir = tempfile.mkdtemp()
+    temp_dir = get_temp_dir_path()
     tmp_ufo_path = os.path.join(temp_dir, input_filename)
     copytree(ufo_path, tmp_ufo_path)
     runner(CMD + ['-o', 'f', f'_{tmp_ufo_path}{os.sep}'])
@@ -194,7 +206,7 @@ def test_ufo_with_trailing_slash_bug280(input_filename):
 def test_output_is_folder_only_bug281(input_filename):
     # makeotf will output a default-named font to the folder
     input_path = get_input_path(input_filename)
-    temp_dir = tempfile.mkdtemp()
+    temp_dir = get_temp_dir_path()
     expected_path = os.path.join(temp_dir, OTF_NAME)
     assert os.path.exists(expected_path) is False
     runner(CMD + ['-o', 'f', f'_{input_path}',

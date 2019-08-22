@@ -1,0 +1,172 @@
+### Header (00000000-00000003)
+major  =1
+minor  =0
+hdrSize=4
+offSize=2
+### Name INDEX (00000004-00000017)
+--- object[index]={value}
+[0]={SourceSans-Test}
+### Top DICT INDEX (00000018-00000049)
+--- object[index]={value}
+[0]={
+  391 392 1 ROS
+  393 version
+  394 FullName
+  394 FamilyName
+  -150 UnderlinePosition
+  37 -120 971 880 FontBBox
+  5 CIDCount
+  126 charset
+  136 CharStrings
+  130 FDIndex
+  706 FDArray
+}
+### String INDEX (0000004a-0000007b)
+--- object[index]={value}
+[391]={Adobe}
+[392]={Identity}
+[393]={1.0}
+[394]={SourceSans}
+[395]={SourceSans-Test}
+### GlobalSubrINDEX (0000007c-0000007d)
+empty
+### Charset (0000007e-00000081)
+format=1
+--- Range1[index]={first,nLeft}
+[0]={1,3}
+### FDSelect (00000082-00000087)
+format =0
+--- glyph[gid]=fd
+[0]=0
+[1]=2
+[2]=1
+[3]=1
+[4]=2
+### FDArray INDEX (000002c2-000002d8)
+--- object[index]={value}
+[0]={
+  395 FontName
+  23 729 Private
+}
+[1]={
+  25 752 Private
+}
+[2]={
+  27 777 Private
+}
+### CharStrings INDEX (00000088-000002c1)
+--- object[index]={value}
+[0]={
+  100 -120 rmoveto
+  800 1000 -800 hlineto
+  400 -459 rmoveto
+  -318 409 rlineto
+  636 hlineto
+  -286 -450 rmoveto
+  318 409 rlineto
+  -818 vlineto
+  -668 -41 rmoveto
+  318 409 318 -409 rlineto
+  -668 859 rmoveto
+  318 -409 -318 -409 rlineto
+  endchar
+}
+[1]={
+  224 endchar
+}
+[2]={
+  415 211 rmoveto
+  156 -179 -156 hlineto
+  -221 246 rmoveto
+  221 148 -221 vlineto
+  73 427 rmoveto
+  156 -139 -156 hlineto
+  156 -288 rmoveto
+  -156 221 156 hlineto
+  227 hmoveto
+  -221 -156 221 vlineto
+  -467 vmoveto
+  179 156 -33 73 388 -229 139 278 68 -839 -68 261 -139 -218 -391 70 36 148 -179 -290 -68 897 68 vlineto
+  endchar
+}
+[3]={
+  86 -77 rmoveto
+  49 50 17 87 10 83 -54 13 rcurveline
+  -8 -78 -18 -80 -45 -45 rrcurveto
+  156 194 rmoveto
+  11 -59 4 -74 -4 -49 54 7 rcurveline
+  2 49 -5 74 -12 59 rrcurveto
+  36 -6 rmoveto
+  20 -53 17 -70 4 -46 50 11 rcurveline
+  -4 46 -18 70 -21 52 rrcurveto
+  42 -2 rmoveto
+  24 -44 25 -61 9 -39 49 20 rcurveline
+  -10 38 -26 59 -26 44 rrcurveto
+  448 14 rmoveto
+  -69 -106 -146 -67 -178 -32 13 -15 15 -24 8 -17 192 41 152 75 75 125 rrcurveto
+  -153 110 rmoveto
+  -52 -60 -100 -57 -93 -31 14 -12 16 -19 10 -14 99 38 102 62 60 73 rrcurveto
+  -129 122 rmoveto
+  -39 -47 -71 -50 -61 -30 16 -9 17 -16 11 -13 62 34 73 54 45 57 rrcurveto
+  -379 65 rmoveto
+  -81 100 81 hlineto
+  -261 vmoveto
+  -81 103 81 hlineto
+  -212 hmoveto
+  76 -103 -76 hlineto
+  76 261 rmoveto
+  -100 -76 100 vlineto
+  142 164 rmoveto
+  -14 -35 -17 -39 -17 -29 rrcurveto
+  -100 hlineto
+  17 34 16 34 13 35 rrcurveto
+  760 -234 rmoveto
+  63 -281 vlineto
+  11 28 9 30 7 32 -5 1 rcurveline
+  56 3 59 3 59 3 12 -16 10 -16 7 -14 59 32 rcurveline
+  -27 51 -65 66 -58 47 -55 -30 rcurveline
+  24 -20 25 -23 22 -23 -215 -8 rcurveline
+  32 46 34 55 28 49 -76 23 rcurveline
+  -20 -52 -36 -70 -33 -53 -87 -3 rcurveline
+  7 -61 176 8 -7 -31 -10 -29 -11 -28 rlinecurve
+  -155 -63 123 hlineto
+  -37 -63 -49 -51 -60 -38 rrcurveto
+  283 -113 vlineto
+  25 42 25 50 18 45 -43 29 rcurveline
+  -13 -4 rlineto
+  -112 hlineto
+  9 27 8 27 6 26 -68 10 rcurveline
+  -22 -94 -44 -123 -71 -93 16 -8 25 -19 12 -16 10 14 rcurveline
+  -297 332 87 vlineto
+  13 -12 17 -17 7 -10 76 50 61 68 44 87 rrcurveto
+  93 hlineto
+  40 -84 72 -86 69 -45 10 17 22 24 14 11 -59 33 -63 65 -39 65 rrcurveto
+  endchar
+}
+[4]={
+  endchar
+}
+--- FD[0]
+### Private DICT (000002d9-000002ef)
+  -250 0 1350 0 BlueValues
+  40 StdHW
+  40 StdVW
+  40 80 StemSnapH
+  40 80 StemSnapV
+  1000 defaultWidthX
+--- FD[1]
+### Private DICT (000002f0-00000308)
+  -250 0 1350 0 BlueValues
+  58 StdHW
+  63 StdVW
+  58 7 19 StemSnapH
+  63 10 16 StemSnapV
+  1000 defaultWidthX
+--- FD[2]
+### Private DICT (00000309-00000323)
+  -13 13 543 14 176 14 BlueValues
+  -250 21 OtherBlues
+  69 StdHW
+  85 StdVW
+  69 10 9 StemSnapH
+  85 10 16 StemSnapV

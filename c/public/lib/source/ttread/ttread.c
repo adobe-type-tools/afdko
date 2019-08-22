@@ -598,23 +598,19 @@ static void srcRead(ttrCtx h, size_t cnt, char *buf) {
 
 /* Read 1-byte unsigned number. */
 #define read1(h) \
-    ((unsigned char)((h->src.next == h->src.end) ? nextbuf(h) : *h->src.next++))
+    ((uint8_t)((h->src.next == h->src.end) ? nextbuf(h) : *h->src.next++))
 
 /* Read 2-byte unsigned number. */
-static unsigned short read2(ttrCtx h) {
-    unsigned short value = (unsigned short)read1(h) << 8;
-    return value | (unsigned short)read1(h);
+static uint16_t read2(ttrCtx h) {
+    uint16_t value = (uint16_t)read1(h) << 8;
+    return value | (uint16_t)read1(h);
 }
 
 /* Read 2-byte signed number. */
-static short sread2(ttrCtx h) {
-    unsigned short value = (unsigned short)read1(h) << 8;
-    value |= (unsigned short)read1(h);
-#if SHRT_MAX == 32767
-    return (short)value;
-#else
-    return (short)((value > 32767) ? value - 65536 : value);
-#endif
+static int16_t sread2(ttrCtx h) {
+    uint16_t value = (uint16_t)read1(h) << 8;
+    value |= (uint16_t)read1(h);
+    return (int16_t)value;
 }
 
 /* Read 4-byte unsigned number. */
@@ -631,11 +627,7 @@ static int32_t sread4(ttrCtx h) {
     value |= (uint32_t)read1(h) << 16;
     value |= (uint32_t)read1(h) << 8;
     value |= (uint32_t)read1(h);
-#if INT32_MAX == 2147483647
     return (int32_t)value;
-#else
-    return (int32_t)((value > 2417483647) ? value - 4294967296 : value);
-#endif
 }
 
 /* ---------------------------- TrueType Reading --------------------------- */
@@ -675,8 +667,10 @@ readhdr:
 /* Read head table. Must be first table reading function to be called. */
 static void headRead(ttrCtx h) {
     sfrTable *table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('h', 'e', 'a', 'd'));
-    if (table == NULL)
+    if (table == NULL) {
         fatal(h, ttrErrNoHead, NULL);
+        return; /* should not reach this line, but it makes Xcode happy */
+    }
 
     /* Force first read */
     if (h->cb.stm.seek(&h->cb.stm, h->stm.src, table->offset))
@@ -710,8 +704,10 @@ static void headRead(ttrCtx h) {
 /* Read hhea table. */
 static void hheaRead(ttrCtx h) {
     sfrTable *table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('h', 'h', 'e', 'a'));
-    if (table == NULL)
+    if (table == NULL) {
         fatal(h, ttrErrNoHhea, NULL);
+        return; /* should not reach this line, but it makes Xcode happy */
+    }
     srcSeek(h, table->offset);
 
     /* Read and validate table version */
@@ -741,8 +737,10 @@ static void hheaRead(ttrCtx h) {
 /* Read maxp table. */
 static void maxpRead(ttrCtx h) {
     sfrTable *table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('m', 'a', 'x', 'p'));
-    if (table == NULL)
+    if (table == NULL) {
         fatal(h, ttrErrNoMaxp, NULL);
+        return; /* should not reach this line, but it makes Xcode happy */
+    }
     srcSeek(h, table->offset);
 
     /* Read and validate table version */
@@ -771,10 +769,11 @@ static void maxpRead(ttrCtx h) {
 static void locaRead(ttrCtx h) {
     long i;
     Offset begin = 0; /* Suppress optimizer warning */
-    Offset end = 0;   /* Suppress optimizer warning */
     sfrTable *table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('l', 'o', 'c', 'a'));
-    if (table == NULL)
+    if (table == NULL) {
         fatal(h, ttrErrNoLoca, NULL);
+        return; /* should not reach this line, but it makes Xcode happy */
+    }
     srcSeek(h, table->offset);
 
     /* Read first offset */
@@ -791,6 +790,7 @@ static void locaRead(ttrCtx h) {
 
     /* Read offset array (note there are numGlyphs+1 offsets) */
     for (i = 0; i < h->glyphs.cnt; i++) {
+        Offset end;
         end = (h->head.indexToLocFormat == 0) ? 2 * read2(h) : read4(h);
         if (end > begin) {
             abfGlyphInfo *info = &h->glyphs.array[i].info;
@@ -803,21 +803,29 @@ static void locaRead(ttrCtx h) {
 
 /* Read hmtx table. */
 static void hmtxRead(ttrCtx h) {
-    uFWord last;
+    uFWord last = 0;
     Glyph *glyph = NULL; /* Suppress optimizer warning */
     long i;
-    sfrTable *table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('h', 'm', 't', 'x'));
-    if (table == NULL)
+    sfrTable *table;
+
+    if (h->glyphs.cnt ==0)
+        return;
+
+    table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('h', 'm', 't', 'x'));
+    if (table == NULL) {
         fatal(h, ttrErrNoHmtx, NULL);
+        return; /* should not reach this line, but it makes Xcode happy */
+    }
     srcSeek(h, table->offset);
 
     /* Read long horizontal metrics */
-    for (i = 0; i < h->hhea.numberOfLongHorMetrics; i++) {
+    for (i = 0; (i < h->hhea.numberOfLongHorMetrics) && (i < h->glyphs.cnt); i++) {
         glyph = &h->glyphs.array[i];
         glyph->hAdv = read2(h);
         glyph->lsb = sread2(h);
     }
-    last = glyph->hAdv;
+    if (glyph != NULL)
+        last = glyph->hAdv;
 
     /* Read left sidebearings */
     for (; i < h->glyphs.cnt; i++) {
@@ -987,7 +995,6 @@ static void postRead(ttrCtx h) {
         dnaSET_CNT(h->post.fmt2.strings, h->post.fmt2.strings.cnt);
         p = h->post.fmt2.buf.array;
         end = p + length;
-        i = 0;
         for (i = 0; i < h->post.fmt2.strings.cnt; i++) {
             length = *(unsigned char *)p;
             *p++ = '\0';
@@ -1615,7 +1622,11 @@ static void assignMacRomanNames(ttrCtx h) {
     /* Convert to Unicode equivalent */
     for (i = 0; i < h->encodings.cnt; i++) {
         Encoding *enc = &h->encodings.array[i];
-        enc->code = macrmn[enc->code];
+        if (enc->code < 256) {
+            enc->code = macrmn[enc->code];
+        } else {
+            enc->code = UV_UNDEF;
+        }
     }
     assignAGLNames(h);
 }
@@ -1685,7 +1696,7 @@ static void assignNamesAndEncoding(ttrCtx h) {
 
     if (h->post.format == 0x00010000 && h->glyphs.cnt == 258)
         assignPost1Names(h);
-    else
+    else if (h->glyphs.cnt > 0)
         /* Assign ".notdef" to GID 0 */
         assignGlyphNameRef(h, 0, ".notdef");
 
@@ -1721,8 +1732,14 @@ static void addStrPtr(ttrCtx h, abfString *str) {
 static int CTL_CDECL cmpGNames(const void *first, const void *second,
                                void *ctx) {
     ttrCtx h = ctx;
-    return strcmp(h->glyphs.array[*(unsigned short *)first].info.gname.ptr,
-                  h->glyphs.array[*(unsigned short *)second].info.gname.ptr);
+    if ((h->glyphs.array[*(unsigned short *)first].info.gname.ptr == NULL) ||
+        (h->glyphs.array[*(unsigned short *)second].info.gname.ptr == NULL)) {
+        fatal(h, ttrErrBadGlyphData, "missing glyph name");
+        return -1; /* should not reach this line, but it makes Xcode happy */
+    } else {
+        return strcmp(h->glyphs.array[*(unsigned short *)first].info.gname.ptr,
+                      h->glyphs.array[*(unsigned short *)second].info.gname.ptr);
+    }
 }
 
 static STI getFontVersion(ttrCtx h) {
@@ -1908,7 +1925,10 @@ static void glyfReadSimple(ttrCtx h, GID gid, int nContours, int iStart) {
     srcSeek(h, where + 2 + read2(h));
 
     /* Read flags */
-    nPoints = endPts[nContours - 1] + 1 - iStart;
+    if (nContours > 0)
+        nPoints = endPts[nContours - 1] + 1 - iStart;
+    else
+        nPoints = 0;
     if (nPoints > h->maxp.maxPoints)
         fatal(h, ttrErrTooManyPoints,
               "gid[%hu]: max points exceeded (%d > max %d)", gid, nPoints, h->maxp.maxPoints);
@@ -1919,7 +1939,7 @@ static void glyfReadSimple(ttrCtx h, GID gid, int nContours, int iStart) {
         coords[i++].flags = flags;
         if (flags & glyf_REPEAT) {
             unsigned cnt = read1(h);
-            while (cnt--)
+            while ((cnt--) && (i < nPoints))
                 coords[i++].flags = flags;
         }
     }
@@ -1966,10 +1986,12 @@ static short glyfReadHdr(ttrCtx h, GID gid) {
     return nContours;
 }
 
+#define GLYF_MAX_COMPONENT_DEPTH 500 /* this is an arbitrary upper limit, to prevent call stack overflow */
+
 /* Read compound glyph. Header already read. */
 static void glyfReadCompound(ttrCtx h, GID gid, GID *mtx_gid, int depth) {
-    unsigned short flags; /* Control flags */
     for (;;) {
+        unsigned short flags; /* Control flags */
         Offset saveoff;
         int i;
         long iStart;
@@ -2055,7 +2077,12 @@ static void glyfReadCompound(ttrCtx h, GID gid, GID *mtx_gid, int depth) {
             if (depth == h->maxp.maxComponentDepth)
                 message(h, "gid[%hu]: max component depth exceeded (ignored)",
                         gid);
-            glyfReadCompound(h, gid, mtx_gid, ++depth);
+            if (depth >= GLYF_MAX_COMPONENT_DEPTH)
+                fatal(h, ttrErrBadGlyphData,
+                      "gid[%hu]: component depth over %d",
+                      gid, GLYF_MAX_COMPONENT_DEPTH);
+            else
+                glyfReadCompound(h, gid, mtx_gid, ++depth);
         }
 
         if (!translate) {

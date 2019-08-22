@@ -1,0 +1,8 @@
+### Header (00000e08-00000e0c)
+major  =2
+minor  =0
+hdrSize=5
+offSize=0
+tx: --- bug895_charstring.otf
+tx: charstring too short
+tx: fatal error

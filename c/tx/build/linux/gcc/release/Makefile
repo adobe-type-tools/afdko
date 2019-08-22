@@ -7,7 +7,7 @@
 
 # Configuration
 CONFIG = release
-ROOT_DIR = ../../../..
+ROOT_DIR = $(realpath ../../../..)
 OBJECT_DIR = .
 
 CFLAGS = $(STD_OPTS)
@@ -21,7 +21,7 @@ PRG_TARGET = $(EXE_DIR)/tx
 TARGETS = $(PRG_TARGET)
 
 # Standard definitions
-include ../../../../../public/config/linux/gcc/gcc_tx.mak
+include $(realpath ../../../../../public/config/linux/gcc/gcc_tx.mak)
 
 # Object rules
 tx.o:

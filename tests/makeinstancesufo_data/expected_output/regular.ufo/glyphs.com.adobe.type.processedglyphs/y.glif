@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <glyph name="y" format="2">
 	<unicode hex="0079"/>
-	<advance width="512.3164556962"/>
+	<advance width="512"/>
 	<outline>
 		<contour>
 			<point name="hintSet0000" x="91.74" y="-249.26" type="curve"/>
@@ -115,7 +115,7 @@
 					</dict>
 				</array>
 				<key>id</key>
-				<string>ea7cd6cde48af9437534ff76af8acf85cc636835efb048db671cf6dbbf3b8a3d710496495711877704a7b14f7a551cccd1d88f87725f5a9b388d8d2063175dc6</string>
+				<string>8b72155e00d7be99bbfc8a89e73654f7d9f64886da28f7dff78841e4fad9bc5e60e89bdfc0d80516977ef3665cfa331e00d25450697744a755016b468ad4a8ba</string>
 			</dict>
 		</dict>
 	</lib>

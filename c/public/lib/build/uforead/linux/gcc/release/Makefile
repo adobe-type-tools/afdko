@@ -10,7 +10,7 @@ CONFIG = release
 CFLAGS = $(STD_OPTS)
 
 # Library
-ROOT_DIR = ../../../../..
+ROOT_DIR = $(realpath ../../../../..)
 SRC_DIR = $(ROOT_DIR)/source/uforead
 
 LIB_SRCS = $(SRC_DIR)/uforead.c
@@ -21,7 +21,7 @@ LIB_TARGET = $(LIB_DIR)/uforead.a
 TARGETS = $(LIB_TARGET)
 
 # Standard definitions
-include ../../../../../config/linux/gcc/gcc_tx.mak
+include $(realpath ../../../../../config/linux/gcc/gcc_tx.mak)
 
 # Object rules
 uforead.o:

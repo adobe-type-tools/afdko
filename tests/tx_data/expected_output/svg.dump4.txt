@@ -1,0 +1,6 @@
+## glyph[tag] {name,encoding}
+glyph[1] {.notdef,-}
+glyph[2] {a,U+0061}
+glyph[3] {gid00002,U+0020}
+glyph[4] {gid00003,U+E000}
+glyph[5] {gid00004,U+E001}

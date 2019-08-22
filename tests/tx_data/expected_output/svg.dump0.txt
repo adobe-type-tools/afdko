@@ -1,0 +1,7 @@
+## Filename svg.svg
+## Top Dict
+FullName            "SourceSansPro-Regular"
+sup.nGlyphs         5
+## FontDict[0]
+FontName            "SourceSansPro-Regular"
+## Private

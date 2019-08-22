@@ -7,7 +7,7 @@
 
 
 # Add info for coretype libraries.
-LIB_BUILD_DIR = $(ROOT_DIR)/../public/lib/build
+LIB_BUILD_DIR = $(realpath $(ROOT_DIR)/../public/lib/build)
 
 PRG_LIBS = \
 	$(CT_LIB_DIR)/cfembed.a \
@@ -35,7 +35,7 @@ PRG_LIBS = \
 	$(CT_LIB_DIR)/dynarr.a \
 	$(CT_LIB_DIR)/varread.a
 
-include ../../../../../public/config/linux/gcc/gcc.mak
+include $(realpath ../../../../../public/config/linux/gcc/gcc.mak)
 
 $(CT_LIB_DIR)/absfont.a:
 	cd $(LIB_BUILD_DIR)/absfont/$(PLATFORM)/$(COMPILER)/$(CONFIG); $(MAKE) clean; $(MAKE);

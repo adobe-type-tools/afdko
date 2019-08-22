@@ -172,7 +172,8 @@ typedef struct _t_Exc_buf {
 #define HANDLER \
     }           \
     else {      \
-        Exception.Code = _EBP->Code;
+        Exception.Code = _EBP->Code; \
+        Exception.Message = NULL;
 
 #define END_HANDLER \
     }               \

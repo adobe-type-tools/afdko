@@ -1,19 +1,21 @@
-import os
 import pytest
 import subprocess
-import tempfile
 
+from afdko.fdkutils import (
+    get_temp_file_path,
+    get_temp_dir_path,
+)
+from test_utils import (
+    get_input_path,
+    get_bad_input_path,
+    get_expected_path,
+    generate_ps_dump,
+)
 from runner import main as runner
 from differ import main as differ, SPLIT_MARKER
-from test_utils import (get_input_path, get_expected_path, get_temp_file_path,
-                        generate_ps_dump)
 
 TOOL = 'tx'
 CMD = ['-t', TOOL]
-
-
-def _get_temp_dir_path():
-    return tempfile.mkdtemp()
 
 
 def _get_extension(in_format):
@@ -99,7 +101,7 @@ def test_convert(from_format, to_format):
 
     # runner args
     if 'ufo' in to_format:
-        save_path = os.path.join(_get_temp_dir_path(), 'font.ufo')
+        save_path = get_temp_dir_path('font.ufo')
     else:
         save_path = get_temp_file_path()
 
@@ -146,31 +148,45 @@ def test_convert(from_format, to_format):
 # Dump tests
 # ----------
 
-@pytest.mark.parametrize('args, exp_filename', [
-    ([], 'type1.dump1.txt'),
-    (['0'], 'type1.dump0.txt'),
-    (['dump', '0'], 'type1.dump0.txt'),
-    (['1'], 'type1.dump1.txt'),
-    (['2'], 'type1.dump2.txt'),
-    (['3'], 'type1.dump3.txt'),
-    (['4'], 'type1.dump4.txt'),
-    (['5'], 'type1.dump5.txt'),
-    (['6'], 'type1.dump6.txt'),
-    (['6', 'd'], 'type1.dump6d.txt'),
-    (['6', 'n'], 'type1.dump6n.txt'),
+@pytest.mark.parametrize('args', [
+    [],
+    ['0'],
+    ['dump', '0'],
+    ['1'],
+    ['2'],
+    ['3'],
+    ['4'],
+    ['5'],
+    ['6'],
+    ['6', 'd'],
+    ['6', 'n'],
 ])
-def test_dump(args, exp_filename):
-    if args:
-        args.insert(0, '-o')
-
+@pytest.mark.parametrize('font_filename', ['type1.pfa', 'svg.svg'])
+def test_dump_option(args, font_filename):
     if any([arg in args for arg in ('4', '5', '6')]):
         skip = []
     else:
         skip = ['-s', '## Filename']
 
-    actual_path = runner(CMD + ['-s', '-f', 'type1.pfa'] + args)
+    head = font_filename.split('.')[0]
+    midl = ''.join(args) if args else 'dump1'
+    if 'dump' not in midl:
+        midl = f'dump{midl}'
+    exp_filename = f'{head}.{midl}.txt'
+
+    opts = ['-o'] + args if args else []
+
+    actual_path = runner(CMD + ['-s', '-f', font_filename] + opts)
     expected_path = get_expected_path(exp_filename)
     assert differ([expected_path, actual_path] + skip)
+
+
+@pytest.mark.parametrize('fext', ['pfa', 'ufo'])
+def test_dump_flex_op(fext):
+    fname = 'flex'
+    actual_path = runner(CMD + ['-s', '-o', '6', '-f', f'{fname}.{fext}'])
+    expected_path = get_expected_path(f'{fname}.txt')
+    assert differ([expected_path, actual_path])
 
 
 # ----------
@@ -350,8 +366,7 @@ def test_no_psname_convert_to_ufo_bug437(font_format):
 
     font_path = get_input_path(f'{font_format}-noPSname.{file_ext}')
     expected_path = get_expected_path(f'bug437/{font_format}.ufo')
-    save_path = os.path.join(
-        _get_temp_dir_path(), f'{font_format}.ufo')
+    save_path = get_temp_dir_path(f'{font_format}.ufo')
 
     runner(CMD + ['-a', '-o', 'ufo', '-f', font_path, save_path])
     assert differ([expected_path, save_path])
@@ -374,7 +389,7 @@ def test_no_psname_convert_to_type1_bug437(font_format):
 
 def test_illegal_chars_in_glyph_name_bug473():
     font_path = get_input_path('bug473.ufo')
-    save_path = os.path.join(_get_temp_dir_path(), 'bug473.ufo')
+    save_path = get_temp_dir_path('bug473.ufo')
     runner(CMD + ['-a', '-o', 'ufo', '-f', font_path, save_path])
     expected_path = get_expected_path('bug473.ufo')
     assert differ([expected_path, save_path])
@@ -488,7 +503,7 @@ def test_ufo_read_processed_contents_plist_bug740(filename):
 
 
 def test_dcf_with_infinite_recursion_bug775():
-    font_path = get_input_path('subr_test_font_infinite_recursion.otf')
+    font_path = get_bad_input_path('subr_test_font_infinite_recursion.otf')
     dcf_path = get_temp_file_path()
     with pytest.raises(subprocess.CalledProcessError) as err:
         runner(CMD + ['-a', '-o', 'dcf', '-f', font_path, dcf_path])
@@ -529,10 +544,87 @@ def test_svg_missing_fontname_bug883(filename):
 
 
 @pytest.mark.parametrize('option', ['dump', 'dcf'])
-def test_fdselect_format_4(option):
+def test_read_fdselect_format_4(option):
     font_name = 'fdselect4.otf'
-    font_path = get_input_path(font_name)
-    dump_path = get_temp_file_path()
-    runner(CMD + ['-a', '-o', option, '-f', font_path, dump_path])
+    input_path = get_input_path(font_name)
+    output_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', option, '-f', input_path, output_path])
     expected_path = get_expected_path(font_name + '.' + option)
-    assert differ([expected_path, dump_path, '-s', '## Filename'])
+    assert differ([expected_path, output_path, '-s', '## Filename'])
+
+
+def test_write_fdselect_format_4():
+    font_name = 'FDArrayTest257FontDicts.otf'
+    input_path = get_input_path(font_name)
+    output_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', 'cff2', '-f', input_path, output_path])
+    expected_path = get_expected_path('FDArrayTest257FontDicts.cff2')
+    assert differ([expected_path, output_path, '-m', 'bin'])
+
+
+@pytest.mark.parametrize('option', ['cff', 'dcf'])
+@pytest.mark.parametrize('font_name',
+                         ['bug895_charstring.otf', 'bug895_private_dict.otf'])
+def test_read_short_charstring_bug895(option, font_name):
+    input_path = get_bad_input_path(font_name)
+    output_path = runner(CMD + ['-s', '-e', '-a', '-o', option,
+                                '-f', input_path])
+    expected_path = get_expected_path(font_name + '.' + option)
+    skip = ['-s', 'tx: ---']  # skip line with filename
+    assert differ([expected_path, output_path] + skip)
+
+
+@pytest.mark.parametrize('option', ['cff2', 'cff'])
+def test_drop_defaultwidthx_when_writing_cff2_bug897(option):
+    input_path = get_bad_input_path('bug897.otf')
+    output_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', option, '-f', input_path, output_path])
+    dcf_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', 'dcf', '-f', output_path, dcf_path])
+    expected_path = get_expected_path('bug897.' + option + '.dcf')
+    assert differ([expected_path, dcf_path])
+
+
+@pytest.mark.parametrize('option', ['afm', 'svg'])
+def test_missing_glyph_names_pr905(option):
+    input_path = get_bad_input_path('pr905.otf')
+    output_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', option, '-f', input_path, output_path])
+    expected_path = get_expected_path('pr905' + '.' + option)
+    if option == 'afm':
+        skip = ['-s',
+                'Comment Creation Date:' + SPLIT_MARKER + 'Comment Copyright']
+    else:
+        skip = []
+    assert differ([expected_path, output_path] + skip)
+
+
+def test_missing_glyph_names_pr905_cef():
+    input_path = get_bad_input_path('pr905.otf')
+    output_path = get_temp_file_path()
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        runner(CMD + ['-a', '-o', 'cef', '-f', input_path, output_path])
+    assert(err.value.returncode > 0)  # error code, not segfault of -11
+
+
+def test_var_bug_913():
+    # AdobeVFPrototype_mod.otf is a modified copy of AdobeVFPrototype.otf 1.003
+    # so that the region indexes in HVAR are listed in a different order from
+    # those in CFF2. Also MVAR table has been modified to contain (dummy)
+    # deltas for underline offset and underline thickness just to exercize
+    # MVAR lookup code.
+    font_path = get_input_path('AdobeVFPrototype_mod.otf')
+    save_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o',
+                  '3', 'g', '_A,W,y', 'U', '_900,0',
+                  '-f', font_path, save_path])
+    expected_path = get_expected_path('bug913.txt')
+    assert differ([expected_path, save_path, '-s', '## Filename'])
+
+
+def test_bad_charset():
+    font_path = get_bad_input_path('bad_charset.otf')
+    save_path = get_temp_file_path()
+    runner(CMD + ['-a', '-f', font_path, save_path])
+    expected_path = get_expected_path('bad_charset.txt')
+    assert differ([expected_path, save_path, '-s', '## Filename'])

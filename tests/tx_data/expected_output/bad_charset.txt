@@ -1,0 +1,42 @@
+## Filename bad_charset.otf
+## Top Dict
+version             "2.20"
+Notice              "Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries."
+Copyright           "Copyright 2010, 2012, 2014 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name 'Source'."
+FamilyName          "Source Sans Pro"
+UnderlinePosition   -75
+FontBBox            {-454,-293,2159,968}
+FSType              0
+sup.srcFontType     CFF (name-keyed)
+sup.nGlyphs         17
+## FontDict[0]
+FontName            "SourceSansPro-Regular"
+## Private
+BlueValues          {-12,0,486,498,518,530,574,586,638,650,656,668,712,724}
+OtherBlues          {-217,-205}
+FamilyBlues         {-12,0,486,498,518,530,574,586,638,650,656,668,712,724}
+FamilyOtherBlues    {-217,-205}
+BlueScale           0.0625
+BlueFuzz            0
+StdHW               67
+StdVW               84
+StemSnapH           {67,78}
+StemSnapV           {84,95}
+## glyph[tag] {name,encoding}
+glyph[0] {.notdef,-}
+glyph[1] {A,U+0041}
+glyph[2] {B,U+0042}
+glyph[3] {C,U+0043}
+glyph[4] {D,U+0044}
+glyph[5] {E,U+0030}
+glyph[6] {F,U+0031}
+glyph[7] {G,U+0032}
+glyph[8] {H,U+0033}
+glyph[9] {I,-}
+glyph[10] {J,-}
+glyph[11] {K,-}
+glyph[12] {L,-}
+glyph[13] {M,-}
+glyph[14] {N,-}
+glyph[15] {O,-}
+glyph[16] {P,-}

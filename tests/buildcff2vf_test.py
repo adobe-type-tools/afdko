@@ -1,10 +1,14 @@
 import os
 from shutil import copytree
-import tempfile
 
+from afdko.fdkutils import get_temp_dir_path
+from test_utils import (
+    get_input_path,
+    get_expected_path,
+    generate_ttx_dump,
+)
 from runner import main as runner
 from differ import main as differ
-from test_utils import get_input_path, get_expected_path, generate_ttx_dump
 
 TOOL = 'buildcff2vf'
 CMD = ['-t', TOOL]
@@ -16,7 +20,7 @@ CMD = ['-t', TOOL]
 
 def test_rvrn_vf():
     input_dir = get_input_path('GSUBVar')
-    temp_dir = os.path.join(tempfile.mkdtemp(), 'GSUBVar')
+    temp_dir = get_temp_dir_path('GSUBVar')
     copytree(input_dir, temp_dir)
     ds_path = os.path.join(temp_dir, 'GSUBVar.designspace')
     runner(CMD + ['-o', 'd', f'_{ds_path}'])
@@ -29,7 +33,7 @@ def test_rvrn_vf():
 
 def test_cjk_vf():
     input_dir = get_input_path('CJKVar')
-    temp_dir = os.path.join(tempfile.mkdtemp(), 'CJKVar')
+    temp_dir = get_temp_dir_path('CJKVar')
     copytree(input_dir, temp_dir)
     ds_path = os.path.join(temp_dir, 'CJKVar.designspace')
     runner(CMD + ['-o', 'd', f'_{ds_path}'])
@@ -45,7 +49,7 @@ def test_sparse_cjk_vf():
     # Check compatibility. Issue is in cid00089.
     # keep PostScript names
     input_dir = get_input_path('CJKSparseVar')
-    temp_dir = os.path.join(tempfile.mkdtemp(), 'CJKSparseVar')
+    temp_dir = get_temp_dir_path('CJKSparseVar')
     copytree(input_dir, temp_dir)
     ds_path = os.path.join(temp_dir, 'SHSansJPVFTest.designspace')
     subset_path = os.path.join(temp_dir, 'SHSansJPVFTest.subset.txt')
@@ -59,7 +63,7 @@ def test_sparse_cjk_vf():
 
 def test_compatibility_vf():
     input_dir = get_input_path('bug816')
-    temp_dir = os.path.join(tempfile.mkdtemp(), 'bug816var')
+    temp_dir = get_temp_dir_path('bug816var')
     copytree(input_dir, temp_dir)
     ds_path = os.path.join(temp_dir, 'bug816.designspace')
     runner(CMD + ['-o', 'c', 'd', f'_{ds_path}'])
@@ -71,7 +75,7 @@ def test_compatibility_vf():
 
 def test_subset_vf():
     input_dir = get_input_path('bug817')
-    temp_dir = os.path.join(tempfile.mkdtemp(), 'bug817var')
+    temp_dir = get_temp_dir_path('bug817var')
     copytree(input_dir, temp_dir)
     ds_path = os.path.join(temp_dir, 'bug817.designspace')
     subset_path = os.path.join(temp_dir, 'bug817.subset')

@@ -23,11 +23,14 @@ from ufonormalizer import normalizeUFO
 from ufoProcessor import build as ufoProcessorBuild
 
 from afdko.checkoutlinesufo import run as checkoutlinesUFO
-from afdko.fdkutils import get_temp_file_path
+from afdko.fdkutils import (
+    get_temp_file_path,
+    validate_path,
+)
 from afdko.ufotools import validateLayers
 
 
-__version__ = '2.3.3'
+__version__ = '2.4.1'
 
 logger = logging.getLogger(__name__)
 
@@ -62,9 +65,7 @@ def filterDesignspaceInstances(dsDoc, options):
         )
 
         if os.path.exists(instance.path):
-            glyphDir = os.path.join(instance.path, "glyphs")
-            if os.path.exists(glyphDir):
-                shutil.rmtree(glyphDir, ignore_errors=True)
+            shutil.rmtree(instance.path, ignore_errors=True)
 
         filteredInstances.append(instance)
 
@@ -75,7 +76,7 @@ def filterDesignspaceInstances(dsDoc, options):
     return tmpPath
 
 
-def updateInstance(options, fontInstancePath):
+def updateInstance(fontInstancePath, options):
     """
     Run checkoutlinesufo and psautohint, unless explicitly suppressed.
     """
@@ -87,7 +88,7 @@ def updateInstance(options, fontInstancePath):
             co_args.insert(0, '-d')
         try:
             checkoutlinesUFO(co_args)
-        except Exception:
+        except (Exception, SystemExit):
             raise
 
     if options.doAutoHint:
@@ -97,7 +98,7 @@ def updateInstance(options, fontInstancePath):
             ah_args.insert(0, '-d')
         try:
             psautohint(ah_args)
-        except Exception:
+        except (Exception, SystemExit):
             raise
 
 
@@ -133,17 +134,13 @@ def roundSelectedFontInfo(fontInfo):
 
         if isinstance(prop_val, float):
 
-            if prop_name == "postscriptBlueScale":
-                # round to 6 places
-                round_val = round(prop_val * 1000000) / 1000000.0
+            if prop_name == 'postscriptBlueScale':
+                round_val = round(prop_val, 6)
 
             elif prop_name in ('postscriptBlueFuzz', 'postscriptBlueShift',
                                'postscriptSlantAngle'):
-                # round to 2 places
-                round_val = round(prop_val * 100) / 100.0
-
+                round_val = round(prop_val, 2)
             else:
-                # simple round, and convert to integer
                 round_val = int(round(prop_val))
 
             if (round_val == prop_val) and (prop_val % 1 == 0):
@@ -159,39 +156,45 @@ def roundSelectedFontInfo(fontInfo):
 
             for i, val in enumerate(prop_val):
                 if isinstance(val, float):
-                    # round to 2 places
-                    prop_val[i] = round(val * 100) / 100.0
+                    prop_val[i] = round(val, 2)
 
 
-def roundSelectedValues(dFont):
-    """
-    Glyph widths, kern values, and selected FontInfo values must be rounded,
-    as these are stored in the final OTF as ints.
-    """
-    roundSelectedFontInfo(dFont.info)
+def roundPostscriptBlueScale(fontInfo):
+    psbs_str = 'postscriptBlueScale'
+    psbs_val = getattr(fontInfo, psbs_str, None)
+    if psbs_val:
+        setattr(fontInfo, psbs_str, round(psbs_val, 6))
 
-    # round widths
+
+def roundGlyphWidths(dFont):
     for dGlyph in dFont:
-        rval = dGlyph.width
-        ival = int(round(rval))
-        if ival != rval:
-            dGlyph.width = ival
+        dGlyph.width = int(round(dGlyph.width))
 
-    # round kern values, if any
+
+def roundKerningValues(dFont):
     if dFont.kerning:
         keys = dFont.kerning.keys()
         for key in keys:
-            rval = dFont.kerning[key]
-            ival = int(round(rval))
-            if ival != rval:
-                dFont.kerning[key] = ival
+            dFont.kerning[key] = int(round(dFont.kerning[key]))
 
 
 def postProcessInstance(fontPath, options):
     dFont = Font(fontPath)
     clearCustomLibs(dFont)
-    if not options.no_round:
-        roundSelectedValues(dFont)
+
+    if options.no_round:
+        # '-r/--no-round' option was used but certain values (glyph widths,
+        # kerning values, font info values) still need to be rounded because
+        # of how they are stored in the final OTF
+        roundSelectedFontInfo(dFont.info)
+        roundGlyphWidths(dFont)
+        roundKerningValues(dFont)
+    else:
+        # ufoProcessor does not round kerning values nor postscriptBlueScale
+        # when 'roundGeometry' = False
+        roundPostscriptBlueScale(dFont.info)
+        roundKerningValues(dFont)
+
     dFont.save()
 
 
@@ -223,6 +226,17 @@ def validateDesignspaceDoc(dsDoc, dsoptions, **kwArgs):
             "Designspace file contains no instances."
         )
 
+    for i, inst in enumerate(dsDoc.instances):
+        if dsoptions.indexList and i not in dsoptions.indexList:
+            continue
+        for attr_name in ('familyName', 'postScriptFontName', 'styleName'):
+            if getattr(inst, attr_name, None) is None:
+                logger.warning(
+                    f"Instance at index {i} has no '{attr_name}' attribute.")
+        if inst.path is None:
+            raise DesignSpaceDocumentError(
+                f"Instance at index {i} has no 'filename' attribute.")
+
 
 def collect_features_content(instances, inst_idx_lst):
     """
@@ -234,8 +248,6 @@ def collect_features_content(instances, inst_idx_lst):
         if inst_idx_lst and i not in inst_idx_lst:
             continue
         ufo_pth = inst_dscrpt.path
-        if ufo_pth is None:
-            continue
         ufo_pth = os.path.abspath(os.path.realpath(ufo_pth))
         fea_pth = os.path.join(ufo_pth, FEATURES_FILENAME)
         if os.path.isfile(fea_pth):
@@ -303,7 +315,7 @@ def run(options):
         # Apply autohint and checkoutlines, if requested.
         for instancePath in newInstancesList:
             # make new instance font.
-            updateInstance(options, instancePath)
+            updateInstance(instancePath, options)
 
     # checkoutlinesufo does ufotools.validateLayers()
     if not options.doOverlapRemoval:
@@ -323,14 +335,6 @@ def run(options):
     for fea_pth, fea_cntnts in features_store.items():
         with open(fea_pth, 'w') as fp:
             fp.write(fea_cntnts)
-
-
-def _validate_path(path_str):
-    valid_path = os.path.abspath(os.path.realpath(path_str))
-    if not os.path.exists(valid_path):
-        raise argparse.ArgumentTypeError(
-            f"'{path_str}' is not a valid path.")
-    return valid_path
 
 
 def _split_comma_sequence(comma_str):
@@ -372,7 +376,7 @@ def get_options(args):
         '--designspace',
         metavar='PATH',
         dest='dsPath',
-        type=_validate_path,
+        type=validate_path,
         default=DFLT_DESIGNSPACE_FILENAME,
         help='path to design space file\n'
              "Default file name is '%(default)s'"

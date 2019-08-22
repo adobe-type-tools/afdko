@@ -27,11 +27,11 @@
 #include <ctype.h>
 
 /* Predefined encodings */
-static const unsigned char stdenc[] =
+static const uint8_t stdenc[] =
     {
 #include "stdenc0.h"
 };
-static const unsigned char exenc[] =
+static const uint8_t exenc[] =
     {
 #include "exenc0.h"
 };
@@ -53,7 +53,7 @@ static char *applestd[258] =
 
 #define ARRAY_LEN(t) (sizeof(t) / sizeof((t)[0]))
 
-typedef unsigned char OffSize; /* Offset size indicator */
+typedef uint8_t OffSize; /* Offset size indicator */
 typedef long Offset;           /* 1, 2, 3, or 4-byte offset */
 typedef unsigned short SID;    /* String identifier */
 #define SID_SIZE 2             /* SID byte size */
@@ -124,9 +124,9 @@ struct cfrCtx_ /* Context */
     cfrSingleRegions region;
     struct /* CFF header */
     {
-        unsigned char major;
-        unsigned char minor;
-        unsigned char hdrSize;
+        uint8_t major;
+        uint8_t minor;
+        uint8_t hdrSize;
         OffSize offSize;
     } header;
     struct /* INDEXes */
@@ -222,11 +222,10 @@ static void setupSharedStream(cfrCtx h);
 /* Write message to debug stream from va_list. */
 static void vmessage(cfrCtx h, char *fmt, va_list ap) {
     char text[500];
-    const size_t textLen = sizeof(text);
     if (h->stm.dbg == NULL)
         return; /* Debug stream not available */
 
-    VSPRINTF_S(text, textLen, fmt, ap);
+    VSPRINTF_S(text, sizeof(text), fmt, ap);
     (void)h->cb.stm.write(&h->cb.stm, h->stm.dbg, strlen(text), text);
 }
 
@@ -249,12 +248,12 @@ static void fatal(cfrCtx h, int err_code) {
 /* Allocate memory. */
 static void *memNew(cfrCtx h, size_t size) {
     void *ptr = h->cb.mem.manage(&h->cb.mem, NULL, size);
-    if (ptr == NULL)
+    if (ptr == NULL) {
         fatal(h, cfrErrNoMemory);
-
-    /* Safety initialization */
-    memset(ptr, 0, size);
-
+    } else {
+        /* Safety initialization */
+        memset(ptr, 0, size);
+    }
     return ptr;
 }
 
@@ -568,9 +567,11 @@ readhdr:
                     if (table == NULL) {
                         table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('C', 'F', 'F', '2'));
                     }
-                    if (table == NULL)
+                    if (table == NULL) {
                         fatal(h, cfrErrNoCFF);
-                    origin = table->offset;
+                    } else {
+                        origin = table->offset;
+                    }
 
                     /* Try to read OS/2.fsType */
                     table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('O', 'S', '/', '2'));
@@ -616,6 +617,13 @@ readhdr:
 #define CHKOFLOW(n)                                                              \
     do                                                                           \
         if (h->stack.cnt + (n) > h->top.maxstack) fatal(h, cfrErrStackOverflow); \
+    while (0)
+
+/* Check that dict has enough bytes left. */
+#define CHECK_DICT_BYTES_LEFT(n)            \
+    do                                      \
+        if ((srcTell(h) + n) > region->end) \
+            fatal(h, cfrErrSrcStream);      \
     while (0)
 
 /* Stack access without check. */
@@ -720,7 +728,7 @@ static void saveMatrix(cfrCtx h, int topdict) {
 }
 
 /* Convert BCD number to double. */
-static double convBCD(cfrCtx h) {
+static double convBCD(cfrCtx h, ctlRegion *region) {
     double result;
     char *p;
     char buf[64];
@@ -735,6 +743,7 @@ static double convBCD(cfrCtx h) {
         if (count++ & 1)
             nibble = byte & 0xf;
         else {
+            CHECK_DICT_BYTES_LEFT(1);
             byte = read1(h);
             nibble = byte >> 4;
         }
@@ -870,8 +879,7 @@ static void saveDeltaArray(cfrCtx h, size_t max, long *cnt, float *array, long *
      values from a blend operation will be copied into a single blendArray entry.
      */
 
-    int i, j, k, bi;
-    int numBlends;
+    int i;
 
     if (h->stack.cnt == 0 || h->stack.cnt > (long)max)
         fatal(h, cfrErrDICTArray);
@@ -885,10 +893,13 @@ static void saveDeltaArray(cfrCtx h, size_t max, long *cnt, float *array, long *
     if (!hasBlend(h)) {
         *blendCnt = 0; /* show that there are no blended values - the regular array should be used. */
     } else {
+        int j, k, bi;
         float lastValue = 0;
 
         i = j = k = bi = 0;
         while (i < h->stack.cnt) {
+            int numBlends;
+
             abfOpEntry *blendEntry = &blendArray[bi];
 
             stack_elem *stackEntry = &(INDEX(i));
@@ -939,7 +950,6 @@ static void saveDeltaArray(cfrCtx h, size_t max, long *cnt, float *array, long *
 
 static void saveBlend(cfrCtx h, float *realValue, abfOpEntry *blendEntry) {
     /* Save a value that may be blended. Stack depth is 1 for a non-blended value, or numBlends for a blended value. */
-    int i;
     int numBlends;
 
     stack_elem *stackEntry = &(INDEX(0));
@@ -952,6 +962,7 @@ static void saveBlend(cfrCtx h, float *realValue, abfOpEntry *blendEntry) {
         blendEntry->numBlends = 0; /* shows there is no blend value, and the regular value shoud be used instead. */
         blendEntry->blendValues = NULL;
     } else {
+        int i;
         float defaultValue;
         signed int numRegions = h->stack.numRegions;
         unsigned short numBlendValues = (unsigned short)(numBlends + numRegions);
@@ -997,11 +1008,6 @@ static int setNumMasters(cfrCtx h, unsigned short vsindex) {
 }
 
 /* -------------------------------- VarStore ------------------------------- */
-
-static float AxisCoord2Real(short val) {
-    float newVal = (float)((val >> 14) + ((val & 0x3fff) / 16384.0));
-    return newVal;
-}
 
 static void readVarStore(cfrCtx h) {
     unsigned short length;
@@ -1110,7 +1116,9 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
         h->stack.numRegions = priv->numRegions = setNumMasters(h, priv->vsindex);
     }
     while (srcTell(h) < region->end) {
-        int byte0 = read1(h);
+        int byte0;
+        CHECK_DICT_BYTES_LEFT(1);
+        byte0 = read1(h);
         switch (byte0) {
             case cff_vsindex:
                 priv->vsindex = (unsigned short)INDEX_INT(0);
@@ -1192,6 +1200,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
                 break;
             case cff_escape:
                 /* Process escaped operator */
+                CHECK_DICT_BYTES_LEFT(1);
                 byte0 = read1(h);
                 switch (cff_ESC(byte0)) {
                     case cff_Copyright:
@@ -1424,7 +1433,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
             case cff_maxstack:
                 CHKUFLOW(1);
                 /* deprecated April 2017.
-                   top->maxstack = (unsigned short)INDEX_INT(0); */
+                   top->maxstack = (uint16_t)INDEX_INT(0); */
                 break;
             case cff_Subrs:
                 CHKUFLOW(1);
@@ -1442,20 +1451,17 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
             case cff_shortint:
                 /* 3 byte number */
                 CHKOFLOW(1);
+                CHECK_DICT_BYTES_LEFT(2);
                 {
-                    short value = read1(h);
+                    uint16_t value = read1(h);
                     value = value << 8 | read1(h);
-#if SHRT_MAX > 32767
-                    /* short greater that 2 bytes; handle negative range */
-                    if (value > 32767)
-                        value -= 65536;
-#endif
                     PUSH_INT(value);
                 }
                 continue;
             case cff_longint:
                 /* 5 byte number */
                 CHKOFLOW(1);
+                CHECK_DICT_BYTES_LEFT(4);
                 {
                     int32_t value = read1(h);
                     value = value << 8 | read1(h);
@@ -1466,7 +1472,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
                 continue;
             case cff_BCD:
                 CHKOFLOW(1);
-                PUSH_REAL((float)convBCD(h));
+                PUSH_REAL((float)convBCD(h, region));
                 continue;
             case cff_blend:
                 if (h->stack.numRegions == 0) {
@@ -1486,6 +1492,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
             case 250:
                 /* Positive 2 byte number */
                 CHKOFLOW(1);
+                CHECK_DICT_BYTES_LEFT(1);
                 PUSH_INT(108 + 256 * (byte0 - 247) + read1(h));
                 continue;
             case 251:
@@ -1494,6 +1501,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
             case 254:
                 /* Negative 2 byte number */
                 CHKOFLOW(1);
+                CHECK_DICT_BYTES_LEFT(1);
                 PUSH_INT(-108 - 256 * (byte0 - 251) - read1(h));
                 continue;
             case cff_reserved26:
@@ -1607,15 +1615,6 @@ static void readINDEX(cfrCtx h, ctlRegion *region, INDEX *index) {
         fatal(h, cfrErrINDEXOffset);
 }
 
-static void readTopDataAsIndex(cfrCtx h, ctlRegion *region, INDEX *index) {
-    srcSeek(h, region->begin);
-    index->count = 1;
-    index->offset = region->begin; /* Get offset array base */
-    index->offSize = 0;
-    index->data = region->end;
-    srcSeek(h, region->end);
-}
-
 /* Get an element (offset and length) from INDEX structure. */
 static void INDEXGet(cfrCtx h, INDEX *index,
                      unsigned element, ctlRegion *region) {
@@ -1705,7 +1704,7 @@ static void readFDArray(cfrCtx h) {
     if (h->region.FDArrayINDEX.begin == -1)
         fatal(h, cfrErrNoFDArray);
     readINDEX(h, &h->region.FDArrayINDEX, &h->index.FDArray);
-    if (h->index.FDArray.count < 1 || h->index.FDArray.count > 256)
+    if (h->index.FDArray.count < 1 || h->index.FDArray.count > 65536)
         fatal(h, cfrErrBadFDArray);
 
     /* Read FDArray */
@@ -1874,14 +1873,10 @@ static void addID(cfrCtx h, long gid, unsigned short id) {
 }
 
 /* Read 2-byte signed number. */
-static short sread2(cfrCtx h) {
-    unsigned short value = (unsigned short)read1(h) << 8;
-    value |= (unsigned short)read1(h);
-#if SHRT_MAX == 32767
-    return (short)value;
-#else
-    return (short)((value > 32767) ? value - 65536 : value);
-#endif
+static int16_t sread2(cfrCtx h) {
+    uint16_t value = (uint16_t)read1(h) << 8;
+    value |= (uint16_t)read1(h);
+    return (int16_t)value;
 }
 
 /* Read 4-byte unsigned number. */
@@ -2018,9 +2013,8 @@ static void postRead(cfrCtx h) {
     dnaSET_CNT(h->post.fmt2.strings, strCount);
     p = h->post.fmt2.buf.array;
     end = p + length;
-    i = 0;
     for (i = 0; i < h->post.fmt2.strings.cnt; i++) {
-        length = *(unsigned char *)p;
+        length = *(uint8_t *)p;
         *p++ = '\0';
         h->post.fmt2.strings.array[i] = p;
         p += length;
@@ -2049,11 +2043,11 @@ static void MVARread(cfrCtx h) {
     abfTopDict *top = &h->top;
     float thickness, position;
 
-    if (!var_lookupMVAR(&h->cb.shstm, h->cff2.mvar, h->cff2.axisCount, h->cff2.scalars, MVAR_unds_tag, &thickness)) {
+    if (!var_lookupMVAR(&h->cb.shstm, h->cff2.mvar, h->cff2.axisCount, h->cff2.ndv, MVAR_unds_tag, &thickness)) {
         top->UnderlineThickness += thickness;
         top->UnderlinePosition -= thickness / 2;
     }
-    if (!var_lookupMVAR(&h->cb.shstm, h->cff2.mvar, h->cff2.axisCount, h->cff2.scalars, MVAR_undo_tag, &position)) {
+    if (!var_lookupMVAR(&h->cb.shstm, h->cff2.mvar, h->cff2.axisCount, h->cff2.ndv, MVAR_undo_tag, &position)) {
         top->UnderlinePosition += position;
     }
 }
@@ -2071,13 +2065,14 @@ static void predefCharset(cfrCtx h, int cnt, const SID *charset) {
 }
 
 static void readCharSetFromPost(cfrCtx h) {
-    Offset offset;
-    unsigned long i;
     long gid;
     char *p;
     long lenStrings = ARRAY_LEN(stdstrs);
 
     if (!(h->flags & CFR_IS_CFF2)) {
+        Offset offset;
+        unsigned long i;
+
         /* init string.offsets and h->string.ptrs */
         h->index.string.count = (short)h->glyphs.cnt;
         dnaSET_CNT(h->string.offsets, h->index.string.count + 1);
@@ -2197,8 +2192,10 @@ static void readCharset(cfrCtx h) {
                         unsigned short id = read2(h);
                         long nLeft = readN(h, size);
                         while (nLeft-- >= 0) {
-                            if (gid >= h->glyphs.cnt)
-                                fatal(h, cfrErrCharsetFmt);
+                            if (gid >= h->glyphs.cnt) {
+                                message(h, "extra mappings in Charset ignored");
+                                break;
+                            }
                             addID(h, gid++, id++);
                         }
                     }
@@ -2271,7 +2268,7 @@ static void encListFree(cfrCtx h, abfEncoding *node) {
 }
 
 /* Initialize from predefined encoding */
-static void predefEncoding(cfrCtx h, int cnt, const unsigned char *encoding) {
+static void predefEncoding(cfrCtx h, int cnt, const uint8_t *encoding) {
     long gid;
     for (gid = 0; gid < h->glyphs.cnt; gid++) {
         abfGlyphInfo *info = &h->glyphs.array[gid];
@@ -2417,7 +2414,7 @@ static float cff2GetWidth(cff2GlyphCallbacks *cb, unsigned short gid) {
     cfrCtx h = (cfrCtx)cb->direct_ctx;
     var_glyphMetrics metrics;
 
-    if (!var_lookuphmtx(&h->cb.shstm, h->cff2.hmtx, h->cff2.axisCount, h->cff2.scalars, gid, &metrics)) {
+    if (!var_lookuphmtx(&h->cb.shstm, h->cff2.hmtx, h->cff2.axisCount, h->cff2.ndv, gid, &metrics)) {
         return metrics.width;
     }
 
@@ -2495,8 +2492,6 @@ static long generateInstancePSName(cfrCtx h, char *nameBuffer, long nameBufferLe
 static void makeupCFF2Info(cfrCtx h) {
     abfTopDict *top = &h->top;
     sfrTable *table;
-    char buf[64];
-    const size_t bufLen = sizeof(buf);
     long lenFontName;
     char postscriptName[LONG_PS_NAME_LIMIT + 1];
     char stringBuffer1[STRING_BUFFER_LIMIT + 1];
@@ -2512,12 +2507,13 @@ static void makeupCFF2Info(cfrCtx h) {
     /* read font version and fontBBox from head table */
     table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('h', 'e', 'a', 'd'));
     if ((table != NULL) && !invalidStreamOffset(h, table->offset + 54 - 1)) {
+        char buf[64];
         unsigned long version;
         unsigned short unitsPerEm;
 
         srcSeek(h, table->offset + 4);
         version = read4(h);
-        SPRINTF_S(buf, bufLen, "%ld.%ld", version >> 16, (version >> 12) & 0xf); /* Apple style "fixed point" version number */
+        SPRINTF_S(buf, sizeof(buf), "%ld.%ld", version >> 16, (version >> 12) & 0xf); /* Apple style "fixed point" version number */
         addString(h, &strPtrs, &top->version, buf);
 
         srcSeek(h, table->offset + 18);
@@ -2874,7 +2870,6 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
 static void readGlyph(cfrCtx h,
                       unsigned short gid, abfGlyphCallbacks *glyph_cb) {
     int result;
-    long flags = h->flags;
     abfGlyphInfo *info = &h->glyphs.array[gid];
     t2cAuxData *aux = &h->FDArray.array[info->iFD].aux;
     cff2GlyphCallbacks *cff2_cb = NULL;
@@ -3131,8 +3126,8 @@ int cfrGetWidths(cfrCtx h, int iFD,
 }
 
 /* Return table mapping standard encoding and glyph index. */
-const unsigned char *cfrGetStdEnc2GIDMap(cfrCtx h) {
-    return (unsigned char *)h->stdEnc2GID;
+const uint8_t *cfrGetStdEnc2GIDMap(cfrCtx h) {
+    return (uint8_t *)h->stdEnc2GID;
 }
 
 /* Finish reading font. */
@@ -3175,15 +3170,15 @@ static void sharedSrcRead(ctlSharedStmCallbacks *h, size_t count, char *ptr) {
     srcRead((cfrCtx)h->direct_ctx, count, ptr);
 }
 
-static unsigned char sharedSrcRead1(ctlSharedStmCallbacks *h) {
+static uint8_t sharedSrcRead1(ctlSharedStmCallbacks *h) {
     return read1(((cfrCtx)h->direct_ctx));
 }
 
-static unsigned short sharedSrcRead2(ctlSharedStmCallbacks *h) {
+static uint16_t sharedSrcRead2(ctlSharedStmCallbacks *h) {
     return read2(((cfrCtx)h->direct_ctx));
 }
 
-static unsigned long sharedSrcRead4(ctlSharedStmCallbacks *h) {
+static uint32_t sharedSrcRead4(ctlSharedStmCallbacks *h) {
     return read4(((cfrCtx)h->direct_ctx));
 }
 

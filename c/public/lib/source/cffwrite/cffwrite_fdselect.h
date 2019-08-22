@@ -13,7 +13,7 @@ void cfwFdselectReuse(cfwCtx g);
 void cfwFdselectFree(cfwCtx g);
 
 void cfwFdselectBeg(cfwCtx g);
-void cfwFdselectAddIndex(cfwCtx g, unsigned char fd);
+void cfwFdselectAddIndex(cfwCtx g, uint16_t fd);
 int cfwFdselectEnd(cfwCtx g);
 
 long cfwFdselectFill(cfwCtx g);

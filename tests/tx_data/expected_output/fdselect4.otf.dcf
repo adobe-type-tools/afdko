@@ -23,13 +23,13 @@ sentinel=5
 ### FDArray INDEX (00000950-00000964)
 --- object[index]={value}
 [0]={
-  25 637 Private
+  22 637 Private
 }
 [1]={
-  27 662 Private
+  24 659 Private
 }
 [2]={
-  27 689 Private
+  27 683 Private
 }
 ### CharStrings INDEX (0000071b-0000094f)
 --- object[index]={value}
@@ -121,23 +121,21 @@ sentinel=5
 
 }
 --- FD[0]
-### Private DICT (00000965-0000097d)
+### Private DICT (00000965-0000097a)
   -250 0 1350 0 BlueValues
   40 StdHW
   40 StdVW
   40 80 StemSnapH
   40 80 StemSnapV
-  1000 defaultWidthX
 --- FD[1]
-### Private DICT (0000097e-00000998)
+### Private DICT (0000097b-00000992)
   -250 0 1350 0 BlueValues
   58 StdHW
   63 StdVW
   58 7 19 StemSnapH
   63 10 16 StemSnapV
-  1000 defaultWidthX
 --- FD[2]
-### Private DICT (00000999-000009b3)
+### Private DICT (00000993-000009ad)
   -13 13 543 14 176 14 BlueValues
   -250 21 OtherBlues
   69 StdHW

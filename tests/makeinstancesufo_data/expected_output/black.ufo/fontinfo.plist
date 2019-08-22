@@ -15,7 +15,7 @@
     <key>guidelines</key>
     <array/>
     <key>italicAngle</key>
-    <integer>0</integer>
+    <integer>2</integer>
     <key>openTypeHheaAscender</key>
     <integer>1036</integer>
     <key>openTypeHheaDescender</key>
@@ -81,9 +81,9 @@
     <key>openTypeOS2WinDescent</key>
     <integer>335</integer>
     <key>postscriptBlueFuzz</key>
-    <integer>0</integer>
+    <integer>5</integer>
     <key>postscriptBlueScale</key>
-    <real>0.0375</real>
+    <real>0.0675</real>
     <key>postscriptBlueValues</key>
     <array>
       <integer>-20</integer>
@@ -120,8 +120,8 @@
     </array>
     <key>postscriptFamilyOtherBlues</key>
     <array>
+      <integer>-259</integer>
       <integer>-249</integer>
-      <integer>-239</integer>
     </array>
     <key>postscriptFontName</key>
     <string>SourceSerifPro-Black</string>
@@ -141,9 +141,9 @@
       <integer>200</integer>
     </array>
     <key>postscriptUnderlinePosition</key>
-    <integer>-75</integer>
+    <integer>-95</integer>
     <key>postscriptUnderlineThickness</key>
-    <integer>50</integer>
+    <integer>80</integer>
     <key>styleName</key>
     <string>Black</string>
     <key>trademark</key>
