@@ -1,6 +1,32 @@
 Changelog
 =========
 
+3.0.1 (released 2019-08-22)
+---------------------------
+
+- [tx] Dump each _flex_ hint as a single line
+  ([#915](https://github.com/adobe-type-tools/afdko/issues/915))
+- [tx] Fixed handling of `hmtx` values when instantiating a
+  CFF2 font with shuffled regions
+  ([#913](https://github.com/adobe-type-tools/afdko/issues/913))
+- [tx] Fixed handling of missing glyph names with `-svg`, `-cef`
+  and `-afm` options
+  ([#905](https://github.com/adobe-type-tools/afdko/pull/905),
+  [#908](https://github.com/adobe-type-tools/afdko/pull/908))
+- [tx] Improved handling of defective CFF2 fonts
+  ([#903](https://github.com/adobe-type-tools/afdko/pull/903),
+  [#906](https://github.com/adobe-type-tools/afdko/pull/906))
+- [ufotools] Corrected the ordering of attributes in GLIF-file
+  `<point>` elements to "x, y, type" (from "type, x, y")
+  ([#900](https://github.com/adobe-type-tools/afdko/pull/900))
+- [makeinstancesufo] Various fixes and enhancements
+  ([#899](https://github.com/adobe-type-tools/afdko/pull/899))
+- [checkoutlinesufo] Fixed support for non-UFO font formats
+  ([#898](https://github.com/adobe-type-tools/afdko/pull/898),
+  [#911](https://github.com/adobe-type-tools/afdko/pull/911))
+- [tx] Added support for writting FDSelect format 4
+  ([#890](https://github.com/adobe-type-tools/afdko/issues/890))
+
 3.0.0 (released 2019-08-07)
 ---------------------------
 
@@ -38,7 +64,7 @@ Changelog
   [#877](https://github.com/adobe-type-tools/afdko/pull/877))
 - [makeotfexe] Port tx subroutinizer
   ([#331](https://github.com/adobe-type-tools/afdko/issues/331))
-- [tx] Add support for FDSelect format 4
+- [tx] Add support for reading FDSelect format 4
   ([#799](https://github.com/adobe-type-tools/afdko/issues/799))
 - [tx] Fix handling of IVS region indices
   ([#835](https://github.com/adobe-type-tools/afdko/pull/835))
