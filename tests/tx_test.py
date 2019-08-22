@@ -631,5 +631,5 @@ def test_bad_charset():
     font_path = get_bad_input_path(font_name)
     save_path = get_temp_dir_path('bad_charset.txt')
     runner(CMD + ['-a', '-f', font_path, save_path])
-    expected_path = get_expected_path(font_name)
+    expected_path = get_expected_path('bad_charset.txt')
     assert differ([expected_path, save_path, '-s', '## Filename'])
