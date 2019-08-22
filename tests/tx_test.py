@@ -576,8 +576,7 @@ def test_read_short_charstring_bug895(option, font_name):
 
 @pytest.mark.parametrize('option', ['cff2', 'cff'])
 def test_drop_defaultwidthx_when_writing_cff2_bug897(option):
-    font_name = 'bug897.otf'
-    input_path = get_bad_input_path(font_name)
+    input_path = get_bad_input_path('bug897.otf')
     output_path = get_temp_file_path()
     runner(CMD + ['-a', '-o', option, '-f', input_path, output_path])
     dcf_path = get_temp_file_path()
@@ -588,8 +587,7 @@ def test_drop_defaultwidthx_when_writing_cff2_bug897(option):
 
 @pytest.mark.parametrize('option', ['afm', 'svg'])
 def test_missing_glyph_names_pr905(option):
-    font_name = 'pr905.otf'
-    input_path = get_bad_input_path(font_name)
+    input_path = get_bad_input_path('pr905.otf')
     output_path = get_temp_file_path()
     runner(CMD + ['-a', '-o', option, '-f', input_path, output_path])
     expected_path = get_expected_path('pr905' + '.' + option)
@@ -602,12 +600,10 @@ def test_missing_glyph_names_pr905(option):
 
 
 def test_missing_glyph_names_pr905_cef():
-    font_name = 'pr905.otf'
-    option = 'cef'
-    input_path = get_bad_input_path(font_name)
+    input_path = get_bad_input_path('pr905.otf')
     output_path = get_temp_file_path()
     with pytest.raises(subprocess.CalledProcessError) as err:
-        runner(CMD + ['-a', '-o', option, '-f', input_path, output_path])
+        runner(CMD + ['-a', '-o', 'cef', '-f', input_path, output_path])
     assert(err.value.returncode > 0)  # error code, not segfault of -11
 
 
@@ -618,7 +614,7 @@ def test_var_bug_913():
     # deltas for underline offset and underline thickness just to exercize
     # MVAR lookup code.
     font_path = get_input_path('AdobeVFPrototype_mod.otf')
-    save_path = get_temp_dir_path('bug913.txt')
+    save_path = get_temp_file_path()
     runner(CMD + ['-a', '-o',
                   '3', 'g', '_A,W,y', 'U', '_900,0',
                   '-f', font_path, save_path])
@@ -627,9 +623,8 @@ def test_var_bug_913():
 
 
 def test_bad_charset():
-    font_name = 'bad_charset.otf'
-    font_path = get_bad_input_path(font_name)
-    save_path = get_temp_dir_path('bad_charset.txt')
+    font_path = get_bad_input_path('bad_charset.otf')
+    save_path = get_temp_file_path()
     runner(CMD + ['-a', '-f', font_path, save_path])
     expected_path = get_expected_path('bad_charset.txt')
     assert differ([expected_path, save_path, '-s', '## Filename'])
