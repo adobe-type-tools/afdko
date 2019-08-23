@@ -22,6 +22,7 @@ matrix:
         - CIBW_TEST_COMMAND="cd {project} && pytest && pip uninstall --yes afdko"
 
     - os: osx
+      osx_image: xcode8
       language: generic
       env:
         - NAME=OSX
@@ -31,6 +32,7 @@ matrix:
 script:
   - |
     if [[ $TRAVIS_OS_NAME == "osx" ]]; then
+      brew install python3
       $PIP install --disable-pip-version-check -U -q pip setuptools wheel pytest
       $PYTHON --version
       $PIP --version
