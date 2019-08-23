@@ -26,6 +26,8 @@
 /* Make uzoperator for internal use */
 #define t2_cntroff t2_reservedESC33
 
+#define MAX_RECURSION_DEPTH 1000
+
 enum /* seac operator conversion phase */
 {
     seacNone,          /* No seac conversion */
@@ -149,7 +151,7 @@ struct _t2cCtx {
 #define SX(x) RND(h->transformMatrix[0] * (x))
 #define SY(y) RND(h->transformMatrix[3] * (y))
 
-static int t2Decode(t2cCtx h, long offset);
+static int t2Decode(t2cCtx h, long offset, int depth);
 static void convertToAbsolute(t2cCtx h, float x1, float y1, abfBlendArg *blendArgs, int num);
 static void copyBlendArgs(t2cCtx h, abfBlendArg *blendArg, abfOpEntry *opEntry);
 
@@ -735,8 +737,12 @@ static void callback_seac(t2cCtx h, float adx, float ady, int bchar, int achar) 
 /* ---------------------------- Charstring Parse --------------------------- */
 
 /* Parse seac component glyph. */
-static int parseSeacComponent(t2cCtx h, int stdcode) {
+static int parseSeacComponent(t2cCtx h, int stdcode, int depth) {
     long offset;
+
+    if (depth > MAX_RECURSION_DEPTH) {
+        fatal(h, t2cErrMaxRecursion);
+    }
 
     if (stdcode < 0 || stdcode > 255)
         return t2cErrBadSeacComp;
@@ -745,7 +751,7 @@ static int parseSeacComponent(t2cCtx h, int stdcode) {
         return t2cErrBadSeacComp;
 
     h->stack.cnt = 0;
-    return t2Decode(h, offset);
+    return t2Decode(h, offset, depth + 1);
 }
 
 /* Unbias subroutine number. Return -1 on error else subroutine number. */
@@ -950,9 +956,13 @@ static void setNumMasters(t2cCtx h) {
 }
 
 /* Decode Type 2 charstring. Return 0 to continue else error code. */
-static int t2Decode(t2cCtx h, long offset) {
+static int t2Decode(t2cCtx h, long offset, int depth) {
     unsigned char *end;
     unsigned char *next;
+
+    if (depth > MAX_RECURSION_DEPTH) {
+        fatal(h, t2cErrMaxRecursion);
+    }
 
     /* Fetch charstring */
     if (srcSeek(h, offset))
@@ -1080,7 +1090,7 @@ static int t2Decode(t2cCtx h, long offset) {
                         return t2cErrSubrDepth;
                     }
 
-                    result = t2Decode(h, h->aux->subrs.offset[num]);
+                    result = t2Decode(h, h->aux->subrs.offset[num], depth + 1);
                     h->src.endOffset = saveEndOff;
                     h->subrDepth--;
 
@@ -1433,7 +1443,7 @@ static int t2Decode(t2cCtx h, long offset) {
                     if (h->aux->flags & T2C_UPDATE_OPS) {
                         /* Parse base component */
                         h->seac.phase = seacBase;
-                        result = parseSeacComponent(h, h->aux->bchar);
+                        result = parseSeacComponent(h, h->aux->bchar, depth + 1);
                         if (result)
                             return result;
 
@@ -1448,7 +1458,7 @@ static int t2Decode(t2cCtx h, long offset) {
 
                         /* Parse accent component */
                         h->seac.phase = seacAccentPreMove;
-                        result = parseSeacComponent(h, h->aux->achar);
+                        result = parseSeacComponent(h, h->aux->achar, depth + 1);
                         if (result)
                             return result;
                     } else
@@ -1602,7 +1612,7 @@ static int t2Decode(t2cCtx h, long offset) {
                         return t2cErrSubrDepth;
                     }
 
-                    result = t2Decode(h, h->aux->gsubrs.offset[num]);
+                    result = t2Decode(h, h->aux->gsubrs.offset[num], depth + 1);
                     h->src.endOffset = saveEndOff;
                     h->subrDepth--;
 
@@ -1817,7 +1827,7 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
 
     DURING_EX(h->err.env)
 
-    retVal = t2Decode(h, offset);
+    retVal = t2Decode(h, offset, 0);
 
     HANDLER
     retVal = Exception.Code;

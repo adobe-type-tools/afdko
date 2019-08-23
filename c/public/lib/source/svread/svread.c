@@ -853,6 +853,10 @@ static int parseSVG(svrCtx h) {
         } else if (tokenEqualStr(tk, "font-family=")) {
             char *fnp;
             tk = getToken(h);
+            if (tk == NULL) {
+                fatal(h, svrErrParse, "Error parsing font-family string.");
+                return svrErrParse; /* should not reach this line, but it makes Xcode happy */
+            }
             fnp = memNew(h, tk->length + 1);
             strncpy(fnp, tk->val, tk->length);
             fnp[tk->length] = 0;
@@ -879,6 +883,10 @@ static int parseSVG(svrCtx h) {
         } else if (tokenEqualStr(tk, "unicode=")) {
             char *endPtr;
             tk = getAttribute(h);
+            if ((tk == NULL) || (tk->length > kMaxName)) {
+                fatal(h, svrErrParse, "Error parsing Unicode value. Glyph index: %ld.", h->chars.index.cnt);
+                return svrErrParse; /* should not reach this line, but it makes Xcode happy */
+            }
             if (tk->length == 1) {
                 unicode = (long)*(tk->val);
                 if ((unicode >= 'A') && (unicode <= 'z'))
@@ -915,6 +923,10 @@ static int parseSVG(svrCtx h) {
         } else if (tokenEqualStr(tk, "horiz-adv-x=")) {
             long width;
             tk = getToken(h);
+            if ((tk == NULL) || (tk->length > kMaxName)) {
+                fatal(h, svrErrParse, "Error parsing horiz-adv-x value. Glyph index: %ld.", h->chars.index.cnt);
+                return svrErrParse; /* should not reach this line, but it makes Xcode happy */
+            }
             strncpy(tempVal, tk->val, tk->length);
             tempVal[tk->length] = 0;
             width = atol(tempVal);
@@ -927,7 +939,7 @@ static int parseSVG(svrCtx h) {
                 setWidth(h, gnameIndex, width);
             else {
                 h->src.buf[h->src.next - (h->src.buf)] = 0; /* terminate the buffer after the current token */
-                fatal(h, svrErrParse, "Encountered horiz-adv-x attribute in unexpected context. state %d. Glyph GID: %d. '%s'.", state, (unsigned short)h->chars.index.cnt, h->src.buf);
+                fatal(h, svrErrParse, "Encountered horiz-adv-x attribute in unexpected context. state %d. Glyph index: %d. '%s'.", state, (unsigned short)h->chars.index.cnt, h->src.buf);
             }
         } else if (tokenEqualStr(tk, "glyph-name=")) {
             if (state != 1) {
@@ -1158,7 +1170,7 @@ static char *getString(svrCtx h, STI sti) {
 /* ----------------------Width management -----------------------*/
 static void addWidth(svrCtx h, STI sti, long value) {
     if (sti != h->chars.widths.cnt) {
-        fatal(h, svrErrParse, "Width index does not match glyph name index. Glyph index %d.", sti);
+        fatal(h, svrErrParse, "Width index does not match glyph name index. Glyph index: %d.", sti);
     }
     *dnaNEXT(h->chars.widths) = value;
 }
