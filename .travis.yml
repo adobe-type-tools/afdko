@@ -18,8 +18,6 @@ matrix:
         - PYTHON=python
         - CIBW_BUILD="cp36-manylinux1_x86_64"
         - CIBW_BEFORE_BUILD="pip install --disable-pip-version-check -U -q pip"
-        - CIBW_TEST_REQUIRES="pytest"
-        - CIBW_TEST_COMMAND="cd {project} && pytest && pip uninstall --yes afdko"
 
     - os: osx
       osx_image: xcode9.4
@@ -44,6 +42,11 @@ script:
         $PIP uninstall --yes afdko
       fi
     else
+      if [[ -z $TRAVIS_TAG ]]; then
+        # run the tests only on untagged commits
+        export CIBW_TEST_REQUIRES='pytest'
+        export CIBW_TEST_COMMAND='cd {project} && pytest && pip uninstall --yes afdko'
+      fi
       $PIP install --disable-pip-version-check -U -q pip
       $PIP install cibuildwheel
       cibuildwheel --output-dir dist
