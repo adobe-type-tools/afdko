@@ -18,20 +18,23 @@ install:
   - SET PATH=%PYTHON_HOME%;%PYTHON_HOME%\Scripts;%PATH%
   - python --version
   - python -c "import struct; print(struct.calcsize('P') * 8)"
-  - python -m pip install --disable-pip-version-check -U -q pip setuptools wheel
-  - python -m pip install pytest
+  - python -m pip install --disable-pip-version-check -U -q pip setuptools wheel pytest
   - python -m pip --version
   - python -m pip list
 
 # to run your custom scripts instead of automatic MSBuild
 build_script:
   - python setup.py bdist_wheel || EXIT /B 1
-  - for %%f in (dist\*.whl) do (set "WHEEL=%%f")
-  - python -m pip install %WHEEL% || EXIT /B 1
 
 test_script:
-  - python -m pytest || EXIT /B 1
-  - python -m pip uninstall --yes afdko || EXIT /B 1
+  # run the tests only on untagged commits
+  - ps: >-
+      if ($env:APPVEYOR_REPO_TAG -ne "true") {
+        $WHEEL = Resolve-Path "dist\*.whl" | Select -ExpandProperty Path
+        python -m pip install $WHEEL
+        python -m pytest
+        python -m pip uninstall --yes afdko
+      }
 
 artifacts:
   # archive the generated packages in the ci.appveyor.com build report
