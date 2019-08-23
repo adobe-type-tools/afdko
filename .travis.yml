@@ -36,9 +36,12 @@ script:
       $PIP --version
       $PIP list
       $PYTHON setup.py bdist_wheel
-      $PIP install dist/*.whl
-      $PYTHON -m pytest
-      $PIP uninstall --yes afdko
+      if [[ -z $TRAVIS_TAG ]]; then
+        # run the tests only on untagged commits
+        $PIP install dist/*.whl
+        $PYTHON -m pytest
+        $PIP uninstall --yes afdko
+      fi
     else
       $PIP install --disable-pip-version-check -U -q pip
       $PIP install cibuildwheel
