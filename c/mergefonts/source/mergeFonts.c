@@ -1866,7 +1866,6 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                 break;
             case opt_bc:
                 goto bc_gone;
-                break;
             case opt_dcf:
                 setMode(h, mode_dcf);
                 break;
@@ -2262,9 +2261,6 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                         h->t1w.flags &= ~T1W_ENCODE_MASK;
                         h->t1w.flags |= T1W_ENCODE_ASCII85;
                         break;
-                    case mode_bc:
-                        goto bc_gone;
-                        break;
                     default:
                         goto wrongmode;
                 }
@@ -2346,9 +2342,6 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                                     goto badarg;
                             }
                         }
-                        break;
-                    case mode_bc:
-                        goto bc_gone;
                         break;
                     default:
                         goto wrongmode;

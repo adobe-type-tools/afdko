@@ -601,7 +601,6 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                 break;
             case opt_bc:
                 goto bc_gone;
-                break;
             case opt_dcf:
                 setMode(h, mode_dcf);
                 break;
@@ -737,7 +736,7 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                 h->flags |= PATH_SUPRESS_HINTS;
                 /* Setting the hint callbacks to NULL works for the most common
                    case where the callbacks have already been assigned by
-                   setMode. Hwoever, in a number of cases, the call backs are
+                   setMode. However, in a number of cases, the call backs are
                    assigned later, within beginFont. This, we need the flag, so
                    we can do the right thing there.*/
                 switch (h->mode) {
@@ -1035,9 +1034,6 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                         h->t1w.flags &= ~T1W_ENCODE_MASK;
                         h->t1w.flags |= T1W_ENCODE_ASCII85;
                         break;
-                    case mode_bc:
-                        goto bc_gone;
-                        break;
                     default:
                         goto wrongmode;
                 }
@@ -1119,9 +1115,6 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                                     goto badarg;
                             }
                         }
-                        break;
-                    case mode_bc:
-                        goto bc_gone;
                         break;
                     default:
                         goto wrongmode;
