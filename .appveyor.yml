@@ -31,9 +31,13 @@ test_script:
   - ps: >-
       if ($env:APPVEYOR_REPO_TAG -ne "true") {
         $WHEEL = Resolve-Path "dist\*.whl" | Select -ExpandProperty Path
+        if ($WHEEL -eq $null) { echo "ERROR: Wheel file not found."; exit 1 }
         python -m pip install $WHEEL
+        if ($LastExitCode -ne 0) { exit $LastExitCode }
         python -m pytest
+        if ($LastExitCode -ne 0) { exit $LastExitCode }
         python -m pip uninstall --yes afdko
+        if ($LastExitCode -ne 0) { exit $LastExitCode }
       }
 
 artifacts:
