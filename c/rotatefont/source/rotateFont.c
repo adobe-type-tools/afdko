@@ -1639,11 +1639,11 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                 }
                 break;
             case opt_Z:
+                if (h->mode != mode_cff)
+                    goto wrongmode;
 #if 0
                 /* Although CFW_NO_DEP_OPS is defined in cffwrite.h,
                    it is not used anywhere. */
-                if (h->mode != mode_cff)
-                    goto wrongmode;
                 h->cfw.flags |= CFW_NO_DEP_OPS;
 #endif
                 h->t1r.flags |= T1R_UPDATE_OPS;
