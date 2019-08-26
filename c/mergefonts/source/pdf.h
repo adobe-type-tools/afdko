@@ -3,7 +3,6 @@
 "[-pdf options: default -0]\n"
 "-0      show glyph palette (320 glyphs/page)\n"
 "-1      -0 + glyph outlines (1 glyph/page)\n"
-"-2      -1 + glyph hints (1 layer/page) *unimplemented*\n"
 "\n"
 "PDF mode writes PDF data that graphically represents the glyphs in an abstract\n"
 "font.\n"

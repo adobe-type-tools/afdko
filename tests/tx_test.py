@@ -88,8 +88,6 @@ def test_exit_invalid_path_or_font(pth):
     ['-t1', '-g', '0', '-gx', '1'],  # options are mutually exclusive
     ['-dcf'],  # non-CFF font
     ['-ps', '-1'],  # must specify an all-glyph range
-    # ['-pdf', '-2'],  # unimplemented option (Windows exit code is 3221225477)
-    # https://ci.appveyor.com/project/adobe-type-tools/afdko/builds/26950430
     ['-ufo'], ['-t1', '-pfb'],  # must specify a destination path
     ['-t1', '-usefd'],  # bad arg
     ['-t1', '-decid'],  # input font is non-CID

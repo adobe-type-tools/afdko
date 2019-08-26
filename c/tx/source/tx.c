@@ -678,10 +678,6 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                     case mode_dump:
                         h->abf.dump.level = 2;
                         break;
-                    case mode_pdf:
-                        fatal(h, "unimplemented option (-2) for mode (-pdf)");
-                        h->pdw.level = 2;
-                        break;
                     case mode_mtx:
                         h->mtx.level = 2;
                         break;
