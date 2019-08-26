@@ -1,0 +1,15 @@
+### Header .......... (000010e4-000010e7)
+### Name INDEX ...... (000010e8-00001105)
+### Top DICT INDEX .. (00001106-00001140)
+### String INDEX .... (00001141-000012c0)
+### GlobalSubrINDEX . (000012c1-000012c2)
+### Charset ......... (000012c3-000012c9)
+### FDSelect ........ (000012ca-000012ce)
+### FDArray INDEX ... (0000156f-00001590)
+### CharStrings INDEX (000012cf-0000156e)
+--- FD[0]
+### Private DICT .... (00001591-000015aa)
+--- FD[1]
+### Private DICT .... (000015ab-000015c6)
+--- FD[2]
+### Private DICT .... (000015c7-000015e4)

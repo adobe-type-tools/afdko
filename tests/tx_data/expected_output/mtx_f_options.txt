@@ -1,0 +1,19 @@
+### glyph[tag] {gname,enc,width,{left,bottom,right,top}}
+glyph[0] {.notdef,-,653,{89,0,565,660}}
+glyph[1] {a,0x61,504,{52,-12,433,498}}
+glyph[2] {space,0x20,500,{0,0,0,0}}
+glyph[3] {zerowidth,-,0,{0,0,0,0}}
+glyph[4] {negative,-,-12,{0,0,0,0}}
+### aggregate
+bbox  {52,-12,565,660}
+tag   {1,1,0,0}
+gname {a,a,.notdef,.notdef}
+### glyph[tag] {gname,enc,width,{left,bottom,right,top}}
+glyph[0] {.notdef,-,640,{80,0,560,670}}
+glyph[1] {gid00001,0x0041,663,{5,0,653,675}}
+glyph[2] {gid00002,0x0054,602,{20,0,582,670}}
+glyph[3] {gid00003,0x043C,742,{45,0,697,474}}
+### aggregate
+bbox  {5,0,697,675}
+tag   {1,0,3,1}
+gname {gid00001,.notdef,gid00003,gid00001}
