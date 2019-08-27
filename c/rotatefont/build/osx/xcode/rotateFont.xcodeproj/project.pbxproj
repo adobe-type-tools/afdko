@@ -987,13 +987,14 @@
 			};
 			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "rotateFont" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 1;
 			knownRegions = (
-				English,
-				Japanese,
-				French,
-				German,
+				fr,
+				Base,
+				de,
+				en,
+				ja,
 			);
 			mainGroup = 08FB7794FE84155DC02AAC07 /* cvt2sing */;
 			projectDirPath = "";
@@ -1529,6 +1530,12 @@
 			baseConfigurationReference = BDA34B5D0D6F3FE00009FF85 /* debug_tx.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SDKROOT)/usr/include",
+					"../../../../public/lib/api/**",
+					"../../../../public/lib/resource/**",
+					../../../../public/lib/source/tx_shared,
+				);
 			};
 			name = Debug;
 		};
@@ -1537,6 +1544,12 @@
 			baseConfigurationReference = BDA34B5B0D6F3FDB0009FF85 /* release_tx.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SDKROOT)/usr/include",
+					"../../../../public/lib/api/**",
+					"../../../../public/lib/resource/**",
+					../../../../public/lib/source/tx_shared,
+				);
 			};
 			name = Release;
 		};

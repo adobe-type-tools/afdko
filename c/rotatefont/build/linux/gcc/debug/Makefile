@@ -23,6 +23,9 @@ TARGETS = $(PRG_TARGET)
 # Standard definitions
 include ../../../../../public/config/linux/gcc/gcc_tx.mak
 
+# include tx/rotatefont/mergefonts shared header files
+STD_OPTS += -I$(realpath $(ROOT_DIR)/../public/lib/source/tx_shared)
+
 # Object rules
 rotateFont.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/rotateFont.c -o $@
