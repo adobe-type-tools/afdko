@@ -29,6 +29,7 @@ matrix:
 
 script:
   - |
+    set -e
     if [[ $TRAVIS_OS_NAME == "osx" ]]; then
       $PIP install --disable-pip-version-check -U -q pip setuptools wheel pytest
       $PYTHON --version
@@ -38,7 +39,7 @@ script:
       if [[ -z $TRAVIS_TAG ]]; then
         # run the tests only on untagged commits
         $PIP install dist/*.whl
-        $PYTHON -m pytest
+        pytest
         $PIP uninstall --yes afdko
       fi
     else
