@@ -266,10 +266,11 @@ def test_m_option_success(arg):
     assert subprocess.call([TOOL, '-m', arg, input_path]) == 0
 
 
-@pytest.mark.parametrize('arg', list(range(1, 16)))
-def test_m_option_fail(arg):
-    input_path = get_input_path('type1.pfa')
-    assert subprocess.call([TOOL, '-m', f'-{arg}', input_path]) != 0
+# Disabled because of https://github.com/adobe-type-tools/afdko/issues/933
+# @pytest.mark.parametrize('arg', range(1, 16))
+# def test_m_option_fail(arg):
+#     input_path = get_input_path('type1.pfa')
+#     assert subprocess.call([TOOL, '-m', f'-{arg}', input_path]) != 0
 
 
 # -------------
