@@ -1866,7 +1866,6 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                 break;
             case opt_bc:
                 goto bc_gone;
-                break;
             case opt_dcf:
                 setMode(h, mode_dcf);
                 break;
@@ -1943,10 +1942,6 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                 switch (h->mode) {
                     case mode_dump:
                         h->abf.dump.level = 2;
-                        break;
-                    case mode_pdf:
-                        fatal(h, "unimplemented option (-2) for mode (-pdf)");
-                        h->pdw.level = 2;
                         break;
                     case mode_mtx:
                         h->mtx.level = 2;
@@ -2092,10 +2087,11 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                 }
                 break;
             case opt_Z:
-#if 0
-                /* Although CFW_NO_DEP_OPS is defined in cffwrite.h, it is not used anywhere. */
                 if (h->mode != mode_cff)
                     goto wrongmode;
+#if 0
+                /* Although CFW_NO_DEP_OPS is defined in cffwrite.h,
+                   it is not used anywhere. */
                 h->cfw.flags |= CFW_NO_DEP_OPS;
 #endif
                 h->t1r.flags |= T1R_UPDATE_OPS;
@@ -2261,9 +2257,6 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                         h->t1w.flags &= ~T1W_ENCODE_MASK;
                         h->t1w.flags |= T1W_ENCODE_ASCII85;
                         break;
-                    case mode_bc:
-                        goto bc_gone;
-                        break;
                     default:
                         goto wrongmode;
                 }
@@ -2345,9 +2338,6 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                                     goto badarg;
                             }
                         }
-                        break;
-                    case mode_bc:
-                        goto bc_gone;
                         break;
                     default:
                         goto wrongmode;

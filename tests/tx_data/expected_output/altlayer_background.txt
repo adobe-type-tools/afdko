@@ -1,0 +1,11 @@
+## glyph[tag] {name,encoding,path}
+glyph[0] {.notdef,-,
+  500 width
+  endchar}
+glyph[1] {foo,-,
+  500 width
+  70 384 move
+  260 384 line
+  260 586 line
+  70 586 line
+  endchar}

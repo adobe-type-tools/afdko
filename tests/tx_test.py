@@ -1,3 +1,4 @@
+import os
 import pytest
 import subprocess
 
@@ -64,9 +65,210 @@ def test_exit_known_option(arg):
     assert subprocess.call([TOOL, arg]) == 0
 
 
-@pytest.mark.parametrize('arg', ['-z', '-foo'])
+@pytest.mark.parametrize('arg', ['-bar', '-foo'])
 def test_exit_unknown_option(arg):
     assert subprocess.call([TOOL, arg]) == 1
+
+
+@pytest.mark.parametrize('pth', [
+    ['invalid_path'],  # no such file or directory
+    [get_temp_file_path()],  # end of file (not a font)
+    [get_input_path('type1.pfa'), 'a', 'b'],  # too many file args
+])
+def test_exit_invalid_path_or_font(pth):
+    assert subprocess.call([TOOL] + pth) == 1
+
+
+# -------------
+# Options tests
+# -------------
+
+@pytest.mark.parametrize('args', [
+    ['-s', '-t1'],  # '-s' option must be last
+    ['-t1', '-g', '0', '-gx', '1'],  # options are mutually exclusive
+    ['-dcf'],  # non-CFF font
+    ['-ps', '-1'],  # must specify an all-glyph range
+    ['-ufo'], ['-t1', '-pfb'],  # must specify a destination path
+    ['-t1', '-usefd'],  # bad arg
+    ['-t1', '-decid'],  # input font is non-CID
+])
+def test_option_error_type1_input(args):
+    font_path = get_input_path('type1.pfa')
+    assert subprocess.call([TOOL] + args + [font_path]) == 1
+
+
+@pytest.mark.parametrize('arg', ['-e', '-q', '+q', '-w', '+w', '-lf', '-cr',
+                                 '-crlf', '-decid', '-LWFN', '-pfb'])
+def test_option_error_type1_clash(arg):
+    # options -pfb or -LWFN may not be used with other options
+    pfb = '-pfb' if arg != '-pfb' else '-LWFN'
+    assert subprocess.call([TOOL, '-t1', pfb, arg]) == 1
+
+
+@pytest.mark.parametrize('args', [
+    ['-cff', '-l'], ['-cff', '-0'], ['-cff', '-1'], ['-cff', '-2'],
+    ['-cff', '-3'], ['-cff', '-4'], ['-cff', '-5'], ['-cff', '-6'],
+    ['-cff', '-q'], ['-cff', '+q'], ['-cff', '-w'], ['-cff', '+w'],
+    ['-cff', '-pfb'], ['-cff', '-usefd'], ['-cff', '-decid'],
+    ['-cff', '-lf'], ['-cff', '-cr'], ['-cff', '-crlf'], ['-cff', '-LWFN'],
+    ['-t1', '-gn0'], ['-t1', '-gn1'], ['-t1', '-gn2'], ['-t1', '-sa'],
+    ['-t1', '-abs'], ['-t1', '-cefsvg'],
+    ['-t1', '-no_futile'], ['-t1', '-no_opt'], ['-t1', '-d'], ['-t1', '+d'],
+    ['-dcf', '-n'], ['-dcf', '-c'],
+    ['-dump', '-E'], ['-dump', '+E'], ['-dump', '-F'], ['-dump', '+F'],
+    ['-dump', '-O'], ['-dump', '+O'], ['-dump', '-S'], ['-dump', '+S'],
+    ['-dump', '-T'], ['-dump', '+T'], ['-dump', '-V'], ['-dump', '+V'],
+    ['-dump', '-b'], ['-dump', '+b'], ['-dump', '-e'], ['-dump', '+e'],
+    ['-dump', '-Z'], ['-dump', '+Z'],
+])
+def test_option_error_wrong_mode(args):
+    assert subprocess.call([TOOL] + args) == 1
+
+
+@pytest.mark.parametrize('arg', [
+    '-a', '-e', '-f', '-g', '-i', '-m', '-o', '-p', '-A', '-P', '-U', '-maxs',
+    '-usefd', '-fd', '-dd', '-sd', '-sr', ['-cef', '-F'], ['-dcf', '-T']
+])
+def test_option_error_no_args_left(arg):
+    if isinstance(arg, list):
+        arg_lst = [TOOL] + arg
+    else:
+        arg_lst = [TOOL, '-t1', arg]
+    assert subprocess.call(arg_lst) == 1
+
+
+@pytest.mark.parametrize('args', [
+    ['-maxs', 'X'], ['-m', 'X'], ['-e', 'X'], ['-e', '5'],
+    ['-usefd', 'X'], ['-usefd', '-1']
+])
+def test_option_error_bad_arg(args):
+    assert subprocess.call([TOOL, '-t1'] + args) == 1
+
+
+@pytest.mark.parametrize('arg2', ['-sd', '-sr', '-dd'])
+@pytest.mark.parametrize('arg1', ['-a', '-f', '-A'])
+def test_option_error_no_args_left2(arg1, arg2):
+    assert subprocess.call([TOOL, '-t1', arg1, arg2]) == 1
+
+
+@pytest.mark.parametrize('arg2', ['-sd', '-sr', '-dd'])
+@pytest.mark.parametrize('arg1', ['-a', '-f'])
+def test_option_error_empty_list(arg1, arg2):
+    empty_dir = get_temp_dir_path()
+    assert subprocess.call([TOOL, '-t1', arg1, arg2, empty_dir]) == 1
+
+
+@pytest.mark.parametrize('arg', ['-bc', '-z', '-cmp', '-sha1'])
+def test_gone_options_bc(arg):
+    assert subprocess.call([TOOL, arg]) == 1
+
+
+@pytest.mark.parametrize('mode, msg', [
+    ('-h', b'tx (Type eXchange) is a test harness'),
+    ('-u', b'tx {[mode][mode options][shared options][files]}*'),
+    ('-afm', b'[-afm options: none]'),
+    ('-cef', b'[-cef options: default none]'),
+    ('-cff', b'[-cff options: -E, -F, -O, -S, +T, +V, -Z, -b, -d]'),
+    ('-dcf', b'[-dcf options: defaults -T all, -5]'),
+    ('-dump', b'[-dump options: default -1]'),
+    ('-mtx', b'[-mtx options: default -0]'),
+    ('-path', b'[-path options: default -0]'),
+    ('-pdf', b'[-pdf options: default -0]'),
+    ('-ps', b'[-ps options: default -0]'),
+    ('-svg', b'[-svg options: default -lf -gn0]'),
+    ('-t1',
+        b'[-t1 options: default -0, -l, -E, -S, +T, +V, +q, -w, -e 4, -lf]'),
+    ('-ufo', b'UFO mode converts an abstract font to a UFO 2 font.'),
+])
+def test_mode_help(mode, msg):
+    output = subprocess.check_output([TOOL, mode, '-h'])
+    assert msg in output
+
+
+@pytest.mark.parametrize('dcf_dump_level', ['0', '1', '5'])
+def test_script_file(dcf_dump_level):
+    font_path = get_input_path('cid.otf')
+    opts_path = get_temp_file_path()
+    opts_file_content = f'\n# foo\n # bar\r -{dcf_dump_level}\t"{font_path}"'
+    with open(opts_path, 'a') as fp:
+        fp.write(opts_file_content)
+    actual_path = runner(CMD + ['-s', '-a', '-o', 'dcf', 's', '-f', opts_path])
+    expected_path = get_expected_path(f'cid_dcf_{dcf_dump_level}.txt')
+    assert differ([expected_path, actual_path])
+
+
+def test_nested_script():
+    # nested scripts not allowed
+    temp_path = get_temp_file_path()
+    assert subprocess.call([TOOL, '-s', 'foobar', '-s', temp_path]) == 1
+
+
+@pytest.mark.parametrize('layer_name', ['', 'None', 'background', 'foobar'])
+def test_ufo_altlayer(layer_name):
+    if not layer_name:
+        fname = 'processed'
+        args = []
+    else:
+        fname = 'foreground' if layer_name == 'None' else layer_name
+        args = ['altLayer', f'_{fname}']
+    actual_path = runner(CMD + ['-s', '-f', 'altlayer.ufo', '-o', '6'] + args)
+    expected_path = get_expected_path(f'altlayer_{fname}.txt')
+    assert differ([expected_path, actual_path])
+
+
+@pytest.mark.parametrize('arg, filename', [
+    ('-a', 'ufo3.t1'),
+    ('-A', 'SourceSansPro-Regular.t1'),
+])
+def test_a_options(arg, filename):
+    input_path = get_input_path('ufo3.ufo')
+    output_path = os.path.join(os.getcwd(), filename)
+    assert os.path.exists(output_path) is False
+    subprocess.call([TOOL, '-t1', arg, input_path])
+    assert os.path.exists(output_path) is True
+    os.remove(output_path)
+
+
+def test_o_option():
+    input_path = get_input_path('ufo3.ufo')
+    expected_path = get_expected_path('ufo3.pfa')
+    output_path = get_temp_file_path()
+    subprocess.call([TOOL, '-t1', '-o', output_path, input_path])
+    assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])
+
+
+def test_f_option():
+    fpath1 = get_input_path('type1.pfa')
+    fpath2 = get_input_path('cff2_vf.otf')
+    actual_path = runner(CMD + ['-s', '-o', 'mtx', '3',
+                                'f', f'_{fpath1}', f'_{fpath2}'])
+    expected_path = get_expected_path('mtx_f_options.txt')
+    assert differ([expected_path, actual_path])
+
+
+def test_stdin():
+    input_path = get_input_path('type1.pfa')
+    expected_path = get_expected_path('stdin.txt')
+    output_path = get_temp_file_path()
+    with open(input_path) as fp:
+        output = subprocess.check_output([TOOL], stdin=fp)
+    with open(output_path, 'wb') as fp:
+        fp.write(output)
+    assert differ([expected_path, output_path])
+
+
+@pytest.mark.parametrize('arg', ['0', '-16'])
+def test_m_option_success(arg):
+    # mem_manage() is called 16 times with the command 'tx -m 0 type1.pfa'
+    input_path = get_input_path('type1.pfa')
+    assert subprocess.call([TOOL, '-m', arg, input_path]) == 0
+
+
+# Disabled because of https://github.com/adobe-type-tools/afdko/issues/933
+# @pytest.mark.parametrize('arg', range(1, 16))
+# def test_m_option_fail(arg):
+#     input_path = get_input_path('type1.pfa')
+#     assert subprocess.call([TOOL, '-m', f'-{arg}', input_path]) != 0
 
 
 # -------------
@@ -144,6 +346,15 @@ def test_convert(from_format, to_format):
     assert differ([expected_path, save_path] + skip + diff_mode)
 
 
+def test_cef_cefsvg():
+    font_path = get_input_path('cff2_vf.otf')
+    output_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', 'cef', 'cefsvg', 'cr', 'gn1', 'abs', 'sa',
+                  '-f', font_path, output_path])
+    expected_path = get_expected_path('cef_cefsvg_cr.svg')
+    assert differ([expected_path, output_path])
+
+
 # ----------
 # Dump tests
 # ----------
@@ -156,6 +367,7 @@ def test_convert(from_format, to_format):
     ['2'],
     ['3'],
     ['4'],
+    ['4', 'N'],
     ['5'],
     ['6'],
     ['6', 'd'],
