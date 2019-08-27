@@ -22,6 +22,7 @@ SRC_DIR = $(ROOT_DIR)/source
 STD_OPTS = $(XFLAGS)  \
 	-I$(realpath $(ROOT_DIR)/../public/lib/api) \
 	-I$(realpath $(ROOT_DIR)/../public/lib/resource) \
+	-I$(realpath $(ROOT_DIR)/../public/lib/source/tx_shared) \
 	 $(SYS_INCLUDES)
 ifneq ($(strip $(OSX)),) # In order to test under Mac OSX, define OSX in the user environment.
 	STD_OPTS += -DOSX=1
