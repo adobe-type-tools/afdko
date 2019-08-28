@@ -1,4 +1,4 @@
-"[-afm options: none]\n"
+"[-afm options: default none]\n"
 "\n"
 "AFM mode write an Adobe Font Metrics format representation of an abstract font.\n"
 "This is a lightweight implementation that is primarily intended for testing and\n"
