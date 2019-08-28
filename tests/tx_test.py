@@ -169,6 +169,7 @@ def test_gone_options_bc(arg):
     ('-afm', b'[-afm options: none]'),
     ('-cef', b'[-cef options: default none]'),
     ('-cff', b'[-cff options: -E, -F, -O, -S, +T, +V, -Z, -b, -d]'),
+    ('-cff2', b'[-cff2 options: defaults -S, -b]'),
     ('-dcf', b'[-dcf options: defaults -T all, -5]'),
     ('-dump', b'[-dump options: default -1]'),
     ('-mtx', b'[-mtx options: default -0]'),
