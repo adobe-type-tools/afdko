@@ -81,7 +81,8 @@ enum {
     /* When bit 10 is set, TopDict encoding vector is set to StandardEncoding,
        no matter what is in the font. This is useful for working with font
        sources that will be used for OpenType/CFF fonts */
-    CFW_NO_OPTIMIZATION =        1 << 12,
+    CFW_NO_OPTIMIZATION =        1 << 12, /* Suppress charstring optimizations, e.g.: */
+                                          /* x 0 rmoveto => x hmoveto */
     CFW_WRITE_CFF2 =             1 << 13
 };
 

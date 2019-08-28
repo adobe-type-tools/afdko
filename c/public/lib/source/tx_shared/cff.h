@@ -10,6 +10,7 @@
 "+/-d    enable duplicate hintsubs warnings\n"
 "-n      remove hints\n"
 "-std    force the output font to have StandardEncoding\n"
+"-no_opt suppress charstring optimizations, e.g.: x 0 rmoveto => x hmoveto\n"
 "-no_futile remove futile subrs during subroutinization (deprecated; always in effect)\n"
 "\n"
 "CFF mode writes a CFF conversion of an abstract font. The precise form of the\n"
