@@ -54,6 +54,13 @@ static void cff_Help(txCtx h) {
     printText(ARRAY_LEN(text), text);
 }
 
+static void cff2_Help(txCtx h) {
+    static char *text[] = {
+#include "cff2.h"
+    };
+    printText(ARRAY_LEN(text), text);
+}
+
 static void dcf_Help(txCtx h) {
     static char *text[] = {
 #include "dcf.h"
@@ -194,7 +201,11 @@ static void help(txCtx h) {
                 afm_Help(h);
                 break;
             case mode_cff:
-                cff_Help(h);
+                if (h->cfw.flags & CFW_WRITE_CFF2) {
+                    cff2_Help(h);
+                } else {
+                    cff_Help(h);
+                }
                 break;
             case mode_cef:
                 cef_Help(h);

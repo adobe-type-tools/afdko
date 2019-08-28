@@ -8,6 +8,7 @@
 "-dcf            write text dump of CFF font data        (-dcf -h for help)\n",
 "-mtx            write metrics dump of font data         (-mtx -h for help)\n"
 "-cff            write CFF (Compact Font Format) FontSet (-cff -h for help)\n"
+"-cff2           write CFF2 FontSet                      (-cff2 -h for help)\n"
 "-t1             write Type 1 font                       (-t1 -h for help)\n"
 "-cef            write CEF (Compact Embedded Font) font  (-cef -h for help)\n"
 "-afm            write AFM representation of font data   (-afm -h for help)\n"
