@@ -1,4 +1,4 @@
-"[-t1 options: default -0, -l, -E, -S, +T, +V, +q, -w, -e 4, -lf]\n"
+"[-t1 options: defaults -0, -l, -E, -S, +T, +V, +q, -w, -e 4, -lf]\n"
 "-0        host font type\n"
 "-1        base incremental download font\n"
 "-2        addition incremental download font\n"
@@ -8,10 +8,10 @@
 "+/-E      add/remove WasEmbedded key\n"
 "+/-S      ProcSet/Private OtherSubrs\n"
 "+/-T      do/don't optimize font\n",
-"+/-V      emove path overlaps. Default is to not remove overlaps\n"
+"+/-V      don't/do remove path overlaps\n"
 "+/-q      retain/remove UniqueID keys in font\n"
 "+/-w      enable/disable widths-only font\n"
-"-Z        decompose SEAC oand dotsection operators\n",
+"-Z        decompose SEAC and dotsection operators\n",
 "-e arg    lenIV encryption, legal values: -1 (unencrypted), 0, 1, 4\n"
 "-lf       Unix newline\n"
 "-cr       Mac newline\n"
@@ -21,7 +21,7 @@
 "-pfb      convert to Windows PFB format\n"
 "-LWFN     convert to Macintosh LWFN resource format\n"
 "-std      force the output font to have StandardEncoding\n"
-"-n      remove hints\n"
+"-n        remove hints\n"
 "\n",
 "Type 1 mode writes a Type 1 conversion of an abstract font. The form of the\n"
 "Type 1 font is controlled by the options above.\n"

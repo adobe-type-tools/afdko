@@ -1,4 +1,4 @@
-"[-svg options: default -lf -gn0]\n"
+"[-svg options: defaults -lf, -gn0]\n"
 "-lf       Unix newline [default]\n"
 "-cr       Mac newline\n"
 "-crlf     Windows newline\n"
@@ -7,6 +7,7 @@
 "-gn1      Glyph names for non-ASCII glyphs only\n"
 "-gn2      Glyph names for all glyphs\n",
 "\n"
+"-abs      Write absolute coordinates (rather than relative)\n"
 "-sa       Standalone font file\n"
 "\n"
 "SVG mode converts an abstract font to an SVG font. The form of the SVG font is\n"
