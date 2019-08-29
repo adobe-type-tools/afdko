@@ -974,7 +974,7 @@ static void saveBlend(cfrCtx h, float *realValue, abfOpEntry *blendEntry) {
         // copy the defaul region value
         blendValues[0] = defaultValue = INDEX_REAL(0);
 
-        /* now, copy the blend absolate values to blendArray[i].
+        /* now, copy the blend absolute values to blendArray[i].
         The default region value is in stackEntry->int_val or real_val
         The region delta values are in the stackEntry->blend_val array.
         */
