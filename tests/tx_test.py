@@ -842,6 +842,7 @@ def test_bad_charset():
     expected_path = get_expected_path('bad_charset.txt')
     assert differ([expected_path, save_path, '-s', '## Filename'])
 
+
 def test_bug_940():
     input_path = get_bad_input_path('bug940_private_blend.otf')
     output_path = get_temp_file_path()
