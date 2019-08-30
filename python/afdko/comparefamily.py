@@ -1799,45 +1799,6 @@ def doSingleTest11():
 			print("	Error: I don't understand this BASE table: Could be bad BASE table, probably this programis out of date or incomplete. %s." % (font.PostScriptName1))
 	return
 
-def getItalicAngle(fontPath):
-	angleList = []
-	# Get the itlaic angle from the middle third of the left side contour.
-	for gname in ["B", "D", "E", "H", "I", "L"]:
-		command = "tx -bc -z 1000 -g %s \"%s\" 2>&1" % (gname, fontPath)
-		report = fdkutils.runShellCmd(command)
-		scanLines = re.findall(r"([ .#]+)(-*\d+)", report)
-		testLines = [ln for ln in scanLines if not ln.startswith('#')]
-
-		if not testLines:
-			continue
-		numLines = len(scanLines)
-		oneThird = numLines//3
-		twothird = oneThird*2
-
-		topX = scanLines[oneThird][0].find("#")
-		topY = eval(scanLines[oneThird][1])
-		bottomX = scanLines[twothird][0].find("#")
-		bottomY = eval(scanLines[twothird][1])
-		if (topX - bottomX) == 0:
-			italicAngle = 0
-		elif (topY -bottomY) == 0:
-			italicAngle = -90
-		else:
-			italicAngle = float(topX - bottomX)/ (topY -bottomY)
-			italicAngle - math.atan(italicAngle)
-			italicAngle = -math.degrees(italicAngle)
-		angleList.append(italicAngle)
-	if not angleList:
-		return None
-
-	#Keep only the angle which is closest to the root mean square average
-	avgAngle = 0
-	for angle in angleList:
-		avgAngle += angle**2
-	avgAngle = (avgAngle / len(angleList))**0.5
-	diffList = sorted(map(lambda angle: (abs(avgAngle-angle), angle), angleList))
-	angle = diffList[0][1]
-	return int(0.5 + angle)
 
 def doSingleTest12():
 	global fontlist
@@ -1855,12 +1816,6 @@ def doSingleTest12():
 	for font in fontlist:
 		if (not font.isItalic) and  (abs(font.italicAngle) > 4):
 			print("\tWarning: Italic style bit is clear, but Italic Angle '%s' is a larger italic angle than -4 for Font %s." % (font.italicAngle, font.PostScriptName1))
-	for font in fontlist:
-		italicAngle = getItalicAngle(font.path)
-		if italicAngle != None:
-			diff = abs(italicAngle - font.italicAngle)
-			if diff > 3:
-				print("Warning: font ItalicAngle in the post table is %s, but a rough calculation based on [B, D, E, H, I, L], says it should be %s. Please check. %s" % (font.italicAngle, italicAngle, font.PostScriptName1))
 
 def doSingleTest13():
 	global fontlist
