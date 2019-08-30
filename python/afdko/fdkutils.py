@@ -9,7 +9,7 @@ import os
 import subprocess
 import tempfile
 
-__version__ = '1.3.5'
+__version__ = '1.3.6'
 
 
 def validate_path(path_str):
@@ -98,6 +98,10 @@ def run_shell_command_logging(args):
             if out:
                 print(out.decode())
             if proc.poll() is not None:
+                if proc.returncode != 0:  # must be called *after* poll()
+                    msg = " ".join(args)
+                    print(f"Error executing command '{msg}'")
+                    return False
                 out = proc.stdout.readline().rstrip()
                 if out:
                     print(out.decode())
@@ -133,24 +137,32 @@ def get_shell_command_output(args, std_error=False):
     return success, str_output
 
 
-def runShellCmd(cmd):
+def runShellCmd(cmd, shell=True, timeout=None):
     try:
-        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+        p = subprocess.Popen(cmd, shell=shell, stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
-        stdoutdata, _ = p.communicate()
+        stdoutdata, _ = p.communicate(timeout=timeout)
         str_output = stdoutdata.decode('utf-8', 'backslashreplace')
 
+        if p.returncode != 0:  # must be called *after* communicate()
+            print(f"Error executing command '{cmd}'\n{str_output}")
+            str_output = ""
+
+    except subprocess.TimeoutExpired as err:
+        p.kill()
+        print(f"{err}")  # the 'err' will contain the command
+        str_output = ""
+
     except (subprocess.CalledProcessError, OSError) as err:
-        msg = f"Error executing command '{cmd}'\n{err}"
-        print(msg)
+        print(f"Error executing command '{cmd}'\n{err}")
         str_output = ""
 
     return str_output
 
 
-def runShellCmdLogging(cmd):
+def runShellCmdLogging(cmd, shell=True):
     try:
-        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+        proc = subprocess.Popen(cmd, shell=shell, stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT)
         while 1:
             output = proc.stdout.readline().rstrip()
@@ -158,14 +170,17 @@ def runShellCmdLogging(cmd):
                 print(output.decode('utf-8', 'backslashreplace'))
 
             if proc.poll() is not None:
+                if proc.returncode != 0:  # must be called *after* poll()
+                    print(f"Error executing command '{cmd}'")
+                    return 1
+
                 output = proc.stdout.readline().rstrip()
                 if output:
                     print(output.decode('utf-8', 'backslashreplace'))
                 break
 
     except (subprocess.CalledProcessError, OSError) as err:
-        msg = f"Error executing command '{cmd}'\n{err}"
-        print(msg)
+        print(f"Error executing command '{cmd}'\n{err}")
         return 1
 
     return 0
