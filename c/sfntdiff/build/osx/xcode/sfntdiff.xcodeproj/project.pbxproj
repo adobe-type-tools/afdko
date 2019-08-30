@@ -48,7 +48,6 @@
 		BDB5C7000DAEBCAD003A4375 /* Dtto.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Dtto.c; path = ../../../source/Dtto.c; sourceTree = SOURCE_ROOT; };
 		BDB5C7010DAEBCAD003A4375 /* Dtto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Dtto.h; path = ../../../source/Dtto.h; sourceTree = SOURCE_ROOT; };
 		BDB5C7060DAEBCAD003A4375 /* numtypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = numtypes.h; path = ../../../source/numtypes.h; sourceTree = SOURCE_ROOT; };
-		BDB5C7090DAEBCAD003A4375 /* sfntdiff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sfntdiff.h; path = ../../../source/sfntdiff.h; sourceTree = SOURCE_ROOT; };
 		BDB5C71B0DAEBD06003A4375 /* sfntdiff */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = sfntdiff; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -99,7 +98,6 @@
 				BDB5C7000DAEBCAD003A4375 /* Dtto.c */,
 				BDB5C7010DAEBCAD003A4375 /* Dtto.h */,
 				BDB5C7060DAEBCAD003A4375 /* numtypes.h */,
-				BDB5C7090DAEBCAD003A4375 /* sfntdiff.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";

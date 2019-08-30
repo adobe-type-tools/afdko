@@ -23,8 +23,7 @@ PRG_INCLUDES = $(SRC_DIR)/Eda.h \
 	$(SRC_DIR)/Eglobal.h \
 	$(SRC_DIR)/Emsgs.h \
 	$(SRC_DIR)/Esys.h \
-	$(SRC_DIR)/otftableeditor.h \
-	$(SRC_DIR)/otter.h
+	$(SRC_DIR)/otftableeditor.h
 
 
 PRG_OBJS = $(OBJECT_DIR)/Eda.o \
