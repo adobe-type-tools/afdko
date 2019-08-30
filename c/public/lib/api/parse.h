@@ -87,7 +87,7 @@
 
 /* HEXENCODING -- if true, the parser will be able to deal with hex format
    eexec fonts; the only fonts that are really in this format are
-   uncompressed fonts on unix machines. */
+   uncompressed fonts on Unix machines. */
 
 #ifndef HEXENCODING
 #define HEXENCODING 1
@@ -349,7 +349,7 @@ typedef struct _t_ParseProcs {
 
 #if COMPOSITE_FONT
 /* The minimum must be long enough to hold the longest token in the font.
-   For composite fonts longets token is the string containing the Character
+   For composite fonts longest token is the string containing the Character
    offset data. The data is 6 bytes for each character in a row. The longest
    therefore is 6 * 256 = 1536. */
 #define TOKENBUFFER_MIN 1536

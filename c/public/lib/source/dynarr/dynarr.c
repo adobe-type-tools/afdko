@@ -64,7 +64,7 @@ void dnaInit(dnaCtx h, void *object, size_t init, size_t incr, int check) {
     da->func = NULL;
 }
 
-/* Grow dynamic array to accomodate index. Return -1 on allocation failure else
+/* Grow dynamic array to accommodate index. Return -1 on allocation failure else
    0. If the client has arranged to trap allocation failures in the memory
    callback functions by using setjmp/longjmp, for example, the -1 return will
    never occur and the macro wrappers provided will be safe to use. */
@@ -102,7 +102,7 @@ long dnaGrow(void *object, size_t elemsize, long index) {
         return -1; /* Allocation failed */
     }
 
-    /* explictly zero out the new memory before initialization */
+    /* explicitly zero out the new memory before initialization */
     memset((char *)new_ptr + (da->size * elemsize), 0, (new_size - da->size) * elemsize);
 
     if (da->func != NULL) {

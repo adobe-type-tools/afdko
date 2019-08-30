@@ -29,10 +29,10 @@ extern Card32 fileSniff(void);
 extern void fileOpenMacRes(Byte8 *filename);
 #endif
 
-/* Convienience macros */
+/* Convenience macros */
 #define TELL() fileTell()
 #define SEEK_ABS(o) fileSeek((o), 0) /* From beginning of file */
-#define SEEK_REL(o) fileSeek((o), 1) /* From current postion */
+#define SEEK_REL(o) fileSeek((o), 1) /* From current position */
 #define SEEK_SURE(o) fileSeekAbsNotBuffered((o))
 #define IN_BYTES(c, b) fileReadBytes((c), (b))
 #define IN1(o) fileReadObject(sizeof(o), &(o))

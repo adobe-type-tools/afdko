@@ -314,7 +314,7 @@ typedef struct /* Glyph data */
 {
     uFWord hAdv;       /* Horizontal advance */
     FWord xMin;        /* Left of bounding box */
-    FWord lsb;         /* Left sidebearing */
+    FWord lsb;         /* Left side-bearing */
     abfGlyphInfo info; /* Client glyph info */
 } Glyph;
 
@@ -499,7 +499,7 @@ ttrCtx ttrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 
     HANDLER
 
-    /* Initilization failed */
+    /* Initialization failed */
     ttrFree(h);
     h = NULL;
 
@@ -827,7 +827,7 @@ static void hmtxRead(ttrCtx h) {
     if (glyph != NULL)
         last = glyph->hAdv;
 
-    /* Read left sidebearings */
+    /* Read left side-bearings */
     for (; i < h->glyphs.cnt; i++) {
         glyph = &h->glyphs.array[i];
         glyph->hAdv = last;
@@ -1569,7 +1569,7 @@ static void assignAGLNames(ttrCtx h) {
                         bsearch(&dblmap->pri, h->encodings.array,
                                 h->encodings.cnt, sizeof(Encoding), matchCode);
                     if (pri != NULL && pri->gid == enc->gid)
-                        /* Same GID is encodied at the primary UV */
+                        /* Same GID is encoded at the primary UV */
                         assignGlyphNameRef(h, enc->gid, aglmap->gname);
                     else
                         assignUnicodeName(h, enc->gid, enc->code);
@@ -1915,7 +1915,7 @@ static void glyfReadSimple(ttrCtx h, GID gid, int nContours, int iStart) {
     int nPoints;
     glyfCoord *coords;
 
-    /* Read countour end point indices */
+    /* Read contour end point indices */
     endPts = dnaEXTEND(h->glyf.endPts, nContours);
     for (i = 0; i < nContours; i++)
         endPts[i] = read2(h) + iStart;
@@ -2019,7 +2019,7 @@ static void glyfReadCompound(ttrCtx h, GID gid, GID *mtx_gid, int depth) {
         if (flags & glyf_ARG_1_AND_2_ARE_WORDS) {
             /* Short word args */
             if (translate) {
-                /* Position component by explict offsets */
+                /* Position component by explicit offsets */
                 x = sread2(h);
                 y = sread2(h);
             } else {
@@ -2155,7 +2155,7 @@ static void callbackExactPath(ttrCtx h, GID gid, abfGlyphCallbacks *glyph_cb) {
                            RND((end->x + beg->x) / 2.0f),
                            RND((end->y + beg->y) / 2.0f));
 
-            /* Compute start of next bezier */
+            /* Compute start of next Bezier */
             x1 = (end->x + 5 * beg->x) / 6.0f;
             y1 = (end->y + 5 * beg->y) / 6.0f;
 
@@ -2174,7 +2174,7 @@ static void callbackExactPath(ttrCtx h, GID gid, abfGlyphCallbacks *glyph_cb) {
                         if (p1 != first)
                             glyph_cb->line(glyph_cb, p1->x, p1->y);
                     } else {
-                        /* [on off] compute start of next bezier */
+                        /* [on off] compute start of next Bezier */
                         x1 = (p0->x + 2 * p1->x) / 3.0f;
                         y1 = (p0->y + 2 * p1->y) / 3.0f;
                     }
@@ -2280,7 +2280,7 @@ static int combinePair(Point *p, abfGlyphCallbacks *glyph_cb) {
    temporary. 
 
    States 2 and 4 are complicated by the fact that a test must be performed to
-   decide if the 2 curves decribed by the point data can be combined into a
+   decide if the 2 curves described by the point data can be combined into a
    single curve or must retained as 2 curves. */
 static void callbackApproxPath(ttrCtx h, GID gid, abfGlyphCallbacks *glyph_cb) {
 /* Save current point at index n */

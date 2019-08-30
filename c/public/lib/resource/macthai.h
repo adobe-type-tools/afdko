@@ -8,7 +8,7 @@
    Source: ftp://ftp.unicode.org/Public/MAPPINGS/VENDORS/APPLE/THAI.TXT
    as of 9/9/99.
 
-   22 entries are mapped to Corporate Use Subarea Unicode values that Apple has
+   22 entries are mapped to Corporate Use Area Unicode values that Apple has
    deprecated. The full transcoding hint sequence is shown in parentheses for
    such mappings. */
 

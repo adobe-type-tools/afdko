@@ -81,7 +81,7 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
    two cases the library will automatically locate the CFF table and
    seek to it before attempting to parse the CFF data.
 
-   The ttcIndex parameter selects whcih font to use in a TTC. This has effect
+   The ttcIndex parameter selects which font to use in a TTC. This has effect
    only when the font file is a TTC font.
 
    The "flags" parameter allows client control over the parse by setting bits
@@ -131,7 +131,7 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
 
 int cfrIterateGlyphs(cfrCtx h, abfGlyphCallbacks *glyph_cb);
 
-/* cfrIterateGlyphs() is called to interate through all the glyph data in the
+/* cfrIterateGlyphs() is called to iterate through all the glyph data in the
    font. (The number of glyphs in the font is passed back to the client via the
    "top" parameter to cfrBegFont() in the "sup.nGlyphs" field.) Glyph data is
    passed back to the client via the callbacks specified via the "glyph_cb"
@@ -208,7 +208,7 @@ typedef struct
 const cfrSingleRegions *cfrGetSingleRegions(cfrCtx h);
 
 /* cfrGetSingleRegions() is called to get the src stream regions occupied by
-   the CFF data struct indentified by its field name. This functions returns a
+   the CFF data struct identified by its field name. This functions returns a
    pointer to a structure containing regions that appear only once per-font.
 
    Note: The "Encoding" and "Charset" regions need special processing because
@@ -228,7 +228,7 @@ typedef struct
 const cfrRepeatRegions *cfrGetRepeatRegions(cfrCtx h, int iFD);
 
 /* cfrGetRepeatRegions() is called to get the src stream regions occupied by
-   the CFF data struct indentified by its field name. This function returns a
+   the CFF data struct identified by its field name. This function returns a
    pointer to a structure containing regions in the FDArray that may appear
    more than once per-font. The "iFD" parameter selects the font dictionary
    containing the regions to be returned. If the "iFD" parameter is invalid a
@@ -240,7 +240,7 @@ int cfrGetWidths(cfrCtx h, int iFD,
                  float *defaultWidthX, float *nominalWidthX);
 
 /* cfrGetWidths() is called to get the values of the default and nominal widths
-   assciated with a font dictionary selected by the "iFD" parameter. The
+   associated with a font dictionary selected by the "iFD" parameter. The
    function returns 0 on success and 1 if the "iFD" parameter is invalid. */
 
 const unsigned char *cfrGetStdEnc2GIDMap(cfrCtx h);
@@ -269,7 +269,7 @@ typedef long (*cfrlastResortInstanceNameCallback)(void *clientCtx, float *udv, l
                                                   char *nameBuffer, long nameBufferLen);
 /* CFF2 variable font last resort naming callback
 
-   If successful, the function should return a postive length of the string
+   If successful, the function should return a positive length of the string
    returned in nameBuffer.
 
    If unsuccessful, the function returns a non-positive number.
@@ -283,7 +283,7 @@ typedef long (*cfrlastResortInstanceNameCallback)(void *clientCtx, float *udv, l
    prefixStr - a null-terminated string of the variable font family name,
                to be used as a prefix of the instance name
 
-   prefixLen - length of the prefix stirng
+   prefixLen - length of the prefix string
 
    nameBuffer - string buffer where a null-terminated Postscript name of the
                 variable font instance should be returned by the client

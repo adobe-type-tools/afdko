@@ -83,7 +83,7 @@ struct t1wCtx_ {
         long maxglyphs;
         char *newline;
     } arg;
-    struct /* Temorary stream */
+    struct /* Temporary stream */
     {
         long offset;   /* Buffer offset */
         size_t length; /* Buffer length */
@@ -1398,7 +1398,7 @@ static void writeAddnEncoding(t1wCtx h, char *FontName) {
         writeLine(h, "pop");
 }
 
-/* Write incremental additon name-keyed font. */
+/* Write incremental addition name-keyed font. */
 static void writeAddnNameKeyedFont(t1wCtx h) {
     char *FontName = h->top->FDArray.array[0].FontName.ptr;
     writeIdentComment(h);
@@ -1846,7 +1846,7 @@ static void writeHostCIDKeyedFont(t1wCtx h) {
            horizontally. To avoid this problem the CDevProc is defined in every
            downloaded CIDFont. 
 
-           Note: the baseline is still hardcoded at .88 from the top of the em
+           Note: the baseline is still hard-coded at .88 from the top of the em
            square which is correct for current Adobe CJK fonts but unlikely to
            be correct for all non-Adobe fonts or even for future Adobe fonts.
            We may want to pass this information (when it's available) via the
@@ -2261,7 +2261,7 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
     return (h->arg.flags & T1W_WIDTHS_ONLY) ? ABF_WIDTH_RET : ABF_CONT_RET;
 }
 
-/* Reserve space in charstring to accomodate specified worst case args and 
+/* Reserve space in charstring to accommodate specified worst case args and 
    ops. Return 0 if space reserved else 1. Worst case numeric arg is sequence
    "5-byte-num 2-byte-num div". */
 static int accomodate(t1wCtx h, int args, int ops) {
@@ -2512,7 +2512,7 @@ static void glyphMove(abfGlyphCallbacks *cb, float x0, float y0) {
     t1wCtx h = cb->direct_ctx;
     float dx0;
     float dy0;
-    x0 = (float)RND_ON_WRITE(x0);  // need to round to 2 decimal places, else get cumulative error when reading the relative coords. This is becuase decimal valuea wre stored as at most "<int> 100 div" aka 2 decimal places.
+    x0 = (float)RND_ON_WRITE(x0);  // need to round to 2 decimal places, else get cumulative error when reading the relative coords. This is because decimal values are stored as at most "<int> 100 div" aka 2 decimal places.
     y0 = (float)RND_ON_WRITE(y0);
     dx0 = x0 - h->path.x;
     dy0 = y0 - h->path.y;

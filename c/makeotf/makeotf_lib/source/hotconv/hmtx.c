@@ -63,7 +63,7 @@ int hmtxFill(hotCtx g) {
         }
     }
 
-    /* Construct left sidebearing array */
+    /* Construct left side-bearing array */
     dnaSET_CNT(h->tbl.leftSideBearing, h->tbl.hMetrics.cnt - i - 2);
     j = 0;
     for (i += 2; i < h->tbl.hMetrics.cnt; i++) {
@@ -85,7 +85,7 @@ void hmtxWrite(hotCtx g) {
         OUT2(metric->lsb);
     }
 
-    /* Write left sidebreaings */
+    /* Write left side-bearings */
     for (i = 0; i < h->tbl.leftSideBearing.cnt; i++) {
         OUT2(h->tbl.leftSideBearing.array[i]);
     }

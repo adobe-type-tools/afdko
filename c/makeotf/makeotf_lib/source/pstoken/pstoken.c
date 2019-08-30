@@ -17,7 +17,7 @@
 /* Selected PostScript lexical classes */
 #define N_ (1 << 0) /* Newline (\n \r) */
 #define W_ (1 << 1) /* Whitespace (\0 \t \n \f \r space) */
-#define S_ (1 << 2) /* Special (delimeter: ( ) < > [ ] { } / %) */
+#define S_ (1 << 2) /* Special (delimiter: ( ) < > [ ] { } / %) */
 #define D_ (1 << 3) /* Decimal digit (0-9)*/
 #define P_ (1 << 4) /* Decimal point (period) */
 #define G_ (1 << 5) /* Sign (+ -) */
@@ -81,7 +81,7 @@ struct psCtx_ {
     psCallbacks cb;                   /* Client callbacks */
     psToken token;                    /* Last input token */
     int (*getch)(psCtx h, int check); /* Get next input char */
-    int lookahead;                    /* Lookahead occured on last token */
+    int lookahead;                    /* Lookahead occurred on last token */
     int binary;                       /* Flags binary input */
     int first;                        /* Flags first line */
     unsigned short r;                 /* Decryption state */
@@ -253,7 +253,7 @@ static void skipArray(psCtx h, char begin, char end) {
 
 static int skipAngle(psCtx h);
 
-/* Scipt dictionary */
+/* Skip dictionary */
 static void skipDictionary(psCtx h) {
     for (;;) {
         int c = h->getch(h, 1);
@@ -480,7 +480,7 @@ static int checkForNumber(psCtx h, int c, short *type) {
         }
     }
 
-    /* Non-numeric character encountered, skip to delimeter */
+    /* Non-numeric character encountered, skip to delimiter */
     operator: SKIPTODELIM;
     *type = PS_OPERATOR;
     return c;

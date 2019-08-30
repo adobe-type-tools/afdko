@@ -8,7 +8,7 @@
    hot library callback support layer.
 
    This module provides a test client for the hot library. hot library clients
-   do not need to include this module; it is mearly provided for reference.
+   do not need to include this module; it is merely provided for reference.
  */
 
 #include "package.h"
@@ -398,7 +398,7 @@ static void cffSize(void *ctx, long size, int euroAdded) {
     h->cff.euroAdded = euroAdded;
 }
 
-/* -------------------------- OTF data input/ouput ------------------------- */
+/* -------------------------- OTF data input/output ------------------------- */
 
 /* [hot callback] Return OTF filename */
 static char *otfId(void *ctx) {
@@ -625,7 +625,7 @@ static void featAddAnonData(void *ctx, char *data, long count,
 #endif
 }
 
-/* [hot callback] Open Unicose Variation Selector file. (name == NULL) indicates not supplied. The full file name is returned. */
+/* [hot callback] Open Unicode Variation Selector file. (name == NULL) indicates not supplied. The full file name is returned. */
 static char *uvsOpen(void *ctx, char *name) {
     cbCtx h = ctx;
 
@@ -1224,7 +1224,7 @@ void cbAliasDBRead(cbCtx h, char *filename) {
 #endif
 }
 
-/* used to overide AliasDB when -q option is used: Usage scenario:
+/* used to override AliasDB when -q option is used: Usage scenario:
    default options are read in and processed from the project file, then
    the user overrides -r with -q. */
 void cbAliasDBCancel(cbCtx h) {
@@ -1756,7 +1756,7 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
     sprintf(pfbpath, "%s%s", h->dir.pfb, pfbfile);
 
     /*CFFDBG part of hack to print out temp cff file for CID fonts */
-    /*h->CMap.file.name set here is used only to trigger dbg behaviour in tempClose() */
+    /*h->CMap.file.name set here is used only to trigger dbg behavior in tempClose() */
     if (hcmapfile != NULL) {
         h->tmp.file.name = pfbpath;
     }

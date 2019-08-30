@@ -14,7 +14,7 @@ typedef Card32 Tag;
 /* In the file an Offset is a byte offset of data relative to some format
    component, normally the beginning of the record it belongs to. The
    OFFSET macros allow a simple declaration of both the byte offset field and
-   a structure containg the data for that offset. */
+   a structure containing the data for that offset. */
 typedef Card16 Offset;
 typedef Card32 LOffset;
 

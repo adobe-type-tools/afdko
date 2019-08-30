@@ -191,7 +191,7 @@ static unsigned long read24(void) {
 static Format14 *readFormat14(void) {
     IntX i;
     Format14 *fmt = memNew(sizeof(Format14));
-    Card32 tableOffset = TELL() - 2; /* -2 becuase we have already red in the format record. */
+    Card32 tableOffset = TELL() - 2; /* -2 because we have already red in the format record. */
     fmt->format = 14;
 
     IN1(fmt->length);

@@ -51,7 +51,7 @@ typedef enum {
     SBITUnknown = 0,
     SBITProportionalSmallByteFormat = 1, /* small metrics & data, byte-aligned */
     SBITProportionalSmallBitFormat,      /* small metrics & data, bit-aligned */
-    SBITProportionalCompressedFormat,    /* not used. metric info followd by compressed data */
+    SBITProportionalCompressedFormat,    /* not used. metric info followed by compressed data */
     SBITMonoCompressedFormat,            /* just compressed data. Metrics in "bloc" */
     SBITMonoFormat,                      /* just bit-aligned data. Metrics in "bloc" */
     SBITProportionalBigByteFormat,       /* big metrics & byte-aligned data */

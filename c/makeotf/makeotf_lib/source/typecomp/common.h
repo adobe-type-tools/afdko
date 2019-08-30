@@ -1,5 +1,5 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-   This software is licensed as OpenSource, under the Apache License, Version 2.0. 
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
@@ -77,7 +77,7 @@ char *tc_dupstrn(tcCtx g, char *src, int length);
    its function and is private to the module or library, i.e. not visible
    externally.
 
-   The library context is public to the modules that make up the libary (but
+   The library context is public to the modules that make up the library (but
    not to the client) and is defined below. The library context contains a
    structure (called ctx) containing an opaque context pointer for each module.
 

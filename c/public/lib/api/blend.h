@@ -36,29 +36,29 @@ extern DesignSpace *MakeDesignSpace(
 
 extern boolean SetMasterDesignPosition(DesignSpace *ds, CardX n, Fixed *dv);
 
-/*  
+/*
  * If ndvSubroutine and cdvSubroutine are both NULL, then an old-style
  * 2^ds->ndimen mapping will be attempted; *ndv will be read and *wv
  * will be written.  lenBuildCharArray, SureMalloc and Free will
  * not be examined.
- * 
+ *
  * If ndvSubroutine is non-NULL then *udv will be read and *ndv will be
  * written.  If cdvSubroutine is non-NULL, then it will be
  * executed; if cdvSubroutine is NULL and wv is non-NULL, an old-style
  * 2^ds->ndimen mapping will be attempted.  Successful conversion to a
  * weight vector by either means causes a write to *wv.
- * 
+ *
  * Unless the storage pointed to by udv, ndv, or wv is specified here as
  * being read or written, the pointer will not be examined.
- * 
+ *
  * lenBuildCharArray must be greater than the highest-numbered BCA entry
  * addressed by *ndvSubroutine or *cdvSubroutine.
- * 
+ *
  * Neither SureMalloc nor Free are permitted to raise exceptions,
  * that is, to call longjmp().  SureMalloc may indicate failure to
  * allocate storage only by returning NULL.
- * 
- * XXX: Should GetWeightVector() be enhanced to be able to convert 
+ *
+ * XXX: Should GetWeightVector() be enhanced to be able to convert
  *      UDV to NDV according to a Type 1 /BlendDesignMap array?
  */
 
@@ -78,7 +78,7 @@ extern boolean GetWeightVector(
 );
 
 /*
- * FontFit -- multiple master contraint matching
+ * FontFit -- multiple master constraint matching
  */
 
 typedef struct {

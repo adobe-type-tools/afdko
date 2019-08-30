@@ -212,7 +212,7 @@ void GDEFWrite(hotCtx g) {
     OUT2(h->tbl.LigCaretTableOffset);
     OUT2(h->tbl.MarkClassDefOffset);
     if (h->tbl.MarkGlyphSetsDefOffset) {
-        /* If this is zero, then we write a Verion 1,0 table, whcih doesn't have this offset. */
+        /* If this is zero, then we write a Version 1,0 table, which doesn't have this offset. */
         OUT2(h->tbl.MarkGlyphSetsDefOffset);
     }
 

@@ -42,7 +42,7 @@ typedef struct _BBox {
 
 typedef struct _Elt {
     struct _Elt *prevelt, *nextelt;
-    unsigned elttype : 3; /* type of element: moveto, cuveto ... */
+    unsigned elttype : 3; /* type of element: moveto, curveto ... */
     BBox ebbx;
     Curve coord; /* coordinates of points */
 } Elt, *Pelt;

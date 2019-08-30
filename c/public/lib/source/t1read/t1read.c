@@ -51,7 +51,7 @@ static const char *keys[] =
 #undef DCL_KEY
 };
 
-#define MAX_AXES 4 /* Pratical multiple master axis limit */
+#define MAX_AXES 4 /* Practical multiple master axis limit */
 
 typedef unsigned short STI; /* String index */
 #define STI_UNDEF 0xffff    /* Undefined string index */
@@ -297,7 +297,7 @@ static void newStrings(t1rCtx h) {
     dnaINIT(h->dna, h->strings.buf, 1500, 6000);
 }
 
-/* Reinitilize strings for new font. */
+/* Reinitialize strings for new font. */
 static void initStrings(t1rCtx h) {
     h->strings.index.cnt = 0;
     h->strings.buf.cnt = 0;
@@ -317,7 +317,7 @@ static STI addString(t1rCtx h, size_t length, const char *value) {
 
     if (length == 0) {
         /* A null name (/) is legal in PostScript but could lead to unexpected
-           behaviour elsewhere in the coretype libraries so it is substituted
+           behavior elsewhere in the coretype libraries so it is substituted
            for a name that is very likely to be unique in the font */
         const char subs_name[] = "_null_name_substitute_";
         value = subs_name;
@@ -352,7 +352,7 @@ static void newChars(t1rCtx h) {
     dnaINIT(h->dna, h->chars.byName, 256, 1000);
 }
 
-/* Reinitilize chars for new font. */
+/* Reinitialize chars for new font. */
 static void initChars(t1rCtx h) {
     h->chars.index.cnt = 0;
     h->chars.byName.cnt = 0;
@@ -495,7 +495,7 @@ t1rCtx t1rNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     if (h == NULL)
         return NULL;
 
-    /* explictly zero out entire structure */
+    /* explicitly zero out entire structure */
     memset(h, 0, sizeof(struct t1rCtx_));
 
     /* Safety initialization */
@@ -1450,7 +1450,7 @@ static void calcUDVFromWV(t1rCtx h, int nAxes, int nMasters) {
     }
 }
 
-/* Initailize MM font. */
+/* Initialize MM font. */
 static void mmInit(t1rCtx h) {
     static char *jenson[] =
         {
@@ -1976,7 +1976,7 @@ static void checkRDType(t1rCtx h) {
 }
 
 /* Parse Erode proc. If we are parsing a print stream font we look for a
-   carrige return in the proc. definition as a clue to the line ending type
+   carriage return in the proc. definition as a clue to the line ending type
    being used in the stream. If we haven't already seen the /StdVW key we
    derive its value from the 16th token in the proc. */
 static void parseErodeProc(t1rCtx h, abfPrivateDict *private) {
@@ -2790,7 +2790,7 @@ static void readSubrMaps(t1rCtx h, long StartDataOffset, long *maxoff) {
     for (i = 0; i < h->FDArray.cnt; i++) {
         FDInfo *fd = &h->FDArray.array[i];
 
-        /* Grow buffer to accomodate SubrCount+1 subr offset */
+        /* Grow buffer to accommodate SubrCount+1 subr offset */
         (void)dnaGROW(fd->subrs.offset, fd->key.SubrCount);
         fd->subrs.offset.cnt = fd->key.SubrCount;
         if (fd->subrs.offset.cnt == 0)

@@ -102,7 +102,7 @@ void *safeManage(ctlMemoryCallbacks *cb, void *old, size_t size) {
 
 /* ------------------------------- Tmp Stream ------------------------------ */
 
-/* Intialize tmp stream. */
+/* Initialize tmp stream. */
 static void tmpSet(Stream *s, char *filename) {
     s->type = stm_Tmp;
     s->flags = 0;
@@ -561,7 +561,7 @@ static void dstFileOpen(txCtx h, abfTopDict *top) {
     if (h->dst.stm.fp != NULL)
         return; /* Already open */
 
-    /* Open dstination file */
+    /* Open destination file */
     if (strcmp(h->dst.stm.filename, "-") == 0)
         h->dst.stm.fp = stdout;
     else {
@@ -802,7 +802,7 @@ static void ps_SetMode(txCtx h) {
     h->cb.glyph = abfGlyphDrawCallbacks;
     h->cb.glyph.direct_ctx = &h->abf.draw;
 
-    /* Set source libarary flags */
+    /* Set source library flags */
     h->t1r.flags = (T1R_UPDATE_OPS | T1R_USE_MATRIX);
     h->cfr.flags = (CFR_UPDATE_OPS | CFR_USE_MATRIX);
 
@@ -854,7 +854,7 @@ static void afm_SetMode(txCtx h) {
     h->cb.glyph = abfGlyphAFMCallbacks;
     h->cb.glyph.direct_ctx = &h->abf.afm;
 
-    /* Set source libarary flags */
+    /* Set source library flags */
     h->t1r.flags = (T1R_UPDATE_OPS | T1R_USE_MATRIX);
     h->cfr.flags = (CFR_UPDATE_OPS | CFR_USE_MATRIX);
 
@@ -2074,7 +2074,7 @@ static void mtx_SetMode(txCtx h) {
     h->mtx.metrics.cb.direct_ctx = &h->mtx.metrics.ctx;
     h->mtx.metrics.ctx.flags = 0;
 
-    /* Set source libarary flags */
+    /* Set source library flags */
     h->t1r.flags = (T1R_UPDATE_OPS | T1R_USE_MATRIX);
     h->cfr.flags = (CFR_UPDATE_OPS | CFR_USE_MATRIX);
 
@@ -2296,7 +2296,7 @@ static void copyPOSTRes(txCtx h, int type, long length,
 static void writeSection(txCtx h, int type, long length,
                          FILE *src, char *srcfile,
                          FILE *dst, char *dstfile) {
-    /* Write full-length resouces */
+    /* Write full-length resources */
     long cnt = length / 2046;
     while (cnt--)
         copyPOSTRes(h, type, 2046, src, srcfile, dst, dstfile);
@@ -2732,7 +2732,7 @@ static void mkdir_tx(txCtx h, char *dirPath) {
 #endif
 
     if (dirErr != 0)
-        fatal(h, "Failed to creater directory '%s'.\n", dirPath);
+        fatal(h, "Failed to create directory '%s'.\n", dirPath);
 }
 
 /* Begin font set. */
@@ -4552,7 +4552,7 @@ static void addNotdef(txCtx h) {
         callbackGlyph(h, sel_by_tag, 0, NULL);
 }
 
-/* Filter glyphs using the glyph list pararmeter. */
+/* Filter glyphs using the glyph list parameter. */
 void callbackSubset(txCtx h) {
     parseSubset(h, callbackGlyph);
     if (!((SUBSET_SKIP_NOTDEF & h->flags) || (SUBSET_HAS_NOTDEF & h->flags))) {

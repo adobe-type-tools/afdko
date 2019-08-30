@@ -39,7 +39,7 @@
    Both kinds of lookups can be referred to later on, when sharing them; e.g.
    specified by the font editor explicitly by "lookup ZERO;" or implicitly by
    "language DEU;" where the hotlib includes the default lookups. These lookup
-   "references" are stored as the original loookup's label with bit 15 set.
+   "references" are stored as the original lookup's label with bit 15 set.
  */
 
 #define FEAT_NAMED_LKP_BEG 0

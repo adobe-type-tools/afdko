@@ -3,7 +3,7 @@
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 /*
- * TrueType Open glyph substution table format definition.
+ * TrueType Open glyph substitution table format definition.
  */
 
 #ifndef FORMAT_GSUB_H

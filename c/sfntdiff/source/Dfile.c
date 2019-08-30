@@ -3,12 +3,12 @@
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 /*
- * Machine independant file operations. The ANSI standard buffered i/o library
+ * Machine independent file operations. The ANSI standard buffered i/o library
  * can't be used here because the Macintosh version doesn't support resource
  * reading.
  *
  * This code assumes that 32 bits is large enough to hold a file offset. This
- * seems a safe assumtion since other code would break long before
+ * seems a safe assumption since other code would break long before
  * fonts/resource files reached this size.
  */
 

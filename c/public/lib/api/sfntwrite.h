@@ -65,7 +65,7 @@ int sfwRegisterTable(sfwCtx h, sfwTableCallbacks *cb);
 
 /* sfwRegisterTable() registers a callback set that manages an sfnt table. It
    must be the first library function to be called after calling sfwNew(). The
-   "cb" parameter points to a sfwTableCallbacks structure, a copy of which is 
+   "cb" parameter points to a sfwTableCallbacks structure, a copy of which is
    saved by the library. This structure contains the following information:
 
    The "ctx" field can be used to specify a client context. Set to NULL if not
@@ -79,7 +79,7 @@ int sfwRegisterTable(sfwCtx h, sfwTableCallbacks *cb);
    required, and the remaining callbacks may be disabled by setting their
    fields to NULL. A callback must return 0 to continue a callback sequence and
    1 to abort the sequence.
-   
+
    The intended usage of the various callbacks is as follows:
 
    The optional new_table() callback is called to initialize the code for
@@ -116,7 +116,7 @@ int sfwRegisterTable(sfwCtx h, sfwTableCallbacks *cb);
 
    The required write_table() callback is called to write the table data to the
    output stream specified by the "stm" parameter using the callbacks specified
-   via the "stm_cb" parameter. Per-table checksum calculations may be overriden
+   via the "stm_cb" parameter. Per-table checksum calculations may be overridden
    by setting the value pointed to by the "checksum" parameters to the desired
    checksum for the table and setting the value pointed to by the
    "use_checksum" parameter to 1. The library initializes the value pointed to
@@ -140,7 +140,7 @@ int sfwRegisterTable(sfwCtx h, sfwTableCallbacks *cb);
    for another font. For example, data counts can be reset so as to be ready to
    accumulate new data. The reuse_table() callbacks are called as a result of
    the client calling the sfwReuseTables() function described below.
-   
+
    The optional free_table() callback is called to free client resources
    associated with a table. For example, dynamic memory used by the table could
    be freed. The free_table() callbacks are called as a result of the client
@@ -181,7 +181,7 @@ int sfwWriteTables(sfwCtx h, void *stm, ctlTag sfnt_tag);
    The destination stream is opened, the tables are written, the table
    checksums are computed, the sfnt header is written, the head table's
    "checkSumAdjustment" field is computed and written into the head table (if
-   present), and finally the destination stream is closed. 
+   present), and finally the destination stream is closed.
 
    The library will automatically pad the table data to a 4-byte boundary by
    writing up to 3 zero-bytes to the stream after the per-table data is
@@ -219,7 +219,7 @@ enum {
 
 char *sfwErrStr(int err_code);
 
-/* sfwErrStr() maps the "err_code" parameter to a null-terminated error 
+/* sfwErrStr() maps the "err_code" parameter to a null-terminated error
    string. */
 
 void sfwGetVersion(ctlVersionCallbacks *cb);

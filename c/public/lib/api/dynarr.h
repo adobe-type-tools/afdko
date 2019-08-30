@@ -16,7 +16,7 @@ extern "C" {
 /* Dynamic Array Library
    =====================
    The dynamic array library provides simple and flexible support for
-   homogeneous arrays that automatically grow to accommodate new elements. 
+   homogeneous arrays that automatically grow to accommodate new elements.
 
    Dynamic arrays or da's are particularly useful in situations where the size
    of the array isn't known at compile or run time until the last element has
@@ -59,8 +59,8 @@ extern "C" {
    without restriction.
 
    Finally, when a client has finished with a da it is freed by a call to
-   dnaFREE(). 
-   
+   dnaFREE().
+
    The following describes the interface to the library. */
 
 typedef struct dnaCtx_ *dnaCtx;
@@ -95,7 +95,7 @@ dnaCtx dnaNew(ctlMemoryCallbacks *mem_cb, CTL_CHECK_ARGS_DCL);
 
    A client uses the dynamic array library almost exclusively through the
    macros described below. Macros are necessary because the C language doesn't
-   permit types to be manipulated flexibly enough for this implementation. 
+   permit types to be manipulated flexibly enough for this implementation.
 
    The macro interface to the library doesn't handle memory allocation
    failures, but since clients normally supply memory callback functions that
@@ -116,14 +116,14 @@ void dnaInit(dnaCtx ctx, void *object, size_t init, size_t incr, int check);
    parameter specifies the initial number of elements to be allocated to the
    array when first accessed. The "incr" parameter specifies the number of
    additional elements allocated to the array on subsequent accesses. Note
-   that indexes that exceed the init or init+incr sizes are accomodated by
-   allocating to the next multiple of the incr size that accomodates the index.
+   that indexes that exceed the init or init+incr sizes are accommodated by
+   allocating to the next multiple of the incr size that accommodates the index.
 
    Sometimes it is necessary to initialize the the newly created elements when
    they are first allocated. This can be achieved by attaching an element
    initializer function to the da by explicitly initializing the "func" field
    of the da object with the address of the initializer function after the
-   calling dnaINIT() or dnaINIT_FIRST() and before first use of the da. 
+   calling dnaINIT() or dnaINIT_FIRST() and before first use of the da.
 
    The initializer function's "cnt" parameter specifies the number of elements
    to be initialized and the "base" parameter (whose type must match the da
@@ -161,7 +161,7 @@ long dnaExtend(void *object, size_t elemsize, long length);
    dnaNext          -       da.cnt++                        da.cnt
    dnaExtend        length  da.cnt+=length                  da.cnt
 
-   The fuctions return -1 if memory allocation failure occurs, that is if
+   The functions return -1 if memory allocation failure occurs, that is if
    either the malloc or realloc functions return NULL.
 
    These function are normally used indirectly through the macros described
@@ -201,7 +201,7 @@ long dnaExtend(void *object, size_t elemsize, long length);
     ((void)dnaMax(DNA_DA_ADDR_(da), DNA_ELEM_SIZE_(da), (i)), DNA_ELEM_ADDR_((da), (i)))
 
 /* dnaMAX() is the same as dnaINDEX() except that the da.cnt field is set to
-   be one greater than the maximum index accomodated. */
+   be one greater than the maximum index accommodated. */
 
 #define dnaNEXT(da) \
     ((void)dnaNext(DNA_DA_ADDR_(da), DNA_ELEM_SIZE_(da)), DNA_ELEM_ADDR_((da), (da).cnt - 1))
@@ -242,7 +242,7 @@ void dnaGetVersion(ctlVersionCallbacks *cb);
    da's are declared with the dnaDCL() macro:
 
      dnaDCL(int, integers);
-   
+
    Declares a da called "integers" with elements of type "int".
 
      dnaDCL(char *, strings);
@@ -260,7 +260,7 @@ void dnaGetVersion(ctlVersionCallbacks *cb);
 
      typedef dnaDCL(char, GrowBuf);
      GrowBuf tmp;
-   
+
    Declares a type called "GrowBuf" that is a da with elements of type "char"
    and defines an object called "tmp" of this type. This could be used as a
    temporary char buffer for string manipulation, for example.
@@ -298,7 +298,7 @@ void dnaGetVersion(ctlVersionCallbacks *cb);
      strings.func = initStrings;
 
    Growing and Loading
-   =================== 
+   ===================
    Once a da has been declared and initialized it may be accessed so that
    elements of the underlying array can be loaded. This is accomplished by a
    number of macros that are tailored to particular types of access.

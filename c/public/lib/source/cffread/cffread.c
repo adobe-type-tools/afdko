@@ -413,7 +413,7 @@ void cfrFree(cfrCtx h) {
 
     if (h->cff2.varStore != NULL) {
         /* Call this here rather than end cfrEndFont, so that
-        the allocated memory will be available to aby client modules
+        the allocated memory will be available to any client modules
          */
         var_freeItemVariationStore(&h->cb.shstm, h->cff2.varStore);
     }
@@ -443,7 +443,7 @@ static void fillbuf(cfrCtx h, long offset) {
     h->src.end = h->src.buf + h->src.length;
 }
 
-/* Perform intial seek and buffer fill. */
+/* Perform initial seek and buffer fill. */
 static void seekbuf(cfrCtx h, long offset) {
     if (h->cb.stm.seek(&h->cb.stm, h->stm.src, offset))
         fatal(h, cfrErrSrcStream);
@@ -930,7 +930,7 @@ static void saveDeltaArray(cfrCtx h, size_t max, long *cnt, float *array, long *
                     i++;
                 }
                 /* now, copy the blend deltas default values to blendArray[i]. 
-                We write all the absolute values for region 0, then for region 1, ...,r egion n.*/
+                We write all the absolute values for region 0, then for region 1, ..., region n.*/
                 l = numBlends;
                 for (j = 0; j < numRegions; j++) {
                     float diff = 0;
@@ -959,7 +959,7 @@ static void saveBlend(cfrCtx h, float *realValue, abfOpEntry *blendEntry) {
 
     if (numBlends == 0) {
         blendEntry->value = *realValue;
-        blendEntry->numBlends = 0; /* shows there is no blend value, and the regular value shoud be used instead. */
+        blendEntry->numBlends = 0; /* shows there is no blend value, and the regular value should be used instead. */
         blendEntry->blendValues = NULL;
     } else if (numBlends == 1) {
         int i;
@@ -971,7 +971,7 @@ static void saveBlend(cfrCtx h, float *realValue, abfOpEntry *blendEntry) {
         blendEntry->numBlends = (unsigned short)numBlends;
         blendEntry->blendValues = blendValues;
 
-        // copy the defaul region value
+        // copy the default region value
         blendValues[0] = defaultValue = INDEX_REAL(0);
 
         /* now, copy the blend absolute values to blendArray[i].
@@ -1050,7 +1050,7 @@ static char *savePostScript(cfrCtx h, char *str) {
         q = p + sizeof("/FSType") - 1;
         if (SSCANF_S(q, " %d def%n", &value, &n) == 1 && n != -1 &&
             0 <= value && value < 65536) {
-            /* Sucessfully parsed value; remove definition from string */
+            /* Successfully parsed value; remove definition from string */
             memmove(p, q + n, strlen(p) + 1 - (q - p + n));
 
             if (h->top.FSType != ABF_UNSET_INT)
@@ -1081,7 +1081,7 @@ static char *savePostScript(cfrCtx h, char *str) {
         else
             fatal(h, cfrErrOrigFontType);
 
-        /* Sucessfully parsed value; remove definition from string */
+        /* Successfully parsed value; remove definition from string */
         memmove(p, q + n, strlen(p) + 1 - (q - p + n));
     }
 
@@ -2591,7 +2591,7 @@ static void makeupCFF2Info(cfrCtx h) {
     if (lenFontName > 0)
         addString(h, &strPtrs, &h->top.Copyright, stringBuffer1);
     lenTrademark = nam_getASCIIName(h->cff2.name, &h->cb.shstm, stringBuffer2, sizeof(stringBuffer2), NAME_ID_TRADEMARK, 0);
-    if (lenFontName > 0 && lenTrademark > 0 && ((unsigned long)(lenFontName + lenTrademark) + 2 < sizeof(stringBuffer1))) { /* concatename copyright and trademark strings */
+    if (lenFontName > 0 && lenTrademark > 0 && ((unsigned long)(lenFontName + lenTrademark) + 2 < sizeof(stringBuffer1))) { /* concatenate copyright and trademark strings */
         STRCAT_S(stringBuffer1, STRING_BUFFER_LIMIT, " ");
         STRCAT_S(stringBuffer1, STRING_BUFFER_LIMIT, stringBuffer2);
     }

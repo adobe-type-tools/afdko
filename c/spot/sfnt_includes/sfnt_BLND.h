@@ -22,7 +22,7 @@ typedef struct
 typedef struct
 {
     Card16 flags;
-#define FLAG_MAP (1 << 0) /* Axis has map infomation */
+#define FLAG_MAP (1 << 0) /* Axis has map information */
     Card16 minRange;
     Card16 maxRange;
     Card8 *type;

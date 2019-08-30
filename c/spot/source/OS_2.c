@@ -503,7 +503,7 @@ void dumpFamilyClass(IntX level) {
     }
 }
 
-/* Make panose dump string */
+/* Make Panose dump string */
 static Byte8 *DLPanose(Byte8 buf[11]) {
     IntX i;
 
@@ -856,7 +856,7 @@ void dumpPanose4() {
             "Cartoon",
             "Picture Stems",
             "Ornamented",
-            "Text and Backgroud",
+            "Text and Background",
             "Collage ",
             "Montage",
         };
@@ -971,7 +971,7 @@ void dumpPanose4() {
             "Range of characters",
             "No Fit",
             "Extended Collection",
-            "Litterals",
+            "Literals",
             "No Lower Case",
             "Small Caps",
         };

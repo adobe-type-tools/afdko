@@ -49,8 +49,8 @@ static Byte8 *macScript[] =
         "Greek",                /*  6 */
         "Russian",              /*  7 */
         "RSymbol",              /*  8 */
-        "Devanagri",            /*  9 */
-        "Gurmuki",              /* 10 */
+        "Devanagari",           /*  9 */
+        "Gurmukhi",             /* 10 */
         "Gujarati",             /* 11 */
         "Oriya",                /* 12 */
         "Bengali",              /* 13 */
@@ -253,21 +253,21 @@ static MSLangEntry MSLanguage[] =
         {0x080a, "Spanish(Mexican)"},
         {0x080c, "French(Belgian)"},
         {0x0810, "Italian(Swiss)"},
-        {0x0813, "Belgian(Flemmish)"},
+        {0x0813, "Belgian(Flemish)"},
         {0x0814, "Norwegian(Nynorsk)"},
         {0x0816, "Portuguese(Standard)"},
         {0x0c04, "Chinese(Hong Kong)"},
         {0x0c07, "German(Austrian)"},
         {0x0c09, "English(Australian)"},
-        {0x0c0a, "Spanish(Mordern)"},
+        {0x0c0a, "Spanish(Modern)"},
         {0x0c0c, "French(Canadian)"},
         {0x1004, "Chinese(Singapore)"},
-        {0x1007, "German(Luxemborg)"},
+        {0x1007, "German(Luxembourg)"},
         {0x1009, "English(Canadian)"},
         {0x100c, "French(Swiss)"},
         {0x1407, "German(Liechtenstein)"},
         {0x1409, "English(New Zealand)"},
-        {0x140c, "French(Luxemborg)"},
+        {0x140c, "French(Luxembourg)"},
         {0x1809, "English(Ireland)"},
 };
 
@@ -289,7 +289,7 @@ static Byte8 *unknown = "--unknown--";
 
 #define SIZE(t) (sizeof(t) / sizeof(t[0]))
 
-/* Return platform decription */
+/* Return platform description */
 Byte8 *descPlat(Card16 platformId) {
     if (platformId < SIZE(platform))
         return platform[platformId];

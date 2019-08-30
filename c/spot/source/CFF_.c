@@ -1013,7 +1013,7 @@ void CFF_SynopsisFinish(void) {
     synopsis.title = NULL;
 }
 
-/* Draw glyph tile for font sysnopsis pages */
+/* Draw glyph tile for font synopsis pages */
 int CFF_DrawTile(GlyphId glyphId, Byte8 *code) {
     IntX origShift;
     IntX lsb, rsb, tsb, bsb;
@@ -1486,7 +1486,7 @@ void CFF_getMetrics(GlyphId glyphId,
 
     *origShift = 0; /* This is needed only for TrueType fonts, where the  */
                     /* xMin of in the glyf table glyph record may contain */
-                    /* whitesepace,and this needs to be added to the left */
+                    /* whitespace,and this needs to be added to the left */
                     /* side bearing.*/
 
     if (!loaded) {
@@ -1522,7 +1522,7 @@ void CFF_getMetrics(GlyphId glyphId,
         if (!vmtxGetMetrics(glyphId, &ttsb, &tvadv, CFF__)) {
             *vwidth = tvadv;
             *tsb = ttsb;
-            *bsb = 0; /* TT opnly */
+            *bsb = 0; /* TT only */
             if (yorig != NULL) {
                 if (!VORGGetVertOriginY(glyphId, &vertOriginY, CFF__)) {
                     *yorig = vertOriginY;

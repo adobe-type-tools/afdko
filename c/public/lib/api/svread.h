@@ -17,7 +17,7 @@ extern "C" {
 
 /*SVG Font Parser Library
    =======================================
-   This library parses parses simple SVG fonts. 
+   This library parses parses simple SVG fonts.
 
    This library is initialized with a single call to svrNew() that allocates
    an opaque context (svrCtx) which is passed to subsequent functions and is
@@ -26,7 +26,7 @@ extern "C" {
 
    Each font parse is begun by calling svrBegFont() and completed by calling
    svrEndFont(). Between these calls one or more glyphs may be parsed with the
-   svrIterateGlyphs(), svrGetGlyphByTag(), and svrGetGlyphByName() functions. 
+   svrIterateGlyphs(), svrGetGlyphByTag(), and svrGetGlyphByName() functions.
 
    Memory management and source data functions are provided by two sets of
    client-supplied callbacks described in ctlshare.h. */
@@ -44,7 +44,7 @@ svrCtx svrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
    the library via the mem_cb and stm_cb parameters.
 
    The SVR_CHECK_ARGS macro is passed as the last parameter to svrNew() in
-   order to perform a client/library compatibility check. 
+   order to perform a client/library compatibility check.
 
    The temporary data stream (SVR_TMP_STREAM_ID) and the optional debug data
    stream (SVR_DBG_STREAM_ID) are opened by this call. The debug stream
@@ -72,7 +72,7 @@ int svrIterateGlyphs(svrCtx h, abfGlyphCallbacks *glyph_cb);
    font. (The number of glyphs in the font is passed back to the client via the
    "top" parameter to svrBegFont() in the "sup.nGlyphs" field.) Glyph data is
    passed back to the client via the callbacks specified via the "glyph_cb"
-   parameter (see absfont.h). 
+   parameter (see absfont.h).
 
    Each glyph is introduced by calling the beg() glyph callback. The "info"
    parameter passed by this call provides a means of identifying each glyph.
@@ -92,9 +92,9 @@ int svrGetGlyphByName(svrCtx h,
                       char *gname, abfGlyphCallbacks *glyph_cb);
 
 /* svrGetGlyphByTag(), svrGetGlyphByName() are called
-   obtain glyph data from a glyph selected by its tag (described above) orits
+   obtain glyph data from a glyph selected by its tag (described above) or its
    name respectively. The glyph name is specified by as a
-   null-terminated string via the "gname" parameter. 
+   null-terminated string via the "gname" parameter.
 
    These functions return svrErrNoGlyph if the requested glyph is not present
    in the font or the access method is incompatible with the font type. */
@@ -138,7 +138,7 @@ enum {
 
 char *svrErrStr(int err_code);
 
-/* svrErrStr() maps the "err_code" parameter to a null-terminated error 
+/* svrErrStr() maps the "err_code" parameter to a null-terminated error
    string. */
 
 void svrGetVersion(ctlVersionCallbacks *cb);

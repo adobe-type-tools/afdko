@@ -107,7 +107,7 @@
    Fixed i = 15, f = 16, range [-32768, 32768)
    Frac  i = 1, f = 30, range [-2, 2)
    UFrac i = 2, f = 30, unsigned, range [0, 4)
-   The type "Fixed", defined in the basictypes interface, is simply
+   The type "Fixed", defined in the basic types interface, is simply
    a typedef for integer and is type-equivalent to integer as far
    as the C compiler is concerned.
 

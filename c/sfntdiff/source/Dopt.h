@@ -229,7 +229,7 @@
    opt_Short    short
    opt_Int      int
    opt_Long     long
-   opt_UShort   usigned short
+   opt_UShort   unsigned short
    opt_UInt     unsigned int
    opt_ULong    unsigned long
    opt_Double   double
@@ -365,7 +365,7 @@
    originally passed to opt_Scan().
 
    The handler returns non-zero if it's required that opt_Scan() return 0
-   thereby indicating that an error occured, and returns 0 otherwise.
+   thereby indicating that an error occurred, and returns 0 otherwise.
 
    A default error handling function is provided prints an error message on
    stderr and returns 1 when it's called.
@@ -420,7 +420,7 @@
 
 /* HEADER DEFINITIONS */
 
-extern char *opt_progname; /* Basename of program path */
+extern char *opt_progname; /* Base name of program path */
 
 /* Compute number of options in option array (t) */
 #define opt_NOPTS(t) (sizeof(t) / sizeof(t[0]))
@@ -432,8 +432,8 @@ enum {
     opt_Format,        /* Bad option value format */
     opt_Range,         /* Option's value out of range */
     opt_Required,      /* Required option missing */
-    opt_Unknown,       /* Unrecognised option */
-    opt_Exclusive,     /* Mutually exclusive option confict */
+    opt_Unknown,       /* Unrecognized option */
+    opt_Exclusive,     /* Mutually exclusive option conflict */
     opt_Client         /* First available client error code */
 };
 
@@ -466,7 +466,7 @@ extern opt_Scanner opt_Char;   /* (char) */
 extern opt_Scanner opt_Short;  /* (short) */
 extern opt_Scanner opt_Int;    /* (int) */
 extern opt_Scanner opt_Long;   /* (long) */
-extern opt_Scanner opt_UShort; /* (usigned short) */
+extern opt_Scanner opt_UShort; /* (unsigned short) */
 extern opt_Scanner opt_UInt;   /* (unsigned int) */
 extern opt_Scanner opt_ULong;  /* (unsigned long) */
 extern opt_Scanner opt_Double; /* (double) */

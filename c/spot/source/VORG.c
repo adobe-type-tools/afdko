@@ -146,5 +146,5 @@ void VORGUsage(void) {
     fprintf(OUTPUTBUFF,
             "--- VORG\n"
             "=4  Print glyph name and id\n"
-            "=8  Proof glyph in Kanji em-box, with widht and Y origin annotations.\n");
+            "=8  Proof glyph in Kanji em-box, with width and Y origin annotations.\n");
 }

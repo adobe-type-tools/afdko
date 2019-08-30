@@ -973,7 +973,7 @@ int sfntTTCScan(int argc, char *argv[], int argi, opt_Option *opt) {
     return argi;
 }
 
-/* Print table usage infomation */
+/* Print table usage information */
 void sfntUsage(void) {
     CardX i;
 

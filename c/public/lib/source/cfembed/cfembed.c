@@ -1470,13 +1470,13 @@ static void coverageSafe(cefCtx h) {
     h->coverage.fmt2.RangeRecord.size = 0;
 }
 
-/* Initialize converage-specific data. */
+/* Initialize coverage-specific data. */
 static void coverageNew(cefCtx h) {
     dnaINIT(h->ctx.dna, h->coverage.gids, 100, 200);
     dnaINIT(h->ctx.dna, h->coverage.fmt2.RangeRecord, 50, 100);
 }
 
-/* Free converage-specific data. */
+/* Free coverage-specific data. */
 static void coverageFree(cefCtx h) {
     dnaFREE(h->coverage.gids);
     dnaFREE(h->coverage.fmt2.RangeRecord);
@@ -2143,7 +2143,7 @@ cefCtx cefNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 
     HANDLER
 
-    /* Initilization failed */
+    /* Initialization failed */
     cefFree(h);
     h = NULL;
 

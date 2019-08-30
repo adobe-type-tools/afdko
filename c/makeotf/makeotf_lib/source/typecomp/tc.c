@@ -472,7 +472,7 @@ static void fillSet(tcCtx g) {
                       ((h->copyright == NULL) ? 0 : strlen(h->copyright));
 }
 
-/* Add PostScript wapper header */
+/* Add PostScript wrapper header */
 static void fillWrapHeader(tcCtx g, char *wrapHeader) {
     tcprivCtx h = g->ctx.tcpriv;
     char call[128];
@@ -501,7 +501,7 @@ static void fillWrapHeader(tcCtx g, char *wrapHeader) {
             call);
 }
 
-/* Add PostScript wapper trailer */
+/* Add PostScript wrapper trailer */
 static void fillWrapTrailer(tcCtx g, char *wrapTrailer) {
     static char buf[] =
         "\n"
@@ -1012,13 +1012,13 @@ void tcSetMaxNumSubrsOverride(tcCtx g, unsigned long maxNumSubrs) {
     g->maxNumSubrs = maxNumSubrs;
 }
 
-/* Set the  weight value for the design vectore for making synthetic glyphs */
+/* Set the weight value for the design vectors for making synthetic glyphs */
 void tcSetWeightOverride(tcCtx g, long weight) {
     tcprivCtx h = g->ctx.tcpriv;
     h->syntheticWeight = weight;
 }
 
-/* Get the  weight value for the design vectore for making synthetic glyphs */
+/* Get the weight value for the design vectors for making synthetic glyphs */
 long tcGetWeightOverride(tcCtx g) {
     tcprivCtx h = g->ctx.tcpriv;
     return (h->syntheticWeight);

@@ -1402,7 +1402,7 @@ void ttoDumpFeaturesByScript(ScriptList *scriptlist, FeatureList *featurelist, L
     }
 }
 
-/* Used only with elvels 6 and 7 */
+/* Used only with levels 6 and 7 */
 void ttoDecompileByScript(ScriptList *scriptlist, FeatureList *featurelist, LookupList *lookuplist,
                           ttoDumpCB dumpCB, IntX level) {
     IntX i, j, k, m, n, index;

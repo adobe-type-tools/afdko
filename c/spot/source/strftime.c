@@ -1,7 +1,7 @@
 /*
  * strftime.c
  *
- * Public-domain relatively quick-and-dirty implemenation of
+ * Public-domain relatively quick-and-dirty implementation of
  * ANSI library routine for System V Unix systems.
  *
  * It's written in old-style C for maximal portability.

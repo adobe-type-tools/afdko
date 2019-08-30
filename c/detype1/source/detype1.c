@@ -525,7 +525,7 @@ static void usage(void) {
     printf("usage: detype1 [font [text]]\n");
 }
 
-#ifndef _MSC_VER /* unix */
+#ifndef _MSC_VER /* Unix */
 extern int getopt(int argc, char **argv, char *optstring);
 extern int optind;
 extern char *optarg;

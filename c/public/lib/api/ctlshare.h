@@ -52,7 +52,7 @@ and prints this to version_buf */
    the affected functions can be indicated to the compiler by using the
    non-standard __cdecl keyword before function name.
 
-   The CoreType libararies have been written so that the affected functions
+   The CoreType libraries have been written so that the affected functions
    include the CTL_CDECL macro before their function names. Therefore, clients
    wishing to compile on the Microsoft platform using Pascal calling
    conventions can simply define CTL_CDECL as __cdecl to obtain the correct
@@ -75,8 +75,8 @@ struct ctlMemoryCallbacks_ {
 
    [required] The manage() callback manages memory in a similar manner to the
    realloc() ISO C Standard library function. Its operation is defined (in
-   standard library function terms) as follows: 
-   
+   standard library function terms) as follows:
+
    old      size    action      return
    ---      ----    ------      ------
    ==NULL   ==0     none        NULL
@@ -89,7 +89,7 @@ struct ctlMemoryCallbacks_ {
    client to access the ctx field.
 
    This function must observe the alignment requirements imposed by the C
-   Standard for memory allocators. 
+   Standard for memory allocators.
 
    If the client has access to a conformant ISO C realloc() function a possible
    implementation is as follows:
@@ -112,15 +112,15 @@ struct ctlMemoryCallbacks_ {
            {
            if (old == NULL)
                return malloc(size);
-           else                         
+           else
                return realloc(old, size);
-           }                                
-       else                             
-           {                                
-           if (old == NULL)             
+           }
+       else
+           {
+           if (old == NULL)
                return NULL;
-           else                         
-               {                            
+           else
+               {
                free(old);
                return NULL;
                }
@@ -149,7 +149,7 @@ struct ctlStreamCallbacks_ {
    perform I/O on abstract data streams. They are modeled on the Standard C
    library functions of the same name but do not need to be implemented using
    files. A client, for example, could choose to keep the data in memory
-   buffers. 
+   buffers.
 
    A stream is identified by a unique "id" parameter that is provided by the
    open() call. The client turns this into a client-specific pointer that is
@@ -351,18 +351,18 @@ struct ctlSharedStmCallbacks_ {
 
 /* ctlSharedStmCallbacks is used for reading SFNT tables shared by multiple font formats.
  * Unlike other font reading libraries, none of stream data and stream reading functions are
- * implemented in this library. Instead they are implmented by each host library as callbacks.
+ * implemented in this library. Instead they are implemented by each host library as callbacks.
  */
 
 /* ----------------------------- Tag Constants ----------------------------- */
 
 /* Several Apple data structures use the concept of a tag which is simply a
    32-bit big endian integer constant that is expressed as four 8-bit
-   charaters. Macintosh compilers normally provide a C language extension for
-   creating tag constants, e.g. 'sfnt'. This is convienient but non-portable.
+   characters. Macintosh compilers normally provide a C language extension for
+   creating tag constants, e.g. 'sfnt'. This is convenient but non-portable.
    The following definition, while a little more awkward to use, is portable
    and creates an integer constant so can be used anywhere a constant is
-   required, e.g. as an enumeration value. Example usage: 
+   required, e.g. as an enumeration value. Example usage:
    CTL_TAG('s','f','n','t') . */
 
 typedef unsigned long ctlTag;
@@ -387,7 +387,7 @@ typedef unsigned long ctlTag;
    null-terminated error string.
 
    In order to keep the error code and error string definitions in sync they
-   are defined in a speparate include file by a macro called CTL_DCL_ERR that
+   are defined in a separate include file by a macro called CTL_DCL_ERR that
    takes a name and a string parameter.
 
    By defining the CTL_DCL_ERR macro to select only one of its two parameters
@@ -405,7 +405,7 @@ typedef unsigned long ctlTag;
 
    before the file is included an initializer may be built. */
 
-/* ---------------------- Client/Library Compatibiliy ---------------------- */
+/* ---------------------- Client/Library Compatibility ---------------------- */
 
 struct ctlPadStruct {
     char c;
@@ -445,13 +445,13 @@ struct ctlPadStruct {
    in the library initialization function usually call <lib-prefix>New(). The
    CTL_CHECK_ARGS_CALL macro is used to pass the compatibility checking args to
    the called library initialization function. The CTL_CHECK_ARGS_TEST macro is
-   used within the library to peform the validation test.
+   used within the library to perform the validation test.
 
    The following incompatibilities are checked with this mechanism:
 
    o APIs have different versions
    o basic C types have different sizes
-   o structure padding differs 
+   o structure padding differs
 */
 
 /* ---------------------- Library Version Information ---------------------- */
@@ -513,7 +513,7 @@ enum {
    The "getversion" callback returns the library name and its version number to
    the client via the "libname" and "version" parameters. The callback set is
    also available via the "cb" parameter so that the client may access the
-   "ctx" field if neccessary. */
+   "ctx" field if necessary. */
 
 /* ---------------------- Security Functions ---------------------- */
 

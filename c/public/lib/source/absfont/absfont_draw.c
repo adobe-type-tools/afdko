@@ -397,7 +397,7 @@ static void drawLabel(abfDrawCtx h, float ax, float ay) {
         return; /* Tile mode */
 
     if (h->path.cnt >= 2) {
-        /* Make vector 90 degress counter clockwise to a->c */
+        /* Make vector 90 degrees counter clockwise to a->c */
         Vector s = makeVec(h->path.bx - ax, h->path.by - ay);
         Vector t = makeVec(h->path.cx - h->path.bx, h->path.cy - h->path.by);
         Vector u = makeVec(s.x + t.x, s.y + t.y);

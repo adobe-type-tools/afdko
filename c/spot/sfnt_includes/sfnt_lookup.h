@@ -9,7 +9,7 @@
 #ifndef FORMAT_LOOKUP_H
 #define FORMAT_LOOKUP_H
 
-/* 
+/*
  * Different lookup clients store different lookup DATA:
  *
  * Table        Data

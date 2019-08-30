@@ -154,7 +154,7 @@ void nameDump(IntX level, LongN start) {
                     continue;
                 }
                 langTagRec = &name->langTag[langIndex];
-                DL(2, (OUTPUTBUFF, "\tLanguag Tag Index[%d]={%04hx} ", langIndex, langTagRec->offset));
+                DL(2, (OUTPUTBUFF, "\tLanguage Tag Index[%d]={%04hx} ", langIndex, langTagRec->offset));
                 dumpLanguageTagString(langTagRec, level);
             }
         }
@@ -240,7 +240,7 @@ void nameUsage(void) {
     fprintf(OUTPUTBUFF, "=2  raw field and table dump.\n");
     fprintf(OUTPUTBUFF, "=3  print single line for all name record values:\n");
     fprintf(OUTPUTBUFF, "          record[index]={platformId,scriptId,languageId,nameId,length,offset} = <name value>\n");
-    fprintf(OUTPUTBUFF, "=4  raw field and table dump, but with decriptive names for some field values.\n");
+    fprintf(OUTPUTBUFF, "=4  raw field and table dump, but with descriptive names for some field values.\n");
 }
 
 Byte8 *nameFontName(void) {

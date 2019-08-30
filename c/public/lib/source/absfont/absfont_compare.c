@@ -41,7 +41,7 @@ static int comparePrivateDicts(abfPrivateDict *private1,
                                abfPrivateDict *private2) {
     int i;
 
-    /* note: for all arrays, unused arrays are init'd with a cnt of 0. */
+    /* note: for all arrays, unused arrays are initialized with a cnt of 0. */
 
     if (private1->BlueValues.cnt != private2->BlueValues.cnt)
         return 1;
