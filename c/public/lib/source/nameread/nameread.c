@@ -515,7 +515,7 @@ long nam_generateLastResortInstancePSName(nam_name nameTbl,
 
     familyNameLen = (unsigned long)nameLen;
 
-    /* generate a SHA1 value of the generated name as the identififier in a last resort name.
+    /* generate a SHA1 value of the generated name as the identifier in a last resort name.
      */
     hashLen = sizeof(sha1_hash);
     for (i = 0; i < 2; i++) {
@@ -527,7 +527,7 @@ long nam_generateLastResortInstancePSName(nam_name nameTbl,
             nameLen = -2;
             goto cleanup;
         }
-        hashLen /= 2; /* give it another chance by halvening the hash length */
+        hashLen /= 2; /* give it another chance by halving the hash length */
     }
     nameLen = familyNameLen;
     STRNCPY_S(instanceName, instanceNameLen, buffer, nameLen);

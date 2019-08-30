@@ -94,7 +94,7 @@ int pstSetDecrypt(pstCtx h);
    called after reading the operator token sequence "currentfile eexec". The
    decryption filter may be removed by calling pstSetPlain(). This function
    returns 0 if successful or an error code otherwise.
-   
+
    Note: calling this function inappropriately will result in garbage input
    data being presented to the parser. */
 
@@ -178,7 +178,7 @@ double pstConvReal(pstCtx h, pstToken *token);
 
 /* pstConvReal() converts the real "token" parameter to a real number. If the
    token isn't a real 0.0 is returned. See the strtod() standard C library
-   function for a description of the values returned on overflow or 
+   function for a description of the values returned on overflow or
    underflow conditions. */
 
 char *pstConvString(pstCtx h, pstToken *token, long *length);
@@ -211,7 +211,7 @@ void *pstHijackStream(pstCtx h, long *offset);
 /* pstHijackStream() returns the source stream and the current stream offset
    via the "offset" parameter to the client. This permits the client to regain
    control of the parsing process by directly reading bytes from the stream,
-   abandoning the tokenizing services offered by the library. Tokeninzing of
+   abandoning the tokenizing services offered by the library. Tokenizing of
    the stream cannot be resumed after calling this function and therefore the
    client can only call pstEndParse() when finished. NULL is returned if a
    stream error is encountered.
@@ -248,7 +248,7 @@ enum {
 
 char *pstErrStr(int err_code);
 
-/* pstErrStr() maps the "err_code" parameter to a null-terminated error 
+/* pstErrStr() maps the "err_code" parameter to a null-terminated error
    string. */
 
 void pstGetVersion(ctlVersionCallbacks *cb);

@@ -144,7 +144,7 @@ void GDEFRead(LongN start, Card32 length) {
     if (GDEF.MarkGlyphSetsDef)
         readMarkGlyphSetsDef(start + GDEF.MarkGlyphSetsDef, &GDEF._MarkGlyphSetsDef);
 
-    length = 0; /* supress compiler complaint */
+    length = 0; /* suppress compiler complaint */
 }
 
 static void freeAttachList(AttachList* attachList) {
@@ -478,5 +478,5 @@ void GDEFFree(void) {
 void GDEFUsage(void) {
     fprintf(OUTPUTBUFF,
             "--- GDEF\n"
-            "=7  output the more readoble feature file format\n");
+            "=7  output the more readable feature file format\n");
 }

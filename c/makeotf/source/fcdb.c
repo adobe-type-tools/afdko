@@ -82,7 +82,7 @@ static void rptError(fcdbCtx h, int errid) {
 
 /* Add new database file */
 void fcdbAddFile(fcdbCtx h, unsigned fileid, void *callBackCtx) {
-    unsigned short syntaxVersion = 0; /* 0 means not yet set. Inidcates which version is being used. */
+    unsigned short syntaxVersion = 0; /* 0 means not yet set. Indicates which version is being used. */
 
     /* Next state table */
     static unsigned char next[10][9] = {
@@ -103,7 +103,7 @@ void fcdbAddFile(fcdbCtx h, unsigned fileid, void *callBackCtx) {
     /* Action table */
 
 #define I_ (1 << 0) /* Increment line counter */
-#define E_ (1 << 1) /* Report sytax error */
+#define E_ (1 << 1) /* Report syntax error */
 #define A_ (1 << 2) /* Accumulate key */
 #define S_ (1 << 3) /* Save key */
 #define O_ (1 << 4) /* Open square bracket; save length & reset key index */
@@ -285,7 +285,7 @@ void fcdbAddFile(fcdbCtx h, unsigned fileid, void *callBackCtx) {
     h->cb.setMenuVersion(callBackCtx, fileid, syntaxVersion);
 }
 
-/* Get key identifer for keyword */
+/* Get key identifier for keyword */
 static int getKeywordId(char *keyword) {
     static struct {
         char *name;
@@ -325,7 +325,7 @@ static int getKeywordId(char *keyword) {
 
 /* Parse comma-terminated number from head of string. If no number or number
    not comma-terminated return -1. If number converted but out of range return
-   -2. If conversion suceeded a pointer following the terminating comma is
+   -2. If conversion succeeded a pointer following the terminating comma is
    return by the "q" argument. */
 static long parseNumber(fcdbCtx h, char **p, int isNameId) {
     char *q;
@@ -349,7 +349,7 @@ static long parseNumber(fcdbCtx h, char **p, int isNameId) {
                 return -2;
             }
 
-            /* Conversion suceeded */
+            /* Conversion succeeded */
             *p = q + 1;
             return value;
         } else {
@@ -529,7 +529,7 @@ static int parseRecord(fcdbCtx h) {
     /* Action table */
 
 #define I_ (1 << 0) /* Increment line counter */
-#define E_ (1 << 1) /* Report sytax error */
+#define E_ (1 << 1) /* Report syntax error */
 #define P_ (1 << 2) /* Save string pointer */
 #define K_ (1 << 3) /* Save keyword */
 #define V_ (1 << 4) /* Save value */

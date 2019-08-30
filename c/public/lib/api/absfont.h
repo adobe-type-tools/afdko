@@ -71,7 +71,7 @@ typedef struct
 {
     long flags;                /* 0 */
 #define ABF_CID_FONT  (1 << 0) /* CID-keyed font */
-#define ABF_SYN_FONT  (1 << 1) /* Synthethic font */
+#define ABF_SYN_FONT  (1 << 1) /* Synthetic font */
 #define ABF_SING_FONT (1 << 2) /* SING glyphlet font */
     long srcFontType;          /* ABF_UNSET_INT */
     char *filename;            /* ABF_UNSET_PTR */
@@ -444,7 +444,7 @@ typedef struct /* Glyph information */
 
 void abfInitGlyphInfo(abfGlyphInfo *info);
 
-/* abfInitGlyphInfo() is provided for client convienience and initializes the
+/* abfInitGlyphInfo() is provided for client convenience and initializes the
    "info" parameter to a standard safe state. */
 
 typedef struct abfGlyphCallbacks_ abfGlyphCallbacks;
@@ -505,7 +505,7 @@ struct abfGlyphCallbacks_ {
    Each subpath must begin with a call to move() in order to specify the
    starting coordinate of the subpath via its parameters.
 
-   line() and curve() extend the path with a line or bezier curve segments,
+   line() and curve() extend the path with a line or Bezier curve segments,
    respectively, that are drawn from last point on the last segment or from the
    point specified with move().
 
@@ -621,11 +621,11 @@ typedef int (*abfGlyphBegCallback)(abfGlyphCallbacks *cb, abfGlyphInfo *info);
    be implemented in this layer by defining a beg() function that calls the
    callee library's beg() function only for glyphs in a the subset. The
    "indirect_ctx" field is provided if this client layer needs its own context.
-   The abfGlyphBegCallback typedef is provided as a convienence for clients
+   The abfGlyphBegCallback typedef is provided as a convenience for clients
    that need to implement this approach.
 
    The required components of a glyph callback sequence are: beg(), width(),
-   and end(), in that order. The call to width() must imediately follow the
+   and end(), in that order. The call to width() must immediately follow the
    call to beg(). Marking glyphs will also make calls to move(), line(), and
    curve(). Hinted glyphs may make calls the stem() and/or flex(). Finally,
    some glyphs may make calls to genop() and/or seac().
@@ -669,7 +669,7 @@ void abfFreeFontDesc(ctlMemoryCallbacks *mem_cb, abfFontDescHeader *hdr);
 
 /* abfNewFontDesc() makes a font descriptor from the information supplied via
    its parameters that is suitable for use with the abfSetUpValues() function
-   in the buildch library. Most of the imformation needed to do this is
+   in the buildch library. Most of the information needed to do this is
    obtained via "top" parameter which would normally be obtained by calling one
    of the BegFont() functions in the font parsing libraries.
 
@@ -680,7 +680,7 @@ void abfFreeFontDesc(ctlMemoryCallbacks *mem_cb, abfFontDescHeader *hdr);
    struct for the font dict specified by the "iFD" parameter.
 
    The "CharstringType" field must have a value of 1 or 2 indicating Type 1 or
-   Type 2 charstrings, respectively. The "lenSubrArray" field contines the
+   Type 2 charstrings, respectively. The "lenSubrArray" field continues the
    count of the local subroutines or 0 if there are none. The "defaultWidthX"
    and "nominalWidthX" fields contain the values of associated with the
    corresponding operators in the CFF Private DICT or 0 if the operators are
@@ -745,13 +745,13 @@ struct abfMetricsCtx_ {
    the facility by setting bits as follows:
 
    ABF_MTX_TRANSFORM - transform path using the "matrix" field. The client must
-   intialize the "matrix" field appropriately when using this option. */
+   initialize the "matrix" field appropriately when using this option. */
 
 extern const abfGlyphCallbacks abfGlyphMetricsCallbacks;
 
 /* abfGlyphMetricsCallbacks is a glyph callback set template that will compute
    bounding box and horizontal advance width metrics for data passed to these
-   callbacks. The facilty may be used as follows:
+   callbacks. The facility may be used as follows:
 
    struct abfMetricsCtx_ ctx;
    abfGlyphCallbacks cb = abfGlyphMetricsCallbacks; // copy template
@@ -831,7 +831,7 @@ extern const abfGlyphCallbacks abfGlyphDumpCallbacks;
 typedef struct abfDrawCtx_ *abfDrawCtx;
 struct abfDrawCtx_ {
     long flags;                   /* Control flags */
-#define ABF_FLIP_TICS    (1 << 0) /* Flip coord tics to otherside of path */
+#define ABF_FLIP_TICS    (1 << 0) /* Flip coord tics to other side of path */
 #define ABF_SHOW_BY_ENC  (1 << 1) /* Show by 8-bit encoding */
 #define ABF_NO_LABELS    (1 << 2) /* Don't show numeric labels */
 #define ABF_DUPLEX_PRINT (1 << 3) /* Prepend duplex print enable */
@@ -902,7 +902,7 @@ extern const abfGlyphCallbacks abfGlyphDrawCallbacks;
 typedef struct abfAFMCtx_ *abfAFMCtx;
 struct abfAFMCtx_ {
     FILE *fp; /* Output stream */
-    FILE *tmp_fp; /* tempory output stream */
+    FILE *tmp_fp; /* temporary output stream */
     int err_code;
     struct /* glyph metrics */
     {

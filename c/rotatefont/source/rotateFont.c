@@ -27,8 +27,8 @@ typedef struct
 
 typedef struct
 {
-#define ROTATE_MATRIX_SET 1              /* if the roation option was set. */
-#define ROTATE_KEEP_HINTS 1 << 1         /* if the rotation is some multipel of 90, then we can keep the hints in the charstring. */
+#define ROTATE_MATRIX_SET 1              /* if the rotation option was set. */
+#define ROTATE_KEEP_HINTS 1 << 1         /* if the rotation is some multiple of 90, then we can keep the hints in the charstring. */
 #define ROTATE_0 1 << 2                  /* rotation is 0 degrees */
 #define ROTATE_90 1 << 3                 /* rotation is 90 degrees */
 #define ROTATE_180 1 << 4                /* rotation is 180 degrees */
@@ -40,8 +40,8 @@ typedef struct
 #define ROTATE_UPDATE_FONTMATRIX 1 << 10 /* Scale FontMatrix as well as coordinates. */
 
     unsigned short flags;
-    float origMatrix[6];            /* rotation/translation matric specified by user. */
-    float curMatrix[6];             /* rotation/translation matric currently in use. */
+    float origMatrix[6];            /* rotation/translation matrix specified by user. */
+    float curMatrix[6];             /* rotation/translation matrix currently in use. */
     abfGlyphCallbacks savedGlyphCB; /* originally chosen writer call-backs */
     void (*endfont)(txCtx h);       /* override to fix up hint dicts */
     char rtFile[FILENAME_MAX];      /* text file containing per-glyph entries */
@@ -580,7 +580,7 @@ static void rotateEndFont(txCtx h) {
                private->StemSnapV.array[j] = -SX(private->StemSnapV.array[j]);
         } else if (rotateInfo->flags & ROTATE_90) /* just scale and transform in place. Swap V and H. The new H ints need a reverse sort. */
         {
-            /* We no longer have sensible values for alignment zones. Use  hardcoded value */
+            /* We no longer have sensible values for alignment zones. Use hard-coded value */
            private->BlueValues.cnt = 4;
            private->BlueValues.array[0] = -250;
            private->BlueValues.array[1] = -250;
@@ -610,7 +610,7 @@ static void rotateEndFont(txCtx h) {
            private->StemSnapH.cnt = tempCnt;
         } else if (rotateInfo->flags & ROTATE_270) /* just scale and transform in place. Swap V and H. The new V ints need a reverse sort. */
         {
-            /* We no longer have sensible values for alignment zones. Use  hardcoded value */
+            /* We no longer have sensible values for alignment zones. Use  hard-coded value */
            private->BlueValues.cnt = 4;
            private->BlueValues.array[0] = -250;
            private->BlueValues.array[1] = -250;
@@ -814,7 +814,7 @@ static void rotate_stem(abfGlyphCallbacks *cb,
         edge1 = offset + RND(scale * edge1);
     } else if (rotateInfo->flags & ROTATE_180) /* 180 degrees.*/
     {
-        /* H hints remain H hints. Since positive values become negative, edg0 and edge1 need to be swapped */
+        /* H hints remain H hints. Since positive values become negative, edge0 and edge1 need to be swapped */
         if (flags & ABF_VERT_STEM) {
             offset = farray[4];
             scale = farray[0];
@@ -864,7 +864,7 @@ static void rotate_stem(abfGlyphCallbacks *cb,
         {
             /* H hints remain H hints. */
             if (flags & ABF_VERT_STEM) {
-                return; /* Becuase of the shear, vertical stems can't be applied. */
+                return; /* Because of the shear, vertical stems can't be applied. */
             } else {
                 offset = farray[5];
                 scale = farray[3];
@@ -1023,7 +1023,7 @@ static void setupRotationCallbacks(txCtx h) {
     h->cb.glyph.move = rotate_move;
     h->cb.glyph.line = rotate_line;
     h->cb.glyph.curve = rotate_curve;
-    if ((rotateInfo->flags & ROTATE_KEEP_HINTS) || (rotateInfo->origMatrix[1] == 0)) /* rotation is some mulitple of 90 degrees */
+    if ((rotateInfo->flags & ROTATE_KEEP_HINTS) || (rotateInfo->origMatrix[1] == 0)) /* rotation is some multiple of 90 degrees */
     {
         h->cb.glyph.stem = rotate_stem;
         h->cb.glyph.flex = rotate_flex;
@@ -1167,7 +1167,7 @@ static void doFile(txCtx h, char *srcname) {
         fprintf(stderr, "--- Filename: %s\n", h->src.stm.filename);
     }
 
-    /* The font file we are reading may contain muliple fonts, e.g. a TTC or
+    /* The font file we are reading may contain multiple fonts, e.g. a TTC or
        multiple sfnt resources, so keep open until the last font processed */
     h->src.stm.flags |= STM_DONT_CLOSE;
 
@@ -1392,7 +1392,7 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                 break;
             case opt_rt:
                 if (rotateInfo->flags & ROTATE_MATRIX_SET)
-                    fatal(h, "-rt option must preceed -rtf option, and cannot be specified twice or with -matrix");
+                    fatal(h, "-rt option must precede -rtf option, and cannot be specified twice or with -matrix");
                 i = setRotationMatrix(h, argc, argv, ++i, 0);
                 break;
             case opt_rtf:
@@ -1417,7 +1417,7 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                 break;
             case opt_matrix:
                 if (rotateInfo->flags & ROTATE_MATRIX_SET)
-                    fatal(h, "-matrix option must preceed -rtf option, and cannot be specified twice or with -rt");
+                    fatal(h, "-matrix option must precede -rtf option, and cannot be specified twice or with -rt");
                 i = setRotationMatrix(h, argc, argv, ++i, 1);
                 break;
             case opt_l:
@@ -2333,7 +2333,7 @@ int CTL_CDECL main(int argc, char *argv[]) {
         /* Option list ends with script option */
         int i;
 
-        /* Copy args preceeding -s */
+        /* Copy args preceding -s */
         for (i = 0; i < argc - 2; i++)
             *dnaNEXT(h->script.args) = argv[i];
 

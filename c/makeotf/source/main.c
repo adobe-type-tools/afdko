@@ -4,7 +4,7 @@
 /***********************************************************************/
 
 /* This module provides a test client for the hot library. hot library clients
-   do not need to include this module; it is mearly provided for reference */
+   do not need to include this module; it is merely provided for reference */
 
 #if BUILDLIB
 #include "makeotflib.h"
@@ -66,7 +66,7 @@ static struct {
     long addGlyphWeight;        /* used when adding synthetic glyphs,            */
                                 /* to override heuristics for determining        */
                                 /* target weight for use with the FillinMM font. */
-    unsigned long maxNumSubrs;  /* if nto 0, caps the number of subrs used. */
+    unsigned long maxNumSubrs;  /* if not 0, caps the number of subrs used. */
     unsigned short os2_version; /* OS/2 table version override. Ignore if 0. */
     short fsSelectionMask_on;   /* mask for OR-ing with OS/2 table fsSelection.  */
     short fsSelectionMask_off;  /* mask for NAND-ing with OS/2 table fsSelection. */
@@ -704,7 +704,7 @@ static void parseArgs(int argc, char *argv[], int inScript) {
                         break;
 
                     case 'V':
-                        convert.flags |= HOT_VERBOSE;              // controls warnigns during oparsing/conversion to CFF
+                        convert.flags |= HOT_VERBOSE;              // controls warnings during parsing/conversion to CFF
                         convert.otherflags |= OTHERFLAGS_VERBOSE;  // controls warnings during feature file processing
                         break;
 

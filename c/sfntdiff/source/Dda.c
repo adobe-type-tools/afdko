@@ -29,7 +29,7 @@ void da_Init(void *object, unsigned long intl, unsigned long incr) {
     da->init = NULL;
 }
 
-/* Grow dynamic array to accomodate index */
+/* Grow dynamic array to accommodate index */
 void da_Grow(void *object, size_t element, unsigned long index) {
     DA *da = object;
     long newSize = (index + da->incr) / da->incr * da->incr;

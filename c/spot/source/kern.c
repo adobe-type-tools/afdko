@@ -44,7 +44,7 @@ static Format0 *read0(Card32 offset, Card32 length) {
         pair->value = memNew(sizeof(FWord) * nMasters);
         for (j = 0; j < nMasters; j++)
             IN1(pair->value[j]);
-        /* printf("Offset at nd of kern pairr '%d': %d.\n", i, fileTell()); */
+        /* printf("Offset at end of kern pair '%d': %d.\n", i, fileTell()); */
     }
 
     return fmt;

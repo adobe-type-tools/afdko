@@ -31,14 +31,14 @@ extern "C" {
    Memory management and stream I/O are implemented via two sets of
    client-supplied callback functions passed to ufwNew(). I/O is performed on
    two abstract data streams:
-   
+
    o UFO font data (w)
    o debug diagnostics (w)
 
    These streams are managed by a single set of client callback functions
    enabling the client to choose from a wide variety of implementation schemes
    ranging from disk files to memory buffers. The temporary stream is used to
-   keep the run-time memory usage within resonable limits when handling large
+   keep the run-time memory usage within reasonable limits when handling large
    fonts.
 
    Glyph data is passed to the library via the set of glyph callback functions
@@ -76,9 +76,9 @@ extern const abfGlyphCallbacks ufwGlyphCallbacks;
    passed to these callbacks to the current font. Clients should make a copy of
    this data structure and set the "direct_ctx" field to the context returned
    by ufwNew().
-  
+
    Clients need to be aware that certain values are not valid in an XML 1.0 file.
-   Because of this the library will skip glyphs that have a unicode value 
+   Because of this the library will skip glyphs that have a unicode value
    that is equal to an invalid character.  These include all control chars (values
    less than 0x20) except 0x9, 0xa, 0xd which represent whitespace. */
 
@@ -106,7 +106,7 @@ enum {
 
 char *ufwErrStr(int err_code);
 
-/* ufwErrStr() maps the "err_code" parameter to a null-terminated error 
+/* ufwErrStr() maps the "err_code" parameter to a null-terminated error
    string. */
 
 void ufwGetVersion(ctlVersionCallbacks *cb);

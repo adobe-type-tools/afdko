@@ -3,7 +3,7 @@
 /***********************************************************************/
 
 /*
- * Presence of at least half (13) of the following UVs constitues support of
+ * Presence of at least half (13) of the following UVs constitutes support of
  * Simplified (as opposed to Traditional) Chinese, given that the CJK Unified
  * Ideographs and Bopomofo Unicode ranges are supported.
  */

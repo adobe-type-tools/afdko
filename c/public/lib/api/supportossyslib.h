@@ -9,12 +9,12 @@
 /*
  * The purpose of ossyslib.h is to provide declarations for routines that
  * are provided by the system's libraries but, alas, not declared in system
- * header files.  
+ * header files.
  * XXX: The function of this file could be shifted to util.h, allowing a
  *      simplification of the atm->20xx source code transfer.
  */
 
-/* Declarations for system library routines on unix machines */
+/* Declarations for system library routines on Unix machines */
 #ifndef OSSYSLIB_H
 #define OSSYSLIB_H
 

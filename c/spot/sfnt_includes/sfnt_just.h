@@ -11,7 +11,7 @@
 
 #define just_VERSION VERSION(1, 0)
 
-/* Ligature decompostion action */
+/* Ligature decomposition action */
 typedef struct
 {
     GlyphId ligglyph;

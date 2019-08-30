@@ -289,7 +289,7 @@ static void cstr_savenum(cstrCtx h, float r) {
     long i;
     unsigned char *t;
     if (h->cstr.cnt + 4 >= h->cstr.size) {
-        /* Grow buffer to accomodate maximum number length */
+        /* Grow buffer to accommodate maximum number length */
         if (dnaGrow(&h->cstr, 1, h->cstr.cnt + 4)) {
             h->g->err.code = cfwErrNoMemory;
             return;
@@ -303,7 +303,7 @@ static void cstr_savenum(cstrCtx h, float r) {
 /* Save op code in charstring. */
 static void cstr_saveop(cstrCtx h, int op) {
     if (h->cstr.cnt + 1 >= h->cstr.size) {
-        /* Grow buffer to accomodate maximum op size */
+        /* Grow buffer to accommodate maximum op size */
         if (dnaGrow(&h->cstr, 1, h->cstr.cnt + 1)) {
             h->g->err.code = cfwErrNoMemory;
             return;
@@ -1647,7 +1647,7 @@ static unsigned char addStem(cstrCtx h, int flags, float edge0, float edge1) {
     /* On the Pentium architecture in an optimized build, float variables
        are kept in 80-bit registers which is more precision than is needed and
        in fact causes the comparisons against the ABF_EDGE_HINT_LO and
-       ABF_EDGE_HINT_HI integers to fail. The "voilatile" qualifier forces
+       ABF_EDGE_HINT_HI integers to fail. The "volatile" qualifier forces
        intermediate stores and loads which circumvents this problem. */
     volatile float delta;
 #else
@@ -1716,7 +1716,7 @@ static unsigned char addStemVF(cstrCtx h, int flags, abfBlendArg *edge0v, abfBle
     /* On the Pentium architecture in an optimized build, float variables
      are kept in 80-bit registers which is more precision than is needed and
      in fact causes the comparisons against the ABF_EDGE_HINT_LO and
-     ABF_EDGE_HINT_HI integers to fail. The "voilatile" qualifier forces
+     ABF_EDGE_HINT_HI integers to fail. The "volatile" qualifier forces
      intermediate stores and loads which circumvents this problem. */
     volatile float delta;
 #else

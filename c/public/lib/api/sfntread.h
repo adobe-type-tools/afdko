@@ -78,7 +78,7 @@ long sfrGetNextTTCOffset(sfrCtx h);
 /* sfrGetNextTTCOffset() is called to iterate through the offsets in TrueType
    Collection table directory. It must only be called if a previous call to
    sfrBegFont() returned a version tag value of 'ttcf'. Repeated calls to
-   sfrGetNextTTCOffset() return succesive offsets from the table directory
+   sfrGetNextTTCOffset() return successive offsets from the table directory
    stating with the first. When all the offsets in the table directory have
    been returned, the function returns 0 indicating the end of the list. The
    next call will then wrap round to the beginning of the list and return the
@@ -116,9 +116,9 @@ sfrTable *sfrGetNextTable(sfrCtx h);
 /* sfrGetNextTable() is called to iterate through all the tables in the table
    directory of the sfnt. It must only be called if the last call to
    sfrBegFont() returned a valid tag whose value wasn't 'ttcf'. Repeated calls
-   to sfrGetNextTable() return succesive table directory entries starting with
+   to sfrGetNextTable() return successive table directory entries starting with
    the first. When all the entries in the table directory have been returned,
-   the fuction returns NULL indicating the end of the list. The next call will
+   the function returns NULL indicating the end of the list. The next call will
    then wrap round to the beginning of the list and return the first entry
    again. */
 

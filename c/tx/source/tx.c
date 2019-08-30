@@ -406,7 +406,7 @@ static void doFile(txCtx h, char *srcname) {
         fprintf(stderr, "--- Filename: %s\n", h->src.stm.filename);
     }
 
-    /* The font file we are reading may contain muliple fonts, e.g. a TTC or
+    /* The font file we are reading may contain multiple fonts, e.g. a TTC or
        multiple sfnt resources, so keep open until the last font processed */
     h->src.stm.flags |= STM_DONT_CLOSE;
 
@@ -1575,7 +1575,7 @@ int CTL_CDECL main(int argc, char *argv[]) {
         /* Option list ends with script option */
         int i;
 
-        /* Copy args preceeding -s */
+        /* Copy args preceding -s */
         for (i = 0; i < argc - 2; i++)
             *dnaNEXT(h->script.args) = argv[i];
 

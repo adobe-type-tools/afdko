@@ -22,8 +22,8 @@ const Byte8 *EnglishMessages[] =
         "GPOS: unsupported dump lookup type [%d][0x%x]@0x%x\n",                                                            /* SPOT_MSG_GPOSUNSDLOOK */
         "GPOS: unknown dump lookup type [%d][0x%x]@0x%x\n",                                                                /* SPOT_MSG_GPOSUNKDLOOK */
         "GSUB: unknown single substitution format [%d]@0x%x\n",                                                            /* SPOT_MSG_GSUBUNKSINGL */
-        "GSUB: unknown multiple substution format [%d]@0x%x\n",                                                            /* SPOT_MSG_GSUBUNKMULT */
-        "GSUB: unknown alternate substution format [%d]@0x%x\n",                                                           /* SPOT_MSG_GSUBUNKALT */
+        "GSUB: unknown multiple substitution format [%d]@0x%x\n",                                                          /* SPOT_MSG_GSUBUNKMULT */
+        "GSUB: unknown alternate substitution format [%d]@0x%x\n",                                                         /* SPOT_MSG_GSUBUNKALT */
         "GSUB: unknown ligature substitution format [%d]@0x%x\n",                                                          /* SPOT_MSG_GSUBUNKLIG */
         "GSUB: unknown context substitution format [%d]@0x%x\n",                                                           /* SPOT_MSG_GSUBUNKCTX */
         "GSUB: unknown chaining-context substitution format [%d]@0x%x\n",                                                  /* SPOT_MSG_GSUBUNKCCTX */
@@ -31,7 +31,7 @@ const Byte8 *EnglishMessages[] =
         "GSUB: Context substitution specifies %d glyphClasses to match, but only %d are defined\n",                        /* SPOT_MSG_GSUBCTXDEF */
         "GSUB: Context substitution specifies more than 1 substitution to be performed. Others will be ignored.\n",        /* SPOT_MSG_GSUBCTXCNT */
         "GSUB: Context substitution specifies GlyphSequenceIndex > 1. Not yet implemented.\n",                             /* SPOT_MSG_GSUBCTXNYI */
-        "GSUB: chain context subst specifies more than 1 substitution to be performed. Others will be ignored\n",          /*  SPOT_MSG_GSUBCCTXCNT */
+        "GSUB: chain context subst specifies more than 1 substitution to be performed. Others will be ignored\n",          /* SPOT_MSG_GSUBCCTXCNT */
         "GSUB: more than 1 item in inputGlyph coverage. Others will be ignored\n",                                         /* SPOT_MSG_GSUBINPUTCNT */
         "GSUB: NULL feature tag @0x%x\n",                                                                                  /* SPOT_MSG_GSUBNULFEAT */
         "GSUB: cannot evaluate SingleSubst format with more than 1 glyph input\n",                                         /* SPOT_MSG_GSUBEVALCNT */
@@ -101,10 +101,10 @@ const Byte8 *EnglishMessages[] =
         "GPOS: Context substitution specifies %d glyphClasses to match, but only %d are defined\n",                        /* SPOT_MSG_GPOSCTXDEF */
         "GPOS: Context substitution specifies more than 1 substitution to be performed. Others will be ignored.\n",        /* SPOT_MSG_GPOSCTXCNT */
         "GPOS: Context substitution specifies GlyphSequenceIndex > 1. Not yet implemented.\n",                             /* SPOT_MSG_GPOSCTXNYI */
-        "GPOS: chain context subst specifies more than 1 substitution to be performed. Others will be ignored\n",          /*  SPOT_MSG_GPOSCCTXCNT */
+        "GPOS: chain context subst specifies more than 1 substitution to be performed. Others will be ignored\n",          /* SPOT_MSG_GPOSCCTXCNT */
         "proof, AFM, and feature file format dumps not yet supported for context format %d.\n",                            /* SPOT_MSG_GPOSUFMTCTX */
         "proof ,AFM, and feature file format dumps not yet supported for chaining  context format %d.\n",                  /* SPOT_MSG_GPOSUFMTCCTX */
-        "AFM format dump not yet supported for chanining  context format %d.\n",                                           /* SPOT_MSG_GPOSUFMTCCTX3 */
+        "AFM format dump not yet supported for chaining context format %d.\n",                                             /* SPOT_MSG_GPOSUFMTCCTX3 */
         "Bad/Unknown Device Table format [%d]@0x%x\n",                                                                     /* SPOT_MSG_GPOSUFMTDEV */
         "proof and feature file format dumps not yet supported for lookup Type 5 context format %d.\n",                    /* SPOT_MSG_GSUBUFMTCTX */
         "proof and feature file format dumps not yet supported for lookup Type 6 chaining  context format %d.\n",          /* SPOT_MSG_GSUBUFMTCCTX */

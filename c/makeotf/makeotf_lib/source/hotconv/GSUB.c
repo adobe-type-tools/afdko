@@ -109,10 +109,10 @@ struct GSUBCtx_ {
     dnaDCL(Subtable, subtables); /* Subtable list */
 
     /* Info for chaining contextual lookups */
-    dnaDCL(SubtableInfo, anonSubtable);     /* Anon subtbl accumulator       */
-    dnaDCL(SubstLookupRecord *, subLookup); /* Ptrs to all records that need */
-                                            /* to be adjusted                */
-    dnaDCL(GNode *, prod);                  /* Tmp for cross product         */
+    dnaDCL(SubtableInfo, anonSubtable);     /* Anon subtable accumulator         */
+    dnaDCL(SubstLookupRecord *, subLookup); /* Pointers to all records that need */
+                                            /* to be adjusted                    */
+    dnaDCL(GNode *, prod);                  /* Tmp for cross product             */
 
     /* info for feature names */
     dnaDCL(FeatureNameRec, featNameID);
@@ -276,7 +276,7 @@ void GSUBWrite(hotCtx g) {
 
     /* Write OTL features */
     if (h->subtables.cnt == 0) {
-        /* When (h->subtables.cnt ==0), we get here only if teh -fs option has been specified. */
+        /* When (h->subtables.cnt ==0), we get here only if the -fs option has been specified. */
         h->otl = otlTableNew(g);
         otlTableFillStub(g, h->otl);
         otlTableWrite(g, h->otl);
@@ -345,7 +345,7 @@ void GSUBWrite(hotCtx g) {
     otlCoverageWrite(g, h->otl);
     otlClassWrite(g, h->otl);
 
-    /* Write extension subtables section. Each subtable is immediatedly */
+    /* Write extension subtables section. Each subtable is immediately  */
     /* followed by its coverages and classes                            */
     for (i = 0; i < h->subtables.cnt; i++) {
         Subtable *sub = &h->subtables.array[i];
@@ -738,7 +738,7 @@ void GSUBLookupEnd(hotCtx g, Tag feature) {
         featRecycleNodes(g, rule->repl);
     }
     h->new.rules.cnt = 0;
-    /* This prevents the rules from being re-used un-intentionally in the */
+    /* This prevents the rules from being re-used unintentionally in the  */
     /* case where an empty GSUB feature is called for; because it is      */
     /* empty, the table type doesn't get correctly assigned, and the code */
     /* comes through here.                                                */
@@ -2063,7 +2063,7 @@ typedef struct {
 
 typedef struct {
     unsigned short SubstFormat; /* =1 */
-    LOffset InputCoverage;      /* a single coverage table, for a singel glyph sub */
+    LOffset InputCoverage;      /* a single coverage table, for a single glyph sub */
     unsigned short BacktrackGlyphCount;
     LOffset *Backtrack; /* [BacktrackGlyphCount] offsets to coverage tables */
     unsigned short LookaheadGlyphCount;
@@ -2278,7 +2278,7 @@ static void createAnonLookups(hotCtx g, GSUBCtx h) {
     }
 }
 
-/* Change anon SubstLookupRecord labels to lookup inxs, now that they've been
+/* Change anon SubstLookupRecord labels to lookup indices, now that they've been
    calculated by otlFill() */
 
 static void setAnonLookupIndices(hotCtx g, GSUBCtx h) {

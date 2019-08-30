@@ -171,7 +171,7 @@ int cefMakeEmbeddingFont(cefCtx h, cefEmbedSpec *spec, cefMapCallback *map);
    If the streams are implemented using ANSI files they must be opened in
    binary mode, possibly using the fopen type strings indicated above.
 
-   The "h" parameter is the context that was returned from a successfull call
+   The "h" parameter is the context that was returned from a successful call
    to cefNew(). The "spec" parameter is a pointer to a structure containing an
    embedding specification via the following fields.
 
@@ -194,7 +194,7 @@ int cefMakeEmbeddingFont(cefCtx h, cefEmbedSpec *spec, cefMapCallback *map);
    source font.
 
    The "URL" field, if non-NULL, specifies a URL as a null-terminated string.
-   The string will be stored as an unreference entry in the String INDEX of the
+   The string will be stored as an unreferenced entry in the String INDEX of the
    CFF table in the embedding font.
 
    The subset structure specifies the glyphs to be included in the embedded
@@ -310,7 +310,7 @@ void cefGetVersion(ctlVersionCallbacks *cb);
 /* ------------------------ Example Callback Functions ------------------------
 
    This section illustrates a simple memory callback and simple file-based
-   implemetation of the stream client callback functions. */
+   implementation of the stream client callback functions. */
 
 #if 0 /* Example */
 

@@ -37,7 +37,7 @@ typedef struct {
 } nameTbl;
 #define TBL_HDR_SIZE (2 * 3)
 
-/* Name records are intially sorted by the string and later by id */
+/* Name records are initially sorted by the string and later by id */
 
 struct nameCtx_ {
     unsigned short userNameId; /* User-defined name id */
@@ -53,7 +53,7 @@ struct nameCtx_ {
 
 /* Enumerate name string(s) for record(s) matching supplied arguments. Search
    begins at the record indexed by the "index" argument -- initially 0. If the
-   search suceeds the index of the record is returned. This index should be
+   search succeeds the index of the record is returned. This index should be
    incremented before the next iteration of the function so that the new search
    begins at the following record. If the search fails, -1 is returned and the
    index will need to be reset to 0 before commencing a new search. */
@@ -276,7 +276,7 @@ static void addStdNames(nameCtx h, int win, int mac) {
         dFontVersion = ((int)(1000 * dFontVersion)) / 1000.0;
 
         if (g->convertFlags & HOT_ID2_CHAIN_CONTXT3) {
-            idTag = id2Tag; /* use tag to trigger soecial case behavious by CoolType */
+            idTag = id2Tag; /* use tag to trigger special case behaviors by CoolType */
         }
         /* Add Unique name */
         /* xxx is this really needed or just a waste of space? */
@@ -460,7 +460,7 @@ static void fillNames(nameCtx h) {
     char *style = styles[h->g->font.flags & 0x3];
     char Full[HOT_MAX_MENU_NAME * 2];
     int doWarning = 0;
-    int doV1Names = (h->g->convertFlags & HOT_USE_V1_MENU_NAMES);    /* if the Font Menu DB file is using hte original V1 syntax, we write the mac Preferred Family */
+    int doV1Names = (h->g->convertFlags & HOT_USE_V1_MENU_NAMES);    /* if the Font Menu DB file is using the original V1 syntax, we write the mac Preferred Family */
                                                                      /* and Preferred Subfamily names to id's 1 and 2 rather than 16 and 17                         */
     int doOTSpecName4 = !(h->g->convertFlags & HOT_USE_OLD_NAMEID4); /* write Windows name ID 4 correctly in Win platform. */
     int omitMacNames = (h->g->convertFlags & HOT_OMIT_MAC_NAMES);    /* omit all Mac platform names. */
@@ -499,7 +499,7 @@ static void fillNames(nameCtx h) {
 
     /* Copy HOT_NAME_PREF_FAMILY entries to HOT_NAME_FAMILY. */
     /* We need to add a compatible family name for each Preferred Family name which does not already have a HOT_NAME_FAMILY name. */
-    /* That way, the name ID 16's will get eiliminated, and we will be left with just name ID 1's, rather than just name ID's 16. */
+    /* That way, the name ID 16's will get eliminated, and we will be left with just name ID 1's, rather than just name ID's 16. */
 
     index = 0;
     for (;;) {
@@ -564,12 +564,12 @@ static void fillNames(nameCtx h) {
         addWinDfltName(h, HOT_NAME_FULL, strlen(h->g->font.FontName.array),
                        h->g->font.FontName.array);
     } else {
-        /* Full name = compaitble Family name + compatible Subfamily name. */
+        /* Full name = compatible Family name + compatible Subfamily name. */
         /* If SubFamily name is Regular, we omit it.                       */
         index = 0;
 
         /* Skip this if we already have one defined by the feature file > Not usually
-         allowed, but the prohibition can be overriden */
+         allowed, but the prohibition can be overridden */
         index = enumNames(h, index,
                           HOT_NAME_MS_PLATFORM,
                           HOT_NAME_MS_UGL,
@@ -632,7 +632,7 @@ static void fillNames(nameCtx h) {
                 Family = translate2MacDflt(h, tempString);
                 addMacDfltName(h, HOT_NAME_PREF_FAMILY, strlen(Family), Family);
 
-                /* In version 1 sytnax, there is never a Mac Compatible Family name entry, */
+                /* In version 1 syntax, there is never a Mac Compatible Family name entry, */
                 /* so just copy the HOT_NAME_PREF_FAMILY to HOT_NAME_FAMILY                */
                 if (doV1Names) {
                     addMacDfltName(h, HOT_NAME_FAMILY, strlen(Family), Family);

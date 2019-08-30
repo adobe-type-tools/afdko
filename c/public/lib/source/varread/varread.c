@@ -1082,7 +1082,7 @@ var_hmtx var_loadhmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
     if (table == NULL)
         goto cleanup;
 
-    /* estimate the number of glphs from the table size instead of reading the head table */
+    /* estimate the number of glyphs from the table size instead of reading the head table */
     numGlyphs = (table->length / 2) - hmtx->header.numberOfHMetrics;
     if (numGlyphs < hmtx->header.numberOfHMetrics) {
         sscb->message(sscb, "invalid hmtx table size");
@@ -1257,7 +1257,7 @@ var_vmtx var_loadvmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
     if (table == NULL)
         goto cleanup;
 
-    /* estimate the number of glphs from the table size instead of reading the head table */
+    /* estimate the number of glyphs from the table size instead of reading the head table */
     numGlyphs = (table->length / 2) - vmtx->header.numOfLongVertMetrics;
     if (numGlyphs < vmtx->header.numOfLongVertMetrics) {
         sscb->message(sscb, "invalid vmtx table size");

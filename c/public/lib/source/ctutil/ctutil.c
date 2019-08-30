@@ -191,7 +191,7 @@ int ctuCountBits(long value) {
     return count;
 }
 
-/* Convert string to double in thread safe and locale-independant manner. */
+/* Convert string to double in thread safe and locale-independent manner. */
 double ctuStrtod(const char *s, char **endptr) {
     char *ep;
     double result = strtod(s, &ep);
@@ -202,7 +202,7 @@ double ctuStrtod(const char *s, char **endptr) {
         size_t length;
 
         /* Assume the period was the decimal point and parse rest of number.
-           Note, it is possible that the period terminated a number tha didn't
+           Note, it is possible that the period terminated a number that didn't
            contain a decimal point, e.g. "1E2.". In this rare case the number
            was already parsed correctly, the following repeated conversions
            will have no effect, and the correct value will be returned. */
@@ -218,7 +218,7 @@ double ctuStrtod(const char *s, char **endptr) {
             tmp[length] = '\0';
             p = ep - s + tmp;
 
-            /* Try conversion serveral times in case locale switched on
+            /* Try conversion several times in case locale switched on
                another thread */
             for (i = 0; i < 6; i++) {
                 /* Cycle between period and comma */
@@ -240,7 +240,7 @@ double ctuStrtod(const char *s, char **endptr) {
     return result;
 }
 
-/* Convert double in a locale-independant manner. */
+/* Convert double in a locale-independent manner. */
 void ctuDtostr(char *buf, size_t bufLen, double value, int width, int precision) {
     char *p;
     if (width == 0 && precision == 0) {
@@ -259,7 +259,7 @@ void ctuDtostr(char *buf, size_t bufLen, double value, int width, int precision)
     }
     p = strchr(buf, '.');
     if (p != NULL) {
-        /* Have decimal point. Remove trailing zeroes.*/
+        /* Have decimal point. Remove trailing zeros.*/
         int l = (int)strlen(p);
         p += l - 1;
         while (*p == '0') {

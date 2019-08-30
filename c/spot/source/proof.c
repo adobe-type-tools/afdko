@@ -56,7 +56,7 @@ typedef struct _ProofContext {
     double thinspace;                /* extra inter-glyph space: in points */
     double unitsPerEm;               /* for scaling */
     Byte8 *psfilename;
-    Byte8 onNewLine; /*To avoid unnecessary linefeeds*/
+    Byte8 onNewLine; /*To avoid unnecessary line feeds */
     FILE *psfileptr;
     Int16 bbLeft, bbBottom, bbRight, bbTop;
 
@@ -267,7 +267,7 @@ void proofNewPage(ProofContextPtr ctx) {
         } else
             ctx->currx = ctx->left;
 
-        ctx->curry = ctx->top - ((3 * TITLE_LABEL_SIZE) + ctx->glyphSize); /* check same seting in proofMessage.*/
+        ctx->curry = ctx->top - ((3 * TITLE_LABEL_SIZE) + ctx->glyphSize); /* check same setting in proofMessage.*/
 
         sprintf(str, "%g %g _MT\n", ctx->currx, ctx->curry);
         proofPSOUT(ctx, str);
@@ -1361,11 +1361,11 @@ void proofDrawGlyph(ProofContextPtr ctx,
                     Int16 width, Card16 widthflags,
                     proofOptions *options, Int16 yOrigKanji, char *message) {
     /* The idea is that we draw with respect to a base-line at y=0. Kanji
-       em-boxes are drawn with their top at the STD positoon of top = 880,
+       em-boxes are drawn with their top at the STD position of top = 880,
        bottom at -120.
 
-       In vertical mode, whcih is for Kanji only, the glyph is translated so
-       that its origin aligns with the top of the kanji em-box at STD position
+       In vertical mode, which is for Kanji only, the glyph is translated so
+       that its origin aligns with the top of the Kanji em-box at STD position
        y = 880. */
     int isVert = proofIsVerticalMode();
 
@@ -1389,7 +1389,7 @@ void proofDrawGlyph(ProofContextPtr ctx,
     proofGlyphStart(ctx, glyphId, glyphname); /* This sets the current transform to scale from font coordinates straight to page coordinates */
 
     /* This moves the glyph up so its origin aligns with DEFAULT_YORIG_KANJI */
-    /* If we are i horizontal mode, yOrigKanji is always passed through as DEFAULT_YORIG_KANJI, so this is nto rriggered. */
+    /* If we are i horizontal mode, yOrigKanji is always passed through as DEFAULT_YORIG_KANJI, so this is not triggered. */
 
     if (originDx || originDy || DEFAULT_YORIG_KANJI != yOrigKanji) {
         if ((originDx < 0) || (originDy < 0))

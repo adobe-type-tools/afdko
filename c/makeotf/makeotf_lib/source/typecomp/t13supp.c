@@ -159,7 +159,7 @@ typedef Fixed Blend[T13_MAX_MASTERS]; /* Blendable array of values */
         *da_NEXT(da) = (unsigned char)(op);           \
     } while (0)
 
-/* Calulate number size in bytes */
+/* Calculate number size in bytes */
 #define NUMSIZE(v) (-107 <= (v) && (v) <= 107 ? 1 : (-1131 <= (v) && (v) <= 1131 ? 2 : 3))
 
 /* Charstring buffer */
@@ -282,7 +282,7 @@ typedef struct /* Segment */
 typedef struct /* Operator */
 {
     unsigned short nArgs; /* Number of arguments */
-    unsigned short iArgs; /* Argment index */
+    unsigned short iArgs; /* Argument index */
     unsigned short iSeg;  /* Next segment index */
     unsigned short type;  /* Operator type */
 } Operator;
@@ -355,7 +355,7 @@ struct t13Ctx_ {
     struct /* --- Stem hints */
     {
         HintMask initmask;  /* Initial stem id mask */
-        HintMask subsmask;  /* Hint subsitution id mask */
+        HintMask subsmask;  /* Hint substitution id mask */
         HintMask lastmask;  /* Last hint substitution mask */
         da_DCL(Stem, list); /* Stem list */
     } stem;
@@ -686,7 +686,7 @@ static void t13NewFont(tcCtx g, Font *font) {
     if (font->flags & FONT_CID && h->cstrs.size < 3000000) {
         /* Resize da's for CID fonts */
         if (!(g->flags & TC_SMALLMEMORY)) {
-            /* xxx what if we've aready allocated cstrs to another font */
+            /* xxx what if we've already allocated cstrs to another font */
             da_FREE(h->cstrs);
             da_INIT(h->cstrs, 3000000, 1000000);
         }
@@ -1205,7 +1205,7 @@ static void addStems(t13Ctx h, int vert, int cntr) {
             h->hint.cntr |= cntr;
         }
         if (h->hint.initial && h->path.segs.cnt > 1) {
-            /* Unsubstuted hints after drawing ops; insert hint subs */
+            /* Unsubstituted hints after drawing ops; insert hint subs */
             h->hint.initial = 0;
             h->hint.seen = 1;
             h->hint.subs = 1;
@@ -1436,7 +1436,7 @@ static void addFlex(t13Ctx h) {
     pendOp(h, t2_flex);
     CHKUFLOW(17);
 
-    /* Add referece point and first control point relative moves */
+    /* Add reference point and first control point relative moves */
     addElement(h, 2, 0);
     addElement(h, 3, 1);
 
@@ -2249,7 +2249,7 @@ static Blend *setCntrMask(t13Ctx h, Blend *p, int vert, HintMask cntrmask) {
 }
 
 /* Set counter control mask groups. The original counter list from the
-   charstring is contructed in reverse order and read back to front. */
+   charstring is constructed in reverse order and read back to front. */
 static void setCntrMaskGroups(t13Ctx h) {
     int i;
     HintMask *cntrmask;
@@ -2666,7 +2666,7 @@ static int doFlex(t13Ctx h, int iCoords, int iHeight) {
     }
 }
 
-/* Calulate max stack depth for new args */
+/* Calculate max stack depth for new args */
 static int maxArgsDepth(t13Ctx h) {
     int i;
     int max = 0;

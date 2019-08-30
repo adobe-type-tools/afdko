@@ -556,7 +556,7 @@ static token *getPathToken(svrCtx h, long endOffset) {
                     break;
             }
         } else if (isalpha(ch)) {
-            /* The non-digit, no whitespace values are assumed to be single-letter oparators */
+            /* The non-digit, no whitespace values are assumed to be single-letter operators */
             tokenType = svrOperator;
             h->src.next++;
         } else /* Found something other than digit or alphabetic.*/
@@ -868,7 +868,7 @@ static int parseSVG(svrCtx h) {
             state = 1;
             char_begin = 0;
             char_end = 0;
-            /* Set default widht and name, to be used if these values are not supplied by the glyph attributes. */
+            /* Set default width and name, to be used if these values are not supplied by the glyph attributes. */
             glyphWidth = defaultWidth;
             sprintf(tempName, "gid%05d", (unsigned short)h->chars.index.cnt);
         } else if (tokenEqualStr(tk, "<missing-glyph")) {
@@ -931,7 +931,7 @@ static int parseSVG(svrCtx h) {
             tempVal[tk->length] = 0;
             width = atol(tempVal);
 
-            if (state == 0) /* Thiis a font attribute; set default width. */
+            if (state == 0) /* This a font attribute; set default width. */
                 defaultWidth = h->metrics.defaultWidth = width;
             else if (state == 1) /* in glyph, but have not seen name yet. Defer setting width until name has been added.*/
                 glyphWidth = width;
@@ -995,8 +995,8 @@ static int parseSVG(svrCtx h) {
                 chr->flags = 0;
                 chr->tag = tag;
                 /* note that we do not store gname here; as it is not stable: it is a pointer into the h->string->buf array,
-                     which moves when it gets resized.  I coudl set this when all the glyphs have been read, 
-                     but it is easier kust to use the impl field.*/
+                   which moves when it gets resized.  I could set this when all the glyphs have been read, 
+                   but it is easier just to use the impl field.*/
                 chr->gname.ptr = NULL;
                 chr->gname.impl = gnameIndex;
                 chr->iFD = 0;
@@ -1143,7 +1143,7 @@ static STI addString(svrCtx h, size_t length, const char *value) {
 
     if (length == 0) {
         /* A null name (/) is legal in PostScript but could lead to unexpected
-           behaviour elsewhere in the coretype libraries so it is substituted
+           behavior elsewhere in the coretype libraries so it is substituted
            for a name that is very likely to be unique in the font */
         const char subs_name[] = "_null_name_substitute_";
         value = subs_name;
@@ -1187,7 +1187,7 @@ static void setWidth(svrCtx h, STI sti, long value) {
 
 /* Match glyph name. */
 static int CTL_CDECL matchChar(const void *key, const void *value, void *ctx) {
-    /* I use getString() rtaher than reference the glyphInfo->gname.ptr because
+    /* I use getString() rather than reference the glyphInfo->gname.ptr because
      gname.ptr  isn't set until after the entire font is read.
     */
     svrCtx h = ctx;

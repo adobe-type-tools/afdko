@@ -3,7 +3,7 @@
 // from a DLL simpler. All files within this DLL are compiled with the MAKEOTFLIB_EXPORTS
 // symbol defined on the command line. this symbol should not be defined on any project
 // that uses this DLL. This way any other project whose source files include this file see
-// MAKEOTFLIB_API functions as being imported from a DLL, wheras this DLL sees symbols
+// MAKEOTFLIB_API functions as being imported from a DLL, whereas this DLL sees symbols
 // defined with this macro as being exported.
 
 #ifdef OTFCOMPARELIB_EXPORTS

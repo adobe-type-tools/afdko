@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <errno.h>
 
-/* Make uzoperator for internal use */
+/* Make operator for internal use */
 #define t2_cntroff t2_reservedESC33
 
 #define MAX_RECURSION_DEPTH 1000
@@ -100,7 +100,7 @@ struct _t2cCtx {
         char *buf;      /* Buffer */
         long length;    /* Buffer length */
         long offset;    /* offset in file */
-        long endOffset; /* offset in file fo end of charstring */
+        long endOffset; /* offset in file for end of charstring */
         long left;      /* Bytes remaining in charstring */
     } src;
     short LanguageGroup;
@@ -239,7 +239,7 @@ static int srcSeek(t2cCtx h, long offset) {
 }
 
 /* Check for the first of possibly multiple bytes for an operator or operand.
-   If we're curently empty, but more bytes are available, refill from buffer.
+   If we're currently empty, but more bytes are available, refill from buffer.
    If this is a CFF2 font and we're completely out of bytes,
    treat this condition as equivalent to an endchar in CFF. */
 
@@ -258,7 +258,7 @@ static int srcSeek(t2cCtx h, long offset) {
     while (0)
 
 /* Check for a byte that follows the first byte of an operator or operand.
-   If we're curently empty, but more bytes are available, refill from buffer.
+   If we're currently empty, but more bytes are available, refill from buffer.
    If we're completely out of bytes, throw an error.                         */
 
 #define CHECK_SUBSEQUENT_BYTE(h)                                    \
@@ -619,15 +619,15 @@ static void callbackFlex(t2cCtx h,
 }
 
 static void convertStemToAbsolute(t2cCtx h, float lastEdge, abfBlendArg *blendArgs) {
-    /* Convert only the default value. At some point, need to actaully convert the region
-     deltas to absolute values, but this requires referencing teh current point and the region weight map.
+    /* Convert only the default value. At some point, need to actually convert the region
+     deltas to absolute values, but this requires referencing the current point and the region weight map.
      */
 
     blendArgs->value += lastEdge;
 }
 
 /* Add stems to stem list. Return 1 on stem overflow else 0;
- This is called only on hstem(hm), vstem(hm), or tx_mask, so all args on teh stack are stems.
+ This is called only on hstem(hm), vstem(hm), or tx_mask, so all args on the stack are stems.
  */
 static int addStems(t2cCtx h, int vert) {
     int i;
@@ -1077,7 +1077,7 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
                     long saveoff = (long)(h->src.offset - (end - next));
                     long saveEndOff = h->src.endOffset;
                     long num = unbias((long)POP(), h->aux->subrs.cnt);
-                    h->stack.blendCnt--;  // we do not blend subr indicies.
+                    h->stack.blendCnt--;  // we do not blend subr indices.
                     if (num == -1)
                         return t2cErrCallsubr;
                     if ((num + 1) < h->aux->subrs.cnt)
@@ -1598,7 +1598,7 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
                     long saveoff = (long)(h->src.offset - (end - next));
                     long saveEndOff = h->src.endOffset;
                     long num = unbias((long)POP(), h->aux->gsubrs.cnt);
-                    h->stack.blendCnt--;  // we do not blend subr indicies.
+                    h->stack.blendCnt--;  // we do not blend subr indices.
                     if (num == -1)
                         return t2cErrCallgsubr;
                     if ((num + 1) < h->aux->gsubrs.cnt)

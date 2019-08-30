@@ -24,7 +24,7 @@
 /* Selected PostScript lexical classes */
 #define N_ (1 << 0) /* Newline (\n \r) */
 #define W_ (1 << 1) /* Whitespace (\0 \t \n \f \r space) */
-#define S_ (1 << 2) /* Special (delimeter: ( ) < > [ ] { } / %) */
+#define S_ (1 << 2) /* Special (delimiter: ( ) < > [ ] { } / %) */
 #define D_ (1 << 3) /* Decimal digit (0-9)*/
 #define P_ (1 << 4) /* Decimal point (period) */
 #define G_ (1 << 5) /* Sign (+ -) */
@@ -319,7 +319,7 @@ int pstSetDecrypt(pstCtx h) {
     if (h->src.refill == eexec_refill)
         return h->errcode = pstErrBadCall; /* Already decrypting */
 
-    /* Discard eexec delimeter */
+    /* Discard eexec delimiter */
     if (read1(h) == -1)
         return h->errcode;
 
@@ -794,7 +794,7 @@ static int skipNumber(pstCtx h, int c) {
         }
     }
 
-    /* Non-numeric character encountered, skip to delimeter */
+    /* Non-numeric character encountered, skip to delimiter */
     operator: return skip2Delim(h) ? -1 : pstOperator;
 }
 

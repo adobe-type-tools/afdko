@@ -45,7 +45,7 @@ static IntX GPOSLookupIndex = 0;
 static IntX GPOSLookupCnt = 0;
 static IntX GPOSContextRecursionCnt = 0;
 
-static Byte8 contextPrefix[MAX_NAME_LEN]; /* when dumping the context sub rules, this cntains the context string for the rule, if any. */
+static Byte8 contextPrefix[MAX_NAME_LEN]; /* when dumping the context sub rules, this contains the context string for the rule, if any. */
 
 static FILE *AFMout;
 
@@ -63,7 +63,7 @@ typedef struct {
     IntX i; /*Index of glyph in Coverage*/
     IntX j; /*Index of PVR with pairset (if pair)*/
     GlyphId g1, g2;
-    IntX c2; /*Index of classe 2 for PosPairFormat2*/
+    IntX c2; /*Index of class 2 for PosPairFormat2*/
     IntX vert;
     void *fmt;
 } ProofRec; /*To be used to store proof attempts for sorting*/
@@ -1721,8 +1721,8 @@ static void proofPosPair1(PosPairFormat1 *fmt, IntX glyphtoproof1, IntX glyphtop
                     proofThinspace(proofctx, 4);
                 }
             } /*if printing*/
-        }     /* forall rights */
-    }         /* forall lefts */
+        }     /* for all rights */
+    }         /* for all lefts */
 
     if (CovList.glyphidlist.size > 0)
         da_FREE(CovList.glyphidlist);
@@ -1921,7 +1921,7 @@ static void proofPosPair2(PosPairFormat2 *fmt, IntX glyphtoproof1, IntX glyphtop
                                        NULL, (isVert) ? yorig2 : DEFAULT_YORIG_KANJI, "");
                         proofThinspace(proofctx, 2);
                     } /* end if kern pair has a non-zero value. */
-                }     /* end if sorting kenr pairs for output - else */
+                }     /* end if sorting kern pairs for output - else */
             }         /* end for each glyph in class2 class definition */
         }             /* end for all class2 records in current Class1record */
     }                 /* end for all nitems in coverage table */
@@ -4055,7 +4055,7 @@ static void proofPosChainContext3(ChainContextPosFormat3 *fmt, int level, void *
                                (isVert) ? yorig1 : DEFAULT_YORIG_KANJI, (VORGfound != 0) ? "*" : "");
                 proofThinspace(proofctx, 1);
             }
-        } /* end of each glyph in coverage for current inpuyt pos */
+        } /* end of each glyph in coverage for current input pos */
     }     /* end for each input position */
 
     /* free all data */
@@ -4338,7 +4338,7 @@ static void dumpSubtable(LOffset offset, Card16 type, void *subtable,
                                                     proofCurrentGlyphSize(),
                                                     0.0, unitsPerEm,
                                                     0, 1, tagstr);
-                    sprintf(message, "Error: Script: '%c%c%c%c' Language: '%c%c%c%c' LookupIndex: %d LookupType %d is not suppoprted.",
+                    sprintf(message, "Error: Script: '%c%c%c%c' Language: '%c%c%c%c' LookupIndex: %d LookupType %d is not supported.",
                             TAG_ARG(scripttag), TAG_ARG(langtag), lookupListIndex, type);
                     proofMessage(proofctx, message);
                 }

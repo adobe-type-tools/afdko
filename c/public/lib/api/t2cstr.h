@@ -60,10 +60,10 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
 /* t2cParse() is called to parse a Type 2 charstring into its constituent
    parts.
 
-   The "offset" prameter specifies the stream offset of the charstring to be
+   The "offset" parameter specifies the stream offset of the charstring to be
    parsed.
 
-   The "endOffset" prameter specifies the stream offset of the end of charstring to be
+   The "endOffset" parameter specifies the stream offset of the end of charstring to be
    parsed; it points one byte past the end end of the charstring.
 
    The "aux" parameter specifies charstring parse data that is normally stable
@@ -71,7 +71,7 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
    all the charstrings in a font. The "aux" parameter fields are described
    below.
 
-   The "gid" prameter specifies the glyph ID.
+   The "gid" parameter specifies the glyph ID.
 
    The "cff2" parameter specifies the context for reading SFNT tables
    for metrics and variation font data needed if this is a CFF2 font.

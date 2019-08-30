@@ -57,7 +57,7 @@ struct var_itemVariationStore_ {
     itemVariationDataSubtableList dataList;
 };
 
-/* glyph width and sidebearing */
+/* glyph width and side-bearing */
 typedef struct glyphMetrics_ {
     float width;
     float sideBearing;
@@ -98,7 +98,7 @@ unsigned short var_getAxisCount(var_axes axes);
 
 int var_getAxis(var_axes axes, unsigned short index, unsigned long *tag, Fixed *minValue, Fixed *defaultValue, Fixed *maxValue, unsigned short *flags);
 
-/*  var_getAxis() retrieves info on an anxis from the axes table data.
+/*  var_getAxis() retrieves info on an axis from the axes table data.
     return 0 for success, 1 for failure.
 
     axes - a pointer to the axes table data.

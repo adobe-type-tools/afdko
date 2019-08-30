@@ -39,7 +39,7 @@ extern "C" {
    These streams are managed by a single set of client callback functions
    enabling the client to choose from a wide variety of implementation schemes
    ranging from disk files to memory buffers. The temporary stream is used to
-   keep the run-time memory usage within resonable limits when handling large
+   keep the run-time memory usage within reasonable limits when handling large
    fonts.
 
    Glyph data is passed to the library via the set of glyph callback functions
@@ -263,7 +263,7 @@ void t1wGetVersion(ctlVersionCallbacks *cb);
    callbacks passed with the "cb" parameter (see ctlshare.h). */
 
 void t1wUpdateGlyphNames(t1wCtx h, char *glyphNames);
-/* Used to update the array of glyph name pointers, when the source data array has changed location becuase it needed to grow. */
+/* Used to update the array of glyph name pointers, when the source data array has changed location because it needed to grow. */
 
 #ifdef __cplusplus
 }

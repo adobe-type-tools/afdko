@@ -22,7 +22,7 @@
    option names into a single argument followed by a separate value argument
    list, e.g. "bf 20 /dev/rmt8", as an alternative to "b 20 f /dev/rmt8".
    This package supports all of these option types.
-   
+
    A program option is described by the "opt_Option" data type which contains
    information about an option's name, value scanning function, value
    variable, default initialization string, value range, attribute flags and
@@ -96,7 +96,7 @@
                            initialization function is called. If used, this
                            string is interpreted as would a corresponding
                            command line argument to the option "name". This is
-                           an optional field. 
+                           an optional field.
 
    double min              For numeric arguments, this field represents the
                            minimum value that may be used. Despite being of
@@ -142,7 +142,7 @@
    structure are referred to as "value scanners." Value scanners typically
    process one or more command-line arguments and store the result in the
    "value" field of the opt_Option structure. The value scanner functions are
-   prototyped as follows: 
+   prototyped as follows:
 
    <valueScanner>(int argc, char *argv[], int argi, opt_Option *opt);
 
@@ -161,7 +161,7 @@
    "argc" and "argv" are the argument count and the argument list as passed to
    "main()". The "argi" parameter is the index of the first, and possibly only,
    value argument and the opt parameter is a pointer to the option's
-   "opt_Option" structure. 
+   "opt_Option" structure.
 
    Every value scanner is called initially with "argi" set to "0" and
    "argv[0]" set to "opt->dflt" so that the value field may be initialized.
@@ -182,7 +182,7 @@
    Value scanners consume one or more arguments from the argument list and
    should therefore check that enough arguments are available and raise an
    error if not. The following code performs this test for a scanner that
-   consumes one argument: 
+   consumes one argument:
 
    if (argi == argc)
        opt_Error(opt_Missing, opt, NULL);
@@ -190,11 +190,11 @@
    If arguments are available, the scanner should perform argument processing.
    Typically this will consist of argument conversion, validation, and storing
    although the scanner is free to do what ever processing is required. The
-   scanner should return the index of the next (unconsumed) argument. 
+   scanner should return the index of the next (unconsumed) argument.
 
    An example of a boolean scanner that accepts argument values of "true" and
    "false" and converts them to values 0 and 1 stored in a int variable
-   follows: 
+   follows:
 
    int boolScan(int argc, char *argv[], int argi, opt_Option *opt)
        {
@@ -229,7 +229,7 @@
    opt_Short    short
    opt_Int      int
    opt_Long     long
-   opt_UShort   usigned short
+   opt_UShort   unsigned short
    opt_UInt     unsigned int
    opt_ULong    unsigned long
    opt_Double   double
@@ -239,11 +239,11 @@
    the character itself or an "escape character" which can be used to represent
    character codes that would be difficult or impossible to represent directly.
    Two kinds of escape characters are supported: "numeric escapes" and
-   "character escapes". 
+   "character escapes".
 
    Numeric escapes allow characters to be represented by their numeric coding.
    Hexadecimal numbers are represented by the string "\x" followed by
-   hexadecimal digits. Octal numbers are represented by "\" followed by octal 
+   hexadecimal digits. Octal numbers are represented by "\" followed by octal
    digits.
 
    Character escapes are used to represent the following special characters:
@@ -260,7 +260,7 @@
    \<other char>    the character itself.
 
    The standard numeric scanners' value arguments follow the normal
-   C conventions: 
+   C conventions:
 
    string           value
    ------           -----
@@ -268,7 +268,7 @@
    0<oct digits>    octal conversion
    [^0]<dec digits> decimal conversion
 
-   opt_String()'s min and max range check fields store the minimum and maximum 
+   opt_String()'s min and max range check fields store the minimum and maximum
    allowable string lengths, respectively.
 
    Two more scanners are provided:
@@ -302,7 +302,7 @@
    Argument List Processing
    ========================
    The argument list is processed by opt_Scan() which has the following
-   prototype: 
+   prototype:
 
    int opt_Scan(int argc, char *argv[], int nOpts, opt_Option *opt,
                 opt_Handler *handler, void *client);
@@ -312,7 +312,7 @@
    macro called opt_NOPTS() which takes an option array argument is provided to
    determine the element count, e.g. opt_NOPTS(opt). The handler and client
    parameters concern client error handling which is described in a separate
-   section. 
+   section.
 
    opt_Scan() returns 0 in the event of an error otherwise it returns the index
    of the next (unconsumed) argument. Typical usage is a follows:
@@ -329,7 +329,7 @@
        ...
        // process remaining arguments
        for (; argi < argc; argi++)
-           { 
+           {
            ...
            }
        ...
@@ -343,8 +343,8 @@
 
    [Warning: optScan() will modify option arguments under certain conditions.
    If you need an unmodified option list you should make a copy of argv and
-   all of the strings it references before calling opt_Scan().] 
-   
+   all of the strings it references before calling opt_Scan().]
+
    Error Handling
    ==============
    Error handling is accomplished by calling a function that processes
@@ -366,13 +366,13 @@
    parameter is a pointer to the option's opt_Option structure, the "arg"
    parameter points to the value argument in error (NULL is some cases:
    beware!), and the "client" parameter is the client data pointer that was
-   originally passed to opt_Scan(). 
+   originally passed to opt_Scan().
 
    The handler returns non-zero if it's required that opt_Scan() return 0
-   thereby indicating that an error occured, and returns 0 otherwise.
+   thereby indicating that an error occurred, and returns 0 otherwise.
 
    A default error handling function is provided prints an error message on
-   OUTPUTBUFF and returns 1 when it's called. 
+   OUTPUTBUFF and returns 1 when it's called.
 
    The following error codes are defined:
 
@@ -407,7 +407,7 @@
 
    Client scanners may call opt_Error() to report errors they encounter. This
    is simply a wrapper around the error handler. opt_Error()'s prototype is as
-   follows: 
+   follows:
 
    void opt_Error(int error, opt_Option *opt, char *arg);
 
@@ -424,7 +424,7 @@
 
 /* HEADER DEFINITIONS */
 
-extern char *opt_progname; /* Basename of program path */
+extern char *opt_progname; /* Base name of program path */
 
 /* Compute number of options in option array (t) */
 #define opt_NOPTS(t) (sizeof(t) / sizeof(t[0]))
@@ -436,8 +436,8 @@ enum {
     opt_Format,        /* Bad option value format */
     opt_Range,         /* Option's value out of range */
     opt_Required,      /* Required option missing */
-    opt_Unknown,       /* Unrecognised option */
-    opt_Exclusive,     /* Mutually exclusive option confict */
+    opt_Unknown,       /* Unrecognized option */
+    opt_Exclusive,     /* Mutually exclusive option conflict */
     opt_Client         /* First available client error code */
 };
 
@@ -464,14 +464,14 @@ extern int opt_Scan(int argc, char *argv[], int nOpts, opt_Option *opt,
                     opt_Handler handler, void *client);
 extern void opt_Error(int error, opt_Option *opt, char *arg);
 extern int opt_Present(char *name);
-extern int opt_hasError(void); /* return if an option scan error has occured. */
+extern int opt_hasError(void); /* return if an option scan error has occurred. */
 
 /* Standard value scanners */
 extern opt_Scanner opt_Char;   /* (char) */
 extern opt_Scanner opt_Short;  /* (short) */
 extern opt_Scanner opt_Int;    /* (int) */
 extern opt_Scanner opt_Long;   /* (long) */
-extern opt_Scanner opt_UShort; /* (usigned short) */
+extern opt_Scanner opt_UShort; /* (unsigned short) */
 extern opt_Scanner opt_UInt;   /* (unsigned int) */
 extern opt_Scanner opt_ULong;  /* (unsigned long) */
 extern opt_Scanner opt_Double; /* (double) */

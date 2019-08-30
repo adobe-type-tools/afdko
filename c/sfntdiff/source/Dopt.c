@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include "Dopt.h"
 
-/* Missing protypes */
+/* Missing prototypes */
 extern int fprintf(FILE *stream, const char *format, ...);
 extern int sscanf(const char *s, const char *format, ...);
 
@@ -25,7 +25,7 @@ static struct
     opt_Option *opts;     /* Options definitions */
     opt_Handler *handler; /* Error handler */
     void *client;         /* Client data pointer */
-    int error;            /* Flags if error occured */
+    int error;            /* Flags if error occurred */
 } global;
 
 /* Compare two options */

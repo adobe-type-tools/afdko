@@ -324,7 +324,7 @@ struct hotCallbacks_ {
 
    featAddAnonData() is called at the end of every anonymous block in the
    feature file. It supplies a pointer to the data seen within the block (from
-   the beginning of the line after the opening brace and upto the end of the
+   the beginning of the line after the opening brace and up to the end of the
    line, including the newline, before the closing brace) and a count of the
    number of bytes of data available. The data is guaranteed to be valid only
    for the duration of the function call. The tag argument indicates the tag
@@ -372,8 +372,8 @@ struct hotCallbacks_ {
        the gname passed in is a final name or an alias name */
 
     void (*getAliasAndOrder)(void *ctx, char *oldName, char **newName, long int *order);
-    /* Optional. If present,  parse.c wil call it to get a new name, and an ordering index. These are
-       used to rename the glyphs in teh font, and establish a new glyph order. */
+    /* Optional. If present,  parse.c will call it to get a new name, and an ordering index. These are
+       used to rename the glyphs in the font, and establish a new glyph order. */
 
     /*  Unicode Variation Selection file data input: */
 
@@ -402,12 +402,12 @@ char *hotReadFont(hotCtx g, int flags, int *psinfo, hotReadFontOverrides *fontOv
 #define HOT_NO_OLD_OPS      (1<<7)  /* Convert seac, remove dotsection */
 #define HOT_IS_SERIF        (1<<8)  /* Target font is serif: used when synthesizing  glyphs */
 #define HOT_SUPRESS_HINT_WARNINGS (1<<9)  /* Emit warnings during target font processing */
-#define HOT_FORCE_NOTDEF    (1<<10) /* Force replacement of source font notdef by markign notdef. */
+#define HOT_FORCE_NOTDEF    (1<<10) /* Force replacement of source font notdef by marking notdef. */
 #define HOT_IS_SANSSERIF    (1<<11) /* Target font is sans serif: used when synthesizing  glyphs */
                                     /* heuristic is used when neither HOT_IS_SANSSERIF nor HOT_IS_SERIF is used. */
 #define HOT_RENAME          (1<<12) /*Use client call-back to rename and reorder glyphs. */
 #define HOT_SUBSET          (1<<13)
-#define HOT_SUPRESS__WIDTH_OPT (1<<14) /* supress width optimization in CFF: makes it easier to poke at charstrings with other tools */
+#define HOT_SUPRESS__WIDTH_OPT (1<<14) /* suppress width optimization in CFF: makes it easier to poke at charstrings with other tools */
 #define HOT_VERBOSE            (1<<15) /* Print all warnings and notes: else suppress the most annoying ones. */
 
 struct hotReadFontOverrides_           /* Record for instructions to modify font as it is read in. */
@@ -697,13 +697,13 @@ void hotAddCMap(hotCtx g, hotCMapId id, hotCMapRefill refill);
 
 void hotAddUVSMap(hotCtx g, char *uvsFileName);
 
-/* hotAddUVSMap() parses hte input file uvsFileName to build a cmap format 14 subtable.
-The uvsFileName is the file path to a specifiaction for a set of Unicode variation Selectors.
+/* hotAddUVSMap() parses the input file uvsFileName to build a cmap format 14 subtable.
+The uvsFileName is the file path to a specification for a set of Unicode variation Selectors.
 Tis is a simple text file with one record per line. The record fields are:
- - base Unicode value, specified as decimnal, or as hex with a preceeding "0x"
- - Unicode Variation Selectior value, s pecified as decimnal, or as hex with a preceeding "0x"
- - ROS name, whci is ignored
- - CID for CID-keuyed fonts, else glyph name.
+ - base Unicode value, specified as decimal, or as hex with a preceding "0x"
+ - Unicode Variation Selection value, specified as decimal, or as hex with a preceding "0x"
+ - ROS name, which is ignored
+ - CID for CID-keyed fonts, else glyph name.
  Example:
  3402 E0100; Adobe-Japan1; CID+13698
 
@@ -850,11 +850,11 @@ void hotConvert(hotCtx g);
                                                /* Mac name ID 4 built from preferred   */
                                                /* family and style names.  Else, do    */
                                                /* both by OT spec: name id 1 + space + */
-                                               /* name ID 2, or "" if nme ID 2 is      */
+                                               /* name ID 2, or "" if name ID 2 is     */
                                                /* "Regular".                           */
 
 #define HOT_OMIT_MAC_NAMES            (1 << 6) /* Build name table without Mac platform names */
-#define HOT_STUB_CMAP4                (1 << 7) /* Build only a stub cmap 4 table. Useful for AdobeBlank, and otehr cases where size is an issue. Font must contain cmap format 4 to work on Windows, but it doesn't have to be useful. */
+#define HOT_STUB_CMAP4                (1 << 7) /* Build only a stub cmap 4 table. Useful for AdobeBlank, and other cases where size is an issue. Font must contain cmap format 4 to work on Windows, but it doesn't have to be useful. */
 #define HOT_OVERRIDE_MENUNAMES        (1 << 8)
 #define HOT_DO_NOT_OPTIMIZE_KERN      (1 << 9) /* Do not use left side kern class 0 for non-zero kern values. Saves a a few hundred to thousand bytes, but confuses some developers. */
 #define HOT_ADD_STUB_DSIG             (1 << 10)
