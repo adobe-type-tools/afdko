@@ -568,20 +568,9 @@
 		BD1FAAA71731D2E100472BF0 /* uforead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = uforead.xcodeproj; path = ../../../../public/lib/build/uforead/osx/xcode/uforead.xcodeproj; sourceTree = "<group>"; };
 		BD49904A0D7DE640005EF88C /* debug_tx.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; name = debug_tx.xcconfig; path = ../../../../public/config/xcconfig/debug_tx.xcconfig; sourceTree = SOURCE_ROOT; };
 		BD49904B0D7DE640005EF88C /* release_tx.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; name = release_tx.xcconfig; path = ../../../../public/config/xcconfig/release_tx.xcconfig; sourceTree = SOURCE_ROOT; };
-		BD49904E0D7DE65D005EF88C /* mtx.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = mtx.h; path = ../../../source/mtx.h; sourceTree = SOURCE_ROOT; };
-		BD49904F0D7DE65D005EF88C /* ps.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = ps.h; path = ../../../source/ps.h; sourceTree = SOURCE_ROOT; };
-		BD4990500D7DE65D005EF88C /* pdf.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = pdf.h; path = ../../../source/pdf.h; sourceTree = SOURCE_ROOT; };
-		BD4990510D7DE65D005EF88C /* t1.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = t1.h; path = ../../../source/t1.h; sourceTree = SOURCE_ROOT; };
-		BD4990520D7DE65D005EF88C /* svg.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = svg.h; path = ../../../source/svg.h; sourceTree = SOURCE_ROOT; };
-		BD4990530D7DE65D005EF88C /* afm.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = afm.h; path = ../../../source/afm.h; sourceTree = SOURCE_ROOT; };
-		BD4990540D7DE65D005EF88C /* cef.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = cef.h; path = ../../../source/cef.h; sourceTree = SOURCE_ROOT; };
-		BD4990550D7DE65D005EF88C /* cff.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = cff.h; path = ../../../source/cff.h; sourceTree = SOURCE_ROOT; };
-		BD4990570D7DE65D005EF88C /* dcf.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = dcf.h; path = ../../../source/dcf.h; sourceTree = SOURCE_ROOT; };
 		BD4990580D7DE65D005EF88C /* help.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = help.h; path = ../../../source/help.h; sourceTree = SOURCE_ROOT; };
 		BD4990590D7DE65D005EF88C /* usage.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = usage.h; path = ../../../source/usage.h; sourceTree = SOURCE_ROOT; };
-		BD49905A0D7DE65D005EF88C /* path.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = path.h; path = ../../../source/path.h; sourceTree = SOURCE_ROOT; };
 		BD49905B0D7DE65D005EF88C /* options.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = options.h; path = ../../../source/options.h; sourceTree = SOURCE_ROOT; };
-		BD49905C0D7DE65D005EF88C /* dump.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = dump.h; path = ../../../source/dump.h; sourceTree = SOURCE_ROOT; };
 		BD49906C0D7DE66E005EF88C /* tx.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = tx.c; path = ../../../source/tx.c; sourceTree = SOURCE_ROOT; };
 		BD49908A0D7DE69A005EF88C /* tx */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = tx; sourceTree = BUILT_PRODUCTS_DIR; };
 		BD4990940D7DE82C005EF88C /* absfont.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = absfont.h; path = ../../../../public/lib/api/absfont.h; sourceTree = SOURCE_ROOT; };
@@ -625,7 +614,19 @@
 		BD5E11E017A7384E007BA047 /* ttread.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ttread.xcodeproj; path = ../../../../public/lib/build/ttread/osx/xcode/ttread.xcodeproj; sourceTree = "<group>"; };
 		BD613CC210F7986500F98996 /* svread.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = svread.xcodeproj; path = ../../../../public/lib/build/svread/osx/xcode/svread.xcodeproj; sourceTree = SOURCE_ROOT; };
 		BDAF345217D6A9AF004B2EA0 /* ufowrite.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ufowrite.xcodeproj; path = ../../../../public/lib/build/ufowrite/osx/xcode/ufowrite.xcodeproj; sourceTree = "<group>"; };
-		BDC28A801808539300053E7D /* ufo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ufo.h; path = ../../../source/ufo.h; sourceTree = "<group>"; };
+		DE9917672319C51D000DEEFA /* afm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = afm.h; path = ../../../../public/lib/source/tx_shared/afm.h; sourceTree = "<group>"; };
+		DE9917682319C528000DEEFA /* svg.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = svg.h; path = ../../../../public/lib/source/tx_shared/svg.h; sourceTree = "<group>"; };
+		DE9917692319C528000DEEFA /* t1.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = t1.h; path = ../../../../public/lib/source/tx_shared/t1.h; sourceTree = "<group>"; };
+		DE99176A2319C528000DEEFA /* cff2.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = cff2.h; path = ../../../../public/lib/source/tx_shared/cff2.h; sourceTree = "<group>"; };
+		DE99176B2319C528000DEEFA /* cef.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = cef.h; path = ../../../../public/lib/source/tx_shared/cef.h; sourceTree = "<group>"; };
+		DE99176C2319C528000DEEFA /* ps.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ps.h; path = ../../../../public/lib/source/tx_shared/ps.h; sourceTree = "<group>"; };
+		DE99176D2319C528000DEEFA /* mtx.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = mtx.h; path = ../../../../public/lib/source/tx_shared/mtx.h; sourceTree = "<group>"; };
+		DE99176E2319C528000DEEFA /* dump.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = dump.h; path = ../../../../public/lib/source/tx_shared/dump.h; sourceTree = "<group>"; };
+		DE99176F2319C528000DEEFA /* pdf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = pdf.h; path = ../../../../public/lib/source/tx_shared/pdf.h; sourceTree = "<group>"; };
+		DE9917702319C528000DEEFA /* path.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = path.h; path = ../../../../public/lib/source/tx_shared/path.h; sourceTree = "<group>"; };
+		DE9917712319C528000DEEFA /* dcf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = dcf.h; path = ../../../../public/lib/source/tx_shared/dcf.h; sourceTree = "<group>"; };
+		DE9917722319C528000DEEFA /* cff.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = cff.h; path = ../../../../public/lib/source/tx_shared/cff.h; sourceTree = "<group>"; };
+		DE9917732319C532000DEEFA /* ufo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ufo.h; path = ../../../../public/lib/source/tx_shared/ufo.h; sourceTree = "<group>"; };
 		DEBF3EFF219259C10022A4C6 /* tx_shared.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = tx_shared.xcodeproj; path = ../../../../public/lib/build/tx_shared/osx/xcode/tx_shared.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -721,21 +722,22 @@
 		BD4990480D7DE60A005EF88C /* Headers */ = {
 			isa = PBXGroup;
 			children = (
-				BDC28A801808539300053E7D /* ufo.h */,
-				BD49904E0D7DE65D005EF88C /* mtx.h */,
-				BD49904F0D7DE65D005EF88C /* ps.h */,
-				BD4990500D7DE65D005EF88C /* pdf.h */,
-				BD4990510D7DE65D005EF88C /* t1.h */,
-				BD4990520D7DE65D005EF88C /* svg.h */,
-				BD4990530D7DE65D005EF88C /* afm.h */,
-				BD4990540D7DE65D005EF88C /* cef.h */,
-				BD4990550D7DE65D005EF88C /* cff.h */,
-				BD4990570D7DE65D005EF88C /* dcf.h */,
+				DE9917672319C51D000DEEFA /* afm.h */,
+				DE99176B2319C528000DEEFA /* cef.h */,
+				DE9917722319C528000DEEFA /* cff.h */,
+				DE99176A2319C528000DEEFA /* cff2.h */,
+				DE9917712319C528000DEEFA /* dcf.h */,
+				DE99176E2319C528000DEEFA /* dump.h */,
 				BD4990580D7DE65D005EF88C /* help.h */,
-				BD4990590D7DE65D005EF88C /* usage.h */,
-				BD49905A0D7DE65D005EF88C /* path.h */,
+				DE99176D2319C528000DEEFA /* mtx.h */,
 				BD49905B0D7DE65D005EF88C /* options.h */,
-				BD49905C0D7DE65D005EF88C /* dump.h */,
+				DE9917702319C528000DEEFA /* path.h */,
+				DE99176F2319C528000DEEFA /* pdf.h */,
+				DE99176C2319C528000DEEFA /* ps.h */,
+				DE9917682319C528000DEEFA /* svg.h */,
+				DE9917692319C528000DEEFA /* t1.h */,
+				DE9917732319C532000DEEFA /* ufo.h */,
+				BD4990590D7DE65D005EF88C /* usage.h */,
 			);
 			name = Headers;
 			sourceTree = "<group>";
