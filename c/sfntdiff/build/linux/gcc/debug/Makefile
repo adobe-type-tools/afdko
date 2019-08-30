@@ -35,7 +35,6 @@ PRG_INCLUDES = 	$(SRC_DIR)/Dda.h \
 	$(SRC_DIR)/Dsys.h \
 	$(SRC_DIR)/Dtto.h \
 	$(SRC_DIR)/numtypes.h \
-	$(SRC_DIR)/sfntdiff.h \
 	$(ROOT_DIR)/../spot/sfnt_includes/sfnt_common.h
 
 
