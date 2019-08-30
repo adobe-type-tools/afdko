@@ -841,3 +841,11 @@ def test_bad_charset():
     runner(CMD + ['-a', '-f', font_path, save_path])
     expected_path = get_expected_path('bad_charset.txt')
     assert differ([expected_path, save_path, '-s', '## Filename'])
+
+
+def test_bug_940():
+    input_path = get_bad_input_path('bug940_private_blend.otf')
+    output_path = get_temp_file_path()
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        runner(CMD + ['-a', '-o', 'cff2', '-f', input_path, output_path])
+    assert(err.value.returncode > 0)  # error code, not segfault or success

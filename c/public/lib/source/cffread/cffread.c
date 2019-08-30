@@ -961,7 +961,7 @@ static void saveBlend(cfrCtx h, float *realValue, abfOpEntry *blendEntry) {
         blendEntry->value = *realValue;
         blendEntry->numBlends = 0; /* shows there is no blend value, and the regular value shoud be used instead. */
         blendEntry->blendValues = NULL;
-    } else {
+    } else if (numBlends == 1) {
         int i;
         float defaultValue;
         signed int numRegions = h->stack.numRegions;
@@ -974,7 +974,7 @@ static void saveBlend(cfrCtx h, float *realValue, abfOpEntry *blendEntry) {
         // copy the defaul region value
         blendValues[0] = defaultValue = INDEX_REAL(0);
 
-        /* now, copy the blend abusolate values to blendArray[i].
+        /* now, copy the blend absolute values to blendArray[i].
         The default region value is in stackEntry->int_val or real_val
         The region delta values are in the stackEntry->blend_val array.
         */
@@ -982,7 +982,8 @@ static void saveBlend(cfrCtx h, float *realValue, abfOpEntry *blendEntry) {
         for (i = 0; i < numRegions; i++) {
             blendValues[i + 1] = stackEntry->blend_val[i] + defaultValue;
         }
-    }
+    } else
+        fatal(h, cfrErrDICTOp);
 }
 
 /* Save integer array operands. */
