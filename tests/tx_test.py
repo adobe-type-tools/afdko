@@ -356,6 +356,15 @@ def test_cef_cefsvg():
     assert differ([expected_path, output_path])
 
 
+@pytest.mark.parametrize('file_ext', [
+    'pfa', 'pfabin', 'pfb', 'lwfn', 'bidf'])  # TODO: 'bidf85'
+def test_type1_inputs(file_ext):
+    bidf = '.bidf' if 'bidf' in file_ext else ''
+    actual_path = runner(CMD + ['-s', '-o', '2', '-f', f'type1.{file_ext}'])
+    expected_path = get_expected_path(f'type1.dump2{bidf}.txt')
+    assert differ([expected_path, actual_path, '-s', '## Filename'])
+
+
 # ----------
 # Dump tests
 # ----------
