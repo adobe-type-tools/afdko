@@ -1,0 +1,57 @@
+%ADOt1write: (1.0.35)
+12 dict dup begin
+/FontType 1 def
+/FontName /SourceSansPro-Regular def
+/FontInfo 4 dict dup begin
+/Notice (Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries.) def
+end def
+/PaintType 0 def
+/FontMatrix [0.001 0 0 0.001 0 0] def
+/Encoding 256 array
+0 1 255 {1 index exch /.notdef put} for
+dup 32 /space put
+dup 97 /a put
+def
+/FontBBox {52 -12 565 660} def
+end
+systemdict begin
+dup /Private
+14 dict dup begin
+/|- {def} def
+/| {put} def
+/BlueValues [-12 0 486 498 518 530 574 586 638 650 656 668 712 724] def
+/OtherBlues [-217 -205] def
+/BlueScale 0.0625 def
+/BlueFuzz 0 def
+/StdHW [67] def
+/StdVW [84] def
+/StemSnapH [67 78] def
+/StemSnapV [84 95] def
+/password 5839 def
+/MinFeature {16 16} def
+/OtherSubrs[{}{}{}{systemdict/internaldict known not{pop 3}{1183615869
+systemdict/internaldict get exec dup/startlock known{/startlock get exec}{dup
+/strtlck known{/strtlck get exec}{pop 3}ifelse}ifelse}ifelse}executeonly]def
+/Subrs 5 array
+dup 0 <~*+7Et^/^5Ikl_Clj[%l~> |
+dup 1 <~*+7Et]B<VBSc~> |
+dup 2 <~*+7Et]B,82RK~> |
+dup 3 <~*+7Et8H~> |
+dup 4 <~*+7Et^01_8&O`lcG5~> |
+def
+put
+dup /CharStrings
+5 dict dup begin
+/.notdef <~*+7Et]@kTgFMSbr.PR5PQ$(R4FS2%;%l7n=Hi<BfMssEG!!i_1FmE
+S^=-&jHGeUI[Im]cFSj3-bM%<=0(trf3FGH+2EtKRM?.gjl2@DTS"mpI&4F5b5<g
+sZZ9:5A03M6iWMY,oe,1$~> |-
+/a <~*+7Et]A#2AY?iIEi$j!^Gd#5Ca^Ig:PYJDY(u,/`6K(&B'n="2Is%:&E&:9
+V*Cs\Cki=1)\>bR9JJV5qPknP?*-te+mkYef]C05!B$p$m[qU$fO!&mD)bT(kY?p
++;~> |-
+/space <~*+7Et]A#<25Q~> |-
+/zerowidth <~*+7Et]BD28~> |-
+/negative <~*+7Et]2S#E~> |-
+end put
+end
+dup /FontName get exch definefont pop
+end
