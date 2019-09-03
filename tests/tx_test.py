@@ -365,6 +365,15 @@ def test_type1_inputs(file_ext):
     assert differ([expected_path, actual_path, '-s', '## Filename'])
 
 
+@pytest.mark.parametrize('args', [[], ['U', '_500,500'], ['U', '_0,0', 'n']])
+@pytest.mark.parametrize('fname', ['zx', 'zy'])
+def test_type1mm_inputs(fname, args):
+    fname2 = f'.{"".join(args)}' if args else ''
+    actual_path = runner(CMD + ['-s', '-f', f'{fname}.pfb', '-o', '2'] + args)
+    expected_path = get_expected_path(f'{fname}.dump2{fname2}.txt')
+    assert differ([expected_path, actual_path, '-s', '## Filename'])
+
+
 @pytest.mark.parametrize('file_ext', ['otf', 'ttf', 'cff', 'cef'])
 def test_other_input_formats(file_ext):
     actual_path = runner(CMD + ['-s', '-o', '3', '-f', f'font.{file_ext}'])

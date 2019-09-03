@@ -1,0 +1,1496 @@
+## Filename zx.pfb
+## Top Dict
+version             "001.002"
+Notice              "Copyright (c) 1993, 1994, 1999 Adobe Systems Incorporated.  All Rights Reserved."
+Weight              "SnapShotMM"
+FontBBox            {-141,-262,956,857}
+XUID                {1,44278,20645,8847,25231,10813,500,500}
+sup.srcFontType     Type 1 (name-keyed)
+sup.nGlyphs         230
+## FontDict[0]
+FontName            "AdobeSansMM_500_500_"
+## Private
+BlueValues          {-14,0,709,723,532,544,692,705,727,739}
+OtherBlues          {274,283,-261,-248}
+BlueScale           0.047958
+StdHW               58.602
+StdVW               87.213
+StemSnapH           {58.602,72.1952}
+StemSnapV           {87.213,92.301}
+ForceBold           true
+## glyph[tag] {name,encoding,path}
+glyph[0] {space,0x20,
+ 271 width endchar}
+glyph[1] {exclam,0x21,
+ 202 width 60 142 vstem 0 111 hstem 709 topedge 149 709 move 53 709 line 67
+ 197 line 135 197 line 59 111 move 59 0 line 143 0 line 143 111 line endchar}
+glyph[2] {quotedbl,0x22,
+ 317 width 54 121 vstem 196 263 vstem 710 topedge 46 710 move newhints 54 121
+ vstem 196 263 vstem 492 710 hstem 63 492 line 112 492 line 130 710 line 187
+ 710 move 205 492 line 254 492 line 272 710 line endchar}
+glyph[3] {numbersign,0x23,
+ 475 width 15 460 vstem 0 bottomedge 231 283 hstem 423 475 hstem 696 topedge
+ 253 231 move 201 0 line 257 0 line 309 231 line 404 231 line 416 283 line 321
+ 283 line 353 423 line 448 423 line 460 475 line 365 475 line 415 696 line 359
+ 696 line 309 475 line 222 475 line 273 696 line 216 696 line 166 475 line 71
+ 475 line 59 423 line 154 423 line 122 283 line 27 283 line 15 231 line 111
+ 231 line 58 0 line 115 0 line 167 231 line 265 283 move 178 283 line 211 423
+ line 297 423 line endchar}
+glyph[4] {dollar,0x24,
+ 483 width 53 136 vstem 218 264 vstem 355 438 vstem 13 68 hstem 619 674 hstem
+ 264 619 move 312 613 331 577 338 538 curve 417 540 line 404 612 363 667 264
+ 674 curve 264 750 line 218 750 line 218 675 line 94 668 53 601 53 522 curve
+ 53 409 143 371 218 326 curve 218 68 line 168 73 140 105 126 158 curve 45 154
+ line 62 67 117 18 218 13 curve 218 -70 line 264 -70 line 264 13 line 374 22
+ 438 96 438 191 curve 438 304 338 344 264 391 curve 218 416 move 179 445 136
+ 471 136 529 curve 136 572 152 612 218 619 curve 264 302 move 306 270 355 246
+ 355 181 curve 355 125 322 75 264 68 curve endchar}
+glyph[5] {percent,0x25,
+ 669 width 26 95 vstem 372 441 vstem 574 643 vstem -12 36 hstem 352 401 hstem
+ 666 714 hstem newhints 26 95 vstem 229 297 vstem 372 441 vstem 574 643 vstem
+ -12 36 hstem 352 401 hstem 666 714 hstem 297 533 move 297 649 246 715 162 715
+ curve 77 715 26 649 26 533 curve 26 419 78 352 162 352 curve 245 352 297 418
+ 297 532 curve newhints 26 95 vstem 372 441 vstem 574 643 vstem -12 36 hstem
+ 352 401 hstem 666 714 hstem 548 711 move 477 711 line 119 -8 line 191 -8 line
+ newhints 26 95 vstem 229 297 vstem 372 441 vstem 574 643 vstem -12 36 hstem
+ 352 401 hstem 666 714 hstem 162 401 move 118 401 95 454 95 533 curve 95 613
+ 118 666 162 666 curve 206 666 229 613 229 533 curve 229 455 207 401 163 401
+ curve newhints 26 95 vstem 372 441 vstem 574 643 vstem -12 36 hstem 301 350
+ hstem 352 401 hstem 666 714 hstem 643 169 move 643 284 592 350 508 350 curve
+ 423 350 372 284 372 169 curve 372 55 423 -12 508 -12 curve 591 -12 643 54 643
+ 168 curve newhints 26 95 vstem 372 441 vstem 574 643 vstem -12 36 hstem 301
+ 350 hstem 352 401 hstem 666 714 hstem 508 36 move 463 36 441 90 441 169 curve
+ 441 248 463 301 508 301 curve 552 301 574 248 574 169 curve 574 90 553 36 509
+ 36 curve endchar}
+glyph[6] {ampersand,0x26,
+ 531 width 43 129 vstem 299 372 vstem 0 bottomedge 623 674 hstem newhints 43
+ 129 vstem 417 488 vstem 0 bottomedge 623 674 hstem 509 0 move newhints 43 129
+ vstem 417 488 vstem 0 112 hstem 623 674 hstem 484 27 456 66 423 112 curve
+ newhints 43 129 vstem 417 488 vstem 0 352 hstem 623 674 hstem 458 178 485 252
+ 488 352 curve 417 352 line 413 278 397 214 378 169 curve 340 220 295 305 262
+ 369 curve newhints 107 187 vstem 299 372 vstem 0 bottomedge 623 674 hstem 331
+ 426 372 479 372 551 curve 372 636 312 674 241 674 curve 151 674 107 621 107
+ 543 curve 107 481 132 425 161 372 curve newhints 43 129 vstem 299 372 vstem
+ -14 bottomedge 623 674 hstem 89 314 43 253 43 164 curve 43 51 100 -14 207 -14
+ curve 286 -14 334 22 360 57 curve 363 57 line newhints 107 187 vstem 299 372
+ vstem 0 bottomedge 623 674 hstem 381 34 395 17 409 0 curve 187 545 move 187
+ 599 209 623 243 623 curve 276 623 299 592 299 549 curve 299 500 267 453 227
+ 415 curve 203 457 187 495 187 544 curve newhints 43 129 vstem 299 372 vstem
+ -14 39 hstem 623 674 hstem 129 162 move 129 226 152 275 198 317 curve 234 246
+ 285 164 324 106 curve 298 64 261 39 221 39 curve 184 39 129 79 129 161 curve
+ endchar}
+glyph[7] {quoteright,0x27,
+ 174 width 39 150 vstem 710 topedge 39 493 move 89 493 line 150 710 line 63
+ 710 line endchar}
+glyph[8] {parenleft,0x28,
+ 296 width 73 163 vstem -184 767 hstem 285 -143 move 249 -95 221 -48 201 9
+ curve 169 108 163 205 163 291 curve 163 401 174 495 201 573 curve 222 635 251
+ 682 285 726 curve 255 767 line 207 722 167 675 134 607 curve 96 525 73 423 73
+ 292 curve 72 165 92 62 131 -23 curve 165 -91 208 -140 254 -184 curve endchar}
+glyph[9] {parenright,0x29,
+ 296 width 133 223 vstem -184 767 hstem 42 -184 move 88 -140 131 -91 165 -23
+ curve 204 62 224 165 223 292 curve 223 423 201 525 162 607 curve 129 675 89
+ 722 41 767 curve 11 726 line 45 682 74 635 95 573 curve 122 495 133 401 133
+ 291 curve 133 205 127 108 95 9 curve 75 -48 47 -95 11 -143 curve endchar}
+glyph[10] {asterisk,0x2A,
+ 376 width 168 209 vstem 720 topedge 173 556 move 175 555 line 160 441 line
+ 216 441 line 201 555 line 203 556 line 296 486 line 324 535 line 216 579 line
+ 216 581 line 323 625 line 295 674 line 203 603 line 201 605 line 216 720 line
+ 160 720 line 175 605 line 173 603 line 81 674 line 53 625 line 161 581 line
+ 161 579 line 53 535 line 81 486 line endchar}
+glyph[11] {plus,0x2B,
+ 510 width 224 286 vstem 233 292 hstem 286 233 move 452 233 line 452 292 line
+ 286 292 line 286 477 line 224 477 line 224 292 line 58 292 line 58 233 line
+ 224 233 line 224 36 line 286 36 line endchar}
+glyph[12] {comma,0x2C,
+ 189 width 32 147 vstem -108 113 hstem 32 -108 move 84 -108 line 147 113 line
+ 56 113 line endchar}
+glyph[13] {hyphen,0x2D,
+ 313 width 52 261 vstem 213 286 hstem 52 286 move 52 213 line 261 213 line 261
+ 286 line endchar}
+glyph[14] {period,0x2E,
+ 189 width 52 137 vstem 0 111 hstem 52 111 move 52 0 line 137 0 line 137 111
+ line endchar}
+glyph[15] {slash,0x2F,
+ 382 width 19 367 vstem -12 bottomedge 739 topedge 367 739 move 297 739 line
+ 19 -12 line 90 -12 line endchar}
+glyph[16] {zero,0x30,
+ 519 width 33 123 vstem 396 485 vstem -13 49 hstem 643 705 hstem 33 346 move
+ 33 85 119 -13 259 -13 curve 406 -13 485 92 485 346 curve 485 596 404 705 259
+ 705 curve 115 705 33 597 33 347 curve 259 643 move 335 643 396 551 396 346
+ curve 396 121 339 49 259 49 curve 181 49 123 119 123 346 curve 123 552 184
+ 643 258 643 curve endchar}
+glyph[17] {one,0x31,
+ 430 width 207 294 vstem 0 bottomedge 698 topedge 46 597 move 78 533 line 207
+ 596 line 207 0 line 294 0 line 294 698 line 242 698 line endchar}
+glyph[18] {two,0x32,
+ 515 width 58 149 vstem 367 456 vstem 0 70 hstem 643 705 hstem 457 70 move 153
+ 70 line 199 282 456 305 456 524 curve 456 614 399 705 257 705 curve 129 705
+ 76 623 58 545 curve 149 541 line 159 596 189 643 254 643 curve 345 643 367
+ 576 367 522 curve 367 352 98 311 49 9 curve 59 0 line 457 0 line endchar}
+glyph[19] {three,0x33,
+ 515 width 67 155 vstem 369 458 vstem -12 50 hstem 643 705 hstem newhints 67
+ 155 vstem 204 300 vstem 369 458 vstem -12 50 hstem 643 705 hstem 204 333 move
+ 319 325 369 276 369 181 curve 369 111 335 50 255 50 curve newhints 54 144
+ vstem 369 458 vstem -12 50 hstem 643 705 hstem 183 50 153 100 144 154 curve
+ 54 148 line 66 65 119 -12 256 -12 curve 389 -12 458 63 458 186 curve newhints
+ 67 155 vstem 204 300 vstem 369 458 vstem -12 50 hstem 643 705 hstem 458 307
+ 385 360 300 370 curve 300 371 line newhints 67 155 vstem 348 435 vstem -12 50
+ hstem 643 705 hstem 391 388 435 451 435 541 curve 435 644 366 705 252 705
+ curve 131 705 77 634 67 555 curve 155 550 line 160 598 186 643 253 643 curve
+ 322 643 348 595 348 536 curve newhints 67 155 vstem 204 300 vstem 348 435
+ vstem -12 50 hstem 643 705 hstem 348 464 312 409 204 398 curve endchar}
+glyph[20] {four,0x34,
+ 520 width 306 394 vstem 0 bottomedge 180 242 hstem 698 topedge 46 237 move 46
+ 180 line 306 180 line 306 0 line 394 0 line 394 180 line 465 180 line 465 242
+ line 394 242 line 394 698 line 302 698 line 128 242 move 225 422 line 253 478
+ 280 532 305 588 curve 308 588 line 307 532 306 474 306 416 curve 306 242 line
+ endchar}
+glyph[21] {five,0x35,
+ 518 width 51 139 vstem 370 459 vstem -12 48 hstem 383 445 hstem 625 692 hstem
+ 77 331 move 154 320 line 174 357 205 383 253 383 curve 322 383 370 320 370
+ 214 curve 370 99 322 48 250 48 curve 181 48 152 100 139 162 curve 51 155 line
+ 70 61 131 -12 253 -12 curve 385 -12 459 69 459 218 curve 459 364 377 445 276
+ 445 curve 225 445 189 425 164 403 curve 162 403 line 193 625 line 420 625
+ line 429 692 line 128 692 line endchar}
+glyph[22] {six,0x36,
+ 518 width 47 139 vstem 388 478 vstem -12 50 hstem 379 442 hstem 643 705 hstem
+ 136 356 move 139 576 186 643 269 643 curve newhints 47 139 vstem 366 453
+ vstem -12 50 hstem 379 442 hstem 643 705 hstem 326 643 353 604 366 558 curve
+ 453 566 line 428 659 363 705 269 705 curve 109 705 47 567 47 315 curve 47 66
+ 132 -12 269 -12 curve newhints 47 139 vstem 388 478 vstem -12 50 hstem 379
+ 442 hstem 643 705 hstem 420 -12 478 95 478 220 curve 478 361 404 442 281 442
+ curve newhints 47 139 vstem 388 478 vstem -12 50 hstem 379 442 hstem 643 705
+ hstem 206 442 159 404 138 356 curve 139 250 move 139 313 191 379 265 379
+ curve 348 379 388 299 388 214 curve 388 143 356 50 267 50 curve 170 50 139
+ 150 139 249 curve endchar}
+glyph[23] {seven,0x37,
+ 469 width 318 413 vstem 0 bottomedge 621 692 hstem 413 692 move 49 692 line
+ 49 621 line 318 621 line 318 618 line 131 0 line 229 0 line 413 667 line
+ endchar}
+glyph[24] {eight,0x38,
+ 517 width 46 135 vstem 382 472 vstem -12 51 hstem 334 395 hstem 643 705 hstem
+ 176 367 move 116 356 46 310 46 186 curve 46 51 134 -12 259 -12 curve 389 -12
+ 472 55 472 186 curve 472 307 404 356 341 367 curve 341 369 line newhints 60
+ 147 vstem 370 457 vstem -12 51 hstem 334 395 hstem 643 705 hstem 395 378 457
+ 412 457 528 curve 457 639 376 705 259 705 curve 134 705 60 634 60 528 curve
+ newhints 46 135 vstem 382 472 vstem -12 51 hstem 334 395 hstem 643 705 hstem
+ 60 420 116 382 176 369 curve newhints 60 147 vstem 370 457 vstem -12 51 hstem
+ 334 395 hstem 643 705 hstem 147 518 move 147 599 188 643 259 643 curve 331
+ 643 370 595 370 518 curve 370 426 319 395 259 395 curve 185 395 147 433 147
+ 517 curve newhints 46 135 vstem 382 472 vstem -12 51 hstem 334 395 hstem 643
+ 705 hstem 135 190 move 135 284 185 334 259 334 curve 336 334 382 285 382 190
+ curve 382 98 325 51 259 51 curve 190 51 135 97 135 189 curve endchar}
+glyph[25] {nine,0x39,
+ 519 width 43 133 vstem 382 474 vstem -12 50 hstem 251 314 hstem 643 705 hstem
+ 385 337 move 382 138 338 50 251 50 curve newhints 58 146 vstem 382 474 vstem
+ -12 50 hstem 251 314 hstem 643 705 hstem 188 50 162 99 146 152 curve 58 144
+ line 84 46 143 -12 249 -12 curve 431 -12 474 172 474 382 curve 474 603 402
+ 705 251 705 curve newhints 43 133 vstem 382 474 vstem -12 50 hstem 251 314
+ hstem 643 705 hstem 99 705 43 601 43 475 curve 43 375 93 251 240 251 curve
+ newhints 43 133 vstem 382 474 vstem -12 50 hstem 251 314 hstem 643 705 hstem
+ 325 251 369 303 383 337 curve 382 438 move 382 384 332 314 256 314 curve 169
+ 314 133 401 133 480 curve 133 566 167 643 254 643 curve 344 643 382 566 382
+ 439 curve endchar}
+glyph[26] {colon,0x3A,
+ 189 width 52 137 vstem 0 111 hstem 379 490 hstem 52 490 move 52 379 line 137
+ 379 line 137 490 line 52 111 move 52 0 line 137 0 line 137 111 line endchar}
+glyph[27] {semicolon,0x3B,
+ 189 width 53 138 vstem 379 490 hstem 53 490 move 53 379 line 138 379 line 138
+ 490 line 32 -108 move 84 -108 line 147 111 line 56 111 line endchar}
+glyph[28] {less,0x3C,
+ 510 width 53 124 vstem 32 493 hstem 124 261 move 124 263 line 443 427 line
+ 443 493 line 53 288 line 53 237 line 443 32 line 443 98 line endchar}
+glyph[29] {equal,0x3D,
+ 510 width 58 452 vstem 147 206 hstem 318 377 hstem 58 318 move 452 318 line
+ 452 377 line 58 377 line 58 147 move 452 147 line 452 206 line 58 206 line
+ endchar}
+glyph[30] {greater,0x3E,
+ 510 width 386 456 vstem 32 493 hstem 386 261 move 67 98 line 67 32 line 456
+ 237 line 456 288 line 67 493 line 67 427 line 386 263 line endchar}
+glyph[31] {question,0x3F,
+ 400 width 150 234 vstem 0 111 hstem 549 717 hstem newhints 156 226 vstem 0
+ 111 hstem 549 717 hstem 226 188 move 224 262 245 322 301 379 curve newhints 9
+ 97 vstem 293 382 vstem 0 111 hstem 549 717 hstem 354 436 382 485 382 562
+ curve 382 643 327 717 204 717 curve 89 717 27 656 9 549 curve 97 542 line
+ newhints 9 97 vstem 293 382 vstem 0 111 hstem 657 717 hstem 108 609 141 657
+ 202 657 curve 253 657 293 631 293 559 curve 293 503 269 468 226 409 curve
+ newhints 150 234 vstem 0 111 hstem 549 717 hstem 164 327 151 262 156 188
+ curve 150 111 move 150 0 line 234 0 line 234 111 line endchar}
+glyph[32] {at,0x40,
+ 644 width 33 95 vstem 178 243 vstem 561 616 vstem 65 112 hstem 203 247 hstem
+ 449 490 hstem 571 618 hstem 467 144 move 427 125 380 112 316 112 curve 198
+ 112 95 180 95 316 curve 95 391 125 454 175 500 curve 224 545 289 571 365 571
+ curve 432 571 479 554 512 528 curve 546 501 561 462 561 417 curve 561 366 540
+ 321 513 287 curve 490 260 465 247 445 247 curve 420 247 413 264 425 306 curve
+ 479 490 line 421 490 line 415 464 line 413 464 line 402 483 382 491 355 491
+ curve 315 491 275 474 238 434 curve 200 393 178 345 178 288 curve newhints 33
+ 95 vstem 178 243 vstem 561 616 vstem 65 112 hstem 203 258 hstem 449 490 hstem
+ 571 618 hstem 178 234 207 203 251 203 curve 299 203 345 241 365 276 curve 368
+ 276 line newhints 33 95 vstem 178 243 vstem 561 616 vstem 65 112 hstem 203
+ 247 hstem 449 490 hstem 571 618 hstem 363 258 365 239 375 225 curve 387 210
+ 407 203 433 203 curve 472 203 513 220 550 258 curve 591 298 616 355 616 417
+ curve 616 526 538 618 369 618 curve 168 618 33 485 33 320 curve 33 164 147 65
+ 304 65 curve 373 65 446 79 492 110 curve newhints 33 95 vstem 178 243 vstem
+ 561 616 vstem 65 112 hstem 203 258 hstem 449 490 hstem 571 618 hstem 243 301
+ move 243 339 260 377 288 408 curve 312 437 339 449 365 449 curve 391 449 402
+ 435 402 425 curve 402 417 392 383 381 353 curve 367 313 317 258 277 258 curve
+ 252 258 243 274 243 300 curve endchar}
+glyph[33] {A,0x41,
+ 466 width 8 458 vstem 0 bottomedge 213 277 hstem 649 709 hstem 319 213 move
+ 362 0 line 458 0 line 294 709 line 172 709 line 8 0 line 104 0 line 146 213
+ line 306 277 move 159 277 line 196 461 line 208 520 219 580 230 649 curve 235
+ 649 line 246 580 258 523 270 462 curve endchar}
+glyph[34] {B,0x42,
+ 496 width 58 150 vstem 371 465 vstem 0 64 hstem 340 404 hstem 645 709 hstem
+ 308 377 move newhints 58 150 vstem 346 437 vstem 0 64 hstem 340 404 hstem 645
+ 709 hstem 390 388 437 435 437 536 curve 437 664 361 709 210 709 curve 58 709
+ line 58 0 line 226 0 line newhints 58 150 vstem 371 465 vstem 0 64 hstem 340
+ 404 hstem 645 709 hstem 362 0 465 47 465 193 curve newhints 58 150 vstem 371
+ 465 vstem 0 64 hstem 340 404 hstem 645 709 hstem 465 304 413 360 308 374
+ curve 150 645 move 219 645 line newhints 58 150 vstem 346 437 vstem 0 64
+ hstem 340 404 hstem 645 709 hstem 304 645 346 608 346 526 curve 346 449 315
+ 404 221 404 curve 150 404 line 150 340 move 224 340 line newhints 58 150
+ vstem 371 465 vstem 0 64 hstem 340 404 hstem 645 709 hstem 325 340 371 286
+ 371 198 curve 371 96 306 64 219 64 curve 150 64 line endchar}
+glyph[35] {C,0x43,
+ 516 width 36 130 vstem 384 475 vstem -14 49 hstem 660 723 hstem newhints 36
+ 130 vstem 393 485 vstem -14 49 hstem 660 723 hstem 393 200 move 381 127 344
+ 49 274 49 curve 199 49 130 113 130 354 curve 130 590 200 660 275 660 curve
+ newhints 36 130 vstem 384 475 vstem -14 49 hstem 660 723 hstem 337 660 369
+ 610 384 523 curve 475 530 line 455 663 376 723 276 723 curve 204 723 148 692
+ 106 636 curve 60 574 36 479 36 357 curve 36 218 63 127 107 69 curve newhints
+ 36 130 vstem 393 485 vstem -14 49 hstem 660 723 hstem 147 12 208 -14 275 -14
+ curve 380 -14 462 72 485 191 curve endchar}
+glyph[36] {D,0x44,
+ 516 width 58 150 vstem 389 483 vstem 0 64 hstem 645 709 hstem 223 0 move 408
+ 0 483 111 483 357 curve 483 618 394 709 221 709 curve 58 709 line 58 0 line
+ 150 64 move 150 645 line 221 645 line 339 645 389 555 389 355 curve 389 139
+ 332 64 222 64 curve endchar}
+glyph[37] {E,0x45,
+ 423 width 58 150 vstem 0 64 hstem 337 401 hstem 645 709 hstem 150 401 move
+ 150 645 line 378 645 line 378 709 line 58 709 line 58 0 line 385 0 line 385
+ 64 line 150 64 line 150 337 line 328 337 line 328 401 line endchar}
+glyph[38] {F,0x46,
+ 411 width 58 150 vstem 0 bottomedge 335 399 hstem 645 709 hstem 150 0 move
+ 150 335 line 327 335 line 327 399 line 150 399 line 150 645 line 376 645 line
+ 376 709 line 58 709 line 58 0 line endchar}
+glyph[39] {G,0x47,
+ 516 width 36 130 vstem 384 470 vstem -14 49 hstem 273 337 hstem 660 723 hstem
+ 472 337 move 285 337 line 285 273 line 384 273 line 384 83 line 361 64 322 49
+ 279 49 curve 188 49 130 146 130 355 curve 130 575 206 660 276 660 curve 329
+ 660 356 625 378 536 curve 470 547 line 437 659 374 723 275 723 curve 139 723
+ 36 630 36 357 curve 36 111 114 -14 275 -14 curve 364 -14 433 27 472 66 curve
+ endchar}
+glyph[40] {H,0x48,
+ 538 width 58 150 vstem 388 480 vstem 0 bottomedge 337 401 hstem 709 topedge
+ 480 709 move 388 709 line 388 401 line 150 401 line 150 709 line 58 709 line
+ 58 0 line 150 0 line 150 337 line 388 337 line 388 0 line 480 0 line endchar}
+glyph[41] {I,0x49,
+ 215 width 61 154 vstem 0 bottomedge 709 topedge 154 0 move 154 709 line 61
+ 709 line 61 0 line endchar}
+glyph[42] {J,0x4A,
+ 330 width 181 274 vstem -14 50 hstem 709 topedge 13 18 move 41 -1 72 -14 121
+ -14 curve 219 -14 274 52 274 209 curve 274 709 line 181 709 line 181 205 line
+ 181 88 150 50 101 50 curve 70 50 47 64 28 83 curve endchar}
+glyph[43] {K,0x4B,
+ 475 width 58 150 vstem 0 bottomedge 709 topedge 148 345 move 150 406 150 450
+ 150 522 curve 150 709 line 58 709 line 58 0 line 150 0 line 150 229 line 213
+ 333 line 365 0 line 468 0 line 267 408 line 438 709 line 337 709 line 240 522
+ line 206 449 180 407 151 345 curve endchar}
+glyph[44] {L,0x4C,
+ 397 width 58 150 vstem 0 64 hstem 709 topedge 378 64 move 150 64 line 150 709
+ line 58 709 line 58 0 line 378 0 line endchar}
+glyph[45] {M,0x4D,
+ 737 width 58 142 vstem 595 679 vstem 0 100 hstem 635 709 hstem 367 100 move
+ 340 217 285 406 197 709 curve 58 709 line 58 0 line 142 0 line 142 312 142
+ 522 138 635 curve 141 635 line 171 522 232 312 323 0 curve 413 0 line 507 318
+ 567 523 596 635 curve 599 635 line 596 522 595 311 595 0 curve 679 0 line 679
+ 709 line 540 709 line 453 408 398 217 370 100 curve endchar}
+glyph[46] {N,0x4E,
+ 539 width 58 143 vstem 397 481 vstem 0 107 hstem 602 709 hstem 400 107 move
+ 368 211 293 417 181 709 curve 58 709 line 58 0 line 143 0 line 143 295 141
+ 499 137 602 curve 141 602 line 172 500 247 297 360 0 curve 481 0 line 481 709
+ line 397 709 line 397 417 398 211 404 107 curve endchar}
+glyph[47] {O,0x4F,
+ 558 width 36 130 vstem 428 522 vstem -14 49 hstem 660 723 hstem 36 354 move
+ 36 91 136 -14 279 -14 curve 422 -14 522 91 522 354 curve 522 619 422 723 279
+ 723 curve 136 723 36 619 36 355 curve 279 660 move 358 660 428 584 428 354
+ curve 428 125 358 49 279 49 curve 201 49 130 125 130 354 curve 130 584 201
+ 660 278 660 curve endchar}
+glyph[48] {P,0x50,
+ 487 width 58 150 vstem 365 459 vstem 0 bottomedge 288 352 hstem 645 709 hstem
+ 150 0 move 150 288 line 220 288 line 374 288 459 346 459 501 curve 459 635
+ 393 709 228 709 curve 58 709 line 58 0 line 150 352 move 150 645 line 227 645
+ line 321 645 365 601 365 501 curve 365 390 318 352 218 352 curve endchar}
+glyph[49] {Q,0x51,
+ 558 width 36 130 vstem 428 522 vstem -14 49 hstem 660 723 hstem 435 45 move
+ 490 101 522 201 522 354 curve 522 619 422 723 279 723 curve 136 723 36 619 36
+ 354 curve 36 91 136 -14 279 -14 curve 314 -14 348 -6 375 12 curve 485 -116
+ line 539 -66 line 279 660 move 358 660 428 584 428 354 curve 428 125 358 49
+ 279 49 curve 201 49 130 125 130 354 curve 130 584 201 660 278 660 curve
+ endchar}
+glyph[50] {R,0x52,
+ 493 width 58 150 vstem 359 453 vstem 0 bottomedge 299 362 hstem 645 709 hstem
+ 307 312 move 384 326 453 376 453 505 curve 453 664 348 709 221 709 curve 58
+ 709 line 58 0 line 150 0 line 150 299 line 222 299 line 382 0 line 492 0 line
+ 150 362 move 150 645 line 221 645 line 323 645 359 598 359 503 curve 359 407
+ 313 362 234 362 curve endchar}
+glyph[51] {S,0x53,
+ 460 width 44 136 vstem 336 430 vstem -14 49 hstem 660 723 hstem newhints 44
+ 136 vstem 325 412 vstem -14 49 hstem 660 723 hstem 412 582 move 399 658 346
+ 723 235 723 curve 167 723 120 700 88 666 curve 57 637 44 596 44 553 curve 44
+ 496 65 454 90 426 curve newhints 44 136 vstem 336 430 vstem -14 49 hstem 660
+ 723 hstem 113 399 142 375 203 336 curve 262 295 284 279 303 261 curve 322 239
+ 336 212 336 173 curve 336 145 328 115 312 95 curve newhints 30 120 vstem 336
+ 430 vstem -14 49 hstem 660 723 hstem 294 72 267 49 226 49 curve 161 49 133 97
+ 120 138 curve 30 133 line 46 50 101 -14 226 -14 curve 306 -14 353 25 384 58
+ curve 416 93 430 139 430 184 curve 430 241 409 281 384 311 curve newhints 44
+ 136 vstem 336 430 vstem -14 49 hstem 660 723 hstem 362 335 331 356 276 394
+ curve 220 429 196 448 173 470 curve 149 492 136 523 136 559 curve 136 585 143
+ 609 158 625 curve newhints 44 136 vstem 325 412 vstem -14 49 hstem 660 723
+ hstem 174 645 202 660 233 660 curve 293 660 315 612 325 579 curve endchar}
+glyph[52] {T,0x54,
+ 427 width 168 260 vstem 0 bottomedge 645 709 hstem 410 709 move 17 709 line
+ 17 645 line 168 645 line 168 0 line 260 0 line 260 645 line 410 645 line
+ endchar}
+glyph[53] {U,0x55,
+ 515 width 54 145 vstem 369 460 vstem -14 49 hstem 709 topedge 460 709 move
+ 369 709 line 369 220 line 369 113 349 49 256 49 curve 166 49 145 115 145 220
+ curve 145 709 line 54 709 line 54 220 line 54 58 107 -14 256 -14 curve 410
+ -14 460 62 460 219 curve endchar}
+glyph[54] {V,0x56,
+ 471 width 11 462 vstem 0 63 hstem 709 topedge 235 63 move 216 172 197 259 178
+ 348 curve 106 709 line 11 709 line 179 0 line 295 0 line 462 709 line 367 709
+ line 295 350 line 276 261 258 173 239 63 curve endchar}
+glyph[55] {W,0x57,
+ 743 width 10 734 vstem 0 71 hstem 709 topedge newhints 10 734 vstem 0 71
+ hstem 630 709 hstem 374 630 move 389 507 405 407 421 305 curve 472 0 line 590
+ 0 line 734 709 line 642 709 line 588 392 line 570 290 553 189 535 71 curve
+ 533 71 line 517 189 500 290 483 393 curve 431 709 line 313 709 line 263 395
+ line 246 293 228 190 214 71 curve 211 71 line 193 188 175 292 157 395 curve
+ 102 709 line 10 709 line 155 0 line 274 0 line 323 300 line 339 402 355 505
+ 371 630 curve endchar}
+glyph[56] {X,0x58,
+ 468 width 19 455 vstem 0 bottomedge 709 topedge 238 419 move 236 419 line 127
+ 709 line 27 709 line 186 364 line 19 0 line 121 0 line 235 297 line 238 297
+ line 352 0 line 455 0 line 287 364 line 447 709 line 347 709 line endchar}
+glyph[57] {Y,0x59,
+ 439 width 175 267 vstem 0 bottomedge 709 topedge 431 709 move 333 709 line
+ 277 533 line 259 472 240 411 222 342 curve 220 342 line 201 411 182 471 163
+ 532 curve 107 709 line 8 709 line 175 281 line 175 0 line 267 0 line 267 281
+ line endchar}
+glyph[58] {Z,0x5A,
+ 409 width 50 368 vstem 0 64 hstem 645 709 hstem 33 0 move newhints 33 379
+ vstem 0 64 hstem 645 709 hstem 379 0 line 379 64 line 136 64 line newhints 50
+ 368 vstem 0 64 hstem 645 709 hstem 368 657 line 368 709 line 50 709 line 50
+ 645 line 268 645 line newhints 33 379 vstem 0 64 hstem 645 709 hstem 33 50
+ line endchar}
+glyph[59] {bracketleft,0x5B,
+ 285 width 81 169 vstem -156 -95 hstem 678 739 hstem 260 -156 move 260 -95
+ line 169 -95 line 169 678 line 260 678 line 260 739 line 81 739 line 81 -156
+ line endchar}
+glyph[60] {backslash,0x5C,
+ 382 width 15 363 vstem -12 bottomedge 739 topedge 15 739 move 292 -12 line
+ 363 -12 line 85 739 line endchar}
+glyph[61] {bracketright,0x5D,
+ 284 width 113 200 vstem -156 -95 hstem 678 739 hstem 21 -156 move 200 -156
+ line 200 739 line 21 739 line 21 678 line 113 678 line 113 -95 line 21 -95
+ line endchar}
+glyph[62] {asciicircum,0x5E,
+ 510 width 60 450 vstem 635 705 hstem 254 635 move 256 635 line 384 382 line
+ 450 382 line 280 705 line 230 705 line 60 382 line 126 382 line endchar}
+glyph[63] {underscore,0x5F,
+ 437 width 0 437 vstem -125 -75 hstem 437 -125 move 437 -75 line 0 -75 line 0
+ -125 line endchar}
+glyph[64] {quoteleft,0x60,
+ 174 width 24 135 vstem 710 topedge 24 710 move 85 493 line 135 493 line 111
+ 710 line endchar}
+glyph[65] {a,0x61,
+ 440 width 32 121 vstem 296 383 vstem -12 45 hstem 491 544 hstem newhints 51
+ 138 vstem 296 383 vstem 0 bottomedge 491 544 hstem 399 0 move 399 5 line 386
+ 17 383 39 383 82 curve 383 344 line 383 502 327 544 221 544 curve 104 544 62
+ 473 51 400 curve 138 394 line 144 441 166 491 218 491 curve 279 491 296 444
+ 296 363 curve 296 344 line newhints 32 121 vstem 296 383 vstem -12 45 hstem
+ 491 544 hstem 94 311 32 237 32 134 curve 32 40 77 -12 178 -12 curve 228 -12
+ 273 11 298 37 curve 300 37 line newhints 32 121 vstem 296 383 vstem 0
+ bottomedge 491 544 hstem 301 24 304 10 312 0 curve newhints 32 121 vstem 296
+ 383 vstem -12 45 hstem 491 544 hstem 296 98 move 267 60 225 45 198 45 curve
+ 141 45 121 81 121 140 curve 121 212 168 270 296 294 curve endchar}
+glyph[66] {b,0x62,
+ 460 width 50 138 vstem 339 428 vstem -12 52 hstem 480 544 hstem 727 topedge
+ newhints 50 138 vstem 339 428 vstem 0 bottomedge 480 544 hstem 727 topedge 50
+ 0 move 137 0 line newhints 50 138 vstem 339 428 vstem 0 47 hstem 480 544
+ hstem 727 topedge 136 47 line 138 47 line newhints 50 138 vstem 339 428 vstem
+ -12 52 hstem 480 544 hstem 727 topedge 162 23 196 -12 257 -12 curve 376 -12
+ 428 98 428 266 curve 428 456 356 544 259 544 curve 206 544 169 516 139 485
+ curve 138 485 line 138 727 line 50 727 line 138 409 move 164 446 197 480 237
+ 480 curve 300 480 339 407 339 264 curve 340 126 300 52 237 52 curve 186 52
+ 155 95 138 131 curve endchar}
+glyph[67] {c,0x63,
+ 440 width 31 121 vstem 324 413 vstem -12 45 hstem 487 544 hstem 408 410 move
+ 392 488 337 544 235 544 curve 113 544 31 459 31 267 curve 31 70 105 -12 234
+ -12 curve 334 -12 395 44 413 137 curve 324 144 line 310 82 283 45 233 45
+ curve 172 45 121 94 121 267 curve 121 420 171 487 234 487 curve 283 487 306
+ 452 320 404 curve endchar}
+glyph[68] {d,0x64,
+ 460 width 31 121 vstem 322 409 vstem -12 52 hstem 480 544 hstem 727 topedge
+ 323 47 move newhints 31 121 vstem 322 409 vstem 0 bottomedge 480 544 hstem
+ 727 topedge 322 0 line 409 0 line 409 727 line 322 727 line 322 488 line 320
+ 488 line 290 518 253 544 202 544 curve 103 544 31 457 31 266 curve newhints
+ 31 121 vstem 322 409 vstem -12 52 hstem 480 544 hstem 727 topedge 31 88 88
+ -12 203 -12 curve newhints 31 121 vstem 322 409 vstem -12 52 hstem 480 544
+ hstem 727 topedge 265 -12 300 24 321 47 curve 222 52 move 160 52 120 123 121
+ 264 curve 121 407 159 480 223 480 curve 263 480 296 446 322 409 curve 322 131
+ line 304 93 273 52 223 52 curve endchar}
+glyph[69] {e,0x65,
+ 445 width 31 121 vstem 325 415 vstem -12 41 hstem 252 299 hstem 491 544 hstem
+ 415 252 move 415 353 397 432 357 484 curve 322 525 278 544 226 544 curve 168
+ 544 123 524 89 485 curve 50 440 31 365 31 271 curve 31 162 52 92 87 49 curve
+ 123 4 174 -12 228 -12 curve 287 -12 328 5 358 32 curve 388 59 406 94 415 128
+ curve 326 133 line 307 72 276 41 229 41 curve 174 41 125 89 121 252 curve 121
+ 299 move 125 451 174 491 226 491 curve 278 491 320 427 325 299 curve endchar}
+glyph[70] {f,0x66,
+ 292 width 75 163 vstem 0 bottomedge 474 532 hstem 679 738 hstem newhints 75
+ 163 vstem 0 bottomedge 474 532 hstem 716 topedge 319 716 move 307 723 294 728
+ 280 731 curve 262 736 242 738 221 738 curve newhints 75 163 vstem 0
+ bottomedge 474 532 hstem 679 738 hstem 175 738 141 726 117 706 curve 88 679
+ 75 631 75 566 curve 75 532 line 20 532 line 20 474 line 75 474 line 75 0 line
+ 163 0 line 163 474 line 266 474 line 266 532 line 163 532 line 163 568 line
+ 163 618 171 649 188 664 curve 201 675 218 679 237 679 curve 253 679 268 677
+ 280 672 curve 291 668 300 664 306 658 curve endchar}
+glyph[71] {g,0x67,
+ 465 width 32 121 vstem 330 417 vstem -261 -204 hstem -12 54 hstem 478 544
+ hstem newhints 32 121 vstem 330 417 vstem -261 -204 hstem -12 54 hstem 494
+ 532 hstem 332 494 move 329 494 line newhints 32 121 vstem 330 417 vstem -261
+ -204 hstem -12 54 hstem 478 544 hstem 303 525 264 544 218 544 curve 95 544 32
+ 448 32 264 curve 32 82 101 -12 214 -12 curve 271 -12 307 13 328 35 curve 330
+ 35 line 330 9 line 330 -77 323 -129 304 -163 curve newhints 45 134 vstem 330
+ 417 vstem -261 -204 hstem -12 54 hstem 494 532 hstem 286 -191 257 -204 229
+ -204 curve 205 -204 183 -198 167 -182 curve 150 -167 140 -149 134 -117 curve
+ 45 -124 line 60 -173 85 -205 113 -226 curve 147 -251 188 -261 230 -261 curve
+ 291 -261 341 -241 371 -200 curve 404 -153 417 -93 417 16 curve 417 532 line
+ 330 532 line newhints 32 121 vstem 330 417 vstem -261 -204 hstem -12 54 hstem
+ 478 544 hstem 121 263 move 121 405 155 478 236 478 curve 279 478 310 452 330
+ 420 curve 330 112 line 309 82 279 54 233 54 curve 165 54 121 131 121 262
+ curve endchar}
+glyph[72] {h,0x68,
+ 463 width 50 138 vstem 328 415 vstem 0 bottomedge 476 544 hstem 727 topedge
+ 415 0 move 415 381 line 415 442 405 480 385 506 curve 364 533 330 544 290 544
+ curve 262 544 234 535 210 521 curve 186 508 163 489 140 470 curve 138 470
+ line 138 727 line 50 727 line 50 0 line 138 0 line 138 397 line 156 422 182
+ 444 202 457 curve 221 469 241 476 260 476 curve 286 476 301 466 312 451 curve
+ 326 430 328 393 328 350 curve 328 0 line endchar}
+glyph[73] {i,0x69,
+ 195 width 54 141 vstem 0 bottomedge 532 topedge 643 731 hstem 141 643 move
+ 141 731 line 54 731 line 54 643 line 141 532 move 54 532 line 54 0 line 141 0
+ line endchar}
+glyph[74] {j,0x6A,
+ 195 width 53 141 vstem -241 -181 hstem 532 topedge 643 731 hstem 141 643 move
+ 141 731 line 53 731 line 53 643 line -123 -212 move -105 -221 -87 -228 -69
+ -233 curve -51 -238 -32 -241 -10 -241 curve 41 -241 80 -225 105 -191 curve
+ 130 -156 141 -104 141 -21 curve 141 532 line 54 532 line 54 -36 line 54 -93
+ 49 -129 36 -153 curve 22 -172 -1 -181 -22 -181 curve -42 -181 -54 -177 -63
+ -173 curve -76 -168 -87 -160 -98 -151 curve endchar}
+glyph[75] {k,0x6B,
+ 415 width 50 138 vstem 0 bottomedge 532 topedge 727 topedge 236 322 move 381
+ 532 line 283 532 line 209 419 line 186 383 162 346 139 307 curve 136 307 line
+ 137 348 138 382 138 421 curve 138 727 line 50 727 line 50 0 line 138 0 line
+ 138 206 line 183 256 line 307 0 line 413 0 line endchar}
+glyph[76] {l,0x6C,
+ 195 width 54 141 vstem 0 bottomedge 727 topedge 141 0 move 141 727 line 54
+ 727 line 54 0 line endchar}
+glyph[77] {m,0x6D,
+ 686 width 50 138 vstem3 301 388 vstem3 552 639 vstem3 0 bottomedge 475 544
+ hstem 639 0 move 639 386 line 639 443 629 482 609 508 curve 590 532 562 544
+ 524 544 curve 497 544 473 537 450 524 curve 426 512 405 491 382 467 curve 379
+ 467 line 374 485 364 506 349 520 curve 332 535 309 544 278 544 curve 254 544
+ 229 537 207 525 curve newhints 50 138 vstem3 301 388 vstem3 552 639 vstem3 0
+ bottomedge 532 topedge 185 513 163 494 139 469 curve 136 469 line 138 532
+ line 50 532 line 50 0 line 138 0 line newhints 50 138 vstem3 301 388 vstem3
+ 552 639 vstem3 0 bottomedge 475 544 hstem 138 395 line 156 421 175 440 193
+ 454 curve 211 468 228 475 244 475 curve 261 475 275 467 284 454 curve 297 434
+ 301 402 301 359 curve 301 0 line 388 0 line 388 397 line 407 423 426 441 443
+ 455 curve 461 468 478 475 493 475 curve 514 475 527 467 536 453 curve 549 432
+ 552 392 552 357 curve 552 0 line endchar}
+glyph[78] {n,0x6E,
+ 463 width 50 138 vstem 328 415 vstem 0 bottomedge 476 544 hstem 415 0 move
+ 415 381 line 415 442 405 480 385 506 curve 364 533 330 544 290 544 curve 262
+ 544 234 535 210 521 curve newhints 50 138 vstem 328 415 vstem 0 bottomedge
+ 532 topedge 186 507 162 488 140 469 curve 136 469 line 138 532 line 50 532
+ line 50 0 line 138 0 line newhints 50 138 vstem 328 415 vstem 0 bottomedge
+ 476 544 hstem 138 397 line 156 422 182 444 202 457 curve 221 469 240 476 259
+ 476 curve 286 476 301 465 312 451 curve 326 429 328 393 328 351 curve 328 0
+ line endchar}
+glyph[79] {o,0x6F,
+ 467 width 31 121 vstem 346 435 vstem -12 45 hstem 487 544 hstem 435 266 move
+ 435 476 347 544 234 544 curve 120 544 31 476 31 266 curve 31 80 96 -12 234
+ -12 curve 369 -12 435 84 435 265 curve 234 45 move 167 45 121 104 121 266
+ curve 121 432 174 487 234 487 curve 293 487 346 433 346 266 curve 346 113 302
+ 45 235 45 curve endchar}
+glyph[80] {p,0x70,
+ 460 width 50 138 vstem 339 428 vstem -248 bottomedge -12 52 hstem 480 544
+ hstem 50 -248 move 138 -248 line 138 40 line 139 40 line 156 23 174 10 192 2
+ curve 216 -10 238 -12 257 -12 curve 310 -12 352 10 380 49 curve 409 90 428
+ 160 428 266 curve 428 371 408 439 379 482 curve 347 527 306 544 258 544 curve
+ 230 544 208 537 189 527 curve newhints 50 138 vstem 339 428 vstem -248
+ bottomedge -12 52 hstem 484 532 hstem 166 515 151 498 139 484 curve 136 484
+ line 138 532 line 50 532 line newhints 50 138 vstem 339 428 vstem -248
+ bottomedge -12 52 hstem 480 544 hstem 138 409 move 152 435 169 454 185 465
+ curve 204 476 221 480 237 480 curve 269 480 294 463 311 433 curve 329 398 339
+ 343 339 265 curve 339 170 326 120 310 94 curve 291 65 265 52 237 52 curve 216
+ 52 198 59 182 71 curve 166 83 151 99 138 123 curve endchar}
+glyph[81] {q,0x71,
+ 460 width 31 121 vstem 322 409 vstem -248 bottomedge -12 52 hstem 480 544
+ hstem 409 -248 move newhints 31 121 vstem 322 409 vstem -248 bottomedge -12
+ 52 hstem 532 topedge 409 532 line 322 532 line newhints 31 121 vstem 322 409
+ vstem -248 bottomedge -12 52 hstem 485 532 hstem 323 485 line 321 485 line
+ newhints 31 121 vstem 322 409 vstem -248 bottomedge -12 52 hstem 480 544
+ hstem 309 498 293 515 271 528 curve 251 538 229 544 202 544 curve 155 544 112
+ 526 80 482 curve 49 438 31 369 31 266 curve 31 175 47 97 78 52 curve 106 11
+ 147 -12 203 -12 curve 221 -12 245 -9 270 4 curve 286 11 305 24 320 41 curve
+ 322 41 line 322 -248 line 322 123 move 308 99 293 83 278 72 curve 262 59 243
+ 52 223 52 curve 194 52 168 66 149 95 curve 133 122 121 173 121 265 curve 121
+ 328 129 394 148 430 curve 166 464 192 480 223 480 curve 239 480 256 476 274
+ 465 curve 290 454 307 435 322 409 curve endchar}
+glyph[82] {r,0x72,
+ 322 width 50 138 vstem 0 bottomedge 477 544 hstem newhints 50 138 vstem 0
+ bottomedge 532 topedge 136 478 move 138 532 line 50 532 line 50 0 line 138 0
+ line 138 394 line newhints 50 138 vstem 0 bottomedge 477 544 hstem 155 419
+ 173 440 191 454 curve 211 470 229 477 245 477 curve 258 477 268 475 279 470
+ curve 287 466 294 461 300 455 curve 310 525 line 302 531 294 535 285 538
+ curve 274 542 262 544 249 544 curve 225 544 206 536 188 525 curve newhints 50
+ 138 vstem 0 bottomedge 532 topedge 169 513 154 496 139 478 curve endchar}
+glyph[83] {s,0x73,
+ 388 width 34 119 vstem 273 362 vstem -12 40 hstem 492 544 hstem newhints 34
+ 119 vstem 271 347 vstem -12 40 hstem 492 544 hstem 347 442 move 340 473 325
+ 496 302 513 curve 274 533 239 544 194 544 curve 144 544 109 532 80 510 curve
+ 51 488 34 453 34 409 curve 34 378 44 348 62 324 curve newhints 34 119 vstem
+ 273 362 vstem -12 40 hstem 492 544 hstem 82 296 110 278 161 256 curve 210 237
+ 236 223 252 201 curve 266 184 273 161 273 140 curve 273 106 265 82 253 67
+ curve newhints 26 107 vstem 273 362 vstem -12 40 hstem 492 544 hstem 237 48
+ 215 40 191 40 curve 149 40 118 62 107 101 curve 26 95 line 37 58 59 29 86 13
+ curve 115 -5 152 -12 194 -12 curve 248 -12 290 6 319 34 curve 348 64 362 102
+ 362 150 curve 362 191 350 220 333 241 curve newhints 34 119 vstem 273 362
+ vstem -12 40 hstem 492 544 hstem 312 268 281 288 228 311 curve 174 335 156
+ 345 141 363 curve 127 378 119 399 119 418 curve 119 443 127 463 139 475 curve
+ newhints 34 119 vstem 271 347 vstem -12 40 hstem 492 544 hstem 153 486 174
+ 492 196 492 curve 239 492 263 465 271 437 curve endchar}
+glyph[84] {t,0x74,
+ 333 width 80 167 vstem -12 47 hstem 474 532 hstem 80 532 move 15 532 line 15
+ 474 line 80 474 line 80 160 line 80 32 137 -12 222 -12 curve 265 -12 300 3
+ 325 15 curve 308 72 line 293 62 269 47 240 47 curve 196 47 167 90 167 185
+ curve 167 474 line 288 474 line 288 532 line 167 532 line 167 648 line 80 648
+ line endchar}
+glyph[85] {u,0x75,
+ 466 width 47 135 vstem 328 415 vstem -12 56 hstem 532 topedge 47 532 move 47
+ 151 line 47 90 58 52 78 26 curve 99 -1 134 -12 174 -12 curve 207 -12 238 -2
+ 264 14 curve newhints 47 135 vstem 328 415 vstem 0 bottomedge 532 topedge 287
+ 29 307 48 325 66 curve 330 66 line 328 0 line 415 0 line 415 532 line 328 532
+ line newhints 47 135 vstem 328 415 vstem -12 56 hstem 532 topedge 328 134
+ line 308 108 286 88 267 76 curve 246 63 224 56 205 56 curve 178 56 161 67 151
+ 81 curve 137 102 135 139 135 182 curve 135 532 line endchar}
+glyph[86] {v,0x76,
+ 401 width 7 393 vstem 0 58 hstem 532 topedge 198 58 move 182 148 166 229 149
+ 306 curve 101 532 line 7 532 line 150 0 line 250 0 line 393 532 line 300 532
+ line 251 307 line 233 205 218 149 202 58 curve endchar}
+glyph[87] {w,0x77,
+ 647 width 9 638 vstem 0 65 hstem 462 532 hstem 326 462 move 339 377 352 318
+ 367 232 curve 412 0 line 517 0 line 638 532 line 555 532 line 510 304 line
+ 495 229 481 154 467 65 curve 463 65 line 450 149 435 228 420 302 curve 375
+ 532 line 272 532 line 227 302 line 212 228 198 153 184 65 curve 180 65 line
+ 167 153 151 235 137 299 curve 92 532 line 9 532 line 131 0 line 235 0 line
+ 280 228 line 295 311 308 373 321 462 curve endchar}
+glyph[88] {x,0x78,
+ 413 width 19 395 vstem 0 bottomedge 532 topedge 385 532 move 285 532 line 209
+ 321 line 206 321 line 129 532 line 29 532 line 29 527 line 155 275 line 19 4
+ line 19 0 line 122 0 line 206 226 line 208 226 line 292 0 line 395 0 line 395
+ 4 line 260 275 line 385 527 line endchar}
+glyph[89] {y,0x79,
+ 413 width -3 403 vstem -261 -203 hstem 532 topedge 403 532 move 313 532 line
+ 272 332 line 259 267 244 201 230 121 curve 227 121 line 209 196 187 266 167
+ 331 curve 107 532 line 10 532 line 191 23 line 169 -83 line 161 -121 150 -150
+ 137 -170 curve 123 -191 104 -203 83 -203 curve 70 -203 57 -200 46 -196 curve
+ 35 -191 26 -184 20 -179 curve -3 -236 line 10 -243 23 -249 38 -254 curve 54
+ -258 71 -261 91 -261 curve 139 -261 172 -241 196 -213 curve 221 -186 241 -133
+ 255 -85 curve endchar}
+glyph[90] {z,0x7A,
+ 345 width 36 316 vstem 0 58 hstem 474 532 hstem 316 532 move 36 532 line 36
+ 474 line 217 474 line newhints 25 327 vstem 0 58 hstem 474 532 hstem 25 49
+ line 25 0 line 327 0 line 327 58 line 126 58 line newhints 36 316 vstem 0 58
+ hstem 474 532 hstem 316 483 line endchar}
+glyph[91] {braceleft,0x7B,
+ 291 width 103 191 vstem -156 -95 hstem 262 322 hstem 678 739 hstem newhints
+ 34 91 vstem -156 -95 hstem 262 322 hstem 678 739 hstem 34 262 move newhints
+ 103 191 vstem -156 -95 hstem 262 322 hstem 678 739 hstem 55 258 72 250 84 235
+ curve 96 220 103 199 103 160 curve 103 10 line 103 -54 116 -91 139 -116 curve
+ 171 -148 224 -155 277 -156 curve 277 -95 line 247 -95 225 -87 210 -69 curve
+ 197 -51 191 -20 191 28 curve 191 157 line 191 206 180 239 159 261 curve
+ newhints 34 91 vstem -156 -95 hstem 262 322 hstem 678 739 hstem 142 278 119
+ 287 91 291 curve 91 294 line newhints 103 191 vstem -156 -95 hstem 262 322
+ hstem 678 739 hstem 119 297 142 306 159 323 curve 180 345 191 378 191 428
+ curve 191 555 line 191 603 197 634 210 652 curve 224 670 247 678 277 678
+ curve 277 739 line 224 738 171 731 139 699 curve 116 674 103 637 103 574
+ curve 103 424 line 103 385 96 364 84 349 curve newhints 34 91 vstem -156 -95
+ hstem 262 322 hstem 678 739 hstem 72 334 55 326 34 322 curve endchar}
+glyph[92] {bar,0x7C,
+ 274 width 106 169 vstem -250 bottomedge 106 -250 move 169 -250 line 169 750
+ line 106 750 line endchar}
+glyph[93] {braceright,0x7D,
+ 291 width 101 188 vstem -156 -95 hstem 262 322 hstem 678 739 hstem newhints
+ 200 257 vstem -156 -95 hstem 262 322 hstem 678 739 hstem 257 322 move
+ newhints 101 188 vstem -156 -95 hstem 262 322 hstem 678 739 hstem 236 326 219
+ 334 207 349 curve 195 364 188 385 188 424 curve 188 574 line 188 637 175 674
+ 152 699 curve 120 731 66 738 14 739 curve 14 678 line 44 678 67 670 81 652
+ curve 94 634 101 603 101 555 curve 101 428 line 101 378 112 345 132 323 curve
+ newhints 200 257 vstem -156 -95 hstem 262 322 hstem 678 739 hstem 149 306 172
+ 297 200 294 curve 200 291 line newhints 101 188 vstem -156 -95 hstem 262 322
+ hstem 678 739 hstem 172 287 149 278 132 261 curve 112 239 101 206 101 157
+ curve 101 28 line 101 -20 95 -51 81 -69 curve 66 -87 44 -95 14 -95 curve 14
+ -156 line 66 -155 120 -148 152 -116 curve 175 -91 188 -54 188 10 curve 188
+ 160 line 188 199 195 220 207 235 curve newhints 200 257 vstem -156 -95 hstem
+ 262 322 hstem 678 739 hstem 219 250 236 258 257 262 curve endchar}
+glyph[94] {asciitilde,0x7E,
+ 510 width 50 459 vstem 264 326 hstem 97 219 move 109 243 128 264 163 264
+ curve 183 264 203 260 229 248 curve newhints 50 459 vstem 213 274 hstem 264
+ 326 hstem 262 234 line 289 222 316 213 353 213 curve 415 213 447 260 459 293
+ curve 413 319 line 401 294 380 274 347 274 curve 327 274 308 278 281 290
+ curve newhints 50 459 vstem 264 326 hstem 246 305 line 222 316 194 326 156
+ 326 curve 93 326 62 277 50 245 curve endchar}
+glyph[95] {exclamdown,0xA1,
+ 202 width 60 142 vstem 379 490 hstem 59 379 move 144 379 line 144 490 line 59
+ 490 line 149 -219 move 135 302 line 67 302 line 53 -219 line endchar}
+glyph[96] {cent,0xA2,
+ 495 width 46 130 vstem 224 270 vstem -1 bottomedge 696 topedge 270 570 move
+ newhints 46 130 vstem 224 270 vstem 354 437 vstem -1 bottomedge 696 topedge
+ 314 563 340 528 351 488 curve 434 494 line newhints 46 130 vstem 224 270
+ vstem -1 bottomedge 696 topedge 416 570 358 624 270 627 curve 270 696 line
+ 224 696 line 224 625 line 105 612 46 517 46 350 curve 46 152 117 80 224 72
+ curve 224 -1 line 270 -1 line 270 72 line newhints 46 130 vstem 224 270 vstem
+ 354 437 vstem -1 bottomedge 696 topedge 360 77 418 127 437 218 curve 354 226
+ line newhints 46 130 vstem 224 270 vstem -1 bottomedge 696 topedge 340 162
+ 313 137 270 129 curve 224 129 move 167 142 130 195 130 349 curve 130 486 169
+ 552 224 567 curve endchar}
+glyph[97] {sterling,0xA3,
+ 502 width 136 220 vstem 340 424 vstem -7 58 hstem 316 379 hstem 645 703 hstem
+ newhints 98 185 vstem 136 220 vstem 340 424 vstem -7 58 hstem 316 379 hstem
+ 645 703 hstem 210 379 move 201 418 185 486 185 532 curve 185 603 211 645 265
+ 645 curve 303 645 325 620 340 557 curve 424 562 line 401 659 348 703 258 703
+ curve 145 703 98 626 98 543 curve 98 480 113 423 122 379 curve newhints 136
+ 220 vstem 340 424 vstem -3 69 hstem 316 379 hstem 645 703 hstem 62 379 line
+ 62 316 line 131 316 line 137 280 140 241 136 201 curve 131 114 100 72 59 53
+ curve 79 -3 line 108 4 139 6 176 6 curve newhints 136 220 vstem 340 424 vstem
+ -7 58 hstem 316 379 hstem 645 703 hstem 223 6 305 -7 351 -7 curve 411 -7 443
+ 5 467 25 curve 452 82 line 431 66 399 58 359 58 curve newhints 136 220 vstem
+ 340 424 vstem -3 bottomedge 316 379 hstem 645 703 hstem 306 58 276 69 224 69
+ curve 200 69 179 67 163 63 curve 161 68 line 194 92 217 138 220 208 curve 223
+ 246 220 282 214 316 curve newhints 98 185 vstem 136 220 vstem 340 424 vstem
+ -7 58 hstem 316 379 hstem 645 703 hstem 362 316 line 362 379 line endchar}
+glyph[98] {fraction,0xA4,
+ 253 width -95 351 vstem -12 bottomedge 705 topedge 351 705 move 279 705 line
+ -95 -12 line -22 -12 line endchar}
+glyph[99] {yen,0xA5,
+ 479 width 195 285 vstem 0 bottomedge 125 171 hstem 259 304 hstem 692 topedge
+ 285 259 move 422 259 line 422 304 line 285 304 line 285 319 line 444 692 line
+ 344 692 line 293 526 line 276 468 258 410 243 347 curve 241 347 line 224 409
+ 206 466 188 525 curve 136 692 line 35 692 line 195 319 line 195 304 line 56
+ 304 line 56 259 line 195 259 line 195 171 line 56 171 line 56 125 line 195
+ 125 line 195 0 line 285 0 line 285 125 line 422 125 line 422 171 line 285 171
+ line endchar}
+glyph[100] {florin,0xA6,
+ 436 width 177 263 vstem -161 -97 hstem 369 426 hstem 641 705 hstem 258 426
+ move 268 501 line 277 542 288 585 307 612 curve 322 632 339 641 364 641 curve
+ 385 641 401 636 414 628 curve newhints 177 263 vstem -161 -97 hstem 369 426
+ hstem 687 topedge 438 687 line newhints 177 263 vstem -161 -97 hstem 369 426
+ hstem 641 705 hstem 414 699 388 705 355 705 curve 308 705 273 690 245 659
+ curve 217 625 197 575 183 508 curve 170 426 line 100 426 line 88 369 line 158
+ 369 line 95 27 line 86 -22 77 -45 61 -70 curve 47 -87 30 -97 9 -97 curve -11
+ -97 -30 -92 -46 -83 curve -69 -144 line -41 -157 -14 -161 13 -161 curve 65
+ -161 99 -146 128 -113 curve 154 -82 172 -34 184 31 curve 246 369 line 346 369
+ line 358 426 line endchar}
+glyph[101] {section,0xA7,
+ 443 width 42 122 vstem 326 406 vstem -120 -69 hstem 672 723 hstem newhints 69
+ 150 vstem 305 381 vstem -120 -69 hstem 672 723 hstem 381 599 move 368 679 312
+ 723 230 723 curve 177 723 139 709 109 682 curve 85 659 69 621 69 581 curve 69
+ 537 83 498 109 468 curve newhints 42 122 vstem 302 383 vstem -120 -69 hstem
+ 672 723 hstem 76 443 42 410 42 346 curve 42 273 94 232 169 182 curve 213 155
+ 252 134 275 111 curve 295 86 302 63 302 30 curve 302 6 293 -23 277 -43 curve
+ newhints 52 131 vstem 302 383 vstem -120 -69 hstem 672 723 hstem 261 -59 241
+ -69 215 -69 curve 168 -69 140 -43 131 16 curve 52 12 line 61 -58 118 -120 216
+ -120 curve 271 -120 312 -104 343 -72 curve 367 -46 383 -9 383 41 curve 383 86
+ 368 121 347 150 curve newhints 69 150 vstem 326 406 vstem -120 -69 hstem 672
+ 723 hstem 383 179 406 223 406 274 curve 406 354 361 394 278 445 curve 233 470
+ 202 490 184 507 curve 161 532 150 555 150 588 curve 150 646 192 672 229 672
+ curve newhints 42 122 vstem 305 381 vstem -120 -69 hstem 672 723 hstem 272
+ 672 297 640 305 596 curve 122 358 move 122 390 133 412 158 434 curve newhints
+ 42 122 vstem 326 406 vstem -120 -69 hstem 672 723 hstem 245 369 326 351 326
+ 264 curve 326 231 317 207 299 184 curve newhints 42 122 vstem 305 381 vstem
+ -120 -69 hstem 672 723 hstem 228 251 122 272 122 357 curve endchar}
+glyph[102] {currency,0xA8,
+ 529 width 93 156 vstem 374 436 vstem 175 236 hstem 456 517 hstem 362 486 move
+ 334 506 300 517 265 517 curve 229 517 195 506 168 486 curve 105 549 line 62
+ 506 line 126 443 line 105 416 93 383 93 346 curve 93 310 105 276 125 249
+ curve 62 186 line 105 143 line 168 206 line 195 186 229 175 265 175 curve 301
+ 175 335 187 361 207 curve 425 143 line 468 186 line 404 250 line 424 277 436
+ 310 436 346 curve 436 382 424 415 404 443 curve 468 506 line 425 549 line 265
+ 456 move 325 456 374 406 374 346 curve 374 286 325 236 265 236 curve 204 236
+ 156 286 156 346 curve 156 406 204 456 264 456 curve endchar}
+glyph[103] {quotesingle,0xA9,
+ 174 width 54 121 vstem 710 topedge 45 710 move 63 492 line 112 492 line 129
+ 710 line endchar}
+glyph[104] {quotedblleft,0xAA,
+ 317 width 24 278 vstem 710 topedge 24 710 move newhints 24 278 vstem 493 710
+ hstem 85 493 line 135 493 line 111 710 line 167 710 move 229 493 line 278 493
+ line 254 710 line endchar}
+glyph[105] {guillemotleft,0xAB,
+ 378 width 32 87 vstem 184 186 vstem 46 452 hstem 87 247 move 87 251 line 186
+ 369 line 186 452 line 32 277 line 32 221 line 186 46 line 186 129 line 238
+ 247 move 238 251 line 338 369 line 338 452 line 184 277 line 184 221 line 338
+ 46 line 338 129 line endchar}
+glyph[106] {guilsinglleft,0xAC,
+ 226 width 32 87 vstem 46 452 hstem 87 247 move 87 251 line 186 369 line 186
+ 452 line 32 277 line 32 221 line 186 46 line 186 129 line endchar}
+glyph[107] {guilsinglright,0xAD,
+ 226 width 140 195 vstem 46 452 hstem 140 247 move 40 129 line 40 46 line 195
+ 221 line 195 277 line 40 452 line 40 369 line 140 251 line endchar}
+glyph[108] {fi,0xAE,
+ 489 width 75 163 vstem 348 435 vstem 0 bottomedge 474 532 hstem 679 738 hstem
+ newhints 75 163 vstem 348 435 vstem 0 bottomedge 474 532 hstem 716 topedge
+ 319 716 move 307 723 294 728 280 731 curve 262 736 242 738 221 738 curve
+ newhints 75 163 vstem 348 435 vstem 0 bottomedge 474 532 hstem 679 738 hstem
+ 175 738 141 726 117 706 curve 88 679 75 631 75 566 curve 75 532 line 20 532
+ line 20 474 line 75 474 line 75 0 line 163 0 line 163 474 line 266 474 line
+ 266 532 line 163 532 line 163 568 line 163 618 171 649 188 664 curve 201 675
+ 218 679 237 679 curve 253 679 268 677 280 672 curve 291 668 300 664 306 658
+ curve newhints 75 163 vstem 348 435 vstem 0 bottomedge 474 532 hstem 643 731
+ hstem 435 642 move newhints 75 163 vstem 348 435 vstem 0 bottomedge 474 532
+ hstem 658 731 hstem 435 731 line 348 731 line newhints 75 163 vstem 348 435
+ vstem 0 bottomedge 474 532 hstem 643 731 hstem 348 642 line 435 532 move 348
+ 532 line 348 0 line 435 0 line endchar}
+glyph[109] {fl,0xAF,
+ 489 width 75 163 vstem 348 435 vstem 0 bottomedge 474 532 hstem 679 738 hstem
+ newhints 75 163 vstem 348 435 vstem 0 bottomedge 474 532 hstem 716 topedge
+ 319 716 move 307 723 294 728 280 731 curve 262 736 242 738 221 738 curve
+ newhints 75 163 vstem 348 435 vstem 0 bottomedge 474 532 hstem 679 738 hstem
+ 175 738 141 726 117 706 curve 88 679 75 631 75 566 curve 75 532 line 20 532
+ line 20 474 line 75 474 line 75 0 line 163 0 line 163 474 line 266 474 line
+ 266 532 line 163 532 line 163 568 line 163 618 171 649 188 664 curve 201 675
+ 218 679 237 679 curve 253 679 268 677 280 672 curve 291 668 300 664 306 658
+ curve 435 0 move newhints 75 163 vstem 348 435 vstem 0 bottomedge 474 532
+ hstem 658 727 hstem 435 727 line 348 727 line 348 0 line endchar}
+glyph[110] {endash,0xB1,
+ 369 width 21 348 vstem 212 287 hstem 21 287 move 21 212 line 348 212 line 348
+ 287 line endchar}
+glyph[111] {dagger,0xB2,
+ 417 width 167 250 vstem 505 567 hstem 723 topedge 245 567 move 255 723 line
+ 161 723 line 172 567 line 55 575 line 55 502 line 172 509 line 169 460 166
+ 415 161 368 curve 170 208 175 53 179 -102 curve 238 -102 line 242 53 246 209
+ 255 368 curve 251 416 248 460 245 509 curve 361 502 line 361 575 line
+ endchar}
+glyph[112] {daggerdbl,0xB3,
+ 417 width 167 250 vstem 154 219 hstem 505 567 hstem 723 topedge 245 216 move
+ 248 269 251 320 255 369 curve 251 416 248 461 245 509 curve 361 502 line 361
+ 575 line 245 567 line 255 723 line 161 723 line 172 567 line 55 575 line 55
+ 502 line 172 509 line 169 461 166 416 161 369 curve 166 319 169 269 172 216
+ curve 55 223 line 55 150 line 172 157 line 161 -76 line 255 -76 line 245 157
+ line 361 150 line 361 223 line endchar}
+glyph[113] {periodcentered,0xB4,
+ 189 width 52 137 vstem 220 305 hstem 94 305 move 71 305 52 286 52 262 curve
+ 52 239 71 220 94 220 curve 118 220 137 239 137 262 curve 137 286 118 305 95
+ 305 curve endchar}
+glyph[114] {paragraph,0xB6,
+ 470 width 201 259 vstem 327 385 vstem 665 709 hstem 201 -138 move 259 -138
+ line 259 665 line 327 665 line 327 -138 line 385 -138 line 385 709 line 214
+ 709 line 148 709 103 689 71 653 curve 38 616 21 565 21 508 curve 21 448 39
+ 398 71 364 curve 103 328 148 308 201 307 curve endchar}
+glyph[115] {bullet,0xB7,
+ 327 width 57 271 vstem 234 448 hstem 164 448 move 105 448 57 400 57 341 curve
+ 57 282 105 234 164 234 curve 223 234 271 282 271 341 curve 271 400 223 448
+ 165 448 curve endchar}
+glyph[116] {quotesinglbase,0xB8,
+ 173 width 39 151 vstem -104 114 hstem 39 -104 move 89 -104 line 151 114 line
+ 64 114 line endchar}
+glyph[117] {quotedblbase,0xB9,
+ 317 width 39 294 vstem -104 114 hstem 39 -104 move 89 -104 line 151 114 line
+ 64 114 line 183 -104 move 233 -104 line 294 114 line 207 114 line endchar}
+glyph[118] {quotedblright,0xBA,
+ 317 width 39 294 vstem 710 topedge newhints 39 294 vstem 493 710 hstem 39 493
+ move 89 493 line 150 710 line 63 710 line 182 493 move 232 493 line 294 710
+ line 207 710 line endchar}
+glyph[119] {guillemotright,0xBB,
+ 378 width 140 195 vstem 292 347 vstem 46 452 hstem 195 277 move 40 452 line
+ 40 369 line 140 251 line 140 247 line 40 129 line 40 46 line 195 221 line 347
+ 277 move 192 452 line 192 369 line 292 251 line 292 247 line 192 129 line 192
+ 46 line 347 221 line endchar}
+glyph[120] {ellipsis,0xBC,
+ 746 width 82 167 vstem3 331 415 vstem3 580 664 vstem3 0 113 hstem 82 113 move
+ 82 0 line 167 0 line 167 113 line 331 113 move 331 0 line 415 0 line 415 113
+ line 580 113 move 580 0 line 664 0 line 664 113 line endchar}
+glyph[121] {perthousand,0xBD,
+ 981 width 26 95 vstem 372 441 vstem 684 753 vstem 886 955 vstem -12 36 hstem
+ 301 350 hstem 666 714 hstem newhints 26 95 vstem 229 297 vstem 352 401 hstem
+ 666 714 hstem 297 533 move 297 649 246 715 162 715 curve 77 715 26 649 26 533
+ curve 26 419 78 352 162 352 curve 245 352 297 418 297 532 curve newhints 26
+ 95 vstem -12 36 hstem 666 714 hstem 548 711 move 477 711 line 119 -8 line 191
+ -8 line newhints 26 95 vstem 229 297 vstem 352 401 hstem 666 714 hstem 162
+ 401 move 118 401 95 454 95 533 curve 95 613 118 666 162 666 curve 206 666 229
+ 613 229 533 curve 229 455 207 401 163 401 curve newhints 372 441 vstem 574
+ 643 vstem -12 36 hstem 301 350 hstem 643 169 move 643 284 592 350 508 350
+ curve 423 350 372 284 372 169 curve 372 55 423 -12 508 -12 curve 591 -12 643
+ 54 643 168 curve newhints 684 753 vstem 886 955 vstem -12 36 hstem 301 350
+ hstem 955 169 move 955 284 904 350 820 350 curve 735 350 684 284 684 169
+ curve 684 55 735 -12 820 -12 curve 903 -12 955 54 955 168 curve newhints 372
+ 441 vstem 574 643 vstem -12 36 hstem 301 350 hstem 508 36 move 463 36 441 90
+ 441 169 curve 441 248 463 301 508 301 curve 552 301 574 248 574 169 curve 574
+ 90 553 36 509 36 curve newhints 684 753 vstem 886 955 vstem -12 36 hstem 301
+ 350 hstem 820 36 move 775 36 753 90 753 169 curve 753 248 775 301 820 301
+ curve 864 301 886 248 886 169 curve 886 90 865 36 821 36 curve endchar}
+glyph[122] {questiondown,0xBF,
+ 400 width 160 245 vstem -226 -58 hstem 379 490 hstem 245 379 move 245 490
+ line 160 490 line 160 379 line 168 302 move 171 228 149 168 94 111 curve
+ newhints 12 101 vstem 297 385 vstem -226 -58 hstem 379 490 hstem 41 54 12 6
+ 12 -72 curve 12 -153 68 -226 191 -226 curve 304 -226 367 -166 385 -58 curve
+ 297 -53 line 286 -120 251 -167 192 -167 curve 142 -167 101 -141 101 -69 curve
+ 101 -13 126 22 169 81 curve newhints 160 245 vstem -226 -58 hstem 379 490
+ hstem 230 163 244 228 239 302 curve endchar}
+glyph[123] {grave,0xC1,
+ 303 width 12 180 vstem 580 676 hstem 12 676 move 126 580 line 180 580 line
+ 102 676 line endchar}
+glyph[124] {acute,0xC2,
+ 303 width 123 291 vstem 580 676 hstem 291 676 move 201 676 line 123 580 line
+ 176 580 line endchar}
+glyph[125] {circumflex,0xC3,
+ 303 width 42 261 vstem 584 677 hstem 153 633 move 198 584 line 261 584 line
+ 175 677 line 128 677 line 42 584 line 104 584 line 150 633 line endchar}
+glyph[126] {tilde,0xC4,
+ 303 width 41 77 vstem 227 263 vstem 593 639 hstem 77 594 move newhints 41 77
+ vstem 227 263 vstem 621 667 hstem 84 614 95 621 109 621 curve 119 621 129 618
+ 138 613 curve 151 606 line newhints 41 77 vstem 227 263 vstem 593 639 hstem
+ 164 598 182 593 197 593 curve 236 593 254 620 263 650 curve newhints 41 77
+ vstem 227 263 vstem 621 667 hstem 227 667 line newhints 41 77 vstem 227 263
+ vstem 593 639 hstem 219 646 209 639 195 639 curve 185 639 175 642 166 647
+ curve 153 655 line newhints 41 77 vstem 227 263 vstem 621 667 hstem 140 662
+ 124 667 107 667 curve 69 667 49 640 41 610 curve endchar}
+glyph[127] {macron,0xC5,
+ 303 width 52 251 vstem 610 654 hstem 52 654 move 52 610 line 251 610 line 251
+ 654 line endchar}
+glyph[128] {breve,0xC6,
+ 303 width 45 89 vstem 213 257 vstem 589 633 hstem 213 680 move 204 655 185
+ 633 151 633 curve 118 633 99 655 89 680 curve 45 680 line 53 636 89 589 151
+ 589 curve 213 589 250 636 257 680 curve endchar}
+glyph[129] {dotaccent,0xC7,
+ 303 width 122 180 vstem 588 676 hstem 122 676 move 122 588 line 180 588 line
+ 180 676 line endchar}
+glyph[130] {dieresis,0xC8,
+ 303 width 48 106 vstem 197 255 vstem 588 676 hstem 48 676 move 48 588 line
+ 106 588 line 106 676 line 197 676 move 197 588 line 255 588 line 255 676 line
+ endchar}
+glyph[131] {ring,0xCA,
+ 303 width 76 116 vstem 187 226 vstem 575 606 hstem 667 697 hstem 151 575 move
+ 190 575 226 599 226 636 curve 226 674 190 697 151 697 curve 112 697 76 674 76
+ 636 curve 76 599 112 575 150 575 curve 151 606 move 130 606 116 619 116 636
+ curve 116 654 131 667 151 667 curve 171 667 187 654 187 636 curve 187 619 173
+ 606 152 606 curve endchar}
+glyph[132] {cedilla,0xCB,
+ 303 width 180 239 vstem -160 -124 hstem 141 0 move 107 -58 line 120 -69 line
+ 147 -63 180 -70 180 -95 curve 180 -112 163 -124 137 -124 curve 115 -124 97
+ -116 85 -109 curve 66 -139 line 82 -149 109 -160 151 -160 curve 210 -160 239
+ -135 239 -98 curve 239 -62 207 -43 167 -45 curve 192 0 line endchar}
+glyph[133] {hungarumlaut,0xCD,
+ 303 width 69 318 vstem 576 678 hstem 194 678 move 121 678 line 69 576 line
+ 115 576 line 318 678 move 245 678 line 192 576 line 239 576 line endchar}
+glyph[134] {ogonek,0xCE,
+ 303 width 78 137 vstem -146 -105 hstem 224 -83 move 210 -96 193 -105 174 -105
+ curve 151 -105 137 -92 137 -73 curve 137 -57 146 -41 162 -25 curve 183 0 line
+ 127 0 line 111 -18 line 90 -39 78 -60 78 -83 curve 78 -121 110 -146 157 -146
+ curve 200 -146 230 -126 249 -104 curve endchar}
+glyph[135] {caron,0xCF,
+ 303 width 42 261 vstem 581 675 hstem 153 626 move 150 626 line 104 675 line
+ 42 675 line 128 581 line 175 581 line 261 675 line 198 675 line endchar}
+glyph[136] {emdash,0xD0,
+ 739 width 21 717 vstem 212 287 hstem 21 287 move 21 212 line 717 212 line 717
+ 287 line endchar}
+glyph[137] {AE,0xE1,
+ 686 width 324 417 vstem 0 64 hstem 212 277 hstem 337 401 hstem 645 709 hstem
+ 324 212 move 324 0 line 649 0 line 649 64 line 417 64 line 417 337 line 592
+ 337 line 592 401 line 417 401 line 417 645 line 642 645 line 642 709 line 264
+ 709 line -12 0 line 88 0 line 164 212 line 324 277 move 188 277 line 255 463
+ line newhints 324 417 vstem 0 64 hstem 212 277 hstem 337 401 hstem 653 709
+ hstem 277 525 299 587 318 653 curve 325 653 line 324 583 324 523 324 463
+ curve endchar}
+glyph[138] {ordfeminine,0xE3,
+ 307 width 30 98 vstem 198 265 vstem 377 415 hstem 669 705 hstem 265 594 move
+ 265 663 247 705 154 705 curve newhints 42 109 vstem 198 265 vstem 377 415
+ hstem 669 705 hstem 75 705 53 664 42 619 curve 109 615 line 112 645 123 669
+ 156 669 curve 195 669 198 641 198 597 curve 198 586 line newhints 30 98 vstem
+ 198 265 vstem 377 415 hstem 669 705 hstem 81 568 30 532 30 464 curve 30 394
+ 76 377 122 377 curve 153 377 182 388 199 404 curve 201 404 line 201 396 203
+ 390 209 384 curve 276 384 line 276 387 line 268 393 265 402 265 429 curve 198
+ 445 move 185 429 163 415 141 415 curve 121 415 98 426 98 467 curve 98 508 126
+ 541 198 554 curve endchar}
+glyph[139] {Lslash,0xE8,
+ 397 width 58 150 vstem 0 64 hstem 709 topedge 150 335 move 254 373 line 254
+ 440 line 150 402 line 150 709 line 58 709 line 58 374 line 10 354 line 10 287
+ line 58 306 line 58 0 line 378 0 line 378 64 line 150 64 line endchar}
+glyph[140] {Oslash,0xE9,
+ 558 width 36 128 vstem 429 522 vstem -14 49 hstem 660 723 hstem 111 61 move
+ 151 16 207 -14 279 -14 curve 422 -14 522 91 522 355 curve 522 458 501 548 473
+ 608 curve 535 701 line 503 726 line 445 648 line 410 689 356 723 279 723
+ curve 137 723 36 621 36 355 curve 36 245 56 160 84 102 curve 22 9 line 54 -15
+ line 147 181 move 133 232 127 297 128 370 curve 130 568 196 660 278 660 curve
+ 309 660 330 652 346 641 curve 364 629 384 603 393 581 curve 409 528 move 424
+ 478 431 411 429 339 curve 428 141 361 49 279 49 curve 248 49 228 57 210 68
+ curve 191 80 173 107 163 130 curve endchar}
+glyph[141] {OE,0xEA,
+ 730 width 36 130 vstem 365 457 vstem 0 64 hstem 337 401 hstem 645 709 hstem
+ 635 337 move 635 401 line 457 401 line 457 645 line 685 645 line 685 709 line
+ 384 709 line newhints 36 130 vstem 365 457 vstem -14 49 hstem 337 401 hstem
+ 660 723 hstem 362 717 335 723 285 723 curve 131 723 36 614 36 354 curve 36 95
+ 131 -14 285 -14 curve newhints 36 130 vstem 365 457 vstem 0 64 hstem 337 401
+ hstem 645 709 hstem 335 -14 362 -9 384 0 curve 692 0 line 692 64 line 457 64
+ line 457 337 line newhints 36 130 vstem 365 457 vstem -14 49 hstem 337 401
+ hstem 660 723 hstem 365 100 move 365 63 327 49 285 49 curve 197 49 130 129
+ 130 354 curve 130 581 197 660 285 660 curve 327 660 365 645 365 610 curve
+ endchar}
+glyph[142] {ordmasculine,0xEB,
+ 315 width 24 93 vstem 223 291 vstem 377 415 hstem 667 705 hstem 24 541 move
+ 24 461 68 377 158 377 curve 248 377 291 461 291 541 curve 291 618 251 705 158
+ 705 curve 64 705 24 618 24 542 curve 158 667 move 199 667 223 604 223 541
+ curve 223 478 199 415 158 415 curve 117 415 93 478 93 541 curve 93 604 117
+ 667 157 667 curve endchar}
+glyph[143] {ae,0xF1,
+ 706 width 32 121 vstem 296 382 vstem 586 676 vstem -12 45 hstem 252 299 hstem
+ 491 544 hstem 676 252 move 676 352 658 431 618 484 curve 584 524 539 544 487
+ 544 curve 422 544 371 515 349 442 curve 347 442 line 334 502 308 544 221 544
+ curve newhints 51 138 vstem 296 382 vstem 586 676 vstem -12 45 hstem 252 299
+ hstem 491 544 hstem 104 544 62 473 51 400 curve 138 394 line 144 441 166 491
+ 218 491 curve 277 491 296 455 296 363 curve 296 344 line newhints 32 121
+ vstem 296 382 vstem 586 676 vstem -12 45 hstem 252 299 hstem 491 544 hstem 94
+ 311 32 237 32 132 curve 32 38 76 -12 179 -12 curve 249 -12 302 10 343 62
+ curve 346 62 line 384 9 441 -12 489 -12 curve 548 -12 589 5 618 32 curve 649
+ 59 667 94 676 128 curve 586 133 line 568 72 537 41 490 41 curve 437 41 385 82
+ 382 252 curve 382 299 move 386 448 431 491 487 491 curve 539 491 581 427 586
+ 299 curve 296 252 move 296 197 302 150 311 118 curve 284 85 245 45 199 45
+ curve 141 45 121 81 121 140 curve 121 212 168 270 296 294 curve endchar}
+glyph[144] {dotlessi,0xF5,
+ 195 width 54 141 vstem 0 bottomedge 532 topedge 141 532 move 54 532 line 54 0
+ line 141 0 line endchar}
+glyph[145] {lslash,0xF8,
+ 195 width 54 141 vstem 0 bottomedge 727 topedge 141 439 move 141 727 line 54
+ 727 line 54 395 line 12 366 line 12 299 line 54 327 line 54 0 line 141 0 line
+ 141 372 line 183 400 line 183 467 line endchar}
+glyph[146] {oslash,0xF9,
+ 466 width 31 118 vstem 349 435 vstem -12 45 hstem 487 544 hstem newhints 31
+ 118 vstem 349 435 vstem -12 45 hstem 527 topedge 456 527 move newhints 31 118
+ vstem 349 435 vstem 3 bottomedge 487 544 hstem 430 551 line 371 471 line 345
+ 509 300 544 234 544 curve 119 544 31 476 31 266 curve 31 200 43 137 70 88
+ curve 8 3 line newhints 31 118 vstem 349 435 vstem -12 45 hstem 527 topedge
+ 34 -21 line 95 58 line 121 21 165 -12 234 -12 curve 369 -12 435 84 435 265
+ curve 435 339 421 396 395 444 curve 129 152 move 122 181 117 225 118 274
+ curve newhints 31 118 vstem 349 435 vstem -12 45 hstem 487 544 hstem 119 425
+ 172 487 234 487 curve 254 487 270 482 284 474 curve 301 464 315 440 322 414
+ curve 338 379 move 345 350 350 306 349 258 curve 348 120 303 45 233 45 curve
+ 213 45 197 49 183 57 curve 167 68 153 91 146 115 curve endchar}
+glyph[147] {oe,0xFA,
+ 750 width 31 121 vstem 340 426 vstem 631 721 vstem -12 45 hstem 252 299 hstem
+ 487 544 hstem 721 252 move 721 353 702 432 662 484 curve 628 525 584 544 532
+ 544 curve 462 544 405 507 384 419 curve 382 419 line 363 480 321 544 230 544
+ curve 118 544 31 475 31 266 curve 31 77 98 -12 229 -12 curve 320 -12 359 50
+ 382 113 curve 384 113 line 404 17 466 -12 534 -12 curve 592 -12 633 5 663 32
+ curve 693 59 711 94 721 128 curve 631 133 line 612 72 582 41 535 41 curve 480
+ 41 430 89 426 252 curve 121 266 move 121 437 178 487 230 487 curve 289 487
+ 340 432 340 266 curve 340 104 291 45 230 45 curve 171 45 121 100 121 265
+ curve 426 299 move 430 446 475 491 531 491 curve 583 491 625 427 631 299
+ curve endchar}
+glyph[148] {germandbls,0xFB,
+ 472 width 52 139 vstem 352 443 vstem 0 57 hstem 412 469 hstem 682 739 hstem
+ 186 57 move 186 0 line 243 0 line 390 0 443 84 443 239 curve newhints 52 139
+ vstem 186 296 vstem 352 443 vstem 0 57 hstem 412 469 hstem 682 739 hstem 443
+ 372 381 430 296 445 curve 296 447 line newhints 52 139 vstem 328 416 vstem 0
+ 57 hstem 412 469 hstem 682 739 hstem 382 459 416 514 416 588 curve 416 667
+ 364 739 233 739 curve 74 739 52 637 52 521 curve 52 0 line 139 0 line 139 533
+ line 139 621 156 682 234 682 curve 309 682 328 630 328 577 curve 328 503 287
+ 469 210 469 curve 186 469 line newhints 52 139 vstem 186 296 vstem 352 443
+ vstem 0 57 hstem 412 469 hstem 682 739 hstem 186 412 line 212 412 line 297
+ 412 352 379 352 245 curve 352 104 309 57 226 57 curve endchar}
+glyph[149] {brokenbar,-,
+ 274 width 106 169 vstem -175 675 hstem 106 325 move 169 325 line 169 675 line
+ 106 675 line 106 -175 move 169 -175 line 169 175 line 106 175 line endchar}
+glyph[150] {Odieresis,-,
+ 558 width 36 130 vstem 428 522 vstem -14 49 hstem 660 723 hstem 36 354 move
+ 36 91 136 -14 279 -14 curve 422 -14 522 91 522 354 curve 522 619 422 723 279
+ 723 curve 136 723 36 619 36 355 curve 279 660 move 358 660 428 584 428 354
+ curve 428 125 358 49 279 49 curve 201 49 130 125 130 354 curve 130 584 201
+ 660 278 660 curve newhints 36 130 vstem 170 230 vstem 328 388 vstem 428 522
+ vstem -14 49 hstem 660 723 hstem 741 825 hstem 170 825 move 170 741 line 230
+ 741 line 230 825 line 328 825 move 328 741 line 388 741 line 388 825 line
+ endchar}
+glyph[151] {multiply,-,
+ 510 width 68 441 vstem 75 449 hstem 255 220 move 399 75 line 441 117 line 297
+ 262 line 441 407 line 399 449 line 255 305 line 110 449 line 68 407 line 212
+ 262 line 68 117 line 110 75 line endchar}
+glyph[152] {plusminus,-,
+ 510 width 224 286 vstem 0 59 hstem 275 334 hstem 286 275 move 452 275 line
+ 452 334 line 286 334 line 286 504 line 224 504 line 224 334 line 58 334 line
+ 58 275 line 224 275 line 224 104 line 286 104 line 58 0 move 452 0 line 452
+ 59 line 58 59 line endchar}
+glyph[153] {Ntilde,-,
+ 539 width 58 143 vstem 397 481 vstem 0 107 hstem 602 709 hstem 751 800 hstem
+ 400 107 move 368 211 293 417 181 709 curve 58 709 line 58 0 line 143 0 line
+ 143 295 141 499 137 602 curve 141 602 line 172 500 247 297 360 0 curve 481 0
+ line 481 709 line 397 709 line 397 417 398 211 404 107 curve newhints 147 183
+ vstem 358 394 vstem 0 107 hstem 602 709 hstem 751 800 hstem 358 830 move 348
+ 809 335 800 319 800 curve 305 800 293 804 283 809 curve 269 817 line newhints
+ 147 183 vstem 397 481 vstem 0 107 hstem 602 709 hstem 781 830 hstem 253 825
+ 236 830 220 830 curve 183 830 160 805 147 772 curve newhints 58 143 vstem 358
+ 394 vstem 0 107 hstem 602 709 hstem 781 830 hstem 183 751 line 192 773 206
+ 781 222 781 curve 236 781 247 777 257 772 curve 272 764 line newhints 58 143
+ vstem 358 394 vstem 0 107 hstem 602 709 hstem 751 800 hstem 288 755 306 751
+ 321 751 curve 358 751 381 776 394 809 curve endchar}
+glyph[154] {eth,-,
+ 467 width 31 121 vstem 346 436 vstem -12 45 hstem 487 544 hstem 739 topedge
+ 404 677 move 368 705 line 279 674 line 242 703 201 725 159 739 curve newhints
+ 31 121 vstem 346 436 vstem -12 45 hstem 487 544 hstem 710 topedge 67 710 line
+ 114 693 158 671 189 646 curve 72 606 line 109 578 line 234 620 line 262 599
+ 277 578 291 558 curve 306 536 319 511 327 482 curve 324 482 line 302 524 260
+ 544 211 544 curve 110 544 31 476 31 270 curve 31 79 96 -12 234 -12 curve 296
+ -12 344 5 380 48 curve 417 96 436 170 436 293 curve 436 378 423 456 398 516
+ curve 378 569 351 612 316 647 curve 234 45 move 167 45 121 104 121 266 curve
+ 121 432 174 487 234 487 curve 297 487 346 428 346 269 curve 346 118 306 45
+ 235 45 curve endchar}
+glyph[155] {Igrave,-,
+ 215 width 61 154 vstem 0 bottomedge 709 topedge 154 0 move 154 709 line 61
+ 709 line 61 0 line newhints 61 154 vstem 0 bottomedge 709 topedge 735 827
+ hstem -22 827 move 107 735 line 164 735 line 78 827 line endchar}
+glyph[156] {Ccedilla,-,
+ 516 width 36 130 vstem 384 475 vstem -174 -136 hstem -76 -50 hstem -12 49
+ hstem 660 723 hstem newhints 36 130 vstem 393 485 vstem -174 -136 hstem -76
+ -50 hstem -12 49 hstem 660 723 hstem 393 200 move 381 127 344 49 274 49 curve
+ 199 49 130 113 130 354 curve 130 590 200 660 275 660 curve newhints 36 130
+ vstem 384 475 vstem -174 -136 hstem -76 -50 hstem -12 49 hstem 660 723 hstem
+ 337 660 369 610 384 523 curve 475 530 line 455 663 376 723 276 723 curve 204
+ 723 148 692 106 636 curve 60 574 36 479 36 357 curve 36 218 63 127 107 69
+ curve newhints 36 130 vstem 299 363 vstem -174 -136 hstem -76 -50 hstem -12
+ 49 hstem 660 723 hstem 140 20 190 -7 247 -12 curve 217 -63 line 231 -76 line
+ 272 -68 299 -81 299 -104 curve 299 -123 280 -136 248 -136 curve 226 -136 203
+ -128 189 -120 curve 169 -151 line 188 -164 219 -174 265 -174 curve 329 -174
+ 363 -147 363 -107 curve 363 -70 327 -48 282 -50 curve newhints 36 130 vstem
+ 393 485 vstem -174 -136 hstem -76 -50 hstem -12 49 hstem 660 723 hstem 304
+ -12 line 398 0 464 87 485 191 curve endchar}
+glyph[157] {thorn,-,
+ 461 width 50 138 vstem 339 428 vstem -248 bottomedge -12 52 hstem 480 544
+ hstem 727 topedge 138 40 move 139 40 line 156 23 174 10 192 2 curve 216 -10
+ 238 -12 257 -12 curve 310 -12 352 10 380 49 curve 409 90 428 160 428 266
+ curve 428 371 409 439 379 482 curve 348 527 306 544 258 544 curve 230 544 208
+ 537 189 527 curve 166 515 151 498 139 484 curve 138 484 line 138 727 line 50
+ 727 line 50 -248 line 138 -248 line 138 409 move 152 436 169 454 185 465
+ curve 204 476 221 480 237 480 curve 270 480 294 463 311 433 curve 329 399 339
+ 342 339 265 curve 339 170 326 120 310 94 curve 291 65 265 52 237 52 curve 216
+ 52 198 59 182 71 curve 166 83 151 99 138 123 curve endchar}
+glyph[158] {onesuperior,-,
+ 310 width 139 209 vstem 283 bottomedge 701 topedge 45 640 move 68 592 line
+ 139 628 line 139 283 line 209 283 line 209 701 line 161 701 line endchar}
+glyph[159] {Idieresis,-,
+ 215 width 61 154 vstem 0 bottomedge 709 topedge 154 0 move 154 709 line 61
+ 709 line 61 0 line newhints -2 58 vstem 61 154 vstem 157 217 vstem 0
+ bottomedge 709 topedge 741 825 hstem -2 825 move -2 741 line 58 741 line 58
+ 825 line 157 825 move 157 741 line 217 741 line 217 825 line endchar}
+glyph[160] {Aacute,-,
+ 466 width 235 294 vstem 0 bottomedge 213 277 hstem 649 709 hstem 319 213 move
+ 362 0 line 458 0 line 294 709 line 172 709 line 8 0 line 104 0 line 146 213
+ line 306 277 move 159 277 line 196 461 line 208 520 219 580 230 649 curve 235
+ 649 line 246 580 258 523 270 462 curve 369 827 move 268 827 line 182 735 line
+ 239 735 line endchar}
+glyph[161] {Oacute,-,
+ 558 width 36 130 vstem 428 522 vstem -14 49 hstem 660 723 hstem 36 354 move
+ 36 91 136 -14 279 -14 curve 422 -14 522 91 522 354 curve 522 619 422 723 279
+ 723 curve 136 723 36 619 36 355 curve 279 660 move 358 660 428 584 428 354
+ curve 428 125 358 49 279 49 curve 201 49 130 125 130 354 curve 130 584 201
+ 660 278 660 curve 431 827 move 331 827 line 245 735 line 302 735 line
+ endchar}
+glyph[162] {Acircumflex,-,
+ 466 width 235 294 vstem 0 bottomedge 213 277 hstem 649 709 hstem 319 213 move
+ 362 0 line 458 0 line 294 709 line 172 709 line 8 0 line 104 0 line 146 213
+ line 306 277 move 159 277 line 196 461 line 208 520 219 580 230 649 curve 235
+ 649 line 246 580 258 523 270 462 curve 235 787 move 293 742 line 365 742 line
+ 260 825 line 207 825 line 102 742 line 174 742 line 232 787 line endchar}
+glyph[163] {Zcaron,-,
+ 409 width 33 136 vstem 268 368 vstem 0 64 hstem 645 709 hstem 33 0 move 379 0
+ line 379 64 line 136 64 line 368 657 line 368 709 line 50 709 line 50 645
+ line 268 645 line 33 50 line 206 778 move 203 778 line 145 823 line 73 823
+ line 178 739 line 232 739 line 336 823 line 264 823 line endchar}
+glyph[164] {Eacute,-,
+ 423 width 58 150 vstem 0 64 hstem 337 401 hstem 645 709 hstem 150 401 move
+ 150 645 line 378 645 line 378 709 line 58 709 line 58 0 line 385 0 line 385
+ 64 line 150 64 line 150 337 line 328 337 line 328 401 line 364 827 move 264
+ 827 line 178 735 line 234 735 line endchar}
+glyph[165] {degree,-,
+ 322 width 47 95 vstem 227 275 vstem 469 516 hstem 652 699 hstem 161 699 move
+ 98 699 47 648 47 584 curve 47 521 98 469 161 469 curve 224 469 275 521 275
+ 584 curve 275 648 224 699 162 699 curve 161 652 move 198 652 227 620 227 584
+ curve 227 546 197 516 161 516 curve 124 516 95 548 95 584 curve 95 622 125
+ 652 160 652 curve endchar}
+glyph[166] {onequarter,-,
+ 743 width 141 211 vstem 566 636 vstem 0 bottomedge 101 147 hstem 283
+ bottomedge 363 417 hstem 705 topedge 562 705 move 491 705 line newhints 141
+ 211 vstem 566 636 vstem -12 bottomedge 101 147 hstem 283 bottomedge 363 417
+ hstem 701 topedge 111 -12 line 184 -12 line 47 640 move 70 594 line 141 630
+ line 141 283 line 211 283 line 211 701 line 163 701 line 391 141 move 391 101
+ line 566 101 line newhints 141 211 vstem 566 636 vstem 0 bottomedge 101 147
+ hstem 283 bottomedge 363 417 hstem 705 topedge 566 0 line 636 0 line 636 101
+ line 681 101 line 681 147 line 636 147 line 636 417 line 554 417 line 454 147
+ move 510 249 line 529 287 548 322 566 363 curve 569 363 line 566 319 566 283
+ 566 246 curve 566 147 line endchar}
+glyph[167] {Otilde,-,
+ 558 width 36 130 vstem 428 522 vstem -14 49 hstem 660 723 hstem 36 354 move
+ 36 91 136 -14 279 -14 curve 422 -14 522 91 522 354 curve 522 619 422 723 279
+ 723 curve 136 723 36 619 36 355 curve 279 660 move 358 660 428 584 428 354
+ curve 428 125 358 49 279 49 curve 201 49 130 125 130 354 curve 130 584 201
+ 660 278 660 curve newhints 36 130 vstem 156 192 vstem 367 403 vstem 428 522
+ vstem -14 49 hstem 660 723 hstem 751 800 hstem 367 830 move 358 809 344 800
+ 328 800 curve 314 800 302 804 293 809 curve 278 817 line newhints 36 130
+ vstem 156 192 vstem 367 403 vstem 428 522 vstem -14 49 hstem 660 723 hstem
+ 781 830 hstem 262 825 245 830 229 830 curve 192 830 169 805 156 772 curve 192
+ 751 line 202 773 215 781 231 781 curve 245 781 256 777 266 772 curve 281 764
+ line newhints 36 130 vstem 367 403 vstem 428 522 vstem -14 49 hstem 660 723
+ hstem 751 800 hstem 297 755 315 751 330 751 curve 368 751 390 776 403 809
+ curve endchar}
+glyph[168] {minus,-,
+ 510 width 58 452 vstem 233 292 hstem 58 233 move 452 233 line 452 292 line 58
+ 292 line endchar}
+glyph[169] {logicalnot,-,
+ 510 width 390 452 vstem 318 377 hstem 452 377 move 58 377 line 58 318 line
+ 390 318 line 390 135 line 452 135 line endchar}
+glyph[170] {ccedilla,-,
+ 440 width 31 121 vstem 324 413 vstem -160 -124 hstem -11 45 hstem 487 544
+ hstem 324 144 move 310 82 283 45 233 45 curve 172 45 121 94 121 267 curve 121
+ 420 171 487 234 487 curve 283 487 306 452 320 404 curve 408 410 line 391 488
+ 337 544 235 544 curve 113 544 31 459 31 267 curve 31 81 98 -2 212 -11 curve
+ newhints 31 121 vstem 257 316 vstem -160 -124 hstem -11 45 hstem 487 544
+ hstem 184 -58 line 196 -69 line 224 -63 257 -70 257 -95 curve 257 -112 239
+ -124 214 -124 curve 192 -124 174 -116 162 -109 curve 143 -139 line 158 -149
+ 186 -160 228 -160 curve 286 -160 316 -135 316 -98 curve 316 -62 284 -43 244
+ -45 curve newhints 31 121 vstem 324 413 vstem -160 -124 hstem -11 45 hstem
+ 487 544 hstem 264 -10 line 346 1 397 55 413 137 curve endchar}
+glyph[171] {trademark,-,
+ 733 width 108 167 vstem 286 342 vstem 598 655 vstem 353 413 hstem 668 709
+ hstem 257 709 move 18 709 line 18 668 line 108 668 line 108 353 line 167 353
+ line 167 668 line 257 668 line 469 413 move 456 467 442 516 426 565 curve 380
+ 709 line 286 709 line 286 353 line 342 353 line 342 505 line newhints 108 167
+ vstem 286 342 vstem 598 655 vstem 353 413 hstem 664 topedge 342 556 340 607
+ 340 664 curve 342 664 line 357 607 374 557 390 505 curve 438 353 line 500 353
+ line 549 505 line newhints 108 167 vstem 286 342 vstem 598 655 vstem 353 413
+ hstem 668 709 hstem 565 556 582 607 597 664 curve 600 664 line 599 607 598
+ 557 598 505 curve 598 353 line 655 353 line 655 709 line 563 709 line 516 565
+ line newhints 108 167 vstem 286 342 vstem 598 655 vstem 353 413 hstem 668 709
+ hstem 500 517 485 468 472 413 curve endchar}
+glyph[172] {Ograve,-,
+ 558 width 36 130 vstem 428 522 vstem -14 49 hstem 660 723 hstem 36 354 move
+ 36 91 136 -14 279 -14 curve 422 -14 522 91 522 354 curve 522 619 422 723 279
+ 723 curve 136 723 36 619 36 355 curve 279 660 move 358 660 428 584 428 354
+ curve 428 125 358 49 279 49 curve 201 49 130 125 130 354 curve 130 584 201
+ 660 278 660 curve newhints 36 130 vstem 428 522 vstem -14 49 hstem 660 723
+ hstem 735 827 hstem 128 827 move 257 735 line 314 735 line 228 827 line
+ endchar}
+glyph[173] {mu,-,
+ 466 width 47 135 vstem 328 415 vstem -248 bottomedge -10 56 hstem 532 topedge
+ 135 532 move 47 532 line 47 -248 line 135 -248 line 135 18 line 137 18 line
+ 141 12 147 8 153 4 curve 165 -5 183 -10 205 -10 curve 225 -10 251 -1 272 14
+ curve newhints 47 135 vstem 328 415 vstem -248 bottomedge 0 bottomedge 532
+ topedge 292 28 308 46 326 63 curve 330 63 line 328 0 line 415 0 line 415 532
+ line 328 532 line newhints 47 135 vstem 328 415 vstem -248 bottomedge -10 56
+ hstem 532 topedge 328 134 line 308 108 286 88 267 76 curve 246 63 224 56 205
+ 56 curve 178 56 161 67 151 81 curve 137 103 135 139 135 182 curve endchar}
+glyph[174] {twosuperior,-,
+ 348 width 39 110 vstem 234 306 vstem 283 338 hstem 661 705 hstem 307 283 move
+ 307 338 line 122 338 line 156 444 306 471 306 598 curve 306 656 272 705 176
+ 705 curve 88 705 48 662 39 601 curve 110 599 line 117 636 134 661 173 661
+ curve 214 661 234 633 234 594 curve 234 497 65 457 32 292 curve 43 283 line
+ endchar}
+glyph[175] {Thorn,-,
+ 487 width 58 150 vstem 365 459 vstem 0 bottomedge 160 224 hstem 516 580 hstem
+ 709 topedge 150 580 move 150 709 line 58 709 line 58 0 line 150 0 line 150
+ 160 line 220 160 line 374 160 459 217 459 373 curve 459 507 393 580 228 580
+ curve 150 224 move 150 516 line 227 516 line 321 516 365 473 365 373 curve
+ 365 261 318 224 218 224 curve endchar}
+glyph[176] {Uacute,-,
+ 515 width 54 145 vstem 369 460 vstem -14 49 hstem 709 topedge 460 709 move
+ 369 709 line 369 220 line 369 113 349 49 256 49 curve 166 49 145 115 145 220
+ curve 145 709 line 54 709 line 54 220 line 54 58 107 -14 256 -14 curve 410
+ -14 460 62 460 219 curve 405 827 move 305 827 line 219 735 line 276 735 line
+ endchar}
+glyph[177] {Agrave,-,
+ 466 width 235 294 vstem 0 bottomedge 213 277 hstem 649 709 hstem 319 213 move
+ 362 0 line 458 0 line 294 709 line 172 709 line 8 0 line 104 0 line 146 213
+ line 306 277 move 159 277 line 196 461 line 208 520 219 580 230 649 curve 235
+ 649 line 246 580 258 523 270 462 curve newhints 235 294 vstem 0 bottomedge
+ 213 277 hstem 649 709 hstem 735 827 hstem 99 827 move 229 735 line 285 735
+ line 199 827 line endchar}
+glyph[178] {Atilde,-,
+ 466 width 111 147 vstem 321 357 vstem 0 bottomedge 213 277 hstem 649 709
+ hstem 751 800 hstem newhints 111 147 vstem 235 294 vstem 321 357 vstem 0
+ bottomedge 213 277 hstem 649 709 hstem 751 800 hstem 319 213 move 362 0 line
+ 458 0 line 294 709 line 172 709 line 8 0 line 104 0 line 146 213 line 306 277
+ move 159 277 line 196 461 line 208 520 219 580 230 649 curve 235 649 line 246
+ 580 258 523 270 462 curve newhints 111 147 vstem 321 357 vstem 0 bottomedge
+ 213 277 hstem 649 709 hstem 751 800 hstem 321 830 move 312 809 298 800 282
+ 800 curve 268 800 257 804 247 809 curve 232 817 line newhints 111 147 vstem
+ 321 357 vstem 0 bottomedge 213 277 hstem 649 709 hstem 781 830 hstem 216 825
+ 199 830 183 830 curve 147 830 124 805 111 772 curve 147 751 line 156 773 169
+ 781 185 781 curve 199 781 211 777 221 772 curve 236 764 line newhints 111 147
+ vstem 321 357 vstem 0 bottomedge 213 277 hstem 649 709 hstem 751 800 hstem
+ 252 755 269 751 285 751 curve 322 751 344 776 357 809 curve endchar}
+glyph[179] {Ugrave,-,
+ 515 width 54 145 vstem 369 460 vstem -14 49 hstem 709 topedge 460 709 move
+ 369 709 line 369 220 line 369 113 349 49 256 49 curve 166 49 145 115 145 220
+ curve 145 709 line 54 709 line 54 220 line 54 58 107 -14 256 -14 curve 410
+ -14 460 62 460 219 curve newhints 54 145 vstem 369 460 vstem -14 49 hstem 709
+ topedge 735 827 hstem 110 827 move 240 735 line 296 735 line 211 827 line
+ endchar}
+glyph[180] {Yacute,-,
+ 439 width 175 267 vstem 0 bottomedge 709 topedge 431 709 move 333 709 line
+ 277 533 line 259 472 240 411 222 342 curve 220 342 line 201 411 182 471 163
+ 532 curve 107 709 line 8 709 line 175 281 line 175 0 line 267 0 line 267 281
+ line 368 827 move 267 827 line 182 735 line 238 735 line endchar}
+glyph[181] {Adieresis,-,
+ 466 width 124 184 vstem 283 343 vstem 0 bottomedge 213 277 hstem 649 709
+ hstem 319 213 move 362 0 line 458 0 line 294 709 line 172 709 line 8 0 line
+ 104 0 line 146 213 line 306 277 move 159 277 line 196 461 line 208 520 219
+ 580 230 649 curve 235 649 line 246 580 258 523 270 462 curve newhints 124 184
+ vstem 283 343 vstem 0 bottomedge 213 277 hstem 649 709 hstem 741 825 hstem
+ 124 825 move 124 741 line 184 741 line 184 825 line 283 825 move 283 741 line
+ 343 741 line 343 825 line endchar}
+glyph[182] {Aring,-,
+ 466 width 154 194 vstem 273 313 vstem 0 bottomedge 213 277 hstem 649 709
+ hstem 824 856 hstem newhints 154 194 vstem 235 294 vstem 273 313 vstem 0
+ bottomedge 213 277 hstem 649 709 hstem 824 856 hstem 319 213 move 362 0 line
+ 458 0 line 294 709 line 172 709 line 8 0 line 104 0 line 146 213 line 306 277
+ move 159 277 line 196 461 line 208 520 219 580 230 649 curve 235 649 line 246
+ 580 258 523 270 462 curve newhints 154 194 vstem 273 313 vstem 0 bottomedge
+ 213 277 hstem 649 709 hstem 725 757 hstem 824 856 hstem 233 725 move 276 725
+ 313 750 313 791 curve 313 831 276 856 233 856 curve 191 856 154 831 154 791
+ curve 154 750 191 725 232 725 curve 233 757 move 210 757 194 772 194 791
+ curve 194 811 212 824 233 824 curve 255 824 273 811 273 791 curve 273 772 257
+ 757 234 757 curve endchar}
+glyph[183] {.notdef,-,
+ 271 width endchar}
+glyph[184] {Ucircumflex,-,
+ 515 width 54 145 vstem 369 460 vstem -14 49 hstem 709 topedge 460 709 move
+ 369 709 line 369 220 line 369 113 349 49 256 49 curve 166 49 145 115 145 220
+ curve 145 709 line 54 709 line 54 220 line 54 58 107 -14 256 -14 curve 410
+ -14 460 62 460 219 curve 259 787 move 317 742 line 389 742 line 284 825 line
+ 231 825 line 126 742 line 198 742 line 256 787 line endchar}
+glyph[185] {Ydieresis,-,
+ 439 width 175 267 vstem 0 bottomedge 709 topedge 431 709 move 333 709 line
+ 277 533 line 259 472 240 411 222 342 curve 220 342 line 201 411 182 471 163
+ 532 curve 107 709 line 8 709 line 175 281 line 175 0 line 267 0 line 267 281
+ line newhints 111 171 vstem 175 267 vstem 269 329 vstem 0 bottomedge 709
+ topedge 737 820 hstem 111 820 move 111 737 line 171 737 line 171 820 line 269
+ 820 move 269 737 line 329 737 line 329 820 line endchar}
+glyph[186] {Udieresis,-,
+ 515 width 54 145 vstem 369 460 vstem -14 49 hstem 709 topedge 460 709 move
+ 369 709 line 369 220 line 369 113 349 49 256 49 curve 166 49 145 115 145 220
+ curve 145 709 line 54 709 line 54 220 line 54 58 107 -14 256 -14 curve 410
+ -14 460 62 460 219 curve newhints 54 145 vstem 148 208 vstem 307 366 vstem
+ 369 460 vstem -14 49 hstem 709 topedge 737 820 hstem 148 820 move 148 737
+ line 208 737 line 208 820 line 307 820 move 307 737 line 366 737 line 366 820
+ line endchar}
+glyph[187] {threequarters,-,
+ 804 width 31 100 vstem 233 305 vstem 630 700 vstem 0 bottomedge 101 147 hstem
+ 274 317 hstem 363 417 hstem 662 705 hstem newhints 31 100 vstem 131 194 vstem
+ 233 305 vstem 630 700 vstem 0 bottomedge 101 147 hstem 274 317 hstem 363 417
+ hstem 662 705 hstem 131 479 move 195 477 233 456 233 396 curve 233 348 211
+ 317 168 317 curve newhints 31 100 vstem 233 305 vstem 630 700 vstem 0
+ bottomedge 101 147 hstem 274 317 hstem 363 417 hstem 662 705 hstem 131 317
+ 109 335 100 379 curve 31 375 line 42 306 86 274 170 274 curve 266 274 305 324
+ 305 394 curve newhints 31 100 vstem 131 194 vstem 233 305 vstem 630 700 vstem
+ 0 bottomedge 101 147 hstem 274 317 hstem 363 417 hstem 662 705 hstem 305 474
+ 249 501 194 504 curve 194 506 line newhints 39 108 vstem 221 292 vstem 630
+ 700 vstem -12 bottomedge 101 147 hstem 274 317 hstem 363 417 hstem 662 705
+ hstem 254 515 292 544 292 607 curve 292 660 267 705 169 705 curve 82 705 46
+ 662 39 611 curve 108 608 line 114 637 130 662 167 662 curve 214 662 221 630
+ 221 599 curve 221 549 186 527 131 521 curve 629 705 move 558 705 line 179 -12
+ line 251 -12 line 455 141 move 455 101 line 630 101 line newhints 31 100
+ vstem 233 305 vstem 630 700 vstem 0 bottomedge 101 147 hstem 274 317 hstem
+ 363 417 hstem 662 705 hstem 630 0 line 700 0 line 700 101 line 745 101 line
+ 745 147 line 700 147 line 700 417 line 618 417 line 518 147 move 574 249 line
+ 593 287 612 322 630 363 curve 633 363 line 630 319 630 283 630 246 curve 630
+ 147 line endchar}
+glyph[188] {Ocircumflex,-,
+ 558 width 36 130 vstem 428 522 vstem -14 49 hstem 660 723 hstem 36 354 move
+ 36 91 136 -14 279 -14 curve 422 -14 522 91 522 354 curve 522 619 422 723 279
+ 723 curve 136 723 36 619 36 355 curve 279 660 move 358 660 428 584 428 354
+ curve 428 125 358 49 279 49 curve 201 49 130 125 130 354 curve 130 584 201
+ 660 278 660 curve 280 787 move 339 742 line 410 742 line 306 825 line 252 825
+ line 148 742 line 219 742 line 278 787 line endchar}
+glyph[189] {Eth,-,
+ 521 width 58 150 vstem 389 483 vstem 0 64 hstem 336 395 hstem 645 709 hstem
+ 58 709 move 58 395 line 10 395 line 10 336 line 58 336 line 58 0 line 223 0
+ line 408 0 483 111 483 357 curve 483 618 394 709 221 709 curve 221 645 move
+ 338 645 389 555 389 355 curve 389 139 334 64 222 64 curve 150 64 line 150 336
+ line 265 336 line 265 395 line 150 395 line 150 645 line endchar}
+glyph[190] {onehalf,-,
+ 754 width 137 206 vstem 436 507 vstem 632 703 vstem 0 55 hstem 283 bottomedge
+ 378 422 hstem 705 topedge 557 705 move 486 705 line newhints 137 206 vstem
+ 436 507 vstem 632 703 vstem -12 bottomedge 283 bottomedge 378 422 hstem 701
+ topedge 107 -12 line 179 -12 line 45 645 move 67 598 line 137 630 line 137
+ 283 line 206 283 line 206 701 line 158 701 line newhints 137 206 vstem 436
+ 507 vstem 632 703 vstem 0 55 hstem 283 bottomedge 378 422 hstem 705 topedge
+ 704 0 move 704 55 line 519 55 line 553 161 703 188 703 315 curve 703 373 669
+ 422 573 422 curve 485 422 445 379 436 318 curve 507 316 line 514 353 531 378
+ 571 378 curve 611 378 632 350 632 311 curve newhints 137 206 vstem 436 507
+ vstem 632 703 vstem -12 bottomedge 283 bottomedge 378 422 hstem 705 topedge
+ 632 214 462 174 429 9 curve 440 0 line endchar}
+glyph[191] {Edieresis,-,
+ 423 width 58 150 vstem 267 327 vstem 0 64 hstem 337 401 hstem 645 709 hstem
+ 150 401 move 150 645 line 378 645 line 378 709 line 58 709 line 58 0 line 385
+ 0 line 385 64 line 150 64 line 150 337 line 328 337 line 328 401 line
+ newhints 109 169 vstem 267 327 vstem 0 64 hstem 337 401 hstem 645 709 hstem
+ 746 829 hstem 109 829 move 109 746 line 169 746 line 169 829 line 267 829
+ move 267 746 line 327 746 line 327 829 line endchar}
+glyph[192] {divide,-,
+ 510 width 212 297 vstem 59 143 hstem3 233 292 hstem3 382 467 hstem3 255 467
+ move 231 467 212 448 212 424 curve 212 401 231 382 255 382 curve 278 382 297
+ 401 297 424 curve 297 448 278 467 256 467 curve 58 233 move 452 233 line 452
+ 292 line 58 292 line 255 143 move 231 143 212 124 212 101 curve 212 77 231 59
+ 255 59 curve 278 59 297 77 297 101 curve 297 124 278 143 256 143 curve
+ endchar}
+glyph[193] {Egrave,-,
+ 423 width 58 150 vstem 0 64 hstem 337 401 hstem 645 709 hstem 150 401 move
+ 150 645 line 378 645 line 378 709 line 58 709 line 58 0 line 385 0 line 385
+ 64 line 150 64 line 150 337 line 328 337 line 328 401 line newhints 58 150
+ vstem 0 64 hstem 337 401 hstem 645 709 hstem 735 827 hstem 60 827 move 190
+ 735 line 247 735 line 161 827 line endchar}
+glyph[194] {Euro,-,
+ 503 width 86 166 vstem -13 48 hstem 263 302 hstem 385 424 hstem 644 705 hstem
+ 464 660 move 434 684 388 705 324 705 curve 169 705 102 610 86 424 curve 34
+ 424 line 24 385 line 84 385 line 83 371 83 355 83 342 curve 83 331 83 313 84
+ 302 curve 34 302 line 24 263 line 87 263 line 103 71 176 -13 321 -13 curve
+ 391 -13 436 12 459 29 curve 459 96 line 429 68 385 48 331 48 curve 223 48 179
+ 132 168 263 curve 377 263 line 388 302 line 163 302 line 163 313 162 328 162
+ 342 curve 162 353 163 372 163 385 curve 405 385 line 415 424 line 166 424
+ line 175 556 217 644 332 644 curve 384 644 419 624 447 597 curve endchar}
+glyph[195] {threesuperior,-,
+ 348 width 34 104 vstem 237 308 vstem 274 317 hstem 662 705 hstem newhints 34
+ 104 vstem 135 198 vstem 237 308 vstem 274 317 hstem 662 705 hstem 135 479
+ move 198 477 237 456 237 396 curve 237 348 215 317 172 317 curve newhints 34
+ 104 vstem 237 308 vstem 274 317 hstem 662 705 hstem 135 317 112 335 104 379
+ curve 34 375 line 46 306 89 274 174 274 curve 270 274 308 324 308 394 curve
+ newhints 34 104 vstem 135 198 vstem 237 308 vstem 274 317 hstem 662 705 hstem
+ 308 474 252 501 198 504 curve 198 506 line newhints 42 112 vstem 225 296
+ vstem 274 317 hstem 662 705 hstem 257 515 296 544 296 607 curve 296 660 271
+ 705 172 705 curve 86 705 49 662 42 611 curve 112 608 line 118 637 134 662 170
+ 662 curve 217 662 225 630 225 599 curve 225 549 190 527 135 521 curve
+ endchar}
+glyph[196] {copyright,-,
+ 637 width 53 96 vstem 170 236 vstem 389 441 vstem 542 584 vstem 198 236 hstem
+ 301 379 hstem 544 622 hstem 686 725 hstem 441 553 move 432 576 419 590 402
+ 601 curve 381 615 354 622 324 622 curve 278 622 242 606 214 578 curve 185 550
+ 170 509 170 462 curve 170 413 186 372 215 344 curve 244 315 281 301 326 301
+ curve newhints 53 96 vstem 170 236 vstem 394 447 vstem 542 584 vstem 198 236
+ hstem 301 379 hstem 544 622 hstem 686 725 hstem 361 301 391 312 409 328 curve
+ 428 343 440 360 447 379 curve 394 387 line 389 375 378 362 366 354 curve 356
+ 347 343 343 327 343 curve 301 343 279 355 260 378 curve 242 402 236 433 236
+ 462 curve 236 505 248 532 261 548 curve newhints 53 96 vstem 170 236 vstem
+ 389 441 vstem 542 584 vstem 198 236 hstem 301 379 hstem 544 622 hstem 686 725
+ hstem 279 571 303 580 327 580 curve 344 580 354 577 365 570 curve 374 564 383
+ 555 389 544 curve 319 686 move 443 686 542 587 542 461 curve 542 335 444 236
+ 319 236 curve 194 236 96 335 96 461 curve 96 587 194 686 318 686 curve 319
+ 725 move 170 725 53 608 53 461 curve 53 314 170 198 319 198 curve 467 198 584
+ 314 584 461 curve 584 608 467 725 320 725 curve endchar}
+glyph[197] {Scaron,-,
+ 460 width 44 136 vstem 336 430 vstem -14 49 hstem 660 723 hstem newhints 44
+ 136 vstem 325 412 vstem -14 49 hstem 660 723 hstem 412 582 move 399 658 346
+ 723 235 723 curve 167 723 120 700 88 666 curve 57 637 44 596 44 553 curve 44
+ 496 65 454 90 426 curve newhints 44 136 vstem 336 430 vstem -14 49 hstem 660
+ 723 hstem 113 399 142 375 203 336 curve 262 295 284 279 303 261 curve 322 239
+ 336 212 336 173 curve 336 145 328 115 312 95 curve newhints 30 120 vstem 336
+ 430 vstem -14 49 hstem 660 723 hstem 294 72 267 49 226 49 curve 161 49 133 97
+ 120 138 curve 30 133 line 46 50 101 -14 226 -14 curve 306 -14 353 25 384 58
+ curve 416 93 430 139 430 184 curve 430 241 409 281 384 311 curve newhints 44
+ 136 vstem 336 430 vstem -14 49 hstem 660 723 hstem 362 335 331 356 276 394
+ curve 220 429 196 448 173 470 curve 149 492 136 523 136 559 curve 136 585 143
+ 609 158 625 curve newhints 44 136 vstem 325 412 vstem -14 49 hstem 660 723
+ hstem 174 645 202 660 233 660 curve 293 660 315 612 325 579 curve 232 778
+ move 229 778 line 171 823 line 99 823 line 204 739 line 257 739 line 362 823
+ line 290 823 line endchar}
+glyph[198] {Ecircumflex,-,
+ 423 width 58 150 vstem 0 64 hstem 337 401 hstem 645 709 hstem 150 401 move
+ 150 645 line 378 645 line 378 709 line 58 709 line 58 0 line 385 0 line 385
+ 64 line 150 64 line 150 337 line 328 337 line 328 401 line 213 787 move 271
+ 742 line 343 742 line 239 825 line 185 825 line 80 742 line 152 742 line 210
+ 787 line endchar}
+glyph[199] {registered,-,
+ 637 width 53 96 vstem 214 270 vstem 385 444 vstem 542 584 vstem 198 236 hstem
+ 439 474 hstem 581 619 hstem 686 725 hstem 214 308 move 270 308 line 270 439
+ line 316 439 line 402 308 line 463 308 line 371 445 line 402 454 444 477 444
+ 530 curve 444 558 433 580 412 595 curve 391 610 361 619 304 619 curve 214 619
+ line 270 581 move 303 581 line 348 581 385 572 385 528 curve 385 495 361 474
+ 318 474 curve 270 474 line 319 725 move 170 725 53 608 53 461 curve 53 314
+ 170 198 319 198 curve 467 198 584 314 584 461 curve 584 608 467 725 320 725
+ curve 319 686 move 443 686 542 587 542 461 curve 542 335 444 236 319 236
+ curve 194 236 96 335 96 461 curve 96 587 194 686 318 686 curve endchar}
+glyph[200] {Icircumflex,-,
+ 215 width 61 154 vstem 0 bottomedge 709 topedge 154 0 move 154 709 line 61
+ 709 line 61 0 line 109 787 move 167 742 line 239 742 line 134 825 line 81 825
+ line -24 742 line 48 742 line 106 787 line endchar}
+glyph[201] {Iacute,-,
+ 215 width 61 154 vstem 0 bottomedge 709 topedge 154 0 move 154 709 line 61
+ 709 line 61 0 line 238 827 move 138 827 line 52 735 line 109 735 line
+ endchar}
+glyph[202] {aacute,-,
+ 440 width 69 0 97 194 seac endchar}
+glyph[203] {acircumflex,-,
+ 440 width 69 0 97 195 seac endchar}
+glyph[204] {adieresis,-,
+ 440 width 69 0 97 200 seac endchar}
+glyph[205] {agrave,-,
+ 440 width 69 0 97 193 seac endchar}
+glyph[206] {aring,-,
+ 440 width 69 0 97 202 seac endchar}
+glyph[207] {atilde,-,
+ 440 width 69 0 97 196 seac endchar}
+glyph[208] {eacute,-,
+ 445 width 71 0 101 194 seac endchar}
+glyph[209] {ecircumflex,-,
+ 445 width 71 0 101 195 seac endchar}
+glyph[210] {edieresis,-,
+ 445 width 71 0 101 200 seac endchar}
+glyph[211] {egrave,-,
+ 445 width 71 0 101 193 seac endchar}
+glyph[212] {iacute,-,
+ 195 width -80 0 245 194 seac endchar}
+glyph[213] {icircumflex,-,
+ 195 width -54 0 245 195 seac endchar}
+glyph[214] {idieresis,-,
+ 195 width -54 0 245 200 seac endchar}
+glyph[215] {igrave,-,
+ 195 width -28 0 245 193 seac endchar}
+glyph[216] {ntilde,-,
+ 463 width 80 0 110 196 seac endchar}
+glyph[217] {oacute,-,
+ 467 width 82 0 111 194 seac endchar}
+glyph[218] {ocircumflex,-,
+ 467 width 82 0 111 195 seac endchar}
+glyph[219] {odieresis,-,
+ 467 width 82 0 111 200 seac endchar}
+glyph[220] {ograve,-,
+ 467 width 82 0 111 193 seac endchar}
+glyph[221] {otilde,-,
+ 467 width 82 0 111 196 seac endchar}
+glyph[222] {scaron,-,
+ 388 width 43 0 115 207 seac endchar}
+glyph[223] {uacute,-,
+ 466 width 82 0 117 194 seac endchar}
+glyph[224] {ucircumflex,-,
+ 466 width 82 0 117 195 seac endchar}
+glyph[225] {udieresis,-,
+ 466 width 82 0 117 200 seac endchar}
+glyph[226] {ugrave,-,
+ 466 width 82 0 117 193 seac endchar}
+glyph[227] {yacute,-,
+ 413 width 64 0 121 194 seac endchar}
+glyph[228] {ydieresis,-,
+ 413 width 62 0 121 200 seac endchar}
+glyph[229] {zcaron,-,
+ 345 width 22 0 122 207 seac endchar}
