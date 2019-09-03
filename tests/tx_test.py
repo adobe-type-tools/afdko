@@ -365,6 +365,13 @@ def test_type1_inputs(file_ext):
     assert differ([expected_path, actual_path, '-s', '## Filename'])
 
 
+@pytest.mark.parametrize('file_ext', ['otf', 'ttf', 'cff', 'cef'])
+def test_other_input_formats(file_ext):
+    actual_path = runner(CMD + ['-s', '-o', '3', '-f', f'font.{file_ext}'])
+    expected_path = get_expected_path(f'font.{file_ext}.dump3.txt')
+    assert differ([expected_path, actual_path, '-s', '## Filename'])
+
+
 # ----------
 # Dump tests
 # ----------
