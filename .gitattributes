@@ -1,3 +1,4 @@
+*.cff* binary
 *.pdf binary
 *.pfa text eol=lf
 *.pfb binary
