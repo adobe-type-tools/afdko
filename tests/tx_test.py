@@ -374,10 +374,11 @@ def test_type1mm_inputs(fname, args):
     assert differ([expected_path, actual_path, '-s', '## Filename'])
 
 
-@pytest.mark.parametrize('file_ext', ['otf', 'ttf', 'cff', 'cef'])
-def test_other_input_formats(file_ext):
-    actual_path = runner(CMD + ['-s', '-o', '3', '-f', f'font.{file_ext}'])
-    expected_path = get_expected_path(f'font.{file_ext}.dump3.txt')
+@pytest.mark.parametrize('fext', ['otf', 'ttf', 'cff', 'cef', 'ttc'])
+def test_other_input_formats(fext):
+    arg = ['y'] if fext == 'ttc' else []
+    actual_path = runner(CMD + ['-s', '-f', f'font.{fext}', '-o', '3'] + arg)
+    expected_path = get_expected_path(f'font.{fext}.dump3.txt')
     assert differ([expected_path, actual_path, '-s', '## Filename'])
 
 
