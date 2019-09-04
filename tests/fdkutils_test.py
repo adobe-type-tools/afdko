@@ -52,6 +52,7 @@ def test_get_resources_dir():
     ('font.ufo', 'UFO'),
     ('font.otf', 'OTF'),
     ('font.ttf', 'TTF'),
+    ('font.ttc', 'TTC'),
     ('font.cff', 'CFF'),
     ('font.pfa', 'PFA'),
     ('font2.pfa', 'PFA'),

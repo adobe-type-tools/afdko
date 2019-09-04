@@ -9,7 +9,7 @@ import os
 import subprocess
 import tempfile
 
-__version__ = '1.3.6'
+__version__ = '1.3.7'
 
 
 def validate_path(path_str):
@@ -57,6 +57,8 @@ def get_font_format(font_file_path):
                 return 'OTF'
             elif head in (b'\x00\x01\x00\x00', b'true'):
                 return 'TTF'
+            elif head == b'ttcf':
+                return 'TTC'
             elif head[0:2] == b'\x01\x00':
                 return 'CFF'
             elif head[0:2] == b'\x80\x01':
