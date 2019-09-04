@@ -1796,6 +1796,11 @@ static void readCharStringsINDEX(cfrCtx h, short flags) {
         fatal(h, cfrErrNoCharStrings);
     readINDEX(h, &h->region.CharStringsINDEX, &index);
 
+    /* Check for case of CFF2 table containing more 
+       glyphs than other tables can handle. */
+    if (index.count > 0xFFFF)
+        fatal(h, cfrErrTooManyGlyphs);
+
     /* Allocate and initialize glyphs array */
     dnaSET_CNT(h->glyphs, index.count);
     if (index.count == 0)
