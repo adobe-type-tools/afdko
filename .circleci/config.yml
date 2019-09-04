@@ -25,7 +25,9 @@ jobs:
           command: |
             source venv/bin/activate
             $PYTHON setup.py bdist_wheel
-            $PIP install dist/*.whl
+            echo 'Installing afdko ...'
+            $PIP install dist/*.whl -q
+            $PIP list
             $PYTHON -m pytest --cov
             codecov
             $PIP uninstall --yes afdko
@@ -47,8 +49,10 @@ jobs:
           name: "Build wheel, run tests, and uninstall"
           command: |
             source venv/bin/activate
-            $PIP wheel . --no-deps -w dist
-            $PIP install dist/*.whl
+            $PYTHON setup.py bdist_wheel
+            echo 'Installing afdko ...'
+            $PIP install dist/*.whl -q
+            $PIP list
             $PYTHON -m pytest
             $PIP uninstall --yes afdko
       # - store_artifacts:
