@@ -285,7 +285,7 @@ def test_m_option_success(arg):
     'afm',
     'pdf',
     'ps',
-    # 'cff',
+    'cff',
 ])
 @pytest.mark.parametrize('from_format', [
     'ufo2',
