@@ -902,3 +902,11 @@ def test_bug_940():
     with pytest.raises(subprocess.CalledProcessError) as err:
         runner(CMD + ['-a', '-o', 'cff2', '-f', input_path, output_path])
     assert(err.value.returncode > 0)  # error code, not segfault or success
+
+
+def test_too_many_glyphs_pr955():
+    input_path = get_bad_input_path('TooManyGlyphsCFF2.otf')
+    output_path = get_temp_file_path()
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        runner(CMD + ['-a', '-o', 'cff', '-f', input_path, output_path])
+    assert(err.value.returncode > 0)  # error code, not hang or success
