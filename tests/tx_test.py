@@ -432,6 +432,33 @@ def test_dump_flex_op(fext):
 # CFF2 tests
 # ----------
 
+@pytest.mark.parametrize('filename, msg', [
+    ('avar_invalid_table_version',
+        b'(cfr) invalid avar table version'),
+    ('fvar_invalid_table_version',
+        b'(cfr) invalid fvar table version'),
+    ('avar_invalid_table_size',
+        b'(cfr) invalid avar table size'),
+    ('fvar_invalid_table_size',
+        b'(cfr) invalid fvar table size'),
+    ('fvar_invalid_table_header',
+        b'(cfr) invalid values in fvar table header'),
+    ('avar_invalid_axis-instance_count-size',
+        b'(cfr) invalid avar table size or axis/instance count/size'),
+    ('fvar_invalid_axis-instance_count-size',
+        b'(cfr) invalid fvar table size or axis/instance count/size'),
+    ('avar_axis_value_map_out_of_bounds',
+        b'(cfr) avar axis value map out of bounds'),
+    ('avar_fvar_axis_mismatch',
+        b'(cfr) mismatching axis counts in fvar and avar'),
+])
+def test_varread_errors(filename, msg):
+    font_path = get_bad_input_path(f'vf_{filename}.otf')
+    output = subprocess.check_output([TOOL, '-dcf', '-0', font_path],
+                                     stderr=subprocess.STDOUT)
+    assert msg in output
+
+
 @pytest.mark.parametrize('args, exp_filename', [
     ([], 'SourceCodeVar-Roman_CFF2'),
     (['*S', '*b', 'std'], 'SourceCodeVar-Roman_CFF2_subr'),  # subroutinize
