@@ -3429,8 +3429,12 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
                 flowCommand(h, opname[byte]);
                 break;
             case t2_vsindex: {
-                unsigned long vsIndex = (unsigned long)h->stack.array[0];
-                h->dcf.numRegions = h->dcf.varRegionInfo.array[vsIndex].regionCount;
+                if (h->dcf.varRegionInfo.cnt == 0) {
+                    h->dcf.numRegions = 0;
+                } else {
+                    unsigned long vsIndex = (unsigned long)h->stack.array[0];
+                    h->dcf.numRegions = h->dcf.varRegionInfo.array[vsIndex].regionCount;
+                }
                 flowCommand(h, opname[byte]);
                 break;
             }
