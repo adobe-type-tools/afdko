@@ -2960,8 +2960,12 @@ static void dumpINDEX(txCtx h, char *title, const ctlRegion *region,
             countSize = 2;
         }
 
-        if (count > 0)
+        if (count > 0) {
             offSize = read1(h);
+            if (offSize == 0) {
+                fatal(h, "invalid offSize in INDEX");
+            }
+        }
 
         if (h->dcf.level < 5) {
             /* Dump header */
