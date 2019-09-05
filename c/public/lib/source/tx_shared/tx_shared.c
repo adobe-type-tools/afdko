@@ -3425,6 +3425,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
                 flowCommand(h, opname[byte]);
                 break;
             case t2_blend:
+                CHKUFLOW(1);
                 if ((h->dcf.flags & DCF_Flatten) && (!(h->dcf.flags & DCF_END_HINTS))) {
                     int numBlends = (int)h->stack.array[h->stack.cnt - 1];
                     // take off 1 for num blend arguments, then pop the delta values: what's left are stem coords.
@@ -3436,7 +3437,9 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
                 if (h->dcf.varRegionInfo.cnt == 0) {
                     h->dcf.numRegions = 0;
                 } else {
-                    unsigned long vsIndex = (unsigned long)h->stack.array[0];
+                    unsigned long vsIndex;
+                    CHKUFLOW(1);
+                    vsIndex = (unsigned long)h->stack.array[0];
                     h->dcf.numRegions = h->dcf.varRegionInfo.array[vsIndex].regionCount;
                 }
                 flowCommand(h, opname[byte]);
