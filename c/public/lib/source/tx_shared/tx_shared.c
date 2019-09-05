@@ -4892,7 +4892,7 @@ void ttrReadFont(txCtx h, long origin, int iTTC) {
             fatal(h, "(ttr) can't init lib");
     }
 
-    if (ttrBegFont(h->ttr.ctx, h->ttr.flags, origin, iTTC, &h->top))
+    if (ttrBegFont(h->ttr.ctx, h->ttr.flags, origin, iTTC, &h->top, getUDV(h)))
         fatal(h, NULL);
 
     prepSubset(h);

@@ -96,6 +96,10 @@
  * Fixed Point interface
  */
 
+#ifndef FIXEDHALF
+#define FIXEDHALF 0x00008000
+#endif
+
 /* Data Structures */
 
 /* A fixed point number consists of a sign bit, i integer bits, and f

@@ -910,3 +910,13 @@ def test_too_many_glyphs_pr955():
     with pytest.raises(subprocess.CalledProcessError) as err:
         runner(CMD + ['-a', '-o', 'cff', '-f', input_path, output_path])
     assert(err.value.returncode > 0)  # error code, not hang or success
+
+
+def test_ttread_varinst():
+    font_path = get_input_path('AdobeVFPrototype.ttf')
+    save_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o',
+                  '3', 'g', '_A', 'U', '_500,800',
+                  '-f', font_path, save_path])
+    expected_path = get_expected_path('vfproto_tt_inst500_800.txt')
+    assert differ([expected_path, save_path, '-s', '## Filename'])

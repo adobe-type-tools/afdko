@@ -1307,7 +1307,7 @@ static void ttParse(cefCtx h) {
     }
 
     /* Parse font */
-    if (ttrBegFont(h->ctx.ttr, TTR_EXACT_PATH, h->src.origin, 0, &h->top))
+    if (ttrBegFont(h->ctx.ttr, TTR_EXACT_PATH, h->src.origin, 0, &h->top, 0))
         fatal(h, cefErrTTParse);
 
     /* Check name override */
