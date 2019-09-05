@@ -74,7 +74,7 @@ enum {
    to zero when parsing regular TrueType fonts.
 
    The "UDV" parameter specifies the User Design Vector to be used in
-   flattening (snapshotting) a CFF2 variable font. If NULL, the font is flattened at the
+   flattening (snapshotting) a TrueType variable font. If NULL, the font is flattened at the
    default instance. The parameter may be set to NULL for non-variable fonts. */
 
 int ttrIterateGlyphs(ttrCtx h, abfGlyphCallbacks *glyph_cb);

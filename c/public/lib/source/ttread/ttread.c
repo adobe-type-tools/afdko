@@ -977,8 +977,6 @@ static void locaRead(ttrCtx h) {
 /* Read hmtx table. */
 static void hmtxRead(ttrCtx h) {
     uFWord last = 0;
-    FWord hAdv;
-    uFWord lsb;
     Glyph *glyph = NULL; /* Suppress optimizer warning */
     long i;
     sfrTable *table;
@@ -995,9 +993,9 @@ static void hmtxRead(ttrCtx h) {
 
     /* Read long horizontal metrics */
     for (i = 0; (i < h->hhea.numberOfLongHorMetrics) && (i < h->glyphs.cnt); i++) {
+        FWord hAdv = read2(h);
+        uFWord lsb = sread2(h);
         glyph = &h->glyphs.array[i];
-        hAdv = read2(h);
-        lsb = sread2(h);
         if (!(glyph->flags & GLYPH_MTX_SET)) {
             glyph->hAdv = hAdv;
             glyph->lsb = lsb;
@@ -1008,8 +1006,8 @@ static void hmtxRead(ttrCtx h) {
 
     /* Read left side-bearings */
     for (; i < h->glyphs.cnt; i++) {
+        uFWord lsb = sread2(h);
         glyph = &h->glyphs.array[i];
-        lsb = sread2(h);
         if (!(glyph->flags & GLYPH_MTX_SET)) {
             glyph->hAdv = last;
             glyph->lsb  = lsb;
@@ -2675,7 +2673,8 @@ static void glyfReadSimple(ttrCtx h, GID gid, int nContours, int iStart) {
     short y;
     ptRange *ranges;
     int lastPt = iStart;
-    int nPoints, nCoords;
+    int nCoords;
+    int nPoints;
     glyfCoord *coords;
 
     /* Read countour end point indices */
@@ -2692,9 +2691,9 @@ static void glyfReadSimple(ttrCtx h, GID gid, int nContours, int iStart) {
 
     /* Read flags */
     if (nContours > 0)
-      nPoints = ranges[nContours - 1].endPt + 1 - iStart;
+        nPoints = ranges[nContours - 1].endPt + 1 - iStart;
     else
-      nPoints = 0;
+        nPoints = 0;
     if (nPoints > h->maxp.maxPoints)
         fatal(h, ttrErrTooManyPoints,
               "gid[%hu]: max points exceeded (%d > max %d)", gid, nPoints, h->maxp.maxPoints);
@@ -3094,7 +3093,7 @@ static int combinePair(Point *p, abfGlyphCallbacks *glyph_cb) {
    4        1 0 1 0         0-3
 
    One curve is described by points 0-2 and another by point 2-4. Point 5 is a
-   temporary.
+   temporary. 
 
    States 2 and 4 are complicated by the fact that a test must be performed to
    decide if the 2 curves described by the point data can be combined into a
