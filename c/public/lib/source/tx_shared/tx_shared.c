@@ -10,6 +10,16 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr);
 
 /* ----------------------------- Error Handling ---------------------------- */
 
+/* Write message to stderr from varargs. */
+static void CTL_CDECL message(txCtx h, char *fmt, ...) {
+    fflush(stdout);
+    va_list ap;
+    fprintf(stderr, "%s: ", h->progname);
+    va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    va_end(ap);
+}
+
 /* If first debug message for source file; print filename */
 static void printFilename(txCtx h) {
     fflush(stdout);
@@ -3434,13 +3444,16 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
                 flowCommand(h, opname[byte]);
                 break;
             case t2_vsindex: {
-                if (h->dcf.varRegionInfo.cnt == 0) {
-                    h->dcf.numRegions = 0;
-                } else {
+                h->dcf.numRegions = 0;
+                if (h->dcf.varRegionInfo.cnt > 0) {
                     unsigned long vsIndex;
                     CHKUFLOW(1);
-                    vsIndex = (unsigned long)h->stack.array[0];
-                    h->dcf.numRegions = h->dcf.varRegionInfo.array[vsIndex].regionCount;
+                    vsIndex = (unsigned long)h->stack.array[h->stack.cnt - 1];
+                    if (vsIndex >= h->dcf.varRegionInfo.cnt) {
+                        message(h, "invalid vsindex\n");
+                    } else {
+                        h->dcf.numRegions = h->dcf.varRegionInfo.array[vsIndex].regionCount;
+                    }
                 }
                 flowCommand(h, opname[byte]);
                 break;
