@@ -1443,7 +1443,6 @@ static void applyGlyphVariationDeltas(ttrCtx h, GID gid, int nContours, int nPoi
             continue;
 
         if (bAllPoints) {
-
             if (nContours >= 0) { /* simple glyph */
                 for (j = 0; j < nPoints - PHANTOM_COUNT; j++) {
                     xFixedDeltas.array[j] = fixmul(FixInt(xIntDeltas.array[j]), scalar);
