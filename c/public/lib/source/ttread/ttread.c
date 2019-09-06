@@ -420,9 +420,6 @@ struct ttrCtx_ {
         long            flags;
         float           *UDV;   /* From client */
         Fixed           ndv[VF_MAX_AXES];               /* normalized weight vector */
-        float           scalars[VF_MAX_MASTERS];        /* scalar values for regions */
-        uint16_t        regionCount;                    /* number of all regions */
-        uint16_t        regionIndices[VF_MAX_MASTERS];  /* region indices for the current vsindex */
         uint16_t        axisCount;
         var_axes        axes;
         var_hmtx        hmtx;
@@ -1056,7 +1053,6 @@ static void gvarRead(ttrCtx h) {
 
 static unsigned long gvarReadPackedPointNumbers(ttrCtx h, unsigned long pointCount, uint16_t* pnts, unsigned long maxPoints) {
     unsigned long index = 0;
-    uint16_t controlByte = 0;
     uint16_t runCount = 0;
     uint16_t element = 0;
     unsigned long i = 0;
@@ -1068,7 +1064,7 @@ static unsigned long gvarReadPackedPointNumbers(ttrCtx h, unsigned long pointCou
         fatal(h, ttrErrBadGlyphData, "point count wrong in gvar");
 
     while (index < pointCount) {
-        controlByte = read1(h);
+        uint16_t controlByte = read1(h);
         runCount = controlByte & gvar_POINT_RUNCOUNT_MASK;
         if (controlByte & gvar_FLAG_POINTS_ARE_WORDS)
             /* read 'runCount + 1' elements with each of two bytes. */
@@ -1126,13 +1122,11 @@ static Fixed calculateScalar(ttrCtx h, uint16_t tupleIndex, Fixed *peakTuple, Fi
 
 static unsigned long gvarReadPackedDeltas(ttrCtx h, int16_t* deltas, long deltaCount) {
     unsigned int index = 0;
-    uint16_t controlByte;
-    uint16_t runCount;
     unsigned int j;
 
     while ( index < deltaCount ) {
-        controlByte = read1(h);
-        runCount = (controlByte & gvar_DELTA_RUNCOUNT_MASK);
+        uint16_t controlByte = read1(h);
+        uint16_t runCount = (controlByte & gvar_DELTA_RUNCOUNT_MASK);
 
         if (controlByte & gvar_DELTAS_ARE_ZERO) {
             /* 'runCount + 1' deltas are zero. */
@@ -1161,8 +1155,7 @@ static void gvarInterpolateIntermCoord(
     int16_t* coords,
     Fixed *deltas) {
     int p;
-    int v;
-    Fixed delta, delta1, delta2;
+    Fixed delta1, delta2;
     Fixed scale = 0;
 
     if (untouch1 > untouch2)
@@ -1176,7 +1169,6 @@ static void gvarInterpolateIntermCoord(
 
     delta1 = deltas[touch1];
     delta2 = deltas[touch2];
-    delta = 0;
 
     if (delta1 == delta2 || coords[touch1] != coords[touch2]) {
         if (coords[touch1] != coords[touch2])
@@ -1185,7 +1177,8 @@ static void gvarInterpolateIntermCoord(
             scale = 0;
 
         for (p = untouch1; p <= untouch2; p++) {
-            v = coords[p];
+            Fixed delta;
+            int v = coords[p];
 
             if (v <= coords[touch1])
                 delta = delta1;
@@ -1203,16 +1196,13 @@ static void gvarInterpolateIntermCoord(
 static void gvarInterpolateDeltas(ttrCtx h, int nContours, ptRange *ranges, int ptBase,
                                   int16_t *xorig, int16_t *yorig,
                                   boolean *hasDelta, Fixed *xDeltas, Fixed *yDeltas) {
-    int iPt;                /* current point index */
-    int iStartPt;           /* start of contour */
-    int iEndPt;             /* end of contour */
-    int iTouch1;            /* first touched or reference point that has delta */
-    int iTouch2;            /* second touched or reference point that has delta */
-    int iFirstDeltaPt;
     int iContour;
-    int p;                  /* used as for loop index below */
 
     for (iContour = 0; iContour < nContours; iContour++) {
+        int iPt;                /* current point index */
+        int iStartPt;           /* start of contour */
+        int iEndPt;             /* end of contour */
+
         iStartPt = ranges[iContour].begPt - ptBase;
         iEndPt = ranges[iContour].endPt - ptBase;
 
@@ -1222,6 +1212,9 @@ static void gvarInterpolateDeltas(ttrCtx h, int nContours, ptRange *ranges, int 
             iPt++;
 
         if (iPt <= iEndPt) {
+            int iTouch1;            /* first touched or reference point that has delta */
+            int iFirstDeltaPt;
+
             iTouch1 = iPt;          /* first touched point which has delta. */
             iFirstDeltaPt = iPt;    /* store the first point which has delta. */
 
@@ -1230,6 +1223,8 @@ static void gvarInterpolateDeltas(ttrCtx h, int nContours, ptRange *ranges, int 
             /* search next touched point that has a delta */
             while (iPt <= iEndPt) {
                 if (hasDelta[iPt]) {
+                    int iTouch2;            /* second touched or reference point that has delta */
+
                     iTouch2 = iPt;
 
                     /* interpolate intermediate points between iTouch1 and iTouch2.
@@ -1246,6 +1241,7 @@ static void gvarInterpolateDeltas(ttrCtx h, int nContours, ptRange *ranges, int 
             if (iFirstDeltaPt == iTouch1) {
                 Fixed deltaX = xDeltas[iTouch1];
                 Fixed deltaY = yDeltas[iTouch1];
+                int p;                  /* used as for loop index below */
 
                 for (p = iStartPt; p <= iEndPt; p++) {
                     if (p != iTouch1) {
@@ -1336,6 +1332,9 @@ static void applyGlyphVariationDeltas(ttrCtx h, GID gid, int nContours, int nPoi
     dnaSET_CNT(xOrig, nTotalPoints);
     dnaSET_CNT(yOrig, nTotalPoints);
     dnaSET_CNT(bHasDelta, nTotalPoints);
+    memset(imStart, 0, sizeof(Fixed) * VF_MAX_AXES);
+    memset(imEnd, 0, sizeof(Fixed) * VF_MAX_AXES);
+    memset(peakTupleCoords, 0, sizeof(Fixed) * VF_MAX_AXES);
     memset(xDeltaSums.array, 0, sizeof(Fixed) * nTotalPoints);
     memset(yDeltaSums.array, 0, sizeof(Fixed) * nTotalPoints);
     tupleHeaderOffset = h->gvar.tableOffset + h->gvar.dataArrayOffset + h->gvar.dataOffsets.array[gid];
@@ -1357,12 +1356,9 @@ static void applyGlyphVariationDeltas(ttrCtx h, GID gid, int nContours, int nPoi
 
         if (pntCount == 0) {
             bAllSharedPoints = 1;
-            pointIndicesCount = 0;
         } else {
             dnaSET_CNT(sharedPoints, gvarReadPackedPointNumbers(h, pntCount, &sharedPoints.array[0], nPoints));
-            bAllPoints = 0;
             pointIndices = privatePoints.array;
-            pointIndicesCount = privatePoints.cnt;
         }
         serializedDataOffset = srcTell(h);
     }
@@ -1447,7 +1443,6 @@ static void applyGlyphVariationDeltas(ttrCtx h, GID gid, int nContours, int nPoi
             continue;
 
         if (bAllPoints) {
-            bAllPoints = 0;
 
             if (nContours >= 0) { /* simple glyph */
                 for (j = 0; j < nPoints - PHANTOM_COUNT; j++) {
@@ -2586,8 +2581,6 @@ int ttrBegFont(ttrCtx h, long flags, long origin, int iTTC, abfTopDict **top, fl
 
     /* Load variable font tables */
     if (h->vf.UDV) {
-        unsigned short  axis;
-
         gvarRead(h);
         h->vf.axes = var_loadaxes(h->ctx.sfr, &h->cb.shstm);
         h->vf.hmtx = var_loadhmtx(h->ctx.sfr, &h->cb.shstm);
@@ -2596,6 +2589,7 @@ int ttrBegFont(ttrCtx h, long flags, long origin, int iTTC, abfTopDict **top, fl
 
         if (h->vf.axisCount > 0) {
             Fixed   userCoords[VF_MAX_AXES];
+            unsigned short  axis;
 
             if (h->vf.axisCount > VF_MAX_AXES)
                 fatal(h, ttrErrGeometry, "axisCount %g too large", h->vf.axisCount);
@@ -2854,7 +2848,6 @@ static void glyfReadCompound(ttrCtx h, GID gid, GID *mtx_gid, int depth) {
 
         /* Read component glyph */
         if (h->glyphs.array[component].info.sup.begin == ABF_UNSET_INT) {
-            nContours = 0;  /* Empty component glyph */
             iStart = h->glyf.coords.cnt;
         } else {
             nContours = glyfReadHdr(h, component);
@@ -3093,7 +3086,7 @@ static int combinePair(Point *p, abfGlyphCallbacks *glyph_cb) {
    4        1 0 1 0         0-3
 
    One curve is described by points 0-2 and another by point 2-4. Point 5 is a
-   temporary. 
+   temporary.
 
    States 2 and 4 are complicated by the fact that a test must be performed to
    decide if the 2 curves described by the point data can be combined into a
@@ -3242,7 +3235,7 @@ static void callbackApproxPath(ttrCtx h, GID gid, abfGlyphCallbacks *glyph_cb) {
 static void readGlyph(ttrCtx h,
                       unsigned short gid, abfGlyphCallbacks *glyph_cb) {
     int result;
-    int nContours;
+    int nContours = 0;
     Glyph *glyph = &h->glyphs.array[gid];
 
     /* Begin glyph and mark it as seen */
@@ -3290,7 +3283,6 @@ static void readGlyph(ttrCtx h,
 
         glyph_cb->width(glyph_cb, glyph->hAdv);
 
-        /* TODO: calculate a value to use with a variable font */
         xshift = h->glyphs.array[mtx_gid].lsb - h->glyphs.array[mtx_gid].xMin;
         if (xshift != 0) {
             /* Shift outline to match lsb in hmtx table */
