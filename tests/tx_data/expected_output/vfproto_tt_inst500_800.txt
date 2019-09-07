@@ -1,0 +1,44 @@
+## Filename ./tests/tx_data/input/AdobeVFPrototype.ttf
+## Top Dict
+version             "1.004"
+Notice              "Adobe is either a registered trademark or a trademark of Adobe in the United States and/or other countries."
+Copyright           "Copyright 2016 Adobe (http://www.adobe.com/)."
+FullName            "Adobe Variable Font Prototype"
+FamilyName          "Adobe Variable Font Prototype"
+Weight              "Regular"
+UnderlinePosition   -75
+FontBBox            {-178,-250,1135,908}
+FSType              0
+sup.srcFontType     TrueType
+sup.nGlyphs         313
+## FontDict[0]
+FontName            "AdobeVFPrototype-Default"
+## Private
+## glyph[tag] {name,encoding,path}
+glyph[34] {A,U+0041,
+  666 width
+  9 0 move
+  9 32 line
+  102 47 line
+  121 47 line
+  229 32 line
+  229 0 line
+  72 0 move
+  295 670 line
+  367 670 line
+  596 0 line
+  481 0 line
+  285 592 line
+  307 596 line
+  118 0 line
+  169 218 move
+  182 254 line
+  462 254 line
+  472 218 line
+  375 0 move
+  375 33 line
+  502 48 line
+  530 48 line
+  655 33 line
+  655 0 line
+  endchar}
