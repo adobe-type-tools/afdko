@@ -1544,8 +1544,16 @@ static void prepMMData(t1rCtx h) {
     char coords[64];
     char *p;
     char *FontName = getString(h, (STI)h->fd->fdict->FontName.impl);
-    unsigned int nAxes = h->mm.BDP.cnt / h->fd->aux.nMasters;
+    unsigned int nAxes;
     char *Weight = "SnapShotMM";
+
+    if (FontName == NULL)
+        fatal(h, t1rErrMMParse, "missing FontName");
+
+    if (h->fd->aux.nMasters == 0)
+        fatal(h, t1rErrMMParse, "invalid number of masters");
+
+    nAxes = h->mm.BDP.cnt / h->fd->aux.nMasters;
 
     if (h->top.ItalicAngle == 0) {
         /* BuildFont incorrectly specifies the ItalicAngle for MM oblique
