@@ -75,7 +75,7 @@ static void saveFSType(cfwCtx g, abfTopDict *dst) {
         }
         /* Copy string to tmp buf */
         /* 64-bit warning fixed by cast here */
-        postscriptLen = strlen(dst->PostScript.ptr);
+        postscriptLen = strlen(dst->PostScript.ptr) + 1;
         STRCPY_S(dnaEXTEND(h->tmp, (long)postscriptLen),
                  postscriptLen,
                  dst->PostScript.ptr);
@@ -159,7 +159,7 @@ static void saveOrigFontType(cfwCtx g, abfTopDict *dst) {
         }
         /* Copy string to tmp buf */
         /* 64-bit warning fixed by cast here */
-        postscriptLen = strlen(dst->PostScript.ptr);
+        postscriptLen = strlen(dst->PostScript.ptr) + 1;
         STRCPY_S(dnaEXTEND(h->tmp, (long)postscriptLen),
                  postscriptLen,
                  dst->PostScript.ptr);
