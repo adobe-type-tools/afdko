@@ -125,7 +125,7 @@ struct _t2cCtx {
 /* Check stack has room for n elements. */
 #define CHKOFLOW(h, n)                                                                                                                                              \
     do {                                                                                                                                                            \
-        if (((h->aux->flags & T2C_IS_CFF2) && ((h->stack.blendCnt) + (n) > CFF2_MAX_OP_STACK)) || (h->stack.cnt) + (n) > h->maxOpStack) return t2cErrStackOverflow; \
+        if (((h->flags & IS_CFF2) && ((h->stack.blendCnt) + (n) > CFF2_MAX_OP_STACK)) || (h->stack.cnt) + (n) > h->maxOpStack) return t2cErrStackOverflow; \
     } while (0)
 
 /* Stack access without check. */
@@ -134,7 +134,7 @@ struct _t2cCtx {
 #define POP() (h->stack.array[--h->stack.cnt])
 #define PUSH(v)                                                                                       \
     {                                                                                                 \
-        if (h->aux->flags & T2C_IS_CFF2) h->stack.blendArray[h->stack.blendCnt++].value = (float)(v); \
+        if (h->flags & IS_CFF2) h->stack.blendArray[h->stack.blendCnt++].value = (float)(v); \
         h->stack.array[h->stack.cnt++] = (float)(v);                                                  \
     }
 
@@ -247,7 +247,7 @@ static int srcSeek(t2cCtx h, long offset) {
     do                                                              \
         if (next == end) {                                          \
             if (h->src.offset >= h->src.endOffset) {                \
-                if (h->aux->flags & T2C_IS_CFF2)                    \
+                if (h->flags & IS_CFF2)                             \
                     goto do_endchar;                                \
                 return t2cErrSrcStream;                             \
             }                                                       \
@@ -1747,7 +1747,7 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
 
 #if 0
     /* for CFF2 Charstrings, we hit the end of the charstring without having seen endchar or return yet. Add it now. */
-    if ((h->aux->flags & T2C_IS_CFF2) && !(h->flags & SEEN_ENDCHAR))
+    if ((h->flags & IS_CFF2) && !(h->flags & SEEN_ENDCHAR))
 
     {
         /* if this was a subr, do return. */
@@ -1773,6 +1773,8 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
 
     /* Initialize */
     h->flags = PEND_WIDTH | PEND_MASK;
+    if (aux->flags & T2C_IS_CFF2)
+        h->flags |= IS_CFF2;
     h->stack.cnt = 0;
     h->stack.blendCnt = 0;
     memset(h->stack.blendArray, 0, sizeof(h->stack.blendArray));
@@ -1797,7 +1799,7 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
     memset(&h->BCA, 0, sizeof(h->BCA));
     aux->bchar = 0;
     aux->achar = 0;
-    if (aux->flags & T2C_IS_CFF2)
+    if (h->flags & IS_CFF2)
         h->maxOpStack = glyph->info->blendInfo.maxstack;
     else
         h->maxOpStack = T2_MAX_OP_STACK;
@@ -1821,8 +1823,6 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
         h->flags |= FLATTEN_BLEND;
         h->flags |= SEEN_BLEND;
     }
-    if (aux->flags & T2C_IS_CFF2)
-        h->flags |= IS_CFF2;
     h->src.endOffset = endOffset;
 
     DURING_EX(h->err.env)
