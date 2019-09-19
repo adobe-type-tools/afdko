@@ -368,7 +368,10 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
     else {
         /* Dump name-keyed glyph */
         abfEncoding *enc = &info->encoding;
-        FPRINTF_S(h->fp, "%s", info->gname.ptr);
+        if (info->gname.ptr == NULL)
+            FPRINTF_S(h->fp, "(missing)");
+        else
+            FPRINTF_S(h->fp, "%s", info->gname.ptr);
         if (enc->code == ABF_GLYPH_UNENC)
             FPRINTF_S(h->fp, ",-");
         else {

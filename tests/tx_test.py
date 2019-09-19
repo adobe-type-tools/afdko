@@ -863,7 +863,7 @@ def test_drop_defaultwidthx_when_writing_cff2_bug897(option):
     assert differ([expected_path, dcf_path])
 
 
-@pytest.mark.parametrize('option', ['afm', 'svg'])
+@pytest.mark.parametrize('option', ['afm', 'dump', 'svg'])
 def test_missing_glyph_names_pr905(option):
     input_path = get_bad_input_path('pr905.otf')
     output_path = get_temp_file_path()
@@ -872,6 +872,8 @@ def test_missing_glyph_names_pr905(option):
     if option == 'afm':
         skip = ['-s',
                 'Comment Creation Date:' + SPLIT_MARKER + 'Comment Copyright']
+    elif option == 'dump':
+        skip = ['-s', '## Filename']
     else:
         skip = []
     assert differ([expected_path, output_path] + skip)
