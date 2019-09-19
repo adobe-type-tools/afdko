@@ -91,24 +91,26 @@ def run_shell_command(args, suppress_output=False):
 
 
 def run_shell_command_logging(args):
+    """
+    Runs a shell command while logging both standard output and standard error.
+
+    An earlier version of this function that used Popen.stdout.readline()
+    was failing intermittently in CI, so now we're trying this version that
+    uses Popen.communicate().
+    """
     try:
         proc = subprocess.Popen(args,
                                 stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT)
-        while True:
-            out = proc.stdout.readline().rstrip()
-            if out:
-                print(out.decode())
-            if proc.poll() is not None:
-                if proc.returncode != 0:  # must be called *after* poll()
-                    msg = " ".join(args)
-                    print(f"Error executing command '{msg}'")
-                    return False
-                out = proc.stdout.readline().rstrip()
-                if out:
-                    print(out.decode())
-                break
-        return True
+                                stderr=subprocess.STDOUT,
+                                universal_newlines=True)
+        out = proc.communicate()[0]
+        print(out, end='')
+        if proc.returncode != 0:
+            msg = " ".join(args)
+            print(f"Error executing command '{msg}'")
+            return False
+        else:
+            return True
     except (subprocess.CalledProcessError, OSError) as err:
         msg = " ".join(args)
         print(f"Error executing command '{msg}'\n{err}")
