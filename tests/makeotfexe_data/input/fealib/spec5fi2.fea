@@ -1,0 +1,11 @@
+# OpenType Feature File specification, section 5.f.i, example 2
+# "Specifying a Chain Sub rule and marking sub-runs"
+# http://www.adobe.com/devnet/opentype/afdko/topic_feature_file_syntax.html
+
+languagesystem latn dflt;
+
+feature test {
+#test-fea2fea: lookupflag RightToLeft IgnoreBaseGlyphs IgnoreLigatures;
+    lookupflag 7;
+    sub [a e n] d' by d.alt;
+} test;
