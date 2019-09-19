@@ -522,6 +522,18 @@ def test_cff2_with_spare_masters_pr835():
     assert differ([expected_path, output_path, '-m', 'bin'])
 
 
+@pytest.mark.parametrize('vector, exp_filename', [
+    ('9999,9999,9999,9999,9999,9', 'psname_last_resort_no.txt'),
+    ('9999,9999,9999,9999,9999,99', 'psname_last_resort_yes.txt'),
+])
+def test_last_resort_instance_psname(vector, exp_filename):
+    font_path = get_input_path('cff2_vf_many_axes.otf')
+    output_path = get_temp_file_path()
+    runner(CMD + ['-o', '0', 'U', f'_{vector}', '-f', font_path, output_path])
+    expected_path = get_expected_path(exp_filename)
+    assert differ([expected_path, output_path, '-s', '## Filename'])
+
+
 # -----------
 # Other tests
 # -----------
