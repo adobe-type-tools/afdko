@@ -1,0 +1,14 @@
+feature f1 {
+    sub c_t by c t;
+    sub f_i by f i;
+    sub f_f_i by f f i;
+} f1;
+
+
+# Even if it has exactly the same content as feature f1,
+# the lookup should not be shared.
+feature f2 {
+    sub c_t by c t;
+    sub f_i by f i;
+    sub f_f_i by f f i;
+} f2;
