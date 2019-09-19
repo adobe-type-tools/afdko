@@ -1,0 +1,29 @@
+## Filename pr905.otf
+## Top Dict
+version             "1.0"
+Notice              " 2014 - 2017 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name Source. Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries."
+Copyright           " 2014 - 2017 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name Source."
+FullName            "Test VF"
+FamilyName          "Test VF"
+FontBBox            {5,0,697,675}
+FSType              0
+sup.srcFontType     CFF (name-keyed)
+sup.nGlyphs         4
+## FontDict[0]
+FontName            "TestVF-Roman"
+## Private
+BlueValues          {-15,0,474,487,527,540,550,563,647,660,670,685,730,750}
+OtherBlues          {-250,-240}
+FamilyBlues         {-15,0,475,488,527,540,549,563,646,659,669,684,729,749}
+FamilyOtherBlues    {-249,-239}
+BlueScale           0.0375
+BlueFuzz            0
+StdHW               55
+StdVW               80
+StemSnapH           {40,55}
+StemSnapV           {80,90}
+## glyph[tag] {name,encoding}
+glyph[0] {(missing),-}
+glyph[1] {(missing),U+0041}
+glyph[2] {(missing),U+0054}
+glyph[3] {(missing),U+043C}
