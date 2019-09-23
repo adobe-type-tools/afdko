@@ -1,0 +1,14 @@
+languagesystem DFLT dflt;
+lookup b {
+    sub b by B;
+} b;
+lookup c {
+    sub c by C;
+} c;
+feature liga {
+    lookup b;
+    script DFLT;
+        lookup c;
+        language dflt;
+            lookup c;
+} liga;

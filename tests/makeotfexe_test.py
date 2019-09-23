@@ -469,3 +469,21 @@ def test_max_revision_bug876():
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value='])
+
+
+def test_infinite_loop_with_dflt_lookups_bug965():
+    input_filename = 'bug965/font.pfa'
+    feat_filename = 'bug965/feat.fea'
+    ttx_filename = 'bug965.ttx'
+    actual_path = get_temp_file_path()
+    runner(CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
+                        'ff', f'_{get_input_path(feat_filename)}',
+                        'o', f'_{actual_path}'])
+    actual_ttx = generate_ttx_dump(actual_path, ['GSUB'])
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx,
+                   '-s',
+                   '<ttFont sfntVersion' + SPLIT_MARKER +
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <created value=' + SPLIT_MARKER +
+                   '    <modified value='])

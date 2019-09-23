@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "map.h"
 #include "otl.h"
 #include "GPOS.h"
@@ -2935,6 +2936,21 @@ static void setIDText(hotCtx g, featCtx h)
     }
 }
 
+/* check if h->curr is in h->DFLTLkps,
+   return true if it is, false otherwise */
+static bool curr_in_default_lookups() {
+    long i;
+    for (i = 0; i < h->DFLTLkps.cnt; i++) {
+        if (memcmp((void *)&h->curr,
+                   (void *)&h->DFLTLkps.array[i],
+                   sizeof(h->curr))
+            == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 static void prepRule(Tag newTbl, int newlkpType, GNode *targ, GNode *repl) {
     int accumDFLTLkps = 1;
 
@@ -3026,7 +3042,7 @@ static void prepRule(Tag newTbl, int newlkpType, GNode *targ, GNode *repl) {
         accumDFLTLkps = 0;
     }
 
-    if (accumDFLTLkps) {
+    if ((accumDFLTLkps) && (!curr_in_default_lookups())) {
         /* Save for possible inclusion later in lang-specific stuff */
         *dnaNEXT(h->DFLTLkps) = h->curr;
     }
