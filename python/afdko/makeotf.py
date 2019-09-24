@@ -25,7 +25,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.7.8 Aug 6 2019
+makeotf.py v2.7.9 Sep 24 2019
 """
 
 __methods__ = """
@@ -2753,7 +2753,7 @@ def main(args=None):
             saveOptionsFile(makeOTFParams)
         runMakeOTF(makeOTFParams)
     except (MakeOTFOptionsError, MakeOTFShellError, MakeOTFRunError):
-        return 1
+        return 2
     except Exception:
         raise
 

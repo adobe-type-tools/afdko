@@ -78,7 +78,7 @@ def test_exit_no_option():
     # current directory, the tool exits with an error
     with pytest.raises(subprocess.CalledProcessError) as err:
         subprocess.check_call([TOOL])
-    assert err.value.returncode == 1
+    assert err.value.returncode == 2
 
 
 @pytest.mark.parametrize('arg', ['-v', '-h', '-u'])
@@ -88,7 +88,7 @@ def test_exit_known_option(arg):
 
 @pytest.mark.parametrize('arg', ['-j', '--bogus'])
 def test_exit_unknown_option(arg):
-    assert subprocess.call([TOOL, arg]) == 1
+    assert subprocess.call([TOOL, arg]) == 2
 
 
 @pytest.mark.parametrize('arg, input_filename, ttx_filename', [
@@ -185,7 +185,7 @@ def test_font_with_outdated_hash_bug239():
     with pytest.raises(subprocess.CalledProcessError) as err:
         runner(CMD + ['-o', 'f', f'_{input_path}',
                             'o', f'_{output_path}'])
-    assert err.value.returncode == 1
+    assert err.value.returncode == 2
 
 
 @xfail_py3_win
@@ -224,7 +224,7 @@ def test_no_postscript_name_bug282(input_filename):
     # makeotf will fail for both UFO and Type 1 inputs
     with pytest.raises(subprocess.CalledProcessError) as err:
         runner(CMD + ['-o', 'f', f'_{input_filename}'])
-    assert err.value.returncode == 1
+    assert err.value.returncode == 2
 
 
 @pytest.mark.parametrize('fea_filename, result', [
@@ -643,7 +643,7 @@ def test_delete_zero_kb_font_on_fail_bug736():
         runner(CMD + ['-o',
                       'f', f'_{get_input_path(input_filename)}',
                       'ff', f'_{get_input_path(feat_filename)}'])
-    assert err.value.returncode == 1
+    assert err.value.returncode == 2
     assert os.path.exists(get_input_path(out_filename)) is False
 
 

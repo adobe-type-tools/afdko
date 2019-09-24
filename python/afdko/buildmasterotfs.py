@@ -99,8 +99,12 @@ def build_masters(opts):
         master_path = os.path.join(dsDir, master_path)
         otf_path = f"{os.path.splitext(master_path)[0]}.otf"
 
-        makeotf(['-nshw', '-f', master_path, '-o', otf_path,
-                 '-r', '-nS'] + opts.mkot)
+        result = makeotf(['-nshw', '-f', master_path, '-o', otf_path,
+                          '-r', '-nS'] + opts.mkot)
+
+        if result:
+            raise Exception(f'makeotf return value: {result}')
+
         logger.info(f"Built OTF font for {master_path}")
         generalizeCFF(otf_path)
 
