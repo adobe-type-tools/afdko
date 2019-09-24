@@ -34,7 +34,7 @@ from afdko.fdkutils import (
 )
 from afdko.makeotf import main as makeotf
 
-__version__ = '1.9.3'
+__version__ = '1.10.0'
 
 logger = logging.getLogger(__name__)
 
@@ -93,24 +93,16 @@ def build_masters(opts):
     master_paths = [s.path for s in ds.sources]
 
     logger.info("Building local OTFs for master font paths...")
-    curDir = os.getcwd()
     dsDir = os.path.dirname(opts.dsPath)
 
     for master_path in master_paths:
         master_path = os.path.join(dsDir, master_path)
-        masterDir = os.path.dirname(master_path)
-        ufoName = os.path.basename(master_path)
-        otfName = os.path.splitext(ufoName)[0]
-        otfName = f"{otfName}.otf"
+        otf_path = f"{os.path.splitext(master_path)[0]}.otf"
 
-        if masterDir:
-            os.chdir(masterDir)
-
-        makeotf(['-nshw', '-f', ufoName, '-o', otfName,
+        makeotf(['-nshw', '-f', master_path, '-o', otf_path,
                  '-r', '-nS'] + opts.mkot)
         logger.info(f"Built OTF font for {master_path}")
-        generalizeCFF(otfName)
-        os.chdir(curDir)
+        generalizeCFF(otf_path)
 
 
 def get_options(args):
