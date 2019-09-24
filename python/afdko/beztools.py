@@ -1207,12 +1207,14 @@ class CFFFontData:
 					tf.write(data)
 					tf.close()
 
-			elif  fontType == 2: # PS.
+			elif  2 <= fontType <= 3: # PS (PFA or PFB)
 				tf = open(tempPath, "wb")
 				tf.write(data)
 				tf.close()
 				finalPath = outFilePath
 				command="tx  -t1 -std \"%s\" \"%s\" 2>&1" % (tempPath, outFilePath)
+				if fontType == 3:  # PFB
+					command = command.replace(" -t1 ", " -t1 -pfb ")
 				report = fdkutils.runShellCmd(command)
 				self.logMsg(report)
 				if "fatal" in report:

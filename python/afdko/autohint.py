@@ -987,7 +987,11 @@ def openOpenTypeFile(path, outFilePath):
 			fontType = 1
 			tempPathCFF = path
 		else:  # It is a PS file. Convert to CFF.
-			fontType =  2
+			if head[0:2] == b'\x80\x01':  # PFB
+				fontType = 3
+			else:  # PFA
+				fontType = 2
+
 			print("Converting Type1 font to temp CFF font file...")
 			command="tx  -cff +b -std \"%s\" \"%s\" 2>&1" % (path, tempPathCFF)
 			report = fdkutils.runShellCmd(command)
