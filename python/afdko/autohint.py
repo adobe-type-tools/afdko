@@ -2,7 +2,7 @@ __copyright__ = """Copyright 2016 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-autohint  AutoHinting program v1.6 Aug 28 2018
+autohint  AutoHinting program v1.6.1 Sep 25 2019
 autohint -h
 autohint -u
 autohint -hfd
@@ -1039,6 +1039,11 @@ def hintFile(options):
 		fontData.allowDecimalCoords = options.allowDecimalCoords
 		if options.writeToDefaultLayer and hasattr(fontData, "setWriteToDefault"): # UFO fonts only
 			fontData.setWriteToDefault()
+			# Check for processed glyphs directory and delete if present
+			pgd = os.path.join(path, "glyphs.com.adobe.type.processedglyphs")
+			if os.path.isdir(pgd):
+				shutil.rmtree(pgd)
+
 	except (IOError, OSError):
 		logMsg( traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])[-1])
 		raise ACFontError("Error opening or reading from font file <%s>." % fontFileName)

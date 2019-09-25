@@ -16,10 +16,10 @@ from psautohint.ufoFont import (norm_float, HashPointPen,
 
 from afdko import convertfonttocid, fdkutils
 
-__version__ = '1.34.5'
+__version__ = '1.34.6'
 
 __doc__ = """
-ufotools.py v1.34.5 Aug 13 2019
+ufotools.py v1.34.6 Sep 24 2019
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -372,6 +372,7 @@ kPointName = "name"
 # Hint stuff
 kStackLimit = 46
 kStemLimit = 96
+kHashIdPlaceholder = "HASH_ID_PLACEHOLDER"
 
 COMP_TRANSFORM = OrderedDict([
     ('xScale', '1'),
@@ -1752,14 +1753,6 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
     if (seenHints) or (len(flexList) > 0):
         hintInfoDict = XMLElement("dict")
 
-        idItem = XMLElement("key")
-        idItem.text = "id"
-        hintInfoDict.append(idItem)
-
-        idString = XMLElement("string")
-        idString.text = "id"
-        hintInfoDict.append(idString)
-
         hintSetListItem = XMLElement("key")
         hintSetListItem.text = kHintSetListName
         hintInfoDict.append(hintSetListItem)
@@ -1779,6 +1772,17 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
             flexArray = XMLElement("array")
             hintInfoDict.append(flexArray)
             addFlexHint(flexList, flexArray)
+
+        # JH 24 Sep 2019
+        # hash now goes at end of glyphDict to match psautohint
+        idItem = XMLElement("key")
+        idItem.text = "id"
+        hintInfoDict.append(idItem)
+
+        idString = XMLElement("string")
+        idString.text = kHashIdPlaceholder
+        hintInfoDict.append(idString)
+
     return newOutline, hintInfoDict
 
 
@@ -1904,9 +1908,14 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
 
         glyphDictItem.append(hintInfoDict)
 
+        # As of September, 2019, the hash should be at the end of the glyph
+        # dict, so we iterate backwards from the end until we find the
+        # placeholder, then set to newGlyphHash
         childList = list(hintInfoDict)
-        idValue = childList[1]
-        idValue.text = newGlyphHash
+        for child in childList[::-1]:
+            if getattr(child, 'text', "") == kHashIdPlaceholder:
+                child.text = newGlyphHash
+                break
 
     addWhiteSpace(glifXML, 0)
     return glifXML
