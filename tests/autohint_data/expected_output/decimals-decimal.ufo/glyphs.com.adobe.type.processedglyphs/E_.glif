@@ -25,8 +25,6 @@
     <dict>
       <key>com.adobe.type.autohint.v2</key>
       <dict>
-        <key>id</key>
-        <string>w527l720l382.40l382.456.8l138.456.8l138.4247.2l337.6247.2l337.6304l138.4304l138.4468.8l374.4468.8l374.4524.8l72524.8</string>
         <key>hintSetList</key>
         <array>
           <dict>
@@ -41,6 +39,8 @@
             </array>
           </dict>
         </array>
+        <key>id</key>
+        <string>w527l720l382.40l382.456.8l138.456.8l138.4247.2l337.6247.2l337.6304l138.4304l138.4468.8l374.4468.8l374.4524.8l72524.8</string>
       </dict>
     </dict>
   </lib>

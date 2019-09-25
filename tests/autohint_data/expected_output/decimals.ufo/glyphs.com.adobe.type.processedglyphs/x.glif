@@ -38,8 +38,6 @@
     <dict>
       <key>com.adobe.type.autohint.v2</key>
       <dict>
-        <key>id</key>
-        <string>f630063fa40f1b39a41885d306e8bb05a1b3bd45bb99d9abccf062190984497504c3e44c810526b9179dc540f9d53aee3cc9ea17aaf2624b95bc3045561b95e8</string>
         <key>hintSetList</key>
         <array>
           <dict>
@@ -52,6 +50,8 @@
             </array>
           </dict>
         </array>
+        <key>id</key>
+        <string>f630063fa40f1b39a41885d306e8bb05a1b3bd45bb99d9abccf062190984497504c3e44c810526b9179dc540f9d53aee3cc9ea17aaf2624b95bc3045561b95e8</string>
       </dict>
     </dict>
   </lib>
