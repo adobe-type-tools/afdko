@@ -128,6 +128,13 @@ def get_options(args):
              'Use -vv for debug mode'
     )
     parser.add_argument(
+        MKOT_OPT,
+        metavar='OPTIONS',
+        help="comma-separated set of 'makeotf' options",
+        type=_split_makeotf_options,
+        default=[]
+    )
+    parser.add_argument(
         '-d',
         '--designspace',
         metavar='PATH',
@@ -135,13 +142,6 @@ def get_options(args):
         type=validate_path,
         help='path to design space file',
         required=True
-    )
-    parser.add_argument(
-        MKOT_OPT,
-        metavar='OPTIONS',
-        help="comma-separated set of 'makeotf' options",
-        type=_split_makeotf_options,
-        default=[]
     )
     options = parser.parse_args(args)
 
