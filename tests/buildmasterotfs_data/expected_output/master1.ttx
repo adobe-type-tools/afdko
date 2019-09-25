@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont sfntVersion="OTTO" ttLibVersion="4.0">
+
+  <GlyphOrder>
+    <!-- The 'id' attribute is only for humans; it is ignored when parsed. -->
+    <GlyphID id="0" name=".notdef"/>
+    <GlyphID id="1" name="a"/>
+  </GlyphOrder>
+
+  <head>
+    <!-- Most of this table will be recalculated by the compiler -->
+    <tableVersion value="1.0"/>
+    <fontRevision value="1.0"/>
+    <checkSumAdjustment value="0x610fd426"/>
+    <magicNumber value="0x5f0f3cf5"/>
+    <flags value="00000000 00000011"/>
+    <unitsPerEm value="1000"/>
+    <created value="Tue Sep 24 16:44:16 2019"/>
+    <modified value="Tue Sep 24 16:44:16 2019"/>
+    <xMin value="25"/>
+    <yMin value="-16"/>
+    <xMax value="548"/>
+    <yMax value="503"/>
+    <macStyle value="00000000 00000000"/>
+    <lowestRecPPEM value="3"/>
+    <fontDirectionHint value="2"/>
+    <indexToLocFormat value="0"/>
+    <glyphDataFormat value="0"/>
+  </head>
+
+  <hhea>
+    <tableVersion value="0x00010000"/>
+    <ascent value="503"/>
+    <descent value="-497"/>
+    <lineGap value="200"/>
+    <advanceWidthMax value="540"/>
+    <minLeftSideBearing value="25"/>
+    <minRightSideBearing value="-8"/>
+    <xMaxExtent value="548"/>
+    <caretSlopeRise value="1000"/>
+    <caretSlopeRun value="-35"/>
+    <caretOffset value="0"/>
+    <reserved0 value="0"/>
+    <reserved1 value="0"/>
+    <reserved2 value="0"/>
+    <reserved3 value="0"/>
+    <metricDataFormat value="0"/>
+    <numberOfHMetrics value="2"/>
+  </hhea>
+
+  <maxp>
+    <tableVersion value="0x5000"/>
+    <numGlyphs value="2"/>
+  </maxp>
+
+  <OS_2>
+    <!-- The fields 'usFirstCharIndex' and 'usLastCharIndex'
+         will be recalculated by the compiler -->
+    <version value="3"/>
+    <xAvgCharWidth value="520"/>
+    <usWeightClass value="400"/>
+    <usWidthClass value="5"/>
+    <fsType value="00000000 00000100"/>
+    <ySubscriptXSize value="650"/>
+    <ySubscriptYSize value="600"/>
+    <ySubscriptXOffset value="3"/>
+    <ySubscriptYOffset value="75"/>
+    <ySuperscriptXSize value="650"/>
+    <ySuperscriptYSize value="600"/>
+    <ySuperscriptXOffset value="-12"/>
+    <ySuperscriptYOffset value="350"/>
+    <yStrikeoutSize value="81"/>
+    <yStrikeoutPosition value="220"/>
+    <sFamilyClass value="0"/>
+    <panose>
+      <bFamilyType value="0"/>
+      <bSerifStyle value="0"/>
+      <bWeight value="5"/>
+      <bProportion value="0"/>
+      <bContrast value="0"/>
+      <bStrokeVariation value="0"/>
+      <bArmStyle value="0"/>
+      <bLetterForm value="0"/>
+      <bMidline value="0"/>
+      <bXHeight value="0"/>
+    </panose>
+    <ulUnicodeRange1 value="00000000 00000000 00000000 00000000"/>
+    <ulUnicodeRange2 value="00000000 00000000 00000000 00000000"/>
+    <ulUnicodeRange3 value="00000000 00000000 00000000 00000000"/>
+    <ulUnicodeRange4 value="00000000 00000000 00000000 00000000"/>
+    <achVendID value="ADBE"/>
+    <fsSelection value="00000000 01000000"/>
+    <usFirstCharIndex value="97"/>
+    <usLastCharIndex value="97"/>
+    <sTypoAscender value="503"/>
+    <sTypoDescender value="-497"/>
+    <sTypoLineGap value="200"/>
+    <usWinAscent value="984"/>
+    <usWinDescent value="16"/>
+    <ulCodePageRange1 value="00000000 00000000 00000000 00000001"/>
+    <ulCodePageRange2 value="00000000 00000000 00000000 00000000"/>
+    <sxHeight value="0"/>
+    <sCapHeight value="0"/>
+    <usDefaultChar value="0"/>
+    <usBreakChar value="32"/>
+    <usMaxContext value="0"/>
+  </OS_2>
+
+  <name>
+    <namerecord nameID="1" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Source Serif Variable
+    </namerecord>
+    <namerecord nameID="2" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Regular
+    </namerecord>
+    <namerecord nameID="3" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      1.000;ADBE;SourceSerif_Black
+    </namerecord>
+    <namerecord nameID="4" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Source Serif Variable
+    </namerecord>
+    <namerecord nameID="5" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Version 1.000;hotconv 1.0.111;makeotfexe 2.5.65597
+    </namerecord>
+    <namerecord nameID="6" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      SourceSerif_Black
+    </namerecord>
+    <namerecord nameID="1" platformID="3" platEncID="1" langID="0x409">
+      Source Serif Variable
+    </namerecord>
+    <namerecord nameID="2" platformID="3" platEncID="1" langID="0x409">
+      Regular
+    </namerecord>
+    <namerecord nameID="3" platformID="3" platEncID="1" langID="0x409">
+      1.000;ADBE;SourceSerif_Black
+    </namerecord>
+    <namerecord nameID="4" platformID="3" platEncID="1" langID="0x409">
+      Source Serif Variable
+    </namerecord>
+    <namerecord nameID="5" platformID="3" platEncID="1" langID="0x409">
+      Version 1.000;hotconv 1.0.111;makeotfexe 2.5.65597
+    </namerecord>
+    <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
+      SourceSerif_Black
+    </namerecord>
+  </name>
+
+  <cmap>
+    <tableVersion version="0"/>
+    <cmap_format_4 platformID="0" platEncID="3" language="0">
+      <map code="0x61" name="a"/><!-- LATIN SMALL LETTER A -->
+    </cmap_format_4>
+    <cmap_format_6 platformID="1" platEncID="0" language="0">
+      <map code="0x61" name="a"/>
+    </cmap_format_6>
+    <cmap_format_4 platformID="3" platEncID="1" language="0">
+      <map code="0x61" name="a"/><!-- LATIN SMALL LETTER A -->
+    </cmap_format_4>
+  </cmap>
+
+  <post>
+    <formatType value="3.0"/>
+    <italicAngle value="2.0"/>
+    <underlinePosition value="-55"/>
+    <underlineThickness value="81"/>
+    <isFixedPitch value="0"/>
+    <minMemType42 value="0"/>
+    <maxMemType42 value="0"/>
+    <minMemType1 value="0"/>
+    <maxMemType1 value="0"/>
+  </post>
+
+  <CFF>
+    <major value="1"/>
+    <minor value="0"/>
+    <CFFFont name="SourceSerif_Black">
+      <version value="1.0"/>
+      <Notice value="Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries."/>
+      <Copyright value="Copyright 2014 - 2017 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name 'Source'."/>
+      <FamilyName value="Source Serif Variable"/>
+      <isFixedPitch value="0"/>
+      <ItalicAngle value="2"/>
+      <UnderlinePosition value="-95"/>
+      <UnderlineThickness value="81"/>
+      <PaintType value="0"/>
+      <CharstringType value="2"/>
+      <FontMatrix value="0.001 0 0 0.001 0 0"/>
+      <FontBBox value="25 -16 548 503"/>
+      <StrokeWidth value="0"/>
+      <!-- charset is dumped separately as the 'GlyphOrder' element -->
+      <Encoding name="StandardEncoding"/>
+      <Private>
+        <BlueValues value="-20 0 487 503 515 531 536 552 624 640 652 672 711 731"/>
+        <OtherBlues value="-232 -222"/>
+        <FamilyBlues value="-15 0 475 488 527 540 549 563 646 659 669 684 729 749"/>
+        <FamilyOtherBlues value="-259 -249"/>
+        <BlueScale value="0.0675"/>
+        <BlueShift value="7"/>
+        <BlueFuzz value="5"/>
+        <StdHW value="60"/>
+        <StdVW value="190"/>
+        <StemSnapH value="60 74"/>
+        <StemSnapV value="190 200"/>
+        <ForceBold value="0"/>
+        <LanguageGroup value="0"/>
+        <ExpansionFactor value="0.06"/>
+        <initialRandomSeed value="0"/>
+        <defaultWidthX value="0"/>
+        <nominalWidthX value="0"/>
+      </Private>
+      <CharStrings>
+        <CharString name=".notdef">
+          500 endchar
+        </CharString>
+        <CharString name="a">
+          540 25 113 rmoveto
+          0 -82 51 -47 79 0 rrcurveto
+          77 0 30 32 44 48 rrcurveto
+          47 52 rlineto
+          -9 12 rlineto
+          -48 -36 rlineto
+          -20 -15 -14 -6 -13 0 rrcurveto
+          -29 0 -23 24 0 49 rrcurveto
+          0 54 37 32 28 13 rrcurveto
+          29 14 52 13 48 13 rrcurveto
+          0 44 rlineto
+          -46 -12 -74 -19 -41 -11 rrcurveto
+          -162 -43 -43 -52 0 -77 rrcurveto
+          389 -129 rmoveto
+          71 0 39 24 24 61 rrcurveto
+          -29 16 rlineto
+          -12 -18 -7 -4 -8 0 rrcurveto
+          -11 0 -6 7 0 10 rrcurveto
+          0 229 rlineto
+          0 137 -51 57 -138 0 rrcurveto
+          -161 0 -83 -60 0 -86 rrcurveto
+          10 -36 27 -18 39 0 rrcurveto
+          43 0 39 31 0 81 rrcurveto
+          0 63 rlineto
+          -80 -42 rlineto
+          46 10 24 3 25 0 rrcurveto
+          63 0 13 -27 0 -85 rrcurveto
+          0 -259 rlineto
+          12 -60 38 -34 73 0 rrcurveto
+          endchar
+        </CharString>
+      </CharStrings>
+    </CFFFont>
+
+    <GlobalSubrs>
+      <!-- The 'index' attribute is only for humans; it is ignored when parsed. -->
+    </GlobalSubrs>
+  </CFF>
+
+  <hmtx>
+    <mtx name=".notdef" width="500" lsb="0"/>
+    <mtx name="a" width="540" lsb="25"/>
+  </hmtx>
+
+  <DSIG>
+    <!-- note that the Digital Signature will be invalid after recompilation! -->
+    <tableHeader flag="0x0" numSigs="0" version="1"/>
+  </DSIG>
+
+</ttFont>
