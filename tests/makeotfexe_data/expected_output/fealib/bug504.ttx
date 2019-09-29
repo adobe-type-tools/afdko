@@ -33,7 +33,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0">
+        <SingleSubst index="0" Format="2">
           <Substitution in="a" out="T"/>
           <Substitution in="b" out="E"/>
           <Substitution in="c" out="S"/>

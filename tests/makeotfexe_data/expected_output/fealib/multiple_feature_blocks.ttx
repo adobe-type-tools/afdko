@@ -11,7 +11,7 @@
           <DefaultLangSys>
             <ReqFeatureIndex value="65535"/>
             <!-- FeatureCount=1 -->
-            <FeatureIndex index="0" value="1"/>
+            <FeatureIndex index="0" value="0"/>
           </DefaultLangSys>
           <!-- LangSysCount=0 -->
         </Script>
@@ -30,19 +30,20 @@
             <LangSys>
               <ReqFeatureIndex value="65535"/>
               <!-- FeatureCount=1 -->
-              <FeatureIndex index="0" value="0"/>
+              <FeatureIndex index="0" value="2"/>
             </LangSys>
           </LangSysRecord>
         </Script>
       </ScriptRecord>
     </ScriptList>
     <FeatureList>
-      <!-- FeatureCount=2 -->
+      <!-- FeatureCount=3 -->
       <FeatureRecord index="0">
         <FeatureTag value="liga"/>
         <Feature>
-          <!-- LookupCount=1 -->
+          <!-- LookupCount=2 -->
           <LookupListIndex index="0" value="0"/>
+          <LookupListIndex index="1" value="1"/>
         </Feature>
       </FeatureRecord>
       <FeatureRecord index="1">
@@ -53,6 +54,13 @@
           <LookupListIndex index="1" value="1"/>
         </Feature>
       </FeatureRecord>
+      <FeatureRecord index="2">
+        <FeatureTag value="liga"/>
+        <Feature>
+          <!-- LookupCount=1 -->
+          <LookupListIndex index="0" value="0"/>
+        </Feature>
+      </FeatureRecord>
     </FeatureList>
     <LookupList>
       <!-- LookupCount=2 -->
@@ -60,7 +68,7 @@
         <LookupType value="4"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <LigatureSubst index="0">
+        <LigatureSubst index="0" Format="1">
           <LigatureSet glyph="f">
             <Ligature components="l" glyph="f_l"/>
           </LigatureSet>
@@ -70,7 +78,7 @@
         <LookupType value="4"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <LigatureSubst index="0">
+        <LigatureSubst index="0" Format="1">
           <LigatureSet glyph="f">
             <Ligature components="i" glyph="f_i"/>
           </LigatureSet>

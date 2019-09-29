@@ -2,17 +2,53 @@
 <ttFont>
 
   <name>
-    <namerecord nameID="256" platformID="3" platEncID="1" langID="0x409">
-      Feature description for MS Platform, script Unicode, language English
+    <namerecord nameID="1" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Untitled1
     </namerecord>
-    <namerecord nameID="256" platformID="3" platEncID="1" langID="0x411">
-      Feature description for MS Platform, script Unicode, language Japanese
+    <namerecord nameID="2" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Regular
+    </namerecord>
+    <namerecord nameID="3" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      1.000;UKWN;Untitled1
+    </namerecord>
+    <namerecord nameID="4" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Untitled1
+    </namerecord>
+    <namerecord nameID="5" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Version 1.000;hotconv 1.0.111;makeotfexe 2.5.65597 DEVELOPMENT
+    </namerecord>
+    <namerecord nameID="6" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Untitled1
     </namerecord>
     <namerecord nameID="256" platformID="1" platEncID="0" langID="0x0" unicode="True">
       Feature description for Apple Platform, script Roman, language unspecified
     </namerecord>
     <namerecord nameID="256" platformID="1" platEncID="1" langID="0xc" unicode="True">
       Feature description for Apple Platform, script Japanese, language Japanese
+    </namerecord>
+    <namerecord nameID="1" platformID="3" platEncID="1" langID="0x409">
+      Untitled1
+    </namerecord>
+    <namerecord nameID="2" platformID="3" platEncID="1" langID="0x409">
+      Regular
+    </namerecord>
+    <namerecord nameID="3" platformID="3" platEncID="1" langID="0x409">
+      1.000;UKWN;Untitled1
+    </namerecord>
+    <namerecord nameID="4" platformID="3" platEncID="1" langID="0x409">
+      Untitled1
+    </namerecord>
+    <namerecord nameID="5" platformID="3" platEncID="1" langID="0x409">
+      Version 1.000;hotconv 1.0.111;makeotfexe 2.5.65597 DEVELOPMENT
+    </namerecord>
+    <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
+      Untitled1
+    </namerecord>
+    <namerecord nameID="256" platformID="3" platEncID="1" langID="0x409">
+      Feature description for MS Platform, script Unicode, language English
+    </namerecord>
+    <namerecord nameID="256" platformID="3" platEncID="1" langID="0x411">
+      Feature description for MS Platform, script Unicode, language Japanese
     </namerecord>
   </name>
 
@@ -39,7 +75,7 @@
         <Feature>
           <FeatureParamsStylisticSet>
             <Version value="0"/>
-            <UINameID value="256"/>  <!-- Feature description for MS Platform, script Unicode, language English -->
+            <UINameID value="256"/>  <!-- Feature description for Apple Platform, script Roman, language unspecified -->
           </FeatureParamsStylisticSet>
           <!-- LookupCount=1 -->
           <LookupListIndex index="0" value="0"/>
@@ -52,7 +88,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0">
+        <SingleSubst index="0" Format="1">
           <Substitution in="A" out="B"/>
         </SingleSubst>
       </Lookup>

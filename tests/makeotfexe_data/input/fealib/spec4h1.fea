@@ -55,10 +55,9 @@ feature liga {
     # would not inherit the default rules for the script latn.
 } liga;
 
-# TODO(sascha): Uncomment once we support 'pos' statements.
-# feature kern {
-#     pos a y -150; 
-#     # [more pos statements]
-#     # All the rules in this feature will be grouped in a single lookup
-#     # that is is registered under all the language systems.
-# } kern;
+feature kern {
+    pos a y -150; 
+    # [more pos statements]
+    # All the rules in this feature will be grouped in a single lookup
+    # that is is registered under all the language systems.
+} kern;

@@ -34,7 +34,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0">
+        <SingleSubst index="0" Format="1">
           <Substitution in="A" out="A.alt1"/>
         </SingleSubst>
       </Lookup>
@@ -42,7 +42,7 @@
         <LookupType value="3"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <AlternateSubst index="0">
+        <AlternateSubst index="0" Format="1">
           <AlternateSet glyph="Eng">
             <Alternate glyph="Eng.alt1"/>
             <Alternate glyph="Eng.alt2"/>

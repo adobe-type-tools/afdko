@@ -33,7 +33,7 @@
         <LookupType value="4"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <LigatureSubst index="0">
+        <LigatureSubst index="0" Format="1">
           <LigatureSet glyph="c">
             <Ligature components="t" glyph="c_t"/>
           </LigatureSet>
@@ -46,7 +46,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0">
+        <SingleSubst index="0" Format="2">
           <Substitution in="n" out="n.end"/>
           <Substitution in="s" out="s.end"/>
         </SingleSubst>
@@ -57,7 +57,7 @@
         <!-- SubTableCount=2 -->
         <ChainContextSubst index="0" Format="3">
           <!-- BacktrackGlyphCount=1 -->
-          <BacktrackCoverage index="0">
+          <BacktrackCoverage index="0" Format="1">
             <Glyph value="a"/>
             <Glyph value="e"/>
             <Glyph value="i"/>
@@ -65,13 +65,13 @@
             <Glyph value="u"/>
           </BacktrackCoverage>
           <!-- InputGlyphCount=3 -->
-          <InputCoverage index="0">
+          <InputCoverage index="0" Format="1">
             <Glyph value="f"/>
           </InputCoverage>
-          <InputCoverage index="1">
+          <InputCoverage index="1" Format="1">
             <Glyph value="i"/>
           </InputCoverage>
-          <InputCoverage index="2">
+          <InputCoverage index="2" Format="1">
             <Glyph value="n"/>
           </InputCoverage>
           <!-- LookAheadGlyphCount=0 -->
@@ -87,7 +87,7 @@
         </ChainContextSubst>
         <ChainContextSubst index="1" Format="3">
           <!-- BacktrackGlyphCount=1 -->
-          <BacktrackCoverage index="0">
+          <BacktrackCoverage index="0" Format="1">
             <Glyph value="a"/>
             <Glyph value="e"/>
             <Glyph value="i"/>
@@ -95,13 +95,13 @@
             <Glyph value="u"/>
           </BacktrackCoverage>
           <!-- InputGlyphCount=3 -->
-          <InputCoverage index="0">
+          <InputCoverage index="0" Format="1">
             <Glyph value="c"/>
           </InputCoverage>
-          <InputCoverage index="1">
+          <InputCoverage index="1" Format="1">
             <Glyph value="t"/>
           </InputCoverage>
-          <InputCoverage index="2">
+          <InputCoverage index="2" Format="1">
             <Glyph value="s"/>
           </InputCoverage>
           <!-- LookAheadGlyphCount=0 -->

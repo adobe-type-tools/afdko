@@ -33,10 +33,6 @@ feature kern {
 # According to the OpenType Feature File specification section 2.e.iv,
 # the following should be interpreted as vertical advance adjustment
 # because -100 (a value record format A) appears within a ‘vkrn’ feature.
-# However, the AFDKO makeotf tool v2.0.90 (built on Nov 19, 2015) still
-# makes it a horizontal advance adjustment.  In our implementation,
-# we follow the specification, so we produce different output than makeotf.
-# https://github.com/adobe-type-tools/afdko/issues/85
 feature vkrn {
     pos A -100;
 } vkrn;

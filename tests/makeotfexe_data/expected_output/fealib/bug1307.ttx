@@ -141,7 +141,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0">
+        <SingleSubst index="0" Format="1">
           <Substitution in="a" out="A"/>
         </SingleSubst>
       </Lookup>
@@ -149,7 +149,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0">
+        <SingleSubst index="0" Format="1">
           <Substitution in="b" out="B"/>
         </SingleSubst>
       </Lookup>
@@ -157,7 +157,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0">
+        <SingleSubst index="0" Format="1">
           <Substitution in="c" out="C"/>
         </SingleSubst>
       </Lookup>
@@ -165,7 +165,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0">
+        <SingleSubst index="0" Format="1">
           <Substitution in="d" out="D"/>
         </SingleSubst>
       </Lookup>
@@ -173,7 +173,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0">
+        <SingleSubst index="0" Format="1">
           <Substitution in="e" out="E"/>
         </SingleSubst>
       </Lookup>
@@ -181,7 +181,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0">
+        <SingleSubst index="0" Format="1">
           <Substitution in="f" out="F"/>
         </SingleSubst>
       </Lookup>
@@ -189,7 +189,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0">
+        <SingleSubst index="0" Format="1">
           <Substitution in="g" out="G"/>
         </SingleSubst>
       </Lookup>
@@ -197,7 +197,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0">
+        <SingleSubst index="0" Format="1">
           <Substitution in="h" out="H"/>
         </SingleSubst>
       </Lookup>
@@ -205,7 +205,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0">
+        <SingleSubst index="0" Format="1">
           <Substitution in="i" out="I"/>
         </SingleSubst>
       </Lookup>

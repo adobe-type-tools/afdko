@@ -36,7 +36,7 @@
         <ChainContextSubst index="0" Format="3">
           <!-- BacktrackGlyphCount=0 -->
           <!-- InputGlyphCount=1 -->
-          <InputCoverage index="0">
+          <InputCoverage index="0" Format="1">
             <Glyph value="A"/>
           </InputCoverage>
           <!-- LookAheadGlyphCount=0 -->
@@ -45,7 +45,7 @@
         <ChainContextSubst index="1" Format="3">
           <!-- BacktrackGlyphCount=0 -->
           <!-- InputGlyphCount=1 -->
-          <InputCoverage index="0">
+          <InputCoverage index="0" Format="1">
             <Glyph value="A"/>
             <Glyph value="A.sc"/>
             <Glyph value="A.alt1"/>
@@ -62,7 +62,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0">
+        <SingleSubst index="0" Format="2">
           <Substitution in="A" out="a"/>
           <Substitution in="A.alt1" out="a"/>
           <Substitution in="A.sc" out="a"/>

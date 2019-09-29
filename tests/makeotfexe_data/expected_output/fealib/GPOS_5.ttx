@@ -3,7 +3,7 @@
 
   <GDEF>
     <Version value="0x00010000"/>
-    <GlyphClassDef>
+    <GlyphClassDef Format="2">
       <ClassDef glyph="acute" class="3"/>
       <ClassDef glyph="c_t" class="2"/>
       <ClassDef glyph="cedilla" class="3"/>
@@ -49,14 +49,14 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
         <MarkLigPos index="0" Format="1">
-          <MarkCoverage>
+          <MarkCoverage Format="1">
             <Glyph value="grave"/>
-            <Glyph value="acute"/>
             <Glyph value="macron"/>
+            <Glyph value="acute"/>
             <Glyph value="cedilla"/>
             <Glyph value="ogonek"/>
           </MarkCoverage>
-          <LigatureCoverage>
+          <LigatureCoverage Format="1">
             <Glyph value="f_l"/>
             <Glyph value="c_t"/>
             <Glyph value="f_f_l"/>
@@ -76,14 +76,14 @@
               <Class value="0"/>
               <MarkAnchor Format="1">
                 <XCoordinate value="500"/>
-                <YCoordinate value="700"/>
+                <YCoordinate value="750"/>
               </MarkAnchor>
             </MarkRecord>
             <MarkRecord index="2">
               <Class value="0"/>
               <MarkAnchor Format="1">
                 <XCoordinate value="500"/>
-                <YCoordinate value="750"/>
+                <YCoordinate value="700"/>
               </MarkAnchor>
             </MarkRecord>
             <MarkRecord index="3">

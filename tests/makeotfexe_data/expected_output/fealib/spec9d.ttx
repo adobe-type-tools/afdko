@@ -10,7 +10,7 @@
     <minLeftSideBearing value="0"/>
     <minRightSideBearing value="0"/>
     <xMaxExtent value="0"/>
-    <caretSlopeRise value="0"/>
+    <caretSlopeRise value="1"/>
     <caretSlopeRun value="0"/>
     <caretOffset value="-50"/>
     <reserved0 value="0"/>
@@ -18,7 +18,7 @@
     <reserved2 value="0"/>
     <reserved3 value="0"/>
     <metricDataFormat value="0"/>
-    <numberOfHMetrics value="0"/>
+    <numberOfHMetrics value="1"/>
   </hhea>
 
 </ttFont>

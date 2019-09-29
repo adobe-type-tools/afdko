@@ -36,7 +36,7 @@
         <ChainContextSubst index="0" Format="3">
           <!-- BacktrackGlyphCount=0 -->
           <!-- InputGlyphCount=1 -->
-          <InputCoverage index="0">
+          <InputCoverage index="0" Format="1">
             <Glyph value="G"/>
           </InputCoverage>
           <!-- LookAheadGlyphCount=0 -->
@@ -49,7 +49,7 @@
         <ChainContextSubst index="1" Format="3">
           <!-- BacktrackGlyphCount=0 -->
           <!-- InputGlyphCount=1 -->
-          <InputCoverage index="0">
+          <InputCoverage index="0" Format="1">
             <Glyph value="H"/>
           </InputCoverage>
           <!-- LookAheadGlyphCount=0 -->
@@ -62,7 +62,7 @@
         <ChainContextSubst index="2" Format="3">
           <!-- BacktrackGlyphCount=0 -->
           <!-- InputGlyphCount=1 -->
-          <InputCoverage index="0">
+          <InputCoverage index="0" Format="1">
             <Glyph value="G"/>
           </InputCoverage>
           <!-- LookAheadGlyphCount=0 -->
@@ -75,7 +75,7 @@
         <ChainContextSubst index="3" Format="3">
           <!-- BacktrackGlyphCount=0 -->
           <!-- InputGlyphCount=1 -->
-          <InputCoverage index="0">
+          <InputCoverage index="0" Format="1">
             <Glyph value="H"/>
           </InputCoverage>
           <!-- LookAheadGlyphCount=0 -->
@@ -90,7 +90,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0">
+        <SingleSubst index="0" Format="1">
           <Substitution in="G" out="G.swash"/>
           <Substitution in="H" out="H.swash"/>
         </SingleSubst>
@@ -99,7 +99,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0">
+        <SingleSubst index="0" Format="2">
           <Substitution in="G" out="g"/>
           <Substitution in="H" out="H.swash"/>
         </SingleSubst>

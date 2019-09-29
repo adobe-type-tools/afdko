@@ -34,10 +34,10 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
         <PairPos index="0" Format="1">
-          <Coverage>
+          <Coverage Format="1">
             <Glyph value="y"/>
-            <Glyph value="ydieresis"/>
             <Glyph value="yacute"/>
+            <Glyph value="ydieresis"/>
           </Coverage>
           <ValueFormat1 value="4"/>
           <ValueFormat2 value="0"/>
@@ -45,7 +45,7 @@
           <PairSet index="0">
             <!-- PairValueCount=3 -->
             <PairValueRecord index="0">
-              <SecondGlyph value="semicolon"/>
+              <SecondGlyph value="comma"/>
               <Value1 XAdvance="-100"/>
             </PairValueRecord>
             <PairValueRecord index="1">
@@ -53,14 +53,14 @@
               <Value1 XAdvance="-100"/>
             </PairValueRecord>
             <PairValueRecord index="2">
-              <SecondGlyph value="comma"/>
+              <SecondGlyph value="semicolon"/>
               <Value1 XAdvance="-100"/>
             </PairValueRecord>
           </PairSet>
           <PairSet index="1">
             <!-- PairValueCount=3 -->
             <PairValueRecord index="0">
-              <SecondGlyph value="semicolon"/>
+              <SecondGlyph value="comma"/>
               <Value1 XAdvance="-100"/>
             </PairValueRecord>
             <PairValueRecord index="1">
@@ -68,14 +68,14 @@
               <Value1 XAdvance="-100"/>
             </PairValueRecord>
             <PairValueRecord index="2">
-              <SecondGlyph value="comma"/>
+              <SecondGlyph value="semicolon"/>
               <Value1 XAdvance="-100"/>
             </PairValueRecord>
           </PairSet>
           <PairSet index="2">
             <!-- PairValueCount=3 -->
             <PairValueRecord index="0">
-              <SecondGlyph value="semicolon"/>
+              <SecondGlyph value="comma"/>
               <Value1 XAdvance="-100"/>
             </PairValueRecord>
             <PairValueRecord index="1">
@@ -83,7 +83,7 @@
               <Value1 XAdvance="-100"/>
             </PairValueRecord>
             <PairValueRecord index="2">
-              <SecondGlyph value="comma"/>
+              <SecondGlyph value="semicolon"/>
               <Value1 XAdvance="-100"/>
             </PairValueRecord>
           </PairSet>
