@@ -35,13 +35,13 @@
         <!-- SubTableCount=1 -->
         <ChainContextSubst index="0" Format="3">
           <!-- BacktrackGlyphCount=1 -->
-          <BacktrackCoverage index="0">
+          <BacktrackCoverage index="0" Format="1">
             <Glyph value="a"/>
             <Glyph value="e"/>
             <Glyph value="n"/>
           </BacktrackCoverage>
           <!-- InputGlyphCount=1 -->
-          <InputCoverage index="0">
+          <InputCoverage index="0" Format="1">
             <Glyph value="d"/>
           </InputCoverage>
           <!-- LookAheadGlyphCount=0 -->
@@ -56,7 +56,7 @@
         <LookupType value="1"/>
         <LookupFlag value="7"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0">
+        <SingleSubst index="0" Format="1">
           <Substitution in="d" out="d.alt"/>
         </SingleSubst>
       </Lookup>

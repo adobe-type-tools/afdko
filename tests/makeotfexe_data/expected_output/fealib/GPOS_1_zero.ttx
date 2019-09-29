@@ -34,13 +34,13 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=2 -->
         <SinglePos index="0" Format="1">
-          <Coverage>
+          <Coverage Format="1">
             <Glyph value="zero"/>
           </Coverage>
           <ValueFormat value="0"/>
         </SinglePos>
         <SinglePos index="1" Format="1">
-          <Coverage>
+          <Coverage Format="1">
             <Glyph value="four"/>
           </Coverage>
           <ValueFormat value="4"/>

@@ -34,15 +34,14 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
         <CursivePos index="0" Format="1">
-          <Coverage>
+          <Coverage Format="2">
             <Glyph value="zero"/>
             <Glyph value="one"/>
             <Glyph value="two"/>
             <Glyph value="three"/>
             <Glyph value="four"/>
-            <Glyph value="five"/>
           </Coverage>
-          <!-- EntryExitCount=6 -->
+          <!-- EntryExitCount=5 -->
           <EntryExitRecord index="0">
           </EntryExitRecord>
           <EntryExitRecord index="1">
@@ -53,7 +52,7 @@
             <ExitAnchor Format="2">
               <XCoordinate value="3"/>
               <YCoordinate value="4"/>
-              <AnchorPoint value="2"/>
+              <AnchorPoint value="0"/>
             </ExitAnchor>
           </EntryExitRecord>
           <EntryExitRecord index="2">
@@ -81,29 +80,6 @@
             <ExitAnchor Format="1">
               <XCoordinate value="3"/>
               <YCoordinate value="4"/>
-            </ExitAnchor>
-          </EntryExitRecord>
-          <EntryExitRecord index="5">
-            <EntryAnchor Format="3">
-              <XCoordinate value="124"/>
-              <YCoordinate value="-4"/>
-              <XDeviceTable>
-                <StartSize value="8"/>
-                <EndSize value="9"/>
-                <DeltaFormat value="2"/>
-                <DeltaValue value="[1, 2]"/>
-              </XDeviceTable>
-              <YDeviceTable>
-                <StartSize value="7"/>
-                <EndSize value="7"/>
-                <DeltaFormat value="2"/>
-                <DeltaValue value="[3]"/>
-              </YDeviceTable>
-            </EntryAnchor>
-            <ExitAnchor Format="2">
-              <XCoordinate value="3"/>
-              <YCoordinate value="4"/>
-              <AnchorPoint value="2"/>
             </ExitAnchor>
           </EntryExitRecord>
         </CursivePos>

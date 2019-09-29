@@ -34,11 +34,11 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=2 -->
         <PairPos index="0" Format="1">
-          <Coverage>
+          <Coverage Format="1">
             <Glyph value="f"/>
             <Glyph value="y"/>
-            <Glyph value="ydieresis"/>
             <Glyph value="yacute"/>
+            <Glyph value="ydieresis"/>
           </Coverage>
           <ValueFormat1 value="4"/>
           <ValueFormat2 value="0"/>
@@ -73,16 +73,16 @@
           </PairSet>
         </PairPos>
         <PairPos index="1" Format="2">
-          <Coverage>
+          <Coverage Format="1">
             <Glyph value="y"/>
-            <Glyph value="ydieresis"/>
             <Glyph value="yacute"/>
+            <Glyph value="ydieresis"/>
           </Coverage>
           <ValueFormat1 value="4"/>
           <ValueFormat2 value="0"/>
-          <ClassDef1>
+          <ClassDef1 Format="2">
           </ClassDef1>
-          <ClassDef2>
+          <ClassDef2 Format="2">
             <ClassDef glyph="comma" class="1"/>
             <ClassDef glyph="period" class="1"/>
             <ClassDef glyph="semicolon" class="1"/>
@@ -91,6 +91,7 @@
           <!-- Class2Count=2 -->
           <Class1Record index="0">
             <Class2Record index="0">
+              <Value1 XAdvance="0"/>
             </Class2Record>
             <Class2Record index="1">
               <Value1 XAdvance="-100"/>

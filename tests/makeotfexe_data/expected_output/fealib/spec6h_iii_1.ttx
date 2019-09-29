@@ -35,19 +35,19 @@
         <!-- SubTableCount=1 -->
         <ChainContextPos index="0" Format="3">
           <!-- BacktrackGlyphCount=1 -->
-          <BacktrackCoverage index="0">
-            <Glyph value="quotedblleft"/>
+          <BacktrackCoverage index="0" Format="1">
             <Glyph value="quoteleft"/>
+            <Glyph value="quotedblleft"/>
           </BacktrackCoverage>
           <!-- InputGlyphCount=1 -->
-          <InputCoverage index="0">
+          <InputCoverage index="0" Format="1">
             <Glyph value="T"/>
             <Glyph value="Y"/>
           </InputCoverage>
           <!-- LookAheadGlyphCount=1 -->
-          <LookAheadCoverage index="0">
-            <Glyph value="quotedblright"/>
+          <LookAheadCoverage index="0" Format="1">
             <Glyph value="quoteright"/>
+            <Glyph value="quotedblright"/>
           </LookAheadCoverage>
           <!-- PosCount=1 -->
           <PosLookupRecord index="0">
@@ -61,7 +61,7 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="1">
-          <Coverage>
+          <Coverage Format="1">
             <Glyph value="T"/>
             <Glyph value="Y"/>
           </Coverage>

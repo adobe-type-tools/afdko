@@ -57,7 +57,7 @@
         <LookupType value="4"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <LigatureSubst index="0">
+        <LigatureSubst index="0" Format="1">
           <LigatureSet glyph="f">
             <Ligature components="f,i" glyph="f_f_i"/>
             <Ligature components="i" glyph="f_i"/>
@@ -68,7 +68,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0">
+        <SingleSubst index="0" Format="1">
           <Substitution in="A" out="A.sc"/>
         </SingleSubst>
       </Lookup>

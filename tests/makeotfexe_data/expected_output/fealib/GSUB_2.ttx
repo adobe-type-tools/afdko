@@ -41,7 +41,7 @@
         <LookupType value="2"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <MultipleSubst index="0">
+        <MultipleSubst index="0" Format="1">
           <Substitution in="c_t" out="c,t"/>
           <Substitution in="f_f_i" out="f,f,i"/>
           <Substitution in="f_i" out="f,i"/>
@@ -51,7 +51,7 @@
         <LookupType value="2"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <MultipleSubst index="0">
+        <MultipleSubst index="0" Format="1">
           <Substitution in="c_t" out="c,t"/>
           <Substitution in="f_f_i" out="f,f,i"/>
           <Substitution in="f_i" out="f,i"/>

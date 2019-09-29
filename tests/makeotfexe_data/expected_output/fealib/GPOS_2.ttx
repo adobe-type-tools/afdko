@@ -24,8 +24,8 @@
         <FeatureTag value="kern"/>
         <Feature>
           <!-- LookupCount=2 -->
-          <LookupListIndex index="0" value="1"/>
-          <LookupListIndex index="1" value="0"/>
+          <LookupListIndex index="0" value="0"/>
+          <LookupListIndex index="1" value="1"/>
         </Feature>
       </FeatureRecord>
       <FeatureRecord index="1">
@@ -43,7 +43,7 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=2 -->
         <PairPos index="0" Format="1">
-          <Coverage>
+          <Coverage Format="1">
             <Glyph value="v"/>
           </Coverage>
           <ValueFormat1 value="4"/>
@@ -58,16 +58,16 @@
           </PairSet>
         </PairPos>
         <PairPos index="1" Format="2">
-          <Coverage>
+          <Coverage Format="1">
             <Glyph value="D"/>
             <Glyph value="O"/>
             <Glyph value="Q"/>
           </Coverage>
           <ValueFormat1 value="4"/>
           <ValueFormat2 value="0"/>
-          <ClassDef1>
+          <ClassDef1 Format="2">
           </ClassDef1>
-          <ClassDef2>
+          <ClassDef2 Format="1">
             <ClassDef glyph="T" class="1"/>
             <ClassDef glyph="V" class="1"/>
             <ClassDef glyph="W" class="1"/>
@@ -76,6 +76,7 @@
           <!-- Class2Count=2 -->
           <Class1Record index="0">
             <Class2Record index="0">
+              <Value1 XAdvance="0"/>
             </Class2Record>
             <Class2Record index="1">
               <Value1 XAdvance="-26"/>
@@ -88,7 +89,7 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=2 -->
         <PairPos index="0" Format="1">
-          <Coverage>
+          <Coverage Format="1">
             <Glyph value="T"/>
             <Glyph value="X"/>
             <Glyph value="Y"/>
@@ -143,7 +144,7 @@
           </PairSet>
         </PairPos>
         <PairPos index="1" Format="1">
-          <Coverage>
+          <Coverage Format="1">
             <Glyph value="Y"/>
           </Coverage>
           <ValueFormat1 value="15"/>
@@ -163,7 +164,7 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
         <PairPos index="0" Format="1">
-          <Coverage>
+          <Coverage Format="1">
             <Glyph value="T"/>
           </Coverage>
           <ValueFormat1 value="8"/>

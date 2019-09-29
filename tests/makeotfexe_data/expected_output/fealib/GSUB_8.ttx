@@ -34,32 +34,32 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=3 -->
         <ReverseChainSingleSubst index="0" Format="1">
-          <Coverage>
+          <Coverage Format="1">
             <Glyph value="q"/>
           </Coverage>
           <!-- BacktrackGlyphCount=3 -->
-          <BacktrackCoverage index="0">
+          <BacktrackCoverage index="0" Format="1">
             <Glyph value="C"/>
             <Glyph value="c"/>
           </BacktrackCoverage>
-          <BacktrackCoverage index="1">
+          <BacktrackCoverage index="1" Format="1">
             <Glyph value="B"/>
             <Glyph value="b"/>
           </BacktrackCoverage>
-          <BacktrackCoverage index="2">
+          <BacktrackCoverage index="2" Format="1">
             <Glyph value="A"/>
             <Glyph value="a"/>
           </BacktrackCoverage>
           <!-- LookAheadGlyphCount=3 -->
-          <LookAheadCoverage index="0">
+          <LookAheadCoverage index="0" Format="1">
             <Glyph value="D"/>
             <Glyph value="d"/>
           </LookAheadCoverage>
-          <LookAheadCoverage index="1">
+          <LookAheadCoverage index="1" Format="1">
             <Glyph value="E"/>
             <Glyph value="e"/>
           </LookAheadCoverage>
-          <LookAheadCoverage index="2">
+          <LookAheadCoverage index="2" Format="1">
             <Glyph value="F"/>
             <Glyph value="f"/>
           </LookAheadCoverage>
@@ -67,7 +67,7 @@
           <Substitute index="0" value="Q"/>
         </ReverseChainSingleSubst>
         <ReverseChainSingleSubst index="1" Format="1">
-          <Coverage>
+          <Coverage Format="2">
             <Glyph value="s"/>
             <Glyph value="t"/>
             <Glyph value="u"/>
@@ -78,28 +78,28 @@
             <Glyph value="z"/>
           </Coverage>
           <!-- BacktrackGlyphCount=3 -->
-          <BacktrackCoverage index="0">
+          <BacktrackCoverage index="0" Format="1">
             <Glyph value="C"/>
             <Glyph value="c"/>
           </BacktrackCoverage>
-          <BacktrackCoverage index="1">
+          <BacktrackCoverage index="1" Format="1">
             <Glyph value="B"/>
             <Glyph value="b"/>
           </BacktrackCoverage>
-          <BacktrackCoverage index="2">
+          <BacktrackCoverage index="2" Format="1">
             <Glyph value="A"/>
             <Glyph value="a"/>
           </BacktrackCoverage>
           <!-- LookAheadGlyphCount=3 -->
-          <LookAheadCoverage index="0">
+          <LookAheadCoverage index="0" Format="1">
             <Glyph value="D"/>
             <Glyph value="d"/>
           </LookAheadCoverage>
-          <LookAheadCoverage index="1">
+          <LookAheadCoverage index="1" Format="1">
             <Glyph value="E"/>
             <Glyph value="e"/>
           </LookAheadCoverage>
-          <LookAheadCoverage index="2">
+          <LookAheadCoverage index="2" Format="1">
             <Glyph value="F"/>
             <Glyph value="f"/>
           </LookAheadCoverage>
@@ -114,7 +114,7 @@
           <Substitute index="7" value="Z"/>
         </ReverseChainSingleSubst>
         <ReverseChainSingleSubst index="2" Format="1">
-          <Coverage>
+          <Coverage Format="1">
             <Glyph value="p"/>
           </Coverage>
           <!-- BacktrackGlyphCount=0 -->

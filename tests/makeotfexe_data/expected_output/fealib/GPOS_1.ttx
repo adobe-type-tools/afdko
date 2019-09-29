@@ -42,7 +42,7 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=7 -->
         <SinglePos index="0" Format="2">
-          <Coverage>
+          <Coverage Format="1">
             <Glyph value="four"/>
             <Glyph value="six"/>
             <Glyph value="seven"/>
@@ -59,8 +59,8 @@
           <Value index="4" XAdvance="-100"/>
           <Value index="5" XAdvance="401"/>
         </SinglePos>
-        <SinglePos index="1" Format="1">
-          <Coverage>
+        <SinglePos index="1" Format="2">
+          <Coverage Format="1">
             <Glyph value="one"/>
             <Glyph value="two"/>
             <Glyph value="three"/>
@@ -70,7 +70,7 @@
           <Value XPlacement="-80" XAdvance="-160"/>
         </SinglePos>
         <SinglePos index="2" Format="2">
-          <Coverage>
+          <Coverage Format="1">
             <Glyph value="P"/>
             <Glyph value="Q"/>
             <Glyph value="R"/>
@@ -82,7 +82,7 @@
           <Value index="2" XPlacement="1" XAdvance="802"/>
         </SinglePos>
         <SinglePos index="3" Format="2">
-          <Coverage>
+          <Coverage Format="2">
             <Glyph value="S"/>
             <Glyph value="T"/>
             <Glyph value="U"/>
@@ -94,7 +94,7 @@
           <Value index="2" XPlacement="1" YPlacement="1" XAdvance="805"/>
         </SinglePos>
         <SinglePos index="4" Format="1">
-          <Coverage>
+          <Coverage Format="1">
             <Glyph value="A"/>
             <Glyph value="B"/>
           </Coverage>
@@ -121,13 +121,13 @@
           </Value>
         </SinglePos>
         <SinglePos index="5" Format="1">
-          <Coverage>
+          <Coverage Format="1">
             <Glyph value="zero"/>
           </Coverage>
           <ValueFormat value="0"/>
         </SinglePos>
         <SinglePos index="6" Format="1">
-          <Coverage>
+          <Coverage Format="1">
             <Glyph value="C"/>
           </Coverage>
           <ValueFormat value="255"/>
@@ -164,7 +164,7 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="1">
-          <Coverage>
+          <Coverage Format="1">
             <Glyph value="A"/>
           </Coverage>
           <ValueFormat value="8"/>

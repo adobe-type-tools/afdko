@@ -2,34 +2,70 @@
 <ttFont>
 
   <name>
-    <namerecord nameID="256" platformID="3" platEncID="1" langID="0x409">
-      uilabel simple a
+    <namerecord nameID="1" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Untitled1
+    </namerecord>
+    <namerecord nameID="2" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Regular
+    </namerecord>
+    <namerecord nameID="3" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      1.000;UKWN;Untitled1
+    </namerecord>
+    <namerecord nameID="4" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Untitled1
+    </namerecord>
+    <namerecord nameID="5" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Version 1.000;hotconv 1.0.111;makeotfexe 2.5.65597 DEVELOPMENT
+    </namerecord>
+    <namerecord nameID="6" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Untitled1
     </namerecord>
     <namerecord nameID="256" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      uilabel simple a
+    </namerecord>
+    <namerecord nameID="257" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      tool tip simple a
+    </namerecord>
+    <namerecord nameID="258" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      sample text simple a
+    </namerecord>
+    <namerecord nameID="259" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      param1 text simple a
+    </namerecord>
+    <namerecord nameID="260" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      param2 text simple a
+    </namerecord>
+    <namerecord nameID="1" platformID="3" platEncID="1" langID="0x409">
+      Untitled1
+    </namerecord>
+    <namerecord nameID="2" platformID="3" platEncID="1" langID="0x409">
+      Regular
+    </namerecord>
+    <namerecord nameID="3" platformID="3" platEncID="1" langID="0x409">
+      1.000;UKWN;Untitled1
+    </namerecord>
+    <namerecord nameID="4" platformID="3" platEncID="1" langID="0x409">
+      Untitled1
+    </namerecord>
+    <namerecord nameID="5" platformID="3" platEncID="1" langID="0x409">
+      Version 1.000;hotconv 1.0.111;makeotfexe 2.5.65597 DEVELOPMENT
+    </namerecord>
+    <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
+      Untitled1
+    </namerecord>
+    <namerecord nameID="256" platformID="3" platEncID="1" langID="0x409">
       uilabel simple a
     </namerecord>
     <namerecord nameID="257" platformID="3" platEncID="1" langID="0x409">
       tool tip simple a
     </namerecord>
-    <namerecord nameID="257" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      tool tip simple a
-    </namerecord>
     <namerecord nameID="258" platformID="3" platEncID="1" langID="0x409">
-      sample text simple a
-    </namerecord>
-    <namerecord nameID="258" platformID="1" platEncID="0" langID="0x0" unicode="True">
       sample text simple a
     </namerecord>
     <namerecord nameID="259" platformID="3" platEncID="1" langID="0x409">
       param1 text simple a
     </namerecord>
-    <namerecord nameID="259" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      param1 text simple a
-    </namerecord>
     <namerecord nameID="260" platformID="3" platEncID="1" langID="0x409">
-      param2 text simple a
-    </namerecord>
-    <namerecord nameID="260" platformID="1" platEncID="0" langID="0x0" unicode="True">
       param2 text simple a
     </namerecord>
   </name>
@@ -77,7 +113,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0">
+        <SingleSubst index="0" Format="1">
           <Substitution in="A" out="B"/>
         </SingleSubst>
       </Lookup>

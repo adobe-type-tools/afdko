@@ -487,3 +487,77 @@ def test_infinite_loop_with_dflt_lookups_bug965():
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value='])
+
+
+TEST_FEATURE_FILES = [
+    "Attach", "enum", "markClass", "language_required", "GlyphClassDef",
+    "LigatureCaretByIndex", "LigatureCaretByPos", "lookup", "lookupflag",
+    "feature_aalt", "ignore_pos", "GPOS_1", "GPOS_1_zero", "GPOS_2", "GPOS_2b",
+    "GPOS_3", "GPOS_4", "GPOS_5", "GPOS_6", "GPOS_8", "GSUB_2", "GSUB_3",
+    "GSUB_6", "GSUB_8", "spec4h1", "spec4h2", "spec5d1", "spec5d2", "spec5fi1",
+    "spec5fi2", "spec5fi3", "spec5fi4", "spec5f_ii_1", "spec5f_ii_2",
+    "spec5f_ii_3", "spec5f_ii_4", "spec5h1", "spec6b_ii", "spec6d2", "spec6e",
+    "spec6f", "spec6h_ii", "spec6h_iii_1", "spec6h_iii_3d", "spec8a", "spec8b",
+    "spec8c", "spec8d", "spec9a", "spec9b", "spec9c1", "spec9c2", "spec9c3",
+    "spec9d", "spec9e", "spec9f", "spec9g", "spec10", "bug453", "bug457",
+    "bug463", "bug501", "bug502", "bug504", "bug505", "bug506", "bug509",
+    "bug512", "bug514", "bug568", "bug633", "bug1307", "bug1459", "name",
+    "size", "size2", "multiple_feature_blocks", "omitted_GlyphClassDef",
+    "ZeroValue_SinglePos_horizontal", "ZeroValue_SinglePos_vertical",
+    "ZeroValue_PairPos_horizontal", "ZeroValue_PairPos_vertical",
+    "ZeroValue_ChainSinglePos_horizontal", "ZeroValue_ChainSinglePos_vertical",
+    "PairPosSubtable",
+]
+
+TEST_FEATURE_FILES_XFAIL = [
+    "GPOS_1",            # <device>
+    "GSUB_6",            # Contextual alternate rule not yet supported
+    "bug1459",           # <NULL>
+    "language_required",  # required
+    "PairPosSubtable",   # https://github.com/adobe-type-tools/afdko/issues/971
+    "bug1307",           # https://github.com/adobe-type-tools/afdko/issues/966
+]
+
+TEST_FEATURE_FILES_TABLES = {
+    "name": ["name"],
+    "spec8b": ["name", "GPOS"],
+    "spec8c": ["name", "GSUB"],
+    "spec8d": ["name", "GSUB"],
+    "spec9c1": ["head"],
+    "spec9c2": ["head"],
+    "spec9c3": ["head"],
+    "spec9d": ["hhea"],
+    "spec9e": ["name"],
+    "spec9f": ["OS/2"],
+    "spec9g": ["vhea"],
+}
+
+TEST_TABLES = ['BASE', 'GDEF', 'GSUB', 'GPOS']
+
+
+@pytest.mark.parametrize('name', TEST_FEATURE_FILES)
+def test_feature_file(name):
+    try:
+        input_filename = "fealib/font.pfa"
+        feat_filename = f"fealib/{name}.fea"
+        ttx_filename = f"fealib/{name}.ttx"
+        actual_path = get_temp_file_path()
+
+        runner(CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
+                            'ff', f'_{get_input_path(feat_filename)}',
+                            'o', f'_{actual_path}'])
+
+        tables = TEST_FEATURE_FILES_TABLES.get(name, TEST_TABLES)
+        actual_ttx = generate_ttx_dump(actual_path, tables)
+        expected_ttx = get_expected_path(ttx_filename)
+        assert differ([expected_ttx, actual_ttx, '-l', '2',
+                       '-s',
+                       '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                       '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                       '    <created value=' + SPLIT_MARKER +
+                       '    <modified value=',
+                       '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
+    except Exception:
+        if name in TEST_FEATURE_FILES_XFAIL:
+            pytest.xfail()
+        raise

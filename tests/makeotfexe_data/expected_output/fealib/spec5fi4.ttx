@@ -36,15 +36,15 @@
         <ChainContextSubst index="0" Format="3">
           <!-- BacktrackGlyphCount=0 -->
           <!-- InputGlyphCount=2 -->
-          <InputCoverage index="0">
+          <InputCoverage index="0" Format="1">
             <Glyph value="e"/>
             <Glyph value="e.begin"/>
           </InputCoverage>
-          <InputCoverage index="1">
+          <InputCoverage index="1" Format="1">
             <Glyph value="t"/>
           </InputCoverage>
           <!-- LookAheadGlyphCount=1 -->
-          <LookAheadCoverage index="0">
+          <LookAheadCoverage index="0" Format="1">
             <Glyph value="c"/>
           </LookAheadCoverage>
           <!-- SubstCount=1 -->
@@ -58,7 +58,7 @@
         <LookupType value="4"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <LigatureSubst index="0">
+        <LigatureSubst index="0" Format="1">
           <LigatureSet glyph="e">
             <Ligature components="t" glyph="ampersand"/>
           </LigatureSet>
