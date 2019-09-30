@@ -1,0 +1,32 @@
+Input font: RgBd.ttc
+font 0 offset: 20/0x00000014. SourceSansPro-Regular.otf
+	BASE offset: 0x000001EC, checksum: 0x651E5DBD, length: 0x00000046
+	CFF  offset: 0x00000234, checksum: 0xF715B0B5, length: 0x0001D71D
+	DSIG offset: 0x0003C38C, checksum: 0x00000001, length: 0x00000008
+	GDEF offset: 0x0003C394, checksum: 0xF721FB92, length: 0x0000038C
+	GPOS offset: 0x0003C720, checksum: 0x43FA27F5, length: 0x00015C7A
+	GSUB offset: 0x00067E1C, checksum: 0x85444310, length: 0x00005228
+	OS/2 offset: 0x0006D044, checksum: 0x5DDFD5A3, length: 0x00000060
+	cmap offset: 0x0006D104, checksum: 0x9FCE01F4, length: 0x000036C2
+	head offset: 0x000707C8, checksum: 0x157F8BB0, length: 0x00000036
+	hhea offset: 0x00070838, checksum: 0x0A840D78, length: 0x00000024
+	hmtx offset: 0x00070880, checksum: 0xD07616EC, length: 0x00001ED8
+	maxp offset: 0x00074630, checksum: 0x07B65000, length: 0x00000006
+	name offset: 0x00074638, checksum: 0x4E7E178C, length: 0x00000814
+	post offset: 0x00075678, checksum: 0xFFD10032, length: 0x00000020
+font 1 offset: 256/0x00000100. SourceSansPro-Bold.otf
+	BASE offset: 0x000001EC, already seen
+	CFF  offset: 0x0001D954, checksum: 0x1B1D42D9, length: 0x0001EA37
+	DSIG offset: 0x0003C38C, already seen
+	GDEF offset: 0x0003C394, already seen
+	GPOS offset: 0x0005239C, checksum: 0x0147FBFD, length: 0x00015A7E
+	GSUB offset: 0x00067E1C, already seen
+	OS/2 offset: 0x0006D0A4, checksum: 0x5F11D7AE, length: 0x00000060
+	cmap offset: 0x0006D104, already seen
+	head offset: 0x00070800, checksum: 0x157B8B8A, length: 0x00000036
+	hhea offset: 0x0007085C, checksum: 0x0A7F0D75, length: 0x00000024
+	hmtx offset: 0x00072758, checksum: 0xC338D3DB, length: 0x00001ED8
+	maxp offset: 0x00074630, already seen
+	name offset: 0x00074E4C, checksum: 0x13EB56F8, length: 0x0000082A
+	post offset: 0x00075678, already seen
+Done

@@ -1,6 +1,6 @@
-# otc2otf.py v1.4.2 Jul 15 2019
+# otc2otf.py v1.4.3 Sep 1 2019
 
-__version__ = "1.4.2"
+__version__ = "1.4.3"
 
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
@@ -28,7 +28,7 @@ import os
 import struct
 
 
-class OTCError(TypeError):
+class OTCError(Exception):
     pass
 
 class FontEntry:
@@ -41,12 +41,12 @@ class FontEntry:
 		self.tableList = []
 		self.fileName = "temp.tmp.otf"
 		self.psName = "PSNameUndefined"
-		
+
 	def append(self, tableEntry):
 		self.tableList.append(tableEntry)
 
 class TableEntry:
-	
+
 	def __init__(self, tag, checkSum, length):
 		self.tag = tag
 		self.checksum = checkSum
@@ -109,7 +109,7 @@ nameRecordFormatDoc = """
 """
 nameRecordSize = struct.calcsize(nameRecordFormat)
 
-		
+
 def parseArgs(args):
 	doReportOnly = False
 	fontPath = None
@@ -118,7 +118,7 @@ def parseArgs(args):
 	while i < argn:
 		arg  = args[i]
 		i += 1
-		
+
 		if arg[0] != '-':
 			fontPath = arg
 		elif arg == "-r":
@@ -128,17 +128,17 @@ def parseArgs(args):
 			raise OTCError()
 		else:
 			raise OTCError("Unknown option '%s'." % (arg))
-			
+
 	if fontPath == None:
 		raise OTCError("You must specify an OpenType Collection font as the input file..")
-	
+
 	allOK = True
 	if not os.path.exists(fontPath):
 		raise OTCError("Cannot find '%s'." % (fontPath))
-		
+
 	with open(fontPath, "rb") as fp:
 		data = fp.read(4)
-	
+
 	if data != b'ttcf':
 		raise OTCError("File is not an OpenType Collection file: '%s'." % (fontPath))
 
@@ -157,11 +157,11 @@ def getPSName(data):
 	stringData = data[stringOffset:]
 	startNameRecordData = data[6:]
 	psName = None
-	
+
 	for nameRecordKey in [ AppleLatinKey, MSUnicodeKey ]:
 		if psName != None:
 			break
-		
+
 		data = startNameRecordData
 		for i in range(n):
 			if len(data) < 12:
@@ -174,7 +174,7 @@ def getPSName(data):
 				if nameRecordKey == MSUnicodeKey:
 					psName = psName.decode('utf-16be')
 				else:
-					assert len(psName) == length
+					psName = psName.decode('macroman')
 				break
 			else:
 				continue
@@ -194,7 +194,7 @@ def readFontFile(fontOffset, data, tableDict, doReportOnly):
 		tableEntry = TableEntry(tag, checksum, length)
 		tableEntry.offset = offset
 		tableEntry.data = data[offset:offset+length]
-		fontEntry.tableList.append(tableEntry)
+		fontEntry.append(tableEntry)
 		if tag == b"name":
 			fontEntry.psName = getPSName(tableEntry.data)
 		elif tag == b"glyf":
@@ -227,23 +227,23 @@ def writeOTFFont(fontEntry, directory):
 	# Build the SFNT header
 	data = struct.pack(sfntDirectoryFormat, fontEntry.sfntType, numTables, fontEntry.searchRange, fontEntry.entrySelector, fontEntry.rangeShift)
 	dataList.append(data)
-	
+
 	fontOffset = sfntDirectorySize + numTables*sfntDirectoryEntrySize
 	# Set the offsets in the tables.
 	for tableEntry in fontEntry.tableList:
 		tableEntry.offset = fontOffset
 		fontOffset += tableEntry.length
-	
+
 	# build table entries in sfnt directory
 	for tableEntry in fontEntry.tableList:
 		tableData = struct.pack(sfntDirectoryEntryFormat, tableEntry.tag, tableEntry.checksum, tableEntry.offset, tableEntry.length)
 		dataList.append(tableData)
-	
+
 	# add table data to font.
 	for tableEntry in fontEntry.tableList:
 		tableData = tableEntry.data
 		dataList.append(tableData)
-	
+
 	fontData = b"".join(dataList)
 	try:
 		font_file_path = os.path.join(directory.decode(sys.getfilesystemencoding()), fontEntry.fileName)
@@ -257,14 +257,14 @@ def writeOTFFont(fontEntry, directory):
 def run(args):
 	fontPath, doReportOnly = parseArgs(args)
 	print("Input font:", fontPath)
-	
+
 
 	with open(fontPath, "rb") as fp:
 		data = fp.read()
 
 	TTCTag, version, numFonts = struct.unpack(ttcHeaderFormat, data[:ttcHeaderSize])
 	offsetdata = data[ttcHeaderSize:]
-	
+
 	fontList = []
 	i = 0
 	tableDict = {} # Used to record whcih tables have been reported before.
@@ -289,7 +289,7 @@ def main():
 		run(sys.argv[1:])
 	except (OTCError) as e:
 		print(e)
-		
-	
+
+
 if __name__ == "__main__":
 	main()
