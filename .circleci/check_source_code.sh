@@ -15,9 +15,10 @@ flake8 convertfonttocid.py
 flake8 fdkutils.py
 flake8 makeinstancesufo.py
 flake8 makeotf.py
+flake8 otc2otf.py
 flake8 otf2ttf.py
-flake8 otfpdf.py
-flake8 pdfmetrics.py
+flake8 pdflib/otfpdf.py
+flake8 pdflib/pdfmetrics.py
 flake8 ttfcomponentizer.py
 flake8 ttxn.py
 flake8 ufotools.py

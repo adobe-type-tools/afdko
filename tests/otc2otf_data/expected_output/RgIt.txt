@@ -1,32 +1,38 @@
 Input font: RgIt.ttc
-font 0 offset: 20/0x00000014. SourceSansPro-Regular.otf
-	BASE offset: 0x000001EC, checksum: 0x651E5DBD, length: 0x00000046
-	CFF  offset: 0x00000234, checksum: 0xF715B0B5, length: 0x0001D71D
-	DSIG offset: 0x0002E110, checksum: 0x00000001, length: 0x00000008
-	GDEF offset: 0x0002E118, checksum: 0xF721FB92, length: 0x0000038C
-	GPOS offset: 0x0002E614, checksum: 0x43FA27F5, length: 0x00015C7A
-	GSUB offset: 0x00047B5C, checksum: 0x85444310, length: 0x00005228
-	OS/2 offset: 0x0004F8E0, checksum: 0x5DDFD5A3, length: 0x00000060
-	cmap offset: 0x0004F9A0, checksum: 0x9FCE01F4, length: 0x000036C2
-	head offset: 0x00055A68, checksum: 0x157F8BB0, length: 0x00000036
-	hhea offset: 0x00055AD8, checksum: 0x0A840D78, length: 0x00000024
-	hmtx offset: 0x00055B20, checksum: 0xD07616EC, length: 0x00001ED8
-	maxp offset: 0x00058B1C, checksum: 0x07B65000, length: 0x00000006
-	name offset: 0x00058B2C, checksum: 0x4E7E178C, length: 0x00000814
-	post offset: 0x00059B6C, checksum: 0xFFD10032, length: 0x00000020
-font 1 offset: 256/0x00000100. SourceSansPro-It.otf
-	BASE offset: 0x000001EC, already seen
-	CFF  offset: 0x0001D954, checksum: 0xAF5B8371, length: 0x000107BB
-	DSIG offset: 0x0002E110, already seen
-	GDEF offset: 0x0002E4A4, checksum: 0x606A6174, length: 0x00000170
-	GPOS offset: 0x00044290, checksum: 0x0EA45E04, length: 0x000038CA
-	GSUB offset: 0x0004CD84, checksum: 0x705F0282, length: 0x00002B5C
-	OS/2 offset: 0x0004F940, checksum: 0x5B549578, length: 0x00000060
-	cmap offset: 0x00053064, checksum: 0xE9DC64DE, length: 0x00002A02
-	head offset: 0x00055AA0, checksum: 0x15B198C8, length: 0x00000036
-	hhea offset: 0x00055AFC, checksum: 0x0B780CED, length: 0x00000024
-	hmtx offset: 0x000579F8, checksum: 0x3E77750F, length: 0x00001124
-	maxp offset: 0x00058B24, checksum: 0x04495000, length: 0x00000006
-	name offset: 0x00059340, checksum: 0x14065713, length: 0x0000082A
-	post offset: 0x00059B8C, checksum: 0xFFC60032, length: 0x00000020
-Done
+
+Font 0: SourceSansPro-Regular.otf
+    tag     checksum    length    offset
+    ----  ----------  --------  --------
+    BASE  0x651E5DBD        70       492
+    CFF   0xF715B0B5    120605       564
+    DSIG  0x00000001         8    188688
+    GDEF  0xF721FB92       908    188696
+    GPOS  0x43FA27F5     89210    189972
+    GSUB  0x85444310     21032    293724
+    OS/2  0x5DDFD5A3        96    325856
+    cmap  0x9FCE01F4     14018    326048
+    head  0x157F8BB0        54    350824
+    hhea  0x0A840D78        36    350936
+    hmtx  0xD07616EC      7896    351008
+    maxp  0x07B65000         6    363292
+    name  0x4E7E178C      2068    363308
+    post  0xFFD10032        32    367468
+
+Font 1: SourceSansPro-It.otf
+    tag     checksum    length    offset
+    ----  ----------  --------  --------
+    BASE  - shared -
+    CFF   0xAF5B8371     67515    121172
+    DSIG  - shared -
+    GDEF  0x606A6174       368    189604
+    GPOS  0x0EA45E04     14538    279184
+    GSUB  0x705F0282     11100    314756
+    OS/2  0x5B549578        96    325952
+    cmap  0xE9DC64DE     10754    340068
+    head  0x15B198C8        54    350880
+    hhea  0x0B780CED        36    350972
+    hmtx  0x3E77750F      4388    358904
+    maxp  0x04495000         6    363300
+    name  0x14065713      2090    365376
+    post  0xFFC60032        32    367500
+
