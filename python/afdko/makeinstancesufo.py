@@ -24,18 +24,18 @@ from ufoProcessor import build as ufoProcessorBuild
 
 from afdko.checkoutlinesufo import run as checkoutlinesUFO
 from afdko.fdkutils import (
-    get_temp_file_path,
     validate_path,
 )
 from afdko.ufotools import validateLayers
 
 
-__version__ = '2.4.1'
+__version__ = '2.4.2'
 
 logger = logging.getLogger(__name__)
 
 
 DFLT_DESIGNSPACE_FILENAME = "font.designspace"
+TEMP_DESIGNSPACE_FILENAME = ".designspace"  # the '.' prefix is intentional
 FEATURES_FILENAME = "features.fea"
 
 
@@ -70,7 +70,13 @@ def filterDesignspaceInstances(dsDoc, options):
         filteredInstances.append(instance)
 
     dsDoc.instances = filteredInstances
-    tmpPath = get_temp_file_path()
+    # Cannot use a proper tempfile here because on Windows the temporary file
+    # may end up being created in a different drive than the original file,
+    # which will cause a ValueError when fontTools.designspaceLib tries to
+    # compute the relative paths.
+    # See https://github.com/fonttools/fonttools/issues/1735
+    tmpPath = os.path.join(
+        os.path.dirname(origDSPath), TEMP_DESIGNSPACE_FILENAME)
     dsDoc.write(tmpPath)
 
     return tmpPath
@@ -296,6 +302,8 @@ def run(options):
                       outputUFOFormatVersion=options.ufo_version,
                       roundGeometry=(not options.no_round),
                       logger=logger)
+
+    # Remove temporary designspace file
     if (dsPath != options.dsPath) and os.path.exists(dsPath):
         os.remove(dsPath)
 
