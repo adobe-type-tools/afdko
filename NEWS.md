@@ -511,8 +511,8 @@ checkOutlines to the newer `checkOutlinesUFO` (which does work with
 OpenType and Type 1 fonts, but currently does only overlap detection and
 removal, and a few basic path checks).
 
-Older releases can be downloaded and installed from the [Adobe's AFDKO
-home page](http://www.adobe.com/devnet/opentype/afdko.html).
+Older releases can be downloaded from the [repository's Releases
+page](https://github.com/adobe-type-tools/afdko/releases?after=2.6.22).
 
 2.5.66097 (released 2017-12-01)
 -------------------------------
