@@ -496,6 +496,25 @@ class UFOFontData(object):
             glyphPath = self.getWriteGlyphPath(glyphName)
             with open(glyphPath, "wb") as fp:
                 et = ET.ElementTree(glifXML)
+
+                # check for and remove explicit 0 advance 'height' or 'width'
+                # or entire <advance> element if both are 0/not present.
+                advance = et.find("advance")
+                if advance is not None:
+                    ht = float(advance.get('height', '-1'))
+                    wx = float(advance.get('width', '-1'))
+                    if ht == 0:
+                        del advance.attrib['height']
+                        ht = -1
+                    if wx == 0:
+                        del advance.attrib['width']
+                        wx = -1
+
+                    if ht == wx == -1:
+                        # empty element; delete.
+                        # Note, et.remove(advance) doesn't work; this does:
+                        advance.getparent().remove(advance)
+
                 et.write(fp, encoding="UTF-8", xml_declaration=True)
             # Recalculate glyph hashes
             if self.writeToDefaultLayer:
