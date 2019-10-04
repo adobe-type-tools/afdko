@@ -1,0 +1,37 @@
+
+begin FDDict LOWERCASE
+    BaselineYCoord 0
+    BaselineOvershoot -20
+    LcHeight 473
+    LcOvershoot 18
+    AscenderHeight 729
+    AscenderOvershoot 20
+    DescenderHeight -239
+    DescenderOvershoot -10
+    DominantV [85]
+    DominantH [41]
+    FlexOK false
+end FDDict LOWERCASE
+
+
+begin FDDict UPPERCASE
+    BaselineYCoord 0
+    BaselineOvershoot -20
+    CapHeight 669
+    CapOvershoot 20
+    DominantV [85]
+    DominantH [41]
+    FlexOK false
+end FDDict UPPERCASE
+
+
+#------------------------------------------------------
+
+begin GlyphSet UPPERCASE
+	^[AY](acute|tilde|dieresis)?$
+end GlyphSet UPPERCASE
+
+
+begin GlyphSet LOWERCASE
+	^[ay](acute|tilde|dieresis)?$
+end GlyphSet LOWERCASE

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="some_width-zero_height" format="2">
-  <advance width="500" height="0"/>
+  <advance width="500"/>
   <outline>
     <contour>
       <point x="0" y="0" type="line" name="hintSet0000"/>

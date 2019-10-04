@@ -66,6 +66,13 @@ def generate_ps_dump(font_path):
     return temp_path
 
 
+def generate_generalized_cff(font_path):
+    """
+    Use fontTools.cffLib.specializer to "normalize" (generalize)
+    CFF-based output for comparison.
+    """
+    pass
+
 def font_has_table(font_path, table_tag):
     with TTFont(font_path) as font:
         return table_tag in font
