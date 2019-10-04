@@ -43,6 +43,12 @@ MSG_4 = (
     "All tables are shared").encode('ascii')
 
 
+MSG_5 = (
+    f"Shared tables: ['glyf']{os.linesep}"
+    "Un-shared tables: ['OS/2', 'cmap', 'head', 'hhea', 'hmtx', 'loca', "
+    "'maxp', 'name', 'post']").encode('ascii')
+
+
 # -----
 # Tests
 # -----
@@ -92,4 +98,15 @@ def test_convert(otf_filenames, ttc_filename, tables_msg):
     with open(stdout_path, 'rb') as f:
         output = f.read()
     assert tables_msg in output
+    assert differ([expected_path, actual_path, '-m', 'bin'])
+
+
+def test_t_option():
+    actual_path = get_temp_file_path()
+    expected_path = get_expected_path('shared_glyf.ttc')
+    stdout_path = runner(CMD + ['-s', '-o', 'o', f'_{actual_path}',
+                                't', '_glyf=0', '-f', FONT0, FONT1])
+    with open(stdout_path, 'rb') as f:
+        output = f.read()
+    assert MSG_5 in output
     assert differ([expected_path, actual_path, '-m', 'bin'])

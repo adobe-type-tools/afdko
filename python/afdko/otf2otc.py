@@ -153,7 +153,7 @@ def parseArgs(args):
 				fontIndex = int(parts[1])
 			except (ValueError, IndexError) as e:
 				raise OTCError("Badly formed table override." + __help__)
-			tagOverrideMap[tag] = fontIndex
+			tagOverrideMap[bytes(tag, 'ascii')] = fontIndex
 			i += 1
 		elif (arg == "-u") or (arg == "-h"):
 			print(__help__)
