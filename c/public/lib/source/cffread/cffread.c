@@ -1821,7 +1821,7 @@ static void readCharStringsINDEX(cfrCtx h, short flags) {
         length = info->sup.end - info->sup.begin;
         if (length > 65535) {
             message(h,
-                    "Warning: CharString of GID %d is %d bytes long. "
+                    "Warning: CharString of GID %ld is %ld bytes long. "
                     "CharStrings longer than 65535 bytes might not be "
                     "supported by some implementations.",
                     i, length);

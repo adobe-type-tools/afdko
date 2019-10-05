@@ -1192,10 +1192,10 @@ static void gnameError(hotCtx g, char *message, char *token, char *filename, lon
 
     if (messageLen > (256 - 6)) {
         /* 6 is max probable max length of decimal line number in Glyph Name Alias Database file */
-        hotMsg(g, hotWARNING, "%s  at token %s [%s: line %d] (record skipped)", message, token, "UVS file", line);
+        hotMsg(g, hotWARNING, "%s  at token %s [%s: line %ld] (record skipped)", message, token, "UVS file", line);
         hotMsg(g, hotWARNING, "UVS  file path name  is too long to include in error message. Please move Unicode Variation Selector  file to shorter absolute path.\n");
     } else {
-        hotMsg(g, hotWARNING, "%s  at token %s [%s: line %d] (record skipped)", message, token, filename, line);
+        hotMsg(g, hotWARNING, "%s  at token %s [%s: line %ld] (record skipped)", message, token, filename, line);
     }
 }
 

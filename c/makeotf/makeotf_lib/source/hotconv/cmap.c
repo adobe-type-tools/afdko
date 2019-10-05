@@ -1071,7 +1071,7 @@ static void checkDuplicates(hotCtx g, cmapCtx h, int isMixedByte) {
             } else {
                 featGlyphDump(g, mapping[i - 1].glyphId, ',', 0);
                 featGlyphDump(g, mapping[i].glyphId, 0, 0);
-                cmapMsg(g, hotFATAL, "multiple glyphs (%s) mapped to code <%hX>",
+                cmapMsg(g, hotFATAL, "multiple glyphs (%s) mapped to code <%lX>",
                         g->note.array, mapping[i].code);
             }
         }
@@ -1537,8 +1537,8 @@ static void writeFormat14(cmapCtx h, Format14 *fmt) {
             }
         }
     }
-    cmapMsg(g, hotNOTE, "Number of default Unicode Variation Sequence values %d", numDefaultUVSEntries);
-    cmapMsg(g, hotNOTE, "Number of non-default UVS values %d", numExtUVSEntries);
+    cmapMsg(g, hotNOTE, "Number of default Unicode Variation Sequence values %lu", numDefaultUVSEntries);
+    cmapMsg(g, hotNOTE, "Number of non-default UVS values %lu", numExtUVSEntries);
 }
 
 void cmapWrite(hotCtx g) {

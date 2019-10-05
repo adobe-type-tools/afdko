@@ -1293,7 +1293,7 @@ static void writeCharStringsINDEX(controlCtx h, cff_Font *font) {
         chrstr_length = glyph->cstr.length;
         if (chrstr_length > 65535) {
             cfwMessage(g,
-                       "Warning: CharString of GID %d is %d bytes long. "
+                       "Warning: CharString of GID %ld is %ld bytes long. "
                        "CharStrings longer than 65535 bytes might not be "
                        "supported by some implementations.",
                        i, chrstr_length);

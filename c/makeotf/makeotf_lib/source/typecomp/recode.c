@@ -4904,10 +4904,10 @@ void recodeAddNewGlyph(tcCtx g, unsigned id, unsigned fill_in_font_id, unsigned 
                 diff = (diff > 0) ? diff : -diff;
 
                 if (diff == 1) {
-                    parseWarning(g, "Zero width vs. calculated Euro width round-off difference: %f, %d", FIX2DBL(zeroWidth), iwidth);
+                    parseWarning(g, "Zero width vs. calculated Euro width round-off difference: %f, %ld", FIX2DBL(zeroWidth), iwidth);
                 }
                 if (diff > 1) {
-                    parseWarning(g, "Problem: Zero width of target font is not same as calculated Euro width: %f, %d", FIX2DBL(zeroWidth), iwidth);
+                    parseWarning(g, "Problem: Zero width of target font is not same as calculated Euro width: %f, %ld", FIX2DBL(zeroWidth), iwidth);
                 }
                 h->newGlyph.width[iMaster] = zeroWidth;
             }

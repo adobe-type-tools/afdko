@@ -333,10 +333,10 @@ static void saveop(cstrCtx h, int op) {
     /* Save op */
     switch (op) {
         case t2_blend:
-            cfwMessage(h->g, "CFF2 error - unexpected blend op  <%s>%s",
-                       h->glyph.info->gname.ptr, 0);
-
+            cfwMessage(h->g, "CFF2 error - unexpected blend op  <%s>",
+                       h->glyph.info->gname.ptr);
             break;
+
         case tx_hlineto:
         case tx_vlineto:
         case tx_hvcurveto:

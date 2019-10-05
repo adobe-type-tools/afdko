@@ -1387,7 +1387,7 @@ static void writeAddnEncoding(t1wCtx h, char *FontName) {
                 }
 
                 /* Add encoding */
-                writeFmt(h, "dup %d /", enc->code & 0xff);
+                writeFmt(h, "dup %lu /", enc->code & 0xff);
                 writeStr(h, info->gname.ptr);
                 writeLine(h, " put");
 

@@ -1868,7 +1868,7 @@ static void cmapReadFmt4(ttrCtx h) {
         unsigned short idRangeOffset = read2(h);
         if (idRangeOffset == 0xffff) {
             idRangeOffset = 0; /* Fix Fontographer bug */
-            message(h, "cmap: invalid idRangeOffset in segment[%d] (fixed)", i);
+            message(h, "cmap: invalid idRangeOffset in segment[%ld] (fixed)", i);
         }
         h->cmap.segments.array[i].idRangeOffset =
             (idRangeOffset == 0) ? 0 : offset + idRangeOffset;
