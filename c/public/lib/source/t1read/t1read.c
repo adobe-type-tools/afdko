@@ -1619,7 +1619,7 @@ static void prepMMData(t1rCtx h) {
 /* Report bad dict value */
 static void badKeyValue(t1rCtx h, int iKey) {
     if (h->FDArray.cnt > 1)
-        fatal(h, t1rErrKeyValue, "/%s bad value: FD[%d]",
+        fatal(h, t1rErrKeyValue, "/%s bad value: FD[%ld]",
               keys[iKey], h->fd - h->FDArray.array);
     else
         fatal(h, t1rErrKeyValue, "/%s bad value", keys[iKey]);
@@ -2806,10 +2806,10 @@ static void readSubrMaps(t1rCtx h, long StartDataOffset, long *maxoff) {
 
         /* Validate */
         if (fd->key.SubrMapOffset == -1)
-            fatal(h, t1rErrSubrMap, "/SubrMapOffset missing: FD[%d]", i);
+            fatal(h, t1rErrSubrMap, "/SubrMapOffset missing: FD[%ld]", i);
 
         if (fd->key.SDBytes < 1 || fd->key.SDBytes > 4)
-            fatal(h, t1rErrKeyValue, "/SDBytes: bad value: FD[%d]", i);
+            fatal(h, t1rErrKeyValue, "/SDBytes: bad value: FD[%ld]", i);
 
         /* Read SubrMap */
         srcSeek(h, StartDataOffset + fd->key.SubrMapOffset);
@@ -2834,7 +2834,7 @@ static void readSubrMaps(t1rCtx h, long StartDataOffset, long *maxoff) {
 
             if (length < 1 || length > 65535)
                 fatal(h, t1rErrKeyValue,
-                      "bad subr length FD[%d].subr[%ld]", i, j);
+                      "bad subr length FD[%ld].subr[%ld]", i, j);
 
             cstr = readCstr(h, begin, end);
 

@@ -194,13 +194,13 @@ void headDiff(LongN offset1, LongN offset2) {
     }
     if (head1.checkSumAdjustment != head2.checkSumAdjustment) {
         DiffExists++;
-        note("< head checkSumAdjustment=%08lx\n", head1.checkSumAdjustment);
-        note("> head checkSumAdjustment=%08lx\n", head2.checkSumAdjustment);
+        note("< head checkSumAdjustment=%08x\n", head1.checkSumAdjustment);
+        note("> head checkSumAdjustment=%08x\n", head2.checkSumAdjustment);
     }
     if (head1.magicNumber != head2.magicNumber) {
         DiffExists++;
-        note("< head magicNumber=%08lx\n", head1.magicNumber);
-        note("> head magicNumber=%08lx\n", head2.magicNumber);
+        note("< head magicNumber=%08x\n", head1.magicNumber);
+        note("> head magicNumber=%08x\n", head2.magicNumber);
     }
     if (head1.flags != head2.flags) {
         DiffExists++;

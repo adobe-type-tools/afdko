@@ -155,7 +155,7 @@ static void dumpString(Card8 which, NameRecord *record) {
         if ((code & 0xff00) == 0 && isprint(code))
             note("%c", (IntN)code);
         else
-            note("\\%0*lx", precision, code);
+            note("\\%0*x", precision, code);
     }
     note("\"");
 }

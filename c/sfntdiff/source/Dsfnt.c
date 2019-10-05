@@ -606,8 +606,8 @@ void hexDiff(Card32 tag,
             if (level == 0) {
                 return;
             } else if (level == 1) {
-                note("< %08lx+%08lx=%08lx\n", start1, diffaddr, start1 + diffaddr);
-                note("> %08lx+%08lx=%08lx\n", start2, diffaddr, start2 + diffaddr);
+                note("< %08lx+%08x=%08lx\n", start1, diffaddr, start1 + diffaddr);
+                note("> %08lx+%08x=%08lx\n", start2, diffaddr, start2 + diffaddr);
                 return;
             } else if (level == 2) {
                 /* Dump 8 hexadecimal words of data */
@@ -721,13 +721,13 @@ static void dirDiff3(LongN start1, LongN start2) {
             Entry *entry2 = &sfnt2.directory[other];
             if (entry1->checksum != entry2->checksum) {
                 DiffExists++;
-                note("< '%c%c%c%c' table checksum=%08lx\n", TAG_ARG(entry1->tag), entry1->checksum);
-                note("> '%c%c%c%c' table checksum=%08lx\n", TAG_ARG(entry2->tag), entry2->checksum);
+                note("< '%c%c%c%c' table checksum=%08x\n", TAG_ARG(entry1->tag), entry1->checksum);
+                note("> '%c%c%c%c' table checksum=%08x\n", TAG_ARG(entry2->tag), entry2->checksum);
             }
             if (entry1->length != entry2->length) {
                 DiffExists++;
-                note("< '%c%c%c%c' table length=%08lx\n", TAG_ARG(entry1->tag), entry1->length);
-                note("> '%c%c%c%c' table length=%08lx\n", TAG_ARG(entry2->tag), entry2->length);
+                note("< '%c%c%c%c' table length=%08x\n", TAG_ARG(entry1->tag), entry1->length);
+                note("> '%c%c%c%c' table length=%08x\n", TAG_ARG(entry2->tag), entry2->length);
             }
         }
     }

@@ -2889,7 +2889,7 @@ static void cidReadSubrs(parseCtx h, int fd) {
 
         subrLength = nextSubrOffset - thisSubrOffset;
         if (subrLength == 0 || subrLength > CS_MAX_SIZE) {
-            tcFatal(h->g, "bad subr length fd[%d].subr[%u]", fd, i);
+            tcFatal(h->g, "bad subr length fd[%d].subr[%ld]", fd, i);
         }
 
         csAddSubr(h->g,

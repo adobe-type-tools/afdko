@@ -1312,7 +1312,7 @@ static void readCIDFontInfo(txCtx h, char *filePath) {
                                 fatal(h, "Parse error in the CID fontinfo file \"%s\" at line no %d. There are more than 16 values in the array.", filePath, lineno - 1);
                             mergeInfo->XUID.array[cnt] = atoi(startp);
                             if ((0 != strcmp("0", startp)) && (mergeInfo->XUID.array[cnt] == 0))
-                                fatal(h, "Parse error in the CID fontinfo file \"%s\" at line no %d. The %d 'th XIUD value (%s) could not be parsed as an integer number.", filePath, lineno - 1, cnt + 1, p);
+                                fatal(h, "Parse error in the CID fontinfo file \"%s\" at line no %d. The %ld'th XIUD value (%s) could not be parsed as an integer number.", filePath, lineno - 1, cnt + 1, p);
                             startp = NULL;
                             cnt++;
                         }
@@ -1328,7 +1328,7 @@ static void readCIDFontInfo(txCtx h, char *filePath) {
                         fatal(h, "Parse error in the CID fontinfo file \"%s\" at line no %d. There are more than 16 values in the array.", filePath, lineno - 1);
                     mergeInfo->XUID.array[cnt] = atoi(startp);
                     if ((0 != strcmp("0", startp)) && (mergeInfo->XUID.array[cnt] == 0))
-                        fatal(h, "Parse error in the CID fontinfo file \"%s\" at line no %d. The %d 'th XIUD value (%s) could not be parsed as an integer number.", filePath, lineno - 1, cnt + 1, p);
+                        fatal(h, "Parse error in the CID fontinfo file \"%s\" at line no %d. The %ld'th XIUD value (%s) could not be parsed as an integer number.", filePath, lineno - 1, cnt + 1, p);
                     cnt++;
                 }
                 mergeInfo->XUID.cnt = cnt;

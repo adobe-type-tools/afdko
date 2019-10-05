@@ -643,7 +643,7 @@ static void addNameString(long platformId, long platspecId,
     }
     if (nameError) {
         hotMsg(g, hotWARNING,
-               "name id %d cannot be set from the feature file. "
+               "name id %ld cannot be set from the feature file. "
                "ignoring record [%s %d]",
                nameId,
                INCL.file, h->linenum);
@@ -3898,7 +3898,7 @@ static void addPos(GNode *targ, int type, int enumerate) {
         /* These nodes are recycled in GPOS.c due to some complicated copying of nodes. */
     } else if (type == GPOSCursive) {
         if (h->anchorMarkInfo.cnt != 2) {
-            featMsg(hotERROR, "The 'cursive' statement requires two anchors. This has %d. Skipping rule.", h->anchorMarkInfo.cnt);
+            featMsg(hotERROR, "The 'cursive' statement requires two anchors. This has %ld. Skipping rule.", h->anchorMarkInfo.cnt);
         } else if ((!(targ->flags & FEAT_HAS_MARKED)) && ((!(targ->flags & FEAT_IS_BASE_NODE)) || (targ->nextSeq != NULL))) {
             featMsg(hotERROR, "This statement has contextual glyphs around the cursive statement, but no glyphs are marked as part of the input sequence. Skipping rule.", h->anchorMarkInfo.cnt);
         } else {
@@ -3981,7 +3981,7 @@ static void setFontRev(char *rev) {
             featMsg(hotWARNING, "head FontRevision entry <%s> should have 3 fractional decimal places. Stored as <%.3f>", rev, version);
         }
     } else {
-        featMsg(hotWARNING, "head FontRevision entry <%d> should have 3 fractional decimal places; it now has none.", major);
+        featMsg(hotWARNING, "head FontRevision entry <%ld> should have 3 fractional decimal places; it now has none.", major);
     }
 
     /* limit of 32767 as anything higher sets the sign bit to negative */

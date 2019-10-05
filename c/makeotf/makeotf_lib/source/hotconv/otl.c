@@ -535,7 +535,7 @@ static Offset fillCoverage(hotCtx g, otlTbl t) {
     }
 
     if (t->coverage.offset > 0xFFFF) {
-        hotMsg(g, hotFATAL, "coverage section too large (%0lx)",
+        hotMsg(g, hotFATAL, "coverage section too large (%0x)",
                t->coverage.offset);
     }
 
@@ -817,7 +817,7 @@ static Offset fillClass(hotCtx g, otlTbl t) {
         t->class.offset += size2;
     }
     if (t->class.offset > 0xFFFF) {
-        hotMsg(g, hotFATAL, "class section too large (%0lx)", t->class.offset);
+        hotMsg(g, hotFATAL, "class section too large (%0x)", t->class.offset);
     }
 
     return new->offset; /* Return new table's offset */
@@ -1683,7 +1683,7 @@ static void fixFeatureParmOffsets(hotCtx g, otlTbl t, short shortfeatureParamBas
             /* shortfeatureParamBaseOffset is (size of featureList) + (size of LookupList).                     */
             feature->FeatureParams = feature->FeatureParams + shortfeatureParamBaseOffset - rec->Feature;
             if (feature->FeatureParams > 0xFFFF) {
-                hotMsg(g, hotFATAL, "feature parameter offset too large (%0lx)",
+                hotMsg(g, hotFATAL, "feature parameter offset too large (%0x)",
                        feature->FeatureParams);
             }
         }
