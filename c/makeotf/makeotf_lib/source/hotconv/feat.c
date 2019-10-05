@@ -2287,7 +2287,7 @@ static int tagAssign(Tag tag, int type, int checkIfDef) {
     } else if (type == scriptTag) {
         ta = &h->script;
         if (tag == dflt_) {
-            tag = dflt_;
+            tag = DFLT_;
             featMsg(hotWARNING, "'dflt' is not a valid tag for a script statement; using 'DFLT'.");
         }
         curr = &h->curr.script;
