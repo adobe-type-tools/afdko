@@ -1089,7 +1089,7 @@ void cbAliasDBRead(cbCtx h, char *filename) {
         }
         *p = '\0';
         if (strlen(final) > MAX_FINAL_CHAR_NAME_LEN) {
-            cbWarning(h, "final name %s is longer (%d) than limit %d, in %s line %ld.\n", final, strlen(final), MAX_FINAL_CHAR_NAME_LEN, filename, lineno);
+            cbWarning(h, "final name %s is longer (%lu) than limit %d, in %s line %ld.\n", final, strlen(final), MAX_FINAL_CHAR_NAME_LEN, filename, lineno);
         }
 
         /* Skip blanks */
@@ -1105,7 +1105,7 @@ void cbAliasDBRead(cbCtx h, char *filename) {
         }
         *p = '\0';
         if (strlen(alias) > MAX_CHAR_NAME_LEN) {
-            cbWarning(h, "alias name %s is longer  (%d) than limit %d, in %s line %ld.\n", alias, strlen(alias), MAX_CHAR_NAME_LEN, filename, lineno);
+            cbWarning(h, "alias name %s is longer (%lu) than limit %d, in %s line %ld.\n", alias, strlen(alias), MAX_CHAR_NAME_LEN, filename, lineno);
         }
 
         /* Skip blanks. Since line is null terminated, will not go past end of line. */

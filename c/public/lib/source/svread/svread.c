@@ -1101,7 +1101,7 @@ static int readGlyph(svrCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb) 
                 copyToken(tk, &op_tk);
             } break;
             case svrUnknown: {
-                fatal(h, svrErrParse, "Encountered unknown operator '%s' in path attribute of glyph '%s'.", gi->gname.ptr);
+                fatal(h, svrErrParse, "Encountered unknown operator in path attribute of glyph '%s'.", gi->gname.ptr);
                 break;
             }
         }

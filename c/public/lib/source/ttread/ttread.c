@@ -2591,9 +2591,9 @@ int ttrBegFont(ttrCtx h, long flags, long origin, int iTTC, abfTopDict **top, fl
             unsigned short  axis;
 
             if (h->vf.axisCount > VF_MAX_AXES)
-                fatal(h, ttrErrGeometry, "axisCount %g too large", h->vf.axisCount);
+                fatal(h, ttrErrGeometry, "axisCount %hu too large", h->vf.axisCount);
             if (h->vf.axisCount != h->gvar.axisCount)
-                fatal(h, ttrErrGeometry, "fvar.axisCount %g != gvar.axisCount");
+                fatal(h, ttrErrGeometry, "fvar.axisCount %hu != gvar.axisCount %hu", h->vf.axisCount, h->gvar.axisCount);
 
             /* normalize the variable font design vector */
             for (axis = 0; axis < h->vf.axisCount; axis++)
@@ -2879,7 +2879,7 @@ static void glyfReadCompound(ttrCtx h, GID gid, GID *mtx_gid, int depth) {
         if (!translate) {
             /* Validate point indexes */
             if ((long)p1 >= iStart || (long)p2 + iStart >= h->glyf.coords.cnt)
-                fatal(h, ttrErrNoPoints, "gid[%hu]: invalid compound points");
+                fatal(h, ttrErrNoPoints, "gid[%hu]: invalid compound points", gid);
 
             /* Convert matched points to a translation */
             x = h->glyf.coords.array[p1].x -
