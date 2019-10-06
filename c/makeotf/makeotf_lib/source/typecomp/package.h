@@ -3,8 +3,8 @@
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef PACKAGE_SPECS_H
-#define PACKAGE_SPECS_H
+#ifndef TYPECOMP_PACKAGE_SPECS_H
+#define TYPECOMP_PACKAGE_SPECS_H
 
 #define TYPECOMP "../include/typecomp.h"
 #define DYNARR "../include/dynarr.h"
@@ -21,4 +21,4 @@
 #define CFFREAD "../include/cffread.h"
 #endif /* TC_EURO_SUPPORT */
 
-#endif /* PACKAGE_SPECS_H */
+#endif /* TYPECOMP_PACKAGE_SPECS_H */

@@ -6,8 +6,8 @@
  * name table support.
  */
 
-#ifndef NAME_H
-#define NAME_H
+#ifndef DNAME_H
+#define DNAME_H
 
 #include "Dglobal.h"
 
@@ -19,4 +19,4 @@ extern void nameFree(Card8 which);
 extern Byte8 *nameFontName(Card8 which);
 extern Byte8 *namePostScriptName(Card8 which);
 
-#endif /* NAME_H */
+#endif /* DNAME_H */

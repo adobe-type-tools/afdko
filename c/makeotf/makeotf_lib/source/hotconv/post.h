@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef POST_H
-#define POST_H
+#ifndef HOTCONV_POST_H
+#define HOTCONV_POST_H
 
 #include "common.h"
 
@@ -16,4 +16,4 @@ void postWrite(hotCtx g);
 void postReuse(hotCtx g);
 void postFree(hotCtx g);
 
-#endif /* POST_H */
+#endif /* HOTCONV_POST_H */

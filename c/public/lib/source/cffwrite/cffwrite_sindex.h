@@ -7,8 +7,8 @@
  * String index support.
  */
 
-#ifndef SINDEX_H
-#define SINDEX_H
+#ifndef CFFWRITE_SINDEX_H
+#define CFFWRITE_SINDEX_H
 
 #include "cffwrite_share.h"
 
@@ -24,4 +24,4 @@ SID cfwSindexAssignSID(cfwCtx g, SRI index);
 long cfwSindexSize(cfwCtx g);
 void cfwSindexWrite(cfwCtx g);
 
-#endif /* SINDEX_H */
+#endif /* CFFWRITE_SINDEX_H */

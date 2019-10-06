@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef SFNT_H
-#define SFNT_H
+#ifndef HOTCONV_SFNT_H
+#define HOTCONV_SFNT_H
 
 #include "common.h"
 
@@ -20,4 +20,4 @@ void sfntSetMetrics(void *ctx, unsigned gid, FWord width,
                     FWord left, FWord bottom, FWord right, FWord top);
 void sfntAddAnonTable(hotCtx g, unsigned long tag, hotAnonRefill refill);
 
-#endif /* SFNT_H */
+#endif /* HOTCONV_SFNT_H */

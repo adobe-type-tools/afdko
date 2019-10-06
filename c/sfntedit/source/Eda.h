@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef DA_H
-#define DA_H
+#ifndef EDA_H
+#define EDA_H
 
 #include <stdlib.h>
 
@@ -143,4 +143,4 @@ extern void da_SetMemFuncs(void *(*alloc)(size_t size),
                                                                  &(da).array[((da).cnt += (len), (da).cnt - (len))])                  \
                                                               : &(da).array[((da).cnt += (len), (da).cnt - (len))])
 
-#endif /* DA_H */
+#endif /* EDA_H */

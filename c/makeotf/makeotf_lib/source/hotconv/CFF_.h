@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef CFF__H
-#define CFF__H
+#ifndef HOTCONV_CFF__H
+#define HOTCONV_CFF__H
 
 #include "common.h"
 
@@ -16,4 +16,4 @@ void CFF_Write(hotCtx g);
 void CFF_Reuse(hotCtx g);
 void CFF_Free(hotCtx g);
 
-#endif /* CFF__H */
+#endif /* HOTCONV_CFF__H */

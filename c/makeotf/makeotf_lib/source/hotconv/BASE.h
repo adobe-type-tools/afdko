@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef BASE_H
-#define BASE_H
+#ifndef HOTCONV_BASE_H
+#define HOTCONV_BASE_H
 
 #include "common.h"
 
@@ -23,4 +23,4 @@ void BASESetBaselineTags(hotCtx g, int vert, int nTag,
 void BASEAddScript(hotCtx g, int vert, Tag script, Tag dfltBaseline,
                    short *coord); /* [nTag] */
 
-#endif /* BASE_H */
+#endif /* HOTCONV_BASE_H */

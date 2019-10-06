@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef FEAT_H
-#define FEAT_H
+#ifndef HOTCONV_FEAT_H
+#define HOTCONV_FEAT_H
 
 #include "common.h"
 
@@ -167,4 +167,4 @@ int featValidateGPOSChain(hotCtx g, GNode *targ, int lookupType);
 
 #endif /* HOT_FEAT_SUPPORT */
 
-#endif /* FEAT_H */
+#endif /* HOTCONV_FEAT_H */

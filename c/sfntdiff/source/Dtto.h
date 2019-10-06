@@ -6,8 +6,9 @@
  * TT Open common table support.
  */
 
-#ifndef TTO_H
-#define TTO_H
+#ifndef DTTO_H
+#define DTTO_H
+#define TTO_H /* this is needed due to the Lookup typedef in sfnt_common.h */
 
 #include "Dglobal.h"
 #include "sfnt_tto.h"
@@ -59,4 +60,4 @@ extern void ttoReadDeviceTable(Card8 which, Card32 offset, DeviceTable *table);
 extern void ttoDumpDeviceTable(Offset offset, DeviceTable *table, IntX level);
 extern void ttoFreeDeviceTable(DeviceTable *table);
 
-#endif /* TTO_H */
+#endif /* DTTO_H */

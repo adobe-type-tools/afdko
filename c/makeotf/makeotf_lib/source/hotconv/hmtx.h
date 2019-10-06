@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef HMTX_H
-#define HMTX_H
+#ifndef HOTCONV_HMTX_H
+#define HOTCONV_HMTX_H
 
 #include "common.h"
 
@@ -19,4 +19,4 @@ void hmtxFree(hotCtx g);
 /* Supplementary Functions */
 int hmtxGetNLongHorMetrics(hotCtx g);
 
-#endif /* HMTX_H */
+#endif /* HOTCONV_HMTX_H */

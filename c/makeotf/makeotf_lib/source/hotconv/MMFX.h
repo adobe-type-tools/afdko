@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef MMFX_H
-#define MMFX_H
+#ifndef HOTCONV_MMFX_H
+#define HOTCONV_MMFX_H
 
 #include "common.h"
 
@@ -33,4 +33,4 @@ void MMFXAddNamedMetric(hotCtx g, unsigned id, FWord *metric);
 unsigned MMFXAddMetric(hotCtx g, FWord *metric);
 Fixed MMFXExecMetric(hotCtx g, unsigned id);
 
-#endif /* MMFX_H */
+#endif /* HOTCONV_MMFX_H */

@@ -6,8 +6,8 @@
  * Machine dependent file operations.
  */
 
-#ifndef SYS_H
-#define SYS_H
+#ifndef ESYS_H
+#define ESYS_H
 
 #include "Eglobal.h"
 
@@ -17,4 +17,4 @@ FILE *sysOpenSearchpath(char *filename);
 int sysFileExists(char *filename);
 long sysFileLen(FILE *f);
 
-#endif /* SYS_H */
+#endif /* ESYS_H */

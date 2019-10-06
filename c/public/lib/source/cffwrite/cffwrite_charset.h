@@ -7,8 +7,8 @@
  * Character set support.
  */
 
-#ifndef CHARSET_H
-#define CHARSET_H
+#ifndef CFFWRITE_CHARSET_H
+#define CFFWRITE_CHARSET_H
 
 #include "cffwrite_share.h"
 
@@ -24,4 +24,4 @@ long cfwCharsetFill(cfwCtx g);
 void cfwCharsetWrite(cfwCtx g);
 Offset cfwCharsetGetOffset(cfwCtx g, int iCharset, Offset base);
 
-#endif /* CHARSET_H */
+#endif /* CFFWRITE_CHARSET_H */

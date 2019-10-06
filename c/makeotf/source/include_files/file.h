@@ -7,8 +7,8 @@
  * File handling.
  */
 
-#ifndef FILE_H
-#define FILE_H
+#ifndef MAKEOTF_FILE_H
+#define MAKEOTF_FILE_H
 
 #include "cb.h"
 #include "lstdio.h"
@@ -31,4 +31,4 @@ long fileTell(File *file);
 void fileClose(File *file);
 void fileError(File *file);
 
-#endif /* FILE_H */
+#endif /* MAKEOTF_FILE_H */

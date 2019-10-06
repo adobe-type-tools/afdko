@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef GSUB_H
-#define GSUB_H
+#ifndef HOTCONV_GSUB_H
+#define HOTCONV_GSUB_H
 
 #include "common.h"
 #include "feat.h"
@@ -72,4 +72,4 @@ void GSUBAddCVParam(hotCtx g, void *param);
 
    GSUBFeatureEnd(g); */
 
-#endif /* GSUB_H */
+#endif /* HOTCONV_GSUB_H */

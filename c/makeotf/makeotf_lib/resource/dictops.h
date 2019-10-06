@@ -42,8 +42,8 @@
  * value, if any, within parentheses.
  */
 
-#ifndef DICTOPS_H
-#define DICTOPS_H
+#ifndef MAKEOTF_DICTOPS_H
+#define MAKEOTF_DICTOPS_H
 
 /* One byte operators (0-31) */
 #define cff_version                 0   /* Top/FD */
@@ -147,4 +147,4 @@ enum
     cff_PredefEncodingCount
     };
 
-#endif /* DICTOPS_H */
+#endif /* MAKEOTF_DICTOPS_H */

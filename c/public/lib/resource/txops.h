@@ -17,8 +17,8 @@
  * t2_  Found in Type 2 only
  */
 
-#ifndef TXOPS_H
-#define TXOPS_H
+#ifndef PUBLIC_TXOPS_H
+#define PUBLIC_TXOPS_H
 
 /* ----------------------- One Byte Operators (0-31) ----------------------- */
 
@@ -223,4 +223,4 @@
 #define RND_ON_READ(val) (((int)((val)*10000))/10000.0) /* Truncate at 4 decimal places, the most that CFF supports as a real. I truncate because if a value is a hair below x.5, I don't want it rounding up to x.5, which will later round to x+1.*/
 #define RND_ON_WRITE(val) (roundf(val*100)/100.0)  /* round to 2 decimal places for output. */
 
-#endif /* TXOPS_H */
+#endif /* PUBLIC_TXOPS_H */

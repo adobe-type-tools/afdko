@@ -7,8 +7,8 @@
  * Encoding support.
  */
 
-#ifndef ENCODING_H
-#define ENCODING_H
+#ifndef CFFWRITE_ENCODING_H
+#define CFFWRITE_ENCODING_H
 
 #include "cffwrite_share.h"
 
@@ -27,4 +27,4 @@ long cfwEncodingFill(cfwCtx g);
 void cfwEncodingWrite(cfwCtx g);
 Offset cfwEncodingGetOffset(cfwCtx g, int iEncoding, Offset base);
 
-#endif /* ENCODING_H */
+#endif /* CFFWRITE_ENCODING_H */

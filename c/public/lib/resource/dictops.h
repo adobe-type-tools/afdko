@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef DICTOPS_H
-#define DICTOPS_H
+#ifndef PUBLIC_DICTOPS_H
+#define PUBLIC_DICTOPS_H
 
 /*
  * CFF dictionary operator definitions.
@@ -172,4 +172,4 @@ enum
     cff_PredefEncodingCount
     };
 
-#endif /* DICTOPS_H */
+#endif /* PUBLIC_DICTOPS_H */
