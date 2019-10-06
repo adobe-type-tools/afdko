@@ -295,7 +295,7 @@ enum {
 
 #endif /* HOT_FEAT_SUPPORT */
 
-int setVendId_str(hotCtx g, char *vend);
+void setVendId_str(hotCtx g, char *vend);
 
 void featSetUnicodeRange(hotCtx g, short unicodeList[kLenUnicodeList]);
 
@@ -874,9 +874,7 @@ static void addVendorString(hotCtx g) {
     }
 
     *dnaNEXT(h->nameString) = '\0';
-    if (setVendId_str(g, h->nameString.array)) {
-        featMsg(hotERROR, "Bad string");
-    }
+    setVendId_str(g, h->nameString.array);
 }
 
 /* Return 1 if last line was seen. isEOL indicates whether ch is the last char
