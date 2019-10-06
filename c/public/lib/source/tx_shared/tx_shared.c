@@ -2987,7 +2987,7 @@ static void dumpINDEX(txCtx h, char *title, const ctlRegion *region,
             /* Dump offset array */
             flowTitle(h, "offset[index]=value");
             for (i = 0; i <= count; i++)
-                flowBreak(h, "[%ld]=%lu", i, readn(h, offSize));
+                flowBreak(h, "[%ld]=%u", i, readn(h, offSize));
             flowEnd(h);
         } else if (count == 0) {
             fprintf(fp, "empty\n");
@@ -3185,7 +3185,7 @@ static void dumpDICT(txCtx h, const ctlRegion *region) {
                 value = value << 8 | read1(h);
                 value = value << 8 | read1(h);
                 left -= 4;
-                flowArg(h, "%ld", value);
+                flowArg(h, "%d", value);
             } break;
             case cff_BCD: {
                 int count = 0;
@@ -3884,7 +3884,7 @@ static void dcf_DumpFDSelect(txCtx h, const ctlRegion *region) {
                 uint32_t gid;
                 flowTitle(h, "glyph[gid]=fd");
                 for (gid = 0; gid < h->top->sup.nGlyphs; gid++)
-                    flowBreak(h, "[%ld]=%u", gid, read1(h));
+                    flowBreak(h, "[%u]=%u", gid, read1(h));
                 flowEnd(h);
             } break;
             case 3: {
