@@ -1437,7 +1437,6 @@ void featAddValRecDef(short *metrics, char *valueName) {
 
     if (vd != NULL) {
         featMsg(hotFATAL, "Named value record definition '%s' is a a duplicate of an earlier named value record definition.", valueName);
-        return;
     }
 
     vd = (ValueDef *)dnaNEXT(h->valueDefs);
@@ -1486,7 +1485,6 @@ void featAddAnchorDef(short x, short y, unsigned short contourIndex, int hasCont
 
     if (ad != NULL) {
         featMsg(hotFATAL, "Named anchor definition '%s' is a a duplicate of an earlier named anchor definition.", anchorName);
-        return;
     }
 
     ad = (AnchorDef *)dnaNEXT(h->anchorDefs);
@@ -1514,7 +1512,6 @@ static void featAddAnchor(short xVal, short yVal, unsigned short contourIndex, i
 
         if (ad == NULL) {
             featMsg(hotFATAL, "Named anchor reference '%s' is not in list of named anchors.", anchorName);
-            return;
         }
         anchorMarkInfo->x = ad->x;
         anchorMarkInfo->y = ad->y;
@@ -4145,7 +4142,6 @@ static Label featGetLabelIndex(char *name) {
     curr = name2NamedLkp(name);
     if (curr == NULL) {
         featMsg(hotFATAL, "lookup name \"%s\" already defined", name);
-        return -1;
     }
     return curr->state.label;
 }
