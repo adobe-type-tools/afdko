@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef HEAD_H
-#define HEAD_H
+#ifndef HOTCONV_HEAD_H
+#define HOTCONV_HEAD_H
 
 #include "common.h"
 
@@ -18,4 +18,4 @@ void headFree(hotCtx g);
 
 #define HEAD_ADJUST_OFFSET (2 * int32) /* Checksum adjustment offset */
 
-#endif /* HEAD_H */
+#endif /* HOTCONV_HEAD_H */

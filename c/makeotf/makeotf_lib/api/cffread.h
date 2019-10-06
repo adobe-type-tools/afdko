@@ -3,8 +3,8 @@
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef CFFREAD_H
-#define CFFREAD_H
+#ifndef MAKEOTF_CFFREAD_H
+#define MAKEOTF_CFFREAD_H
 
 #include <stddef.h> /* For [u]int32_t */
 #include <stdint.h> /* For size_t */
@@ -417,4 +417,4 @@ void cffFree(cffCtx h);
 /* cffFree() destroys the library context and all the resources allocated to
    it. */
 
-#endif /* CFFREAD_H */
+#endif /* MAKEOTF_CFFREAD_H */

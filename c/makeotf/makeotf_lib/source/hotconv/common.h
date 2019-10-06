@@ -6,8 +6,8 @@
  * Common definitions.
  */
 
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef HOTCONV_COMMON_H
+#define HOTCONV_COMMON_H
 
 #include "hotconv.h"
 #include "dynarr.h"
@@ -461,4 +461,4 @@ char *bcopy(const void *src, void *dst, int len);
 
 #define OVERRIDE(field) ((field) != SHRT_MAX)
 
-#endif /* COMMON_H */
+#endif /* HOTCONV_COMMON_H */

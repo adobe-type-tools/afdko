@@ -7,8 +7,8 @@
  * PostScript font file parser.
  */
 
-#ifndef PARSE_H
-#define PARSE_H
+#ifndef TYPECOMP_PARSE_H
+#define TYPECOMP_PARSE_H
 
 #include "common.h"
 #include "font.h"
@@ -30,4 +30,4 @@ double parseGetItalicAngle(tcCtx g);
 
 #endif /* TC_EURO_SUPPORT */
 
-#endif /* PARSE_H */
+#endif /* TYPECOMP_PARSE_H */

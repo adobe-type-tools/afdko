@@ -6,8 +6,8 @@
  * head table support.
  */
 
-#ifndef HEAD_H
-#define HEAD_H
+#ifndef DHEAD_H
+#define DHEAD_H
 
 #include "Dglobal.h"
 
@@ -23,4 +23,4 @@ extern IntX headGetBBox(Card8 which, Int16 *xMin, Int16 *yMin, Int16 *xMax, Int1
 extern Byte8 *headGetCreatedDate(Card8 which, Card32 client);
 extern Byte8 *headGetModifiedDate(Card8 which, Card32 client);
 
-#endif /* HEAD_H */
+#endif /* DHEAD_H */

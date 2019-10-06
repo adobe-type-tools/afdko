@@ -7,8 +7,8 @@
  */
 
 #include <stdbool.h>
-#ifndef FILE_H
-#define FILE_H
+#ifndef DFILE_H
+#define DFILE_H
 
 extern void fileOpen(Int8 which, Byte8 *filename);
 extern IntX fileIsOpened(Card8 which);
@@ -30,4 +30,4 @@ extern bool isSupportedFontFormat(Card32 value, Byte8 *fname);
 #define SEEK_SURE(which, o)   fileSeekAbsNotBuffered((which), (o))
 #define IN_BYTES(which, c, b) fileReadBytes((which), (c), (b))
 #define IN(which, o)          fileReadObject((which), sizeof(o), &(o))
-#endif /* FILE_H */
+#endif /* DFILE_H */

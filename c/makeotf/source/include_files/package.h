@@ -3,11 +3,11 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0.
 This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef PACKAGE_SPECS_H
-#define PACKAGE_SPECS_H
+#ifndef MAKEOTF_PACKAGE_SPECS_H
+#define MAKEOTF_PACKAGE_SPECS_H
 
 #define TYPECOMP "typecomp.h"
 #define HOTCONV "hotconv.h"
 #define DYNARR "dynarr.h"
 
-#endif /* PACKAGE_SPECS_H */
+#endif /* MAKEOTF_PACKAGE_SPECS_H */

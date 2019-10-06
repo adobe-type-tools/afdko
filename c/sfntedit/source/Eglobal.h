@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef GLOBAL_H
-#define GLOBAL_H
+#ifndef EGLOBAL_H
+#define EGLOBAL_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -62,4 +62,4 @@ extern double strtod(const char *str, char **ptr);
 extern int fprintf(FILE *stream, const char *format, ...);
 */
 
-#endif /* GLOBAL_H */
+#endif /* EGLOBAL_H */

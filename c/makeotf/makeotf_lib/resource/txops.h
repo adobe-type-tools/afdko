@@ -18,8 +18,8 @@
  * t2_  Found in Type 2 only
  */
 
-#ifndef TXOPS_H
-#define TXOPS_H
+#ifndef MAKEOTF_TXOPS_H
+#define MAKEOTF_TXOPS_H
 
 /* ----------------------- One Byte Operators (0-31) ----------------------- */
 
@@ -207,4 +207,4 @@
 #define T1_MAX_OP_STACK     24  /* Max operand stack depth */
 #define T1_MAX_AXES         4   /* Max design axes */
 
-#endif /* TXOPS_H */
+#endif /* MAKEOTF_TXOPS_H */

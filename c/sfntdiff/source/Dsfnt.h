@@ -6,8 +6,8 @@
  * sfnt reading/dumping.
  */
 
-#ifndef SFNT_H
-#define SFNT_H
+#ifndef DSFNT_H
+#define DSFNT_H
 
 #include "Dglobal.h"
 #include "Dopt.h"
@@ -28,4 +28,4 @@ extern void sfntReset(void);
 
 void hexDump(Card8 which, Card32 tag, LongN start, Card32 length);
 void hexDiff(Card32 tag, LongN start1, Card32 length1, LongN start2, Card32 length2);
-#endif /* SFNT_H */
+#endif /* DSFNT_H */

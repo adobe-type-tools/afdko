@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef OPT_H
-#define OPT_H
+#ifndef DOPT_H
+#define DOPT_H
 
 /* Command-line option processing support.
 
@@ -473,4 +473,4 @@ extern opt_Scanner opt_Double; /* (double) */
 extern opt_Scanner opt_Call;   /* void (*function)(void) */
 extern opt_Scanner opt_Flag;   /* no value */
 
-#endif /* OPT_H */
+#endif /* DOPT_H */

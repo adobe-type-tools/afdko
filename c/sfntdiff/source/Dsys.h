@@ -6,8 +6,8 @@
  * Machine dependent file operations.
  */
 
-#ifndef SYS_H
-#define SYS_H
+#ifndef DSYS_H
+#define DSYS_H
 
 #include "Dglobal.h"
 
@@ -30,4 +30,4 @@ IntX sysReadInputDir(Byte8 *dirName, Byte8 ***fileNameList);
 
 #define sysDIRECTORY -111
 
-#endif /* SYS_H */
+#endif /* DSYS_H */

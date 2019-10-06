@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef FVAR_H
-#define FVAR_H
+#ifndef HOTCONV_FVAR_H
+#define HOTCONV_FVAR_H
 
 #include "common.h"
 
@@ -16,4 +16,4 @@ void fvarWrite(hotCtx g);
 void fvarReuse(hotCtx g);
 void fvarFree(hotCtx g);
 
-#endif /* FVAR_H */
+#endif /* HOTCONV_FVAR_H */

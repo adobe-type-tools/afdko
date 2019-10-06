@@ -4,8 +4,8 @@
 
 /* File input support. */
 
-#ifndef FILE_H
-#define FILE_H
+#ifndef EFILE_H
+#define EFILE_H
 
 typedef struct /* File data */
 {
@@ -30,4 +30,4 @@ extern void fileCopy(File *src, File *dst, size_t count);
 /* using a macro for this since strlcpy() is not portable */
 #define STRLCPY(dst, src, dstsize) strncpy(dst, src, dstsize); dst[dstsize - 1] = 0
 
-#endif /* FILE_H */
+#endif /* EFILE_H */
