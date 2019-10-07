@@ -1429,7 +1429,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
     bezString = re.sub(r"%.+?\n", "", bezString)  # supress comments
     bezList = re.findall(r"(\S+)", bezString)
     if not bezList:
-        return "", None, None
+        return "", None
     flexList = []
     # Create an initial hint mask. We use this if
     # there is no explicit initial hint sub.
