@@ -907,7 +907,7 @@ def convertBezToT2(bezString):
 				if int(val1) == val2:
 					argList.append(val2)
 				else:
-					argList.append("% 100 div" % (str(int(val1*100))))
+					argList.append("%s 100 div" % (str(int(val1*100))))
 			except ValueError:
 				argList.append(val1)
 			continue
