@@ -2071,6 +2071,7 @@ def updateFontRevision(featuresPath, fontRevision):
 
     try:
         # get FontRevision from feature file
+        featuresPath = os.path.abspath(featuresPath)
         with open(featuresPath, "r", encoding='utf-8') as fp:
             data = fp.read()
     except (IOError, OSError):
