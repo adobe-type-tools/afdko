@@ -4141,7 +4141,7 @@ static Label featGetLabelIndex(char *name) {
 
     curr = name2NamedLkp(name);
     if (curr == NULL) {
-        featMsg(hotFATAL, "lookup name \"%s\" already defined", name);
+        featMsg(hotFATAL, "lookup name \"%s\" not defined", name);
     }
     return curr->state.label;
 }
