@@ -21,7 +21,6 @@ All coordinates are in points, in the usual PostScript model. Note,.
 however, that the coordinate system for the page puts (0,0) at the top
 right, with the positive Y axis pointing down.
 """
-
 from math import ceil
 import os
 import re
@@ -679,16 +678,16 @@ class FontPDFGlyph:
 
 		for clientMethod in params.sortedMethodsDraw:
 			methodName =  kDrawTag + clientMethod
-			if   eval("params." + methodName):
-				eval("self." + methodName + "(params)")
+			if getattr(params, methodName, 0):
+				getattr(self, methodName)(params)
 
 		rt_canvas.setFont( params.pointLabelFont, params.pointLabelSize)
 		for path  in self.pathList:
 			for pt in path:
 				for clientMethod in params.sortedMethodsDrawPoint:
 					methodName =  kDrawPointTag + clientMethod
-					if  eval("params." + methodName):
-						eval("self." + methodName + "(path, pt, params)")
+					if getattr(params, methodName, 0):
+						getattr(self, methodName)(path, pt, params)
 
 		rt_canvas.restoreState()
 		# back to 1000 em-square coords.
@@ -1136,7 +1135,7 @@ class FontPDFGlyph:
 		rt_canvas.restoreState()
 
 	def drawPoint_PointMarks(self, path, pointPDF , params):
-		eval("self.drawPoint" + pointPDF.type + "(params, pointPDF)")
+		getattr(self, f'drawPoint{pointPDF.type}')(params, pointPDF)
 
 	def drawPointm(self, params, pt):
 		rt_canvas = params.rt_canvas
