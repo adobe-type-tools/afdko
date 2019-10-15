@@ -489,6 +489,24 @@ def test_infinite_loop_with_dflt_lookups_bug965():
                    '    <modified value='])
 
 
+def test_bug993():
+    input_filename = 'fealib/font.pfa'
+    feat_filename = 'bug993/feat.fea'
+    ttx_filename = 'bug993.ttx'
+    actual_path = get_temp_file_path()
+    runner(CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
+                        'ff', f'_{get_input_path(feat_filename)}',
+                        'o', f'_{actual_path}'])
+    actual_ttx = generate_ttx_dump(actual_path, ['GPOS'])
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx,
+                   '-s',
+                   '<ttFont sfntVersion' + SPLIT_MARKER +
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <created value=' + SPLIT_MARKER +
+                   '    <modified value='])
+
+
 TEST_FEATURE_FILES = [
     "Attach", "enum", "markClass", "language_required", "GlyphClassDef",
     "LigatureCaretByIndex", "LigatureCaretByPos", "lookup", "lookupflag",

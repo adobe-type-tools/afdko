@@ -2067,7 +2067,9 @@ static void addPosRule(hotCtx g, GPOSCtx h, SubtableInfo *si, GNode *targ, char 
             while ((nextNode != NULL) && (!(nextNode->flags & FEAT_IS_MARK_NODE))) {
                 nextNode = nextNode->nextSeq;
             }
-            nextNode->lookupLabel = anon_si->label;
+            if (nextNode != NULL) {
+                nextNode->lookupLabel = anon_si->label;
+            }
             /* is contextual */
         } else {
             /* isn't contextual */
