@@ -3,8 +3,9 @@ import glob
 import logging
 import os
 import sys
-from functools import singledispatch
+from functools import partial, singledispatch
 from itertools import chain
+from multiprocessing import Pool
 
 from cu2qu.pens import Cu2QuPen
 from fontTools import configLogger
@@ -89,6 +90,31 @@ def _(fonts, **kwargs):
         otf_to_ttf(font, **kwargs)
 
 
+def run(path, options):
+    with open(path, 'rb') as f:
+        header = f.read(4)
+
+    if header == b'ttcf' and options.face_index == -1:
+        extension = '.ttc'
+        font = TTCollection(path)
+    else:
+        extension = '.ttf'
+        font = TTFont(path, fontNumber=options.face_index)
+
+    if options.output and not os.path.isdir(options.output):
+        output = options.output
+    else:
+        output = makeOutputFileName(path, outputDir=options.output,
+                                    extension=extension,
+                                    overWrite=options.overwrite)
+
+    otf_to_ttf(font,
+               post_format=options.post_format,
+               max_err=options.max_error,
+               reverse_direction=options.reverse_direction)
+    font.save(output)
+
+
 def main(args=None):
     configLogger(logger=log)
 
@@ -110,29 +136,8 @@ def main(args=None):
 
     files = chain.from_iterable(map(glob.glob, options.input))
 
-    for path in files:
-        with open(path, 'rb') as f:
-            header = f.read(4)
-
-        if header == b'ttcf' and options.face_index == -1:
-            extension = '.ttc'
-            font = TTCollection(path)
-        else:
-            extension = '.ttf'
-            font = TTFont(path, fontNumber=options.face_index)
-
-        if options.output and not os.path.isdir(options.output):
-            output = options.output
-        else:
-            output = makeOutputFileName(path, outputDir=options.output,
-                                        extension=extension,
-                                        overWrite=options.overwrite)
-
-        otf_to_ttf(font,
-                   post_format=options.post_format,
-                   max_err=options.max_error,
-                   reverse_direction=options.reverse_direction)
-        font.save(output)
+    with Pool() as pool:
+        pool.map(partial(run, options=options), files)
 
 
 if __name__ == "__main__":
