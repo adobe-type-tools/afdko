@@ -97,7 +97,7 @@ def main(args=None):
     parser.add_argument("--post-format", type=float, default=POST_FORMAT)
     parser.add_argument(
         "--keep-direction", dest='reverse_direction', action='store_false')
-    parser.add_argument("--face-index", type=int, default=0)
+    parser.add_argument("--face-index", type=int, default=-1)
     parser.add_argument("--overwrite", action='store_true')
     options = parser.parse_args(args)
 
