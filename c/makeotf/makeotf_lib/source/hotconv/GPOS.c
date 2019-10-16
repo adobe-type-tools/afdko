@@ -2029,8 +2029,10 @@ static void addPosRule(hotCtx g, GPOSCtx h, SubtableInfo *si, GNode *targ, char 
 
             rule = dnaNEXT(si->rules);
             rule->targ = targ;
-            /*  add the lookupLabel. */
-            nextNode->lookupLabel = anon_si->label;
+            if (nextNode != NULL) {
+                /*  add the lookupLabel. */
+                nextNode->lookupLabel = anon_si->label;
+            }
             /* is contextual */
         } else {
             /* isn't contextual */
