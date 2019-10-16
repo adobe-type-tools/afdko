@@ -2,12 +2,13 @@ import argparse
 import logging
 import os
 import sys
+from functools import singledispatch
 
 from cu2qu.pens import Cu2QuPen
 from fontTools import configLogger
 from fontTools.misc.cliTools import makeOutputFileName
 from fontTools.pens.ttGlyphPen import TTGlyphPen
-from fontTools.ttLib import TTFont, newTable
+from fontTools.ttLib import TTCollection, TTFont, newTable
 
 
 log = logging.getLogger()
@@ -36,6 +37,7 @@ def glyphs_to_quadratic(
     return quadGlyphs
 
 
+@singledispatch
 def otf_to_ttf(ttFont, post_format=POST_FORMAT, **kwargs):
     assert ttFont.sfntVersion == "OTTO"
     assert "CFF " in ttFont
@@ -79,6 +81,12 @@ def otf_to_ttf(ttFont, post_format=POST_FORMAT, **kwargs):
     ttFont.sfntVersion = "\000\001\000\000"
 
 
+@otf_to_ttf.register(TTCollection)
+def _(fonts, **kwargs):
+    for font in fonts:
+        otf_to_ttf(font, **kwargs)
+
+
 def main(args=None):
     configLogger(logger=log)
 
@@ -99,14 +107,23 @@ def main(args=None):
                          "processing multiple fonts")
 
     for path in options.input:
+        with open(path, 'rb') as f:
+            header = f.read(4)
+
+        if header == b'ttcf' and options.face_index == -1:
+            extension = '.ttc'
+            font = TTCollection(path)
+        else:
+            extension = '.ttf'
+            font = TTFont(path, fontNumber=options.face_index)
+
         if options.output and not os.path.isdir(options.output):
             output = options.output
         else:
             output = makeOutputFileName(path, outputDir=options.output,
-                                        extension='.ttf',
+                                        extension=extension,
                                         overWrite=options.overwrite)
 
-        font = TTFont(path, fontNumber=options.face_index)
         otf_to_ttf(font,
                    post_format=options.post_format,
                    max_err=options.max_error,
