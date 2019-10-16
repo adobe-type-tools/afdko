@@ -1,8 +1,10 @@
 import argparse
+import glob
 import logging
 import os
 import sys
 from functools import singledispatch
+from itertools import chain
 
 from cu2qu.pens import Cu2QuPen
 from fontTools import configLogger
@@ -106,7 +108,9 @@ def main(args=None):
             parser.error("-o/--output option must be a directory when "
                          "processing multiple fonts")
 
-    for path in options.input:
+    files = chain.from_iterable(map(glob.glob, options.input))
+
+    for path in files:
         with open(path, 'rb') as f:
             header = f.read(4)
 
