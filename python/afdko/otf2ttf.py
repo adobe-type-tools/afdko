@@ -15,6 +15,7 @@ from fontTools.ttLib import TTCollection, TTFont, newTable
 
 
 log = logging.getLogger()
+configLogger(logger=log)
 
 # default approximation error, measured in UPEM
 MAX_ERR = 1.0
@@ -116,8 +117,6 @@ def run(path, options):
 
 
 def main(args=None):
-    configLogger(logger=log)
-
     parser = argparse.ArgumentParser()
     parser.add_argument("input", nargs='+', metavar="INPUT")
     parser.add_argument("-o", "--output")
