@@ -11,8 +11,7 @@ from cu2qu.pens import Cu2QuPen
 from fontTools import configLogger
 from fontTools.misc.cliTools import makeOutputFileName
 from fontTools.pens.ttGlyphPen import TTGlyphPen
-from fontTools.ttLib import TTCollection, TTFont, newTable
-
+from fontTools.ttLib import TTCollection, TTFont, TTLibError, newTable
 
 log = logging.getLogger()
 configLogger(logger=log)
@@ -43,7 +42,8 @@ def glyphs_to_quadratic(
 
 @singledispatch
 def otf_to_ttf(ttFont, post_format=POST_FORMAT, **kwargs):
-    assert ttFont.sfntVersion == "OTTO"
+    if ttFont.sfntVersion != "OTTO":
+        raise TTLibError("Not a OpenType font (bad sfntVersion)")
     assert "CFF " in ttFont
 
     glyphOrder = ttFont.getGlyphOrder()
@@ -109,11 +109,15 @@ def run(path, options):
                                     extension=extension,
                                     overWrite=options.overwrite)
 
-    otf_to_ttf(font,
-               post_format=options.post_format,
-               max_err=options.max_error,
-               reverse_direction=options.reverse_direction)
-    font.save(output)
+    try:
+        otf_to_ttf(font,
+                   post_format=options.post_format,
+                   max_err=options.max_error,
+                   reverse_direction=options.reverse_direction)
+    except TTLibError as warn:
+        log.warning(f'"{path}" cannot be converted since it is {warn}.')
+    else:
+        font.save(output)
 
 
 def main(args=None):
