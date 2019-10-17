@@ -2067,7 +2067,9 @@ static void addPosRule(hotCtx g, GPOSCtx h, SubtableInfo *si, GNode *targ, char 
 
             rule = dnaNEXT(si->rules);
             rule->targ = targ;
-            nextNode->lookupLabel = anon_si->label;
+            if (nextNode != NULL) {
+                nextNode->lookupLabel = anon_si->label;
+            }
         } else {
             /* isn't contextual */
             GPOSAddMark(g, si, targ, anchorCount, anchorMarkInfo, fileName, lineNum);
