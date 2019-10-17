@@ -2032,6 +2032,8 @@ static void addPosRule(hotCtx g, GPOSCtx h, SubtableInfo *si, GNode *targ, char 
             if (nextNode != NULL) {
                 /*  add the lookupLabel. */
                 nextNode->lookupLabel = anon_si->label;
+            } else {
+                hotMsg(g, hotFATAL, "aborting due to unexpected NULL nextNode pointer");
             }
             /* is contextual */
         } else {
@@ -2069,6 +2071,8 @@ static void addPosRule(hotCtx g, GPOSCtx h, SubtableInfo *si, GNode *targ, char 
             rule->targ = targ;
             if (nextNode != NULL) {
                 nextNode->lookupLabel = anon_si->label;
+            } else {
+                hotMsg(g, hotFATAL, "aborting due to unexpected NULL nextNode pointer");
             }
         } else {
             /* isn't contextual */
