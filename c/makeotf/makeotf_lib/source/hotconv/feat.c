@@ -4496,15 +4496,6 @@ void featFree(hotCtx g) {
     MEM_FREE(g, g->ctx.feat);
 }
 
-int featDefined(hotCtx g, Tag feat) {
-#if HOT_FEAT_SUPPORT
-    featCtx h = g->ctx.feat;
-    return featFileExists(g) && tagDefined(feat, &h->feature);
-#else
-    return 0;
-#endif
-}
-
 #if HOT_FEAT_SUPPORT
 #if HOT_DEBUG
 /* This function just serves to suppress annoying "defined but not used"
