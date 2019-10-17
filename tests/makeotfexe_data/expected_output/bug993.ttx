@@ -25,7 +25,11 @@
             <Glyph value="u"/>
           </InputCoverage>
           <!-- LookAheadGlyphCount=0 -->
-          <!-- PosCount=0 -->
+          <!-- PosCount=1 -->
+          <PosLookupRecord index="0">
+            <SequenceIndex value="0"/>
+            <LookupListIndex value="1"/>
+          </PosLookupRecord>
         </ChainContextPos>
       </Lookup>
       <Lookup index="1">
