@@ -3935,7 +3935,7 @@ static void addPos(GNode *targ, int type, int enumerate) {
                 prevNode = markClassNode;
                 markClassNode = markClassNode->nextSeq;
             }
-            if (markClassNode->flags & FEAT_IS_MARK_NODE) {
+            if ((markClassNode != NULL) && (markClassNode->flags & FEAT_IS_MARK_NODE)) {
                 featGlyphClassCopy(h->g, &copyHeadNode, markClassNode);
                 markClassNode = copyHeadNode;
                 featGlyphClassSort(g, &markClassNode, 1, 0); /* changes value of markClassNode. I specify to NOT warn of duplicates, because they can happen with correct syntax. */
