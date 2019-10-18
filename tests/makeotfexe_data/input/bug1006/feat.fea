@@ -1,0 +1,5 @@
+markClass [acute grave] <anchor 500 700> @TOP_MARKS;
+lookup test {
+    pos ligature c c_t' t <anchor 500 800> mark @TOP_MARKS
+        ligComponent <anchor 1500 800> mark @TOP_MARKS;
+} test;

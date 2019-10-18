@@ -507,6 +507,24 @@ def test_bug993():
                    '    <modified value='])
 
 
+def test_bug1006():
+    input_filename = 'fealib/font.pfa'
+    feat_filename = 'bug1006/feat.fea'
+    ttx_filename = 'bug1006.ttx'
+    actual_path = get_temp_file_path()
+    runner(CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
+                        'ff', f'_{get_input_path(feat_filename)}',
+                        'o', f'_{actual_path}'])
+    actual_ttx = generate_ttx_dump(actual_path, ['GPOS'])
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx,
+                   '-s',
+                   '<ttFont sfntVersion' + SPLIT_MARKER +
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <created value=' + SPLIT_MARKER +
+                   '    <modified value='])
+
+
 TEST_FEATURE_FILES = [
     "Attach", "enum", "markClass", "language_required", "GlyphClassDef",
     "LigatureCaretByIndex", "LigatureCaretByPos", "lookup", "lookupflag",
