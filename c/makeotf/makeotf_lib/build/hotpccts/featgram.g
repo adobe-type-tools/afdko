@@ -31,8 +31,8 @@ extern hotCtx g;
 
 typedef union
 	{
-	long lval;
-	unsigned long ulval;
+	int64_t lval;
+	uint64_t ulval;
 	char text[MAX_TOKEN];
 	} Attrib;
 
@@ -457,13 +457,13 @@ numUInt32Ext>[unsigned value]
 	:	<<$value = 0; /* Suppress optimizer warning */
 		  h->linenum = zzline;>>
 		m:T_NUMEXT	<<
-					if ( $m.ulval > ((unsigned long)0xFFFFFFFF))
+					if ( $m.ulval > 0xFFFFFFFFu)
 						zzerr("not in range 0 .. ((1<<32) -1)");
 					$value = (unsigned)($m).ulval;
 					>>
 		|
 		n:T_NUM		<<
-					if ($n.ulval > ((unsigned long)0xFFFFFFFF))
+					if ($n.ulval > 0xFFFFFFFFu)
 						zzerr("not in range 0 .. ((1<<32) -1)");
 					$value = (unsigned)($n).ulval;
 					>>
