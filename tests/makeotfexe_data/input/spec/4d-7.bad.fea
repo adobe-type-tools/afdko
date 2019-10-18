@@ -1,0 +1,7 @@
+# Zero value in MarkAttachmentType.
+
+@TOP_MARKS = [acute grave macron];
+lookup test {
+  lookupflag MarkAttachmentType 0;
+  sub f i by f_i;
+} test;

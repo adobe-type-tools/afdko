@@ -1,0 +1,6 @@
+# Missing glyph in range.
+@A = [A.alt4-A.alt6];
+@B = [B.alt1-B.alt3];
+feature liga {
+    sub @A by @B;
+} liga;

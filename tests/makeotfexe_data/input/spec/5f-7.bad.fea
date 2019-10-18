@@ -1,0 +1,5 @@
+# Test many to many.
+
+lookup test {
+  sub f' i' by f i;
+} test;

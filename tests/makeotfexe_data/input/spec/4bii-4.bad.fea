@@ -1,0 +1,5 @@
+# Test not allowed script in aalt feature.
+feature aalt {
+    script DFLT;
+    sub A by B;
+} aalt;

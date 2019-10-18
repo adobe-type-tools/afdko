@@ -1,0 +1,5 @@
+#  Ignore followed by wrong keyword.
+@Y_LC = [y yacute ydieresis];
+lookup test {
+  ignore enum pos @Y_LC A -80;
+} test;

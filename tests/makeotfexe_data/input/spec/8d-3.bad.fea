@@ -1,0 +1,29 @@
+feature cv01 {
+  cvParameters {
+    FeatUILabelNameID {
+      name 3 1 0x0409 "uilabel simple a";
+      name 1 0 0 "uilabel simple a";
+    };
+    FeatUITooltipTextNameID {
+      name 3 1 0x0409 "tool tip simple a";
+      name 1 0 0 "tool tip simple a";
+    };
+    SampleTextNameID {
+      name 3 1 0x0409 "sample text simple a";
+    };
+    SampleTextNameID {
+      name 1 0 0 "sample text simple a";
+    };
+    ParamUILabelNameID {
+      name 3 1 0x0409 "param1 text simple a";
+      name 1 0 0 "param1 text simple a";
+    };
+    ParamUILabelNameID {
+      name 3 1 0x0409 "param2 text simple a";
+      name 1 0 0 "param2 text simple a";
+    };
+    Character 10;
+    Character 0x5DDE;
+  };
+    sub A by B;
+} cv01;

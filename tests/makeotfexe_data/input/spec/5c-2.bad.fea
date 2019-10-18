@@ -1,0 +1,4 @@
+# Alt target must be unmarked glyph.
+lookup test {
+    sub A' from [A.alt1 A.alt2];
+} test;

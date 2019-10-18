@@ -1,0 +1,9 @@
+# Test not allowed language in standalone lookup
+lookup liga1 {
+    language ENG;
+    sub f i by f_i;
+} liga1;
+
+feature liga {
+    lookup liga1;
+} liga;

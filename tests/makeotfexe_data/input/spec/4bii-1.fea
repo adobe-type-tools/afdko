@@ -1,0 +1,34 @@
+# Test deprecated includeDFLT and excludeDFLT.
+
+languagesystem DFLT dflt;
+languagesystem latn dflt;
+languagesystem latn DEU;
+languagesystem cyrl dflt;
+languagesystem cyrl SRB;
+languagesystem grek dflt;
+
+feature liga {
+    lookup HAS_I {
+        sub f f i by f_f_i;
+        sub f i by f_i;
+    } HAS_I;
+
+    lookup NO_I {
+        sub f f l by f_f_l;
+        sub f f by f_f;
+    } NO_I;
+
+    script latn;
+    language dflt;
+    sub f l by f_l;
+
+    language DEU includeDFLT;
+    sub s s by germandbls;
+
+    language TRK excludeDFLT;
+    lookup NO_I;
+
+    script cyrl;
+    language SRB;
+    sub c t by c_t;
+} liga;

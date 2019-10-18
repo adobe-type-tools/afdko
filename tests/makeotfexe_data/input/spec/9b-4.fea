@@ -1,0 +1,5 @@
+# Test automatic GDEF table
+feature liga {
+    lookupflag IgnoreMarks;
+    sub f i by f_i;
+} liga;

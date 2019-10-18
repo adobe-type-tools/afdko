@@ -1,0 +1,6 @@
+# Bad anchor.
+anchorDef 1 2 ANCH12;
+markClass [acute grave] <anchor 150 -10> @TOP_MARKS;
+lookup mark1 {
+    pos base [a e o u] <anchor @ANCH12> mark @TOP_MARKS;
+} mark1;

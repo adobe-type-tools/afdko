@@ -1,0 +1,9 @@
+# Unicode name platform.
+feature cv01 {
+    cvParameters {
+      FeatUILabelNameID {
+        name 0 "Feature description for Unicode Platform.";
+      };
+    };
+    sub A by B;
+} cv01;

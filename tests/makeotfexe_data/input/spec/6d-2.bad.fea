@@ -1,0 +1,5 @@
+# Test undefined markClass.
+
+feature mark {
+  position base [a e o u] <anchor 250 450> mark @TOP_MARKS;
+} mark;

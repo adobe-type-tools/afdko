@@ -1,0 +1,5 @@
+# Test marking the first glyph in ingore statement if none is marked.
+feature rlig {
+    ignore sub A B;
+    sub A' by A.alt1;
+} rlig;

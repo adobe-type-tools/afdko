@@ -1,0 +1,8 @@
+# Test wrong dflt script.
+
+languagesystem latn ENG;
+
+feature liga {
+  script dflt;
+    sub f l by f_l;
+} liga;

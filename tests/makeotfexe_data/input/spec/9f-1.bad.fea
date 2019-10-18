@@ -1,0 +1,4 @@
+# Test bad OS/2 Unicode range
+table OS/2 {
+    UnicodeRange -1;
+} OS/2;

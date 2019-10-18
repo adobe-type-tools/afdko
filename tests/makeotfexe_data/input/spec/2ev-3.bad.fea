@@ -1,0 +1,8 @@
+# Test undefined named value record.
+
+valueRecordDef -10 KERNA;
+valueRecordDef -20 KERNB;
+
+feature kern {
+  pos A B <KERN>;
+} kern;

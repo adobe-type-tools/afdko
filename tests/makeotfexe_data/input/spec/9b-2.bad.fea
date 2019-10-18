@@ -1,0 +1,5 @@
+# Test multiple glyphs in Attach statement
+
+table GDEF {
+  LigatureCaretByIndex c_t s_t 11;
+} GDEF;

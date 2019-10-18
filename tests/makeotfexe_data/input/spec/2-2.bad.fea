@@ -1,0 +1,5 @@
+# Test mismatching feature tags.
+
+feature liga {
+ sub f i by f_i;
+} rlig; 

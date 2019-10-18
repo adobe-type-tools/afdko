@@ -1,0 +1,4 @@
+# Bad name.
+feature size {
+  sizemenuname 3 Feature description;
+} size;

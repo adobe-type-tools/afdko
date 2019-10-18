@@ -1,0 +1,6 @@
+# Test duplicate glyphs in class
+@A = [A.alt1-A.alt3 A.alt1];
+@B = [B.alt1-B.alt3];
+feature kern {
+    pos @A @B -10;
+} kern;

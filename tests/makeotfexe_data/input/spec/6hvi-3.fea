@@ -1,0 +1,5 @@
+# Comma syntax in ignore pos.
+feature test {
+    ignore pos f [a e] d, a d d;
+    pos [a e n] d' -20;
+} test;

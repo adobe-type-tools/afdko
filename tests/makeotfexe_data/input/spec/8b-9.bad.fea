@@ -1,0 +1,4 @@
+# Unicode name platform.
+feature size {
+  sizemenuname 0 "Feature description for Unicode Platform.";
+} size;

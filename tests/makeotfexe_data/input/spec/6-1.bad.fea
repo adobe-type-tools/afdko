@@ -1,0 +1,4 @@
+# No glyph before value record.
+lookup test {
+ pos <0 0 10 0>;
+} test;

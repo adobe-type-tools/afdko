@@ -1,0 +1,7 @@
+# Table inside feature.
+feature liga {
+  table name {
+    nameid 10 "Test";
+  } name;
+  sub A by B;
+} liga;

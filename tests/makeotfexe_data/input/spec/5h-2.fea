@@ -1,0 +1,6 @@
+# Test ignore rsub.
+
+feature rlig {
+ ignore rsub A [B];
+ rsub A' by A.alt1;
+} rlig;

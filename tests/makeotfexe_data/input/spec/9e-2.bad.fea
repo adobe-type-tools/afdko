@@ -1,0 +1,5 @@
+# Bad nameid
+table name {
+  nameid 65536 "Test";
+} name;
+

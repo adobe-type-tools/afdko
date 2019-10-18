@@ -1,3 +1,5 @@
+import glob
+import os
 import pytest
 import subprocess
 
@@ -597,3 +599,43 @@ def test_feature_file(name):
         if name in TEST_FEATURE_FILES_XFAIL:
             pytest.xfail()
         raise
+
+
+@pytest.mark.parametrize('path', glob.glob(get_input_path("spec/*.fea")))
+def test_spec(path):
+    name = os.path.splitext(os.path.basename(path))[0]
+    if ".cid" in name:
+        input_filename = "spec/fontcid.ps"
+    else:
+        input_filename = "spec/font.pfa"
+    feat_filename = f"spec/{name}.fea"
+    ttx_filename = f"spec/{name}.ttx"
+    cmap_filename = f"spec/Identity-H"
+    actual_path = get_temp_file_path()
+
+    cmd = CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
+                       'ff', f'_{get_input_path(feat_filename)}',
+                       'o', f'_{actual_path}',
+                       'ch', f'_{get_input_path(cmap_filename)}']
+
+    if name.endswith(".bad"):
+        with pytest.raises(subprocess.CalledProcessError):
+            runner(cmd)
+        return
+    runner(cmd)
+
+    tables = TEST_TABLES
+    with open(get_input_path(feat_filename)) as fp:
+        line = fp.readline()
+        if line.startswith("#") and "TABLES" in line:
+            tables = line.split("# TABLES:")[1].strip().split(",")
+
+    actual_ttx = generate_ttx_dump(actual_path, tables)
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx, '-l', '2',
+                   '-s',
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <created value=' + SPLIT_MARKER +
+                   '    <modified value=',
+                   '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])

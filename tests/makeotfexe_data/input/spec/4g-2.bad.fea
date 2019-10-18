@@ -1,0 +1,6 @@
+# Test not allowed subtable in size feature.
+feature size {
+    sub A by A.alt1;
+    subtable;
+    sub B by B.alt1;
+} size;

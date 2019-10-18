@@ -1,0 +1,9 @@
+# Test mixing replacement rule and direct lookup.
+
+lookup test {
+  sub A by A.sc;
+} test;
+
+lookup test2 {
+  sub A' lookup test B' by B.sc;
+} test2;

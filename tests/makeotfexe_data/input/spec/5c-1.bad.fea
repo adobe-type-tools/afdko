@@ -1,0 +1,5 @@
+# Alt target must be single glyph.
+
+lookup test {
+  sub a b from [A B];
+} test;

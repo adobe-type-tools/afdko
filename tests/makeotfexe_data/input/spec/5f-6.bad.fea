@@ -1,0 +1,5 @@
+# Test marking replacement.
+
+lookup test {
+  sub f_i' by f i';
+} test;
