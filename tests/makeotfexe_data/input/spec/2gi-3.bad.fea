@@ -1,0 +1,8 @@
+# Test invalid glyph ranges, glyph names are of different length.
+
+@A = [A  - A.alt3];
+@B = [B.alt1 - B.alt3];
+
+feature liga {
+  sub @A by @B;
+} liga;

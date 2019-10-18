@@ -1,0 +1,9 @@
+# Bad name.
+feature cv01 {
+    cvParameters {
+      FeatUILabelNameID {
+        name 3 Feature description;
+      };
+    };
+    sub A by B;
+} cv01;

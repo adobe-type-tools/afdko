@@ -1,0 +1,4 @@
+# Bad metric.
+lookup test {
+   pos A B 32768;
+} test;

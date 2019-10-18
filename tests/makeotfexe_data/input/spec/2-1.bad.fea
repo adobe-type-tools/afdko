@@ -1,0 +1,5 @@
+# Test mismatching table tags.
+
+table head {
+ FontRevision 1.0;
+} vead; 

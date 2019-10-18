@@ -1,0 +1,7 @@
+# Bad syntax.
+feature liga {
+  lookup test useExtension {
+    sub f i by f_i;
+  } test;
+  lookup test;
+} liga;

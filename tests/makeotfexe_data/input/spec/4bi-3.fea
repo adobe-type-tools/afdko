@@ -1,0 +1,6 @@
+# Test duplicate language system.
+languagesystem latn dflt;
+languagesystem latn dflt;
+feature liga {
+    sub f l by f_l;
+} liga;

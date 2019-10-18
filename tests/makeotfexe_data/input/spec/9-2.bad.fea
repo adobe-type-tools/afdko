@@ -1,0 +1,5 @@
+# Unknown table tag.
+table base {
+    HorizAxis.BaseTagList     ideo romn;
+    HorizAxis.BaseScriptList  latn romn   -120    0;
+} base;

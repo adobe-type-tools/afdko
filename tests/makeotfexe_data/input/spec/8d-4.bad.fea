@@ -1,0 +1,7 @@
+# Bad character.
+feature cv01 {
+  cvParameters {
+    Character 4294967296;
+  };
+    sub A by B;
+} cv01;

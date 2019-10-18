@@ -1,0 +1,7 @@
+# Test redefining name glyph class.
+@Vowels.lc = [a e i];
+@Vowels.lc = [a e i o u];
+@Vowels.uc = [A E I O U];
+feature liga {
+    sub @Vowels.lc by @Vowels.uc;
+} liga;

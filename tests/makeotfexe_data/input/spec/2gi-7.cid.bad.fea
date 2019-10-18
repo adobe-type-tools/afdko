@@ -1,0 +1,8 @@
+# Test invalid glyph ranges, CID last > first.
+
+@A = [\120 - \118];
+@B = [\121 - \123];
+
+feature liga {
+  sub @A by @B;
+} liga;

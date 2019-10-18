@@ -1,0 +1,6 @@
+# Test CID glyph ranges.
+@A = [\118-\120];
+@B = [\121-\123];
+feature liga {
+    sub @A by @B;
+} liga;

@@ -1,0 +1,122 @@
+# Test more than 16 glyph classes in MarkAttachmentType.
+@A = [A];
+@B = [B];
+@C = [C];
+@D = [D];
+@E = [E];
+@F = [F];
+@G = [G];
+@H = [H];
+@I = [I];
+@G = [G];
+@K = [K];
+@L = [L];
+@M = [M];
+@N = [N];
+@O = [O];
+@P = [P];
+@Q = [Q];
+lookup liga01 {
+    lookupflag MarkAttachmentType @A;
+    sub a by b;
+} liga01;
+
+lookup liga02 {
+    lookupflag MarkAttachmentType @B;
+    sub b by b;
+} liga02;
+
+lookup liga03 {
+    lookupflag MarkAttachmentType @C;
+    sub c by b;
+} liga03;
+
+lookup liga04 {
+    lookupflag MarkAttachmentType @D;
+    sub d by b;
+} liga04;
+
+lookup liga05 {
+    lookupflag MarkAttachmentType @E;
+    sub e by b;
+} liga05;
+
+lookup liga06 {
+    lookupflag MarkAttachmentType @F;
+    sub f by b;
+} liga06;
+
+lookup liga07 {
+    lookupflag MarkAttachmentType @G;
+    sub g by b;
+} liga07;
+
+lookup liga08 {
+    lookupflag MarkAttachmentType @H;
+    sub h by b;
+} liga08;
+
+lookup liga09 {
+    lookupflag MarkAttachmentType @I;
+    sub i by b;
+} liga09;
+
+lookup liga10 {
+    lookupflag MarkAttachmentType @G;
+    sub g by b;
+} liga10;
+
+lookup liga11 {
+    lookupflag MarkAttachmentType @K;
+    sub k by b;
+} liga11;
+
+lookup liga12 {
+    lookupflag MarkAttachmentType @L;
+    sub l by b;
+} liga12;
+
+lookup liga13 {
+    lookupflag MarkAttachmentType @M;
+    sub m by b;
+} liga13;
+
+lookup liga14 {
+    lookupflag MarkAttachmentType @N;
+    sub n by b;
+} liga14;
+
+lookup liga15 {
+    lookupflag MarkAttachmentType @O;
+    sub o by b;
+} liga15;
+
+lookup liga16 {
+    lookupflag MarkAttachmentType @P;
+    sub p by b;
+} liga16;
+
+lookup liga17 {
+    lookupflag MarkAttachmentType @Q;
+    sub q by b;
+} liga17;
+
+feature liga {
+    lookup liga01;
+    lookup liga02;
+    lookup liga03;
+    lookup liga04;
+    lookup liga05;
+    lookup liga06;
+    lookup liga07;
+    lookup liga08;
+    lookup liga09;
+    lookup liga10;
+    lookup liga11;
+    lookup liga12;
+    lookup liga13;
+    lookup liga14;
+    lookup liga15;
+    lookup liga16;
+    lookup liga17;
+} liga;

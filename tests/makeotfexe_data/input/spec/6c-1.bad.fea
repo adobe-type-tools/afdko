@@ -1,0 +1,9 @@
+# Cursive takes exactly two anchors.
+
+anchorDef 1 2 ANCH12;
+anchorDef 3 4 ANCH34;
+anchorDef 5 6 ANCH56;
+
+feature kern {
+    pos cursive one <anchor ANCH12> <anchor ANCH34> <anchor ANCH56>;
+} kern;

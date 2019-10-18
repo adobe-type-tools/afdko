@@ -1,0 +1,4 @@
+table BASE {
+    VertAxis.BaseTagList ideo romn;
+    VertAxis.BaseScriptList latn romn -120 0, cyrl romn -120 0, grek romn -120 0, hani ideo -120 0, kana ideo -120 0, hang ideo -120 0;
+} BASE;

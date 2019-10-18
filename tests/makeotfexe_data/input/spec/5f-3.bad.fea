@@ -1,0 +1,5 @@
+# Test contextual substitution clause must have a replacement.
+
+lookup test {
+  sub A';
+} test;

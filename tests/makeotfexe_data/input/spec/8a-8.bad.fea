@@ -1,0 +1,8 @@
+# Test lookup not allowed in aalt feature
+feature aalt {
+    lookup test {
+        sub A by A.sc;
+    } test;
+
+    lookup test;
+} aalt;

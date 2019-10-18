@@ -1,0 +1,5 @@
+table hhea {
+    VertTypoAscender 500;
+    VertTypoDescender -500;
+    VertTypoLineGap 1000;
+} hhea;

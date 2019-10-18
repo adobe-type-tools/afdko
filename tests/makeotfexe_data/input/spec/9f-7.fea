@@ -1,0 +1,5 @@
+# TABLES: OS/2
+# Test too short vendor string.
+table OS/2 {
+    Vendor "AB";
+} OS/2;

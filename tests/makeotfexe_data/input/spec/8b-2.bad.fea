@@ -1,0 +1,9 @@
+# Test lookupflag in size feature.
+
+feature size {
+  lookupflag 0;
+  parameters 10.0 3 80 139;
+  sizemenuname "Win MinionPro Size Name";
+  sizemenuname 1 "Mac MinionPro Size Name";
+  sizemenuname 1 21 0 "Mac MinionPro Size Name";
+} size;

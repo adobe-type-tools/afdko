@@ -1,0 +1,9 @@
+# Test mismatching lookup tags.
+
+lookup liga1 {
+ sub f i by f_i;
+} liga2;
+
+feature liga {
+ lookup liga1;
+} rlig; 

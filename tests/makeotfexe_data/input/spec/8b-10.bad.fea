@@ -1,0 +1,4 @@
+# Bad name.
+feature size {
+  sizemenuname 3 1 0x0409 Feature description;
+} size;

@@ -1,0 +1,8 @@
+# Test aalt inside aalt.
+feature aalt {
+    feature aalt;
+} aalt;
+
+feature aalt {
+    sub A by B;
+} aalt;

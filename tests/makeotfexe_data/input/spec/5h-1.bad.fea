@@ -1,0 +1,5 @@
+# Test mismatched glyph count
+
+lookup test {
+  rsub [A B C]' f by [A.sc B.sc];
+} test;

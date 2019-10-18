@@ -1,0 +1,5 @@
+# Bad nameid
+table name {
+  nameid -1 "Test";
+} name;
+

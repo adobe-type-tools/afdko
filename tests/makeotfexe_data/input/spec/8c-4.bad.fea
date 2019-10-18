@@ -1,0 +1,7 @@
+# Bad name.
+feature ss01 {
+    featureNames {
+        name 3 Feature description;
+    };
+    sub A by B;
+} ss01;

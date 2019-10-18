@@ -1,0 +1,12 @@
+# Test aalt with feature using standalone lookups.
+feature aalt {
+    feature liga;
+} aalt;
+
+lookup test {
+    sub f i by f_i;
+} test;
+
+feature liga {
+    lookup test;
+} liga;

@@ -1,0 +1,17 @@
+# Test that only single and alternate substitutions are allowed in aalt, and
+# sorting the rules inside aalt feature.
+feature aalt {
+    sub A by A.sc;
+    sub B from [A.alt1 B.alt2 B.sc];
+    sub B from [A.alt1 B.alt2 B.sc];
+    sub A from [A.alt1 A.alt2 A.sc];
+    # ignored
+    sub a' b by A;
+    # ignored
+    sub f' i' by f_i;
+    sub a by b;
+    # ignored
+    sub f i by f_i;
+    # ignored
+    pos a 10;
+} aalt;

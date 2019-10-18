@@ -1,0 +1,7 @@
+# Test "language-specific behavior already specified".
+languagesystem DFLT ENG;
+feature liga {
+    script DFLT;
+    language ENG;
+    sub f l by f_l;
+} liga;

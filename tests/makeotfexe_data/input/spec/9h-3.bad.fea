@@ -1,0 +1,8 @@
+# TABLES: vmtx
+# Redefined VertAdvanceY
+
+table vmtx {
+    VertOriginY A 864;
+    VertAdvanceY A 964;
+    VertAdvanceY A 0;
+} vmtx;

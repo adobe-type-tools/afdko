@@ -1,0 +1,8 @@
+# Test already defined lookup name.
+lookup test {
+    sub a by b;
+} test;
+
+lookup test {
+    sub b by c;
+} test;

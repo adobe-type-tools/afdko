@@ -1,0 +1,4 @@
+# Bad keyword.
+table name {
+  name 10 3 "Feature description";
+} name;

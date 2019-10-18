@@ -1,0 +1,8 @@
+table BASE {
+    HorizAxis.BaseTagList     ideo romn;
+    HorizAxis.BaseScriptList  latn romn   -120    0;
+    VertAxis.BaseTagList      ideo romn;
+    VertAxis.BaseScriptList   latn romn   -120    0;
+    HorizAxis.BaseTagList     ideo romn;
+    HorizAxis.BaseScriptList  latn romn   -120    0;
+} BASE;

@@ -1,0 +1,8 @@
+# Test  feature parameter is supported only for the 'size' feature.
+
+feature ss01 {
+   parameters 10.0 3 80 139;
+   sizemenuname "Win MinionPro Size Name";
+   sizemenuname 1 "Mac MinionPro Size Name";
+   sizemenuname 1 21 0 "Mac MinionPro Size Name";
+} ss01;

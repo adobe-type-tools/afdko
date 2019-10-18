@@ -1,0 +1,6 @@
+# Test marking the first glyph in ingore statement if none is marked.
+feature test {
+    ignore pos f [a e] d;
+    ignore pos a d d;
+    pos [a e n] d' -20;
+} test;

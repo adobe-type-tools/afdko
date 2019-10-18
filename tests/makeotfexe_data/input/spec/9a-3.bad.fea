@@ -1,0 +1,5 @@
+# Bad syntax.
+table BASE {
+    BaseTagList    romn;
+    HorizAxis.BaseScriptList latn romn -120;
+} BASE;
