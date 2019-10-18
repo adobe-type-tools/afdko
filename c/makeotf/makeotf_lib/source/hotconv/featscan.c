@@ -34,8 +34,8 @@ extern featCtx h; /* Not reentrant; see featNew() comments */
 extern hotCtx g;
 
 typedef union {
-    long lval;
-    unsigned long ulval;
+    int64_t lval;
+    uint64_t ulval;
     char text[MAX_TOKEN];
 } Attrib;
 

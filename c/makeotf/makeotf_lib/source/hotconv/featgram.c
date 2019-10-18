@@ -35,8 +35,8 @@ extern featCtx h; /* Not reentrant; see featNew() comments */
 extern hotCtx g;
 
 typedef union {
-    long lval;
-    unsigned long ulval;
+    int64_t lval;
+    uint64_t ulval;
     char text[MAX_TOKEN];
 } Attrib;
 
@@ -476,7 +476,7 @@ numUInt32Ext()
             zzmatch(T_NUMEXT);
             m = zzaCur;
 
-            if (m.ulval > ((unsigned long)0xFFFFFFFF))
+            if (m.ulval > 0xFFFFFFFFu)
                 zzerr("not in range 0 .. ((1<<32) -1)");
             _retv = (unsigned)(m).ulval;
             zzCONSUME;
@@ -486,7 +486,7 @@ numUInt32Ext()
                 zzmatch(T_NUM);
                 n = zzaCur;
 
-                if (n.ulval > ((unsigned long)0xFFFFFFFF))
+                if (n.ulval > 0xFFFFFFFFu)
                     zzerr("not in range 0 .. ((1<<32) -1)");
                 _retv = (unsigned)(n).ulval;
                 zzCONSUME;
