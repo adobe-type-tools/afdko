@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont sfntVersion="OTTO" ttLibVersion="4.0">
+
+  <CFF2>
+    <major value="2"/>
+    <minor value="0"/>
+    <CFFFont name="CFF2Font">
+      <FontMatrix value="0.001 0 0 0.001 0 0"/>
+      <FDArray>
+        <FontDict index="0">
+          <Private>
+            <BlueValues value="0 0"/>
+            <BlueScale value="0.039625"/>
+            <BlueShift value="7"/>
+            <BlueFuzz value="1"/>
+          </Private>
+        </FontDict>
+      </FDArray>
+      <CharStrings>
+        <CharString name=".notdef">
+          0 50 600 50 hstem
+          0 50 400 50 vstem
+          0 hmoveto
+          500 700 -500 -700 hlineto
+          250 395 rmoveto
+          -170 255 340 0 -170 -255 rlineto
+          30 -45 rmoveto
+          170 255 0 -510 -170 255 rlineto
+          -200 -300 rmoveto
+          170 255 170 -255 rlineto
+          -340 hlineto
+          -30 555 rmoveto
+          170 -255 -170 -255 rlineto
+          510 vlineto
+        </CharString>
+        <CharString name="a">
+          100 200 rmoveto
+          300 hlineto
+          59 102 -59 -2 2 blend
+          0 100 -59 98 59 2 2 blend
+          rrcurveto
+          -300 -300 hlineto
+        </CharString>
+      </CharStrings>
+      <VarStore Format="1">
+        <Format value="1"/>
+        <VarRegionList>
+          <!-- RegionAxisCount=1 -->
+          <!-- RegionCount=1 -->
+          <Region index="0">
+            <VarRegionAxis index="0">
+              <StartCoord value="-1.0"/>
+              <PeakCoord value="-1.0"/>
+              <EndCoord value="0.0"/>
+            </VarRegionAxis>
+          </Region>
+        </VarRegionList>
+        <!-- VarDataCount=1 -->
+        <VarData index="0">
+          <!-- ItemCount=0 -->
+          <NumShorts value="0"/>
+          <!-- VarRegionCount=1 -->
+          <VarRegionIndex index="0" value="0"/>
+        </VarData>
+      </VarStore>
+    </CFFFont>
+
+    <GlobalSubrs>
+      <!-- The 'index' attribute is only for humans; it is ignored when parsed. -->
+    </GlobalSubrs>
+  </CFF2>
+
+</ttFont>
