@@ -84,3 +84,32 @@ def test_subset_vf():
     actual_ttx = generate_ttx_dump(actual_path, ['GSUB'])
     expected_ttx = get_expected_path('bug817.ttx')
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
+def test_bug1003(capfd):
+    """
+    Check that "the input set requires compatibilization" message is in
+    stderr when run without '-c' option.
+    """
+    input_dir = get_input_path('bug1003')
+    temp_dir = get_temp_dir_path('bug1003var')
+    copytree(input_dir, temp_dir)
+    ds_path = os.path.join(temp_dir, 'bug1003.designspace')
+    runner(CMD + ['-o', 'd', f'_{ds_path}'])
+    captured = capfd.readouterr()
+    assert "The input set requires compatibilization" in captured.err
+
+
+def test_bug1003_compat():
+    """
+    Check that file is properly built when '-c' is specified.
+    """
+    input_dir = get_input_path('bug1003')
+    temp_dir = get_temp_dir_path('bug1003cvar')
+    copytree(input_dir, temp_dir)
+    ds_path = os.path.join(temp_dir, 'bug1003.designspace')
+    runner(CMD + ['-o', 'c' 'd', f'_{ds_path}'])
+    actual_path = os.path.join(temp_dir, 'bug1003.otf')
+    actual_ttx = generate_ttx_dump(actual_path, ['CFF2'])
+    expected_ttx = get_expected_path('bug1003.ttx')
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
