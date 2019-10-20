@@ -95,9 +95,9 @@ def _(fonts, **kwargs):
         except TTLibError as warn:
             skip += 1
             log.warning(warn)
-    else:
-        if skip == len(fonts):
-            raise TTLibError("a Font Collection that has Not a OpenType font")
+
+    if skip == len(fonts):
+        raise TTLibError("a Font Collection that has Not a OpenType font")
 
 
 def run(path, options):
