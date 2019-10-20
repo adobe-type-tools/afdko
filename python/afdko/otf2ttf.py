@@ -92,15 +92,12 @@ def _(fonts, **kwargs):
 
 
 def run(path, options):
-    with open(path, 'rb') as f:
-        header = f.read(4)
-
-    if header == b'ttcf' and options.face_index == -1:
-        extension = '.ttc'
-        font = TTCollection(path)
-    else:
-        extension = '.ttf'
+    try:
         font = TTFont(path, fontNumber=options.face_index)
+        extension = '.ttf'
+    except TTLibError:
+        font = TTCollection(path)
+        extension = '.ttc'
 
     if options.output and not os.path.isdir(options.output):
         output = options.output
