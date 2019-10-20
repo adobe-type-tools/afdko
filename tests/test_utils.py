@@ -1,7 +1,7 @@
 import inspect
 import os
 
-from fontTools.ttLib import TTFont
+from fontTools.ttLib import TTCollection, TTFont, TTLibError
 from afdko.fdkutils import get_temp_file_path
 
 
@@ -24,10 +24,14 @@ def get_bad_input_path(file_name):
 
 
 def generate_ttx_dump(font_path, tables=None):
-    with TTFont(font_path) as font:
-        temp_path = get_temp_file_path()
-        font.saveXML(temp_path, tables=tables)
-        return temp_path
+    try:
+        font = TTFont(font_path)
+    except TTLibError:
+        font = TTCollection(font_path)
+
+    temp_path = get_temp_file_path()
+    font.saveXML(temp_path, tables=tables)
+    return temp_path
 
 
 def generate_ps_dump(font_path):
