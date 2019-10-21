@@ -17,16 +17,16 @@
       <!-- Most of this table will be recalculated by the compiler -->
       <tableVersion value="1.0"/>
       <fontRevision value="3.00099"/>
-      <checkSumAdjustment value="0x87325014"/>
+      <checkSumAdjustment value="0x9d41c3fe"/>
       <magicNumber value="0x5f0f3cf5"/>
-      <flags value="00000000 00000001"/>
+      <flags value="00000000 00000011"/>
       <unitsPerEm value="1000"/>
       <created value="Fri Oct 11 13:57:31 2019"/>
-      <modified value="Fri Oct 11 20:57:37 2019"/>
-      <xMin value="-310"/>
-      <yMin value="-319"/>
-      <xMax value="2350"/>
-      <yMax value="1036"/>
+      <modified value="Mon Oct 21 05:17:50 2019"/>
+      <xMin value="11"/>
+      <yMin value="-16"/>
+      <xMax value="615"/>
+      <yMax value="721"/>
       <macStyle value="00000000 00000000"/>
       <lowestRecPPEM value="3"/>
       <fontDirectionHint value="2"/>
@@ -39,10 +39,10 @@
       <ascent value="1036"/>
       <descent value="-335"/>
       <lineGap value="0"/>
-      <advanceWidthMax value="2390"/>
-      <minLeftSideBearing value="-310"/>
-      <minRightSideBearing value="-310"/>
-      <xMaxExtent value="2350"/>
+      <advanceWidthMax value="640"/>
+      <minLeftSideBearing value="11"/>
+      <minRightSideBearing value="-8"/>
+      <xMaxExtent value="615"/>
       <caretSlopeRise value="1"/>
       <caretSlopeRun value="0"/>
       <caretOffset value="0"/>
@@ -58,10 +58,10 @@
       <!-- Most of this table will be recalculated by the compiler -->
       <tableVersion value="0x10000"/>
       <numGlyphs value="6"/>
-      <maxPoints value="104"/>
+      <maxPoints value="57"/>
       <maxContours value="5"/>
-      <maxCompositePoints value="134"/>
-      <maxCompositeContours value="7"/>
+      <maxCompositePoints value="0"/>
+      <maxCompositeContours value="0"/>
       <maxZones value="1"/>
       <maxTwilightPoints value="0"/>
       <maxStorage value="0"/>
@@ -69,8 +69,8 @@
       <maxInstructionDefs value="0"/>
       <maxStackElements value="0"/>
       <maxSizeOfInstructions value="0"/>
-      <maxComponentElements value="3"/>
-      <maxComponentDepth value="3"/>
+      <maxComponentElements value="0"/>
+      <maxComponentDepth value="0"/>
     </maxp>
 
     <OS_2>
@@ -898,16 +898,16 @@
       <!-- Most of this table will be recalculated by the compiler -->
       <tableVersion value="1.0"/>
       <fontRevision value="3.00099"/>
-      <checkSumAdjustment value="0xc161d070"/>
+      <checkSumAdjustment value="0xd7fb4354"/>
       <magicNumber value="0x5f0f3cf5"/>
-      <flags value="00000000 00000001"/>
+      <flags value="00000000 00000011"/>
       <unitsPerEm value="1000"/>
       <created value="Fri Oct 11 13:56:47 2019"/>
-      <modified value="Fri Oct 11 20:56:53 2019"/>
-      <xMin value="-197"/>
-      <yMin value="-335"/>
-      <xMax value="2230"/>
-      <yMax value="966"/>
+      <modified value="Mon Oct 21 05:17:50 2019"/>
+      <xMin value="14"/>
+      <yMin value="-13"/>
+      <xMax value="571"/>
+      <yMax value="748"/>
       <macStyle value="00000000 00000000"/>
       <lowestRecPPEM value="3"/>
       <fontDirectionHint value="2"/>
@@ -920,10 +920,10 @@
       <ascent value="1036"/>
       <descent value="-335"/>
       <lineGap value="0"/>
-      <advanceWidthMax value="2270"/>
-      <minLeftSideBearing value="-197"/>
-      <minRightSideBearing value="-197"/>
-      <xMaxExtent value="2230"/>
+      <advanceWidthMax value="640"/>
+      <minLeftSideBearing value="14"/>
+      <minRightSideBearing value="4"/>
+      <xMaxExtent value="571"/>
       <caretSlopeRise value="1"/>
       <caretSlopeRun value="0"/>
       <caretOffset value="0"/>
@@ -939,10 +939,10 @@
       <!-- Most of this table will be recalculated by the compiler -->
       <tableVersion value="0x10000"/>
       <numGlyphs value="6"/>
-      <maxPoints value="111"/>
+      <maxPoints value="56"/>
       <maxContours value="5"/>
-      <maxCompositePoints value="132"/>
-      <maxCompositeContours value="7"/>
+      <maxCompositePoints value="0"/>
+      <maxCompositeContours value="0"/>
       <maxZones value="1"/>
       <maxTwilightPoints value="0"/>
       <maxStorage value="0"/>
@@ -950,8 +950,8 @@
       <maxInstructionDefs value="0"/>
       <maxStackElements value="0"/>
       <maxSizeOfInstructions value="0"/>
-      <maxComponentElements value="3"/>
-      <maxComponentDepth value="3"/>
+      <maxComponentElements value="0"/>
+      <maxComponentDepth value="0"/>
     </maxp>
 
     <OS_2>
