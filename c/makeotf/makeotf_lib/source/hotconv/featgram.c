@@ -4411,7 +4411,8 @@ table_OS_2()
                                                                                             unicodeRangeList[arrayIndex] = valUInt16;
                                                                                             arrayIndex++;
                                                                                             zzLOOP(zztasp5);
-                                                                                        } while ((LA(1) == T_NUM));
+                                                                                            /* CJC: I hand-edited in the arrayIndex check in the line below */
+                                                                                        } while ((LA(1) == T_NUM) && (arrayIndex < kLenUnicodeList));
                                                                                         zzEXIT(zztasp5);
                                                                                     }
                                                                                 }
