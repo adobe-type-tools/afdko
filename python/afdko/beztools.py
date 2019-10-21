@@ -1207,7 +1207,7 @@ class CFFFontData:
 					tf.write(data)
 					tf.close()
 
-			elif  2 <= fontType <= 3: # PS (PFA or PFB)
+			elif  fontType in (2, 3): # PS (PFA or PFB)
 				tf = open(tempPath, "wb")
 				tf.write(data)
 				tf.close()
