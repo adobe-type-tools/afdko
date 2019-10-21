@@ -44,8 +44,7 @@ def glyphs_to_quadratic(
 def otf_to_ttf(ttFont, post_format=POST_FORMAT, **kwargs):
     if ttFont.sfntVersion != "OTTO":
         raise TTLibError("Not a OpenType font (bad sfntVersion)")
-    if "CFF " not in ttFont:
-        raise TTLibError("Not a OpenType font (no 'CFF ' table)")
+    assert "CFF " in ttFont
 
     glyphOrder = ttFont.getGlyphOrder()
 
