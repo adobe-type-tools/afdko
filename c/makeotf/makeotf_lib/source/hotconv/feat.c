@@ -1047,11 +1047,11 @@ static Tag str2tag(char *tagName) {
 
 void zzcr_attr(Attrib *attr, int type, char *text) {
     if (type == T_NUM) {
-        attr->lval = strtol(text, NULL, 10);
+        attr->lval = strtoll(text, NULL, 10);
     } else if (type == T_NUMEXT) {
-        attr->lval = strtol(text, NULL, 0);
+        attr->lval = strtoll(text, NULL, 0);
     } else if (type == T_CID) {
-        attr->lval = strtol(text + 1, NULL, 10); /* Skip initial '\' */
+        attr->lval = strtoll(text + 1, NULL, 10); /* Skip initial '\' */
         if (attr->lval < 0 || attr->lval > 65535) {
             zzerr("not in range 0 .. 65535");
         }
