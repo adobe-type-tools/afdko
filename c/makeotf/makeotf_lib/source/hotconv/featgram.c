@@ -4407,8 +4407,8 @@ table_OS_2()
                                                                                     {
                                                                                         do {
                                                                                             valUInt16 = numUInt16();
-                                                                                            if ((arrayIndex) < kLenUnicodeList)
-                                                                                                unicodeRangeList[arrayIndex] = valUInt16;
+
+                                                                                            if ((arrayIndex) < kLenUnicodeList) unicodeRangeList[arrayIndex] = valUInt16;
                                                                                             arrayIndex++;
                                                                                             zzLOOP(zztasp5);
                                                                                         } while ((LA(1) == T_NUM));
