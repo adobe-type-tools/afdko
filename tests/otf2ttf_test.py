@@ -133,11 +133,28 @@ def test_convert_ttc(filename):
                    '      <modified value='])
 
 
-@pytest.mark.parametrize('filename', ['font', 'ttf_ttf'])
-def test_skip_ttf(filename):
-    input_path = get_input_path(f'{filename}.ttf')
-    out_dir = get_temp_dir_path()
-    out_path = path.join(get_temp_dir_path(), f'{filename}.ttf')
+@pytest.mark.parametrize('file', ['font.ttf', 'ttf_ttf.ttc'])
+def test_skip_ttf(file):
+    warn = 'Not a OpenType font' if path.splitext(file)[1] != '.ttc' \
+        else 'a Font Collection that has Not a OpenType font'
+    input_path = get_input_path(file)
+    out_path = path.join(get_temp_dir_path(), file)
     assert path.exists(out_path) is False
-    otf2ttf(['-o', out_dir, input_path])
+    msg_path = runner(CMD + ['-s', '-e', '-o', 'o', f'_{out_path}',
+                             '=post-format', '_2', '-f', input_path])
     assert path.exists(out_path) is False
+    with open(msg_path, 'rb') as f:
+        output = f.read()
+    assert (f'WARNING: "{input_path}" cannot be converted '
+            f'since it is {warn}').encode() in output
+
+
+@pytest.mark.parametrize('filename', ['otf_ttf', 'ttf_otf', 'ttf_ttf'])
+def test_skip_ttf_in_ttc(filename):
+    input_path = get_input_path(f'{filename}.ttc')
+    out_path = path.join(get_temp_dir_path(), f'{filename}.ttc')
+    msg_path = runner(CMD + ['-s', '-e', '-o', 'o', f'_{out_path}',
+                             '=post-format', '_2', '-f', input_path])
+    with open(msg_path, 'rb') as f:
+        output = f.read()
+    assert b'WARNING: Not a OpenType font (bad sfntVersion)' in output
