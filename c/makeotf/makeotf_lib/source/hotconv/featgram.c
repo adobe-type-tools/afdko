@@ -4407,12 +4407,11 @@ table_OS_2()
                                                                                     {
                                                                                         do {
                                                                                             valUInt16 = numUInt16();
-
-                                                                                            unicodeRangeList[arrayIndex] = valUInt16;
+                                                                                            if ((arrayIndex) < kLenUnicodeList)
+                                                                                                unicodeRangeList[arrayIndex] = valUInt16;
                                                                                             arrayIndex++;
                                                                                             zzLOOP(zztasp5);
-                                                                                            /* CJC: I hand-edited in the arrayIndex check in the line below */
-                                                                                        } while ((LA(1) == T_NUM) && (arrayIndex < kLenUnicodeList));
+                                                                                        } while ((LA(1) == T_NUM));
                                                                                         zzEXIT(zztasp5);
                                                                                     }
                                                                                 }

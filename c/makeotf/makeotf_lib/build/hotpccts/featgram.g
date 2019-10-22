@@ -1914,7 +1914,7 @@ table_OS_2
 			  (
 				<<for (arrayIndex = 0; arrayIndex < kLenUnicodeList; arrayIndex++) unicodeRangeList[arrayIndex] = kCodePageUnSet; arrayIndex = 0; >>
 				(
-				numUInt16>[valUInt16] <<unicodeRangeList[arrayIndex] = valUInt16; arrayIndex++;>>
+				numUInt16>[valUInt16] <<if ((arrayIndex) < kLenUnicodeList) unicodeRangeList[arrayIndex] = valUInt16; arrayIndex++;>>
 				)+
 				<<featSetUnicodeRange(g, unicodeRangeList);>>
 			  )
