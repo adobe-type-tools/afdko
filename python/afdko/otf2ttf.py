@@ -144,8 +144,13 @@ def main(args=None):
 
     files = chain.from_iterable(map(glob.glob, options.input))
 
-    with Pool() as pool:
+    # Do not use "with" statement, or code coverage will malfunction.
+    pool = Pool()
+    try:
         pool.map(partial(run, options=options), files)
+    finally:
+        pool.close()
+        pool.join()
 
 
 if __name__ == "__main__":
