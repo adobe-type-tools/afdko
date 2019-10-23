@@ -1,6 +1,6 @@
 # Issues with OpenType/CFF and TrueType fonts in MS Font Validator
 
-Version 1.2 — October 21 2019
+Version 1.2 — October 2019
 
 #### Copyright
 Copyright 2016 Adobe Systems Incorporated. All rights reserved.
@@ -55,10 +55,8 @@ The following is a list of inappropriate error messages issued by the MS Font Va
 
 ---
 
-#### Version History
+#### Document Version History
 
-Version 1.0 First version. Read Roberts 4/24/2007
-
-Version 1.1 Added section #5. Miguel Sousa 8/31/2015
-
-Version 1.2 Converted to Markdown + minor edits. Josh Hadley 10/21/2019
+Version 1.0 First version. Read Roberts 4/24/2007  
+Version 1.1 Added section #5. Miguel Sousa 8/31/2015  
+Version 1.2 Converted to Markdown + minor edits. Josh Hadley 10/2019  

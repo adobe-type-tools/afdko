@@ -198,8 +198,7 @@ This took five minutes, instead of several hours of opening each of several hund
 
 ---
 
-#### Version History
+#### Document Version History
 
-Version 1.0 - First version. Read Roberts ?/??/????
-
-Version 1.1 - Converted to Markdown, minor edits & updates. Josh Hadley 10/21/2019
+Version 1.0 - First version. Read Roberts ?/??/????  
+Version 1.1 - Converted to Markdown, minor edits & updates. Josh Hadley 10/21/2019  
