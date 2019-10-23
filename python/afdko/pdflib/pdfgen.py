@@ -54,10 +54,7 @@ Modified 7/25/2006 read rooberts. Added supported for embedding fonts.
 ##
 
 import os
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+from io import StringIO
 from math import sin, cos, tan, pi
 
 from afdko.pdflib import pdfdoc, pdfgeom, pdfmetrics, pdfutils

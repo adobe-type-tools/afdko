@@ -941,7 +941,6 @@ class UFOFontData(object):
             setattr(fdDict, key, value)
 
         otherBlues = self.fontInfo.get("postscriptOtherBlues", [])
-        numBlueValues = len(otherBlues)
 
         if len(otherBlues) > 0:
             i = 0
@@ -1854,7 +1853,6 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
 
     outlineItem = None
     libIndex = outlineIndex = -1
-    outlineIndex = outlineIndex = -1
     childIndex = 0
     for childElement in glifXML:
         if childElement.tag == "outline":

@@ -161,7 +161,6 @@ class dictionary:
 	#  priority=0: New entries defer entirely to existing entries
 	def add(self, g, priority=1):
 		m = self.messages
-		u = re.compile(r'uni([0-9A-F]{4})$') # Unicode value regexp
 		addplace = None # position of added glyph in glyph order
 		g.check() # check glyph before adding
 
