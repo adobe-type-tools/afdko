@@ -1,4 +1,4 @@
-# PRACTICAL ISSUES IN WEIGHT SETTING AND STYLE LINKING (WINDOWS ONLY):
+# Practical Issues in Weight Setting and Style Linking (Windows):
 
 #### Copyright 2016 Adobe Systems Incorporated. All rights reserved.
 
