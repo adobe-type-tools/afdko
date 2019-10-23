@@ -564,7 +564,6 @@ def getTickPos(pt0, pt1, pt2, tickSize, pathisCW):
 	vector1 = makeVector(pt1, pt2)
 	sum = ( vector1[0] + vector0[0], vector1[1] + vector0[1])
 	if pathisCW:
-		tickPos = ((pt1[0] +  (sum[1] * tickSize)), pt1[1] - (sum[0]*tickSize))
 		# tickPos is 90 degrees counter-clockwise to the vector "sum"
 		tickPos = ((pt1[0] -  (sum[1] * tickSize)), pt1[1] + (sum[0]*tickSize))
 	else:

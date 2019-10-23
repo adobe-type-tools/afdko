@@ -1261,14 +1261,10 @@ def readNameTable(cmpfFont):
 		if stylePat in cmpfFont.preferredFamilyName1:
 			print("	Error: Preferred family name '%s' contains the style name '%s'. This is usually confusing to users. %s" % (cmpfFont.preferredFamilyName1, style, cmpfFont.PostScriptName1))
 
-	try:
-		temp = cmpfFont.nameIDDict[(3, 1, 1033, 14)]
-	except KeyError:
+	if (3, 1, 1033, 14) not in cmpfFont.nameIDDict:
 		print("	Warning: Missing Windows License Notice URL from name table! Should be in record", (3, 1, 1033, 14))
 
-	try:
-		temp = cmpfFont.nameIDDict[(3, 1, 1033, 8)]
-	except KeyError:
+	if (3, 1, 1033, 8) not in cmpfFont.nameIDDict:
 		print("	Warning: Missing Windows Manufacturer from name table! Should be in record", (3, 1, 1033, 8))
 
 
@@ -4045,7 +4041,6 @@ def doFamilyTest16():
 						widthList.append([htmx_table.metrics[gname][0], font.PostScriptName1])
 					except KeyError:
 						print("\tError: Glyph '%s' is in font, but is not in the width list. This can happen when the number of glyphs in the maxp table is less than the actual number of glyphs." % (gname))
-						pass
 				if not widthList:
 					continue
 				widthList.sort()
