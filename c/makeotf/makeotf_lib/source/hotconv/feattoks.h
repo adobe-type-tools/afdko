@@ -235,13 +235,13 @@ extern GNode* pattern();
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode* pattern2(int markedOK, GNode** headP);
+extern GNode* pattern2(GNode** headP);
 #else
 extern GNode* pattern2();
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode* pattern3(int markedOK, GNode** headP);
+extern GNode* pattern3(GNode** headP);
 #else
 extern GNode* pattern3();
 #endif
@@ -295,19 +295,19 @@ extern void cvParameterBlock();
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode* cursive(int markedOK, GNode** headP);
+extern GNode* cursive(GNode** headP);
 #else
 extern GNode* cursive();
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode* baseToMark(int markedOK, GNode** headP);
+extern GNode* baseToMark(GNode** headP);
 #else
 extern GNode* baseToMark();
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode* ligatureMark(int markedOK, GNode** headP);
+extern GNode* ligatureMark(GNode** headP);
 #else
 extern GNode* ligatureMark();
 #endif

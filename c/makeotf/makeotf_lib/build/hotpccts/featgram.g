@@ -737,7 +737,7 @@ pattern[int markedOK]>[GNode *pat]
 		<<(*insert) = NULL;>>
 	;
 
-pattern2[int markedOK, GNode** headP]>[GNode *lastNode]
+pattern2[GNode** headP]>[GNode *lastNode]
 	:	<<
 			GNode **insert;
 			insert = $headP;
@@ -768,13 +768,8 @@ pattern2[int markedOK, GNode** headP]>[GNode *lastNode]
 			)
 			{	"'"		
 				<<
-					if ($markedOK)
-						{
-						/* Mark this node: */
-						(*insert)->flags |= FEAT_MARKED;
-						}
-					else
-						zzerr("cannot mark a replacement glyph pattern");
+					/* Mark this node: */
+					(*insert)->flags |= FEAT_MARKED;
 				>>
 			}
 			<<
@@ -791,7 +786,7 @@ pattern2[int markedOK, GNode** headP]>[GNode *lastNode]
 
 
 /* Single glyph or glyph class */
-pattern3[int markedOK, GNode** headP]>[GNode *lastNode]
+pattern3[GNode** headP]>[GNode *lastNode]
 	:	<<
 			GNode **insert;
 			insert = $headP;
@@ -822,13 +817,8 @@ pattern3[int markedOK, GNode** headP]>[GNode *lastNode]
 			)
 			{	"'"		
 				<<
-					if ($markedOK)
-						{
-						/* Mark this node: */
-						(*insert)->flags |= FEAT_MARKED;
-						}
-					else
-						zzerr("cannot mark a replacement glyph pattern");
+					/* Mark this node: */
+					(*insert)->flags |= FEAT_MARKED;
 				>>
 			}
 			<<
@@ -974,7 +964,6 @@ position
 		GNode *ruleHead = NULL;
 		GNode *temp = NULL;
 		int enumerate = 0;
-		int markedOK = 1;
 		int labelIndex;
 		int type = 0;
 		int labelLine;
@@ -987,7 +976,7 @@ position
 		}
 		K_position
 		{
-			pattern2[markedOK, &targ]>[lastNodeP] <<ruleHead = lastNodeP;>>
+			pattern2[&targ]>[lastNodeP] <<ruleHead = lastNodeP;>>
 		}
 		( /* group everything that follows the optional initial glyph or glyph class */
 		
@@ -999,7 +988,7 @@ position
 				)
 				<<type = GPOSSingle;>> /* Note that this is a first pass setting; could end up being GPOSPair */
 				(
-					pattern3[markedOK, &ruleHead]>[lastNodeP] <<ruleHead = lastNodeP;>>
+					pattern3[&ruleHead]>[lastNodeP] <<ruleHead = lastNodeP;>>
 					{
 						valueRecord3[ruleHead] /* simple number */
 						|
@@ -1022,7 +1011,7 @@ position
 					type = GPOSChain;
 					>>
 				(
-					pattern3[markedOK, &ruleHead]>[lastNodeP] <<ruleHead = lastNodeP;>>
+					pattern3[&ruleHead]>[lastNodeP] <<ruleHead = lastNodeP;>>
 					{
 						K_lookup 		<<labelLine = zzline;>>
 						t2:T_LABEL
@@ -1040,39 +1029,39 @@ position
 			|
 			(
 				K_cursive
-				cursive[markedOK, &ruleHead]>[lastNodeP]
+				cursive[&ruleHead]>[lastNodeP]
 				<<
 				type = GPOSCursive;
 				>>
 				{
-				pattern2[markedOK, &lastNodeP]>[lastNodeP]
+				pattern2[&lastNodeP]>[lastNodeP]
 				}
 			)
 			|
 			(
 				K_markBase
-				baseToMark[markedOK, &ruleHead]>[lastNodeP]
+				baseToMark[&ruleHead]>[lastNodeP]
 				<<type = GPOSMarkToBase;>>
 				{
-				pattern2[markedOK, &lastNodeP]>[lastNodeP]
+				pattern2[&lastNodeP]>[lastNodeP]
 				}
 			)
 			|
 			(
 				K_markLigature
-				ligatureMark[markedOK, &ruleHead]>[lastNodeP]
+				ligatureMark[&ruleHead]>[lastNodeP]
 				<<type = GPOSMarkToLigature;>>
 				{
-				pattern2[markedOK, &lastNodeP]>[lastNodeP]
+				pattern2[&lastNodeP]>[lastNodeP]
 				}
 			)
 			|
 			(
 				K_mark
-				baseToMark[markedOK, &ruleHead]>[lastNodeP]
+				baseToMark[&ruleHead]>[lastNodeP]
 				<<type = GPOSMarkToMark;>>
 				{
-				pattern2[markedOK, &lastNodeP]>[lastNodeP]
+				pattern2[&lastNodeP]>[lastNodeP]
 				}
 			)
 			
@@ -1243,7 +1232,7 @@ cvParameterBlock
 /* This expects the cursive base glyph or glyph clase
 followed by two anchors.
 */
-cursive[int markedOK, GNode** headP]>[GNode *lastNode]
+cursive[GNode** headP]>[GNode *lastNode]
 	:	<<
 			GNode **insert;
 			int isNull = 0;
@@ -1277,13 +1266,8 @@ cursive[int markedOK, GNode** headP]>[GNode *lastNode]
 			
 			{	"'"		
 				<<
-					if ($markedOK)
-						{
-						/* Mark this node: */
-						(*insert)->flags |= FEAT_MARKED;
-						}
-					else
-						zzerr("cannot mark a replacement glyph pattern");
+					/* Mark this node: */
+					(*insert)->flags |= FEAT_MARKED;
 					>>
 			}
 			<<
@@ -1304,7 +1288,7 @@ cursive[int markedOK, GNode** headP]>[GNode *lastNode]
 /* This expects the base to mark base glyph or glyph clase
 followed by one anchor, follwed by none or more contextul glyph or glyph classes, then by 'mark' and mark class, then by more glyphs.
 */
-baseToMark[int markedOK, GNode** headP]>[GNode *lastNode]
+baseToMark[GNode** headP]>[GNode *lastNode]
 	:	<<
 			GNode **insert;
 			GNode **markInsert = NULL; /* This is used to hold the union of the mark classes, for use in contextual lookups */
@@ -1339,13 +1323,8 @@ baseToMark[int markedOK, GNode** headP]>[GNode *lastNode]
 			
 			{	"'"		
 				<<
-					if ($markedOK)
-						{
-						/* Mark this node: */
-						(*insert)->flags |= FEAT_MARKED;
-						}
-					else
-						zzerr("cannot mark a replacement glyph pattern");
+					/* Mark this node: */
+					(*insert)->flags |= FEAT_MARKED;
 					>>
 			}
 			<<
@@ -1384,13 +1363,8 @@ baseToMark[int markedOK, GNode** headP]>[GNode *lastNode]
 				
 				{	"'"		
 					<<
-						if ($markedOK)
-							{
-							/* Mark this node: */
-							(*insert)->flags |= FEAT_MARKED;
-							}
-						else
-							zzerr("cannot mark a replacement glyph pattern");
+						/* Mark this node: */
+						(*insert)->flags |= FEAT_MARKED;
 						>>
 				}
 				<<
@@ -1440,7 +1414,7 @@ baseToMark[int markedOK, GNode** headP]>[GNode *lastNode]
 	;
 
 
-ligatureMark[int markedOK, GNode** headP]>[GNode *lastNode]
+ligatureMark[GNode** headP]>[GNode *lastNode]
 	:	<<
 			GNode **insert;
 			GNode **markInsert = NULL; /* This is used to hold the union of the mark classes, for use in contextual lookups */
@@ -1475,13 +1449,8 @@ ligatureMark[int markedOK, GNode** headP]>[GNode *lastNode]
 			
 			{	"'"		
 				<<
-					if ($markedOK)
-						{
-						/* Mark this node: */
-						(*insert)->flags |= FEAT_MARKED;
-						}
-					else
-						zzerr("cannot mark a replacement glyph pattern");
+					/* Mark this node: */
+					(*insert)->flags |= FEAT_MARKED;
 					>>
 			}
 			<<
@@ -1520,13 +1489,8 @@ ligatureMark[int markedOK, GNode** headP]>[GNode *lastNode]
 				
 				{	"'"		
 					<<
-						if ($markedOK)
-							{
-							/* Mark this node: */
-							(*insert)->flags |= FEAT_MARKED;
-							}
-						else
-							zzerr("cannot mark a replacement glyph pattern");
+						/* Mark this node: */
+						(*insert)->flags |= FEAT_MARKED;
 						>>
 				}
 				<<
