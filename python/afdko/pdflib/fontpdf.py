@@ -756,20 +756,14 @@ class FontPDFGlyph:
 		for path  in self.pathList:
 			for pdfPoint in path:
 				if pdfPoint.type == FontPDFPoint.MT: # Dont't need to draw anything.
-					x0 = curX
-					y0 = curY
 					curX = pdfPoint.pt0[0]
 					curY = pdfPoint.pt0[1]
 					p.moveTo(curX , curY)
 				if pdfPoint.type == FontPDFPoint.LT:
-					x0 = curX
-					y0 = curY
 					curX = pdfPoint.pt0[0]
 					curY = pdfPoint.pt0[1]
 					p.lineTo(curX , curY)
 				elif pdfPoint.type == FontPDFPoint.CT:
-					x0 = curX
-					y0 = curY
 					x1 = pdfPoint.bcp1[0]
 					y1 = pdfPoint.bcp1[1]
 					x2 =  pdfPoint.bcp2[0]
@@ -2031,7 +2025,7 @@ def makeFontSetPDF(pdfFontList, params, doProgressBar=True):
 		firstPDFFont = pdfFontList[0][1]
 		fontPath = params.rt_filePath
 		pdfPath = f"{os.path.splitext(fontPath)[0]}.fontset.pdf"
-	params.rt_canvas = rt_canvas = pdfgen.Canvas(pdfPath, pagesize=params.pageSize, bottomup = 1)
+	params.rt_canvas = pdfgen.Canvas(pdfPath, pagesize=params.pageSize, bottomup = 1)
 
 	# figure out how much space to leave at start of line for PS names and fond index fields.
 	psNameSize = params.fontsetGroupPtSize
@@ -2331,7 +2325,7 @@ def makeKernPairPDF(pdfFont, kernOverlapList, params, doProgressBar=True):
 		fontPath = params.rt_filePath
 		pdfPath = os.path.splitext(fontPath)[0] + ".kc.pdf"
 
-	params.rt_canvas = rt_canvas = pdfgen.Canvas(pdfPath, pagesize=params.pageSize, bottomup = 1)
+	params.rt_canvas = pdfgen.Canvas(pdfPath, pagesize=params.pageSize, bottomup = 1)
 
 	# figure out how much space to leave at start of line for PS names and fond index fields..
 	maxLen = 0

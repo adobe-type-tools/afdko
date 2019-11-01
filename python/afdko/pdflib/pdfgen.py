@@ -573,11 +573,7 @@ class Canvas:
         Also allow file names as well as images.  This allows a
         caching mechanism"""
         # print "drawInlineImage: x=%s, y=%s, width = %s, height=%s " % (x,y, width, height)
-        try:
-            import zlib
-        except ImportError:
-            print('zlib not available')
-            return
+        import zlib
 
         self._currentPageHasImages = 1
 
