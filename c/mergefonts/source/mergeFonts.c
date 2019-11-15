@@ -1569,6 +1569,7 @@ static bool readGlyphAliasFile(txCtx h, int fileIndex, char *filePath) {
     unsigned short lineno = 0;
     GAFileInfo *gaf = NULL;
     MergeInfo *mergeInfo = (MergeInfo *)h->appSpecificInfo;
+    char *p;
 
     /* Always make a  glyphAliasSet entry - even if we are skipping a GA file
        and the current file turns out to be a font. we still need an empty
@@ -1601,6 +1602,10 @@ static bool readGlyphAliasFile(txCtx h, int fileIndex, char *filePath) {
         fclose(ga_fp);
         return isGA;
     }
+
+    /* convert to lower case to allow for old uses of "mergeFonts" */
+    for (p = progName; *p != 0; p++)
+        *p = tolower(*p);
 
     if (strcmp(progName, "mergefonts")) {
         fclose(ga_fp);
