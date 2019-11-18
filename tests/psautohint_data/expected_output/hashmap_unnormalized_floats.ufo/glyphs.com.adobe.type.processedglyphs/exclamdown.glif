@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="exclamdown" format="2">
+  <advance width="196"/>
+  <outline>
+    <contour>
+      <point x="130" y="82" type="line" name="hintSet0000"/>
+      <point x="127" y="361" type="line"/>
+      <point x="89" y="361" type="line"/>
+      <point x="86" y="82" type="line"/>
+    </contour>
+    <contour>
+      <point x="108" y="487" type="line"/>
+      <point x="75" y="455" type="line"/>
+      <point x="108" y="423" type="line"/>
+      <point x="141" y="455" type="line"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 487 -20</string>
+              <string>vstem 87.5 41</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>w196l13082l127361l89361l8682l108487l75455l108423l141455</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

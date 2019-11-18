@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="zero_width-zero_height" format="2">
+  <outline>
+    <contour>
+      <point x="0" y="0" type="line" name="hintSet0000"/>
+      <point x="140" y="0" type="line"/>
+      <point x="140" y="140" type="line"/>
+      <point x="0" y="140" type="line"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 0 140</string>
+              <string>vstem 0 140</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>w0l00l1400l140140l0140</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

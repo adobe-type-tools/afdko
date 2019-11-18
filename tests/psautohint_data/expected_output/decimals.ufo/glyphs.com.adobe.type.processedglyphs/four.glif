@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="four" format="2">
+  <advance width="497"/>
+  <unicode hex="0034"/>
+  <outline>
+    <contour>
+      <point x="243" y="0" type="line" name="hintSet0000"/>
+      <point x="306" y="0" type="line"/>
+      <point x="306" y="510" type="line"/>
+      <point x="232" y="510" type="line"/>
+      <point x="14" y="184" type="line" name="hintSet0004"/>
+      <point x="14" y="141" type="line"/>
+      <point x="375" y="141" type="line"/>
+      <point x="375" y="194" type="line"/>
+      <point x="83" y="194" type="line"/>
+      <point x="202" y="368" type="line" name="hintSet0009"/>
+      <point x="217" y="393"/>
+      <point x="231" y="415"/>
+      <point x="244" y="440" type="curve"/>
+      <point x="247" y="440" type="line"/>
+      <point x="246" y="413"/>
+      <point x="243" y="369"/>
+      <point x="243" y="342" type="curve"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 0 194</string>
+              <string>hstem 440 70</string>
+              <string>vstem 243 63</string>
+            </array>
+          </dict>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0004</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 141 53</string>
+              <string>vstem 243 132</string>
+            </array>
+          </dict>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0009</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 141 53</string>
+              <string>hstem 440 70</string>
+              <string>vstem 243 63</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>w497l2430l3060l306510l232510l14184l14141l375141l375194l83194l202368217393231415c244440l247440246413243369c243342</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

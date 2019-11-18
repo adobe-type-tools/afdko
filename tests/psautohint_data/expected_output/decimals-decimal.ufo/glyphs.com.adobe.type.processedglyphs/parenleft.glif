@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="parenleft" format="2">
+  <advance width="303"/>
+  <unicode hex="0028"/>
+  <outline>
+    <contour>
+      <point x="171.2" y="-140.8" type="curve" name="hintSet0000"/>
+      <point x="212" y="-121.6" type="line"/>
+      <point x="150.4" y="-20"/>
+      <point x="120" y="100.8"/>
+      <point x="120" y="222.4" type="curve"/>
+      <point x="120" y="344"/>
+      <point x="150.4" y="464.8"/>
+      <point x="212" y="566.4" type="curve"/>
+      <point x="171.2" y="585.6" type="line"/>
+      <point x="104.8" y="478.4"/>
+      <point x="65.6" y="363.2"/>
+      <point x="65.6" y="222.4" type="curve"/>
+      <point x="65.6" y="81.6"/>
+      <point x="104.8" y="-33.6"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 585.6 -20</string>
+              <string>vstem 65.6 54.4</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>bf038f979d7b04a4e43b68ff38aacb5029f9d68769558a1d03b2b19e87a4695a45245d36e6a8e2776c6acce81e8b7451c4b0fb6ba3c7602508f5ff3a9fe85350</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

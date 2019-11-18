@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="K" format="2">
+  <advance width="579"/>
+  <unicode hex="004B"/>
+  <anchor x="248.8" y="542.4" name="aboveUC"/>
+  <anchor x="262.40000000000003" y="-17.6" name="belowLC"/>
+  <outline>
+    <contour>
+      <point x="72" y="0" type="line" name="hintSet0000"/>
+      <point x="138" y="0" type="line"/>
+      <point x="138" y="166" type="line"/>
+      <point x="229" y="273" type="line"/>
+      <point x="386" y="0" type="line"/>
+      <point x="460" y="0" type="line"/>
+      <point x="270" y="325" type="line"/>
+      <point x="434" y="525" type="line"/>
+      <point x="359" y="525" type="line"/>
+      <point x="141" y="262" type="line"/>
+      <point x="138" y="262" type="line"/>
+      <point x="138" y="525" type="line"/>
+      <point x="72" y="525" type="line"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 21 -21</string>
+              <string>hstem 525 -20</string>
+              <string>vstem 72 66</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>w579l720l1380l138166l229273l3860l4600l270325l434525l359525l141262l138262l138525l72525</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

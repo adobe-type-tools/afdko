@@ -1,0 +1,77 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="exclam" format="2">
+  <advance width="289"/>
+  <unicode hex="0021"/>
+  <outline>
+    <contour>
+      <point x="93" y="158" type="line" name="hintSet0000"/>
+      <point x="138" y="158" type="line"/>
+      <point x="147" y="461" type="line"/>
+      <point x="149" y="536" type="line"/>
+      <point x="82" y="536" type="line"/>
+      <point x="84" y="461" type="line"/>
+    </contour>
+    <contour>
+      <point x="116" y="-10" type="curve" name="hintSet0006"/>
+      <point x="142" y="-10"/>
+      <point x="163" y="11"/>
+      <point x="163" y="40" type="curve"/>
+      <point x="163" y="70" name="hintSet0008"/>
+      <point x="142" y="91"/>
+      <point x="116" y="91" type="curve"/>
+      <point x="90" y="91"/>
+      <point x="68" y="70"/>
+      <point x="68" y="40" type="curve"/>
+      <point x="68" y="11" name="hintSet0010"/>
+      <point x="90" y="-10"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 11 -21</string>
+              <string>vstem 88.5 54</string>
+            </array>
+          </dict>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0006</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 11 -21</string>
+              <string>vstem 68 95</string>
+            </array>
+          </dict>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0008</string>
+            <key>stems</key>
+            <array>
+              <string>hstem -10 101</string>
+              <string>vstem 68 95</string>
+            </array>
+          </dict>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0010</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 11 -21</string>
+              <string>vstem 68 95</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>w289l93158l138158l147461l149536l82536l84461c116-10142-1016311c163401637014291c1169190916870c6840681190-10</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>
