@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="w" format="2">
+  <advance width="718"/>
+  <unicode hex="0077"/>
+  <anchor x="288.0" y="407.20000000000005" name="aboveLC"/>
+  <anchor x="288.0" y="-17.6" name="belowLC"/>
+  <outline>
+    <contour>
+      <point x="127" y="0" type="line" name="hintSet0000"/>
+      <point x="204" y="0" type="line"/>
+      <point x="258" y="208" type="line"/>
+      <point x="269" y="245"/>
+      <point x="277" y="282"/>
+      <point x="286" y="321" type="curve"/>
+      <point x="289" y="321" type="line"/>
+      <point x="298" y="282"/>
+      <point x="306" y="246"/>
+      <point x="315" y="209" type="curve"/>
+      <point x="371" y="0" type="line"/>
+      <point x="451" y="0" type="line"/>
+      <point x="555" y="389" type="line"/>
+      <point x="493" y="389" type="line"/>
+      <point x="436" y="164" type="line"/>
+      <point x="428" y="127"/>
+      <point x="421" y="92"/>
+      <point x="412" y="56" type="curve"/>
+      <point x="409" y="56" type="line"/>
+      <point x="400" y="92"/>
+      <point x="391" y="127"/>
+      <point x="382" y="164" type="curve"/>
+      <point x="321" y="389" type="line"/>
+      <point x="257" y="389" type="line"/>
+      <point x="197" y="164" type="line"/>
+      <point x="187" y="128"/>
+      <point x="179" y="92"/>
+      <point x="170" y="56" type="curve"/>
+      <point x="167" y="56" type="line"/>
+      <point x="160" y="92"/>
+      <point x="153" y="127"/>
+      <point x="144" y="164" type="curve"/>
+      <point x="86" y="389" type="line"/>
+      <point x="19" y="389" type="line"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 0 56</string>
+              <string>hstem 321 68</string>
+              <string>vstem 19 536</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>bd4c6cd393ea090fbc4aa1eb158848431c431b650f99f4fb5d0f061b9b8bef21c75a322cd1016ac4e6a70566621c912d2ffabdd74c3e1467f575ba4f4e9d00ff</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

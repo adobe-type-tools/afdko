@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="period" format="2">
+  <advance width="249"/>
+  <unicode hex="002E"/>
+  <outline>
+    <contour>
+      <point x="100" y="-10" type="curve" name="hintSet0000"/>
+      <point x="126" y="-10"/>
+      <point x="147" y="11"/>
+      <point x="147" y="40" type="curve"/>
+      <point x="147" y="70" name="hintSet0002"/>
+      <point x="126" y="91"/>
+      <point x="100" y="91" type="curve"/>
+      <point x="74" y="91"/>
+      <point x="52" y="70"/>
+      <point x="52" y="40" type="curve"/>
+      <point x="52" y="11" name="hintSet0004"/>
+      <point x="74" y="-10"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 11 -21</string>
+              <string>vstem 52 95</string>
+            </array>
+          </dict>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0002</string>
+            <key>stems</key>
+            <array>
+              <string>hstem -10 101</string>
+              <string>vstem 52 95</string>
+            </array>
+          </dict>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0004</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 11 -21</string>
+              <string>vstem 52 95</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>w249c100-10126-1014711c147401477012691c1009174915270c5240521174-10</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

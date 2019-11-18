@@ -1,8 +1,38 @@
 import inspect
 import os
+import shutil
 
 from fontTools.ttLib import TTFont
-from afdko.fdkutils import get_temp_file_path
+from afdko.fdkutils import get_temp_file_path, run_shell_command
+
+
+def generalizeCFF(otfPath, do_sfnt=True):
+    """
+    Adapted from similar routine in 'buildmasterotfs'. This uses
+    temp files for both tx output and sfntedit output instead of
+    overwriting 'otfPath', and also provides an option to skip
+    the sfntedit step (so 'otfPath' can be either a .otf file or
+    a .cff file).
+    """
+    tmp_tx_path = get_temp_file_path()
+    out_path = get_temp_file_path()
+    shutil.copyfile(otfPath, out_path, follow_symlinks=True)
+
+    if not run_shell_command(['tx', '-cff', '+b', '-std', '-no_opt',
+                              otfPath, tmp_tx_path]):
+        raise Exception
+
+    if do_sfnt:
+
+        if not run_shell_command(['sfntedit', '-a',
+                                  f'CFF ={tmp_tx_path}', out_path]):
+            raise Exception
+
+        return out_path
+
+    else:
+
+        return tmp_tx_path
 
 
 def get_data_dir():

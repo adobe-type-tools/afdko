@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="o" format="2">
+  <advance width="542"/>
+  <unicode hex="006F"/>
+  <anchor x="291.2" y="388.8" name="hornLC"/>
+  <anchor x="216.8" y="407.20000000000005" name="aboveLC"/>
+  <anchor x="256.0" y="0" name="ogonekLC"/>
+  <anchor x="216.8" y="-17.6" name="belowLC"/>
+  <outline>
+    <contour>
+      <point x="217" y="-10" type="curve" name="hintSet0000"/>
+      <point x="312" y="-10"/>
+      <point x="397" y="65"/>
+      <point x="397" y="194" type="curve"/>
+      <point x="397" y="324"/>
+      <point x="312" y="398"/>
+      <point x="217" y="398" type="curve"/>
+      <point x="122" y="398"/>
+      <point x="37" y="324"/>
+      <point x="37" y="194" type="curve"/>
+      <point x="37" y="65"/>
+      <point x="122" y="-10"/>
+    </contour>
+    <contour>
+      <point x="217" y="45" type="curve"/>
+      <point x="150" y="45"/>
+      <point x="105" y="105"/>
+      <point x="105" y="194" type="curve"/>
+      <point x="105" y="283"/>
+      <point x="150" y="344"/>
+      <point x="217" y="344" type="curve"/>
+      <point x="284" y="344"/>
+      <point x="329" y="283"/>
+      <point x="329" y="194" type="curve"/>
+      <point x="329" y="105"/>
+      <point x="284" y="45"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem -10 55</string>
+              <string>hstem 344 54</string>
+              <string>vstem 37 68</string>
+              <string>vstem 329 68</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>192a7788a9dc845b4f37bfeb6e42cf4f87282ea991fd8750374344e5be60c0d274666b6624f97379573f5f425d7f209a4f0240ef7f978d7b04e3628069947d54</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

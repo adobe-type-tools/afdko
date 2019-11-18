@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="parenright" format="2">
+  <advance width="303"/>
+  <unicode hex="0029"/>
+  <outline>
+    <contour>
+      <point x="71" y="-141" type="line" name="hintSet0000"/>
+      <point x="138" y="-34"/>
+      <point x="177" y="82"/>
+      <point x="177" y="222" type="curve"/>
+      <point x="177" y="363"/>
+      <point x="138" y="478"/>
+      <point x="71" y="586" type="curve"/>
+      <point x="30" y="566" type="line"/>
+      <point x="92" y="465"/>
+      <point x="122" y="344"/>
+      <point x="122" y="222" type="curve"/>
+      <point x="122" y="101"/>
+      <point x="92" y="-20"/>
+      <point x="30" y="-122" type="curve"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 586 -20</string>
+              <string>vstem 122 55</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>w303l71-141138-3417782c177222177363138478c71586l3056692465122344c12222212210192-20c30-122</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

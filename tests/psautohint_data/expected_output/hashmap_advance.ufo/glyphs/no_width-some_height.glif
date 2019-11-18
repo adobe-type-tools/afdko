@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="no_width-some_height" format="2">
+  <advance height="800"/>
+  <outline>
+    <contour>
+      <point x="0" y="0" type="line"/>
+      <point x="140" y="0" type="line"/>
+      <point x="140" y="140" type="line"/>
+      <point x="0" y="140" type="line"/>
+    </contour>
+  </outline>
+</glyph>
