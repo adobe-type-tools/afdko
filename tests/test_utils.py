@@ -29,9 +29,10 @@ def generate_ttx_dump(font_path, tables=None):
     except TTLibError:
         font = TTCollection(font_path)
 
-    temp_path = get_temp_file_path()
-    font.saveXML(temp_path, tables=tables)
-    return temp_path
+    with font:
+        temp_path = get_temp_file_path()
+        font.saveXML(temp_path, tables=tables)
+        return temp_path
 
 
 def generate_ps_dump(font_path):
