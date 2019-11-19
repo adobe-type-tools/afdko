@@ -126,7 +126,7 @@ def test_convert_ttc(filename):
     expected_ttx = get_expected_path('ttf_ttf.ttx')
     assert differ([expected_ttx, actual_ttx,
                    '-s',
-                   '  <ttFont sfntVersion' + SPLIT_MARKER +
+                   '<ttCollection ttLibVersion=' + SPLIT_MARKER +
                    '      <checkSumAdjustment value=' + SPLIT_MARKER +
                    '      <checkSumAdjustment value=' + SPLIT_MARKER +
                    '      <created value=' + SPLIT_MARKER +
