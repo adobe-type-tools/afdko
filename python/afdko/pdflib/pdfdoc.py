@@ -17,16 +17,12 @@ Modified 7/25/2006 read rooberts. Added supported for embedding fonts.
 
 import sys
 import time
+import zlib
 
 from afdko.pdflib import pdfutils
 from afdko.pdflib.pdfutils import LINEEND   # this constant needed in both
 
 Log = sys.stderr  # reassign this if you don't want err output to console
-
-try:
-    import zlib
-except ImportError:
-    Log.write("zlib not available, page compression not available\n")
 
 ##############################################################
 #

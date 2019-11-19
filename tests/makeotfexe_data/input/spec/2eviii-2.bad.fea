@@ -1,0 +1,6 @@
+# Test duplicated named anchor.
+anchorDef 3 4 ANCH34;
+anchorDef 5 6 ANCH34;
+feature kern {
+    pos cursive one <anchor ANCH34> <anchor ANCH34>;
+} kern;

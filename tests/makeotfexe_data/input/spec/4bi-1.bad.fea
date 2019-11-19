@@ -1,0 +1,9 @@
+# Test DFLT script not being first.
+# The first line shouldn’t be needed:
+# https://github.com/adobe-type-tools/afdko/issues/985
+languagesystem latn dflt;
+languagesystem latn dflt;
+languagesystem DFLT dflt;
+feature liga {
+    sub f l by f_l;
+} liga;

@@ -1,0 +1,4 @@
+# Bad value in parameters.
+feature size {
+  parameters -.5 3 80 139;
+} size;

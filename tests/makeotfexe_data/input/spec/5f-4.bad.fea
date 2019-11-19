@@ -1,0 +1,9 @@
+# Test lookup not applied to marked glyph.
+
+lookup test {
+  sub A by A.sc;
+} test;
+
+lookup test2 {
+  sub A lookup test;
+} test2;

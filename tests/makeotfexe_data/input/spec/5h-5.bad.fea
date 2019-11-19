@@ -1,0 +1,4 @@
+# Incorrect lookup type for reversesub.
+lookup test {
+   reversesub A from [A.alt1 A.alt2];
+} test;

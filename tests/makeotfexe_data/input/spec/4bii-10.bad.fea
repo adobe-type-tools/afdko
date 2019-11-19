@@ -1,0 +1,8 @@
+# Test "script behavior already specified".
+languagesystem latn ENG;
+feature liga {
+    language ENG;
+    sub f l by f_l;
+    language dflt;
+    sub f l by f_l;
+} liga;

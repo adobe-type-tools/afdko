@@ -1,0 +1,3 @@
+# Bad syntax.
+@TOP_ACCENTS = [acute grave dieresis];
+markClass "@TOP_ACCENTS" <anchor 350 0> @MARK_TOP_ACCENTS;

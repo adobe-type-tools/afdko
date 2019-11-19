@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<designspace format="3">
+  <axes>
+    <axis default="500" maximum="500" minimum="100" name="Weight" tag="wght" />
+  </axes>
+  <sources>
+    <source familyname="VarTest" filename="VarTest-Regular.ufo" name="master_0">
+      <location>
+        <dimension name="Weight" xvalue="100" />
+      </location>
+    </source>
+    <source familyname="VarTest" filename="VarTest-Bold.ufo" name="master_1">
+      <location>
+        <dimension name="Weight" xvalue="500" />
+      </location>
+    </source>
+  </sources>
+  <instances>
+    <instance familyname="VarTest VF" postscriptfontname="VarTestVF-Regular" stylename="Regular">
+      <location>
+        <dimension name="Weight" xvalue="100" />
+      </location>
+      <kerning />
+      <info />
+    </instance>
+    <instance familyname="VarTest VF" postscriptfontname="VarTestVF-Bold" stylename="Bold">
+      <location>
+        <dimension name="Weight" xvalue="300" />
+      </location>
+      <kerning />
+      <info />
+    </instance>
+  </instances>
+</designspace>

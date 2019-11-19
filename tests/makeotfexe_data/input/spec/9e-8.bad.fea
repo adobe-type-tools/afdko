@@ -1,0 +1,4 @@
+# Bad name.
+table name {
+  nameid 10 3 1 "Feature description";
+} name;

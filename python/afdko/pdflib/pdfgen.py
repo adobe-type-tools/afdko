@@ -54,10 +54,7 @@ Modified 7/25/2006 read rooberts. Added supported for embedding fonts.
 ##
 
 import os
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+from io import StringIO
 from math import sin, cos, tan, pi
 
 from afdko.pdflib import pdfdoc, pdfgeom, pdfmetrics, pdfutils
@@ -576,11 +573,7 @@ class Canvas:
         Also allow file names as well as images.  This allows a
         caching mechanism"""
         # print "drawInlineImage: x=%s, y=%s, width = %s, height=%s " % (x,y, width, height)
-        try:
-            import zlib
-        except ImportError:
-            print('zlib not available')
-            return
+        import zlib
 
         self._currentPageHasImages = 1
 

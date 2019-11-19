@@ -1,0 +1,8 @@
+# Test test feature inside other non-aalt feature.
+feature rlig {
+    sub f i by f_i;
+} rlig;
+
+feature liga {
+    feature rlig;
+} liga;

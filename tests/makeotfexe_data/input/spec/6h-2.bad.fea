@@ -1,0 +1,9 @@
+# Test lookup references are allowed only in the input sequence.
+
+lookup test {
+ pos A 10;
+} test;
+
+lookup test2 {
+ pos A lookup test B C';
+} test2;

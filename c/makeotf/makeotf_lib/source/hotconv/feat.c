@@ -295,7 +295,7 @@ enum {
 
 #endif /* HOT_FEAT_SUPPORT */
 
-int setVendId_str(hotCtx g, char *vend);
+void setVendId_str(hotCtx g, char *vend);
 
 void featSetUnicodeRange(hotCtx g, short unicodeList[kLenUnicodeList]);
 
@@ -874,9 +874,7 @@ static void addVendorString(hotCtx g) {
     }
 
     *dnaNEXT(h->nameString) = '\0';
-    if (setVendId_str(g, h->nameString.array)) {
-        featMsg(hotERROR, "Bad string");
-    }
+    setVendId_str(g, h->nameString.array);
 }
 
 /* Return 1 if last line was seen. isEOL indicates whether ch is the last char
@@ -1049,11 +1047,11 @@ static Tag str2tag(char *tagName) {
 
 void zzcr_attr(Attrib *attr, int type, char *text) {
     if (type == T_NUM) {
-        attr->lval = strtol(text, NULL, 10);
+        attr->lval = strtoll(text, NULL, 10);
     } else if (type == T_NUMEXT) {
-        attr->lval = strtol(text, NULL, 0);
+        attr->lval = strtoll(text, NULL, 0);
     } else if (type == T_CID) {
-        attr->lval = strtol(text + 1, NULL, 10); /* Skip initial '\' */
+        attr->lval = strtoll(text + 1, NULL, 10); /* Skip initial '\' */
         if (attr->lval < 0 || attr->lval > 65535) {
             zzerr("not in range 0 .. 65535");
         }
@@ -1439,7 +1437,6 @@ void featAddValRecDef(short *metrics, char *valueName) {
 
     if (vd != NULL) {
         featMsg(hotFATAL, "Named value record definition '%s' is a a duplicate of an earlier named value record definition.", valueName);
-        return;
     }
 
     vd = (ValueDef *)dnaNEXT(h->valueDefs);
@@ -1488,7 +1485,6 @@ void featAddAnchorDef(short x, short y, unsigned short contourIndex, int hasCont
 
     if (ad != NULL) {
         featMsg(hotFATAL, "Named anchor definition '%s' is a a duplicate of an earlier named anchor definition.", anchorName);
-        return;
     }
 
     ad = (AnchorDef *)dnaNEXT(h->anchorDefs);
@@ -1516,7 +1512,6 @@ static void featAddAnchor(short xVal, short yVal, unsigned short contourIndex, i
 
         if (ad == NULL) {
             featMsg(hotFATAL, "Named anchor reference '%s' is not in list of named anchors.", anchorName);
-            return;
         }
         anchorMarkInfo->x = ad->x;
         anchorMarkInfo->y = ad->y;
@@ -2287,7 +2282,7 @@ static int tagAssign(Tag tag, int type, int checkIfDef) {
     } else if (type == scriptTag) {
         ta = &h->script;
         if (tag == dflt_) {
-            tag = dflt_;
+            tag = DFLT_;
             featMsg(hotWARNING, "'dflt' is not a valid tag for a script statement; using 'DFLT'.");
         }
         curr = &h->curr.script;
@@ -3935,7 +3930,7 @@ static void addPos(GNode *targ, int type, int enumerate) {
                 prevNode = markClassNode;
                 markClassNode = markClassNode->nextSeq;
             }
-            if (markClassNode->flags & FEAT_IS_MARK_NODE) {
+            if ((markClassNode != NULL) && (markClassNode->flags & FEAT_IS_MARK_NODE)) {
                 featGlyphClassCopy(h->g, &copyHeadNode, markClassNode);
                 markClassNode = copyHeadNode;
                 featGlyphClassSort(g, &markClassNode, 1, 0); /* changes value of markClassNode. I specify to NOT warn of duplicates, because they can happen with correct syntax. */
@@ -4146,8 +4141,7 @@ static Label featGetLabelIndex(char *name) {
 
     curr = name2NamedLkp(name);
     if (curr == NULL) {
-        featMsg(hotFATAL, "lookup name \"%s\" already defined", name);
-        return -1;
+        featMsg(hotFATAL, "lookup name \"%s\" not defined", name);
     }
     return curr->state.label;
 }
@@ -4500,15 +4494,6 @@ void featFree(hotCtx g) {
 #endif /* HOT_FEAT_SUPPORT */
 
     MEM_FREE(g, g->ctx.feat);
-}
-
-int featDefined(hotCtx g, Tag feat) {
-#if HOT_FEAT_SUPPORT
-    featCtx h = g->ctx.feat;
-    return featFileExists(g) && tagDefined(feat, &h->feature);
-#else
-    return 0;
-#endif
 }
 
 #if HOT_FEAT_SUPPORT

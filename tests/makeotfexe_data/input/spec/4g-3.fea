@@ -1,0 +1,6 @@
+# Test ignored subtable in GSUB lookups
+feature liga {
+    sub A by A.alt1;
+    subtable;
+    sub B by B.alt1;
+} liga;

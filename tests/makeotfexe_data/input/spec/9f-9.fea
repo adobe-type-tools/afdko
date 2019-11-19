@@ -1,0 +1,5 @@
+# TABLES: OS/2
+# Test deprecated fsType keyword.
+table OS/2 {
+  fsType 4;
+} OS/2;

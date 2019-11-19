@@ -1,0 +1,4 @@
+# Bad glyph name.
+lookup test {
+  pos -A B;
+} test;

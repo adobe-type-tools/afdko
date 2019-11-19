@@ -1,0 +1,5 @@
+# Test not defined lookup.
+
+feature liga {
+  sub f' i' lookup liga1 b;
+} liga;

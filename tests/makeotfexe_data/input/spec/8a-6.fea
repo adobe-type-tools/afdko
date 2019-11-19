@@ -1,0 +1,8 @@
+# Test aalt must be first when referencing other features.
+feature smcp {
+    sub A by A.sc;
+} smcp;
+
+feature aalt {
+    feature smcp;
+} aalt;

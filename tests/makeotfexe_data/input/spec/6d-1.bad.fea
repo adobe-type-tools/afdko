@@ -1,0 +1,15 @@
+# Test adding glyph to markClass after using it.
+markClass [acute grave] <anchor 150 -10> @TOP_MARKS;
+lookup mark1 {
+    pos base [a e o u] <anchor 250 450> mark @TOP_MARKS;
+} mark1;
+
+markClass [dieresis umlaut] <anchor 300 -10> @TOP_MARKS;
+lookup mark2 {
+    pos base [i j] <anchor 250 450> mark @TOP_MARKS;
+} mark2;
+
+feature mark {
+    lookup mark1;
+    lookup mark2;
+} mark;

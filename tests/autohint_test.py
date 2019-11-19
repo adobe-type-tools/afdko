@@ -64,8 +64,7 @@ def teardown_function():
 def test_basic_hinting(font_filename, opt):
     arg = []
     head, tail = os.path.splitext(font_filename)
-    if tail == '.pfb':
-        tail = '.pfa'  # the input is PFB, but the output will be PFA
+
     if opt:
         if opt == 'fi':
             _copy_fontinfo_file()
@@ -81,7 +80,7 @@ def test_basic_hinting(font_filename, opt):
         actual_path = get_temp_file_path()
 
     diff_mode = []
-    if tail == '.cff':
+    if tail in {'.cff', '.pfb'}:
         diff_mode = ['-m', 'bin']
 
     runner(CMD + ['-f', get_input_path(font_filename),

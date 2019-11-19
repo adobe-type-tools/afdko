@@ -1,0 +1,5 @@
+# Test multiple glyphs in Attach statement
+
+table GDEF {
+  Attach a b 23;
+} GDEF;

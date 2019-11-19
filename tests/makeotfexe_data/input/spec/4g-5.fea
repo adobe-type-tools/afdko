@@ -1,0 +1,6 @@
+# Test subtable in PairPos lookups
+feature kern {
+    pos A B 10;
+    subtable;
+    pos B C 10;
+} kern;

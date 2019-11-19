@@ -1,0 +1,6 @@
+# no glyphs are marked as part of the input sequence.
+anchorDef 3 4 ANCH34;
+anchorDef 5 6 ANCH56;
+feature kern {
+    pos cursive one <anchor ANCH56> <anchor ANCH34> two;
+} kern;

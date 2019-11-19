@@ -35,8 +35,8 @@ extern featCtx h; /* Not reentrant; see featNew() comments */
 extern hotCtx g;
 
 typedef union {
-    long lval;
-    unsigned long ulval;
+    int64_t lval;
+    uint64_t ulval;
     char text[MAX_TOKEN];
 } Attrib;
 
@@ -476,7 +476,7 @@ numUInt32Ext()
             zzmatch(T_NUMEXT);
             m = zzaCur;
 
-            if (m.ulval > ((unsigned long)0xFFFFFFFF))
+            if (m.ulval > 0xFFFFFFFFu)
                 zzerr("not in range 0 .. ((1<<32) -1)");
             _retv = (unsigned)(m).ulval;
             zzCONSUME;
@@ -486,7 +486,7 @@ numUInt32Ext()
                 zzmatch(T_NUM);
                 n = zzaCur;
 
-                if (n.ulval > ((unsigned long)0xFFFFFFFF))
+                if (n.ulval > 0xFFFFFFFFu)
                     zzerr("not in range 0 .. ((1<<32) -1)");
                 _retv = (unsigned)(n).ulval;
                 zzCONSUME;
@@ -1206,10 +1206,10 @@ pattern(int markedOK)
 
 GNode *
 #ifdef __USE_PROTOS
-pattern2(int markedOK, GNode **headP)
+pattern2(GNode **headP)
 #else
-    pattern2(markedOK, headP) int markedOK;
-GNode **headP;
+    pattern2(headP)
+        GNode **headP;
 #endif
 {
     GNode *_retv;
@@ -1274,11 +1274,8 @@ GNode **headP;
                             if ((LA(1) == 145)) {
                                 zzmatch(145);
 
-                                if (markedOK) {
-                                    /* Mark this node: */
-                                    (*insert)->flags |= FEAT_MARKED;
-                                } else
-                                    zzerr("cannot mark a replacement glyph pattern");
+                                /* Mark this node: */
+                                (*insert)->flags |= FEAT_MARKED;
                                 zzCONSUME;
 
                             } else {
@@ -1315,10 +1312,10 @@ GNode **headP;
 
 GNode *
 #ifdef __USE_PROTOS
-pattern3(int markedOK, GNode **headP)
+pattern3(GNode **headP)
 #else
-    pattern3(markedOK, headP) int markedOK;
-GNode **headP;
+    pattern3(headP)
+        GNode **headP;
 #endif
 {
     GNode *_retv;
@@ -1381,11 +1378,8 @@ GNode **headP;
                         if ((LA(1) == 145)) {
                             zzmatch(145);
 
-                            if (markedOK) {
-                                /* Mark this node: */
-                                (*insert)->flags |= FEAT_MARKED;
-                            } else
-                                zzerr("cannot mark a replacement glyph pattern");
+                            /* Mark this node: */
+                            (*insert)->flags |= FEAT_MARKED;
                             zzCONSUME;
 
                         } else {
@@ -1797,7 +1791,6 @@ position()
         GNode *ruleHead = NULL;
         GNode *temp = NULL;
         int enumerate = 0;
-        int markedOK = 1;
         int labelIndex;
         int type = 0;
         int labelLine;
@@ -1829,7 +1822,7 @@ position()
             zzMake0;
             {
                 if ((setwd6[LA(1)] & 0x10)) {
-                    lastNodeP = pattern2(markedOK, &targ);
+                    lastNodeP = pattern2(&targ);
 
                     ruleHead = lastNodeP;
                 } else {
@@ -1874,7 +1867,7 @@ position()
                                 zzMake0;
                                 {
                                     while ((setwd6[LA(1)] & 0x80)) {
-                                        lastNodeP = pattern3(markedOK, &ruleHead);
+                                        lastNodeP = pattern3(&ruleHead);
 
                                         ruleHead = lastNodeP;
                                         {
@@ -1933,7 +1926,7 @@ position()
                                     zzMake0;
                                     {
                                         while ((setwd7[LA(1)] & 0x2)) {
-                                            lastNodeP = pattern3(markedOK, &ruleHead);
+                                            lastNodeP = pattern3(&ruleHead);
 
                                             ruleHead = lastNodeP;
                                             {
@@ -1982,7 +1975,7 @@ position()
                                 {
                                     zzmatch(K_cursive);
                                     zzCONSUME;
-                                    lastNodeP = cursive(markedOK, &ruleHead);
+                                    lastNodeP = cursive(&ruleHead);
 
                                     type = GPOSCursive;
                                     {
@@ -1990,7 +1983,7 @@ position()
                                         zzMake0;
                                         {
                                             if ((setwd7[LA(1)] & 0x8)) {
-                                                lastNodeP = pattern2(markedOK, &lastNodeP);
+                                                lastNodeP = pattern2(&lastNodeP);
 
                                             } else {
                                                 if ((LA(1) == 146)) {
@@ -2013,7 +2006,7 @@ position()
                                     {
                                         zzmatch(K_markBase);
                                         zzCONSUME;
-                                        lastNodeP = baseToMark(markedOK, &ruleHead);
+                                        lastNodeP = baseToMark(&ruleHead);
 
                                         type = GPOSMarkToBase;
                                         {
@@ -2021,7 +2014,7 @@ position()
                                             zzMake0;
                                             {
                                                 if ((setwd7[LA(1)] & 0x10)) {
-                                                    lastNodeP = pattern2(markedOK, &lastNodeP);
+                                                    lastNodeP = pattern2(&lastNodeP);
 
                                                 } else {
                                                     if ((LA(1) == 146)) {
@@ -2044,7 +2037,7 @@ position()
                                         {
                                             zzmatch(K_markLigature);
                                             zzCONSUME;
-                                            lastNodeP = ligatureMark(markedOK, &ruleHead);
+                                            lastNodeP = ligatureMark(&ruleHead);
 
                                             type = GPOSMarkToLigature;
                                             {
@@ -2052,7 +2045,7 @@ position()
                                                 zzMake0;
                                                 {
                                                     if ((setwd7[LA(1)] & 0x20)) {
-                                                        lastNodeP = pattern2(markedOK, &lastNodeP);
+                                                        lastNodeP = pattern2(&lastNodeP);
 
                                                     } else {
                                                         if ((LA(1) == 146)) {
@@ -2075,7 +2068,7 @@ position()
                                             {
                                                 zzmatch(K_mark);
                                                 zzCONSUME;
-                                                lastNodeP = baseToMark(markedOK, &ruleHead);
+                                                lastNodeP = baseToMark(&ruleHead);
 
                                                 type = GPOSMarkToMark;
                                                 {
@@ -2083,7 +2076,7 @@ position()
                                                     zzMake0;
                                                     {
                                                         if ((setwd7[LA(1)] & 0x40)) {
-                                                            lastNodeP = pattern2(markedOK, &lastNodeP);
+                                                            lastNodeP = pattern2(&lastNodeP);
 
                                                         } else {
                                                             if ((LA(1) == 146)) {
@@ -2567,10 +2560,10 @@ cvParameterBlock()
 
 GNode *
 #ifdef __USE_PROTOS
-cursive(int markedOK, GNode **headP)
+cursive(GNode **headP)
 #else
-    cursive(markedOK, headP) int markedOK;
-GNode **headP;
+    cursive(headP)
+        GNode **headP;
 #endif
 {
     GNode *_retv;
@@ -2634,11 +2627,8 @@ GNode **headP;
                         if ((LA(1) == 145)) {
                             zzmatch(145);
 
-                            if (markedOK) {
-                                /* Mark this node: */
-                                (*insert)->flags |= FEAT_MARKED;
-                            } else
-                                zzerr("cannot mark a replacement glyph pattern");
+                            /* Mark this node: */
+                            (*insert)->flags |= FEAT_MARKED;
                             zzCONSUME;
 
                         } else {
@@ -2678,10 +2668,10 @@ GNode **headP;
 
 GNode *
 #ifdef __USE_PROTOS
-baseToMark(int markedOK, GNode **headP)
+baseToMark(GNode **headP)
 #else
-    baseToMark(markedOK, headP) int markedOK;
-GNode **headP;
+    baseToMark(headP)
+        GNode **headP;
 #endif
 {
     GNode *_retv;
@@ -2747,11 +2737,8 @@ GNode **headP;
                         if ((LA(1) == 145)) {
                             zzmatch(145);
 
-                            if (markedOK) {
-                                /* Mark this node: */
-                                (*insert)->flags |= FEAT_MARKED;
-                            } else
-                                zzerr("cannot mark a replacement glyph pattern");
+                            /* Mark this node: */
+                            (*insert)->flags |= FEAT_MARKED;
                             zzCONSUME;
 
                         } else {
@@ -2831,11 +2818,8 @@ GNode **headP;
                                         if ((LA(1) == 145)) {
                                             zzmatch(145);
 
-                                            if (markedOK) {
-                                                /* Mark this node: */
-                                                (*insert)->flags |= FEAT_MARKED;
-                                            } else
-                                                zzerr("cannot mark a replacement glyph pattern");
+                                            /* Mark this node: */
+                                            (*insert)->flags |= FEAT_MARKED;
                                             zzCONSUME;
 
                                         } else {
@@ -2941,10 +2925,10 @@ GNode **headP;
 
 GNode *
 #ifdef __USE_PROTOS
-ligatureMark(int markedOK, GNode **headP)
+ligatureMark(GNode **headP)
 #else
-    ligatureMark(markedOK, headP) int markedOK;
-GNode **headP;
+    ligatureMark(headP)
+        GNode **headP;
 #endif
 {
     GNode *_retv;
@@ -3010,11 +2994,8 @@ GNode **headP;
                         if ((LA(1) == 145)) {
                             zzmatch(145);
 
-                            if (markedOK) {
-                                /* Mark this node: */
-                                (*insert)->flags |= FEAT_MARKED;
-                            } else
-                                zzerr("cannot mark a replacement glyph pattern");
+                            /* Mark this node: */
+                            (*insert)->flags |= FEAT_MARKED;
                             zzCONSUME;
 
                         } else {
@@ -3094,11 +3075,8 @@ GNode **headP;
                                         if ((LA(1) == 145)) {
                                             zzmatch(145);
 
-                                            if (markedOK) {
-                                                /* Mark this node: */
-                                                (*insert)->flags |= FEAT_MARKED;
-                                            } else
-                                                zzerr("cannot mark a replacement glyph pattern");
+                                            /* Mark this node: */
+                                            (*insert)->flags |= FEAT_MARKED;
                                             zzCONSUME;
 
                                         } else {
@@ -4408,7 +4386,7 @@ table_OS_2()
                                                                                         do {
                                                                                             valUInt16 = numUInt16();
 
-                                                                                            unicodeRangeList[arrayIndex] = valUInt16;
+                                                                                            if ((arrayIndex) < kLenUnicodeList) unicodeRangeList[arrayIndex] = valUInt16;
                                                                                             arrayIndex++;
                                                                                             zzLOOP(zztasp5);
                                                                                         } while ((LA(1) == T_NUM));

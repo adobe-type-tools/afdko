@@ -36,7 +36,7 @@ jobs:
 
 - job: macOS
   pool:
-    vmImage: 'macOS-10.13'
+    vmImage: 'macOS-latest'
   variables:
     - name: PYTHON
       value: python3

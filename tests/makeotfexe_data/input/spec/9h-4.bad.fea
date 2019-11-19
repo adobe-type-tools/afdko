@@ -1,0 +1,8 @@
+# TABLES: vmtx
+# Bad keyword.
+
+table vmtx {
+    VertOriginY A 864;
+    VertOriginX A 0;
+    VertAdvanceY A 964;
+} vmtx;

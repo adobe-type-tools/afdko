@@ -1,0 +1,6 @@
+# Test repeated lookup flag.
+
+lookup test {
+  lookupflag IgnoreLigatures IgnoreMarks IgnoreLigatures;
+  sub f i by f_i;
+} test;

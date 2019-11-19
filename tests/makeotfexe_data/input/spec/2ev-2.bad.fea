@@ -1,0 +1,6 @@
+# Test duplicated named value record.
+valueRecordDef -10 KERN;
+valueRecordDef -20 KERN;
+feature kern {
+    pos A B <KERN>;
+} kern;

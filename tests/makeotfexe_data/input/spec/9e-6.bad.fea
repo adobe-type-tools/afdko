@@ -1,0 +1,4 @@
+# Unicode name platform.
+table name {
+  nameid 10 0 "Feature description for Unicode Platform.";
+} name;

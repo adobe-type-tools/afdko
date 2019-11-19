@@ -1,0 +1,12 @@
+{
+'hashMapVersion': (1, 0),
+'no_width-no_height': ['w0l00l1400l140140l0140', ['autohint']],
+'no_width-some_height': ['w0l00l1400l140140l0140', ['autohint']],
+'no_width-zero_height': ['w0l00l1400l140140l0140', ['autohint']],
+'some_width-no_height': ['w500l00l1400l140140l0140', ['autohint']],
+'some_width-some_height': ['w500l00l1400l140140l0140', ['autohint']],
+'some_width-zero_height': ['w500l00l1400l140140l0140', ['autohint']],
+'zero_width-no_height': ['w0l00l1400l140140l0140', ['autohint']],
+'zero_width-some_height': ['w0l00l1400l140140l0140', ['autohint']],
+'zero_width-zero_height': ['w0l00l1400l140140l0140', ['autohint']],
+}

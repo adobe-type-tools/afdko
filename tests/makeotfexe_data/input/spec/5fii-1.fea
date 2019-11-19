@@ -1,0 +1,10 @@
+# Test deprecated except statement. Both lookups should be identical.
+
+lookup test1 {
+ except A B sub A by A.alt1;
+} test1;
+
+lookup test2 {
+ ignore sub A B;
+ sub A' by A.alt1;
+} test2;

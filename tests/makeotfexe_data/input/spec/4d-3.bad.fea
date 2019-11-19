@@ -1,0 +1,7 @@
+# Test repeated lookup flag.
+
+@TOP_MARKS = [acute grave macron];
+lookup test {
+  lookupflag UseMarkFilteringSet @TOP_MARKS IgnoreLigatures UseMarkFilteringSet @TOP_MARKS;
+  sub f i by f_i;
+} test;

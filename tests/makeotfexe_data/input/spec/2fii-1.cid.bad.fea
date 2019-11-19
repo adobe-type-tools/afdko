@@ -1,0 +1,4 @@
+# Test missing CID
+lookup test {
+  sub \40 by \214;
+} test;

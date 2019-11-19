@@ -470,7 +470,12 @@ def main(args=None):
     # Note that we now pass in the design space object, rather than a path to
     # the design space file, in order to pass in the modified source fonts
     # fonts without having to recompile and save them.
-    varFont, _, _ = varLib.build(designspace, otfFinder)
+    try:
+        varFont, _, _ = varLib.build(designspace, otfFinder)
+    except varLib.cff.MergeTypeError:
+        logger.error("The input set requires compatibilization. Please try "
+                     "again with the -c (--check-compat) option.")
+        return 0
 
     if not options.keep_glyph_names:
         suppress_glyph_names(varFont)

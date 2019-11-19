@@ -1,0 +1,5 @@
+# Test only one replacement glyph in rsub.
+
+feature rlig {
+ rsub f_i' by f i;
+} rlig;

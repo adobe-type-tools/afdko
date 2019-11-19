@@ -1,0 +1,11 @@
+# Test already defined lookup name.
+feature ccmp {
+    lookup test {
+        sub a by b;
+    } test;
+
+    lookup test {
+        sub b by c;
+    } test;
+
+} ccmp;

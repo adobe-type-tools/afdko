@@ -1,0 +1,6 @@
+# Different flags in block.
+lookup smcp {
+    sub A by A.sc;
+    lookupflag IgnoreMarks;
+    sub B by B.sc;
+} smcp;

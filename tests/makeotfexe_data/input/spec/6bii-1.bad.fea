@@ -1,0 +1,7 @@
+# Enumerate in non-pair pos lookup.
+
+@Y_LC = [y yacute ydieresis];
+
+lookup test {
+  enum pos @Y_LC -80;
+} test;

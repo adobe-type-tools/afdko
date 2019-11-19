@@ -1,0 +1,6 @@
+# Contextual mark to base with backtrace and look ahead.
+markClass [acute grave] <anchor 150 -10> @TOP_MARKS;
+lookup mark {
+    position base [A B C] [a e o u]' [X Y Z] <anchor 250 450> mark @TOP_MARKS;
+    position base A a' X <anchor 250 450> mark @TOP_MARKS;
+} mark;

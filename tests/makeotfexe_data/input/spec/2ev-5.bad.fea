@@ -1,0 +1,7 @@
+# Bad valueRecordDef format.
+valueRecordDef 0x10 KERNA;
+valueRecordDef -20 KERNB;
+feature kern {
+    pos A B <KERNA>;
+    pos B A <KERNB>;
+} kern;

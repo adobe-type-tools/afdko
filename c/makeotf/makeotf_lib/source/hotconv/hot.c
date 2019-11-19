@@ -27,7 +27,6 @@
 #define ANSI_CHARSET 0
 #define SYMBOL_CHARSET 2
 
-int setVendId_str(hotCtx g, char *vend);
 void hotAddAnonTable(hotCtx g, unsigned long tag, hotAnonRefill refill);
 
 /* Initialize character name */
@@ -208,13 +207,12 @@ hotCtx hotNew(hotCallbacks *hotcb) {
     return g;
 }
 
-int setVendId_str(hotCtx g, char *vend) {
+void setVendId_str(hotCtx g, char *vend) {
     char *id;
 
     id = (char *)g->cb.malloc(g->cb.ctx, strlen(vend) + 1);
     strcpy(id, vend);
     g->font.vendId = id;
-    return 0;
 }
 
 /* Try to set vendor id by matching against copyright strings in the font */

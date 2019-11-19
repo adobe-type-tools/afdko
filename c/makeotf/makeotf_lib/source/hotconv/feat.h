@@ -122,8 +122,6 @@ void featReuse(hotCtx g);
 void featFree(hotCtx g);
 
 /* --- Supplementary functions --- */
-int featDefined(hotCtx g, Tag feat);
-
 GNode *featSetNewNode(hotCtx g, GID gid);
 void featRecycleNodes(hotCtx g, GNode *node);
 GNode **featGlyphClassCopy(hotCtx g, GNode **dst, GNode *src);

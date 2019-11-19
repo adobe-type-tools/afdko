@@ -2029,8 +2029,12 @@ static void addPosRule(hotCtx g, GPOSCtx h, SubtableInfo *si, GNode *targ, char 
 
             rule = dnaNEXT(si->rules);
             rule->targ = targ;
-            /*  add the lookupLabel. */
-            nextNode->lookupLabel = anon_si->label;
+            if (nextNode != NULL) {
+                /*  add the lookupLabel. */
+                nextNode->lookupLabel = anon_si->label;
+            } else {
+                hotMsg(g, hotFATAL, "aborting due to unexpected NULL nextNode pointer");
+            }
             /* is contextual */
         } else {
             /* isn't contextual */
@@ -2049,8 +2053,10 @@ static void addPosRule(hotCtx g, GPOSCtx h, SubtableInfo *si, GNode *targ, char 
                 return;
             }
 
-            /* add the pos rule to the anonymous tables. First, find the base glyph */
-            while ((nextNode != NULL) && (!(nextNode->flags & FEAT_IS_BASE_NODE))) {
+            /* add the pos rule to the anonymous tables. First, find the base glyph.
+             In a chain contextual rule, this will be the one and only marked glyph
+             or glyph class. */
+            while ((nextNode != NULL) && (!(nextNode->flags & FEAT_MARKED))) {
                 nextNode = nextNode->nextSeq;
             }
 
@@ -2063,12 +2069,11 @@ static void addPosRule(hotCtx g, GPOSCtx h, SubtableInfo *si, GNode *targ, char 
 
             rule = dnaNEXT(si->rules);
             rule->targ = targ;
-            /* find the mark class and add the lookupLabel. */
-            while ((nextNode != NULL) && (!(nextNode->flags & FEAT_IS_MARK_NODE))) {
-                nextNode = nextNode->nextSeq;
+            if (nextNode != NULL) {
+                nextNode->lookupLabel = anon_si->label;
+            } else {
+                hotMsg(g, hotFATAL, "aborting due to unexpected NULL nextNode pointer");
             }
-            nextNode->lookupLabel = anon_si->label;
-            /* is contextual */
         } else {
             /* isn't contextual */
             GPOSAddMark(g, si, targ, anchorCount, anchorMarkInfo, fileName, lineNum);

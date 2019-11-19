@@ -1,0 +1,6 @@
+# Test ignore clause may have at most one run of marked glyphs.
+
+lookup test {
+  ignore sub A' B C';
+  sub A' f by A.sc;
+} test;

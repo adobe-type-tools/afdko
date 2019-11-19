@@ -1,0 +1,5 @@
+# Test lookupflag in aalt feature
+feature aalt {
+    lookupflag 0;
+    sub A by A.sc;
+} aalt;

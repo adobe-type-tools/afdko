@@ -1,0 +1,4 @@
+# Test deprecated except statement, comma syntax.
+lookup test {
+    except A B, A C sub A by A.alt1;
+} test;

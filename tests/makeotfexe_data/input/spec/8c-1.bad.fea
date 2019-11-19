@@ -1,0 +1,7 @@
+# Unicode name platform.
+feature ss01 {
+    featureNames {
+        name 0 "Feature description for Unicode Platform.";
+    };
+    sub A by B;
+} ss01;

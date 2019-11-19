@@ -564,7 +564,6 @@ def getTickPos(pt0, pt1, pt2, tickSize, pathisCW):
 	vector1 = makeVector(pt1, pt2)
 	sum = ( vector1[0] + vector0[0], vector1[1] + vector0[1])
 	if pathisCW:
-		tickPos = ((pt1[0] +  (sum[1] * tickSize)), pt1[1] - (sum[0]*tickSize))
 		# tickPos is 90 degrees counter-clockwise to the vector "sum"
 		tickPos = ((pt1[0] -  (sum[1] * tickSize)), pt1[1] + (sum[0]*tickSize))
 	else:
@@ -757,20 +756,14 @@ class FontPDFGlyph:
 		for path  in self.pathList:
 			for pdfPoint in path:
 				if pdfPoint.type == FontPDFPoint.MT: # Dont't need to draw anything.
-					x0 = curX
-					y0 = curY
 					curX = pdfPoint.pt0[0]
 					curY = pdfPoint.pt0[1]
 					p.moveTo(curX , curY)
 				if pdfPoint.type == FontPDFPoint.LT:
-					x0 = curX
-					y0 = curY
 					curX = pdfPoint.pt0[0]
 					curY = pdfPoint.pt0[1]
 					p.lineTo(curX , curY)
 				elif pdfPoint.type == FontPDFPoint.CT:
-					x0 = curX
-					y0 = curY
 					x1 = pdfPoint.bcp1[0]
 					y1 = pdfPoint.bcp1[1]
 					x2 =  pdfPoint.bcp2[0]
@@ -2032,7 +2025,7 @@ def makeFontSetPDF(pdfFontList, params, doProgressBar=True):
 		firstPDFFont = pdfFontList[0][1]
 		fontPath = params.rt_filePath
 		pdfPath = f"{os.path.splitext(fontPath)[0]}.fontset.pdf"
-	params.rt_canvas = rt_canvas = pdfgen.Canvas(pdfPath, pagesize=params.pageSize, bottomup = 1)
+	params.rt_canvas = pdfgen.Canvas(pdfPath, pagesize=params.pageSize, bottomup = 1)
 
 	# figure out how much space to leave at start of line for PS names and fond index fields.
 	psNameSize = params.fontsetGroupPtSize
@@ -2332,7 +2325,7 @@ def makeKernPairPDF(pdfFont, kernOverlapList, params, doProgressBar=True):
 		fontPath = params.rt_filePath
 		pdfPath = os.path.splitext(fontPath)[0] + ".kc.pdf"
 
-	params.rt_canvas = rt_canvas = pdfgen.Canvas(pdfPath, pagesize=params.pageSize, bottomup = 1)
+	params.rt_canvas = pdfgen.Canvas(pdfPath, pagesize=params.pageSize, bottomup = 1)
 
 	# figure out how much space to leave at start of line for PS names and fond index fields..
 	maxLen = 0
