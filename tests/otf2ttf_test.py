@@ -33,6 +33,14 @@ def test_multiple_inputs_fail():
     assert exc_info.value.code == 2
 
 
+def test_wildcard_inputs_fail():
+    paths = map(get_input_path, ['latincid.otf*', 'sans.ot?', 'serif.ot[cf]'])
+    out_path = get_temp_file_path()
+    with pytest.raises(SystemExit) as exc_info:
+        otf2ttf(['-o', out_path, *paths])
+    assert exc_info.value.code == 2
+
+
 def test_multiple_inputs():
     fname1 = 'latincid'
     fname2 = 'sans'
@@ -44,6 +52,16 @@ def test_multiple_inputs():
     assert all([path.exists(out_path1), path.exists(out_path2)]) is False
     otf2ttf(['-o', out_dir, path1, path2])
     assert all([path.exists(out_path1), path.exists(out_path2)]) is True
+
+
+def test_wildcard_inputs():
+    fnames = ['latincid', 'sans', 'serif']
+    paths = map(get_input_path, ['latincid.otf*', 'sans.ot?', 'serif.ot[cf]'])
+    out_dir = get_temp_dir_path()
+    out_paths = [path.join(out_dir, f'{fname}.ttf') for fname in fnames]
+    assert all(map(path.exists, out_paths)) is False
+    otf2ttf(['-o', out_dir, *paths])
+    assert all(map(path.exists, out_paths)) is True
 
 
 def test_overwrite():
@@ -97,3 +115,46 @@ def test_convert(filename):
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value='])
+
+
+@pytest.mark.parametrize('filename', ['otf_otf', 'otf_ttf', 'ttf_otf'])
+def test_convert_ttc(filename):
+    input_path = get_input_path(f'{filename}.ttc')
+    actual_path = get_temp_file_path()
+    otf2ttf(['-o', actual_path, input_path])
+    actual_ttx = generate_ttx_dump(actual_path)
+    expected_ttx = get_expected_path('ttf_ttf.ttx')
+    assert differ([expected_ttx, actual_ttx,
+                   '-s',
+                   '<ttCollection ttLibVersion=' + SPLIT_MARKER +
+                   '      <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '      <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '      <created value=' + SPLIT_MARKER +
+                   '      <modified value='])
+
+
+@pytest.mark.parametrize('file', ['font.ttf', 'ttf_ttf.ttc'])
+def test_skip_ttf(file):
+    warn = 'Not a OpenType font' if path.splitext(file)[1] != '.ttc' \
+        else 'a Font Collection that has Not a OpenType font'
+    input_path = get_input_path(file)
+    out_path = path.join(get_temp_dir_path(), file)
+    assert path.exists(out_path) is False
+    msg_path = runner(CMD + ['-s', '-e', '-o', 'o', f'_{out_path}',
+                             '=post-format', '_2', '-f', input_path])
+    assert path.exists(out_path) is False
+    with open(msg_path, 'rb') as f:
+        output = f.read()
+    assert (f'WARNING: "{input_path}" cannot be converted '
+            f'since it is {warn}').encode() in output
+
+
+@pytest.mark.parametrize('filename', ['otf_ttf', 'ttf_otf', 'ttf_ttf'])
+def test_skip_ttf_in_ttc(filename):
+    input_path = get_input_path(f'{filename}.ttc')
+    out_path = path.join(get_temp_dir_path(), f'{filename}.ttc')
+    msg_path = runner(CMD + ['-s', '-e', '-o', 'o', f'_{out_path}',
+                             '=post-format', '_2', '-f', input_path])
+    with open(msg_path, 'rb') as f:
+        output = f.read()
+    assert b'WARNING: Not a OpenType font (bad sfntVersion)' in output
