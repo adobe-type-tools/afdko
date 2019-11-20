@@ -7,9 +7,9 @@
 
 [![Coverage](https://codecov.io/gh/adobe-type-tools/afdko/branch/develop/graph/badge.svg)](https://codecov.io/gh/adobe-type-tools/afdko/branch/develop)
 
-[![Codacy](https://api.codacy.com/project/badge/Grade/08ceff914833445685924ebb1f040070)](https://www.codacy.com/app/adobe-type-tools/afdko?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=adobe-type-tools/afdko&amp;utm_campaign=Badge_Grade)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/adobe-type-tools/afdko.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/adobe-type-tools/afdko/context:cpp)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/adobe-type-tools/afdko.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/adobe-type-tools/afdko/context:python)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/adobe-type-tools/afdko.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/adobe-type-tools/afdko/alerts/)
 
 Adobe Font Development Kit for OpenType (AFDKO)
 ===============================================
