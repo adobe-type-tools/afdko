@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="V.sc" format="1">
+	<advance width="522"/>
+	<outline>
+		<contour>
+			<point x="261" y="63" type="line"/>
+			<point x="240" y="145"/>
+			<point x="219" y="212"/>
+			<point x="198" y="282" type="curve"/>
+			<point x="116" y="575" type="line"/>
+			<point x="20" y="575" type="line"/>
+			<point x="207" y="0" type="line"/>
+			<point x="319" y="0" type="line"/>
+			<point x="505" y="575" type="line"/>
+			<point x="410" y="575" type="line"/>
+			<point x="327" y="283" type="line"/>
+			<point x="306" y="213"/>
+			<point x="286" y="145"/>
+			<point x="265" y="63" type="curve"/>
+		</contour>
+	</outline>
+</glyph>
