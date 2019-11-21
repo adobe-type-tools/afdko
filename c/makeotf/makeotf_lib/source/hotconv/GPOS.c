@@ -152,6 +152,8 @@ typedef struct { /* New subtable data */
 struct GPOSCtx_ {
     SubtableInfo new;
     struct {
+        LOffset featParams;         /* (Cumulative.) Next subtable offset |->  */
+        
         LOffset subtable;         /* (Cumulative.) Next subtable offset |->  */
                                   /* start of subtable section. LOffset to   */
                                   /* check for overflow                      */
@@ -417,6 +419,8 @@ void GPOSWrite(hotCtx g) {
 
     /* Write OTL features */
     otlTableWrite(g, h->otl);
+    otlLookupListWrite(g, h->otl);
+
 
     /* Write main subtable section */
     for (i = 0; i < h->subtables.cnt; i++) {
@@ -578,6 +582,7 @@ void GPOSReuse(hotCtx g) {
     h->new.baseList.cnt = 0;
     h->new.single.cnt = 0;
     h->new.pairs.cnt = 0;
+    h->offset.featParams = 0;
     h->offset.subtable = h->offset.extension = h->offset.extensionSection = 0;
     h->values.cnt = 0;
     h->subtables.cnt = 0;

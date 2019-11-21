@@ -19,6 +19,7 @@ otlTbl otlTableNew(hotCtx g);
 void otlTableFill(hotCtx g, otlTbl t);
 void otlTableFillStub(hotCtx g, otlTbl t);
 void otlTableWrite(hotCtx g, otlTbl t);
+void otlLookupListWrite(hotCtx g, otlTbl t);
 void otlTableReuse(hotCtx g, otlTbl t);
 void otlTableFree(hotCtx g, otlTbl t);
 
