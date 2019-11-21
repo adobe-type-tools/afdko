@@ -1273,7 +1273,7 @@ int svrEndFont(svrCtx h) {
 }
 
 int svrIterateGlyphs(svrCtx h, abfGlyphCallbacks *glyph_cb) {
-    unsigned short i;
+    long i;
 
     /* Set error handler */
     DURING_EX(h->err.env)

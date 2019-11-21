@@ -357,7 +357,7 @@ cleanup:;
 
 static void var_freefvar(ctlSharedStmCallbacks *sscb, var_fvar fvar) {
     if (fvar) {
-        unsigned short i;
+        long i;
 
         for (i = 0; i < fvar->instances.cnt; i++) {
             dnaFREE(fvar->instances.array[i].coordinates);
@@ -1037,7 +1037,7 @@ var_hmtx var_loadhmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
     unsigned long lsbMapOffset;
     unsigned long rsbMapOffset;
     float defaultWidth;
-    unsigned short i;
+    long i;
     long numGlyphs;
 
     hmtx = (var_hmtx)sscb->memNew(sscb, sizeof(*hmtx));
@@ -1213,7 +1213,7 @@ var_vmtx var_loadvmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
     unsigned long bsbMapOffset;
     unsigned long vorgMapOffset;
     float defaultWidth;
-    unsigned short i;
+    long i;
     long numGlyphs;
 
     vmtx = (var_vmtx)sscb->memNew(sscb, sizeof(*vmtx));

@@ -202,7 +202,7 @@ static void writeChainPos(hotCtx g, GPOSCtx h, Subtable *sub);
 static void freeChain3(hotCtx g, GPOSCtx h, Subtable *sub);
 static void freeChain(hotCtx g, GPOSCtx h, Subtable *sub);
 static void checkBaseAnchorConflict(hotCtx g, BaseGlyphRec *baseGlyphArray, long recCnt, char *fileName, int isMarkToLigature);
-static int findMarkClassIndex(SubtableInfo *si, GNode *markNode);
+static long findMarkClassIndex(SubtableInfo *si, GNode *markNode);
 static int addMarkClass(hotCtx g, SubtableInfo *si, GNode *markNode, char *filename, int lineNum);
 static void GPOSAdCursive(hotCtx g, SubtableInfo *si, GNode *targ, int anchorCount, AnchorMarkInfo *anchorMarkInfo, char *fileName, long lineNum);
 static void GPOSAddMark(hotCtx g, SubtableInfo *si, GNode *targ, int anchorCount, AnchorMarkInfo *anchorMarkInfo, char *fileName, long lineNum);
@@ -3636,8 +3636,8 @@ static void checkBaseLigatureConflict(hotCtx g, BaseGlyphRec *baseGlyphArray, lo
     return;
 }
 
-static int findMarkClassIndex(SubtableInfo *si, GNode *markNode) {
-    short i;
+static long findMarkClassIndex(SubtableInfo *si, GNode *markNode) {
+    long i;
 
     for (i = 0; i < si->markClassList.cnt; i++) {
         if (markNode == si->markClassList.array[i].gnode) {

@@ -1912,7 +1912,7 @@ static void buildGIDNames(cfrCtx h) {
     char *p;
     long length;
     long numGlyphs = h->glyphs.cnt;
-    unsigned short i;
+    long i;
 
     if (numGlyphs <= 0)
         fatal(h, cfrErrNoGlyph);
@@ -1932,7 +1932,7 @@ static void buildGIDNames(cfrCtx h) {
     p += length + 1;
     for (i = 1; i < numGlyphs; i++) {
         h->post.fmt2.strings.array[i] = p;
-        sprintf(p, "gid%05d", i);
+        sprintf(p, "gid%05ld", i);
         length = (long)strlen(p);
         p += length + 1;
     }
