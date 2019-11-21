@@ -4825,7 +4825,7 @@ void prepOTF(txCtx h) {
     unsigned short winscore;
     unsigned short version;
     unsigned short nEncodings;
-    unsigned short i;
+    long i;
     sfrTable *table;
 
     /* Install new callback */

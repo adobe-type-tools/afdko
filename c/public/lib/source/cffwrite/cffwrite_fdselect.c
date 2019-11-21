@@ -198,7 +198,7 @@ void cfwFdselectWrite(cfwCtx g) {
             case 3: {
                 /* Write format 3 */
                 uint8_t lastfd;
-                uint16_t j;
+                long j;
 
                 cfwWrite2(g, selector->nRanges);
 
