@@ -2560,7 +2560,7 @@ static void fillPairPos2(hotCtx g, GPOSCtx h) {
     fmt->Class1Record = MEM_NEW(g, fmt->Class1Count * sizeof(Class1Record));
 
     fmt->Class1Record[0].Class2Record =
-        MEM_NEW(g, fmt->Class1Count * fmt->Class2Count * sizeof(Class2Record));
+        MEM_NEW(g, (unsigned long)fmt->Class1Count * fmt->Class2Count * sizeof(Class2Record));
     for (i = 0; i < fmt->Class1Count; i++) {
         int j;
         if (i != 0) {

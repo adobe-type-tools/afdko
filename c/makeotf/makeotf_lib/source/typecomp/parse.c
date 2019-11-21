@@ -2927,7 +2927,7 @@ static void cidReadChars(parseCtx h) {
         /* Use subset list or enumerate entire range. */
         Char *new;
         unsigned CID = icid;
-        char *pOffset = &h->buf.array[h->cid.MapOffset + CID * tableBytes];
+        char *pOffset = &h->buf.array[h->cid.MapOffset + (long)CID * tableBytes];
         long thisCSOffset =
             getOffset(h, pOffset + h->cid.FDBytes, h->cid.GDBytes);
         long nextCSOffset =
