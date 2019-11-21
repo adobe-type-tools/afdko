@@ -1500,7 +1500,7 @@ static void mmInit(t1rCtx h) {
     /* Compute and check design geometry */
     nMasters = h->mm.WV.cnt;
     nAxes = h->mm.BDP.cnt / nMasters;
-    if (nAxes > T1_MAX_AXES || nAxes * nMasters != h->mm.BDP.cnt ||
+    if (nAxes > T1_MAX_AXES || (long)nAxes * nMasters != h->mm.BDP.cnt ||
         !validBDM(h, nAxes, nMasters))
         fatal(h, t1rErrGeometry, NULL);
 

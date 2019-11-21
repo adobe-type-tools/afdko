@@ -726,7 +726,7 @@ var_itemVariationStore var_loadItemVariationStore(ctlSharedStmCallbacks *sscb, u
         goto cleanup;
     }
 
-    if (dnaSetCnt(&ivs->regionList.regions, DNA_ELEM_SIZE_(ivs->regionList.regions), ivs->regionList.axisCount * ivs->regionList.regionCount) < 0)
+    if (dnaSetCnt(&ivs->regionList.regions, DNA_ELEM_SIZE_(ivs->regionList.regions), (long)ivs->regionList.axisCount * ivs->regionList.regionCount) < 0)
         goto cleanup;
 
     if (ivsOffset + regionListOffset + IVS_VARIATION_REGION_LIST_HEADER_SIZE
@@ -771,9 +771,9 @@ var_itemVariationStore var_loadItemVariationStore(ctlSharedStmCallbacks *sscb, u
             goto cleanup;
 
         dnaINIT(sscb->dna, ivd->regionIndices, ivd->regionCount, 1);
-        dnaINIT(sscb->dna, ivd->deltaValues, ivd->itemCount * ivd->regionCount, 1);
+        dnaINIT(sscb->dna, ivd->deltaValues, (size_t)ivd->itemCount * ivd->regionCount, 1);
         if ((dnaSetCnt(&ivd->regionIndices, DNA_ELEM_SIZE_(ivd->regionIndices), ivd->regionCount) < 0)
-            || (dnaSetCnt(&ivd->deltaValues, DNA_ELEM_SIZE_(ivd->deltaValues), ivd->itemCount * ivd->regionCount) < 0))
+            || (dnaSetCnt(&ivd->deltaValues, DNA_ELEM_SIZE_(ivd->deltaValues), (long)ivd->itemCount * ivd->regionCount) < 0))
             goto cleanup;
 
         /* load region indices */
@@ -991,7 +991,7 @@ static float var_applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb, var_itemVa
         return netAdjustment;
     }
 
-    deltaSetIndex = subtable->regionCount * pair->innerIndex;
+    deltaSetIndex = (long)subtable->regionCount * pair->innerIndex;
 
     if ((long)pair->innerIndex >= subtable->itemCount || deltaSetIndex + subtable->regionCount > subtable->deltaValues.cnt) {
         sscb->message(sscb, "invalid inner index in index map");
