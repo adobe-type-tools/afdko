@@ -2464,7 +2464,7 @@ context, you need to put the mark and kern rules in different lookups.
 mark sukun <anchor 0 0> @TOP_CLASS;
 
 lookup MARK_POS {
-    position lam_meem_jeem' <anchor 625 1800> mark @TOP_CLASS alef;
+    position base lam_meem_jeem' <anchor 625 1800> mark @TOP_CLASS alef;
 } MARK_POS;
 
 lookup MARK_KERN {
