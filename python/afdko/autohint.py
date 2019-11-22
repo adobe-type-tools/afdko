@@ -448,11 +448,17 @@ from afdko import fdkutils, ufotools
 from afdko.beztools import *
 import traceback
 import shutil
+import warnings
 
 try:
     from psautohint import AUTOHINTEXE
 except ImportError:
     AUTOHINTEXE = "autohintexe"
+
+warnings.warn(
+	"autohint has been deprecated and will be removed from AFDKO soon. "
+	"Please update your code.",
+	category=FutureWarning)
 
 # warnings.simplefilter("ignore", RuntimeWarning) # supress waring about use of os.tempnam().
 
