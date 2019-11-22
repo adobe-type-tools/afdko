@@ -1,5 +1,7 @@
 import pytest
+import re
 import subprocess
+import time
 
 from runner import main as runner
 from differ import main as differ, SPLIT_MARKER
@@ -118,3 +120,45 @@ def test_full_unicode_ranges_bug813():
     actual_path = runner(CMD + ['-s', '-o', 't', '_OS/2', '-f', font_name])
     expected_path = get_expected_path('AdobeBlack2VF_OS2.txt')
     assert differ([expected_path, actual_path])
+
+
+@pytest.mark.parametrize('args, input_filename', [
+    (['t', '_glyf=6'], 'black.ttf'),
+    (['t', '_glyf=7'], 'black.ttf'),
+    (['t', '_CFF_=7'], 'black.otf'),
+])
+def test_date_and_time(args, input_filename):
+    """
+    There are three different places in the spot code where time() and
+    localtime_r() are called. This test is meant to exercise all three of them
+    and to confirm that the time is correctly set.
+    """
+    actual_path = runner(CMD + ['-s', '-f', input_filename, '-o'] + args)
+    found_date = False
+    with open(actual_path) as output_file:
+        lines = output_file.readlines()
+        now = time.time()
+        for line in lines:
+            line = line.strip()
+            if line.startswith('318 764 moveto'):
+                # this is the pattern for glyf=6
+                file_timestamp = re.split(r'[()]', line)[1]
+                file_time = time.mktime(time.strptime(file_timestamp))
+                found_date = True
+            elif line.startswith('0 743.4 moveto ('):
+                # this is the pattern for glyf=7 and CFF_=7
+                file_timestamp = ' '.join(re.split(r'[\s()]+', line)[-3:-1])
+                file_time = time.mktime(
+                    time.strptime(file_timestamp, '%m/%d/%y %H:%M'))
+                found_date = True
+            if found_date:
+                # The difference in time between when the file was made
+                # and now should be less than an hour. That should be enough
+                # even for some of the slower CI processes. ;-)
+                hours_diff = abs(now - file_time) / 3600
+                assert(hours_diff < 1)
+                break
+
+    # Make sure we actually found a date and checked it.
+    # (This is to catch the case of an empty or incomplete output file.)
+    assert found_date
