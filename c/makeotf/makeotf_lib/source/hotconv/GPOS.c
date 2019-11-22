@@ -142,6 +142,7 @@ typedef struct { /* New subtable data */
 
     dnaDCL(SingleRec, single);  /* Single pos accumulator */
     dnaDCL(KernRec, pairs);     /* Kern pair accumulator */
+    Subtable *featsub;          /* Current feature param subtable */
     Subtable *sub;              /* Current subtable */
     short pairFmt;              /* Fmt (1 or 2) of GPOS pair */
     unsigned short pairValFmt1; /* Fmt (1 or 2) of first value record  of GPOS pair */
@@ -152,7 +153,7 @@ typedef struct { /* New subtable data */
 struct GPOSCtx_ {
     SubtableInfo new;
     struct {
-        LOffset featParams;         /* (Cumulative.) Next subtable offset |->  */
+        LOffset featParam;         /* (Cumulative.) Next subtable offset |->  */
         
         LOffset subtable;         /* (Cumulative.) Next subtable offset |->  */
                                   /* start of subtable section. LOffset to   */
@@ -390,7 +391,7 @@ int GPOSFill(hotCtx g) {
     }
     DF(1, (stderr, "### GPOS:\n"));
 
-    otlTableFill(g, h->otl);
+    otlTableFill(g, h->otl, h->offset.featParam);
 
     h->offset.extensionSection = h->offset.subtable + otlGetCoverageSize(h->otl) + otlGetClassSize(h->otl);
 
@@ -582,7 +583,7 @@ void GPOSReuse(hotCtx g) {
     h->new.baseList.cnt = 0;
     h->new.single.cnt = 0;
     h->new.pairs.cnt = 0;
-    h->offset.featParams = 0;
+    h->offset.featParam = 0;
     h->offset.subtable = h->offset.extension = h->offset.extensionSection = 0;
     h->values.cnt = 0;
     h->subtables.cnt = 0;
@@ -794,7 +795,7 @@ void GPOSLookupEnd(hotCtx g, Tag feature) {
 
         case GPOSFeatureParam:
             /* No need to test that current feature is 'size', as that is already enforced in feat.c */
-            fillSizeFeature(g, h, h->new.sub);
+            fillSizeFeature(g, h, h->new.featsub);
             break;
 
         case GPOSChain:

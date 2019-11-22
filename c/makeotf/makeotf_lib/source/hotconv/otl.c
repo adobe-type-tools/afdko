@@ -266,6 +266,7 @@ struct otlTbl_ {
     short nStandAloneSubtables;
     short nRefLookups; /* number of otl Subtable 's that are only references to look ups*/
     short nFeatParams; /* number of otl Subtable 's that hold feature table parameters.*/
+    LOffset params_size;
 #if HOT_DEBUG
     int nCoverageReused;
     int nClassReused;
@@ -1007,12 +1008,13 @@ Offset otlClassEnd(hotCtx g, otlTbl t) {
 otlTbl otlTableNew(hotCtx g) {
     otlTbl t = MEM_NEW(g, sizeof(struct otlTbl_));
 
+    dnaINIT(g->dnaCtx, t->featParam, 10, 5);
     dnaINIT(g->dnaCtx, t->subtable, 10, 5);
     dnaINIT(g->dnaCtx, t->label, 50, 100);
     dnaINIT(g->dnaCtx, t->refLabel, 50, 100);
 
 #if HOT_DEBUG
-    t->subtable.func = initSubtable;
+    t->subtable.func = t->featParam.func = initSubtable;
     t->nCoverageReused = 0;
     t->nClassReused = 0;
 #endif
@@ -1124,6 +1126,10 @@ static int CDECL cmpLookupList(const void *first, const void *second,
         return 1;
     } else if (IS_REF_LAB(a->label) && IS_REF_LAB(b->label)) {
         return 0; /* Don't bother sorting references */
+    } else if ((!a->isFeatParam) && b->isFeatParam) {
+        return -1;
+    } else if (a->isFeatParam && (!b->isFeatParam)) {
+        return 1;
     } else if ((a->feature != b->feature) && (a->feature == aalt_tag)) {
         return -1;
     } else if ((a->feature != b->feature) && (b->feature == aalt_tag)) {
@@ -1576,7 +1582,6 @@ static Offset fillFeatureList(hotCtx g, otlTbl t) {
     t->tbl.FeatureList_.FeatureCount = nFeatures;
     t->tbl.FeatureList_.FeatureRecord =
         MEM_NEW(g, sizeof(FeatureRecord) * nFeatures);
-
     oFeatureList = FEATURE_LIST_SIZE(nFeatures);
 
     /* Build table */
@@ -1611,10 +1616,13 @@ static Offset fillFeatureList(hotCtx g, otlTbl t) {
                 
                 nParamOffset = fsub->offset;
                 break;
-                /*
-                 if (IS_REF_LAB(fsub->label)) {
-                     nParamOffset = findFeatParamOffset(sub->feature, t->featureParm.array, spanLimit);
-                */
+                
+                 /*
+                  if (IS_REF_LAB(fsub->label)) {
+                     nParamOffset = findFeatParamOffset(fsub->feature, fsub->label, t->featParam.array, spanLimit);
+                 }
+                  */
+                
             }
         }
         
@@ -1626,7 +1634,17 @@ static Offset fillFeatureList(hotCtx g, otlTbl t) {
         /* Within the current run, the first subtable of a sequence with the same lookup table index                   */
         /* span.lookup set to the first subtable of the next sequence with a different lookup index or feature index.  */
         for (j = iFeature; j < sub->span.feature; j = t->subtable.array[j].span.lookup) {
-            nLookups++;
+            Subtable *lsub = &t->subtable.array[j];
+
+            if (lsub->isFeatParam) {
+                nParamSubtables++;           /* There ought to be only one of these! */
+                nParamOffset = lsub->offset; /* Note! this is only the offset from the start of the subtable block that follows the lookupList */
+                if (IS_REF_LAB(lsub->label)) {
+                    nParamOffset = findFeatParamOffset(lsub->feature, lsub->label, t->subtable.array, spanLimit);
+                }
+            } else {
+                nLookups++;
+            }
         }
 
         /* Allocate Lookups */
@@ -1675,7 +1693,6 @@ static Offset fillFeatureList(hotCtx g, otlTbl t) {
 static void fixFeatureParmOffsets(hotCtx g, otlTbl t, short shortfeatureParamBaseOffset) {
     int nFeatures = t->tbl.FeatureList_.FeatureCount;
     int i;
-
     for (i = 0; i < nFeatures; i++) {
         FeatureRecord *rec = &t->tbl.FeatureList_.FeatureRecord[i];
         Feature *feature = &rec->Feature_;
@@ -1774,9 +1791,10 @@ void checkStandAloneTablRefs(hotCtx g, otlTbl t) {
     }
 }
 
-void otlTableFill(hotCtx g, otlTbl t) {
+void otlTableFill(hotCtx g, otlTbl t, LOffset params_size) {
     Offset offset = HEADER_SIZE;
-
+    Offset size;
+    t->params_size = params_size;
     calcLookupListIndexes(g, t);
     calcFeatureListIndexes(g, t);
 
@@ -1794,17 +1812,18 @@ void otlTableFill(hotCtx g, otlTbl t) {
 
     prepFeatureList(g, t);
     t->tbl.FeatureList = offset;
-    offset += fillFeatureList(g, t);
-
+    size = fillFeatureList(g, t);
+    offset += size;
     if (t->nFeatParams > 0) {
         /* The feature table FeatureParam offsets are currently from the start of the featureParam
         block, starting right after the FeatureList.
-        featureParamBaseOffset is the (size of the feature list + feature record array).
+        featureParamBaseOffset is the size of the FeatureList and its records..
          */
-        long featureParamBaseOffset = t->tbl.FeatureList;
+        long featureParamBaseOffset = size;
         fixFeatureParmOffsets(g, t, (short)featureParamBaseOffset);
+        offset += t->params_size;
     }
- 
+
     prepLookupList(g, t);
     t->tbl.LookupList = offset;
     t->lookupSize = fillLookupList(g, t);
@@ -1985,14 +2004,16 @@ static void freeTable(hotCtx g, otlTbl t) {
 }
 
 void otlTableReuse(hotCtx g, otlTbl t) {
-    if (t->subtable.cnt != 0) {
+    if ((t->subtable.cnt != 0) || (t->featParam.cnt != 0)) {
         freeTable(g, t);
     }
+    t->featParam.cnt = 0;
     t->subtable.cnt = 0;
     t->label.cnt = 0;
     t->refLabel.cnt = 0;
 
 #if HOT_DEBUG
+    t->featParam.func = initSubtable;
     t->subtable.func = initSubtable;
     t->nCoverageReused = 0;
     t->nClassReused = 0;
@@ -2006,6 +2027,7 @@ void otlTableFree(hotCtx g, otlTbl t) {
     if (t == NULL) {
         return;
     }
+    dnaFREE(t->featParam);
     dnaFREE(t->subtable);
     dnaFREE(t->label);
     dnaFREE(t->refLabel);
@@ -2036,19 +2058,26 @@ void otlSubtableAdd(hotCtx g, otlTbl t, Tag script, Tag language, Tag feature,
     sub->offset = offset;
     sub->label = label;
     sub->fmt = fmt;
+    
     if (feature == (Tag)TAG_STAND_ALONE) {
         sub->seenInFeature = 0;
     } else {
         sub->seenInFeature = 1;
     }
 
-    if (script == TAG_UNDEF) {
-        t->nAnonSubtables++;
-    }
-    if (feature == (Tag)TAG_STAND_ALONE) {
-        t->nStandAloneSubtables++;
+    if (isFeatParam) {
+        t->nFeatParams++;
+    } else {
+        if (script == TAG_UNDEF) {
+          t->nAnonSubtables++;
+        }
+        if (feature == (Tag)TAG_STAND_ALONE) {
+          t->nStandAloneSubtables++;
+        }
+
+        if (IS_REF_LAB(label)) {
+          t->nRefLookups++;
+        }
     }
 
-    if (IS_REF_LAB(label))
-        t->nRefLookups++;
 }

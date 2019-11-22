@@ -65,6 +65,7 @@ typedef struct { /* New subtable data */
 
     dnaDCL(SubstRule, rules);
     Subtable *sub;  /* Current subtable */
+    Subtable *featsub;  /* Current featparam subtable */
     char *fileName; /* the current feature file name */
 } SubtableInfo;
 
@@ -304,7 +305,7 @@ int GSUBFill(hotCtx g) {
     }
     DF(1, (stderr, "### GSUB:\n"));
 
-    otlTableFill(g, h->otl);
+    otlTableFill(g, h->otl, h->offset.featParam);
 
     h->offset.extensionSection = h->offset.subtable + otlGetCoverageSize(h->otl) + otlGetClassSize(h->otl);
 #if HOT_DEBUG
@@ -331,6 +332,9 @@ static void featParamsWrite(hotCtx g, GSUBCtx h) {
 
     for (i = 0; i < h->featparams.cnt; i++) {
         Subtable *sub = &h->featparams.array[i];
+        if (IS_REF_LAB(sub->label)) {
+            continue;
+        }
 
         switch (sub->lkpType) {
                 case GSUBFeatureNameParam:
@@ -354,12 +358,13 @@ void GSUBWrite(hotCtx g) {
         /* When (h->subtables.cnt ==0), we get here only if the -fs option has been specified. */
         h->otl = otlTableNew(g);
         otlTableFillStub(g, h->otl);
+        otlTableWrite(g, h->otl);
         /* don't need to call featParamsWrite(): no features without lookup subtables. */
         otlLookupListWrite(g, h->otl);
         return;
     }
 
-    otlTableFillStub(g, h->otl);
+    otlTableWrite(g, h->otl);
     featParamsWrite(g, h);
     otlLookupListWrite(g, h->otl);
 
@@ -474,6 +479,24 @@ void GSUBReuse(hotCtx g) {
     h->new.script = h->new.language = h->new.feature = TAG_UNDEF;
 
     /* Free subtables */
+    for (i = 0; i < h->featparams.cnt; i++) {
+        Subtable *sub = &h->featparams.array[i];
+
+        if (IS_REF_LAB(sub->label)) {
+            continue;
+        }
+
+        switch (sub->lkpType) {
+                    case GSUBFeatureNameParam:
+                        freeGSUBFeatParam(g, sub);
+                        break;
+
+                    case GSUBCVParam:
+                        freeGSUBCVParam(g, sub);
+                        break;
+        }
+    }
+
     for (i = 0; i < h->subtables.cnt; i++) {
         Subtable *sub = &h->subtables.array[i];
 
@@ -584,8 +607,18 @@ void GSUBFeatureBegin(hotCtx g, Tag script, Tag language, Tag feature) {
 }
 
 static void startNewSubtable(hotCtx g) {
+    Subtable *sub;
     GSUBCtx h = g->ctx.GSUB;
-    Subtable *sub = h->new.sub = dnaNEXT(h->subtables);
+    int hasFeatureParam = ((h->new.lkpType == GSUBFeatureNameParam) ||
+                           (h->new.lkpType == GSUBCVParam));
+                            
+    if (hasFeatureParam) {
+        sub = h->new.featsub = dnaNEXT(h->featparams);
+        sub->offset = h->offset.featParam;
+    } else {
+        sub = h->new.sub = dnaNEXT(h->subtables);
+        sub->offset = h->offset.subtable;
+    }
 
     sub->script = h->new.script;
     sub->language = h->new.language;
@@ -595,10 +628,9 @@ static void startNewSubtable(hotCtx g) {
     sub->lkpFlag = h->new.lkpFlag;
     sub->markSetIndex = h->new.markSetIndex;
     sub->label = h->new.label;
-    sub->offset = h->offset.subtable;
 
     sub->extension.use = h->new.useExtension;
-    if (h->new.useExtension && !IS_REF_LAB(h->new.label)) {
+    if (h->new.useExtension && (!IS_REF_LAB(h->new.label)) && (!hasFeatureParam)) {
         sub->extension.otl = otlTableNew(g);
         sub->extension.offset = h->offset.extension; /* Not needed */
         sub->extension.tbl = fillExtension(g, h, h->new.lkpType);
@@ -607,20 +639,6 @@ static void startNewSubtable(hotCtx g) {
         sub->extension.offset = 0;
         sub->extension.tbl = NULL;
     }
-}
-
-static void startNewFeatParamSubtable(hotCtx g) {
-    GSUBCtx h = g->ctx.GSUB;
-    Subtable *sub = h->new.sub = dnaNEXT(h->featparams);
-
-    sub->script = h->new.script;
-    sub->language = h->new.language;
-    sub->feature = h->new.feature;
-    strcpy(sub->id_text, g->error_id_text); /* save feature and lookup names for writing phase */
-    sub->lkpType = h->new.lkpType;
-    sub->lkpFlag = h->new.lkpFlag;
-     sub->label = h->new.label;
-    sub->offset = h->offset.featParam;
 }
 
 /* Begin new lookup */
@@ -811,11 +829,11 @@ void GSUBLookupEnd(hotCtx g, Tag feature) {
             break;
 
         case GSUBFeatureNameParam:
-            fillGSUBFeatureNameParam(g, h, h->new.sub);
+            fillGSUBFeatureNameParam(g, h, h->new.featsub);
             break;
 
         case GSUBCVParam:
-            fillGSUBCVParam(g, h, h->new.sub);
+            fillGSUBCVParam(g, h, h->new.featsub);
             break;
 
 #endif /* HOT_FEAT_SUPPORT */
@@ -875,7 +893,7 @@ static void fillGSUBFeatureNameParam(hotCtx g, GSUBCtx h, Subtable *sub) {
                "A 'featureNames' block is only allowed in Stylistic Set (ssXX) features; it is being used in %s.",
                g->error_id_text);
     }
-    }
+}
 
 static void writeGSUBFeatNameParam(GSUBCtx h, Subtable *sub) {
     FeatureNameParameterFormat *feat_param;
@@ -894,10 +912,10 @@ void GSUBAddFeatureMenuParam(hotCtx g, void *param) {
     Subtable *sub;
     FeatureNameParameterFormat *feat_param = NULL;
     Offset param_size = sizeof(FeatureNameParameterFormat);
-
-    startNewFeatParamSubtable(g);
-    sub = h->new.sub;
-
+    
+    startNewSubtable(g);
+    sub = h->new.featsub;
+    
     feat_param = MEM_NEW(g, param_size);
 
     feat_param->version = 0;
@@ -974,8 +992,8 @@ void GSUBAddCVParam(hotCtx g, void *param) {
     Offset param_size = sizeof(CVParameterFormat);
     Offset param_offset = (Offset)CV_PARAM_SIZE(feat_param);
 
-    startNewFeatParamSubtable(g);
-    sub = h->new.sub;
+    startNewSubtable(g);
+    sub = h->new.featsub;
 
     new_param = MEM_NEW(g, param_size);
 

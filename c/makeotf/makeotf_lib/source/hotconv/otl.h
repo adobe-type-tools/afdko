@@ -16,7 +16,7 @@ void otlFree(hotCtx g);
 typedef struct otlTbl_ *otlTbl;
 
 otlTbl otlTableNew(hotCtx g);
-void otlTableFill(hotCtx g, otlTbl t);
+void otlTableFill(hotCtx g, otlTbl t, LOffset params_size);
 void otlTableFillStub(hotCtx g, otlTbl t);
 void otlTableWrite(hotCtx g, otlTbl t);
 void otlLookupListWrite(hotCtx g, otlTbl t);
