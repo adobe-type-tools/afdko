@@ -449,9 +449,9 @@ pos T V <SECOND_KERN>;
 ```
 
 Note than when the value record name is used, it must be enclosed by angle
-brackets, whether it is a single value or four value record. The valueRecordDef
-is a top level statement, and must be defined outside of feature blocks. It also
-must be defined before it is used.
+brackets, whether it is a single value or four value record. The
+`valueRecordDef` is a top level statement, and must be defined outside of
+feature blocks. It also must be defined before it is used.
 
 <a name="2.e.vi"></a>
 #### 2.e.vi. Contour point
@@ -539,7 +539,7 @@ the `anchorDef` keyword.
 <a name="2.e.viii"></a>
 #### 2.e.viii. Named anchor definition
 
-The anchorDef keyword is used to define a named anchor. This name can then be
+The `anchorDef` keyword is used to define a named anchor. This name can then be
 used in anchor definitions instead of coordinates. It offers the advantage of
 being able to change the coordinates in the named anchor definition only, and
 having that single edit change the coordinates used in all the rules in which
@@ -638,8 +638,10 @@ For example, a glyph named “table” must be specified in the feature file as:
 CIDs are represented by a non-negative `<number>` [§[2.e.i](#2.e.i)] preceded by
 a backslash. For example:
 
-    \101
-    \0
+```fea
+\101
+\0
+```
 
 <a name="2.g"></a>
 ### 2.g. Glyph classes
@@ -696,11 +698,13 @@ font. `<firstGlyph>` and `<lastGlyph>` must be the same length and can differ:
 
 1.  By a single letter from A-Z, either uppercase or lowercase. For example:
 
-        [A.swash - Z.swash]
-        [a - z]
+    ```fea
+    [A.swash - Z.swash]
+    [a - z]
+    ```
 
-The range is expanded by incrementing the letter that differs, while keeping
-the rest of the glyph name the same.
+    The range is expanded by incrementing the letter that differs, while keeping
+    the rest of the glyph name the same.
 
 2.  By up to 3 decimal digits in a contiguous run. For example:
 
@@ -874,7 +878,7 @@ A lookup is a group of rules of the same type. See §[4.e](#4.e).
 ### 4.b. Language system
 
 An OpenType language system is any combination of a script tag
-and a language tag. (In the text of this document, the notation  `<script
+and a language tag. (In the text of this document, the notation `<script
 tag>`/`<language tag>` is used to refer to a language system; for example,
 `script latn`/`language dflt` denotes the default language of the Latin script.)
 
@@ -883,8 +887,8 @@ one or more language systems. The lookups of a particular feature may vary acros
 the language systems under which the feature is registered.
 
 There are two ways to specify language system in the feature
-file: with the languagesystem keyword outside of feature definition blocks, and
-by the script and language keywords within feature definition blocks.
+file: with the `languagesystem` keyword outside of feature definition blocks,
+and by the `script` and `language` keywords within feature definition blocks.
 
 <a name="4.b.i"></a>
 #### 4.b.i. languagesystem
@@ -910,7 +914,7 @@ does not contain an explicit `script` or `language` statement (see
 specified by the `languagesystem` statement(s). If a feature block does contain
 `script` or `language` tags, then all lookups that occur before the first
 `script` or `language` tag will also be applied under all the specified
-languagesystems.
+language systems.
 
 If no `languagesystem` statement is present, then the implementation must behave
 exactly as though the following statement were present at the beginning of the
@@ -926,18 +930,18 @@ If any `languagesystem` statement is used, then the statement specifying:
 languagesystem DFLT dflt;
 ```
 
-must be specified explicitly; if not, this `languagesystem` will not be included
+must be specified explicitly; if not, this language system will not be included
 in the font. This `script`/`language` pair is special: it is used if a program
 cannot find a match in the font to the current writing script and language.
 If it is not in your font, then all the rules may be invisible to the program
 if your font does not have a match for the current script and language.
 It is strongly recommended to use the statement `languagesystem DFLT dflt;`.
 
-If the statement `languagesystem DFLT dflt;` is present, it must be the first of
-the languagesystem statements. Any other language statements using the `DFLT`
-script tag must precede all other language statements.
+If the statement `languagesystem DFLT dflt;` is present, it must be the first
+of the `languagesystem` statements. Any other `language` statements using the
+`DFLT` script tag must precede all other `language` statements.
 
-Please see example 1 in §[4.g](#4.g) below.
+Please see example 1 in §[4.h](#4.h) below.
 
 <a name="4.b.ii"></a>
 #### 4.b.ii. script and language
@@ -945,7 +949,7 @@ Please see example 1 in §[4.g](#4.g) below.
 Occasionally a feature may need to be specified whose lookups vary across the
 language systems of the feature, or whose language systems vary from the set
 of language systems of the rest of the features in the file, as specified by
-the `languagesystem` statements). In these cases, `script` and `language`
+the `languagesystem` statements. In these cases, `script` and `language`
 statements will need to be used within the feature block itself.
 Such statements affect only that feature.
 
@@ -1178,10 +1182,10 @@ A lookup block may be defined either inside or outside of feature blocks. You
 may not use the script or language keywords within a standalone lookup block.
 
 The `useExtension` keyword has two effects: all the records of all types that
-are referenced by a lookup qualifier placed in one contiguous block of data, and
-the offset to the lookup may be 32 bits rather limited to 16 bits.
+are referenced by a lookup qualifier are placed in one contiguous block of data,
+and the offset to the lookup may be 32 bits rather than limited to 16 bits.
 
-When you font cannot be built because of an offset overflow error (meaning that
+When your font cannot be built because of an offset overflow error (meaning that
 the offset from one record to another record exceeds the 64 Kbyte limit imposed
 by the maximum size possible for a 16-bit offset field), then add this qualifier
 to the largest lookup. Keep adding it to more lookups until your font will
@@ -1284,10 +1288,10 @@ lookup.
 implementation of this syntax will create one. In this case, it will use the set
 of defined mark classes to define the mark glyphs for the GDEF GlyphClass. In
 this case, the assignment of a glyph to the GDEF GlyphClass mark class may
-conflict other assignments to the other GDEF GlyphClass classes. In this case,
-an implementation should warn the user of the conflict.
+conflict with other assignments to the other GDEF GlyphClass classes. In this
+case, an implementation should warn the user of the conflict.
 
-The set of mark classes have an implicit order. Any implementation should order
+The set of mark classes has an implicit order. An implementation should order
 the mark classes in the order of occurrence of the first definition statement
 for a mark glyph class. In the example:
 
@@ -1396,7 +1400,7 @@ and `cyrl`/`dflt` language systems since no explicit `script` or `language`
 statements are present in those features.
 
 In the `liga` feature, the f_f, f_i and f_l ligature substitutions will be
-applied under all all language systems. The c_t and c_s ligature substitutions
+applied under all language systems. The c_t and c_s ligature substitutions
 will be applied under all languages of the script latn, but not under any other
 scripts. The c_h and c_k ligature substitutions will be applied when the
 language is German (i.e. they are registered only under `latn`/`DEU `).
@@ -1455,13 +1459,13 @@ feature liga {
 *   The germandbls ligature will apply only for the `latn`/`DEU ` language
     system.
 
-*   The `latn`/`TRK ` languagesystem will contain only the NO_I lookup.
+*   The `latn`/`TRK ` language system will contain only the NO_I lookup.
 
-*   The `cyrl`/`SRB ` languagesystem will contain all the default rules, and the
+*   The `cyrl`/`SRB ` language system will contain all the default rules, and the
     c_t ligature rule.
 
 Note that if you specify no explicit rules or lookup references after a script
-and language statement, that the effect is to include all the default rules for
+and language statement, then the effect is to include all the default rules for
 all scripts for the feature. Note also that lookup HAS_I must be placed before
 lookup NO_I since the f_f_i substitution must precede the f_f substitution when
 both are applied. (See [7: Ordering of lookups and rules in the feature file](#7)).
