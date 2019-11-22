@@ -120,7 +120,7 @@ from afdko import fdkutils, ufotools
 
 warnings.warn(
 	"stemhist has been deprecated and will be removed from AFDKO soon. "
-	"Please update your code.",
+	"Please update your code to use psstemhist.",
 	category=FutureWarning)
 
 
