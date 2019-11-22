@@ -1103,7 +1103,6 @@ def main():
         run(sys.argv[1:])
     except (FocusOptionParseError, FocusFontError) as focus_error:
         print("Quitting after error.", focus_error)
-        pass
 
 
 if __name__ == '__main__':
