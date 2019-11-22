@@ -443,7 +443,6 @@ import time
 import tempfile
 from fontTools.ttLib import TTFont, getTableModule
 import plistlib
-import warnings
 from afdko import fdkutils, ufotools
 from afdko.beztools import *
 import traceback
@@ -457,10 +456,8 @@ except ImportError:
 
 warnings.warn(
 	"autohint has been deprecated and will be removed from AFDKO soon. "
-	"Please update your code.",
+	"Please update your code to use psautohint.",
 	category=FutureWarning)
-
-# warnings.simplefilter("ignore", RuntimeWarning) # supress waring about use of os.tempnam().
 
 kACIDKey = "AutoHintKey"
 NEWBEZ_SUFFIX = '.new'
