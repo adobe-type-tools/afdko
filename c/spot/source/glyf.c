@@ -1268,8 +1268,11 @@ static IntX donedate = 0;
 static Byte8 *thedate(void) {
     static Byte8 date[64];
     if (!donedate) {
-        time_t now = time(NULL);
-        strftime(date, 64, "%m/%d/%y %H:%M", localtime(&now));
+        time_t seconds_since_epoch;
+        struct tm local_time;
+        time(&seconds_since_epoch);
+        SAFE_LOCALTIME(&seconds_since_epoch, &local_time);
+        strftime(date, 64, "%m/%d/%y %H:%M", &local_time);
         donedate = 1;
     }
     return date;
