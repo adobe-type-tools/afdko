@@ -1,6 +1,6 @@
 # Copyright 2014 Adobe. All rights reserved.
 """
-otfpdf v1.6.3 Jul 15 2019
+otfpdf v1.6.4 Nov 25 2019
 provides support for the proofpdf script, for working with OpenType/CFF
 fonts. Provides an implementation of the fontpdf font object. Cannot be
 run alone.
@@ -10,7 +10,7 @@ from fontTools.misc.psCharStrings import T2OutlineExtractor
 
 from afdko.pdflib.fontpdf import FontPDFGlyph, FontPDFFont, FontPDFPen
 
-__version__ = "1.6.3"
+__version__ = "1.6.4"
 
 
 class txPDFFont(FontPDFFont):
@@ -35,6 +35,9 @@ class txPDFFont(FontPDFFont):
         self.getBBox()
         self.GetBlueZones()
         self.AscentDescent()
+
+    def __lt__(self, other):
+        return self.clientGetPSName() < other.clientGetPSName()
 
     def clientGetPSName(self):
         psName = self.clientFont['CFF '].cff.fontNames[0]

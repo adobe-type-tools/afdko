@@ -1,5 +1,5 @@
 """
-fontpdf v1.28 Jul 12 2019. This module is not run stand-alone; it requires
+fontpdf v1.29 Nov 25 2019. This module is not run stand-alone; it requires
 another module, such as proofpdf, in order to collect the options, and call
 the MakePDF function.
 
@@ -32,7 +32,7 @@ from afdko import fdkutils
 from afdko.pdflib import pdfgen, pdfmetrics
 from afdko.pdflib.pdfutils import LINEEND
 
-__version__ = "1.28"
+__version__ = "1.29"
 
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
@@ -2014,9 +2014,8 @@ def makeFontSetPDF(pdfFontList, params, doProgressBar=True):
 	An entry in the pdfFontList is [glyphList, pdfFont, tempCFFPath]
 	"""
 	# Sort fonts with same charsets together. Sort by: len charset, charset, ps name.
-	sortList = map(lambda entry: [ len(entry[0]), entry[0], entry[1].getPSName(), entry[1]], pdfFontList)
-	sortList.sort()
-	pdfFontList = map(lambda entry: [entry[1], entry[3]], sortList)
+	sortList = sorted(map(lambda entry: [ len(entry[0]), entry[0], entry[1].getPSName(), entry[1]], pdfFontList))
+	pdfFontList = list(map(lambda entry: [entry[1], entry[3]], sortList))
 
 	if params.rt_pdfFileName:
 		pdfPath = params.rt_pdfFileName
