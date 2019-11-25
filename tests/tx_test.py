@@ -272,6 +272,20 @@ def test_m_option_success(arg):
 #     assert subprocess.call([TOOL, '-m', f'-{arg}', input_path]) != 0
 
 
+@pytest.mark.parametrize('arg, exp_filename', [(None, 'not_removed'),
+                                               ('-V', 'not_removed'),
+                                               ('+V', 'removed')])
+def test_V_option(arg, exp_filename):
+    input_path = get_input_path('overlap.pfa')
+    expected_path = get_expected_path(f'overlap_{exp_filename}.pfa')
+    output_path = get_temp_file_path()
+    args = [TOOL, '-t1', '-o', output_path, input_path]
+    if arg:
+        args.insert(2, arg)
+    subprocess.call(args)
+    assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])
+
+
 # -------------
 # Convert tests
 # -------------
