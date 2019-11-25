@@ -1,10 +1,10 @@
-"[-cff options: defaults -E, -F, -O, -S, +T, +V, -Z, -b, -d]\n"
+"[-cff options: defaults -E, -F, -O, -S, +T, -V, -Z, -b, -d]\n"
 "+/-E    do/don't optimize for embedding\n"
 "+/-F    do/don't optimize Family zones\n"
 "+/-O    do/don't optimize for ROM\n"
 "+/-S    do/don't subroutinize\n"
 "+/-T    do/don't optimize font (for testing purpose; not for production)\n"
-"+/-V    don't/do remove path overlaps\n"
+"+/-V    do/don't remove path overlaps\n"
 "+/-Z    don't/do decompose SEAC and dotsection operators\n",
 "+/-b    do/don't preserve glyph order\n"
 "+/-d    do/don't print duplicate hintsubs warnings to stderr\n"

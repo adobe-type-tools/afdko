@@ -168,7 +168,7 @@ def test_gone_options_bc(arg):
     ('-u', b'tx {[mode][mode options][shared options][files]}*'),
     ('-afm', b'[-afm options: default none]'),
     ('-cef', b'[-cef options: default none]'),
-    ('-cff', b'[-cff options: defaults -E, -F, -O, -S, +T, +V, -Z, -b, -d]'),
+    ('-cff', b'[-cff options: defaults -E, -F, -O, -S, +T, -V, -Z, -b, -d]'),
     ('-cff2', b'[-cff2 options: defaults -S, -b]'),
     ('-dcf', b'[-dcf options: defaults -T all, -5]'),
     ('-dump', b'[-dump options: default -1]'),
@@ -178,7 +178,7 @@ def test_gone_options_bc(arg):
     ('-ps', b'[-ps options: default -0]'),
     ('-svg', b'[-svg options: defaults -lf, -gn0]'),
     ('-t1',
-        b'[-t1 options: defaults -0, -l, -E, -S, +T, +V, +q, -w, -e 4, -lf]'),
+        b'[-t1 options: defaults -0, -l, -E, -S, +T, -V, +q, -w, -e 4, -lf]'),
     ('-ufo', b'[-ufo options: default none]'),
 ])
 def test_mode_help(mode, msg):
