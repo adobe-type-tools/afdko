@@ -51,7 +51,7 @@ This tool will rotate and translate glyphs in a font, including the hints. Howev
 
 ### `sfntedit`
 
-This allows you to cut and past the entire binary block of a font table from one font to another. You do this by first using it on a source font with the `-x` option to copy a table from the source font to a separate file, and then using it with the `-a` option to add that table to a target font. It can also be used to simply delete a table, and to fix the font table checksums.
+This allows you to cut and paste the entire binary block of a font table from one font to another. You do this by first using it on a source font with the `-x` option to copy a table from the source font to a separate file, and then using it with the `-a` option to add that table to a target font. It can also be used to simply delete a table, and to fix the font table checksums.
 
 ### `stemhist`/`psstemhist`
 
