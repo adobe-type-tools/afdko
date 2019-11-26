@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from runner import main as runner
@@ -97,6 +99,30 @@ def test_fontplot2_lf_option(font_filename, glyphs):
     assert differ([expected_path, save_path,
                    '-s', '/CreationDate', '-e', 'macroman'])
 
+
+def test_fontsetplot():
+    f1 = 'SourceSansPro-Black.otf'
+    f2 = 'SourceSansPro-BlackIt.otf'
+    # pdf_filename = "fontsetplot_otf_glyphs_2-7.pdf"
+    fp1 = get_input_path(f1)
+    fp2 = get_input_path(f2)
+    save_path = get_temp_file_path()
+    runner(['-t', 'fontsetplot', '-o', 'o', f'_{save_path}', 'dno',
+            'g', '_2-7', f'_{fp1}', f'_{fp2}'])
+    # expected_path = get_expected_path(pdf_filename)
+
+    # It would be nice to compare the output PDF here, but it seems there
+    # are some minor variations in the binary section from run to run.
+    # Visual comparison of the output suggests that they are the same
+    # (apart from the CreationDate).
+    #
+    # For now, we're just checking that we: 1) don't get any errors
+    # while running, and 2) that an output file gets generated.
+    #
+    # assert(differ([expected_path, save_path,
+    #                '-s', '/CreationDate', '-e', 'macroman']))
+
+    assert os.path.exists(save_path)
 
 @pytest.mark.parametrize('filename', ['SourceSansPro-Black',
                                       'SourceSansPro-BlackIt'])
