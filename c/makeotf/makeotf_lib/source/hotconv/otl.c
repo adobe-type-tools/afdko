@@ -265,6 +265,7 @@ struct otlTbl_ {
     short nStandAloneSubtables;
     short nRefLookups; /* number of otl Subtable 's that are only references to look ups*/
     short nFeatParams; /* number of otl Subtable 's that hold feature table parameters.*/
+    LOffset params_size; /* size of feature parameter subtable block.*/
 #if HOT_DEBUG
     int nCoverageReused;
     int nClassReused;
@@ -1654,7 +1655,7 @@ static Offset fillFeatureList(hotCtx g, otlTbl t) {
                 /* This happens when the 'size' feature is the first GPOS feature in the feature file.*/
                 nParamOffset = FEAT_PARAM_ZERO; /* So we can tell the difference between 'undefined' and a real zero value.*/
             }
-            feature->FeatureParams = nParamOffset; /* Note! this is only the offset from the start of the subtable block that follows the lookupList */
+            feature->FeatureParams = nParamOffset; /* Note! this is only the offset from the start of the featureParam block, which follows the FeatureList and records. */
         } else {
             feature->FeatureParams = NULL_OFFSET;
         }
@@ -1666,7 +1667,7 @@ static Offset fillFeatureList(hotCtx g, otlTbl t) {
     return oFeatureList;
 }
 
-static void fixFeatureParmOffsets(hotCtx g, otlTbl t, short shortfeatureParamBaseOffset) {
+static void fixFeatureParamOffsets(hotCtx g, otlTbl t, short shortfeatureParamBaseOffset) {
     int nFeatures = t->tbl.FeatureList_.FeatureCount;
     int i;
 
@@ -1679,8 +1680,8 @@ static void fixFeatureParmOffsets(hotCtx g, otlTbl t, short shortfeatureParamBas
             if (feature->FeatureParams == FEAT_PARAM_ZERO) {
                 feature->FeatureParams = 0;
             }
-            /* feature->FeatureParams is now: (offset from start of subtable block that follows the LookupList) */
-            /* shortfeatureParamBaseOffset is (size of featureList) + (size of LookupList).                     */
+            /* feature->FeatureParams is now: (offset from start of featureParams block that follows the FeatureList and feature records) */
+            /* featureParamBaseOffset is (size of featureList).                     */
             feature->FeatureParams = feature->FeatureParams + shortfeatureParamBaseOffset - rec->Feature;
             if (feature->FeatureParams > 0xFFFF) {
                 hotMsg(g, hotFATAL, "feature parameter offset too large (%0x)",
@@ -1768,8 +1769,10 @@ void checkStandAloneTablRefs(hotCtx g, otlTbl t) {
     }
 }
 
-void otlTableFill(hotCtx g, otlTbl t) {
+void otlTableFill(hotCtx g, otlTbl t, LOffset params_size) {
     Offset offset = HEADER_SIZE;
+    Offset size;
+    t->params_size = params_size;
 
     calcLookupListIndexes(g, t);
     calcFeatureListIndexes(g, t);
@@ -1788,18 +1791,20 @@ void otlTableFill(hotCtx g, otlTbl t) {
 
     prepFeatureList(g, t);
     t->tbl.FeatureList = offset;
-    offset += fillFeatureList(g, t);
+    size = fillFeatureList(g, t);
+    offset += size;
+    if (t->nFeatParams > 0) {
+        /* The feature table FeatureParam offsets are currently from the start of the featureParam
+        block, starting right after the FeatureList.
+        featureParamBaseOffset is the size of the FeatureList and its records..
+         */
+        fixFeatureParamOffsets(g, t, (short)size);
+        offset += t->params_size;
+    }
 
     prepLookupList(g, t);
     t->tbl.LookupList = offset;
     t->lookupSize = fillLookupList(g, t);
-
-    if (t->nFeatParams > 0) {
-        /* The feature table FeatureParam offsets are currently from the start of the subtable block.*/
-        /* featureParamBaseOffset is the (size of the feature list + feature record array) + size of the lookup list. */
-        long featureParamBaseOffset = (t->tbl.LookupList - t->tbl.FeatureList) + t->lookupSize;
-        fixFeatureParmOffsets(g, t, (short)featureParamBaseOffset);
-    }
 }
 
 void otlTableFillStub(hotCtx g, otlTbl t) {
@@ -1893,6 +1898,13 @@ void otlTableWrite(hotCtx g, otlTbl t) {
             OUT2(feature->LookupListIndex[j]);
         }
     }
+}
+
+void otlLookupListWrite(hotCtx g, otlTbl t) {
+    int i;
+    int j;
+    otlCtx h = g->ctx.otl;
+    Header *hdr = &t->tbl;
 
     /* Write lookup list */
     OUT2(hdr->LookupList_.LookupCount);
@@ -2014,24 +2026,29 @@ void otlSubtableAdd(hotCtx g, otlTbl t, Tag script, Tag language, Tag feature,
     sub->label = label;
     sub->fmt = fmt;
     sub->isFeatParam = isFeatParam;
+
     if (feature == (Tag)TAG_STAND_ALONE) {
         sub->seenInFeature = 0;
     } else {
         sub->seenInFeature = 1;
     }
 
-    if (script == TAG_UNDEF) {
-        t->nAnonSubtables++;
-    }
-    if (feature == (Tag)TAG_STAND_ALONE) {
-        t->nStandAloneSubtables++;
-    }
-
-    /* FeatParam subtables may be labeled, but should NOT be added */
-    /* to the list of real look ups.                               */
-    if (IS_REF_LAB(label)) {
-        t->nRefLookups++;
-    } else if (isFeatParam) {
+    if (isFeatParam) {
         t->nFeatParams++;
+
+        if (IS_REF_LAB(label)) {
+          t->nRefLookups++;
+        }
+    } else {
+        if (script == TAG_UNDEF) {
+          t->nAnonSubtables++;
+        }
+        if (feature == (Tag)TAG_STAND_ALONE) {
+          t->nStandAloneSubtables++;
+        }
+
+        if (IS_REF_LAB(label)) {
+          t->nRefLookups++;
+        }
     }
 }

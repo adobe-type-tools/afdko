@@ -427,6 +427,8 @@ def test_overflow_bug731():
 
 
 def test_parameter_offset_overflow_bug746():
+    # Since the fix for issue 1017, the test is that the feature param offset
+    # does NOT overflow.
     input_filename = 'bug746/font.pfa'
     feat_filename = 'bug746/feat.fea'
     otf_path = get_temp_file_path()
@@ -439,7 +441,7 @@ def test_parameter_offset_overflow_bug746():
 
     with open(stderr_path, 'rb') as f:
         output = f.read()
-    assert(b"[FATAL] <bug746> feature parameter offset too large") in output
+    assert(b"[FATAL] <bug746> FeatParam offset too large") not in output
 
 
 def test_base_anchor_bug811():

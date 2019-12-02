@@ -152,6 +152,8 @@ typedef struct { /* New subtable data */
 struct GPOSCtx_ {
     SubtableInfo new;
     struct {
+        LOffset featParam;         /* (Cumulative.) Next subtable offset |->  */
+
         LOffset subtable;         /* (Cumulative.) Next subtable offset |->  */
                                   /* start of subtable section. LOffset to   */
                                   /* check for overflow                      */
@@ -332,7 +334,8 @@ void GPOSNew(hotCtx g) {
 #if HOT_DEBUG
     h->new.single.func = initSingle;
 #endif
-    h->offset.subtable = h->offset.extension = h->offset.extensionSection = 0;
+    h->offset.subtable = h->offset.featParam = 0;
+    h->offset.extension = h->offset.extensionSection = 0;
     dnaINIT(g->dnaCtx, h->values, 1000, 500);
     dnaINIT(g->dnaCtx, h->subtables, 10, 10);
     dnaINIT(g->dnaCtx, h->anonSubtable, 3, 10);
@@ -373,6 +376,8 @@ int GPOSFill(hotCtx g) {
 #endif /* HOT_FEAT_SUPPORT */
 
     /* Add OTL features */
+    /* See GSUB.c::GSUBFill() for an explanation of the subtable order */
+
     for (i = 0; i < h->subtables.cnt; i++) {
         Subtable *sub = &h->subtables.array[i];
         int isExt = sub->extension.use;
@@ -388,7 +393,7 @@ int GPOSFill(hotCtx g) {
     }
     DF(1, (stderr, "### GPOS:\n"));
 
-    otlTableFill(g, h->otl);
+    otlTableFill(g, h->otl, h->offset.featParam);
 
     h->offset.extensionSection = h->offset.subtable + otlGetCoverageSize(h->otl) + otlGetClassSize(h->otl);
 
@@ -411,12 +416,35 @@ int GPOSFill(hotCtx g) {
     return 1;
 }
 
+static void featParamsWrite(hotCtx g, GPOSCtx h) {
+    int i;
+
+    for (i = 0; i < h->subtables.cnt; i++) {
+        Subtable *sub = &h->subtables.array[i];
+        if (IS_REF_LAB(sub->label)) {
+            continue;
+        }
+
+        switch (sub->lkpType) {
+                /* I am keep the case switch from GPOS Write in case
+                 we ever have  new GPOS feature param. */
+                case GPOSFeatureParam:
+                    writeFeatParam(h, sub);
+                    break;
+        }
+    }
+}
+
+
 void GPOSWrite(hotCtx g) {
     int i;
     GPOSCtx h = g->ctx.GPOS;
 
     /* Write OTL features */
     otlTableWrite(g, h->otl);
+    featParamsWrite(g, h);
+    otlLookupListWrite(g, h->otl);
+
 
     /* Write main subtable section */
     for (i = 0; i < h->subtables.cnt; i++) {
@@ -441,10 +469,6 @@ void GPOSWrite(hotCtx g) {
                 writePairPos(g, h, sub);
                 break;
 
-            case GPOSFeatureParam:
-                writeFeatParam(h, sub);
-                break;
-
             case GPOSChain:
                 writeChainPos(g, h, sub);
                 break;
@@ -467,6 +491,8 @@ void GPOSWrite(hotCtx g) {
 
             case GPOSContext:
                 break;
+            /* We do not write the feature param in this loop. That
+             happens in featParamsWrite(). */
         }
     }
 
@@ -524,7 +550,6 @@ void GPOSReuse(hotCtx g) {
 
     h->new.script = h->new.language = h->new.feature = TAG_UNDEF;
 
-    /* Free subtables */
     for (i = 0; i < h->subtables.cnt; i++) {
         Subtable *sub = &h->subtables.array[i];
 
@@ -578,7 +603,9 @@ void GPOSReuse(hotCtx g) {
     h->new.baseList.cnt = 0;
     h->new.single.cnt = 0;
     h->new.pairs.cnt = 0;
-    h->offset.subtable = h->offset.extension = h->offset.extensionSection = 0;
+    h->offset.featParam = h->offset.subtable = 0;
+    h->offset.extension = h->offset.extensionSection = 0;
+
     h->values.cnt = 0;
     h->subtables.cnt = 0;
 
@@ -665,7 +692,15 @@ static void reuseClassDefs(GPOSCtx h) {
 
 static void startNewSubtable(hotCtx g) {
     GPOSCtx h = g->ctx.GPOS;
-    Subtable *sub = h->new.sub = dnaNEXT(h->subtables);
+    Subtable *sub;
+    int hasFeatureParam = h->new.lkpType == GPOSFeatureParam;
+
+    sub = h->new.sub = dnaNEXT(h->subtables);
+    if (hasFeatureParam) {
+        sub->offset = h->offset.featParam;
+    } else {
+        sub->offset = h->offset.subtable;
+    }
 
     sub->script = h->new.script;
     sub->language = h->new.language;
@@ -675,10 +710,9 @@ static void startNewSubtable(hotCtx g) {
     sub->lkpFlag = h->new.lkpFlag;
     sub->markSetIndex = h->new.markSetIndex;
     sub->label = h->new.label;
-    sub->offset = h->offset.subtable;
 
     sub->extension.use = h->new.useExtension;
-    if (h->new.useExtension && !IS_REF_LAB(h->new.label)) {
+    if (h->new.useExtension && (!IS_REF_LAB(h->new.label)) && (!hasFeatureParam)) {
         sub->extension.otl = otlTableNew(g);
         sub->extension.offset = h->offset.extension; /* Not needed */
         sub->extension.tbl = fillExtensionPos(g, h, h->new.lkpType);
@@ -1027,7 +1061,7 @@ void GPOSAddSize(hotCtx g, short *params, unsigned short numParams) {
     }
 
     sub->tbl = feat_param;
-    h->offset.subtable += uint16 * 5; /* When we write it out, we leave off the initial numParams short value.*/
+    h->offset.featParam += uint16 * 5; /* When we write it out, we leave off the initial numParams short value.*/
 }
 
 void GPOSSetSizeMenuNameID(hotCtx g, unsigned short nameID) {
