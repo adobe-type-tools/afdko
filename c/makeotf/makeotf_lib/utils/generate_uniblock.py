@@ -113,13 +113,29 @@ def _get_os2_ur_records():
 
 
 def _print_records(records):
-    for record in sorted(records):
+    block_indices = dict()
+    blocks_to_remember = {
+        'Hiragana': 'HIRAGANA_INX',
+        'Katakana': 'KATAKANA_INX',
+        'Bopomofo': 'BOPOMOFO_INX',
+        'CJK Unified Ideographs': 'CJK_IDEO_INX',
+        'Hangul Syllables': 'HANGUL_SYL_INX'}
+
+    for index, record in enumerate(sorted(records)):
         (start, end, count, os2_num, name) = record
         start_str = '0x%04X' % start
         end_str = '0x%04X' % end
         name_str = '"%s"' % name
         print('    { %8s, %8s, %5d, %d, %3d, %d, %-41s },'
               % (start_str, end_str, count, 0, os2_num, 0, name_str))
+        if name in blocks_to_remember:
+            block_indices[name] = index
+
+    print('')
+    print('MOVE THESE VALUES INTO map.c:')
+    for name in blocks_to_remember:
+        print('#define %-14s %3d' % (
+            blocks_to_remember[name], block_indices[name]))
 
 
 def _main():
