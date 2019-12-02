@@ -60,11 +60,15 @@ typedef int32_t SInx;   /* Index into char da */
 #define SYMBOL_BIT 31    /* Symbol code page bit number */
 #define MAC_BIT 29       /* Symbol code page bit number */
 
-#define HIRAGANA_INX 45 /* Unicode blocks used in determining... */
-#define KATAKANA_INX 46
-#define BOPOMOFO_INX 47
-#define CJK_IDEO_INX 51
-#define HANGUL_SYL_INX 52
+/* NOTE: the *_INX values below refer to the *INDEX* of the corresponding
+         Unicode range in uniblock.h, and *NOT* the bit number of that range
+         in the OS/2 Unicode ranges bits. For example UnicodeBlock[97] is the
+         Bopomofo block, which corresponds to OS/2 Unicode range bit 51. */
+#define HIRAGANA_INX    95 /* Unicode blocks used in determining... */
+#define KATAKANA_INX    96
+#define BOPOMOFO_INX    97
+#define CJK_IDEO_INX   107
+#define HANGUL_SYL_INX 120
 
 #define JIS_CP 17 /* ... code page support for CJK */
 #define CHN_SIMP_CP 18
