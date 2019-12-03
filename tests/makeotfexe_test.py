@@ -527,6 +527,26 @@ def test_bug1006():
                    '    <modified value='])
 
 
+@pytest.mark.parametrize(
+    'cmap_filename, cs, expectedOS2',
+    [('UniCN-UTF32-H', '25', 'expected_OS2_SC.ttx'),
+     ('UniJP-UTF32-H', '1', 'expected_OS2_JP.ttx'),
+     ('UniKR-UTF32-H', '3', 'expected_OS2_KR.ttx'),
+     ('UniTW-UTF32-H', '2', 'expected_OS2_TC.ttx')])
+def test_bug1040(cmap_filename, cs, expectedOS2):
+    out_path = get_temp_file_path()
+    cmd = CMD + ['-o', 'f', f'_{get_input_path("bug1040/cidfont.ps")}',
+                       'cs', f'_{cs}',
+                       'o', f'_{out_path}',
+                       'ch', f'_{get_input_path("bug1040/" + cmap_filename)}']
+    runner(cmd)
+
+    actual_ttx = generate_ttx_dump(out_path, ["OS/2"])
+    expected_ttx = get_expected_path("bug1040/" + expectedOS2)
+
+    assert differ([expected_ttx, actual_ttx, '-l', '2'])
+
+
 TEST_FEATURE_FILES = [
     "Attach", "enum", "markClass", "language_required", "GlyphClassDef",
     "LigatureCaretByIndex", "LigatureCaretByPos", "lookup", "lookupflag",
