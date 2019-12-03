@@ -65,6 +65,7 @@ def generate_ttx_dump(font_path, tables=None):
         font.saveXML(temp_path, tables=tables)
         return temp_path
 
+
 def generate_spot_dumptables(font_path, tables):
     tmp_txt_path = get_temp_file_path()
     myargs = ['spot', "-t" + ",".join(tables), font_path]
