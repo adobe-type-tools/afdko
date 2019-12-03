@@ -1,0 +1,13 @@
+languagesystem DFLT dflt;
+
+
+feature ss05 {
+	featureNames {
+		name 3 1 0x0409 "Switch to black icons";
+		name 1 0 0 "Switch to black icons";
+	};
+
+sub b a' by b;
+
+} ss05;
+

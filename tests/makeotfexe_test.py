@@ -6,7 +6,7 @@ import subprocess
 from runner import main as runner
 from differ import main as differ, SPLIT_MARKER
 from test_utils import (get_input_path, get_expected_path, get_temp_file_path,
-                        generate_ttx_dump)
+                        generate_ttx_dump, generate_spot_dumptables)
 
 TOOL = 'makeotfexe'
 CMD = ['-t', TOOL]
@@ -426,24 +426,6 @@ def test_overflow_bug731():
            b"lookup 0 type 3") in output
 
 
-def test_parameter_offset_overflow_bug746():
-    # Since the fix for issue 1017, the test is that the feature param offset
-    # does NOT overflow.
-    input_filename = 'bug746/font.pfa'
-    feat_filename = 'bug746/feat.fea'
-    otf_path = get_temp_file_path()
-
-    stderr_path = runner(
-        CMD + ['-s', '-e', '-o', 'shw',
-               'f', f'_{get_input_path(input_filename)}',
-               'ff', f'_{get_input_path(feat_filename)}',
-               'o', f'_{otf_path}'])
-
-    with open(stderr_path, 'rb') as f:
-        output = f.read()
-    assert(b"[FATAL] <bug746> FeatParam offset too large") not in output
-
-
 def test_base_anchor_bug811():
     input_filename = 'bug811/font.pfa'
     feat_filename = 'bug811/feat.fea'
@@ -547,6 +529,28 @@ def test_bug1040(cmap_filename, cs, expectedOS2):
     expected_ttx = get_expected_path("bug1040/" + expectedOS2)
 
     assert differ([expected_ttx, actual_ttx, '-l', '2'])
+
+
+def test_parameter_offset_overflow_bug1017():
+    # Since the fix for issue 1017, it is not practical to actually cause
+    # this overflow, which used to be tested as bug746.  What we do
+    # instead is to verify that the FeatParams blocks are written right
+    # after the FeatureList, and before the LookupList, by comparing with
+    # the expected low level spot GSUB dump.
+    input_filename = 'bug1017/font.pfa'
+    feat_filename = 'bug1017/feat.fea'
+    txt_filename = 'bug1017.GSUB.txt'
+    otf_path = get_temp_file_path()
+
+    runner(
+        CMD + ['-s', '-e', '-o', 'shw',
+               'f', f'_{get_input_path(input_filename)}',
+               'ff', f'_{get_input_path(feat_filename)}',
+               'o', f'_{otf_path}'])
+
+    actual_txt = generate_spot_dumptables(otf_path, ['GSUB'])
+    expected_txt = get_expected_path(txt_filename)
+    assert differ([expected_txt, actual_txt])
 
 
 TEST_FEATURE_FILES = [
