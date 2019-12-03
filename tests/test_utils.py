@@ -3,7 +3,8 @@ import os
 import shutil
 
 from fontTools.ttLib import TTCollection, TTFont, TTLibError
-from afdko.fdkutils import get_temp_file_path, run_shell_command
+from afdko.fdkutils import (get_temp_file_path, run_shell_command,
+                            get_shell_command_output)
 
 
 def generalizeCFF(otfPath, do_sfnt=True):
@@ -63,6 +64,17 @@ def generate_ttx_dump(font_path, tables=None):
         temp_path = get_temp_file_path()
         font.saveXML(temp_path, tables=tables)
         return temp_path
+
+def generate_spot_dumptables(font_path, tables):
+    tmp_txt_path = get_temp_file_path()
+    myargs = ['spot', "-t" + ",".join(tables), font_path]
+    success, spot_txt = get_shell_command_output(myargs)
+    if not success:
+        raise Exception
+    tf = open(tmp_txt_path, "wt")
+    tf.write(spot_txt)
+    tf.close()
+    return tmp_txt_path
 
 
 def generate_ps_dump(font_path):
