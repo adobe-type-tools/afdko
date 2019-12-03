@@ -235,31 +235,37 @@ int GSUBFill(hotCtx g) {
 
     /* The font tables are in the order:
      ScriptList
-     FeastureList
+     FeatureList
      FeatureParams
      LookupList
-     lookup subtables
+     lookup subtables (with aalt subtables written last)
      anon subtables (lookup subtables created by contextual rules)
-     coverage defintion tables
+     coverage definition tables
      class definition tables
      extension sections.
      Notes:
-     All lookup/coverage/class tables are added in the order that they
-     are created by the feature file. All offsets are set to the current
-     end of the subtable list when they are created. The only exceptions
-     are the sub-tables for the aalt lookups. These are created after
-     the end of fearure file parsing, in feat.c:featFill(), since the
-     aalt feature references can be used only after all the other
-     features are defined.
-     */
+     All directly defined lookup subtables are added in the order that they are
+     created by the feature file. The only exceptions are the subtables for
+     the aalt lookups, and anonymous subtables. 'aalt'subtables' are created
+     after the end of feature file parsing, in feat.c:featFill(), since the
+     aalt feature references can be used only after all the other features are
+     defined. Anonymous subtables, those implied by contextual rules rather
+     than being explicitly defined, are added at the end of the subtable list,
+     in createAnonLookups() above.
 
-    /* For featparams and lookup subtables, there are two parallel sets of arrays
-    of subtables. The GSUB arrays (h->*) contain the actual data to be written,
-    and is where the offsets are set. The others are in the otl table, and exists
-    so that the GPOS and GSUB can share code for ordering and writing
-    feature and lookup indices. The latter inherit offset and other data
-    from the GSUB arrays. The otl table arrays are created below. The GSUB arrays
-    are created when the feature file is processed, by all the fill* functions. */
+     coverage and class subtables are seperately accumulated in otlTable
+     t->coverage.tables and t->class.tables, and are written after all the
+     lookup subtables, first coverage, then class subtables.
+
+     For featparams and lookup subtables, there are two parallel sets of arrays
+     of subtables. The GSUB arrays (h->*) contain the actual data to be
+     written, and is where the offsets are set. The other set is in the otl
+     table, and exists so that the GPOS and GSUB can share code for ordering
+     and writing feature and lookup indices. The latter inherit offset and
+     other data from the GSUB arrays. The GSUB arrays are created when the
+     feature file is processed, by all the fill* functions.  The otl table
+     arrays are created below.
+    */
     for (i = 0; i < h->subtables.cnt; i++) {
         Subtable *sub = &h->subtables.array[i];
         int isExt = sub->extension.use;
