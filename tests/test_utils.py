@@ -1,10 +1,12 @@
 import inspect
 import os
 import shutil
+import subprocess
 
 from fontTools.ttLib import TTCollection, TTFont, TTLibError
-from afdko.fdkutils import (get_temp_file_path, run_shell_command,
-                            get_shell_command_output)
+from afdko.fdkutils import (get_temp_file_path, run_shell_command)
+
+TIMEOUT = 240  # seconds
 
 
 def generalizeCFF(otfPath, do_sfnt=True):
@@ -69,10 +71,8 @@ def generate_ttx_dump(font_path, tables=None):
 def generate_spot_dumptables(font_path, tables):
     tmp_txt_path = get_temp_file_path()
     myargs = ['spot', "-t" + ",".join(tables), font_path]
-    success, spot_txt = get_shell_command_output(myargs)
-    if not success:
-        raise Exception
-    tf = open(tmp_txt_path, "wt")
+    spot_txt = subprocess.check_output(myargs, timeout=TIMEOUT)
+    tf = open(tmp_txt_path, "wb")
     tf.write(spot_txt)
     tf.close()
     return tmp_txt_path
