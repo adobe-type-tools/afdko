@@ -25,6 +25,15 @@ static IntX nameLookupType1 = 0;
 static IntX nameLookupType2 = 0;
 static char *dateFormat = "%a %b %d %H:%M:%S %Y";
 
+#if WIN32
+#define SAFE_LOCALTIME(x, y) localtime_s(y, x)
+#define LOCALTIME_FAILURE(x) (x != 0)
+#else
+#define SAFE_LOCALTIME(x, y) localtime_r(x, y)
+#define LOCALTIME_FAILURE(x) (x == NULL)
+#endif
+
+
 /* Warn of missing table */
 IntX tableMissing(Card32 table, Card32 client) {
     warning("%c%c%c%c can't read %c%c%c%c because table missing\n",
@@ -193,18 +202,18 @@ static Byte8 tday[32];
 
 Byte8 *fileModTimeString(Card8 which, Byte8 *fname) {
     Byte8 *str;
-    struct stat s;
+    struct stat file_stat;
 
     str = headGetModifiedDate(which, TAG('f', 'i', 'l', 'e'));
     if ((str != NULL) && (str[0] != '\0'))
         return str;
     else {
-        struct tm *tmp;
+        struct tm local_time;
         tday[0] = '\0';
 
-        stat(fname, &s);
-        tmp = localtime(&(s.st_mtime));
-        if (strftime(tday, sizeof(tday), dateFormat, tmp) == 0) {
+        stat(fname, &file_stat);
+        SAFE_LOCALTIME(&(file_stat.st_mtime), &local_time);
+        if (strftime(tday, sizeof(tday), dateFormat, &local_time) == 0) {
             fprintf(stderr, "strftime returned 0");
             exit(EXIT_FAILURE);
         }
@@ -213,17 +222,16 @@ Byte8 *fileModTimeString(Card8 which, Byte8 *fname) {
 }
 
 Byte8 *ourtime(void) {
-    time_t secs;
-    struct tm *tmp;
+    time_t seconds_since_epoch;
+    struct tm local_time;
     tday[0] = '\0';
-    (void)time(&secs);
-    tmp = localtime(&secs);
-    if (tmp == NULL) {
-        perror("localtime");
+    time(&seconds_since_epoch);
+    if (LOCALTIME_FAILURE(SAFE_LOCALTIME(&seconds_since_epoch, &local_time))) {
+        perror("localtime failed");
         exit(EXIT_FAILURE);
     }
 
-    if (strftime(tday, sizeof(tday), dateFormat, tmp) == 0) {
+    if (strftime(tday, sizeof(tday), dateFormat, &local_time) == 0) {
         fprintf(stderr, "strftime returned 0");
         exit(EXIT_FAILURE);
     }
