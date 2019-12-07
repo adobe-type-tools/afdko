@@ -2007,7 +2007,7 @@ static void postRead(cfrCtx h) {
             message(h, "post 2.0: invalid name id (table ignored)");
             goto parseError;
         } else if (nid > 257)
-            strCount++;
+            strCount = MAX(strCount, nid-257);
     }
 
     /* Read string data */
