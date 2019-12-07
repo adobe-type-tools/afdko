@@ -23,4 +23,4 @@ StemSnapH           {67,78}
 StemSnapV           {84,95}
 ## glyph[tag] {name,encoding}
 glyph[0] {.notdef,-}
-glyph[1] {Abreveacute,U+0041}
+glyph[1] {USED_A,U+0041}
