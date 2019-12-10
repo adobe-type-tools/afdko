@@ -943,8 +943,7 @@ def test_too_many_glyphs_pr955():
 def test_ttread_varinst():
     font_path = get_input_path('AdobeVFPrototype.ttf')
     save_path = get_temp_file_path()
-    runner(CMD + ['-a', '-o',
-                  '3', 'g', '_A', 'U', '_500,800',
+    runner(CMD + ['-a', '-o', '3', 'g', '_A', 'U', '_500,800',
                   '-f', font_path, save_path])
     expected_path = get_expected_path('vfproto_tt_inst500_800.txt')
     assert differ([expected_path, save_path, '-s', '## Filename'])
@@ -953,8 +952,20 @@ def test_ttread_varinst():
 def test_unused_post2_names():
     font_path = get_input_path('SourceSansPro-Regular-cff2-unused-post.otf')
     save_path = get_temp_file_path()
-    runner(CMD + ['-a', '-o',
-                  '1',
-                  '-f', font_path, save_path])
+    runner(CMD + ['-a', '-o', '1', '-f', font_path, save_path])
     expected_path = get_expected_path('ssr-cff2-unused-post.txt')
     assert differ([expected_path, save_path, '-s', '## Filename'])
+
+
+def test_seac_reporting():
+    # This test aims to show that the SEAC operator
+    # is not reported by all tx modes
+    font_path = get_input_path('seac.otf')
+    save_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', '6', '-f', font_path, save_path])
+    expected_path = get_expected_path('seac.dump.txt')
+    assert differ([expected_path, save_path])
+    runner(CMD + ['-a', '-o', 'dcf', '5', 'T', '_c',
+                  '-f', font_path, save_path])
+    expected_path = get_expected_path('seac.dcf.txt')
+    assert differ([expected_path, save_path])

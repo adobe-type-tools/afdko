@@ -1,0 +1,35 @@
+### CharStrings INDEX (00000560-000005d8)
+--- object[index]={value}
+[0]={
+  endchar
+}
+[1]={
+  0 47 139 44 286 47 hstemhm
+  10 205 -205 580 -205 205 hintmask[E8]
+  113 563 rmoveto
+  -47 143 vlineto
+  hintmask[F4]
+  -193 -469 rlineto
+  -53 -47 205 47 -102 hlineto
+  56 139 rlineto
+  261 hlineto
+  57 -139 rlineto
+  -102 -47 205 47 -51 hlineto
+  -211 516 rlineto
+  85 -333 rmoveto
+  -226 hlineto
+  113 274 rlineto
+  endchar
+}
+[2]={
+  503 115 hstem
+  215 196 vstem
+  411 618 rmoveto
+  -107 hlineto
+  -89 -115 rlineto
+  53 hlineto
+  endchar
+}
+[3]={
+  0 133 65 194 endchar
+}
