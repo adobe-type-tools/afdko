@@ -1,5 +1,5 @@
 """
-fontpdf v1.29 Nov 25 2019. This module is not run stand-alone; it requires
+fontpdf v1.30 Dec 10 2019. This module is not run stand-alone; it requires
 another module, such as proofpdf, in order to collect the options, and call
 the MakePDF function.
 
@@ -32,7 +32,7 @@ from afdko import fdkutils
 from afdko.pdflib import pdfgen, pdfmetrics
 from afdko.pdflib.pdfutils import LINEEND
 
-__version__ = "1.29"
+__version__ = "1.30"
 
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
@@ -1310,22 +1310,27 @@ def getTitleHeight(params):
 def doFontSetTitle(rt_canvas, params, numPages):
 	pageTitleFont = params.pageTitleFont
 	pageTitleSize = params.pageTitleSize
+	pageIncludeTitle = params.pageIncludeTitle
 	# Set 0,0 to be at top right of page.
 
-	rt_canvas.setFont(pageTitleFont, pageTitleSize)
+	if pageIncludeTitle:
+		rt_canvas.setFont(pageTitleFont, pageTitleSize)
 	title = "FontSet Proof"
 	rightMarginPos = params.pageSize[0]-params.pageRightMargin
 	cur_y = params.pageSize[1] - (params.pageTopMargin + pageTitleSize)
-	rt_canvas.drawString(params.pageLeftMargin, cur_y, title)
-	rt_canvas.drawRightString(rightMarginPos, cur_y, time.asctime())
+	if pageIncludeTitle:
+		rt_canvas.drawString(params.pageLeftMargin, cur_y, title)
+		rt_canvas.drawRightString(rightMarginPos, cur_y, time.asctime())
 	cur_y -= pageTitleSize*1.2
 	pageString = 'page %d' % (rt_canvas.getPageNumber())
-	rt_canvas.drawRightString(rightMarginPos, cur_y, pageString)
+	if pageIncludeTitle:
+		rt_canvas.drawRightString(rightMarginPos, cur_y, pageString)
 	cur_y -= pageTitleSize/2
-	rt_canvas.setLineWidth(3)
-	rt_canvas.line(params.pageLeftMargin, cur_y, rightMarginPos, cur_y)
-	#reset carefully afterwards
-	rt_canvas.setLineWidth(1)
+	if pageIncludeTitle:
+		rt_canvas.setLineWidth(3)
+		rt_canvas.line(params.pageLeftMargin, cur_y, rightMarginPos, cur_y)
+		#reset carefully afterwards
+		rt_canvas.setLineWidth(1)
 	return  cur_y - pageTitleSize # Add some space below the title line.
 
 def doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages = None):
@@ -1354,8 +1359,7 @@ def doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages = None):
 	if pageIncludeTitle:
 		rt_canvas.setLineWidth(3)
 		rt_canvas.line(params.pageLeftMargin, cur_y, rightMarginPos, cur_y)
-	#reset carefully afterwards
-	if pageIncludeTitle:
+		#reset carefully afterwards
 		rt_canvas.setLineWidth(1)
 	return  cur_y - pageTitleSize # Add some space below the title line.
 
@@ -2038,7 +2042,6 @@ def makeFontSetPDF(pdfFontList, params, doProgressBar=True):
 			maxLen = psNameLen
 			maxPSName = psName
 	indexString = "%s" % (len(pdfFontList))
-	pageTitleFont
 	psNameAndIndex = maxPSName + " " + indexString
 	psNameWidth = pdfmetrics.stringwidth(psNameAndIndex, pageTitleFont)  * 0.001 * psNameSize
 	indexWidth = pdfmetrics.stringwidth(indexString, pageTitleFont)  * 0.001 * psNameSize
