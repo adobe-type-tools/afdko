@@ -1,6 +1,8 @@
 import os
 import pytest
+import re
 import subprocess
+import time
 
 from afdko.fdkutils import (
     get_temp_file_path,
@@ -969,3 +971,45 @@ def test_seac_reporting():
                   '-f', font_path, save_path])
     expected_path = get_expected_path('seac.dcf.txt')
     assert differ([expected_path, save_path])
+
+
+def test_date_and_time_afm():
+    """
+    test the use of date and time functions in absfont_afm.c
+    """
+    input_path = get_input_path('font.otf')
+    output_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', 'afm', '-f', input_path, output_path])
+    now = time.time()
+    year = '%s' % time.localtime().tm_year
+    with open(output_path) as output_file:
+        lines = output_file.readlines()
+        file_year = lines[1].split()[2]
+        assert year == file_year
+        file_time_str = lines[2].split(': ')[1].strip()
+        file_time = time.mktime(
+            time.strptime(file_time_str, '%a %b %d %H:%M:%S %Y'))
+        hours_diff = abs(now - file_time) / 3600
+        assert(hours_diff < 1)
+
+
+def test_date_and_time_ps():
+    """
+    test the use of date and time functions in absfont_draw.c
+    """
+    input_path = get_input_path('font.otf')
+    output_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', 'ps', '-f', input_path, output_path])
+    now = time.time()
+    with open(output_path) as output_file:
+        lines = output_file.readlines()
+        print(lines[0:5])
+        date_str = re.split(r'[\(\)]', lines[5])[1]
+        date_str = date_str.split(': ')[1]
+        time_str = re.split(r'[\(\)]', lines[7])[1]
+        time_str = time_str.split(': ')[1]
+        file_date_and_time_str = date_str + ' ' + time_str
+        file_time = time.mktime(
+            time.strptime(file_date_and_time_str, '%m/%d/%y %H:%M'))
+        hours_diff = abs(now - file_time) / 3600
+        assert(hours_diff < 1)
