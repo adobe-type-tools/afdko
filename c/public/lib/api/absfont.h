@@ -7,6 +7,7 @@
 
 #include "ctlshare.h"
 #include "dynarr.h"
+#include "safetime.h"
 #include "txops.h"
 
 #define ABF_VERSION CTL_MAKE_VERSION(1, 0, 54)
