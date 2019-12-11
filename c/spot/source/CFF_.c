@@ -1650,14 +1650,9 @@ Byte8 *CFF_GetName(GlyphId glyphId, IntX *length, IntX forProofing) {
                     sprintf(cidname, "\\\\%04hu", cffgi->id);
                 else
                     sprintf(cidname, "\\%hu", cffgi->id);
-            } else if (nglyphs < 100000) {
-                if (forProofing)
-                    sprintf(cidname, "\\\\%05hu", cffgi->id);
-                else
-                    sprintf(cidname, "\\%hu", cffgi->id);
             } else {
                 if (forProofing)
-                    sprintf(cidname, "\\\\%hu", cffgi->id);
+                    sprintf(cidname, "\\\\%05hu", cffgi->id);
                 else
                     sprintf(cidname, "\\%hu", cffgi->id);
             }

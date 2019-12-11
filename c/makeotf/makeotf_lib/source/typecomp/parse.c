@@ -673,10 +673,8 @@ static void readChars(parseCtx h) {
 
                 if (g->flags & TC_NOOLDOPS && sid < TABLE_LEN(stdcodes)) {
                     /* Save standard-encoded char index */
-                    int code = stdcodes[sid];
-                    if (code != -1) {
-                        h->component.stdindex[code] = h->chars.cnt - 1;
-                    }
+                    uint8_t code = stdcodes[sid];
+                    h->component.stdindex[code] = h->chars.cnt - 1;
                 }
             } /* end if-else sid == SID_UNDEF */
         } else {
@@ -688,20 +686,18 @@ static void readChars(parseCtx h) {
                 (h->encoding.std ||
                  ((bname = h->encoding.custom[stdcodes[sid]]) != NULL &&
                   tc_strncmp(name.data, name.length, bname) == 0))) {
-                int code = stdcodes[sid];
-                if (code != -1) {
-                    /* Standard encoded glyph save as possible component */
-                    new = dnaNEXT(h->component.chars);
-                    new->index = h->buf.cnt;
-                    new->length = binlen;
-                    new->code = code;
-                    new->id = sid;
-                    new->encrypted = 1;
+                uint8_t code = stdcodes[sid];
+                /* Standard encoded glyph save as possible component */
+                new = dnaNEXT(h->component.chars);
+                new->index = h->buf.cnt;
+                new->length = binlen;
+                new->code = code;
+                new->id = sid;
+                new->encrypted = 1;
 
-                    /* Save standard-encoded char index */
-                    h->component.stdindex[code] =
-                        COMP_CHAR | (h->component.chars.cnt - 1);
-                }
+                /* Save standard-encoded char index */
+                h->component.stdindex[code] =
+                    COMP_CHAR | (h->component.chars.cnt - 1);
             }
         }
 

@@ -810,8 +810,6 @@ static int handleBlend(t2cCtx h) {
     h->stack.cnt--;
     h->stack.blendCnt--;
 
-    if (numBlends < 0)
-        return t2cErrStackUnderflow;
     CHKUFLOW(h, numTotalBlends);
     firstItemIndex = (h->stack.blendCnt - numTotalBlends);
     if (firstItemIndex < 0)

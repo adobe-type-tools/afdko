@@ -4244,8 +4244,7 @@ static void dumpSubtable(LOffset offset, Card16 type, void *subtable,
                 dumpPosPair(subtable, level, -1, -1, -1);
                 break;
             case ExtensionPositionType:
-                if (level != 8)
-                    dumpExtension(subtable, level, feattag);
+                dumpExtension(subtable, level, feattag);
                 break;
             default:;
         }
