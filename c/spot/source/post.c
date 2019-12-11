@@ -148,10 +148,10 @@ static Byte8 *getName2_0(Format2_0 *format, GlyphId glyphId, IntX *length) {
     if (glyphId > format->numberGlyphs)
         return tooBig(glyphId, length);
     else {
-        IntX index = format->glyphNameIndex[glyphId];
+        uint16_t index = format->glyphNameIndex[glyphId];
         Byte8 *name;
 
-        if ((index < 0) || (index > 32767)) {
+        if (index > 32767) {
             Byte8 gni[32];
             sprintf(gni, "glyphNameIndex[%d]", glyphId);
             warning(SPOT_MSG_BADINDEX, TAG_ARG(post_), index, gni);
@@ -241,13 +241,13 @@ static void dump2_0(Format2_0 *format, IntX level) {
 
     DL(2, (OUTPUTBUFF, "--- glyphNameIndex[glyphId]=value\n"));
     for (i = 0; i < format->numberGlyphs; i++) {
-        IntX ix = format->glyphNameIndex[i];
-        if ((ix < 0) || (ix > 32767)) {
+        uint16_t ix = format->glyphNameIndex[i];
+        if (ix > 32767) {
             Byte8 gni[32];
             sprintf(gni, "glyphNameIndex[%d]", i);
             warning(SPOT_MSG_BADINDEX, TAG_ARG(post_), ix, gni);
         }
-        DL(2, (OUTPUTBUFF, "[%d]=%hu ", i, (Card16)ix));
+        DL(2, (OUTPUTBUFF, "[%d]=%hu ", i, ix));
     }
     DL(2, (OUTPUTBUFF, "\n"));
 

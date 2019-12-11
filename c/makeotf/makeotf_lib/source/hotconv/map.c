@@ -1867,17 +1867,11 @@ static void setOS_2Fields(hotCtx g) {
 /* Create a custom cmap which stores the custom PS encoding. */
 static void makeCustomcmap(hotCtx g) {
     long i;
-    short charset = g->font.win.CharSet;
+    uint8_t charset = g->font.win.CharSet;
     unsigned platSpec = 0;
 
     /* Set lower byte of platSpec to charset */
-    if (charset != -1) {
-        if (charset > 0xFF) {
-            hotMsg(g, hotWARNING, "invalid charset <%d>", charset);
-        } else {
-            platSpec = charset;
-        }
-    }
+    platSpec = charset;
 
     cmapBeginEncoding(g, cmap_CUSTOM, platSpec, 0);
 

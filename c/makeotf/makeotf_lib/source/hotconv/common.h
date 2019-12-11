@@ -308,8 +308,8 @@ typedef struct { /* Font information */
 #define FI_CUSTOM_CS 3         /* Custom (defined by font) */
     struct {
         /* Windows-specific data */
-        unsigned char Family;
-        unsigned char CharSet;
+        uint8_t Family;
+        uint8_t CharSet;
         UV_BMP DefaultChar;
         UV_BMP BreakChar;
         FWord AvgWidth;
