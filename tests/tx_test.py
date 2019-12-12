@@ -1013,3 +1013,12 @@ def test_date_and_time_ps():
             time.strptime(file_date_and_time_str, '%m/%d/%y %H:%M'))
         hours_diff = abs(now - file_time) / 3600
         assert(hours_diff < 1)
+
+
+def test_overlap_removal():
+    input_path = get_input_path('overlaps.ufo')
+    expected_path = get_expected_path('overlaps.pfa')
+    output_path = get_temp_file_path()
+    args = [TOOL, '-t1', '+V', '-o', output_path, input_path]
+    subprocess.call(args)
+    assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])
