@@ -2436,11 +2436,11 @@ static int parseStem3(ufoCtx h, GLIF_Rec* glifRec, HintMask* curHintMask, int st
     while (i < 6) {
         StemHint* stem;
         stem = dnaNEXT(curHintMask->maskStems);
-        stem->edge = coords[i++];
-        stem->width = coords[i++];
         stem->flags = stemFlags;
         if ((i == 0) && (stemFlags & ABF_NEW_HINTS))
             stemFlags &= ~ABF_NEW_HINTS;
+        stem->edge = coords[i++];
+        stem->width = coords[i++];
     }
     return result;
 }
@@ -2771,11 +2771,11 @@ static int parseStem3V2(ufoCtx h, GLIF_Rec* glifRec, HintMask* curHintMask, int 
     while (count < 6) {
         StemHint* stem;
         stem = dnaNEXT(curHintMask->maskStems);
-        stem->edge = coords[count++];
-        stem->width = coords[count++];
         stem->flags = stemFlags;
         if ((count == 0) && (stemFlags & ABF_NEW_HINTS))
             stemFlags &= ~ABF_NEW_HINTS;
+        stem->edge = coords[count++];
+        stem->width = coords[count++];
     }
     return result;
 }
