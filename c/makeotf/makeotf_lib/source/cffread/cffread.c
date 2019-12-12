@@ -47,7 +47,7 @@ typedef int32_t Fixed;
 #define FixedHalf ((Fixed)0x00008000)
 
 /* Type conversions */
-#define INT(f) (((f)&0xffff0000) >> 16)
+#define INT(f) ((int16_t)(((f)&0xffff0000) >> 16))
 #define FRAC(f) ((f)&0x0000ffff)
 #define INT2FIX(i) ((Fixed)(i) << 16)
 #define FIX2INT(f) ((short)(((f) + FixedHalf) >> 16))
@@ -436,7 +436,7 @@ static Fixed popFix(cffCtx h) {
             return h->stack.array[h->stack.cnt].f;
 
         case STK_INT32: {
-            uint32_t l = h->stack.array[h->stack.cnt].i;
+            int32_t l = h->stack.array[h->stack.cnt].i;
             if (l < INT(FixedMin) || l > INT(FixedMax)) {
                 fatal(h, "range check\n");
             } else {
