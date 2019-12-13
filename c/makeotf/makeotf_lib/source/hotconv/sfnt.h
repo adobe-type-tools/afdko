@@ -18,6 +18,6 @@ void sfntFree(hotCtx g);
 void sfntSetnGlyphs(void *ctx, unsigned nGlyphs);
 void sfntSetMetrics(void *ctx, unsigned gid, FWord width,
                     FWord left, FWord bottom, FWord right, FWord top);
-void sfntAddAnonTable(hotCtx g, unsigned long tag, hotAnonRefill refill);
+void sfntAddAnonTable(hotCtx g, uint32_t tag, hotAnonRefill refill);
 
 #endif /* HOTCONV_SFNT_H */

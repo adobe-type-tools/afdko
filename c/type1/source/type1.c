@@ -42,7 +42,7 @@ static int mainlen = 0;
 #define key_eexec ((unsigned short)55665)
 #define key_charstring ((unsigned short)4330)
 
-unsigned short key = key_eexec;
+unsigned short g_key = key_eexec;
 
 static void put1(int c) {
     if (inmain >= mainlen) {
@@ -142,7 +142,7 @@ static int get1(FILE *fp) {
  */
 
 static void eeputchar(int c) {
-    c = (int)Encrypt((unsigned char)c, &key);
+    c = (int)Encrypt((unsigned char)c, &g_key);
     if (inmode == 1) {
         put1(c);
     } else {
@@ -484,7 +484,7 @@ static void epilogue(FILE *fp1) {
 
 static void type1(FILE *fp1, FILE *fp2) {
     for (;;) {
-        key = key_eexec;
+        g_key = key_eexec;
         col = 0;
         cleartext(fp1, fp2);
         flushtext(fp2);
