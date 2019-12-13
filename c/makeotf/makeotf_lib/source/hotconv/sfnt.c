@@ -48,7 +48,7 @@ typedef struct {
    Tables inside the sfnt are ordered using the writeOrder field so as to
    optimize access during font loading. Order fields with the same values are
    ordered by tag. */
-static Funcs funcs[] = {
+static Funcs g_funcs[] = {
     {head_, headNew, headFill, headWrite, headReuse, headFree, 1, 1, 0},
     {hhea_, hheaNew, hheaFill, hheaWrite, hheaReuse, hheaFree, 2, 2, 0},
     {maxp_, maxpNew, maxpFill, maxpWrite, maxpReuse, maxpFree, 1, 3, 0},
@@ -69,7 +69,7 @@ static Funcs funcs[] = {
     {BASE_, BASENew, BASEFill, BASEWrite, BASEReuse, BASEFree, 1, 18, 0},
     {VORG_, VORGNew, VORGFill, VORGWrite, VORGReuse, VORGFree, 1, 19, 0},
 };
-#define SFNT_TABLE_CNT ARRAY_LEN(funcs)
+#define SFNT_TABLE_CNT ARRAY_LEN(g_funcs)
 
 /* ---------------------------- Table Definition --------------------------- */
 
@@ -115,7 +115,7 @@ void sfntNew(hotCtx g) {
 
     dnaINIT(g->dnaCtx, h->funcs, SFNT_TABLE_CNT + 2, 5);
     dnaSET_CNT(h->funcs, SFNT_TABLE_CNT);
-    COPY(h->funcs.array, funcs, SFNT_TABLE_CNT);
+    COPY(h->funcs.array, g_funcs, SFNT_TABLE_CNT);
     for (i = 0; i < SFNT_TABLE_CNT; i++) {
         h->funcs.array[i].new(g);
     }
@@ -379,7 +379,7 @@ void sfntFree(hotCtx g) {
 }
 
 /* Add anonymous client table */
-void sfntAddAnonTable(hotCtx g, unsigned long tag, hotAnonRefill refill) {
+void sfntAddAnonTable(hotCtx g, uint32_t tag, hotAnonRefill refill) {
     sfntCtx h = g->ctx.sfnt;
     int i;
     Funcs *funcs;

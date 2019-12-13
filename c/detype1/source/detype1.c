@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #ifdef _MSC_VER /* defined by Microsoft Compiler */
 #include <io.h>
 #include <fcntl.h>
@@ -13,10 +14,7 @@
 
 typedef unsigned char uchar;
 
-typedef enum { FALSE,
-               TRUE } bool;
-
-int lenIV;
+int g_lenIV;
 
 static const char *panicname = "detype1";
 static void panic(const char *fmt, ...) {
@@ -41,7 +39,7 @@ static const unsigned short
     key_charstring = 4330;
 
 static uchar decrypt(uchar cipher, unsigned short *keyp) {
-    if (lenIV < 0) {
+    if (g_lenIV < 0) {
         return cipher;
     } else {
         unsigned short key = *keyp;
@@ -211,11 +209,11 @@ static int getlenIV(const uchar *s, const uchar *end) {
         if (*s != *k)
             k = key;
         else if (*++k == '\0') {
-            lenIV = atoi((const char *)++s);
-            return lenIV;
+            g_lenIV = atoi((const char *)++s);
+            return g_lenIV;
         }
-    lenIV = 4;
-    return lenIV;
+    g_lenIV = 4;
+    return g_lenIV;
 }
 
 /*
@@ -263,9 +261,9 @@ static bool snarfeexec(int c) {
         for (s = closefile; *s != '\0'; s++)
             eeappend(*s);
         cp = closefile;
-        return FALSE;
+        return false;
     }
-    return TRUE;
+    return true;
 }
 
 bool isRD(uchar s[2]) {
@@ -423,7 +421,7 @@ static void binaryfile(FILE *fp1, FILE *fp2, uchar initial[4]) {
 static void ciphertext(FILE *fp1, FILE *fp2) {
     int i;
     uchar initial[4];
-    bool isbinary = FALSE;
+    bool isbinary = false;
     for (i = 0; i < 4; i++) {
         int j;
         initial[i] = j = get1(fp1);
@@ -432,7 +430,7 @@ static void ciphertext(FILE *fp1, FILE *fp2) {
     }
     for (i = 0; i < 4; i++)
         if (!isxdigit(initial[i]) && initial[i] != ' ' && initial[i] != '\t' && initial[i] != '\n' && initial[i] != '\r') {
-            isbinary = TRUE;
+            isbinary = true;
             break;
         }
     (isbinary ? binaryfile : asciifile)(fp1, fp2, initial);

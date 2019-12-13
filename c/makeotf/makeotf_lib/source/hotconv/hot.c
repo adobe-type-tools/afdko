@@ -1029,9 +1029,9 @@ static void hotReuse(hotCtx g) {
     featReuse(g);
 }
 
-const char data[] = "\x00\x00\x00\x01\x00\x00\x00";
-unsigned int dsigCnt = 0;
 char *refillDSIG(void *ctx, long *count, unsigned long tag) {
+    static const char data[] = "\x00\x00\x00\x01\x00\x00\x00";
+    static unsigned int dsigCnt = 0;
     if (dsigCnt == 0) {
         *count = 8;
         dsigCnt = 1;

@@ -11,6 +11,7 @@
 
 #include <string.h>
 #include <math.h>
+#include <stdbool.h>
 #include "CFF_.h"
 #include "sfnt.h"
 #include "cffread.h"
@@ -394,17 +395,16 @@ static void drawText(GlyphId glyphId, IntX lsb, IntX rsb, IntX width) {
     proofPSOUT(cffproofctx, workstr);
 }
 
-static IntX donedate = 0;
-static Byte8 date[64];
-
 Byte8 *getthedate(void) {
+    static bool donedate = false;
+    static char date[64];
     if (!donedate) {
         time_t seconds_since_epoch;
         struct tm local_time;
         time(&seconds_since_epoch);
         SAFE_LOCALTIME(&seconds_since_epoch, &local_time);
         strftime(date, 64, "%m/%d/%y %H:%M", &local_time);
-        donedate = 1;
+        donedate = true;
     }
     return date;
 }
