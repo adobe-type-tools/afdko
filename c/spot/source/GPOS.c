@@ -2534,20 +2534,20 @@ static void dumpBaseArray(Card32 offset, BaseArray *basearray, Card32 classCount
         DL(2, (OUTPUTBUFF, " --- BaseRecord [%d]\n", i));
         for (j = 0; j < (IntX)classCount; j++) {
             IntX seenRecord = 0;
-            IntX offset = record->BaseAnchor[j];
+            IntX anchor_offset = record->BaseAnchor[j];
             void *fmt = record->_BaseAnchor[j];
-            DL(2, (OUTPUTBUFF, " Class= %d Anchor Table offset= %04hx\n", j, (Card16)offset));
+            DL(2, (OUTPUTBUFF, " Class= %d Anchor Table offset= %04hx\n", j, (Card16)anchor_offset));
 
             for (m = 0; m < uniqueAnchorTables.cnt; m++) {
                 AnchorRecord *tempRecord = da_INDEX(uniqueAnchorTables, m);
-                if (tempRecord->BaseAnchor == offset) {
+                if (tempRecord->BaseAnchor == anchor_offset) {
                     seenRecord = 1;
                     break;
                 }
             }
             if (seenRecord == 0) {
                 AnchorRecord *tempRecord = da_NEXT(uniqueAnchorTables);
-                tempRecord->BaseAnchor = offset;
+                tempRecord->BaseAnchor = anchor_offset;
                 tempRecord->_BaseAnchor = fmt;
             }
         }
@@ -2676,11 +2676,11 @@ static void dumpLigatureAttach(Card32 offset, LigatureAttach *ligatureAttach, Ca
         DL(2, (OUTPUTBUFF, " --- ComponentRecord [%d]\n", i));
         for (j = 0; j < (IntX)classCount; j++) {
             IntX seenRecord = 0;
-            IntX offset = record->LigatureAnchor[j];
+            IntX anchor_offset = record->LigatureAnchor[j];
             void *fmt;
 
-            DL(2, (OUTPUTBUFF, " Class= %d Anchor Table offset= %04hx\n", j, (Card16)offset));
-            if (offset == 0) {
+            DL(2, (OUTPUTBUFF, " Class= %d Anchor Table offset= %04hx\n", j, (Card16)anchor_offset));
+            if (anchor_offset == 0) {
                 DL(2, (OUTPUTBUFF, " NULL offset for Anchor Table %d.\n", j));
                 continue;
             }
@@ -2689,14 +2689,14 @@ static void dumpLigatureAttach(Card32 offset, LigatureAttach *ligatureAttach, Ca
 
             for (m = 0; m < uniqueAnchorTables.cnt; m++) {
                 AnchorRecord *tempRecord = da_INDEX(uniqueAnchorTables, m);
-                if (tempRecord->BaseAnchor == offset) {
+                if (tempRecord->BaseAnchor == anchor_offset) {
                     seenRecord = 1;
                     break;
                 }
             }
             if (seenRecord == 0) {
                 AnchorRecord *tempRecord = da_NEXT(uniqueAnchorTables);
-                tempRecord->BaseAnchor = offset;
+                tempRecord->BaseAnchor = anchor_offset;
                 tempRecord->_BaseAnchor = fmt;
             }
         }
@@ -2717,10 +2717,10 @@ static void dumpLigatureArray(Card32 offset, LigatureArray *ligatureArray, Card3
     da_INIT(uniqueAnchorTables, classCount, classCount);
 
     for (i = 0; i < ligatureArray->LigatureCount; i++) {
-        IntX offset = ligatureArray->LigatureAttach[i];
+        IntX lig_attach_offset = ligatureArray->LigatureAttach[i];
         void *fmt = &ligatureArray->_LigatureAttach[i];
         DL(2, (OUTPUTBUFF, " LigatureAttach index=%d\n", i));
-        dumpLigatureAttach(offset, fmt, classCount, level);
+        dumpLigatureAttach(lig_attach_offset, fmt, classCount, level);
     }
 }
 

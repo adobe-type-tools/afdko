@@ -1806,11 +1806,11 @@ static void DICTRead(cffCtx h, int length, Offset offset, int enable) {
                         h->stack.cnt = 0;
                         if (!(h->flags & WV_SET)) {
                             /* Convert UDV to WV if WV not already set */
-                            unsigned length;
+                            unsigned string_length;
                             Offset save = TELL(h);
-                            t2Read(h, getProcOffset(h, h->font.mm.NDV, &length),
+                            t2Read(h, getProcOffset(h, h->font.mm.NDV, &string_length),
                                    cstr_DICT, INT_MAX);
-                            t2Read(h, getProcOffset(h, h->font.mm.CDV, &length),
+                            t2Read(h, getProcOffset(h, h->font.mm.CDV, &string_length),
                                    cstr_DICT, INT_MAX);
                             h->flags |= WV_SET;
                             seekbyte(h, save);
