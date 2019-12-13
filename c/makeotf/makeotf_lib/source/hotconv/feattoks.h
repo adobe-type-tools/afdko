@@ -480,7 +480,6 @@ void featureFile(void);
 extern void featureFile();
 #endif
 
-#endif
 extern SetWordType zzerr1[];
 extern SetWordType zzerr2[];
 extern SetWordType zzerr3[];
@@ -589,3 +588,5 @@ extern SetWordType zzerr89[];
 extern SetWordType setwd17[];
 extern SetWordType zzerr90[];
 extern SetWordType setwd18[];
+
+#endif /* feattoks_h */

@@ -2,6 +2,9 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
+#ifndef PATHBUILD_H
+#define PATHBUILD_H
+
 #define FREENONNULL(p)      \
     if (p != NULL) {        \
         memFree((char *)p); \
@@ -92,3 +95,5 @@ typedef struct _vector {
 /* return normalized vectors */
 extern void init_vector(Pelt e, Vector *v);
 extern void end_vector(Pelt e, Vector *v);
+
+#endif /* PATHBUILD_H */
