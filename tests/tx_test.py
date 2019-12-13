@@ -1003,14 +1003,48 @@ def test_date_and_time_ps():
     now = time.time()
     with open(output_path) as output_file:
         lines = output_file.readlines()
-        print(lines[0:5])
-        date_str = re.split(r'[\(\)]', lines[5])[1]
+        date_str = re.split(r'[()]', lines[5])[1]
         date_str = date_str.split(': ')[1]
-        time_str = re.split(r'[\(\)]', lines[7])[1]
+        time_str = re.split(r'[()]', lines[7])[1]
         time_str = time_str.split(': ')[1]
         file_date_and_time_str = date_str + ' ' + time_str
         file_time = time.mktime(
             time.strptime(file_date_and_time_str, '%m/%d/%y %H:%M'))
+        hours_diff = abs(now - file_time) / 3600
+        assert(hours_diff < 1)
+
+
+def test_date_and_time_pdf():
+    """
+    test the use of date and time functions in pdfwrite.c
+    """
+    input_path = get_input_path('font.otf')
+    output_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', 'pdf', '-f', input_path, output_path])
+    now = time.time()
+    tz = time.timezone
+    tz_hr = abs(int(tz / 3600))  # ignore sign since we're splitting on +/-
+    tz_min = (tz % 3600) // 60
+    with open(output_path) as output_file:
+        lines = output_file.readlines()
+        creation_date_str = re.split(r'[()]', lines[13])[1]
+        mod_date_str = re.split(r'[()]', lines[14])[1]
+        assert(creation_date_str == mod_date_str)
+        (date_time_str, tz_hr_str, tz_min_str) = \
+            re.split(r"[:+\-Z']", creation_date_str)[1:4]
+        creation_time = time.mktime(
+            time.strptime(date_time_str, '%Y%m%d%H%M%S'))
+        hours_diff = abs(now - creation_time) / 3600
+        assert(hours_diff < 1)
+        creation_tz_hr = int(tz_hr_str)
+        assert(creation_tz_hr == tz_hr)
+        creation_tz_min = int(tz_min_str)
+        assert(creation_tz_min == tz_min)
+        file_date_str = re.split(r"[():]", lines[36])[2].strip()
+        file_time_str = re.split(r"[() ]", lines[38])[3]
+        file_date_time_str = file_date_str + ' ' + file_time_str
+        file_time = time.mktime(
+            time.strptime(file_date_time_str, "%d %b %y %H:%M"))
         hours_diff = abs(now - file_time) / 3600
         assert(hours_diff < 1)
 

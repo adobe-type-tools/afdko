@@ -364,16 +364,24 @@ int pdwFree(pdwCtx h) {
 
 /* Set time fields. */
 static void settime(pdwCtx h) {
-    time_t now = time(NULL);
-    struct tm utc = *gmtime(&now);
-    struct tm local = *localtime(&now);
-    double tzoff = difftime(mktime(&utc), mktime(&local));
-    long tzmins = (long)fabs(tzoff) / 60;
+    time_t seconds_since_epoch;
+    struct tm utc_time;
+    struct tm local_time;
+    double tzoff;
+    long tzmins;
 
-    strftime(h->date, sizeof(h->date), "%d %b %y", &local);
-    strftime(h->time, sizeof(h->time), "%H:%M", &local);
+    time(&seconds_since_epoch);
 
-    strftime(h->pdfdate, sizeof(h->pdfdate), "D:%Y%m%d%H%M%S", &local);
+    SAFE_GMTIME(&seconds_since_epoch, &utc_time);
+    SAFE_LOCALTIME(&seconds_since_epoch, &local_time);
+
+    tzoff = difftime(mktime(&utc_time), mktime(&local_time));
+    tzmins = (long)fabs(tzoff) / 60;
+
+    strftime(h->date, sizeof(h->date), "%d %b %y", &local_time);
+    strftime(h->time, sizeof(h->time), "%H:%M", &local_time);
+
+    strftime(h->pdfdate, sizeof(h->pdfdate), "D:%Y%m%d%H%M%S", &local_time);
     sprintf(&h->pdfdate[strlen(h->pdfdate)], "%c%02ld'%02ld'",
             (tzoff == 0) ? 'Z' : (tzoff < 0) ? '-' : '+', tzmins / 60L, tzmins % 60L);
 }
