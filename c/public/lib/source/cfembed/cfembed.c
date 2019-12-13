@@ -1975,8 +1975,8 @@ int cefMakeEmbeddingFont(cefCtx h, cefEmbedSpec *spec, cefMapCallback *map) {
 
         /* Add glyph names to subset */
         for (i = 0; i < h->subset.cnt; i++) {
-            GlyphMap *map = &h->subset.array[i];
-            map->gname = spec->subset.names[map->id];
+            GlyphMap *glyph_map = &h->subset.array[i];
+            glyph_map->gname = spec->subset.names[glyph_map->id];
         }
 
         /* Sort subset by glyph name */

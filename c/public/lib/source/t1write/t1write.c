@@ -497,9 +497,9 @@ static size_t hexEncode(t1wCtx h, int col, size_t cnt, char *p) {
 
     if (cnt > 0 || h->overflow.cnt > 0) {
         /* Add newline */
-        char *p;
-        for (p = h->arg.newline; *p != '\0'; p++)
-            *q++ = *p;
+        char *ptr;
+        for (ptr = h->arg.newline; *ptr != '\0'; ptr++)
+            *q++ = *ptr;
     }
     writeBuf(h, q - beg, beg);
 

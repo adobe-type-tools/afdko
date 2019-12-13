@@ -2750,7 +2750,7 @@ static void readCIDMap(t1rCtx h,
         unsigned char nextfd = (h->key.FDBytes == 0) ? 0 : read1(h);
         long nextoff = readN(h, h->key.GDBytes);
         if (offset != nextoff) {
-            long length;
+            long charstring_length;
             Char *chr = &h->chars.index.array[tag];
 
             /* Initialize char */
@@ -2764,8 +2764,8 @@ static void readCIDMap(t1rCtx h,
 
             setLanguageGroup(h, chr, fd, cid);
 
-            length = chr->sup.end - chr->sup.begin;
-            if (length < 0 || length > 65535)
+            charstring_length = chr->sup.end - chr->sup.begin;
+            if (charstring_length < 0 || charstring_length > 65535)
                 fatal(h, t1rErrCharLength,
                       "bad charstring length <cid-%ld>", cid);
         }
