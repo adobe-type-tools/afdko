@@ -6,6 +6,9 @@
  Code shared by tx, rotatefont, and mergefonts.
  */
 
+#ifndef TX_SHARED_H
+#define TX_SHARED_H
+
 #include "ctlshare.h"
 #include "cfembed.h"
 #include "cffread.h"
@@ -580,3 +583,5 @@ void svrReadFont(txCtx h, long origin);
 void t1rReadFont(txCtx h, long origin);
 void ttrReadFont(txCtx h, long origin, int iTTC);
 void ufoReadFont(txCtx h, long origin);
+
+#endif /* TX_SHARED_H */
