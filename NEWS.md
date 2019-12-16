@@ -1,7 +1,7 @@
 Changelog
 =========
 
-3.0.2 (released 2019-12-XX)
+3.1.0 (released 2019-12-16)
 ---------------------------
 - [ci] updates and maintenance on several CI services:
   - added LGTM.com (Semmle) analyze-on-Pull-Request support
