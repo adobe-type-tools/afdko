@@ -1,6 +1,63 @@
 Changelog
 =========
 
+3.0.2 (released 2019-12-XX)
+---------------------------
+- [ci] updates and maintenance on several CI services:
+  - added LGTM.com/Semmle analyze-on-Pull-Request support
+  - removed Codacy check
+  - set up Azure Pipeline with Mac, Windows, and Linux testing
+- [tx] improve robustness
+  ([#929](https://github.com/adobe-type-tools/afdko/pull/929))
+- [tests] Add filtering for fontTools `DeprecationWarnings`
+- [tx] Add descriptions of optimization options (`tx -cff` help)
+  ([#938](https://github.com/adobe-type-tools/afdko/pull/938), 
+   [#939](https://github.com/adobe-type-tools/afdko/pull/939))
+- [tx] Fix handling of blend options
+  ([#940](https://github.com/adobe-type-tools/afdko/issues/940),
+   [#941](https://github.com/adobe-type-tools/afdko/pull/941))
+- [fdkutils] Improve shell command handling, increase test coverage
+  ([#946](https://github.com/adobe-type-tools/afdko/pull/946))
+- [comparefamily] Trim `agd.py` to only parts needed to keep
+  `comparefamily` running
+  ([#948](https://github.com/adobe-type-tools/afdko/pull/948))
+- [tx tests] Improved tests
+  ([#949](https://github.com/adobe-type-tools/afdko/pull/949), 
+   [#950](https://github.com/adobe-type-tools/afdko/pull/951))
+- [fdkutils] Add TTC support
+  ([#952](https://github.com/adobe-type-tools/afdko/pull/952))
+- [tx] A whole bunch of improvements and fixes
+  ([#954](https://github.com/adobe-type-tools/afdko/pull/954),
+   [#955](https://github.com/adobe-type-tools/afdko/pull/955),
+   [#956](https://github.com/adobe-type-tools/afdko/pull/956),
+   [#957](https://github.com/adobe-type-tools/afdko/pull/957),
+   [#958](https://github.com/adobe-type-tools/afdko/pull/958),
+   [#959](https://github.com/adobe-type-tools/afdko/pull/959),
+   [#960](https://github.com/adobe-type-tools/afdko/pull/960),
+   [#961](https://github.com/adobe-type-tools/afdko/pull/961),
+   [#962](https://github.com/adobe-type-tools/afdko/pull/962),
+   [#964](https://github.com/adobe-type-tools/afdko/pull/964))
+- [makeotfexe] Fix memory consumption issue
+  ([#968](https://github.com/adobe-type-tools/afdko/pull/968),
+   [#965](https://github.com/adobe-type-tools/afdko/issues/965))
+- [makeinstancesufo] Fix potential issue with temp files
+  ([#976](https://github.com/adobe-type-tools/afdko/pull/976))
+- [otc2otf] Rewrite, fix `-t` option, increase test coverage
+  ([#978](https://github.com/adobe-type-tools/afdko/pull/978))
+- [python][c] Numerous fixes for LGTM-reported issues
+  ([LGTM.com/afdko](https://lgtm.com/projects/g/adobe-type-tools/afdko/history/))
+- [makeotf] Fix path issue in Mac OS X 10.15 Catalina
+  ([#991](https://github.com/adobe-type-tools/afdko/pull/991))
+- [requirements] Relax pinning
+  ([#997](https://github.com/adobe-type-tools/afdko/pull/997),
+   [#408](https://github.com/adobe-type-tools/afdko/issues/408))
+- [makeotfexe] fix calculation of OS/2.ulCodePageRange bits
+  ([#1039](https://github.com/adobe-type-tools/afdko/pull/1042),
+   [#1040](https://github.com/adobe-type-tools/afdko/issues/1040))
+- [dependencies] Update `psautohint` and `fontTools` to latest
+  ([#1043](https://github.com/adobe-type-tools/afdko/pull/1043),
+   [#1057](https://github.com/adobe-type-tools/afdko/pull/1057))
+
 3.0.1 (released 2019-08-22)
 ---------------------------
 
