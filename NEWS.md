@@ -4,11 +4,9 @@ Changelog
 3.0.2 (released 2019-12-XX)
 ---------------------------
 - [ci] updates and maintenance on several CI services:
-  - added LGTM.com/Semmle analyze-on-Pull-Request support
+  - added LGTM.com (Semmle) analyze-on-Pull-Request support
   - removed Codacy check
   - set up Azure Pipeline with Mac, Windows, and Linux testing
-- [tx] improve robustness
-  ([#929](https://github.com/adobe-type-tools/afdko/pull/929))
 - [tests] Add filtering for fontTools `DeprecationWarnings`
 - [tx] Add descriptions of optimization options (`tx -cff` help)
   ([#938](https://github.com/adobe-type-tools/afdko/pull/938), 
@@ -22,24 +20,30 @@ Changelog
   `comparefamily` running
   ([#948](https://github.com/adobe-type-tools/afdko/pull/948))
 - [tx tests] Improved tests
-  ([#949](https://github.com/adobe-type-tools/afdko/pull/949), 
+  ([#949](https://github.com/adobe-type-tools/afdko/pull/949),
    [#950](https://github.com/adobe-type-tools/afdko/pull/951))
 - [fdkutils] Add TTC support
   ([#952](https://github.com/adobe-type-tools/afdko/pull/952))
+- [tx] Add variable font support to ttread
+  ([#957](https://github.com/adobe-type-tools/afdko/pull/957))
 - [tx] A whole bunch of improvements and fixes
-  ([#954](https://github.com/adobe-type-tools/afdko/pull/954),
+  ([#929](https://github.com/adobe-type-tools/afdko/pull/929),
+   [#954](https://github.com/adobe-type-tools/afdko/pull/954),
    [#955](https://github.com/adobe-type-tools/afdko/pull/955),
    [#956](https://github.com/adobe-type-tools/afdko/pull/956),
-   [#957](https://github.com/adobe-type-tools/afdko/pull/957),
    [#958](https://github.com/adobe-type-tools/afdko/pull/958),
    [#959](https://github.com/adobe-type-tools/afdko/pull/959),
    [#960](https://github.com/adobe-type-tools/afdko/pull/960),
    [#961](https://github.com/adobe-type-tools/afdko/pull/961),
    [#962](https://github.com/adobe-type-tools/afdko/pull/962),
-   [#964](https://github.com/adobe-type-tools/afdko/pull/964))
+   [#964](https://github.com/adobe-type-tools/afdko/pull/964),
+   [#1045](https://github.com/adobe-type-tools/afdko/issues/1045),
+   [#1046](https://github.com/adobe-type-tools/afdko/pull/1046))
 - [makeotfexe] Fix memory consumption issue
   ([#968](https://github.com/adobe-type-tools/afdko/pull/968),
    [#965](https://github.com/adobe-type-tools/afdko/issues/965))
+- [makeotfexe] Import fealib tests (thanks @khaledhosny!)
+  ([#973](https://github.com/adobe-type-tools/afdko/pull/973))
 - [makeinstancesufo] Fix potential issue with temp files
   ([#976](https://github.com/adobe-type-tools/afdko/pull/976))
 - [otc2otf] Rewrite, fix `-t` option, increase test coverage
@@ -51,6 +55,18 @@ Changelog
 - [requirements] Relax pinning
   ([#997](https://github.com/adobe-type-tools/afdko/pull/997),
    [#408](https://github.com/adobe-type-tools/afdko/issues/408))
+- [fea-spec]
+  - Fix example for mark glyph positioning (thanks @anthrotype!)
+  ([#999](https://github.com/adobe-type-tools/afdko/pull/999))
+  - Improve formatting and grammar (thanks @sergeresko!)
+  ([#1031](https://github.com/adobe-type-tools/afdko/pull/1031))
+- [otf2ttf] Enhance for Collections, parallel processing, and file wildcards (thanks @msoxzw!)
+  ([#1000](https://github.com/adobe-type-tools/afdko/pull/1000))
+- [makeotfexe] Increase code coverage (thanks @khaledhosny!)
+  ([#1008](https://github.com/adobe-type-tools/afdko/pull/1008))
+- [docs] update documentation of hex format for GlyphOrderAndAliasDB, multiple Unicodes (thanks @benkiel!)
+  ([#1028](https://github.com/adobe-type-tools/afdko/pull/1028),
+   [#1024](https://github.com/adobe-type-tools/afdko/pull/1024))
 - [makeotfexe] fix calculation of OS/2.ulCodePageRange bits
   ([#1039](https://github.com/adobe-type-tools/afdko/pull/1042),
    [#1040](https://github.com/adobe-type-tools/afdko/issues/1040))
